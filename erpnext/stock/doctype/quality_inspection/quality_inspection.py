@@ -80,6 +80,41 @@ class QualityInspection(UnitReadingsMixin, Document):
 		self.update_qc_reference()
 		self.db_set("status", "Cancelled")
 
+	def before_validate(self):
+		self.clear_unborn_identity()
+
+	def clear_unborn_identity(self):
+		"""A transaction row still without identity gets it at submission.
+
+		Whatever the inspection names now cannot be that future identity — a
+		typed batch or serial would only contradict the materialised row later.
+		Lots hold their identity and custody records the supplier's, so both
+		keep what is recorded.
+		"""
+		if not self.reference_type or self.reference_type in ("Quality Control Lot", "Goods Inward Note"):
+			return
+		if not self.batch_no and not (self.serial_no or "").strip():
+			return
+
+		self.set_child_row_reference()
+		if not self.child_row_reference:
+			return
+
+		from erpnext.stock.services.quality_trigger_resolution import (
+			get_reference_row_tracking,
+			get_row_batch_nos,
+			get_row_serial_nos,
+		)
+
+		child_doctype = (
+			"Stock Entry Detail" if self.reference_type == "Stock Entry" else self.reference_type + " Item"
+		)
+		row = get_reference_row_tracking(child_doctype, self.child_row_reference)
+		if not get_row_batch_nos(row):
+			self.batch_no = None
+		if not get_row_serial_nos(row):
+			self.serial_no = None
+
 	def validate(self):
 		self.set_inspection_basis_from_lot()
 		self.set_batch_from_lot()

@@ -173,6 +173,30 @@ frappe.ui.form.on("Quality Inspection", {
 			frm.toggle_display("serial_no", frm.__item_is_serialized && !bundle_decided);
 			frm.set_df_property("serial_no", "reqd", 0);
 			frm.trigger("toggle_sample_size_lock");
+
+			// a transaction row still without identity gets it at submission —
+			// there is nothing for the inspection to name yet
+			if (!is_lot && !is_custody && frm.doc.child_row_reference) {
+				const child_doctype =
+					frm.doc.reference_type === "Stock Entry"
+						? "Stock Entry Detail"
+						: frm.doc.reference_type + " Item";
+				frappe.db
+					.get_value(child_doctype, frm.doc.child_row_reference, [
+						"batch_no",
+						"serial_no",
+						"serial_and_batch_bundle",
+					])
+					.then((row) => {
+						const bundle = row.message?.serial_and_batch_bundle;
+						if (!row.message?.batch_no && !bundle) {
+							frm.toggle_display("batch_no", false);
+						}
+						if (!(row.message?.serial_no || "").trim() && !bundle) {
+							frm.toggle_display("serial_no", false);
+						}
+					});
+			}
 		});
 	},
 

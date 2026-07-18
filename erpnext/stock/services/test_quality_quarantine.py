@@ -1995,7 +1995,50 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		receipt.submit()
 		self.assertEqual(receipt.docstatus, 1)
 
-	def test_receipt_inspection_serials_must_match_the_receipt(self):
+	def test_unborn_identity_is_cleared_off_the_inspection(self):
+		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1})
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Purchase Receipt",
+				warehouse_role=None,
+				quality_control_mode="Block",
+			),
+		)
+		item.save()
+		stray = (
+			frappe.get_doc({"doctype": "Batch", "item": item.name, "batch_id": item.name + "-STRAY"})
+			.insert()
+			.name
+		)
+
+		# the row types no batch — its identity is born at submission, so a
+		# batch named now could only contradict it
+		receipt = make_purchase_receipt(
+			item_code=item.name, qty=2, warehouse=REAL_WH, rate=100, do_not_submit=True
+		)
+		inspection = frappe.get_doc(
+			{
+				"doctype": "Quality Inspection",
+				"inspection_type": "Incoming",
+				"reference_type": "Purchase Receipt",
+				"reference_name": receipt.name,
+				"item_code": item.name,
+				"sample_size": 1,
+				"report_date": nowdate(),
+				"inspected_by": frappe.session.user,
+				"manual_inspection": 1,
+				"status": "Accepted",
+				"batch_no": stray,
+			}
+		)
+		inspection.insert(ignore_permissions=True)
+		self.assertFalse(inspection.batch_no)
+
+	def test_receipt_inspection_cannot_name_unborn_serials(self):
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
@@ -2009,8 +2052,8 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		)
 		foreign_serial = frappe.get_all("Serial No", filters={"item_code": item.name}, pluck="name")[0]
 
-		# the receipt's serials are auto-created at submission — nothing on the
-		# draft row for validate-time checks to see
+		# the receipt's serials are auto-created at submission — nothing exists
+		# for the inspection to name, so the foreign serial is cleared on save
 		receipt = make_purchase_receipt(
 			item_code=item.name, qty=2, warehouse=REAL_WH, rate=100, do_not_submit=True
 		)
@@ -2021,6 +2064,7 @@ class TestQualityQuarantine(ERPNextTestSuite):
 				"reference_type": "Purchase Receipt",
 				"reference_name": receipt.name,
 				"item_code": item.name,
+				"sample_size": 1,
 				"report_date": nowdate(),
 				"inspected_by": frappe.session.user,
 				"manual_inspection": 1,
@@ -2029,11 +2073,13 @@ class TestQualityQuarantine(ERPNextTestSuite):
 			}
 		)
 		inspection.insert(ignore_permissions=True)
-		inspection.submit()  # the draft row carries no serials yet: nothing to compare
+		self.assertFalse(inspection.serial_no)
+		inspection.submit()
 
-		# at receipt submission the serials exist — the foreign sample is caught
+		# with nothing foreign on record, the receipt submits clean
 		receipt.reload()
-		self.assertRaises(frappe.ValidationError, receipt.submit)
+		receipt.submit()
+		self.assertEqual(receipt.docstatus, 1)
 
 	def test_customer_return_is_quarantined_and_released(self):
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
