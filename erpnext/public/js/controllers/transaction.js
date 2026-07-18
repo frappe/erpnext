@@ -2947,6 +2947,11 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 						in_list_view: this.frm.doc.doctype === "Goods Inward Note",
 						hidden: this.frm.doc.doctype !== "Goods Inward Note",
 					},
+					{
+						fieldtype: "Float",
+						fieldname: "remaining_qty",
+						hidden: true,
+					},
 					// the rest rides along unseen — sample sizes are reviewed
 					// on the draft inspections themselves
 					{
@@ -2995,7 +3000,44 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			fields: fields,
 			primary_action: function () {
 				const data = dialog.get_values();
-				const selected_data = data.items.filter((item) => item?.__checked == 1);
+				const selected_data = (data.items || []).filter((item) => item?.__checked == 1);
+				if (!selected_data.length) {
+					frappe.msgprint({
+						message: __("Select at least one item to inspect."),
+						title: __("No Items Selected"),
+						indicator: "red",
+					});
+					return;
+				}
+				if (me.frm.doc.doctype === "Goods Inward Note") {
+					for (const item of selected_data) {
+						if (flt(item.qty) <= 0) {
+							frappe.msgprint({
+								message: __("{0}: Qty to Inspect must be greater than zero.", [
+									frappe.utils.escape_html(item.item_code),
+								]),
+								title: __("Invalid Quantity"),
+								indicator: "red",
+							});
+							return;
+						}
+						if (flt(item.qty) > flt(item.remaining_qty)) {
+							frappe.msgprint({
+								message: __(
+									"{0}: Qty to Inspect ({1}) exceeds the undecided quantity ({2}).",
+									[
+										frappe.utils.escape_html(item.item_code),
+										flt(item.qty),
+										flt(item.remaining_qty),
+									]
+								),
+								title: __("Invalid Quantity"),
+								indicator: "red",
+							});
+							return;
+						}
+					}
+				}
 				frappe.call({
 					method: "erpnext.controllers.stock_controller.make_quality_inspections",
 					args: {
@@ -3044,6 +3086,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 							item_code: item.item_code,
 							item_name: item.item_name,
 							qty: item.qty,
+							remaining_qty: item.qty,
 							description: item.description,
 							serial_no: item.serial_no,
 							batch_no: item.batch_no,
