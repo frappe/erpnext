@@ -153,6 +153,8 @@ frappe.ui.form.on("Quality Inspection", {
 		frappe.db.get_value("Item", frm.doc.item_code, ["has_batch_no", "has_serial_no"]).then((r) => {
 			frm.__item_is_serialized = cint(r.message?.has_serial_no);
 			frm.trigger("toggle_unit_serial_column");
+			// serialization decides whether the decided quantity is lockable
+			frm.trigger("prefill_decided_quantity_from_lot");
 
 			const bundle_decided = frm.doc.inspection_basis === "Each Quantity";
 			const is_lot = frm.doc.reference_type === "Quality Control Lot";
@@ -250,13 +252,20 @@ frappe.ui.form.on("Quality Inspection", {
 
 	prefill_decided_quantity_from_lot(frm) {
 		// the verdict decides everything still undecided unless the inspector
-		// narrows it to a tranche
+		// narrows it to a tranche — but a serialized lot verdict without
+		// per-unit readings cannot narrow (it could not say which units), so
+		// the full quantity is locked in
+		const locked =
+			cint(frm.__item_is_serialized) &&
+			frm.doc.reference_type === "Quality Control Lot" &&
+			!(frm.doc.inspection_basis === "Each Quantity" && !frm.doc.manual_inspection);
+		frm.set_df_property("decided_quantity", "read_only", locked ? 1 : 0);
 		if (
 			frm.doc.docstatus !== 0 ||
 			!["Quality Control Lot", "Goods Inward Note"].includes(frm.doc.reference_type) ||
 			!frm.doc.reference_name ||
 			(frm.doc.inspection_basis === "Each Quantity" && !frm.doc.manual_inspection) ||
-			flt(frm.doc.decided_quantity)
+			(flt(frm.doc.decided_quantity) && !locked)
 		) {
 			return;
 		}
