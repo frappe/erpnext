@@ -1990,6 +1990,96 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		receipt.submit()
 		self.assertEqual(receipt.docstatus, 1)
 
+	def test_batch_sample_cannot_exceed_the_rows_batch_qty(self):
+		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
+
+		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 0)
+		item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1})
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Stock Entry",
+				stock_entry_type="Material Issue",
+				warehouse_role="Outbound",
+				quality_control_mode="Block",
+			),
+		)
+		item.save()
+
+		def receive(batch_id):
+			batch = frappe.get_doc({"doctype": "Batch", "item": item.name, "batch_id": batch_id}).insert(
+				ignore_permissions=True
+			)
+			make_stock_entry(
+				item_code=item.name,
+				qty=3,
+				to_warehouse=REAL_WH,
+				purpose="Material Receipt",
+				rate=100,
+				batch_no=batch.name,
+				use_serial_batch_fields=1,
+			)
+			return batch.name
+
+		batch_one = receive(item.name + "-B1")
+		batch_two = receive(item.name + "-B2")
+
+		# one issue row drawing on both batches through a bundle
+		issue = make_stock_entry(
+			item_code=item.name,
+			qty=4,
+			from_warehouse=REAL_WH,
+			purpose="Material Issue",
+			do_not_submit=True,
+		)
+		bundle = frappe.get_doc(
+			{
+				"doctype": "Serial and Batch Bundle",
+				"item_code": item.name,
+				"warehouse": REAL_WH,
+				"voucher_type": "Stock Entry",
+				"type_of_transaction": "Outward",
+				"company": issue.company,
+				"entries": [
+					{"batch_no": batch_one, "qty": -2, "warehouse": REAL_WH},
+					{"batch_no": batch_two, "qty": -2, "warehouse": REAL_WH},
+				],
+			}
+		).insert(ignore_permissions=True)
+		issue.items[0].serial_and_batch_bundle = bundle.name
+		issue.save()
+
+		def verdict(batch_no, sample_size):
+			doc = frappe.get_doc(
+				{
+					"doctype": "Quality Inspection",
+					"inspection_type": "Outgoing",
+					"reference_type": "Stock Entry",
+					"reference_name": issue.name,
+					"item_code": item.name,
+					"sample_size": sample_size,
+					"report_date": nowdate(),
+					"inspected_by": frappe.session.user,
+					"manual_inspection": 1,
+					"status": "Accepted",
+					"batch_no": batch_no,
+				}
+			)
+			doc.insert(ignore_permissions=True)
+			doc.submit()
+			return doc
+
+		# 3 sampled units fit the row (4) but not the batch (2)
+		oversized = verdict(batch_one, 3)
+		self.assertRaises(frappe.ValidationError, issue.submit)
+
+		oversized.cancel()
+		verdict(batch_one, 2)
+		verdict(batch_two, 2)
+		issue.reload()
+		issue.submit()
+		self.assertEqual(issue.docstatus, 1)
+
 	def test_unborn_identity_is_cleared_off_the_inspection(self):
 		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt

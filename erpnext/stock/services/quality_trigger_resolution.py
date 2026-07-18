@@ -14,7 +14,7 @@ is wired separately.
 
 import frappe
 from frappe import _
-from frappe.utils import get_link_to_form
+from frappe.utils import flt, get_link_to_form
 from frappe.utils.nestedset import get_ancestors_of
 
 from erpnext.stock.services.quality_warehouse import is_transit_warehouse
@@ -317,6 +317,21 @@ def get_row_batch_nos(row):
 	return batches
 
 
+def get_row_batch_qty(row, batch_no):
+	"""How much of a batch a transaction row carries, in stock units."""
+	if row.get("serial_and_batch_bundle"):
+		entries = frappe.get_all(
+			"Serial and Batch Entry",
+			filters={"parent": row.get("serial_and_batch_bundle"), "batch_no": batch_no},
+			pluck="qty",
+		)
+		if entries:
+			return sum(abs(flt(qty)) for qty in entries)
+	if row.get("batch_no") == batch_no:
+		return abs(flt(row.get("stock_qty") or row.get("transfer_qty") or row.get("qty")))
+	return 0
+
+
 def validate_inspected_serial_consistency(doc, method=None):
 	"""Every inspection bound to a row must describe the row's identity.
 
@@ -367,6 +382,25 @@ def validate_inspected_serial_consistency(doc, method=None):
 					).format(row.idx, link, get_link_to_form("Batch", inspection.batch_no)),
 					title=_("Inspected Batch Mismatch"),
 				)
+
+			if inspection.batch_no and inspection.batch_no in row_batches:
+				batch_qty = get_row_batch_qty(row, inspection.batch_no) or (
+					get_row_batch_qty(db_row, inspection.batch_no) if db_row else 0
+				)
+				if batch_qty and flt(inspection.sample_size) > batch_qty:
+					frappe.throw(
+						_(
+							"Row #{0}: Quality Inspection {1} samples {2} unit(s) of batch {3}, but "
+							"this row carries only {4}."
+						).format(
+							row.idx,
+							link,
+							flt(inspection.sample_size),
+							get_link_to_form("Batch", inspection.batch_no),
+							batch_qty,
+						),
+						title=_("Sample Larger Than Batch"),
+					)
 
 
 @frappe.whitelist()
@@ -566,7 +600,7 @@ def _row_inspections(doc, row):
 			"child_row_reference": row.name,
 			"docstatus": 1,
 		},
-		fields=["name", "serial_no", "batch_no"],
+		fields=["name", "serial_no", "batch_no", "sample_size"],
 	)
 
 

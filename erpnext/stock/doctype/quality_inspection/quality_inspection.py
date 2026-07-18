@@ -832,9 +832,14 @@ class QualityInspection(UnitReadingsMixin, Document):
 					)
 				)
 
-				# not every referenced child table carries a batch column
-				# (a Goods Inward Note row has none)
-				if self.batch_no and self.docstatus < 2 and frappe.get_meta(doctype).has_field("batch_no"):
+				# an unbound inspection falls back to the typed batch to find its
+				# row — a bound one is already pinned, and bundle rows type none
+				if (
+					not self.child_row_reference
+					and self.batch_no
+					and self.docstatus < 2
+					and frappe.get_meta(doctype).has_field("batch_no")
+				):
 					query = query.where(child_doc.batch_no == self.batch_no)
 
 				if self.docstatus == 2:  # if cancel, then remove qi link wherever same name
