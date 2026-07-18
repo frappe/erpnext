@@ -140,10 +140,10 @@ frappe.ui.form.on("Quality Inspection", {
 	},
 
 	toggle_batch_and_serial_fields(frm) {
-		// identity is the lot's and custody's business: a lot mirrors its batch
-		// and may sample serials, custody may record the supplier's serials — a
-		// transaction-referenced (Block / Warn) inspection ignores identity,
-		// which the document itself mints and checks at submission
+		// identity flows by reference: a lot mirrors its batch, custody may
+		// record the supplier's serials (no batch exists yet), and a
+		// transaction-referenced (Block / Warn) inspection names the identity
+		// it vouches for — the document reconciles coverage at its submission
 		if (!frm.doc.item_code) {
 			frm.toggle_display(["batch_no", "serial_no"], false);
 			frm.trigger("toggle_unit_serial_column");
@@ -158,34 +158,30 @@ frappe.ui.form.on("Quality Inspection", {
 			const is_lot = frm.doc.reference_type === "Quality Control Lot";
 			const is_custody = frm.doc.reference_type === "Goods Inward Note";
 
-			// Each Quantity identity lives per unit in the readings below — but a
-			// both-tracked item keeps the batch on show: it narrows the units'
-			// serial picker
+			// on a lot, Each Quantity identity lives per unit in the readings
+			// below — but a both-tracked item keeps the batch on show: it
+			// narrows the units' serial picker
 			frm.toggle_display(
 				"batch_no",
-				cint(r.message?.has_batch_no) && is_lot && (!bundle_decided || frm.__item_is_serialized)
+				cint(r.message?.has_batch_no) &&
+					!is_custody &&
+					(!is_lot || !bundle_decided || frm.__item_is_serialized)
 			);
-			frm.set_df_property("batch_no", "read_only", 1);
+			frm.set_df_property("batch_no", "read_only", is_lot ? 1 : 0);
 			frm.set_df_property("batch_no", "reqd", 0);
 
-			frm.toggle_display(
-				"serial_no",
-				frm.__item_is_serialized && !bundle_decided && (is_lot || is_custody)
-			);
+			frm.toggle_display("serial_no", frm.__item_is_serialized && !bundle_decided);
 			frm.set_df_property("serial_no", "reqd", 0);
 			frm.trigger("toggle_sample_size_lock");
 		});
 	},
 
 	toggle_unit_serial_column(frm) {
-		// unit readings name serials only where they identify the verdict —
-		// on a lot (demanded) or a custody row (the supplier's, optional)
-		const relevant =
-			cint(frm.__item_is_serialized) &&
-			["Quality Control Lot", "Goods Inward Note"].includes(frm.doc.reference_type);
+		// unit readings only name serials when the item has them to name
+		const serialized = cint(frm.__item_is_serialized);
 		const grid = frm.fields_dict.unit_readings?.grid;
-		grid?.update_docfield_property("serial_no", "hidden", relevant ? 0 : 1);
-		grid?.update_docfield_property("serial_no", "read_only", relevant ? 0 : 1);
+		grid?.update_docfield_property("serial_no", "hidden", serialized ? 0 : 1);
+		grid?.update_docfield_property("serial_no", "read_only", serialized ? 0 : 1);
 	},
 
 	toggle_sample_size_lock(frm) {

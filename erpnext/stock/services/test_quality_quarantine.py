@@ -1607,8 +1607,9 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, wrong.submit)
 		wrong.delete()
 
-		# sampling a returned serial passes
-		inspection = build_inspection(serials[0])
+		# sampling the returned serials passes — and every returned unit must
+		# be covered before the return itself may submit
+		inspection = build_inspection("\n".join(serials[:2]))
 		inspection.insert(ignore_permissions=True)
 		inspection.submit()
 
@@ -1921,6 +1922,79 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		receipt.reload()
 		receipt.submit()
 		self.assertEqual(frappe.db.get_value("Serial No", "QC-TYPED-001", "warehouse"), REAL_WH)
+
+	def test_block_receipt_reconciles_typed_batches(self):
+		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
+		item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1})
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Purchase Receipt",
+				warehouse_role=None,
+				quality_control_mode="Block",
+			),
+		)
+		item.save()
+		batch_one = (
+			frappe.get_doc({"doctype": "Batch", "item": item.name, "batch_id": item.name + "-B1"})
+			.insert()
+			.name
+		)
+		batch_two = (
+			frappe.get_doc({"doctype": "Batch", "item": item.name, "batch_id": item.name + "-B2"})
+			.insert()
+			.name
+		)
+
+		receipt = make_purchase_receipt(
+			item_code=item.name, qty=2, warehouse=REAL_WH, rate=100, do_not_submit=True
+		)
+		receipt.items[0].batch_no = batch_one
+		receipt.items[0].use_serial_batch_fields = 1
+		receipt.save()
+
+		def verdict(batch_no=None):
+			doc = frappe.get_doc(
+				{
+					"doctype": "Quality Inspection",
+					"inspection_type": "Incoming",
+					"reference_type": "Purchase Receipt",
+					"reference_name": receipt.name,
+					"item_code": item.name,
+					"sample_size": 1,
+					"report_date": nowdate(),
+					"inspected_by": frappe.session.user,
+					"manual_inspection": 1,
+					"status": "Accepted",
+					"batch_no": batch_no,
+				}
+			)
+			doc.insert(ignore_permissions=True)
+			doc.submit()
+			return doc
+
+		# a verdict naming no batch does not account for the typed one
+		verdict()
+		receipt.reload()
+		self.assertRaises(frappe.ValidationError, receipt.submit)
+
+		verdict(batch_one)
+
+		# the row changed after inspection — its verdicts no longer describe it
+		receipt.reload()
+		receipt.items[0].batch_no = batch_two
+		receipt.save()
+		self.assertRaises(frappe.ValidationError, receipt.submit)
+
+		# back on the inspected batch, identity and verdicts reconcile
+		receipt.reload()
+		receipt.items[0].batch_no = batch_one
+		receipt.save()
+		receipt.submit()
+		self.assertEqual(receipt.docstatus, 1)
 
 	def test_receipt_inspection_serials_must_match_the_receipt(self):
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt

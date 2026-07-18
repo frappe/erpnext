@@ -318,81 +318,53 @@ def get_row_batch_nos(row):
 
 
 def validate_inspected_serial_consistency(doc, method=None):
-	"""A row's inspection must describe the row's serials.
+	"""Every inspection bound to a row must describe the row's identity.
 
-	The inspection samples specific units; if the row no longer carries them
-	(e.g. the serials on a return were changed after the inspection), the
-	recorded verdict says nothing about the stock actually moving. Enforced at
-	submission for every row with a linked inspection, regardless of mode —
-	and re-checked on submit, when inward documents have materialised their
+	An inspection names specific units or a batch; if the row no longer
+	carries them (changed after the inspection), the recorded verdict says
+	nothing about the stock actually moving and must be cancelled. Enforced at
+	submission for every row-bound inspection, regardless of mode — and
+	re-checked on submit, when inward documents have materialised their
 	auto-created serials and bundles that validate time cannot see.
 	"""
-	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-
 	if doc.docstatus != 1:
 		return
 
 	child_doctype = "Stock Entry Detail" if doc.doctype == "Stock Entry" else doc.doctype + " Item"
 
 	for row in doc.get("items") or []:
-		inspection = row.get("quality_inspection")
-		if not inspection:
-			continue
-
-		qi = frappe.db.get_value("Quality Inspection", inspection, ["serial_no", "batch_no"], as_dict=True)
-		sampled = set(get_serial_nos(qi.serial_no or "")) if qi else set()
-		if qi:
-			# Each Quantity inspections carry their serials per unit
-			sampled.update(
-				frappe.get_all(
-					"Quality Inspection Reading Entry",
-					filters={
-						"parent": inspection,
-						"parentfield": "unit_readings",
-						"serial_no": ("is", "set"),
-					},
-					pluck="serial_no",
-				)
-			)
-		if not sampled and not (qi and qi.batch_no):
+		inspections = _row_inspections(doc, row)
+		if not inspections:
 			continue
 
 		# inward documents materialise serials/bundles during submission via
 		# direct writes — the in-memory row may be stale, the database is not
-		db_row = None
-		if row.get("name"):
-			db_row = frappe.db.get_value(
-				child_doctype, row.name, ["serial_no", "serial_and_batch_bundle", "batch_no"], as_dict=True
-			)
-
+		db_row = frappe.db.get_value(
+			child_doctype, row.name, ["serial_no", "serial_and_batch_bundle", "batch_no"], as_dict=True
+		)
 		row_serials = get_row_serial_nos(row) or (get_row_serial_nos(db_row) if db_row else set())
-		if sampled and row_serials:
-			missing = sampled - row_serials
-			if missing:
-				frappe.throw(
-					_(
-						"Row #{0}: Quality Inspection {1} sampled serial number(s) {2}, which this row "
-						"does not carry. The inspection must describe the stock actually moving."
-					).format(
-						row.idx,
-						frappe.utils.get_link_to_form("Quality Inspection", inspection),
-						frappe.bold(", ".join(sorted(missing))),
-					),
-					title=_("Inspected Serials Mismatch"),
-				)
+		row_batches = get_row_batch_nos(row) or (get_row_batch_nos(db_row) if db_row else set())
 
-		if qi and qi.batch_no:
-			row_batches = get_row_batch_nos(row) or (get_row_batch_nos(db_row) if db_row else set())
-			if row_batches and qi.batch_no not in row_batches:
+		for inspection in inspections:
+			link = frappe.utils.get_link_to_form("Quality Inspection", inspection.name)
+			sampled = _inspection_serials(inspection)
+			if sampled and row_serials:
+				missing = sampled - row_serials
+				if missing:
+					frappe.throw(
+						_(
+							"Row #{0}: Quality Inspection {1} sampled serial number(s) {2}, which this "
+							"row does not carry. Cancel {1} and inspect the stock actually moving."
+						).format(row.idx, link, frappe.bold(", ".join(sorted(missing)))),
+						title=_("Inspected Serials Mismatch"),
+					)
+
+			if inspection.batch_no and row_batches and inspection.batch_no not in row_batches:
 				frappe.throw(
 					_(
 						"Row #{0}: Quality Inspection {1} covers batch {2}, which this row does not "
-						"carry. The inspection must describe the stock actually moving."
-					).format(
-						row.idx,
-						frappe.utils.get_link_to_form("Quality Inspection", inspection),
-						get_link_to_form("Batch", qi.batch_no),
-					),
+						"carry. Cancel {1} and inspect the stock actually moving."
+					).format(row.idx, link, get_link_to_form("Batch", inspection.batch_no)),
 					title=_("Inspected Batch Mismatch"),
 				)
 
@@ -535,14 +507,96 @@ def enforce_inspection_points(doc):
 
 		info = frappe.db.get_value("Quality Inspection", qi, ["docstatus", "status"], as_dict=True)
 		link = get_link_to_form("Quality Inspection", qi)
+		msg = None
 		if not info or info.docstatus != 1:
 			msg = _("Row #{0}: Quality Inspection {1} is not submitted.").format(row.idx, link)
 		elif info.status == "Rejected":
 			msg = _("Row #{0}: Quality Inspection {1} was rejected.").format(row.idx, link)
-		else:
+
+		if msg:
+			if block:
+				frappe.throw(msg, title=_("Quality Inspection"))
+			else:
+				frappe.msgprint(msg, title=_("Quality Inspection"), indicator="orange", alert=True)
 			continue
 
 		if block:
-			frappe.throw(msg, title=_("Quality Inspection"))
-		else:
-			frappe.msgprint(msg, title=_("Quality Inspection"), indicator="orange", alert=True)
+			_validate_identity_covered(doc, row)
+
+
+def _validate_identity_covered(doc, row):
+	"""Identity known before submission must be vouched for by the row's verdicts.
+
+	Auto-created serials and batches are born at the document's submission and
+	cannot be pre-inspected — rows without prior identity are exempt.
+	"""
+	from frappe.utils import get_link_to_form
+
+	row_serials = get_row_serial_nos(row)
+	row_batches = get_row_batch_nos(row)
+	if not row_serials and not row_batches:
+		return
+
+	covered_serials, covered_batches = set(), set()
+	for inspection in _row_inspections(doc, row):
+		covered_serials.update(_inspection_serials(inspection))
+		if inspection.batch_no:
+			covered_batches.add(inspection.batch_no)
+
+	missing_batches = sorted(row_batches - covered_batches)
+	if missing_batches:
+		frappe.throw(
+			_(
+				"Row #{0}: batch(es) {1} carry no verdict — every batch moving must be covered "
+				"by a submitted Quality Inspection naming it."
+			).format(
+				row.idx,
+				", ".join(get_link_to_form("Batch", batch) for batch in missing_batches),
+			),
+			title=_("Batches Not Inspected"),
+		)
+
+	missing_serials = sorted(row_serials - covered_serials)
+	if missing_serials:
+		frappe.throw(
+			_(
+				"Row #{0}: serial number(s) {1} were never inspected — every unit known before "
+				"submission must be covered by a submitted Quality Inspection."
+			).format(row.idx, frappe.bold(", ".join(missing_serials))),
+			title=_("Serials Not Inspected"),
+		)
+
+
+def _row_inspections(doc, row):
+	"""Every submitted inspection bound to this document row."""
+	if not row.get("name"):
+		return []
+	return frappe.get_all(
+		"Quality Inspection",
+		filters={
+			"reference_type": doc.doctype,
+			"reference_name": doc.name,
+			"child_row_reference": row.name,
+			"docstatus": 1,
+		},
+		fields=["name", "serial_no", "batch_no"],
+	)
+
+
+def _inspection_serials(inspection):
+	"""The serials a verdict names — sampled on the document or per unit."""
+	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+	serials = set(get_serial_nos(inspection.serial_no or ""))
+	serials.update(
+		frappe.get_all(
+			"Quality Inspection Reading Entry",
+			filters={
+				"parent": inspection.name,
+				"parentfield": "unit_readings",
+				"serial_no": ("is", "set"),
+			},
+			pluck="serial_no",
+		)
+	)
+	return serials

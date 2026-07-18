@@ -258,6 +258,19 @@ class QualityInspection(UnitReadingsMixin, Document):
 
 		if len(child_row_references):
 			self.child_row_reference = child_row_references[0]
+			return
+
+		# every row of this item already carries a verdict — a further one (say,
+		# for another batch on the same row) binds the first row all the same
+		fallback = frappe.get_all(
+			doctype,
+			filters={"parent": self.reference_name, "item_code": self.item_code, "docstatus": ("<", 2)},
+			order_by="idx",
+			limit=1,
+			pluck="name",
+		)
+		if fallback:
+			self.child_row_reference = fallback[0]
 
 	def set_inspection_basis_from_lot(self):
 		"""Prefill how the stock is inspected (Sample / Each Quantity).
