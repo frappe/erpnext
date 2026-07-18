@@ -115,6 +115,30 @@ class QualityInspection(UnitReadingsMixin, Document):
 		if not get_row_serial_nos(row):
 			self.serial_no = None
 
+	@frappe.whitelist()
+	def get_reference_row_identity(self):
+		"""What the referenced transaction row carries — drives the form's field toggles."""
+		if self.reference_type in ("Quality Control Lot", "Goods Inward Note"):
+			return None
+		self.set_child_row_reference()
+		if not self.child_row_reference:
+			return None
+
+		from erpnext.stock.services.quality_trigger_resolution import (
+			get_reference_row_tracking,
+			get_row_batch_nos,
+			get_row_serial_nos,
+		)
+
+		child_doctype = (
+			"Stock Entry Detail" if self.reference_type == "Stock Entry" else self.reference_type + " Item"
+		)
+		row = get_reference_row_tracking(child_doctype, self.child_row_reference)
+		return {
+			"has_batch": bool(get_row_batch_nos(row)),
+			"has_serials": bool(get_row_serial_nos(row)),
+		}
+
 	def validate(self):
 		self.set_inspection_basis_from_lot()
 		self.set_batch_from_lot()

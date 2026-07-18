@@ -1980,7 +1980,8 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		receipt.reload()
 		self.assertRaises(frappe.ValidationError, receipt.submit)
 
-		verdict(batch_one)
+		inspected = verdict(batch_one)
+		self.assertEqual(inspected.get_reference_row_identity(), {"has_batch": True, "has_serials": False})
 
 		# the row changed after inspection — its verdicts no longer describe it
 		receipt.reload()
@@ -2037,6 +2038,7 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		)
 		inspection.insert(ignore_permissions=True)
 		self.assertFalse(inspection.batch_no)
+		self.assertEqual(inspection.get_reference_row_identity(), {"has_batch": False, "has_serials": False})
 
 	def test_receipt_inspection_cannot_name_unborn_serials(self):
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt

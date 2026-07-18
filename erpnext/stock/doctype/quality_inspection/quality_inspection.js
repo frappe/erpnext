@@ -176,26 +176,18 @@ frappe.ui.form.on("Quality Inspection", {
 
 			// a transaction row still without identity gets it at submission —
 			// there is nothing for the inspection to name yet
-			if (!is_lot && !is_custody && frm.doc.child_row_reference) {
-				const child_doctype =
-					frm.doc.reference_type === "Stock Entry"
-						? "Stock Entry Detail"
-						: frm.doc.reference_type + " Item";
-				frappe.db
-					.get_value(child_doctype, frm.doc.child_row_reference, [
-						"batch_no",
-						"serial_no",
-						"serial_and_batch_bundle",
-					])
-					.then((row) => {
-						const bundle = row.message?.serial_and_batch_bundle;
-						if (!row.message?.batch_no && !bundle) {
-							frm.toggle_display("batch_no", false);
-						}
-						if (!(row.message?.serial_no || "").trim() && !bundle) {
-							frm.toggle_display("serial_no", false);
-						}
-					});
+			if (!is_lot && !is_custody && frm.doc.reference_name) {
+				frm.call("get_reference_row_identity").then((r) => {
+					if (!r.message) {
+						return;
+					}
+					if (!r.message.has_batch) {
+						frm.toggle_display("batch_no", false);
+					}
+					if (!r.message.has_serials) {
+						frm.toggle_display("serial_no", false);
+					}
+				});
 			}
 		});
 	},
