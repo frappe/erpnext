@@ -435,8 +435,6 @@ class QualityInspection(UnitReadingsMixin, Document):
 		self.validate_readings_recorded()
 		self.validate_sample_size()
 		self.validate_unit_readings_complete()
-		self.validate_inspected_serials_against_reference()
-		self.validate_inspected_batch_against_reference()
 		self.validate_unit_readings_coverage()
 		self.validate_decided_quantity()
 		self.validate_units_not_already_decided()
