@@ -42,6 +42,15 @@ frappe.ui.form.on("Quality Inspection", {
 			};
 		});
 
+		// a both-tracked item's units can only be the mirrored batch's serials
+		frm.set_query("serial_no", "unit_readings", function (doc) {
+			const filters = { item_code: doc.item_code };
+			if (doc.batch_no) {
+				filters.batch_no = doc.batch_no;
+			}
+			return { filters: filters };
+		});
+
 		// item code based on GRN/DN
 		frm.set_query("item_code", function (doc) {
 			if (doc.reference_type && doc.reference_name) {
@@ -149,8 +158,13 @@ frappe.ui.form.on("Quality Inspection", {
 			const is_lot = frm.doc.reference_type === "Quality Control Lot";
 			const is_custody = frm.doc.reference_type === "Goods Inward Note";
 
-			// Each Quantity identity lives per unit in the readings below
-			frm.toggle_display("batch_no", cint(r.message?.has_batch_no) && is_lot && !bundle_decided);
+			// Each Quantity identity lives per unit in the readings below — but a
+			// both-tracked item keeps the batch on show: it narrows the units'
+			// serial picker
+			frm.toggle_display(
+				"batch_no",
+				cint(r.message?.has_batch_no) && is_lot && (!bundle_decided || frm.__item_is_serialized)
+			);
 			frm.set_df_property("batch_no", "read_only", 1);
 			frm.set_df_property("batch_no", "reqd", 0);
 
