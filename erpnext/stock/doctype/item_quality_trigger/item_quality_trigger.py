@@ -4,6 +4,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import flt
 
 # Document types that carry a party and can be an external transaction or an
 # internal (inter-company) transfer.
@@ -174,6 +175,9 @@ def _validate_trigger_row(row):
 				"readings are generated from its parameters."
 			).format(row.idx)
 		)
+
+	if row.get("sample_size_is_percentage") and flt(row.sample_size) > 100:
+		frappe.throw(_("Row #{0}: A percentage sample size cannot exceed 100.").format(row.idx))
 
 	# Periodic Re-test rows are interval-driven and always quarantine; none of the
 	# transaction dimensions (document type, direction, parties) apply to them.

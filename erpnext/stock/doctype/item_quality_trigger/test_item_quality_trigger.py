@@ -182,6 +182,21 @@ class TestItemQualityTrigger(ERPNextTestSuite):
 		item.save()
 		self.assertEqual(item.quality_triggers[0].quality_control_mode, "Quarantine")
 
+	def test_percentage_sample_size_capped_at_hundred(self):
+		item = make_item(properties={"is_stock_item": 1})
+		item.append(
+			"quality_triggers",
+			trigger_row(sample_size=120, sample_size_is_percentage=1),
+		)
+		self.assertRaisesRegex(frappe.ValidationError, "cannot exceed 100", item.save)
+
+		item.reload()
+		item.append(
+			"quality_triggers",
+			trigger_row(sample_size=100, sample_size_is_percentage=1),
+		)
+		item.save()  # 100% is a full inspection, not an error
+
 	def test_periodic_retest_needs_batch_tracking(self):
 		# the re-test schedule lives on the batch: an unbatched item is refused
 		item = make_item(properties={"is_stock_item": 1})
