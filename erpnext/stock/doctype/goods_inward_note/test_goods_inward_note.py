@@ -142,7 +142,7 @@ class TestGoodsInwardNote(ERPNextTestSuite):
 		self.assertEqual(receipt.items[0].qty, 2)
 		self.assertEqual(receipt.items[0].uom, "Box")
 
-	def test_package_counted_rows_decide_boxes_not_pieces(self):
+	def test_custody_rows_decide_pieces_not_boxes(self):
 		item = make_item(
 			properties={
 				"is_stock_item": 1,
@@ -186,19 +186,16 @@ class TestGoodsInwardNote(ERPNextTestSuite):
 			)
 			return inspection
 
-		# a serial names a piece, not a box — refused on a package-counted row
-		serialled = sample_inspection(serial_no="BOX-SN-0001")
-		self.assertRaises(frappe.ValidationError, serialled.insert)
-
-		# without serials, a partial verdict decides whole boxes — even for a
-		# serialized item, whose serials only exist after the receipt
-		partial = sample_inspection(decided_quantity=1)
+		# custody inspects physical stock units: 2 boxes hold 20 pieces, and a
+		# partial verdict decides pieces of them
+		partial = sample_inspection(decided_quantity=5)
 		partial.insert(ignore_permissions=True)
 		partial.submit()
 
-		# and the quantities speak the packing unit, refused on save
-		oversized = sample_inspection(sample_size=5)
-		self.assertRaisesRegex(frappe.ValidationError, "Box", oversized.insert)
+		# bounded by the stock quantity still undecided (15 of 20 remain)
+		oversized = sample_inspection(decided_quantity=16)
+		oversized.insert(ignore_permissions=True)
+		self.assertRaises(frappe.ValidationError, oversized.submit)
 
 	def test_disabled_inward_location_is_refused(self):
 		location = make_inward_location("_Test Closed Yard")

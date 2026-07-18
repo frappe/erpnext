@@ -97,7 +97,8 @@ class GoodsInwardNote(Document):
 				point.item_code
 				for point in resolve_inspection_points(self)
 				if point.quality_control_mode in ("Block", "Warn")
-				and flt(point.row.qty) > get_custody_verdicts(point.row.name, row_qty=point.row.qty).decided
+				and flt(point.row.stock_qty)
+				> get_custody_verdicts(point.row.name, row_qty=point.row.stock_qty).decided
 			}
 		)
 		if pending:
@@ -405,7 +406,7 @@ def get_custody_verdicts(row_name, exclude_inspection=None, row_qty=None):
 	many of those they rejected, both capped at what arrived.
 	"""
 	if row_qty is None:
-		row_qty = frappe.db.get_value("Goods Inward Note Item", row_name, "qty")
+		row_qty = frappe.db.get_value("Goods Inward Note Item", row_name, "stock_qty")
 	row_qty = flt(row_qty)
 	filters = {
 		"reference_type": "Goods Inward Note",

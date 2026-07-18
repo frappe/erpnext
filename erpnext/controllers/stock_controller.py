@@ -763,10 +763,13 @@ def check_item_quality_inspection(doctype: str, docstatus: str | int, items: str
 			# their verdicts
 			from erpnext.stock.doctype.goods_inward_note.goods_inward_note import get_custody_verdicts
 
-			in_custody = max(item["qty"] - flt(item.get("received_qty")), 0)
-			undecided = item["qty"]
+			# custody inspects physical stock units
+			conversion = flt(item.get("conversion_factor")) or 1
+			stock_qty = abs(flt(item.get("stock_qty"))) or item["qty"] * conversion
+			in_custody = max(stock_qty - flt(item.get("received_qty")) * conversion, 0)
+			undecided = stock_qty
 			if item.get("name"):
-				undecided = max(item["qty"] - get_custody_verdicts(item.get("name")).decided, 0)
+				undecided = max(stock_qty - get_custody_verdicts(item.get("name")).decided, 0)
 			item["qty"] = min(in_custody, undecided)
 		item_code = item.get("item_code")
 		if item_code not in triggers:

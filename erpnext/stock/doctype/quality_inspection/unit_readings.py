@@ -66,7 +66,7 @@ class UnitReadingsMixin:
 			frappe.throw(
 				_("This inspection decides {0} unit(s), but only {1} remain undecided on {2}.").format(
 					self.decided_quantity,
-					self._format_inspectable_qty(undecided),
+					flt(undecided),
 					get_link_to_form(self.reference_type, self.reference_name),
 				),
 				title=_("More Than Undecided"),
@@ -85,9 +85,9 @@ class UnitReadingsMixin:
 			flt(self.decided_quantity) < undecided
 			and not (self.inspection_basis == "Each Quantity" and not self.manual_inspection)
 			and frappe.get_cached_value("Item", self.item_code, "has_serial_no")
-			# package-counted custody rows decide whole boxes; the serials that
-			# would name pieces only exist after the receipt
-			and not self.get_custody_packing_unit()
+			# custody precedes the receipt that mints serials: a partial custody
+			# verdict need not name units it cannot know yet
+			and self.reference_type != "Goods Inward Note"
 		):
 			frappe.throw(
 				_(
@@ -152,7 +152,7 @@ class UnitReadingsMixin:
 				frappe.throw(
 					_("The unit readings inspect {0} unit(s), but only {1} remain undecided on {2}.").format(
 						self.unit_quantity,
-						self._format_inspectable_qty(inspected_qty),
+						flt(inspected_qty),
 						get_link_to_form(self.reference_type, self.reference_name),
 					),
 					title=_("More Units Than Undecided"),

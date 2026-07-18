@@ -151,7 +151,7 @@ def _map_order_to_receiver(note, receipt_doctype):
 
 def _verdicts_by_row(note):
 	"""The custody verdicts of every note row, fetched once for the caller."""
-	return {row.name: get_custody_verdicts(row.name, row_qty=row.qty) for row in note.items}
+	return {row.name: get_custody_verdicts(row.name, row_qty=row.stock_qty) for row in note.items}
 
 
 def _custody_inspection_state(note, verdicts=None):
@@ -172,12 +172,15 @@ def _custody_inspection_state(note, verdicts=None):
 	for point in resolve_inspection_points(note):
 		row = point.row
 		verdict = verdicts[row.name]
-		# every arrived unit wants a verdict before it becomes stock
-		if flt(verdict.decided - flt(row.qty), 6) >= 0:
+		# verdicts count stock units; every arrived unit wants one before it
+		# becomes stock
+		if flt(verdict.decided - flt(row.stock_qty), 6) >= 0:
 			continue
 		if point.quality_control_mode == "Block":
-			# decided units may go, less what earlier receipts took
-			caps[row.name] = max(verdict.decided - flt(row.received_qty), 0)
+			# decided stock may go, less what earlier receipts took — the cap
+			# speaks the receipt's row unit
+			conversion = flt(row.conversion_factor) or 1
+			caps[row.name] = max(verdict.decided / conversion - flt(row.received_qty), 0)
 		elif point.quality_control_mode == "Warn":
 			warned.add(row.get("item_code"))
 	return caps, warned
@@ -206,7 +209,8 @@ def _custody_rejected_by_order_item(note, verdicts):
 	"""
 	rejected = {}
 	for row in note.items:
-		amount = verdicts[row.name].rejected
+		# verdicts count stock units; the receipt's rejected quantity is row units
+		amount = verdicts[row.name].rejected / (flt(row.conversion_factor) or 1)
 		if amount > 0:
 			rejected[row.order_item] = rejected.get(row.order_item, 0) + amount
 

@@ -122,7 +122,6 @@ class QualityInspection(UnitReadingsMixin, Document):
 			self.set_status_from_unit_readings()
 
 		self.set_decided_quantity_default()
-		self.validate_package_units_carry_no_serials()
 		self.validate_serial_nos()
 		# a sample larger than the stock it describes is wrong on a draft too
 		self.validate_sample_within_quantity()
@@ -220,13 +219,14 @@ class QualityInspection(UnitReadingsMixin, Document):
 					"item_code": self.item_code,
 					"docstatus": ("<", 2),
 				},
-				fields=["name", "qty", "received_qty"],
+				fields=["name", "stock_qty", "received_qty", "conversion_factor"],
 				order_by="idx",
 			)
 			for row in rows:
-				in_custody = flt(row.qty) - flt(row.received_qty)
+				conversion = flt(row.conversion_factor) or 1
+				in_custody = flt(row.stock_qty) - flt(row.received_qty) * conversion
 				undecided = (
-					flt(row.qty) - get_custody_verdicts(row.name, exclude_inspection=self.name).decided
+					flt(row.stock_qty) - get_custody_verdicts(row.name, exclude_inspection=self.name).decided
 				)
 				if min(in_custody, undecided) > 0:
 					self.child_row_reference = row.name
@@ -280,51 +280,6 @@ class QualityInspection(UnitReadingsMixin, Document):
 			self.inspection_basis = "Sample"
 
 	@frappe.whitelist()
-	def get_custody_packing_unit(self):
-		"""The handling unit a custody row counts in, when it is not the stock unit.
-
-		A Goods Inward Note row arrives in the order line's unit of measure —
-		boxes, drums, pallets. Custody verdicts decide those handling units;
-		piece-level inspection happens after receipt, in quarantine.
-		"""
-		if self.reference_type != "Goods Inward Note" or not self.item_code:
-			return None
-		if not self.child_row_reference:
-			self.set_child_row_reference()
-		if not self.child_row_reference:
-			return None
-
-		row_uom = frappe.db.get_value("Goods Inward Note Item", self.child_row_reference, "uom")
-		stock_uom = frappe.get_cached_value("Item", self.item_code, "stock_uom")
-		return row_uom if row_uom and row_uom != stock_uom else None
-
-	def _format_inspectable_qty(self, qty):
-		"""A quantity under inspection, with its handling unit where one applies."""
-		packing_unit = self.get_custody_packing_unit()
-		return f"{flt(qty)} {packing_unit}" if packing_unit else qty
-
-	def validate_package_units_carry_no_serials(self):
-		"""Package-counted custody rows take no serials — a serial names a piece.
-
-		The verdict here decides boxes; which pieces inside them pass is a
-		question for quarantine, after the receipt creates the serials.
-		"""
-		if not (
-			(self.serial_no or "").strip()
-			or any(entry.serial_no for entry in self.get("unit_readings") or [])
-		):
-			return
-
-		packing_unit = self.get_custody_packing_unit()
-		if packing_unit:
-			frappe.throw(
-				_(
-					"This inspection counts in {0} — a Serial No identifies a single {1}. "
-					"Inspect serials after the receipt, in quarantine."
-				).format(packing_unit, frappe.get_cached_value("Item", self.item_code, "stock_uom")),
-				title=_("Packages Carry No Serials"),
-			)
-
 	def validate_serial_nos(self):
 		"""The recorded serials must be real and the item's; they set the sample size.
 
@@ -460,7 +415,7 @@ class QualityInspection(UnitReadingsMixin, Document):
 		if (strict or flt(qty_under_inspection) > 0) and flt(self.sample_size) > flt(qty_under_inspection):
 			frappe.throw(
 				_("The sample of {0} unit(s) exceeds the {1} unit(s) under inspection.").format(
-					self.sample_size, self._format_inspectable_qty(qty_under_inspection)
+					self.sample_size, flt(qty_under_inspection)
 				),
 				title=_("Sample Larger Than Quantity"),
 			)
@@ -628,8 +583,9 @@ class QualityInspection(UnitReadingsMixin, Document):
 			not bundle_decided
 			and item.has_serial_no
 			and not (self.serial_no or "").strip()
-			# package-counted custody rows decide boxes; serials wait for quarantine
-			and not self.get_custody_packing_unit()
+			# custody precedes the receipt that mints serials: naming them there
+			# is optional, never demanded
+			and self.reference_type != "Goods Inward Note"
 		):
 			frappe.throw(
 				_(
@@ -738,14 +694,15 @@ class QualityInspection(UnitReadingsMixin, Document):
 				row = frappe.db.get_value(
 					child_doctype,
 					self.child_row_reference,
-					["qty", "received_qty"],
+					["stock_qty", "received_qty", "conversion_factor"],
 					as_dict=True,
 				)
 				if not row:
 					return None
-				in_custody = max(flt(row.qty) - flt(row.received_qty), 0)
+				conversion = flt(row.conversion_factor) or 1
+				in_custody = max(flt(row.stock_qty) - flt(row.received_qty) * conversion, 0)
 				decided = get_custody_verdicts(self.child_row_reference, exclude_inspection=self.name).decided
-				return min(in_custody, max(flt(row.qty) - decided, 0))
+				return min(in_custody, max(flt(row.stock_qty) - decided, 0))
 			# returns carry negative quantities; inspection thinks in physical units
 			return abs(flt(frappe.db.get_value(child_doctype, self.child_row_reference, "qty")))
 
@@ -791,20 +748,24 @@ class QualityInspection(UnitReadingsMixin, Document):
 		from erpnext.stock.doctype.goods_inward_note.goods_inward_note import get_custody_verdicts
 
 		row = frappe.db.get_value(
-			"Goods Inward Note Item", self.child_row_reference, ["qty", "received_qty"], as_dict=True
+			"Goods Inward Note Item",
+			self.child_row_reference,
+			["stock_qty", "received_qty", "conversion_factor"],
+			as_dict=True,
 		)
 		if not row or not flt(row.received_qty):
 			return
 
+		received_stock = flt(row.received_qty) * (flt(row.conversion_factor) or 1)
 		decided_without = get_custody_verdicts(
-			self.child_row_reference, exclude_inspection=self.name, row_qty=row.qty
+			self.child_row_reference, exclude_inspection=self.name, row_qty=row.stock_qty
 		).decided
-		if flt(flt(row.received_qty) - decided_without, 6) > 0:
+		if flt(received_stock - decided_without, 6) > 0:
 			frappe.throw(
 				_(
 					"{0} unit(s) of this custody row were already received on this verdict's "
 					"strength. Cancel the receipt before cancelling the inspection."
-				).format(row.received_qty),
+				).format(received_stock),
 				title=_("Verdict Already Acted On"),
 			)
 

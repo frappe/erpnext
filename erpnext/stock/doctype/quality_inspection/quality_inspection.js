@@ -109,21 +109,14 @@ frappe.ui.form.on("Quality Inspection", {
 			return;
 		}
 
-		// package-counted custody rows count handling units — a serial names a
-		// piece, so the field is forbidden there (the receipt mints serials later)
-		const packing_unit =
-			frm.doc.reference_type === "Goods Inward Note"
-				? frm.call("get_custody_packing_unit").then((r) => r.message)
-				: Promise.resolve(null);
-
-		Promise.all([
-			frappe.db.get_value("Item", frm.doc.item_code, ["has_batch_no", "has_serial_no"]),
-			packing_unit,
-		]).then(([r, packing_unit]) => {
+		frappe.db.get_value("Item", frm.doc.item_code, ["has_batch_no", "has_serial_no"]).then((r) => {
 			frm.__item_is_serialized = cint(r.message?.has_serial_no);
 			const has_batch = cint(r.message?.has_batch_no);
 			const bundle_decided = frm.doc.inspection_basis === "Each Quantity";
-			const show_serial = frm.__item_is_serialized && !bundle_decided && !packing_unit;
+			const show_serial = frm.__item_is_serialized && !bundle_decided;
+			// custody precedes the receipt that mints serials: recording them
+			// there is optional, so nothing is forced or derived from them
+			const serial_required = show_serial && frm.doc.reference_type !== "Goods Inward Note";
 			// a lot-referenced Each Quantity inspection draws its identity from
 			// the lot: serials per unit below, the batch on the lot itself.
 			// custody goods have no batch at all — the receipt mints it later
@@ -135,10 +128,10 @@ frappe.ui.form.on("Quality Inspection", {
 			// Each Quantity inspections record serials per unit below
 			frm.toggle_display("serial_no", show_serial);
 			// the recorded serials drive the sample size for serialized items
-			frm.set_df_property("sample_size", "read_only", show_serial ? 1 : 0);
+			frm.set_df_property("sample_size", "read_only", serial_required ? 1 : 0);
 
 			// mirror the server's identity gates as mandatory marks
-			frm.set_df_property("serial_no", "reqd", show_serial ? 1 : 0);
+			frm.set_df_property("serial_no", "reqd", serial_required ? 1 : 0);
 
 			if (!has_batch || batch_exempt) {
 				frm.set_df_property("batch_no", "reqd", 0);
@@ -224,15 +217,6 @@ frappe.ui.form.on("Quality Inspection", {
 			frm.call("get_qty_under_inspection").then((r) => {
 				if (r.message != null) {
 					frm.set_value("decided_quantity", flt(r.message));
-				}
-			});
-			// package-counted rows: say what a "unit" is here
-			frm.call("get_custody_packing_unit").then((r) => {
-				if (r.message) {
-					const hint = __("Counted in {0} — custody decides handling units.", [r.message]);
-					frm.set_df_property("unit_quantity", "description", hint);
-					frm.set_df_property("sample_size", "description", hint);
-					frm.set_df_property("decided_quantity", "description", hint);
 				}
 			});
 			return;
