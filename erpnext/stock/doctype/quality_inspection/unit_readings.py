@@ -160,8 +160,10 @@ class UnitReadingsMixin:
 		elif inspected_qty and flt(self.unit_quantity) != flt(inspected_qty):
 			frappe.throw(
 				_(
-					"The unit readings inspect {0} unit(s), but {1} are under inspection. Every "
-					"unit needs its own readings on an Each Quantity basis."
+					"The unit readings inspect {0} unit(s), but {1} are under inspection — a "
+					"verdict here cannot decide in parts. Inspect every unit, judge them all "
+					"from a sample on the Sample basis, or inspect in parts through a Goods "
+					"Inward Note."
 				).format(self.unit_quantity, inspected_qty),
 				title=_("Incomplete Per-Unit Readings"),
 			)

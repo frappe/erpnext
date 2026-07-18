@@ -62,12 +62,42 @@ frappe.ui.form.on("Quality Inspection", {
 		frm.ignore_doctypes_on_cancel_all = [frm.doc.reference_type, "Serial and Batch Bundle"];
 		frm.trigger("toggle_batch_and_serial_fields");
 		frm.trigger("toggle_populate_units_button");
+		frm.trigger("toggle_unit_quantity");
 	},
 
 	inspection_basis(frm) {
 		frm.trigger("toggle_batch_and_serial_fields");
 		frm.trigger("toggle_populate_units_button");
 		frm.trigger("prefill_decided_quantity_from_lot");
+		frm.trigger("toggle_unit_quantity");
+	},
+
+	reference_type(frm) {
+		frm.trigger("toggle_unit_quantity");
+	},
+
+	toggle_unit_quantity(frm) {
+		// a tranche is only choosable where undecided units can wait (a lot or
+		// custody row); every other reference is decided whole, so the count
+		// is a fact of the row, not an input
+		const tranche_capable = ["Quality Control Lot", "Goods Inward Note"].includes(frm.doc.reference_type);
+		frm.set_df_property("unit_quantity", "read_only", tranche_capable ? 0 : 1);
+		if (
+			tranche_capable ||
+			frm.doc.docstatus !== 0 ||
+			frm.doc.inspection_basis !== "Each Quantity" ||
+			!frm.doc.reference_name ||
+			!frm.doc.item_code
+		) {
+			return;
+		}
+		frm.call("get_qty_under_inspection").then((r) => {
+			const qty = flt(r.message);
+			// fractional quantities stay blank; the server points those at Sample
+			if (qty && qty === cint(qty) && cint(frm.doc.unit_quantity) !== qty) {
+				frm.set_value("unit_quantity", qty);
+			}
+		});
 	},
 
 	quality_inspection_template(frm) {
@@ -195,6 +225,7 @@ frappe.ui.form.on("Quality Inspection", {
 		} else {
 			frm.set_value("inspection_basis", "Sample");
 		}
+		frm.trigger("toggle_unit_quantity");
 	},
 
 	manual_inspection(frm) {
@@ -237,5 +268,6 @@ frappe.ui.form.on("Quality Inspection", {
 		frm.trigger("toggle_batch_and_serial_fields");
 		// a custody row resolves its quantity through the item's row
 		frm.trigger("prefill_decided_quantity_from_lot");
+		frm.trigger("toggle_unit_quantity");
 	},
 });
