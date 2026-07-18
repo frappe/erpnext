@@ -784,9 +784,7 @@ class TestQualityQuarantine(ERPNextTestSuite):
 			"Serial No", filters={"item_code": item.name, "warehouse": REAL_WH}, pluck="name"
 		)[0]
 		stray_inspection = build_inspection(stray)
-		stray_inspection.insert(ignore_permissions=True)
-		self.assertRaises(frappe.ValidationError, stray_inspection.submit)
-		stray_inspection.delete()
+		self.assertRaises(frappe.ValidationError, stray_inspection.insert, ignore_permissions=True)
 
 		# a serial belonging to another item is refused
 		other = make_item(
@@ -1603,9 +1601,7 @@ class TestQualityQuarantine(ERPNextTestSuite):
 
 		# sampling a delivered serial that is NOT on this return is refused
 		wrong = build_inspection(serials[2])
-		wrong.insert(ignore_permissions=True)
-		self.assertRaises(frappe.ValidationError, wrong.submit)
-		wrong.delete()
+		self.assertRaises(frappe.ValidationError, wrong.insert, ignore_permissions=True)
 
 		# sampling a returned serial passes — the sample vouches for the row
 		inspection = build_inspection(serials[0])
@@ -1755,9 +1751,7 @@ class TestQualityQuarantine(ERPNextTestSuite):
 				"batch_no": batch_two,
 			}
 		)
-		wrong.insert(ignore_permissions=True)
-		self.assertRaises(frappe.ValidationError, wrong.submit)
-		wrong.delete()
+		self.assertRaises(frappe.ValidationError, wrong.insert, ignore_permissions=True)
 
 		inspection = frappe.copy_doc(wrong)
 		inspection.batch_no = batch_one

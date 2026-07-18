@@ -184,6 +184,10 @@ class QualityInspection(UnitReadingsMixin, Document):
 
 		self.set_decided_quantity_default()
 		self.validate_serial_nos()
+		# named identity must describe the reference from the first save, not
+		# only when the verdict lands
+		self.validate_inspected_serials_against_reference()
+		self.validate_inspected_batch_against_reference()
 		# a sample larger than the stock it describes is wrong on a draft too
 		self.validate_sample_within_quantity()
 		self.set_company()
