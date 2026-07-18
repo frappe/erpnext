@@ -59,6 +59,24 @@ class TestQualityRetest(ERPNextTestSuite):
 		# not due: nothing was quarantined
 		self.assertEqual(get_qty(item, store), 3)
 
+	def test_overdue_batch_is_quarantined_on_the_initialising_sweep(self):
+		from frappe.utils import add_days
+
+		qc = make_qc_warehouse("_Test QC Retest Overdue WH")
+		store = make_warehouse("_Test QC Retest Overdue Store", quality_warehouse=qc)
+		item = make_retest_item("TQRO-.####")
+
+		make_stock_entry(item_code=item, qty=2, to_warehouse=store, purpose="Material Receipt", rate=100)
+		batch = frappe.get_all("Batch", filters={"item": item}, pluck="name")[0]
+		# manufactured far past its interval, clock never initialised
+		frappe.db.set_value("Batch", batch, "manufacturing_date", add_days(today(), -100))
+
+		# one sweep: the date initialises AND the overdue batch quarantines —
+		# it must not wait for a second run
+		process_periodic_retests()
+		self.assertEqual(get_qty(item, store), 0)
+		self.assertEqual(get_qty(item, qc), 2)
+
 	def test_due_batch_is_quarantined_and_decision_schedules_next_retest(self):
 		qc = make_qc_warehouse("_Test QC Retest WH")
 		store = make_warehouse("_Test QC Retest Store", quality_warehouse=qc)

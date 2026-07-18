@@ -81,14 +81,15 @@ def process_periodic_retests():
 		for batch in batches:
 			if not batch.next_quality_inspection_date:
 				base = batch.manufacturing_date or getdate(batch.creation)
+				batch.next_quality_inspection_date = add_days(base, trigger.retest_interval_days)
 				frappe.db.set_value(
 					"Batch",
 					batch.name,
 					"next_quality_inspection_date",
-					add_days(base, trigger.retest_interval_days),
+					batch.next_quality_inspection_date,
 					update_modified=False,
 				)
-				continue
+				# no skip: a batch already past its computed date is due right now
 
 			if getdate(batch.next_quality_inspection_date) <= current_date:
 				quarantine_batch_for_retest(item_code, batch.name)
