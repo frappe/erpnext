@@ -45,6 +45,7 @@ class QualityInspection(UnitReadingsMixin, Document):
 		item_code: DF.Link
 		item_name: DF.Data | None
 		serial_no: DF.SmallText | None
+		stock_uom: DF.Link | None
 		letter_head: DF.Link | None
 		manual_inspection: DF.Check
 		naming_series: DF.Literal["MAT-QA-.YYYY.-"]

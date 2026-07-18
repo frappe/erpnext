@@ -18,6 +18,7 @@
   "reference_name",
   "section_break_7",
   "item_code",
+  "stock_uom",
   "serial_no",
   "batch_no",
   "sample_size",
@@ -119,6 +120,14 @@
    "reqd": 1,
    "search_index": 1,
    "set_only_once": 1
+  },
+  {
+   "fetch_from": "item_code.stock_uom",
+   "fieldname": "stock_uom",
+   "fieldtype": "Link",
+   "label": "Stock UOM",
+   "options": "UOM",
+   "read_only": 1
   },
   {
    "fieldname": "serial_no",
@@ -291,7 +300,7 @@
   },
   {
    "depends_on": "eval:doc.inspection_basis == 'Each Quantity' && !doc.manual_inspection",
-   "description": "Units inspected \u2014 one set of readings per unit below.",
+   "description": "Units inspected — one set of readings per unit below.",
    "fieldname": "unit_quantity",
    "fieldtype": "Int",
    "label": "Unit Quantity"

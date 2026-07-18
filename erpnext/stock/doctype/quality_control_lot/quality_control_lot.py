@@ -31,6 +31,7 @@ class QualityControlLot(Document):
 		returned_qty: DF.Float
 		source_document: DF.DynamicLink | None
 		source_document_type: DF.Link | None
+		stock_uom: DF.Link | None
 		status: DF.Literal[
 			"Under Inspection", "Awaiting Release", "Partially Released", "Released", "Rejected"
 		]

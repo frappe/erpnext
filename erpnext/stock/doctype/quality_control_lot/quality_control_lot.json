@@ -10,6 +10,7 @@
   "item_section",
   "naming_series",
   "item_code",
+  "stock_uom",
   "batch_no",
   "column_break_item",
   "company",
@@ -58,6 +59,14 @@
    "read_only": 1
   },
   {
+   "fetch_from": "item_code.stock_uom",
+   "fieldname": "stock_uom",
+   "fieldtype": "Link",
+   "label": "Stock UOM",
+   "options": "UOM",
+   "read_only": 1
+  },
+  {
    "fieldname": "batch_no",
    "fieldtype": "Link",
    "label": "Batch",
@@ -99,7 +108,7 @@
    "read_only": 1
   },
   {
-   "description": "Decided by inspections so far \u2014 a lot may be decided in parts.",
+   "description": "Decided by inspections so far — a lot may be decided in parts.",
    "fieldname": "decided_qty",
    "fieldtype": "Float",
    "label": "Decided Qty",
