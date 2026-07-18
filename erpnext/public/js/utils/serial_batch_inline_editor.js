@@ -615,7 +615,10 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 
 		if (!data || !data.length) {
 			frappe.msgprint(
-				__("No stock available for Item {0} in Warehouse {1}", [this.row.item_code, warehouse])
+				__("No stock available for Item {0} in Warehouse {1}", [
+					this.esc(this.row.item_code),
+					this.esc(warehouse),
+				])
 			);
 			return;
 		}
@@ -718,7 +721,7 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 		if (cint(this.item.has_serial_no)) {
 			if (this.get_known_identifiers().has(value)) {
 				frappe.show_alert({
-					message: __("Serial No {0} already added", [value]),
+					message: __("Serial No {0} already added", [this.esc(value)]),
 					indicator: "orange",
 				});
 				return false;
