@@ -222,14 +222,13 @@ def reverse_inspection_result(doc, method=None):
 
 
 @frappe.whitelist()
-def make_release_for_lot(lot_name: str, release_warehouse: str | None = None):
-	"""A Quality Control Release pre-filled with the lot's accepted stock.
+def get_release_prefill_for_lot(lot_name: str, release_warehouse: str | None = None):
+	"""The release row for a lot's accepted stock still in quarantine.
 
-	The path for when the automatic release could not run — typically several
-	stores share one Quality Control warehouse, so no unique release target
-	exists. Pre-filled with the quantity the inspection accepted that is still
-	in quarantine, the lot's batch and exactly the accepted serials; the caller
-	(or the form) picks the target warehouse.
+	Shared by make_release_for_lot and the Stock Entry form (picking the lot on
+	a Quality Control Release prefills the row): the quantity the inspection
+	accepted that has not left quarantine, the lot's batch and exactly the
+	accepted serials; the target stays open unless a unique store resolves.
 	"""
 	frappe.has_permission("Stock Entry", "create", throw=True)
 	lot = frappe.get_doc("Quality Control Lot", lot_name)
@@ -260,11 +259,6 @@ def make_release_for_lot(lot_name: str, release_warehouse: str | None = None):
 		accepted_serials = accepted_serials[: int(accepted_qty)]
 
 	stock_uom = frappe.get_cached_value("Item", lot.item_code, "stock_uom")
-	entry = frappe.new_doc("Stock Entry")
-	entry.purpose = "Quality Control Release"
-	entry.stock_entry_type = "Quality Control Release"
-	entry.company = lot.company
-	entry.quality_control_lot = lot.name
 	row = {
 		"item_code": lot.item_code,
 		"qty": accepted_qty,
@@ -283,7 +277,24 @@ def make_release_for_lot(lot_name: str, release_warehouse: str | None = None):
 		batch_no=lot.batch_no,
 		serial_nos=accepted_serials,
 	)
-	entry.append("items", row)
+	return {"company": lot.company, "row": row}
+
+
+@frappe.whitelist()
+def make_release_for_lot(lot_name: str, release_warehouse: str | None = None):
+	"""A Quality Control Release pre-filled with the lot's accepted stock.
+
+	The path for when the automatic release could not run — typically several
+	stores share one Quality Control warehouse, so no unique release target
+	exists. The caller (or the form) picks the target warehouse.
+	"""
+	prefill = get_release_prefill_for_lot(lot_name, release_warehouse)
+	entry = frappe.new_doc("Stock Entry")
+	entry.purpose = "Quality Control Release"
+	entry.stock_entry_type = "Quality Control Release"
+	entry.company = prefill["company"]
+	entry.quality_control_lot = lot_name
+	entry.append("items", prefill["row"])
 	return entry
 
 

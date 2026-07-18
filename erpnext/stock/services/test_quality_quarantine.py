@@ -305,6 +305,15 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		# decided but nothing has physically left quarantine yet
 		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "status"), "Awaiting Release")
 
+		# the form prefill (picking the lot on a Stock Entry) carries the same
+		# row: accepted quantity out of the Quality Control warehouse, target open
+		from erpnext.stock.services.quality_release import get_release_prefill_for_lot
+
+		prefill = get_release_prefill_for_lot(lot)
+		self.assertEqual(prefill["row"]["qty"], 4)
+		self.assertEqual(prefill["row"]["s_warehouse"], qc)
+		self.assertFalse(prefill["row"]["t_warehouse"])
+
 		# pre-filled with the accepted quantity; the user picked the store
 		release = make_release_for_lot(lot, store_one)
 		self.assertEqual(release.items[0].qty, 4)

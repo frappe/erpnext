@@ -928,6 +928,30 @@ frappe.ui.form.on("Stock Entry", {
 		erpnext.utils.get_address_display(frm, "target_warehouse_address", "target_address_display", false);
 	},
 
+	quality_control_lot: function (frm) {
+		// picking the lot on a hand-made release prefills what its verdicts
+		// allow out: the accepted quantity, its batch and exactly its serials
+		if (
+			!frm.doc.quality_control_lot ||
+			frm.doc.purpose !== "Quality Control Release" ||
+			frm.doc.docstatus !== 0
+		) {
+			return;
+		}
+		frappe
+			.xcall("erpnext.stock.services.quality_release.get_release_prefill_for_lot", {
+				lot_name: frm.doc.quality_control_lot,
+			})
+			.then((prefill) => {
+				if (frm.doc.company !== prefill.company) {
+					frm.set_value("company", prefill.company);
+				}
+				frm.clear_table("items");
+				frm.add_child("items", prefill.row);
+				frm.refresh_field("items");
+			});
+	},
+
 	add_to_transit: function (frm) {
 		// the target query itself branches on add_to_transit (set_warehouse_queries)
 		if (frm.doc.purpose == "Material Transfer" && frm.doc.add_to_transit) {
