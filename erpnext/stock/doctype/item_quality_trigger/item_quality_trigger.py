@@ -100,12 +100,21 @@ class ItemQualityTrigger(Document):
 def validate_item_quality_triggers(doc, method=None):
 	"""Validate the quality_triggers child rows on Item / Item Group.
 
-	Wired via doc_events because a child doctype's own validate() is not invoked
-	automatically by the framework.
+	Called from the Item and Item Group controllers because a child doctype's
+	own validate() is not invoked automatically by the framework.
 	"""
 	rows = doc.get("quality_triggers") or []
 	for row in rows:
 		_validate_trigger_row(row)
+		if doc.doctype == "Item" and row.get("trigger_type") == "Periodic Re-test" and not doc.has_batch_no:
+			# the re-test clock lives on the Batch; an Item Group row is fine —
+			# it applies only to the group's batch-tracked items
+			frappe.throw(
+				_(
+					"Row #{0}: A Periodic Re-test trigger needs batch tracking — the re-test "
+					"schedule lives on the batch. Enable Has Batch No on the item first."
+				).format(row.idx)
+			)
 	_validate_no_overlapping_rows(rows)
 
 

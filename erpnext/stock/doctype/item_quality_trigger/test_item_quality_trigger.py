@@ -155,7 +155,7 @@ class TestItemQualityTrigger(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, item.save)
 
 	def test_periodic_retest_row_needs_interval_and_forces_quarantine(self):
-		item = make_item(properties={"is_stock_item": 1})
+		item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1})
 		item.append(
 			"quality_triggers",
 			trigger_row(
@@ -181,3 +181,33 @@ class TestItemQualityTrigger(ERPNextTestSuite):
 		)
 		item.save()
 		self.assertEqual(item.quality_triggers[0].quality_control_mode, "Quarantine")
+
+	def test_periodic_retest_needs_batch_tracking(self):
+		# the re-test schedule lives on the batch: an unbatched item is refused
+		item = make_item(properties={"is_stock_item": 1})
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				trigger_type="Periodic Re-test",
+				document_type=None,
+				warehouse_role=None,
+				quality_control_mode=None,
+				retest_interval_days=90,
+			),
+		)
+		self.assertRaisesRegex(frappe.ValidationError, "batch tracking", item.save)
+
+		# an Item Group row is fine — it applies only to batch-tracked members
+		group = frappe.get_doc("Item Group", create_test_item_group("_Test QC Retest Group"))
+		group.append(
+			"quality_triggers",
+			trigger_row(
+				trigger_type="Periodic Re-test",
+				document_type=None,
+				warehouse_role=None,
+				quality_control_mode=None,
+				retest_interval_days=90,
+			),
+		)
+		group.save()
+		self.assertEqual(group.quality_triggers[0].quality_control_mode, "Quarantine")

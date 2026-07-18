@@ -184,8 +184,23 @@ frappe.ui.form.on("Item", {
 		}
 	},
 
+	has_batch_no: function (frm) {
+		frm.trigger("toggle_periodic_retest_option");
+	},
+
+	toggle_periodic_retest_option: function (frm) {
+		// the re-test schedule lives on the batch: unbatched items keep the
+		// Transaction default, read-only
+		frm.fields_dict.quality_triggers?.grid.update_docfield_property(
+			"trigger_type",
+			"read_only",
+			cint(frm.doc.has_batch_no) ? 0 : 1
+		);
+	},
+
 	refresh: function (frm) {
 		frm.trigger("toggle_has_serial_batch_fields");
+		frm.trigger("toggle_periodic_retest_option");
 
 		if (frappe.defaults.get_default("item_naming_by") != "Naming Series" || frm.doc.variant_of) {
 			frm.toggle_display("naming_series", false);
