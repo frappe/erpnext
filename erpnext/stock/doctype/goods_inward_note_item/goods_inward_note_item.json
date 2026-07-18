@@ -18,8 +18,7 @@
   "section_break_reference",
   "order_item",
   "supplier_reference",
-  "column_break_reference",
-  "quality_inspection"
+  "column_break_reference"
  ],
  "fields": [
   {
@@ -121,14 +120,6 @@
   {
    "fieldname": "column_break_reference",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "quality_inspection",
-   "fieldtype": "Link",
-   "label": "Quality Inspection",
-   "no_copy": 1,
-   "options": "Quality Inspection",
-   "read_only": 1
   }
  ],
  "istable": 1,

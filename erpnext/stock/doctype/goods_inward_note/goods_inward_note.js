@@ -56,18 +56,6 @@ frappe.ui.form.on("Goods Inward Note", {
 			);
 		}
 
-		const quality_inspection_field = frm.get_docfield("items", "quality_inspection");
-		quality_inspection_field.get_route_options_for_new_doc = function (row) {
-			if (frm.is_new()) return {};
-			return {
-				inspection_type: "Incoming",
-				reference_type: frm.doc.doctype,
-				reference_name: frm.doc.name,
-				child_row_reference: row.doc.name,
-				item_code: row.doc.item_code,
-			};
-		};
-
 		if (frm.doc.docstatus === 1 && ["In Custody", "Partially Received"].includes(frm.doc.status)) {
 			const receive_via = (label, method) => {
 				frm.add_custom_button(

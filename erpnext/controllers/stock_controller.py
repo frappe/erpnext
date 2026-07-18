@@ -782,14 +782,15 @@ def check_item_quality_inspection(doctype: str, docstatus: str | int, items: str
 			item["sample_quantity"] = computed_sample
 		# the browser may hold a stale row (e.g. its inspection was cancelled since
 		# the form was loaded) — the database decides whether a link still exists
-		if item.get("name"):
+		if item.get("name") and doctype != "Goods Inward Note":
 			item["quality_inspection"] = frappe.db.get_value(
 				child_doctype, item.get("name"), "quality_inspection"
 			)
-		if doctype == "Goods Inward Note" and item["qty"] > 0:
-			# a custody row may be inspected in batches: keep offering it while
-			# undecided units remain, past inspections notwithstanding
-			item["quality_inspection"] = None
+		if doctype == "Goods Inward Note":
+			# a custody row carries no inspection link — it may be inspected in
+			# batches, so it stays offered while undecided units remain; the
+			# sentinel only tells the dialog to skip fully decided rows
+			item["quality_inspection"] = None if item["qty"] > 0 else "fully decided"
 
 	return items
 

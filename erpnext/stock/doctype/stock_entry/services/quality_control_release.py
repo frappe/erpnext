@@ -40,10 +40,9 @@ class QualityControlReleaseStockEntry(MaterialTransferStockEntry):
 
 		lot = frappe.get_doc("Quality Control Lot", doc.quality_control_lot)
 
-		if (
-			not lot.quality_inspection
-			or frappe.db.get_value("Quality Inspection", lot.quality_inspection, "docstatus") != 1
-		):
+		from erpnext.stock.services.quality_release import has_submitted_inspection
+
+		if not has_submitted_inspection(lot.name):
 			frappe.throw(
 				_(
 					"Quality Control Lot {0} has no submitted Quality Inspection. Stock cannot leave "

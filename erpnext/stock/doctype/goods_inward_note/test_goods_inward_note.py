@@ -732,7 +732,10 @@ class TestGoodsInwardNote(ERPNextTestSuite):
 		inspection.submit()
 
 		note.reload()
-		self.assertEqual(note.items[0].quality_inspection, inspection.name)
+		from erpnext.stock.doctype.goods_inward_note.goods_inward_note import get_custody_verdicts
+
+		verdicts = get_custody_verdicts(note.items[0].name, row_qty=note.items[0].qty)
+		self.assertEqual(verdicts.decided, 4)
 
 		receipt = make_receipt_from_goods_inward_note(note.name)
 		self.assertEqual(receipt.items[0].qty, 4)

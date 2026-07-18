@@ -29,7 +29,6 @@
   "source_document_type",
   "source_document",
   "column_break_source",
-  "quality_inspection",
   "inspection_template",
   "inspection_basis",
   "serial_numbers_section",
@@ -177,14 +176,6 @@
   {
    "fieldname": "column_break_source",
    "fieldtype": "Column Break"
-  },
-  {
-   "description": "The latest submitted inspection of this lot.",
-   "fieldname": "quality_inspection",
-   "fieldtype": "Link",
-   "label": "Quality Inspection",
-   "options": "Quality Inspection",
-   "read_only": 1
   },
   {
    "fieldname": "inspection_template",

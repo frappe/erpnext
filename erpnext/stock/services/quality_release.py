@@ -226,6 +226,15 @@ def reverse_inspection_result(doc, method=None):
 	lot.save()
 
 
+def has_submitted_inspection(lot_name: str) -> bool:
+	return bool(
+		frappe.db.exists(
+			"Quality Inspection",
+			{"reference_type": "Quality Control Lot", "reference_name": lot_name, "docstatus": 1},
+		)
+	)
+
+
 @frappe.whitelist()
 def get_release_prefill_for_lot(lot_name: str, release_warehouse: str | None = None):
 	"""The release row for a lot's accepted stock still in quarantine.
@@ -239,10 +248,7 @@ def get_release_prefill_for_lot(lot_name: str, release_warehouse: str | None = N
 	lot = frappe.get_doc("Quality Control Lot", lot_name)
 	lot.check_permission("read")
 
-	if (
-		not lot.quality_inspection
-		or frappe.db.get_value("Quality Inspection", lot.quality_inspection, "docstatus") != 1
-	):
+	if not has_submitted_inspection(lot.name):
 		frappe.throw(
 			_(
 				"Quality Control Lot {0} has no submitted Quality Inspection. Stock cannot leave "

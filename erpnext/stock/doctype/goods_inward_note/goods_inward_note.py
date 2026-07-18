@@ -96,7 +96,8 @@ class GoodsInwardNote(Document):
 			{
 				point.item_code
 				for point in resolve_inspection_points(self)
-				if point.quality_control_mode in ("Block", "Warn") and not point.row.get("quality_inspection")
+				if point.quality_control_mode in ("Block", "Warn")
+				and flt(point.row.qty) > get_custody_verdicts(point.row.name, row_qty=point.row.qty).decided
 			}
 		)
 		if pending:

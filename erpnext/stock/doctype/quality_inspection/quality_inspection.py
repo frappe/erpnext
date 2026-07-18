@@ -826,27 +826,9 @@ class QualityInspection(UnitReadingsMixin, Document):
 	def update_qc_reference(self, remove_reference=False):
 		quality_inspection = self.name if self.docstatus < 2 and not remove_reference else ""
 
-		if self.reference_type == "Quality Control Lot":
-			if self.reference_name:
-				if not quality_inspection:
-					# fall back to the latest remaining verdict of the lot
-					quality_inspection = (
-						frappe.db.get_value(
-							"Quality Inspection",
-							{
-								"reference_type": "Quality Control Lot",
-								"reference_name": self.reference_name,
-								"docstatus": 1,
-								"name": ("!=", self.name),
-							},
-							"name",
-							order_by="modified desc",
-						)
-						or ""
-					)
-				frappe.db.set_value(
-					"Quality Control Lot", self.reference_name, "quality_inspection", quality_inspection
-				)
+		# lots and custody rows take several inspections each; theirs are found
+		# by reference query, never through a single link field
+		if self.reference_type in ("Quality Control Lot", "Goods Inward Note"):
 			return
 
 		if self.reference_type == "Job Card":

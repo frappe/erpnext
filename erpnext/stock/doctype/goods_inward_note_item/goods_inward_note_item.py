@@ -18,7 +18,6 @@ class GoodsInwardNoteItem(Document):
 		item_name: DF.Data | None
 		order_item: DF.Data | None
 		qty: DF.Float
-		quality_inspection: DF.Link | None
 		received_qty: DF.Float
 		stock_qty: DF.Float
 		stock_uom: DF.Link | None
