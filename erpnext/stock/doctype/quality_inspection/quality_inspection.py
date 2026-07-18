@@ -82,6 +82,7 @@ class QualityInspection(UnitReadingsMixin, Document):
 
 	def validate(self):
 		self.set_inspection_basis_from_lot()
+		self.set_batch_from_lot()
 		# the reference must be resolved before the unit machinery runs: the
 		# quantity under inspection comes off the referenced row or lot
 		self.validate_item_belongs_to_reference()
@@ -280,6 +281,11 @@ class QualityInspection(UnitReadingsMixin, Document):
 		else:
 			self.inspection_basis = "Sample"
 
+	def set_batch_from_lot(self):
+		"""The lot holds the batch; a lot-referenced inspection mirrors it."""
+		if self.reference_type == "Quality Control Lot" and self.reference_name:
+			self.batch_no = frappe.db.get_value("Quality Control Lot", self.reference_name, "batch_no")
+
 	@frappe.whitelist()
 	def validate_serial_nos(self):
 		"""The recorded serials must be real and the item's; they set the sample size.
@@ -333,33 +339,6 @@ class QualityInspection(UnitReadingsMixin, Document):
 		if serial_nos:
 			self.sample_size = len(serial_nos)
 
-	def _referenced_row_awaits_batch(self):
-		"""Whether the row under inspection will only get its batch at submission.
-
-		Auto-created batches do not exist before the inbound document submits, so
-		the inspection cannot name one — the document-side consistency gate takes
-		over once the batch materialises.
-		"""
-		if self.reference_type == "Goods Inward Note":
-			# custody precedes stock identity: the batch is minted by the receipt
-			return True
-		if not self.child_row_reference or self.reference_type == "Quality Control Lot":
-			return False
-
-		child_doctype = (
-			"Stock Entry Detail" if self.reference_type == "Stock Entry" else self.reference_type + " Item"
-		)
-		from erpnext.stock.services.quality_trigger_resolution import (
-			get_reference_row_tracking,
-			get_row_batch_nos,
-		)
-
-		row = get_reference_row_tracking(child_doctype, self.child_row_reference)
-		if not row:
-			return False
-
-		return not get_row_batch_nos(row)
-
 	def _referenced_row_typed_serials(self):
 		"""Serials typed on the referenced row — acceptable before they exist."""
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -380,7 +359,6 @@ class QualityInspection(UnitReadingsMixin, Document):
 		self.validate_readings_recorded()
 		self.validate_sample_size()
 		self.validate_unit_readings_complete()
-		self.validate_tracking_identity_recorded()
 		self.validate_inspected_serials_against_reference()
 		self.validate_inspected_batch_against_reference()
 		self.validate_unit_readings_coverage()
@@ -564,48 +542,6 @@ class QualityInspection(UnitReadingsMixin, Document):
 					"only the stock actually moving can be sampled."
 				).format(frappe.bold(", ".join(sorted(missing)))),
 				title=_("Sampled Serials Mismatch"),
-			)
-
-	def validate_tracking_identity_recorded(self):
-		"""A tracked item's verdict must say which units it covers.
-
-		Serialized items record the sampled serials, batched items the batch.
-		Each Quantity / bundle-decided inspections are exempt: their identity
-		lives per unit in the unit readings and on the Quality Control Lot.
-		"""
-		if not self.item_code:
-			return
-
-		bundle_decided = self.inspection_basis == "Each Quantity"
-		item = frappe.get_cached_value(
-			"Item", self.item_code, ["has_serial_no", "has_batch_no"], as_dict=True
-		)
-		if (
-			not bundle_decided
-			and item.has_serial_no
-			and not (self.serial_no or "").strip()
-			# custody precedes the receipt that mints serials: naming them there
-			# is optional, never demanded
-			and self.reference_type != "Goods Inward Note"
-		):
-			frappe.throw(
-				_(
-					"Record the sampled Serial Nos before submission — {0} is serialized, and the "
-					"verdict must say which units it covers."
-				).format(get_link_to_form("Item", self.item_code)),
-				title=_("Serial Nos Missing"),
-			)
-		# the bundle carries serials per unit but no batch: only a lot reference
-		# (which holds the batch itself) exempts the batch requirement
-		if bundle_decided and self.reference_type == "Quality Control Lot":
-			return
-		if item.has_batch_no and not self.batch_no and not self._referenced_row_awaits_batch():
-			frappe.throw(
-				_(
-					"Record the Batch No before submission — {0} is batch-tracked, and the verdict "
-					"must say which batch it covers."
-				).format(get_link_to_form("Item", self.item_code)),
-				title=_("Batch No Missing"),
 			)
 
 	def warn_unrecorded_readings(self):

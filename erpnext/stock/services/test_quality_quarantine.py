@@ -563,7 +563,7 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		batch_one, lot_one = receive_batch("_Test QC Batch One")
 		batch_two, lot_two = receive_batch("_Test QC Batch Two")
 
-		# a verdict claiming the wrong batch is refused
+		# the lot's batch is a fact the verdict mirrors — a wrong claim cannot survive
 		mismatched = frappe.get_doc(
 			{
 				"doctype": "Quality Inspection",
@@ -580,27 +580,8 @@ class TestQualityQuarantine(ERPNextTestSuite):
 			}
 		)
 		mismatched.insert(ignore_permissions=True)
-		self.assertRaises(frappe.ValidationError, mismatched.submit)
+		self.assertEqual(mismatched.batch_no, batch_one)
 		mismatched.delete()
-
-		# a batched verdict must say which batch it covers
-		anonymous = frappe.get_doc(
-			{
-				"doctype": "Quality Inspection",
-				"inspection_type": "Incoming",
-				"reference_type": "Quality Control Lot",
-				"reference_name": lot_one,
-				"item_code": item.name,
-				"sample_size": 1,
-				"report_date": nowdate(),
-				"inspected_by": frappe.session.user,
-				"manual_inspection": 1,
-				"status": "Accepted",
-			}
-		)
-		anonymous.insert(ignore_permissions=True)
-		self.assertRaises(frappe.ValidationError, anonymous.submit)
-		anonymous.delete()
 
 		submit_inspection_for_lot(lot_one)
 
@@ -783,10 +764,11 @@ class TestQualityQuarantine(ERPNextTestSuite):
 				}
 			)
 
-		# a serialized verdict must say which units it covers
+		# serials are optional — an unnamed verdict stands, releasing by age
 		anonymous = build_inspection()
 		anonymous.insert(ignore_permissions=True)
-		self.assertRaises(frappe.ValidationError, anonymous.submit)
+		anonymous.submit()
+		anonymous.cancel()
 		anonymous.delete()
 
 		inspection = build_inspection("\n".join(serials[:2]))

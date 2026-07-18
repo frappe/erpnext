@@ -131,11 +131,12 @@ frappe.ui.form.on("Quality Inspection", {
 	},
 
 	toggle_batch_and_serial_fields(frm) {
-		// only show batch / serial for items that are actually tracked that way
+		// identity is the lot's and custody's business: a lot mirrors its batch
+		// and may sample serials, custody may record the supplier's serials — a
+		// transaction-referenced (Block / Warn) inspection ignores identity,
+		// which the document itself mints and checks at submission
 		if (!frm.doc.item_code) {
 			frm.toggle_display(["batch_no", "serial_no"], false);
-			frm.set_df_property("batch_no", "reqd", 0);
-			frm.set_df_property("serial_no", "reqd", 0);
 			frm.trigger("toggle_unit_serial_column");
 			return;
 		}
@@ -143,71 +144,51 @@ frappe.ui.form.on("Quality Inspection", {
 		frappe.db.get_value("Item", frm.doc.item_code, ["has_batch_no", "has_serial_no"]).then((r) => {
 			frm.__item_is_serialized = cint(r.message?.has_serial_no);
 			frm.trigger("toggle_unit_serial_column");
-			const has_batch = cint(r.message?.has_batch_no);
+
 			const bundle_decided = frm.doc.inspection_basis === "Each Quantity";
-			const show_serial = frm.__item_is_serialized && !bundle_decided;
-			// custody precedes the receipt that mints serials: recording them
-			// there is optional, so nothing is forced or derived from them
-			const serial_required = show_serial && frm.doc.reference_type !== "Goods Inward Note";
-			// a lot-referenced Each Quantity inspection draws its identity from
-			// the lot: serials per unit below, the batch on the lot itself.
-			// custody goods have no batch at all — the receipt mints it later
-			const batch_exempt =
-				(bundle_decided && frm.doc.reference_type === "Quality Control Lot") ||
-				frm.doc.reference_type === "Goods Inward Note";
+			const is_lot = frm.doc.reference_type === "Quality Control Lot";
+			const is_custody = frm.doc.reference_type === "Goods Inward Note";
 
-			frm.toggle_display("batch_no", has_batch && !batch_exempt);
-			// Each Quantity inspections record serials per unit below
-			frm.toggle_display("serial_no", show_serial);
-			// the recorded serials drive the sample size for serialized items
-			frm.set_df_property("sample_size", "read_only", serial_required ? 1 : 0);
+			// Each Quantity identity lives per unit in the readings below
+			frm.toggle_display("batch_no", cint(r.message?.has_batch_no) && is_lot && !bundle_decided);
+			frm.set_df_property("batch_no", "read_only", 1);
+			frm.set_df_property("batch_no", "reqd", 0);
 
-			// mirror the server's identity gates as mandatory marks
-			frm.set_df_property("serial_no", "reqd", serial_required ? 1 : 0);
-
-			if (!has_batch || batch_exempt) {
-				frm.set_df_property("batch_no", "reqd", 0);
-			} else if (frm.doc.child_row_reference && frm.doc.reference_type !== "Quality Control Lot") {
-				// an auto-created batch does not exist before the inbound document
-				// submits — the field cannot be filled, so it cannot be mandatory
-				const child_doctype =
-					frm.doc.reference_type === "Stock Entry"
-						? "Stock Entry Detail"
-						: frm.doc.reference_type + " Item";
-				frappe.db
-					.get_value(child_doctype, frm.doc.child_row_reference, [
-						"batch_no",
-						"serial_and_batch_bundle",
-					])
-					.then((row) => {
-						const row_has_batch = row.message?.batch_no || row.message?.serial_and_batch_bundle;
-						frm.set_df_property("batch_no", "reqd", row_has_batch ? 1 : 0);
-					});
-			} else {
-				frm.set_df_property("batch_no", "reqd", 1);
-			}
+			frm.toggle_display(
+				"serial_no",
+				frm.__item_is_serialized && !bundle_decided && (is_lot || is_custody)
+			);
+			frm.set_df_property("serial_no", "reqd", 0);
+			frm.trigger("toggle_sample_size_lock");
 		});
 	},
 
 	toggle_unit_serial_column(frm) {
-		// unit readings only name serials when the item has them to name
-		const serialized = cint(frm.__item_is_serialized);
+		// unit readings name serials only where they identify the verdict —
+		// on a lot (demanded) or a custody row (the supplier's, optional)
+		const relevant =
+			cint(frm.__item_is_serialized) &&
+			["Quality Control Lot", "Goods Inward Note"].includes(frm.doc.reference_type);
 		const grid = frm.fields_dict.unit_readings?.grid;
-		grid?.update_docfield_property("serial_no", "hidden", serialized ? 0 : 1);
-		grid?.update_docfield_property("serial_no", "read_only", serialized ? 0 : 1);
+		grid?.update_docfield_property("serial_no", "hidden", relevant ? 0 : 1);
+		grid?.update_docfield_property("serial_no", "read_only", relevant ? 0 : 1);
 	},
 
-	serial_no: function (frm) {
-		if (!frm.__item_is_serialized || frm.doc.inspection_basis === "Each Quantity") {
-			return;
-		}
+	toggle_sample_size_lock(frm) {
+		// recorded serials are the sample: they set its size and lock it;
+		// without them the size is the inspector's to type
 		const count = (frm.doc.serial_no || "")
 			.split("\n")
 			.map((serial) => serial.trim())
 			.filter(Boolean).length;
-		if (count) {
+		if (count && frm.doc.inspection_basis !== "Each Quantity") {
 			frm.set_value("sample_size", count);
 		}
+		frm.set_df_property("sample_size", "read_only", count ? 1 : 0);
+	},
+
+	serial_no: function (frm) {
+		frm.trigger("toggle_sample_size_lock");
 	},
 
 	reference_name: function (frm) {
@@ -226,9 +207,8 @@ frappe.ui.form.on("Quality Inspection", {
 					if (r.message?.item_code && !frm.doc.item_code) {
 						frm.set_value("item_code", r.message.item_code);
 					}
-					if (r.message?.batch_no && !frm.doc.batch_no) {
-						frm.set_value("batch_no", r.message.batch_no);
-					}
+					// the lot's batch is a fact, not a choice — mirror it
+					frm.set_value("batch_no", r.message?.batch_no || "");
 					frm.set_value("inspection_basis", r.message?.inspection_basis || "Sample");
 					frm.trigger("prefill_decided_quantity_from_lot");
 				});
