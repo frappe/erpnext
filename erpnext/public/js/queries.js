@@ -182,9 +182,9 @@ $.extend(erpnext.queries, {
 			filters: [
 				["Warehouse", "company", "in", ["", cstr(doc.company)]],
 				["Warehouse", "is_group", "=", 0],
-				// quarantine and transit are entered by routing, rejected stock by
-				// its dedicated fields — none of them is an ordinary inbound pick
-				["Warehouse", "warehouse_type", "not in", ["Quality", "Rejected", "Transit"]],
+				// quarantine is entered by routing and left by release/return,
+				// never by an ordinary pick
+				["Warehouse", "warehouse_type", "!=", "Quality"],
 			],
 		};
 	},
@@ -194,23 +194,8 @@ $.extend(erpnext.queries, {
 			filters: [
 				["Warehouse", "company", "in", ["", cstr(doc.company)]],
 				["Warehouse", "is_group", "=", 0],
-				// quarantine only leaves through a release or return, transit through
-				// the end-transit flow — but rejected stock moved to a Rejected
-				// warehouse re-enters normal flows there (scrap, rework, sale as
-				// scrap), so outbound picks may offer it
-				["Warehouse", "warehouse_type", "not in", ["Quality", "Transit"]],
-			],
-		};
-	},
-
-	rejected_warehouse: function (doc) {
-		return {
-			filters: [
-				["Warehouse", "company", "in", ["", cstr(doc.company)]],
-				["Warehouse", "is_group", "=", 0],
-				// rejected stock belongs in a Rejected-type warehouse, but sites
-				// that don't segregate it may keep using untyped warehouses
-				["Warehouse", "warehouse_type", "in", ["Rejected", ""]],
+				// quarantine only leaves through a release or return
+				["Warehouse", "warehouse_type", "!=", "Quality"],
 			],
 		};
 	},
@@ -243,16 +228,10 @@ erpnext.queries.setup_queries = function (frm, options, query_fn) {
 			options: options,
 		});
 		$.each(link_fields, function (i, df) {
-			// rejected stock has its own destination type — the generic
-			// warehouse blanket must not clobber the Rejected-type picker
-			const field_query_fn =
-				options === "Warehouse" && df.fieldname === "rejected_warehouse"
-					? () => erpnext.queries.rejected_warehouse(frm.doc)
-					: query_fn;
 			if (parentfield) {
-				frm.set_query(df.fieldname, parentfield, field_query_fn);
+				frm.set_query(df.fieldname, parentfield, query_fn);
 			} else {
-				frm.set_query(df.fieldname, field_query_fn);
+				frm.set_query(df.fieldname, query_fn);
 			}
 		});
 	};

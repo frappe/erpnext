@@ -28,11 +28,11 @@ function set_warehouse_queries(frm) {
 function target_warehouse_query(frm) {
 	// a Quality Control Release may also send rejected stock to a Rejected
 	// warehouse; a transit entry targets its transit stop; everything else
-	// avoids the special types
+	// avoids quarantine
 	if (frm.doc.purpose === "Quality Control Release") {
 		return {
 			filters: {
-				warehouse_type: ["not in", ["Quality", "Transit"]],
+				warehouse_type: ["!=", "Quality"],
 				is_group: 0,
 				company: frm.doc.company,
 			},
@@ -41,7 +41,7 @@ function target_warehouse_query(frm) {
 	if (frm.doc.add_to_transit && frm.doc.purpose === "Material Transfer") {
 		return {
 			filters: {
-				warehouse_type: ["in", ["Transit", ""]],
+				warehouse_type: "Transit",
 				is_group: 0,
 				company: frm.doc.company,
 			},
@@ -51,16 +51,6 @@ function target_warehouse_query(frm) {
 }
 
 function source_warehouse_query(frm) {
-	// receiving from transit: the end-transit entry's source is its transit stop
-	if (frm.doc.outgoing_stock_entry) {
-		return {
-			filters: {
-				warehouse_type: ["in", ["Transit", ""]],
-				is_group: 0,
-				company: frm.doc.company,
-			},
-		};
-	}
 	const query = erpnext.queries.source_warehouse(frm.doc);
 	if (frm.__sample_retention_warehouse) {
 		query.filters.push(["Warehouse", "name", "!=", frm.__sample_retention_warehouse]);

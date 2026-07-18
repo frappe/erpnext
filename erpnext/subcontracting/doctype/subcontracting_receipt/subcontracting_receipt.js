@@ -215,8 +215,6 @@ frappe.ui.form.on("Subcontracting Receipt", {
 			return erpnext.queries.company_address_query(frm.doc);
 		});
 
-		frm.set_query("rejected_warehouse", () => erpnext.queries.rejected_warehouse(frm.doc));
-
 		frm.set_query("cost_center", (doc) => {
 			return {
 				filters: {
@@ -236,8 +234,6 @@ frappe.ui.form.on("Subcontracting Receipt", {
 		frm.set_query("supplier_warehouse", () => erpnext.queries.warehouse(frm.doc));
 
 		frm.set_query("warehouse", "items", () => erpnext.queries.warehouse(frm.doc));
-
-		frm.set_query("rejected_warehouse", "items", () => erpnext.queries.rejected_warehouse(frm.doc));
 
 		frm.set_query("expense_account", "items", () => {
 			return {
