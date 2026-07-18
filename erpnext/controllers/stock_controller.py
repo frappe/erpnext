@@ -820,6 +820,14 @@ def make_quality_inspections(
 				)
 			)
 
+		tranche = {}
+		if doctype == "Goods Inward Note" and flt(item.get("qty")):
+			# custody rows are decided in tranches: the dialog's quantity is
+			# how much this inspection decides (bounded by the inspection's
+			# own undecided-remainder validation)
+			field = "unit_quantity" if each_quantity else "decided_quantity"
+			tranche[field] = flt(item.get("qty"))
+
 		quality_inspection = frappe.get_doc(
 			{
 				"company": company,
@@ -834,6 +842,7 @@ def make_quality_inspections(
 				"serial_no": item.get("serial_no"),
 				"batch_no": item.get("batch_no"),
 				"child_row_reference": item.get("child_row_reference"),
+				**tranche,
 			}
 		)
 		quality_inspection.save()

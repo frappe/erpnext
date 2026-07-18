@@ -2937,13 +2937,18 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 						read_only: true,
 						columns: 5,
 					},
-					// the rest rides along unseen — quantities and sample sizes
-					// are reviewed on the draft inspections themselves
 					{
 						fieldtype: "Float",
 						fieldname: "qty",
-						hidden: true,
+						label: __("Qty to Inspect"),
+						// custody rows may be decided in tranches: on a Goods
+						// Inward Note the quantity is the user's to choose,
+						// prefilled with the undecided remainder
+						in_list_view: this.frm.doc.doctype === "Goods Inward Note",
+						hidden: this.frm.doc.doctype !== "Goods Inward Note",
 					},
+					// the rest rides along unseen — sample sizes are reviewed
+					// on the draft inspections themselves
 					{
 						fieldtype: "Float",
 						fieldname: "sample_size",

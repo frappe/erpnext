@@ -399,6 +399,20 @@ class TestGoodsInwardNote(ERPNextTestSuite):
 		)
 		self.assertRaises(frappe.ValidationError, excess.insert)
 
+	def test_dialog_quantity_becomes_the_decided_tranche(self):
+		from erpnext.controllers.stock_controller import make_quality_inspections
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		order = create_purchase_order(item_code=item, qty=5)
+		note = make_goods_inward_note(order)
+
+		# the dialog offers the undecided remainder; the user inspects a tranche
+		row = note.items[0].as_dict()
+		row["qty"] = 2
+		created = make_quality_inspections(note.company, "Goods Inward Note", note.name, [row], "Incoming")
+		inspection = frappe.get_doc("Quality Inspection", created[0])
+		self.assertEqual(inspection.decided_quantity, 2)
+
 	def test_inspection_offers_only_what_is_in_custody(self):
 		from erpnext.controllers.stock_controller import check_item_quality_inspection
 
