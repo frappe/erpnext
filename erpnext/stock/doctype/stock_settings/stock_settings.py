@@ -50,6 +50,7 @@ class StockSettings(Document):
 		naming_series_prefix: DF.Data | None
 		over_delivery_receipt_allowance: DF.Float
 		over_picking_allowance: DF.Percent
+		pending_quality_inspection_reminder_days: DF.Int
 		pick_serial_and_batch_based_on: DF.Literal["FIFO", "LIFO", "Expiry"]
 		reorder_email_notify: DF.Check
 		role_allowed_to_create_edit_back_dated_transactions: DF.Link | None

@@ -313,6 +313,11 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		self.assertEqual(get_qty(item.name, store), 0)
 		self.assertEqual(get_qty(item.name, qc), 3)
 
+		# one candidate store: the release dialog defaults to it
+		lot_doc = frappe.get_doc("Quality Control Lot", lot)
+		lot_doc.run_method("onload")
+		self.assertEqual(lot_doc.get_onload("default_release_warehouse"), store)
+
 		# the manual path stays open
 		release = make_release_for_lot(lot, store)
 		release.insert()
@@ -339,6 +344,11 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "pending_qty"), 4)
 		# decided but nothing has physically left quarantine yet
 		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "status"), "Awaiting Release")
+
+		# two candidate stores: the release dialog gets no default
+		lot_doc = frappe.get_doc("Quality Control Lot", lot)
+		lot_doc.run_method("onload")
+		self.assertFalse(lot_doc.get_onload("default_release_warehouse"))
 
 		# the form prefill (picking the lot on a Stock Entry) carries the same
 		# row: accepted quantity out of the Quality Control warehouse, target open

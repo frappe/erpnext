@@ -37,6 +37,13 @@ class QualityControlLot(Document):
 		]
 	# end: auto-generated types
 
+	def onload(self):
+		from erpnext.stock.services.quality_release import get_release_warehouse
+
+		# the release dialog defaults to the unique store pointing at this
+		# lot's Quality Control warehouse; ambiguity leaves the choice open
+		self.set_onload("default_release_warehouse", get_release_warehouse(self.quality_warehouse))
+
 	def on_update(self):
 		self._sync_source_quality_status()
 

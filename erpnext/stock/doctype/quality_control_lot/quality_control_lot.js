@@ -132,6 +132,7 @@ frappe.ui.form.on("Quality Control Lot", {
 							fieldtype: "Link",
 							options: "Warehouse",
 							reqd: 1,
+							default: frm.doc.__onload?.default_release_warehouse || undefined,
 							description: __("The store the accepted stock is released into."),
 							get_query: () => ({
 								filters: {

@@ -40,6 +40,7 @@
   "validate_material_transfer_warehouses",
   "quality_inspection_section",
   "pending_quality_inspection_reminder_days",
+  "column_break_vhic",
   "disable_automatic_quality_control_release",
   "serial_and_batch_item_settings_tab",
   "enable_serial_and_batch_no_for_item",
@@ -574,6 +575,10 @@
    "fieldname": "disable_automatic_quality_control_release",
    "fieldtype": "Check",
    "label": "Disable Automatic Quality Control Release"
+  },
+  {
+   "fieldname": "column_break_vhic",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "icon-cog",
