@@ -40,6 +40,7 @@
   "validate_material_transfer_warehouses",
   "quality_inspection_section",
   "pending_quality_inspection_reminder_days",
+  "disable_automatic_quality_control_release",
   "serial_and_batch_item_settings_tab",
   "enable_serial_and_batch_no_for_item",
   "section_break_7",
@@ -566,6 +567,13 @@
    "fieldname": "pending_quality_inspection_reminder_days",
    "fieldtype": "Int",
    "label": "Pending Quality Inspection Reminder Days"
+  },
+  {
+   "default": "0",
+   "description": "Accepted stock then stays on its lot (Awaiting Release) until a Quality Control Release is created manually.",
+   "fieldname": "disable_automatic_quality_control_release",
+   "fieldtype": "Check",
+   "label": "Disable Automatic Quality Control Release"
   }
  ],
  "icon": "icon-cog",

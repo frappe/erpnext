@@ -11,7 +11,7 @@ every verdict of the lot — never a rejected or undecided serial leaves.
 
 import frappe
 from frappe import _
-from frappe.utils import flt, get_link_to_form
+from frappe.utils import cint, flt, get_link_to_form
 
 from erpnext.stock.services.quality_quarantine import stamp_tracking_on_outward_row
 
@@ -73,6 +73,11 @@ def process_inspection_result(doc, method=None):
 	lot.save()
 
 	if not accepted_qty:
+		return
+
+	if cint(frappe.db.get_single_value("Stock Settings", "disable_automatic_quality_control_release")):
+		# the site releases by hand: the lot waits (Awaiting Release) for a
+		# manually created Quality Control Release
 		return
 
 	release_warehouse = get_release_warehouse(lot.quality_warehouse)

@@ -284,6 +284,41 @@ class TestQualityQuarantine(ERPNextTestSuite):
 			batch_no,
 		)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"disable_automatic_quality_control_release": 1})
+	def test_setting_turns_off_the_automatic_release(self):
+		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
+		from erpnext.stock.services.quality_release import make_release_for_lot
+
+		qc = make_qc_warehouse("_Test QC NoAuto WH")
+		store = make_warehouse("_Test QC NoAuto Store", quality_warehouse=qc)
+
+		item = make_item(properties={"is_stock_item": 1})
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Stock Entry", warehouse_role="Inbound", quality_control_mode="Quarantine"
+			),
+		)
+		item.save()
+
+		receipt = make_stock_entry(
+			item_code=item.name, qty=3, to_warehouse=store, purpose="Material Receipt", rate=100
+		)
+		lot = quality_control_lots_for(receipt.name)[0].name
+
+		# a unique release warehouse exists, but the site opted for manual
+		# releases: the verdict books, nothing moves
+		submit_inspection_for_lot(lot, status="Accepted")
+		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "status"), "Awaiting Release")
+		self.assertEqual(get_qty(item.name, store), 0)
+		self.assertEqual(get_qty(item.name, qc), 3)
+
+		# the manual path stays open
+		release = make_release_for_lot(lot, store)
+		release.insert()
+		release.submit()
+		self.assertEqual(get_qty(item.name, store), 3)
+
 	def test_manual_release_built_from_the_lot(self):
 		from erpnext.stock.services.quality_release import make_release_for_lot
 
