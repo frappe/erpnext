@@ -751,6 +751,12 @@ class TestGoodsInwardNote(ERPNextTestSuite):
 		receipt = make_receipt_from_goods_inward_note(note.name)
 		self.assertEqual(receipt.items[0].qty, 4)
 
+		# the custody verdict already decided these goods: the receipt must not
+		# demand a second inspection of its own
+		receipt.insert(ignore_permissions=True)
+		receipt.submit()
+		self.assertEqual(receipt.docstatus, 1)
+
 	def test_custody_quarantine_is_refused(self):
 		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
 

@@ -209,17 +209,24 @@ def _decided_in_custody(doc, row):
 	from erpnext.stock.doctype.goods_inward_note.goods_inward_note import ORDER_REFERENCE_FIELDS
 
 	order_item_field = ORDER_REFERENCE_FIELDS[doc.doctype][1]
-	inspections = frappe.get_all(
+	note_rows = frappe.get_all(
 		"Goods Inward Note Item",
-		filters={
-			"parent": row.goods_inward_note,
-			"order_item": row.get(order_item_field),
-			"quality_inspection": ("is", "set"),
-		},
-		pluck="quality_inspection",
+		filters={"parent": row.goods_inward_note, "order_item": row.get(order_item_field)},
+		pluck="name",
 	)
-	return any(
-		frappe.db.get_value("Quality Inspection", inspection, "docstatus") == 1 for inspection in inspections
+	if not note_rows:
+		return False
+
+	# partial verdicts are safe to exempt: the receipt is capped to decided units
+	return bool(
+		frappe.db.exists(
+			"Quality Inspection",
+			{
+				"reference_type": "Goods Inward Note",
+				"child_row_reference": ("in", note_rows),
+				"docstatus": 1,
+			},
+		)
 	)
 
 
