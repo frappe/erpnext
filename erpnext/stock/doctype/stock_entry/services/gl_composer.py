@@ -20,6 +20,7 @@ class StockEntryGLComposer(BaseStockGLComposer):
 	"""
 
 	enforce_pl_expense_account = False
+	book_expenses_added_to_stock = True
 
 	def compose(self, inventory_account_map: dict | None = None) -> list:
 		doc = self.doc

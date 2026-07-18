@@ -545,6 +545,65 @@ class TestStockReservationEntry(ERPNextTestSuite):
 			"enable_stock_reservation": 1,
 			"auto_reserve_serial_and_batch": 1,
 			"pick_serial_and_batch_based_on": "FIFO",
+			"use_serial_batch_fields": 1,
+		},
+	)
+	def test_batch_shared_across_sales_orders_can_be_delivered(self) -> None:
+		# Regression (#57159): one batch reserved by two Sales Orders. Delivering each order's own
+		# reserved unit must not raise Reserved Batch Conflict — the remainder covers the other order.
+		item_doc = make_batch_item()
+		create_material_receipt(items={item_doc.name: item_doc}, warehouse=self.warehouse, qty=2)
+
+		orders = []
+		for _i in range(2):
+			so = make_sales_order(item_code=item_doc.name, warehouse=self.warehouse, qty=1, rate=100)
+			so.create_stock_reservation_entries()
+			orders.append(so)
+
+		self.assertEqual(
+			len(get_reserved_batch_nos(orders[0].name) | get_reserved_batch_nos(orders[1].name)), 1
+		)
+
+		for so in orders:
+			dn = make_delivery_note(so.name, kwargs={"for_reserved_stock": True})
+			dn.save()
+			dn.submit()
+			self.assertEqual(dn.docstatus, 1)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"allow_negative_stock": 0,
+			"enable_stock_reservation": 1,
+			"auto_reserve_serial_and_batch": 1,
+			"pick_serial_and_batch_based_on": "FIFO",
+			"use_serial_batch_fields": 1,
+		},
+	)
+	def test_delivery_draining_a_batch_reserved_for_another_sales_order_is_blocked(self) -> None:
+		# Guard for #57159 fix: an order without a reservation must still be blocked from draining
+		# a batch below what another order has reserved from it, even if other batches have stock.
+		item_doc = make_batch_item()
+		create_material_receipt(items={item_doc.name: item_doc}, warehouse=self.warehouse, qty=2)
+		create_material_receipt(items={item_doc.name: item_doc}, warehouse=self.warehouse, qty=2)
+
+		so_a = make_sales_order(item_code=item_doc.name, warehouse=self.warehouse, qty=2, rate=100)
+		so_a.create_stock_reservation_entries()
+		(reserved_batch_no,) = get_reserved_batch_nos(so_a.name)
+
+		so_b = make_sales_order(item_code=item_doc.name, warehouse=self.warehouse, qty=2, rate=100)
+		dn = make_delivery_note(so_b.name)
+		dn.items[0].batch_no = reserved_batch_no
+		dn.save()
+		self.assertRaisesRegex(frappe.ValidationError, "is reserved for", dn.submit)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"allow_negative_stock": 0,
+			"enable_stock_reservation": 1,
+			"auto_reserve_serial_and_batch": 1,
+			"pick_serial_and_batch_based_on": "FIFO",
 		},
 	)
 	def test_auto_reserve_serial_and_batch(self) -> None:
@@ -891,6 +950,33 @@ def create_items() -> dict:
 		items[item.name] = item
 
 	return items
+
+
+def make_batch_item():
+	return make_item(
+		properties={
+			"is_stock_item": 1,
+			"valuation_rate": 100,
+			"has_batch_no": 1,
+			"create_new_batch": 1,
+			"batch_number_series": "SRBI-.#####.",
+		}
+	)
+
+
+def get_reserved_batch_nos(sales_order: str) -> set:
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	sb_entry = frappe.qb.DocType("Serial and Batch Entry")
+
+	batch_nos = (
+		frappe.qb.from_(sre)
+		.inner_join(sb_entry)
+		.on(sre.name == sb_entry.parent)
+		.select(sb_entry.batch_no)
+		.where((sre.voucher_no == sales_order) & (sre.docstatus == 1))
+	).run(pluck=True)
+
+	return set(batch_nos)
 
 
 def create_material_receipt(

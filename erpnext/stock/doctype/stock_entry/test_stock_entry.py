@@ -26,7 +26,11 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 	make_serial_batch_bundle,
 )
 from erpnext.stock.doctype.serial_no.serial_no import *
-from erpnext.stock.doctype.stock_entry.stock_entry import FinishedGoodError, make_stock_in_entry
+from erpnext.stock.doctype.stock_entry.stock_entry import (
+	FinishedGoodError,
+	get_pending_work_orders,
+	make_stock_in_entry,
+)
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import StockFreezeError
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
@@ -3391,6 +3395,24 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 				self.assertTrue(row.serial_and_batch_bundle)
 				for bn in list(get_batches_from_bundle(row.serial_and_batch_bundle).keys()):
 					self.assertIn(bn, wo1_batches)
+
+	def test_get_pending_work_orders(self):
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+
+		wo = make_wo_order_test_record(qty=2, skip_transfer=True)
+
+		def pending_work_orders(txt=""):
+			return [
+				row[0]
+				for row in get_pending_work_orders("Work Order", txt, "name", 0, 0, {"company": wo.company})
+			]
+
+		self.assertIn(wo.name, pending_work_orders())
+		self.assertIn(wo.name, pending_work_orders(wo.name.lower()))
+		self.assertNotIn(wo.name, pending_work_orders("no-such-work-order"))
+
+		frappe.db.set_value("Work Order", wo.name, "produced_qty", wo.qty)
+		self.assertNotIn(wo.name, pending_work_orders())
 
 
 def make_serialized_item(self, **args):

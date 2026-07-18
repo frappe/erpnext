@@ -323,10 +323,9 @@ def update_bin_details(ctx: frappe._dict, out: frappe._dict, doc):
 		out.update(get_bin_details(ctx.item_code, ctx.from_warehouse))
 
 	elif out.get("warehouse"):
-		company = ctx.company if (doc and doc.get("doctype") == "Purchase Order") else None
-
-		# calculate company_total_stock only for po
-		bin_details = get_bin_details(ctx.item_code, out.warehouse, company, include_child_warehouses=True)
+		bin_details = get_bin_details(
+			ctx.item_code, out.warehouse, ctx.company, include_child_warehouses=True
+		)
 
 		out.update(bin_details)
 

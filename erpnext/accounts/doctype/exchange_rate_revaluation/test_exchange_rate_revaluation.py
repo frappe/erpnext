@@ -348,10 +348,15 @@ class TestExchangeRateRevaluation(ERPNextTestSuite, AccountsTestMixin):
 		je.reload()
 		self.assertEqual(je.voucher_type, "Exchange Rate Revaluation")
 		self.assertEqual(len(je.accounts), 3)
+		# A gain is credited to the gain/loss account, a loss is debited. The current
+		# exchange rate (from master data) may sit either side of the booked rate, so
+		# derive the column from the sign instead of assuming a gain.
+		gain_loss_debit = abs(total_gain_loss) if total_gain_loss < 0 else 0.0
+		gain_loss_credit = total_gain_loss if total_gain_loss > 0 else 0.0
 		expected = [
 			(usd_account, new_balance, 0.0, 100.0, 0.0),
 			(usd_account, 0.0, old_balance, 0.0, 100.0),
-			(gain_loss_account, 0.0, total_gain_loss, 0.0, total_gain_loss),
+			(gain_loss_account, gain_loss_debit, gain_loss_credit, gain_loss_debit, gain_loss_credit),
 		]
 		actual = []
 		for acc in je.accounts:

@@ -1,0 +1,32 @@
+{
+ "applies_to_doctype": "Subcontracting Order",
+ "creation": "2026-07-03 17:16:58.607891",
+ "docstatus": 0,
+ "doctype": "DocType Settings Map",
+ "idx": 0,
+ "is_active": 1,
+ "is_standard": 1,
+ "mappings": [
+  {
+   "setting_field": "backflush_raw_materials_of_subcontract_based_on",
+   "settings_doctype": "Buying Settings"
+  },
+  {
+   "setting_field": "over_transfer_allowance",
+   "settings_doctype": "Buying Settings"
+  },
+  {
+   "setting_field": "auto_create_subcontracting_order",
+   "settings_doctype": "Buying Settings"
+  },
+  {
+   "setting_field": "over_delivery_receipt_allowance",
+   "settings_doctype": "Stock Settings"
+  }
+ ],
+ "modified": "2026-07-10 11:46:43.205485",
+ "modified_by": "Administrator",
+ "module": "Subcontracting",
+ "name": "Subcontracting Order (Standard)",
+ "owner": "Administrator"
+}

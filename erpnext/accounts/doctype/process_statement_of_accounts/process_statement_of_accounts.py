@@ -100,9 +100,9 @@ class ProcessStatementOfAccounts(Document):
 		if not self.pdf_name:
 			self.pdf_name = "{{ customer.customer_name }}"
 
-		validate_template(self.subject)
-		validate_template(self.body)
-		validate_template(self.pdf_name)
+		validate_template(self.subject, restrict_globals=True)
+		validate_template(self.body, restrict_globals=True)
+		validate_template(self.pdf_name, restrict_globals=True)
 
 		if not self.customers:
 			frappe.throw(_("Customers not selected."))
@@ -421,7 +421,6 @@ def get_context(customer, doc):
 	return {
 		"doc": template_doc,
 		"customer": frappe.get_doc("Customer", customer),
-		"frappe": frappe.utils,
 	}
 
 
@@ -532,15 +531,15 @@ def send_emails(document_name: str, from_scheduler: bool = False, posting_date: 
 	if report:
 		for customer, report_pdf in report.items():
 			context = get_context(customer, doc)
-			filename = frappe.render_template(doc.pdf_name, context)
+			filename = frappe.render_template(doc.pdf_name, context, restrict_globals=True)
 			attachments = [{"fname": filename + ".pdf", "fcontent": report_pdf}]
 
 			recipients, cc = get_recipients_and_cc(customer, doc)
 			if not recipients:
 				continue
 
-			subject = frappe.render_template(doc.subject, context)
-			message = frappe.render_template(doc.body, context)
+			subject = frappe.render_template(doc.subject, context, restrict_globals=True)
+			message = frappe.render_template(doc.body, context, restrict_globals=True)
 
 			if doc.sender:
 				sender_email = frappe.db.get_value("Email Account", doc.sender, "email_id")

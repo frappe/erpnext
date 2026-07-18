@@ -126,6 +126,8 @@ def get_company_resolved_defaults(company: str) -> dict:
 		"deferred_revenue_account": company_doc.get("default_deferred_revenue_account"),
 		"default_discount_account": company_doc.get("default_discount_account"),
 		"purchase_expense_contra_account": company_doc.get("purchase_expense_contra_account"),
+		"expenses_added_to_stock_account": company_doc.get("expenses_added_to_stock_account"),
+		"expenses_added_to_stock_contra_account": company_doc.get("expenses_added_to_stock_contra_account"),
 		"default_price_list": "",
 		"default_supplier": "",
 	}

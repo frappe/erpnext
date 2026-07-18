@@ -411,7 +411,7 @@ def get_project_name(
 		if filters.get("company"):
 			qb_filter_and_conditions.append(proj.company == filters.get("company"))
 
-	qb_filter_and_conditions.append(proj.status.notin(["Completed", "Cancelled"]))
+	qb_filter_and_conditions.append(proj.status.notin(["Completed", "Cancelled", "On hold"]))
 
 	q = qb.from_(proj)
 

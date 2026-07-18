@@ -181,6 +181,7 @@ class BootStrapTestData:
 		self.make_location()
 		self.make_price_list()
 		self.make_item_price()
+		self.make_currency_exchange()
 		self.make_loyalty_program()
 		self.make_shareholder()
 		self.make_sales_taxes_template()
@@ -2532,6 +2533,38 @@ class BootStrapTestData:
 			},
 		]
 		self.make_records(["item_code", "price_list", "price_list_rate"], records)
+
+	def make_currency_exchange(self):
+		"""Seed current-dated USD<->INR rates so foreign-currency documents
+		transacted on ``today()`` resolve an exchange rate deterministically.
+
+		Without this, ``get_exchange_rate`` finds no in-window Currency Exchange
+		record and falls back to an external API that is unreachable in CI,
+		returning ``0`` and breaking tests that create USD documents. The rates
+		mirror the latest values in the Currency Exchange ``test_records`` so
+		cost calculations stay unchanged regardless of which record is picked.
+		"""
+		records = [
+			{
+				"doctype": "Currency Exchange",
+				"date": today(),
+				"from_currency": "USD",
+				"to_currency": "INR",
+				"exchange_rate": 62.9,
+				"for_buying": 1,
+				"for_selling": 1,
+			},
+			{
+				"doctype": "Currency Exchange",
+				"date": today(),
+				"from_currency": "INR",
+				"to_currency": "USD",
+				"exchange_rate": 0.0167,
+				"for_buying": 1,
+				"for_selling": 1,
+			},
+		]
+		self.make_records(["from_currency", "to_currency", "date", "for_buying", "for_selling"], records)
 
 	def make_operation(self):
 		records = [

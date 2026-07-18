@@ -472,7 +472,7 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		pr = frappe.new_doc("Purchase Receipt")
 		pr.currency = "USD"
 		pr.company = "_Test Company with perpetual inventory"
-		pr.conversion_rate = (70,)
+		pr.conversion_rate = 80
 		pr.supplier = "_Test Supplier USD"
 		pr.append(
 			"items",
@@ -491,7 +491,7 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 
 		# Createing purchase invoice against Purchase Receipt
 		pi = create_purchase_invoice(pr.name)
-		pi.conversion_rate = 80
+		pi.conversion_rate = 70
 		pi.credit_to = "_Test Payable USD - TCP1"
 		pi.insert()
 		pi.submit()

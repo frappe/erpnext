@@ -17,6 +17,7 @@ add_to_apps_screen = [
 		"title": app_title,
 		"route": app_home,
 		"has_permission": "erpnext.check_app_permission",
+		"sequence_id": 1,
 	}
 ]
 
@@ -307,6 +308,18 @@ sounds = [
 
 has_upload_permission = {"Employee": "erpnext.setup.doctype.employee.employee.has_upload_permission"}
 
+permission_query_conditions = {
+	"Item": "erpnext.stock.doctype.company_restriction.company_restriction.get_permission_query_conditions",
+	"Customer": "erpnext.stock.doctype.company_restriction.company_restriction.get_permission_query_conditions",
+	"Supplier": "erpnext.stock.doctype.company_restriction.company_restriction.get_permission_query_conditions",
+}
+
+has_permission = {
+	"Item": "erpnext.stock.doctype.company_restriction.company_restriction.has_permission",
+	"Customer": "erpnext.stock.doctype.company_restriction.company_restriction.has_permission",
+	"Supplier": "erpnext.stock.doctype.company_restriction.company_restriction.has_permission",
+}
+
 has_website_permission = {
 	"Sales Order": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Quotation": "erpnext.controllers.website_list_for_contact.has_website_permission",
@@ -451,8 +464,6 @@ scheduler_events = {
 	"cron": {
 		"0/15 * * * *": [
 			"erpnext.manufacturing.doctype.bom_update_log.bom_update_log.resume_bom_cost_update_jobs",
-		],
-		"0/30 * * * *": [
 			"erpnext.stock.doctype.repost_item_valuation.repost_item_valuation.run_parallel_reposting",
 		],
 		# Hourly but offset by 30 minutes

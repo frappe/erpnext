@@ -571,8 +571,6 @@ def create_dunning(
 	source_name: str, target_doc: str | Document | None = None, ignore_permissions: bool = False
 ):
 	def postprocess_dunning(source, target):
-		from erpnext.accounts.doctype.dunning.dunning import get_dunning_letter_text
-
 		dunning_type = frappe.db.exists("Dunning Type", {"is_default": 1, "company": source.company})
 		if dunning_type:
 			dunning_type = frappe.get_doc("Dunning Type", dunning_type)
@@ -581,14 +579,8 @@ def create_dunning(
 			target.dunning_fee = dunning_type.dunning_fee
 			target.income_account = dunning_type.income_account
 			target.cost_center = dunning_type.cost_center
-			letter_text = get_dunning_letter_text(
-				dunning_type=dunning_type.name, doc=target.as_dict(), language=source.language
-			)
-
-			if letter_text:
-				target.body_text = letter_text.get("body_text")
-				target.closing_text = letter_text.get("closing_text")
-				target.language = letter_text.get("language")
+			target.language = source.language
+			target.get_dunning_letter_text()
 
 		# update outstanding from doc
 		if source.payment_schedule and len(source.payment_schedule) == 1:

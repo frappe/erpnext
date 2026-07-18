@@ -2530,9 +2530,7 @@ def get_reference_details(
 			exchange_rate = get_exchange_rate(party_account_currency, company_currency, ref_doc.posting_date)
 		else:
 			exchange_rate = 1
-			outstanding_amount, total_amount = get_outstanding_on_journal_entry(
-				reference_name, party_type, party
-			)
+		outstanding_amount, total_amount = get_outstanding_on_journal_entry(reference_name, party_type, party)
 
 	elif reference_doctype == "Payment Entry":
 		if reverse_payment_details := frappe.db.get_all(
