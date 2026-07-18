@@ -136,11 +136,13 @@ frappe.ui.form.on("Quality Inspection", {
 			frm.toggle_display(["batch_no", "serial_no"], false);
 			frm.set_df_property("batch_no", "reqd", 0);
 			frm.set_df_property("serial_no", "reqd", 0);
+			frm.trigger("toggle_unit_serial_column");
 			return;
 		}
 
 		frappe.db.get_value("Item", frm.doc.item_code, ["has_batch_no", "has_serial_no"]).then((r) => {
 			frm.__item_is_serialized = cint(r.message?.has_serial_no);
+			frm.trigger("toggle_unit_serial_column");
 			const has_batch = cint(r.message?.has_batch_no);
 			const bundle_decided = frm.doc.inspection_basis === "Each Quantity";
 			const show_serial = frm.__item_is_serialized && !bundle_decided;
@@ -185,6 +187,14 @@ frappe.ui.form.on("Quality Inspection", {
 				frm.set_df_property("batch_no", "reqd", 1);
 			}
 		});
+	},
+
+	toggle_unit_serial_column(frm) {
+		// unit readings only name serials when the item has them to name
+		const serialized = cint(frm.__item_is_serialized);
+		const grid = frm.fields_dict.unit_readings?.grid;
+		grid?.update_docfield_property("serial_no", "hidden", serialized ? 0 : 1);
+		grid?.update_docfield_property("serial_no", "read_only", serialized ? 0 : 1);
 	},
 
 	serial_no: function (frm) {
