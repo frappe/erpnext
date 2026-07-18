@@ -521,49 +521,36 @@ def enforce_inspection_points(doc):
 			continue
 
 		if block:
-			_validate_identity_covered(doc, row)
+			_validate_batches_covered(doc, row)
 
 
-def _validate_identity_covered(doc, row):
-	"""Identity known before submission must be vouched for by the row's verdicts.
+def _validate_batches_covered(doc, row):
+	"""Batches known before submission must each carry a verdict.
 
-	Auto-created serials and batches are born at the document's submission and
-	cannot be pre-inspected — rows without prior identity are exempt.
+	A sample vouches for its whole row, so serials need no unit-by-unit
+	coverage — but a batch is a quality boundary of its own, and each one
+	moving needs a submitted inspection naming it. Auto-created batches are
+	born at the document's submission and cannot be pre-inspected — rows
+	without one are exempt.
 	"""
 	from frappe.utils import get_link_to_form
 
-	row_serials = get_row_serial_nos(row)
 	row_batches = get_row_batch_nos(row)
-	if not row_serials and not row_batches:
+	if not row_batches:
 		return
 
-	covered_serials, covered_batches = set(), set()
-	for inspection in _row_inspections(doc, row):
-		covered_serials.update(_inspection_serials(inspection))
-		if inspection.batch_no:
-			covered_batches.add(inspection.batch_no)
-
-	missing_batches = sorted(row_batches - covered_batches)
-	if missing_batches:
+	covered = {inspection.batch_no for inspection in _row_inspections(doc, row) if inspection.batch_no}
+	missing = sorted(row_batches - covered)
+	if missing:
 		frappe.throw(
 			_(
 				"Row #{0}: batch(es) {1} carry no verdict — every batch moving must be covered "
 				"by a submitted Quality Inspection naming it."
 			).format(
 				row.idx,
-				", ".join(get_link_to_form("Batch", batch) for batch in missing_batches),
+				", ".join(get_link_to_form("Batch", batch) for batch in missing),
 			),
 			title=_("Batches Not Inspected"),
-		)
-
-	missing_serials = sorted(row_serials - covered_serials)
-	if missing_serials:
-		frappe.throw(
-			_(
-				"Row #{0}: serial number(s) {1} were never inspected — every unit known before "
-				"submission must be covered by a submitted Quality Inspection."
-			).format(row.idx, frappe.bold(", ".join(missing_serials))),
-			title=_("Serials Not Inspected"),
 		)
 
 
