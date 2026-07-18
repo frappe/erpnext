@@ -36,6 +36,12 @@ frappe.ui.form.on("Item", {
 		}
 	},
 
+	restrict_to_companies(frm) {
+		if (!frm.doc.restrict_to_companies) {
+			frm.set_value("allowed_companies", []);
+		}
+	},
+
 	setup: function (frm) {
 		frm.set_query("allowed_companies", () => ({
 			query: "erpnext.stock.doctype.company_restriction.company_restriction.company_query",

@@ -41,6 +41,7 @@
   "column_break_wugd",
   "over_billing_allowance",
   "company_restrictions_section",
+  "restrict_to_companies",
   "allowed_companies",
   "section_break_11",
   "brand",
@@ -1091,16 +1092,22 @@
   {
    "fieldname": "company_restrictions_section",
    "fieldtype": "Section Break",
-   "label": "Company Restrictions",
-   "description": "If set, this Item is only available for transactions in the listed companies. Leave empty for no restriction.",
-   "depends_on": "eval:cint(frappe.sys_defaults.enable_company_wise_masters)"
+   "label": "Company Restrictions"
+  },
+  {
+   "default": "0",
+   "fieldname": "restrict_to_companies",
+   "fieldtype": "Check",
+   "label": "Restrict to Companies",
+   "description": "If checked, this Item is only available for transactions in the companies listed below."
   },
   {
    "fieldname": "allowed_companies",
    "fieldtype": "Table MultiSelect",
    "label": "Allowed Companies",
    "options": "Company Restriction",
-   "depends_on": "eval:cint(frappe.sys_defaults.enable_company_wise_masters)"
+   "depends_on": "eval:doc.restrict_to_companies",
+   "mandatory_depends_on": "eval:doc.restrict_to_companies"
   }
  ],
  "icon": "fa fa-tag",
@@ -1108,7 +1115,7 @@
  "image_field": "image",
  "links": [],
  "make_attachments_public": 1,
- "modified": "2026-07-14 21:00:00.000000",
+ "modified": "2026-07-14 23:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

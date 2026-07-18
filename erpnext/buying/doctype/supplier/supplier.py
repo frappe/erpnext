@@ -73,6 +73,7 @@ class Supplier(TransactionBase):
 		primary_address: DF.TextEditor | None
 		release_date: DF.Date | None
 		represents_company: DF.Link | None
+		restrict_to_companies: DF.Check
 		supplier_details: DF.Text | None
 		supplier_group: DF.Link | None
 		supplier_name: DF.Data

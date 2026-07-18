@@ -94,6 +94,7 @@ class Customer(TransactionBase):
 		primary_address: DF.TextEditor | None
 		prospect_name: DF.Link | None
 		represents_company: DF.Link | None
+		restrict_to_companies: DF.Check
 		sales_team: DF.Table[SalesTeam]
 		so_required: DF.Check
 		supplier_numbers: DF.Table[SupplierNumberAtCustomer]
