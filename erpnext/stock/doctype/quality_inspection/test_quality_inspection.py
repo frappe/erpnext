@@ -491,6 +491,34 @@ class TestManualUnitEntry(ERPNextTestSuite):
 		self.assertEqual(inspection.unit_readings[0].status, "Accepted")
 		self.assertEqual(inspection.unit_readings[1].status, "Rejected")
 
+	def test_manual_unit_entry_needs_no_reading(self):
+		inspection = frappe.new_doc("Quality Inspection")
+		inspection.inspection_basis = "Each Quantity"
+		inspection.unit_quantity = 2
+		inspection.append(
+			"unit_readings",
+			{
+				"unit_no": 1,
+				"specification": "_Test Manual Unit Parameter",
+				"reading_value": "0.3",
+				"status": "Accepted",
+			},
+		)
+		inspection.append(
+			"unit_readings",
+			{
+				"unit_no": 2,
+				"specification": "_Test Manual Unit Parameter",
+				"status": "Rejected",
+				"manual_inspection": 1,
+			},
+		)
+		inspection.validate_unit_readings_complete()
+
+		# unchecked, the same blank row is an untouched unit and is refused
+		inspection.unit_readings[1].manual_inspection = 0
+		self.assertRaises(frappe.ValidationError, inspection.validate_unit_readings_complete)
+
 
 class TestQualityInspectionJobCardReference(ERPNextTestSuite):
 	def test_qi_updates_job_card_reference(self):

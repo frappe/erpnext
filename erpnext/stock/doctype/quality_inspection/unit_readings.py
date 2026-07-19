@@ -247,7 +247,9 @@ class UnitReadingsMixin:
 
 		On submission every declared unit must have readings, and every entry
 		must carry one — otherwise untouched rows would pass on their default
-		status without anyone having looked at the unit.
+		status without anyone having looked at the unit. An entry marked
+		Manual Inspection is a deliberate verdict, not an untouched row: it
+		needs no reading.
 		"""
 		if self.inspection_basis != "Each Quantity" or self.manual_inspection:
 			return
@@ -274,6 +276,8 @@ class UnitReadingsMixin:
 			)
 
 		for entry in self.unit_readings:
+			if entry.manual_inspection:
+				continue
 			if not (entry.reading_value or "").strip():
 				frappe.throw(
 					_("Row #{0}: Record a reading for unit {1} ({2}) before submission.").format(
