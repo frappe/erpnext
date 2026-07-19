@@ -535,7 +535,8 @@
    "label": "Quality Inspection",
    "no_copy": 1,
    "options": "Quality Inspection",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fieldname": "section_break_40",

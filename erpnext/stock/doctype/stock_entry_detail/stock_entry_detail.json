@@ -332,7 +332,8 @@
    "fieldtype": "Link",
    "label": "Quality Inspection",
    "no_copy": 1,
-   "options": "Quality Inspection"
+   "options": "Quality Inspection",
+   "read_only": 1
   },
   {
    "fieldname": "accounting",

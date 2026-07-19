@@ -533,7 +533,8 @@
    "oldfieldname": "qa_no",
    "oldfieldtype": "Link",
    "options": "Quality Inspection",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fieldname": "column_break_40",
