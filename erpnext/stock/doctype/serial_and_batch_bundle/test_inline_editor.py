@@ -179,6 +179,38 @@ class TestSerialBatchInlineEditor(ERPNextTestSuite):
 			frappe.db.get_value("Purchase Receipt Item", pr.items[0].name, "serial_and_batch_bundle")
 		)
 
+	def test_remove_empty_bundle_ignores_spoofed_child_row(self):
+		item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
+		pr = self.make_draft_pr(item)
+		victim_pr = self.make_draft_pr(item)
+
+		summary = self.upsert(pr, entries=[{"serial_no": f"SN-{frappe.generate_hash(length=8)}"}])
+		bundle = summary.bundle
+		pr.items[0].db_set("serial_and_batch_bundle", bundle)
+
+		victim_summary = self.upsert(
+			victim_pr, entries=[{"serial_no": f"SN-{frappe.generate_hash(length=8)}"}]
+		)
+		victim_bundle = victim_summary.bundle
+		victim_pr.items[0].db_set("serial_and_batch_bundle", victim_bundle)
+
+		child_row = pr.items[0].as_dict()
+		child_row["is_rejected"] = 0
+		child_row["name"] = victim_pr.items[0].name
+
+		to_delete = frappe.get_all("Serial and Batch Entry", {"parent": bundle}, pluck="name")
+		upsert_bundle_entries(
+			child_row=json.dumps(child_row, default=str),
+			doc=json.dumps(pr.as_dict(), default=str),
+			deleted=json.dumps(to_delete),
+		)
+
+		self.assertFalse(frappe.db.exists("Serial and Batch Bundle", bundle))
+		self.assertEqual(
+			frappe.db.get_value("Purchase Receipt Item", victim_pr.items[0].name, "serial_and_batch_bundle"),
+			victim_bundle,
+		)
+
 	def test_pagination(self):
 		item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
 		pr = self.make_draft_pr(item, qty=5)

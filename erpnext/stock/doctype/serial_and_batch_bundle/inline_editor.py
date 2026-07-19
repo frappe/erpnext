@@ -152,8 +152,14 @@ def validate_parent_document(child_row, doc):
 
 
 def remove_empty_bundle(bundle, child_row, bundle_field):
-	if child_row.get("name") and frappe.db.exists(child_row.get("doctype"), child_row.get("name")):
-		frappe.db.set_value(child_row.get("doctype"), child_row.get("name"), bundle_field, None)
+	child_doctype, child_name = child_row.get("doctype"), child_row.get("name")
+	if (
+		child_name
+		and child_doctype
+		and frappe.get_meta(child_doctype).has_field(bundle_field)
+		and frappe.db.exists(child_doctype, {"name": child_name, bundle_field: bundle.name})
+	):
+		frappe.db.set_value(child_doctype, child_name, bundle_field, None)
 
 	bundle.delete(ignore_permissions=True)
 
