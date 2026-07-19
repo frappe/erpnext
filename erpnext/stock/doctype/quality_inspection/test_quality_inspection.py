@@ -520,6 +520,18 @@ class TestManualUnitEntry(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, inspection.validate_unit_readings_complete)
 
 
+class TestSampleWithinDecided(ERPNextTestSuite):
+	def test_oversized_sample_is_refused_on_save(self):
+		inspection = frappe.new_doc("Quality Inspection")
+		inspection.inspection_basis = "Sample"
+		inspection.sample_size = 4
+		inspection.decided_quantity = 3
+		self.assertRaises(frappe.ValidationError, inspection.validate_sample_within_decided)
+
+		inspection.decided_quantity = 4
+		inspection.validate_sample_within_decided()
+
+
 class TestQualityInspectionJobCardReference(ERPNextTestSuite):
 	def test_qi_updates_job_card_reference(self):
 		"""Submitting a QI with reference_type 'Job Card' writes its name onto the

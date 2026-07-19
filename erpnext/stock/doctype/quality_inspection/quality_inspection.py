@@ -184,6 +184,10 @@ class QualityInspection(UnitReadingsMixin, Document):
 
 		self.set_decided_quantity_default()
 		self.validate_serial_nos()
+		# creation lands the draft even when its prefills disagree (the dialog
+		# copies the trigger's sample beside the tranche); saves enforce
+		if not self.is_new():
+			self.validate_sample_within_decided()
 		# named identity must describe the reference from the first save, not
 		# only when the verdict lands
 		self.validate_inspected_serials_against_reference()

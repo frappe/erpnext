@@ -1267,9 +1267,10 @@ class TestQualityQuarantine(ERPNextTestSuite):
 				"inspected_by": frappe.session.user,
 			}
 		)
+		# creation lands the draft, prefills and all — but a sample of 5 cannot
+		# decide only 2, and the first save says so without waiting for submission
 		inspection.insert(ignore_permissions=True)
-		# a sample of 5 cannot decide only 2 — it is drawn from what it decides
-		self.assertRaises(frappe.ValidationError, inspection.submit)
+		self.assertRaises(frappe.ValidationError, inspection.save)
 		inspection.delete()
 
 		# left blank, the decided quantity fills with everything undecided on save

@@ -72,14 +72,7 @@ class UnitReadingsMixin:
 				title=_("More Than Undecided"),
 			)
 
-		if self.inspection_basis != "Each Quantity" and flt(self.sample_size) > flt(self.decided_quantity):
-			frappe.throw(
-				_(
-					"The sample of {0} unit(s) exceeds the {1} unit(s) this verdict decides — a "
-					"sample is drawn from the quantity it decides."
-				).format(self.sample_size, self.decided_quantity),
-				title=_("Sample Exceeds Decided Quantity"),
-			)
+		self.validate_sample_within_decided()
 
 		if (
 			flt(self.decided_quantity) < undecided
@@ -166,6 +159,24 @@ class UnitReadingsMixin:
 					"Inward Note."
 				).format(self.unit_quantity, inspected_qty),
 				title=_("Incomplete Per-Unit Readings"),
+			)
+
+	def validate_sample_within_decided(self):
+		"""A sample is drawn from the quantity it decides.
+
+		Runs on every save — both numbers sit on the form, so the mismatch
+		need not wait for submission. A zero decided quantity means no tranche
+		is in play (transaction references), so there is nothing to compare.
+		"""
+		if self.inspection_basis == "Each Quantity" or flt(self.decided_quantity) <= 0:
+			return
+		if flt(self.sample_size) > flt(self.decided_quantity):
+			frappe.throw(
+				_(
+					"The sample of {0} unit(s) exceeds the {1} unit(s) this verdict decides — a "
+					"sample is drawn from the quantity it decides."
+				).format(self.sample_size, self.decided_quantity),
+				title=_("Sample Exceeds Decided Quantity"),
 			)
 
 	def _whole_quantity_under_inspection(self):
