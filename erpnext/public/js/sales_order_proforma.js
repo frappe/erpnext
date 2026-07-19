@@ -123,11 +123,15 @@ Object.assign(erpnext.proforma, {
 							label: __("Qty"),
 							in_list_view: 1,
 							onchange: function () {
-								// In Quantity basis, Amount is derived (qty x rate). In Amount basis
-								// both are user-entered, so leave Amount alone.
-								if (this.doc && dialog.get_value("based_on") === "Quantity") {
-									this.doc.amount = flt(this.doc.qty) * flt(this.doc.rate);
-									this.grid_row?.refresh_field("amount");
+								// In Quantity basis, Amount is derived (qty x rate). Recompute across
+								// all rows and re-render — refreshing a single row only updates the
+								// active one, so rows beyond the edited one would go stale.
+								if (dialog.get_value("based_on") === "Quantity") {
+									const grid = dialog.get_field("items").grid;
+									(grid.grid_rows || []).forEach((row) => {
+										if (row.doc) row.doc.amount = flt(row.doc.qty) * flt(row.doc.rate);
+									});
+									grid.refresh();
 								}
 								erpnext.proforma.update_warning(dialog);
 							},
