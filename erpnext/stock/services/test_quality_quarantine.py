@@ -2481,6 +2481,56 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		return_doc = make_return_doc("Purchase Receipt", receipt.name)
 		self.assertEqual(return_doc.items[0].qty, -1)
 
+	def test_wholly_rejected_verdict_is_received_as_rejected_only(self):
+		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		item = make_item(properties={"is_stock_item": 1})
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Purchase Receipt",
+				warehouse_role=None,
+				quality_control_mode="Block",
+			),
+		)
+		item.save()
+
+		receipt = make_purchase_receipt(
+			item_code=item.name, qty=2, warehouse=REAL_WH, rate=100, do_not_submit=True
+		)
+		inspection = frappe.get_doc(
+			{
+				"doctype": "Quality Inspection",
+				"inspection_type": "Incoming",
+				"reference_type": "Purchase Receipt",
+				"reference_name": receipt.name,
+				"item_code": item.name,
+				"sample_size": 1,
+				"report_date": nowdate(),
+				"inspected_by": frappe.session.user,
+				"manual_inspection": 1,
+				"status": "Rejected",
+			}
+		)
+		inspection.insert(ignore_permissions=True)
+		inspection.submit()
+
+		# accepting any of it defies the verdict
+		receipt.reload()
+		self.assertRaises(frappe.ValidationError, receipt.submit)
+
+		# nothing accepted, everything rejected: the verdict is honoured
+		receipt.reload()
+		receipt.items[0].qty = 0
+		receipt.items[0].rejected_qty = 2
+		receipt.items[0].rejected_warehouse = make_warehouse(
+			"_Test QC Rejected Intake", warehouse_type="Rejected"
+		)
+		receipt.save()
+		receipt.submit()
+		self.assertEqual(receipt.docstatus, 1)
+
 	def test_inspection_outcome_proposes_the_document_split(self):
 		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt

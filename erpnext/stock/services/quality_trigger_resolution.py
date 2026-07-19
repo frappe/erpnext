@@ -544,8 +544,11 @@ def enforce_inspection_points(doc):
 		msg = None
 		if not info or info.docstatus != 1:
 			msg = _("Row #{0}: Quality Inspection {1} is not submitted.").format(row.idx, link)
-		elif info.status == "Rejected":
-			msg = _("Row #{0}: Quality Inspection {1} was rejected.").format(row.idx, link)
+		elif info.status == "Rejected" and not _row_honours_rejection(row):
+			msg = _(
+				"Row #{0}: Quality Inspection {1} was rejected. Receive the goods as Rejected "
+				"Quantity only (Apply → Inspection Outcome), or remove the row."
+			).format(row.idx, link)
 
 		if msg:
 			if block:
@@ -556,6 +559,16 @@ def enforce_inspection_points(doc):
 
 		if block:
 			_validate_batches_covered(doc, row)
+
+
+def _row_honours_rejection(row):
+	"""A wholly rejected verdict may still be honoured, not defied.
+
+	Nothing accepted, everything booked as rejected quantity bound for the
+	supplier return. Rows without a rejected quantity (deliveries, stock
+	entries) have no such way out and stay blocked.
+	"""
+	return flt(row.get("rejected_qty")) > 0 and not flt(row.get("qty"))
 
 
 def _validate_batches_covered(doc, row):
