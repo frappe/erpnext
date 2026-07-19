@@ -195,11 +195,12 @@ frappe.ui.form.on("Quality Inspection", {
 	},
 
 	toggle_unit_serial_column(frm) {
-		// unit readings only name serials when the item has them to name
+		// unit readings only name serials when the item has them to name;
+		// the hidden flag covers the row editor, the list-view toggle the grid
 		const serialized = cint(frm.__item_is_serialized);
 		const grid = frm.fields_dict.unit_readings?.grid;
 		grid?.update_docfield_property("serial_no", "hidden", serialized ? 0 : 1);
-		grid?.update_docfield_property("serial_no", "read_only", serialized ? 0 : 1);
+		grid?.set_column_disp_in_list_view("serial_no", serialized ? 1 : 0);
 	},
 
 	toggle_sample_size_lock(frm) {
