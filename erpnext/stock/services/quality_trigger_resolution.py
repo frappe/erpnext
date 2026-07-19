@@ -575,39 +575,28 @@ def _validate_identity_covered(doc, row):
 	"""Identity known before submission must be spoken for by the row's verdicts.
 
 	A batch is a quality boundary of its own: each one moving needs a
-	submitted inspection naming it. Serials need no unit-by-unit coverage —
-	a sample vouches for its whole row — but a verdict naming no identity at
-	all on an identified row is ambiguous evidence and must be cancelled.
-	Identity born at the document's submission cannot be pre-inspected —
-	rows without any stay exempt.
+	submitted inspection naming it, and a verdict naming none on such a row
+	is ambiguous evidence that must be cancelled. Serials need no rule here:
+	the inspection itself refuses to submit unnamed when the row has serials
+	to name. Identity born at the document's submission cannot be
+	pre-inspected — rows without any stay exempt.
 	"""
 	from frappe.utils import get_link_to_form
 
 	row_batches = get_row_batch_nos(row)
-	row_serials = get_row_serial_nos(row)
-	if not row_batches and not row_serials:
+	if not row_batches:
 		return
 
 	covered = set()
 	for inspection in _row_inspections(doc, row):
-		link = get_link_to_form("Quality Inspection", inspection.name)
-		if row_batches and not inspection.batch_no:
+		if not inspection.batch_no:
 			frappe.throw(
 				_(
 					"Row #{0}: Quality Inspection {1} names no batch, but this row moves batched "
 					"stock — the verdict cannot say which batch it judged. Cancel {1} and "
 					"inspect each batch by name."
-				).format(row.idx, link),
+				).format(row.idx, get_link_to_form("Quality Inspection", inspection.name)),
 				title=_("Verdict Names No Batch"),
-			)
-		if row_serials and not _inspection_serials(inspection):
-			frappe.throw(
-				_(
-					"Row #{0}: Quality Inspection {1} names no serials, but this row moves "
-					"serialized stock — the verdict cannot say which units it sampled. Cancel "
-					"{1} and inspect the units by serial."
-				).format(row.idx, link),
-				title=_("Verdict Names No Serials"),
 			)
 		covered.add(inspection.batch_no)
 	missing = sorted(row_batches - covered)

@@ -173,7 +173,13 @@ frappe.ui.form.on("Quality Inspection", {
 			frm.set_df_property("batch_no", "reqd", 0);
 
 			frm.toggle_display("serial_no", frm.__item_is_serialized && !bundle_decided);
-			frm.set_df_property("serial_no", "reqd", 0);
+			// a named sample is proof one was taken — demanded wherever serials
+			// exist to name; custody's supplier serials stay optional
+			frm.set_df_property(
+				"serial_no",
+				"reqd",
+				frm.__item_is_serialized && !bundle_decided && is_lot ? 1 : 0
+			);
 			frm.trigger("toggle_sample_size_lock");
 
 			// a transaction row still without identity gets it at submission —
@@ -188,6 +194,8 @@ frappe.ui.form.on("Quality Inspection", {
 					}
 					if (!r.message.has_serials) {
 						frm.toggle_display("serial_no", false);
+					} else if (frm.__item_is_serialized && !bundle_decided) {
+						frm.set_df_property("serial_no", "reqd", 1);
 					}
 				});
 			}

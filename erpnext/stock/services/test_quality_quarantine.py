@@ -764,11 +764,11 @@ class TestQualityQuarantine(ERPNextTestSuite):
 				}
 			)
 
-		# serials are optional — an unnamed verdict stands, releasing by age
+		# a serialized verdict must name the units it sampled
 		anonymous = build_inspection()
 		anonymous.insert(ignore_permissions=True)
-		anonymous.submit()
-		anonymous.cancel()
+		self.assertRaises(frappe.ValidationError, anonymous.submit)
+		anonymous.reload()
 		anonymous.delete()
 
 		inspection = build_inspection("\n".join(serials[:2]))
@@ -1994,7 +1994,7 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		receipt.submit()
 		self.assertEqual(receipt.docstatus, 1)
 
-	def test_serialized_row_refuses_verdicts_naming_no_serial(self):
+	def test_serialized_verdict_must_name_its_sample(self):
 		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 
@@ -2034,17 +2034,17 @@ class TestQualityQuarantine(ERPNextTestSuite):
 				}
 			)
 			doc.insert(ignore_permissions=True)
-			doc.submit()
 			return doc
 
-		# a verdict naming no serials cannot say which units it sampled
+		# an unnamed serialized verdict refuses to submit at the source: the
+		# sampled serials are the proof a sample was taken
 		anonymous = verdict()
-		receipt.reload()
-		self.assertRaises(frappe.ValidationError, receipt.submit)
-		anonymous.cancel()
+		self.assertRaises(frappe.ValidationError, anonymous.submit)
+		anonymous.reload()
+		anonymous.delete()
 
 		# a sampled serial vouches for the row
-		verdict("QC-ANON-001")
+		verdict("QC-ANON-001").submit()
 		receipt.reload()
 		receipt.submit()
 		self.assertEqual(receipt.docstatus, 1)

@@ -198,6 +198,7 @@ class QualityInspection(UnitReadingsMixin, Document):
 		if not self.is_new():
 			self.validate_readings_status_mandatory()
 			self.validate_readings_recorded()
+			self.validate_serials_recorded()
 			self.validate_sample_size()
 			self.validate_unit_readings_complete()
 			self.validate_unit_readings_coverage()
@@ -372,6 +373,44 @@ class QualityInspection(UnitReadingsMixin, Document):
 		"""The lot holds the batch; a lot-referenced inspection mirrors it."""
 		if self.reference_type == "Quality Control Lot" and self.reference_name:
 			self.batch_no = frappe.db.get_value("Quality Control Lot", self.reference_name, "batch_no")
+
+	def validate_serials_recorded(self):
+		"""A serialized verdict names the units it sampled — proof one was taken.
+
+		Custody precedes stock identity and stays exempt, and a transaction row
+		whose serials are born at submission has nothing to name yet (its field
+		is cleared). Everywhere else, an unnamed serialized verdict is refused.
+		"""
+		if not self.item_code or self.reference_type == "Goods Inward Note":
+			return
+		if not frappe.get_cached_value("Item", self.item_code, "has_serial_no"):
+			return
+
+		if self.reference_type != "Quality Control Lot":
+			from erpnext.stock.services.quality_trigger_resolution import (
+				get_reference_row_tracking,
+				get_row_serial_nos,
+			)
+
+			if not self.child_row_reference:
+				return
+			child_doctype = (
+				"Stock Entry Detail"
+				if self.reference_type == "Stock Entry"
+				else self.reference_type + " Item"
+			)
+			if not get_row_serial_nos(get_reference_row_tracking(child_doctype, self.child_row_reference)):
+				return
+
+		named = (self.serial_no or "").strip() or any(entry.serial_no for entry in self.get("unit_readings"))
+		if not named:
+			frappe.throw(
+				_(
+					"Record the sampled Serial Nos — {0} is serialized, and the verdict must "
+					"show which units were actually taken."
+				).format(get_link_to_form("Item", self.item_code)),
+				title=_("Serial Nos Missing"),
+			)
 
 	@frappe.whitelist()
 	def validate_serial_nos(self):
