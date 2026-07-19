@@ -174,7 +174,10 @@ class JournalEntry(AccountsController):
 		self.validate_credit_debit_note()
 		self.validate_empty_accounts_table()
 		self.validate_inter_company_accounts()
-		AssetService(self).validate_depr_account_and_depr_entry_voucher_type()
+		asset_service = AssetService(self)
+		asset_service.validate_depr_account_and_depr_entry_voucher_type()
+		if not frappe.flags.is_reverse_depr_entry:
+			asset_service.validate_asset_not_disposed()
 		self.validate_company_in_accounting_dimension()
 		self.validate_advance_accounts()
 

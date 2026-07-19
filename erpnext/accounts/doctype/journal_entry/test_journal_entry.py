@@ -832,6 +832,39 @@ class TestJournalEntry(ERPNextTestSuite):
 		self.assertFalse(jv.accounts[1].reference_type)
 		self.assertFalse(jv.accounts[1].reference_name)
 
+	def test_journal_entry_against_sold_or_scrapped_asset_is_rejected(self):
+		from erpnext.assets.doctype.asset.test_asset import create_asset
+
+		asset = create_asset(calculate_depreciation=0, submit=1)
+
+		def asset_journal_entry():
+			jv = frappe.new_doc("Journal Entry")
+			jv.posting_date = nowdate()
+			jv.company = asset.company
+			jv.set(
+				"accounts",
+				[
+					{
+						"account": "_Test Fixed Asset - _TC",
+						"credit_in_account_currency": 1000,
+						"reference_type": "Asset",
+						"reference_name": asset.name,
+					},
+					{
+						"account": "_Test Cash - _TC",
+						"debit_in_account_currency": 1000,
+					},
+				],
+			)
+			return jv
+
+		for bad_status in ("Sold", "Scrapped"):
+			with self.subTest(f"referencing a {bad_status} asset is rejected"):
+				frappe.db.set_value("Asset", asset.name, "status", bad_status)
+				self.assertRaises(frappe.ValidationError, asset_journal_entry().insert)
+
+		frappe.db.set_value("Asset", asset.name, "status", "Submitted")
+
 	def test_get_payment_entry_against_order_builds_advance_je(self):
 		"""Characterize the mapper: an advance Bank Entry JE is built against an unbilled order."""
 		from erpnext.accounts.doctype.journal_entry.mapper import get_payment_entry_against_order

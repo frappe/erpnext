@@ -35,6 +35,19 @@ class AssetService:
 				if frappe.get_cached_value("Account", d.account, "root_type") != "Expense":
 					frappe.throw(_("Account {0} should be of type Expense").format(d.account))
 
+	def validate_asset_not_disposed(self) -> None:
+		for d in self.doc.get("accounts"):
+			if d.reference_type == "Asset" and d.reference_name:
+				asset_status = frappe.get_cached_value("Asset", d.reference_name, "status")
+				if asset_status in ("Sold", "Scrapped"):
+					frappe.throw(
+						_("Row #{0}: Asset {1} is already {2} and cannot be used in a Journal Entry").format(
+							d.idx,
+							frappe.utils.get_link_to_form("Asset", d.reference_name),
+							asset_status,
+						)
+					)
+
 	def has_asset_adjustment_entry(self) -> None:
 		"""Block cancellation while a submitted Asset Value Adjustment links to this entry."""
 		if self.doc.flags.get("via_asset_value_adjustment"):
