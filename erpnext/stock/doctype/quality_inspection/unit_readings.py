@@ -298,16 +298,20 @@ class UnitReadingsMixin:
 				)
 
 	def _validate_unit_serials(self):
-		"""Lot-flow unit readings of serialized items must name every unit's serial.
+		"""Unit readings of serialized items must name every unit's serial.
 
-		Without them the release falls back to picking units by age instead of
-		by verdict. Row-referenced inspections are exempt — inward serials may
-		not exist before the document submits.
+		On a lot, unnamed units would release by age instead of by verdict; on
+		a transaction row they leave the verdict unable to say which units it
+		judged. Demanded wherever serials exist to name — custody's supplier
+		serials stay optional, and a row whose serials are born at submission
+		has none to name yet.
 		"""
 		if not self.item_code or not frappe.get_cached_value("Item", self.item_code, "has_serial_no"):
 			return
 		if self.reference_type != "Quality Control Lot":
-			return
+			identity = self.get_reference_row_identity()
+			if not identity or not identity["has_serials"]:
+				return
 
 		units_without_serial = sorted(
 			{entry.unit_no for entry in self.unit_readings if not entry.serial_no}

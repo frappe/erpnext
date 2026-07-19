@@ -194,8 +194,16 @@ frappe.ui.form.on("Quality Inspection", {
 					}
 					if (!r.message.has_serials) {
 						frm.toggle_display("serial_no", false);
-					} else if (frm.__item_is_serialized && !bundle_decided) {
-						frm.set_df_property("serial_no", "reqd", 1);
+					} else if (frm.__item_is_serialized) {
+						if (bundle_decided) {
+							frm.fields_dict.unit_readings?.grid.update_docfield_property(
+								"serial_no",
+								"reqd",
+								1
+							);
+						} else {
+							frm.set_df_property("serial_no", "reqd", 1);
+						}
 					}
 				});
 			}
@@ -209,6 +217,13 @@ frappe.ui.form.on("Quality Inspection", {
 		const grid = frm.fields_dict.unit_readings?.grid;
 		grid?.update_docfield_property("serial_no", "hidden", serialized ? 0 : 1);
 		grid?.set_column_disp_in_list_view("serial_no", serialized ? 1 : 0);
+		// every serialized unit names its serial — custody's supplier serials
+		// stay optional; rows with serials to name are marked in the identity fetch
+		grid?.update_docfield_property(
+			"serial_no",
+			"reqd",
+			serialized && frm.doc.reference_type === "Quality Control Lot" ? 1 : 0
+		);
 	},
 
 	toggle_sample_size_lock(frm) {

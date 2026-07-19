@@ -1691,6 +1691,65 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		issue.save()
 		issue.submit()
 
+	def test_transaction_units_name_their_serials(self):
+		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
+
+		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
+		item = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "QCTU.#####"}
+		)
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Stock Entry",
+				stock_entry_type="Material Issue",
+				warehouse_role="Outbound",
+				quality_control_mode="Block",
+				inspection_basis="Each Quantity",
+			),
+		)
+		item.save()
+
+		make_stock_entry(
+			item_code=item.name, qty=2, to_warehouse=REAL_WH, purpose="Material Receipt", rate=100
+		)
+		serials = frappe.get_all(
+			"Serial No", filters={"item_code": item.name, "warehouse": REAL_WH}, pluck="name", order_by="name"
+		)
+		issue = make_stock_entry(
+			item_code=item.name,
+			qty=2,
+			from_warehouse=REAL_WH,
+			purpose="Material Issue",
+			serial_no="\n".join(serials),
+			use_serial_batch_fields=1,
+			do_not_submit=True,
+		)
+
+		# the row names its serials, so every inspected unit must too
+		inspection = frappe.get_doc(
+			{
+				"doctype": "Quality Inspection",
+				"inspection_type": "Outgoing",
+				"reference_type": "Stock Entry",
+				"reference_name": issue.name,
+				"item_code": item.name,
+				"report_date": nowdate(),
+				"inspected_by": frappe.session.user,
+				"inspection_basis": "Each Quantity",
+				"unit_readings": unit_reading_rows({1: ["Accepted"], 2: ["Accepted"]}),
+			}
+		)
+		inspection.insert(ignore_permissions=True)
+		self.assertRaises(frappe.ValidationError, inspection.submit)
+
+		inspection.reload()
+		for entry, serial in zip(inspection.unit_readings, serials, strict=True):
+			entry.serial_no = serial
+		inspection.save(ignore_permissions=True)
+		inspection.submit()
+		self.assertEqual(inspection.docstatus, 1)
+
 	def test_inspected_batch_guards_the_document(self):
 		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
 
