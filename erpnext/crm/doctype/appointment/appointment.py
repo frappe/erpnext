@@ -3,14 +3,19 @@
 
 
 from collections import Counter
+from datetime import timedelta
 
 import frappe
 from frappe import _
 from frappe.desk.form.assign_to import add as add_assignment
 from frappe.model.document import Document
 from frappe.share import add_docshare
-from frappe.utils import add_to_date, cint, get_url, getdate, now, now_datetime
+from frappe.utils import add_to_date, cint, date_diff, get_datetime, get_url, getdate, now, now_datetime
 from frappe.utils.verified_command import get_signed_params
+
+from erpnext.setup.doctype.holiday_list.holiday_list import is_holiday
+
+WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
 
 class Appointment(Document):
@@ -46,17 +51,74 @@ class Appointment(Document):
 		return old_doc and old_doc.scheduled_time == self.scheduled_time
 
 	def validate(self):
-		self.validate_available_time_slot()
-
-	def validate_available_time_slot(self):
 		if self.scheduled_time_intact:
 			return
 
-		number_of_appointments_in_same_slot = frappe.db.count(
-			"Appointment", filters={"scheduled_time": self.scheduled_time}
+		self.validate_backdated_booking()
+		self.validate_advanced_booking()
+		self.validate_holiday()
+		self.validate_slot_timing()
+		self.validate_available_time_slot()
+
+	def validate_backdated_booking(self):
+		if get_datetime(self.scheduled_time) < now_datetime():
+			frappe.throw(_("Appointment cannot be scheduled for a past time."))
+
+	def validate_advanced_booking(self):
+		advance_booking_days = cint(
+			frappe.get_single_value("Appointment Booking Settings", "advance_booking_days")
 		)
-		number_of_agents = frappe.db.get_single_value("Appointment Booking Settings", "number_of_agents")
-		if number_of_agents != 0 and number_of_appointments_in_same_slot >= number_of_agents:
+
+		if advance_booking_days and date_diff(self.scheduled_time, now_datetime()) > advance_booking_days:
+			frappe.throw(
+				_("Appointment can only be scheduled up to {0} day(s) in advance.").format(
+					advance_booking_days
+				)
+			)
+
+	def validate_holiday(self):
+		holiday_list = frappe.get_single_value("Appointment Booking Settings", "holiday_list")
+
+		if is_holiday(holiday_list, getdate(self.scheduled_time)):
+			frappe.throw(_("Appointment cannot be scheduled on a holiday."))
+
+	def validate_slot_timing(self):
+		settings = frappe.get_cached_doc("Appointment Booking Settings")
+		if not settings.availability_of_slots:
+			return
+
+		scheduled_time = get_datetime(self.scheduled_time)
+		day_of_week = WEEKDAYS[scheduled_time.weekday()]
+		slot_start = timedelta(
+			hours=scheduled_time.hour, minutes=scheduled_time.minute, seconds=scheduled_time.second
+		)
+		slot_end = slot_start + timedelta(minutes=cint(settings.appointment_duration))
+
+		for slot in settings.availability_of_slots:
+			if slot.day_of_week == day_of_week and slot.from_time <= slot_start and slot_end <= slot.to_time:
+				return
+
+		frappe.throw(_("Appointment must be scheduled within the available slot timings."))
+
+	def validate_available_time_slot(self):
+		appointment_duration, number_of_agents = frappe.get_single_value(
+			"Appointment Booking Settings", ["appointment_duration", "number_of_agents"]
+		)
+		number_of_agents = cint(number_of_agents)
+		if not number_of_agents:
+			return
+
+		appointment_duration = cint(appointment_duration)
+		number_of_appointments_in_same_slot = frappe.db.count(
+			"Appointment",
+			filters=[
+				["scheduled_time", ">", add_to_date(self.scheduled_time, minutes=-appointment_duration)],
+				["scheduled_time", "<", add_to_date(self.scheduled_time, minutes=appointment_duration)],
+				["name", "!=", self.name],
+			],
+		)
+
+		if number_of_appointments_in_same_slot >= number_of_agents:
 			frappe.throw(_("Time slot is not available"))
 
 	def before_insert(self):
