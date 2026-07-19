@@ -1994,6 +1994,61 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		receipt.submit()
 		self.assertEqual(receipt.docstatus, 1)
 
+	def test_serialized_row_refuses_verdicts_naming_no_serial(self):
+		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
+		item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1})
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Purchase Receipt",
+				warehouse_role=None,
+				quality_control_mode="Block",
+			),
+		)
+		item.save()
+
+		receipt = make_purchase_receipt(
+			item_code=item.name, qty=2, warehouse=REAL_WH, rate=100, do_not_submit=True
+		)
+		receipt.items[0].serial_no = "QC-ANON-001\nQC-ANON-002"
+		receipt.items[0].use_serial_batch_fields = 1
+		receipt.save()
+
+		def verdict(serial_no=None):
+			doc = frappe.get_doc(
+				{
+					"doctype": "Quality Inspection",
+					"inspection_type": "Incoming",
+					"reference_type": "Purchase Receipt",
+					"reference_name": receipt.name,
+					"item_code": item.name,
+					"sample_size": 1,
+					"report_date": nowdate(),
+					"inspected_by": frappe.session.user,
+					"manual_inspection": 1,
+					"status": "Accepted",
+					"serial_no": serial_no,
+				}
+			)
+			doc.insert(ignore_permissions=True)
+			doc.submit()
+			return doc
+
+		# a verdict naming no serials cannot say which units it sampled
+		anonymous = verdict()
+		receipt.reload()
+		self.assertRaises(frappe.ValidationError, receipt.submit)
+		anonymous.cancel()
+
+		# a sampled serial vouches for the row
+		verdict("QC-ANON-001")
+		receipt.reload()
+		receipt.submit()
+		self.assertEqual(receipt.docstatus, 1)
+
 	def test_batch_sample_cannot_exceed_the_rows_batch_qty(self):
 		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
 
