@@ -9,7 +9,6 @@ import frappe
 from frappe import _
 from frappe.desk.form.assign_to import add as add_assignment
 from frappe.model.document import Document
-from frappe.query_builder.functions import Count
 from frappe.share import add_docshare
 from frappe.utils import add_to_date, cint, date_diff, get_datetime, get_url, getdate, now, now_datetime
 from frappe.utils.verified_command import get_signed_params
@@ -361,10 +360,12 @@ def count_overlapping_appointments(
 ):
 	"""Count non-Closed appointments whose duration window overlaps `scheduled_time`.
 	With `for_update`, the range stays locked until commit, serializing concurrent bookings."""
+	# select the rows (not COUNT) so `for_update` stays valid: PostgreSQL
+	# rejects `FOR UPDATE` combined with an aggregate function
 	appointment = frappe.qb.DocType("Appointment")
 	query = (
 		frappe.qb.from_(appointment)
-		.select(Count(appointment.name))
+		.select(appointment.name)
 		.where(appointment.scheduled_time > add_to_date(scheduled_time, minutes=-appointment_duration))
 		.where(appointment.scheduled_time < add_to_date(scheduled_time, minutes=appointment_duration))
 		.where(appointment.status != "Closed")
@@ -376,7 +377,7 @@ def count_overlapping_appointments(
 	if for_update:
 		query = query.for_update()
 
-	return query.run()[0][0]
+	return len(query.run())
 
 
 def handle_expired_unverified_appointments():
