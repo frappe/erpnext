@@ -2373,17 +2373,18 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		inspection.insert(ignore_permissions=True)
 
 		inspection.populate_units()
+		for entry in inspection.unit_readings:
+			entry.reading_value = "Yes"
 		inspection.save(ignore_permissions=True)
 
 		# the lot's source receipt names the serials under inspection: prefilled
 		self.assertEqual([entry.serial_no for entry in inspection.unit_readings], serials)
 
-		# a lot-flow inspection of a serialized item must identify every unit
+		# a lot-flow inspection of a serialized item must identify every unit —
+		# refused at save, no need to wait for submission
 		for entry in inspection.unit_readings:
-			entry.reading_value = "Yes"
 			entry.serial_no = None
-		inspection.save(ignore_permissions=True)
-		self.assertRaises(frappe.ValidationError, inspection.submit)
+		self.assertRaises(frappe.ValidationError, inspection.save)
 
 		inspection.reload()
 		for entry, serial in zip(inspection.unit_readings, serials, strict=True):

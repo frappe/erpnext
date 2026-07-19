@@ -184,10 +184,6 @@ class QualityInspection(UnitReadingsMixin, Document):
 
 		self.set_decided_quantity_default()
 		self.validate_serial_nos()
-		# creation lands the draft even when its prefills disagree (the dialog
-		# copies the trigger's sample beside the tranche); saves enforce
-		if not self.is_new():
-			self.validate_sample_within_decided()
 		# named identity must describe the reference from the first save, not
 		# only when the verdict lands
 		self.validate_inspected_serials_against_reference()
@@ -195,7 +191,18 @@ class QualityInspection(UnitReadingsMixin, Document):
 		# a sample larger than the stock it describes is wrong on a draft too
 		self.validate_sample_within_quantity()
 		self.set_company()
-		self.warn_unrecorded_readings()
+
+		# creation lands the draft even when its prefills disagree or its
+		# readings are still empty (the dialog and the lot button create drafts
+		# to be filled in); every save after that enforces what submission will
+		if not self.is_new():
+			self.validate_readings_status_mandatory()
+			self.validate_readings_recorded()
+			self.validate_sample_size()
+			self.validate_unit_readings_complete()
+			self.validate_unit_readings_coverage()
+			self.validate_decided_quantity()
+			self.validate_units_not_already_decided()
 
 	def set_company(self):
 		if self.reference_type and self.reference_name:
@@ -434,21 +441,12 @@ class QualityInspection(UnitReadingsMixin, Document):
 		typed = get_reference_row_tracking(child_doctype, self.child_row_reference).get("serial_no")
 		return set(get_serial_nos(typed or ""))
 
-	def before_submit(self):
-		self.validate_readings_status_mandatory()
-		self.validate_readings_recorded()
-		self.validate_sample_size()
-		self.validate_unit_readings_complete()
-		self.validate_unit_readings_coverage()
-		self.validate_decided_quantity()
-		self.validate_units_not_already_decided()
-
 	def validate_sample_size(self):
 		"""A Sample inspection of zero units is a verdict about nothing.
 
-		Submission-only: a draft may carry no sample yet (the dialog and the lot
-		button create drafts to be filled in). A manual verdict needs no counted
-		sample. The sample-vs-quantity ceiling is a current-state check and runs
+		Creation-exempt: a fresh draft may carry no sample yet (the dialog and
+		the lot button create drafts to be filled in). A manual verdict needs no
+		counted sample. The sample-vs-quantity ceiling is a current-state check and runs
 		on every save in validate_sample_within_quantity.
 		"""
 		if self.inspection_basis == "Each Quantity" or self.manual_inspection:
@@ -621,29 +619,6 @@ class QualityInspection(UnitReadingsMixin, Document):
 					"only the stock actually moving can be sampled."
 				).format(frappe.bold(", ".join(sorted(missing)))),
 				title=_("Sampled Serials Mismatch"),
-			)
-
-	def warn_unrecorded_readings(self):
-		"""A heads-up on save: drafts may be incomplete, but submission will not be.
-
-		Silent on creation — the dialog and the lot button create drafts with
-		empty readings by design — and a toast on subsequent saves.
-		"""
-		if self.docstatus != 0 or self.is_new():
-			return
-		if self.manual_inspection or self.inspection_basis == "Each Quantity":
-			return
-
-		unrecorded = [
-			reading
-			for reading in self.readings
-			if not reading.manual_inspection and not self.has_recorded_reading(reading)
-		]
-		if unrecorded:
-			frappe.msgprint(
-				_("{0} reading(s) not yet recorded — required before submission.").format(len(unrecorded)),
-				indicator="orange",
-				alert=True,
 			)
 
 	def validate_readings_recorded(self):
