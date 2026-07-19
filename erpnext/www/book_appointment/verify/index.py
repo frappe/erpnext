@@ -10,11 +10,19 @@ def get_context(context):
 	email = frappe.form_dict["email"]
 	appointment_name = frappe.form_dict["appointment"]
 
-	if email and appointment_name:
-		appointment = frappe.get_doc("Appointment", appointment_name)
-		appointment.set_verified(email)
-		context.success = True
-		return context
-	else:
+	if not (email and appointment_name):
 		context.success = False
 		return context
+
+	appointment = frappe.get_doc("Appointment", appointment_name)
+
+	if appointment.status != "Unverified":
+		context.success = True
+		return context
+
+	appointment.set_verified(email)
+	appointment.save(ignore_permissions=True)
+	# GET requests are rolled back at the end of the request unless this flag is set
+	frappe.local.flags.commit = True
+	context.success = True
+	return context

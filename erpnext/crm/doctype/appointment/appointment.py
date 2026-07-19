@@ -24,6 +24,7 @@ class Appointment(Document):
 
 		appointment_with: DF.Link | None
 		calendar_event: DF.Link | None
+		created_through_portal: DF.Check
 		customer_details: DF.LongText | None
 		customer_email: DF.Data
 		customer_name: DF.Data
@@ -33,6 +34,98 @@ class Appointment(Document):
 		scheduled_time: DF.Datetime
 		status: DF.Literal["Open", "Unverified", "Closed"]
 	# end: auto-generated types
+
+	@property
+	def scheduled_time_intact(self) -> bool:
+		"""
+		Returns False for new Appointment and `scheduled_time` changed for existing documents.
+		Returns True for existing Appointment where the `scheduled_time` has been changed.
+		"""
+		old_doc = self.get_doc_before_save()
+
+		return old_doc and old_doc.scheduled_time == self.scheduled_time
+
+	def validate(self):
+		self.validate_available_time_slot()
+
+	def validate_available_time_slot(self):
+		if self.scheduled_time_intact:
+			return
+
+		number_of_appointments_in_same_slot = frappe.db.count(
+			"Appointment", filters={"scheduled_time": self.scheduled_time}
+		)
+		number_of_agents = frappe.db.get_single_value("Appointment Booking Settings", "number_of_agents")
+		if number_of_agents != 0 and number_of_appointments_in_same_slot >= number_of_agents:
+			frappe.throw(_("Time slot is not available"))
+
+	def before_insert(self):
+		# Set status to "Unverified" for new Appointments.
+		if self.created_through_portal:
+			self.status = "Unverified"
+			return
+
+		self.link_customer_lead()
+
+	def after_insert(self):
+		if not self.created_through_portal and self.party:
+			self.auto_assign()
+			self.create_calendar_event()
+			return
+
+		# Send email to confirm
+		self.send_confirmation_email()
+
+	def send_confirmation_email(self):
+		verify_url = self._get_verify_url()
+		template = "confirm_appointment"
+		args = {
+			"link": verify_url,
+			"site_url": frappe.utils.get_url(),
+			"full_name": self.customer_name,
+		}
+		frappe.sendmail(
+			recipients=[self.customer_email],
+			template=template,
+			args=args,
+			subject=_("Appointment Confirmation"),
+		)
+		frappe.msgprint(_("Please check your email to confirm the appointment."))
+
+	def on_change(self):
+		self.sync_calendar_event()
+
+	def sync_calendar_event(self):
+		if not self.calendar_event:
+			return
+
+		if self.scheduled_time_intact:
+			return
+
+		cal_event = frappe.get_doc("Event", self.calendar_event)
+		cal_event.starts_on = self.scheduled_time
+		cal_event.save(ignore_permissions=True)
+
+	def set_verified(self, email):
+		if email != self.customer_email:
+			frappe.throw(_("Email verification failed."))
+		# Create new lead
+		self.link_customer_lead()
+		# Remove unverified status
+		self.status = "Open"
+		# Create calender event
+		self.auto_assign()
+		self.create_calendar_event()
+
+	def link_customer_lead(self):
+		if not self.party:
+			lead = self.find_lead_by_email()
+			customer = self.find_customer_by_email()
+
+			self.appointment_with = "Customer" if customer else "Lead"
+			self.party = customer if customer else lead
+
+		self.create_lead_and_link()
 
 	def find_lead_by_email(self):
 		lead_list = frappe.get_list(
@@ -49,79 +142,6 @@ class Appointment(Document):
 		if customer_list:
 			return customer_list[0].name
 		return None
-
-	def before_insert(self):
-		number_of_appointments_in_same_slot = frappe.db.count(
-			"Appointment", filters={"scheduled_time": self.scheduled_time}
-		)
-		number_of_agents = frappe.db.get_single_value("Appointment Booking Settings", "number_of_agents")
-		if number_of_agents != 0:
-			if number_of_appointments_in_same_slot >= number_of_agents:
-				frappe.throw(_("Time slot is not available"))
-		# Link lead
-		if not self.party:
-			lead = self.find_lead_by_email()
-			customer = self.find_customer_by_email()
-			if customer:
-				self.appointment_with = "Customer"
-				self.party = customer
-			else:
-				self.appointment_with = "Lead"
-				self.party = lead
-
-	def after_insert(self):
-		if self.party:
-			# Create Calendar event
-			self.auto_assign()
-			self.create_calendar_event()
-		else:
-			# Set status to unverified
-			self.db_set("status", "Unverified")
-			# Send email to confirm
-			self.send_confirmation_email()
-
-	def send_confirmation_email(self):
-		verify_url = self._get_verify_url()
-		template = "confirm_appointment"
-		args = {
-			"link": verify_url,
-			"site_url": frappe.utils.get_url(),
-			"full_name": self.customer_name,
-		}
-		frappe.sendmail(
-			recipients=[self.customer_email],
-			template=template,
-			args=args,
-			subject=_("Appointment Confirmation"),
-		)
-		if frappe.session.user == "Guest":
-			frappe.msgprint(_("Please check your email to confirm the appointment"))
-		else:
-			frappe.msgprint(
-				_("Appointment was created. But no lead was found. Please check the email to confirm")
-			)
-
-	def on_change(self):
-		# Sync Calendar
-		if not self.calendar_event:
-			return
-		cal_event = frappe.get_doc("Event", self.calendar_event)
-		cal_event.starts_on = self.scheduled_time
-		cal_event.save(ignore_permissions=True)
-
-	def set_verified(self, email):
-		if email != self.customer_email:
-			frappe.throw(_("Email verification failed."))
-		# Create new lead
-		self.create_lead_and_link()
-		# Remove unverified status
-		self.status = "Open"
-		# Create calender event
-		self.auto_assign()
-		self.create_calendar_event()
-		self.save(ignore_permissions=True)
-		if not frappe.in_test:
-			frappe.db.commit()
 
 	def create_lead_and_link(self):
 		# Return if already linked

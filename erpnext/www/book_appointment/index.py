@@ -4,6 +4,7 @@ import zoneinfo
 
 import frappe
 from frappe import _
+from frappe.rate_limiter import rate_limit
 from frappe.utils.data import get_system_timezone
 
 WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
@@ -100,7 +101,8 @@ def get_available_slots_between(query_start_time, query_end_time, settings):
 	return timeslots
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist(allow_guest=True, methods=["POST"])
+@rate_limit(limit=5, seconds=300)
 def create_appointment(date: str, time: str, tz: str, contact: str | dict):
 	handle_appointment_booking_disabled()
 	format_string = "%Y-%m-%d %H:%M:%S"
@@ -118,7 +120,7 @@ def create_appointment(date: str, time: str, tz: str, contact: str | dict):
 	appointment.customer_skype = contact.get("skype", None)
 	appointment.customer_details = contact.get("notes", None)
 	appointment.customer_email = contact.get("email", None)
-	appointment.status = "Open"
+	appointment.created_through_portal = 1
 	appointment.insert(ignore_permissions=True)
 	return appointment
 
