@@ -27,21 +27,11 @@ function set_warehouse_queries(frm) {
 
 function target_warehouse_query(frm) {
 	// a Quality Control Release may also send rejected stock to a Rejected
-	// warehouse; a transit entry targets its transit stop; everything else
-	// avoids quarantine
+	// warehouse; everything else avoids quarantine
 	if (frm.doc.purpose === "Quality Control Release") {
 		return {
 			filters: {
 				warehouse_type: ["!=", "Quality"],
-				is_group: 0,
-				company: frm.doc.company,
-			},
-		};
-	}
-	if (frm.doc.add_to_transit && frm.doc.purpose === "Material Transfer") {
-		return {
-			filters: {
-				warehouse_type: "Transit",
 				is_group: 0,
 				company: frm.doc.company,
 			},
