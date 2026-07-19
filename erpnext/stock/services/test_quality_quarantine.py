@@ -1970,10 +1970,12 @@ class TestQualityQuarantine(ERPNextTestSuite):
 			doc.submit()
 			return doc
 
-		# a verdict naming no batch does not account for the typed one
-		verdict()
+		# a verdict naming no batch cannot say which batch it judged — it must
+		# be cancelled before the receipt may submit
+		anonymous = verdict()
 		receipt.reload()
 		self.assertRaises(frappe.ValidationError, receipt.submit)
+		anonymous.cancel()
 
 		inspected = verdict(batch_one)
 		self.assertEqual(inspected.get_reference_row_identity(), {"has_batch": True, "has_serials": False})

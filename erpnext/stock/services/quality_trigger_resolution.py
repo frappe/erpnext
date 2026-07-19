@@ -576,9 +576,10 @@ def _validate_batches_covered(doc, row):
 
 	A sample vouches for its whole row, so serials need no unit-by-unit
 	coverage — but a batch is a quality boundary of its own, and each one
-	moving needs a submitted inspection naming it. Auto-created batches are
-	born at the document's submission and cannot be pre-inspected — rows
-	without one are exempt.
+	moving needs a submitted inspection naming it. A verdict naming no batch
+	on such a row is ambiguous — it cannot say which batch it judged — and
+	must be cancelled. Auto-created batches are born at the document's
+	submission and cannot be pre-inspected — rows without one are exempt.
 	"""
 	from frappe.utils import get_link_to_form
 
@@ -586,7 +587,18 @@ def _validate_batches_covered(doc, row):
 	if not row_batches:
 		return
 
-	covered = {inspection.batch_no for inspection in _row_inspections(doc, row) if inspection.batch_no}
+	covered = set()
+	for inspection in _row_inspections(doc, row):
+		if not inspection.batch_no:
+			frappe.throw(
+				_(
+					"Row #{0}: Quality Inspection {1} names no batch, but this row moves batched "
+					"stock — the verdict cannot say which batch it judged. Cancel {1} and "
+					"inspect each batch by name."
+				).format(row.idx, get_link_to_form("Quality Inspection", inspection.name)),
+				title=_("Verdict Names No Batch"),
+			)
+		covered.add(inspection.batch_no)
 	missing = sorted(row_batches - covered)
 	if missing:
 		frappe.throw(
