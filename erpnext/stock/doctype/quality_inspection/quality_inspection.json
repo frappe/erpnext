@@ -151,7 +151,7 @@
    "fieldname": "sample_size",
    "fieldtype": "Float",
    "label": "Sample Size",
-   "mandatory_depends_on": "eval:doc.inspection_basis != 'Each Quantity'",
+   "mandatory_depends_on": "eval:doc.inspection_basis != 'Each Quantity' && !doc.manual_inspection",
    "oldfieldname": "sample_size",
    "oldfieldtype": "Currency",
    "description": "Derived from the recorded Serial Nos for serialized items."

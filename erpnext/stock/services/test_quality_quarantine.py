@@ -1423,12 +1423,13 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, empty.submit)
 		empty.delete()
 
-		# a sample of zero units is a verdict about nothing — refused even manual
+		# a manual verdict needs no counted sample — it stands on the inspector
 		zero = build_inspection()
 		zero.manual_inspection = 1
 		zero.sample_size = 0
 		zero.insert(ignore_permissions=True)
-		self.assertRaises(frappe.ValidationError, zero.submit)
+		zero.submit()
+		zero.cancel()
 		zero.delete()
 
 		# a formula row without a recorded reading is no better

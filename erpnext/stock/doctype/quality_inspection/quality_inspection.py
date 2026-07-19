@@ -443,10 +443,11 @@ class QualityInspection(UnitReadingsMixin, Document):
 		"""A Sample inspection of zero units is a verdict about nothing.
 
 		Submission-only: a draft may carry no sample yet (the dialog and the lot
-		button create drafts to be filled in). The sample-vs-quantity ceiling is
-		a current-state check and runs on every save in validate_sample_within_quantity.
+		button create drafts to be filled in). A manual verdict needs no counted
+		sample. The sample-vs-quantity ceiling is a current-state check and runs
+		on every save in validate_sample_within_quantity.
 		"""
-		if self.inspection_basis == "Each Quantity":
+		if self.inspection_basis == "Each Quantity" or self.manual_inspection:
 			return
 		if flt(self.sample_size) <= 0:
 			frappe.throw(
