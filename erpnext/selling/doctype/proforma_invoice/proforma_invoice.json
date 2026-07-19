@@ -1,7 +1,7 @@
 {
  "actions": [],
  "autoname": "naming_series:",
- "creation": "2026-07-16 00:00:00.000000",
+ "creation": "2026-07-16 00:00:00",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -10,9 +10,9 @@
   "sales_order",
   "customer",
   "customer_name",
+  "company",
   "column_break_header",
   "proforma_date",
-  "company",
   "currency",
   "based_on",
   "hide_item_qty",
@@ -21,6 +21,7 @@
   "totals_section",
   "column_break_totals",
   "total_qty",
+  "column_break_fukr",
   "grand_total",
   "print_section",
   "print_format",
@@ -231,13 +232,17 @@
    "options": "Proforma Invoice",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_fukr",
+   "fieldtype": "Column Break"
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-16 00:00:00.000000",
+ "modified": "2026-07-19 11:15:50.347119",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Proforma Invoice",
@@ -273,6 +278,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],

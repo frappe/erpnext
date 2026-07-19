@@ -18,9 +18,7 @@ class ProformaInvoice(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.selling.doctype.proforma_invoice_item.proforma_invoice_item import (
-			ProformaInvoiceItem,
-		)
+		from erpnext.selling.doctype.proforma_invoice_item.proforma_invoice_item import ProformaInvoiceItem
 
 		amended_from: DF.Link | None
 		based_on: DF.Literal["Quantity", "Amount"]

@@ -307,7 +307,7 @@ Object.assign(erpnext.proforma, {
 
 		frappe.ui
 			.button({
-				label: __("New Proforma"),
+				label: __("New Proforma Invoice"),
 				icon: "plus",
 				variant: "subtle",
 				size: "sm",
