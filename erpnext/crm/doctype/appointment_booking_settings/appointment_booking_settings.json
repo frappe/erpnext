@@ -1,11 +1,14 @@
 {
  "actions": [],
+ "allow_bulk_edit": 1,
  "creation": "2019-08-27 10:56:48.309824",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "enable_scheduling",
+  "column_break_jsom",
+  "verification_link_expiry_duration",
   "agent_detail_section",
   "availability_of_slots",
   "number_of_agents",
@@ -99,13 +102,27 @@
    "fieldname": "success_redirect_url",
    "fieldtype": "Data",
    "label": "Success Redirect URL"
+  },
+  {
+   "fieldname": "column_break_jsom",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "30",
+   "depends_on": "eval: doc.enable_scheduling === 1;",
+   "description": "In Minutes (min: 15 mins, max: 60 mins)",
+   "fieldname": "verification_link_expiry_duration",
+   "fieldtype": "Int",
+   "label": "Verification Link Expiry Duration",
+   "max_value": 60.0,
+   "min_value": 15.0,
+   "non_negative": 1
   }
  ],
  "grid_page_length": 50,
- "hide_toolbar": 0,
  "issingle": 1,
  "links": [],
- "modified": "2026-03-16 13:28:21.198138",
+ "modified": "2026-07-19 16:09:09.562695",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment Booking Settings",

@@ -33,6 +33,7 @@ class AppointmentBookingSettings(Document):
 		holiday_list: DF.Link
 		number_of_agents: DF.Int
 		success_redirect_url: DF.Data | None
+		verification_link_expiry_duration: DF.Int
 	# end: auto-generated types
 
 	agent_list: typing.ClassVar[list] = []  # Hack
