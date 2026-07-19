@@ -13,6 +13,7 @@ class QualityInspectionReadingEntry(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+		manual_inspection: DF.Check
 		max_value: DF.Float
 		min_value: DF.Float
 		numeric: DF.Check

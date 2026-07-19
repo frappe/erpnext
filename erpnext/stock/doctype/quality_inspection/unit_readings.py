@@ -198,9 +198,11 @@ class UnitReadingsMixin:
 
 		Numeric readings pass inside [min, max]; non-numeric readings are compared
 		case-insensitively against the acceptance criteria value. Entries without a
-		reading keep their manually chosen status.
+		reading — or marked Manual Inspection — keep their manually chosen status.
 		"""
 		for entry in self.unit_readings:
+			if entry.manual_inspection:
+				continue
 			reading = (entry.reading_value or "").strip()
 			if not reading:
 				continue

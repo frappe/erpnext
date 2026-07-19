@@ -446,7 +446,6 @@ class TestQualityInspection(ERPNextTestSuite):
 			item_code=item_code, target="_Test Warehouse - _TC", qty=1, basic_rate=100, do_not_submit=True
 		)
 
-		se.inspection_required = 1
 		se.save()
 
 		qa = create_quality_inspection(
@@ -466,6 +465,34 @@ class TestQualityInspection(ERPNextTestSuite):
 
 		se.delete()
 
+
+class TestManualUnitEntry(ERPNextTestSuite):
+	def test_manual_unit_entry_keeps_its_status(self):
+		create_quality_inspection_parameter("_Test Manual Unit Parameter")
+		inspection = frappe.new_doc("Quality Inspection")
+		for unit_no, manual in ((1, 1), (2, 0)):
+			inspection.append(
+				"unit_readings",
+				{
+					"unit_no": unit_no,
+					"specification": "_Test Manual Unit Parameter",
+					"numeric": 1,
+					"min_value": 0,
+					"max_value": 0.5,
+					"reading_value": "0.9",
+					"status": "Accepted",
+					"manual_inspection": manual,
+				},
+			)
+
+		inspection.evaluate_unit_entry_statuses()
+
+		# a deviation-approved unit keeps its hand-set verdict, reading on record
+		self.assertEqual(inspection.unit_readings[0].status, "Accepted")
+		self.assertEqual(inspection.unit_readings[1].status, "Rejected")
+
+
+class TestQualityInspectionJobCardReference(ERPNextTestSuite):
 	def test_qi_updates_job_card_reference(self):
 		"""Submitting a QI with reference_type 'Job Card' writes its name onto the
 		Job Card's quality_inspection field (the Job Card branch of

@@ -14,7 +14,8 @@
   "numeric",
   "min_value",
   "max_value",
-  "status"
+  "status",
+  "manual_inspection"
  ],
  "fields": [
   {
@@ -78,6 +79,15 @@
    "label": "Status",
    "options": "Accepted\nRejected",
    "reqd": 1
+  },
+  {
+   "default": "0",
+   "description": "Set the status manually.",
+   "fieldname": "manual_inspection",
+   "fieldtype": "Check",
+   "label": "Manual Inspection",
+   "in_list_view": 1,
+   "columns": 1
   }
  ],
  "istable": 1,
