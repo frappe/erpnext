@@ -91,8 +91,11 @@ class BOMCreator(Document):
 
 			key = (row.item_code, row.fg_reference_id)
 			if key in item_map:
+				# The parent is either another row or the finished good itself, in
+				# which case there is no row to look up.
 				parent_item_code = next(
-					item.item_code for item in self.items if item.name == row.fg_reference_id
+					(item.item_code for item in self.items if item.name == row.fg_reference_id),
+					self.item_code,
 				)
 
 				frappe.throw(
@@ -529,32 +532,33 @@ class BOMCreator(Document):
 		if isinstance(kwargs, dict):
 			kwargs = frappe._dict(kwargs)
 
-		updated = False
-		if kwargs.docname:
-			row = next((row for row in self.items if row.name == kwargs.docname), None)
-			if not row:
-				frappe.throw(_("BOM Creator Item with name {0} does not exist").format(kwargs.docname))
+		if not kwargs.docname:
+			return frappe._dict()
 
-			row.delete()
-			updated = True
+		row = next((row for row in self.items if row.name == kwargs.docname), None)
+		if not row:
+			frappe.throw(_("BOM Creator Item with name {0} does not exist").format(kwargs.docname))
 
-		items = get_children(parent=kwargs.fg_item, parent_id=self.name)
-		if items:
-			for item in items:
-				updated = True
-				child_row = next((row for row in self.items if row.name == item.name), None)
-				if child_row:
-					child_row.delete()
-				if item.expandable:
-					self.delete_node(fg_item=item.value)
+		# Collect the row and everything below it. Descendants are resolved by row
+		# reference, not by item code, so deleting one instance of a sub-assembly
+		# leaves the other instances of the same item untouched.
+		to_delete = {row.name}
+		pending = [row.name]
+		while pending:
+			parent_reference = pending.pop()
+			for child in self.items:
+				if child.fg_reference_id == parent_reference and child.name not in to_delete:
+					to_delete.add(child.name)
+					pending.append(child.name)
 
-		if updated:
-			self.set_rate_for_items()
-			self.save()
+		for item_row in list(self.items):
+			if item_row.name in to_delete:
+				item_row.delete()
 
-			return self
+		self.set_rate_for_items()
+		self.save()
 
-		return frappe._dict()
+		return self
 
 
 @frappe.whitelist()
@@ -576,6 +580,7 @@ def get_children(doctype: str | None = None, parent: str | None = None, **kwargs
 		"idx",
 		ValueWrapper("BOM Creator Item").as_("doctype"),
 		"name",
+		"name as node_id",
 		"uom",
 		"rate",
 		"amount",
@@ -583,9 +588,14 @@ def get_children(doctype: str | None = None, parent: str | None = None, **kwargs
 		"is_subcontracted",
 	]
 
+	# The same item can be used as a sub-assembly at several places in the tree, so
+	# children must be resolved against the specific row being expanded
+	# (`fg_reference_id`) rather than against the item code alone. The root node has
+	# no row of its own; its children point at the BOM Creator document itself.
 	query_filters = {
 		"fg_item": parent,
 		"parent": kwargs.parent_id,
+		"fg_reference_id": kwargs.parent_node_id or kwargs.parent_id,
 	}
 
 	if kwargs.name:
