@@ -7,7 +7,10 @@
  "engine": "InnoDB",
  "field_order": [
   "scheduled_time",
+  "column_break_xaox",
   "status",
+  "created_through_portal",
+  "email_verified",
   "customer_details_section",
   "customer_name",
   "customer_phone_number",
@@ -19,8 +22,7 @@
   "appointment_with",
   "party",
   "col_br_3",
-  "calendar_event",
-  "created_through_portal"
+  "calendar_event"
  ],
  "fields": [
   {
@@ -55,7 +57,8 @@
    "fieldtype": "Datetime",
    "in_list_view": 1,
    "label": "Scheduled Time",
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "fieldname": "status",
@@ -106,11 +109,25 @@
    "default": "0",
    "fieldname": "created_through_portal",
    "fieldtype": "Check",
-   "label": "Created through Portal"
+   "label": "Created through Portal",
+   "read_only": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "column_break_xaox",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.created_through_portal === 1;",
+   "fieldname": "email_verified",
+   "fieldtype": "Check",
+   "label": "Email Verified",
+   "read_only": 1
   }
  ],
  "links": [],
- "modified": "2026-07-17 17:25:10.646652",
+ "modified": "2026-07-21 01:00:00.000000",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment",

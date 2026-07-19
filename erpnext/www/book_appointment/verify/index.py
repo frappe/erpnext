@@ -17,25 +17,35 @@ def get_context(context):
 		context.success = False
 		return context
 
-	# Expired Unverified appointments are deleted by the scheduled cleanup job,
-	# so a signed link can outlive its appointment.
+	if not valid_till or get_datetime(valid_till) < now_datetime():
+		context.success = False
+		context.message = _("Verification link has expired.")
+		return context
+
 	if not frappe.db.exists("Appointment", appointment_name):
 		context.success = False
-		context.message = _("Verification link has expired. Please book the appointment again.")
+		context.message = _("Appointment not found. Please book the appointment again.")
 		return context
 
 	appointment = frappe.get_doc("Appointment", appointment_name)
 
-	if appointment.status != "Unverified":
-		context.success = True
-		return context
-
-	if not valid_till or get_datetime(valid_till) < now_datetime():
+	if appointment.customer_email != email:
 		context.success = False
-		context.message = _("Verification link has expired. Please book the appointment again.")
+		context.message = _("Email couldn't be verified.")
 		return context
 
-	appointment.set_verified(email)
+	if appointment.status == "Closed":
+		context.success = False
+		context.message = _("Appointment has been closed. Please book the appointment again.")
+		return context
+
+	if appointment.status == "Open":
+		context.success = True
+		context.message = _("Appointment is already verified.")
+		return context
+
+	appointment.email_verified = True
+	appointment.status = "Open"
 	appointment.save(ignore_permissions=True)
 	# GET requests are rolled back at the end of the request unless this flag is set
 	frappe.local.flags.commit = True
