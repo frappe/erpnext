@@ -9,15 +9,17 @@ from frappe.utils import add_to_date, get_datetime, getdate, now_datetime, set_r
 
 from erpnext.crm.doctype.appointment.appointment import (
 	Appointment,
-	delete_expired_unverified_appointments,
+	_check_agent_availability,
+	handle_expired_unverified_appointments,
 )
 from erpnext.setup.doctype.holiday_list.test_holiday_list import make_holiday_list
 from erpnext.tests.utils import ERPNextTestSuite
-from erpnext.www.book_appointment.index import create_appointment
+from erpnext.www.book_appointment.index import create_appointment, get_appointment_slots
 from erpnext.www.book_appointment.verify import index as verify_index
 
 LEAD_EMAIL = "test_appointment_lead@example.com"
 VERIFICATION_EXPIRY_MINUTES = 30
+ALL_WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
 
 def create_test_appointment(**kwargs):
@@ -37,13 +39,123 @@ def create_test_appointment(**kwargs):
 	return test_appointment
 
 
+def create_lead(email, name="Existing Lead"):
+	frappe.db.delete("Lead", {"email_id": email})
+	return frappe.get_doc({"doctype": "Lead", "lead_name": name, "email_id": email}).insert(
+		ignore_permissions=True
+	)
+
+
+def set_booking_setting(field, value):
+	frappe.db.set_single_value("Appointment Booking Settings", field, value)
+
+
+def slot_on(days_from_now, hour, minute=0):
+	day = datetime.date.today() + datetime.timedelta(days=days_from_now)
+	return datetime.datetime.combine(day, datetime.time(hour, minute))
+
+
+def backdate_creation(appointment_name, minutes):
+	frappe.db.set_value(
+		"Appointment",
+		appointment_name,
+		"creation",
+		add_to_date(now_datetime(), minutes=-minutes),
+		update_modified=False,
+	)
+
+
+def get_status(appointment_name):
+	return frappe.db.get_value("Appointment", appointment_name, "status")
+
+
+def get_assignees(appointment_name):
+	return frappe.parse_json(frappe.db.get_value("Appointment", appointment_name, "_assign") or "[]")
+
+
+def get_todo_statuses(appointment_name):
+	return frappe.get_all(
+		"ToDo",
+		filters={"reference_type": "Appointment", "reference_name": appointment_name},
+		pluck="status",
+	)
+
+
+def parse_verify_url(verify_url):
+	parsed = urlparse(verify_url)
+	return parsed, {key: value[0] for key, value in parse_qs(parsed.query).items()}
+
+
 class TestAppointment(ERPNextTestSuite):
 	def setUp(self):
-		frappe.db.set_single_value(
-			"Appointment Booking Settings", "verification_link_expiry_duration", VERIFICATION_EXPIRY_MINUTES
-		)
+		set_booking_setting("verification_link_expiry_duration", VERIFICATION_EXPIRY_MINUTES)
 		frappe.db.delete("Lead", {"email_id": LEAD_EMAIL})
 		self.test_appointment = create_test_appointment()
+
+	def _configure_booking_settings(self, holiday_dates=None, agents=None):
+		holiday_list = make_holiday_list(
+			"_Test Appointment Holiday List",
+			from_date=getdate(),
+			to_date=add_to_date(getdate(), days=60),
+			holiday_dates=holiday_dates or [],
+		)
+
+		settings = frappe.get_doc("Appointment Booking Settings")
+		settings.enable_scheduling = 1
+		settings.enable_appointment_portal = 1
+		settings.appointment_duration = 30
+		settings.advance_booking_days = 30
+		settings.verification_link_expiry_duration = VERIFICATION_EXPIRY_MINUTES
+		settings.holiday_list = holiday_list.name
+		settings.set("agent_list", [])
+		for agent in agents or ["Administrator"]:
+			settings.append("agent_list", {"user": agent})
+		settings.set("availability_of_slots", [])
+		for day in ALL_WEEKDAYS:
+			settings.append(
+				"availability_of_slots", {"day_of_week": day, "from_time": "09:00:00", "to_time": "17:00:00"}
+			)
+		settings.save()
+
+	def _create_portal_appointment(self, email, days_from_now=7, time="10:00:00"):
+		"""Book as Guest. The verification email is mocked and kept on
+		``self._verification_email_mock`` for assertions."""
+		if not getattr(self, "_booking_settings_configured", False):
+			self._configure_booking_settings()
+			self._booking_settings_configured = True
+
+		with self.set_user("Guest"), patch.object(Appointment, "send_confirmation_email") as mock_send:
+			appointment = create_appointment(
+				date=str(datetime.date.today() + datetime.timedelta(days=days_from_now)),
+				time=time,
+				tz="UTC",
+				contact={"name": "Portal Visitor", "email": email, "number": "123", "skype": "", "notes": ""},
+			)
+		self._verification_email_mock = mock_send
+		return appointment
+
+	def _request_verification(self, appointment, verify_url=None):
+		"""Simulate the GET request made by clicking the emailed verification link.
+
+		The confirmation email sent on successful verification is mocked and kept
+		on ``self._confirmed_email_mock`` for assertions.
+		"""
+		parsed, params = parse_verify_url(verify_url or appointment._get_verify_url())
+
+		old_request = getattr(frappe.local, "request", None)
+		old_form_dict = frappe.local.form_dict
+		try:
+			set_request(method="GET", path=f"{parsed.path}?{parsed.query}")
+			frappe.local.form_dict = frappe._dict(params)
+			context = frappe._dict()
+			with patch.object(Appointment, "send_appointment_confirmed_email") as mock_confirmed:
+				verify_index.get_context(context)
+			self._confirmed_email_mock = mock_confirmed
+			return context
+		finally:
+			frappe.local.request = old_request
+			frappe.local.form_dict = old_form_dict
+			frappe.local.flags.commit = False
 
 	def test_calendar_event_created(self):
 		cal_event = frappe.get_doc("Event", self.test_appointment.calendar_event)
@@ -66,85 +178,18 @@ class TestAppointment(ERPNextTestSuite):
 	def test_portal_booking_stays_unverified_for_existing_lead(self):
 		"""A portal booking whose email matches an existing Lead/Customer must NOT
 		be auto-linked - it must stay Unverified until the email is confirmed."""
-		existing_lead_email = "existing_lead@example.com"
-		frappe.db.delete("Lead", {"email_id": existing_lead_email})
-		frappe.get_doc(
-			{"doctype": "Lead", "lead_name": "Existing Lead", "email_id": existing_lead_email}
-		).insert(ignore_permissions=True)
+		create_lead("existing_lead@example.com")
+		appointment = self._create_portal_appointment("existing_lead@example.com", days_from_now=5)
 
-		frappe.db.set_single_value("Appointment Booking Settings", "enable_scheduling", 1)
-		frappe.db.set_single_value("Appointment Booking Settings", "number_of_agents", 0)
-
-		with self.set_user("Guest"), patch.object(Appointment, "send_confirmation_email") as mock_send:
-			appointment = create_appointment(
-				date=str(datetime.date.today() + datetime.timedelta(days=5)),
-				time="10:00:00",
-				tz="UTC",
-				contact={
-					"name": "Portal Visitor",
-					"email": existing_lead_email,
-					"number": "123",
-					"skype": "",
-					"notes": "",
-				},
-			)
-
-		mock_send.assert_called_once()
+		self._verification_email_mock.assert_called_once()
 		self.assertTrue(appointment.created_through_portal)
 		self.assertEqual(appointment.status, "Unverified")
+		self.assertFalse(appointment.email_verified)
 		self.assertFalse(appointment.party)
-
-	def test_portal_booking_links_party_only_after_email_verification(self):
-		"""Only after the confirmation link is used does the appointment get linked
-		to the matching Lead and confirmed. This also covers saving the verified
-		appointment as a Guest user, which must not raise a PermissionError."""
-		existing_lead_email = "another_existing_lead@example.com"
-		frappe.db.delete("Lead", {"email_id": existing_lead_email})
-		frappe.get_doc(
-			{"doctype": "Lead", "lead_name": "Another Existing Lead", "email_id": existing_lead_email}
-		).insert(ignore_permissions=True)
-
-		frappe.db.set_single_value("Appointment Booking Settings", "enable_scheduling", 1)
-		frappe.db.set_single_value("Appointment Booking Settings", "number_of_agents", 0)
-
-		with self.set_user("Guest"), patch.object(Appointment, "send_confirmation_email"):
-			appointment = create_appointment(
-				date=str(datetime.date.today() + datetime.timedelta(days=6)),
-				time="11:00:00",
-				tz="UTC",
-				contact={
-					"name": "Portal Visitor",
-					"email": existing_lead_email,
-					"number": "123",
-					"skype": "",
-					"notes": "",
-				},
-			)
-
-			appointment.set_verified(existing_lead_email)
-			appointment.save(ignore_permissions=True)
-
-		self.assertEqual(appointment.status, "Open")
-		self.assertTrue(appointment.party)
-
-	def _create_portal_appointment(self, email, days_from_now=7, time="10:00:00"):
-		frappe.db.set_single_value("Appointment Booking Settings", "enable_scheduling", 1)
-		frappe.db.set_single_value("Appointment Booking Settings", "number_of_agents", 0)
-		frappe.db.set_single_value("Appointment Booking Settings", "advance_booking_days", 30)
-
-		with self.set_user("Guest"), patch.object(Appointment, "send_confirmation_email"):
-			return create_appointment(
-				date=str(datetime.date.today() + datetime.timedelta(days=days_from_now)),
-				time=time,
-				tz="UTC",
-				contact={"name": "Portal Visitor", "email": email, "number": "123", "skype": "", "notes": ""},
-			)
 
 	def test_verify_url_contains_expiry(self):
 		appointment = self._create_portal_appointment("portal_visitor@example.com")
-
-		query = urlparse(appointment._get_verify_url()).query
-		params = {key: value[0] for key, value in parse_qs(query).items()}
+		_parsed, params = parse_verify_url(appointment._get_verify_url())
 
 		self.assertIn("_signature", params)
 		self.assertIn("valid_till", params)
@@ -152,33 +197,19 @@ class TestAppointment(ERPNextTestSuite):
 		self.assertGreater(valid_till, add_to_date(now_datetime(), minutes=VERIFICATION_EXPIRY_MINUTES - 1))
 		self.assertLessEqual(valid_till, add_to_date(now_datetime(), minutes=VERIFICATION_EXPIRY_MINUTES + 1))
 
-	def _request_verification(self, appointment, verify_url=None):
-		"""Simulate the GET request made by clicking the emailed verification link."""
-		parsed = urlparse(verify_url or appointment._get_verify_url())
-		params = {key: value[0] for key, value in parse_qs(parsed.query).items()}
-
-		old_request = getattr(frappe.local, "request", None)
-		old_form_dict = frappe.local.form_dict
-		try:
-			set_request(method="GET", path=f"{parsed.path}?{parsed.query}")
-			frappe.local.form_dict = frappe._dict(params)
-			context = frappe._dict()
-			verify_index.get_context(context)
-			return context
-		finally:
-			frappe.local.request = old_request
-			frappe.local.form_dict = old_form_dict
-			frappe.local.flags.commit = False
-
 	def test_email_verification_within_expiry_window(self):
-		# Link used within the validity window - verification succeeds
+		# Link used within the validity window - verification succeeds and the
+		# appointment gets linked, assigned and added to the calendar
 		on_time = self._create_portal_appointment("portal_visitor_on_time@example.com")
 		context = self._request_verification(on_time)
 
 		self.assertTrue(context.success)
+		self._confirmed_email_mock.assert_called_once()
 		on_time.reload()
 		self.assertEqual(on_time.status, "Open")
+		self.assertTrue(on_time.email_verified)
 		self.assertTrue(on_time.party)
+		self.assertTrue(on_time.calendar_event)
 
 		# Link used after the validity window - verification fails
 		late = self._create_portal_appointment("portal_visitor_late@example.com", days_from_now=10)
@@ -187,13 +218,42 @@ class TestAppointment(ERPNextTestSuite):
 			context = self._request_verification(late)
 
 		self.assertFalse(context.success)
+		self._confirmed_email_mock.assert_not_called()
 		late.reload()
 		self.assertEqual(late.status, "Unverified")
+		self.assertFalse(late.email_verified)
 		self.assertFalse(late.party)
 
+	def test_verification_link_reused_after_success(self):
+		appointment = self._create_portal_appointment("portal_visitor_twice@example.com")
+		verify_url = appointment._get_verify_url()
+
+		context = self._request_verification(appointment, verify_url=verify_url)
+		self.assertTrue(context.success)
+		self._confirmed_email_mock.assert_called_once()
+
+		# re-clicking the link is idempotent and does not send another email
+		context = self._request_verification(appointment, verify_url=verify_url)
+		self.assertTrue(context.success)
+		self.assertIn("already verified", context.message)
+		self._confirmed_email_mock.assert_not_called()
+
+	def test_verification_fails_for_changed_email(self):
+		appointment = self._create_portal_appointment("portal_visitor_old@example.com")
+		verify_url = appointment._get_verify_url()
+
+		appointment.customer_email = "portal_visitor_new@example.com"
+		appointment.save(ignore_permissions=True)
+
+		context = self._request_verification(appointment, verify_url=verify_url)
+
+		self.assertFalse(context.success)
+		self.assertIn("couldn't be verified", context.message)
+		self.assertEqual(get_status(appointment.name), "Unverified")
+
 	def test_verification_link_for_deleted_appointment(self):
-		"""A signed link can outlive its appointment (the cleanup job deletes stale
-		Unverified appointments) - clicking it must render the expired message, not crash."""
+		"""A signed link can outlive its appointment - clicking it must render a
+		friendly message, not crash."""
 		appointment = self._create_portal_appointment("portal_visitor_gone@example.com")
 		verify_url = appointment._get_verify_url()
 		frappe.delete_doc("Appointment", appointment.name, ignore_permissions=True)
@@ -201,66 +261,261 @@ class TestAppointment(ERPNextTestSuite):
 		context = self._request_verification(appointment, verify_url=verify_url)
 
 		self.assertFalse(context.success)
-		self.assertIn("expired", context.message)
+		self.assertIn("book the appointment again", context.message)
 
-	def test_expired_unverified_appointments_are_deleted(self):
-		stale = self._create_portal_appointment("portal_visitor_stale@example.com", days_from_now=8)
-		fresh = self._create_portal_appointment("portal_visitor_fresh@example.com", days_from_now=9)
+	def test_reschedule_syncs_calendar_event(self):
+		new_time = add_to_date(self.test_appointment.scheduled_time, hours=1)
+		self.test_appointment.scheduled_time = new_time
+		self.test_appointment.save()
 
-		frappe.db.set_value(
-			"Appointment",
-			stale.name,
-			"creation",
-			add_to_date(now_datetime(), minutes=-(VERIFICATION_EXPIRY_MINUTES + 15)),
-			update_modified=False,
+		starts_on = frappe.db.get_value("Event", self.test_appointment.calendar_event, "starts_on")
+		self.assertEqual(starts_on, new_time)
+
+	def test_portal_endpoint_disabled(self):
+		self._configure_booking_settings()
+		set_booking_setting("enable_appointment_portal", 0)
+
+		with self.set_user("Guest"), self.assertRaises(frappe.Redirect):
+			create_appointment(
+				date=str(datetime.date.today() + datetime.timedelta(days=3)),
+				time="10:00:00",
+				tz="UTC",
+				contact={
+					"name": "Blocked",
+					"email": "blocked@example.com",
+					"number": "1",
+					"skype": "",
+					"notes": "",
+				},
+			)
+
+	def test_booked_slot_unavailable_on_portal(self):
+		from frappe.utils.data import get_system_timezone
+
+		self._configure_booking_settings()
+		tz = get_system_timezone()
+		day = datetime.date.today() + datetime.timedelta(days=2)
+
+		def get_availability():
+			with self.set_user("Guest"):
+				slots = get_appointment_slots(str(day), tz)
+			return {slot["time"].strftime("%H:%M"): slot["availability"] for slot in slots}
+
+		booked = create_test_appointment(
+			customer_email="slot_taken@example.com", scheduled_time=slot_on(2, 10)
 		)
 
-		delete_expired_unverified_appointments()
+		availability = get_availability()
+		self.assertFalse(availability["10:00"])
+		self.assertTrue(availability["13:00"])
+
+		# closing the appointment frees its slot on the portal
+		booked.status = "Closed"
+		booked.save()
+		self.assertTrue(get_availability()["10:00"])
+
+		# an off-grid desk appointment blocks every portal slot it overlaps
+		create_test_appointment(customer_email="off_grid@example.com", scheduled_time=slot_on(2, 13, 15))
+		availability = get_availability()
+		self.assertFalse(availability["13:00"])
+		self.assertFalse(availability["13:30"])
+		self.assertTrue(availability["14:00"])
+
+	def test_expired_unverified_appointments_are_closed(self):
+		stale = self._create_portal_appointment("portal_visitor_stale@example.com", days_from_now=8)
+		fresh = self._create_portal_appointment("portal_visitor_fresh@example.com", days_from_now=9)
+		verify_url = stale._get_verify_url()
+
+		backdate_creation(stale.name, VERIFICATION_EXPIRY_MINUTES + 15)
+		set_booking_setting("action_for_expired_unverified_appointments", "Mark as Closed")
+
+		handle_expired_unverified_appointments()
+
+		self.assertEqual(get_status(stale.name), "Closed")
+		self.assertEqual(get_status(fresh.name), "Unverified")
+		# Open appointments are never touched, regardless of age
+		self.assertEqual(get_status(self.test_appointment.name), "Open")
+
+		# clicking the link of a closed appointment renders a friendly message
+		context = self._request_verification(stale, verify_url=verify_url)
+		self.assertFalse(context.success)
+		self.assertIn("closed", context.message)
+
+	def test_expired_unverified_appointments_are_deleted(self):
+		stale = self._create_portal_appointment("portal_visitor_purged@example.com", days_from_now=8)
+		fresh = self._create_portal_appointment("portal_visitor_kept@example.com", days_from_now=9)
+
+		backdate_creation(stale.name, VERIFICATION_EXPIRY_MINUTES + 15)
+		set_booking_setting("action_for_expired_unverified_appointments", "Delete Permanently")
+
+		handle_expired_unverified_appointments()
 
 		self.assertFalse(frappe.db.exists("Appointment", stale.name))
 		self.assertTrue(frappe.db.exists("Appointment", fresh.name))
-		# Open appointments are never touched, regardless of age
 		self.assertTrue(frappe.db.exists("Appointment", self.test_appointment.name))
 
 	def test_cleanup_skipped_when_expiry_not_configured(self):
 		appointment = self._create_portal_appointment("portal_visitor_no_expiry@example.com")
-		frappe.db.set_value(
-			"Appointment",
-			appointment.name,
-			"creation",
-			add_to_date(now_datetime(), minutes=-5),
-			update_modified=False,
+		backdate_creation(appointment.name, 5)
+		set_booking_setting("verification_link_expiry_duration", 0)
+
+		handle_expired_unverified_appointments()
+
+		self.assertEqual(get_status(appointment.name), "Unverified")
+
+	def test_status_transition_rules(self):
+		# desk appointments can never be Unverified
+		with self.assertRaises(frappe.ValidationError):
+			create_test_appointment(customer_email="desk_unverified@example.com", status="Unverified")
+
+		# portal appointments cannot be opened manually before verification
+		unverified = self._create_portal_appointment("manual_open@example.com")
+		unverified.status = "Open"
+		with self.assertRaises(frappe.ValidationError):
+			unverified.save(ignore_permissions=True)
+
+		# verified appointments cannot be reverted to Unverified
+		verified = self._create_portal_appointment("revert_unverified@example.com", days_from_now=8)
+		self._request_verification(verified)
+		verified.reload()
+		verified.status = "Unverified"
+		with self.assertRaises(frappe.ValidationError):
+			verified.save(ignore_permissions=True)
+
+		# both desk and verified portal appointments can be closed and reopened
+		for appointment in (self.test_appointment, verified):
+			appointment.reload()
+			appointment.status = "Closed"
+			appointment.save(ignore_permissions=True)
+			appointment.status = "Open"
+			appointment.save(ignore_permissions=True)
+			self.assertEqual(appointment.status, "Open")
+
+	def test_agent_auto_assignment(self):
+		agent_email = "appointment_agent@example.com"
+		if not frappe.db.exists("User", agent_email):
+			frappe.get_doc(
+				{"doctype": "User", "email": agent_email, "first_name": "Appointment Agent"}
+			).insert(ignore_permissions=True)
+
+		self._configure_booking_settings(agents=["Administrator", agent_email])
+		first = create_test_appointment(
+			customer_email="assigned_one@example.com", scheduled_time=slot_on(2, 11)
 		)
-		frappe.db.set_single_value("Appointment Booking Settings", "verification_link_expiry_duration", 0)
+		second = create_test_appointment(
+			customer_email="assigned_two@example.com", scheduled_time=slot_on(2, 11)
+		)
 
-		delete_expired_unverified_appointments()
+		# both appointments in the same slot get an agent, and never the same one
+		self.assertTrue(get_assignees(first.name))
+		self.assertTrue(get_assignees(second.name))
+		self.assertNotEqual(get_assignees(first.name), get_assignees(second.name))
 
-		self.assertTrue(frappe.db.exists("Appointment", appointment.name))
+		# closing an assigned appointment closes its ToDo without re-assigning
+		first.reload()
+		first.status = "Closed"
+		first.save()
+		self.assertTrue(get_todo_statuses(first.name))
+		self.assertTrue(all(status == "Closed" for status in get_todo_statuses(first.name)))
+
+		# reopening brings the ToDos back
+		first.status = "Open"
+		first.save()
+		self.assertTrue(all(status == "Open" for status in get_todo_statuses(first.name)))
+
+	def test_agent_busy_for_the_whole_appointment_duration(self):
+		self._configure_booking_settings()
+		slot = slot_on(3, 11)
+		appointment = create_test_appointment(customer_email="busy_agent@example.com", scheduled_time=slot)
+		assignee = get_assignees(appointment.name)[0]
+
+		# busy anywhere inside the 30-minute appointment window, free right after it
+		self.assertFalse(_check_agent_availability(assignee, slot))
+		self.assertFalse(_check_agent_availability(assignee, slot + datetime.timedelta(minutes=15)))
+		self.assertTrue(_check_agent_availability(assignee, slot + datetime.timedelta(minutes=30)))
+
+	def test_closed_appointment_closes_calendar_event(self):
+		self.test_appointment.status = "Closed"
+		self.test_appointment.save()
+		event_status = frappe.db.get_value("Event", self.test_appointment.calendar_event, "status")
+		self.assertEqual(event_status, "Closed")
+
+		# reopening the appointment reopens the calendar event
+		self.test_appointment.status = "Open"
+		self.test_appointment.save()
+		event_status = frappe.db.get_value("Event", self.test_appointment.calendar_event, "status")
+		self.assertEqual(event_status, "Open")
+
+	def test_deleting_appointment_deletes_calendar_event(self):
+		event = self.test_appointment.calendar_event
+		self.assertTrue(frappe.db.exists("Event", event))
+
+		frappe.delete_doc("Appointment", self.test_appointment.name)
+
+		self.assertFalse(frappe.db.exists("Event", event))
+
+	def test_backdated_appointment_is_rejected(self):
+		with self.assertRaises(frappe.ValidationError):
+			create_test_appointment(
+				customer_email="backdated@example.com",
+				scheduled_time=add_to_date(now_datetime(), hours=-1),
+			)
 
 	def test_booking_beyond_advance_window_is_rejected(self):
-		frappe.db.set_single_value("Appointment Booking Settings", "advance_booking_days", 7)
+		self._configure_booking_settings()
+		set_booking_setting("advance_booking_days", 7)
 
 		# within the advance booking window - allowed
 		within = create_test_appointment(
-			customer_email="advance_within@example.com",
-			scheduled_time=add_to_date(now_datetime(), days=5),
+			customer_email="advance_within@example.com", scheduled_time=slot_on(5, 10)
 		)
 		self.assertTrue(frappe.db.exists("Appointment", within.name))
 
 		# beyond the advance booking window - rejected
 		with self.assertRaises(frappe.ValidationError):
 			create_test_appointment(
-				customer_email="advance_beyond@example.com",
-				scheduled_time=add_to_date(now_datetime(), days=8),
+				customer_email="advance_beyond@example.com", scheduled_time=slot_on(8, 10)
 			)
 
-	def test_overlapping_time_slot_capacity(self):
-		frappe.db.set_single_value("Appointment Booking Settings", "number_of_agents", 1)
-		frappe.db.set_single_value("Appointment Booking Settings", "appointment_duration", 30)
-
-		slot = datetime.datetime.combine(
-			datetime.date.today() + datetime.timedelta(days=1), datetime.time(10, 0)
+	def test_appointment_on_holiday_is_rejected(self):
+		holiday = add_to_date(getdate(), days=3)
+		self._configure_booking_settings(
+			holiday_dates=[{"holiday_date": holiday, "description": "Test Holiday"}]
 		)
+
+		with self.assertRaises(frappe.ValidationError):
+			create_test_appointment(customer_email="on_holiday@example.com", scheduled_time=slot_on(3, 10))
+
+		# the day after the holiday is bookable
+		after_holiday = create_test_appointment(
+			customer_email="after_holiday@example.com", scheduled_time=slot_on(4, 10)
+		)
+		self.assertTrue(frappe.db.exists("Appointment", after_holiday.name))
+
+	def test_appointment_outside_slot_timing_is_rejected(self):
+		self._configure_booking_settings()
+
+		# before the slot opens
+		with self.assertRaises(frappe.ValidationError):
+			create_test_appointment(customer_email="before_opening@example.com", scheduled_time=slot_on(2, 8))
+
+		# starts within the slot but would end after it closes
+		with self.assertRaises(frappe.ValidationError):
+			create_test_appointment(
+				customer_email="past_closing@example.com", scheduled_time=slot_on(2, 16, 45)
+			)
+
+		# within the slot timings
+		within = create_test_appointment(
+			customer_email="within_slot@example.com", scheduled_time=slot_on(2, 10)
+		)
+		self.assertTrue(frappe.db.exists("Appointment", within.name))
+
+	def test_overlapping_time_slot_capacity(self):
+		set_booking_setting("number_of_agents", 1)
+		set_booking_setting("appointment_duration", 30)
+
+		slot = slot_on(1, 10)
 		first = create_test_appointment(customer_email="slot_first@example.com", scheduled_time=slot)
 
 		# a booking starting inside the first appointment's duration is rejected
@@ -285,78 +540,6 @@ class TestAppointment(ERPNextTestSuite):
 		first.status = "Closed"
 		first.save()
 		after_cancellation = create_test_appointment(
-			customer_email="after_cancellation@example.com",
-			scheduled_time=slot,
+			customer_email="after_cancellation@example.com", scheduled_time=slot
 		)
 		self.assertTrue(frappe.db.exists("Appointment", after_cancellation.name))
-
-	def _configure_slot_settings(self, holiday_dates=None):
-		holiday_list = make_holiday_list(
-			"_Test Appointment Holiday List",
-			from_date=getdate(),
-			to_date=add_to_date(getdate(), days=60),
-			holiday_dates=holiday_dates or [],
-		)
-
-		settings = frappe.get_doc("Appointment Booking Settings")
-		settings.enable_scheduling = 1
-		settings.appointment_duration = 30
-		settings.advance_booking_days = 30
-		settings.holiday_list = holiday_list.name
-		settings.set("agent_list", [])
-		settings.append("agent_list", {"user": "Administrator"})
-		settings.set("availability_of_slots", [])
-		for day in ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]:
-			settings.append(
-				"availability_of_slots", {"day_of_week": day, "from_time": "09:00:00", "to_time": "17:00:00"}
-			)
-		settings.save()
-
-	def test_backdated_appointment_is_rejected(self):
-		with self.assertRaises(frappe.ValidationError):
-			create_test_appointment(
-				customer_email="backdated@example.com",
-				scheduled_time=add_to_date(now_datetime(), hours=-1),
-			)
-
-	def test_appointment_on_holiday_is_rejected(self):
-		holiday = add_to_date(getdate(), days=3)
-		self._configure_slot_settings(
-			holiday_dates=[{"holiday_date": holiday, "description": "Test Holiday"}]
-		)
-
-		scheduled = datetime.datetime.combine(holiday, datetime.time(10, 0))
-		with self.assertRaises(frappe.ValidationError):
-			create_test_appointment(customer_email="on_holiday@example.com", scheduled_time=scheduled)
-
-		# the day after the holiday is bookable
-		after_holiday = create_test_appointment(
-			customer_email="after_holiday@example.com",
-			scheduled_time=scheduled + datetime.timedelta(days=1),
-		)
-		self.assertTrue(frappe.db.exists("Appointment", after_holiday.name))
-
-	def test_appointment_outside_slot_timing_is_rejected(self):
-		self._configure_slot_settings()
-		day = datetime.date.today() + datetime.timedelta(days=2)
-
-		# before the slot opens
-		with self.assertRaises(frappe.ValidationError):
-			create_test_appointment(
-				customer_email="before_opening@example.com",
-				scheduled_time=datetime.datetime.combine(day, datetime.time(8, 0)),
-			)
-
-		# starts within the slot but would end after it closes
-		with self.assertRaises(frappe.ValidationError):
-			create_test_appointment(
-				customer_email="past_closing@example.com",
-				scheduled_time=datetime.datetime.combine(day, datetime.time(16, 45)),
-			)
-
-		# within the slot timings
-		within = create_test_appointment(
-			customer_email="within_slot@example.com",
-			scheduled_time=datetime.datetime.combine(day, datetime.time(10, 0)),
-		)
-		self.assertTrue(frappe.db.exists("Appointment", within.name))
