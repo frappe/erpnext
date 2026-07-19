@@ -222,6 +222,21 @@ class TestAppointment(ERPNextTestSuite):
 		# Open appointments are never touched, regardless of age
 		self.assertTrue(frappe.db.exists("Appointment", self.test_appointment.name))
 
+	def test_cleanup_skipped_when_expiry_not_configured(self):
+		appointment = self._create_portal_appointment("portal_visitor_no_expiry@example.com")
+		frappe.db.set_value(
+			"Appointment",
+			appointment.name,
+			"creation",
+			add_to_date(now_datetime(), minutes=-5),
+			update_modified=False,
+		)
+		frappe.db.set_single_value("Appointment Booking Settings", "verification_link_expiry_duration", 0)
+
+		delete_expired_unverified_appointments()
+
+		self.assertTrue(frappe.db.exists("Appointment", appointment.name))
+
 	def test_booking_beyond_advance_window_is_rejected(self):
 		frappe.db.set_single_value("Appointment Booking Settings", "advance_booking_days", 7)
 
@@ -265,6 +280,15 @@ class TestAppointment(ERPNextTestSuite):
 			scheduled_time=slot + datetime.timedelta(minutes=40),
 		)
 		self.assertTrue(frappe.db.exists("Appointment", adjacent.name))
+
+		# a closed (cancelled) appointment frees its slot
+		first.status = "Closed"
+		first.save()
+		after_cancellation = create_test_appointment(
+			customer_email="after_cancellation@example.com",
+			scheduled_time=slot,
+		)
+		self.assertTrue(frappe.db.exists("Appointment", after_cancellation.name))
 
 	def _configure_slot_settings(self, holiday_dates=None):
 		holiday_list = make_holiday_list(

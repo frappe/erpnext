@@ -44,7 +44,7 @@ class Appointment(Document):
 	def scheduled_time_intact(self) -> bool:
 		"""
 		Returns False for new Appointment and `scheduled_time` changed for existing documents.
-		Returns True for existing Appointment where the `scheduled_time` has been changed.
+		Returns True for existing Appointment where the `scheduled_time` has NOT been changed.
 		"""
 		old_doc = self.get_doc_before_save()
 
@@ -115,6 +115,7 @@ class Appointment(Document):
 				["scheduled_time", ">", add_to_date(self.scheduled_time, minutes=-appointment_duration)],
 				["scheduled_time", "<", add_to_date(self.scheduled_time, minutes=appointment_duration)],
 				["name", "!=", self.name],
+				["status", "!=", "Closed"],
 			],
 		)
 
@@ -322,7 +323,11 @@ def get_verification_link_expiry():
 
 def delete_expired_unverified_appointments():
 	"""Delete Unverified appointments whose verification link has expired."""
-	cutoff = add_to_date(now_datetime(), minutes=-get_verification_link_expiry())
+	expiry = get_verification_link_expiry()
+	if not expiry:
+		return
+
+	cutoff = add_to_date(now_datetime(), minutes=-expiry)
 	expired_appointments = frappe.get_all(
 		"Appointment",
 		filters={"status": "Unverified", "creation": ("<", cutoff)},
