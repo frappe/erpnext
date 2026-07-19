@@ -375,12 +375,16 @@ class QualityInspection(UnitReadingsMixin, Document):
 			self.batch_no = frappe.db.get_value("Quality Control Lot", self.reference_name, "batch_no")
 
 	def validate_serials_recorded(self):
-		"""A serialized verdict names the units it sampled — proof one was taken.
+		"""A serialized sample names the units it took — proof one was taken.
 
-		Custody precedes stock identity and stays exempt, and a transaction row
-		whose serials are born at submission has nothing to name yet (its field
-		is cleared). Everywhere else, an unnamed serialized verdict is refused.
+		Each Quantity is exempt: its identity lives per unit, where the unit
+		machinery makes its own demands and a manual override stands on the
+		inspector. Custody precedes stock identity and stays exempt, and a
+		transaction row whose serials are born at submission has nothing to
+		name yet (its field is cleared).
 		"""
+		if self.inspection_basis == "Each Quantity":
+			return
 		if not self.item_code or self.reference_type == "Goods Inward Note":
 			return
 		if not frappe.get_cached_value("Item", self.item_code, "has_serial_no"):
