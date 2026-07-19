@@ -57,6 +57,9 @@ class BOMConfigurator {
 			breadcrumb: "Manufacturing",
 			get_tree_nodes: "erpnext.manufacturing.doctype.bom_creator.bom_creator.get_children",
 			root_label: this.frm.doc.item_code,
+			// The root stands for the BOM Creator itself: its children are the rows
+			// that reference the document rather than another row.
+			root_node_id: this.frm.doc.name,
 			disable_add_node: true,
 			get_tree_root: false,
 			show_expand_all: false,

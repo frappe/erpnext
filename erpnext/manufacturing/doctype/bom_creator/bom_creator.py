@@ -588,15 +588,21 @@ def get_children(doctype: str | None = None, parent: str | None = None, **kwargs
 		"is_subcontracted",
 	]
 
-	# The same item can be used as a sub-assembly at several places in the tree, so
-	# children must be resolved against the specific row being expanded
-	# (`fg_reference_id`) rather than against the item code alone. The root node has
-	# no row of its own; its children point at the BOM Creator document itself.
 	query_filters = {
 		"fg_item": parent,
 		"parent": kwargs.parent_id,
-		"fg_reference_id": kwargs.parent_node_id or kwargs.parent_id,
 	}
+
+	# The same item can be used as a sub-assembly at several places in the tree, so
+	# children must be resolved against the specific row being expanded rather than
+	# against the item code alone. The tree sends that row as `parent_node_id`; the
+	# root node reports the BOM Creator document itself.
+	#
+	# An older frontend does not send it at all. Filtering on the document name in
+	# that case would return nothing below the first level, which is a worse failure
+	# than the duplicate branches this fixes, so fall back to the previous behaviour.
+	if kwargs.parent_node_id:
+		query_filters["fg_reference_id"] = kwargs.parent_node_id
 
 	if kwargs.name:
 		query_filters["name"] = kwargs.name
