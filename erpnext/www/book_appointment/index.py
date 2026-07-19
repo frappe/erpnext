@@ -19,7 +19,7 @@ def get_context(context):
 
 
 def handle_appointment_booking_disabled():
-	if not frappe.get_single_value("Appointment Booking Settings", "enable_scheduling"):
+	if not frappe.get_single_value("Appointment Booking Settings", "enable_appointment_portal"):
 		frappe.redirect_to_message(
 			_("Appointment Scheduling Disabled"),
 			_("Appointment Scheduling has been disabled for this site"),
@@ -151,7 +151,11 @@ def convert_to_system_timezone(guest_tz, datetimeobject):
 
 
 def check_availabilty(timeslot, settings):
-	return frappe.db.count("Appointment", {"scheduled_time": timeslot}) < settings.number_of_agents
+	from erpnext.crm.doctype.appointment.appointment import count_overlapping_appointments
+
+	# mirror the capacity validation so the portal never offers a slot
+	# the server would reject, and frees slots of cancelled appointments
+	return count_overlapping_appointments(timeslot, settings.appointment_duration) < settings.number_of_agents
 
 
 def _is_holiday(date, holiday_list):
