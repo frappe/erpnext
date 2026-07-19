@@ -9,7 +9,7 @@ from frappe import _
 from frappe.desk.form.assign_to import add as add_assignment
 from frappe.model.document import Document
 from frappe.share import add_docshare
-from frappe.utils import get_url, getdate, now
+from frappe.utils import add_to_date, cint, get_url, getdate, now, now_datetime
 from frappe.utils.verified_command import get_signed_params
 
 
@@ -83,6 +83,7 @@ class Appointment(Document):
 			"link": verify_url,
 			"site_url": frappe.utils.get_url(),
 			"full_name": self.customer_name,
+			"expiry_minutes": get_verification_link_expiry(),
 		}
 		frappe.sendmail(
 			recipients=[self.customer_email],
@@ -238,7 +239,11 @@ class Appointment(Document):
 
 	def _get_verify_url(self):
 		verify_route = "/book_appointment/verify"
-		params = {"email": self.customer_email, "appointment": self.name}
+		params = {
+			"email": self.customer_email,
+			"appointment": self.name,
+			"valid_till": add_to_date(now_datetime(), minutes=get_verification_link_expiry()),
+		}
 		return get_url(verify_route + "?" + get_signed_params(params))
 
 	def assign_agent(self, agent):
@@ -246,6 +251,23 @@ class Appointment(Document):
 			add_docshare(self.doctype, self.name, agent, flags={"ignore_share_permission": True})
 
 		add_assignment({"doctype": self.doctype, "name": self.name, "assign_to": [agent]})
+
+
+def get_verification_link_expiry():
+	"""Verification link expiry window in minutes."""
+	return cint(frappe.get_single_value("Appointment Booking Settings", "verification_link_expiry_duration"))
+
+
+def delete_expired_unverified_appointments():
+	"""Delete Unverified appointments whose verification link has expired."""
+	cutoff = add_to_date(now_datetime(), minutes=-get_verification_link_expiry())
+	expired_appointments = frappe.get_all(
+		"Appointment",
+		filters={"status": "Unverified", "creation": ("<", cutoff)},
+		pluck="name",
+	)
+	for name in expired_appointments:
+		frappe.delete_doc("Appointment", name, ignore_permissions=True)
 
 
 def _get_agents_sorted_by_asc_workload(date):
