@@ -29,7 +29,7 @@ class TestBin(ERPNextTestSuite):
 	def test_recalculate_values(self):
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
-		item_code = make_item("_TestBinRecalculateValues").name
+		item_code = make_item().name
 		warehouse = "_Test Warehouse - _TC"
 		make_stock_entry(item_code=item_code, target=warehouse, qty=10, rate=100)
 
@@ -43,7 +43,7 @@ class TestBin(ERPNextTestSuite):
 		self.assertEqual(bin.stock_value, 1000)
 
 	def test_recalculate_values_without_sle(self):
-		item_code = make_item("_TestBinRecalculateValuesNoSLE").name
+		item_code = make_item().name
 		warehouse = "_Test Warehouse - _TC"
 
 		bin = _create_bin(item_code, warehouse)

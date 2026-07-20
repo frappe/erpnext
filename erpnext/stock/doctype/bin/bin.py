@@ -50,6 +50,15 @@ class Bin(Document):
 		self.actual_qty = last_sle.qty_after_transaction
 		self.valuation_rate = last_sle.valuation_rate
 		self.stock_value = last_sle.stock_value
+
+		from erpnext.stock.utils import get_valuation_method
+
+		if get_valuation_method(self.item_code) == "Standard Cost":
+			from erpnext.stock.doctype.item_standard_cost.item_standard_cost import get_item_standard_rate
+
+			self.stock_value = flt(self.actual_qty) * flt(
+				get_item_standard_rate(self.item_code, self.company)
+			)
 		self.planned_qty = get_planned_qty(self.item_code, self.warehouse)
 		self.indented_qty = get_indented_qty(self.item_code, self.warehouse)
 		self.ordered_qty = get_ordered_qty(self.item_code, self.warehouse)
