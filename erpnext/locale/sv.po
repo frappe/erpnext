@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-07-19 10:04+0000\n"
-"PO-Revision-Date: 2026-07-19 13:56\n"
+"PO-Revision-Date: 2026-07-20 14:08\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -942,7 +942,7 @@ msgstr "<pre><h5>Meddelande Exempel</h5>\n\n"
 #. Header text in the Accounting Workspace
 #: erpnext/accounts/workspace/accounting/accounting.json
 msgid "<span class=\"h4\"><b>Accounting Overview</b></span>"
-msgstr ""
+msgstr "<span class=\"h4\"><b>Bokföring Översikt</b></span>"
 
 #. Header text in the Stock Workspace
 #: erpnext/stock/workspace/stock/stock.json
@@ -1627,7 +1627,7 @@ msgstr "Konto för att registrera övriga inköp kostnader som frakt eller tull"
 #. 'Item Default'
 #: erpnext/stock/doctype/item_default/item_default.json
 msgid "Account to track value added to stock via Stock Entry, Stock Reconciliation or Landed Cost Voucher"
-msgstr ""
+msgstr "Konto för att spåra mervärde som tillförts lager via Lager Post, Lager Avstämning eller Landad Kostnad Verifikat"
 
 #. Description of the 'COGS Account' (Link) field in DocType 'Item Default'
 #: erpnext/stock/doctype/item_default/item_default.json
@@ -2191,7 +2191,7 @@ msgstr "Skulder"
 #. Label of a chart in the Accounting Workspace
 #: erpnext/accounts/workspace/accounting/accounting.json
 msgid "Accounts Payable Ageing"
-msgstr ""
+msgstr "Leverantörsskulder Åldrande"
 
 #. Name of a report
 #: erpnext/accounts/report/accounts_payable/accounts_payable.js:191
@@ -2233,7 +2233,7 @@ msgstr "Fordringar/Skulder kommentar längd"
 #. Label of a chart in the Accounting Workspace
 #: erpnext/accounts/workspace/accounting/accounting.json
 msgid "Accounts Receivable Ageing"
-msgstr ""
+msgstr "Kundfordringar Åldrande"
 
 #. Label of the accounts_receivable_credit (Link) field in DocType 'Invoice
 #. Discounting'
@@ -4569,11 +4569,11 @@ msgstr "Tillåt överföring av råmaterial även efter att Erfordrad Kvantitet 
 #: erpnext/selling/doctype/customer/customer.json
 #: erpnext/stock/doctype/item/item.json
 msgid "Allowed Companies"
-msgstr ""
+msgstr "Tillåtna Bolag"
 
 #: erpnext/stock/doctype/company_restriction/company_restriction.py:74
 msgid "Allowed Companies is required when Restrict to Companies is checked"
-msgstr ""
+msgstr "Tillåtna Bolag erfordras när Begränsa till Bolag  är aktiverad"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/allowed_dimension/allowed_dimension.json
@@ -8755,7 +8755,7 @@ msgstr "Spärra Leverantör"
 #. DocType 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Block submitting a new Sales Invoice when the customer's overdue amount exceeds the Overdue Billing Threshold set on the customer."
-msgstr ""
+msgstr "Förhindra att ny Försäljning Faktura godkänns när kundens förfallna belopp överstiger Förfallen Faktura Tröskel angiven för kund."
 
 #. Description of the 'Is Frozen' (Check) field in DocType 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
@@ -8838,7 +8838,7 @@ msgstr "Bokför Uppskjutna poster baserat på"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Book Stock Expense GL Entries"
-msgstr ""
+msgstr "Bokför Lager Kostnad Poster"
 
 #: erpnext/www/book_appointment/index.html:15
 msgid "Book an appointment"
@@ -8871,7 +8871,7 @@ msgstr "Bokförd Fast Tillgång"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Books Purchase Expense and Expenses Added To Stock account pairs against stock value. On enabling this, the accounts become mandatory in Company or Item Defaults for Purchase Receipt, Purchase Invoice, Stock Entry, Stock Reconciliation and Landed Cost Voucher"
-msgstr ""
+msgstr "Kontopar Inköp Kostnad och Kostnader Lagda till Lager motställs lager värde. När detta aktiveras erfordras kontona i Bolag eller Artikel Standard för Inköp Följesedel, Inköp Faktura, Lager Post, Lager Avstämning och Landad Kostnad Verifikat"
 
 #: erpnext/accounts/services/gl_validator.py:143
 msgid "Books have been closed until the period ending on {0}"
@@ -11868,7 +11868,7 @@ msgstr "Bolag ej Länkad"
 #. Name of a DocType
 #: erpnext/stock/doctype/company_restriction/company_restriction.json
 msgid "Company Restriction"
-msgstr ""
+msgstr "Bolag Begränsning"
 
 #. Label of the company_restrictions_section (Section Break) field in DocType
 #. 'Supplier'
@@ -11880,7 +11880,7 @@ msgstr ""
 #: erpnext/selling/doctype/customer/customer.json
 #: erpnext/stock/doctype/item/item.json
 msgid "Company Restrictions"
-msgstr ""
+msgstr "Bolag Begränsningar"
 
 #. Label of the shipping_address (Link) field in DocType 'Request for
 #. Quotation'
@@ -13164,7 +13164,7 @@ msgstr "Resultat Enhet Nummer"
 
 #: erpnext/accounts/doctype/dunning_type/dunning_type.py:122
 msgid "Cost Center Validation Error"
-msgstr ""
+msgstr "Resultat Enhet Validering Fel"
 
 #. Label of a Card Break in the Invoicing Workspace
 #: erpnext/accounts/workspace/invoicing/invoicing.json
@@ -14080,7 +14080,7 @@ msgstr "Kredit"
 #: erpnext/selling/doctype/customer/customer.json
 #: erpnext/setup/doctype/customer_group/customer_group.json
 msgid "Credit & Overdue Limits"
-msgstr ""
+msgstr "Kredit & Förfallna Gränser"
 
 #: erpnext/accounts/report/general_ledger/general_ledger.py:744
 msgid "Credit (Transaction)"
@@ -15292,7 +15292,7 @@ msgstr "Kund {0} tillhör inte Projekt {1}"
 
 #: erpnext/selling/doctype/customer/customer.py:605
 msgid "Customer {0} has an overdue billing limit. Overdue amount {1} exceeds the allowed threshold {2}."
-msgstr ""
+msgstr "Kund {0} har överskridit förfallen faktura gräns. Förfallen belopp {1} överskrider tillåten gräns {2}."
 
 #. Label of the customer_item_code (Data) field in DocType 'POS Invoice Item'
 #. Label of the customer_item_code (Data) field in DocType 'Sales Invoice Item'
@@ -15988,7 +15988,7 @@ msgstr "Standard Beräknad Pris"
 #. Label of the country (Link) field in DocType 'Global Defaults'
 #: erpnext/setup/doctype/global_defaults/global_defaults.json
 msgid "Default Country"
-msgstr ""
+msgstr "Standard Land"
 
 #. Label of the default_currency (Link) field in DocType 'Company'
 #. Label of the default_currency (Link) field in DocType 'Global Defaults'
@@ -18383,11 +18383,11 @@ msgstr "Påminnelse Brev Text"
 
 #: erpnext/accounts/doctype/dunning/dunning.py:184
 msgid "Dunning Letter for Dunning Type {0} in language '{1}' not found."
-msgstr ""
+msgstr "Påminnelse Brev för Påminnelse Typ {0} på ”{1}” hittades inte."
 
 #: erpnext/accounts/doctype/dunning/dunning.py:188
 msgid "Dunning Letter for Dunning Type {0} not found."
-msgstr ""
+msgstr "Påminnelse Brev för Påminnelse Typ {0} hittades inte."
 
 #. Label of the dunning_level (Int) field in DocType 'Overdue Payment'
 #: erpnext/accounts/doctype/overdue_payment/overdue_payment.json
@@ -18478,7 +18478,7 @@ msgstr "Kopiera Artikel Grupp hittad i Artikel Grupp Tabell"
 
 #: erpnext/accounts/doctype/dunning_type/dunning_type.py:133
 msgid "Duplicate languages found on Dunning Letter Text. Keep only one of them."
-msgstr ""
+msgstr "Det finns flera språk i påminnelse brev. Behåll endast ett språk."
 
 #: erpnext/projects/doctype/project/project.js:186
 msgid "Duplicate project has been created"
@@ -19174,7 +19174,7 @@ msgstr "Aktivera skapande av affärsmöjligheter från Kontakta Oss"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Enable Overdue Billing Threshold"
-msgstr ""
+msgstr "Aktivera Försenad Faktura Gräns Tröskel"
 
 #. Label of the enable_parallel_reposting (Check) field in DocType 'Stock
 #. Reposting Settings'
@@ -20254,7 +20254,7 @@ msgstr "Kostnader"
 #: erpnext/setup/doctype/company/company.json
 #: erpnext/stock/doctype/item_default/item_default.json
 msgid "Expenses Added To Stock Account"
-msgstr ""
+msgstr "Kostnader Tillagda till Lager Konto"
 
 #. Label of the expenses_added_to_stock_contra_account (Link) field in DocType
 #. 'Company'
@@ -20265,11 +20265,11 @@ msgstr ""
 #: erpnext/setup/doctype/company/company.json
 #: erpnext/stock/doctype/item_default/item_default.json
 msgid "Expenses Added To Stock Contra Account"
-msgstr ""
+msgstr "Kostnader Tillagda till Lager Motkonto"
 
 #: erpnext/stock/services/base_stock_gl_composer.py:217
 msgid "Expenses Added To Stock for Item {0}"
-msgstr ""
+msgstr "Kostnader Tillagda i Lager för Artikel {0}"
 
 #. Option for the 'Account Type' (Select) field in DocType 'Account'
 #: erpnext/accounts/doctype/account/account.json
@@ -23759,18 +23759,18 @@ msgstr "Om vald, kommer moms belopp anses vara inkluderad i Utskrift Pris / Utsk
 #. 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
 msgid "If checked, this Customer is only available for transactions in the companies listed below."
-msgstr ""
+msgstr "Om aktiverad, denna Kund är endast tillgänglig för transaktioner i bolag som anges nedan."
 
 #. Description of the 'Restrict to Companies' (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "If checked, this Item is only available for transactions in the companies listed below."
-msgstr ""
+msgstr "Om aktiverad, denna Artikel är endast tillgänglig för transaktioner i bolag som anges nedan."
 
 #. Description of the 'Restrict to Companies' (Check) field in DocType
 #. 'Supplier'
 #: erpnext/buying/doctype/supplier/supplier.json
 msgid "If checked, this Supplier is only available for transactions in the companies listed below."
-msgstr ""
+msgstr "Om aktiverad, denna Leverantör är endast tillgänglig för transaktioner i bolag som anges nedan."
 
 #. Description of the 'Delivered by Supplier (Drop Ship)' (Check) field in
 #. DocType 'Item'
@@ -24918,7 +24918,7 @@ msgstr "Intäkt Konto"
 
 #: erpnext/accounts/doctype/dunning_type/dunning_type.py:86
 msgid "Income Account Validation Error"
-msgstr ""
+msgstr "Intäkt Konto Validering Fel"
 
 #. Label of the income_and_expense_account (Section Break) field in DocType
 #. 'POS Profile'
@@ -28158,7 +28158,7 @@ msgstr "Artikel pris har angivits till noll eftersom Tillåt Noll Värdering Gra
 
 #: erpnext/stock/doctype/material_request/material_request.py:231
 msgid "Item rates have been updated based on the selected Buying Price List {0}"
-msgstr ""
+msgstr "Artikel priser är uppdaterade baserat på vald Inköp Prislista {0}"
 
 #. Label of the item (Link) field in DocType 'BOM'
 #. Label of the finished_good (Link) field in DocType 'Job Card'
@@ -32642,7 +32642,7 @@ msgstr "Ny Försäljning Faktura"
 #. 'Customer Credit Limit'
 #: erpnext/selling/doctype/customer_credit_limit/customer_credit_limit.json
 msgid "New Sales Invoices are blocked when the customer's overdue amount exceeds this. Requires 'Enable Overdue Billing Threshold' in Accounts Settings."
-msgstr ""
+msgstr "Nya Försäljning Fakturor spärras när kundens förfallna belopp överstiger detta. Erfordrar \"Aktivera Förfallen Faktura Tröskelvärde\" i Bokföring Inställningar."
 
 #. Label of the sales_order (Check) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
@@ -33848,7 +33848,7 @@ msgstr "Vid utvidgning av rad i Artiklar att Producera Tabell, kommer du att se 
 #: erpnext/projects/doctype/project/project.json
 #: erpnext/projects/doctype/project/project_list.js:8
 msgid "On hold"
-msgstr ""
+msgstr "Parkerad"
 
 #. Description of the 'Excluded Fee' (Currency) field in DocType 'Bank
 #. Transaction'
@@ -35182,13 +35182,13 @@ msgstr "Försenad"
 
 #: erpnext/selling/doctype/customer/customer.py:612
 msgid "Overdue Billing Limit Crossed"
-msgstr ""
+msgstr "Försenad Faktura Gräns Överskriden"
 
 #. Label of the overdue_billing_threshold (Currency) field in DocType 'Customer
 #. Credit Limit'
 #: erpnext/selling/doctype/customer_credit_limit/customer_credit_limit.json
 msgid "Overdue Billing Threshold"
-msgstr ""
+msgstr "Försenad Faktura Gräns Tröskel"
 
 #. Label of the overdue_days (Data) field in DocType 'Overdue Payment'
 #: erpnext/accounts/doctype/overdue_payment/overdue_payment.json
@@ -39303,7 +39303,7 @@ msgstr "Ange {0} i Stycklista {1}"
 #: erpnext/controllers/buying_controller.py:347
 #: erpnext/stock/services/base_stock_gl_composer.py:209
 msgid "Please set {0} in Company {1} or in the Item Defaults of Item {2}"
-msgstr ""
+msgstr "Ange {0} i {1} eller i Artikel Standard Inställningar {2}"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:1147
 msgid "Please set {0} in Company {1} to account for Exchange Gain / Loss"
@@ -45796,7 +45796,7 @@ msgstr "Begränsa Artiklar Baserat På"
 #: erpnext/selling/doctype/customer/customer.json
 #: erpnext/stock/doctype/item/item.json
 msgid "Restrict to Companies"
-msgstr ""
+msgstr "Begränsa till Bolag"
 
 #. Label of the section_break_6 (Section Break) field in DocType 'Shipping
 #. Rule'
@@ -46270,7 +46270,7 @@ msgstr "Roll Godkänd att Åsidosätta Kredit Gräns"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Role allowed to bypass overdue billing limit"
-msgstr ""
+msgstr "Roll som har behörighet att kringgå förfallen faktura gräns"
 
 #. Description of the 'Exempted Role' (Link) field in DocType 'Accounting
 #. Period'
@@ -52598,13 +52598,13 @@ msgstr "Lager Post {0} ej godkänd"
 #. 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Stock Expense"
-msgstr ""
+msgstr "Lager Kostnad"
 
 #. Label of the stock_expense_section (Section Break) field in DocType
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Stock Expense Accounting"
-msgstr ""
+msgstr "Lager Kostnad Bokföring"
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:87
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:147
@@ -55914,7 +55914,7 @@ msgstr "Bank konto är inte bolag konto. Välj bolag konto"
 
 #: erpnext/stock/services/serial_batch_bundle_service.py:655
 msgid "The batch {0} is reserved for {1} in the warehouse {2} and the remaining quantity is not enough to cover the reservations. So, cannot proceed with the {3} {4}."
-msgstr ""
+msgstr "Parti {0} är reserverad för {1} i lager {2} och återstående kvantitet räcker inte för att täcka reservationer. Därför kan man inte fortsätta med {3} {4}."
 
 #: erpnext/regional/report/vat_audit_report/vat_audit_report.py:41
 msgid "The company {0} is not in South Africa. VAT Audit Report is only available for companies in South Africa."
@@ -58655,7 +58655,7 @@ msgstr "Transaktioner mot bolag finns redan! Kontoplan kan endast importeras fö
 #. 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
 msgid "Transactions are blocked when the outstanding balance exceeds the credit limit. When the overdue billing setting is enabled, new invoices are also blocked when the customer's overdue amount exceeds the overdue billing threshold."
-msgstr ""
+msgstr "Transaktioner blockeras när det utestående saldo överstiger kredit gräns. När förfallna fakturering är aktiverad blockeras även nya fakturor när kundens förfallna belopp överstiger gräns för förfallen fakturering."
 
 #: banking/src/components/features/BankStatementImporter/CSV/StatementDetails.tsx:239
 msgid "Transactions to be imported into the system"
@@ -60106,7 +60106,7 @@ msgstr "Används för artiklar värderade till Standard Kostnad: skillnaden mell
 #. DocType 'Item Default'
 #: erpnext/stock/doctype/item_default/item_default.json
 msgid "Used to balance the books when recording expenses added to stock"
-msgstr ""
+msgstr "Används för att balansera bokföringen vid bokföring av kostnader som tillförs lager"
 
 #. Description of the 'Purchase Expense Contra Account' (Link) field in DocType
 #. 'Item Default'
@@ -60218,7 +60218,7 @@ msgstr "Användare med denna roll tillåts att överleverera/ta emot ordrar öve
 #. field in DocType 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Users with this role can still submit invoices for customers over their overdue billing threshold."
-msgstr ""
+msgstr "Användare med denna roll kan fortfarande godkänna fakturor till kunder vars skulder överskrider tröskelvärde för förfallna fakturor."
 
 #. Description of the 'Role to Notify on Depreciation Failure' (Link) field in
 #. DocType 'Accounts Settings'
@@ -62492,7 +62492,7 @@ msgstr "Du är inte behörig att ange Stängd värde"
 
 #: erpnext/stock/doctype/company_restriction/company_restriction.py:93
 msgid "You are not permitted to add or remove Company {0} in Allowed Companies"
-msgstr ""
+msgstr "Du har inte tillåtelse att lägga till eller ta bort {0} i Tillåtna Bolag"
 
 #: erpnext/stock/doctype/pick_list/pick_list.py:544
 msgid "You are picking more than required quantity for the item {0}. Check if there is any other pick list created for the sales order {1}."
@@ -63319,11 +63319,11 @@ msgstr "{0} tillhör inte {1}."
 
 #: erpnext/accounts/doctype/dunning_type/dunning_type.py:100
 msgid "{0} doesn't belong to Company {1}. Please select a Cost Center that belongs to Company {1}."
-msgstr ""
+msgstr "{0} tillhör inte {1}. Välj Resultat Enhet som tillhör {1}."
 
 #: erpnext/accounts/doctype/dunning_type/dunning_type.py:57
 msgid "{0} doesn't belong to Company {1}. Please select an Income Account that belongs to Company {1}."
-msgstr ""
+msgstr "{0} tillhör inte {1}. Välj Intäkt Konto som tillhör {1}."
 
 #: erpnext/public/js/templates/shop_floor_template.html:880
 msgid "{0} draft job cards awaiting submission"
@@ -63377,11 +63377,11 @@ msgstr "{0} är en undertabell och kommer att tas bort automatiskt tillsammans m
 
 #: erpnext/accounts/doctype/dunning_type/dunning_type.py:114
 msgid "{0} is a group Cost Center. Please select a non-group Cost Center."
-msgstr ""
+msgstr "{0} är Resultat Enhet Grupp. Välj Resultat Enhet som inte tillhör någon grupp."
 
 #: erpnext/accounts/doctype/dunning_type/dunning_type.py:78
 msgid "{0} is a group account. Please select a non-group Income Account."
-msgstr ""
+msgstr "{0} är grupp konto. Välj Intäkt Konto som inte tillhör någon grupp."
 
 #: erpnext/accounts/doctype/pos_profile/pos_profile.py:95
 msgid "{0} is a mandatory Accounting Dimension. <br>Please set a value for {0} in Accounting Dimensions section."
@@ -63407,11 +63407,11 @@ msgstr "{0} är spärrad så denna transaktion kan inte fortsätta"
 
 #: erpnext/accounts/doctype/dunning_type/dunning_type.py:64
 msgid "{0} is disabled. Please select a valid Income Account."
-msgstr ""
+msgstr "{0} är inaktiverad. Välj giltig Intäkt Konto."
 
 #: erpnext/accounts/doctype/dunning_type/dunning_type.py:107
 msgid "{0} is disabled. Please select an enabled Cost Center."
-msgstr ""
+msgstr "{0} är inaktiverad. Välj Resultat Enhet som är aktiverad."
 
 #: erpnext/assets/doctype/asset/asset.py:514
 msgid "{0} is in Draft. Submit it before creating the Asset."
@@ -63472,7 +63472,7 @@ msgstr "{0} är inte lagd till i tabell"
 
 #: erpnext/accounts/doctype/dunning_type/dunning_type.py:71
 msgid "{0} is not an Income Account. Please select a valid Income Account."
-msgstr ""
+msgstr "{0} är inte Intäkt Konto. Välj giltig Intäkt Konto."
 
 #: erpnext/support/doctype/service_level_agreement/service_level_agreement.py:146
 msgid "{0} is not enabled in {1}"
@@ -63528,7 +63528,7 @@ msgstr "{0} jobbkort väntar Produktion post"
 
 #: erpnext/accounts/doctype/dunning_type/dunning_type.py:144
 msgid "{0} languages are marked as default languages. Please select only one of them."
-msgstr ""
+msgstr "{0} språk är aktiverad som standard språk. Välj endast ett språk."
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.py:160
 msgid "{0} must be a group warehouse."
