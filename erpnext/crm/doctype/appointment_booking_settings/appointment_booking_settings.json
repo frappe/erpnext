@@ -1,48 +1,56 @@
 {
  "actions": [],
+ "allow_bulk_edit": 1,
  "creation": "2019-08-27 10:56:48.309824",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "enable_scheduling",
-  "agent_detail_section",
-  "availability_of_slots",
-  "number_of_agents",
-  "agent_list",
-  "holiday_list",
   "appointment_details_section",
   "appointment_duration",
   "email_reminders",
+  "column_break_ehiq",
+  "agent_list",
+  "number_of_agents",
+  "agent_detail_section",
+  "enable_scheduling",
+  "availability_of_slots",
+  "section_break_bkln",
+  "column_break_alwa",
   "advance_booking_days",
+  "column_break_bspp",
+  "holiday_list",
   "success_details",
-  "success_redirect_url"
+  "enable_appointment_portal",
+  "verification_link_expiry_duration",
+  "column_break_fovk",
+  "success_redirect_url",
+  "action_for_expired_unverified_appointments"
  ],
  "fields": [
   {
+   "depends_on": "eval:doc.enable_scheduling === 1;",
    "fieldname": "availability_of_slots",
    "fieldtype": "Table",
    "label": "Availability Of Slots",
-   "options": "Appointment Booking Slots",
-   "reqd": 1
+   "mandatory_depends_on": "eval:doc.enable_scheduling === 1;",
+   "options": "Appointment Booking Slots"
   },
   {
-   "default": "1",
    "fieldname": "number_of_agents",
    "fieldtype": "Int",
-   "hidden": 1,
    "in_list_view": 1,
    "label": "Number of Concurrent Appointments",
-   "read_only": 1,
-   "reqd": 1
+   "read_only": 1
   },
   {
+   "depends_on": "eval:doc.enable_scheduling === 1;",
    "fieldname": "holiday_list",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Holiday List",
-   "options": "Holiday List",
-   "reqd": 1
+   "mandatory_depends_on": "eval:doc.enable_scheduling === 1;",
+   "options": "Holiday List"
   },
   {
    "default": "60",
@@ -60,29 +68,31 @@
   },
   {
    "default": "7",
+   "depends_on": "eval:doc.enable_scheduling === 1;",
    "fieldname": "advance_booking_days",
    "fieldtype": "Int",
    "label": "Number of days appointments can be booked in advance",
-   "reqd": 1
+   "mandatory_depends_on": "eval:doc.enable_scheduling === 1;"
   },
   {
    "fieldname": "agent_list",
    "fieldtype": "Table MultiSelect",
    "label": "Agents",
-   "options": "Assignment Rule User",
-   "reqd": 1
+   "mandatory_depends_on": "eval:doc.enable_scheduling === 1;",
+   "options": "Assignment Rule User"
   },
   {
    "default": "0",
    "fieldname": "enable_scheduling",
    "fieldtype": "Check",
    "label": "Enable Appointment Scheduling",
-   "reqd": 1
+   "mandatory_depends_on": "eval:doc.enable_appointment_portal === 1;"
   },
   {
    "fieldname": "agent_detail_section",
    "fieldtype": "Section Break",
-   "label": "Agent Details"
+   "hide_border": 1,
+   "label": "Appointment Scheduling"
   },
   {
    "fieldname": "appointment_details_section",
@@ -92,20 +102,68 @@
   {
    "fieldname": "success_details",
    "fieldtype": "Section Break",
-   "label": "Success Settings"
+   "label": "Appointment Booking Portal Settings"
   },
   {
    "description": "Leave blank for home.\nThis is relative to site URL, for example \"about\" will redirect to \"https://yoursitename.com/about\"",
    "fieldname": "success_redirect_url",
    "fieldtype": "Data",
-   "label": "Success Redirect URL"
+   "label": "Success Redirect URL",
+   "permlevel": 1
+  },
+  {
+   "default": "30",
+   "depends_on": "eval: doc.enable_scheduling === 1;",
+   "description": "In Minutes (min: 15 mins, max: 60 mins)",
+   "fieldname": "verification_link_expiry_duration",
+   "fieldtype": "Int",
+   "label": "Verification Link Expiry Duration",
+   "mandatory_depends_on": "eval:doc.enable_appointment_portal === 1;",
+   "max_value": 60.0,
+   "min_value": 15.0,
+   "non_negative": 1,
+   "permlevel": 1
+  },
+  {
+   "fieldname": "column_break_ehiq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_appointment_portal",
+   "fieldtype": "Check",
+   "label": "Enable Appointment Booking Through Portal",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "column_break_fovk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Mark as Closed",
+   "fieldname": "action_for_expired_unverified_appointments",
+   "fieldtype": "Select",
+   "label": "Action for Expired Unverified Appointments",
+   "options": "Mark as Closed\nDelete Permanently",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "section_break_bkln",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_alwa",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_bspp",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
- "hide_toolbar": 0,
  "issingle": 1,
  "links": [],
- "modified": "2026-03-16 13:28:21.198138",
+ "modified": "2026-07-20 00:11:18.996384",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment Booking Settings",
@@ -137,6 +195,15 @@
    "print": 1,
    "read": 1,
    "role": "Sales Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "permlevel": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
    "share": 1,
    "write": 1
   }
