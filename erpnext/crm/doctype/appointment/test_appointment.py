@@ -94,6 +94,9 @@ class TestAppointment(FrappeTestCase):
 		frappe.db.delete("Lead", {"email_id": LEAD_EMAIL})
 		self.test_appointment = create_test_appointment()
 
+	def tearDown(self):
+		frappe.db.rollback()
+
 	def _configure_booking_settings(self, holiday_dates=None, agents=None):
 		holiday_list = make_holiday_list(
 			"_Test Appointment Holiday List",
