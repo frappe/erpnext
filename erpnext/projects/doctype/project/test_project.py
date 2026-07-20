@@ -227,6 +227,61 @@ class TestProject(FrappeTestCase):
 		project.save()
 		self.assertEqual(project.status, "Completed")
 
+	def _project_with_tasks(self, method, count):
+		name = f"_Test PercentComplete {frappe.generate_hash(length=8)}"
+		project = frappe.get_doc(
+			{
+				"doctype": "Project",
+				"project_name": name,
+				"status": "Open",
+				"percent_complete_method": method,
+				"company": "_Test Company",
+				"expected_start_date": nowdate(),
+			}
+		).insert()
+		task_names = []
+		for i in range(count):
+			task = frappe.get_doc(
+				{
+					"doctype": "Task",
+					"subject": f"{name} Task {i}",
+					"project": project.name,
+					"status": "Open",
+					"exp_start_date": nowdate(),
+					"exp_end_date": nowdate(),
+				}
+			).insert()
+			task_names.append(task.name)
+		return project, task_names
+
+	def test_percent_complete_manual(self):
+		project, tasks = self._project_with_tasks("Manual", 2)
+
+		# manual value is preserved on save, even with linked tasks
+		project.percent_complete = 42
+		project.save()
+		self.assertEqual(project.percent_complete, 42)
+
+		# task updates do not overwrite the manual value
+		frappe.db.set_value("Task", tasks[0], "status", "Completed")
+		project.update_percent_complete()
+		self.assertEqual(project.percent_complete, 42)
+
+		# out-of-range values are rejected
+		project.percent_complete = 150
+		self.assertRaises(frappe.ValidationError, project.save)
+		project.reload()
+
+		project.percent_complete = -10
+		self.assertRaises(frappe.ValidationError, project.save)
+		project.reload()
+
+		# Completed status forces 100 regardless of the manual value
+		project.percent_complete = 42
+		project.status = "Completed"
+		project.save()
+		self.assertEqual(project.percent_complete, 100)
+
 	def _create_portal_user(self, email):
 		"""A user with no Project-related role, so read access can only come from
 		control_access_for_project_users() sharing the doc with them."""
