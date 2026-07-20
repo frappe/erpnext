@@ -4,6 +4,7 @@
 
 from collections import Counter
 from datetime import timedelta
+from urllib.parse import urlencode
 
 import frappe
 from frappe import _
@@ -11,7 +12,7 @@ from frappe.desk.form.assign_to import add as add_assignment
 from frappe.model.document import Document
 from frappe.share import add_docshare
 from frappe.utils import add_to_date, cint, date_diff, get_datetime, get_url, getdate, now, now_datetime
-from frappe.utils.verified_command import get_signed_params
+from frappe.utils.data import sha256_hash
 
 from erpnext.setup.doctype.holiday_list.holiday_list import is_holiday
 
@@ -39,6 +40,7 @@ class Appointment(Document):
 		party: DF.DynamicLink | None
 		scheduled_time: DF.Datetime
 		status: DF.Literal["Open", "Unverified", "Closed"]
+		verification_token: DF.Data | None
 	# end: auto-generated types
 
 	def validate(self):
@@ -335,12 +337,14 @@ class Appointment(Document):
 		return participants
 
 	def _get_verify_url(self):
-		params = {
-			"email": self.customer_email,
-			"appointment": self.name,
-			"valid_till": add_to_date(now_datetime(), minutes=get_verification_link_expiry()),
-		}
-		return get_url("/book_appointment/verify?" + get_signed_params(params))
+		key = self.generate_verification_key()
+		return get_url("/book_appointment/verify?" + urlencode({"key": key}))
+
+	def generate_verification_key(self):
+		# store only the hash; the raw key lives solely in the emailed link
+		key = frappe.generate_hash()
+		self.db_set("verification_token", sha256_hash(key), update_modified=False)
+		return key
 
 
 def get_booking_settings():

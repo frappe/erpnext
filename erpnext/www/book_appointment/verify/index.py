@@ -1,39 +1,28 @@
 import frappe
 from frappe import _
-from frappe.utils import get_datetime, now_datetime
-from frappe.utils.verified_command import verify_request
+from frappe.utils import add_to_date, now_datetime
+from frappe.utils.data import sha256_hash
+
+from erpnext.crm.doctype.appointment.appointment import get_verification_link_expiry
 
 
 def get_context(context):
-	if not verify_request():
+	key = frappe.form_dict.get("key")
+	if not key:
 		context.success = False
 		return context
 
-	email = frappe.form_dict["email"]
-	appointment_name = frappe.form_dict["appointment"]
-	valid_till = frappe.form_dict.get("valid_till")
-
-	if not (email and appointment_name):
+	appointment_name = frappe.db.get_value("Appointment", {"verification_token": sha256_hash(key)}, "name")
+	if not appointment_name:
 		context.success = False
-		return context
-
-	if not valid_till or get_datetime(valid_till) < now_datetime():
-		context.success = False
-		context.message = _("Verification link has expired.")
-		return context
-
-	if not frappe.db.exists("Appointment", appointment_name):
-		context.success = False
-		context.message = _("Appointment not found. Please book the appointment again.")
+		context.message = _("This verification link is invalid. Please book the appointment again.")
 		return context
 
 	appointment = frappe.get_doc("Appointment", appointment_name)
 
-	if appointment.customer_email != email:
-		context.success = False
-		context.message = _("Email couldn't be verified.")
-		return context
-
+	# report a settled status before expiry: a closed/verified appointment is
+	# more informative than a generic "expired" (and creation-based expiry would
+	# otherwise mask a sweeper-closed appointment)
 	if appointment.status == "Closed":
 		context.success = False
 		context.message = _("Appointment has been closed. Please book the appointment again.")
@@ -42,6 +31,11 @@ def get_context(context):
 	if appointment.status == "Open":
 		context.success = True
 		context.message = _("Appointment is already verified.")
+		return context
+
+	if now_datetime() > add_to_date(appointment.creation, minutes=get_verification_link_expiry()):
+		context.success = False
+		context.message = _("Verification link has expired.")
 		return context
 
 	verify_appointment(appointment)

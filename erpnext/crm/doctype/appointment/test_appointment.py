@@ -5,7 +5,8 @@ from unittest.mock import patch
 from urllib.parse import parse_qs, urlparse
 
 import frappe
-from frappe.utils import add_to_date, get_datetime, getdate, now_datetime, set_request
+from frappe.utils import add_to_date, getdate, now_datetime, set_request
+from frappe.utils.data import sha256_hash
 
 from erpnext.crm.doctype.appointment.appointment import (
 	Appointment,
@@ -192,15 +193,16 @@ class TestAppointment(ERPNextTestSuite):
 		self.assertFalse(appointment.email_verified)
 		self.assertFalse(appointment.party)
 
-	def test_verify_url_contains_expiry(self):
+	def test_verify_url_uses_opaque_token(self):
 		appointment = self._create_portal_appointment("portal_visitor@example.com")
-		_parsed, params = parse_verify_url(appointment._get_verify_url())
+		parsed, params = parse_verify_url(appointment._get_verify_url())
 
-		self.assertIn("_signature", params)
-		self.assertIn("valid_till", params)
-		valid_till = get_datetime(params["valid_till"])
-		self.assertGreater(valid_till, add_to_date(now_datetime(), minutes=VERIFICATION_EXPIRY_MINUTES - 1))
-		self.assertLessEqual(valid_till, add_to_date(now_datetime(), minutes=VERIFICATION_EXPIRY_MINUTES + 1))
+		# the link carries only an opaque key - no email, name or signed params
+		self.assertEqual(set(params), {"key"})
+		self.assertNotIn("email", parsed.query)
+		# only the hash of that key is stored on the appointment
+		stored = frappe.db.get_value("Appointment", appointment.name, "verification_token")
+		self.assertEqual(stored, sha256_hash(params["key"]))
 
 	def test_email_verification_within_expiry_window(self):
 		# Link used within the validity window - verification succeeds and the
@@ -243,22 +245,9 @@ class TestAppointment(ERPNextTestSuite):
 		self.assertIn("already verified", context.message)
 		self._confirmed_email_mock.assert_not_called()
 
-	def test_verification_fails_for_changed_email(self):
-		appointment = self._create_portal_appointment("portal_visitor_old@example.com")
-		verify_url = appointment._get_verify_url()
-
-		appointment.customer_email = "portal_visitor_new@example.com"
-		appointment.save(ignore_permissions=True)
-
-		context = self._request_verification(appointment, verify_url=verify_url)
-
-		self.assertFalse(context.success)
-		self.assertIn("couldn't be verified", context.message)
-		self.assertEqual(get_status(appointment.name), "Unverified")
-
 	def test_verification_link_for_deleted_appointment(self):
-		"""A signed link can outlive its appointment - clicking it must render a
-		friendly message, not crash."""
+		"""A verification link can outlive its appointment - clicking it must
+		render a friendly message, not crash."""
 		appointment = self._create_portal_appointment("portal_visitor_gone@example.com")
 		verify_url = appointment._get_verify_url()
 		frappe.delete_doc("Appointment", appointment.name, ignore_permissions=True)

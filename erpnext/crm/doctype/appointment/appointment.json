@@ -11,6 +11,7 @@
   "status",
   "created_through_portal",
   "email_verified",
+  "verification_token",
   "customer_details_section",
   "customer_name",
   "customer_phone_number",
@@ -124,10 +125,19 @@
    "fieldtype": "Check",
    "label": "Email Verified",
    "read_only": 1
+  },
+  {
+   "fieldname": "verification_token",
+   "fieldtype": "Data",
+   "label": "Verification Token",
+   "hidden": 1,
+   "read_only": 1,
+   "no_copy": 1,
+   "search_index": 1
   }
  ],
  "links": [],
- "modified": "2026-07-21 01:00:00.000000",
+ "modified": "2026-07-20 02:00:00.000000",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment",
