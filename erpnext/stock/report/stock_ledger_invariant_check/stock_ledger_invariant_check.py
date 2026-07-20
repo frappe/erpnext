@@ -325,7 +325,7 @@ def create_reposting_entries(rows, item_code=None, warehouse=None):
 					"warehouse": warehouse or row.warehouse,
 					"posting_date": row.posting_date,
 					"posting_time": row.posting_time,
-					"allow_nagative_stock": 1,
+					"allow_negative_stock": 1,
 				}
 			).submit()
 
