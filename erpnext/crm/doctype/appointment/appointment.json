@@ -82,10 +82,7 @@
    "fieldname": "customer_email",
    "fieldtype": "Data",
    "label": "Email",
-<<<<<<< HEAD
-=======
    "options": "Email",
->>>>>>> 73004c6e4b (refactor: rework appointment booking lifecycle and portal verification (#57270))
    "reqd": 1
   },
   {
@@ -140,19 +137,11 @@
   }
  ],
  "links": [],
-<<<<<<< HEAD
- "modified": "2022-12-15 11:11:02.131986",
- "modified_by": "Administrator",
- "module": "CRM",
- "name": "Appointment",
- "name_case": "UPPER CASE",
-=======
  "modified": "2026-07-20 02:00:00.000000",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment",
  "naming_rule": "Expression (old style)",
->>>>>>> 73004c6e4b (refactor: rework appointment booking lifecycle and portal verification (#57270))
  "owner": "Administrator",
  "permissions": [
   {
@@ -204,12 +193,8 @@
   }
  ],
  "quick_entry": 1,
-<<<<<<< HEAD
- "sort_field": "modified",
-=======
  "row_format": "Dynamic",
  "sort_field": "creation",
->>>>>>> 73004c6e4b (refactor: rework appointment booking lifecycle and portal verification (#57270))
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1

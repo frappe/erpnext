@@ -160,16 +160,10 @@
    "fieldtype": "Column Break"
   }
  ],
-<<<<<<< HEAD
- "issingle": 1,
- "links": [],
- "modified": "2022-12-15 11:10:13.517742",
-=======
  "grid_page_length": 50,
  "issingle": 1,
  "links": [],
  "modified": "2026-07-20 00:11:18.996384",
->>>>>>> 73004c6e4b (refactor: rework appointment booking lifecycle and portal verification (#57270))
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment Booking Settings",

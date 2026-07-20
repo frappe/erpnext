@@ -1,24 +1,16 @@
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-<<<<<<< HEAD
-# import frappe
-import unittest
-
-
-class TestAppointmentBookingSettings(unittest.TestCase):
-	pass
-=======
 import datetime
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_to_date, getdate
 
 from erpnext.setup.doctype.holiday_list.test_holiday_list import make_holiday_list
-from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestAppointmentBookingSettings(ERPNextTestSuite):
+class TestAppointmentBookingSettings(FrappeTestCase):
 	def assert_invalid(self, settings):
 		with self.assertRaises(frappe.ValidationError):
 			settings.save()
@@ -131,4 +123,3 @@ class TestAppointmentBookingSettings(ERPNextTestSuite):
 		settings.save()
 
 		self.assertEqual(frappe.db.get_single_value("Appointment Booking Settings", "number_of_agents"), 1)
->>>>>>> 73004c6e4b (refactor: rework appointment booking lifecycle and portal verification (#57270))

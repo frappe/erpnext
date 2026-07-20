@@ -2,30 +2,23 @@
 # See license.txt
 
 import datetime
-<<<<<<< HEAD
-import unittest
-=======
 from unittest.mock import patch
 from urllib.parse import parse_qs, urlparse
->>>>>>> 73004c6e4b (refactor: rework appointment booking lifecycle and portal verification (#57270))
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_to_date, getdate, now_datetime, set_request
 from frappe.utils.data import sha256_hash
 
-<<<<<<< HEAD
-=======
 from erpnext.crm.doctype.appointment.appointment import (
 	Appointment,
 	_check_agent_availability,
 	handle_expired_unverified_appointments,
 )
 from erpnext.setup.doctype.holiday_list.test_holiday_list import make_holiday_list
-from erpnext.tests.utils import ERPNextTestSuite
 from erpnext.www.book_appointment.index import create_appointment, get_appointment_slots
 from erpnext.www.book_appointment.verify import index as verify_index
 
->>>>>>> 73004c6e4b (refactor: rework appointment booking lifecycle and portal verification (#57270))
 LEAD_EMAIL = "test_appointment_lead@example.com"
 VERIFICATION_EXPIRY_MINUTES = 30
 ALL_WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
@@ -48,10 +41,6 @@ def create_test_appointment(**kwargs):
 	return test_appointment
 
 
-<<<<<<< HEAD
-class TestAppointment(unittest.TestCase):
-	def setUpClass():
-=======
 def create_lead(email, name="Existing Lead"):
 	frappe.db.delete("Lead", {"email_id": email})
 	return frappe.get_doc({"doctype": "Lead", "lead_name": name, "email_id": email}).insert(
@@ -99,13 +88,10 @@ def parse_verify_url(verify_url):
 	return parsed, {key: value[0] for key, value in parse_qs(parsed.query).items()}
 
 
-class TestAppointment(ERPNextTestSuite):
+class TestAppointment(FrappeTestCase):
 	def setUp(self):
 		set_booking_setting("verification_link_expiry_duration", VERIFICATION_EXPIRY_MINUTES)
->>>>>>> 73004c6e4b (refactor: rework appointment booking lifecycle and portal verification (#57270))
 		frappe.db.delete("Lead", {"email_id": LEAD_EMAIL})
-
-	def setUp(self):
 		self.test_appointment = create_test_appointment()
 
 	def _configure_booking_settings(self, holiday_dates=None, agents=None):

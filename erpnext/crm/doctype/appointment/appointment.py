@@ -133,44 +133,17 @@ class Appointment(Document):
 			frappe.throw(_("Time slot is not available"))
 
 	def before_insert(self):
-<<<<<<< HEAD
-		number_of_appointments_in_same_slot = frappe.db.count(
-			"Appointment", filters={"scheduled_time": self.scheduled_time}
-		)
-		number_of_agents = frappe.db.get_single_value("Appointment Booking Settings", "number_of_agents")
-		if not number_of_agents == 0:
-			if number_of_appointments_in_same_slot >= number_of_agents:
-				frappe.throw(_("Time slot is not available"))
-		# Link lead
-		if not self.party:
-			lead = self.find_lead_by_email()
-			customer = self.find_customer_by_email()
-			if customer:
-				self.appointment_with = "Customer"
-				self.party = customer
-			else:
-				self.appointment_with = "Lead"
-				self.party = lead
-=======
 		# Set status to "Unverified" for new Appointments.
 		if self.created_through_portal:
 			self.status = "Unverified"
 			return
 
 		self.link_customer_lead()
->>>>>>> 73004c6e4b (refactor: rework appointment booking lifecycle and portal verification (#57270))
 
 	def after_insert(self):
 		if not self.created_through_portal and self.party:
 			self.auto_assign()
 			self.create_calendar_event()
-<<<<<<< HEAD
-		else:
-			# Set status to unverified
-			self.status = "Unverified"
-			# Send email to confirm
-			self.send_confirmation_email()
-=======
 			return
 
 		# Send email to confirm
@@ -201,7 +174,6 @@ class Appointment(Document):
 		event = self.calendar_event
 		self.db_set("calendar_event", None, update_modified=False)
 		frappe.delete_doc("Event", event, ignore_permissions=True)
->>>>>>> 73004c6e4b (refactor: rework appointment booking lifecycle and portal verification (#57270))
 
 	def send_confirmation_email(self):
 		self.send_email_to_customer(
@@ -249,20 +221,6 @@ class Appointment(Document):
 		cal_event.starts_on = self.scheduled_time
 		cal_event.save(ignore_permissions=True)
 
-<<<<<<< HEAD
-	def set_verified(self, email):
-		if not email == self.customer_email:
-			frappe.throw(_("Email verification failed."))
-		# Create new lead
-		self.create_lead_and_link()
-		# Remove unverified status
-		self.status = "Open"
-		# Create calender event
-		self.auto_assign()
-		self.create_calendar_event()
-		self.save(ignore_permissions=True)
-		frappe.db.commit()
-=======
 	def update_event_and_assignments_status(self):
 		"""Close or reopen the calendar event and assignments along with the appointment."""
 		if self.status == "Unverified":
@@ -293,7 +251,6 @@ class Appointment(Document):
 	def find_party_by_email(self, doctype):
 		party = frappe.get_all(doctype, filters={"email_id": self.customer_email}, limit=1, pluck="name")
 		return party[0] if party else None
->>>>>>> 73004c6e4b (refactor: rework appointment booking lifecycle and portal verification (#57270))
 
 	def create_lead_and_link(self):
 		# Return if already linked
