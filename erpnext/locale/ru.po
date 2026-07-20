@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-07-19 10:04+0000\n"
-"PO-Revision-Date: 2026-07-19 13:56\n"
+"PO-Revision-Date: 2026-07-20 19:38\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Russian\n"
 "MIME-Version: 1.0\n"
@@ -10044,7 +10044,7 @@ msgstr "Невозможно установить количество мень�
 
 #: erpnext/accounts/services/child_item_update.py:259
 msgid "Cannot set quantity less than received quantity."
-msgstr ""
+msgstr "РќРµРІРѕР·РјРѕР¶РЅРѕ СѓСЃС‚Р°РЅРѕРІРёС‚СЊ РєРѕР»РёС‡РµСЃС‚РІРѕ РјРµРЅСЊС€Рµ РїРѕР»СѓС‡РµРЅРЅРѕРіРѕ."
 
 #: erpnext/stock/doctype/item_variant_settings/item_variant_settings.py:69
 msgid "Cannot set the field <b>{0}</b> for copying in variants"
