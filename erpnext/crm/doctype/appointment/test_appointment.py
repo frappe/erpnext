@@ -90,13 +90,17 @@ def parse_verify_url(verify_url):
 
 class TestAppointment(FrappeTestCase):
 	def setUp(self):
+		# sending an email commits the transaction (EmailQueue sets its status
+		# with commit=True), which would break the per-test rollback below
+		frappe.flags.mute_emails = 1
 		set_booking_setting("verification_link_expiry_duration", VERIFICATION_EXPIRY_MINUTES)
 		frappe.db.delete("Lead", {"email_id": LEAD_EMAIL})
 		self.test_appointment = create_test_appointment()
 
 	def tearDown(self):
 		frappe.db.rollback()
-		frappe.clear_document_cache("Appointment Booking Settings")
+		frappe.clear_document_cache("Appointment Booking Settings", "Appointment Booking Settings")
+		frappe.flags.mute_emails = 0
 
 	def _configure_booking_settings(self, holiday_dates=None, agents=None):
 		holiday_list = make_holiday_list(
