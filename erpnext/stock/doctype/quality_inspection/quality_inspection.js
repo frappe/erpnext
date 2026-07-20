@@ -70,13 +70,11 @@ frappe.ui.form.on("Quality Inspection", {
 		// Ignore cancellation of reference doctype on cancel all.
 		frm.ignore_doctypes_on_cancel_all = [frm.doc.reference_type, "Serial and Batch Bundle"];
 		frm.trigger("toggle_batch_and_serial_fields");
-		frm.trigger("toggle_populate_units_button");
 		frm.trigger("toggle_unit_quantity");
 	},
 
 	inspection_basis(frm) {
 		frm.trigger("toggle_batch_and_serial_fields");
-		frm.trigger("toggle_populate_units_button");
 		frm.trigger("prefill_decided_quantity_from_lot");
 		frm.trigger("toggle_unit_quantity");
 	},
@@ -110,7 +108,6 @@ frappe.ui.form.on("Quality Inspection", {
 	},
 
 	quality_inspection_template(frm) {
-		frm.trigger("toggle_populate_units_button");
 		if (frm.doc.quality_inspection_template && frm.doc.inspection_basis !== "Each Quantity") {
 			return frm.call({
 				method: "get_item_specification_details",
@@ -122,21 +119,11 @@ frappe.ui.form.on("Quality Inspection", {
 		}
 	},
 
-	toggle_populate_units_button(frm) {
-		frm.remove_custom_button(__("Populate Units"));
-		if (
-			frm.doc.docstatus === 0 &&
-			frm.doc.inspection_basis === "Each Quantity" &&
-			!frm.doc.manual_inspection &&
-			frm.doc.quality_inspection_template
-		) {
-			frm.add_custom_button(__("Populate Units"), () => {
-				frm.call("populate_units").then(() => {
-					frm.refresh_field("unit_readings");
-					frm.dirty();
-				});
-			});
-		}
+	populate_units_button(frm) {
+		frm.call("populate_units").then(() => {
+			frm.refresh_field("unit_readings");
+			frm.dirty();
+		});
 	},
 
 	toggle_batch_and_serial_fields(frm) {

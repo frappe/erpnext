@@ -33,6 +33,7 @@
   "decided_quantity",
   "unit_quantity",
   "readings_section",
+  "populate_units_button",
   "unit_readings",
   "readings",
   "unit_results_section",
@@ -304,6 +305,12 @@
    "fieldname": "unit_quantity",
    "fieldtype": "Int",
    "label": "Unit Quantity"
+  },
+  {
+   "depends_on": "eval:doc.docstatus === 0 && doc.inspection_basis === 'Each Quantity' && !doc.manual_inspection && doc.quality_inspection_template",
+   "fieldname": "populate_units_button",
+   "fieldtype": "Button",
+   "label": "Populate Units"
   },
   {
    "depends_on": "eval:doc.inspection_basis == 'Each Quantity' && !doc.manual_inspection",
