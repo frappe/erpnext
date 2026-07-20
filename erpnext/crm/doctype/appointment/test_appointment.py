@@ -1,12 +1,8 @@
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 import datetime
-<<<<<<< HEAD
-import unittest
-=======
 from unittest.mock import patch
 from urllib.parse import parse_qs, urlparse
->>>>>>> 73004c6e4b (refactor: rework appointment booking lifecycle and portal verification (#57270))
 
 import frappe
 from frappe.utils import add_to_date, getdate, now_datetime, set_request

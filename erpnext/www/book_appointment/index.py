@@ -103,14 +103,9 @@ def get_available_slots_between(query_start_time, query_end_time, settings):
 	return timeslots
 
 
-<<<<<<< HEAD
-@frappe.whitelist(allow_guest=True)
-def create_appointment(date, time, tz, contact):
-=======
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=5, seconds=300)
-def create_appointment(date: str, time: str, tz: str, contact: str | dict):
->>>>>>> 73004c6e4b (refactor: rework appointment booking lifecycle and portal verification (#57270))
+def create_appointment(date, time, tz, contact):
 	handle_appointment_booking_disabled()
 	format_string = "%Y-%m-%d %H:%M:%S"
 	scheduled_time = datetime.datetime.strptime(date + " " + time, format_string)
