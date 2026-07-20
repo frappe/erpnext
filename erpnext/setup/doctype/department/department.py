@@ -40,7 +40,7 @@ class Department(NestedSet):
 	def validate(self):
 		if not self.parent_department:
 			root = get_root_of("Department")
-			if root:
+			if root and root != self.name:
 				self.parent_department = root
 
 	def before_rename(self, old, new, merge=False):

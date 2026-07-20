@@ -47,7 +47,9 @@ class SalesPerson(NestedSet):
 			self.validate_sales_person()
 
 		if not self.parent_sales_person:
-			self.parent_sales_person = get_root_of("Sales Person")
+			root = get_root_of("Sales Person")
+			if root and root != self.name:
+				self.parent_sales_person = root
 
 		for d in self.get("targets") or []:
 			if not flt(d.target_qty) and not flt(d.target_amount):

@@ -33,7 +33,9 @@ class Territory(NestedSet):
 
 	def validate(self):
 		if not self.parent_territory:
-			self.parent_territory = get_root_of("Territory")
+			root = get_root_of("Territory")
+			if root and root != self.name:
+				self.parent_territory = root
 
 		for d in self.get("targets") or []:
 			if not flt(d.target_qty) and not flt(d.target_amount):

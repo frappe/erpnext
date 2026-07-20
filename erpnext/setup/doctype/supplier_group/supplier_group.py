@@ -32,7 +32,9 @@ class SupplierGroup(NestedSet):
 
 	def validate(self):
 		if not self.parent_supplier_group:
-			self.parent_supplier_group = get_root_of("Supplier Group")
+			root = get_root_of("Supplier Group")
+			if root and root != self.name:
+				self.parent_supplier_group = root
 		self.validate_currency_for_payable_and_advance_account()
 
 	def validate_currency_for_payable_and_advance_account(self):
