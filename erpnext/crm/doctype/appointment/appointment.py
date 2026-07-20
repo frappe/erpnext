@@ -281,8 +281,9 @@ class Appointment(Document):
 			self.assign_agent(existing_assignee)
 			return
 
+		busy_agents = get_busy_agents(self.scheduled_time)
 		for agent in _get_agents_sorted_by_asc_workload(getdate(self.scheduled_time)):
-			if _check_agent_availability(agent, self.scheduled_time):
+			if agent not in busy_agents:
 				self.assign_agent(agent)
 				break
 
@@ -398,33 +399,56 @@ def handle_expired_unverified_appointments():
 
 
 def _get_agents_sorted_by_asc_workload(date):
+	# count only the given day's assignments; scheduled_time is indexed so the
+	# date range is resolved in SQL instead of scanning every appointment ever
 	workload = Counter(agent.user for agent in get_booking_settings().agent_list)
-	appointments = frappe.get_all(
-		"Appointment", filters={"_assign": ("is", "set")}, fields=["_assign", "scheduled_time"]
+	assigns = frappe.get_all(
+		"Appointment",
+		filters=[
+			["_assign", "is", "set"],
+			["scheduled_time", ">=", getdate(date)],
+			["scheduled_time", "<", add_to_date(getdate(date), days=1)],
+		],
+		pluck="_assign",
 	)
 
-	for appointment in appointments:
-		assignees = frappe.parse_json((appointment._assign or "").strip() or "[]")
-		if assignees and assignees[0] in workload and getdate(appointment.scheduled_time) == date:
+	for assign in assigns:
+		assignees = frappe.parse_json((assign or "").strip() or "[]")
+		if assignees and assignees[0] in workload:
 			workload[assignees[0]] += 1
 
 	return [agent for agent, _workload in reversed(workload.most_common())]
 
 
-def _check_agent_availability(agent_email, scheduled_time):
-	overlapping_appointments = frappe.get_all(
+def get_busy_agents(scheduled_time):
+	"""Agents already assigned to a non-Closed appointment overlapping `scheduled_time`."""
+	duration = _get_appointment_duration()
+	assigns = frappe.get_all(
 		"Appointment",
 		filters=[
-			["scheduled_time", ">", add_to_date(scheduled_time, minutes=-_get_appointment_duration())],
-			["scheduled_time", "<", add_to_date(scheduled_time, minutes=_get_appointment_duration())],
+			["scheduled_time", ">", add_to_date(scheduled_time, minutes=-duration)],
+			["scheduled_time", "<", add_to_date(scheduled_time, minutes=duration)],
 			["status", "!=", "Closed"],
 		],
-		fields=["_assign"],
+		pluck="_assign",
 	)
+	return {assignee for assign in assigns for assignee in frappe.parse_json(assign or "[]")}
 
-	return not any(
-		agent_email in frappe.parse_json(appointment._assign or "[]")
-		for appointment in overlapping_appointments
+
+def _check_agent_availability(agent_email, scheduled_time):
+	return agent_email not in get_busy_agents(scheduled_time)
+
+
+def get_booked_slot_times(from_time, to_time):
+	"""scheduled_times of non-Closed appointments within (from_time, to_time), for slot availability."""
+	return frappe.get_all(
+		"Appointment",
+		filters=[
+			["scheduled_time", ">", from_time],
+			["scheduled_time", "<", to_time],
+			["status", "!=", "Closed"],
+		],
+		pluck="scheduled_time",
 	)
 
 

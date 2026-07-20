@@ -65,6 +65,8 @@ def get_appointment_slots(date: str, timezone: str):
 	)
 	holiday_list = frappe.get_doc("Holiday List", settings.holiday_list)
 	timeslots = get_available_slots_between(query_start_time, query_end_time, settings)
+	# fetch the day's booked slots once instead of querying per timeslot
+	booked_times = get_booked_slot_times_for(timeslots, settings.appointment_duration)
 
 	# Filter and convert timeslots
 	converted_timeslots = []
@@ -75,7 +77,7 @@ def get_appointment_slots(date: str, timezone: str):
 			converted_timeslots.append(dict(time=converted_timeslot, availability=False))
 			continue
 		# Check availability
-		if check_availabilty(timeslot, settings) and converted_timeslot >= now:
+		if is_slot_available(timeslot, booked_times, settings) and converted_timeslot >= now:
 			converted_timeslots.append(dict(time=converted_timeslot, availability=True))
 		else:
 			converted_timeslots.append(dict(time=converted_timeslot, availability=False))
@@ -150,12 +152,23 @@ def convert_to_system_timezone(guest_tz, datetimeobject):
 	return datetimeobject
 
 
-def check_availabilty(timeslot, settings):
-	from erpnext.crm.doctype.appointment.appointment import count_overlapping_appointments
+def get_booked_slot_times_for(timeslots, appointment_duration):
+	if not timeslots:
+		return []
 
-	# mirror the capacity validation so the portal never offers a slot
-	# the server would reject, and frees slots of cancelled appointments
-	return count_overlapping_appointments(timeslot, settings.appointment_duration) < settings.number_of_agents
+	from erpnext.crm.doctype.appointment.appointment import get_booked_slot_times
+
+	duration = datetime.timedelta(minutes=appointment_duration)
+	return get_booked_slot_times(min(timeslots) - duration, max(timeslots) + duration)
+
+
+def is_slot_available(timeslot, booked_times, settings):
+	# mirror the server capacity check: count non-Closed appointments whose
+	# duration window overlaps this slot, without a per-slot query
+	duration = datetime.timedelta(minutes=settings.appointment_duration)
+	lower, upper = timeslot - duration, timeslot + duration
+	overlapping = sum(1 for booked in booked_times if lower < booked < upper)
+	return overlapping < settings.number_of_agents
 
 
 def _is_holiday(date, holiday_list):
