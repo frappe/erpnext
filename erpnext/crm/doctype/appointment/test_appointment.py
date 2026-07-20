@@ -144,7 +144,11 @@ class TestAppointment(ERPNextTestSuite):
 
 		old_request = getattr(frappe.local, "request", None)
 		old_form_dict = frappe.local.form_dict
+		old_user = frappe.session.user
 		try:
+			# the real link is clicked by an anonymous visitor; set_user resets
+			# form_dict, so switch the user before populating the request
+			frappe.set_user("Guest")
 			set_request(method="GET", path=f"{parsed.path}?{parsed.query}")
 			frappe.local.form_dict = frappe._dict(params)
 			context = frappe._dict()
@@ -153,6 +157,7 @@ class TestAppointment(ERPNextTestSuite):
 			self._confirmed_email_mock = mock_confirmed
 			return context
 		finally:
+			frappe.set_user(old_user)
 			frappe.local.request = old_request
 			frappe.local.form_dict = old_form_dict
 			frappe.local.flags.commit = False
