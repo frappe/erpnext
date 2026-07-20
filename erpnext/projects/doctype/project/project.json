@@ -117,7 +117,7 @@
    "fieldtype": "Percent",
    "label": "% Completed",
    "no_copy": 1,
-   "read_only": 1
+   "read_only_depends_on": "eval:doc.percent_complete_method != 'Manual'"
   },
   {
    "fieldname": "column_break_5",
@@ -466,7 +466,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 4,
- "modified": "2026-07-14 14:32:11.328347",
+ "modified": "2026-07-21 11:23:22.000000",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",
