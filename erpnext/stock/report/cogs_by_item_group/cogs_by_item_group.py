@@ -34,7 +34,18 @@ def update_filters_with_account(filters: Filters) -> None:
 
 
 def validate_filters(filters: Filters) -> None:
-	if filters.from_date > filters.to_date:
+	from_date = filters.from_date
+	to_date = filters.to_date
+
+	if not from_date or not to_date:
+		frappe.throw(
+			_("{0} and {1} are mandatory").format(
+				frappe.bold(_("From Date")),
+				frappe.bold(_("To Date")),
+			)
+		)
+
+	if from_date > to_date:
 		frappe.throw(_("From Date must be before To Date"))
 
 
