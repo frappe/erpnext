@@ -116,7 +116,7 @@ def create_appointment(date, time, tz, contact):
 	# Create a appointment document from form
 	appointment = frappe.new_doc("Appointment")
 	appointment.scheduled_time = scheduled_time
-	contact = json.loads(contact)
+	contact = frappe.parse_json(contact)
 	appointment.customer_name = contact.get("name", None)
 	appointment.customer_phone_number = contact.get("number", None)
 	appointment.customer_skype = contact.get("skype", None)
