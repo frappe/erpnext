@@ -602,19 +602,17 @@ def check_overdue_billing_threshold(customer: str, company: str) -> None:
 
 	company_currency = frappe.get_cached_value("Company", company, "default_currency")
 	frappe.throw(
-		_(
-			"Customer {0} has an overdue billing limit. Overdue amount {1} exceeds the allowed threshold {2}."
-		).format(
+		_("Overdue Limit crossed for customer {0}. Overdue amount {1} exceeds the allowed limit {2}.").format(
 			customer,
 			fmt_money(overdue_amount, currency=company_currency),
 			fmt_money(threshold, currency=company_currency),
 		),
-		title=_("Overdue Billing Limit Crossed"),
+		title=_("Overdue Limit Crossed"),
 	)
 
 
 def get_overdue_billing_threshold(customer: str, company: str) -> float:
-	"""Threshold set on the customer, falling back to its customer group."""
+	"""Overdue limit set on the customer, falling back to its customer group."""
 	threshold = frappe.db.get_value(
 		"Customer Credit Limit",
 		{"parent": customer, "parenttype": "Customer", "company": company},
@@ -652,7 +650,7 @@ def get_outstanding_invoices_for_customer(customer: str, company: str) -> list[f
 	gl_entry = frappe.qb.DocType("GL Entry")
 	sales_invoice = frappe.qb.DocType("Sales Invoice")
 
-	# debit - credit is always booked in company currency, so this is comparable to the threshold
+	# debit - credit is always booked in company currency, so this is comparable to the overdue limit
 	outstanding = Sum(gl_entry.debit) - Sum(gl_entry.credit)
 
 	return (

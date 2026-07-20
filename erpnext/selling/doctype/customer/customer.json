@@ -471,7 +471,7 @@
    "report_hide": 1
   },
   {
-   "description": "Transactions are blocked when the outstanding balance exceeds the credit limit. When the overdue billing setting is enabled, new invoices are also blocked when the customer's overdue amount exceeds the overdue billing threshold.",
+   "description": "Transactions are blocked when the outstanding balance exceeds the credit limit. When Restrict Customer Over Billing is enabled, new invoices are also blocked when the customer's overdue amount exceeds the Overdue Limit.",
    "fieldname": "credit_limits",
    "fieldtype": "Table",
    "label": "Credit & Overdue Limits",

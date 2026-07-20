@@ -278,17 +278,17 @@
   },
   {
    "default": "0",
-   "description": "Block submitting a new Sales Invoice when the customer's overdue amount exceeds the Overdue Billing Threshold set on the customer.",
+   "description": "Block a new Sales Invoice when the customer's overdue amount exceeds the Overdue Limit set on the customer.",
    "fieldname": "enable_overdue_billing_threshold",
    "fieldtype": "Check",
-   "label": "Enable Overdue Billing Threshold"
+   "label": "Restrict Customer Over Billing"
   },
   {
    "depends_on": "eval:doc.enable_overdue_billing_threshold",
-   "description": "Users with this role can still submit invoices for customers over their overdue billing threshold.",
+   "description": "Users with this role can still submit invoices for customers who have crossed their Overdue Limit.",
    "fieldname": "role_allowed_to_bypass_overdue_billing",
    "fieldtype": "Link",
-   "label": "Role allowed to bypass overdue billing limit",
+   "label": "Role Allowed to Bypass Over Billing Restriction",
    "options": "Role"
   },
   {
