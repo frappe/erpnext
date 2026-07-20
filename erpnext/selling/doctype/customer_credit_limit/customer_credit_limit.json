@@ -21,12 +21,12 @@
   },
   {
    "columns": 3,
-   "description": "New Sales Invoices are blocked when the customer's overdue amount exceeds this. Requires 'Enable Overdue Billing Threshold' in Accounts Settings.",
+   "description": "New Sales Invoices are blocked when the customer's overdue amount exceeds this. Requires 'Restrict Customer Over Billing' in Accounts Settings.",
    "fieldname": "overdue_billing_threshold",
    "fieldtype": "Currency",
    "hidden": 1,
    "in_list_view": 1,
-   "label": "Overdue Billing Threshold"
+   "label": "Overdue Limit"
   },
   {
    "fieldname": "column_break_2",
