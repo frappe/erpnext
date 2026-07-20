@@ -349,6 +349,34 @@ class TestProject(ERPNextTestSuite):
 		self.assertEqual(project.percent_complete, 75)
 		self.assertEqual(project.status, "On hold")
 
+	def test_percent_complete_manual(self):
+		project, tasks = self._project_with_tasks("Manual", 2)
+
+		# manual value is preserved on save, even with linked tasks
+		project.percent_complete = 42
+		project.save()
+		self.assertEqual(project.percent_complete, 42)
+
+		# task updates do not overwrite the manual value
+		frappe.db.set_value("Task", tasks[0], "status", "Completed")
+		project.update_percent_complete()
+		self.assertEqual(project.percent_complete, 42)
+
+		# out-of-range values are rejected
+		project.percent_complete = 150
+		self.assertRaises(frappe.ValidationError, project.save)
+		project.reload()
+
+		project.percent_complete = -10
+		self.assertRaises(frappe.ValidationError, project.save)
+		project.reload()
+
+		# Completed status forces 100 regardless of the manual value
+		project.percent_complete = 42
+		project.status = "Completed"
+		project.save()
+		self.assertEqual(project.percent_complete, 100)
+
 	def test_percent_complete_by_task_progress(self):
 		project, tasks = self._project_with_tasks("Task Progress", 2)
 
