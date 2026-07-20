@@ -404,9 +404,9 @@ def is_holiday(employee, date=None, raise_exception=True, only_non_weekly=False,
 	        :param only_non_weekly: Check only non-weekly holidays, default is False
 	"""
 
-	holiday_list = get_holiday_list_for_employee(employee, raise_exception)
 	if not date:
 		date = today()
+	holiday_list = get_holiday_list_for_employee(employee, raise_exception, as_on=date)
 
 	if not holiday_list:
 		return False

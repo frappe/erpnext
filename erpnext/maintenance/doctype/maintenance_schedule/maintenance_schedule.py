@@ -181,7 +181,7 @@ class MaintenanceSchedule(TransactionBase):
 
 		employee = frappe.db.get_value("Sales Person", sales_person, "employee")
 		if employee:
-			holiday_list = get_holiday_list_for_employee(employee)
+			holiday_list = get_holiday_list_for_employee(employee, as_on=schedule_date)
 		else:
 			holiday_list = frappe.get_cached_value("Company", self.company, "default_holiday_list")
 
