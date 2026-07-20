@@ -8,7 +8,7 @@ from urllib.parse import parse_qs, urlparse
 import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_to_date, getdate, now_datetime, set_request
-from frappe.utils.data import sha256_hash
+from frappe.utils.data import get_system_timezone, sha256_hash
 
 from erpnext.crm.doctype.appointment.appointment import (
 	Appointment,
@@ -96,6 +96,7 @@ class TestAppointment(FrappeTestCase):
 
 	def tearDown(self):
 		frappe.db.rollback()
+		frappe.clear_document_cache("Appointment Booking Settings")
 
 	def _configure_booking_settings(self, holiday_dates=None, agents=None):
 		holiday_list = make_holiday_list(
@@ -133,7 +134,7 @@ class TestAppointment(FrappeTestCase):
 			appointment = create_appointment(
 				date=str(datetime.date.today() + datetime.timedelta(days=days_from_now)),
 				time=time,
-				tz="UTC",
+				tz=get_system_timezone(),
 				contact={"name": "Portal Visitor", "email": email, "number": "123", "skype": "", "notes": ""},
 			)
 		self._verification_email_mock = mock_send
@@ -288,8 +289,6 @@ class TestAppointment(FrappeTestCase):
 			)
 
 	def test_booked_slot_unavailable_on_portal(self):
-		from frappe.utils.data import get_system_timezone
-
 		self._configure_booking_settings()
 		tz = get_system_timezone()
 		day = datetime.date.today() + datetime.timedelta(days=2)
