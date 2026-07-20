@@ -151,6 +151,7 @@ class QualityInspection(UnitReadingsMixin, Document):
 			# per-unit readings live in the unit readings table; rows lurking in
 			# the hidden readings table would invisibly block submission
 			self.set("readings", [])
+			self.assign_unit_numbers_from_serials()
 			if not cint(self.unit_quantity):
 				self.unit_quantity = self._whole_quantity_under_inspection()
 			self.validate_units()

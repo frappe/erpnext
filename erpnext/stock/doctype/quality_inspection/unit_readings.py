@@ -197,6 +197,29 @@ class UnitReadingsMixin:
 			)
 		return cint(qty)
 
+	def assign_unit_numbers_from_serials(self):
+		"""Rows added by serial need no hand-typed unit number.
+
+		Rows sharing a serial share a unit; a new serial takes the next free
+		number. Rows without a serial cannot be grouped by inference and keep
+		the hand-typed number the grid demands.
+		"""
+		by_serial = {
+			entry.serial_no: entry.unit_no
+			for entry in self.unit_readings
+			if entry.unit_no and entry.serial_no
+		}
+		next_no = max((cint(entry.unit_no) for entry in self.unit_readings), default=0)
+		for entry in self.unit_readings:
+			if entry.unit_no or not entry.serial_no:
+				continue
+			if entry.serial_no in by_serial:
+				entry.unit_no = by_serial[entry.serial_no]
+				continue
+			next_no += 1
+			entry.unit_no = next_no
+			by_serial[entry.serial_no] = next_no
+
 	def validate_units(self):
 		units = {entry.unit_no for entry in self.unit_readings}
 		if units and (min(units) < 1 or max(units) > cint(self.unit_quantity)):

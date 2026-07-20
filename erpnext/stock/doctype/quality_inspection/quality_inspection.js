@@ -196,11 +196,10 @@ frappe.ui.form.on("Quality Inspection", {
 						frm.toggle_display("serial_no", false);
 					} else if (frm.__item_is_serialized) {
 						if (bundle_decided) {
-							frm.fields_dict.unit_readings?.grid.update_docfield_property(
-								"serial_no",
-								"reqd",
-								1
-							);
+							const grid = frm.fields_dict.unit_readings?.grid;
+							grid?.update_docfield_property("serial_no", "reqd", 1);
+							grid?.update_docfield_property("unit_no", "hidden", 1);
+							grid?.set_column_disp_in_list_view("unit_no", 0);
 						} else {
 							frm.set_df_property("serial_no", "reqd", 1);
 						}
@@ -219,11 +218,11 @@ frappe.ui.form.on("Quality Inspection", {
 		grid?.set_column_disp_in_list_view("serial_no", serialized ? 1 : 0);
 		// every serialized unit names its serial — custody's supplier serials
 		// stay optional; rows with serials to name are marked in the identity fetch
-		grid?.update_docfield_property(
-			"serial_no",
-			"reqd",
-			serialized && frm.doc.reference_type === "Quality Control Lot" ? 1 : 0
-		);
+		const named_units = serialized && frm.doc.reference_type === "Quality Control Lot";
+		grid?.update_docfield_property("serial_no", "reqd", named_units ? 1 : 0);
+		// where the serial identifies the unit, the number is derived bookkeeping
+		grid?.update_docfield_property("unit_no", "hidden", named_units ? 1 : 0);
+		grid?.set_column_disp_in_list_view("unit_no", named_units ? 0 : 1);
 	},
 
 	toggle_sample_size_lock(frm) {
@@ -318,5 +317,26 @@ frappe.ui.form.on("Quality Inspection", {
 		// a custody row resolves its quantity through the item's row
 		frm.trigger("prefill_decided_quantity_from_lot");
 		frm.trigger("toggle_unit_quantity");
+	},
+});
+
+frappe.ui.form.on("Quality Inspection Reading Entry", {
+	serial_no(frm, cdt, cdn) {
+		// rows added by serial number themselves: same serial, same unit;
+		// a new serial takes the next free number
+		const row = locals[cdt][cdn];
+		if (!row.serial_no) {
+			return;
+		}
+		const twin = (frm.doc.unit_readings || []).find(
+			(entry) => entry.name !== row.name && entry.serial_no === row.serial_no
+		);
+		if (twin) {
+			frappe.model.set_value(cdt, cdn, "unit_no", twin.unit_no);
+		} else if (!row.unit_no) {
+			const next =
+				Math.max(0, ...(frm.doc.unit_readings || []).map((entry) => cint(entry.unit_no))) + 1;
+			frappe.model.set_value(cdt, cdn, "unit_no", next);
+		}
 	},
 });

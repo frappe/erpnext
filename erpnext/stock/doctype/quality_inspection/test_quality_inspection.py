@@ -520,6 +520,23 @@ class TestManualUnitEntry(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, inspection.validate_unit_readings_complete)
 
 
+class TestUnitAutoNumbering(ERPNextTestSuite):
+	def test_rows_number_themselves_from_serials(self):
+		inspection = frappe.new_doc("Quality Inspection")
+		for specification, serial in (("P", "S-1"), ("Q", "S-1"), ("P", "S-2"), ("P", None)):
+			inspection.append(
+				"unit_readings",
+				{"specification": specification, "serial_no": serial, "status": "Accepted"},
+			)
+		inspection.unit_readings[3].unit_no = 9
+
+		inspection.assign_unit_numbers_from_serials()
+
+		# same serial, same unit; a new serial takes the next free number;
+		# a hand-numbered serial-less row keeps its number
+		self.assertEqual([entry.unit_no for entry in inspection.unit_readings], [10, 10, 11, 9])
+
+
 class TestSampleWithinDecided(ERPNextTestSuite):
 	def test_oversized_sample_is_refused_on_save(self):
 		inspection = frappe.new_doc("Quality Inspection")
