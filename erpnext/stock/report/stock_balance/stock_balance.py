@@ -175,6 +175,7 @@ class StockBalanceReport:
 				item_table.item_group,
 				item_table.stock_uom,
 				item_table.item_name,
+				item_table.has_batch_no,
 			)
 			.where((sle.docstatus < 2) & (sle.is_cancelled == 0))
 			.orderby(sle.posting_datetime)

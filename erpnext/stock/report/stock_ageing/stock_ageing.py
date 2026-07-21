@@ -750,13 +750,20 @@ class FIFOSlots:
 
 		while qty_to_pop:
 			slot = fifo_queue[index] if fifo_queue else [0, None, 0]
-			slot_qty = flt(slot[FIFO_QTY_INDEX])
-			slot_value = flt(slot[FIFO_VALUE_INDEX])
+			qty_idx = BATCH_SLOT_QTY_INDEX if is_batch_slot(slot) else FIFO_QTY_INDEX
+			date_idx = BATCH_SLOT_DATE_INDEX if is_batch_slot(slot) else FIFO_DATE_INDEX
+			val_idx = BATCH_SLOT_VALUE_INDEX if is_batch_slot(slot) else FIFO_VALUE_INDEX
+
+			slot_qty = flt(slot[qty_idx])
+			slot_value = flt(slot[val_idx])
 
 			if 0 < slot_qty <= qty_to_pop:
 				qty_to_pop -= slot_qty
 				stock_value -= slot_value
-				self.transferred_item_details[transfer_key].append(fifo_queue.pop(index))
+				popped_slot = fifo_queue.pop(index)
+				self.transferred_item_details[transfer_key].append(
+					[slot_qty, popped_slot[date_idx], slot_value]
+				)
 			elif not fifo_queue:
 				fifo_queue.append([-(qty_to_pop), row.posting_date, -(stock_value)])
 				self.transferred_item_details[transfer_key].append(
@@ -765,11 +772,9 @@ class FIFOSlots:
 				qty_to_pop = 0
 				stock_value = 0
 			else:
-				slot[FIFO_QTY_INDEX] = slot_qty - qty_to_pop
-				slot[FIFO_VALUE_INDEX] = slot_value - stock_value
-				self.transferred_item_details[transfer_key].append(
-					[qty_to_pop, slot[FIFO_DATE_INDEX], stock_value]
-				)
+				slot[qty_idx] = slot_qty - qty_to_pop
+				slot[val_idx] = slot_value - stock_value
+				self.transferred_item_details[transfer_key].append([qty_to_pop, slot[date_idx], stock_value])
 				qty_to_pop = 0
 				stock_value = 0
 
