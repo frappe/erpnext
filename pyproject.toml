@@ -18,7 +18,11 @@ dependencies = [
     # integration dependencies
     "googlemaps",
     "plaid-python~=7.2.1",
+<<<<<<< HEAD
     "python-youtube~=0.8.0",
+=======
+    "python-youtube~=0.9.9",
+>>>>>>> 6d31af3a52 (chore: remove `apiclient` (#57339))
 
     # Not used directly - required by PyQRCode for PNG generation
     "pypng~=0.20220715.0",
