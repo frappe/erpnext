@@ -491,7 +491,6 @@ def get_material_request_items(
 	required_qty, actual_required_qty = _required_qty_for_mr(
 		doc, row, ignore_existing_ordered_qty, warehouse, bin_dict, consumed_qty, include_safety_stock
 	)
-	required_qty = _adjust_required_qty_for_uom(row, required_qty)
 	item_group_defaults = get_item_group_defaults(row.item_code, company)
 	conversion_factor = _mr_purchase_conversion_factor(row)
 	return _material_request_item_row(
@@ -513,12 +512,14 @@ def _required_qty_for_mr(
 	qty = flt(row.get("qty"))
 
 	if not ignore_existing_ordered_qty or bin_dict.get("projected_qty", 0) < 0:
-		return _apply_minimum_order_qty(doc, row, qty + safety_stock), qty
+		required_qty = _apply_minimum_order_qty(doc, row, qty + safety_stock)
+		return _adjust_required_qty_for_uom(row, required_qty), qty
 
 	key = (row.get("item_code"), warehouse)
 	available_qty = flt(bin_dict.get("projected_qty", 0)) - consumed_qty[key]
 	actual_required_qty = max(0, qty - available_qty)
 	required_qty = _apply_minimum_order_qty(doc, row, max(0, qty - (available_qty - safety_stock)))
+	required_qty = _adjust_required_qty_for_uom(row, required_qty)
 	consumed_qty[key] += qty - required_qty
 
 	return required_qty, actual_required_qty

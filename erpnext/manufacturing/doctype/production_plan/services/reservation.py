@@ -47,10 +47,8 @@ def get_reserved_qty_for_production_plan(item_code, warehouse):
 def _production_plan_reserved_qty(item_code, warehouse, non_completed_production_plans):
 	table = frappe.qb.DocType("Production Plan")
 	child = frappe.qb.DocType("Material Request Plan Item")
-	qty = (
-		Case().when(child.actual_required_qty == 0, child.required_bom_qty).else_(child.actual_required_qty)
-		* child.conversion_factor
-	)
+	reserved_qty = IfNull(child.actual_required_qty, child.quantity)
+	qty = Case().when(reserved_qty == 0, child.required_bom_qty).else_(reserved_qty) * child.conversion_factor
 	query = (
 		frappe.qb.from_(table)
 		.inner_join(child)
