@@ -323,9 +323,13 @@ def add_total_row_account(
 	consolidated=False,
 	add_blank_row=True,
 ):
+	name_key = "account" if consolidated else "section"
+	parent_key = "parent_account" if consolidated else "parent_section"
+	label_str = "'" + str(label) + "'"
+
 	total_row = {
-		"section_name": "'" + _("{0}").format(label) + "'",
-		"section": "'" + _("{0}").format(label) + "'",
+		f"{name_key}_name": label_str,
+		name_key: label_str,
 		"currency": currency,
 	}
 
@@ -336,15 +340,15 @@ def add_total_row_account(
 		period_list = get_filtered_list_for_consolidated_report(filters, period_list)
 
 	for row in data:
-		if row.get("parent_section"):
+		if row.get(parent_key):
 			for period in period_list:
 				key = period if consolidated else period["key"]
 				total_row.setdefault(key, 0.0)
 				total_row[key] += row.get(key, 0.0)
-				summary_data[label] += row.get(key)
+				summary_data[label] += row.get(key) or 0.0
 
 			total_row.setdefault("total", 0.0)
-			total_row["total"] += row["total"]
+			total_row["total"] += row.get("total", 0.0)
 
 	out.append(total_row)
 
@@ -484,7 +488,6 @@ def get_opening_range_using_fiscal_year(company, period_list):
 
 def get_report_summary(summary_data, currency):
 	report_summary = []
-
 	for label, value in summary_data.items():
 		report_summary.append({"value": value, "label": label, "datatype": "Currency", "currency": currency})
 
