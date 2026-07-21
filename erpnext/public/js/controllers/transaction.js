@@ -533,7 +533,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			return;
 		}
 
-		schedules.forEach((schedule) => (schedule.__checked = 1));
+		schedules.forEach((schedule) => {
+			schedule.__checked = 1;
+			schedule.currency = frm.doc.currency;
+		});
 
 		const dialog = new frappe.ui.Dialog({
 			title: __("Select Payment Schedule"),
