@@ -589,6 +589,11 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 		super.onload(doc, dt, dn);
 	}
 
+	company() {
+		super.company();
+		erpnext.accounts.dimensions.update_dimension(this.frm, this.frm.doctype);
+	}
+
 	refresh(doc, dt, dn) {
 		var me = this;
 		super.refresh();
