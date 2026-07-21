@@ -51,7 +51,7 @@ class GlobalDefaults(Document):
 		demo_company: DF.Link | None
 		disable_in_words: DF.Check
 		disable_rounded_total: DF.Check
-		hide_currency_symbol: DF.Literal["", "No", "Yes"]
+		hide_currency_symbol: DF.Check
 		use_posting_datetime_for_naming_documents: DF.Check
 	# end: auto-generated types
 

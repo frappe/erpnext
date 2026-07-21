@@ -6,6 +6,7 @@ import "./sms_manager";
 import "./utils/party";
 import "./controllers/stock_controller";
 import "./utils/serial_no_batch_selector";
+import "./utils/serial_batch_inline_editor";
 import "./payment/payments";
 import "./templates/visual_plant_floor_template.html";
 import "./plant_floor_visual/visual_plant";

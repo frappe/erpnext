@@ -30,6 +30,11 @@ def execute(filters=None):
 			_("Please select either the Item or Warehouse or Warehouse Type filter to generate the report.")
 		)
 
+	if not filters.from_date or not filters.to_date:
+		frappe.throw(
+			_("{0} and {1} are mandatory").format(frappe.bold(_("From Date")), frappe.bold(_("To Date")))
+		)
+
 	if filters.from_date > filters.to_date:
 		frappe.throw(_("From Date must be before To Date"))
 

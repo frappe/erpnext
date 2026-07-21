@@ -493,6 +493,49 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertEqual(transfer_entry.items[0].item_code, "_Test Item")
 		self.assertEqual(transfer_entry.items[0].qty, 2)
 
+	def test_work_order_transferred_qty_with_multiple_job_cards(self):
+		create_bom_with_multiple_operations()
+		work_order = make_wo_with_transfer_against_jc()
+		self.generate_required_stock(work_order)
+
+		job_cards = frappe.get_all(
+			"Job Card",
+			filters={"work_order": work_order.name},
+			pluck="name",
+			order_by="sequence_id",
+		)
+		completed_qty = (4, 3)
+
+		for job_card_name, qty in zip(job_cards, completed_qty, strict=True):
+			job_card = frappe.get_doc("Job Card", job_card_name)
+			job_card.for_quantity = qty
+			job_card.save()
+
+			transfer_entry = make_stock_entry_from_jc(job_card.name)
+			transfer_entry.fg_completed_qty = qty
+			transfer_entry.get_items()
+			transfer_entry.submit()
+
+			job_card.reload()
+			job_card.append(
+				"time_logs",
+				{
+					"from_time": now(),
+					"to_time": add_to_date(now(), hours=1),
+					"completed_qty": qty,
+				},
+			)
+			job_card.submit()
+
+		work_order.reload()
+		self.assertEqual(work_order.material_transferred_for_manufacturing, min(completed_qty))
+
+		# Refreshing required items must not replace the Job Card roll-up with the sum
+		# of FG quantities from Material Transfer Stock Entries (4 + 3).
+		work_order.update_required_items()
+		work_order.reload()
+		self.assertEqual(work_order.material_transferred_for_manufacturing, min(completed_qty))
+
 	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings", {"add_corrective_operation_cost_in_finished_good_valuation": 1}
 	)

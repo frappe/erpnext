@@ -28,8 +28,8 @@ erpnext.financial_statements = {
 	},
 
 	is_blank_row: function (data) {
+		if (!data || data.segment_values) return false;
 		return (
-			data &&
 			!data.account &&
 			!data.accounts &&
 			!data.child_accounts &&

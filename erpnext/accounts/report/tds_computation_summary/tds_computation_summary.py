@@ -21,11 +21,21 @@ class TDSComputationSummaryReport(TaxWithholdingDetailsReport):
 	AGGREGATE_FIELDS = ("total_amount", "tax_amount")
 
 	def validate_filters(self):
-		if self.filters.from_date > self.filters.to_date:
+		from_date = self.filters.from_date
+		to_date = self.filters.to_date
+		if not from_date or not to_date:
+			frappe.throw(
+				_("{0} and {1} are mandatory").format(
+					frappe.bold(_("From Date")),
+					frappe.bold(_("To Date")),
+				)
+			)
+
+		if from_date > to_date:
 			frappe.throw(_("From Date must be before To Date"))
 
-		from_year = get_fiscal_year(self.filters.from_date)[0]
-		to_year = get_fiscal_year(self.filters.to_date)[0]
+		from_year = get_fiscal_year(from_date)[0]
+		to_year = get_fiscal_year(to_date)[0]
 		if from_year != to_year:
 			frappe.throw(_("From Date and To Date lie in different Fiscal Year"))
 

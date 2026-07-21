@@ -20,7 +20,7 @@ from frappe.query_builder.functions import (
 	Substring,
 	Sum,
 )
-from frappe.utils import cint, nowdate, today, unique
+from frappe.utils import nowdate, today, unique
 from pypika import Order
 
 import erpnext
@@ -411,7 +411,7 @@ def get_project_name(
 		if filters.get("company"):
 			qb_filter_and_conditions.append(proj.company == filters.get("company"))
 
-	qb_filter_and_conditions.append(proj.status.notin(["Completed", "Cancelled"]))
+	qb_filter_and_conditions.append(proj.status.notin(["Completed", "Cancelled", "On hold"]))
 
 	q = qb.from_(proj)
 
@@ -809,10 +809,8 @@ def get_filtered_dimensions(
 
 	for field in searchfields:
 		df = meta.get_field(field)
-		if df and df.fieldtype != "Check":
+		if not df or df.fieldtype != "Check":
 			or_filters.append([field, "LIKE", "%%%s%%" % txt])
-		else:
-			or_filters.append([field, "=", cint(txt)])
 		fields.append(field)
 
 	if dimension_filters:

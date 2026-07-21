@@ -453,7 +453,13 @@ def _apply_other_locations(doc, mr_items, warehouses, ignore_ordered_qty, get_pa
 
 	new_mr_items = []
 	for item in mr_items:
-		get_materials_from_other_locations(item, warehouses, new_mr_items, doc.get("company"))
+		get_materials_from_other_locations(
+			item,
+			warehouses,
+			new_mr_items,
+			doc.get("company"),
+			consider_minimum_order_qty=doc.get("consider_minimum_order_qty"),
+		)
 	return new_mr_items
 
 
@@ -573,7 +579,9 @@ def _material_request_item_row(
 	}
 
 
-def get_materials_from_other_locations(item, warehouses, new_mr_items, company):
+def get_materials_from_other_locations(
+	item, warehouses, new_mr_items, company, consider_minimum_order_qty=False
+):
 	from erpnext.stock.doctype.pick_list.pick_list import get_available_item_locations
 
 	locations = get_available_item_locations(
@@ -590,7 +598,7 @@ def get_materials_from_other_locations(item, warehouses, new_mr_items, company):
 		required_qty = required_qty * item.get("conversion_factor")
 
 	required_qty = _transfer_from_locations(item, locations, new_mr_items, required_qty)
-	_add_remaining_purchase_request(item, new_mr_items, required_qty)
+	_add_remaining_purchase_request(item, new_mr_items, required_qty, consider_minimum_order_qty)
 
 
 def _transfer_from_locations(item, locations, new_mr_items, required_qty):
@@ -615,11 +623,14 @@ def _transfer_from_locations(item, locations, new_mr_items, required_qty):
 	return required_qty
 
 
-def _add_remaining_purchase_request(item, new_mr_items, required_qty):
+def _add_remaining_purchase_request(item, new_mr_items, required_qty, consider_minimum_order_qty=False):
 	# raise purchase request for remaining qty
 	precision = frappe.get_precision("Material Request Plan Item", "quantity")
 	if flt(required_qty, precision) <= 0:
 		return
+
+	if consider_minimum_order_qty:
+		required_qty = max(required_qty, flt(item.get("min_order_qty")))
 
 	purchase_uom = frappe.db.get_value("Item", item.get("item_code"), "purchase_uom")
 	if frappe.db.get_value("UOM", purchase_uom, "must_be_whole_number"):

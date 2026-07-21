@@ -355,7 +355,16 @@ def update_stock_entry_based_on_job_card(pick_list, stock_entry, job_card):
 	job_card = frappe.db.get_value(
 		"Job Card",
 		job_card,
-		["name", "work_order", "bom_no", "semi_fg_bom", "for_quantity", "transferred_qty", "wip_warehouse"],
+		[
+			"name",
+			"work_order",
+			"bom_no",
+			"semi_fg_bom",
+			"for_quantity",
+			"transferred_qty",
+			"wip_warehouse",
+			"project",
+		],
 		as_dict=True,
 	)
 
@@ -366,6 +375,7 @@ def update_stock_entry_based_on_job_card(pick_list, stock_entry, job_card):
 	stock_entry.bom_no = job_card.semi_fg_bom or job_card.bom_no
 	stock_entry.fg_completed_qty = max(flt(job_card.for_quantity) - flt(job_card.transferred_qty), 0)
 	stock_entry.to_warehouse = job_card.wip_warehouse
+	stock_entry.project = job_card.project
 
 	job_card_items = get_job_card_items_by_material_request_item(pick_list)
 

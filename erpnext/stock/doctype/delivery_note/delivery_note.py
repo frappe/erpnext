@@ -430,6 +430,11 @@ class DeliveryNote(SellingController):
 				d.actual_qty = flt(bin_data.actual_qty)
 				d.projected_qty = flt(bin_data.projected_qty)
 
+	def get_gl_entries(self, inventory_account_map=None):
+		from erpnext.stock.doctype.delivery_note.services.gl_composer import DeliveryNoteGLComposer
+
+		return DeliveryNoteGLComposer(self).compose(inventory_account_map)
+
 	def validate_expense_account(self):
 		company_values = frappe.get_cached_value(
 			"Company",

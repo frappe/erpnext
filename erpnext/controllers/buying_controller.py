@@ -330,30 +330,38 @@ class BuyingController(SubcontractingController):
 					address_display_field, render_address(self.get(address_field), check_permissions=False)
 				)
 
+	def get_validated_purchase_expense_details(self, item_code):
+		fields = ("purchase_expense_account", "purchase_expense_contra_account")
+		details = get_purchase_expense_account(item_code, self.company)
+
+		for field in fields:
+			if not details.get(field):
+				details[field] = frappe.get_cached_value("Company", self.company, field)
+
+		if not any(details.get(field) for field in fields):
+			return None
+
+		for field in fields:
+			if not details.get(field):
+				frappe.throw(
+					_("Please set {0} in Company {1} or in the Item Defaults of Item {2}").format(
+						frappe.bold(_(frappe.unscrub(field))), self.company, item_code
+					)
+				)
+
+		return details
+
 	def set_gl_entry_for_purchase_expense(self, gl_entries):
+		if not cint(frappe.db.get_single_value("Accounts Settings", "book_stock_expense_gl_entries")):
+			return
+
 		if self.doctype == "Purchase Invoice" and not self.update_stock:
 			return
 
 		for row in self.items:
-			details = get_purchase_expense_account(row.item_code, self.company)
-
-			if not details.purchase_expense_account:
-				details.purchase_expense_account = frappe.get_cached_value(
-					"Company", self.company, "purchase_expense_account"
-				)
-
-			if not details.purchase_expense_account:
-				return
-
-			if not details.purchase_expense_contra_account:
-				details.purchase_expense_contra_account = frappe.get_cached_value(
-					"Company", self.company, "purchase_expense_contra_account"
-				)
-
-			if not details.purchase_expense_contra_account:
-				frappe.throw(
-					_("Please set Purchase Expense Contra Account in Company {0}").format(self.company)
-				)
+			details = self.get_validated_purchase_expense_details(row.item_code)
+			if not details:
+				continue
 
 			amount = flt(row.valuation_rate * row.stock_qty, row.precision("base_amount"))
 			self.add_gl_entry(
