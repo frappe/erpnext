@@ -408,6 +408,7 @@ class FIFOSlots:
 				slot[FIFO_VALUE_INDEX] = flt(slot[FIFO_QTY_INDEX] * flt(row.valuation_rate))
 
 	def _revalue_reconciled_batch_slots(self, fifo_queue: list, batch_nos: list) -> None:
+		precision = get_float_precision()
 		for batch_no, _use_batchwise_valuation, qty, stock_value_difference in batch_nos:
 			if not flt(qty):
 				continue
@@ -417,7 +418,7 @@ class FIFOSlots:
 				for slot in fifo_queue
 				if is_batch_slot(slot) and slot[BATCH_SLOT_BATCH_INDEX] == batch_no
 			]
-			if flt(sum(flt(slot[BATCH_SLOT_QTY_INDEX]) for slot in slots) - flt(qty), 6):
+			if flt(sum(flt(slot[BATCH_SLOT_QTY_INDEX]) for slot in slots) - flt(qty), precision):
 				continue
 
 			rate = flt(stock_value_difference) / flt(qty)
