@@ -412,10 +412,17 @@ class FIFOSlots:
 			if not flt(qty):
 				continue
 
+			slots = [
+				slot
+				for slot in fifo_queue
+				if is_batch_slot(slot) and slot[BATCH_SLOT_BATCH_INDEX] == batch_no
+			]
+			if flt(sum(flt(slot[BATCH_SLOT_QTY_INDEX]) for slot in slots) - flt(qty), 6):
+				continue
+
 			rate = flt(stock_value_difference) / flt(qty)
-			for slot in fifo_queue:
-				if is_batch_slot(slot) and slot[BATCH_SLOT_BATCH_INDEX] == batch_no:
-					slot[BATCH_SLOT_VALUE_INDEX] = flt(slot[BATCH_SLOT_QTY_INDEX] * rate)
+			for slot in slots:
+				slot[BATCH_SLOT_VALUE_INDEX] = flt(slot[BATCH_SLOT_QTY_INDEX] * rate)
 
 	def _get_serial_and_batch_nos(
 		self, row: dict, bundle_wise_serial_nos: dict, bundle_wise_batch_nos: dict

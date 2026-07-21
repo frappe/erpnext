@@ -464,6 +464,57 @@ class TestStockAgeing(ERPNextTestSuite):
 
 		self.assertEqual(queue, [[10.0, "2021-12-01", 20.0], [2.0, "2021-12-02", 4.0]])
 
+	def test_stock_reco_decrease_rescales_slots_at_reco_rate(self):
+		"""Ledger (same wh): [+10 @ 100, +20 @ 250, reco reset >> 25 @ 220]
+		The valuation engine collapses the FIFO stack to qty_after * valuation_rate
+		on a reco, so remaining slot values follow the reco rate, not the lot rates."""
+		sle = [
+			frappe._dict(
+				name="Flask Item",
+				actual_qty=10,
+				qty_after_transaction=10,
+				stock_value_difference=1000,
+				valuation_rate=100,
+				warehouse="WH 1",
+				posting_date="2021-12-01",
+				voucher_type="Stock Entry",
+				voucher_no="001",
+				has_serial_no=False,
+				serial_no=None,
+			),
+			frappe._dict(
+				name="Flask Item",
+				actual_qty=20,
+				qty_after_transaction=30,
+				stock_value_difference=5000,
+				valuation_rate=200,
+				warehouse="WH 1",
+				posting_date="2021-12-02",
+				voucher_type="Stock Entry",
+				voucher_no="002",
+				has_serial_no=False,
+				serial_no=None,
+			),
+			frappe._dict(
+				name="Flask Item",
+				actual_qty=0,
+				qty_after_transaction=25,
+				stock_value_difference=(-500),
+				valuation_rate=220,
+				warehouse="WH 1",
+				posting_date="2021-12-03",
+				voucher_type="Stock Reconciliation",
+				voucher_no="003",
+				has_serial_no=False,
+				serial_no=None,
+			),
+		]
+
+		slots = FIFOSlots(self.filters, sle).generate()
+		queue = slots["Flask Item"]["fifo_queue"]
+
+		self.assertEqual(queue, [[5.0, "2021-12-01", 1100.0], [20.0, "2021-12-02", 4400.0]])
+
 	def test_batch_stock_reco_revaluation_rescales_slot_values(self):
 		"Ledger (same wh, batch B): [+10 @ 100, reco out >> 0, reco in >> 12 @ 2]"
 		from erpnext.stock.doctype.item.test_item import make_item
@@ -486,7 +537,7 @@ class TestStockAgeing(ERPNextTestSuite):
 				actual_qty=actual_qty,
 				qty_after_transaction=qty_after,
 				stock_value_difference=stock_value_difference,
-				valuation_rate=abs(stock_value_difference / actual_qty),
+				valuation_rate=abs(stock_value_difference / actual_qty) if actual_qty else 0,
 				warehouse="WH 1",
 				posting_date=posting_date,
 				voucher_type=voucher_type,
@@ -511,6 +562,57 @@ class TestStockAgeing(ERPNextTestSuite):
 			[
 				[batch_no, 1, 10.0, "2021-12-01", 20.0],
 				[batch_no, 1, 2.0, "2021-12-02", 4.0],
+			],
+		)
+
+	def test_partial_batch_reco_keeps_existing_slot_values(self):
+		"""Ledger (same wh, batch B): [+10 @ 100, single-SLE reco >> 12]
+		The reco entry qty (delta 2) does not cover the whole batch, so
+		stock_value_difference / qty is not the batch rate: skip the rescale."""
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item_code = make_item(
+			"Test Stock Ageing Partial Batch Reco",
+			{"is_stock_item": 1, "has_batch_no": 1, "valuation_method": "FIFO"},
+		).name
+
+		batch_no = "SA-PARTIAL-RECO-BATCH"
+		if not frappe.db.exists("Batch", batch_no):
+			frappe.get_doc({"doctype": "Batch", "batch_id": batch_no, "item": item_code}).insert(
+				ignore_permissions=True
+			)
+		frappe.db.set_value("Batch", batch_no, "use_batchwise_valuation", 1)
+
+		def make_sle(posting_date, voucher_type, voucher_no, actual_qty, qty_after, stock_value_difference):
+			return frappe._dict(
+				name=item_code,
+				actual_qty=actual_qty,
+				qty_after_transaction=qty_after,
+				stock_value_difference=stock_value_difference,
+				valuation_rate=abs(stock_value_difference / actual_qty) if actual_qty else 0,
+				warehouse="WH 1",
+				posting_date=posting_date,
+				voucher_type=voucher_type,
+				voucher_no=voucher_no,
+				has_serial_no=False,
+				has_batch_no=True,
+				serial_no=None,
+				batch_no=batch_no,
+			)
+
+		sle = [
+			make_sle("2021-12-01", "Stock Entry", "001", 10, 10, 1000),
+			make_sle("2021-12-02", "Stock Reconciliation", "002", 0, 12, -400),
+		]
+
+		slots = FIFOSlots(self.filters, sle).generate()
+		queue = slots[item_code]["fifo_queue"]
+
+		self.assertEqual(
+			queue,
+			[
+				[batch_no, 1, 10.0, "2021-12-01", 1000.0],
+				[batch_no, 1, 2.0, "2021-12-01", 400.0],
 			],
 		)
 
