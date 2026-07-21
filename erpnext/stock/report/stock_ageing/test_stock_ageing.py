@@ -379,6 +379,91 @@ class TestStockAgeing(ERPNextTestSuite):
 		self.assertEqual(queue, [[60.0, "2025-11-30", 60.0], [30.0, "2026-01-31", 30.0]])
 		self.assertEqual(report_data[0][7:15], [30.0, 30.0, 0.0, 0.0, 60.0, 60.0, 0.0, 0.0])
 
+	def test_stock_reco_revaluation_rescales_queue_values(self):
+		"Ledger (same wh): [+15 @ 100, reco reset >> 20 @ 50]"
+		sle = [
+			frappe._dict(
+				name="Flask Item",
+				actual_qty=15,
+				qty_after_transaction=15,
+				stock_value_difference=1500,
+				valuation_rate=100,
+				warehouse="WH 1",
+				posting_date="2021-12-01",
+				voucher_type="Stock Entry",
+				voucher_no="001",
+				has_serial_no=False,
+				serial_no=None,
+			),
+			frappe._dict(
+				name="Flask Item",
+				actual_qty=0,
+				qty_after_transaction=20,
+				stock_value_difference=(-500),
+				valuation_rate=50,
+				warehouse="WH 1",
+				posting_date="2021-12-02",
+				voucher_type="Stock Reconciliation",
+				voucher_no="002",
+				has_serial_no=False,
+				serial_no=None,
+			),
+		]
+
+		slots = FIFOSlots(self.filters, sle).generate()
+		queue = slots["Flask Item"]["fifo_queue"]
+
+		self.assertEqual(queue, [[15.0, "2021-12-01", 750.0], [5.0, "2021-12-02", 250.0]])
+
+	def test_stock_reco_with_split_out_and_in_sles_revalues_queue(self):
+		"Ledger (same wh): [+10 @ 100, reco out >> 0, reco in >> 12 @ 2]"
+		sle = [
+			frappe._dict(
+				name="Flask Item",
+				actual_qty=10,
+				qty_after_transaction=10,
+				stock_value_difference=1000,
+				valuation_rate=100,
+				warehouse="WH 1",
+				posting_date="2021-12-01",
+				voucher_type="Stock Entry",
+				voucher_no="001",
+				has_serial_no=False,
+				serial_no=None,
+			),
+			frappe._dict(
+				name="Flask Item",
+				actual_qty=(-10),
+				qty_after_transaction=0,
+				stock_value_difference=(-1000),
+				valuation_rate=100,
+				warehouse="WH 1",
+				posting_date="2021-12-02",
+				voucher_type="Stock Reconciliation",
+				voucher_no="002",
+				has_serial_no=False,
+				serial_no=None,
+			),
+			frappe._dict(
+				name="Flask Item",
+				actual_qty=12,
+				qty_after_transaction=12,
+				stock_value_difference=24,
+				valuation_rate=2,
+				warehouse="WH 1",
+				posting_date="2021-12-02",
+				voucher_type="Stock Reconciliation",
+				voucher_no="002",
+				has_serial_no=False,
+				serial_no=None,
+			),
+		]
+
+		slots = FIFOSlots(self.filters, sle).generate()
+		queue = slots["Flask Item"]["fifo_queue"]
+
+		self.assertEqual(queue, [[10.0, "2021-12-01", 20.0], [2.0, "2021-12-02", 4.0]])
+
 	def test_sequential_stock_reco_same_warehouse(self):
 		"""
 		Test back to back stock recos (same warehouse).
