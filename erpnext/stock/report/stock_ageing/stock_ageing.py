@@ -306,6 +306,7 @@ class FIFOSlots:
 
 		# prepare single sle voucher detail lookup
 		self.prepare_stock_reco_voucher_wise_count()
+		self.float_precision = get_float_precision()
 
 		if stock_ledger_entries is None:
 			# streaming path: nested queries invalidate the streaming cursor below,
@@ -408,7 +409,6 @@ class FIFOSlots:
 				slot[FIFO_VALUE_INDEX] = flt(slot[FIFO_QTY_INDEX] * flt(row.valuation_rate))
 
 	def _revalue_reconciled_batch_slots(self, fifo_queue: list, batch_nos: list) -> None:
-		precision = get_float_precision()
 		for batch_no, _use_batchwise_valuation, qty, stock_value_difference in batch_nos:
 			if not flt(qty):
 				continue
@@ -418,7 +418,7 @@ class FIFOSlots:
 				for slot in fifo_queue
 				if is_batch_slot(slot) and slot[BATCH_SLOT_BATCH_INDEX] == batch_no
 			]
-			if flt(sum(flt(slot[BATCH_SLOT_QTY_INDEX]) for slot in slots) - flt(qty), precision):
+			if flt(sum(flt(slot[BATCH_SLOT_QTY_INDEX]) for slot in slots) - flt(qty), self.float_precision):
 				continue
 
 			rate = flt(stock_value_difference) / flt(qty)
