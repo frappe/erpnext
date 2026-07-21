@@ -488,35 +488,49 @@ def get_material_request_items(
 	bin_dict,
 	consumed_qty,
 ):
-	required_qty = _required_qty_for_mr(
-		doc, row, ignore_existing_ordered_qty, warehouse, bin_dict, consumed_qty
+	required_qty, actual_required_qty = _required_qty_for_mr(
+		doc, row, ignore_existing_ordered_qty, warehouse, bin_dict, consumed_qty, include_safety_stock
 	)
-	required_qty = _adjust_required_qty_for_uom(row, required_qty, include_safety_stock)
+	required_qty = _adjust_required_qty_for_uom(row, required_qty)
 	item_group_defaults = get_item_group_defaults(row.item_code, company)
 	conversion_factor = _mr_purchase_conversion_factor(row)
 	return _material_request_item_row(
-		row, sales_order, target_warehouse, bin_dict, required_qty, conversion_factor, item_group_defaults
+		row,
+		sales_order,
+		target_warehouse,
+		bin_dict,
+		required_qty,
+		actual_required_qty,
+		conversion_factor,
+		item_group_defaults,
 	)
 
 
-def _required_qty_for_mr(doc, row, ignore_existing_ordered_qty, warehouse, bin_dict, consumed_qty):
-	if not ignore_existing_ordered_qty or bin_dict.get("projected_qty", 0) < 0:
-		required_qty = flt(row.get("qty"))
-	else:
-		key = (row.get("item_code"), warehouse)
-		available_qty = flt(bin_dict.get("projected_qty", 0)) - consumed_qty[key]
-		if available_qty > 0:
-			required_qty = max(0, flt(row.get("qty")) - available_qty)
-			consumed_qty[key] += min(flt(row.get("qty")), available_qty)
-		else:
-			required_qty = flt(row.get("qty"))
+def _required_qty_for_mr(
+	doc, row, ignore_existing_ordered_qty, warehouse, bin_dict, consumed_qty, include_safety_stock
+):
+	safety_stock = flt(row["safety_stock"]) if include_safety_stock else 0
+	qty = flt(row.get("qty"))
 
+	if not ignore_existing_ordered_qty or bin_dict.get("projected_qty", 0) < 0:
+		return _apply_minimum_order_qty(doc, row, qty + safety_stock), qty
+
+	key = (row.get("item_code"), warehouse)
+	available_qty = flt(bin_dict.get("projected_qty", 0)) - consumed_qty[key]
+	actual_required_qty = max(0, qty - available_qty)
+	required_qty = _apply_minimum_order_qty(doc, row, max(0, qty - (available_qty - safety_stock)))
+	consumed_qty[key] += qty - required_qty
+
+	return required_qty, actual_required_qty
+
+
+def _apply_minimum_order_qty(doc, row, required_qty):
 	if doc.get("consider_minimum_order_qty") and 0 < required_qty < row["min_order_qty"]:
-		required_qty = row["min_order_qty"]
+		return row["min_order_qty"]
 	return required_qty
 
 
-def _adjust_required_qty_for_uom(row, required_qty, include_safety_stock):
+def _adjust_required_qty_for_uom(row, required_qty):
 	if not row["purchase_uom"]:
 		row["purchase_uom"] = row["stock_uom"]
 
@@ -531,8 +545,6 @@ def _adjust_required_qty_for_uom(row, required_qty, include_safety_stock):
 
 	if frappe.db.get_value("UOM", row["purchase_uom"], "must_be_whole_number"):
 		required_qty = ceil(required_qty)
-	if include_safety_stock:
-		required_qty += flt(row["safety_stock"])
 	return required_qty
 
 
@@ -548,7 +560,14 @@ def _mr_purchase_conversion_factor(row):
 
 
 def _material_request_item_row(
-	row, sales_order, warehouse, bin_dict, required_qty, conversion_factor, item_group_defaults
+	row,
+	sales_order,
+	warehouse,
+	bin_dict,
+	required_qty,
+	actual_required_qty,
+	conversion_factor,
+	item_group_defaults,
 ):
 	warehouse = (
 		warehouse
@@ -560,6 +579,7 @@ def _material_request_item_row(
 		"item_code": row.item_code,
 		"item_name": row.item_name,
 		"quantity": required_qty / conversion_factor,
+		"actual_required_qty": actual_required_qty / conversion_factor,
 		"conversion_factor": conversion_factor,
 		"required_bom_qty": row.get("qty"),
 		"stock_uom": row.get("stock_uom"),
@@ -612,6 +632,7 @@ def _transfer_from_locations(item, locations, new_mr_items, required_qty):
 		new_dict.update(
 			{
 				"quantity": quantity,
+				"actual_required_qty": quantity,
 				"material_request_type": "Material Transfer",
 				"uom": new_dict.get("stock_uom"),  # internal transfer should be in stock UOM
 				"from_warehouse": d.get("warehouse"),
@@ -628,6 +649,8 @@ def _add_remaining_purchase_request(item, new_mr_items, required_qty, consider_m
 	precision = frappe.get_precision("Material Request Plan Item", "quantity")
 	if flt(required_qty, precision) <= 0:
 		return
+
+	item["actual_required_qty"] = required_qty / item.get("conversion_factor")
 
 	if consider_minimum_order_qty:
 		required_qty = max(required_qty, flt(item.get("min_order_qty")))

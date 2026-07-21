@@ -15,6 +15,7 @@ class MaterialRequestPlanItem(Document):
 		from frappe.types import DF
 
 		actual_qty: DF.Float
+		actual_required_qty: DF.Float
 		conversion_factor: DF.Float
 		description: DF.TextEditor | None
 		from_bom: DF.Link | None

@@ -501,3 +501,4 @@ erpnext.patches.v16_0.crm_settings_handle_allowed_users_for_frappe_crm
 erpnext.patches.v16_0.access_control_for_project_users
 erpnext.patches.v16_0.enable_book_stock_expense_gl_entries
 execute:frappe.db.set_single_value("Stock Settings", "use_inline_serial_batch_editor", 0)
+erpnext.patches.v16_0.backfill_mr_plan_item_actual_required_qty
