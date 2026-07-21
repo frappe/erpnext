@@ -159,8 +159,15 @@ def make_order(source_name: str):
 		},
 	)
 
-	if target_doc.doctype == "Purchase Order":
-		target_doc.set_missing_values()
+	target_doc.set_missing_values()
+
+	# blanket order rate is always in the company currency (Blanket Order has no
+	# currency of its own); convert it to the target document's currency
+	conversion_rate = flt(target_doc.get("conversion_rate")) or 1.0
+	if conversion_rate != 1.0:
+		for item in target_doc.items:
+			item.rate = flt(item.blanket_order_rate) / conversion_rate
+		target_doc.calculate_taxes_and_totals()
 
 	return target_doc
 
