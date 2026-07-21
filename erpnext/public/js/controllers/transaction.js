@@ -533,7 +533,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			return;
 		}
 
-		schedules.forEach((schedule) => (schedule.__checked = 1));
+		schedules.forEach((schedule) => {
+			schedule.__checked = 1;
+			schedule.currency = frm.doc.currency;
+		});
 
 		const dialog = new frappe.ui.Dialog({
 			title: __("Select Payment Schedule"),
@@ -568,9 +571,18 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 							read_only: 1,
 						},
 						{
+							fieldtype: "Link",
+							fieldname: "currency",
+							label: __("Currency"),
+							options: "Currency",
+							hidden: 1,
+							read_only: 1,
+						},
+						{
 							fieldtype: "Currency",
 							fieldname: "payment_amount",
 							label: __("Amount"),
+							options: "currency",
 							in_list_view: 1,
 							read_only: 1,
 						},
