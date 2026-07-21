@@ -632,7 +632,7 @@ def _transfer_from_locations(item, locations, new_mr_items, required_qty):
 		new_dict.update(
 			{
 				"quantity": quantity,
-				"actual_required_qty": quantity,
+				"actual_required_qty": min(quantity, flt(new_dict.get("required_bom_qty"))),
 				"material_request_type": "Material Transfer",
 				"uom": new_dict.get("stock_uom"),  # internal transfer should be in stock UOM
 				"from_warehouse": d.get("warehouse"),
@@ -650,7 +650,9 @@ def _add_remaining_purchase_request(item, new_mr_items, required_qty, consider_m
 	if flt(required_qty, precision) <= 0:
 		return
 
-	item["actual_required_qty"] = required_qty / item.get("conversion_factor")
+	item["actual_required_qty"] = min(required_qty, flt(item.get("required_bom_qty"))) / item.get(
+		"conversion_factor"
+	)
 
 	if consider_minimum_order_qty:
 		required_qty = max(required_qty, flt(item.get("min_order_qty")))
