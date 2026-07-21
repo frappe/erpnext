@@ -306,6 +306,7 @@ class FIFOSlots:
 
 		# prepare single sle voucher detail lookup
 		self.prepare_stock_reco_voucher_wise_count()
+		self.float_precision = get_float_precision()
 
 		if stock_ledger_entries is None:
 			# streaming path: nested queries invalidate the streaming cursor below,
@@ -370,6 +371,7 @@ class FIFOSlots:
 				row, fifo_queue, transferred_item_key, serial_nos, batch_nos, from_end
 			)
 
+		self._revalue_stock_reconciliation_slots(row, fifo_queue, batch_nos)
 		self._update_balances(row, key)
 		self._trim_serial_fifo_queue(row, key, fifo_queue)
 
@@ -392,6 +394,36 @@ class FIFOSlots:
 
 		# Stock reconciliation stores the final balance; FIFO needs the movement delta.
 		row.actual_qty = flt(row.qty_after_transaction) - flt(prev_balance_qty)
+
+	def _revalue_stock_reconciliation_slots(self, row: dict, fifo_queue: list, batch_nos: list) -> None:
+		if row.voucher_type != "Stock Reconciliation" or row.has_serial_no:
+			return
+
+		if row.has_batch_no:
+			if flt(row.actual_qty) > 0:
+				self._revalue_reconciled_batch_slots(fifo_queue, batch_nos)
+			return
+
+		for slot in fifo_queue:
+			if is_qty_slot(slot):
+				slot[FIFO_VALUE_INDEX] = flt(slot[FIFO_QTY_INDEX] * flt(row.valuation_rate))
+
+	def _revalue_reconciled_batch_slots(self, fifo_queue: list, batch_nos: list) -> None:
+		for batch_no, _use_batchwise_valuation, qty, stock_value_difference in batch_nos:
+			if not flt(qty):
+				continue
+
+			slots = [
+				slot
+				for slot in fifo_queue
+				if is_batch_slot(slot) and slot[BATCH_SLOT_BATCH_INDEX] == batch_no
+			]
+			if flt(sum(flt(slot[BATCH_SLOT_QTY_INDEX]) for slot in slots) - flt(qty), self.float_precision):
+				continue
+
+			rate = flt(stock_value_difference) / flt(qty)
+			for slot in slots:
+				slot[BATCH_SLOT_VALUE_INDEX] = flt(slot[BATCH_SLOT_QTY_INDEX] * rate)
 
 	def _get_serial_and_batch_nos(
 		self, row: dict, bundle_wise_serial_nos: dict, bundle_wise_batch_nos: dict
