@@ -260,3 +260,67 @@ class TestStockBalance(ERPNextTestSuite):
 			stock_ageing_data["fifo_queue"],
 			[[3.0, "2021-12-01", 30.0], [2.0, "2021-12-05", 20.0]],
 		)
+
+	def test_stock_balance_ageing_with_batch_slot_transfer(self):
+		item_code = "TEST-RCA-BATCH-ITEM-TEST"
+		frappe.delete_doc("Item", item_code, force=1, ignore_missing=1)
+		make_item(
+			item_code, {"has_batch_no": 1, "create_new_batch": 1, "is_stock_item": 1, "val_method": "FIFO"}
+		)
+
+		batch_id = "BATCH-RCA-TEST-001"
+		frappe.delete_doc("Batch", batch_id, force=1, ignore_missing=1)
+		frappe.get_doc(
+			{
+				"doctype": "Batch",
+				"batch_id": batch_id,
+				"item": item_code,
+				"item_code": item_code,
+				"use_batchwise_valuation": 1,
+			}
+		).insert()
+
+		# SLE 1: inward batch slot
+		make_stock_entry(
+			item_code=item_code,
+			qty=10.0,
+			rate=10.0,
+			to_warehouse=self.test_warehouse,
+			batch_no=batch_id,
+			posting_date="2025-01-02",
+			posting_time="12:00:00",
+		)
+
+		# SLE 2 & 3: transfer within the same warehouse (missing batch)
+		make_stock_entry(
+			item_code=item_code,
+			qty=3.0,
+			rate=10.0,
+			from_warehouse=self.test_warehouse,
+			to_warehouse=self.test_warehouse,
+			posting_date="2025-01-03",
+			posting_time="12:00:00",
+		)
+
+		filters = _dict(
+			{
+				"company": "_Test Company",
+				"from_date": "2025-01-01",
+				"to_date": "2025-01-05",
+				"item_code": [item_code],
+				"warehouse": [self.test_warehouse],
+				"show_stock_ageing_data": 1,
+				"valuation_field_type": "Currency",
+			}
+		)
+
+		columns, result = execute(filters)
+		self.assertEqual(len(result), 1)
+
+		# Assert specific queue values to prevent regression of stock value calculations
+		fifo_queue = result[0].get("fifo_queue")
+		self.assertEqual(len(fifo_queue), 2)
+		self.assertAlmostEqual(fifo_queue[0][0], 7.0)
+		self.assertAlmostEqual(fifo_queue[0][2], 70.0)
+		self.assertAlmostEqual(fifo_queue[1][0], 3.0)
+		self.assertAlmostEqual(fifo_queue[1][2], 30.0)
