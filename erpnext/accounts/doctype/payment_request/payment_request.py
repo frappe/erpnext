@@ -943,6 +943,7 @@ def set_payment_references(payment_schedules):
 				"description": row.get("description"),
 				"due_date": row.get("due_date"),
 				"amount": row.get("payment_amount"),
+				"currency": row.get("currency"),
 			}
 		)
 
