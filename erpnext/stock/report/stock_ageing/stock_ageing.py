@@ -370,6 +370,7 @@ class FIFOSlots:
 				row, fifo_queue, transferred_item_key, serial_nos, batch_nos, from_end
 			)
 
+		self._revalue_stock_reconciliation_slots(row, fifo_queue)
 		self._update_balances(row, key)
 		self._trim_serial_fifo_queue(row, key, fifo_queue)
 
@@ -392,6 +393,14 @@ class FIFOSlots:
 
 		# Stock reconciliation stores the final balance; FIFO needs the movement delta.
 		row.actual_qty = flt(row.qty_after_transaction) - flt(prev_balance_qty)
+
+	def _revalue_stock_reconciliation_slots(self, row: dict, fifo_queue: list) -> None:
+		if row.voucher_type != "Stock Reconciliation" or row.has_serial_no or row.has_batch_no:
+			return
+
+		for slot in fifo_queue:
+			if is_qty_slot(slot):
+				slot[FIFO_VALUE_INDEX] = flt(slot[FIFO_QTY_INDEX] * flt(row.valuation_rate))
 
 	def _get_serial_and_batch_nos(
 		self, row: dict, bundle_wise_serial_nos: dict, bundle_wise_batch_nos: dict
