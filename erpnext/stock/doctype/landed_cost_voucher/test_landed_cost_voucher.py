@@ -8,6 +8,7 @@ import frappe
 from frappe.utils import add_days, add_to_date, flt, now, nowtime, today
 
 from erpnext.accounts.doctype.account.test_account import create_account, get_inventory_account
+from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.utils import update_gl_entries_after
 from erpnext.assets.doctype.asset.test_asset import create_fixed_asset_item
@@ -348,6 +349,32 @@ class TestLandedCostVoucher(ERPNextTestSuite):
 			if not gle.get("is_cancelled"):
 				self.assertEqual(expected_values[gle.account][0], gle.debit)
 				self.assertEqual(expected_values[gle.account][1], gle.credit)
+
+	def test_landed_cost_voucher_preserves_exchange_gain_loss_journal(self):
+		pi = make_purchase_invoice(
+			update_stock=1,
+			supplier="_Test Supplier USD",
+			debit_to="_Test Payable USD - _TC",
+			currency="USD",
+			conversion_rate=50,
+		)
+		pe = get_payment_entry("Purchase Invoice", pi.name, bank_account="_Test Bank USD - _TC")
+		pe.reference_no = "1"
+		pe.reference_date = pi.posting_date
+		pe.source_exchange_rate = 55
+		pe.insert()
+		pe.submit()
+
+		journal_entry = frappe.db.get_value(
+			"Journal Entry Account",
+			{"reference_type": "Payment Entry", "reference_name": pe.name, "docstatus": 1},
+			"parent",
+		)
+		self.assertTrue(journal_entry)
+
+		create_landed_cost_voucher("Purchase Invoice", pi.name, pi.company)
+
+		self.assertEqual(frappe.db.get_value("Journal Entry", journal_entry, "docstatus"), 1)
 
 	def test_landed_cost_voucher_for_serialized_item(self):
 		frappe.db.set_value("Item", "_Test Serialized Item", "serial_no_series", "SNJJ.###")
