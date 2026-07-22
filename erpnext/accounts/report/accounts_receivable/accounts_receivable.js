@@ -140,8 +140,11 @@ frappe.query_reports["Accounts Receivable"] = {
 		{
 			fieldname: "territory",
 			label: __("Territory"),
-			fieldtype: "Link",
+			fieldtype: "MultiSelectList",
 			options: "Territory",
+			get_data: function (txt) {
+				return frappe.db.get_link_options("Territory", txt);
+			},
 		},
 		{
 			fieldname: "group_by_party",
