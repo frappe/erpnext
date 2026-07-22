@@ -8,12 +8,28 @@
  "is_standard": 1,
  "mappings": [
   {
-   "setting_field": "allow_to_edit_stock_uom_qty_for_purchase",
+   "setting_field": "allow_to_make_quality_inspection_after_purchase_or_delivery",
    "settings_doctype": "Stock Settings"
   },
   {
-   "setting_field": "allow_to_make_quality_inspection_after_purchase_or_delivery",
-   "settings_doctype": "Stock Settings"
+   "setting_field": "pr_required",
+   "settings_doctype": "Buying Settings"
+  },
+  {
+   "setting_field": "po_required",
+   "settings_doctype": "Buying Settings"
+  },
+  {
+   "setting_field": "project_update_frequency",
+   "settings_doctype": "Buying Settings"
+  },
+  {
+   "setting_field": "set_landed_cost_based_on_purchase_invoice_rate",
+   "settings_doctype": "Buying Settings"
+  },
+  {
+   "setting_field": "use_transaction_date_exchange_rate",
+   "settings_doctype": "Buying Settings"
   },
   {
    "setting_field": "maintain_same_rate",
@@ -32,18 +48,6 @@
    "settings_doctype": "Buying Settings"
   },
   {
-   "setting_field": "use_transaction_date_exchange_rate",
-   "settings_doctype": "Buying Settings"
-  },
-  {
-   "setting_field": "allow_multiple_items",
-   "settings_doctype": "Buying Settings"
-  },
-  {
-   "setting_field": "disable_last_purchase_rate",
-   "settings_doctype": "Buying Settings"
-  },
-  {
    "setting_field": "unlink_payment_on_cancellation_of_invoice",
    "settings_doctype": "Accounts Settings"
   },
@@ -56,22 +60,6 @@
    "settings_doctype": "Accounts Settings"
   },
   {
-   "setting_field": "po_required",
-   "settings_doctype": "Buying Settings"
-  },
-  {
-   "setting_field": "project_update_frequency",
-   "settings_doctype": "Buying Settings"
-  },
-  {
-   "setting_field": "pr_required",
-   "settings_doctype": "Buying Settings"
-  },
-  {
-   "setting_field": "set_landed_cost_based_on_purchase_invoice_rate",
-   "settings_doctype": "Buying Settings"
-  },
-  {
    "setting_field": "over_billing_allowance",
    "settings_doctype": "Accounts Settings"
   },
@@ -80,7 +68,7 @@
    "settings_doctype": "Accounts Settings"
   }
  ],
- "modified": "2026-07-10 11:25:15.824417",
+ "modified": "2026-07-20 15:56:46.025286",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice (Standard)",

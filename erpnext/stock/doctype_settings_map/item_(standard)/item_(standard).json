@@ -8,10 +8,6 @@
  "is_standard": 1,
  "mappings": [
   {
-   "setting_field": "selling_price_list",
-   "settings_doctype": "Selling Settings"
-  },
-  {
    "setting_field": "allow_uom_with_conversion_rate_defined_in_item",
    "settings_doctype": "Stock Settings"
   },
@@ -20,27 +16,31 @@
    "settings_doctype": "Stock Settings"
   },
   {
-   "setting_field": "do_not_update_variants",
-   "settings_doctype": "Item Variant Settings"
-  },
-  {
-   "setting_field": "allow_different_uom",
-   "settings_doctype": "Item Variant Settings"
+   "setting_field": "default_warehouse",
+   "settings_doctype": "Stock Settings"
   },
   {
    "setting_field": "valuation_method",
    "settings_doctype": "Stock Settings"
   },
   {
-   "setting_field": "default_warehouse",
+   "setting_field": "sample_retention_warehouse",
    "settings_doctype": "Stock Settings"
   },
   {
-   "setting_field": "sample_retention_warehouse",
-   "settings_doctype": "Stock Settings"
+   "setting_field": "selling_price_list",
+   "settings_doctype": "Selling Settings"
+  },
+  {
+   "setting_field": "do_not_update_variants",
+   "settings_doctype": "Item Variant Settings"
+  },
+  {
+   "setting_field": "allow_different_uom",
+   "settings_doctype": "Item Variant Settings"
   }
  ],
- "modified": "2026-07-10 11:10:38.332967",
+ "modified": "2026-07-20 15:03:19.905964",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item (Standard)",

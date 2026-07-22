@@ -8,10 +8,6 @@
  "is_standard": 1,
  "mappings": [
   {
-   "setting_field": "editable_price_list_rate",
-   "settings_doctype": "Selling Settings"
-  },
-  {
    "setting_field": "maintain_same_sales_rate",
    "settings_doctype": "Selling Settings"
   },
@@ -32,47 +28,19 @@
    "settings_doctype": "Selling Settings"
   },
   {
-   "setting_field": "allow_multiple_items",
-   "settings_doctype": "Selling Settings"
-  },
-  {
-   "setting_field": "hide_tax_id",
-   "settings_doctype": "Selling Settings"
-  },
-  {
    "setting_field": "enable_cutoff_date_on_bulk_delivery_note_creation",
    "settings_doctype": "Selling Settings"
-  },
-  {
-   "setting_field": "enable_discount_accounting",
-   "settings_doctype": "Selling Settings"
-  },
-  {
-   "setting_field": "enable_utm",
-   "settings_doctype": "Selling Settings"
-  },
-  {
-   "setting_field": "allow_to_edit_stock_uom_qty_for_sales",
-   "settings_doctype": "Stock Settings"
-  },
-  {
-   "setting_field": "show_barcode_field",
-   "settings_doctype": "Stock Settings"
-  },
-  {
-   "setting_field": "allow_to_make_quality_inspection_after_purchase_or_delivery",
-   "settings_doctype": "Stock Settings"
   },
   {
    "setting_field": "so_required",
    "settings_doctype": "Selling Settings"
   },
   {
-   "setting_field": "set_zero_rate_for_expired_batch",
-   "settings_doctype": "Selling Settings"
+   "setting_field": "allow_to_make_quality_inspection_after_purchase_or_delivery",
+   "settings_doctype": "Stock Settings"
   }
  ],
- "modified": "2026-07-10 11:18:20.045245",
+ "modified": "2026-07-20 15:19:29.595043",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note (Standard)",
