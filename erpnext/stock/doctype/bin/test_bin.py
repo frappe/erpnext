@@ -57,6 +57,21 @@ class TestBin(ERPNextTestSuite):
 		self.assertEqual(bin.valuation_rate, 0)
 		self.assertEqual(bin.stock_value, 0)
 
+	def test_recalculate_values_on_legacy_submitted_bin(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		item_code = make_item().name
+		warehouse = "_Test Warehouse - _TC"
+		make_stock_entry(item_code=item_code, target=warehouse, qty=10, rate=100)
+
+		bin = frappe.get_doc("Bin", {"item_code": item_code, "warehouse": warehouse})
+		bin.db_set({"docstatus": 1, "valuation_rate": 40, "stock_value": 400})
+		bin.reload()
+		bin.recalculate_values()
+
+		self.assertEqual(bin.valuation_rate, 100)
+		self.assertEqual(bin.stock_value, 1000)
+
 	def test_index_exists(self):
 		# has_index is db-agnostic; raw "SHOW INDEX" is MySQL-only and errors on Postgres
 		if not frappe.db.has_index("tabBin", "unique_item_warehouse"):

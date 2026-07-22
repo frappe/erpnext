@@ -68,6 +68,7 @@ class Bin(Document):
 		self.update_reserved_qty_for_sub_contracting(update_qty=False)
 		self.update_reserved_qty_for_production_plan(skip_project_qty_update=True, update_qty=False)
 		self.set_projected_qty()
+		self.flags.ignore_validate_update_after_submit = True
 		self.save()
 
 	def before_save(self):
