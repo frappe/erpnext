@@ -17,6 +17,10 @@ from pypika import Order
 import erpnext
 from erpnext.accounts.utils import build_qb_match_conditions
 from erpnext.selling.doctype.party_specific_item.party_specific_item import get_allowed_items_condition
+from erpnext.stock.doctype.company_restriction.company_restriction import (
+	get_restriction_criterion,
+	get_sql_condition,
+)
 from erpnext.stock.doctype.item.item_search import get_item_search_candidates
 from erpnext.stock.get_item_details import ItemDetailsCtx, _get_item_tax_template
 from erpnext.stock.utils import get_combine_datetime
@@ -193,6 +197,8 @@ def item_query(
 	if isinstance(filters, str):
 		filters = json.loads(filters)
 
+	company = filters.pop("company", None) if isinstance(filters, dict) else None
+
 	# Get searchfields from meta and use in Item Link field query
 	meta = frappe.get_meta(doctype, cached=True)
 	searchfields = meta.get_search_fields()
@@ -235,6 +241,10 @@ def item_query(
 			filters.pop("customer", None)
 			filters.pop("supplier", None)
 
+	company_cond = ""
+	if company:
+		company_cond = "and " + get_sql_condition(get_restriction_criterion("Item", [company]))
+
 	description_cond = ""
 	if frappe.db.estimate_count(doctype) < 50000:
 		# scan description only if items are less than 50000
@@ -260,7 +270,7 @@ def item_query(
 			and (tabItem.end_of_life > %(today)s or ifnull(tabItem.end_of_life, '0000-00-00')='0000-00-00')
 			and ({scond} or tabItem.item_code IN (select parent from `tabItem Barcode` where barcode LIKE %(txt)s)
 				{description_cond})
-			{fcond} {mcond} {candidate_cond} {allowed_items_cond}
+			{fcond} {mcond} {candidate_cond} {allowed_items_cond} {company_cond}
 		order by
 			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
 			if(locate(%(_txt)s, item_name), locate(%(_txt)s, item_name), 99999),
@@ -274,6 +284,7 @@ def item_query(
 			description_cond=description_cond,
 			candidate_cond=candidate_cond,
 			allowed_items_cond=allowed_items_cond.replace("%", "%%"),
+			company_cond=company_cond,
 		),
 		{
 			"today": nowdate(),

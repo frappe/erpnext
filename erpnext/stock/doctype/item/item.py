@@ -34,7 +34,6 @@ from erpnext.controllers.item_variant import (
 	validate_item_variant_attributes,
 )
 from erpnext.setup.utils import get_exchange_rate
-from erpnext.stock.doctype.company_restriction.company_restriction import validate_allowed_companies
 from erpnext.stock.doctype.item_default.item_default import ItemDefault
 from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 from erpnext.stock.utils import get_valuation_method
@@ -260,7 +259,6 @@ class Item(Document):
 		self.validate_serial_no_wise_valuation()
 		self.set_valuation_method_for_serial_no_wise_valuation()
 		self.validate_item_tax_net_rate_range()
-		validate_allowed_companies(self)
 
 		if not self.is_new():
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
