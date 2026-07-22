@@ -488,6 +488,7 @@ def _pick_list_mapping(postprocess):
 		"Work Order": {"doctype": "Pick List", "validation": {"docstatus": ["=", 1]}},
 		"Work Order Item": {
 			"doctype": "Pick List Item",
+			"field_no_map": ["transferred_qty"],
 			"postprocess": postprocess,
 			"condition": lambda doc: abs(doc.transferred_qty) < abs(doc.required_qty),
 		},

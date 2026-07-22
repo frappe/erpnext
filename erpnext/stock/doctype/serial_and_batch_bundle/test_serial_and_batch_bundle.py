@@ -1603,3 +1603,37 @@ class TestSerialandBatchBundleLogic(ERPNextTestSuite):
 		serialized.append("entries", {"qty": 5})
 		serialized.calculate_total_qty(save=False)
 		self.assertEqual(serialized.total_qty, 1)
+
+	def test_get_bundle_wise_serial_nos(self):
+		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+			get_bundle_wise_serial_nos,
+		)
+
+		item_code = make_item(properties={"has_serial_no": 1, "serial_no_series": "TEST-BWSN-.#####"}).name
+
+		bundles = []
+		for _ in range(2):
+			se = make_stock_entry(
+				item_code=item_code,
+				target="_Test Warehouse - _TC",
+				qty=3,
+				rate=100,
+			)
+			bundles.append(se.items[0].serial_and_batch_bundle)
+
+		data = [frappe._dict(serial_and_batch_bundle=bundle) for bundle in bundles]
+
+		self.assertEqual(get_bundle_wise_serial_nos([], {}), {})
+
+		bundle_wise_serial_nos = get_bundle_wise_serial_nos(data, {})
+		for bundle in bundles:
+			self.assertEqual(sorted(bundle_wise_serial_nos[bundle]), get_serial_nos_from_bundle(bundle))
+
+		# check_serial_nos must restrict the result to the requested serial nos
+		serial_no = get_serial_nos_from_bundle(bundles[0])[0]
+		bundle_wise_serial_nos = get_bundle_wise_serial_nos(
+			data, {"check_serial_nos": True, "serial_nos": [serial_no]}
+		)
+
+		self.assertNotIn(bundles[1], bundle_wise_serial_nos)
+		self.assertEqual(bundle_wise_serial_nos[bundles[0]], [serial_no])

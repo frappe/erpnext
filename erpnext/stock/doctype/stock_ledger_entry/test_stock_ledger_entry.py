@@ -34,6 +34,21 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 		create_items()
 		reset("Stock Entry")
 
+	def test_stock_write_takes_sle_advisory_gate(self):
+		if frappe.db.db_type != "postgres":
+			return
+
+		item = make_item(properties={"is_stock_item": 1}).name
+
+		def held_advisory_locks():
+			return frappe.db.sql(
+				"SELECT count(*) FROM pg_locks WHERE locktype = 'advisory' AND pid = pg_backend_pid()"
+			)[0][0]
+
+		before = held_advisory_locks()
+		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=1, rate=10)
+		self.assertGreater(held_advisory_locks(), before)
+
 	def test_incoming_value_for_transferred_serial_no_is_deterministic(self):
 		"""get_incoming_value_for_serial_nos picks the latest SLE (posting_date desc, limit 1) for a
 		serial transferred to another company. posting_date alone is non-total, so two same-date SLEs

@@ -147,7 +147,15 @@ frappe.ui.form.on("Asset", {
 						__("Actions")
 					);
 				}
-
+				if (frm.doc.status === "Fully Depreciated") {
+					frm.add_custom_button(
+						__("Asset Repair"),
+						function () {
+							frm.trigger("create_asset_repair");
+						},
+						__("Actions")
+					);
+				}
 				frm.add_custom_button(
 					__("Split Asset"),
 					function () {

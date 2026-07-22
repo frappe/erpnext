@@ -345,6 +345,26 @@ class SubcontractingInwardOrder(SubcontractingController):
 		if target_doc and target_doc.get("items"):
 			target_doc.items = []
 
+		def postprocess(source, target):
+			target.purpose = "Receive from Customer"
+			target.subcontracting_inward_order = source.name
+			target.set_stock_entry_type()
+
+			for rm_item in source.received_items:
+				if not rm_item.required_qty or not rm_item.is_customer_provided_item:
+					continue
+
+				target.append(
+					"items",
+					{
+						"scio_detail": rm_item.get("name"),
+						"item_code": rm_item.get("rm_item_code"),
+						"qty": calculate_qty_as_per_bom(rm_item),
+						"t_warehouse": rm_item.get("warehouse"),
+						"stock_uom": rm_item.get("stock_uom"),
+					},
+				)
+
 		stock_entry = get_mapped_doc(
 			"Subcontracting Inward Order",
 			self.name,
@@ -357,29 +377,9 @@ class SubcontractingInwardOrder(SubcontractingController):
 				},
 			},
 			target_doc,
+			postprocess=postprocess,
 			ignore_child_tables=True,
 		)
-
-		stock_entry.purpose = "Receive from Customer"
-		stock_entry.subcontracting_inward_order = self.name
-
-		stock_entry.set_stock_entry_type()
-
-		for rm_item in self.received_items:
-			if not rm_item.required_qty or not rm_item.is_customer_provided_item:
-				continue
-
-			items_dict = {
-				rm_item.get("rm_item_code"): {
-					"scio_detail": rm_item.get("name"),
-					"item_code": rm_item.get("rm_item_code"),
-					"qty": calculate_qty_as_per_bom(rm_item),
-					"t_warehouse": rm_item.get("warehouse"),
-					"stock_uom": rm_item.get("stock_uom"),
-				}
-			}
-
-			stock_entry.append("items", items_dict[rm_item.get("rm_item_code")])
 
 		if target_doc:
 			return stock_entry
@@ -391,6 +391,27 @@ class SubcontractingInwardOrder(SubcontractingController):
 		if target_doc and target_doc.get("items"):
 			target_doc.items = []
 
+		def postprocess(source, target):
+			target.purpose = "Return Raw Material to Customer"
+			target.subcontracting_inward_order = source.name
+			target.set_stock_entry_type()
+
+			for rm_item in source.received_items:
+				qty = rm_item.received_qty - rm_item.work_order_qty - rm_item.returned_qty
+				if not qty:
+					continue
+
+				target.append(
+					"items",
+					{
+						"scio_detail": rm_item.get("name"),
+						"item_code": rm_item.get("rm_item_code"),
+						"qty": qty,
+						"s_warehouse": rm_item.get("warehouse"),
+						"stock_uom": rm_item.get("stock_uom"),
+					},
+				)
+
 		stock_entry = get_mapped_doc(
 			"Subcontracting Inward Order",
 			self.name,
@@ -403,27 +424,9 @@ class SubcontractingInwardOrder(SubcontractingController):
 				},
 			},
 			target_doc,
+			postprocess=postprocess,
 			ignore_child_tables=True,
 		)
-
-		stock_entry.purpose = "Return Raw Material to Customer"
-		stock_entry.set_stock_entry_type()
-		stock_entry.subcontracting_inward_order = self.name
-
-		for rm_item in self.received_items:
-			items_dict = {
-				rm_item.get("rm_item_code"): {
-					"scio_detail": rm_item.get("name"),
-					"item_code": rm_item.get("rm_item_code"),
-					"qty": rm_item.received_qty - rm_item.work_order_qty - rm_item.returned_qty,
-					"s_warehouse": rm_item.get("warehouse"),
-					"stock_uom": rm_item.get("stock_uom"),
-				}
-			}
-
-			ste_item = items_dict[rm_item.get("rm_item_code")]
-			if ste_item.get("qty"):
-				stock_entry.append("items", ste_item)
 
 		if target_doc:
 			return stock_entry
@@ -435,6 +438,58 @@ class SubcontractingInwardOrder(SubcontractingController):
 		if target_doc and target_doc.get("items"):
 			target_doc.items = []
 
+		def postprocess(source, target):
+			target.purpose = "Subcontracting Delivery"
+			target.subcontracting_inward_order = source.name
+			target.set_stock_entry_type()
+
+			scio_details = []
+			allow_over = frappe.get_single_value("Selling Settings", "allow_delivery_of_overproduced_qty")
+			for fg_item in source.items:
+				qty = (
+					fg_item.produced_qty
+					if allow_over
+					else min(fg_item.qty, fg_item.produced_qty) - fg_item.delivered_qty
+				)
+				if qty < 0:
+					continue
+
+				scio_details.append(fg_item.name)
+				target.append(
+					"items",
+					{
+						"qty": qty,
+						"item_code": fg_item.item_code,
+						"s_warehouse": fg_item.delivery_warehouse,
+						"stock_uom": fg_item.stock_uom,
+						"scio_detail": fg_item.name,
+						"is_finished_item": 1,
+					},
+				)
+
+			if (
+				frappe.get_single_value("Selling Settings", "deliver_secondary_items")
+				and source.secondary_items
+				and scio_details
+			):
+				for secondary_item in source.secondary_items:
+					if secondary_item.reference_name not in scio_details:
+						continue
+
+					qty = secondary_item.produced_qty - secondary_item.delivered_qty
+					if qty > 0:
+						target.append(
+							"items",
+							{
+								"qty": qty,
+								"item_code": secondary_item.item_code,
+								"s_warehouse": secondary_item.warehouse,
+								"stock_uom": secondary_item.stock_uom,
+								"scio_detail": secondary_item.name,
+								"secondary_item_type": secondary_item.secondary_item_type,
+							},
+						)
+
 		stock_entry = get_mapped_doc(
 			"Subcontracting Inward Order",
 			self.name,
@@ -447,63 +502,9 @@ class SubcontractingInwardOrder(SubcontractingController):
 				},
 			},
 			target_doc,
+			postprocess=postprocess,
 			ignore_child_tables=True,
 		)
-
-		stock_entry.purpose = "Subcontracting Delivery"
-		stock_entry.set_stock_entry_type()
-		stock_entry.subcontracting_inward_order = self.name
-		scio_details = []
-
-		allow_over = frappe.get_single_value("Selling Settings", "allow_delivery_of_overproduced_qty")
-		for fg_item in self.items:
-			qty = (
-				fg_item.produced_qty
-				if allow_over
-				else min(fg_item.qty, fg_item.produced_qty) - fg_item.delivered_qty
-			)
-			if qty < 0:
-				continue
-
-			scio_details.append(fg_item.name)
-			items_dict = {
-				fg_item.item_code: {
-					"qty": qty,
-					"item_code": fg_item.item_code,
-					"s_warehouse": fg_item.delivery_warehouse,
-					"stock_uom": fg_item.stock_uom,
-					"scio_detail": fg_item.name,
-					"is_finished_item": 1,
-				}
-			}
-
-			stock_entry.append("items", items_dict[fg_item.item_code])
-
-		if (
-			frappe.get_single_value("Selling Settings", "deliver_secondary_items")
-			and self.secondary_items
-			and scio_details
-		):
-			secondary_items = [
-				secondary_item
-				for secondary_item in self.secondary_items
-				if secondary_item.reference_name in scio_details
-			]
-			for secondary_item in secondary_items:
-				qty = secondary_item.produced_qty - secondary_item.delivered_qty
-				if qty > 0:
-					items_dict = {
-						secondary_item.item_code: {
-							"qty": secondary_item.produced_qty - secondary_item.delivered_qty,
-							"item_code": secondary_item.item_code,
-							"s_warehouse": secondary_item.warehouse,
-							"stock_uom": secondary_item.stock_uom,
-							"scio_detail": secondary_item.name,
-							"secondary_item_type": secondary_item.secondary_item_type,
-						}
-					}
-
-					stock_entry.append("items", items_dict[secondary_item.item_code])
 
 		if target_doc:
 			return stock_entry
@@ -514,6 +515,26 @@ class SubcontractingInwardOrder(SubcontractingController):
 	def make_subcontracting_return(self, target_doc: Document | str | None = None):
 		if target_doc and target_doc.get("items"):
 			target_doc.items = []
+
+		def postprocess(source, target):
+			target.purpose = "Subcontracting Return"
+			target.set_stock_entry_type()
+
+			for fg_item in source.items:
+				qty = fg_item.delivered_qty - fg_item.returned_qty
+				if qty < 0:
+					continue
+
+				target.append(
+					"items",
+					{
+						"qty": qty,
+						"item_code": fg_item.item_code,
+						"stock_uom": fg_item.stock_uom,
+						"scio_detail": fg_item.name,
+						"is_finished_item": 1,
+					},
+				)
 
 		stock_entry = get_mapped_doc(
 			"Subcontracting Inward Order",
@@ -528,28 +549,9 @@ class SubcontractingInwardOrder(SubcontractingController):
 				},
 			},
 			target_doc,
+			postprocess=postprocess,
 			ignore_child_tables=True,
 		)
-
-		stock_entry.purpose = "Subcontracting Return"
-		stock_entry.set_stock_entry_type()
-
-		for fg_item in self.items:
-			qty = fg_item.delivered_qty - fg_item.returned_qty
-			if qty < 0:
-				continue
-
-			items_dict = {
-				fg_item.item_code: {
-					"qty": qty,
-					"item_code": fg_item.item_code,
-					"stock_uom": fg_item.stock_uom,
-					"scio_detail": fg_item.name,
-					"is_finished_item": 1,
-				}
-			}
-
-			stock_entry.append("items", items_dict[fg_item.item_code])
 
 		if target_doc:
 			return stock_entry

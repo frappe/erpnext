@@ -20,11 +20,12 @@ from frappe.query_builder.functions import (
 	Substring,
 	Sum,
 )
-from frappe.utils import cint, nowdate, today, unique
+from frappe.utils import nowdate, today, unique
 from pypika import Order
 
 import erpnext
 from erpnext.accounts.utils import build_qb_match_conditions
+from erpnext.stock.doctype.company_restriction.company_restriction import get_restriction_criterion
 from erpnext.stock.get_item_details import _get_item_tax_template
 from erpnext.stock.utils import get_combine_datetime
 from erpnext.utilities.query import get_filter_conditions_qb
@@ -214,6 +215,7 @@ def item_query(
 	doctype = "Item"
 
 	filters = frappe.parse_json(filters)
+	company = filters.pop("company", None) if isinstance(filters, dict) else None
 
 	if filters and isinstance(filters, dict):
 		if filters.get("customer") or filters.get("supplier"):
@@ -361,6 +363,9 @@ def item_query(
 		.offset(start)
 	)
 
+	if company:
+		query = query.where(get_restriction_criterion("Item", [company]))
+
 	return query.run(as_dict=as_dict)
 
 
@@ -411,7 +416,7 @@ def get_project_name(
 		if filters.get("company"):
 			qb_filter_and_conditions.append(proj.company == filters.get("company"))
 
-	qb_filter_and_conditions.append(proj.status.notin(["Completed", "Cancelled"]))
+	qb_filter_and_conditions.append(proj.status.notin(["Completed", "Cancelled", "On hold"]))
 
 	q = qb.from_(proj)
 
@@ -809,10 +814,8 @@ def get_filtered_dimensions(
 
 	for field in searchfields:
 		df = meta.get_field(field)
-		if df and df.fieldtype != "Check":
+		if not df or df.fieldtype != "Check":
 			or_filters.append([field, "LIKE", "%%%s%%" % txt])
-		else:
-			or_filters.append([field, "=", cint(txt)])
 		fields.append(field)
 
 	if dimension_filters:

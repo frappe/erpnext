@@ -39,7 +39,10 @@ class TermsandConditions(Document):
 def get_terms_and_conditions(template_name: str, doc: str | dict):
 	doc = frappe.parse_json(doc)
 
-	terms = frappe.get_cached_value("Terms and Conditions", template_name, "terms")
+	tnc = frappe.get_cached_doc("Terms and Conditions", template_name)
+	tnc.check_permission()
 
-	if terms:
-		return frappe.render_template(terms, doc, restrict_globals=True)
+	if not tnc.terms:
+		return
+
+	return frappe.render_template(tnc.terms, doc, restrict_globals=True)
