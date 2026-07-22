@@ -8,10 +8,6 @@
  "is_standard": 1,
  "mappings": [
   {
-   "setting_field": "editable_price_list_rate",
-   "settings_doctype": "Selling Settings"
-  },
-  {
    "setting_field": "maintain_same_sales_rate",
    "settings_doctype": "Selling Settings"
   },
@@ -24,10 +20,6 @@
    "settings_doctype": "Selling Settings"
   },
   {
-   "setting_field": "validate_selling_price",
-   "settings_doctype": "Selling Settings"
-  },
-  {
    "setting_field": "allow_negative_rates_for_items",
    "settings_doctype": "Selling Settings"
   },
@@ -36,28 +28,12 @@
    "settings_doctype": "Selling Settings"
   },
   {
-   "setting_field": "allow_multiple_items",
+   "setting_field": "dn_required",
    "settings_doctype": "Selling Settings"
   },
   {
-   "setting_field": "hide_tax_id",
+   "setting_field": "so_required",
    "settings_doctype": "Selling Settings"
-  },
-  {
-   "setting_field": "enable_discount_accounting",
-   "settings_doctype": "Selling Settings"
-  },
-  {
-   "setting_field": "enable_utm",
-   "settings_doctype": "Selling Settings"
-  },
-  {
-   "setting_field": "allow_to_edit_stock_uom_qty_for_sales",
-   "settings_doctype": "Stock Settings"
-  },
-  {
-   "setting_field": "show_barcode_field",
-   "settings_doctype": "Stock Settings"
   },
   {
    "setting_field": "allow_to_make_quality_inspection_after_purchase_or_delivery",
@@ -72,39 +48,19 @@
    "settings_doctype": "Accounts Settings"
   },
   {
-   "setting_field": "dn_required",
-   "settings_doctype": "Selling Settings"
-  },
-  {
-   "setting_field": "so_required",
-   "settings_doctype": "Selling Settings"
-  },
-  {
-   "setting_field": "fetch_timesheet_in_sales_invoice",
-   "settings_doctype": "Projects Settings"
-  },
-  {
-   "setting_field": "set_zero_rate_for_expired_batch",
-   "settings_doctype": "Selling Settings"
-  },
-  {
-   "setting_field": "invoice_type",
-   "settings_doctype": "POS Settings"
-  },
-  {
-   "setting_field": "post_change_gl_entries",
-   "settings_doctype": "POS Settings"
+   "setting_field": "role_allowed_to_over_bill",
+   "settings_doctype": "Accounts Settings"
   },
   {
    "setting_field": "over_billing_allowance",
    "settings_doctype": "Accounts Settings"
   },
   {
-   "setting_field": "role_allowed_to_over_bill",
-   "settings_doctype": "Accounts Settings"
+   "setting_field": "fetch_timesheet_in_sales_invoice",
+   "settings_doctype": "Projects Settings"
   }
  ],
- "modified": "2026-07-10 11:14:25.977200",
+ "modified": "2026-07-20 15:32:43.080034",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice (Standard)",

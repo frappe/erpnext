@@ -8,31 +8,15 @@
  "is_standard": 1,
  "mappings": [
   {
-   "setting_field": "allow_sales_order_creation_for_expired_quotation",
-   "settings_doctype": "Selling Settings"
-  },
-  {
    "setting_field": "allow_zero_qty_in_quotation",
    "settings_doctype": "Selling Settings"
   },
   {
-   "setting_field": "enable_utm",
-   "settings_doctype": "Selling Settings"
-  },
-  {
-   "setting_field": "validate_selling_price",
-   "settings_doctype": "Selling Settings"
-  },
-  {
-   "setting_field": "editable_price_list_rate",
-   "settings_doctype": "Selling Settings"
-  },
-  {
-   "setting_field": "allow_multiple_items",
+   "setting_field": "allow_sales_order_creation_for_expired_quotation",
    "settings_doctype": "Selling Settings"
   }
  ],
- "modified": "2026-07-10 11:47:57.123329",
+ "modified": "2026-07-20 15:34:21.043827",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation (Standard)",

@@ -8,10 +8,6 @@
  "is_standard": 1,
  "mappings": [
   {
-   "setting_field": "auto_reserve_stock",
-   "settings_doctype": "Stock Settings"
-  },
-  {
    "setting_field": "material_consumption",
    "settings_doctype": "Manufacturing Settings"
   },
@@ -20,23 +16,11 @@
    "settings_doctype": "Manufacturing Settings"
   },
   {
-   "setting_field": "backflush_raw_materials_based_on",
-   "settings_doctype": "Manufacturing Settings"
-  },
-  {
    "setting_field": "allow_editing_of_items_and_quantities_in_work_order",
    "settings_doctype": "Manufacturing Settings"
   },
   {
-   "setting_field": "overproduction_percentage_for_work_order",
-   "settings_doctype": "Manufacturing Settings"
-  },
-  {
-   "setting_field": "transfer_extra_materials_percentage",
-   "settings_doctype": "Manufacturing Settings"
-  },
-  {
-   "setting_field": "validate_components_quantities_per_bom",
+   "setting_field": "make_serial_no_batch_from_work_order",
    "settings_doctype": "Manufacturing Settings"
   },
   {
@@ -48,19 +32,15 @@
    "settings_doctype": "Manufacturing Settings"
   },
   {
-   "setting_field": "make_serial_no_batch_from_work_order",
+   "setting_field": "overproduction_percentage_for_work_order",
    "settings_doctype": "Manufacturing Settings"
   },
   {
-   "setting_field": "overproduction_percentage_for_sales_order",
+   "setting_field": "transfer_extra_materials_percentage",
    "settings_doctype": "Manufacturing Settings"
-  },
-  {
-   "setting_field": "enable_stock_reservation",
-   "settings_doctype": "Stock Settings"
   }
  ],
- "modified": "2026-07-10 11:32:58.811771",
+ "modified": "2026-07-20 17:58:35.816693",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order (Standard)",
