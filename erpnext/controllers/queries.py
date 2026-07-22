@@ -16,6 +16,7 @@ from pypika import Order
 
 import erpnext
 from erpnext.accounts.utils import build_qb_match_conditions
+from erpnext.stock.doctype.company_restriction.company_restriction import get_blocked_masters
 from erpnext.stock.get_item_details import ItemDetailsCtx, _get_item_tax_template
 from erpnext.stock.utils import get_combine_datetime
 
@@ -176,12 +177,22 @@ def tax_account_query(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=False):
+def item_query(
+	doctype: str,
+	txt: str,
+	searchfield: str,
+	start: int,
+	page_len: int,
+	filters: dict | str | None = None,
+	as_dict: bool = False,
+):
 	doctype = "Item"
 	conditions = []
 
 	if isinstance(filters, str):
 		filters = json.loads(filters)
+
+	company = filters.pop("company", None) if isinstance(filters, dict) else None
 
 	# Get searchfields from meta and use in Item Link field query
 	meta = frappe.get_meta(doctype, cached=True)
@@ -258,6 +269,14 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 		else:
 			filters.pop("customer", None)
 			filters.pop("supplier", None)
+
+	if company:
+		restricted = frappe.get_all("Item", filters={"restrict_to_companies": 1}, pluck="name")
+		blocked = get_blocked_masters("Item", restricted, company) if restricted else []
+		if blocked:
+			if (existing := filters.get("name")) and existing[0] == "not in":
+				blocked = sorted(set(blocked) | set(existing[1]))
+			filters["name"] = ["not in", blocked]
 
 	description_cond = ""
 	if frappe.db.estimate_count(doctype) < 50000:

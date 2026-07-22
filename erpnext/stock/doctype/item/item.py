@@ -33,7 +33,6 @@ from erpnext.controllers.item_variant import (
 	make_variant_item_code,
 	validate_item_variant_attributes,
 )
-from erpnext.stock.doctype.company_restriction.company_restriction import validate_allowed_companies
 from erpnext.stock.doctype.item_default.item_default import ItemDefault
 from erpnext.stock.utils import get_valuation_method
 
@@ -231,7 +230,6 @@ class Item(Document):
 		self.cant_change()
 		self.validate_serialized_change_with_bundle()
 		self.validate_item_tax_net_rate_range()
-		validate_allowed_companies(self)
 
 		if not self.is_new():
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")

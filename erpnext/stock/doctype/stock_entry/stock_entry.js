@@ -1234,7 +1234,7 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 		};
 
 		this.frm.fields_dict.items.grid.get_field("item_code").get_query = function () {
-			return erpnext.queries.item({ is_stock_item: 1 });
+			return erpnext.queries.item({ is_stock_item: 1, company: me.frm.doc.company });
 		};
 
 		this.frm.set_query("purchase_order", function () {
