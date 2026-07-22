@@ -1,6 +1,8 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from unittest.mock import patch
+
 import frappe
 
 from erpnext.stock.report.stock_ageing.stock_ageing import FIFOSlots, format_report_data, get_average_age
@@ -62,6 +64,131 @@ class TestStockAgeing(ERPNextTestSuite):
 		self.assertEqual(queue[0][0], 20.0)
 		data = format_report_data(self.filters, slots, self.filters["to_date"])
 		self.assertEqual(data[0][8], 40.0)  # valuating for stock value between age 0-30
+
+	def test_moving_average_value_ties_to_stock_balance(self):
+		"""For Moving Average items the queue value is re-derived as qty * rate so the
+		report's stock value ties to Stock Balance, instead of stranding a residual
+		from FIFO-by-qty consumption vs blended outgoing value."""
+		sle = [
+			frappe._dict(
+				name="MA Item",
+				actual_qty=10,
+				qty_after_transaction=10,
+				stock_value_difference=1000,
+				valuation_rate=100,
+				warehouse="WH 1",
+				posting_date="2021-12-01",
+				voucher_type="Stock Entry",
+				voucher_no="001",
+				has_serial_no=False,
+				serial_no=None,
+			),
+			frappe._dict(
+				name="MA Item",
+				actual_qty=10,
+				qty_after_transaction=20,
+				stock_value_difference=2000,
+				valuation_rate=150,
+				warehouse="WH 1",
+				posting_date="2021-12-02",
+				voucher_type="Stock Entry",
+				voucher_no="002",
+				has_serial_no=False,
+				serial_no=None,
+			),
+			frappe._dict(
+				name="MA Item",
+				actual_qty=(-10),
+				qty_after_transaction=10,
+				stock_value_difference=(-1500),
+				valuation_rate=150,
+				warehouse="WH 1",
+				posting_date="2021-12-03",
+				voucher_type="Stock Entry",
+				voucher_no="003",
+				has_serial_no=False,
+				serial_no=None,
+			),
+			frappe._dict(
+				name="MA Item",
+				actual_qty=(-5),
+				qty_after_transaction=5,
+				stock_value_difference=(-750),
+				valuation_rate=150,
+				warehouse="WH 1",
+				posting_date="2021-12-04",
+				voucher_type="Stock Entry",
+				voucher_no="004",
+				has_serial_no=False,
+				serial_no=None,
+			),
+		]
+
+		with patch("erpnext.stock.utils.get_valuation_method", return_value="Moving Average"):
+			slots = FIFOSlots(self.filters, sle).generate()
+
+		queue = slots["MA Item"]["fifo_queue"]
+		total_value = sum(slot[2] for slot in queue)
+
+		# Stock Balance bal_val = qty_after_transaction * valuation_rate = 5 * 150
+		self.assertEqual(total_value, 750.0)
+
+	def test_lifo_consumes_newest_first(self):
+		"""LIFO items consume the most recent inward first, so the oldest lot stays on
+		hand. The remaining queue, stock value and average age must reflect the older
+		stock, unlike the default FIFO which retains the newest lots."""
+		sle = [
+			frappe._dict(
+				name="LIFO Item",
+				actual_qty=30,
+				qty_after_transaction=30,
+				stock_value_difference=30,
+				warehouse="WH 1",
+				posting_date="2021-12-01",
+				voucher_type="Stock Entry",
+				voucher_no="001",
+				has_serial_no=False,
+				serial_no=None,
+			),
+			frappe._dict(
+				name="LIFO Item",
+				actual_qty=20,
+				qty_after_transaction=50,
+				stock_value_difference=20,
+				warehouse="WH 1",
+				posting_date="2021-12-02",
+				voucher_type="Stock Entry",
+				voucher_no="002",
+				has_serial_no=False,
+				serial_no=None,
+			),
+			frappe._dict(
+				name="LIFO Item",
+				actual_qty=(-10),
+				qty_after_transaction=40,
+				stock_value_difference=(-10),
+				warehouse="WH 1",
+				posting_date="2021-12-03",
+				voucher_type="Stock Entry",
+				voucher_no="003",
+				has_serial_no=False,
+				serial_no=None,
+			),
+		]
+
+		with patch("erpnext.stock.utils.get_valuation_method", return_value="LIFO"):
+			slots = FIFOSlots(self.filters, sle).generate()
+
+		queue = slots["LIFO Item"]["fifo_queue"]
+
+		# newest lot (day 2) is consumed first: oldest 30 stays, newest drops 20 -> 10
+		self.assertEqual(queue[0][0], 30.0)
+		self.assertEqual(queue[-1][0], 10.0)
+		self.assertEqual(sum(slot[0] for slot in queue), 40.0)
+		self.assertEqual(sum(slot[2] for slot in queue), 40.0)
+
+		# average age skews older than the FIFO result (8.5) because the old lot is retained
+		self.assertEqual(get_average_age(queue, self.filters["to_date"]), 8.75)
 
 	def test_insufficient_balance(self):
 		"Reference: Case 3 in stock_ageing_fifo_logic.md (same wh)"
@@ -251,6 +378,243 @@ class TestStockAgeing(ERPNextTestSuite):
 
 		self.assertEqual(queue, [[60.0, "2025-11-30", 60.0], [30.0, "2026-01-31", 30.0]])
 		self.assertEqual(report_data[0][7:15], [30.0, 30.0, 0.0, 0.0, 60.0, 60.0, 0.0, 0.0])
+
+	def test_stock_reco_revaluation_rescales_queue_values(self):
+		"Ledger (same wh): [+15 @ 100, reco reset >> 20 @ 50]"
+		sle = [
+			frappe._dict(
+				name="Flask Item",
+				actual_qty=15,
+				qty_after_transaction=15,
+				stock_value_difference=1500,
+				valuation_rate=100,
+				warehouse="WH 1",
+				posting_date="2021-12-01",
+				voucher_type="Stock Entry",
+				voucher_no="001",
+				has_serial_no=False,
+				serial_no=None,
+			),
+			frappe._dict(
+				name="Flask Item",
+				actual_qty=0,
+				qty_after_transaction=20,
+				stock_value_difference=(-500),
+				valuation_rate=50,
+				warehouse="WH 1",
+				posting_date="2021-12-02",
+				voucher_type="Stock Reconciliation",
+				voucher_no="002",
+				has_serial_no=False,
+				serial_no=None,
+			),
+		]
+
+		slots = FIFOSlots(self.filters, sle).generate()
+		queue = slots["Flask Item"]["fifo_queue"]
+
+		self.assertEqual(queue, [[15.0, "2021-12-01", 750.0], [5.0, "2021-12-02", 250.0]])
+
+	def test_stock_reco_with_split_out_and_in_sles_revalues_queue(self):
+		"Ledger (same wh): [+10 @ 100, reco out >> 0, reco in >> 12 @ 2]"
+		sle = [
+			frappe._dict(
+				name="Flask Item",
+				actual_qty=10,
+				qty_after_transaction=10,
+				stock_value_difference=1000,
+				valuation_rate=100,
+				warehouse="WH 1",
+				posting_date="2021-12-01",
+				voucher_type="Stock Entry",
+				voucher_no="001",
+				has_serial_no=False,
+				serial_no=None,
+			),
+			frappe._dict(
+				name="Flask Item",
+				actual_qty=(-10),
+				qty_after_transaction=0,
+				stock_value_difference=(-1000),
+				valuation_rate=100,
+				warehouse="WH 1",
+				posting_date="2021-12-02",
+				voucher_type="Stock Reconciliation",
+				voucher_no="002",
+				has_serial_no=False,
+				serial_no=None,
+			),
+			frappe._dict(
+				name="Flask Item",
+				actual_qty=12,
+				qty_after_transaction=12,
+				stock_value_difference=24,
+				valuation_rate=2,
+				warehouse="WH 1",
+				posting_date="2021-12-02",
+				voucher_type="Stock Reconciliation",
+				voucher_no="002",
+				has_serial_no=False,
+				serial_no=None,
+			),
+		]
+
+		slots = FIFOSlots(self.filters, sle).generate()
+		queue = slots["Flask Item"]["fifo_queue"]
+
+		self.assertEqual(queue, [[10.0, "2021-12-01", 20.0], [2.0, "2021-12-02", 4.0]])
+
+	def test_stock_reco_decrease_rescales_slots_at_reco_rate(self):
+		"""Ledger (same wh): [+10 @ 100, +20 @ 250, reco reset >> 25 @ 220]
+		The valuation engine collapses the FIFO stack to qty_after * valuation_rate
+		on a reco, so remaining slot values follow the reco rate, not the lot rates."""
+		sle = [
+			frappe._dict(
+				name="Flask Item",
+				actual_qty=10,
+				qty_after_transaction=10,
+				stock_value_difference=1000,
+				valuation_rate=100,
+				warehouse="WH 1",
+				posting_date="2021-12-01",
+				voucher_type="Stock Entry",
+				voucher_no="001",
+				has_serial_no=False,
+				serial_no=None,
+			),
+			frappe._dict(
+				name="Flask Item",
+				actual_qty=20,
+				qty_after_transaction=30,
+				stock_value_difference=5000,
+				valuation_rate=200,
+				warehouse="WH 1",
+				posting_date="2021-12-02",
+				voucher_type="Stock Entry",
+				voucher_no="002",
+				has_serial_no=False,
+				serial_no=None,
+			),
+			frappe._dict(
+				name="Flask Item",
+				actual_qty=0,
+				qty_after_transaction=25,
+				stock_value_difference=(-500),
+				valuation_rate=220,
+				warehouse="WH 1",
+				posting_date="2021-12-03",
+				voucher_type="Stock Reconciliation",
+				voucher_no="003",
+				has_serial_no=False,
+				serial_no=None,
+			),
+		]
+
+		slots = FIFOSlots(self.filters, sle).generate()
+		queue = slots["Flask Item"]["fifo_queue"]
+
+		self.assertEqual(queue, [[5.0, "2021-12-01", 1100.0], [20.0, "2021-12-02", 4400.0]])
+
+	def test_batch_stock_reco_revaluation_rescales_slot_values(self):
+		"Ledger (same wh, batch B): [+10 @ 100, reco out >> 0, reco in >> 12 @ 2]"
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item_code = make_item(
+			"Test Stock Ageing Batch Reco Revaluation",
+			{"is_stock_item": 1, "has_batch_no": 1, "valuation_method": "FIFO"},
+		).name
+
+		batch_no = "SA-RECO-REVALUE-BATCH"
+		if not frappe.db.exists("Batch", batch_no):
+			frappe.get_doc({"doctype": "Batch", "batch_id": batch_no, "item": item_code}).insert(
+				ignore_permissions=True
+			)
+		frappe.db.set_value("Batch", batch_no, "use_batchwise_valuation", 1)
+
+		def make_sle(posting_date, voucher_type, voucher_no, actual_qty, qty_after, stock_value_difference):
+			return frappe._dict(
+				name=item_code,
+				actual_qty=actual_qty,
+				qty_after_transaction=qty_after,
+				stock_value_difference=stock_value_difference,
+				valuation_rate=abs(stock_value_difference / actual_qty) if actual_qty else 0,
+				warehouse="WH 1",
+				posting_date=posting_date,
+				voucher_type=voucher_type,
+				voucher_no=voucher_no,
+				has_serial_no=False,
+				has_batch_no=True,
+				serial_no=None,
+				batch_no=batch_no,
+			)
+
+		sle = [
+			make_sle("2021-12-01", "Stock Entry", "001", 10, 10, 1000),
+			make_sle("2021-12-02", "Stock Reconciliation", "002", -10, 0, -1000),
+			make_sle("2021-12-02", "Stock Reconciliation", "002", 12, 12, 24),
+		]
+
+		slots = FIFOSlots(self.filters, sle).generate()
+		queue = slots[item_code]["fifo_queue"]
+
+		self.assertEqual(
+			queue,
+			[
+				[batch_no, 1, 10.0, "2021-12-01", 20.0],
+				[batch_no, 1, 2.0, "2021-12-02", 4.0],
+			],
+		)
+
+	def test_partial_batch_reco_keeps_existing_slot_values(self):
+		"""Ledger (same wh, batch B): [+10 @ 100, single-SLE reco >> 12]
+		The reco entry qty (delta 2) does not cover the whole batch, so
+		stock_value_difference / qty is not the batch rate: skip the rescale."""
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item_code = make_item(
+			"Test Stock Ageing Partial Batch Reco",
+			{"is_stock_item": 1, "has_batch_no": 1, "valuation_method": "FIFO"},
+		).name
+
+		batch_no = "SA-PARTIAL-RECO-BATCH"
+		if not frappe.db.exists("Batch", batch_no):
+			frappe.get_doc({"doctype": "Batch", "batch_id": batch_no, "item": item_code}).insert(
+				ignore_permissions=True
+			)
+		frappe.db.set_value("Batch", batch_no, "use_batchwise_valuation", 1)
+
+		def make_sle(posting_date, voucher_type, voucher_no, actual_qty, qty_after, stock_value_difference):
+			return frappe._dict(
+				name=item_code,
+				actual_qty=actual_qty,
+				qty_after_transaction=qty_after,
+				stock_value_difference=stock_value_difference,
+				valuation_rate=abs(stock_value_difference / actual_qty) if actual_qty else 0,
+				warehouse="WH 1",
+				posting_date=posting_date,
+				voucher_type=voucher_type,
+				voucher_no=voucher_no,
+				has_serial_no=False,
+				has_batch_no=True,
+				serial_no=None,
+				batch_no=batch_no,
+			)
+
+		sle = [
+			make_sle("2021-12-01", "Stock Entry", "001", 10, 10, 1000),
+			make_sle("2021-12-02", "Stock Reconciliation", "002", 0, 12, -400),
+		]
+
+		slots = FIFOSlots(self.filters, sle).generate()
+		queue = slots[item_code]["fifo_queue"]
+
+		self.assertEqual(
+			queue,
+			[
+				[batch_no, 1, 10.0, "2021-12-01", 1000.0],
+				[batch_no, 1, 2.0, "2021-12-01", 400.0],
+			],
+		)
 
 	def test_sequential_stock_reco_same_warehouse(self):
 		"""

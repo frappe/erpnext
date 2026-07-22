@@ -433,8 +433,6 @@ scheduler_events = {
 	"cron": {
 		"0/15 * * * *": [
 			"erpnext.manufacturing.doctype.bom_update_log.bom_update_log.resume_bom_cost_update_jobs",
-		],
-		"0/30 * * * *": [
 			"erpnext.stock.doctype.repost_item_valuation.repost_item_valuation.run_parallel_reposting",
 		],
 		# Hourly but offset by 30 minutes
@@ -449,6 +447,7 @@ scheduler_events = {
 	],
 	"hourly_long": [],
 	"hourly_maintenance": [
+		"erpnext.crm.doctype.appointment.appointment.handle_expired_unverified_appointments",
 		"erpnext.stock.doctype.repost_item_valuation.repost_item_valuation.repost_entries",
 		"erpnext.utilities.bulk_transaction.retry",
 		"erpnext.projects.doctype.project.project.collect_project_status",
