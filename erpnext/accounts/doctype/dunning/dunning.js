@@ -169,23 +169,10 @@ frappe.ui.form.on("Dunning", {
 	},
 	get_dunning_letter_text: function (frm) {
 		if (frm.doc.dunning_type) {
-			frappe.call({
-				method: "erpnext.accounts.doctype.dunning.dunning.get_dunning_letter_text",
-				args: {
-					dunning_type: frm.doc.dunning_type,
-					language: frm.doc.language,
-					doc: frm.doc,
-				},
-				callback: function (r) {
-					if (r.message) {
-						frm.set_value("body_text", r.message.body_text);
-						frm.set_value("closing_text", r.message.closing_text);
-						frm.set_value("language", r.message.language);
-					} else {
-						frm.set_value("body_text", "");
-						frm.set_value("closing_text", "");
-					}
-				},
+			frm.call("get_dunning_letter_text").then((r) => {
+				if (!r.exc) {
+					frm.refresh_fields();
+				}
 			});
 		}
 	},

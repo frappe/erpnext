@@ -431,6 +431,7 @@ scheduler_events = {
 	],
 	"hourly_long": [],
 	"hourly_maintenance": [
+		"erpnext.crm.doctype.appointment.appointment.handle_expired_unverified_appointments",
 		"erpnext.stock.doctype.repost_item_valuation.repost_item_valuation.repost_entries",
 		"erpnext.utilities.bulk_transaction.retry",
 		"erpnext.projects.doctype.project.project.collect_project_status",
