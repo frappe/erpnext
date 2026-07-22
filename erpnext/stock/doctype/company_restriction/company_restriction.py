@@ -167,24 +167,28 @@ def validate_transaction_company(doc, method=None):
 
 def get_master_references(doc):
 	references = defaultdict(set)
-	collect_master_references(doc, references)
+	collect_master_references([doc], references)
 	for table_field in doc.meta.get_table_fields():
-		for row in doc.get(table_field.fieldname) or []:
-			collect_master_references(row, references)
+		if rows := doc.get(table_field.fieldname):
+			collect_master_references(rows, references)
 
 	return references
 
 
-def collect_master_references(row, references):
-	meta = frappe.get_meta(row.doctype)
-	for field in meta.get_link_fields():
-		if field.options in RESTRICTABLE_MASTER_DOCTYPES and (value := row.get(field.fieldname)):
-			references[field.options].add(value)
+def collect_master_references(rows, references):
+	meta = frappe.get_meta(rows[0].doctype)
+	link_fields = [field for field in meta.get_link_fields() if field.options in RESTRICTABLE_MASTER_DOCTYPES]
+	dynamic_link_fields = meta.get_dynamic_link_fields()
 
-	for field in meta.get_dynamic_link_fields():
-		doctype = row.get(field.options)
-		if doctype in RESTRICTABLE_MASTER_DOCTYPES and (value := row.get(field.fieldname)):
-			references[doctype].add(value)
+	for row in rows:
+		for field in link_fields:
+			if value := row.get(field.fieldname):
+				references[field.options].add(value)
+
+		for field in dynamic_link_fields:
+			doctype = row.get(field.options)
+			if doctype in RESTRICTABLE_MASTER_DOCTYPES and (value := row.get(field.fieldname)):
+				references[doctype].add(value)
 
 
 def get_blocked_masters(doctype, names, company):
