@@ -21,7 +21,7 @@ class DraftLinkFinder:
 
 		names: set[str] = set()
 		for filters in self._link_filters():
-			names.update(frappe.get_list(self.target_doctype, filters=filters, pluck="name"))
+			names.update(frappe.get_list(self.target_doctype, filters=filters, pluck="name", limit=0))
 		return sorted(names)
 
 	def _link_filters(self) -> Iterator[list]:

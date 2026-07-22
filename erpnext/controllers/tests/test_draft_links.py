@@ -36,7 +36,10 @@ class TestDraftLinks(ERPNextTestSuite):
 
 		self.assertIn(packing_slip.name, get_existing_drafts("Delivery Note", dn.name, "Packing Slip"))
 
-	def test_nonexistent_target_doctype_returns_empty_for_non_admin(self):
+	def test_nonexistent_target_doctype_does_not_raise_for_non_admin(self):
+		# guards check ordering: for non-Administrator users has_permission()
+		# raises DoesNotExistError on unknown doctypes, so existence must be
+		# checked first (Administrator short-circuits and would not catch this)
 		with self.set_user("test@example.com"):
 			drafts = get_existing_drafts("Sales Order", "SO-0001", "Inter Company Purchase Order")
 		self.assertEqual(drafts, [])
