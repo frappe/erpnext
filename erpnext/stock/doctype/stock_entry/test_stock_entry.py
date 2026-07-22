@@ -2751,6 +2751,50 @@ class TestStockEntry(FrappeTestCase):
 
 		self.assertEqual(se.process_loss_qty, 50)
 
+	@change_settings("Stock Settings", {"allow_negative_stock": 0})
+	def test_cancel_seeds_replay_from_before_posting_datetime_bucket(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		item = make_item().name
+		warehouse = create_warehouse("Cancel Replay Warehouse", company="_Test Company")
+
+		def stock_entry(qty, posting_date, **kwargs):
+			return make_stock_entry(
+				item_code=item,
+				qty=qty,
+				company="_Test Company",
+				posting_date=posting_date,
+				posting_time="10:00:00",
+				**kwargs,
+			)
+
+		stock_entry(25, add_days(today(), -3), to_warehouse=warehouse, rate=10)
+
+		bucket_date = add_days(today(), -2)
+		stock_entry(20, bucket_date, from_warehouse=warehouse)
+		receipt = stock_entry(75, bucket_date, to_warehouse=warehouse, rate=10)
+		duplicate_issue = stock_entry(20, bucket_date, from_warehouse=warehouse)
+
+		frappe.flags.dont_execute_stock_reposts = True
+		self.addCleanup(frappe.flags.pop, "dont_execute_stock_reposts")
+
+		duplicate_issue.reload()
+		duplicate_issue.cancel()
+
+		self.assertEqual(
+			flt(
+				frappe.db.get_value(
+					"Stock Ledger Entry",
+					{"voucher_no": receipt.name, "is_cancelled": 0},
+					"qty_after_transaction",
+				)
+			),
+			80,
+		)
+
+		overdraw = stock_entry(100, add_days(today(), -1), from_warehouse=warehouse, do_not_submit=True)
+		self.assertRaises(NegativeStockError, overdraw.submit)
+
 
 def make_serialized_item(**args):
 	args = frappe._dict(args)
