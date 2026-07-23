@@ -3,7 +3,6 @@
 
 """Stock reservation for Production Plan (extracted from production_plan.py)."""
 
-
 import frappe
 from frappe import _
 from frappe.model.document import Document
@@ -48,15 +47,11 @@ def get_reserved_qty_for_production_plan(item_code, warehouse):
 def _production_plan_reserved_qty(item_code, warehouse, non_completed_production_plans):
 	table = frappe.qb.DocType("Production Plan")
 	child = frappe.qb.DocType("Material Request Plan Item")
-	qty = (
-		Case().when(child.quantity == 0, child.required_bom_qty).else_(child.quantity)
-		* child.conversion_factor
-	)
 	query = (
 		frappe.qb.from_(table)
 		.inner_join(child)
 		.on(table.name == child.parent)
-		.select(Sum(qty))
+		.select(Sum(child.required_bom_qty))
 		.where(_plan_reserved_filter(table, child, item_code, warehouse))
 	)
 	if non_completed_production_plans:

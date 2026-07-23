@@ -489,9 +489,8 @@ def get_material_request_items(
 	consumed_qty,
 ):
 	required_qty = _required_qty_for_mr(
-		doc, row, ignore_existing_ordered_qty, warehouse, bin_dict, consumed_qty
+		doc, row, ignore_existing_ordered_qty, warehouse, bin_dict, consumed_qty, include_safety_stock
 	)
-	required_qty = _adjust_required_qty_for_uom(row, required_qty, include_safety_stock)
 	item_group_defaults = get_item_group_defaults(row.item_code, company)
 	conversion_factor = _mr_purchase_conversion_factor(row)
 	return _material_request_item_row(
@@ -499,24 +498,31 @@ def get_material_request_items(
 	)
 
 
-def _required_qty_for_mr(doc, row, ignore_existing_ordered_qty, warehouse, bin_dict, consumed_qty):
-	if not ignore_existing_ordered_qty or bin_dict.get("projected_qty", 0) < 0:
-		required_qty = flt(row.get("qty"))
-	else:
-		key = (row.get("item_code"), warehouse)
-		available_qty = flt(bin_dict.get("projected_qty", 0)) - consumed_qty[key]
-		if available_qty > 0:
-			required_qty = max(0, flt(row.get("qty")) - available_qty)
-			consumed_qty[key] += min(flt(row.get("qty")), available_qty)
-		else:
-			required_qty = flt(row.get("qty"))
+def _required_qty_for_mr(
+	doc, row, ignore_existing_ordered_qty, warehouse, bin_dict, consumed_qty, include_safety_stock
+):
+	safety_stock = flt(row["safety_stock"]) if include_safety_stock else 0
+	qty = flt(row.get("qty"))
 
-	if doc.get("consider_minimum_order_qty") and 0 < required_qty < row["min_order_qty"]:
-		required_qty = row["min_order_qty"]
+	if not ignore_existing_ordered_qty or bin_dict.get("projected_qty", 0) < 0:
+		required_qty = _apply_minimum_order_qty(doc, row, qty + safety_stock)
+		return _adjust_required_qty_for_uom(row, required_qty)
+
+	key = (row.get("item_code"), warehouse)
+	available_qty = flt(bin_dict.get("projected_qty", 0)) - consumed_qty[key]
+	required_qty = _apply_minimum_order_qty(doc, row, max(0, qty - (available_qty - safety_stock)))
+	required_qty = _adjust_required_qty_for_uom(row, required_qty)
+	consumed_qty[key] += qty - required_qty
 	return required_qty
 
 
-def _adjust_required_qty_for_uom(row, required_qty, include_safety_stock):
+def _apply_minimum_order_qty(doc, row, required_qty):
+	if doc.get("consider_minimum_order_qty") and 0 < required_qty < row["min_order_qty"]:
+		return row["min_order_qty"]
+	return required_qty
+
+
+def _adjust_required_qty_for_uom(row, required_qty):
 	if not row["purchase_uom"]:
 		row["purchase_uom"] = row["stock_uom"]
 
@@ -531,8 +537,6 @@ def _adjust_required_qty_for_uom(row, required_qty, include_safety_stock):
 
 	if frappe.db.get_value("UOM", row["purchase_uom"], "must_be_whole_number"):
 		required_qty = ceil(required_qty)
-	if include_safety_stock:
-		required_qty += flt(row["safety_stock"])
 	return required_qty
 
 
