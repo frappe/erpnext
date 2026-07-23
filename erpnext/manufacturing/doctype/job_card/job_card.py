@@ -163,6 +163,7 @@ class JobCard(Document):
 		self.validate_time_logs()
 		self.validate_on_hold()
 		self.set_status()
+		self.set_operation_id()
 		self.validate_sequence_id()
 		self.set_sub_operations()
 		self.update_sub_operation_status()
@@ -1337,6 +1338,25 @@ class JobCard(Document):
 	def set_wip_warehouse(self):
 		if not self.wip_warehouse:
 			self.wip_warehouse = frappe.get_cached_value("Company", self.company, "default_wip_warehouse")
+
+	def set_operation_id(self):
+		if self.operation_id or not (self.work_order and self.operation):
+			return
+
+		operation_rows = frappe.get_all(
+			"Work Order Operation",
+			filters={"parent": self.work_order, "operation": self.operation},
+			pluck="name",
+		)
+
+		if len(operation_rows) == 1:
+			self.operation_id = operation_rows[0]
+		elif operation_rows and self.docstatus == 0:
+			frappe.throw(
+				_(
+					"Operation {0} is added multiple times in the work order {1}. Please select the operation row."
+				).format(bold(self.operation), get_link_to_form("Work Order", self.work_order))
+			)
 
 	@frappe.whitelist()
 	def pause_job(self, **kwargs):
