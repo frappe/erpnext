@@ -87,10 +87,10 @@
   },
   {
    "default": "1",
-   "description": "When checked, the system will use the posting datetime of the document for naming the document instead of the creation datetime of the document.",
+   "description": "When checked, the system will use the posting date of the document for naming instead of the creation date.",
    "fieldname": "use_posting_datetime_for_naming_documents",
    "fieldtype": "Check",
-   "label": "Use Posting Datetime for Naming Documents"
+   "label": "Use Posting Date for Naming Documents"
   },
   {
    "fieldname": "defaults_section",
@@ -113,7 +113,7 @@
  "in_create": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-07-14 23:00:00.000000",
+ "modified": "2026-07-22 15:28:19.250215",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Global Defaults",
