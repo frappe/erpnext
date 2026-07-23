@@ -175,6 +175,13 @@ class TestJobCard(ERPNextTestSuite):
 		job_card.operation = operation_row.operation
 		self.assertRaises(frappe.ValidationError, job_card.set_operation_id)
 
+		job_card.operation_id = "bogus-row"
+		self.assertRaises(frappe.ValidationError, job_card.set_operation_id)
+
+		job_card.operation_id = work_order.operations[-1].name
+		job_card.set_operation_id()
+		self.assertEqual(job_card.operation_id, work_order.operations[-1].name)
+
 	def test_job_card_with_different_work_station(self):
 		job_cards = frappe.get_all(
 			"Job Card",

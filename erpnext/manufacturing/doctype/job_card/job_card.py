@@ -1340,7 +1340,10 @@ class JobCard(Document):
 			self.wip_warehouse = frappe.get_cached_value("Company", self.company, "default_wip_warehouse")
 
 	def set_operation_id(self):
-		if self.operation_id or not (self.work_order and self.operation):
+		if not (self.work_order and self.operation):
+			return
+
+		if self.operation_id and self.docstatus != 0:
 			return
 
 		operation_rows = frappe.get_all(
@@ -1349,7 +1352,14 @@ class JobCard(Document):
 			pluck="name",
 		)
 
-		if len(operation_rows) == 1:
+		if self.operation_id:
+			if operation_rows and self.operation_id not in operation_rows:
+				frappe.throw(
+					_("Operation {0} does not belong to the work order {1}").format(
+						bold(self.operation), get_link_to_form("Work Order", self.work_order)
+					)
+				)
+		elif len(operation_rows) == 1:
 			self.operation_id = operation_rows[0]
 		elif operation_rows and self.docstatus == 0:
 			frappe.throw(
