@@ -448,8 +448,6 @@ class Company(NestedSet):
 		frappe.clear_cache()
 
 	def create_default_warehouses(self):
-		from erpnext.setup.utils import identity as _
-
 		parent_warehouse = None
 		for wh_detail in [
 			{"warehouse_name": _("All Warehouses"), "is_group": 1},
@@ -461,10 +459,7 @@ class Company(NestedSet):
 			if frappe.db.exists(
 				"Warehouse",
 				{
-					"warehouse_name": (
-						"in",
-						(wh_detail["warehouse_name"], frappe._(wh_detail["warehouse_name"])),
-					),
+					"warehouse_name": wh_detail["warehouse_name"],
 					"company": self.name,
 				},
 			):
