@@ -13,6 +13,7 @@ from functools import partial
 
 import frappe
 from frappe import _
+from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import cint, flt, get_link_to_form, nowdate
 
@@ -467,7 +468,9 @@ def get_work_order_operation_data(work_order, operation, workstation):
 
 
 @frappe.whitelist()
-def create_pick_list(source_name: str, target_doc: str | dict | None = None, for_qty: float | None = None):
+def create_pick_list(
+	source_name: str, target_doc: str | dict | Document | None = None, for_qty: float | None = None
+):
 	frappe.has_permission("Pick List", "create", throw=True)
 
 	for_qty = for_qty or frappe.parse_json(target_doc).get("for_qty")
@@ -517,7 +520,7 @@ def _set_pick_list_item_qty(source, target, source_parent, for_qty, max_finished
 
 
 @frappe.whitelist()
-def make_material_request(source_name: str, target_doc: str | dict | None = None):
+def make_material_request(source_name: str, target_doc: str | dict | Document | None = None):
 	frappe.has_permission("Material Request", "create", throw=True)
 
 	doc = get_mapped_doc("Work Order", source_name, _material_request_mapping(), target_doc)

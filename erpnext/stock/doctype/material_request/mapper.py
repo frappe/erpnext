@@ -49,7 +49,7 @@ def update_item(obj, target, source_parent):
 
 @frappe.whitelist()
 def make_purchase_order(
-	source_name: str, target_doc: str | Document | None = None, args: dict | str | None = None
+	source_name: str, target_doc: str | dict | Document | None = None, args: dict | str | None = None
 ):
 	if args is None:
 		args = {}
@@ -115,7 +115,7 @@ def make_purchase_order(
 
 
 @frappe.whitelist()
-def make_request_for_quotation(source_name: str, target_doc: str | Document | None = None):
+def make_request_for_quotation(source_name: str, target_doc: str | dict | Document | None = None):
 	doclist = get_mapped_doc(
 		"Material Request",
 		source_name,
@@ -154,7 +154,7 @@ def get_items_based_on_default_supplier(supplier: str):
 
 @frappe.whitelist()
 def make_purchase_order_based_on_supplier(
-	source_name: str, target_doc: str | Document | None = None, args: dict | None = None
+	source_name: str, target_doc: str | dict | Document | None = None, args: dict | None = None
 ):
 	mr = source_name
 
@@ -198,7 +198,7 @@ def make_purchase_order_based_on_supplier(
 
 
 @frappe.whitelist()
-def make_supplier_quotation(source_name: str, target_doc: str | Document | None = None):
+def make_supplier_quotation(source_name: str, target_doc: str | dict | Document | None = None):
 	def postprocess(source, target_doc):
 		set_missing_values(source, target_doc)
 
@@ -228,7 +228,7 @@ def make_supplier_quotation(source_name: str, target_doc: str | Document | None 
 
 
 @frappe.whitelist()
-def make_stock_entry(source_name: str, target_doc: str | Document | None = None):
+def make_stock_entry(source_name: str, target_doc: str | dict | Document | None = None):
 	def update_item(obj, target, source_parent):
 		qty = (
 			flt(flt(obj.stock_qty) - flt(obj.ordered_qty)) / target.conversion_factor
@@ -335,7 +335,7 @@ def make_stock_entry(source_name: str, target_doc: str | Document | None = None)
 
 
 @frappe.whitelist()
-def create_pick_list(source_name: str, target_doc: str | Document | None = None):
+def create_pick_list(source_name: str, target_doc: str | dict | Document | None = None):
 	def update_item(obj, target, source_parent):
 		qty = flt((obj.stock_qty - obj.picked_qty) / target.conversion_factor, obj.precision("qty"))
 		target.qty = qty
