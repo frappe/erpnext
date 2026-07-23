@@ -504,8 +504,26 @@ frappe.ui.form.on("Job Card", {
 					operation: frm.doc.operation,
 				},
 				callback(r) {
-					if (r.message && r.message.length == 1) {
+					if (!r.message || !r.message.length) return;
+
+					if (r.message.length == 1) {
 						frm.set_value("operation_id", r.message[0].name);
+					} else {
+						frappe.prompt(
+							{
+								fieldname: "operation_row",
+								fieldtype: "Select",
+								label: __("Operation Row"),
+								options: r.message.map((row) => ({ label: row.idx, value: row.name })),
+								reqd: 1,
+								description: __(
+									"Operation {0} is added multiple times in the work order {1}",
+									[frm.doc.operation, frm.doc.work_order]
+								),
+							},
+							(values) => frm.set_value("operation_id", values.operation_row),
+							__("Select Operation Row")
+						);
 					}
 				},
 			});
