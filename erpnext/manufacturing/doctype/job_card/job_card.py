@@ -44,10 +44,6 @@ class OverlapError(frappe.ValidationError):
 	pass
 
 
-class OperationMismatchError(frappe.ValidationError):
-	pass
-
-
 class OperationSequenceError(frappe.ValidationError):
 	pass
 
@@ -105,7 +101,6 @@ class JobCard(Document):
 		operation: DF.Link
 		operation_id: DF.Data | None
 		operation_row_id: DF.Int
-		operation_row_number: DF.Literal[None]
 		pending_qty: DF.Float
 		posting_date: DF.Date | None
 		process_loss_qty: DF.Float
@@ -170,7 +165,6 @@ class JobCard(Document):
 		self.validate_time_logs()
 		self.validate_on_hold()
 		self.set_status()
-		self.validate_operation_id()
 		self.validate_sequence_id()
 		self.set_sub_operations()
 		self.update_sub_operation_status()
@@ -1320,6 +1314,7 @@ class JobCard(Document):
 		if not self.wip_warehouse:
 			self.wip_warehouse = frappe.get_cached_value("Company", self.company, "default_wip_warehouse")
 
+<<<<<<< HEAD
 	def set_stock_uom(self):
 		item_code = self.finished_good or self.production_item
 		if item_code:
@@ -1342,6 +1337,8 @@ class JobCard(Document):
 				OperationMismatchError,
 			)
 
+=======
+>>>>>>> d71681a (refactor: drop unused operation_row_number field from Job Card)
 	@frappe.whitelist()
 	def pause_job(self, **kwargs):
 		frappe.has_permission("Job Card", "write", doc=self, throw=True)

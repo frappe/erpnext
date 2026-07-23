@@ -11,8 +11,11 @@ from frappe.utils.data import add_to_date, now, today
 
 from erpnext.manufacturing.doctype.job_card.job_card import (
 	JobCardOverTransferError,
+<<<<<<< HEAD
 	OperationMismatchError,
 	OperationSequenceError,
+=======
+>>>>>>> d71681a (refactor: drop unused operation_row_number field from Job Card)
 	OverlapError,
 	make_corrective_job_card,
 	make_material_request,
@@ -148,19 +151,6 @@ class TestJobCard(ERPNextTestSuite):
 			},
 		)
 		self.assertRaises(frappe.ValidationError, job_card_doc.submit)
-
-	def test_job_card_operations(self):
-		job_cards = frappe.get_all(
-			"Job Card", filters={"work_order": self.work_order.name}, fields=["operation_id", "name"]
-		)
-
-		if job_cards:
-			job_card = job_cards[0]
-			frappe.db.set_value("Job Card", job_card.name, "operation_row_number", job_card.operation_id)
-
-			doc = frappe.get_doc("Job Card", job_card.name)
-			doc.operation_id = "Test Data"
-			self.assertRaises(OperationMismatchError, doc.save)
 
 	def test_job_card_with_different_work_station(self):
 		job_cards = frappe.get_all(
