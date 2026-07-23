@@ -30,7 +30,7 @@ def get_preset_records(country=None):
 		# item group
 		{
 			"doctype": "Item Group",
-			"item_group_name": _("All Item Groups"),
+			"item_group_name": "All Item Groups",
 			"is_group": 1,
 			"parent_item_group": "",
 		},
@@ -38,32 +38,32 @@ def get_preset_records(country=None):
 			"doctype": "Item Group",
 			"item_group_name": _("Products"),
 			"is_group": 0,
-			"parent_item_group": _("All Item Groups"),
+			"parent_item_group": "All Item Groups",
 			"show_in_website": 1,
 		},
 		{
 			"doctype": "Item Group",
 			"item_group_name": _("Raw Material"),
 			"is_group": 0,
-			"parent_item_group": _("All Item Groups"),
+			"parent_item_group": "All Item Groups",
 		},
 		{
 			"doctype": "Item Group",
 			"item_group_name": _("Services"),
 			"is_group": 0,
-			"parent_item_group": _("All Item Groups"),
+			"parent_item_group": "All Item Groups",
 		},
 		{
 			"doctype": "Item Group",
 			"item_group_name": _("Sub Assemblies"),
 			"is_group": 0,
-			"parent_item_group": _("All Item Groups"),
+			"parent_item_group": "All Item Groups",
 		},
 		{
 			"doctype": "Item Group",
 			"item_group_name": _("Consumable"),
 			"is_group": 0,
-			"parent_item_group": _("All Item Groups"),
+			"parent_item_group": "All Item Groups",
 		},
 		# Stock Entry Type
 		{
