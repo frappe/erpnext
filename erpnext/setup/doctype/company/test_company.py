@@ -1,11 +1,13 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 import json
+from unittest.mock import patch
 
 import frappe
 from frappe import _
 from frappe.query_builder.functions import IfNull
 from frappe.utils import random_string
+from frappe.utils.nestedset import get_root_of
 
 from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import (
 	get_charts_for_country,
@@ -186,6 +188,31 @@ class TestCompany(ERPNextTestSuite):
 				return no_of_children
 
 		return get_no_of_children([company], 0)
+
+	def test_default_departments_ignore_session_translations(self):
+		self.assertEqual(get_root_of("Department"), "All Departments")
+
+		translations = {"All Departments": "Alle Abteilungen", "Accounts": "Buchhaltung"}
+		with patch("frappe.translate.get_all_translations", return_value=translations):
+			company = frappe.new_doc("Company")
+			company.company_name = "Dept Translation Test Co"
+			company.abbr = "DTTC"
+			company.default_currency = "INR"
+			company.country = "India"
+			company.insert()
+
+		self.assertFalse(frappe.db.exists("Department", "Alle Abteilungen"))
+		self.assertEqual(
+			frappe.get_all("Department", filters={"parent_department": ("is", "not set")}, pluck="name"),
+			["All Departments"],
+		)
+
+		departments = frappe.get_all(
+			"Department", filters={"company": company.name}, fields=["name", "parent_department"]
+		)
+		self.assertTrue(departments)
+		self.assertEqual({d.parent_department for d in departments}, {"All Departments"})
+		self.assertIn("Buchhaltung - DTTC", [d.name for d in departments])
 
 	def test_change_parent_company(self):
 		child_company = frappe.get_doc("Company", "_Test Company 5")
