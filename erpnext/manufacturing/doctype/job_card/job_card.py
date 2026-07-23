@@ -34,10 +34,6 @@ class OverlapError(frappe.ValidationError):
 	pass
 
 
-class OperationMismatchError(frappe.ValidationError):
-	pass
-
-
 class OperationSequenceError(frappe.ValidationError):
 	pass
 
@@ -89,7 +85,12 @@ class JobCard(Document):
 		naming_series: DF.Literal["PO-JOB.#####"]
 		operation: DF.Link
 		operation_id: DF.Data | None
+<<<<<<< HEAD
 		operation_row_number: DF.Literal[None]
+=======
+		operation_row_id: DF.Int
+		pending_qty: DF.Float
+>>>>>>> d71681a (refactor: drop unused operation_row_number field from Job Card)
 		posting_date: DF.Date | None
 		process_loss_qty: DF.Float
 		production_item: DF.Link | None
@@ -141,7 +142,6 @@ class JobCard(Document):
 	def validate(self):
 		self.validate_time_logs()
 		self.set_status()
-		self.validate_operation_id()
 		self.validate_sequence_id()
 		self.set_sub_operations()
 		self.update_sub_operation_status()
@@ -1029,6 +1029,7 @@ class JobCard(Document):
 		if not self.wip_warehouse:
 			self.wip_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_wip_warehouse")
 
+<<<<<<< HEAD
 	def validate_operation_id(self):
 		if (
 			self.get("operation_id")
@@ -1045,6 +1046,35 @@ class JobCard(Document):
 				),
 				OperationMismatchError,
 			)
+=======
+	@frappe.whitelist()
+	def pause_job(self, **kwargs):
+		frappe.has_permission("Job Card", "write", doc=self, throw=True)
+
+		self.validate_docstatus()
+
+		if isinstance(kwargs, dict):
+			kwargs = frappe._dict(kwargs)
+
+		self.db_set("is_paused", 1)
+		self.add_time_logs(to_time=kwargs.end_time, completed_qty=0.0, employees=self.employee)
+
+	@frappe.whitelist()
+	def resume_job(self, **kwargs):
+		frappe.has_permission("Job Card", "write", doc=self, throw=True)
+
+		self.validate_docstatus()
+
+		if isinstance(kwargs, dict):
+			kwargs = frappe._dict(kwargs)
+
+		self.db_set("is_paused", 0)
+		self.add_time_logs(
+			from_time=kwargs.start_time,
+			employees=self.employee,
+			completed_qty=0.0,
+		)
+>>>>>>> d71681a (refactor: drop unused operation_row_number field from Job Card)
 
 	def validate_sequence_id(self):
 		if self.is_corrective_job_card:

@@ -111,6 +111,7 @@ frappe.ui.form.on("Job Card", {
 			};
 		});
 
+<<<<<<< HEAD
 		frm.trigger("toggle_operation_number");
 
 		if (
@@ -141,6 +142,12 @@ frappe.ui.form.on("Job Card", {
 			} else {
 				frm.trigger("prepare_timer_buttons");
 			}
+=======
+		const is_timer_running = frm.events.setup_job_action_buttons(frm, has_items);
+
+		if (!is_timer_running) {
+			frm.trigger("setup_stock_entry");
+>>>>>>> d71681a (refactor: drop unused operation_row_number field from Job Card)
 		}
 
 		frm.trigger("setup_quality_inspection");
@@ -245,9 +252,13 @@ frappe.ui.form.on("Job Card", {
 		});
 	},
 
+<<<<<<< HEAD
 	operation: function (frm) {
 		frm.trigger("toggle_operation_number");
 
+=======
+	operation(frm) {
+>>>>>>> d71681a (refactor: drop unused operation_row_number field from Job Card)
 		if (frm.doc.operation && frm.doc.work_order) {
 			frappe.call({
 				method: "erpnext.manufacturing.doctype.job_card.job_card.get_operation_details",
@@ -255,6 +266,7 @@ frappe.ui.form.on("Job Card", {
 					work_order: frm.doc.work_order,
 					operation: frm.doc.operation,
 				},
+<<<<<<< HEAD
 				callback: function (r) {
 					if (r.message) {
 						if (r.message.length == 1) {
@@ -276,12 +288,18 @@ frappe.ui.form.on("Job Card", {
 						}
 
 						frm.trigger("toggle_operation_number");
+=======
+				callback(r) {
+					if (r.message && r.message.length == 1) {
+						frm.set_value("operation_id", r.message[0].name);
+>>>>>>> d71681a (refactor: drop unused operation_row_number field from Job Card)
 					}
 				},
 			});
 		}
 	},
 
+<<<<<<< HEAD
 	operation_row_number(frm) {
 		if (frm.doc.operation_row_number) {
 			frm.set_value("operation_id", frm.doc.operation_row_number);
@@ -295,6 +313,10 @@ frappe.ui.form.on("Job Card", {
 
 	prepare_timer_buttons: function (frm) {
 		frm.trigger("make_dashboard");
+=======
+	make_time_log(frm, args) {
+		frm.events.update_sub_operation(frm, args);
+>>>>>>> d71681a (refactor: drop unused operation_row_number field from Job Card)
 
 		const transfer_pending =
 			!frm.doc.is_corrective_job_card &&
