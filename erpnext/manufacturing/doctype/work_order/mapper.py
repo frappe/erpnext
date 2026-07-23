@@ -115,7 +115,7 @@ def make_work_order(
 		frappe.throw(_("Not permitted"), frappe.PermissionError)
 
 	item_details = get_item_details(item, project)
-	bom_no = _variant_default_bom(item) or bom_no
+	bom_no = _variant_default_bom(item, bom_no) or bom_no
 	wo_doc = _new_work_order(item, bom_no, company, item_details, use_multi_level_bom)
 
 	if flt(qty) > 0:
@@ -128,8 +128,11 @@ def make_work_order(
 	return wo_doc
 
 
-def _variant_default_bom(item):
+def _variant_default_bom(item, bom_no=None):
 	if not frappe.db.get_value("Item", item, "variant_of"):
+		return None
+	# selected BOM already belongs to this variant
+	if bom_no and frappe.db.get_value("BOM", bom_no, "item") == item:
 		return None
 	return frappe.db.get_value("BOM", {"item": item, "is_default": 1, "docstatus": 1})
 
