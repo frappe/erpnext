@@ -115,7 +115,12 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 			}
 		}
 
-		if (doc.docstatus == 1 && doc.outstanding_amount != 0 && !doc.on_hold) {
+		if (
+			doc.docstatus == 1 &&
+			doc.outstanding_amount != 0 &&
+			!doc.on_hold &&
+			frappe.model.can_create("Payment Entry")
+		) {
 			this.frm.add_custom_button(__("Payment"), () => this.make_payment_entry(), __("Create"));
 			this.frm.page.set_inner_btn_group_as_primary(__("Create"));
 		}
@@ -130,7 +135,13 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 			}
 		}
 
-		if (doc.docstatus == 1 && doc.outstanding_amount > 0 && !cint(doc.is_return) && !doc.on_hold) {
+		if (
+			doc.docstatus == 1 &&
+			doc.outstanding_amount > 0 &&
+			!cint(doc.is_return) &&
+			!doc.on_hold &&
+			frappe.boot.user.in_create.includes("Payment Request")
+		) {
 			this.frm.add_custom_button(
 				__("Payment Request"),
 				function () {
@@ -145,7 +156,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 				__("Purchase Order"),
 				function () {
 					erpnext.utils.map_current_doc({
-						method: "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_invoice",
+						method: "erpnext.buying.doctype.purchase_order.mapper.make_purchase_invoice",
 						source_doctype: "Purchase Order",
 						target: me.frm,
 						setters: {
@@ -170,7 +181,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 				__("Purchase Receipt"),
 				function () {
 					erpnext.utils.map_current_doc({
-						method: "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_invoice",
+						method: "erpnext.stock.doctype.purchase_receipt.mapper.make_purchase_invoice",
 						source_doctype: "Purchase Receipt",
 						target: me.frm,
 						setters: {
@@ -403,7 +414,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 
 	make_inter_company_invoice(frm) {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.accounts.doctype.purchase_invoice.purchase_invoice.make_inter_company_sales_invoice",
+			method: "erpnext.accounts.doctype.purchase_invoice.mapper.make_inter_company_sales_invoice",
 			frm: frm,
 		});
 	}
@@ -443,13 +454,14 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 	}
 
 	items_add(doc, cdt, cdn) {
-		var row = frappe.get_doc(cdt, cdn);
-		this.frm.script_manager.copy_from_first_row("items", row, [
-			"expense_account",
-			"discount_account",
-			"cost_center",
-			"project",
-		]);
+		const row = frappe.get_doc(cdt, cdn);
+		const field_copy = ["expense_account", "discount_account", "cost_center"];
+		if (doc.project) {
+			frappe.model.set_value(cdt, cdn, "project", doc.project);
+		} else {
+			field_copy.push("project");
+		}
+		this.frm.script_manager.copy_from_first_row("items", row, field_copy);
 	}
 
 	on_submit() {
@@ -462,7 +474,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 
 	make_debit_note() {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.accounts.doctype.purchase_invoice.purchase_invoice.make_debit_note",
+			method: "erpnext.accounts.doctype.purchase_invoice.mapper.make_debit_note",
 			frm: this.frm,
 		});
 	}
@@ -558,12 +570,6 @@ cur_frm.fields_dict["items"].grid.get_field("cost_center").get_query = function 
 	};
 };
 
-cur_frm.fields_dict["items"].grid.get_field("project").get_query = function (doc, cdt, cdn) {
-	return {
-		filters: [["Project", "status", "not in", "Completed, Cancelled"]],
-	};
-};
-
 frappe.ui.form.on("Purchase Invoice", {
 	setup: function (frm) {
 		frm.custom_make_buttons = {
@@ -581,6 +587,25 @@ frappe.ui.form.on("Purchase Invoice", {
 					company: frm.doc.company,
 					is_group: 0,
 					report_type: "Profit and Loss",
+				},
+			};
+		});
+
+		frm.set_query("write_off_account", function (doc) {
+			return {
+				filters: {
+					report_type: "Profit and Loss",
+					is_group: 0,
+					company: doc.company,
+				},
+			};
+		});
+
+		frm.set_query("write_off_cost_center", function (doc) {
+			return {
+				filters: {
+					is_group: 0,
+					company: doc.company,
 				},
 			};
 		});
@@ -685,10 +710,6 @@ frappe.ui.form.on("Purchase Invoice", {
 	},
 
 	is_subcontracted: function (frm) {
-		if (frm.doc.is_old_subcontracting_flow) {
-			erpnext.buying.get_default_bom(frm);
-		}
-
 		frm.toggle_reqd("supplier_warehouse", frm.doc.is_subcontracted);
 	},
 
@@ -699,7 +720,7 @@ frappe.ui.form.on("Purchase Invoice", {
 
 	make_purchase_receipt: function (frm) {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.accounts.doctype.purchase_invoice.purchase_invoice.make_purchase_receipt",
+			method: "erpnext.accounts.doctype.purchase_invoice.mapper.make_purchase_receipt",
 			frm: frm,
 			freeze_message: __("Creating Purchase Receipt ..."),
 		});

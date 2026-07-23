@@ -2,23 +2,19 @@
 # For license information, please see license.txt
 
 
-import json
-
 import frappe
 from frappe import _
+from frappe.contacts.doctype.contact.contact import get_full_name
 from frappe.core.doctype.communication.email import make
 from frappe.desk.form.load import get_attachments
 from frappe.model.document import Document
-from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder import Order
 from frappe.utils import get_url
 from frappe.utils.print_format import download_pdf
 from frappe.utils.user import get_user_fullname
 
-from erpnext.accounts.party import get_party_account_currency, get_party_details
 from erpnext.buying.utils import validate_for_items
 from erpnext.controllers.buying_controller import BuyingController
-from erpnext.stock.doctype.material_request.material_request import set_missing_values
 
 STANDARD_USERS = ("Guest", "Administrator")
 
@@ -276,12 +272,20 @@ class RequestforQuotation(BuyingController):
 			supplier_doc.save()
 
 	def create_user(self, rfq_supplier, link):
+		contact_name = None
+		if rfq_supplier.contact:
+			name_fields = frappe.get_value(
+				"Contact", rfq_supplier.contact, ["first_name", "middle_name", "last_name"]
+			)
+			if name_fields:
+				contact_name = get_full_name(*name_fields)
+
 		user = frappe.get_doc(
 			{
 				"doctype": "User",
 				"send_welcome_email": 0,
 				"email": rfq_supplier.email_id,
-				"first_name": rfq_supplier.supplier_name or rfq_supplier.supplier,
+				"first_name": contact_name or rfq_supplier.supplier_name or rfq_supplier.supplier,
 				"user_type": "Website User",
 				"redirect_url": link,
 			}
@@ -378,25 +382,29 @@ class RequestforQuotation(BuyingController):
 		return [d.name for d in get_attachments(self.doctype, self.name)]
 
 	def update_rfq_supplier_status(self, sup_name=None):
+		from frappe.query_builder.functions import Count
+
+		SQ = frappe.qb.DocType("Supplier Quotation")
+		SQ_Item = frappe.qb.DocType("Supplier Quotation Item")
+
 		for supplier in self.suppliers:
 			if sup_name is None or supplier.supplier == sup_name:
 				quote_status = _("Received")
 				for item in self.items:
-					sqi_count = frappe.db.sql(
-						"""
-						SELECT
-							COUNT(sqi.name) as count
-						FROM
-							`tabSupplier Quotation Item` as sqi,
-							`tabSupplier Quotation` as sq
-						WHERE sq.supplier = %(supplier)s
-							AND sqi.docstatus = 1
-							AND sqi.request_for_quotation_item = %(rqi)s
-							AND sqi.parent = sq.name""",
-						{"supplier": supplier.supplier, "rqi": item.name},
-						as_dict=1,
-					)[0]
-					if (sqi_count.count) == 0:
+					query = (
+						frappe.qb.from_(SQ_Item)
+						.join(SQ)
+						.on(SQ_Item.parent == SQ.name)
+						.select(Count(SQ_Item.name).as_("count"))
+						.where(SQ.supplier == supplier.supplier)
+						.where(SQ_Item.docstatus == 1)
+						.where(SQ_Item.request_for_quotation_item == item.name)
+					)
+
+					result = query.run(as_dict=True)
+					sqi_count = result[0] if result else frappe._dict(count=0)
+
+					if sqi_count.count == 0:
 						quote_status = _("Pending")
 				supplier.quote_status = quote_status
 
@@ -413,7 +421,7 @@ def check_portal_enabled(reference_doctype):
 	if not frappe.db.get_value("Portal Menu Item", {"reference_doctype": reference_doctype}, "enabled"):
 		frappe.throw(
 			_(
-				"The Access to Request for Quotation From Portal is Disabled. To Allow Access, Enable it in Portal Settings."
+				"Access to Request for Quotation from the portal is disabled. To allow access, enable it in Portal Settings."
 			)
 		)
 
@@ -432,120 +440,6 @@ def get_list_context(context=None):
 		}
 	)
 	return list_context
-
-
-@frappe.whitelist()
-def make_supplier_quotation_from_rfq(
-	source_name: str, target_doc: str | Document | None = None, for_supplier: str | None = None
-):
-	def postprocess(source, target_doc):
-		if for_supplier:
-			target_doc.supplier = for_supplier
-			args = get_party_details(for_supplier, party_type="Supplier", ignore_permissions=True)
-			target_doc.currency = args.currency or get_party_account_currency(
-				"Supplier", for_supplier, source.company
-			)
-			target_doc.buying_price_list = args.buying_price_list or frappe.db.get_single_value(
-				"Buying Settings", "buying_price_list"
-			)
-		set_missing_values(source, target_doc)
-
-	doclist = get_mapped_doc(
-		"Request for Quotation",
-		source_name,
-		{
-			"Request for Quotation": {
-				"doctype": "Supplier Quotation",
-				"validation": {"docstatus": ["=", 1]},
-				"field_map": {"opportunity": "opportunity"},
-			},
-			"Request for Quotation Item": {
-				"doctype": "Supplier Quotation Item",
-				"field_map": {
-					"name": "request_for_quotation_item",
-					"parent": "request_for_quotation",
-					"project_name": "project",
-				},
-			},
-		},
-		target_doc,
-		postprocess,
-	)
-
-	return doclist
-
-
-# This method is used to make supplier quotation from supplier's portal.
-@frappe.whitelist()
-def create_supplier_quotation(doc: str | Document | dict):
-	if isinstance(doc, str):
-		doc = json.loads(doc)
-
-	if frappe.session.user not in frappe.get_all(
-		"Portal User", {"parent": doc.get("supplier")}, pluck="user"
-	):
-		frappe.throw(_("Not Permitted"), frappe.PermissionError)
-
-	try:
-		sq_doc = frappe.get_doc(
-			{
-				"doctype": "Supplier Quotation",
-				"supplier": doc.get("supplier"),
-				"terms": doc.get("terms"),
-				"company": doc.get("company"),
-				"currency": doc.get("currency")
-				or get_party_account_currency("Supplier", doc.get("supplier"), doc.get("company")),
-				"buying_price_list": doc.get("buying_price_list")
-				or frappe.db.get_single_value("Buying Settings", "buying_price_list"),
-			}
-		)
-		add_items(sq_doc, doc.get("supplier"), doc.get("items"))
-		sq_doc.flags.ignore_permissions = True
-		sq_doc.run_method("set_missing_values")
-		sq_doc.save()
-		frappe.msgprint(_("Supplier Quotation {0} Created").format(sq_doc.name))
-		return sq_doc.name
-	except Exception:
-		return None
-
-
-def add_items(sq_doc, supplier, items):
-	for data in items:
-		if isinstance(data, dict):
-			data = frappe._dict(data)
-
-		create_rfq_items(sq_doc, supplier, data)
-
-
-def create_rfq_items(sq_doc, supplier, data):
-	args = {}
-
-	for field in [
-		"item_code",
-		"item_name",
-		"description",
-		"qty",
-		"rate",
-		"conversion_factor",
-		"warehouse",
-		"material_request",
-		"material_request_item",
-		"stock_qty",
-		"uom",
-	]:
-		args[field] = data.get(field)
-
-	args.update(
-		{
-			"request_for_quotation_item": data.name,
-			"request_for_quotation": data.parent,
-			"supplier_part_no": frappe.db.get_value(
-				"Item Supplier", {"parent": data.item_code, "supplier": supplier}, "supplier_part_no"
-			),
-		}
-	)
-
-	sq_doc.append("items", args)
 
 
 @frappe.whitelist()
@@ -569,63 +463,6 @@ def get_pdf(
 		language=language,
 		letterhead=letterhead or None,
 	)
-
-
-@frappe.whitelist()
-def get_item_from_material_requests_based_on_supplier(
-	source_name: str, target_doc: str | Document | None = None
-):
-	mr_items_list = frappe.db.sql(
-		"""
-		SELECT
-			mr.name, mr_item.item_code
-		FROM
-			`tabItem` as item,
-			`tabItem Supplier` as item_supp,
-			`tabMaterial Request Item` as mr_item,
-			`tabMaterial Request`  as mr
-		WHERE item_supp.supplier = %(supplier)s
-			AND item.name = item_supp.parent
-			AND mr_item.parent = mr.name
-			AND mr_item.item_code = item.name
-			AND mr.status != "Stopped"
-			AND mr.material_request_type = "Purchase"
-			AND mr.docstatus = 1
-			AND mr.per_ordered < 99.99""",
-		{"supplier": source_name},
-		as_dict=1,
-	)
-
-	material_requests = {}
-	for d in mr_items_list:
-		material_requests.setdefault(d.name, []).append(d.item_code)
-
-	for mr, items in material_requests.items():
-		target_doc = get_mapped_doc(
-			"Material Request",
-			mr,
-			{
-				"Material Request": {
-					"doctype": "Request for Quotation",
-					"validation": {
-						"docstatus": ["=", 1],
-						"material_request_type": ["=", "Purchase"],
-					},
-				},
-				"Material Request Item": {
-					"doctype": "Request for Quotation Item",
-					"condition": lambda row: row.item_code in items,
-					"field_map": [
-						["name", "material_request_item"],
-						["parent", "material_request"],
-						["uom", "uom"],
-					],
-				},
-			},
-			target_doc,
-		)
-
-	return target_doc
 
 
 @frappe.whitelist()

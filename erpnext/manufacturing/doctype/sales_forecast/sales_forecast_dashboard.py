@@ -3,7 +3,7 @@ from frappe import _
 
 def get_data():
 	return {
-		"fieldname": "demand_planning",
+		"fieldname": "sales_forecast",
 		"transactions": [
 			{
 				"label": _("MPS"),

@@ -25,6 +25,10 @@ frappe.ui.form.on("Shipping Rule", {
 	},
 	calculate_based_on: function (frm) {
 		frm.trigger("toggle_reqd");
+		if (frm.doc.calculate_based_on === "Fixed") {
+			frm.clear_table("conditions");
+			frm.refresh_field("conditions");
+		}
 	},
 	toggle_reqd: function (frm) {
 		frm.toggle_reqd("shipping_amount", frm.doc.calculate_based_on === "Fixed");

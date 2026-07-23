@@ -98,7 +98,7 @@ class TestCodeListImport(ERPNextTestSuite):
 		)
 
 		file_doc = frappe.get_doc("File", import_result["file"])
-		self.assertEqual(file_doc.file_name, "trusted.xml")
+		self.assertEqual(file_doc.get_content(encodings=()), SAMPLE_GENERICODE)
 		self.assertFalse(file_doc.file_url.startswith("https://"))
 
 	def test_import_genericode_from_trusted_url_propagates_fetch_errors(self):
@@ -117,7 +117,7 @@ class TestCodeListImport(ERPNextTestSuite):
 		self.assert_import_response(import_result)
 
 		file_doc = frappe.get_doc("File", import_result["file"])
-		self.assertEqual(file_doc.file_name, "uploaded_genericode.xml")
+		self.assertEqual(file_doc.get_content(encodings=()), SAMPLE_GENERICODE)
 
 	def test_process_genericode_import_reads_file_doc_content(self):
 		self.set_upload_context(content=SAMPLE_GENERICODE, file_name="uploaded_genericode.xml")

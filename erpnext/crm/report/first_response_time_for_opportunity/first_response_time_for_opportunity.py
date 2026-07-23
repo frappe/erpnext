@@ -4,6 +4,8 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import Avg, Date
+from pypika import Order
 
 
 def execute(filters=None):
@@ -17,19 +19,19 @@ def execute(filters=None):
 		},
 	]
 
-	data = frappe.db.sql(
-		"""
-		SELECT
-			date(creation) as creation_date,
-			avg(first_response_time) as avg_response_time
-		FROM tabOpportunity
-		WHERE
-			date(creation) between %s and %s
-			and first_response_time > 0
-		GROUP BY creation_date
-		ORDER BY creation_date desc
-	""",
-		(filters.from_date, filters.to_date),
+	opportunity = frappe.qb.DocType("Opportunity")
+	creation_date = Date(opportunity.creation)
+	data = (
+		frappe.qb.from_(opportunity)
+		.select(
+			creation_date.as_("creation_date"), Avg(opportunity.first_response_time).as_("avg_response_time")
+		)
+		.where(
+			creation_date.between(filters.from_date, filters.to_date) & (opportunity.first_response_time > 0)
+		)
+		.groupby(creation_date)
+		.orderby(creation_date, order=Order.desc)
+		.run()
 	)
 
 	return columns, data

@@ -71,6 +71,7 @@ def get_ratios_data(filters, period_list, years):
 	assets, liabilities, income, expense = get_gl_data(filters, period_list, years)
 
 	current_asset, total_asset = {}, {}
+	fixed_asset = {}
 	current_liability, total_liability = {}, {}
 	net_sales, total_income = {}, {}
 	cogs, total_expense = {}, {}
@@ -93,6 +94,7 @@ def get_ratios_data(filters, period_list, years):
 				quick_asset,
 				total_quick_asset,
 			],
+			[fixed_asset, total_asset, "Fixed Asset", year, assets, "Asset", {}, 0],
 			[
 				current_liability,
 				total_liability,
@@ -112,7 +114,7 @@ def get_ratios_data(filters, period_list, years):
 	add_solvency_ratios(
 		data, years, total_asset, total_liability, net_sales, cogs, total_income, total_expense
 	)
-	add_turnover_ratios(data, years, period_list, filters, total_asset, net_sales, cogs, direct_expense)
+	add_turnover_ratios(data, years, period_list, filters, fixed_asset, net_sales, cogs, direct_expense)
 
 	return data
 
@@ -193,7 +195,7 @@ def add_solvency_ratios(
 	data.append(return_on_equity_ratio)
 
 
-def add_turnover_ratios(data, years, period_list, filters, total_asset, net_sales, cogs, direct_expense):
+def add_turnover_ratios(data, years, period_list, filters, fixed_asset, net_sales, cogs, direct_expense):
 	precision = frappe.db.get_single_value("System Settings", "float_precision")
 	data.append({"ratio": _("Turnover Ratios")})
 
@@ -208,7 +210,7 @@ def add_turnover_ratios(data, years, period_list, filters, total_asset, net_sale
 	)
 
 	ratio_data = [
-		[_("Fixed Asset Turnover Ratio"), net_sales, total_asset],
+		[_("Fixed Asset Turnover Ratio"), net_sales, fixed_asset],
 		[_("Debtor Turnover Ratio"), net_sales, avg_debtors],
 		[_("Creditor Turnover Ratio"), direct_expense, avg_creditors],
 		[_("Inventory Turnover Ratio"), cogs, avg_stock],

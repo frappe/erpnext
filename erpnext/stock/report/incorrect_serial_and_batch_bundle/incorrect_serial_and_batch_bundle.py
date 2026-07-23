@@ -135,11 +135,14 @@ def get_linked_cancelled_sabb(filters):
 
 @frappe.whitelist()
 def fix_sabb_entries(selected_rows: str | list):
+	frappe.has_permission("Serial and Batch Bundle", "write", throw=True)
+
 	if isinstance(selected_rows, str):
 		selected_rows = frappe.parse_json(selected_rows)
 
 	for row in selected_rows:
 		doc = frappe.get_doc("Serial and Batch Bundle", row.get("name"))
+		doc.check_permission("write")
 		if doc.is_cancelled == 0 and not frappe.db.get_value(
 			"Stock Ledger Entry",
 			{"serial_and_batch_bundle": doc.name, "is_cancelled": 0},

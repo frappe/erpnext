@@ -158,6 +158,49 @@ class TestTask(ERPNextTestSuite):
 		task.save()
 		self.assertEqual(getdate(task.exp_end_date), getdate(add_days(nowdate(), 5)))
 
+	def test_set_multiple_status(self):
+		from erpnext.projects.doctype.task.task import set_multiple_status
+
+		task1 = create_task("_Test Bulk Status 1")
+		task2 = create_task("_Test Bulk Status 2")
+
+		set_multiple_status(frappe.as_json([task1.name, task2.name]), "Completed")
+
+		self.assertEqual(frappe.db.get_value("Task", task1.name, "status"), "Completed")
+		self.assertEqual(frappe.db.get_value("Task", task2.name, "status"), "Completed")
+
+	def test_add_multiple_tasks_under_parent(self):
+		from erpnext.projects.doctype.task.task import add_multiple_tasks
+
+		parent = create_task("_Test Bulk Parent", is_group=1)
+		rows = [{"subject": "_Test Bulk Child A"}, {"subject": ""}, {"subject": "_Test Bulk Child B"}]
+
+		add_multiple_tasks(frappe.as_json(rows), parent.name)
+
+		children = frappe.get_all("Task", filters={"parent_task": parent.name}, pluck="subject")
+		# the row with a blank subject is skipped
+		self.assertEqual(sorted(children), ["_Test Bulk Child A", "_Test Bulk Child B"])
+
+	def test_template_task_dependency_must_be_template(self):
+		normal_task = create_task("_Test Non Template Dependency")
+		template_task = create_task("_Test Template With Dependency", is_template=1, save=False)
+		template_task.append("depends_on", {"task": normal_task.name})
+
+		self.assertRaises(frappe.ValidationError, template_task.save)
+
+	def test_cannot_delete_task_with_children(self):
+		parent = create_task("_Test Parent With Child", is_group=1)
+		create_task("_Test Child Blocking Delete", parent_task=parent.name)
+
+		self.assertRaises(frappe.ValidationError, parent.delete)
+
+	def test_child_task_registers_in_parent_depends_on(self):
+		parent = create_task("_Test Parent Depends On", is_group=1)
+		child = create_task("_Test Child Depends On", parent_task=parent.name)
+
+		parent.reload()
+		self.assertIn(child.name, [row.task for row in parent.depends_on])
+
 
 def create_task(
 	subject,

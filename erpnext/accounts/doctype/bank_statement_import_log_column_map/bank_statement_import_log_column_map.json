@@ -1,0 +1,60 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_rename": 1,
+ "creation": "2026-05-06 11:02:27.133576",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "header_text",
+  "index",
+  "maps_to",
+  "variable"
+ ],
+ "fields": [
+  {
+   "fieldname": "header_text",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Header Text",
+   "reqd": 1
+  },
+  {
+   "fieldname": "maps_to",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Maps To",
+   "options": "Do not import\nDate\nWithdrawal\nDeposit\nAmount\nDescription\nReference\nTransaction Type\nDebit/Credit\nBalance\nIncluded Fee\nExcluded Fee\nParty Name/Account Holder\nParty Account No.\nParty IBAN",
+   "reqd": 1
+  },
+  {
+   "fieldname": "index",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Index",
+   "non_negative": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "variable",
+   "fieldtype": "Data",
+   "label": "Variable"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-05-06 15:59:12.465092",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Bank Statement Import Log Column Map",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

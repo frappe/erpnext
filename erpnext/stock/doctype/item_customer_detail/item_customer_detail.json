@@ -36,6 +36,7 @@
    "options": "Customer Group"
   },
   {
+   "description": "Enter the Item Code that this customer uses at their end. This will be shown in Sales Orders for the customer's reference.",
    "fieldname": "ref_code",
    "fieldtype": "Data",
    "in_filter": 1,
@@ -52,12 +53,13 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-03-27 13:09:54.332166",
+ "modified": "2026-04-23 02:09:39.602010",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Customer Detail",
  "owner": "Administrator",
  "permissions": [],
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": []

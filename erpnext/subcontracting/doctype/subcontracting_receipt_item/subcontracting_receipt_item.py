@@ -62,7 +62,7 @@ class SubcontractingReceiptItem(Document):
 		subcontracting_order: DF.Link | None
 		subcontracting_order_item: DF.Data | None
 		subcontracting_receipt_item: DF.Data | None
-		type: DF.Literal["", "Co-Product", "By-Product", "Scrap", "Additional Finished Good"]
+		secondary_item_type: DF.Literal["", "Co-Product", "By-Product", "Scrap", "Additional Finished Good"]
 		use_serial_batch_fields: DF.Check
 		warehouse: DF.Link | None
 	# end: auto-generated types

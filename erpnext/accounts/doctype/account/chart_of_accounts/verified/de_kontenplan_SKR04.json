@@ -1144,6 +1144,10 @@
                         "Wareneingangs-­Verrechnungskonto" : {
                             "account_number": "70001",
                             "account_type": "Stock Received But Not Billed"
+                        },
+                        "Warenausgangs-Verrechnungskonto" : {
+                            "account_number": "70002",
+                            "account_type": "Stock Delivered But Not Billed"
                         }
                     },
                     "Verb. aus Lieferungen und Leistungen": {

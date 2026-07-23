@@ -15,7 +15,6 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 class TestPricingRule(ERPNextTestSuite):
 	def setUp(self):
-		delete_existing_pricing_rules()
 		setup_pricing_rule_data()
 		self.enterClassContext(self.change_settings("Selling Settings", validate_selling_price=0))
 
@@ -92,7 +91,9 @@ class TestPricingRule(ERPNextTestSuite):
 		details = get_item_details(args)
 		self.assertEqual(details.get("discount_percentage"), 5)
 
-		frappe.db.sql("update `tabPricing Rule` set priority=NULL where campaign='_Test Campaign'")
+		frappe.db.set_value(
+			"Pricing Rule", {"campaign": "_Test Campaign"}, "priority", None, update_modified=False
+		)
 		from erpnext.accounts.doctype.pricing_rule.utils import MultiplePricingRuleConflict
 
 		self.assertRaises(MultiplePricingRuleConflict, get_item_details, args)
@@ -331,6 +332,31 @@ class TestPricingRule(ERPNextTestSuite):
 
 		details = get_item_details(args)
 		self.assertEqual(details.get("discount_percentage"), 17.5)
+
+	def test_pricing_rule_with_template_and_its_variant(self):
+		if not frappe.db.exists("Item", "Test Variant PRT"):
+			variant = frappe.new_doc("Item")
+			variant.item_code = "Test Variant PRT"
+			variant.item_name = "Test Variant PRT"
+			variant.item_group = "_Test Item Group"
+			variant.is_stock_item = 1
+			variant.variant_of = "_Test Variant Item"
+			variant.stock_uom = "_Test UOM"
+			variant.append("attributes", {"attribute": "Test Size", "attribute_value": "Medium"})
+			variant.insert()
+
+		rule = frappe.new_doc("Pricing Rule")
+		rule.title = "_Test Pricing Rule Template Variant"
+		rule.apply_on = "Item Code"
+		rule.currency = "USD"
+		rule.selling = 1
+		rule.rate_or_discount = "Discount Percentage"
+		rule.discount_percentage = 10
+		rule.company = "_Test Company"
+		rule.append("items", {"item_code": "_Test Variant Item"})
+		rule.append("items", {"item_code": "Test Variant PRT"})
+
+		self.assertRaises(frappe.ValidationError, rule.insert)
 
 	def test_pricing_rule_for_stock_qty(self):
 		test_record = {
@@ -1582,16 +1608,6 @@ def setup_pricing_rule_data():
 		frappe.get_doc(
 			{"doctype": "UTM Campaign", "description": "_Test Campaign", "name": "_Test Campaign"}
 		).insert()
-
-
-def delete_existing_pricing_rules():
-	for doctype in [
-		"Pricing Rule",
-		"Pricing Rule Item Code",
-		"Pricing Rule Item Group",
-		"Pricing Rule Brand",
-	]:
-		frappe.db.sql(f"delete from `tab{doctype}`")
 
 
 def make_item_price(item, price_list_name, item_price):

@@ -130,24 +130,26 @@ erpnext.PointOfSale.ItemDetails = class {
 			return ``;
 		}
 
-		this.$item_name.html(item_name);
+		this.$item_name.html(frappe.utils.escape_html(item_name));
 		this.$item_description.html(get_description_html());
 		this.$item_price.html(format_currency(price_list_rate, this.currency));
 		if (!this.hide_images && image) {
 			this.$item_image.html(
 				`<img
 					onerror="cur_pos.item_details.handle_broken_image(this)"
-					class="h-full" src="${image}"
-					alt="${frappe.get_abbr(item_name)}"
+					class="h-full" src="${frappe.utils.escape_html(image)}"
+					alt="${frappe.utils.escape_html(frappe.get_abbr(item_name))}"
 					style="object-fit: cover;">`
 			);
 		} else {
-			this.$item_image.html(`<div class="item-abbr">${frappe.get_abbr(item_name)}</div>`);
+			this.$item_image.html(
+				`<div class="item-abbr">${frappe.utils.escape_html(frappe.get_abbr(item_name))}</div>`
+			);
 		}
 	}
 
 	handle_broken_image($img) {
-		const item_abbr = $($img).attr("alt");
+		const item_abbr = frappe.utils.escape_html($($img).attr("alt"));
 		$($img).replaceWith(`<div class="item-abbr">${item_abbr}</div>`);
 	}
 

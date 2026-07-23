@@ -7,6 +7,8 @@
  "engine": "InnoDB",
  "field_order": [
   "account_category_name",
+  "root_type",
+  "column_break_qluu",
   "description"
  ],
  "fields": [
@@ -14,6 +16,7 @@
    "fieldname": "account_category_name",
    "fieldtype": "Data",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Account Category Name",
    "reqd": 1,
    "unique": 1
@@ -22,6 +25,18 @@
    "fieldname": "description",
    "fieldtype": "Small Text",
    "label": "Description"
+  },
+  {
+   "fieldname": "column_break_qluu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "root_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Root Type",
+   "options": "\nAsset\nLiability\nIncome\nExpense\nEquity"
   }
  ],
  "grid_page_length": 50,
@@ -32,7 +47,7 @@
    "link_fieldname": "account_category"
   }
  ],
- "modified": "2026-02-23 01:19:49.589393",
+ "modified": "2026-03-05 06:49:34.430723",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account Category",
@@ -69,7 +84,7 @@
   }
  ],
  "row_format": "Dynamic",
- "search_fields": "account_category_name, description",
+ "search_fields": "account_category_name, root_type",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": []

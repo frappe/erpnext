@@ -37,6 +37,10 @@
                         "account_type": "Stock",
                         "account_category": "Stock Assets"
                     },
+                    "Stock Delivered But Not Billed": {
+                        "account_type": "Stock Delivered But Not Billed",
+                        "account_category": "Stock Assets"
+                    },
                     "account_type": "Stock",
                     "account_category": "Stock Assets"
                 },

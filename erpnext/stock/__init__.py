@@ -61,19 +61,20 @@ def get_warehouse_account(warehouse, warehouse_account=None):
 
 				rebuild_tree("Warehouse")
 		else:
-			account = frappe.db.sql(
-				"""
-				select
-					account from `tabWarehouse`
-				where
-					lft <= %s and rgt >= %s and company = %s
-					and account is not null and ifnull(account, '') !=''
-				order by lft desc limit 1""",
-				(warehouse.lft, warehouse.rgt, warehouse.company),
-				as_list=1,
+			account = frappe.get_all(
+				"Warehouse",
+				filters={
+					"lft": ["<=", warehouse.lft],
+					"rgt": [">=", warehouse.rgt],
+					"company": warehouse.company,
+					"account": ["is", "set"],
+				},
+				pluck="account",
+				order_by="lft desc",
+				limit=1,
 			)
 
-			account = account[0][0] if account else None
+			account = account[0] if account else None
 
 	if not account and warehouse.company:
 		account = get_company_default_inventory_account(warehouse.company)

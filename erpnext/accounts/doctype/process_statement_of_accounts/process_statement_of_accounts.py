@@ -6,7 +6,6 @@ import copy
 
 import frappe
 from frappe import _
-from frappe.desk.reportview import get_match_cond
 from frappe.model.document import Document
 from frappe.utils import add_days, add_months, format_date, getdate, today
 from frappe.utils.jinja import validate_template
@@ -20,6 +19,7 @@ from erpnext.accounts.report.accounts_receivable_summary.accounts_receivable_sum
 	execute as get_ageing,
 )
 from erpnext.accounts.report.general_ledger.general_ledger import execute as get_soa
+from erpnext.utilities.query import get_match_conditions_qb
 
 
 class ProcessStatementOfAccounts(Document):
@@ -75,6 +75,7 @@ class ProcessStatementOfAccounts(Document):
 		sender: DF.Link | None
 		show_future_payments: DF.Check
 		show_net_values_in_party_account: DF.Check
+		show_opening_entries: DF.Check
 		show_remarks: DF.Check
 		start_date: DF.Date | None
 		subject: DF.Data | None
@@ -99,8 +100,9 @@ class ProcessStatementOfAccounts(Document):
 		if not self.pdf_name:
 			self.pdf_name = "{{ customer.customer_name }}"
 
-		validate_template(self.subject)
-		validate_template(self.body)
+		validate_template(self.subject, restrict_globals=True)
+		validate_template(self.body, restrict_globals=True)
+		validate_template(self.pdf_name, restrict_globals=True)
 
 		if not self.customers:
 			frappe.throw(_("Customers not selected."))
@@ -154,17 +156,17 @@ class ProcessStatementOfAccounts(Document):
 		)
 
 		if invalid_values:
-			msg = _("<p>Following {0}s doesn't belong to Company {1} :</p>").format(
+			msg = _("<p>Following {0}s do not belong to Company {1}:</p>").format(
 				doctype, frappe.bold(self.company)
 			)
 
 			msg += (
 				"<ul>"
-				+ "".join(_("<li>{}</li>").format(frappe.bold(row)) for row in invalid_values)
+				+ "".join(_("<li>{0}</li>").format(frappe.bold(row)) for row in invalid_values)
 				+ "</ul>"
 			)
 
-			frappe.throw(_(msg))
+			frappe.throw(msg)
 
 
 def get_report_pdf(doc, consolidated=True):
@@ -269,7 +271,7 @@ def get_gl_filters(doc, entry, tax_id, presentation_currency):
 		"categorize_by": doc.categorize_by,
 		"currency": doc.currency,
 		"project": [p.project_name for p in doc.project],
-		"show_opening_entries": 0,
+		"show_opening_entries": doc.show_opening_entries,
 		"include_default_book_entries": 0,
 		"tax_id": tax_id if tax_id else None,
 		"show_net_values_in_party_account": doc.show_net_values_in_party_account,
@@ -364,15 +366,19 @@ def get_customers_based_on_territory_or_customer_group(customer_collection, coll
 
 def get_customers_based_on_sales_person(sales_person):
 	lft, rgt = frappe.db.get_value("Sales Person", sales_person, ["lft", "rgt"])
-	records = frappe.db.sql(
-		"""
-		select distinct parent, parenttype
-		from `tabSales Team` steam
-		where parenttype = 'Customer'
-			and exists(select name from `tabSales Person` where lft >= %s and rgt <= %s and name = steam.sales_person)
-	""",
-		(lft, rgt),
-		as_dict=1,
+	steam = frappe.qb.DocType("Sales Team")
+	sp = frappe.qb.DocType("Sales Person")
+	records = (
+		frappe.qb.from_(steam)
+		.select(steam.parent, steam.parenttype)
+		.distinct()
+		.where(
+			(steam.parenttype == "Customer")
+			& steam.sales_person.isin(
+				frappe.qb.from_(sp).select(sp.name).where((sp.lft >= lft) & (sp.rgt <= rgt))
+			)
+		)
+		.run(as_dict=1)
 	)
 	sales_person_records = frappe._dict()
 	for d in records:
@@ -415,7 +421,6 @@ def get_context(customer, doc):
 	return {
 		"doc": template_doc,
 		"customer": frappe.get_doc("Customer", customer),
-		"frappe": frappe.utils,
 	}
 
 
@@ -467,30 +472,29 @@ def get_customer_emails(customer_name: str, primary_mandatory: str | int, billin
 
 	frappe.has_permission("Customer", "read", customer_name, throw=True)
 
-	billing_email = frappe.db.sql(
-		"""
-		SELECT
-			email.email_id
-		FROM
-			`tabContact Email` AS email
-		JOIN
-			`tabDynamic Link` AS link
-		ON
-			email.parent=link.parent
-		JOIN
-			`tabContact` AS contact
-		ON
-			contact.name=link.parent
-		WHERE
-			link.link_doctype='Customer'
-			and link.link_name=%s
-			and contact.is_billing_contact=1
-			{mcond}
-		ORDER BY
-			contact.creation desc
-		""".format(mcond=get_match_cond("Contact")),
-		customer_name,
+	email = frappe.qb.DocType("Contact Email")
+	link = frappe.qb.DocType("Dynamic Link")
+	contact = frappe.qb.DocType("Contact")
+
+	query = (
+		frappe.qb.from_(email)
+		.join(link)
+		.on(email.parent == link.parent)
+		.join(contact)
+		.on(contact.name == link.parent)
+		.select(email.email_id)
+		.where(
+			(link.link_doctype == "Customer")
+			& (link.link_name == customer_name)
+			& (contact.is_billing_contact == 1)
+		)
+		.orderby(contact.creation, order=frappe.qb.desc)
 	)
+
+	for condition in get_match_conditions_qb("Contact", table=contact):
+		query = query.where(condition)
+
+	billing_email = query.run()
 
 	if len(billing_email) == 0 or (billing_email[0][0] is None):
 		if billing_and_primary:
@@ -521,20 +525,21 @@ def download_statements(document_name: str):
 @frappe.whitelist()
 def send_emails(document_name: str, from_scheduler: bool = False, posting_date: str | None = None):
 	doc = frappe.get_doc("Process Statement Of Accounts", document_name)
+	doc.check_permission()
 	report = get_report_pdf(doc, consolidated=False)
 
 	if report:
 		for customer, report_pdf in report.items():
 			context = get_context(customer, doc)
-			filename = frappe.render_template(doc.pdf_name, context)
+			filename = frappe.render_template(doc.pdf_name, context, restrict_globals=True)
 			attachments = [{"fname": filename + ".pdf", "fcontent": report_pdf}]
 
 			recipients, cc = get_recipients_and_cc(customer, doc)
 			if not recipients:
 				continue
 
-			subject = frappe.render_template(doc.subject, context)
-			message = frappe.render_template(doc.body, context)
+			subject = frappe.render_template(doc.subject, context, restrict_globals=True)
+			message = frappe.render_template(doc.body, context, restrict_globals=True)
 
 			if doc.sender:
 				sender_email = frappe.db.get_value("Email Account", doc.sender, "email_id")
@@ -577,6 +582,7 @@ def send_emails(document_name: str, from_scheduler: bool = False, posting_date: 
 
 @frappe.whitelist()
 def send_auto_email():
+	frappe.has_permission("Process Statement Of Accounts", throw=True)
 	selected = frappe.get_list(
 		"Process Statement Of Accounts",
 		filters={"enable_auto_email": 1},

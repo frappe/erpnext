@@ -1,0 +1,40 @@
+# Orchestrator — lives on develop only.
+#
+# Triggers on the weekly schedule and dispatches the runner workflow on each
+# hotfix branch listed in the matrix. To add or remove a branch, edit the
+# matrix below.
+#
+# POT-change triggers are handled by the runner on each hotfix branch
+# (run-hotfix-translation-sync.yml), since GitHub only evaluates a workflow
+# from the branch that receives the push.
+
+name: Sync translations to hotfix branches
+
+on:
+  schedule:
+    # 10:00 UTC Monday
+    - cron: "0 10 * * 1"
+  workflow_dispatch:
+
+# The runner dispatch uses RELEASE_TOKEN (a PAT), not the default GITHUB_TOKEN,
+# so no GITHUB_TOKEN permissions are required.
+permissions: {}
+
+jobs:
+  trigger-runners:
+    name: Trigger sync → ${{ matrix.hotfix_branch }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        hotfix_branch:
+          - version-16-hotfix
+      fail-fast: false
+
+    steps:
+      - name: Dispatch runner on ${{ matrix.hotfix_branch }}
+        run: |
+          gh workflow run run-hotfix-translation-sync.yml \
+            --repo "${{ github.repository }}" \
+            --ref "${{ matrix.hotfix_branch }}"
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}

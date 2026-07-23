@@ -9,7 +9,7 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "chart",
+   "icon": "chart-column",
    "indent": 0,
    "keep_closed": 0,
    "label": "Home",
@@ -45,7 +45,7 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "customer",
+   "icon": "user",
    "indent": 0,
    "keep_closed": 0,
    "label": "Customer",
@@ -148,17 +148,6 @@
    "collapsible": 1,
    "indent": 0,
    "keep_closed": 0,
-   "label": "Inactive Customers",
-   "link_to": "Inactive Customers",
-   "link_type": "Report",
-   "show_arrow": 0,
-   "type": "Link"
-  },
-  {
-   "child": 1,
-   "collapsible": 1,
-   "indent": 0,
-   "keep_closed": 0,
    "label": "Campaign Efficiency",
    "link_to": "Campaign Efficiency",
    "link_type": "Report",
@@ -179,7 +168,7 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "getting-started",
+   "icon": "rocket",
    "indent": 1,
    "keep_closed": 1,
    "label": "Maintenance",
@@ -300,7 +289,7 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "sell",
+   "icon": "store",
    "indent": 1,
    "keep_closed": 1,
    "label": "Campaign",
@@ -485,7 +474,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-01-10 00:06:13.192366",
+ "modified": "2026-07-03 14:11:15.910719",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "CRM",

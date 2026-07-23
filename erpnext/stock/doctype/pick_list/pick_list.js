@@ -9,6 +9,22 @@ frappe.ui.form.on("Pick List", {
 		}, 500);
 	},
 
+	set_warehouse_query: function (frm, fieldname, parentfield = null) {
+		const query = () => {
+			let filters = { company: frm.doc.company };
+
+			frm.doc.consider_rejected_warehouses ? null : (filters.is_rejected_warehouse = 0);
+
+			return { filters };
+		};
+
+		if (parentfield) {
+			frm.set_query(fieldname, parentfield, query);
+		} else {
+			frm.set_query(fieldname, query);
+		}
+	},
+
 	setup: (frm) => {
 		frm.ignore_doctypes_on_cancel_all = ["Serial and Batch Bundle"];
 
@@ -21,21 +37,8 @@ frappe.ui.form.on("Pick List", {
 			"Stock Entry": "Stock Entry",
 		};
 
-		frm.set_query("warehouse", "locations", () => {
-			return {
-				filters: {
-					company: frm.doc.company,
-				},
-			};
-		});
-
-		frm.set_query("parent_warehouse", () => {
-			return {
-				filters: {
-					company: frm.doc.company,
-				},
-			};
-		});
+		frm.events.set_warehouse_query(frm, "warehouse", "locations");
+		frm.events.set_warehouse_query(frm, "parent_warehouse");
 
 		frm.set_query("work_order", () => {
 			return {
@@ -132,7 +135,12 @@ frappe.ui.form.on("Pick List", {
 				if (frm.doc.purpose === "Delivery") {
 					frm.add_custom_button(
 						__("Delivery Note"),
-						() => frm.trigger("create_delivery_note"),
+						() => frm.events.create_delivery(frm, "Delivery Note"),
+						__("Create")
+					);
+					frm.add_custom_button(
+						__("Sales Invoice"),
+						() => frm.events.create_delivery(frm, "Sales Invoice"),
 						__("Create")
 					);
 				} else {
@@ -208,7 +216,7 @@ frappe.ui.form.on("Pick List", {
 						}
 						frm.clear_table("locations");
 						erpnext.utils.map_current_doc({
-							method: "erpnext.manufacturing.doctype.work_order.work_order.create_pick_list",
+							method: "erpnext.manufacturing.doctype.work_order.mapper.create_pick_list",
 							target: frm,
 							source_name: frm.doc.work_order,
 						});
@@ -220,7 +228,7 @@ frappe.ui.form.on("Pick List", {
 	},
 	material_request: (frm) => {
 		erpnext.utils.map_current_doc({
-			method: "erpnext.stock.doctype.material_request.material_request.create_pick_list",
+			method: "erpnext.stock.doctype.material_request.mapper.create_pick_list",
 			target: frm,
 			source_name: frm.doc.material_request,
 		});
@@ -229,15 +237,18 @@ frappe.ui.form.on("Pick List", {
 		frm.clear_table("locations");
 		frm.trigger("add_get_items_button");
 	},
-	create_delivery_note: (frm) => {
+	create_delivery(frm, doctype) {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.stock.doctype.pick_list.pick_list.create_delivery_note",
+			method: "erpnext.stock.doctype.pick_list.mapper.create_delivery",
+			args: {
+				target: doctype,
+			},
 			frm: frm,
 		});
 	},
 	create_stock_entry: (frm) => {
 		frappe
-			.xcall("erpnext.stock.doctype.pick_list.pick_list.create_stock_entry", {
+			.xcall("erpnext.stock.doctype.pick_list.mapper.create_stock_entry", {
 				pick_list: frm.doc,
 			})
 			.then((stock_entry) => {
@@ -259,7 +270,7 @@ frappe.ui.form.on("Pick List", {
 		};
 		frm.get_items_btn = frm.add_custom_button(__("Get Items"), () => {
 			erpnext.utils.map_current_doc({
-				method: "erpnext.selling.doctype.sales_order.sales_order.create_pick_list",
+				method: "erpnext.selling.doctype.sales_order.mapper.create_pick_list",
 				source_doctype: "Sales Order",
 				target: frm,
 				setters: {
@@ -277,7 +288,8 @@ frappe.ui.form.on("Pick List", {
 			items_table_name: "locations",
 			qty_field: "picked_qty",
 			max_qty_field: "qty",
-			dont_allow_new_row: true,
+			demand_ref_fields: ["sales_order_item", "material_request_item", "product_bundle_item"],
+			dont_allow_new_row: !frm.doc.pick_manually,
 			prompt_qty: frm.doc.prompt_qty,
 			serial_no_field: "not_supported", // doesn't make sense for picklist without a separate field.
 		};

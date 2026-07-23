@@ -2,6 +2,7 @@
 # See license.txt
 
 import frappe
+from frappe.query_builder.functions import Sum
 from frappe.utils import cint, flt, now_datetime
 
 from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries
@@ -22,7 +23,6 @@ class TestAssetCapitalization(ERPNextTestSuite):
 	def setUp(self):
 		set_depreciation_settings_in_company()
 		create_asset_capitalization_data()
-		frappe.db.sql("delete from `tabTax Rule`")
 
 	def test_capitalization_with_perpetual_inventory(self):
 		company = "_Test Company with perpetual inventory"
@@ -550,34 +550,33 @@ def create_depreciation_asset(**args):
 
 
 def get_actual_gle_dict(name):
+	gle = frappe.qb.DocType("GL Entry")
+	diff = Sum(gle.debit - gle.credit)
 	return dict(
-		frappe.db.sql(
-			"""
-		select account, sum(debit-credit) as diff
-		from `tabGL Entry`
-		where voucher_type = 'Asset Capitalization' and voucher_no = %s
-		group by account
-		having diff != 0
-	""",
-			name,
-		)
+		frappe.qb.from_(gle)
+		.select(gle.account, diff.as_("diff"))
+		.where((gle.voucher_type == "Asset Capitalization") & (gle.voucher_no == name))
+		.groupby(gle.account)
+		.having(diff != 0)
+		.run()
 	)
 
 
 def get_actual_sle_dict(name):
-	sles = frappe.db.sql(
-		"""
-		select
-			item_code, warehouse,
-			sum(actual_qty) as actual_qty,
-			sum(stock_value_difference) as stock_value_difference
-		from `tabStock Ledger Entry`
-		where voucher_type = 'Asset Capitalization' and voucher_no = %s
-		group by item_code, warehouse
-		having actual_qty != 0
-	""",
-		name,
-		as_dict=1,
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	actual_qty = Sum(sle.actual_qty)
+	sles = (
+		frappe.qb.from_(sle)
+		.select(
+			sle.item_code,
+			sle.warehouse,
+			actual_qty.as_("actual_qty"),
+			Sum(sle.stock_value_difference).as_("stock_value_difference"),
+		)
+		.where((sle.voucher_type == "Asset Capitalization") & (sle.voucher_no == name))
+		.groupby(sle.item_code, sle.warehouse)
+		.having(actual_qty != 0)
+		.run(as_dict=1)
 	)
 
 	sle_dict = {}
@@ -588,3 +587,47 @@ def get_actual_sle_dict(name):
 		}
 
 	return sle_dict
+
+
+class TestAssetCapitalizationValidation(ERPNextTestSuite):
+	"""Row-level validations for the consumed/target items. Exercised on the document
+	directly (the integration tests above cover the full capitalization posting)."""
+
+	def make_capitalization(self, **fields):
+		doc = frappe.new_doc("Asset Capitalization")
+		doc.company = "_Test Company"
+		doc.update(fields)
+		return doc
+
+	def test_source_items_are_mandatory(self):
+		doc = self.make_capitalization()
+		self.assertRaises(frappe.ValidationError, doc.validate_source_mandatory)
+
+	def test_target_item_must_be_a_fixed_asset(self):
+		# _Test Item is a stock item, not a fixed asset
+		doc = self.make_capitalization(target_item_code="_Test Item")
+		self.assertRaises(frappe.ValidationError, doc.validate_target_item)
+
+	def test_consumed_stock_row_rejects_a_non_stock_item(self):
+		doc = self.make_capitalization()
+		doc.append("stock_items", {"item_code": "_Test Non Stock Item", "stock_qty": 1})
+		self.assertRaises(frappe.ValidationError, doc.validate_consumed_stock_item)
+
+	def test_consumed_stock_row_requires_positive_qty(self):
+		doc = self.make_capitalization()
+		doc.append("stock_items", {"item_code": "_Test Item", "stock_qty": 0})
+		self.assertRaises(frappe.ValidationError, doc.validate_consumed_stock_item)
+
+	def test_service_row_rejects_a_stock_item(self):
+		doc = self.make_capitalization()
+		doc.append("service_items", {"item_code": "_Test Item", "qty": 1, "rate": 100})
+		self.assertRaises(frappe.ValidationError, doc.validate_service_item)
+
+	def test_service_row_requires_positive_qty_and_rate(self):
+		zero_qty = self.make_capitalization()
+		zero_qty.append("service_items", {"item_code": "_Test Non Stock Item", "qty": 0, "rate": 100})
+		self.assertRaises(frappe.ValidationError, zero_qty.validate_service_item)
+
+		zero_rate = self.make_capitalization()
+		zero_rate.append("service_items", {"item_code": "_Test Non Stock Item", "qty": 1, "rate": 0})
+		self.assertRaises(frappe.ValidationError, zero_rate.validate_service_item)

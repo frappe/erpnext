@@ -104,80 +104,75 @@ def get_data(filters=None):
 
 
 def get_opportunities(filters):
-	conditions = ""
+	orm_filters = {}
 
 	if filters.get("transaction_date"):
-		conditions = " WHERE transaction_date between {} and {}".format(
-			frappe.db.escape(filters["transaction_date"][0]),
-			frappe.db.escape(filters["transaction_date"][1]),
-		)
+		orm_filters["transaction_date"] = [
+			"between",
+			[filters["transaction_date"][0], filters["transaction_date"][1]],
+		]
 
-	if filters.company:
-		if conditions:
-			conditions += " AND"
-		else:
-			conditions += " WHERE"
-		conditions += " company = %(company)s"
+	if filters.get("company"):
+		orm_filters["company"] = filters["company"]
 
-	return frappe.db.sql(
-		f"""
-		SELECT name, territory, opportunity_amount
-		FROM `tabOpportunity` {conditions}
-	""",
-		filters,
-		as_dict=1,
-	)  # nosec
+	return frappe.get_all(
+		"Opportunity", fields=["name", "territory", "opportunity_amount"], filters=orm_filters
+	)
 
 
 def get_quotations(opportunities):
 	if not opportunities:
 		return []
 
-	opportunity_names = [o.name for o in opportunities]
+	opportunity_names = [o.get("name") for o in opportunities]
 
-	return frappe.db.sql(
-		"""
-		SELECT `name`,`base_grand_total`, `opportunity`
-		FROM `tabQuotation`
-		WHERE docstatus=1 AND opportunity in ({})
-	""".format(", ".join(["%s"] * len(opportunity_names))),
-		tuple(opportunity_names),
-		as_dict=1,
-	)  # nosec
+	return frappe.get_all(
+		"Quotation",
+		fields=["name", "base_grand_total", "opportunity"],
+		filters={"docstatus": 1, "opportunity": ["in", opportunity_names]},
+	)
 
 
 def get_sales_orders(quotations):
 	if not quotations:
 		return []
 
-	quotation_names = [q.name for q in quotations]
+	quotation_names = [q.get("name") for q in quotations]
 
-	return frappe.db.sql(
-		"""
-	SELECT so.`name`, so.`base_grand_total`, soi.prevdoc_docname as quotation
-	FROM `tabSales Order` so, `tabSales Order Item` soi
-	WHERE so.docstatus=1 AND so.name = soi.parent AND soi.prevdoc_docname in ({})
-	""".format(", ".join(["%s"] * len(quotation_names))),
-		tuple(quotation_names),
-		as_dict=1,
-	)  # nosec
+	SalesOrder = frappe.qb.DocType("Sales Order")
+	SalesOrderItem = frappe.qb.DocType("Sales Order Item")
+
+	query = (
+		frappe.qb.from_(SalesOrder)
+		.join(SalesOrderItem)
+		.on(SalesOrder.name == SalesOrderItem.parent)
+		.select(SalesOrder.name, SalesOrder.base_grand_total, SalesOrderItem.prevdoc_docname.as_("quotation"))
+		.where(SalesOrder.docstatus == 1)
+		.where(SalesOrderItem.prevdoc_docname.isin(quotation_names))
+	)
+
+	return query.run(as_dict=True)
 
 
 def get_sales_invoice(sales_orders):
 	if not sales_orders:
 		return []
 
-	so_names = [so.name for so in sales_orders]
+	so_names = [so.get("name") for so in sales_orders]
 
-	return frappe.db.sql(
-		"""
-	SELECT si.name, si.base_grand_total, sii.sales_order
-	FROM `tabSales Invoice` si, `tabSales Invoice Item` sii
-	WHERE si.docstatus=1 AND si.name = sii.parent AND sii.sales_order in ({})
-	""".format(", ".join(["%s"] * len(so_names))),
-		tuple(so_names),
-		as_dict=1,
-	)  # nosec
+	SalesInvoice = frappe.qb.DocType("Sales Invoice")
+	SalesInvoiceItem = frappe.qb.DocType("Sales Invoice Item")
+
+	query = (
+		frappe.qb.from_(SalesInvoice)
+		.join(SalesInvoiceItem)
+		.on(SalesInvoice.name == SalesInvoiceItem.parent)
+		.select(SalesInvoice.name, SalesInvoice.base_grand_total, SalesInvoiceItem.sales_order)
+		.where(SalesInvoice.docstatus == 1)
+		.where(SalesInvoiceItem.sales_order.isin(so_names))
+	)
+
+	return query.run(as_dict=True)
 
 
 def _get_total(doclist, amount_field="base_grand_total"):

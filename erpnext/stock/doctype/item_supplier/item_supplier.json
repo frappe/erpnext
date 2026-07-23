@@ -6,6 +6,7 @@
  "engine": "InnoDB",
  "field_order": [
   "supplier",
+  "column_break_vcuv",
   "supplier_part_no"
  ],
  "fields": [
@@ -25,17 +26,22 @@
    "label": "Supplier Part Number",
    "print_width": "200px",
    "width": "200px"
+  },
+  {
+   "fieldname": "column_break_vcuv",
+   "fieldtype": "Column Break"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-03-27 13:09:55.339052",
+ "modified": "2026-04-22 02:08:38.777228",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Supplier",
  "owner": "Administrator",
  "permissions": [],
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],

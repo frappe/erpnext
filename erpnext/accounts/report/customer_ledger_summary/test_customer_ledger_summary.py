@@ -11,10 +11,12 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 class TestCustomerLedgerSummary(ERPNextTestSuite, AccountsTestMixin):
 	def setUp(self):
-		self.create_company()
-		self.create_customer()
-		self.create_item()
-		self.clear_old_entries()
+		self.company = "_Test Company"
+		self.customer = "_Test Customer"
+		self.item = "_Test Item"
+		self.debit_to = "Debtors - _TC"
+		self.cost_center = "Main - _TC"
+		self.cash = "Cash - _TC"
 
 	def create_sales_invoice(self, do_not_submit=False, **args):
 		si = create_sales_invoice(

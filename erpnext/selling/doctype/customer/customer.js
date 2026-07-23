@@ -2,7 +2,16 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.ui.form.on("Customer", {
+	restrict_to_companies(frm) {
+		if (!frm.doc.restrict_to_companies) {
+			frm.set_value("allowed_companies", []);
+		}
+	},
+
 	setup: function (frm) {
+		frm.set_query("allowed_companies", () => ({
+			query: "erpnext.stock.doctype.company_restriction.company_restriction.company_query",
+		}));
 		frm.custom_make_buttons = {
 			Opportunity: "Opportunity",
 			Quotation: "Quotation",
@@ -13,7 +22,7 @@ frappe.ui.form.on("Customer", {
 		frm.make_methods = {
 			Quotation: () =>
 				frappe.model.open_mapped_doc({
-					method: "erpnext.selling.doctype.customer.customer.make_quotation",
+					method: "erpnext.selling.doctype.customer.mapper.make_quotation",
 					frm: frm,
 				}),
 			"Sales Order": () =>
@@ -24,12 +33,12 @@ frappe.ui.form.on("Customer", {
 				}),
 			Opportunity: () =>
 				frappe.model.open_mapped_doc({
-					method: "erpnext.selling.doctype.customer.customer.make_opportunity",
+					method: "erpnext.selling.doctype.customer.mapper.make_opportunity",
 					frm: frm,
 				}),
 			"Payment Entry": () =>
 				frappe.model.open_mapped_doc({
-					method: "erpnext.selling.doctype.customer.customer.make_payment_entry",
+					method: "erpnext.selling.doctype.customer.mapper.make_payment_entry",
 					frm: frm,
 				}),
 			"Pricing Rule": () => frm.trigger("make_pricing_rule"),
@@ -38,7 +47,7 @@ frappe.ui.form.on("Customer", {
 
 		frm.add_fetch("lead_name", "company_name", "customer_name");
 		frm.add_fetch("default_sales_partner", "commission_rate", "default_commission_rate");
-		frm.set_query("default_price_list", { selling: 1 });
+		frm.set_query("default_price_list", () => ({ filters: { selling: 1 } }));
 		frm.set_query("account", "accounts", function (doc, cdt, cdn) {
 			let d = locals[cdt][cdn];
 			let filters = {
@@ -185,13 +194,15 @@ frappe.ui.form.on("Customer", {
 				frm.add_custom_button(__(doctype), frm.make_methods[doctype], __("Create"));
 			}
 
-			frm.add_custom_button(
-				__("Get Customer Group Details"),
-				function () {
-					frm.trigger("get_customer_group_details");
-				},
-				__("Actions")
-			);
+			if (frm.doc.customer_group) {
+				frm.add_custom_button(
+					__("Get Customer Group Details"),
+					function () {
+						frm.trigger("get_customer_group_details");
+					},
+					__("Actions")
+				);
+			}
 
 			if (
 				cint(frappe.defaults.get_default("enable_common_party_accounting")) &&
@@ -277,7 +288,7 @@ frappe.ui.form.on("Customer", {
 					error: function () {
 						dialog.hide();
 						frappe.msgprint({
-							message: __("Linking to Supplier Failed. Please try again."),
+							message: __("Linking to Supplier failed. Please try again."),
 							title: __("Linking Failed"),
 							indicator: "red",
 						});

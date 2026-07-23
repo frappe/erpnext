@@ -84,6 +84,7 @@ def execute(filters=None):
 				bin.reserved_qty_for_production_plan,
 				bin.reserved_qty_for_sub_contract,
 				reserved_qty_for_pos,
+				bin.reserved_stock,
 				bin.projected_qty,
 				re_order_level,
 				re_order_qty,
@@ -203,6 +204,13 @@ def get_columns():
 			"convertible": "qty",
 		},
 		{
+			"label": _("Reserved Stock"),
+			"fieldname": "reserved_stock",
+			"fieldtype": "Float",
+			"width": 100,
+			"convertible": "qty",
+		},
+		{
 			"label": _("Projected Qty"),
 			"fieldname": "projected_qty",
 			"fieldtype": "Float",
@@ -248,6 +256,7 @@ def get_bin_list(filters):
 			bin.reserved_qty_for_production,
 			bin.reserved_qty_for_sub_contract,
 			bin.reserved_qty_for_production_plan,
+			bin.reserved_stock,
 			bin.projected_qty,
 		)
 		.orderby(bin.item_code, bin.warehouse)
@@ -284,17 +293,19 @@ def get_item_map(item_code, include_uom):
 	bin = frappe.qb.DocType("Bin")
 	item = frappe.qb.DocType("Item")
 
+	# alive = end_of_life unset / future / MariaDB zero-date '0000-00-00' (an invalid date literal on
+	# postgres, where "not set" is NULL — already covered by IS NULL); zero-date term on MariaDB only.
+	alive = (item.end_of_life > today()) | item.end_of_life.isnull()
+	if frappe.db.db_type != "postgres":
+		alive |= item.end_of_life == "0000-00-00"
+
 	query = (
 		frappe.qb.from_(item)
 		.select(item.name, item.item_name, item.description, item.item_group, item.brand, item.stock_uom)
 		.where(
 			(item.is_stock_item == 1)
 			& (item.disabled == 0)
-			& (
-				(item.end_of_life > today())
-				| (item.end_of_life.isnull())
-				| (item.end_of_life == "0000-00-00")
-			)
+			& alive
 			& (ExistsCriterion(frappe.qb.from_(bin).select(bin.name).where(bin.item_code == item.name)))
 		)
 	)

@@ -227,6 +227,7 @@ def get_data_when_grouped_by_invoice(columns, gross_profit_data, filters, group_
 				)
 				if total_base_amount
 				else 0,
+				"currency": filters.currency,
 			}
 		)
 	)
@@ -269,6 +270,7 @@ def get_data_when_not_grouped_by_invoice(gross_profit_data, filters, group_wise_
 		"buying_amount": total_buying_amount,
 		"gross_profit": total_gross_profit,
 		"gross_profit_percent": flt(gross_profit_percent, currency_precision),
+		"currency": filters.currency,
 	}
 
 	total_row = [total_row.get(col, None) for col in [*group_columns, "currency"]]
@@ -562,7 +564,12 @@ class GrossProfitGenerator:
 								row.base_amount = packed_item.base_amount
 
 			# get buying amount
-			if row.item_code in product_bundles:
+			if row.is_debit_note:
+				# Rate adjustment debit notes have no stock movement, so buying amount is zero
+				if not grouped_by_invoice:
+					row.qty = 0
+				row.buying_amount = 0
+			elif row.item_code in product_bundles:
 				row.buying_amount = flt(
 					self.get_buying_amount_from_product_bundle(row, product_bundles[row.item_code]),
 					self.currency_precision,
@@ -713,20 +720,25 @@ class GrossProfitGenerator:
 		)
 
 	def get_returned_invoice_items(self):
-		returned_invoices = frappe.db.sql(
-			"""
-			select
-				si.name, si_item.item_code, si_item.stock_qty as qty, si_item.base_net_amount as base_amount, si.return_against
-			from
-				`tabSales Invoice` si, `tabSales Invoice Item` si_item
-			where
-				si.name = si_item.parent
-				and si.docstatus = 1
-				and si.is_return = 1
-				and si.posting_date between %(from_date)s and %(to_date)s
-		""",
-			{"from_date": self.filters.from_date, "to_date": self.filters.to_date},
-			as_dict=1,
+		si = frappe.qb.DocType("Sales Invoice")
+		si_item = frappe.qb.DocType("Sales Invoice Item")
+		returned_invoices = (
+			frappe.qb.from_(si)
+			.inner_join(si_item)
+			.on(si.name == si_item.parent)
+			.select(
+				si.name,
+				si_item.item_code,
+				si_item.stock_qty.as_("qty"),
+				si_item.base_net_amount.as_("base_amount"),
+				si.return_against,
+			)
+			.where(
+				(si.docstatus == 1)
+				& (si.is_return == 1)
+				& si.posting_date.between(self.filters.from_date, self.filters.to_date)
+			)
+			.run(as_dict=1)
 		)
 
 		self.returned_invoices = frappe._dict()
@@ -812,19 +824,11 @@ class GrossProfitGenerator:
 				return self.calculate_buying_amount_from_sle(
 					row, my_sle, parenttype, parent, row.item_row, item_code
 				)
-			elif self.delivery_notes.get((row.parent, row.item_code), None):
-				#  check if Invoice has delivery notes
-				dn = self.delivery_notes.get((row.parent, row.item_code))
-				parenttype, parent, item_row, dn_warehouse = (
-					"Delivery Note",
-					dn["delivery_note"],
-					dn["item_row"],
-					dn["warehouse"],
-				)
-				my_sle = self.get_stock_ledger_entries(item_code, dn_warehouse)
-				return self.calculate_buying_amount_from_sle(
-					row, my_sle, parenttype, parent, item_row, item_code
-				)
+			elif row.item_row and self.delivery_notes.get(row.item_row):
+				dn = self.delivery_notes[row.item_row]
+				if flt(dn.total_qty):
+					return flt(row.qty) * flt(dn.total_incoming_value) / flt(dn.total_qty)
+				return flt(row.qty) * self.get_average_buying_rate(row, item_code)
 			elif row.sales_order and row.so_detail:
 				incoming_amount = self.get_buying_amount_from_so_dn(row.sales_order, row.so_detail, item_code)
 				if incoming_amount:
@@ -898,7 +902,11 @@ class GrossProfitGenerator:
 		if row.cost_center:
 			query = query.where(purchase_invoice_item.cost_center == row.cost_center)
 
-		query = query.orderby(purchase_invoice.posting_date, order=frappe.qb.desc).limit(1)
+		query = (
+			query.orderby(purchase_invoice.posting_date, order=frappe.qb.desc)
+			.orderby(purchase_invoice.name, order=frappe.qb.desc)
+			.limit(1)
+		)
 		last_purchase_rate = query.run()
 
 		return flt(last_purchase_rate[0][0]) if last_purchase_rate else 0
@@ -959,6 +967,7 @@ class GrossProfitGenerator:
 			SalesInvoice.customer_group,
 			SalesInvoice.customer_name,
 			SalesInvoice.territory,
+			SalesInvoice.is_debit_note,
 			SalesInvoiceItem.item_code,
 			SalesInvoice.base_net_total.as_("invoice_base_net_total"),
 			SalesInvoiceItem.item_name,
@@ -1076,25 +1085,29 @@ class GrossProfitGenerator:
 	def get_delivery_notes(self):
 		self.delivery_notes = frappe._dict({})
 		if self.si_list:
+			from frappe.query_builder.functions import Sum
+
 			invoices = [x.parent for x in self.si_list]
 			dni = qb.DocType("Delivery Note Item")
 			delivery_notes = (
 				qb.from_(dni)
 				.select(
-					dni.against_sales_invoice.as_("sales_invoice"),
-					dni.item_code,
-					dni.warehouse,
-					dni.parent.as_("delivery_note"),
-					dni.name.as_("item_row"),
+					dni.si_detail,
+					Sum(dni.stock_qty * dni.incoming_rate).as_("total_incoming_value"),
+					Sum(dni.stock_qty).as_("total_qty"),
 				)
-				.where((dni.docstatus == 1) & (dni.against_sales_invoice.isin(invoices)))
-				.groupby(dni.against_sales_invoice, dni.item_code)
-				.orderby(dni.creation, order=Order.desc)
+				.where(
+					(dni.docstatus == 1)
+					& (dni.against_sales_invoice.isin(invoices))
+					& (dni.si_detail.isnotnull())
+					& (dni.si_detail != "")
+				)
+				.groupby(dni.si_detail)
 				.run(as_dict=True)
 			)
 
 			for entry in delivery_notes:
-				self.delivery_notes[(entry.sales_invoice, entry.item_code)] = entry
+				self.delivery_notes[entry.si_detail] = entry
 
 	def group_items_by_invoice(self):
 		"""
@@ -1135,6 +1148,7 @@ class GrossProfitGenerator:
 				"posting_time": row.posting_time,
 				"project": row.project,
 				"update_stock": row.update_stock,
+				"is_debit_note": row.is_debit_note,
 				"customer": row.customer,
 				"customer_group": row.customer_group,
 				"customer_name": row.customer_name,
@@ -1173,6 +1187,7 @@ class GrossProfitGenerator:
 				"description": item.description,
 				"warehouse": item.warehouse or row.warehouse,
 				"update_stock": row.update_stock,
+				"is_debit_note": row.is_debit_note,
 				"item_group": "",
 				"brand": "",
 				"dn_detail": row.dn_detail,
@@ -1245,7 +1260,4 @@ class GrossProfitGenerator:
 			).setdefault(d.parent_item, []).append(d)
 
 	def load_non_stock_items(self):
-		self.non_stock_items = frappe.db.sql_list(
-			"""select name from tabItem
-			where is_stock_item=0"""
-		)
+		self.non_stock_items = frappe.get_all("Item", filters={"is_stock_item": 0}, pluck="name")

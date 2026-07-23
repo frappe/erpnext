@@ -78,6 +78,7 @@
   "from_template",
   "title",
   "column_break3",
+  "custom_remark",
   "remark",
   "mode_of_payment",
   "party_not_required"
@@ -202,6 +203,7 @@
   {
    "fieldname": "user_remark",
    "fieldtype": "Small Text",
+   "hidden": 1,
    "label": "User Remark",
    "no_copy": 1,
    "oldfieldname": "user_remark",
@@ -315,7 +317,7 @@
    "no_copy": 1,
    "oldfieldname": "remark",
    "oldfieldtype": "Small Text",
-   "read_only": 1
+   "read_only_depends_on": "eval: !doc.custom_remark"
   },
   {
    "depends_on": "eval:doc.voucher_type== \"Inter Company Journal Entry\"",
@@ -651,6 +653,12 @@
    "fieldname": "auto_repeat_section",
    "fieldtype": "Section Break",
    "label": "Auto Repeat"
+  },
+  {
+   "default": "0",
+   "fieldname": "custom_remark",
+   "fieldtype": "Check",
+   "label": "Custom Remark"
   }
  ],
  "icon": "fa fa-file-text",
@@ -665,7 +673,7 @@
    "table_fieldname": "payment_entries"
   }
  ],
- "modified": "2026-03-09 17:15:26.569327",
+ "modified": "2026-04-08 14:19:30.870894",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry",

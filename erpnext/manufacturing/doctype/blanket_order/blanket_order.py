@@ -120,7 +120,7 @@ class BlanketOrder(Document):
 
 	def validate_item_qty(self):
 		for d in self.items:
-			if d.qty < 0:
+			if flt(d.qty) < 0:
 				frappe.throw(_("Row {0}: Quantity cannot be negative.").format(d.idx))
 
 

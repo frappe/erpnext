@@ -169,6 +169,15 @@ class InventoryDimension(Document):
 		if label_start_with:
 			label = f"{label_start_with} {self.dimension_name}"
 
+		mandatory_depends_on = self.mandatory_depends_on
+		if self.reqd:
+			if doctype == "Stock Entry Detail":
+				mandatory_depends_on = "eval:doc.s_warehouse"
+			elif doctype == "Subcontracting Receipt Supplied Item":
+				mandatory_depends_on = "eval:doc.reference_name"
+			elif doctype == "Packed Item":
+				mandatory_depends_on = "eval:doc.parent_detail_docname && ['Delivery Note', 'Sales Invoice', 'POS Invoice'].includes(parent.doctype)"
+
 		dimension_fields = [
 			dict(
 				fieldname="inventory_dimension",
@@ -186,11 +195,12 @@ class InventoryDimension(Document):
 				depends_on="eval:doc.s_warehouse" if doctype == "Stock Entry Detail" else "",
 				search_index=1,
 				reqd=1
-				if self.reqd and not self.mandatory_depends_on and doctype != "Stock Entry Detail"
+				if self.reqd
+				and not self.mandatory_depends_on
+				and doctype
+				not in ["Stock Entry Detail", "Subcontracting Receipt Supplied Item", "Packed Item"]
 				else 0,
-				mandatory_depends_on="eval:doc.s_warehouse"
-				if self.reqd and doctype == "Stock Entry Detail"
-				else self.mandatory_depends_on,
+				mandatory_depends_on=mandatory_depends_on,
 			),
 		]
 
@@ -399,7 +409,7 @@ def get_inventory_dimensions():
 			"validate_negative_stock",
 			"name as dimension_name",
 		],
-		order_by="creation",
+		order_by="creation",  # pg-ok: dropped under distinct on PG — config-list iteration order only, not data
 		distinct=True,
 	)
 
