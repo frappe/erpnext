@@ -79,3 +79,30 @@ class TestCompanyRestriction(ERPNextTestSuite):
 		self.restrict_to_companies("Item", item.name, ["_Test Company 1"])
 		stock_entry.reload()
 		stock_entry.cancel()
+
+	def test_restriction_fields_require_permlevel_access(self):
+		customer = make_customer("_Test Permlevel Restricted Customer")
+		self.restrict_to_companies("Customer", customer, ["_Test Company"])
+
+		user = "test_company_restriction_perm@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{
+					"doctype": "User",
+					"email": user,
+					"first_name": "Company Restriction Perm",
+					"roles": [{"role": "Sales User"}],
+				}
+			).insert(ignore_permissions=True)
+
+		frappe.set_user(user)
+		self.addCleanup(frappe.set_user, "Administrator")
+
+		doc = frappe.get_doc("Customer", customer)
+		doc.restrict_to_companies = 0
+		doc.set("allowed_companies", [])
+		doc.save()
+
+		doc.reload()
+		self.assertEqual(doc.restrict_to_companies, 1)
+		self.assertEqual([row.company for row in doc.allowed_companies], ["_Test Company"])
