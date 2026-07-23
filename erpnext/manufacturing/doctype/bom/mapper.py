@@ -179,7 +179,7 @@ def make_variant_bom(
 	bom_no: str,
 	item: str,
 	variant_items: str | list,
-	target_doc: Document | str | None = None,
+	target_doc: str | dict | Document | None = None,
 ):
 	frappe.has_permission("BOM", "write", throw=True)
 

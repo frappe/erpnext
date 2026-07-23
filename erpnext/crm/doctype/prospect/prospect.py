@@ -95,7 +95,7 @@ class Prospect(CRMNote):
 
 
 @frappe.whitelist()
-def make_customer(source_name: str, target_doc: str | Document | None = None):
+def make_customer(source_name: str, target_doc: str | dict | Document | None = None):
 	def set_missing_values(source, target):
 		target.customer_type = "Company"
 		target.company_name = source.name
@@ -119,7 +119,7 @@ def make_customer(source_name: str, target_doc: str | Document | None = None):
 
 
 @frappe.whitelist()
-def make_opportunity(source_name: str, target_doc: str | Document | None = None):
+def make_opportunity(source_name: str, target_doc: str | dict | Document | None = None):
 	def set_missing_values(source, target):
 		target.opportunity_from = "Prospect"
 		target.customer_name = source.company_name

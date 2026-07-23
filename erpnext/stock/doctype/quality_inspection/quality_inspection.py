@@ -489,7 +489,7 @@ def quality_inspection_query(
 
 
 @frappe.whitelist()
-def make_quality_inspection(source_name: str, target_doc: Document | str | None = None):
+def make_quality_inspection(source_name: str, target_doc: str | dict | Document | None = None):
 	def postprocess(source, doc):
 		doc.inspected_by = frappe.session.user
 		doc.get_quality_inspection_template()
