@@ -450,16 +450,16 @@ class Company(NestedSet):
 	def create_default_warehouses(self):
 		parent_warehouse = None
 		for wh_detail in [
-			{"warehouse_name": "All Warehouses", "is_group": 1},
-			{"warehouse_name": "Stores", "is_group": 0},
-			{"warehouse_name": "Work In Progress", "is_group": 0},
-			{"warehouse_name": "Finished Goods", "is_group": 0},
-			{"warehouse_name": "Goods In Transit", "is_group": 0, "warehouse_type": "Transit"},
+			{"warehouse_name": _("All Warehouses"), "is_group": 1},
+			{"warehouse_name": _("Stores"), "is_group": 0},
+			{"warehouse_name": _("Work In Progress"), "is_group": 0},
+			{"warehouse_name": _("Finished Goods"), "is_group": 0},
+			{"warehouse_name": _("Goods In Transit"), "is_group": 0, "warehouse_type": "Transit"},
 		]:
 			if frappe.db.exists(
 				"Warehouse",
 				{
-					"warehouse_name": ("in", (wh_detail["warehouse_name"], _(wh_detail["warehouse_name"]))),
+					"warehouse_name": wh_detail["warehouse_name"],
 					"company": self.name,
 				},
 			):
