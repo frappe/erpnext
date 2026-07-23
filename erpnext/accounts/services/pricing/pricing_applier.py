@@ -82,8 +82,10 @@ class EffectApplier:
 			if row:
 				changed = self._update_free_row(row, effect) or changed
 			else:
-				self._append_free_row(effect)
+				row = self._append_free_row(effect)
 				changed = True
+			self._inherit_source_line_values(row, effect)
+			self._set_missing_row_details(row)
 		return changed
 
 	def _remove_stale_free_rows(self, desired: dict) -> bool:
@@ -116,11 +118,11 @@ class EffectApplier:
 		row.rate = row.price_list_rate = effect.rate
 		return True
 
-	def _append_free_row(self, effect: FreeItemEffect) -> None:
+	def _append_free_row(self, effect: FreeItemEffect):
 		item = frappe.get_cached_value(
 			"Item", effect.item_code, ("item_name", "description", "stock_uom"), as_dict=True
 		)
-		self.doc.append(
+		return self.doc.append(
 			"items",
 			{
 				"item_code": effect.item_code,
@@ -142,9 +144,59 @@ class EffectApplier:
 			},
 		)
 
+	def _inherit_source_line_values(self, row, effect: FreeItemEffect) -> None:
+		"""The freebie belongs to the sale that earned it: accounting and
+		inventory dimensions and mandatory custom fields carry over from
+		the trigger line."""
+		source = self._source_row(effect)
+		if not source:
+			return
+		for fieldname in _inheritable_fieldnames(row):
+			if row.get(fieldname) is None and source.get(fieldname) is not None:
+				row.set(fieldname, source.get(fieldname))
+
+	def _set_missing_row_details(self, row) -> None:
+		"""Fill the accounting defaults (income and expense account, cost
+		center, tax template) that the controller's enrichment pass had
+		already run for user-entered rows before this row existed."""
+		from erpnext.stock.get_item_details import get_item_details
+
+		context = frappe._dict(
+			{fieldname: self.doc.get(fieldname) for fieldname in self.doc.meta.get_valid_columns()}
+		)
+		context.update(row.as_dict())
+		context.update(
+			{
+				"doctype": self.doc.doctype,
+				"name": self.doc.name,
+				"child_doctype": row.doctype,
+				"child_docname": row.name,
+				"transaction_date": context.transaction_date or context.posting_date,
+			}
+		)
+		if self.doc.doctype in SELLING_DOCTYPES:
+			context.document_type = f"{self.doc.doctype} Item"
+		details = get_item_details(context, self.doc, for_validate=True, overwrite_warehouse=False)
+		for fieldname, value in details.items():
+			if row.meta.get_field(fieldname) and value is not None and row.get(fieldname) is None:
+				row.set(fieldname, value)
+
 	def _default_warehouse(self, effect: FreeItemEffect) -> str | None:
-		source = next((row for row in self.doc.get("items") if row.name == effect.source_line_key), None)
+		source = self._source_row(effect)
 		return (source and source.get("warehouse")) or self.doc.get("set_warehouse")
+
+	def _source_row(self, effect: FreeItemEffect):
+		"""The trigger line the freebie came from. Free rows never qualify:
+		an unsaved appended row has no name and would match a missing
+		source_line_key as None == None."""
+		return next(
+			(
+				row
+				for row in self.doc.get("items")
+				if not row.get("is_free_item") and row.name and row.name == effect.source_line_key
+			),
+			None,
+		)
 
 	def _apply_header_discount(self) -> bool:
 		headers = [e for e in self.result.effects if isinstance(e, HeaderDiscount)]
@@ -177,6 +229,19 @@ def should_apply(doc) -> bool:
 
 def is_pricing_scheme_engine_enabled() -> bool:
 	return frappe.get_cached_value("Accounts Settings", None, "pricing_engine") == "Pricing Scheme"
+
+
+def _inheritable_fieldnames(row) -> set[str]:
+	from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+		get_accounting_dimensions,
+	)
+	from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
+
+	fieldnames = {"cost_center", "project"}
+	fieldnames.update(get_accounting_dimensions())
+	fieldnames.update(dimension.source_fieldname for dimension in get_inventory_dimensions())
+	fieldnames.update(field.fieldname for field in row.meta.get_custom_fields() if field.reqd)
+	return {fieldname for fieldname in fieldnames if row.meta.has_field(fieldname)}
 
 
 def baseline_rate(item) -> float:

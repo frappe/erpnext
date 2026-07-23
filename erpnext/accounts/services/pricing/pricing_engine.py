@@ -190,7 +190,8 @@ class PricingEngine:
 		if not free_qty:
 			return []
 		if tier.free_item:
-			return [self._free_effect(match, tier.free_item, free_qty, None)]
+			source_key = match.trigger_line_keys[0] if match.trigger_line_keys else None
+			return [self._free_effect(match, tier.free_item, free_qty, source_key)]
 		return [
 			self._free_effect(match, self._line_by_key(key).item_code, free_qty, key)
 			for key in match.trigger_line_keys

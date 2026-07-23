@@ -428,6 +428,31 @@ class TestPricingSchemeApplier(ERPNextTestSuite):
 		so.save()
 		self.assertFalse([d for d in so.items if d.is_free_item])
 
+	def test_free_row_gets_accounting_defaults(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		make_scheme(
+			effect_type="Free Item",
+			trigger=[group_row(PARENT_GROUP)],
+			tiers=[tier(min_qty=12, free_qty=1, free_item=ITEM_B)],
+		)
+		si = create_sales_invoice(item_code=ITEM_A, qty=24, rate=100, do_not_save=1)
+		si.flags.ignore_mandatory = True  # site-local custom field on invoices
+		si.insert()
+
+		free = next(row for row in si.items if row.is_free_item)
+		source = next(row for row in si.items if not row.is_free_item)
+		self.assertEqual(free.item_code, ITEM_B)
+		self.assertTrue(free.income_account, "free row must inherit an income account")
+		self.assertEqual(
+			free.cost_center, source.cost_center, "free row must inherit the trigger line's cost center"
+		)
+
+		# the update path must keep inherited values stable across saves
+		si.save()
+		free = next(row for row in si.items if row.is_free_item)
+		self.assertEqual(free.cost_center, source.cost_center, "re-save must preserve inherited values")
+
 	def test_chain_stability_so_to_delivery_note(self):
 		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
 
