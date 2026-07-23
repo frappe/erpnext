@@ -1343,7 +1343,7 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 
 		# receipt2 now sits on a zero base -> 10 (not 0 from a double shift, nor a negative-stock error).
 		self.assertEqual(qty_after(receipt2), 10)
-=======
+
 	def test_cancel_shifts_same_timestamp_delivery_notes(self):
 		item = make_item().name
 		warehouse = "_Test Warehouse - _TC"
