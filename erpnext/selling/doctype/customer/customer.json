@@ -541,14 +541,16 @@
   {
    "fieldname": "company_restrictions_section",
    "fieldtype": "Section Break",
-   "label": "Company Restrictions"
+   "label": "Company Restrictions",
+   "permlevel": 1
   },
   {
    "default": "0",
    "fieldname": "restrict_to_companies",
    "fieldtype": "Check",
    "label": "Restrict to Companies",
-   "description": "If checked, this Customer is only available for transactions in the companies listed below."
+   "description": "If checked, this Customer is only available for transactions in the companies listed below.",
+   "permlevel": 1
   },
   {
    "fieldname": "allowed_companies",
@@ -556,7 +558,8 @@
    "label": "Allowed Companies",
    "options": "Company Restriction",
    "depends_on": "eval:doc.restrict_to_companies",
-   "mandatory_depends_on": "eval:doc.restrict_to_companies"
+   "mandatory_depends_on": "eval:doc.restrict_to_companies",
+   "permlevel": 1
   },
   {
    "collapsible": 1,
@@ -754,11 +757,6 @@
    "role": "Sales User",
    "share": 1,
    "write": 1
-  },
-  {
-   "permlevel": 1,
-   "read": 1,
-   "role": "Sales User"
   },
   {
    "email": 1,
