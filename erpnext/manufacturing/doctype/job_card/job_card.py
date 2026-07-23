@@ -45,10 +45,6 @@ class OverlapError(frappe.ValidationError):
 	pass
 
 
-class OperationMismatchError(frappe.ValidationError):
-	pass
-
-
 class OperationSequenceError(frappe.ValidationError):
 	pass
 
@@ -106,7 +102,6 @@ class JobCard(Document):
 		operation: DF.Link
 		operation_id: DF.Data | None
 		operation_row_id: DF.Int
-		operation_row_number: DF.Literal[None]
 		pending_qty: DF.Float
 		posting_date: DF.Date | None
 		process_loss_qty: DF.Float
@@ -168,7 +163,6 @@ class JobCard(Document):
 		self.validate_time_logs()
 		self.validate_on_hold()
 		self.set_status()
-		self.validate_operation_id()
 		self.validate_sequence_id()
 		self.set_sub_operations()
 		self.update_sub_operation_status()
@@ -1343,23 +1337,6 @@ class JobCard(Document):
 	def set_wip_warehouse(self):
 		if not self.wip_warehouse:
 			self.wip_warehouse = frappe.get_cached_value("Company", self.company, "default_wip_warehouse")
-
-	def validate_operation_id(self):
-		if (
-			self.get("operation_id")
-			and self.get("operation_row_number")
-			and self.operation
-			and self.work_order
-			and frappe.get_cached_value("Work Order Operation", self.operation_row_number, "name")
-			!= self.operation_id
-		):
-			work_order = bold(get_link_to_form("Work Order", self.work_order))
-			frappe.throw(
-				_("Operation {0} does not belong to the work order {1}").format(
-					bold(self.operation), work_order
-				),
-				OperationMismatchError,
-			)
 
 	@frappe.whitelist()
 	def pause_job(self, **kwargs):

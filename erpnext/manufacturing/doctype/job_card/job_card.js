@@ -172,8 +172,6 @@ frappe.ui.form.on("Job Card", {
 			},
 		}));
 
-		frm.trigger("toggle_operation_number");
-
 		const is_timer_running = frm.events.setup_job_action_buttons(frm, has_items);
 
 		if (!is_timer_running) {
@@ -498,8 +496,6 @@ frappe.ui.form.on("Job Card", {
 	},
 
 	operation(frm) {
-		frm.trigger("toggle_operation_number");
-
 		if (frm.doc.operation && frm.doc.work_order) {
 			frappe.call({
 				method: "erpnext.manufacturing.doctype.job_card.job_card.get_operation_details",
@@ -508,35 +504,12 @@ frappe.ui.form.on("Job Card", {
 					operation: frm.doc.operation,
 				},
 				callback(r) {
-					if (!r.message) return;
-
-					if (r.message.length == 1) {
+					if (r.message && r.message.length == 1) {
 						frm.set_value("operation_id", r.message[0].name);
-					} else {
-						const args = r.message.map((row) => ({ label: row.idx, value: row.name }));
-						const description = __("Operation {0} added multiple times in the work order {1}", [
-							frm.doc.operation,
-							frm.doc.work_order,
-						]);
-						frm.set_df_property("operation_row_number", "options", args);
-						frm.set_df_property("operation_row_number", "description", description);
 					}
-
-					frm.trigger("toggle_operation_number");
 				},
 			});
 		}
-	},
-
-	operation_row_number(frm) {
-		if (frm.doc.operation_row_number) {
-			frm.set_value("operation_id", frm.doc.operation_row_number);
-		}
-	},
-
-	toggle_operation_number(frm) {
-		frm.toggle_display("operation_row_number", !frm.doc.operation_id && frm.doc.operation);
-		frm.toggle_reqd("operation_row_number", !frm.doc.operation_id && frm.doc.operation);
 	},
 
 	make_time_log(frm, args) {
