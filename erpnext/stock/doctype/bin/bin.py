@@ -37,7 +37,7 @@ class Bin(Document):
 	# end: auto-generated types
 
 	@frappe.whitelist()
-	def recalculate_qty(self):
+	def recalculate_values(self):
 		from erpnext.manufacturing.doctype.work_order.work_order import get_reserved_qty_for_production
 		from erpnext.stock.stock_balance import (
 			get_indented_qty,
@@ -46,7 +46,19 @@ class Bin(Document):
 			get_reserved_qty,
 		)
 
-		self.actual_qty = get_actual_qty(self.item_code, self.warehouse)
+		last_sle = get_last_sle_values(self.item_code, self.warehouse)
+		self.actual_qty = last_sle.qty_after_transaction
+		self.valuation_rate = last_sle.valuation_rate
+		self.stock_value = last_sle.stock_value
+
+		from erpnext.stock.utils import get_valuation_method
+
+		if get_valuation_method(self.item_code) == "Standard Cost":
+			from erpnext.stock.doctype.item_standard_cost.item_standard_cost import get_item_standard_rate
+
+			self.stock_value = flt(self.actual_qty) * flt(
+				get_item_standard_rate(self.item_code, self.company)
+			)
 		self.planned_qty = get_planned_qty(self.item_code, self.warehouse)
 		self.indented_qty = get_indented_qty(self.item_code, self.warehouse)
 		self.ordered_qty = get_ordered_qty(self.item_code, self.warehouse)
@@ -301,20 +313,23 @@ def update_qty(bin_name, args):
 
 
 def get_actual_qty(item_code, warehouse):
+	return get_last_sle_values(item_code, warehouse).qty_after_transaction
+
+
+def get_last_sle_values(item_code, warehouse):
 	sle = frappe.qb.DocType("Stock Ledger Entry")
 
-	last_sle_qty = (
+	last_sle = (
 		frappe.qb.from_(sle)
-		.select(sle.qty_after_transaction)
+		.select(sle.qty_after_transaction, sle.valuation_rate, sle.stock_value)
 		.where((sle.item_code == item_code) & (sle.warehouse == warehouse) & (sle.is_cancelled == 0))
 		.orderby(sle.posting_datetime, order=Order.desc)
 		.orderby(sle.creation, order=Order.desc)
 		.limit(1)
-		.run()
+		.run(as_dict=True)
 	)
 
-	actual_qty = 0.0
-	if last_sle_qty:
-		actual_qty = last_sle_qty[0][0]
+	if last_sle:
+		return last_sle[0]
 
-	return actual_qty
+	return frappe._dict(qty_after_transaction=0.0, valuation_rate=0.0, stock_value=0.0)

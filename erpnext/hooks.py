@@ -38,6 +38,7 @@ web_include_icons = [
 
 doctype_js = {
 	"Address": "public/js/address.js",
+	"Sales Order": "public/js/sales_order_proforma.js",
 	"Communication": "public/js/communication.js",
 	"Event": "public/js/event.js",
 	"Newsletter": "public/js/newsletter.js",
@@ -369,6 +370,7 @@ doc_events = {
 		"validate": [
 			"erpnext.support.doctype.service_level_agreement.service_level_agreement.apply",
 			"erpnext.setup.doctype.transaction_deletion_record.transaction_deletion_record.check_for_running_deletion_job",
+			"erpnext.stock.doctype.company_restriction.company_restriction.validate_transaction_company",
 		],
 	},
 	tuple(period_closing_doctypes): {
@@ -376,6 +378,9 @@ doc_events = {
 	},
 	tuple(pre_submit_validation_doctypes): {
 		"validate": "erpnext.accounts.utils.pre_submit_validation",
+	},
+	("Item", "Customer", "Supplier"): {
+		"validate": "erpnext.stock.doctype.company_restriction.company_restriction.validate_allowed_companies",
 	},
 	"Stock Entry": {
 		"on_submit": "erpnext.stock.doctype.material_request.material_request.update_completed_and_requested_qty",
@@ -478,6 +483,7 @@ scheduler_events = {
 	],
 	"hourly_long": [],
 	"hourly_maintenance": [
+		"erpnext.crm.doctype.appointment.appointment.handle_expired_unverified_appointments",
 		"erpnext.stock.doctype.repost_item_valuation.repost_item_valuation.repost_entries",
 		"erpnext.utilities.bulk_transaction.retry",
 		"erpnext.projects.doctype.project.project.collect_project_status",

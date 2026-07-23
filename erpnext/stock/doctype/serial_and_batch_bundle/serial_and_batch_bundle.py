@@ -3011,6 +3011,9 @@ def get_auto_batch_nos(kwargs):
 			picked_batches,
 		)
 
+	if not kwargs.ignore_reserved_stock and not kwargs.for_stock_levels:
+		available_batches = remove_reservation_conflict_batches(available_batches, kwargs)
+
 	if kwargs.based_on == "Expiry":
 		available_batches = sorted(available_batches, key=lambda x: x.expiry_date or getdate("9999-12-31"))
 
@@ -3027,6 +3030,71 @@ def get_auto_batch_nos(kwargs):
 		return available_batches
 
 	return get_qty_based_available_batches(available_batches, qty)
+
+
+def remove_reservation_conflict_batches(available_batches, kwargs):
+	if not available_batches or not frappe.db.get_single_value("Stock Settings", "enable_stock_reservation"):
+		return available_batches
+
+	conflicting_batches = get_cross_warehouse_reserved_batches(kwargs)
+	if not conflicting_batches:
+		return available_batches
+
+	return [d for d in available_batches if d.batch_no not in conflicting_batches]
+
+
+def get_cross_warehouse_reserved_batches(kwargs) -> set:
+	from erpnext.stock.doctype.batch.batch import get_batch_qty
+
+	conflicting_batches = set()
+	for row in get_cross_warehouse_sre_details(kwargs):
+		if flt(row.outstanding_qty) <= 0:
+			continue
+
+		batch_qty = get_batch_qty(
+			row.batch_no,
+			row.warehouse,
+			posting_date=kwargs.get("posting_date"),
+			posting_time=kwargs.get("posting_time"),
+			consider_negative_batches=True,
+		)
+
+		if flt(batch_qty, 6) < flt(row.outstanding_qty, 6):
+			conflicting_batches.add(row.batch_no)
+
+	return conflicting_batches
+
+
+def get_cross_warehouse_sre_details(kwargs):
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	sb_entry = frappe.qb.DocType("Serial and Batch Entry")
+	query = (
+		frappe.qb.from_(sre)
+		.inner_join(sb_entry)
+		.on(sre.name == sb_entry.parent)
+		.select(
+			sb_entry.batch_no,
+			sre.warehouse,
+			Sum(sb_entry.qty - sb_entry.delivered_qty).as_("outstanding_qty"),
+		)
+		.where(
+			(sre.docstatus == 1)
+			& (sre.item_code == kwargs.item_code)
+			& (sre.delivered_qty < sre.reserved_qty)
+			& (sre.reservation_based_on == "Serial and Batch")
+			& (sb_entry.batch_no.isnotnull())
+		)
+		.groupby(sb_entry.batch_no, sre.warehouse)
+	)
+
+	if kwargs.get("company"):
+		query = query.where(sre.company == kwargs.get("company"))
+
+	if kwargs.warehouse:
+		warehouses = kwargs.warehouse if isinstance(kwargs.warehouse, list) else [kwargs.warehouse]
+		query = query.where(sre.warehouse.notin(warehouses))
+
+	return query.run(as_dict=True)
 
 
 def get_batch_nos_from_sre(kwargs):

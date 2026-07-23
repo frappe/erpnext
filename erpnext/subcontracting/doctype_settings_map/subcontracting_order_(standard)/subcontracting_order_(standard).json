@@ -8,6 +8,10 @@
  "is_standard": 1,
  "mappings": [
   {
+   "setting_field": "auto_create_subcontracting_order",
+   "settings_doctype": "Buying Settings"
+  },
+  {
    "setting_field": "backflush_raw_materials_of_subcontract_based_on",
    "settings_doctype": "Buying Settings"
   },
@@ -16,15 +20,11 @@
    "settings_doctype": "Buying Settings"
   },
   {
-   "setting_field": "auto_create_subcontracting_order",
-   "settings_doctype": "Buying Settings"
-  },
-  {
    "setting_field": "over_delivery_receipt_allowance",
    "settings_doctype": "Stock Settings"
   }
  ],
- "modified": "2026-07-10 11:46:43.205485",
+ "modified": "2026-07-21 17:10:04.037735",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Order (Standard)",

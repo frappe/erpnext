@@ -1345,7 +1345,7 @@ def make_rm_stock_entry(
 	subcontract_order: str,
 	rm_items: list | None = None,
 	order_doctype: str = "Subcontracting Order",
-	target_doc: dict | None = None,
+	target_doc: str | dict | Document | None = None,
 ):
 	if subcontract_order:
 		subcontract_order = frappe.get_doc(order_doctype, subcontract_order)
@@ -1534,7 +1534,7 @@ def make_return_stock_entry_for_subcontract(
 
 
 @frappe.whitelist()
-def get_materials_from_supplier(source_name: str, target_doc: Document | str | None = None):
+def get_materials_from_supplier(source_name: str, target_doc: str | dict | Document | None = None):
 	args = frappe.flags.args or {}
 
 	subcontract_order = args.get("subcontract_order") or source_name

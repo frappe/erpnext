@@ -28,7 +28,6 @@ from erpnext.controllers.website_list_for_contact import (
 	add_role_for_portal_user,
 	link_portal_users_to_contacts,
 )
-from erpnext.stock.doctype.company_restriction.company_restriction import validate_allowed_companies
 from erpnext.utilities.transaction_base import TransactionBase
 
 from .mapper import (
@@ -99,6 +98,7 @@ class Customer(TransactionBase):
 		primary_address: DF.TextEditor | None
 		prospect_name: DF.Link | None
 		represents_company: DF.Link | None
+		restrict_to_companies: DF.Check
 		sales_team: DF.Table[SalesTeam]
 		so_required: DF.Check
 		supplier_numbers: DF.Table[SupplierNumberAtCustomer]
@@ -192,7 +192,6 @@ class Customer(TransactionBase):
 		self.validate_internal_customer()
 		self.add_role_for_user()
 		self.validate_currency_for_receivable_payable_and_advance_account()
-		validate_allowed_companies(self)
 
 		# set loyalty program tier
 		if not self.is_new() and (customer := self.get_doc_before_save()):
@@ -601,19 +600,17 @@ def check_overdue_billing_threshold(customer: str, company: str) -> None:
 
 	company_currency = frappe.get_cached_value("Company", company, "default_currency")
 	frappe.throw(
-		_(
-			"Customer {0} has an overdue billing limit. Overdue amount {1} exceeds the allowed threshold {2}."
-		).format(
+		_("Overdue Limit crossed for customer {0}. Overdue amount {1} exceeds the allowed limit {2}.").format(
 			customer,
 			fmt_money(overdue_amount, currency=company_currency),
 			fmt_money(threshold, currency=company_currency),
 		),
-		title=_("Overdue Billing Limit Crossed"),
+		title=_("Overdue Limit Crossed"),
 	)
 
 
 def get_overdue_billing_threshold(customer: str, company: str) -> float:
-	"""Threshold set on the customer, falling back to its customer group."""
+	"""Overdue limit set on the customer, falling back to its customer group."""
 	threshold = frappe.db.get_value(
 		"Customer Credit Limit",
 		{"parent": customer, "parenttype": "Customer", "company": company},
@@ -651,7 +648,7 @@ def get_outstanding_invoices_for_customer(customer: str, company: str) -> list[f
 	gl_entry = frappe.qb.DocType("GL Entry")
 	sales_invoice = frappe.qb.DocType("Sales Invoice")
 
-	# debit - credit is always booked in company currency, so this is comparable to the threshold
+	# debit - credit is always booked in company currency, so this is comparable to the overdue limit
 	outstanding = Sum(gl_entry.debit) - Sum(gl_entry.credit)
 
 	return (

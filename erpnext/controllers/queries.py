@@ -25,6 +25,7 @@ from pypika import Order
 
 import erpnext
 from erpnext.accounts.utils import build_qb_match_conditions
+from erpnext.stock.doctype.company_restriction.company_restriction import get_restriction_criterion
 from erpnext.stock.get_item_details import _get_item_tax_template
 from erpnext.stock.utils import get_combine_datetime
 from erpnext.utilities.query import get_filter_conditions_qb
@@ -214,6 +215,7 @@ def item_query(
 	doctype = "Item"
 
 	filters = frappe.parse_json(filters)
+	company = filters.pop("company", None) if isinstance(filters, dict) else None
 
 	if filters and isinstance(filters, dict):
 		if filters.get("customer") or filters.get("supplier"):
@@ -360,6 +362,9 @@ def item_query(
 		.limit(page_len)
 		.offset(start)
 	)
+
+	if company:
+		query = query.where(get_restriction_criterion("Item", [company]))
 
 	return query.run(as_dict=as_dict)
 

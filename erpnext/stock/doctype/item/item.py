@@ -30,7 +30,6 @@ from erpnext.controllers.item_variant import (
 	make_variant_item_code,
 	validate_item_variant_attributes,
 )
-from erpnext.stock.doctype.company_restriction.company_restriction import validate_allowed_companies
 from erpnext.stock.doctype.item_default.item_default import ItemDefault
 from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 from erpnext.stock.utils import get_valuation_method
@@ -134,6 +133,7 @@ class Item(Document):
 		quality_inspection_template: DF.Link | None
 		reorder_levels: DF.Table[ItemReorder]
 		retain_sample: DF.Check
+		restrict_to_companies: DF.Check
 		safety_stock: DF.Float
 		sales_tax_withholding_category: DF.Link | None
 		sales_uom: DF.Link | None
@@ -245,7 +245,6 @@ class Item(Document):
 		self.validate_serialized_change_with_bundle()
 		self.validate_standard_cost_change()
 		self.validate_item_tax_net_rate_range()
-		validate_allowed_companies(self)
 
 		if not self.is_new():
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
@@ -292,7 +291,7 @@ class Item(Document):
 		if not price_list:
 			price_list = frappe.get_single_value(
 				"Selling Settings", "selling_price_list"
-			) or frappe.db.get_value("Price List", _("Standard Selling"))
+			) or frappe.db.get_value("Price List", "Standard Selling")
 		if price_list:
 			item_price = frappe.get_doc(
 				{

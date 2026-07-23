@@ -116,31 +116,37 @@ def get_data(filters, group_fieldname=None):
 
 
 def group_by(data, fieldname):
-	groups = {row.get(fieldname) for row in data}
-	grouped_data = []
-	for group in sorted(groups):
-		group_row = {
-			fieldname: group,
-			"hours": sum(row.get("hours") for row in data if row.get(fieldname) == group),
-			"billing_hours": sum(row.get("billing_hours") for row in data if row.get(fieldname) == group),
-			"billing_amount": sum(row.get("billing_amount") for row in data if row.get(fieldname) == group),
-			"indent": 0,
-			"is_group": 1,
-		}
-		if fieldname == "employee":
-			group_row["employee_name"] = next(
-				row.get("employee_name") for row in data if row.get(fieldname) == group
-			)
+	groups = {}
+	for row in data:
+		groups.setdefault(row.get(fieldname), []).append(row)
 
-		grouped_data.append(group_row)
-		for row in data:
-			if row.get(fieldname) != group:
-				continue
+	grouped_data = []
+	for group in sorted(groups, key=lambda g: (g is None, g)):
+		hours = billing_hours = billing_amount = 0
+		child_rows = []
+		for row in groups[group]:
+			hours += row.get("hours") or 0
+			billing_hours += row.get("billing_hours") or 0
+			billing_amount += row.get("billing_amount") or 0
 
 			_row = row.copy()
 			_row[fieldname] = None
 			_row["indent"] = 1
 			_row["is_group"] = 0
-			grouped_data.append(_row)
+			child_rows.append(_row)
+
+		group_row = {
+			fieldname: group,
+			"hours": hours,
+			"billing_hours": billing_hours,
+			"billing_amount": billing_amount,
+			"indent": 0,
+			"is_group": 1,
+		}
+		if fieldname == "employee":
+			group_row["employee_name"] = groups[group][0].get("employee_name")
+
+		grouped_data.append(group_row)
+		grouped_data.extend(child_rows)
 
 	return grouped_data

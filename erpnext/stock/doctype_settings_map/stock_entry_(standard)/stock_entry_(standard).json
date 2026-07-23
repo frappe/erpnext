@@ -12,19 +12,11 @@
    "settings_doctype": "Stock Settings"
   },
   {
-   "setting_field": "enable_stock_reservation",
-   "settings_doctype": "Stock Settings"
-  },
-  {
    "setting_field": "material_consumption",
    "settings_doctype": "Manufacturing Settings"
   },
   {
    "setting_field": "get_rm_cost_from_consumption_entry",
-   "settings_doctype": "Manufacturing Settings"
-  },
-  {
-   "setting_field": "backflush_raw_materials_based_on",
    "settings_doctype": "Manufacturing Settings"
   },
   {
@@ -52,6 +44,10 @@
    "settings_doctype": "Manufacturing Settings"
   },
   {
+   "setting_field": "backflush_raw_materials_based_on",
+   "settings_doctype": "Manufacturing Settings"
+  },
+  {
    "setting_field": "backflush_raw_materials_of_subcontract_based_on",
    "settings_doctype": "Buying Settings"
   },
@@ -66,17 +62,9 @@
   {
    "setting_field": "use_serial_batch_fields",
    "settings_doctype": "Stock Settings"
-  },
-  {
-   "setting_field": "sample_retention_warehouse",
-   "settings_doctype": "Stock Settings"
-  },
-  {
-   "setting_field": "allow_to_make_quality_inspection_after_purchase_or_delivery",
-   "settings_doctype": "Stock Settings"
   }
  ],
- "modified": "2026-07-10 11:50:38.572083",
+ "modified": "2026-07-20 17:43:38.321292",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry (Standard)",

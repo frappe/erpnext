@@ -630,8 +630,9 @@ class SerialBatchBundleService:
 			if outstanding > 0:
 				reservations[key].append(row)
 
+		precision = frappe.get_precision("Serial and Batch Entry", "qty")
 		for (batch_no, warehouse), reserved_qty in outstanding_qty.items():
-			if flt(reserved_qty, 6) <= 0:
+			if flt(reserved_qty, precision) <= 0:
 				continue
 
 			batch_qty = get_batch_qty(
@@ -642,7 +643,7 @@ class SerialBatchBundleService:
 				consider_negative_batches=True,
 			)
 
-			if flt(batch_qty, 6) >= flt(reserved_qty, 6):
+			if flt(batch_qty, precision) >= flt(reserved_qty, precision):
 				continue
 
 			vouchers = ", ".join(
