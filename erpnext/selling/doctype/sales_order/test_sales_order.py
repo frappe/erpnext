@@ -692,6 +692,13 @@ class TestSalesOrder(ERPNextTestSuite):
 			)
 
 	def test_update_child_removing_item_without_cancel_and_delete_perms(self):
+		for workflow_name in frappe.get_all(
+			"Workflow", filters={"document_type": "Sales Order", "is_active": 1}, pluck="name"
+		):
+			workflow = frappe.get_doc("Workflow", workflow_name)
+			workflow.is_active = 0
+			workflow.save()
+
 		role = "_Test Sales Order Item Editor"
 		if not frappe.db.exists("Role", role):
 			frappe.get_doc({"doctype": "Role", "role_name": role, "desk_access": 1}).insert()
