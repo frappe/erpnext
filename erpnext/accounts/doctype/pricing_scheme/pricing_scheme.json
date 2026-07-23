@@ -187,7 +187,7 @@
    "fieldname": "stacking_group",
    "fieldtype": "Select",
    "in_standard_filter": 1,
-   "label": "Stacking Group",
+   "label": "Offer Group",
    "options": "Default\nSeasonal\nLoyalty",
    "reqd": 1,
    "show_description_on_click": 1
@@ -198,7 +198,7 @@
   },
   {
    "default": "1",
-   "description": "Higher priority wins within the stacking group.",
+   "description": "Higher priority wins within the offer group.",
    "fieldname": "priority",
    "fieldtype": "Int",
    "label": "Priority",

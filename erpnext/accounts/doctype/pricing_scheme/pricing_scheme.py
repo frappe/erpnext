@@ -166,7 +166,7 @@ class PricingScheme(Document):
 			names = ", ".join(f"{o['scheme']} ({o['title']})" for o in conflicts)
 			frappe.throw(
 				_(
-					"This scheme conflicts with {0}: same stacking group and priority over an intersecting scope. Set a different Priority or Stacking Group."
+					"This scheme conflicts with {0}: same offer group and priority over an intersecting scope. Set a different Priority or Offer Group."
 				).format(names),
 				title=_("Conflicting Pricing Scheme"),
 			)

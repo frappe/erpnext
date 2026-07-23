@@ -112,7 +112,7 @@ def _classify(doc, other) -> dict | None:
 	evidence = _intersection_evidence(_effective_trigger_rows(doc), _effective_trigger_rows(other))
 	if doc.stacking_group != other.stacking_group:
 		return _entry(
-			other, "stacks", _("combines with this scheme for {0}, different stacking group").format(evidence)
+			other, "stacks", _("combines with this scheme for {0}, different offer group").format(evidence)
 		)
 	if cint(doc.priority) == cint(other.priority):
 		return _entry(

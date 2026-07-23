@@ -28,11 +28,13 @@
  "fields": [
   {
    "default": "0",
+   "description": "Included. The band starts exactly at Min Qty.",
    "fieldname": "min_qty",
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Min Qty (Stock UOM)",
-   "non_negative": 1
+   "non_negative": 1,
+   "show_description_on_click": 1
   },
   {
    "fieldname": "column_break_qty_band",
@@ -40,7 +42,7 @@
   },
   {
    "default": "0",
-   "description": "Leave at 0 for no upper bound. A tier matches from Min up to, but not including, Max.",
+   "description": "Not included. The band ends just below Max Qty, so the next tier can start exactly here. Leave at 0 for no upper bound.",
    "fieldname": "max_qty",
    "fieldtype": "Float",
    "in_list_view": 1,
@@ -64,10 +66,12 @@
    "fieldtype": "Column Break"
   },
   {
+   "description": "Not included, like Max Qty. Leave at 0 for no upper bound.",
    "fieldname": "max_amount",
    "fieldtype": "Currency",
    "label": "Max Amount (Base Currency)",
-   "non_negative": 1
+   "non_negative": 1,
+   "show_description_on_click": 1
   },
   {
    "depends_on": "eval:parent.effect_type != 'Free Item'",

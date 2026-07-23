@@ -123,23 +123,25 @@ frappe.ui.form.on("Pricing Scheme", {
 				"Header Discount": __("Document Total Discount Tiers"),
 			}[frm.doc.effect_type] || __("Offer")
 		);
+		const effect_description = {
+			Rate: __("One row per quantity slab. Rate replaces the price list rate."),
+			"Discount Percentage": __(
+				"Enter the discount percent in the Discount % column, one row per quantity slab. Leave Min and Max Qty as 0 to always apply."
+			),
+			"Discount Amount": __(
+				"Enter the per-unit discount amount, one row per quantity slab. Leave Min and Max Qty as 0 to always apply."
+			),
+			Margin: __("Margin added over the price list rate, one row per quantity slab."),
+			"Free Item": __(
+				"Free Qty per slab. Leave Free Item blank to give the purchased item itself. 'Per Every N Qty' repeats the freebie per dozen-style schemes."
+			),
+			"Header Discount": __("Discount percent applied on the document total."),
+		}[frm.doc.effect_type];
+		const band_note = __("Min is included, Max is not.");
 		set_section_description(
 			frm,
 			"tiers_section",
-			{
-				Rate: __("One row per quantity slab. Rate replaces the price list rate."),
-				"Discount Percentage": __(
-					"Enter the discount percent in the Discount % column, one row per quantity slab. Leave Min and Max Qty as 0 to always apply."
-				),
-				"Discount Amount": __(
-					"Enter the per-unit discount amount, one row per quantity slab. Leave Min and Max Qty as 0 to always apply."
-				),
-				Margin: __("Margin added over the price list rate, one row per quantity slab."),
-				"Free Item": __(
-					"Free Qty per slab. Leave Free Item blank to give the purchased item itself. 'Per Every N Qty' repeats the freebie per dozen-style schemes."
-				),
-				"Header Discount": __("Discount percent applied on the document total."),
-			}[frm.doc.effect_type] || ""
+			effect_description ? `${effect_description} ${band_note}` : ""
 		);
 		grid.reset_grid();
 	},
@@ -370,7 +372,7 @@ function render_overlaps(frm, overlaps) {
 	const conflict = overlaps.find((o) => o.severity === "conflict");
 	if (conflict) {
 		frm.set_intro(
-			__("Conflicts with {0}: same stacking group and priority. Saving will be blocked.", [
+			__("Conflicts with {0}: same offer group and priority. Saving will be blocked.", [
 				`<a href="/app/pricing-scheme/${conflict.scheme}">${frappe.utils.escape_html(
 					conflict.title
 				)}</a>`,
