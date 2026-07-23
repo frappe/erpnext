@@ -49,6 +49,7 @@ class TestDraftLinks(ERPNextTestSuite):
 		dn = make_delivery_note(so.name)
 		dn.insert()
 
-		with self.set_user("test@example.com"):
+		# test1@example.com has no roles, so no read permission on Delivery Note
+		with self.set_user("test1@example.com"):
 			drafts = get_existing_drafts("Sales Order", so.name, "Delivery Note")
 		self.assertEqual(drafts, [])
