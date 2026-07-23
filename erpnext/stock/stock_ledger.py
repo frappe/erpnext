@@ -623,7 +623,9 @@ class update_entries_after:
 
 		self.data = frappe._dict()
 
-		if not self.repost_doc or not self.args.get("item_wh_wise_last_posted_sle"):
+		if (not self.repost_doc or not self.args.get("item_wh_wise_last_posted_sle")) and not self.args.get(
+			"cancelled"
+		):
 			self.initialize_previous_data(self.args)
 
 		self.build()
@@ -937,9 +939,22 @@ class update_entries_after:
 
 	def process_sle_against_current_timestamp(self):
 		sl_entries = get_sle_against_current_voucher(self.args)
+		if self.args.get("cancelled") and sl_entries:
+			self.seed_previous_sle_for_cancellation(sl_entries[0])
 		for sle in sl_entries:
 			sle["timestamp"] = sle.posting_datetime
 			self.process_sle(sle)
+
+	def seed_previous_sle_for_cancellation(self, anchor_sle):
+		key = (anchor_sle.item_code, anchor_sle.warehouse)
+		if key in self.prev_sle_dict:
+			return
+
+		args = frappe._dict(anchor_sle)
+		args["sle_id"] = args.name
+		prev_sle = get_previous_sle_of_current_voucher(args)
+		if prev_sle:
+			self.prev_sle_dict[key] = prev_sle
 
 	def get_future_entries_to_fix(self):
 		# includes current entry!
@@ -2221,11 +2236,14 @@ def update_qty_in_future_sle(args, allow_negative_stock=False):
 		qty_shift = get_stock_reco_qty_shift(args)
 
 	sle = frappe.qb.DocType("Stock Ledger Entry")
+	creation = args.get("creation")
+	if args.get("is_cancelled"):
+		creation = get_cancelled_entry_creation(args)
 
 	future_condition = sle.posting_datetime > posting_datetime
-	if args.get("creation") and not args.get("is_cancelled"):
+	if creation:
 		future_condition = future_condition | (
-			(sle.posting_datetime == posting_datetime) & (sle.creation > args.get("creation"))
+			(sle.posting_datetime == posting_datetime) & (sle.creation > creation)
 		)
 
 	query = frappe.qb.update(sle).where(
@@ -2263,6 +2281,29 @@ def update_qty_in_future_sle(args, allow_negative_stock=False):
 	query.run()
 
 	validate_negative_qty_in_future_sle(args, allow_negative_stock)
+
+
+def get_cancelled_entry_creation(args):
+	filters = {
+		"voucher_type": args.get("voucher_type"),
+		"voucher_no": args.get("voucher_no"),
+		"voucher_detail_no": args.get("voucher_detail_no"),
+		"item_code": args.get("item_code"),
+		"warehouse": args.get("warehouse"),
+		"actual_qty": -flt(args.get("actual_qty")),
+		"is_cancelled": 1,
+	}
+	if args.get("serial_and_batch_bundle"):
+		filters["serial_and_batch_bundle"] = args.get("serial_and_batch_bundle")
+	if args.get("name"):
+		filters["name"] = ("!=", args.get("name"))
+
+	return frappe.db.get_value(
+		"Stock Ledger Entry",
+		filters,
+		"creation",
+		order_by="creation asc",
+	)
 
 
 def get_stock_reco_qty_shift(args):
