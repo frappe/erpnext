@@ -32,8 +32,8 @@ class ItemGroup(NestedSet):
 
 	def validate(self):
 		if not self.parent_item_group and not frappe.in_test:
-			if frappe.db.exists("Item Group", _("All Item Groups")):
-				self.parent_item_group = _("All Item Groups")
+			if frappe.db.exists("Item Group", "All Item Groups"):
+				self.parent_item_group = "All Item Groups"
 		self.validate_item_group_defaults()
 		self.check_item_tax()
 
