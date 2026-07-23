@@ -85,7 +85,7 @@ class WarrantyClaim(TransactionBase):
 
 
 @frappe.whitelist()
-def make_maintenance_visit(source_name: str, target_doc: str | Document | None = None):
+def make_maintenance_visit(source_name: str, target_doc: str | dict | Document | None = None):
 	from frappe.model.mapper import get_mapped_doc, map_child_doc
 
 	def _update_links(source_doc, target_doc, source_parent):

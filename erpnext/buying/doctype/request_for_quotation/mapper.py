@@ -14,7 +14,7 @@ from erpnext.stock.doctype.material_request.mapper import set_missing_values
 
 @frappe.whitelist()
 def make_supplier_quotation_from_rfq(
-	source_name: str, target_doc: str | Document | None = None, for_supplier: str | None = None
+	source_name: str, target_doc: str | dict | Document | None = None, for_supplier: str | None = None
 ):
 	def postprocess(source, target_doc):
 		if for_supplier:
@@ -129,7 +129,7 @@ def create_rfq_items(sq_doc, supplier, data):
 
 @frappe.whitelist()
 def get_item_from_material_requests_based_on_supplier(
-	source_name: str, target_doc: str | Document | None = None
+	source_name: str, target_doc: str | dict | Document | None = None
 ):
 	Item = frappe.qb.DocType("Item")
 	Item_Supp = frappe.qb.DocType("Item Supplier")
