@@ -496,38 +496,46 @@ frappe.ui.form.on("Job Card", {
 	},
 
 	operation(frm) {
-		if (frm.doc.operation && frm.doc.work_order) {
-			frappe.call({
-				method: "erpnext.manufacturing.doctype.job_card.job_card.get_operation_details",
-				args: {
-					work_order: frm.doc.work_order,
-					operation: frm.doc.operation,
-				},
-				callback(r) {
-					if (!r.message || !r.message.length) return;
-
-					if (r.message.length == 1) {
-						frm.set_value("operation_id", r.message[0].name);
-					} else {
-						frappe.prompt(
-							{
-								fieldname: "operation_row",
-								fieldtype: "Select",
-								label: __("Operation Row"),
-								options: r.message.map((row) => ({ label: row.idx, value: row.name })),
-								reqd: 1,
-								description: __(
-									"Operation {0} is added multiple times in the work order {1}",
-									[frm.doc.operation, frm.doc.work_order]
-								),
-							},
-							(values) => frm.set_value("operation_id", values.operation_row),
-							__("Select Operation Row")
-						);
-					}
-				},
-			});
+		if (frm.doc.operation_id) {
+			frm.set_value("operation_id", "");
 		}
+
+		if (!frm.doc.operation || !frm.doc.work_order) return;
+
+		const { operation, work_order } = frm.doc;
+		const is_current = () => frm.doc.operation === operation && frm.doc.work_order === work_order;
+
+		frappe.call({
+			method: "erpnext.manufacturing.doctype.job_card.job_card.get_operation_details",
+			args: { work_order, operation },
+			callback(r) {
+				if (!is_current() || !r.message || !r.message.length) return;
+
+				if (r.message.length == 1) {
+					frm.set_value("operation_id", r.message[0].name);
+				} else {
+					frappe.prompt(
+						{
+							fieldname: "operation_row",
+							fieldtype: "Select",
+							label: __("Operation Row"),
+							options: r.message.map((row) => ({ label: row.idx, value: row.name })),
+							reqd: 1,
+							description: __("Operation {0} is added multiple times in the work order {1}", [
+								operation,
+								work_order,
+							]),
+						},
+						(values) => {
+							if (is_current()) {
+								frm.set_value("operation_id", values.operation_row);
+							}
+						},
+						__("Select Operation Row")
+					);
+				}
+			},
+		});
 	},
 
 	make_time_log(frm, args) {
