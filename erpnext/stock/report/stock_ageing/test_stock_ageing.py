@@ -620,6 +620,58 @@ class TestStockAgeing(FrappeTestCase):
 			],
 		)
 
+	def test_batch_issue_at_pooled_rate_keeps_slot_values_positive(self):
+		"""Ledger (same wh, batch B): [+10 @ 0, +10 @ 10, -4 @ pooled 5]
+		Consuming the zero-valued head slot at the pooled rate drives it
+		negative; slot values are then rebalanced to the batch pool rate."""
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item_code = make_item(
+			"Test Stock Ageing Batch Pool Rebalance",
+			{"is_stock_item": 1, "has_batch_no": 1, "valuation_method": "FIFO"},
+		).name
+
+		batch_no = "SA-POOL-REBALANCE-BATCH"
+		if not frappe.db.exists("Batch", batch_no):
+			frappe.get_doc({"doctype": "Batch", "batch_id": batch_no, "item": item_code}).insert(
+				ignore_permissions=True
+			)
+		frappe.db.set_value("Batch", batch_no, "use_batchwise_valuation", 1)
+
+		def make_sle(posting_date, voucher_no, actual_qty, qty_after, stock_value_difference):
+			return frappe._dict(
+				name=item_code,
+				actual_qty=actual_qty,
+				qty_after_transaction=qty_after,
+				stock_value_difference=stock_value_difference,
+				valuation_rate=abs(stock_value_difference / actual_qty) if actual_qty else 0,
+				warehouse="WH 1",
+				posting_date=posting_date,
+				voucher_type="Stock Entry",
+				voucher_no=voucher_no,
+				has_serial_no=False,
+				has_batch_no=True,
+				serial_no=None,
+				batch_no=batch_no,
+			)
+
+		sle = [
+			make_sle("2021-12-01", "001", 10, 10, 0),
+			make_sle("2021-12-02", "002", 10, 20, 100),
+			make_sle("2021-12-03", "003", -4, 16, -20),
+		]
+
+		slots = FIFOSlots(self.filters, sle).generate()
+		queue = slots[item_code]["fifo_queue"]
+
+		self.assertEqual(
+			queue,
+			[
+				[batch_no, 1, 6.0, "2021-12-01", 30.0],
+				[batch_no, 1, 10.0, "2021-12-01", 50.0],
+			],
+		)
+
 	def test_sequential_stock_reco_same_warehouse(self):
 		"""
 		Test back to back stock recos (same warehouse).
