@@ -187,6 +187,7 @@
    "fieldname": "proforma_pdf",
    "fieldtype": "Attach",
    "label": "Proforma PDF",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -250,7 +251,6 @@
  "owner": "Administrator",
  "permissions": [
   {
-   "amend": 1,
    "cancel": 1,
    "create": 1,
    "delete": 1,
@@ -264,7 +264,6 @@
    "write": 1
   },
   {
-   "amend": 1,
    "cancel": 1,
    "create": 1,
    "delete": 1,

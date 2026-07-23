@@ -9,6 +9,7 @@ from frappe.utils import flt
 from erpnext.selling.doctype.proforma_invoice.proforma_invoice import (
 	get_sales_order_items,
 	make_proforma_invoice,
+	send_proforma_email,
 )
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.tests.utils import ERPNextTestSuite
@@ -143,6 +144,13 @@ class TestProformaInvoice(ERPNextTestSuite):
 			sales_order,
 			[(sales_order.items[0].name, 4)],
 		)
+
+	def test_cannot_email_cancelled_proforma(self):
+		sales_order = make_sales_order(qty=10)
+		proforma = self.create_proforma(sales_order, [(sales_order.items[0].name, 4)])
+		proforma.cancel()
+
+		self.assertRaises(frappe.ValidationError, send_proforma_email, proforma.name, "customer@example.com")
 
 	def test_requires_submitted_sales_order(self):
 		"""The server rejects a proforma against a draft Sales Order (the button is JS-gated only)."""

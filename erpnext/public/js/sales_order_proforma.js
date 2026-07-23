@@ -301,7 +301,13 @@ Object.assign(erpnext.proforma, {
 						{
 							icon: "mail",
 							label: __("Send Email"),
-							action: (row, refresh) => this.send_email(frm, row.name, refresh),
+							action: (row, refresh) => {
+								if (row.status === "Cancelled") {
+									frappe.msgprint(__("A cancelled Proforma Invoice cannot be emailed."));
+									return;
+								}
+								this.send_email(frm, row.name, refresh);
+							},
 						},
 					],
 				},
