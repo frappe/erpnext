@@ -5,6 +5,8 @@ import frappe
 from frappe import _
 from frappe.query_builder.functions import IfNull
 
+from erpnext.accounts.report.utils import validate_mandatory_date_range
+
 
 class TaxWithholdingDetailsReport:
 	party_types = ("Customer", "Supplier")
@@ -25,11 +27,7 @@ class TaxWithholdingDetailsReport:
 		return self.get_columns(), self.get_data()
 
 	def validate_filters(self):
-		if not self.filters.from_date or not self.filters.to_date:
-			frappe.throw(_("From Date and To Date are required"))
-
-		if self.filters.from_date > self.filters.to_date:
-			frappe.throw(_("From Date must be before To Date"))
+		validate_mandatory_date_range(self.filters)
 
 	def get_data(self):
 		self.entries = self.get_entries_query().run(as_dict=True)

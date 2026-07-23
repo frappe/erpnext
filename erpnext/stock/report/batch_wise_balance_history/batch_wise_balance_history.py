@@ -7,6 +7,7 @@ from frappe import _
 from frappe.utils import add_to_date, cint, flt, get_datetime, getdate
 from pypika import functions as fn
 
+from erpnext.accounts.report.utils import validate_mandatory_date_range
 from erpnext.deprecation_dumpster import deprecated
 from erpnext.stock.doctype.stock_closing_entry.stock_closing_entry import StockClosing
 from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
@@ -30,13 +31,7 @@ def execute(filters=None):
 			_("Please select either the Item or Warehouse or Warehouse Type filter to generate the report.")
 		)
 
-	if not filters.from_date or not filters.to_date:
-		frappe.throw(
-			_("{0} and {1} are mandatory").format(frappe.bold(_("From Date")), frappe.bold(_("To Date")))
-		)
-
-	if filters.from_date > filters.to_date:
-		frappe.throw(_("From Date must be before To Date"))
+	validate_mandatory_date_range(filters)
 
 	float_precision = cint(frappe.db.get_default("float_precision")) or 3
 
