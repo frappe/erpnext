@@ -2236,14 +2236,11 @@ def update_qty_in_future_sle(args, allow_negative_stock=False):
 		qty_shift = get_stock_reco_qty_shift(args)
 
 	sle = frappe.qb.DocType("Stock Ledger Entry")
-	creation = args.get("creation")
-	if args.get("is_cancelled"):
-		creation = get_cancelled_entry_creation(args)
 
 	future_condition = sle.posting_datetime > posting_datetime
-	if creation:
+	if args.get("creation") and not args.get("is_cancelled"):
 		future_condition = future_condition | (
-			(sle.posting_datetime == posting_datetime) & (sle.creation > creation)
+			(sle.posting_datetime == posting_datetime) & (sle.creation > args.get("creation"))
 		)
 
 	query = frappe.qb.update(sle).where(
@@ -2281,29 +2278,6 @@ def update_qty_in_future_sle(args, allow_negative_stock=False):
 	query.run()
 
 	validate_negative_qty_in_future_sle(args, allow_negative_stock)
-
-
-def get_cancelled_entry_creation(args):
-	filters = {
-		"voucher_type": args.get("voucher_type"),
-		"voucher_no": args.get("voucher_no"),
-		"voucher_detail_no": args.get("voucher_detail_no"),
-		"item_code": args.get("item_code"),
-		"warehouse": args.get("warehouse"),
-		"actual_qty": -flt(args.get("actual_qty")),
-		"is_cancelled": 1,
-	}
-	if args.get("serial_and_batch_bundle"):
-		filters["serial_and_batch_bundle"] = args.get("serial_and_batch_bundle")
-	if args.get("name"):
-		filters["name"] = ("!=", args.get("name"))
-
-	return frappe.db.get_value(
-		"Stock Ledger Entry",
-		filters,
-		"creation",
-		order_by="creation asc",
-	)
 
 
 def get_stock_reco_qty_shift(args):
