@@ -91,6 +91,9 @@ def create_delivery_wo_so(pick_list, target, target_doc=None):
 
 	target_doc.company = pick_list.company
 
+	if not target_doc.customer:
+		target_doc.customer = pick_list.customer
+
 	item_table_mapper_without_so = {
 		"doctype": f"{target} Item",
 		"field_map": {
