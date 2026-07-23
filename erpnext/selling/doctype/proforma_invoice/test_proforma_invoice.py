@@ -143,3 +143,14 @@ class TestProformaInvoice(ERPNextTestSuite):
 			sales_order,
 			[(sales_order.items[0].name, 4)],
 		)
+
+	def test_requires_submitted_sales_order(self):
+		"""The server rejects a proforma against a draft Sales Order (the button is JS-gated only)."""
+		sales_order = make_sales_order(qty=10, do_not_submit=True)
+
+		self.assertRaises(
+			frappe.ValidationError,
+			self.create_proforma,
+			sales_order,
+			[(sales_order.items[0].name, 4)],
+		)

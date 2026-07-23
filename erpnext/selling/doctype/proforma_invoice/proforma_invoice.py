@@ -152,6 +152,8 @@ def make_proforma_invoice(
 	validate_feature_enabled()
 	selected = frappe.parse_json(items)
 	sales_order_doc = frappe.get_doc("Sales Order", sales_order)
+	if sales_order_doc.docstatus != 1:
+		frappe.throw(_("A Proforma Invoice can only be created against a submitted Sales Order."))
 	so_items = {item.name: item for item in sales_order_doc.items}
 
 	proforma = frappe.new_doc("Proforma Invoice")
@@ -214,6 +216,8 @@ def send_proforma_email(proforma_name: str, recipients: str) -> None:
 		frappe.throw(_("This Proforma Invoice has no PDF to send."))
 
 	file_name = frappe.db.get_value("File", {"file_url": proforma.proforma_pdf}, "name")
+	if not file_name:
+		frappe.throw(_("The attached PDF file could not be found."))
 	frappe.sendmail(
 		recipients=[email.strip() for email in recipients.split(",") if email.strip()],
 		subject=_("Proforma Invoice {0}").format(proforma.name),
