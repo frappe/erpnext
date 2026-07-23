@@ -10,7 +10,6 @@ from frappe.utils.data import add_to_date, now, today
 
 from erpnext.manufacturing.doctype.job_card.job_card import (
 	JobCardOverTransferError,
-	OperationMismatchError,
 	OverlapError,
 )
 from erpnext.manufacturing.doctype.job_card.mapper import (
@@ -149,18 +148,39 @@ class TestJobCard(ERPNextTestSuite):
 		)
 		self.assertRaises(frappe.ValidationError, job_card_doc.submit)
 
-	def test_job_card_operations(self):
-		job_cards = frappe.get_all(
-			"Job Card", filters={"work_order": self.work_order.name}, fields=["operation_id", "name"]
+	def test_set_operation_id(self):
+		work_order = make_wo_order_test_record(item="_Test FG Item 2", qty=2, do_not_submit=1)
+		operation_row = work_order.operations[0]
+
+		job_card = frappe.new_doc("Job Card")
+		job_card.work_order = work_order.name
+		job_card.operation = operation_row.operation
+		job_card.set_operation_id()
+		self.assertEqual(job_card.operation_id, operation_row.name)
+
+		work_order.append(
+			"operations",
+			{
+				"operation": operation_row.operation,
+				"workstation": operation_row.workstation,
+				"time_in_mins": operation_row.time_in_mins,
+				"hour_rate": operation_row.hour_rate,
+				"sequence_id": work_order.operations[-1].sequence_id,
+			},
 		)
+		work_order.save()
 
-		if job_cards:
-			job_card = job_cards[0]
-			frappe.db.set_value("Job Card", job_card.name, "operation_row_number", job_card.operation_id)
+		job_card = frappe.new_doc("Job Card")
+		job_card.work_order = work_order.name
+		job_card.operation = operation_row.operation
+		self.assertRaises(frappe.ValidationError, job_card.set_operation_id)
 
-			doc = frappe.get_doc("Job Card", job_card.name)
-			doc.operation_id = "Test Data"
-			self.assertRaises(OperationMismatchError, doc.save)
+		job_card.operation_id = "bogus-row"
+		self.assertRaises(frappe.ValidationError, job_card.set_operation_id)
+
+		job_card.operation_id = work_order.operations[-1].name
+		job_card.set_operation_id()
+		self.assertEqual(job_card.operation_id, work_order.operations[-1].name)
 
 	def test_job_card_with_different_work_station(self):
 		job_cards = frappe.get_all(
