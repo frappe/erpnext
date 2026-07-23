@@ -328,9 +328,7 @@ class Item(Document):
 				warehouse_company = frappe.db.get_value("Warehouse", default_warehouse, "company")
 
 			if not default_warehouse or warehouse_company != default.company:
-				default_warehouse = frappe.db.get_value(
-					"Warehouse", {"warehouse_name": _("Stores"), "company": default.company}
-				)
+				default_warehouse = get_stores_warehouse(default.company)
 
 			if default_warehouse:
 				opening_account = frappe.db.get_value(
@@ -1776,7 +1774,7 @@ def get_default_warehouse_for_opening_stock(item, company: str, warehouse: str |
 		if warehouse_company == company:
 			return settings_warehouse
 
-	stores_warehouse = frappe.db.get_value("Warehouse", {"warehouse_name": _("Stores"), "company": company})
+	stores_warehouse = get_stores_warehouse(company)
 
 	if stores_warehouse:
 		return stores_warehouse
@@ -1786,6 +1784,17 @@ def get_default_warehouse_for_opening_stock(item, company: str, warehouse: str |
 			"No warehouse found for company {0}. Please set a Default Warehouse in Item Defaults or Stock Settings."
 		).format(frappe.bold(company))
 	)
+
+
+def get_stores_warehouse(company: str) -> str | None:
+	stores_warehouse = frappe.db.get_value("Warehouse", {"warehouse_name": "Stores", "company": company})
+
+	if not stores_warehouse and _("Stores") != "Stores":
+		stores_warehouse = frappe.db.get_value(
+			"Warehouse", {"warehouse_name": _("Stores"), "company": company}
+		)
+
+	return stores_warehouse
 
 
 def on_doctype_update():

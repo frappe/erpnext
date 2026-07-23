@@ -15,6 +15,7 @@ from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import
 from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.setup.doctype.company.company import get_default_company_address
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+from erpnext.stock.doctype.item.item import get_stores_warehouse
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.tests.utils import ERPNextTestSuite
@@ -213,6 +214,34 @@ class TestCompany(ERPNextTestSuite):
 		self.assertTrue(departments)
 		self.assertEqual({d.parent_department for d in departments}, {"All Departments"})
 		self.assertIn("Buchhaltung - DTTC", [d.name for d in departments])
+
+	def test_default_warehouses_ignore_session_translations(self):
+		translations = {"Stores": "Lager", "All Warehouses": "Alle Lagerhäuser"}
+		with patch("frappe.translate.get_all_translations", return_value=translations):
+			company = frappe.new_doc("Company")
+			company.company_name = "Warehouse Translation Test Co"
+			company.abbr = "WTTC"
+			company.default_currency = "INR"
+			company.country = "India"
+			company.insert()
+
+			self.assertEqual(get_stores_warehouse(company.name), "Stores - WTTC")
+
+		warehouse_names = frappe.get_all("Warehouse", filters={"company": company.name}, pluck="name")
+		for warehouse_name in (
+			"All Warehouses",
+			"Stores",
+			"Work In Progress",
+			"Finished Goods",
+			"Goods In Transit",
+		):
+			self.assertIn(f"{warehouse_name} - WTTC", warehouse_names)
+		self.assertNotIn("Lager - WTTC", warehouse_names)
+		self.assertEqual(get_stores_warehouse(company.name), "Stores - WTTC")
+
+		frappe.db.set_value("Warehouse", "Stores - WTTC", "warehouse_name", "Lager", update_modified=False)
+		with patch("frappe.translate.get_all_translations", return_value=translations):
+			self.assertEqual(get_stores_warehouse(company.name), "Stores - WTTC")
 
 	def test_change_parent_company(self):
 		child_company = frappe.get_doc("Company", "_Test Company 5")
