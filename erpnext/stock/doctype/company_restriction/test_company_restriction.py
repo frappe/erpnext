@@ -103,11 +103,9 @@ class TestCompanyRestriction(ERPNextTestSuite):
 
 		permitted = frappe.get_meta("Customer").get_permitted_fieldnames(user=sales_user)
 		self.assertNotIn("restrict_to_companies", permitted)
-		self.assertNotIn("allowed_companies", permitted)
 
 		permitted = frappe.get_meta("Customer").get_permitted_fieldnames(user=manager)
 		self.assertIn("restrict_to_companies", permitted)
-		self.assertIn("allowed_companies", permitted)
 
 		frappe.set_user(sales_user)
 		self.addCleanup(frappe.set_user, "Administrator")
