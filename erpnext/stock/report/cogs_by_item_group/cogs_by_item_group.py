@@ -9,6 +9,7 @@ from frappe import _
 from frappe.utils import date_diff
 
 from erpnext.accounts.report.general_ledger.general_ledger import get_gl_entries
+from erpnext.accounts.report.utils import validate_mandatory_date_range
 
 Filters = frappe._dict
 Row = frappe._dict
@@ -34,19 +35,7 @@ def update_filters_with_account(filters: Filters) -> None:
 
 
 def validate_filters(filters: Filters) -> None:
-	from_date = filters.from_date
-	to_date = filters.to_date
-
-	if not from_date or not to_date:
-		frappe.throw(
-			_("{0} and {1} are mandatory").format(
-				frappe.bold(_("From Date")),
-				frappe.bold(_("To Date")),
-			)
-		)
-
-	if from_date > to_date:
-		frappe.throw(_("From Date must be before To Date"))
+	validate_mandatory_date_range(filters)
 
 
 def get_columns() -> Columns:
