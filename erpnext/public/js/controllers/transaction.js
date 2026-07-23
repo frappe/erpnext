@@ -2864,9 +2864,17 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		}
 	}
 
-	make_mapped_payment_entry(args) {
+	async make_mapped_payment_entry(args) {
 		var me = this;
 		args = args || { dt: this.frm.doc.doctype, dn: this.frm.doc.name };
+		// get_method_for_payment bypasses open_mapped_doc, so run the draft guard explicitly
+		let via_journal_entry = this.frm.doc.__onload && this.frm.doc.__onload.make_payment_via_journal_entry;
+		if (
+			!via_journal_entry &&
+			!(await erpnext.utils.confirm_if_drafts_exist(this.frm.doc, "Payment Entry"))
+		) {
+			return;
+		}
 		return frappe.call({
 			method: me.get_method_for_payment(),
 			args: args,
