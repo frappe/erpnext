@@ -1316,7 +1316,6 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 		self.assertEqual(frappe.db.get_value("Stock Ledger Entry", sle2.name, "qty_after_transaction"), 35)
 		self.assertEqual(frappe.db.get_value("Stock Ledger Entry", sle1.name, "qty_after_transaction"), 10)
 
-<<<<<<< HEAD
 	def test_cancel_first_of_two_same_timestamp_entries(self):
 		# Two receipts of the same item+warehouse at the exact same posting timestamp: balances 10 -> 20.
 		# Cancelling the first must leave the second standing alone on a zero base (qty 10), not
@@ -1357,7 +1356,7 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 
 		# receipt2 now sits on a zero base -> 10 (not 0 from a double shift, nor a negative-stock error).
 		self.assertEqual(qty_after(receipt2), 10)
-=======
+
 	def test_cancel_shifts_same_timestamp_delivery_notes(self):
 		item = make_item().name
 		warehouse = "_Test Warehouse - _TC"
@@ -1398,7 +1397,6 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 		)
 
 		self.assertEqual(expected_qty_after_transaction_of_dns3, qty_after_transaction_of_dns3)
->>>>>>> 8c0ec3c179 (fix: Incorrect creation time at the time cancelling an entry causing an issue especially same posting datetime  (#57380))
 
 	def test_get_next_stock_reco_respects_creation_order(self):
 		# A stock reco sharing the exact posting timestamp of the current entry must only count as the
