@@ -30,7 +30,7 @@ def record_applications(doc, method: str | None = None) -> None:
 
 	rows = _build_rows(doc, context, result)
 	for row in rows:
-		entry = frappe.get_doc({"doctype": "Pricing Scheme Application", **row})
+		entry = frappe.get_doc({"doctype": "Pricing Scheme Ledger Entry", **row})
 		entry.insert(ignore_permissions=True)
 	_record_coupon_redemption(doc, context, result)
 
@@ -38,7 +38,7 @@ def record_applications(doc, method: str | None = None) -> None:
 def cancel_applications(doc, method: str | None = None) -> None:
 	cancel_redemptions(doc)
 	frappe.db.set_value(
-		"Pricing Scheme Application",
+		"Pricing Scheme Ledger Entry",
 		{"voucher_type": doc.doctype, "voucher_no": doc.name},
 		"is_cancelled",
 		1,

@@ -55,7 +55,7 @@ def get_accrued_basis(scheme, context: PricingContext) -> tuple[float, float]:
 	if window := _accrual_window(scheme, context):
 		filters["posting_date"] = ("between", window)
 
-	rows = frappe.get_all("Pricing Scheme Application", filters=filters, fields=["qty", "discount_amount"])
+	rows = frappe.get_all("Pricing Scheme Ledger Entry", filters=filters, fields=["qty", "discount_amount"])
 	return (
 		sum(row.qty or 0.0 for row in rows),
 		sum(row.discount_amount or 0.0 for row in rows),
@@ -66,7 +66,7 @@ def get_cap_usage(scheme) -> tuple[int, float]:
 	"""Applications count and discount spend, for cap checks."""
 	from frappe.query_builder.functions import Count, Sum
 
-	app = frappe.qb.DocType("Pricing Scheme Application")
+	app = frappe.qb.DocType("Pricing Scheme Ledger Entry")
 	rows = (
 		frappe.qb.from_(app)
 		.select(Count(app.name).as_("applications"), Sum(app.discount_amount).as_("spend"))

@@ -31,7 +31,7 @@ def get_usage(scheme: str) -> dict:
 	"""Ledger-driven usage stats for the form dashboard."""
 	from frappe.query_builder.functions import Count, Sum
 
-	app = frappe.qb.DocType("Pricing Scheme Application")
+	app = frappe.qb.DocType("Pricing Scheme Ledger Entry")
 	rows = (
 		frappe.qb.from_(app)
 		.select(
