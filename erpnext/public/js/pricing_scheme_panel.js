@@ -22,30 +22,24 @@ erpnext.pricing_scheme.render_panel = function (frm) {
 		callback: ({ message }) => {
 			if (message && message.enabled) {
 				render_pricing_panel(frm, message);
-			} else {
-				panel_container(frm).empty();
+			} else if (frm.pricing_scheme_section) {
+				frm.pricing_scheme_section.empty();
 			}
 		},
 	});
 };
 
-function panel_container(frm) {
-	// dashboard sections can only sit at the top of the form, so the panel
-	// manages its own container right below the items table
-	const wrapper = frm.get_field("items").$wrapper;
-	let container = wrapper.siblings(".pricing-scheme-panel").first();
-	if (!container.length) {
-		container = $('<div class="pricing-scheme-panel" style="margin: 2px 0 10px;"></div>').insertAfter(
-			wrapper
-		);
+function panel_section(frm) {
+	// the dashboard DOM is rebuilt on form refresh, so a cached section ref can go stale
+	if (!frm.pricing_scheme_section || !document.body.contains(frm.pricing_scheme_section[0])) {
+		frm.pricing_scheme_section = frm.dashboard.add_section("", __("Pricing Scheme"));
 	}
-	return container;
+	return frm.pricing_scheme_section;
 }
 
 function render_pricing_panel(frm, data) {
-	const body = panel_container(frm);
+	const body = panel_section(frm);
 	body.empty();
-	body.append(`<div style="font-weight: 600; margin-bottom: 4px;">${__("Pricing Scheme")}</div>`);
 
 	(data.applied || []).forEach((entry) => body.append(applied_row(frm, entry)));
 	if (!(data.applied || []).length) {
@@ -71,6 +65,7 @@ function render_pricing_panel(frm, data) {
 					${frappe.utils.escape_html(entry.reason || entry.status)}
 				</div>`)
 		);
+	frm.dashboard.show();
 }
 
 function applied_row(frm, entry) {
