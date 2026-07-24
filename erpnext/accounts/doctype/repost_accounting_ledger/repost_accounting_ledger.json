@@ -24,6 +24,8 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Company",
    "options": "Company"
   },
@@ -102,7 +104,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-24 17:42:33.346509",
+ "modified": "2026-07-24 19:24:38.842549",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Repost Accounting Ledger",
