@@ -5,7 +5,7 @@ from frappe.model.document import Document
 
 
 class PricingSchemeLedgerEntry(Document):
-	"""Ledger of scheme applications, written at origination submit only.
+	"""Ledger of scheme usage, written at origination submit only.
 
 	Lifecycle mirrors GL Entry / SLE: created on submit of the origination
 	document, flagged cancelled on its cancel, negative rows for returns.

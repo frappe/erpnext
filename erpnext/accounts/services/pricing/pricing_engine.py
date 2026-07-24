@@ -97,11 +97,11 @@ class PricingEngine:
 		return self._passes_caps(scheme)
 
 	def _passes_caps(self, scheme) -> bool:
-		if not (scheme.cap_total_applications or scheme.cap_total_discount_amount):
+		if not (scheme.cap_total_uses or scheme.cap_total_discount_amount):
 			return True
-		applications, spend = get_cap_usage(scheme)
-		if scheme.cap_total_applications and applications >= scheme.cap_total_applications:
-			self.trace.rejected(scheme.name, f"application cap reached ({applications})")
+		uses, spend = get_cap_usage(scheme)
+		if scheme.cap_total_uses and uses >= scheme.cap_total_uses:
+			self.trace.rejected(scheme.name, f"usage cap reached ({uses})")
 			return False
 		if scheme.cap_total_discount_amount and spend >= flt(scheme.cap_total_discount_amount):
 			self.trace.rejected(scheme.name, f"discount budget exhausted ({spend})")

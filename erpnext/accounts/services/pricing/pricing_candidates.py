@@ -63,18 +63,18 @@ def get_accrued_basis(scheme, context: PricingContext) -> tuple[float, float]:
 
 
 def get_cap_usage(scheme) -> tuple[int, float]:
-	"""Applications count and discount spend, for cap checks."""
+	"""Use count and discount spend, for cap checks."""
 	from frappe.query_builder.functions import Count, Sum
 
 	app = frappe.qb.DocType("Pricing Scheme Ledger Entry")
 	rows = (
 		frappe.qb.from_(app)
-		.select(Count(app.name).as_("applications"), Sum(app.discount_amount).as_("spend"))
+		.select(Count(app.name).as_("uses"), Sum(app.discount_amount).as_("spend"))
 		.where((app.scheme == scheme.name) & (app.is_cancelled == 0))
 		.run(as_dict=True)
 	)
 	row = rows[0] if rows else frappe._dict()
-	return int(row.get("applications") or 0), float(row.get("spend") or 0.0)
+	return int(row.get("uses") or 0), float(row.get("spend") or 0.0)
 
 
 def _accrual_window(scheme, context: PricingContext) -> tuple[str, str] | None:

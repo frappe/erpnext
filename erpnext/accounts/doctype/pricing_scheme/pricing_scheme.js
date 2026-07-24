@@ -215,17 +215,17 @@ frappe.ui.form.on("Pricing Scheme", {
 			args: { scheme: frm.doc.name },
 			callback: ({ message: usage }) => {
 				frm.dashboard.add_indicator(
-					__("Applications: {0}", [usage.applications]),
-					usage.applications ? "green" : "gray"
+					__("Used {0} times", [usage.uses]),
+					usage.uses ? "green" : "gray"
 				);
 				frm.dashboard.add_indicator(
 					__("Discount given: {0}", [format_currency(usage.discount_given)]),
 					"blue"
 				);
-				if (usage.cap_total_applications) {
-					const capped = usage.applications >= usage.cap_total_applications;
+				if (usage.cap_total_uses) {
+					const capped = usage.uses >= usage.cap_total_uses;
 					frm.dashboard.add_indicator(
-						__("Used {0} of {1} times", [usage.applications, usage.cap_total_applications]),
+						__("Used {0} of {1} times", [usage.uses, usage.cap_total_uses]),
 						capped ? "red" : "orange"
 					);
 				}

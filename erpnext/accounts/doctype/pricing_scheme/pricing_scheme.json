@@ -39,7 +39,7 @@
   "price_list",
   "warehouse",
   "caps_section",
-  "cap_total_applications",
+  "cap_total_uses",
   "column_break_caps",
   "cap_total_discount_amount",
   "coupon_section",
@@ -305,7 +305,7 @@
   },
   {
    "description": "The scheme stops applying after it has been used on this many documents. Leave at 0 for no limit.",
-   "fieldname": "cap_total_applications",
+   "fieldname": "cap_total_uses",
    "fieldtype": "Int",
    "label": "Maximum Uses",
    "non_negative": 1,

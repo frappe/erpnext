@@ -43,6 +43,14 @@ doctype_js = {
 	"Event": "public/js/event.js",
 	"Newsletter": "public/js/newsletter.js",
 	"Contact": "public/js/contact.js",
+	"Quotation": "public/js/pricing_scheme_panel.js",
+	"Sales Order": "public/js/pricing_scheme_panel.js",
+	"Delivery Note": "public/js/pricing_scheme_panel.js",
+	"Sales Invoice": "public/js/pricing_scheme_panel.js",
+	"Supplier Quotation": "public/js/pricing_scheme_panel.js",
+	"Purchase Order": "public/js/pricing_scheme_panel.js",
+	"Purchase Receipt": "public/js/pricing_scheme_panel.js",
+	"Purchase Invoice": "public/js/pricing_scheme_panel.js",
 }
 doctype_list_js = {
 	"Code List": [
@@ -426,8 +434,8 @@ doc_events = {
 		"on_trash": "erpnext.regional.check_deletion_permission",
 	},
 	tuple(pricing_scheme_origination_doctypes): {
-		"on_submit": "erpnext.accounts.services.pricing.pricing_ledger.record_applications",
-		"on_cancel": "erpnext.accounts.services.pricing.pricing_ledger.cancel_applications",
+		"on_submit": "erpnext.accounts.services.pricing.pricing_ledger.create_pricing_scheme_ledger_entries",
+		"on_cancel": "erpnext.accounts.services.pricing.pricing_ledger.cancel_pricing_scheme_ledger_entries",
 	},
 	"Purchase Invoice": {
 		"validate": [

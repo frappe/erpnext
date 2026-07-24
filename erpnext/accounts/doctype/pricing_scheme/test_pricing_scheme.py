@@ -453,6 +453,21 @@ class TestPricingSchemeApplier(ERPNextTestSuite):
 		free = next(row for row in si.items if row.is_free_item)
 		self.assertEqual(free.cost_center, source.cost_center, "re-save must preserve inherited values")
 
+	def test_explain_pricing(self):
+		from erpnext.accounts.services.pricing.pricing_preview import explain_pricing
+
+		scheme = make_scheme(trigger=[group_row(PARENT_GROUP)], tiers=[tier(1, 0, value=10)])
+		so = self.make_sales_order(qty=24)
+
+		explanation = explain_pricing("Sales Order", so.name)
+		self.assertTrue(explanation["enabled"])
+		applied = {entry["scheme"]: entry for entry in explanation["applied"]}
+		self.assertIn(scheme.name, applied)
+		self.assertAlmostEqual(applied[scheme.name]["discount_amount"], 240.0)
+		self.assertTrue(
+			any(t["scheme"] == scheme.name and t["status"] == "matched" for t in explanation["trace"])
+		)
+
 	def test_chain_stability_so_to_delivery_note(self):
 		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
 

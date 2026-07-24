@@ -35,7 +35,7 @@ def get_usage(scheme: str) -> dict:
 	rows = (
 		frappe.qb.from_(app)
 		.select(
-			Count(app.name).as_("applications"),
+			Count(app.name).as_("uses"),
 			Sum(app.discount_amount).as_("discount_given"),
 			Sum(app.free_item_qty).as_("free_qty"),
 		)
@@ -44,13 +44,13 @@ def get_usage(scheme: str) -> dict:
 	)
 	row = rows[0] if rows else frappe._dict()
 	caps = frappe.get_cached_value(
-		"Pricing Scheme", scheme, ("cap_total_applications", "cap_total_discount_amount"), as_dict=True
+		"Pricing Scheme", scheme, ("cap_total_uses", "cap_total_discount_amount"), as_dict=True
 	)
 	return {
-		"applications": cint(row.get("applications")),
+		"uses": cint(row.get("uses")),
 		"discount_given": float(row.get("discount_given") or 0),
 		"free_qty": float(row.get("free_qty") or 0),
-		"cap_total_applications": cint(caps.cap_total_applications),
+		"cap_total_uses": cint(caps.cap_total_uses),
 		"cap_total_discount_amount": float(caps.cap_total_discount_amount or 0),
 	}
 

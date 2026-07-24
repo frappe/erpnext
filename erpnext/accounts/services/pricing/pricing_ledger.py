@@ -15,7 +15,7 @@ from erpnext.accounts.services.pricing.pricing_effects import (
 from erpnext.accounts.services.pricing.pricing_engine import PricingEngine
 
 
-def record_applications(doc, method: str | None = None) -> None:
+def create_pricing_scheme_ledger_entries(doc, method: str | None = None) -> None:
 	"""hooks entry: write ledger rows at origination submit (spec section 7.4).
 
 	Only lines the document *originated* accrue; inherited lines were
@@ -35,7 +35,7 @@ def record_applications(doc, method: str | None = None) -> None:
 	_record_coupon_redemption(doc, context, result)
 
 
-def cancel_applications(doc, method: str | None = None) -> None:
+def cancel_pricing_scheme_ledger_entries(doc, method: str | None = None) -> None:
 	cancel_redemptions(doc)
 	frappe.db.set_value(
 		"Pricing Scheme Ledger Entry",

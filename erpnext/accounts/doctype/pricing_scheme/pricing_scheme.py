@@ -34,7 +34,7 @@ class PricingScheme(Document):
 		applies_to: DF.Literal["All Items", "Specific Items"]
 		apply_discount_on: DF.Literal["Grand Total", "Net Total"]
 		benefit_scope: DF.Table[PricingSchemeItemScope]
-		cap_total_applications: DF.Int
+		cap_total_uses: DF.Int
 		cap_total_discount_amount: DF.Currency
 		company: DF.Link | None
 		condition: DF.Code | None
