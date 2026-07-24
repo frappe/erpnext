@@ -469,7 +469,7 @@ def unset_existing_data(company):
 		"Sales Taxes and Charges Template",
 		"Purchase Taxes and Charges Template",
 	]:
-		frappe.get_query(doctype, delete=True, filters={"company": company}, ignore_permissions=False).run()
+		frappe.get_query(doctype, delete=True, filters={"company": company}, ignore_permissions=True).run()
 
 
 def set_default_accounts(company):
