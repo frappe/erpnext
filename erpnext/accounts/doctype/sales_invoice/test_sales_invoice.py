@@ -2025,6 +2025,14 @@ class TestSalesInvoice(ERPNextTestSuite):
 		cr_note.items[0].qty = 0
 		self.assertRaises(frappe.ValidationError, cr_note.save)
 
+	def test_zero_qty_return_invoice_without_update_stock(self):
+		si = create_sales_invoice(qty=1, rate=100)
+		cr_note = create_sales_invoice(
+			qty=-1, rate=100, is_return=1, return_against=si.name, do_not_save=True
+		)
+		cr_note.items[0].qty = 0
+		self.assertRaises(frappe.ValidationError, cr_note.save)
+
 	def test_return_invoice_with_account_mismatch(self):
 		debtors2 = create_account(
 			parent_account="Accounts Receivable - _TC",
