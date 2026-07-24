@@ -180,8 +180,6 @@ class RepostAccountingLedger(Document):
 		return rendered_page
 
 	def on_submit(self):
-		if frappe.in_test:
-			return
 		self.start_repost()
 
 	def before_cancel(self):
@@ -206,6 +204,10 @@ class RepostAccountingLedger(Document):
 
 		self.check_permission("write")
 		self.db_set("status", "Queued")
+
+		if frappe.in_test:
+			repost(repost_doc_name=self.name)
+			return
 
 		job_id = frappe.generate_hash()
 		frappe.enqueue(
@@ -283,7 +285,8 @@ def repost(repost_doc_name: str):
 			else:
 				x.db_set({"reposted": 1, "traceback": ""})
 			finally:
-				frappe.db.commit()
+				if not frappe.in_test:
+					frappe.db.commit()
 
 	except Exception:
 		if frappe.in_test:
@@ -315,7 +318,8 @@ def repost(repost_doc_name: str):
 	finally:
 		for doc in locked_docs:
 			doc.unlock()
-		frappe.db.commit()
+		if not frappe.in_test:
+			frappe.db.commit()
 
 
 def _repost_vouchers(doc, delete_cancelled_entries: bool | int | None):
