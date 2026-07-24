@@ -118,6 +118,7 @@ def validate_returned_items(doc):
 	)
 
 	items_returned = False
+	has_negative_return_qty = False
 	for d in doc.get("items"):
 		key = d.item_code
 		raise_exception = False
@@ -161,12 +162,16 @@ def validate_returned_items(doc):
 					frappe.throw(_("Warehouse is mandatory"))
 
 			items_returned = True
+			if flt(d.qty) < 0 or flt(d.get("received_qty")) < 0 or flt(d.get("rejected_qty")) < 0:
+				has_negative_return_qty = True
 
 		elif d.item_name:
 			items_returned = True
 
 	if not items_returned:
 		frappe.throw(_("At least one item should be entered with negative quantity in return document"))
+	elif not has_negative_return_qty:
+		frappe.throw(_("At least one item must have a negative quantity in the return document"))
 
 
 def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
@@ -215,7 +220,7 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
 		label = column.replace("_", " ").title()
 
 		if reference_qty:
-			if flt(args.get(column)) >= 0:
+			if flt(args.get(column)) > 0:
 				frappe.throw(_("{0} must be negative in return document").format(label))
 			elif returned_qty >= reference_qty and args.get(column) >= 0:
 				frappe.throw(
