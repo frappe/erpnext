@@ -13,7 +13,7 @@
  "doctype": "Workspace",
  "for_user": "",
  "hide_custom": 0,
- "icon": "assets",
+ "icon": "archive",
  "idx": 0,
  "is_hidden": 0,
  "label": "Assets",
@@ -199,7 +199,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-06-14 13:44:08.417956",
+ "modified": "2026-07-03 13:44:08.417956",
  "modified_by": "Administrator",
  "module": "Assets",
  "module_onboarding": "Asset Onboarding",
@@ -217,7 +217,7 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "home",
+   "icon": "house",
    "indent": 0,
    "keep_closed": 0,
    "label": "Home",
@@ -230,7 +230,7 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "chart",
+   "icon": "chart-column",
    "indent": 0,
    "keep_closed": 0,
    "label": "Dashboard",
@@ -295,7 +295,7 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "getting-started",
+   "icon": "rocket",
    "indent": 1,
    "keep_closed": 1,
    "label": "Maintenance",

@@ -913,8 +913,10 @@
    "fieldname": "job_card",
    "fieldtype": "Link",
    "label": "Job Card",
+   "no_copy": 1,
    "options": "Job Card",
-   "search_index": 1
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fieldname": "distributed_discount_amount",
@@ -941,7 +943,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-06-08 21:00:00.000000",
+ "modified": "2026-07-15 10:30:04.600510",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item",

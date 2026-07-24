@@ -3,6 +3,7 @@
 
 
 import copy
+import datetime
 import functools
 import math
 import re
@@ -15,10 +16,185 @@ from pypika.terms import Bracket, ExistsCriterion, LiteralValue
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
+	get_dimension_fieldname,
 	get_dimension_with_children,
+	get_doctypes_with_dimensions,
 )
 from erpnext.accounts.report.utils import convert_to_presentation_currency, get_currency
 from erpnext.accounts.utils import get_fiscal_year, get_zero_cutoff
+
+
+def get_dimension_values(filters: frappe._dict) -> tuple[str | None, list]:
+	"""
+	Return (fieldname, [dimension_values]) for the chosen grouping dimension.
+
+	NOTE: Disabled dimensions values are not filtered out!
+	"""
+	if not filters.group_by_dimension:
+		return None, []
+
+	dim_doctype = filters.group_by_dimension
+	fieldname = get_dimension_fieldname(dim_doctype)
+
+	meta = frappe.get_meta(dim_doctype)
+	is_tree = bool(meta.is_tree)
+
+	dim = frappe.qb.DocType(dim_doctype)
+	query = frappe.qb.from_(dim).select(dim.name)
+
+	if is_tree and meta.has_field("is_group"):
+		query = query.where(dim.is_group == 0)
+
+	if meta.has_field("company"):
+		query = query.where(dim.company == filters.company)
+
+	# Self-filter: narrow to values the user picked for this same dimension.
+	if selected := filters.get(fieldname):
+		if isinstance(selected, str):
+			selected = frappe.parse_json(selected)
+		if is_tree:
+			selected = get_dimension_with_children(dim_doctype, selected)
+		query = query.where(dim.name.isin(selected))
+
+	from frappe.desk.reportview import build_match_conditions
+
+	if match_conditions := build_match_conditions(dim_doctype):
+		query = query.where(Bracket(LiteralValue(match_conditions)))
+
+	# order by name
+	query = query.orderby(dim.name)
+
+	return fieldname, query.run(pluck=True)
+
+
+def get_dimension_period_list(filters: frappe._dict) -> list[dict]:
+	"""
+	Return a period_list-shaped axis = cross-product of (dimension_value * time period).
+
+	Each cell is a `get_period_list` bucket plus dimension keys, e.g.:
+
+	```
+	{
+	        "dimension_field": "cost_center",
+	        "dimension_value": "Main - ATD",
+	        "key": "main___atd_mar_2027",
+	        "label": "Main - ATD - 2026-2027",
+	        "period": "mar_2027",
+	        ...
+	}
+
+	```
+	"""
+	fieldname, dimensions = get_dimension_values(filters)
+	if not fieldname or not dimensions:
+		return []
+
+	period_buckets = get_period_list(
+		filters.from_fiscal_year,
+		filters.to_fiscal_year,
+		filters.period_start_date,
+		filters.period_end_date,
+		filters.filter_based_on,
+		filters.periodicity,
+		accumulated_values=filters.accumulated_values,
+		company=filters.company,
+	)
+
+	if not period_buckets:
+		return []
+
+	period_list = []
+
+	# Guard against rare collisions where two distinct dimension values
+	# `frappe.scrub()` to the same key (e.g. "CC-A" and "CC A") and would
+	# otherwise overwrite each other's column.
+	used_keys = set()
+
+	for dimension in dimensions:
+		dim_key_base = frappe.scrub(dimension)
+		for period in period_buckets:
+			key = f"{dim_key_base}_{period.key}"
+
+			if key in used_keys:
+				key = f"{key}_{len(used_keys)}"
+			used_keys.add(key)
+
+			cell = frappe._dict(period)
+			cell.update(
+				{
+					"key": key,
+					"label": f"{dimension} - {period.label}",
+					"dimension_field": fieldname,
+					"dimension_value": dimension,
+					"period": period.key,
+				}
+			)
+			period_list.append(cell)
+
+	return period_list
+
+
+def build_period_list(filters: frappe._dict) -> list[dict]:
+	"""
+	Build the report `period_list` from filters.
+
+	- If `group_by_dimension` is set, returns a dimension * period cross-product via `get_dimension_period_list`.
+	- Otherwise, returns plain time buckets via `get_period_list`.
+	"""
+	if filters.group_by_dimension and not filters.report_template:
+		return get_dimension_period_list(filters)
+
+	return get_period_list(
+		filters.from_fiscal_year,
+		filters.to_fiscal_year,
+		filters.period_start_date,
+		filters.period_end_date,
+		filters.filter_based_on,
+		filters.periodicity,
+		company=filters.company,
+	)
+
+
+def is_dimension_grouped(period_list: list[dict]) -> bool:
+	"""
+	Return True if period_list contains dimension-grouped periods.
+	"""
+	if not period_list or not isinstance(period_list, list):
+		return False
+
+	return bool(period_list[0].get("dimension_field"))
+
+
+def get_period_keys_for_total(
+	period_list: list[dict],
+	accumulated_values: bool,
+	consolidated: bool = False,
+) -> list[str]:
+	"""
+	Return the period keys whose values should be summed for the row-level
+	`Total` column / report-summary cards.
+
+	- Group by Dimension + accumulated: each dimension's last period
+	- Accumulated:  only the last period
+	- Not accumulated: all periods (sum of independent period activity)
+	- Consolidated: list of period keys is the same as the period_list
+	        - In case of consolidated reports
+	"""
+	if not period_list:
+		return []
+
+	if consolidated:
+		return list(period_list)
+
+	if is_dimension_grouped(period_list) and accumulated_values:
+		return list({period.dimension_value: period.key for period in period_list}.values())
+
+	# when 'accumulated_values' is enabled, periods have running balance.
+	# so, last period will have the net amount.
+	if accumulated_values:
+		return [period_list[-1].key]
+
+	return [period.key for period in period_list]
 
 
 def get_period_list(
@@ -33,18 +209,19 @@ def get_period_list(
 	reset_period_on_fy_change=True,
 	ignore_fiscal_year=False,
 ):
-	"""Get a list of dict {"from_date": from_date, "to_date": to_date, "key": key, "label": label}
-	Periodicity can be (Yearly, Quarterly, Monthly)"""
+	"""
+	Generate a list of time buckets between the provided from/to fiscal year or date range,
+	based on the periodicity (Yearly, Half-Yearly, Quarterly, Monthly).
+	"""
 
+	# Resolve the report's overall date range (with validation).
 	if filter_based_on == "Fiscal Year":
-		fiscal_year = get_fiscal_year_data(from_fiscal_year, to_fiscal_year)
-		validate_fiscal_year(fiscal_year, from_fiscal_year, to_fiscal_year)
-		year_start_date = getdate(fiscal_year.year_start_date)
-		year_end_date = getdate(fiscal_year.year_end_date)
+		fy_data = get_fiscal_year_data(from_fiscal_year, to_fiscal_year)
+		validate_fiscal_year(fy_data, from_fiscal_year, to_fiscal_year)
+		year_start_date, year_end_date = getdate(fy_data.year_start_date), getdate(fy_data.year_end_date)
 	else:
 		validate_dates(period_start_date, period_end_date)
-		year_start_date = getdate(period_start_date)
-		year_end_date = getdate(period_end_date)
+		year_start_date, year_end_date = getdate(period_start_date), getdate(period_end_date)
 
 	months_to_add = {"Yearly": 12, "Half-Yearly": 6, "Quarterly": 3, "Monthly": 1}[periodicity]
 
@@ -233,6 +410,8 @@ def calculate_values(
 	accumulated_values,
 	ignore_accumulated_values_for_fy,
 ):
+	grouped_by_dimension = is_dimension_grouped(period_list)
+
 	for entries in gl_entries_by_account.values():
 		for entry in entries:
 			d = accounts_by_name.get(entry.account)
@@ -243,7 +422,8 @@ def calculate_values(
 					raise_exception=1,
 				)
 			for period in period_list:
-				# check if posting date is within the period
+				if grouped_by_dimension and entry.get(period.dimension_field) != period.dimension_value:
+					continue
 
 				if entry.posting_date <= period.to_date:
 					if (accumulated_values or entry.posting_date >= period.from_date) and (
@@ -252,7 +432,8 @@ def calculate_values(
 					):
 						d[period.key] = d.get(period.key, 0.0) + flt(entry.debit) - flt(entry.credit)
 
-			if entry.posting_date < period_list[0].year_start_date:
+			# Balance Sheet only: track pre-FY entries as opening_balance (no per-dimension breakdown possible).
+			if not grouped_by_dimension and entry.posting_date < period_list[0].year_start_date:
 				d["opening_balance"] = d.get("opening_balance", 0.0) + flt(entry.debit) - flt(entry.credit)
 
 
@@ -274,11 +455,11 @@ def prepare_data(accounts, balance_must_be, period_list, company_currency, accum
 	data = []
 	year_start_date = period_list[0]["year_start_date"].strftime("%Y-%m-%d")
 	year_end_date = period_list[-1]["year_end_date"].strftime("%Y-%m-%d")
+	total_keys = get_period_keys_for_total(period_list, accumulated_values)
 
 	for d in accounts:
 		# add to output
 		has_value = False
-		total = 0
 		row = frappe._dict(
 			{
 				"account": _(d.name),
@@ -303,21 +484,14 @@ def prepare_data(accounts, balance_must_be, period_list, company_currency, accum
 				# change sign based on Debit or Credit, since calculation is done using (debit - credit)
 				d[period.key] *= -1
 
-			row[period.key] = flt(d.get(period.key, 0.0), 3)
+			row[period.key] = flt(d.get(period.key, 0), 3)
 
 			if abs(row[period.key]) >= get_zero_cutoff(company_currency):
 				# ignore zero values
 				has_value = True
-				total += flt(row[period.key])
 
-		if accumulated_values:
-			# when 'accumulated_values' is enabled, periods have running balance.
-			# so, last period will have the net amount.
-			row["has_value"] = has_value
-			row["total"] = flt(d.get(period_list[-1].key, 0.0), 3)
-		else:
-			row["has_value"] = has_value
-			row["total"] = total
+		row["has_value"] = has_value
+		row["total"] = flt(sum(row.get(k, 0) for k in total_keys), 3)
 		data.append(row)
 
 	return data
@@ -547,6 +721,10 @@ def get_accounting_entries(
 		.where(gl_entry.company == filters.company)
 	)
 
+	if filters.group_by_dimension and doctype in get_doctypes_with_dimensions() and not group_by_account:
+		dimension_field = get_dimension_fieldname(filters.group_by_dimension)
+		query = query.select(gl_entry[dimension_field])
+
 	if not ignore_reporting_currency:
 		query = query.select(
 			gl_entry.debit_in_reporting_currency
@@ -687,7 +865,14 @@ def get_cost_centers_with_children(cost_centers):
 	return list(set(all_cost_centers))
 
 
-def get_columns(periodicity, period_list, accumulated_values=1, company=None, cash_flow=False):
+def get_columns(
+	periodicity,
+	period_list,
+	accumulated_values=1,
+	company=None,
+	cash_flow=False,
+	selected_view="Report",
+):
 	columns = [
 		{
 			"fieldname": "account" if not cash_flow else "section",
@@ -697,6 +882,7 @@ def get_columns(periodicity, period_list, accumulated_values=1, company=None, ca
 			"width": 300,
 		}
 	]
+
 	if not cash_flow:
 		columns.extend(
 			[
@@ -716,6 +902,7 @@ def get_columns(periodicity, period_list, accumulated_values=1, company=None, ca
 				},
 			]
 		)
+
 	if company:
 		columns.append(
 			{
@@ -726,27 +913,40 @@ def get_columns(periodicity, period_list, accumulated_values=1, company=None, ca
 				"hidden": 1,
 			}
 		)
+
+	seen_dim_values = set()
 	for period in period_list:
+		col = {
+			"fieldname": period.key,
+			"label": period.label,
+			"fieldtype": "Currency",
+			"options": "currency",
+			"width": 150,
+		}
+
+		if dim_value := period.get("dimension_value"):
+			# used to identify cross-dimension boundaries
+			col["dimension_value"] = dim_value
+
+			# to handle special view (Growth/Margin) formatting in UI.
+			if dim_value not in seen_dim_values:
+				seen_dim_values.add(dim_value)
+				col["is_first_in_dimension"] = True
+
+		columns.append(col)
+
+	if selected_view not in ("Growth", "Margin") and (
+		is_dimension_grouped(period_list) or (periodicity != "Yearly" and not accumulated_values)
+	):
 		columns.append(
 			{
-				"fieldname": period.key,
-				"label": period.label,
+				"fieldname": "total",
+				"label": _("Total"),
 				"fieldtype": "Currency",
-				"options": "currency",
 				"width": 150,
+				"options": "currency",
 			}
 		)
-	if periodicity != "Yearly":
-		if not accumulated_values:
-			columns.append(
-				{
-					"fieldname": "total",
-					"label": _("Total"),
-					"fieldtype": "Currency",
-					"width": 150,
-					"options": "currency",
-				}
-			)
 
 	return columns
 
@@ -768,6 +968,10 @@ def compute_growth_view_data(data, columns):
 			continue
 
 		for column_idx in range(1, len(columns)):
+			# No growth comparison across dimension boundaries
+			if columns[column_idx - 1].get("dimension_value") != columns[column_idx].get("dimension_value"):
+				continue
+
 			previous_period_key = columns[column_idx - 1].get("key")
 			current_period_key = columns[column_idx].get("key")
 			current_period_value = data_copy[row_idx].get(current_period_key)
@@ -789,12 +993,9 @@ def compute_growth_view_data(data, columns):
 			data[row_idx][current_period_key] = growth_percent
 
 
-def compute_margin_view_data(data, columns, accumulated_values):
+def compute_margin_view_data(data, columns):
 	if not columns:
 		return
-
-	if not accumulated_values:
-		columns.append({"key": "total"})
 
 	data_copy = copy.deepcopy(data)
 

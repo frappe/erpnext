@@ -89,50 +89,55 @@ class ProcessPeriodClosingVoucher(Document):
 		cancel_pcv_processing(self.name)
 
 
+def initialize_parallel_threads(docname: str):
+	threads = 4
+	timeout = frappe.db.get_single_value("Accounts Settings", "pcv_job_timeout") or 3600
+	ppcvd = qb.DocType("Process Period Closing Voucher Detail")
+
+	frappe.db.set_value("Process Period Closing Voucher", docname, "status", "Running")
+
+	if normal_balances := (
+		qb.from_(ppcvd)
+		.select(ppcvd.name, ppcvd.processing_date, ppcvd.report_type, ppcvd.parentfield)
+		.where(ppcvd.parent.eq(docname) & ppcvd.status.eq("Queued"))
+		.orderby(ppcvd.parentfield, ppcvd.idx, ppcvd.processing_date)
+		.limit(threads)
+		.for_update(skip_locked=True)
+		.run(as_dict=True)
+	):
+		if not is_scheduler_inactive():
+			for x in normal_balances:
+				frappe.db.set_value(
+					"Process Period Closing Voucher Detail",
+					x.name,
+					"status",
+					"Running",
+				)
+				frappe.enqueue(
+					method="erpnext.accounts.doctype.process_period_closing_voucher.process_period_closing_voucher.process_individual_date",
+					queue="long",
+					timeout=timeout,
+					is_async=True,
+					enqueue_after_commit=True,
+					docname=docname,
+					row_name=x.name,
+					date=x.processing_date,
+					report_type=x.report_type,
+					parentfield=x.parentfield,
+				)
+			# keep transaction on PPCV and PPCVD short
+			# prevents concurrency errors - REPEATABLE READ
+			if not frappe.in_test:
+				frappe.db.commit()  # nosemgrep
+	else:
+		frappe.db.set_value("Process Period Closing Voucher", docname, "status", "Completed")
+
+
 @frappe.whitelist()
 def start_pcv_processing(docname: str):
 	if frappe.db.get_value("Process Period Closing Voucher", docname, "status") in ["Queued", "Running"]:
 		frappe.has_permission("Process Period Closing Voucher", "write", doc=docname, throw=True)
-		frappe.db.set_value("Process Period Closing Voucher", docname, "status", "Running")
-
-		timeout = frappe.db.get_single_value("Accounts Settings", "pcv_job_timeout") or 3600
-
-		ppcvd = qb.DocType("Process Period Closing Voucher Detail")
-		if normal_balances := (
-			qb.from_(ppcvd)
-			.select(ppcvd.processing_date, ppcvd.report_type, ppcvd.parentfield)
-			.where(ppcvd.parent.eq(docname) & ppcvd.status.eq("Queued"))
-			.orderby(ppcvd.parentfield, ppcvd.idx, ppcvd.processing_date)
-			.limit(4)
-			.for_update(skip_locked=True)
-			.run(as_dict=True)
-		):
-			if not is_scheduler_inactive():
-				for x in normal_balances:
-					frappe.db.set_value(
-						"Process Period Closing Voucher Detail",
-						{
-							"processing_date": x.processing_date,
-							"parent": docname,
-							"report_type": x.report_type,
-							"parentfield": x.parentfield,
-						},
-						"status",
-						"Running",
-					)
-					frappe.enqueue(
-						method="erpnext.accounts.doctype.process_period_closing_voucher.process_period_closing_voucher.process_individual_date",
-						queue="long",
-						timeout=timeout,
-						is_async=True,
-						enqueue_after_commit=True,
-						docname=docname,
-						date=x.processing_date,
-						report_type=x.report_type,
-						parentfield=x.parentfield,
-					)
-		else:
-			frappe.db.set_value("Process Period Closing Voucher", docname, "status", "Completed")
+		initialize_parallel_threads(docname)
 
 
 @frappe.whitelist()
@@ -250,11 +255,11 @@ def get_gle_for_closing_account(pcv, dimension_balance, dimensions):
 @frappe.whitelist()
 def schedule_next_date(docname: str):
 	timeout = frappe.db.get_single_value("Accounts Settings", "pcv_job_timeout") or 3600
-
 	ppcvd = qb.DocType("Process Period Closing Voucher Detail")
+
 	if to_process := (
 		qb.from_(ppcvd)
-		.select(ppcvd.processing_date, ppcvd.report_type, ppcvd.parentfield)
+		.select(ppcvd.name, ppcvd.processing_date, ppcvd.report_type, ppcvd.parentfield)
 		.where(ppcvd.parent.eq(docname) & ppcvd.status.eq("Queued"))
 		.orderby(ppcvd.parentfield, ppcvd.idx, ppcvd.processing_date)
 		.limit(1)
@@ -264,15 +269,15 @@ def schedule_next_date(docname: str):
 		if not is_scheduler_inactive():
 			frappe.db.set_value(
 				"Process Period Closing Voucher Detail",
-				{
-					"processing_date": to_process[0].processing_date,
-					"parent": docname,
-					"report_type": to_process[0].report_type,
-					"parentfield": to_process[0].parentfield,
-				},
+				to_process[0].name,
 				"status",
 				"Running",
 			)
+			# keep transaction on PPCV and PPCVD short
+			# prevents concurrency errors - REPEATABLE READ
+			if not frappe.in_test:
+				frappe.db.commit()  # nosemgrep
+
 			frappe.enqueue(
 				method="erpnext.accounts.doctype.process_period_closing_voucher.process_period_closing_voucher.process_individual_date",
 				queue="long",
@@ -280,6 +285,7 @@ def schedule_next_date(docname: str):
 				is_async=True,
 				enqueue_after_commit=True,
 				docname=docname,
+				row_name=to_process[0].name,
 				date=to_process[0].processing_date,
 				report_type=to_process[0].report_type,
 				parentfield=to_process[0].parentfield,
@@ -444,6 +450,11 @@ def summarize_and_post_ledger_entries(docname):
 
 	make_closing_entries(closing_entries, pcv.name, pcv.company, pcv.period_end_date)
 
+	# keep transaction on PPCV and PPCVD short
+	# prevents concurrency errors - REPEATABLE READ
+	if not frappe.in_test:
+		frappe.db.commit()  # nosemgrep
+
 	frappe.db.set_value("Period Closing Voucher", pcv.name, "gle_processing_status", "Completed")
 	frappe.db.set_value("Process Period Closing Voucher", docname, "status", "Completed")
 
@@ -529,10 +540,10 @@ def build_dimension_wise_balance_dict(gl_entries):
 	return dimension_balances
 
 
-def process_individual_date(docname: str, date, report_type, parentfield):
+def process_individual_date(docname: str, row_name, date, report_type, parentfield):
 	current_date_status = frappe.db.get_value(
 		"Process Period Closing Voucher Detail",
-		{"processing_date": date, "report_type": report_type, "parentfield": parentfield},
+		row_name,
 		"status",
 	)
 	if current_date_status != "Running":
@@ -580,17 +591,20 @@ def process_individual_date(docname: str, date, report_type, parentfield):
 	# save results
 	frappe.db.set_value(
 		"Process Period Closing Voucher Detail",
-		{"processing_date": date, "parent": docname, "report_type": report_type, "parentfield": parentfield},
+		row_name,
 		"closing_balance",
 		frappe.json.dumps(res),
 	)
 
 	frappe.db.set_value(
 		"Process Period Closing Voucher Detail",
-		{"processing_date": date, "parent": docname, "report_type": report_type, "parentfield": parentfield},
+		row_name,
 		"status",
 		"Completed",
 	)
+	# commit heavy computation before touching PPCV or PPCVD
+	if not frappe.in_test:
+		frappe.db.commit()  # nosemgrep
 
 	# chain call
 	schedule_next_date(docname)

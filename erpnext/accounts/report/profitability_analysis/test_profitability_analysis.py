@@ -46,8 +46,9 @@ class TestProfitabilityAnalysis(ERPNextTestSuite):
 		)
 
 	def test_income_expense_and_gross_profit(self):
-		# bootstrap leaf cost center; clean of committed GL so exact assertions hold
-		cc = "_Test Cost Center - _TC"
+		# a dedicated leaf cost center keeps these exact assertions free of GL that
+		# other tests may book against a shared cost center in the same fiscal year
+		cc = self.make_cc("_Test PA Income Expense")
 		self.book_income(cc, 10000)
 		self.book_expense(cc, 4000)
 
@@ -74,7 +75,7 @@ class TestProfitabilityAnalysis(ERPNextTestSuite):
 		self.assertEqual(parent_row["gross_profit_loss"], 7000)
 
 	def test_date_range_excludes_out_of_period_entries(self):
-		cc = "_Test Cost Center 2 - _TC"
+		cc = self.make_cc("_Test PA Date Range")
 		self.book_income(cc, 10000, posting_date="2025-06-01")
 
 		# the 2025 income must not appear in a 2026 report (zero-value rows are dropped)
@@ -97,7 +98,8 @@ class TestProfitabilityAnalysis(ERPNextTestSuite):
 		data = self.run_report()
 		# the report appends a blank separator row and a totals row at the end
 		total_row = data[-1]
-		self.assertEqual(total_row["account"], "'Total'")
+		# the report wraps the (possibly translated) "Total" label in single quotes
+		self.assertEqual(total_row["account"], "'" + frappe._("Total") + "'")
 		# total is built from direct (non-accumulated) values, so it stays internally consistent
 		self.assertEqual(total_row["gross_profit_loss"], total_row["income"] - total_row["expense"])
 		# and it includes this test's bookings

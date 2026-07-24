@@ -347,7 +347,7 @@ def check_opening_entry(user: str):
 	return open_vouchers
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def create_opening_voucher(pos_profile: str, company: str, balance_details: str | list):
 	balance_details = frappe.parse_json(balance_details)
 
@@ -438,7 +438,7 @@ def get_past_order_list(search_term: str, status: str, limit: int = 20):
 	return invoice_list
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def set_customer_info(fieldname: str, customer: str, value: str = ""):
 	customer_doc = frappe.get_doc("Customer", customer)
 	customer_doc.check_permission("write")

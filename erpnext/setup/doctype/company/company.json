@@ -137,6 +137,10 @@
   "disable_sdbnb_in_sr",
   "default_provisional_account",
   "default_in_transit_warehouse",
+  "stock_expense_section",
+  "expenses_added_to_stock_account",
+  "column_break_gthb",
+  "expenses_added_to_stock_contra_account",
   "manufacturing_section",
   "default_operating_cost_account",
   "column_break_9prc",
@@ -963,6 +967,18 @@
    "options": "Account"
   },
   {
+   "fieldname": "expenses_added_to_stock_account",
+   "fieldtype": "Link",
+   "label": "Expenses Added To Stock Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "expenses_added_to_stock_contra_account",
+   "fieldtype": "Link",
+   "label": "Expenses Added To Stock Contra Account",
+   "options": "Account"
+  },
+  {
    "default": "0",
    "description": "If enabled, the system will use the inventory account set in the Item Master or Item Group or Brand. Otherwise, it will use the inventory account set in the Warehouse.",
    "fieldname": "enable_item_wise_inventory_account",
@@ -1071,6 +1087,15 @@
    "fieldname": "enable_stock_delivered_but_not_billed",
    "fieldtype": "Check",
    "label": "Enable Stock Delivered But Not Billed"
+  },
+  {
+   "fieldname": "stock_expense_section",
+   "fieldtype": "Section Break",
+   "label": "Stock Expense"
+  },
+  {
+   "fieldname": "column_break_gthb",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
@@ -1079,7 +1104,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2026-07-02 07:21:21.794533",
+ "modified": "2026-07-15 15:38:29.214020",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",

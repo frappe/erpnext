@@ -105,6 +105,10 @@ class ManufactureEntry:
 				)
 
 	def add_raw_materials(self):
+		from erpnext.stock.doctype.stock_entry.services.manufacturing import (
+			set_previous_operation_serial_batch,
+		)
+
 		if self.job_card:
 			item_dict = {}
 			if not item_dict:
@@ -127,9 +131,7 @@ class ManufactureEntry:
 				_dict.t_warehouse = ""
 				_dict.item_code = item_code
 
-				if backflush_based_on != "BOM" and not frappe.db.get_value(
-					"Job Card", self.job_card, "skip_material_transfer"
-				):
+				if backflush_based_on != "BOM" and not self.skip_material_transfer:
 					calculated_qty = flt(_dict.transferred_qty) - flt(_dict.consumed_qty)
 					if calculated_qty < 0:
 						frappe.throw(
@@ -138,6 +140,8 @@ class ManufactureEntry:
 
 					_dict.qty = calculated_qty
 					self.update_available_serial_batches(_dict, available_serial_batches)
+				elif self.skip_material_transfer:
+					set_previous_operation_serial_batch(self.stock_entry, _dict)
 
 				self.stock_entry.append("items", _dict)
 

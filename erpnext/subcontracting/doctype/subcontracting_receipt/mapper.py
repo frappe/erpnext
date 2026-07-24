@@ -16,16 +16,16 @@ def make_subcontract_return_against_rejected_warehouse(source_name: str):
 
 
 @frappe.whitelist()
-def make_subcontract_return(source_name: str, target_doc: Document | str | None = None):
+def make_subcontract_return(source_name: str, target_doc: str | dict | Document | None = None):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
 
 	return make_return_doc("Subcontracting Receipt", source_name, target_doc)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def make_purchase_receipt(
 	source_name: Document | str,
-	target_doc: Document | str | None = None,
+	target_doc: str | dict | Document | None = None,
 	save: bool = False,
 	submit: bool = False,
 	notify: bool = False,

@@ -315,6 +315,77 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 		repost_doc.posting_date = today()
 		repost_doc.save()
 
+	def test_dimension_grouped_opening_balance_matches_gl_scan(self):
+		"""
+		A dimension-grouped Balance Sheet must produce identical per-dimension
+		figures whether opening balances come from
+
+		- Account Closing Balance (the fast path) or
+		- from a full GL scan (the fallback).
+		"""
+		from frappe.utils import add_days, getdate
+
+		from erpnext.accounts.report.balance_sheet.balance_sheet import execute
+		from erpnext.accounts.report.financial_statements import build_period_list
+
+		company = "Test PCV Company"
+		cc1 = create_cost_center("Test Cost Center 1")
+		cc2 = create_cost_center("Test Cost Center 2")
+
+		# Post to two cost centers, then close the year so balances land in Account Closing Balance.
+		for amount, cost_center in ((400, cc1), (200, cc2)):
+			jv = make_journal_entry(
+				posting_date="2021-03-15",
+				amount=amount,
+				account1="Cash - TPC",
+				account2="Sales - TPC",
+				cost_center=cost_center,
+				company=company,
+				save=False,
+			)
+			jv.company = company
+			jv.save()
+			jv.submit()
+
+		pcv = self.make_period_closing_voucher(posting_date="2021-03-31")
+		report_date = add_days(getdate(pcv.period_end_date), 1)
+
+		report_filters = frappe._dict(
+			company=company,
+			period_start_date=report_date,
+			period_end_date=report_date,
+			periodicity="Yearly",
+			filter_based_on="Date Range",
+			accumulated_values=True,
+			group_by_dimension="Cost Center",
+		)
+
+		period_list = build_period_list(report_filters)
+		period_keys = [p.key for p in period_list]
+
+		def key_for(cost_center):
+			return next(p.key for p in period_list if p.dimension_value == cost_center)
+
+		def figures(data):
+			return {
+				row["account_name"]: {k: row.get(k) for k in period_keys}
+				for row in data
+				if row.get("account_name")
+			}
+
+		# Fast path: opening balance sourced from Account Closing Balance.
+		acb_figures = figures(execute(report_filters)[1])
+
+		# Fallback: force a full GL scan and expect the same numbers.
+		with self.change_settings("Accounts Settings", {"ignore_account_closing_balance": 1}):
+			gl_figures = figures(execute(report_filters)[1])
+
+		self.assertEqual(acb_figures, gl_figures)
+
+		# the fast path must carry per-dimension opening balances, not aggregates or zeros
+		self.assertEqual(acb_figures["Cash"][key_for(cc1)], 400)
+		self.assertEqual(acb_figures["Cash"][key_for(cc2)], 200)
+
 	def make_period_closing_voucher(self, posting_date, submit=True):
 		surplus_account = create_account()
 		cost_center = create_cost_center("Test Cost Center 1")

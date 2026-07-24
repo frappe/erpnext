@@ -182,7 +182,7 @@ def get_columns(filters):
 	]
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def create_reposting_entries(rows: str | list, company: str):
 	if isinstance(rows, str):
 		rows = parse_json(rows)
@@ -219,7 +219,7 @@ def create_reposting_entries(rows: str | list, company: str):
 					"posting_date": sle.posting_date,
 					"posting_time": sle.posting_time,
 					"company": company,
-					"allow_nagative_stock": 1,
+					"allow_negative_stock": 1,
 				}
 			).submit()
 
@@ -265,7 +265,7 @@ def repost_based_on_transaction(rows, company=None, entries=None):
 						"posting_date": row.get("posting_date"),
 						"posting_time": row.get("posting_time"),
 						"company": company,
-						"allow_nagative_stock": 1,
+						"allow_negative_stock": 1,
 						"recalculate_valuation_rate": 1,
 					}
 				).submit()

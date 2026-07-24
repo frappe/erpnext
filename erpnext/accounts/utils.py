@@ -13,6 +13,7 @@ from frappe.desk.reportview import build_match_conditions
 from frappe.model.meta import get_field_precision
 from frappe.model.naming import determine_consecutive_week_number
 from frappe.query_builder import AliasedQuery, Case, Criterion, Field, Table
+from frappe.query_builder.custom import ConstantColumn
 from frappe.query_builder.functions import Count, IfNull, Max, Min, Round, Sum
 from frappe.query_builder.utils import DocType
 from frappe.utils import (
@@ -1426,13 +1427,11 @@ def get_account_balances(
 def get_account_balances_coa(company: str, include_default_fb_balances: bool = False):
 	company_currency = frappe.get_cached_value("Company", company, "default_currency")
 
-	Account = DocType("Account")
-	account_list = (
-		frappe.qb.from_(Account)
-		.select(Account.name, Account.parent_account, Account.account_currency)
-		.where(Account.company == company)
-		.orderby(Account.lft)
-		.run(as_dict=True)
+	account_list = frappe.get_list(
+		"Account",
+		fields=["name", "parent_account", "account_currency"],
+		filters={"company": company},
+		order_by="lft",
 	)
 
 	account_balances_cc = {account.get("name"): 0 for account in account_list}
@@ -1442,9 +1441,8 @@ def get_account_balances_coa(company: str, include_default_fb_balances: bool = F
 	GLEntry = DocType("GL Entry")
 	precision = get_currency_precision()
 	get_ledger_balances_query = (
-		frappe.qb.from_(GLEntry)
+		frappe.get_query(GLEntry, fields=[GLEntry.account], ignore_permissions=False)
 		.select(
-			GLEntry.account,
 			(Sum(Round(GLEntry.debit, precision)) - Sum(Round(GLEntry.credit, precision))).as_("balance"),
 			(
 				Sum(Round(GLEntry.debit_in_account_currency, precision))
@@ -1454,7 +1452,7 @@ def get_account_balances_coa(company: str, include_default_fb_balances: bool = F
 		.groupby(GLEntry.account)
 	)
 
-	condition_list = [GLEntry.company == company, GLEntry.is_cancelled == 0]
+	conditions = [GLEntry.company == company, GLEntry.is_cancelled == 0]
 
 	default_finance_book = None
 
@@ -1462,12 +1460,9 @@ def get_account_balances_coa(company: str, include_default_fb_balances: bool = F
 		default_finance_book = frappe.get_cached_value("Company", company, "default_finance_book")
 
 	if default_finance_book:
-		condition_list.append(
-			(GLEntry.finance_book == default_finance_book) | (GLEntry.finance_book.isnull())
-		)
+		conditions.append((GLEntry.finance_book == default_finance_book) | (GLEntry.finance_book.isnull()))
 
-	for condition in condition_list:
-		get_ledger_balances_query = get_ledger_balances_query.where(condition)
+	get_ledger_balances_query = get_ledger_balances_query.where(Criterion.all(conditions))
 
 	ledger_balances = get_ledger_balances_query.run(as_dict=True)
 
@@ -1791,9 +1786,10 @@ def get_future_stock_vouchers(posting_date, posting_time, for_warehouses=None, f
 	# transaction can't modify them mid-flight (the original DISTINCT ... FOR UPDATE did this).
 	# MariaDB carries the lock on the grouped query below; postgres rejects FOR UPDATE alongside
 	# GROUP BY, so lock the matching rows in a separate pass first -- the row locks are held until
-	# the surrounding transaction ends, giving the same protection.
+	# the surrounding transaction ends, giving the same protection. Select a constant, not the
+	# name: a deep backdated repost can match millions of rows and only the locks are needed.
 	if frappe.db.db_type == "postgres":
-		frappe.qb.from_(SLE).select(SLE.name).where(conditions).for_update().run()
+		frappe.qb.from_(SLE).select(ConstantColumn(1)).where(conditions).for_update().run()
 
 	# distinct vouchers in chronological order; expressed as GROUP BY + Min() so it's valid on
 	# postgres (SELECT DISTINCT can't ORDER BY non-selected cols, and FOR UPDATE is invalid with both).

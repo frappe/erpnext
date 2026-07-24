@@ -42,3 +42,35 @@ class TestStockLedgerInvariantCheck(ERPNextTestSuite):
 		data = self.run_report(item_code=item)
 
 		self.assertEqual(data[-1].qty_after_transaction, 11)
+
+	def test_show_incorrect_entries(self):
+		item = self.make_movements()
+
+		self.assertEqual(self.run_report(item_code=item, show_incorrect_entries=1), [])
+
+		sle = frappe.get_last_doc(
+			"Stock Ledger Entry", {"item_code": item, "warehouse": WAREHOUSE, "is_cancelled": 0}
+		)
+		frappe.db.set_value(
+			"Stock Ledger Entry", sle.name, "qty_after_transaction", sle.qty_after_transaction + 5
+		)
+
+		data = self.run_report(item_code=item, show_incorrect_entries=1)
+		self.assertEqual(len(data), 2)  # incorrect entry + one before it for context
+		self.assertEqual(data[-1].name, sle.name)
+
+	def test_batch_item_skips_fifo_queue_checks(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item(
+			properties={"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "SLIC-BAT-.####"}
+		).name
+		make_stock_entry(item_code=item, to_warehouse=WAREHOUSE, qty=10, rate=100)
+
+		data = self.run_report(item_code=item)
+		self.assertTrue(data)
+		for row in data:
+			self.assertIsNone(row.fifo_qty_diff)
+			self.assertIsNone(row.fifo_value_diff)
+
+		self.assertEqual(self.run_report(item_code=item, show_incorrect_entries=1), [])

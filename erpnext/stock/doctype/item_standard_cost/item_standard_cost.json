@@ -73,7 +73,7 @@
    "label": "Revaluation"
   },
   {
-   "description": "Stock Reconciliation auto-created to revalue on-hand stock to the new standard rate.",
+   "description": "Stock Reconciliation that revalues on-hand stock to this standard rate: auto-created when the rate is changed here, or the reconciliation that captured this rate (opening entry or rate change).",
    "fieldname": "revaluation_entry",
    "fieldtype": "Link",
    "label": "Revaluation Entry",
@@ -95,7 +95,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-26 11:00:00.000000",
+ "modified": "2026-07-02 11:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Standard Cost",

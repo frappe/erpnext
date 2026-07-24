@@ -10,6 +10,7 @@ from frappe.utils import flt
 from erpnext.controllers.item_variant import (
 	InvalidItemAttributeValueError,
 	update_variant_attribute_values,
+	update_variant_item_codes_for_abbr_renames,
 	validate_is_incremental,
 	validate_item_attribute_value,
 )
@@ -46,6 +47,7 @@ class ItemAttribute(Document):
 
 	def on_update(self):
 		update_variant_attribute_values(self)
+		update_variant_item_codes_for_abbr_renames(self)
 		self.validate_exising_items()
 		self.set_enabled_disabled_in_items()
 

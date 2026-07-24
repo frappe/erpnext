@@ -13,7 +13,7 @@ from erpnext.accounts.party import CROSS_PARTY_FIELD_NO_MAP, _get_party_details
 
 
 @frappe.whitelist()
-def make_maintenance_schedule(source_name: str, target_doc: str | Document | None = None):
+def make_maintenance_schedule(source_name: str, target_doc: str | dict | Document | None = None):
 	doclist = get_mapped_doc(
 		"Sales Invoice",
 		source_name,
@@ -30,7 +30,7 @@ def make_maintenance_schedule(source_name: str, target_doc: str | Document | Non
 
 
 @frappe.whitelist()
-def make_delivery_note(source_name: str, target_doc: Document | None = None):
+def make_delivery_note(source_name: str, target_doc: str | dict | Document | None = None):
 	def set_missing_values(source, target):
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
@@ -79,7 +79,7 @@ def make_delivery_note(source_name: str, target_doc: Document | None = None):
 
 
 @frappe.whitelist()
-def make_sales_return(source_name: str, target_doc: Document | None = None):
+def make_sales_return(source_name: str, target_doc: str | dict | Document | None = None):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
 
 	return make_return_doc("Sales Invoice", source_name, target_doc)
@@ -173,7 +173,7 @@ def validate_inter_company_transaction(doc, doctype):
 
 
 @frappe.whitelist()
-def make_inter_company_purchase_invoice(source_name: str, target_doc: Document | None = None):
+def make_inter_company_purchase_invoice(source_name: str, target_doc: str | dict | Document | None = None):
 	return make_inter_company_transaction("Sales Invoice", source_name, target_doc)
 
 
@@ -549,7 +549,7 @@ def update_address(doc, address_field, address_display_field, address_name):
 
 
 @frappe.whitelist()
-def create_invoice_discounting(source_name: str, target_doc: str | Document | None = None):
+def create_invoice_discounting(source_name: str, target_doc: str | dict | Document | None = None):
 	invoice = frappe.get_doc("Sales Invoice", source_name)
 	invoice_discounting = frappe.new_doc("Invoice Discounting")
 	invoice_discounting.company = invoice.company
@@ -568,11 +568,9 @@ def create_invoice_discounting(source_name: str, target_doc: str | Document | No
 
 @frappe.whitelist()
 def create_dunning(
-	source_name: str, target_doc: str | Document | None = None, ignore_permissions: bool = False
+	source_name: str, target_doc: str | dict | Document | None = None, ignore_permissions: bool = False
 ):
 	def postprocess_dunning(source, target):
-		from erpnext.accounts.doctype.dunning.dunning import get_dunning_letter_text
-
 		dunning_type = frappe.db.exists("Dunning Type", {"is_default": 1, "company": source.company})
 		if dunning_type:
 			dunning_type = frappe.get_doc("Dunning Type", dunning_type)
@@ -581,20 +579,22 @@ def create_dunning(
 			target.dunning_fee = dunning_type.dunning_fee
 			target.income_account = dunning_type.income_account
 			target.cost_center = dunning_type.cost_center
-			letter_text = get_dunning_letter_text(
-				dunning_type=dunning_type.name, doc=target.as_dict(), language=source.language
-			)
-
-			if letter_text:
-				target.body_text = letter_text.get("body_text")
-				target.closing_text = letter_text.get("closing_text")
-				target.language = letter_text.get("language")
+			target.language = source.language
+			target.get_dunning_letter_text()
 
 		# update outstanding from doc
 		if source.payment_schedule and len(source.payment_schedule) == 1:
 			for row in target.overdue_payments:
 				if row.payment_schedule == source.payment_schedule[0].name:
-					row.outstanding = source.get("outstanding_amount")
+					# outstanding_amount is in the party account currency, but the Overdue Payment
+					# row is in the invoice's transaction currency. When they differ, use the
+					# payment schedule's own outstanding — it is kept in transaction currency and
+					# updated as payments are allocated, so it stays correct even when the invoice
+					# and its payments post at different exchange rates (#56006).
+					if source.party_account_currency and source.party_account_currency != source.currency:
+						row.outstanding = source.payment_schedule[0].outstanding
+					else:
+						row.outstanding = source.get("outstanding_amount")
 
 		target.validate()
 

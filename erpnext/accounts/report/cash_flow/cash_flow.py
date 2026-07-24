@@ -10,17 +10,23 @@ from frappe.query_builder import DocType
 from frappe.query_builder.functions import Sum
 from frappe.utils import cstr, flt
 from pypika import Order
+from pypika.terms import Bracket, LiteralValue
 
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	get_accounting_dimensions,
+	get_dimension_with_children,
+)
 from erpnext.accounts.doctype.financial_report_template.financial_report_engine import (
 	FinancialReportEngine,
 	get_xlsx_styles,  #! DO NOT REMOVE - hook for styling
 )
 from erpnext.accounts.report.financial_statements import (
+	build_period_list,
 	get_columns,
 	get_cost_centers_with_children,
 	get_data,
 	get_filtered_list_for_consolidated_report,
-	get_period_list,
+	is_dimension_grouped,
 	set_gl_entries_by_account,
 )
 from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement import (
@@ -33,15 +39,10 @@ def execute(filters=None):
 	if filters and filters.report_template:
 		return FinancialReportEngine().execute(filters)
 
-	period_list = get_period_list(
-		filters.from_fiscal_year,
-		filters.to_fiscal_year,
-		filters.period_start_date,
-		filters.period_end_date,
-		filters.filter_based_on,
-		filters.periodicity,
-		company=filters.company,
-	)
+	period_list = build_period_list(filters)
+
+	if not period_list:
+		return
 
 	cash_flow_sections = get_cash_flow_accounts()
 
@@ -67,7 +68,13 @@ def execute(filters=None):
 		ignore_accumulated_values_for_fy=True,
 	)
 
-	net_profit_loss = get_net_profit_loss(income, expense, period_list, filters.company)
+	net_profit_loss = get_net_profit_loss(
+		income,
+		expense,
+		period_list,
+		filters.company,
+		accumulated_values=bool(filters.accumulated_values),
+	)
 
 	data = []
 	summary_data = {}
@@ -81,6 +88,7 @@ def execute(filters=None):
 				"parent_section": None,
 				"indent": 0.0,
 				"section": cash_flow_section["section_header"],
+				"currency": company_currency,
 			}
 		)
 
@@ -143,8 +151,16 @@ def execute(filters=None):
 		add_blank_row=False,
 	)
 
-	if filters.show_opening_and_closing_balance:
+	if filters.show_opening_and_closing_balance and not is_dimension_grouped(period_list):
 		show_opening_and_closing_balance(data, period_list, company_currency, net_change_in_cash, filters)
+	elif filters.show_opening_and_closing_balance:
+		filters.show_opening_and_closing_balance = False
+
+		frappe.msgprint(
+			indicator="orange",
+			title=_("Not Supported"),
+			msg=_("Opening and Closing balance is not supported for dimension grouped cash flow statement"),
+		)
 
 	columns = get_columns(
 		filters.periodicity,
@@ -200,6 +216,8 @@ def get_account_type_based_data(company, account_type, period_list, accumulated_
 		filters.start_date = start_date
 		filters.end_date = period["to_date"]
 		filters.account_type = account_type
+		filters.dimension_field = period.get("dimension_field")
+		filters.dimension_value = period.get("dimension_value")
 
 		amount = get_account_type_based_gl_data(company, filters)
 
@@ -216,41 +234,71 @@ def get_account_type_based_data(company, account_type, period_list, accumulated_
 def get_account_type_based_gl_data(company, filters=None):
 	filters = frappe._dict(filters or {})
 
-	gle = frappe.qb.DocType("GL Entry")
-	account = frappe.qb.DocType("Account")
+	gl = frappe.qb.DocType("GL Entry")
+	acc = frappe.qb.DocType("Account")
 
 	query = (
-		frappe.qb.from_(gle)
-		.select(Sum(gle.credit) - Sum(gle.debit))
+		frappe.qb.from_(gl)
+		.select(Sum(gl.credit) - Sum(gl.debit))
+		.where(gl.company == company)
+		.where(gl.posting_date >= filters.start_date)
+		.where(gl.posting_date <= filters.end_date)
+		.where(gl.voucher_type != "Period Closing Voucher")
 		.where(
-			(gle.company == company)
-			& (gle.posting_date >= filters.start_date)
-			& (gle.posting_date <= filters.end_date)
-			& (gle.voucher_type != "Period Closing Voucher")
-			& gle.account.isin(
-				frappe.qb.from_(account)
-				.select(account.name)
-				.where(account.account_type == filters.account_type)
+			gl.account.isin(
+				frappe.qb.from_(acc)
+				.select(acc.name)
+				.where(acc.is_group == 0)
+				.where(acc.company == company)
+				.where(acc.account_type == filters.account_type)
 			)
 		)
 	)
 
+	# finance book
 	if filters.include_default_book_entries:
 		company_fb = frappe.get_cached_value("Company", company, "default_finance_book")
 		query = query.where(
-			gle.finance_book.isin([filters.finance_book, company_fb, ""]) | gle.finance_book.isnull()
+			(gl.finance_book.isin([cstr(filters.finance_book), cstr(company_fb), ""]))
+			| (gl.finance_book.isnull())
 		)
 	else:
 		query = query.where(
-			gle.finance_book.isin([cstr(filters.finance_book), ""]) | gle.finance_book.isnull()
+			(gl.finance_book.isin([cstr(filters.finance_book), ""])) | (gl.finance_book.isnull())
 		)
 
+	# cost center (with children)
 	if filters.get("cost_center"):
 		cost_centers = get_cost_centers_with_children(filters.cost_center)
-		query = query.where(gle.cost_center.isin(cost_centers))
+		query = query.where(gl.cost_center.isin(cost_centers))
 
-	gl_sum = query.run()
-	return gl_sum[0][0] if gl_sum and gl_sum[0][0] else 0
+	# project
+	if filters.get("project"):
+		projects = filters.project
+		if not isinstance(projects, list):
+			projects = frappe.parse_json(projects)
+		query = query.where(gl.project.isin(projects))
+
+	# per-period group-by-dimension filter (always a single exact value)
+	if filters.get("dimension_field") and filters.get("dimension_value"):
+		query = query.where(gl[filters.dimension_field] == filters.dimension_value)
+
+	# accounting dimension filters selected in the filter bar
+	for dimension in get_accounting_dimensions(as_list=False):
+		if filters.get(dimension.fieldname):
+			values = filters[dimension.fieldname]
+			if frappe.get_cached_value("DocType", dimension.document_type, "is_tree"):
+				values = get_dimension_with_children(dimension.document_type, values)
+			query = query.where(gl[dimension.fieldname].isin(values))
+
+	# apply permission filters
+	from frappe.desk.reportview import build_match_conditions
+
+	if match_conditions := build_match_conditions("GL Entry"):
+		query = query.where(Bracket(LiteralValue(match_conditions)))
+
+	result = query.run()
+	return flt(result[0][0]) if result and result[0][0] else 0
 
 
 def get_start_date(period, accumulated_values, company):

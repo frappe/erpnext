@@ -59,11 +59,10 @@ class StockClosingEntry(Document):
 			.where(
 				(table.docstatus == 1)
 				& (table.company == self.company)
-				& (
-					(table.from_date.between(self.from_date, self.to_date))
-					| (table.to_date.between(self.from_date, self.to_date))
-					| ((self.from_date >= table.from_date) & (table.from_date >= self.to_date))
-				)
+				# two date ranges overlap when each starts on or before the other ends;
+				# this also catches one range being fully contained within the other
+				& (table.from_date <= self.to_date)
+				& (table.to_date >= self.from_date)
 			)
 		)
 

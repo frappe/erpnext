@@ -6,7 +6,7 @@ frappe.provide("erpnext.accounts.dimensions");
 
 frappe.ui.form.on("Stock Reconciliation", {
 	setup(frm) {
-		frm.ignore_doctypes_on_cancel_all = ["Serial and Batch Bundle"];
+		frm.ignore_doctypes_on_cancel_all = ["Serial and Batch Bundle", "Item Standard Cost"];
 		frm.barcode_scanner = new erpnext.utils.BarcodeScanner({
 			frm: frm,
 			uom_field: "stock_uom",
@@ -22,6 +22,7 @@ frappe.ui.form.on("Stock Reconciliation", {
 				query: "erpnext.controllers.queries.item_query",
 				filters: {
 					is_stock_item: 1,
+					company: doc.company,
 				},
 			};
 		});
@@ -45,17 +46,6 @@ frappe.ui.form.on("Stock Reconciliation", {
 				},
 			};
 		});
-
-		let sbb_field = frm.get_docfield("items", "serial_and_batch_bundle");
-		if (sbb_field) {
-			sbb_field.get_route_options_for_new_doc = (row) => {
-				return {
-					item_code: row.doc.item_code,
-					warehouse: row.doc.warehouse,
-					voucher_type: frm.doc.doctype,
-				};
-			};
-		}
 
 		if (frm.doc.company) {
 			erpnext.queries.setup_queries(frm, "Warehouse", function () {

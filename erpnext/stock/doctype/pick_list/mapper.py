@@ -24,12 +24,14 @@ def validate_item_locations(pick_list):
 
 
 @frappe.whitelist()
-def create_delivery_note(source_name: str, target_doc: str | Document | None = None):
+def create_delivery_note(source_name: str, target_doc: str | dict | Document | None = None):
 	return create_delivery(source_name, target_doc, "Delivery Note")
 
 
 @frappe.whitelist()
-def create_delivery(source_name: str, target_doc: str | Document | None = None, target: str | None = None):
+def create_delivery(
+	source_name: str, target_doc: str | dict | Document | None = None, target: str | None = None
+):
 	pick_list = frappe.get_doc("Pick List", source_name)
 	target = target or (frappe.flags.args or {}).get("target") or "Delivery Note"
 	validate_item_locations(pick_list)
@@ -89,6 +91,9 @@ def create_delivery_wo_so(pick_list, target, target_doc=None):
 
 	target_doc.company = pick_list.company
 
+	if not target_doc.customer:
+		target_doc.customer = pick_list.customer
+
 	item_table_mapper_without_so = {
 		"doctype": f"{target} Item",
 		"field_map": {
@@ -108,7 +113,7 @@ def create_delivery_wo_so(pick_list, target, target_doc=None):
 
 @frappe.whitelist()
 def create_dn_for_pick_lists(
-	source_name: str, target_doc: str | Document | None = None, kwargs: dict | str | None = None
+	source_name: str, target_doc: str | dict | Document | None = None, kwargs: dict | str | None = None
 ):
 	"""Get Items from Multiple Pick Lists and create a Delivery Note for filtered customer"""
 	if kwargs is None:
@@ -289,14 +294,21 @@ def create_stock_entry(pick_list: str | dict):
 	stock_entry.pick_list = pick_list.get("name")
 	stock_entry.purpose = pick_list.get("purpose")
 	stock_entry.company = pick_list.get("company")
-	stock_entry.set_stock_entry_type()
 
-	if pick_list.get("work_order"):
+	job_card = pick_list.get("material_request") and frappe.db.get_value(
+		"Material Request", pick_list.get("material_request"), "job_card"
+	)
+
+	if job_card:
+		stock_entry = update_stock_entry_based_on_job_card(pick_list, stock_entry, job_card)
+	elif pick_list.get("work_order"):
 		stock_entry = update_stock_entry_based_on_work_order(pick_list, stock_entry)
 	elif pick_list.get("material_request"):
 		stock_entry = update_stock_entry_based_on_material_request(pick_list, stock_entry)
 	else:
 		stock_entry = update_stock_entry_items_with_no_reference(pick_list, stock_entry)
+
+	stock_entry.set_stock_entry_type()
 
 	if not stock_entry.get("items"):
 		return frappe.msgprint(_("All picked items have already been transferred against this Pick List"))
@@ -344,9 +356,67 @@ def stock_entry_exists(pick_list_name):
 	return frappe.db.exists("Stock Entry", {"pick_list": pick_list_name})
 
 
+def update_stock_entry_based_on_job_card(pick_list, stock_entry, job_card):
+	job_card = frappe.db.get_value(
+		"Job Card",
+		job_card,
+		[
+			"name",
+			"work_order",
+			"bom_no",
+			"semi_fg_bom",
+			"for_quantity",
+			"transferred_qty",
+			"wip_warehouse",
+			"project",
+		],
+		as_dict=True,
+	)
+
+	stock_entry.purpose = "Material Transfer for Manufacture"
+	stock_entry.job_card = job_card.name
+	stock_entry.work_order = job_card.work_order
+	stock_entry.from_bom = 1
+	stock_entry.bom_no = job_card.semi_fg_bom or job_card.bom_no
+	stock_entry.fg_completed_qty = max(flt(job_card.for_quantity) - flt(job_card.transferred_qty), 0)
+	stock_entry.to_warehouse = job_card.wip_warehouse
+	stock_entry.project = job_card.project
+
+	job_card_items = get_job_card_items_by_material_request_item(pick_list)
+
+	for location in pick_list.locations:
+		if get_pending_transfer_stock_qty(location) <= 0:
+			continue
+		item = frappe._dict()
+		update_common_item_properties(item, location)
+		item.t_warehouse = job_card.wip_warehouse
+		item.job_card_item = job_card_items.get(location.material_request_item)
+		stock_entry.append("items", item)
+
+	return stock_entry
+
+
+def get_job_card_items_by_material_request_item(pick_list):
+	material_request_items = [
+		location.material_request_item for location in pick_list.locations if location.material_request_item
+	]
+	if not material_request_items:
+		return {}
+
+	return dict(
+		frappe.get_all(
+			"Material Request Item",
+			filters={"name": ["in", material_request_items]},
+			fields=["name", "job_card_item"],
+			as_list=True,
+		)
+	)
+
+
 def update_stock_entry_based_on_work_order(pick_list, stock_entry):
 	work_order = frappe.get_doc("Work Order", pick_list.get("work_order"))
 
+	stock_entry.purpose = "Material Transfer for Manufacture"
 	stock_entry.work_order = work_order.name
 	stock_entry.company = work_order.company
 	stock_entry.from_bom = 1

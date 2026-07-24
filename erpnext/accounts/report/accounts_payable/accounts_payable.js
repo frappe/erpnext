@@ -117,8 +117,11 @@ frappe.query_reports["Accounts Payable"] = {
 		{
 			fieldname: "supplier_group",
 			label: __("Supplier Group"),
-			fieldtype: "Link",
+			fieldtype: "MultiSelectList",
 			options: "Supplier Group",
+			get_data: function (txt) {
+				return frappe.db.get_link_options("Supplier Group", txt);
+			},
 			hidden: 1,
 		},
 		{
@@ -174,7 +177,17 @@ frappe.query_reports["Accounts Payable"] = {
 	},
 
 	get_datatable_options(options) {
-		return Object.assign(options, { checkboxColumn: true });
+		return Object.assign(options, {
+			checkboxColumn: true,
+			events: {
+				onCheckRow: () => erpnext.accounts.toggle_create_pe_primary_action(frappe.query_report),
+			},
+		});
+	},
+
+	after_refresh: function (report) {
+		report.datatable?.rowmanager?.checkAll(false);
+		report.page.clear_primary_action();
 	},
 
 	onload: function (report) {
@@ -186,20 +199,27 @@ frappe.query_reports["Accounts Payable"] = {
 		if (frappe.boot.sysdefaults.default_ageing_range) {
 			report.set_filter_value("range", frappe.boot.sysdefaults.default_ageing_range);
 		}
-
-		if (frappe.model.can_create("Payment Entry")) {
-			report.page.add_inner_button(
-				__("Create Payment Entries"),
-				function () {
-					erpnext.accounts.create_payment_entries_from_payable_report(report);
-				},
-				__("Actions")
-			);
-		}
 	},
 };
 
 frappe.provide("erpnext.accounts");
+
+erpnext.accounts.toggle_create_pe_primary_action = function (report) {
+	if (!report || !report.datatable || !frappe.model.can_create("Payment Entry")) return;
+
+	const has_purchase_invoice = report.datatable.rowmanager
+		.getCheckedRows()
+		.some((i) => report.datatable.datamanager.data[i]?.voucher_type === "Purchase Invoice");
+
+	if (has_purchase_invoice) {
+		report.page.set_primary_action(__("Create Payment Entries"), () =>
+			erpnext.accounts.create_payment_entries_from_payable_report(report)
+		);
+	} else {
+		report.page.clear_primary_action();
+	}
+};
+
 erpnext.accounts.create_payment_entries_from_payable_report = function (report) {
 	const datatable = report.datatable;
 	if (!datatable) return;

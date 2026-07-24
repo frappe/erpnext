@@ -40,10 +40,29 @@ frappe.ui.form.on("Production Plan", {
 		});
 
 		frm.set_query("for_warehouse", function (doc) {
+			// when a group is chosen, For Warehouse must be one of its child warehouses
+			if (doc.raw_material_group_warehouse) {
+				return {
+					query: "erpnext.manufacturing.doctype.production_plan.production_plan.get_child_warehouses",
+					filters: {
+						group_warehouse: doc.raw_material_group_warehouse,
+						company: doc.company,
+					},
+				};
+			}
+			return {
+				filters: [
+					["Warehouse", "company", "=", doc.company],
+					["Warehouse", "is_group", "=", 0],
+				],
+			};
+		});
+
+		frm.set_query("raw_material_group_warehouse", function (doc) {
 			return {
 				filters: {
 					company: doc.company,
-					is_group: 0,
+					is_group: 1,
 				},
 			};
 		});
@@ -100,6 +119,13 @@ frappe.ui.form.on("Production Plan", {
 				},
 			};
 		});
+	},
+
+	raw_material_group_warehouse(frm) {
+		// For Warehouse must sit inside the chosen group, so drop a stale selection
+		if (frm.doc.for_warehouse) {
+			frm.set_value("for_warehouse", null);
+		}
 	},
 
 	refresh(frm) {
@@ -445,12 +471,11 @@ frappe.ui.form.on("Production Plan", {
 			frappe.throw(__("Select the Warehouse"));
 		}
 
-		frm.set_value("consider_minimum_order_qty", 0);
-
 		if (!frm.doc.ignore_existing_ordered_qty) {
 			frm.events.get_items_for_material_requests(frm);
 		} else {
 			const title = __("Transfer Materials For Warehouse {0}", [frm.doc.for_warehouse]);
+			const source_warehouse = frm.doc.raw_material_group_warehouse;
 			var dialog = new frappe.ui.Dialog({
 				title: title,
 				fields: [
@@ -459,6 +484,7 @@ frappe.ui.form.on("Production Plan", {
 						fieldtype: "Table MultiSelect",
 						fieldname: "warehouses",
 						options: "Production Plan Material Request Warehouse",
+						default: source_warehouse ? [{ warehouse: source_warehouse }] : [],
 						get_query: function () {
 							return {
 								filters: {
@@ -515,8 +541,9 @@ frappe.ui.form.on("Production Plan", {
 	download_materials_required(frm) {
 		const warehouses_data = [];
 
-		if (frm.doc.for_warehouse) {
-			warehouses_data.push({ warehouse: frm.doc.for_warehouse });
+		const availability_warehouse = frm.doc.raw_material_group_warehouse || frm.doc.for_warehouse;
+		if (availability_warehouse) {
+			warehouses_data.push({ warehouse: availability_warehouse });
 		}
 
 		const fields = [

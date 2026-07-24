@@ -150,6 +150,34 @@ Add it only when it is functionally dependent on the existing select columns; ot
 SQL `ORDER BY` and **sort in Python** (`key=str.casefold`, per §2) so the distinct row set is
 unchanged.
 
+### 3.1 Second-order traps — when the `Max()`/`Min()` wrap itself is the bug
+
+The wrap is only a no-op when the column is provably single-valued per group (**"`Max()` means
+provably constant"**). When the column can genuinely vary, the wrap is a decision, and a full
+audit of these fixes found four recurring mistakes:
+
+- **Incoherent pair** — two semantically-coupled columns (a flag + a link:
+  `is_phantom_item` + `bom_no`; a discriminator + its value) aggregated with *independent*
+  `Max()`/`Min()` can pair values from **different rows** — a chimera row that never existed.
+  MariaDB's loose pick was at least row-coherent. Fix: group by the pair (when consumers
+  tolerate the extra rows), or select one **representative row** (`Min(child.name)` subquery +
+  join-back) so every column comes from the same line.
+- **NULL-skipping** — `MAX`/`MIN` ignore NULLs, so `Max()` over a mostly-NULL discriminator
+  (an `original_item`-style column) *deterministically* returns the non-NULL value where
+  MariaDB could return NULL — deterministically wrong where the old behavior was only
+  intermittently wrong. Flag it wherever "no value" is a meaningful state (fallback gates,
+  dict keys).
+- **Fabricated arithmetic** — `Sum(x) * Max(y)` where `y` varies within the group invents a
+  number no row ever had (and `Max` biases it upward) — poisonous when it feeds validation,
+  budgets, valuation, or GL/stock values. Fix per-row: `Sum(x * y)`.
+- **Wrong bound** — where the value has a semantic, pick the bound deliberately:
+  `Min(schedule_date)` for a "required by", `Min(idx)` for first-line ordering, a qty-weighted
+  average for a rate. A blind `Max` can understate urgency or overstate a figure.
+
+Review heuristic: **if choosing between `Max` and `Min` would change the answer, the column is
+not functionally dependent** — wrapping either is the wrong fix. Group by it, restructure, or
+pick a bound for a stated reason, and cover the varying-group case with a test.
+
 ---
 
 ## 4. False positives — do NOT flag these

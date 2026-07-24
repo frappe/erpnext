@@ -7,6 +7,7 @@ import json
 import frappe
 from frappe import _, throw
 from frappe.desk.form.assign_to import clear, close_all_assignments
+from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import Max, Min, Sum
 from frappe.utils import add_days, add_to_date, date_diff, flt, get_link_to_form, getdate, today
@@ -369,7 +370,7 @@ def get_project(doctype: str, txt: str, searchfield: str, start: int, page_len: 
 	)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def set_multiple_status(names: str | list, status: str):
 	names = frappe.parse_json(names)
 	for name in names:
@@ -392,7 +393,9 @@ def set_tasks_as_overdue():
 
 
 @frappe.whitelist()
-def make_timesheet(source_name: str, target_doc: dict | None = None, ignore_permissions: bool = False):
+def make_timesheet(
+	source_name: str, target_doc: str | dict | Document | None = None, ignore_permissions: bool = False
+):
 	def set_missing_values(source: dict, target: dict) -> None:
 		target.parent_project = source.project
 		target.append(
@@ -451,7 +454,7 @@ def get_children(
 	return tasks
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def add_node():
 	from frappe.desk.treeview import make_tree_args
 
@@ -465,7 +468,7 @@ def add_node():
 	frappe.get_doc(args).insert()
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def add_multiple_tasks(data: str | list, parent: str):
 	data = frappe.parse_json(data)
 	new_doc = {"doctype": "Task", "parent_task": parent if parent != "All Tasks" else ""}

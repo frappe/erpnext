@@ -1319,8 +1319,12 @@ def _add_secondary_item_columns(query, t, stock_item_condition):
 
 
 def _add_normal_item_columns(query, t, amount_col, stock_item_condition, track_semi_finished_goods):
-	# non-grouped columns are constant per grouped item_code (+operation/operation_row_id) -> Max()
-	# keeps the GROUP BY valid on postgres while returning the value MySQL picked arbitrarily.
+	# Grouped also by bom_no/is_phantom_item: the pair MUST come from the same BOM Item row --
+	# _add_bom_item_to_dict recurses into bom_no when is_phantom_item is set, so independent Max()
+	# per column could pair one line's phantom flag with another line's bom_no and explode the
+	# wrong sub-BOM (same fix as sub_assembly_queries). The remaining non-grouped columns are
+	# constant per grouped item_code (+operation/operation_row_id) -> Max() keeps the GROUP BY
+	# valid on postgres while returning the value MySQL picked arbitrarily.
 	# NOTE: base_rate is aliased "rate" below and is what callers receive; bom_item.rate was selected
 	# under the same alias and silently shadowed (last value wins in the dict), so it is dropped here
 	# -- output is unchanged.
@@ -1335,14 +1339,15 @@ def _add_normal_item_columns(query, t, amount_col, stock_item_condition, track_s
 		Max(t.bom_item.description).as_("description"),
 		Max(t.bom_item.base_rate).as_("rate"),
 		Max(t.bom_item.operation_row_id).as_("operation_row_id"),
-		Max(t.bom_item.is_phantom_item).as_("is_phantom_item"),
-		Max(t.bom_item.bom_no).as_("bom_no"),
+		t.bom_item.is_phantom_item,
+		t.bom_item.bom_no,
 	).where(stock_item_condition | (t.bom_item.is_phantom_item == 1))
 
 	if track_semi_finished_goods:
 		group_by = [t.bom_item.item_code, t.bom_item.operation_row_id, t.item_doc.stock_uom]
 	else:
 		group_by = [t.bom_item.item_code, t.item_doc.stock_uom, t.bom_item.operation]
+	group_by += [t.bom_item.bom_no, t.bom_item.is_phantom_item]
 
 	return query, group_by
 
@@ -1382,13 +1387,29 @@ def _merge_phantom_bom_items(item_dict, item, company, opts):
 
 
 def _set_default_accounts_for_items(item_dict, company):
+	fields = [
+		["Account", "expense_account", "stock_adjustment_account"],
+		["Cost Center", "cost_center", "cost_center"],
+		["Warehouse", "default_warehouse", ""],
+	]
+
+	company_of = {}
+	for d in fields:
+		names = {item_details.get(d[1]) for item_details in item_dict.values() if item_details.get(d[1])}
+		company_of[d[0]] = (
+			{
+				r.name: r.company
+				for r in frappe.get_all(
+					d[0], filters={"name": ("in", list(names))}, fields=["name", "company"]
+				)
+			}
+			if names
+			else {}
+		)
+
 	for item, item_details in item_dict.items():
-		for d in [
-			["Account", "expense_account", "stock_adjustment_account"],
-			["Cost Center", "cost_center", "cost_center"],
-			["Warehouse", "default_warehouse", ""],
-		]:
-			company_in_record = frappe.db.get_value(d[0], item_details.get(d[1]), "company")
+		for d in fields:
+			company_in_record = company_of[d[0]].get(item_details.get(d[1]))
 			if not item_details.get(d[1]) or (company_in_record and company != company_in_record):
 				item_dict[item][d[1]] = frappe.get_cached_value("Company", company, d[2]) if d[2] else None
 

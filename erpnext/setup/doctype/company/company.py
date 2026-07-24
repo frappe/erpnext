@@ -23,7 +23,7 @@ from frappe.utils import (
 	nowdate,
 	today,
 )
-from frappe.utils.nestedset import NestedSet, rebuild_tree
+from frappe.utils.nestedset import NestedSet, get_root_of, rebuild_tree
 
 from erpnext.accounts.doctype.account.account import get_account_currency
 from erpnext.accounts.doctype.financial_report_template.financial_report_template import (
@@ -104,6 +104,8 @@ class Company(NestedSet):
 		exception_budget_approver_role: DF.Link | None
 		exchange_gain_loss_account: DF.Link | None
 		existing_company: DF.Link | None
+		expenses_added_to_stock_account: DF.Link | None
+		expenses_added_to_stock_contra_account: DF.Link | None
 		fax: DF.Data | None
 		is_group: DF.Check
 		lft: DF.Int
@@ -499,91 +501,92 @@ class Company(NestedSet):
 		)
 
 	def create_default_departments(self):
+		root = get_root_of("Department") or "All Departments"
 		records = [
 			# Department
 			{
 				"doctype": "Department",
-				"department_name": _("All Departments"),
+				"department_name": root,
 				"is_group": 1,
 				"parent_department": "",
-				"__condition": lambda: not frappe.db.exists("Department", _("All Departments")),
+				"__condition": lambda: not frappe.db.exists("Department", root),
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Accounts"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Marketing"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Sales"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Purchase"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Operations"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Production"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Dispatch"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Customer Service"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Human Resources"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Management"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Quality Management"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Research & Development"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Legal"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 		]
@@ -1007,7 +1010,7 @@ def get_children(doctype: str, parent: str | None = None, company: str | None = 
 	)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def add_node():
 	from frappe.desk.treeview import make_tree_args
 
@@ -1118,7 +1121,7 @@ def get_billing_shipping_address(
 	return {"primary_address": primary_address, "shipping_address": shipping_address}
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def create_transaction_deletion_request(company: str):
 	frappe.only_for("System Manager")
 

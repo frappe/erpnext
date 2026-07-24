@@ -545,6 +545,65 @@ class TestStockReservationEntry(ERPNextTestSuite):
 			"enable_stock_reservation": 1,
 			"auto_reserve_serial_and_batch": 1,
 			"pick_serial_and_batch_based_on": "FIFO",
+			"use_serial_batch_fields": 1,
+		},
+	)
+	def test_batch_shared_across_sales_orders_can_be_delivered(self) -> None:
+		# Regression (#57159): one batch reserved by two Sales Orders. Delivering each order's own
+		# reserved unit must not raise Reserved Batch Conflict — the remainder covers the other order.
+		item_doc = make_batch_item()
+		create_material_receipt(items={item_doc.name: item_doc}, warehouse=self.warehouse, qty=2)
+
+		orders = []
+		for _i in range(2):
+			so = make_sales_order(item_code=item_doc.name, warehouse=self.warehouse, qty=1, rate=100)
+			so.create_stock_reservation_entries()
+			orders.append(so)
+
+		self.assertEqual(
+			len(get_reserved_batch_nos(orders[0].name) | get_reserved_batch_nos(orders[1].name)), 1
+		)
+
+		for so in orders:
+			dn = make_delivery_note(so.name, kwargs={"for_reserved_stock": True})
+			dn.save()
+			dn.submit()
+			self.assertEqual(dn.docstatus, 1)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"allow_negative_stock": 0,
+			"enable_stock_reservation": 1,
+			"auto_reserve_serial_and_batch": 1,
+			"pick_serial_and_batch_based_on": "FIFO",
+			"use_serial_batch_fields": 1,
+		},
+	)
+	def test_delivery_draining_a_batch_reserved_for_another_sales_order_is_blocked(self) -> None:
+		# Guard for #57159 fix: an order without a reservation must still be blocked from draining
+		# a batch below what another order has reserved from it, even if other batches have stock.
+		item_doc = make_batch_item()
+		create_material_receipt(items={item_doc.name: item_doc}, warehouse=self.warehouse, qty=2)
+		create_material_receipt(items={item_doc.name: item_doc}, warehouse=self.warehouse, qty=2)
+
+		so_a = make_sales_order(item_code=item_doc.name, warehouse=self.warehouse, qty=2, rate=100)
+		so_a.create_stock_reservation_entries()
+		(reserved_batch_no,) = get_reserved_batch_nos(so_a.name)
+
+		so_b = make_sales_order(item_code=item_doc.name, warehouse=self.warehouse, qty=2, rate=100)
+		dn = make_delivery_note(so_b.name)
+		dn.items[0].batch_no = reserved_batch_no
+		dn.save()
+		self.assertRaisesRegex(frappe.ValidationError, "is reserved for", dn.submit)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"allow_negative_stock": 0,
+			"enable_stock_reservation": 1,
+			"auto_reserve_serial_and_batch": 1,
+			"pick_serial_and_batch_based_on": "FIFO",
 		},
 	)
 	def test_auto_reserve_serial_and_batch(self) -> None:
@@ -893,6 +952,33 @@ def create_items() -> dict:
 	return items
 
 
+def make_batch_item():
+	return make_item(
+		properties={
+			"is_stock_item": 1,
+			"valuation_rate": 100,
+			"has_batch_no": 1,
+			"create_new_batch": 1,
+			"batch_number_series": "SRBI-.#####.",
+		}
+	)
+
+
+def get_reserved_batch_nos(sales_order: str) -> set:
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	sb_entry = frappe.qb.DocType("Serial and Batch Entry")
+
+	batch_nos = (
+		frappe.qb.from_(sre)
+		.inner_join(sb_entry)
+		.on(sre.name == sb_entry.parent)
+		.select(sb_entry.batch_no)
+		.where((sre.voucher_no == sales_order) & (sre.docstatus == 1))
+	).run(pluck=True)
+
+	return set(batch_nos)
+
+
 def create_material_receipt(
 	items: dict, warehouse: str = "_Test Warehouse - _TC", qty: float = 100
 ) -> StockEntry:
@@ -957,3 +1043,74 @@ def make_stock_reservation_entry(**args):
 			doc.submit()
 
 	return doc
+
+
+class TestStockReservationEntryValidation(ERPNextTestSuite):
+	"""Field-level validations and pure helpers, exercised on the document directly so
+	they don't need the stock-ledger / reservation fixtures the integration tests build."""
+
+	def make_sre(self, **overrides):
+		doc = frappe.new_doc("Stock Reservation Entry")
+		doc.update(
+			{
+				"item_code": "_Test Item",
+				"warehouse": "_Test Warehouse - _TC",
+				"voucher_type": "Sales Order",
+				"voucher_no": "SO-TEST",
+				"voucher_detail_no": "SOI-TEST",
+				"available_qty": 10,
+				"voucher_qty": 10,
+				"stock_uom": "Nos",
+				"reserved_qty": 10,
+				"company": "_Test Company",
+			}
+		)
+		doc.update(overrides)
+		return doc
+
+	def test_all_mandatory_fields_are_required(self):
+		self.make_sre().validate_mandatory()  # everything set -> passes
+		# clearing any single mandatory field is rejected
+		mandatory = [
+			"item_code",
+			"warehouse",
+			"voucher_type",
+			"voucher_no",
+			"voucher_detail_no",
+			"available_qty",
+			"voucher_qty",
+			"stock_uom",
+			"reserved_qty",
+			"company",
+		]
+		for field in mandatory:
+			with self.subTest(field=field):
+				self.assertRaises(frappe.ValidationError, self.make_sre(**{field: None}).validate_mandatory)
+
+	def test_amended_document_is_rejected(self):
+		self.assertRaises(frappe.ValidationError, self.make_sre(amended_from="SRE-0001").validate_amended_doc)
+		self.make_sre().validate_amended_doc()  # not amended -> passes
+
+	def test_can_be_updated_guards(self):
+		self.make_sre().can_be_updated()  # a fresh entry can be updated
+		self.assertRaises(frappe.ValidationError, self.make_sre(status="Delivered").can_be_updated)
+		self.assertRaises(frappe.ValidationError, self.make_sre(status="Partially Delivered").can_be_updated)
+		self.assertRaises(frappe.ValidationError, self.make_sre(from_voucher_type="Pick List").can_be_updated)
+		self.assertRaises(frappe.ValidationError, self.make_sre(delivered_qty=5).can_be_updated)
+
+	def test_group_warehouse_cannot_be_reserved(self):
+		group_wh = frappe.db.get_value("Warehouse", {"company": "_Test Company", "is_group": 1}, "name")
+		self.assertTrue(group_wh, "need a group warehouse for _Test Company")
+		self.assertRaises(frappe.ValidationError, self.make_sre(warehouse=group_wh).validate_group_warehouse)
+		self.make_sre().validate_group_warehouse()  # leaf warehouse -> passes
+
+	def test_get_serial_batch_entries_aggregates(self):
+		doc = self.make_sre(reservation_based_on="Serial and Batch")
+		doc.append("sb_entries", {"serial_no": "SN1"})
+		doc.append("sb_entries", {"serial_no": "SN2"})
+		doc.append("sb_entries", {"batch_no": "B1", "qty": 5})
+		doc.append("sb_entries", {"batch_no": "B1", "qty": 3})
+
+		result = doc.get_serial_batch_entries()
+		self.assertEqual(result.serial_nos, ["SN1", "SN2"])
+		self.assertEqual(result.batches["B1"], 8)
