@@ -143,7 +143,7 @@ class PricingRuleConverter:
 			return "Per Period"
 		if self.rule.mixed_conditions:
 			return "Per Document"
-		return "Per Line"
+		return "Per Line Item"
 
 	def _trigger_scope(self) -> list[dict]:
 		if self.rule.apply_on == "Transaction":

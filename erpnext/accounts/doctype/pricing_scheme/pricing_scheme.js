@@ -16,7 +16,7 @@ frappe.ui.form.on("Pricing Scheme", {
 			frm.refresh_field("tiers");
 		}
 
-		frm.add_custom_button(__("Test Pricing"), () => open_test_pricing_dialog(frm));
+		frm.add_custom_button(__("Preview"), () => open_preview_dialog(frm));
 	},
 
 	effect_type(frm) {
@@ -33,7 +33,7 @@ frappe.ui.form.on("Pricing Scheme", {
 		set_section_label(
 			frm,
 			"party_section",
-			frm.doc.transaction_type === "Buying" ? __("Suppliers") : __("Customers")
+			frm.doc.transaction_type === "Buying" ? __("Eligible Suppliers") : __("Eligible Customers")
 		);
 	},
 
@@ -78,6 +78,17 @@ frappe.ui.form.on("Pricing Scheme", {
 		["tiers", "benefit_scope", "party_scope"].forEach((field) =>
 			frm.fields_dict[field].grid.wrapper.find(".control-label").first().hide()
 		);
+		["trigger_scope", "benefit_scope", "party_scope"].forEach((field) =>
+			frm.fields_dict[field].grid.update_docfield_property(
+				"value",
+				"formatter",
+				(value, df, options, doc) => format_scope_value(frm, value, doc)
+			)
+		);
+		frm.fields_dict.trigger_scope.grid.add_custom_button(__("Add Exception"), () => {
+			frm.add_child("trigger_scope", { exclude: 1 });
+			frm.refresh_field("trigger_scope");
+		});
 	},
 
 	morph_tier_columns(frm) {
@@ -85,9 +96,9 @@ frappe.ui.form.on("Pricing Scheme", {
 		const grid = frm.fields_dict.tiers.grid;
 		const list_columns = {
 			Margin: ["min_qty", "max_qty", "margin_type", "value"],
-			"Free Item": ["min_qty", "max_qty", "free_item", "free_qty"],
+			"Free Item": ["min_qty", "max_qty", "free_item", "free_qty", "recurrence_qty"],
 			"Header Discount": ["min_amount", "max_amount", "value"],
-		}[frm.doc.effect_type] || ["min_qty", "max_qty", "value"];
+		}[frm.doc.effect_type] || ["min_qty", "max_qty", "min_amount", "max_amount", "value"];
 		[
 			"min_qty",
 			"max_qty",
@@ -97,6 +108,7 @@ frappe.ui.form.on("Pricing Scheme", {
 			"margin_type",
 			"free_item",
 			"free_qty",
+			"recurrence_qty",
 		].forEach((field) =>
 			grid.update_docfield_property(field, "in_list_view", list_columns.includes(field) ? 1 : 0)
 		);
@@ -150,6 +162,7 @@ frappe.ui.form.on("Pricing Scheme", {
 		const all_items = get_applies_to(frm.doc) === "All Items";
 		const grid = frm.fields_dict.trigger_scope.grid;
 		grid.update_docfield_property("exclude", "hidden", all_items ? 1 : 0);
+		grid.custom_buttons[__("Add Exception")]?.toggle(!all_items);
 		set_grid_label(frm, "trigger_scope", all_items ? __("Exclusions") : __("Items"));
 		if (!all_items && !(frm.doc.trigger_scope || []).length) {
 			frm.add_child("trigger_scope", {});
@@ -275,6 +288,16 @@ frappe.ui.form.on("Pricing Scheme Party Scope", {
 	},
 });
 
+function format_scope_value(frm, value, doc) {
+	const text = frappe.utils.escape_html(value || "");
+	if (!doc || !doc.exclude) return text;
+	// under All Items the trigger table is already labeled Exclusions
+	if (doc.parentfield === "trigger_scope" && get_applies_to(frm.doc) === "All Items") {
+		return text;
+	}
+	return `<span class="text-danger">${__("except")} ${text}</span>`;
+}
+
 function get_applies_to(doc) {
 	// Documents saved before the applies_to field carried scope in rows only.
 	if (doc.applies_to) return doc.applies_to;
@@ -399,9 +422,9 @@ function render_overlaps(frm, overlaps) {
 	frm.dashboard.show();
 }
 
-function open_test_pricing_dialog(frm) {
+function open_preview_dialog(frm) {
 	const dialog = new frappe.ui.Dialog({
-		title: __("Test Pricing"),
+		title: __("Preview Pricing"),
 		size: "large",
 		fields: [
 			{ fieldname: "customer", fieldtype: "Link", options: "Customer", label: __("Customer") },
@@ -413,6 +436,7 @@ function open_test_pricing_dialog(frm) {
 				reqd: 1,
 				default: frm.doc.company || frappe.defaults.get_user_default("Company"),
 			},
+			{ fieldname: "coupon", fieldtype: "Link", options: "Coupon", label: __("Coupon") },
 			{ fieldname: "col1", fieldtype: "Column Break" },
 			{
 				fieldname: "transaction_date",
@@ -420,12 +444,20 @@ function open_test_pricing_dialog(frm) {
 				label: __("Date"),
 				default: frappe.datetime.get_today(),
 			},
-			{ fieldname: "coupon", fieldtype: "Link", options: "Coupon", label: __("Coupon") },
+			{
+				fieldname: "price_list",
+				fieldtype: "Link",
+				options: "Price List",
+				label: __("Price List"),
+				filters: { selling: 1 },
+				default: frm.doc.price_list || frappe.defaults.get_global_default("selling_price_list"),
+			},
 			{ fieldname: "sec1", fieldtype: "Section Break" },
 			{
 				fieldname: "items",
 				fieldtype: "Table",
 				label: __("Items"),
+				description: __("Leave Rate blank to use the price list rate."),
 				cannot_add_rows: false,
 				in_place_edit: true,
 				fields: [
@@ -440,12 +472,11 @@ function open_test_pricing_dialog(frm) {
 					{
 						fieldname: "rate",
 						fieldtype: "Currency",
-						label: __("Rate (blank = price list)"),
+						label: __("Rate"),
 						in_list_view: 1,
 					},
 				],
 			},
-			{ fieldname: "sec2", fieldtype: "Section Break" },
 			{ fieldname: "results", fieldtype: "HTML" },
 		],
 		primary_action_label: __("Run"),
@@ -456,6 +487,7 @@ function open_test_pricing_dialog(frm) {
 					company: values.company,
 					customer: values.customer,
 					transaction_date: values.transaction_date,
+					price_list: values.price_list,
 					items: values.items || [],
 					coupon: values.coupon,
 				},
@@ -499,14 +531,15 @@ function render_preview(dialog, result) {
 		.join("");
 
 	dialog.fields_dict.results.$wrapper.html(`
+		<hr style="margin: 4px 0 16px;">
+		<div style="font-weight: 600; margin-bottom: 8px;">${__("Result")}</div>
 		<table class="table table-bordered table-sm">
 			<thead><tr><th>${__("Item")}</th><th class="text-right">${__("Qty")}</th><th class="text-right">${__(
 		"Base"
 	)}</th><th class="text-right">${__("Final")}</th><th>${__("Schemes")}</th></tr></thead>
 			<tbody>${lines}${free}</tbody>
 		</table>
-		<div style="margin-top: 8px;"><b class="small">${__("Trace")}</b>${
-		trace || `<div class="text-muted small">${__("No candidate schemes.")}</div>`
-	}</div>
+		<div style="font-weight: 600; margin: 12px 0 4px;">${__("Trace")}</div>
+		${trace || `<div class="text-muted small">${__("No candidate schemes.")}</div>`}
 	`);
 }

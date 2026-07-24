@@ -43,9 +43,9 @@
   },
   {
    "default": "0",
+   "description": "Subtracts the matching entries instead of including them.",
    "fieldname": "exclude",
    "fieldtype": "Check",
-   "in_list_view": 1,
    "label": "Exclude"
   }
  ],

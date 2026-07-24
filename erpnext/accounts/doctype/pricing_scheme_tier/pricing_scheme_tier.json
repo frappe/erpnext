@@ -27,12 +27,13 @@
  ],
  "fields": [
   {
+   "columns": 2,
    "default": "0",
-   "description": "Included. The band starts exactly at Min Qty.",
+   "description": "In stock UOM. Included, the band starts exactly at Min Qty.",
    "fieldname": "min_qty",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Min Qty (Stock UOM)",
+   "label": "Min Qty",
    "non_negative": 1,
    "show_description_on_click": 1
   },
@@ -41,12 +42,13 @@
    "fieldtype": "Column Break"
   },
   {
+   "columns": 2,
    "default": "0",
-   "description": "Not included. The band ends just below Max Qty, so the next tier can start exactly here. Leave at 0 for no upper bound.",
+   "description": "In stock UOM. Not included, the band ends just below Max Qty, so the next tier can start exactly here. Leave at 0 for no upper bound.",
    "fieldname": "max_qty",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Max Qty (Stock UOM)",
+   "label": "Max Qty",
    "non_negative": 1,
    "show_description_on_click": 1
   },
@@ -56,20 +58,24 @@
    "label": "Amount Band"
   },
   {
+   "columns": 2,
+   "description": "In company base currency. Included, like Min Qty.",
    "fieldname": "min_amount",
    "fieldtype": "Currency",
-   "label": "Min Amount (Base Currency)",
-   "non_negative": 1
+   "label": "Min Amount",
+   "non_negative": 1,
+   "show_description_on_click": 1
   },
   {
    "fieldname": "column_break_amount_band",
    "fieldtype": "Column Break"
   },
   {
-   "description": "Not included, like Max Qty. Leave at 0 for no upper bound.",
+   "columns": 2,
+   "description": "In company base currency. Not included, like Max Qty. Leave at 0 for no upper bound.",
    "fieldname": "max_amount",
    "fieldtype": "Currency",
-   "label": "Max Amount (Base Currency)",
+   "label": "Max Amount",
    "non_negative": 1,
    "show_description_on_click": 1
   },
@@ -80,6 +86,7 @@
    "label": "Value"
   },
   {
+   "columns": 2,
    "fieldname": "value",
    "fieldtype": "Float",
    "in_list_view": 1,
@@ -91,6 +98,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "columns": 2,
    "depends_on": "eval:parent.effect_type == 'Margin'",
    "fieldname": "margin_type",
    "fieldtype": "Select",
@@ -104,6 +112,7 @@
    "label": "Free Item"
   },
   {
+   "columns": 2,
    "description": "Leave blank to give the trigger item itself for free.",
    "fieldname": "free_item",
    "fieldtype": "Link",
@@ -112,6 +121,7 @@
    "show_description_on_click": 1
   },
   {
+   "columns": 2,
    "default": "0",
    "fieldname": "free_qty",
    "fieldtype": "Float",
@@ -119,6 +129,7 @@
    "non_negative": 1
   },
   {
+   "columns": 2,
    "default": "0",
    "description": "Give Free Qty per every N qty of the trigger basis. Leave at 0 to give it once per matched tier.",
    "fieldname": "recurrence_qty",

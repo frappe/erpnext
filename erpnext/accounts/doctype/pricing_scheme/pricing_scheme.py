@@ -30,7 +30,7 @@ class PricingScheme(Document):
 		)
 		from erpnext.accounts.doctype.pricing_scheme_tier.pricing_scheme_tier import PricingSchemeTier
 
-		aggregation: DF.Literal["Per Line", "Per Document", "Per Period"]
+		aggregation: DF.Literal["Per Line Item", "Per Document", "Per Period"]
 		applies_to: DF.Literal["All Items", "Specific Items"]
 		apply_discount_on: DF.Literal["Grand Total", "Net Total"]
 		benefit_scope: DF.Table[PricingSchemeItemScope]

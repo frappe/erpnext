@@ -271,7 +271,7 @@ def make_scheme(**kwargs):
 			"transaction_type": kwargs.pop("transaction_type", "Selling"),
 			"stacking_group": kwargs.pop("stacking_group", "Default"),
 			"priority": kwargs.pop("priority", 1),
-			"aggregation": kwargs.pop("aggregation", "Per Line"),
+			"aggregation": kwargs.pop("aggregation", "Per Line Item"),
 			"trigger_scope": kwargs.pop("trigger"),
 			"benefit_scope": kwargs.pop("benefit", []),
 			"party_scope": kwargs.pop("party", []),
@@ -285,7 +285,7 @@ def make_scheme(**kwargs):
 def make_ledger_row(scheme: str, qty: float) -> None:
 	frappe.get_doc(
 		{
-			"doctype": "Pricing Scheme Application",
+			"doctype": "Pricing Scheme Ledger Entry",
 			"scheme": scheme,
 			"company": "_Test Company",
 			"party_type": "Customer",
@@ -484,7 +484,7 @@ class TestPricingSchemeApplier(ERPNextTestSuite):
 		so = self.make_sales_order(qty=24, do_not_submit=False)
 
 		rows = frappe.get_all(
-			"Pricing Scheme Application",
+			"Pricing Scheme Ledger Entry",
 			filters={"voucher_no": so.name, "is_cancelled": 0},
 			fields=["scheme", "qty", "discount_amount", "party"],
 		)
@@ -496,7 +496,7 @@ class TestPricingSchemeApplier(ERPNextTestSuite):
 
 		so.cancel()
 		self.assertFalse(
-			frappe.get_all("Pricing Scheme Application", filters={"voucher_no": so.name, "is_cancelled": 0})
+			frappe.get_all("Pricing Scheme Ledger Entry", filters={"voucher_no": so.name, "is_cancelled": 0})
 		)
 
 	def test_buying_scheme_on_purchase_order(self):
@@ -514,7 +514,7 @@ class TestPricingSchemeApplier(ERPNextTestSuite):
 
 		po.submit()
 		rows = frappe.get_all(
-			"Pricing Scheme Application",
+			"Pricing Scheme Ledger Entry",
 			filters={"voucher_no": po.name, "is_cancelled": 0},
 			fields=["scheme", "party", "qty"],
 		)

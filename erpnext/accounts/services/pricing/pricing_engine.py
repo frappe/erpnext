@@ -74,7 +74,7 @@ class PricingEngine:
 			return []
 
 		benefit_keys = self._benefit_line_keys(scheme, trigger_lines)
-		if scheme.aggregation == "Per Line" and not scheme.benefit_scope:
+		if scheme.aggregation == "Per Line Item" and not scheme.benefit_scope:
 			return self._per_line_matches(scheme, trigger_lines)
 		return self._aggregate_match(scheme, trigger_lines, benefit_keys)
 

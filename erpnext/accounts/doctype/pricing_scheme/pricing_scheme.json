@@ -15,41 +15,41 @@
   "disabled",
   "tiers_section",
   "tiers",
-  "applies_to_tab",
-  "applies_to_section",
-  "applies_to",
-  "trigger_scope",
-  "benefit_section",
-  "benefit_scope",
-  "party_section",
-  "party_scope",
-  "conditions_tab",
   "basis_section",
   "aggregation",
   "column_break_basis",
   "period_window",
   "period_days",
+  "applies_to_section",
+  "applies_to",
+  "trigger_scope",
+  "validity_section",
+  "valid_from",
+  "column_break_validity",
+  "valid_upto",
+  "composition_section",
+  "stacking_group",
+  "column_break_composition",
+  "priority",
+  "advanced_tab",
+  "applicability_section",
+  "company",
+  "currency",
+  "column_break_applicability",
+  "price_list",
+  "warehouse",
   "caps_section",
   "cap_total_applications",
   "column_break_caps",
   "cap_total_discount_amount",
   "coupon_section",
   "coupon_required",
+  "benefit_section",
+  "benefit_scope",
+  "party_section",
+  "party_scope",
   "advanced_section",
   "condition",
-  "settings_tab",
-  "composition_section",
-  "stacking_group",
-  "column_break_composition",
-  "priority",
-  "validity_section",
-  "company",
-  "currency",
-  "price_list",
-  "warehouse",
-  "column_break_validity",
-  "valid_from",
-  "valid_upto",
   "legacy_pricing_rule"
  ],
  "fields": [
@@ -119,11 +119,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "applies_to_tab",
-   "fieldtype": "Tab Break",
-   "label": "Applies To"
-  },
-  {
    "fieldname": "applies_to_section",
    "fieldtype": "Section Break",
    "label": "Items"
@@ -162,7 +157,7 @@
    "collapsible": 1,
    "fieldname": "party_section",
    "fieldtype": "Section Break",
-   "label": "Customers / Suppliers"
+   "label": "Eligible Customers"
   },
   {
    "description": "Applies to everyone if empty.",
@@ -170,11 +165,6 @@
    "fieldtype": "Table",
    "label": "Party Scope",
    "options": "Pricing Scheme Party Scope"
-  },
-  {
-   "fieldname": "settings_tab",
-   "fieldtype": "Tab Break",
-   "label": "Settings"
   },
   {
    "fieldname": "composition_section",
@@ -208,7 +198,12 @@
   {
    "fieldname": "validity_section",
    "fieldtype": "Section Break",
-   "label": "Validity & Applicability"
+   "label": "Validity"
+  },
+  {
+   "fieldname": "applicability_section",
+   "fieldtype": "Section Break",
+   "label": "Applicability"
   },
   {
    "description": "Applies to all companies if blank.",
@@ -247,6 +242,10 @@
    "fieldtype": "Column Break"
   },
   {
+   "fieldname": "column_break_applicability",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "valid_from",
    "fieldtype": "Datetime",
    "label": "Valid From"
@@ -257,9 +256,9 @@
    "label": "Valid Upto"
   },
   {
-   "fieldname": "conditions_tab",
+   "fieldname": "advanced_tab",
    "fieldtype": "Tab Break",
-   "label": "Conditions & Caps"
+   "label": "Advanced"
   },
   {
    "description": "Decides which quantity and amount are compared against the tier bands.",
@@ -268,12 +267,12 @@
    "label": "Tier Evaluation"
   },
   {
-   "default": "Per Line",
-   "description": "Per Line uses each line's own quantity and amount. Per Document sums all matching lines together. Per Period also adds usage accrued from earlier documents.",
+   "default": "Per Line Item",
+   "description": "Per Line Item uses each line's own quantity and amount. Per Document sums all matching lines together. Per Period also adds usage accrued from earlier documents.",
    "fieldname": "aggregation",
    "fieldtype": "Select",
    "label": "Evaluate Tiers",
-   "options": "Per Line\nPer Document\nPer Period",
+   "options": "Per Line Item\nPer Document\nPer Period",
    "reqd": 1
   },
   {
@@ -341,7 +340,7 @@
    "collapsible": 1,
    "fieldname": "advanced_section",
    "fieldtype": "Section Break",
-   "label": "Advanced"
+   "label": "Advanced Condition"
   },
   {
    "description": "Python expression evaluated against the transaction document. The scheme applies only when it returns a truthy value. Every document field is available by name, and child rows in <code>items</code> are dicts.<br><br>Examples:<br><code>grand_total > 10000</code> applies only to large orders<br><code>customer_group == 'Wholesale'</code> applies to one customer group<br><code>customer in ('Acme', 'Globex')</code> applies to named customers<br><code>total_qty >= 100 and po_no</code> combines checks<br><code>[item for item in items if item.get('qty') > 50]</code> is truthy when some line exceeds 50 units<br><br>Only <code>int</code>, <code>float</code> and <code>round</code> builtins are available. A failing condition is logged and shown in the pricing trace, never swallowed.",
