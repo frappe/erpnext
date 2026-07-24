@@ -946,8 +946,7 @@
   {
    "fieldname": "connections_tab",
    "fieldtype": "Tab Break",
-   "label": "Connections",
-   "show_dashboard": 1
+   "label": "Connections"
   },
   {
    "fieldname": "column_break_7",
