@@ -286,7 +286,7 @@ def repost(repost_doc_name: str):
 				x.db_set({"reposted": 1, "traceback": ""})
 			finally:
 				if not frappe.in_test:
-					frappe.db.commit()
+					frappe.db.commit()  # nosemgrep
 
 	except Exception:
 		if frappe.in_test:
@@ -319,7 +319,7 @@ def repost(repost_doc_name: str):
 		for doc in locked_docs:
 			doc.unlock()
 		if not frappe.in_test:
-			frappe.db.commit()
+			frappe.db.commit()  # nosemgrep
 
 
 def _repost_vouchers(doc, delete_cancelled_entries: bool | int | None):
