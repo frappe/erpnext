@@ -474,9 +474,9 @@ class TestCustomer(ERPNextTestSuite):
 		set_overdue_billing_threshold("_Test Customer", "_Test Company", 2000)
 		self.assertEqual(get_overdue_billing_threshold("_Test Customer", "_Test Company"), 2000)
 
-		# an explicit 0 on the customer opts out and does not fall back to the group
+		# a 0 on the customer inherits the group's limit
 		set_overdue_billing_threshold("_Test Customer", "_Test Company", 0)
-		self.assertEqual(get_overdue_billing_threshold("_Test Customer", "_Test Company"), 0)
+		self.assertEqual(get_overdue_billing_threshold("_Test Customer", "_Test Company"), 5000)
 
 	def test_overdue_threshold_row_without_credit_limit(self):
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice

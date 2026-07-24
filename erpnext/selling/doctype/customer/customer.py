@@ -716,7 +716,7 @@ def get_overdue_billing_threshold(customer: str, company: str) -> float:
 		"overdue_billing_threshold",
 	)
 
-	if threshold is None:
+	if not threshold:
 		customer_group = frappe.get_cached_value("Customer", customer, "customer_group")
 		threshold = frappe.db.get_value(
 			"Customer Credit Limit",
