@@ -1358,7 +1358,7 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 		self.assertEqual(qty_after(receipt2), 10)
 
 	def test_cancel_shifts_same_timestamp_delivery_notes(self):
-		item = make_item("Test Shifts Same Timestamp Muultiple DNs").name
+		item = make_item("Test Shifts Same Timestamp Multiple DNs").name
 		warehouse = "_Test Warehouse - _TC"
 		posting_date = today()
 		posting_time = "10:00:00"
