@@ -184,6 +184,21 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(pi.payment_schedule[1].payment_amount, flt(pi.grand_total) / 2)
 		self.assertEqual(pi.payment_schedule[1].invoice_portion, 50)
 
+	def test_make_purchase_invoice_with_dict_target(self):
+		from frappe.model.mapper import map_docs
+
+		pr = make_purchase_receipt()
+		target = frappe.new_doc("Purchase Invoice").as_dict()
+
+		pi = map_docs(
+			method="erpnext.stock.doctype.purchase_receipt.mapper.make_purchase_invoice",
+			source_names=[pr.name],
+			target_doc=target,
+		)
+
+		self.assertEqual(pi.doctype, "Purchase Invoice")
+		self.assertEqual(len(pi.items), len(pr.items))
+
 	def test_purchase_receipt_no_gl_entry(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 

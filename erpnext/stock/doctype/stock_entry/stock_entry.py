@@ -1407,7 +1407,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			self.process_loss_qty = flt(
 				(flt(self.fg_completed_qty) * flt(self.process_loss_percentage)) / 100
 			)
-		elif self.process_loss_qty and not self.process_loss_percentage:
+		elif self.process_loss_qty and self.fg_completed_qty:
 			self.process_loss_percentage = flt(
 				(flt(self.process_loss_qty) / flt(self.fg_completed_qty)) * 100
 			)
@@ -1527,7 +1527,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 
 @frappe.whitelist()
-def make_stock_in_entry(source_name: str, target_doc: str | Document | None = None):
+def make_stock_in_entry(source_name: str, target_doc: str | dict | Document | None = None):
 	def set_missing_values(source, target):
 		target.stock_entry_type = "Material Transfer"
 		target.set_missing_values()

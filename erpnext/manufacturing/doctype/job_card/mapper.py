@@ -13,7 +13,7 @@ from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import
 
 
 @frappe.whitelist()
-def make_subcontracting_po(source_name: str, target_doc: Document | str | None = None):
+def make_subcontracting_po(source_name: str, target_doc: str | dict | Document | None = None):
 	def set_missing_values(source, target):
 		_item_details = get_subcontracting_boms_for_finished_goods(source.finished_good)
 
@@ -54,7 +54,7 @@ def make_subcontracting_po(source_name: str, target_doc: Document | str | None =
 
 
 @frappe.whitelist()
-def make_material_request(source_name: str, target_doc: Document | str | None = None):
+def make_material_request(source_name: str, target_doc: str | dict | Document | None = None):
 	def update_item(obj, target, source_parent):
 		target.warehouse = source_parent.wip_warehouse
 
@@ -85,7 +85,7 @@ def make_material_request(source_name: str, target_doc: Document | str | None = 
 
 
 @frappe.whitelist()
-def make_stock_entry(source_name: str, target_doc: Document | str | None = None):
+def make_stock_entry(source_name: str, target_doc: str | dict | Document | None = None):
 	from erpnext.stock.doctype.stock_entry.services.manufacturing import (
 		set_previous_operation_serial_batch,
 	)
@@ -162,7 +162,7 @@ def make_corrective_job_card(
 	source_name: str,
 	operation: str | None = None,
 	for_operation: str | None = None,
-	target_doc: Document | str | None = None,
+	target_doc: str | dict | Document | None = None,
 ):
 	def set_missing_values(source, target):
 		target.is_corrective_job_card = 1

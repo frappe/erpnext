@@ -24,12 +24,14 @@ def validate_item_locations(pick_list):
 
 
 @frappe.whitelist()
-def create_delivery_note(source_name: str, target_doc: str | Document | None = None):
+def create_delivery_note(source_name: str, target_doc: str | dict | Document | None = None):
 	return create_delivery(source_name, target_doc, "Delivery Note")
 
 
 @frappe.whitelist()
-def create_delivery(source_name: str, target_doc: str | Document | None = None, target: str | None = None):
+def create_delivery(
+	source_name: str, target_doc: str | dict | Document | None = None, target: str | None = None
+):
 	pick_list = frappe.get_doc("Pick List", source_name)
 	target = target or (frappe.flags.args or {}).get("target") or "Delivery Note"
 	validate_item_locations(pick_list)
@@ -89,6 +91,9 @@ def create_delivery_wo_so(pick_list, target, target_doc=None):
 
 	target_doc.company = pick_list.company
 
+	if not target_doc.customer:
+		target_doc.customer = pick_list.customer
+
 	item_table_mapper_without_so = {
 		"doctype": f"{target} Item",
 		"field_map": {
@@ -108,7 +113,7 @@ def create_delivery_wo_so(pick_list, target, target_doc=None):
 
 @frappe.whitelist()
 def create_dn_for_pick_lists(
-	source_name: str, target_doc: str | Document | None = None, kwargs: dict | str | None = None
+	source_name: str, target_doc: str | dict | Document | None = None, kwargs: dict | str | None = None
 ):
 	"""Get Items from Multiple Pick Lists and create a Delivery Note for filtered customer"""
 	if kwargs is None:

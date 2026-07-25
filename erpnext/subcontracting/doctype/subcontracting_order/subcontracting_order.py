@@ -438,7 +438,7 @@ class SubcontractingOrder(SubcontractingController):
 
 
 @frappe.whitelist()
-def make_subcontracting_receipt(source_name: str, target_doc: Document | str | None = None):
+def make_subcontracting_receipt(source_name: str, target_doc: str | dict | Document | None = None):
 	items = frappe.flags.args.get("items") if frappe.flags.args else None
 	return get_mapped_subcontracting_receipt(source_name, target_doc, items=items)
 

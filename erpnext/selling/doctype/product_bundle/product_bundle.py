@@ -191,7 +191,7 @@ def get_active_product_bundle(item_code: str) -> str | None:
 
 
 @frappe.whitelist()
-def make_new_version(source_name: str, target_doc: str | None = None):
+def make_new_version(source_name: str, target_doc: str | dict | Document | None = None):
 	"""Create a fresh draft bundle copied from an existing (typically submitted) one.
 
 	The copy keeps the same parent item and component rows but gets a new version

@@ -1025,7 +1025,7 @@ def get_pos_reserved_qty_from_table(child_table, item_code, warehouse):
 
 
 @frappe.whitelist()
-def make_sales_return(source_name: str, target_doc: Document | str | None = None):
+def make_sales_return(source_name: str, target_doc: str | dict | Document | None = None):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
 
 	return make_return_doc("POS Invoice", source_name, target_doc)

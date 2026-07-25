@@ -1559,6 +1559,80 @@ class TestProductionPlan(ERPNextTestSuite):
 		reserved_qty_after_mr = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
 		self.assertEqual(reserved_qty_after_mr, before_qty)
 
+	def test_reserved_qty_for_production_plan_with_partial_stock(self):
+		from erpnext.stock.utils import get_or_make_bin
+
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], source_warehouse="_Test Warehouse - _TC")
+
+		make_stock_entry(item_code=rm_item, qty=4, rate=100, target="_Test Warehouse - _TC")
+
+		bin_name = get_or_make_bin(rm_item, "_Test Warehouse - _TC")
+		before_qty = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
+
+		pln = create_production_plan(item_code=fg_item, planned_qty=10, ignore_existing_ordered_qty=1)
+
+		row = next(d for d in pln.mr_items if d.item_code == rm_item)
+		self.assertEqual(row.required_bom_qty, 10)
+		self.assertEqual(row.quantity, 6)
+
+		after_qty = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
+		self.assertEqual(after_qty - before_qty, 10)
+
+		pln.reload()
+		pln.cancel()
+
+		after_cancel = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
+		self.assertEqual(after_cancel, before_qty)
+
+	def _plan_with_shared_raw_material(self, rm_item, qty_per_order):
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], source_warehouse="_Test Warehouse - _TC")
+
+		pln = create_production_plan(
+			item_code=fg_item,
+			ignore_existing_ordered_qty=1,
+			do_not_save=1,
+			skip_getting_mr_items=1,
+		)
+		pln.get_items_from = "Sales Order"
+		for _ in range(2):
+			so = make_sales_order(item_code=fg_item, qty=qty_per_order)
+			pln.append(
+				"sales_orders",
+				{
+					"sales_order": so.name,
+					"sales_order_date": so.transaction_date,
+					"customer": so.customer,
+					"grand_total": so.grand_total,
+				},
+			)
+		pln.get_items()
+		return pln
+
+	def test_safety_stock_added_once_for_repeated_raw_material(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "safety_stock": 10, "valuation_rate": 100}).name
+		make_stock_entry(item_code=rm_item, qty=100, rate=100, target="_Test Warehouse - _TC")
+
+		pln = self._plan_with_shared_raw_material(rm_item, qty_per_order=50)
+		pln.include_safety_stock = 1
+
+		items = get_items_for_material_requests(pln.as_dict())
+		quantities = sorted(flt(d.get("quantity")) for d in items if d.get("item_code") == rm_item)
+		self.assertEqual(quantities, [0, 10])
+
+	def test_minimum_order_qty_surplus_covers_later_rows(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "min_order_qty": 100, "valuation_rate": 100}).name
+		make_stock_entry(item_code=rm_item, qty=40, rate=100, target="_Test Warehouse - _TC")
+
+		pln = self._plan_with_shared_raw_material(rm_item, qty_per_order=50)
+		pln.consider_minimum_order_qty = 1
+
+		items = get_items_for_material_requests(pln.as_dict())
+		quantities = sorted(flt(d.get("quantity")) for d in items if d.get("item_code") == rm_item)
+		self.assertEqual(quantities, [0, 100])
+
 	def test_from_warehouse_for_purchase_material_request(self):
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 		from erpnext.stock.utils import get_or_make_bin

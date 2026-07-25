@@ -431,14 +431,16 @@
   {
    "fieldname": "company_restrictions_section",
    "fieldtype": "Section Break",
-   "label": "Company Restrictions"
+   "label": "Company Restrictions",
+   "permlevel": 1
   },
   {
    "default": "0",
    "fieldname": "restrict_to_companies",
    "fieldtype": "Check",
    "label": "Restrict to Companies",
-   "description": "If checked, this Supplier is only available for transactions in the companies listed below."
+   "description": "If checked, this Supplier is only available for transactions in the companies listed below.",
+   "permlevel": 1
   },
   {
    "fieldname": "allowed_companies",
@@ -446,7 +448,8 @@
    "label": "Allowed Companies",
    "options": "Company Restriction",
    "depends_on": "eval:doc.restrict_to_companies",
-   "mandatory_depends_on": "eval:doc.restrict_to_companies"
+   "mandatory_depends_on": "eval:doc.restrict_to_companies",
+   "permlevel": 1
   },
   {
    "fieldname": "contact_and_address_tab",
@@ -585,7 +588,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2026-07-14 23:00:00.000000",
+ "modified": "2026-07-23 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",
@@ -641,6 +644,12 @@
    "read": 1,
    "report": 1,
    "role": "Accounts Manager"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Purchase Master Manager",
+   "write": 1
   }
  ],
  "quick_entry": 1,

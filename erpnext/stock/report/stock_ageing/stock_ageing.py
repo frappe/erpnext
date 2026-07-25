@@ -308,6 +308,7 @@ class FIFOSlots:
 
 		# prepare single sle voucher detail lookup
 		self.prepare_stock_reco_voucher_wise_count()
+		self.float_precision = get_float_precision()
 
 		if stock_ledger_entries is None:
 			# streaming path: nested queries invalidate the streaming cursor below,
@@ -337,6 +338,7 @@ class FIFOSlots:
 				self._process_stock_ledger_entry(row, bundle_wise_serial_nos, bundle_wise_batch_nos)
 
 		self._recompute_moving_average_slots()
+		self._rebalance_negative_batch_slots()
 
 		if not self.filters.get("show_warehouse_wise_stock"):
 			# (Item 1, WH 1), (Item 1, WH 2) => (Item 1)
@@ -357,6 +359,33 @@ class FIFOSlots:
 			for slot in item_dict["fifo_queue"]:
 				if is_qty_slot(slot):
 					slot[FIFO_VALUE_INDEX] = flt(slot[FIFO_QTY_INDEX] * rate)
+
+	def _rebalance_negative_batch_slots(self) -> None:
+		for item_dict in self.item_details.values():
+			if item_dict.get("has_batch_no"):
+				self._rebalance_negative_batch_slot_values(item_dict["fifo_queue"])
+
+	def _rebalance_negative_batch_slot_values(self, fifo_queue: list) -> None:
+		"""A batch is one valuation pool, so a slot driven negative by consumption
+		at the pooled rate is stale detail: spread the pool value over its slots."""
+		groups = {}
+		for slot in fifo_queue:
+			if is_batch_slot(slot):
+				key = slot[BATCH_SLOT_BATCH_INDEX] if slot[BATCH_SLOT_VALUATION_INDEX] else None
+				groups.setdefault(key, []).append(slot)
+
+		for slots in groups.values():
+			has_negative_slot = any(
+				flt(slot[BATCH_SLOT_VALUE_INDEX]) < 0 and flt(slot[BATCH_SLOT_QTY_INDEX]) > 0
+				for slot in slots
+			)
+			total_qty = sum(flt(slot[BATCH_SLOT_QTY_INDEX]) for slot in slots)
+			if not has_negative_slot or total_qty <= 0:
+				continue
+
+			rate = sum(flt(slot[BATCH_SLOT_VALUE_INDEX]) for slot in slots) / total_qty
+			for slot in slots:
+				slot[BATCH_SLOT_VALUE_INDEX] = flt(slot[BATCH_SLOT_QTY_INDEX] * rate)
 
 	def _get_bundle_wise_details(self, stock_ledger_entries: list | None) -> tuple[dict, dict]:
 		if stock_ledger_entries is not None:
@@ -383,6 +412,7 @@ class FIFOSlots:
 				row, fifo_queue, transferred_item_key, serial_nos, batch_nos, from_end
 			)
 
+		self._revalue_stock_reconciliation_slots(row, fifo_queue, batch_nos)
 		self._update_balances(row, key)
 		self._trim_serial_fifo_queue(row, key, fifo_queue)
 
@@ -405,6 +435,36 @@ class FIFOSlots:
 
 		# Stock reconciliation stores the final balance; FIFO needs the movement delta.
 		row.actual_qty = flt(row.qty_after_transaction) - flt(prev_balance_qty)
+
+	def _revalue_stock_reconciliation_slots(self, row: dict, fifo_queue: list, batch_nos: list) -> None:
+		if row.voucher_type != "Stock Reconciliation" or row.has_serial_no:
+			return
+
+		if row.has_batch_no:
+			if flt(row.actual_qty) > 0:
+				self._revalue_reconciled_batch_slots(fifo_queue, batch_nos)
+			return
+
+		for slot in fifo_queue:
+			if is_qty_slot(slot):
+				slot[FIFO_VALUE_INDEX] = flt(slot[FIFO_QTY_INDEX] * flt(row.valuation_rate))
+
+	def _revalue_reconciled_batch_slots(self, fifo_queue: list, batch_nos: list) -> None:
+		for batch_no, _use_batchwise_valuation, qty, stock_value_difference in batch_nos:
+			if not flt(qty):
+				continue
+
+			slots = [
+				slot
+				for slot in fifo_queue
+				if is_batch_slot(slot) and slot[BATCH_SLOT_BATCH_INDEX] == batch_no
+			]
+			if flt(sum(flt(slot[BATCH_SLOT_QTY_INDEX]) for slot in slots) - flt(qty), self.float_precision):
+				continue
+
+			rate = flt(stock_value_difference) / flt(qty)
+			for slot in slots:
+				slot[BATCH_SLOT_VALUE_INDEX] = flt(slot[BATCH_SLOT_QTY_INDEX] * rate)
 
 	def _get_serial_and_batch_nos(
 		self, row: dict, bundle_wise_serial_nos: dict, bundle_wise_batch_nos: dict

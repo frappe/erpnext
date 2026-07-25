@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils.nestedset import NestedSet
+from frappe.utils.nestedset import NestedSet, get_root_of
 
 
 class ItemGroup(NestedSet):
@@ -32,8 +32,9 @@ class ItemGroup(NestedSet):
 
 	def validate(self):
 		if not self.parent_item_group and not frappe.in_test:
-			if frappe.db.exists("Item Group", _("All Item Groups")):
-				self.parent_item_group = _("All Item Groups")
+			root = get_root_of(self.doctype)
+			if root and root != self.name:
+				self.parent_item_group = root
 		self.validate_item_group_defaults()
 		self.check_item_tax()
 
