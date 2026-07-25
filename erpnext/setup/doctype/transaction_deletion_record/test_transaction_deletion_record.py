@@ -163,6 +163,28 @@ class TestTransactionDeletionRecord(ERPNextTestSuite):
 				# Task should have company field set
 				self.assertIsNotNone(row.company_field, "Task should have company_field set after import")
 
+	def test_csv_import_tolerates_short_rows(self):
+		"""Test that CSV rows omitting trailing columns are imported with an auto-detected company_field"""
+		company = "_Test Company 7"
+
+		tdr = frappe.new_doc("Transaction Deletion Record")
+		tdr.company = company
+		tdr.insert()
+
+		# Row omits the trailing company_field and child_doctypes columns; csv.DictReader fills
+		# them with None, which used to raise on None.strip().
+		csv_content = "doctype_name,company_field,child_doctypes\nSales Invoice\n"
+		result = tdr.import_to_delete_template_method(csv_content)
+		tdr.reload()
+
+		self.assertEqual(result["imported"], 1)
+		self.assertEqual(len(tdr.doctypes_to_delete), 1)
+
+		row = tdr.doctypes_to_delete[0]
+		self.assertEqual(row.doctype_name, "Sales Invoice")
+		# company_field was not provided, so it should be auto-detected as "company"
+		self.assertEqual(row.company_field, "company")
+
 	def test_progress_tracking(self):
 		"""Test that deleted checkbox is marked when DocType deletion completes"""
 		company = "_Test Company 7"
