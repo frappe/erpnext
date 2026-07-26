@@ -338,9 +338,6 @@ class BuyingController(SubcontractingController):
 			if not details.get(field):
 				details[field] = frappe.get_cached_value("Company", self.company, field)
 
-		if not any(details.get(field) for field in fields):
-			return None
-
 		for field in fields:
 			if not details.get(field):
 				frappe.throw(
@@ -364,6 +361,9 @@ class BuyingController(SubcontractingController):
 				continue
 
 			amount = flt(row.valuation_rate * row.stock_qty, row.precision("base_amount"))
+			if row.landed_cost_voucher_amount:
+				amount -= flt(row.landed_cost_voucher_amount, row.precision("base_amount"))
+
 			self.add_gl_entry(
 				gl_entries=gl_entries,
 				account=details.purchase_expense_account,
