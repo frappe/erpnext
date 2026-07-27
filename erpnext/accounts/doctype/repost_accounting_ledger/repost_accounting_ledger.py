@@ -230,7 +230,7 @@ def _lock_vouchers(vouchers):
 			doc = frappe.get_doc(x.voucher_type, x.voucher_no)
 			doc.lock()
 			locked_docs.append(doc)
-	except frappe.DocumentLockedError:
+	except Exception:
 		for doc in locked_docs:
 			doc.unlock()
 		raise
