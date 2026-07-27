@@ -117,6 +117,10 @@
   "service_expense_account",
   "column_break_ereg",
   "purchase_expense_contra_account",
+  "stock_expense_section",
+  "expenses_added_to_stock_account",
+  "column_break_gthb",
+  "expenses_added_to_stock_contra_account",
   "stock_tab",
   "auto_accounting_for_stock_settings",
   "enable_perpetual_inventory",
@@ -823,6 +827,27 @@
    "fieldname": "buying_and_selling_tab",
    "fieldtype": "Tab Break",
    "label": "Buying and Selling"
+  },
+  {
+   "fieldname": "stock_expense_section",
+   "fieldtype": "Section Break",
+   "label": "Stock Expense"
+  },
+  {
+   "fieldname": "expenses_added_to_stock_account",
+   "fieldtype": "Link",
+   "label": "Expenses Added To Stock Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_gthb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "expenses_added_to_stock_contra_account",
+   "fieldtype": "Link",
+   "label": "Expenses Added To Stock Contra Account",
+   "options": "Account"
   },
   {
    "fieldname": "stock_tab",
