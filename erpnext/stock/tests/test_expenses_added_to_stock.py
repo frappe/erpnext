@@ -14,6 +14,7 @@ WAREHOUSE = "Stores - TCP1"
 
 class TestExpensesAddedToStock(ERPNextTestSuite):
 	def setUp(self):
+		self.restore_stock_expense_settings()
 		self.eats_account = create_account(
 			account_name="Expenses Added To Stock",
 			parent_account="Expenses - TCP1",
@@ -46,6 +47,27 @@ class TestExpensesAddedToStock(ERPNextTestSuite):
 		)
 		frappe.db.set_single_value("Accounts Settings", "book_stock_expense_gl_entries", 1)
 		self.item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
+
+	def restore_stock_expense_settings(self):
+		"""These are a Single and Company fields, so they outlive the test. Left set, every later
+		Purchase Receipt / Invoice in the run has to resolve the expense account pair and throws
+		for any company that has none configured."""
+		account_fields = [
+			"expenses_added_to_stock_account",
+			"expenses_added_to_stock_contra_account",
+			"purchase_expense_account",
+			"purchase_expense_contra_account",
+		]
+		previous_accounts = frappe.db.get_value("Company", COMPANY, account_fields, as_dict=True)
+		previous_flag = frappe.db.get_single_value("Accounts Settings", "book_stock_expense_gl_entries")
+
+		self.addCleanup(frappe.db.set_value, "Company", COMPANY, dict(previous_accounts))
+		self.addCleanup(
+			frappe.db.set_single_value,
+			"Accounts Settings",
+			"book_stock_expense_gl_entries",
+			previous_flag,
+		)
 
 	def get_gl_balances(self, voucher_type, voucher_no):
 		entries = frappe.get_all(
