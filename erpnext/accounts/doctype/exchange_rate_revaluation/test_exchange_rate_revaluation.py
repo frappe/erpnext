@@ -377,6 +377,15 @@ class TestExchangeRateRevaluation(ERPNextTestSuite, AccountsTestMixin):
 		self.assertFalse(ret.get("reversals_posted"))
 
 		err.make_reverse_journal()
+		# submit
+		draft = frappe.db.get_all(
+			"Journal Entry",
+			filters={"docstatus": 0, "reversal_of": je.name, "voucher_type": "Exchange Rate Revaluation"},
+			pluck="name",
+			as_list=1,
+		)
+		self.assertIsNotNone(draft)
+		frappe.get_doc("Journal Entry", draft[0]).submit()
 		ret = err.check_journal_and_reversal()
 		self.assertTrue(ret.get("journals_posted"))
 		self.assertTrue(ret.get("reversals_posted"))
