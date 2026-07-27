@@ -503,3 +503,4 @@ erpnext.patches.v16_0.enable_book_stock_expense_gl_entries
 execute:frappe.db.set_single_value("Stock Settings", "use_inline_serial_batch_editor", 0)
 erpnext.patches.v16_0.recompute_production_plan_reserved_qty
 erpnext.patches.v16_0.rename_ar_ap_ageing_filter
+erpnext.patches.v16_0.fix_subcontracting_titles
