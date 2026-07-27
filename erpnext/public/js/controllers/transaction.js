@@ -518,7 +518,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			return;
 		}
 
-		schedules.forEach((schedule) => (schedule.__checked = 1));
+		schedules.forEach((schedule) => {
+			schedule.__checked = 1;
+			schedule.currency = frm.doc.currency;
+		});
 
 		const dialog = new frappe.ui.Dialog({
 			title: __("Select Payment Schedule"),
@@ -553,9 +556,18 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 							read_only: 1,
 						},
 						{
+							fieldtype: "Link",
+							fieldname: "currency",
+							label: __("Currency"),
+							options: "Currency",
+							hidden: 1,
+							read_only: 1,
+						},
+						{
 							fieldtype: "Currency",
 							fieldname: "payment_amount",
 							label: __("Amount"),
+							options: "currency",
 							in_list_view: 1,
 							read_only: 1,
 						},
@@ -635,34 +647,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		erpnext.utils.view_serial_batch_nos(this.frm);
 		this.set_route_options_for_new_doc();
 		erpnext.toggle_serial_batch_fields(this.frm);
-	}
-
-	set_route_options_for_new_doc() {
-		// While creating the batch from the link field, copy item from line item to batch form
-
-		if (this.frm.fields_dict["items"].grid.get_field("batch_no")) {
-			let batch_no_field = this.frm.get_docfield("items", "batch_no");
-			if (batch_no_field) {
-				batch_no_field.get_route_options_for_new_doc = function (row) {
-					return {
-						item: row.doc.item_code,
-					};
-				};
-			}
-		}
-
-		// While creating the SABB from the link field, copy item, doctype from line item to SABB form
-		if (this.frm.fields_dict["items"].grid.get_field("serial_and_batch_bundle")) {
-			let sbb_field = this.frm.get_docfield("items", "serial_and_batch_bundle");
-			if (sbb_field) {
-				sbb_field.get_route_options_for_new_doc = (row) => {
-					return {
-						item_code: row.doc.item_code,
-						voucher_type: this.frm.doc.doctype,
-					};
-				};
-			}
-		}
 	}
 
 	scan_barcode() {
