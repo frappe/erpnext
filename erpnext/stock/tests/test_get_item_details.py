@@ -124,3 +124,75 @@ class TestGetItemDetail(ERPNextTestSuite):
 		dn.save()
 		self.assertEqual(dn.items[0].batch_no, "BATCH01")
 		self.assertEqual(dn.items[0].rate, 50)
+
+	def test_maintain_same_rate_keeps_source_rate_on_refetch(self):
+		"""#57436: with "maintain same rate" on, re-fetching a PR row mapped from a
+		PO must keep the PO rate instead of pulling a newer, higher Item Price.
+
+		The rate is validated on save, so it can never persist changed; assert the
+		fetched rate directly to prove the newer Item Price is never picked up.
+		"""
+		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		def set_maintain_same_rate(value):
+			frappe.db.set_single_value("Buying Settings", "maintain_same_rate", value)
+			frappe.clear_cache(doctype="Buying Settings")
+
+		set_maintain_same_rate(1)
+
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		po = create_purchase_order(item_code=item_code, qty=1, rate=100)
+
+		# The PO may auto-insert an Item Price at 100; bump it to the newer, higher rate.
+		item_price = frappe.db.get_value(
+			"Item Price", {"item_code": item_code, "price_list": "Standard Buying"}
+		)
+		if item_price:
+			frappe.db.set_value("Item Price", item_price, "price_list_rate", 120)
+		else:
+			frappe.get_doc(
+				{
+					"doctype": "Item Price",
+					"price_list": "Standard Buying",
+					"item_code": item_code,
+					"price_list_rate": 120,
+				}
+			).insert()
+
+		pr = make_purchase_receipt(po.name)
+		pr.insert()
+
+		def fetch_price_list_rate():
+			ctx = frappe._dict(
+				{
+					"item_code": item_code,
+					"doctype": "Purchase Receipt",
+					"name": pr.name,
+					"company": pr.company,
+					"supplier": pr.supplier,
+					"currency": pr.currency,
+					"conversion_rate": 1.0,
+					"price_list": "Standard Buying",
+					"price_list_currency": pr.currency,
+					"plc_conversion_rate": 1.0,
+					"warehouse": pr.items[0].warehouse,
+					"uom": pr.items[0].uom,
+					"stock_uom": pr.items[0].stock_uom,
+					"qty": pr.items[0].qty,
+					"child_doctype": pr.items[0].doctype,
+					"child_docname": pr.items[0].name,
+					"is_return": 0,
+					"is_internal_supplier": 0,
+					"ignore_pricing_rule": 1,
+				}
+			)
+			return get_item_details(ctx, pr).get("price_list_rate")
+
+		# Rate stays at the PO rate; the newer Item Price (120) is not fetched.
+		self.assertEqual(fetch_price_list_rate(), 100)
+
+		# Control: without the setting the newer Item Price would be fetched.
+		set_maintain_same_rate(0)
+		self.assertEqual(fetch_price_list_rate(), 120)

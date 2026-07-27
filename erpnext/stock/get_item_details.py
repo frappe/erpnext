@@ -40,6 +40,17 @@ purchase_doctypes = [
 
 NOT_APPLICABLE_TAX = "N/A"
 
+# Item rows mapped from these source documents must keep the source rate when
+# "maintain same rate" is enabled, so a newer Item Price is never fetched onto them.
+maintain_same_rate_source_fields = {
+	"Purchase Order": ("supplier_quotation_item",),
+	"Purchase Receipt": ("purchase_order_item",),
+	"Purchase Invoice": ("po_detail", "pr_detail"),
+	"Sales Order": ("quotation_item", "prevdoc_docname"),
+	"Delivery Note": ("so_detail", "si_detail"),
+	"Sales Invoice": ("so_detail", "dn_detail"),
+}
+
 
 def _preprocess_ctx(ctx):
 	if not ctx.price_list:
@@ -120,7 +131,11 @@ def get_item_details(
 	if ctx.doctype in ["Purchase Order", "Purchase Receipt", "Purchase Invoice"]:
 		ctx.customer = None
 
-	out.update(get_price_list_rate(ctx, item))
+	source_row = get_rate_locked_source_row(ctx, doc)
+	if source_row:
+		out.price_list_rate = flt(source_row.get("price_list_rate")) or flt(source_row.get("rate"))
+	else:
+		out.update(get_price_list_rate(ctx, item))
 
 	if (
 		not out.price_list_rate
@@ -186,6 +201,34 @@ def remove_standard_fields(out: frappe._dict):
 	for key in child_table_fields + default_fields:
 		out.pop(key, None)
 	return out
+
+
+def get_rate_locked_source_row(ctx: ItemDetailsCtx, doc) -> frappe._dict | None:
+	"""Return the current item row when its rate is locked to a source document.
+
+	With "maintain same rate" enabled, a row mapped from a source (e.g. a Purchase
+	Order) can only be saved at the source rate. Fetching a newer Item Price here
+	would set a rate the document can never be saved with, so keep the source rate.
+	"""
+	source_fields = maintain_same_rate_source_fields.get(ctx.doctype)
+	if not source_fields or not doc or ctx.get("is_return") or not maintain_same_rate_enabled(ctx):
+		return None
+
+	row = next((d for d in doc.get("items") or [] if d.get("name") == ctx.child_docname), None)
+	if row and any(row.get(field) for field in source_fields):
+		return row
+	return None
+
+
+def maintain_same_rate_enabled(ctx: ItemDetailsCtx) -> bool:
+	if ctx.doctype in purchase_doctypes:
+		if ctx.get("is_internal_supplier"):
+			return False
+		return bool(cint(frappe.get_cached_value("Buying Settings", "None", "maintain_same_rate")))
+
+	if ctx.get("is_internal_customer"):
+		return False
+	return bool(cint(frappe.get_cached_value("Selling Settings", "None", "maintain_same_sales_rate")))
 
 
 def set_valuation_rate(out: frappe._dict, ctx: frappe._dict):
