@@ -283,10 +283,15 @@ class Opportunity(TransactionBase, CRMNote):
 		if not self.get("items", []):
 			return frappe.get_all(
 				"Quotation",
-				{"opportunity": self.name, "status": ("not in", ["Lost", "Closed"]), "docstatus": 1},
+				{
+					"opportunity": self.name,
+					"status": ("not in", ["Lost", "Cancelled", "Expired"]),
+					"docstatus": 1,
+				},
 				"name",
 			)
 		else:
+<<<<<<< HEAD
 			return frappe.db.sql(
 				"""
 				select q.name
@@ -294,14 +299,36 @@ class Opportunity(TransactionBase, CRMNote):
 				where q.name = qi.parent and q.docstatus=1 and qi.prevdoc_docname =%s
 				and q.status not in ('Lost', 'Closed')""",
 				self.name,
+=======
+			q = frappe.qb.DocType("Quotation")
+			qi = frappe.qb.DocType("Quotation Item")
+			return (
+				frappe.qb.from_(q)
+				.inner_join(qi)
+				.on(q.name == qi.parent)
+				.select(q.name)
+				.where(
+					(q.docstatus == 1)
+					& (qi.prevdoc_docname == self.name)
+					& q.status.notin(["Lost", "Cancelled", "Expired"])
+				)
+				.run()
+>>>>>>> 8b37c52187 (fix(crm): align Opportunity status checks with Quotation statuses (#57489))
 			)
 
 	def has_ordered_quotation(self):
 		if not self.get("items", []):
 			return frappe.get_all(
-				"Quotation", {"opportunity": self.name, "status": "Ordered", "docstatus": 1}, "name"
+				"Quotation",
+				{
+					"opportunity": self.name,
+					"status": ("in", ["Ordered", "Partially Ordered"]),
+					"docstatus": 1,
+				},
+				"name",
 			)
 		else:
+<<<<<<< HEAD
 			return frappe.db.sql(
 				"""
 				select q.name
@@ -309,6 +336,21 @@ class Opportunity(TransactionBase, CRMNote):
 				where q.name = qi.parent and q.docstatus=1 and qi.prevdoc_docname =%s
 				and q.status = 'Ordered'""",
 				self.name,
+=======
+			q = frappe.qb.DocType("Quotation")
+			qi = frappe.qb.DocType("Quotation Item")
+			return (
+				frappe.qb.from_(q)
+				.inner_join(qi)
+				.on(q.name == qi.parent)
+				.select(q.name)
+				.where(
+					(q.docstatus == 1)
+					& (qi.prevdoc_docname == self.name)
+					& (q.status.isin(["Ordered", "Partially Ordered"]))
+				)
+				.run()
+>>>>>>> 8b37c52187 (fix(crm): align Opportunity status checks with Quotation statuses (#57489))
 			)
 
 	def has_lost_quotation(self):
