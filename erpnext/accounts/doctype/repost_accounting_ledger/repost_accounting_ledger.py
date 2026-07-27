@@ -9,6 +9,7 @@ from frappe.desk.form.linked_with import get_child_tables_of_doctypes
 from frappe.model.document import Document
 from frappe.utils.background_jobs import is_job_enqueued
 from frappe.utils.data import comma_and
+from frappe.utils.scheduler import is_scheduler_inactive
 
 
 class RepostAccountingLedger(Document):
@@ -203,6 +204,12 @@ class RepostAccountingLedger(Document):
 		self._raise_error_if_reposting_in_progress()
 
 		self.check_permission("write")
+
+		# Reposting runs in a background job. Without an active scheduler the job would never be
+		# picked up, leaving the document stuck in `Queued` forever.
+		if is_scheduler_inactive() and not frappe.in_test:
+			frappe.throw(_("Scheduler is inactive. Cannot start reposting."), title=_("Scheduler Inactive"))
+
 		self.db_set("status", "Queued")
 
 		if frappe.in_test:
