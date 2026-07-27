@@ -164,11 +164,8 @@ class Bin(Document):
 			& (subcontract_order.name == supplied_item.parent)
 			& (subcontract_order.per_received < 100)
 			& (supplied_item.reserve_warehouse == self.warehouse)
-			& (
-				((subcontract_order.status != "Closed") & (subcontract_order.docstatus == 1))
-				if subcontract_doctype == "Purchase Order"
-				else (subcontract_order.docstatus == 1)
-			)
+			& (subcontract_order.status != "Closed")
+			& (subcontract_order.docstatus == 1)
 		)
 
 		reserved_qty_for_sub_contract = (
@@ -203,6 +200,7 @@ class Bin(Document):
 				else (
 					(Coalesce(se.subcontracting_order, "") != "")
 					& (subcontract_order.name == se.subcontracting_order)
+					& (subcontract_order.status != "Closed")
 				)
 			)
 		)
