@@ -575,7 +575,7 @@ class TransactionBase(StatusUpdater):
 			"is_internal_customer": self.is_internal_customer,
 		}
 		# TODO: test method call impact on document
-		apply_price_list(cts=args, as_doc=True, doc=self)
+		apply_price_list(ctx=args, as_doc=True, doc=self)
 
 
 def delete_events(ref_type, ref_name):

@@ -6,6 +6,8 @@ from frappe import _
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.model.document import Document
 
+from erpnext.crm.frappe_crm_api import is_crm_installed
+
 
 class CRMSettings(Document):
 	# begin: auto-generated types
@@ -46,12 +48,15 @@ class CRMSettings(Document):
 			)
 
 	def validate_allowed_users(self):
-		if self.enable_frappe_crm_data_synchronization and not self.allowed_users:
+		if self.enable_frappe_crm_data_synchronization and not (is_crm_installed() or self.allowed_users):
 			frappe.throw(
 				_(
 					"Please add at least one user on Allowed Users to allow Data Synchronization from Frappe CRM site."
 				)
 			)
+
+		if self.enable_frappe_crm_data_synchronization and is_crm_installed() and self.allowed_users:
+			frappe.throw(_("Allowed Users is not required as Frappe CRM is already installed on the site."))
 
 	def before_save(self):
 		self.clear_allowed_users()

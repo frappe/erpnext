@@ -192,7 +192,15 @@ def get_income_expense_data(companies, fiscal_year, filters):
 
 	expense = get_data(companies, "Expense", "Debit", fiscal_year, filters, True)
 
-	net_profit_loss = get_net_profit_loss(income, expense, companies, filters.company, company_currency, True)
+	net_profit_loss = get_net_profit_loss(
+		income,
+		expense,
+		companies,
+		filters.company,
+		company_currency,
+		consolidated=True,
+		accumulated_values=bool(filters.accumulated_values),
+	)
 
 	return income, expense, net_profit_loss
 

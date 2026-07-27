@@ -107,7 +107,7 @@ def get_party_bank_account(party_type, party):
 	)
 
 
-def get_default_company_bank_account(company, party_type, party):
+def get_default_company_bank_account(company, party_type, party, ignore_permissions=True):
 	default_company_bank_account = frappe.db.get_value(party_type, party, "default_bank_account")
 	if default_company_bank_account:
 		if company != frappe.get_cached_value("Bank Account", default_company_bank_account, "company"):
@@ -116,6 +116,14 @@ def get_default_company_bank_account(company, party_type, party):
 	if not default_company_bank_account:
 		default_company_bank_account = frappe.db.get_value(
 			"Bank Account", {"company": company, "is_company_account": 1, "is_default": 1}
+		)
+
+	if not ignore_permissions:
+		default_company_bank_account = (
+			default_company_bank_account
+			if default_company_bank_account
+			and frappe.get_cached_doc("Bank Account", default_company_bank_account).has_permission("select")
+			else None
 		)
 
 	return default_company_bank_account

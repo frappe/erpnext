@@ -2,9 +2,10 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe.utils import today
+from frappe.utils import getdate, today
 
 from erpnext.accounts.report.cash_flow.cash_flow import execute
+from erpnext.accounts.report.financial_statements import build_period_list, is_dimension_grouped
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -68,3 +69,45 @@ class TestCashFlow(ERPNextTestSuite):
 		make_journal_entry(asset_account, "Cash - _TC", 800, posting_date=today(), submit=True)
 
 		self.assertEqual(self.net_change_in_cash() - before, -800)
+
+	def test_group_by_dimension(self):
+		"""Cash movements must land in their own cost center's column, not just the overall total."""
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
+		cc1, cc2 = "_Test Cost Center - _TC", "_Test Cost Center 2 - _TC"
+
+		filters = frappe._dict(
+			company=self.company,
+			period_start_date=getdate(),
+			period_end_date=getdate(),
+			filter_based_on="Date Range",
+			periodicity="Yearly",
+			accumulated_values=False,
+			group_by_dimension="Cost Center",
+		)
+
+		period_list = build_period_list(filters)
+		self.assertTrue(is_dimension_grouped(period_list))
+
+		def key_for(cost_center):
+			return next(p.key for p in period_list if p.dimension_value == cost_center)
+
+		def net_change_row():
+			rows = execute(filters)[1]
+			return next((row for row in rows if row.get("section") == "'Net Change in Cash'"), {})
+
+		before = net_change_row()
+
+		# cash sales: 400 via cc1, 200 via cc2
+		make_journal_entry(
+			"Cash - _TC", "Sales - _TC", 400, cost_center=cc1, posting_date=today(), submit=True
+		)
+		make_journal_entry(
+			"Cash - _TC", "Sales - _TC", 200, cost_center=cc2, posting_date=today(), submit=True
+		)
+
+		after = net_change_row()
+
+		self.assertEqual(after.get(key_for(cc1), 0) - before.get(key_for(cc1), 0), 400)
+		self.assertEqual(after.get(key_for(cc2), 0) - before.get(key_for(cc2), 0), 200)
+		self.assertEqual(after.get("total", 0) - before.get("total", 0), 600)

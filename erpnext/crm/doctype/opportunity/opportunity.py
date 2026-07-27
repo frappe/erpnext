@@ -280,13 +280,17 @@ class Opportunity(TransactionBase, CRMNote):
 			self.save()
 
 		else:
-			frappe.throw(_("Cannot declare as lost, because Quotation has been made."))
+			frappe.throw(_("Cannot declare as Lost because an active Quotation exists."))
 
 	def has_active_quotation(self):
 		if not self.get("items", []):
 			return frappe.get_all(
 				"Quotation",
-				{"opportunity": self.name, "status": ("not in", ["Lost", "Closed"]), "docstatus": 1},
+				{
+					"opportunity": self.name,
+					"status": ("not in", ["Lost", "Cancelled", "Expired"]),
+					"docstatus": 1,
+				},
 				"name",
 			)
 		else:
@@ -300,7 +304,7 @@ class Opportunity(TransactionBase, CRMNote):
 				.where(
 					(q.docstatus == 1)
 					& (qi.prevdoc_docname == self.name)
-					& q.status.notin(["Lost", "Closed"])
+					& q.status.notin(["Lost", "Cancelled", "Expired"])
 				)
 				.run()
 			)
@@ -308,7 +312,13 @@ class Opportunity(TransactionBase, CRMNote):
 	def has_ordered_quotation(self):
 		if not self.get("items", []):
 			return frappe.get_all(
-				"Quotation", {"opportunity": self.name, "status": "Ordered", "docstatus": 1}, "name"
+				"Quotation",
+				{
+					"opportunity": self.name,
+					"status": ("in", ["Ordered", "Partially Ordered"]),
+					"docstatus": 1,
+				},
+				"name",
 			)
 		else:
 			q = frappe.qb.DocType("Quotation")
@@ -318,7 +328,11 @@ class Opportunity(TransactionBase, CRMNote):
 				.inner_join(qi)
 				.on(q.name == qi.parent)
 				.select(q.name)
-				.where((q.docstatus == 1) & (qi.prevdoc_docname == self.name) & (q.status == "Ordered"))
+				.where(
+					(q.docstatus == 1)
+					& (qi.prevdoc_docname == self.name)
+					& (q.status.isin(["Ordered", "Partially Ordered"]))
+				)
 				.run()
 			)
 

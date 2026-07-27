@@ -2,6 +2,7 @@
 # See license.txt
 
 import frappe
+from frappe import _
 
 from erpnext.selling.doctype.quotation.test_quotation import make_quotation
 from erpnext.selling.report.quotation_trends.quotation_trends import execute
@@ -86,3 +87,94 @@ class TestQuotationTrends(ERPNextTestSuite):
 
 		labels, after = self.run_report(based_on="Customer")
 		self.assertEqual(self._cell(after, "Party", "_Test Customer", amt_col, labels) - before_amt, 300)
+
+	def test_group_by_chart_matches_table_total_with_mixed_group_sizes(self):
+		# _Test Item is quoted to two customers -> two detail rows under one header row.
+		# _Test Item 2 is quoted to only one customer -> exactly one detail row under its
+		# header row. A regression that double-counts header rows would inflate the chart
+		# above 800; a regression that zeroes single-group rows would report less than 800.
+		filters = frappe._dict(
+			{
+				"company": "_Test Company",
+				"fiscal_year": FISCAL_YEAR,
+				"period": "Yearly",
+				"based_on": "Item",
+				"group_by": "Customer",
+			}
+		)
+
+		make_quotation(
+			item="_Test Item", party_name="_Test Customer", qty=4, rate=100, transaction_date=TXN_DATE
+		)
+		make_quotation(
+			item="_Test Item", party_name="_Test Customer 1", qty=1, rate=100, transaction_date=TXN_DATE
+		)
+		make_quotation(
+			item="_Test Item 2", party_name="_Test Customer", qty=3, rate=100, transaction_date=TXN_DATE
+		)
+
+		columns, data, _message, chart = execute(filters)
+		self.assertTrue(columns)
+		self.assertTrue(data)
+
+		total_row = next(row for row in data if row[0] == f"'{_('Total')}'")
+		expected_total = total_row[-1]
+		chart_total = sum(chart["data"]["datasets"][0]["values"])
+
+		# 400 (item/customer) + 100 (item/customer1) + 300 (item2/customer) = 800
+		self.assertEqual(expected_total, 800)
+		self.assertEqual(chart_total, expected_total)
+
+	def test_group_by_swapped_roles_based_on_customer_group_by_item(self):
+		# Same regression, opposite role assignment: based_on="Customer" with group_by="Item".
+		# Customer's based_on_cols for Quotation (Party, Party Name, Territory, Currency) put
+		# the group_by placeholder at a different column index than the Item-based_on case
+		# above, exercising the alternate `inc`/`ind` arithmetic.
+		filters = frappe._dict(
+			{
+				"company": "_Test Company",
+				"fiscal_year": FISCAL_YEAR,
+				"period": "Yearly",
+				"based_on": "Customer",
+				"group_by": "Item",
+			}
+		)
+
+		make_quotation(
+			party_name="_Test Customer", item="_Test Item", qty=3, rate=100, transaction_date=TXN_DATE
+		)
+		make_quotation(
+			party_name="_Test Customer", item="_Test Item 2", qty=1, rate=100, transaction_date=TXN_DATE
+		)
+
+		columns, data, _message, chart = execute(filters)
+		total_row = next(row for row in data if row[0] == f"'{_('Total')}'")
+		expected_total = total_row[-1]
+		chart_total = sum(chart["data"]["datasets"][0]["values"])
+
+		# 300 + 100 = 400
+		self.assertEqual(expected_total, 400)
+		self.assertEqual(chart_total, expected_total)
+
+	def test_group_by_single_group_value_not_zeroed(self):
+		# Isolates the specific failure mode flagged in review: a based_on value with exactly
+		# one associated group value must still contribute its real amount to the chart, not 0.
+		filters = frappe._dict(
+			{
+				"company": "_Test Company",
+				"fiscal_year": FISCAL_YEAR,
+				"period": "Yearly",
+				"based_on": "Item",
+				"group_by": "Customer",
+			}
+		)
+
+		make_quotation(
+			item="_Test Item", party_name="_Test Customer", qty=2, rate=150, transaction_date=TXN_DATE
+		)
+
+		columns, data, _message, chart = execute(filters)
+		chart_total = sum(chart["data"]["datasets"][0]["values"])
+
+		self.assertGreater(chart_total, 0)
+		self.assertEqual(chart_total, 300)

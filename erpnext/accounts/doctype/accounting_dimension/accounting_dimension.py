@@ -359,3 +359,13 @@ def create_accounting_dimensions_for_doctype(doctype):
 		create_custom_field(doctype, df, ignore_validate=True)
 
 	frappe.clear_cache(doctype=doctype)
+
+
+def get_dimension_fieldname(dim_doctype: str) -> str:
+	"""
+	Return the `GL Entry` fieldname for a given dimension.
+	"""
+	if dim_doctype in ("Cost Center", "Project"):
+		return frappe.scrub(dim_doctype)
+
+	return frappe.db.get_value("Accounting Dimension", {"document_type": dim_doctype}, "fieldname")

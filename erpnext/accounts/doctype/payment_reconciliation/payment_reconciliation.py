@@ -75,7 +75,10 @@ class PaymentReconciliation(Document):
 		self.accounting_dimension_filter_conditions = []
 		self.ple_posting_date_filter = []
 		self.dimensions = get_dimensions(with_cost_center_and_project=True)[0]
-		self.user_permissions = get_user_permissions(frappe.session.user)
+
+	@property
+	def user_permissions(self):
+		return get_user_permissions(frappe.session.user)
 
 	def load_from_db(self):
 		# 'modified' attribute is required for `run_doc_method` to work properly.
@@ -833,10 +836,17 @@ class PaymentReconciliation(Document):
 
 
 def reconcile_dr_cr_note(dr_cr_notes, company, active_dimensions=None):
+	allocated_amount_precision = get_field_precision(
+		frappe.get_meta("Payment Reconciliation Allocation").get_field("allocated_amount")
+	)
 	for inv in dr_cr_notes:
 		if (
-			abs(frappe.db.get_value(inv.voucher_type, inv.voucher_no, "outstanding_amount"))
-			< inv.allocated_amount
+			flt(
+				abs(frappe.db.get_value(inv.voucher_type, inv.voucher_no, "outstanding_amount"))
+				- inv.allocated_amount,
+				allocated_amount_precision,
+			)
+			< 0
 		):
 			frappe.throw(
 				_("{0} has been modified after you pulled it. Please pull it again.").format(inv.voucher_type)

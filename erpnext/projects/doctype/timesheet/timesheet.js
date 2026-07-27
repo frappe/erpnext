@@ -30,6 +30,7 @@ frappe.ui.form.on("Timesheet", {
 			return {
 				filters: {
 					company: frm.doc.company,
+					status: "Open",
 				},
 			};
 		};
@@ -122,6 +123,7 @@ frappe.ui.form.on("Timesheet", {
 			return {
 				filters: {
 					customer: doc.customer,
+					status: "Open",
 				},
 			};
 		});

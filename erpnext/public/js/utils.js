@@ -562,6 +562,18 @@ $.extend(erpnext.utils, {
 	},
 });
 
+erpnext.utils.confirm_negative_stock = function (frm) {
+	if (!frm.doc.allow_negative_stock) return;
+
+	frappe.confirm(
+		__(
+			"Using negative stock disables FIFO/Moving average valuation when inventory is negative. This is considered dangerous from accounting point of view.<br>Do you still want to enable negative inventory?"
+		),
+		() => {},
+		() => frm.set_value("allow_negative_stock", 0)
+	);
+};
+
 erpnext.utils.select_alternate_items = function (opts) {
 	const frm = opts.frm;
 	const warehouse_field = opts.warehouse_field || "warehouse";

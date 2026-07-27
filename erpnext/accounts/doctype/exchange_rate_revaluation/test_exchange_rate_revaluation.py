@@ -9,11 +9,10 @@ from frappe.utils import add_days, flt, today
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestExchangeRateRevaluation(ERPNextTestSuite, AccountsTestMixin):
+class TestExchangeRateRevaluation(ERPNextTestSuite):
 	def setUp(self):
 		self.company = "_Test Company"
 		self.item = "_Test Item"
@@ -23,14 +22,6 @@ class TestExchangeRateRevaluation(ERPNextTestSuite, AccountsTestMixin):
 		self.set_system_and_company_settings()
 
 	def set_system_and_company_settings(self):
-		# set number and currency precision
-		system_settings = frappe.get_doc("System Settings")
-		system_settings.float_precision = 2
-		system_settings.currency_precision = 2
-		system_settings.language = "en"
-		system_settings.time_zone = "Asia/Kolkata"
-		system_settings.save()
-
 		# Using Exchange Gain/Loss account for unrealized as well.
 		company_doc = frappe.get_doc("Company", self.company)
 		company_doc.unrealized_exchange_gain_loss_account = company_doc.exchange_gain_loss_account
@@ -132,7 +123,8 @@ class TestExchangeRateRevaluation(ERPNextTestSuite, AccountsTestMixin):
 		err = err.save().submit()
 
 		# Create JV for ERR
-		self.assertTrue(err.check_journal_entry_condition())
+		ret = err.check_journal_and_reversal()
+		self.assertFalse(ret.get("journals_posted"))
 		err_journals = err.make_jv_entries()
 		je = frappe.get_doc("Journal Entry", err_journals.get("zero_balance_jv"))
 		je = je.submit()
@@ -221,7 +213,8 @@ class TestExchangeRateRevaluation(ERPNextTestSuite, AccountsTestMixin):
 		err = err.save().submit()
 
 		# Create JV for ERR
-		self.assertTrue(err.check_journal_entry_condition())
+		ret = err.check_journal_and_reversal()
+		self.assertFalse(ret.get("journals_posted"))
 		err_journals = err.make_jv_entries()
 		je = frappe.get_doc("Journal Entry", err_journals.get("zero_balance_jv"))
 		je = je.submit()
@@ -298,6 +291,100 @@ class TestExchangeRateRevaluation(ERPNextTestSuite, AccountsTestMixin):
 
 		for key, _val in expected_data.items():
 			self.assertEqual(expected_data.get(key), account_details.get(key))
+
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings",
+		{"allow_multi_currency_invoices_against_single_party_account": 1, "allow_stale": 0},
+	)
+	def test_05_revaluation_journal_reversal(self):
+		"""
+		Test reversing of revaluation journals
+		"""
+		si = create_sales_invoice(
+			item=self.item,
+			company=self.company,
+			customer="_Test Customer 1",
+			debit_to=self.debtors_usd,
+			posting_date=today(),
+			parent_cost_center=self.cost_center,
+			cost_center=self.cost_center,
+			rate=100,
+			price_list_rate=100,
+			do_not_submit=1,
+		)
+		si.currency = "USD"
+		si.conversion_rate = 80
+		si.save().submit()
+
+		err = frappe.new_doc("Exchange Rate Revaluation")
+		err.company = self.company
+		err.posting_date = today()
+		err.fetch_and_calculate_accounts_data()
+		self.assertEqual(len(err.accounts), 1)
+		err.save().submit()
+
+		gain_loss_account = err.get_for_unrealized_gain_loss_account()
+		usd_account = err.accounts[0].account
+		old_balance = err.accounts[0].balance_in_base_currency
+		new_balance = err.accounts[0].new_balance_in_base_currency
+		total_gain_loss = err.total_gain_loss
+
+		# Create JV for ERR
+		ret = err.check_journal_and_reversal()
+		self.assertFalse(ret.get("journals_posted"))
+		err_journals = err.make_jv_entries()
+		je = frappe.get_doc("Journal Entry", err_journals.get("revaluation_jv"))
+		je = je.submit()
+
+		je.reload()
+		self.assertEqual(je.voucher_type, "Exchange Rate Revaluation")
+		self.assertEqual(len(je.accounts), 3)
+		# A gain is credited to the gain/loss account, a loss is debited. The current
+		# exchange rate (from master data) may sit either side of the booked rate, so
+		# derive the column from the sign instead of assuming a gain.
+		gain_loss_debit = abs(total_gain_loss) if total_gain_loss < 0 else 0.0
+		gain_loss_credit = total_gain_loss if total_gain_loss > 0 else 0.0
+		expected = [
+			(usd_account, new_balance, 0.0, 100.0, 0.0),
+			(usd_account, 0.0, old_balance, 0.0, 100.0),
+			(gain_loss_account, gain_loss_debit, gain_loss_credit, gain_loss_debit, gain_loss_credit),
+		]
+		actual = []
+		for acc in je.accounts:
+			actual.append(
+				(
+					acc.account,
+					acc.debit,
+					acc.credit,
+					acc.debit_in_account_currency,
+					acc.credit_in_account_currency,
+				)
+			)
+		self.assertEqual(expected, actual)
+
+		# Assert reversals are not posted
+		ret = err.check_journal_and_reversal()
+		self.assertTrue(ret.get("journals_posted"))
+		self.assertFalse(ret.get("reversals_posted"))
+
+		err.make_reverse_journal()
+		# submit
+		draft = frappe.db.get_all(
+			"Journal Entry",
+			filters={"docstatus": 0, "reversal_of": je.name, "voucher_type": "Exchange Rate Revaluation"},
+			pluck="name",
+			as_list=1,
+		)
+		self.assertIsNotNone(draft)
+		frappe.get_doc("Journal Entry", draft[0]).submit()
+		ret = err.check_journal_and_reversal()
+		self.assertTrue(ret.get("journals_posted"))
+		self.assertTrue(ret.get("reversals_posted"))
+
+		reverse_jv = frappe.db.get_all(
+			"Journal Entry", filters={"reversal_of": err_journals.get("revaluation_jv")}, pluck="name"
+		)
+		self.assertIsNotNone(reverse_jv)
 
 
 class TestExchangeRateRevaluationValidation(ERPNextTestSuite):

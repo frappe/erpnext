@@ -9,7 +9,7 @@ from frappe.model.document import Document
 from frappe.model.meta import get_field_precision
 from frappe.query_builder import Criterion, Order
 from frappe.query_builder.functions import Max, NullIf, Sum
-from frappe.utils import flt, get_link_to_form
+from frappe.utils import flt, get_link_to_form, nowdate
 
 import erpnext
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_balance_on
@@ -91,25 +91,31 @@ class ExchangeRateRevaluation(Document):
 		)
 
 	def on_cancel(self):
-		self.ignore_linked_doctypes = "GL Entry"
+		self.ignore_linked_doctypes = ["GL Entry", "Payment Ledger Entry"]
 
 	@frappe.whitelist()
-	def check_journal_entry_condition(self):
+	def check_journal_and_reversal(self):
 		exchange_gain_loss_account = self.get_for_unrealized_gain_loss_account()
 
+		journals_posted = False
+		reversals_posted = False
+
+		je = qb.DocType("Journal Entry")
 		jea = qb.DocType("Journal Entry Account")
 		journals = (
-			qb.from_(jea)
-			.select(jea.parent)
+			qb.from_(je)
+			.join(jea)
+			.on(je.name == jea.parent)
+			.select(je.name)
 			.distinct()
 			.where(
 				(jea.reference_type == "Exchange Rate Revaluation")
 				& (jea.reference_name == self.name)
 				& (jea.docstatus == 1)
+				& (je.reversal_of.isnull())  # omit journals that have reversals
 			)
-			.run()
+			.run(pluck="name")
 		)
-
 		if journals:
 			gle = qb.DocType("GL Entry")
 			total_amt = (
@@ -124,12 +130,31 @@ class ExchangeRateRevaluation(Document):
 				.run()
 			)
 
-			if total_amt and total_amt[0][0] != self.total_gain_loss:
-				return True
+			if total_amt and total_amt[0][0] == self.total_gain_loss:
+				journals_posted = True
 			else:
-				return False
+				journals_posted = False
 
-		return True
+		# reverse journals
+		reverse_journals = (
+			qb.from_(je)
+			.join(jea)
+			.on(je.name == jea.parent)
+			.select(je.name)
+			.where(
+				(jea.reference_type == "Exchange Rate Revaluation")
+				& (jea.reference_name == self.name)
+				& (jea.docstatus == 1)
+				& (je.reversal_of.notnull())
+			)
+			.run(pluck="name")
+		)
+		if reverse_journals:
+			reversals_posted = True
+		else:
+			reversals_posted = False
+
+		return {"journals_posted": journals_posted, "reversals_posted": reversals_posted}
 
 	def fetch_and_calculate_accounts_data(self):
 		accounts = self.get_accounts_data()
@@ -347,6 +372,7 @@ class ExchangeRateRevaluation(Document):
 
 	@frappe.whitelist()
 	def make_jv_entries(self):
+		frappe.has_permission("Journal Entry", "write", throw=True)
 		zero_balance_jv = self.make_jv_for_zero_balance()
 		if zero_balance_jv:
 			frappe.msgprint(
@@ -574,6 +600,50 @@ class ExchangeRateRevaluation(Document):
 		journal_entry.set_total_debit_credit()
 		journal_entry.save()
 		return journal_entry
+
+	@frappe.whitelist()
+	def make_reverse_journal(self):
+		frappe.has_permission("Journal Entry", "write", throw=True)
+		je = qb.DocType("Journal Entry")
+		jea = qb.DocType("Journal Entry Account")
+		journals = (
+			qb.from_(je)
+			.join(jea)
+			.on(je.name == jea.parent)
+			.select(je.name)
+			.distinct()
+			.where(
+				(jea.reference_type == "Exchange Rate Revaluation")
+				& (jea.reference_name == self.name)
+				& (jea.docstatus == 1)
+				& (je.reversal_of.isnull())  # omit journals that have reversals
+			)
+			.run(pluck="name")
+		)
+		if journals:
+			from erpnext.accounts.doctype.journal_entry.mapper import make_reverse_journal_entry
+
+			if drafts := frappe.db.get_all(
+				"Journal Entry",
+				filters={"docstatus": 0, "reversal_of": ["in", journals]},
+				pluck="name",
+				as_list=1,
+			):
+				part = "journals are" if len(drafts) > 1 else "journal is"
+				doc_links = ", ".join(["{}".format(get_link_to_form("Journal Entry", x)) for x in drafts])
+				frappe.throw(
+					msg=_("Reverse {0} already available in draft status: {1}").format(part, doc_links),
+				)
+			else:
+				for x in journals:
+					reversal = make_reverse_journal_entry(x)
+					reversal.posting_date = nowdate()
+					reversal.save()
+					frappe.msgprint(
+						_("A draft reverse journal for {0} has been created: {1}").format(
+							frappe.bold(x), get_link_to_form("Journal Entry", reversal.name)
+						)
+					)
 
 
 def calculate_exchange_rate_using_last_gle(company, account, party_type, party):

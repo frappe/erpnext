@@ -3,6 +3,7 @@
 
 import frappe
 from frappe import _, throw
+from frappe.model.document import Document
 from frappe.utils import add_days, cint, cstr, date_diff, formatdate, getdate
 
 from erpnext.setup.doctype.employee.employee import get_holiday_list_for_employee
@@ -452,7 +453,7 @@ def get_serial_nos_from_schedule(item_code: str, schedule: str):
 @frappe.whitelist()
 def make_maintenance_visit(
 	source_name: str,
-	target_doc: str | dict | None = None,
+	target_doc: str | dict | Document | None = None,
 	item_name: str | None = None,
 	s_id: str | None = None,
 ):

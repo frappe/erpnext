@@ -2424,6 +2424,9 @@ def get_party_details(company: str, party_type: str, party: str, date: str, cost
 	if not frappe.db.exists(party_type, party):
 		frappe.throw(_("{0} {1} does not exist").format(_(party_type), party))
 
+	ptype = "select" if frappe.only_has_select_perm(party_type) else "read"
+	frappe.has_permission(party_type, ptype, party, throw=True)
+
 	party_account = get_party_account(party_type, party, company)
 	account_currency = get_account_currency(party_account)
 	_party_name = "title" if party_type == "Shareholder" else party_type.lower() + "_name"
@@ -2431,7 +2434,7 @@ def get_party_details(company: str, party_type: str, party: str, date: str, cost
 
 	if party_type in ["Customer", "Supplier"]:
 		party_bank_account = get_party_bank_account(party_type, party)
-		bank_account = get_default_company_bank_account(company, party_type, party)
+		bank_account = get_default_company_bank_account(company, party_type, party, ignore_permissions=False)
 
 	return {
 		"party_account": party_account,
@@ -2527,9 +2530,7 @@ def get_reference_details(
 			exchange_rate = get_exchange_rate(party_account_currency, company_currency, ref_doc.posting_date)
 		else:
 			exchange_rate = 1
-			outstanding_amount, total_amount = get_outstanding_on_journal_entry(
-				reference_name, party_type, party
-			)
+		outstanding_amount, total_amount = get_outstanding_on_journal_entry(reference_name, party_type, party)
 
 	elif reference_doctype == "Payment Entry":
 		if reverse_payment_details := frappe.db.get_all(
@@ -3276,7 +3277,7 @@ def get_paid_amount(dt, dn, party_type, party, account, due_date):
 
 
 @frappe.whitelist()
-def make_payment_order(source_name: str, target_doc: str | Document | None = None):
+def make_payment_order(source_name: str, target_doc: str | dict | Document | None = None):
 	from frappe.model.mapper import get_mapped_doc
 
 	def set_missing_values(source, target):

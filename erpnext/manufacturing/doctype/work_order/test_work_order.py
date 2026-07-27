@@ -12,6 +12,7 @@ from erpnext.manufacturing.doctype.job_card.job_card import JobCardCancelError
 from erpnext.manufacturing.doctype.job_card.mapper import make_stock_entry as make_stock_entry_from_jc
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 from erpnext.manufacturing.doctype.work_order.mapper import (
+	make_material_request,
 	make_stock_entry,
 	make_stock_return_entry,
 )
@@ -1575,6 +1576,61 @@ class TestWorkOrder(ERPNextTestSuite):
 		pick_list.submit()
 
 		stock_entry = frappe.get_doc(create_stock_entry(pick_list.as_dict()))
+		self.assertEqual(stock_entry.fg_completed_qty, 0.0)
+		stock_entry.submit()
+
+		work_order.reload()
+		self.assertEqual(work_order.material_transferred_for_manufacturing, 0.0)
+		self.assertEqual(work_order.status, "In Process")
+
+	def test_work_order_material_request_and_bom_details(self):
+		from erpnext.stock.doctype.material_request.mapper import make_stock_entry as mr_to_stock_entry
+
+		work_order = make_wo_order_test_record(
+			planned_start_date=now(), qty=2, source_warehouse="Stores - _TC"
+		)
+
+		mr = make_material_request(work_order.name)
+		mr.schedule_date = today()
+		for item in mr.items:
+			item.schedule_date = today()
+		mr.submit()
+		self.assertEqual(mr.work_order, work_order.name)
+
+		ste = mr_to_stock_entry(mr.name)
+		self.assertEqual(ste.purpose, "Material Transfer for Manufacture")
+		self.assertEqual(ste.work_order, work_order.name)
+		self.assertEqual(ste.from_bom, 1.0)
+		self.assertEqual(ste.bom_no, work_order.bom_no)
+		self.assertEqual(ste.fg_completed_qty, 0.0)
+
+	def test_status_in_process_when_only_one_required_item_transferred_via_material_request(self):
+		"""Same bottleneck scenario as the Pick List flow, but the intermediate document is a
+		Material Request created directly from the Work Order: min-fraction keeps
+		material_transferred_for_manufacturing at 0, but the work order must still move to
+		In Process because material is already in WIP.
+		"""
+		from erpnext.stock.doctype.material_request.mapper import make_stock_entry as mr_to_stock_entry
+
+		work_order = make_wo_order_test_record(
+			planned_start_date=now(), qty=2, source_warehouse="Stores - _TC"
+		)
+		test_stock_entry.make_stock_entry(
+			item_code="_Test Item", target="Stores - _TC", qty=10, basic_rate=5000.0
+		)
+		test_stock_entry.make_stock_entry(
+			item_code="_Test Item Home Desktop 100", target="Stores - _TC", qty=10, basic_rate=1000.0
+		)
+
+		mr = make_material_request(work_order.name)
+		mr.schedule_date = today()
+		# request only _Test Item; the other required item is left off this material request
+		mr.items = [item for item in mr.items if item.item_code == "_Test Item"]
+		for item in mr.items:
+			item.schedule_date = today()
+		mr.submit()
+
+		stock_entry = frappe.get_doc(mr_to_stock_entry(mr.name))
 		self.assertEqual(stock_entry.fg_completed_qty, 0.0)
 		stock_entry.submit()
 
