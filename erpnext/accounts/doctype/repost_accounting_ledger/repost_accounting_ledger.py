@@ -248,7 +248,7 @@ def repost(repost_doc_name: str):
 
 		locked_docs = _lock_vouchers(repost_doc.vouchers)
 
-		repost_doc.db_set("status", "In Progress", commit=True)
+		repost_doc.db_set("status", "In Progress", commit=not frappe.in_test)
 
 		for x in repost_doc.vouchers:
 			if x.reposted:
@@ -267,7 +267,7 @@ def repost(repost_doc_name: str):
 								x.voucher_type, x.voucher_no
 							),
 						},
-						commit=True,
+						commit=not frappe.in_test,
 					)
 					continue
 
