@@ -283,7 +283,11 @@ class Opportunity(TransactionBase, CRMNote):
 		if not self.get("items", []):
 			return frappe.get_all(
 				"Quotation",
-				{"opportunity": self.name, "status": ("not in", ["Lost", "Closed"]), "docstatus": 1},
+				{
+					"opportunity": self.name,
+					"status": ("not in", ["Lost", "Cancelled", "Expired"]),
+					"docstatus": 1,
+				},
 				"name",
 			)
 		else:
@@ -292,14 +296,20 @@ class Opportunity(TransactionBase, CRMNote):
 				select q.name
 				from `tabQuotation` q, `tabQuotation Item` qi
 				where q.name = qi.parent and q.docstatus=1 and qi.prevdoc_docname =%s
-				and q.status not in ('Lost', 'Closed')""",
+				and q.status not in ('Lost', 'Cancelled', 'Expired')""",
 				self.name,
 			)
 
 	def has_ordered_quotation(self):
 		if not self.get("items", []):
 			return frappe.get_all(
-				"Quotation", {"opportunity": self.name, "status": "Ordered", "docstatus": 1}, "name"
+				"Quotation",
+				{
+					"opportunity": self.name,
+					"status": ("in", ["Ordered", "Partially Ordered"]),
+					"docstatus": 1,
+				},
+				"name",
 			)
 		else:
 			return frappe.db.sql(
@@ -307,7 +317,7 @@ class Opportunity(TransactionBase, CRMNote):
 				select q.name
 				from `tabQuotation` q, `tabQuotation Item` qi
 				where q.name = qi.parent and q.docstatus=1 and qi.prevdoc_docname =%s
-				and q.status = 'Ordered'""",
+				and q.status in ('Ordered', 'Partially Ordered')""",
 				self.name,
 			)
 
