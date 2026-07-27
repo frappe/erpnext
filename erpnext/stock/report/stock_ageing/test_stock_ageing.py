@@ -7,19 +7,12 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 
 from erpnext.stock.report.stock_ageing.stock_ageing import (
-<<<<<<< HEAD
-=======
 	BATCH_SLOT_QTY_INDEX,
 	BATCH_SLOT_VALUE_INDEX,
->>>>>>> 545262c5d4 (test: assert batch pooling preserves the group total on a repeating rate)
 	FIFOSlots,
 	format_report_data,
 	get_average_age,
 )
-<<<<<<< HEAD
-=======
-from erpnext.tests.utils import ERPNextTestSuite
->>>>>>> 545262c5d4 (test: assert batch pooling preserves the group total on a repeating rate)
 
 
 class TestStockAgeing(FrappeTestCase):
