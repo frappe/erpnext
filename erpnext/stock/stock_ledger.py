@@ -799,8 +799,17 @@ class update_entries_after:
 
 	def process_sle_against_current_timestamp(self):
 		sl_entries = get_sle_against_current_voucher(self.args)
+		if self.args.get("cancelled") and sl_entries:
+			self.seed_previous_sle_for_cancellation(sl_entries[0])
 		for sle in sl_entries:
 			self.process_sle(sle)
+
+	def seed_previous_sle_for_cancellation(self, anchor_sle):
+		args = frappe._dict(anchor_sle)
+		args["sle_id"] = args.name
+		prev_sle = get_previous_sle_of_current_voucher(args)
+		if prev_sle:
+			self.prev_sle_dict[(anchor_sle.item_code, anchor_sle.warehouse)] = prev_sle
 
 	def get_future_entries_to_fix(self):
 		# includes current entry!
