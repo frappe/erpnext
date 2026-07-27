@@ -1398,6 +1398,40 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 
 		self.assertEqual(expected_qty_after_transaction_of_dns3, qty_after_transaction_of_dns3)
 
+	def test_cancel_updates_bin_stock_value_when_no_sle_shares_timestamp(self):
+		item = make_item("Test Cancel Bin Stock Value Lone Timestamp").name
+		warehouse = "_Test Warehouse - _TC"
+		posting_date = today()
+
+		make_stock_entry(
+			item_code=item,
+			to_warehouse=warehouse,
+			qty=100,
+			rate=10,
+			posting_date=posting_date,
+			posting_time="09:00:00",
+		)
+
+		dn = create_delivery_note(
+			item_code=item,
+			warehouse=warehouse,
+			qty=20,
+			rate=10,
+			posting_date=posting_date,
+			posting_time="10:00:00",
+		)
+
+		dn.cancel()
+
+		# Nothing else sits on the delivery note's posting datetime, so the cancellation leaves no
+		# live SLE to reprocess. The bin must still fall back to the receipt's stock value.
+		bin_qty, bin_stock_value = frappe.db.get_value(
+			"Bin", {"item_code": item, "warehouse": warehouse}, ["actual_qty", "stock_value"]
+		)
+
+		self.assertEqual(bin_qty, 100)
+		self.assertEqual(bin_stock_value, 1000)
+
 	def test_get_next_stock_reco_respects_creation_order(self):
 		# A stock reco sharing the exact posting timestamp of the current entry must only count as the
 		# "next" reco when it was created after that entry. A reco created before it actually precedes

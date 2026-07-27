@@ -494,9 +494,7 @@ class update_entries_after:
 
 		self.data = frappe._dict()
 
-		if (not self.repost_doc or not self.args.get("item_wh_wise_last_posted_sle")) and not self.args.get(
-			"cancelled"
-		):
+		if not self.repost_doc or not self.args.get("item_wh_wise_last_posted_sle"):
 			self.initialize_previous_data(self.args)
 
 		self.build()
@@ -807,15 +805,11 @@ class update_entries_after:
 			self.process_sle(sle)
 
 	def seed_previous_sle_for_cancellation(self, anchor_sle):
-		key = (anchor_sle.item_code, anchor_sle.warehouse)
-		if key in self.prev_sle_dict:
-			return
-
 		args = frappe._dict(anchor_sle)
 		args["sle_id"] = args.name
 		prev_sle = get_previous_sle_of_current_voucher(args)
 		if prev_sle:
-			self.prev_sle_dict[key] = prev_sle
+			self.prev_sle_dict[(anchor_sle.item_code, anchor_sle.warehouse)] = prev_sle
 
 	def get_future_entries_to_fix(self):
 		# includes current entry!
