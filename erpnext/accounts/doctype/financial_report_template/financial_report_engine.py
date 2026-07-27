@@ -1853,28 +1853,51 @@ class GrowthViewTransformer:
 		self.formatted_rows = context.raw_data.get("formatted_data", [])
 		self.period_list = context.period_list
 
-	def transform(self) -> None:
+	def transform(self):
 		for row_data in self.formatted_rows:
 			if row_data.get("is_blank_line"):
 				continue
 
-			transformed_values = {}
-			for i in range(len(self.period_list)):
-				current_period = self.period_list[i]["key"]
+			if row_data.get("segment_values"):
+				self._transform_segmented_row(row_data)
+			else:
+				self._transform_single_row(row_data)
 
-				current_value = row_data[current_period]
-				previous_value = row_data[self.period_list[i - 1]["key"]] if i != 0 else 0
+	def _compute_growth_values(self, source: dict) -> dict:
+		transformed = {}
 
-				if i == 0:
-					transformed_values[current_period] = current_value
-				else:
-					growth_percent = self._calculate_growth(previous_value, current_value)
-					transformed_values[current_period] = growth_percent
+		for i, period in enumerate(self.period_list):
+			current_period = period["key"]
+			current_value = source.get(current_period)
 
-			row_data.update(transformed_values)
+			if current_value in (None, ""):
+				continue
+
+			if i == 0:
+				transformed[current_period] = current_value
+			else:
+				previous_period = self.period_list[i - 1]["key"]
+				previous_value = source.get(previous_period) or 0
+				transformed[current_period] = self._calculate_growth(previous_value, current_value)
+
+		return transformed
+
+	def _transform_single_row(self, row_data: dict):
+		row_data.update(self._compute_growth_values(row_data))
+
+	def _transform_segmented_row(self, row_data: dict):
+		for seg_id, seg_data in row_data.get("segment_values", {}).items():
+			if seg_data.get("is_blank_line"):
+				continue
+
+			transformed = self._compute_growth_values(seg_data)
+			seg_data.update(transformed)
+
+			for period_key, value in transformed.items():
+				row_data[f"{seg_id}_{period_key}"] = value
 
 	def _calculate_growth(self, previous_value: float, current_value: float) -> float | None:
-		if current_value is None:
+		if current_value in (None, ""):
 			return None
 
 		if previous_value == 0 and current_value > 0:
