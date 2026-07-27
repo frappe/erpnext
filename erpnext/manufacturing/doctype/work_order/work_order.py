@@ -11,6 +11,7 @@ from frappe.query_builder.functions import Coalesce, IfNull, Sum
 from frappe.utils import (
 	cint,
 	flt,
+	get_datetime,
 	get_link_to_form,
 	now,
 	nowdate,
@@ -34,6 +35,7 @@ from erpnext.manufacturing.doctype.work_order.mapper import (
 	get_template_rm_item,
 	get_work_order_operation_data,
 	make_job_card,
+	make_material_request,
 	make_stock_entry,
 	make_stock_return_entry,
 	make_work_order,
@@ -317,6 +319,10 @@ class WorkOrder(Document):
 		self.validate_subcontracting_inward_order()
 
 	def validate_dates(self):
+		if self.planned_start_date and self.planned_end_date:
+			if get_datetime(self.planned_end_date) < get_datetime(self.planned_start_date):
+				frappe.throw(_("Planned End Date cannot be before Planned Start Date"))
+
 		if self.actual_start_date and self.actual_end_date:
 			if self.actual_end_date < self.actual_start_date:
 				frappe.throw(_("Actual End Date cannot be before Actual Start Date"))

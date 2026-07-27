@@ -26,6 +26,8 @@
   "use_serial_batch_fields",
   "column_break_11",
   "serial_and_batch_bundle",
+  "serial_batch_entries_section",
+  "serial_batch_entries_html",
   "section_break_bgys",
   "serial_no",
   "column_break_qlha",
@@ -299,6 +301,15 @@
    "label": "Use Serial No / Batch Fields"
   },
   {
+   "fieldname": "serial_batch_entries_section",
+   "fieldtype": "Section Break",
+   "label": "Serial / Batch Entries"
+  },
+  {
+   "fieldname": "serial_batch_entries_html",
+   "fieldtype": "HTML"
+  },
+  {
    "depends_on": "eval:doc.use_serial_batch_fields === 1 && !['Sales Order', 'Quotation'].includes(parent.doctype)",
    "fieldname": "section_break_bgys",
    "fieldtype": "Section Break"
@@ -338,7 +349,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-06-08 15:00:00.000000",
+ "modified": "2026-07-18 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packed Item",

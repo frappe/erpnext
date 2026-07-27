@@ -60,6 +60,7 @@ class Item(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+		from erpnext.stock.doctype.company_restriction.company_restriction import CompanyRestriction
 		from erpnext.stock.doctype.item_barcode.item_barcode import ItemBarcode
 		from erpnext.stock.doctype.item_customer_detail.item_customer_detail import ItemCustomerDetail
 		from erpnext.stock.doctype.item_default.item_default import ItemDefault
@@ -71,6 +72,7 @@ class Item(Document):
 
 		allow_alternative_item: DF.Check
 		allow_negative_stock: DF.Check
+		allowed_companies: DF.TableMultiSelect[CompanyRestriction]
 		asset_category: DF.Link | None
 		asset_naming_series: DF.Literal[None]
 		attributes: DF.Table[ItemVariantAttribute]
@@ -131,6 +133,7 @@ class Item(Document):
 		quality_inspection_template: DF.Link | None
 		reorder_levels: DF.Table[ItemReorder]
 		retain_sample: DF.Check
+		restrict_to_companies: DF.Check
 		safety_stock: DF.Float
 		sales_tax_withholding_category: DF.Link | None
 		sales_uom: DF.Link | None
@@ -288,7 +291,7 @@ class Item(Document):
 		if not price_list:
 			price_list = frappe.get_single_value(
 				"Selling Settings", "selling_price_list"
-			) or frappe.db.get_value("Price List", _("Standard Selling"))
+			) or frappe.db.get_value("Price List", "Standard Selling")
 		if price_list:
 			item_price = frappe.get_doc(
 				{

@@ -13,7 +13,7 @@ frappe.query_reports["Accounts Payable"] = {
 		},
 		{
 			fieldname: "report_date",
-			label: __("Posting Date"),
+			label: __("Report Date"),
 			fieldtype: "Date",
 			default: frappe.datetime.get_today(),
 		},
@@ -69,10 +69,10 @@ frappe.query_reports["Accounts Payable"] = {
 			default: "Due Date",
 		},
 		{
-			fieldname: "calculate_ageing_with",
-			label: __("Calculate Ageing With"),
+			fieldname: "age_as_on",
+			label: __("Age as on"),
 			fieldtype: "Select",
-			options: "Report Date\nToday Date",
+			options: "Report Date\nToday",
 			default: "Report Date",
 		},
 		{
@@ -117,8 +117,11 @@ frappe.query_reports["Accounts Payable"] = {
 		{
 			fieldname: "supplier_group",
 			label: __("Supplier Group"),
-			fieldtype: "Link",
+			fieldtype: "MultiSelectList",
 			options: "Supplier Group",
+			get_data: function (txt) {
+				return frappe.db.get_link_options("Supplier Group", txt);
+			},
 			hidden: 1,
 		},
 		{
@@ -177,17 +180,25 @@ frappe.query_reports["Accounts Payable"] = {
 		return Object.assign(options, {
 			checkboxColumn: true,
 			events: {
-				onCheckRow: () => erpnext.accounts.toggle_create_pe_primary_action(frappe.query_report),
+				onCheckRow: () => toggle_create_pe_button(frappe.query_report),
 			},
 		});
 	},
 
 	after_refresh: function (report) {
 		report.datatable?.rowmanager?.checkAll(false);
-		report.page.clear_primary_action();
+		toggle_create_pe_button(report);
 	},
 
 	onload: function (report) {
+		if (frappe.model.can_create("Payment Entry")) {
+			report.create_pe_btn = report.page
+				.add_inner_button(__("Create Payment Entries"), function () {
+					create_payment_entries_from_payable_report(report);
+				})
+				.toggle(false);
+		}
+
 		report.page.add_inner_button(__("Accounts Payable Summary"), function () {
 			var filters = report.get_values();
 			frappe.set_route("query-report", "Accounts Payable Summary", { company: filters.company });
@@ -199,25 +210,17 @@ frappe.query_reports["Accounts Payable"] = {
 	},
 };
 
-frappe.provide("erpnext.accounts");
-
-erpnext.accounts.toggle_create_pe_primary_action = function (report) {
-	if (!report || !report.datatable || !frappe.model.can_create("Payment Entry")) return;
+function toggle_create_pe_button(report) {
+	if (!report || !report.create_pe_btn || !report.datatable) return;
 
 	const has_purchase_invoice = report.datatable.rowmanager
 		.getCheckedRows()
 		.some((i) => report.datatable.datamanager.data[i]?.voucher_type === "Purchase Invoice");
 
-	if (has_purchase_invoice) {
-		report.page.set_primary_action(__("Create Payment Entries"), () =>
-			erpnext.accounts.create_payment_entries_from_payable_report(report)
-		);
-	} else {
-		report.page.clear_primary_action();
-	}
-};
+	report.create_pe_btn.toggle(has_purchase_invoice);
+}
 
-erpnext.accounts.create_payment_entries_from_payable_report = function (report) {
+function create_payment_entries_from_payable_report(report) {
 	const datatable = report.datatable;
 	if (!datatable) return;
 
@@ -340,7 +343,7 @@ erpnext.accounts.create_payment_entries_from_payable_report = function (report) 
 		},
 	});
 	dialog.show();
-};
+}
 
 erpnext.utils.add_dimensions("Accounts Payable", 10);
 

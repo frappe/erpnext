@@ -6,6 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils import DateTimeLikeObject, getdate, today
 
+import erpnext
 from erpnext.accounts.utils import get_fiscal_year
 
 
@@ -42,6 +43,9 @@ def get_columns(filters, trans):
 		"addl_tables": based_on_details["addl_tables"],
 		"addl_tables_relational_cond": based_on_details.get("addl_tables_relational_cond", ""),
 	}
+	conditions["company_currency"] = (
+		erpnext.get_company_currency(filters.get("company")) if filters.get("company") else None
+	)
 
 	return conditions
 
@@ -214,7 +218,7 @@ def get_data(filters, conditions):
 
 				data.append(des)
 
-		total_row = calculate_total_row(data1, conditions["columns"])
+		total_row = calculate_total_row(data1, conditions["columns"], conditions.get("company_currency"))
 		data.append(total_row)
 	else:
 		data = frappe.db.sql(
@@ -239,20 +243,23 @@ def get_data(filters, conditions):
 			as_list=1,
 		)
 
-		total_row = calculate_total_row(data, conditions["columns"])
+		total_row = calculate_total_row(data, conditions["columns"], conditions.get("company_currency"))
 		data.append(total_row)
 
 	return data
 
 
-def calculate_total_row(data, columns):
+def calculate_total_row(data, columns, company_currency=None):
 	def wrap_in_quotes(label):
 		return f"'{label}'"
 
 	total_values = {}
+	currency_col_idx = None
 	for i, col in enumerate(columns):
 		if "Float" in col or "Currency/currency" in col:
 			total_values[i] = 0
+		if "Link/Currency" in col:
+			currency_col_idx = i
 
 	for row in data:
 		for i in total_values.keys():
@@ -261,6 +268,9 @@ def calculate_total_row(data, columns):
 	total_row = [wrap_in_quotes(_("Total"))]
 	for i in range(1, len(columns)):
 		total_row.append(total_values.get(i, None))
+
+	if currency_col_idx is not None:
+		total_row[currency_col_idx] = company_currency
 
 	return total_row
 
@@ -371,7 +381,10 @@ def based_wise_columns_query(based_on, trans):
 
 	# based_on_cols, based_on_select, based_on_group_by, addl_tables
 	if based_on == "Item":
-		based_on_details["based_on_cols"] = ["Item:Link/Item:120", "Item Name:Data:120"]
+		based_on_details["based_on_cols"] = [
+			{"label": _("Item"), "fieldtype": "Link", "options": "Item", "width": 120, "fieldname": "item"},
+			{"label": _("Item Name"), "fieldtype": "Data", "width": 120, "fieldname": "item_name"},
+		]
 		# item_name is an editable per-line field, not functionally dependent on item_code, so it
 		# is aggregated (one row per item_code) rather than added to GROUP BY (which would split
 		# the row and change the MariaDB row count). See get_data's group-by query.
@@ -380,7 +393,15 @@ def based_wise_columns_query(based_on, trans):
 		based_on_details["addl_tables"] = ""
 
 	elif based_on == "Item Group":
-		based_on_details["based_on_cols"] = ["Item Group:Link/Item Group:120"]
+		based_on_details["based_on_cols"] = [
+			{
+				"label": _("Item Group"),
+				"fieldtype": "Link",
+				"options": "Item Group",
+				"width": 120,
+				"fieldname": "item_group",
+			}
+		]
 		based_on_details["based_on_select"] = "t2.item_group,"
 		based_on_details["based_on_group_by"] = "t2.item_group"
 		based_on_details["addl_tables"] = ""
@@ -388,18 +409,47 @@ def based_wise_columns_query(based_on, trans):
 	elif based_on == "Customer":
 		if trans == "Quotation":
 			based_on_details["based_on_cols"] = [
-				"Party:Link/Customer:120",
-				"Party Name:Data:120",
-				"Territory:Link/Territory:120",
+				{
+					"label": _("Party"),
+					"fieldtype": "Link",
+					"options": "Customer",
+					"width": 120,
+					"fieldname": "party",
+				},
+				{"label": _("Party Name"), "fieldtype": "Data", "width": 120, "fieldname": "party_name"},
+				{
+					"label": _("Territory"),
+					"fieldtype": "Link",
+					"options": "Territory",
+					"width": 120,
+					"fieldname": "territory",
+				},
 			]
 			based_on_details[
 				"based_on_select"
 			] = "t1.party_name, Max(t1.customer_name) as customer_name, Max(t1.territory) as territory,"
 		else:
 			based_on_details["based_on_cols"] = [
-				"Customer:Link/Customer:120",
-				"Customer Name:Data:120",
-				"Territory:Link/Territory:120",
+				{
+					"label": _("Customer"),
+					"fieldtype": "Link",
+					"options": "Customer",
+					"width": 120,
+					"fieldname": "customer",
+				},
+				{
+					"label": _("Customer Name"),
+					"fieldtype": "Data",
+					"width": 120,
+					"fieldname": "customer_name",
+				},
+				{
+					"label": _("Territory"),
+					"fieldtype": "Link",
+					"options": "Territory",
+					"width": 120,
+					"fieldname": "territory",
+				},
 			]
 			based_on_details[
 				"based_on_select"
@@ -410,16 +460,35 @@ def based_wise_columns_query(based_on, trans):
 		based_on_details["addl_tables"] = ""
 
 	elif based_on == "Customer Group":
-		based_on_details["based_on_cols"] = ["Customer Group:Link/Customer Group"]
+		based_on_details["based_on_cols"] = [
+			{
+				"label": _("Customer Group"),
+				"fieldtype": "Link",
+				"options": "Customer Group",
+				"fieldname": "customer_group",
+			}
+		]
 		based_on_details["based_on_select"] = "t1.customer_group,"
 		based_on_details["based_on_group_by"] = "t1.customer_group"
 		based_on_details["addl_tables"] = ""
 
 	elif based_on == "Supplier":
 		based_on_details["based_on_cols"] = [
-			"Supplier:Link/Supplier:120",
-			"Supplier Name:Data:120",
-			"Supplier Group:Link/Supplier Group:140",
+			{
+				"label": _("Supplier"),
+				"fieldtype": "Link",
+				"options": "Supplier",
+				"width": 120,
+				"fieldname": "supplier",
+			},
+			{"label": _("Supplier Name"), "fieldtype": "Data", "width": 120, "fieldname": "supplier_name"},
+			{
+				"label": _("Supplier Group"),
+				"fieldtype": "Link",
+				"options": "Supplier Group",
+				"width": 140,
+				"fieldname": "supplier_group",
+			},
 		]
 		# supplier_name is a stored per-transaction field (not functionally dependent on supplier), so
 		# it is aggregated to keep one row per supplier — matching the prior MariaDB output, which grouped
@@ -433,26 +502,58 @@ def based_wise_columns_query(based_on, trans):
 		based_on_details["addl_tables_relational_cond"] = " and t1.supplier = t3.name"
 
 	elif based_on == "Supplier Group":
-		based_on_details["based_on_cols"] = ["Supplier Group:Link/Supplier Group:140"]
+		based_on_details["based_on_cols"] = [
+			{
+				"label": _("Supplier Group"),
+				"fieldtype": "Link",
+				"options": "Supplier Group",
+				"width": 140,
+				"fieldname": "supplier_group",
+			}
+		]
 		based_on_details["based_on_select"] = "t3.supplier_group,"
 		based_on_details["based_on_group_by"] = "t3.supplier_group"
 		based_on_details["addl_tables"] = ",`tabSupplier` t3"
 		based_on_details["addl_tables_relational_cond"] = " and t1.supplier = t3.name"
 
 	elif based_on == "Territory":
-		based_on_details["based_on_cols"] = ["Territory:Link/Territory:120"]
+		based_on_details["based_on_cols"] = [
+			{
+				"label": _("Territory"),
+				"fieldtype": "Link",
+				"options": "Territory",
+				"width": 120,
+				"fieldname": "territory",
+			}
+		]
 		based_on_details["based_on_select"] = "t1.territory,"
 		based_on_details["based_on_group_by"] = "t1.territory"
 		based_on_details["addl_tables"] = ""
 
 	elif based_on == "Project":
 		if trans in ["Sales Invoice", "Delivery Note", "Sales Order"]:
-			based_on_details["based_on_cols"] = ["Project:Link/Project:120"]
+			based_on_details["based_on_cols"] = [
+				{
+					"label": _("Project"),
+					"fieldtype": "Link",
+					"options": "Project",
+					"width": 120,
+					"fieldname": "project",
+				}
+			]
 			based_on_details["based_on_select"] = "t1.project,"
 			based_on_details["based_on_group_by"] = "t1.project"
 			based_on_details["addl_tables"] = ""
 		elif trans in ["Purchase Order", "Purchase Invoice", "Purchase Receipt"]:
-			based_on_details["based_on_cols"] = ["Project:Link/Project:120"]
+			based_on_details["based_on_cols"] = [
+				{
+					"label": _("Project"),
+					"fieldtype": "Link",
+					"options": "Project",
+					"width": 120,
+					"fieldname": "project",
+				}
+			]
 			based_on_details["based_on_select"] = "t2.project,"
 			based_on_details["based_on_group_by"] = "t2.project"
 			based_on_details["addl_tables"] = ""
@@ -461,7 +562,15 @@ def based_wise_columns_query(based_on, trans):
 
 	based_on_details["based_on_select"] += "t4.default_currency as currency,"
 	based_on_details["based_on_group_by"] += ", t4.default_currency"
-	based_on_details["based_on_cols"].append("Currency:Link/Currency:120")
+	based_on_details["based_on_cols"].append(
+		{
+			"label": _("Currency"),
+			"fieldtype": "Link",
+			"options": "Currency",
+			"width": 120,
+			"fieldname": "currency",
+		}
+	)
 	based_on_details["addl_tables"] += ", `tabCompany` t4"
 	based_on_details["addl_tables_relational_cond"] = (
 		based_on_details.get("addl_tables_relational_cond", "") + " and t1.company = t4.name"
@@ -472,6 +581,14 @@ def based_wise_columns_query(based_on, trans):
 
 def group_wise_column(group_by):
 	if group_by:
-		return [group_by + ":Link/" + group_by + ":120"]
+		return [
+			{
+				"label": _(group_by),
+				"fieldtype": "Link",
+				"options": group_by,
+				"width": 120,
+				"fieldname": frappe.scrub(group_by),
+			}
+		]
 	else:
 		return []

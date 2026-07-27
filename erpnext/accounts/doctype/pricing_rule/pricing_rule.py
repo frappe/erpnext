@@ -156,6 +156,24 @@ class PricingRule(Document):
 			if len(values) != len(set(values)):
 				frappe.throw(_("Duplicate {0} found in the table").format(self.apply_on))
 
+			if self.apply_on == "Item Code":
+				self.validate_template_with_variant(values)
+
+	def validate_template_with_variant(self, item_codes):
+		# throws if a template and its variant both exist in one rule
+		variants = frappe.get_all(
+			"Item",
+			filters={"name": ("in", item_codes), "variant_of": ("in", item_codes)},
+			fields=["name", "variant_of"],
+		)
+		if variants:
+			variant = variants[0]
+			frappe.throw(
+				_("Variant {0} and its template {1} cannot both be added to the same Pricing Rule").format(
+					frappe.bold(variant.name), frappe.bold(variant.variant_of)
+				)
+			)
+
 	def validate_mandatory(self):
 		if self.has_priority and not self.priority:
 			throw(_("Priority is mandatory"), frappe.MandatoryError, _("Please Set Priority"))

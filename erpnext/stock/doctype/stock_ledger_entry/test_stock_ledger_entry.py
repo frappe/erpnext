@@ -34,6 +34,21 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 		create_items()
 		reset("Stock Entry")
 
+	def test_stock_write_takes_sle_advisory_gate(self):
+		if frappe.db.db_type != "postgres":
+			return
+
+		item = make_item(properties={"is_stock_item": 1}).name
+
+		def held_advisory_locks():
+			return frappe.db.sql(
+				"SELECT count(*) FROM pg_locks WHERE locktype = 'advisory' AND pid = pg_backend_pid()"
+			)[0][0]
+
+		before = held_advisory_locks()
+		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=1, rate=10)
+		self.assertGreater(held_advisory_locks(), before)
+
 	def test_incoming_value_for_transferred_serial_no_is_deterministic(self):
 		"""get_incoming_value_for_serial_nos picks the latest SLE (posting_date desc, limit 1) for a
 		serial transferred to another company. posting_date alone is non-total, so two same-date SLEs
@@ -1348,6 +1363,47 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 		# receipt2 (same timestamp, later creation) is shifted; receipt1 (the current entry) is not.
 		self.assertEqual(frappe.db.get_value("Stock Ledger Entry", sle2.name, "qty_after_transaction"), 35)
 		self.assertEqual(frappe.db.get_value("Stock Ledger Entry", sle1.name, "qty_after_transaction"), 10)
+
+	def test_cancel_shifts_same_timestamp_delivery_notes(self):
+		item = make_item().name
+		warehouse = "_Test Warehouse - _TC"
+		posting_date = today()
+		posting_time = "10:00:00"
+
+		make_stock_entry(
+			item_code=item,
+			to_warehouse=warehouse,
+			qty=100,
+			rate=10,
+			posting_date=posting_date,
+			posting_time="09:00:00",
+		)
+
+		dns = []
+		for i in range(5):
+			dns.append(
+				create_delivery_note(
+					item_code=item,
+					warehouse=warehouse,
+					qty=20,
+					rate=10 * i,
+					posting_date=posting_date,
+					posting_time=posting_time,
+				)
+			)
+			time.sleep(1)
+
+		dn = dns[2]
+		dn.cancel()
+
+		expected_qty_after_transaction_of_dns3 = 40
+		qty_after_transaction_of_dns3 = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": dns[3].name, "is_cancelled": 0},
+			"qty_after_transaction",
+		)
+
+		self.assertEqual(expected_qty_after_transaction_of_dns3, qty_after_transaction_of_dns3)
 
 	def test_get_next_stock_reco_respects_creation_order(self):
 		# A stock reco sharing the exact posting timestamp of the current entry must only count as the

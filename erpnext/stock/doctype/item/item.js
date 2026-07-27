@@ -17,6 +17,8 @@ const virtual_field_map = {
 	default_provisional_account: "vf_default_provisional_account",
 	purchase_expense_account: "vf_purchase_expense_account",
 	purchase_expense_contra_account: "vf_purchase_expense_contra_account",
+	expenses_added_to_stock_account: "vf_expenses_added_to_stock_account",
+	expenses_added_to_stock_contra_account: "vf_expenses_added_to_stock_contra_account",
 	selling_cost_center: "vf_selling_cost_center",
 	income_account: "vf_income_account",
 	default_cogs_account: "vf_default_cogs_account",
@@ -54,7 +56,20 @@ frappe.ui.form.on("Item", {
 		}
 	},
 
+	allow_negative_stock(frm) {
+		erpnext.utils.confirm_negative_stock(frm);
+	},
+
+	restrict_to_companies(frm) {
+		if (!frm.doc.restrict_to_companies) {
+			frm.set_value("allowed_companies", []);
+		}
+	},
+
 	setup: function (frm) {
+		frm.set_query("allowed_companies", () => ({
+			query: "erpnext.stock.doctype.company_restriction.company_restriction.company_query",
+		}));
 		frm.add_fetch("attribute", "numeric_values", "numeric_values");
 		frm.add_fetch("attribute", "from_range", "from_range");
 		frm.add_fetch("attribute", "to_range", "to_range");
@@ -780,7 +795,13 @@ $.extend(erpnext.item, {
 			};
 		});
 
-		let fields = ["purchase_expense_account", "purchase_expense_contra_account", "default_cogs_account"];
+		let fields = [
+			"purchase_expense_account",
+			"purchase_expense_contra_account",
+			"default_cogs_account",
+			"expenses_added_to_stock_account",
+			"expenses_added_to_stock_contra_account",
+		];
 
 		fields.forEach((field) => {
 			frm.set_query(field, "item_defaults", (doc, cdt, cdn) => {

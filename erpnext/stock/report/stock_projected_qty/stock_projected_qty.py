@@ -84,6 +84,7 @@ def execute(filters=None):
 				bin.reserved_qty_for_production_plan,
 				bin.reserved_qty_for_sub_contract,
 				reserved_qty_for_pos,
+				bin.reserved_stock,
 				bin.projected_qty,
 				re_order_level,
 				re_order_qty,
@@ -203,6 +204,13 @@ def get_columns():
 			"convertible": "qty",
 		},
 		{
+			"label": _("Reserved Stock"),
+			"fieldname": "reserved_stock",
+			"fieldtype": "Float",
+			"width": 100,
+			"convertible": "qty",
+		},
+		{
 			"label": _("Projected Qty"),
 			"fieldname": "projected_qty",
 			"fieldtype": "Float",
@@ -248,6 +256,7 @@ def get_bin_list(filters):
 			bin.reserved_qty_for_production,
 			bin.reserved_qty_for_sub_contract,
 			bin.reserved_qty_for_production_plan,
+			bin.reserved_stock,
 			bin.projected_qty,
 		)
 		.orderby(bin.item_code, bin.warehouse)

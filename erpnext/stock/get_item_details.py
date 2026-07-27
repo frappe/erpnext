@@ -323,10 +323,9 @@ def update_bin_details(ctx: frappe._dict, out: frappe._dict, doc):
 		out.update(get_bin_details(ctx.item_code, ctx.from_warehouse))
 
 	elif out.get("warehouse"):
-		company = ctx.company if (doc and doc.get("doctype") == "Purchase Order") else None
-
-		# calculate company_total_stock only for po
-		bin_details = get_bin_details(ctx.item_code, out.warehouse, company, include_child_warehouses=True)
+		bin_details = get_bin_details(
+			ctx.item_code, out.warehouse, ctx.company, include_child_warehouses=True
+		)
 
 		out.update(bin_details)
 
@@ -1594,7 +1593,7 @@ def get_batch_qty(batch_no: str, warehouse: str, item_code: str):
 
 @frappe.whitelist()
 @erpnext.normalize_ctx_input(ItemDetailsCtx)
-def apply_price_list(ctx: ItemDetailsCtx, as_doc: bool = False, doc: Document | str | None = None):
+def apply_price_list(ctx: ItemDetailsCtx, as_doc: bool = False, doc: Document | str | dict | None = None):
 	"""Apply pricelist on a document-like dict object and return as
 	{'parent': dict, 'children': list}
 
@@ -1653,6 +1652,12 @@ def apply_price_list(ctx: ItemDetailsCtx, as_doc: bool = False, doc: Document | 
 def apply_price_list_on_item(ctx, doc=None):
 	item_doc = frappe.get_cached_doc("Item", ctx.item_code)
 	item_details = get_price_list_rate(ctx, item_doc)
+
+	ctx.conversion_factor = flt(ctx.conversion_factor) or get_conversion_factor(ctx.item_code, ctx.uom).get(
+		"conversion_factor", 1
+	)
+	ctx.stock_qty = flt(ctx.qty) * flt(ctx.conversion_factor)
+
 	item_details.update(get_pricing_rule_for_item(ctx, doc=doc))
 
 	return item_details

@@ -16,7 +16,10 @@ from erpnext.accounts.party import (
 	validate_party_accounts,
 	validate_party_currency_before_merging,
 )
-from erpnext.controllers.website_list_for_contact import add_role_for_portal_user
+from erpnext.controllers.website_list_for_contact import (
+	add_role_for_portal_user,
+	link_portal_users_to_contacts,
+)
 from erpnext.utilities.transaction_base import TransactionBase
 
 
@@ -36,12 +39,14 @@ class Supplier(TransactionBase):
 		from erpnext.buying.doctype.customer_number_at_supplier.customer_number_at_supplier import (
 			CustomerNumberAtSupplier,
 		)
+		from erpnext.stock.doctype.company_restriction.company_restriction import CompanyRestriction
 		from erpnext.utilities.doctype.portal_user.portal_user import PortalUser
 
 		accounts: DF.Table[PartyAccount]
 		alias: DF.Data | None
 		allow_purchase_invoice_creation_without_purchase_order: DF.Check
 		allow_purchase_invoice_creation_without_purchase_receipt: DF.Check
+		allowed_companies: DF.TableMultiSelect[CompanyRestriction]
 		companies: DF.Table[AllowedToTransactWith]
 		country: DF.Link | None
 		customer_numbers: DF.Table[CustomerNumberAtSupplier]
@@ -67,6 +72,7 @@ class Supplier(TransactionBase):
 		primary_address: DF.TextEditor | None
 		release_date: DF.Date | None
 		represents_company: DF.Link | None
+		restrict_to_companies: DF.Check
 		supplier_details: DF.Text | None
 		supplier_group: DF.Link | None
 		supplier_name: DF.Data
@@ -109,6 +115,7 @@ class Supplier(TransactionBase):
 	def on_update(self):
 		self.create_primary_contact()
 		self.create_primary_address()
+		link_portal_users_to_contacts(self)
 
 	def add_role_for_user(self):
 		for portal_user in self.portal_users:

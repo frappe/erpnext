@@ -132,7 +132,7 @@
   {
    "fieldname": "credit_limits",
    "fieldtype": "Table",
-   "label": "Credit Limit",
+   "label": "Credit & Overdue Limits",
    "options": "Customer Credit Limit"
   }
  ],

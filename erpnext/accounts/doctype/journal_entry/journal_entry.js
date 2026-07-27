@@ -235,6 +235,7 @@ Object.assign(erpnext.journal_entry, {
 	lock_reversal_entry(frm) {
 		frm.fields
 			.filter((field) => field.has_input)
+			.filter((field) => field.df.fieldname != "posting_date")
 			.forEach((field) => frm.set_df_property(field.df.fieldname, "read_only", 1));
 		frm.set_df_property("accounts", "read_only", 1);
 	},

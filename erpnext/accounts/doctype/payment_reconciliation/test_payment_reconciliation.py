@@ -48,6 +48,7 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		sinv = create_sales_invoice(
 			qty=qty,
 			rate=rate,
+			posting_date=posting_date,
 			company=self.company,
 			customer=self.customer,
 			item_code=self.item,
@@ -2110,7 +2111,7 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		pr.reconcile()
 
 		si.reload()
-		self.assertEqual(si.status, "Partly Paid")
+		self.assertEqual(si.status, "Overdue")
 		# check PR tool output post reconciliation
 		self.assertEqual(len(pr.get("invoices")), 1)
 		self.assertEqual(pr.get("invoices")[0].get("outstanding_amount"), 120)
@@ -2505,6 +2506,76 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		# Check the difference_amount is a gain of 5000
 		self.assertEqual(flt(pr.allocation[0].difference_amount), 5000.0)
 		pr.reconcile()
+
+	def test_cr_note_split_across_invoices_floating_point_precision(self):
+		"""Regression: when a credit note is split across multiple invoices, floating-point
+		arithmetic (150 - 8.45 - 90.72 = 50.83000000000001) must not cause reconcile() to fail.
+
+		The test environment rounds INR totals to whole rupees (smallest_currency_fraction_value=0),
+		so the invoices are created with round-number totals (100, 200, 100) and then partially paid
+		down to the decimal outstanding amounts (8.45, 90.72, 72.57) via payment entries.
+		"""
+		from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+
+		# Create invoices on different posting dates to control sort-order in Payment Reconciliation
+		# (invoices are sorted by posting_date ascending, so si_a is processed first).
+		# Processing order 8.45 → 90.72 → 72.57 produces the float chain:
+		#   150 - 8.45 = 141.55  →  141.55 - 90.72 = 50.83000000000001
+		# The last allocation row will therefore carry allocated_amount = 50.83000000000001.
+		si_a = self.create_sales_invoice(qty=1, rate=100, posting_date=add_days(nowdate(), -2))
+		si_b = self.create_sales_invoice(qty=1, rate=200, posting_date=add_days(nowdate(), -1))
+		si_c = self.create_sales_invoice(qty=1, rate=100, posting_date=nowdate())
+
+		# Partially pay each invoice so the remaining outstanding is a clean decimal value.
+		# INR rounds the invoice total to a whole rupee, so we achieve decimal outstandings
+		# by subtracting a decimal-valued payment from the integer total:
+		#   100 - 91.55 = 8.45
+		#   200 - 109.28 = 90.72
+		#   100 - 27.43 = 72.57
+		for si, partial_paid in ((si_a, 91.55), (si_b, 109.28), (si_c, 27.43)):
+			pe = get_payment_entry(si.doctype, si.name)
+			pe.paid_amount = partial_paid
+			pe.received_amount = partial_paid
+			pe.references[0].allocated_amount = partial_paid
+			pe.save().submit()
+
+		cr_note = self.create_sales_invoice(
+			qty=-1, rate=150, posting_date=nowdate(), do_not_save=True, do_not_submit=True
+		)
+		cr_note.is_return = 1
+		cr_note = cr_note.save().submit()
+
+		pr = self.create_payment_reconciliation()
+		# Widen date range so all three invoices (oldest is -2 days) are fetched
+		pr.from_invoice_date = add_days(nowdate(), -2)
+		pr.to_invoice_date = nowdate()
+		pr.from_payment_date = nowdate()
+		pr.to_payment_date = nowdate()
+
+		pr.get_unreconciled_entries()
+		self.assertEqual(len(pr.invoices), 3)
+		self.assertEqual(len(pr.payments), 1)
+
+		invoices = [x.as_dict() for x in pr.invoices]
+		payments = [x.as_dict() for x in pr.payments]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+
+		# Credit note (150) covers all of si_a (8.45) and si_b (90.72), then partially si_c
+		self.assertEqual(len(pr.allocation), 3)
+		last_row = pr.allocation[-1]
+		# Last allocated amount should be ~50.83 (possibly 50.83000000000001 due to float arithmetic)
+		self.assertAlmostEqual(flt(last_row.allocated_amount), 50.83, places=2)
+
+		# reconcile() must not raise "has been modified after you pulled it" due to float imprecision
+		pr.reconcile()
+
+		si_a.reload()
+		si_b.reload()
+		si_c.reload()
+		self.assertEqual(si_a.outstanding_amount, 0)
+		self.assertEqual(si_b.outstanding_amount, 0)
+		# si_c is only partially settled: 72.57 - 50.83 = 21.74
+		self.assertAlmostEqual(si_c.outstanding_amount, 21.74, places=2)
 
 
 def create_fiscal_year(company, year_start_date, year_end_date):

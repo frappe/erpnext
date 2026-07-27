@@ -944,6 +944,38 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 			# Assert that the customer group of each row is in the list of customer groups
 			self.assertIn(row.customer_group, cus_groups_list)
 
+	def test_territory_filter(self):
+		self.create_sales_invoice()
+		territory = frappe.db.get_value("Customer", self.customer, "territory")
+
+		filters = {
+			"company": self.company,
+			"report_date": today(),
+			"range": "30, 60, 90, 120",
+			"territory": territory,
+		}
+		report = execute(filters)[1]
+		self.assertEqual(len(report), 1)
+		self.assertEqual(
+			[100.0, 100.0, territory], [report[0].invoiced, report[0].outstanding, report[0].territory]
+		)
+
+		filters.update({"territory": ["_Test Territory United States"]})
+		self.assertEqual(len(execute(filters)[1]), 0)
+
+		filters.update({"territory": [territory, "_Test Territory United States"]})
+		self.assertEqual(len(execute(filters)[1]), 1)
+
+		frappe.db.set_value("Customer", self.customer, "territory", "_Test Territory Maharashtra")
+		filters.update({"territory": ["_Test Territory India"]})
+		self.assertEqual(len(execute(filters)[1]), 1)
+
+		filters.update({"territory": ["_Test Territory Mars"]})
+		self.assertRaises(frappe.ValidationError, execute, filters)
+
+		filters.update({"territory": "  "})
+		self.assertRaises(frappe.ValidationError, execute, filters)
+
 	def test_party_account_filter(self):
 		si1 = self.create_sales_invoice()
 		jane = frappe.get_doc(

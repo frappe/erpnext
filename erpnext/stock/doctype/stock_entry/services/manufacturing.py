@@ -138,7 +138,7 @@ class BaseManufactureStockEntry(BaseStockEntry):
 			self.doc.process_loss_qty = flt(
 				(flt(self.doc.fg_completed_qty) * flt(self.doc.process_loss_percentage)) / 100
 			)
-		elif self.doc.process_loss_qty and not self.doc.process_loss_percentage:
+		elif self.doc.process_loss_qty and self.doc.fg_completed_qty:
 			self.doc.process_loss_percentage = flt(
 				(flt(self.doc.process_loss_qty) / flt(self.doc.fg_completed_qty)) * 100
 			)

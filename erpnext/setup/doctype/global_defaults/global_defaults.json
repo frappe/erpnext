@@ -5,16 +5,19 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "defaults_section",
   "default_company",
   "country",
-  "default_distance_unit",
   "column_break_8",
   "default_currency",
+  "default_distance_unit",
+  "demo_company",
+  "general_settings_section",
   "hide_currency_symbol",
   "disable_rounded_total",
   "disable_in_words",
-  "use_posting_datetime_for_naming_documents",
-  "demo_company"
+  "column_break_hnew",
+  "use_posting_datetime_for_naming_documents"
  ],
  "fields": [
   {
@@ -27,7 +30,7 @@
   {
    "fieldname": "country",
    "fieldtype": "Link",
-   "label": "Country",
+   "label": "Default Country",
    "options": "Country"
   },
   {
@@ -51,12 +54,12 @@
    "reqd": 1
   },
   {
+   "default": "0",
    "description": "Do not show any symbol like $ etc next to currencies.",
    "fieldname": "hide_currency_symbol",
-   "fieldtype": "Select",
+   "fieldtype": "Check",
    "in_list_view": 1,
-   "label": "Hide Currency Symbol",
-   "options": "\nNo\nYes"
+   "label": "Hide Currency Symbol"
   },
   {
    "default": "0",
@@ -83,21 +86,34 @@
    "read_only": 1
   },
   {
-   "default": "0",
-   "description": "When checked, the system will use the posting datetime of the document for naming the document instead of the creation datetime of the document.",
+   "default": "1",
+   "description": "When checked, the system will use the posting date of the document for naming instead of the creation date.",
    "fieldname": "use_posting_datetime_for_naming_documents",
    "fieldtype": "Check",
-   "label": "Use Posting Datetime for Naming Documents"
+   "label": "Use Posting Date for Naming Documents"
+  },
+  {
+   "fieldname": "defaults_section",
+   "fieldtype": "Section Break",
+   "label": "Defaults"
+  },
+  {
+   "fieldname": "general_settings_section",
+   "fieldtype": "Section Break",
+   "label": "General Settings"
+  },
+  {
+   "fieldname": "column_break_hnew",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
- "hide_toolbar": 0,
  "icon": "fa fa-cog",
  "idx": 1,
  "in_create": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-03-16 13:28:20.155574",
+ "modified": "2026-07-22 15:28:19.250215",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Global Defaults",

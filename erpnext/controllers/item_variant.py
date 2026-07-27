@@ -186,6 +186,68 @@ def update_variant_attribute_values(item_attribute):
 	frappe.flags.attribute_values = None
 
 
+def get_attribute_abbr_renames(item_attribute):
+	"""Return the set of (current) attribute values whose abbreviation was renamed."""
+	if item_attribute.numeric_values:
+		return set()
+
+	db_value = item_attribute.get_doc_before_save()
+	if not db_value:
+		return set()
+
+	old_abbrs = {d.name: d.abbr for d in db_value.item_attribute_values}
+	changed_values = set()
+
+	for row in item_attribute.item_attribute_values:
+		if row.name in old_abbrs and old_abbrs[row.name] != row.abbr:
+			changed_values.add(row.attribute_value)
+
+	return changed_values
+
+
+def update_variant_item_codes_for_abbr_renames(item_attribute):
+	"""Rebuild item_code/item_name of variant Items affected by a renamed Item Attribute abbreviation."""
+	changed_values = get_attribute_abbr_renames(item_attribute)
+	if not changed_values:
+		return
+
+	item_variant_table = frappe.qb.DocType("Item Variant Attribute")
+	variant_names = (
+		frappe.qb.from_(item_variant_table)
+		.select(item_variant_table.parent)
+		.where(item_variant_table.attribute == item_attribute.name)
+		.where(item_variant_table.attribute_value.isin(list(changed_values)))
+		.distinct()
+		.run(pluck=True)
+	)
+
+	for variant_name in variant_names:
+		rename_variant_item_code(variant_name)
+
+
+def rename_variant_item_code(variant_name):
+	"""Recompute a variant's item_code/item_name from its template and current attribute abbreviations,
+	renaming the Item if it has changed."""
+	variant = frappe.get_doc("Item", variant_name)
+	if not variant.variant_of:
+		return
+
+	template = frappe.get_cached_doc("Item", variant.variant_of)
+
+	new_code = frappe._dict({"item_code": None, "item_name": None, "attributes": variant.attributes})
+	make_variant_item_code(template.item_code, template.item_name, new_code)
+
+	if not new_code.item_code or new_code.item_code == variant.item_code:
+		return
+
+	frappe.rename_doc("Item", variant.item_code, new_code.item_code)
+
+	# Keep item_name in lockstep with item_code: both are derived from the same abbreviation, so
+	# item_name is always rebuilt here too, even if it had since been customized away from that pattern.
+	if new_code.item_name and new_code.item_name != variant.item_name:
+		frappe.db.set_value("Item", new_code.item_code, "item_name", new_code.item_name)
+
+
 def validate_item_attribute_value(attributes_list, attribute, attribute_value, item, from_variant=True):
 	allow_rename_attribute_value = frappe.db.get_single_value(
 		"Item Variant Settings", "allow_rename_attribute_value"

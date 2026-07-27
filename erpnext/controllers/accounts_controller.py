@@ -234,7 +234,9 @@ class AccountsController(TransactionBase):
 			if self.is_return:
 				self.validate_qty()
 			else:
-				self.validate_deferred_start_and_end_date()
+				from erpnext.accounts.services.deferred_accounting import DeferredAccountingService
+
+				DeferredAccountingService(self).validate_start_and_end_date()
 
 		from erpnext.accounts.services.internal_transfer import InternalTransferService
 
@@ -262,7 +264,9 @@ class AccountsController(TransactionBase):
 
 			validate_return(self)
 
-		self.validate_all_documents_schedule()
+		from erpnext.accounts.services.payment_schedule import PaymentScheduleService
+
+		PaymentScheduleService(self).validate_all_documents_schedule()
 
 		from erpnext.accounts.services.party_validation import PartyValidator
 
@@ -286,7 +290,9 @@ class AccountsController(TransactionBase):
 
 			self.set_advance_gain_or_loss()
 
-			self.validate_deferred_income_expense_account()
+			from erpnext.accounts.services.deferred_accounting import DeferredAccountingService
+
+			DeferredAccountingService(self).validate_income_expense_account()
 			InternalTransferService(self).set_account()
 
 		if self.doctype == "Purchase Invoice":
@@ -504,88 +510,9 @@ class AccountsController(TransactionBase):
 					)
 				)
 
-	def validate_deferred_income_expense_account(self):
-		field_map = {
-			"Sales Invoice": "deferred_revenue_account",
-			"Purchase Invoice": "deferred_expense_account",
-		}
-
-		for item in self.get("items"):
-			if item.get("enable_deferred_revenue") or item.get("enable_deferred_expense"):
-				if not item.get(field_map.get(self.doctype)):
-					default_deferred_account = frappe.get_cached_value(
-						"Company", self.company, "default_" + field_map.get(self.doctype)
-					)
-					if not default_deferred_account:
-						frappe.throw(
-							_(
-								"Row #{0}: Please update deferred revenue/expense account in item row or default account in company master"
-							).format(item.idx)
-						)
-					else:
-						item.set(field_map.get(self.doctype), default_deferred_account)
-
 	def validate_auto_repeat_subscription_dates(self):
 		if self.get("from_date") and self.get("to_date") and getdate(self.from_date) > getdate(self.to_date):
 			frappe.throw(_("To Date cannot be before From Date"), title=_("Invalid Auto Repeat Date"))
-
-	def validate_deferred_start_and_end_date(self):
-		for d in self.items:
-			if d.get("enable_deferred_revenue") or d.get("enable_deferred_expense"):
-				if not (d.service_start_date and d.service_end_date):
-					frappe.throw(
-						_("Row #{0}: Service Start and End Date is required for deferred accounting").format(
-							d.idx
-						)
-					)
-				elif getdate(d.service_start_date) > getdate(d.service_end_date):
-					frappe.throw(
-						_("Row #{0}: Service Start Date cannot be greater than Service End Date").format(
-							d.idx
-						)
-					)
-				elif getdate(self.posting_date) > getdate(d.service_end_date):
-					frappe.throw(
-						_("Row #{0}: Service End Date cannot be before Invoice Posting Date").format(d.idx)
-					)
-
-	def validate_invoice_documents_schedule(self):
-		if (
-			self.is_return
-			or (self.doctype == "Purchase Invoice" and self.is_paid)
-			or (self.doctype == "Sales Invoice" and self.is_pos)
-			or self.get("is_opening") == "Yes"
-		):
-			self.payment_terms_template = ""
-			self.payment_schedule = []
-
-		if self.is_return:
-			return
-
-		from erpnext.accounts.services.payment_schedule import PaymentScheduleService
-
-		ps = PaymentScheduleService(self)
-		ps.validate_payment_schedule_dates()
-		ps.set_due_date()
-		ps.set_payment_schedule()
-		if not self.get("ignore_default_payment_terms_template"):
-			ps.validate_payment_schedule_amount()
-			self.validate_due_date()
-		self.validate_advance_entries()
-
-	def validate_non_invoice_documents_schedule(self):
-		from erpnext.accounts.services.payment_schedule import PaymentScheduleService
-
-		ps = PaymentScheduleService(self)
-		ps.set_payment_schedule()
-		ps.validate_payment_schedule_dates()
-		ps.validate_payment_schedule_amount()
-
-	def validate_all_documents_schedule(self):
-		if self.doctype in ("Sales Invoice", "Purchase Invoice"):
-			self.validate_invoice_documents_schedule()
-		elif self.doctype in ("Quotation", "Purchase Order", "Sales Order"):
-			self.validate_non_invoice_documents_schedule()
 
 	def before_print(self, settings=None):
 		if self.doctype in [
