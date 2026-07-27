@@ -291,29 +291,13 @@ class Opportunity(TransactionBase, CRMNote):
 				"name",
 			)
 		else:
-<<<<<<< HEAD
 			return frappe.db.sql(
 				"""
 				select q.name
 				from `tabQuotation` q, `tabQuotation Item` qi
 				where q.name = qi.parent and q.docstatus=1 and qi.prevdoc_docname =%s
-				and q.status not in ('Lost', 'Closed')""",
+				and q.status not in ('Lost', 'Cancelled', 'Expired')""",
 				self.name,
-=======
-			q = frappe.qb.DocType("Quotation")
-			qi = frappe.qb.DocType("Quotation Item")
-			return (
-				frappe.qb.from_(q)
-				.inner_join(qi)
-				.on(q.name == qi.parent)
-				.select(q.name)
-				.where(
-					(q.docstatus == 1)
-					& (qi.prevdoc_docname == self.name)
-					& q.status.notin(["Lost", "Cancelled", "Expired"])
-				)
-				.run()
->>>>>>> 8b37c52187 (fix(crm): align Opportunity status checks with Quotation statuses (#57489))
 			)
 
 	def has_ordered_quotation(self):
@@ -328,29 +312,13 @@ class Opportunity(TransactionBase, CRMNote):
 				"name",
 			)
 		else:
-<<<<<<< HEAD
 			return frappe.db.sql(
 				"""
 				select q.name
 				from `tabQuotation` q, `tabQuotation Item` qi
 				where q.name = qi.parent and q.docstatus=1 and qi.prevdoc_docname =%s
-				and q.status = 'Ordered'""",
+				and q.status in ('Ordered', 'Partially Ordered')""",
 				self.name,
-=======
-			q = frappe.qb.DocType("Quotation")
-			qi = frappe.qb.DocType("Quotation Item")
-			return (
-				frappe.qb.from_(q)
-				.inner_join(qi)
-				.on(q.name == qi.parent)
-				.select(q.name)
-				.where(
-					(q.docstatus == 1)
-					& (qi.prevdoc_docname == self.name)
-					& (q.status.isin(["Ordered", "Partially Ordered"]))
-				)
-				.run()
->>>>>>> 8b37c52187 (fix(crm): align Opportunity status checks with Quotation statuses (#57489))
 			)
 
 	def has_lost_quotation(self):
