@@ -11,6 +11,10 @@ from frappe.utils.background_jobs import is_job_enqueued
 from frappe.utils.data import comma_and
 from frappe.utils.scheduler import is_scheduler_inactive
 
+# Every voucher is reposted by a single background job, so the batch has to stay small enough
+# to finish well within the queue timeout.
+MAX_VOUCHERS_PER_REPOST = 50
+
 
 class RepostAccountingLedger(Document):
 	# begin: auto-generated types
@@ -80,6 +84,13 @@ class RepostAccountingLedger(Document):
 	def validate_vouchers(self):
 		if not self.vouchers:
 			frappe.throw(_("Add atleast one voucher to repost."))
+
+		if len(self.vouchers) > MAX_VOUCHERS_PER_REPOST:
+			frappe.throw(
+				_("Cannot repost more than {0} vouchers at once. Split them into multiple documents.").format(
+					MAX_VOUCHERS_PER_REPOST
+				)
+			)
 
 		validate_docs_for_voucher_types([x.voucher_type for x in self.vouchers])
 
