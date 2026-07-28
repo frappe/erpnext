@@ -2,12 +2,14 @@
  "actions": [],
  "allow_bulk_edit": 1,
  "allow_copy": 1,
+ "autoname": "format:OPEN-INV-.#####",
  "creation": "2017-08-29 02:22:54.947711",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "section_break_ynel",
+  "status",
   "company",
   "create_missing_party",
   "column_break_3",
@@ -20,6 +22,15 @@
   "invoices"
  ],
  "fields": [
+  {
+   "default": "Pending",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Pending\nIn Progress\nSuccess\nPartial Success\nError",
+   "read_only": 1
+  },
   {
    "fieldname": "company",
    "fieldtype": "Link",
@@ -88,9 +99,9 @@
   }
  ],
  "hide_toolbar": 1,
- "issingle": 1,
+ "issingle": 0,
  "links": [],
- "modified": "2026-05-30 23:18:48.691227",
+ "modified": "2026-07-28 23:59:59.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Opening Invoice Creation Tool",

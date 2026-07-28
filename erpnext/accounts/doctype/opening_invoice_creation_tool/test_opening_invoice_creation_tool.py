@@ -5,6 +5,7 @@ import frappe
 from frappe.utils import add_days, today
 
 from erpnext.accounts.doctype.opening_invoice_creation_tool.opening_invoice_creation_tool import (
+	create_and_start_import,
 	get_temporary_opening_account,
 )
 from erpnext.projects.doctype.project.test_project import make_project
@@ -22,7 +23,6 @@ class TestOpeningInvoiceCreationTool(ERPNextTestSuite):
 		department=None,
 		return_doc=False,
 	):
-		doc = frappe.get_single("Opening Invoice Creation Tool")
 		args = get_opening_invoice_creation_dict(
 			invoice_type=invoice_type,
 			company=company,
@@ -31,7 +31,8 @@ class TestOpeningInvoiceCreationTool(ERPNextTestSuite):
 			cost_center=cost_center,
 			department=department,
 		)
-		doc.update(args)
+		doc = frappe.get_doc({"doctype": "Opening Invoice Creation Tool", **args})
+		doc.insert()
 
 		if return_doc:
 			return doc
@@ -53,6 +54,43 @@ class TestOpeningInvoiceCreationTool(ERPNextTestSuite):
 
 		# Check if update stock is not enabled
 		self.assertEqual(si.update_stock, 0)
+
+	def test_import_run_keeps_results(self):
+		doc = self.make_invoices(company="_Test Opening Invoice Company", return_doc=True)
+		doc.make_invoices()
+
+		doc.reload()
+		self.assertEqual(doc.status, "Success")
+		self.assertEqual(doc.get_import_result_summary(), {"total": 2, "successes": 2, "failures": 0})
+		logs = frappe.get_all(
+			"Opening Invoice Creation Log",
+			filters={"opening_invoice_creation_tool": doc.name},
+			fields=["success", "invoice_name"],
+		)
+		self.assertEqual(len(logs), 2)
+		self.assertTrue(all(log.success and log.invoice_name for log in logs))
+
+	def test_create_missing_party_before_run_is_saved(self):
+		party = "New Opening Customer"
+		frappe.delete_doc_if_exists("Customer", party, force=True)
+		args = get_opening_invoice_creation_dict(
+			company="_Test Opening Invoice Company",
+			invoices=[{"party": party}],
+		)
+		args.create_missing_party = 1
+
+		result = create_and_start_import(frappe.as_json({"doctype": "Opening Invoice Creation Tool", **args}))
+		run = frappe.get_doc("Opening Invoice Creation Tool", result["name"])
+
+		self.assertTrue(frappe.db.exists("Customer", party))
+		self.assertEqual(run.status, "Success")
+		self.assertEqual(len(result["invoices"]), 1)
+
+	def test_started_run_cannot_start_again(self):
+		doc = self.make_invoices(company="_Test Opening Invoice Company", return_doc=True)
+		doc.make_invoices()
+		doc.reload()
+		self.assertRaises(frappe.ValidationError, doc.make_invoices)
 
 	def check_expected_values(self, invoices, expected_value, invoice_type="Sales"):
 		doctype = "Sales Invoice" if invoice_type == "Sales" else "Purchase Invoice"
@@ -86,17 +124,22 @@ class TestOpeningInvoiceCreationTool(ERPNextTestSuite):
 		)
 		frappe.db.set_value("Company", "_Test Opening Invoice Company", "default_receivable_account", "")
 
-		self.make_invoices(
+		doc = self.make_invoices(
 			company="_Test Opening Invoice Company",
 			invoices=[{"party": party_1}, {"party": party_2}],
+			return_doc=True,
 		)
+		doc.make_invoices()
+		doc.reload()
 
-		# Check if missing debit account error raised
-		error_log = frappe.db.exists(
-			"Error Log",
-			{"error": ["like", "%erpnext.controllers.accounts_controller.AccountMissingError%"]},
+		logs = frappe.get_all(
+			"Opening Invoice Creation Log",
+			filters={"opening_invoice_creation_tool": doc.name, "success": 0},
+			fields=["messages", "exception"],
 		)
-		self.assertTrue(error_log)
+		self.assertEqual(len(logs), 2)
+		self.assertTrue(all("AccountMissingError" in log.exception for log in logs))
+		self.assertEqual(doc.get_import_result_summary(), {"total": 2, "successes": 0, "failures": 2})
 
 		# teardown
 		frappe.db.set_value(

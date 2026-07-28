@@ -1,0 +1,95 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-07-28 14:17:22.184278",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "opening_invoice_creation_tool",
+  "source_row_index",
+  "success",
+  "reference_type",
+  "reference_name",
+  "messages",
+  "exception"
+ ],
+ "fields": [
+  {
+   "fieldname": "opening_invoice_creation_tool",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Opening Invoice Creation Tool",
+   "options": "Opening Invoice Creation Tool",
+   "read_only": 1,
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "source_row_index",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Source Row",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "success",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Success",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reference_type",
+   "fieldtype": "Link",
+   "label": "Reference Type",
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reference_name",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Reference Name",
+   "options": "reference_type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "messages",
+   "fieldtype": "Code",
+   "label": "Messages",
+   "options": "JSON",
+   "read_only": 1
+  },
+  {
+   "fieldname": "exception",
+   "fieldtype": "Text",
+   "label": "Error",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-07-28 17:19:54.848420",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Opening Invoice Creation Log",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager"
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
