@@ -1178,7 +1178,7 @@ def ceil_qty_if_uom_has_whole_number(qty, stock_uom):
 def move_sample_to_retention_warehouse(company: str, items: str | list):
 	items = frappe.parse_json(items)
 
-	retention_warehouse = frappe.get_single_value("Stock Settings", "sample_retention_warehouse")
+	retention_warehouse = frappe.get_cached_value("Company", company, "sample_retention_warehouse")
 	stock_entry = frappe.new_doc("Stock Entry")
 	stock_entry.company = company
 	stock_entry.purpose = "Material Transfer"
@@ -1195,7 +1195,7 @@ def move_sample_to_retention_warehouse(company: str, items: str | list):
 def _process_sample_item(stock_entry, item, retention_warehouse):
 	warehouse = item.get("t_warehouse") or item.get("warehouse")
 	sabb = _duplicate_sample_bundle(item, warehouse)
-	total_qty, sabe_list = _collect_sample_batches(sabb, item, warehouse)
+	total_qty, sabe_list = _collect_sample_batches(sabb, item, warehouse, stock_entry.company)
 	if total_qty:
 		_append_sample_entry(stock_entry, sabb, item, warehouse, retention_warehouse, total_qty, sabe_list)
 
@@ -1212,21 +1212,22 @@ def _duplicate_sample_bundle(item, warehouse):
 	).duplicate_package()
 
 
-def _collect_sample_batches(sabb, item, warehouse):
+def _collect_sample_batches(sabb, item, warehouse, company):
 	batches = get_batch_nos(item.get("serial_and_batch_bundle"))
 	sabe_list, total_qty = [], 0
 	for batch_no in batches.keys():
-		qty, entries = _process_sample_batch(sabb, item, warehouse, batch_no)
+		qty, entries = _process_sample_batch(sabb, item, warehouse, batch_no, company)
 		total_qty += qty
 		sabe_list.extend(entries)
 	return total_qty, sabe_list
 
 
-def _process_sample_batch(sabb, item, warehouse, batch_no):
+def _process_sample_batch(sabb, item, warehouse, batch_no, company):
 	sample_quantity = validate_sample_quantity(
 		item.get("item_code"),
 		item.get("sample_quantity"),
 		item.get("transfer_qty") or item.get("qty"),
+		company,
 		batch_no,
 	)
 	sabe = next(entry for entry in sabb.entries if entry.batch_no == batch_no)
@@ -1270,18 +1271,21 @@ def _append_sample_entry(stock_entry, sabb, item, warehouse, retention_warehouse
 
 
 @frappe.whitelist()
-def validate_sample_quantity(item_code: str, sample_quantity: int, qty: float, batch_no: str | None = None):
+def validate_sample_quantity(
+	item_code: str, sample_quantity: int, qty: float, company: str, batch_no: str | None = None
+):
 	from erpnext.stock.doctype.batch.batch import get_batch_qty
 
 	if cint(qty) < cint(sample_quantity):
 		frappe.throw(
 			_("Sample quantity {0} cannot be more than received quantity {1}").format(sample_quantity, qty)
 		)
-	return _adjust_sample_quantity(item_code, sample_quantity, batch_no, get_batch_qty)
+
+	retention_warehouse = frappe.get_cached_value("Company", company, "sample_retention_warehouse")
+	return _adjust_sample_quantity(item_code, sample_quantity, batch_no, get_batch_qty, retention_warehouse)
 
 
-def _adjust_sample_quantity(item_code, sample_quantity, batch_no, get_batch_qty):
-	retention_warehouse = frappe.get_single_value("Stock Settings", "sample_retention_warehouse")
+def _adjust_sample_quantity(item_code, sample_quantity, batch_no, get_batch_qty, retention_warehouse):
 	retainted_qty = get_batch_qty(batch_no, retention_warehouse, item_code) if batch_no else 0
 	max_retain_qty = frappe.get_value("Item", item_code, "sample_quantity")
 	if retainted_qty >= max_retain_qty:

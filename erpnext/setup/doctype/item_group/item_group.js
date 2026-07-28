@@ -196,7 +196,7 @@ const COMPANY_DEFAULTS_TO_VF = {
 };
 
 const FIELD_DEFAULT_SOURCE = {
-	default_warehouse: "Stock Settings",
+	default_warehouse: "Company",
 	default_inventory_account: "Company",
 	buying_cost_center: "Company",
 	selling_cost_center: "Company",

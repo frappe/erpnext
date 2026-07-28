@@ -41,7 +41,6 @@ class StockSettings(Document):
 		auto_reserve_stock: DF.Check
 		auto_reserve_stock_for_sales_order_on_purchase: DF.Check
 		clean_description_html: DF.Check
-		default_warehouse: DF.Link | None
 		disable_serial_no_and_batch_selector: DF.Check
 		do_not_update_serial_batch_on_creation_of_auto_bundle: DF.Check
 		do_not_use_batchwise_valuation: DF.Check
@@ -57,7 +56,6 @@ class StockSettings(Document):
 		reorder_email_notify: DF.Check
 		role_allowed_to_create_edit_back_dated_transactions: DF.Link | None
 		role_allowed_to_over_deliver_receive: DF.Link | None
-		sample_retention_warehouse: DF.Link | None
 		set_serial_and_batch_bundle_naming_based_on_naming_series: DF.Check
 		show_barcode_field: DF.Check
 		stock_auth_role: DF.Link | None
@@ -79,7 +77,6 @@ class StockSettings(Document):
 			"item_group",
 			"stock_uom",
 			"allow_negative_stock",
-			"default_warehouse",
 			"set_qty_in_transactions_based_on_serial_no_input",
 			"use_serial_batch_fields",
 			"enable_serial_and_batch_no_for_item",
@@ -104,7 +101,6 @@ class StockSettings(Document):
 				validate_fields_for_doctype=False,
 			)
 
-		self.validate_warehouses()
 		self.validate_serial_and_batch_no_settings()
 		self.cant_change_valuation_method()
 		self.validate_clean_description_html()
@@ -148,17 +144,6 @@ class StockSettings(Document):
 					_(
 						"Cannot disable Serial and Batch No for Item, as there are existing records for serial / batch."
 					)
-				)
-
-	def validate_warehouses(self):
-		warehouse_fields = ["default_warehouse", "sample_retention_warehouse"]
-		for field in warehouse_fields:
-			if frappe.db.get_value("Warehouse", self.get(field), "is_group"):
-				frappe.throw(
-					_(
-						"Group Warehouses cannot be used in transactions. Please change the value of {0}"
-					).format(frappe.bold(self.meta.get_field(field).label)),
-					title=_("Incorrect Warehouse"),
 				)
 
 	def cant_change_valuation_method(self):
