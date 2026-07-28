@@ -132,10 +132,6 @@ class Item(Document):
 		purchase_uom: DF.Link | None
 		quality_inspection_template: DF.Link | None
 		reorder_levels: DF.Table[ItemReorder]
-<<<<<<< HEAD
-=======
-		restrict_to_companies: DF.Check
->>>>>>> fa75aa08ab (fix(item): correct description on deferred revenue/expense)
 		retain_sample: DF.Check
 		safety_stock: DF.Float
 		sales_tax_withholding_category: DF.Link | None
