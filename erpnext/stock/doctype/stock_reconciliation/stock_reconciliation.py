@@ -1364,7 +1364,25 @@ def get_stock_balance_for(
 			or 0
 		)
 
+<<<<<<< HEAD
 		if row.use_serial_batch_fields and row.batch_no and (qty or row.current_qty):
+=======
+		if has_serial_no:
+			serial_no_details = get_available_serial_nos(
+				frappe._dict(
+					{
+						"item_code": item_code,
+						"warehouse": warehouse,
+						"posting_datetime": combine_datetime(posting_date, posting_time),
+						"ignore_warehouse": 1,
+						"has_batch_no": 1,
+					}
+				)
+			)
+			serial_nos = "\n".join(d.serial_no for d in serial_no_details if d.batch_no == batch_no)
+
+		if row and row.use_serial_batch_fields and row.batch_no and (qty or row.current_qty):
+>>>>>>> f9d25bc3d3 (fix: guard against None row in get_stock_balance_for)
 			rate = get_incoming_rate(
 				frappe._dict(
 					{
