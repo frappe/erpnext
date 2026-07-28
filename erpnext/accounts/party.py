@@ -853,7 +853,7 @@ def get_dashboard_info(party_type, party, loyalty_program=None):
 
 	doctype = "Sales Invoice" if party_type == "Customer" else "Purchase Invoice"
 
-	companies = frappe.get_all(
+	companies = frappe.get_list(
 		doctype, filters={"docstatus": 1, party_type.lower(): party}, distinct=1, fields=["company"]
 	)
 
