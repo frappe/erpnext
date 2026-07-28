@@ -7,7 +7,7 @@ import frappe
 from frappe import _, qb
 from frappe.desk.form.linked_with import get_child_tables_of_doctypes
 from frappe.model.document import Document
-from frappe.utils.background_jobs import is_job_enqueued
+from frappe.utils.background_jobs import create_job_id, is_job_enqueued
 from frappe.utils.data import comma_and
 from frappe.utils.scheduler import is_scheduler_inactive
 
@@ -206,7 +206,7 @@ class RepostAccountingLedger(Document):
 		self.db_set("status", "Cancelled")
 
 	def _raise_error_if_reposting_in_progress(self):
-		if self.scheduled_job and is_job_enqueued(self.scheduled_job):
+		if is_job_enqueued(_repost_job_id(self.name)):
 			frappe.throw(_("Reposting is still in progress in background."))
 
 	@frappe.whitelist()
@@ -214,8 +214,10 @@ class RepostAccountingLedger(Document):
 		if self.docstatus != 1:
 			frappe.throw(_("Reposting can be started only for submitted document."))
 
-		if self.status in TERMINAL_STATUSES:
-			frappe.throw(_("Reposting cannot be started when status is {0}.").format(self.status))
+		# read the status under a row lock, so two concurrent starts cannot both get past here
+		status = frappe.db.get_value(self.doctype, self.name, "status", for_update=True)
+		if status in TERMINAL_STATUSES:
+			frappe.throw(_("Reposting cannot be started when status is {0}.").format(status))
 
 		# `Queued` and `In Progress` are not blocked by the status alone. A worker that is killed
 		# or times out leaves the status behind, and the document has to stay restartable.
@@ -250,20 +252,24 @@ def _revalidate_before_repost(repost_doc) -> None:
 	repost_doc.validate_for_deferred_accounting()
 
 
+def _repost_job_id(repost_doc_name: str) -> str:
+	"""Derive the job id from the document, so a repost can only ever have one job."""
+	return f"repost_accounting_ledger::{repost_doc_name}"
+
+
 def _enqueue_repost(repost_doc_name: str) -> str:
-	"""Hand the repost over to a background worker and return the id of the job."""
-	job_id = frappe.generate_hash()
+	"""Hand the repost over to a background worker and return the name of the `RQ Job`."""
+	job_id = _repost_job_id(repost_doc_name)
 	frappe.enqueue(
 		method="erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger.repost",
 		repost_doc_name=repost_doc_name,
 		queue="long",
 		timeout=REPOST_JOB_TIMEOUT,
-		is_async=True,
-		job_name=f"repost_accounting_ledger_{repost_doc_name}",
 		job_id=job_id,
+		deduplicate=True,
 		enqueue_after_commit=True,
 	)
-	return job_id
+	return create_job_id(job_id)
 
 
 def _lock_vouchers(vouchers):

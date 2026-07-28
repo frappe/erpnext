@@ -8,13 +8,16 @@ import frappe
 from frappe import qb
 from frappe.query_builder.functions import Sum
 from frappe.utils import add_days, nowdate, today
+from frappe.utils.background_jobs import create_job_id
 
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger import (
+	_enqueue_repost,
 	_record_repost_failure,
 	_repost_allowed_hook_doctypes,
+	_repost_job_id,
 	_repost_vouchers,
 	repost,
 )
@@ -41,7 +44,7 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 
 	def repost_in_foreground(self, repost_doc_name):
 		repost(repost_doc_name, commit=False)
-		return frappe.generate_hash()
+		return create_job_id(_repost_job_id(repost_doc_name))
 
 	def create_sales_invoice(self, **kwargs):
 		return create_sales_invoice(
@@ -350,7 +353,6 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 
 		# a document left behind by a worker that died mid-repost
 		ral.db_set("status", "In Progress")
-		ral.db_set("scheduled_job", frappe.generate_hash())
 
 		with patch(f"{REPOST_MODULE}.is_job_enqueued", return_value=True):
 			self.assert_repost_blocked(ral, "still in progress in background")
@@ -366,7 +368,23 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 		ral.reload()
 		self.assertEqual(ral.status, "Completed")
 
-	def test_11_voucher_failures_are_isolated_and_retried(self):
+	def test_11_repost_job_is_tied_to_the_document(self):
+		si = self.create_sales_invoice()
+		ral = self.create_repost_doc([si], submit=True)
+
+		# the stored job is the `RQ Job` of this repost, so the link resolves
+		self.assertEqual(ral.scheduled_job, create_job_id(_repost_job_id(ral.name)))
+
+		with patch(f"{REPOST_MODULE}.frappe.enqueue") as enqueue:
+			_enqueue_repost(ral.name)
+
+		kwargs = enqueue.call_args.kwargs
+		self.assertEqual(kwargs["repost_doc_name"], ral.name)
+		self.assertEqual(kwargs["job_id"], _repost_job_id(ral.name))
+		# a second start cannot queue a second job for the same document
+		self.assertTrue(kwargs["deduplicate"])
+
+	def test_12_voucher_failures_are_isolated_and_retried(self):
 		si, pe = self.create_invoice_and_payment()
 		pe_gl_entries = frappe.db.count("GL Entry", {"voucher_no": pe.name})
 
@@ -399,7 +417,7 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 			self.assertEqual(voucher.reposted, 1)
 			self.assertFalse(voucher.traceback)
 
-	def test_12_status_of_a_run_that_could_not_finish(self):
+	def test_13_status_of_a_run_that_could_not_finish(self):
 		si, pe = self.create_invoice_and_payment()
 
 		ral = self.create_repost_doc([si, pe])
@@ -428,7 +446,7 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value(ral.doctype, ral.name, "status"), "Failed")
 
 	@ERPNextTestSuite.change_settings("Accounts Settings", {"delete_linked_ledger_entries": 1})
-	def test_13_period_closed_after_the_repost_was_started(self):
+	def test_14_period_closed_after_the_repost_was_started(self):
 		gl = qb.DocType("GL Entry")
 		qb.from_(gl).delete().where(gl.company == "_Test Company").run()
 
@@ -465,7 +483,7 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 		self.assertEqual(frappe.db.count("GL Entry", {"voucher_no": si.name}), gl_entries)
 		self.assertEqual(ral.vouchers[0].reposted, 0)
 
-	def test_14_failed_repost_skips_cancelled_voucher(self):
+	def test_15_failed_repost_skips_cancelled_voucher(self):
 		si = self.create_sales_invoice()
 
 		ral = self.create_repost_doc([si])
@@ -485,7 +503,7 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 		self.assertEqual(ral.vouchers[0].reposted, 1)
 		self.assertIn("has been cancelled, nothing to repost", ral.vouchers[0].traceback)
 
-	def test_15_concurrent_repost_is_blocked_by_voucher_lock(self):
+	def test_16_concurrent_repost_is_blocked_by_voucher_lock(self):
 		si, pe = self.create_invoice_and_payment()
 		ral = self.create_repost_doc([si, pe])
 
@@ -500,7 +518,7 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 		finally:
 			locked_pe.unlock()
 
-	def test_16_journal_entry_repost(self):
+	def test_17_journal_entry_repost(self):
 		je = make_journal_entry("_Test Bank - _TC", "_Test Cash - _TC", 500, submit=True)
 		je = frappe.get_doc("Journal Entry", je.name)
 
@@ -530,7 +548,7 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 					cancelled_entries,
 				)
 
-	def test_17_hook_allowed_doctype_repost(self):
+	def test_18_hook_allowed_doctype_repost(self):
 		class VoucherWithCancelArg:
 			doctype = "Test Repost Voucher"
 			name = "TRV-00001"
