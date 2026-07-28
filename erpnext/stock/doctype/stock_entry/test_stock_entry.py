@@ -3236,6 +3236,30 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 		)
 		self.assertRaises(frappe.ValidationError, validate_sample_quantity, item.name, 10, 5, "_Test Company")
 
+	def test_validate_sample_quantity_raises_when_company_has_no_retention_warehouse(self):
+		"""Item.retain_sample only needs *some* company configured, so the transaction company may not be."""
+		from erpnext.stock.doctype.stock_entry.services.manufacturing import (
+			validate_sample_quantity,
+		)
+
+		frappe.db.set_value(
+			"Company", "_Test Company", "sample_retention_warehouse", "_Test Warehouse 1 - _TC"
+		)
+		frappe.db.set_value("Company", "_Test Company 1", "sample_retention_warehouse", None)
+		item = make_item(
+			"_Sample Qty No Retention Item",
+			{"is_stock_item": 1, "retain_sample": 1, "sample_quantity": 2, "has_batch_no": 1},
+		)
+		self.assertRaises(
+			frappe.ValidationError,
+			validate_sample_quantity,
+			item.name,
+			1,
+			5,
+			"_Test Company 1",
+			"_Sample Batch",
+		)
+
 	# ── get_expired_batches ────────────────────────────────────────────────────
 
 	def test_get_expired_batches_includes_expired_batch(self):
