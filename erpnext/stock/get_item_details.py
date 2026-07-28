@@ -63,6 +63,7 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 	for_validate = process_string_args(for_validate)
 	overwrite_warehouse = process_string_args(overwrite_warehouse)
 	item = frappe.get_cached_doc("Item", args.item_code)
+	item.check_permission()
 	validate_item_details(args, item)
 
 	if isinstance(doc, str):
@@ -177,10 +178,9 @@ def update_bin_details(args, out, doc):
 		out.update(get_bin_details(args.item_code, args.get("from_warehouse")))
 
 	elif out.get("warehouse"):
-		company = args.company if (doc and doc.get("doctype") == "Purchase Order") else None
-
-		# calculate company_total_stock only for po
-		bin_details = get_bin_details(args.item_code, out.warehouse, company, include_child_warehouses=True)
+		bin_details = get_bin_details(
+			args.item_code, out.warehouse, args.company, include_child_warehouses=True
+		)
 
 		out.update(bin_details)
 

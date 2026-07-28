@@ -8,7 +8,7 @@ from frappe.utils import cint
 from frappe.utils.nestedset import NestedSet
 from pypika.terms import ExistsCriterion
 
-from erpnext.stock import get_warehouse_account
+from erpnext.stock import get_warehouse_account, get_warehouse_account_map
 
 
 class Warehouse(NestedSet):
@@ -195,11 +195,19 @@ def get_child_warehouses(warehouse):
 
 def get_warehouses_based_on_account(account, company=None):
 	warehouses = []
+	warehouse_account_map = None
 	for d in frappe.get_all(
 		"Warehouse", fields=["name", "is_group"], filters={"account": account, "disabled": 0}
 	):
 		if d.is_group:
-			warehouses.extend(get_child_warehouses(d.name))
+			# Keep only children whose effective account matches; a child can override the group's account
+			if warehouse_account_map is None:
+				warehouse_account_map = get_warehouse_account_map(company)
+			warehouses.extend(
+				w
+				for w in get_child_warehouses(d.name)
+				if (warehouse_account_map.get(w) or {}).get("account") == account
+			)
 		else:
 			warehouses.append(d.name)
 

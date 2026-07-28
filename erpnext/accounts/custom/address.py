@@ -15,7 +15,7 @@ class ERPNextAddress(Address):
 
 	def link_address(self):
 		"""Link address based on owner"""
-		if self.is_your_company_address:
+		if self.get("is_your_company_address"):
 			return
 
 		return super().link_address()
@@ -26,7 +26,9 @@ class ERPNextAddress(Address):
 				self.is_your_company_address = 1
 
 	def validate_reference(self):
-		if self.is_your_company_address and not [row for row in self.links if row.link_doctype == "Company"]:
+		if self.get("is_your_company_address") and not [
+			row for row in self.links if row.link_doctype == "Company"
+		]:
 			frappe.throw(
 				_(
 					"Address needs to be linked to a Company. Please add a row for Company in the Links table."

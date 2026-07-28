@@ -1606,6 +1606,118 @@ class TestProductionPlan(FrappeTestCase):
 				self.assertTrue(row.warehouse == mrp_warhouse)
 				self.assertEqual(row.quantity, 12.0)
 
+	def test_purchase_uom_falls_back_to_uom_conversion_factor(self):
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+
+		if not frappe.db.exists("UOM Conversion Factor", {"from_uom": "Kg", "to_uom": "Gram"}):
+			frappe.get_doc(
+				doctype="UOM Conversion Factor",
+				category="Mass",
+				from_uom="Kg",
+				to_uom="Gram",
+				value=1000,
+			).insert()
+
+		rm = make_item("Test RM Item Global CF", {"is_stock_item": 1, "stock_uom": "Gram"})
+		rm.purchase_uom = "Kg"
+		rm.save()
+		self.assertFalse([row for row in rm.uoms if row.uom == "Kg"])
+
+		bom_tree = {"Test FG Item Global CF": {rm.name: {}}}
+		parent_bom = create_nested_bom(bom_tree, prefix="")
+
+		plan = create_production_plan(
+			item_code=parent_bom.item,
+			planned_qty=2000,
+			ignore_existing_ordered_qty=1,
+			skip_getting_mr_items=1,
+			do_not_submit=1,
+			warehouse="_Test Warehouse - _TC",
+		)
+		plan.for_warehouse = "_Test Warehouse - _TC"
+
+		items = get_items_for_material_requests(
+			plan.as_dict(), warehouses=[{"warehouse": "_Test Warehouse - _TC"}]
+		)
+
+		row = frappe._dict(next(item for item in items if item["item_code"] == rm.name))
+		self.assertEqual(row.uom, "Kg")
+		self.assertEqual(row.conversion_factor, 1000)
+		self.assertEqual(row.quantity, 2)
+
+	def test_variant_inherits_purchase_uom_conversion_factor_of_template(self):
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+
+		template = make_item(
+			"TRMVCF",
+			{
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"has_variants": 1,
+				"attributes": [{"attribute": "Colour"}],
+			},
+		)
+		if not [row for row in template.uoms if row.uom == "Box"]:
+			template.purchase_uom = "Box"
+			template.append("uoms", {"uom": "Box", "conversion_factor": 12})
+			template.save()
+
+		if not frappe.db.exists("Item", "TRMVCF-RED"):
+			create_variant("TRMVCF", {"Colour": "Red"}).insert()
+
+		variant = frappe.get_doc("Item", "TRMVCF-RED")
+		variant.uoms = [row for row in variant.uoms if row.uom != "Box"]
+		variant.purchase_uom = "Box"
+		variant.save()
+
+		bom_tree = {"Test FG Item Variant CF": {variant.name: {}}}
+		parent_bom = create_nested_bom(bom_tree, prefix="")
+
+		plan = create_production_plan(
+			item_code=parent_bom.item,
+			planned_qty=24,
+			ignore_existing_ordered_qty=1,
+			skip_getting_mr_items=1,
+			do_not_submit=1,
+			warehouse="_Test Warehouse - _TC",
+		)
+		plan.for_warehouse = "_Test Warehouse - _TC"
+
+		items = get_items_for_material_requests(
+			plan.as_dict(), warehouses=[{"warehouse": "_Test Warehouse - _TC"}]
+		)
+
+		row = frappe._dict(next(item for item in items if item["item_code"] == variant.name))
+		self.assertEqual(row.conversion_factor, 12)
+		self.assertEqual(row.quantity, 2)
+
+	def test_missing_purchase_uom_conversion_factor_throws(self):
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+
+		rm = make_item("Test RM Item Missing CF", {"is_stock_item": 1, "stock_uom": "Nos"})
+		rm.purchase_uom = "Box"
+		rm.save()
+
+		bom_tree = {"Test FG Item Missing CF": {rm.name: {}}}
+		parent_bom = create_nested_bom(bom_tree, prefix="")
+
+		plan = create_production_plan(
+			item_code=parent_bom.item,
+			planned_qty=10,
+			ignore_existing_ordered_qty=1,
+			skip_getting_mr_items=1,
+			do_not_submit=1,
+			warehouse="_Test Warehouse - _TC",
+		)
+		plan.for_warehouse = "_Test Warehouse - _TC"
+
+		with self.assertRaises(frappe.ValidationError) as error:
+			get_items_for_material_requests(
+				plan.as_dict(), warehouses=[{"warehouse": "_Test Warehouse - _TC"}]
+			)
+
+		self.assertIn("UOM Conversion factor", str(error.exception))
+
 	def test_mr_qty_for_same_rm_with_different_sub_assemblies(self):
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
 
@@ -1831,6 +1943,17 @@ class TestProductionPlan(FrappeTestCase):
 		mr_items = get_items_for_material_requests(pln.as_dict())
 		for d in mr_items:
 			self.assertEqual(d.get("quantity"), 1000.0)
+
+		source_warehouse = create_warehouse("MOQ Source Warehouse", company="_Test Company")
+		make_stock_entry(item_code=rm_item, qty=7, rate=100, target=source_warehouse)
+
+		mr_items = get_items_for_material_requests(
+			pln.as_dict(), warehouses=[{"warehouse": source_warehouse}]
+		)
+		self.assertEqual(len(mr_items), 2)
+		items_by_type = {d.get("material_request_type"): d for d in mr_items}
+		self.assertEqual(items_by_type["Material Transfer"].get("quantity"), 7.0)
+		self.assertEqual(items_by_type["Purchase"].get("quantity"), 1000.0)
 
 	def test_fg_item_quantity(self):
 		fg_item = make_item(properties={"is_stock_item": 1}).name

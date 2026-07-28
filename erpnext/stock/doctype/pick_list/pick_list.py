@@ -1339,6 +1339,9 @@ def create_dn_wo_so(pick_list, delivery_note=None):
 
 	delivery_note.company = pick_list.company
 
+	if not delivery_note.customer:
+		delivery_note.customer = pick_list.customer
+
 	item_table_mapper_without_so = {
 		"doctype": "Delivery Note Item",
 		"field_map": {
