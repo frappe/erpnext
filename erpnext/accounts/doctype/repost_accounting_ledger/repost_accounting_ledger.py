@@ -229,24 +229,24 @@ class RepostAccountingLedger(Document):
 			frappe.throw(_("Scheduler is inactive. Cannot start reposting."), title=_("Scheduler Inactive"))
 
 		self.db_set("status", "Queued")
-
-		if frappe.in_test:
-			repost(repost_doc_name=self.name)
-			return
-
-		job_id = frappe.generate_hash()
-		frappe.enqueue(
-			method="erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger.repost",
-			repost_doc_name=self.name,
-			queue="long",
-			timeout=REPOST_JOB_TIMEOUT,
-			is_async=True,
-			job_name=f"repost_accounting_ledger_{self.name}",
-			job_id=job_id,
-			enqueue_after_commit=True,
-		)
-		self.db_set("scheduled_job", job_id)
+		self.db_set("scheduled_job", _enqueue_repost(self.name))
 		frappe.msgprint(_("Repost has started in the background"), alert=True, indicator="blue")
+
+
+def _enqueue_repost(repost_doc_name: str) -> str:
+	"""Hand the repost over to a background worker and return the id of the job."""
+	job_id = frappe.generate_hash()
+	frappe.enqueue(
+		method="erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger.repost",
+		repost_doc_name=repost_doc_name,
+		queue="long",
+		timeout=REPOST_JOB_TIMEOUT,
+		is_async=True,
+		job_name=f"repost_accounting_ledger_{repost_doc_name}",
+		job_id=job_id,
+		enqueue_after_commit=True,
+	)
+	return job_id
 
 
 def _lock_vouchers(vouchers):
@@ -264,7 +264,13 @@ def _lock_vouchers(vouchers):
 	return locked_docs
 
 
-def repost(repost_doc_name: str):
+def repost(repost_doc_name: str, commit: bool = True):
+	"""Repost every voucher of the document, one transaction at a time.
+
+	`commit` says whether this call owns the transaction. The background job does: it commits
+	after every voucher so that progress survives a crash, and rolls back what it could not
+	finish. A caller running this inside its own transaction passes `False` and keeps both.
+	"""
 	locked_docs = []
 	repost_doc = None
 	try:
@@ -276,7 +282,7 @@ def repost(repost_doc_name: str):
 
 		locked_docs = _lock_vouchers(repost_doc.vouchers)
 
-		repost_doc.db_set("status", "In Progress", commit=not frappe.in_test)
+		repost_doc.db_set("status", "In Progress", commit=commit)
 
 		for x in repost_doc.vouchers:
 			if x.reposted:
@@ -295,7 +301,6 @@ def repost(repost_doc_name: str):
 								x.voucher_type, x.voucher_no
 							),
 						},
-						commit=not frappe.in_test,
 					)
 					continue
 
@@ -313,23 +318,21 @@ def repost(repost_doc_name: str):
 			else:
 				x.db_set({"reposted": 1, "traceback": ""})
 			finally:
-				if not frappe.in_test:
+				if commit:
 					frappe.db.commit()  # nosemgrep
 
 	except Exception:
-		if frappe.in_test:
-			# Don't silently fail in tests,
-			# there is no reason for reposts to fail in CI
-			raise
+		if commit:
+			frappe.db.rollback()
 
-		frappe.db.rollback()
 		_record_repost_failure(repost_doc_name, repost_doc)
+		raise
 	else:
 		repost_doc.db_set({"status": _derive_status(repost_doc), "error_log": ""}, notify=True)
 	finally:
 		for doc in locked_docs:
 			doc.unlock()
-		if not frappe.in_test:
+		if commit:
 			frappe.db.commit()  # nosemgrep
 
 

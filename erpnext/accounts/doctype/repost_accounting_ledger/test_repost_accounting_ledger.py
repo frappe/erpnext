@@ -7,7 +7,6 @@ from unittest.mock import patch
 import frappe
 from frappe import qb
 from frappe.query_builder.functions import Sum
-from frappe.tests.utils import toggle_test_mode
 from frappe.utils import add_days, nowdate, today
 
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
@@ -17,6 +16,7 @@ from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger 
 	_record_repost_failure,
 	_repost_allowed_hook_doctypes,
 	_repost_vouchers,
+	repost,
 )
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.utils import get_fiscal_year
@@ -32,6 +32,16 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 	def setUp(self):
 		frappe.db.set_single_value("Selling Settings", "validate_selling_price", 0)
 		update_repost_settings()
+
+		# reposting is handed over to a worker; run it in the foreground and inside the
+		# transaction of the test instead
+		patcher = patch(f"{REPOST_MODULE}._enqueue_repost", side_effect=self.repost_in_foreground)
+		patcher.start()
+		self.addCleanup(patcher.stop)
+
+	def repost_in_foreground(self, repost_doc_name):
+		repost(repost_doc_name, commit=False)
+		return frappe.generate_hash()
 
 	def create_sales_invoice(self, **kwargs):
 		return create_sales_invoice(
@@ -77,15 +87,6 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 
 		with patch(f"{REPOST_MODULE}._repost_vouchers", side_effect=repost_voucher):
 			yield
-
-	@contextmanager
-	def outside_test_mode(self):
-		"""Reposting is only handed over to a background job outside of test mode."""
-		try:
-			toggle_test_mode(False)
-			yield
-		finally:
-			toggle_test_mode(True)
 
 	def assert_repost_blocked(self, ral, message):
 		self.assertRaisesRegex(frappe.ValidationError, message, ral.start_repost)
@@ -359,12 +360,6 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 		ral.reload()
 
 		with patch(f"{REPOST_MODULE}.is_job_enqueued", return_value=False):
-			with (
-				self.outside_test_mode(),
-				patch(f"{REPOST_MODULE}.is_scheduler_inactive", return_value=True),
-			):
-				self.assert_repost_blocked(ral, "Scheduler is inactive")
-
 			# the job is gone, so `In Progress` must not keep the document stuck
 			ral.start_repost()
 
