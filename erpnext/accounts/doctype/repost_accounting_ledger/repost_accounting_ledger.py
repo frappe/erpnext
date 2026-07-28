@@ -266,6 +266,7 @@ def _lock_vouchers(vouchers):
 
 def repost(repost_doc_name: str):
 	locked_docs = []
+	repost_doc = None
 	try:
 		from erpnext.accounts.utils import _delete_accounting_ledger_entries, _delete_adv_pl_entries
 
@@ -322,31 +323,44 @@ def repost(repost_doc_name: str):
 			raise
 
 		frappe.db.rollback()
-		traceback = frappe.get_traceback(with_context=True)
-
-		frappe.log_error(
-			title=_("Unable to Repost Accounting Ledger"),
-		)
-
-		frappe.db.set_value(
-			"Repost Accounting Ledger", repost_doc_name, {"error_log": traceback, "status": "Failed"}
-		)
+		_record_repost_failure(repost_doc_name, repost_doc)
 	else:
-		reposted = sum(1 for voucher in repost_doc.vouchers if voucher.reposted)
-
-		if reposted == len(repost_doc.vouchers):
-			status = "Completed"
-		elif reposted == 0:
-			status = "Failed"
-		else:
-			status = "Partially Reposted"
-
-		repost_doc.db_set({"status": status, "error_log": ""}, notify=True)
+		repost_doc.db_set({"status": _derive_status(repost_doc), "error_log": ""}, notify=True)
 	finally:
 		for doc in locked_docs:
 			doc.unlock()
 		if not frappe.in_test:
 			frappe.db.commit()  # nosemgrep
+
+
+def _derive_status(repost_doc) -> str:
+	"""Vouchers are committed one by one, so the status has to follow what was actually reposted."""
+	reposted = sum(1 for voucher in repost_doc.vouchers if voucher.reposted)
+
+	if reposted == len(repost_doc.vouchers):
+		return "Completed"
+	elif reposted == 0:
+		return "Failed"
+
+	return "Partially Reposted"
+
+
+def _record_repost_failure(repost_doc_name: str, repost_doc=None) -> None:
+	"""Persist the traceback of a run that could not finish, without discarding its progress."""
+	traceback = frappe.get_traceback(with_context=True)
+
+	frappe.log_error(
+		title=_("Unable to Repost Accounting Ledger"),
+		reference_doctype="Repost Accounting Ledger",
+		reference_name=repost_doc_name,
+	)
+
+	# the document is unavailable only when it could not be loaded, i.e. nothing was reposted
+	status = _derive_status(repost_doc) if repost_doc else "Failed"
+
+	frappe.db.set_value(
+		"Repost Accounting Ledger", repost_doc_name, {"error_log": traceback, "status": status}
+	)
 
 
 def _repost_vouchers(doc, delete_cancelled_entries: bool | int | None):

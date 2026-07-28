@@ -14,6 +14,7 @@ from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journ
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger import (
+	_record_repost_failure,
 	_repost_allowed_hook_doctypes,
 	_repost_vouchers,
 )
@@ -403,7 +404,35 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 			self.assertEqual(voucher.reposted, 1)
 			self.assertFalse(voucher.traceback)
 
-	def test_12_failed_repost_skips_cancelled_voucher(self):
+	def test_12_status_of_a_run_that_could_not_finish(self):
+		si, pe = self.create_invoice_and_payment()
+
+		ral = self.create_repost_doc([si, pe])
+		with self.patched_repost(fail_for=["Payment Entry"]):
+			ral.submit()
+
+		ral.reload()
+
+		# the job dies after the loop committed the invoice, e.g. killed or timed out
+		try:
+			frappe.throw(SIMULATED_FAILURE)
+		except frappe.ValidationError:
+			_record_repost_failure(ral.name, ral)
+
+		ral.reload()
+
+		# progress already committed must not be reported as a total failure
+		self.assertEqual(ral.status, "Partially Reposted")
+		self.assertIn(SIMULATED_FAILURE, ral.error_log)
+		self.assertTrue(
+			frappe.db.exists("Error Log", {"reference_doctype": ral.doctype, "reference_name": ral.name})
+		)
+
+		# a document that could not even be loaded has nothing to report but the failure
+		_record_repost_failure(ral.name)
+		self.assertEqual(frappe.db.get_value(ral.doctype, ral.name, "status"), "Failed")
+
+	def test_13_failed_repost_skips_cancelled_voucher(self):
 		si = self.create_sales_invoice()
 
 		ral = self.create_repost_doc([si])
@@ -423,7 +452,7 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 		self.assertEqual(ral.vouchers[0].reposted, 1)
 		self.assertIn("has been cancelled, nothing to repost", ral.vouchers[0].traceback)
 
-	def test_13_concurrent_repost_is_blocked_by_voucher_lock(self):
+	def test_14_concurrent_repost_is_blocked_by_voucher_lock(self):
 		si, pe = self.create_invoice_and_payment()
 		ral = self.create_repost_doc([si, pe])
 
@@ -438,7 +467,7 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 		finally:
 			locked_pe.unlock()
 
-	def test_14_journal_entry_repost(self):
+	def test_15_journal_entry_repost(self):
 		je = make_journal_entry("_Test Bank - _TC", "_Test Cash - _TC", 500, submit=True)
 		je = frappe.get_doc("Journal Entry", je.name)
 
@@ -468,7 +497,7 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 					cancelled_entries,
 				)
 
-	def test_15_hook_allowed_doctype_repost(self):
+	def test_16_hook_allowed_doctype_repost(self):
 		class VoucherWithCancelArg:
 			doctype = "Test Repost Voucher"
 			name = "TRV-00001"
