@@ -272,16 +272,22 @@ def _enqueue_repost(repost_doc_name: str) -> str:
 	return create_job_id(job_id)
 
 
-def _lock_vouchers(vouchers):
-	"""Lock every voucher up front so a concurrent repost cannot touch the same GL entries."""
-	locked_docs = []
+def _lock_vouchers(vouchers) -> dict:
+	"""Lock every voucher up front so a concurrent repost cannot touch the same GL entries.
+
+	Returns the locked documents keyed by voucher, so reposting does not have to load them
+	a second time. Note that these are file locks under the site directory: they serialise
+	nothing across hosts that do not share it, and a worker killed outright leaves them
+	behind until they expire.
+	"""
+	locked_docs = {}
 	try:
 		for x in vouchers:
 			doc = frappe.get_doc(x.voucher_type, x.voucher_no)
 			doc.lock()
-			locked_docs.append(doc)
+			locked_docs[(x.voucher_type, x.voucher_no)] = doc
 	except Exception:
-		for doc in locked_docs:
+		for doc in locked_docs.values():
 			doc.unlock()
 		raise
 	return locked_docs
@@ -294,7 +300,7 @@ def repost(repost_doc_name: str, commit: bool = True):
 	after every voucher so that progress survives a crash, and rolls back what it could not
 	finish. A caller running this inside its own transaction passes `False` and keeps both.
 	"""
-	locked_docs = []
+	locked_docs = {}
 	repost_doc = None
 	try:
 		from erpnext.accounts.utils import _delete_accounting_ledger_entries, _delete_adv_pl_entries
@@ -316,7 +322,7 @@ def repost(repost_doc_name: str, commit: bool = True):
 			save_point = "reposting"
 			frappe.db.savepoint(save_point=save_point)
 			try:
-				doc = frappe.get_doc(x.voucher_type, x.voucher_no)
+				doc = locked_docs[(x.voucher_type, x.voucher_no)]
 
 				if doc.docstatus == 2:
 					x.db_set(
@@ -355,7 +361,7 @@ def repost(repost_doc_name: str, commit: bool = True):
 	else:
 		repost_doc.db_set({"status": _derive_status(repost_doc), "error_log": ""}, notify=True)
 	finally:
-		for doc in locked_docs:
+		for doc in locked_docs.values():
 			doc.unlock()
 		if commit:
 			frappe.db.commit()  # nosemgrep
