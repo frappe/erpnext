@@ -8,7 +8,6 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "title",
   "naming_series",
   "supplier",
   "supplier_name",
@@ -64,6 +63,7 @@
   "total_additional_costs",
   "tab_other_info",
   "more_info",
+  "title",
   "amended_from",
   "range",
   "column_break4",
@@ -92,10 +92,8 @@
  "fields": [
   {
    "allow_on_submit": 1,
-   "default": "{supplier_name}",
    "fieldname": "title",
    "fieldtype": "Data",
-   "hidden": 1,
    "label": "Title",
    "no_copy": 1,
    "print_hide": 1
@@ -681,7 +679,7 @@
  "in_create": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-27 17:59:44.107193",
+ "modified": "2026-07-28 13:04:52.771908",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Receipt",
@@ -749,6 +747,6 @@
  "sort_order": "DESC",
  "states": [],
  "timeline_field": "supplier",
- "title_field": "title",
+ "title_field": "supplier_name",
  "track_changes": 1
 }
