@@ -22,7 +22,9 @@ frappe.ui.form.on("Repost Accounting Ledger", {
 	},
 
 	refresh: function (frm) {
-		if (["", "Partially Reposted", "Failed"].includes(frm.doc.status) && frm.doc.docstatus == 1) {
+		// `Queued` and `In Progress` stay offered: the server refuses only while the
+		// background job is still alive, so a job that died can be restarted from here.
+		if (frm.doc.docstatus == 1 && !["Completed", "Cancelled"].includes(frm.doc.status)) {
 			frm.add_custom_button(__("Start Reposting"), () => {
 				frm.events.start_repost(frm);
 			});

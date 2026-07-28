@@ -346,7 +346,8 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 		ral.reload()
 		self.assert_repost_blocked(ral, "cannot be started when status is Completed")
 
-		ral.db_set("status", "Failed")
+		# a document left behind by a worker that died mid-repost
+		ral.db_set("status", "In Progress")
 		ral.db_set("scheduled_job", frappe.generate_hash())
 
 		with patch(f"{REPOST_MODULE}.is_job_enqueued", return_value=True):
@@ -363,7 +364,7 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 			):
 				self.assert_repost_blocked(ral, "Scheduler is inactive")
 
-			# none of the guards leave the document in a state that cannot be retried
+			# the job is gone, so `In Progress` must not keep the document stuck
 			ral.start_repost()
 
 		ral.reload()

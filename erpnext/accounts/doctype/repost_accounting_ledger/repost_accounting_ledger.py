@@ -14,6 +14,11 @@ from frappe.utils.scheduler import is_scheduler_inactive
 # Every voucher is reposted by a single background job, so the batch has to stay small enough
 # to finish well within the queue timeout.
 MAX_VOUCHERS_PER_REPOST = 50
+REPOST_JOB_TIMEOUT = 1500
+
+# Statuses a document cannot be moved out of. Everything else can be restarted, including
+# `Queued` and `In Progress`, which are held back by the background job instead.
+TERMINAL_STATUSES = ("Completed", "Cancelled")
 
 
 class RepostAccountingLedger(Document):
@@ -209,9 +214,11 @@ class RepostAccountingLedger(Document):
 		if self.docstatus != 1:
 			frappe.throw(_("Reposting can be started only for submitted document."))
 
-		if self.status in ["Queued", "In Progress", "Completed", "Cancelled"]:
+		if self.status in TERMINAL_STATUSES:
 			frappe.throw(_("Reposting cannot be started when status is {0}.").format(self.status))
 
+		# `Queued` and `In Progress` are not blocked by the status alone. A worker that is killed
+		# or times out leaves the status behind, and the document has to stay restartable.
 		self._raise_error_if_reposting_in_progress()
 
 		self.check_permission("write")
@@ -231,6 +238,8 @@ class RepostAccountingLedger(Document):
 		frappe.enqueue(
 			method="erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger.repost",
 			repost_doc_name=self.name,
+			queue="long",
+			timeout=REPOST_JOB_TIMEOUT,
 			is_async=True,
 			job_name=f"repost_accounting_ledger_{self.name}",
 			job_id=job_id,
