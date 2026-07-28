@@ -990,13 +990,12 @@ class JobCard(Document):
 				"work_order": self.work_order,
 				"operation_id": self.operation_id,
 				"docstatus": 1,
+				"is_corrective_job_card": 0,
 			},
 			fields=["manufactured_qty", "total_completed_qty"],
 		)
 
-		completed_qty = sum(
-			max(flt(row.manufactured_qty), flt(row.total_completed_qty)) for row in job_cards
-		)
+		completed_qty = sum(max(flt(row.manufactured_qty), flt(row.total_completed_qty)) for row in job_cards)
 
 		frappe.db.set_value("Work Order Operation", self.operation_id, "completed_qty", completed_qty)
 		if (
