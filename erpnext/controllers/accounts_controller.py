@@ -260,9 +260,15 @@ class AccountsController(TransactionBase):
 			else:
 				self.validate_deferred_start_and_end_date()
 
+<<<<<<< HEAD
 		self.validate_inter_company_reference()
 		# validate inter  company transaction rate
 		self.validate_internal_transaction()
+=======
+				deferred_service = DeferredAccountingService(self)
+				deferred_service.clear_stale_deferred_fields()
+				deferred_service.validate_start_and_end_date()
+>>>>>>> 5125d64b7f (fix: clear deferred revenue/expense fields on uncheck (#57140))
 
 		self.disable_pricing_rule_on_internal_transfer()
 		self.disable_tax_included_prices_for_internal_transfer()
