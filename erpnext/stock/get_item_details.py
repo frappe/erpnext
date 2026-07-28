@@ -58,20 +58,12 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 	        "set_warehouse": ""
 	}
 	"""
-<<<<<<< HEAD
-=======
-	_preprocess_ctx(ctx)
-	for_validate = parse_json(for_validate)
-	overwrite_warehouse = parse_json(overwrite_warehouse)
-	item = frappe.get_cached_doc("Item", ctx.item_code)
-	item.check_permission()
-	validate_item_details(ctx, item)
->>>>>>> 5835709402 (fix: add permission check for `get_item_details` (#57515))
 
 	args = process_args(args)
 	for_validate = process_string_args(for_validate)
 	overwrite_warehouse = process_string_args(overwrite_warehouse)
 	item = frappe.get_cached_doc("Item", args.item_code)
+	item.check_permission()
 	validate_item_details(args, item)
 
 	if isinstance(doc, str):
