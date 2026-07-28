@@ -238,6 +238,18 @@ class RepostAccountingLedger(Document):
 		frappe.msgprint(_("Repost has started in the background"), alert=True, indicator="blue")
 
 
+def _revalidate_before_repost(repost_doc) -> None:
+	"""Re-run the checks that keep the repost safe, right before it touches the ledger.
+
+	Vouchers are validated when the document is saved, but the repost runs later and can be
+	retried days after that: a period may have been closed or deferred accounting turned on in
+	the meantime. Vouchers cancelled in the meantime are not checked here, they are skipped
+	one by one while reposting.
+	"""
+	repost_doc.validate_for_closed_fiscal_year()
+	repost_doc.validate_for_deferred_accounting()
+
+
 def _enqueue_repost(repost_doc_name: str) -> str:
 	"""Hand the repost over to a background worker and return the id of the job."""
 	job_id = frappe.generate_hash()
@@ -284,6 +296,8 @@ def repost(repost_doc_name: str, commit: bool = True):
 		frappe.flags.through_repost_accounting_ledger = True
 
 		repost_doc = frappe.get_doc("Repost Accounting Ledger", repost_doc_name)
+
+		_revalidate_before_repost(repost_doc)
 
 		locked_docs = _lock_vouchers(repost_doc.vouchers)
 
