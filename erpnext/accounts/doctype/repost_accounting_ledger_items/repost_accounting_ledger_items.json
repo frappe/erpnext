@@ -12,8 +12,6 @@
   "voucher_no",
   "reposting_status_section",
   "status",
-  "reposted",
-  "remark",
   "traceback"
  ],
  "fields": [
@@ -53,23 +51,6 @@
    "label": "Status",
    "no_copy": 1,
    "options": "Pending\nReposted\nSkipped\nFailed",
-   "read_only": 1
-  },
-  {
-   "default": "0",
-   "fieldname": "reposted",
-   "fieldtype": "Check",
-   "label": "Reposted",
-   "no_copy": 1,
-   "read_only": 1,
-   "hidden": 1,
-   "description": "Kept in step with Status for anything still reading this field."
-  },
-  {
-   "fieldname": "remark",
-   "fieldtype": "Small Text",
-   "label": "Remark",
-   "no_copy": 1,
    "read_only": 1
   },
   {

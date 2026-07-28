@@ -17,8 +17,6 @@ class RepostAccountingLedgerItems(Document):
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
-		remark: DF.SmallText | None
-		reposted: DF.Check
 		status: DF.Literal["Pending", "Reposted", "Skipped", "Failed"]
 		traceback: DF.Code | None
 		voucher_no: DF.DynamicLink

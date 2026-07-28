@@ -11,16 +11,9 @@ from frappe.utils.background_jobs import create_job_id, is_job_enqueued
 from frappe.utils.data import comma_and
 from frappe.utils.scheduler import is_scheduler_inactive
 
-# Every voucher is reposted by a single background job, so the batch has to stay small enough
-# to finish well within the queue timeout.
+# a batch has to finish well within the timeout of the job reposting it
 MAX_VOUCHERS_PER_REPOST = 50
-REPOST_JOB_TIMEOUT = 1500
 
-# Statuses a document cannot be moved out of. Everything else can be restarted, including
-# `Queued` and `In Progress`, which are held back by the background job instead.
-TERMINAL_STATUSES = ("Completed", "Cancelled")
-
-# Vouchers in these states are done with: a retry moves on to the rest.
 HANDLED_VOUCHER_STATUSES = ("Reposted", "Skipped")
 
 
@@ -54,6 +47,11 @@ class RepostAccountingLedger(Document):
 
 	def validate(self):
 		self.validate_vouchers()
+		self.validate_repost_preconditions()
+
+	def validate_repost_preconditions(self):
+		"""The checks a repost queued days ago could have outlived, re-run before it touches
+		the ledger. Vouchers cancelled since are skipped one by one while reposting."""
 		self.validate_for_closed_fiscal_year()
 		self.validate_for_deferred_accounting()
 
@@ -209,7 +207,7 @@ class RepostAccountingLedger(Document):
 		self.db_set("status", "Cancelled")
 
 	def _raise_error_if_reposting_in_progress(self):
-		if is_job_enqueued(_repost_job_id(self.name)):
+		if self.scheduled_job and is_job_enqueued(_repost_job_id(self.name)):
 			frappe.throw(_("Reposting is still in progress in background."))
 
 	@frappe.whitelist()
@@ -217,20 +215,18 @@ class RepostAccountingLedger(Document):
 		if self.docstatus != 1:
 			frappe.throw(_("Reposting can be started only for submitted document."))
 
-		# read the status under a row lock, so two concurrent starts cannot both get past here
+		# under a row lock, so two concurrent starts cannot both get past here
 		status = frappe.db.get_value(self.doctype, self.name, "status", for_update=True)
-		if status in TERMINAL_STATUSES:
+		if status in ("Completed", "Cancelled"):
 			frappe.throw(_("Reposting cannot be started when status is {0}.").format(status))
 
-		# `Queued` and `In Progress` are not blocked by the status alone. A worker that is killed
-		# or times out leaves the status behind, and the document has to stay restartable.
+		# `Queued` and `In Progress` are held back by the job, not by the status: a worker that
+		# died leaves the status behind and the document has to stay restartable
 		self._raise_error_if_reposting_in_progress()
 
 		self.check_permission("write")
 
-		# Enqueued jobs are picked up by workers, not by the scheduler, so an inactive scheduler
-		# does not necessarily mean the repost will not run. Say so instead of refusing: a
-		# document that is never picked up can be started again once workers are processing.
+		# workers pick up enqueued jobs whether or not the scheduler runs, so this is a warning
 		if is_scheduler_inactive():
 			frappe.msgprint(
 				_("Scheduler is inactive. Reposting will only run once background jobs are processed."),
@@ -238,60 +234,42 @@ class RepostAccountingLedger(Document):
 				indicator="orange",
 			)
 
-		self.db_set("status", "Queued")
-		self.db_set("scheduled_job", _enqueue_repost(self.name))
+		self.db_set({"status": "Queued", "scheduled_job": create_job_id(_repost_job_id(self.name))})
+		_enqueue_repost(self.name)
 		frappe.msgprint(_("Repost has started in the background"), alert=True, indicator="blue")
 
 
-def _revalidate_before_repost(repost_doc) -> None:
-	"""Re-run the checks that keep the repost safe, right before it touches the ledger.
-
-	Vouchers are validated when the document is saved, but the repost runs later and can be
-	retried days after that: a period may have been closed or deferred accounting turned on in
-	the meantime. Vouchers cancelled in the meantime are not checked here, they are skipped
-	one by one while reposting.
-	"""
-	repost_doc.validate_for_closed_fiscal_year()
-	repost_doc.validate_for_deferred_accounting()
-
-
 def _repost_job_id(repost_doc_name: str) -> str:
-	"""Derive the job id from the document, so a repost can only ever have one job."""
+	"""Derived from the document, so a repost can only ever have one job."""
 	return f"repost_accounting_ledger::{repost_doc_name}"
 
 
-def _enqueue_repost(repost_doc_name: str) -> str:
-	"""Hand the repost over to a background worker and return the name of the `RQ Job`.
+def _enqueue_repost(repost_doc_name: str) -> None:
+	"""Hand the repost to a background worker.
 
-	Documents edited after submit repost themselves through `repost_accounting_entries`, and
-	tests across apps assert on the ledger right after doing so. They run the repost here
-	instead, in the foreground and inside their own transaction.
+	Tests run it in the foreground, inside their own transaction: documents edited after submit
+	repost themselves through `repost_accounting_entries`, and tests across apps assert on the
+	ledger right after doing so.
 	"""
-	job_id = _repost_job_id(repost_doc_name)
-
-	if frappe.in_test:
-		repost(repost_doc_name, commit=False)
-	else:
-		frappe.enqueue(
-			method="erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger.repost",
-			repost_doc_name=repost_doc_name,
-			queue="long",
-			timeout=REPOST_JOB_TIMEOUT,
-			job_id=job_id,
-			deduplicate=True,
-			enqueue_after_commit=True,
-		)
-
-	return create_job_id(job_id)
+	frappe.enqueue(
+		method="erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger.repost",
+		repost_doc_name=repost_doc_name,
+		commit=not frappe.in_test,
+		queue="long",
+		timeout=1500,
+		job_id=_repost_job_id(repost_doc_name),
+		deduplicate=True,
+		enqueue_after_commit=True,
+		now=frappe.in_test,
+	)
 
 
 def _lock_vouchers(vouchers) -> dict:
 	"""Lock every voucher up front so a concurrent repost cannot touch the same GL entries.
 
-	Returns the locked documents keyed by voucher, so reposting does not have to load them
-	a second time. Note that these are file locks under the site directory: they serialise
-	nothing across hosts that do not share it, and a worker killed outright leaves them
-	behind until they expire.
+	Returns them keyed by voucher, so reposting does not load them again. These are file locks
+	under the site directory: they serialise nothing across hosts that do not share it, and a
+	worker killed outright leaves them behind until they expire.
 	"""
 	locked_docs = {}
 	try:
@@ -309,26 +287,27 @@ def _lock_vouchers(vouchers) -> dict:
 def repost(repost_doc_name: str, commit: bool = True):
 	"""Repost every voucher of the document, one transaction at a time.
 
-	`commit` says whether this call owns the transaction. The background job does: it commits
-	after every voucher so that progress survives a crash, and rolls back what it could not
-	finish. A caller running this inside its own transaction passes `False` and keeps both.
+	`commit` says whether this call owns the transaction. The background job does, and commits
+	after every voucher so progress survives a crash; a caller inside its own passes `False`.
 	"""
+	from erpnext.accounts.utils import _delete_accounting_ledger_entries, _delete_adv_pl_entries
+
+	frappe.flags.through_repost_accounting_ledger = True
+
+	repost_doc = frappe.get_doc("Repost Accounting Ledger", repost_doc_name)
 	locked_docs = {}
-	repost_doc = None
+
 	try:
-		from erpnext.accounts.utils import _delete_accounting_ledger_entries, _delete_adv_pl_entries
-
-		frappe.flags.through_repost_accounting_ledger = True
-
-		repost_doc = frappe.get_doc("Repost Accounting Ledger", repost_doc_name)
-
-		_revalidate_before_repost(repost_doc)
+		repost_doc.validate_repost_preconditions()
 
 		locked_docs = _lock_vouchers(repost_doc.vouchers)
 
 		repost_doc.db_set("status", "In Progress", commit=commit)
 
 		for position, x in enumerate(repost_doc.vouchers, start=1):
+			if x.status in HANDLED_VOUCHER_STATUSES:
+				continue
+
 			frappe.publish_progress(
 				position * 100 / len(repost_doc.vouchers),
 				doctype=repost_doc.doctype,
@@ -336,25 +315,13 @@ def repost(repost_doc_name: str, commit: bool = True):
 				description=_("Reposting {0} {1}").format(x.voucher_type, x.voucher_no),
 			)
 
-			if x.status in HANDLED_VOUCHER_STATUSES:
-				continue
-
 			save_point = "reposting"
 			frappe.db.savepoint(save_point=save_point)
 			try:
 				doc = locked_docs[(x.voucher_type, x.voucher_no)]
 
 				if doc.docstatus == 2:
-					x.db_set(
-						{
-							"status": "Skipped",
-							"reposted": 1,
-							"remark": _("{0} {1} has been cancelled, nothing to repost.").format(
-								x.voucher_type, x.voucher_no
-							),
-							"traceback": "",
-						},
-					)
+					x.db_set({"status": "Skipped", "traceback": ""})
 					continue
 
 				if repost_doc.delete_cancelled_entries:
@@ -365,9 +332,9 @@ def repost(repost_doc_name: str, commit: bool = True):
 			except Exception:
 				frappe.db.rollback(save_point=save_point)
 
-				x.db_set({"status": "Failed", "reposted": 0, "traceback": frappe.get_traceback()})
+				x.db_set({"status": "Failed", "traceback": frappe.get_traceback()})
 			else:
-				x.db_set({"status": "Reposted", "reposted": 1, "remark": "", "traceback": ""})
+				x.db_set({"status": "Reposted", "traceback": ""})
 			finally:
 				if commit:
 					frappe.db.commit()  # nosemgrep
@@ -376,7 +343,7 @@ def repost(repost_doc_name: str, commit: bool = True):
 		if commit:
 			frappe.db.rollback()
 
-		_record_repost_failure(repost_doc_name, repost_doc)
+		_record_repost_failure(repost_doc)
 		raise
 	else:
 		repost_doc.db_set({"status": _derive_status(repost_doc), "error_log": ""}, notify=True)
@@ -388,7 +355,7 @@ def repost(repost_doc_name: str, commit: bool = True):
 
 
 def _derive_status(repost_doc) -> str:
-	"""Vouchers are committed one by one, so the status has to follow what was actually handled."""
+	"""Vouchers are committed one by one, so the status follows what was actually handled."""
 	handled = sum(1 for voucher in repost_doc.vouchers if voucher.status in HANDLED_VOUCHER_STATUSES)
 
 	if handled == len(repost_doc.vouchers):
@@ -399,24 +366,19 @@ def _derive_status(repost_doc) -> str:
 	return "Partially Reposted"
 
 
-def _record_repost_failure(repost_doc_name: str, repost_doc=None) -> None:
+def _record_repost_failure(repost_doc) -> None:
 	"""Persist the traceback of a run that could not finish, without discarding its progress."""
-	# `frappe.log_error` keeps the full traceback, including the local variables of every
-	# frame. Those belong in the Error Log, which is not readable by everyone who can read
-	# this document.
+	# the traceback with frame locals goes to the Error Log, which is permissioned separately
 	traceback = frappe.get_traceback()
 
 	frappe.log_error(
 		title=_("Unable to Repost Accounting Ledger"),
-		reference_doctype="Repost Accounting Ledger",
-		reference_name=repost_doc_name,
+		reference_doctype=repost_doc.doctype,
+		reference_name=repost_doc.name,
 	)
 
-	# the document is unavailable only when it could not be loaded, i.e. nothing was reposted
-	status = _derive_status(repost_doc) if repost_doc else "Failed"
-
 	frappe.db.set_value(
-		"Repost Accounting Ledger", repost_doc_name, {"error_log": traceback, "status": status}
+		repost_doc.doctype, repost_doc.name, {"error_log": traceback, "status": _derive_status(repost_doc)}
 	)
 
 

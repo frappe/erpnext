@@ -8,13 +8,11 @@ import frappe
 from frappe import qb
 from frappe.query_builder.functions import Sum
 from frappe.utils import add_days, nowdate, today
-from frappe.utils.background_jobs import create_job_id
 
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger import (
-	_enqueue_repost,
 	_record_repost_failure,
 	_repost_allowed_hook_doctypes,
 	_repost_job_id,
@@ -36,7 +34,7 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 		frappe.db.set_single_value("Selling Settings", "validate_selling_price", 0)
 		update_repost_settings()
 
-	def create_sales_invoice(self, **kwargs):
+	def make_invoice(self, **kwargs):
 		return create_sales_invoice(
 			item="_Test Item",
 			company="_Test Company",
@@ -48,8 +46,8 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 			**kwargs,
 		)
 
-	def create_invoice_and_payment(self):
-		si = self.create_sales_invoice()
+	def make_invoice_and_payment(self):
+		si = self.make_invoice()
 		pe = get_payment_entry(si.doctype, si.name)
 		pe.save().submit()
 		return si, pe
@@ -68,24 +66,47 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 		return ral
 
 	@contextmanager
-	def patched_repost(self, fail_for=(), calls=None):
-		"""Record the vouchers handed over to `_repost_vouchers` and fail the given voucher types."""
+	def patched_repost(self, fail_for=()):
+		"""Yield the vouchers handed over to `_repost_vouchers`, failing the given types."""
+		reposted = []
 
 		def repost_voucher(doc, delete_cancelled_entries):
-			if calls is not None:
-				calls.append(doc.name)
+			reposted.append(doc.name)
 			if doc.doctype in fail_for:
 				frappe.throw(SIMULATED_FAILURE)
 			_repost_vouchers(doc, delete_cancelled_entries)
 
-		with patch(f"{REPOST_MODULE}._repost_vouchers", side_effect=repost_voucher):
-			yield
+		with patch(f"{REPOST_MODULE}._repost_vouchers", new=repost_voucher):
+			yield reposted
 
-	def assert_repost_blocked(self, ral, message):
-		self.assertRaisesRegex(frappe.ValidationError, message, ral.start_repost)
+	def make_period_closing_voucher(self):
+		fy = get_fiscal_year(today(), company="_Test Company")
+		pcv = frappe.get_doc(
+			{
+				"doctype": "Period Closing Voucher",
+				"transaction_date": today(),
+				"period_start_date": fy[1],
+				"period_end_date": today(),
+				"company": "_Test Company",
+				"fiscal_year": fy[0],
+				"cost_center": "Main - _TC",
+				"closing_account_head": "Retained Earnings - _TC",
+				"remarks": "test",
+			}
+		)
+		return pcv.save().submit()
+
+	def get_gl_totals(self, voucher_no, is_cancelled=0):
+		gl = qb.DocType("GL Entry")
+		return (
+			qb.from_(gl)
+			.select(Sum(gl.debit).as_("debit"), Sum(gl.credit).as_("credit"))
+			.where((gl.voucher_no == voucher_no) & (gl.is_cancelled == is_cancelled))
+			.run()
+		)[0]
 
 	def test_01_basic_functions(self):
-		si = self.create_sales_invoice()
+		si = self.make_invoice()
 
 		preq = frappe.get_doc(
 			make_payment_request(
@@ -120,44 +141,24 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 		gle = frappe.db.get_all("GL Entry", filters={"voucher_no": si.name, "account": "Debtors - _TC"})
 		frappe.db.set_value("GL Entry", gle[0], "debit", 90)
 
-		gl = qb.DocType("GL Entry")
-		res = (
-			qb.from_(gl)
-			.select(gl.voucher_no, Sum(gl.debit).as_("debit"), Sum(gl.credit).as_("credit"))
-			.where((gl.voucher_no == si.name) & (gl.is_cancelled == 0))
-			.groupby(gl.voucher_no)
-			.run()
-		)
-
 		# Assert incorrect ledger balance
-		self.assertNotEqual(res[0], (si.name, 100, 100))
+		self.assertNotEqual(self.get_gl_totals(si.name), (100, 100))
 
 		# Submit repost document
 		ral.save().submit()
 
-		res = (
-			qb.from_(gl)
-			.select(gl.voucher_no, Sum(gl.debit).as_("debit"), Sum(gl.credit).as_("credit"))
-			.where((gl.voucher_no == si.name) & (gl.is_cancelled == 0))
-			.groupby(gl.voucher_no)
-			.run()
-		)
-
 		# Ledger should reflect correct amount post repost
-		self.assertEqual(res[0], (si.name, 100, 100))
+		self.assertEqual(self.get_gl_totals(si.name), (100, 100))
 
 	def test_02_deferred_accounting_valiations(self):
-		si = self.create_sales_invoice(do_not_submit=True)
+		si = self.make_invoice(do_not_submit=True)
 		si.items[0].enable_deferred_revenue = True
 		si.items[0].deferred_revenue_account = "Deferred Revenue - _TC"
 		si.items[0].service_start_date = nowdate()
 		si.items[0].service_end_date = add_days(nowdate(), 90)
 		si.save().submit()
 
-		ral = frappe.new_doc("Repost Accounting Ledger")
-		ral.company = "_Test Company"
-		ral.append("vouchers", {"voucher_type": si.doctype, "voucher_no": si.name})
-		self.assertRaises(frappe.ValidationError, ral.save)
+		self.assertRaises(frappe.ValidationError, self.create_repost_doc, [si])
 
 	@ERPNextTestSuite.change_settings("Accounts Settings", {"delete_linked_ledger_entries": 1})
 	def test_04_pcv_validation(self):
@@ -165,34 +166,17 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 		gl = frappe.qb.DocType("GL Entry")
 		qb.from_(gl).delete().where(gl.company == "_Test Company").run()
 
-		si = self.create_sales_invoice()
-		fy = get_fiscal_year(today(), company="_Test Company")
-		pcv = frappe.get_doc(
-			{
-				"doctype": "Period Closing Voucher",
-				"transaction_date": today(),
-				"period_start_date": fy[1],
-				"period_end_date": today(),
-				"company": "_Test Company",
-				"fiscal_year": fy[0],
-				"cost_center": "Main - _TC",
-				"closing_account_head": "Retained Earnings - _TC",
-				"remarks": "test",
-			}
-		)
-		pcv.save().submit()
+		si = self.make_invoice()
+		pcv = self.make_period_closing_voucher()
 
-		ral = frappe.new_doc("Repost Accounting Ledger")
-		ral.company = "_Test Company"
-		ral.append("vouchers", {"voucher_type": si.doctype, "voucher_no": si.name})
-		self.assertRaises(frappe.ValidationError, ral.save)
+		self.assertRaises(frappe.ValidationError, self.create_repost_doc, [si])
 
 		pcv.reload()
 		pcv.cancel()
 		pcv.delete()
 
 	def test_03_deletion_flag_and_preview_function(self):
-		si, pe = self.create_invoice_and_payment()
+		si, pe = self.make_invoice_and_payment()
 
 		# with deletion flag set
 		self.create_repost_doc([si, pe], delete_cancelled_entries=True, submit=True)
@@ -201,7 +185,7 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 		self.assertIsNone(frappe.db.exists("GL Entry", {"voucher_no": pe.name, "is_cancelled": 1}))
 
 	def test_05_without_deletion_flag(self):
-		si, pe = self.create_invoice_and_payment()
+		si, pe = self.make_invoice_and_payment()
 
 		# without deletion flag set
 		self.create_repost_doc([si, pe], submit=True)
@@ -277,9 +261,9 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 		company.save()
 
 	def test_07_voucher_validations(self):
-		submitted_si = self.create_sales_invoice()
-		draft_si = self.create_sales_invoice(do_not_submit=True)
-		cancelled_si = self.create_sales_invoice()
+		submitted_si = self.make_invoice()
+		draft_si = self.make_invoice(do_not_submit=True)
+		cancelled_si = self.make_invoice()
 		cancelled_si.cancel()
 
 		for vouchers, exception, message in (
@@ -295,8 +279,8 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 		self.create_repost_doc([submitted_si])
 
 	def test_08_voucher_count_limit(self):
-		si, pe = self.create_invoice_and_payment()
-		another_si = self.create_sales_invoice()
+		si, pe = self.make_invoice_and_payment()
+		another_si = self.make_invoice()
 
 		with patch(f"{REPOST_MODULE}.MAX_VOUCHERS_PER_REPOST", 2):
 			self.create_repost_doc([si, pe])
@@ -308,7 +292,7 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 			)
 
 	def test_09_status_lifecycle(self):
-		si, pe = self.create_invoice_and_payment()
+		si, pe = self.make_invoice_and_payment()
 
 		ral = self.create_repost_doc([si, pe])
 		self.assertEqual(ral.status, "")
@@ -320,7 +304,6 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 		self.assertFalse(ral.error_log)
 		for voucher in ral.vouchers:
 			self.assertEqual(voucher.status, "Reposted")
-			self.assertEqual(voucher.reposted, 1)
 			self.assertFalse(voucher.traceback)
 
 		ral.cancel()
@@ -333,20 +316,24 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 		self.assertEqual(discarded.status, "Cancelled")
 
 	def test_10_start_repost_guards(self):
-		si = self.create_sales_invoice()
+		si = self.make_invoice()
 		ral = self.create_repost_doc([si])
 
-		self.assert_repost_blocked(ral, "only for submitted document")
+		self.assertRaisesRegex(frappe.ValidationError, "only for submitted document", ral.start_repost)
 
 		ral.submit()
 		ral.reload()
-		self.assert_repost_blocked(ral, "cannot be started when status is Completed")
+		self.assertRaisesRegex(
+			frappe.ValidationError, "cannot be started when status is Completed", ral.start_repost
+		)
 
 		# a document left behind by a worker that died mid-repost
 		ral.db_set("status", "In Progress")
 
 		with patch(f"{REPOST_MODULE}.is_job_enqueued", return_value=True):
-			self.assert_repost_blocked(ral, "still in progress in background")
+			self.assertRaisesRegex(
+				frappe.ValidationError, "still in progress in background", ral.start_repost
+			)
 			self.assertRaisesRegex(frappe.ValidationError, "still in progress in background", ral.cancel)
 
 		# `cancel` flips docstatus in memory before running `before_cancel`
@@ -360,17 +347,12 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 		self.assertEqual(ral.status, "Completed")
 
 	def test_11_repost_job_is_tied_to_the_document(self):
-		si = self.create_sales_invoice()
+		si = self.make_invoice()
 		ral = self.create_repost_doc([si], submit=True)
+		ral.db_set("status", "Failed")
 
-		# the stored job is the `RQ Job` of this repost, so the link resolves
-		self.assertEqual(ral.scheduled_job, create_job_id(_repost_job_id(ral.name)))
-
-		with (
-			patch(f"{REPOST_MODULE}.frappe.in_test", False),
-			patch(f"{REPOST_MODULE}.frappe.enqueue") as enqueue,
-		):
-			_enqueue_repost(ral.name)
+		with patch(f"{REPOST_MODULE}.frappe.enqueue") as enqueue:
+			ral.start_repost()
 
 		kwargs = enqueue.call_args.kwargs
 		self.assertEqual(kwargs["repost_doc_name"], ral.name)
@@ -379,7 +361,7 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 		self.assertTrue(kwargs["deduplicate"])
 
 	def test_12_voucher_failures_are_isolated_and_retried(self):
-		si, pe = self.create_invoice_and_payment()
+		si, pe = self.make_invoice_and_payment()
 		pe_gl_entries = frappe.db.count("GL Entry", {"voucher_no": pe.name})
 
 		# the deletion flag drops the existing entries before reposting them
@@ -399,8 +381,7 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 		self.assertEqual(frappe.db.count("GL Entry", {"voucher_no": pe.name}), pe_gl_entries)
 
 		# a retry only picks up the vouchers that are not reposted yet
-		retried = []
-		with self.patched_repost(calls=retried):
+		with self.patched_repost() as retried:
 			ral.start_repost()
 
 		self.assertEqual(retried, [pe.name])
@@ -412,7 +393,7 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 			self.assertFalse(voucher.traceback)
 
 	def test_13_status_of_a_run_that_could_not_finish(self):
-		si, pe = self.create_invoice_and_payment()
+		si, pe = self.make_invoice_and_payment()
 
 		ral = self.create_repost_doc([si, pe])
 		with self.patched_repost(fail_for=["Payment Entry"]):
@@ -424,7 +405,7 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 		try:
 			frappe.throw(SIMULATED_FAILURE)
 		except frappe.ValidationError:
-			_record_repost_failure(ral.name, ral)
+			_record_repost_failure(ral)
 
 		ral.reload()
 
@@ -435,36 +416,18 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 			frappe.db.exists("Error Log", {"reference_doctype": ral.doctype, "reference_name": ral.name})
 		)
 
-		# a document that could not even be loaded has nothing to report but the failure
-		_record_repost_failure(ral.name)
-		self.assertEqual(frappe.db.get_value(ral.doctype, ral.name, "status"), "Failed")
-
 	@ERPNextTestSuite.change_settings("Accounts Settings", {"delete_linked_ledger_entries": 1})
 	def test_14_period_closed_after_the_repost_was_started(self):
 		gl = qb.DocType("GL Entry")
 		qb.from_(gl).delete().where(gl.company == "_Test Company").run()
 
-		si = self.create_sales_invoice()
+		si = self.make_invoice()
 		ral = self.create_repost_doc([si], submit=True)
 		ral.db_set("status", "Failed")
-		ral.vouchers[0].db_set({"status": "Pending", "reposted": 0})
+		ral.vouchers[0].db_set("status", "Pending")
 
 		# the period is closed between the repost being started and the job running
-		fy = get_fiscal_year(today(), company="_Test Company")
-		pcv = frappe.get_doc(
-			{
-				"doctype": "Period Closing Voucher",
-				"transaction_date": today(),
-				"period_start_date": fy[1],
-				"period_end_date": today(),
-				"company": "_Test Company",
-				"fiscal_year": fy[0],
-				"cost_center": "Main - _TC",
-				"closing_account_head": "Retained Earnings - _TC",
-				"remarks": "test",
-			}
-		)
-		pcv.save().submit()
+		self.make_period_closing_voucher()
 
 		gl_entries = frappe.db.count("GL Entry", {"voucher_no": si.name})
 		self.assertRaisesRegex(frappe.ValidationError, "Closed fiscal year", repost, ral.name, commit=False)
@@ -478,7 +441,7 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 		self.assertEqual(ral.vouchers[0].status, "Pending")
 
 	def test_15_failed_repost_skips_cancelled_voucher(self):
-		si = self.create_sales_invoice()
+		si = self.make_invoice()
 
 		ral = self.create_repost_doc([si])
 		with self.patched_repost(fail_for=["Sales Invoice"]):
@@ -497,10 +460,9 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 		self.assertEqual(ral.status, "Completed")
 		self.assertEqual(ral.vouchers[0].status, "Skipped")
 		self.assertFalse(ral.vouchers[0].traceback)
-		self.assertIn("has been cancelled, nothing to repost", ral.vouchers[0].remark)
 
 	def test_16_concurrent_repost_is_blocked_by_voucher_lock(self):
-		si, pe = self.create_invoice_and_payment()
+		si, pe = self.make_invoice_and_payment()
 		ral = self.create_repost_doc([si, pe])
 
 		# a concurrent repost holding the lock on the second voucher
@@ -518,16 +480,7 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 		je = make_journal_entry("_Test Bank - _TC", "_Test Cash - _TC", 500, submit=True)
 		je = frappe.get_doc("Journal Entry", je.name)
 
-		def get_gl_totals():
-			gl = qb.DocType("GL Entry")
-			return (
-				qb.from_(gl)
-				.select(Sum(gl.debit), Sum(gl.credit))
-				.where((gl.voucher_no == je.name) & (gl.is_cancelled == 0))
-				.run()
-			)[0]
-
-		self.assertEqual(get_gl_totals(), (500.0, 500.0))
+		self.assertEqual(self.get_gl_totals(je.name), (500.0, 500.0))
 
 		# without the deletion flag the 2 original entries are marked as cancelled,
 		# along with the 2 reverse entries booked against them
@@ -538,7 +491,7 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 				)
 
 				self.assertEqual(ral.status, "Completed")
-				self.assertEqual(get_gl_totals(), (500.0, 500.0))
+				self.assertEqual(self.get_gl_totals(je.name), (500.0, 500.0))
 				self.assertEqual(
 					frappe.db.count("GL Entry", {"voucher_no": je.name, "is_cancelled": 1}),
 					cancelled_entries,

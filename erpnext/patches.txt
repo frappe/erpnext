@@ -506,4 +506,3 @@ erpnext.patches.v16_0.rename_ar_ap_ageing_filter
 erpnext.patches.v16_0.fix_subcontracting_titles
 erpnext.patches.v16_0.move_warehouse_defaults_to_company
 erpnext.patches.v16_0.backfill_repost_accounting_ledger_status
-erpnext.patches.v16_0.set_repost_accounting_ledger_item_status
