@@ -1164,7 +1164,7 @@ class TestJobCard(ERPNextTestSuite):
 
 	def test_semi_fg_produced_qty_across_split_job_cards(self):
 		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
-		from erpnext.manufacturing.doctype.work_order.mapper import make_job_card
+		from erpnext.manufacturing.doctype.work_order.work_order import make_job_card
 		from erpnext.stock.doctype.item.test_item import make_item
 
 		warehouse = "Stores - _TC"
