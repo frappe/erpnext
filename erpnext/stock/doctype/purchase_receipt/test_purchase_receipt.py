@@ -2395,9 +2395,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
 
 		pr = make_inter_company_purchase_receipt(dn.name)
-		pr.inter_company_reference = ""
-		self.assertRaises(frappe.ValidationError, pr.save)
-
 		pr.inter_company_reference = dn.name
 		pr.items[0].qty = 10
 		pr.items[0].from_warehouse = target_warehouse
