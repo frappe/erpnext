@@ -242,7 +242,7 @@ class RepostItemValuation(Document):
 	def clear_attachment(self):
 		if attachments := get_attachments(self.doctype, self.name):
 			attachment = attachments[0]
-			frappe.delete_doc("File", attachment.name, ignore_permissions=True)
+			frappe.delete_doc("File", attachment.name, ignore_permissions=True, force=True)
 
 		if self.reposting_data_file:
 			self.db_set("reposting_data_file", None)

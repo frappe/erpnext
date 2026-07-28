@@ -69,6 +69,17 @@ frappe.ui.form.on("Company", {
 				},
 			};
 		});
+
+		["default_wip_warehouse", "default_fg_warehouse", "default_scrap_warehouse"].forEach((fieldname) => {
+			frm.set_query(fieldname, function (doc) {
+				return {
+					filters: {
+						company: doc.name,
+						is_group: 0,
+					},
+				};
+			});
+		});
 	},
 
 	company_name: function (frm) {
@@ -307,6 +318,8 @@ erpnext.company.setup_queries = function (frm) {
 			["default_advance_received_account", { root_type: "Liability", account_type: "Receivable" }],
 			["default_advance_paid_account", { root_type: "Asset", account_type: "Payable" }],
 			["service_expense_account", { root_type: "Expense" }],
+			["expenses_added_to_stock_account", { root_type: "Expense" }],
+			["expenses_added_to_stock_contra_account", { root_type: "Expense" }],
 		],
 		function (i, v) {
 			erpnext.company.set_custom_query(frm, v);

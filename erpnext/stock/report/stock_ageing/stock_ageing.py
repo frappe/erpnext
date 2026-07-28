@@ -325,6 +325,7 @@ class FIFOSlots:
 			del stock_ledger_entries
 
 		self._recompute_moving_average_slots()
+		self._rebalance_batch_slots()
 
 		if not self.filters.get("show_warehouse_wise_stock"):
 			# (Item 1, WH 1), (Item 1, WH 2) => (Item 1)
@@ -345,6 +346,29 @@ class FIFOSlots:
 			for slot in item_dict["fifo_queue"]:
 				if is_qty_slot(slot):
 					slot[FIFO_VALUE_INDEX] = flt(slot[FIFO_QTY_INDEX] * rate)
+
+	def _rebalance_batch_slots(self) -> None:
+		for item_dict in self.item_details.values():
+			if item_dict.get("has_batch_no"):
+				self._rebalance_batch_slot_values(item_dict["fifo_queue"])
+
+	def _rebalance_batch_slot_values(self, fifo_queue: list) -> None:
+		"""A batch is one valuation pool, so per-slot value differences are stale
+		detail: spread the pool value over its slots in proportion to qty."""
+		groups = {}
+		for slot in fifo_queue:
+			if is_batch_slot(slot):
+				key = slot[BATCH_SLOT_BATCH_INDEX] if slot[BATCH_SLOT_VALUATION_INDEX] else None
+				groups.setdefault(key, []).append(slot)
+
+		for slots in groups.values():
+			total_qty = sum(flt(slot[BATCH_SLOT_QTY_INDEX]) for slot in slots)
+			if total_qty <= 0:
+				continue
+
+			rate = sum(flt(slot[BATCH_SLOT_VALUE_INDEX]) for slot in slots) / total_qty
+			for slot in slots:
+				slot[BATCH_SLOT_VALUE_INDEX] = flt(slot[BATCH_SLOT_QTY_INDEX] * rate)
 
 	def _get_bundle_wise_details(self, stock_ledger_entries: list | None) -> tuple[dict, dict]:
 		if stock_ledger_entries is not None:

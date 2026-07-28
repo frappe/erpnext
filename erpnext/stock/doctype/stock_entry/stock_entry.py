@@ -176,6 +176,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 		work_order: DF.Link | None
 	# end: auto-generated types
 
+	book_expenses_added_to_stock = True
+
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.status_updater = [
