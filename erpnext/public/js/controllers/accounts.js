@@ -209,10 +209,6 @@ erpnext.accounts.taxes = {
 			if (tax.charge_type == "Actual") {
 				// inclusive tax cannot be of type Actual
 				actual_type_error();
-			} else if (tax.category == "Valuation") {
-				frappe.throw(__("Valuation type charges can not marked as Inclusive"));
-			} else if (cint(tax.gross_up_inclusive)) {
-				// gross-up rows don't compound, so can coexist with non-inclusive rows
 			} else if (
 				tax.charge_type == "On Previous Row Amount" &&
 				this.frm &&
@@ -228,6 +224,8 @@ erpnext.accounts.taxes = {
 					// all rows above this tax should be inclusive
 					on_previous_row_error(tax.row_id == 1 ? "1" : "1 - " + tax.row_id);
 				}
+			} else if (tax.category == "Valuation") {
+				frappe.throw(__("Valuation type charges cannot be marked as Inclusive"));
 			}
 		}
 	},

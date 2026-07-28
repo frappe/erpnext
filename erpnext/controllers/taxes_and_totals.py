@@ -358,15 +358,8 @@ class calculate_taxes_and_totals:
 			if tax_rate == NOT_APPLICABLE_TAX:
 				return tax_slope, tax_intercept
 
-			gross_up = cint(tax.gross_up_inclusive)
-
 			if tax.charge_type == "On Net Total":
-				if gross_up:
-					# Gross-up: rate applies to the printed gross.
-					qty = flt(item.qty) or 1
-					tax_intercept = (tax_rate / 100.0) * flt(item.amount) / qty
-				else:
-					tax_slope = tax_rate / 100.0
+				tax_slope = tax_rate / 100.0
 
 			elif tax.charge_type == "On Previous Row Amount":
 				row = self.doc.get("taxes")[cint(tax.row_id) - 1]
@@ -383,7 +376,7 @@ class calculate_taxes_and_totals:
 
 			else:
 				# Custom charge_type: the rate applies to a resolved (fixed) base,
-				# independent of gross-up. e.g. a tax on MRP included in the printed price.
+				# e.g. a tax on MRP included in the printed price.
 				qty = flt(item.qty) or 1
 				base = self.get_item_taxable_base(item, tax)
 				tax_intercept = (tax_rate / 100.0) * base / qty
@@ -616,22 +609,17 @@ class calculate_taxes_and_totals:
 			current_tax_amount = item.net_amount * actual / self.doc.net_total if self.doc.net_total else 0.0
 
 		elif tax.charge_type == "On Net Total":
-			if cint(tax.included_in_print_rate) and cint(tax.gross_up_inclusive):
-				# Gross-up: the tax posts on the printed gross.
-				current_net_amount = flt(item.amount)
-				current_tax_amount = (tax_rate / 100.0) * flt(item.amount)
+			if tax.account_head in item_tax_map:
+				current_net_amount = item.net_amount
+			# Use unrounded net for inclusive taxes to avoid double rounding
+			if (
+				cint(tax.included_in_print_rate)
+				and not self.discount_amount_applied
+				and item._unrounded_net_amount is not None
+			):
+				current_tax_amount = (tax_rate / 100.0) * item._unrounded_net_amount
 			else:
-				if tax.account_head in item_tax_map:
-					current_net_amount = item.net_amount
-				# Use unrounded net for inclusive taxes to avoid double rounding
-				if (
-					cint(tax.included_in_print_rate)
-					and not self.discount_amount_applied
-					and item._unrounded_net_amount is not None
-				):
-					current_tax_amount = (tax_rate / 100.0) * item._unrounded_net_amount
-				else:
-					current_tax_amount = (tax_rate / 100.0) * item.net_amount
+				current_tax_amount = (tax_rate / 100.0) * item.net_amount
 		elif tax.charge_type == "On Previous Row Amount":
 			current_net_amount = self.doc.get("taxes")[cint(tax.row_id) - 1].tax_amount_for_current_item
 			current_tax_amount = (tax_rate / 100.0) * current_net_amount

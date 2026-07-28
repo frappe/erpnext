@@ -310,10 +310,6 @@ def validate_inclusive_tax(tax, doc) -> None:
 					tax.idx
 				)
 			)
-		elif tax.get("category") == "Valuation":
-			frappe.throw(_("Valuation type charges can not be marked as Inclusive"))
-		elif cint(getattr(tax, "gross_up_inclusive", 0)):
-			pass
 		elif tax.charge_type == "On Previous Row Amount" and not cint(
 			doc.get("taxes")[cint(tax.row_id) - 1].included_in_print_rate
 		):
@@ -322,6 +318,8 @@ def validate_inclusive_tax(tax, doc) -> None:
 			[cint(t.included_in_print_rate) for t in doc.get("taxes")[: cint(tax.row_id) - 1]]
 		):
 			_on_previous_row_error("1 - %d" % (tax.row_id,))
+		elif tax.get("category") == "Valuation":
+			frappe.throw(_("Valuation type charges can not be marked as Inclusive"))
 
 
 def set_balance_in_account_currency(

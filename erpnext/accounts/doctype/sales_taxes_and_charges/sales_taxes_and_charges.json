@@ -12,7 +12,6 @@
   "col_break_1",
   "description",
   "included_in_print_rate",
-  "gross_up_inclusive",
   "included_in_paid_amount",
   "set_by_item_tax_template",
   "is_tax_withholding_account",
@@ -105,16 +104,6 @@
    "width": "150px"
   },
   {
-   "default": "0",
-   "depends_on": "eval:doc.included_in_print_rate",
-   "description": "Apply the rate to the gross (tax-inclusive) amount instead of the net.",
-   "fieldname": "gross_up_inclusive",
-   "fieldtype": "Check",
-   "label": "Gross-up Inclusive",
-   "print_hide": 1,
-   "report_hide": 1
-  },
-  {
    "fieldname": "section_break_8",
    "fieldtype": "Section Break"
   },
@@ -195,11 +184,11 @@
    "fieldtype": "Column Break"
   },
   {
-   "allow_on_submit": 1,
-   "fieldname": "project",
-   "fieldtype": "Link",
-   "label": "Project",
-   "options": "Project"
+    "allow_on_submit": 1,
+    "fieldname": "project",
+    "fieldtype": "Link",
+    "label": "Project",
+    "options": "Project"
   },
   {
    "default": "0",
@@ -266,7 +255,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-06-22 17:44:59.142216",
+ "modified": "2025-07-24 15:08:34.381704",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Taxes and Charges",

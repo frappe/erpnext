@@ -315,16 +315,8 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 				return [tax_slope, tax_intercept];
 			}
 
-			var gross_up = cint(tax.gross_up_inclusive);
-
 			if (tax.charge_type == "On Net Total") {
-				if (gross_up) {
-					// Gross-up: rate applies to the printed gross.
-					const qty = flt(item.qty) || 1;
-					tax_intercept = ((tax_rate / 100.0) * flt(item.amount)) / qty;
-				} else {
-					tax_slope = tax_rate / 100.0;
-				}
+				tax_slope = tax_rate / 100.0;
 			} else if (tax.charge_type == "On Previous Row Amount") {
 				const row = this.frm.doc["taxes"][cint(tax.row_id) - 1];
 				tax_slope = (tax_rate / 100.0) * row.tax_fraction_for_current_item;
@@ -337,7 +329,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 				tax_intercept = flt(tax_rate);
 			} else {
 				// Custom charge_type: the rate applies to a resolved (fixed) base,
-				// independent of gross-up. e.g. a tax on MRP included in the printed price.
+				// e.g. a tax on MRP included in the printed price.
 				const qty = flt(item.qty) || 1;
 				const base = this.get_item_taxable_base(item, tax);
 				tax_intercept = ((tax_rate / 100.0) * base) / qty;
@@ -596,23 +588,17 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 				? (item.net_amount / this.frm.doc.net_total) * actual
 				: 0.0;
 		} else if (tax.charge_type == "On Net Total") {
-			if (cint(tax.included_in_print_rate) && cint(tax.gross_up_inclusive)) {
-				// Gross-up: the tax posts on the printed gross.
-				current_net_amount = flt(item.amount);
-				current_tax_amount = (tax_rate / 100.0) * flt(item.amount);
-			} else {
-				if (tax.account_head in item_tax_map) {
-					current_net_amount = item.net_amount;
-				}
-				// Use unrounded net for inclusive taxes to avoid double rounding
-				var net_for_tax =
-					cint(tax.included_in_print_rate) &&
-					!this.discount_amount_applied &&
-					item._unrounded_net_amount !== null
-						? item._unrounded_net_amount
-						: item.net_amount;
-				current_tax_amount = (tax_rate / 100.0) * net_for_tax;
+			if (tax.account_head in item_tax_map) {
+				current_net_amount = item.net_amount;
 			}
+			// Use unrounded net for inclusive taxes to avoid double rounding
+			var net_for_tax =
+				cint(tax.included_in_print_rate) &&
+				!this.discount_amount_applied &&
+				item._unrounded_net_amount !== null
+					? item._unrounded_net_amount
+					: item.net_amount;
+			current_tax_amount = (tax_rate / 100.0) * net_for_tax;
 		} else if (tax.charge_type == "On Previous Row Amount") {
 			current_net_amount = this.frm.doc["taxes"][cint(tax.row_id) - 1].tax_amount_for_current_item;
 			current_tax_amount =
