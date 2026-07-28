@@ -174,3 +174,38 @@ class TestExpensesAddedToStock(ERPNextTestSuite):
 			rate=100,
 			company=COMPANY,
 		)
+
+	def test_service_item_books_nothing_on_purchase_invoice_with_update_stock(self):
+		"""A service item carries no stock value, so booking it produced a GL row with neither a
+		debit nor a credit, which GL Entry rejects outright."""
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+
+		service_item = make_item(properties={"is_stock_item": 0}).name
+
+		pi = make_purchase_invoice(
+			company=COMPANY,
+			warehouse=WAREHOUSE,
+			item_code=service_item,
+			qty=1,
+			rate=500,
+			update_stock=1,
+			expense_account="Expenses - TCP1",
+			cost_center="Main - TCP1",
+		)
+
+		self.assertEqual(pi.docstatus, 1)
+
+		_balances, debits, credits = self.get_gl_balances("Purchase Invoice", pi.name)
+		self.assertEqual(debits[self.eats_account], 0)
+		self.assertEqual(credits[self.eats_contra_account], 0)
+
+		booked = frappe.get_all(
+			"GL Entry",
+			filters={
+				"voucher_type": "Purchase Invoice",
+				"voucher_no": pi.name,
+				"is_cancelled": 0,
+				"account": self.purchase_expense_account,
+			},
+		)
+		self.assertFalse(booked)

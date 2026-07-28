@@ -356,7 +356,14 @@ class BuyingController(SubcontractingController):
 		if self.doctype == "Purchase Invoice" and not self.update_stock:
 			return
 
+		stock_items = self.get_stock_items()
+
 		for row in self.items:
+			# A service item holds no stock value, so there is nothing to book against it - and it
+			# must not make the expense accounts mandatory either.
+			if row.item_code not in stock_items:
+				continue
+
 			details = self.get_validated_purchase_expense_details(row.item_code)
 			if not details:
 				continue
@@ -364,6 +371,10 @@ class BuyingController(SubcontractingController):
 			amount = flt(row.valuation_rate * row.stock_qty, row.precision("base_amount"))
 			if row.landed_cost_voucher_amount:
 				amount -= flt(row.landed_cost_voucher_amount, row.precision("base_amount"))
+
+			if not amount:
+				# GL Entry rejects a row with neither a debit nor a credit.
+				continue
 
 			self.add_gl_entry(
 				gl_entries=gl_entries,
