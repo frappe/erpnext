@@ -343,7 +343,7 @@ def repost(repost_doc_name: str, commit: bool = True):
 		if commit:
 			frappe.db.rollback()
 
-		_record_repost_failure(repost_doc)
+		_record_repost_failure(repost_doc, commit=commit)
 		raise
 	else:
 		repost_doc.db_set({"status": _derive_status(repost_doc), "error_log": ""}, notify=True)
@@ -366,7 +366,7 @@ def _derive_status(repost_doc) -> str:
 	return "Partially Reposted"
 
 
-def _record_repost_failure(repost_doc) -> None:
+def _record_repost_failure(repost_doc, commit=False) -> None:
 	"""Persist the traceback of a run that could not finish, without discarding its progress."""
 	# the traceback with frame locals goes to the Error Log, which is permissioned separately
 	traceback = frappe.get_traceback()
@@ -380,6 +380,9 @@ def _record_repost_failure(repost_doc) -> None:
 	frappe.db.set_value(
 		repost_doc.doctype, repost_doc.name, {"error_log": traceback, "status": _derive_status(repost_doc)}
 	)
+
+	if commit:
+		frappe.db.commit()
 
 
 def _repost_vouchers(doc, delete_cancelled_entries: bool | int | None):
