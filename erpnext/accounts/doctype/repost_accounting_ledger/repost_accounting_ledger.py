@@ -300,16 +300,16 @@ def repost(repost_doc_name: str, commit: bool = True):
 	try:
 		repost_doc.validate_repost_preconditions()
 
-		locked_docs = _lock_vouchers(repost_doc.vouchers)
+		# a retry leaves the vouchers it is done with alone: they are not locked, not loaded
+		# and not reposted again
+		pending = [x for x in repost_doc.vouchers if x.status not in HANDLED_VOUCHER_STATUSES]
+		locked_docs = _lock_vouchers(pending)
 
 		repost_doc.db_set("status", "In Progress", commit=commit)
 
-		for position, x in enumerate(repost_doc.vouchers, start=1):
-			if x.status in HANDLED_VOUCHER_STATUSES:
-				continue
-
+		for position, x in enumerate(pending, start=1):
 			frappe.publish_progress(
-				position * 100 / len(repost_doc.vouchers),
+				position * 100 / len(pending),
 				doctype=repost_doc.doctype,
 				docname=repost_doc.name,
 				description=_("Reposting {0} {1}").format(x.voucher_type, x.voucher_no),

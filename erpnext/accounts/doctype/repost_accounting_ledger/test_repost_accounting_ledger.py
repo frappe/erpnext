@@ -13,6 +13,7 @@ from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journ
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger import (
+	_lock_vouchers,
 	_record_repost_failure,
 	_repost_allowed_hook_doctypes,
 	_repost_job_id,
@@ -380,11 +381,16 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 		# the failed voucher is rolled back to its savepoint, so its entries are back
 		self.assertEqual(frappe.db.count("GL Entry", {"voucher_no": pe.name}), pe_gl_entries)
 
-		# a retry only picks up the vouchers that are not reposted yet
-		with self.patched_repost() as retried:
+		# a retry only picks up the vouchers that are not reposted yet, and leaves the rest
+		# alone entirely: they are not locked or loaded either
+		with (
+			patch(f"{REPOST_MODULE}._lock_vouchers", side_effect=_lock_vouchers) as lock_vouchers,
+			self.patched_repost() as retried,
+		):
 			ral.start_repost()
 
 		self.assertEqual(retried, [pe.name])
+		self.assertEqual([x.voucher_no for x in lock_vouchers.call_args.args[0]], [pe.name])
 
 		ral.reload()
 		self.assertEqual(ral.status, "Completed")
