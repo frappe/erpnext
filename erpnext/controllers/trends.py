@@ -248,10 +248,12 @@ def calculate_total_row(data, columns, company_currency=None):
 	total_values = {}
 	currency_col_idx = None
 	for i, col in enumerate(columns):
-		if "Float" in col or "Currency/currency" in col:
+		# based-on and group-by columns are dicts, periodic and total columns are strings
+		if isinstance(col, dict):
+			if col.get("fieldtype") == "Link" and col.get("options") == "Currency":
+				currency_col_idx = i
+		elif "Float" in col or "Currency/currency" in col:
 			total_values[i] = 0
-		if "Link/Currency" in col:
-			currency_col_idx = i
 
 	for row in data:
 		for i in total_values.keys():
