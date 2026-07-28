@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
  "allow_copy": 0, 
  "allow_import": 0, 
  "allow_rename": 0, 
@@ -62,6 +63,43 @@
    "set_only_once": 0, 
    "unique": 0
   }, 
+=======
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "autoname": "hash",
+ "creation": "2013-03-07 11:42:59",
+ "doctype": "DocType",
+ "document_type": "Setup",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "warehouse",
+  "warehouse_group",
+  "warehouse_reorder_level",
+  "warehouse_reorder_qty",
+  "material_request_type"
+ ],
+ "fields": [
+  {
+   "columns": 3,
+   "fieldname": "warehouse_group",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_list_view": 1,
+   "label": "Check Availability in Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "columns": 2,
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_list_view": 1,
+   "label": "Request for",
+   "options": "Warehouse",
+   "reqd": 1
+  },
+>>>>>>> 5835709402 (fix: add permission check for `get_item_details` (#57515))
   {
    "allow_on_submit": 0, 
    "bold": 0, 
@@ -136,6 +174,7 @@
    "set_only_once": 0, 
    "unique": 0
   }
+<<<<<<< HEAD
  ], 
  "hide_heading": 0, 
  "hide_toolbar": 0, 
@@ -158,4 +197,22 @@
  "read_only_onload": 0, 
  "sort_order": "ASC", 
  "track_seen": 0
+=======
+ ],
+ "idx": 1,
+ "in_create": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-07-28 15:54:36.089238",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Item Reorder",
+ "naming_rule": "Random",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "ASC",
+ "states": []
+>>>>>>> 5835709402 (fix: add permission check for `get_item_details` (#57515))
 }

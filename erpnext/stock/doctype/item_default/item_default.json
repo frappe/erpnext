@@ -38,6 +38,7 @@
   {
    "fieldname": "default_warehouse",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "in_list_view": 1,
    "label": "Default Warehouse",
    "options": "Warehouse",
@@ -51,8 +52,67 @@
    "fieldname": "default_price_list",
    "fieldtype": "Link",
    "in_list_view": 1,
+<<<<<<< HEAD
    "label": "Default Price List",
    "options": "Price List"
+=======
+   "label": "Price List",
+   "options": "Price List",
+   "show_description_on_click": 1
+  },
+  {
+   "fieldname": "default_discount_account",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Discount Account",
+   "options": "Account"
+  },
+  {
+   "description": "Stock account where inventory value for this item will be tracked",
+   "fieldname": "default_inventory_account",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Inventory Account",
+   "options": "Account",
+   "show_description_on_click": 1
+  },
+  {
+   "fetch_from": "default_inventory_account.account_currency",
+   "fieldname": "inventory_account_currency",
+   "fieldtype": "Link",
+   "label": "Inventory Account Currency",
+   "options": "Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_general",
+   "fieldtype": "Column Break",
+   "label": "Inherited Default"
+  },
+  {
+   "fieldname": "vf_default_warehouse",
+   "fieldtype": "Read Only",
+   "is_virtual": 1,
+   "label": "Warehouse"
+  },
+  {
+   "fieldname": "vf_default_price_list",
+   "fieldtype": "Read Only",
+   "is_virtual": 1,
+   "label": "Price List"
+  },
+  {
+   "fieldname": "vf_default_discount_account",
+   "fieldtype": "Read Only",
+   "is_virtual": 1,
+   "label": "Discount Account"
+  },
+  {
+   "fieldname": "vf_default_inventory_account",
+   "fieldtype": "Read Only",
+   "is_virtual": 1,
+   "label": "Inventory Account"
+>>>>>>> 5835709402 (fix: add permission check for `get_item_details` (#57515))
   },
   {
    "fieldname": "purchase_defaults",
@@ -62,8 +122,15 @@
   {
    "fieldname": "buying_cost_center",
    "fieldtype": "Link",
+<<<<<<< HEAD
    "label": "Default Buying Cost Center",
    "options": "Cost Center"
+=======
+   "ignore_user_permissions": 1,
+   "label": "Buying Cost Center",
+   "options": "Cost Center",
+   "show_description_on_click": 1
+>>>>>>> 5835709402 (fix: add permission check for `get_item_details` (#57515))
   },
   {
    "fieldname": "default_supplier",
@@ -72,7 +139,83 @@
    "options": "Supplier"
   },
   {
+<<<<<<< HEAD
    "fieldname": "column_break_8",
+=======
+   "description": "Account where the cost of this item will be debited on purchase",
+   "fieldname": "expense_account",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Expense Account",
+   "options": "Account",
+   "show_description_on_click": 1
+  },
+  {
+   "description": "Provisional liability account used for service items before invoice is received",
+   "fieldname": "default_provisional_account",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Provisional Account (Service)",
+   "options": "Account",
+   "show_description_on_click": 1
+  },
+  {
+   "description": "Account to record additional purchase expenses like freight or customs",
+   "fieldname": "purchase_expense_account",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Purchase Expense Account",
+   "options": "Account",
+   "show_description_on_click": 1
+  },
+  {
+   "description": "Used to balance the books when recording extra purchase costs",
+   "fieldname": "purchase_expense_contra_account",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Purchase Expense Contra Account",
+   "options": "Account",
+   "show_description_on_click": 1
+  },
+  {
+   "description": "Account to track value added to stock via Stock Entry, Stock Reconciliation or Landed Cost Voucher",
+   "fieldname": "expenses_added_to_stock_account",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Expenses Added To Stock Account",
+   "options": "Account",
+   "show_description_on_click": 1
+  },
+  {
+   "description": "Used to balance the books when recording expenses added to stock",
+   "fieldname": "expenses_added_to_stock_contra_account",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Expenses Added To Stock Contra Account",
+   "options": "Account",
+   "show_description_on_click": 1
+  },
+  {
+   "description": "For Standard Cost items: the purchase price vs standard rate difference is booked here. Falls back to the Company's Default Purchase Price Variance Account.",
+   "fieldname": "purchase_price_variance_account",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Purchase Price Variance Account",
+   "options": "Account",
+   "show_description_on_click": 1
+  },
+  {
+   "description": "For Standard Cost items: the Manufacture/Repack consumed cost vs standard rate difference is booked here. Falls back to the Company's Default Manufacturing Variance Account.",
+   "fieldname": "manufacturing_variance_account",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Manufacturing Variance Account",
+   "options": "Account",
+   "show_description_on_click": 1
+  },
+  {
+   "fieldname": "column_break_purchase",
+>>>>>>> 5835709402 (fix: add permission check for `get_item_details` (#57515))
    "fieldtype": "Column Break"
   },
   {
@@ -89,24 +232,45 @@
   {
    "fieldname": "selling_cost_center",
    "fieldtype": "Link",
+<<<<<<< HEAD
    "label": "Default Selling Cost Center",
    "options": "Cost Center"
   },
   {
    "fieldname": "column_break_12",
    "fieldtype": "Column Break"
+=======
+   "ignore_user_permissions": 1,
+   "label": "Selling Cost Center",
+   "options": "Cost Center",
+   "show_description_on_click": 1
+>>>>>>> 5835709402 (fix: add permission check for `get_item_details` (#57515))
   },
   {
    "fieldname": "income_account",
    "fieldtype": "Link",
+<<<<<<< HEAD
    "label": "Default Income Account",
    "options": "Account"
+=======
+   "ignore_user_permissions": 1,
+   "label": "Income Account",
+   "options": "Account",
+   "show_description_on_click": 1
+>>>>>>> 5835709402 (fix: add permission check for `get_item_details` (#57515))
   },
   {
    "fieldname": "default_discount_account",
    "fieldtype": "Link",
+<<<<<<< HEAD
    "label": "Default Discount Account",
    "options": "Account"
+=======
+   "ignore_user_permissions": 1,
+   "label": "COGS Account",
+   "options": "Account",
+   "show_description_on_click": 1
+>>>>>>> 5835709402 (fix: add permission check for `get_item_details` (#57515))
   },
   {
    "fieldname": "default_provisional_account",
@@ -123,15 +287,29 @@
    "depends_on": "eval: parent.enable_deferred_expense",
    "fieldname": "deferred_expense_account",
    "fieldtype": "Link",
+<<<<<<< HEAD
    "label": "Deferred Expense Account",
    "options": "Account"
+=======
+   "ignore_user_permissions": 1,
+   "label": "Expense Account",
+   "options": "Account",
+   "show_description_on_click": 1
+>>>>>>> 5835709402 (fix: add permission check for `get_item_details` (#57515))
   },
   {
    "depends_on": "eval: parent.enable_deferred_revenue",
    "fieldname": "deferred_revenue_account",
    "fieldtype": "Link",
+<<<<<<< HEAD
    "label": "Deferred Revenue Account",
    "options": "Account"
+=======
+   "ignore_user_permissions": 1,
+   "label": "Revenue Account",
+   "options": "Account",
+   "show_description_on_click": 1
+>>>>>>> 5835709402 (fix: add permission check for `get_item_details` (#57515))
   },
   {
    "fieldname": "column_break_kwad",
@@ -140,7 +318,11 @@
  ],
  "istable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-03-17 13:46:09.719105",
+=======
+ "modified": "2026-07-28 15:39:44.848087",
+>>>>>>> 5835709402 (fix: add permission check for `get_item_details` (#57515))
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Default",

@@ -28,6 +28,12 @@ class ItemDefault(Document):
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
+<<<<<<< HEAD
+=======
+		purchase_expense_account: DF.Link | None
+		purchase_expense_contra_account: DF.Link | None
+		purchase_price_variance_account: DF.Link | None
+>>>>>>> 5835709402 (fix: add permission check for `get_item_details` (#57515))
 		selling_cost_center: DF.Link | None
 	# end: auto-generated types
 
