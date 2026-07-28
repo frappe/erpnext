@@ -343,9 +343,7 @@ def repost(repost_doc_name: str, commit: bool = True):
 			except Exception:
 				frappe.db.rollback(save_point=save_point)
 
-				traceback = frappe.get_traceback(with_context=True)
-
-				x.db_set("traceback", traceback)
+				x.db_set("traceback", frappe.get_traceback())
 			else:
 				x.db_set({"reposted": 1, "traceback": ""})
 			finally:
@@ -381,7 +379,10 @@ def _derive_status(repost_doc) -> str:
 
 def _record_repost_failure(repost_doc_name: str, repost_doc=None) -> None:
 	"""Persist the traceback of a run that could not finish, without discarding its progress."""
-	traceback = frappe.get_traceback(with_context=True)
+	# `frappe.log_error` keeps the full traceback, including the local variables of every
+	# frame. Those belong in the Error Log, which is not readable by everyone who can read
+	# this document.
+	traceback = frappe.get_traceback()
 
 	frappe.log_error(
 		title=_("Unable to Repost Accounting Ledger"),
