@@ -444,4 +444,10 @@ erpnext.patches.v16_0.crm_settings_handle_allowed_users_for_frappe_crm
 erpnext.patches.v16_0.backfill_pick_list_transferred_qty
 erpnext.patches.v16_0.access_control_for_project_users
 erpnext.patches.v16_0.rename_ar_ap_ageing_filter
+<<<<<<< HEAD
 erpnext.patches.v15_0.fix_titles
+=======
+erpnext.patches.v16_0.fix_subcontracting_titles
+erpnext.patches.v16_0.move_warehouse_defaults_to_company
+erpnext.patches.v16_0.backfill_repost_accounting_ledger_status
+>>>>>>> 372dff2ffa (refactor(accounts): repost accounting ledger (#56442))
