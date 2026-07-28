@@ -1547,7 +1547,7 @@ def get_stock_balance_for(
 			)
 			serial_nos = "\n".join(d.serial_no for d in serial_no_details if d.batch_no == batch_no)
 
-		if row.use_serial_batch_fields and row.batch_no and (qty or row.current_qty):
+		if row and row.use_serial_batch_fields and row.batch_no and (qty or row.current_qty):
 			rate = get_incoming_rate(
 				frappe._dict(
 					{
