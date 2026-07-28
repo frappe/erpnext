@@ -223,10 +223,15 @@ class RepostAccountingLedger(Document):
 
 		self.check_permission("write")
 
-		# Reposting runs in a background job. Without an active scheduler the job would never be
-		# picked up, leaving the document stuck in `Queued` forever.
-		if is_scheduler_inactive() and not frappe.in_test:
-			frappe.throw(_("Scheduler is inactive. Cannot start reposting."), title=_("Scheduler Inactive"))
+		# Enqueued jobs are picked up by workers, not by the scheduler, so an inactive scheduler
+		# does not necessarily mean the repost will not run. Say so instead of refusing: a
+		# document that is never picked up can be started again once workers are processing.
+		if is_scheduler_inactive():
+			frappe.msgprint(
+				_("Scheduler is inactive. Reposting will only run once background jobs are processed."),
+				alert=True,
+				indicator="orange",
+			)
 
 		self.db_set("status", "Queued")
 		self.db_set("scheduled_job", _enqueue_repost(self.name))
