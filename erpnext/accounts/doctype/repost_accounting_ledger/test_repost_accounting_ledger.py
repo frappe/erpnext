@@ -1,18 +1,30 @@
 # Copyright (c) 2023, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from contextlib import contextmanager
+from unittest.mock import patch
+
 import frappe
 from frappe import qb
 from frappe.query_builder.functions import Sum
+from frappe.tests.utils import toggle_test_mode
 from frappe.utils import add_days, nowdate, today
 
+from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
+from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger import (
+	_repost_allowed_hook_doctypes,
+	_repost_vouchers,
+)
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import get_gl_entries, make_purchase_receipt
 from erpnext.tests.utils import ERPNextTestSuite
+
+REPOST_MODULE = "erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger"
+SIMULATED_FAILURE = "Simulated repost failure"
 
 
 class TestRepostAccountingLedger(ERPNextTestSuite):
@@ -20,8 +32,8 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 		frappe.db.set_single_value("Selling Settings", "validate_selling_price", 0)
 		update_repost_settings()
 
-	def test_01_basic_functions(self):
-		si = create_sales_invoice(
+	def create_sales_invoice(self, **kwargs):
+		return create_sales_invoice(
 			item="_Test Item",
 			company="_Test Company",
 			customer="_Test Customer",
@@ -29,7 +41,56 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 			parent_cost_center="Main - _TC",
 			cost_center="Main - _TC",
 			rate=100,
+			**kwargs,
 		)
+
+	def create_invoice_and_payment(self):
+		si = self.create_sales_invoice()
+		pe = get_payment_entry(si.doctype, si.name)
+		pe.save().submit()
+		return si, pe
+
+	def create_repost_doc(self, vouchers, delete_cancelled_entries=False, submit=False):
+		ral = frappe.new_doc("Repost Accounting Ledger")
+		ral.company = "_Test Company"
+		ral.delete_cancelled_entries = delete_cancelled_entries
+		for voucher in vouchers:
+			ral.append("vouchers", {"voucher_type": voucher.doctype, "voucher_no": voucher.name})
+
+		ral.save()
+		if submit:
+			ral.submit()
+			ral.reload()
+		return ral
+
+	@contextmanager
+	def patched_repost(self, fail_for=(), calls=None):
+		"""Record the vouchers handed over to `_repost_vouchers` and fail the given voucher types."""
+
+		def repost_voucher(doc, delete_cancelled_entries):
+			if calls is not None:
+				calls.append(doc.name)
+			if doc.doctype in fail_for:
+				frappe.throw(SIMULATED_FAILURE)
+			_repost_vouchers(doc, delete_cancelled_entries)
+
+		with patch(f"{REPOST_MODULE}._repost_vouchers", side_effect=repost_voucher):
+			yield
+
+	@contextmanager
+	def outside_test_mode(self):
+		"""Reposting is only handed over to a background job outside of test mode."""
+		try:
+			toggle_test_mode(False)
+			yield
+		finally:
+			toggle_test_mode(True)
+
+	def assert_repost_blocked(self, ral, message):
+		self.assertRaisesRegex(frappe.ValidationError, message, ral.start_repost)
+
+	def test_01_basic_functions(self):
+		si = self.create_sales_invoice()
 
 		preq = frappe.get_doc(
 			make_payment_request(
@@ -91,16 +152,7 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 		self.assertEqual(res[0], (si.name, 100, 100))
 
 	def test_02_deferred_accounting_valiations(self):
-		si = create_sales_invoice(
-			item="_Test Item",
-			company="_Test Company",
-			customer="_Test Customer",
-			debit_to="Debtors - _TC",
-			parent_cost_center="Main - _TC",
-			cost_center="Main - _TC",
-			rate=100,
-			do_not_submit=True,
-		)
+		si = self.create_sales_invoice(do_not_submit=True)
 		si.items[0].enable_deferred_revenue = True
 		si.items[0].deferred_revenue_account = "Deferred Revenue - _TC"
 		si.items[0].service_start_date = nowdate()
@@ -118,15 +170,7 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 		gl = frappe.qb.DocType("GL Entry")
 		qb.from_(gl).delete().where(gl.company == "_Test Company").run()
 
-		si = create_sales_invoice(
-			item="_Test Item",
-			company="_Test Company",
-			customer="_Test Customer",
-			debit_to="Debtors - _TC",
-			parent_cost_center="Main - _TC",
-			cost_center="Main - _TC",
-			rate=100,
-		)
+		si = self.create_sales_invoice()
 		fy = get_fiscal_year(today(), company="_Test Company")
 		pcv = frappe.get_doc(
 			{
@@ -153,51 +197,19 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 		pcv.delete()
 
 	def test_03_deletion_flag_and_preview_function(self):
-		si = create_sales_invoice(
-			item="_Test Item",
-			company="_Test Company",
-			customer="_Test Customer",
-			debit_to="Debtors - _TC",
-			parent_cost_center="Main - _TC",
-			cost_center="Main - _TC",
-			rate=100,
-		)
-
-		pe = get_payment_entry(si.doctype, si.name)
-		pe.save().submit()
+		si, pe = self.create_invoice_and_payment()
 
 		# with deletion flag set
-		ral = frappe.new_doc("Repost Accounting Ledger")
-		ral.company = "_Test Company"
-		ral.delete_cancelled_entries = True
-		ral.append("vouchers", {"voucher_type": si.doctype, "voucher_no": si.name})
-		ral.append("vouchers", {"voucher_type": pe.doctype, "voucher_no": pe.name})
-		ral.save().submit()
+		self.create_repost_doc([si, pe], delete_cancelled_entries=True, submit=True)
 
 		self.assertIsNone(frappe.db.exists("GL Entry", {"voucher_no": si.name, "is_cancelled": 1}))
 		self.assertIsNone(frappe.db.exists("GL Entry", {"voucher_no": pe.name, "is_cancelled": 1}))
 
 	def test_05_without_deletion_flag(self):
-		si = create_sales_invoice(
-			item="_Test Item",
-			company="_Test Company",
-			customer="_Test Customer",
-			debit_to="Debtors - _TC",
-			parent_cost_center="Main - _TC",
-			cost_center="Main - _TC",
-			rate=100,
-		)
-
-		pe = get_payment_entry(si.doctype, si.name)
-		pe.save().submit()
+		si, pe = self.create_invoice_and_payment()
 
 		# without deletion flag set
-		ral = frappe.new_doc("Repost Accounting Ledger")
-		ral.company = "_Test Company"
-		ral.delete_cancelled_entries = False
-		ral.append("vouchers", {"voucher_type": si.doctype, "voucher_no": si.name})
-		ral.append("vouchers", {"voucher_type": pe.doctype, "voucher_no": pe.name})
-		ral.save().submit()
+		self.create_repost_doc([si, pe], submit=True)
 
 		self.assertIsNotNone(frappe.db.exists("GL Entry", {"voucher_no": si.name, "is_cancelled": 1}))
 		self.assertIsNotNone(frappe.db.exists("GL Entry", {"voucher_no": pe.name, "is_cancelled": 1}))
@@ -248,11 +260,7 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 			another_provisional_account,
 		)
 
-		repost_doc = frappe.new_doc("Repost Accounting Ledger")
-		repost_doc.company = "_Test Company"
-		repost_doc.delete_cancelled_entries = True
-		repost_doc.append("vouchers", {"voucher_type": pr.doctype, "voucher_no": pr.name})
-		repost_doc.save().submit()
+		repost_doc = self.create_repost_doc([pr], delete_cancelled_entries=True, submit=True)
 
 		pr_gles_after_repost = get_gl_entries(pr.doctype, pr.name, skip_cancelled=True)
 		expected_pr_gles_after_repost = [
@@ -272,6 +280,212 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 		company.enable_provisional_accounting_for_non_stock_items = 0
 		company.default_provisional_account = None
 		company.save()
+
+	def test_07_voucher_validations(self):
+		submitted_si = self.create_sales_invoice()
+		draft_si = self.create_sales_invoice(do_not_submit=True)
+		cancelled_si = self.create_sales_invoice()
+		cancelled_si.cancel()
+
+		for vouchers, exception, message in (
+			([], frappe.ValidationError, "Add atleast one voucher"),
+			([submitted_si, submitted_si], frappe.ValidationError, "Duplicate vouchers found"),
+			([draft_si], frappe.ValidationError, f"not submitted.*{draft_si.name}"),
+			# cancelled vouchers don't make it past link validation
+			([cancelled_si], frappe.CancelledLinkError, "Cannot link cancelled document"),
+		):
+			with self.subTest(vouchers=[x.name for x in vouchers]):
+				self.assertRaisesRegex(exception, message, self.create_repost_doc, vouchers)
+
+		self.create_repost_doc([submitted_si])
+
+	def test_08_status_lifecycle(self):
+		si, pe = self.create_invoice_and_payment()
+
+		ral = self.create_repost_doc([si, pe])
+		self.assertEqual(ral.status, "")
+
+		ral.submit()
+		ral.reload()
+
+		self.assertEqual(ral.status, "Completed")
+		self.assertFalse(ral.error_log)
+		for voucher in ral.vouchers:
+			self.assertEqual(voucher.reposted, 1)
+			self.assertFalse(voucher.traceback)
+
+		ral.cancel()
+		ral.reload()
+		self.assertEqual(ral.status, "Cancelled")
+
+		discarded = self.create_repost_doc([si])
+		discarded.discard()
+		discarded.reload()
+		self.assertEqual(discarded.status, "Cancelled")
+
+	def test_09_start_repost_guards(self):
+		si = self.create_sales_invoice()
+		ral = self.create_repost_doc([si])
+
+		self.assert_repost_blocked(ral, "only for submitted document")
+
+		ral.submit()
+		ral.reload()
+		self.assert_repost_blocked(ral, "cannot be started when status is Completed")
+
+		ral.db_set("status", "Failed")
+		ral.db_set("scheduled_job", frappe.generate_hash())
+
+		with patch(f"{REPOST_MODULE}.is_job_enqueued", return_value=True):
+			self.assert_repost_blocked(ral, "still in progress in background")
+			self.assertRaisesRegex(frappe.ValidationError, "still in progress in background", ral.cancel)
+
+		# `cancel` flips docstatus in memory before running `before_cancel`
+		ral.reload()
+
+		with patch(f"{REPOST_MODULE}.is_job_enqueued", return_value=False):
+			with (
+				self.outside_test_mode(),
+				patch(f"{REPOST_MODULE}.is_scheduler_inactive", return_value=True),
+			):
+				self.assert_repost_blocked(ral, "Scheduler is inactive")
+
+			# none of the guards leave the document in a state that cannot be retried
+			ral.start_repost()
+
+		ral.reload()
+		self.assertEqual(ral.status, "Completed")
+
+	def test_10_voucher_failures_are_isolated_and_retried(self):
+		si, pe = self.create_invoice_and_payment()
+		pe_gl_entries = frappe.db.count("GL Entry", {"voucher_no": pe.name})
+
+		# the deletion flag drops the existing entries before reposting them
+		ral = self.create_repost_doc([si, pe], delete_cancelled_entries=True)
+		with self.patched_repost(fail_for=["Payment Entry"]):
+			ral.submit()
+
+		ral.reload()
+		self.assertEqual(ral.status, "Partially Reposted")
+
+		si_row, pe_row = ral.vouchers
+		self.assertEqual((si_row.reposted, pe_row.reposted), (1, 0))
+		self.assertFalse(si_row.traceback)
+		self.assertIn(SIMULATED_FAILURE, pe_row.traceback)
+
+		# the failed voucher is rolled back to its savepoint, so its entries are back
+		self.assertEqual(frappe.db.count("GL Entry", {"voucher_no": pe.name}), pe_gl_entries)
+
+		# a retry only picks up the vouchers that are not reposted yet
+		retried = []
+		with self.patched_repost(calls=retried):
+			ral.start_repost()
+
+		self.assertEqual(retried, [pe.name])
+
+		ral.reload()
+		self.assertEqual(ral.status, "Completed")
+		for voucher in ral.vouchers:
+			self.assertEqual(voucher.reposted, 1)
+			self.assertFalse(voucher.traceback)
+
+	def test_11_failed_repost_skips_cancelled_voucher(self):
+		si = self.create_sales_invoice()
+
+		ral = self.create_repost_doc([si])
+		with self.patched_repost(fail_for=["Sales Invoice"]):
+			ral.submit()
+
+		ral.reload()
+		self.assertEqual(ral.status, "Failed")
+
+		si.reload()
+		si.cancel()
+
+		ral.start_repost()
+		ral.reload()
+
+		self.assertEqual(ral.status, "Completed")
+		self.assertEqual(ral.vouchers[0].reposted, 1)
+		self.assertIn("has been cancelled, nothing to repost", ral.vouchers[0].traceback)
+
+	def test_12_concurrent_repost_is_blocked_by_voucher_lock(self):
+		si, pe = self.create_invoice_and_payment()
+		ral = self.create_repost_doc([si, pe])
+
+		# a concurrent repost holding the lock on the second voucher
+		locked_pe = frappe.get_doc(pe.doctype, pe.name)
+		locked_pe.lock()
+		try:
+			self.assertRaises(frappe.DocumentLockedError, ral.submit)
+
+			# vouchers locked before the failure are released again
+			self.assertFalse(frappe.get_doc(si.doctype, si.name).is_locked)
+		finally:
+			locked_pe.unlock()
+
+	def test_13_journal_entry_repost(self):
+		je = make_journal_entry("_Test Bank - _TC", "_Test Cash - _TC", 500, submit=True)
+		je = frappe.get_doc("Journal Entry", je.name)
+
+		def get_gl_totals():
+			gl = qb.DocType("GL Entry")
+			return (
+				qb.from_(gl)
+				.select(Sum(gl.debit), Sum(gl.credit))
+				.where((gl.voucher_no == je.name) & (gl.is_cancelled == 0))
+				.run()
+			)[0]
+
+		self.assertEqual(get_gl_totals(), (500.0, 500.0))
+
+		# without the deletion flag the 2 original entries are marked as cancelled,
+		# along with the 2 reverse entries booked against them
+		for delete_cancelled_entries, cancelled_entries in ((False, 4), (True, 0)):
+			with self.subTest(delete_cancelled_entries=delete_cancelled_entries):
+				ral = self.create_repost_doc(
+					[je], delete_cancelled_entries=delete_cancelled_entries, submit=True
+				)
+
+				self.assertEqual(ral.status, "Completed")
+				self.assertEqual(get_gl_totals(), (500.0, 500.0))
+				self.assertEqual(
+					frappe.db.count("GL Entry", {"voucher_no": je.name, "is_cancelled": 1}),
+					cancelled_entries,
+				)
+
+	def test_14_hook_allowed_doctype_repost(self):
+		class VoucherWithCancelArg:
+			doctype = "Test Repost Voucher"
+			name = "TRV-00001"
+
+			def __init__(self):
+				self.calls = []
+
+			def make_gl_entries(self, cancel=0):
+				self.calls.append(cancel)
+
+		class VoucherWithoutCancelArg(VoucherWithCancelArg):
+			def make_gl_entries(self):
+				self.calls.append("repost")
+
+		# vouchers that can reverse their own entries are asked to do so first
+		doc = VoucherWithCancelArg()
+		_repost_allowed_hook_doctypes(doc, delete_cancelled_entries=False)
+		self.assertEqual(doc.calls, [1, 0])
+
+		# nothing to reverse when the old entries are deleted
+		doc = VoucherWithCancelArg()
+		_repost_allowed_hook_doctypes(doc, delete_cancelled_entries=True)
+		self.assertEqual(doc.calls, [0])
+
+		# the rest fall back to the generic reversal
+		doc = VoucherWithoutCancelArg()
+		with patch("erpnext.accounts.general_ledger.make_reverse_gl_entries") as make_reverse_gl_entries:
+			_repost_allowed_hook_doctypes(doc, delete_cancelled_entries=False)
+
+		make_reverse_gl_entries.assert_called_once_with(voucher_type=doc.doctype, voucher_no=doc.name)
+		self.assertEqual(doc.calls, ["repost"])
 
 
 def update_repost_settings():
