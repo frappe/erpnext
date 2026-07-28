@@ -1037,18 +1037,32 @@ class JobCard(Document):
 		return for_quantity, time_in_mins, process_loss_qty, pending_qty
 
 	def update_semi_finished_good_details(self):
-		if self.operation_id:
-			qty = max(flt(self.manufactured_qty), flt(self.total_completed_qty))
+		if not self.operation_id:
+			return
 
-			frappe.db.set_value("Work Order Operation", self.operation_id, "completed_qty", qty)
-			if (
-				self.finished_good
-				and frappe.get_cached_value("Work Order", self.work_order, "production_item")
-				== self.finished_good
-			):
-				_wo_doc = frappe.get_doc("Work Order", self.work_order)
-				_wo_doc.db_set("produced_qty", self.manufactured_qty)
-				_wo_doc.db_set("status", _wo_doc.get_status())
+		job_cards = frappe.get_all(
+			"Job Card",
+			filters={
+				"work_order": self.work_order,
+				"operation_id": self.operation_id,
+				"docstatus": 1,
+			},
+			fields=["manufactured_qty", "total_completed_qty"],
+		)
+
+		completed_qty = sum(
+			max(flt(row.manufactured_qty), flt(row.total_completed_qty)) for row in job_cards
+		)
+
+		frappe.db.set_value("Work Order Operation", self.operation_id, "completed_qty", completed_qty)
+		if (
+			self.finished_good
+			and frappe.get_cached_value("Work Order", self.work_order, "production_item")
+			== self.finished_good
+		):
+			_wo_doc = frappe.get_doc("Work Order", self.work_order)
+			_wo_doc.db_set("produced_qty", sum(flt(row.manufactured_qty) for row in job_cards))
+			_wo_doc.db_set("status", _wo_doc.get_status())
 
 	def update_corrective_in_work_order(self, wo):
 		wo.corrective_operation_cost = 0.0
