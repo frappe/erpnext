@@ -101,12 +101,7 @@ def get_item_group_defaults(item, company):
 
 @frappe.whitelist()
 def get_company_resolved_defaults(company: str) -> dict:
-	"""
-	Returns effective default values for a company by checking:
-	1. Company document
-	2. Stock Settings (for warehouse fallback)
-	3. Accounts Settings (for deferred account fallbacks)
-	"""
+	"""Effective defaults for a company: Company document, plus Stock Settings for the warehouse."""
 	if not company:
 		return {}
 

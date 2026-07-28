@@ -26,6 +26,10 @@ const virtual_field_map = {
 	deferred_revenue_account: "vf_deferred_revenue_account",
 };
 
+const fallback_source_map = {
+	default_warehouse: "Stock Settings",
+};
+
 frappe.ui.form.on("Item", {
 	valuation_method(frm) {
 		if (!frm.is_new() && frm.doc.valuation_method === "Moving Average") {
@@ -620,7 +624,10 @@ $.extend(erpnext.item, {
 			}
 			const base = $label.data("base-label");
 
-			$label.text(from_company[real_field] ? `${base} (Company)` : `${base} (Item Group)`);
+			const source = from_company[real_field]
+				? __(fallback_source_map[real_field] || "Company")
+				: __("Item Group");
+			$label.text(`${base} (${source})`);
 		});
 	},
 
