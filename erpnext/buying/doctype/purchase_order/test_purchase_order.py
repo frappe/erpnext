@@ -54,6 +54,19 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		po.save()
 		self.assertEqual(po.items[1].qty, 1)
 
+	def test_purchase_order_negative_grand_total_blocked_by_default(self):
+		po = create_purchase_order(qty=1, rate=100, do_not_save=True)
+		po.append("items", {"item_code": "_Test Item 2", "qty": 1, "rate": -150, "schedule_date": nowdate()})
+		self.assertRaises(frappe.ValidationError, po.save)
+
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_negative_rates_for_items": 1})
+	def test_purchase_order_negative_grand_total_allowed_with_setting(self):
+		"""A supplier change order can net to a negative grand total (credit owed)."""
+		po = create_purchase_order(qty=1, rate=100, do_not_save=True)
+		po.append("items", {"item_code": "_Test Item 2", "qty": 1, "rate": -150, "schedule_date": nowdate()})
+		po.save()
+		self.assertTrue(po.base_grand_total < 0)
+
 	def test_purchase_order_zero_qty(self):
 		po = create_purchase_order(qty=0, do_not_save=True)
 
