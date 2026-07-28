@@ -329,6 +329,7 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 		self.assertEqual(ral.status, "Completed")
 		self.assertFalse(ral.error_log)
 		for voucher in ral.vouchers:
+			self.assertEqual(voucher.status, "Reposted")
 			self.assertEqual(voucher.reposted, 1)
 			self.assertFalse(voucher.traceback)
 
@@ -397,7 +398,7 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 		self.assertEqual(ral.status, "Partially Reposted")
 
 		si_row, pe_row = ral.vouchers
-		self.assertEqual((si_row.reposted, pe_row.reposted), (1, 0))
+		self.assertEqual((si_row.status, pe_row.status), ("Reposted", "Failed"))
 		self.assertFalse(si_row.traceback)
 		self.assertIn(SIMULATED_FAILURE, pe_row.traceback)
 
@@ -414,7 +415,7 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 		ral.reload()
 		self.assertEqual(ral.status, "Completed")
 		for voucher in ral.vouchers:
-			self.assertEqual(voucher.reposted, 1)
+			self.assertEqual(voucher.status, "Reposted")
 			self.assertFalse(voucher.traceback)
 
 	def test_13_status_of_a_run_that_could_not_finish(self):
@@ -453,7 +454,7 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 		si = self.create_sales_invoice()
 		ral = self.create_repost_doc([si], submit=True)
 		ral.db_set("status", "Failed")
-		ral.vouchers[0].db_set("reposted", 0)
+		ral.vouchers[0].db_set({"status": "Pending", "reposted": 0})
 
 		# the period is closed between the repost being started and the job running
 		fy = get_fiscal_year(today(), company="_Test Company")
@@ -481,7 +482,7 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 
 		# the ledger is left exactly as it was
 		self.assertEqual(frappe.db.count("GL Entry", {"voucher_no": si.name}), gl_entries)
-		self.assertEqual(ral.vouchers[0].reposted, 0)
+		self.assertEqual(ral.vouchers[0].status, "Pending")
 
 	def test_15_failed_repost_skips_cancelled_voucher(self):
 		si = self.create_sales_invoice()
@@ -499,9 +500,11 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 		ral.start_repost()
 		ral.reload()
 
+		# nothing was reposted, but there is nothing left to repost either
 		self.assertEqual(ral.status, "Completed")
-		self.assertEqual(ral.vouchers[0].reposted, 1)
-		self.assertIn("has been cancelled, nothing to repost", ral.vouchers[0].traceback)
+		self.assertEqual(ral.vouchers[0].status, "Skipped")
+		self.assertFalse(ral.vouchers[0].traceback)
+		self.assertIn("has been cancelled, nothing to repost", ral.vouchers[0].remark)
 
 	def test_16_concurrent_repost_is_blocked_by_voucher_lock(self):
 		si, pe = self.create_invoice_and_payment()

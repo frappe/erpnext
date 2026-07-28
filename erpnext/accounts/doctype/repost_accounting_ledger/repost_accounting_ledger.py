@@ -20,6 +20,9 @@ REPOST_JOB_TIMEOUT = 1500
 # `Queued` and `In Progress`, which are held back by the background job instead.
 TERMINAL_STATUSES = ("Completed", "Cancelled")
 
+# Vouchers in these states are done with: a retry moves on to the rest.
+HANDLED_VOUCHER_STATUSES = ("Reposted", "Skipped")
+
 
 class RepostAccountingLedger(Document):
 	# begin: auto-generated types
@@ -316,7 +319,7 @@ def repost(repost_doc_name: str, commit: bool = True):
 		repost_doc.db_set("status", "In Progress", commit=commit)
 
 		for x in repost_doc.vouchers:
-			if x.reposted:
+			if x.status in HANDLED_VOUCHER_STATUSES:
 				continue
 
 			save_point = "reposting"
@@ -327,10 +330,12 @@ def repost(repost_doc_name: str, commit: bool = True):
 				if doc.docstatus == 2:
 					x.db_set(
 						{
+							"status": "Skipped",
 							"reposted": 1,
-							"traceback": _("{0} {1} has been cancelled, nothing to repost.").format(
+							"remark": _("{0} {1} has been cancelled, nothing to repost.").format(
 								x.voucher_type, x.voucher_no
 							),
+							"traceback": "",
 						},
 					)
 					continue
@@ -343,9 +348,9 @@ def repost(repost_doc_name: str, commit: bool = True):
 			except Exception:
 				frappe.db.rollback(save_point=save_point)
 
-				x.db_set("traceback", frappe.get_traceback())
+				x.db_set({"status": "Failed", "reposted": 0, "traceback": frappe.get_traceback()})
 			else:
-				x.db_set({"reposted": 1, "traceback": ""})
+				x.db_set({"status": "Reposted", "reposted": 1, "remark": "", "traceback": ""})
 			finally:
 				if commit:
 					frappe.db.commit()  # nosemgrep
@@ -366,12 +371,12 @@ def repost(repost_doc_name: str, commit: bool = True):
 
 
 def _derive_status(repost_doc) -> str:
-	"""Vouchers are committed one by one, so the status has to follow what was actually reposted."""
-	reposted = sum(1 for voucher in repost_doc.vouchers if voucher.reposted)
+	"""Vouchers are committed one by one, so the status has to follow what was actually handled."""
+	handled = sum(1 for voucher in repost_doc.vouchers if voucher.status in HANDLED_VOUCHER_STATUSES)
 
-	if reposted == len(repost_doc.vouchers):
+	if handled == len(repost_doc.vouchers):
 		return "Completed"
-	elif reposted == 0:
+	elif handled == 0:
 		return "Failed"
 
 	return "Partially Reposted"
