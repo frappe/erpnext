@@ -461,6 +461,7 @@ var validate_sample_quantity = function (frm, cdt, cdn) {
 				item_code: d.item_code,
 				sample_quantity: d.sample_quantity,
 				qty: d.qty,
+				company: frm.doc.company,
 			},
 			callback: (r) => {
 				frappe.model.set_value(cdt, cdn, "sample_quantity", r.message);

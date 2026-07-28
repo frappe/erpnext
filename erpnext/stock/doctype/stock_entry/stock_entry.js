@@ -65,30 +65,25 @@ frappe.ui.form.on("Stock Entry", {
 			};
 		});
 
-		frappe.db.get_value(
-			"Stock Settings",
-			{ name: "Stock Settings" },
-			"sample_retention_warehouse",
-			(r) => {
-				if (r.sample_retention_warehouse) {
-					let filters = [
-						["Warehouse", "company", "=", frm.doc.company],
-						["Warehouse", "is_group", "=", 0],
-						["Warehouse", "name", "!=", r.sample_retention_warehouse],
-					];
-					frm.set_query("from_warehouse", function () {
-						return {
-							filters: filters,
-						};
-					});
-					frm.set_query("s_warehouse", "items", function () {
-						return {
-							filters: filters,
-						};
-					});
-				}
+		frappe.db.get_value("Company", frm.doc.company, "sample_retention_warehouse", (r) => {
+			if (r.sample_retention_warehouse) {
+				let filters = [
+					["Warehouse", "company", "=", frm.doc.company],
+					["Warehouse", "is_group", "=", 0],
+					["Warehouse", "name", "!=", r.sample_retention_warehouse],
+				];
+				frm.set_query("from_warehouse", function () {
+					return {
+						filters: filters,
+					};
+				});
+				frm.set_query("s_warehouse", "items", function () {
+					return {
+						filters: filters,
+					};
+				});
 			}
-		);
+		});
 
 		frm.set_query("batch_no", "items", function (doc, cdt, cdn) {
 			let item = locals[cdt][cdn];
@@ -1173,6 +1168,7 @@ var validate_sample_quantity = function (frm, cdt, cdn) {
 				item_code: d.item_code,
 				sample_quantity: d.sample_quantity,
 				qty: d.transfer_qty,
+				company: frm.doc.company,
 			},
 			callback: (r) => {
 				frappe.model.set_value(cdt, cdn, "sample_quantity", r.message);
