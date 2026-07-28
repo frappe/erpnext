@@ -22,7 +22,7 @@ frappe.ui.form.on("Repost Accounting Ledger", {
 	},
 
 	refresh: function (frm) {
-		if (["Partially Reposted", "Failed"].includes(frm.doc.status) && frm.doc.docstatus == 1) {
+		if (["", "Partially Reposted", "Failed"].includes(frm.doc.status) && frm.doc.docstatus == 1) {
 			frm.add_custom_button(__("Start Reposting"), () => {
 				frm.events.start_repost(frm);
 			});
