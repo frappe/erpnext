@@ -403,12 +403,7 @@ def get_recipients_and_cc(customer, doc):
 			if doc.primary_mandatory and clist.primary_email:
 				for email in clist.primary_email.split(","):
 					recipients.append(email.strip())
-	cc = []
-	if doc.cc_to != "":
-		try:
-			cc = [frappe.get_value("User", user.cc, "email") for user in doc.cc_to]
-		except Exception:
-			pass
+	cc = [email for user in doc.cc_to if (email := frappe.get_value("User", user.cc, "email"))]
 
 	return recipients, cc
 

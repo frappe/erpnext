@@ -331,7 +331,7 @@ def add_bank_account(data, bank_account):
 				bank_account_loc = loc
 
 	for row in data[1:]:
-		if bank_account_loc:
+		if bank_account_loc is not None:
 			row[bank_account_loc] = bank_account
 		else:
 			row.append(bank_account)

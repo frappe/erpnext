@@ -338,7 +338,7 @@ class FIFOSlots:
 				self._process_stock_ledger_entry(row, bundle_wise_serial_nos, bundle_wise_batch_nos)
 
 		self._recompute_moving_average_slots()
-		self._rebalance_negative_batch_slots()
+		self._rebalance_batch_slots()
 
 		if not self.filters.get("show_warehouse_wise_stock"):
 			# (Item 1, WH 1), (Item 1, WH 2) => (Item 1)
@@ -360,14 +360,14 @@ class FIFOSlots:
 				if is_qty_slot(slot):
 					slot[FIFO_VALUE_INDEX] = flt(slot[FIFO_QTY_INDEX] * rate)
 
-	def _rebalance_negative_batch_slots(self) -> None:
+	def _rebalance_batch_slots(self) -> None:
 		for item_dict in self.item_details.values():
 			if item_dict.get("has_batch_no"):
-				self._rebalance_negative_batch_slot_values(item_dict["fifo_queue"])
+				self._rebalance_batch_slot_values(item_dict["fifo_queue"])
 
-	def _rebalance_negative_batch_slot_values(self, fifo_queue: list) -> None:
-		"""A batch is one valuation pool, so a slot driven negative by consumption
-		at the pooled rate is stale detail: spread the pool value over its slots."""
+	def _rebalance_batch_slot_values(self, fifo_queue: list) -> None:
+		"""A batch is one valuation pool, so per-slot value differences are stale
+		detail: spread the pool value over its slots in proportion to qty."""
 		groups = {}
 		for slot in fifo_queue:
 			if is_batch_slot(slot):
@@ -375,12 +375,8 @@ class FIFOSlots:
 				groups.setdefault(key, []).append(slot)
 
 		for slots in groups.values():
-			has_negative_slot = any(
-				flt(slot[BATCH_SLOT_VALUE_INDEX]) < 0 and flt(slot[BATCH_SLOT_QTY_INDEX]) > 0
-				for slot in slots
-			)
 			total_qty = sum(flt(slot[BATCH_SLOT_QTY_INDEX]) for slot in slots)
-			if not has_negative_slot or total_qty <= 0:
+			if total_qty <= 0:
 				continue
 
 			rate = sum(flt(slot[BATCH_SLOT_VALUE_INDEX]) for slot in slots) / total_qty
