@@ -30,9 +30,11 @@ frappe.ui.form.on("Repost Accounting Ledger", {
 			});
 		}
 
-		frm.add_custom_button(__("Show Preview"), () => {
-			frm.events.generate_preview(frm);
-		});
+		if (frm.doc.docstatus != 2) {
+			frm.add_custom_button(__("Show Preview"), () => {
+				frm.events.generate_preview(frm);
+			});
+		}
 	},
 
 	generate_preview: function (frm) {

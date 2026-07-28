@@ -7,6 +7,7 @@ frappe.listview_settings["Repost Accounting Ledger"] = {
 			"Partially Reposted": "orange",
 			Completed: "green",
 			Failed: "red",
+			Cancelled: "dark grey",
 		};
 		const color = status_color[doc.status] || "gray";
 		return [__(doc.status || "Draft"), color, "status,=," + doc.status];

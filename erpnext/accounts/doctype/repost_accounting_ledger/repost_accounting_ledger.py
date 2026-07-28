@@ -318,7 +318,14 @@ def repost(repost_doc_name: str, commit: bool = True):
 
 		repost_doc.db_set("status", "In Progress", commit=commit)
 
-		for x in repost_doc.vouchers:
+		for position, x in enumerate(repost_doc.vouchers, start=1):
+			frappe.publish_progress(
+				position * 100 / len(repost_doc.vouchers),
+				doctype=repost_doc.doctype,
+				docname=repost_doc.name,
+				description=_("Reposting {0} {1}").format(x.voucher_type, x.voucher_no),
+			)
+
 			if x.status in HANDLED_VOUCHER_STATUSES:
 				continue
 
