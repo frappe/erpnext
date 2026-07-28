@@ -36,16 +36,6 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 		frappe.db.set_single_value("Selling Settings", "validate_selling_price", 0)
 		update_repost_settings()
 
-		# reposting is handed over to a worker; run it in the foreground and inside the
-		# transaction of the test instead
-		patcher = patch(f"{REPOST_MODULE}._enqueue_repost", side_effect=self.repost_in_foreground)
-		patcher.start()
-		self.addCleanup(patcher.stop)
-
-	def repost_in_foreground(self, repost_doc_name):
-		repost(repost_doc_name, commit=False)
-		return create_job_id(_repost_job_id(repost_doc_name))
-
 	def create_sales_invoice(self, **kwargs):
 		return create_sales_invoice(
 			item="_Test Item",
@@ -376,7 +366,10 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 		# the stored job is the `RQ Job` of this repost, so the link resolves
 		self.assertEqual(ral.scheduled_job, create_job_id(_repost_job_id(ral.name)))
 
-		with patch(f"{REPOST_MODULE}.frappe.enqueue") as enqueue:
+		with (
+			patch(f"{REPOST_MODULE}.frappe.in_test", False),
+			patch(f"{REPOST_MODULE}.frappe.enqueue") as enqueue,
+		):
 			_enqueue_repost(ral.name)
 
 		kwargs = enqueue.call_args.kwargs

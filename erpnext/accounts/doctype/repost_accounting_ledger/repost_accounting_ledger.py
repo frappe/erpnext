@@ -261,17 +261,27 @@ def _repost_job_id(repost_doc_name: str) -> str:
 
 
 def _enqueue_repost(repost_doc_name: str) -> str:
-	"""Hand the repost over to a background worker and return the name of the `RQ Job`."""
+	"""Hand the repost over to a background worker and return the name of the `RQ Job`.
+
+	Documents edited after submit repost themselves through `repost_accounting_entries`, and
+	tests across apps assert on the ledger right after doing so. They run the repost here
+	instead, in the foreground and inside their own transaction.
+	"""
 	job_id = _repost_job_id(repost_doc_name)
-	frappe.enqueue(
-		method="erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger.repost",
-		repost_doc_name=repost_doc_name,
-		queue="long",
-		timeout=REPOST_JOB_TIMEOUT,
-		job_id=job_id,
-		deduplicate=True,
-		enqueue_after_commit=True,
-	)
+
+	if frappe.in_test:
+		repost(repost_doc_name, commit=False)
+	else:
+		frappe.enqueue(
+			method="erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger.repost",
+			repost_doc_name=repost_doc_name,
+			queue="long",
+			timeout=REPOST_JOB_TIMEOUT,
+			job_id=job_id,
+			deduplicate=True,
+			enqueue_after_commit=True,
+		)
+
 	return create_job_id(job_id)
 
 
