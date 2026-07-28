@@ -72,7 +72,7 @@ class TestWorkstation(FrappeTestCase):
 
 		test_routing_operations = [
 			{"operation": "Test Operation A", "workstation": "_Test Workstation A", "time_in_mins": 60},
-			{"operation": "Test Operation B", "workstation": "_Test Workstation A", "time_in_mins": 60},
+			{"operation": "Test Operation B", "workstation": "_Test Workstation A", "time_in_mins": 30},
 		]
 		routing_doc = create_routing(routing_name="Routing Test", operations=test_routing_operations)
 		bom_doc = setup_bom(item_code="_Testing Item", routing=routing_doc.name, currency="INR")
@@ -93,6 +93,17 @@ class TestWorkstation(FrappeTestCase):
 		self.assertEqual(w1.hour_rate, 250)
 		self.assertEqual(bom_doc.operations[0].hour_rate, 250)
 		self.assertEqual(bom_doc.operations[1].hour_rate, 250)
+
+		# hour_rate propagation must also refresh operating_cost (hour_rate * time_in_mins / 60)
+		# on the Routing's BOM Operation rows; the 30-min op exercises the arithmetic.
+		for operation, expected_operating_cost in (("Test Operation A", 250), ("Test Operation B", 125)):
+			hour_rate, operating_cost = frappe.db.get_value(
+				"BOM Operation",
+				{"parent": routing_doc.name, "parenttype": "Routing", "operation": operation},
+				["hour_rate", "operating_cost"],
+			)
+			self.assertEqual(hour_rate, 250)
+			self.assertEqual(operating_cost, expected_operating_cost)
 
 
 def make_workstation(*args, **kwargs):
