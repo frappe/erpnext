@@ -275,6 +275,7 @@ def get_linked_dunnings_as_per_state(sales_invoice, state):
 		.join(overdue_payment)
 		.on(overdue_payment.parent == dunning.name)
 		.select(dunning.name)
+		.distinct()
 		.where(
 			(dunning.status == state)
 			& (dunning.docstatus != 2)
