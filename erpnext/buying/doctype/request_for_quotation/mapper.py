@@ -64,27 +64,24 @@ def create_supplier_quotation(doc: str | Document | dict):
 	):
 		frappe.throw(_("Not Permitted"), frappe.PermissionError)
 
-	try:
-		sq_doc = frappe.get_doc(
-			{
-				"doctype": "Supplier Quotation",
-				"supplier": doc.get("supplier"),
-				"terms": doc.get("terms"),
-				"company": doc.get("company"),
-				"currency": doc.get("currency")
-				or get_party_account_currency("Supplier", doc.get("supplier"), doc.get("company")),
-				"buying_price_list": doc.get("buying_price_list")
-				or frappe.db.get_single_value("Buying Settings", "buying_price_list"),
-			}
-		)
-		add_items(sq_doc, doc.get("supplier"), doc.get("items"))
-		sq_doc.flags.ignore_permissions = True
-		sq_doc.run_method("set_missing_values")
-		sq_doc.save()
-		frappe.msgprint(_("Supplier Quotation {0} Created").format(sq_doc.name))
-		return sq_doc.name
-	except Exception:
-		return None
+	sq_doc = frappe.get_doc(
+		{
+			"doctype": "Supplier Quotation",
+			"supplier": doc.get("supplier"),
+			"terms": doc.get("terms"),
+			"company": doc.get("company"),
+			"currency": doc.get("currency")
+			or get_party_account_currency("Supplier", doc.get("supplier"), doc.get("company")),
+			"buying_price_list": doc.get("buying_price_list")
+			or frappe.db.get_single_value("Buying Settings", "buying_price_list"),
+		}
+	)
+	add_items(sq_doc, doc.get("supplier"), doc.get("items"))
+	sq_doc.flags.ignore_permissions = True
+	sq_doc.run_method("set_missing_values")
+	sq_doc.save()
+	frappe.msgprint(_("Supplier Quotation {0} Created").format(sq_doc.name))
+	return sq_doc.name
 
 
 def add_items(sq_doc, supplier, items):
