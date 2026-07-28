@@ -132,8 +132,8 @@ class Item(Document):
 		purchase_uom: DF.Link | None
 		quality_inspection_template: DF.Link | None
 		reorder_levels: DF.Table[ItemReorder]
-		retain_sample: DF.Check
 		restrict_to_companies: DF.Check
+		retain_sample: DF.Check
 		safety_stock: DF.Float
 		sales_tax_withholding_category: DF.Link | None
 		sales_uom: DF.Link | None
