@@ -152,9 +152,10 @@ class Workstation(Document):
 
 		for bom_no in bom_list:
 			frappe.db.sql(
-				"""update `tabBOM Operation` set hour_rate = %s
+				"""update `tabBOM Operation`
+				set hour_rate = %s, operating_cost = %s * time_in_mins / 60
 				where parent = %s and workstation = %s""",
-				(self.hour_rate, bom_no[0], self.name),
+				(self.hour_rate, self.hour_rate, bom_no[0], self.name),
 			)
 
 	def validate_workstation_holiday(self, schedule_date, skip_holiday_list_check=False):
