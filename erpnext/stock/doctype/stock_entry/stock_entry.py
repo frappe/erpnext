@@ -4528,7 +4528,7 @@ def move_sample_to_retention_warehouse(company, items):
 	if isinstance(items, str):
 		items = json.loads(items)
 
-	retention_warehouse = frappe.get_cached_value("Company", company, "sample_retention_warehouse")
+	retention_warehouse = get_sample_retention_warehouse(company)
 	stock_entry = frappe.new_doc("Stock Entry")
 	stock_entry.company = company
 	stock_entry.purpose = "Material Transfer"
@@ -4902,7 +4902,7 @@ def validate_sample_quantity(item_code, sample_quantity, qty, company, batch_no=
 		frappe.throw(
 			_("Sample quantity {0} cannot be more than received quantity {1}").format(sample_quantity, qty)
 		)
-	retention_warehouse = frappe.get_cached_value("Company", company, "sample_retention_warehouse")
+	retention_warehouse = get_sample_retention_warehouse(company)
 	retainted_qty = 0
 	if batch_no:
 		retainted_qty = get_batch_qty(batch_no, retention_warehouse, item_code)
@@ -4925,6 +4925,18 @@ def validate_sample_quantity(item_code, sample_quantity, qty, company, batch_no=
 		)
 		sample_quantity = qty_diff
 	return sample_quantity
+
+
+def get_sample_retention_warehouse(company: str) -> str:
+	warehouse = frappe.get_cached_value("Company", company, "sample_retention_warehouse")
+	if not warehouse:
+		frappe.throw(
+			_("Please set {0} in Company {1} to retain samples.").format(
+				bold(_("Sample Retention Warehouse")), bold(company)
+			),
+			title=_("Sample Retention Warehouse Missing"),
+		)
+	return warehouse
 
 
 def get_supplied_items(

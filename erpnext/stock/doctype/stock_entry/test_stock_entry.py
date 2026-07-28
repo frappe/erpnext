@@ -4497,6 +4497,28 @@ class TestStockEntry(ERPNextTestSuite):
 			se.fg_completed_qty = 0
 			self.assertRaises(FinishedGoodError, se.validate_finished_good_qty_against_fg_completed_qty)
 
+	def test_validate_sample_quantity_raises_when_company_has_no_retention_warehouse(self):
+		"""Item.retain_sample only needs *some* company configured, so the transaction company may not be."""
+		from erpnext.stock.doctype.stock_entry.stock_entry import validate_sample_quantity
+
+		frappe.db.set_value(
+			"Company", "_Test Company", "sample_retention_warehouse", "_Test Warehouse 1 - _TC"
+		)
+		frappe.db.set_value("Company", "_Test Company 1", "sample_retention_warehouse", None)
+		item = make_item(
+			"_Sample Qty No Retention Item",
+			{"is_stock_item": 1, "retain_sample": 1, "sample_quantity": 2, "has_batch_no": 1},
+		)
+		self.assertRaises(
+			frappe.ValidationError,
+			validate_sample_quantity,
+			item.name,
+			1,
+			5,
+			"_Test Company 1",
+			"_Sample Batch",
+		)
+
 	def test_process_loss_percentage_resyncs_from_qty(self):
 		# changing fg qty recomputes process_loss_qty
 		se = frappe.new_doc("Stock Entry")
