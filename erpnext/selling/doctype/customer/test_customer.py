@@ -479,6 +479,10 @@ class TestCustomer(ERPNextTestSuite):
 	def test_overdue_billing_threshold_falls_back_to_customer_group(self):
 		customer_group = frappe.get_cached_value("Customer", "_Test Customer", "customer_group")
 		group = frappe.get_doc("Customer Group", customer_group)
+		customer = frappe.get_doc("Customer", "_Test Customer")
+		self._restore_credit_limits_after(group)
+		self._restore_credit_limits_after(customer)
+
 		group.credit_limits = []
 		group.append("credit_limits", {"company": "_Test Company", "overdue_billing_threshold": 5000})
 		group.save()
@@ -493,6 +497,18 @@ class TestCustomer(ERPNextTestSuite):
 		# a 0 on the customer inherits the group's limit
 		set_overdue_billing_threshold("_Test Customer", "_Test Company", 0)
 		self.assertEqual(get_overdue_billing_threshold("_Test Customer", "_Test Company"), 5000)
+
+	def _restore_credit_limits_after(self, doc):
+		original = [row.as_dict(no_default_fields=True) for row in doc.credit_limits]
+
+		def restore():
+			fresh = frappe.get_doc(doc.doctype, doc.name)
+			fresh.credit_limits = []
+			for row in original:
+				fresh.append("credit_limits", row)
+			fresh.save()
+
+		self.addCleanup(restore)
 
 	def test_overdue_threshold_row_without_credit_limit(self):
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
