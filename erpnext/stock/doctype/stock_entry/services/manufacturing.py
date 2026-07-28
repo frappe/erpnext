@@ -1286,6 +1286,9 @@ def validate_sample_quantity(
 
 
 def get_sample_retention_warehouse(company: str) -> str:
+	# `company` arrives from whitelisted callers, so it decides which company's stock gets read.
+	frappe.has_permission("Company", "read", company, throw=True)
+
 	warehouse = frappe.get_cached_value("Company", company, "sample_retention_warehouse")
 	if not warehouse:
 		frappe.throw(
