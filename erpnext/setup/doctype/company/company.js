@@ -69,6 +69,17 @@ frappe.ui.form.on("Company", {
 				},
 			};
 		});
+
+		["default_wip_warehouse", "default_fg_warehouse", "default_scrap_warehouse"].forEach((fieldname) => {
+			frm.set_query(fieldname, function (doc) {
+				return {
+					filters: {
+						company: doc.name,
+						is_group: 0,
+					},
+				};
+			});
+		});
 	},
 
 	company_name: function (frm) {
