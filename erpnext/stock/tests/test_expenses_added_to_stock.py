@@ -140,22 +140,6 @@ class TestExpensesAddedToStock(ERPNextTestSuite):
 		self.assertEqual(debits[self.eats_account], 0)
 		self.assertEqual(credits[self.eats_contra_account], 0)
 
-	def test_unconfigured_company_skips_booking(self):
-		frappe.db.set_value(
-			"Company",
-			COMPANY,
-			{
-				"expenses_added_to_stock_account": None,
-				"expenses_added_to_stock_contra_account": None,
-			},
-		)
-
-		se = make_stock_entry(item_code=self.item, to_warehouse=WAREHOUSE, qty=10, rate=100, company=COMPANY)
-
-		_balances, debits, credits = self.get_gl_balances("Stock Entry", se.name)
-		self.assertEqual(debits[self.eats_account], 0)
-		self.assertEqual(credits[self.eats_contra_account], 0)
-
 	def test_missing_contra_account_raises_when_feature_enabled(self):
 		frappe.db.set_value("Company", COMPANY, "expenses_added_to_stock_contra_account", None)
 

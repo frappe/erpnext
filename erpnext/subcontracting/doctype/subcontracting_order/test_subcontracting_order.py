@@ -394,6 +394,85 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 			bin_after_cancel_sco.reserved_qty_for_sub_contract, bin_before_sco.reserved_qty_for_sub_contract
 		)
 
+	def test_close_subcontracting_order_releases_reserved_qty(self):
+		# RM in stock at the reserve warehouse for transfer
+		make_stock_entry(target="_Test Warehouse - _TC", item_code="_Test Item", qty=10, basic_rate=100)
+		make_stock_entry(
+			target="_Test Warehouse - _TC", item_code="_Test Item Home Desktop 100", qty=20, basic_rate=100
+		)
+
+		bin_before_sco = frappe.db.get_value(
+			"Bin",
+			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "_Test Item"},
+			fieldname="reserved_qty_for_sub_contract",
+			as_dict=1,
+		)
+
+		# Create SCO with a reserve warehouse on the supplied items
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": "_Test FG Item",
+				"fg_item_qty": 10,
+			},
+		]
+		sco = get_subcontracting_order(service_items=service_items)
+
+		# Transfer only 90% of the raw materials to the supplier warehouse
+		ste = frappe.get_doc(make_rm_stock_entry(sco.name))
+		for item in ste.items:
+			item.qty *= 0.9
+		ste.save()
+		ste.submit()
+		sco.load_from_db()
+		self.assertEqual(sco.status, "Partial Material Transferred")
+
+		# Receive only a partial qty so the order stays open (per_received < 100)
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty -= 1
+		scr.save()
+		scr.submit()
+		sco.load_from_db()
+		self.assertEqual(sco.status, "Partially Received")
+
+		# Keep another SCO open so transfers from the closed SCO must not reduce its reservation
+		open_sco = get_subcontracting_order(service_items=service_items)
+		self.assertEqual(open_sco.status, "Open")
+
+		bin_before_close = frappe.db.get_value(
+			"Bin",
+			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "_Test Item"},
+			fieldname=["reserved_qty_for_sub_contract", "projected_qty"],
+			as_dict=1,
+		)
+
+		# One unit remains reserved for the partially transferred SCO, plus ten for the open SCO
+		self.assertEqual(
+			bin_before_close.reserved_qty_for_sub_contract,
+			bin_before_sco.reserved_qty_for_sub_contract + 11,
+		)
+
+		# Close the partially-received order
+		sco.update_status("Closed")
+		self.assertEqual(sco.status, "Closed")
+
+		bin_after_close = frappe.db.get_value(
+			"Bin",
+			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "_Test Item"},
+			fieldname=["reserved_qty_for_sub_contract", "projected_qty"],
+			as_dict=1,
+		)
+
+		# Closing releases the remaining unit without applying its transfer against the open SCO
+		self.assertEqual(
+			bin_after_close.reserved_qty_for_sub_contract,
+			bin_before_sco.reserved_qty_for_sub_contract + 10,
+		)
+		self.assertEqual(bin_after_close.projected_qty, bin_before_close.projected_qty + 1)
+
 	def test_send_to_subcontractor_ste_submit_without_sco_write_permission(self):
 		"""A Stock-only user (can submit Stock Entries but has no Subcontracting Order write) must be
 		able to submit and cancel a 'Send to Subcontractor' Stock Entry. The SCO status update on the

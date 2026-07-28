@@ -501,4 +501,5 @@ erpnext.patches.v16_0.crm_settings_handle_allowed_users_for_frappe_crm
 erpnext.patches.v16_0.access_control_for_project_users
 erpnext.patches.v16_0.enable_book_stock_expense_gl_entries
 execute:frappe.db.set_single_value("Stock Settings", "use_inline_serial_batch_editor", 0)
-erpnext.patches.v16_0.recompute_production_plan_reserved_qty
+erpnext.patches.v16_0.recalculate_bins_for_production_plan_items
+erpnext.patches.v16_0.rename_ar_ap_ageing_filter
