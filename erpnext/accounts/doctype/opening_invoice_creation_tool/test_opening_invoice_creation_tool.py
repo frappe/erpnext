@@ -217,6 +217,7 @@ def get_opening_invoice_creation_dict(**args):
 	for row in args.get("invoices") or default_invoice_rows:
 		default_invoices.append(
 			{
+				"party_type": party,
 				"qty": row.get("qty") or 1.0,
 				"outstanding_amount": row.get("outstanding_amount") or 200,
 				"party": row.get("party") or f"_Test {party}",
