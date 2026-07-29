@@ -632,8 +632,11 @@ $.extend(erpnext.item, {
 		) {
 			const row = locals[cdt][cdn];
 			return {
-				query: "erpnext.controllers.queries.get_expense_account",
-				filters: { company: row.company, root_type: "Expense", is_group: 0 },
+				filters: {
+					company: row.company,
+					root_type: "Expense",
+					is_group: 0,
+				},
 			};
 		};
 
@@ -644,8 +647,11 @@ $.extend(erpnext.item, {
 		) {
 			const row = locals[cdt][cdn];
 			return {
-				query: "erpnext.controllers.queries.get_income_account",
-				filters: { company: row.company, root_type: "Income", is_group: 0 },
+				filters: {
+					company: row.company,
+					root_type: "Income",
+					is_group: 0,
+				},
 			};
 		};
 
