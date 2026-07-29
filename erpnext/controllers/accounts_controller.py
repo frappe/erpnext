@@ -232,8 +232,13 @@ class AccountsController(TransactionBase):
 		"""A row can be closed while anything is still pending on it.
 
 		Billing is the axis every closable document shares; the order doctypes
-		extend this with their own fulfilment axis. Amounts are compared as
-		magnitudes so return rows, which carry negative amounts, stay closable.
+		extend this with their own fulfilment axis.
+
+		Amounts are compared as magnitudes so that return rows stay closable.
+		That is deliberate: writing off a credit note that will never be issued
+		is a real decision, and closing a whole return document is already
+		allowed. Leaving it to the sign of the amount would decide it by
+		accident.
 		"""
 		return abs(flt(item.billed_amt)) < abs(flt(item.amount))
 
