@@ -433,29 +433,10 @@ class PurchaseReceipt(BuyingController):
 						row.received_qty,
 					)
 
-	def check_next_docstatus(self):
-		submit_rv = frappe.db.sql(
-			"""select t1.name
-			from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2
-			where t1.name = t2.parent and t2.purchase_receipt = %s and t1.docstatus = 1""",
-			(self.name),
-		)
-		if submit_rv:
-			frappe.throw(_("Purchase Invoice {0} is already submitted").format(self.submit_rv[0][0]))
-
 	def on_cancel(self):
 		super().on_cancel()
 
 		self.check_for_on_hold_or_closed_status("Purchase Order", "purchase_order")
-		# Check if Purchase Invoice has been submitted against current Purchase Order
-		submitted = frappe.db.sql(
-			"""select t1.name
-			from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2
-			where t1.name = t2.parent and t2.purchase_receipt = %s and t1.docstatus = 1""",
-			self.name,
-		)
-		if submitted:
-			frappe.throw(_("Purchase Invoice {0} is already submitted").format(submitted[0][0]))
 
 		self.update_prevdoc_status()
 		self.update_billing_status()
