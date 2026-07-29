@@ -964,6 +964,16 @@ frappe.ui.form.on("Stock Entry Detail", {
 		if (item.is_finished_item) {
 			frm.events.set_fg_completed_qty(frm);
 		}
+<<<<<<< HEAD
+=======
+
+		if (frm.doc.purpose === "Receive from Customer") {
+			const scio_row = frm.doc.items.find((row) => row.scio_detail);
+			if (scio_row) {
+				item.t_warehouse = scio_row.t_warehouse;
+			}
+		}
+>>>>>>> 6e444a1832 (fix: guard scio row lookup in stock entry items_add)
 	},
 	set_basic_rate_manually(frm, cdt, cdn) {
 		let row = locals[cdt][cdn];
