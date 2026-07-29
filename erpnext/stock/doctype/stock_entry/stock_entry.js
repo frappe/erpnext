@@ -998,7 +998,10 @@ frappe.ui.form.on("Stock Entry Detail", {
 		}
 
 		if (frm.doc.purpose === "Receive from Customer") {
-			item.t_warehouse = frm.doc.items.find((item) => item.scio_detail).t_warehouse;
+			const scio_row = frm.doc.items.find((row) => row.scio_detail);
+			if (scio_row) {
+				item.t_warehouse = scio_row.t_warehouse;
+			}
 		}
 	},
 	set_basic_rate_manually(frm, cdt, cdn) {
