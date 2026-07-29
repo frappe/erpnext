@@ -94,6 +94,20 @@ class TestPurchaseReceiptItemClose(ERPNextTestSuite):
 		self.assertNotEqual(receipt.status, "Closed")
 		self.assertEqual(receipt.per_billed, 0)
 
+	def test_unbilled_return_row_can_be_closed(self):
+		"""Return rows are closable by design, not by an accident of sign."""
+		receipt = self.make_purchase_receipt()
+		return_receipt = make_return_doc("Purchase Receipt", receipt.name)
+		return_receipt.insert()
+		return_receipt.submit()
+
+		row = return_receipt.items[0]
+		self.assertLess(row.amount, 0)
+		self.assertTrue(return_receipt.is_item_closable(row))
+
+		self.close_items(return_receipt, [row])
+		self.assertTrue(return_receipt.items[0].closed)
+
 
 class TestDeliveryNoteItemClose(ERPNextTestSuite):
 	def setUp(self):
@@ -215,3 +229,20 @@ class TestDeliveryNoteItemClose(ERPNextTestSuite):
 		pending = abs(flt(row.amount)) - abs(flt(row.billed_amt))
 		self.assertEqual(pending, abs(flt(note.items[0].amount)))
 		self.assertGreater(pending, 0)
+
+	def test_closing_a_return_row_leaves_the_original_untouched(self):
+		"""Writing off a credit note must not disturb what was returned."""
+		note = self.make_delivery_note()
+		return_note = make_return_doc("Delivery Note", note.name)
+		return_note.insert()
+		return_note.submit()
+
+		note.reload()
+		before = [(row.returned_qty, row.closed) for row in note.items]
+		per_returned_before = note.per_returned
+
+		self.close_items(return_note, [return_note.items[0]])
+
+		note.reload()
+		self.assertEqual([(row.returned_qty, row.closed) for row in note.items], before)
+		self.assertEqual(note.per_returned, per_returned_before)
