@@ -6180,6 +6180,32 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		srbnb_credit = sum(flt(row.credit) for row in gl_entries if row.account == srbnb_account)
 		self.assertAlmostEqual(srbnb_credit, pi_base_net_amount, places=2)
 
+	def test_cancel_blocked_by_submitted_invoice_rolls_back(self):
+		"""A submitted Purchase Invoice must block cancelling its Purchase Receipt. Frappe's backlink
+		check rejects the cancel only after on_cancel has run stock, GL, and status work, so the whole
+		transaction has to roll back: the receipt stays submitted with no leaked ledger entries."""
+		pr = make_purchase_receipt()
+		pi = make_purchase_invoice(pr.name)
+		pi.insert()
+		pi.submit()
+
+		pr.reload()
+		status_before = pr.status
+		sle_before = frappe.db.count("Stock Ledger Entry", {"voucher_no": pr.name})
+		gle_before = frappe.db.count("GL Entry", {"voucher_no": pr.name})
+
+		frappe.db.savepoint("before_blocked_cancel")
+		with self.assertRaises(frappe.LinkExistsError) as cm:
+			pr.cancel()
+		self.assertIn(pi.name, str(cm.exception))
+		frappe.db.rollback(save_point="before_blocked_cancel")  # mimic the request-level rollback
+
+		pr.reload()
+		self.assertEqual(pr.docstatus, 1)
+		self.assertEqual(pr.status, status_before)
+		self.assertEqual(frappe.db.count("Stock Ledger Entry", {"voucher_no": pr.name}), sle_before)
+		self.assertEqual(frappe.db.count("GL Entry", {"voucher_no": pr.name}), gle_before)
+
 
 def create_asset_category_for_pr_test():
 	category_name = "Test Asset Category for PR"
