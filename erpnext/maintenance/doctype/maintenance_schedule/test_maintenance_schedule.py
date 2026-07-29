@@ -1,6 +1,8 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from unittest.mock import patch
+
 import frappe
 from frappe.utils import format_date
 from frappe.utils.data import add_days, formatdate, today
@@ -212,6 +214,22 @@ class TestMaintenanceSchedule(ERPNextTestSuite):
 		non_holiday = add_days(today(), 7)
 		unchanged = ms.validate_schedule_date_for_holiday_list(getdate(non_holiday), sp.name)
 		self.assertEqual(getdate(unchanged), getdate(non_holiday))
+
+	def test_schedule_holiday_list_uses_schedule_date(self):
+		ms = make_maintenance_schedule()
+		with (
+			patch(
+				"erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule.frappe.db.get_value",
+				return_value="_Test Employee",
+			),
+			patch(
+				"erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule.get_holiday_list_for_employee",
+				return_value=None,
+			) as get_holiday_list,
+		):
+			ms.validate_schedule_date_for_holiday_list("2026-01-01", "Sales Team")
+
+		get_holiday_list.assert_called_once_with("_Test Employee", as_on="2026-01-01")
 
 
 def make_serial_item_with_serial(self, item_code):

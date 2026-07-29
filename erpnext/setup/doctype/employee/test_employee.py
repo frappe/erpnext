@@ -1,17 +1,27 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from unittest.mock import patch
+
 import frappe
 import frappe.utils
 from frappe.query_builder import Criterion
 
 import erpnext
 from erpnext.accounts.utils import build_qb_match_conditions
-from erpnext.setup.doctype.employee.employee import InactiveEmployeeStatusError
+from erpnext.setup.doctype.employee.employee import InactiveEmployeeStatusError, is_holiday
 from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestEmployee(ERPNextTestSuite):
+	def test_is_holiday_resolves_holiday_list_for_requested_date(self):
+		with patch(
+			"erpnext.setup.doctype.employee.employee.get_holiday_list_for_employee", return_value=None
+		) as get_holiday_list:
+			is_holiday("_Test Employee", "2026-01-01", raise_exception=False)
+
+		get_holiday_list.assert_called_once_with("_Test Employee", False, as_on="2026-01-01")
+
 	def test_employee_status_left(self):
 		employee1 = make_employee("test_employee_1@company.com", company="_Test Company")
 		employee2 = make_employee("test_employee_2@company.com", company="_Test Company")
