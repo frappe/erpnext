@@ -38,28 +38,17 @@ class TestRepostAccountingLedger(AccountsTestMixin, FrappeTestCase):
 		self.create_item()
 		update_repost_settings()
 
-<<<<<<< HEAD
 	def tearDown(self):
 		frappe.db.rollback()
 
-	def test_01_basic_functions(self):
-		si = create_sales_invoice(
+	def make_invoice(self, **kwargs):
+		return create_sales_invoice(
 			item=self.item,
 			company=self.company,
 			customer=self.customer,
 			debit_to=self.debit_to,
 			parent_cost_center=self.cost_center,
 			cost_center=self.cost_center,
-=======
-	def make_invoice(self, **kwargs):
-		return create_sales_invoice(
-			item="_Test Item",
-			company="_Test Company",
-			customer="_Test Customer",
-			debit_to="Debtors - _TC",
-			parent_cost_center="Main - _TC",
-			cost_center="Main - _TC",
->>>>>>> 372dff2ffa (refactor(accounts): repost accounting ledger (#56442))
 			rate=100,
 			**kwargs,
 		)
@@ -72,7 +61,7 @@ class TestRepostAccountingLedger(AccountsTestMixin, FrappeTestCase):
 
 	def create_repost_doc(self, vouchers, delete_cancelled_entries=False, submit=False):
 		ral = frappe.new_doc("Repost Accounting Ledger")
-		ral.company = "_Test Company"
+		ral.company = self.company
 		ral.delete_cancelled_entries = delete_cancelled_entries
 		for voucher in vouchers:
 			ral.append("vouchers", {"voucher_type": voucher.doctype, "voucher_no": voucher.name})
@@ -98,17 +87,17 @@ class TestRepostAccountingLedger(AccountsTestMixin, FrappeTestCase):
 			yield reposted
 
 	def make_period_closing_voucher(self):
-		fy = get_fiscal_year(today(), company="_Test Company")
+		fy = get_fiscal_year(today(), company=self.company)
 		pcv = frappe.get_doc(
 			{
 				"doctype": "Period Closing Voucher",
 				"transaction_date": today(),
 				"period_start_date": fy[1],
 				"period_end_date": today(),
-				"company": "_Test Company",
+				"company": self.company,
 				"fiscal_year": fy[0],
-				"cost_center": "Main - _TC",
-				"closing_account_head": "Retained Earnings - _TC",
+				"cost_center": self.cost_center,
+				"closing_account_head": self.retained_earnings,
 				"remarks": "test",
 			}
 		)
@@ -159,65 +148,24 @@ class TestRepostAccountingLedger(AccountsTestMixin, FrappeTestCase):
 		gle = frappe.db.get_all("GL Entry", filters={"voucher_no": si.name, "account": self.debit_to})
 		frappe.db.set_value("GL Entry", gle[0], "debit", 90)
 
-<<<<<<< HEAD
-		gl = qb.DocType("GL Entry")
-		res = (
-			qb.from_(gl)
-			.select(gl.voucher_no, Sum(gl.debit).as_("debit"), Sum(gl.credit).as_("credit"))
-			.where((gl.voucher_no == si.name) & (gl.is_cancelled == 0))
-			.run()
-		)
-
-=======
->>>>>>> 372dff2ffa (refactor(accounts): repost accounting ledger (#56442))
 		# Assert incorrect ledger balance
 		self.assertNotEqual(self.get_gl_totals(si.name), (100, 100))
 
 		# Submit repost document
 		ral.save().submit()
 
-<<<<<<< HEAD
-		res = (
-			qb.from_(gl)
-			.select(gl.voucher_no, Sum(gl.debit).as_("debit"), Sum(gl.credit).as_("credit"))
-			.where((gl.voucher_no == si.name) & (gl.is_cancelled == 0))
-			.run()
-		)
-
-=======
->>>>>>> 372dff2ffa (refactor(accounts): repost accounting ledger (#56442))
 		# Ledger should reflect correct amount post repost
 		self.assertEqual(self.get_gl_totals(si.name), (100, 100))
 
 	def test_02_deferred_accounting_valiations(self):
-<<<<<<< HEAD
-		si = create_sales_invoice(
-			item=self.item,
-			company=self.company,
-			customer=self.customer,
-			debit_to=self.debit_to,
-			parent_cost_center=self.cost_center,
-			cost_center=self.cost_center,
-			rate=100,
-			do_not_submit=True,
-		)
-=======
 		si = self.make_invoice(do_not_submit=True)
->>>>>>> 372dff2ffa (refactor(accounts): repost accounting ledger (#56442))
 		si.items[0].enable_deferred_revenue = True
 		si.items[0].deferred_revenue_account = self.deferred_revenue
 		si.items[0].service_start_date = nowdate()
 		si.items[0].service_end_date = add_days(nowdate(), 90)
 		si.save().submit()
 
-<<<<<<< HEAD
-		ral = frappe.new_doc("Repost Accounting Ledger")
-		ral.company = self.company
-		ral.append("vouchers", {"voucher_type": si.doctype, "voucher_no": si.name})
-		self.assertRaises(frappe.ValidationError, ral.save)
-=======
 		self.assertRaises(frappe.ValidationError, self.create_repost_doc, [si])
->>>>>>> 372dff2ffa (refactor(accounts): repost accounting ledger (#56442))
 
 	@change_settings("Accounts Settings", {"delete_linked_ledger_entries": 1})
 	def test_04_pcv_validation(self):
@@ -225,107 +173,29 @@ class TestRepostAccountingLedger(AccountsTestMixin, FrappeTestCase):
 		gl = frappe.qb.DocType("GL Entry")
 		qb.from_(gl).delete().where(gl.company == self.company).run()
 
-<<<<<<< HEAD
-		si = create_sales_invoice(
-			item=self.item,
-			company=self.company,
-			customer=self.customer,
-			debit_to=self.debit_to,
-			parent_cost_center=self.cost_center,
-			cost_center=self.cost_center,
-			rate=100,
-		)
-		fy = get_fiscal_year(today(), company=self.company)
-		pcv = frappe.get_doc(
-			{
-				"doctype": "Period Closing Voucher",
-				"transaction_date": today(),
-				"period_start_date": fy[1],
-				"period_end_date": today(),
-				"company": self.company,
-				"fiscal_year": fy[0],
-				"cost_center": self.cost_center,
-				"closing_account_head": self.retained_earnings,
-				"remarks": "test",
-			}
-		)
-		pcv.save().submit()
-
-		ral = frappe.new_doc("Repost Accounting Ledger")
-		ral.company = self.company
-		ral.append("vouchers", {"voucher_type": si.doctype, "voucher_no": si.name})
-		self.assertRaises(frappe.ValidationError, ral.save)
-=======
 		si = self.make_invoice()
 		pcv = self.make_period_closing_voucher()
 
 		self.assertRaises(frappe.ValidationError, self.create_repost_doc, [si])
->>>>>>> 372dff2ffa (refactor(accounts): repost accounting ledger (#56442))
 
 		pcv.reload()
 		pcv.cancel()
 		pcv.delete()
 
 	def test_03_deletion_flag_and_preview_function(self):
-<<<<<<< HEAD
-		si = create_sales_invoice(
-			item=self.item,
-			company=self.company,
-			customer=self.customer,
-			debit_to=self.debit_to,
-			parent_cost_center=self.cost_center,
-			cost_center=self.cost_center,
-			rate=100,
-		)
-
-		pe = get_payment_entry(si.doctype, si.name)
-		pe.save().submit()
-
-		# with deletion flag set
-		ral = frappe.new_doc("Repost Accounting Ledger")
-		ral.company = self.company
-		ral.delete_cancelled_entries = True
-		ral.append("vouchers", {"voucher_type": si.doctype, "voucher_no": si.name})
-		ral.append("vouchers", {"voucher_type": pe.doctype, "voucher_no": pe.name})
-		ral.save().submit()
-=======
 		si, pe = self.make_invoice_and_payment()
 
 		# with deletion flag set
 		self.create_repost_doc([si, pe], delete_cancelled_entries=True, submit=True)
->>>>>>> 372dff2ffa (refactor(accounts): repost accounting ledger (#56442))
 
 		self.assertIsNone(frappe.db.exists("GL Entry", {"voucher_no": si.name, "is_cancelled": 1}))
 		self.assertIsNone(frappe.db.exists("GL Entry", {"voucher_no": pe.name, "is_cancelled": 1}))
 
 	def test_05_without_deletion_flag(self):
-<<<<<<< HEAD
-		si = create_sales_invoice(
-			item=self.item,
-			company=self.company,
-			customer=self.customer,
-			debit_to=self.debit_to,
-			parent_cost_center=self.cost_center,
-			cost_center=self.cost_center,
-			rate=100,
-		)
-
-		pe = get_payment_entry(si.doctype, si.name)
-		pe.save().submit()
-
-		# without deletion flag set
-		ral = frappe.new_doc("Repost Accounting Ledger")
-		ral.company = self.company
-		ral.delete_cancelled_entries = False
-		ral.append("vouchers", {"voucher_type": si.doctype, "voucher_no": si.name})
-		ral.append("vouchers", {"voucher_type": pe.doctype, "voucher_no": pe.name})
-		ral.save().submit()
-=======
 		si, pe = self.make_invoice_and_payment()
 
 		# without deletion flag set
 		self.create_repost_doc([si, pe], submit=True)
->>>>>>> 372dff2ffa (refactor(accounts): repost accounting ledger (#56442))
 
 		self.assertIsNotNone(frappe.db.exists("GL Entry", {"voucher_no": si.name, "is_cancelled": 1}))
 		self.assertIsNotNone(frappe.db.exists("GL Entry", {"voucher_no": pe.name, "is_cancelled": 1}))
@@ -371,15 +241,7 @@ class TestRepostAccountingLedger(AccountsTestMixin, FrappeTestCase):
 			another_provisional_account,
 		)
 
-<<<<<<< HEAD
-		repost_doc = frappe.new_doc("Repost Accounting Ledger")
-		repost_doc.company = self.company
-		repost_doc.delete_cancelled_entries = True
-		repost_doc.append("vouchers", {"voucher_type": pr.doctype, "voucher_no": pr.name})
-		repost_doc.save().submit()
-=======
 		repost_doc = self.create_repost_doc([pr], delete_cancelled_entries=True, submit=True)
->>>>>>> 372dff2ffa (refactor(accounts): repost accounting ledger (#56442))
 
 		pr_gles_after_repost = get_gl_entries(pr.doctype, pr.name, skip_cancelled=True)
 		expected_pr_gles_after_repost = [
@@ -450,10 +312,8 @@ class TestRepostAccountingLedger(AccountsTestMixin, FrappeTestCase):
 		ral.reload()
 		self.assertEqual(ral.status, "Cancelled")
 
-		discarded = self.create_repost_doc([si])
-		discarded.discard()
-		discarded.reload()
-		self.assertEqual(discarded.status, "Cancelled")
+		# the `discard` flow (and the `on_discard` hook it triggers) only exists on v16,
+		# so there is nothing to assert here on v15
 
 	def test_10_start_repost_guards(self):
 		si = self.make_invoice()
@@ -561,10 +421,10 @@ class TestRepostAccountingLedger(AccountsTestMixin, FrappeTestCase):
 			frappe.db.exists("Error Log", {"reference_doctype": ral.doctype, "reference_name": ral.name})
 		)
 
-	@ERPNextTestSuite.change_settings("Accounts Settings", {"delete_linked_ledger_entries": 1})
+	@change_settings("Accounts Settings", {"delete_linked_ledger_entries": 1})
 	def test_14_period_closed_after_the_repost_was_started(self):
 		gl = qb.DocType("GL Entry")
-		qb.from_(gl).delete().where(gl.company == "_Test Company").run()
+		qb.from_(gl).delete().where(gl.company == self.company).run()
 
 		si = self.make_invoice()
 		ral = self.create_repost_doc([si], submit=True)

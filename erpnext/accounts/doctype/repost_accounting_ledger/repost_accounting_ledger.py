@@ -256,13 +256,13 @@ def _enqueue_repost(repost_doc_name: str) -> None:
 	frappe.enqueue(
 		method="erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger.repost",
 		repost_doc_name=repost_doc_name,
-		commit=not frappe.in_test,
+		commit=not frappe.flags.in_test,
 		queue="long",
 		timeout=1500,
 		job_id=_repost_job_id(repost_doc_name),
 		deduplicate=True,
 		enqueue_after_commit=True,
-		now=frappe.in_test,
+		now=frappe.flags.in_test,
 	)
 
 

@@ -64,22 +64,13 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2023-07-04 14:15:51.165584",
-=======
  "modified": "2026-07-29 02:41:00.000000",
->>>>>>> 372dff2ffa (refactor(accounts): repost accounting ledger (#56442))
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Repost Accounting Ledger Items",
  "owner": "Administrator",
  "permissions": [],
-<<<<<<< HEAD
  "sort_field": "modified",
-=======
- "row_format": "Dynamic",
- "sort_field": "creation",
->>>>>>> 372dff2ffa (refactor(accounts): repost accounting ledger (#56442))
  "sort_order": "DESC",
  "states": []
 }

@@ -127,12 +127,7 @@
    "write": 1
   }
  ],
-<<<<<<< HEAD
  "sort_field": "modified",
-=======
- "row_format": "Dynamic",
- "sort_field": "creation",
->>>>>>> 372dff2ffa (refactor(accounts): repost accounting ledger (#56442))
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1
