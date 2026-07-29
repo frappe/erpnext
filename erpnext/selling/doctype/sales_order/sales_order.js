@@ -1885,30 +1885,16 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 	}
 
 	set_item_close_buttons() {
-		erpnext.item_close.add_buttons(this.frm, {
-			is_closable: (item) =>
-				!item.closed &&
-				(flt(item.delivered_qty) < flt(item.qty) || flt(item.billed_amt) < flt(item.amount)),
-			help: __(
-				"Closed rows stop being expected. Their pending quantity is written off, stock is no longer reserved for them, and they are skipped when creating a Delivery Note or Sales Invoice."
-			),
-			summarise: (item) => ({
-				item_code: item.item_code,
-				item_name: item.item_name,
-				qty: item.qty,
-				delivered_qty: item.delivered_qty || 0,
-				pending_qty: Math.max(flt(item.qty) - flt(item.delivered_qty), 0),
-				pending_amount: Math.max(flt(item.amount) - flt(item.billed_amt), 0),
-			}),
-			columns: [
-				erpnext.item_close.column("item_code", __("Item Code"), "Data", 3),
-				erpnext.item_close.column("item_name", __("Item Name"), "Data", 2),
-				erpnext.item_close.column("qty", __("Qty")),
-				erpnext.item_close.column("delivered_qty", __("Delivered Qty")),
-				erpnext.item_close.column("pending_qty", __("Pending Qty")),
-				erpnext.item_close.column("pending_amount", __("Pending Amount"), "Currency", 2),
-			],
-		});
+		erpnext.item_close.add_buttons(
+			this.frm,
+			erpnext.item_close.fulfilment_config({
+				qty_field: "delivered_qty",
+				qty_label: __("Delivered Qty"),
+				help: __(
+					"Closed rows stop being expected. Their pending quantity is written off, stock is no longer reserved for them, and they are skipped when creating a Delivery Note or Sales Invoice."
+				),
+			})
+		);
 	}
 	update_status(label, status) {
 		var doc = this.frm.doc;

@@ -691,20 +691,18 @@ class StatusUpdater(Document):
 		# A closed row is written off, so it leaves the denominator rather than
 		# counting as done. The percentage stays a true measure of what was
 		# actually received, delivered or billed against what is still expected.
+		# Once every row is written off there is nothing left to measure against,
+		# so fall back to the whole table and report what actually happened.
 		open_records = [r for r in child_records if not (tracks_closed_rows and r["closed"])]
+		basis = open_records or child_records
 
-		sum_ref = sum(abs(record[ref_key]) for record in open_records)
+		sum_ref = sum(abs(record[ref_key]) for record in basis)
 
 		if sum_ref > 0:
 			percentage = round(
-				sum(min(abs(record[target_field]), abs(record[ref_key])) for record in open_records)
-				/ sum_ref
-				* 100,
+				sum(min(abs(record[target_field]), abs(record[ref_key])) for record in basis) / sum_ref * 100,
 				6,
 			)
-		elif child_records and not open_records:
-			# every row written off, so nothing is outstanding
-			percentage = 100
 		else:
 			percentage = 0
 

@@ -406,7 +406,7 @@ class PurchaseOrder(BuyingController):
 		StatusService(self).recalculate_after_item_close()
 
 	def is_item_closable(self, item):
-		return flt(item.received_qty) < flt(item.qty) or flt(item.billed_amt) < flt(item.amount)
+		return flt(item.received_qty) < flt(item.qty) or super().is_item_closable(item)
 
 	def on_submit(self):
 		super().on_submit()

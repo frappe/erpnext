@@ -15,6 +15,7 @@ from frappe.utils import flt
 
 from erpnext.accounts.party import CROSS_PARTY_FIELD_NO_MAP, get_due_date
 from erpnext.controllers.accounts_controller import get_taxes_and_charges, merge_taxes
+from erpnext.controllers.item_close import is_bundle_of_closed_row
 from erpnext.stock.doctype.packed_item.packed_item import is_product_bundle
 
 
@@ -56,14 +57,6 @@ def get_returned_qty_map(delivery_note: str) -> dict:
 	)
 
 	return returned_qty_map
-
-
-def is_bundle_of_closed_row(packed_item) -> bool:
-	"""A packed item follows the Delivery Note Item row that bundles it."""
-	return bool(
-		packed_item.parent_detail_docname
-		and frappe.db.get_value("Delivery Note Item", packed_item.parent_detail_docname, "closed")
-	)
 
 
 @frappe.whitelist()

@@ -589,7 +589,7 @@ class SalesOrder(SellingController):
 		StatusService(self).recalculate_after_item_close()
 
 	def is_item_closable(self, item):
-		return flt(item.delivered_qty) < flt(item.qty) or flt(item.billed_amt) < flt(item.amount)
+		return flt(item.delivered_qty) < flt(item.qty) or super().is_item_closable(item)
 
 	def validate_item_close(self, items):
 		"""Reserved stock has to be released deliberately before a row is closed."""

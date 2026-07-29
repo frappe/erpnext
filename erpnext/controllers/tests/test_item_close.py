@@ -143,7 +143,9 @@ class TestPurchaseOrderItemClose(ERPNextTestSuite):
 
 		self.close_items(po, po.items)
 
-		self.assertEqual(po.per_billed, 100)
+		# billing written off, but the goods really did arrive
+		self.assertEqual(po.per_billed, 0)
+		self.assertEqual(po.per_received, 100)
 		self.assertEqual(po.status, "Closed")
 
 	def test_receipt_is_not_offered_when_the_rest_is_closed(self):

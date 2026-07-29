@@ -228,6 +228,14 @@ class AccountsController(TransactionBase):
 
 		return False
 
+	def is_item_closable(self, item):
+		"""A row can be closed while anything is still pending on it.
+
+		Billing is the axis every closable document shares; the order doctypes
+		extend this with their own fulfilment axis.
+		"""
+		return flt(item.billed_amt) < flt(item.amount)
+
 	def validate(self):
 		clear_closed_rows_on_amend(self)
 

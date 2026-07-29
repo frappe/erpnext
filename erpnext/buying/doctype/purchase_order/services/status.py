@@ -55,17 +55,9 @@ class StatusService:
 	def update_receiving_percentage(self) -> None:
 		doc = self.doc
 		total_qty, received_qty = 0.0, 0.0
-		for item in doc.items:
-			if item.closed:
-				continue
+		for item in [item for item in doc.items if not item.closed] or doc.items:
 			received_qty += min(item.received_qty, item.qty)
 			total_qty += item.qty
 
-		if total_qty and received_qty:
-			per_received = flt(received_qty / total_qty) * 100
-		elif doc.items and not total_qty:
-			per_received = 100
-		else:
-			per_received = 0
-
+		per_received = flt(received_qty / total_qty) * 100 if total_qty else 0
 		doc.db_set("per_received", per_received, update_modified=False)
