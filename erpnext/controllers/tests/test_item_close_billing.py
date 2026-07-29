@@ -4,6 +4,7 @@
 import frappe
 
 from erpnext.controllers.item_close import update_closed_status
+from erpnext.controllers.sales_and_purchase_return import make_return_doc
 from erpnext.stock.doctype.delivery_note.mapper import make_sales_invoice
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.item.test_item import make_item
@@ -177,3 +178,26 @@ class TestDeliveryNoteItemClose(ERPNextTestSuite):
 		amended.insert()
 
 		self.assertFalse(any(row.closed for row in amended.items))
+
+	def test_noncanonical_closed_value_is_normalised(self):
+		"""A truthy non-1 value must not slip past the exact-match submission guard."""
+		note = self.make_delivery_note()
+
+		update_closed_status("Delivery Note", note.name, [note.items[1].name], 2)
+
+		note.reload()
+		self.assertEqual(note.items[1].closed, 1)
+
+	def test_unbilled_return_row_can_be_closed(self):
+		"""Return rows carry negative amounts and must still be closable."""
+		note = self.make_delivery_note()
+		return_note = make_return_doc("Delivery Note", note.name)
+		return_note.insert()
+		return_note.submit()
+
+		row = return_note.items[0]
+		self.assertLess(row.amount, 0)
+		self.assertTrue(return_note.is_item_closable(row))
+
+		self.close_items(return_note, [row])
+		self.assertTrue(return_note.items[0].closed)
