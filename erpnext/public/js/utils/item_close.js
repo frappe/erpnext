@@ -80,7 +80,8 @@ erpnext.item_close = {
 		return {
 			is_closable: (item) =>
 				!item.closed &&
-				(flt(item[qty_field]) < flt(item.qty) || flt(item.billed_amt) < flt(item.amount)),
+				(flt(item[qty_field]) < flt(item.qty) ||
+					Math.abs(flt(item.billed_amt)) < Math.abs(flt(item.amount))),
 			help: help,
 			summarise: (item) => ({
 				item_code: item.item_code,
@@ -88,7 +89,7 @@ erpnext.item_close = {
 				qty: item.qty,
 				fulfilled_qty: item[qty_field] || 0,
 				pending_qty: Math.max(flt(item.qty) - flt(item[qty_field]), 0),
-				pending_amount: Math.max(flt(item.amount) - flt(item.billed_amt), 0),
+				pending_amount: Math.max(Math.abs(flt(item.amount)) - Math.abs(flt(item.billed_amt)), 0),
 			}),
 			columns: [
 				erpnext.item_close.column("item_code", __("Item Code"), "Data", 3),
@@ -103,7 +104,8 @@ erpnext.item_close = {
 
 	billing_config(invoice_label) {
 		return {
-			is_closable: (item) => !item.closed && flt(item.billed_amt) < flt(item.amount),
+			is_closable: (item) =>
+				!item.closed && Math.abs(flt(item.billed_amt)) < Math.abs(flt(item.amount)),
 			help: __(
 				"Closed rows stop being expected. Their unbilled amount is written off and they are skipped when creating a {0}.",
 				[invoice_label]
@@ -114,7 +116,7 @@ erpnext.item_close = {
 				qty: item.qty,
 				amount: item.amount,
 				billed_amt: item.billed_amt || 0,
-				pending_amount: Math.max(flt(item.amount) - flt(item.billed_amt), 0),
+				pending_amount: Math.max(Math.abs(flt(item.amount)) - Math.abs(flt(item.billed_amt)), 0),
 			}),
 			columns: [
 				erpnext.item_close.column("item_code", __("Item Code"), "Data", 3),

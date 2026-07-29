@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
+from frappe.utils import flt
 
 from erpnext.controllers.item_close import update_closed_status
 from erpnext.controllers.sales_and_purchase_return import make_return_doc
@@ -201,3 +202,16 @@ class TestDeliveryNoteItemClose(ERPNextTestSuite):
 
 		self.close_items(return_note, [row])
 		self.assertTrue(return_note.items[0].closed)
+
+	def test_return_row_pending_amount_is_a_magnitude(self):
+		"""The dialog shows what is outstanding, so a return row must not read as zero."""
+		note = self.make_delivery_note()
+		return_note = make_return_doc("Delivery Note", note.name)
+		return_note.insert()
+		return_note.submit()
+
+		row = return_note.items[0]
+		self.assertLess(row.amount, 0)
+		pending = abs(flt(row.amount)) - abs(flt(row.billed_amt))
+		self.assertEqual(pending, abs(flt(note.items[0].amount)))
+		self.assertGreater(pending, 0)
