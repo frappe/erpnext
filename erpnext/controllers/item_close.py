@@ -106,6 +106,20 @@ def reopen_parent_if_closed(doc) -> None:
 		doc.update_status(REOPEN_STATUS[doc.doctype])
 
 
+def clear_closed_rows_on_amend(doc) -> None:
+	"""An amended document starts with nothing written off.
+
+	Frappe copies `no_copy` fields when amending so a cancelled document can be
+	corrected and resubmitted, which would otherwise carry a write-off decision
+	that was made against the cancelled document onto the new one.
+	"""
+	if not doc.is_new() or not doc.get("amended_from") or not has_closable_items(doc.doctype):
+		return
+
+	for row in doc.get("items") or []:
+		row.closed = 0
+
+
 def validate_parent_reopen(doc) -> None:
 	"""Block reopening a parent whose rows are all closed.
 

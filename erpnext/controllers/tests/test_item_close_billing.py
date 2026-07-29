@@ -41,13 +41,15 @@ class TestPurchaseReceiptItemClose(ERPNextTestSuite):
 		update_closed_status(doc.doctype, doc.name, [row.name for row in rows], closed)
 		doc.reload()
 
-	def test_closing_row_settles_billing_percentage(self):
+	def test_closing_a_row_does_not_inflate_billing_percentage(self):
 		receipt = self.make_purchase_receipt()
 		self.assertEqual(receipt.per_billed, 0)
 
 		self.close_items(receipt, [receipt.items[1]])
 
-		self.assertEqual(receipt.per_billed, 50)
+		# nothing was billed, so the receipt must not read as partly billed
+		self.assertEqual(receipt.per_billed, 0)
+		self.assertEqual(receipt.status, "To Bill")
 
 	def test_closing_every_row_closes_the_receipt(self):
 		receipt = self.make_purchase_receipt()
@@ -87,7 +89,7 @@ class TestPurchaseReceiptItemClose(ERPNextTestSuite):
 		self.close_items(receipt, [receipt.items[1]], closed=0)
 
 		self.assertNotEqual(receipt.status, "Closed")
-		self.assertEqual(receipt.per_billed, 50)
+		self.assertEqual(receipt.per_billed, 0)
 
 
 class TestDeliveryNoteItemClose(ERPNextTestSuite):
@@ -118,13 +120,15 @@ class TestDeliveryNoteItemClose(ERPNextTestSuite):
 		update_closed_status(doc.doctype, doc.name, [row.name for row in rows], closed)
 		doc.reload()
 
-	def test_closing_row_settles_billing_percentage(self):
+	def test_closing_a_row_does_not_inflate_billing_percentage(self):
 		note = self.make_delivery_note()
 		self.assertEqual(note.per_billed, 0)
 
 		self.close_items(note, [note.items[1]])
 
-		self.assertEqual(note.per_billed, 50)
+		# nothing was billed, so the note must not read as partially billed
+		self.assertEqual(note.per_billed, 0)
+		self.assertEqual(note.status, "To Bill")
 
 	def test_closing_every_row_closes_the_note(self):
 		note = self.make_delivery_note()
@@ -158,3 +162,16 @@ class TestDeliveryNoteItemClose(ERPNextTestSuite):
 
 		self.assertEqual(note.per_returned, 0)
 		self.assertEqual(note.status, "Closed")
+
+	def test_amending_clears_closed_rows(self):
+		"""Frappe keeps no_copy fields when amending, so the flag must be cleared."""
+		note = self.make_delivery_note()
+		self.close_items(note, [note.items[1]])
+		note.cancel()
+
+		amended = frappe.copy_doc(note, ignore_no_copy=True)
+		amended.docstatus = 0
+		amended.amended_from = note.name
+		amended.insert()
+
+		self.assertFalse(any(row.closed for row in amended.items))

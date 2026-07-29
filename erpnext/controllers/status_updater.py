@@ -688,20 +688,23 @@ class StatusUpdater(Document):
 		# For operator dicts, the alias is in the "as" key; for strings, use the field name directly
 		ref_key = target_ref_field.get("as") if isinstance(target_ref_field, dict) else target_ref_field
 
-		def settled(record):
-			"""A closed row is settled in full, so it stops holding the parent open."""
-			if tracks_closed_rows and record["closed"]:
-				return abs(record[ref_key])
+		# A closed row is written off, so it leaves the denominator rather than
+		# counting as done. The percentage stays a true measure of what was
+		# actually received, delivered or billed against what is still expected.
+		open_records = [r for r in child_records if not (tracks_closed_rows and r["closed"])]
 
-			return min(abs(record[target_field]), abs(record[ref_key]))
-
-		sum_ref = sum(abs(record[ref_key]) for record in child_records)
+		sum_ref = sum(abs(record[ref_key]) for record in open_records)
 
 		if sum_ref > 0:
 			percentage = round(
-				sum(settled(record) for record in child_records) / sum_ref * 100,
+				sum(min(abs(record[target_field]), abs(record[ref_key])) for record in open_records)
+				/ sum_ref
+				* 100,
 				6,
 			)
+		elif child_records and not open_records:
+			# every row written off, so nothing is outstanding
+			percentage = 100
 		else:
 			percentage = 0
 

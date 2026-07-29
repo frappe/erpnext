@@ -197,6 +197,9 @@ def update_billing_percentage(
 		billed_qty_amt_based_on_po = get_billed_qty_amount_against_purchase_order(pr_doc)
 
 	for item in pr_doc.items:
+		if item.closed:
+			continue
+
 		returned_qty = flt(item_wise_returned_qty.get(item.name))
 		returned_amount = flt(returned_qty) * flt(item.rate)
 		pending_amount = flt(item.amount) - returned_amount
@@ -208,7 +211,7 @@ def update_billing_percentage(
 			total_billable_amount = pending_amount if item.billed_amt <= pending_amount else item.billed_amt
 
 		total_amount += total_billable_amount
-		total_billed_amount += total_billable_amount if item.closed else abs(flt(item.billed_amt))
+		total_billed_amount += abs(flt(item.billed_amt))
 
 		if pr_doc.get("is_return") and not total_amount and total_billed_amount:
 			total_amount = total_billed_amount
@@ -281,7 +284,10 @@ def update_billing_percentage(
 	if pi_landed_cost_amount < 0:
 		total_billed_amount += abs(pi_landed_cost_amount)
 
-	percent_billed = round(100 * (total_billed_amount / (total_amount or 1)), 6)
+	if not total_amount and pr_doc.items and all(item.closed for item in pr_doc.items):
+		percent_billed = 100
+	else:
+		percent_billed = round(100 * (total_billed_amount / (total_amount or 1)), 6)
 	pr_doc.db_set("per_billed", percent_billed)
 
 	if update_modified:

@@ -122,12 +122,12 @@ class StatusService:
 		per_picked = 0.0
 
 		for so_item in doc.items:
+			if so_item.closed:
+				continue
 			if cint(
 				frappe.get_cached_value("Item", so_item.item_code, "is_stock_item")
 			) or doc.has_product_bundle(so_item.item_code):
-				total_picked_qty += (
-					flt(so_item.stock_qty) if so_item.closed else flt(so_item.picked_qty)
-				)
+				total_picked_qty += flt(so_item.picked_qty)
 				total_qty += flt(so_item.stock_qty)
 
 		if total_picked_qty and total_qty:
