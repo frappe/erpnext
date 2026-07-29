@@ -65,10 +65,10 @@ class TestOpeningInvoiceCreationTool(ERPNextTestSuite):
 		logs = frappe.get_all(
 			"Opening Invoice Creation Log",
 			filters={"opening_invoice_creation_tool": doc.name},
-			fields=["success", "invoice_name"],
+			fields=["success", "reference_name"],
 		)
 		self.assertEqual(len(logs), 2)
-		self.assertTrue(all(log.success and log.invoice_name for log in logs))
+		self.assertTrue(all(log.success and log.reference_name for log in logs))
 
 	def test_create_missing_party_before_run_is_saved(self):
 		party = "New Opening Customer"
@@ -103,7 +103,20 @@ class TestOpeningInvoiceCreationTool(ERPNextTestSuite):
 	def test_opening_invoice_requires_temporary_account_type(self):
 		doc = self.make_invoices(company="_Test Opening Invoice Company", return_doc=True)
 		doc.invoices[0].temporary_opening_account = "Sales - _TOIC"
-		self.assertRaises(frappe.ValidationError, doc.make_invoices)
+		doc.save()
+		doc.make_invoices()
+		doc.reload()
+		self.assertEqual(doc.status, "Partial Success")
+		self.assertTrue(
+			frappe.db.exists(
+				"Opening Invoice Creation Log",
+				{
+					"opening_invoice_creation_tool": doc.name,
+					"source_row_index": 1,
+					"success": 0,
+				},
+			)
+		)
 
 	def test_opening_purchase_invoice_creation(self):
 		invoices = self.make_invoices(invoice_type="Purchase", company="_Test Opening Invoice Company")
@@ -181,6 +194,7 @@ class TestOpeningInvoiceCreationTool(ERPNextTestSuite):
 		)
 		doc.invoices[0].project = project_1.name
 		doc.invoices[1].project = project_2.name
+		doc.save()
 		invoices = doc.make_invoices()
 		sales_invoice_1 = frappe.get_doc("Sales Invoice", invoices[0])
 		sales_invoice_2 = frappe.get_doc("Sales Invoice", invoices[1])
