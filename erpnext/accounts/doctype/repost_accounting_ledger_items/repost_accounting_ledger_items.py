@@ -17,8 +17,10 @@ class RepostAccountingLedgerItems(Document):
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
-		voucher_no: DF.DynamicLink | None
-		voucher_type: DF.Link | None
+		status: DF.Literal["Pending", "Reposted", "Skipped", "Failed"]
+		traceback: DF.Code | None
+		voucher_no: DF.DynamicLink
+		voucher_type: DF.Link
 	# end: auto-generated types
 
 	pass
