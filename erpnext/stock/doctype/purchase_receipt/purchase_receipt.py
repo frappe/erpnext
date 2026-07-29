@@ -11,6 +11,7 @@ from frappe.utils import cint, flt, getdate, nowdate
 import erpnext
 from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_enabled
 from erpnext.controllers.buying_controller import BuyingController
+from erpnext.controllers.item_close import validate_parent_reopen
 from erpnext.stock.doctype.purchase_receipt.services.billing_status import BillingStatusService
 from erpnext.stock.doctype.purchase_receipt.services.provisional_accounting import (
 	ProvisionalAccountingService,
@@ -498,9 +499,18 @@ class PurchaseReceipt(BuyingController):
 			)
 
 	def update_status(self, status):
+		if status != "Closed" and self.status == "Closed":
+			validate_parent_reopen(self)
+
 		self.set_status(update=True, status=status)
 		self.notify_update()
 		clear_doctype_notifications(self)
+
+	def on_item_close_status_change(self):
+		self.update_billing_status()
+
+	def is_item_closable(self, item):
+		return flt(item.billed_amt) < flt(item.amount)
 
 	def update_billing_status(self, update_modified=True):
 		BillingStatusService(self).update_billing_status(update_modified)

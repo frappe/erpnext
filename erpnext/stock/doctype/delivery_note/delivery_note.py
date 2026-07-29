@@ -626,6 +626,12 @@ class DeliveryNote(SellingController):
 	def update_status(self, status):
 		BillingStatusService(self).update_status(status)
 
+	def on_item_close_status_change(self):
+		self.update_billing_percentage()
+
+	def is_item_closable(self, item):
+		return flt(item.billed_amt) < flt(item.amount)
+
 	def update_billing_status(self, update_modified=True):
 		BillingStatusService(self).update_billing_status(update_modified)
 

@@ -23,6 +23,9 @@ frappe.ui.form.on("Delivery Note", {
 			Shipment: "Shipment",
 		}),
 			frm.set_indicator_formatter("item_code", function (doc) {
+				if (doc.closed) {
+					return "gray";
+				}
 				return doc.docstatus == 1 || doc.qty <= doc.actual_qty ? "green" : "orange";
 			});
 
@@ -353,7 +356,12 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends (
 			}
 		}
 
-		if (doc.docstatus == 1 && doc.status === "Closed" && this.frm.has_perm("submit")) {
+		if (
+			doc.docstatus == 1 &&
+			doc.status === "Closed" &&
+			this.frm.has_perm("submit") &&
+			!doc.items.every((item) => item.closed)
+		) {
 			this.frm.add_custom_button(
 				__("Reopen"),
 				function () {
@@ -363,6 +371,7 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends (
 			);
 		}
 		erpnext.stock.delivery_note.set_print_hide(doc, dt, dn);
+		this.set_item_close_buttons();
 	}
 
 	make_shipment() {
@@ -427,6 +436,30 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends (
 
 	reopen_delivery_note() {
 		this.update_status("Submitted");
+	}
+
+	set_item_close_buttons() {
+		erpnext.item_close.add_buttons(this.frm, {
+			is_closable: (item) => !item.closed && flt(item.billed_amt) < flt(item.amount),
+			help: __(
+				"Closed rows stop being expected. Their unbilled amount is written off and they are skipped when creating a Sales Invoice."
+			),
+			summarise: (item) => ({
+				item_code: item.item_code,
+				item_name: item.item_name,
+				qty: item.qty,
+				amount: item.amount,
+				billed_amt: item.billed_amt || 0,
+				pending_amount: Math.max(flt(item.amount) - flt(item.billed_amt), 0),
+			}),
+			columns: [
+				erpnext.item_close.column("item_code", __("Item Code"), "Data", 3),
+				erpnext.item_close.column("item_name", __("Item Name"), "Data", 2),
+				erpnext.item_close.column("qty", __("Qty")),
+				erpnext.item_close.column("amount", __("Amount"), "Currency", 2),
+				erpnext.item_close.column("pending_amount", __("Pending Amount"), "Currency", 2),
+			],
+		});
 	}
 
 	update_status(status) {

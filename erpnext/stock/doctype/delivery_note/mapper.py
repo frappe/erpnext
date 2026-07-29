@@ -58,6 +58,14 @@ def get_returned_qty_map(delivery_note: str) -> dict:
 	return returned_qty_map
 
 
+def is_bundle_of_closed_row(packed_item) -> bool:
+	"""A packed item follows the Delivery Note Item row that bundles it."""
+	return bool(
+		packed_item.parent_detail_docname
+		and frappe.db.get_value("Delivery Note Item", packed_item.parent_detail_docname, "closed")
+	)
+
+
 @frappe.whitelist()
 def make_sales_invoice(
 	source_name: str, target_doc: str | dict | Document | None = None, args: dict | str | None = None
@@ -123,7 +131,7 @@ def make_sales_invoice(
 	def select_item(d):
 		filtered_items = args.get("filtered_children", [])
 		child_filter = d.name in filtered_items if filtered_items else True
-		return child_filter
+		return child_filter and not d.closed
 
 	doc = get_mapped_doc(
 		"Delivery Note",
@@ -254,7 +262,7 @@ def make_installation_note(
 					"parenttype": "prevdoc_doctype",
 				},
 				"postprocess": update_item,
-				"condition": lambda doc: doc.installed_qty < doc.qty,
+				"condition": lambda doc: doc.installed_qty < doc.qty and not doc.closed,
 			},
 		},
 		target_doc,
@@ -293,7 +301,9 @@ def make_packing_slip(source_name: str, target_doc: str | dict | Document | None
 				},
 				"postprocess": update_item,
 				"condition": lambda item: (
-					not is_product_bundle(item.item_code) and flt(item.packed_qty) < flt(item.qty)
+					not is_product_bundle(item.item_code)
+					and not item.closed
+					and flt(item.packed_qty) < flt(item.qty)
 				),
 			},
 			"Packed Item": {
@@ -307,7 +317,9 @@ def make_packing_slip(source_name: str, target_doc: str | dict | Document | None
 					"name": "pi_detail",
 				},
 				"postprocess": update_item,
-				"condition": lambda item: (flt(item.packed_qty) < flt(item.qty)),
+				"condition": lambda item: (
+					flt(item.packed_qty) < flt(item.qty) and not is_bundle_of_closed_row(item)
+				),
 			},
 		},
 		target_doc,
@@ -576,7 +588,8 @@ def make_inter_company_transaction(doctype: str, source_name: str, target_doc=No
 					"Material_request_item": "material_request_item",
 				},
 				"field_no_map": ["warehouse"],
-				"condition": lambda item: item.received_qty < item.qty + item.returned_qty,
+				"condition": lambda item: item.received_qty < item.qty + item.returned_qty
+				and not item.closed,
 				"postprocess": update_item,
 			},
 		},

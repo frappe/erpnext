@@ -17,6 +17,10 @@ frappe.ui.form.on("Purchase Receipt", {
 			"Landed Cost Voucher": "Landed Cost Voucher",
 		};
 
+		frm.set_indicator_formatter("item_code", function (doc) {
+			return doc.closed ? "gray" : "green";
+		});
+
 		frm.set_query("wip_composite_asset", "items", function () {
 			return {
 				filters: { asset_type: "Composite Asset", docstatus: 0 },
@@ -275,9 +279,40 @@ erpnext.stock.PurchaseReceiptController = class PurchaseReceiptController extend
 			}
 		}
 
-		if (this.frm.doc.docstatus == 1 && this.frm.doc.status === "Closed" && this.frm.has_perm("submit")) {
+		if (
+			this.frm.doc.docstatus == 1 &&
+			this.frm.doc.status === "Closed" &&
+			this.frm.has_perm("submit") &&
+			!this.frm.doc.items.every((item) => item.closed)
+		) {
 			cur_frm.add_custom_button(__("Reopen"), this.reopen_purchase_receipt, __("Status"));
 		}
+
+		this.set_item_close_buttons();
+	}
+
+	set_item_close_buttons() {
+		erpnext.item_close.add_buttons(this.frm, {
+			is_closable: (item) => !item.closed && flt(item.billed_amt) < flt(item.amount),
+			help: __(
+				"Closed rows stop being expected. Their unbilled amount is written off and they are skipped when creating a Purchase Invoice."
+			),
+			summarise: (item) => ({
+				item_code: item.item_code,
+				item_name: item.item_name,
+				qty: item.qty,
+				amount: item.amount,
+				billed_amt: item.billed_amt || 0,
+				pending_amount: Math.max(flt(item.amount) - flt(item.billed_amt), 0),
+			}),
+			columns: [
+				erpnext.item_close.column("item_code", __("Item Code"), "Data", 3),
+				erpnext.item_close.column("item_name", __("Item Name"), "Data", 2),
+				erpnext.item_close.column("qty", __("Qty")),
+				erpnext.item_close.column("amount", __("Amount"), "Currency", 2),
+				erpnext.item_close.column("pending_amount", __("Pending Amount"), "Currency", 2),
+			],
+		});
 	}
 
 	make_purchase_invoice() {

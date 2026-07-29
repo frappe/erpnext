@@ -208,7 +208,7 @@ def update_billing_percentage(
 			total_billable_amount = pending_amount if item.billed_amt <= pending_amount else item.billed_amt
 
 		total_amount += total_billable_amount
-		total_billed_amount += abs(flt(item.billed_amt))
+		total_billed_amount += total_billable_amount if item.closed else abs(flt(item.billed_amt))
 
 		if pr_doc.get("is_return") and not total_amount and total_billed_amount:
 			total_amount = total_billed_amount

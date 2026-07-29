@@ -25,7 +25,9 @@ frappe.ui.form.on("Sales Order", {
 		// formatter for material request item
 		frm.set_indicator_formatter("item_code", function (doc) {
 			let color;
-			if (!doc.qty && frm.doc.has_unit_price_items) {
+			if (doc.closed) {
+				color = "gray";
+			} else if (!doc.qty && frm.doc.has_unit_price_items) {
 				color = "yellow";
 			} else if (doc.stock_qty - doc.delivered_qty <= doc.actual_qty) {
 				color = "green";
@@ -973,7 +975,6 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 		var me = this;
 		super.refresh();
 		let allow_delivery = false;
-		this.set_item_close_buttons();
 
 		if (doc.docstatus == 1) {
 			if (
@@ -1267,6 +1268,8 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 		}
 
 		this.order_type(doc);
+
+		this.set_item_close_buttons();
 	}
 
 	items_add(doc, cdt, cdn) {

@@ -14,7 +14,9 @@ frappe.ui.form.on("Purchase Order", {
 	setup: function (frm) {
 		frm.set_indicator_formatter("item_code", function (doc) {
 			let color;
-			if (!doc.qty && frm.doc.has_unit_price_items) {
+			if (doc.closed) {
+				color = "gray";
+			} else if (!doc.qty && frm.doc.has_unit_price_items) {
 				color = "yellow";
 			} else if (doc.qty <= doc.received_qty) {
 				color = "green";
@@ -283,7 +285,6 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 		}
 
 		this.frm.set_df_property("drop_ship", "hidden", !is_drop_ship);
-		this.set_item_close_buttons();
 
 		if (doc.docstatus == 1) {
 			this.frm.fields_dict.items_section.wrapper.addClass("hide-border");
@@ -438,6 +439,8 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 		} else if (doc.docstatus === 0) {
 			this.frm.cscript.add_from_mappers();
 		}
+
+		this.set_item_close_buttons();
 	}
 
 	validate() {
