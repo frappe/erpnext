@@ -3,21 +3,25 @@
 
 """Row level close and reopen for transaction items.
 
-Each closable parent maps to the status it is put back into when a row is
-reopened while the parent itself is closed.
+`REOPEN_STATUS` holds, per closable parent, the status its own Re-open button
+passes to `update_status`. `set_status` recomputes from `status_map` anyway, so
+the value is mostly a sentinel for "clear the Closed override" -- but not
+always: Sales Order re-checks the credit limit only on the literal "Draft".
+Reusing each doctype's own value keeps reopening a row indistinguishable from
+reopening the document by hand.
 """
 
 import frappe
 from frappe import _
 from frappe.utils import cint
 
-CLOSABLE_PARENTS = {"Purchase Order": "Submitted"}
+REOPEN_STATUS = {"Purchase Order": "Submitted", "Sales Order": "Draft"}
 
 SETTLED_BY_CLOSE = ("per_ordered", "per_received", "per_delivered", "per_billed")
 
 
 def has_closable_items(doctype: str | None) -> bool:
-	return doctype in CLOSABLE_PARENTS
+	return doctype in REOPEN_STATUS
 
 
 def closed_rows_settle(parent_doctype: str, item_doctype: str, percentage_field: str) -> bool:
@@ -57,10 +61,14 @@ def update_closed_status(
 		settled = [row for row in changed if not doc.is_item_closable(row)]
 		if settled:
 			frappe.throw(
-				_("Row #{0}: {1} is already received and billed in full, so there is nothing to close").format(
+				_("Row #{0}: {1} is already completed in full, so there is nothing to close").format(
 					settled[0].idx, frappe.bold(settled[0].item_code)
 				)
 			)
+
+		validate_rows = getattr(doc, "validate_item_close", None)
+		if validate_rows:
+			validate_rows(changed)
 
 	for row in changed:
 		row.db_set("closed", closed)
@@ -92,7 +100,7 @@ def reopen_parent_if_closed(doc) -> None:
 	make reopening a row look like it did nothing.
 	"""
 	if doc.status == "Closed":
-		doc.update_status(CLOSABLE_PARENTS[doc.doctype])
+		doc.update_status(REOPEN_STATUS[doc.doctype])
 
 
 def validate_parent_reopen(doc) -> None:
