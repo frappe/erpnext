@@ -106,6 +106,16 @@ def reopen_parent_if_closed(doc) -> None:
 		doc.update_status(REOPEN_STATUS[doc.doctype])
 
 
+def is_bundle_of_closed_row(packed_item) -> bool:
+	"""A packed item follows the row of its parent document that bundles it."""
+	if not packed_item.parent_detail_docname or not packed_item.parenttype:
+		return False
+
+	item_doctype = f"{packed_item.parenttype} Item"
+
+	return bool(frappe.db.get_value(item_doctype, packed_item.parent_detail_docname, "closed"))
+
+
 def clear_closed_rows_on_amend(doc) -> None:
 	"""An amended document starts with nothing written off.
 

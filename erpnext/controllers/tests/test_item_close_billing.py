@@ -56,7 +56,8 @@ class TestPurchaseReceiptItemClose(ERPNextTestSuite):
 
 		self.close_items(receipt, receipt.items)
 
-		self.assertEqual(receipt.per_billed, 100)
+		# nothing was billed, and writing every row off must not claim otherwise
+		self.assertEqual(receipt.per_billed, 0)
 		self.assertEqual(receipt.status, "Closed")
 
 	def test_closed_row_is_not_mapped_to_purchase_invoice(self):
@@ -135,7 +136,8 @@ class TestDeliveryNoteItemClose(ERPNextTestSuite):
 
 		self.close_items(note, note.items)
 
-		self.assertEqual(note.per_billed, 100)
+		# nothing was billed, and writing every row off must not claim otherwise
+		self.assertEqual(note.per_billed, 0)
 		self.assertEqual(note.status, "Closed")
 
 	def test_closed_row_is_not_mapped_to_sales_invoice(self):

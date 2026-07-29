@@ -729,6 +729,7 @@ def get_ordered_amount(params):
 			(child.item_code == item_code)
 			& (parent.docstatus == 1)
 			& (child.amount > child.billed_amt)
+			& (child.closed == 0)
 			& (parent.status != "Closed")
 			& Criterion.all(get_other_condition(params, child, parent, "Purchase Order"))
 		)

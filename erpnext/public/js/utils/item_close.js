@@ -76,6 +76,56 @@ erpnext.item_close = {
 		dialog.show();
 	},
 
+	fulfilment_config({ qty_field, qty_label, help }) {
+		return {
+			is_closable: (item) =>
+				!item.closed &&
+				(flt(item[qty_field]) < flt(item.qty) || flt(item.billed_amt) < flt(item.amount)),
+			help: help,
+			summarise: (item) => ({
+				item_code: item.item_code,
+				item_name: item.item_name,
+				qty: item.qty,
+				fulfilled_qty: item[qty_field] || 0,
+				pending_qty: Math.max(flt(item.qty) - flt(item[qty_field]), 0),
+				pending_amount: Math.max(flt(item.amount) - flt(item.billed_amt), 0),
+			}),
+			columns: [
+				erpnext.item_close.column("item_code", __("Item Code"), "Data", 3),
+				erpnext.item_close.column("item_name", __("Item Name"), "Data", 2),
+				erpnext.item_close.column("qty", __("Qty")),
+				erpnext.item_close.column("fulfilled_qty", qty_label),
+				erpnext.item_close.column("pending_qty", __("Pending Qty")),
+				erpnext.item_close.column("pending_amount", __("Pending Amount"), "Currency", 2),
+			],
+		};
+	},
+
+	billing_config(invoice_label) {
+		return {
+			is_closable: (item) => !item.closed && flt(item.billed_amt) < flt(item.amount),
+			help: __(
+				"Closed rows stop being expected. Their unbilled amount is written off and they are skipped when creating a {0}.",
+				[invoice_label]
+			),
+			summarise: (item) => ({
+				item_code: item.item_code,
+				item_name: item.item_name,
+				qty: item.qty,
+				amount: item.amount,
+				billed_amt: item.billed_amt || 0,
+				pending_amount: Math.max(flt(item.amount) - flt(item.billed_amt), 0),
+			}),
+			columns: [
+				erpnext.item_close.column("item_code", __("Item Code"), "Data", 3),
+				erpnext.item_close.column("item_name", __("Item Name"), "Data", 2),
+				erpnext.item_close.column("qty", __("Qty")),
+				erpnext.item_close.column("amount", __("Amount"), "Currency", 2),
+				erpnext.item_close.column("pending_amount", __("Pending Amount"), "Currency", 2),
+			],
+		};
+	},
+
 	column(fieldname, label, fieldtype = "Float", columns = 1) {
 		return {
 			fieldname: fieldname,

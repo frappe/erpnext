@@ -13,6 +13,7 @@ from frappe.query_builder.functions import Sum
 from frappe.utils import add_days, cint, flt, nowdate, strip_html
 
 from erpnext.accounts.party import CROSS_PARTY_FIELD_NO_MAP, get_party_account
+from erpnext.controllers.item_close import is_bundle_of_closed_row
 from erpnext.manufacturing.doctype.production_plan.production_plan import (
 	get_items_for_material_requests,
 	get_sales_orders,
@@ -46,14 +47,6 @@ def get_requested_item_qty(sales_order: str) -> dict:
 			result[item.name] = frappe._dict({"qty": item.requested_qty})
 
 	return result
-
-
-def is_bundle_of_closed_row(packed_item) -> bool:
-	"""A packed item follows the Sales Order Item row that bundles it."""
-	return bool(
-		packed_item.parent_detail_docname
-		and frappe.db.get_value("Sales Order Item", packed_item.parent_detail_docname, "closed")
-	)
 
 
 @frappe.whitelist()

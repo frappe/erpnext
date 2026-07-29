@@ -439,27 +439,7 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends (
 	}
 
 	set_item_close_buttons() {
-		erpnext.item_close.add_buttons(this.frm, {
-			is_closable: (item) => !item.closed && flt(item.billed_amt) < flt(item.amount),
-			help: __(
-				"Closed rows stop being expected. Their unbilled amount is written off and they are skipped when creating a Sales Invoice."
-			),
-			summarise: (item) => ({
-				item_code: item.item_code,
-				item_name: item.item_name,
-				qty: item.qty,
-				amount: item.amount,
-				billed_amt: item.billed_amt || 0,
-				pending_amount: Math.max(flt(item.amount) - flt(item.billed_amt), 0),
-			}),
-			columns: [
-				erpnext.item_close.column("item_code", __("Item Code"), "Data", 3),
-				erpnext.item_close.column("item_name", __("Item Name"), "Data", 2),
-				erpnext.item_close.column("qty", __("Qty")),
-				erpnext.item_close.column("amount", __("Amount"), "Currency", 2),
-				erpnext.item_close.column("pending_amount", __("Pending Amount"), "Currency", 2),
-			],
-		});
+		erpnext.item_close.add_buttons(this.frm, erpnext.item_close.billing_config(__("Sales Invoice")));
 	}
 
 	update_status(status) {
