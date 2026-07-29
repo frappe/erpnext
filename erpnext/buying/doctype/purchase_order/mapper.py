@@ -89,6 +89,7 @@ def make_purchase_receipt(
 					else abs(doc.received_qty) < abs(get_max_receivable_qty(doc))
 				)
 				and doc.delivered_by_supplier != 1
+				and not doc.closed
 				and select_item(doc),
 			},
 			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
@@ -193,6 +194,7 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 				or abs(doc.billed_amt) < abs(doc.amount)
 				or doc.qty > flt(get_billed_qty(doc.name))
 			)
+			and not doc.closed
 			and select_item(doc),
 		},
 		"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
