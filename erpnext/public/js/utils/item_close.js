@@ -1,3 +1,5 @@
+frappe.provide("erpnext");
+
 erpnext.item_close = {
 	add_buttons(frm, config) {
 		if (frm.doc.docstatus != 1 || !frm.has_perm("submit")) {
@@ -42,16 +44,14 @@ erpnext.item_close = {
 					cannot_add_rows: true,
 					cannot_delete_rows: true,
 					in_place_edit: false,
-					fields: [
-						{ fieldname: "name", fieldtype: "Data", read_only: 1, hidden: 1 },
-					].concat(config.columns),
+					fields: [{ fieldname: "name", fieldtype: "Data", read_only: 1, hidden: 1 }].concat(
+						config.columns
+					),
 				},
 			],
 			primary_action_label: closed ? __("Close") : __("Reopen"),
 			primary_action: () => {
-				const selected = dialog.fields_dict.items.grid
-					.get_selected_children()
-					.map((row) => row.name);
+				const selected = dialog.fields_dict.items.grid.get_selected_children().map((row) => row.name);
 
 				if (!selected.length) {
 					frappe.msgprint(__("Select at least one row"));

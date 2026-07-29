@@ -15,7 +15,12 @@ import frappe
 from frappe import _
 from frappe.utils import cint
 
-REOPEN_STATUS = {"Purchase Order": "Submitted", "Sales Order": "Draft"}
+REOPEN_STATUS = {
+	"Purchase Order": "Submitted",
+	"Sales Order": "Draft",
+	"Delivery Note": "Submitted",
+	"Purchase Receipt": "Submitted",
+}
 
 SETTLED_BY_CLOSE = ("per_ordered", "per_received", "per_delivered", "per_billed")
 
@@ -38,9 +43,7 @@ def closed_rows_settle(parent_doctype: str, item_doctype: str, percentage_field:
 
 
 @frappe.whitelist()
-def update_closed_status(
-	doctype: str, name: str, item_names: str | list[str], closed: int
-) -> None:
+def update_closed_status(doctype: str, name: str, item_names: str | list[str], closed: int) -> None:
 	if not has_closable_items(doctype):
 		frappe.throw(_("Rows of {0} cannot be closed individually").format(_(doctype)))
 

@@ -62,6 +62,7 @@
   "base_net_rate",
   "base_net_amount",
   "billed_amt",
+  "closed",
   "incoming_rate",
   "item_weight_details",
   "weight_per_unit",
@@ -704,6 +705,15 @@
    "read_only": 1
   },
   {
+   "default": "0",
+   "fieldname": "closed",
+   "fieldtype": "Check",
+   "label": "Closed",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
    "allow_on_submit": 1,
    "default": "0",
    "fieldname": "page_break",
@@ -982,7 +992,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-07-18 10:00:00.000000",
+ "modified": "2026-07-29 12:30:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",

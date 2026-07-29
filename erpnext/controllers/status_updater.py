@@ -198,23 +198,36 @@ class StatusUpdater(Document):
 		self.update_qty()
 		self.validate_qty()
 
+	def get_closed_source_links(self):
+		"""Row links that must not point at a closed source row.
+
+		`status_updater` covers documents whose progress it already tracks.
+		Delivery Note and Purchase Receipt are billed through their own services
+		instead, so their invoices declare the link in `closed_source_links`.
+		"""
+		links = [
+			(args["source_dt"], args["join_field"], args["target_dt"], args["target_parent_dt"])
+			for args in self.status_updater
+			if args.get("target_dt")
+			and args.get("target_parent_dt")
+			and has_closable_items(args["target_parent_dt"])
+		]
+
+		return links + list(getattr(self, "closed_source_links", []))
+
 	def validate_closed_source_items(self):
 		"""Block submitting against rows that were closed on the source document."""
 		if self.docstatus != 1:
 			return
 
-		for args in self.status_updater:
-			target_dt = args.get("target_dt")
-			if not target_dt or not has_closable_items(args.get("target_parent_dt")):
-				continue
-
+		for source_dt, join_field, target_dt, target_parent_dt in self.get_closed_source_links():
 			if not frappe.get_meta(target_dt).has_field("closed"):
 				continue
 
 			row_idx = {}
-			for d in self.get_all_children(args["source_dt"]):
-				if d.get(args["join_field"]):
-					row_idx[d.get(args["join_field"])] = d.idx
+			for d in self.get_all_children(source_dt):
+				if d.get(join_field):
+					row_idx[d.get(join_field)] = d.idx
 
 			if not row_idx:
 				continue
@@ -230,7 +243,7 @@ class StatusUpdater(Document):
 					_("Row #{0}: Item {1} is closed in {2} {3} and cannot be processed further").format(
 						row_idx[row.name],
 						frappe.bold(row.item_code),
-						_(args.get("target_parent_dt") or target_dt),
+						_(target_parent_dt),
 						frappe.bold(row.parent),
 					)
 				)

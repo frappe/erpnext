@@ -29,6 +29,7 @@ class PurchaseReceiptItem(Document):
 		batch_no: DF.Link | None
 		billed_amt: DF.Currency
 		brand: DF.Link | None
+		closed: DF.Check
 		conversion_factor: DF.Float
 		cost_center: DF.Link | None
 		delivery_note_item: DF.Data | None

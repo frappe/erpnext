@@ -122,7 +122,7 @@ def make_purchase_invoice(
 	def select_item(d):
 		filtered_items = args.get("filtered_children", [])
 		child_filter = d.name in filtered_items if filtered_items else True
-		return child_filter
+		return child_filter and not d.closed
 
 	doclist = get_mapped_doc(
 		"Purchase Receipt",

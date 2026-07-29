@@ -9,6 +9,8 @@ from frappe.desk.notifications import clear_doctype_notifications
 from frappe.query_builder.functions import Sum
 from frappe.utils import flt
 
+from erpnext.controllers.item_close import validate_parent_reopen
+
 
 class BillingStatusService:
 	def __init__(self, doc):
@@ -16,6 +18,10 @@ class BillingStatusService:
 
 	def update_status(self, status: str) -> None:
 		doc = self.doc
+
+		if status != "Closed" and doc.status == "Closed":
+			validate_parent_reopen(doc)
+
 		doc.set_status(update=True, status=status)
 		doc.notify_update()
 		clear_doctype_notifications(doc)
