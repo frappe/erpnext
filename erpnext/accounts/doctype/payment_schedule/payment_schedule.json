@@ -124,6 +124,7 @@
   {
    "default": "Percentage",
    "fetch_from": "payment_term.discount_type",
+   "fetch_if_empty": 1,
    "fieldname": "discount_type",
    "fieldtype": "Select",
    "label": "Discount Type",
@@ -131,6 +132,7 @@
   },
   {
    "fetch_from": "payment_term.discount",
+   "fetch_if_empty": 1,
    "fieldname": "discount",
    "fieldtype": "Float",
    "label": "Discount"
