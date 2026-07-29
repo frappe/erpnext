@@ -2868,14 +2868,14 @@ class TestStockEntry(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, se.save)
 
-	@ERPNextTestSuite.change_settings(
-		"Stock Settings", {"sample_retention_warehouse": "_Test Warehouse 1 - _TC"}
-	)
 	def test_sample_retention_stock_entry(self):
 		from erpnext.stock.doctype.stock_entry.services.manufacturing import (
 			move_sample_to_retention_warehouse,
 		)
 
+		frappe.db.set_value(
+			"Company", "_Test Company", "sample_retention_warehouse", "_Test Warehouse 1 - _TC"
+		)
 		warehouse = "_Test Warehouse - _TC"
 		retain_sample_item = make_item(
 			"Retain Sample Item",
@@ -3222,19 +3222,77 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 
 	# ── validate_sample_quantity ───────────────────────────────────────────────
 
-	@ERPNextTestSuite.change_settings(
-		"Stock Settings", {"sample_retention_warehouse": "_Test Warehouse 1 - _TC"}
-	)
 	def test_validate_sample_quantity_raises_when_sample_exceeds_received_qty(self):
 		from erpnext.stock.doctype.stock_entry.services.manufacturing import (
 			validate_sample_quantity,
 		)
 
+		frappe.db.set_value(
+			"Company", "_Test Company", "sample_retention_warehouse", "_Test Warehouse 1 - _TC"
+		)
 		item = make_item(
 			"_Sample Qty Excess Item",
 			{"is_stock_item": 1, "retain_sample": 1, "sample_quantity": 2},
 		)
-		self.assertRaises(frappe.ValidationError, validate_sample_quantity, item.name, 10, 5)
+		self.assertRaises(frappe.ValidationError, validate_sample_quantity, item.name, 10, 5, "_Test Company")
+
+	def test_validate_sample_quantity_raises_when_company_has_no_retention_warehouse(self):
+		"""Item.retain_sample only needs *some* company configured, so the transaction company may not be."""
+		from erpnext.stock.doctype.stock_entry.services.manufacturing import (
+			validate_sample_quantity,
+		)
+
+		frappe.db.set_value(
+			"Company", "_Test Company", "sample_retention_warehouse", "_Test Warehouse 1 - _TC"
+		)
+		frappe.db.set_value("Company", "_Test Company 1", "sample_retention_warehouse", None)
+		item = make_item(
+			"_Sample Qty No Retention Item",
+			{"is_stock_item": 1, "retain_sample": 1, "sample_quantity": 2, "has_batch_no": 1},
+		)
+		self.assertRaises(
+			frappe.ValidationError,
+			validate_sample_quantity,
+			item.name,
+			1,
+			5,
+			"_Test Company 1",
+			"_Sample Batch",
+		)
+
+	def test_sample_retention_warehouse_denied_for_other_company(self):
+		"""`company` comes from whitelisted callers, so it must not read another company's stock."""
+		from erpnext.stock.doctype.stock_entry.services.manufacturing import (
+			get_sample_retention_warehouse,
+		)
+
+		frappe.db.set_value(
+			"Company", "_Test Company", "sample_retention_warehouse", "_Test Warehouse 1 - _TC"
+		)
+
+		user = "test_sample_retention_perm@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{
+					"doctype": "User",
+					"email": user,
+					"first_name": "Sample Retention",
+					"send_welcome_email": 0,
+					"roles": [{"role": "Stock User"}],
+				}
+			).insert(ignore_permissions=True)
+
+		frappe.get_doc(
+			{
+				"doctype": "User Permission",
+				"user": user,
+				"allow": "Company",
+				"for_value": "_Test Company 1",
+			}
+		).insert(ignore_permissions=True)
+
+		with self.set_user(user):
+			self.assertRaises(frappe.PermissionError, get_sample_retention_warehouse, "_Test Company")
 
 	# ── get_expired_batches ────────────────────────────────────────────────────
 
