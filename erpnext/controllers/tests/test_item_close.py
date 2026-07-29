@@ -17,9 +17,7 @@ WAREHOUSE = "_Test Warehouse - _TC"
 
 
 def get_ordered_qty(item_code):
-	return flt(
-		frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": WAREHOUSE}, "ordered_qty")
-	)
+	return flt(frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": WAREHOUSE}, "ordered_qty"))
 
 
 class TestPurchaseOrderItemClose(ERPNextTestSuite):
@@ -114,7 +112,8 @@ class TestPurchaseOrderItemClose(ERPNextTestSuite):
 		self.assertEqual(po.status, "To Receive and Bill")
 		self.assertTrue(po.items[0].closed)
 		self.assertFalse(po.items[1].closed)
-		self.assertEqual(po.per_received, 50)
+		# nothing received, and the closed row is written off rather than counted
+		self.assertEqual(po.per_received, 0)
 		self.assertEqual(get_ordered_qty(self.second_item), 10)
 		self.assertEqual(get_ordered_qty(self.first_item), 0)
 
@@ -215,3 +214,16 @@ class TestPurchaseOrderItemClose(ERPNextTestSuite):
 			["any-row"],
 			1,
 		)
+
+	def test_amending_clears_closed_rows(self):
+		"""Frappe keeps no_copy fields when amending, so the flag must be cleared."""
+		po = self.make_purchase_order()
+		self.close_items(po, [po.items[1]])
+		po.cancel()
+
+		amended = frappe.copy_doc(po, ignore_no_copy=True)
+		amended.docstatus = 0
+		amended.amended_from = po.name
+		amended.insert()
+
+		self.assertFalse(any(row.closed for row in amended.items))

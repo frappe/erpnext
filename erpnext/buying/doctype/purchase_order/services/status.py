@@ -56,9 +56,16 @@ class StatusService:
 		doc = self.doc
 		total_qty, received_qty = 0.0, 0.0
 		for item in doc.items:
-			received_qty += item.qty if item.closed else min(item.received_qty, item.qty)
+			if item.closed:
+				continue
+			received_qty += min(item.received_qty, item.qty)
 			total_qty += item.qty
+
 		if total_qty and received_qty:
-			doc.db_set("per_received", flt(received_qty / total_qty) * 100, update_modified=False)
+			per_received = flt(received_qty / total_qty) * 100
+		elif doc.items and not total_qty:
+			per_received = 100
 		else:
-			doc.db_set("per_received", 0, update_modified=False)
+			per_received = 0
+
+		doc.db_set("per_received", per_received, update_modified=False)

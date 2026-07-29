@@ -15,9 +15,7 @@ WAREHOUSE = "_Test Warehouse - _TC"
 
 
 def get_reserved_qty(item_code):
-	return flt(
-		frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": WAREHOUSE}, "reserved_qty")
-	)
+	return flt(frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": WAREHOUSE}, "reserved_qty"))
 
 
 class TestSalesOrderItemClose(ERPNextTestSuite):
