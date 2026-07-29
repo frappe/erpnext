@@ -283,6 +283,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 		}
 
 		this.frm.set_df_property("drop_ship", "hidden", !is_drop_ship);
+		this.set_item_close_buttons();
 
 		if (doc.docstatus == 1) {
 			this.frm.fields_dict.items_section.wrapper.addClass("hide-border");
@@ -340,7 +341,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 					this.frm.page.set_inner_btn_group_as_primary(__("Status"));
 				}
 			} else if (["Closed", "Delivered"].includes(doc.status)) {
-				if (this.frm.has_perm("submit")) {
+				if (this.frm.has_perm("submit") && !doc.items.every((item) => item.closed)) {
 					this.frm.add_custom_button(
 						__("Re-open"),
 						() => this.unclose_purchase_order(),
@@ -352,7 +353,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 				if (doc.status != "On Hold") {
 					if (
 						(doc.items
-							.filter((item) => !item.delivered_by_supplier)
+							.filter((item) => !item.delivered_by_supplier && !item.closed)
 							.some((item) => item.received_qty < item.qty) ||
 							doc.__onload?.has_pending_receivable_qty) &&
 						allow_receipt
@@ -365,7 +366,11 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 							__("Create")
 						);
 						if (doc.is_subcontracted) {
-							if (!doc.items.every((item) => item.qty == item.subcontracted_qty)) {
+							if (
+								!doc.items
+									.filter((item) => !item.closed)
+									.every((item) => item.qty == item.subcontracted_qty)
+							) {
 								this.frm.add_custom_button(
 									__("Subcontracting Order"),
 									() => {
@@ -695,6 +700,157 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 
 	close_purchase_order() {
 		this.frm.cscript.update_status("Close", "Closed");
+	}
+
+	set_item_close_buttons() {
+		if (this.frm.doc.docstatus != 1 || !this.frm.has_perm("submit")) {
+			return;
+		}
+
+		if (this.frm.doc.status != "Closed" && this.frm.doc.items.some((item) => this.is_item_closable(item))) {
+			this.frm.add_custom_button(
+				__("Close Items"),
+				() => this.select_items_to_close(1),
+				__("Status")
+			);
+		}
+
+		if (this.frm.doc.items.some((item) => item.closed)) {
+			this.frm.add_custom_button(
+				__("Reopen Items"),
+				() => this.select_items_to_close(0),
+				__("Status")
+			);
+		}
+	}
+
+	is_item_closable(item) {
+		return (
+			!item.closed &&
+			(flt(item.received_qty) < flt(item.qty) || flt(item.billed_amt) < flt(item.amount))
+		);
+	}
+
+	select_items_to_close(closed) {
+		const rows = this.frm.doc.items
+			.filter((item) => (closed ? this.is_item_closable(item) : item.closed))
+			.map((item) => {
+				return {
+					name: item.name,
+					item_code: item.item_code,
+					item_name: item.item_name,
+					qty: item.qty,
+					received_qty: item.received_qty || 0,
+					pending_qty: Math.max(flt(item.qty) - flt(item.received_qty), 0),
+					pending_amount: Math.max(flt(item.amount) - flt(item.billed_amt), 0),
+				};
+			});
+
+		const dialog = new frappe.ui.Dialog({
+			title: closed ? __("Close Items") : __("Reopen Items"),
+			size: "large",
+			fields: [
+				{
+					fieldtype: "HTML",
+					fieldname: "help",
+					options: closed
+						? `<p class="text-muted small">${__(
+								"Closed rows stop being expected. Their pending quantity is written off and they are skipped when creating a Purchase Receipt or Purchase Invoice."
+							)}</p>`
+						: "",
+				},
+				{
+					fieldname: "items",
+					fieldtype: "Table",
+					data: rows,
+					cannot_add_rows: true,
+					cannot_delete_rows: true,
+					in_place_edit: false,
+					fields: [
+						{ fieldname: "name", fieldtype: "Data", read_only: 1, hidden: 1 },
+						{
+							fieldname: "item_code",
+							fieldtype: "Link",
+							options: "Item",
+							label: __("Item Code"),
+							in_list_view: 1,
+							read_only: 1,
+							columns: 3,
+						},
+						{
+							fieldname: "item_name",
+							fieldtype: "Data",
+							label: __("Item Name"),
+							in_list_view: 1,
+							read_only: 1,
+							columns: 2,
+						},
+						{
+							fieldname: "qty",
+							fieldtype: "Float",
+							label: __("Qty"),
+							in_list_view: 1,
+							read_only: 1,
+							columns: 1,
+						},
+						{
+							fieldname: "received_qty",
+							fieldtype: "Float",
+							label: __("Received Qty"),
+							in_list_view: 1,
+							read_only: 1,
+							columns: 1,
+						},
+						{
+							fieldname: "pending_qty",
+							fieldtype: "Float",
+							label: __("Pending Qty"),
+							in_list_view: 1,
+							read_only: 1,
+							columns: 1,
+						},
+						{
+							fieldname: "pending_amount",
+							fieldtype: "Currency",
+							label: __("Pending Amount"),
+							in_list_view: 1,
+							read_only: 1,
+							columns: 2,
+						},
+					],
+				},
+			],
+			primary_action_label: closed ? __("Close") : __("Reopen"),
+			primary_action: () => {
+				const selected = dialog.fields_dict.items.grid
+					.get_selected_children()
+					.map((row) => row.name);
+
+				if (!selected.length) {
+					frappe.msgprint(__("Select at least one row"));
+					return;
+				}
+
+				dialog.hide();
+				this.update_items_closed_status(selected, closed);
+			},
+		});
+
+		dialog.show();
+	}
+
+	update_items_closed_status(item_names, closed) {
+		frappe.call({
+			method: "erpnext.controllers.item_close.update_closed_status",
+			args: {
+				doctype: this.frm.doc.doctype,
+				name: this.frm.doc.name,
+				item_names: item_names,
+				closed: closed,
+			},
+			freeze: true,
+			callback: () => this.frm.reload_doc(),
+		});
 	}
 
 	update_dropship_delivered_qty() {

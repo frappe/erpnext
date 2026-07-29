@@ -86,6 +86,7 @@
   "returned_qty",
   "column_break_60",
   "billed_amt",
+  "closed",
   "accounting_details",
   "expense_account",
   "column_break_fyqr",
@@ -646,6 +647,15 @@
    "read_only": 1
   },
   {
+   "default": "0",
+   "fieldname": "closed",
+   "fieldtype": "Check",
+   "label": "Closed",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
    "description": "Tax detail table fetched from item master as a string and stored in this field.\nUsed for Taxes and Charges",
    "fieldname": "item_tax_rate",
    "fieldtype": "Code",
@@ -944,7 +954,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-08-07 17:31:31.732720",
+ "modified": "2026-08-07 18:00:00.000000",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item",

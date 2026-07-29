@@ -8,6 +8,8 @@ from frappe.model.document import Document
 from frappe.query_builder.functions import Sum
 from frappe.utils import comma_or, flt, get_link_to_form, getdate, now, nowdate, safe_div
 
+from erpnext.controllers.item_close import closed_rows_settle, has_closable_items
+
 
 class OverAllowanceError(frappe.ValidationError):
 	pass
@@ -192,8 +194,46 @@ class StatusUpdater(Document):
 			self.db_set("status", "Cancelled")
 
 	def update_prevdoc_status(self):
+		self.validate_closed_source_items()
 		self.update_qty()
 		self.validate_qty()
+
+	def validate_closed_source_items(self):
+		"""Block submitting against rows that were closed on the source document."""
+		if self.docstatus != 1:
+			return
+
+		for args in self.status_updater:
+			target_dt = args.get("target_dt")
+			if not target_dt or not has_closable_items(args.get("target_parent_dt")):
+				continue
+
+			if not frappe.get_meta(target_dt).has_field("closed"):
+				continue
+
+			row_idx = {}
+			for d in self.get_all_children(args["source_dt"]):
+				if d.get(args["join_field"]):
+					row_idx[d.get(args["join_field"])] = d.idx
+
+			if not row_idx:
+				continue
+
+			closed_rows = frappe.get_all(
+				target_dt,
+				filters={"name": ("in", list(row_idx)), "closed": 1},
+				fields=["name", "item_code", "parent"],
+			)
+
+			for row in closed_rows:
+				frappe.throw(
+					_("Row #{0}: Item {1} is closed in {2} {3} and cannot be processed further").format(
+						row_idx[row.name],
+						frappe.bold(row.item_code),
+						_(args.get("target_parent_dt") or target_dt),
+						frappe.bold(row.parent),
+					)
+				)
 
 	def set_status(self, update=False, status=None, update_modified=True):
 		if self.is_new():
@@ -605,16 +645,28 @@ class StatusUpdater(Document):
 
 	@staticmethod
 	def _calculate_target_parent_percentage(
-		name, target_parent_dt, target_dt, target_ref_field, target_field, exclude_field=None
+		name,
+		target_parent_dt,
+		target_dt,
+		target_ref_field,
+		target_field,
+		target_parent_field=None,
+		exclude_field=None,
 	):
 		filters = {"parent": name, "parenttype": target_parent_dt}
 		if exclude_field:
 			filters[exclude_field] = 0
 
+		tracks_closed_rows = closed_rows_settle(target_parent_dt, target_dt, target_parent_field)
+
+		fields = [target_ref_field, target_field]
+		if tracks_closed_rows:
+			fields.append("closed")
+
 		child_records = frappe.get_all(
 			target_dt,
 			filters=filters,
-			fields=[target_ref_field, target_field],
+			fields=fields,
 		)
 
 		if exclude_field and not child_records:
@@ -623,13 +675,18 @@ class StatusUpdater(Document):
 		# For operator dicts, the alias is in the "as" key; for strings, use the field name directly
 		ref_key = target_ref_field.get("as") if isinstance(target_ref_field, dict) else target_ref_field
 
+		def settled(record):
+			"""A closed row is settled in full, so it stops holding the parent open."""
+			if tracks_closed_rows and record["closed"]:
+				return abs(record[ref_key])
+
+			return min(abs(record[target_field]), abs(record[ref_key]))
+
 		sum_ref = sum(abs(record[ref_key]) for record in child_records)
 
 		if sum_ref > 0:
 			percentage = round(
-				sum(min(abs(record[target_field]), abs(record[ref_key])) for record in child_records)
-				/ sum_ref
-				* 100,
+				sum(settled(record) for record in child_records) / sum_ref * 100,
 				6,
 			)
 		else:
@@ -678,6 +735,7 @@ class StatusUpdater(Document):
 					args["target_dt"],
 					args["target_ref_field"],
 					args["target_field"],
+					args["target_parent_field"],
 					args.get("exclude_field"),
 				)
 			# update field
