@@ -16,8 +16,6 @@ MAX_VOUCHERS_PER_REPOST = 50
 
 HANDLED_VOUCHER_STATUSES = ("Reposted", "Skipped")
 
-from erpnext.stock import get_warehouse_account_map
-
 
 class RepostAccountingLedger(Document):
 	# begin: auto-generated types

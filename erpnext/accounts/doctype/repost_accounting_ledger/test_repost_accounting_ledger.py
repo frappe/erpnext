@@ -142,33 +142,12 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 		gle = frappe.db.get_all("GL Entry", filters={"voucher_no": si.name, "account": "Debtors - _TC"})
 		frappe.db.set_value("GL Entry", gle[0], "debit", 90)
 
-<<<<<<< HEAD
-		gl = qb.DocType("GL Entry")
-		res = (
-			qb.from_(gl)
-			.select(gl.voucher_no, Sum(gl.debit).as_("debit"), Sum(gl.credit).as_("credit"))
-			.where((gl.voucher_no == si.name) & (gl.is_cancelled == 0))
-			.run()
-		)
-
-=======
->>>>>>> 372dff2ffa (refactor(accounts): repost accounting ledger (#56442))
 		# Assert incorrect ledger balance
 		self.assertNotEqual(self.get_gl_totals(si.name), (100, 100))
 
 		# Submit repost document
 		ral.save().submit()
 
-<<<<<<< HEAD
-		res = (
-			qb.from_(gl)
-			.select(gl.voucher_no, Sum(gl.debit).as_("debit"), Sum(gl.credit).as_("credit"))
-			.where((gl.voucher_no == si.name) & (gl.is_cancelled == 0))
-			.run()
-		)
-
-=======
->>>>>>> 372dff2ffa (refactor(accounts): repost accounting ledger (#56442))
 		# Ledger should reflect correct amount post repost
 		self.assertEqual(self.get_gl_totals(si.name), (100, 100))
 
