@@ -47,7 +47,7 @@ def update_closed_status(doctype: str, name: str, item_names: str | list[str], c
 	if not has_closable_items(doctype):
 		frappe.throw(_("Rows of {0} cannot be closed individually").format(_(doctype)))
 
-	closed = cint(closed)
+	closed = 1 if cint(closed) else 0
 	item_names = set(frappe.parse_json(item_names) or [])
 	if not item_names:
 		frappe.throw(_("Select at least one row"))

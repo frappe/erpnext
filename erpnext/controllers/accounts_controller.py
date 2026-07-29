@@ -232,9 +232,10 @@ class AccountsController(TransactionBase):
 		"""A row can be closed while anything is still pending on it.
 
 		Billing is the axis every closable document shares; the order doctypes
-		extend this with their own fulfilment axis.
+		extend this with their own fulfilment axis. Amounts are compared as
+		magnitudes so return rows, which carry negative amounts, stay closable.
 		"""
-		return flt(item.billed_amt) < flt(item.amount)
+		return abs(flt(item.billed_amt)) < abs(flt(item.amount))
 
 	def validate(self):
 		clear_closed_rows_on_amend(self)
