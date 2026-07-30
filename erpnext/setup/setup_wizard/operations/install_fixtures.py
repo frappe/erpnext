@@ -12,6 +12,7 @@ from frappe.desk.doctype.global_search_settings.global_search_settings import (
 )
 from frappe.desk.page.setup_wizard.setup_wizard import make_records
 from frappe.utils import cstr, getdate
+from frappe.utils.nestedset import get_root_of
 
 from erpnext.accounts.doctype.account.account import RootNotEditable
 from erpnext.regional.address_template.setup import set_up_address_templates
@@ -24,46 +25,48 @@ def read_lines(filename: str) -> list[str]:
 
 
 def get_preset_records(country=None):
+	root_item_group = get_root_of("Item Group") or _("All Item Groups")
 	records = [
 		# ensure at least an empty Address Template exists for this Country
 		{"doctype": "Address Template", "country": country},
 		# item group
 		{
 			"doctype": "Item Group",
-			"item_group_name": _("All Item Groups"),
+			"item_group_name": root_item_group,
 			"is_group": 1,
 			"parent_item_group": "",
+			"__condition": lambda: not frappe.db.exists("Item Group", root_item_group),
 		},
 		{
 			"doctype": "Item Group",
 			"item_group_name": _("Products"),
 			"is_group": 0,
-			"parent_item_group": _("All Item Groups"),
+			"parent_item_group": root_item_group,
 			"show_in_website": 1,
 		},
 		{
 			"doctype": "Item Group",
 			"item_group_name": _("Raw Material"),
 			"is_group": 0,
-			"parent_item_group": _("All Item Groups"),
+			"parent_item_group": root_item_group,
 		},
 		{
 			"doctype": "Item Group",
 			"item_group_name": _("Services"),
 			"is_group": 0,
-			"parent_item_group": _("All Item Groups"),
+			"parent_item_group": root_item_group,
 		},
 		{
 			"doctype": "Item Group",
 			"item_group_name": _("Sub Assemblies"),
 			"is_group": 0,
-			"parent_item_group": _("All Item Groups"),
+			"parent_item_group": root_item_group,
 		},
 		{
 			"doctype": "Item Group",
 			"item_group_name": _("Consumable"),
 			"is_group": 0,
-			"parent_item_group": _("All Item Groups"),
+			"parent_item_group": root_item_group,
 		},
 		# Stock Entry Type
 		{
@@ -534,7 +537,6 @@ def update_stock_settings():
 	stock_settings = frappe.get_doc("Stock Settings")
 	stock_settings.item_naming_by = "Item Code"
 	stock_settings.valuation_method = "FIFO"
-	stock_settings.default_warehouse = frappe.db.get_value("Warehouse", {"warehouse_name": _("Stores")})
 	stock_settings.stock_uom = "Nos"
 	stock_settings.auto_indent = 1
 	stock_settings.auto_insert_price_list_rate_if_missing = 1

@@ -3,6 +3,17 @@
 
 frappe.provide("erpnext.company");
 
+// Static filters (is_group / disabled / warehouse_type) live in the fields' link_filters.
+const WAREHOUSE_DEFAULT_FIELDS = [
+	"default_warehouse",
+	"sample_retention_warehouse",
+	"default_in_transit_warehouse",
+	"default_warehouse_for_sales_return",
+	"default_wip_warehouse",
+	"default_fg_warehouse",
+	"default_scrap_warehouse",
+];
+
 frappe.ui.form.on("Company", {
 	onload: function (frm) {
 		if (frm.doc.__islocal && frm.doc.parent_company) {
@@ -51,23 +62,21 @@ frappe.ui.form.on("Company", {
 			return { filters: { buying: 1 } };
 		});
 
-		frm.set_query("default_in_transit_warehouse", function () {
-			return {
-				filters: {
-					warehouse_type: "Transit",
-					is_group: 0,
-					company: frm.doc.company_name,
-				},
-			};
+		WAREHOUSE_DEFAULT_FIELDS.forEach((fieldname) => {
+			frm.set_query(fieldname, function (doc) {
+				return { filters: { company: doc.name } };
+			});
 		});
 
-		frm.set_query("default_warehouse_for_sales_return", function () {
-			return {
-				filters: {
-					company: frm.doc.name,
-					is_group: 0,
-				},
-			};
+		["default_wip_warehouse", "default_fg_warehouse", "default_scrap_warehouse"].forEach((fieldname) => {
+			frm.set_query(fieldname, function (doc) {
+				return {
+					filters: {
+						company: doc.name,
+						is_group: 0,
+					},
+				};
+			});
 		});
 
 		frm.set_query("default_letter_head", function () {

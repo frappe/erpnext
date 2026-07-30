@@ -196,12 +196,15 @@ class BaseStockGLComposer(BaseGLComposer):
 			self.append_expenses_added_to_stock_pair(gl_list, item_code, amount, item_row)
 
 	def append_expenses_added_to_stock_pair(self, gl_list, item_code, amount, item_row):
+		# A service item holds no stock value, so there is nothing to book against it - and it must
+		# not make the expense accounts mandatory either. A zero pair would be rejected by GL Entry
+		# anyway, which needs a debit or a credit on every row.
+		if not amount or not frappe.get_cached_value("Item", item_code, "is_stock_item"):
+			return
+
 		doc = self.doc
 		fields = ("expenses_added_to_stock_account", "expenses_added_to_stock_contra_account")
 		details = get_expenses_added_to_stock_accounts(item_code, doc.company)
-
-		if not any(details.get(field) for field in fields):
-			return
 
 		for field in fields:
 			if not details.get(field):

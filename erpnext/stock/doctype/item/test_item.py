@@ -976,10 +976,8 @@ class TestItem(ERPNextTestSuite):
 		)
 		self.consume_item_code_with_differet_stock_transactions(item_code=item.name)
 
-	@ERPNextTestSuite.change_settings(
-		"Stock Settings", {"sample_retention_warehouse": "_Test Warehouse - _TC"}
-	)
 	def test_retain_sample(self):
+		frappe.db.set_value("Company", "_Test Company", "sample_retention_warehouse", "_Test Warehouse - _TC")
 		item = make_item("_TestRetainSample", {"has_batch_no": 1, "retain_sample": 1, "sample_quantity": 1})
 
 		self.assertEqual(item.has_batch_no, 1)

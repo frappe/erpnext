@@ -97,6 +97,7 @@ def get_item_details(
 	for_validate = parse_json(for_validate)
 	overwrite_warehouse = parse_json(overwrite_warehouse)
 	item = frappe.get_cached_doc("Item", ctx.item_code)
+	item.check_permission()
 	validate_item_details(ctx, item)
 
 	doc = frappe.parse_json(doc)
@@ -708,13 +709,8 @@ def get_item_warehouse_(ctx: ItemDetailsCtx, item, overwrite_warehouse, defaults
 	else:
 		warehouse = ctx.warehouse
 
-	if not warehouse:
-		default_warehouse = frappe.get_single_value("Stock Settings", "default_warehouse")
-		if (
-			default_warehouse
-			and frappe.get_cached_value("Warehouse", default_warehouse, "company") == ctx.company
-		):
-			return default_warehouse
+	if not warehouse and ctx.company:
+		return frappe.get_cached_value("Company", ctx.company, "default_warehouse")
 
 	return warehouse
 

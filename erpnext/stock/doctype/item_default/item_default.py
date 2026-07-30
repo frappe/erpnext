@@ -36,6 +36,7 @@ class ItemDefault(Document):
 		parenttype: DF.Data
 		purchase_expense_account: DF.Link | None
 		purchase_expense_contra_account: DF.Link | None
+		purchase_price_variance_account: DF.Link | None
 		selling_cost_center: DF.Link | None
 	# end: auto-generated types
 

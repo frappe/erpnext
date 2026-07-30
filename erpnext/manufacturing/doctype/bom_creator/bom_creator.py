@@ -538,15 +538,8 @@ class BOMCreator(Document):
 			row.delete()
 			updated = True
 
-		items = get_children(parent=kwargs.fg_item, parent_id=self.name)
-		if items:
-			for item in items:
-				updated = True
-				child_row = next((row for row in self.items if row.name == item.name), None)
-				if child_row:
-					child_row.delete()
-				if item.expandable:
-					self.delete_node(fg_item=item.value)
+		if self.delete_child_nodes(kwargs.docname or self.name):
+			updated = True
 
 		if updated:
 			self.set_rate_for_items()
@@ -555,6 +548,19 @@ class BOMCreator(Document):
 			return self
 
 		return frappe._dict()
+
+	def delete_child_nodes(self, fg_reference_id: str):
+		deleted = False
+		for item in get_children(parent=fg_reference_id, parent_id=self.name):
+			child_row = next((row for row in self.items if row.name == item.name), None)
+			if child_row:
+				child_row.delete()
+
+			deleted = True
+			if item.expandable:
+				self.delete_child_nodes(item.name)
+
+		return deleted
 
 
 @frappe.whitelist()
@@ -568,7 +574,7 @@ def get_children(doctype: str | None = None, parent: str | None = None, **kwargs
 		kwargs = frappe._dict(kwargs)
 
 	fields = [
-		"item_code as value",
+		"name as value",
 		"item_name as title",
 		"is_expandable as expandable",
 		"parent as parent_id",
@@ -576,6 +582,7 @@ def get_children(doctype: str | None = None, parent: str | None = None, **kwargs
 		"idx",
 		ValueWrapper("BOM Creator Item").as_("doctype"),
 		"name",
+		"item_code",
 		"uom",
 		"rate",
 		"amount",
@@ -584,7 +591,7 @@ def get_children(doctype: str | None = None, parent: str | None = None, **kwargs
 	]
 
 	query_filters = {
-		"fg_item": parent,
+		"fg_reference_id": parent,
 		"parent": kwargs.parent_id,
 	}
 

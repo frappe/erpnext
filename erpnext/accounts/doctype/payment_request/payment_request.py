@@ -459,6 +459,11 @@ class PaymentRequest(Document):
 			else:
 				return True
 		except Exception:
+			frappe.log_error(
+				title=f"Payment Gateway validation failed: {self.payment_gateway}",
+				reference_doctype=self.doctype,
+				reference_name=self.name,
+			)
 			return False
 
 	def set_payment_request_url(self):

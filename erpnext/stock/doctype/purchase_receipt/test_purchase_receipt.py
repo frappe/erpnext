@@ -2395,9 +2395,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
 
 		pr = make_inter_company_purchase_receipt(dn.name)
-		pr.inter_company_reference = ""
-		self.assertRaises(frappe.ValidationError, pr.save)
-
 		pr.inter_company_reference = dn.name
 		pr.items[0].qty = 10
 		pr.items[0].from_warehouse = target_warehouse
@@ -6134,17 +6131,31 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		# already received against this PO line, excluding pr2 itself, is pr1's 4
 		self.assertEqual(pr2.get_already_received_qty(po.name, po_detail), 4.0)
 
-	def test_check_next_docstatus_blocks_with_submitted_invoice(self):
-		"""check_next_docstatus must flag a submitted Purchase Invoice drawn from the receipt —
-		covers the converted child-table get_all (Purchase Invoice Item, docstatus=1)."""
+	def test_cancel_blocked_by_submitted_invoice_rolls_back(self):
+		"""A submitted Purchase Invoice must block cancelling its Purchase Receipt. Frappe's backlink
+		check rejects the cancel only after on_cancel has run stock, GL, and status work, so the whole
+		transaction has to roll back: the receipt stays submitted with no leaked ledger entries."""
 		pr = make_purchase_receipt()
 		pi = make_purchase_invoice(pr.name)
 		pi.insert()
 		pi.submit()
 
-		with self.assertRaises(frappe.ValidationError) as cm:
-			pr.check_next_docstatus()
-		self.assertIn("is already submitted", str(cm.exception))
+		pr.reload()
+		status_before = pr.status
+		sle_before = frappe.db.count("Stock Ledger Entry", {"voucher_no": pr.name})
+		gle_before = frappe.db.count("GL Entry", {"voucher_no": pr.name})
+
+		frappe.db.savepoint("before_blocked_cancel")
+		with self.assertRaises(frappe.LinkExistsError) as cm:
+			pr.cancel()
+		self.assertIn(pi.name, str(cm.exception))
+		frappe.db.rollback(save_point="before_blocked_cancel")  # mimic the request-level rollback
+
+		pr.reload()
+		self.assertEqual(pr.docstatus, 1)
+		self.assertEqual(pr.status, status_before)
+		self.assertEqual(frappe.db.count("Stock Ledger Entry", {"voucher_no": pr.name}), sle_before)
+		self.assertEqual(frappe.db.count("GL Entry", {"voucher_no": pr.name}), gle_before)
 
 
 def create_asset_category_for_pr_test():

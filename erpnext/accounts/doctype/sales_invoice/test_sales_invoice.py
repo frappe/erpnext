@@ -3215,6 +3215,10 @@ class TestSalesInvoice(ERPNextTestSuite):
 			"Stock Received But Not Billed - _TC1",
 		)
 
+		# companies are created with their Stores warehouse as Default Warehouse; clear it so the
+		# item genuinely maps without one
+		frappe.db.set_value("Company", "_Test Company 1", "default_warehouse", None)
+
 		# begin test
 		si = create_sales_invoice(
 			company="Wind Power LLC",
