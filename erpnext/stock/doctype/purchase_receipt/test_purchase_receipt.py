@@ -3079,11 +3079,14 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		old_perpetual_inventory = erpnext.is_perpetual_inventory_enabled("_Test Company")
 		frappe.local.enable_perpetual_inventory["_Test Company"] = 1
+		old_inventory_account = frappe.db.get_value("Company", "_Test Company", "default_inventory_account")
 		frappe.db.set_value(
 			"Company",
 			"_Test Company",
-			"stock_received_but_not_billed",
-			"Stock Received But Not Billed - _TC",
+			{
+				"stock_received_but_not_billed": "Stock Received But Not Billed - _TC",
+				"default_inventory_account": "Stock In Hand - _TC",
+			},
 		)
 
 		pr = make_purchase_receipt(qty=10, rate=1000, do_not_submit=1)
@@ -3119,6 +3122,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		)
 		self.assertCountEqual(expected_gle, gl_entries)
 		frappe.local.enable_perpetual_inventory["_Test Company"] = old_perpetual_inventory
+		frappe.db.set_value("Company", "_Test Company", "default_inventory_account", old_inventory_account)
 
 	def test_purchase_receipt_with_use_serial_batch_field_for_rejected_qty(self):
 		batch_item = make_item(
