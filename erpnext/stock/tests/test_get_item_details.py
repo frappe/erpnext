@@ -259,3 +259,65 @@ class TestGetItemDetail(ERPNextTestSuite):
 		finally:
 			frappe.db.set_single_value("Buying Settings", "maintain_same_rate", original)
 			frappe.clear_cache(doctype="Buying Settings")
+
+	def test_maintain_same_rate_keeps_source_discount_on_refetch(self):
+		"""A mapped row with a manual discount has rate != price_list_rate. Re-fetch must
+		keep the source's rate and discount, not just the pre-discount price, or the
+		recomputed rate diverges from the reference and fails maintain-same-rate on save.
+		"""
+		from frappe.utils import flt
+
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		item_code = "_Test Item"
+		price_list = "_Test Buying Price List"
+
+		original = frappe.db.get_single_value("Buying Settings", "maintain_same_rate")
+		frappe.db.set_single_value("Buying Settings", "maintain_same_rate", 1)
+		frappe.clear_cache(doctype="Buying Settings")
+
+		try:
+			po = create_purchase_order(item_code=item_code, rate=90, qty=1)
+
+			row_name = "pr-row-1"
+			# price_list_rate 100 with a 10% discount gives the effective rate 90.
+			pr_doc = {
+				"doctype": "Purchase Receipt",
+				"items": [
+					{
+						"name": row_name,
+						"item_code": item_code,
+						"purchase_order_item": po.items[0].name,
+						"price_list_rate": 100,
+						"rate": 90,
+						"discount_percentage": 10,
+					}
+				],
+			}
+			ctx = frappe._dict(
+				item_code=item_code,
+				doctype="Purchase Receipt",
+				company=po.company,
+				supplier=po.supplier,
+				currency=po.currency,
+				conversion_rate=1.0,
+				price_list=price_list,
+				price_list_currency=po.currency,
+				plc_conversion_rate=1.0,
+				warehouse="_Test Warehouse - _TC",
+				uom=po.items[0].uom,
+				stock_uom=po.items[0].stock_uom,
+				qty=1,
+				child_docname=row_name,
+				is_return=0,
+				is_internal_supplier=0,
+				ignore_pricing_rule=1,
+			)
+
+			out = get_item_details(ctx, pr_doc)
+			self.assertEqual(flt(out.get("price_list_rate")), 100)
+			self.assertEqual(flt(out.get("rate")), 90)
+			self.assertEqual(flt(out.get("discount_percentage")), 10)
+		finally:
+			frappe.db.set_single_value("Buying Settings", "maintain_same_rate", original)
+			frappe.clear_cache(doctype="Buying Settings")

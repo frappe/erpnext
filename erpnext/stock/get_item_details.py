@@ -133,18 +133,18 @@ def get_item_details(
 
 	source_row = get_rate_locked_source_row(ctx, doc)
 	if source_row:
-		out.price_list_rate = flt(source_row.get("price_list_rate")) or flt(source_row.get("rate"))
+		lock_source_rate(out, source_row)
 	else:
 		out.update(get_price_list_rate(ctx, item))
 
-	if (
-		not out.price_list_rate
-		and ctx.transaction_type == "selling"
-		and frappe.get_single_value("Selling Settings", "fallback_to_default_price_list")
-	):
-		fallback_args = ctx.copy()
-		fallback_args.price_list = frappe.get_single_value("Selling Settings", "selling_price_list")
-		out.update(get_price_list_rate(fallback_args, item))
+		if (
+			not out.price_list_rate
+			and ctx.transaction_type == "selling"
+			and frappe.get_single_value("Selling Settings", "fallback_to_default_price_list")
+		):
+			fallback_args = ctx.copy()
+			fallback_args.price_list = frappe.get_single_value("Selling Settings", "selling_price_list")
+			out.update(get_price_list_rate(fallback_args, item))
 
 	ctx.customer = current_customer
 
@@ -159,9 +159,8 @@ def get_item_details(
 		if ctx.get(key) is None:
 			ctx[key] = value
 
-	data = get_pricing_rule_for_item(ctx, doc=doc, for_validate=for_validate)
-
-	out.update(data)
+	if not source_row:
+		out.update(get_pricing_rule_for_item(ctx, doc=doc, for_validate=for_validate))
 
 	if (
 		frappe.get_single_value("Stock Settings", "auto_create_serial_and_batch_bundle_for_outward")
@@ -232,6 +231,19 @@ def maintain_same_rate_enabled(ctx: ItemDetailsCtx) -> bool:
 	if ctx.get("is_internal_customer"):
 		return False
 	return bool(cint(frappe.get_cached_value("Selling Settings", "None", "maintain_same_sales_rate")))
+
+
+def lock_source_rate(out: frappe._dict, source_row) -> None:
+	"""Copy the source row's whole pricing block onto out so a mapped row keeps its
+	exact rate. Pricing rules are skipped for these rows, so nothing re-derives it and
+	the manual discount or margin that made rate differ from price_list_rate survives.
+	"""
+	out.price_list_rate = flt(source_row.get("price_list_rate")) or flt(source_row.get("rate"))
+	out.rate = flt(source_row.get("rate"))
+	out.discount_percentage = flt(source_row.get("discount_percentage"))
+	out.discount_amount = flt(source_row.get("discount_amount"))
+	out.margin_type = source_row.get("margin_type")
+	out.margin_rate_or_amount = flt(source_row.get("margin_rate_or_amount"))
 
 
 def set_valuation_rate(out: frappe._dict, ctx: frappe._dict):
@@ -1700,9 +1712,8 @@ def apply_price_list_on_item(ctx, doc=None):
 
 	source_row = get_rate_locked_source_row(ctx, doc)
 	if source_row:
-		item_details = frappe._dict(
-			price_list_rate=flt(source_row.get("price_list_rate")) or flt(source_row.get("rate"))
-		)
+		item_details = frappe._dict()
+		lock_source_rate(item_details, source_row)
 	else:
 		item_details = get_price_list_rate(ctx, item_doc)
 
@@ -1711,7 +1722,8 @@ def apply_price_list_on_item(ctx, doc=None):
 	)
 	ctx.stock_qty = flt(ctx.qty) * flt(ctx.conversion_factor)
 
-	item_details.update(get_pricing_rule_for_item(ctx, doc=doc))
+	if not source_row:
+		item_details.update(get_pricing_rule_for_item(ctx, doc=doc))
 
 	return item_details
 
