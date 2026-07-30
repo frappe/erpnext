@@ -24,12 +24,8 @@ def read_lines(filename: str) -> list[str]:
 	return (Path(__file__).parent.parent / "data" / filename).read_text().splitlines()
 
 
-<<<<<<< HEAD
 def install(country=None):
-=======
-def get_preset_records(country=None):
 	root_item_group = get_root_of("Item Group") or _("All Item Groups")
->>>>>>> e7088d8981 (fix: seed standard Item Groups under the existing tree root)
 	records = [
 		# ensure at least an empty Address Template exists for this Country
 		{"doctype": "Address Template", "country": country},
