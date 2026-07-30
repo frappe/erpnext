@@ -799,7 +799,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-07-05 12:08:07.187999",
+ "modified": "2026-07-30 11:42:33.379243",
  "modified_by": "Administrator",
  "module": "Stock",
  "module_onboarding": "Stock Onboarding",
@@ -1022,7 +1022,7 @@
   {
    "child": 1,
    "collapsible": 1,
-   "default_workspace": 1,
+   "default_workspace": 0,
    "icon": "",
    "indent": 0,
    "keep_closed": 0,
