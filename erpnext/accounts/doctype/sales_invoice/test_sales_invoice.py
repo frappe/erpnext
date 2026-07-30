@@ -3064,6 +3064,99 @@ class TestSalesInvoice(ERPNextTestSuite):
 		):
 			make_inter_company_transaction("Sales Invoice", si.name)
 
+<<<<<<< HEAD
+=======
+	def test_inter_company_transaction_does_not_inherit_party_fields(self):
+		"""
+		Party-derived fields on SI (from Customer) must not leak into the mapped PI.
+		"""
+		si = create_sales_invoice(
+			company="Wind Power LLC",
+			customer="_Test Internal Customer",
+			debit_to="Debtors - WP",
+			warehouse="Stores - WP",
+			income_account="Sales - WP",
+			expense_account="Cost of Goods Sold - WP",
+			cost_center="Main - WP",
+			currency="USD",
+			do_not_save=1,
+		)
+		si.selling_price_list = "_Test Price List Rest of the World"
+		si.tax_category = "_Test Tax Category 1"
+		si.language = "ar"
+		si.payment_terms_template = "_Test Payment Term Template"
+		si.submit()
+
+		pi = make_inter_company_transaction("Sales Invoice", si.name)
+
+		supplier = frappe.get_doc("Supplier", "_Test Internal Supplier")
+		self.assertEqual(pi.tax_category or None, supplier.tax_category or None)
+		self.assertEqual(pi.language or None, supplier.language or None)
+		self.assertEqual(pi.payment_terms_template or None, supplier.payment_terms or None)
+
+	def test_inter_company_transaction_without_default_warehouse(self):
+		"Check mapping (expense account) of inter company SI to PI in absence of default warehouse."
+		# setup
+		old_negative_stock = frappe.db.get_single_value("Stock Settings", "allow_negative_stock")
+		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 1)
+
+		old_perpetual_inventory = erpnext.is_perpetual_inventory_enabled("_Test Company 1")
+		frappe.local.enable_perpetual_inventory["_Test Company 1"] = 1
+		old_inventory_account = frappe.db.get_value("Company", "_Test Company 1", "default_inventory_account")
+
+		frappe.db.set_value(
+			"Company",
+			"_Test Company 1",
+			{
+				"stock_received_but_not_billed": "Stock Received But Not Billed - _TC1",
+				"default_inventory_account": "Stock In Hand - _TC1",
+			},
+		)
+
+		# companies are created with their Stores warehouse as Default Warehouse; clear it so the
+		# item genuinely maps without one
+		frappe.db.set_value("Company", "_Test Company 1", "default_warehouse", None)
+
+		# begin test
+		si = create_sales_invoice(
+			company="Wind Power LLC",
+			customer="_Test Internal Customer",
+			debit_to="Debtors - WP",
+			warehouse="Stores - WP",
+			income_account="Sales - WP",
+			expense_account="Cost of Goods Sold - WP",
+			cost_center="Main - WP",
+			currency="USD",
+			update_stock=1,
+			do_not_save=1,
+		)
+		si.selling_price_list = "_Test Price List Rest of the World"
+		si.submit()
+
+		target_doc = make_inter_company_transaction("Sales Invoice", si.name)
+
+		# in absence of warehouse Stock Received But Not Billed is set as expense account while mapping
+		# mapping is not obstructed
+		self.assertIsNone(target_doc.items[0].warehouse)
+		self.assertEqual(target_doc.items[0].expense_account, "Stock Received But Not Billed - _TC1")
+
+		target_doc.items[0].update({"cost_center": "Main - _TC1"})
+
+		# missing warehouse is validated on save, after mapping
+		self.assertRaises(WarehouseMissingError, target_doc.save)
+
+		target_doc.items[0].update({"warehouse": "Stores - _TC1"})
+		target_doc.save()
+
+		# after warehouse is set, linked account or default inventory account is set
+		self.assertEqual(target_doc.items[0].expense_account, "Stock In Hand - _TC1")
+
+		# tear down
+		frappe.local.enable_perpetual_inventory["_Test Company 1"] = old_perpetual_inventory
+		frappe.db.set_value("Company", "_Test Company 1", "default_inventory_account", old_inventory_account)
+		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", old_negative_stock)
+
+>>>>>>> 386a4ac1f0 (fix: do not fetch a random inventory account when multiple inventory accounts exist (#57626))
 	def test_sle_for_target_warehouse(self):
 		se = make_stock_entry(
 			item_code="138-CMS Shoe",
