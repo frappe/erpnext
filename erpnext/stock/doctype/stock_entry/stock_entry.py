@@ -1321,12 +1321,15 @@ class StockEntry(StockController):
 		# Set rate for outgoing items
 		outgoing_items_cost = self.set_rate_for_outgoing_items(reset_outgoing_rate, raise_error_if_no_rate)
 		finished_item_qty = sum(d.transfer_qty for d in self.items if d.is_finished_item)
+		has_consumption_basis = self.has_consumption_basis()
 
 		items = []
 		# Set basic rate for incoming items
 		for d in self.get("items"):
 			if d.s_warehouse or d.set_basic_rate_manually:
 				continue
+
+			rate_derived_from_consumption = False
 
 			if d.allow_zero_valuation_rate:
 				d.basic_rate = 0.0
@@ -1335,12 +1338,17 @@ class StockEntry(StockController):
 			elif d.is_finished_item:
 				if self.purpose == "Manufacture":
 					d.basic_rate = self.get_basic_rate_for_manufactured_item(
-						finished_item_qty, outgoing_items_cost
+						finished_item_qty, outgoing_items_cost, has_consumption_basis
 					)
+					rate_derived_from_consumption = has_consumption_basis
 				elif self.purpose == "Repack":
 					d.basic_rate = self.get_basic_rate_for_repacked_items(d.transfer_qty, outgoing_items_cost)
+					# Repack rate comes from consumed source-warehouse rows, not consumption entries
+					rate_derived_from_consumption = any(item.s_warehouse for item in self.get("items"))
 
-			if not d.basic_rate and not d.allow_zero_valuation_rate:
+			# A rate of zero derived from the consumed items is their actual cost, not a missing
+			# rate. Falling back to the item's valuation here would value free inputs as output.
+			if not d.basic_rate and not d.allow_zero_valuation_rate and not rate_derived_from_consumption:
 				if self.is_new():
 					raise_error_if_no_rate = False
 
@@ -1374,6 +1382,31 @@ class StockEntry(StockController):
 				).format(frappe.bold(items[0]))
 
 			frappe.msgprint(message, alert=True)
+
+	def has_consumption_basis(self) -> bool:
+		"""Whether the cost of the consumed items is known, even when that cost is zero."""
+		if any(d.s_warehouse for d in self.get("items")):
+			return True
+
+		settings = frappe.get_single("Manufacturing Settings")
+		if settings.material_consumption and settings.get_rm_cost_from_consumption_entry and self.work_order:
+			return bool(self.get_consumption_entries())
+
+		return False
+
+	def get_consumption_entries(self) -> list[str]:
+		# Cached: queried in both has_consumption_basis() and get_basic_rate_for_manufactured_item()
+		if getattr(self, "_consumption_entries", None) is None:
+			self._consumption_entries = frappe.get_all(
+				"Stock Entry",
+				filters={
+					"docstatus": 1,
+					"work_order": self.work_order,
+					"purpose": "Material Consumption for Manufacture",
+				},
+				pluck="name",
+			)
+		return self._consumption_entries
 
 	def set_rate_for_outgoing_items(self, reset_outgoing_rate=True, raise_error_if_no_rate=True):
 		outgoing_items_cost = 0.0
@@ -1428,21 +1461,16 @@ class StockEntry(StockController):
 				)
 				return flt(outgoing_items_cost / total_fg_qty)
 
-	def get_basic_rate_for_manufactured_item(self, finished_item_qty, outgoing_items_cost=0) -> float:
+	def get_basic_rate_for_manufactured_item(
+		self, finished_item_qty, outgoing_items_cost=0, has_consumption_basis=False
+	) -> float:
 		settings = frappe.get_single("Manufacturing Settings")
 		scrap_items_cost = sum([flt(d.basic_amount) for d in self.get("items") if d.is_scrap_item])
 
 		if settings.material_consumption:
 			if settings.get_rm_cost_from_consumption_entry and self.work_order:
 				# Validate only if Material Consumption Entry exists for the Work Order.
-				if frappe.db.exists(
-					"Stock Entry",
-					{
-						"docstatus": 1,
-						"work_order": self.work_order,
-						"purpose": "Material Consumption for Manufacture",
-					},
-				):
+				if self.get_consumption_entries():
 					for item in self.items:
 						if not item.is_finished_item and not item.is_scrap_item:
 							label = frappe.get_meta(settings.doctype).get_label(
@@ -1489,7 +1517,9 @@ class StockEntry(StockController):
 						)
 					).run()[0][0] or 0
 
-			elif not outgoing_items_cost:
+			# Estimate from the BOM only when nothing was consumed. A consumed cost of zero is a
+			# real cost, so substituting BOM rates would value free inputs as output.
+			elif not outgoing_items_cost and not has_consumption_basis:
 				bom_items = self.get_bom_raw_materials(finished_item_qty)
 				outgoing_items_cost = sum([flt(row.qty) * flt(row.rate) for row in bom_items.values()])
 

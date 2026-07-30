@@ -2574,6 +2574,149 @@ class TestStockEntry(FrappeTestCase):
 		material_request.reload()
 		self.assertEqual(material_request.transfer_status, "Completed")
 
+	def test_manufacture_with_zero_valued_raw_material(self):
+		# A finished good produced from free inputs is worth nothing. Falling back to the item's
+		# own valuation would create value out of nothing and inflate it on every production run.
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		warehouse = "_Test Warehouse - _TC"
+		fg_warehouse = "Finished Goods - _TC"
+
+		rm_receipt = make_stock_entry(item_code=rm_item, target=warehouse, qty=100, rate=0, do_not_save=True)
+		rm_receipt.items[0].allow_zero_valuation_rate = 1
+		rm_receipt.save()
+		rm_receipt.submit()
+
+		# the finished good already carries a valuation in the target warehouse
+		make_stock_entry(item_code=fg_item, target=fg_warehouse, qty=10, rate=100)
+
+		se = frappe.new_doc("Stock Entry")
+		se.purpose = se.stock_entry_type = "Manufacture"
+		se.company = "_Test Company"
+		se.append(
+			"items",
+			{"item_code": rm_item, "s_warehouse": warehouse, "qty": 10, "conversion_factor": 1},
+		)
+		se.append(
+			"items",
+			{
+				"item_code": fg_item,
+				"t_warehouse": fg_warehouse,
+				"qty": 10,
+				"is_finished_item": 1,
+				"conversion_factor": 1,
+			},
+		)
+		se.save()
+
+		self.assertEqual(se.items[0].basic_amount, 0)
+		self.assertEqual(se.items[1].basic_rate, 0)
+		self.assertEqual(se.items[1].basic_amount, 0)
+
+		se.submit()
+
+		fg_sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": se.name, "item_code": fg_item, "is_cancelled": 0},
+			["incoming_rate", "stock_value_difference"],
+			as_dict=True,
+		)
+
+		self.assertEqual(fg_sle.incoming_rate, 0)
+		self.assertEqual(fg_sle.stock_value_difference, 0)
+
+	def _make_wo_for_free_raw_material(self, rm_item, fg_item, bom_no):
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			make_stock_entry as make_stock_entry_from_wo,
+		)
+
+		receipt = make_stock_entry(item_code=rm_item, target="Stores - _TC", qty=10, rate=0, do_not_save=True)
+		receipt.items[0].allow_zero_valuation_rate = 1
+		receipt.save()
+		receipt.submit()
+
+		wo = make_wo_order_test_record(production_item=fg_item, bom_no=bom_no, qty=10)
+
+		transfer = frappe.get_doc(make_stock_entry_from_wo(wo.name, "Material Transfer for Manufacture", 10))
+		transfer.items[0].s_warehouse = "Stores - _TC"
+		transfer.insert().submit()
+
+		return wo
+
+	@change_settings(
+		"Manufacturing Settings", {"material_consumption": 1, "get_rm_cost_from_consumption_entry": 0}
+	)
+	def test_manufacture_does_not_fall_back_to_bom_cost_for_free_raw_material(self):
+		# The BOM is only an estimate for when nothing was consumed. Items that were consumed and
+		# cost nothing are a real cost, so a BOM rate must not stand in for them.
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			make_stock_entry as make_stock_entry_from_wo,
+		)
+
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+
+		frappe.get_doc(
+			{
+				"doctype": "Item Price",
+				"item_code": rm_item,
+				"price_list": "_Test Price List India",
+				"price_list_rate": 150,
+				"buying": 1,
+			}
+		).insert()
+
+		# price the BOM off the price list so that it carries a rate the free stock does not
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], do_not_save=True)
+		bom.rm_cost_as_per = "Price List"
+		bom.buying_price_list = "_Test Price List India"
+		bom.currency = "INR"
+		bom.save()
+		bom.submit()
+
+		wo = self._make_wo_for_free_raw_material(rm_item, fg_item, bom.name)
+
+		manufacture = frappe.get_doc(make_stock_entry_from_wo(wo.name, "Manufacture", 10))
+		manufacture.save()
+
+		fg_row = next(d for d in manufacture.items if d.is_finished_item)
+		self.assertEqual(fg_row.basic_rate, 0)
+		self.assertEqual(fg_row.basic_amount, 0)
+
+	@change_settings(
+		"Manufacturing Settings", {"material_consumption": 1, "get_rm_cost_from_consumption_entry": 1}
+	)
+	def test_manufacture_with_zero_valued_consumption_entry(self):
+		# The raw material is consumed by a separate entry, so the Manufacture entry carries no
+		# consumed rows of its own. Its cost is still known, and it is zero.
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			make_stock_entry as make_stock_entry_from_wo,
+		)
+
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+
+		# the finished good already carries a valuation in the work order's target warehouse
+		make_stock_entry(item_code=fg_item, target="_Test Warehouse 1 - _TC", qty=10, rate=100)
+
+		bom = make_bom(item=fg_item, raw_materials=[rm_item]).name
+		wo = self._make_wo_for_free_raw_material(rm_item, fg_item, bom)
+
+		consumption = frappe.get_doc(
+			make_stock_entry_from_wo(wo.name, "Material Consumption for Manufacture", 10)
+		)
+		consumption.insert().submit()
+
+		manufacture = frappe.get_doc(make_stock_entry_from_wo(wo.name, "Manufacture", 10))
+		manufacture.save()
+
+		fg_row = next(d for d in manufacture.items if d.is_finished_item)
+		self.assertEqual(fg_row.basic_rate, 0)
+		self.assertEqual(fg_row.basic_amount, 0)
+
 	def test_disassemble_entry_without_wo(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 
