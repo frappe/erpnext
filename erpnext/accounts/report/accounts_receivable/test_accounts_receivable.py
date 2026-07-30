@@ -6,6 +6,7 @@ from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_ent
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.accounts_receivable.accounts_receivable import execute
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
+from erpnext.controllers.sales_and_purchase_return import make_return_doc
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -1490,3 +1491,61 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 		self.assertIn(original_customer, parties)
 		self.assertNotIn(second_customer, parties)
 		self.assertEqual(allowed_invoice.customer, original_customer)
+
+	def test_receivable_filtered_by_sales_partner(self):
+		frappe.set_user("Administrator")
+		partner_a, partner_b = "_Test AR Sales Partner A", "_Test AR Sales Partner B"
+		for partner in (partner_a, partner_b):
+			if not frappe.db.exists("Sales Partner", partner):
+				frappe.get_doc(
+					{
+						"doctype": "Sales Partner",
+						"partner_name": partner,
+						"commission_rate": 0,
+						"territory": "All Territories",
+					}
+				).insert()
+
+		def _si(sales_partner):
+			si = self.create_sales_invoice(no_payment_schedule=True, do_not_submit=True, qty=2)
+			si.sales_partner = sales_partner
+			return si.save().submit()
+
+		partner_a_si = _si(partner_a)
+		partner_b_si = _si(partner_b)
+		no_partner_si = _si(None)
+
+		# a return is folded onto the invoice it settles, so it nets against that
+		# invoice's partner even when the return's own partner is cleared
+		no_partner_return = make_return_doc("Sales Invoice", partner_a_si.name)
+		no_partner_return.sales_partner = None
+		no_partner_return.items[0].qty = -1
+		no_partner_return.update_outstanding_for_self = 0
+		no_partner_return.save().submit()
+
+		filters = {
+			"company": self.company,
+			"party_type": "Customer",
+			"report_date": today(),
+			"range": "30, 60, 90, 120",
+		}
+
+		def rows_for(partner):
+			return {
+				r.voucher_no: r
+				for r in execute({**filters, "sales_partner": partner})[1]
+				if r.get("voucher_no")
+			}
+
+		rows_a = rows_for(partner_a)
+		self.assertIn(partner_a_si.name, rows_a)
+		self.assertEqual(rows_a[partner_a_si.name].sales_partner, partner_a)
+		self.assertNotIn(partner_b_si.name, rows_a)
+		self.assertNotIn(no_partner_si.name, rows_a)
+		self.assertNotIn(no_partner_return.name, rows_a)
+		self.assertEqual(rows_a[partner_a_si.name].credit_note, 100)
+		self.assertEqual(rows_a[partner_a_si.name].outstanding, 100)
+
+		rows_b = rows_for(partner_b)
+		self.assertIn(partner_b_si.name, rows_b)
+		self.assertNotIn(partner_a_si.name, rows_b)
