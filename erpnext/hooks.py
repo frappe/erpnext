@@ -38,13 +38,12 @@ web_include_icons = [
 
 doctype_js = {
 	"Address": "public/js/address.js",
-	"Sales Order": "public/js/sales_order_proforma.js",
+	"Sales Order": ["public/js/sales_order_proforma.js", "public/js/pricing_scheme_panel.js"],
 	"Communication": "public/js/communication.js",
 	"Event": "public/js/event.js",
 	"Newsletter": "public/js/newsletter.js",
 	"Contact": "public/js/contact.js",
 	"Quotation": "public/js/pricing_scheme_panel.js",
-	"Sales Order": "public/js/pricing_scheme_panel.js",
 	"Delivery Note": "public/js/pricing_scheme_panel.js",
 	"Sales Invoice": "public/js/pricing_scheme_panel.js",
 	"Supplier Quotation": "public/js/pricing_scheme_panel.js",
