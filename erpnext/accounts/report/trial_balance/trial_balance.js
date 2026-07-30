@@ -29,6 +29,15 @@ frappe.query_reports["Trial Balance"] = {
 						from_date: fy[1],
 						to_date: fy[2],
 					});
+				} else {
+					// No Fiscal Year found for the selected company as on today.
+					// Clear the previous company's values instead of leaving stale
+					// filters, which would run the report for the wrong period.
+					frappe.query_report.set_filter_value({
+						fiscal_year: "",
+						from_date: "",
+						to_date: "",
+					});
 				}
 			},
 		},
