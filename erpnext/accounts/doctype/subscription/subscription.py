@@ -25,11 +25,8 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 )
 from erpnext.accounts.doctype.subscription_plan.subscription_plan import get_plan_rate
-<<<<<<< HEAD
 from erpnext.accounts.party import get_party_account_currency
-=======
 from erpnext.stock.doctype.item.item import get_item_defaults
->>>>>>> 7febc28ed6 (feat: auto-fill subscription accounting dimensions from plan with item fallback (#57615))
 
 
 class InvoiceCancelled(frappe.ValidationError):
@@ -779,7 +776,7 @@ def get_item_dimension(
 
 	selling = item_defaults.get("selling_cost_center")
 	buying = item_defaults.get("buying_cost_center")
-	if party_type == PARTY_SUPPLIER:
+	if party_type == "Supplier":
 		return buying or selling
 	return selling or buying
 
