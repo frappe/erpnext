@@ -196,3 +196,66 @@ class TestGetItemDetail(ERPNextTestSuite):
 		# Control: without the setting the newer Item Price would be fetched.
 		set_maintain_same_rate(0)
 		self.assertEqual(fetch_price_list_rate(), 120)
+
+	def test_apply_price_list_keeps_source_rate_when_maintain_same_rate(self):
+		"""#57436: the bulk apply_price_list path (price list / party / conversion rate
+		change) must also keep the source rate on mapped rows, not just re-fetch of a
+		single row. Here a PR row carries its PO rate (175) while the current price list
+		rate is 100; the bulk apply must keep 175.
+		"""
+		from frappe.utils import flt, nowdate
+
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+		from erpnext.stock.get_item_details import apply_price_list
+
+		item_code = "_Test Item"
+		price_list = "_Test Buying Price List"
+
+		original = frappe.db.get_single_value("Buying Settings", "maintain_same_rate")
+		frappe.db.set_single_value("Buying Settings", "maintain_same_rate", 1)
+		frappe.clear_cache(doctype="Buying Settings")
+
+		try:
+			po = create_purchase_order(item_code=item_code, rate=175, qty=1)
+
+			row_name = "pr-row-1"
+			pr_doc = {
+				"doctype": "Purchase Receipt",
+				"items": [
+					{
+						"name": row_name,
+						"item_code": item_code,
+						"purchase_order_item": po.items[0].name,
+						"price_list_rate": 175,
+						"rate": 175,
+					}
+				],
+			}
+			ctx = frappe._dict(
+				doctype="Purchase Receipt",
+				supplier=po.supplier,
+				company=po.company,
+				currency=po.currency,
+				conversion_rate=1.0,
+				price_list=price_list,
+				plc_conversion_rate=1.0,
+				transaction_date=nowdate(),
+				items=[
+					frappe._dict(
+						doctype="Purchase Receipt Item",
+						parenttype="Purchase Receipt",
+						item_code=item_code,
+						child_docname=row_name,
+						qty=1,
+						uom=po.items[0].uom,
+						stock_uom=po.items[0].stock_uom,
+						conversion_factor=1.0,
+					)
+				],
+			)
+
+			result = apply_price_list(ctx, doc=pr_doc)
+			self.assertEqual(flt(result["children"][0].get("price_list_rate")), 175)
+		finally:
+			frappe.db.set_single_value("Buying Settings", "maintain_same_rate", original)
+			frappe.clear_cache(doctype="Buying Settings")

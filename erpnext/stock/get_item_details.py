@@ -210,7 +210,10 @@ def get_rate_locked_source_row(ctx: ItemDetailsCtx, doc) -> frappe._dict | None:
 	Order) can only be saved at the source rate. Fetching a newer Item Price here
 	would set a rate the document can never be saved with, so keep the source rate.
 	"""
-	source_fields = maintain_same_rate_source_fields.get(ctx.doctype)
+	if isinstance(doc, str):
+		doc = json.loads(doc)
+
+	source_fields = maintain_same_rate_source_fields.get(ctx.parenttype or ctx.doctype)
 	if not source_fields or not doc or ctx.get("is_return") or not maintain_same_rate_enabled(ctx):
 		return None
 
@@ -221,7 +224,7 @@ def get_rate_locked_source_row(ctx: ItemDetailsCtx, doc) -> frappe._dict | None:
 
 
 def maintain_same_rate_enabled(ctx: ItemDetailsCtx) -> bool:
-	if ctx.doctype in purchase_doctypes:
+	if (ctx.parenttype or ctx.doctype) in purchase_doctypes:
 		if ctx.get("is_internal_supplier"):
 			return False
 		return bool(cint(frappe.get_cached_value("Buying Settings", "None", "maintain_same_rate")))
@@ -1694,7 +1697,14 @@ def apply_price_list(ctx: ItemDetailsCtx, as_doc: bool = False, doc: Document | 
 
 def apply_price_list_on_item(ctx, doc=None):
 	item_doc = frappe.get_cached_doc("Item", ctx.item_code)
-	item_details = get_price_list_rate(ctx, item_doc)
+
+	source_row = get_rate_locked_source_row(ctx, doc)
+	if source_row:
+		item_details = frappe._dict(
+			price_list_rate=flt(source_row.get("price_list_rate")) or flt(source_row.get("rate"))
+		)
+	else:
+		item_details = get_price_list_rate(ctx, item_doc)
 
 	ctx.conversion_factor = flt(ctx.conversion_factor) or get_conversion_factor(ctx.item_code, ctx.uom).get(
 		"conversion_factor", 1
