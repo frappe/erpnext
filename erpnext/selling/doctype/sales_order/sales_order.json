@@ -46,6 +46,8 @@
   "reserve_stock",
   "items_section",
   "items",
+  "pricing_scheme_section",
+  "pricing_scheme_explanation",
   "section_break_31",
   "total_qty",
   "total_net_weight",
@@ -1783,6 +1785,16 @@
    "label": "Title",
    "no_copy": 1,
    "print_hide": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "pricing_scheme_section",
+   "fieldtype": "Section Break",
+   "label": "Pricing Scheme"
+  },
+  {
+   "fieldname": "pricing_scheme_explanation",
+   "fieldtype": "HTML"
   }
  ],
  "grid_page_length": 50,

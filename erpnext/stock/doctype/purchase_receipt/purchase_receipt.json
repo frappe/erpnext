@@ -50,6 +50,8 @@
   "supplier_warehouse",
   "items_section",
   "items",
+  "pricing_scheme_section",
+  "pricing_scheme_explanation",
   "section_break0",
   "total_qty",
   "total_net_weight",
@@ -1286,6 +1288,16 @@
   {
    "fieldname": "column_break_ugyv",
    "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "pricing_scheme_section",
+   "fieldtype": "Section Break",
+   "label": "Pricing Scheme"
+  },
+  {
+   "fieldname": "pricing_scheme_explanation",
+   "fieldtype": "HTML"
   }
  ],
  "grid_page_length": 50,

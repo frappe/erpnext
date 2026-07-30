@@ -44,6 +44,8 @@
   "set_warehouse",
   "items_section",
   "items",
+  "pricing_scheme_section",
+  "pricing_scheme_explanation",
   "sb_last_purchase",
   "total_qty",
   "total_net_weight",
@@ -1291,6 +1293,16 @@
    "fieldname": "auto_repeat_section",
    "fieldtype": "Section Break",
    "label": "Auto Repeat"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "pricing_scheme_section",
+   "fieldtype": "Section Break",
+   "label": "Pricing Scheme"
+  },
+  {
+   "fieldname": "pricing_scheme_explanation",
+   "fieldtype": "HTML"
   }
  ],
  "grid_page_length": 50,

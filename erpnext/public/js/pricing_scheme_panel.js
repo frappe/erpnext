@@ -15,6 +15,7 @@ const PRICING_PANEL_DOCTYPES = [
 ];
 
 erpnext.pricing_scheme.render_panel = function (frm) {
+	frm.toggle_display("pricing_scheme_section", false);
 	if (frm.is_new()) return;
 	frappe.call({
 		method: "erpnext.accounts.services.pricing.pricing_preview.explain_pricing",
@@ -22,23 +23,14 @@ erpnext.pricing_scheme.render_panel = function (frm) {
 		callback: ({ message }) => {
 			if (message && message.enabled) {
 				render_pricing_panel(frm, message);
-			} else if (frm.pricing_scheme_section) {
-				frm.pricing_scheme_section.empty();
 			}
 		},
 	});
 };
 
-function panel_section(frm) {
-	// the dashboard DOM is rebuilt on form refresh, so a cached section ref can go stale
-	if (!frm.pricing_scheme_section || !document.body.contains(frm.pricing_scheme_section[0])) {
-		frm.pricing_scheme_section = frm.dashboard.add_section("", __("Pricing Scheme"));
-	}
-	return frm.pricing_scheme_section;
-}
-
 function render_pricing_panel(frm, data) {
-	const body = panel_section(frm);
+	frm.toggle_display("pricing_scheme_section", true);
+	const body = frm.get_field("pricing_scheme_explanation").$wrapper;
 	body.empty();
 
 	(data.applied || []).forEach((entry) => body.append(applied_row(frm, entry)));
@@ -65,7 +57,6 @@ function render_pricing_panel(frm, data) {
 					${frappe.utils.escape_html(entry.reason || entry.status)}
 				</div>`)
 		);
-	frm.dashboard.show();
 }
 
 function applied_row(frm, entry) {

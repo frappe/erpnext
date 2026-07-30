@@ -34,6 +34,8 @@
   "scan_barcode",
   "last_scanned_warehouse",
   "items",
+  "pricing_scheme_section",
+  "pricing_scheme_explanation",
   "sec_break23",
   "total_qty",
   "total_net_weight",
@@ -1138,6 +1140,16 @@
    "label": "Title",
    "no_copy": 1,
    "print_hide": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "pricing_scheme_section",
+   "fieldtype": "Section Break",
+   "label": "Pricing Scheme"
+  },
+  {
+   "fieldname": "pricing_scheme_explanation",
+   "fieldtype": "HTML"
   }
  ],
  "icon": "fa fa-shopping-cart",
