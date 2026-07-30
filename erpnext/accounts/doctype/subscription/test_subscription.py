@@ -17,7 +17,12 @@ from frappe.utils.data import (
 )
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
-from erpnext.accounts.doctype.subscription.subscription import Subscription, get_prorata_factor, process_all
+from erpnext.accounts.doctype.subscription.subscription import (
+	Subscription,
+	get_plan_dimensions,
+	get_prorata_factor,
+	process_all,
+)
 from erpnext.accounts.utils import update_subscription_on_invoice_update
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -804,6 +809,184 @@ class TestSubscription(ERPNextTestSuite):
 		)
 		self.assertEqual(len(subscription.invoices), 0)
 
+<<<<<<< HEAD
+=======
+	def test_generate_invoice_at_migration_patch(self):
+		from erpnext.patches.v16_0.migrate_subscription_generate_invoice_at import VALUE_MAP, execute
+
+		subscription = create_subscription(start_date=add_days(nowdate(), 10))
+		for old_value, new_value in VALUE_MAP.items():
+			frappe.db.set_value("Subscription", subscription.name, "generate_invoice_at", old_value)
+			execute()
+			self.assertEqual(
+				frappe.db.get_value("Subscription", subscription.name, "generate_invoice_at"), new_value
+			)
+
+	def test_next_billing_period_populated_for_prepaid(self):
+		subscription = create_subscription(
+			start_date=add_days(nowdate(), 10),
+			generate_invoice_at="Prepaid (bill at period start)",
+		)
+		self.assertEqual(getdate(subscription.next_billing_period_start), getdate(add_days(nowdate(), 10)))
+		self.assertGreater(
+			getdate(subscription.next_billing_period_end), getdate(subscription.next_billing_period_start)
+		)
+
+	def test_status_becomes_refunded_when_only_invoice_credited(self):
+		subscription = create_subscription(
+			start_date=nowdate(),
+			generate_invoice_at="Prepaid (bill at period start)",
+			submit_invoice=1,
+		)
+		subscription.process(posting_date=nowdate())
+		self.assertEqual(subscription.status, "Unpaid")
+
+		make_full_credit_note(subscription.get_current_invoice().name)
+
+		subscription.reload()
+		self.assertEqual(subscription.status, "Refunded")
+
+	def test_status_stays_unpaid_when_one_of_two_invoices_credited(self):
+		subscription = create_subscription(
+			start_date=add_months(nowdate(), -2),
+			generate_invoice_at="Prepaid (bill at period start)",
+			submit_invoice=1,
+			generate_new_invoices_past_due_date=1,
+		)
+		invoices = frappe.get_all(
+			"Sales Invoice",
+			filters={"subscription": subscription.name, "docstatus": 1, "is_return": 0},
+			pluck="name",
+			order_by="from_date asc",
+		)
+		self.assertGreaterEqual(len(invoices), 2)
+
+		make_full_credit_note(invoices[0])
+
+		subscription.reload()
+		self.assertNotEqual(subscription.status, "Refunded")
+
+	def test_refunded_reverts_to_active_after_full_settlement(self):
+		subscription = create_subscription(
+			start_date=nowdate(),
+			generate_invoice_at="Prepaid (bill at period start)",
+			submit_invoice=1,
+		)
+		subscription.process(posting_date=nowdate())
+		invoice = subscription.get_current_invoice()
+		make_full_credit_note(invoice.name)
+
+		subscription.reload()
+		self.assertEqual(subscription.status, "Refunded")
+
+		invoice.db_set("status", "Paid")
+		invoice.db_set("outstanding_amount", 0)
+		subscription.process()
+		self.assertEqual(subscription.status, "Active")
+
+	def test_heatmap_spans_twelve_months_from_start_month(self):
+		start_date = getdate("2024-03-14")
+		subscription = create_subscription(start_date=start_date)
+		heatmap = subscription.get_billing_heatmap()
+		self.assertEqual(getdate(heatmap[0]["date"]), get_first_day(start_date))
+		self.assertEqual(
+			getdate(heatmap[-1]["date"]), get_last_day(add_months(get_first_day(start_date), 11))
+		)
+		self.assertIn("status", heatmap[0])
+
+	def test_heatmap_marks_paid_days_green(self):
+		subscription = create_subscription(
+			start_date=nowdate(),
+			generate_invoice_at="Prepaid (bill at period start)",
+			submit_invoice=1,
+		)
+		subscription.process(posting_date=nowdate())
+		invoice = subscription.get_current_invoice()
+		invoice.db_set("status", "Paid")
+		invoice.db_set("outstanding_amount", 0)
+
+		subscription.reload()
+		cells = {cell["date"]: cell for cell in subscription.get_billing_heatmap()}
+		self.assertEqual(cells[str(getdate(invoice.from_date))]["status"], "paid")
+
+	def test_heatmap_marks_future_planned_days(self):
+		subscription = create_subscription(
+			start_date=nowdate(),
+			generate_invoice_at="Prepaid (bill at period start)",
+		)
+		today = getdate(nowdate())
+		planned = [
+			cell
+			for cell in subscription.get_billing_heatmap()
+			if cell["status"] == "planned" and getdate(cell["date"]) > today
+		]
+		self.assertTrue(planned)
+
+	def test_heatmap_marks_refunded_days_for_credited_periods(self):
+		subscription = create_subscription(
+			start_date=nowdate(),
+			generate_invoice_at="Prepaid (bill at period start)",
+			submit_invoice=1,
+		)
+		subscription.process(posting_date=nowdate())
+		invoice = subscription.get_current_invoice()
+		make_full_credit_note(invoice.name)
+
+		subscription.reload()
+		cells = {cell["date"]: cell for cell in subscription.get_billing_heatmap()}
+		self.assertEqual(cells[str(getdate(invoice.from_date))]["status"], "refunded")
+
+	def test_plan_dimensions_resolve_from_plan_then_item(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		# Plan-level cost center takes precedence.
+		create_plan(plan_name="_Test Sub Plan CC", cost=100, currency="INR")
+		frappe.db.set_value(
+			"Subscription Plan", "_Test Sub Plan CC", "cost_center", "_Test Cost Center - _TC"
+		)
+		self.assertEqual(
+			get_plan_dimensions("_Test Sub Plan CC", "_Test Company", "Customer").get("cost_center"),
+			"_Test Cost Center - _TC",
+		)
+
+		# No plan cost center: fall back to the item's company default (selling vs buying by party type).
+		item = make_item(
+			"_Test Sub Dimension Item",
+			{
+				"is_stock_item": 0,
+				"item_defaults": [
+					{
+						"company": "_Test Company",
+						"selling_cost_center": "_Test Cost Center - _TC",
+						"buying_cost_center": "_Test Cost Center 2 - _TC",
+					}
+				],
+			},
+		)
+		create_plan(plan_name="_Test Sub Plan No CC", cost=100, currency="INR", item=item.name)
+
+		self.assertEqual(
+			get_plan_dimensions("_Test Sub Plan No CC", "_Test Company", "Customer").get("cost_center"),
+			"_Test Cost Center - _TC",
+		)
+		self.assertEqual(
+			get_plan_dimensions("_Test Sub Plan No CC", "_Test Company", "Supplier").get("cost_center"),
+			"_Test Cost Center 2 - _TC",
+		)
+
+		# Without a company the item fallback is skipped.
+		self.assertNotIn("cost_center", get_plan_dimensions("_Test Sub Plan No CC"))
+
+
+def make_full_credit_note(invoice_name):
+	from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return
+
+	credit_note = make_sales_return(invoice_name)
+	credit_note.insert()
+	credit_note.submit()
+	return credit_note
+
+>>>>>>> 7febc28ed6 (feat: auto-fill subscription accounting dimensions from plan with item fallback (#57615))
 
 def make_plans():
 	create_plan(plan_name="_Test Plan Name", cost=900, currency="INR")

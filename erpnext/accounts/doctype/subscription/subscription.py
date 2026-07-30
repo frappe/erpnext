@@ -25,6 +25,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 )
 from erpnext.accounts.doctype.subscription_plan.subscription_plan import get_plan_rate
+from erpnext.stock.doctype.item.item import get_item_defaults
 
 
 class InvoiceCancelled(frappe.ValidationError):
@@ -799,6 +800,39 @@ def get_prorata_factor(
 	diff = flt(date_diff(nowdate(), period_start) + 1)
 	plan_days = flt(date_diff(period_end, period_start) + 1)
 	return diff / plan_days
+
+
+@frappe.whitelist()
+def get_plan_dimensions(
+	plan: str, company: str | None = None, party_type: str | None = None
+) -> dict[str, str]:
+	"""Resolve a plan's accounting dimensions, falling back to the plan item's company defaults."""
+	plan_doc = frappe.get_cached_doc("Subscription Plan", plan)
+
+	dimensions = {}
+	for dimension in ["cost_center", *get_accounting_dimensions()]:
+		value = plan_doc.get(dimension) or get_item_dimension(plan_doc.item, dimension, company, party_type)
+		if value:
+			dimensions[dimension] = value
+
+	return dimensions
+
+
+def get_item_dimension(
+	item_code: str, dimension: str, company: str | None, party_type: str | None
+) -> str | None:
+	if not company:
+		return None
+
+	item_defaults = get_item_defaults(item_code, company)
+	if dimension != "cost_center":
+		return item_defaults.get(dimension)
+
+	selling = item_defaults.get("selling_cost_center")
+	buying = item_defaults.get("buying_cost_center")
+	if party_type == PARTY_SUPPLIER:
+		return buying or selling
+	return selling or buying
 
 
 def process_all(subscription: list, posting_date: DateTimeLikeObject | None = None) -> None:
