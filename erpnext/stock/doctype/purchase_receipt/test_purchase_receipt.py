@@ -2769,6 +2769,61 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr.reload()
 		self.assertEqual(pr.per_billed, 100)
 
+<<<<<<< HEAD
+=======
+	def test_valuation_taxes_lcv_repost_after_billing(self):
+		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
+			make_landed_cost_voucher,
+		)
+
+		old_perpetual_inventory = erpnext.is_perpetual_inventory_enabled("_Test Company")
+		frappe.local.enable_perpetual_inventory["_Test Company"] = 1
+		old_inventory_account = frappe.db.get_value("Company", "_Test Company", "default_inventory_account")
+		frappe.db.set_value(
+			"Company",
+			"_Test Company",
+			{
+				"stock_received_but_not_billed": "Stock Received But Not Billed - _TC",
+				"default_inventory_account": "Stock In Hand - _TC",
+			},
+		)
+
+		pr = make_purchase_receipt(qty=10, rate=1000, do_not_submit=1)
+		pr.append(
+			"taxes",
+			{
+				"category": "Valuation and Total",
+				"charge_type": "Actual",
+				"account_head": "Freight and Forwarding Charges - _TC",
+				"tax_amount": 2000,
+				"description": "Test",
+			},
+		)
+		pr.submit()
+		pi = make_purchase_invoice(pr.name)
+		pi.submit()
+		make_landed_cost_voucher(
+			company=pr.company,
+			receipt_document_type="Purchase Receipt",
+			receipt_document=pr.name,
+			charges=2000,
+			distribute_charges_based_on="Qty",
+			expense_account="Expenses Included In Valuation - _TC",
+		)
+
+		gl_entries = get_gl_entries("Purchase Receipt", pr.name, skip_cancelled=True, as_dict=False)
+		warehouse_account = get_warehouse_account_map("_Test Company")
+		expected_gle = (
+			("Stock Received But Not Billed - _TC", 0.0, 10000.0, "Main - _TC"),
+			("Freight and Forwarding Charges - _TC", 0.0, 2000.0, "Main - _TC"),
+			("Expenses Included In Valuation - _TC", 0.0, 2000.0, "Main - _TC"),
+			(warehouse_account[pr.items[0].warehouse]["account"], 14000.0, 0.0, "Main - _TC"),
+		)
+		self.assertCountEqual(expected_gle, gl_entries)
+		frappe.local.enable_perpetual_inventory["_Test Company"] = old_perpetual_inventory
+		frappe.db.set_value("Company", "_Test Company", "default_inventory_account", old_inventory_account)
+
+>>>>>>> 386a4ac1f0 (fix: do not fetch a random inventory account when multiple inventory accounts exist (#57626))
 	def test_purchase_receipt_with_use_serial_batch_field_for_rejected_qty(self):
 		batch_item = make_item(
 			"_Test Purchase Receipt Batch Item For Rejected Qty",
