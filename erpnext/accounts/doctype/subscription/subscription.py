@@ -830,7 +830,7 @@ def get_item_dimension(
 
 	selling = item_defaults.get("selling_cost_center")
 	buying = item_defaults.get("buying_cost_center")
-	if party_type == PARTY_SUPPLIER:
+	if party_type == "Supplier":
 		return buying or selling
 	return selling or buying
 
