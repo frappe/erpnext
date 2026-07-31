@@ -1290,6 +1290,100 @@ class TestMaterialRequest(ERPNextTestSuite):
 		self.assertIn(mr1.name, returned)
 		self.assertIn(mr2.name, returned)
 
+	def test_get_item_default_suppliers(self):
+		from erpnext.stock.doctype.material_request.mapper import get_item_default_suppliers
+
+		with_supplier = create_item_with_default_supplier("_Test MR Item Supplier A", "_Test Supplier")
+		without_supplier = create_item("_Test MR Item Without Supplier").name
+
+		mr = make_material_request_for_items([with_supplier, without_supplier])
+		items = get_item_default_suppliers(mr.name)
+
+		self.assertEqual([d["item_code"] for d in items], [with_supplier, without_supplier])
+		self.assertEqual(items[0]["supplier"], "_Test Supplier")
+		self.assertFalse(items[1]["supplier"])
+		self.assertEqual(items[0]["qty"], 10)
+
+	def test_make_purchase_order_sets_supplier(self):
+		mr = make_material_request_for_items(["_Test Item"])
+		po = make_purchase_order(mr.name, args={"supplier": "_Test Supplier"})
+
+		self.assertEqual(po.supplier, "_Test Supplier")
+
+	def test_make_purchase_orders_by_supplier(self):
+		from erpnext.stock.doctype.material_request.mapper import make_purchase_orders_by_supplier
+
+		item_codes = [create_item(f"_Test MR Grouped Item {index}").name for index in range(1, 4)]
+		mr = make_material_request_for_items(item_codes)
+		suppliers = ["_Test Supplier", "_Test Supplier", "_Test Supplier 1"]
+
+		purchase_orders = make_purchase_orders_by_supplier(
+			mr.name,
+			[
+				{"material_request_item": item.name, "item_code": item.item_code, "supplier": supplier}
+				for item, supplier in zip(mr.items, suppliers, strict=True)
+			],
+		)
+
+		self.assertEqual(len(purchase_orders), 2)
+
+		first, second = (frappe.get_doc("Purchase Order", name) for name in purchase_orders)
+		self.assertEqual(first.supplier, "_Test Supplier")
+		self.assertEqual([d.item_code for d in first.items], item_codes[:2])
+		self.assertEqual(second.supplier, "_Test Supplier 1")
+		self.assertEqual([d.item_code for d in second.items], item_codes[2:])
+
+	def test_make_purchase_orders_by_supplier_without_supplier(self):
+		from erpnext.stock.doctype.material_request.mapper import make_purchase_orders_by_supplier
+
+		mr = make_material_request_for_items(["_Test Item"])
+
+		self.assertRaises(
+			frappe.ValidationError,
+			make_purchase_orders_by_supplier,
+			mr.name,
+			[{"material_request_item": mr.items[0].name, "item_code": "_Test Item", "supplier": None}],
+		)
+
+
+def create_item_with_default_supplier(item_code, supplier):
+	item = create_item(item_code)
+	item.set("item_defaults", [])
+	item.append(
+		"item_defaults",
+		{
+			"company": "_Test Company",
+			"default_warehouse": "_Test Warehouse - _TC",
+			"default_supplier": supplier,
+		},
+	)
+	item.save()
+
+	return item.name
+
+
+def make_material_request_for_items(item_codes, **args):
+	args = frappe._dict(args)
+	mr = frappe.new_doc("Material Request")
+	mr.material_request_type = args.material_request_type or "Purchase"
+	mr.company = args.company or "_Test Company"
+	mr.schedule_date = today()
+	for item_code in item_codes:
+		mr.append(
+			"items",
+			{
+				"item_code": item_code,
+				"qty": args.qty or 10,
+				"schedule_date": today(),
+				"warehouse": args.warehouse or "_Test Warehouse - _TC",
+			},
+		)
+
+	mr.insert()
+	mr.submit()
+
+	return mr
+
 
 def get_in_transit_warehouse(company):
 	if not frappe.db.exists("Warehouse Type", "Transit"):
