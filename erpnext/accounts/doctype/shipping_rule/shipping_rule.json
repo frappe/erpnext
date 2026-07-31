@@ -80,8 +80,7 @@
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "label": "Cost Center",
-   "options": "Cost Center",
-   "reqd": 1
+   "options": "Cost Center"
   },
   {
    "fieldname": "shipping_amount_section",
@@ -139,18 +138,20 @@
    "fieldtype": "Column Break"
   },
   {
-    "fieldname": "project",
-    "fieldtype": "Link",
-    "label": "Project",
-    "options": "Project"
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
   }
  ],
  "icon": "fa fa-truck",
  "idx": 1,
- "modified": "2019-05-25 23:12:26.156405",
+ "links": [],
+ "modified": "2026-07-22 14:53:27.315435",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Shipping Rule",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -196,5 +197,8 @@
    "write": 1
   }
  ],
- "sort_order": "ASC"
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "ASC",
+ "states": []
 }
