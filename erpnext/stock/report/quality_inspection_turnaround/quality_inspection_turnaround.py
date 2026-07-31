@@ -10,6 +10,7 @@ quarantined stock nobody decides is working capital standing still.
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import IfNull
 from frappe.utils import date_diff, flt, getdate, today
 
 
@@ -65,26 +66,34 @@ def get_columns():
 
 
 def get_data(filters):
-	lot_filters = {}
-	if filters.get("company"):
-		lot_filters["company"] = filters.company
-	if filters.get("item_code"):
-		lot_filters["item_code"] = filters.item_code
-	if filters.get("quality_warehouse"):
-		lot_filters["quality_warehouse"] = filters.quality_warehouse
-	if filters.get("from_date") and filters.get("to_date"):
-		lot_filters["creation"] = ("between", [filters.from_date, filters.to_date])
-	elif filters.get("from_date"):
-		lot_filters["creation"] = (">=", filters.from_date)
-	elif filters.get("to_date"):
-		lot_filters["creation"] = ("<=", filters.to_date)
+	lot = frappe.qb.DocType("Quality Control Lot")
+	quarantined_on = IfNull(lot.source_posting_datetime, lot.creation)
 
-	lots = frappe.get_all(
-		"Quality Control Lot",
-		filters=lot_filters,
-		fields=["name", "item_code", "status", "received_qty", "decided_qty", "creation"],
-		order_by="creation",
+	query = (
+		frappe.qb.from_(lot)
+		.select(
+			lot.name,
+			lot.item_code,
+			lot.status,
+			lot.received_qty,
+			lot.decided_qty,
+			quarantined_on.as_("quarantined_on"),
+		)
+		.orderby(quarantined_on)
 	)
+
+	if filters.get("company"):
+		query = query.where(lot.company == filters.company)
+	if filters.get("item_code"):
+		query = query.where(lot.item_code == filters.item_code)
+	if filters.get("quality_warehouse"):
+		query = query.where(lot.quality_warehouse == filters.quality_warehouse)
+	if filters.get("from_date"):
+		query = query.where(quarantined_on >= filters.from_date)
+	if filters.get("to_date"):
+		query = query.where(quarantined_on <= filters.to_date)
+
+	lots = query.run(as_dict=True)
 
 	data = []
 	for lot in lots:
@@ -103,7 +112,7 @@ def get_data(filters):
 			order_by="report_date",
 		)
 
-		quarantined_on = getdate(lot.creation)
+		quarantined_on = getdate(lot.quarantined_on)
 		first_verdict_on = verdict_dates[0] if verdict_dates else None
 		fully_decided_on = verdict_dates[-1] if verdict_dates and undecided_qty <= 0 else None
 

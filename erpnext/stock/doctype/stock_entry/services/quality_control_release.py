@@ -3,9 +3,10 @@
 
 import frappe
 from frappe import _
-from frappe.utils import flt, get_link_to_form
+from frappe.utils import flt, format_datetime, get_datetime, get_link_to_form
 
 from erpnext.stock.services.quality_warehouse import is_rejected_warehouse
+from erpnext.stock.utils import get_combine_datetime
 
 from .material_transfer import MaterialTransferStockEntry
 
@@ -38,7 +39,7 @@ class QualityControlReleaseStockEntry(MaterialTransferStockEntry):
 				title=_("Quality Control Lot Missing"),
 			)
 
-		lot = frappe.get_doc("Quality Control Lot", doc.quality_control_lot)
+		lot = frappe.get_doc("Quality Control Lot", doc.quality_control_lot, for_update=True)
 
 		from erpnext.stock.services.quality_release import has_submitted_inspection
 
@@ -104,6 +105,81 @@ class QualityControlReleaseStockEntry(MaterialTransferStockEntry):
 					"rejected unit(s) remain in quarantine."
 				).format(disposal_qty, lot.name, rejected_outstanding),
 				title=_("Quantity Exceeds Rejected Stock"),
+			)
+
+		self._validate_claims_within_quarantine_balance(lot)
+		self._validate_release_follows_quarantine(lot)
+
+	def _validate_release_follows_quarantine(self, lot):
+		"""Stock cannot leave quarantine before it arrived there.
+
+		Identical stock already sitting in the shared Quality Control warehouse
+		would otherwise let a backdated release post against a lot whose own
+		receipt lands later, inventing an audit trail that runs backwards.
+		"""
+		if not lot.source_posting_datetime:
+			return
+
+		doc = self.doc
+		posted_at = get_combine_datetime(doc.posting_date, doc.posting_time)
+		if get_datetime(posted_at) < get_datetime(lot.source_posting_datetime):
+			frappe.throw(
+				_("This release posts at {0}, before Quality Control Lot {1} was quarantined at {2}.").format(
+					frappe.bold(format_datetime(posted_at)),
+					get_link_to_form("Quality Control Lot", lot.name),
+					frappe.bold(format_datetime(lot.source_posting_datetime)),
+				),
+				title=_("Release Precedes Quarantine"),
+			)
+
+	def _validate_claims_within_quarantine_balance(self, lot):
+		"""Lots partition fungible stock by accounting, not by ledger identity.
+
+		Serialized units carry their own identity, but two lots holding the same
+		item and batch in one Quality Control warehouse are claims over a single
+		undifferentiated pile. Their outstanding holds must not exceed what is
+		actually there, or releasing each within its own bound still overdraws the
+		warehouse — caught here rather than as a raw negative-stock error later.
+		"""
+		claims = frappe.get_all(
+			"Quality Control Lot",
+			filters={
+				"item_code": lot.item_code,
+				"quality_warehouse": lot.quality_warehouse,
+				"batch_no": lot.batch_no or ("in", ["", None]),
+			},
+			fields=["pending_qty", "rejected_qty", "returned_qty", "disposed_qty"],
+		)
+		claimed = sum(
+			flt(row.pending_qty) + flt(row.rejected_qty) - flt(row.returned_qty) - flt(row.disposed_qty)
+			for row in claims
+		)
+
+		if lot.batch_no:
+			from erpnext.stock.doctype.batch.batch import get_batch_qty
+
+			held = flt(get_batch_qty(lot.batch_no, lot.quality_warehouse))
+		else:
+			held = flt(
+				frappe.db.get_value(
+					"Bin",
+					{"item_code": lot.item_code, "warehouse": lot.quality_warehouse},
+					"actual_qty",
+				)
+			)
+
+		if claimed > held:
+			frappe.throw(
+				_(
+					"Quality Control Lots covering {0} in {1} claim {2} unit(s), but only {3} are held "
+					"there. Reconcile the lots before releasing."
+				).format(
+					get_link_to_form("Item", lot.item_code),
+					get_link_to_form("Warehouse", lot.quality_warehouse),
+					claimed,
+					held,
+				),
+				title=_("Quarantine Claims Exceed Stock"),
 			)
 
 	def _validate_row_batch(self, row, lot):
@@ -226,7 +302,7 @@ class QualityControlReleaseStockEntry(MaterialTransferStockEntry):
 
 	def _apply_to_lot(self, direction):
 		doc = self.doc
-		lot = frappe.get_doc("Quality Control Lot", doc.quality_control_lot)
+		lot = frappe.get_doc("Quality Control Lot", doc.quality_control_lot, for_update=True)
 		released = disposed = 0.0
 		for row in doc.items:
 			if is_rejected_warehouse(row.t_warehouse):

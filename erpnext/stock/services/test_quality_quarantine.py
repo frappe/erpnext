@@ -2889,10 +2889,22 @@ class TestQualityQuarantine(ERPNextTestSuite):
 			).insert(ignore_permissions=True)
 
 		frappe.db.set_single_value("Stock Settings", "pending_quality_inspection_reminder_days", 2)
+
 		frappe.db.set_value(
 			"Quality Control Lot",
 			lot,
 			"creation",
+			frappe.utils.add_days(nowdate(), -3),
+			update_modified=False,
+		)
+		frappe.db.delete("Notification Log", {"for_user": manager})
+		remind_pending_quality_inspections()
+		self.assertEqual(frappe.db.count("Notification Log", {"for_user": manager}), 0)
+
+		frappe.db.set_value(
+			"Quality Control Lot",
+			lot,
+			"source_posting_datetime",
 			frappe.utils.add_days(nowdate(), -3),
 			update_modified=False,
 		)

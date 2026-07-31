@@ -10,6 +10,7 @@ the stock got there (receipt, transfer, redirect).
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import IfNull
 from frappe.utils import flt, get_link_to_form
 
 from erpnext.stock.services.quality_trigger_resolution import (
@@ -18,6 +19,37 @@ from erpnext.stock.services.quality_trigger_resolution import (
 	resolve_inspection_points,
 )
 from erpnext.stock.services.quality_warehouse import get_quality_warehouse, is_quality_warehouse
+from erpnext.stock.utils import get_combine_datetime
+
+
+def get_lot_serial_members(lot) -> set[str]:
+	"""The serials that physically entered quarantine with this lot.
+
+	Bound to the lot's own source row: two rows of the same item on one document
+	mint separate lots, and neither may inspect or release the other's serials.
+	Lots minted before the row was recorded fall back to the whole document.
+	"""
+	from erpnext.stock.services.quality_trigger_resolution import get_row_serial_nos
+
+	if not (lot.get("source_document_type") and lot.get("source_document")):
+		return set()
+
+	source_doctype = lot.get("source_document_type")
+	child_doctypes = ["Stock Entry Detail" if source_doctype == "Stock Entry" else source_doctype + " Item"]
+	if source_doctype in ("Delivery Note", "Sales Invoice"):
+		child_doctypes.append("Packed Item")
+
+	filters = {"parent": lot.get("source_document"), "item_code": lot.get("item_code")}
+	if lot.get("source_document_row"):
+		filters["name"] = lot.get("source_document_row")
+
+	members = set()
+	for child_doctype in child_doctypes:
+		for row in frappe.get_all(
+			child_doctype, filters=filters, fields=["serial_no", "serial_and_batch_bundle"]
+		):
+			members.update(get_row_serial_nos(row))
+	return members
 
 
 def apply_quarantine_routing(doc):
@@ -231,7 +263,9 @@ def handle_source_document_cancel(doc, method=None):
 	"""
 	for lot in _lots_minted_by(doc):
 		_unlink_cancelled_lot_references(lot.name)
-		frappe.delete_doc("Quality Control Lot", lot.name, ignore_permissions=True)
+		lot_doc = frappe.get_doc("Quality Control Lot", lot.name)
+		lot_doc.flags.from_source_cancellation = True
+		lot_doc.delete(ignore_permissions=True)
 
 
 def _unlink_cancelled_lot_references(lot_name):
@@ -348,6 +382,8 @@ def create_quality_control_lots(doc, method=None):
 					"received_qty": batch_qty,
 					"source_document_type": doc.doctype,
 					"source_document": doc.name,
+					"source_document_row": row.get("name"),
+					"source_posting_datetime": get_combine_datetime(doc.posting_date, doc.posting_time),
 					"inspection_template": template,
 				}
 			)
@@ -368,11 +404,14 @@ def remind_pending_quality_inspections():
 	if days < 1:
 		return
 
-	lots = frappe.get_all(
-		"Quality Control Lot",
-		filters={"creation": ("<", add_days(today(), -days))},
-		fields=["name", "item_code", "received_qty", "decided_qty"],
-		order_by="creation",
+	lot = frappe.qb.DocType("Quality Control Lot")
+	quarantined_on = IfNull(lot.source_posting_datetime, lot.creation)
+	lots = (
+		frappe.qb.from_(lot)
+		.select(lot.name, lot.item_code, lot.received_qty, lot.decided_qty)
+		.where(quarantined_on < add_days(today(), -days))
+		.orderby(quarantined_on)
+		.run(as_dict=True)
 	)
 	pending = [lot for lot in lots if flt(lot.received_qty) > flt(lot.decided_qty)]
 	if not pending:

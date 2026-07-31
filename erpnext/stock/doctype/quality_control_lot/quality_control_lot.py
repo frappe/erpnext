@@ -2,8 +2,9 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt
+from frappe.utils import flt, get_link_to_form
 
 
 class QualityControlLot(Document):
@@ -30,7 +31,9 @@ class QualityControlLot(Document):
 		rejected_qty: DF.Float
 		returned_qty: DF.Float
 		source_document: DF.DynamicLink | None
+		source_document_row: DF.Data | None
 		source_document_type: DF.Link | None
+		source_posting_datetime: DF.Datetime | None
 		stock_uom: DF.Link | None
 		status: DF.Literal[
 			"Under Inspection", "Awaiting Release", "Partially Released", "Released", "Rejected"
@@ -46,6 +49,30 @@ class QualityControlLot(Document):
 
 	def on_update(self):
 		self._sync_source_quality_status()
+
+	def on_trash(self):
+		"""The lot is the only handle on quarantined stock, so only the cascade may drop it.
+
+		Deleting a lot by hand strands its stock in the Quality Control warehouse:
+		the ledger still refuses to let it out, and nothing is left to inspect or
+		release it with. Cancelling the source document is the supported unwind,
+		and it reverses the stock in the same breath.
+		"""
+		if self.flags.from_source_cancellation:
+			return
+
+		frappe.throw(
+			_(
+				"Quality Control Lot {0} is maintained by the system and cannot be deleted. "
+				"Cancel {1} to unwind the quarantined stock along with its lot."
+			).format(
+				frappe.bold(self.name),
+				get_link_to_form(self.source_document_type, self.source_document)
+				if self.source_document
+				else _("its source document"),
+			),
+			title=_("System Managed Lot"),
+		)
 
 	def after_delete(self):
 		self._sync_source_quality_status()
@@ -127,28 +154,15 @@ def get_serial_numbers(lot_name: str):
 	computed fresh, since serials leave the lot piecemeal through releases,
 	returns and dispositions.
 	"""
-	from erpnext.stock.services.quality_trigger_resolution import get_row_serial_nos
+	from erpnext.stock.services.quality_quarantine import get_lot_serial_members
 	from erpnext.stock.services.quality_warehouse import is_rejected_warehouse
 
 	lot = frappe.get_doc("Quality Control Lot", lot_name)
 	lot.check_permission("read")
 	if not frappe.get_cached_value("Item", lot.item_code, "has_serial_no"):
 		return []
-	if not lot.source_document_type or not lot.source_document:
-		return []
 
-	child_doctype = (
-		"Stock Entry Detail"
-		if lot.source_document_type == "Stock Entry"
-		else lot.source_document_type + " Item"
-	)
-	members = set()
-	for row in frappe.get_all(
-		child_doctype,
-		filters={"parent": lot.source_document, "item_code": lot.item_code},
-		fields=["serial_no", "serial_and_batch_bundle"],
-	):
-		members.update(get_row_serial_nos(row))
+	members = get_lot_serial_members(lot)
 
 	from erpnext.stock.services.quality_release import _union_unit_serials
 

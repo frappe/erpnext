@@ -40,7 +40,7 @@ def process_inspection_result(doc, method=None):
 	if doc.reference_type != "Quality Control Lot" or not doc.reference_name:
 		return
 
-	lot = frappe.get_doc("Quality Control Lot", doc.reference_name)
+	lot = frappe.get_doc("Quality Control Lot", doc.reference_name, for_update=True)
 	undecided_qty = lot.undecided_qty()
 	if undecided_qty <= 0:
 		return
@@ -152,7 +152,7 @@ def reverse_inspection_result(doc, method=None):
 	if not frappe.db.exists("Quality Control Lot", doc.reference_name):
 		return
 
-	lot = frappe.get_doc("Quality Control Lot", doc.reference_name)
+	lot = frappe.get_doc("Quality Control Lot", doc.reference_name, for_update=True)
 	other_verdicts = frappe.get_all(
 		"Quality Inspection",
 		filters={

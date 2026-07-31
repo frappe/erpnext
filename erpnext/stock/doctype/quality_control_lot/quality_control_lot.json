@@ -1,6 +1,6 @@
 {
  "actions": [],
- "allow_rename": 1,
+ "allow_rename": 0,
  "autoname": "naming_series:",
  "creation": "2026-06-10 00:00:00.000000",
  "doctype": "DocType",
@@ -29,6 +29,8 @@
   "source_section",
   "source_document_type",
   "source_document",
+  "source_document_row",
+  "source_posting_datetime",
   "column_break_source",
   "inspection_template",
   "inspection_basis",
@@ -183,6 +185,20 @@
    "read_only": 1
   },
   {
+   "description": "The row of the source document whose stock this lot holds.",
+   "fieldname": "source_document_row",
+   "fieldtype": "Data",
+   "label": "Source Document Row",
+   "read_only": 1
+  },
+  {
+   "description": "Posting datetime of the movement that quarantined this stock.",
+   "fieldname": "source_posting_datetime",
+   "fieldtype": "Datetime",
+   "label": "Quarantined On",
+   "read_only": 1
+  },
+  {
    "fieldname": "column_break_source",
    "fieldtype": "Column Break"
   },
@@ -226,7 +242,6 @@
  "owner": "Administrator",
  "permissions": [
   {
-   "delete": 1,
    "email": 1,
    "export": 1,
    "print": 1,

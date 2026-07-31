@@ -9,7 +9,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import cint, flt, get_link_to_form, get_number_format_info
+from frappe.utils import cint, flt, formatdate, get_link_to_form, get_number_format_info, getdate
 from frappe.utils.number_format import NUMBER_FORMAT_MAP, NumberFormat
 
 from erpnext.stock.doctype.quality_inspection.unit_readings import UnitReadingsMixin
@@ -191,6 +191,7 @@ class QualityInspection(UnitReadingsMixin, Document):
 		self.validate_inspected_batch_against_reference()
 		# a sample larger than the stock it describes is wrong on a draft too
 		self.validate_sample_within_quantity()
+		self.validate_decision_follows_quarantine()
 		self.set_company()
 
 		# creation lands the draft even when its prefills disagree or its
@@ -205,6 +206,27 @@ class QualityInspection(UnitReadingsMixin, Document):
 			self.validate_unit_readings_coverage()
 			self.validate_decided_quantity()
 			self.validate_units_not_already_decided()
+
+	def validate_decision_follows_quarantine(self):
+		"""A verdict cannot be dated before the stock it decides was quarantined."""
+		if self.reference_type != "Quality Control Lot" or not self.reference_name:
+			return
+
+		quarantined_on = frappe.db.get_value(
+			"Quality Control Lot", self.reference_name, "source_posting_datetime"
+		)
+		if not quarantined_on or not self.report_date:
+			return
+
+		if getdate(self.report_date) < getdate(quarantined_on):
+			frappe.throw(
+				_("Report Date {0} precedes the day Quality Control Lot {1} was quarantined ({2}).").format(
+					frappe.bold(formatdate(self.report_date)),
+					get_link_to_form("Quality Control Lot", self.reference_name),
+					frappe.bold(formatdate(quarantined_on)),
+				),
+				title=_("Verdict Precedes Quarantine"),
+			)
 
 	def set_company(self):
 		if self.reference_type and self.reference_name:
@@ -584,26 +606,22 @@ class QualityInspection(UnitReadingsMixin, Document):
 			return
 
 		if self.reference_type == "Quality Control Lot" and self.reference_name:
+			from erpnext.stock.services.quality_quarantine import get_lot_serial_members
+
 			lot = frappe.db.get_value(
 				"Quality Control Lot",
 				self.reference_name,
-				["item_code", "quality_warehouse", "source_document_type", "source_document"],
+				[
+					"item_code",
+					"quality_warehouse",
+					"source_document_type",
+					"source_document",
+					"source_document_row",
+				],
 				as_dict=True,
 			)
 
-			members = set()
-			if lot.source_document_type and lot.source_document:
-				child_doctype = (
-					"Stock Entry Detail"
-					if lot.source_document_type == "Stock Entry"
-					else lot.source_document_type + " Item"
-				)
-				for row in frappe.get_all(
-					child_doctype,
-					filters={"parent": lot.source_document, "item_code": lot.item_code},
-					fields=["serial_no", "serial_and_batch_bundle"],
-				):
-					members.update(get_row_serial_nos(row))
+			members = get_lot_serial_members(lot)
 
 			if members:
 				missing = inspected - members
