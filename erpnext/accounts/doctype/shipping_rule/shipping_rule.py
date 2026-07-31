@@ -143,7 +143,7 @@ class ShippingRule(Document):
 		shipping_charge = {
 			"charge_type": "Actual",
 			"account_head": self.account,
-			"cost_center": self.cost_center,
+			"cost_center": self.cost_center or "",
 		}
 		if self.shipping_rule_type == "Selling":
 			# check if not applied on purchase
