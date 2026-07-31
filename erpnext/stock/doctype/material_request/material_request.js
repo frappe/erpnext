@@ -411,11 +411,132 @@ frappe.ui.form.on("Material Request", {
 	},
 
 	make_purchase_order: function (frm) {
+<<<<<<< HEAD
 		frappe.model.open_mapped_doc({
 			method: "erpnext.stock.doctype.material_request.material_request.make_purchase_order",
 			frm: frm,
 			run_link_triggers: true,
+=======
+		frappe.call({
+			method: "erpnext.stock.doctype.material_request.mapper.get_item_default_suppliers",
+			args: {
+				source_name: frm.doc.name,
+				filtered_children: (frm.get_selected() || {}).items || [],
+			},
+			freeze: true,
+			callback: function (r) {
+				const items = r.message || [];
+				const suppliers = new Set(items.map((item) => item.supplier || ""));
+
+				if (suppliers.size > 1) {
+					frm.events.select_suppliers_for_items(frm, items);
+					return;
+				}
+
+				frappe.model.open_mapped_doc({
+					method: "erpnext.stock.doctype.material_request.mapper.make_purchase_order",
+					frm: frm,
+					args: { supplier: items.length ? items[0].supplier : null },
+					run_link_triggers: true,
+				});
+			},
+>>>>>>> e8df7b4a90 (feat: select a supplier per item when creating Purchase Orders from Material Request)
 		});
+	},
+
+	select_suppliers_for_items: function (frm, items) {
+		const dialog = new frappe.ui.Dialog({
+			title: __("Select Supplier for Items"),
+			size: "large",
+			fields: [
+				{
+					fieldname: "items",
+					fieldtype: "Table",
+					cannot_add_rows: true,
+					cannot_delete_rows: true,
+					in_place_edit: true,
+					data: items,
+					get_data: () => items,
+					description: __("A separate Purchase Order is created for each Supplier."),
+					fields: [
+						{
+							fieldtype: "Data",
+							fieldname: "material_request_item",
+							hidden: 1,
+						},
+						{
+							fieldtype: "Link",
+							fieldname: "item_code",
+							options: "Item",
+							label: __("Item Code"),
+							read_only: 1,
+							in_list_view: 1,
+							columns: 3,
+						},
+						{
+							fieldtype: "Data",
+							fieldname: "item_name",
+							label: __("Item Name"),
+							read_only: 1,
+							in_list_view: 1,
+							columns: 2,
+						},
+						{
+							fieldtype: "Float",
+							fieldname: "qty",
+							label: __("Quantity"),
+							read_only: 1,
+							in_list_view: 1,
+							columns: 2,
+						},
+						{
+							fieldtype: "Link",
+							fieldname: "supplier",
+							options: "Supplier",
+							label: __("Supplier"),
+							reqd: 1,
+							in_list_view: 1,
+							columns: 3,
+						},
+					],
+				},
+			],
+			primary_action_label: __("Create"),
+			primary_action: function (values) {
+				const rows = values.items || [];
+				const missing = rows.find((row) => !row.supplier);
+				if (missing) {
+					frappe.throw(__("Select a Supplier for Item {0}", [missing.item_code]));
+				}
+
+				frappe.call({
+					method: "erpnext.stock.doctype.material_request.mapper.make_purchase_orders_by_supplier",
+					args: { source_name: frm.doc.name, item_suppliers: rows },
+					freeze: true,
+					callback: function (r) {
+						if (r.exc) return;
+
+						dialog.hide();
+
+						const purchase_orders = r.message || [];
+						if (purchase_orders.length === 1) {
+							frappe.set_route("Form", "Purchase Order", purchase_orders[0]);
+							return;
+						}
+
+						frappe.msgprint({
+							title: __("Purchase Orders Created"),
+							indicator: "green",
+							message: purchase_orders
+								.map((name) => frappe.utils.get_form_link("Purchase Order", name, true))
+								.join(", "),
+						});
+					},
+				});
+			},
+		});
+
+		dialog.show();
 	},
 
 	make_request_for_quotation: function (frm) {
