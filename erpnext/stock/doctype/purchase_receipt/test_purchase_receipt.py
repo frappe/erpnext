@@ -3263,11 +3263,14 @@ class TestPurchaseReceipt(FrappeTestCase):
 
 		old_perpetual_inventory = erpnext.is_perpetual_inventory_enabled("_Test Company")
 		frappe.local.enable_perpetual_inventory["_Test Company"] = 1
+		old_inventory_account = frappe.db.get_value("Company", "_Test Company", "default_inventory_account")
 		frappe.db.set_value(
 			"Company",
 			"_Test Company",
-			"stock_received_but_not_billed",
-			"Stock Received But Not Billed - _TC",
+			{
+				"stock_received_but_not_billed": "Stock Received But Not Billed - _TC",
+				"default_inventory_account": "Stock In Hand - _TC",
+			},
 		)
 
 		pr = make_purchase_receipt(qty=10, rate=1000, do_not_submit=1)
@@ -3296,13 +3299,14 @@ class TestPurchaseReceipt(FrappeTestCase):
 		gl_entries = get_gl_entries("Purchase Receipt", pr.name, skip_cancelled=True, as_dict=False)
 		warehouse_account = get_warehouse_account_map("_Test Company")
 		expected_gle = (
-			("Stock Received But Not Billed - _TC", 0, 10000, "Main - _TC"),
-			("Freight and Forwarding Charges - _TC", 0, 2000, "Main - _TC"),
-			("Expenses Included In Valuation - _TC", 0, 2000, "Main - _TC"),
-			(warehouse_account[pr.items[0].warehouse]["account"], 14000, 0, "Main - _TC"),
+			("Stock Received But Not Billed - _TC", 0.0, 10000.0, "Main - _TC"),
+			("Freight and Forwarding Charges - _TC", 0.0, 2000.0, "Main - _TC"),
+			("Expenses Included In Valuation - _TC", 0.0, 2000.0, "Main - _TC"),
+			(warehouse_account[pr.items[0].warehouse]["account"], 14000.0, 0.0, "Main - _TC"),
 		)
-		self.assertSequenceEqual(expected_gle, gl_entries)
+		self.assertCountEqual(expected_gle, gl_entries)
 		frappe.local.enable_perpetual_inventory["_Test Company"] = old_perpetual_inventory
+		frappe.db.set_value("Company", "_Test Company", "default_inventory_account", old_inventory_account)
 
 	def test_manufacturing_and_expiry_date_for_batch(self):
 		item = make_item(

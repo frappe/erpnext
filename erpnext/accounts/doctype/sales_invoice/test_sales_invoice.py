@@ -2802,12 +2802,15 @@ class TestSalesInvoice(FrappeTestCase):
 
 		old_perpetual_inventory = erpnext.is_perpetual_inventory_enabled("_Test Company 1")
 		frappe.local.enable_perpetual_inventory["_Test Company 1"] = 1
+		old_inventory_account = frappe.db.get_value("Company", "_Test Company 1", "default_inventory_account")
 
 		frappe.db.set_value(
 			"Company",
 			"_Test Company 1",
-			"stock_received_but_not_billed",
-			"Stock Received But Not Billed - _TC1",
+			{
+				"stock_received_but_not_billed": "Stock Received But Not Billed - _TC1",
+				"default_inventory_account": "Stock In Hand - _TC1",
+			},
 		)
 		frappe.db.set_value(
 			"Company",
@@ -2852,6 +2855,7 @@ class TestSalesInvoice(FrappeTestCase):
 
 		# tear down
 		frappe.local.enable_perpetual_inventory["_Test Company 1"] = old_perpetual_inventory
+		frappe.db.set_value("Company", "_Test Company 1", "default_inventory_account", old_inventory_account)
 		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", old_negative_stock)
 
 	def test_sle_for_target_warehouse(self):
