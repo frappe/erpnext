@@ -261,6 +261,29 @@ class QualityInspection(Document):
 					self.modified,
 				)
 
+				self.notify_reference_update()
+
+	def notify_reference_update(self):
+		"""Push a realtime `doc_update` for the linked reference document.
+
+		Submitting/cancelling a Quality Inspection bumps the reference (e.g. Purchase
+		Receipt / Delivery Note) `modified` timestamp via a raw db write above. A form
+		still open in the browser keeps the old timestamp and would fail the timestamp
+		conflict check on the next save/submit. Mirroring `Document.notify_update`, this
+		lets an open, unedited form silently reload and sync the timestamp instead.
+		"""
+		frappe.publish_realtime(
+			"doc_update",
+			{
+				"modified": self.modified,
+				"doctype": self.reference_type,
+				"name": self.reference_name,
+			},
+			doctype=self.reference_type,
+			docname=self.reference_name,
+			after_commit=True,
+		)
+
 	def inspect_and_set_status(self):
 		for reading in self.readings:
 			if not reading.manual_inspection:  # dont auto set status if manual
