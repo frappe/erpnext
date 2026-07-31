@@ -226,6 +226,29 @@ class GoodsInwardNote(Document):
 					title=_("More Than Arrived"),
 				)
 
+	def _lock_order_rows(self):
+		"""Hold the order rows this note claims against, for the rest of the transaction.
+
+		The arrival ceiling is a read of every other note and receipt drawing on the
+		same order rows. Without the lock two notes — or a note and a direct receipt —
+		read the same remaining allowance and both commit. A custody note writes no
+		Stock Ledger Entry, so nothing downstream would notice the overshoot.
+		Ordered by name so concurrent claimants queue instead of deadlocking.
+		"""
+		order_items = sorted({row.order_item for row in self.items if row.order_item})
+		if not order_items:
+			return
+
+		order_item = frappe.qb.DocType(ORDER_ITEM_DOCTYPES[self.order_type])
+		(
+			frappe.qb.from_(order_item)
+			.select(order_item.name)
+			.where(order_item.name.isin(order_items))
+			.orderby(order_item.name)
+			.for_update()
+			.run()
+		)
+
 	def validate_arrivals_against_order_qty(self):
 		"""All arrivals together may not overshoot the order (plus allowance).
 
@@ -236,6 +259,8 @@ class GoodsInwardNote(Document):
 		their replacement may arrive on a new note.
 		"""
 		from erpnext.controllers.status_updater import get_allowance_for
+
+		self._lock_order_rows()
 
 		claimed = {}
 		for row in self.items:

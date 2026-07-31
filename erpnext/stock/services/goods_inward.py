@@ -270,6 +270,16 @@ def validate_custody_claims(doc, method=None):
 	if not taken:
 		return
 
+	order_item = frappe.qb.DocType(ORDER_ITEM_DOCTYPES_BY_RECEIVER[doc.doctype])
+	(
+		frappe.qb.from_(order_item)
+		.select(order_item.name)
+		.where(order_item.name.isin(sorted(taken)))
+		.orderby(order_item.name)
+		.for_update()
+		.run()
+	)
+
 	in_custody = {}
 	for note_row in frappe.get_all(
 		"Goods Inward Note Item",
