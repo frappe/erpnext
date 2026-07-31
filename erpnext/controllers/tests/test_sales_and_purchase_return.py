@@ -78,3 +78,35 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 		return_pi.items[0].item_code = ""
 
 		self.assertRaises(frappe.ValidationError, return_pi.save)
+
+	def test_delivery_note_zero_qty_return_is_rejected(self):
+		# A return with every item at qty 0 moves no stock and no value, so it must be
+		# rejected the same way a return with no items at all would be.
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		se = make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=20, basic_rate=100)
+		self.addCleanup(self._cancel_and_delete, "Stock Entry", se.name)
+
+		dn = create_delivery_note(qty=5)
+		self.addCleanup(self._cancel_and_delete, "Delivery Note", dn.name)
+
+		return_dn = make_sales_return(dn.name)
+		return_dn.items[0].qty = 0
+
+		self.assertRaises(frappe.ValidationError, return_dn.insert)
+
+	def test_sales_invoice_zero_qty_return_is_rejected(self):
+		# Same rule for a standalone (non stock-affecting) Sales Invoice return: qty 0 on
+		# every row must be rejected, not silently accepted as a no-op credit note.
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		si = create_sales_invoice(qty=10)
+		self.addCleanup(self._cancel_and_delete, "Sales Invoice", si.name)
+
+		return_si = make_return_doc(si.doctype, si.name)
+		return_si.items[0].qty = 0
+
+		self.assertRaises(frappe.ValidationError, return_si.save)
