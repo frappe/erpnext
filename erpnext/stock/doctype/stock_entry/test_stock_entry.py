@@ -929,6 +929,38 @@ class TestStockEntry(ERPNextTestSuite):
 		fg_cost = next(filter(lambda x: x.item_code == "_Test FG Item 2", stock_entry.get("items"))).amount
 		self.assertEqual(fg_cost, flt(rm_cost + bom_operation_cost + work_order.additional_operating_cost, 2))
 
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 3})
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM"})
+	def test_material_transfer_for_manufacture_qty_precision(self):
+		work_order = frappe.new_doc("Work Order")
+		work_order.append(
+			"required_items",
+			{
+				"item_code": "_Test Item",
+				"required_qty": 33.876,
+				"transferred_qty": 33.875,
+			},
+		)
+
+		stock_entry = frappe.new_doc("Stock Entry")
+		stock_entry.work_order = "Test Work Order"
+		stock_entry.append(
+			"items",
+			{
+				"item_code": "_Test Item",
+				"s_warehouse": "_Test Warehouse - _TC",
+				"qty": 0.001,
+				"uom": "Nos",
+			},
+		)
+
+		stock_entry.pro_doc = work_order
+		stock_entry._validate_no_excess_transfer()
+
+		stock_entry.items[0].qty = 0.002
+		with self.assertRaises(frappe.ValidationError):
+			stock_entry._validate_no_excess_transfer()
+
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"material_consumption": 1})
 	def test_work_order_manufacture_with_material_consumption(self):
 		from erpnext.manufacturing.doctype.work_order.work_order import (
