@@ -1309,6 +1309,7 @@ def get_row_stock_value_difference(voucher_type: str, voucher_no: str, voucher_d
 	return flt(result[0][0]) if result and result[0][0] else 0.0
 
 
+# nosemgrep: missing-argument-type-hint
 @frappe.whitelist()
 def get_stock_balance_for(
 	item_code: str,
@@ -1381,7 +1382,7 @@ def get_stock_balance_for(
 			or 0
 		)
 
-		if row.use_serial_batch_fields and row.batch_no and (qty or row.current_qty):
+		if row and row.use_serial_batch_fields and row.batch_no and (qty or row.current_qty):
 			rate = get_incoming_rate(
 				frappe._dict(
 					{
