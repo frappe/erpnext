@@ -2068,6 +2068,30 @@ class TestSalesOrder(ERPNextTestSuite):
 		sales_order.save()
 		self.assertEqual(sales_order.taxes[0].tax_amount, 0)
 
+	def test_sales_order_with_shipping_rule_without_cost_center(self):
+		shipping_rule = frappe.get_doc(
+			{
+				"doctype": "Shipping Rule",
+				"label": "Shipping Rule Without Cost Center - Sales Order Test",
+				"shipping_rule_type": "Selling",
+				"company": "_Test Company",
+				"account": "_Test Account Shipping Charges - _TC",
+				"cost_center": None,
+				"calculate_based_on": "Fixed",
+				"shipping_amount": 50,
+			}
+		)
+		sales_order = make_sales_order(do_not_save=True)
+
+		shipping_rule.apply(sales_order)
+		self.assertEqual(len(sales_order.taxes), 1)
+		self.assertEqual(sales_order.taxes[0].cost_center, "")
+
+		# Blank values from the client are deserialized as empty strings.
+		sales_order.taxes[0].cost_center = ""
+		shipping_rule.apply(sales_order)
+		self.assertEqual(len(sales_order.taxes), 1)
+
 	def test_sales_order_partial_advance_payment(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import (
 			create_payment_entry,
