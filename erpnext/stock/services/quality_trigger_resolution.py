@@ -58,15 +58,11 @@ def movements_of(doc):
 					yield row, role, row.warehouse
 
 	elif doctype == "Delivery Note":
-		for row in doc.get("items") or []:
-			if row.get("warehouse"):
-				yield row, role, row.warehouse
+		yield from _selling_movements(doc, role)
 
 	elif doctype == "Sales Invoice":
 		if doc.get("update_stock"):
-			for row in doc.get("items") or []:
-				if row.get("warehouse"):
-					yield row, role, row.warehouse
+			yield from _selling_movements(doc, role)
 
 	elif doctype == "Stock Entry":
 		# In-transit transfers move stock through a dummy Transit warehouse, which
@@ -80,6 +76,25 @@ def movements_of(doc):
 			s_warehouse = row.get("s_warehouse")
 			if s_warehouse and not is_transit_warehouse(s_warehouse):
 				yield row, OUTBOUND, s_warehouse
+
+
+def _selling_movements(doc, role):
+	"""Rows of a Delivery Note / Sales Invoice that actually move stock.
+
+	A Product Bundle line is not itself stock — the ledger posts its components
+	from packed_items, so that is where a component's quality trigger has to be
+	resolved. The bundle's own row is skipped, identified by the components that
+	name it, so a bundle is never inspected as though it were a physical item.
+	"""
+	bundled = {row.get("parent_item") for row in doc.get("packed_items") or []}
+
+	for row in doc.get("items") or []:
+		if row.get("warehouse") and row.get("item_code") not in bundled:
+			yield row, role, row.warehouse
+
+	for row in doc.get("packed_items") or []:
+		if row.get("warehouse"):
+			yield row, role, row.warehouse
 
 
 def _ordered_triggers(item_code):
@@ -194,7 +209,32 @@ def _trigger_matches(trigger, doc, row, role, warehouse):
 			if not frappe.safe_eval(trigger.condition, None, {"doc": doc, "row": row}):
 				return False
 		except Exception:
-			return False
+			item_code = row.get("item_code")
+			frappe.log_error(
+				title="Quality trigger condition failed",
+				message=_("Trigger on {0} {1}, evaluating {2} against {3} {4} (item {5})").format(
+					trigger.get("parenttype"),
+					trigger.get("parent"),
+					trigger.condition,
+					doc.doctype,
+					doc.name,
+					item_code,
+				)
+				+ "\n\n"
+				+ frappe.get_traceback(),
+			)
+			frappe.throw(
+				_(
+					"Quality trigger condition on {0} could not be evaluated for item {1}: {2}<br><br>"
+					"Fix the condition before submitting — stock is not cleared while the rule that "
+					"decides its inspection is broken."
+				).format(
+					get_link_to_form(trigger.get("parenttype"), trigger.get("parent")),
+					get_link_to_form("Item", item_code),
+					frappe.bold(trigger.condition),
+				),
+				title=_("Broken Quality Trigger"),
+			)
 
 	return True
 

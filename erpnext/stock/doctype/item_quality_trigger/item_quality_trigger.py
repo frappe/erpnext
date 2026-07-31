@@ -164,6 +164,31 @@ def _validate_no_overlapping_rows(rows):
 				)
 
 
+def _validate_condition_syntax(row):
+	"""Reject a condition the sandbox will not accept, while the author is still looking at it.
+
+	Applies the exact gate frappe.safe_eval applies at runtime — NFKC normalisation
+	and its blocked-node check — so a condition that saves is one that will
+	evaluate. Nothing is executed here; the expression is only parsed.
+	"""
+	if not row.get("condition"):
+		return
+
+	import unicodedata
+
+	from frappe.utils.safe_exec import _validate_safe_eval_syntax
+
+	try:
+		_validate_safe_eval_syntax(unicodedata.normalize("NFKC", row.condition))
+	except SyntaxError as exception:
+		frappe.throw(
+			_("Row #{0}: Condition is not a valid sandboxed expression — {1}").format(
+				row.idx, frappe.bold(exception.msg or str(exception))
+			),
+			title=_("Invalid Condition"),
+		)
+
+
 def _validate_trigger_row(row):
 	# Without a template the inspection is verdict-style, which is fine for a
 	# sample — but Each Quantity generates its per-unit readings from the
@@ -178,6 +203,8 @@ def _validate_trigger_row(row):
 
 	if row.get("sample_size_is_percentage") and flt(row.sample_size) > 100:
 		frappe.throw(_("Row #{0}: A percentage sample size cannot exceed 100.").format(row.idx))
+
+	_validate_condition_syntax(row)
 
 	# Periodic Re-test rows are interval-driven and always quarantine; none of the
 	# transaction dimensions (document type, direction, parties) apply to them.
