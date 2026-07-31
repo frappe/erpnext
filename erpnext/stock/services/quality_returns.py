@@ -54,9 +54,9 @@ def update_lots_for_purchase_return(doc, method=None):
 			# leaves no half-submitted state behind
 			_validate_return_capacity(row, warehouse, return_qty, source)
 		elif method == "on_cancel":
-			_allocate_return_to_lots(row, warehouse, return_qty, -1, source)
+			_reverse_return_allocation(doc, row)
 		else:
-			_allocate_return_to_lots(row, warehouse, return_qty, +1, source)
+			_book_return_allocation(doc, row, warehouse, return_qty, source)
 
 
 def _rejected_outstanding_lots(item_code, warehouse, batch_no=None, source=None):
@@ -96,16 +96,15 @@ def _validate_return_capacity(row, warehouse, return_qty, source=None):
 		)
 
 
-def _allocate_return_to_lots(row, warehouse, return_qty, direction, source=None):
+def _book_return_allocation(doc, row, warehouse, return_qty, source=None):
+	"""Take the return out of the item's lots and record what came from where."""
 	remaining = return_qty
-	for lot in _rejected_outstanding_lots(row.get("item_code"), warehouse, row.get("batch_no"), source):
+	for candidate in _rejected_outstanding_lots(row.get("item_code"), warehouse, row.get("batch_no"), source):
 		if remaining <= 0:
 			break
 
-		if direction > 0:
-			capacity = flt(lot.rejected_qty) - flt(lot.returned_qty) - flt(lot.disposed_qty)
-		else:
-			capacity = flt(lot.returned_qty)
+		lot = frappe.get_doc("Quality Control Lot", candidate.name, for_update=True)
+		capacity = flt(lot.rejected_qty) - flt(lot.returned_qty) - flt(lot.disposed_qty)
 		if capacity <= 0:
 			continue
 
@@ -114,10 +113,56 @@ def _allocate_return_to_lots(row, warehouse, return_qty, direction, source=None)
 			"Quality Control Lot",
 			lot.name,
 			"returned_qty",
-			flt(lot.returned_qty) + direction * allocated,
+			flt(lot.returned_qty) + allocated,
 			update_modified=False,
 		)
+		frappe.get_doc(
+			{
+				"doctype": "Quality Control Lot Return Allocation",
+				"voucher_type": doc.doctype,
+				"voucher_no": doc.name,
+				"voucher_detail_no": row.get("name"),
+				"quality_control_lot": lot.name,
+				"qty": allocated,
+				"batch_no": row.get("batch_no"),
+				"serial_no": row.get("serial_no"),
+			}
+		).insert(ignore_permissions=True)
 		remaining -= allocated
+
+
+def _reverse_return_allocation(doc, row):
+	"""Give back exactly what this return row took, to the lots it took it from.
+
+	Re-running the allocator here would walk today's totals instead of the ones
+	that existed at submission, so cancelling one return could unwind another
+	return's allocation and silently reassign it to a different lot.
+	"""
+	allocations = frappe.get_all(
+		"Quality Control Lot Return Allocation",
+		filters={
+			"voucher_type": doc.doctype,
+			"voucher_no": doc.name,
+			"voucher_detail_no": row.get("name"),
+		},
+		fields=["name", "quality_control_lot", "qty"],
+	)
+
+	for allocation in allocations:
+		lot = frappe.get_doc("Quality Control Lot", allocation.quality_control_lot, for_update=True)
+		frappe.db.set_value(
+			"Quality Control Lot",
+			lot.name,
+			"returned_qty",
+			flt(lot.returned_qty) - flt(allocation.qty),
+			update_modified=False,
+		)
+		frappe.delete_doc(
+			"Quality Control Lot Return Allocation",
+			allocation.name,
+			ignore_permissions=True,
+			force=True,
+		)
 
 
 @frappe.whitelist()

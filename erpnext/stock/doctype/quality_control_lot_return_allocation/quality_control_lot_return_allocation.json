@@ -1,0 +1,130 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "hash",
+ "creation": "2026-07-31 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "voucher_type",
+  "voucher_no",
+  "voucher_detail_no",
+  "column_break_voucher",
+  "quality_control_lot",
+  "qty",
+  "identity_section",
+  "batch_no",
+  "column_break_identity",
+  "serial_no"
+ ],
+ "fields": [
+  {
+   "fieldname": "voucher_type",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Voucher Type",
+   "options": "DocType",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "voucher_no",
+   "fieldtype": "Dynamic Link",
+   "in_standard_filter": 1,
+   "label": "Voucher No",
+   "options": "voucher_type",
+   "read_only": 1,
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "description": "The return row this allocation was taken for.",
+   "fieldname": "voucher_detail_no",
+   "fieldtype": "Data",
+   "label": "Voucher Detail No",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "column_break_voucher",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "quality_control_lot",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Quality Control Lot",
+   "options": "Quality Control Lot",
+   "read_only": 1,
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "label": "Allocated Qty",
+   "read_only": 1
+  },
+  {
+   "fieldname": "identity_section",
+   "fieldtype": "Section Break",
+   "label": "Identity"
+  },
+  {
+   "fieldname": "batch_no",
+   "fieldtype": "Link",
+   "label": "Batch No",
+   "options": "Batch",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_identity",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "serial_no",
+   "fieldtype": "Small Text",
+   "label": "Serial No",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-07-31 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Quality Control Lot Return Allocation",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock Manager",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock User"
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Quality Manager",
+   "share": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
