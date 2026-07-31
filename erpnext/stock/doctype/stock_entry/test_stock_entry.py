@@ -193,8 +193,11 @@ class TestStockEntry(ERPNextTestSuite):
 		item_code = "_Test Transit Item"
 		company = "_Test Company"
 
+		if not frappe.db.exists("Warehouse Type", "Transit"):
+			frappe.get_doc({"doctype": "Warehouse Type", "name": "Transit"}).insert()
+
 		create_warehouse("Test From Warehouse")
-		create_warehouse("Test Transit Warehouse")
+		create_warehouse("Test Transit Warehouse", properties={"warehouse_type": "Transit"})
 		create_warehouse("Test To Warehouse")
 
 		create_item(

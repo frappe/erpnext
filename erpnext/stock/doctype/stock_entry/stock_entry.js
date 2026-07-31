@@ -26,6 +26,15 @@ function set_warehouse_queries(frm) {
 }
 
 function target_warehouse_query(frm) {
+	if (frm.doc.purpose === "Material Transfer" && frm.doc.add_to_transit) {
+		return {
+			filters: {
+				warehouse_type: "Transit",
+				is_group: 0,
+				company: frm.doc.company,
+			},
+		};
+	}
 	// a Quality Control Release may also send rejected stock to a Rejected
 	// warehouse; everything else avoids quarantine
 	if (frm.doc.purpose === "Quality Control Release") {

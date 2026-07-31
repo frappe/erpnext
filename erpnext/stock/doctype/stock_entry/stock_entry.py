@@ -33,6 +33,7 @@ from erpnext.stock.get_item_details import (
 	get_conversion_factor,
 	get_default_cost_center,
 )
+from erpnext.stock.services.quality_warehouse import TRANSIT_WAREHOUSE_TYPE
 from erpnext.stock.stock_ledger import get_previous_sle, get_valuation_rate
 from erpnext.stock.utils import get_incoming_rate
 
@@ -338,6 +339,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.validate_difference_account()
 		self.validate_job_card_item()
 		self.set_purpose_for_stock_entry()
+		self.validate_transit_warehouse()
 		sbb.clean_serial_nos()
 		self.remove_fg_completed_qty()
 		sbb.validate_serialized_batch()
@@ -345,6 +347,39 @@ class StockEntry(StockController, SubcontractingInwardController):
 		validate_putaway_capacity(self)
 		self.validate_closed_subcontracting_order()
 		super().validate_subcontracting_inward()
+
+	def validate_transit_warehouse(self):
+		"""An in-transit leg must park stock in a Transit warehouse of this company.
+
+		Quality movement resolution skips transit legs by warehouse type, so a leg
+		flagged as in-transit that lands anywhere else is read as a real arrival
+		and can pull inspection or quarantine onto stock still in motion.
+		"""
+		if not self.add_to_transit or self.purpose != "Material Transfer":
+			return
+
+		for row in self.get("items"):
+			if not row.t_warehouse:
+				continue
+
+			details = frappe.get_cached_value(
+				"Warehouse", row.t_warehouse, ["warehouse_type", "is_group", "company"], as_dict=True
+			)
+			if details.warehouse_type != TRANSIT_WAREHOUSE_TYPE or details.is_group:
+				frappe.throw(
+					_(
+						"Row #{0}: {1} is not a Transit warehouse. An in-transit transfer must target "
+						"one, so the leg is recognised as stock still in motion."
+					).format(row.idx, get_link_to_form("Warehouse", row.t_warehouse)),
+					title=_("Invalid Transit Warehouse"),
+				)
+			if details.company != self.company:
+				frappe.throw(
+					_("Row #{0}: Transit warehouse {1} does not belong to {2}.").format(
+						row.idx, get_link_to_form("Warehouse", row.t_warehouse), frappe.bold(self.company)
+					),
+					title=_("Invalid Transit Warehouse"),
+				)
 
 	def remove_fg_completed_qty(self):
 		if not self.from_bom and self.fg_completed_qty:
