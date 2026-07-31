@@ -154,6 +154,9 @@ class Quotation(SellingController):
 
 		make_packing_list(self)
 
+	def after_insert(self):
+		self.carry_forward_communication()
+
 	def before_submit(self):
 		self.set_has_alternative_item()
 
@@ -301,7 +304,6 @@ class Quotation(SellingController):
 		# update enquiry status
 		self.update_opportunity("Quotation")
 		self.update_lead()
-		self.carry_forward_communication()
 
 	def on_cancel(self):
 		if self.lost_reasons:
