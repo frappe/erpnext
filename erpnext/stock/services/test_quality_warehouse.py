@@ -45,8 +45,9 @@ class TestQualityWarehouseConfiguration(ERPNextTestSuite):
 
 
 class TestWarehouseLinkQuery(ERPNextTestSuite):
-	"""The default Warehouse link query (standard_queries) hides Quality
-	warehouses unless the caller filters on warehouse types itself."""
+	"""The default Warehouse link query (standard_queries) applies warehouse_type
+	filters NULL-safely and leaves unfiltered lookups alone; hiding Quality
+	warehouses belongs to the operational pickers that send the filter."""
 
 	def run_query(self, filters=None, txt=""):
 		from erpnext.controllers.queries import warehouse_link_query
@@ -54,25 +55,21 @@ class TestWarehouseLinkQuery(ERPNextTestSuite):
 		rows = warehouse_link_query("Warehouse", txt, "name", 0, 20, filters)
 		return {row[0] for row in rows}
 
-	def test_default_pick_hides_only_quality_warehouses(self):
+	def test_unfiltered_lookup_offers_every_warehouse_type(self):
 		ensure_quality_warehouse_type()
 		qc = make_warehouse("_Test WLQ Quality", warehouse_type="Quality")
 		transit = make_warehouse("_Test WLQ Transit", warehouse_type="Transit")
 		plain = make_warehouse("_Test WLQ Plain")
 
-		# quarantine is entered by routing, never picked by hand; every other
-		# type stays an ordinary pick
 		names = self.run_query(txt="_Test WLQ")
 		self.assertIn(plain, names)
 		self.assertIn(transit, names)
-		self.assertNotIn(qc, names)
+		self.assertIn(qc, names)
 
 	def test_explicit_type_filter_offers_quality_warehouses(self):
 		ensure_quality_warehouse_type()
 		qc = make_warehouse("_Test WLQ Quality", warehouse_type="Quality")
 
-		# the routing-target field, release dispatch and quality reports all
-		# ask for the type explicitly — the default exclusion yields to them
 		names = self.run_query(filters={"warehouse_type": "Quality"}, txt="_Test WLQ")
 		self.assertIn(qc, names)
 
@@ -84,10 +81,13 @@ class TestWarehouseLinkQuery(ERPNextTestSuite):
 		# erpnext.queries.* builders send ["Warehouse", field, op, value] rows
 		names = self.run_query(filters=[["Warehouse", "company", "=", "_Test Company"]], txt="_Test WLQ")
 		self.assertIn(plain, names)
-		self.assertNotIn(qc, names)
 
 		names = self.run_query(filters=[["Warehouse", "warehouse_type", "=", "Quality"]], txt="_Test WLQ")
 		self.assertIn(qc, names)
+
+		names = self.run_query(filters=[["Warehouse", "warehouse_type", "!=", "Quality"]], txt="_Test WLQ")
+		self.assertIn(plain, names)
+		self.assertNotIn(qc, names)
 
 	def test_not_in_type_filter_keeps_untyped_warehouses(self):
 		ensure_quality_warehouse_type()

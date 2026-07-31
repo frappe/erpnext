@@ -1006,10 +1006,11 @@ def warehouse_link_query(
 ):
 	"""Default link query for Warehouse (wired via standard_queries).
 
-	A Quality Control warehouse is entered by quarantine routing and left by
-	controlled flows, never picked by hand — so every warehouse link hides the
-	type unless the caller filters on warehouse types itself (the routing-target
-	field, the Quality Control Release dispatch, the quality reports).
+	Applies warehouse_type conditions NULL-safely. Hiding Quality Control
+	warehouses is the operational pickers' job — ``erpnext.queries.warehouse`` on
+	the transaction forms and ``warehouse_query`` for stock availability — so that
+	ordinary lookups (report filters, masters, configuration, integrations) can
+	still name a quarantine warehouse they only ever read.
 	"""
 	filters = _normalize_warehouse_filters(filters)
 	# warehouse_type is NULL on ordinary warehouses, so its conditions must be
@@ -1028,8 +1029,6 @@ def warehouse_link_query(
 	)
 
 	warehouse_type = IfNull(wh.warehouse_type, "")
-	if not type_conditions:
-		query = query.where(warehouse_type != "Quality")
 	for operator, value in type_conditions:
 		operator = (operator or "=").lower()
 		if operator == "=":
