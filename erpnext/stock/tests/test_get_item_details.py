@@ -197,6 +197,60 @@ class TestGetItemDetail(ERPNextTestSuite):
 		set_maintain_same_rate(0)
 		self.assertEqual(fetch_price_list_rate(), 120)
 
+	def test_maintain_same_rate_survives_refetch_with_discount(self):
+		"""A mapped Purchase Receipt row that carries a source discount (rate != price
+		list rate) must keep its rate when the row is re-fetched, so maintain-same-rate
+		lets the document save. process_item_selection runs the same recompute the desk
+		mirrors, so it covers the "discount discarded on refresh" concern end to end.
+		"""
+		from frappe.utils import flt
+
+		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		item, price_list = "_Test Item", "_Test Buying Price List"
+		original = frappe.db.get_single_value("Buying Settings", "maintain_same_rate")
+		original_action = frappe.db.get_single_value("Buying Settings", "maintain_same_rate_action")
+		frappe.db.set_single_value("Buying Settings", "maintain_same_rate", 1)
+		frappe.db.set_single_value("Buying Settings", "maintain_same_rate_action", "Stop")
+		frappe.clear_cache(doctype="Buying Settings")
+
+		try:
+			for label, adjustment in (
+				("percentage", {"discount_percentage": 10}),
+				("amount", {"discount_amount": 10}),
+			):
+				with self.subTest(discount=label):
+					# a controlled discounted PO: list rate 100, effective rate 90
+					frappe.flags.dont_fetch_price_list_rate = True
+					po = create_purchase_order(item_code=item, qty=1, do_not_save=True)
+					po.buying_price_list = price_list
+					po.items[0].price_list_rate = 100
+					po.items[0].update(adjustment)
+					po.items[0].rate = 90
+					po.insert()
+					po.submit()
+					frappe.flags.dont_fetch_price_list_rate = False
+
+					# a newer Item Price must not leak onto the mapped row on re-fetch
+					item_price = frappe.db.get_value(
+						"Item Price", {"item_code": item, "price_list": price_list}
+					)
+					if item_price:
+						frappe.db.set_value("Item Price", item_price, "price_list_rate", 250)
+
+					pr = make_purchase_receipt(po.name)
+					pr.insert()
+					pr.process_item_selection(item_idx=pr.items[0].idx)
+
+					self.assertEqual(flt(pr.items[0].rate), 90)
+					pr.save()  # must not raise the maintain-same-rate check
+		finally:
+			frappe.db.set_single_value("Buying Settings", "maintain_same_rate", original)
+			frappe.db.set_single_value("Buying Settings", "maintain_same_rate_action", original_action)
+			frappe.clear_cache(doctype="Buying Settings")
+			frappe.flags.dont_fetch_price_list_rate = False
+
 	def test_apply_price_list_keeps_source_rate_when_maintain_same_rate(self):
 		"""#57436: the bulk apply_price_list path (price list / party / conversion rate
 		change) must also keep the source rate on mapped rows, not just re-fetch of a
