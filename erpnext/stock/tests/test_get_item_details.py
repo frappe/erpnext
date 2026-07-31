@@ -315,8 +315,8 @@ class TestGetItemDetail(ERPNextTestSuite):
 			frappe.clear_cache(doctype="Buying Settings")
 
 	def test_maintain_same_rate_keeps_source_discount_on_refetch(self):
-		"""A mapped row with a manual discount has rate != price_list_rate. Re-fetch must
-		keep the source's rate and discount, not just the pre-discount price, or the
+		"""A mapped source row with a discount has rate != price_list_rate. Re-fetch must
+		return the source's rate and discount, not just the pre-discount price, or the
 		recomputed rate diverges from the reference and fails maintain-same-rate on save.
 		"""
 		from frappe.utils import flt
@@ -331,21 +331,22 @@ class TestGetItemDetail(ERPNextTestSuite):
 		frappe.clear_cache(doctype="Buying Settings")
 
 		try:
-			po = create_purchase_order(item_code=item_code, rate=90, qty=1)
+			# source PO carries the discount: list rate 100, 10% off, effective rate 90
+			frappe.flags.dont_fetch_price_list_rate = True
+			po = create_purchase_order(item_code=item_code, qty=1, do_not_save=True)
+			po.buying_price_list = price_list
+			po.items[0].price_list_rate = 100
+			po.items[0].discount_percentage = 10
+			po.items[0].rate = 90
+			po.insert()
+			po.submit()
+			frappe.flags.dont_fetch_price_list_rate = False
 
 			row_name = "pr-row-1"
-			# price_list_rate 100 with a 10% discount gives the effective rate 90.
 			pr_doc = {
 				"doctype": "Purchase Receipt",
 				"items": [
-					{
-						"name": row_name,
-						"item_code": item_code,
-						"purchase_order_item": po.items[0].name,
-						"price_list_rate": 100,
-						"rate": 90,
-						"discount_percentage": 10,
-					}
+					{"name": row_name, "item_code": item_code, "purchase_order_item": po.items[0].name}
 				],
 			}
 			ctx = frappe._dict(
@@ -374,4 +375,39 @@ class TestGetItemDetail(ERPNextTestSuite):
 			self.assertEqual(flt(out.get("discount_percentage")), 10)
 		finally:
 			frappe.db.set_single_value("Buying Settings", "maintain_same_rate", original)
+			frappe.clear_cache(doctype="Buying Settings")
+			frappe.flags.dont_fetch_price_list_rate = False
+
+	def test_refetch_restores_source_rate_after_target_edit(self):
+		"""Editing a mapped row's rate then re-fetching must restore the persisted source
+		rate (read from the linked row), not lock in the edit, so the document still saves.
+		"""
+		from frappe.utils import flt
+
+		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		item = "_Test Item"
+		original = frappe.db.get_single_value("Buying Settings", "maintain_same_rate")
+		original_action = frappe.db.get_single_value("Buying Settings", "maintain_same_rate_action")
+		frappe.db.set_single_value("Buying Settings", "maintain_same_rate", 1)
+		frappe.db.set_single_value("Buying Settings", "maintain_same_rate_action", "Stop")
+		frappe.clear_cache(doctype="Buying Settings")
+
+		try:
+			po = create_purchase_order(item_code=item, qty=1, rate=90)
+			pr = make_purchase_receipt(po.name)
+			pr.insert()
+
+			# user edits the mapped row to a non-source rate
+			pr.items[0].price_list_rate = 200
+			pr.items[0].rate = 200
+
+			# a re-fetch must restore the persisted source (PO) rate, not keep the edit
+			pr.process_item_selection(item_idx=pr.items[0].idx)
+			self.assertEqual(flt(pr.items[0].rate), 90)
+			pr.save()  # must not raise the maintain-same-rate check
+		finally:
+			frappe.db.set_single_value("Buying Settings", "maintain_same_rate", original)
+			frappe.db.set_single_value("Buying Settings", "maintain_same_rate_action", original_action)
 			frappe.clear_cache(doctype="Buying Settings")

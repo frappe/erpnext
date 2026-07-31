@@ -40,16 +40,27 @@ purchase_doctypes = [
 
 NOT_APPLICABLE_TAX = "N/A"
 
-# Item rows mapped from these source documents must keep the source rate when
-# "maintain same rate" is enabled, so a newer Item Price is never fetched onto them.
+# For each transaction, the child-row link field(s) that point to the source
+# document item, mapped to that source item doctype. When "maintain same rate" is
+# on, a mapped row keeps the persisted source pricing (read straight from that row),
+# so an unsaved edit on the target row can never lock in a non-source rate.
 maintain_same_rate_source_fields = {
-	"Purchase Order": ("supplier_quotation_item",),
-	"Purchase Receipt": ("purchase_order_item",),
-	"Purchase Invoice": ("po_detail", "pr_detail"),
-	"Sales Order": ("quotation_item", "prevdoc_docname"),
-	"Delivery Note": ("so_detail", "si_detail"),
-	"Sales Invoice": ("so_detail", "dn_detail"),
+	"Purchase Order": {"supplier_quotation_item": "Supplier Quotation Item"},
+	"Purchase Receipt": {"purchase_order_item": "Purchase Order Item"},
+	"Purchase Invoice": {"po_detail": "Purchase Order Item", "pr_detail": "Purchase Receipt Item"},
+	"Sales Order": {"quotation_item": "Quotation Item"},
+	"Delivery Note": {"so_detail": "Sales Order Item", "si_detail": "Sales Invoice Item"},
+	"Sales Invoice": {"so_detail": "Sales Order Item", "dn_detail": "Delivery Note Item"},
 }
+
+LOCKED_RATE_FIELDS = [
+	"price_list_rate",
+	"rate",
+	"discount_percentage",
+	"discount_amount",
+	"margin_type",
+	"margin_rate_or_amount",
+]
 
 
 def _preprocess_ctx(ctx):
@@ -204,11 +215,11 @@ def remove_standard_fields(out: frappe._dict):
 
 
 def get_rate_locked_source_row(ctx: ItemDetailsCtx, doc) -> frappe._dict | None:
-	"""Return the current item row when its rate is locked to a source document.
+	"""Return the persisted source-document row a mapped target row is locked to.
 
-	With "maintain same rate" enabled, a row mapped from a source (e.g. a Purchase
-	Order) can only be saved at the source rate. Fetching a newer Item Price here
-	would set a rate the document can never be saved with, so keep the source rate.
+	The rate is read from the linked source row in the database (not the mutable
+	target row), so a re-fetch always restores the source pricing the maintain-same-
+	rate validator checks against, even after an unsaved edit on the target row.
 	"""
 	if isinstance(doc, str):
 		doc = json.loads(doc)
@@ -218,8 +229,12 @@ def get_rate_locked_source_row(ctx: ItemDetailsCtx, doc) -> frappe._dict | None:
 		return None
 
 	row = next((d for d in doc.get("items") or [] if d.get("name") == ctx.child_docname), None)
-	if row and any(row.get(field) for field in source_fields):
-		return row
+	if not row:
+		return None
+
+	for link_field, source_doctype in source_fields.items():
+		if source_name := row.get(link_field):
+			return frappe.db.get_value(source_doctype, source_name, LOCKED_RATE_FIELDS, as_dict=True)
 	return None
 
 
