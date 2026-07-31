@@ -226,9 +226,11 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 			first_row_by_item.setdefault(key, item)
 
 		for key, transfer_qty in transfer_by_item.items():
-			pending_qty = pending_by_item[key]
+			item = first_row_by_item[key]
+			precision = item.precision("qty")
+			transfer_qty = flt(transfer_qty, precision)
+			pending_qty = flt(pending_by_item[key], precision)
 			if transfer_qty > pending_qty:
-				item = first_row_by_item[key]
 				frappe.throw(
 					_(
 						"Row #{0}: Cannot transfer {1} {2} of Item {3}. "
