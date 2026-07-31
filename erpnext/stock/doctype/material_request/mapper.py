@@ -9,6 +9,10 @@ from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import cint, flt, getdate, nowdate
 
+from erpnext.setup.doctype.brand.brand import get_brand_defaults
+from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
+from erpnext.stock.doctype.item.item import get_item_defaults
+from erpnext.stock.get_item_details import get_default_supplier
 from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import (
 	get_subcontracting_boms_for_finished_goods,
 )
@@ -52,7 +56,7 @@ def make_purchase_order(
 	source_name: str, target_doc: str | dict | Document | None = None, args: dict | str | None = None
 ):
 	if args is None:
-		args = {}
+		args = frappe.flags.args or {}
 	args = frappe.parse_json(args)
 
 	is_subcontracted = (
@@ -61,6 +65,8 @@ def make_purchase_order(
 
 	def postprocess(source, target_doc):
 		target_doc.is_subcontracted = is_subcontracted
+		if args.get("supplier"):
+			target_doc.supplier = args.get("supplier")
 		set_missing_values(source, target_doc)
 
 	def select_item(d):
@@ -138,6 +144,70 @@ def make_request_for_quotation(source_name: str, target_doc: str | dict | Docume
 	)
 
 	return doclist
+
+
+def get_default_supplier_for_item(item_code: str, company: str) -> str | None:
+	return get_default_supplier(
+		frappe._dict(),
+		get_item_defaults(item_code, company),
+		get_item_group_defaults(item_code, company),
+		get_brand_defaults(item_code, company),
+	)
+
+
+@frappe.whitelist()
+def get_item_default_suppliers(source_name: str, filtered_children: str | list | None = None) -> list[dict]:
+	"""Pending items of the Material Request with their default supplier."""
+	filtered_children = frappe.parse_json(filtered_children) if filtered_children else []
+
+	material_request = frappe.get_doc("Material Request", source_name)
+	material_request.check_permission("read")
+
+	items = []
+	for item in material_request.items:
+		if filtered_children and item.name not in filtered_children:
+			continue
+
+		ordered_qty = flt(item.ordered_qty) or flt(item.received_qty)
+		if ordered_qty >= flt(item.stock_qty):
+			continue
+
+		items.append(
+			{
+				"material_request_item": item.name,
+				"item_code": item.item_code,
+				"item_name": item.item_name,
+				"qty": (flt(item.stock_qty) - ordered_qty) / (flt(item.conversion_factor) or 1),
+				"uom": item.uom,
+				"supplier": get_default_supplier_for_item(item.item_code, material_request.company),
+			}
+		)
+
+	return items
+
+
+@frappe.whitelist(methods=["POST"])
+def make_purchase_orders_by_supplier(source_name: str, item_suppliers: str | list) -> list[str]:
+	"""Create one draft Purchase Order per supplier for the given Material Request items."""
+	item_suppliers = frappe.parse_json(item_suppliers)
+
+	items_by_supplier = {}
+	for row in item_suppliers:
+		row = frappe._dict(row)
+		if not row.supplier:
+			frappe.throw(_("Select a Supplier for Item {0}").format(frappe.bold(row.item_code)))
+
+		items_by_supplier.setdefault(row.supplier, []).append(row.material_request_item)
+
+	purchase_orders = []
+	for supplier, material_request_items in items_by_supplier.items():
+		purchase_order = make_purchase_order(
+			source_name, args={"supplier": supplier, "filtered_children": material_request_items}
+		)
+		purchase_order.insert()
+		purchase_orders.append(purchase_order.name)
+
+	return purchase_orders
 
 
 @frappe.whitelist()
