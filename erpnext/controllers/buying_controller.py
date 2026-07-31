@@ -467,7 +467,7 @@ class BuyingController(SubcontractingController):
 					self.precision("item_tax_amount", item),
 				)
 
-				self.round_floats_in(item)
+				self.round_floats_in(item, do_not_round_fields=["conversion_factor"])
 				if flt(item.conversion_factor) == 0.0:
 					item.conversion_factor = (
 						get_conversion_factor(item.item_code, item.uom).get("conversion_factor") or 1.0
