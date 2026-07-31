@@ -411,3 +411,49 @@ class TestGetItemDetail(ERPNextTestSuite):
 			frappe.db.set_single_value("Buying Settings", "maintain_same_rate", original)
 			frappe.db.set_single_value("Buying Settings", "maintain_same_rate_action", original_action)
 			frappe.clear_cache(doctype="Buying Settings")
+
+	def test_rate_lock_source_lookup_checks_permission(self):
+		"""The lock reads source pricing via a direct DB read, so it must not disclose a
+		source document's pricing to a caller who cannot read that document.
+		"""
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+		from erpnext.stock.get_item_details import get_rate_locked_source_row
+
+		original = frappe.db.get_single_value("Buying Settings", "maintain_same_rate")
+		frappe.db.set_single_value("Buying Settings", "maintain_same_rate", 1)
+		frappe.clear_cache(doctype="Buying Settings")
+
+		role, email = "_Test Role Without PO Access", "_test_rate_lock_probe@example.com"
+		try:
+			po = create_purchase_order(item_code="_Test Item", qty=1, rate=90)
+			pr_doc = {
+				"doctype": "Purchase Receipt",
+				"items": [{"name": "r1", "item_code": "_Test Item", "purchase_order_item": po.items[0].name}],
+			}
+			ctx = frappe._dict(doctype="Purchase Receipt", child_docname="r1")
+
+			# an authorized caller receives the source row
+			self.assertIsNotNone(get_rate_locked_source_row(ctx.copy(), dict(pr_doc)))
+
+			if not frappe.db.exists("Role", role):
+				frappe.get_doc({"doctype": "Role", "role_name": role, "desk_access": 1}).insert(
+					ignore_permissions=True
+				)
+			if not frappe.db.exists("User", email):
+				frappe.get_doc(
+					{
+						"doctype": "User",
+						"email": email,
+						"first_name": "Probe",
+						"send_welcome_email": 0,
+						"roles": [{"role": role}],
+					}
+				).insert(ignore_permissions=True)
+
+			frappe.set_user(email)
+			# a caller who cannot read the Purchase Order gets nothing
+			self.assertIsNone(get_rate_locked_source_row(ctx.copy(), dict(pr_doc)))
+		finally:
+			frappe.set_user("Administrator")
+			frappe.db.set_single_value("Buying Settings", "maintain_same_rate", original)
+			frappe.clear_cache(doctype="Buying Settings")

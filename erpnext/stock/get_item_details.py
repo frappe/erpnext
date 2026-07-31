@@ -234,7 +234,14 @@ def get_rate_locked_source_row(ctx: ItemDetailsCtx, doc) -> frappe._dict | None:
 
 	for link_field, source_doctype in source_fields.items():
 		if source_name := row.get(link_field):
-			return frappe.db.get_value(source_doctype, source_name, LOCKED_RATE_FIELDS, as_dict=True)
+			# a direct read would bypass permissions; only return source pricing to a
+			# caller allowed to read the source document
+			source = frappe.db.get_value(
+				source_doctype, source_name, [*LOCKED_RATE_FIELDS, "parent", "parenttype"], as_dict=True
+			)
+			if source and frappe.has_permission(source.parenttype, doc=source.parent):
+				return source
+			return None
 	return None
 
 
