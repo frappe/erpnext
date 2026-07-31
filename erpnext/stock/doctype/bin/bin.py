@@ -175,7 +175,7 @@ class Bin(Document):
 					& (subcontract_order.docstatus == 1)
 				)
 				if subcontract_doctype == "Purchase Order"
-				else (subcontract_order.docstatus == 1)
+				else ((subcontract_order.status != "Closed") & (subcontract_order.docstatus == 1))
 			)
 		)
 
@@ -212,6 +212,7 @@ class Bin(Document):
 				else (
 					(Coalesce(se.subcontracting_order, "") != "")
 					& (subcontract_order.name == se.subcontracting_order)
+					& (subcontract_order.status != "Closed")
 				)
 			)
 		)

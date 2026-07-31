@@ -75,6 +75,7 @@ class DeprecatedSerialNoValuation:
 						| (table.serial_no.like("%\n" + serial_no))
 						| (table.serial_no.like("%\n" + serial_no + "\n%"))
 					)
+					& (table.item_code == self.sle.item_code)
 					& (table.company == self.sle.company)
 					& (table.warehouse == self.sle.warehouse)
 					& (table.serial_and_batch_bundle.isnull())

@@ -84,6 +84,11 @@ def stock_entry_row_requires_inspection(purpose, row):
 
 
 class StockController(AccountsController):
+	#: Vouchers whose stock value change should also be booked to the Expenses Added To Stock
+	#: account pair (Stock Entry, Stock Reconciliation). Purchase Receipt books its own, against
+	#: the landed cost amount rather than the stock value difference.
+	book_expenses_added_to_stock = False
+
 	def validate(self):
 		super().validate()
 
@@ -858,8 +863,88 @@ class StockController(AccountsController):
 						).format(wh, self.company)
 					)
 
+		if self.book_expenses_added_to_stock:
+			self.append_expenses_added_to_stock_entries(gl_list, voucher_details, sle_map)
+
 		return process_gl_map(
 			gl_list, precision=precision, from_repost=frappe.flags.through_repost_item_valuation
+		)
+
+	def book_stock_expense_enabled(self):
+		if not hasattr(self, "_book_stock_expense_enabled"):
+			self._book_stock_expense_enabled = cint(
+				frappe.db.get_single_value("Accounts Settings", "book_stock_expense_gl_entries")
+			)
+
+		return self._book_stock_expense_enabled
+
+	def append_expenses_added_to_stock_entries(self, gl_list, voucher_details, sle_map):
+		if not self.book_stock_expense_enabled():
+			return
+
+		precision = self.get_debit_field_precision()
+
+		for item_row in voucher_details:
+			sle_list = sle_map.get(item_row.name)
+			if not sle_list:
+				continue
+
+			amount = flt(sum(flt(sle.stock_value_difference) for sle in sle_list), precision)
+			if not amount:
+				continue
+
+			item_code = item_row.get("item_code") or sle_list[0].item_code
+			self.append_expenses_added_to_stock_pair(gl_list, item_code, amount, item_row)
+
+	def append_expenses_added_to_stock_pair(self, gl_list, item_code, amount, item_row):
+		# A service item holds no stock value, so there is nothing to book against it - and it must
+		# not make the expense accounts mandatory either. A zero pair would be rejected by GL Entry
+		# anyway, which needs a debit or a credit on every row.
+		if not amount or not frappe.get_cached_value("Item", item_code, "is_stock_item"):
+			return
+
+		fields = ("expenses_added_to_stock_account", "expenses_added_to_stock_contra_account")
+		details = get_expenses_added_to_stock_accounts(item_code, self.company)
+
+		for field in fields:
+			if not details.get(field):
+				frappe.throw(
+					_("Please set {0} in Company {1} or in the Item Defaults of Item {2}").format(
+						frappe.bold(_(frappe.unscrub(field))), self.company, item_code
+					)
+				)
+
+		cost_center = item_row.get("cost_center") or frappe.get_cached_value(
+			"Company", self.company, "cost_center"
+		)
+		remarks = _("Expenses Added To Stock for Item {0}").format(item_code)
+		common_args = {
+			"cost_center": cost_center,
+			"project": item_row.get("project") or self.get("project"),
+			"remarks": remarks,
+		}
+
+		gl_list.append(
+			self.get_gl_dict(
+				{
+					"account": details.expenses_added_to_stock_account,
+					"against": details.expenses_added_to_stock_contra_account,
+					"debit": amount,
+					**common_args,
+				},
+				item=item_row,
+			)
+		)
+		gl_list.append(
+			self.get_gl_dict(
+				{
+					"account": details.expenses_added_to_stock_contra_account,
+					"against": details.expenses_added_to_stock_account,
+					"debit": -1 * amount,
+					**common_args,
+				},
+				item=item_row,
+			)
 		)
 
 	def get_debit_field_precision(self):
@@ -2568,3 +2653,31 @@ def get_item_wise_inventory_account_map(rows, company):
 				)
 
 	return inventory_map
+
+
+@frappe.request_cache
+def get_expenses_added_to_stock_accounts(item_code, company):
+	"""Resolves the Expenses Added To Stock account pair for an item, falling back through
+	Item Defaults -> Item Group -> Brand -> Company."""
+	from erpnext.stock.doctype.item.item import get_item_defaults
+
+	fields = ["expenses_added_to_stock_account", "expenses_added_to_stock_contra_account"]
+	defaults = get_item_defaults(item_code, company)
+
+	details = frappe._dict({field: defaults.get(field) for field in fields})
+
+	if not details.expenses_added_to_stock_account:
+		details = frappe.db.get_value(
+			"Item Default", {"parent": defaults.item_group, "company": company}, fields, as_dict=1
+		) or frappe._dict({})
+
+	if not details.expenses_added_to_stock_account and defaults.get("brand"):
+		details = frappe.db.get_value(
+			"Item Default", {"parent": defaults.brand, "company": company}, fields, as_dict=1
+		) or frappe._dict({})
+
+	for field in fields:
+		if not details.get(field):
+			details[field] = frappe.get_cached_value("Company", company, field)
+
+	return details

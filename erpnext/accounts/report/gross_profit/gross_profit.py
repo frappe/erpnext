@@ -227,6 +227,7 @@ def get_data_when_grouped_by_invoice(columns, gross_profit_data, filters, group_
 				)
 				if total_base_amount
 				else 0,
+				"currency": filters.currency,
 			}
 		)
 	)
@@ -269,6 +270,7 @@ def get_data_when_not_grouped_by_invoice(gross_profit_data, filters, group_wise_
 		"buying_amount": total_buying_amount,
 		"gross_profit": total_gross_profit,
 		"gross_profit_percent": flt(gross_profit_percent, currency_precision),
+		"currency": filters.currency,
 	}
 
 	total_row = [total_row.get(col, None) for col in [*group_columns, "currency"]]

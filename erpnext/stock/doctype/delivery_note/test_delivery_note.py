@@ -712,6 +712,76 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 		self.assertEqual(gle_warehouse_amount, 1400)
 
+	def test_return_bundle_voucher_detail_no_as_packed_item(self):
+		"""Return bundle whose voucher_detail_no is the Packed Item (SLE-driven path) must still value on repost."""
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+
+		warehouse = "_Test Warehouse - _TC"
+		packed_item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "BATCH-DN-RET-VDN-.#####",
+			}
+		).name
+		bundle_item = make_item(properties={"is_stock_item": 0, "is_sales_item": 1}).name
+		make_product_bundle(bundle_item, [packed_item], qty=20)
+
+		make_stock_entry(item_code=packed_item, target=warehouse, qty=60, basic_rate=35)
+
+		dn = create_delivery_note(item_code=bundle_item, warehouse=warehouse, qty=3)
+
+		return_dn = make_sales_return(dn.name)
+		return_dn.items[0].qty = -2
+		return_dn.submit()
+		return_dn.reload()
+
+		packed_row = return_dn.packed_items[0]
+		bundle = frappe.get_doc("Serial and Batch Bundle", packed_row.serial_and_batch_bundle)
+
+		# Reproduce the reported state: bundle points at the Packed Item (not the DN Item), valuation at 0.
+		bundle.db_set("voucher_detail_no", packed_row.name)
+		bundle.db_set({"avg_rate": 0, "total_amount": 0})
+		for entry in bundle.entries:
+			entry.db_set({"incoming_rate": 0, "stock_value_difference": 0})
+		packed_row.db_set("incoming_rate", 0)
+		frappe.db.set_value(
+			"Stock Ledger Entry",
+			{
+				"voucher_type": "Delivery Note",
+				"voucher_no": return_dn.name,
+				"item_code": packed_item,
+				"is_cancelled": 0,
+			},
+			{"incoming_rate": 0, "stock_value_difference": 0},
+		)
+
+		frappe.get_doc(
+			doctype="Repost Item Valuation",
+			based_on="Transaction",
+			voucher_type="Delivery Note",
+			voucher_no=return_dn.name,
+			posting_date=return_dn.posting_date,
+			posting_time=return_dn.posting_time,
+		).submit()
+
+		bundle.reload()
+		self.assertEqual(flt(bundle.avg_rate), 35)
+
+		incoming_rate, stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{
+				"voucher_type": "Delivery Note",
+				"voucher_no": return_dn.name,
+				"item_code": packed_item,
+				"is_cancelled": 0,
+			},
+			["incoming_rate", "stock_value_difference"],
+		)
+		self.assertEqual(flt(incoming_rate), 35)
+		self.assertEqual(flt(stock_value_difference), 1400)
+
 	def test_bin_details_of_packed_item(self):
 		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
 		from erpnext.stock.doctype.item.test_item import make_item

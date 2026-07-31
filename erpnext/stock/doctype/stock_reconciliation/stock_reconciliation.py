@@ -57,6 +57,8 @@ class StockReconciliation(StockController):
 		set_warehouse: DF.Link | None
 	# end: auto-generated types
 
+	book_expenses_added_to_stock = True
+
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.head_row = ["Item Code", "Warehouse", "Quantity", "Valuation Rate"]

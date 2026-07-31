@@ -3134,11 +3134,14 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		old_perpetual_inventory = erpnext.is_perpetual_inventory_enabled("_Test Company")
 		frappe.local.enable_perpetual_inventory["_Test Company"] = 1
+		old_inventory_account = frappe.db.get_value("Company", "_Test Company", "default_inventory_account")
 		frappe.db.set_value(
 			"Company",
 			"_Test Company",
-			"stock_received_but_not_billed",
-			"Stock Received But Not Billed - _TC",
+			{
+				"stock_received_but_not_billed": "Stock Received But Not Billed - _TC",
+				"default_inventory_account": "Stock In Hand - _TC",
+			},
 		)
 
 		pr = make_purchase_receipt(qty=10, rate=1000, do_not_submit=1)
@@ -3174,6 +3177,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		)
 		self.assertCountEqual(expected_gle, gl_entries)
 		frappe.local.enable_perpetual_inventory["_Test Company"] = old_perpetual_inventory
+		frappe.db.set_value("Company", "_Test Company", "default_inventory_account", old_inventory_account)
 
 	def test_purchase_receipt_with_use_serial_batch_field_for_rejected_qty(self):
 		batch_item = make_item(
@@ -5125,6 +5129,14 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(srbnb_cost, 1000)
 
 	def test_purchase_expense_account(self):
+		# Single, so it outlives this test - every later Purchase Receipt / Invoice would otherwise
+		# be forced to resolve the expense account pair and throw for unconfigured companies.
+		previous = frappe.db.get_single_value("Accounts Settings", "book_stock_expense_gl_entries")
+		self.addCleanup(
+			frappe.db.set_single_value, "Accounts Settings", "book_stock_expense_gl_entries", previous
+		)
+		frappe.db.set_single_value("Accounts Settings", "book_stock_expense_gl_entries", 1)
+
 		item = "Test Item with Purchase Expense Account"
 		make_item(item, {"is_stock_item": 1})
 		company = "_Test Company with perpetual inventory"
@@ -6171,6 +6183,32 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		gl_entries = get_gl_entries("Purchase Receipt", pr.name, skip_cancelled=True)
 		srbnb_credit = sum(flt(row.credit) for row in gl_entries if row.account == srbnb_account)
 		self.assertAlmostEqual(srbnb_credit, pi_base_net_amount, places=2)
+
+	def test_cancel_blocked_by_submitted_invoice_rolls_back(self):
+		"""A submitted Purchase Invoice must block cancelling its Purchase Receipt. Frappe's backlink
+		check rejects the cancel only after on_cancel has run stock, GL, and status work, so the whole
+		transaction has to roll back: the receipt stays submitted with no leaked ledger entries."""
+		pr = make_purchase_receipt()
+		pi = make_purchase_invoice(pr.name)
+		pi.insert()
+		pi.submit()
+
+		pr.reload()
+		status_before = pr.status
+		sle_before = frappe.db.count("Stock Ledger Entry", {"voucher_no": pr.name})
+		gle_before = frappe.db.count("GL Entry", {"voucher_no": pr.name})
+
+		frappe.db.savepoint("before_blocked_cancel")
+		with self.assertRaises(frappe.LinkExistsError) as cm:
+			pr.cancel()
+		self.assertIn(pi.name, str(cm.exception))
+		frappe.db.rollback(save_point="before_blocked_cancel")  # mimic the request-level rollback
+
+		pr.reload()
+		self.assertEqual(pr.docstatus, 1)
+		self.assertEqual(pr.status, status_before)
+		self.assertEqual(frappe.db.count("Stock Ledger Entry", {"voucher_no": pr.name}), sle_before)
+		self.assertEqual(frappe.db.count("GL Entry", {"voucher_no": pr.name}), gle_before)
 
 
 def create_asset_category_for_pr_test():

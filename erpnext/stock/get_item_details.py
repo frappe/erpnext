@@ -84,6 +84,7 @@ def get_item_details(ctx, doc=None, for_validate=False, overwrite_warehouse=True
 	for_validate = parse_json(for_validate)
 	overwrite_warehouse = parse_json(overwrite_warehouse)
 	item = frappe.get_cached_doc("Item", ctx.item_code)
+	item.check_permission()
 	validate_item_details(ctx, item)
 
 	if isinstance(doc, str):

@@ -241,6 +241,26 @@ class TestBOMCreator(ERPNextTestSuite):
 		data = frappe.get_all("BOM", filters={"bom_creator": doc.name, "docstatus": 1})
 		self.assertEqual(len(data), 2)
 
+	def test_repeated_sub_assembly_keeps_own_raw_materials(self):
+		doc, first_wheel, second_wheel = make_repeated_sub_assembly_bom(
+			"Bicycle BOM with Repeated Sub Assembly"
+		)
+
+		self.assertEqual(child_items(doc, doc.name), ["Frame Assembly", "Seat Assembly"])
+		self.assertEqual(child_items(doc, first_wheel), ["Rim", "Spokes"])
+		self.assertEqual(child_items(doc, second_wheel), ["Hub"])
+
+	def test_delete_repeated_sub_assembly_keeps_sibling_raw_materials(self):
+		doc, first_wheel, second_wheel = make_repeated_sub_assembly_bom(
+			"Bicycle BOM with Deleted Sub Assembly"
+		)
+
+		doc.delete_node(doctype="BOM Creator Item", docname=second_wheel)
+		doc.reload()
+
+		self.assertEqual(child_items(doc, first_wheel), ["Rim", "Spokes"])
+		self.assertFalse([row for row in doc.items if row.item_code == "Hub"])
+
 	def test_edit_and_delete_reject_unknown_item(self):
 		final_product = "Bicycle"
 		make_item(
@@ -325,6 +345,55 @@ def create_items():
 				"stock_uom": "Nos",
 			},
 		)
+
+
+def make_repeated_sub_assembly_bom(name):
+	"""Bicycle > (Frame Assembly > Wheel Assembly > Rim, Spokes), (Seat Assembly > Wheel Assembly > Hub)"""
+	final_product = "Bicycle"
+	make_item(final_product, {"item_group": "Raw Material", "stock_uom": "Nos"})
+
+	doc = make_bom_creator(
+		name=name,
+		company="_Test Company",
+		item_code=final_product,
+		qty=1,
+		rm_cosy_as_per="Valuation Rate",
+		currency="INR",
+		plc_conversion_rate=1,
+		conversion_rate=1,
+	)
+
+	def add_sub_assembly(fg_item, fg_reference_id, item_code, raw_materials):
+		doc.add_sub_assembly(
+			fg_item=fg_item,
+			fg_reference_id=fg_reference_id,
+			bom_item={
+				"item_code": item_code,
+				"qty": 1,
+				"items": [{"item_code": item, "qty": 1} for item in raw_materials],
+			},
+		)
+		doc.reload()
+
+		return next(
+			row.name
+			for row in doc.items
+			if row.item_code == item_code and row.fg_reference_id == fg_reference_id
+		)
+
+	frame = add_sub_assembly(final_product, doc.name, "Frame Assembly", ["Frame"])
+	first_wheel = add_sub_assembly("Frame Assembly", frame, "Wheel Assembly", ["Rim", "Spokes"])
+
+	seat = add_sub_assembly(final_product, doc.name, "Seat Assembly", ["Seat"])
+	second_wheel = add_sub_assembly("Seat Assembly", seat, "Wheel Assembly", ["Hub"])
+
+	return doc, first_wheel, second_wheel
+
+
+def child_items(doc, parent):
+	from erpnext.manufacturing.doctype.bom_creator.bom_creator import get_children
+
+	return sorted(row.item_code for row in get_children(parent=parent, parent_id=doc.name))
 
 
 def make_bom_creator(**kwargs):

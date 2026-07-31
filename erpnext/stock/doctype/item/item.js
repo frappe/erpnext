@@ -620,7 +620,13 @@ $.extend(erpnext.item, {
 			};
 		});
 
-		let fields = ["purchase_expense_account", "purchase_expense_contra_account", "default_cogs_account"];
+		let fields = [
+			"purchase_expense_account",
+			"purchase_expense_contra_account",
+			"expenses_added_to_stock_account",
+			"expenses_added_to_stock_contra_account",
+			"default_cogs_account",
+		];
 
 		fields.forEach((field) => {
 			frm.set_query(field, "item_defaults", (doc, cdt, cdn) => {

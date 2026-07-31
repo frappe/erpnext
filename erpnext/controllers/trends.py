@@ -6,6 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils import DateTimeLikeObject, getdate, today
 
+import erpnext
 from erpnext.accounts.utils import get_fiscal_year
 
 
@@ -42,6 +43,9 @@ def get_columns(filters, trans):
 		"addl_tables": based_on_details["addl_tables"],
 		"addl_tables_relational_cond": based_on_details.get("addl_tables_relational_cond", ""),
 	}
+	conditions["company_currency"] = (
+		erpnext.get_company_currency(filters.get("company")) if filters.get("company") else None
+	)
 
 	return conditions
 
@@ -206,7 +210,7 @@ def get_data(filters, conditions):
 
 				data.append(des)
 
-		total_row = calculate_total_row(data1, conditions["columns"])
+		total_row = calculate_total_row(data1, conditions["columns"], conditions.get("company_currency"))
 		data.append(total_row)
 	else:
 		data = frappe.db.sql(
@@ -231,19 +235,24 @@ def get_data(filters, conditions):
 			as_list=1,
 		)
 
-		total_row = calculate_total_row(data, conditions["columns"])
+		total_row = calculate_total_row(data, conditions["columns"], conditions.get("company_currency"))
 		data.append(total_row)
 
 	return data
 
 
-def calculate_total_row(data, columns):
+def calculate_total_row(data, columns, company_currency=None):
 	def wrap_in_quotes(label):
 		return f"'{label}'"
 
 	total_values = {}
+	currency_col_idx = None
 	for i, col in enumerate(columns):
-		if "Float" in col or "Currency/currency" in col:
+		# based-on and group-by columns are dicts, periodic and total columns are strings
+		if isinstance(col, dict):
+			if col.get("fieldtype") == "Link" and col.get("options") == "Currency":
+				currency_col_idx = i
+		elif "Float" in col or "Currency/currency" in col:
 			total_values[i] = 0
 
 	for row in data:
@@ -253,6 +262,9 @@ def calculate_total_row(data, columns):
 	total_row = [wrap_in_quotes(_("Total"))]
 	for i in range(1, len(columns)):
 		total_row.append(total_values.get(i, None))
+
+	if currency_col_idx is not None:
+		total_row[currency_col_idx] = company_currency
 
 	return total_row
 
