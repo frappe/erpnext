@@ -117,8 +117,11 @@ frappe.query_reports["Accounts Payable"] = {
 		{
 			fieldname: "supplier_group",
 			label: __("Supplier Group"),
-			fieldtype: "Link",
+			fieldtype: "MultiSelectList",
 			options: "Supplier Group",
+			get_data: function (txt) {
+				return frappe.db.get_link_options("Supplier Group", txt);
+			},
 			hidden: 1,
 		},
 		{
