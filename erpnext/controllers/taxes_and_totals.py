@@ -184,8 +184,20 @@ class calculate_taxes_and_totals:
 		if self.doc.get("is_consolidated"):
 			return
 
+<<<<<<< HEAD
 		if not self.discount_amount_applied:
 			do_not_round_fields = ["valuation_rate", "incoming_rate", "sales_incoming_rate"]
+=======
+		do_not_round_fields = [
+			"valuation_rate",
+			"incoming_rate",
+			"sales_incoming_rate",
+			"conversion_factor",
+		]
+		for item in self.doc.items:
+			self.doc.round_floats_in(item, do_not_round_fields=do_not_round_fields)
+			self.calculate_item_rate(item)
+>>>>>>> 269cc6ee3b (fix: preserve UOM conversion factor precision in transactions)
 
 			for item in self.doc.items:
 				self.doc.round_floats_in(item, do_not_round_fields=do_not_round_fields)
