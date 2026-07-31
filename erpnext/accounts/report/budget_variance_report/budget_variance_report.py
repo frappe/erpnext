@@ -84,7 +84,13 @@ def build_budget_map(budget_records, filters):
 		budget_distributions = get_budget_distributions(budget)
 
 		for row in budget_distributions:
+			if not row.start_date or not row.end_date:
+				continue
+
 			months = get_months_in_range(row.start_date, row.end_date)
+			if not months:
+				continue
+
 			monthly_budget = flt(row.amount) / len(months)
 
 			for month_date in months:
@@ -422,6 +428,11 @@ def build_comparison_chart_data(filters, columns, data):
 		if not fieldname:
 			continue
 
+		# skip the dimension column ("budget_against"), it only matches the
+		# "budget_" prefix by coincidence and would shift the actual values by one
+		if fieldname == "budget_against":
+			continue
+
 		if fieldname.startswith("budget_"):
 			budget_fields.append(fieldname)
 		elif fieldname.startswith("actual_"):
@@ -433,7 +444,7 @@ def build_comparison_chart_data(filters, columns, data):
 	labels = [
 		col["label"].replace("Budget", "").strip()
 		for col in columns
-		if col.get("fieldname", "").startswith("budget_")
+		if col.get("fieldname", "").startswith("budget_") and col.get("fieldname") != "budget_against"
 	]
 
 	budget_values = [0] * len(budget_fields)

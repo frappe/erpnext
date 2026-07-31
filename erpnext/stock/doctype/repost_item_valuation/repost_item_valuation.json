@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_bulk_edit": 1,
  "allow_import": 1,
  "autoname": "hash",
  "creation": "2022-01-11 15:03:38.273179",
@@ -23,7 +24,7 @@
   "via_landed_cost_voucher",
   "allow_zero_rate",
   "recreate_stock_ledgers",
-  "amended_from",
+  "recalculate_valuation_rate",
   "error_section",
   "error_log",
   "reposting_info_section",
@@ -34,6 +35,7 @@
   "gl_reposting_index",
   "reposting_data_file",
   "vouchers_based_on_item_and_warehouse_section",
+  "amended_from",
   "total_vouchers",
   "column_break_yqwo",
   "vouchers_posted"
@@ -256,13 +258,21 @@
    "label": "Reposting Data File",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "Only works for Purchase Receipt, Purchase Invoice and Stock Entry",
+   "fieldname": "recalculate_valuation_rate",
+   "fieldtype": "Check",
+   "label": "Recalculate Valuation Rate",
+   "show_description_on_click": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-27 18:59:58.637964",
+ "modified": "2026-06-16 17:30:42.715321",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Repost Item Valuation",

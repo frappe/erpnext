@@ -232,7 +232,7 @@ class ServiceLevelAgreement(Document):
 		if self.document_type == "Issue":
 			return
 
-		service_level_agreement_fields = get_service_level_agreement_fields()
+		service_level_agreement_fields = get_service_level_agreement_fields(self.document_type)
 		meta = frappe.get_meta(self.document_type, cached=False)
 
 		if meta.custom:
@@ -276,6 +276,7 @@ class ServiceLevelAgreement(Document):
 						"hidden": field.get("hidden"),
 						"description": field.get("description"),
 						"default": field.get("default"),
+						"link_filters": field.get("link_filters"),
 					}
 				).insert(ignore_permissions=True)
 			else:
@@ -302,6 +303,7 @@ class ServiceLevelAgreement(Document):
 						"hidden": field.get("hidden"),
 						"description": field.get("description"),
 						"default": field.get("default"),
+						"link_filters": field.get("link_filters"),
 					}
 				).insert(ignore_permissions=True)
 			else:
@@ -309,7 +311,7 @@ class ServiceLevelAgreement(Document):
 				self.reset_field_properties(existing_field, "Custom Field", field)
 
 	def reset_field_properties(self, field, field_dt, sla_field):
-		field = frappe.get_doc(field_dt, {"fieldname": field.fieldname})
+		field = frappe.get_doc(field_dt, field.name)
 		field.label = sla_field.get("label")
 		field.fieldname = sla_field.get("fieldname")
 		field.fieldtype = sla_field.get("fieldtype")
@@ -320,6 +322,7 @@ class ServiceLevelAgreement(Document):
 		field.hidden = sla_field.get("hidden")
 		field.description = sla_field.get("description")
 		field.default = sla_field.get("default")
+		field.link_filters = sla_field.get("link_filters")
 		field.save(ignore_permissions=True)
 
 
@@ -907,7 +910,7 @@ def record_assigned_users_on_failure(doc):
 		doc.add_comment(comment_type="Assigned", text=message)
 
 
-def get_service_level_agreement_fields():
+def get_service_level_agreement_fields(doctype: str):
 	return [
 		{
 			"collapsible": 1,
@@ -920,6 +923,9 @@ def get_service_level_agreement_fields():
 			"fieldtype": "Link",
 			"label": "Service Level Agreement",
 			"options": "Service Level Agreement",
+			"link_filters": frappe.as_json(
+				[["Service Level Agreement", "document_type", "=", doctype]], indent=None
+			),
 		},
 		{"fieldname": "priority", "fieldtype": "Link", "label": "Priority", "options": "Issue Priority"},
 		{"fieldname": "response_by", "fieldtype": "Datetime", "label": "Response By", "read_only": 1},

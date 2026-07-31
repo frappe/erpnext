@@ -11,7 +11,7 @@ from frappe.contacts.doctype.address.address import get_address_display
 from frappe.model.workflow import get_workflow_name
 from frappe.query_builder import Criterion, DocType
 from frappe.query_builder.custom import ConstantColumn
-from frappe.query_builder.functions import Abs, Sum
+from frappe.query_builder.functions import Abs, IfNull, Sum
 from frappe.utils import (
 	add_days,
 	add_months,
@@ -51,12 +51,11 @@ from erpnext.accounts.utils import (
 	create_gain_loss_journal,
 	get_account_currency,
 	get_currency_precision,
+	get_fiscal_year,
 	get_fiscal_years,
 	validate_fiscal_year,
 )
-from erpnext.accounts.utils import (
-	get_advance_payment_doctypes as _get_advance_payment_doctypes,
-)
+from erpnext.accounts.utils import get_advance_payment_doctypes as _get_advance_payment_doctypes
 from erpnext.buying.utils import update_last_purchase_rate
 from erpnext.controllers.print_settings import (
 	set_print_templates_for_item_table,
@@ -140,6 +139,26 @@ class AccountsController(TransactionBase):
 			)
 			if self.doctype in relevant_docs:
 				self.set_payment_schedule()
+
+	def before_insert(self):
+		self.clear_clearance_date_on_amend()
+
+	def clear_clearance_date_on_amend(self):
+		"""Drop the bank reconciliation clearance date copied over while amending.
+
+		The framework copies `no_copy` fields when amending, so a reconciled
+		voucher would carry a stale clearance date into its amendment even though
+		the linked bank transaction gets unreconciled on cancellation.
+		"""
+		if not self.get("amended_from"):
+			return
+
+		if self.meta.has_field("clearance_date"):
+			self.clearance_date = None
+
+		for payment in self.get("payments") or []:
+			if payment.meta.has_field("clearance_date"):
+				payment.clearance_date = None
 
 	def on_update(self):
 		from erpnext.controllers.taxes_and_totals import process_item_wise_tax_details
@@ -749,21 +768,29 @@ class AccountsController(TransactionBase):
 			self.calculate_contribution()
 
 	def validate_date_with_fiscal_year(self):
-		if self.meta.get_field("fiscal_year"):
-			date_field = None
-			if self.meta.get_field("posting_date"):
-				date_field = "posting_date"
-			elif self.meta.get_field("transaction_date"):
-				date_field = "transaction_date"
+		date_field = None
+		if self.meta.get_field("posting_date"):
+			date_field = "posting_date"
+		elif self.meta.get_field("transaction_date"):
+			date_field = "transaction_date"
 
-			if date_field and self.get(date_field):
-				validate_fiscal_year(
-					self.get(date_field),
-					self.fiscal_year,
-					self.company,
-					self.meta.get_label(date_field),
-					self,
-				)
+		if not date_field or not self.get(date_field):
+			return
+
+		if self.meta.get_field("fiscal_year"):
+			validate_fiscal_year(
+				self.get(date_field),
+				self.fiscal_year,
+				self.company,
+				self.meta.get_label(date_field),
+				self,
+			)
+		else:
+			get_fiscal_year(
+				self.get(date_field),
+				company=self.company,
+				label=self.meta.get_label(date_field),
+			)
 
 	def validate_party_accounts(self):
 		if self.doctype not in ("Sales Invoice", "Purchase Invoice"):
@@ -3484,8 +3511,18 @@ def get_common_query(
 				common_filter_conditions.append(payment_entry.cost_center == condition["cost_center"])
 
 			if condition.get("accounting_dimensions"):
+				apply_strict_user_permissions = frappe.get_system_settings("apply_strict_user_permissions")
 				for field, val in condition.get("accounting_dimensions").items():
-					common_filter_conditions.append(payment_entry[field] == val)
+					if isinstance(val, list | tuple | set):
+						value_condition = payment_entry[field].isin(val)
+						if apply_strict_user_permissions:
+							common_filter_conditions.append(value_condition)
+						else:
+							common_filter_conditions.append(
+								(IfNull(payment_entry[field], "") == "") | value_condition
+							)
+					else:
+						common_filter_conditions.append(payment_entry[field] == val)
 
 			if condition.get("minimum_payment_amount"):
 				common_filter_conditions.append(
@@ -3836,6 +3873,7 @@ def validate_and_delete_children(parent, data, ordered_item=None) -> bool:
 
 	for d in deleted_children:
 		validate_child_on_delete(d, parent, ordered_item)
+		d.flags.ignore_permissions = True
 		d.cancel()
 		d.delete()
 
@@ -4146,6 +4184,7 @@ def update_child_qty_rate(
 					#  if rate is greater than price_list_rate, set margin
 					#  or set discount
 					child_item.discount_percentage = 0
+					child_item.discount_amount = 0
 					child_item.margin_type = "Amount"
 					child_item.margin_rate_or_amount = flt(
 						child_item.rate - child_item.price_list_rate,
@@ -4153,14 +4192,11 @@ def update_child_qty_rate(
 					)
 					child_item.rate_with_margin = child_item.rate
 				else:
-					child_item.discount_percentage = flt(
-						(1 - flt(child_item.rate) / flt(child_item.price_list_rate)) * 100.0,
-						child_item.precision("discount_percentage"),
-					)
-					child_item.discount_amount = flt(child_item.price_list_rate) - flt(child_item.rate)
 					child_item.margin_type = ""
 					child_item.margin_rate_or_amount = 0
-					child_item.rate_with_margin = 0
+					child_item.rate_with_margin = child_item.price_list_rate
+					child_item.discount_percentage = 0
+					child_item.discount_amount = flt(child_item.rate_with_margin) - flt(child_item.rate)
 
 		child_item.flags.ignore_validate_update_after_submit = True
 		if new_child_flag:

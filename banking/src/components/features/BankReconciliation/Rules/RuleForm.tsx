@@ -11,6 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { H4, Paragraph } from "@/components/ui/typography"
 import { today } from "@/lib/date"
+import { evaluateAmountFormula } from "@/lib/amountFormula"
 import _ from "@/lib/translate"
 import { cn } from "@/lib/utils"
 import { BankTransactionRule } from "@/types/Accounts/BankTransactionRule"
@@ -445,11 +446,10 @@ const AmountFormulaRenderer = ({ value }: { value?: string }) => {
     // If it's a string and cannot be a number, then show it as a formula
 
     if (isNaN(Number(value))) {
-
         let calculatedValue = "";
 
         try {
-            calculatedValue = window.eval(`const transaction_amount = 200; ${value}`);
+            calculatedValue = String(evaluateAmountFormula(value ?? "", 200));
         } catch (error: unknown) {
             console.error(error);
             calculatedValue = "Error";

@@ -2,7 +2,7 @@
 # See license.txt
 
 
-from unittest.mock import MagicMock, call
+from unittest.mock import MagicMock, call, patch
 
 import frappe
 from frappe.utils import add_days, add_to_date, now, nowdate, today
@@ -13,7 +13,11 @@ from erpnext.controllers.stock_controller import create_item_wise_repost_entries
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import (
+	REPOSTING_JOB_ID_PREFIX,
+	enqueue_reposting_entry,
+	execute_reposting_entry,
 	in_configured_timeslot,
+	run_parallel_reposting,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.tests.test_utils import StockTestMixin
@@ -195,6 +199,7 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 	@ERPNextTestSuite.change_settings("Stock Reposting Settings", {"item_based_reposting": 0})
 	def test_prevention_of_cancelled_transaction_riv(self):
 		frappe.flags.dont_execute_stock_reposts = True
+		self.addCleanup(frappe.flags.pop, "dont_execute_stock_reposts")
 
 		item = make_item()
 		warehouse = "_Test Warehouse - _TC"
@@ -419,6 +424,62 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 		self.assertRaises(frappe.ValidationError, riv.save)
 		doc.cancel()
 
+	def test_recalculate_valuation_rate_for_purchase_receipt(self):
+		item = self.make_item().name
+
+		# receive item at rate 100
+		pr = make_purchase_receipt(item_code=item, qty=1, rate=100)
+		self.assertSLEs(pr, [{"incoming_rate": 100}])
+
+		# change the rate from 100 to 150
+		pr.load_from_db()
+		pr.items[0].db_set(
+			{
+				"base_net_amount": 150,
+				"net_rate": 150,
+			}
+		)
+
+		# repost with recalculate valuation rate
+		riv = frappe.get_doc(
+			doctype="Repost Item Valuation",
+			based_on="Transaction",
+			voucher_type=pr.doctype,
+			voucher_no=pr.name,
+			recalculate_valuation_rate=1,
+			posting_date=pr.posting_date,
+			posting_time=pr.posting_time,
+		)
+		riv.submit()
+
+		# incoming rate after reposting should be 150
+		self.assertSLEs(pr, [{"incoming_rate": 150}])
+
+	def test_recalculate_valuation_rate_for_stock_entry(self):
+		item = self.make_item().name
+
+		# receive item at rate 100
+		se = make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=1, rate=100)
+		self.assertSLEs(se, [{"incoming_rate": 100}])
+
+		# change the rate from 100 to 150
+		se.items[0].db_set("basic_rate", 150)
+
+		# repost with recalculate valuation rate
+		riv = frappe.get_doc(
+			doctype="Repost Item Valuation",
+			based_on="Transaction",
+			voucher_type=se.doctype,
+			voucher_no=se.name,
+			recalculate_valuation_rate=1,
+			posting_date=se.posting_date,
+			posting_time=se.posting_time,
+		)
+		riv.submit()
+
+		# incoming rate after reposting should be 150
+		self.assertSLEs(se, [{"incoming_rate": 150}])
+
 	def test_remove_attached_file(self):
 		item_code = make_item("_Test Remove Attached File Item", properties={"is_stock_item": 1})
 
@@ -453,3 +514,108 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 						"name",
 					)
 				)
+
+	def test_clear_attachment_skips_referenced_data_file(self):
+		riv = frappe.get_doc(
+			{
+				"doctype": "Repost Item Valuation",
+				"based_on": "Item and Warehouse",
+				"company": "_Test Company",
+				"item_code": "_Test Item",
+				"warehouse": "_Test Warehouse - _TC",
+				"posting_date": today(),
+			}
+		).insert(ignore_permissions=True)
+
+		attached = frappe.get_doc(
+			{
+				"doctype": "File",
+				"file_name": "repost_data.json.gz",
+				"content": "test",
+				"attached_to_doctype": riv.doctype,
+				"attached_to_name": riv.name,
+			}
+		).insert(ignore_permissions=True)
+		riv.db_set("reposting_data_file", attached.file_url)
+
+		riv.clear_attachment()
+
+		self.assertFalse(frappe.db.exists("File", attached.name))
+		self.assertIsNone(frappe.db.get_value("Repost Item Valuation", riv.name, "reposting_data_file"))
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Reposting Settings",
+		{"item_based_reposting": 1, "enable_parallel_reposting": 1, "no_of_parallel_reposting": 2},
+	)
+	def test_parallel_reposting_excludes_items_with_active_jobs(self):
+		module = "erpnext.stock.doctype.repost_item_valuation.repost_item_valuation"
+		entries = [
+			frappe._dict(
+				name="RIV-1",
+				based_on="Item and Warehouse",
+				item_code="ITEM-A",
+				repost_only_accounting_ledgers=0,
+			),
+			frappe._dict(
+				name="RIV-2",
+				based_on="Item and Warehouse",
+				item_code="ITEM-A",
+				repost_only_accounting_ledgers=0,
+			),
+			frappe._dict(
+				name="RIV-3", based_on="Transaction", item_code=None, repost_only_accounting_ledgers=0
+			),
+			frappe._dict(
+				name="RIV-4",
+				based_on="Item and Warehouse",
+				item_code="ITEM-B",
+				repost_only_accounting_ledgers=0,
+			),
+			frappe._dict(
+				name="RIV-5",
+				based_on="Item and Warehouse",
+				item_code="ITEM-C",
+				repost_only_accounting_ledgers=0,
+			),
+		]
+
+		with (
+			patch(f"{module}.get_repost_item_valuation_entries", return_value=entries) as entries_mock,
+			patch(f"{module}.get_entries_with_active_jobs", return_value={"RIV-1"}),
+			patch(f"{module}.get_items_with_active_reposting", return_value={"ITEM-A"}),
+			patch(f"{module}.execute_reposting_entry") as execute_mock,
+			patch(f"{module}.enqueue_reposting_entry") as enqueue_mock,
+		):
+			run_parallel_reposting()
+
+		entries_mock.assert_called_once_with(limit=200)
+		execute_mock.assert_called_once_with("RIV-3")
+		enqueue_mock.assert_called_once_with("RIV-4")
+
+	def test_reposting_entry_continues_with_next_batch(self):
+		module = "erpnext.stock.doctype.repost_item_valuation.repost_item_valuation"
+
+		with (
+			patch(f"{module}._execute_reposting_entry", side_effect=Exception("boom")),
+			patch(f"{module}.enqueue_parallel_reposting") as chain_mock,
+		):
+			self.assertRaises(Exception, execute_reposting_entry, "RIV-X", continue_reposting=True)
+
+		chain_mock.assert_called_once()
+
+		with (
+			patch(f"{module}._execute_reposting_entry"),
+			patch(f"{module}.enqueue_parallel_reposting") as chain_mock,
+		):
+			execute_reposting_entry("RIV-X")
+
+		chain_mock.assert_not_called()
+
+	def test_enqueue_reposting_entry_is_deduplicated(self):
+		with patch("frappe.enqueue") as enqueue_mock:
+			enqueue_reposting_entry("RIV-X")
+
+		kwargs = enqueue_mock.call_args.kwargs
+		self.assertEqual(kwargs["job_id"], f"{REPOSTING_JOB_ID_PREFIX}RIV-X")
+		self.assertTrue(kwargs["deduplicate"])
+		self.assertTrue(kwargs["continue_reposting"])

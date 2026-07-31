@@ -1333,6 +1333,301 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		pr.delete()
 
+	def test_valuation_tax_distribution_with_non_stock_item(self):
+		"""When "Allocate Full Amount to Stock Items" is unchecked, a "Valuation and Total"
+		actual charge is distributed across all items by net amount, but only stock/asset items
+		can carry valuation. For a document with 2 stock items + 1 service item (each net 100)
+		and a 30 valuation charge, each item's share is 10; only the two stock items capitalize
+		their share (20 total), so the non-stock item's 10 share must not be capitalized onto the
+		stock items."""
+		company = "_Test Company with perpetual inventory"
+		warehouse = "Stores - TCP1"
+
+		stock_item1 = make_item(properties={"is_stock_item": 1}).name
+		stock_item2 = make_item(properties={"is_stock_item": 1}).name
+		service_item = make_item(properties={"is_stock_item": 0}).name
+
+		pr = frappe.new_doc("Purchase Receipt")
+		pr.company = company
+		pr.supplier = "_Test Supplier"
+		pr.currency = "INR"
+		# Order matters: stock, service, stock (service item in the middle)
+		for code in (stock_item1, service_item, stock_item2):
+			pr.append(
+				"items",
+				{
+					"item_code": code,
+					"qty": 1,
+					"rate": 100,
+					"warehouse": warehouse,
+					"cost_center": "Main - TCP1",
+					"expense_account": "Cost of Goods Sold - TCP1",
+				},
+			)
+
+		pr.append(
+			"taxes",
+			{
+				"charge_type": "Actual",
+				"account_head": "_Test Account Shipping Charges - TCP1",
+				"category": "Valuation and Total",
+				"cost_center": "Main - TCP1",
+				"description": "Valuation Tax",
+				"tax_amount": 30,
+				# Spread across all items (incl. non-stock); do not allocate full amount to stock items
+				"allocate_full_amount_to_stock_items": 0,
+			},
+		)
+
+		pr.insert()
+
+		# 30 tax / 300 net = 10 per item. The two stock items capitalize 10 each; the service
+		# item's 10 share is excluded from valuation (not dumped onto the stock items).
+		self.assertAlmostEqual(pr.items[0].item_tax_amount, 10.0, places=2)
+		self.assertAlmostEqual(pr.items[1].item_tax_amount, 0.0, places=2)
+		self.assertAlmostEqual(pr.items[2].item_tax_amount, 10.0, places=2)
+		self.assertAlmostEqual(pr.items[0].valuation_rate, 110.0, places=2)
+		self.assertAlmostEqual(pr.items[2].valuation_rate, 110.0, places=2)
+
+		pr.submit()
+
+		gl_entries = get_gl_entries("Purchase Receipt", pr.name, skip_cancelled=True, as_dict=True)
+		gl_map = {row.account: row for row in gl_entries}
+
+		warehouse_account = get_warehouse_account_map(company)
+		stock_account = warehouse_account[warehouse]["account"]
+
+		# Stock asset = 200 (goods) + 20 (stock items' share of the valuation tax)
+		self.assertAlmostEqual(gl_map[stock_account].debit, 220.0, places=2)
+		self.assertAlmostEqual(gl_map["Stock Received But Not Billed - TCP1"].credit, 200.0, places=2)
+		# Only the stock items' share (20) is capitalized; the service item's 10 is excluded
+		self.assertAlmostEqual(gl_map["_Test Account Shipping Charges - TCP1"].credit, 20.0, places=2)
+
+	def test_full_actual_charge_capitalized_on_stock_items_only(self):
+		"""When "Allocate Full Amount to Stock Items" is checked (the default), an actual
+		valuation charge such as Freight is fully capitalized onto stock/asset items only. For a
+		document with 2 stock items + 1 service item (each net 100) and a 30 freight charge, the
+		charge is distributed over the 200 stock net only: 15 per stock item, and the entire 30
+		is capitalized (nothing is lost to the non-stock item)."""
+		company = "_Test Company with perpetual inventory"
+		warehouse = "Stores - TCP1"
+
+		stock_item1 = make_item(properties={"is_stock_item": 1}).name
+		stock_item2 = make_item(properties={"is_stock_item": 1}).name
+		service_item = make_item(properties={"is_stock_item": 0}).name
+
+		pr = frappe.new_doc("Purchase Receipt")
+		pr.company = company
+		pr.supplier = "_Test Supplier"
+		pr.currency = "INR"
+		# Order matters: stock, service, stock (service item in the middle)
+		for code in (stock_item1, service_item, stock_item2):
+			pr.append(
+				"items",
+				{
+					"item_code": code,
+					"qty": 1,
+					"rate": 100,
+					"warehouse": warehouse,
+					"cost_center": "Main - TCP1",
+					"expense_account": "Cost of Goods Sold - TCP1",
+				},
+			)
+
+		pr.append(
+			"taxes",
+			{
+				"charge_type": "Actual",
+				"account_head": "_Test Account Shipping Charges - TCP1",
+				"category": "Valuation and Total",
+				"cost_center": "Main - TCP1",
+				"description": "Freight",
+				"tax_amount": 30,
+				# Default behavior: allocate the full amount to stock/asset items only
+				"allocate_full_amount_to_stock_items": 1,
+			},
+		)
+
+		pr.insert()
+
+		# 30 freight / 200 stock net = 15 per stock item. The service item carries nothing.
+		self.assertAlmostEqual(pr.items[0].item_tax_amount, 15.0, places=2)
+		self.assertAlmostEqual(pr.items[1].item_tax_amount, 0.0, places=2)
+		self.assertAlmostEqual(pr.items[2].item_tax_amount, 15.0, places=2)
+		self.assertAlmostEqual(pr.items[0].valuation_rate, 115.0, places=2)
+		self.assertAlmostEqual(pr.items[2].valuation_rate, 115.0, places=2)
+
+		pr.submit()
+
+		gl_entries = get_gl_entries("Purchase Receipt", pr.name, skip_cancelled=True, as_dict=True)
+		gl_map = {row.account: row for row in gl_entries}
+
+		warehouse_account = get_warehouse_account_map(company)
+		stock_account = warehouse_account[warehouse]["account"]
+
+		# Stock asset = 200 (goods) + 30 (the entire freight charge)
+		self.assertAlmostEqual(gl_map[stock_account].debit, 230.0, places=2)
+		self.assertAlmostEqual(gl_map["Stock Received But Not Billed - TCP1"].credit, 200.0, places=2)
+		# The whole freight charge (30) is capitalized
+		self.assertAlmostEqual(gl_map["_Test Account Shipping Charges - TCP1"].credit, 30.0, places=2)
+
+	def test_actual_charge_distribution_with_both_allocation_modes(self):
+		"""Both allocation modes can coexist on the same document, and each item's share from
+		each charge adds up. For 2 stock items + 1 service item (each net 100):
+		- a 30 charge with the flag unchecked spreads over all 3 items (10 each); the service
+		  item's 10 is not capitalized, so each stock item keeps 10.
+		- a 20 charge with the flag checked spreads over the 2 stock items only (10 each).
+		So each stock item carries 10 + 10 = 20, and the service item carries nothing."""
+		company = "_Test Company with perpetual inventory"
+		warehouse = "Stores - TCP1"
+
+		stock_item1 = make_item(properties={"is_stock_item": 1}).name
+		stock_item2 = make_item(properties={"is_stock_item": 1}).name
+		service_item = make_item(properties={"is_stock_item": 0}).name
+
+		pr = frappe.new_doc("Purchase Receipt")
+		pr.company = company
+		pr.supplier = "_Test Supplier"
+		pr.currency = "INR"
+		# Order matters: stock, service, stock (service item in the middle)
+		for code in (stock_item1, service_item, stock_item2):
+			pr.append(
+				"items",
+				{
+					"item_code": code,
+					"qty": 1,
+					"rate": 100,
+					"warehouse": warehouse,
+					"cost_center": "Main - TCP1",
+					"expense_account": "Cost of Goods Sold - TCP1",
+				},
+			)
+
+		# Spread across all items (service share dropped)
+		pr.append(
+			"taxes",
+			{
+				"charge_type": "Actual",
+				"account_head": "_Test Account Shipping Charges - TCP1",
+				"category": "Valuation and Total",
+				"cost_center": "Main - TCP1",
+				"description": "Valuation Tax",
+				"tax_amount": 30,
+				"allocate_full_amount_to_stock_items": 0,
+			},
+		)
+		# Allocate the full amount to stock items only
+		pr.append(
+			"taxes",
+			{
+				"charge_type": "Actual",
+				"account_head": "_Test Account Customs Duty - TCP1",
+				"category": "Valuation and Total",
+				"cost_center": "Main - TCP1",
+				"description": "Freight",
+				"tax_amount": 20,
+				"allocate_full_amount_to_stock_items": 1,
+			},
+		)
+
+		pr.insert()
+
+		# Each stock item: 10 (all-items charge) + 10 (stock-only charge) = 20
+		self.assertAlmostEqual(pr.items[0].item_tax_amount, 20.0, places=2)
+		self.assertAlmostEqual(pr.items[1].item_tax_amount, 0.0, places=2)
+		self.assertAlmostEqual(pr.items[2].item_tax_amount, 20.0, places=2)
+		self.assertAlmostEqual(pr.items[0].valuation_rate, 120.0, places=2)
+		self.assertAlmostEqual(pr.items[2].valuation_rate, 120.0, places=2)
+
+		pr.submit()
+
+		gl_entries = get_gl_entries("Purchase Receipt", pr.name, skip_cancelled=True, as_dict=True)
+		gl_map = {row.account: row for row in gl_entries}
+
+		warehouse_account = get_warehouse_account_map(company)
+		stock_account = warehouse_account[warehouse]["account"]
+
+		# Stock asset = 200 (goods) + 20 (stock share of the spread charge) + 20 (the full freight)
+		self.assertAlmostEqual(gl_map[stock_account].debit, 240.0, places=2)
+		self.assertAlmostEqual(gl_map["Stock Received But Not Billed - TCP1"].credit, 200.0, places=2)
+		# Only the stock items' 20 share of the spread charge is capitalized (service 10 excluded)
+		self.assertAlmostEqual(gl_map["_Test Account Shipping Charges - TCP1"].credit, 20.0, places=2)
+		# The whole freight charge (20) is capitalized
+		self.assertAlmostEqual(gl_map["_Test Account Customs Duty - TCP1"].credit, 20.0, places=2)
+
+	def test_multiple_actual_charges_per_item_matches_gl_per_account(self):
+		"""With multiple "Actual" valuation charges over unevenly valued stock items, each charge
+		is distributed individually so the per-item item_tax_amount decomposes exactly into the
+		per-tax-row amount capitalized in the GL (no rounding drift between the two paths).
+
+		2 stock items with net 100 and 200 (total 300), and two freight charges of 10 each, both
+		flagged to capitalize fully onto stock items. Distributing each charge separately gives
+		item1 = round(100/300*10) * 2 = 3.33 * 2 = 6.66 and item2 = 6.67 * 2 = 13.34. Pooling the
+		two charges into 20 first and spreading the aggregate would instead put 6.67 on item1,
+		which no longer matches the 3.33 + 3.33 implied by the two per-account GL credits."""
+		company = "_Test Company with perpetual inventory"
+		warehouse = "Stores - TCP1"
+
+		stock_item1 = make_item(properties={"is_stock_item": 1}).name
+		stock_item2 = make_item(properties={"is_stock_item": 1}).name
+
+		pr = frappe.new_doc("Purchase Receipt")
+		pr.company = company
+		pr.supplier = "_Test Supplier"
+		pr.currency = "INR"
+		for code, rate in ((stock_item1, 100), (stock_item2, 200)):
+			pr.append(
+				"items",
+				{
+					"item_code": code,
+					"qty": 1,
+					"rate": rate,
+					"warehouse": warehouse,
+					"cost_center": "Main - TCP1",
+					"expense_account": "Cost of Goods Sold - TCP1",
+				},
+			)
+
+		for account, amount in (
+			("_Test Account Shipping Charges - TCP1", 10),
+			("_Test Account Customs Duty - TCP1", 10),
+		):
+			pr.append(
+				"taxes",
+				{
+					"charge_type": "Actual",
+					"account_head": account,
+					"category": "Valuation and Total",
+					"cost_center": "Main - TCP1",
+					"description": account,
+					"tax_amount": amount,
+					"allocate_full_amount_to_stock_items": 1,
+				},
+			)
+
+		pr.insert()
+
+		# Each charge spread on its own: 3.33 + 3.33 = 6.66 and 6.67 + 6.67 = 13.34 (total 20)
+		self.assertAlmostEqual(pr.items[0].item_tax_amount, 6.66, places=2)
+		self.assertAlmostEqual(pr.items[1].item_tax_amount, 13.34, places=2)
+		self.assertAlmostEqual(pr.items[0].valuation_rate, 106.66, places=2)
+		self.assertAlmostEqual(pr.items[1].valuation_rate, 213.34, places=2)
+
+		pr.submit()
+
+		gl_entries = get_gl_entries("Purchase Receipt", pr.name, skip_cancelled=True, as_dict=True)
+		gl_map = {row.account: row for row in gl_entries}
+
+		warehouse_account = get_warehouse_account_map(company)
+		stock_account = warehouse_account[warehouse]["account"]
+
+		# Stock asset = 300 (goods) + 10 + 10 (both freight charges fully capitalized)
+		self.assertAlmostEqual(gl_map[stock_account].debit, 320.0, places=2)
+		self.assertAlmostEqual(gl_map["Stock Received But Not Billed - TCP1"].credit, 300.0, places=2)
+		# Each charge is credited in full to its own account
+		self.assertAlmostEqual(gl_map["_Test Account Shipping Charges - TCP1"].credit, 10.0, places=2)
+		self.assertAlmostEqual(gl_map["_Test Account Customs Duty - TCP1"].credit, 10.0, places=2)
+
 	def test_po_to_pi_and_po_to_pr_worflow_full(self):
 		"""Test following behaviour:
 		- Create PO
@@ -1680,6 +1975,92 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		).run(as_dict=True)
 
 		self.assertEqual(query[0].value, 0)
+
+	def test_internal_transfer_pr_incoming_sle_anchored_to_dn_rate(self):
+		"""Internal-transfer PR's inward SLE must use DN.incoming_rate even when
+		PR.item.valuation_rate was wrong at submit, so divisional_loss does not
+		leak to COGS."""
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.stock_ledger import update_entries_after
+
+		prepare_data_for_internal_transfer()
+		customer = "_Test Internal Customer 2"
+		company = "_Test Company with perpetual inventory"
+
+		from_warehouse = create_warehouse("_Test Drift From", company=company)
+		transit_warehouse = create_warehouse("_Test Drift Transit", company=company)
+		to_warehouse = create_warehouse("_Test Drift Receiver", company=company)
+		item_doc = create_item("Test Internal Drift Item")
+
+		make_purchase_receipt(
+			item_code=item_doc.name,
+			company=company,
+			posting_date=add_days(today(), -1),
+			warehouse=from_warehouse,
+			qty=10,
+			rate=100,
+		)
+
+		dn = create_delivery_note(
+			item_code=item_doc.name,
+			company=company,
+			customer=customer,
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=1,
+			rate=100,
+			warehouse=from_warehouse,
+			target_warehouse=transit_warehouse,
+		)
+		self.assertEqual(flt(dn.items[0].incoming_rate), 100.0)
+
+		pr = make_inter_company_purchase_receipt(dn.name)
+		pr.items[0].warehouse = to_warehouse
+		pr.submit()
+
+		# Simulate the failure path
+		frappe.db.set_value(
+			"Purchase Receipt Item",
+			pr.items[0].name,
+			{"sales_incoming_rate": 0, "valuation_rate": 80},
+		)
+		inward_sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{
+				"voucher_type": "Purchase Receipt",
+				"voucher_no": pr.name,
+				"warehouse": to_warehouse,
+				"is_cancelled": 0,
+			},
+			["name", "item_code", "warehouse", "posting_date", "posting_time", "creation"],
+			as_dict=True,
+		)
+		frappe.db.set_value(
+			"Stock Ledger Entry",
+			inward_sle.name,
+			{"incoming_rate": 80, "stock_value_difference": 80},
+		)
+
+		update_entries_after(
+			{
+				"item_code": inward_sle.item_code,
+				"warehouse": inward_sle.warehouse,
+				"posting_date": inward_sle.posting_date,
+				"posting_time": inward_sle.posting_time,
+				"sle_id": inward_sle.name,
+				"creation": inward_sle.creation,
+			}
+		)
+
+		refreshed = frappe.db.get_value(
+			"Stock Ledger Entry",
+			inward_sle.name,
+			["incoming_rate", "stock_value_difference"],
+			as_dict=True,
+		)
+		self.assertEqual(flt(refreshed.incoming_rate), 100.0)
+		self.assertEqual(flt(refreshed.stock_value_difference), 100.0)
 
 	def test_backdated_transaction_for_internal_transfer_in_trasit_warehouse_for_purchase_invoice(
 		self,
@@ -2753,11 +3134,14 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		old_perpetual_inventory = erpnext.is_perpetual_inventory_enabled("_Test Company")
 		frappe.local.enable_perpetual_inventory["_Test Company"] = 1
+		old_inventory_account = frappe.db.get_value("Company", "_Test Company", "default_inventory_account")
 		frappe.db.set_value(
 			"Company",
 			"_Test Company",
-			"stock_received_but_not_billed",
-			"Stock Received But Not Billed - _TC",
+			{
+				"stock_received_but_not_billed": "Stock Received But Not Billed - _TC",
+				"default_inventory_account": "Stock In Hand - _TC",
+			},
 		)
 
 		pr = make_purchase_receipt(qty=10, rate=1000, do_not_submit=1)
@@ -2793,6 +3177,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		)
 		self.assertCountEqual(expected_gle, gl_entries)
 		frappe.local.enable_perpetual_inventory["_Test Company"] = old_perpetual_inventory
+		frappe.db.set_value("Company", "_Test Company", "default_inventory_account", old_inventory_account)
 
 	def test_purchase_receipt_with_use_serial_batch_field_for_rejected_qty(self):
 		batch_item = make_item(
@@ -4744,6 +5129,14 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(srbnb_cost, 1000)
 
 	def test_purchase_expense_account(self):
+		# Single, so it outlives this test - every later Purchase Receipt / Invoice would otherwise
+		# be forced to resolve the expense account pair and throw for unconfigured companies.
+		previous = frappe.db.get_single_value("Accounts Settings", "book_stock_expense_gl_entries")
+		self.addCleanup(
+			frappe.db.set_single_value, "Accounts Settings", "book_stock_expense_gl_entries", previous
+		)
+		frappe.db.set_single_value("Accounts Settings", "book_stock_expense_gl_entries", 1)
+
 		item = "Test Item with Purchase Expense Account"
 		make_item(item, {"is_stock_item": 1})
 		company = "_Test Company with perpetual inventory"
@@ -5790,6 +6183,32 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		gl_entries = get_gl_entries("Purchase Receipt", pr.name, skip_cancelled=True)
 		srbnb_credit = sum(flt(row.credit) for row in gl_entries if row.account == srbnb_account)
 		self.assertAlmostEqual(srbnb_credit, pi_base_net_amount, places=2)
+
+	def test_cancel_blocked_by_submitted_invoice_rolls_back(self):
+		"""A submitted Purchase Invoice must block cancelling its Purchase Receipt. Frappe's backlink
+		check rejects the cancel only after on_cancel has run stock, GL, and status work, so the whole
+		transaction has to roll back: the receipt stays submitted with no leaked ledger entries."""
+		pr = make_purchase_receipt()
+		pi = make_purchase_invoice(pr.name)
+		pi.insert()
+		pi.submit()
+
+		pr.reload()
+		status_before = pr.status
+		sle_before = frappe.db.count("Stock Ledger Entry", {"voucher_no": pr.name})
+		gle_before = frappe.db.count("GL Entry", {"voucher_no": pr.name})
+
+		frappe.db.savepoint("before_blocked_cancel")
+		with self.assertRaises(frappe.LinkExistsError) as cm:
+			pr.cancel()
+		self.assertIn(pi.name, str(cm.exception))
+		frappe.db.rollback(save_point="before_blocked_cancel")  # mimic the request-level rollback
+
+		pr.reload()
+		self.assertEqual(pr.docstatus, 1)
+		self.assertEqual(pr.status, status_before)
+		self.assertEqual(frappe.db.count("Stock Ledger Entry", {"voucher_no": pr.name}), sle_before)
+		self.assertEqual(frappe.db.count("GL Entry", {"voucher_no": pr.name}), gle_before)
 
 
 def create_asset_category_for_pr_test():

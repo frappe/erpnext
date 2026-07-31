@@ -19,6 +19,7 @@ from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger 
 	validate_docs_for_voucher_types,
 )
 from erpnext.accounts.doctype.tax_withholding_entry.tax_withholding_entry import JournalTaxWithholding
+from erpnext.accounts.general_ledger import validate_opening_entry_against_pcv
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.utils import (
 	cancel_exchange_gain_loss_journal,
@@ -130,6 +131,9 @@ class JournalEntry(AccountsController):
 
 		if not self.is_opening:
 			self.is_opening = "No"
+
+		if self.is_opening == "Yes":
+			validate_opening_entry_against_pcv(self.company)
 
 		self.clearance_date = None
 
@@ -413,11 +417,12 @@ class JournalEntry(AccountsController):
 
 	def update_journal_entry_link_on_depr_schedule(self, asset, je_row):
 		depr_schedule = get_depr_schedule(asset.name, "Active", self.finance_book)
+		precision = je_row.precision("debit")
 		for d in depr_schedule or []:
 			if (
 				d.schedule_date == self.posting_date
 				and not d.journal_entry
-				and d.depreciation_amount == flt(je_row.debit)
+				and flt(d.depreciation_amount, precision) == flt(je_row.debit, precision)
 			):
 				frappe.db.set_value("Depreciation Schedule", d.name, "journal_entry", self.name)
 

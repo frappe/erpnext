@@ -28,7 +28,8 @@
   "detected_transaction_starting_index",
   "detected_transaction_ending_index",
   "section_break_yulq",
-  "column_mapping"
+  "column_mapping",
+  "pdf_tables"
  ],
  "fields": [
   {
@@ -53,7 +54,6 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Closing Balance",
-   "non_negative": 1,
    "options": "currency"
   },
   {
@@ -129,6 +129,13 @@
    "options": "Bank Statement Import Log Column Map"
   },
   {
+   "description": "Per-table extraction data for PDF statements (rows, bbox, page image, column mapping). Edited via the banking app.",
+   "fieldname": "pdf_tables",
+   "fieldtype": "JSON",
+   "label": "PDF Tables",
+   "read_only": 1
+  },
+  {
    "default": "Not Started",
    "fieldname": "status",
    "fieldtype": "Select",
@@ -183,7 +190,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-05-08 17:55:25.615942",
+ "modified": "2026-07-09 17:55:25.615942",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Statement Import Log",

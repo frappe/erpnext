@@ -8,7 +8,6 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname, revert_series_if_last
-from frappe.query_builder.functions import CurDate, Sum
 from frappe.utils import cint, flt, get_link_to_form
 from frappe.utils.data import add_days
 
@@ -94,6 +93,7 @@ class Batch(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+		allow_negative_stock_for_batch: DF.Check
 		batch_id: DF.Data
 		batch_qty: DF.Float
 		description: DF.SmallText | None
@@ -296,7 +296,7 @@ def get_batches_by_oldest(item_code, warehouse):
 	"""Returns the oldest batch and qty for the given item_code and warehouse"""
 	batches = get_batch_qty(item_code=item_code, warehouse=warehouse)
 	batches_dates = [[batch, frappe.get_value("Batch", batch.batch_no, "expiry_date")] for batch in batches]
-	batches_dates.sort(key=lambda tup: tup[1])
+	batches_dates.sort(key=lambda tup: (tup[1] is None, tup[1]))
 	return batches_dates
 
 
@@ -377,50 +377,6 @@ def make_batch_bundle(
 		.make_serial_and_batch_bundle()
 		.name
 	)
-
-
-def get_batches(item_code, warehouse, qty=1, throw=False, serial_no=None):
-	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-
-	batch = frappe.qb.DocType("Batch")
-	sle = frappe.qb.DocType("Stock Ledger Entry")
-
-	query = (
-		frappe.qb.from_(batch)
-		.join(sle)
-		.on(batch.batch_id == sle.batch_no)
-		.select(
-			batch.batch_id,
-			Sum(sle.actual_qty).as_("qty"),
-		)
-		.where(
-			(sle.item_code == item_code)
-			& (sle.warehouse == warehouse)
-			& (sle.is_cancelled == 0)
-			& ((batch.expiry_date >= CurDate()) | (batch.expiry_date.isnull()))
-		)
-		.groupby(batch.batch_id)
-		.orderby(batch.expiry_date, batch.creation)
-	)
-
-	if serial_no and frappe.get_cached_value("Item", item_code, "has_batch_no"):
-		serial_nos = get_serial_nos(serial_no)
-		batches = frappe.get_all(
-			"Serial No",
-			fields=["batch_no"],
-			filters={"item_code": item_code, "warehouse": warehouse, "name": ("in", serial_nos)},
-			distinct=True,
-		)
-
-		if not batches:
-			validate_serial_no_with_batch(serial_nos, item_code)
-
-		if batches and len(batches) > 1:
-			return []
-
-		query = query.where(batch.name == batches[0].batch_no)
-
-	return query.run(as_dict=True)
 
 
 def validate_serial_no_with_batch(serial_nos, item_code):

@@ -1730,6 +1730,118 @@ class TestProductionPlan(ERPNextTestSuite):
 				self.assertTrue(row.warehouse == mrp_warhouse)
 				self.assertEqual(row.quantity, 12.0)
 
+	def test_purchase_uom_falls_back_to_uom_conversion_factor(self):
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+
+		if not frappe.db.exists("UOM Conversion Factor", {"from_uom": "Kg", "to_uom": "Gram"}):
+			frappe.get_doc(
+				doctype="UOM Conversion Factor",
+				category="Mass",
+				from_uom="Kg",
+				to_uom="Gram",
+				value=1000,
+			).insert()
+
+		rm = make_item("Test RM Item Global CF", {"is_stock_item": 1, "stock_uom": "Gram"})
+		rm.purchase_uom = "Kg"
+		rm.save()
+		self.assertFalse([row for row in rm.uoms if row.uom == "Kg"])
+
+		bom_tree = {"Test FG Item Global CF": {rm.name: {}}}
+		parent_bom = create_nested_bom(bom_tree, prefix="")
+
+		plan = create_production_plan(
+			item_code=parent_bom.item,
+			planned_qty=2000,
+			ignore_existing_ordered_qty=1,
+			skip_getting_mr_items=1,
+			do_not_submit=1,
+			warehouse="_Test Warehouse - _TC",
+		)
+		plan.for_warehouse = "_Test Warehouse - _TC"
+
+		items = get_items_for_material_requests(
+			plan.as_dict(), warehouses=[{"warehouse": "_Test Warehouse - _TC"}]
+		)
+
+		row = frappe._dict(next(item for item in items if item["item_code"] == rm.name))
+		self.assertEqual(row.uom, "Kg")
+		self.assertEqual(row.conversion_factor, 1000)
+		self.assertEqual(row.quantity, 2)
+
+	def test_variant_inherits_purchase_uom_conversion_factor_of_template(self):
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+
+		template = make_item(
+			"TRMVCF",
+			{
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"has_variants": 1,
+				"attributes": [{"attribute": "Colour"}],
+			},
+		)
+		if not [row for row in template.uoms if row.uom == "Box"]:
+			template.purchase_uom = "Box"
+			template.append("uoms", {"uom": "Box", "conversion_factor": 12})
+			template.save()
+
+		if not frappe.db.exists("Item", "TRMVCF-RED"):
+			create_variant("TRMVCF", {"Colour": "Red"}).insert()
+
+		variant = frappe.get_doc("Item", "TRMVCF-RED")
+		variant.uoms = [row for row in variant.uoms if row.uom != "Box"]
+		variant.purchase_uom = "Box"
+		variant.save()
+
+		bom_tree = {"Test FG Item Variant CF": {variant.name: {}}}
+		parent_bom = create_nested_bom(bom_tree, prefix="")
+
+		plan = create_production_plan(
+			item_code=parent_bom.item,
+			planned_qty=24,
+			ignore_existing_ordered_qty=1,
+			skip_getting_mr_items=1,
+			do_not_submit=1,
+			warehouse="_Test Warehouse - _TC",
+		)
+		plan.for_warehouse = "_Test Warehouse - _TC"
+
+		items = get_items_for_material_requests(
+			plan.as_dict(), warehouses=[{"warehouse": "_Test Warehouse - _TC"}]
+		)
+
+		row = frappe._dict(next(item for item in items if item["item_code"] == variant.name))
+		self.assertEqual(row.conversion_factor, 12)
+		self.assertEqual(row.quantity, 2)
+
+	def test_missing_purchase_uom_conversion_factor_throws(self):
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+
+		rm = make_item("Test RM Item Missing CF", {"is_stock_item": 1, "stock_uom": "Nos"})
+		rm.purchase_uom = "Box"
+		rm.save()
+
+		bom_tree = {"Test FG Item Missing CF": {rm.name: {}}}
+		parent_bom = create_nested_bom(bom_tree, prefix="")
+
+		plan = create_production_plan(
+			item_code=parent_bom.item,
+			planned_qty=10,
+			ignore_existing_ordered_qty=1,
+			skip_getting_mr_items=1,
+			do_not_submit=1,
+			warehouse="_Test Warehouse - _TC",
+		)
+		plan.for_warehouse = "_Test Warehouse - _TC"
+
+		with self.assertRaises(frappe.ValidationError) as error:
+			get_items_for_material_requests(
+				plan.as_dict(), warehouses=[{"warehouse": "_Test Warehouse - _TC"}]
+			)
+
+		self.assertIn("UOM Conversion factor", str(error.exception))
+
 	def test_mr_qty_for_complex_bom(self):
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
@@ -2030,6 +2142,18 @@ class TestProductionPlan(ERPNextTestSuite):
 		for d in mr_items:
 			self.assertEqual(d.get("quantity"), 1000.0)
 
+		source_warehouse = create_warehouse("MOQ Source Warehouse", company="_Test Company")
+		make_stock_entry(item_code=rm_item, qty=7, rate=100, target=source_warehouse)
+
+		pln.ignore_existing_ordered_qty = 1
+		mr_items = get_items_for_material_requests(
+			pln.as_dict(), warehouses=[{"warehouse": source_warehouse}]
+		)
+		self.assertEqual(len(mr_items), 2)
+		items_by_type = {d.get("material_request_type"): d for d in mr_items}
+		self.assertEqual(items_by_type["Material Transfer"].get("quantity"), 7.0)
+		self.assertEqual(items_by_type["Purchase"].get("quantity"), 1000.0)
+
 	def test_fg_item_quantity(self):
 		fg_item = make_item(properties={"is_stock_item": 1}).name
 		rm_item = make_item(properties={"is_stock_item": 1}).name
@@ -2320,6 +2444,145 @@ class TestProductionPlan(ERPNextTestSuite):
 		sre = StockReservation(plan)
 		reserved_entries = sre.get_reserved_entries("Production Plan", plan.name)
 		self.assertTrue(len(reserved_entries) == 0)
+		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 0)
+
+	def test_no_stock_reservation_via_purchase_receipt_when_reserve_stock_disabled(self):
+		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+		from erpnext.stock.doctype.material_request.material_request import make_purchase_order
+
+		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 1)
+		frappe.db.set_single_value("Stock Settings", "auto_reserve_stock", 0)
+
+		bom_tree = {"FG For SR No Auto Reserve": {"RM For SR No Auto Reserve": {}}}
+		parent_bom = create_nested_bom(bom_tree, prefix="")
+
+		warehouse = "_Test Warehouse - _TC"
+
+		# reserve_stock is deliberately left unset (defaults to 0): this is what happens when
+		# "Auto Reserve Stock" is off and nobody ticks "Reserve Stock" on the Production Plan by hand.
+		plan = create_production_plan(
+			item_code=parent_bom.item,
+			planned_qty=5,
+			ignore_existing_ordered_qty=1,
+			do_not_submit=1,
+			warehouse=warehouse,
+			for_warehouse=warehouse,
+		)
+		plan.get_sub_assembly_items()
+		plan.set("mr_items", [])
+		for d in get_items_for_material_requests(plan.as_dict()):
+			plan.append("mr_items", d)
+		plan.save()
+
+		self.assertEqual(plan.reserve_stock, 0)
+		plan.submit()
+
+		plan.submit_material_request = 1
+		plan.make_material_request()
+
+		material_requests = frappe.get_all(
+			"Material Request", filters={"production_plan": plan.name}, pluck="name"
+		)
+		self.assertGreater(len(material_requests), 0)
+
+		for mr_name in list(set(material_requests)):
+			po = make_purchase_order(mr_name)
+			po.supplier = "_Test Supplier"
+			po.submit()
+
+			pr = make_purchase_receipt(po.name)
+			pr.submit()
+
+		sre = StockReservation(plan)
+		reserved_entries = sre.get_reserved_entries("Production Plan", plan.name)
+		self.assertEqual(len(reserved_entries), 0)
+
+		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 0)
+
+	def test_stock_reservation_ignores_production_plans_with_reserve_stock_off_on_shared_purchase_order(self):
+		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+
+		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 1)
+		frappe.db.set_single_value("Stock Settings", "auto_reserve_stock", 0)
+
+		warehouse = "_Test Warehouse - _TC"
+
+		bom_reserve = create_nested_bom({"FG SR Mixed Reserve": {"RM SR Mixed Reserve": {}}}, prefix="")
+		bom_skip = create_nested_bom({"FG SR Mixed Skip": {"RM SR Mixed Skip": {}}}, prefix="")
+
+		def make_submitted_plan(item_code, reserve_stock):
+			plan = create_production_plan(
+				item_code=item_code,
+				planned_qty=5,
+				ignore_existing_ordered_qty=1,
+				do_not_submit=1,
+				warehouse=warehouse,
+				for_warehouse=warehouse,
+				reserve_stock=reserve_stock,
+			)
+			plan.get_sub_assembly_items()
+			plan.set("mr_items", [])
+			for d in get_items_for_material_requests(plan.as_dict()):
+				plan.append("mr_items", d)
+			plan.save()
+			plan.submit()
+			plan.submit_material_request = 1
+			plan.make_material_request()
+			return plan
+
+		plan_reserve = make_submitted_plan(bom_reserve.item, reserve_stock=1)
+		plan_skip = make_submitted_plan(bom_skip.item, reserve_stock=0)
+
+		self.assertEqual(plan_reserve.reserve_stock, 1)
+		self.assertEqual(plan_skip.reserve_stock, 0)
+
+		mr_reserve = frappe.get_all(
+			"Material Request", filters={"production_plan": plan_reserve.name}, pluck="name"
+		)[0]
+		mr_skip = frappe.get_all(
+			"Material Request", filters={"production_plan": plan_skip.name}, pluck="name"
+		)[0]
+
+		# One Purchase Order pulling rows from both Material Requests, so the Purchase Receipt made
+		# from it has both a reservable and a non-reservable Production Plan reference in `doc.items`.
+		po = frappe.new_doc("Purchase Order")
+		po.supplier = "_Test Supplier"
+		po.company = plan_reserve.company
+		po.schedule_date = nowdate()
+
+		for mr_name in (mr_reserve, mr_skip):
+			mr = frappe.get_doc("Material Request", mr_name)
+			for item in mr.items:
+				po.append(
+					"items",
+					{
+						"item_code": item.item_code,
+						"qty": item.qty,
+						"rate": 100,
+						"schedule_date": nowdate(),
+						"warehouse": warehouse,
+						"material_request": mr.name,
+						"material_request_item": item.name,
+					},
+				)
+
+		po.submit()
+
+		pr = make_purchase_receipt(po.name)
+		pr.submit()
+
+		reserved_for_plan_reserve = StockReservation(plan_reserve).get_reserved_entries(
+			"Production Plan", plan_reserve.name
+		)
+		reserved_for_plan_skip = StockReservation(plan_skip).get_reserved_entries(
+			"Production Plan", plan_skip.name
+		)
+
+		self.assertGreater(len(reserved_for_plan_reserve), 0)
+		self.assertEqual(len(reserved_for_plan_skip), 0)
+
 		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 0)
 
 	def test_stock_reservation_of_serial_nos_against_production_plan(self):

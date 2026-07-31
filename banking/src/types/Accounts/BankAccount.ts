@@ -38,6 +38,8 @@ export interface BankAccount{
 	branch_code?: string
 	/**	Bank Account No : Data	*/
 	bank_account_no?: string
+	/**	Statement PDF Password : Password - Password used to open password-protected PDF statements for this account. Stored encrypted.	*/
+	statement_password?: string
 	/**	Is Credit Card : Check	*/
 	is_credit_card?: 0 | 1
 	/**	Integration ID : Data	*/

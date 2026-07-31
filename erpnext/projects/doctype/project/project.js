@@ -222,6 +222,9 @@ function open_form(frm, doctype, child_doctype, parentfield) {
 		new_child_doc.parenttype = doctype;
 		new_doc[parentfield] = [new_child_doc];
 		new_doc.project = frm.doc.name;
+		if (frm.doc.company) {
+			new_doc.company = frm.doc.company;
+		}
 
 		frappe.ui.form.make_quick_entry(doctype, null, null, new_doc);
 	});

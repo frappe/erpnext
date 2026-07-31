@@ -17,7 +17,12 @@ from frappe.utils.data import (
 )
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
-from erpnext.accounts.doctype.subscription.subscription import Subscription, get_prorata_factor, process_all
+from erpnext.accounts.doctype.subscription.subscription import (
+	Subscription,
+	get_plan_dimensions,
+	get_prorata_factor,
+	process_all,
+)
 from erpnext.accounts.utils import update_subscription_on_invoice_update
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -803,6 +808,48 @@ class TestSubscription(ERPNextTestSuite):
 			generate_invoice_at="Beginning of the current subscription period",
 		)
 		self.assertEqual(len(subscription.invoices), 0)
+
+	def test_plan_dimensions_resolve_from_plan_then_item(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		# Plan-level cost center takes precedence.
+		create_plan(plan_name="_Test Sub Plan CC", cost=100, currency="INR")
+		frappe.db.set_value(
+			"Subscription Plan", "_Test Sub Plan CC", "cost_center", "_Test Cost Center - _TC"
+		)
+		self.assertEqual(
+			get_plan_dimensions("_Test Sub Plan CC", "_Test Company", "Customer").get("cost_center"),
+			"_Test Cost Center - _TC",
+		)
+
+		# No plan cost center: fall back to the item's company default (selling vs buying by party type).
+		item = make_item(
+			"_Test Sub Dimension Item",
+			{
+				"is_stock_item": 0,
+				"item_defaults": [
+					{
+						"company": "_Test Company",
+						"default_warehouse": "_Test Warehouse - _TC",
+						"selling_cost_center": "_Test Cost Center - _TC",
+						"buying_cost_center": "_Test Cost Center 2 - _TC",
+					}
+				],
+			},
+		)
+		create_plan(plan_name="_Test Sub Plan No CC", cost=100, currency="INR", item=item.name)
+
+		self.assertEqual(
+			get_plan_dimensions("_Test Sub Plan No CC", "_Test Company", "Customer").get("cost_center"),
+			"_Test Cost Center - _TC",
+		)
+		self.assertEqual(
+			get_plan_dimensions("_Test Sub Plan No CC", "_Test Company", "Supplier").get("cost_center"),
+			"_Test Cost Center 2 - _TC",
+		)
+
+		# Without a company the item fallback is skipped.
+		self.assertNotIn("cost_center", get_plan_dimensions("_Test Sub Plan No CC"))
 
 
 def make_plans():

@@ -18,6 +18,7 @@ from frappe.utils import cint, cstr, flt, get_link_to_form, getdate, new_line_se
 from erpnext.buying.utils import check_on_hold_or_closed_status, validate_for_items
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
+from erpnext.stock.get_item_details import get_price_list_rate_for
 from erpnext.stock.stock_balance import get_indented_qty, update_bin_qty
 from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import (
 	get_subcontracting_boms_for_finished_goods,
@@ -188,8 +189,46 @@ class MaterialRequest(BuyingController):
 
 		self.validate_pp_qty()
 
+		if self.buying_price_list and not frappe.get_value("Price List", self.buying_price_list, "buying"):
+			self.buying_price_list = None
+
 		if not self.buying_price_list:
-			self.buying_price_list = frappe.defaults.get_defaults().buying_price_list
+			buying_price_list = frappe.defaults.get_defaults().buying_price_list
+			if frappe.has_permission("Price List", "read", buying_price_list):
+				self.buying_price_list = buying_price_list
+
+	def on_update(self):
+		if not self.is_new() and self.buying_price_list and self.has_value_changed("buying_price_list"):
+			self.update_item_rates()
+
+	def update_item_rates(self):
+		price_not_uom_dependent = frappe.get_value(
+			"Price List", self.buying_price_list, "price_not_uom_dependent"
+		)
+		for item in self.items:
+			rate = get_price_list_rate_for(
+				frappe._dict(
+					{
+						"price_list": self.buying_price_list,
+						"uom": item.uom,
+						"transaction_date": self.transaction_date,
+						"qty": item.qty,
+						"stock_uom": item.stock_uom,
+						"conversion_factor": item.conversion_factor,
+						"price_list_uom_dependant": price_not_uom_dependent,
+					}
+				),
+				item.item_code,
+			)
+			if rate is not None:
+				item.db_set({"rate": rate, "amount": flt(rate * item.qty, item.precision("amount"))})
+
+		frappe.msgprint(
+			_("Item rates have been updated based on the selected Buying Price List {0}").format(
+				self.buying_price_list
+			),
+			alert=True,
+		)
 
 	def validate_pp_qty(self):
 		items_from_pp = [item for item in self.items if item.material_request_plan_item]
@@ -717,7 +756,7 @@ def make_supplier_quotation(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def make_stock_entry(source_name, target_doc=None):
+def make_stock_entry(source_name: str, target_doc: str | dict | None = None):
 	def update_item(obj, target, source_parent):
 		qty = (
 			flt(flt(obj.stock_qty) - flt(obj.ordered_qty)) / target.conversion_factor
@@ -753,6 +792,9 @@ def make_stock_entry(source_name, target_doc=None):
 		if source.job_card:
 			target.purpose = "Material Transfer for Manufacture"
 
+		if source.work_order:
+			target.purpose = "Material Transfer for Manufacture"
+
 		if source.material_request_type == "Customer Provided":
 			target.purpose = "Material Receipt"
 
@@ -771,6 +813,18 @@ def make_stock_entry(source_name, target_doc=None):
 				target.bom_no = job_card_details[0].bom_no
 				target.fg_completed_qty = job_card_details[0].for_quantity
 				target.from_bom = 1
+
+		if source.work_order:
+			work_order_details = frappe.db.get_value(
+				"Work Order", source.work_order, ["bom_no", "use_multi_level_bom"], as_dict=True
+			)
+
+			if work_order_details:
+				target.bom_no = work_order_details.bom_no
+				target.use_multi_level_bom = work_order_details.use_multi_level_bom
+				target.from_bom = 1
+				# not fg-qty-driven, mirrors the Pick List -> Stock Entry transfer for this Work Order
+				target.fg_completed_qty = 0
 
 	doclist = get_mapped_doc(
 		"Material Request",

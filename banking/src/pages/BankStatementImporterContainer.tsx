@@ -1,6 +1,7 @@
+import { Suspense } from 'react'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator, BreadcrumbList } from '@/components/ui/breadcrumb'
 import _ from '@/lib/translate'
-import { HomeIcon } from 'lucide-react'
+import { HomeIcon, Loader2Icon } from 'lucide-react'
 import { Link, Outlet } from 'react-router'
 
 const BankStatementImporterContainer = () => {
@@ -29,7 +30,13 @@ const BankStatementImporterContainer = () => {
                     </BreadcrumbList>
                 </Breadcrumb>
             </div>
-            <Outlet />
+            <Suspense fallback={
+                <div className="flex flex-1 items-center justify-center p-16">
+                    <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
+                </div>
+            }>
+                <Outlet />
+            </Suspense>
         </div>
     )
 }

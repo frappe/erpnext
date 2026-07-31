@@ -216,11 +216,8 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 			group = "Customer Group" if filters.get("customer") else "Supplier Group"
 			item_rules_list = frappe.get_all(
 				"Party Specific Item",
-				filters={
-					"party": ["!=", party],
-					"party_type": party_type,
-				},
-				fields=["restrict_based_on", "based_on_value"],
+				filters={"party_type": party_type},
+				fields=["party", "restrict_based_on", "based_on_value"],
 			)
 
 			party_group_rules_list = frappe.get_all(
@@ -229,21 +226,30 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 				fields=["party as party_group", "restrict_based_on", "based_on_value"],
 			)
 			current_party_group = frappe.get_value(party_type, party, frappe.scrub(group))
+
+			restricted_items = defaultdict(set)
+			allowed_items = defaultdict(set)
+
+			for rule in item_rules_list:
+				restrict_based_on = "name" if rule.restrict_based_on == "Item" else rule.restrict_based_on
+
+				if rule.party == party:
+					allowed_items[restrict_based_on].add(rule.based_on_value)
+				else:
+					restricted_items[restrict_based_on].add(rule.based_on_value)
+
 			for rule in party_group_rules_list:
-				if current_party_group != rule.party_group:
-					item_rules_list.append(rule)
+				restrict_based_on = "name" if rule.restrict_based_on == "Item" else rule.restrict_based_on
 
-			filters_dict = {}
-			for rule in item_rules_list:
-				if rule["restrict_based_on"] == "Item":
-					rule["restrict_based_on"] = "name"
-				filters_dict[rule.restrict_based_on] = []
+				if current_party_group == rule.party_group:
+					allowed_items[restrict_based_on].add(rule.based_on_value)
+				else:
+					restricted_items[restrict_based_on].add(rule.based_on_value)
 
-			for rule in item_rules_list:
-				filters_dict[rule.restrict_based_on].append(rule.based_on_value)
-
-			for filter in filters_dict:
-				filters[scrub(filter)] = ["not in", filters_dict[filter]]
+			for field, restricted_values in restricted_items.items():
+				values_to_exclude = restricted_values - allowed_items[field]
+				if values_to_exclude:
+					filters[scrub(field)] = ["not in", list(values_to_exclude)]
 
 			if filters.get("customer"):
 				del filters["customer"]
@@ -326,7 +332,9 @@ def bom(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_project_name(doctype, txt, searchfield, start, page_len, filters):
+def get_project_name(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict | None = None
+):
 	proj = qb.DocType("Project")
 	qb_filter_and_conditions = []
 	qb_filter_or_conditions = []
@@ -341,7 +349,7 @@ def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 		if filters.get("company"):
 			qb_filter_and_conditions.append(proj.company == filters.get("company"))
 
-	qb_filter_and_conditions.append(proj.status.notin(["Completed", "Cancelled"]))
+	qb_filter_and_conditions.append(proj.status.notin(["Completed", "Cancelled", "On hold"]))
 
 	q = qb.from_(proj)
 

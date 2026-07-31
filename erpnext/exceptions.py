@@ -28,3 +28,20 @@ class MandatoryAccountDimensionError(frappe.ValidationError):
 
 class ReportingCurrencyExchangeNotFoundError(frappe.ValidationError):
 	pass
+
+
+# stock
+class QualityInspectionRequiredError(frappe.ValidationError):
+	pass
+
+
+class QualityInspectionRejectedError(frappe.ValidationError):
+	pass
+
+
+class QualityInspectionNotSubmittedError(frappe.ValidationError):
+	pass
+
+
+class BatchExpiredError(frappe.ValidationError):
+	pass

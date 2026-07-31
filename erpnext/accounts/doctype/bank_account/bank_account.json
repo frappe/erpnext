@@ -27,6 +27,7 @@
   "column_break_12",
   "branch_code",
   "bank_account_no",
+  "statement_password",
   "address_and_contact",
   "address_html",
   "column_break_13",
@@ -148,6 +149,12 @@
    "in_list_view": 1,
    "label": "Bank Account No",
    "length": 30
+  },
+  {
+   "description": "Password used to open password-protected PDF statements for this account. Stored encrypted.",
+   "fieldname": "statement_password",
+   "fieldtype": "Password",
+   "label": "Statement PDF Password"
   },
   {
    "fieldname": "address_and_contact",

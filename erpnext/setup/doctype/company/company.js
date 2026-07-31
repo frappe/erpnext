@@ -69,6 +69,17 @@ frappe.ui.form.on("Company", {
 				},
 			};
 		});
+
+		["default_wip_warehouse", "default_fg_warehouse", "default_scrap_warehouse"].forEach((fieldname) => {
+			frm.set_query(fieldname, function (doc) {
+				return {
+					filters: {
+						company: doc.name,
+						is_group: 0,
+					},
+				};
+			});
+		});
 	},
 
 	company_name: function (frm) {
@@ -211,12 +222,11 @@ frappe.ui.form.on("Company", {
 							{
 								fieldtype: "Data",
 								fieldname: "company_name",
-								label: __('Please enter the company name <b>"{0}"</b> to confirm', [
-									frappe.utils.escape_html(frm.doc.name),
-								]),
+								label: __("Please enter the company name to confirm"),
 								reqd: 1,
 								description: __(
-									"Please make sure you really want to delete all the transactions for this company. Your master data will remain as it is. This action cannot be undone."
+									"Please make sure you really want to delete all the transactions for {0}. Your master data will remain as it is. This action cannot be undone.",
+									[frappe.utils.bold(frm.doc.name)]
 								),
 							},
 							function (data) {
@@ -236,7 +246,7 @@ frappe.ui.form.on("Company", {
 									},
 								});
 							},
-							__("Delete all the Transactions for this Company"),
+							__("Delete all the Transactions for {0}", [frappe.utils.bold(frm.doc.name)]),
 							__("Delete")
 						);
 						d.get_primary_btn().addClass("btn-danger");
@@ -308,6 +318,8 @@ erpnext.company.setup_queries = function (frm) {
 			["default_advance_received_account", { root_type: "Liability", account_type: "Receivable" }],
 			["default_advance_paid_account", { root_type: "Asset", account_type: "Payable" }],
 			["service_expense_account", { root_type: "Expense" }],
+			["expenses_added_to_stock_account", { root_type: "Expense" }],
+			["expenses_added_to_stock_contra_account", { root_type: "Expense" }],
 		],
 		function (i, v) {
 			erpnext.company.set_custom_query(frm, v);

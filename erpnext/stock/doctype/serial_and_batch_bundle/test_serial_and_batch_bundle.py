@@ -10,8 +10,12 @@ from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 	add_serial_batch_ledgers,
 	combine_datetime,
+	get_available_batches_qty,
+	get_qty_based_available_batches,
+	get_type_of_transaction,
 	make_batch_nos,
 	make_serial_nos,
+	parse_serial_nos,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.tests.utils import ERPNextTestSuite
@@ -1330,6 +1334,91 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 		# Stock queue should have the returned stock: [[5, 100]]
 		self.assertEqual(json.loads(return_sle.stock_queue), [[5, 100]])
 
+	def _assert_legacy_return_valuation(self, item_code, props, batch_no=None):
+		"""Return against a legacy serial/batch receipt (no Serial and Batch Bundle) must value outgoing stock from the original ledger rate."""
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		make_item(item_code, props)
+		if batch_no and not frappe.db.exists("Batch", batch_no):
+			frappe.get_doc({"doctype": "Batch", "batch_id": batch_no, "item": item_code}).insert()
+
+		pr = make_purchase_receipt(
+			item_code=item_code, qty=10, rate=100, batch_no=batch_no, use_serial_batch_fields=True
+		)
+
+		# Simulate a receipt migrated from an older version: serial nos / batch tracked via the
+		# deprecated fields on the Stock Ledger Entry, with no Serial and Batch Bundle.
+		serial_nos = []
+		for row in pr.items:
+			if row.serial_and_batch_bundle:
+				serial_nos = frappe.get_all(
+					"Serial and Batch Entry",
+					filters={"parent": row.serial_and_batch_bundle},
+					pluck="serial_no",
+				)
+				frappe.db.delete("Serial and Batch Bundle", {"name": row.serial_and_batch_bundle})
+				frappe.db.set_value("Purchase Receipt Item", row.name, "serial_and_batch_bundle", None)
+
+		serial_nos = [sn for sn in serial_nos if sn]
+		legacy = {"serial_and_batch_bundle": None}
+		if batch_no:
+			legacy["batch_no"] = batch_no
+		if serial_nos:
+			legacy["serial_no"] = "\n".join(serial_nos)
+		for sle in frappe.get_all("Stock Ledger Entry", filters={"voucher_no": pr.name}, pluck="name"):
+			frappe.db.set_value("Stock Ledger Entry", sle, legacy)
+
+		rt = make_return_doc("Purchase Receipt", pr.name)
+		rt.items[0].qty = -4
+		rt.items[0].received_qty = -4
+		rt.items[0].use_serial_batch_fields = 1
+		if batch_no:
+			rt.items[0].batch_no = batch_no
+		if serial_nos:
+			rt.items[0].serial_no = "\n".join(serial_nos[:4])
+		rt.submit()
+
+		difference_in_stock_value = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": rt.name, "is_cancelled": 0, "voucher_type": "Purchase Receipt"},
+			"stock_value_difference",
+		)
+		# 4 units returned at the original ledger rate of 100 -> -400 (must not be zero)
+		self.assertEqual(flt(difference_in_stock_value, 2), -400.0)
+
+	def test_return_valuation_for_legacy_batch_without_bundle(self):
+		self._assert_legacy_return_valuation(
+			"Test Legacy Batch Return Valuation",
+			{
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "LBRV-.#####",
+				"is_stock_item": 1,
+			},
+			batch_no="LBRV-BATCH-0001",
+		)
+
+	def test_return_valuation_for_legacy_serial_without_bundle(self):
+		self._assert_legacy_return_valuation(
+			"Test Legacy Serial Return Valuation",
+			{"has_serial_no": 1, "serial_no_series": "LSRV-.#####", "is_stock_item": 1},
+		)
+
+	def test_return_valuation_for_legacy_serial_and_batch_without_bundle(self):
+		self._assert_legacy_return_valuation(
+			"Test Legacy Serial Batch Return Valuation",
+			{
+				"has_serial_no": 1,
+				"serial_no_series": "LSBRV-.#####",
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "LSBRVB-.#####",
+				"is_stock_item": 1,
+			},
+			batch_no="LSBRV-BATCH-0001",
+		)
+
 
 def get_batch_from_bundle(bundle):
 	from erpnext.stock.serial_batch_bundle import get_batch_nos
@@ -1382,3 +1471,133 @@ def make_serial_batch_bundle(kwargs):
 		return sb.make_serial_and_batch_bundle()
 
 	return sb
+
+
+class TestSerialandBatchBundleLogic(ERPNextTestSuite):
+	"""Pure helpers and in-memory document validations, covering branches the
+	integration suite doesn't reach (no stock-ledger / serial / batch fixtures)."""
+
+	def test_parse_serial_nos_splits_and_trims(self):
+		self.assertEqual(parse_serial_nos("SN1\nSN2"), ["SN1", "SN2"])
+		self.assertEqual(parse_serial_nos("SN1, SN2 , SN3"), ["SN1", "SN2", "SN3"])
+		# blanks are dropped and an existing list is returned unchanged
+		self.assertEqual(parse_serial_nos("SN1,,\n , SN2"), ["SN1", "SN2"])
+		self.assertEqual(parse_serial_nos(["SN1", "SN2"]), ["SN1", "SN2"])
+
+	def test_get_qty_based_available_batches_allocates_across_batches(self):
+		batches = [
+			frappe._dict(batch_no="B1", qty=10, warehouse="W"),
+			frappe._dict(batch_no="B2", qty=5, warehouse="W"),
+		]
+		# 12 consumes B1 fully then 2 from B2
+		result = get_qty_based_available_batches(batches, 12)
+		self.assertEqual([(b.batch_no, b.qty) for b in result], [("B1", 10), ("B2", 2)])
+		# 8 is satisfied by B1 alone; B2 is not touched
+		result = get_qty_based_available_batches(batches, 8)
+		self.assertEqual([(b.batch_no, b.qty) for b in result], [("B1", 8)])
+
+	def test_get_available_batches_qty_aggregates_by_batch(self):
+		batches = [
+			frappe._dict(batch_no="B1", qty=10),
+			frappe._dict(batch_no="B2", qty=5),
+			frappe._dict(batch_no="B1", qty=3),
+		]
+		agg = get_available_batches_qty(batches)
+		self.assertEqual(agg["B1"], 13)
+		self.assertEqual(agg["B2"], 5)
+
+	def test_get_type_of_transaction_derives_direction(self):
+		def se(**kw):
+			return get_type_of_transaction(frappe._dict(doctype="Stock Entry"), frappe._dict(**kw))
+
+		self.assertEqual(se(s_warehouse="W"), "Outward")  # issuing from a source warehouse
+		self.assertEqual(se(), "Inward")  # only a target warehouse
+		self.assertEqual(
+			get_type_of_transaction(frappe._dict(doctype="Purchase Receipt"), frappe._dict()), "Inward"
+		)
+		self.assertEqual(
+			get_type_of_transaction(frappe._dict(doctype="Stock Reconciliation"), frappe._dict()), "Inward"
+		)
+		# a purchase return reverses the direction to Outward
+		self.assertEqual(
+			get_type_of_transaction(frappe._dict(doctype="Purchase Receipt", is_return=1), frappe._dict()),
+			"Outward",
+		)
+
+	def test_duplicate_serial_no_in_entries_is_rejected(self):
+		doc = frappe.new_doc("Serial and Batch Bundle")
+		doc.append("entries", {"serial_no": "SN1"})
+		doc.append("entries", {"serial_no": "SN1"})
+		self.assertRaises(frappe.ValidationError, doc.validate_duplicate_serial_and_batch_no)
+
+	def test_duplicate_batch_no_in_entries_is_rejected(self):
+		doc = frappe.new_doc("Serial and Batch Bundle")
+		doc.append("entries", {"batch_no": "B1"})
+		doc.append("entries", {"batch_no": "B1"})
+		self.assertRaises(frappe.ValidationError, doc.validate_duplicate_serial_and_batch_no)
+
+	def test_voucher_no_is_mandatory(self):
+		doc = frappe.new_doc("Serial and Batch Bundle")
+		self.assertRaises(frappe.ValidationError, doc.validate_serial_and_batch_data)
+
+	def test_validate_docstatus_rejects_unsubmitted_entries(self):
+		doc = frappe.new_doc("Serial and Batch Bundle")
+		doc.append("entries", {"qty": 1})  # a fresh row has docstatus 0
+		self.assertRaises(frappe.ValidationError, doc.validate_docstatus)
+
+	def test_calculate_total_qty_normalizes_and_signs(self):
+		inward = frappe.new_doc("Serial and Batch Bundle")
+		inward.type_of_transaction = "Inward"
+		inward.append("entries", {"qty": 5})
+		inward.append("entries", {"qty": 3})
+		inward.calculate_total_qty(save=False)
+		self.assertEqual(inward.total_qty, 8)
+
+		# Outward flips the sign
+		outward = frappe.new_doc("Serial and Batch Bundle")
+		outward.type_of_transaction = "Outward"
+		outward.append("entries", {"qty": 5})
+		outward.calculate_total_qty(save=False)
+		self.assertEqual(outward.total_qty, -5)
+
+		# a serialized bundle normalizes each row qty to 1
+		serialized = frappe.new_doc("Serial and Batch Bundle")
+		serialized.has_serial_no = 1
+		serialized.type_of_transaction = "Inward"
+		serialized.append("entries", {"qty": 5})
+		serialized.calculate_total_qty(save=False)
+		self.assertEqual(serialized.total_qty, 1)
+
+	def test_get_bundle_wise_serial_nos(self):
+		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+			get_bundle_wise_serial_nos,
+		)
+
+		item_code = make_item(properties={"has_serial_no": 1, "serial_no_series": "TEST-BWSN-.#####"}).name
+
+		bundles = []
+		for _ in range(2):
+			se = make_stock_entry(
+				item_code=item_code,
+				target="_Test Warehouse - _TC",
+				qty=3,
+				rate=100,
+			)
+			bundles.append(se.items[0].serial_and_batch_bundle)
+
+		data = [frappe._dict(serial_and_batch_bundle=bundle) for bundle in bundles]
+
+		self.assertEqual(get_bundle_wise_serial_nos([], {}), {})
+
+		bundle_wise_serial_nos = get_bundle_wise_serial_nos(data, {})
+		for bundle in bundles:
+			self.assertEqual(sorted(bundle_wise_serial_nos[bundle]), get_serial_nos_from_bundle(bundle))
+
+		# check_serial_nos must restrict the result to the requested serial nos
+		serial_no = get_serial_nos_from_bundle(bundles[0])[0]
+		bundle_wise_serial_nos = get_bundle_wise_serial_nos(
+			data, {"check_serial_nos": True, "serial_nos": [serial_no]}
+		)
+
+		self.assertNotIn(bundles[1], bundle_wise_serial_nos)
+		self.assertEqual(bundle_wise_serial_nos[bundles[0]], [serial_no])

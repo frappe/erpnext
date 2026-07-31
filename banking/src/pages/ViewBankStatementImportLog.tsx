@@ -1,4 +1,4 @@
-import CSVImport from '@/components/features/BankStatementImporter/CSV/CSVImport'
+import { lazy } from 'react'
 import { useGetStatementDetails } from '@/components/features/BankStatementImporter/import_utils'
 import { Button } from '@/components/ui/button'
 import { useDirection } from '@/components/ui/direction'
@@ -8,11 +8,14 @@ import { useFrappeDocumentEventListener } from 'frappe-react-sdk'
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 import { Link, useParams } from 'react-router'
 
+const CSVImport = lazy(() => import('@/components/features/BankStatementImporter/CSV/CSVImport'))
+const PDFImport = lazy(() => import('@/components/features/BankStatementImporter/PDF/PDFImport'))
+
 const ViewBankStatementImportLog = () => {
 
     const { id } = useParams<{ id: string }>()
 
-    const { data, isLoading, error } = useGetStatementDetails(id ?? "")
+    const { data, isLoading, error, mutate } = useGetStatementDetails(id ?? "")
 
     useFrappeDocumentEventListener("Bank Statement Import Log", id ?? "", () => {
     })
@@ -40,7 +43,13 @@ const ViewBankStatementImportLog = () => {
             <ErrorBanner error={error} />
         </div>
     }
-    return <CSVImport data={data} />
+    const isPdf = data.message.doc.file?.toLowerCase().endsWith('.pdf')
+
+    if (isPdf) {
+        return <PDFImport data={data} mutate={mutate} />
+    }
+
+    return <CSVImport data={data} mutate={mutate} />
 }
 
 export default ViewBankStatementImportLog

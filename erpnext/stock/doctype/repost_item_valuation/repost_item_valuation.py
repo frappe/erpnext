@@ -47,6 +47,7 @@ class RepostItemValuation(Document):
 		items_to_be_repost: DF.Code | None
 		posting_date: DF.Date
 		posting_time: DF.Time | None
+		recalculate_valuation_rate: DF.Check
 		recreate_stock_ledgers: DF.Check
 		repost_only_accounting_ledgers: DF.Check
 		reposting_data_file: DF.Attach | None
@@ -92,7 +93,7 @@ class RepostItemValuation(Document):
 		self.validate_recreate_stock_ledgers()
 
 	def set_default_posting_time(self):
-		if not self.posting_time:
+		if self.posting_time is None:
 			self.posting_time = nowtime()
 
 		if not self.posting_date:
@@ -241,7 +242,7 @@ class RepostItemValuation(Document):
 	def clear_attachment(self):
 		if attachments := get_attachments(self.doctype, self.name):
 			attachment = attachments[0]
-			frappe.delete_doc("File", attachment.name, ignore_permissions=True)
+			frappe.delete_doc("File", attachment.name, ignore_permissions=True, force=True)
 
 		if self.reposting_data_file:
 			self.db_set("reposting_data_file", None)
@@ -343,6 +344,15 @@ class RepostItemValuation(Document):
 			filters,
 		)
 
+	def _recalculate_valuation_rate(self):
+		doc = frappe.get_doc(self.voucher_type, self.voucher_no)
+		if doc.get("is_internal_supplier"):
+			doc.set_sales_incoming_rate_for_internal_transfer()
+
+		doc.update_valuation_rate()
+		for item in doc.items:
+			item.db_set("valuation_rate", item.valuation_rate)
+
 	def recreate_stock_ledger_entries(self):
 		"""Recreate Stock Ledger Entries for the transaction."""
 		if self.based_on == "Transaction" and self.recreate_stock_ledgers:
@@ -383,6 +393,12 @@ def repost(doc):
 		doc.set_status("In Progress")
 		if not frappe.in_test:
 			frappe.db.commit()
+
+		if (
+			doc.voucher_type in ["Purchase Receipt", "Purchase Invoice", "Stock Entry"]
+			and doc.recalculate_valuation_rate
+		):
+			doc._recalculate_valuation_rate()
 
 		if doc.recreate_stock_ledgers:
 			doc.recreate_stock_ledger_entries()
@@ -584,8 +600,13 @@ def get_recipients():
 	return recipients
 
 
+REPOSTING_JOB_ID_PREFIX = "repost_item_valuation_entry_"
+
+
 def run_parallel_reposting():
-	# This function is called every 15 minutes via hooks.py
+	# This function is called every 15 minutes via hooks.py as a recovery net;
+	# each reposting job re-triggers it on completion to pick the next queued
+	# entry, so the queue drains continuously without waiting for the cron
 
 	if not frappe.db.get_single_value("Stock Reposting Settings", "enable_parallel_reposting"):
 		return
@@ -593,26 +614,17 @@ def run_parallel_reposting():
 	if not in_configured_timeslot():
 		return
 
-	items = set()
 	no_of_parallel_reposting = (
 		frappe.db.get_single_value("Stock Reposting Settings", "no_of_parallel_reposting") or 4
 	)
 
-	riv_entries = get_repost_item_valuation_entries()
-
-	rq_jobs = frappe.get_all(
-		"RQ Job",
-		fields=["arguments"],
-		filters={
-			"status": ("like", "%started%"),
-			"job_name": "erpnext.stock.doctype.repost_item_valuation.repost_item_valuation.execute_reposting_entry",
-		},
-	)
+	riv_entries = get_repost_item_valuation_entries(limit=no_of_parallel_reposting * 100)
+	entries_in_progress = get_entries_with_active_jobs()
+	items = get_items_with_active_reposting(entries_in_progress)
 
 	for row in riv_entries:
-		if rq_jobs:
-			if job_running_for_entry(row.name, rq_jobs):
-				continue
+		if row.name in entries_in_progress:
+			continue
 
 		if row.based_on != "Item and Warehouse" or row.repost_only_accounting_ledgers:
 			execute_reposting_entry(row.name)
@@ -625,12 +637,52 @@ def run_parallel_reposting():
 		if len(items) > no_of_parallel_reposting:
 			break
 
-		frappe.enqueue(
-			execute_reposting_entry,
-			name=row.name,
-			queue="long",
-			timeout=1800,
-		)
+		enqueue_reposting_entry(row.name)
+
+
+def enqueue_reposting_entry(name):
+	frappe.enqueue(
+		execute_reposting_entry,
+		name=name,
+		continue_reposting=True,
+		queue="long",
+		timeout=1800,
+		job_id=f"{REPOSTING_JOB_ID_PREFIX}{name}",
+		deduplicate=True,
+	)
+
+
+def enqueue_parallel_reposting():
+	frappe.enqueue(
+		run_parallel_reposting,
+		queue="long",
+		timeout=1800,
+		job_id="run_parallel_reposting",
+		deduplicate=True,
+	)
+
+
+def get_entries_with_active_jobs() -> set:
+	from frappe.utils.background_jobs import get_queue
+
+	queue = get_queue("long")
+	job_ids = list(queue.get_job_ids()) + list(queue.started_job_registry.get_job_ids())
+
+	prefix = f"{frappe.local.site}||{REPOSTING_JOB_ID_PREFIX}"
+	return {job_id[len(prefix) :] for job_id in job_ids if job_id.startswith(prefix)}
+
+
+def get_items_with_active_reposting(entries_in_progress) -> set:
+	if not entries_in_progress:
+		return set()
+
+	items = frappe.get_all(
+		"Repost Item Valuation",
+		filters={"name": ("in", list(entries_in_progress))},
+		pluck="item_code",
+	)
+
+	return {item_code for item_code in items if item_code}
 
 
 def repost_entries():
@@ -648,7 +700,15 @@ def repost_entries():
 		execute_reposting_entry(row.name)
 
 
-def execute_reposting_entry(name):
+def execute_reposting_entry(name, continue_reposting=False):
+	try:
+		_execute_reposting_entry(name)
+	finally:
+		if continue_reposting:
+			enqueue_parallel_reposting()
+
+
+def _execute_reposting_entry(name):
 	doc = frappe.get_doc("Repost Item Valuation", name)
 	if (
 		doc.repost_only_accounting_ledgers
@@ -663,7 +723,7 @@ def execute_reposting_entry(name):
 		doc.deduplicate_similar_repost()
 
 
-def get_repost_item_valuation_entries():
+def get_repost_item_valuation_entries(limit=None):
 	doctype = frappe.qb.DocType("Repost Item Valuation")
 
 	query = (
@@ -678,6 +738,9 @@ def get_repost_item_valuation_entries():
 		.orderby(doctype.creation, order=frappe.qb.asc)
 		.orderby(doctype.status, order=frappe.qb.asc)
 	)
+
+	if limit:
+		query = query.limit(cint(limit))
 
 	return query.run(as_dict=True)
 
@@ -762,19 +825,3 @@ def get_existing_reposting_only_gl_entries(reposting_reference):
 		reposting_map[key] = d.reposting_reference
 
 	return reposting_map
-
-
-def job_running_for_entry(reposting_entry, rq_jobs):
-	for job in rq_jobs:
-		if not job.arguments:
-			continue
-
-		try:
-			job_args = json.loads(job.arguments)
-		except (TypeError, json.JSONDecodeError):
-			continue
-
-		if isinstance(job_args, dict) and job_args.get("kwargs", {}).get("name") == reposting_entry:
-			return True
-
-	return False

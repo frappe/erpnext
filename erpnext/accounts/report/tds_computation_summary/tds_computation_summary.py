@@ -21,8 +21,7 @@ class TDSComputationSummaryReport(TaxWithholdingDetailsReport):
 	AGGREGATE_FIELDS = ("total_amount", "tax_amount")
 
 	def validate_filters(self):
-		if self.filters.from_date > self.filters.to_date:
-			frappe.throw(_("From Date must be before To Date"))
+		super().validate_filters()
 
 		from_year = get_fiscal_year(self.filters.from_date)[0]
 		to_year = get_fiscal_year(self.filters.to_date)[0]

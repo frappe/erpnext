@@ -341,13 +341,6 @@ class BOM(WebsiteGenerator):
 					).format(item.idx, get_link_to_form("Item", item.item_code))
 				)
 
-			if not item.qty:
-				frappe.throw(
-					_("Row #{0}: Quantity should be greater than 0 for {1} Item {2}").format(
-						item.idx, item.type, get_link_to_form("Item", item.item_code)
-					)
-				)
-
 			if item.process_loss_per >= 100:
 				frappe.throw(
 					_("Row #{0}: Process Loss Percentage should be less than 100% for {1} Item {2}").format(
@@ -1010,7 +1003,7 @@ class BOM(WebsiteGenerator):
 
 		for d in self.get("items"):
 			old_rate = d.rate
-			if not self.bom_creator and (d.is_stock_item or d.is_phantom_item):
+			if d.is_stock_item or d.is_phantom_item:
 				d.rate = self.get_rm_rate(
 					{
 						"company": self.company,

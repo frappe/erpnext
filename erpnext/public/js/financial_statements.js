@@ -28,8 +28,8 @@ erpnext.financial_statements = {
 	},
 
 	is_blank_row: function (data) {
+		if (!data || data.segment_values) return false;
 		return (
-			data &&
 			!data.account &&
 			!data.accounts &&
 			!data.child_accounts &&
@@ -41,6 +41,26 @@ erpnext.financial_statements = {
 	_is_special_view: function (column, data) {
 		if (!data) return false;
 		const view = get_filter_value("selected_view");
+
+		if (!["Growth", "Margin"].includes(view)) return false;
+
+		if (get_filter_value("report_template")) {
+			const columnInfo = erpnext.financial_statements._parse_column_info(column.fieldname, data);
+			// Account column
+			if (columnInfo.isAccount) return false;
+
+			const periodKeys = data._segment_info?.period_keys || [];
+
+			if (!periodKeys.includes(columnInfo.fieldname)) return false;
+
+			if (view === "Growth") {
+				// First period of new segment
+				if (periodKeys[0] === columnInfo.fieldname) return false;
+			}
+
+			return true;
+		}
+
 		return (view === "Growth" && column.colIndex >= 3) || (view === "Margin" && column.colIndex >= 2);
 	},
 

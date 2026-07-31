@@ -17,13 +17,18 @@ dependencies = [
     # integration dependencies
     "googlemaps~=4.10.0",
     "plaid-python~=7.2.1",
-    "python-youtube~=0.9.8",
+    "python-youtube~=0.9.9",
 
     # Not used directly - required by PyQRCode for PNG generation
     "pypng~=0.20220715.0",
 
     # MT940 parser for bank statements
     "mt-940>=4.26.0",
+
+    # PDF bank statement table extraction + page rasterization.
+    # Pulls pdfminer.six (parsing), Pillow, and pypdfium2 (render backend for
+    # Page.to_image) - all pure-Python wheels, no system binaries required.
+    "pdfplumber>=0.11.0",
 ]
 
 [build-system]
@@ -34,11 +39,10 @@ build-backend = "flit_core.buildapi"
 max_module_depth = 1
 skip_namespaces = [
     "erpnext.deprecation_dumpster",
-    "erpnext.assets.dashboard_fixtures",  # https://github.com/frappe/erpnext/issues/44418
 ]
 
 [tool.bench.frappe-dependencies]
-frappe = ">=16.0.0,<17.0.0"
+frappe = ">=16.21.0,<17.0.0"
 
 [tool.bench.assets]
 build_dir = "./banking"

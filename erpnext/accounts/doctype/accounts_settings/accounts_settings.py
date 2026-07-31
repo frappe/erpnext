@@ -62,6 +62,7 @@ class AccountsSettings(Document):
 		book_asset_depreciation_entry_automatically: DF.Check
 		book_deferred_entries_based_on: DF.Literal["Days", "Months"]
 		book_deferred_entries_via_journal_entry: DF.Check
+		book_stock_expense_gl_entries: DF.Check
 		book_tax_discount_loss: DF.Check
 		calculate_depr_using_total_days: DF.Check
 		check_supplier_invoice_uniqueness: DF.Check
@@ -77,6 +78,7 @@ class AccountsSettings(Document):
 		enable_fuzzy_matching: DF.Check
 		enable_immutable_ledger: DF.Check
 		enable_loyalty_point_program: DF.Check
+		enable_overdue_billing_threshold: DF.Check
 		enable_party_matching: DF.Check
 		enable_subscription: DF.Check
 		exchange_gain_loss_posting_date: DF.Literal["Invoice", "Payment", "Reconciliation Date"]
@@ -90,10 +92,12 @@ class AccountsSettings(Document):
 		make_payment_via_journal_entry: DF.Check
 		merge_similar_account_heads: DF.Check
 		over_billing_allowance: DF.Currency
+		pcv_job_timeout: DF.Int
 		receivable_payable_fetch_method: DF.Literal["Buffered Cursor", "UnBuffered Cursor"]
 		receivable_payable_remarks_length: DF.Int
 		reconciliation_queue_size: DF.Int
 		repost_allowed_types: DF.Table[RepostAllowedTypes]
+		role_allowed_to_bypass_overdue_billing: DF.Link | None
 		role_allowed_to_over_bill: DF.Link | None
 		role_to_notify_on_depreciation_failure: DF.Link | None
 		role_to_override_stop_action: DF.Link | None
@@ -147,6 +151,10 @@ class AccountsSettings(Document):
 
 		if old_doc.enable_subscription != self.enable_subscription:
 			toggle_subscription_sections(not self.enable_subscription)
+			clear_cache = True
+
+		if old_doc.enable_overdue_billing_threshold != self.enable_overdue_billing_threshold:
+			toggle_overdue_billing_threshold_field(not self.enable_overdue_billing_threshold)
 			clear_cache = True
 
 		if clear_cache:
@@ -238,6 +246,10 @@ def toggle_subscription_sections(hide):
 	subscription_doctypes = frappe.get_hooks("subscription_doctypes")
 	for doctype in subscription_doctypes:
 		create_property_setter_for_hiding_field(doctype, "subscription_section", hide)
+
+
+def toggle_overdue_billing_threshold_field(hide):
+	create_property_setter_for_hiding_field("Customer Credit Limit", "overdue_billing_threshold", hide)
 
 
 def create_property_setter_for_hiding_field(doctype, field_name, hide):

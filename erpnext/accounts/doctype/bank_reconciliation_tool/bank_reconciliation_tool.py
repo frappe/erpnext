@@ -64,7 +64,7 @@ def get_bank_transactions(
 		filters.append(["date", "<=", to_date])
 	if from_date:
 		filters.append(["date", ">=", from_date])
-	transactions = frappe.get_all(
+	transactions = frappe.get_list(
 		"Bank Transaction",
 		fields=[
 			"date",
@@ -93,6 +93,7 @@ def get_bank_transactions(
 @frappe.whitelist()
 def get_account_balance(bank_account: str, till_date: str | date, company: str):
 	# returns account balance till the specified date
+	frappe.has_permission("Bank Account", "read", bank_account, throw=True)
 	account = frappe.db.get_value("Bank Account", bank_account, "account")
 	filters = frappe._dict(
 		{
@@ -1078,7 +1079,7 @@ def reconcile_vouchers(bank_transaction_name: str | int, vouchers: str, is_new_v
 @frappe.whitelist()
 def get_linked_payments(
 	bank_transaction_name: str | int,
-	document_types: list[str] | None = None,
+	document_types: str | list[str] | None = None,
 	from_date: str | date | None = None,
 	to_date: str | date | None = None,
 	filter_by_reference_date: bool | None = None,
