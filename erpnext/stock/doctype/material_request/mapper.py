@@ -7,7 +7,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import cint, flt, getdate, nowdate
+from frappe.utils import cint, comma_and, flt, get_link_to_form, getdate, nowdate
 
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
@@ -241,6 +241,12 @@ def make_purchase_orders_by_supplier(source_name: str, item_suppliers: str | lis
 
 		purchase_order.insert()
 		purchase_orders.append(purchase_order.name)
+
+	frappe.msgprint(
+		_("{0} created").format(
+			comma_and([get_link_to_form("Purchase Order", name) for name in purchase_orders])
+		)
+	)
 
 	return purchase_orders
 
