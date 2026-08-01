@@ -207,20 +207,24 @@ def get_item_default_suppliers(source_name: str, filtered_children: str | list |
 def make_purchase_orders_by_supplier(source_name: str, item_suppliers: str | list) -> list[str]:
 	"""Create one draft Purchase Order per supplier for the given Material Request items."""
 	item_suppliers = frappe.parse_json(item_suppliers)
-	pending_qty = {
-		d["material_request_item"]: d["pending_qty"] for d in get_item_default_suppliers(source_name)
+	pending_items = {
+		d["material_request_item"]: frappe._dict(d) for d in get_item_default_suppliers(source_name)
 	}
 
 	items_by_supplier = {}
 	for row in item_suppliers:
 		row = frappe._dict(row)
-		if not row.supplier:
-			frappe.throw(_("Select a Supplier for Item {0}").format(frappe.bold(row.item_code)))
+		pending = pending_items.get(row.material_request_item) or frappe._dict()
+		item_link = get_link_to_form("Item", row.item_code)
 
-		if flt(row.qty) <= 0 or flt(row.qty) > flt(pending_qty.get(row.material_request_item)):
+		if not row.supplier:
+			frappe.throw(_("Select a Supplier for Item {0}").format(item_link))
+
+		if flt(row.qty) <= 0 or flt(row.qty) > flt(pending.pending_qty):
+			pending_qty = frappe.format_value(flt(pending.pending_qty), "Float")
 			frappe.throw(
 				_("Quantity for Item {0} must be greater than zero and cannot exceed {1}").format(
-					frappe.bold(row.item_code), flt(pending_qty.get(row.material_request_item))
+					item_link, frappe.bold(f"{pending_qty} {pending.uom or ''}".strip())
 				)
 			)
 
