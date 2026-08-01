@@ -4,15 +4,14 @@ import frappe
 def execute():
 	job_cards = frappe.get_all(
 		"Job Card",
-		filters={"stock_uom": ("in", ["", None])},
+		filters={"stock_uom": ("is", "not set")},
 		fields=["name", "finished_good", "production_item"],
 	)
 
 	if not job_cards:
 		return
 
-	item_codes = {row.finished_good or row.production_item for row in job_cards}
-	item_codes.discard(None)
+	item_codes = {code for row in job_cards if (code := row.finished_good or row.production_item)}
 	if not item_codes:
 		return
 
@@ -34,6 +33,4 @@ def execute():
 	if not updates:
 		return
 
-	frappe.db.auto_commit_on_many_writes = True
 	frappe.db.bulk_update("Job Card", updates)
-	frappe.db.auto_commit_on_many_writes = False
