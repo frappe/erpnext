@@ -445,6 +445,8 @@ frappe.ui.form.on("Material Request", {
 	},
 
 	select_suppliers_for_items: function (frm, items) {
+		const rows = items.map((item) => Object.assign({}, item, { qty: item.pending_qty }));
+
 		const dialog = new frappe.ui.Dialog({
 			title: __("Select Supplier for Items"),
 			size: "large",
@@ -455,8 +457,8 @@ frappe.ui.form.on("Material Request", {
 					cannot_add_rows: true,
 					cannot_delete_rows: true,
 					in_place_edit: true,
-					data: items,
-					get_data: () => items,
+					data: rows,
+					get_data: () => rows,
 					description: __("A separate Purchase Order is created for each Supplier."),
 					fields: [
 						{
@@ -483,9 +485,14 @@ frappe.ui.form.on("Material Request", {
 						},
 						{
 							fieldtype: "Float",
+							fieldname: "pending_qty",
+							hidden: 1,
+						},
+						{
+							fieldtype: "Float",
 							fieldname: "qty",
 							label: __("Quantity"),
-							read_only: 1,
+							reqd: 1,
 							in_list_view: 1,
 							columns: 2,
 						},
@@ -503,15 +510,28 @@ frappe.ui.form.on("Material Request", {
 			],
 			primary_action_label: __("Create"),
 			primary_action: function (values) {
-				const rows = values.items || [];
-				const missing = rows.find((row) => !row.supplier);
-				if (missing) {
-					frappe.throw(__("Select a Supplier for Item {0}", [missing.item_code]));
+				const item_suppliers = values.items || [];
+
+				const missing_supplier = item_suppliers.find((row) => !row.supplier);
+				if (missing_supplier) {
+					frappe.throw(__("Select a Supplier for Item {0}", [missing_supplier.item_code]));
+				}
+
+				const invalid_qty = item_suppliers.find(
+					(row) => flt(row.qty) <= 0 || flt(row.qty) > flt(row.pending_qty)
+				);
+				if (invalid_qty) {
+					frappe.throw(
+						__("Quantity for Item {0} must be greater than zero and cannot exceed {1}", [
+							invalid_qty.item_code,
+							format_number(invalid_qty.pending_qty),
+						])
+					);
 				}
 
 				frappe.call({
 					method: "erpnext.stock.doctype.material_request.mapper.make_purchase_orders_by_supplier",
-					args: { source_name: frm.doc.name, item_suppliers: rows },
+					args: { source_name: frm.doc.name, item_suppliers: item_suppliers },
 					freeze: true,
 					callback: function (r) {
 						if (r.exc) return;
