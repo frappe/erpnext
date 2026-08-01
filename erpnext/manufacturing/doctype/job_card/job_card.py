@@ -1310,11 +1310,17 @@ class JobCard(Document):
 		if self.workstation:
 			self.update_workstation_status()
 
+	def get_qty_to_produce(self):
+		"""Qty this job card is expected to produce, the pending qty is left to another job card."""
+		return flt(self.for_quantity) - flt(self.pending_qty)
+
 	def set_finished_good_status(self):
 		# Only reached for a submitted job card (docstatus == 1) with a finished good, see set_status().
-		if (self.manufactured_qty + self.process_loss_qty) >= self.for_quantity:
+		qty_to_produce = self.get_qty_to_produce()
+
+		if (self.manufactured_qty + self.process_loss_qty) >= qty_to_produce:
 			self.status = "Completed"
-		elif (self.total_completed_qty + self.process_loss_qty) >= self.for_quantity:
+		elif (self.total_completed_qty + self.process_loss_qty) >= qty_to_produce:
 			# Production is done and the card is submitted, but the finished goods have not been
 			# booked into stock yet (Manufacture Stock Entry pending) — distinct from active WIP.
 			self.status = "To Manufacture"
@@ -1344,7 +1350,8 @@ class JobCard(Document):
 			self.status = "Work In Progress"
 
 		if self.docstatus == 1 and (
-			self.for_quantity <= (self.total_completed_qty + self.process_loss_qty) or not self.items
+			self.get_qty_to_produce() <= (self.total_completed_qty + self.process_loss_qty)
+			or not self.items
 		):
 			self.status = "Completed"
 
@@ -1752,7 +1759,7 @@ class JobCard(Document):
 
 		return ManufactureEntry(
 			{
-				"for_quantity": self.for_quantity - self.manufactured_qty,
+				"for_quantity": self.get_qty_to_produce() - self.manufactured_qty,
 				"process_loss_qty": max(self.process_loss_qty - self.get_consumed_process_loss(), 0),
 				"job_card": self.name,
 				"skip_material_transfer": self.skip_material_transfer,
