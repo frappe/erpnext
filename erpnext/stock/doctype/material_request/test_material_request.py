@@ -1361,6 +1361,9 @@ class TestMaterialRequest(ERPNextTestSuite):
 		po = frappe.get_doc("Purchase Order", purchase_orders[0])
 		self.assertEqual(po.schedule_date, getdate(today()))
 
+		alerts = [m for m in frappe.get_message_log() if m.get("alert")]
+		self.assertTrue(any("was set to today" in m.get("message") for m in alerts))
+
 	def test_make_purchase_orders_by_supplier_invalid_rows(self):
 		from erpnext.stock.doctype.material_request.mapper import make_purchase_orders_by_supplier
 
