@@ -1011,6 +1011,8 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		# self.assertEqual(po.payment_terms_template, pi.payment_terms_template)
 		compare_payment_schedules(self, po, pi)
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"maintain_same_sales_rate": 1})
+	@ERPNextTestSuite.change_settings("Buying Settings", {"maintain_same_rate": 1})
 	def test_internal_transfer_flow(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 		from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
@@ -1021,9 +1023,6 @@ class TestPurchaseOrder(ERPNextTestSuite):
 			make_sales_invoice,
 		)
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
-
-		frappe.db.set_single_value("Selling Settings", "maintain_same_sales_rate", 1)
-		frappe.db.set_single_value("Buying Settings", "maintain_same_rate", 1)
 
 		prepare_data_for_internal_transfer()
 		supplier = "_Test Internal Supplier 2"
@@ -1463,6 +1462,7 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		self.assertEqual(pi_2.status, "Paid")
 		self.assertEqual(po.status, "Completed")
 
+	@ERPNextTestSuite.change_settings("Buying Settings", {"maintain_same_rate": 0})
 	def test_purchase_order_over_billing_missing_item(self):
 		item1 = make_item(
 			"_Test Item for Overbilling",
