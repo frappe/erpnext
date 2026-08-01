@@ -944,19 +944,21 @@ class JobCard(Document):
 			return
 
 		precision = self.precision("total_completed_qty")
-		total_completed_qty = flt(
+		accounted_qty = flt(
 			flt(self.total_completed_qty, precision)
 			+ flt(self.process_loss_qty, precision)
 			+ flt(self.pending_qty, precision)
 		)
 
-		if self.for_quantity and flt(total_completed_qty, precision) != flt(self.for_quantity, precision):
+		if self.for_quantity and flt(accounted_qty, precision) != flt(self.for_quantity, precision):
 			frappe.throw(
-				_("The {0} ({1}) must be equal to {2} ({3})").format(
-					bold(_("Total Completed Qty")),
-					bold(flt(total_completed_qty, precision)),
-					bold(_("Qty to Manufacture")),
-					bold(self.for_quantity),
+				_(
+					"Total Completed Qty ({0}), Process Loss Qty ({1}) and Pending Qty ({2}) must add up to the Qty to Manufacture ({3})."
+				).format(
+					bold(flt(self.total_completed_qty, precision)),
+					bold(flt(self.process_loss_qty, precision)),
+					bold(flt(self.pending_qty, precision)),
+					bold(flt(self.for_quantity, precision)),
 				)
 			)
 
@@ -1663,8 +1665,8 @@ class JobCard(Document):
 		if isinstance(kwargs, dict):
 			kwargs = frappe._dict(kwargs)
 
-		self.set_for_quantity(kwargs)
 		self.validate_complete_job_card_qty(kwargs)
+		self.set_for_quantity(kwargs)
 
 		self.pending_qty = flt(kwargs.pending_qty)
 		self.process_loss_qty = flt(kwargs.process_loss_qty)
@@ -1698,6 +1700,29 @@ class JobCard(Document):
 
 		if flt(kwargs.pending_qty) and flt(kwargs.pending_qty) > self.for_quantity:
 			frappe.throw(_("Pending quantity cannot be greater than the for quantity."))
+
+		self.validate_completion_qty_split(kwargs)
+
+	def validate_completion_qty_split(self, kwargs):
+		if not flt(kwargs.for_quantity):
+			return
+
+		precision = self.precision("total_completed_qty")
+		accounted_qty = flt(kwargs.qty) + flt(kwargs.pending_qty) + flt(kwargs.process_loss_qty)
+
+		if flt(accounted_qty, precision) == flt(kwargs.for_quantity, precision):
+			return
+
+		frappe.throw(
+			_(
+				"Completed Quantity ({0}), Pending Quantity ({1}) and Process Loss Quantity ({2}) must add up to the Qty to Manufacture ({3})."
+			).format(
+				bold(flt(kwargs.qty, precision)),
+				bold(flt(kwargs.pending_qty, precision)),
+				bold(flt(kwargs.process_loss_qty, precision)),
+				bold(flt(kwargs.for_quantity, precision)),
+			)
+		)
 
 	def add_completion_time_logs(self, kwargs):
 		if kwargs.end_time:
