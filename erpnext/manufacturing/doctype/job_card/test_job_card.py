@@ -1879,3 +1879,94 @@ def create_semi_fg_bom(semi_fg_item, raw_item, inspection_required):
 	bom.append("items", {"item_code": raw_item, "qty": 1})
 	bom.submit()
 	return bom.name
+<<<<<<< HEAD
+=======
+
+
+class TestJobCardLogic(ERPNextTestSuite):
+	"""Field-level validations and pure quantity/capacity helpers, exercised on the
+	document directly so they don't need a Work Order / BOM (the integration suite does)."""
+
+	def test_processing_a_submitted_or_cancelled_card_is_blocked(self):
+		submitted = frappe.new_doc("Job Card")
+		submitted.docstatus = 1
+		self.assertRaises(frappe.ValidationError, submitted.validate_docstatus)
+
+		cancelled = frappe.new_doc("Job Card")
+		cancelled.docstatus = 2
+		self.assertRaises(frappe.ValidationError, cancelled.validate_docstatus)
+
+	def test_complete_job_card_qty_guards(self):
+		jc = frappe.new_doc("Job Card")
+		jc.for_quantity = 5
+		jc.validate_complete_job_card_qty(frappe._dict(pending_qty=3))  # within range -> passes
+		self.assertRaises(
+			frappe.ValidationError, jc.validate_complete_job_card_qty, frappe._dict(pending_qty=-1)
+		)
+		self.assertRaises(
+			frappe.ValidationError, jc.validate_complete_job_card_qty, frappe._dict(process_loss_qty=-1)
+		)
+		self.assertRaises(
+			frappe.ValidationError, jc.validate_complete_job_card_qty, frappe._dict(pending_qty=10)
+		)
+
+	def test_completion_qty_split_must_add_up(self):
+		jc = frappe.new_doc("Job Card")
+		jc.for_quantity = 5
+
+		# 3 completed + 2 pending + 0 lost == 5 to manufacture -> passes
+		jc.validate_complete_job_card_qty(
+			frappe._dict(for_quantity=5, qty=3, pending_qty=2, process_loss_qty=0)
+		)
+
+		self.assertRaises(
+			frappe.ValidationError,
+			jc.validate_complete_job_card_qty,
+			frappe._dict(for_quantity=3, qty=3, pending_qty=2, process_loss_qty=0),
+		)
+
+	def test_completed_qty_must_reconcile_with_for_quantity(self):
+		jc = frappe.new_doc("Job Card")
+		jc.for_quantity = 10
+		jc.total_completed_qty = 6
+		jc.process_loss_qty = 0
+		jc.pending_qty = 0
+		# 6 + 0 + 0 != 10 -> throws
+		self.assertRaises(frappe.ValidationError, jc.validate_completed_qty_matches_for_quantity)
+		# completed + loss + pending == for_quantity -> passes
+		jc.pending_qty = 4
+		jc.validate_completed_qty_matches_for_quantity()
+
+	def test_set_process_loss(self):
+		jc = frappe.new_doc("Job Card")
+		jc.for_quantity = 10
+		jc.total_completed_qty = 6
+		jc.pending_qty = 1
+		jc.set_process_loss()
+		self.assertEqual(jc.process_loss_qty, 3)  # 10 - 6 - 1
+
+		# no loss when nothing completed yet
+		nothing_done = frappe.new_doc("Job Card")
+		nothing_done.for_quantity = 10
+		nothing_done.total_completed_qty = 0
+		nothing_done.set_process_loss()
+		self.assertEqual(nothing_done.process_loss_qty, 0)
+
+	def test_capacity_overlap_detection(self):
+		jc = frappe.new_doc("Job Card")
+		sequential = [
+			{"from_time": "2026-01-01 10:00:00", "to_time": "2026-01-01 11:00:00"},
+			{"from_time": "2026-01-01 11:00:00", "to_time": "2026-01-01 12:00:00"},
+		]
+		overlapping = [
+			{"from_time": "2026-01-01 10:00:00", "to_time": "2026-01-01 11:00:00"},
+			{"from_time": "2026-01-01 10:30:00", "to_time": "2026-01-01 11:30:00"},
+		]
+		# sequential logs share one capacity slot; overlapping logs need two
+		self.assertEqual(len(jc.get_alloted_capacity(sequential)), 1)
+		self.assertEqual(len(jc.get_alloted_capacity(overlapping)), 2)
+		# capacity 1 overlaps with any log; capacity 2 only when both slots are taken
+		self.assertTrue(jc.has_overlap(1, sequential))
+		self.assertFalse(jc.has_overlap(2, sequential))
+		self.assertTrue(jc.has_overlap(2, overlapping))
+>>>>>>> 7bffd84482 (fix(job_card): reject a completion split that cannot add up (#57687))
