@@ -494,7 +494,16 @@ frappe.ui.form.on("Material Request", {
 							label: __("Quantity"),
 							reqd: 1,
 							in_list_view: 1,
-							columns: 2,
+							columns: 1,
+						},
+						{
+							fieldtype: "Link",
+							fieldname: "uom",
+							options: "UOM",
+							label: __("UOM"),
+							read_only: 1,
+							in_list_view: 1,
+							columns: 1,
 						},
 						{
 							fieldtype: "Link",
