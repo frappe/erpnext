@@ -6,7 +6,18 @@ cd ~ || exit
 
 githubbranch=${GITHUB_BASE_REF:-${GITHUB_REF##*/}}
 frappeuser=${FRAPPE_USER:-"frappe"}
-frappecommitish=${FRAPPE_BRANCH:-$githubbranch}
+frappecommitish=${FRAPPE_BRANCH:-}
+
+# A stacked pull request targets another erpnext branch, which has no counterpart in frappe.
+# Fall back to develop so the bench is still installed. An explicit FRAPPE_BRANCH is trusted as
+# given, since it can be a commit sha rather than a branch.
+if [ -z "$frappecommitish" ]; then
+    frappecommitish=$githubbranch
+    if ! git ls-remote --exit-code --heads "https://github.com/${frappeuser}/frappe" "$frappecommitish" >/dev/null 2>&1; then
+        echo "frappe has no branch ${frappecommitish}, falling back to develop"
+        frappecommitish=develop
+    fi
+fi
 db_host=${DB_HOST:-"127.0.0.1"}
 db_user_host=${DB_USER_HOST:-"localhost"}
 wkhtmltox_deb=${WKHTMLTOX_DEB:-"/tmp/wkhtmltox.deb"}
