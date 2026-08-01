@@ -227,6 +227,7 @@ def make_purchase_orders_by_supplier(source_name: str, item_suppliers: str | lis
 		items_by_supplier.setdefault(row.supplier, {})[row.material_request_item] = flt(row.qty)
 
 	purchase_orders = []
+	is_rescheduled = False
 	for supplier, requested_qty in items_by_supplier.items():
 		purchase_order = make_purchase_order(
 			source_name,
@@ -237,10 +238,20 @@ def make_purchase_orders_by_supplier(source_name: str, item_suppliers: str | lis
 			},
 		)
 		for item in purchase_order.items:
-			item.schedule_date = item.schedule_date or nowdate()
+			if not item.schedule_date:
+				item.schedule_date = nowdate()
+				is_rescheduled = True
 
 		purchase_order.insert()
 		purchase_orders.append(purchase_order.name)
+
+	if is_rescheduled:
+		frappe.toast(
+			_("{0} was set to today for items whose requested date has passed").format(
+				_(frappe.get_meta("Purchase Order Item").get_label("schedule_date"))
+			),
+			indicator="orange",
+		)
 
 	frappe.msgprint(
 		_("{0} created").format(
