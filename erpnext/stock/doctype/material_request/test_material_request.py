@@ -6,7 +6,7 @@
 
 
 import frappe
-from frappe.utils import flt, today
+from frappe.utils import add_days, flt, getdate, today
 
 from erpnext.controllers.accounts_controller import InvalidQtyError
 from erpnext.stock.doctype.item.test_item import create_item
@@ -1339,6 +1339,27 @@ class TestMaterialRequest(ERPNextTestSuite):
 		self.assertEqual([d.item_code for d in second.items], item_codes[2:])
 		self.assertEqual(second.items[0].qty, 4)
 		self.assertEqual(second.items[0].stock_qty, 4)
+
+	def test_make_purchase_orders_by_supplier_sets_schedule_date(self):
+		from erpnext.stock.doctype.material_request.mapper import make_purchase_orders_by_supplier
+
+		mr = make_material_request_for_items(["_Test Item"])
+		frappe.db.set_value("Material Request Item", mr.items[0].name, "schedule_date", add_days(today(), -1))
+
+		purchase_orders = make_purchase_orders_by_supplier(
+			mr.name,
+			[
+				{
+					"material_request_item": mr.items[0].name,
+					"item_code": "_Test Item",
+					"qty": 10,
+					"supplier": "_Test Supplier",
+				}
+			],
+		)
+
+		po = frappe.get_doc("Purchase Order", purchase_orders[0])
+		self.assertEqual(po.schedule_date, getdate(today()))
 
 	def test_make_purchase_orders_by_supplier_invalid_rows(self):
 		from erpnext.stock.doctype.material_request.mapper import make_purchase_orders_by_supplier
