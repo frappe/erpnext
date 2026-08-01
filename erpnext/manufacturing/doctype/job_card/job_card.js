@@ -249,6 +249,7 @@ frappe.ui.form.on("Job Card", {
 				change() {
 					const dialog = frm.job_completion_dialog;
 					dialog.set_value("completed_qty", dialog.get_value("for_quantity"));
+					dialog.set_value("pending_qty", 0);
 					dialog.set_value("process_loss_qty", 0);
 				},
 			},
@@ -260,8 +261,21 @@ frappe.ui.form.on("Job Card", {
 				default: pending_qty,
 				change() {
 					const dialog = frm.job_completion_dialog;
-					const remaining = dialog.get_value("for_quantity") - dialog.get_value("completed_qty");
-					if (remaining > 0 && remaining != dialog.get_value("pending_qty")) {
+					const remaining =
+						dialog.get_value("for_quantity") -
+						dialog.get_value("completed_qty") -
+						dialog.get_value("process_loss_qty");
+
+					if (remaining < 0) {
+						const max_completed_qty =
+							flt(dialog.get_value("for_quantity")) - flt(dialog.get_value("process_loss_qty"));
+						dialog.set_value("completed_qty", max_completed_qty);
+						frappe.throw(
+							__("Completed Quantity cannot be greater than {0}", [max_completed_qty])
+						);
+					}
+
+					if (remaining != dialog.get_value("pending_qty")) {
 						dialog.set_value("pending_qty", remaining);
 					}
 				},
@@ -277,7 +291,18 @@ frappe.ui.form.on("Job Card", {
 						dialog.get_value("for_quantity") -
 						dialog.get_value("completed_qty") -
 						dialog.get_value("pending_qty");
-					if (process_loss_qty >= 0 && process_loss_qty != dialog.get_value("process_loss_qty")) {
+
+					if (process_loss_qty < 0) {
+						dialog.set_value("pending_qty", 0);
+						frappe.throw(
+							__("Pending Quantity cannot be greater than {0}", [
+								flt(dialog.get_value("for_quantity")) -
+									flt(dialog.get_value("completed_qty")),
+							])
+						);
+					}
+
+					if (process_loss_qty != dialog.get_value("process_loss_qty")) {
 						dialog.set_value("process_loss_qty", process_loss_qty);
 					}
 				},
@@ -292,7 +317,18 @@ frappe.ui.form.on("Job Card", {
 						dialog.get_value("for_quantity") -
 						dialog.get_value("completed_qty") -
 						dialog.get_value("process_loss_qty");
-					if (remaining >= 0 && remaining != dialog.get_value("pending_qty")) {
+
+					if (remaining < 0) {
+						dialog.set_value("process_loss_qty", 0);
+						frappe.throw(
+							__("Process Loss Quantity cannot be greater than {0}", [
+								flt(dialog.get_value("for_quantity")) -
+									flt(dialog.get_value("completed_qty")),
+							])
+						);
+					}
+
+					if (remaining != dialog.get_value("pending_qty")) {
 						dialog.set_value("pending_qty", remaining);
 					}
 				},

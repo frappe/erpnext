@@ -796,6 +796,7 @@ class ShopFloor {
 				change() {
 					const d = me.session_dialog;
 					d.set_value("completed_qty", d.get_value("for_quantity"));
+					d.set_value("pending_qty", 0);
 					d.set_value("process_loss_qty", 0);
 				},
 			},
@@ -807,8 +808,21 @@ class ShopFloor {
 				default: pending,
 				change() {
 					const d = me.session_dialog;
-					const remaining = flt(d.get_value("for_quantity")) - flt(d.get_value("completed_qty"));
-					if (remaining > 0 && remaining !== flt(d.get_value("pending_qty"))) {
+					const remaining =
+						flt(d.get_value("for_quantity")) -
+						flt(d.get_value("completed_qty")) -
+						flt(d.get_value("process_loss_qty"));
+
+					if (remaining < 0) {
+						const max_completed_qty =
+							flt(d.get_value("for_quantity")) - flt(d.get_value("process_loss_qty"));
+						d.set_value("completed_qty", max_completed_qty);
+						frappe.throw(
+							__("Completed Quantity cannot be greater than {0}", [max_completed_qty])
+						);
+					}
+
+					if (remaining !== flt(d.get_value("pending_qty"))) {
 						d.set_value("pending_qty", remaining);
 					}
 				},
@@ -824,7 +838,17 @@ class ShopFloor {
 						flt(d.get_value("for_quantity")) -
 						flt(d.get_value("completed_qty")) -
 						flt(d.get_value("pending_qty"));
-					if (pl >= 0 && pl !== flt(d.get_value("process_loss_qty"))) {
+
+					if (pl < 0) {
+						d.set_value("pending_qty", 0);
+						frappe.throw(
+							__("Pending Quantity cannot be greater than {0}", [
+								flt(d.get_value("for_quantity")) - flt(d.get_value("completed_qty")),
+							])
+						);
+					}
+
+					if (pl !== flt(d.get_value("process_loss_qty"))) {
 						d.set_value("process_loss_qty", pl);
 					}
 				},
@@ -840,7 +864,17 @@ class ShopFloor {
 						flt(d.get_value("for_quantity")) -
 						flt(d.get_value("completed_qty")) -
 						flt(d.get_value("process_loss_qty"));
-					if (remaining >= 0 && remaining !== flt(d.get_value("pending_qty"))) {
+
+					if (remaining < 0) {
+						d.set_value("process_loss_qty", 0);
+						frappe.throw(
+							__("Process Loss Quantity cannot be greater than {0}", [
+								flt(d.get_value("for_quantity")) - flt(d.get_value("completed_qty")),
+							])
+						);
+					}
+
+					if (remaining !== flt(d.get_value("pending_qty"))) {
 						d.set_value("pending_qty", remaining);
 					}
 				},
