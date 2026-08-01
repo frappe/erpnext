@@ -822,8 +822,8 @@ class ShopFloor {
 						d.set_value("completed_qty", max_completed_qty);
 						frappe.throw(
 							__("Completed Quantity cannot be greater than {0}", [
-							qty_with_uom(max_completed_qty),
-						])
+								qty_with_uom(max_completed_qty),
+							])
 						);
 					}
 
