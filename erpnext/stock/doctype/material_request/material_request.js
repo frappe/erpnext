@@ -441,10 +441,28 @@ frappe.ui.form.on("Material Request", {
 	select_suppliers_for_items: function (frm, items) {
 		const rows = items.map((item) => Object.assign({}, item, { qty: item.pending_qty, __checked: 1 }));
 
+		const supplier_query = () => {
+			return { filters: { disabled: 0, prevent_pos: 0 } };
+		};
+
 		const dialog = new frappe.ui.Dialog({
 			title: __("Select Supplier for Items"),
 			size: "large",
 			fields: [
+				{
+					fieldname: "supplier",
+					fieldtype: "Link",
+					options: "Supplier",
+					label: __("Set Supplier for All Items"),
+					get_query: supplier_query,
+					onchange: function () {
+						const supplier = dialog.get_value("supplier");
+						if (!supplier) return;
+
+						rows.forEach((row) => (row.supplier = supplier));
+						dialog.fields_dict.items.grid.refresh();
+					},
+				},
 				{
 					fieldname: "items",
 					fieldtype: "Table",
@@ -504,6 +522,7 @@ frappe.ui.form.on("Material Request", {
 							fieldname: "supplier",
 							options: "Supplier",
 							label: __("Supplier"),
+							get_query: supplier_query,
 							reqd: 1,
 							in_list_view: 1,
 							columns: 3,
