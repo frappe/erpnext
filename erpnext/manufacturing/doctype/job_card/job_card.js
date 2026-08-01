@@ -273,8 +273,7 @@ frappe.ui.form.on("Job Card", {
 
 					if (remaining < 0) {
 						const max_completed_qty =
-							flt(dialog.get_value("for_quantity")) -
-							flt(dialog.get_value("process_loss_qty"));
+							flt(dialog.get_value("for_quantity")) - flt(dialog.get_value("process_loss_qty"));
 						dialog.set_value("completed_qty", max_completed_qty);
 						frappe.throw(
 							__("Completed Quantity cannot be greater than {0}", [
