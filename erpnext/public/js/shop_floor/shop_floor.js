@@ -789,10 +789,11 @@ class ShopFloor {
 		const fields = [
 			{
 				fieldtype: "Float",
-				label: __("Qty to Manufacture"),
+				label: __("Qty to Manufacture in this Cycle"),
 				fieldname: "for_quantity",
 				reqd: 1,
 				default: pending,
+				description: __("Completed, Pending and Process Loss quantities must add up to this."),
 				change() {
 					const d = me.session_dialog;
 					d.set_value("completed_qty", d.get_value("for_quantity"));
@@ -832,6 +833,7 @@ class ShopFloor {
 				label: __("Pending Quantity"),
 				fieldname: "pending_qty",
 				default: 0.0,
+				description: __("Qty left for a later cycle or for another job card."),
 				change() {
 					const d = me.session_dialog;
 					const pl =
@@ -858,6 +860,7 @@ class ShopFloor {
 				label: __("Process Loss Quantity"),
 				fieldname: "process_loss_qty",
 				default: 0.0,
+				description: __("Qty scrapped in this cycle, nobody will produce it."),
 				change() {
 					const d = me.session_dialog;
 					const remaining =
