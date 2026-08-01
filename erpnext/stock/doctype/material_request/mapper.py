@@ -236,6 +236,9 @@ def make_purchase_orders_by_supplier(source_name: str, item_suppliers: str | lis
 				"requested_qty": requested_qty,
 			},
 		)
+		for item in purchase_order.items:
+			item.schedule_date = item.schedule_date or nowdate()
+
 		purchase_order.insert()
 		purchase_orders.append(purchase_order.name)
 
