@@ -912,6 +912,74 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertEqual(wo_doc.process_loss_qty, 2)
 		self.assertEqual(wo_doc.status, "Completed")
 
+	def get_first_job_card(self, work_order):
+		return frappe.get_doc(
+			"Job Card",
+			frappe.get_all(
+				"Job Card",
+				filters={"work_order": work_order},
+				order_by="sequence_id, creation",
+				limit=1,
+				pluck="name",
+			)[0],
+		)
+
+	def test_completion_qty_reduces_for_quantity_without_process_loss(self):
+		work_order = make_wo_order_test_record(item="_Test FG Item 2", qty=5)
+
+		job_card = self.get_first_job_card(work_order.name)
+		job_card.append("time_logs", {"from_time": "2024-03-01 08:00:00"})
+		job_card.save()
+
+		job_card.complete_job_card(
+			qty=3,
+			for_quantity=3,
+			pending_qty=0,
+			process_loss_qty=0,
+			end_time="2024-03-01 09:00:00",
+		)
+
+		job_card.reload()
+		self.assertEqual(flt(job_card.for_quantity), 3)
+		self.assertEqual(flt(job_card.total_completed_qty), 3)
+		self.assertEqual(flt(job_card.process_loss_qty), 0)
+
+	def test_completion_qty_keeps_for_quantity_across_cycles(self):
+		work_order = make_wo_order_test_record(item="_Test FG Item 2", qty=5)
+
+		job_card = self.get_first_job_card(work_order.name)
+		job_card.append("time_logs", {"from_time": "2024-03-02 08:00:00"})
+		job_card.save()
+
+		job_card.complete_job_card(
+			qty=3,
+			for_quantity=5,
+			pending_qty=2,
+			process_loss_qty=0,
+			end_time="2024-03-02 09:00:00",
+		)
+
+		job_card.reload()
+		self.assertEqual(flt(job_card.for_quantity), 5)
+		self.assertEqual(flt(job_card.pending_qty), 2)
+		self.assertEqual(flt(job_card.process_loss_qty), 0)
+
+		job_card.append("time_logs", {"from_time": "2024-03-02 10:00:00"})
+		job_card.save()
+
+		job_card.complete_job_card(
+			qty=2,
+			for_quantity=2,
+			pending_qty=0,
+			process_loss_qty=0,
+			end_time="2024-03-02 11:00:00",
+		)
+
+		job_card.reload()
+		self.assertEqual(flt(job_card.for_quantity), 5)
+		self.assertEqual(flt(job_card.total_completed_qty), 5)
+		self.assertEqual(flt(job_card.process_loss_qty), 0)
+
 	def test_op_cost_calculation(self):
 		from erpnext.manufacturing.doctype.routing.test_routing import (
 			create_routing,
