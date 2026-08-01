@@ -2228,6 +2228,21 @@ class TestJobCardLogic(ERPNextTestSuite):
 			frappe.ValidationError, jc.validate_complete_job_card_qty, frappe._dict(pending_qty=10)
 		)
 
+	def test_completion_qty_split_must_add_up(self):
+		jc = frappe.new_doc("Job Card")
+		jc.for_quantity = 5
+
+		# 3 completed + 2 pending + 0 lost == 5 to manufacture -> passes
+		jc.validate_complete_job_card_qty(
+			frappe._dict(for_quantity=5, qty=3, pending_qty=2, process_loss_qty=0)
+		)
+
+		self.assertRaises(
+			frappe.ValidationError,
+			jc.validate_complete_job_card_qty,
+			frappe._dict(for_quantity=3, qty=3, pending_qty=2, process_loss_qty=0),
+		)
+
 	def test_completed_qty_must_reconcile_with_for_quantity(self):
 		jc = frappe.new_doc("Job Card")
 		jc.for_quantity = 10
