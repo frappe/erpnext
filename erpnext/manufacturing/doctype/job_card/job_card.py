@@ -1352,8 +1352,7 @@ class JobCard(Document):
 			self.status = "Work In Progress"
 
 		if self.docstatus == 1 and (
-			self.get_qty_to_produce() <= (self.total_completed_qty + self.process_loss_qty)
-			or not self.items
+			self.get_qty_to_produce() <= (self.total_completed_qty + self.process_loss_qty) or not self.items
 		):
 			self.status = "Completed"
 
@@ -1709,9 +1708,7 @@ class JobCard(Document):
 			return
 
 		precision = self.precision("total_completed_qty")
-		accounted_qty = (
-			flt(kwargs.qty) + flt(kwargs.pending_qty) + flt(kwargs.process_loss_qty)
-		)
+		accounted_qty = flt(kwargs.qty) + flt(kwargs.pending_qty) + flt(kwargs.process_loss_qty)
 
 		if flt(accounted_qty, precision) == flt(kwargs.for_quantity, precision):
 			return
