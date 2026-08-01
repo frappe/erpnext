@@ -474,6 +474,7 @@ frappe.ui.form.on("Material Request", {
 				{
 					fieldname: "items",
 					fieldtype: "Table",
+					label: __("Items"),
 					cannot_add_rows: true,
 					cannot_delete_rows: true,
 					in_place_edit: true,
