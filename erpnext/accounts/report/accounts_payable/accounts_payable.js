@@ -18,6 +18,11 @@ frappe.query_reports["Accounts Payable"] = {
 			default: frappe.datetime.get_today(),
 		},
 		{
+			fieldname: "due_upto",
+			label: __("Due Upto"),
+			fieldtype: "Date",
+		},
+		{
 			fieldname: "finance_book",
 			label: __("Finance Book"),
 			fieldtype: "Link",

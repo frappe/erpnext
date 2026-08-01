@@ -403,6 +403,15 @@ class ReceivablePayableReport:
 		self.set_party_details(row)
 		self.set_ageing(row)
 
+		# cutoff filters invoices only; leave payments, credit/debit notes and journals untouched
+		if (
+			self.filters.get("due_upto")
+			and self.is_invoice(row)
+			and row.due_date
+			and getdate(row.due_date) > getdate(self.filters.due_upto)
+		):
+			return
+
 		if self.filters.get("group_by_party"):
 			self.update_sub_total_row(row, row.party)
 			if self.previous_party and (self.previous_party != row.party):
