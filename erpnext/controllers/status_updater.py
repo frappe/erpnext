@@ -312,6 +312,7 @@ class StatusUpdater(Document):
 			qty_or_amount,
 		)
 
+<<<<<<< HEAD
 		role_allowed_to_over_deliver_receive = frappe.db.get_single_value(
 			"Stock Settings", "role_allowed_to_over_deliver_receive"
 		)
@@ -319,6 +320,14 @@ class StatusUpdater(Document):
 			"Accounts Settings", "role_allowed_to_over_bill"
 		)
 		role = role_allowed_to_over_deliver_receive if qty_or_amount == "qty" else role_allowed_to_over_bill
+=======
+		role = None
+		if qty_or_amount == "qty":
+			if args.get("overflow_type") in ("delivery", "receipt"):
+				role = frappe.get_single_value("Stock Settings", "role_allowed_to_over_deliver_receive")
+		else:
+			role = frappe.get_single_value("Accounts Settings", "role_allowed_to_over_bill")
+>>>>>>> 248873034d (fix(stock): scope over deliver/receive role check to delivery and receipt overflow)
 
 		overflow_percent = (
 			(item[args["target_field"]] - item[args["target_ref_field"]]) / item[args["target_ref_field"]]
