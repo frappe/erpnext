@@ -445,7 +445,7 @@ frappe.ui.form.on("Material Request", {
 	},
 
 	select_suppliers_for_items: function (frm, items) {
-		const rows = items.map((item) => Object.assign({}, item, { qty: item.pending_qty }));
+		const rows = items.map((item) => Object.assign({}, item, { qty: item.pending_qty, __checked: 1 }));
 
 		const dialog = new frappe.ui.Dialog({
 			title: __("Select Supplier for Items"),
@@ -519,7 +519,10 @@ frappe.ui.form.on("Material Request", {
 			],
 			primary_action_label: __("Create"),
 			primary_action: function (values) {
-				const item_suppliers = values.items || [];
+				const item_suppliers = (values.items || []).filter((row) => row.__checked);
+				if (!item_suppliers.length) {
+					frappe.throw(__("Select at least one Item"));
+				}
 
 				const missing_supplier = item_suppliers.find((row) => !row.supplier);
 				if (missing_supplier) {

@@ -207,6 +207,9 @@ def get_item_default_suppliers(source_name: str, filtered_children: str | list |
 def make_purchase_orders_by_supplier(source_name: str, item_suppliers: str | list) -> list[str]:
 	"""Create one draft Purchase Order per supplier for the given Material Request items."""
 	item_suppliers = frappe.parse_json(item_suppliers)
+	if not item_suppliers:
+		frappe.throw(_("Select at least one Item"))
+
 	pending_items = {
 		d["material_request_item"]: frappe._dict(d) for d in get_item_default_suppliers(source_name)
 	}
