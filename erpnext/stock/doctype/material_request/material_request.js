@@ -544,8 +544,13 @@ frappe.ui.form.on("Material Request", {
 					args: { source_name: frm.doc.name, item_suppliers: item_suppliers },
 					freeze: true,
 					callback: function (r) {
-						if (!r.exc) {
-							dialog.hide();
+						if (r.exc) return;
+
+						dialog.hide();
+
+						const purchase_orders = r.message || [];
+						if (purchase_orders.length === 1) {
+							frappe.set_route("Form", "Purchase Order", purchase_orders[0]);
 						}
 					},
 				});
