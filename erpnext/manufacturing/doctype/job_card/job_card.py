@@ -1350,8 +1350,7 @@ class JobCard(Document):
 			self.status = "Work In Progress"
 
 		if self.docstatus == 1 and (
-			self.get_qty_to_produce() <= (self.total_completed_qty + self.process_loss_qty)
-			or not self.items
+			self.get_qty_to_produce() <= (self.total_completed_qty + self.process_loss_qty) or not self.items
 		):
 			self.status = "Completed"
 
