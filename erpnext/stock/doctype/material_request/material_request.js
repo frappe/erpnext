@@ -469,6 +469,8 @@ frappe.ui.form.on("Material Request", {
 						dialog.fields_dict.items.grid.refresh();
 					},
 				},
+				{ fieldtype: "Column Break" },
+				{ fieldtype: "Section Break" },
 				{
 					fieldname: "items",
 					fieldtype: "Table",
