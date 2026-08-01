@@ -3949,6 +3949,45 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, transfer_entry.submit)
 
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"enable_stock_reservation": 1, "allow_partial_reservation": 1},
+	)
+	def test_partial_reservation_records_full_voucher_qty(self):
+		# Regression: a short reservation must keep voucher_qty as the full requirement.
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import (
+			make_stock_entry as make_stock_entry_test_record,
+		)
+
+		production_item = "Test Partial Reservation FG"
+		rm_item = "Test Partial Reservation RM"
+		source_warehouse = "Stores - _TC"
+
+		make_item(production_item, {"is_stock_item": 1})
+		make_item(rm_item, {"is_stock_item": 1})
+
+		make_bom(item=production_item, source_warehouse=source_warehouse, raw_materials=[rm_item])
+
+		# Only 6 units on hand while the Work Order needs 10.
+		make_stock_entry_test_record(item_code=rm_item, target=source_warehouse, qty=6, basic_rate=100)
+
+		wo = make_wo_order_test_record(
+			item=production_item,
+			qty=10,
+			reserve_stock=1,
+			source_warehouse=source_warehouse,
+		)
+
+		sre = frappe.get_all(
+			"Stock Reservation Entry",
+			filters={"voucher_no": wo.name, "docstatus": 1},
+			fields=["voucher_qty", "reserved_qty", "status"],
+		)
+		self.assertEqual(len(sre), 1)
+		self.assertEqual(sre[0].reserved_qty, 6)
+		self.assertEqual(sre[0].voucher_qty, 10)
+		self.assertEqual(sre[0].status, "Partially Reserved")
+
 	def test_auto_stock_reservation_for_batched_raw_material(self):
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import (
 			make_stock_entry as make_stock_entry_test_record,
