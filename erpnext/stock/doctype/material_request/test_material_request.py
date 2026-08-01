@@ -1380,6 +1380,8 @@ class TestMaterialRequest(ERPNextTestSuite):
 				frappe.ValidationError, make_purchase_orders_by_supplier, mr.name, [row | invalid]
 			)
 
+		self.assertRaises(frappe.ValidationError, make_purchase_orders_by_supplier, mr.name, [])
+
 
 def create_item_with_default_supplier(item_code, supplier):
 	item = create_item(item_code)
