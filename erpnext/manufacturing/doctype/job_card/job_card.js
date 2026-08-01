@@ -384,46 +384,6 @@ frappe.ui.form.on("Job Card", {
 		});
 	},
 
-	make_finished_good(frm) {
-		const fields = [
-			{
-				fieldtype: "Float",
-				label: __("Completed Quantity"),
-				fieldname: "qty",
-				reqd: 1,
-				default: frm.doc.for_quantity - frm.doc.manufactured_qty,
-			},
-			{
-				fieldtype: "Datetime",
-				label: __("End Time"),
-				fieldname: "end_time",
-				default: frappe.datetime.now_datetime(),
-			},
-		];
-
-		frappe.prompt(
-			fields,
-			(data) => {
-				if (data.qty <= 0) {
-					frappe.throw(__("Quantity should be greater than 0"));
-				}
-
-				frm.call({
-					method: "make_finished_good",
-					doc: frm.doc,
-					args: { qty: data.qty, end_time: data.end_time },
-					callback(r) {
-						const doc = frappe.model.sync(r.message);
-						frappe.set_route("Form", doc[0].doctype, doc[0].name);
-					},
-				});
-			},
-			__("Enter Value"),
-			__("Update"),
-			__("Set Finished Good Quantity")
-		);
-	},
-
 	setup_quality_inspection(frm) {
 		const quality_inspection_field = frm.get_docfield("quality_inspection");
 		quality_inspection_field.get_route_options_for_new_doc = function (frm) {
