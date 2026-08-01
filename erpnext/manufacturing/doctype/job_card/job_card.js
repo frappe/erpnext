@@ -67,7 +67,11 @@ frappe.ui.form.on("Job Card", {
 		if (remaining_qty < frm.doc.pending_qty) {
 			frm.doc.pending_qty = 0.0;
 			refresh_field("pending_qty");
-			frappe.throw(__("Pending Quantity cannot be greater than {0}", [remaining_qty]));
+			frappe.throw(
+				__("Pending Quantity cannot be greater than {0}", [
+					get_qty_with_uom(remaining_qty, frm.doc.stock_uom),
+				])
+			);
 		}
 
 		const process_loss_qty = flt(remaining_qty) - flt(frm.doc.pending_qty);
@@ -272,7 +276,9 @@ frappe.ui.form.on("Job Card", {
 							flt(dialog.get_value("for_quantity")) - flt(dialog.get_value("process_loss_qty"));
 						dialog.set_value("completed_qty", max_completed_qty);
 						frappe.throw(
-							__("Completed Quantity cannot be greater than {0}", [max_completed_qty])
+							__("Completed Quantity cannot be greater than {0}", [
+								get_qty_with_uom(max_completed_qty, frm.doc.stock_uom),
+							])
 						);
 					}
 
@@ -298,8 +304,11 @@ frappe.ui.form.on("Job Card", {
 						dialog.set_value("pending_qty", 0);
 						frappe.throw(
 							__("Pending Quantity cannot be greater than {0}", [
-								flt(dialog.get_value("for_quantity")) -
-									flt(dialog.get_value("completed_qty")),
+								get_qty_with_uom(
+									flt(dialog.get_value("for_quantity")) -
+										flt(dialog.get_value("completed_qty")),
+									frm.doc.stock_uom
+								),
 							])
 						);
 					}
@@ -325,8 +334,11 @@ frappe.ui.form.on("Job Card", {
 						dialog.set_value("process_loss_qty", 0);
 						frappe.throw(
 							__("Process Loss Quantity cannot be greater than {0}", [
-								flt(dialog.get_value("for_quantity")) -
-									flt(dialog.get_value("completed_qty")),
+								get_qty_with_uom(
+									flt(dialog.get_value("for_quantity")) -
+										flt(dialog.get_value("completed_qty")),
+									frm.doc.stock_uom
+								),
 							])
 						);
 					}
@@ -883,4 +895,8 @@ function get_last_completed_row(time_logs) {
 
 function get_last_row(time_logs) {
 	return time_logs[time_logs.length - 1] || {};
+}
+
+function get_qty_with_uom(qty, stock_uom) {
+	return stock_uom ? `${flt(qty)} ${stock_uom}` : flt(qty);
 }

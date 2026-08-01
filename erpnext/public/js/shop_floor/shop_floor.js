@@ -786,6 +786,8 @@ class ShopFloor {
 			pending = flt(jc.pending_qty);
 		}
 
+		const qty_with_uom = (qty) => `${flt(qty)} ${jc.stock_uom || ""}`.trim();
+
 		const fields = [
 			{
 				fieldtype: "Float",
@@ -819,7 +821,9 @@ class ShopFloor {
 							flt(d.get_value("for_quantity")) - flt(d.get_value("process_loss_qty"));
 						d.set_value("completed_qty", max_completed_qty);
 						frappe.throw(
-							__("Completed Quantity cannot be greater than {0}", [max_completed_qty])
+							__("Completed Quantity cannot be greater than {0}", [
+							qty_with_uom(max_completed_qty),
+						])
 						);
 					}
 
@@ -845,7 +849,9 @@ class ShopFloor {
 						d.set_value("pending_qty", 0);
 						frappe.throw(
 							__("Pending Quantity cannot be greater than {0}", [
-								flt(d.get_value("for_quantity")) - flt(d.get_value("completed_qty")),
+								qty_with_uom(
+									flt(d.get_value("for_quantity")) - flt(d.get_value("completed_qty"))
+								),
 							])
 						);
 					}
@@ -872,7 +878,9 @@ class ShopFloor {
 						d.set_value("process_loss_qty", 0);
 						frappe.throw(
 							__("Process Loss Quantity cannot be greater than {0}", [
-								flt(d.get_value("for_quantity")) - flt(d.get_value("completed_qty")),
+								qty_with_uom(
+									flt(d.get_value("for_quantity")) - flt(d.get_value("completed_qty"))
+								),
 							])
 						);
 					}
