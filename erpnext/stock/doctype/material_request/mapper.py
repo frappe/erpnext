@@ -215,10 +215,16 @@ def make_purchase_orders_by_supplier(source_name: str, item_suppliers: str | lis
 	}
 
 	items_by_supplier = {}
+	requested_items = set()
 	for row in item_suppliers:
 		row = frappe._dict(row)
 		pending = pending_items.get(row.material_request_item) or frappe._dict()
 		item_link = get_link_to_form("Item", row.item_code)
+
+		if row.material_request_item in requested_items:
+			frappe.throw(_("Item {0} cannot be ordered more than once").format(item_link))
+
+		requested_items.add(row.material_request_item)
 
 		if not row.supplier:
 			frappe.throw(_("Select a Supplier for Item {0}").format(item_link))
