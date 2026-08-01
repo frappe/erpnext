@@ -67,7 +67,11 @@ frappe.ui.form.on("Job Card", {
 		if (remaining_qty < frm.doc.pending_qty) {
 			frm.doc.pending_qty = 0.0;
 			refresh_field("pending_qty");
-			frappe.throw(__("Pending Quantity cannot be greater than {0}", [remaining_qty]));
+			frappe.throw(
+				__("Pending Quantity cannot be greater than {0}", [
+					get_qty_with_uom(remaining_qty, frm.doc.stock_uom),
+				])
+			);
 		}
 
 		const process_loss_qty = flt(remaining_qty) - flt(frm.doc.pending_qty);
@@ -261,8 +265,28 @@ frappe.ui.form.on("Job Card", {
 				default: pending_qty,
 				change() {
 					const dialog = frm.job_completion_dialog;
+<<<<<<< HEAD
 					const remaining = dialog.get_value("for_quantity") - dialog.get_value("completed_qty");
 					if (remaining > 0 && remaining != dialog.get_value("pending_qty")) {
+=======
+					const remaining =
+						dialog.get_value("for_quantity") -
+						dialog.get_value("completed_qty") -
+						dialog.get_value("process_loss_qty");
+
+					if (remaining < 0) {
+						const max_completed_qty =
+							flt(dialog.get_value("for_quantity")) - flt(dialog.get_value("process_loss_qty"));
+						dialog.set_value("completed_qty", max_completed_qty);
+						frappe.throw(
+							__("Completed Quantity cannot be greater than {0}", [
+								get_qty_with_uom(max_completed_qty, frm.doc.stock_uom),
+							])
+						);
+					}
+
+					if (remaining != dialog.get_value("pending_qty")) {
+>>>>>>> 07ac4d83ef (feat(job_card): print quantities with their stock uom (#57689))
 						dialog.set_value("pending_qty", remaining);
 					}
 				},
@@ -278,7 +302,25 @@ frappe.ui.form.on("Job Card", {
 						dialog.get_value("for_quantity") -
 						dialog.get_value("completed_qty") -
 						dialog.get_value("pending_qty");
+<<<<<<< HEAD
 					if (process_loss_qty >= 0 && process_loss_qty != dialog.get_value("process_loss_qty")) {
+=======
+
+					if (process_loss_qty < 0) {
+						dialog.set_value("pending_qty", 0);
+						frappe.throw(
+							__("Pending Quantity cannot be greater than {0}", [
+								get_qty_with_uom(
+									flt(dialog.get_value("for_quantity")) -
+										flt(dialog.get_value("completed_qty")),
+									frm.doc.stock_uom
+								),
+							])
+						);
+					}
+
+					if (process_loss_qty != dialog.get_value("process_loss_qty")) {
+>>>>>>> 07ac4d83ef (feat(job_card): print quantities with their stock uom (#57689))
 						dialog.set_value("process_loss_qty", process_loss_qty);
 					}
 				},
@@ -293,7 +335,25 @@ frappe.ui.form.on("Job Card", {
 						dialog.get_value("for_quantity") -
 						dialog.get_value("completed_qty") -
 						dialog.get_value("process_loss_qty");
+<<<<<<< HEAD
 					if (remaining >= 0 && remaining != dialog.get_value("pending_qty")) {
+=======
+
+					if (remaining < 0) {
+						dialog.set_value("process_loss_qty", 0);
+						frappe.throw(
+							__("Process Loss Quantity cannot be greater than {0}", [
+								get_qty_with_uom(
+									flt(dialog.get_value("for_quantity")) -
+										flt(dialog.get_value("completed_qty")),
+									frm.doc.stock_uom
+								),
+							])
+						);
+					}
+
+					if (remaining != dialog.get_value("pending_qty")) {
+>>>>>>> 07ac4d83ef (feat(job_card): print quantities with their stock uom (#57689))
 						dialog.set_value("pending_qty", remaining);
 					}
 				},
@@ -885,4 +945,8 @@ function get_last_completed_row(time_logs) {
 
 function get_last_row(time_logs) {
 	return time_logs[time_logs.length - 1] || {};
+}
+
+function get_qty_with_uom(qty, stock_uom) {
+	return stock_uom ? `${flt(qty)} ${stock_uom}` : flt(qty);
 }

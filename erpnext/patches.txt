@@ -496,4 +496,8 @@ erpnext.patches.v16_0.rename_ar_ap_ageing_filter
 erpnext.patches.v16_0.fix_subcontracting_titles
 erpnext.patches.v16_0.backfill_repost_accounting_ledger_status
 erpnext.patches.v16_0.merge_seeded_item_group_root
+<<<<<<< HEAD
 erpnext.patches.v16_0.rename_italy_customer_name_fields
+=======
+erpnext.patches.v16_0.set_stock_uom_in_job_card
+>>>>>>> 07ac4d83ef (feat(job_card): print quantities with their stock uom (#57689))

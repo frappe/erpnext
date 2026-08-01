@@ -888,6 +888,85 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertEqual(wo_doc.process_loss_qty, 2)
 		self.assertEqual(wo_doc.status, "Completed")
 
+<<<<<<< HEAD
+=======
+	def get_first_job_card(self, work_order):
+		return frappe.get_doc(
+			"Job Card",
+			frappe.get_all(
+				"Job Card",
+				filters={"work_order": work_order},
+				order_by="sequence_id, creation",
+				limit=1,
+				pluck="name",
+			)[0],
+		)
+
+	def test_stock_uom_is_set_from_the_produced_item(self):
+		work_order = make_wo_order_test_record(item="_Test FG Item 2", qty=5)
+
+		job_card = self.get_first_job_card(work_order.name)
+		item_code = job_card.finished_good or job_card.production_item
+
+		self.assertEqual(job_card.stock_uom, frappe.db.get_value("Item", item_code, "stock_uom"))
+
+	def test_completion_qty_reduces_for_quantity_without_process_loss(self):
+		work_order = make_wo_order_test_record(item="_Test FG Item 2", qty=5)
+
+		job_card = self.get_first_job_card(work_order.name)
+		job_card.append("time_logs", {"from_time": "2024-03-01 08:00:00"})
+		job_card.save()
+
+		job_card.complete_job_card(
+			qty=3,
+			for_quantity=3,
+			pending_qty=0,
+			process_loss_qty=0,
+			end_time="2024-03-01 09:00:00",
+		)
+
+		job_card.reload()
+		self.assertEqual(flt(job_card.for_quantity), 3)
+		self.assertEqual(flt(job_card.total_completed_qty), 3)
+		self.assertEqual(flt(job_card.process_loss_qty), 0)
+
+	def test_completion_qty_keeps_for_quantity_across_cycles(self):
+		work_order = make_wo_order_test_record(item="_Test FG Item 2", qty=5)
+
+		job_card = self.get_first_job_card(work_order.name)
+		job_card.append("time_logs", {"from_time": "2024-03-02 08:00:00"})
+		job_card.save()
+
+		job_card.complete_job_card(
+			qty=3,
+			for_quantity=5,
+			pending_qty=2,
+			process_loss_qty=0,
+			end_time="2024-03-02 09:00:00",
+		)
+
+		job_card.reload()
+		self.assertEqual(flt(job_card.for_quantity), 5)
+		self.assertEqual(flt(job_card.pending_qty), 2)
+		self.assertEqual(flt(job_card.process_loss_qty), 0)
+
+		job_card.append("time_logs", {"from_time": "2024-03-02 10:00:00"})
+		job_card.save()
+
+		job_card.complete_job_card(
+			qty=2,
+			for_quantity=2,
+			pending_qty=0,
+			process_loss_qty=0,
+			end_time="2024-03-02 11:00:00",
+		)
+
+		job_card.reload()
+		self.assertEqual(flt(job_card.for_quantity), 5)
+		self.assertEqual(flt(job_card.total_completed_qty), 5)
+		self.assertEqual(flt(job_card.process_loss_qty), 0)
+
+>>>>>>> 07ac4d83ef (feat(job_card): print quantities with their stock uom (#57689))
 	def test_op_cost_calculation(self):
 		from erpnext.manufacturing.doctype.routing.test_routing import (
 			create_routing,
@@ -1879,3 +1958,101 @@ def create_semi_fg_bom(semi_fg_item, raw_item, inspection_required):
 	bom.append("items", {"item_code": raw_item, "qty": 1})
 	bom.submit()
 	return bom.name
+<<<<<<< HEAD
+=======
+
+
+class TestJobCardLogic(ERPNextTestSuite):
+	"""Field-level validations and pure quantity/capacity helpers, exercised on the
+	document directly so they don't need a Work Order / BOM (the integration suite does)."""
+
+	def test_processing_a_submitted_or_cancelled_card_is_blocked(self):
+		submitted = frappe.new_doc("Job Card")
+		submitted.docstatus = 1
+		self.assertRaises(frappe.ValidationError, submitted.validate_docstatus)
+
+		cancelled = frappe.new_doc("Job Card")
+		cancelled.docstatus = 2
+		self.assertRaises(frappe.ValidationError, cancelled.validate_docstatus)
+
+	def test_complete_job_card_qty_guards(self):
+		jc = frappe.new_doc("Job Card")
+		jc.for_quantity = 5
+		jc.validate_complete_job_card_qty(frappe._dict(pending_qty=3))  # within range -> passes
+		self.assertRaises(
+			frappe.ValidationError, jc.validate_complete_job_card_qty, frappe._dict(pending_qty=-1)
+		)
+		self.assertRaises(
+			frappe.ValidationError, jc.validate_complete_job_card_qty, frappe._dict(process_loss_qty=-1)
+		)
+		self.assertRaises(
+			frappe.ValidationError, jc.validate_complete_job_card_qty, frappe._dict(pending_qty=10)
+		)
+
+	def test_qty_in_messages_carries_the_uom(self):
+		jc = frappe.new_doc("Job Card")
+		jc.stock_uom = "Nos"
+
+		self.assertEqual(jc.get_qty_with_uom(5), "5.0 Nos")
+		self.assertEqual(jc.get_qty_with_uom(0), "0.0 Nos")
+
+	def test_completion_qty_split_must_add_up(self):
+		jc = frappe.new_doc("Job Card")
+		jc.for_quantity = 5
+
+		# 3 completed + 2 pending + 0 lost == 5 to manufacture -> passes
+		jc.validate_complete_job_card_qty(
+			frappe._dict(for_quantity=5, qty=3, pending_qty=2, process_loss_qty=0)
+		)
+
+		self.assertRaises(
+			frappe.ValidationError,
+			jc.validate_complete_job_card_qty,
+			frappe._dict(for_quantity=3, qty=3, pending_qty=2, process_loss_qty=0),
+		)
+
+	def test_completed_qty_must_reconcile_with_for_quantity(self):
+		jc = frappe.new_doc("Job Card")
+		jc.for_quantity = 10
+		jc.total_completed_qty = 6
+		jc.process_loss_qty = 0
+		jc.pending_qty = 0
+		# 6 + 0 + 0 != 10 -> throws
+		self.assertRaises(frappe.ValidationError, jc.validate_completed_qty_matches_for_quantity)
+		# completed + loss + pending == for_quantity -> passes
+		jc.pending_qty = 4
+		jc.validate_completed_qty_matches_for_quantity()
+
+	def test_set_process_loss(self):
+		jc = frappe.new_doc("Job Card")
+		jc.for_quantity = 10
+		jc.total_completed_qty = 6
+		jc.pending_qty = 1
+		jc.set_process_loss()
+		self.assertEqual(jc.process_loss_qty, 3)  # 10 - 6 - 1
+
+		# no loss when nothing completed yet
+		nothing_done = frappe.new_doc("Job Card")
+		nothing_done.for_quantity = 10
+		nothing_done.total_completed_qty = 0
+		nothing_done.set_process_loss()
+		self.assertEqual(nothing_done.process_loss_qty, 0)
+
+	def test_capacity_overlap_detection(self):
+		jc = frappe.new_doc("Job Card")
+		sequential = [
+			{"from_time": "2026-01-01 10:00:00", "to_time": "2026-01-01 11:00:00"},
+			{"from_time": "2026-01-01 11:00:00", "to_time": "2026-01-01 12:00:00"},
+		]
+		overlapping = [
+			{"from_time": "2026-01-01 10:00:00", "to_time": "2026-01-01 11:00:00"},
+			{"from_time": "2026-01-01 10:30:00", "to_time": "2026-01-01 11:30:00"},
+		]
+		# sequential logs share one capacity slot; overlapping logs need two
+		self.assertEqual(len(jc.get_alloted_capacity(sequential)), 1)
+		self.assertEqual(len(jc.get_alloted_capacity(overlapping)), 2)
+		# capacity 1 overlaps with any log; capacity 2 only when both slots are taken
+		self.assertTrue(jc.has_overlap(1, sequential))
+		self.assertFalse(jc.has_overlap(2, sequential))
+		self.assertTrue(jc.has_overlap(2, overlapping))
+>>>>>>> 07ac4d83ef (feat(job_card): print quantities with their stock uom (#57689))
