@@ -216,6 +216,21 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		po2.items[0].qty = 110
 		self.assertRaises(OverAllowanceError, po2.submit)
 
+		# Stock over-delivery role must not bypass over-ordering against Material Request.
+		with self.change_settings(
+			"Stock Settings", {"role_allowed_to_over_deliver_receive": "Stock Manager"}
+		):
+			test_user = frappe.get_doc("User", "test@example.com")
+			test_user.add_roles("Stock Manager")
+
+			mr3 = make_material_request(qty=100)
+			po3 = make_purchase_order(mr3.name)
+			po3.supplier = "_Test Supplier"
+			po3.items[0].qty = 110
+			with self.set_user("test@example.com"):
+				po3.flags.ignore_permissions = True
+				self.assertRaises(OverAllowanceError, po3.submit)
+
 		# cleanup
 		frappe.db.set_single_value("Buying Settings", "over_order_allowance", 0)
 		frappe.db.set_single_value("Stock Settings", "over_delivery_receipt_allowance", 0)
