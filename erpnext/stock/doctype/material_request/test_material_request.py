@@ -1302,7 +1302,7 @@ class TestMaterialRequest(ERPNextTestSuite):
 		self.assertEqual([d["item_code"] for d in items], [with_supplier, without_supplier])
 		self.assertEqual(items[0]["supplier"], "_Test Supplier")
 		self.assertFalse(items[1]["supplier"])
-		self.assertEqual(items[0]["qty"], 10)
+		self.assertEqual(items[0]["pending_qty"], 10)
 
 	def test_make_purchase_order_sets_supplier(self):
 		mr = make_material_request_for_items(["_Test Item"])
@@ -1320,8 +1320,13 @@ class TestMaterialRequest(ERPNextTestSuite):
 		purchase_orders = make_purchase_orders_by_supplier(
 			mr.name,
 			[
-				{"material_request_item": item.name, "item_code": item.item_code, "supplier": supplier}
-				for item, supplier in zip(mr.items, suppliers, strict=True)
+				{
+					"material_request_item": item.name,
+					"item_code": item.item_code,
+					"qty": qty,
+					"supplier": supplier,
+				}
+				for item, supplier, qty in zip(mr.items, suppliers, [10, 10, 4], strict=True)
 			],
 		)
 
@@ -1332,18 +1337,24 @@ class TestMaterialRequest(ERPNextTestSuite):
 		self.assertEqual([d.item_code for d in first.items], item_codes[:2])
 		self.assertEqual(second.supplier, "_Test Supplier 1")
 		self.assertEqual([d.item_code for d in second.items], item_codes[2:])
+		self.assertEqual(second.items[0].qty, 4)
+		self.assertEqual(second.items[0].stock_qty, 4)
 
-	def test_make_purchase_orders_by_supplier_without_supplier(self):
+	def test_make_purchase_orders_by_supplier_invalid_rows(self):
 		from erpnext.stock.doctype.material_request.mapper import make_purchase_orders_by_supplier
 
 		mr = make_material_request_for_items(["_Test Item"])
+		row = {
+			"material_request_item": mr.items[0].name,
+			"item_code": "_Test Item",
+			"qty": 10,
+			"supplier": "_Test Supplier",
+		}
 
-		self.assertRaises(
-			frappe.ValidationError,
-			make_purchase_orders_by_supplier,
-			mr.name,
-			[{"material_request_item": mr.items[0].name, "item_code": "_Test Item", "supplier": None}],
-		)
+		for invalid in [{"supplier": None}, {"qty": 0}, {"qty": -5}, {"qty": 11}]:
+			self.assertRaises(
+				frappe.ValidationError, make_purchase_orders_by_supplier, mr.name, [row | invalid]
+			)
 
 
 def create_item_with_default_supplier(item_code, supplier):
