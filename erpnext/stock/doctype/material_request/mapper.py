@@ -260,11 +260,12 @@ def make_purchase_orders_by_supplier(source_name: str, item_suppliers: str | lis
 			indicator="orange",
 		)
 
-	frappe.msgprint(
-		_("{0} created").format(
-			comma_and([get_link_to_form("Purchase Order", name) for name in purchase_orders])
+	if len(purchase_orders) > 1:
+		frappe.msgprint(
+			_("{0} created").format(
+				comma_and([get_link_to_form("Purchase Order", name) for name in purchase_orders])
+			)
 		)
-	)
 
 	return purchase_orders
 
