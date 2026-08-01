@@ -524,23 +524,30 @@ frappe.ui.form.on("Material Request", {
 					frappe.throw(__("Select at least one Item"));
 				}
 
+				const item_link = (row) =>
+					frappe.utils.get_form_link(
+						"Item",
+						row.item_code,
+						true,
+						frappe.utils.escape_html(row.item_code)
+					);
+
 				const missing_supplier = item_suppliers.find((row) => !row.supplier);
 				if (missing_supplier) {
-					frappe.throw(
-						__("Select a Supplier for Item {0}", [
-							frappe.utils.get_form_link("Item", missing_supplier.item_code, true),
-						])
-					);
+					frappe.throw(__("Select a Supplier for Item {0}", [item_link(missing_supplier)]));
 				}
 
 				const invalid_qty = item_suppliers.find(
 					(row) => flt(row.qty) <= 0 || flt(row.qty) > flt(row.pending_qty)
 				);
 				if (invalid_qty) {
+					const pending_qty = `${format_number(invalid_qty.pending_qty)} ${frappe.utils.escape_html(
+						invalid_qty.uom
+					)}`;
 					frappe.throw(
 						__("Quantity for Item {0} must be greater than zero and cannot exceed {1}", [
-							frappe.utils.get_form_link("Item", invalid_qty.item_code, true),
-							`<b>${format_number(invalid_qty.pending_qty)} ${invalid_qty.uom}</b>`,
+							item_link(invalid_qty),
+							`<b>${pending_qty}</b>`,
 						])
 					);
 				}
