@@ -51,7 +51,13 @@ def get_payable_invoices(invoices: str | list | None = None):
 
 	names = [d["voucher_no"] for d in frappe.parse_json(invoices or "[]") if d.get("voucher_no")]
 	payable, excluded = _partition_payable_invoices(names)
-	return {"payable": payable, "excluded": excluded}
+
+	currency = None
+	if payable:
+		company = frappe.get_cached_value("Purchase Invoice", payable[0]["voucher_no"], "company")
+		currency = frappe.get_cached_value("Company", company, "default_currency")
+
+	return {"payable": payable, "excluded": excluded, "currency": currency}
 
 
 def _partition_payable_invoices(names):
@@ -63,7 +69,7 @@ def _partition_payable_invoices(names):
 	if not names:
 		return [], []
 
-	rows = frappe.get_all(
+	rows = frappe.get_list(
 		"Purchase Invoice",
 		filters={"name": ["in", names], "docstatus": 1},
 		fields=[
@@ -75,6 +81,7 @@ def _partition_payable_invoices(names):
 			"is_return",
 			"is_internal_supplier",
 		],
+		limit_page_length=0,
 	)
 
 	payable, excluded = [], []
@@ -94,6 +101,12 @@ def _partition_payable_invoices(names):
 					"outstanding": flt(r.outstanding_amount) * flt(r.conversion_rate or 1),
 				}
 			)
+
+	# names not returned were cancelled/deleted or no longer readable after the report loaded
+	found = {r.name for r in rows}
+	for name in names:
+		if name not in found:
+			excluded.append({"voucher_no": name, "reason": _("Not available")})
 
 	return payable, excluded
 

@@ -239,17 +239,17 @@ function create_payment_entries_from_payable_report(report) {
 		method: "erpnext.accounts.bulk_payment.get_payable_invoices",
 		args: { invoices: rows.map((r) => ({ voucher_no: r.voucher_no })) },
 		callback: ({ message }) => {
-			const { payable = [], excluded = [] } = message || {};
+			const { payable = [], excluded = [], currency } = message || {};
 			if (!payable.length) {
 				frappe.msgprint(__("None of the selected invoices are payable"));
 				return;
 			}
-			show_create_payment_entries_dialog(report, payable, excluded);
+			show_create_payment_entries_dialog(report, payable, excluded, currency);
 		},
 	});
 }
 
-function show_create_payment_entries_dialog(report, payable, excluded) {
+function show_create_payment_entries_dialog(report, payable, excluded, currency) {
 	// group by (supplier, party_account) for the overview — matches the backend grouping key
 	const supplierMap = {};
 	for (const inv of payable) {
@@ -319,6 +319,14 @@ function show_create_payment_entries_dialog(report, payable, excluded) {
 		})),
 	});
 
+	const pe_count = Object.keys(supplierMap).length;
+	const grand_total = Object.values(supplierMap).reduce((sum, d) => sum + d.outstanding, 0);
+	fields.push({
+		fieldtype: "HTML",
+		fieldname: "summary_footer",
+		options: summary_footer_html(pe_count, grand_total, currency),
+	});
+
 	const dialog = new frappe.ui.Dialog({
 		title: __("Create Payment Entries"),
 		fields: fields,
@@ -346,6 +354,20 @@ function show_create_payment_entries_dialog(report, payable, excluded) {
 		},
 	});
 	dialog.show();
+}
+
+function summary_footer_html(pe_count, grand_total, currency) {
+	return `<div style="
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-top: var(--margin-sm);
+			font-size: var(--text-sm);
+		">
+			<span class="text-muted">${__("Payment Entries are created as drafts for your review")}</span>
+			<span>${__("{0} Payment Entries", [pe_count])} ·
+				<strong>${format_currency(grand_total, currency)}</strong></span>
+		</div>`;
 }
 
 function excluded_note_html(excluded) {
