@@ -25,6 +25,16 @@ def set_missing_values(source, target_doc):
 	target_doc.run_method("calculate_taxes_and_totals")
 
 
+def get_source_item_for_qty(item, qty):
+	"""Copy of the source row whose pending quantity is the requested quantity."""
+	source_item = frappe._dict(item.as_dict())
+	source_item.ordered_qty = 0
+	source_item.received_qty = 0
+	source_item.stock_qty = flt(qty) * flt(item.conversion_factor)
+
+	return source_item
+
+
 def update_item(obj, target, source_parent):
 	target.conversion_factor = obj.conversion_factor
 
@@ -63,11 +73,18 @@ def make_purchase_order(
 		frappe.db.get_value("Material Request", source_name, "material_request_type") == "Subcontracting"
 	)
 
+	requested_qty = args.get("requested_qty") or {}
+
 	def postprocess(source, target_doc):
 		target_doc.is_subcontracted = is_subcontracted
 		if args.get("supplier"):
 			target_doc.supplier = args.get("supplier")
 		set_missing_values(source, target_doc)
+
+	def update_requested_item(obj, target, source_parent):
+		if obj.name in requested_qty:
+			obj = get_source_item_for_qty(obj, requested_qty[obj.name])
+		update_item(obj, target, source_parent)
 
 	def select_item(d):
 		filtered_items = args.get("filtered_children", [])
@@ -108,7 +125,7 @@ def make_purchase_order(
 				"doctype": "Purchase Order Item",
 				"field_map": generate_field_map(),
 				"field_no_map": ["item_code", "item_name", "qty"] if is_subcontracted else [],
-				"postprocess": update_item,
+				"postprocess": update_requested_item,
 				"condition": select_item,
 			},
 		},
@@ -177,7 +194,7 @@ def get_item_default_suppliers(source_name: str, filtered_children: str | list |
 				"material_request_item": item.name,
 				"item_code": item.item_code,
 				"item_name": item.item_name,
-				"qty": (flt(item.stock_qty) - ordered_qty) / (flt(item.conversion_factor) or 1),
+				"pending_qty": (flt(item.stock_qty) - ordered_qty) / (flt(item.conversion_factor) or 1),
 				"uom": item.uom,
 				"supplier": get_default_supplier_for_item(item.item_code, material_request.company),
 			}
@@ -190,6 +207,9 @@ def get_item_default_suppliers(source_name: str, filtered_children: str | list |
 def make_purchase_orders_by_supplier(source_name: str, item_suppliers: str | list) -> list[str]:
 	"""Create one draft Purchase Order per supplier for the given Material Request items."""
 	item_suppliers = frappe.parse_json(item_suppliers)
+	pending_qty = {
+		d["material_request_item"]: d["pending_qty"] for d in get_item_default_suppliers(source_name)
+	}
 
 	items_by_supplier = {}
 	for row in item_suppliers:
@@ -197,12 +217,24 @@ def make_purchase_orders_by_supplier(source_name: str, item_suppliers: str | lis
 		if not row.supplier:
 			frappe.throw(_("Select a Supplier for Item {0}").format(frappe.bold(row.item_code)))
 
-		items_by_supplier.setdefault(row.supplier, []).append(row.material_request_item)
+		if flt(row.qty) <= 0 or flt(row.qty) > flt(pending_qty.get(row.material_request_item)):
+			frappe.throw(
+				_("Quantity for Item {0} must be greater than zero and cannot exceed {1}").format(
+					frappe.bold(row.item_code), flt(pending_qty.get(row.material_request_item))
+				)
+			)
+
+		items_by_supplier.setdefault(row.supplier, {})[row.material_request_item] = flt(row.qty)
 
 	purchase_orders = []
-	for supplier, material_request_items in items_by_supplier.items():
+	for supplier, requested_qty in items_by_supplier.items():
 		purchase_order = make_purchase_order(
-			source_name, args={"supplier": supplier, "filtered_children": material_request_items}
+			source_name,
+			args={
+				"supplier": supplier,
+				"filtered_children": list(requested_qty),
+				"requested_qty": requested_qty,
+			},
 		)
 		purchase_order.insert()
 		purchase_orders.append(purchase_order.name)
