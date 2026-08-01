@@ -99,7 +99,8 @@ frappe.ui.form.on("Job Card", {
 			doc.docstatus === 1 &&
 			!doc.is_subcontracted &&
 			(doc.skip_material_transfer || doc.transferred_qty > 0) &&
-			flt(doc.manufactured_qty) + flt(doc.process_loss_qty) < flt(doc.for_quantity);
+			flt(doc.manufactured_qty) + flt(doc.process_loss_qty) <
+				flt(doc.for_quantity) - flt(doc.pending_qty);
 
 		if (!can_make_stock_entry) return;
 
