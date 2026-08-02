@@ -176,10 +176,10 @@ jobs:
             frappe_ref="refs/heads/$GITHUB_BASE_REF"
             fallback_to_develop=1
           elif [ "${GITHUB_REF_TYPE:-}" = "branch" ]; then
-            frappe_ref="refs/heads/$GITHUB_REF_NAME"
+            frappe_ref="$GITHUB_REF"
             fallback_to_develop=1
           elif [ "${GITHUB_REF_TYPE:-}" = "tag" ]; then
-            frappe_ref="refs/tags/$GITHUB_REF_NAME"
+            frappe_ref="$GITHUB_REF"
           else
             echo "Unsupported GitHub ref type: '${GITHUB_REF_TYPE:-unset}'"
             exit 1
