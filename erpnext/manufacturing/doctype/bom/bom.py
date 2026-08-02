@@ -1264,11 +1264,9 @@ def _build_base_bom_items_query(bom, company, qty, t):
 def _add_bom_item_columns(query, t, bom, opts, track_semi_finished_goods):
 	is_stock_item = cint(not opts.include_non_stock_items)
 	stock_item_condition = t.item_doc.is_stock_item.isin([1, is_stock_item])
-	# rate is constant per grouped item -> Max() keeps it out of the Sum (preserving the original
-	# Sum(...) * rate * qty arithmetic) while making the expression postgres-valid under GROUP BY.
-	amount_col = (
-		Sum(t.bom_item.stock_qty / IfNull(t.bom_doc.quantity, 1)) * Max(t.bom_item.rate) * opts.qty
-	).as_("amount")
+	amount_col = (Sum(t.bom_item.stock_qty / IfNull(t.bom_doc.quantity, 1) * t.bom_item.rate) * opts.qty).as_(
+		"amount"
+	)
 
 	if cint(opts.fetch_exploded):
 		return _add_exploded_item_columns(query, t, bom, amount_col, stock_item_condition)
