@@ -4,7 +4,7 @@
 """Sub-assembly resolution helpers for Production Plan."""
 
 import frappe
-from frappe.query_builder.functions import IfNull, Max, Sum
+from frappe.query_builder.functions import Count, IfNull, Max, Sum
 from frappe.utils import flt
 
 from erpnext.manufacturing.doctype.bom.bom import get_children as get_bom_children
@@ -167,7 +167,7 @@ def _sub_assembly_rm_query(company, bom_no, include_non_stock_items, planned_qty
 	item = frappe.qb.DocType("Item")
 	item_default = frappe.qb.DocType("Item Default")
 	item_uom = frappe.qb.DocType("UOM Conversion Detail")
-	return (
+	rows = (
 		frappe.qb.from_(bei)
 		.join(bom)
 		.on(bom.name == bei.parent)
@@ -182,6 +182,57 @@ def _sub_assembly_rm_query(company, bom_no, include_non_stock_items, planned_qty
 		.groupby(bei.item_code, bei.stock_uom, bei.bom_no, bei.is_phantom_item)
 	).run(as_dict=True)
 
+	_apply_representative_lines(rows, bom_no)
+	return rows
+
+
+def _apply_representative_lines(rows, bom_no):
+	"""Fill description/source_warehouse from a single real BOM Item line per group.
+
+	Both describe a line, not an item. Aggregating each independently can pair one line's
+	description with another's warehouse, and Max() over text is a sort -- MariaDB folds case,
+	PostgreSQL orders by byte value, so the engines pick differently. Take the first line by idx.
+	"""
+	repeated = [row for row in rows if (row.pop("line_count", 1) or 1) > 1]
+	if not repeated:
+		return
+
+	keys = ("item_code", "stock_uom", "bom_no", "is_phantom_item")
+	representative = _representative_lines(bom_no, keys)
+
+	for row in repeated:
+		line = representative.get(tuple(row.get(key) for key in keys))
+		if line:
+			row.description = line.description
+			row.source_warehouse = line.source_warehouse
+
+
+def _representative_lines(bom_no, keys):
+	"""Cached per request: sub-assembly resolution recurses and revisits the same BOM."""
+	cache = getattr(frappe.local, "_sub_assembly_representative_lines", None)
+	if cache is None:
+		cache = frappe.local._sub_assembly_representative_lines = {}
+
+	if bom_no in cache:
+		return cache[bom_no]
+
+	representative = {}
+	for line in frappe.get_all(
+		"BOM Item",
+		filters={
+			"parent": bom_no,
+			"parenttype": "BOM",
+			"is_sub_assembly_item": 0,
+			"docstatus": 1,
+		},
+		fields=["item_code", "stock_uom", "bom_no", "is_phantom_item", "description", "source_warehouse"],
+		order_by="idx",
+	):
+		representative.setdefault(tuple(line.get(key) for key in keys), line)
+
+	cache[bom_no] = representative
+	return representative
+
 
 def _sub_assembly_rm_columns(bei, bom, item, item_default, item_uom, planned_qty):
 	# Grouped by item_code/stock_uom plus bom_no/is_phantom_item: those two MUST come from the same
@@ -195,11 +246,12 @@ def _sub_assembly_rm_columns(bei, bom, item, item_default, item_uom, planned_qty
 		Max(item.item_name).as_("item_name"),
 		Max(item.name).as_("item_code"),
 		Max(bei.description).as_("description"),
+		Max(bei.source_warehouse).as_("source_warehouse"),
+		Count(bei.name).distinct().as_("line_count"),
 		bei.stock_uom,
 		bei.is_phantom_item,
 		bei.bom_no,
 		Max(item.min_order_qty).as_("min_order_qty"),
-		Max(bei.source_warehouse).as_("source_warehouse"),
 		Max(item.default_material_request_type).as_("default_material_request_type"),
 		Max(item.min_order_qty).as_("min_order_qty"),
 		Max(item_default.default_warehouse).as_("default_warehouse"),

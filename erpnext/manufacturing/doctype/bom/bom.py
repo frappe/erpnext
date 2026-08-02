@@ -1208,7 +1208,73 @@ def _query_bom_items(bom, company, opts):
 	query, group_by = _add_bom_item_columns(query, t, bom, opts, track_semi_finished_goods)
 	# qualify + aggregate idx: bare "idx" is ambiguous across the joined tables and isn't grouped
 	# (idx is unique per BOM item, so Min() preserves the original ordering) — needed for postgres
-	return query.groupby(*group_by).orderby(Min(t.bom_item.idx)).run(as_dict=True)
+	rows = query.groupby(*group_by).orderby(Min(t.bom_item.idx)).run(as_dict=True)
+
+	if not opts.fetch_secondary_items:
+		doctype = "BOM Explosion Item" if cint(opts.fetch_exploded) else "BOM Item"
+		# key only on group-by columns that belong to the line table. stock_uom is grouped from Item
+		# and can differ from the line's stored copy once an item's stock UOM is changed after the
+		# BOM was submitted; keying on it would miss and blank the row. It is functionally dependent
+		# on item_code anyway, so dropping it from the key loses nothing.
+		keys = [field.name for field in group_by if field.table is t.bom_item]
+		_apply_representative_lines(rows, doctype, bom, keys)
+
+	return rows
+
+
+def _line_columns_for(doctype):
+	columns = ["description", "source_warehouse"]
+	if doctype == "BOM Item":
+		# uom only means something beside its own conversion_factor, so they travel together
+		columns += ["uom", "conversion_factor"]
+	return columns
+
+
+def _apply_representative_lines(rows, doctype, bom, keys):
+	"""Fill the line-level columns from a single real BOM line per group.
+
+	They describe a line, not an item, so a BOM listing the same item more than once holds several
+	values per group. Aggregating each independently can pair one line's description with another's
+	warehouse -- or a uom with the wrong conversion_factor -- and Max() over text is a sort, which
+	MariaDB (case-folding) and PostgreSQL (byte order) resolve differently. Take the first by idx.
+	"""
+	repeated = [row for row in rows if (row.pop("line_count", 1) or 1) > 1]
+	if not repeated:
+		return
+
+	columns = _line_columns_for(doctype)
+	representative = _representative_lines(doctype, bom, tuple(keys), tuple(columns))
+
+	for row in repeated:
+		line = representative.get(tuple(row.get(key) for key in keys))
+		if not line:
+			continue
+		for column in columns:
+			row[column] = line.get(column)
+
+
+def _representative_lines(doctype, bom, keys, columns):
+	"""Cached per request: get_bom_items_as_dict recurses through phantom BOMs, and the same
+	sub-BOM is commonly reached more than once."""
+	cache = getattr(frappe.local, "_bom_representative_lines", None)
+	if cache is None:
+		cache = frappe.local._bom_representative_lines = {}
+
+	cache_key = (doctype, bom, keys, columns)
+	if cache_key in cache:
+		return cache[cache_key]
+
+	representative = {}
+	for line in frappe.get_all(
+		doctype,
+		filters={"parent": bom, "parenttype": "BOM", "docstatus": ("<", 2)},
+		fields=[*keys, *columns],
+		order_by="idx",
+	):
+		representative.setdefault(tuple(line.get(key) for key in keys), line)
+
+	cache[cache_key] = representative
+	return representative
 
 
 def _get_bom_item_tables(opts):
@@ -1290,10 +1356,11 @@ def _add_exploded_item_columns(query, t, bom, amount_col, stock_item_condition):
 	# keeping the GROUP BY postgres-valid; the correlated idx subquery references only item_code
 	# (a grouped column) so it stays valid and still overrides the explosion idx for display.
 	query = query.select(
+		Max(t.bom_item.description).as_("description"),
 		Max(t.bom_item.source_warehouse).as_("source_warehouse"),
+		Count(t.bom_item.name).distinct().as_("line_count"),
 		Max(t.bom_item.operation).as_("operation"),
 		Max(t.bom_item.include_item_in_manufacturing).as_("include_item_in_manufacturing"),
-		Max(t.bom_item.description).as_("description"),
 		Max(t.bom_item.rate).as_("rate"),
 		Max(t.bom_item.sourced_by_supplier).as_("sourced_by_supplier"),
 		amount_col,
@@ -1329,14 +1396,15 @@ def _add_normal_item_columns(query, t, amount_col, stock_item_condition, track_s
 	# under the same alias and silently shadowed (last value wins in the dict), so it is dropped here
 	# -- output is unchanged.
 	query = query.select(
-		Max(t.bom_item.uom).as_("uom"),
-		Max(t.bom_item.conversion_factor).as_("conversion_factor"),
+		Max(t.bom_item.description).as_("description"),
 		Max(t.bom_item.source_warehouse).as_("source_warehouse"),
+		Count(t.bom_item.name).distinct().as_("line_count"),
 		Max(t.bom_item.operation).as_("operation"),
 		Max(t.bom_item.include_item_in_manufacturing).as_("include_item_in_manufacturing"),
 		Max(t.bom_item.sourced_by_supplier).as_("sourced_by_supplier"),
+		Max(t.bom_item.uom).as_("uom"),
+		Max(t.bom_item.conversion_factor).as_("conversion_factor"),
 		amount_col,
-		Max(t.bom_item.description).as_("description"),
 		Max(t.bom_item.base_rate).as_("rate"),
 		Max(t.bom_item.operation_row_id).as_("operation_row_id"),
 		t.bom_item.is_phantom_item,
