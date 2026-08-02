@@ -2889,6 +2889,68 @@ class TestWorkOrder(ERPNextTestSuite):
 			f"BOM-path disassembly must apply process_loss_per; expected 18, got {bom_scrap_row.qty}",
 		)
 
+	def test_disassembly_source_row_columns_come_from_one_posted_line(self):
+		"""uom and conversion_factor must be read off the same posted line.
+
+		Two Manufacture entries consume the same raw material with different UOMs. "Nos" sorts
+		above "Box" while 5 sorts above 1, so aggregating each column on its own takes the uom
+		from one entry and the conversion factor from the other, yielding a pair that was never
+		posted and does not describe the summed quantity.
+		"""
+		from erpnext.stock.doctype.stock_entry.services.disassemble import DisassembleStockEntry
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import (
+			make_stock_entry as make_stock_entry_test_record,
+		)
+
+		raw_item = make_item("Test Raw for Disassembly Coherence", {"is_stock_item": 1}).name
+		fg_item = make_item("Test FG for Disassembly Coherence", {"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, quantity=1, raw_materials=[raw_item], rm_qty=2)
+
+		wo = make_wo_order_test_record(production_item=fg_item, qty=10, bom_no=bom.name, status="Not Started")
+		make_stock_entry_test_record(
+			item_code=raw_item,
+			purpose="Material Receipt",
+			target=wo.wip_warehouse,
+			qty=50,
+			basic_rate=100,
+		)
+
+		transfer = frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", wo.qty))
+		for item in transfer.items:
+			item.s_warehouse = wo.wip_warehouse
+		transfer.save()
+		transfer.submit()
+
+		first = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 3))
+		first.submit()
+		second = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 7))
+		second.submit()
+
+		second_row = next(row for row in second.items if row.item_code == raw_item)
+		frappe.db.set_value(
+			"Stock Entry Detail",
+			second_row.name,
+			{"uom": "Box", "conversion_factor": 5},
+			update_modified=False,
+		)
+
+		posted_pairs = {
+			(row.uom, flt(row.conversion_factor))
+			for row in frappe.get_all(
+				"Stock Entry Detail",
+				filters={"parent": ("in", [first.name, second.name]), "item_code": raw_item},
+				fields=["uom", "conversion_factor"],
+			)
+		}
+		self.assertEqual(len(posted_pairs), 2)
+
+		service = DisassembleStockEntry(frappe._dict(work_order=wo.name, source_stock_entry=None))
+		source_row = next(
+			row for row in service.get_items_from_manufacture_stock_entry() if row.item_code == raw_item
+		)
+
+		self.assertIn((source_row.uom, flt(source_row.conversion_factor)), posted_pairs)
+
 	def test_disassembly_with_additional_rm_not_in_bom(self):
 		"""
 		Test that SE-linked disassembly includes additional raw materials
