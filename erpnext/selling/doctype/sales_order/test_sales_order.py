@@ -1984,6 +1984,41 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		sales_order.save()
 		self.assertEqual(sales_order.taxes[0].tax_amount, 0)
 
+	def test_sales_order_with_shipping_rule_without_cost_center(self):
+		from erpnext import get_default_cost_center
+
+		shipping_rule = frappe.get_doc(
+			{
+				"doctype": "Shipping Rule",
+				"label": "Shipping Rule Without Cost Center - Sales Order Test",
+				"shipping_rule_type": "Selling",
+				"company": "_Test Company",
+				"account": "_Test Account Shipping Charges - _TC",
+				"calculate_based_on": "Fixed",
+				"shipping_amount": 50,
+			}
+		).insert()
+		sales_order = make_sales_order(do_not_save=True)
+		sales_order.shipping_rule = shipping_rule.name
+		company_cost_center = get_default_cost_center(sales_order.company)
+
+		shipping_rule.apply(sales_order)
+		self.assertEqual(len(sales_order.taxes), 1)
+		self.assertIsNone(sales_order.taxes[0].cost_center)
+
+		for cost_center in (None, "", company_cost_center):
+			sales_order.taxes[0].cost_center = cost_center
+			shipping_rule.apply(sales_order)
+			self.assertEqual(len(sales_order.taxes), 1)
+			self.assertEqual(sales_order.taxes[0].cost_center, cost_center)
+
+		sales_order.taxes[0].cost_center = ""
+		sales_order.save()
+		sales_order.reload()
+		shipping_rule.apply(sales_order)
+		self.assertEqual(len(sales_order.taxes), 1)
+		self.assertEqual(sales_order.taxes[0].cost_center, "")
+
 	@change_settings(
 		"Accounts Settings",
 		{"add_taxes_from_item_tax_template": 0, "add_taxes_from_taxes_and_charges_template": 1},
