@@ -2889,20 +2889,23 @@ class TestWorkOrder(ERPNextTestSuite):
 			f"BOM-path disassembly must apply process_loss_per; expected 18, got {bom_scrap_row.qty}",
 		)
 
-	def test_disassembly_source_row_columns_come_from_one_posted_line(self):
-		"""uom and conversion_factor must be read off the same posted line.
-
-		Two Manufacture entries consume the same raw material with different UOMs. "Nos" sorts
-		above "Box" while 5 sorts above 1, so aggregating each column on its own takes the uom
-		from one entry and the conversion factor from the other, yielding a pair that was never
-		posted and does not describe the summed quantity.
-		"""
+	def test_disassembly_mixed_uom_rows_are_aggregated_in_stock_uom(self):
+		"""Quantities and rates from different row UOMs must be aggregated in stock UOM."""
 		from erpnext.stock.doctype.stock_entry.services.disassemble import DisassembleStockEntry
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import (
 			make_stock_entry as make_stock_entry_test_record,
 		)
 
-		raw_item = make_item("Test Raw for Disassembly Coherence", {"is_stock_item": 1}).name
+		raw_item_doc = make_item(
+			"Test Raw for Disassembly Coherence", {"is_stock_item": 1, "stock_uom": "Nos"}
+		)
+		box_uom = next((row for row in raw_item_doc.uoms if row.uom == "Box"), None)
+		if box_uom:
+			box_uom.conversion_factor = 5
+		else:
+			raw_item_doc.append("uoms", {"uom": "Box", "conversion_factor": 5})
+		raw_item_doc.save()
+		raw_item = raw_item_doc.name
 		fg_item = make_item("Test FG for Disassembly Coherence", {"is_stock_item": 1}).name
 		bom = make_bom(item=fg_item, quantity=1, raw_materials=[raw_item], rm_qty=2)
 
@@ -2921,35 +2924,63 @@ class TestWorkOrder(ERPNextTestSuite):
 		transfer.save()
 		transfer.submit()
 
-		first = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 3))
+		first = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 5))
 		first.submit()
-		second = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 7))
+		second = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 5))
 		second.submit()
+		wo.reload()
 
+		first_row = next(row for row in first.items if row.item_code == raw_item)
 		second_row = next(row for row in second.items if row.item_code == raw_item)
+		first_stock_qty = flt(first_row.transfer_qty)
 		frappe.db.set_value(
 			"Stock Entry Detail",
-			second_row.name,
-			{"uom": "Box", "conversion_factor": 5},
+			first_row.name,
+			{
+				"uom": "Box",
+				"conversion_factor": 5,
+				"qty": first_stock_qty / 5,
+				"transfer_qty": first_stock_qty,
+				"basic_rate": 100,
+			},
 			update_modified=False,
 		)
+		frappe.db.set_value("Stock Entry Detail", second_row.name, "basic_rate", 200, update_modified=False)
 
-		posted_pairs = {
-			(row.uom, flt(row.conversion_factor))
-			for row in frappe.get_all(
-				"Stock Entry Detail",
-				filters={"parent": ("in", [first.name, second.name]), "item_code": raw_item},
-				fields=["uom", "conversion_factor"],
-			)
-		}
-		self.assertEqual(len(posted_pairs), 2)
+		posted_rows = frappe.get_all(
+			"Stock Entry Detail",
+			filters={"parent": ("in", [first.name, second.name]), "item_code": raw_item},
+			fields=["qty", "transfer_qty", "uom", "conversion_factor", "basic_rate"],
+		)
+		self.assertEqual(len({row.uom for row in posted_rows}), 2)
+		self.assertTrue(
+			all(flt(row.qty) * flt(row.conversion_factor) == flt(row.transfer_qty) for row in posted_rows)
+		)
 
 		service = DisassembleStockEntry(frappe._dict(work_order=wo.name, source_stock_entry=None))
 		source_row = next(
 			row for row in service.get_items_from_manufacture_stock_entry() if row.item_code == raw_item
 		)
 
-		self.assertIn((source_row.uom, flt(source_row.conversion_factor)), posted_pairs)
+		expected_stock_qty = sum(flt(row.transfer_qty) for row in posted_rows)
+		expected_rate = (
+			sum(flt(row.basic_rate) * flt(row.transfer_qty) for row in posted_rows) / expected_stock_qty
+		)
+		self.assertEqual(source_row.uom, source_row.stock_uom)
+		self.assertEqual(flt(source_row.conversion_factor), 1.0)
+		self.assertEqual(flt(source_row.qty), expected_stock_qty)
+		self.assertEqual(flt(source_row.transfer_qty), expected_stock_qty)
+		self.assertAlmostEqual(flt(source_row.basic_rate), expected_rate, places=6)
+
+		disassemble_qty = 4
+		disassembly = frappe.get_doc(make_stock_entry(wo.name, "Disassemble", disassemble_qty))
+		disassembly.save()
+		disassembly_row = next(row for row in disassembly.items if row.item_code == raw_item)
+		expected_disassembly_qty = expected_stock_qty * disassemble_qty / flt(wo.produced_qty)
+		self.assertEqual(disassembly_row.uom, disassembly_row.stock_uom)
+		self.assertEqual(flt(disassembly_row.conversion_factor), 1.0)
+		self.assertEqual(flt(disassembly_row.transfer_qty), expected_disassembly_qty)
+		disassembly.submit()
 
 	def test_disassembly_with_additional_rm_not_in_bom(self):
 		"""
