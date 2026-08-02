@@ -411,12 +411,6 @@ frappe.ui.form.on("Material Request", {
 	},
 
 	make_purchase_order: function (frm) {
-<<<<<<< HEAD
-		frappe.model.open_mapped_doc({
-			method: "erpnext.stock.doctype.material_request.material_request.make_purchase_order",
-			frm: frm,
-			run_link_triggers: true,
-=======
 		frappe.call({
 			method: "erpnext.stock.doctype.material_request.mapper.get_item_default_suppliers",
 			args: {
@@ -440,7 +434,6 @@ frappe.ui.form.on("Material Request", {
 					run_link_triggers: true,
 				});
 			},
->>>>>>> e8df7b4a90 (feat: select a supplier per item when creating Purchase Orders from Material Request)
 		});
 	},
 
