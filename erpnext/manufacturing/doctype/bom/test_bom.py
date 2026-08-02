@@ -121,8 +121,9 @@ class TestBOM(ERPNextTestSuite):
 		self.assertEqual(len(lines), 2)
 		self.assertEqual(len({flt(row.rate) for row in lines}), 2)
 
-		expected = sum(flt(row.stock_qty) / flt(bom.quantity) * flt(row.rate) for row in lines)
-		items_dict = get_bom_items_as_dict(bom.name, "_Test Company", qty=1, fetch_exploded=0)
+		requested_qty = 2
+		expected = sum(flt(row.qty) * flt(row.rate) for row in lines) / flt(bom.quantity) * requested_qty
+		items_dict = get_bom_items_as_dict(bom.name, "_Test Company", qty=requested_qty, fetch_exploded=0)
 
 		self.assertEqual(len([row for row in items_dict if row == rm.name]), 1)
 		self.assertAlmostEqual(flt(items_dict[rm.name].amount), expected, places=2)
