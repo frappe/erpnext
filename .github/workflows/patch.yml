@@ -171,11 +171,17 @@ jobs:
           update_to_version 16 3.14
 
           echo "Updating to latest version"
-          # a stacked PR's base is an erpnext feature branch with no counterpart in frappe,
-          # so fall back to the repository's default branch
           base_ref="${GITHUB_BASE_REF:-${GITHUB_REF##*/}}"
-          git -C "apps/frappe" fetch --depth 1 upstream "$base_ref" \
-            || git -C "apps/frappe" fetch --depth 1 upstream develop
+          ls_remote_status=0
+          git -C "apps/frappe" ls-remote --exit-code --heads upstream "$base_ref" >/dev/null \
+            || ls_remote_status=$?
+          if [ "$ls_remote_status" -eq 2 ]; then
+            echo "frappe has no '$base_ref' branch; falling back to develop"
+            base_ref=develop
+          elif [ "$ls_remote_status" -ne 0 ]; then
+            exit "$ls_remote_status"
+          fi
+          git -C "apps/frappe" fetch --depth 1 upstream "$base_ref"
           git -C "apps/frappe" checkout -q -f FETCH_HEAD
           git -C "apps/erpnext" checkout -q -f "$GITHUB_SHA"
 
