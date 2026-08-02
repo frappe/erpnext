@@ -795,6 +795,28 @@ class TestMaterialRequest(FrappeTestCase):
 		mr = frappe.get_doc("Material Request", mr.name)
 		self.assertEqual(mr.per_ordered, 100)
 
+	def test_fractional_conversion_factor_for_purchase(self):
+		item = create_item("_Test Fractional Conversion Item", stock_uom="Kg", is_purchase_item=1)
+		conversion_factor = 0.453592292
+
+		mr = make_material_request(
+			item_code=item.name,
+			qty=1000,
+			uom="Pound",
+			conversion_factor=conversion_factor,
+		)
+		mr.reload()
+
+		self.assertEqual(mr.items[0].conversion_factor, conversion_factor)
+
+		po = make_purchase_order(mr.name)
+		po.supplier = "_Test Supplier"
+		po.insert()
+		po.reload()
+
+		self.assertEqual(po.items[0].conversion_factor, conversion_factor)
+		self.assertEqual(po.items[0].stock_qty, mr.items[0].stock_qty)
+
 	def test_customer_provided_parts_mr(self):
 		create_item("CUST-0987", is_customer_provided_item=1, customer="_Test Customer", is_purchase_item=0)
 		existing_requested_qty = self._get_requested_qty("_Test Customer", "_Test Warehouse - _TC")
