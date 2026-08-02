@@ -1984,12 +1984,6 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		sales_order.save()
 		self.assertEqual(sales_order.taxes[0].tax_amount, 0)
 
-<<<<<<< HEAD
-	@change_settings(
-		"Accounts Settings",
-		{"add_taxes_from_item_tax_template": 0, "add_taxes_from_taxes_and_charges_template": 1},
-	)
-=======
 	def test_sales_order_with_shipping_rule_without_cost_center(self):
 		from erpnext import get_default_cost_center
 
@@ -2025,7 +2019,10 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		self.assertEqual(len(sales_order.taxes), 1)
 		self.assertEqual(sales_order.taxes[0].cost_center, "")
 
->>>>>>> a4134af30b (fix: prevent duplicate shipping charges without cost center)
+	@change_settings(
+		"Accounts Settings",
+		{"add_taxes_from_item_tax_template": 0, "add_taxes_from_taxes_and_charges_template": 1},
+	)
 	def test_sales_order_partial_advance_payment(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import (
 			create_payment_entry,
