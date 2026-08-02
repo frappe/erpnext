@@ -190,27 +190,14 @@ def batch_fetch_purchase_rates(bom_data):
 	}
 
 
-def get_bom_data(filters):
-	bom_item_table = "BOM Explosion Item" if filters.get("show_exploded_view") else "BOM Item"
-
-	bom_item = frappe.qb.DocType(bom_item_table)
+def get_stock_qty_by_item(filters):
+	"""One row per item_code, so joining it to BOM Item cannot multiply either side's sum."""
 	bin = frappe.qb.DocType("Bin")
 
 	query = (
-		frappe.qb.from_(bom_item)
-		.left_join(bin)
-		.on(bom_item.item_code == bin.item_code)
-		.select(
-			bom_item.item_code,
-			# non-grouped columns are constant per grouped item_code -> Max() keeps the GROUP BY valid
-			Max(bom_item.description).as_("description"),
-			Max(bom_item.parent).as_("from_bom_no"),
-			Sum(bom_item.qty_consumed_per_unit).as_("qty_per_unit"),
-			IfNull(Sum(bin.actual_qty), 0).as_("actual_qty"),
-		)
-		.where((bom_item.parent == filters.get("bom")) & (bom_item.parenttype == "BOM"))
-		.groupby(bom_item.item_code)
-		.orderby(Min(bom_item.idx))
+		frappe.qb.from_(bin)
+		.select(bin.item_code, Sum(bin.actual_qty).as_("actual_qty"))
+		.groupby(bin.item_code)
 	)
 
 	if filters.get("warehouse"):
@@ -232,6 +219,33 @@ def get_bom_data(filters):
 			)
 		else:
 			query = query.where(bin.warehouse == filters.get("warehouse"))
+
+	return query
+
+
+def get_bom_data(filters):
+	bom_item_table = "BOM Explosion Item" if filters.get("show_exploded_view") else "BOM Item"
+
+	bom_item = frappe.qb.DocType(bom_item_table)
+	stock_qty = get_stock_qty_by_item(filters).as_("stock_qty")
+
+	base = frappe.qb.from_(bom_item)
+	base = base.join(stock_qty) if filters.get("warehouse") else base.left_join(stock_qty)
+
+	query = (
+		base.on(bom_item.item_code == stock_qty.item_code)
+		.select(
+			bom_item.item_code,
+			# non-grouped columns are constant per grouped item_code -> Max() keeps the GROUP BY valid
+			Max(bom_item.description).as_("description"),
+			Max(bom_item.parent).as_("from_bom_no"),
+			Sum(bom_item.qty_consumed_per_unit).as_("qty_per_unit"),
+			IfNull(Max(stock_qty.actual_qty), 0).as_("actual_qty"),
+		)
+		.where((bom_item.parent == filters.get("bom")) & (bom_item.parenttype == "BOM"))
+		.groupby(bom_item.item_code)
+		.orderby(Min(bom_item.idx))
+	)
 
 	data = query.run(as_dict=True)
 
