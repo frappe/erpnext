@@ -163,8 +163,6 @@ class ShippingRule(Document):
 
 		shipping_charge_filters = shipping_charge.copy()
 		if not self.cost_center:
-			# Blank Link values can be None on the server or an empty string from the client.
-			# Child-table defaults can also resolve a blank value to the company default.
 			shipping_charge_filters["cost_center"] = (
 				"in",
 				(None, "", erpnext.get_default_cost_center(doc.company)),
