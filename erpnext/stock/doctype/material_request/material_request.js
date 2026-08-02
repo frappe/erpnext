@@ -412,7 +412,7 @@ frappe.ui.form.on("Material Request", {
 
 	make_purchase_order: function (frm) {
 		frappe.call({
-			method: "erpnext.stock.doctype.material_request.mapper.get_item_default_suppliers",
+			method: "erpnext.stock.doctype.material_request.material_request.get_item_default_suppliers",
 			args: {
 				source_name: frm.doc.name,
 				filtered_children: (frm.get_selected() || {}).items || [],
@@ -428,7 +428,7 @@ frappe.ui.form.on("Material Request", {
 				}
 
 				frappe.model.open_mapped_doc({
-					method: "erpnext.stock.doctype.material_request.mapper.make_purchase_order",
+					method: "erpnext.stock.doctype.material_request.material_request.make_purchase_order",
 					frm: frm,
 					args: { supplier: items.length ? items[0].supplier : null },
 					run_link_triggers: true,
@@ -572,7 +572,7 @@ frappe.ui.form.on("Material Request", {
 				}
 
 				frappe.call({
-					method: "erpnext.stock.doctype.material_request.mapper.make_purchase_orders_by_supplier",
+					method: "erpnext.stock.doctype.material_request.material_request.make_purchase_orders_by_supplier",
 					args: { source_name: frm.doc.name, item_suppliers: item_suppliers },
 					freeze: true,
 					callback: function (r) {

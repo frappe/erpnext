@@ -1190,7 +1190,7 @@ class TestMaterialRequest(ERPNextTestSuite):
 		self.assertEqual(material_request.transfer_status, "Completed")
 
 	def test_get_item_default_suppliers(self):
-		from erpnext.stock.doctype.material_request.mapper import get_item_default_suppliers
+		from erpnext.stock.doctype.material_request.material_request import get_item_default_suppliers
 
 		with_supplier = create_item_with_default_supplier("_Test MR Item Supplier A", "_Test Supplier")
 		without_supplier = create_item("_Test MR Item Without Supplier").name
@@ -1210,7 +1210,7 @@ class TestMaterialRequest(ERPNextTestSuite):
 		self.assertEqual(po.supplier, "_Test Supplier")
 
 	def test_make_purchase_orders_by_supplier(self):
-		from erpnext.stock.doctype.material_request.mapper import make_purchase_orders_by_supplier
+		from erpnext.stock.doctype.material_request.material_request import make_purchase_orders_by_supplier
 
 		item_codes = [create_item(f"_Test MR Grouped Item {index}").name for index in range(1, 4)]
 		mr = make_material_request_for_items(item_codes)
@@ -1240,7 +1240,7 @@ class TestMaterialRequest(ERPNextTestSuite):
 		self.assertEqual(second.items[0].stock_qty, 4)
 
 	def test_make_purchase_orders_by_supplier_sets_schedule_date(self):
-		from erpnext.stock.doctype.material_request.mapper import make_purchase_orders_by_supplier
+		from erpnext.stock.doctype.material_request.material_request import make_purchase_orders_by_supplier
 
 		mr = make_material_request_for_items(["_Test Item"])
 		frappe.db.set_value("Material Request Item", mr.items[0].name, "schedule_date", add_days(today(), -1))
@@ -1264,7 +1264,7 @@ class TestMaterialRequest(ERPNextTestSuite):
 		self.assertTrue(any("was set to today" in m.get("message") for m in alerts))
 
 	def test_make_purchase_orders_by_supplier_invalid_rows(self):
-		from erpnext.stock.doctype.material_request.mapper import make_purchase_orders_by_supplier
+		from erpnext.stock.doctype.material_request.material_request import make_purchase_orders_by_supplier
 
 		mr = make_material_request_for_items(["_Test Item"])
 		row = {
