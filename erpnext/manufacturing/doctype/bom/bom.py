@@ -11,6 +11,7 @@ from frappe.model.document import Document
 from frappe.query_builder import Field
 from frappe.query_builder.functions import Count, IfNull, Max, Min, NullIf, Sum
 from frappe.utils import cint, cstr, flt, get_link_to_form, parse_json
+from frappe.utils.caching import request_cache
 from frappe.website.website_generator import WebsiteGenerator
 
 import erpnext
@@ -1253,17 +1254,10 @@ def _apply_representative_lines(rows, doctype, bom, keys):
 			row[column] = line.get(column)
 
 
+@request_cache
 def _representative_lines(doctype, bom, keys, columns):
 	"""Cached per request: get_bom_items_as_dict recurses through phantom BOMs, and the same
 	sub-BOM is commonly reached more than once."""
-	cache = getattr(frappe.local, "_bom_representative_lines", None)
-	if cache is None:
-		cache = frappe.local._bom_representative_lines = {}
-
-	cache_key = (doctype, bom, keys, columns)
-	if cache_key in cache:
-		return cache[cache_key]
-
 	representative = {}
 	for line in frappe.get_all(
 		doctype,
@@ -1273,7 +1267,6 @@ def _representative_lines(doctype, bom, keys, columns):
 	):
 		representative.setdefault(tuple(line.get(key) for key in keys), line)
 
-	cache[cache_key] = representative
 	return representative
 
 

@@ -6,6 +6,7 @@
 import frappe
 from frappe.query_builder.functions import Count, IfNull, Max, Sum
 from frappe.utils import flt
+from frappe.utils.caching import request_cache
 
 from erpnext.manufacturing.doctype.bom.bom import get_children as get_bom_children
 from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
@@ -207,15 +208,9 @@ def _apply_representative_lines(rows, bom_no):
 			row.source_warehouse = line.source_warehouse
 
 
+@request_cache
 def _representative_lines(bom_no, keys):
 	"""Cached per request: sub-assembly resolution recurses and revisits the same BOM."""
-	cache = getattr(frappe.local, "_sub_assembly_representative_lines", None)
-	if cache is None:
-		cache = frappe.local._sub_assembly_representative_lines = {}
-
-	if bom_no in cache:
-		return cache[bom_no]
-
 	representative = {}
 	for line in frappe.get_all(
 		"BOM Item",
@@ -230,7 +225,6 @@ def _representative_lines(bom_no, keys):
 	):
 		representative.setdefault(tuple(line.get(key) for key in keys), line)
 
-	cache[bom_no] = representative
 	return representative
 
 

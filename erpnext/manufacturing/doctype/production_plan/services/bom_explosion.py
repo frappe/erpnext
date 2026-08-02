@@ -5,6 +5,7 @@
 
 import frappe
 from frappe.query_builder.functions import Count, IfNull, Max, Min, Sum
+from frappe.utils.caching import request_cache
 
 from erpnext.manufacturing.doctype.production_plan.services.planning_queries import get_uom_conversion_factor
 
@@ -67,16 +68,9 @@ def _apply_representative_lines(rows, doctype, bom_no, keys, include_non_stock_i
 			row.source_warehouse = line.source_warehouse
 
 
+@request_cache
 def _representative_lines(doctype, bom_no, keys, include_non_stock_items):
 	"""Cached per request: the explosion recurses and commonly revisits the same sub-BOM."""
-	cache = getattr(frappe.local, "_bom_explosion_representative_lines", None)
-	if cache is None:
-		cache = frappe.local._bom_explosion_representative_lines = {}
-
-	cache_key = (doctype, bom_no, keys, include_non_stock_items)
-	if cache_key in cache:
-		return cache[cache_key]
-
 	# only BOM Item carries is_phantom_item, and only its query ORs the phantom flag into the stock
 	# filter; the explosion table has neither
 	filters_phantom = doctype == "BOM Item"
@@ -112,7 +106,6 @@ def _representative_lines(doctype, bom_no, keys, include_non_stock_items):
 	for line in lines:
 		representative.setdefault(tuple(line.get(key) for key in keys), line)
 
-	cache[cache_key] = representative
 	return representative
 
 
