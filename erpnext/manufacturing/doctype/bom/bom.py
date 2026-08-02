@@ -1264,16 +1264,16 @@ def _build_base_bom_items_query(bom, company, qty, t):
 def _add_bom_item_columns(query, t, bom, opts, track_semi_finished_goods):
 	is_stock_item = cint(not opts.include_non_stock_items)
 	stock_item_condition = t.item_doc.is_stock_item.isin([1, is_stock_item])
-	# rate is constant per grouped item -> Max() keeps it out of the Sum (preserving the original
-	# Sum(...) * rate * qty arithmetic) while making the expression postgres-valid under GROUP BY.
-	amount_col = (
-		Sum(t.bom_item.stock_qty / IfNull(t.bom_doc.quantity, 1)) * Max(t.bom_item.rate) * opts.qty
-	).as_("amount")
+	if opts.fetch_secondary_items:
+		return _add_secondary_item_columns(query, t, stock_item_condition)
+
+	# BOM Item rate is per row UOM, while BOM Explosion Item rate is per stock UOM. Select the
+	# matching quantity so a normal BOM row's conversion factor is not applied twice.
+	qty_col = t.bom_item.stock_qty if cint(opts.fetch_exploded) else t.bom_item.qty
+	amount_col = (Sum(qty_col / IfNull(t.bom_doc.quantity, 1) * t.bom_item.rate) * opts.qty).as_("amount")
 
 	if cint(opts.fetch_exploded):
 		return _add_exploded_item_columns(query, t, bom, amount_col, stock_item_condition)
-	if opts.fetch_secondary_items:
-		return _add_secondary_item_columns(query, t, stock_item_condition)
 	return _add_normal_item_columns(query, t, amount_col, stock_item_condition, track_semi_finished_goods)
 
 
