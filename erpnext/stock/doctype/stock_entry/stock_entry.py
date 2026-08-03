@@ -1447,9 +1447,21 @@ class StockEntry(StockController, SubcontractingInwardController):
 		outgoing_items_cost = self.set_rate_for_outgoing_items(reset_outgoing_rate, raise_error_if_no_rate)
 		has_consumption_basis = self.has_consumption_basis()
 
+<<<<<<< HEAD
 		items = []
 		# Set basic rate for incoming items
 		for d in self.get("items"):
+=======
+		bom_cost_allocation_per = (
+			frappe.get_cached_value("BOM", self.bom_no, "cost_allocation_per") if self.bom_no else None
+		)
+
+		secondary_items_cost_basis = self.get_secondary_items_cost_basis(outgoing_items_cost)
+
+		zero_valuation_items = []
+		finished_items_last = sorted(self.get("items"), key=lambda row: cint(row.is_finished_item))
+		for d in finished_items_last:
+>>>>>>> 8db8c6a83d (fix(stock): allocate secondary item cost from the consumption entry (#57738))
 			if d.s_warehouse or d.set_basic_rate_manually:
 				continue
 
@@ -1459,7 +1471,19 @@ class StockEntry(StockController, SubcontractingInwardController):
 				d.basic_amount = 0.0
 				continue
 
+<<<<<<< HEAD
 			rate_derived_from_consumption = False
+=======
+			self._set_incoming_item_rate(
+				d,
+				outgoing_items_cost,
+				raise_error_if_no_rate,
+				zero_valuation_items,
+				bom_cost_allocation_per,
+				has_consumption_basis,
+				secondary_items_cost_basis,
+			)
+>>>>>>> 8db8c6a83d (fix(stock): allocate secondary item cost from the consumption entry (#57738))
 
 			if d.allow_zero_valuation_rate and d.basic_rate and self.purpose != "Receive from Customer":
 				d.basic_rate = 0.0
@@ -1523,6 +1547,20 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 			frappe.msgprint(message, alert=True)
 
+	def get_secondary_items_cost_basis(self, outgoing_items_cost) -> float:
+		"""The cost a BOM allocation splits: the consumed rows, or the entry that replaced them."""
+		if outgoing_items_cost or self.purpose != "Manufacture" or not self.work_order:
+			return outgoing_items_cost
+
+		settings = frappe.get_single("Manufacturing Settings")
+		if not (settings.material_consumption and settings.get_rm_cost_from_consumption_entry):
+			return outgoing_items_cost
+
+		if not self.get_consumption_entries():
+			return outgoing_items_cost
+
+		return self._fetch_consumption_entry_cost()
+
 	def has_consumption_basis(self) -> bool:
 		"""Whether the cost of the consumed items is known, even when that cost is zero."""
 		if any(d.s_warehouse for d in self.get("items")):
@@ -1548,6 +1586,77 @@ class StockEntry(StockController, SubcontractingInwardController):
 			)
 		return self._consumption_entries
 
+<<<<<<< HEAD
+=======
+	def _set_incoming_item_rate(
+		self,
+		d,
+		outgoing_items_cost,
+		raise_error_if_no_rate,
+		zero_valuation_items,
+		bom_cost_allocation_per=None,
+		has_consumption_basis=False,
+		secondary_items_cost_basis=0,
+	):
+		has_derived_rate = False
+
+		if d.allow_zero_valuation_rate and d.basic_rate and self.purpose != "Receive from Customer":
+			d.basic_rate = 0.0
+			zero_valuation_items.append(d.item_code)
+		elif d.is_finished_item:
+			if self.purpose == "Manufacture":
+				d.basic_rate = self.get_basic_rate_for_manufactured_item(
+					d.transfer_qty, outgoing_items_cost, has_consumption_basis
+				)
+				has_derived_rate = has_consumption_basis
+			elif self.purpose == "Repack":
+				d.basic_rate = self.get_basic_rate_for_repacked_items(d.transfer_qty, outgoing_items_cost)
+				# Repack rate comes from consumed source-warehouse rows, not consumption entries
+				has_derived_rate = any(item.s_warehouse for item in self.get("items"))
+
+			if self.bom_no:
+				d.basic_rate *= bom_cost_allocation_per / 100
+		elif d.secondary_item_type and d.bom_secondary_item:
+			cost_allocation_per = flt(
+				frappe.get_value("BOM Secondary Item", d.bom_secondary_item, "cost_allocation_per")
+			)
+			if flt(d.transfer_qty):
+				d.basic_rate = (secondary_items_cost_basis * (cost_allocation_per / 100)) / d.transfer_qty
+				has_derived_rate = True
+
+		# A rate of zero that was derived rather than left unset is a real cost. Falling back to
+		# the item's valuation here would value free inputs, or an unallocated row, as output.
+		if not d.basic_rate and not d.allow_zero_valuation_rate and not has_derived_rate:
+			d.basic_rate = get_valuation_rate(
+				d.item_code,
+				d.t_warehouse,
+				self.doctype,
+				self.name,
+				d.allow_zero_valuation_rate,
+				currency=erpnext.get_company_currency(self.company),
+				company=self.company,
+				raise_error_if_no_rate=raise_error_if_no_rate,
+				batch_no=d.batch_no,
+				serial_and_batch_bundle=d.serial_and_batch_bundle,
+			)
+
+		# do not round off basic rate to avoid precision loss
+		d.basic_rate = flt(d.basic_rate)
+		d.basic_amount = flt(flt(d.transfer_qty) * flt(d.basic_rate), d.precision("basic_amount"))
+
+	def _notify_zero_valuation_rate(self, items):
+		if len(items) > 1:
+			message = _(
+				"Items rate has been updated to zero as Allow Zero Valuation Rate is checked for the following items: {0}"
+			).format(", ".join(frappe.bold(item) for item in items))
+		else:
+			message = _(
+				"Item rate has been updated to zero as Allow Zero Valuation Rate is checked for item {0}"
+			).format(frappe.bold(items[0]))
+
+		frappe.msgprint(message, alert=True)
+
+>>>>>>> 8db8c6a83d (fix(stock): allocate secondary item cost from the consumption entry (#57738))
 	def set_rate_for_outgoing_items(self, reset_outgoing_rate=True, raise_error_if_no_rate=True):
 		outgoing_items_cost = 0.0
 		for d in self.get("items"):
