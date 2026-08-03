@@ -60,7 +60,7 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 	def test_delivery_note_zero_qty_return_is_rejected(self):
 		# A return with every item at qty 0 moves no stock and no value, so it must be
 		# rejected the same way a return with no items at all would be.
-		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
