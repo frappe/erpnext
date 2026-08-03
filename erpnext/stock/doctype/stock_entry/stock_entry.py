@@ -2031,7 +2031,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		for d in self.items:
 			if d.t_warehouse and not d.s_warehouse:
-				if self.purpose == "Repack" or d.item_code == finished_item:
+				if d.secondary_item_type or d.is_legacy_scrap_item:
+					d.is_finished_item = 0
+				elif self.purpose == "Repack" or d.item_code == finished_item:
 					d.is_finished_item = 1
 			else:
 				d.is_finished_item = 0
