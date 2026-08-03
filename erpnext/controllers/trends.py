@@ -376,6 +376,38 @@ def get_period_month_ranges(period, fiscal_year):
 	return period_month_ranges
 
 
+def quotation_party_name_expr():
+	"""Resolve a Quotation's party label from its dynamic link, mirroring set_customer_name()."""
+	branches = [
+		"when t1.quotation_to = 'Customer' then "
+		"(select c.customer_name from `tabCustomer` c where c.name = t1.party_name)",
+		"when t1.quotation_to = 'Lead' then "
+		"(select coalesce(nullif(l.company_name, ''), l.lead_name) from `tabLead` l "
+		"where l.name = t1.party_name)",
+		"when t1.quotation_to = 'Prospect' then t1.party_name",
+	]
+	# CRM Deal ships with the CRM app; skip the branch when its table is absent
+	if frappe.db.table_exists("CRM Deal"):
+		branches.append(
+			"when t1.quotation_to = 'CRM Deal' then "
+			"(select d.organization from `tabCRM Deal` d where d.name = t1.party_name)"
+		)
+
+	return "case " + " ".join(branches) + " end"
+
+
+def quotation_territory_expr():
+	"""Only Customer and Lead carry a territory; other party types have none."""
+	return (
+		"case "
+		"when t1.quotation_to = 'Customer' then "
+		"(select c.territory from `tabCustomer` c where c.name = t1.party_name) "
+		"when t1.quotation_to = 'Lead' then "
+		"(select l.territory from `tabLead` l where l.name = t1.party_name) "
+		"end"
+	)
+
+
 def based_wise_columns_query(based_on, trans):
 	based_on_details = {}
 
@@ -427,17 +459,16 @@ def based_wise_columns_query(based_on, trans):
 					"fieldname": "territory",
 				},
 			]
-			# a Quotation's party_name is a dynamic link -- Customer or Lead -- so the master cannot be
-			# joined without dropping one of them. Correlated on the grouped party_name only, which
-			# keeps the query valid under GROUP BY and free of any text sort.
+			# a Quotation's party_name is a dynamic link, so no single master can be joined. Resolve
+			# it through the quotation_to discriminator, mirroring Quotation.set_customer_name, and
+			# group by it too: two parties of different types can share a name, and merging them
+			# under one row was never right. Correlated only on grouped columns, so the query stays
+			# valid under GROUP BY and free of any text sort.
 			based_on_details["based_on_select"] = (
-				"t1.party_name, "
-				"coalesce((select c.customer_name from `tabCustomer` c where c.name = t1.party_name), "
-				"(select l.lead_name from `tabLead` l where l.name = t1.party_name)) as customer_name, "
-				"coalesce((select c.territory from `tabCustomer` c where c.name = t1.party_name), "
-				"(select l.territory from `tabLead` l where l.name = t1.party_name)) as territory,"
+				f"t1.party_name, {quotation_party_name_expr()} as customer_name, "
+				f"{quotation_territory_expr()} as territory,"
 			)
-			based_on_details["based_on_group_by"] = "t1.party_name"
+			based_on_details["based_on_group_by"] = "t1.party_name, t1.quotation_to"
 			based_on_details["addl_tables"] = ""
 		else:
 			based_on_details["based_on_cols"] = [
