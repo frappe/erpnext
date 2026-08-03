@@ -51,7 +51,6 @@ def get_data(filters):
 			mr_item.item_code.as_("item_code"),
 			Sum(Coalesce(mr_item.qty, 0)).as_("qty"),
 			Sum(Coalesce(mr_item.stock_qty, 0)).as_("stock_qty"),
-			Max(Coalesce(mr_item.uom, "")).as_("uom"),
 			Max(Coalesce(mr_item.stock_uom, "")).as_("stock_uom"),
 			Sum(Coalesce(mr_item.ordered_qty, 0)).as_("ordered_qty"),
 			Sum(Coalesce(mr_item.received_qty, 0)).as_("received_qty"),
@@ -60,8 +59,6 @@ def get_data(filters):
 			),
 			Sum(Coalesce(mr_item.received_qty, 0)).as_("received_qty"),
 			(Sum(Coalesce(mr_item.stock_qty, 0)) - Sum(Coalesce(mr_item.ordered_qty, 0))).as_("qty_to_order"),
-			Max(mr_item.item_name).as_("item_name"),
-			Max(mr_item.description).as_("description"),
 			Max(mr.company).as_("company"),
 		)
 		.where(
@@ -75,8 +72,34 @@ def get_data(filters):
 	query = get_conditions(filters, query, mr, mr_item)  # add conditional conditions
 
 	query = query.groupby(mr.name, mr_item.item_code).orderby(Max(mr.transaction_date), Max(mr.schedule_date))
-	data = query.run(as_dict=True)
-	return data
+	rows = query.run(as_dict=True)
+	apply_representative_lines(rows)
+	return rows
+
+
+def apply_representative_lines(rows):
+	"""Fill item_name/description/uom from one real Material Request Item line per group.
+
+	All three are editable per line, so a request listing the same item twice holds several values
+	per group. Aggregating them sorts text, and MariaDB folds case while PostgreSQL orders by byte
+	value, so the engines pick differently. Take the first line by idx.
+	"""
+	material_requests = list({row.material_request for row in rows})
+	representative = {}
+	if material_requests:
+		for line in frappe.get_all(
+			"Material Request Item",
+			filters={"parent": ("in", material_requests), "docstatus": 1},
+			fields=["parent", "item_code", "item_name", "description", "uom"],
+			order_by="idx",
+		):
+			representative.setdefault((line.parent, line.item_code), line)
+
+	for row in rows:
+		line = representative.get((row.material_request, row.item_code))
+		row.item_name = line.item_name if line else None
+		row.description = line.description if line else None
+		row.uom = line.uom if line else ""
 
 
 def get_conditions(filters, query, mr, mr_item):
