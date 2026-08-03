@@ -29,6 +29,27 @@ class TestQueries(ERPNextTestSuite):
 		self.assertGreaterEqual(len(query(txt="_Test Lead")), 4)
 		self.assertEqual(len(query(txt="_Test Lead 4")), 1)
 
+	def test_lead_query_ranking_is_case_insensitive(self):
+		"""A match at the start must rank first whatever its case.
+
+		The filter uses .like(), which frappe renders as ILIKE on PostgreSQL, so both leads match.
+		Ranking used a bare Locate(), which becomes case-sensitive strpos() there: the upper-cased
+		lead scores no match, falls back to 99999 and sorts last, while MariaDB's case-insensitive
+		LOCATE ranks it first. Same query, different order -- and a different page when page_len is
+		small enough to cut between them.
+		"""
+		early, late = "ZZABCD Ranking Lead", "Ranking Lead zzabcd"
+		for lead_name in (early, late):
+			if not frappe.db.exists("Lead", {"lead_name": lead_name}):
+				frappe.get_doc({"doctype": "Lead", "lead_name": lead_name}).insert()
+
+		query = add_default_params(queries.lead_query, "Lead")
+		names = [row[1] for row in query(txt="zzabcd")]
+
+		self.assertIn(early, names)
+		self.assertIn(late, names)
+		self.assertLess(names.index(early), names.index(late))
+
 	def test_item_query(self):
 		query = add_default_params(queries.item_query, "Item")
 

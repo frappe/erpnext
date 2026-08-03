@@ -16,8 +16,10 @@ from erpnext.accounts.party import (
 	validate_party_accounts,
 	validate_party_currency_before_merging,
 )
-from erpnext.controllers.website_list_for_contact import add_role_for_portal_user
-from erpnext.stock.doctype.company_restriction.company_restriction import validate_allowed_companies
+from erpnext.controllers.website_list_for_contact import (
+	add_role_for_portal_user,
+	link_portal_users_to_contacts,
+)
 from erpnext.utilities.transaction_base import TransactionBase
 
 
@@ -70,6 +72,7 @@ class Supplier(TransactionBase):
 		primary_address: DF.TextEditor | None
 		release_date: DF.Date | None
 		represents_company: DF.Link | None
+		restrict_to_companies: DF.Check
 		supplier_details: DF.Text | None
 		supplier_group: DF.Link | None
 		supplier_name: DF.Data
@@ -112,6 +115,7 @@ class Supplier(TransactionBase):
 	def on_update(self):
 		self.create_primary_contact()
 		self.create_primary_address()
+		link_portal_users_to_contacts(self)
 
 	def add_role_for_user(self):
 		for portal_user in self.portal_users:
@@ -149,7 +153,6 @@ class Supplier(TransactionBase):
 		self.validate_internal_supplier()
 		self.add_role_for_user()
 		self.validate_currency_for_receivable_payable_and_advance_account()
-		validate_allowed_companies(self)
 
 	@frappe.whitelist()
 	def get_supplier_group_details(self):

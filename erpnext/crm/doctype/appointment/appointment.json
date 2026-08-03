@@ -7,7 +7,11 @@
  "engine": "InnoDB",
  "field_order": [
   "scheduled_time",
+  "column_break_xaox",
   "status",
+  "created_through_portal",
+  "email_verified",
+  "verification_token",
   "customer_details_section",
   "customer_name",
   "customer_phone_number",
@@ -54,7 +58,8 @@
    "fieldtype": "Datetime",
    "in_list_view": 1,
    "label": "Scheduled Time",
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "fieldname": "status",
@@ -77,8 +82,8 @@
    "fieldname": "customer_email",
    "fieldtype": "Data",
    "label": "Email",
-   "reqd": 1,
-   "options": "Email"
+   "options": "Email",
+   "reqd": 1
   },
   {
    "fieldname": "linked_docs_section",
@@ -100,13 +105,43 @@
    "fieldtype": "Dynamic Link",
    "label": "Party",
    "options": "appointment_with"
+  },
+  {
+   "default": "0",
+   "fieldname": "created_through_portal",
+   "fieldtype": "Check",
+   "label": "Created through Portal",
+   "read_only": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "column_break_xaox",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.created_through_portal === 1;",
+   "fieldname": "email_verified",
+   "fieldtype": "Check",
+   "label": "Email Verified",
+   "read_only": 1
+  },
+  {
+   "fieldname": "verification_token",
+   "fieldtype": "Data",
+   "label": "Verification Token",
+   "hidden": 1,
+   "read_only": 1,
+   "no_copy": 1,
+   "search_index": 1
   }
  ],
  "links": [],
- "modified": "2026-06-06 13:05:59.300573",
+ "modified": "2026-07-20 02:00:00.000000",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -158,6 +193,7 @@
   }
  ],
  "quick_entry": 1,
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],

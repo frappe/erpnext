@@ -380,7 +380,7 @@ def notify_errors(exceptions_list):
 			error_message = f"<div class='small text-muted'>{escape_html(str(exception))}</div><br>"
 			content += error_message
 		except Exception:
-			pass
+			frappe.log_error(title="Failed to format auto reorder exception", message=frappe.get_traceback())
 
 	content += _("Regards,") + "<br>" + _("Administrator")
 

@@ -220,6 +220,7 @@ def build_forest(data):
 		for row in data:
 			account_name, parent_account, account_number, parent_account_number = row[0:4]
 			if account_number:
+				account_number = cstr(account_number).strip()
 				account_name = f"{account_number} - {account_name}"
 			if parent_account_number:
 				parent_account_number = cstr(parent_account_number).strip()

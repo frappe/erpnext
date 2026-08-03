@@ -11,7 +11,7 @@ from erpnext.setup.utils import get_exchange_rate
 
 
 @frappe.whitelist()
-def make_quotation(source_name: str, target_doc: str | Document | None = None):
+def make_quotation(source_name: str, target_doc: str | dict | Document | None = None):
 	def set_missing_values(source, target):
 		from erpnext.controllers.accounts_controller import get_default_taxes_and_charges
 
@@ -64,7 +64,7 @@ def make_quotation(source_name: str, target_doc: str | Document | None = None):
 
 
 @frappe.whitelist()
-def make_request_for_quotation(source_name: str, target_doc: str | Document | None = None):
+def make_request_for_quotation(source_name: str, target_doc: str | dict | Document | None = None):
 	def update_item(obj, target, source_parent):
 		target.conversion_factor = 1.0
 
@@ -86,7 +86,7 @@ def make_request_for_quotation(source_name: str, target_doc: str | Document | No
 
 
 @frappe.whitelist()
-def make_customer(source_name: str, target_doc: str | Document | None = None):
+def make_customer(source_name: str, target_doc: str | dict | Document | None = None):
 	def set_missing_values(source, target):
 		target.opportunity_name = source.name
 
@@ -110,7 +110,7 @@ def make_customer(source_name: str, target_doc: str | Document | None = None):
 
 
 @frappe.whitelist()
-def make_supplier_quotation(source_name: str, target_doc: str | Document | None = None):
+def make_supplier_quotation(source_name: str, target_doc: str | dict | Document | None = None):
 	doclist = get_mapped_doc(
 		"Opportunity",
 		source_name,

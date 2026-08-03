@@ -453,6 +453,17 @@ class TestTimesheet(ERPNextTestSuite):
 		rate = get_timesheet_detail_rate(detail.name, timesheet.currency)
 		self.assertEqual(rate, detail.billing_amount)
 
+	def test_title_follows_employee(self):
+		first = make_employee("_test_timesheet_title_one@example.com", company="_Test Company")
+		second = make_employee("_test_timesheet_title_two@example.com", company="_Test Company")
+
+		timesheet = make_timesheet(first, simulate=True, do_not_submit=True)
+		self.assertEqual(timesheet.get_title(), frappe.db.get_value("Employee", first, "employee_name"))
+
+		timesheet.employee = second
+		timesheet.save()
+		self.assertEqual(timesheet.get_title(), frappe.db.get_value("Employee", second, "employee_name"))
+
 	@staticmethod
 	def _delete_if_exists(doctype, name):
 		if frappe.db.exists(doctype, name):

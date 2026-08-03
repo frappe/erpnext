@@ -115,6 +115,10 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 	from erpnext.controllers.stock_controller import future_sle_exists
 
 	if sl_entries:
+		# Sorted so two vouchers touching the same pairs can't take the gates in opposite order.
+		for pair in sorted({(d.get("item_code"), d.get("warehouse")) for d in sl_entries}):
+			sle_processing_gate(*pair)
+
 		cancelled = sl_entries[0].get("is_cancelled")
 		if cancelled:
 			validate_cancellation(sl_entries)
@@ -283,6 +287,18 @@ def repost_gate(item_code, warehouse):
 		# Tuple key: a colon in item_code/warehouse can't collide two distinct pairs onto one lock.
 		return frappe.db.advisory_lock(("stock_repost", item_code, warehouse), timeout=REPOST_LOCK_TIMEOUT)
 	return nullcontext()
+
+
+def sle_processing_gate(item_code, warehouse):
+	"""Serialize all stock writes for an (item, warehouse) on postgres. MariaDB gets this from the
+	gap locks its previous-SLE locking reads take (which also block, then reveal, concurrent
+	inserts); postgres locking reads never see rows another transaction is inserting, so without
+	this gate two concurrent writers compute from the same stale previous SLE and the loser's Bin
+	write is lost. Txn-scoped and re-entrant; released at commit/rollback. hasattr keeps a frappe
+	predating transaction_advisory_lock on the status quo (serialization-failure retries) instead
+	of breaking every stock submission."""
+	if frappe.db.db_type == "postgres" and hasattr(frappe.db, "transaction_advisory_lock"):
+		frappe.db.transaction_advisory_lock(("stock-sle", item_code, warehouse), timeout=REPOST_LOCK_TIMEOUT)
 
 
 def repost_future_sle(
@@ -594,6 +610,8 @@ class update_entries_after:
 		if self.args.sle_id:
 			self.args["name"] = self.args.sle_id
 
+		sle_processing_gate(self.item_code, self.args.warehouse)
+
 		self.prev_sle_dict = frappe._dict({})
 		self.company = frappe.get_cached_value("Warehouse", self.args.warehouse, "company")
 		self.set_precision()
@@ -605,7 +623,9 @@ class update_entries_after:
 
 		self.data = frappe._dict()
 
-		if not self.repost_doc or not self.args.get("item_wh_wise_last_posted_sle"):
+		if (not self.repost_doc or not self.args.get("item_wh_wise_last_posted_sle")) and not self.args.get(
+			"cancelled"
+		):
 			self.initialize_previous_data(self.args)
 
 		self.build()
@@ -919,9 +939,22 @@ class update_entries_after:
 
 	def process_sle_against_current_timestamp(self):
 		sl_entries = get_sle_against_current_voucher(self.args)
+		if self.args.get("cancelled") and sl_entries:
+			self.seed_previous_sle_for_cancellation(sl_entries[0])
 		for sle in sl_entries:
 			sle["timestamp"] = sle.posting_datetime
 			self.process_sle(sle)
+
+	def seed_previous_sle_for_cancellation(self, anchor_sle):
+		key = (anchor_sle.item_code, anchor_sle.warehouse)
+		if key in self.prev_sle_dict:
+			return
+
+		args = frappe._dict(anchor_sle)
+		args["sle_id"] = args.name
+		prev_sle = get_previous_sle_of_current_voucher(args)
+		if prev_sle:
+			self.prev_sle_dict[key] = prev_sle
 
 	def get_future_entries_to_fix(self):
 		# includes current entry!

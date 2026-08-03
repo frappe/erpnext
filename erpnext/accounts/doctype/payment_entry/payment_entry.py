@@ -3045,13 +3045,11 @@ def set_paid_amount_and_received_amount(
 			company_currency = frappe.get_cached_value("Company", doc.get("company"), "default_currency")
 			if bank and company_currency != bank.account_currency:
 				# doc currency can be different from bank currency
-				posting_date = doc.get("posting_date") or doc.get("transaction_date")
-				conversion_rate = get_exchange_rate(
-					bank.account_currency, party_account_currency, posting_date
-				)
+				conversion_rate = get_exchange_rate(bank.account_currency, party_account_currency)
 				received_amount = paid_amount / conversion_rate
 			else:
-				received_amount = paid_amount * doc.get("conversion_rate", 1)
+				conversion_rate = get_exchange_rate(doc.get("currency", company_currency), company_currency)
+				received_amount = paid_amount * conversion_rate
 
 		# if payment type is pay, then paid amount and received amount are swapped
 		if payment_type == "Pay":
@@ -3277,7 +3275,7 @@ def get_paid_amount(dt, dn, party_type, party, account, due_date):
 
 
 @frappe.whitelist()
-def make_payment_order(source_name: str, target_doc: str | Document | None = None):
+def make_payment_order(source_name: str, target_doc: str | dict | Document | None = None):
 	from frappe.model.mapper import get_mapped_doc
 
 	def set_missing_values(source, target):

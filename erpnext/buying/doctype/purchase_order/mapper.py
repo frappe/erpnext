@@ -23,7 +23,7 @@ def set_missing_values(source, target):
 
 @frappe.whitelist()
 def make_purchase_receipt(
-	source_name: str, target_doc: str | Document | None = None, args: str | dict | None = None
+	source_name: str, target_doc: str | dict | Document | None = None, args: str | dict | None = None
 ):
 	if args is None:
 		args = {}
@@ -102,7 +102,7 @@ def make_purchase_receipt(
 
 @frappe.whitelist()
 def make_purchase_invoice(
-	source_name: str, target_doc: str | Document | None = None, args: str | dict | None = None
+	source_name: str, target_doc: str | dict | Document | None = None, args: str | dict | None = None
 ):
 	return get_mapped_purchase_invoice(source_name, target_doc, args=args)
 
@@ -211,7 +211,7 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 
 
 @frappe.whitelist()
-def make_inter_company_sales_order(source_name: str, target_doc: str | Document | None = None):
+def make_inter_company_sales_order(source_name: str, target_doc: str | dict | Document | None = None):
 	from erpnext.accounts.doctype.sales_invoice.mapper import make_inter_company_transaction
 
 	return make_inter_company_transaction("Purchase Order", source_name, target_doc)
@@ -220,7 +220,7 @@ def make_inter_company_sales_order(source_name: str, target_doc: str | Document 
 @frappe.whitelist()
 def make_subcontracting_order(
 	source_name: str,
-	target_doc: str | Document | None = None,
+	target_doc: str | dict | Document | None = None,
 	save: bool = False,
 	submit: bool = False,
 	notify: bool = False,
@@ -263,7 +263,9 @@ def is_po_fully_subcontracted(po_name: str) -> bool:
 	return not query.run(as_dict=True)
 
 
-def get_mapped_subcontracting_order(source_name: str, target_doc: str | Document | None = None) -> Document:
+def get_mapped_subcontracting_order(
+	source_name: str, target_doc: str | dict | Document | None = None
+) -> Document:
 	def post_process(source_doc, target_doc):
 		target_doc.populate_items_table()
 

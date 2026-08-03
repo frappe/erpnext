@@ -11,12 +11,12 @@ from frappe.model.mapper import get_mapped_doc
 
 
 @frappe.whitelist()
-def make_customer(source_name: str, target_doc: str | Document | None = None):
+def make_customer(source_name: str, target_doc: str | dict | Document | None = None):
 	return _make_customer(source_name, target_doc)
 
 
 def _make_customer(
-	source_name: str, target_doc: str | Document | None = None, ignore_permissions: bool = False
+	source_name: str, target_doc: str | dict | Document | None = None, ignore_permissions: bool = False
 ):
 	def set_missing_values(source, target):
 		if source.company_name:
@@ -60,7 +60,7 @@ def _make_customer(
 
 
 @frappe.whitelist()
-def make_opportunity(source_name: str, target_doc: str | Document | None = None):
+def make_opportunity(source_name: str, target_doc: str | dict | Document | None = None):
 	def set_missing_values(source, target):
 		_set_missing_values(source, target)
 
@@ -90,7 +90,7 @@ def make_opportunity(source_name: str, target_doc: str | Document | None = None)
 
 
 @frappe.whitelist()
-def make_quotation(source_name: str, target_doc: str | Document | None = None):
+def make_quotation(source_name: str, target_doc: str | dict | Document | None = None):
 	def set_missing_values(source, target):
 		_set_missing_values(source, target)
 
