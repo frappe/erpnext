@@ -360,6 +360,24 @@ class TestItem(FrappeTestCase):
 		self.assertRaises(InvalidItemAttributeValueError, attribute.save)
 		frappe.db.rollback()
 
+	def test_disabled_attribute_blocks_only_attribute_changes(self):
+		frappe.delete_doc_if_exists("Item", "_Test Variant Item-L", force=1)
+
+		variant = create_variant("_Test Variant Item", {"Test Size": "Large"})
+		variant.save()
+
+		attribute = frappe.get_doc("Item Attribute", "Test Size")
+		attribute.disabled = 1
+		attribute.save()
+
+		variant.reload()
+		variant.description = "Edited after the attribute was disabled"
+		variant.save()
+
+		variant.reload()
+		variant.attributes[0].attribute_value = "Small"
+		self.assertRaises(frappe.ValidationError, variant.save)
+
 	def test_rename_attribute_value_updates_variants(self):
 		frappe.delete_doc_if_exists("Item", "_Test Variant Item-L", force=1)
 
