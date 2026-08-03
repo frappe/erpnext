@@ -83,10 +83,20 @@ from erpnext.controllers.subcontracting_inward_controller import SubcontractingI
 form_grid_templates = {"items": "templates/form_grid/stock_entry_grid.html"}
 
 
+<<<<<<< HEAD
 def _qty_tolerance(precision: int) -> float:
 	"""One unit at the column's precision -- absorbs float rounding without letting a real
 	(whole-unit) quantity divergence slip through."""
 	return 1.0 / (10**precision)
+=======
+def is_costed_out_of_finished_item(row) -> bool:
+	"""Whether the row takes its value out of the finished good instead of adding to it.
+
+	A secondary item that is not linked to a BOM has no cost allocation of its own, so it is
+	valued the way the legacy scrap item was: its cost is deducted from the finished good.
+	"""
+	return bool(row.is_legacy_scrap_item or (row.secondary_item_type and not row.bom_secondary_item))
+>>>>>>> 5e81cd1540 (fix(stock): cost a BOM-less secondary item out of the finished good)
 
 
 class StockEntry(StockController, SubcontractingInwardController):
@@ -1447,9 +1457,19 @@ class StockEntry(StockController, SubcontractingInwardController):
 		outgoing_items_cost = self.set_rate_for_outgoing_items(reset_outgoing_rate, raise_error_if_no_rate)
 		has_consumption_basis = self.has_consumption_basis()
 
+<<<<<<< HEAD
 		items = []
 		# Set basic rate for incoming items
 		for d in self.get("items"):
+=======
+		bom_cost_allocation_per = (
+			frappe.get_cached_value("BOM", self.bom_no, "cost_allocation_per") if self.bom_no else None
+		)
+
+		zero_valuation_items = []
+		finished_items_last = sorted(self.get("items"), key=lambda row: cint(row.is_finished_item))
+		for d in finished_items_last:
+>>>>>>> 5e81cd1540 (fix(stock): cost a BOM-less secondary item out of the finished good)
 			if d.s_warehouse or d.set_basic_rate_manually:
 				continue
 
@@ -1605,7 +1625,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self, finished_item_qty, outgoing_items_cost=0, has_consumption_basis=False
 	) -> float:
 		settings = frappe.get_single("Manufacturing Settings")
-		scrap_items_cost = sum([flt(d.basic_amount) for d in self.get("items") if d.is_legacy_scrap_item])
+		scrap_items_cost = sum(
+			[flt(d.basic_amount) for d in self.get("items") if is_costed_out_of_finished_item(d)]
+		)
 
 		if settings.material_consumption:
 			if settings.get_rm_cost_from_consumption_entry and self.work_order:
