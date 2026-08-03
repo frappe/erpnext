@@ -7,6 +7,7 @@ from frappe.utils import add_days, cstr, flt, get_time, getdate, nowtime, today
 
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.controllers.accounts_controller import InvalidQtyError
+from erpnext.exceptions import QualityInspectionRequiredError
 from erpnext.stock.doctype.item.test_item import (
 	create_item,
 	make_item,
@@ -2727,6 +2728,36 @@ class TestStockEntry(ERPNextTestSuite):
 
 		self.assertEqual(fg_sle.incoming_rate, 0)
 		self.assertEqual(fg_sle.stock_value_difference, 0)
+
+	def test_secondary_item_type_does_not_waive_inspection_outside_manufacturing(self):
+		"""A stray secondary item type must not let a QI-required item through a receipt."""
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"valuation_rate": 50,
+				"inspection_required_before_purchase": 1,
+			}
+		).name
+
+		def receipt(secondary_item_type):
+			se = frappe.new_doc("Stock Entry")
+			se.purpose = se.stock_entry_type = "Material Receipt"
+			se.company = "_Test Company"
+			se.inspection_required = 1
+			se.append(
+				"items",
+				{
+					"item_code": item,
+					"t_warehouse": "_Test Warehouse - _TC",
+					"qty": 10,
+					"conversion_factor": 1,
+					"secondary_item_type": secondary_item_type,
+				},
+			)
+			return se
+
+		self.assertRaises(QualityInspectionRequiredError, receipt("").submit)
+		self.assertRaises(QualityInspectionRequiredError, receipt("Scrap").submit)
 
 	def _make_wo_for_free_raw_material(self, rm_item, fg_item, bom_no):
 		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
