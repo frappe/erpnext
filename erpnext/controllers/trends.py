@@ -378,14 +378,17 @@ def get_period_month_ranges(period, fiscal_year):
 
 def quotation_party_name_expr():
 	"""Resolve a Quotation's party label from its dynamic link, mirroring set_customer_name()."""
-	branches = [
+	customer_branch = (
 		"when t1.quotation_to = 'Customer' then "
-		"(select c.customer_name from `tabCustomer` c where c.name = t1.party_name)",
+		"(select c.customer_name from `tabCustomer` c where c.name = t1.party_name)"
+	)
+	lead_branch = (
 		"when t1.quotation_to = 'Lead' then "
 		"(select coalesce(nullif(l.company_name, ''), l.lead_name) from `tabLead` l "
-		"where l.name = t1.party_name)",
-		"when t1.quotation_to = 'Prospect' then t1.party_name",
-	]
+		"where l.name = t1.party_name)"
+	)
+	prospect_branch = "when t1.quotation_to = 'Prospect' then t1.party_name"
+	branches = [customer_branch, lead_branch, prospect_branch]
 	# CRM Deal ships with the CRM app; skip the branch when its table is absent
 	if frappe.db.table_exists("CRM Deal"):
 		branches.append(
