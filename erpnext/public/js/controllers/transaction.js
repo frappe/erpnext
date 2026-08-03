@@ -18,10 +18,19 @@ erpnext.stock.qi_outgoing_purposes = [
 	"Subcontracting Delivery",
 	"Disassemble",
 ];
+erpnext.stock.secondary_item_purposes = ["Manufacture", "Repack", "Disassemble"];
 erpnext.stock.is_incoming_qi_purpose = (purpose) =>
 	purpose === "Manufacture" || erpnext.stock.qi_incoming_purposes.includes(purpose);
 erpnext.stock.row_requires_quality_inspection = (purpose, row) => {
+<<<<<<< HEAD
 	if (row.type || row.is_legacy_scrap_item) return false;
+=======
+	if (
+		erpnext.stock.secondary_item_purposes.includes(purpose) &&
+		(row.secondary_item_type || row.is_legacy_scrap_item)
+	)
+		return false;
+>>>>>>> dfec7bd5c7 (fix(stock): stop a secondary item type from waiving quality inspection)
 	if (purpose === "Manufacture") return !!row.is_finished_item;
 	if (erpnext.stock.qi_incoming_purposes.includes(purpose)) return !!row.t_warehouse;
 	if (erpnext.stock.qi_outgoing_purposes.includes(purpose))
