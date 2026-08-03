@@ -126,62 +126,6 @@ class TestPurchaseOrder(FrappeTestCase):
 		frappe.db.set_value("Item", "_Test Item", "over_billing_allowance", 0)
 		frappe.db.set_single_value("Accounts Settings", "over_billing_allowance", 0)
 
-<<<<<<< HEAD
-=======
-	def test_over_order_allowance_against_material_request(self) -> None:
-		"""Over Order Allowance in Buying Settings must govern PO qty vs MR qty independently
-		from Over Delivery/Receipt Allowance which governs receipt/delivery against a PO."""
-		mr = make_material_request(qty=100)
-		po = make_purchase_order(mr.name)
-		po.supplier = "_Test Supplier"
-		po.items[0].qty = 110  # 10% over the MR qty
-
-		# Without any allowance, submitting should raise an OverAllowanceError
-		from erpnext.controllers.status_updater import OverAllowanceError
-
-		frappe.db.set_single_value("Buying Settings", "over_order_allowance", 0)
-		frappe.db.set_single_value("Stock Settings", "over_delivery_receipt_allowance", 0)
-		self.assertRaises(OverAllowanceError, po.submit)
-
-		# Granting 10% in Over Order Allowance (Buying Settings) must allow the submit
-		frappe.db.set_single_value("Buying Settings", "over_order_allowance", 10)
-		po.reload()
-		po.items[0].qty = 110
-		po.submit()
-		self.assertEqual(po.docstatus, 1)
-		po.cancel()
-
-		# Over Delivery/Receipt Allowance must remain independent — changing it must not
-		# affect the MR → PO validation when Over Order Allowance is 0.
-		frappe.db.set_single_value("Buying Settings", "over_order_allowance", 0)
-		frappe.db.set_single_value("Stock Settings", "over_delivery_receipt_allowance", 50)
-
-		mr2 = make_material_request(qty=100)
-		po2 = make_purchase_order(mr2.name)
-		po2.supplier = "_Test Supplier"
-		po2.items[0].qty = 110
-		self.assertRaises(OverAllowanceError, po2.submit)
-
-		# Stock over-delivery role must not bypass over-ordering against Material Request.
-		with self.change_settings(
-			"Stock Settings", {"role_allowed_to_over_deliver_receive": "Stock Manager"}
-		):
-			test_user = frappe.get_doc("User", "test@example.com")
-			test_user.add_roles("Stock Manager")
-
-			mr3 = make_material_request(qty=100)
-			po3 = make_purchase_order(mr3.name)
-			po3.supplier = "_Test Supplier"
-			po3.items[0].qty = 110
-			with self.set_user("test@example.com"):
-				po3.flags.ignore_permissions = True
-				self.assertRaises(OverAllowanceError, po3.submit)
-
-		# cleanup
-		frappe.db.set_single_value("Buying Settings", "over_order_allowance", 0)
-		frappe.db.set_single_value("Stock Settings", "over_delivery_receipt_allowance", 0)
-
->>>>>>> 0b271e24b6 (test(stock): add test cases verifying stock over delivery role does not bypass order allowance)
 	def test_update_remove_child_linked_to_mr(self):
 		"""Test impact on linked PO and MR on deleting/updating row."""
 		mr = make_material_request(qty=10)
@@ -1004,8 +948,8 @@ class TestPurchaseOrder(FrappeTestCase):
 		# self.assertEqual(po.payment_terms_template, pi.payment_terms_template)
 		compare_payment_schedules(self, po, pi)
 
-	@ERPNextTestSuite.change_settings("Selling Settings", {"maintain_same_sales_rate": 1})
-	@ERPNextTestSuite.change_settings("Buying Settings", {"maintain_same_rate": 1})
+	@change_settings("Selling Settings", {"maintain_same_sales_rate": 1})
+	@change_settings("Buying Settings", {"maintain_same_rate": 1})
 	def test_internal_transfer_flow(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 		from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
@@ -1425,11 +1369,7 @@ class TestPurchaseOrder(FrappeTestCase):
 		self.assertEqual(pi_2.status, "Paid")
 		self.assertEqual(po.status, "Completed")
 
-<<<<<<< HEAD
 	@change_settings("Buying Settings", {"maintain_same_rate": 0})
-=======
-	@ERPNextTestSuite.change_settings("Buying Settings", {"maintain_same_rate": 0})
->>>>>>> 99630f40eb (test(stock): prevent settings leakage in purchase order tests)
 	def test_purchase_order_over_billing_missing_item(self):
 		item1 = make_item(
 			"_Test Item for Overbilling",
