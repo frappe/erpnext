@@ -572,6 +572,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 			frappe.get_cached_value("BOM", self.bom_no, "cost_allocation_per") if self.bom_no else None
 		)
 
+		secondary_items_cost_basis = self.get_secondary_items_cost_basis(outgoing_items_cost)
+
 		zero_valuation_items = []
 		finished_items_last = sorted(self.get("items"), key=lambda row: cint(row.is_finished_item))
 		for d in finished_items_last:
@@ -591,10 +593,25 @@ class StockEntry(StockController, SubcontractingInwardController):
 				zero_valuation_items,
 				bom_cost_allocation_per,
 				has_consumption_basis,
+				secondary_items_cost_basis,
 			)
 
 		if zero_valuation_items:
 			self._notify_zero_valuation_rate(zero_valuation_items)
+
+	def get_secondary_items_cost_basis(self, outgoing_items_cost) -> float:
+		"""The cost a BOM allocation splits: the consumed rows, or the entry that replaced them."""
+		if outgoing_items_cost or self.purpose != "Manufacture" or not self.work_order:
+			return outgoing_items_cost
+
+		settings = frappe.get_single("Manufacturing Settings")
+		if not (settings.material_consumption and settings.get_rm_cost_from_consumption_entry):
+			return outgoing_items_cost
+
+		if not self.get_consumption_entries():
+			return outgoing_items_cost
+
+		return self._fetch_consumption_entry_cost()
 
 	def has_consumption_basis(self) -> bool:
 		"""Whether the cost of the consumed items is known, even when that cost is zero."""
@@ -629,6 +646,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		zero_valuation_items,
 		bom_cost_allocation_per=None,
 		has_consumption_basis=False,
+		secondary_items_cost_basis=0,
 	):
 		has_derived_rate = False
 
@@ -653,7 +671,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 				frappe.get_value("BOM Secondary Item", d.bom_secondary_item, "cost_allocation_per")
 			)
 			if flt(d.transfer_qty):
-				d.basic_rate = (outgoing_items_cost * (cost_allocation_per / 100)) / d.transfer_qty
+				d.basic_rate = (secondary_items_cost_basis * (cost_allocation_per / 100)) / d.transfer_qty
 				has_derived_rate = True
 
 		# A rate of zero that was derived rather than left unset is a real cost. Falling back to
