@@ -385,12 +385,14 @@ def based_wise_columns_query(based_on, trans):
 			{"label": _("Item"), "fieldtype": "Link", "options": "Item", "width": 120, "fieldname": "item"},
 			{"label": _("Item Name"), "fieldtype": "Data", "width": 120, "fieldname": "item_name"},
 		]
-		# item_name is an editable per-line field, not functionally dependent on item_code, so it
-		# is aggregated (one row per item_code) rather than added to GROUP BY (which would split
-		# the row and change the MariaDB row count). See get_data's group-by query.
-		based_on_details["based_on_select"] = "t2.item_code, Max(t2.item_name) as item_name,"
-		based_on_details["based_on_group_by"] = "t2.item_code"
-		based_on_details["addl_tables"] = ""
+		# item_name is stored per line and editable, so it is not functionally dependent on item_code
+		# and Max() over it is a sort -- which MariaDB and PostgreSQL resolve differently. Read it
+		# from the Item master instead: that IS functionally dependent on the grouped item_code, so
+		# it can be grouped without splitting rows and is identical on both engines by construction.
+		based_on_details["based_on_select"] = "t2.item_code, item_master.item_name as item_name,"
+		based_on_details["based_on_group_by"] = "t2.item_code, item_master.item_name"
+		based_on_details["addl_tables"] = ",`tabItem` item_master"
+		based_on_details["addl_tables_relational_cond"] = " and t2.item_code = item_master.name"
 
 	elif based_on == "Item Group":
 		based_on_details["based_on_cols"] = [
@@ -425,9 +427,18 @@ def based_wise_columns_query(based_on, trans):
 					"fieldname": "territory",
 				},
 			]
-			based_on_details[
-				"based_on_select"
-			] = "t1.party_name, Max(t1.customer_name) as customer_name, Max(t1.territory) as territory,"
+			# a Quotation's party_name is a dynamic link -- Customer or Lead -- so the master cannot be
+			# joined without dropping one of them. Correlated on the grouped party_name only, which
+			# keeps the query valid under GROUP BY and free of any text sort.
+			based_on_details["based_on_select"] = (
+				"t1.party_name, "
+				"coalesce((select c.customer_name from `tabCustomer` c where c.name = t1.party_name), "
+				"(select l.lead_name from `tabLead` l where l.name = t1.party_name)) as customer_name, "
+				"coalesce((select c.territory from `tabCustomer` c where c.name = t1.party_name), "
+				"(select l.territory from `tabLead` l where l.name = t1.party_name)) as territory,"
+			)
+			based_on_details["based_on_group_by"] = "t1.party_name"
+			based_on_details["addl_tables"] = ""
 		else:
 			based_on_details["based_on_cols"] = [
 				{
@@ -451,13 +462,19 @@ def based_wise_columns_query(based_on, trans):
 					"fieldname": "territory",
 				},
 			]
+			# customer_name and territory are stored per transaction and editable, so they are not
+			# functionally dependent on the customer and Max() over them is a text sort, which the
+			# engines resolve differently. The Customer master's values ARE dependent on the grouped
+			# key, so they can be grouped without splitting rows and agree on both engines.
+			based_on_details["based_on_select"] = (
+				"t1.customer, customer_master.customer_name as customer_name, "
+				"customer_master.territory as territory,"
+			)
 			based_on_details[
-				"based_on_select"
-			] = "t1.customer, Max(t1.customer_name) as customer_name, Max(t1.territory) as territory,"
-		# territory (and customer_name) are not functionally dependent on the customer key, so they
-		# are aggregated rather than grouped — one row per customer, matching the prior MariaDB output.
-		based_on_details["based_on_group_by"] = "t1.party_name" if trans == "Quotation" else "t1.customer"
-		based_on_details["addl_tables"] = ""
+				"based_on_group_by"
+			] = "t1.customer, customer_master.customer_name, customer_master.territory"
+			based_on_details["addl_tables"] = ",`tabCustomer` customer_master"
+			based_on_details["addl_tables_relational_cond"] = " and t1.customer = customer_master.name"
 
 	elif based_on == "Customer Group":
 		based_on_details["based_on_cols"] = [
@@ -490,14 +507,12 @@ def based_wise_columns_query(based_on, trans):
 				"fieldname": "supplier_group",
 			},
 		]
-		# supplier_name is a stored per-transaction field (not functionally dependent on supplier), so
-		# it is aggregated to keep one row per supplier — matching the prior MariaDB output, which grouped
-		# by t1.supplier only. supplier_group comes from the joined master and is FD on supplier, so it
-		# stays in GROUP BY (postgres-valid, no row split).
-		based_on_details[
-			"based_on_select"
-		] = "t1.supplier, Max(t1.supplier_name) as supplier_name, t3.supplier_group,"
-		based_on_details["based_on_group_by"] = "t1.supplier, t3.supplier_group"
+		# supplier_name is stored per transaction and editable, so Max() over it is a text sort that
+		# the engines resolve differently. The Supplier master is already joined here as t3 and its
+		# columns are functionally dependent on the grouped supplier, so both can simply be grouped:
+		# no row split, and identical on both engines by construction.
+		based_on_details["based_on_select"] = "t1.supplier, t3.supplier_name, t3.supplier_group,"
+		based_on_details["based_on_group_by"] = "t1.supplier, t3.supplier_name, t3.supplier_group"
 		based_on_details["addl_tables"] = ",`tabSupplier` t3"
 		based_on_details["addl_tables_relational_cond"] = " and t1.supplier = t3.name"
 
