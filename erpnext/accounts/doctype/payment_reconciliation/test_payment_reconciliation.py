@@ -241,6 +241,49 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		for row in rows:
 			self.assertIn((row.cost_center, row.remarks), posted)
 
+	def test_voucher_outstanding_splits_by_party_account(self):
+		"""A voucher posting to two party accounts must report each account separately.
+
+		account is the join key between the amount and outstanding CTEs. Selecting Max(account)
+		while grouping without it made that key an aggregate over two different row sets, so the two
+		sides could pick different accounts, the join would miss and the outstanding come back NULL.
+		It also summed amounts across accounts that need not share a currency.
+		"""
+		from erpnext.accounts.utils import QueryPaymentLedger
+
+		second_receivable = "_Test Receivable - _TC"
+		je = frappe.new_doc("Journal Entry")
+		je.posting_date = nowdate()
+		je.company = self.company
+		je.user_remark = "two receivable accounts"
+		for account, amount in ((self.debit_to, 100), (second_receivable, 60)):
+			je.append(
+				"accounts",
+				{
+					"account": account,
+					"party_type": "Customer",
+					"party": self.customer,
+					"cost_center": self.main_cc,
+					"debit_in_account_currency": amount,
+				},
+			)
+		je.append(
+			"accounts", {"account": self.cash, "cost_center": self.main_cc, "credit_in_account_currency": 160}
+		)
+		je.save()
+		je.submit()
+
+		rows = QueryPaymentLedger().get_voucher_outstandings(
+			vouchers=[frappe._dict(voucher_type="Journal Entry", voucher_no=je.name)]
+		)
+		by_account = {row.account: row for row in rows}
+
+		self.assertEqual(set(by_account), {self.debit_to, second_receivable})
+		self.assertEqual(flt(by_account[self.debit_to].invoice_amount), 100)
+		self.assertEqual(flt(by_account[second_receivable].invoice_amount), 60)
+		for row in rows:
+			self.assertIsNotNone(row.outstanding)
+
 	def test_filter_min_max(self):
 		# check filter condition minimum and maximum amount
 		self.create_sales_invoice(qty=1, rate=300)
