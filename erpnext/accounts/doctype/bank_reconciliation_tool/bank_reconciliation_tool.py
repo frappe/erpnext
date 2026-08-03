@@ -1336,9 +1336,11 @@ def get_pe_matching_query(
 	ref_condition = pe.reference_no == transaction.reference_number
 	ref_rank = frappe.qb.terms.Case().when(ref_condition, 1).else_(0)
 
-	amount_equality = pe.paid_amount == transaction.unallocated_amount
+	amount_field = pe.received_amount_after_tax if account_from_to == "paid_to" else pe.paid_amount_after_tax
+
+	amount_equality = amount_field == transaction.unallocated_amount
 	amount_rank = frappe.qb.terms.Case().when(amount_equality, 1).else_(0)
-	amount_condition = amount_equality if exact_match else pe.paid_amount > 0.0
+	amount_condition = amount_equality if exact_match else amount_field > 0.0
 
 	party_condition = (
 		(pe.party_type == transaction.party_type) & (pe.party == transaction.party) & pe.party.isnotnull()
@@ -1355,7 +1357,7 @@ def get_pe_matching_query(
 			(ref_rank + amount_rank + party_rank + 1).as_("rank"),
 			ConstantColumn("Payment Entry").as_("doctype"),
 			pe.name,
-			pe.base_paid_amount_after_tax.as_("paid_amount"),
+			amount_field.as_("paid_amount"),
 			pe.reference_no,
 			pe.reference_date,
 			pe.party,
