@@ -13,14 +13,14 @@ from erpnext.controllers.accounts_controller import merge_taxes
 
 
 @frappe.whitelist()
-def make_debit_note(source_name: str, target_doc: str | Document | None = None):
+def make_debit_note(source_name: str, target_doc: str | dict | Document | None = None):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
 
 	return make_return_doc("Purchase Invoice", source_name, target_doc)
 
 
 @frappe.whitelist()
-def make_stock_entry(source_name: str, target_doc: str | Document | None = None):
+def make_stock_entry(source_name: str, target_doc: str | dict | Document | None = None):
 	doc = get_mapped_doc(
 		"Purchase Invoice",
 		source_name,
@@ -38,7 +38,7 @@ def make_stock_entry(source_name: str, target_doc: str | Document | None = None)
 
 
 @frappe.whitelist()
-def make_inter_company_sales_invoice(source_name: str, target_doc: Document | None = None):
+def make_inter_company_sales_invoice(source_name: str, target_doc: str | dict | Document | None = None):
 	from erpnext.accounts.doctype.sales_invoice.mapper import make_inter_company_transaction
 
 	return make_inter_company_transaction("Purchase Invoice", source_name, target_doc)
@@ -46,7 +46,7 @@ def make_inter_company_sales_invoice(source_name: str, target_doc: Document | No
 
 @frappe.whitelist()
 def make_purchase_receipt(
-	source_name: str, target_doc: str | Document | None = None, args: str | dict | None = None
+	source_name: str, target_doc: str | dict | Document | None = None, args: str | dict | None = None
 ):
 	if args is None:
 		args = {}

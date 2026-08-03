@@ -26,7 +26,11 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 	make_serial_batch_bundle,
 )
 from erpnext.stock.doctype.serial_no.serial_no import *
-from erpnext.stock.doctype.stock_entry.stock_entry import FinishedGoodError, make_stock_in_entry
+from erpnext.stock.doctype.stock_entry.stock_entry import (
+	FinishedGoodError,
+	get_pending_work_orders,
+	make_stock_in_entry,
+)
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import StockFreezeError
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
@@ -901,6 +905,43 @@ class TestStockEntry(ERPNextTestSuite):
 				rm_cost += flt(d.amount)
 		fg_cost = next(filter(lambda x: x.item_code == "_Test FG Item 2", stock_entry.get("items"))).amount
 		self.assertEqual(fg_cost, flt(rm_cost + bom_operation_cost + work_order.additional_operating_cost, 2))
+
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 3})
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM"})
+	def test_material_transfer_for_manufacture_qty_precision(self):
+		from erpnext.stock.doctype.stock_entry.services.material_transfer import (
+			MaterialTransferForManufactureStockEntry,
+		)
+
+		work_order = frappe.new_doc("Work Order")
+		work_order.append(
+			"required_items",
+			{
+				"item_code": "_Test Item",
+				"required_qty": 33.876,
+				"transferred_qty": 33.875,
+			},
+		)
+
+		stock_entry = frappe.new_doc("Stock Entry")
+		stock_entry.work_order = "Test Work Order"
+		stock_entry.append(
+			"items",
+			{
+				"item_code": "_Test Item",
+				"s_warehouse": "_Test Warehouse - _TC",
+				"qty": 0.001,
+				"uom": "Nos",
+			},
+		)
+
+		service = MaterialTransferForManufactureStockEntry(stock_entry)
+		service._wo_doc = work_order
+		service._validate_no_excess_transfer()
+
+		stock_entry.items[0].qty = 0.002
+		with self.assertRaises(frappe.ValidationError):
+			service._validate_no_excess_transfer()
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"material_consumption": 1})
 	def test_work_order_manufacture_with_material_consumption(self):
@@ -2636,6 +2677,149 @@ class TestStockEntry(ERPNextTestSuite):
 		se.save()
 		se.submit()
 
+	def test_manufacture_with_zero_valued_raw_material(self):
+		# A finished good produced from free inputs is worth nothing. Falling back to the item's
+		# own valuation would create value out of nothing and inflate it on every production run.
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		warehouse = "_Test Warehouse - _TC"
+		fg_warehouse = "Finished Goods - _TC"
+
+		rm_receipt = make_stock_entry(item_code=rm_item, target=warehouse, qty=100, rate=0, do_not_save=True)
+		rm_receipt.items[0].allow_zero_valuation_rate = 1
+		rm_receipt.save()
+		rm_receipt.submit()
+
+		# the finished good already carries a valuation in the target warehouse
+		make_stock_entry(item_code=fg_item, target=fg_warehouse, qty=10, rate=100)
+
+		se = frappe.new_doc("Stock Entry")
+		se.purpose = se.stock_entry_type = "Manufacture"
+		se.company = "_Test Company"
+		se.append(
+			"items",
+			{"item_code": rm_item, "s_warehouse": warehouse, "qty": 10, "conversion_factor": 1},
+		)
+		se.append(
+			"items",
+			{
+				"item_code": fg_item,
+				"t_warehouse": fg_warehouse,
+				"qty": 10,
+				"is_finished_item": 1,
+				"conversion_factor": 1,
+			},
+		)
+		se.save()
+
+		self.assertEqual(se.items[0].basic_amount, 0)
+		self.assertEqual(se.items[1].basic_rate, 0)
+		self.assertEqual(se.items[1].basic_amount, 0)
+
+		se.submit()
+
+		fg_sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": se.name, "item_code": fg_item, "is_cancelled": 0},
+			["incoming_rate", "stock_value_difference"],
+			as_dict=True,
+		)
+
+		self.assertEqual(fg_sle.incoming_rate, 0)
+		self.assertEqual(fg_sle.stock_value_difference, 0)
+
+	def _make_wo_for_free_raw_material(self, rm_item, fg_item, bom_no):
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			make_stock_entry as make_stock_entry_from_wo,
+		)
+
+		receipt = make_stock_entry(item_code=rm_item, target="Stores - _TC", qty=10, rate=0, do_not_save=True)
+		receipt.items[0].allow_zero_valuation_rate = 1
+		receipt.save()
+		receipt.submit()
+
+		wo = make_wo_order_test_record(production_item=fg_item, bom_no=bom_no, qty=10)
+
+		transfer = frappe.get_doc(make_stock_entry_from_wo(wo.name, "Material Transfer for Manufacture", 10))
+		transfer.items[0].s_warehouse = "Stores - _TC"
+		transfer.insert().submit()
+
+		return wo
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"material_consumption": 1, "get_rm_cost_from_consumption_entry": 0}
+	)
+	def test_manufacture_does_not_fall_back_to_bom_cost_for_free_raw_material(self):
+		# The BOM is only an estimate for when nothing was consumed. Items that were consumed and
+		# cost nothing are a real cost, so a BOM rate must not stand in for them.
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			make_stock_entry as make_stock_entry_from_wo,
+		)
+
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+
+		frappe.get_doc(
+			{
+				"doctype": "Item Price",
+				"item_code": rm_item,
+				"price_list": "_Test Price List India",
+				"price_list_rate": 150,
+				"buying": 1,
+			}
+		).insert()
+
+		# price the BOM off the price list so that it carries a rate the free stock does not
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], do_not_save=True)
+		bom.rm_cost_as_per = "Price List"
+		bom.buying_price_list = "_Test Price List India"
+		bom.currency = "INR"
+		bom.save()
+		bom.submit()
+
+		wo = self._make_wo_for_free_raw_material(rm_item, fg_item, bom.name)
+
+		manufacture = frappe.get_doc(make_stock_entry_from_wo(wo.name, "Manufacture", 10))
+		manufacture.save()
+
+		fg_row = next(d for d in manufacture.items if d.is_finished_item)
+		self.assertEqual(fg_row.basic_rate, 0)
+		self.assertEqual(fg_row.basic_amount, 0)
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"material_consumption": 1, "get_rm_cost_from_consumption_entry": 1}
+	)
+	def test_manufacture_with_zero_valued_consumption_entry(self):
+		# The raw material is consumed by a separate entry, so the Manufacture entry carries no
+		# consumed rows of its own. Its cost is still known, and it is zero.
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			make_stock_entry as make_stock_entry_from_wo,
+		)
+
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+
+		# the finished good already carries a valuation in the work order's target warehouse
+		make_stock_entry(item_code=fg_item, target="_Test Warehouse 1 - _TC", qty=10, rate=100)
+
+		bom = make_bom(item=fg_item, raw_materials=[rm_item]).name
+		wo = self._make_wo_for_free_raw_material(rm_item, fg_item, bom)
+
+		consumption = frappe.get_doc(
+			make_stock_entry_from_wo(wo.name, "Material Consumption for Manufacture", 10)
+		)
+		consumption.insert().submit()
+
+		manufacture = frappe.get_doc(make_stock_entry_from_wo(wo.name, "Manufacture", 10))
+		manufacture.save()
+
+		fg_row = next(d for d in manufacture.items if d.is_finished_item)
+		self.assertEqual(fg_row.basic_rate, 0)
+		self.assertEqual(fg_row.basic_amount, 0)
+
 	def test_disassemble_entry_without_wo(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 
@@ -2721,14 +2905,14 @@ class TestStockEntry(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, se.save)
 
-	@ERPNextTestSuite.change_settings(
-		"Stock Settings", {"sample_retention_warehouse": "_Test Warehouse 1 - _TC"}
-	)
 	def test_sample_retention_stock_entry(self):
 		from erpnext.stock.doctype.stock_entry.services.manufacturing import (
 			move_sample_to_retention_warehouse,
 		)
 
+		frappe.db.set_value(
+			"Company", "_Test Company", "sample_retention_warehouse", "_Test Warehouse 1 - _TC"
+		)
 		warehouse = "_Test Warehouse - _TC"
 		retain_sample_item = make_item(
 			"Retain Sample Item",
@@ -3075,19 +3259,77 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 
 	# ── validate_sample_quantity ───────────────────────────────────────────────
 
-	@ERPNextTestSuite.change_settings(
-		"Stock Settings", {"sample_retention_warehouse": "_Test Warehouse 1 - _TC"}
-	)
 	def test_validate_sample_quantity_raises_when_sample_exceeds_received_qty(self):
 		from erpnext.stock.doctype.stock_entry.services.manufacturing import (
 			validate_sample_quantity,
 		)
 
+		frappe.db.set_value(
+			"Company", "_Test Company", "sample_retention_warehouse", "_Test Warehouse 1 - _TC"
+		)
 		item = make_item(
 			"_Sample Qty Excess Item",
 			{"is_stock_item": 1, "retain_sample": 1, "sample_quantity": 2},
 		)
-		self.assertRaises(frappe.ValidationError, validate_sample_quantity, item.name, 10, 5)
+		self.assertRaises(frappe.ValidationError, validate_sample_quantity, item.name, 10, 5, "_Test Company")
+
+	def test_validate_sample_quantity_raises_when_company_has_no_retention_warehouse(self):
+		"""Item.retain_sample only needs *some* company configured, so the transaction company may not be."""
+		from erpnext.stock.doctype.stock_entry.services.manufacturing import (
+			validate_sample_quantity,
+		)
+
+		frappe.db.set_value(
+			"Company", "_Test Company", "sample_retention_warehouse", "_Test Warehouse 1 - _TC"
+		)
+		frappe.db.set_value("Company", "_Test Company 1", "sample_retention_warehouse", None)
+		item = make_item(
+			"_Sample Qty No Retention Item",
+			{"is_stock_item": 1, "retain_sample": 1, "sample_quantity": 2, "has_batch_no": 1},
+		)
+		self.assertRaises(
+			frappe.ValidationError,
+			validate_sample_quantity,
+			item.name,
+			1,
+			5,
+			"_Test Company 1",
+			"_Sample Batch",
+		)
+
+	def test_sample_retention_warehouse_denied_for_other_company(self):
+		"""`company` comes from whitelisted callers, so it must not read another company's stock."""
+		from erpnext.stock.doctype.stock_entry.services.manufacturing import (
+			get_sample_retention_warehouse,
+		)
+
+		frappe.db.set_value(
+			"Company", "_Test Company", "sample_retention_warehouse", "_Test Warehouse 1 - _TC"
+		)
+
+		user = "test_sample_retention_perm@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{
+					"doctype": "User",
+					"email": user,
+					"first_name": "Sample Retention",
+					"send_welcome_email": 0,
+					"roles": [{"role": "Stock User"}],
+				}
+			).insert(ignore_permissions=True)
+
+		frappe.get_doc(
+			{
+				"doctype": "User Permission",
+				"user": user,
+				"allow": "Company",
+				"for_value": "_Test Company 1",
+			}
+		).insert(ignore_permissions=True)
+
+		with self.set_user(user):
+			self.assertRaises(frappe.PermissionError, get_sample_retention_warehouse, "_Test Company")
 
 	# ── get_expired_batches ────────────────────────────────────────────────────
 
@@ -3391,6 +3633,46 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 				self.assertTrue(row.serial_and_batch_bundle)
 				for bn in list(get_batches_from_bundle(row.serial_and_batch_bundle).keys()):
 					self.assertIn(bn, wo1_batches)
+
+	def test_get_pending_work_orders(self):
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+
+		wo = make_wo_order_test_record(qty=2, skip_transfer=True)
+
+		def pending_work_orders(txt=""):
+			return [
+				row[0]
+				for row in get_pending_work_orders("Work Order", txt, "name", 0, 0, {"company": wo.company})
+			]
+
+		self.assertIn(wo.name, pending_work_orders())
+		self.assertIn(wo.name, pending_work_orders(wo.name.lower()))
+		self.assertNotIn(wo.name, pending_work_orders("no-such-work-order"))
+
+		frappe.db.set_value("Work Order", wo.name, "produced_qty", wo.qty)
+		self.assertNotIn(wo.name, pending_work_orders())
+
+	def test_process_loss_percentage_resyncs_from_qty(self):
+		# changing fg qty recomputes process_loss_qty and process_loss_percentage
+		se = frappe.new_doc("Stock Entry")
+		se.purpose = "Manufacture"
+		se.fg_completed_qty = 200
+		se.process_loss_qty = 100
+		se.process_loss_percentage = 80
+
+		se.set_process_loss_qty()
+
+		self.assertEqual(se.process_loss_percentage, 50)
+
+	def test_process_loss_qty_derived_from_percentage_when_qty_blank(self):
+		se = frappe.new_doc("Stock Entry")
+		se.purpose = "Manufacture"
+		se.fg_completed_qty = 200
+		se.process_loss_percentage = 25
+
+		se.set_process_loss_qty()
+
+		self.assertEqual(se.process_loss_qty, 50)
 
 
 def make_serialized_item(self, **args):

@@ -338,9 +338,6 @@ class BuyingController(SubcontractingController):
 			if not details.get(field):
 				details[field] = frappe.get_cached_value("Company", self.company, field)
 
-		if not any(details.get(field) for field in fields):
-			return None
-
 		for field in fields:
 			if not details.get(field):
 				frappe.throw(
@@ -358,12 +355,26 @@ class BuyingController(SubcontractingController):
 		if self.doctype == "Purchase Invoice" and not self.update_stock:
 			return
 
+		stock_items = self.get_stock_items()
+
 		for row in self.items:
+			# A service item holds no stock value, so there is nothing to book against it - and it
+			# must not make the expense accounts mandatory either.
+			if row.item_code not in stock_items:
+				continue
+
 			details = self.get_validated_purchase_expense_details(row.item_code)
 			if not details:
 				continue
 
 			amount = flt(row.valuation_rate * row.stock_qty, row.precision("base_amount"))
+			if row.landed_cost_voucher_amount:
+				amount -= flt(row.landed_cost_voucher_amount, row.precision("base_amount"))
+
+			if not amount:
+				# GL Entry rejects a row with neither a debit nor a credit.
+				continue
+
 			self.add_gl_entry(
 				gl_entries=gl_entries,
 				account=details.purchase_expense_account,
@@ -455,7 +466,7 @@ class BuyingController(SubcontractingController):
 					self.precision("item_tax_amount", item),
 				)
 
-				self.round_floats_in(item)
+				self.round_floats_in(item, do_not_round_fields=["conversion_factor"])
 				if flt(item.conversion_factor) == 0.0:
 					item.conversion_factor = (
 						get_conversion_factor(item.item_code, item.uom).get("conversion_factor") or 1.0

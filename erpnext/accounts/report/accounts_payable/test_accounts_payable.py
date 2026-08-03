@@ -166,6 +166,36 @@ class TestAccountsPayable(ERPNextTestSuite, AccountsTestMixin):
 		self.assertEqual(len(report[1]), 2)
 		self.assertEqual([pi.name, expected_payment_term], [row.voucher_no, row.payment_term])
 
+	def test_supplier_group_filter(self):
+		pi = self.create_purchase_invoice()
+		supplier_group = frappe.db.get_value("Supplier", self.supplier, "supplier_group")
+		other_group = frappe.get_doc(
+			doctype="Supplier Group",
+			supplier_group_name="_Test Supplier Group AP",
+			parent_supplier_group="All Supplier Groups",
+		).insert()
+
+		filters = {
+			"company": self.company,
+			"party_type": "Supplier",
+			"report_date": today(),
+			"range": "30, 60, 90, 120",
+			"supplier_group": supplier_group,
+		}
+		self.assertIn(pi.name, [row.voucher_no for row in execute(filters)[1]])
+
+		filters.update({"supplier_group": [other_group.name]})
+		self.assertEqual(len(execute(filters)[1]), 0)
+
+		filters.update({"supplier_group": [supplier_group, other_group.name]})
+		self.assertIn(pi.name, [row.voucher_no for row in execute(filters)[1]])
+
+		filters.update({"supplier_group": ["All Supplier Groups"]})
+		self.assertIn(pi.name, [row.voucher_no for row in execute(filters)[1]])
+
+		filters.update({"supplier_group": ["_Test Supplier Group Mars"]})
+		self.assertRaises(frappe.ValidationError, execute, filters)
+
 	def test_project_filter(self):
 		project = frappe.get_doc("Project", {"project_name": "_Test Project"})
 

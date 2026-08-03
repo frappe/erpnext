@@ -49,7 +49,7 @@ def get_requested_item_qty(sales_order: str) -> dict:
 
 
 @frappe.whitelist()
-def make_material_request(source_name: str, target_doc: str | Document | None = None):
+def make_material_request(source_name: str, target_doc: str | dict | Document | None = None):
 	requested_item_qty = get_requested_item_qty(source_name)
 
 	def postprocess(source, target):
@@ -156,7 +156,7 @@ def make_material_request(source_name: str, target_doc: str | Document | None = 
 
 
 @frappe.whitelist()
-def make_project(source_name: str, target_doc: str | Document | None = None):
+def make_project(source_name: str, target_doc: str | dict | Document | None = None):
 	def postprocess(source, doc):
 		doc.project_type = "External"
 		doc.project_name = source.name
@@ -230,7 +230,7 @@ def set_serial_batch_for_bundle_reservation(source, target, use_serial_batch_fie
 
 @frappe.whitelist()
 def make_delivery_note(
-	source_name: str, target_doc: str | Document | None = None, kwargs: dict | None = None
+	source_name: str, target_doc: str | dict | Document | None = None, kwargs: dict | None = None
 ):
 	if not kwargs:
 		kwargs = {
@@ -424,7 +424,7 @@ def make_delivery_note(
 @frappe.whitelist()
 def make_sales_invoice(
 	source_name: str,
-	target_doc: str | Document | None = None,
+	target_doc: str | dict | Document | None = None,
 	ignore_permissions: bool = False,
 	args: str | dict | None = None,
 ):
@@ -609,7 +609,7 @@ def make_sales_invoice(
 
 
 @frappe.whitelist()
-def make_maintenance_schedule(source_name: str, target_doc: str | Document | None = None):
+def make_maintenance_schedule(source_name: str, target_doc: str | dict | Document | None = None):
 	maint_schedule = frappe.db.exists(
 		"Maintenance Schedule Item", {"sales_order": source_name, "docstatus": 1}
 	)
@@ -632,7 +632,7 @@ def make_maintenance_schedule(source_name: str, target_doc: str | Document | Non
 
 
 @frappe.whitelist()
-def make_maintenance_visit(source_name: str, target_doc: str | Document | None = None):
+def make_maintenance_visit(source_name: str, target_doc: str | dict | Document | None = None):
 	MaintenanceVisit = frappe.qb.DocType("Maintenance Visit")
 	MaintenanceVisitPurpose = frappe.qb.DocType("Maintenance Visit Purpose")
 
@@ -665,7 +665,9 @@ def make_maintenance_visit(source_name: str, target_doc: str | Document | None =
 
 @frappe.whitelist()
 def make_purchase_order(
-	source_name: str, selected_items: str | list | None = None, target_doc: str | Document | None = None
+	source_name: str,
+	selected_items: str | list | None = None,
+	target_doc: str | dict | Document | None = None,
 ):
 	"""Creates Purchase Order for each Supplier. Returns a list of doc objects."""
 
@@ -873,7 +875,7 @@ def make_work_orders(items: str | dict, sales_order: str, company: str, project:
 
 
 @frappe.whitelist()
-def make_production_plan(source_name: str, target_doc: str | Document | None = None):
+def make_production_plan(source_name: str, target_doc: str | dict | Document | None = None):
 	sales_order = frappe.get_doc("Sales Order", source_name)
 
 	production_plan = frappe.new_doc(
@@ -965,14 +967,14 @@ def make_raw_material_request(
 
 
 @frappe.whitelist()
-def make_inter_company_purchase_order(source_name: str, target_doc: str | Document | None = None):
+def make_inter_company_purchase_order(source_name: str, target_doc: str | dict | Document | None = None):
 	from erpnext.accounts.doctype.sales_invoice.mapper import make_inter_company_transaction
 
 	return make_inter_company_transaction("Sales Order", source_name, target_doc)
 
 
 @frappe.whitelist()
-def create_pick_list(source_name: str, target_doc: str | Document | None = None):
+def create_pick_list(source_name: str, target_doc: str | dict | Document | None = None):
 	def validate_sales_order():
 		so = frappe.get_doc("Sales Order", source_name)
 		for item in so.items:
@@ -1051,7 +1053,7 @@ def create_pick_list(source_name: str, target_doc: str | Document | None = None)
 
 
 @frappe.whitelist()
-def make_subcontracting_inward_order(source_name: str, target_doc: str | Document | None = None):
+def make_subcontracting_inward_order(source_name: str, target_doc: str | dict | Document | None = None):
 	if not is_so_fully_subcontracted(source_name):
 		return get_mapped_subcontracting_inward_order(source_name, target_doc)
 	else:
@@ -1069,7 +1071,7 @@ def is_so_fully_subcontracted(so_name: str) -> bool:
 
 
 def get_mapped_subcontracting_inward_order(
-	source_name: str, target_doc: str | Document | None = None
+	source_name: str, target_doc: str | dict | Document | None = None
 ) -> Document:
 	def post_process(source_doc, target_doc):
 		if (

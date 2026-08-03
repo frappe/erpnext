@@ -250,7 +250,7 @@ def get_supplied_items(
 
 
 @frappe.whitelist()
-def get_items_from_subcontract_order(source_name: str, target_doc: str | Document | None = None):
+def get_items_from_subcontract_order(source_name: str, target_doc: str | dict | Document | None = None):
 	from erpnext.controllers.subcontracting_controller import make_rm_stock_entry
 
 	target_doc = frappe.get_doc(frappe.parse_json(target_doc))

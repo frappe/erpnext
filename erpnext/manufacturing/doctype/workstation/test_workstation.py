@@ -80,7 +80,7 @@ class TestWorkstation(ERPNextTestSuite):
 
 		test_routing_operations = [
 			{"operation": "Test Operation A", "workstation": "_Test Workstation A", "time_in_mins": 60},
-			{"operation": "Test Operation B", "workstation": "_Test Workstation A", "time_in_mins": 60},
+			{"operation": "Test Operation B", "workstation": "_Test Workstation A", "time_in_mins": 30},
 		]
 		routing_doc = create_routing(routing_name="Routing Test", operations=test_routing_operations)
 		bom_doc = setup_bom(item_code="_Testing Item", routing=routing_doc.name, currency="INR")
@@ -113,12 +113,16 @@ class TestWorkstation(ERPNextTestSuite):
 		# update_bom_operation() (run on w1.save()) must write the new rate directly onto the
 		# Routing's BOM Operation rows. This is the converted query's own effect (not the BOM
 		# update_cost above) and is what silently skipped on Postgres when parenttype was 'routing'.
-		routing_op_rate = frappe.db.get_value(
-			"BOM Operation",
-			{"parent": routing_doc.name, "parenttype": "Routing", "workstation": "_Test Workstation A"},
-			"hour_rate",
-		)
-		self.assertEqual(routing_op_rate, 250)
+		# It must also refresh operating_cost (hour_rate * time_in_mins / 60); the 30-min op
+		# exercises the arithmetic rather than a plain rate copy.
+		for operation, expected_operating_cost in (("Test Operation A", 250), ("Test Operation B", 125)):
+			hour_rate, operating_cost = frappe.db.get_value(
+				"BOM Operation",
+				{"parent": routing_doc.name, "parenttype": "Routing", "operation": operation},
+				["hour_rate", "operating_cost"],
+			)
+			self.assertEqual(hour_rate, 250)
+			self.assertEqual(operating_cost, expected_operating_cost)
 
 
 def make_workstation(*args, **kwargs):

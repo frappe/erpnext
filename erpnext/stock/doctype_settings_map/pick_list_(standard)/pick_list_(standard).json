@@ -12,19 +12,11 @@
    "settings_doctype": "Stock Settings"
   },
   {
-   "setting_field": "enable_stock_reservation",
-   "settings_doctype": "Stock Settings"
-  },
-  {
-   "setting_field": "pick_serial_and_batch_based_on",
-   "settings_doctype": "Stock Settings"
-  },
-  {
    "setting_field": "over_delivery_receipt_allowance",
    "settings_doctype": "Stock Settings"
   }
  ],
- "modified": "2026-07-10 11:27:36.601829",
+ "modified": "2026-07-20 16:05:15.546016",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List (Standard)",

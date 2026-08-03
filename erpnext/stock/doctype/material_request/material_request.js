@@ -22,9 +22,10 @@ frappe.ui.form.on("Material Request", {
 			return doc.stock_qty <= doc.ordered_qty ? "green" : "orange";
 		});
 
-		frm.set_query("item_code", "items", function () {
+		frm.set_query("item_code", "items", function (doc) {
 			return {
 				query: "erpnext.controllers.queries.item_query",
+				filters: { company: doc.company },
 			};
 		});
 
@@ -100,7 +101,10 @@ frappe.ui.form.on("Material Request", {
 
 		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
 		if (!frm.doc.buying_price_list) {
-			frm.doc.buying_price_list = frappe.defaults.get_default("buying_price_list");
+			const buying_price_list = frappe.defaults.get_default("buying_price_list");
+			if (frappe.has_permission("Price List", "read", buying_price_list)) {
+				frm.set_value("buying_price_list", buying_price_list);
+			}
 		}
 	},
 
@@ -287,9 +291,7 @@ frappe.ui.form.on("Material Request", {
 					from_warehouse: item.from_warehouse,
 					warehouse: item.warehouse,
 					doctype: frm.doc.doctype,
-					buying_price_list: frm.doc.buying_price_list
-						? frm.doc.buying_price_list
-						: frappe.defaults.get_default("buying_price_list"),
+					buying_price_list: frm.doc.buying_price_list,
 					currency: frappe.defaults.get_default("Currency"),
 					name: frm.doc.name,
 					qty: item.qty || 1,
@@ -410,11 +412,185 @@ frappe.ui.form.on("Material Request", {
 	},
 
 	make_purchase_order: function (frm) {
-		frappe.model.open_mapped_doc({
-			method: "erpnext.stock.doctype.material_request.mapper.make_purchase_order",
-			frm: frm,
-			run_link_triggers: true,
+		frappe.call({
+			method: "erpnext.stock.doctype.material_request.mapper.get_item_default_suppliers",
+			args: {
+				source_name: frm.doc.name,
+				filtered_children: (frm.get_selected() || {}).items || [],
+			},
+			freeze: true,
+			callback: function (r) {
+				const items = r.message || [];
+				const suppliers = new Set(items.map((item) => item.supplier || ""));
+
+				if (suppliers.size > 1) {
+					frm.events.select_suppliers_for_items(frm, items);
+					return;
+				}
+
+				frappe.model.open_mapped_doc({
+					method: "erpnext.stock.doctype.material_request.mapper.make_purchase_order",
+					frm: frm,
+					args: { supplier: items.length ? items[0].supplier : null },
+					run_link_triggers: true,
+				});
+			},
 		});
+	},
+
+	select_suppliers_for_items: function (frm, items) {
+		const rows = items.map((item) => Object.assign({}, item, { qty: item.pending_qty, __checked: 1 }));
+
+		const supplier_query = () => {
+			return { filters: { disabled: 0, prevent_pos: 0 } };
+		};
+
+		const dialog = new frappe.ui.Dialog({
+			title: __("Select Supplier for Items"),
+			size: "large",
+			fields: [
+				{
+					fieldname: "supplier",
+					fieldtype: "Link",
+					options: "Supplier",
+					label: __("Set Supplier for All Items"),
+					get_query: supplier_query,
+					onchange: function () {
+						const supplier = dialog.get_value("supplier");
+						if (!supplier) return;
+
+						rows.forEach((row) => (row.supplier = supplier));
+						dialog.fields_dict.items.grid.refresh();
+					},
+				},
+				{ fieldtype: "Column Break" },
+				{ fieldtype: "Section Break" },
+				{
+					fieldname: "items",
+					fieldtype: "Table",
+					label: __("Items"),
+					cannot_add_rows: true,
+					cannot_delete_rows: true,
+					in_place_edit: true,
+					data: rows,
+					get_data: () => rows,
+					description: __("A separate Purchase Order is created for each Supplier."),
+					fields: [
+						{
+							fieldtype: "Data",
+							fieldname: "material_request_item",
+							hidden: 1,
+						},
+						{
+							fieldtype: "Link",
+							fieldname: "item_code",
+							options: "Item",
+							label: __("Item Code"),
+							read_only: 1,
+							in_list_view: 1,
+							columns: 3,
+						},
+						{
+							fieldtype: "Data",
+							fieldname: "item_name",
+							label: __("Item Name"),
+							read_only: 1,
+							in_list_view: 1,
+							columns: 2,
+						},
+						{
+							fieldtype: "Float",
+							fieldname: "pending_qty",
+							hidden: 1,
+						},
+						{
+							fieldtype: "Float",
+							fieldname: "qty",
+							label: __("Quantity"),
+							reqd: 1,
+							in_list_view: 1,
+							columns: 1,
+						},
+						{
+							fieldtype: "Link",
+							fieldname: "uom",
+							options: "UOM",
+							label: __("UOM"),
+							read_only: 1,
+							in_list_view: 1,
+							columns: 1,
+						},
+						{
+							fieldtype: "Link",
+							fieldname: "supplier",
+							options: "Supplier",
+							label: __("Supplier"),
+							get_query: supplier_query,
+							reqd: 1,
+							in_list_view: 1,
+							columns: 3,
+						},
+					],
+				},
+			],
+			primary_action_label: __("Create"),
+			primary_action: async function (values) {
+				const item_suppliers = (values.items || []).filter((row) => row.__checked);
+				if (!item_suppliers.length) {
+					frappe.throw(__("Select at least one Item"));
+				}
+
+				const item_link = (row) =>
+					frappe.utils.get_form_link(
+						"Item",
+						row.item_code,
+						true,
+						frappe.utils.escape_html(row.item_code)
+					);
+
+				const missing_supplier = item_suppliers.find((row) => !row.supplier);
+				if (missing_supplier) {
+					frappe.throw(__("Select a Supplier for Item {0}", [item_link(missing_supplier)]));
+				}
+
+				const invalid_qty = item_suppliers.find(
+					(row) => flt(row.qty) <= 0 || flt(row.qty) > flt(row.pending_qty)
+				);
+				if (invalid_qty) {
+					const pending_qty = `${format_number(invalid_qty.pending_qty)} ${frappe.utils.escape_html(
+						invalid_qty.uom
+					)}`;
+					frappe.throw(
+						__("Quantity for Item {0} must be greater than zero and cannot exceed {1}", [
+							item_link(invalid_qty),
+							`<b>${pending_qty}</b>`,
+						])
+					);
+				}
+
+				if (!(await erpnext.utils.confirm_if_drafts_exist(frm.doc, "Purchase Order"))) {
+					return;
+				}
+
+				frappe.call({
+					method: "erpnext.stock.doctype.material_request.mapper.make_purchase_orders_by_supplier",
+					args: { source_name: frm.doc.name, item_suppliers: item_suppliers },
+					freeze: true,
+					callback: function (r) {
+						if (r.exc) return;
+
+						dialog.hide();
+
+						const purchase_orders = r.message || [];
+						if (purchase_orders.length === 1) {
+							frappe.set_route("Form", "Purchase Order", purchase_orders[0]);
+						}
+					},
+				});
+			},
+		});
+
+		dialog.show();
 	},
 
 	make_request_for_quotation: function (frm) {
@@ -603,7 +779,7 @@ erpnext.buying.MaterialRequestController = class MaterialRequestController exten
 
 	onload() {
 		this.frm.set_query("item_code", "items", function (doc, cdt, cdn) {
-			let filters = { is_stock_item: 1 };
+			let filters = { is_stock_item: 1, company: doc.company };
 
 			if (doc.material_request_type == "Customer Provided") {
 				filters.customer = doc.customer;

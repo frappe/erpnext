@@ -206,6 +206,7 @@ class Workstation(Document):
 			(
 				frappe.qb.update(bom_op)
 				.set(bom_op.hour_rate, self.hour_rate)
+				.set(bom_op.operating_cost, self.hour_rate * bom_op.time_in_mins / 60)
 				.where(bom_op.parent.isin(bom_list) & (bom_op.workstation == self.name))
 				.run()
 			)

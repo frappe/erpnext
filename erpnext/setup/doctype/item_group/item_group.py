@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils.nestedset import NestedSet
+from frappe.utils.nestedset import NestedSet, get_root_of
 
 
 class ItemGroup(NestedSet):
@@ -32,8 +32,9 @@ class ItemGroup(NestedSet):
 
 	def validate(self):
 		if not self.parent_item_group and not frappe.in_test:
-			if frappe.db.exists("Item Group", _("All Item Groups")):
-				self.parent_item_group = _("All Item Groups")
+			root = get_root_of(self.doctype)
+			if root and root != self.name:
+				self.parent_item_group = root
 		self.validate_item_group_defaults()
 		self.check_item_tax()
 
@@ -103,17 +104,15 @@ def get_company_resolved_defaults(company: str) -> dict:
 	"""
 	Returns effective default values for a company by checking:
 	1. Company document
-	2. Stock Settings (for warehouse fallback)
-	3. Accounts Settings (for deferred account fallbacks)
+	2. Accounts Settings (for deferred account fallbacks)
 	"""
 	if not company:
 		return {}
 
 	company_doc = frappe.get_cached_doc("Company", company)
-	default_warehouse = frappe.db.get_single_value("Stock Settings", "default_warehouse")
 
 	return {
-		"default_warehouse": default_warehouse,
+		"default_warehouse": company_doc.get("default_warehouse"),
 		"default_inventory_account": company_doc.get("default_inventory_account"),
 		"buying_cost_center": company_doc.get("cost_center"),
 		"selling_cost_center": company_doc.get("cost_center"),

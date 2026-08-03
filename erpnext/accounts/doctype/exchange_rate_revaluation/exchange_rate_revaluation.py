@@ -623,15 +623,27 @@ class ExchangeRateRevaluation(Document):
 		if journals:
 			from erpnext.accounts.doctype.journal_entry.mapper import make_reverse_journal_entry
 
-			for x in journals:
-				reversal = make_reverse_journal_entry(x)
-				reversal.posting_date = nowdate()
-				reversal.submit()
-				frappe.msgprint(
-					_("Revaluation journal for {0} has been created: {1}").format(
-						frappe.bold(x), get_link_to_form("Journal Entry", reversal.name)
-					)
+			if drafts := frappe.db.get_all(
+				"Journal Entry",
+				filters={"docstatus": 0, "reversal_of": ["in", journals]},
+				pluck="name",
+				as_list=1,
+			):
+				part = "journals are" if len(drafts) > 1 else "journal is"
+				doc_links = ", ".join(["{}".format(get_link_to_form("Journal Entry", x)) for x in drafts])
+				frappe.throw(
+					msg=_("Reverse {0} already available in draft status: {1}").format(part, doc_links),
 				)
+			else:
+				for x in journals:
+					reversal = make_reverse_journal_entry(x)
+					reversal.posting_date = nowdate()
+					reversal.save()
+					frappe.msgprint(
+						_("A draft reverse journal for {0} has been created: {1}").format(
+							frappe.bold(x), get_link_to_form("Journal Entry", reversal.name)
+						)
+					)
 
 
 def calculate_exchange_rate_using_last_gle(company, account, party_type, party):

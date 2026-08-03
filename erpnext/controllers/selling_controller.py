@@ -916,8 +916,8 @@ class SellingController(StockController):
 		if self.get("is_return"):
 			return
 
-		sample_retention_warehouse = frappe.db.get_single_value(
-			"Stock Settings", "sample_retention_warehouse"
+		sample_retention_warehouse = frappe.get_cached_value(
+			"Company", self.company, "sample_retention_warehouse"
 		)
 		if not sample_retention_warehouse:
 			return

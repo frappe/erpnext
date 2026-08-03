@@ -12,7 +12,7 @@ from frappe.utils import cint, flt, getdate, nowdate
 
 @frappe.whitelist()
 def make_sales_order(
-	source_name: str, target_doc: str | Document | None = None, args: str | dict | None = None
+	source_name: str, target_doc: str | dict | Document | None = None, args: str | dict | None = None
 ):
 	if not frappe.db.get_singles_value(
 		"Selling Settings", "allow_sales_order_creation_for_expired_quotation"
@@ -142,7 +142,7 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False, ar
 
 @frappe.whitelist()
 def make_sales_invoice(
-	source_name: str, target_doc: str | Document | None = None, args: str | dict | None = None
+	source_name: str, target_doc: str | dict | Document | None = None, args: str | dict | None = None
 ):
 	return _make_sales_invoice(source_name, target_doc, args=args)
 
