@@ -158,9 +158,6 @@ def validate_returned_items(doc):
 				):
 					frappe.throw(_("Warehouse is mandatory"))
 
-<<<<<<< HEAD
-			items_returned = True
-=======
 			if doc.doctype in (
 				"Purchase Invoice",
 				"Purchase Receipt",
@@ -173,7 +170,6 @@ def validate_returned_items(doc):
 					items_returned = True
 			else:
 				items_returned = True
->>>>>>> a3e9d13da3 (fix(sales): reject sales returns where every item has zero quantity)
 
 		elif d.item_name:
 			items_returned = True
