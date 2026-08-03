@@ -702,6 +702,11 @@ def is_reposting_pending():
 	)
 
 
+def invalidate_future_sle_cache(voucher_type, voucher_no):
+	if hasattr(frappe.local, "future_sle"):
+		frappe.local.future_sle.pop((voucher_type, voucher_no), None)
+
+
 def future_sle_exists(args, sl_entries=None):
 	from erpnext.stock.utils import get_combine_datetime
 
