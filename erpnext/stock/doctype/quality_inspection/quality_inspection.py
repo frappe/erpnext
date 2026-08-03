@@ -2,22 +2,14 @@
 # License: GNU General Public License v3. See license.txt
 
 
-<<<<<<< HEAD
-=======
 from math import isfinite
-from typing import Any
 
->>>>>>> 5b5f354090 (fix(stock): accept every number a reading can be written as)
 import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
-<<<<<<< HEAD
-from frappe.utils import cint, cstr, flt, get_link_to_form, get_number_format_info
-=======
-from frappe.utils import cint, flt, get_link_to_form
+from frappe.utils import cint, cstr, flt, get_link_to_form
 from frappe.utils.number_format import NUMBER_FORMAT_MAP, NumberFormat
->>>>>>> 5b5f354090 (fix(stock): accept every number a reading can be written as)
 
 from erpnext.controllers.stock_controller import (
 	QI_INCOMING_PURPOSES,
