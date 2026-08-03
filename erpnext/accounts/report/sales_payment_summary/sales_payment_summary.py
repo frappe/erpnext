@@ -3,7 +3,7 @@
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import Coalesce, Max, Sum
+from frappe.query_builder.functions import Coalesce, Max, Min, Sum
 from frappe.utils import cstr
 
 
@@ -128,25 +128,40 @@ def get_pos_invoice_data(filters):
 	sip = frappe.qb.DocType("Sales Invoice Payment")
 	si = frappe.qb.DocType("Sales Invoice")
 
-	# t1: one row per invoice with the summed item base_total. warehouse/cost_center are line-level and
-	# not grouped, so they are arbitrary per invoice -- Max() makes that pick deterministic and valid on
-	# Postgres (item_code was selected but never consumed downstream, so it is dropped).
-	t1 = (
+	# t1: one row per invoice with the summed item base_total. warehouse and cost_center describe an
+	# item line, not the invoice, and an invoice may carry several. warehouse then becomes an outer
+	# grouping key below, so which line wins decides how rows are partitioned and what each row totals
+	# -- not merely which label is shown. Max() over text is a sort, and MariaDB (case-folding) and
+	# PostgreSQL (byte order) resolve it differently, so take both off one real line instead.
+	# Sales Invoice Item is hash-named, so Min(name) picks a stable row without sorting text.
+	grouped_items = (
 		frappe.qb.from_(sii)
-		.select(
-			sii.parent,
-			Sum(sii.amount).as_("base_total"),
-			Max(sii.warehouse).as_("warehouse"),
-			Max(sii.cost_center).as_("cost_center"),
-		)
+		.select(sii.parent, Sum(sii.amount).as_("base_total"), Min(sii.name).as_("representative"))
 		.groupby(sii.parent)
+	).as_("grouped_items")
+	representative_item = frappe.qb.DocType("Sales Invoice Item").as_("representative_item")
+	t1 = (
+		frappe.qb.from_(grouped_items)
+		.inner_join(representative_item)
+		.on(representative_item.name == grouped_items.representative)
+		.select(
+			grouped_items.parent,
+			grouped_items.base_total,
+			representative_item.warehouse,
+			representative_item.cost_center,
+		)
 	)
 
-	# t3: mode_of_payment per invoice (arbitrary across an invoice's payment lines -> Max() to be valid)
+	# t3: mode_of_payment per invoice, from one real payment line for the same reason
+	grouped_payments = (
+		frappe.qb.from_(sip).select(sip.parent, Min(sip.name).as_("representative")).groupby(sip.parent)
+	).as_("grouped_payments")
+	representative_payment = frappe.qb.DocType("Sales Invoice Payment").as_("representative_payment")
 	t3 = (
-		frappe.qb.from_(sip)
-		.select(sip.parent, Max(sip.mode_of_payment).as_("mode_of_payment"))
-		.groupby(sip.parent)
+		frappe.qb.from_(grouped_payments)
+		.inner_join(representative_payment)
+		.on(representative_payment.name == grouped_payments.representative)
+		.select(grouped_payments.parent, representative_payment.mode_of_payment.as_("mode_of_payment"))
 	)
 
 	# a: invoice-level aggregates. Grouped by the primary key (si.name), so the other plain si columns
