@@ -1548,6 +1548,76 @@ class StockEntry(StockController, SubcontractingInwardController):
 			)
 		return self._consumption_entries
 
+<<<<<<< HEAD
+=======
+	def _set_incoming_item_rate(
+		self,
+		d,
+		outgoing_items_cost,
+		raise_error_if_no_rate,
+		zero_valuation_items,
+		bom_cost_allocation_per=None,
+		has_consumption_basis=False,
+	):
+		has_derived_rate = False
+
+		if d.allow_zero_valuation_rate and d.basic_rate and self.purpose != "Receive from Customer":
+			d.basic_rate = 0.0
+			zero_valuation_items.append(d.item_code)
+		elif d.is_finished_item:
+			if self.purpose == "Manufacture":
+				d.basic_rate = self.get_basic_rate_for_manufactured_item(
+					d.transfer_qty, outgoing_items_cost, has_consumption_basis
+				)
+				has_derived_rate = has_consumption_basis
+			elif self.purpose == "Repack":
+				d.basic_rate = self.get_basic_rate_for_repacked_items(d.transfer_qty, outgoing_items_cost)
+				# Repack rate comes from consumed source-warehouse rows, not consumption entries
+				has_derived_rate = any(item.s_warehouse for item in self.get("items"))
+
+			if self.bom_no:
+				d.basic_rate *= bom_cost_allocation_per / 100
+		elif d.secondary_item_type and d.bom_secondary_item:
+			cost_allocation_per = flt(
+				frappe.get_value("BOM Secondary Item", d.bom_secondary_item, "cost_allocation_per")
+			)
+			if flt(d.transfer_qty):
+				d.basic_rate = (outgoing_items_cost * (cost_allocation_per / 100)) / d.transfer_qty
+				has_derived_rate = True
+
+		# A rate of zero that was derived rather than left unset is a real cost. Falling back to
+		# the item's valuation here would value free inputs, or an unallocated row, as output.
+		if not d.basic_rate and not d.allow_zero_valuation_rate and not has_derived_rate:
+			d.basic_rate = get_valuation_rate(
+				d.item_code,
+				d.t_warehouse,
+				self.doctype,
+				self.name,
+				d.allow_zero_valuation_rate,
+				currency=erpnext.get_company_currency(self.company),
+				company=self.company,
+				raise_error_if_no_rate=raise_error_if_no_rate,
+				batch_no=d.batch_no,
+				serial_and_batch_bundle=d.serial_and_batch_bundle,
+			)
+
+		# do not round off basic rate to avoid precision loss
+		d.basic_rate = flt(d.basic_rate)
+		d.basic_amount = flt(flt(d.transfer_qty) * flt(d.basic_rate), d.precision("basic_amount"))
+
+	def _notify_zero_valuation_rate(self, items):
+		if len(items) > 1:
+			message = _(
+				"Items rate has been updated to zero as Allow Zero Valuation Rate is checked for the following items: {0}"
+			).format(", ".join(frappe.bold(item) for item in items))
+		else:
+			message = _(
+				"Item rate has been updated to zero as Allow Zero Valuation Rate is checked for item {0}"
+			).format(frappe.bold(items[0]))
+
+		frappe.msgprint(message, alert=True)
+
+>>>>>>> 7d901ed92c (fix(stock): treat a 0% BOM cost allocation as no cost (#57736))
 	def set_rate_for_outgoing_items(self, reset_outgoing_rate=True, raise_error_if_no_rate=True):
 		outgoing_items_cost = 0.0
 		for d in self.get("items"):
