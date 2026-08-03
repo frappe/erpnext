@@ -187,6 +187,60 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		)
 		return je
 
+	def test_voucher_outstanding_metadata_comes_from_one_ledger_entry(self):
+		"""cost_center and remarks must describe the same Payment Ledger Entry.
+
+		A voucher can post several ledger entries for one party with different cost centers and
+		remarks. Aggregating each column on its own can pair one entry's cost center with another's
+		remarks -- a row that was never posted -- and because Max() over text is a sort, MariaDB and
+		PostgreSQL can pick differently on top of that.
+		"""
+		from erpnext.accounts.utils import QueryPaymentLedger
+
+		je = frappe.new_doc("Journal Entry")
+		je.posting_date = nowdate()
+		je.company = self.company
+		je.user_remark = "aaa base remark"
+		for cost_center, remark, amount in (
+			(self.main_cc, "aaa main line", 100),
+			(self.sub_cc, "zzz sub line", 50),
+		):
+			je.append(
+				"accounts",
+				{
+					"account": self.debit_to,
+					"party_type": "Customer",
+					"party": self.customer,
+					"cost_center": cost_center,
+					"user_remark": remark,
+					"debit_in_account_currency": amount,
+				},
+			)
+		je.append(
+			"accounts", {"account": self.cash, "cost_center": self.main_cc, "credit_in_account_currency": 150}
+		)
+		je.save()
+		je.submit()
+
+		posted = {
+			(row.cost_center, row.remarks)
+			for row in frappe.get_all(
+				"Payment Ledger Entry",
+				filters={"voucher_no": je.name, "delinked": 0},
+				fields=["cost_center", "remarks"],
+			)
+		}
+		self.assertGreater(len(posted), 1, "fixture must post more than one ledger entry to be meaningful")
+
+		ledger = QueryPaymentLedger()
+		rows = ledger.get_voucher_outstandings(
+			vouchers=[frappe._dict(voucher_type="Journal Entry", voucher_no=je.name)]
+		)
+		self.assertTrue(rows)
+
+		for row in rows:
+			self.assertIn((row.cost_center, row.remarks), posted)
+
 	def test_filter_min_max(self):
 		# check filter condition minimum and maximum amount
 		self.create_sales_invoice(qty=1, rate=300)
