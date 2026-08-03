@@ -159,7 +159,14 @@ def validate_returned_items(doc):
 				):
 					frappe.throw(_("Warehouse is mandatory"))
 
-			if doc.doctype in ("Purchase Invoice", "Purchase Receipt", "Subcontracting Receipt"):
+			if doc.doctype in (
+				"Purchase Invoice",
+				"Purchase Receipt",
+				"Subcontracting Receipt",
+				"Sales Invoice",
+				"Delivery Note",
+				"POS Invoice",
+			):
 				if flt(d.qty) < 0 or flt(d.get("received_qty")) < 0:
 					items_returned = True
 			else:
