@@ -133,6 +133,7 @@ class Opportunity(TransactionBase, CRMNote):
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_cust_name()
 		self.map_fields()
+		self.validate_qty()
 		self.set_exchange_rate()
 
 		if not self.title:
@@ -142,6 +143,15 @@ class Opportunity(TransactionBase, CRMNote):
 
 	def on_update(self):
 		self.update_prospect()
+
+	def validate_qty(self):
+		for item in self.items:
+			if item.qty <= 0:
+				frappe.throw(
+					_("Row #{0}: Quantity must be greater than 0 for Item {1}").format(
+						item.idx, item.item_code
+					)
+				)
 
 	def map_fields(self):
 		for field in self.meta.get_valid_columns():
