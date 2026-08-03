@@ -630,7 +630,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		bom_cost_allocation_per=None,
 		has_consumption_basis=False,
 	):
-		rate_derived_from_consumption = False
+		has_derived_rate = False
 
 		if d.allow_zero_valuation_rate and d.basic_rate and self.purpose != "Receive from Customer":
 			d.basic_rate = 0.0
@@ -640,26 +640,25 @@ class StockEntry(StockController, SubcontractingInwardController):
 				d.basic_rate = self.get_basic_rate_for_manufactured_item(
 					d.transfer_qty, outgoing_items_cost, has_consumption_basis
 				)
-				rate_derived_from_consumption = has_consumption_basis
+				has_derived_rate = has_consumption_basis
 			elif self.purpose == "Repack":
 				d.basic_rate = self.get_basic_rate_for_repacked_items(d.transfer_qty, outgoing_items_cost)
 				# Repack rate comes from consumed source-warehouse rows, not consumption entries
-				rate_derived_from_consumption = any(item.s_warehouse for item in self.get("items"))
+				has_derived_rate = any(item.s_warehouse for item in self.get("items"))
 
 			if self.bom_no:
 				d.basic_rate *= bom_cost_allocation_per / 100
 		elif d.secondary_item_type and d.bom_secondary_item:
-			cost_allocation_per = frappe.get_value(
-				"BOM Secondary Item", d.bom_secondary_item, "cost_allocation_per"
+			cost_allocation_per = flt(
+				frappe.get_value("BOM Secondary Item", d.bom_secondary_item, "cost_allocation_per")
 			)
-			# Only recalculate when cost is actually allocated; otherwise preserve the
-			# user-entered rate (or fall through to get_valuation_rate below)
-			if cost_allocation_per and flt(d.transfer_qty):
+			if flt(d.transfer_qty):
 				d.basic_rate = (outgoing_items_cost * (cost_allocation_per / 100)) / d.transfer_qty
+				has_derived_rate = True
 
-		# A rate of zero derived from the consumed items is their actual cost, not a missing
-		# rate. Falling back to the item's valuation here would value free inputs as output.
-		if not d.basic_rate and not d.allow_zero_valuation_rate and not rate_derived_from_consumption:
+		# A rate of zero that was derived rather than left unset is a real cost. Falling back to
+		# the item's valuation here would value free inputs, or an unallocated row, as output.
+		if not d.basic_rate and not d.allow_zero_valuation_rate and not has_derived_rate:
 			d.basic_rate = get_valuation_rate(
 				d.item_code,
 				d.t_warehouse,
