@@ -70,7 +70,7 @@ class StockSettings(Document):
 		use_naming_series: DF.Check
 		use_serial_batch_fields: DF.Check
 		validate_material_transfer_warehouses: DF.Check
-		valuation_method: DF.Literal["FIFO", "Moving Average", "LIFO", "Standard Cost"]
+		valuation_method: DF.Literal["FIFO", "Moving Average", "LIFO"]
 	# end: auto-generated types
 
 	def validate(self):
@@ -104,11 +104,8 @@ class StockSettings(Document):
 				validate_fields_for_doctype=False,
 			)
 
-<<<<<<< HEAD
 		self.validate_warehouses()
-=======
 		self.validate_over_delivery_receipt_allowance()
->>>>>>> 446ec6030a (fix(stock): validate over delivery/receipt allowance in stock settings)
 		self.validate_serial_and_batch_no_settings()
 		self.cant_change_valuation_method()
 		self.validate_clean_description_html()

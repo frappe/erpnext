@@ -605,11 +605,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2026-06-13 12:38:02.202183",
-=======
  "modified": "2026-08-01 23:35:02.896836",
->>>>>>> 446ec6030a (fix(stock): validate over delivery/receipt allowance in stock settings)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",
