@@ -148,7 +148,7 @@
    "label": "Status",
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "\nAccepted\nRejected",
+   "options": "Accepted\nRejected",
    "read_only_depends_on": "eval:!doc.manual_inspection"
   },
   {
