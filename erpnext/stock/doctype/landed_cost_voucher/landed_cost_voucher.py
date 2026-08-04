@@ -91,6 +91,8 @@ class LandedCostVoucher(Document):
 
 		self.set_applicable_charges_on_item()
 		self.set_total_vendor_invoices_cost()
+		# Runs last: needs the items table populated by get_items_from_purchase_receipts
+		self.validate_mandatory_dimensions()
 
 	def set_total_vendor_invoices_cost(self):
 		self.total_vendor_invoices_cost = 0.0
@@ -200,6 +202,104 @@ class LandedCostVoucher(Document):
 					title=_("Incorrect Account"),
 					exc=IncorrectCompanyValidationError,
 				)
+
+	def validate_mandatory_dimensions(self):
+		"""Flag missing mandatory dimensions on the charge row that causes them.
+
+		The landed cost charges are posted as part of the *receipt document's* ledger, so
+		without this the user sees a GL Entry error raised from the middle of
+		`update_landed_cost`, naming an account but not the voucher row responsible.
+		"""
+		from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+			get_accounting_dimensions,
+			get_checks_for_pl_and_bs_accounts,
+		)
+		from erpnext.accounts.doctype.accounting_dimension_filter.accounting_dimension_filter import (
+			get_dimension_filter_map,
+		)
+
+		if not is_perpetual_inventory_enabled(self.company):
+			return
+
+		company_checks = [
+			check
+			for check in get_checks_for_pl_and_bs_accounts()
+			if check.company == self.company and (check.mandatory_for_pl or check.mandatory_for_bs)
+		]
+		dimension_filter_map = get_dimension_filter_map()
+
+		if not company_checks and not dimension_filter_map:
+			return
+
+		labels = {d.fieldname: d.label for d in get_accounting_dimensions(as_list=False)}
+		receipts = {}
+
+		for tax in self.get("taxes"):
+			if not tax.expense_account:
+				continue
+
+			report_type = frappe.get_cached_value("Account", tax.expense_account, "report_type")
+
+			mandatory = {}
+			for check in company_checks:
+				is_mandatory = (
+					check.mandatory_for_pl if report_type == "Profit and Loss" else check.mandatory_for_bs
+				)
+				if is_mandatory:
+					mandatory[check.fieldname] = check.label
+
+			for (fieldname, account), dimension_filter in dimension_filter_map.items():
+				if account == tax.expense_account and dimension_filter.get("is_mandatory"):
+					mandatory.setdefault(fieldname, labels.get(fieldname) or frappe.unscrub(fieldname))
+
+			for fieldname, label in mandatory.items():
+				if tax.get(fieldname):
+					continue
+
+				for item in self.get("items"):
+					if self.get_receipt_dimension(receipts, item, fieldname):
+						continue
+
+					frappe.throw(
+						_(
+							"Row {0}: Accounting Dimension {1} is mandatory for account {2}."
+							" Set it on this Taxes and Charges row, or on Item Row {3} ({4})."
+						).format(
+							tax.idx,
+							frappe.bold(label),
+							frappe.bold(tax.expense_account),
+							item.idx,
+							frappe.bold(item.item_code),
+						),
+						title=_("Missing Accounting Dimension"),
+					)
+
+	def get_receipt_dimension(self, receipts, item, fieldname):
+		"""Resolve a dimension the way the GL composers do, minus the charge row itself.
+
+		Mirrors the composer fallback chain: LCV item row, then the receipt item row, then
+		the receipt document. Keep the two in step - if they disagree, this either blocks a
+		voucher that would have posted fine or lets one through that still fails downstream.
+		"""
+		if item.get(fieldname):
+			return item.get(fieldname)
+
+		key = (item.receipt_document_type, item.receipt_document)
+		if key not in receipts:
+			receipts[key] = frappe.get_doc(*key) if item.receipt_document else None
+
+		receipt = receipts[key]
+		if not receipt:
+			return None
+
+		row_fieldname = "stock_entry_item" if receipt.doctype == "Stock Entry" else "purchase_receipt_item"
+		receipt_row_name = item.get(row_fieldname)
+
+		for row in receipt.get("items") or []:
+			if row.name == receipt_row_name and row.get(fieldname):
+				return row.get(fieldname)
+
+		return receipt.get(fieldname)
 
 	def set_total_taxes_and_charges(self):
 		self.total_taxes_and_charges = sum(flt(d.base_amount) for d in self.get("taxes"))
