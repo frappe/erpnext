@@ -1301,7 +1301,13 @@ class PaymentEntry(AccountsController):
 		self.add_deductions_gl_entries(gl_entries)
 		self.add_tax_gl_entries(gl_entries)
 		add_regional_gl_entries(gl_entries, self)
+		self.set_transaction_currency_and_rate_in_gl_map(gl_entries)
 		return gl_entries
+
+	def set_transaction_currency_and_rate_in_gl_map(self, gl_entries):
+		for gle in gl_entries:
+			gle.setdefault("transaction_currency", self.transaction_currency)
+			gle.setdefault("transaction_exchange_rate", self.transaction_exchange_rate)
 
 	def make_gl_entries(self, cancel=0, adv_adj=0):
 		gl_entries = self.build_gl_map()
@@ -3316,13 +3322,11 @@ def set_paid_amount_and_received_amount(
 			company_currency = frappe.get_cached_value("Company", doc.get("company"), "default_currency")
 			if bank and company_currency != bank.account_currency:
 				# doc currency can be different from bank currency
-				posting_date = doc.get("posting_date") or doc.get("transaction_date")
-				conversion_rate = get_exchange_rate(
-					bank.account_currency, party_account_currency, posting_date
-				)
+				conversion_rate = get_exchange_rate(bank.account_currency, party_account_currency)
 				received_amount = paid_amount / conversion_rate
 			else:
-				received_amount = paid_amount * doc.get("conversion_rate", 1)
+				conversion_rate = get_exchange_rate(doc.get("currency", company_currency), company_currency)
+				received_amount = paid_amount * conversion_rate
 
 		# if payment type is pay, then paid amount and received amount are swapped
 		if payment_type == "Pay":

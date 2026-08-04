@@ -36,18 +36,17 @@ class ShippingRule(Document):
 		from erpnext.accounts.doctype.shipping_rule_condition.shipping_rule_condition import (
 			ShippingRuleCondition,
 		)
-		from erpnext.accounts.doctype.shipping_rule_country.shipping_rule_country import (
-			ShippingRuleCountry,
-		)
+		from erpnext.accounts.doctype.shipping_rule_country.shipping_rule_country import ShippingRuleCountry
 
 		account: DF.Link
 		calculate_based_on: DF.Literal["Fixed", "Net Total", "Net Weight"]
 		company: DF.Link
 		conditions: DF.Table[ShippingRuleCondition]
-		cost_center: DF.Link
+		cost_center: DF.Link | None
 		countries: DF.Table[ShippingRuleCountry]
 		disabled: DF.Check
 		label: DF.Data
+		project: DF.Link | None
 		shipping_amount: DF.Currency
 		shipping_rule_type: DF.Literal["Selling", "Buying"]
 	# end: auto-generated types
@@ -162,7 +161,14 @@ class ShippingRule(Document):
 			)
 			shipping_charge["add_deduct_tax"] = "Add"
 
-		existing_shipping_charge = doc.get("taxes", filters=shipping_charge)
+		shipping_charge_filters = shipping_charge.copy()
+		if not self.cost_center:
+			shipping_charge_filters["cost_center"] = (
+				"in",
+				(None, "", erpnext.get_default_cost_center(doc.company)),
+			)
+
+		existing_shipping_charge = doc.get("taxes", filters=shipping_charge_filters)
 		if existing_shipping_charge:
 			# take the last record found
 			existing_shipping_charge[-1].tax_amount = shipping_amount

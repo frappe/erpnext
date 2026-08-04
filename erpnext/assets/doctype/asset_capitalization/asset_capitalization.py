@@ -734,6 +734,7 @@ def get_target_asset_details(asset=None, company=None):
 
 @frappe.whitelist()
 def get_consumed_stock_item_details(args):
+	frappe.has_permission("Stock Ledger Entry", throw=True)
 	if isinstance(args, str):
 		args = json.loads(args)
 
@@ -743,6 +744,7 @@ def get_consumed_stock_item_details(args):
 	item = frappe._dict()
 	if args.item_code:
 		item = frappe.get_cached_doc("Item", args.item_code)
+		item.check_permission()
 
 	out.item_name = item.item_name
 	out.batch_no = None
@@ -752,6 +754,8 @@ def get_consumed_stock_item_details(args):
 	out.stock_uom = item.stock_uom
 
 	out.warehouse = get_item_warehouse(item, args, overwrite_warehouse=True) if item else None
+	if out.warehouse:
+		frappe.has_permission("Warehouse", doc=out.warehouse, throw=True)
 
 	# Cost Center
 	item_defaults = get_item_defaults(item.name, args.company)
@@ -792,6 +796,9 @@ def get_warehouse_details(args):
 
 	out = {}
 	if args.warehouse and args.item_code:
+		frappe.has_permission("Item", doc=args.item_code, throw=True)
+		frappe.has_permission("Warehouse", doc=args.warehouse, throw=True)
+		frappe.has_permission("Stock Ledger Entry", throw=True)
 		out = {
 			"actual_qty": get_previous_sle(args).get("qty_after_transaction") or 0,
 			"valuation_rate": get_incoming_rate(args, raise_error_if_no_rate=False),

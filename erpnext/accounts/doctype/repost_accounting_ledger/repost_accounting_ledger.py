@@ -473,19 +473,24 @@ def get_child_docs(doc: list) -> list:
 
 
 def validate_docs_for_deferred_accounting(sales_docs, purchase_docs):
-	docs_with_deferred_revenue = frappe.db.get_all(
-		"Sales Invoice Item",
-		filters={"parent": ["in", sales_docs], "docstatus": 1, "enable_deferred_revenue": True},
-		fields=["parent"],
-		as_list=1,
-	)
+	docs_with_deferred_revenue = ()
+	docs_with_deferred_expense = ()
 
-	docs_with_deferred_expense = frappe.db.get_all(
-		"Purchase Invoice Item",
-		filters={"parent": ["in", purchase_docs], "docstatus": 1, "enable_deferred_expense": 1},
-		fields=["parent"],
-		as_list=1,
-	)
+	if sales_docs:
+		docs_with_deferred_revenue = frappe.db.get_all(
+			"Sales Invoice Item",
+			filters={"parent": ["in", sales_docs], "docstatus": 1, "enable_deferred_revenue": True},
+			fields=["parent"],
+			as_list=1,
+		)
+
+	if purchase_docs:
+		docs_with_deferred_expense = frappe.db.get_all(
+			"Purchase Invoice Item",
+			filters={"parent": ["in", purchase_docs], "docstatus": 1, "enable_deferred_expense": 1},
+			fields=["parent"],
+			as_list=1,
+		)
 
 	if docs_with_deferred_revenue or docs_with_deferred_expense:
 		frappe.throw(

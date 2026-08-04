@@ -103,6 +103,44 @@ class TestWarehouse(FrappeTestCase):
 		children = get_children("Warehouse", parent=company, company=company, is_root=True)
 		self.assertTrue(any(wh["value"] == "_Test Warehouse - _TC" for wh in children))
 
+	def test_inventory_account_fallback_with_multiple_stock_accounts(self):
+		from erpnext.stock import get_warehouse_account
+
+		company = create_inventory_fallback_company()
+		frappe.db.set_value("Company", company, "default_inventory_account", None)
+		if frappe.db.exists("Account", "Extra Inventory Account - _TCIF"):
+			frappe.delete_doc("Account", "Extra Inventory Account - _TCIF")
+
+		warehouse = frappe.get_doc("Warehouse", {"company": company, "is_group": 0})
+		single_account = frappe.db.get_value(
+			"Account", {"account_type": "Stock", "is_group": 0, "company": company}, "name"
+		)
+		self.assertEqual(get_warehouse_account(warehouse), single_account)
+
+		create_account(
+			account_name="Extra Inventory Account",
+			parent_account=frappe.db.get_value("Account", single_account, "parent_account"),
+			account_type="Stock",
+			company=company,
+		)
+		self.assertRaises(frappe.ValidationError, get_warehouse_account, warehouse)
+
+
+def create_inventory_fallback_company():
+	company = "_Test Company Inventory Fallback"
+	if not frappe.db.exists("Company", company):
+		frappe.get_doc(
+			{
+				"doctype": "Company",
+				"company_name": company,
+				"abbr": "_TCIF",
+				"default_currency": "INR",
+				"enable_perpetual_inventory": 0,
+				"country": "India",
+			}
+		).insert(ignore_permissions=True)
+	return company
+
 
 def create_warehouse(warehouse_name, properties=None, company=None):
 	if not company:
