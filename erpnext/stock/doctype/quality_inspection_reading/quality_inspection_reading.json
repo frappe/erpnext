@@ -35,7 +35,7 @@
  ],
  "fields": [
   {
-   "columns": 3,
+   "columns": 2,
    "fieldname": "specification",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -61,7 +61,9 @@
    "fieldtype": "Data",
    "label": "Reading 1",
    "oldfieldname": "reading_1",
-   "oldfieldtype": "Data"
+   "oldfieldtype": "Data",
+   "columns": 2,
+   "in_list_view": 1
   },
   {
    "columns": 1,
