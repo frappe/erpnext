@@ -11,6 +11,7 @@
   "company",
   "report_date",
   "status",
+  "manual_inspection",
   "child_row_reference",
   "column_break_4",
   "inspection_type",
@@ -29,7 +30,6 @@
   "quality_inspection_template",
   "inspection_basis",
   "column_break_specification",
-  "manual_inspection",
   "decided_quantity",
   "unit_quantity",
   "readings_section",
@@ -229,7 +229,8 @@
    "fieldname": "specification_details",
    "fieldtype": "Section Break",
    "oldfieldtype": "Section Break",
-   "options": "Simple"
+   "options": "Simple",
+   "depends_on": "eval:!doc.manual_inspection"
   },
   {
    "depends_on": "eval:!doc.manual_inspection",
