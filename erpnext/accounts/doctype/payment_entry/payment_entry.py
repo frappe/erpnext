@@ -1301,7 +1301,13 @@ class PaymentEntry(AccountsController):
 		self.add_deductions_gl_entries(gl_entries)
 		self.add_tax_gl_entries(gl_entries)
 		add_regional_gl_entries(gl_entries, self)
+		self.set_transaction_currency_and_rate_in_gl_map(gl_entries)
 		return gl_entries
+
+	def set_transaction_currency_and_rate_in_gl_map(self, gl_entries):
+		for gle in gl_entries:
+			gle.setdefault("transaction_currency", self.transaction_currency)
+			gle.setdefault("transaction_exchange_rate", self.transaction_exchange_rate)
 
 	def make_gl_entries(self, cancel=0, adv_adj=0):
 		gl_entries = self.build_gl_map()
