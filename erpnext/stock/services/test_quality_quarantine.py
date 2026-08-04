@@ -6,6 +6,7 @@ from frappe.utils import nowdate
 
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.stock.services.quality_trigger_resolution import get_row_serial_nos
 from erpnext.stock.services.test_quality_warehouse import ensure_quality_warehouse_type, make_warehouse
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -2388,6 +2389,78 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		).insert(ignore_permissions=True, ignore_if_duplicate=True)
 		inspection.insert(ignore_permissions=True)
 		self.assertEqual(inspection.readings, [])
+
+	def test_a_lot_sees_only_its_own_rows_serials(self):
+		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
+
+		qc = make_qc_warehouse("_Test QC Row Scope WH")
+		item = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "QCRS.#####"}
+		)
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Stock Entry",
+				warehouse_role="Inbound",
+				quality_control_mode="Quarantine",
+				inspection_basis="Each Quantity",
+				applicable_warehouse=qc,
+			),
+		)
+		item.save()
+
+		template = frappe.get_doc(
+			{
+				"doctype": "Quality Inspection Template",
+				"quality_inspection_template_name": "_Test Row Scope Template",
+				"item_quality_inspection_parameter": [
+					{
+						"specification": ensure_parameter("_Test Row Scope Parameter"),
+						"numeric": 0,
+						"value": "Yes",
+					}
+				],
+			}
+		).insert(ignore_permissions=True, ignore_if_duplicate=True)
+
+		receipt = frappe.new_doc("Stock Entry")
+		receipt.purpose = "Material Receipt"
+		receipt.stock_entry_type = "Material Receipt"
+		receipt.company = "_Test Company"
+		for qty in (2, 3):
+			receipt.append(
+				"items", {"item_code": item.name, "qty": qty, "t_warehouse": qc, "basic_rate": 100}
+			)
+		receipt.insert()
+		receipt.submit()
+		receipt.reload()
+
+		lots = quality_control_lots_for(receipt.name)
+		self.assertEqual(len(lots), 2)
+
+		by_row = {
+			frappe.db.get_value("Quality Control Lot", lot.name, "source_document_row"): lot.name
+			for lot in lots
+		}
+		for row in receipt.items:
+			expected = set(get_row_serial_nos(row))
+			inspection = frappe.get_doc(
+				{
+					"doctype": "Quality Inspection",
+					"inspection_type": "Incoming",
+					"reference_type": "Quality Control Lot",
+					"reference_name": by_row[row.name],
+					"item_code": item.name,
+					"quality_inspection_template": template.name,
+					"report_date": nowdate(),
+					"inspected_by": frappe.session.user,
+				}
+			).insert(ignore_permissions=True)
+
+			inspection.populate_units()
+			# both rows put the same item in the same warehouse; each lot may still
+			# only see the units that arrived on its own row
+			self.assertEqual({entry.serial_no for entry in inspection.unit_readings}, expected)
 
 	def test_populate_units_builds_the_unit_readings(self):
 		qc = make_qc_warehouse("_Test QC Born Bundle WH")
