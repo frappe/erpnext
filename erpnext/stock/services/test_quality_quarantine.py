@@ -660,6 +660,32 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		self.assertNotIn(stranger.name, offered)
 		self.assertNotIn(second.name, offered)
 
+	def test_a_manual_verdict_is_accepted_or_rejected(self):
+		qc = make_qc_warehouse("_Test QC Manual Verdict WH")
+		item = make_quarantine_item(qc)
+		se = make_stock_entry(item_code=item, qty=3, to_warehouse=qc, purpose="Material Receipt", rate=100)
+		lot = quality_control_lots_for(se.name)[0].name
+
+		def manual_inspection(status):
+			return frappe.get_doc(
+				{
+					"doctype": "Quality Inspection",
+					"inspection_type": "Incoming",
+					"reference_type": "Quality Control Lot",
+					"reference_name": lot,
+					"item_code": item,
+					"report_date": nowdate(),
+					"inspected_by": frappe.session.user,
+					"manual_inspection": 1,
+					"sample_size": 1,
+					"status": status,
+				}
+			)
+
+		self.assertRaises(frappe.ValidationError, manual_inspection("Partially Accepted").insert)
+
+		manual_inspection("Rejected").insert(ignore_permissions=True)
+
 	def test_quality_warehouse_refuses_unrelated_stock(self):
 		qc = make_qc_warehouse("_Test QC Strict WH")
 		plain_item = make_item(properties={"is_stock_item": 1}).name
