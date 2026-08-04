@@ -547,6 +547,91 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		# nothing left awaiting release: the action refuses rather than making empty entries
 		self.assertRaises(frappe.ValidationError, make_releases_for_lots, json.dumps(lots), REAL_WH)
 
+	def test_readings_copy_from_another_inspection(self):
+		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
+		from erpnext.stock.doctype.quality_inspection.quality_inspection import get_readings_to_copy
+
+		qc = make_qc_warehouse("_Test QC Copy WH")
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "QCCP.#####",
+			}
+		)
+		template = frappe.get_doc(
+			{
+				"doctype": "Quality Inspection Template",
+				"quality_inspection_template_name": "_Test Copy Readings Template",
+				"item_quality_inspection_parameter": [
+					{
+						"specification": ensure_parameter("_Test Copy Parameter"),
+						"numeric": 1,
+						"min_value": 1,
+						"max_value": 10,
+					}
+				],
+			}
+		).insert(ignore_permissions=True, ignore_if_duplicate=True)
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Stock Entry",
+				warehouse_role="Inbound",
+				quality_control_mode="Quarantine",
+				applicable_warehouse=qc,
+				inspection_template=template.name,
+			),
+		)
+		item.save()
+
+		receipt = frappe.new_doc("Stock Entry")
+		receipt.purpose = "Material Receipt"
+		receipt.stock_entry_type = "Material Receipt"
+		receipt.company = "_Test Company"
+		for qty in (2, 3):
+			receipt.append(
+				"items", {"item_code": item.name, "qty": qty, "t_warehouse": qc, "basic_rate": 100}
+			)
+		receipt.insert()
+		receipt.submit()
+
+		lots = [lot.name for lot in quality_control_lots_for(receipt.name)]
+
+		def draft_for(lot_name):
+			return frappe.get_doc(
+				{
+					"doctype": "Quality Inspection",
+					"inspection_type": "Incoming",
+					"reference_type": "Quality Control Lot",
+					"reference_name": lot_name,
+					"item_code": item.name,
+					"quality_inspection_template": template.name,
+					"report_date": nowdate(),
+					"inspected_by": frappe.session.user,
+					"sample_size": 1,
+				}
+			).insert(ignore_permissions=True)
+
+		first = draft_for(lots[0])
+		first.readings[0].reading_1 = "5"
+		first.save(ignore_permissions=True)
+
+		copied = get_readings_to_copy(first.name)
+		self.assertEqual(copied[0]["specification"], "_Test Copy Parameter")
+		self.assertEqual(copied[0]["reading_1"], "5")
+
+		second = draft_for(lots[1])
+		for row in second.readings:
+			for source in copied:
+				if source["specification"] == row.specification:
+					row.reading_1 = source["reading_1"]
+		second.save(ignore_permissions=True)
+
+		self.assertEqual(second.readings[0].reading_1, "5")
+		self.assertEqual(second.readings[0].status, "Accepted")
+
 	def test_quality_warehouse_refuses_unrelated_stock(self):
 		qc = make_qc_warehouse("_Test QC Strict WH")
 		plain_item = make_item(properties={"is_stock_item": 1}).name
