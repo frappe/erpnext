@@ -1893,7 +1893,7 @@ class AccountsController(TransactionBase):
 
 	def is_payable_account(self, reference_doctype, account):
 		if reference_doctype == "Purchase Invoice" or (
-			reference_doctype == "Journal Entry"
+			reference_doctype in ("Journal Entry", "Payment Entry")
 			and frappe.get_cached_value("Account", account, "account_type") == "Payable"
 		):
 			return True
