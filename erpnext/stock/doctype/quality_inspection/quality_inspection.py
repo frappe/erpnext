@@ -1180,6 +1180,29 @@ def parse_reading(value: str, decimal_str: str, comma_str: str) -> float | None:
 	return number if isfinite(number) else None
 
 
+@frappe.whitelist()
+def get_readings_to_copy(source: str) -> list[dict]:
+	"""The recorded readings of another inspection, to copy onto one being filled in.
+
+	A document quarantining several lots is inspected once per lot, and where the
+	same measurements answer for all of them the inspector would otherwise type
+	them again per document. Only the recorded values travel — status and the
+	manual override stay with the inspection that made them, so the copy is
+	judged on its own readings when it saves.
+	"""
+	inspection = frappe.get_doc("Quality Inspection", source)
+	inspection.check_permission("read")
+
+	return [
+		{
+			"specification": reading.specification,
+			"reading_value": reading.reading_value,
+			**{f"reading_{index}": reading.get(f"reading_{index}") for index in range(1, 11)},
+		}
+		for reading in inspection.readings
+	]
+
+
 def parse_float(num: str) -> float:
 	"""Since reading_# fields are `Data` field they might contain number which
 	is representation in user's prefered number format instead of machine

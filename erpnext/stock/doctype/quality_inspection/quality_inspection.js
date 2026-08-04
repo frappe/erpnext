@@ -71,6 +71,73 @@ frappe.ui.form.on("Quality Inspection", {
 		frm.ignore_doctypes_on_cancel_all = [frm.doc.reference_type, "Serial and Batch Bundle"];
 		frm.trigger("toggle_batch_and_serial_fields");
 		frm.trigger("toggle_unit_quantity");
+		frm.trigger("add_copy_readings_button");
+	},
+
+	add_copy_readings_button(frm) {
+		if (frm.is_new() || frm.doc.docstatus !== 0 || frm.doc.inspection_basis === "Each Quantity") {
+			return;
+		}
+		if (!(frm.doc.readings || []).length) {
+			return;
+		}
+
+		frm.add_custom_button(__("Copy Readings"), () => frm.trigger("pick_readings_source"));
+	},
+
+	pick_readings_source(frm) {
+		frappe.prompt(
+			{
+				fieldtype: "Link",
+				fieldname: "source",
+				label: __("Copy From"),
+				options: "Quality Inspection",
+				reqd: 1,
+				get_query: () => ({
+					filters: {
+						name: ["!=", frm.doc.name],
+						item_code: frm.doc.item_code,
+						inspection_basis: ["!=", "Each Quantity"],
+						docstatus: ["<", 2],
+					},
+				}),
+			},
+			(values) => {
+				frappe.call({
+					method: "erpnext.stock.doctype.quality_inspection.quality_inspection.get_readings_to_copy",
+					args: { source: values.source },
+					callback: (r) => {
+						const by_specification = {};
+						(r.message || []).forEach((reading) => {
+							by_specification[reading.specification] = reading;
+						});
+
+						let copied = 0;
+						(frm.doc.readings || []).forEach((row) => {
+							const source = by_specification[row.specification];
+							if (!source) return;
+
+							row.reading_value = source.reading_value;
+							for (let index = 1; index <= 10; index++) {
+								row[`reading_${index}`] = source[`reading_${index}`];
+							}
+							copied++;
+						});
+
+						frm.refresh_field("readings");
+						frm.dirty();
+						frappe.show_alert({
+							message: copied
+								? __("Copied readings for {0} parameter(s)", [copied])
+								: __("No matching parameters to copy"),
+							indicator: copied ? "green" : "orange",
+						});
+					},
+				});
+			},
+			__("Copy Readings"),
+			__("Copy")
+		);
 	},
 
 	inspection_basis(frm) {
