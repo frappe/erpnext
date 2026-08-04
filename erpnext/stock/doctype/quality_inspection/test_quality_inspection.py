@@ -68,6 +68,29 @@ class TestNonNumericAcceptance(ERPNextTestSuite):
 		self.assertEqual(reading.status, "Accepted")
 
 
+class TestReadingsGrid(ERPNextTestSuite):
+	def test_a_reading_is_always_enterable_from_the_grid(self):
+		"""Whichever way `numeric` is set, the grid must still offer somewhere to
+		record the reading — the numeric and non-numeric inputs hide on opposite
+		conditions, so dropping either leaves the row with nothing to fill in."""
+		meta = frappe.get_meta("Quality Inspection Reading")
+		inputs = {"reading_1": 1, "reading_value": 0}
+
+		for fieldname, numeric in inputs.items():
+			field = meta.get_field(fieldname)
+			self.assertTrue(
+				field.in_list_view,
+				f"{fieldname} must stay in the readings grid; it is the only input a "
+				f"row with numeric={numeric} has",
+			)
+
+		self.assertLessEqual(
+			sum(field.columns or 0 for field in meta.fields if field.in_list_view),
+			11,
+			"the readings grid must fit the 11 columns a child table can show",
+		)
+
+
 class TestQualityInspection(ERPNextTestSuite):
 	def setUp(self):
 		super().setUp()
