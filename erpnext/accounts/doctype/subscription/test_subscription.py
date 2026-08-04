@@ -307,6 +307,32 @@ class TestSubscription(FrappeTestCase):
 		self.assertEqual(subscription.status, "Cancelled")
 		self.assertEqual(len(subscription.invoices), invoice_count)
 
+	def test_subscription_cancels_at_period_end_without_end_date(self):
+		# https://github.com/frappe/erpnext/issues/57761 -- generate_invoice() rolls
+		# current_invoice_end forward to the next period before this check runs, so
+		# with no end_date to fall back on, cancel_at_period_end must compare
+		# against the period that just ended, not the (already advanced) next one.
+		create_plan(
+			plan_name="_Test plan name 11",
+			cost=80,
+			currency="INR",
+			billing_interval="Day",
+			billing_interval_count=3,
+		)
+		subscription = create_subscription(
+			start_date=nowdate(),
+			generate_invoice_at="End of the current subscription period",
+			plans=[{"plan": "_Test plan name 11", "qty": 1}],
+		)
+		subscription.cancel_at_period_end = 1
+		self.assertEqual(len(subscription.invoices), 0)
+		period_end = subscription.current_invoice_end
+
+		subscription.process(posting_date=period_end)
+
+		self.assertEqual(subscription.status, "Cancelled")
+		self.assertEqual(len(subscription.invoices), 1)
+
 	def test_subscription_restart_and_process(self):
 		settings = frappe.get_single("Subscription Settings")
 		default_grace_period_action = settings.cancel_after_grace
