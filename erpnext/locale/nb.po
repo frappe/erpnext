@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-08-02 10:09+0000\n"
-"PO-Revision-Date: 2026-08-03 09:01\n"
+"PO-Revision-Date: 2026-08-04 09:44\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Norwegian Bokmal\n"
 "MIME-Version: 1.0\n"
@@ -19430,7 +19430,7 @@ msgstr ""
 #: erpnext/manufacturing/doctype/job_card/job_card.js:422
 #: erpnext/manufacturing/doctype/workstation/workstation.js:312
 msgid "Enter Value"
-msgstr ""
+msgstr "Angi verdi"
 
 #: erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.js:96
 msgid "Enter Visit Details"
