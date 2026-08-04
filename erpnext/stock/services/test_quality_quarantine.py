@@ -549,7 +549,10 @@ class TestQualityQuarantine(ERPNextTestSuite):
 
 	def test_readings_copy_from_another_inspection(self):
 		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
-		from erpnext.stock.doctype.quality_inspection.quality_inspection import get_readings_to_copy
+		from erpnext.stock.doctype.quality_inspection.quality_inspection import (
+			get_readings_to_copy,
+			readings_source_query,
+		)
 
 		qc = make_qc_warehouse("_Test QC Copy WH")
 		item = make_item(
@@ -635,6 +638,27 @@ class TestQualityQuarantine(ERPNextTestSuite):
 
 		self.assertEqual(second.readings[0].reading_1, "5")
 		self.assertEqual(second.readings[0].status, "Accepted")
+
+		other_receipt = frappe.new_doc("Stock Entry")
+		other_receipt.purpose = "Material Receipt"
+		other_receipt.stock_entry_type = "Material Receipt"
+		other_receipt.company = "_Test Company"
+		other_receipt.append(
+			"items", {"item_code": item.name, "qty": 1, "t_warehouse": qc, "basic_rate": 100}
+		)
+		other_receipt.insert()
+		other_receipt.submit()
+		stranger = draft_for(quality_control_lots_for(other_receipt.name)[0].name)
+
+		offered = {
+			row[0]
+			for row in readings_source_query(
+				"Quality Inspection", "", "name", 0, 20, {"inspection": second.name}
+			)
+		}
+		self.assertIn(first.name, offered)
+		self.assertNotIn(stranger.name, offered)
+		self.assertNotIn(second.name, offered)
 
 	def test_quality_warehouse_refuses_unrelated_stock(self):
 		qc = make_qc_warehouse("_Test QC Strict WH")
