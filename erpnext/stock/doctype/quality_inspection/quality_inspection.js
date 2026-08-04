@@ -230,15 +230,7 @@ frappe.ui.form.on("Quality Inspection", {
 			const is_lot = frm.doc.reference_type === "Quality Control Lot";
 			const is_custody = frm.doc.reference_type === "Goods Inward Note";
 
-			// on a lot, Each Quantity identity lives per unit in the readings
-			// below — but a both-tracked item keeps the batch on show: it
-			// narrows the units' serial picker
-			frm.toggle_display(
-				"batch_no",
-				cint(r.message?.has_batch_no) &&
-					!is_custody &&
-					(!is_lot || !bundle_decided || frm.__item_is_serialized)
-			);
+			frm.toggle_display("batch_no", cint(r.message?.has_batch_no) && !is_custody);
 			frm.set_df_property("batch_no", "read_only", is_lot ? 1 : 0);
 			frm.set_df_property("batch_no", "reqd", 0);
 
