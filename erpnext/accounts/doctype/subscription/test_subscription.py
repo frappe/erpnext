@@ -609,6 +609,32 @@ class TestSubscription(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, subscription.process, posting_date=add_days(start_date, 7))
 
+	def test_subscription_cancels_at_period_end_without_end_date(self):
+		# https://github.com/frappe/erpnext/issues/57761 -- generate_invoice() rolls
+		# current_invoice_end forward to the next period before this check runs, so
+		# with no end_date to fall back on, cancel_at_period_end must compare
+		# against the period that just ended, not the (already advanced) next one.
+		create_plan(
+			plan_name="_Test plan name 11",
+			cost=80,
+			currency="INR",
+			billing_interval="Day",
+			billing_interval_count=3,
+		)
+		subscription = create_subscription(
+			start_date=nowdate(),
+			cancel_at_period_end=1,
+			generate_invoice_at="End of the current subscription period",
+			plans=[{"plan": "_Test plan name 11", "qty": 1}],
+		)
+		self.assertEqual(len(subscription.invoices), 0)
+		period_end = subscription.current_invoice_end
+
+		subscription.process(posting_date=period_end)
+
+		self.assertEqual(subscription.status, "Cancelled")
+		self.assertEqual(len(subscription.invoices), 1)
+
 	def test_invoice_generated_when_scheduler_runs_one_day_late(self):
 		# The trigger date (period end) is long past, yet catch-up still bills the period
 		# on creation (Bug 1: the check is `>= trigger`, not `== trigger`).
