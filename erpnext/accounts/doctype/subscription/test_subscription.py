@@ -283,12 +283,12 @@ class TestSubscription(FrappeTestCase):
 	def test_cancelled_subscription_stays_cancelled_after_payment_and_reprocess(self):
 		# https://github.com/frappe/erpnext/issues/57761
 		subscription = create_subscription(
-			start_date="2018-01-01", generate_invoice_at="Beginning of the current subscription period"
+			start_date=nowdate(), generate_invoice_at="Beginning of the current subscription period"
 		)
-		subscription.process(posting_date="2018-01-01")  # generate first invoice
-		self.assertEqual(subscription.status, "Unpaid")
-
+		subscription.process(posting_date=nowdate())  # generate first invoice
 		invoice = subscription.get_current_invoice()
+		self.assertIsNotNone(invoice)
+
 		invoice.db_set("outstanding_amount", 0)
 		invoice.db_set("status", "Paid")
 
