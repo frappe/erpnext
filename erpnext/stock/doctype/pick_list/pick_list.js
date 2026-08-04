@@ -288,7 +288,8 @@ frappe.ui.form.on("Pick List", {
 			items_table_name: "locations",
 			qty_field: "picked_qty",
 			max_qty_field: "qty",
-			dont_allow_new_row: true,
+			demand_ref_fields: ["sales_order_item", "material_request_item", "product_bundle_item"],
+			dont_allow_new_row: !frm.doc.pick_manually,
 			prompt_qty: frm.doc.prompt_qty,
 			serial_no_field: "not_supported", // doesn't make sense for picklist without a separate field.
 		};

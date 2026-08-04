@@ -67,7 +67,11 @@ frappe.ui.form.on("Job Card", {
 		if (remaining_qty < frm.doc.pending_qty) {
 			frm.doc.pending_qty = 0.0;
 			refresh_field("pending_qty");
-			frappe.throw(__("Pending Quantity cannot be greater than {0}", [remaining_qty]));
+			frappe.throw(
+				__("Pending Quantity cannot be greater than {0}", [
+					get_qty_with_uom(remaining_qty, frm.doc.stock_uom),
+				])
+			);
 		}
 
 		const process_loss_qty = flt(remaining_qty) - flt(frm.doc.pending_qty);
@@ -99,7 +103,8 @@ frappe.ui.form.on("Job Card", {
 			doc.docstatus === 1 &&
 			!doc.is_subcontracted &&
 			(doc.skip_material_transfer || doc.transferred_qty > 0) &&
-			flt(doc.manufactured_qty) + flt(doc.process_loss_qty) < flt(doc.for_quantity);
+			flt(doc.manufactured_qty) + flt(doc.process_loss_qty) <
+				flt(doc.for_quantity) - flt(doc.pending_qty);
 
 		if (!can_make_stock_entry) return;
 
@@ -172,8 +177,6 @@ frappe.ui.form.on("Job Card", {
 			},
 		}));
 
-		frm.trigger("toggle_operation_number");
-
 		const is_timer_running = frm.events.setup_job_action_buttons(frm, has_items);
 
 		if (!is_timer_running) {
@@ -243,13 +246,15 @@ frappe.ui.form.on("Job Card", {
 		const fields = [
 			{
 				fieldtype: "Float",
-				label: __("Qty to Manufacture"),
+				label: __("Qty to Manufacture in this Cycle"),
 				fieldname: "for_quantity",
 				reqd: 1,
 				default: pending_qty,
+				description: __("Completed, Pending and Process Loss quantities must add up to this."),
 				change() {
 					const dialog = frm.job_completion_dialog;
 					dialog.set_value("completed_qty", dialog.get_value("for_quantity"));
+					dialog.set_value("pending_qty", 0);
 					dialog.set_value("process_loss_qty", 0);
 				},
 			},
@@ -261,8 +266,23 @@ frappe.ui.form.on("Job Card", {
 				default: pending_qty,
 				change() {
 					const dialog = frm.job_completion_dialog;
-					const remaining = dialog.get_value("for_quantity") - dialog.get_value("completed_qty");
-					if (remaining > 0 && remaining != dialog.get_value("pending_qty")) {
+					const remaining =
+						dialog.get_value("for_quantity") -
+						dialog.get_value("completed_qty") -
+						dialog.get_value("process_loss_qty");
+
+					if (remaining < 0) {
+						const max_completed_qty =
+							flt(dialog.get_value("for_quantity")) - flt(dialog.get_value("process_loss_qty"));
+						dialog.set_value("completed_qty", max_completed_qty);
+						frappe.throw(
+							__("Completed Quantity cannot be greater than {0}", [
+								get_qty_with_uom(max_completed_qty, frm.doc.stock_uom),
+							])
+						);
+					}
+
+					if (remaining != dialog.get_value("pending_qty")) {
 						dialog.set_value("pending_qty", remaining);
 					}
 				},
@@ -272,13 +292,28 @@ frappe.ui.form.on("Job Card", {
 				label: __("Pending Quantity"),
 				fieldname: "pending_qty",
 				default: 0.0,
+				description: __("Qty left for a later cycle or for another job card."),
 				change() {
 					const dialog = frm.job_completion_dialog;
 					const process_loss_qty =
 						dialog.get_value("for_quantity") -
 						dialog.get_value("completed_qty") -
 						dialog.get_value("pending_qty");
-					if (process_loss_qty >= 0 && process_loss_qty != dialog.get_value("process_loss_qty")) {
+
+					if (process_loss_qty < 0) {
+						dialog.set_value("pending_qty", 0);
+						frappe.throw(
+							__("Pending Quantity cannot be greater than {0}", [
+								get_qty_with_uom(
+									flt(dialog.get_value("for_quantity")) -
+										flt(dialog.get_value("completed_qty")),
+									frm.doc.stock_uom
+								),
+							])
+						);
+					}
+
+					if (process_loss_qty != dialog.get_value("process_loss_qty")) {
 						dialog.set_value("process_loss_qty", process_loss_qty);
 					}
 				},
@@ -287,13 +322,28 @@ frappe.ui.form.on("Job Card", {
 				fieldtype: "Float",
 				label: __("Process Loss Quantity"),
 				fieldname: "process_loss_qty",
+				description: __("Qty scrapped in this cycle, nobody will produce it."),
 				onchange() {
 					const dialog = frm.job_completion_dialog;
 					const remaining =
 						dialog.get_value("for_quantity") -
 						dialog.get_value("completed_qty") -
 						dialog.get_value("process_loss_qty");
-					if (remaining >= 0 && remaining != dialog.get_value("pending_qty")) {
+
+					if (remaining < 0) {
+						dialog.set_value("process_loss_qty", 0);
+						frappe.throw(
+							__("Process Loss Quantity cannot be greater than {0}", [
+								get_qty_with_uom(
+									flt(dialog.get_value("for_quantity")) -
+										flt(dialog.get_value("completed_qty")),
+									frm.doc.stock_uom
+								),
+							])
+						);
+					}
+
+					if (remaining != dialog.get_value("pending_qty")) {
 						dialog.set_value("pending_qty", remaining);
 					}
 				},
@@ -357,9 +407,8 @@ frappe.ui.form.on("Job Card", {
 					},
 				});
 			},
-			__("Enter Value"),
-			__("Update"),
-			__("Set Finished Good Quantity")
+			__("Complete Job"),
+			__("Update")
 		);
 	},
 
@@ -383,46 +432,6 @@ frappe.ui.form.on("Job Card", {
 				frm.reload_doc();
 			},
 		});
-	},
-
-	make_finished_good(frm) {
-		const fields = [
-			{
-				fieldtype: "Float",
-				label: __("Completed Quantity"),
-				fieldname: "qty",
-				reqd: 1,
-				default: frm.doc.for_quantity - frm.doc.manufactured_qty,
-			},
-			{
-				fieldtype: "Datetime",
-				label: __("End Time"),
-				fieldname: "end_time",
-				default: frappe.datetime.now_datetime(),
-			},
-		];
-
-		frappe.prompt(
-			fields,
-			(data) => {
-				if (data.qty <= 0) {
-					frappe.throw(__("Quantity should be greater than 0"));
-				}
-
-				frm.call({
-					method: "make_finished_good",
-					doc: frm.doc,
-					args: { qty: data.qty, end_time: data.end_time },
-					callback(r) {
-						const doc = frappe.model.sync(r.message);
-						frappe.set_route("Form", doc[0].doctype, doc[0].name);
-					},
-				});
-			},
-			__("Enter Value"),
-			__("Update"),
-			__("Set Finished Good Quantity")
-		);
 	},
 
 	setup_quality_inspection(frm) {
@@ -498,45 +507,46 @@ frappe.ui.form.on("Job Card", {
 	},
 
 	operation(frm) {
-		frm.trigger("toggle_operation_number");
-
-		if (frm.doc.operation && frm.doc.work_order) {
-			frappe.call({
-				method: "erpnext.manufacturing.doctype.job_card.job_card.get_operation_details",
-				args: {
-					work_order: frm.doc.work_order,
-					operation: frm.doc.operation,
-				},
-				callback(r) {
-					if (!r.message) return;
-
-					if (r.message.length == 1) {
-						frm.set_value("operation_id", r.message[0].name);
-					} else {
-						const args = r.message.map((row) => ({ label: row.idx, value: row.name }));
-						const description = __("Operation {0} added multiple times in the work order {1}", [
-							frm.doc.operation,
-							frm.doc.work_order,
-						]);
-						frm.set_df_property("operation_row_number", "options", args);
-						frm.set_df_property("operation_row_number", "description", description);
-					}
-
-					frm.trigger("toggle_operation_number");
-				},
-			});
+		if (frm.doc.operation_id) {
+			frm.set_value("operation_id", "");
 		}
-	},
 
-	operation_row_number(frm) {
-		if (frm.doc.operation_row_number) {
-			frm.set_value("operation_id", frm.doc.operation_row_number);
-		}
-	},
+		if (!frm.doc.operation || !frm.doc.work_order) return;
 
-	toggle_operation_number(frm) {
-		frm.toggle_display("operation_row_number", !frm.doc.operation_id && frm.doc.operation);
-		frm.toggle_reqd("operation_row_number", !frm.doc.operation_id && frm.doc.operation);
+		const { operation, work_order } = frm.doc;
+		const is_current = () => frm.doc.operation === operation && frm.doc.work_order === work_order;
+
+		frappe.call({
+			method: "erpnext.manufacturing.doctype.job_card.job_card.get_operation_details",
+			args: { work_order, operation },
+			callback(r) {
+				if (!is_current() || !r.message || !r.message.length) return;
+
+				if (r.message.length == 1) {
+					frm.set_value("operation_id", r.message[0].name);
+				} else {
+					frappe.prompt(
+						{
+							fieldname: "operation_row",
+							fieldtype: "Select",
+							label: __("Operation Row"),
+							options: r.message.map((row) => ({ label: row.idx, value: row.name })),
+							reqd: 1,
+							description: __("Operation {0} is added multiple times in the work order {1}", [
+								operation,
+								work_order,
+							]),
+						},
+						(values) => {
+							if (is_current()) {
+								frm.set_value("operation_id", values.operation_row);
+							}
+						},
+						__("Select Operation Row")
+					);
+				}
+			},
+		});
 	},
 
 	make_time_log(frm, args) {
@@ -885,4 +895,8 @@ function get_last_completed_row(time_logs) {
 
 function get_last_row(time_logs) {
 	return time_logs[time_logs.length - 1] || {};
+}
+
+function get_qty_with_uom(qty, stock_uom) {
+	return stock_uom ? `${flt(qty)} ${stock_uom}` : flt(qty);
 }

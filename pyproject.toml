@@ -17,7 +17,7 @@ dependencies = [
     # integration dependencies
     "googlemaps~=4.10.0",
     "plaid-python~=7.2.1",
-    "python-youtube~=0.9.8",
+    "python-youtube~=0.9.9",
 
     # Not used directly - required by PyQRCode for PNG generation
     "pypng~=0.20220715.0",
@@ -39,7 +39,6 @@ build-backend = "flit_core.buildapi"
 max_module_depth = 1
 skip_namespaces = [
     "erpnext.deprecation_dumpster",
-    "erpnext.assets.dashboard_fixtures",  # https://github.com/frappe/erpnext/issues/44418
 ]
 
 [tool.bench.frappe-dependencies]

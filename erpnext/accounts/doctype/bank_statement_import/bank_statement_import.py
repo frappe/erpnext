@@ -142,6 +142,30 @@ def preprocess_mt940_content(content: str) -> str:
 	return processed_content
 
 
+MT940_CUSTOMER_REFERENCE_MAX_LEN = 16
+
+
+def get_transaction_reference(txn_data: dict) -> str:
+	"""Extract the per-transaction reference from an MT940 :61: tag.
+
+	The mt940 library exposes ``transaction_reference`` from the :20: tag, which is the
+	statement-level reference and identical for every transaction in a statement. The
+	real per-transaction reference is ``customer_reference`` (with any overflow captured
+	into ``extra_details`` when a bank emits a single-line :61: longer than 16 chars).
+	"""
+	customer_reference = (txn_data.get("customer_reference") or "").strip()
+
+	if len(customer_reference) == MT940_CUSTOMER_REFERENCE_MAX_LEN:
+		customer_reference += (txn_data.get("extra_details") or "").strip()
+
+	if customer_reference and customer_reference.upper() != "NONREF":
+		return customer_reference
+
+	return (txn_data.get("bank_reference") or "").strip() or (
+		txn_data.get("transaction_reference") or ""
+	).strip()
+
+
 @frappe.whitelist()
 def convert_mt940_to_csv(data_import: str, mt940_file_path: str):
 	doc = frappe.get_doc("Bank Statement Import", data_import)
@@ -189,8 +213,8 @@ def convert_mt940_to_csv(data_import: str, mt940_file_path: str):
 
 		deposit = amount_value if amount_value > 0 else ""
 		withdrawal = abs(amount_value) if amount_value < 0 else ""
-		description = txn.data.get("extra_details") or ""
-		reference = txn.data.get("transaction_reference") or ""
+		description = txn.data.get("transaction_details") or txn.data.get("extra_details") or ""
+		reference = get_transaction_reference(txn.data)
 		currency = txn.data.get("currency", "")
 
 		writer.writerow([date_str, deposit, withdrawal, description, reference, doc.bank_account, currency])
@@ -307,7 +331,7 @@ def add_bank_account(data, bank_account):
 				bank_account_loc = loc
 
 	for row in data[1:]:
-		if bank_account_loc:
+		if bank_account_loc is not None:
 			row[bank_account_loc] = bank_account
 		else:
 			row.append(bank_account)

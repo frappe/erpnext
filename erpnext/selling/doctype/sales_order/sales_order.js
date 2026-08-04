@@ -1368,7 +1368,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 								frappe.throw(__("Please select at least one item to continue"));
 							}
 							me.frm.call({
-								method: "make_work_orders",
+								method: "erpnext.selling.doctype.sales_order.mapper.make_work_orders",
 								args: {
 									items: data,
 									company: me.frm.doc.company,

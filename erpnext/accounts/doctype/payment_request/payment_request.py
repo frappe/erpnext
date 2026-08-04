@@ -459,6 +459,11 @@ class PaymentRequest(Document):
 			else:
 				return True
 		except Exception:
+			frappe.log_error(
+				title=f"Payment Gateway validation failed: {self.payment_gateway}",
+				reference_doctype=self.doctype,
+				reference_name=self.name,
+			)
 			return False
 
 	def set_payment_request_url(self):
@@ -542,6 +547,7 @@ class PaymentRequest(Document):
 			bank_amount=bank_amount,
 			created_from_payment_request=True,
 		)
+		payment_entry.set_missing_ref_details(force=True)
 
 		payment_entry.update(
 			{
@@ -583,6 +589,18 @@ class PaymentRequest(Document):
 
 		return payment_entry
 
+	@frappe.whitelist(methods=["POST"])
+	def resend_payment_email(self):
+		if not (
+			self.docstatus == 1
+			and self.payment_request_type == "Inward"
+			and self.payment_channel != "Phone"
+			and self.status not in ["Initiated", "Paid"]
+		):
+			frappe.throw(_("Payment Link couldn't be sent."))
+
+		self.send_email()
+
 	def send_email(self):
 		"""send email with payment link"""
 		email_args = {
@@ -600,11 +618,14 @@ class PaymentRequest(Document):
 				)
 			],
 		}
+		job_id = f"send_payment_email::{self.name}"
 		enqueue(
 			method=frappe.sendmail,
 			queue="short",
 			timeout=300,
 			is_async=True,
+			job_id=job_id,
+			deduplicate=True,
 			enqueue_after_commit=True,
 			**email_args,
 		)
@@ -942,6 +963,7 @@ def set_payment_references(payment_schedules):
 				"description": row.get("description"),
 				"due_date": row.get("due_date"),
 				"amount": row.get("payment_amount"),
+				"currency": row.get("currency"),
 			}
 		)
 
@@ -1109,11 +1131,6 @@ def get_print_format_list(ref_doctype: str):
 
 
 @frappe.whitelist()
-def resend_payment_email(docname: str):
-	return frappe.get_doc("Payment Request", docname).send_email()
-
-
-@frappe.whitelist()
 def make_payment_entry(docname: str):
 	doc = frappe.get_doc("Payment Request", docname)
 	doc.check_permission("read")
@@ -1225,7 +1242,7 @@ def get_subscription_details(reference_doctype: str, reference_name: str):
 
 
 @frappe.whitelist()
-def make_payment_order(source_name: str, target_doc: str | Document | None = None):
+def make_payment_order(source_name: str, target_doc: str | dict | Document | None = None):
 	from frappe.model.mapper import get_mapped_doc
 
 	def set_missing_values(source, target):

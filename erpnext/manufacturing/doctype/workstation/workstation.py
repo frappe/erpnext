@@ -206,6 +206,7 @@ class Workstation(Document):
 			(
 				frappe.qb.update(bom_op)
 				.set(bom_op.hour_rate, self.hour_rate)
+				.set(bom_op.operating_cost, self.hour_rate * bom_op.time_in_mins / 60)
 				.where(bom_op.parent.isin(bom_list) & (bom_op.workstation == self.name))
 				.run()
 			)
@@ -456,7 +457,7 @@ def get_workstations(**kwargs):
 		d.color = color_map.get(d.status, "red")
 		d.workstation_link = get_url_to_form("Workstation", d.name)
 		if d.status != "Production":
-			d.status_image = d.off_status_image
+			d.status_image = frappe.utils.escape_html(d.off_status_image)
 			d.workstation_off = "workstation-off"
 
 	return data

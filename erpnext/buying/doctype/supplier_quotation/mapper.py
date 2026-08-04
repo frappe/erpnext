@@ -11,7 +11,7 @@ from frappe.utils import flt
 
 @frappe.whitelist()
 def make_purchase_order(
-	source_name: str, target_doc: str | Document | None = None, args: str | dict | None = None
+	source_name: str, target_doc: str | dict | Document | None = None, args: str | dict | None = None
 ):
 	if args is None:
 		args = {}
@@ -65,7 +65,7 @@ def make_purchase_order(
 
 
 @frappe.whitelist()
-def make_purchase_invoice(source_name: str, target_doc: str | Document | None = None):
+def make_purchase_invoice(source_name: str, target_doc: str | dict | Document | None = None):
 	doc = get_mapped_doc(
 		"Supplier Quotation",
 		source_name,
@@ -86,7 +86,7 @@ def make_purchase_invoice(source_name: str, target_doc: str | Document | None = 
 
 
 @frappe.whitelist()
-def make_quotation(source_name: str, target_doc: str | Document | None = None):
+def make_quotation(source_name: str, target_doc: str | dict | Document | None = None):
 	doclist = get_mapped_doc(
 		"Supplier Quotation",
 		source_name,

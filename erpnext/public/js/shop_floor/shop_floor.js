@@ -786,16 +786,20 @@ class ShopFloor {
 			pending = flt(jc.pending_qty);
 		}
 
+		const qty_with_uom = (qty) => `${flt(qty)} ${jc.stock_uom || ""}`.trim();
+
 		const fields = [
 			{
 				fieldtype: "Float",
-				label: __("Qty to Manufacture"),
+				label: __("Qty to Manufacture in this Cycle"),
 				fieldname: "for_quantity",
 				reqd: 1,
 				default: pending,
+				description: __("Completed, Pending and Process Loss quantities must add up to this."),
 				change() {
 					const d = me.session_dialog;
 					d.set_value("completed_qty", d.get_value("for_quantity"));
+					d.set_value("pending_qty", 0);
 					d.set_value("process_loss_qty", 0);
 				},
 			},
@@ -807,8 +811,23 @@ class ShopFloor {
 				default: pending,
 				change() {
 					const d = me.session_dialog;
-					const remaining = flt(d.get_value("for_quantity")) - flt(d.get_value("completed_qty"));
-					if (remaining > 0 && remaining !== flt(d.get_value("pending_qty"))) {
+					const remaining =
+						flt(d.get_value("for_quantity")) -
+						flt(d.get_value("completed_qty")) -
+						flt(d.get_value("process_loss_qty"));
+
+					if (remaining < 0) {
+						const max_completed_qty =
+							flt(d.get_value("for_quantity")) - flt(d.get_value("process_loss_qty"));
+						d.set_value("completed_qty", max_completed_qty);
+						frappe.throw(
+							__("Completed Quantity cannot be greater than {0}", [
+								qty_with_uom(max_completed_qty),
+							])
+						);
+					}
+
+					if (remaining !== flt(d.get_value("pending_qty"))) {
 						d.set_value("pending_qty", remaining);
 					}
 				},
@@ -818,13 +837,26 @@ class ShopFloor {
 				label: __("Pending Quantity"),
 				fieldname: "pending_qty",
 				default: 0.0,
+				description: __("Qty left for a later cycle or for another job card."),
 				change() {
 					const d = me.session_dialog;
 					const pl =
 						flt(d.get_value("for_quantity")) -
 						flt(d.get_value("completed_qty")) -
 						flt(d.get_value("pending_qty"));
-					if (pl >= 0 && pl !== flt(d.get_value("process_loss_qty"))) {
+
+					if (pl < 0) {
+						d.set_value("pending_qty", 0);
+						frappe.throw(
+							__("Pending Quantity cannot be greater than {0}", [
+								qty_with_uom(
+									flt(d.get_value("for_quantity")) - flt(d.get_value("completed_qty"))
+								),
+							])
+						);
+					}
+
+					if (pl !== flt(d.get_value("process_loss_qty"))) {
 						d.set_value("process_loss_qty", pl);
 					}
 				},
@@ -834,13 +866,26 @@ class ShopFloor {
 				label: __("Process Loss Quantity"),
 				fieldname: "process_loss_qty",
 				default: 0.0,
+				description: __("Qty scrapped in this cycle, nobody will produce it."),
 				change() {
 					const d = me.session_dialog;
 					const remaining =
 						flt(d.get_value("for_quantity")) -
 						flt(d.get_value("completed_qty")) -
 						flt(d.get_value("process_loss_qty"));
-					if (remaining >= 0 && remaining !== flt(d.get_value("pending_qty"))) {
+
+					if (remaining < 0) {
+						d.set_value("process_loss_qty", 0);
+						frappe.throw(
+							__("Process Loss Quantity cannot be greater than {0}", [
+								qty_with_uom(
+									flt(d.get_value("for_quantity")) - flt(d.get_value("completed_qty"))
+								),
+							])
+						);
+					}
+
+					if (remaining !== flt(d.get_value("pending_qty"))) {
 						d.set_value("pending_qty", remaining);
 					}
 				},

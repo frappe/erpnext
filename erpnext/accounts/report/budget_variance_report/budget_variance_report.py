@@ -422,6 +422,11 @@ def build_comparison_chart_data(filters, columns, data):
 		if not fieldname:
 			continue
 
+		# skip the dimension column ("budget_against"), it only matches the
+		# "budget_" prefix by coincidence and would shift the actual values by one
+		if fieldname == "budget_against":
+			continue
+
 		if fieldname.startswith("budget_"):
 			budget_fields.append(fieldname)
 		elif fieldname.startswith("actual_"):
@@ -433,7 +438,7 @@ def build_comparison_chart_data(filters, columns, data):
 	labels = [
 		col["label"].replace("Budget", "").strip()
 		for col in columns
-		if col.get("fieldname", "").startswith("budget_")
+		if col.get("fieldname", "").startswith("budget_") and col.get("fieldname") != "budget_against"
 	]
 
 	budget_values = [0] * len(budget_fields)

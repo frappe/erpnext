@@ -54,7 +54,6 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Closing Balance",
-   "non_negative": 1,
    "options": "currency"
   },
   {
@@ -191,7 +190,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-05-08 17:55:25.615942",
+ "modified": "2026-07-09 17:55:25.615942",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Statement Import Log",

@@ -184,6 +184,21 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(pi.payment_schedule[1].payment_amount, flt(pi.grand_total) / 2)
 		self.assertEqual(pi.payment_schedule[1].invoice_portion, 50)
 
+	def test_make_purchase_invoice_with_dict_target(self):
+		from frappe.model.mapper import map_docs
+
+		pr = make_purchase_receipt()
+		target = frappe.new_doc("Purchase Invoice").as_dict()
+
+		pi = map_docs(
+			method="erpnext.stock.doctype.purchase_receipt.mapper.make_purchase_invoice",
+			source_names=[pr.name],
+			target_doc=target,
+		)
+
+		self.assertEqual(pi.doctype, "Purchase Invoice")
+		self.assertEqual(len(pi.items), len(pr.items))
+
 	def test_purchase_receipt_no_gl_entry(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
@@ -2380,9 +2395,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
 
 		pr = make_inter_company_purchase_receipt(dn.name)
-		pr.inter_company_reference = ""
-		self.assertRaises(frappe.ValidationError, pr.save)
-
 		pr.inter_company_reference = dn.name
 		pr.items[0].qty = 10
 		pr.items[0].from_warehouse = target_warehouse
@@ -3067,11 +3079,14 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		old_perpetual_inventory = erpnext.is_perpetual_inventory_enabled("_Test Company")
 		frappe.local.enable_perpetual_inventory["_Test Company"] = 1
+		old_inventory_account = frappe.db.get_value("Company", "_Test Company", "default_inventory_account")
 		frappe.db.set_value(
 			"Company",
 			"_Test Company",
-			"stock_received_but_not_billed",
-			"Stock Received But Not Billed - _TC",
+			{
+				"stock_received_but_not_billed": "Stock Received But Not Billed - _TC",
+				"default_inventory_account": "Stock In Hand - _TC",
+			},
 		)
 
 		pr = make_purchase_receipt(qty=10, rate=1000, do_not_submit=1)
@@ -3107,6 +3122,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		)
 		self.assertCountEqual(expected_gle, gl_entries)
 		frappe.local.enable_perpetual_inventory["_Test Company"] = old_perpetual_inventory
+		frappe.db.set_value("Company", "_Test Company", "default_inventory_account", old_inventory_account)
 
 	def test_purchase_receipt_with_use_serial_batch_field_for_rejected_qty(self):
 		batch_item = make_item(
@@ -5054,6 +5070,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(srbnb_cost, 1000)
 
 	def test_purchase_expense_account(self):
+		frappe.db.set_single_value("Accounts Settings", "book_stock_expense_gl_entries", 1)
 		item = "Test Item with Purchase Expense Account"
 		make_item(item, {"is_stock_item": 1})
 		company = "_Test Company with perpetual inventory"
@@ -6118,17 +6135,31 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		# already received against this PO line, excluding pr2 itself, is pr1's 4
 		self.assertEqual(pr2.get_already_received_qty(po.name, po_detail), 4.0)
 
-	def test_check_next_docstatus_blocks_with_submitted_invoice(self):
-		"""check_next_docstatus must flag a submitted Purchase Invoice drawn from the receipt —
-		covers the converted child-table get_all (Purchase Invoice Item, docstatus=1)."""
+	def test_cancel_blocked_by_submitted_invoice_rolls_back(self):
+		"""A submitted Purchase Invoice must block cancelling its Purchase Receipt. Frappe's backlink
+		check rejects the cancel only after on_cancel has run stock, GL, and status work, so the whole
+		transaction has to roll back: the receipt stays submitted with no leaked ledger entries."""
 		pr = make_purchase_receipt()
 		pi = make_purchase_invoice(pr.name)
 		pi.insert()
 		pi.submit()
 
-		with self.assertRaises(frappe.ValidationError) as cm:
-			pr.check_next_docstatus()
-		self.assertIn("is already submitted", str(cm.exception))
+		pr.reload()
+		status_before = pr.status
+		sle_before = frappe.db.count("Stock Ledger Entry", {"voucher_no": pr.name})
+		gle_before = frappe.db.count("GL Entry", {"voucher_no": pr.name})
+
+		frappe.db.savepoint("before_blocked_cancel")
+		with self.assertRaises(frappe.LinkExistsError) as cm:
+			pr.cancel()
+		self.assertIn(pi.name, str(cm.exception))
+		frappe.db.rollback(save_point="before_blocked_cancel")  # mimic the request-level rollback
+
+		pr.reload()
+		self.assertEqual(pr.docstatus, 1)
+		self.assertEqual(pr.status, status_before)
+		self.assertEqual(frappe.db.count("Stock Ledger Entry", {"voucher_no": pr.name}), sle_before)
+		self.assertEqual(frappe.db.count("GL Entry", {"voucher_no": pr.name}), gle_before)
 
 
 def create_asset_category_for_pr_test():

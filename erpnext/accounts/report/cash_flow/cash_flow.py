@@ -88,6 +88,7 @@ def execute(filters=None):
 				"parent_section": None,
 				"indent": 0.0,
 				"section": cash_flow_section["section_header"],
+				"currency": company_currency,
 			}
 		)
 

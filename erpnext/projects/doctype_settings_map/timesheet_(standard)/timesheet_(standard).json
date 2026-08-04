@@ -1,0 +1,24 @@
+{
+ "applies_to_doctype": "Timesheet",
+ "creation": "2026-07-09 13:37:06.053835",
+ "docstatus": 0,
+ "doctype": "DocType Settings Map",
+ "idx": 0,
+ "is_active": 1,
+ "is_standard": 1,
+ "mappings": [
+  {
+   "setting_field": "ignore_user_time_overlap",
+   "settings_doctype": "Projects Settings"
+  },
+  {
+   "setting_field": "ignore_employee_time_overlap",
+   "settings_doctype": "Projects Settings"
+  }
+ ],
+ "modified": "2026-07-10 10:37:54.591039",
+ "modified_by": "Administrator",
+ "module": "Projects",
+ "name": "Timesheet (Standard)",
+ "owner": "Administrator"
+}
