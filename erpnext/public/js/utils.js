@@ -1527,6 +1527,45 @@ erpnext.utils.add_quality_control_lot_buttons = function (frm) {
 		});
 };
 
+erpnext.utils.lot_selection_columns = function () {
+	return [
+		{
+			fieldname: "name",
+			fieldtype: "Data",
+			label: __("Quality Control Lot"),
+			in_list_view: 1,
+			read_only: 1,
+			columns: 3,
+		},
+		{
+			fieldname: "item_code",
+			fieldtype: "Link",
+			options: "Item",
+			label: __("Item"),
+			in_list_view: 1,
+			read_only: 1,
+			columns: 3,
+		},
+		{
+			fieldname: "batch_no",
+			fieldtype: "Link",
+			options: "Batch",
+			label: __("Batch"),
+			in_list_view: 1,
+			read_only: 1,
+			columns: 3,
+		},
+		{
+			fieldname: "qty",
+			fieldtype: "Float",
+			label: __("Quantity"),
+			in_list_view: 1,
+			read_only: 1,
+			columns: 2,
+		},
+	];
+};
+
 erpnext.utils.release_lots = function (lots) {
 	const company = lots[0].company;
 	const dialog = new frappe.ui.Dialog({
@@ -1548,30 +1587,24 @@ erpnext.utils.release_lots = function (lots) {
 				}),
 			},
 			{
-				fieldtype: "MultiCheck",
+				fieldtype: "Table",
 				fieldname: "lots",
-				columns: 1,
-				select_all: true,
-				options: lots.map((lot) => ({
-					label: [
-						lot.item_code,
-						lot.batch_no ? `${__("Batch")} ${lot.batch_no}` : null,
-						__("{0} accepted", [
-							format_number(
-								flt(lot.decided_qty) - flt(lot.rejected_qty) - flt(lot.accepted_qty)
-							),
-						]),
-					]
-						.filter(Boolean)
-						.join(" &middot; "),
-					value: lot.name,
-					checked: 1,
+				label: __("Accepted, Awaiting Release"),
+				cannot_add_rows: true,
+				cannot_delete_rows: true,
+				in_place_edit: true,
+				data: lots.map((lot) => ({
+					name: lot.name,
+					item_code: lot.item_code,
+					batch_no: lot.batch_no,
+					qty: flt(lot.decided_qty) - flt(lot.rejected_qty) - flt(lot.accepted_qty),
 				})),
+				fields: erpnext.utils.lot_selection_columns(),
 			},
 		],
 		primary_action_label: __("Release"),
 		primary_action(values) {
-			const chosen = values.lots || [];
+			const chosen = (values.lots || []).filter((row) => row.__checked).map((row) => row.name);
 			if (!chosen.length) {
 				frappe.msgprint(__("Select at least one Quality Control Lot."));
 				return;
@@ -1612,26 +1645,24 @@ erpnext.utils.pick_lots_to_inspect = function (lots) {
 		size: "large",
 		fields: [
 			{
-				fieldtype: "MultiCheck",
+				fieldtype: "Table",
 				fieldname: "lots",
-				columns: 1,
-				select_all: true,
-				options: lots.map((lot) => ({
-					label: [
-						lot.item_code,
-						lot.batch_no ? `${__("Batch")} ${lot.batch_no}` : null,
-						__("{0} pending", [format_number(lot.pending_qty)]),
-					]
-						.filter(Boolean)
-						.join(" &middot; "),
-					value: lot.name,
-					checked: 1,
+				label: __("Awaiting Inspection"),
+				cannot_add_rows: true,
+				cannot_delete_rows: true,
+				in_place_edit: true,
+				data: lots.map((lot) => ({
+					name: lot.name,
+					item_code: lot.item_code,
+					batch_no: lot.batch_no,
+					qty: flt(lot.received_qty) - flt(lot.decided_qty),
 				})),
+				fields: erpnext.utils.lot_selection_columns(),
 			},
 		],
 		primary_action_label: __("Create"),
 		primary_action(values) {
-			const chosen = values.lots || [];
+			const chosen = (values.lots || []).filter((row) => row.__checked).map((row) => row.name);
 			if (!chosen.length) {
 				frappe.msgprint(__("Select at least one Quality Control Lot."));
 				return;
