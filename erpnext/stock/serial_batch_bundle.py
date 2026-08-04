@@ -6,6 +6,7 @@ from frappe.model.naming import NamingSeries, parse_naming_series
 from frappe.query_builder.functions import Max, Sum
 from frappe.utils import add_days, cint, cstr, flt, get_link_to_form, getdate, now
 from pypika import Order
+from pypika.terms import ExistsCriterion
 
 from erpnext.stock.deprecated_serial_batch import (
 	DeprecatedBatchNoValuation,
@@ -851,14 +852,45 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 
 		child = frappe.qb.DocType("Serial and Batch Entry")
 
+		sle_creation = self.sle.creation if self.sle.get("name") else None
+		if not self.sle.get("name") and self.sle.get("serial_and_batch_bundle"):
+			sle_creation = frappe.db.get_value(
+				"Stock Ledger Entry",
+				{"serial_and_batch_bundle": self.sle.serial_and_batch_bundle, "is_cancelled": 0},
+				"creation",
+			)
+
 		timestamp_condition = ""
 		if self.sle.posting_datetime:
 			timestamp_condition = child.posting_datetime < self.sle.posting_datetime
 
-			if self.sle.creation:
-				timestamp_condition |= (child.posting_datetime == self.sle.posting_datetime) & (
-					child.creation < self.sle.creation
+			sle_table = frappe.qb.DocType("Stock Ledger Entry")
+			if sle_creation:
+				# bundle creation and SLE creation are different timelines (a
+				# bundle can be created much before its SLE), so break the tie
+				# using the creation of the bundle's own SLE
+				tie_condition = ExistsCriterion(
+					frappe.qb.from_(sle_table)
+					.select(sle_table.name)
+					.where(
+						(sle_table.serial_and_batch_bundle == child.parent)
+						& (sle_table.is_cancelled == 0)
+						& (sle_table.creation < sle_creation)
+					)
 				)
+			else:
+				# the current entry is not yet in the ledger and will get the
+				# latest creation, so the same-timestamp entries which are
+				# already in the ledger precede it
+				tie_condition = ExistsCriterion(
+					frappe.qb.from_(sle_table)
+					.select(sle_table.name)
+					.where(
+						(sle_table.serial_and_batch_bundle == child.parent) & (sle_table.is_cancelled == 0)
+					)
+				)
+
+			timestamp_condition |= (child.posting_datetime == self.sle.posting_datetime) & tie_condition
 
 		conditions = (
 			(child.item_code == self.sle.item_code)
