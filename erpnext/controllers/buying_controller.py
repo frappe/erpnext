@@ -129,7 +129,7 @@ class BuyingController(SubcontractingController):
 			msg += f"<li>{po} ({date})</li>"
 		msg += "</ul>"
 
-		frappe.throw(_(msg))
+		frappe.throw(msg)
 
 	def create_package_for_transfer(self) -> None:
 		"""Create serial and batch package for Sourece Warehouse in case of inter transfer."""
@@ -287,7 +287,7 @@ class BuyingController(SubcontractingController):
 		if self.is_return and len(not_cancelled_asset):
 			frappe.throw(
 				_(
-					"{} has submitted assets linked to it. You need to cancel the assets to create purchase return."
+					"{0} has submitted assets linked to it. You need to cancel the assets to create purchase return."
 				).format(self.return_against),
 				title=_("Not Allowed"),
 			)
@@ -330,32 +330,51 @@ class BuyingController(SubcontractingController):
 					address_display_field, render_address(self.get(address_field), check_permissions=False)
 				)
 
+	def get_validated_purchase_expense_details(self, item_code):
+		fields = ("purchase_expense_account", "purchase_expense_contra_account")
+		details = get_purchase_expense_account(item_code, self.company)
+
+		for field in fields:
+			if not details.get(field):
+				details[field] = frappe.get_cached_value("Company", self.company, field)
+
+		for field in fields:
+			if not details.get(field):
+				frappe.throw(
+					_("Please set {0} in Company {1} or in the Item Defaults of Item {2}").format(
+						frappe.bold(_(frappe.unscrub(field))), self.company, item_code
+					)
+				)
+
+		return details
+
 	def set_gl_entry_for_purchase_expense(self, gl_entries):
+		if not cint(frappe.db.get_single_value("Accounts Settings", "book_stock_expense_gl_entries")):
+			return
+
 		if self.doctype == "Purchase Invoice" and not self.update_stock:
 			return
 
+		stock_items = self.get_stock_items()
+
 		for row in self.items:
-			details = get_purchase_expense_account(row.item_code, self.company)
+			# A service item holds no stock value, so there is nothing to book against it - and it
+			# must not make the expense accounts mandatory either.
+			if row.item_code not in stock_items:
+				continue
 
-			if not details.purchase_expense_account:
-				details.purchase_expense_account = frappe.get_cached_value(
-					"Company", self.company, "purchase_expense_account"
-				)
-
-			if not details.purchase_expense_account:
-				return
-
-			if not details.purchase_expense_contra_account:
-				details.purchase_expense_contra_account = frappe.get_cached_value(
-					"Company", self.company, "purchase_expense_contra_account"
-				)
-
-			if not details.purchase_expense_contra_account:
-				frappe.throw(
-					_("Please set Purchase Expense Contra Account in Company {0}").format(self.company)
-				)
+			details = self.get_validated_purchase_expense_details(row.item_code)
+			if not details:
+				continue
 
 			amount = flt(row.valuation_rate * row.stock_qty, row.precision("base_amount"))
+			if row.landed_cost_voucher_amount:
+				amount -= flt(row.landed_cost_voucher_amount, row.precision("base_amount"))
+
+			if not amount:
+				# GL Entry rejects a row with neither a debit nor a credit.
+				continue
+
 			self.add_gl_entry(
 				gl_entries=gl_entries,
 				account=details.purchase_expense_account,
@@ -447,7 +466,7 @@ class BuyingController(SubcontractingController):
 					self.precision("item_tax_amount", item),
 				)
 
-				self.round_floats_in(item)
+				self.round_floats_in(item, do_not_round_fields=["conversion_factor"])
 				if flt(item.conversion_factor) == 0.0:
 					item.conversion_factor = (
 						get_conversion_factor(item.item_code, item.uom).get("conversion_factor") or 1.0
@@ -738,7 +757,7 @@ class BuyingController(SubcontractingController):
 				frappe.throw(
 					_("Row #{idx}: {field_label} can not be negative for item {item_code}.").format(
 						idx=item_row["idx"],
-						field_label=frappe.get_meta(item_row.doctype).get_label(fieldname),
+						field_label=_(frappe.get_meta(item_row.doctype).get_label(fieldname)),
 						item_code=frappe.bold(item_row["item_code"]),
 					)
 				)

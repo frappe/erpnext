@@ -2,7 +2,7 @@
 # See license.txt
 
 
-from unittest.mock import MagicMock, call
+from unittest.mock import MagicMock, call, patch
 
 import frappe
 from frappe.utils import add_days, add_to_date, now, nowdate, today
@@ -13,11 +13,16 @@ from erpnext.controllers.stock_controller import create_item_wise_repost_entries
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import (
+	REPOSTING_JOB_ID_PREFIX,
+	enqueue_reposting_entry,
+	execute_reposting_entry,
 	in_configured_timeslot,
+	mark_covered_transaction_reposts,
+	run_parallel_reposting,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.tests.test_utils import StockTestMixin
-from erpnext.stock.utils import PendingRepostingError
+from erpnext.stock.utils import PendingRepostingError, get_combine_datetime
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -99,6 +104,15 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 			repost_doc.creation = add_days(now(), days=-i * 10)
 			repost_doc.db_update_all()
 
+		repost_doc.add_comment("Comment", "test comment")
+		frappe.new_doc(
+			"File",
+			file_name="test_clear_old_logs.txt",
+			content="test",
+			attached_to_doctype=repost_doc.doctype,
+			attached_to_name=repost_doc.name,
+		).insert(ignore_permissions=True)
+
 		logs = frappe.get_all("Repost Item Valuation", filters={"status": "Skipped"})
 		self.assertGreater(len(logs), 10)
 
@@ -108,6 +122,15 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 
 		logs = frappe.get_all("Repost Item Valuation", filters={"status": "Skipped"})
 		self.assertEqual(len(logs), 0)
+
+		orphan_reference = {"reference_doctype": repost_doc.doctype, "reference_name": repost_doc.name}
+		self.assertFalse(frappe.get_all("Comment", filters=orphan_reference))
+		self.assertFalse(
+			frappe.get_all(
+				"File",
+				filters={"attached_to_doctype": repost_doc.doctype, "attached_to_name": repost_doc.name},
+			)
+		)
 
 	def test_create_item_wise_repost_item_valuation_entries(self):
 		pr = make_purchase_receipt(
@@ -171,6 +194,127 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 		riv4.set_status("Skipped")
 		riv3.set_status("Skipped")
 
+	def _make_queued_transaction_riv(self, voucher):
+		riv = frappe.get_doc(
+			doctype="Repost Item Valuation",
+			based_on="Transaction",
+			voucher_type=voucher.doctype,
+			voucher_no=voucher.name,
+			posting_date=voucher.posting_date,
+			posting_time="00:00:00",
+		)
+		riv.flags.dont_run_in_test = True
+		riv.submit()
+		return riv
+
+	def test_skip_transaction_repost_covered_by_dependent(self):
+		company = "_Test Company with perpetual inventory"
+		warehouse = "Stores - TCP1"
+
+		covered_pr = make_purchase_receipt(
+			company=company, warehouse=warehouse, item_code="_Test Item", qty=5
+		)
+		other_pr = make_purchase_receipt(
+			company=company, warehouse=warehouse, item_code="_Test Item 2", qty=5
+		)
+
+		covered_riv = self._make_queued_transaction_riv(covered_pr)
+		other_riv = self._make_queued_transaction_riv(other_pr)
+
+		earlier_date = add_days(covered_pr.posting_date, -1)
+		source = frappe._dict(name="__test_source_riv__", posting_date=earlier_date, posting_time="00:00:00")
+		coverage = {("_Test Item", warehouse): get_combine_datetime(earlier_date, "00:00:00")}
+		affected = {("Purchase Receipt", covered_pr.name), ("Purchase Receipt", other_pr.name)}
+
+		mark_covered_transaction_reposts(source, coverage, affected)
+
+		covered_riv.reload()
+		other_riv.reload()
+		self.assertEqual(covered_riv.status, "Skipped")
+		self.assertEqual(other_riv.status, "Queued")
+
+		other_riv.db_set("status", "Skipped")
+
+	def _make_dependent_repack(self, company, consumed_items, source_wh, fg_item, fg_wh, qty, posting_date):
+		se = frappe.new_doc("Stock Entry")
+		se.stock_entry_type = "Repack"
+		se.company = company
+		se.set_posting_time = 1
+		se.posting_date = posting_date
+		for item_code in consumed_items:
+			se.append("items", {"item_code": item_code, "s_warehouse": source_wh, "qty": qty})
+		se.append("items", {"item_code": fg_item, "t_warehouse": fg_wh, "qty": qty, "is_finished_item": 1})
+		se.insert()
+		se.submit()
+		return se
+
+	def test_backdated_manufacture_repost_skips_redundant_dependent(self):
+		from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import (
+			execute_reposting_entry,
+		)
+
+		frappe.flags.dont_execute_stock_reposts = True
+		self.addCleanup(frappe.flags.pop, "dont_execute_stock_reposts", None)
+
+		original_setting = frappe.db.get_single_value("Stock Reposting Settings", "item_based_reposting")
+		frappe.db.set_single_value("Stock Reposting Settings", "item_based_reposting", 1)
+		self.addCleanup(
+			frappe.db.set_single_value, "Stock Reposting Settings", "item_based_reposting", original_setting
+		)
+
+		company = "_Test Company with perpetual inventory"
+		source_wh = "Stores - TCP1"
+		fg_wh = "Finished Goods - TCP1"
+
+		item_a = make_item(properties={"valuation_method": "FIFO"}).name
+		item_b = make_item(properties={"valuation_method": "FIFO"}).name
+		item_c = make_item(properties={"valuation_method": "FIFO"}).name
+
+		def _day(days):
+			return add_days(nowdate(), days)
+
+		make_stock_entry(
+			item_code=item_a, to_warehouse=source_wh, qty=10, rate=100, posting_date=_day(2), company=company
+		)
+		make_stock_entry(
+			item_code=item_b, to_warehouse=source_wh, qty=10, rate=100, posting_date=_day(3), company=company
+		)
+		self._make_dependent_repack(company, [item_a, item_b], source_wh, item_c, fg_wh, 5, _day(10))
+
+		make_stock_entry(
+			item_code=item_a, to_warehouse=source_wh, qty=10, rate=200, posting_date=_day(1), company=company
+		)
+		make_stock_entry(
+			item_code=item_b, to_warehouse=source_wh, qty=10, rate=200, posting_date=_day(1), company=company
+		)
+		self._make_dependent_repack(company, [item_a, item_b], source_wh, item_c, fg_wh, 5, _day(5))
+
+		rivs = frappe.get_all(
+			"Repost Item Valuation",
+			filters={
+				"docstatus": 1,
+				"based_on": "Item and Warehouse",
+				"status": "Queued",
+				"item_code": ("in", [item_a, item_b, item_c]),
+			},
+			fields=["name", "item_code", "warehouse"],
+			order_by="posting_date asc, posting_time asc, creation asc",
+		)
+		self.assertTrue(
+			any(r.item_code == item_c and r.warehouse == fg_wh for r in rivs),
+			msg="Expected a queued repost for the finished good",
+		)
+
+		for r in rivs:
+			execute_reposting_entry(r.name)
+
+		fg_repost_status = frappe.db.get_value(
+			"Repost Item Valuation",
+			{"based_on": "Item and Warehouse", "item_code": item_c, "warehouse": fg_wh, "docstatus": 1},
+			"status",
+		)
+		self.assertEqual(fg_repost_status, "Skipped")
+
 	def test_stock_freeze_validation(self):
 		today = nowdate()
 
@@ -219,6 +363,39 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 			[["a", "b"], ["c", "d"]],
 			sorted(frappe.parse_json(frappe.as_json(set([("a", "b"), ("c", "d")])))),
 		)
+
+	def test_recoverable_error_requeues_instead_of_failing(self):
+		# A recoverable DB error (e.g. Postgres deadlock -> QueryDeadlockError) must re-queue the
+		# repost as "In Progress"; a non-recoverable error still fails. Regression: the old check
+		# string-matched MariaDB's "Deadlock found" and missed Postgres deadlocks ("deadlock detected").
+		from unittest.mock import patch
+
+		from frappe.exceptions import QueryDeadlockError
+
+		from erpnext.stock.doctype.repost_item_valuation import repost_item_valuation as riv
+
+		orig_max_writes = frappe.db.MAX_WRITES_PER_TRANSACTION
+		self.addCleanup(setattr, frappe.db, "MAX_WRITES_PER_TRANSACTION", orig_max_writes)
+
+		def status_after(error):
+			doc = frappe.new_doc("Repost Item Valuation")
+			doc.name = "test-recoverable-riv"
+			doc.set_status = doc.log_error = doc.db_set = MagicMock()
+			captured = {}
+			with (
+				patch.object(frappe, "in_test", False),
+				patch.object(frappe.db, "exists", return_value=True),
+				patch.object(frappe.db, "commit"),
+				patch.object(frappe.db, "rollback"),
+				patch.object(frappe.db, "set_value", side_effect=lambda *a, **k: captured.update(a[2])),
+				patch.object(riv, "repost_sl_entries", side_effect=error),
+				patch.object(frappe, "get_cached_value", return_value=None),
+			):
+				riv.repost(doc)
+			return captured.get("status")
+
+		self.assertEqual(status_after(QueryDeadlockError("deadlock detected")), "In Progress")
+		self.assertEqual(status_after(ValueError("boom")), "Failed")
 
 	def test_gl_repost_progress(self):
 		from erpnext.accounts import utils
@@ -510,3 +687,108 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 						"name",
 					)
 				)
+
+	def test_clear_attachment_skips_referenced_data_file(self):
+		riv = frappe.get_doc(
+			{
+				"doctype": "Repost Item Valuation",
+				"based_on": "Item and Warehouse",
+				"company": "_Test Company",
+				"item_code": "_Test Item",
+				"warehouse": "_Test Warehouse - _TC",
+				"posting_date": today(),
+			}
+		).insert(ignore_permissions=True)
+
+		attached = frappe.get_doc(
+			{
+				"doctype": "File",
+				"file_name": "repost_data.json.gz",
+				"content": "test",
+				"attached_to_doctype": riv.doctype,
+				"attached_to_name": riv.name,
+			}
+		).insert(ignore_permissions=True)
+		riv.db_set("reposting_data_file", attached.file_url)
+
+		riv.clear_attachment()
+
+		self.assertFalse(frappe.db.exists("File", attached.name))
+		self.assertIsNone(frappe.db.get_value("Repost Item Valuation", riv.name, "reposting_data_file"))
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Reposting Settings",
+		{"item_based_reposting": 1, "enable_parallel_reposting": 1, "no_of_parallel_reposting": 2},
+	)
+	def test_parallel_reposting_excludes_items_with_active_jobs(self):
+		module = "erpnext.stock.doctype.repost_item_valuation.repost_item_valuation"
+		entries = [
+			frappe._dict(
+				name="RIV-1",
+				based_on="Item and Warehouse",
+				item_code="ITEM-A",
+				repost_only_accounting_ledgers=0,
+			),
+			frappe._dict(
+				name="RIV-2",
+				based_on="Item and Warehouse",
+				item_code="ITEM-A",
+				repost_only_accounting_ledgers=0,
+			),
+			frappe._dict(
+				name="RIV-3", based_on="Transaction", item_code=None, repost_only_accounting_ledgers=0
+			),
+			frappe._dict(
+				name="RIV-4",
+				based_on="Item and Warehouse",
+				item_code="ITEM-B",
+				repost_only_accounting_ledgers=0,
+			),
+			frappe._dict(
+				name="RIV-5",
+				based_on="Item and Warehouse",
+				item_code="ITEM-C",
+				repost_only_accounting_ledgers=0,
+			),
+		]
+
+		with (
+			patch(f"{module}.get_repost_item_valuation_entries", return_value=entries) as entries_mock,
+			patch(f"{module}.get_entries_with_active_jobs", return_value={"RIV-1"}),
+			patch(f"{module}.get_items_with_active_reposting", return_value={"ITEM-A"}),
+			patch(f"{module}.execute_reposting_entry") as execute_mock,
+			patch(f"{module}.enqueue_reposting_entry") as enqueue_mock,
+		):
+			run_parallel_reposting()
+
+		entries_mock.assert_called_once_with(limit=200)
+		execute_mock.assert_called_once_with("RIV-3")
+		enqueue_mock.assert_called_once_with("RIV-4")
+
+	def test_reposting_entry_continues_with_next_batch(self):
+		module = "erpnext.stock.doctype.repost_item_valuation.repost_item_valuation"
+
+		with (
+			patch(f"{module}._execute_reposting_entry", side_effect=Exception("boom")),
+			patch(f"{module}.enqueue_parallel_reposting") as chain_mock,
+		):
+			self.assertRaises(Exception, execute_reposting_entry, "RIV-X", continue_reposting=True)
+
+		chain_mock.assert_called_once()
+
+		with (
+			patch(f"{module}._execute_reposting_entry"),
+			patch(f"{module}.enqueue_parallel_reposting") as chain_mock,
+		):
+			execute_reposting_entry("RIV-X")
+
+		chain_mock.assert_not_called()
+
+	def test_enqueue_reposting_entry_is_deduplicated(self):
+		with patch("frappe.enqueue") as enqueue_mock:
+			enqueue_reposting_entry("RIV-X")
+
+		kwargs = enqueue_mock.call_args.kwargs
+		self.assertEqual(kwargs["job_id"], f"{REPOSTING_JOB_ID_PREFIX}RIV-X")
+		self.assertTrue(kwargs["deduplicate"])
+		self.assertTrue(kwargs["continue_reposting"])

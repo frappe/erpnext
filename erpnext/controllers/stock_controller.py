@@ -565,6 +565,7 @@ def show_accounting_ledger_preview(company: str, doctype: str, docname: str):
 
 	filters = frappe._dict(company=company, include_dimensions=1)
 	doc = frappe.get_lazy_doc(doctype, docname)
+	doc.check_permission("read")
 	doc.run_method("before_gl_preview")
 
 	gl_columns, gl_data = get_accounting_ledger_preview(doc, filters)
@@ -580,6 +581,7 @@ def show_stock_ledger_preview(company: str, doctype: str, docname: str):
 
 	filters = frappe._dict(company=company)
 	doc = frappe.get_lazy_doc(doctype, docname)
+	doc.check_permission("read")
 	doc.run_method("before_sl_preview")
 
 	sl_columns, sl_data = get_stock_ledger_preview(doc, filters)
@@ -625,8 +627,7 @@ def repost_required_for_queue(doc: StockController) -> bool:
 def check_item_quality_inspection(doctype: str, docstatus: str | int, items: str | list[dict]):
 	from erpnext.stock.services.quality_inspection_service import INSPECTION_FIELDNAME_MAP
 
-	if isinstance(items, str):
-		items = json.loads(items)
+	items = frappe.parse_json(items)
 
 	inspection_fieldname = INSPECTION_FIELDNAME_MAP.get(doctype)
 	if inspection_fieldname is None:
@@ -654,12 +655,11 @@ def check_item_quality_inspection(doctype: str, docstatus: str | int, items: str
 	return [item for item in items if item.get("item_code") in inspection_required_items]
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def make_quality_inspections(
 	company: str, doctype: str, docname: str, items: str | list, inspection_type: str
 ):
-	if isinstance(items, str):
-		items = json.loads(items)
+	items = frappe.parse_json(items)
 
 	inspections = []
 	for item in items:
@@ -822,6 +822,8 @@ def create_item_wise_repost_entries(
 ):
 	"""Using a voucher create repost item valuation records for all item-warehouse pairs."""
 
+	from erpnext.stock.utils import get_valuation_method
+
 	stock_ledger_entries = get_items_to_be_repost(voucher_type, voucher_no)
 
 	distinct_item_warehouses = set()
@@ -832,6 +834,11 @@ def create_item_wise_repost_entries(
 		if item_wh in distinct_item_warehouses:
 			continue
 		distinct_item_warehouses.add(item_wh)
+
+		# Standard Cost items don't need a full repost: a backdated entry only shifts future balances
+		# (qty and value at the standard rate), which is done in place by update_qty_in_future_sle.
+		if get_valuation_method(sle.item_code) == "Standard Cost":
+			continue
 
 		repost_entry = frappe.new_doc("Repost Item Valuation")
 		repost_entry.based_on = "Item and Warehouse"

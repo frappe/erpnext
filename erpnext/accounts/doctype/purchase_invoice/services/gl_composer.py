@@ -329,6 +329,11 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 						self.make_provisional_gl_entry(gl_entries, item)
 
 					if not doc.is_internal_transfer():
+						# When Update Stock is disabled, this invoice has no stock impact: the linked
+						# Purchase Receipt already booked the stock (at standard) and the Purchase Price
+						# Variance. Here we only clear "Stock Received But Not Billed" at the full billed
+						# amount against the supplier - booking PPV again would double count it and leave
+						# SRBNB partially uncleared.
 						gl_entries.append(
 							self.get_gl_dict(
 								{
@@ -515,6 +520,38 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 				},
 			)
 
+	def get_stock_variance_account(self, item):
+		"""Return the account for stock valuation difference.
+		Standard Cost items use the Purchase Price Variance account. Other items use
+		the default expense account, falling back to the item expense account for
+		returns and the stock/asset received but not billed account for non-returns."""
+		from erpnext.stock.doctype.item_standard_cost.item_standard_cost import (
+			get_purchase_price_variance_account,
+		)
+		from erpnext.stock.utils import get_valuation_method
+
+		if item.item_code and get_valuation_method(item.item_code, self.doc.company) == "Standard Cost":
+			return get_purchase_price_variance_account(item.item_code, self.doc.company)
+
+		# 1. Primary choice: Company Default Expense / COGS Account
+		default_expense = self.doc.get_company_default("default_expense_account", ignore_validation=True)
+		if default_expense:
+			return default_expense
+
+		# 2. If default_expense_account is NOT set (Unconfigured):
+		# For returns, fall back to item.expense_account
+		if self.doc.is_return and item.expense_account:
+			return item.expense_account
+
+		# For non-returns, fall back to the clearing account used by Purchase Receipts.
+		stock_asset_rbnb = (
+			self.doc.get_company_default("asset_received_but_not_billed", ignore_validation=True)
+			if item.is_fixed_asset
+			else self.doc.get_company_default("stock_received_but_not_billed", ignore_validation=True)
+		)
+
+		return stock_asset_rbnb or item.expense_account
+
 	def make_stock_adjustment_entry(self, gl_entries, item, voucher_wise_stock_value, account_currency):
 		doc = self.doc
 		net_amt_precision = item.precision("base_net_amount")
@@ -536,7 +573,7 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 			)
 
 			if flt(stock_amount, net_amt_precision) != flt(warehouse_debit_amount, net_amt_precision):
-				cost_of_goods_sold_account = doc.get_company_default("default_expense_account")
+				cost_of_goods_sold_account = self.get_stock_variance_account(item)
 				stock_adjustment_amt = stock_amount - warehouse_debit_amount
 
 				gl_entries.append(
@@ -561,7 +598,7 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 			and warehouse_debit_amount
 			!= flt(voucher_wise_stock_value.get((item.name, item.warehouse)), net_amt_precision)
 		):
-			cost_of_goods_sold_account = doc.get_company_default("default_expense_account")
+			cost_of_goods_sold_account = self.get_stock_variance_account(item)
 			stock_amount = flt(voucher_wise_stock_value.get((item.name, item.warehouse)), net_amt_precision)
 			stock_adjustment_amt = warehouse_debit_amount - stock_amount
 
@@ -589,6 +626,10 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 		doc = self.doc
 		tax_service = TaxService(doc)
 		valuation_tax = {}
+
+		# Amount of each valuation charge actually capitalized into stock/asset valuation, keyed by
+		# tax row name - a non-stock item's share of a spread-across-all-items charge is excluded.
+		capitalized_valuation_tax = doc.get_capitalized_valuation_tax()
 
 		for tax in doc.get("taxes"):
 			amount, base_amount = tax_service.get_tax_amounts(tax, None)
@@ -624,8 +665,7 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 							tax.idx, _(tax.category)
 						)
 					)
-				valuation_tax.setdefault(tax.name, 0)
-				valuation_tax[tax.name] += (tax.add_deduct_tax == "Add" and 1 or -1) * flt(base_amount)
+				valuation_tax[tax.name] = capitalized_valuation_tax.get(tax.name, 0.0)
 
 		if doc.is_opening == "No" and doc.negative_expense_to_be_booked and valuation_tax:
 			total_valuation_amount = sum(valuation_tax.values())

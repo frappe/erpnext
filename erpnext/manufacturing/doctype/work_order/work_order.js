@@ -203,6 +203,15 @@ frappe.ui.form.on("Work Order", {
 			}
 		}
 
+		let pending_ops = frm.doc?.operations?.filter((op) => op.completed_qty < frm.doc.qty);
+		// Jump to the operator Shop Floor view, pre-filtered to this work order.
+		if (frm.doc.docstatus === 1 && frm.doc.status !== "Closed" && pending_ops && pending_ops.length > 0) {
+			frm.add_custom_button(__("Operator Dashboard"), () => {
+				frappe.route_options = { work_order: frm.doc.name };
+				frappe.set_route("shop-floor");
+			});
+		}
+
 		if (frm.doc.status == "Completed") {
 			if (frm.doc.__onload.backflush_raw_materials_based_on == "Material Transferred for Manufacture") {
 				frm.add_custom_button(
@@ -389,7 +398,7 @@ frappe.ui.form.on("Work Order", {
 			function () {
 				const selected_rows = dialog.fields_dict["operations"].grid.get_selected_children();
 				if (selected_rows.length == 0) {
-					frappe.msgprint(__("Please select atleast one operation to create Job Card"));
+					frappe.msgprint(__("Please select at least one operation to create Job Card"));
 					return;
 				}
 				frappe.call({
@@ -760,7 +769,7 @@ erpnext.work_order = {
 			frm.add_custom_button(
 				__("Close"),
 				function () {
-					frappe.confirm(__("Once the Work Order is Closed. It can't be resumed."), () => {
+					frappe.confirm(__("Once the Work Order is Closed, it cannot be resumed."), () => {
 						erpnext.work_order.change_work_order_status(frm, "Closed");
 					});
 				},
@@ -811,6 +820,10 @@ erpnext.work_order = {
 						frm.has_start_btn = true;
 						frm.add_custom_button(__("Create Pick List"), function () {
 							erpnext.work_order.create_pick_list(frm);
+						});
+
+						frm.add_custom_button(__("Material Request"), function () {
+							erpnext.work_order.make_material_request(frm);
 						});
 
 						var start_btn = frm.add_custom_button(__("Start"), function () {
@@ -1146,6 +1159,13 @@ erpnext.work_order = {
 					frappe.set_route("Form", stock_entry.doctype, stock_entry.name);
 				});
 		}
+	},
+
+	make_material_request: function (frm) {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.manufacturing.doctype.work_order.mapper.make_material_request",
+			frm,
+		});
 	},
 
 	create_pick_list: function (frm, purpose = "Material Transfer for Manufacture") {

@@ -216,7 +216,7 @@ class DeliveryTrip(Document):
 		        (list of list of str): List of address routes split at locks, if optimize is `True`
 		"""
 		if not self.driver_address:
-			frappe.throw(_("Cannot Calculate Arrival Time as Driver Address is Missing."))
+			frappe.throw(_("Cannot calculate arrival time as the driver address is missing."))
 
 		home_address = get_address_display(frappe.get_doc("Address", self.driver_address).as_dict())
 

@@ -216,6 +216,21 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		po2.items[0].qty = 110
 		self.assertRaises(OverAllowanceError, po2.submit)
 
+		# Stock over-delivery role must not bypass over-ordering against Material Request.
+		with self.change_settings(
+			"Stock Settings", {"role_allowed_to_over_deliver_receive": "Stock Manager"}
+		):
+			test_user = frappe.get_doc("User", "test@example.com")
+			test_user.add_roles("Stock Manager")
+
+			mr3 = make_material_request(qty=100)
+			po3 = make_purchase_order(mr3.name)
+			po3.supplier = "_Test Supplier"
+			po3.items[0].qty = 110
+			with self.set_user("test@example.com"):
+				po3.flags.ignore_permissions = True
+				self.assertRaises(OverAllowanceError, po3.submit)
+
 		# cleanup
 		frappe.db.set_single_value("Buying Settings", "over_order_allowance", 0)
 		frappe.db.set_single_value("Stock Settings", "over_delivery_receipt_allowance", 0)
@@ -1044,6 +1059,8 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		# self.assertEqual(po.payment_terms_template, pi.payment_terms_template)
 		compare_payment_schedules(self, po, pi)
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"maintain_same_sales_rate": 1})
+	@ERPNextTestSuite.change_settings("Buying Settings", {"maintain_same_rate": 1})
 	def test_internal_transfer_flow(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 		from erpnext.accounts.doctype.sales_invoice.mapper import (
@@ -1054,9 +1071,6 @@ class TestPurchaseOrder(ERPNextTestSuite):
 			make_sales_invoice,
 		)
 		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
-
-		frappe.db.set_single_value("Selling Settings", "maintain_same_sales_rate", 1)
-		frappe.db.set_single_value("Buying Settings", "maintain_same_rate", 1)
 
 		prepare_data_for_internal_transfer()
 		supplier = "_Test Internal Supplier 2"
@@ -1496,6 +1510,7 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		self.assertEqual(pi_2.status, "Paid")
 		self.assertEqual(po.status, "Completed")
 
+	@ERPNextTestSuite.change_settings("Buying Settings", {"maintain_same_rate": 0})
 	def test_purchase_order_over_billing_missing_item(self):
 		item1 = make_item(
 			"_Test Item for Overbilling",
@@ -1531,11 +1546,11 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		(via the standard item lookup the form uses) without going through
 		the Sales Order → Purchase Order mapping pipeline.
 		"""
-		from erpnext.stock.get_item_details import ItemDetailsCtx, get_item_details
+		from erpnext.stock.get_item_details import get_item_details
 
 		item = make_item("_Test Drop Ship From Master", {"is_stock_item": 1, "delivered_by_supplier": 1})
 
-		ctx = ItemDetailsCtx(
+		ctx = frappe._dict(
 			{
 				"item_code": item.item_code,
 				"doctype": "Purchase Order",

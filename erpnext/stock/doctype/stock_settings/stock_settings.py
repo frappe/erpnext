@@ -41,7 +41,6 @@ class StockSettings(Document):
 		auto_reserve_stock: DF.Check
 		auto_reserve_stock_for_sales_order_on_purchase: DF.Check
 		clean_description_html: DF.Check
-		default_warehouse: DF.Link | None
 		disable_serial_no_and_batch_selector: DF.Check
 		do_not_update_serial_batch_on_creation_of_auto_bundle: DF.Check
 		do_not_use_batchwise_valuation: DF.Check
@@ -57,7 +56,6 @@ class StockSettings(Document):
 		reorder_email_notify: DF.Check
 		role_allowed_to_create_edit_back_dated_transactions: DF.Link | None
 		role_allowed_to_over_deliver_receive: DF.Link | None
-		sample_retention_warehouse: DF.Link | None
 		set_serial_and_batch_bundle_naming_based_on_naming_series: DF.Check
 		show_barcode_field: DF.Check
 		stock_auth_role: DF.Link | None
@@ -66,10 +64,11 @@ class StockSettings(Document):
 		stock_uom: DF.Link | None
 		update_existing_price_list_rate: DF.Check
 		update_price_list_based_on: DF.Literal["Rate", "Price List Rate"]
+		use_inline_serial_batch_editor: DF.Check
 		use_naming_series: DF.Check
 		use_serial_batch_fields: DF.Check
 		validate_material_transfer_warehouses: DF.Check
-		valuation_method: DF.Literal["FIFO", "Moving Average", "LIFO"]
+		valuation_method: DF.Literal["FIFO", "Moving Average", "LIFO", "Standard Cost"]
 	# end: auto-generated types
 
 	def validate(self):
@@ -78,7 +77,6 @@ class StockSettings(Document):
 			"item_group",
 			"stock_uom",
 			"allow_negative_stock",
-			"default_warehouse",
 			"set_qty_in_transactions_based_on_serial_no_input",
 			"use_serial_batch_fields",
 			"enable_serial_and_batch_no_for_item",
@@ -103,7 +101,7 @@ class StockSettings(Document):
 				validate_fields_for_doctype=False,
 			)
 
-		self.validate_warehouses()
+		self.validate_over_delivery_receipt_allowance()
 		self.validate_serial_and_batch_no_settings()
 		self.cant_change_valuation_method()
 		self.validate_clean_description_html()
@@ -114,6 +112,10 @@ class StockSettings(Document):
 		self.change_precision_for_purchase()
 		self.change_precision_for_stock_entry()
 		self.validate_do_not_use_batchwise_valuation()
+
+	def validate_over_delivery_receipt_allowance(self):
+		if not self.over_delivery_receipt_allowance:
+			self.role_allowed_to_over_deliver_receive = None
 
 	def validate_do_not_use_batchwise_valuation(self):
 		doc_before_save = self.get_doc_before_save()
@@ -149,17 +151,6 @@ class StockSettings(Document):
 					)
 				)
 
-	def validate_warehouses(self):
-		warehouse_fields = ["default_warehouse", "sample_retention_warehouse"]
-		for field in warehouse_fields:
-			if frappe.db.get_value("Warehouse", self.get(field), "is_group"):
-				frappe.throw(
-					_(
-						"Group Warehouses cannot be used in transactions. Please change the value of {0}"
-					).format(frappe.bold(self.meta.get_field(field).label)),
-					title=_("Incorrect Warehouse"),
-				)
-
 	def cant_change_valuation_method(self):
 		doc_before_save = self.get_doc_before_save()
 		if not doc_before_save:
@@ -189,7 +180,7 @@ class StockSettings(Document):
 			if sle:
 				frappe.throw(
 					_(
-						"Can't change the valuation method, as there are transactions against some items which do not have its own valuation method"
+						"Can't change the valuation method, as there are transactions against some items which do not have their own valuation method"
 					)
 				)
 
@@ -247,7 +238,7 @@ class StockSettings(Document):
 
 				if has_reserved_stock:
 					frappe.throw(
-						_("As there are reserved stock, you cannot disable {0}.").format(
+						_("As there is reserved stock, you cannot disable {0}.").format(
 							frappe.bold(_("Stock Reservation"))
 						)
 					)

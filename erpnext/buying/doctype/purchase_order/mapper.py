@@ -23,12 +23,11 @@ def set_missing_values(source, target):
 
 @frappe.whitelist()
 def make_purchase_receipt(
-	source_name: str, target_doc: str | Document | None = None, args: str | dict | None = None
+	source_name: str, target_doc: str | dict | Document | None = None, args: str | dict | None = None
 ):
 	if args is None:
 		args = {}
-	if isinstance(args, str):
-		args = json.loads(args)
+	args = frappe.parse_json(args)
 
 	has_unit_price_items = frappe.db.get_value("Purchase Order", source_name, "has_unit_price_items")
 
@@ -103,7 +102,7 @@ def make_purchase_receipt(
 
 @frappe.whitelist()
 def make_purchase_invoice(
-	source_name: str, target_doc: str | Document | None = None, args: str | dict | None = None
+	source_name: str, target_doc: str | dict | Document | None = None, args: str | dict | None = None
 ):
 	return get_mapped_purchase_invoice(source_name, target_doc, args=args)
 
@@ -123,8 +122,7 @@ def make_purchase_invoice_from_portal(purchase_order_name: str):
 def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions=False, args=None):
 	if args is None:
 		args = {}
-	if isinstance(args, str):
-		args = json.loads(args)
+	args = frappe.parse_json(args)
 
 	def postprocess(source, target):
 		target.flags.ignore_permissions = ignore_permissions
@@ -213,7 +211,7 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 
 
 @frappe.whitelist()
-def make_inter_company_sales_order(source_name: str, target_doc: str | Document | None = None):
+def make_inter_company_sales_order(source_name: str, target_doc: str | dict | Document | None = None):
 	from erpnext.accounts.doctype.sales_invoice.mapper import make_inter_company_transaction
 
 	return make_inter_company_transaction("Purchase Order", source_name, target_doc)
@@ -222,7 +220,7 @@ def make_inter_company_sales_order(source_name: str, target_doc: str | Document 
 @frappe.whitelist()
 def make_subcontracting_order(
 	source_name: str,
-	target_doc: str | Document | None = None,
+	target_doc: str | dict | Document | None = None,
 	save: bool = False,
 	submit: bool = False,
 	notify: bool = False,
@@ -234,9 +232,11 @@ def make_subcontracting_order(
 			target_doc.save()
 
 			if submit and frappe.has_permission(target_doc.doctype, "submit", target_doc):
+				frappe.db.savepoint("submit_subcontracting_order")
 				try:
 					target_doc.submit()
 				except Exception as e:
+					frappe.db.rollback(save_point="submit_subcontracting_order")
 					target_doc.add_comment("Comment", _("Submit Action Failed") + "<br><br>" + str(e))
 
 			if notify:
@@ -263,7 +263,9 @@ def is_po_fully_subcontracted(po_name: str) -> bool:
 	return not query.run(as_dict=True)
 
 
-def get_mapped_subcontracting_order(source_name: str, target_doc: str | Document | None = None) -> Document:
+def get_mapped_subcontracting_order(
+	source_name: str, target_doc: str | dict | Document | None = None
+) -> Document:
 	def post_process(source_doc, target_doc):
 		target_doc.populate_items_table()
 
@@ -294,7 +296,7 @@ def get_mapped_subcontracting_order(source_name: str, target_doc: str | Document
 		) or frappe.get_value("Production Plan", target_doc.production_plan, "reserve_stock")
 
 	if target_doc and isinstance(target_doc, str):
-		target_doc = json.loads(target_doc)
+		target_doc = frappe.parse_json(target_doc)
 		for key in ["service_items", "items", "supplied_items"]:
 			if key in target_doc:
 				del target_doc[key]

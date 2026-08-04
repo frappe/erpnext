@@ -259,6 +259,7 @@ class PurchaseOrder(BuyingController):
 					"ref_dn_field": "material_request_item",
 					"compare_fields": mri_compare_fields,
 					"is_child_table": True,
+					"allow_duplicate_prev_row_id": True,
 				},
 			}
 		)
@@ -549,11 +550,11 @@ def item_last_purchase_rate(name, conversion_rate, item_code, conversion_factor=
 
 
 @frappe.whitelist()
-def close_or_unclose_purchase_orders(names: str, status: str):
+def close_or_unclose_purchase_orders(names: str | list, status: str):
 	if not frappe.has_permission("Purchase Order", "write"):
 		frappe.throw(_("Not permitted"), frappe.PermissionError)
 
-	names = json.loads(names)
+	names = frappe.parse_json(names)
 	for name in names:
 		po = frappe.get_lazy_doc("Purchase Order", name)
 		if po.docstatus == 1:

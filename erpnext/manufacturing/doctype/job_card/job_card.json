@@ -13,10 +13,11 @@
   "work_order",
   "column_break_uqjq",
   "production_item",
+  "bom_no",
   "column_break_qrpg",
   "for_quantity",
   "column_break_yecz",
-  "bom_no",
+  "stock_uom",
   "section_break_oisd",
   "company",
   "naming_series",
@@ -92,7 +93,6 @@
   "operation_row_id",
   "amended_from",
   "column_break_xhzg",
-  "operation_row_number",
   "operation_id",
   "sequence_id",
   "section_break_jcmx",
@@ -163,6 +163,13 @@
    "in_list_view": 1,
    "in_preview": 1,
    "label": "Qty To Manufacture"
+  },
+  {
+   "fieldname": "stock_uom",
+   "fieldtype": "Link",
+   "label": "Stock UOM",
+   "options": "UOM",
+   "read_only": 1
   },
   {
    "fieldname": "wip_warehouse",
@@ -272,7 +279,7 @@
    "fieldtype": "Select",
    "label": "Status",
    "no_copy": 1,
-   "options": "Open\nWork In Progress\nPartially Transferred\nMaterial Transferred\nOn Hold\nSubmitted\nCancelled\nCompleted",
+   "options": "Open\nWork In Progress\nPartially Transferred\nMaterial Transferred\nOn Hold\nSubmitted\nTo Manufacture\nCancelled\nCompleted",
    "read_only": 1
   },
   {
@@ -323,11 +330,6 @@
    "fieldtype": "Read Only",
    "label": "Item Name",
    "read_only": 1
-  },
-  {
-   "fieldname": "operation_row_number",
-   "fieldtype": "Select",
-   "label": "Operation Row Number"
   },
   {
    "fieldname": "sequence_id",
@@ -695,7 +697,7 @@
  "grid_page_length": 50,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-19 17:39:42.293242",
+ "modified": "2026-08-01 14:22:19.926911",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",

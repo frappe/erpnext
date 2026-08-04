@@ -6,6 +6,7 @@ from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_ent
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.accounts_receivable.accounts_receivable import execute
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
+from erpnext.controllers.sales_and_purchase_return import make_return_doc
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -568,6 +569,119 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 		report = execute(filters)
 		self.assertEqual(report[1], [])
 
+	def pay_invoice_via_journal_entry(self, si, amount):
+		je = frappe.new_doc("Journal Entry")
+		je.company = self.company
+		je.posting_date = today()
+		je.append(
+			"accounts",
+			{
+				"account": self.cash,
+				"debit": amount,
+				"debit_in_account_currency": amount,
+				"cost_center": self.cost_center,
+			},
+		)
+		je.append(
+			"accounts",
+			{
+				"account": self.debit_to,
+				"party_type": "Customer",
+				"party": self.customer,
+				"credit": amount,
+				"credit_in_account_currency": amount,
+				"reference_type": "Sales Invoice",
+				"reference_name": si.name,
+				"cost_center": self.cost_center,
+			},
+		)
+		return je.save().submit()
+
+	def ar_rows(self):
+		filters = {"company": self.company, "report_date": today(), "range": "30, 60, 90, 120"}
+		return execute(filters)[1]
+
+	def test_invoice_partially_paid_via_journal_entry(self):
+		si = self.create_sales_invoice(no_payment_schedule=True)  # outstanding 100
+		self.pay_invoice_via_journal_entry(si, 40)
+
+		row = next(row for row in self.ar_rows() if row.voucher_no == si.name)
+		self.assertEqual(row.paid, 40)
+		self.assertEqual(row.outstanding, 60)
+
+	def test_invoice_fully_paid_via_journal_entry(self):
+		si = self.create_sales_invoice(no_payment_schedule=True)  # outstanding 100
+		self.pay_invoice_via_journal_entry(si, 100)
+
+		# a fully settled invoice drops out of the receivable report
+		self.assertEqual([row for row in self.ar_rows() if row.voucher_no == si.name], [])
+
+	def test_credit_note_via_journal_entry_shows_negative_outstanding(self):
+		je = frappe.new_doc("Journal Entry")
+		je.company = self.company
+		je.voucher_type = "Credit Note"
+		je.posting_date = today()
+		je.append(
+			"accounts",
+			{
+				"account": self.income_account,
+				"debit": 100,
+				"debit_in_account_currency": 100,
+				"cost_center": self.cost_center,
+			},
+		)
+		je.append(
+			"accounts",
+			{
+				"account": self.debit_to,
+				"party_type": "Customer",
+				"party": self.customer,
+				"credit": 100,
+				"credit_in_account_currency": 100,
+				"cost_center": self.cost_center,
+			},
+		)
+		je = je.save().submit()
+
+		row = next(row for row in self.ar_rows() if row.voucher_no == je.name)
+		self.assertEqual(row.outstanding, -100)
+
+	def test_show_remarks_includes_invoice_remark(self):
+		si = self.create_sales_invoice(no_payment_schedule=True, do_not_submit=True)
+		si.remarks = "AR test remark"
+		si.save().submit()
+
+		filters = {
+			"company": self.company,
+			"report_date": today(),
+			"range": "30, 60, 90, 120",
+			"show_remarks": 1,
+		}
+		row = next(row for row in execute(filters)[1] if row.voucher_no == si.name)
+		self.assertIn("AR test remark", row.remarks or "")
+
+	def test_show_delivery_notes_links_delivery_note(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_invoice
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		make_stock_entry(item_code=self.item, qty=5, to_warehouse=self.warehouse, basic_rate=100)
+		dn = create_delivery_note(
+			customer=self.customer, item=self.item, warehouse=self.warehouse, cost_center=self.cost_center
+		)
+		si = make_sales_invoice(dn.name)
+		si.insert()
+		si.submit()
+
+		filters = {
+			"company": self.company,
+			"report_date": today(),
+			"range": "30, 60, 90, 120",
+			"show_delivery_notes": 1,
+		}
+		row = next(row for row in execute(filters)[1] if row.voucher_no == si.name)
+		self.assertIn(dn.name, row.delivery_notes or "")
+
 	def test_group_by_party(self):
 		si1 = self.create_sales_invoice(do_not_submit=True)
 		si1.posting_date = add_days(today(), -1)
@@ -830,6 +944,38 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 		for row in report:
 			# Assert that the customer group of each row is in the list of customer groups
 			self.assertIn(row.customer_group, cus_groups_list)
+
+	def test_territory_filter(self):
+		self.create_sales_invoice()
+		territory = frappe.db.get_value("Customer", self.customer, "territory")
+
+		filters = {
+			"company": self.company,
+			"report_date": today(),
+			"range": "30, 60, 90, 120",
+			"territory": territory,
+		}
+		report = execute(filters)[1]
+		self.assertEqual(len(report), 1)
+		self.assertEqual(
+			[100.0, 100.0, territory], [report[0].invoiced, report[0].outstanding, report[0].territory]
+		)
+
+		filters.update({"territory": ["_Test Territory United States"]})
+		self.assertEqual(len(execute(filters)[1]), 0)
+
+		filters.update({"territory": [territory, "_Test Territory United States"]})
+		self.assertEqual(len(execute(filters)[1]), 1)
+
+		frappe.db.set_value("Customer", self.customer, "territory", "_Test Territory Maharashtra")
+		filters.update({"territory": ["_Test Territory India"]})
+		self.assertEqual(len(execute(filters)[1]), 1)
+
+		filters.update({"territory": ["_Test Territory Mars"]})
+		self.assertRaises(frappe.ValidationError, execute, filters)
+
+		filters.update({"territory": "  "})
+		self.assertRaises(frappe.ValidationError, execute, filters)
 
 	def test_party_account_filter(self):
 		si1 = self.create_sales_invoice()
@@ -1309,10 +1455,10 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 		# Party is a dynamic link on Payment Ledger Entry, so user permissions on Customer
 		# must be applied explicitly. The report should only show permitted customers.
 		original_customer = self.customer
-		second_customer = "_Test AR Perm Customer"
+		second_customer = "_Test Customer 1"
 
 		# create_customer overrides self.customer, so build the restricted invoice first
-		self.create_customer(customer_name=second_customer)
+		self.customer = second_customer
 		self.create_sales_invoice(no_payment_schedule=True)
 
 		self.customer = original_customer
@@ -1345,3 +1491,61 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 		self.assertIn(original_customer, parties)
 		self.assertNotIn(second_customer, parties)
 		self.assertEqual(allowed_invoice.customer, original_customer)
+
+	def test_receivable_filtered_by_sales_partner(self):
+		frappe.set_user("Administrator")
+		partner_a, partner_b = "_Test AR Sales Partner A", "_Test AR Sales Partner B"
+		for partner in (partner_a, partner_b):
+			if not frappe.db.exists("Sales Partner", partner):
+				frappe.get_doc(
+					{
+						"doctype": "Sales Partner",
+						"partner_name": partner,
+						"commission_rate": 0,
+						"territory": "All Territories",
+					}
+				).insert()
+
+		def _si(sales_partner):
+			si = self.create_sales_invoice(no_payment_schedule=True, do_not_submit=True, qty=2)
+			si.sales_partner = sales_partner
+			return si.save().submit()
+
+		partner_a_si = _si(partner_a)
+		partner_b_si = _si(partner_b)
+		no_partner_si = _si(None)
+
+		# a return is folded onto the invoice it settles, so it nets against that
+		# invoice's partner even when the return's own partner is cleared
+		no_partner_return = make_return_doc("Sales Invoice", partner_a_si.name)
+		no_partner_return.sales_partner = None
+		no_partner_return.items[0].qty = -1
+		no_partner_return.update_outstanding_for_self = 0
+		no_partner_return.save().submit()
+
+		filters = {
+			"company": self.company,
+			"party_type": "Customer",
+			"report_date": today(),
+			"range": "30, 60, 90, 120",
+		}
+
+		def rows_for(partner):
+			return {
+				r.voucher_no: r
+				for r in execute({**filters, "sales_partner": partner})[1]
+				if r.get("voucher_no")
+			}
+
+		rows_a = rows_for(partner_a)
+		self.assertIn(partner_a_si.name, rows_a)
+		self.assertEqual(rows_a[partner_a_si.name].sales_partner, partner_a)
+		self.assertNotIn(partner_b_si.name, rows_a)
+		self.assertNotIn(no_partner_si.name, rows_a)
+		self.assertNotIn(no_partner_return.name, rows_a)
+		self.assertEqual(rows_a[partner_a_si.name].credit_note, 100)
+		self.assertEqual(rows_a[partner_a_si.name].outstanding, 100)
+
+		rows_b = rows_for(partner_b)
+		self.assertIn(partner_b_si.name, rows_b)
+		self.assertNotIn(partner_a_si.name, rows_b)

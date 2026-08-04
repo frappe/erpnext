@@ -102,6 +102,32 @@ class TestPointOfSaleGetItems(ERPNextTestSuite):
 		item_codes = self._get_item_codes(self.item_code)
 		self.assertNotIn(self.item_code, item_codes)
 
+	def test_pos_profile_item_group_restriction_returns_items(self):
+		# get_item_groups() returns Item Group names that the callers parameterize via
+		# item.item_group.isin(...) / frappe.get_all, which escapes them once. The names must be RAW;
+		# pre-escaping them double-escaped to `item_group IN ('''X''')`, so a POS Profile restricting
+		# item groups matched nothing and returned ZERO items on both engines.
+		from erpnext.accounts.doctype.pos_profile.pos_profile import get_item_groups
+
+		restricted = make_pos_profile(name="_Test POS Profile IG Restricted")
+		restricted.append("item_groups", {"item_group": self.item_group})
+		restricted.save()
+
+		# the helper must hand back the real (raw) group name, not an escaped literal
+		self.assertIn(self.item_group, get_item_groups(restricted.name))
+
+		# end-to-end: the restricted profile must still surface its in-group items
+		result = get_items(
+			start=0,
+			page_length=100,
+			price_list="Standard Selling",
+			item_group=self.item_group,
+			pos_profile=restricted.name,
+			search_term="",
+		)
+		items = result["items"] if isinstance(result, dict) else result
+		self.assertIn(self.item_code, [row.get("item_code") for row in items])
+
 	def test_non_sales_item_is_excluded(self):
 		# is_sales_item == 1 is part of the converted WHERE clause.
 		frappe.db.set_value("Item", self.item_code, "is_sales_item", 0)

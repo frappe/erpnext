@@ -91,7 +91,7 @@ erpnext.buying = {
 
 				this.frm.set_query("item_code", "items", function () {
 					if (me.frm.doc.is_subcontracted) {
-						var filters = { supplier: me.frm.doc.supplier };
+						var filters = { supplier: me.frm.doc.supplier, company: me.frm.doc.company };
 						filters["is_stock_item"] = 0;
 
 						return {
@@ -101,7 +101,12 @@ erpnext.buying = {
 					} else {
 						return {
 							query: "erpnext.controllers.queries.item_query",
-							filters: { supplier: me.frm.doc.supplier, is_purchase_item: 1, has_variants: 0 },
+							filters: {
+								supplier: me.frm.doc.supplier,
+								is_purchase_item: 1,
+								has_variants: 0,
+								company: me.frm.doc.company,
+							},
 						};
 					}
 				});
@@ -552,10 +557,10 @@ erpnext.buying.link_to_mrs = function (frm) {
 						item.qty = my_qty;
 
 						frappe.msgprint(
-							"Assigning " + d.mr_name + " to " + d.item_code + " (row " + item.idx + ")"
+							__("Assigning {0} to {1} (row {2})", [d.mr_name, d.item_code, item.idx])
 						);
 						if (qty > 0) {
-							frappe.msgprint("Splitting " + qty + " units of " + d.item_code);
+							frappe.msgprint(__("Splitting {0} units of {1}", [qty, d.item_code]));
 							var newrow = frappe.model.add_child(frm.doc, item.doctype, "items");
 							item_length++;
 

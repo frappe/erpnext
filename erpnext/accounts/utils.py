@@ -13,6 +13,7 @@ from frappe.desk.reportview import build_match_conditions
 from frappe.model.meta import get_field_precision
 from frappe.model.naming import determine_consecutive_week_number
 from frappe.query_builder import AliasedQuery, Case, Criterion, Field, Table
+from frappe.query_builder.custom import ConstantColumn
 from frappe.query_builder.functions import Count, IfNull, Max, Min, Round, Sum
 from frappe.query_builder.utils import DocType
 from frappe.utils import (
@@ -1426,13 +1427,11 @@ def get_account_balances(
 def get_account_balances_coa(company: str, include_default_fb_balances: bool = False):
 	company_currency = frappe.get_cached_value("Company", company, "default_currency")
 
-	Account = DocType("Account")
-	account_list = (
-		frappe.qb.from_(Account)
-		.select(Account.name, Account.parent_account, Account.account_currency)
-		.where(Account.company == company)
-		.orderby(Account.lft)
-		.run(as_dict=True)
+	account_list = frappe.get_list(
+		"Account",
+		fields=["name", "parent_account", "account_currency"],
+		filters={"company": company},
+		order_by="lft",
 	)
 
 	account_balances_cc = {account.get("name"): 0 for account in account_list}
@@ -1442,9 +1441,8 @@ def get_account_balances_coa(company: str, include_default_fb_balances: bool = F
 	GLEntry = DocType("GL Entry")
 	precision = get_currency_precision()
 	get_ledger_balances_query = (
-		frappe.qb.from_(GLEntry)
+		frappe.get_query(GLEntry, fields=[GLEntry.account], ignore_permissions=False)
 		.select(
-			GLEntry.account,
 			(Sum(Round(GLEntry.debit, precision)) - Sum(Round(GLEntry.credit, precision))).as_("balance"),
 			(
 				Sum(Round(GLEntry.debit_in_account_currency, precision))
@@ -1454,7 +1452,7 @@ def get_account_balances_coa(company: str, include_default_fb_balances: bool = F
 		.groupby(GLEntry.account)
 	)
 
-	condition_list = [GLEntry.company == company, GLEntry.is_cancelled == 0]
+	conditions = [GLEntry.company == company, GLEntry.is_cancelled == 0]
 
 	default_finance_book = None
 
@@ -1462,12 +1460,9 @@ def get_account_balances_coa(company: str, include_default_fb_balances: bool = F
 		default_finance_book = frappe.get_cached_value("Company", company, "default_finance_book")
 
 	if default_finance_book:
-		condition_list.append(
-			(GLEntry.finance_book == default_finance_book) | (GLEntry.finance_book.isnull())
-		)
+		conditions.append((GLEntry.finance_book == default_finance_book) | (GLEntry.finance_book.isnull()))
 
-	for condition in condition_list:
-		get_ledger_balances_query = get_ledger_balances_query.where(condition)
+	get_ledger_balances_query = get_ledger_balances_query.where(Criterion.all(conditions))
 
 	ledger_balances = get_ledger_balances_query.run(as_dict=True)
 
@@ -1791,9 +1786,10 @@ def get_future_stock_vouchers(posting_date, posting_time, for_warehouses=None, f
 	# transaction can't modify them mid-flight (the original DISTINCT ... FOR UPDATE did this).
 	# MariaDB carries the lock on the grouped query below; postgres rejects FOR UPDATE alongside
 	# GROUP BY, so lock the matching rows in a separate pass first -- the row locks are held until
-	# the surrounding transaction ends, giving the same protection.
+	# the surrounding transaction ends, giving the same protection. Select a constant, not the
+	# name: a deep backdated repost can match millions of rows and only the locks are needed.
 	if frappe.db.db_type == "postgres":
-		frappe.qb.from_(SLE).select(SLE.name).where(conditions).for_update().run()
+		frappe.qb.from_(SLE).select(ConstantColumn(1)).where(conditions).for_update().run()
 
 	# distinct vouchers in chronological order; expressed as GROUP BY + Min() so it's valid on
 	# postgres (SELECT DISTINCT can't ORDER BY non-selected cols, and FOR UPDATE is invalid with both).
@@ -2383,13 +2379,16 @@ class QueryPaymentLedger:
 				)
 
 		# build query for voucher amount
-		query_voucher_amount = (
+		# account is grouped, not aggregated: it is a join key against the outstanding CTE below, and
+		# it fixes the currency the amounts are summed in. The two CTEs aggregate over different row
+		# sets, so two Max() picks could disagree and the join would silently miss, leaving the
+		# outstanding NULL. posting_date/due_date are dates, so Max() there cannot depend on
+		# collation. cost_center and remarks are free text that genuinely varies per row, so they
+		# come off one real row instead -- see representative below.
+		grouped_voucher_amount = (
 			qb.from_(ple)
 			.select(
-				# columns that are constant per (voucher_type, voucher_no, party_type, party) are
-				# wrapped in Max() so the query is valid on postgres (which, unlike MariaDB, requires
-				# every non-aggregated column to be grouped or aggregated)
-				Max(ple.account).as_("account"),
+				ple.account,
 				ple.voucher_type,
 				ple.voucher_no,
 				ple.party_type,
@@ -2397,25 +2396,47 @@ class QueryPaymentLedger:
 				Max(ple.posting_date).as_("posting_date"),
 				Max(ple.due_date).as_("due_date"),
 				Max(ple.account_currency).as_("currency"),
-				Max(ple.cost_center).as_("cost_center"),
 				Sum(ple.amount).as_("amount"),
 				Sum(ple.amount_in_account_currency).as_("amount_in_account_currency"),
-				Max(ple.remarks).as_("remarks"),
+				Min(ple.name).as_("representative"),
 			)
 			.where(ple.delinked == 0)
 			.where(Criterion.all(filter_on_voucher_no))
 			.where(Criterion.all(self.common_filter))
 			.where(Criterion.all(self.dimensions_filter))
 			.where(Criterion.all(self.voucher_posting_date))
-			.groupby(ple.voucher_type, ple.voucher_no, ple.party_type, ple.party)
+			.groupby(ple.account, ple.voucher_type, ple.voucher_no, ple.party_type, ple.party)
+		).as_("grouped")
+
+		# Payment Ledger Entry has no autoname rule, so frappe names it by hash -- lower-case, which
+		# keeps Min(name) free of the collation divergence that picking Max() over free text has.
+		representative_ple = qb.DocType("Payment Ledger Entry").as_("representative_ple")
+		query_voucher_amount = (
+			qb.from_(grouped_voucher_amount)
+			.inner_join(representative_ple)
+			.on(representative_ple.name == grouped_voucher_amount.representative)
+			.select(
+				grouped_voucher_amount.account,
+				grouped_voucher_amount.voucher_type,
+				grouped_voucher_amount.voucher_no,
+				grouped_voucher_amount.party_type,
+				grouped_voucher_amount.party,
+				grouped_voucher_amount.posting_date,
+				grouped_voucher_amount.due_date,
+				grouped_voucher_amount.currency,
+				grouped_voucher_amount.amount,
+				grouped_voucher_amount.amount_in_account_currency,
+				representative_ple.cost_center.as_("cost_center"),
+				representative_ple.remarks.as_("remarks"),
+			)
 		)
 
 		# build query for voucher outstanding
 		query_voucher_outstanding = (
 			qb.from_(ple)
 			.select(
-				# Max() on columns constant per group keeps this valid on postgres (see above)
-				Max(ple.account).as_("account"),
+				# grouped, not aggregated: this is the other side of the join key -- see above
+				ple.account,
 				ple.against_voucher_type.as_("voucher_type"),
 				ple.against_voucher_no.as_("voucher_no"),
 				ple.party_type,
@@ -2429,7 +2450,7 @@ class QueryPaymentLedger:
 			.where(ple.delinked == 0)
 			.where(Criterion.all(filter_on_against_voucher_no))
 			.where(Criterion.all(self.common_filter))
-			.groupby(ple.against_voucher_type, ple.against_voucher_no, ple.party_type, ple.party)
+			.groupby(ple.account, ple.against_voucher_type, ple.against_voucher_no, ple.party_type, ple.party)
 		)
 
 		# build CTE for combining voucher amount and outstanding
@@ -2565,7 +2586,7 @@ def create_gain_loss_journal(
 	party_account_currency = frappe.get_cached_value("Account", party_account, "account_currency")
 
 	if not gain_loss_account:
-		frappe.throw(_("Please set default Exchange Gain/Loss Account in Company {}").format(company))
+		frappe.throw(_("Please set default Exchange Gain/Loss Account in Company {0}").format(company))
 	gain_loss_account_currency = get_account_currency(gain_loss_account)
 	company_currency = frappe.get_cached_value("Company", company, "default_currency")
 

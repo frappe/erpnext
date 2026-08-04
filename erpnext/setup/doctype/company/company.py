@@ -23,7 +23,7 @@ from frappe.utils import (
 	nowdate,
 	today,
 )
-from frappe.utils.nestedset import NestedSet, rebuild_tree
+from frappe.utils.nestedset import NestedSet, get_root_of, rebuild_tree
 
 from erpnext.accounts.doctype.account.account import get_account_currency
 from erpnext.accounts.doctype.financial_report_template.financial_report_template import (
@@ -80,13 +80,16 @@ class Company(NestedSet):
 		default_inventory_account: DF.Link | None
 		default_letter_head: DF.Link | None
 		default_letter_head_report: DF.Link | None
+		default_manufacturing_variance_account: DF.Link | None
 		default_operating_cost_account: DF.Link | None
 		default_payable_account: DF.Link | None
 		default_provisional_account: DF.Link | None
+		default_purchase_price_variance_account: DF.Link | None
 		default_receivable_account: DF.Link | None
 		default_sales_contact: DF.Link | None
 		default_scrap_warehouse: DF.Link | None
 		default_selling_terms: DF.Link | None
+		default_warehouse: DF.Link | None
 		default_warehouse_for_sales_return: DF.Link | None
 		default_wip_warehouse: DF.Link | None
 		depreciation_cost_center: DF.Link | None
@@ -98,9 +101,12 @@ class Company(NestedSet):
 		enable_item_wise_inventory_account: DF.Check
 		enable_perpetual_inventory: DF.Check
 		enable_provisional_accounting_for_non_stock_items: DF.Check
+		enable_stock_delivered_but_not_billed: DF.Check
 		exception_budget_approver_role: DF.Link | None
 		exchange_gain_loss_account: DF.Link | None
 		existing_company: DF.Link | None
+		expenses_added_to_stock_account: DF.Link | None
+		expenses_added_to_stock_contra_account: DF.Link | None
 		fax: DF.Data | None
 		is_group: DF.Check
 		lft: DF.Int
@@ -123,6 +129,7 @@ class Company(NestedSet):
 		round_off_cost_center: DF.Link | None
 		round_off_for_opening: DF.Link | None
 		sales_monthly_history: DF.SmallText | None
+		sample_retention_warehouse: DF.Link | None
 		series_for_depreciation_entry: DF.Data | None
 		service_expense_account: DF.Link | None
 		stock_adjustment_account: DF.Link | None
@@ -182,8 +189,67 @@ class Company(NestedSet):
 		self.validate_parent_company()
 		self.set_reporting_currency()
 		self.validate_inventory_account_settings()
+		self.validate_warehouses()
 		self.cant_change_valuation_method()
 		self.validate_pending_reposts(old_doc)
+		self.validate_sdbnb_configuration()
+
+	def validate_outstanding_sdbnb_transactions(self, account):
+		GLEntry = frappe.qb.DocType("GL Entry")
+		DeliveryNote = frappe.qb.DocType("Delivery Note")
+
+		delivery_notes = (
+			frappe.qb.from_(GLEntry)
+			.join(DeliveryNote)
+			.on((GLEntry.voucher_type == "Delivery Note") & (GLEntry.voucher_no == DeliveryNote.name))
+			.select(DeliveryNote.name)
+			.where(
+				(GLEntry.is_cancelled == 0)
+				& (GLEntry.company == self.name)
+				& (GLEntry.account == account)
+				& (DeliveryNote.per_billed < 100)
+				& (DeliveryNote.docstatus == 1)
+				& (DeliveryNote.status.isin(["To Bill", "Partially Billed"]))
+			)
+			.distinct()
+			.run(pluck=True)
+		)
+
+		if delivery_notes:
+			dn_links = ", ".join(get_link_to_form("Delivery Note", dn) for dn in delivery_notes[:10])
+
+			frappe.throw(
+				_(
+					"Stock Delivered But Not Billed Account cannot be changed or disabled since account {0} contains outstanding Delivery Notes: {1}"
+				).format(
+					bold(account),
+					dn_links,
+				)
+			)
+
+	def validate_sdbnb_configuration(self):
+		if self.get("__islocal"):
+			return
+
+		if self.enable_stock_delivered_but_not_billed and not self.stock_delivered_but_not_billed:
+			frappe.throw(_("Please select Stock Delivered But Not Billed Account"))
+
+		doc_before_save = self.get_doc_before_save()
+
+		if not (doc_before_save and doc_before_save.stock_delivered_but_not_billed):
+			return
+
+		account_changed = (
+			self.stock_delivered_but_not_billed != doc_before_save.stock_delivered_but_not_billed
+		)
+
+		feature_disabled = (
+			doc_before_save.enable_stock_delivered_but_not_billed
+			and not self.enable_stock_delivered_but_not_billed
+		)
+
+		if account_changed or feature_disabled:
+			self.validate_outstanding_sdbnb_transactions(doc_before_save.stock_delivered_but_not_billed)
 
 	def cant_change_valuation_method(self):
 		doc_before_save = self.get_doc_before_save()
@@ -235,6 +301,42 @@ class Company(NestedSet):
 				).format(bold(self.name)),
 				title=_("Cannot Change Inventory Account Setting"),
 			)
+
+	def validate_warehouses(self):
+		for fieldname in (
+			"default_warehouse",
+			"sample_retention_warehouse",
+			"default_in_transit_warehouse",
+			"default_warehouse_for_sales_return",
+			"default_wip_warehouse",
+			"default_fg_warehouse",
+			"default_scrap_warehouse",
+		):
+			warehouse = self.get(fieldname)
+			if not warehouse:
+				continue
+
+			details = frappe.db.get_value("Warehouse", warehouse, ["is_group", "company"], as_dict=True)
+			if not details:
+				continue
+
+			label = _(self.meta.get_label(fieldname))
+
+			if details.is_group:
+				frappe.throw(
+					_(
+						"Group Warehouses cannot be used in transactions. Please change the value of {0}"
+					).format(bold(label)),
+					title=_("Incorrect Warehouse"),
+				)
+
+			if details.company != self.name:
+				frappe.throw(
+					_("{0} {1} does not belong to company {2}").format(
+						bold(label), bold(warehouse), bold(self.name)
+					),
+					title=_("Incorrect Warehouse"),
+				)
 
 	def validate_abbr(self):
 		if not self.abbr:
@@ -419,6 +521,11 @@ class Company(NestedSet):
 			if wh_detail["is_group"]:
 				parent_warehouse = warehouse.name
 
+		if not self.default_warehouse:
+			stores = frappe.db.get_value("Warehouse", {"warehouse_name": _("Stores"), "company": self.name})
+			if stores:
+				self.db_set("default_warehouse", stores)
+
 	def create_default_accounts(self):
 		from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import create_charts
 
@@ -438,91 +545,92 @@ class Company(NestedSet):
 		)
 
 	def create_default_departments(self):
+		root = get_root_of("Department") or "All Departments"
 		records = [
 			# Department
 			{
 				"doctype": "Department",
-				"department_name": _("All Departments"),
+				"department_name": root,
 				"is_group": 1,
 				"parent_department": "",
-				"__condition": lambda: not frappe.db.exists("Department", _("All Departments")),
+				"__condition": lambda: not frappe.db.exists("Department", root),
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Accounts"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Marketing"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Sales"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Purchase"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Operations"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Production"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Dispatch"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Customer Service"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Human Resources"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Management"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Quality Management"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Research & Development"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Legal"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 		]
@@ -856,6 +964,7 @@ def install_country_fixtures(company, country):
 	except ImportError:
 		pass
 	except Exception:
+		frappe.db.rollback()
 		frappe.log_error("Unable to set country fixtures")
 		frappe.throw(
 			_("Failed to setup defaults for country {0}. Please contact support.").format(
@@ -945,7 +1054,7 @@ def get_children(doctype: str, parent: str | None = None, company: str | None = 
 	)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def add_node():
 	from frappe.desk.treeview import make_tree_args
 
@@ -1056,7 +1165,7 @@ def get_billing_shipping_address(
 	return {"primary_address": primary_address, "shipping_address": shipping_address}
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def create_transaction_deletion_request(company: str):
 	frappe.only_for("System Manager")
 

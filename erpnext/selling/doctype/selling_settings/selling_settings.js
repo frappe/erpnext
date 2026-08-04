@@ -3,7 +3,7 @@
 
 frappe.ui.form.on("Selling Settings", {
 	refresh(frm) {
-		if (!frm.naming_controller) frm.naming_controller = new erpnext.NamingSeriesController(frm);
+		if (!frm.naming_controller) frm.naming_controller = new frappe.ui.NamingSeriesController(frm);
 
 		const display = frm.doc.cust_master_name === "Naming Series";
 		frm.set_df_property("naming_series_details", "hidden", !display);
@@ -50,6 +50,7 @@ function get_transactions(frm) {
 		{ label: __("Sales Order"), doctype: "Sales Order" },
 		{ label: __("Sales Invoice"), doctype: "Sales Invoice" },
 		{ label: __("Delivery Note"), doctype: "Delivery Note" },
+		{ label: __("Proforma Invoice"), doctype: "Proforma Invoice" },
 	];
 
 	if (frm.doc.cust_master_name !== "Naming Series") {

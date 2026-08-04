@@ -660,7 +660,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 		}
 
 		if ((entries && !entries.length) || !entries) {
-			frappe.throw(__("Please add atleast one Serial No / Batch No"));
+			frappe.throw(__("Please add at least one Serial No / Batch No"));
 		}
 
 		if (!warehouse) {
@@ -668,7 +668,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 		}
 
 		if (this.item?.is_rejected && this.item.rejected_warehouse === this.item.warehouse) {
-			frappe.throw(__("Rejected Warehouse and Accepted Warehouse cannot be same."));
+			frappe.throw(__("Rejected Warehouse and Accepted Warehouse cannot be the same."));
 		}
 
 		frappe

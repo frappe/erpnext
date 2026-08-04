@@ -20,7 +20,8 @@
   "sub_operations",
   "total_operation_time",
   "section_break_4",
-  "description"
+  "description",
+  "work_instruction"
  ],
  "fields": [
   {
@@ -42,6 +43,12 @@
    "fieldtype": "Text",
    "in_preview": 1,
    "label": "Description"
+  },
+  {
+   "description": "Shown to operators on the Shop Floor. Supports rich text and embedded images for step-by-step guidance.",
+   "fieldname": "work_instruction",
+   "fieldtype": "Text Editor",
+   "label": "Work Instructions"
   },
   {
    "collapsible": 1,

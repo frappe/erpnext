@@ -178,6 +178,8 @@
   "column_break_yvzv",
   "inter_company_order_reference",
   "party_account_currency",
+  "proforma_tab",
+  "proforma_html",
   "connections_tab"
  ],
  "fields": [
@@ -893,13 +895,15 @@
    "print_hide": 1
   },
   {
+   "description": "Applying a Discount Amount? When this Sales Order is partially fulfilled through multiple Delivery Notes and Sales Invoices, the Discount Amount is allocated on a FIFO basis. The earlier transactions receive a larger share of the discount. To spread the discount proportionally across item prices, use Additional Discount Percentage instead.",
    "fieldname": "discount_amount",
    "fieldtype": "Currency",
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Additional Discount Amount",
    "options": "currency",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_description_on_click": 1
   },
   {
    "fieldname": "base_grand_total",
@@ -1329,6 +1333,7 @@
    "width": "50%"
   },
   {
+   "depends_on": "eval:doc.sales_partner",
    "fetch_from": "sales_partner.commission_rate",
    "fetch_if_empty": 1,
    "fieldname": "commission_rate",
@@ -1336,17 +1341,20 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Commission Rate",
+   "no_copy": 1,
    "oldfieldname": "commission_rate",
    "oldfieldtype": "Currency",
    "print_hide": 1,
    "width": "100px"
   },
   {
+   "depends_on": "eval:doc.sales_partner",
    "fieldname": "total_commission",
    "fieldtype": "Currency",
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Total Commission",
+   "no_copy": 1,
    "oldfieldname": "total_commission",
    "oldfieldtype": "Currency",
    "options": "Company:company:default_currency",
@@ -1477,9 +1485,11 @@
   },
   {
    "allow_on_submit": 1,
+   "depends_on": "eval:doc.sales_partner",
    "fieldname": "amount_eligible_for_commission",
    "fieldtype": "Currency",
    "label": "Amount Eligible for Commission",
+   "no_copy": 1,
    "options": "Company:company:default_currency",
    "read_only": 1
   },
@@ -1517,6 +1527,17 @@
   {
    "fieldname": "column_break_49",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "proforma_tab",
+   "fieldtype": "Tab Break",
+   "hidden": 1,
+   "label": "Proforma"
+  },
+  {
+   "fieldname": "proforma_html",
+   "fieldtype": "HTML",
+   "label": "Proforma Invoices"
   },
   {
    "fieldname": "connections_tab",
@@ -1760,7 +1781,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-28 11:41:11.823034",
+ "modified": "2026-06-24 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

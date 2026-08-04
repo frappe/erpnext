@@ -330,6 +330,31 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		self.assertEqual(scio.items[0].delivered_qty, 2)
 		self.assertEqual(scio.items[0].returned_qty, 1)
 
+	def test_manufacture_consumption_validates_against_work_order(self):
+		"""Cover the non-skip-transfer manufacture path, where consumption is validated
+		against the Work Order's transferred quantity (the Work Order branch of
+		validate_manufacture)."""
+		so, scio = create_so_scio()
+		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
+
+		scio.reload()
+		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+		wo.wip_warehouse = "Work In Progress - _TC"
+		next(
+			item for item in wo.required_items if item.item_code == "Self RM"
+		).source_warehouse = "Stores - _TC"
+		wo.submit()
+
+		frappe.new_doc("Stock Entry").update(
+			make_stock_entry_from_wo(wo.name, "Material Transfer for Manufacture")
+		).submit()
+
+		manufacture = frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture"))
+		manufacture.submit()
+
+		scio.reload()
+		self.assertEqual(scio.items[0].produced_qty, 5)
+
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_delivery_of_overproduced_qty": 1})
 	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings", {"overproduction_percentage_for_work_order": 20}

@@ -15,7 +15,7 @@ from frappe.utils.caching import request_cache
 from frappe.utils.nestedset import NestedSet
 from pypika.terms import ExistsCriterion
 
-from erpnext.stock import get_warehouse_account
+from erpnext.stock import get_warehouse_account, get_warehouse_account_map
 
 
 class Warehouse(NestedSet):
@@ -176,8 +176,7 @@ def get_children(
 	if is_root:
 		parent = ""
 
-	if isinstance(include_disabled, str):
-		include_disabled = json.loads(include_disabled)
+	include_disabled = frappe.parse_json(include_disabled)
 
 	fields = ["name as value", "is_group as expandable"]
 
@@ -192,7 +191,7 @@ def get_children(
 	return frappe.get_list(doctype, fields=fields, filters=filters, order_by="name")
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def add_node():
 	from frappe.desk.treeview import make_tree_args
 
@@ -221,11 +220,19 @@ def get_child_warehouses(warehouse):
 
 def get_warehouses_based_on_account(account, company=None):
 	warehouses = []
+	warehouse_account_map = None
 	for d in frappe.get_all(
 		"Warehouse", fields=["name", "is_group"], filters={"account": account, "disabled": 0}
 	):
 		if d.is_group:
-			warehouses.extend(get_child_warehouses(d.name))
+			# Keep only children whose effective account matches; a child can override the group's account
+			if warehouse_account_map is None:
+				warehouse_account_map = get_warehouse_account_map(company)
+			warehouses.extend(
+				w
+				for w in get_child_warehouses(d.name)
+				if (warehouse_account_map.get(w) or {}).get("account") == account
+			)
 		else:
 			warehouses.append(d.name)
 

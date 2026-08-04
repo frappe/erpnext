@@ -62,7 +62,7 @@ def validate_accounting_period(gl_map):
 				return
 		frappe.throw(
 			_(
-				"You cannot create or cancel any accounting entries with in the closed Accounting Period {0}"
+				"You cannot create or cancel any accounting entries within the closed Accounting Period {0}"
 			).format(frappe.bold(accounting_periods[0].name)),
 			ClosedAccountingPeriod,
 		)
@@ -140,9 +140,9 @@ def validate_against_pcv(is_opening, posting_date, company):
 	)
 
 	if last_pcv_date and getdate(posting_date) <= getdate(last_pcv_date):
-		message = _("Books have been closed till the period ending on {0}").format(formatdate(last_pcv_date))
+		message = _("Books have been closed until the period ending on {0}").format(formatdate(last_pcv_date))
 		message += "</br >"
-		message += _("You cannot create/amend any accounting entries till this date.")
+		message += _("You cannot create/amend any accounting entries until this date.")
 		frappe.throw(message, title=_("Period Closed"))
 
 

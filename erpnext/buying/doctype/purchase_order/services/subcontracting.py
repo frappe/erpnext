@@ -36,7 +36,7 @@ class SubcontractingService:
 							)
 						)
 				if not item.fg_item_qty:
-					frappe.throw(_("Row #{0}: Finished Good Item Qty can not be zero").format(item.idx))
+					frappe.throw(_("Row #{0}: Finished Good Item Qty cannot be zero").format(item.idx))
 		else:
 			for item in doc.items:
 				item.set("fg_item", None)

@@ -7,9 +7,10 @@ import json
 import frappe
 from frappe import _, throw
 from frappe.desk.form.assign_to import clear, close_all_assignments
+from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import Max, Min, Sum
-from frappe.utils import add_days, add_to_date, cstr, date_diff, flt, get_link_to_form, getdate, today
+from frappe.utils import add_days, add_to_date, date_diff, flt, get_link_to_form, getdate, today
 from frappe.utils.data import format_date
 from frappe.utils.nestedset import NestedSet
 
@@ -144,7 +145,7 @@ class Task(NestedSet):
 				if frappe.db.get_value("Task", d.task, "status") not in ("Completed", "Cancelled"):
 					frappe.throw(
 						_(
-							"Cannot complete task {0} as its dependant task {1} are not completed / cancelled."
+							"Cannot complete task {0} as its dependent task {1} is not completed / cancelled."
 						).format(frappe.bold(self.name), frappe.bold(d.task))
 					)
 
@@ -247,25 +248,32 @@ class Task(NestedSet):
 	def check_recursion(self):
 		if self.flags.ignore_recursion_check:
 			return
-		check_list = [["task", "parent"], ["parent", "task"]]
-		for d in check_list:
-			task_list, count = [self.name], 0
-			while len(task_list) > count:
-				tasks = frappe.get_all(
-					"Task Depends On",
-					filters={d[1]: cstr(task_list[count])},
-					fields=[d[0]],
-					as_list=True,
-				)
-				count = count + 1
-				for b in tasks:
-					if b[0] == self.name:
-						frappe.throw(_("Circular Reference Error"), CircularReferenceError)
-					if b[0]:
-						task_list.append(b[0])
+		# "Task Depends On" is a directed edge (parent depends on `task`); a cycle exists if this
+		# task is reachable from itself along either direction. One recursive CTE per direction
+		# fetches the whole reachable set in a single query -- UNION makes it cycle-safe at any
+		# depth, so unlike the old per-node BFS it needs no arbitrary depth cap.
+		for select_field, filter_field in (("task", "parent"), ("parent", "task")):
+			if self._reaches_self(select_field, filter_field):
+				frappe.throw(_("Circular Reference Error"), CircularReferenceError)
 
-				if count == 15:
-					break
+	def _reaches_self(self, select_field: str, filter_field: str) -> bool:
+		depends_on = frappe.qb.DocType("Task Depends On")
+		tree = frappe.qb.Table("dependency_tree")
+		seed = (
+			frappe.qb.from_(depends_on)
+			.select(depends_on[select_field].as_("node"))
+			.where(depends_on[filter_field] == self.name)
+		)
+		recursion = (
+			frappe.qb.from_(depends_on)
+			.join(tree)
+			.on(depends_on[filter_field] == tree.node)
+			.select(depends_on[select_field])
+		)
+		reachable = (
+			frappe.qb.with_(seed + recursion, "dependency_tree", recursive=True).from_(tree).select(tree.node)
+		).run(pluck=True)
+		return self.name in reachable
 
 	def reschedule_dependent_tasks(self):
 		end_date = self.exp_end_date or self.act_end_date
@@ -316,7 +324,7 @@ class Task(NestedSet):
 
 	def on_trash(self):
 		if check_if_child_exists(self.name):
-			throw(_("Child Task exists for this Task. You can not delete this Task."))
+			throw(_("Child Task exists for this Task. You cannot delete this Task."))
 
 		self.update_nsm_model()
 
@@ -362,9 +370,9 @@ def get_project(doctype: str, txt: str, searchfield: str, start: int, page_len: 
 	)
 
 
-@frappe.whitelist()
-def set_multiple_status(names: str, status: str):
-	names = json.loads(names)
+@frappe.whitelist(methods=["POST"])
+def set_multiple_status(names: str | list, status: str):
+	names = frappe.parse_json(names)
 	for name in names:
 		task = frappe.get_doc("Task", name)
 		task.status = status
@@ -385,7 +393,9 @@ def set_tasks_as_overdue():
 
 
 @frappe.whitelist()
-def make_timesheet(source_name: str, target_doc: dict | None = None, ignore_permissions: bool = False):
+def make_timesheet(
+	source_name: str, target_doc: str | dict | Document | None = None, ignore_permissions: bool = False
+):
 	def set_missing_values(source: dict, target: dict) -> None:
 		target.parent_project = source.project
 		target.append(
@@ -444,7 +454,7 @@ def get_children(
 	return tasks
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def add_node():
 	from frappe.desk.treeview import make_tree_args
 
@@ -458,9 +468,9 @@ def add_node():
 	frappe.get_doc(args).insert()
 
 
-@frappe.whitelist()
-def add_multiple_tasks(data: str, parent: str):
-	data = json.loads(data)
+@frappe.whitelist(methods=["POST"])
+def add_multiple_tasks(data: str | list, parent: str):
+	data = frappe.parse_json(data)
 	new_doc = {"doctype": "Task", "parent_task": parent if parent != "All Tasks" else ""}
 	new_doc["project"] = frappe.db.get_value("Task", {"name": parent}, "project") or ""
 

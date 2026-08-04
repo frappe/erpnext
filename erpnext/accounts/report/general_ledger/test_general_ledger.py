@@ -3,7 +3,7 @@
 
 import frappe
 from frappe import qb
-from frappe.utils import flt, today
+from frappe.utils import add_days, flt, today
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.general_ledger.general_ledger import execute
@@ -62,6 +62,64 @@ class TestGeneralLedger(ERPNextTestSuite):
 		]
 		for doctype in doctype_list:
 			qb.from_(qb.DocType(doctype)).delete().where(qb.DocType(doctype).company == self.company).run()
+
+	def test_opening_total_and_closing_balances(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
+		self.clear_old_entries()
+		# reuse bootstrap non-party accounts; clear_old_entries() leaves them clean of GL
+		account = "_Test Account Cost for Goods Sold - _TC"
+		offset = "_Test Bank - _TC"
+		make_journal_entry(account, offset, 1000, posting_date=add_days(today(), -60), submit=True)  # opening
+		make_journal_entry(account, offset, 200, posting_date=today(), submit=True)  # in period
+
+		filters = frappe._dict(
+			company=self.company, from_date=add_days(today(), -30), to_date=today(), account=[account]
+		)
+		labelled = {row.get("account"): row for row in execute(filters)[1]}
+
+		self.assertEqual(labelled["'Opening'"]["debit"], 1000)
+		self.assertEqual(labelled["'Total'"]["debit"], 200)
+		self.assertEqual(labelled["'Closing (Opening + Total)'"]["debit"], 1200)
+
+	def test_categorize_by_account_subtotals(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
+		self.clear_old_entries()
+		# reuse bootstrap non-party accounts; clear_old_entries() leaves them clean of GL
+		account_a = "_Test Account Cost for Goods Sold - _TC"
+		account_b = "_Test Bank - _TC"
+		offset = "_Test Cash - _TC"
+		make_journal_entry(account_a, offset, 300, posting_date=today(), submit=True)
+		make_journal_entry(account_b, offset, 400, posting_date=today(), submit=True)
+
+		filters = frappe._dict(
+			company=self.company,
+			from_date=add_days(today(), -1),
+			to_date=today(),
+			categorize_by="Categorize by Account",
+		)
+		total_debits = [row["debit"] for row in execute(filters)[1] if row.get("account") == "'Total'"]
+
+		# each account gets its own subtotal row, then a grand total (300 + 400) at the end
+		self.assertIn(300, total_debits)
+		self.assertIn(400, total_debits)
+		self.assertEqual(total_debits[-1], 700)
+
+	def test_party_filter_returns_only_that_party(self):
+		self.clear_old_entries()
+		create_sales_invoice(customer="_Test Customer", company=self.company, debit_to="Debtors - _TC")
+		create_sales_invoice(customer="_Test Customer 1", company=self.company, debit_to="Debtors - _TC")
+
+		filters = frappe._dict(
+			company=self.company,
+			from_date=add_days(today(), -1),
+			to_date=today(),
+			party_type="Customer",
+			party=["_Test Customer"],
+		)
+		parties = {row.get("party") for row in execute(filters)[1] if row.get("party")}
+		self.assertEqual(parties, {"_Test Customer"})
 
 	def test_foreign_account_balance_after_exchange_rate_revaluation(self):
 		"""

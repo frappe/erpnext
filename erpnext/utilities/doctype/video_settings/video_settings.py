@@ -3,9 +3,9 @@
 
 
 import frappe
-from apiclient.discovery import build
 from frappe import _
 from frappe.model.document import Document
+from pyyoutube import Api, PyYouTubeException
 
 
 class VideoSettings(Document):
@@ -28,8 +28,10 @@ class VideoSettings(Document):
 	def validate_youtube_api_key(self):
 		if self.enable_youtube_tracking and self.api_key:
 			try:
-				build("youtube", "v3", developerKey=self.api_key)
+				Api(api_key=self.api_key).get_i18n_languages(parts="snippet")
 			except Exception:
-				title = _("Failed to Authenticate the API key.")
 				self.log_error("Failed to authenticate API key")
-				frappe.throw(title + " Please check the error logs.", title=_("Invalid Credentials"))
+				frappe.throw(
+					_("Failed to authenticate the API key. Please check the error logs."),
+					title=_("Invalid Credentials"),
+				)

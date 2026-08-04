@@ -13,6 +13,7 @@ from functools import partial
 
 import frappe
 from frappe import _
+from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import cint, flt, get_link_to_form, nowdate
 
@@ -115,7 +116,7 @@ def make_work_order(
 		frappe.throw(_("Not permitted"), frappe.PermissionError)
 
 	item_details = get_item_details(item, project)
-	bom_no = _variant_default_bom(item) or bom_no
+	bom_no = _variant_default_bom(item, bom_no) or bom_no
 	wo_doc = _new_work_order(item, bom_no, company, item_details, use_multi_level_bom)
 
 	if flt(qty) > 0:
@@ -128,8 +129,11 @@ def make_work_order(
 	return wo_doc
 
 
-def _variant_default_bom(item):
+def _variant_default_bom(item, bom_no=None):
 	if not frappe.db.get_value("Item", item, "variant_of"):
+		return None
+	# selected BOM already belongs to this variant
+	if bom_no and frappe.db.get_value("BOM", bom_no, "item") == item:
 		return None
 	return frappe.db.get_value("BOM", {"item": item, "is_default": 1, "docstatus": 1})
 
@@ -148,8 +152,7 @@ def _new_work_order(item, bom_no, company, item_details, use_multi_level_bom):
 
 
 def add_variant_item(variant_items, wo_doc, bom_no, table_name="items"):
-	if isinstance(variant_items, str):
-		variant_items = json.loads(variant_items)
+	variant_items = frappe.parse_json(variant_items)
 
 	for item in variant_items:
 		_add_variant_row(item, wo_doc, bom_no, table_name)
@@ -289,8 +292,7 @@ def _set_stock_entry_warehouses(stock_entry, work_order, purpose, target_warehou
 def make_job_card(work_order: str, operations: str | list, parent_bom: str | None = None):
 	frappe.has_permission("Job Card", "create", throw=True)
 
-	if isinstance(operations, str):
-		operations = json.loads(operations)
+	operations = frappe.parse_json(operations)
 
 	work_order = frappe.get_doc("Work Order", work_order)
 	for row in operations:
@@ -378,7 +380,7 @@ def validate_operation_data(row):
 
 	if flt(row.get("qty")) > flt(row.get("pending_qty")):
 		frappe.throw(
-			_("For operation {0}: Quantity ({1}) can not be greater than pending quantity({2})").format(
+			_("For operation {0}: Quantity ({1}) can not be greater than pending quantity ({2})").format(
 				frappe.bold(row.get("operation")),
 				frappe.bold(row.get("qty")),
 				frappe.bold(row.get("pending_qty")),
@@ -469,10 +471,12 @@ def get_work_order_operation_data(work_order, operation, workstation):
 
 
 @frappe.whitelist()
-def create_pick_list(source_name: str, target_doc: str | None = None, for_qty: float | None = None):
+def create_pick_list(
+	source_name: str, target_doc: str | dict | Document | None = None, for_qty: float | None = None
+):
 	frappe.has_permission("Pick List", "create", throw=True)
 
-	for_qty = for_qty or json.loads(target_doc).get("for_qty")
+	for_qty = for_qty or frappe.parse_json(target_doc).get("for_qty")
 	max_finished_goods_qty = frappe.db.get_value("Work Order", source_name, "qty")
 	postprocess = partial(
 		_set_pick_list_item_qty, for_qty=for_qty, max_finished_goods_qty=max_finished_goods_qty
@@ -490,6 +494,7 @@ def _pick_list_mapping(postprocess):
 		"Work Order": {"doctype": "Pick List", "validation": {"docstatus": ["=", 1]}},
 		"Work Order Item": {
 			"doctype": "Pick List Item",
+			"field_no_map": ["transferred_qty"],
 			"postprocess": postprocess,
 			"condition": lambda doc: abs(doc.transferred_qty) < abs(doc.required_qty),
 		},
@@ -515,6 +520,41 @@ def _set_pick_list_item_qty(source, target, source_parent, for_qty, max_finished
 	target.uom = frappe.get_value("Item", source.item_code, "stock_uom")
 	target.stock_uom = target.uom
 	target.conversion_factor = 1
+
+
+@frappe.whitelist()
+def make_material_request(source_name: str, target_doc: str | dict | Document | None = None):
+	frappe.has_permission("Material Request", "create", throw=True)
+
+	doc = get_mapped_doc("Work Order", source_name, _material_request_mapping(), target_doc)
+	doc.material_request_type = "Material Transfer"
+	return doc
+
+
+def _material_request_mapping():
+	return {
+		"Work Order": {
+			"doctype": "Material Request",
+			"validation": {"docstatus": ["=", 1]},
+			"field_map": {"name": "work_order"},
+		},
+		"Work Order Item": {
+			"doctype": "Material Request Item",
+			"field_map": [
+				("required_qty", "qty"),
+				("stock_uom", "uom"),
+				("source_warehouse", "from_warehouse"),
+			],
+			"postprocess": _set_material_request_item,
+			"condition": lambda doc: abs(doc.transferred_qty) < abs(doc.required_qty),
+		},
+	}
+
+
+def _set_material_request_item(source, target, source_parent):
+	target.warehouse = source_parent.wip_warehouse
+	target.qty = flt(source.required_qty) - flt(source.transferred_qty)
+	target.schedule_date = nowdate()
 
 
 @frappe.whitelist()

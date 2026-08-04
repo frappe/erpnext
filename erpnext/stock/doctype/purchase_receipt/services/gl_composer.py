@@ -67,6 +67,7 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 				remarks=remarks,
 				against_account=stock_asset_rbnb,
 				account_currency=account_currency,
+				project=item.project,
 				item=item,
 			)
 
@@ -118,6 +119,7 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 					against_account=stock_asset_account_name,
 					debit_in_account_currency=-1 * flt(outgoing_amount, item.precision("base_net_amount")),
 					account_currency=account_currency,
+					project=item.project,
 					item=item,
 				)
 
@@ -141,6 +143,7 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 							against_account=doc.supplier,
 							debit_in_account_currency=-1 * discrepancy_caused_by_exchange_rate_difference,
 							account_currency=account_currency,
+							project=item.project,
 							item=item,
 						)
 
@@ -154,6 +157,7 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 							against_account=doc.supplier,
 							debit_in_account_currency=-1 * discrepancy_caused_by_exchange_rate_difference,
 							account_currency=account_currency,
+							project=item.project,
 							item=item,
 						)
 
@@ -187,6 +191,14 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 							item=item,
 						)
 
+		def make_expenses_added_to_stock_entries(item):
+			if not self.book_stock_expense_enabled():
+				return
+
+			amount = flt(item.landed_cost_voucher_amount, item.precision("base_net_amount"))
+			if amount and not item.is_fixed_asset:
+				self.append_expenses_added_to_stock_pair(gl_entries, item.item_code, amount, item)
+
 		def make_amount_difference_entry(item):
 			if item.amount_difference_with_purchase_invoice and stock_asset_rbnb:
 				account_currency = get_account_currency(stock_asset_rbnb)
@@ -214,6 +226,7 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 					remarks=remarks,
 					against_account=stock_asset_account_name,
 					account_currency=supplier_warehouse_account_currency,
+					project=item.project,
 					item=item,
 				)
 
@@ -240,13 +253,7 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 				divisional_loss -= rejected_item_cost
 
 			if divisional_loss:
-				loss_account = (
-					doc.get_company_default("default_expense_account", ignore_validation=True)
-					or stock_asset_rbnb
-				)
-
-				if doc.is_return and item.expense_account:
-					loss_account = item.expense_account
+				loss_account = self.get_divisional_loss_account(item, stock_asset_rbnb)
 
 				cost_center = item.cost_center or frappe.get_cached_value(
 					"Company", doc.company, "cost_center"
@@ -322,6 +329,7 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 					make_item_asset_inward_gl_entry(d, stock_value_diff, stock_asset_account_name)
 					outgoing_amount = make_stock_received_but_not_billed_entry(d)
 					make_landed_cost_gl_entries(d)
+					make_expenses_added_to_stock_entries(d)
 					make_amount_difference_entry(d)
 					make_sub_contracting_gl_entries(d)
 					make_divisional_loss_gl_entry(d, outgoing_amount)
@@ -358,6 +366,30 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 				+ ": \n"
 				+ "\n".join(warehouse_with_no_account)
 			)
+
+	def get_divisional_loss_account(self, item, stock_asset_rbnb):
+		"""Account that absorbs the difference between the document value and the value actually
+		booked into stock. For a Standard Cost item this difference is a purchase price variance
+		(receipt rate vs standard rate), so it goes to the Purchase Price Variance account; for all
+		other items it keeps the existing behaviour (default expense account, or the item's expense
+		account on a return)."""
+		from erpnext.stock.utils import get_valuation_method
+
+		doc = self.doc
+		if item.item_code and get_valuation_method(item.item_code, doc.company) == "Standard Cost":
+			from erpnext.stock.doctype.item_standard_cost.item_standard_cost import (
+				get_purchase_price_variance_account,
+			)
+
+			return get_purchase_price_variance_account(item.item_code, doc.company)
+
+		loss_account = (
+			doc.get_company_default("default_expense_account", ignore_validation=True) or stock_asset_rbnb
+		)
+		if doc.is_return and item.expense_account:
+			loss_account = item.expense_account
+
+		return loss_account
 
 	def _make_tax_gl_entries(self, gl_entries: list, via_landed_cost_voucher: bool = False) -> None:
 		doc = self.doc

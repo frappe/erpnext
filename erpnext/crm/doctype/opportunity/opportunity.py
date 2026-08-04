@@ -280,13 +280,17 @@ class Opportunity(TransactionBase, CRMNote):
 			self.save()
 
 		else:
-			frappe.throw(_("Cannot declare as lost, because Quotation has been made."))
+			frappe.throw(_("Cannot declare as Lost because an active Quotation exists."))
 
 	def has_active_quotation(self):
 		if not self.get("items", []):
 			return frappe.get_all(
 				"Quotation",
-				{"opportunity": self.name, "status": ("not in", ["Lost", "Closed"]), "docstatus": 1},
+				{
+					"opportunity": self.name,
+					"status": ("not in", ["Lost", "Cancelled", "Expired"]),
+					"docstatus": 1,
+				},
 				"name",
 			)
 		else:
@@ -300,7 +304,7 @@ class Opportunity(TransactionBase, CRMNote):
 				.where(
 					(q.docstatus == 1)
 					& (qi.prevdoc_docname == self.name)
-					& q.status.notin(["Lost", "Closed"])
+					& q.status.notin(["Lost", "Cancelled", "Expired"])
 				)
 				.run()
 			)
@@ -308,7 +312,13 @@ class Opportunity(TransactionBase, CRMNote):
 	def has_ordered_quotation(self):
 		if not self.get("items", []):
 			return frappe.get_all(
-				"Quotation", {"opportunity": self.name, "status": "Ordered", "docstatus": 1}, "name"
+				"Quotation",
+				{
+					"opportunity": self.name,
+					"status": ("in", ["Ordered", "Partially Ordered"]),
+					"docstatus": 1,
+				},
+				"name",
 			)
 		else:
 			q = frappe.qb.DocType("Quotation")
@@ -318,7 +328,11 @@ class Opportunity(TransactionBase, CRMNote):
 				.inner_join(qi)
 				.on(q.name == qi.parent)
 				.select(q.name)
-				.where((q.docstatus == 1) & (qi.prevdoc_docname == self.name) & (q.status == "Ordered"))
+				.where(
+					(q.docstatus == 1)
+					& (qi.prevdoc_docname == self.name)
+					& (q.status.isin(["Ordered", "Partially Ordered"]))
+				)
 				.run()
 			)
 
@@ -389,9 +403,9 @@ def get_item_details(item_code: str):
 	}
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def set_multiple_status(names: str | list[str], status: str):
-	names = json.loads(names)
+	names = frappe.parse_json(names)
 	for name in names:
 		opp = frappe.get_doc("Opportunity", name)
 		opp.status = status
@@ -399,8 +413,8 @@ def set_multiple_status(names: str | list[str], status: str):
 
 
 def auto_close_opportunity():
-	"""auto close the `Replied` Opportunities after 7 days"""
-	auto_close_after_days = frappe.db.get_single_value("CRM Settings", "close_opportunity_after_days") or 15
+	"""Auto close `Replied` Opportunities inactive for the days configured in CRM Settings."""
+	auto_close_after_days = frappe.db.get_single_value("CRM Settings", "close_opportunity_after_days")
 
 	table = frappe.qb.DocType("Opportunity")
 	opportunities = (

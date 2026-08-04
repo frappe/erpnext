@@ -84,7 +84,7 @@ def get_columns():
 
 
 @frappe.whitelist()
-def irs_1099_print(filters: str):
+def irs_1099_print(filters: str | dict):
 	if not filters:
 		frappe._dict(
 			{
@@ -93,7 +93,7 @@ def irs_1099_print(filters: str):
 			}
 		)
 	else:
-		filters = frappe._dict(json.loads(filters))
+		filters = frappe._dict(frappe.parse_json(filters))
 
 	fiscal_year_doc = get_fiscal_year(fiscal_year=filters.fiscal_year, as_dict=True)
 	fiscal_year = cstr(fiscal_year_doc.year_start_date.year)
@@ -131,6 +131,7 @@ def get_payer_address_html(company):
 		.where(address.is_your_company_address == 1)
 		.orderby(Case().when(address.address_type == "Postal", 1).else_(0), order=frappe.qb.desc)
 		.orderby(Case().when(address.address_type == "Billing", 1).else_(0), order=frappe.qb.desc)
+		.orderby(address.name)  # deterministic LIMIT-1 tie-break across engines
 		.limit(1)
 		.run(as_dict=True)
 	)

@@ -156,13 +156,15 @@ def process_genericode_import(
 	code_column: str,
 	title_column: str | None = None,
 	description_column: str | None = None,
-	filters: str | None = None,
+	filters: str | dict | None = None,
 ):
 	from erpnext.edi.doctype.common_code.common_code import import_genericode
 
 	column_map = {"code": code_column, "title": title_column, "description": description_column}
 
-	return import_genericode(code_list_name, file_name, column_map, json.loads(filters) if filters else None)
+	return import_genericode(
+		code_list_name, file_name, column_map, frappe.parse_json(filters) if filters else None
+	)
 
 
 def get_genericode_columns_and_examples(root):

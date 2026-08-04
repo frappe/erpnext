@@ -26,6 +26,58 @@ INSPECTION_FIELDNAME_MAP = {
 	"Delivery Note": "inspection_required_before_delivery",
 }
 
+# Purposes whose inward (t_warehouse) row is inspected.
+QI_INCOMING_PURPOSES = (
+	"Material Receipt",
+	"Repack",
+	"Receive from Customer",
+	"Subcontracting Return",
+)
+
+# Purposes whose outgoing (s_warehouse) row is inspected. This is an explicit
+# allow-list rather than "everything that isn't incoming" so a new purpose can't
+# silently start requiring a QI. Material Consumption for Manufacture is left out
+# on purpose: an inspection_required BOM inspects the manufactured output (handled
+# by the "Manufacture" finished-good rule), not each consumed raw material.
+# Keep this in sync with erpnext.stock.qi_* helpers in transaction.js.
+QI_OUTGOING_PURPOSES = (
+	"Material Issue",
+	"Material Transfer",
+	"Material Transfer for Manufacture",
+	"Send to Subcontractor",
+	"Subcontracting Delivery",
+	"Disassemble",
+)
+
+
+SECONDARY_ITEM_PURPOSES = ("Manufacture", "Repack", "Disassemble")
+
+
+def is_inspection_exempt_secondary_row(doc, row) -> bool:
+	"""Whether the row is a secondary item on a document that produces secondary items."""
+	if not (row.get("secondary_item_type") or row.get("is_legacy_scrap_item")):
+		return False
+
+	if doc.doctype == "Stock Entry":
+		return doc.purpose in SECONDARY_ITEM_PURPOSES
+
+	return True
+
+
+def stock_entry_row_requires_inspection(purpose, row):
+	"""Check if this Stock Entry row need a Quality Inspection."""
+	if purpose in SECONDARY_ITEM_PURPOSES and (
+		row.get("secondary_item_type") or row.get("is_legacy_scrap_item")
+	):
+		return False
+	if purpose == "Manufacture":
+		return bool(row.is_finished_item)
+	if purpose in QI_INCOMING_PURPOSES:
+		return bool(row.t_warehouse)
+	if purpose in QI_OUTGOING_PURPOSES:
+		return bool(row.s_warehouse and row.s_warehouse != row.t_warehouse)
+	return False
+
 
 class QualityInspectionService:
 	def __init__(self, doc) -> None:
@@ -49,10 +101,10 @@ class QualityInspectionService:
 				"Item", row.item_code, inspection_required_fieldname
 			):
 				qi_required = True
-			elif self.doc.doctype == "Stock Entry" and row.t_warehouse:
-				qi_required = True  # inward stock needs inspection
+			elif self.doc.doctype == "Stock Entry":
+				qi_required = stock_entry_row_requires_inspection(self.doc.purpose, row)
 
-			if row.get("secondary_item_type") or row.get("is_legacy_scrap_item"):
+			if is_inspection_exempt_secondary_row(self.doc, row):
 				continue
 
 			if qi_required:  # validate row only if inspection is required on item level

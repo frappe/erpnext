@@ -2,7 +2,7 @@
 # See license.txt
 
 import frappe
-from frappe.utils import add_days, today
+from frappe.utils import add_days, getdate, today
 
 from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
 from erpnext.buying.report.requested_items_to_order_and_receive.requested_items_to_order_and_receive import (
@@ -43,6 +43,36 @@ class TestRequestedItemsToOrderAndReceive(ERPNextTestSuite):
 		self.assertEqual(len(data), 2)
 		self.assertEqual(data[0].ordered_qty, 0.0)
 		self.assertEqual(data[1].ordered_qty, 57.0)
+
+	def test_required_date_is_earliest_schedule_date(self):
+		create_item("Test MR Report Dup Item")
+		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0])
+		mr.transaction_date = today()
+		mr.schedule_date = add_days(today(), 5)
+		mr.set("items", mr.items[:1])
+		row = mr.items[0]
+		row.item_code = "Test MR Report Dup Item"
+		row.item_name = "Test MR Report Dup Item"
+		row.description = "Test MR Report Dup Item"
+		row.uom = "Nos"
+		row.schedule_date = add_days(today(), 5)
+		mr.append(
+			"items",
+			{
+				"item_code": "Test MR Report Dup Item",
+				"item_name": "Test MR Report Dup Item",
+				"description": "Test MR Report Dup Item",
+				"uom": "Nos",
+				"qty": row.qty,
+				"warehouse": row.warehouse,
+				"schedule_date": add_days(today(), 1),
+			},
+		)
+		mr.submit()
+
+		data = get_data(self.filters.update({"item_code": "Test MR Report Dup Item"}))
+		self.assertEqual(len(data), 1)
+		self.assertEqual(getdate(data[0].required_date), getdate(add_days(today(), 1)))
 
 	def setup_material_request(self, order=False, receive=False, days=0):
 		po = None

@@ -1,0 +1,32 @@
+{
+ "applies_to_doctype": "Delivery Trip",
+ "creation": "2026-07-09 15:06:59.710395",
+ "docstatus": 0,
+ "doctype": "DocType Settings Map",
+ "idx": 0,
+ "is_active": 1,
+ "is_standard": 1,
+ "mappings": [
+  {
+   "setting_field": "dispatch_template",
+   "settings_doctype": "Delivery Settings"
+  },
+  {
+   "setting_field": "stop_delay",
+   "settings_doctype": "Delivery Settings"
+  },
+  {
+   "setting_field": "dispatch_attachment",
+   "settings_doctype": "Delivery Settings"
+  },
+  {
+   "setting_field": "send_with_attachment",
+   "settings_doctype": "Delivery Settings"
+  }
+ ],
+ "modified": "2026-07-09 15:07:54.781814",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Delivery Trip (Standard)",
+ "owner": "Administrator"
+}

@@ -117,6 +117,30 @@ class TestSalesAnalytics(ERPNextTestSuite):
 		self.assertAlmostEqual(rows["Sales"]["total"], expected, places=2)
 		self.assertAlmostEqual(rows["Order Types"]["total"], expected, places=2)
 
+	def test_order_type_leaf_rows_in_sorted_order(self):
+		"""get_teams fetches distinct order_types; frappe drops the SQL ORDER BY for distinct queries on
+		postgres, so the report sorts the order-type rows in python (key=str.casefold) to keep them in a
+		deterministic, case-insensitive order identical on both engines."""
+		for order_type in ("Shopping Cart", "Maintenance", "Sales"):  # created out of sorted order
+			so = make_sales_order(
+				company=COMPANY,
+				customer=CUSTOMER,
+				qty=1,
+				rate=100,
+				transaction_date="2019-04-12",
+				do_not_submit=True,
+			)
+			so.order_type = order_type
+			so.submit()
+
+		columns, data, *_ = execute(self._base_filters(tree_type="Order Type"))
+
+		mine = {"Sales", "Maintenance", "Shopping Cart"}
+		leaves = [row["entity"] for row in data if row.get("entity") in mine]
+		# the order-type rows must appear in casefold-sorted order on both engines
+		self.assertEqual(leaves, sorted(leaves, key=str.casefold))
+		self.assertEqual(set(leaves), mine)
+
 	def test_customer_group_by_quantity(self):
 		"""value_quantity='Quantity' switches the selected value column (total_qty)."""
 		_columns, data, *_ = execute(

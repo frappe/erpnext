@@ -15,6 +15,7 @@ from erpnext.stock.serial_batch_bundle import (
 	get_empty_batches_based_work_order,
 	get_serial_nos_from_bundle,
 )
+from erpnext.stock.utils import get_combine_datetime
 
 from .serial_batch import create_serial_and_batch_bundle
 from .stock_entry_base import BaseStockEntry
@@ -124,7 +125,8 @@ class BaseManufactureStockEntry(BaseStockEntry):
 					self.doc.process_loss_qty = flt(process_loss_qty, precision)
 
 					frappe.msgprint(
-						_("The Process Loss Qty has reset as per job cards Process Loss Qty"), alert=True
+						_("The Process Loss Qty has been reset as per the Job Card's Process Loss Qty"),
+						alert=True,
 					)
 
 		if not self.doc.process_loss_percentage and not self.doc.process_loss_qty:
@@ -136,7 +138,7 @@ class BaseManufactureStockEntry(BaseStockEntry):
 			self.doc.process_loss_qty = flt(
 				(flt(self.doc.fg_completed_qty) * flt(self.doc.process_loss_percentage)) / 100
 			)
-		elif self.doc.process_loss_qty and not self.doc.process_loss_percentage:
+		elif self.doc.process_loss_qty and self.doc.fg_completed_qty:
 			self.doc.process_loss_percentage = flt(
 				(flt(self.doc.process_loss_qty) / flt(self.doc.fg_completed_qty)) * 100
 			)
@@ -1005,11 +1007,9 @@ def get_secondary_items_from_job_card(work_order, jc_name=None):
 		.select(
 			Sum(job_card_secondary_item.stock_qty).as_("stock_qty"),
 			job_card_secondary_item.item_code,
-			# non-grouped columns are item attributes / the secondary-item BOM link, constant per
-			# grouped (item_code, secondary_item_type) -> Max() keeps the GROUP BY valid on postgres
-			# while returning the value MySQL picked arbitrarily.
-			Max(job_card_secondary_item.item_name).as_("item_name"),
-			Max(job_card_secondary_item.description).as_("description"),
+			# stock_uom and the secondary-item BOM link are constant per grouped
+			# (item_code, secondary_item_type) -> Max() returns their single value. item_name and
+			# description are editable per line, so they come from a representative line below.
 			Max(job_card_secondary_item.stock_uom).as_("stock_uom"),
 			job_card_secondary_item.secondary_item_type,
 			Max(job_card_secondary_item.bom_secondary_item).as_("bom_secondary_item"),
@@ -1028,7 +1028,175 @@ def get_secondary_items_from_job_card(work_order, jc_name=None):
 	if jc_name:
 		secondary_items = secondary_items.where(job_card.name == jc_name)
 
-	return secondary_items.run(as_dict=1)
+	rows = secondary_items.run(as_dict=1)
+	apply_representative_secondary_lines(rows, work_order, jc_name)
+	return rows
+
+
+def apply_representative_secondary_lines(rows, work_order, jc_name=None):
+	"""Fill item_name/description from one real Job Card Secondary Item line per group.
+
+	Both are editable per line, so the same secondary item across a work order's job cards can
+	carry several values per group. Aggregating them sorts text, and MariaDB folds case while
+	PostgreSQL orders by byte value, so the engines pick differently.
+	"""
+	job_cards = frappe.get_all(
+		"Job Card",
+		filters={"work_order": work_order, "docstatus": 1, **({"name": jc_name} if jc_name else {})},
+		pluck="name",
+	)
+
+	representative = {}
+	if job_cards:
+		for line in frappe.get_all(
+			"Job Card Secondary Item",
+			filters={"parent": ("in", job_cards)},
+			# idx first, so the rule really is "first by idx"; creation breaks ties across job cards.
+			# Never order by parent -- the Job Card name is text, and sorting text is the divergence
+			# this is here to avoid.
+			fields=["item_code", "secondary_item_type", "item_name", "description"],
+			order_by="idx, creation",
+		):
+			representative.setdefault((line.item_code, line.secondary_item_type), line)
+
+	for row in rows:
+		line = representative.get((row.item_code, row.secondary_item_type))
+		row.item_name = line.item_name if line else None
+		row.description = line.description if line else None
+
+
+def get_previous_operation_output_sn_batch(work_order, item_code, warehouse):
+	"""Serial nos / batches that an earlier operation produced for ``item_code`` (a
+	semi-finished good) and are still available in ``warehouse`` -- i.e. produced by a
+	prior operation's Manufacture entry minus whatever later entries already pulled out
+	of that warehouse. Returns an empty result for ordinary raw materials."""
+	result = frappe._dict(serial_nos=[], batches=defaultdict(float))
+	if not (work_order and item_code and warehouse):
+		return result
+
+	# Only items that are the output (finished_good) of some operation qualify.
+	if not frappe.db.exists("Work Order Operation", {"parent": work_order, "finished_good": item_code}):
+		return result
+
+	item_details = frappe.get_cached_value("Item", item_code, ["has_serial_no", "has_batch_no"], as_dict=1)
+	if not item_details or not (item_details.has_serial_no or item_details.has_batch_no):
+		return result
+
+	produced = _get_operation_sn_batch(work_order, item_code, warehouse, produced=True)
+	consumed = _get_operation_sn_batch(work_order, item_code, warehouse, produced=False)
+
+	for serial_no in produced.serial_nos:
+		if serial_no not in consumed.serial_nos:
+			result.serial_nos.append(serial_no)
+
+	for batch_no, qty in produced.batches.items():
+		available = flt(qty) - flt(consumed.batches.get(batch_no))
+		if available > 0:
+			result.batches[batch_no] = available
+
+	return result
+
+
+def _get_operation_sn_batch(work_order, item_code, warehouse, produced=True):
+	bundles = _get_operation_bundles(work_order, item_code, warehouse, produced)
+	result = frappe._dict(serial_nos=[], batches=defaultdict(float))
+	if not bundles:
+		return result
+
+	sbe = frappe.qb.DocType("Serial and Batch Entry")
+	entries = (
+		frappe.qb.from_(sbe)
+		.select(sbe.serial_no, sbe.batch_no, sbe.qty)
+		.where((sbe.parent.isin(bundles)) & (sbe.is_cancelled == 0))
+		.orderby(sbe.parent)
+		.orderby(sbe.idx)
+	).run(as_dict=True)
+
+	for row in entries:
+		if row.serial_no:
+			result.serial_nos.append(row.serial_no)
+		if row.batch_no:
+			result.batches[row.batch_no] += abs(flt(row.qty))
+
+	return result
+
+
+def _get_operation_bundles(work_order, item_code, warehouse, produced):
+	se = frappe.qb.DocType("Stock Entry")
+	sed = frappe.qb.DocType("Stock Entry Detail")
+	warehouse_field = sed.t_warehouse if produced else sed.s_warehouse
+
+	query = (
+		frappe.qb.from_(se)
+		.inner_join(sed)
+		.on(sed.parent == se.name)
+		.select(sed.serial_and_batch_bundle)
+		.where(
+			(se.work_order == work_order)
+			& (se.docstatus == 1)
+			& (sed.item_code == item_code)
+			& (warehouse_field == warehouse)
+			& (sed.serial_and_batch_bundle.isnotnull())
+		)
+	)
+	if produced:
+		query = query.where((se.purpose == "Manufacture") & (sed.is_finished_item == 1))
+
+	return [row[0] for row in query.run()]
+
+
+def _cap_pool_to_qty(pool, qty):
+	"""Trim the available serial/batch pool to at most ``qty`` (fill what's available)."""
+	serial_nos, batches = [], frappe._dict()
+	if pool.serial_nos:
+		serial_nos = pool.serial_nos[: cint(qty)]
+	elif pool.batches:
+		remaining = flt(qty)
+		for batch_no, batch_qty in pool.batches.items():
+			if remaining <= 0:
+				break
+			use = min(flt(batch_qty), remaining)
+			batches[batch_no] = use
+			remaining -= use
+	return serial_nos, batches
+
+
+def set_previous_operation_serial_batch(parent_doc, row):
+	"""Auto-pull serial nos / batches produced by a previous operation onto a
+	consumption / transfer-out ``row`` of a Stock Entry, filling what is available and
+	leaving any shortfall blank for the user. No-op for ordinary raw materials or when
+	the row already carries serial/batch."""
+	warehouse = row.get("s_warehouse")
+	qty = flt(row.get("qty")) * flt(row.get("conversion_factor") or 1)
+
+	if not parent_doc.get("work_order") or not warehouse or qty <= 0:
+		return
+	if row.get("serial_and_batch_bundle") or row.get("serial_no") or row.get("batch_no"):
+		return
+
+	pool = get_previous_operation_output_sn_batch(parent_doc.work_order, row.item_code, warehouse)
+	serial_nos, batches = _cap_pool_to_qty(pool, qty)
+	if not serial_nos and not batches:
+		return
+
+	bundle = SerialBatchCreation(
+		{
+			"item_code": row.item_code,
+			"warehouse": warehouse,
+			"posting_datetime": get_combine_datetime(parent_doc.posting_date, parent_doc.posting_time),
+			"voucher_type": "Stock Entry",
+			"company": parent_doc.company,
+			"type_of_transaction": "Outward",
+			"qty": flt(qty),
+			"serial_nos": serial_nos,
+			"batches": batches,
+			"do_not_submit": True,
+		}
+	).make_serial_and_batch_bundle()
+
+	if bundle and bundle.get("name"):
+		row.serial_and_batch_bundle = bundle.name
+		row.use_serial_batch_fields = 0
 
 
 def ceil_qty_if_uom_has_whole_number(qty, stock_uom):
@@ -1040,10 +1208,9 @@ def ceil_qty_if_uom_has_whole_number(qty, stock_uom):
 
 @frappe.whitelist()
 def move_sample_to_retention_warehouse(company: str, items: str | list):
-	if isinstance(items, str):
-		items = json.loads(items)
+	items = frappe.parse_json(items)
 
-	retention_warehouse = frappe.get_single_value("Stock Settings", "sample_retention_warehouse")
+	retention_warehouse = get_sample_retention_warehouse(company)
 	stock_entry = frappe.new_doc("Stock Entry")
 	stock_entry.company = company
 	stock_entry.purpose = "Material Transfer"
@@ -1060,7 +1227,7 @@ def move_sample_to_retention_warehouse(company: str, items: str | list):
 def _process_sample_item(stock_entry, item, retention_warehouse):
 	warehouse = item.get("t_warehouse") or item.get("warehouse")
 	sabb = _duplicate_sample_bundle(item, warehouse)
-	total_qty, sabe_list = _collect_sample_batches(sabb, item, warehouse)
+	total_qty, sabe_list = _collect_sample_batches(sabb, item, warehouse, stock_entry.company)
 	if total_qty:
 		_append_sample_entry(stock_entry, sabb, item, warehouse, retention_warehouse, total_qty, sabe_list)
 
@@ -1077,21 +1244,22 @@ def _duplicate_sample_bundle(item, warehouse):
 	).duplicate_package()
 
 
-def _collect_sample_batches(sabb, item, warehouse):
+def _collect_sample_batches(sabb, item, warehouse, company):
 	batches = get_batch_nos(item.get("serial_and_batch_bundle"))
 	sabe_list, total_qty = [], 0
 	for batch_no in batches.keys():
-		qty, entries = _process_sample_batch(sabb, item, warehouse, batch_no)
+		qty, entries = _process_sample_batch(sabb, item, warehouse, batch_no, company)
 		total_qty += qty
 		sabe_list.extend(entries)
 	return total_qty, sabe_list
 
 
-def _process_sample_batch(sabb, item, warehouse, batch_no):
+def _process_sample_batch(sabb, item, warehouse, batch_no, company):
 	sample_quantity = validate_sample_quantity(
 		item.get("item_code"),
 		item.get("sample_quantity"),
 		item.get("transfer_qty") or item.get("qty"),
+		company,
 		batch_no,
 	)
 	sabe = next(entry for entry in sabb.entries if entry.batch_no == batch_no)
@@ -1135,18 +1303,36 @@ def _append_sample_entry(stock_entry, sabb, item, warehouse, retention_warehouse
 
 
 @frappe.whitelist()
-def validate_sample_quantity(item_code: str, sample_quantity: int, qty: float, batch_no: str | None = None):
+def validate_sample_quantity(
+	item_code: str, sample_quantity: int, qty: float, company: str, batch_no: str | None = None
+):
 	from erpnext.stock.doctype.batch.batch import get_batch_qty
 
 	if cint(qty) < cint(sample_quantity):
 		frappe.throw(
 			_("Sample quantity {0} cannot be more than received quantity {1}").format(sample_quantity, qty)
 		)
-	return _adjust_sample_quantity(item_code, sample_quantity, batch_no, get_batch_qty)
+
+	retention_warehouse = get_sample_retention_warehouse(company)
+	return _adjust_sample_quantity(item_code, sample_quantity, batch_no, get_batch_qty, retention_warehouse)
 
 
-def _adjust_sample_quantity(item_code, sample_quantity, batch_no, get_batch_qty):
-	retention_warehouse = frappe.get_single_value("Stock Settings", "sample_retention_warehouse")
+def get_sample_retention_warehouse(company: str) -> str:
+	# `company` arrives from whitelisted callers, so it decides which company's stock gets read.
+	frappe.has_permission("Company", "read", company, throw=True)
+
+	warehouse = frappe.get_cached_value("Company", company, "sample_retention_warehouse")
+	if not warehouse:
+		frappe.throw(
+			_("Please set {0} in Company {1} to retain samples.").format(
+				bold(_("Sample Retention Warehouse")), bold(company)
+			),
+			title=_("Sample Retention Warehouse Missing"),
+		)
+	return warehouse
+
+
+def _adjust_sample_quantity(item_code, sample_quantity, batch_no, get_batch_qty, retention_warehouse):
 	retainted_qty = get_batch_qty(batch_no, retention_warehouse, item_code) if batch_no else 0
 	max_retain_qty = frappe.get_value("Item", item_code, "sample_quantity")
 	if retainted_qty >= max_retain_qty:

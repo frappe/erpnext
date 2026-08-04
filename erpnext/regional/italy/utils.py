@@ -104,7 +104,7 @@ def prepare_invoice(invoice, progressive_number):
 
 
 def get_conditions(filters):
-	filters = json.loads(filters)
+	filters = frappe.parse_json(filters)
 
 	conditions = {"docstatus": 1, "company_tax_id": ("!=", "")}
 
@@ -219,12 +219,12 @@ def append_row_as_charges(items, tax, reference_row, summary_data):
 # Preflight for successful e-invoice export.
 def sales_invoice_validate(doc):
 	# Validate company
-	if doc.doctype != "Sales Invoice":
+	if doc.doctype != "Sales Invoice" or doc.is_opening == "Yes":
 		return
 
 	if not doc.company_address:
 		frappe.throw(
-			_("Please set an Address on the Company '%s'" % doc.company),
+			_("Please set an Address on the Company '{0}'").format(doc.company),
 			title=_("E-Invoicing Information Missing"),
 		)
 	else:
@@ -254,7 +254,7 @@ def sales_invoice_validate(doc):
 		doc.customer_fiscal_code = customer.fiscal_code
 		if not doc.customer_fiscal_code:
 			frappe.throw(
-				_("Please set Fiscal Code for the customer '%s'" % doc.customer),
+				_("Please set Fiscal Code for the customer '{0}'").format(doc.customer),
 				title=_("E-Invoicing Information Missing"),
 			)
 	else:
@@ -262,14 +262,14 @@ def sales_invoice_validate(doc):
 			doc.customer_fiscal_code = customer.fiscal_code
 			if not doc.customer_fiscal_code:
 				frappe.throw(
-					_("Please set Fiscal Code for the public administration '%s'" % doc.customer),
+					_("Please set Fiscal Code for the public administration '{0}'").format(doc.customer),
 					title=_("E-Invoicing Information Missing"),
 				)
 		else:
 			doc.tax_id = customer.tax_id
 			if not doc.tax_id:
 				frappe.throw(
-					_("Please set Tax ID for the customer '%s'" % doc.customer),
+					_("Please set Tax ID for the customer '{0}'").format(doc.customer),
 					title=_("E-Invoicing Information Missing"),
 				)
 
@@ -303,7 +303,7 @@ def sales_invoice_validate(doc):
 # Ensure payment details are valid for e-invoice.
 def sales_invoice_on_submit(doc, method):
 	# Validate payment details
-	if get_company_country(doc.company) not in [
+	if doc.is_opening == "Yes" or get_company_country(doc.company) not in [
 		"Italy",
 		"Italia",
 		"Italian Republic",
@@ -369,7 +369,7 @@ def generate_single_invoice(docname: str):
 
 # Delete e-invoice attachment on cancel.
 def sales_invoice_on_cancel(doc, method):
-	if get_company_country(doc.company) not in [
+	if doc.is_opening == "Yes" or get_company_country(doc.company) not in [
 		"Italy",
 		"Italia",
 		"Italian Republic",

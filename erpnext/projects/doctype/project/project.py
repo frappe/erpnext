@@ -59,7 +59,7 @@ class Project(Document):
 		project_type: DF.Link | None
 		sales_order: DF.Link | None
 		second_email: DF.Time | None
-		status: DF.Literal["Open", "Completed", "Cancelled"]
+		status: DF.Literal["Open", "On hold", "Completed", "Cancelled"]
 		subject: DF.Data | None
 		to_time: DF.Time | None
 		total_billable_amount: DF.Currency
@@ -90,6 +90,7 @@ class Project(Document):
 	def validate(self):
 		if not self.is_new():
 			self.copy_from_template()
+			self.control_access_for_project_users()
 		self.send_welcome_email()
 		self.update_costing()
 		self.update_percent_complete()
@@ -239,6 +240,7 @@ class Project(Document):
 	def after_insert(self):
 		self.copy_from_template("after_insert")
 		self.link_with_sales_order()
+		self.control_access_for_project_users()
 
 	def link_with_sales_order(self) -> None:
 		"""Back-link the source Sales Order to this project.
@@ -276,6 +278,8 @@ class Project(Document):
 		if self.percent_complete_method == "Manual":
 			if self.status == "Completed":
 				self.percent_complete = 100
+			elif flt(self.percent_complete) < 0 or flt(self.percent_complete) > 100:
+				frappe.throw(_("% Complete must be between 0 and 100"))
 			return
 
 		total = frappe.db.count("Task", dict(project=self.name))
@@ -311,8 +315,8 @@ class Project(Document):
 					pct_complete += row["progress"] * frappe.utils.safe_div(row["task_weight"], weight_sum)
 				self.percent_complete = flt(flt(pct_complete), 2)
 
-		# don't update status if it is cancelled
-		if self.status == "Cancelled":
+		# don't update status if it is manually set to cancelled or on hold
+		if self.status in ("Cancelled", "On hold"):
 			return
 
 		self.status = "Completed" if self.percent_complete == 100 else "Open"
@@ -434,6 +438,34 @@ class Project(Document):
 					)
 					user.welcome_email_sent = 1
 
+	def control_access_for_project_users(self):
+		def revoke_access_for_project_users(removed_users):
+			users = set([d.user for d in frappe.share.get_users(self.doctype, self.name)])
+			for user in removed_users:
+				if user not in users:
+					continue
+
+				frappe.share.remove(self.doctype, self.name, user)
+
+		def grant_access_for_project_users(new_users):
+			for user in new_users:
+				frappe.share.add_docshare(self.doctype, self.name, user=user)
+
+		current_users = set([d.user for d in self.users])
+		old_doc = self.get_doc_before_save()
+
+		if not old_doc:
+			grant_access_for_project_users(current_users)
+			return
+
+		previous_users = set([d.user for d in old_doc.users])
+
+		new_users = current_users - previous_users
+		removed_users = previous_users - current_users
+
+		revoke_access_for_project_users(removed_users)
+		grant_access_for_project_users(new_users)
+
 
 def get_timeline_data(doctype: str, name: str) -> dict[int, int]:
 	"""Return timeline for attendance"""
@@ -486,6 +518,8 @@ def get_project_list(doctype, txt, filters, limit_start, limit_page_length=20, o
 			else:
 				filters.append([doctype, "name", "like", "%" + txt + "%"])
 
+	# No distinct=True: it never dedupes here (single table, fields="*" carries PK `name`) but makes
+	# frappe drop ORDER BY on Postgres, leaving the portal list unordered there.
 	return frappe.get_list(
 		doctype,
 		fields="*",
@@ -495,7 +529,6 @@ def get_project_list(doctype, txt, filters, limit_start, limit_page_length=20, o
 		limit_page_length=limit_page_length,
 		order_by=order_by,
 		ignore_permissions=ignore_permissions,
-		distinct=True,
 	)
 
 
@@ -627,12 +660,12 @@ def allow_to_make_project_update(project, time, frequency):
 		return True
 
 
-@frappe.whitelist()
-def create_duplicate_project(prev_doc: str, project_name: str):
+@frappe.whitelist(methods=["POST"])
+def create_duplicate_project(prev_doc: str | dict, project_name: str):
 	"""Create duplicate project based on the old project"""
 	import json
 
-	prev_doc = json.loads(prev_doc)
+	prev_doc = frappe.parse_json(prev_doc)
 
 	if project_name == prev_doc.get("name"):
 		frappe.throw(_("Use a name that is different from previous project name"))
@@ -778,7 +811,7 @@ def create_kanban_board_if_not_exists(project: str):
 	return True
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def set_project_status(project: str, status: str):
 	"""
 	set status for project and all related tasks

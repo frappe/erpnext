@@ -112,6 +112,64 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		sco.load_from_db()
 		self.assertEqual(sco.status, "Partially Received")
 
+	def test_sco_requires_a_subcontracting_purchase_order(self):
+		sco = get_subcontracting_order(do_not_save=1)
+		sco.purchase_order = None
+		self.assertRaises(frappe.ValidationError, sco.validate_purchase_order_for_subcontracting)
+
+	def test_service_item_must_be_non_stock(self):
+		sco = get_subcontracting_order(do_not_submit=1)
+		sco.service_items[0].item_code = "_Test Item"  # a stock item
+		self.assertRaises(frappe.ValidationError, sco.validate_service_items)
+
+	def test_reserve_warehouse_must_differ_from_supplier_warehouse(self):
+		sco = get_subcontracting_order(do_not_submit=1)
+		sco.supplied_items[0].reserve_warehouse = sco.supplier_warehouse
+		self.assertRaises(frappe.ValidationError, sco.validate_supplied_items)
+
+	def test_subcontracting_receipt_applies_bom_process_loss(self):
+		sco = get_subcontracting_order()
+		frappe.db.set_value("BOM", sco.items[0].bom, "process_loss_percentage", 10)
+
+		scr = make_subcontracting_receipt(sco.name)
+
+		# 10% of the ordered 10 qty is lost in processing
+		self.assertEqual(scr.items[0].received_qty, 10)
+		self.assertEqual(scr.items[0].process_loss_qty, 1)
+		self.assertEqual(scr.items[0].qty, 9)
+
+	def test_service_cost_is_matched_by_purchase_order_item(self):
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 7",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": "Subcontracted Item SA7",
+				"fg_item_qty": 10,
+			},
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 10,
+				"rate": 200,
+				"fg_item": "Subcontracted Item SA1",
+				"fg_item_qty": 10,
+			},
+		]
+		sco = get_subcontracting_order(service_items=service_items)
+		expected = {item.purchase_order_item: item.service_cost_per_qty for item in sco.items}
+
+		# The two finished goods have distinct service costs, so a position-based pairing would swap them
+		self.assertEqual(len(set(expected.values())), 2)
+
+		# Service costs must follow purchase_order_item, not list position
+		sco.service_items.reverse()
+		sco.calculate_service_costs()
+
+		for item in sco.items:
+			self.assertEqual(item.service_cost_per_qty, expected[item.purchase_order_item])
+
 	def test_make_rm_stock_entry(self):
 		sco = get_subcontracting_order()
 		rm_items = get_rm_items(sco.supplied_items)
@@ -335,6 +393,85 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		self.assertEqual(
 			bin_after_cancel_sco.reserved_qty_for_sub_contract, bin_before_sco.reserved_qty_for_sub_contract
 		)
+
+	def test_close_subcontracting_order_releases_reserved_qty(self):
+		# RM in stock at the reserve warehouse for transfer
+		make_stock_entry(target="_Test Warehouse - _TC", item_code="_Test Item", qty=10, basic_rate=100)
+		make_stock_entry(
+			target="_Test Warehouse - _TC", item_code="_Test Item Home Desktop 100", qty=20, basic_rate=100
+		)
+
+		bin_before_sco = frappe.db.get_value(
+			"Bin",
+			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "_Test Item"},
+			fieldname="reserved_qty_for_sub_contract",
+			as_dict=1,
+		)
+
+		# Create SCO with a reserve warehouse on the supplied items
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": "_Test FG Item",
+				"fg_item_qty": 10,
+			},
+		]
+		sco = get_subcontracting_order(service_items=service_items)
+
+		# Transfer only 90% of the raw materials to the supplier warehouse
+		ste = frappe.get_doc(make_rm_stock_entry(sco.name))
+		for item in ste.items:
+			item.qty *= 0.9
+		ste.save()
+		ste.submit()
+		sco.load_from_db()
+		self.assertEqual(sco.status, "Partial Material Transferred")
+
+		# Receive only a partial qty so the order stays open (per_received < 100)
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty -= 1
+		scr.save()
+		scr.submit()
+		sco.load_from_db()
+		self.assertEqual(sco.status, "Partially Received")
+
+		# Keep another SCO open so transfers from the closed SCO must not reduce its reservation
+		open_sco = get_subcontracting_order(service_items=service_items)
+		self.assertEqual(open_sco.status, "Open")
+
+		bin_before_close = frappe.db.get_value(
+			"Bin",
+			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "_Test Item"},
+			fieldname=["reserved_qty_for_sub_contract", "projected_qty"],
+			as_dict=1,
+		)
+
+		# One unit remains reserved for the partially transferred SCO, plus ten for the open SCO
+		self.assertEqual(
+			bin_before_close.reserved_qty_for_sub_contract,
+			bin_before_sco.reserved_qty_for_sub_contract + 11,
+		)
+
+		# Close the partially-received order
+		sco.update_status("Closed")
+		self.assertEqual(sco.status, "Closed")
+
+		bin_after_close = frappe.db.get_value(
+			"Bin",
+			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "_Test Item"},
+			fieldname=["reserved_qty_for_sub_contract", "projected_qty"],
+			as_dict=1,
+		)
+
+		# Closing releases the remaining unit without applying its transfer against the open SCO
+		self.assertEqual(
+			bin_after_close.reserved_qty_for_sub_contract,
+			bin_before_sco.reserved_qty_for_sub_contract + 10,
+		)
+		self.assertEqual(bin_after_close.projected_qty, bin_before_close.projected_qty + 1)
 
 	def test_send_to_subcontractor_ste_submit_without_sco_write_permission(self):
 		"""A Stock-only user (can submit Stock Entries but has no Subcontracting Order write) must be

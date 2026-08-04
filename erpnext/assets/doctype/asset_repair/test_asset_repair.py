@@ -238,22 +238,13 @@ class TestAssetRepair(ERPNextTestSuite):
 			submit=1,
 		)
 
-		gl_entries = frappe.db.sql(
-			"""
-			select
-				account,
-				sum(debit) as debit,
-				sum(credit) as credit
-			from `tabGL Entry`
-			where
-				voucher_type='Asset Repair'
-				and voucher_no=%s
-			group by
-				account
-		""",
-			asset_repair.name,
-			as_dict=1,
-		)
+		gle = frappe.qb.DocType("GL Entry")
+		gl_entries = (
+			frappe.qb.from_(gle)
+			.select(gle.account, Sum(gle.debit).as_("debit"), Sum(gle.credit).as_("credit"))
+			.where((gle.voucher_type == "Asset Repair") & (gle.voucher_no == asset_repair.name))
+			.groupby(gle.account)
+		).run(as_dict=True)
 
 		self.assertTrue(gl_entries)
 
@@ -287,22 +278,13 @@ class TestAssetRepair(ERPNextTestSuite):
 			submit=1,
 		)
 
-		gl_entries = frappe.db.sql(
-			"""
-			select
-				account,
-				sum(debit) as debit,
-				sum(credit) as credit
-			from `tabGL Entry`
-			where
-				voucher_type='Asset Repair'
-				and voucher_no=%s
-			group by
-				account
-		""",
-			asset_repair.name,
-			as_dict=1,
-		)
+		gle = frappe.qb.DocType("GL Entry")
+		gl_entries = (
+			frappe.qb.from_(gle)
+			.select(gle.account, Sum(gle.debit).as_("debit"), Sum(gle.credit).as_("credit"))
+			.where((gle.voucher_type == "Asset Repair") & (gle.voucher_no == asset_repair.name))
+			.groupby(gle.account)
+		).run(as_dict=True)
 
 		self.assertTrue(gl_entries)
 

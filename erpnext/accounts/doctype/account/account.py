@@ -121,6 +121,7 @@ class Account(NestedSet):
 		self.validate_account_currency()
 		self.validate_root_company_and_sync_account_to_children()
 		self.validate_receivable_payable_account_type()
+		self.validate_stock_account_type_change()
 
 	def validate_parent_child_account_type(self):
 		if self.parent_account:
@@ -212,6 +213,36 @@ class Account(NestedSet):
 				frappe.msgprint(msg)
 				self.add_comment("Comment", msg)
 
+	def validate_stock_account_type_change(self):
+		doc_before_save = self.get_doc_before_save()
+		if not (doc_before_save and doc_before_save.account_type == "Stock"):
+			return
+
+		if self.account_type == "Stock":
+			return
+
+		if self.stock_ledger_entry_exists():
+			frappe.throw(
+				_(
+					"The account type of {0} cannot be changed from {1} because stock ledger entries exist against it."
+				).format(frappe.bold(self.name), frappe.bold(_("Stock")))
+			)
+
+	def stock_ledger_entry_exists(self):
+		from erpnext.stock import get_warehouse_account_map
+
+		warehouse_account = get_warehouse_account_map(self.company)
+		warehouses = [wh for wh, details in warehouse_account.items() if details.account == self.name]
+		if not warehouses:
+			return False
+
+		return bool(
+			frappe.db.count(
+				"Stock Ledger Entry",
+				filters={"warehouse": ("in", warehouses), "is_cancelled": 0},
+			)
+		)
+
 	def validate_root_details(self):
 		doc_before_save = self.get_doc_before_save()
 
@@ -234,7 +265,7 @@ class Account(NestedSet):
 			if not frappe.db.get_value(
 				"Account", {"account_name": self.account_name, "company": ancestors[0]}, "name"
 			):
-				frappe.throw(_("Please add the account to root level Company - {}").format(ancestors[0]))
+				frappe.throw(_("Please add the account to root level Company - {0}").format(ancestors[0]))
 		elif self.parent_account:
 			descendants = get_descendants_of("Company", self.company)
 			if not descendants:
@@ -659,8 +690,15 @@ def _ensure_idle_system():
 
 	last_gl_update = None
 	try:
-		# We also lock inserts to GL entry table with for_update here.
-		last_gl_update = frappe.db.get_value("GL Entry", {}, "modified", for_update=True, wait=False)
+		if frappe.db.db_type == "postgres":
+			# The MariaDB branch blocks new GL inserts via the gap lock its for_update read takes;
+			# a postgres row lock never blocks inserts, so take an EXCLUSIVE table lock instead --
+			# writers block until the rename commits, readers don't. NOWAIT mirrors wait=False.
+			frappe.db.sql("LOCK TABLE `tabGL Entry` IN EXCLUSIVE MODE NOWAIT")
+			last_gl_update = frappe.db.get_value("GL Entry", {}, "modified")
+		else:
+			# We also lock inserts to GL entry table with for_update here.
+			last_gl_update = frappe.db.get_value("GL Entry", {}, "modified", for_update=True, wait=False)
 	except frappe.QueryTimeoutError:
 		# wait=False fails immediately if there's an active transaction.
 		last_gl_update = add_to_date(None, seconds=-1)
@@ -671,7 +709,7 @@ def _ensure_idle_system():
 	if last_gl_update > add_to_date(None, minutes=-5):
 		frappe.throw(
 			_(
-				"Last GL Entry update was done {}. This operation is not allowed while system is actively being used. Please wait for 5 minutes before retrying."
+				"Last GL Entry update was done {0}. This operation is not allowed while system is actively being used. Please wait for 5 minutes before retrying."
 			).format(pretty_date(last_gl_update)),
 			title=_("System In Use"),
 		)

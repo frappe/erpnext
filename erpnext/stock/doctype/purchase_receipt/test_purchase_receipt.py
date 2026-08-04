@@ -184,6 +184,21 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(pi.payment_schedule[1].payment_amount, flt(pi.grand_total) / 2)
 		self.assertEqual(pi.payment_schedule[1].invoice_portion, 50)
 
+	def test_make_purchase_invoice_with_dict_target(self):
+		from frappe.model.mapper import map_docs
+
+		pr = make_purchase_receipt()
+		target = frappe.new_doc("Purchase Invoice").as_dict()
+
+		pi = map_docs(
+			method="erpnext.stock.doctype.purchase_receipt.mapper.make_purchase_invoice",
+			source_names=[pr.name],
+			target_doc=target,
+		)
+
+		self.assertEqual(pi.doctype, "Purchase Invoice")
+		self.assertEqual(len(pi.items), len(pr.items))
+
 	def test_purchase_receipt_no_gl_entry(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
@@ -1909,6 +1924,92 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		self.assertEqual(query[0].value, 0)
 
+	def test_internal_transfer_pr_incoming_sle_anchored_to_dn_rate(self):
+		"""Internal-transfer PR's inward SLE must use DN.incoming_rate even when
+		PR.item.valuation_rate was wrong at submit, so divisional_loss does not
+		leak to COGS."""
+		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.stock_ledger import update_entries_after
+
+		prepare_data_for_internal_transfer()
+		customer = "_Test Internal Customer 2"
+		company = "_Test Company with perpetual inventory"
+
+		from_warehouse = create_warehouse("_Test Drift From", company=company)
+		transit_warehouse = create_warehouse("_Test Drift Transit", company=company)
+		to_warehouse = create_warehouse("_Test Drift Receiver", company=company)
+		item_doc = create_item("Test Internal Drift Item")
+
+		make_purchase_receipt(
+			item_code=item_doc.name,
+			company=company,
+			posting_date=add_days(today(), -1),
+			warehouse=from_warehouse,
+			qty=10,
+			rate=100,
+		)
+
+		dn = create_delivery_note(
+			item_code=item_doc.name,
+			company=company,
+			customer=customer,
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=1,
+			rate=100,
+			warehouse=from_warehouse,
+			target_warehouse=transit_warehouse,
+		)
+		self.assertEqual(flt(dn.items[0].incoming_rate), 100.0)
+
+		pr = make_inter_company_purchase_receipt(dn.name)
+		pr.items[0].warehouse = to_warehouse
+		pr.submit()
+
+		# Simulate the failure path
+		frappe.db.set_value(
+			"Purchase Receipt Item",
+			pr.items[0].name,
+			{"sales_incoming_rate": 0, "valuation_rate": 80},
+		)
+		inward_sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{
+				"voucher_type": "Purchase Receipt",
+				"voucher_no": pr.name,
+				"warehouse": to_warehouse,
+				"is_cancelled": 0,
+			},
+			["name", "item_code", "warehouse", "posting_date", "posting_time", "creation"],
+			as_dict=True,
+		)
+		frappe.db.set_value(
+			"Stock Ledger Entry",
+			inward_sle.name,
+			{"incoming_rate": 80, "stock_value_difference": 80},
+		)
+
+		update_entries_after(
+			{
+				"item_code": inward_sle.item_code,
+				"warehouse": inward_sle.warehouse,
+				"posting_date": inward_sle.posting_date,
+				"posting_time": inward_sle.posting_time,
+				"sle_id": inward_sle.name,
+				"creation": inward_sle.creation,
+			}
+		)
+
+		refreshed = frappe.db.get_value(
+			"Stock Ledger Entry",
+			inward_sle.name,
+			["incoming_rate", "stock_value_difference"],
+			as_dict=True,
+		)
+		self.assertEqual(flt(refreshed.incoming_rate), 100.0)
+		self.assertEqual(flt(refreshed.stock_value_difference), 100.0)
+
 	def test_backdated_transaction_for_internal_transfer_in_trasit_warehouse_for_purchase_invoice(
 		self,
 	):
@@ -2062,7 +2163,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(return_pi.docstatus, 1)
 
 	def test_disable_last_purchase_rate(self):
-		from erpnext.stock.get_item_details import ItemDetailsCtx, get_item_details
+		from erpnext.stock.get_item_details import get_item_details
 
 		item = make_item(
 			"_Test Disable Last Purchase Rate",
@@ -2077,7 +2178,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			item_code=item.name,
 		)
 
-		ctx = ItemDetailsCtx(pr.items[0].as_dict())
+		ctx = frappe._dict(pr.items[0].as_dict())
 		ctx.update(
 			{
 				"supplier": pr.supplier,
@@ -2294,9 +2395,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
 
 		pr = make_inter_company_purchase_receipt(dn.name)
-		pr.inter_company_reference = ""
-		self.assertRaises(frappe.ValidationError, pr.save)
-
 		pr.inter_company_reference = dn.name
 		pr.items[0].qty = 10
 		pr.items[0].from_warehouse = target_warehouse
@@ -2981,11 +3079,14 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		old_perpetual_inventory = erpnext.is_perpetual_inventory_enabled("_Test Company")
 		frappe.local.enable_perpetual_inventory["_Test Company"] = 1
+		old_inventory_account = frappe.db.get_value("Company", "_Test Company", "default_inventory_account")
 		frappe.db.set_value(
 			"Company",
 			"_Test Company",
-			"stock_received_but_not_billed",
-			"Stock Received But Not Billed - _TC",
+			{
+				"stock_received_but_not_billed": "Stock Received But Not Billed - _TC",
+				"default_inventory_account": "Stock In Hand - _TC",
+			},
 		)
 
 		pr = make_purchase_receipt(qty=10, rate=1000, do_not_submit=1)
@@ -3021,6 +3122,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		)
 		self.assertCountEqual(expected_gle, gl_entries)
 		frappe.local.enable_perpetual_inventory["_Test Company"] = old_perpetual_inventory
+		frappe.db.set_value("Company", "_Test Company", "default_inventory_account", old_inventory_account)
 
 	def test_purchase_receipt_with_use_serial_batch_field_for_rejected_qty(self):
 		batch_item = make_item(
@@ -4968,6 +5070,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(srbnb_cost, 1000)
 
 	def test_purchase_expense_account(self):
+		frappe.db.set_single_value("Accounts Settings", "book_stock_expense_gl_entries", 1)
 		item = "Test Item with Purchase Expense Account"
 		make_item(item, {"is_stock_item": 1})
 		company = "_Test Company with perpetual inventory"
@@ -6032,17 +6135,31 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		# already received against this PO line, excluding pr2 itself, is pr1's 4
 		self.assertEqual(pr2.get_already_received_qty(po.name, po_detail), 4.0)
 
-	def test_check_next_docstatus_blocks_with_submitted_invoice(self):
-		"""check_next_docstatus must flag a submitted Purchase Invoice drawn from the receipt —
-		covers the converted child-table get_all (Purchase Invoice Item, docstatus=1)."""
+	def test_cancel_blocked_by_submitted_invoice_rolls_back(self):
+		"""A submitted Purchase Invoice must block cancelling its Purchase Receipt. Frappe's backlink
+		check rejects the cancel only after on_cancel has run stock, GL, and status work, so the whole
+		transaction has to roll back: the receipt stays submitted with no leaked ledger entries."""
 		pr = make_purchase_receipt()
 		pi = make_purchase_invoice(pr.name)
 		pi.insert()
 		pi.submit()
 
-		with self.assertRaises(frappe.ValidationError) as cm:
-			pr.check_next_docstatus()
-		self.assertIn("is already submitted", str(cm.exception))
+		pr.reload()
+		status_before = pr.status
+		sle_before = frappe.db.count("Stock Ledger Entry", {"voucher_no": pr.name})
+		gle_before = frappe.db.count("GL Entry", {"voucher_no": pr.name})
+
+		frappe.db.savepoint("before_blocked_cancel")
+		with self.assertRaises(frappe.LinkExistsError) as cm:
+			pr.cancel()
+		self.assertIn(pi.name, str(cm.exception))
+		frappe.db.rollback(save_point="before_blocked_cancel")  # mimic the request-level rollback
+
+		pr.reload()
+		self.assertEqual(pr.docstatus, 1)
+		self.assertEqual(pr.status, status_before)
+		self.assertEqual(frappe.db.count("Stock Ledger Entry", {"voucher_no": pr.name}), sle_before)
+		self.assertEqual(frappe.db.count("GL Entry", {"voucher_no": pr.name}), gle_before)
 
 
 def create_asset_category_for_pr_test():

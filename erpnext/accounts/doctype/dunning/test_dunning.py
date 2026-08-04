@@ -12,6 +12,7 @@ from erpnext.accounts.doctype.sales_invoice.mapper import (
 	create_dunning as create_dunning_from_sales_invoice,
 )
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import (
+	create_sales_invoice,
 	create_sales_invoice_against_cost_center,
 )
 from erpnext.tests.utils import ERPNextTestSuite
@@ -151,6 +152,37 @@ class TestDunning(ERPNextTestSuite):
 		credit_note.cancel()
 		dunning.reload()
 		self.assertEqual(dunning.status, "Unresolved")
+
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings", {"allow_multi_currency_invoices_against_single_party_account": 1}
+	)
+	def test_dunning_outstanding_uses_transaction_currency(self):
+		"""
+		Regression for #56006: dunning outstanding must be in the invoice transaction
+		currency, not in the party account currency.
+
+		A USD invoice posted against an INR receivable account stores
+		outstanding_amount in INR (party account currency).  The overdue payment
+		row on the resulting Dunning must carry the USD amount, not the INR amount.
+		"""
+		si = create_sales_invoice(
+			posting_date=add_days(today(), -10),
+			currency="USD",
+			conversion_rate=50,
+			rate=100,
+			debit_to="Debtors - _TC",
+		)
+
+		# Sanity-check the invoice state before creating the dunning
+		self.assertEqual(si.currency, "USD")
+		self.assertEqual(si.outstanding_amount, 5000.0)  # INR (party account currency)
+		self.assertEqual(si.payment_schedule[0].outstanding, 100.0)  # USD (transaction currency)
+
+		dunning = create_dunning_from_sales_invoice(si.name)
+
+		self.assertEqual(len(dunning.overdue_payments), 1)
+		# Must reflect 100 USD, not 5000 INR mislabelled as USD
+		self.assertEqual(dunning.overdue_payments[0].outstanding, 100.0)
 
 	def test_dunning_not_affected_by_standalone_credit_note(self):
 		"""

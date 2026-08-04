@@ -59,12 +59,11 @@ frappe.query_reports["Stock Ledger Invariant Check"] = {
 			let message = `
 				<div>
 					<p>
-						Reposting Entry will change the value of
-						accounts Stock In Hand, and Stock Expenses
-						in the Trial Balance report and will also change
-						the Balance Value in the Stock Balance report.
+						${__(
+							"Reposting Entry will change the value of accounts Stock In Hand and Stock Expenses in the Trial Balance report and will also change the Balance Value in the Stock Balance report."
+						)}
 					</p>
-					<p>Are you sure you want to create a Reposting Entry?</p>
+					<p>${__("Are you sure you want to create a Reposting Entry?")}</p>
 				</div>`;
 			let indexes = frappe.query_report.datatable.rowmanager.getCheckedRows();
 			let selected_rows = indexes.map((i) => frappe.query_report.data[i]);
@@ -74,7 +73,7 @@ frappe.query_reports["Stock Ledger Invariant Check"] = {
 			} else if (selected_rows.length > 1) {
 				frappe.throw(__("Please select only one row to create a Reposting Entry"));
 			} else {
-				frappe.confirm(__(message), () => {
+				frappe.confirm(message, () => {
 					frappe.call({
 						method: "erpnext.stock.report.stock_ledger_invariant_check.stock_ledger_invariant_check.create_reposting_entries",
 						args: {

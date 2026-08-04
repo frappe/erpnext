@@ -58,7 +58,7 @@ class PutawayRule(Document):
 
 	def validate_priority(self):
 		if self.priority < 1:
-			frappe.throw(_("Priority cannot be lesser than 1."), title=_("Invalid Priority"))
+			frappe.throw(_("Priority cannot be less than 1."), title=_("Invalid Priority"))
 
 	def validate_warehouse_and_company(self):
 		company = frappe.db.get_value("Warehouse", self.warehouse, "company")
@@ -111,8 +111,7 @@ def apply_putaway_rule(
 	purpose: Purpose of Stock Entry
 	sync (optional): Sync with client side only for client side calls
 	"""
-	if isinstance(items, str):
-		items = json.loads(items)
+	items = frappe.parse_json(items)
 
 	items_not_accomodated, updated_table = [], []
 	item_wise_rules = defaultdict(list)
@@ -198,7 +197,7 @@ def apply_putaway_rule(
 		frappe.msgprint(_("Applied putaway rules."), alert=True)
 		return updated_table
 
-	if sync and json.loads(sync):  # sync with client side
+	if sync and frappe.parse_json(sync):  # sync with client side
 		return items
 
 
@@ -304,7 +303,7 @@ def add_row(item, to_allocate, warehouse, updated_table, rule=None, serial_nos=N
 
 
 def show_unassigned_items_message(items_not_accomodated):
-	msg = _("The following Items, having Putaway Rules, could not be accomodated:") + "<br><br>"
+	msg = _("The following Items, having Putaway Rules, could not be accommodated:") + "<br><br>"
 	formatted_item_rows = ""
 
 	for entry in items_not_accomodated:

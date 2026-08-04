@@ -110,7 +110,7 @@ class OpeningInvoiceCreationTool(Document):
 	def validate_mandatory_invoice_fields(self, row):
 		if self.create_missing_party:
 			if not row.party and not row.party_name:
-				frappe.throw(_("Row #{}: Either Party ID or Party Name is required").format(row.idx))
+				frappe.throw(_("Row #{0}: Either Party ID or Party Name is required").format(row.idx))
 
 			if not row.party and row.party_name:
 				row.party = self.add_party(row.party_type, row.party_name)
@@ -120,10 +120,10 @@ class OpeningInvoiceCreationTool(Document):
 
 		else:
 			if not row.party:
-				frappe.throw(_("Row #{}: Party ID is required").format(row.idx))
+				frappe.throw(_("Row #{0}: Party ID is required").format(row.idx))
 			if not frappe.db.exists(row.party_type, row.party):
 				frappe.throw(
-					_("Row #{}: {} {} does not exist.").format(
+					_("Row #{0}: {1} {2} does not exist.").format(
 						row.idx, frappe.bold(row.party_type), frappe.bold(row.party)
 					)
 				)
@@ -132,6 +132,17 @@ class OpeningInvoiceCreationTool(Document):
 		for d in ("Outstanding Amount", "Temporary Opening Account"):
 			if not row.get(scrub(d)):
 				frappe.throw(mandatory_error_msg.format(row.idx, d, self.invoice_type))
+
+		self.validate_temporary_opening_account(row)
+
+	def validate_temporary_opening_account(self, row):
+		account_type = frappe.get_cached_value("Account", row.temporary_opening_account, "account_type")
+		if account_type != "Temporary":
+			frappe.throw(
+				_("Row #{0}: {1} account is not of type {2}").format(
+					row.idx, row.temporary_opening_account, "Temporary"
+				)
+			)
 
 	def get_invoices(self):
 		invoices = []
@@ -203,6 +214,7 @@ class OpeningInvoiceCreationTool(Document):
 					"description": row.item_name or "Opening Invoice Item",
 					income_expense_account_field: row.temporary_opening_account,
 					"cost_center": cost_center,
+					"project": row.get("project") or self.get("project"),
 				}
 			)
 
@@ -269,6 +281,7 @@ class OpeningInvoiceCreationTool(Document):
 def start_import(invoices):
 	errors = 0
 	names = []
+	total = len(invoices)
 	for idx, d in enumerate(invoices):
 		# Scope each invoice to a savepoint so a failure only undoes that invoice.
 		# A plain rollback() would discard the whole transaction — including invoices
@@ -277,11 +290,11 @@ def start_import(invoices):
 		# postgres they would be lost). Rolling back to a savepoint keeps both.
 		savepoint = f"opening_invoice_{frappe.generate_hash(length=8)}"
 		frappe.db.savepoint(savepoint)
+		is_last = idx == total - 1
 		try:
 			invoice_number = None
 			if d.invoice_number:
 				invoice_number = d.invoice_number
-			publish(idx, len(invoices), d.doctype)
 			doc = frappe.get_doc(d)
 			doc.flags.ignore_mandatory = True
 			doc.insert(set_name=invoice_number)
@@ -289,13 +302,15 @@ def start_import(invoices):
 			if not frappe.in_test:
 				frappe.db.commit()
 			names.append(doc.name)
+			publish(idx, total, d.doctype, errors=errors if is_last else None)
 		except Exception:
 			errors += 1
 			frappe.db.rollback(save_point=savepoint)
 			doc.log_error("Opening invoice creation failed")
+			publish(idx, total, d.doctype, errors=errors if is_last else None)
 	if errors:
 		frappe.msgprint(
-			_("You had {} errors while creating opening invoices. Check {} for more details").format(
+			_("You had {0} errors while creating opening invoices. Check {1} for more details").format(
 				errors, "<a href='/app/List/Error Log' class='variant-click'>Error Log</a>"
 			),
 			indicator="red",
@@ -304,7 +319,7 @@ def start_import(invoices):
 	return names
 
 
-def publish(index, total, doctype):
+def publish(index, total, doctype, errors=None):
 	frappe.publish_realtime(
 		"opening_invoice_creation_progress",
 		dict(
@@ -312,6 +327,7 @@ def publish(index, total, doctype):
 			message=_("Creating {} out of {} {}").format(index + 1, total, doctype),
 			count=index + 1,
 			total=total,
+			errors=errors,
 		),
 		user=frappe.session.user,
 	)

@@ -514,10 +514,12 @@ class PaymentEntry(AccountsController):
 				invoice_names.add((ref.reference_doctype, ref.reference_name))
 
 		for doctype, name in invoice_names:
+			frappe.db.savepoint("subscription_update")
 			try:
 				doc = frappe.get_doc(doctype, name)
 				doc.refresh_subscription_status()
 			except Exception:
+				frappe.db.rollback(save_point="subscription_update")
 				frappe.log_error(_("Failed to update subscription status for {0} {1}").format(doctype, name))
 
 	def set_missing_values(self):
@@ -621,7 +623,7 @@ class PaymentEntry(AccountsController):
 
 	def validate_payment_type(self):
 		if self.payment_type not in ("Receive", "Pay", "Internal Transfer"):
-			frappe.throw(_("Payment Type must be one of Receive, Pay and Internal Transfer"))
+			frappe.throw(_("Payment Type must be one of Receive, Pay, or Internal Transfer"))
 
 	def validate_party_details(self):
 		if self.party and not frappe.db.exists(self.party_type, self.party):
@@ -678,7 +680,7 @@ class PaymentEntry(AccountsController):
 
 			elif d.reference_name:
 				if not frappe.db.exists(d.reference_doctype, d.reference_name):
-					frappe.throw(_("{0} {1} does not exist").format(d.reference_doctype, d.reference_name))
+					frappe.throw(_("{0} {1} does not exist").format(_(d.reference_doctype), d.reference_name))
 
 				ref_doc = frappe.get_lazy_doc(d.reference_doctype, d.reference_name)
 
@@ -1805,8 +1807,7 @@ class PaymentEntry(AccountsController):
 		if not self.references or not matched_payment_requests:
 			return
 
-		if isinstance(matched_payment_requests, str):
-			matched_payment_requests = json.loads(matched_payment_requests)
+		matched_payment_requests = frappe.parse_json(matched_payment_requests)
 
 		# modify matched_payment_requests
 		# like (reference_doctype, reference_name, allocated_amount): payment_request
@@ -2011,8 +2012,7 @@ def validate_inclusive_tax(tax, doc):
 
 @frappe.whitelist()
 def get_outstanding_reference_documents(args: str | dict, validate: bool = False):
-	if isinstance(args, str):
-		args = json.loads(args)
+	args = frappe.parse_json(args)
 
 	if args.get("party_type") == "Member":
 		return
@@ -2424,6 +2424,9 @@ def get_party_details(company: str, party_type: str, party: str, date: str, cost
 	if not frappe.db.exists(party_type, party):
 		frappe.throw(_("{0} {1} does not exist").format(_(party_type), party))
 
+	ptype = "select" if frappe.only_has_select_perm(party_type) else "read"
+	frappe.has_permission(party_type, ptype, party, throw=True)
+
 	party_account = get_party_account(party_type, party, company)
 	account_currency = get_account_currency(party_account)
 	_party_name = "title" if party_type == "Shareholder" else party_type.lower() + "_name"
@@ -2431,7 +2434,7 @@ def get_party_details(company: str, party_type: str, party: str, date: str, cost
 
 	if party_type in ["Customer", "Supplier"]:
 		party_bank_account = get_party_bank_account(party_type, party)
-		bank_account = get_default_company_bank_account(company, party_type, party)
+		bank_account = get_default_company_bank_account(company, party_type, party, ignore_permissions=False)
 
 	return {
 		"party_account": party_account,
@@ -2527,9 +2530,7 @@ def get_reference_details(
 			exchange_rate = get_exchange_rate(party_account_currency, company_currency, ref_doc.posting_date)
 		else:
 			exchange_rate = 1
-			outstanding_amount, total_amount = get_outstanding_on_journal_entry(
-				reference_name, party_type, party
-			)
+		outstanding_amount, total_amount = get_outstanding_on_journal_entry(reference_name, party_type, party)
 
 	elif reference_doctype == "Payment Entry":
 		if reverse_payment_details := frappe.db.get_all(
@@ -2685,7 +2686,7 @@ def get_payment_entry(
 
 	# only Purchase Invoice can be blocked individually
 	if doc.doctype == "Purchase Invoice" and doc.invoice_is_blocked():
-		frappe.msgprint(_("{0} is on hold till {1}").format(doc.name, doc.release_date))
+		frappe.msgprint(_("{0} is on hold until {1}").format(doc.name, doc.release_date))
 	else:
 		if doc.doctype in (
 			"Sales Invoice",
@@ -2795,6 +2796,9 @@ def get_open_payment_requests_for_references(references=None):
 		.where(PR.docstatus == 1)
 		.where(PR.outstanding_amount > 0)  # to avoid old PRs with 0 outstanding amount
 		.orderby(Coalesce(PR.transaction_date, PR.creation), order=frappe.qb.asc)
+		# unique tiebreaker so PRs sharing a transaction_date allocate in the same order on both engines
+		.orderby(PR.creation, order=frappe.qb.asc)
+		.orderby(PR.name, order=frappe.qb.asc)
 	).run(as_dict=True)
 
 	if not response:
@@ -3041,13 +3045,11 @@ def set_paid_amount_and_received_amount(
 			company_currency = frappe.get_cached_value("Company", doc.get("company"), "default_currency")
 			if bank and company_currency != bank.account_currency:
 				# doc currency can be different from bank currency
-				posting_date = doc.get("posting_date") or doc.get("transaction_date")
-				conversion_rate = get_exchange_rate(
-					bank.account_currency, party_account_currency, posting_date
-				)
+				conversion_rate = get_exchange_rate(bank.account_currency, party_account_currency)
 				received_amount = paid_amount / conversion_rate
 			else:
-				received_amount = paid_amount * doc.get("conversion_rate", 1)
+				conversion_rate = get_exchange_rate(doc.get("currency", company_currency), company_currency)
+				received_amount = paid_amount * conversion_rate
 
 		# if payment type is pay, then paid amount and received amount are swapped
 		if payment_type == "Pay":
@@ -3089,7 +3091,7 @@ def apply_early_payment_discount(paid_amount, received_amount, doc, party_accoun
 		if total_discount:
 			currency = doc.get("currency") if is_multi_currency else doc.company_currency
 			money = frappe.utils.fmt_money(total_discount, currency=currency)
-			frappe.msgprint(_("Discount of {} applied as per Payment Term").format(money), alert=1)
+			frappe.msgprint(_("Discount of {0} applied as per Payment Term").format(money), alert=1)
 
 	return paid_amount, received_amount, total_discount, valid_discounts
 
@@ -3273,7 +3275,7 @@ def get_paid_amount(dt, dn, party_type, party, account, due_date):
 
 
 @frappe.whitelist()
-def make_payment_order(source_name: str, target_doc: str | Document | None = None):
+def make_payment_order(source_name: str, target_doc: str | dict | Document | None = None):
 	from frappe.model.mapper import get_mapped_doc
 
 	def set_missing_values(source, target):

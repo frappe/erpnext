@@ -29,6 +29,27 @@ class TestQueries(ERPNextTestSuite):
 		self.assertGreaterEqual(len(query(txt="_Test Lead")), 4)
 		self.assertEqual(len(query(txt="_Test Lead 4")), 1)
 
+	def test_lead_query_ranking_is_case_insensitive(self):
+		"""A match at the start must rank first whatever its case.
+
+		The filter uses .like(), which frappe renders as ILIKE on PostgreSQL, so both leads match.
+		Ranking used a bare Locate(), which becomes case-sensitive strpos() there: the upper-cased
+		lead scores no match, falls back to 99999 and sorts last, while MariaDB's case-insensitive
+		LOCATE ranks it first. Same query, different order -- and a different page when page_len is
+		small enough to cut between them.
+		"""
+		early, late = "ZZABCD Ranking Lead", "Ranking Lead zzabcd"
+		for lead_name in (early, late):
+			if not frappe.db.exists("Lead", {"lead_name": lead_name}):
+				frappe.get_doc({"doctype": "Lead", "lead_name": lead_name}).insert()
+
+		query = add_default_params(queries.lead_query, "Lead")
+		names = [row[1] for row in query(txt="zzabcd")]
+
+		self.assertIn(early, names)
+		self.assertIn(late, names)
+		self.assertLess(names.index(early), names.index(late))
+
 	def test_item_query(self):
 		query = add_default_params(queries.item_query, "Item")
 
@@ -92,6 +113,34 @@ class TestQueries(ERPNextTestSuite):
 	def test_get_purchase_invoices_query(self):
 		query = add_default_params(queries.get_purchase_invoices, "Purchase Invoice")
 		self.assertIsInstance(query(txt="", filters={}), list | tuple)
+
+	def test_get_filtered_child_rows_query(self):
+		# idx is an integer column. Searching child rows by it must run on Postgres
+		# (a bare LIKE rejects "bigint ILIKE text") AND cast to a full-length string:
+		# CAST(idx AS CHAR) is character(1) on Postgres, so a two-digit idx like 11
+		# would render as "1" and be missed. Build a Sales Order with >10 rows and
+		# search for row 11 to lock both behaviours.
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		frappe.db.set_single_value("Selling Settings", "allow_multiple_items", 1)
+		so = make_sales_order(
+			item_list=[
+				{"item_code": "_Test Item", "qty": 1, "rate": 100, "warehouse": "_Test Warehouse - _TC"}
+				for _ in range(11)
+			],
+			do_not_submit=True,
+		)
+
+		rows = queries.get_filtered_child_rows(
+			"Sales Order Item",
+			txt="#11",
+			searchfield="name",
+			start=0,
+			page_len=20,
+			filters={"parent": so.name},
+		)
+		# row label is "#<idx>, <item_code>"; row 11 must be present
+		self.assertTrue(any(str(label).startswith("#11,") for _name, label in rows))
 
 	def test_default_uoms(self):
 		self.assertGreaterEqual(frappe.db.count("UOM", {"enabled": 1}), 10)

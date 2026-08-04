@@ -49,7 +49,7 @@ class TestProject(ERPNextTestSuite):
 
 	def test_project_with_template_having_no_parent_and_depend_tasks(self):
 		project_name = "Test Project with Template - No Parent and Dependend Tasks"
-		frappe.db.sql(""" delete from tabTask where project = %s """, project_name)
+		frappe.db.delete("Task", {"project": project_name})
 		frappe.delete_doc("Project", project_name)
 
 		task1 = task_exists("Test Template Task with No Parent and Dependency")
@@ -82,7 +82,7 @@ class TestProject(ERPNextTestSuite):
 		if frappe.db.get_value("Project", {"project_name": project_name}, "name"):
 			project_name = frappe.db.get_value("Project", {"project_name": project_name}, "name")
 
-		frappe.db.sql(""" delete from tabTask where project = %s """, project_name)
+		frappe.db.delete("Task", {"project": project_name})
 		frappe.delete_doc("Project", project_name)
 
 		task1 = task_exists("Test Template Task Parent")
@@ -137,7 +137,7 @@ class TestProject(ERPNextTestSuite):
 
 	def test_project_template_having_dependent_tasks(self):
 		project_name = "Test Project with Template - Dependent Tasks"
-		frappe.db.sql(""" delete from tabTask where project = %s  """, project_name)
+		frappe.db.delete("Task", {"project": project_name})
 		frappe.delete_doc("Project", project_name)
 
 		task1 = task_exists("Test Template Task for Dependency")
@@ -252,7 +252,7 @@ class TestProject(ERPNextTestSuite):
 
 	def test_project_having_no_tasks_complete(self):
 		project_name = "Test Project - No Tasks Completion"
-		frappe.db.sql(""" delete from tabTask where project = %s """, project_name)
+		frappe.db.delete("Task", {"project": project_name})
 		frappe.delete_doc("Project", project_name)
 
 		project = frappe.get_doc(
@@ -277,6 +277,264 @@ class TestProject(ERPNextTestSuite):
 		project.status = "Completed"
 		project.save()
 		self.assertEqual(project.status, "Completed")
+
+	def _project_with_tasks(self, method, count):
+		name = f"_Test PercentComplete {frappe.generate_hash(length=8)}"
+		project = frappe.get_doc(
+			{
+				"doctype": "Project",
+				"project_name": name,
+				"status": "Open",
+				"percent_complete_method": method,
+				"company": "_Test Company",
+				"expected_start_date": nowdate(),
+			}
+		).insert()
+		task_names = []
+		for i in range(count):
+			task = frappe.get_doc(
+				{
+					"doctype": "Task",
+					"subject": f"{name} Task {i}",
+					"project": project.name,
+					"status": "Open",
+					"exp_start_date": nowdate(),
+					"exp_end_date": nowdate(),
+				}
+			).insert()
+			task_names.append(task.name)
+		return project, task_names
+
+	def test_percent_complete_by_task_completion(self):
+		project, tasks = self._project_with_tasks("Task Completion", 4)
+
+		frappe.db.set_value("Task", tasks[0], "status", "Completed")
+		project.update_percent_complete()
+		self.assertEqual(project.percent_complete, 25)  # 1 of 4
+
+		for task in tasks:
+			frappe.db.set_value("Task", task, "status", "Completed")
+		project.update_percent_complete()
+		self.assertEqual(project.percent_complete, 100)
+		self.assertEqual(project.status, "Completed")  # 100% flips status to Completed
+
+		# reopening a task drops below 100% and flips status back to Open
+		frappe.db.set_value("Task", tasks[0], "status", "Open")
+		project.update_percent_complete()
+		self.assertEqual(project.percent_complete, 75)
+		self.assertEqual(project.status, "Open")
+
+		# a Cancelled project keeps its status regardless of completion
+		project.status = "Cancelled"
+		for task in tasks:
+			frappe.db.set_value("Task", task, "status", "Completed")
+		project.update_percent_complete()
+		self.assertEqual(project.percent_complete, 100)
+		self.assertEqual(project.status, "Cancelled")
+
+	def test_on_hold_project_keeps_status(self):
+		project, tasks = self._project_with_tasks("Task Completion", 4)
+
+		# an On hold project is not auto-flipped to Completed even at 100%
+		project.status = "On hold"
+		for task in tasks:
+			frappe.db.set_value("Task", task, "status", "Completed")
+		project.update_percent_complete()
+		self.assertEqual(project.percent_complete, 100)
+		self.assertEqual(project.status, "On hold")
+
+		# nor auto-flipped back to Open when below 100%
+		frappe.db.set_value("Task", tasks[0], "status", "Open")
+		project.update_percent_complete()
+		self.assertEqual(project.percent_complete, 75)
+		self.assertEqual(project.status, "On hold")
+
+	def test_percent_complete_manual(self):
+		project, tasks = self._project_with_tasks("Manual", 2)
+
+		# manual value is preserved on save, even with linked tasks
+		project.percent_complete = 42
+		project.save()
+		self.assertEqual(project.percent_complete, 42)
+
+		# task updates do not overwrite the manual value
+		frappe.db.set_value("Task", tasks[0], "status", "Completed")
+		project.update_percent_complete()
+		self.assertEqual(project.percent_complete, 42)
+
+		# out-of-range values are rejected
+		project.percent_complete = 150
+		self.assertRaises(frappe.ValidationError, project.save)
+		project.reload()
+
+		project.percent_complete = -10
+		self.assertRaises(frappe.ValidationError, project.save)
+		project.reload()
+
+		# Completed status forces 100 regardless of the manual value
+		project.percent_complete = 42
+		project.status = "Completed"
+		project.save()
+		self.assertEqual(project.percent_complete, 100)
+
+	def test_percent_complete_by_task_progress(self):
+		project, tasks = self._project_with_tasks("Task Progress", 2)
+
+		frappe.db.set_value("Task", tasks[0], "progress", 50)
+		frappe.db.set_value("Task", tasks[1], "progress", 100)
+		project.update_percent_complete()
+		self.assertEqual(project.percent_complete, 75)  # (50 + 100) / 2
+
+	def test_percent_complete_by_task_weight(self):
+		project, tasks = self._project_with_tasks("Task Weight", 2)
+
+		frappe.db.set_value("Task", tasks[0], {"progress": 100, "task_weight": 3})
+		frappe.db.set_value("Task", tasks[1], {"progress": 0, "task_weight": 1})
+		project.update_percent_complete()
+		self.assertEqual(project.percent_complete, 75)  # 100 * 3/4 + 0 * 1/4
+
+	def test_create_duplicate_project_copies_tasks(self):
+		from erpnext.projects.doctype.project.project import create_duplicate_project
+
+		source, tasks = self._project_with_tasks("Task Completion", 2)
+		new_name = f"{source.project_name} Copy"
+
+		create_duplicate_project(frappe.as_json(source.as_dict()), new_name)
+
+		# Project is named by series, so look the copy up by its project_name
+		new_project = frappe.db.get_value("Project", {"project_name": new_name})
+		self.assertTrue(new_project)
+		copied_tasks = frappe.get_all("Task", filters={"project": new_project})
+		self.assertEqual(len(copied_tasks), len(tasks))
+
+	def test_create_duplicate_project_rejects_same_name(self):
+		from erpnext.projects.doctype.project.project import create_duplicate_project
+
+		source, _ = self._project_with_tasks("Task Completion", 1)
+		self.assertRaises(
+			frappe.ValidationError,
+			create_duplicate_project,
+			frappe.as_json(source.as_dict()),
+			source.name,
+		)
+
+	def test_set_project_status_updates_project_and_tasks(self):
+		from erpnext.projects.doctype.project.project import set_project_status
+
+		project, tasks = self._project_with_tasks("Task Completion", 2)
+
+		set_project_status(project.name, "Cancelled")
+
+		self.assertEqual(frappe.db.get_value("Project", project.name, "status"), "Cancelled")
+		for task in tasks:
+			self.assertEqual(frappe.db.get_value("Task", task, "status"), "Cancelled")
+
+	def test_set_project_status_rejects_invalid_status(self):
+		from erpnext.projects.doctype.project.project import set_project_status
+
+		project, _ = self._project_with_tasks("Task Completion", 1)
+		self.assertRaises(frappe.ValidationError, set_project_status, project.name, "Open")
+
+	def test_costing_rollup_from_sales_documents(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+		from erpnext.projects.doctype.project.project import update_costing_and_billing
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		project = make_project({"project_name": f"_Test Costing Rollup {frappe.generate_hash(length=6)}"})
+
+		sales_order = make_sales_order(do_not_save=True)
+		sales_order.project = project.name
+		sales_order.insert()
+		sales_order.submit()
+
+		sales_invoice = create_sales_invoice(do_not_submit=True)
+		sales_invoice.project = project.name
+		sales_invoice.submit()
+
+		update_costing_and_billing(project.name)
+		project.reload()
+
+		self.assertEqual(project.total_sales_amount, sales_order.base_net_total)
+		self.assertEqual(project.total_billed_amount, sales_invoice.base_net_total)
+		# with no costing/purchase/material expense, gross margin is the billed amount in full
+		self.assertEqual(project.gross_margin, sales_invoice.base_net_total)
+		self.assertEqual(project.per_gross_margin, 100)
+
+	def test_consumed_material_cost_from_stock_entry(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		project = make_project({"project_name": f"_Test Consumed Cost {frappe.generate_hash(length=6)}"})
+
+		# receive stock, then issue it against the project so it counts as consumed
+		make_stock_entry(item_code="_Test Item", qty=10, to_warehouse="_Test Warehouse - _TC", rate=100)
+		issue = make_stock_entry(
+			item_code="_Test Item", qty=4, from_warehouse="_Test Warehouse - _TC", do_not_save=True
+		)
+		issue.project = project.name
+		for row in issue.items:
+			row.project = project.name
+		issue.insert()
+		issue.submit()
+		issue.reload()
+
+		project.set_consumed_material_cost()
+		self.assertEqual(project.total_consumed_material_cost, sum(row.amount for row in issue.items))
+		self.assertGreater(project.total_consumed_material_cost, 0)
+
+	def _create_portal_user(self, email):
+		"""A user with no Project-related role, so read access can only come from
+		control_access_for_project_users() sharing the doc with them."""
+		if not frappe.db.exists("User", email):
+			frappe.get_doc(
+				{
+					"doctype": "User",
+					"email": email,
+					"first_name": "Portal",
+					"send_welcome_email": 0,
+				}
+			).insert(ignore_permissions=True)
+		return email
+
+	def test_new_project_grants_access_to_its_users(self):
+		member = self._create_portal_user(f"new_proj_member_{frappe.generate_hash(length=6)}@example.com")
+
+		project = frappe.get_doc(
+			doctype="Project",
+			project_name=f"_Test New Project Access {frappe.generate_hash(length=6)}",
+			status="Open",
+			company="_Test Company",
+		)
+		project.append("users", {"user": member, "welcome_email_sent": 1})
+		project.insert()  # must not raise
+
+		self.assertTrue(project.has_permission(user=member))
+		shared_with = [d.user for d in frappe.share.get_users("Project", project.name)]
+		self.assertIn(member, shared_with)
+
+	def test_adding_and_removing_project_user_updates_access(self):
+		stays = self._create_portal_user(f"stays_{frappe.generate_hash(length=6)}@example.com")
+		leaves = self._create_portal_user(f"leaves_{frappe.generate_hash(length=6)}@example.com")
+
+		project = frappe.get_doc(
+			doctype="Project",
+			project_name=f"_Test Project User Membership {frappe.generate_hash(length=6)}",
+			status="Open",
+			company="_Test Company",
+		)
+		project.append("users", {"user": stays, "welcome_email_sent": 1})
+		project.insert()
+		self.assertTrue(project.has_permission(user=stays))
+
+		# adding a user on update (not insert) must also grant them access
+		project.append("users", {"user": leaves, "welcome_email_sent": 1})
+		project.save()
+		self.assertTrue(project.has_permission(user=leaves))
+
+		# removing a user must revoke the share that was granted for membership
+		project.users = [d for d in project.users if d.user != leaves]
+		project.save()
+		self.assertFalse(project.has_permission(user=leaves))
+		self.assertTrue(project.has_permission(user=stays))
 
 
 def get_project(name, template):

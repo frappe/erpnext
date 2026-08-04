@@ -186,7 +186,7 @@ class AssetCapitalization(StockController):
 			target_asset = self.get_asset_for_validation(self.target_asset)
 
 			if not target_asset.asset_type == "Composite Asset":
-				frappe.throw(_("Target Asset {0} needs to be composite asset").format(target_asset.name))
+				frappe.throw(_("Target Asset {0} needs to be a composite asset").format(target_asset.name))
 
 			if target_asset.item_code != self.target_item_code:
 				frappe.throw(
@@ -500,7 +500,7 @@ def get_target_item_details(item_code: str | None = None, company: str | None = 
 	item_group_defaults = get_item_group_defaults(item.name, company)
 	brand_defaults = get_brand_defaults(item.name, company)
 	out.cost_center = get_default_cost_center(
-		ItemDetailsCtx({"item_code": item.name, "company": company}),
+		frappe._dict({"item_code": item.name, "company": company}),
 		item_defaults,
 		item_group_defaults,
 		brand_defaults,
@@ -539,11 +539,13 @@ def get_target_asset_details(asset: str | None = None, company: str | None = Non
 @frappe.whitelist()
 @erpnext.normalize_ctx_input(ItemDetailsCtx)
 def get_consumed_stock_item_details(ctx: ItemDetailsCtx):
+	frappe.has_permission("Stock Ledger Entry", throw=True)
 	out = frappe._dict()
 
 	item = frappe._dict()
 	if ctx.item_code:
 		item = frappe.get_cached_doc("Item", ctx.item_code)
+		item.check_permission()
 
 	out.item_name = item.item_name
 	out.batch_no = None
@@ -553,6 +555,8 @@ def get_consumed_stock_item_details(ctx: ItemDetailsCtx):
 	out.stock_uom = item.stock_uom
 
 	out.warehouse = get_item_warehouse_(ctx, item, overwrite_warehouse=True) if item else None
+	if out.warehouse:
+		frappe.has_permission("Warehouse", doc=out.warehouse, throw=True)
 
 	# Cost Center
 	item_defaults = get_item_defaults(item.name, ctx.company)
@@ -589,6 +593,9 @@ def get_consumed_stock_item_details(ctx: ItemDetailsCtx):
 def get_warehouse_details(ctx: ItemDetailsCtx) -> frappe._dict:
 	out = frappe._dict()
 	if ctx.warehouse and ctx.item_code:
+		frappe.has_permission("Item", doc=ctx.item_code, throw=True)
+		frappe.has_permission("Warehouse", doc=ctx.warehouse, throw=True)
+		frappe.has_permission("Stock Ledger Entry", throw=True)
 		out = frappe._dict(
 			{
 				"actual_qty": get_previous_sle(ctx).get("qty_after_transaction") or 0,
@@ -669,8 +676,7 @@ def get_service_item_details(ctx: ItemDetailsCtx) -> frappe._dict:
 
 @frappe.whitelist()
 def get_items_tagged_to_wip_composite_asset(params: dict | str):
-	if isinstance(params, str):
-		params = json.loads(params)
+	params = frappe.parse_json(params)
 
 	fields = [
 		"item_code",

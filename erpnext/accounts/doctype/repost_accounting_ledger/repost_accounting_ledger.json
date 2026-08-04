@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_bulk_edit": 1,
  "creation": "2023-07-04 13:07:32.923675",
  "default_view": "List",
  "doctype": "DocType",
@@ -7,16 +8,24 @@
  "engine": "InnoDB",
  "field_order": [
   "company",
-  "column_break_vpup",
   "delete_cancelled_entries",
+  "column_break_vpup",
+  "status",
   "section_break_metl",
   "vouchers",
-  "amended_from"
+  "error_section",
+  "error_log",
+  "miscellaneous_section",
+  "amended_from",
+  "column_break_hrah",
+  "scheduled_job"
  ],
  "fields": [
   {
    "fieldname": "company",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Company",
    "options": "Company"
   },
@@ -48,12 +57,54 @@
    "fieldname": "delete_cancelled_entries",
    "fieldtype": "Check",
    "label": "Delete Cancelled Ledger Entries"
+  },
+  {
+   "fieldname": "error_section",
+   "fieldtype": "Section Break",
+   "label": "Error"
+  },
+  {
+   "fieldname": "error_log",
+   "fieldtype": "Code",
+   "label": "Error Log",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "miscellaneous_section",
+   "fieldtype": "Section Break",
+   "label": "Miscellaneous"
+  },
+  {
+   "fieldname": "column_break_hrah",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.docstatus >= 1;",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "no_copy": 1,
+   "options": "\nQueued\nIn Progress\nPartially Reposted\nCompleted\nFailed\nCancelled",
+   "read_only": 1
+  },
+  {
+   "fieldname": "scheduled_job",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Scheduled Job",
+   "no_copy": 1,
+   "options": "RQ Job",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-06-03 17:30:37.012593",
+ "modified": "2026-07-28 00:56:50.290314",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Repost Accounting Ledger",
@@ -76,6 +127,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],

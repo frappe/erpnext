@@ -10,6 +10,7 @@ from frappe import qb, scrub
 from frappe.permissions import has_permission
 from frappe.query_builder import Case, Criterion, DocType
 from frappe.query_builder.functions import (
+	Cast_,
 	Concat,
 	IfNull,
 	Length,
@@ -24,7 +25,8 @@ from pypika import Order
 
 import erpnext
 from erpnext.accounts.utils import build_qb_match_conditions
-from erpnext.stock.get_item_details import ItemDetailsCtx, _get_item_tax_template
+from erpnext.stock.doctype.company_restriction.company_restriction import get_restriction_criterion
+from erpnext.stock.get_item_details import _get_item_tax_template
 from erpnext.stock.utils import get_combine_datetime
 from erpnext.utilities.query import get_filter_conditions_qb
 
@@ -71,14 +73,17 @@ def employee_query(
 		.where(Criterion.any(search_conditions))
 		.orderby(
 			Case()
-			.when(Locate(txt_no_percent, Employee.name) > 0, Locate(txt_no_percent, Employee.name))
+			.when(
+				Locate(Lower(txt_no_percent), Lower(Employee.name)) > 0,
+				Locate(Lower(txt_no_percent), Lower(Employee.name)),
+			)
 			.else_(99999)
 		)
 		.orderby(
 			Case()
 			.when(
-				Locate(txt_no_percent, Employee.employee_name) > 0,
-				Locate(txt_no_percent, Employee.employee_name),
+				Locate(Lower(txt_no_percent), Lower(Employee.employee_name)) > 0,
+				Locate(Lower(txt_no_percent), Lower(Employee.employee_name)),
 			)
 			.else_(99999)
 		)
@@ -135,16 +140,27 @@ def lead_query(
 		.where(Lead.status.isnull() | (Lead.status != "Converted"))
 		.where(Criterion.any(search_conditions))
 		.orderby(
-			Case().when(Locate(txt_no_percent, Lead.name) > 0, Locate(txt_no_percent, Lead.name)).else_(99999)
-		)
-		.orderby(
 			Case()
-			.when(Locate(txt_no_percent, Lead.lead_name) > 0, Locate(txt_no_percent, Lead.lead_name))
+			.when(
+				Locate(Lower(txt_no_percent), Lower(Lead.name)) > 0,
+				Locate(Lower(txt_no_percent), Lower(Lead.name)),
+			)
 			.else_(99999)
 		)
 		.orderby(
 			Case()
-			.when(Locate(txt_no_percent, Lead.company_name) > 0, Locate(txt_no_percent, Lead.company_name))
+			.when(
+				Locate(Lower(txt_no_percent), Lower(Lead.lead_name)) > 0,
+				Locate(Lower(txt_no_percent), Lower(Lead.lead_name)),
+			)
+			.else_(99999)
+		)
+		.orderby(
+			Case()
+			.when(
+				Locate(Lower(txt_no_percent), Lower(Lead.company_name)) > 0,
+				Locate(Lower(txt_no_percent), Lower(Lead.company_name)),
+			)
 			.else_(99999)
 		)
 		.orderby(Lead.idx, order=Order.desc)
@@ -212,8 +228,8 @@ def item_query(
 	"""
 	doctype = "Item"
 
-	if isinstance(filters, str):
-		filters = json.loads(filters)
+	filters = frappe.parse_json(filters)
+	company = filters.pop("company", None) if isinstance(filters, dict) else None
 
 	if filters and isinstance(filters, dict):
 		if filters.get("customer") or filters.get("supplier"):
@@ -222,11 +238,8 @@ def item_query(
 			group = "Customer Group" if filters.get("customer") else "Supplier Group"
 			item_rules_list = frappe.get_all(
 				"Party Specific Item",
-				filters={
-					"party": ["!=", party],
-					"party_type": party_type,
-				},
-				fields=["restrict_based_on", "based_on_value"],
+				filters={"party_type": party_type},
+				fields=["party", "restrict_based_on", "based_on_value"],
 			)
 
 			party_group_rules_list = frappe.get_all(
@@ -235,21 +248,30 @@ def item_query(
 				fields=["party as party_group", "restrict_based_on", "based_on_value"],
 			)
 			current_party_group = frappe.get_value(party_type, party, frappe.scrub(group))
+
+			restricted_items = defaultdict(set)
+			allowed_items = defaultdict(set)
+
+			for rule in item_rules_list:
+				restrict_based_on = "name" if rule.restrict_based_on == "Item" else rule.restrict_based_on
+
+				if rule.party == party:
+					allowed_items[restrict_based_on].add(rule.based_on_value)
+				else:
+					restricted_items[restrict_based_on].add(rule.based_on_value)
+
 			for rule in party_group_rules_list:
-				if current_party_group != rule.party_group:
-					item_rules_list.append(rule)
+				restrict_based_on = "name" if rule.restrict_based_on == "Item" else rule.restrict_based_on
 
-			filters_dict = {}
-			for rule in item_rules_list:
-				if rule["restrict_based_on"] == "Item":
-					rule["restrict_based_on"] = "name"
-				filters_dict[rule.restrict_based_on] = []
+				if current_party_group == rule.party_group:
+					allowed_items[restrict_based_on].add(rule.based_on_value)
+				else:
+					restricted_items[restrict_based_on].add(rule.based_on_value)
 
-			for rule in item_rules_list:
-				filters_dict[rule.restrict_based_on].append(rule.based_on_value)
-
-			for filter in filters_dict:
-				filters[scrub(filter)] = ["not in", filters_dict[filter]]
+			for field, restricted_values in restricted_items.items():
+				values_to_exclude = restricted_values - allowed_items[field]
+				if values_to_exclude:
+					filters[scrub(field)] = ["not in", list(values_to_exclude)]
 
 			if filters.get("customer"):
 				del filters["customer"]
@@ -355,6 +377,9 @@ def item_query(
 		.offset(start)
 	)
 
+	if company:
+		query = query.where(get_restriction_criterion("Item", [company]))
+
 	return query.run(as_dict=as_dict)
 
 
@@ -376,7 +401,12 @@ def bom(
 		.where(BOM.is_active == 1)
 		.where(BOM[searchfield].like(f"%{txt}%"))
 		.orderby(
-			Case().when(Locate(txt_no_percent, BOM.name) > 0, Locate(txt_no_percent, BOM.name)).else_(99999)
+			Case()
+			.when(
+				Locate(Lower(txt_no_percent), Lower(BOM.name)) > 0,
+				Locate(Lower(txt_no_percent), Lower(BOM.name)),
+			)
+			.else_(99999)
 		)
 		.orderby(BOM.idx, order=Order.desc)
 		.orderby(BOM.name)
@@ -405,7 +435,7 @@ def get_project_name(
 		if filters.get("company"):
 			qb_filter_and_conditions.append(proj.company == filters.get("company"))
 
-	qb_filter_and_conditions.append(proj.status.notin(["Completed", "Cancelled"]))
+	qb_filter_and_conditions.append(proj.status.notin(["Completed", "Cancelled", "On hold"]))
 
 	q = qb.from_(proj)
 
@@ -566,7 +596,7 @@ def get_batches_from_stock_ledger_entries(searchfields, txt, filters, start=0, p
 			& (batch_table.disabled == 0)
 			& (stock_ledger_entry.batch_no.isnotnull())
 		)
-		.groupby(stock_ledger_entry.batch_no, stock_ledger_entry.warehouse)
+		.groupby(stock_ledger_entry.batch_no, stock_ledger_entry.warehouse, batch_table.name)
 		.having(Sum(stock_ledger_entry.actual_qty) != 0)
 		.offset(start)
 		.limit(page_len)
@@ -583,8 +613,12 @@ def get_batches_from_stock_ledger_entries(searchfields, txt, filters, start=0, p
 		query = query.where((batch_table.expiry_date >= expiry_date) | (batch_table.expiry_date.isnull()))
 
 	query = query.select(
-		Concat("MFG-", batch_table.manufacturing_date).as_("manufacturing_date"),
-		Concat("EXP-", batch_table.expiry_date).as_("expiry_date"),
+		Case()
+		.when(batch_table.manufacturing_date.isnotnull(), Concat("MFG-", batch_table.manufacturing_date))
+		.as_("manufacturing_date"),
+		Case()
+		.when(batch_table.expiry_date.isnotnull(), Concat("EXP-", batch_table.expiry_date))
+		.as_("expiry_date"),
 	)
 
 	if filters.get("warehouse"):
@@ -626,7 +660,7 @@ def get_batches_from_serial_and_batch_bundle(searchfields, txt, filters, start=0
 			& (batch_table.disabled == 0)
 			& (stock_ledger_entry.serial_and_batch_bundle.isnotnull())
 		)
-		.groupby(bundle.batch_no, bundle.warehouse)
+		.groupby(bundle.batch_no, bundle.warehouse, batch_table.name)
 		.having(Sum(bundle.qty) != 0)
 		.offset(start)
 		.limit(page_len)
@@ -645,8 +679,12 @@ def get_batches_from_serial_and_batch_bundle(searchfields, txt, filters, start=0
 		)
 
 	bundle_query = bundle_query.select(
-		Concat("MFG-", batch_table.manufacturing_date),
-		Concat("EXP-", batch_table.expiry_date),
+		Case()
+		.when(batch_table.manufacturing_date.isnotnull(), Concat("MFG-", batch_table.manufacturing_date))
+		.as_("manufacturing_date"),
+		Case()
+		.when(batch_table.expiry_date.isnotnull(), Concat("EXP-", batch_table.expiry_date))
+		.as_("expiry_date"),
 	)
 
 	if filters.get("warehouse"):
@@ -794,7 +832,9 @@ def get_filtered_dimensions(
 		query_filters.append(["company", "=", filters.get("company")])
 
 	for field in searchfields:
-		or_filters.append([field, "LIKE", "%%%s%%" % txt])
+		df = meta.get_field(field)
+		if not df or df.fieldtype != "Check":
+			or_filters.append([field, "LIKE", "%%%s%%" % txt])
 		fields.append(field)
 
 	if dimension_filters:
@@ -1042,7 +1082,7 @@ def get_tax_template(doctype: str, txt: str, searchfield: str, start: int, page_
 		valid_from = filters.get("valid_from")
 		valid_from = valid_from[1] if isinstance(valid_from, list) else valid_from
 
-		ctx = ItemDetailsCtx(
+		ctx = frappe._dict(
 			{
 				"item_code": filters.get("item_code"),
 				"posting_date": valid_from,
@@ -1110,7 +1150,8 @@ def get_filtered_child_rows(
 	if txt:
 		txt += "%"
 		query = query.where(
-			((table.idx.like(txt.replace("#", ""))) | (table.item_code.like(txt))) | (table.name.like(txt))
+			((Cast_(table.idx, "varchar").like(txt.replace("#", ""))) | (table.item_code.like(txt)))
+			| (table.name.like(txt))
 		)
 
 	return query.run(as_dict=False)

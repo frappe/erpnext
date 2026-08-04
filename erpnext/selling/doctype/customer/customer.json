@@ -4,7 +4,7 @@
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "naming_series:",
- "creation": "2013-06-11 14:26:44",
+ "creation": "2026-07-14 12:46:50.256889",
  "description": "Buyer of Goods and Services.",
  "doctype": "DocType",
  "document_type": "Setup",
@@ -13,6 +13,7 @@
   "basic_info",
   "naming_series",
   "customer_name",
+  "alias",
   "customer_type",
   "gender",
   "column_break0",
@@ -64,6 +65,10 @@
   "tax_withholding_group",
   "tax_withholding_category",
   "settings_tab",
+  "company_restrictions_section",
+  "restrict_to_companies",
+  "allowed_companies",
+  "section_break_ario",
   "so_required",
   "dn_required",
   "column_break_53",
@@ -466,10 +471,10 @@
    "report_hide": 1
   },
   {
-   "description": "Transactions are blocked or warned when outstanding balance exceeds this amount.",
+   "description": "Transactions are blocked when the outstanding balance exceeds the credit limit. When Restrict Customer Over Billing is enabled, new invoices are also blocked when the customer's overdue amount exceeds the Overdue Limit.",
    "fieldname": "credit_limits",
    "fieldtype": "Table",
-   "label": "Credit Limit",
+   "label": "Credit & Overdue Limits",
    "options": "Customer Credit Limit",
    "show_description_on_click": 1
   },
@@ -510,6 +515,29 @@
    "fieldname": "settings_tab",
    "fieldtype": "Tab Break",
    "label": "Settings"
+  },
+  {
+   "fieldname": "company_restrictions_section",
+   "fieldtype": "Section Break",
+   "label": "Company Restrictions",
+   "permlevel": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "restrict_to_companies",
+   "fieldtype": "Check",
+   "label": "Restrict to Companies",
+   "description": "If checked, this Customer is only available for transactions in the companies listed below.",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "allowed_companies",
+   "fieldtype": "Table MultiSelect",
+   "label": "Allowed Companies",
+   "options": "Company Restriction",
+   "depends_on": "eval:doc.restrict_to_companies",
+   "mandatory_depends_on": "eval:doc.restrict_to_companies",
+   "permlevel": 1
   },
   {
    "collapsible": 1,
@@ -674,6 +702,18 @@
   {
    "fieldname": "credit_limit_column",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "alias",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "label": "Alias",
+   "no_copy": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "section_break_ario",
+   "fieldtype": "Section Break"
   }
  ],
  "icon": "fa fa-user",
@@ -687,7 +727,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2026-05-29 16:52:59.441272",
+ "modified": "2026-07-23 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
@@ -703,11 +743,6 @@
    "role": "Sales User",
    "share": 1,
    "write": 1
-  },
-  {
-   "permlevel": 1,
-   "read": 1,
-   "role": "Sales User"
   },
   {
    "email": 1,
@@ -766,7 +801,7 @@
  ],
  "quick_entry": 1,
  "row_format": "Dynamic",
- "search_fields": "customer_group,territory, mobile_no,primary_address",
+ "search_fields": "customer_group,territory, mobile_no,primary_address, alias",
  "show_name_in_global_search": 1,
  "sort_field": "creation",
  "sort_order": "DESC",

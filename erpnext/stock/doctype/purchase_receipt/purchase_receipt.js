@@ -342,7 +342,7 @@ erpnext.stock.PurchaseReceiptController = class PurchaseReceiptController extend
 
 	make_retention_stock_entry() {
 		frappe.call({
-			method: "erpnext.stock.doctype.stock_entry.stock_entry_handler.manufacturing.move_sample_to_retention_warehouse",
+			method: "erpnext.stock.doctype.stock_entry.services.manufacturing.move_sample_to_retention_warehouse",
 			args: {
 				company: cur_frm.doc.company,
 				items: cur_frm.doc.items,
@@ -353,7 +353,7 @@ erpnext.stock.PurchaseReceiptController = class PurchaseReceiptController extend
 					frappe.set_route("Form", doc.doctype, doc.name);
 				} else {
 					frappe.msgprint(
-						__("Purchase Receipt doesn't have any Item for which Retain Sample is enabled.")
+						__("Purchase Receipt does not have any Item for which Retain Sample is enabled.")
 					);
 				}
 			},
@@ -455,12 +455,13 @@ var validate_sample_quantity = function (frm, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if (d.sample_quantity && d.qty) {
 		frappe.call({
-			method: "erpnext.stock.doctype.stock_entry.stock_entry_handler.manufacturing.validate_sample_quantity",
+			method: "erpnext.stock.doctype.stock_entry.services.manufacturing.validate_sample_quantity",
 			args: {
 				batch_no: d.batch_no,
 				item_code: d.item_code,
 				sample_quantity: d.sample_quantity,
 				qty: d.qty,
+				company: frm.doc.company,
 			},
 			callback: (r) => {
 				frappe.model.set_value(cdt, cdn, "sample_quantity", r.message);

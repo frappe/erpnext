@@ -26,7 +26,7 @@ from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry impor
 	get_sre_reserved_qty_details_for_voucher,
 	get_ssb_bundle_for_voucher,
 )
-from erpnext.stock.get_item_details import ItemDetailsCtx, get_bin_details, get_price_list_rate
+from erpnext.stock.get_item_details import get_bin_details, get_price_list_rate
 
 
 def get_requested_item_qty(sales_order: str) -> dict:
@@ -49,7 +49,7 @@ def get_requested_item_qty(sales_order: str) -> dict:
 
 
 @frappe.whitelist()
-def make_material_request(source_name: str, target_doc: str | Document | None = None):
+def make_material_request(source_name: str, target_doc: str | dict | Document | None = None):
 	requested_item_qty = get_requested_item_qty(source_name)
 
 	def postprocess(source, target):
@@ -105,7 +105,7 @@ def make_material_request(source_name: str, target_doc: str | Document | None = 
 			target.item_code, target.warehouse, source_parent.company, True
 		).get("actual_qty", 0)
 
-		ctx = ItemDetailsCtx(target.as_dict().copy())
+		ctx = frappe._dict(target.as_dict().copy())
 		ctx.update(
 			{
 				"company": source_parent.get("company"),
@@ -156,7 +156,7 @@ def make_material_request(source_name: str, target_doc: str | Document | None = 
 
 
 @frappe.whitelist()
-def make_project(source_name: str, target_doc: str | Document | None = None):
+def make_project(source_name: str, target_doc: str | dict | Document | None = None):
 	def postprocess(source, doc):
 		doc.project_type = "External"
 		doc.project_name = source.name
@@ -230,7 +230,7 @@ def set_serial_batch_for_bundle_reservation(source, target, use_serial_batch_fie
 
 @frappe.whitelist()
 def make_delivery_note(
-	source_name: str, target_doc: str | Document | None = None, kwargs: dict | None = None
+	source_name: str, target_doc: str | dict | Document | None = None, kwargs: dict | None = None
 ):
 	if not kwargs:
 		kwargs = {
@@ -245,7 +245,12 @@ def make_delivery_note(
 		sre_details = get_sre_reserved_qty_details_for_voucher("Sales Order", source_name)
 
 	mapper = {
-		"Sales Order": {"doctype": "Delivery Note", "validation": {"docstatus": ["=", 1]}},
+		"Sales Order": {
+			"doctype": "Delivery Note",
+			"validation": {"docstatus": ["=", 1]},
+			# commission_rate is no_copy (so it isn't carried on Duplicate), map it explicitly here
+			"field_map": {"commission_rate": "commission_rate"},
+		},
 		"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "reset_value": True},
 		"Sales Team": {"doctype": "Sales Team", "add_if_empty": True},
 	}
@@ -419,14 +424,13 @@ def make_delivery_note(
 @frappe.whitelist()
 def make_sales_invoice(
 	source_name: str,
-	target_doc: str | Document | None = None,
+	target_doc: str | dict | Document | None = None,
 	ignore_permissions: bool = False,
 	args: str | dict | None = None,
 ):
 	if args is None:
 		args = {}
-	if isinstance(args, str):
-		args = json.loads(args)
+	args = frappe.parse_json(args)
 
 	# 0 qty is accepted, as the qty is uncertain for some items
 	has_unit_price_items = frappe.db.get_value("Sales Order", source_name, "has_unit_price_items")
@@ -558,6 +562,8 @@ def make_sales_invoice(
 				"doctype": "Sales Invoice",
 				"field_map": {
 					"party_account_currency": "party_account_currency",
+					# commission_rate is no_copy (so it isn't carried on Duplicate), map it explicitly here
+					"commission_rate": "commission_rate",
 				},
 				"field_no_map": ["payment_terms_template"],
 				"validation": {"docstatus": ["=", 1]},
@@ -603,7 +609,7 @@ def make_sales_invoice(
 
 
 @frappe.whitelist()
-def make_maintenance_schedule(source_name: str, target_doc: str | Document | None = None):
+def make_maintenance_schedule(source_name: str, target_doc: str | dict | Document | None = None):
 	maint_schedule = frappe.db.exists(
 		"Maintenance Schedule Item", {"sales_order": source_name, "docstatus": 1}
 	)
@@ -626,7 +632,7 @@ def make_maintenance_schedule(source_name: str, target_doc: str | Document | Non
 
 
 @frappe.whitelist()
-def make_maintenance_visit(source_name: str, target_doc: str | Document | None = None):
+def make_maintenance_visit(source_name: str, target_doc: str | dict | Document | None = None):
 	MaintenanceVisit = frappe.qb.DocType("Maintenance Visit")
 	MaintenanceVisitPurpose = frappe.qb.DocType("Maintenance Visit Purpose")
 
@@ -659,7 +665,9 @@ def make_maintenance_visit(source_name: str, target_doc: str | Document | None =
 
 @frappe.whitelist()
 def make_purchase_order(
-	source_name: str, selected_items: str | list | None = None, target_doc: str | Document | None = None
+	source_name: str,
+	selected_items: str | list | None = None,
+	target_doc: str | dict | Document | None = None,
 ):
 	"""Creates Purchase Order for each Supplier. Returns a list of doc objects."""
 
@@ -668,8 +676,7 @@ def make_purchase_order(
 	if not selected_items:
 		return
 
-	if isinstance(selected_items, str):
-		selected_items = json.loads(selected_items)
+	selected_items = frappe.parse_json(selected_items)
 
 	def set_missing_values(source, target):
 		target.supplier = supplier
@@ -835,10 +842,10 @@ def set_delivery_date(items: list, sales_order: str) -> None:
 			item.schedule_date = delivery_by_bundle.get(item.product_bundle)
 
 
-@frappe.whitelist()
-def make_work_orders(items: str, sales_order: str, company: str, project: str | None = None):
+@frappe.whitelist(methods=["POST"])
+def make_work_orders(items: str | dict, sales_order: str, company: str, project: str | None = None):
 	"""Make Work Orders against the given Sales Order for the given `items`"""
-	items = json.loads(items).get("items")
+	items = frappe.parse_json(items).get("items")
 	out = []
 
 	for i in items:
@@ -868,7 +875,7 @@ def make_work_orders(items: str, sales_order: str, company: str, project: str | 
 
 
 @frappe.whitelist()
-def make_production_plan(source_name: str, target_doc: str | Document | None = None):
+def make_production_plan(source_name: str, target_doc: str | dict | Document | None = None):
 	sales_order = frappe.get_doc("Sales Order", source_name)
 
 	production_plan = frappe.new_doc(
@@ -905,8 +912,7 @@ def make_raw_material_request(
 	if not frappe.has_permission("Sales Order", "write"):
 		frappe.throw(_("Not permitted"), frappe.PermissionError)
 
-	if isinstance(items, str):
-		items = frappe._dict(json.loads(items))
+	items = frappe._dict(frappe.parse_json(items))
 
 	for item in items.get("items"):
 		item["include_exploded_items"] = items.get("include_exploded_items")
@@ -961,14 +967,14 @@ def make_raw_material_request(
 
 
 @frappe.whitelist()
-def make_inter_company_purchase_order(source_name: str, target_doc: str | Document | None = None):
+def make_inter_company_purchase_order(source_name: str, target_doc: str | dict | Document | None = None):
 	from erpnext.accounts.doctype.sales_invoice.mapper import make_inter_company_transaction
 
 	return make_inter_company_transaction("Sales Order", source_name, target_doc)
 
 
 @frappe.whitelist()
-def create_pick_list(source_name: str, target_doc: str | Document | None = None):
+def create_pick_list(source_name: str, target_doc: str | dict | Document | None = None):
 	def validate_sales_order():
 		so = frappe.get_doc("Sales Order", source_name)
 		for item in so.items:
@@ -1047,7 +1053,7 @@ def create_pick_list(source_name: str, target_doc: str | Document | None = None)
 
 
 @frappe.whitelist()
-def make_subcontracting_inward_order(source_name: str, target_doc: str | Document | None = None):
+def make_subcontracting_inward_order(source_name: str, target_doc: str | dict | Document | None = None):
 	if not is_so_fully_subcontracted(source_name):
 		return get_mapped_subcontracting_inward_order(source_name, target_doc)
 	else:
@@ -1065,7 +1071,7 @@ def is_so_fully_subcontracted(so_name: str) -> bool:
 
 
 def get_mapped_subcontracting_inward_order(
-	source_name: str, target_doc: str | Document | None = None
+	source_name: str, target_doc: str | dict | Document | None = None
 ) -> Document:
 	def post_process(source_doc, target_doc):
 		if (
@@ -1082,7 +1088,7 @@ def get_mapped_subcontracting_inward_order(
 		target_doc.populate_items_table()
 
 	if target_doc and isinstance(target_doc, str):
-		target_doc = json.loads(target_doc)
+		target_doc = frappe.parse_json(target_doc)
 		for key in ["service_items", "items", "received_items"]:
 			if key in target_doc:
 				del target_doc[key]

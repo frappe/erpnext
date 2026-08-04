@@ -21,7 +21,6 @@ from erpnext.controllers.accounts_controller import (
 from erpnext.deprecation_dumpster import deprecated
 from erpnext.stock.get_item_details import (
 	NOT_APPLICABLE_TAX,
-	ItemDetailsCtx,
 	_get_item_tax_template,
 	get_item_tax_map,
 )
@@ -99,7 +98,7 @@ class calculate_taxes_and_totals:
 		for item in self.doc.items:
 			if item.item_code and item.get("item_tax_template"):
 				item_doc = frappe.get_cached_doc("Item", item.item_code)
-				ctx = ItemDetailsCtx(
+				ctx = frappe._dict(
 					{
 						"net_rate": item.net_rate or item.rate,
 						"base_net_rate": item.base_net_rate or item.base_rate,
@@ -131,9 +130,9 @@ class calculate_taxes_and_totals:
 					if item.item_tax_template not in taxes:
 						item.item_tax_template = taxes[0]
 						frappe.msgprint(
-							_("Row {0}: Item Tax template updated as per validity and rate applied").format(
-								item.idx, frappe.bold(item.item_code)
-							)
+							_(
+								"Row {0}: Item Tax template for {1} updated as per validity and rate applied"
+							).format(item.idx, frappe.bold(item.item_code))
 						)
 
 						# For correct tax_amount calculation re-computation is required
@@ -164,83 +163,90 @@ class calculate_taxes_and_totals:
 
 		self.doc.conversion_rate = flt(self.doc.conversion_rate)
 
-	def calculate_item_values(self):
-		if self.doc.get("is_consolidated"):
+	def calculate_item_rate(self, item):
+		if not item.price_list_rate:
+			remove_margin(item)
+			remove_discount(item)
+			item.rate_with_margin = 0
 			return
 
-		if not self.discount_amount_applied:
-			do_not_round_fields = ["valuation_rate", "incoming_rate"]
+		has_pricing_rules = item.pricing_rules and not self.doc.ignore_pricing_rule
+		if has_pricing_rules:
+			remove_margin(item)
 
-			for item in self.doc.items:
-				self.doc.round_floats_in(item, do_not_round_fields=do_not_round_fields)
+			for d in get_applied_pricing_rules(item.pricing_rules):
+				pricing_rule = frappe.get_cached_doc("Pricing Rule", d)
 
-				if item.discount_percentage == 100:
-					item.rate = 0.0
-				elif item.price_list_rate:
-					if not item.rate or (item.pricing_rules and item.discount_percentage > 0):
-						item.rate = flt(
-							item.price_list_rate * (1.0 - (item.discount_percentage / 100.0)),
-							item.precision("rate"),
-						)
-
-						item.discount_amount = item.price_list_rate * (item.discount_percentage / 100.0)
-
-					elif item.discount_amount and item.pricing_rules:
-						item.rate = item.price_list_rate - item.discount_amount
-
-				if item.doctype in [
-					"Quotation Item",
-					"Sales Order Item",
-					"Delivery Note Item",
-					"Sales Invoice Item",
-					"POS Invoice Item",
-					"Purchase Invoice Item",
-					"Purchase Order Item",
-					"Purchase Receipt Item",
-				]:
-					item.rate_with_margin, item.base_rate_with_margin = self.calculate_margin(item)
-					if flt(item.rate_with_margin) > 0:
-						item.rate = flt(
-							item.rate_with_margin * (1.0 - (item.discount_percentage / 100.0)),
-							item.precision("rate"),
-						)
-
-						if item.discount_amount and not item.discount_percentage:
-							item.rate = item.rate_with_margin - item.discount_amount
-						else:
-							item.discount_amount = flt(
-								item.rate_with_margin - item.rate, item.precision("discount_amount")
-							)
-
-					elif flt(item.price_list_rate) > 0:
-						item.discount_amount = flt(
-							item.price_list_rate - item.rate, item.precision("discount_amount")
-						)
-				elif flt(item.price_list_rate) > 0 and not item.discount_amount:
-					item.discount_amount = flt(
-						item.price_list_rate - item.rate, item.precision("discount_amount")
+				if not (
+					pricing_rule.margin_type
+					and pricing_rule.margin_rate_or_amount
+					and (
+						pricing_rule.margin_type == "Percentage" or pricing_rule.currency == self.doc.currency
 					)
-
-				item.net_rate = item.rate
-
-				if (
-					not item.qty
-					and self.doc.get("is_return")
-					and self.doc.get("doctype") != "Purchase Receipt"
 				):
-					item.amount = flt(-1 * item.rate, item.precision("amount"))
-				elif not item.qty and self.doc.get("is_debit_note"):
-					item.amount = flt(item.rate, item.precision("amount"))
-				else:
-					item.amount = flt(item.rate * item.qty, item.precision("amount"))
+					continue
 
-				item.net_amount = item.amount
+				item.margin_type = pricing_rule.margin_type
+				item.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
 
-				self._set_in_company_currency(
-					item, ["price_list_rate", "rate", "net_rate", "amount", "net_amount"]
-				)
+		item.rate_with_margin = get_rate_with_margin(item)
+		if item.discount_percentage > 0:
+			item.discount_amount = flt(
+				item.rate_with_margin * item.discount_percentage / 100.0, item.precision("discount_amount")
+			)
 
-				item.item_tax_amount = 0.0
+		calculated_rate = flt(item.rate_with_margin - item.discount_amount, item.precision("rate"))
+
+		# if rate is 0 or pricing rules are applicable, calculated rate is preferred
+		if has_pricing_rules or not item.rate:
+			item.rate = calculated_rate
+			return
+
+		# discount and margin are correct, exit early
+		if item.rate == calculated_rate:
+			return
+
+		# item rate does not match calculated rate. prefer item rate, reset margin / discount
+		if item.rate > item.price_list_rate:
+			item.margin_type = "Amount"
+			item.margin_rate_or_amount = flt(
+				item.rate - item.price_list_rate, item.precision("margin_rate_or_amount")
+			)
+			item.rate_with_margin = item.rate
+			remove_discount(item)
+			return
+
+		item.rate_with_margin = item.price_list_rate
+		item.discount_amount = flt(item.rate_with_margin - item.rate, item.precision("discount_amount"))
+		item.discount_percentage = 0
+		remove_margin(item)
+
+	def calculate_item_values(self):
+		if self.doc.get("is_consolidated") or self.discount_amount_applied:
+			return
+
+		do_not_round_fields = [
+			"valuation_rate",
+			"incoming_rate",
+			"sales_incoming_rate",
+			"conversion_factor",
+		]
+		for item in self.doc.items:
+			self.doc.round_floats_in(item, do_not_round_fields=do_not_round_fields)
+			self.calculate_item_rate(item)
+
+			item.net_rate = item.rate
+			if not item.qty and self.doc.get("is_return") and self.doc.get("doctype") != "Purchase Receipt":
+				item.amount = flt(-1 * item.rate, item.precision("amount"))
+			elif not item.qty and self.doc.get("is_debit_note"):
+				item.amount = flt(item.rate, item.precision("amount"))
+			else:
+				item.amount = flt(item.rate * item.qty, item.precision("amount"))
+			item.net_amount = item.amount
+			self._set_in_company_currency(
+				item, ["price_list_rate", "rate_with_margin", "rate", "net_rate", "amount", "net_amount"]
+			)
+			item.item_tax_amount = 0.0
 
 	def _set_in_company_currency(self, doc, fields):
 		"""set values in base currency"""
@@ -306,33 +312,32 @@ class calculate_taxes_and_totals:
 		for item in self.doc.items:
 			item._unrounded_net_amount = None
 			item_tax_map = self._load_item_tax_rate(item.item_tax_rate)
-			cumulated_tax_fraction = 0
-			total_inclusive_tax_amount_per_qty = 0
+			total_tax_slope = 0
+			total_tax_intercept = 0
 			for i, tax in enumerate(self.doc.get("taxes")):
 				(
 					tax.tax_fraction_for_current_item,
-					inclusive_tax_amount_per_qty,
-				) = self.get_current_tax_fraction(tax, item_tax_map)
+					tax_intercept_per_qty,
+				) = self.get_current_tax_fraction(tax, item_tax_map, item)
+				tax.inclusive_amount_per_qty = tax_intercept_per_qty
 
 				if i == 0:
 					tax.grand_total_fraction_for_current_item = 1 + tax.tax_fraction_for_current_item
+					tax.grand_total_amount_per_qty = tax_intercept_per_qty
 				else:
+					prev = self.doc.get("taxes")[i - 1]
 					tax.grand_total_fraction_for_current_item = (
-						self.doc.get("taxes")[i - 1].grand_total_fraction_for_current_item
-						+ tax.tax_fraction_for_current_item
+						prev.grand_total_fraction_for_current_item + tax.tax_fraction_for_current_item
 					)
+					tax.grand_total_amount_per_qty = prev.grand_total_amount_per_qty + tax_intercept_per_qty
 
-				cumulated_tax_fraction += tax.tax_fraction_for_current_item
-				total_inclusive_tax_amount_per_qty += inclusive_tax_amount_per_qty * flt(item.qty)
+				total_tax_slope += tax.tax_fraction_for_current_item
+				total_tax_intercept += tax_intercept_per_qty * flt(item.qty)
 
-			if (
-				not self.discount_amount_applied
-				and item.qty
-				and (cumulated_tax_fraction or total_inclusive_tax_amount_per_qty)
-			):
-				amount = flt(item.amount) - total_inclusive_tax_amount_per_qty
+			if not self.discount_amount_applied and item.qty and (total_tax_slope or total_tax_intercept):
+				amount = flt(item.amount) - total_tax_intercept
 
-				item._unrounded_net_amount = amount / (1 + cumulated_tax_fraction)
+				item._unrounded_net_amount = amount / (1 + total_tax_slope)
 				item.net_amount = flt(item._unrounded_net_amount, item.precision("net_amount"))
 				item.net_rate = flt(item.net_amount / item.qty, item.precision("net_rate"))
 				item.discount_percentage = flt(
@@ -342,43 +347,50 @@ class calculate_taxes_and_totals:
 				self._set_in_company_currency(item, ["net_rate", "net_amount"])
 
 	def _load_item_tax_rate(self, item_tax_rate):
-		return json.loads(item_tax_rate) if item_tax_rate else {}
+		return frappe.parse_json(item_tax_rate) if item_tax_rate else {}
 
-	def get_current_tax_fraction(self, tax, item_tax_map):
+	def get_current_tax_fraction(self, tax, item_tax_map, item):
 		"""
-		Get tax fraction for calculating tax exclusive amount
-		from tax inclusive amount
+		tax = slope * net + intercept.
+		Returns (slope, intercept_per_qty)
 		"""
-		current_tax_fraction = 0
-		inclusive_tax_amount_per_qty = 0
+		tax_slope = 0
+		tax_intercept = 0
 
 		if cint(tax.included_in_print_rate):
 			tax_rate = self._get_tax_rate(tax, item_tax_map)
 
 			if tax_rate == NOT_APPLICABLE_TAX:
-				return current_tax_fraction, inclusive_tax_amount_per_qty
+				return tax_slope, tax_intercept
 
 			if tax.charge_type == "On Net Total":
-				current_tax_fraction = tax_rate / 100.0
+				tax_slope = tax_rate / 100.0
 
 			elif tax.charge_type == "On Previous Row Amount":
-				current_tax_fraction = (tax_rate / 100.0) * self.doc.get("taxes")[
-					cint(tax.row_id) - 1
-				].tax_fraction_for_current_item
+				row = self.doc.get("taxes")[cint(tax.row_id) - 1]
+				tax_slope = (tax_rate / 100.0) * row.tax_fraction_for_current_item
+				tax_intercept = (tax_rate / 100.0) * flt(getattr(row, "inclusive_amount_per_qty", 0))
 
 			elif tax.charge_type == "On Previous Row Total":
-				current_tax_fraction = (tax_rate / 100.0) * self.doc.get("taxes")[
-					cint(tax.row_id) - 1
-				].grand_total_fraction_for_current_item
+				row = self.doc.get("taxes")[cint(tax.row_id) - 1]
+				tax_slope = (tax_rate / 100.0) * row.grand_total_fraction_for_current_item
+				tax_intercept = (tax_rate / 100.0) * flt(getattr(row, "grand_total_amount_per_qty", 0))
 
 			elif tax.charge_type == "On Item Quantity":
-				inclusive_tax_amount_per_qty = flt(tax_rate)
+				tax_intercept = flt(tax_rate)
+
+			else:
+				# Custom charge_type: the rate applies to a resolved (fixed) base,
+				# e.g. a tax on MRP included in the printed price.
+				qty = flt(item.qty) or 1
+				base = self.get_item_taxable_base(item, tax)
+				tax_intercept = (tax_rate / 100.0) * base / qty
 
 		if getattr(tax, "add_deduct_tax", None) and tax.add_deduct_tax == "Deduct":
-			current_tax_fraction *= -1.0
-			inclusive_tax_amount_per_qty *= -1.0
+			tax_slope *= -1.0
+			tax_intercept *= -1.0
 
-		return current_tax_fraction, inclusive_tax_amount_per_qty
+		return tax_slope, tax_intercept
 
 	def _get_tax_rate(self, tax, item_tax_map):
 		if tax.account_head in item_tax_map:
@@ -562,7 +574,7 @@ class calculate_taxes_and_totals:
 				+ "<br>".join(invalid_rows)
 			)
 
-			frappe.throw(_(message))
+			frappe.throw(message)
 
 	def get_tax_amount_if_for_valuation_or_deduction(self, tax_amount, tax):
 		# if just for valuation, do not add the tax amount in total
@@ -604,7 +616,6 @@ class calculate_taxes_and_totals:
 		elif tax.charge_type == "On Net Total":
 			if tax.account_head in item_tax_map:
 				current_net_amount = item.net_amount
-
 			# Use unrounded net for inclusive taxes to avoid double rounding
 			if (
 				cint(tax.included_in_print_rate)
@@ -623,11 +634,45 @@ class calculate_taxes_and_totals:
 		elif tax.charge_type == "On Item Quantity":
 			# don't sum current net amount due to the field being a currency field
 			current_tax_amount = tax_rate * item.qty
+		else:
+			# Custom charge_type: rate applies to the resolver-provided base.
+			base = self.get_item_taxable_base(item, tax)
+			current_net_amount = base
+			current_tax_amount = (tax_rate / 100.0) * base
 
 		if not tax.get("dont_recompute_tax"):
 			self.set_item_wise_tax(item, tax, tax_rate, current_tax_amount, current_net_amount)
 
 		return current_net_amount, current_tax_amount
+
+	def get_item_taxable_base(self, item, tax):
+		"""Per-item base a custom charge_type's rate is applied to.
+
+		Override the base (gross, MRP, net of other taxes, …) via the
+		`erpnext_taxable_base_resolvers` hook
+
+		Register a resolver in `hooks.py`, keyed by charge_type:
+
+		        erpnext_taxable_base_resolvers = {"On Gross Amount": "my_app.taxes.gross_base"}
+
+		It receives (calc, item, tax) — calc is this instance, calc.doc the parent —
+		and returns the base (flt-coerced by the caller):
+
+		        def gross_base(calc, item, tax):
+		                return item.custom_field_mrp * item.qty
+
+		A resolver may stamp transient attributes on `item`; it can be called more than once
+		per item, so such stamping must be idempotent.
+		"""
+		resolvers = frappe.get_hooks("erpnext_taxable_base_resolvers") or {}
+		path = resolvers.get(tax.charge_type)
+
+		if path:
+			method = path[-1] if isinstance(path, list | tuple) else path
+			return flt(frappe.get_attr(method)(self, item, tax))
+
+		# fallback
+		return flt(item.net_amount)
 
 	def set_item_wise_tax(self, item, tax, tax_rate, current_tax_amount, current_net_amount):
 		# store tax breakup for each item
@@ -1134,48 +1179,6 @@ class calculate_taxes_and_totals:
 
 			self.calculate_outstanding_amount()
 
-	def calculate_margin(self, item):
-		rate_with_margin = 0.0
-		base_rate_with_margin = 0.0
-		if item.price_list_rate:
-			if item.pricing_rules and not self.doc.ignore_pricing_rule:
-				has_margin = False
-				for d in get_applied_pricing_rules(item.pricing_rules):
-					pricing_rule = frappe.get_cached_doc("Pricing Rule", d)
-
-					if pricing_rule.margin_rate_or_amount and (
-						(
-							pricing_rule.currency == self.doc.currency
-							and pricing_rule.margin_type in ["Amount", "Percentage"]
-						)
-						or pricing_rule.margin_type == "Percentage"
-					):
-						item.margin_type = pricing_rule.margin_type
-						item.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
-						has_margin = True
-
-				if not has_margin:
-					item.margin_type = None
-					item.margin_rate_or_amount = 0.0
-
-			if not item.pricing_rules and flt(item.rate) > flt(item.price_list_rate):
-				item.margin_type = "Amount"
-				item.margin_rate_or_amount = flt(
-					item.rate - item.price_list_rate, item.precision("margin_rate_or_amount")
-				)
-				item.rate_with_margin = item.rate
-
-			elif item.margin_type and item.margin_rate_or_amount:
-				margin_value = (
-					item.margin_rate_or_amount
-					if item.margin_type == "Amount"
-					else flt(item.price_list_rate) * flt(item.margin_rate_or_amount) / 100
-				)
-				rate_with_margin = flt(item.price_list_rate) + flt(margin_value)
-				base_rate_with_margin = flt(rate_with_margin) * flt(self.doc.conversion_rate)
-
-		return rate_with_margin, base_rate_with_margin
-
 	def set_item_wise_tax_breakup(self):
 		self.doc.other_charges_calculation = get_itemised_tax_breakup_html(self.doc)
 
@@ -1208,6 +1211,29 @@ class calculate_taxes_and_totals:
 						"default": 1,
 					},
 				)
+
+
+def remove_discount(item):
+	item.discount_percentage = 0.0
+	item.discount_amount = 0.0
+
+
+def remove_margin(item):
+	item.margin_type = None
+	item.margin_rate_or_amount = 0.0
+
+
+def get_rate_with_margin(item):
+	if not item.margin_type:
+		return item.price_list_rate
+
+	if item.margin_type == "Percentage":
+		return flt(
+			item.price_list_rate * (1 + (item.margin_rate_or_amount / 100.0)),
+			item.precision("rate_with_margin"),
+		)
+
+	return flt(item.price_list_rate + item.margin_rate_or_amount, item.precision("rate_with_margin"))
 
 
 def get_itemised_tax_breakup_html(doc):

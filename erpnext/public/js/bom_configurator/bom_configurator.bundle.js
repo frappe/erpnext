@@ -57,6 +57,7 @@ class BOMConfigurator {
 			breadcrumb: "Manufacturing",
 			get_tree_nodes: "erpnext.manufacturing.doctype.bom_creator.bom_creator.get_children",
 			root_label: this.frm.doc.item_code,
+			get_label: (node) => this.get_node_label(node),
 			disable_add_node: true,
 			get_tree_root: false,
 			show_expand_all: false,
@@ -66,6 +67,23 @@ class BOMConfigurator {
 		};
 	}
 
+	get_node_label(node) {
+		const item_code = this.get_item_code(node);
+		const item_name = node.data?.title || item_code;
+
+		if (item_name === item_code) {
+			return frappe.utils.escape_html(item_code);
+		}
+
+		return `${frappe.utils.escape_html(item_name)} <span class='text-muted'>(${frappe.utils.escape_html(
+			item_code
+		)})</span>`;
+	}
+
+	get_item_code(node) {
+		return node.data?.item_code || this.frm.doc.item_code;
+	}
+
 	tree_methods() {
 		let frm_obj = this;
 		let view = frappe.views.trees["BOM Configurator"];
@@ -73,7 +91,8 @@ class BOMConfigurator {
 		return {
 			onload: function (me) {
 				me.args["parent_id"] = frm_obj.frm.doc.name;
-				me.args["parent"] = frm_obj.frm.doc.item_code;
+				me.args["parent"] = frm_obj.frm.doc.name;
+				me.root_value = frm_obj.frm.doc.name;
 				me.parent = frm_obj.$wrapper.get(0);
 				me.body = frm_obj.$wrapper.get(0);
 				me.make_tree();
@@ -83,7 +102,7 @@ class BOMConfigurator {
 				const uom = node.data.uom || frm_obj.frm.doc.uom;
 				const docname = node.data.name || frm_obj.frm.doc.name;
 				let amount = node.data.amount;
-				if (node.data.value === frm_obj.frm.doc.item_code) {
+				if (node.is_root) {
 					amount = frm_obj.frm.doc.raw_material_cost;
 				}
 
@@ -111,7 +130,7 @@ class BOMConfigurator {
 				this.frm?.doc.docstatus === 0
 					? [
 							{
-								label: __(frappe.utils.icon("edit", "sm") + " BOM"),
+								label: __(frappe.utils.icon("pencil", "sm") + " BOM"),
 								click: function (node) {
 									let view = frappe.views.trees["BOM Configurator"];
 									view.events.edit_bom(node, view);
@@ -119,7 +138,7 @@ class BOMConfigurator {
 								btnClass: "hidden-xs",
 							},
 							{
-								label: __(frappe.utils.icon("add", "sm") + " Raw Material"),
+								label: __(frappe.utils.icon("plus", "sm") + " Raw Material"),
 								click: function (node) {
 									let view = frappe.views.trees["BOM Configurator"];
 									view.events.add_item(node, view);
@@ -130,7 +149,7 @@ class BOMConfigurator {
 								btnClass: "hidden-xs",
 							},
 							{
-								label: __(frappe.utils.icon("add", "sm") + " Sub Assembly"),
+								label: __(frappe.utils.icon("plus", "sm") + " Sub Assembly"),
 								click: function (node) {
 									let view = frappe.views.trees["BOM Configurator"];
 									view.events.add_sub_assembly(node, view);
@@ -141,7 +160,7 @@ class BOMConfigurator {
 								btnClass: "hidden-xs",
 							},
 							{
-								label: __(frappe.utils.icon("add", "sm") + " Phantom Item"),
+								label: __(frappe.utils.icon("plus", "sm") + " Phantom Item"),
 								click: function (node) {
 									let view = frappe.views.trees["BOM Configurator"];
 									view.events.add_sub_assembly(node, view, true);
@@ -243,7 +262,7 @@ class BOMConfigurator {
 					method: "add_item",
 					doc: this.frm.doc,
 					args: {
-						fg_item: node.data.value,
+						fg_item: this.get_item_code(node),
 						item_code: data.item_code,
 						fg_reference_id: node.data.name || this.frm.doc.name,
 						qty: data.qty,
@@ -298,7 +317,7 @@ class BOMConfigurator {
 				method: "add_sub_assembly",
 				doc: this.frm.doc,
 				args: {
-					fg_item: node.data.value,
+					fg_item: this.get_item_code(node),
 					fg_reference_id: node.data.name || this.frm.doc.name,
 					bom_item: bom_item,
 					operation: node.data.operation,
@@ -417,7 +436,7 @@ class BOMConfigurator {
 		});
 
 		dialog.set_values({
-			item_code: node.data.value,
+			item_code: this.get_item_code(node),
 			qty: node.data.qty,
 		});
 
@@ -445,7 +464,7 @@ class BOMConfigurator {
 				method: "add_sub_assembly",
 				doc: this.frm.doc,
 				args: {
-					fg_item: node.data.value,
+					fg_item: this.get_item_code(node),
 					bom_item: bom_item,
 					fg_reference_id: node.data.name || this.frm.doc.name,
 					convert_to_sub_assembly: true,
@@ -482,7 +501,6 @@ class BOMConfigurator {
 				method: "delete_node",
 				doc: this.frm.doc,
 				args: {
-					fg_item: node.data.value,
 					doctype: node.data.doctype,
 					docname: node.data.name,
 				},
