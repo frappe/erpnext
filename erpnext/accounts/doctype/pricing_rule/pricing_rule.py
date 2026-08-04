@@ -446,6 +446,31 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 
 	update_args_for_pricing_rule(args)
 
+	previous_document_detail_fields = {
+		"Sales Order": ("quotation_item", "purchase_order_item"),
+		"Delivery Note": ("so_detail", "si_detail", "dn_detail"),
+		"Sales Invoice": ("so_detail", "dn_detail", "sales_invoice_item", "pos_invoice_item"),
+		"POS Invoice": ("so_detail", "dn_detail", "pos_invoice_item"),
+		"Purchase Order": ("supplier_quotation_item",),
+		"Purchase Receipt": (
+			"purchase_order_item",
+			"purchase_receipt_item",
+			"delivery_note_item",
+			"purchase_invoice_item",
+		),
+		"Purchase Invoice": ("po_detail", "pr_detail", "purchase_invoice_item", "sales_invoice_item"),
+		"Proforma Invoice": ("so_detail",),
+	}
+	has_prevdoc = any(
+		args.get(fieldname) for fieldname in previous_document_detail_fields.get(args.get("doctype"), ())
+	)
+
+	if has_prevdoc:
+		if args.get("pricing_rules"):
+			item_details.has_pricing_rule = 1
+			item_details.pricing_rules = frappe.as_json(get_applied_pricing_rules(args.get("pricing_rules")))
+		return item_details
+
 	pricing_rules = (
 		get_applied_pricing_rules(args.get("pricing_rules"))
 		if for_validate and args.get("pricing_rules")

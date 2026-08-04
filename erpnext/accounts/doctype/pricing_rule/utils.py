@@ -639,10 +639,13 @@ def remove_free_item(doc):
 
 def get_applied_pricing_rules(pricing_rules):
 	if pricing_rules:
-		if pricing_rules.startswith("["):
-			return frappe.parse_json(pricing_rules)
-		else:
-			return pricing_rules.split(",")
+		if isinstance(pricing_rules, list):
+			return pricing_rules
+		elif isinstance(pricing_rules, str):
+			if pricing_rules.startswith("["):
+				return frappe.parse_json(pricing_rules)
+			else:
+				return pricing_rules.split(",")
 
 	return []
 
