@@ -72,7 +72,7 @@ class QualityInspection(UnitReadingsMixin, Document):
 		rejected_unit_quantity: DF.Int
 		unit_quantity: DF.Int
 		unit_readings: DF.Table[QualityInspectionReadingEntry]
-		status: DF.Literal["", "Accepted", "Partially Accepted", "Rejected", "Cancelled"]
+		status: DF.Literal["Accepted", "Partially Accepted", "Rejected", "Cancelled"]
 		verified_by: DF.Data | None
 
 	# end: auto-generated types
