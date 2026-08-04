@@ -393,6 +393,7 @@ class UnitReadingsMixin:
 		still sit in its Quality Control warehouse. Row flow: the referenced
 		row's serials. Only an unambiguous one-serial-per-unit match prefills.
 		"""
+		from erpnext.stock.services.quality_quarantine import get_lot_serial_members
 		from erpnext.stock.services.quality_trigger_resolution import get_row_serial_nos
 
 		if not self.item_code or not frappe.get_cached_value("Item", self.item_code, "has_serial_no"):
@@ -403,23 +404,19 @@ class UnitReadingsMixin:
 			lot = frappe.db.get_value(
 				"Quality Control Lot",
 				self.reference_name,
-				["item_code", "batch_no", "quality_warehouse", "source_document_type", "source_document"],
+				[
+					"name",
+					"item_code",
+					"batch_no",
+					"quality_warehouse",
+					"source_document_type",
+					"source_document",
+					"source_document_row",
+				],
 				as_dict=True,
 			)
 			if lot and lot.source_document_type and lot.source_document:
-				child_doctype = (
-					"Stock Entry Detail"
-					if lot.source_document_type == "Stock Entry"
-					else lot.source_document_type + " Item"
-				)
-				members = set()
-				for row in frappe.get_all(
-					child_doctype,
-					filters={"parent": lot.source_document, "item_code": lot.item_code},
-					fields=["serial_no", "serial_and_batch_bundle"],
-				):
-					members.update(get_row_serial_nos(row))
-				for serial in members:
+				for serial in get_lot_serial_members(lot):
 					info = frappe.db.get_value("Serial No", serial, ["warehouse", "batch_no"], as_dict=True)
 					if not info or info.warehouse != lot.quality_warehouse:
 						continue
