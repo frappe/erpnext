@@ -80,7 +80,6 @@ frappe.ui.form.on("Delivery Note", {
 
 	refresh: function (frm) {
 		frm._submitting = false;
-		frm._credit_checked_grand_total = frm.doc.base_grand_total;
 
 		if (
 			frm.doc.docstatus === 1 &&

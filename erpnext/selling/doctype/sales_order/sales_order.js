@@ -74,7 +74,6 @@ frappe.ui.form.on("Sales Order", {
 
 	refresh: function (frm) {
 		frm._submitting = false;
-		frm._credit_checked_grand_total = frm.doc.base_grand_total;
 
 		frm.fields_dict["items"].grid.update_docfield_property(
 			"add_schedule",

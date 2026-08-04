@@ -59,6 +59,9 @@ class SellingController(StockController):
 
 	@frappe.whitelist()
 	def check_credit_limit_on_save(self, extra_amount: float = 0, raise_exception: bool = True) -> bool:
+		if not hasattr(self, "check_credit_limit"):
+			return False
+
 		frappe.has_permission("Customer", "read", self.customer, throw=True)
 		return self.check_credit_limit(extra_amount, raise_exception)
 

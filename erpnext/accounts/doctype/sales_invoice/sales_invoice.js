@@ -1186,7 +1186,6 @@ frappe.ui.form.on("Sales Invoice", {
 
 	refresh: function (frm) {
 		frm._submitting = false;
-		frm._credit_checked_grand_total = frm.doc.base_grand_total;
 
 		if (frm.doc.is_debit_note) {
 			frm.set_df_property("return_against", "label", __("Adjustment Against"));
