@@ -147,7 +147,7 @@ class Opportunity(TransactionBase, CRMNote):
 
 	def validate_qty(self):
 		for item in self.items:
-			if item.qty <= 0:
+			if flt(item.qty) <= 0:
 				frappe.throw(
 					_("Row #{0}: Quantity must be greater than 0 for Item {1}").format(
 						item.idx, item.item_code
