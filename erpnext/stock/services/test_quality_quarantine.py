@@ -496,6 +496,57 @@ class TestQualityQuarantine(ERPNextTestSuite):
 			[lots[1]],
 		)
 
+	def test_one_action_releases_every_lot_awaiting_one(self):
+		import json
+
+		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
+		from erpnext.stock.services.quality_release import make_releases_for_lots
+
+		qc = make_qc_warehouse("_Test QC BulkRel WH")
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "QCBR.#####",
+			}
+		)
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Stock Entry",
+				warehouse_role="Inbound",
+				quality_control_mode="Quarantine",
+				applicable_warehouse=qc,
+			),
+		)
+		item.save()
+
+		receipt = frappe.new_doc("Stock Entry")
+		receipt.purpose = "Material Receipt"
+		receipt.stock_entry_type = "Material Receipt"
+		receipt.company = "_Test Company"
+		for qty in (2, 3):
+			receipt.append(
+				"items", {"item_code": item.name, "qty": qty, "t_warehouse": qc, "basic_rate": 100}
+			)
+		receipt.insert()
+		receipt.submit()
+
+		lots = [lot.name for lot in quality_control_lots_for(receipt.name)]
+		self.assertEqual(len(lots), 2)
+		for lot in lots:
+			submit_inspection_for_lot(lot)
+			self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "status"), "Awaiting Release")
+
+		released = make_releases_for_lots(json.dumps(lots), REAL_WH)
+		self.assertEqual(len(released), 2)
+		for lot in lots:
+			self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "status"), "Released")
+
+		# nothing left awaiting release: the action refuses rather than making empty entries
+		self.assertRaises(frappe.ValidationError, make_releases_for_lots, json.dumps(lots), REAL_WH)
+
 	def test_quality_warehouse_refuses_unrelated_stock(self):
 		qc = make_qc_warehouse("_Test QC Strict WH")
 		plain_item = make_item(properties={"is_stock_item": 1}).name
