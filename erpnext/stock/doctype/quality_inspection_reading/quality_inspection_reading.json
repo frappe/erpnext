@@ -9,10 +9,10 @@
   "specification",
   "parameter_group",
   "status",
-  "manual_inspection",
   "value",
-  "numeric",
+  "manual_inspection",
   "column_break_4",
+  "numeric",
   "min_value",
   "max_value",
   "formula_based_criteria",
@@ -47,7 +47,7 @@
   },
   {
    "columns": 2,
-   "depends_on": "eval:(!doc.formula_based_criteria && !doc.numeric)",
+   "depends_on": "eval:(!doc.manual_inspection && !doc.formula_based_criteria && !doc.numeric)",
    "fieldname": "value",
    "fieldtype": "Data",
    "label": "Acceptance Criteria Value",
@@ -56,7 +56,7 @@
    "in_list_view": 1
   },
   {
-   "depends_on": "eval:doc.numeric",
+   "depends_on": "eval:(!doc.manual_inspection && doc.numeric)",
    "fieldname": "reading_1",
    "fieldtype": "Data",
    "label": "Reading 1",
@@ -67,7 +67,7 @@
   },
   {
    "columns": 1,
-   "depends_on": "eval:doc.numeric",
+   "depends_on": "eval:(!doc.manual_inspection && doc.numeric)",
    "fieldname": "reading_2",
    "fieldtype": "Data",
    "label": "Reading 2",
@@ -76,7 +76,7 @@
   },
   {
    "columns": 1,
-   "depends_on": "eval:doc.numeric",
+   "depends_on": "eval:(!doc.manual_inspection && doc.numeric)",
    "fieldname": "reading_3",
    "fieldtype": "Data",
    "label": "Reading 3",
@@ -84,7 +84,7 @@
    "oldfieldtype": "Data"
   },
   {
-   "depends_on": "eval:doc.numeric",
+   "depends_on": "eval:(!doc.manual_inspection && doc.numeric)",
    "fieldname": "reading_4",
    "fieldtype": "Data",
    "label": "Reading 4",
@@ -92,7 +92,7 @@
    "oldfieldtype": "Data"
   },
   {
-   "depends_on": "eval:doc.numeric",
+   "depends_on": "eval:(!doc.manual_inspection && doc.numeric)",
    "fieldname": "reading_5",
    "fieldtype": "Data",
    "label": "Reading 5",
@@ -100,7 +100,7 @@
    "oldfieldtype": "Data"
   },
   {
-   "depends_on": "eval:doc.numeric",
+   "depends_on": "eval:(!doc.manual_inspection && doc.numeric)",
    "fieldname": "reading_6",
    "fieldtype": "Data",
    "label": "Reading 6",
@@ -108,7 +108,7 @@
    "oldfieldtype": "Data"
   },
   {
-   "depends_on": "eval:doc.numeric",
+   "depends_on": "eval:(!doc.manual_inspection && doc.numeric)",
    "fieldname": "reading_7",
    "fieldtype": "Data",
    "label": "Reading 7",
@@ -116,7 +116,7 @@
    "oldfieldtype": "Data"
   },
   {
-   "depends_on": "eval:doc.numeric",
+   "depends_on": "eval:(!doc.manual_inspection && doc.numeric)",
    "fieldname": "reading_8",
    "fieldtype": "Data",
    "label": "Reading 8",
@@ -124,7 +124,7 @@
    "oldfieldtype": "Data"
   },
   {
-   "depends_on": "eval:doc.numeric",
+   "depends_on": "eval:(!doc.manual_inspection && doc.numeric)",
    "fieldname": "reading_9",
    "fieldtype": "Data",
    "label": "Reading 9",
@@ -132,7 +132,7 @@
    "oldfieldtype": "Data"
   },
   {
-   "depends_on": "eval:doc.numeric",
+   "depends_on": "eval:(!doc.manual_inspection && doc.numeric)",
    "fieldname": "reading_10",
    "fieldtype": "Data",
    "label": "Reading 10",
@@ -148,10 +148,11 @@
    "label": "Status",
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "\nAccepted\nRejected"
+   "options": "\nAccepted\nRejected",
+   "read_only_depends_on": "eval:!doc.manual_inspection"
   },
   {
-   "depends_on": "eval:!doc.numeric",
+   "depends_on": "eval:(!doc.manual_inspection && !doc.numeric)",
    "fieldname": "section_break_3",
    "fieldtype": "Section Break",
    "label": "Value Based Inspection"
@@ -161,7 +162,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "formula_based_criteria",
+   "depends_on": "eval:(!doc.manual_inspection && doc.formula_based_criteria)",
    "description": "Simple Python formula applied on Reading fields.<br> Numeric eg. 1: <b>reading_1 &gt; 0.2 and reading_1 &lt; 0.5</b><br>\nNumeric eg. 2: <b>mean &gt; 3.5</b> (mean of populated fields)<br>\nValue based eg.:  <b>reading_value in (\"A\", \"B\", \"C\")</b>",
    "fieldname": "acceptance_formula",
    "fieldtype": "Code",
@@ -179,17 +180,18 @@
    "default": "0",
    "fieldname": "formula_based_criteria",
    "fieldtype": "Check",
-   "label": "Formula Based Criteria"
+   "label": "Formula Based Criteria",
+   "depends_on": "eval:!doc.manual_inspection"
   },
   {
-   "depends_on": "eval:(!doc.formula_based_criteria && doc.numeric)",
+   "depends_on": "eval:(!doc.manual_inspection && !doc.formula_based_criteria && doc.numeric)",
    "description": "Applied on each reading.",
    "fieldname": "min_value",
    "fieldtype": "Float",
    "label": "Minimum Value"
   },
   {
-   "depends_on": "eval:(!doc.formula_based_criteria && doc.numeric)",
+   "depends_on": "eval:(!doc.manual_inspection && !doc.formula_based_criteria && doc.numeric)",
    "description": "Applied on each reading.",
    "fieldname": "max_value",
    "fieldtype": "Float",
@@ -197,14 +199,14 @@
   },
   {
    "columns": 2,
-   "depends_on": "eval:!doc.numeric",
+   "depends_on": "eval:(!doc.manual_inspection && !doc.numeric)",
    "fieldname": "reading_value",
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Reading Value"
   },
   {
-   "depends_on": "numeric",
+   "depends_on": "eval:(!doc.manual_inspection && doc.numeric)",
    "fieldname": "section_break_14",
    "fieldtype": "Section Break",
    "label": "Numeric Inspection"
@@ -222,7 +224,8 @@
    "default": "0",
    "fieldname": "numeric",
    "fieldtype": "Check",
-   "label": "Numeric"
+   "label": "Numeric",
+   "depends_on": "eval:!doc.manual_inspection"
   },
   {
    "fetch_from": "specification.parameter_group",
@@ -230,7 +233,8 @@
    "fieldtype": "Link",
    "label": "Parameter Group",
    "options": "Quality Inspection Parameter Group",
-   "read_only": 1
+   "read_only": 1,
+   "depends_on": "eval:!doc.manual_inspection"
   }
  ],
  "idx": 1,
