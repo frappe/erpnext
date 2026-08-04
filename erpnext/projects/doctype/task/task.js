@@ -14,6 +14,12 @@ frappe.ui.form.on("Task", {
 		};
 	},
 	onload: function (frm) {
+		frm.set_query("project", function () {
+			return {
+				query: "erpnext.controllers.queries.get_project_name",
+			};
+		});
+
 		frm.set_query("task", "depends_on", function () {
 			let filters = {
 				name: ["!=", frm.doc.name],

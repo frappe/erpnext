@@ -688,6 +688,51 @@ class TestSalesOrder(ERPNextTestSuite):
 				frappe.ValidationError, update_child_qty_rate, "Sales Order", trans_item, so.name
 			)
 
+	def test_update_child_removing_item_without_cancel_and_delete_perms(self):
+		for workflow_name in frappe.get_all(
+			"Workflow", filters={"document_type": "Sales Order", "is_active": 1}, pluck="name"
+		):
+			workflow = frappe.get_doc("Workflow", workflow_name)
+			workflow.is_active = 0
+			workflow.save()
+
+		role = "_Test Sales Order Item Editor"
+		if not frappe.db.exists("Role", role):
+			frappe.get_doc({"doctype": "Role", "role_name": role, "desk_access": 1}).insert()
+
+		frappe.permissions.add_permission("Sales Order", role, 0)
+		for right, value in {
+			"read": 1,
+			"write": 1,
+			"create": 1,
+			"submit": 1,
+			"cancel": 0,
+			"delete": 0,
+		}.items():
+			frappe.permissions.update_permission_property("Sales Order", role, 0, right, value)
+		frappe.clear_cache()
+
+		so = make_sales_order(**{"item_list": [{"item_code": "_Test Item", "qty": 5, "rate": 1000}]})
+		trans_item = json.dumps(
+			[
+				{"item_code": "_Test Item", "qty": 5, "rate": 1000, "docname": so.items[0].name},
+				{"item_code": "_Test Item 2", "qty": 2, "rate": 500},
+			]
+		)
+		update_child_qty_rate("Sales Order", trans_item, so.name)
+		so.reload()
+		self.assertEqual(len(so.items), 2)
+
+		test_user = create_user("test_so_item_editor@example.com", role, "Accounts User", "Stock User")
+		trans_item = json.dumps(
+			[{"item_code": "_Test Item", "qty": 5, "rate": 1000, "docname": so.items[0].name}]
+		)
+		with self.set_user(test_user.name):
+			update_child_qty_rate("Sales Order", trans_item, so.name)
+
+		so.reload()
+		self.assertEqual(len(so.items), 1)
+
 	def test_update_child_qty_rate_with_workflow(self):
 		from frappe.model.workflow import apply_workflow
 
@@ -2006,6 +2051,41 @@ class TestSalesOrder(ERPNextTestSuite):
 		sales_order.items[0].qty = 21
 		sales_order.save()
 		self.assertEqual(sales_order.taxes[0].tax_amount, 0)
+
+	def test_sales_order_with_shipping_rule_without_cost_center(self):
+		from erpnext import get_default_cost_center
+
+		shipping_rule = frappe.get_doc(
+			{
+				"doctype": "Shipping Rule",
+				"label": "Shipping Rule Without Cost Center - Sales Order Test",
+				"shipping_rule_type": "Selling",
+				"company": "_Test Company",
+				"account": "_Test Account Shipping Charges - _TC",
+				"calculate_based_on": "Fixed",
+				"shipping_amount": 50,
+			}
+		).insert()
+		sales_order = make_sales_order(do_not_save=True)
+		sales_order.shipping_rule = shipping_rule.name
+		company_cost_center = get_default_cost_center(sales_order.company)
+
+		shipping_rule.apply(sales_order)
+		self.assertEqual(len(sales_order.taxes), 1)
+		self.assertIsNone(sales_order.taxes[0].cost_center)
+
+		for cost_center in (None, "", company_cost_center):
+			sales_order.taxes[0].cost_center = cost_center
+			shipping_rule.apply(sales_order)
+			self.assertEqual(len(sales_order.taxes), 1)
+			self.assertEqual(sales_order.taxes[0].cost_center, cost_center)
+
+		sales_order.taxes[0].cost_center = ""
+		sales_order.save()
+		sales_order.reload()
+		shipping_rule.apply(sales_order)
+		self.assertEqual(len(sales_order.taxes), 1)
+		self.assertEqual(sales_order.taxes[0].cost_center, "")
 
 	def test_sales_order_partial_advance_payment(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import (

@@ -513,7 +513,7 @@ def get_workstations(**kwargs):
 		d.color = color_map.get(d.status, "red")
 		d.workstation_link = get_url_to_form("Workstation", d.name)
 		if d.status != "Production":
-			d.status_image = d.off_status_image
+			d.status_image = frappe.utils.escape_html(d.off_status_image)
 			d.workstation_off = "workstation-off"
 
 	return data

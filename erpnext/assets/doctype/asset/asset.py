@@ -1332,7 +1332,7 @@ def has_active_capitalization(asset):
 
 
 @frappe.whitelist()
-def get_values_from_purchase_doc(purchase_doc_name, item_code, doctype):
+def get_values_from_purchase_doc(purchase_doc_name: str, item_code: str, doctype: str):
 	purchase_doc = frappe.get_doc(doctype, purchase_doc_name)
 	matching_items = [item for item in purchase_doc.items if item.item_code == item_code]
 
@@ -1344,7 +1344,7 @@ def get_values_from_purchase_doc(purchase_doc_name, item_code, doctype):
 	return {
 		"company": purchase_doc.company,
 		"purchase_date": purchase_doc.get("posting_date"),
-		"net_purchase_amount": flt(first_item.base_net_amount),
+		"net_purchase_amount": flt(first_item.valuation_rate) * flt(first_item.qty),
 		"asset_quantity": first_item.qty,
 		"cost_center": first_item.cost_center or purchase_doc.get("cost_center"),
 		"asset_location": first_item.get("asset_location"),

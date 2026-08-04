@@ -1893,7 +1893,7 @@ class AccountsController(TransactionBase):
 
 	def is_payable_account(self, reference_doctype, account):
 		if reference_doctype == "Purchase Invoice" or (
-			reference_doctype == "Journal Entry"
+			reference_doctype in ("Journal Entry", "Payment Entry")
 			and frappe.get_cached_value("Account", account, "account_type") == "Payable"
 		):
 			return True
@@ -3873,6 +3873,7 @@ def validate_and_delete_children(parent, data, ordered_item=None) -> bool:
 
 	for d in deleted_children:
 		validate_child_on_delete(d, parent, ordered_item)
+		d.flags.ignore_permissions = True
 		d.cancel()
 		d.delete()
 
