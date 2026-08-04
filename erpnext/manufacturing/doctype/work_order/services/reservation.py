@@ -546,10 +546,10 @@ class WorkOrderStockReservation:
 
 @frappe.whitelist()
 def make_stock_reservation_entries(
-	doc: str | Document, items: str | list | None = None, is_transfer: bool = True, notify: bool = False
+	doc: str | dict, items: str | list | None = None, is_transfer: bool = True, notify: bool = False
 ):
 	"""Whitelisted entry point: verify Work Order write access, then reserve stock."""
-	if isinstance(doc, str):
+	if isinstance(doc, str | dict):
 		doc = parse_json(doc)
 		doc = frappe.get_doc("Work Order", doc.get("name"))
 

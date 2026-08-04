@@ -143,11 +143,26 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		}
 	}
 
+	get_item_fields_to_round() {
+		const [item] = this.frm.doc.items || [];
+		if (!item) {
+			return [];
+		}
+
+		const do_not_round_fields = ["conversion_factor"];
+		return frappe.meta
+			.get_fieldnames(item.doctype, item.parent, {
+				fieldtype: ["in", ["Currency", "Float"]],
+			})
+			.filter((fieldname) => !do_not_round_fields.includes(fieldname));
+	}
+
 	calculate_item_values() {
 		var me = this;
 		if (!this.discount_amount_applied) {
+			const fields_to_round = this.get_item_fields_to_round();
 			for (const item of this.frm.doc.items || []) {
-				frappe.model.round_floats_in(item);
+				frappe.model.round_floats_in(item, fields_to_round);
 				item.net_rate = item.rate;
 				item.qty = item.qty === undefined ? (me.frm.doc.is_return ? -1 : 1) : item.qty;
 
