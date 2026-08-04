@@ -439,6 +439,63 @@ class TestQualityQuarantine(ERPNextTestSuite):
 			{name: float(qty) for name, qty in batches.items()},
 		)
 
+	def test_one_action_drafts_an_inspection_for_every_open_lot(self):
+		import json
+
+		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
+		from erpnext.stock.doctype.quality_control_lot.quality_control_lot import (
+			make_inspections_for_lots,
+		)
+
+		qc = make_qc_warehouse("_Test QC Bulk WH")
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "QCBLK.#####",
+			}
+		)
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Stock Entry",
+				warehouse_role="Inbound",
+				quality_control_mode="Quarantine",
+				applicable_warehouse=qc,
+			),
+		)
+		item.save()
+
+		receipt = frappe.new_doc("Stock Entry")
+		receipt.purpose = "Material Receipt"
+		receipt.stock_entry_type = "Material Receipt"
+		receipt.company = "_Test Company"
+		for qty in (2, 3):
+			receipt.append(
+				"items", {"item_code": item.name, "qty": qty, "t_warehouse": qc, "basic_rate": 100}
+			)
+		receipt.insert()
+		receipt.submit()
+
+		lots = [lot.name for lot in quality_control_lots_for(receipt.name)]
+		self.assertEqual(len(lots), 2)
+
+		created = make_inspections_for_lots(json.dumps(lots))
+		self.assertEqual(len(created), 2)
+		self.assertEqual(
+			{frappe.db.get_value("Quality Inspection", name, "reference_name") for name in created},
+			set(lots),
+		)
+
+		# a decided lot is skipped rather than drafted again
+		submit_inspection_for_lot(lots[0])
+		second_round = make_inspections_for_lots(json.dumps(lots))
+		self.assertEqual(
+			[frappe.db.get_value("Quality Inspection", name, "reference_name") for name in second_round],
+			[lots[1]],
+		)
+
 	def test_quality_warehouse_refuses_unrelated_stock(self):
 		qc = make_qc_warehouse("_Test QC Strict WH")
 		plain_item = make_item(properties={"is_stock_item": 1}).name
