@@ -881,10 +881,15 @@ def reset_item_valuation_rate(item_code, warehouse_list=None, qty=None, rate=Non
 		warehouse_list = [warehouse_list]
 
 	if not warehouse_list:
+		# Reconcile every warehouse the item has a non-zero balance in -- including
+		# negative balances left by other tests. get_valuation_rate averages
+		# Sum(stock_value)/Sum(actual_qty) across all bins, so a leftover negative
+		# balance in one warehouse can cancel the reset qty elsewhere and make the
+		# average collapse to 0, which is a source of flaky BOM-cost failures.
 		warehouse_list = frappe.db.sql_list(
 			"""
 			select warehouse from `tabBin`
-			where item_code=%s and actual_qty > 0
+			where item_code=%s and actual_qty != 0
 		""",
 			item_code,
 		)
