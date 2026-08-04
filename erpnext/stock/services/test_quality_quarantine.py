@@ -622,6 +622,10 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		self.assertEqual(copied[0]["specification"], "_Test Copy Parameter")
 		self.assertEqual(copied[0]["reading_1"], "5")
 
+		self.assertEqual(copied[0]["numeric"], 1)
+		self.assertEqual(copied[0]["min_value"], 1)
+		self.assertEqual(copied[0]["max_value"], 10)
+
 		second = draft_for(lots[1])
 		for row in second.readings:
 			for source in copied:
