@@ -14,7 +14,6 @@ from frappe.utils import cint, flt
 
 import erpnext
 from erpnext import is_perpetual_inventory_enabled
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 from erpnext.controllers.taxes_and_totals import init_landed_taxes_and_totals
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
@@ -552,21 +551,6 @@ def set_landed_cost_voucher_amount(doc):
 			d.db_set("cost_center", lc_voucher_data[0][1])
 
 
-def get_landed_cost_gl_item(item, landed_cost_entry):
-	dimension_values = {
-		dimension: value
-		for dimension, value in landed_cost_entry.items()
-		if dimension not in ("amount", "base_amount") and value
-	}
-
-	if not dimension_values:
-		return item
-
-	merged_item = frappe._dict(item.as_dict())
-	merged_item.update(dimension_values)
-	return merged_item
-
-
 def has_landed_cost_amount(doc):
 	for row in doc.items:
 		if row.get("landed_cost_voucher_amount"):
@@ -575,8 +559,55 @@ def has_landed_cost_amount(doc):
 	return False
 
 
+def get_lcv_dimension_fields():
+	"""Every field whose value should travel from an LCV row onto the landed cost GL entry.
+
+	`get_accounting_dimensions()` covers custom dimensions only, so cost center and project
+	are prepended explicitly.
+	"""
+	from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+		get_accounting_dimensions,
+	)
+
+	return ["cost_center", "project", *get_accounting_dimensions()]
+
+
+def get_row_dimensions(tax_row, lcv_item, dimension_fields):
+	"""Resolve the dimensions of a landed cost charge: tax row first, then the LCV item row.
+
+	Blanks are left blank on purpose - the GL composers fall back to the receipt item and
+	then the receipt document from there.
+	"""
+	return frappe._dict(
+		{field: (tax_row.get(field) or lcv_item.get(field) or None) for field in dimension_fields}
+	)
+
+
+def get_custom_dimension_overrides(entry):
+	"""Custom dimension overrides for a landed cost GL entry.
+
+	Cost center and project are excluded because the composers pass them as explicit
+	arguments. Only truthy values are returned: `get_gl_dict` applies `args` last, so a
+	`None` here would wipe out the receipt item fallback instead of deferring to it.
+	"""
+	return {
+		dimension: value
+		for dimension, value in (entry.dimensions or {}).items()
+		if value and dimension not in ("cost_center", "project")
+	}
+
+
 def get_item_account_wise_lcv_entries(doc):
-	"""Account-wise landed-cost map for a receipt document, consumed by the GL composers."""
+	"""Landed cost charges for a receipt document, consumed by the GL composers.
+
+	Returns `{(item_code, receipt_row_name): [entry, ...]}` where each entry is a
+	`frappe._dict(expense_account, amount, base_amount, dimensions)`.
+
+	Charges are grouped by *(expense account, dimension values)* rather than by expense
+	account alone, so two tax rows - whether in one voucher or across vouchers - that post
+	to the same account with different dimensions stay separate GL entries instead of
+	silently collapsing into the first row's dimensions.
+	"""
 	if not has_landed_cost_amount(doc):
 		return
 
@@ -590,7 +621,7 @@ def get_item_account_wise_lcv_entries(doc):
 		return
 
 	item_account_wise_cost = {}
-	dimensions = get_accounting_dimensions()
+	dimension_fields = get_lcv_dimension_fields()
 
 	row_fieldname = "purchase_receipt_item"
 	if doc.doctype == "Stock Entry":
@@ -612,30 +643,36 @@ def get_item_account_wise_lcv_entries(doc):
 
 		for item in landed_cost_voucher_doc.items:
 			if item.receipt_document == doc.name:
-				account_map = item_account_wise_cost.setdefault((item.item_code, item.get(row_fieldname)), {})
+				charges = item_account_wise_cost.setdefault((item.item_code, item.get(row_fieldname)), {})
 
 				for account in landed_cost_voucher_doc.taxes:
 					exchange_rate = account.exchange_rate or 1
-					item_row = account_map.get(account.expense_account)
+					dimensions = get_row_dimensions(account, item, dimension_fields)
+					group_key = (
+						account.expense_account,
+						tuple(dimensions.get(field) for field in dimension_fields),
+					)
 
+					item_row = charges.get(group_key)
 					if item_row is None:
-						item_row = account_map[account.expense_account] = {
-							"amount": 0.0,
-							"base_amount": 0.0,
-						}
-						for dimension in dimensions:
-							dimension_value = account.get(dimension) or item.get(dimension)
-							if dimension_value:
-								item_row[dimension] = dimension_value
+						item_row = charges[group_key] = frappe._dict(
+							expense_account=account.expense_account,
+							amount=0.0,
+							base_amount=0.0,
+							dimensions=dimensions,
+						)
 
 					if total_item_cost > 0:
-						item_row["amount"] += account.amount * item.get(based_on_field) / total_item_cost
+						item_row.amount += account.amount * item.get(based_on_field) / total_item_cost
 
-						item_row["base_amount"] += (
+						item_row.base_amount += (
 							account.base_amount * item.get(based_on_field) / total_item_cost
 						)
 					else:
-						item_row["amount"] += item.applicable_charges / exchange_rate
-						item_row["base_amount"] += item.applicable_charges
+						# Pre-existing behaviour: this adds the item's full applicable charges once
+						# per tax row. Unreachable for submitted vouchers, since
+						# validate_applicable_charges_for_item rejects a zero total.
+						item_row.amount += item.applicable_charges / exchange_rate
+						item_row.base_amount += item.applicable_charges
 
-	return item_account_wise_cost
+	return {key: list(charges.values()) for key, charges in item_account_wise_cost.items()}
