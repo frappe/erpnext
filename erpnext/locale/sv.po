@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-08-02 10:09+0000\n"
-"PO-Revision-Date: 2026-08-03 09:00\n"
+"PO-Revision-Date: 2026-08-04 09:43\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -7028,7 +7028,7 @@ msgstr "BFS"
 #. Request Plan Item'
 #: erpnext/manufacturing/doctype/material_request_plan_item/material_request_plan_item.json
 msgid "BIN Qty"
-msgstr "Lager Kvantitet"
+msgstr "Lagerplats Kvantitet"
 
 #. Label of the bom (Link) field in DocType 'Purchase Invoice Item'
 #. Option for the 'Backflush raw materials of subcontract based on' (Select)
@@ -8652,11 +8652,11 @@ msgstr "Faktura Valuta måste vara lika med antingen Standard Bolag Valuta eller
 #. Name of a DocType
 #: erpnext/stock/doctype/bin/bin.json
 msgid "Bin"
-msgstr "Papperskorg"
+msgstr "Lagerplats"
 
 #: erpnext/stock/doctype/bin/bin.js:16
 msgid "Bin Values Recalculated"
-msgstr ""
+msgstr "Binge Värden Omräknade"
 
 #. Label of the bio (Text Editor) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
