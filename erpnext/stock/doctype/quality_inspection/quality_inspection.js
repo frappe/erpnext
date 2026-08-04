@@ -91,12 +91,8 @@ frappe.ui.form.on("Quality Inspection", {
 				options: "Quality Inspection",
 				reqd: 1,
 				get_query: () => ({
-					filters: {
-						name: ["!=", frm.doc.name],
-						item_code: frm.doc.item_code,
-						inspection_basis: ["!=", "Each Quantity"],
-						docstatus: ["<", 2],
-					},
+					query: "erpnext.stock.doctype.quality_inspection.quality_inspection.readings_source_query",
+					filters: { inspection: frm.doc.name },
 				}),
 			},
 			(values) => {

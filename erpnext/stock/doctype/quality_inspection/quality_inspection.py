@@ -1181,6 +1181,72 @@ def parse_reading(value: str, decimal_str: str, comma_str: str) -> float | None:
 
 
 @frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def readings_source_query(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict | None = None
+):
+	"""Inspections of stock that arrived on the same document as this one.
+
+	Copying readings answers the several inspections one receipt produces, so
+	the picker offers those siblings rather than every inspection of the item
+	ever made.
+	"""
+	inspection = (filters or {}).get("inspection")
+	if not inspection:
+		return []
+
+	current = frappe.db.get_value(
+		"Quality Inspection", inspection, ["reference_type", "reference_name"], as_dict=True
+	)
+	if not current:
+		return []
+
+	source_type, source_name = _source_document_of(current.reference_type, current.reference_name)
+	if not source_name:
+		return []
+
+	siblings = frappe.get_all(
+		"Quality Control Lot",
+		filters={"source_document_type": source_type, "source_document": source_name},
+		pluck="name",
+	)
+
+	conditions = [
+		["name", "!=", inspection],
+		["inspection_basis", "!=", "Each Quantity"],
+		["docstatus", "<", 2],
+		["reference_name", "in", [*siblings, source_name]],
+	]
+	if txt:
+		conditions.append(["name", "like", f"%{txt}%"])
+
+	return frappe.get_all(
+		"Quality Inspection",
+		filters=conditions,
+		fields=["name", "item_code", "reference_name"],
+		order_by="creation desc",
+		limit_start=start,
+		limit_page_length=page_len,
+		as_list=True,
+	)
+
+
+def _source_document_of(reference_type: str, reference_name: str) -> tuple[str | None, str | None]:
+	"""The transaction an inspection's stock arrived on, through its lot or directly."""
+	if reference_type == "Quality Control Lot" and reference_name:
+		lot = frappe.db.get_value(
+			"Quality Control Lot",
+			reference_name,
+			["source_document_type", "source_document"],
+			as_dict=True,
+		)
+		if lot:
+			return lot.source_document_type, lot.source_document
+
+	return reference_type, reference_name
+
+
+@frappe.whitelist()
 def get_readings_to_copy(source: str) -> list[dict]:
 	"""The recorded readings of another inspection, to copy onto one being filled in.
 
