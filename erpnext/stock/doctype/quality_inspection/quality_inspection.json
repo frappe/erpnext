@@ -253,7 +253,7 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "Accepted\nPartially Accepted\nRejected\nCancelled",
+   "options": "Accepted\nPartially Accepted\nRejected",
    "read_only_depends_on": "eval:!doc.manual_inspection",
    "reqd": 1
   },

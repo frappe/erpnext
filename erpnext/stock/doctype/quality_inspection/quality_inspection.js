@@ -72,6 +72,18 @@ frappe.ui.form.on("Quality Inspection", {
 		frm.trigger("toggle_batch_and_serial_fields");
 		frm.trigger("toggle_unit_quantity");
 		frm.trigger("add_copy_readings_button");
+		frm.trigger("toggle_status_options");
+	},
+
+	toggle_status_options(frm) {
+		const manual = ["Accepted", "Rejected"];
+		const derived = ["Accepted", "Partially Accepted", "Rejected"];
+		const options = frm.doc.manual_inspection ? manual : derived;
+
+		frm.set_df_property("status", "options", options.join("\n"));
+		if (frm.doc.manual_inspection && !manual.includes(frm.doc.status)) {
+			frm.set_value("status", "Accepted");
+		}
 	},
 
 	add_copy_readings_button(frm) {
@@ -329,6 +341,7 @@ frappe.ui.form.on("Quality Inspection", {
 
 	manual_inspection(frm) {
 		frm.trigger("prefill_decided_quantity_from_lot");
+		frm.trigger("toggle_status_options");
 	},
 
 	prefill_decided_quantity_from_lot(frm) {

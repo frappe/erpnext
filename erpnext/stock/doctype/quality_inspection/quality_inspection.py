@@ -72,13 +72,12 @@ class QualityInspection(UnitReadingsMixin, Document):
 		rejected_unit_quantity: DF.Int
 		unit_quantity: DF.Int
 		unit_readings: DF.Table[QualityInspectionReadingEntry]
-		status: DF.Literal["Accepted", "Partially Accepted", "Rejected", "Cancelled"]
+		status: DF.Literal["Accepted", "Partially Accepted", "Rejected"]
 		verified_by: DF.Data | None
 
 	# end: auto-generated types
 	def on_discard(self):
 		self.update_qc_reference()
-		self.db_set("status", "Cancelled")
 
 	def before_validate(self):
 		self.clear_unborn_identity()
@@ -192,6 +191,7 @@ class QualityInspection(UnitReadingsMixin, Document):
 		# a sample larger than the stock it describes is wrong on a draft too
 		self.validate_sample_within_quantity()
 		self.validate_decision_follows_quarantine()
+		self.validate_manual_status()
 		self.set_company()
 
 		# creation lands the draft even when its prefills disagree or its
@@ -206,6 +206,25 @@ class QualityInspection(UnitReadingsMixin, Document):
 			self.validate_unit_readings_coverage()
 			self.validate_decided_quantity()
 			self.validate_units_not_already_decided()
+
+	def validate_manual_status(self):
+		"""A hand-set verdict decides the whole quantity, so it is one or the other.
+
+		Partially Accepted is the roll-up of a per-unit inspection and Cancelled is
+		stamped when the inspection is discarded; neither describes what a person
+		is deciding here. Both matter because the booking reads only "Rejected" and
+		treats everything else as a full acceptance — so either would quietly
+		release the lot entire.
+		"""
+		if not self.manual_inspection or self.status in ("Accepted", "Rejected"):
+			return
+
+		frappe.throw(
+			_("A manual inspection is Accepted or Rejected — {0} is not a verdict to set by hand.").format(
+				frappe.bold(_(self.status))
+			),
+			title=_("Invalid Manual Verdict"),
+		)
 
 	def validate_decision_follows_quarantine(self):
 		"""A verdict cannot be dated before the stock it decides was quarantined."""
