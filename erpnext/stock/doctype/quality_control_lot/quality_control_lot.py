@@ -4,7 +4,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt, get_link_to_form
+from frappe.utils import flt, get_link_to_form, nowdate
 
 
 class QualityControlLot(Document):
@@ -116,6 +116,48 @@ class QualityControlLot(Document):
 
 	def awaiting_release_qty(self):
 		return flt(self.decided_qty) - flt(self.rejected_qty) - flt(self.accepted_qty)
+
+
+@frappe.whitelist()
+def make_inspections_for_lots(lots: str) -> list[str]:
+	"""Draft a Quality Inspection for each of several lots awaiting one.
+
+	A receipt spanning batches mints a lot per batch, and inspecting them meant
+	opening every lot in turn. Each draft arrives with the identity and template
+	its lot already knows, so the inspector is left with the readings.
+	"""
+	frappe.has_permission("Quality Inspection", "create", throw=True)
+
+	created = []
+	for lot_name in frappe.parse_json(lots):
+		lot = frappe.get_doc("Quality Control Lot", lot_name)
+		lot.check_permission("read")
+
+		undecided_qty = lot.undecided_qty()
+		if undecided_qty <= 0:
+			continue
+
+		inspection = frappe.new_doc("Quality Inspection")
+		inspection.inspection_type = "Incoming"
+		inspection.reference_type = "Quality Control Lot"
+		inspection.reference_name = lot.name
+		inspection.item_code = lot.item_code
+		inspection.inspected_by = frappe.session.user
+		inspection.report_date = nowdate()
+		inspection.quality_inspection_template = lot.inspection_template
+		inspection.inspection_basis = lot.inspection_basis
+		if lot.inspection_basis != "Each Quantity":
+			inspection.sample_size = undecided_qty
+		inspection.insert()
+		created.append(inspection.name)
+
+	if not created:
+		frappe.throw(
+			_("Every Quality Control Lot on this document has already been decided."),
+			title=_("Nothing To Inspect"),
+		)
+
+	return created
 
 
 @frappe.whitelist()

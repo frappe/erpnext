@@ -1495,9 +1495,72 @@ erpnext.utils.add_quality_control_lot_buttons = function (frm) {
 					},
 					__("Create")
 				);
+				return;
 			}
-			// several open lots: the connections dashboard lists them
+
+			frm.add_custom_button(
+				__("Quality Inspections ({0})", [lots.length]),
+				() => erpnext.utils.pick_lots_to_inspect(lots),
+				__("Create")
+			);
 		});
+};
+
+erpnext.utils.pick_lots_to_inspect = function (lots) {
+	const dialog = new frappe.ui.Dialog({
+		title: __("Create Quality Inspections"),
+		size: "large",
+		fields: [
+			{
+				fieldtype: "MultiCheck",
+				fieldname: "lots",
+				columns: 1,
+				select_all: true,
+				options: lots.map((lot) => ({
+					label: [
+						lot.item_code,
+						lot.batch_no ? `${__("Batch")} ${lot.batch_no}` : null,
+						__("{0} pending", [format_number(lot.pending_qty)]),
+					]
+						.filter(Boolean)
+						.join(" &middot; "),
+					value: lot.name,
+					checked: 1,
+				})),
+			},
+		],
+		primary_action_label: __("Create"),
+		primary_action(values) {
+			const chosen = values.lots || [];
+			if (!chosen.length) {
+				frappe.msgprint(__("Select at least one Quality Control Lot."));
+				return;
+			}
+
+			frappe.call({
+				method: "erpnext.stock.doctype.quality_control_lot.quality_control_lot.make_inspections_for_lots",
+				args: { lots: JSON.stringify(chosen) },
+				freeze: true,
+				freeze_message: __("Creating Quality Inspections..."),
+				callback: (r) => {
+					const created = r.message || [];
+					if (!created.length) return;
+
+					dialog.hide();
+					frappe.show_alert({
+						message: __("{0} Quality Inspection(s) created", [created.length]),
+						indicator: "green",
+					});
+					if (created.length === 1) {
+						frappe.set_route("Form", "Quality Inspection", created[0]);
+					} else {
+						frappe.set_route("List", "Quality Inspection", { name: ["in", created] });
+					}
+				},
+			});
+		},
+	});
+	dialog.show();
 };
 
 erpnext.utils.add_apply_inspection_outcome_button = function (frm) {
