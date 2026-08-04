@@ -99,6 +99,7 @@ class TestQualityInspection(ERPNextTestSuite):
 		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
 		readings = [
 			{
+				"numeric": 1,
 				"specification": "Iron Content",  # numeric reading
 				"min_value": 0.1,
 				"max_value": 0.9,
@@ -129,18 +130,21 @@ class TestQualityInspection(ERPNextTestSuite):
 		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
 		readings = [
 			{
+				"numeric": 1,
 				"specification": "Iron Content",  # numeric reading
 				"formula_based_criteria": 1,
 				"acceptance_formula": "reading_1 > 0.35 and reading_1 < 0.50",
 				"reading_1": "0.4",
 			},
 			{
+				"numeric": 1,
 				"specification": "Calcium Content",  # numeric reading
 				"formula_based_criteria": 1,
 				"acceptance_formula": "reading_1 > 0.20 and reading_1 < 0.50",
 				"reading_1": "0.7",
 			},
 			{
+				"numeric": 1,
 				"specification": "Mg Content",  # numeric reading
 				"formula_based_criteria": 1,
 				"acceptance_formula": "mean < 0.9",
@@ -211,12 +215,14 @@ class TestQualityInspection(ERPNextTestSuite):
 		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
 		readings = [
 			{
+				"numeric": 1,
 				"specification": "Iron Content",  # numeric reading
 				"min_value": 60,
 				"max_value": 100,
 				"reading_1": "70,000",
 			},
 			{
+				"numeric": 1,
 				"specification": "Iron Content",  # numeric reading
 				"min_value": 60,
 				"max_value": 100,
@@ -242,7 +248,13 @@ class TestQualityInspection(ERPNextTestSuite):
 		create_quality_inspection_parameter("Density")
 
 		readings = [
-			{"specification": "Density", "min_value": 1.15, "max_value": 1.20, "reading_1": "random text"}
+			{
+				"numeric": 1,
+				"specification": "Density",
+				"min_value": 1.15,
+				"max_value": 1.20,
+				"reading_1": "random text",
+			}
 		]
 		qa = create_quality_inspection(
 			reference_type="Delivery Note", reference_name=dn.name, readings=readings, do_not_save=True
@@ -258,6 +270,7 @@ class TestQualityInspection(ERPNextTestSuite):
 
 		readings = [
 			{
+				"numeric": 1,
 				"specification": "Density",
 				"formula_based_criteria": 1,
 				"acceptance_formula": "mean < 0.9",
@@ -280,6 +293,7 @@ class TestQualityInspection(ERPNextTestSuite):
 
 		readings = [
 			{
+				"numeric": 1,
 				"specification": "Density",
 				"manual_inspection": 1,
 				"status": "Accepted",
@@ -302,7 +316,15 @@ class TestQualityInspection(ERPNextTestSuite):
 		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
 		create_quality_inspection_parameter("Density")
 
-		readings = [{"specification": "Density", "min_value": 1.15, "max_value": 1.20, "reading_1": "1,15"}]
+		readings = [
+			{
+				"numeric": 1,
+				"specification": "Density",
+				"min_value": 1.15,
+				"max_value": 1.20,
+				"reading_1": "1,15",
+			}
+		]
 		with user_number_format("#.###,##"):
 			qa = create_quality_inspection(
 				reference_type="Delivery Note", reference_name=dn.name, readings=readings, do_not_save=True
@@ -319,7 +341,15 @@ class TestQualityInspection(ERPNextTestSuite):
 		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
 		create_quality_inspection_parameter("Density")
 
-		readings = [{"specification": "Density", "min_value": 1.15, "max_value": 1.20, "reading_1": "1,15"}]
+		readings = [
+			{
+				"numeric": 1,
+				"specification": "Density",
+				"min_value": 1.15,
+				"max_value": 1.20,
+				"reading_1": "1,15",
+			}
+		]
 		with user_number_format("# ###,##"):
 			qa = create_quality_inspection(
 				reference_type="Delivery Note", reference_name=dn.name, readings=readings, do_not_save=True
@@ -336,7 +366,15 @@ class TestQualityInspection(ERPNextTestSuite):
 		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
 		create_quality_inspection_parameter("Density")
 
-		readings = [{"specification": "Density", "min_value": 1.15, "max_value": 1.20, "reading_1": "1.15"}]
+		readings = [
+			{
+				"numeric": 1,
+				"specification": "Density",
+				"min_value": 1.15,
+				"max_value": 1.20,
+				"reading_1": "1.15",
+			}
+		]
 		with user_number_format("#.###,##"):
 			qa = create_quality_inspection(
 				reference_type="Delivery Note", reference_name=dn.name, readings=readings, do_not_save=True
@@ -350,7 +388,15 @@ class TestQualityInspection(ERPNextTestSuite):
 		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
 		create_quality_inspection_parameter("Density")
 
-		readings = [{"specification": "Density", "min_value": 1.15, "max_value": 1.20, "reading_1": "1,15"}]
+		readings = [
+			{
+				"numeric": 1,
+				"specification": "Density",
+				"min_value": 1.15,
+				"max_value": 1.20,
+				"reading_1": "1,15",
+			}
+		]
 		with user_number_format("#,###.##"):
 			qa = create_quality_inspection(
 				reference_type="Delivery Note", reference_name=dn.name, readings=readings, do_not_save=True
@@ -365,7 +411,15 @@ class TestQualityInspection(ERPNextTestSuite):
 		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
 		create_quality_inspection_parameter("Density")
 
-		readings = [{"specification": "Density", "min_value": 1.15, "max_value": 1.20, "reading_1": "1,15"}]
+		readings = [
+			{
+				"numeric": 1,
+				"specification": "Density",
+				"min_value": 1.15,
+				"max_value": 1.20,
+				"reading_1": "1,15",
+			}
+		]
 		with user_number_format("#.###,##"):
 			qa = create_quality_inspection(
 				reference_type="Delivery Note", reference_name=dn.name, readings=readings, do_not_save=True
@@ -381,7 +435,15 @@ class TestQualityInspection(ERPNextTestSuite):
 		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
 		create_quality_inspection_parameter("Density")
 
-		readings = [{"specification": "Density", "min_value": 1.15, "max_value": 1.20, "reading_1": "1,15"}]
+		readings = [
+			{
+				"numeric": 1,
+				"specification": "Density",
+				"min_value": 1.15,
+				"max_value": 1.20,
+				"reading_1": "1,15",
+			}
+		]
 		with user_number_format("#.###,##"):
 			qa = create_quality_inspection(
 				reference_type="Delivery Note", reference_name=dn.name, readings=readings, do_not_save=True
