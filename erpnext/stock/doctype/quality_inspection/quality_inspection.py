@@ -1186,17 +1186,29 @@ def get_readings_to_copy(source: str) -> list[dict]:
 
 	A document quarantining several lots is inspected once per lot, and where the
 	same measurements answer for all of them the inspector would otherwise type
-	them again per document. Only the recorded values travel — status and the
-	manual override stay with the inspection that made them, so the copy is
-	judged on its own readings when it saves.
+	them again per document. Carries the acceptance criteria alongside the values
+	so an inspection with no template of its own has something to be judged
+	against; the caller keeps its own criteria where it already has them. Status
+	and the manual override never travel, so the copy reaches its own verdict
+	when it saves.
 	"""
 	inspection = frappe.get_doc("Quality Inspection", source)
 	inspection.check_permission("read")
+
+	criteria = (
+		"numeric",
+		"value",
+		"min_value",
+		"max_value",
+		"formula_based_criteria",
+		"acceptance_formula",
+	)
 
 	return [
 		{
 			"specification": reading.specification,
 			"reading_value": reading.reading_value,
+			**{field: reading.get(field) for field in criteria},
 			**{f"reading_{index}": reading.get(f"reading_{index}") for index in range(1, 11)},
 		}
 		for reading in inspection.readings

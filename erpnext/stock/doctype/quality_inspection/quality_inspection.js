@@ -78,9 +78,6 @@ frappe.ui.form.on("Quality Inspection", {
 		if (frm.is_new() || frm.doc.docstatus !== 0 || frm.doc.inspection_basis === "Each Quantity") {
 			return;
 		}
-		if (!(frm.doc.readings || []).length) {
-			return;
-		}
 
 		frm.add_custom_button(__("Copy Readings"), () => frm.trigger("pick_readings_source"));
 	},
@@ -107,15 +104,26 @@ frappe.ui.form.on("Quality Inspection", {
 					method: "erpnext.stock.doctype.quality_inspection.quality_inspection.get_readings_to_copy",
 					args: { source: values.source },
 					callback: (r) => {
-						const by_specification = {};
-						(r.message || []).forEach((reading) => {
-							by_specification[reading.specification] = reading;
-						});
+						const criteria = [
+							"numeric",
+							"value",
+							"min_value",
+							"max_value",
+							"formula_based_criteria",
+							"acceptance_formula",
+						];
 
 						let copied = 0;
-						(frm.doc.readings || []).forEach((row) => {
-							const source = by_specification[row.specification];
-							if (!source) return;
+						(r.message || []).forEach((source) => {
+							let row = (frm.doc.readings || []).find(
+								(existing) => existing.specification === source.specification
+							);
+							if (!row) {
+								row = frm.add_child("readings", { specification: source.specification });
+								criteria.forEach((field) => {
+									row[field] = source[field];
+								});
+							}
 
 							row.reading_value = source.reading_value;
 							for (let index = 1; index <= 10; index++) {
