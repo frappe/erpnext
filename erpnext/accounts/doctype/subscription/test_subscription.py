@@ -280,6 +280,33 @@ class TestSubscription(FrappeTestCase):
 		settings.cancel_after_grace = default_grace_period_action
 		settings.save()
 
+	def test_cancelled_subscription_stays_cancelled_after_payment_and_reprocess(self):
+		# https://github.com/frappe/erpnext/issues/57761
+		subscription = create_subscription(
+			start_date="2018-01-01", generate_invoice_at="Beginning of the current subscription period"
+		)
+		subscription.process(posting_date="2018-01-01")  # generate first invoice
+		self.assertEqual(subscription.status, "Unpaid")
+
+		invoice = subscription.get_current_invoice()
+		invoice.db_set("outstanding_amount", 0)
+		invoice.db_set("status", "Paid")
+
+		subscription.cancel_subscription()
+		self.assertEqual(subscription.status, "Cancelled")
+		cancelation_date = getdate(subscription.cancelation_date)
+
+		subscription.set_subscription_status()
+		self.assertEqual(subscription.status, "Cancelled")
+		self.assertEqual(getdate(subscription.cancelation_date), cancelation_date)
+
+		subscription.cancel_at_period_end = 1
+		subscription.end_date = None
+		invoice_count = len(subscription.invoices)
+		subscription.process()
+		self.assertEqual(subscription.status, "Cancelled")
+		self.assertEqual(len(subscription.invoices), invoice_count)
+
 	def test_subscription_restart_and_process(self):
 		settings = frappe.get_single("Subscription Settings")
 		default_grace_period_action = settings.cancel_after_grace

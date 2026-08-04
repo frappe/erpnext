@@ -221,6 +221,9 @@ class Subscription(Document):
 		"""
 		Sets the status of the `Subscription`
 		"""
+		if self.status == "Cancelled":
+			return
+
 		if self.is_trialling():
 			self.status = "Trialling"
 		elif self.status == "Active" and self.end_date and getdate(posting_date) > getdate(self.end_date):
@@ -567,7 +570,7 @@ class Subscription(Document):
 
 		if self.cancel_at_period_end and (
 			getdate(posting_date) >= getdate(self.current_invoice_end)
-			or getdate(posting_date) >= getdate(self.end_date)
+			or (self.end_date and getdate(posting_date) >= getdate(self.end_date))
 		):
 			self.cancel_subscription()
 
