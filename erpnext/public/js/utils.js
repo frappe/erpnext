@@ -1461,19 +1461,40 @@ erpnext.utils.add_quality_control_lot_buttons = function (frm) {
 			filters: {
 				source_document_type: frm.doc.doctype,
 				source_document: frm.doc.name,
-				status: ["in", ["Under Inspection", "Partially Released"]],
+				status: ["in", ["Under Inspection", "Awaiting Release", "Partially Released"]],
 			},
 			fields: [
 				"name",
 				"item_code",
 				"batch_no",
+				"company",
+				"received_qty",
+				"decided_qty",
+				"accepted_qty",
+				"rejected_qty",
 				"pending_qty",
 				"inspection_template",
 				"inspection_basis",
 			],
 		})
-		.then((lots) => {
-			if (!lots || !lots.length) {
+		.then((all_lots) => {
+			if (!all_lots || !all_lots.length) {
+				return;
+			}
+
+			const awaiting = all_lots.filter(
+				(lot) => flt(lot.decided_qty) - flt(lot.rejected_qty) - flt(lot.accepted_qty) > 0
+			);
+			if (awaiting.length) {
+				frm.add_custom_button(
+					__("Quality Control Release ({0})", [awaiting.length]),
+					() => erpnext.utils.release_lots(awaiting),
+					__("Create")
+				);
+			}
+
+			const lots = all_lots.filter((lot) => flt(lot.received_qty) - flt(lot.decided_qty) > 0);
+			if (!lots.length) {
 				return;
 			}
 
@@ -1504,6 +1525,85 @@ erpnext.utils.add_quality_control_lot_buttons = function (frm) {
 				__("Create")
 			);
 		});
+};
+
+erpnext.utils.release_lots = function (lots) {
+	const company = lots[0].company;
+	const dialog = new frappe.ui.Dialog({
+		title: __("Release Quarantined Stock"),
+		size: "large",
+		fields: [
+			{
+				fieldtype: "Link",
+				fieldname: "release_warehouse",
+				label: __("Release Into"),
+				options: "Warehouse",
+				reqd: 1,
+				get_query: () => ({
+					filters: [
+						["Warehouse", "company", "in", ["", company]],
+						["Warehouse", "is_group", "=", 0],
+						["Warehouse", "warehouse_type", "!=", "Quality"],
+					],
+				}),
+			},
+			{
+				fieldtype: "MultiCheck",
+				fieldname: "lots",
+				columns: 1,
+				select_all: true,
+				options: lots.map((lot) => ({
+					label: [
+						lot.item_code,
+						lot.batch_no ? `${__("Batch")} ${lot.batch_no}` : null,
+						__("{0} accepted", [
+							format_number(
+								flt(lot.decided_qty) - flt(lot.rejected_qty) - flt(lot.accepted_qty)
+							),
+						]),
+					]
+						.filter(Boolean)
+						.join(" &middot; "),
+					value: lot.name,
+					checked: 1,
+				})),
+			},
+		],
+		primary_action_label: __("Release"),
+		primary_action(values) {
+			const chosen = values.lots || [];
+			if (!chosen.length) {
+				frappe.msgprint(__("Select at least one Quality Control Lot."));
+				return;
+			}
+
+			frappe.call({
+				method: "erpnext.stock.services.quality_release.make_releases_for_lots",
+				args: {
+					lots: JSON.stringify(chosen),
+					release_warehouse: values.release_warehouse,
+				},
+				freeze: true,
+				freeze_message: __("Releasing quarantined stock..."),
+				callback: (r) => {
+					const released = r.message || [];
+					if (!released.length) return;
+
+					dialog.hide();
+					frappe.show_alert({
+						message: __("{0} Quality Control Release(s) submitted", [released.length]),
+						indicator: "green",
+					});
+					if (released.length === 1) {
+						frappe.set_route("Form", "Stock Entry", released[0]);
+					} else {
+						frappe.set_route("List", "Stock Entry", { name: ["in", released] });
+					}
+				},
+			});
+		},
+	});
+	dialog.show();
 };
 
 erpnext.utils.pick_lots_to_inspect = function (lots) {

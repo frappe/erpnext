@@ -310,6 +310,39 @@ def make_release_for_lot(lot_name: str, release_warehouse: str | None = None):
 
 
 @frappe.whitelist()
+def make_releases_for_lots(lots: str, release_warehouse: str) -> list[str]:
+	"""Release every lot of a document awaiting one, into a single store.
+
+	A receipt spanning batches quarantines a lot per batch, and releasing them
+	meant building and submitting a Stock Entry from each. Submits rather than
+	drafts, mirroring the automatic release that already runs per lot whenever a
+	unique store resolves — the verdict is on record, the stock has somewhere to
+	go, and a draft per lot would leave the same pile of documents behind.
+	"""
+	frappe.has_permission("Stock Entry", "create", throw=True)
+
+	released = []
+	for lot_name in frappe.parse_json(lots):
+		lot = frappe.get_doc("Quality Control Lot", lot_name, for_update=True)
+		lot.check_permission("read")
+		if lot.awaiting_release_qty() <= 0:
+			continue
+
+		entry = make_release_for_lot(lot_name, release_warehouse)
+		entry.insert()
+		entry.submit()
+		released.append(entry.name)
+
+	if not released:
+		frappe.throw(
+			_("No Quality Control Lot on this document has accepted stock awaiting release."),
+			title=_("Nothing To Release"),
+		)
+
+	return released
+
+
+@frappe.whitelist()
 def make_rejected_stock_transfer_for_lot(lot_name: str):
 	"""A Quality Control Release moving the lot's rejected stock to a Rejected warehouse.
 
