@@ -307,6 +307,64 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 		repost_doc.posting_date = today()
 		repost_doc.save()
 
+	def test_stock_validations_before_period_closing(self):
+		from unittest.mock import patch
+
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		item = make_item("Test PCV Stock Item", {"is_stock_item": 1})
+		se = make_stock_entry(
+			item_code=item.name,
+			qty=10,
+			rate=100,
+			to_warehouse="Stores - TPC",
+			company="Test PCV Company",
+			posting_date="2021-03-15",
+		)
+
+		pcv = self.make_period_closing_voucher(posting_date="2021-03-31", submit=False)
+		self.assertRaisesRegex(frappe.ValidationError, "Create a Stock Closing Entry", pcv.submit)
+
+		sce = frappe.get_doc(
+			{
+				"doctype": "Stock Closing Entry",
+				"company": "Test PCV Company",
+				"from_date": pcv.period_start_date,
+				"to_date": pcv.period_end_date,
+			}
+		).insert()
+
+		with patch("erpnext.stock.doctype.stock_closing_entry.stock_closing_entry.enqueue"):
+			sce.submit()
+
+		pcv.reload()
+		self.assertRaisesRegex(frappe.ValidationError, "is not completed yet", pcv.submit)
+
+		sce.create_stock_closing_balance_entries()
+		sce.db_set("status", "Completed")
+
+		sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": se.name},
+			["name", "stock_value_difference"],
+			as_dict=1,
+		)
+		frappe.db.set_value(
+			"Stock Ledger Entry", sle.name, "stock_value_difference", sle.stock_value_difference + 100
+		)
+
+		pcv.reload()
+		self.assertRaisesRegex(frappe.ValidationError, "does not match", pcv.submit)
+
+		frappe.db.set_value(
+			"Stock Ledger Entry", sle.name, "stock_value_difference", sle.stock_value_difference
+		)
+
+		pcv.reload()
+		pcv.submit()
+		self.assertEqual(pcv.docstatus, 1)
+
 	def make_period_closing_voucher(self, posting_date, submit=True):
 		surplus_account = create_account()
 		cost_center = create_cost_center("Test Cost Center 1")
