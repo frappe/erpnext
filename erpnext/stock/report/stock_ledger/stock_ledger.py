@@ -7,11 +7,7 @@ from collections import defaultdict
 
 import frappe
 from frappe import _
-<<<<<<< HEAD
-from frappe.query_builder.functions import CombineDatetime, Sum
-=======
-from frappe.query_builder.functions import IfNull, Sum
->>>>>>> 0dbe410414 (fix(stock): handle multi-item opening balance in Stock Ledger report (#57591))
+from frappe.query_builder.functions import CombineDatetime, IfNull, Sum
 from frappe.utils import cint, flt, get_datetime
 from pypika import Order
 from pypika.analytics import RowNumber

@@ -5,25 +5,48 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, today
 
-from erpnext.maintenance.doctype.maintenance_schedule.test_maintenance_schedule import (
-	make_serial_item_with_serial,
-)
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.stock.report.stock_ledger.stock_ledger import execute
+
+WAREHOUSE = "Stores - _TC"
 
 
-class TestStockLedgerReeport(FrappeTestCase):
-	def setUp(self) -> None:
-		make_serial_item_with_serial("_Test Stock Report Serial Item")
-		self.filters = frappe._dict(
-			company="_Test Company",
-			from_date=today(),
-			to_date=add_days(today(), 30),
-			item_code=["_Test Stock Report Serial Item"],
-		)
+class TestStockLedgerReport(FrappeTestCase):
+	"""Correctness tests for the Stock Ledger report.
 
-<<<<<<< HEAD
+	A shared `make_movements`/`run` pair keeps each test small without persisting
+	any data: movements are created per test and rolled back, while the report runs
+	read-only. Tests reuse bootstrap items and transact in `Stores - _TC`, which
+	starts clean (zero balance) for these items.
+	"""
+
 	def tearDown(self) -> None:
 		frappe.db.rollback()
-=======
+
+	def make_movements(self, item_code, movements):
+		for movement in movements:
+			make_stock_entry(item_code=item_code, **movement)
+
+	def run_report(self, item_code, from_date=None, to_date=None):
+		filters = frappe._dict(
+			company="_Test Company",
+			from_date=from_date or add_days(today(), -1),
+			to_date=to_date or today(),
+			item_code=[item_code],
+			warehouse=WAREHOUSE,
+		)
+		return list(execute(filters)[1])
+
+	def test_in_out_quantities_and_running_balance(self):
+		item = "_Test Item"
+		self.make_movements(
+			item,
+			[
+				{"qty": 10, "to_warehouse": WAREHOUSE, "basic_rate": 100},
+				{"qty": 4, "from_warehouse": WAREHOUSE},
+			],
+		)
+
 		rows = self.run_report(item)
 		receipt = next(row for row in rows if row.get("in_qty"))
 		issue = next(row for row in rows if row.get("out_qty"))
@@ -314,4 +337,3 @@ class TestStockLedgerReeport(FrappeTestCase):
 			opening_rows[0]["qty_after_transaction"],
 			sum(sle.qty_after_transaction for sle in sle_rows),
 		)
->>>>>>> 0dbe410414 (fix(stock): handle multi-item opening balance in Stock Ledger report (#57591))
