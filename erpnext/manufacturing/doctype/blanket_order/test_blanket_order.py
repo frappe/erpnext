@@ -182,6 +182,21 @@ class TestBlanketOrder(ERPNextTestSuite):
 		with self.assertRaises(frappe.ValidationError):
 			bo.insert()
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_zero_qty_in_sales_order": 1})
+	def test_selling_blanket_order_zero_quantity_when_allowed(self):
+		bo = make_blanket_order(blanket_order_type="Selling", quantity=0)
+		self.assertEqual(bo.items[0].qty, 0)
+
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_zero_qty_in_purchase_order": 1})
+	def test_purchasing_blanket_order_zero_quantity_when_allowed(self):
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=0)
+		self.assertEqual(bo.items[0].qty, 0)
+
+	def test_blanket_order_negative_quantity(self):
+		self.assertRaises(
+			frappe.ValidationError, make_blanket_order, blanket_order_type="Selling", quantity=-10
+		)
+
 
 def make_blanket_order(**args):
 	args = frappe._dict(args)
@@ -201,7 +216,7 @@ def make_blanket_order(**args):
 		"items",
 		{
 			"item_code": args.item_code or "_Test Item",
-			"qty": args.quantity or 1000,
+			"qty": 1000 if args.quantity is None else args.quantity,
 			"rate": args.rate or 100,
 		},
 	)
