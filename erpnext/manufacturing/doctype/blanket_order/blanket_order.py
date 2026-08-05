@@ -119,9 +119,21 @@ class BlanketOrder(Document):
 			d.db_set("ordered_qty", item_ordered_qty.get(d.item_code, 0))
 
 	def validate_item_qty(self):
+		allow_zero_qty = self.is_zero_qty_allowed()
+
 		for d in self.items:
-			if flt(d.qty) <= 0:
+			if flt(d.qty) < 0:
+				frappe.throw(_("Row {0}: Quantity cannot be negative.").format(d.idx))
+
+			if not flt(d.qty) and not allow_zero_qty:
 				frappe.throw(_("Row {0}: Quantity must be greater than zero.").format(d.idx))
+
+	def is_zero_qty_allowed(self):
+		"""Zero qty is allowed only if unit price items are permitted in the order it maps to."""
+		if self.blanket_order_type == "Selling":
+			return frappe.db.get_single_value("Selling Settings", "allow_zero_qty_in_sales_order")
+
+		return frappe.db.get_single_value("Buying Settings", "allow_zero_qty_in_purchase_order")
 
 
 @frappe.whitelist()
