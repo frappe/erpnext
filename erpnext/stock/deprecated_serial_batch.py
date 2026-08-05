@@ -159,6 +159,9 @@ class DeprecatedBatchNoValuation:
 		if self.sle.name:
 			query = query.where(sle.name != self.sle.name)
 
+		if getattr(self, "stock_closing_from_datetime", None):
+			query = query.where(sle.posting_datetime >= self.stock_closing_from_datetime)
+
 		return query.run(as_dict=True)
 
 	@deprecated(
