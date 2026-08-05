@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-08-02 10:09+0000\n"
-"PO-Revision-Date: 2026-08-03 09:29\n"
+"PO-Revision-Date: 2026-08-05 10:02\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -6660,7 +6660,7 @@ msgstr ""
 #. DocType 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Auto match and set the Party in Bank Transactions"
-msgstr "مطابقت خودکار و تنظیم طرف در معاملات بانکی"
+msgstr "مطابقت خودکار و تنظیم طرف در تراکنش‌های بانکی"
 
 #. Label of the reorder_section (Section Break) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -7811,7 +7811,7 @@ msgstr "تراکنش بانکی"
 #: erpnext/accounts/doctype/bank/bank.json
 #: erpnext/accounts/doctype/bank_transaction_mapping/bank_transaction_mapping.json
 msgid "Bank Transaction Mapping"
-msgstr "نگاشت معاملات بانکی"
+msgstr "نگاشت تراکنش‌های بانکی"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/bank_transaction_payments/bank_transaction_payments.json
@@ -20727,7 +20727,7 @@ msgstr "نگاشت فیلد"
 #. Transaction Mapping'
 #: erpnext/accounts/doctype/bank_transaction_mapping/bank_transaction_mapping.json
 msgid "Field in Bank Transaction"
-msgstr "فیلد در معاملات بانکی"
+msgstr "فیلد در تراکنش‌های بانکی"
 
 #: erpnext/accounts/doctype/accounting_dimension/accounting_dimension.py:95
 msgid "Fieldname Conflict"
@@ -24086,7 +24086,7 @@ msgstr "اگر آیتم‌ها موجود هستند، مراحل انتقال �
 #. (Link) field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "If mentioned, the system will allow only the users with this Role to create or modify any stock transaction earlier than the latest stock transaction for a specific item and warehouse. If set as blank, it allows all users to create/edit back-dated transactions."
-msgstr "در صورت ذکر شده، این سیستم فقط به کاربران دارای این نقش اجازه می‌دهد تا هر تراکنش موجودی را زودتر از آخرین تراکنش موجودی برای یک کالا و انبار خاص ایجاد یا اصلاح کنند. اگر به صورت خالی تنظیم شود، به همه کاربران اجازه می‌دهد تا تراکنش‌های قدیمی را ایجاد/ویرایش کنند."
+msgstr "در صورت ذکر، سیستم فقط به کاربرانی که این نقش را دارند اجازه می‌دهد هرگونه تراکنش موجودی را قبل از آخرین تراکنش موجودی برای یک کالا و انبار خاص ایجاد یا اصلاح کنند. اگر خالی تنظیم شود، به همه کاربران اجازه می‌دهد تراکنش‌های تاریخ گذشته را ایجاد/ویرایش کنند."
 
 #. Description of the 'To Package No.' (Int) field in DocType 'Packing Slip'
 #: erpnext/stock/doctype/packing_slip/packing_slip.json
@@ -24872,7 +24872,7 @@ msgstr "شامل آیتم‌های غیر موجودی"
 #: erpnext/accounts/doctype/bank_clearance/bank_clearance.json
 #: erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.js:45
 msgid "Include POS Transactions"
-msgstr "شامل معاملات POS"
+msgstr "شامل تراکنش‌های POS"
 
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:208
 msgid "Include Payment"
@@ -33723,7 +33723,7 @@ msgstr "از طریق ایمیل اطلاع دهید"
 #. Label of the reorder_email_notify (Check) field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Notify by email on creation of automatic Material Request"
-msgstr ""
+msgstr "اطلاع رسانی از طریق ایمیل در مورد ایجاد درخواست خودکار مواد"
 
 #. Description of the 'Notify Via Email' (Check) field in DocType 'Appointment
 #. Booking Settings'
@@ -35748,7 +35748,7 @@ msgstr "تنظیمات POS"
 #. Label of the pos_invoices (Table) field in DocType 'POS Closing Entry'
 #: erpnext/accounts/doctype/pos_closing_entry/pos_closing_entry.json
 msgid "POS Transactions"
-msgstr "معاملات POS"
+msgstr "تراکنش‌های POS"
 
 #: erpnext/selling/page/point_of_sale/pos_controller.js:178
 msgid "POS has been closed at {0}. Please refresh the page."
@@ -43491,7 +43491,7 @@ msgstr "RFQ برای {0} مجاز نیست به دلیل رتبه کارت ام�
 #. Label of the auto_indent (Check) field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Raise Material Request when stock reaches re-order level"
-msgstr ""
+msgstr "ثبت درخواست مواد زمانی که موجودی به سطح سفارش مجدد رسید"
 
 #. Label of the complaint_raised_by (Data) field in DocType 'Warranty Claim'
 #: erpnext/support/doctype/warranty_claim/warranty_claim.json
@@ -45896,7 +45896,7 @@ msgstr "موجودی رزرو شده برای زیر مونتاژ"
 
 #: erpnext/stock/report/stock_projected_qty/stock_projected_qty.py:200
 msgid "Reserved for POS Transactions"
-msgstr "برای معاملات POS رزرو شده است"
+msgstr "برای تراکنش‌های POS رزرو شده است"
 
 #: erpnext/stock/report/stock_projected_qty/stock_projected_qty.py:179
 msgid "Reserved for Production"
@@ -54121,7 +54121,7 @@ msgstr "پیش‌فاکتور خود را ارسال کنید"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:1712
 msgid "Submitted Job Card cannot be processed."
-msgstr "کارت شغلی ارسال‌شده قابل پردازش نیست."
+msgstr "کارت کار ارسال‌شده قابل پردازش نیست."
 
 #: erpnext/public/js/shop_floor/shop_floor.js:936
 #: erpnext/public/js/shop_floor/shop_floor.js:1148
@@ -57191,7 +57191,7 @@ msgstr "این گزینه برای ویرایش فیلدهای «تاریخ ار
 #. level' (Check) field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "This option is useful if you want to ensure a constant supply of raw materials/products and avoid shortage. A Material Request will be raised automatically when stock reached the re-order level defined in the Item form."
-msgstr ""
+msgstr "این گزینه در صورتی مفید است که بخواهید از تأمین مداوم مواد اولیه/محصولات اطمینان حاصل کنید و از کمبود جلوگیری کنید. درخواست مواد به طور خودکار زمانی که موجودی به سطح سفارش مجدد تعریف شده در فرم کالا برسد، ایجاد می‌شود."
 
 #: banking/src/components/features/BankReconciliation/IncorrectlyClearedEntries.tsx:180
 msgid "This report shows all entries in the system where the <strong>clearance date is before the posting date</strong> which is incorrect."
