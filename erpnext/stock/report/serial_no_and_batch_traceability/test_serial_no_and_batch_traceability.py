@@ -5,6 +5,9 @@ import frappe
 
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import (
+	get_serial_nos_for_voucher,
+)
 from erpnext.stock.report.serial_no_and_batch_traceability.serial_no_and_batch_traceability import (
 	execute,
 )
@@ -20,12 +23,8 @@ class TestSerialNoAndBatchTraceability(ERPNextTestSuite):
 		return execute(filters)[1]
 
 	def get_received_serial_no(self, receipt):
-		bundle = frappe.db.get_value(
-			"Stock Entry Detail",
-			{"parent": receipt.name, "item_code": SERIAL_ITEM},
-			"serial_and_batch_bundle",
-		)
-		return frappe.db.get_value("Serial and Batch Entry", {"parent": bundle}, "serial_no")
+		row = next(item for item in receipt.items if item.item_code == SERIAL_ITEM)
+		return get_serial_nos_for_voucher("Stock Entry", receipt.name, row.name, row.t_warehouse)[0]
 
 	def test_serial_movements_traced(self):
 		"""Backward trace should surface the receipt voucher the serial came in through."""

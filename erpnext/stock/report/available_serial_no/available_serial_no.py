@@ -5,7 +5,7 @@ import frappe
 from frappe import _
 from frappe.utils import cint, flt
 
-from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos, get_serial_nos_from_sle_list
+from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.report.stock_ledger.stock_ledger import (
 	get_item_details,
 	get_opening_balance,
@@ -36,19 +36,33 @@ def process_stock_ledger_entries(sl_entries, item_details, opening_row, precisio
 	if opening_row:
 		data.append(opening_row)
 
-	available_serial_nos = {}
-	if sabb_list := [sle.serial_and_batch_bundle for sle in sl_entries if sle.serial_and_batch_bundle]:
-		available_serial_nos = get_serial_nos_from_sle_list(sabb_list)
-
-	if not available_serial_nos:
-		return [], []
+	voucher_wise_serial_nos = get_voucher_wise_serial_nos(sl_entries)
+	balance_serial_nos = {}
 
 	for sle in sl_entries:
 		update_stock_ledger_entry(sle, item_details, precision)
-		update_available_serial_nos(available_serial_nos, sle)
+		update_available_serial_nos(balance_serial_nos, voucher_wise_serial_nos, sle)
 		data.append(sle)
 
 	return data
+
+
+def get_voucher_wise_serial_nos(sl_entries):
+	result = {}
+	voucher_nos = list({sle.voucher_no for sle in sl_entries if not sle.serial_no})
+	if not voucher_nos:
+		return result
+
+	for d in frappe.get_all(
+		"Stock Location Ledger",
+		fields=["serial_no", "voucher_type", "voucher_no", "voucher_detail_no", "warehouse"],
+		filters={"voucher_no": ("in", voucher_nos), "docstatus": ("!=", 2), "serial_no": ("is", "set")},
+		order_by="idx asc",
+	):
+		key = (d.voucher_type, d.voucher_no, d.voucher_detail_no, d.warehouse)
+		result.setdefault(key, []).append(d.serial_no)
+
+	return result
 
 
 def update_stock_ledger_entry(sle, item_details, precision):
@@ -63,21 +77,22 @@ def update_stock_ledger_entry(sle, item_details, precision):
 		sle["in_out_rate"] = sle.valuation_rate
 
 
-def update_available_serial_nos(available_serial_nos, sle):
-	serial_nos = (
-		get_serial_nos(sle.serial_no)
-		if sle.serial_no
-		else available_serial_nos.get(sle.serial_and_batch_bundle)
-	)
+def update_available_serial_nos(balance_serial_nos, voucher_wise_serial_nos, sle):
+	if sle.serial_no:
+		serial_nos = get_serial_nos(sle.serial_no)
+	else:
+		voucher_key = (sle.voucher_type, sle.voucher_no, sle.voucher_detail_no, sle.warehouse)
+		serial_nos = voucher_wise_serial_nos.get(voucher_key)
+
 	key = (sle.item_code, sle.warehouse)
 	sle.serial_no = "\n".join(serial_nos) if serial_nos else ""
-	if key not in available_serial_nos:
-		available_serial_nos.setdefault(key, serial_nos)
+	if key not in balance_serial_nos:
+		balance_serial_nos[key] = list(serial_nos or [])
 		sle.balance_serial_no = "\n".join(serial_nos) if serial_nos else ""
 		return
 
-	existing_serial_no = available_serial_nos[key]
-	for sn in serial_nos:
+	existing_serial_no = balance_serial_nos[key]
+	for sn in serial_nos or []:
 		if sn in existing_serial_no:
 			existing_serial_no.remove(sn)
 		else:
@@ -183,13 +198,6 @@ def get_columns(filters):
 				"fieldtype": "Currency",
 				"width": 110,
 				"options": "Company:company:default_currency",
-			},
-			{
-				"label": _("Serial and Batch Bundle"),
-				"fieldname": "serial_and_batch_bundle",
-				"fieldtype": "Link",
-				"options": "Serial and Batch Bundle",
-				"width": 100,
 			},
 			{"label": _("Voucher Type"), "fieldname": "voucher_type", "width": 110},
 			{

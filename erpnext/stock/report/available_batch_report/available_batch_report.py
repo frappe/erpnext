@@ -122,13 +122,19 @@ def get_batchwise_data_from_stock_ledger(filters):
 
 def get_batchwise_data_from_serial_batch_bundle(batchwise_data, filters):
 	table = frappe.qb.DocType("Stock Ledger Entry")
-	ch_table = frappe.qb.DocType("Serial and Batch Entry")
+	ch_table = frappe.qb.DocType("Stock Location Ledger")
 	batch = frappe.qb.DocType("Batch")
 
 	query = (
 		frappe.qb.from_(table)
 		.inner_join(ch_table)
-		.on(table.serial_and_batch_bundle == ch_table.parent)
+		.on(
+			(table.voucher_type == ch_table.voucher_type)
+			& (table.voucher_no == ch_table.voucher_no)
+			& (table.voucher_detail_no == ch_table.voucher_detail_no)
+			& (table.warehouse == ch_table.warehouse)
+			& (ch_table.docstatus != 2)
+		)
 		.inner_join(batch)
 		.on(ch_table.batch_no == batch.name)
 		.select(

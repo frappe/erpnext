@@ -14,7 +14,7 @@ doctype_series_map = {
 	"Attendance Request": "HR-ARQ-.YY.-.MM.-.#####",
 	"Authorization Rule": "HR-ARU-.#####",
 	"Bank Guarantee": "ACC-BG-.YYYY.-.#####",
-	"Bin": "MAT-BIN-.YYYY.-.#####",
+	"Stock Level": "MAT-BIN-.YYYY.-.#####",
 	"Certification Application": "NPO-CAPP-.YYYY.-.#####",
 	"Certified Consultant": "NPO-CONS-.YYYY.-.#####",
 	"Chat Room": "CHAT-ROOM-.#####",

@@ -10,7 +10,7 @@ frappe.query_reports["Serial No and Batch Traceability"] = {
 			fieldtype: "Link",
 			get_query: () => {
 				return {
-					query: "erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.item_query",
+					query: "erpnext.stock.serial_batch_bundle.item_query",
 				};
 			},
 		},

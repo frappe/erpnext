@@ -32,7 +32,7 @@ def get_columns(filters):
 
 
 def get_total_stock(filters):
-	bin = frappe.qb.DocType("Bin")
+	bin = frappe.qb.DocType("Stock Level")
 	item = frappe.qb.DocType("Item")
 	wh = frappe.qb.DocType("Warehouse")
 

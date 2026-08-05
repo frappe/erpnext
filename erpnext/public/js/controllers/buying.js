@@ -457,8 +457,6 @@ erpnext.buying = {
 								}
 
 								let update_values = {
-									serial_and_batch_bundle: r.name,
-									use_serial_batch_fields: 0,
 									qty:
 										qty /
 										flt(
@@ -500,8 +498,6 @@ erpnext.buying = {
 								}
 
 								let update_values = {
-									rejected_serial_and_batch_bundle: r.name,
-									use_serial_batch_fields: 0,
 									rejected_qty:
 										qty /
 										flt(

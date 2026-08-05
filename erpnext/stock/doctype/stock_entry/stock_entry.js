@@ -7,8 +7,6 @@ erpnext.landed_cost_taxes_and_charges.setup_triggers("Stock Entry");
 
 frappe.ui.form.on("Stock Entry", {
 	setup: function (frm) {
-		frm.ignore_doctypes_on_cancel_all = ["Serial and Batch Bundle"];
-
 		frm.trigger("toggle_enable_for_stock_uom_qty");
 
 		frm.set_indicator_formatter("item_code", function (doc) {
@@ -130,18 +128,6 @@ frappe.ui.form.on("Stock Entry", {
 					filters: filters,
 				};
 			}
-		});
-
-		frm.set_query("serial_and_batch_bundle", "items", (doc, cdt, cdn) => {
-			let row = locals[cdt][cdn];
-			return {
-				filters: {
-					item_code: row.item_code,
-					voucher_type: doc.doctype,
-					voucher_no: ["in", [doc.name, ""]],
-					is_cancelled: 0,
-				},
-			};
 		});
 
 		frm.set_query("project", "items", function (doc) {
@@ -727,7 +713,6 @@ frappe.ui.form.on("Stock Entry", {
 						item_code: child.item_code,
 						warehouse: cstr(child.s_warehouse) || cstr(child.t_warehouse),
 						transfer_qty: child.transfer_qty,
-						serial_and_batch_bundle: child.serial_and_batch_bundle,
 						qty: child.s_warehouse ? -1 * child.transfer_qty : child.transfer_qty,
 						posting_date: frm.doc.posting_date,
 						posting_time: frm.doc.posting_time,
@@ -1145,10 +1130,7 @@ frappe.ui.form.on("Stock Entry Detail", {
 		let row = locals[cdt][cdn];
 
 		if (row.batch_no) {
-			frappe.model.set_value(cdt, cdn, {
-				use_serial_batch_fields: 1,
-				serial_and_batch_bundle: "",
-			});
+			frappe.model.set_value(cdt, cdn, "use_serial_batch_fields", 1);
 		}
 
 		frm.events.set_basic_rate(frm, cdt, cdn);
@@ -1310,10 +1292,7 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 		var item = frappe.get_doc(cdt, cdn);
 
 		if (item.serial_no) {
-			frappe.model.set_value(cdt, cdn, {
-				use_serial_batch_fields: 1,
-				serial_and_batch_bundle: "",
-			});
+			frappe.model.set_value(cdt, cdn, "use_serial_batch_fields", 1);
 		}
 
 		if (item?.serial_no) {
@@ -1344,9 +1323,7 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 			cint(frappe.user_defaults?.use_serial_batch_fields) === 1
 		) {
 			this.frm.doc.items.forEach((item) => {
-				if (!item.serial_and_batch_bundle) {
-					frappe.model.set_value(item.doctype, item.name, "use_serial_batch_fields", 1);
-				}
+				frappe.model.set_value(item.doctype, item.name, "use_serial_batch_fields", 1);
 			});
 		}
 	}
@@ -1611,9 +1588,6 @@ erpnext.stock.select_batch_and_serial_no = (frm, item) => {
 			new erpnext.SerialBatchPackageSelector(frm, item, (r) => {
 				if (r) {
 					frappe.model.set_value(item.doctype, item.name, {
-						serial_and_batch_bundle: r.name,
-						use_serial_batch_fields: 0,
-						basic_rate: r.avg_rate,
 						qty:
 							Math.abs(r.total_qty) /
 							flt(item.conversion_factor || 1, precision("conversion_factor", item)),

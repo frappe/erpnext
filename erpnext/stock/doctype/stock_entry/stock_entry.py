@@ -290,14 +290,12 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if self.purpose_cls:
 			self.purpose_cls(self).validate()
 
-		sbb.validate_duplicate_serial_and_batch_bundle("items")
 		self.validate_posting_time()
 		self.validate_item()
 		self.validate_customer_provided_item()
 		self.set_transfer_qty()
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_uom_is_integer("stock_uom", "transfer_qty")
-		sbb.validate_warehouse_of_sabb()
 		self.validate_source_stock_entry()
 		self.validate_bom()
 		self.set_process_loss_qty()
@@ -335,7 +333,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			self.fg_completed_qty = 0.0
 
 	def before_submit(self):
-		StockEntrySABB(self).make_serial_and_batch_bundle_for_outward()
+		StockEntrySABB(self).make_serial_batch_ledgers_for_outward()
 
 	def on_submit(self):
 		if self.purpose_cls and hasattr(self.purpose_cls, "on_submit"):
@@ -364,7 +362,6 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if self.purpose_cls and hasattr(self.purpose_cls, "on_cancel"):
 			self.purpose_cls(self).on_cancel()
 
-		self.delink_asset_repair_sabb()
 		self.validate_closed_subcontracting_order()
 		self.update_subcontracting_order_status()
 		self.update_pick_list_status()
@@ -380,7 +377,6 @@ class StockEntry(StockController, SubcontractingInwardController):
 			"GL Entry",
 			"Stock Ledger Entry",
 			"Repost Item Valuation",
-			"Serial and Batch Bundle",
 		)
 
 		self.make_gl_entries_on_cancel()
@@ -394,10 +390,6 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.delete_auto_created_batches()
 		self.delete_linked_stock_entry()
 		super().on_cancel_subcontracting_inward()
-
-	def on_update(self):
-		super().on_update()
-		self.set_serial_and_batch_bundle()
 
 	def validate_job_card_fg_item(self):
 		if not self.job_card:
@@ -444,13 +436,6 @@ class StockEntry(StockController, SubcontractingInwardController):
 				},
 			):
 				frappe.delete_doc("Stock Entry", d.name)
-
-	def delink_asset_repair_sabb(self):
-		if not self.asset_repair:
-			return
-
-		for row in self.items:
-			row.delink_asset_repair_sabb(self.asset_repair)
 
 	def set_transfer_qty(self):
 		self.validate_qty_is_not_zero()
@@ -687,7 +672,6 @@ class StockEntry(StockController, SubcontractingInwardController):
 				company=self.company,
 				raise_error_if_no_rate=raise_error_if_no_rate,
 				batch_no=d.batch_no,
-				serial_and_batch_bundle=d.serial_and_batch_bundle,
 			)
 
 		# do not round off basic rate to avoid precision loss
@@ -734,7 +718,6 @@ class StockEntry(StockController, SubcontractingInwardController):
 				"voucher_no": self.name,
 				"company": self.company,
 				"allow_zero_valuation": item.allow_zero_valuation_rate,
-				"serial_and_batch_bundle": item.serial_and_batch_bundle,
 				"voucher_detail_no": item.name,
 				"batch_no": item.batch_no,
 				"serial_no": item.serial_no,
@@ -1034,24 +1017,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		return finished_item_row
 
-	def validate_serial_batch_bundle_type(self, serial_and_batch_bundle):
-		if (
-			frappe.db.get_value("Serial and Batch Bundle", serial_and_batch_bundle, "type_of_transaction")
-			!= "Outward"
-		):
-			frappe.throw(
-				_(
-					"The Serial and Batch Bundle {0} is not valid for this transaction. The 'Type of Transaction' should be 'Outward' instead of 'Inward' in Serial and Batch Bundle {0}"
-				).format(get_link_to_form("Serial and Batch Bundle", serial_and_batch_bundle)),
-				title=_("Invalid Serial and Batch Bundle"),
-			)
-
 	def get_sle_for_source_warehouse(self, sl_entries, finished_item_row):
 		for d in self.get("items"):
 			if cstr(d.s_warehouse):
-				if d.serial_and_batch_bundle and self.docstatus == 1:
-					self.validate_serial_batch_bundle_type(d.serial_and_batch_bundle)
-
 				sle = self.get_sl_entries(
 					d,
 					{
@@ -1068,43 +1036,48 @@ class StockEntry(StockController, SubcontractingInwardController):
 				):
 					sle.dependant_sle_voucher_detail_no = finished_item_row.name
 
-				if sle.serial_and_batch_bundle and self.docstatus == 2:
-					bundle_id = frappe.get_cached_value(
-						"Serial and Batch Bundle",
-						{
-							"voucher_detail_no": d.name,
-							"voucher_no": self.name,
-							"is_cancelled": 0,
-							"type_of_transaction": "Outward",
-						},
-						"name",
-					)
-
-					if bundle_id:
-						sle.serial_and_batch_bundle = bundle_id
-
 				sl_entries.append(sle)
 
-	def make_serial_and_batch_bundle_for_transfer(self):
-		ids = frappe._dict(
-			frappe.get_all(
-				"Stock Entry Detail",
-				fields=["name", "serial_and_batch_bundle"],
-				filters={"parent": self.outgoing_stock_entry, "serial_and_batch_bundle": ("is", "set")},
-				as_list=1,
-			)
+	def make_serial_batch_ledgers_for_transfer(self):
+		from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import (
+			get_voucher_entries,
+			upsert_draft_ledger_entries,
 		)
 
-		if not ids:
+		ste_details = frappe.get_all(
+			"Stock Entry Detail",
+			fields=["name", "t_warehouse"],
+			filters={"parent": self.outgoing_stock_entry},
+		)
+		source_details = {d.name: d.t_warehouse for d in ste_details}
+		if not source_details:
 			return
 
 		for d in self.get("items"):
-			serial_and_batch_bundle = ids.get(d.ste_detail)
-			if not serial_and_batch_bundle:
+			source_detail = source_details.get(d.ste_detail)
+			if not source_detail:
 				continue
 
-			d.serial_and_batch_bundle = self.make_package_for_transfer(
-				serial_and_batch_bundle, d.s_warehouse, "Outward", do_not_submit=True
+			source_entries = get_voucher_entries(
+				"Stock Entry",
+				self.outgoing_stock_entry,
+				d.ste_detail,
+				fields=["serial_no", "batch_no", "qty"],
+			)
+			if not source_entries:
+				continue
+
+			upsert_draft_ledger_entries(
+				[
+					{"serial_no": e.serial_no, "batch_no": e.batch_no, "qty": -abs(flt(e.qty))}
+					for e in source_entries
+				],
+				voucher_type=self.doctype,
+				voucher_no=self.name,
+				voucher_detail_no=d.name,
+				warehouse=d.s_warehouse,
+				item_code=d.item_code,
+				company=self.company,
 			)
 
 	def get_sle_for_target_warehouse(self, sl_entries, finished_item_row):
@@ -1128,25 +1101,12 @@ class StockEntry(StockController, SubcontractingInwardController):
 					"Material Transfer for Manufacture",
 				]
 
-				if self.purpose in allowed_types and d.serial_and_batch_bundle and self.docstatus == 1:
-					sle.serial_and_batch_bundle = self.make_package_for_transfer(
-						d.serial_and_batch_bundle, d.t_warehouse
+				if self.purpose in allowed_types and cstr(d.s_warehouse) and self.docstatus == 1:
+					from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import (
+						duplicate_location_entries_for_transfer,
 					)
 
-				if sle.serial_and_batch_bundle and self.docstatus == 2:
-					bundle_id = frappe.get_cached_value(
-						"Serial and Batch Bundle",
-						{
-							"voucher_detail_no": d.name,
-							"voucher_no": self.name,
-							"is_cancelled": 0,
-							"type_of_transaction": "Inward",
-						},
-						"name",
-					)
-
-					if sle.serial_and_batch_bundle != bundle_id:
-						sle.serial_and_batch_bundle = bundle_id
+					duplicate_location_entries_for_transfer(sle)
 
 				sl_entries.append(sle)
 
@@ -1188,7 +1148,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			for item in self.items:
 				if item.sco_rm_detail in items:
 					items[item.sco_rm_detail].qty_to_reserve += item.transfer_qty
-					items[item.sco_rm_detail].serial_and_batch_bundles.append(item.serial_and_batch_bundle)
+					items[item.sco_rm_detail].voucher_detail_nos.append(item.name)
 				else:
 					items[item.sco_rm_detail] = frappe._dict(
 						{
@@ -1196,7 +1156,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 							"qty_to_reserve": item.transfer_qty,
 							"warehouse": item.t_warehouse,
 							"reference_voucher_detail_no": item.name,
-							"serial_and_batch_bundles": [item.serial_and_batch_bundle],
+							"voucher_detail_nos": [item.name],
 						}
 					)
 
@@ -1604,7 +1564,7 @@ def make_stock_in_entry(source_name: str, target_doc: str | dict | Document | No
 		target.set_missing_values()
 
 		if not frappe.get_single_value("Stock Settings", "use_serial_batch_fields"):
-			target.make_serial_and_batch_bundle_for_transfer()
+			target.make_serial_batch_ledgers_for_transfer()
 
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.t_warehouse = ""

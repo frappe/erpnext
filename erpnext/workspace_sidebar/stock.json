@@ -276,17 +276,6 @@
    "collapsible": 1,
    "indent": 0,
    "keep_closed": 0,
-   "label": "Serial and Batch Bundle",
-   "link_to": "Serial and Batch Bundle",
-   "link_type": "DocType",
-   "show_arrow": 0,
-   "type": "Link"
-  },
-  {
-   "child": 1,
-   "collapsible": 1,
-   "indent": 0,
-   "keep_closed": 0,
    "label": "Inventory Dimension",
    "link_to": "Inventory Dimension",
    "link_type": "DocType",
@@ -625,7 +614,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-07-03 16:45:15.295668",
+ "modified": "2026-07-24 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "module_onboarding": "Stock Onboarding",

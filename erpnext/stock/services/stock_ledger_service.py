@@ -82,7 +82,6 @@ class StockLedgerService:
 			{
 				"item_code": d.get("item_code", None),
 				"warehouse": d.get("warehouse", None),
-				"serial_and_batch_bundle": d.get("serial_and_batch_bundle"),
 				"posting_date": self.doc.posting_date,
 				"posting_time": self.doc.posting_time,
 				"fiscal_year": get_fiscal_year(self.doc.posting_date, company=self.doc.company)[0],
@@ -103,14 +102,26 @@ class StockLedgerService:
 		sl_dict.update(args)
 		self.update_inventory_dimensions(d, sl_dict)
 
-		if self.doc.docstatus == 2:
-			from erpnext.deprecation_dumpster import deprecation_warning
+		# An explicitly chosen composition (use_serial_batch_fields flow) must reach the
+		# SLE-time bundle builder, or the outward entry silently auto-picks a different
+		# batch/serial than the user selected. Stock Location Ledger stays the source of
+		# truth; these fields only relay the row's choice. Delivery Note / Sales Invoice
+		# wrap the real item row inside d.item_row.
+		item_row = d.get("item_row") or d
+		serial_source = "serial_no"
+		if item_row.get("rejected_warehouse") and sl_dict.get("warehouse") == item_row.get(
+			"rejected_warehouse"
+		):
+			serial_source = "rejected_serial_no"
 
-			deprecation_warning("unknown", "v16", "No instructions.")
-			# To handle denormalized serial no records, will br deprecated in v16
-			for field in ["serial_no", "batch_no"]:
-				if d.get(field):
-					sl_dict[field] = d.get(field)
+		for field, source in (
+			("serial_no", serial_source),
+			("batch_no", "batch_no"),
+			("rack", "rack"),
+			("bin", "bin"),
+		):
+			if not sl_dict.get(field) and item_row.get(source):
+				sl_dict[field] = item_row.get(source)
 
 		return sl_dict
 
@@ -207,12 +218,7 @@ class StockLedgerService:
 		from erpnext.stock.stock_ledger import make_sl_entries
 
 		make_sl_entries(sl_entries, allow_negative_stock, via_landed_cost_voucher)
-		update_batch_qty(
-			self.doc.doctype,
-			self.doc.name,
-			self.doc.docstatus,
-			via_landed_cost_voucher=via_landed_cost_voucher,
-		)
+		update_batch_qty(self.doc.doctype, self.doc.name, self.doc.docstatus)
 
 		SerialBatchBundleService(self.doc).validate_reserved_batches()
 

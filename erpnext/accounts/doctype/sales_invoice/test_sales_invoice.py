@@ -39,19 +39,19 @@ from erpnext.selling.doctype.customer.test_customer import get_customer_dict
 from erpnext.stock.doctype.delivery_note.mapper import make_sales_invoice
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
-from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
-	get_batch_from_bundle,
-	get_serial_nos_from_bundle,
-	make_serial_batch_bundle,
-)
 from erpnext.stock.doctype.stock_entry.test_stock_entry import (
 	get_qty_after_transaction,
 	make_stock_entry,
+)
+from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import (
+	get_batches_for_voucher,
+	get_serial_nos_for_voucher,
 )
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 	create_stock_reconciliation,
 )
 from erpnext.stock.get_item_details import get_item_tax_map
+from erpnext.stock.tests.serial_batch_bundle_test_utils import make_serial_batch_bundle
 from erpnext.stock.utils import get_incoming_rate, get_stock_balance
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -1727,7 +1727,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 		make_stock_entry(item="_Packed Item New 1", target="_Test Warehouse - _TC", qty=120, rate=100)
 
 		bin_details = frappe.db.get_value(
-			"Bin",
+			"Stock Level",
 			{"item_code": "_Packed Item New 1", "warehouse": "_Test Warehouse - _TC"},
 			["actual_qty", "projected_qty", "ordered_qty"],
 			as_dict=1,
@@ -1867,29 +1867,19 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 		se = make_serialized_item(self)
 		se.load_from_db()
-		serial_nos = get_serial_nos_from_bundle(se.get("items")[0].serial_and_batch_bundle)
+		serial_nos = sorted(
+			get_serial_nos_for_voucher(
+				"Stock Entry", se.name, se.get("items")[0].name, se.get("items")[0].t_warehouse
+			)
+		)
 
 		si = frappe.copy_doc(self.globalTestRecords["Sales Invoice"][0])
 		si.update_stock = 1
 		si.get("items")[0].item_code = "_Test Serialized Item With Series"
 		si.get("items")[0].qty = 1
 		si.get("items")[0].warehouse = se.get("items")[0].t_warehouse
-		si.get("items")[0].serial_and_batch_bundle = make_serial_batch_bundle(
-			frappe._dict(
-				{
-					"item_code": si.get("items")[0].item_code,
-					"warehouse": si.get("items")[0].warehouse,
-					"company": si.company,
-					"qty": 1,
-					"voucher_type": "Stock Entry",
-					"serial_nos": [serial_nos[0]],
-					"posting_date": si.posting_date,
-					"posting_time": si.posting_time,
-					"type_of_transaction": "Outward",
-					"do_not_submit": True,
-				}
-			)
-		).name
+		si.get("items")[0].serial_no = serial_nos[0]
+		si.get("items")[0].use_serial_batch_fields = 1
 
 		si.insert()
 		si.submit()
@@ -1901,7 +1891,11 @@ class TestSalesInvoice(ERPNextTestSuite):
 	def test_serialized_cancel(self):
 		si = self.test_serialized()
 		si.reload()
-		serial_nos = get_serial_nos_from_bundle(si.get("items")[0].serial_and_batch_bundle)
+		serial_nos = sorted(
+			get_serial_nos_for_voucher(
+				"Sales Invoice", si.name, si.get("items")[0].name, si.get("items")[0].warehouse
+			)
+		)
 
 		si.cancel()
 
@@ -1919,14 +1913,28 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 		se = make_serialized_item(self)
 		se.load_from_db()
-		serial_nos = get_serial_nos_from_bundle(se.get("items")[0].serial_and_batch_bundle)[0]
+		serial_nos = sorted(
+			get_serial_nos_for_voucher(
+				"Stock Entry", se.name, se.get("items")[0].name, se.get("items")[0].t_warehouse
+			)
+		)[0]
 
 		dn = create_delivery_note(item=se.get("items")[0].item_code, serial_no=[serial_nos])
 		dn.submit()
 		dn.load_from_db()
 
-		serial_nos = get_serial_nos_from_bundle(dn.get("items")[0].serial_and_batch_bundle)[0]
-		self.assertTrue(get_serial_nos_from_bundle(se.get("items")[0].serial_and_batch_bundle)[0])
+		serial_nos = sorted(
+			get_serial_nos_for_voucher(
+				"Delivery Note", dn.name, dn.get("items")[0].name, dn.get("items")[0].warehouse
+			)
+		)[0]
+		self.assertTrue(
+			sorted(
+				get_serial_nos_for_voucher(
+					"Stock Entry", se.name, se.get("items")[0].name, se.get("items")[0].t_warehouse
+				)
+			)[0]
+		)
 
 		si = make_sales_invoice(dn.name)
 		si.save()
@@ -3326,7 +3334,6 @@ class TestSalesInvoice(ERPNextTestSuite):
 					"posting_date": si.posting_date,
 					"posting_time": si.posting_time,
 					"qty": -1 * flt(d.get("stock_qty")),
-					"serial_and_batch_bundle": d.serial_and_batch_bundle,
 					"company": si.company,
 					"voucher_type": "Sales Invoice",
 					"voucher_no": si.name,
@@ -4266,7 +4273,9 @@ class TestSalesInvoice(ERPNextTestSuite):
 			item_code="_Test Serialized Item With Series", update_stock=True, is_return=True, qty=-1
 		)
 		si.reload()
-		self.assertTrue(get_serial_nos_from_bundle(si.items[0].serial_and_batch_bundle))
+		self.assertTrue(
+			get_serial_nos_for_voucher("Sales Invoice", si.name, si.items[0].name, si.items[0].warehouse)
+		)
 
 	def test_sales_invoice_with_disabled_account(self):
 		try:
@@ -4377,11 +4386,19 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 		pr = make_purchase_receipt(qty=1, item_code=item.name)
 
-		batch_no = get_batch_from_bundle(pr.items[0].serial_and_batch_bundle)
+		batch_no = next(
+			iter(
+				get_batches_for_voucher("Purchase Receipt", pr.name, pr.items[0].name, pr.items[0].warehouse)
+			),
+			None,
+		)
 		si = create_sales_invoice(qty=1, item_code=item.name, update_stock=1, batch_no=batch_no)
 
 		si.load_from_db()
-		batch_no = get_batch_from_bundle(si.items[0].serial_and_batch_bundle)
+		batch_no = next(
+			iter(get_batches_for_voucher("Sales Invoice", si.name, si.items[0].name, si.items[0].warehouse)),
+			None,
+		)
 		self.assertTrue(batch_no)
 
 		frappe.db.set_value("Batch", batch_no, "expiry_date", add_days(today(), -1))
@@ -5374,7 +5391,10 @@ class TestSalesInvoice(ERPNextTestSuite):
 			use_serial_batch_fields=True,
 		)
 
-		se_batch = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+		se_batch = next(
+			iter(get_batches_for_voucher("Stock Entry", se.name, se.items[0].name, se.items[0].t_warehouse)),
+			None,
+		)
 
 		# without use serial and batch fields
 		si = create_sales_invoice(
@@ -5387,12 +5407,14 @@ class TestSalesInvoice(ERPNextTestSuite):
 		)
 
 		si.reload()
-		si_batch = get_batch_from_bundle(si.items[0].serial_and_batch_bundle)
+		si_batch = next(
+			iter(get_batches_for_voucher("Sales Invoice", si.name, si.items[0].name, si.items[0].warehouse)),
+			None,
+		)
 
 		self.assertEqual(se_batch, si_batch)
 		self.assertEqual(si.items[0].use_serial_batch_fields, 0)
 
-		serial_and_batch_bundle = si.items[0].serial_and_batch_bundle
 		change_in_value = frappe.db.get_value(
 			"Stock Ledger Entry",
 			{
@@ -5400,7 +5422,6 @@ class TestSalesInvoice(ERPNextTestSuite):
 				"voucher_no": si.name,
 				"item_code": item_code,
 				"warehouse": "_Test Warehouse - _TC",
-				"serial_and_batch_bundle": serial_and_batch_bundle,
 			},
 			"stock_value_difference",
 		)
@@ -5421,7 +5442,6 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 		self.assertEqual(si.items[0].use_serial_batch_fields, 1)
 
-		serial_and_batch_bundle = si.items[0].serial_and_batch_bundle
 		change_in_value = frappe.db.get_value(
 			"Stock Ledger Entry",
 			{
@@ -5429,7 +5449,6 @@ class TestSalesInvoice(ERPNextTestSuite):
 				"voucher_no": si.name,
 				"item_code": item_code,
 				"warehouse": "_Test Warehouse - _TC",
-				"serial_and_batch_bundle": serial_and_batch_bundle,
 			},
 			"stock_value_difference",
 		)
@@ -5461,7 +5480,10 @@ class TestSalesInvoice(ERPNextTestSuite):
 		)
 
 		# fetch batch no from bundle
-		batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+		batch_no = next(
+			iter(get_batches_for_voucher("Stock Entry", se.name, se.items[0].name, se.items[0].t_warehouse)),
+			None,
+		)
 
 		si = create_sales_invoice(
 			posting_date=add_days(nowdate(), 3),
@@ -5610,33 +5632,6 @@ def create_sales_invoice(**args):
 			pos_profile.save()
 		si.pos_profile = args.pos_profile or pos_profile.name
 
-	bundle_id = None
-	if si.update_stock and (args.get("batch_no") or args.get("serial_no")):
-		batches = {}
-		qty = args.qty if args.qty is not None else 1
-		item_code = args.item or args.item_code or "_Test Item"
-		if args.get("batch_no"):
-			batches = frappe._dict({args.batch_no: qty})
-
-		serial_nos = args.get("serial_no") or []
-
-		bundle_id = make_serial_batch_bundle(
-			frappe._dict(
-				{
-					"item_code": item_code,
-					"warehouse": args.warehouse or "_Test Warehouse - _TC",
-					"qty": qty,
-					"batches": batches,
-					"voucher_type": "Sales Invoice",
-					"serial_nos": serial_nos,
-					"type_of_transaction": "Outward" if not args.is_return else "Inward",
-					"posting_date": si.posting_date or today(),
-					"posting_time": si.posting_time,
-					"do_not_submit": True,
-				}
-			)
-		).name
-
 	si.append(
 		"items",
 		{
@@ -5658,7 +5653,6 @@ def create_sales_invoice(**args):
 			"cost_center": args.cost_center or "_Test Cost Center - _TC",
 			"conversion_factor": args.get("conversion_factor", 1),
 			"incoming_rate": args.incoming_rate or 0,
-			"serial_and_batch_bundle": bundle_id,
 			"allow_zero_valuation_rate": args.allow_zero_valuation_rate or 0,
 			"use_serial_batch_fields": args.use_serial_batch_fields or 0,
 		},

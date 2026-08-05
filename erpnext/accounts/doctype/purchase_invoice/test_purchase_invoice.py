@@ -30,12 +30,13 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
 	get_taxes,
 	make_purchase_receipt,
 )
-from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
-	get_batch_from_bundle,
-	get_serial_nos_from_bundle,
-	make_serial_batch_bundle,
-)
 from erpnext.stock.doctype.stock_entry.test_stock_entry import get_qty_after_transaction
+from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import (
+	get_batches_for_voucher,
+	get_serial_nos_for_voucher,
+	has_bundled_entries,
+)
+from erpnext.stock.tests.serial_batch_bundle_test_utils import make_serial_batch_bundle
 from erpnext.stock.tests.test_utils import StockTestMixin
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -1063,10 +1064,16 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		)
 		pi.load_from_db()
 
-		serial_no = get_serial_nos_from_bundle(pi.get("items")[0].serial_and_batch_bundle)[0]
-		rejected_serial_no = get_serial_nos_from_bundle(pi.get("items")[0].rejected_serial_and_batch_bundle)[
-			0
-		]
+		serial_no = sorted(
+			get_serial_nos_for_voucher(
+				"Purchase Invoice", pi.name, pi.get("items")[0].name, pi.get("items")[0].warehouse
+			)
+		)[0]
+		rejected_serial_no = sorted(
+			get_serial_nos_for_voucher(
+				"Purchase Invoice", pi.name, pi.get("items")[0].name, pi.get("items")[0].rejected_warehouse
+			)
+		)[0]
 
 		self.assertEqual(
 			frappe.db.get_value("Serial No", serial_no, "warehouse"),
@@ -2189,7 +2196,12 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		)
 
 		pi.load_from_db()
-		batch_no = get_batch_from_bundle(pi.items[0].serial_and_batch_bundle)
+		batch_no = next(
+			iter(
+				get_batches_for_voucher("Purchase Invoice", pi.name, pi.items[0].name, pi.items[0].warehouse)
+			),
+			None,
+		)
 		self.assertTrue(batch_no)
 
 		frappe.db.set_value("Batch", batch_no, "expiry_date", add_days(nowdate(), -1))
@@ -2577,8 +2589,8 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		pi.reload()
 
 		for row in pi.items:
-			self.assertTrue(row.serial_and_batch_bundle)
-			self.assertTrue(row.rejected_serial_and_batch_bundle)
+			self.assertTrue(has_bundled_entries(pi.doctype, pi.name, row.name, row.warehouse))
+			self.assertTrue(has_bundled_entries(pi.doctype, pi.name, row.name, row.rejected_warehouse))
 
 			if row.item_code == batch_item:
 				self.assertEqual(row.batch_no, batch_no)
@@ -3258,32 +3270,6 @@ def make_purchase_invoice(**args):
 	pi.supplier_warehouse = args.supplier_warehouse or "_Test Warehouse 1 - _TC"
 	pi.cost_center = args.parent_cost_center
 
-	bundle_id = None
-	if not args.use_serial_batch_fields and (args.get("batch_no") or args.get("serial_no")):
-		batches = {}
-		qty = args.qty if args.qty is not None else 5
-		item_code = args.item or args.item_code or "_Test Item"
-		if args.get("batch_no"):
-			batches = frappe._dict({args.batch_no: qty})
-
-		serial_nos = args.get("serial_no") or []
-
-		bundle_id = make_serial_batch_bundle(
-			frappe._dict(
-				{
-					"item_code": item_code,
-					"warehouse": args.warehouse or "_Test Warehouse - _TC",
-					"qty": qty,
-					"batches": batches,
-					"voucher_type": "Purchase Invoice",
-					"serial_nos": serial_nos,
-					"type_of_transaction": "Inward",
-					"posting_date": args.posting_date or today(),
-					"posting_time": args.posting_time,
-				}
-			)
-		).name
-
 	pi.append(
 		"items",
 		{
@@ -3299,7 +3285,6 @@ def make_purchase_invoice(**args):
 			"discount_account": args.discount_account or None,
 			"discount_amount": args.discount_amount or 0,
 			"conversion_factor": 1.0,
-			"serial_and_batch_bundle": bundle_id,
 			"stock_uom": args.uom or "_Test UOM",
 			"cost_center": args.cost_center or "_Test Cost Center - _TC",
 			"project": args.project,
@@ -3350,31 +3335,6 @@ def make_purchase_invoice_against_cost_center(**args):
 	if args.supplier_warehouse:
 		pi.supplier_warehouse = "_Test Warehouse 1 - _TC"
 
-	bundle_id = None
-	if args.get("batch_no") or args.get("serial_no"):
-		batches = {}
-		qty = args.qty or 5
-		item_code = args.item or args.item_code or "_Test Item"
-		if args.get("batch_no"):
-			batches = frappe._dict({args.batch_no: qty})
-
-		serial_nos = args.get("serial_no") or []
-
-		bundle_id = make_serial_batch_bundle(
-			frappe._dict(
-				{
-					"item_code": item_code,
-					"warehouse": args.warehouse or "_Test Warehouse - _TC",
-					"qty": qty,
-					"batches": batches,
-					"voucher_type": "Purchase Receipt",
-					"serial_nos": serial_nos,
-					"posting_date": args.posting_date or today(),
-					"posting_time": args.posting_time,
-				}
-			)
-		).name
-
 	pi.append(
 		"items",
 		{
@@ -3385,7 +3345,6 @@ def make_purchase_invoice_against_cost_center(**args):
 			"rejected_qty": args.rejected_qty or 0,
 			"rate": args.rate or 50,
 			"conversion_factor": 1.0,
-			"serial_and_batch_bundle": bundle_id,
 			"stock_uom": "_Test UOM",
 			"cost_center": args.cost_center or "_Test Cost Center - _TC",
 			"project": args.project,

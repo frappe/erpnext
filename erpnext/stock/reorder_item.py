@@ -187,7 +187,7 @@ def get_item_warehouse_projected_qty(items_to_consider):
 	)
 
 	for item_code, warehouse, projected_qty in frappe.get_all(
-		"Bin",
+		"Stock Level",
 		filters={"item_code": ["in", items_to_consider], "warehouse": ["is", "set"]},
 		fields=["item_code", "warehouse", "projected_qty"],
 		as_list=True,

@@ -139,17 +139,6 @@ class AccountsController(TransactionBase):
 
 		process_item_wise_tax_details(self)
 
-	def remove_bundle_for_non_stock_invoices(self):
-		has_sabb = False
-		if self.doctype in ("Sales Invoice", "Purchase Invoice") and not self.update_stock:
-			for item in self.get("items"):
-				if item.serial_and_batch_bundle:
-					item.serial_and_batch_bundle = None
-					has_sabb = True
-
-		if has_sabb:
-			self.remove_serial_and_batch_bundle()
-
 	def ensure_supplier_is_not_blocked(self):
 		is_supplier_payment = self.doctype == "Payment Entry" and self.party_type == "Supplier"
 		is_buying_invoice = self.doctype in ["Purchase Invoice", "Purchase Order"]
@@ -223,9 +212,6 @@ class AccountsController(TransactionBase):
 
 		if self.get("_action") and self._action != "update_after_submit":
 			self.set_missing_values(for_validate=True)
-
-		if self.get("_action") == "submit":
-			self.remove_bundle_for_non_stock_invoices()
 
 		self.ensure_supplier_is_not_blocked()
 
@@ -418,10 +404,14 @@ class AccountsController(TransactionBase):
 
 	def on_trash(self):
 		from erpnext.accounts.utils import delete_exchange_gain_loss_journal
+		from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import (
+			delete_non_submitted_ledgers_for_voucher,
+		)
 
 		self._remove_references_in_repost_doctypes()
 		self._remove_references_in_unreconcile()
-		self.remove_serial_and_batch_bundle()
+		self.remove_auto_created_batches()
+		delete_non_submitted_ledgers_for_voucher(self.doctype, self.name)
 
 		# delete sl and gl entries on deletion of transaction
 		if frappe.get_single_value("Accounts Settings", "delete_linked_ledger_entries"):
@@ -449,15 +439,7 @@ class AccountsController(TransactionBase):
 
 			self._remove_advance_payment_ledger_entries()
 
-	def remove_serial_and_batch_bundle(self):
-		bundles = frappe.get_all(
-			"Serial and Batch Bundle",
-			filters={"voucher_type": self.doctype, "voucher_no": self.name, "docstatus": ("!=", 1)},
-		)
-
-		for bundle in bundles:
-			frappe.delete_doc("Serial and Batch Bundle", bundle.name)
-
+	def remove_auto_created_batches(self):
 		batches = frappe.get_all(
 			"Batch", filters={"reference_doctype": self.doctype, "reference_name": self.name}
 		)

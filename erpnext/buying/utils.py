@@ -66,7 +66,7 @@ def validate_for_items(doc) -> None:
 
 def set_stock_levels(row) -> None:
 	projected_qty = frappe.db.get_value(
-		"Bin",
+		"Stock Level",
 		{
 			"item_code": row.item_code,
 			"warehouse": row.warehouse,

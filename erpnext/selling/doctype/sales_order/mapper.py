@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import json
+from collections import defaultdict
 
 import frappe
 from frappe import _
@@ -24,7 +25,6 @@ from erpnext.stock.doctype.packed_item.packed_item import is_product_bundle, mak
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 	get_sre_details_for_voucher,
 	get_sre_reserved_qty_details_for_voucher,
-	get_ssb_bundle_for_voucher,
 )
 from erpnext.stock.get_item_details import get_bin_details, get_price_list_rate
 
@@ -182,7 +182,23 @@ def make_project(source_name: str, target_doc: str | dict | Document | None = No
 	return doc
 
 
-def set_serial_batch_for_bundle_reservation(source, target, use_serial_batch_fields, packed_sre):
+def set_serial_batch_for_bundle_reservation(source, target, packed_sre):
+	"""Preview the reserved serial/batch composition on mapped packed-item rows, for the common
+	case a single `batch_no` Link field can show (one batch, or any number of serials). A
+	reservation spanning more than one batch can't be previewed here - it is resolved straight
+	from the Stock Reservation Entry when the Delivery Note / Sales Invoice is actually
+	submitted, see SerialBatchBundleService.apply_reserved_serial_batch."""
+	if not packed_sre:
+		return
+
+	entries_by_sre = defaultdict(list)
+	for entry in frappe.get_all(
+		"Stock Reservation Serial Batch",
+		filters={"parent": ["in", [sre.name for sre in packed_sre]]},
+		fields=["parent", "serial_no", "batch_no"],
+	):
+		entries_by_sre[entry.parent].append(entry)
+
 	for item in source.packed_items:
 		target_item = next(
 			(
@@ -193,39 +209,19 @@ def set_serial_batch_for_bundle_reservation(source, target, use_serial_batch_fie
 			),
 			None,
 		)
-		if target_item and (sre := [sre for sre in packed_sre if sre.voucher_detail_no == item.name]):
-			if sre[0].reservation_based_on == "Serial and Batch":
-				qty = 0
-				serial_nos = []
-				batch_nos = []
-				if use_serial_batch_fields:
-					target_item.use_serial_batch_fields = 1
-					for item in sre:
-						qty += item.reserved_qty
-						if item.has_serial_no:
-							serial_nos.extend(
-								frappe.get_all(
-									"Serial and Batch Entry",
-									filters={"parent": item.name},
-									pluck="serial_no",
-								)
-							)
-						if item.has_batch_no:
-							batch_nos.extend(
-								frappe.get_all(
-									"Serial and Batch Entry",
-									filters={"parent": item.name},
-									pluck="batch_no",
-								)
-							)
+		matching_sre = [sre for sre in packed_sre if sre.voucher_detail_no == item.name]
+		if not (target_item and matching_sre and matching_sre[0].reservation_based_on == "Serial and Batch"):
+			continue
 
-					if len(batch_nos) == 1:
-						target_item.batch_no = batch_nos[0] if batch_nos else None
-					if serial_nos and len(batch_nos) < 2:
-						target_item.serial_no = "\n".join(serial_nos)
+		entries = [e for sre in matching_sre for e in entries_by_sre.get(sre.name, [])]
+		serial_nos = [e.serial_no for e in entries if e.serial_no]
+		batch_nos = list({e.batch_no for e in entries if e.batch_no})
 
-				if not use_serial_batch_fields or len(batch_nos) > 1:
-					target_item.serial_and_batch_bundle = get_ssb_bundle_for_voucher(sre).name
+		target_item.use_serial_batch_fields = 1
+		if serial_nos and len(batch_nos) < 2:
+			target_item.serial_no = "\n".join(serial_nos)
+		if len(batch_nos) == 1:
+			target_item.batch_no = batch_nos[0]
 
 
 @frappe.whitelist()
@@ -257,7 +253,6 @@ def make_delivery_note(
 
 	# 0 qty is accepted, as the qty is uncertain for some items
 	has_unit_price_items = frappe.db.get_value("Sales Order", source_name, "has_unit_price_items")
-	use_serial_batch_fields = frappe.get_single_value("Stock Settings", "use_serial_batch_fields")
 
 	def is_unit_price_row(source):
 		return has_unit_price_items and source.qty == 0
@@ -382,26 +377,23 @@ def make_delivery_note(
 				dn_item.warehouse = sre.warehouse
 
 				if sre.reservation_based_on == "Serial and Batch" and (sre.has_serial_no or sre.has_batch_no):
-					if use_serial_batch_fields:
-						# Carry the reserved serial/batch in the row fields. A single field can't hold
-						# multiple batches, so fall back to a bundle in that case.
+					# Carry the reserved serial/batch in the row fields for preview - a single
+					# batch_no field can't hold more than one batch, so a reservation spanning
+					# several batches is resolved straight from the SRE at submit time instead
+					# (SerialBatchBundleService.apply_reserved_serial_batch).
+					sb_entries = frappe.get_all(
+						"Stock Reservation Serial Batch",
+						filters={"parent": sre.name},
+						fields=["serial_no", "batch_no"],
+					)
+					serial_nos = [d.serial_no for d in sb_entries if d.serial_no]
+					batch_nos = list({d.batch_no for d in sb_entries if d.batch_no})
+					if len(batch_nos) < 2:
 						dn_item.use_serial_batch_fields = 1
-						sb_entries = frappe.get_all(
-							"Serial and Batch Entry",
-							filters={"parent": sre.name},
-							fields=["serial_no", "batch_no"],
-						)
-						serial_nos = [d.serial_no for d in sb_entries if d.serial_no]
-						batch_nos = list({d.batch_no for d in sb_entries if d.batch_no})
 						if serial_nos:
 							dn_item.serial_no = "\n".join(serial_nos)
-						if len(batch_nos) == 1:
+						if batch_nos:
 							dn_item.batch_no = batch_nos[0]
-						elif len(batch_nos) > 1:
-							dn_item.use_serial_batch_fields = 0
-							dn_item.serial_and_batch_bundle = get_ssb_bundle_for_voucher([sre]).name
-					else:
-						dn_item.serial_and_batch_bundle = get_ssb_bundle_for_voucher([sre]).name
 
 				target_doc.append("items", dn_item)
 			# Correct rows index.
@@ -416,7 +408,7 @@ def make_delivery_note(
 	# Should be called after mapping items.
 	target_doc.packed_items = []
 	set_missing_values(so, target_doc)
-	set_serial_batch_for_bundle_reservation(so, target_doc, use_serial_batch_fields, packed_sre)
+	set_serial_batch_for_bundle_reservation(so, target_doc, packed_sre)
 
 	return target_doc
 
@@ -446,10 +438,7 @@ def make_sales_invoice(
 
 		make_packing_list(target)
 		set_serial_batch_for_bundle_reservation(
-			source,
-			target,
-			frappe.get_single_value("Stock Settings", "use_serial_batch_fields"),
-			get_sre_details_for_voucher("Sales Order", source_name),
+			source, target, get_sre_details_for_voucher("Sales Order", source_name)
 		)
 
 	def set_missing_values(source, target):

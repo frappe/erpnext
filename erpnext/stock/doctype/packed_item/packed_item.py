@@ -48,7 +48,6 @@ class PackedItem(Document):
 		rate: DF.Currency
 		requested_qty: DF.Float
 		reserve_stock: DF.Check
-		serial_and_batch_bundle: DF.Link | None
 		serial_no: DF.Text | None
 		target_warehouse: DF.Link | None
 		uom: DF.Link | None
@@ -59,7 +58,7 @@ class PackedItem(Document):
 	def set_actual_and_projected_qty(self):
 		"Set actual and projected qty based on warehouse and item_code"
 		_bin = frappe.db.get_value(
-			"Bin",
+			"Stock Level",
 			{"item_code": self.item_code, "warehouse": self.warehouse},
 			["actual_qty", "projected_qty"],
 			as_dict=True,
@@ -378,7 +377,7 @@ def update_packed_item_from_cancelled_doc(main_item_row, packing_item, pi_row, d
 
 def get_packed_item_bin_qty(item, warehouse):
 	bin_data = frappe.db.get_values(
-		"Bin",
+		"Stock Level",
 		fieldname=["actual_qty", "projected_qty"],
 		filters={"item_code": item, "warehouse": warehouse},
 		as_dict=True,

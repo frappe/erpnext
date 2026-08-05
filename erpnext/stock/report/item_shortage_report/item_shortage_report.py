@@ -19,7 +19,7 @@ def execute(filters=None):
 
 
 def get_data(filters):
-	bin = frappe.qb.DocType("Bin")
+	bin = frappe.qb.DocType("Stock Level")
 	wh = frappe.qb.DocType("Warehouse")
 	item = frappe.qb.DocType("Item")
 

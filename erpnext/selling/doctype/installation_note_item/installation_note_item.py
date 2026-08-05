@@ -23,7 +23,6 @@ class InstallationNoteItem(Document):
 		prevdoc_docname: DF.Data | None
 		prevdoc_doctype: DF.Data | None
 		qty: DF.Float
-		serial_and_batch_bundle: DF.Link | None
 		serial_no: DF.SmallText | None
 	# end: auto-generated types
 

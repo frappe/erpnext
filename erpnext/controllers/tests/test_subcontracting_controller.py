@@ -14,11 +14,11 @@ from erpnext.controllers.subcontracting_controller import (
 )
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 from erpnext.stock.doctype.item.test_item import make_item
-from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
-	make_serial_batch_bundle,
-)
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+from erpnext.stock.tests.serial_batch_bundle_test_utils import (
+	make_serial_batch_bundle,
+)
 from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
 	make_subcontracting_receipt,
 )
@@ -782,36 +782,17 @@ class TestSubcontractingController(ERPNextTestSuite):
 
 		scr1 = make_subcontracting_receipt(sco.name)
 		scr1.save()
-		bundle = frappe.get_doc("Serial and Batch Bundle", scr1.supplied_items[0].serial_and_batch_bundle)
-		original_serial_no = ""
-		for row in bundle.entries:
-			if row.idx == 1:
-				original_serial_no = row.serial_no
-				row.serial_no = "ABC"
-				break
 
-		self.assertRaises(frappe.ValidationError, bundle.save)
+		original_serial_no = scr1.supplied_items[0].serial_no
+		scr1.supplied_items[0].serial_no = serial_no
 
-		bundle.load_from_db()
-		for row in bundle.entries:
-			if row.idx == 1:
-				row.serial_no = original_serial_no
-				break
+		self.assertRaises(frappe.ValidationError, scr1.save)
 
-		bundle.save()
-		scr1.load_from_db()
+		scr1.reload()
+		self.assertEqual(scr1.supplied_items[0].serial_no, original_serial_no)
 		scr1.save()
-		self.delete_bundle_from_scr(scr1)
 		scr1.delete()
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
-
-	@staticmethod
-	def delete_bundle_from_scr(scr):
-		for row in scr.supplied_items:
-			if not row.serial_and_batch_bundle:
-				continue
-
-			frappe.delete_doc("Serial and Batch Bundle", row.serial_and_batch_bundle)
 
 	def test_partial_transfer_batch_based_on_material_transfer(self):
 		"""
@@ -1259,7 +1240,7 @@ def get_supplied_items(scr_doc):
 			)
 
 		details = supplied_items[row.rm_item_code]
-		update_item_details(row, details)
+		update_item_details(scr_doc, row, details)
 
 	return supplied_items
 
@@ -1285,33 +1266,39 @@ def make_stock_in_entry(**args):
 
 		child_row = doc.items[0]
 		details = items[child_row.item_code]
-		update_item_details(child_row, details)
+		update_item_details(doc, child_row, details)
 
 	return items
 
 
-def update_item_details(child_row, details):
+def update_item_details(parent_doc, child_row, details):
+	from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import get_voucher_entries
+
 	details.qty += (
 		child_row.get("qty") if child_row.doctype == "Stock Entry Detail" else child_row.get("consumed_qty")
 	)
 
 	details.use_serial_batch_fields = child_row.get("use_serial_batch_fields")
-	if child_row.serial_and_batch_bundle:
-		doc = frappe.get_doc("Serial and Batch Bundle", child_row.serial_and_batch_bundle)
-		for row in doc.get("entries"):
-			if row.serial_no:
-				details.serial_no.append(row.serial_no)
 
-			if row.batch_no:
-				details.batch_no[row.batch_no] += row.qty * (
-					-1 if doc.type_of_transaction == "Outward" else 1
-				)
-	else:
-		if child_row.serial_no:
-			details.serial_no.extend(get_serial_nos(child_row.serial_no))
+	warehouse = (
+		child_row.get("t_warehouse")
+		if child_row.doctype == "Stock Entry Detail"
+		else parent_doc.supplier_warehouse
+	)
 
-		if child_row.batch_no:
-			details.batch_no[child_row.batch_no] += child_row.get("qty") or child_row.get("consumed_qty")
+	rows = get_voucher_entries(
+		parent_doc.doctype,
+		parent_doc.name,
+		child_row.name,
+		warehouse,
+		fields=["serial_no", "batch_no", "qty"],
+	)
+	for row in rows:
+		if row.serial_no:
+			details.serial_no.append(row.serial_no)
+
+		if row.batch_no:
+			details.batch_no[row.batch_no] += abs(flt(row.qty))
 
 
 def make_stock_transfer_entry(**args):
@@ -1351,20 +1338,11 @@ def make_stock_transfer_entry(**args):
 					break
 
 		if not row.get("use_serial_batch_fields") and (serial_nos or batches):
-			item["serial_and_batch_bundle"] = make_serial_batch_bundle(
-				frappe._dict(
-					{
-						"item_code": row.item_code,
-						"warehouse": row.warehouse or "_Test Warehouse - _TC",
-						"qty": (row.qty or 1) * -1,
-						"batches": batches,
-						"serial_nos": serial_nos,
-						"voucher_type": "Delivery Note",
-						"type_of_transaction": "Outward",
-						"do_not_submit": True,
-					}
-				)
-			).name
+			item["use_serial_batch_fields"] = 1
+			if serial_nos:
+				item["serial_no"] = "\n".join(serial_nos)
+			if batches:
+				item["batch_no"] = next(iter(batches))
 
 		if serial_nos and row.get("use_serial_batch_fields"):
 			item["serial_no"] = "\n".join(serial_nos)

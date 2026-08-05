@@ -169,7 +169,6 @@ class StockBalanceReport:
 				sle.stock_value,
 				sle.batch_no,
 				sle.serial_no,
-				sle.serial_and_batch_bundle,
 				sle.has_serial_no,
 				sle.voucher_detail_no,
 				item_table.item_group,
@@ -346,9 +345,7 @@ class StockBalanceReport:
 		for field in self.inventory_dimensions:
 			qty_dict[field] = entry.get(field)
 
-		if entry.voucher_type == "Stock Reconciliation" and (
-			not entry.batch_no or entry.serial_no or entry.serial_and_batch_bundle
-		):
+		if entry.voucher_type == "Stock Reconciliation" and (not entry.batch_no or entry.serial_no):
 			if entry.serial_no and entry.voucher_detail_no in self.stock_reco_voucher_wise_count:
 				qty_dict.opening_qty -= self.stock_reco_voucher_wise_count.get(entry.voucher_detail_no, 0)
 				qty_dict.bal_qty = 0.0

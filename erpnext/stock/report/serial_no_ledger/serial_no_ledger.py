@@ -101,9 +101,7 @@ def get_data(filters):
 		return []
 
 	data = []
-	serial_bundle_ids = [d.serial_and_batch_bundle for d in stock_ledgers if d.serial_and_batch_bundle]
-
-	bundle_wise_serial_nos = get_serial_nos(filters, serial_bundle_ids)
+	voucher_wise_serial_nos = get_serial_nos(filters, stock_ledgers)
 
 	for row in stock_ledgers:
 		args = frappe._dict(
@@ -144,8 +142,9 @@ def get_data(filters):
 					}
 				)
 
-		if row.serial_and_batch_bundle:
-			serial_nos.extend(bundle_wise_serial_nos.get(row.serial_and_batch_bundle, []))
+		if not serial_nos:
+			key = (row.voucher_type, row.voucher_no, row.voucher_detail_no, row.warehouse)
+			serial_nos.extend(voucher_wise_serial_nos.get(key, []))
 
 		for index, bundle_data in enumerate(serial_nos):
 			if index == 0:
@@ -165,19 +164,31 @@ def get_data(filters):
 	return data
 
 
-def get_serial_nos(filters, serial_bundle_ids):
+def get_serial_nos(filters, stock_ledgers):
 	bundle_wise_serial_nos = {}
-	bundle_filters = {"parent": ["in", serial_bundle_ids]}
+	voucher_nos = list({d.voucher_no for d in stock_ledgers if not d.serial_no})
+	if not voucher_nos:
+		return bundle_wise_serial_nos
+
+	sll_filters = {"voucher_no": ["in", voucher_nos], "docstatus": ["!=", 2], "serial_no": ["is", "set"]}
 	if filters.get("serial_no"):
-		bundle_filters["serial_no"] = filters.get("serial_no")
+		sll_filters["serial_no"] = filters.get("serial_no")
 
 	for d in frappe.get_all(
-		"Serial and Batch Entry",
-		fields=["serial_no", "parent", "stock_value_difference as valuation_rate"],
-		filters=bundle_filters,
+		"Stock Location Ledger",
+		fields=[
+			"serial_no",
+			"voucher_type",
+			"voucher_no",
+			"voucher_detail_no",
+			"warehouse",
+			"stock_value_difference as valuation_rate",
+		],
+		filters=sll_filters,
 		order_by="idx asc",
 	):
-		bundle_wise_serial_nos.setdefault(d.parent, []).append(
+		key = (d.voucher_type, d.voucher_no, d.voucher_detail_no, d.warehouse)
+		bundle_wise_serial_nos.setdefault(key, []).append(
 			{
 				"serial_no": d.serial_no,
 				"valuation_rate": abs(d.valuation_rate),

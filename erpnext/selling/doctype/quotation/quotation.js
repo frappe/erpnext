@@ -24,18 +24,6 @@ frappe.ui.form.on("Quotation", {
 		frm.set_df_property("packed_items", "cannot_add_rows", true);
 		frm.set_df_property("packed_items", "cannot_delete_rows", true);
 
-		frm.set_query("serial_and_batch_bundle", "packed_items", (doc, cdt, cdn) => {
-			let row = locals[cdt][cdn];
-			return {
-				filters: {
-					item_code: row.item_code,
-					voucher_type: doc.doctype,
-					voucher_no: ["in", [doc.name, ""]],
-					is_cancelled: 0,
-				},
-			};
-		});
-
 		frm.set_query("warehouse", "items", (doc, cdt, cdn) => {
 			return {
 				filters: {
@@ -56,17 +44,6 @@ frappe.ui.form.on("Quotation", {
 
 		if (frm.doc.docstatus === 0) {
 			erpnext.set_unit_price_items_note(frm);
-		}
-
-		let sbb_field = frm.get_docfield("packed_items", "serial_and_batch_bundle");
-		if (sbb_field) {
-			sbb_field.get_route_options_for_new_doc = (row) => {
-				return {
-					item_code: row.doc.item_code,
-					warehouse: row.doc.warehouse,
-					voucher_type: frm.doc.doctype,
-				};
-			};
 		}
 	},
 

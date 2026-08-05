@@ -14,14 +14,18 @@ from frappe.utils import cint, floor, flt, get_link_to_form
 from frappe.utils.nestedset import get_descendants_of
 
 from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
-from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-	get_auto_batch_nos,
+from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import (
+	cancel_stock_location_ledgers,
+	delete_non_submitted_ledgers_for_voucher,
+	get_batches_for_voucher,
+	get_serial_nos_for_voucher,
+	has_bundled_entries,
+	submit_stock_location_ledgers,
 )
 from erpnext.stock.get_item_details import get_company_total_stock, get_conversion_factor
 from erpnext.stock.serial_batch_bundle import (
 	SerialBatchCreation,
-	get_batches_from_bundle,
-	get_serial_nos_from_bundle,
+	get_auto_batch_nos,
 )
 from erpnext.utilities.transaction_base import TransactionBase
 
@@ -152,7 +156,7 @@ class PickList(TransactionBase):
 
 			bin_qty = flt(
 				frappe.db.get_value(
-					"Bin",
+					"Stock Level",
 					{"item_code": row.item_code, "warehouse": row.warehouse},
 					"actual_qty",
 				)
@@ -275,7 +279,6 @@ class PickList(TransactionBase):
 				item.picked_qty = item.stock_qty
 
 	def on_submit(self):
-		self.validate_serial_and_batch_bundle()
 		self.make_bundle_using_old_serial_batch_fields()
 		self.update_status()
 		self.update_bundle_picked_qty()
@@ -320,8 +323,10 @@ class PickList(TransactionBase):
 			if not row.use_serial_batch_fields and (row.serial_no or row.batch_no):
 				frappe.throw(_("Please enable Use Old Serial / Batch Fields to make_bundle"))
 
-			if row.use_serial_batch_fields and (not row.serial_and_batch_bundle):
-				sn_doc = SerialBatchCreation(
+			if row.use_serial_batch_fields and not has_bundled_entries(
+				self.doctype, self.name, row.name, row.warehouse, is_outward=1
+			):
+				SerialBatchCreation(
 					{
 						"item_code": row.item_code,
 						"warehouse": row.warehouse,
@@ -334,11 +339,11 @@ class PickList(TransactionBase):
 						"serial_nos": get_serial_nos(row.serial_no) if row.serial_no else None,
 						"batches": frappe._dict({row.batch_no: row.stock_qty}) if row.batch_no else None,
 						"batch_no": row.batch_no,
+						"ledger_is_outward": 1,
 					}
-				).make_serial_and_batch_bundle()
+				).make_location_ledger_entries()
 
-				row.serial_and_batch_bundle = sn_doc.name
-				row.db_set("serial_and_batch_bundle", sn_doc.name)
+		submit_stock_location_ledgers(self.doctype, self.name)
 
 	def on_update_after_submit(self) -> None:
 		if self.has_reserved_stock():
@@ -349,7 +354,6 @@ class PickList(TransactionBase):
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = [
-			"Serial and Batch Bundle",
 			"Stock Reservation Entry",
 			"Delivery Note",
 		]
@@ -358,50 +362,11 @@ class PickList(TransactionBase):
 		self.update_bundle_picked_qty()
 		self.update_reference_qty()
 		self.update_sales_order_picking_status()
-		self.delink_serial_and_batch_bundle()
+		cancel_stock_location_ledgers(self.doctype, self.name)
 		self.update_prevdoc_status()
 
-	def delink_serial_and_batch_bundle(self):
-		for row in self.locations:
-			if (
-				row.serial_and_batch_bundle
-				and frappe.db.get_value("Serial and Batch Bundle", row.serial_and_batch_bundle, "docstatus")
-				== 1
-			):
-				frappe.db.set_value(
-					"Serial and Batch Bundle",
-					row.serial_and_batch_bundle,
-					{"is_cancelled": 1, "voucher_no": ""},
-				)
-
-				frappe.get_doc("Serial and Batch Bundle", row.serial_and_batch_bundle).cancel()
-				row.db_set("serial_and_batch_bundle", None)
-
-	def on_update(self):
-		if self.get("locations"):
-			self.linked_serial_and_batch_bundle()
-
-	def linked_serial_and_batch_bundle(self):
-		for row in self.get("locations"):
-			if row.serial_and_batch_bundle:
-				frappe.get_doc(
-					"Serial and Batch Bundle", row.serial_and_batch_bundle
-				).set_serial_and_batch_values(self, row)
-
 	def on_trash(self):
-		self.remove_serial_and_batch_bundle()
-
-	def remove_serial_and_batch_bundle(self):
-		for row in self.locations:
-			if row.serial_and_batch_bundle:
-				frappe.delete_doc("Serial and Batch Bundle", row.serial_and_batch_bundle)
-
-	def validate_serial_and_batch_bundle(self):
-		for row in self.locations:
-			if row.serial_and_batch_bundle:
-				doc = frappe.get_doc("Serial and Batch Bundle", row.serial_and_batch_bundle)
-				if doc.docstatus == 0:
-					doc.submit()
+		delete_non_submitted_ledgers_for_voucher(self.doctype, self.name)
 
 	def update_status(self, status=None, update_modified=True):
 		if not status:
@@ -508,7 +473,6 @@ class PickList(TransactionBase):
 					"qty_to_reserve": (flt(location.picked_qty) - flt(location.stock_reserved_qty)),
 					"from_voucher_no": location.parent,
 					"from_voucher_detail_no": location.name,
-					"serial_and_batch_bundle": location.serial_and_batch_bundle,
 				}
 				so_items_details_map.setdefault(location.sales_order, []).append(item_details)
 
@@ -770,22 +734,26 @@ class PickList(TransactionBase):
 			key = (item_data.warehouse, item_data.batch_no) if item_data.batch_no else item_data.warehouse
 			serial_no = [x for x in item_data.serial_no.split("\n") if x] if item_data.serial_no else None
 
-			if item_data.serial_and_batch_bundle:
+			if not serial_no and not item_data.batch_no:
+				serial_no = get_serial_nos_for_voucher(
+					"Pick List", item_data.parent, item_data.name, item_data.warehouse
+				)
+
 				if not serial_no:
-					serial_no = get_serial_nos_from_bundle(item_data.serial_and_batch_bundle)
+					bundle_batches = get_batches_for_voucher(
+						"Pick List", item_data.parent, item_data.name, item_data.warehouse
+					)
+					if bundle_batches:
+						for batch_no, batch_qty in bundle_batches.items():
+							batch_qty = abs(batch_qty)
 
-				if not item_data.batch_no and not serial_no:
-					bundle_batches = get_batches_from_bundle(item_data.serial_and_batch_bundle)
-					for batch_no, batch_qty in bundle_batches.items():
-						batch_qty = abs(batch_qty)
+							key = (item_data.warehouse, batch_no)
+							if item_data.item_code not in picked_items:
+								picked_items[item_data.item_code] = {key: {"picked_qty": batch_qty}}
+							else:
+								picked_items[item_data.item_code][key]["picked_qty"] += batch_qty
 
-						key = (item_data.warehouse, batch_no)
-						if item_data.item_code not in picked_items:
-							picked_items[item_data.item_code] = {key: {"picked_qty": batch_qty}}
-						else:
-							picked_items[item_data.item_code][key]["picked_qty"] += batch_qty
-
-					continue
+						continue
 
 			if item_data.item_code not in picked_items:
 				picked_items[item_data.item_code] = {}
@@ -837,10 +805,11 @@ class PickList(TransactionBase):
 			.inner_join(pi_item)
 			.on(pi.name == pi_item.parent)
 			.select(
+				pi_item.parent,
+				pi_item.name,
 				pi_item.item_code,
 				pi_item.warehouse,
 				pi_item.batch_no,
-				pi_item.serial_and_batch_bundle,
 				pi_item.serial_no,
 				(
 					Case()
@@ -1308,7 +1277,7 @@ def get_available_item_locations_for_other_item(
 	company,
 	consider_rejected_warehouses=False,
 ):
-	bin = frappe.qb.DocType("Bin")
+	bin = frappe.qb.DocType("Stock Level")
 	query = (
 		frappe.qb.from_(bin)
 		.select(bin.warehouse, bin.actual_qty.as_("qty"))
@@ -1383,7 +1352,7 @@ def get_item_details(
 
 def get_actual_qty(item_code, warehouse):
 	return frappe.db.get_value(
-		"Bin",
+		"Stock Level",
 		{"item_code": item_code, "warehouse": warehouse},
 		"actual_qty",
 	)

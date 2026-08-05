@@ -41,10 +41,10 @@ class TestSerialAndBatchSummary(ERPNextTestSuite):
 
 	def test_batch_receipt_listed(self):
 		from erpnext.stock.doctype.item.test_item import make_item
-		from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
-			get_batch_from_bundle,
-		)
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+		from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import (
+			get_batches_for_voucher,
+		)
 
 		item = make_item(
 			properties={
@@ -56,7 +56,10 @@ class TestSerialAndBatchSummary(ERPNextTestSuite):
 		).name
 		se = make_stock_entry(item_code=item, to_warehouse="_Test Warehouse - _TC", qty=10, basic_rate=50)
 		self.addCleanup(self._cancel_and_delete_stock_entry, se.name)
-		batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+		batch_no = next(
+			iter(get_batches_for_voucher("Stock Entry", se.name, se.items[0].name, se.items[0].t_warehouse)),
+			None,
+		)
 
 		data = self.run_report(voucher_no=[se.name], voucher_type="Stock Entry")
 

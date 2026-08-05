@@ -196,7 +196,7 @@ def get_valuation_rate():
 
 	item_val_rate_map = {}
 
-	bin = frappe.qb.DocType("Bin")
+	bin = frappe.qb.DocType("Stock Level")
 	bin_data = (
 		frappe.qb.from_(bin)
 		.select(

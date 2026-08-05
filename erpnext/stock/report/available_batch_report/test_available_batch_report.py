@@ -22,10 +22,10 @@ class TestAvailableBatchReport(ERPNextTestSuite):
 		# while grouping by SLE columns; the Batch PK must be in the GROUP BY for the report to run
 		# on Postgres. show_item_name=1 forces the extra Batch column to be selected.
 		from erpnext.stock.doctype.item.test_item import make_item
-		from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
-			get_batch_from_bundle,
-		)
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+		from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import (
+			get_batches_for_voucher,
+		)
 		from erpnext.stock.report.available_batch_report.available_batch_report import execute
 
 		item = make_item(
@@ -38,7 +38,10 @@ class TestAvailableBatchReport(ERPNextTestSuite):
 		# make_item is idempotent (returns the existing item), but each receipt stacks a new batch,
 		# so cancel+delete the stock entry to keep repeated runs clean.
 		self.addCleanup(self._cancel_and_delete_stock_entry, se.name)
-		batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+		batch_no = next(
+			iter(get_batches_for_voucher("Stock Entry", se.name, se.items[0].name, se.items[0].t_warehouse)),
+			None,
+		)
 
 		filters = frappe._dict(to_date=today(), item_code=item, show_item_name=1)
 		columns, data = execute(filters)

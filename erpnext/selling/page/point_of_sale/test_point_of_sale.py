@@ -150,11 +150,13 @@ class TestPointOfSaleGetItems(ERPNextTestSuite):
 
 		# Sanity-check the precondition the branch keys off of.
 		self.assertGreater(
-			frappe.db.get_value("Bin", {"item_code": in_stock_item, "warehouse": warehouse}, "actual_qty")
+			frappe.db.get_value(
+				"Stock Level", {"item_code": in_stock_item, "warehouse": warehouse}, "actual_qty"
+			)
 			or 0,
 			0,
 		)
-		self.assertFalse(frappe.db.exists("Bin", {"item_code": out_of_stock_item}))
+		self.assertFalse(frappe.db.exists("Stock Level", {"item_code": out_of_stock_item}))
 
 		in_stock_codes = self._get_item_codes(in_stock_item)
 		self.assertIn(in_stock_item, in_stock_codes)

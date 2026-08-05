@@ -248,8 +248,6 @@ class InventoryDimension(Document):
 
 		filter_custom_fields = {}
 		ignore_doctypes = [
-			"Serial and Batch Bundle",
-			"Serial and Batch Entry",
 			"Pick List Item",
 			"Maintenance Visit Purpose",
 		]

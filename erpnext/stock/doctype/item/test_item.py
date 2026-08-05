@@ -25,6 +25,7 @@ from erpnext.stock.doctype.item.item import (
 	validate_is_stock_item,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import get_voucher_entries
 from erpnext.stock.get_item_details import get_item_details
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -100,7 +101,7 @@ class TestItem(ERPNextTestSuite):
 	def make_bin(self, records):
 		for x in records:
 			x = frappe._dict(x)
-			bin = qb.DocType("Bin")
+			bin = qb.DocType("Stock Level")
 			filters = {
 				"item_code": x.get("item_code"),
 				"warehouse": x.get("warehouse"),
@@ -109,7 +110,7 @@ class TestItem(ERPNextTestSuite):
 				"ordered_qty": x.get("ordered_qty"),
 				"projected_qty": x.get("projected_qty"),
 			}
-			if not frappe.db.exists("Bin", filters):
+			if not frappe.db.exists("Stock Level", filters):
 				qb.from_(bin).delete().where(
 					bin.item_code.eq(x.item_code) & bin.warehouse.eq(x.warehouse)
 				).run()
@@ -143,7 +144,7 @@ class TestItem(ERPNextTestSuite):
 		self.make_bin(
 			[
 				{
-					"doctype": "Bin",
+					"doctype": "Stock Level",
 					"item_code": "_Test Item",
 					"warehouse": "_Test Warehouse - _TC",
 					"reserved_qty": 1,
@@ -750,9 +751,11 @@ class TestItem(ERPNextTestSuite):
 
 		self.assertFalse(frappe.db.exists("Item", old))
 
-		self.assertTrue(frappe.db.get_value("Bin", {"item_code": new, "warehouse": "_Test Warehouse - _TC"}))
 		self.assertTrue(
-			frappe.db.get_value("Bin", {"item_code": new, "warehouse": "_Test Warehouse 1 - _TC"})
+			frappe.db.get_value("Stock Level", {"item_code": new, "warehouse": "_Test Warehouse - _TC"})
+		)
+		self.assertTrue(
+			frappe.db.get_value("Stock Level", {"item_code": new, "warehouse": "_Test Warehouse 1 - _TC"})
 		)
 
 	def test_item_merging_with_product_bundle(self):
@@ -1232,61 +1235,41 @@ class TestItem(ERPNextTestSuite):
 		for item_code, properties in items.items():
 			make_item(item_code, properties)
 
-			stock_entry_bundle = frappe.db.get_value(
-				"Stock Entry Detail", {"docstatus": 1, "item_code": item_code}, "serial_and_batch_bundle"
-			)
-			self.assertFalse(stock_entry_bundle)
+			# Opening stock is recorded via Stock Reconciliation, not a Stock Entry.
+			self.assertFalse(frappe.db.exists("Stock Entry Detail", {"docstatus": 1, "item_code": item_code}))
 
-			serial_and_batch_bundle = frappe.db.get_value(
+			sr_name = frappe.db.get_value(
 				"Stock Ledger Entry",
 				{
 					"voucher_type": "Stock Reconciliation",
 					"is_cancelled": 0,
 					"item_code": item_code,
 				},
-				"serial_and_batch_bundle",
+				"voucher_no",
 			)
-			self.assertTrue(serial_and_batch_bundle)
+			self.assertTrue(sr_name)
 
-			sabb_qty = frappe.db.get_value("Serial and Batch Bundle", serial_and_batch_bundle, "total_qty")
-			self.assertEqual(abs(sabb_qty), properties["opening_stock"])
+			entries = get_voucher_entries(
+				"Stock Reconciliation", sr_name, item_code=item_code, fields=["qty"], is_outward=0
+			)
+			self.assertTrue(entries)
+			self.assertEqual(sum(abs(entry.qty) for entry in entries), properties["opening_stock"])
 
-	def test_cannot_unset_serialized_while_bundle_exists(self):
-		from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
-			make_serial_batch_bundle,
-		)
-
+	def test_cannot_unset_serialized_while_ledger_exists(self):
 		item = make_item(
 			properties={"has_serial_no": 1, "is_stock_item": 1, "serial_no_series": "TSN-UNSET-.####"}
 		).name
 
-		serial_no = f"{item}-SN-01"
-		frappe.get_doc(
-			{"doctype": "Serial No", "serial_no": serial_no, "item_code": item, "company": "_Test Company"}
-		).insert()
-
-		# A draft (unsubmitted) Serial and Batch Bundle for the item must block the change.
-		bundle = make_serial_batch_bundle(
-			{
-				"item_code": item,
-				"warehouse": "_Test Warehouse - _TC",
-				"company": "_Test Company",
-				"qty": 1,
-				"rate": 100,
-				"voucher_type": "Stock Entry",
-				"serial_nos": [serial_no],
-				"type_of_transaction": "Inward",
-				"do_not_submit": True,
-				"ignore_sabb_validation": True,
-			}
-		)
+		# A Stock Location Ledger movement for the item must block the change.
+		se = make_stock_entry(item_code=item, qty=1, target="_Test Warehouse - _TC", basic_rate=100)
 
 		doc = frappe.get_doc("Item", item)
 		doc.has_serial_no = 0
 		self.assertRaises(frappe.ValidationError, doc.save)
 
-		# Once the bundle is removed, the item can be made non-serialized.
-		frappe.delete_doc("Serial and Batch Bundle", bundle.name, force=True)
+		# Once the movement is cancelled, the item can be made non-serialized.
+		se.reload()
+		se.cancel()
 		doc = frappe.get_doc("Item", item)
 		doc.has_serial_no = 0
 		doc.save()

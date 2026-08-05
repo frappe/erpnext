@@ -2,15 +2,13 @@
 # For license information, please see license.txt
 
 
+import copy
 from collections import defaultdict
 
 import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint, flt
-
-from erpnext.stock.serial_batch_bundle import SerialBatchCreation
-from erpnext.stock.utils import get_combine_datetime
 
 
 class StockEntryType(Document):
@@ -139,7 +137,9 @@ class ManufactureEntry:
 						)
 
 					_dict.qty = calculated_qty
-					self.update_available_serial_batches(_dict, available_serial_batches)
+					for row_dict in self.split_by_available_serial_batches(_dict, available_serial_batches):
+						self.stock_entry.append("items", row_dict)
+					continue
 				elif self.skip_material_transfer:
 					set_previous_operation_serial_batch(self.stock_entry, _dict)
 
@@ -181,47 +181,57 @@ class ManufactureEntry:
 
 		return serial_nos, batches
 
-	def update_available_serial_batches(self, item_dict, available_serial_batches):
+	def split_by_available_serial_batches(self, item_dict, available_serial_batches):
+		"""Returns one row per batch (batch_no is single-valued) or a single row with every
+		serial no joined into the plain field (which already holds multiple, newline-separated)."""
 		serial_nos, batches = self.parse_available_serial_batches(item_dict, available_serial_batches)
-		if serial_nos or batches:
-			sabb = SerialBatchCreation(
-				{
-					"item_code": item_dict.item_code,
-					"warehouse": item_dict.from_warehouse,
-					"posting_datetime": get_combine_datetime(
-						self.stock_entry.posting_date, self.stock_entry.posting_time
-					),
-					"voucher_type": self.stock_entry.doctype,
-					"company": self.stock_entry.company,
-					"type_of_transaction": "Outward",
-					"qty": item_dict.qty,
-					"serial_nos": serial_nos,
-					"batches": batches,
-					"do_not_submit": True,
-				}
-			).make_serial_and_batch_bundle()
 
-			item_dict.serial_and_batch_bundle = sabb.name
+		if serial_nos:
+			item_dict.use_serial_batch_fields = 1
+			item_dict.serial_no = "\n".join(serial_nos)
+			return [item_dict]
+
+		if not batches:
+			return [item_dict]
+
+		rows = []
+		for batch_no, qty in batches.items():
+			row = copy.deepcopy(item_dict)
+			row.use_serial_batch_fields = 1
+			row.batch_no = batch_no
+			row.qty = qty
+			rows.append(row)
+
+		return rows
 
 	def get_stock_entry_data(self):
 		stock_entry = frappe.qb.DocType("Stock Entry")
 		stock_entry_detail = frappe.qb.DocType("Stock Entry Detail")
+		sll = frappe.qb.DocType("Stock Location Ledger")
 
 		return (
 			frappe.qb.from_(stock_entry)
 			.inner_join(stock_entry_detail)
 			.on(stock_entry.name == stock_entry_detail.parent)
+			.inner_join(sll)
+			.on(
+				(sll.voucher_type == "Stock Entry")
+				& (sll.voucher_no == stock_entry.name)
+				& (sll.voucher_detail_no == stock_entry_detail.name)
+			)
 			.select(
 				stock_entry_detail.item_code,
-				stock_entry_detail.qty,
-				stock_entry_detail.serial_and_batch_bundle,
+				sll.serial_no,
+				sll.batch_no,
+				sll.qty,
+				sll.warehouse,
 				stock_entry_detail.s_warehouse,
 				stock_entry_detail.t_warehouse,
 				stock_entry.purpose,
 			)
 			.where(
 				(stock_entry.job_card == self.job_card)
-				& (stock_entry_detail.serial_and_batch_bundle.isnotnull())
+				& (sll.docstatus == 1)
 				& (stock_entry.docstatus == 1)
 				& (stock_entry.purpose.isin(["Material Transfer for Manufacture", "Manufacture"]))
 			)
@@ -237,6 +247,9 @@ class ManufactureEntry:
 			warehouse = (
 				row.t_warehouse if row.purpose == "Material Transfer for Manufacture" else row.s_warehouse
 			)
+			if not warehouse or row.warehouse != warehouse:
+				continue
+
 			key = (row.item_code, warehouse)
 			if key not in available_serial_batches:
 				available_serial_batches[key] = frappe._dict(
@@ -248,21 +261,13 @@ class ManufactureEntry:
 
 			_avl_dict = available_serial_batches[key]
 
-			sabb_data = frappe.get_all(
-				"Serial and Batch Entry",
-				filters={"parent": row.serial_and_batch_bundle},
-				fields=["serial_no", "batch_no", "qty"],
-			)
-			for entry in sabb_data:
-				if entry.serial_no:
-					if entry.qty > 0:
-						_avl_dict.serial_nos.append(entry.serial_no)
-					else:
-						_avl_dict.serial_nos.remove(entry.serial_no)
-				if entry.batch_no:
-					_avl_dict.batches[entry.batch_no] += flt(entry.qty) * (
-						-1 if row.purpose == "Material Transfer for Manufacture" else 1
-					)
+			if row.serial_no:
+				if row.qty > 0:
+					_avl_dict.serial_nos.append(row.serial_no)
+				elif row.serial_no in _avl_dict.serial_nos:
+					_avl_dict.serial_nos.remove(row.serial_no)
+			if row.batch_no:
+				_avl_dict.batches[row.batch_no] += flt(row.qty)
 
 		return available_serial_batches
 

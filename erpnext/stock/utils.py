@@ -14,9 +14,8 @@ from frappe.utils.data import DateTimeLikeObject
 
 import erpnext
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
-from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_available_serial_nos
 from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
-from erpnext.stock.serial_batch_bundle import BatchNoValuation, SerialNoValuation
+from erpnext.stock.serial_batch_bundle import BatchNoValuation, SerialNoValuation, get_available_serial_nos
 from erpnext.stock.valuation import FIFOValuation, LIFOValuation
 
 BarcodeScanResult = dict[str, str | None]
@@ -31,7 +30,7 @@ class PendingRepostingError(frappe.ValidationError):
 
 
 def get_stock_value_from_bin(warehouse=None, item_code=None):
-	bin_dt = frappe.qb.DocType("Bin")
+	bin_dt = frappe.qb.DocType("Stock Level")
 	item = frappe.qb.DocType("Item")
 
 	query = (
@@ -178,7 +177,7 @@ def get_serial_nos_data(serial_nos):
 
 @frappe.whitelist()
 def get_latest_stock_qty(item_code: str, warehouse: str | None = None):
-	bin_dt = frappe.qb.DocType("Bin")
+	bin_dt = frappe.qb.DocType("Stock Level")
 	query = frappe.qb.from_(bin_dt).select(Sum(bin_dt.actual_qty)).where(bin_dt.item_code == item_code)
 
 	if warehouse:
@@ -199,24 +198,24 @@ def get_latest_stock_qty(item_code: str, warehouse: str | None = None):
 
 def get_latest_stock_balance():
 	bin_map = {}
-	for d in frappe.get_all("Bin", fields=["item_code", "warehouse", "stock_value"]):
+	for d in frappe.get_all("Stock Level", fields=["item_code", "warehouse", "stock_value"]):
 		bin_map.setdefault(d.warehouse, {}).setdefault(d.item_code, flt(d.stock_value))
 
 	return bin_map
 
 
 def get_bin(item_code, warehouse):
-	bin = frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse})
+	bin = frappe.db.get_value("Stock Level", {"item_code": item_code, "warehouse": warehouse})
 	if not bin:
 		bin_obj = _create_bin(item_code, warehouse)
 	else:
-		bin_obj = frappe.get_doc("Bin", bin)
+		bin_obj = frappe.get_doc("Stock Level", bin)
 	bin_obj.flags.ignore_permissions = True
 	return bin_obj
 
 
 def get_or_make_bin(item_code: str, warehouse: str) -> str:
-	bin_record = frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse})
+	bin_record = frappe.db.get_value("Stock Level", {"item_code": item_code, "warehouse": warehouse})
 
 	if not bin_record:
 		bin_obj = _create_bin(item_code, warehouse)
@@ -230,12 +229,12 @@ def _create_bin(item_code, warehouse):
 	bin_creation_savepoint = "create_bin"
 	try:
 		frappe.db.savepoint(bin_creation_savepoint)
-		bin_obj = frappe.get_doc(doctype="Bin", item_code=item_code, warehouse=warehouse)
+		bin_obj = frappe.get_doc(doctype="Stock Level", item_code=item_code, warehouse=warehouse)
 		bin_obj.flags.ignore_permissions = 1
 		bin_obj.insert()
 	except frappe.UniqueValidationError:
 		frappe.db.rollback(save_point=bin_creation_savepoint)  # preserve transaction in postgres
-		bin_obj = frappe.get_last_doc("Bin", {"item_code": item_code, "warehouse": warehouse})
+		bin_obj = frappe.get_last_doc("Stock Level", {"item_code": item_code, "warehouse": warehouse})
 
 	return bin_obj
 
@@ -252,48 +251,19 @@ def get_incoming_rate(args: dict | str, raise_error_if_no_rate: bool = True, fal
 
 	in_rate = None
 
-	item_details = frappe.get_cached_value(
-		"Item", args.get("item_code"), ["has_serial_no", "has_batch_no"], as_dict=1
-	)
-
 	use_moving_avg_for_batch = frappe.get_single_value("Stock Settings", "do_not_use_batchwise_valuation")
 
 	if isinstance(args, dict):
 		args = frappe._dict(args)
 
-	if item_details and item_details.has_serial_no and args.get("serial_and_batch_bundle"):
-		args.actual_qty = args.qty
-		sn_obj = SerialNoValuation(
-			sle=args,
-			warehouse=args.get("warehouse"),
-			item_code=args.get("item_code"),
-		)
-
-		return sn_obj.get_incoming_rate()
-
-	elif (
-		item_details
-		and item_details.has_batch_no
-		and args.get("serial_and_batch_bundle")
-		and not use_moving_avg_for_batch
-	):
-		args.actual_qty = args.qty
-		batch_obj = BatchNoValuation(
-			sle=args,
-			warehouse=args.get("warehouse"),
-			item_code=args.get("item_code"),
-		)
-
-		return batch_obj.get_incoming_rate()
-
-	elif (args.get("serial_no") or "").strip() and not args.get("serial_and_batch_bundle"):
+	if (args.get("serial_no") or "").strip():
 		args.actual_qty = args.qty
 		args.serial_nos = get_serial_nos_data(args.get("serial_no"))
 
 		sn_obj = SerialNoValuation(sle=args, warehouse=args.get("warehouse"), item_code=args.get("item_code"))
 
 		return sn_obj.get_incoming_rate()
-	elif args.get("batch_no") and not args.get("serial_and_batch_bundle") and not use_moving_avg_for_batch:
+	elif args.get("batch_no") and not use_moving_avg_for_batch:
 		args.actual_qty = args.qty
 		args.batch_nos = frappe._dict({args.batch_no: args})
 

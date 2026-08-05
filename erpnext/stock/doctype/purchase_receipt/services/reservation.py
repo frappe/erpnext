@@ -27,7 +27,7 @@ class PurchaseReceiptStockReservation:
 		):
 			return
 
-		doc.reload()  # reload to get the Serial and Batch Bundle Details
+		doc.reload()  # reload to get the current committed state of the items table
 
 		so_items_details_map = {}
 		for item in doc.items:
@@ -39,7 +39,6 @@ class PurchaseReceiptStockReservation:
 					"qty_to_reserve": item.stock_qty,
 					"from_voucher_no": item.parent,
 					"from_voucher_detail_no": item.name,
-					"serial_and_batch_bundle": item.serial_and_batch_bundle,
 				}
 				so_items_details_map.setdefault(item.sales_order, []).append(item_details)
 
@@ -89,7 +88,7 @@ class PurchaseReceiptStockReservation:
 						"from_voucher_no": doc.name,
 						"from_voucher_detail_no": row.name,
 						"from_voucher_type": doc.doctype,
-						"serial_and_batch_bundles": [row.serial_and_batch_bundle],
+						"voucher_detail_nos": [row.name],
 					}
 				)
 

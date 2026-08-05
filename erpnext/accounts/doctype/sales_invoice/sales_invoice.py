@@ -360,7 +360,7 @@ class SalesInvoice(SellingController):
 					row.billing_amount = -abs(row.billing_amount)
 
 		self.validate_update_stock_for_pick_list_reference()
-		self.set_serial_and_batch_bundle_from_pick_list()
+		self.set_serial_batch_ledgers_from_pick_list()
 		self.update_packing_list()
 		TimesheetBillingService(self).set_billing_hours_and_amount()
 		TimesheetBillingService(self).update_timesheet_billing_for_project()
@@ -573,7 +573,6 @@ class SalesInvoice(SellingController):
 			"Unreconcile Payment",
 			"Unreconcile Payment Entries",
 			"Payment Ledger Entry",
-			"Serial and Batch Bundle",
 			"Tax Withholding Entry",
 		)
 

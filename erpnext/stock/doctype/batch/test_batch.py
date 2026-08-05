@@ -12,16 +12,17 @@ from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make
 from erpnext.stock.doctype.batch.batch import get_batch_qty
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
-from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-	BatchNegativeStockError,
-)
-from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
-	get_batch_from_bundle,
-)
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import (
+	get_batches_for_voucher,
+	has_bundled_entries,
+)
 from erpnext.stock.get_item_details import get_item_details
-from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 from erpnext.tests.utils import ERPNextTestSuite
+
+
+def _first_batch(voucher_type, voucher_no, voucher_detail_no, warehouse):
+	return next(iter(get_batches_for_voucher(voucher_type, voucher_no, voucher_detail_no, warehouse)), None)
 
 
 class TestBatch(ERPNextTestSuite):
@@ -53,8 +54,14 @@ class TestBatch(ERPNextTestSuite):
 		receipt.submit()
 
 		receipt.load_from_db()
-		self.assertTrue(receipt.items[0].serial_and_batch_bundle)
-		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
+		self.assertTrue(
+			has_bundled_entries(
+				receipt.doctype, receipt.name, receipt.items[0].name, receipt.items[0].warehouse
+			)
+		)
+		batch_no = _first_batch(
+			receipt.doctype, receipt.name, receipt.items[0].name, receipt.items[0].warehouse
+		)
 		self.assertEqual(get_batch_qty(batch_no, receipt.items[0].warehouse), batch_qty)
 
 		return receipt
@@ -72,23 +79,8 @@ class TestBatch(ERPNextTestSuite):
 		receipt.submit()
 
 		receipt.load_from_db()
-		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
-
-		bundle_id = (
-			SerialBatchCreation(
-				{
-					"item_code": "ITEM-BATCH-1",
-					"warehouse": "_Test Warehouse - _TC",
-					"actual_qty": 20,
-					"voucher_type": "Purchase Receipt",
-					"batches": frappe._dict({batch_no: 20}),
-					"type_of_transaction": "Inward",
-					"company": receipt.company,
-					"do_not_submit": 1,
-				}
-			)
-			.make_serial_and_batch_bundle()
-			.name
+		batch_no = _first_batch(
+			receipt.doctype, receipt.name, receipt.items[0].name, receipt.items[0].warehouse
 		)
 
 		receipt2 = frappe.get_doc(
@@ -101,7 +93,8 @@ class TestBatch(ERPNextTestSuite):
 					qty=20,
 					rate=10,
 					warehouse="_Test Warehouse - _TC",
-					serial_and_batch_bundle=bundle_id,
+					batch_no=batch_no,
+					use_serial_batch_fields=1,
 				)
 			],
 		).insert()
@@ -110,12 +103,20 @@ class TestBatch(ERPNextTestSuite):
 		receipt.load_from_db()
 		receipt2.load_from_db()
 
-		self.assertTrue(receipt.items[0].serial_and_batch_bundle)
-		self.assertTrue(receipt2.items[0].serial_and_batch_bundle)
+		self.assertTrue(
+			has_bundled_entries(
+				receipt.doctype, receipt.name, receipt.items[0].name, receipt.items[0].warehouse
+			)
+		)
+		self.assertTrue(
+			has_bundled_entries(
+				receipt2.doctype, receipt2.name, receipt2.items[0].name, receipt2.items[0].warehouse
+			)
+		)
 
 		batchwise_qty = frappe._dict({})
 		for r in [receipt, receipt2]:
-			batch_no = get_batch_from_bundle(r.items[0].serial_and_batch_bundle)
+			batch_no = _first_batch(r.doctype, r.name, r.items[0].name, r.items[0].warehouse)
 			key = (batch_no, r.items[0].warehouse)
 			batchwise_qty[key] = r.items[0].qty
 
@@ -129,11 +130,11 @@ class TestBatch(ERPNextTestSuite):
 		)
 		from erpnext.accounts.doctype.pos_invoice.test_pos_invoice import create_pos_invoice
 		from erpnext.accounts.doctype.pos_opening_entry.test_pos_opening_entry import create_opening_entry
-		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-			get_auto_batch_nos,
-		)
 		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 			create_batch_item_with_batch,
+		)
+		from erpnext.stock.serial_batch_bundle import (
+			get_auto_batch_nos,
 		)
 
 		invoice_type = frappe.db.get_single_value("POS Settings", "invoice_type")
@@ -156,7 +157,7 @@ class TestBatch(ERPNextTestSuite):
 
 			se.reload()
 
-			batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+			batch_no = _first_batch(se.doctype, se.name, se.items[0].name, se.items[0].t_warehouse)
 
 			# Create opening entry
 			session_user = frappe.session.user
@@ -223,9 +224,11 @@ class TestBatch(ERPNextTestSuite):
 
 		stock_entry.load_from_db()
 
-		bundle = stock_entry.items[0].serial_and_batch_bundle
-		self.assertTrue(bundle)
-		self.assertEqual(get_batch_qty(get_batch_from_bundle(bundle), stock_entry.items[0].t_warehouse), 90)
+		batch_no = _first_batch(
+			stock_entry.doctype, stock_entry.name, stock_entry.items[0].name, stock_entry.items[0].t_warehouse
+		)
+		self.assertTrue(batch_no)
+		self.assertEqual(get_batch_qty(batch_no, stock_entry.items[0].t_warehouse), 90)
 
 	def test_delivery_note(self):
 		"""Test automatic batch selection for outgoing items"""
@@ -233,23 +236,8 @@ class TestBatch(ERPNextTestSuite):
 		receipt = self.test_purchase_receipt(batch_qty)
 		item_code = "ITEM-BATCH-1"
 
-		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
-
-		bundle_id = (
-			SerialBatchCreation(
-				{
-					"item_code": item_code,
-					"warehouse": receipt.items[0].warehouse,
-					"actual_qty": batch_qty,
-					"voucher_type": "Stock Entry",
-					"batches": frappe._dict({batch_no: batch_qty}),
-					"type_of_transaction": "Outward",
-					"company": receipt.company,
-					"do_not_submit": 1,
-				}
-			)
-			.make_serial_and_batch_bundle()
-			.name
+		batch_no = _first_batch(
+			receipt.doctype, receipt.name, receipt.items[0].name, receipt.items[0].warehouse
 		)
 
 		delivery_note = frappe.get_doc(
@@ -262,7 +250,8 @@ class TestBatch(ERPNextTestSuite):
 					qty=batch_qty,
 					rate=10,
 					warehouse=receipt.items[0].warehouse,
-					serial_and_batch_bundle=bundle_id,
+					batch_no=batch_no,
+					use_serial_batch_fields=1,
 				)
 			],
 		).insert()
@@ -273,30 +262,38 @@ class TestBatch(ERPNextTestSuite):
 
 		# shipped from FEFO batch
 		self.assertEqual(
-			get_batch_from_bundle(delivery_note.items[0].serial_and_batch_bundle),
+			_first_batch(
+				delivery_note.doctype,
+				delivery_note.name,
+				delivery_note.items[0].name,
+				delivery_note.items[0].warehouse,
+			),
 			batch_no,
 		)
 
 	def test_batch_negative_stock_error(self):
-		"""Test automatic batch selection for outgoing items"""
+		"""Negative-stock enforcement now happens on Stock Location Ledger submit, not at
+		bundle-creation time - so this needs an actual Delivery Note submit to trigger it."""
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.stock_ledger import NegativeStockError
+
 		receipt = self.test_purchase_receipt(100)
 
 		receipt.load_from_db()
-		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
-		sn_doc = SerialBatchCreation(
-			{
-				"item_code": "ITEM-BATCH-1",
-				"warehouse": receipt.items[0].warehouse,
-				"voucher_type": "Delivery Note",
-				"qty": 5000,
-				"avg_rate": 10,
-				"batches": frappe._dict({batch_no: 5000}),
-				"type_of_transaction": "Outward",
-				"company": receipt.company,
-			}
+		batch_no = _first_batch(
+			receipt.doctype, receipt.name, receipt.items[0].name, receipt.items[0].warehouse
 		)
 
-		self.assertRaises(BatchNegativeStockError, sn_doc.make_serial_and_batch_bundle)
+		dn = create_delivery_note(
+			item_code="ITEM-BATCH-1",
+			qty=5000,
+			rate=10,
+			warehouse=receipt.items[0].warehouse,
+			batch_no=batch_no,
+			do_not_submit=True,
+		)
+
+		self.assertRaises(NegativeStockError, dn.submit)
 
 	def test_stock_entry_outgoing(self):
 		"""Test automatic batch selection for outgoing stock entry"""
@@ -305,23 +302,8 @@ class TestBatch(ERPNextTestSuite):
 		receipt = self.test_purchase_receipt(batch_qty)
 		item_code = "ITEM-BATCH-1"
 
-		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
-
-		bundle_id = (
-			SerialBatchCreation(
-				{
-					"item_code": item_code,
-					"warehouse": receipt.items[0].warehouse,
-					"actual_qty": batch_qty,
-					"voucher_type": "Stock Entry",
-					"batches": frappe._dict({batch_no: batch_qty}),
-					"type_of_transaction": "Outward",
-					"company": receipt.company,
-					"do_not_submit": 1,
-				}
-			)
-			.make_serial_and_batch_bundle()
-			.name
+		batch_no = _first_batch(
+			receipt.doctype, receipt.name, receipt.items[0].name, receipt.items[0].warehouse
 		)
 
 		stock_entry = frappe.get_doc(
@@ -333,7 +315,8 @@ class TestBatch(ERPNextTestSuite):
 					item_code=item_code,
 					qty=batch_qty,
 					s_warehouse=receipt.items[0].warehouse,
-					serial_and_batch_bundle=bundle_id,
+					batch_no=batch_no,
+					use_serial_batch_fields=1,
 				)
 			],
 		)
@@ -344,8 +327,13 @@ class TestBatch(ERPNextTestSuite):
 		stock_entry.load_from_db()
 
 		self.assertEqual(
-			get_batch_from_bundle(stock_entry.items[0].serial_and_batch_bundle),
-			get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle),
+			_first_batch(
+				stock_entry.doctype,
+				stock_entry.name,
+				stock_entry.items[0].name,
+				stock_entry.items[0].s_warehouse,
+			),
+			batch_no,
 		)
 
 	def test_batch_split(self):
@@ -353,7 +341,9 @@ class TestBatch(ERPNextTestSuite):
 		receipt = self.test_purchase_receipt()
 		from erpnext.stock.doctype.batch.batch import split_batch
 
-		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
+		batch_no = _first_batch(
+			receipt.doctype, receipt.name, receipt.items[0].name, receipt.items[0].warehouse
+		)
 
 		new_batch = split_batch(batch_no, "ITEM-BATCH-1", receipt.items[0].warehouse, 22)
 
@@ -389,14 +379,12 @@ class TestBatch(ERPNextTestSuite):
 	def test_get_batch_no_search_returns_batches(self):
 		"""The batch-number picker must run on every engine.
 
-		Both query builders group by Stock Ledger Entry / Serial-and-Batch-Entry
-		columns while selecting un-aggregated Batch-master columns; PostgreSQL only
-		accepts that when the Batch primary key is in the GROUP BY, so the picker
-		errors there without it.
+		The query builder groups by Stock Ledger Entry columns while selecting
+		un-aggregated Batch-master columns; PostgreSQL only accepts that when the
+		Batch primary key is in the GROUP BY, so the picker errors there without it.
 		"""
 		from erpnext.controllers.queries import (
 			get_batch_no,
-			get_batches_from_serial_and_batch_bundle,
 			get_batches_from_stock_ledger_entries,
 		)
 
@@ -407,11 +395,10 @@ class TestBatch(ERPNextTestSuite):
 		searchfields = frappe.get_meta("Batch").get_search_fields()
 		filters = {"item_code": "ITEM-BATCH-PICKER", "warehouse": "_Test Warehouse - _TC"}
 
-		# Exercise both query builders directly so each GROUP BY is covered regardless
-		# of which path holds the data: PostgreSQL validates the GROUP BY even when no
-		# rows match, so a missing Batch primary key raises GroupingError here.
+		# Exercise the query builder directly so the GROUP BY is covered: PostgreSQL
+		# validates the GROUP BY even when no rows match, so a missing Batch primary
+		# key raises GroupingError here.
 		get_batches_from_stock_ledger_entries(searchfields, "", filters)
-		get_batches_from_serial_and_batch_bundle(searchfields, "", filters)
 
 		result = get_batch_no(
 			doctype="Batch",
@@ -486,20 +473,6 @@ class TestBatch(ERPNextTestSuite):
 			)
 			batch.save()
 
-		sn_doc = SerialBatchCreation(
-			{
-				"item_code": item_name,
-				"warehouse": warehouse,
-				"voucher_type": "Stock Entry",
-				"qty": 90,
-				"avg_rate": 10,
-				"batches": frappe._dict({batch_name: 90}),
-				"type_of_transaction": "Inward",
-				"company": "_Test Company",
-				"do_not_submit": 1,
-			}
-		).make_serial_and_batch_bundle()
-
 		stock_entry = frappe.get_doc(
 			doctype="Stock Entry",
 			purpose="Material Receipt",
@@ -508,7 +481,8 @@ class TestBatch(ERPNextTestSuite):
 				dict(
 					item_code=item_name,
 					qty=90,
-					serial_and_batch_bundle=sn_doc.name,
+					batch_no=batch_name,
+					use_serial_batch_fields=1,
 					t_warehouse=warehouse,
 					cost_center="Main - _TC",
 					rate=10,
@@ -636,7 +610,7 @@ class TestBatch(ERPNextTestSuite):
 		batches = {}
 		for rate in rates:
 			se = make_stock_entry(item_code=item_code, qty=10, rate=rate, target=warehouse)
-			batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+			batch_no = _first_batch(se.doctype, se.name, se.items[0].name, se.items[0].t_warehouse)
 			batches[batch_no] = rate
 
 		LOW, HIGH = list(batches.keys())
@@ -658,9 +632,8 @@ class TestBatch(ERPNextTestSuite):
 
 			sle = frappe.get_last_doc("Stock Ledger Entry", {"is_cancelled": 0, "voucher_no": se.name})
 
-			stock_value_difference = (
-				sle.actual_qty * batches[get_batch_from_bundle(sle.serial_and_batch_bundle)]
-			)
+			consumed_batch = _first_batch(se.doctype, se.name, se.items[0].name, se.items[0].s_warehouse)
+			stock_value_difference = sle.actual_qty * batches[consumed_batch]
 			self.assertAlmostEqual(sle.stock_value_difference, stock_value_difference)
 
 			stock_value += stock_value_difference
@@ -677,7 +650,7 @@ class TestBatch(ERPNextTestSuite):
 		self.make_batch_item(item_code)
 
 		se = make_stock_entry(item_code=item_code, qty=100, rate=10, target="_Test Warehouse - _TC")
-		batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+		batch_no = _first_batch(se.doctype, se.name, se.items[0].name, se.items[0].t_warehouse)
 		batch = frappe.get_doc("Batch", batch_no)
 
 		expiry_date = add_to_date(batch.manufacturing_date, days=30)
@@ -709,12 +682,14 @@ class TestBatch(ERPNextTestSuite):
 		pr_1.load_from_db()
 		pr_2.load_from_db()
 
+		pr_2_batch = _first_batch(pr_2.doctype, pr_2.name, pr_2.items[0].name, pr_2.items[0].warehouse)
+
 		self.assertNotEqual(
-			get_batch_from_bundle(pr_1.items[0].serial_and_batch_bundle),
-			get_batch_from_bundle(pr_2.items[0].serial_and_batch_bundle),
+			_first_batch(pr_1.doctype, pr_1.name, pr_1.items[0].name, pr_1.items[0].warehouse),
+			pr_2_batch,
 		)
 
-		self.assertEqual("BATCHEXISTING002", get_batch_from_bundle(pr_2.items[0].serial_and_batch_bundle))
+		self.assertEqual("BATCHEXISTING002", pr_2_batch)
 
 
 def create_batch(item_code, rate, create_item_price_for_batch):

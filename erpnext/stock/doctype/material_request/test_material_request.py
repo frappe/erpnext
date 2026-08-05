@@ -686,7 +686,9 @@ class TestMaterialRequest(ERPNextTestSuite):
 
 	def _get_requested_qty(self, item_code, warehouse):
 		return flt(
-			frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "indented_qty")
+			frappe.db.get_value(
+				"Stock Level", {"item_code": item_code, "warehouse": warehouse}, "indented_qty"
+			)
 		)
 
 	def test_make_stock_entry_for_material_issue(self):
@@ -706,7 +708,7 @@ class TestMaterialRequest(ERPNextTestSuite):
 		def _get_requested_qty():
 			return flt(
 				frappe.db.get_value(
-					"Bin",
+					"Stock Level",
 					{"item_code": "_Test Item Home Desktop 100", "warehouse": "_Test Warehouse - _TC"},
 					"indented_qty",
 				)
@@ -747,7 +749,7 @@ class TestMaterialRequest(ERPNextTestSuite):
 		mr.submit()
 		completed_qty = mr.items[0].ordered_qty
 		requested_qty = frappe.db.get_value(
-			"Bin",
+			"Stock Level",
 			{"item_code": mr.items[0].item_code, "warehouse": mr.items[0].warehouse},
 			"indented_qty",
 		)
@@ -761,7 +763,7 @@ class TestMaterialRequest(ERPNextTestSuite):
 		self.assertEqual(completed_qty + po.qty, mr.items[0].ordered_qty)
 
 		new_requested_qty = frappe.db.get_value(
-			"Bin",
+			"Stock Level",
 			{"item_code": mr.items[0].item_code, "warehouse": mr.items[0].warehouse},
 			"indented_qty",
 		)
@@ -774,7 +776,7 @@ class TestMaterialRequest(ERPNextTestSuite):
 		self.assertEqual(completed_qty, mr.items[0].ordered_qty)
 
 		new_requested_qty = frappe.db.get_value(
-			"Bin",
+			"Stock Level",
 			{"item_code": mr.items[0].item_code, "warehouse": mr.items[0].warehouse},
 			"indented_qty",
 		)

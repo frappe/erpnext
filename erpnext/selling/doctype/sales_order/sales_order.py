@@ -315,7 +315,7 @@ class SalesOrder(SellingController):
 		bin_data = {}
 		if item_warehouse_pairs:
 			bins = frappe.get_all(
-				"Bin",
+				"Stock Level",
 				fields=["item_code", "warehouse", "projected_qty"],
 				filters={"item_code": ["in", [p[0] for p in item_warehouse_pairs]]},
 			)

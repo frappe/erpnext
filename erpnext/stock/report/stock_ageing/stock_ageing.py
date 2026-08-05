@@ -418,7 +418,7 @@ class FIFOSlots:
 		if row.voucher_type != "Stock Reconciliation":
 			return
 
-		if row.has_serial_no and (not row.batch_no or row.serial_no or row.serial_and_batch_bundle):
+		if row.has_serial_no and (not row.batch_no or row.serial_no):
 			if row.voucher_detail_no in self.stock_reco_voucher_wise_count:
 				# Legacy reconciliation with a single SLE has qty_after_transaction and
 				# stock_value_difference without an outward entry, so reset the queue first.
@@ -465,29 +465,34 @@ class FIFOSlots:
 	def _get_serial_and_batch_nos(
 		self, row: dict, bundle_wise_serial_nos: dict, bundle_wise_batch_nos: dict
 	) -> tuple[list, list]:
-		from erpnext.stock.serial_batch_bundle import get_serial_nos_from_bundle
-
 		serial_nos = get_serial_nos(row.serial_no) if row.serial_no else []
 		batch_nos = self._get_row_batch_nos(row)
 
-		if row.serial_and_batch_bundle:
-			if row.has_serial_no:
-				if bundle_wise_serial_nos:
-					serial_nos = bundle_wise_serial_nos.get(row.serial_and_batch_bundle) or []
-				else:
-					serial_nos = sorted(get_serial_nos_from_bundle(row.serial_and_batch_bundle)) or []
-			elif row.has_batch_no:
-				if bundle_wise_batch_nos:
-					batch_nos = bundle_wise_batch_nos.get(row.serial_and_batch_bundle) or []
-				else:
-					batch_nos = (
-						self._get_bundle_wise_batch_nos(row.serial_and_batch_bundle).get(
-							row.serial_and_batch_bundle
-						)
-						or []
-					)
+		key = self._row_voucher_key(row)
+		if row.has_serial_no and not serial_nos:
+			if bundle_wise_serial_nos:
+				serial_nos = bundle_wise_serial_nos.get(key) or []
+			else:
+				serial_nos = sorted(self._get_bundle_wise_serial_nos(row).get(key, [])) or []
+		elif row.has_batch_no and not batch_nos:
+			if bundle_wise_batch_nos:
+				batch_nos = bundle_wise_batch_nos.get(key) or []
+			else:
+				batch_nos = self._get_bundle_wise_batch_nos(row).get(key, []) or []
 
 		return self.uppercase_serial_nos(serial_nos), batch_nos
+
+	def _row_voucher_key(self, row: dict) -> tuple:
+		is_outward = 1 if flt(row.actual_qty) < 0 else 0
+		return (row.voucher_type, row.voucher_no, row.voucher_detail_no, row.warehouse, is_outward)
+
+	def _scope_query_to_voucher(self, query, table, row: dict):
+		return query.where(
+			(table.voucher_type == row.voucher_type)
+			& (table.voucher_no == row.voucher_no)
+			& (table.voucher_detail_no == row.voucher_detail_no)
+			& (table.warehouse == row.warehouse)
+		)
 
 	def _get_row_batch_nos(self, row: dict) -> list:
 		if not row.batch_no:
@@ -1056,7 +1061,6 @@ class FIFOSlots:
 				sle.serial_no,
 				sle.batch_no,
 				sle.qty_after_transaction,
-				sle.serial_and_batch_bundle,
 				sle.warehouse,
 			)
 			.where(
@@ -1085,74 +1089,80 @@ class FIFOSlots:
 		# _process_stock_ledger_entry needs; fall back to a buffered fetch there. MariaDB streams.
 		return sle_query.run(as_dict=True, as_iterator=frappe.db.db_type != "postgres")
 
-	def _get_bundle_wise_serial_nos(self) -> dict:
-		bundle = frappe.qb.DocType("Serial and Batch Bundle")
-		entry = frappe.qb.DocType("Serial and Batch Entry")
-
+	def _get_bundle_wise_serial_nos(self, row: dict | None = None) -> dict:
+		sll = frappe.qb.DocType("Stock Location Ledger")
 		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59")
 		query = (
-			frappe.qb.from_(bundle)
-			.join(entry)
-			.on(bundle.name == entry.parent)
-			.select(bundle.name, entry.serial_no)
+			frappe.qb.from_(sll)
+			.select(
+				sll.voucher_type,
+				sll.voucher_no,
+				sll.voucher_detail_no,
+				sll.warehouse,
+				sll.is_outward,
+				sll.serial_no,
+			)
 			.where(
-				(bundle.docstatus == 1)
-				& (entry.serial_no.isnotnull())
-				& (bundle.company == self.filters.get("company"))
-				& (bundle.posting_datetime <= to_date)
+				(sll.docstatus == 1)
+				& (sll.serial_no.isnotnull())
+				& (sll.serial_no != "")
+				& (sll.company == self.filters.get("company"))
+				& (sll.posting_datetime <= to_date)
 			)
 		)
 
-		query = self._apply_filter(query, bundle, "item_code")
-
+		query = self._apply_filter(query, sll, "item_code")
 		if self.filters.get("warehouse"):
-			query = self._get_warehouse_conditions(bundle, query)
+			query = self._get_warehouse_conditions(sll, query)
+		if row is not None:
+			query = self._scope_query_to_voucher(query, sll, row)
 
 		bundle_wise_serial_nos = frappe._dict({})
-		for bundle_name, serial_no in query.run():
-			bundle_wise_serial_nos.setdefault(bundle_name, []).append(serial_no)
+		for d in query.run(as_dict=True):
+			key = (d.voucher_type, d.voucher_no, d.voucher_detail_no, d.warehouse, d.is_outward)
+			bundle_wise_serial_nos.setdefault(key, []).append(d.serial_no)
 
 		return bundle_wise_serial_nos
 
-	def _get_bundle_wise_batch_nos(self, sabb_name=None) -> dict:
-		bundle = frappe.qb.DocType("Serial and Batch Bundle")
-		entry = frappe.qb.DocType("Serial and Batch Entry")
+	def _get_bundle_wise_batch_nos(self, row: dict | None = None) -> dict:
+		sll = frappe.qb.DocType("Stock Location Ledger")
 		batch = frappe.qb.DocType("Batch")
-
 		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59")
 		query = (
-			frappe.qb.from_(bundle)
-			.join(entry)
-			.on(bundle.name == entry.parent)
+			frappe.qb.from_(sll)
 			.join(batch)
-			.on(entry.batch_no == batch.name)
+			.on(sll.batch_no == batch.name)
 			.select(
-				bundle.name,
-				entry.batch_no,
+				sll.voucher_type,
+				sll.voucher_no,
+				sll.voucher_detail_no,
+				sll.warehouse,
+				sll.is_outward,
+				sll.batch_no,
 				batch.use_batchwise_valuation,
-				Abs(entry.qty).as_("qty"),
-				Abs(entry.stock_value_difference).as_("stock_value_difference"),
+				Abs(sll.qty).as_("qty"),
+				Abs(sll.stock_value_difference).as_("stock_value_difference"),
 			)
 			.where(
-				(bundle.docstatus == 1)
-				& (entry.batch_no.isnotnull())
-				& (bundle.company == self.filters.get("company"))
-				& (bundle.posting_datetime <= to_date)
+				(sll.docstatus == 1)
+				& (sll.batch_no.isnotnull())
+				& (sll.batch_no != "")
+				& (sll.company == self.filters.get("company"))
+				& (sll.posting_datetime <= to_date)
 			)
 		)
 
-		query = self._apply_filter(query, bundle, "item_code")
-
+		query = self._apply_filter(query, sll, "item_code")
 		if self.filters.get("warehouse"):
-			query = self._get_warehouse_conditions(bundle, query)
-
-		if sabb_name:
-			query = query.where(bundle.name == sabb_name)
+			query = self._get_warehouse_conditions(sll, query)
+		if row is not None:
+			query = self._scope_query_to_voucher(query, sll, row)
 
 		bundle_wise_batch_nos = frappe._dict({})
-		for bundle_name, batch_no, use_batchwise_valuation, qty, stock_value_difference in query.run():
-			bundle_wise_batch_nos.setdefault(bundle_name, []).append(
-				[batch_no.upper(), use_batchwise_valuation, qty, stock_value_difference]
+		for d in query.run(as_dict=True):
+			key = (d.voucher_type, d.voucher_no, d.voucher_detail_no, d.warehouse, d.is_outward)
+			bundle_wise_batch_nos.setdefault(key, []).append(
+				[d.batch_no.upper(), d.use_batchwise_valuation, d.qty, d.stock_value_difference]
 			)
 
 		return bundle_wise_batch_nos

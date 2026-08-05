@@ -97,7 +97,6 @@
   "sequence_id",
   "section_break_jcmx",
   "serial_no",
-  "serial_and_batch_bundle",
   "column_break_swqr",
   "barcode",
   "batch_no",
@@ -444,15 +443,6 @@
    "fieldname": "expected_end_date",
    "fieldtype": "Datetime",
    "label": "Expected End Date"
-  },
-  {
-   "fieldname": "serial_and_batch_bundle",
-   "fieldtype": "Link",
-   "label": "Serial and Batch Bundle",
-   "no_copy": 1,
-   "options": "Serial and Batch Bundle",
-   "print_hide": 1,
-   "read_only": 1
   },
   {
    "depends_on": "process_loss_qty",

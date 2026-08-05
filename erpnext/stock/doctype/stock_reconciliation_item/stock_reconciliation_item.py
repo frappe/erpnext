@@ -21,7 +21,6 @@ class StockReconciliationItem(Document):
 		batch_no: DF.Link | None
 		current_amount: DF.Currency
 		current_qty: DF.Float
-		current_serial_and_batch_bundle: DF.Link | None
 		current_serial_no: DF.LongText | None
 		current_valuation_rate: DF.Currency
 		has_item_scanned: DF.Data | None
@@ -34,7 +33,6 @@ class StockReconciliationItem(Document):
 		qty: DF.Float
 		quantity_difference: DF.ReadOnly | None
 		reconcile_all_serial_batch: DF.Check
-		serial_and_batch_bundle: DF.Link | None
 		serial_no: DF.LongText | None
 		stock_uom: DF.Link | None
 		use_serial_batch_fields: DF.Check

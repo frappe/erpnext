@@ -42,13 +42,13 @@ class TestAvailableStockForPackingItems(ERPNextTestSuite):
 		Bin exists we force the exact value with db.set_value (no controller recompute).
 		This is precisely the column the report reads back.
 		"""
-		name = frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse})
+		name = frappe.db.get_value("Stock Level", {"item_code": item_code, "warehouse": warehouse})
 		if not name:
-			bin_doc = frappe.get_doc(doctype="Bin", item_code=item_code, warehouse=warehouse)
+			bin_doc = frappe.get_doc(doctype="Stock Level", item_code=item_code, warehouse=warehouse)
 			bin_doc.flags.ignore_permissions = True
 			bin_doc.insert()
 			name = bin_doc.name
-		frappe.db.set_value("Bin", name, "projected_qty", projected_qty)
+		frappe.db.set_value("Stock Level", name, "projected_qty", projected_qty)
 		return name
 
 	def make_active_bundle(self, parent, components):

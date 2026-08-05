@@ -56,7 +56,7 @@
    "settings_doctype": "Buying Settings"
   },
   {
-   "setting_field": "auto_create_serial_and_batch_bundle_for_outward",
+   "setting_field": "auto_create_serial_batch_entries_for_outward",
    "settings_doctype": "Stock Settings"
   },
   {

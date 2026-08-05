@@ -24,7 +24,6 @@ class AssetCapitalizationStockItem(Document):
 		parentfield: DF.Data
 		parenttype: DF.Data
 		purchase_receipt_item: DF.Data | None
-		serial_and_batch_bundle: DF.Link | None
 		serial_no: DF.Text | None
 		stock_qty: DF.Float
 		stock_uom: DF.Link

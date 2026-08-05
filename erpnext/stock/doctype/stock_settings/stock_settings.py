@@ -34,7 +34,7 @@ class StockSettings(Document):
 		allow_to_edit_stock_uom_qty_for_stock_entry: DF.Check
 		allow_to_make_quality_inspection_after_purchase_or_delivery: DF.Check
 		allow_uom_with_conversion_rate_defined_in_item: DF.Check
-		auto_create_serial_and_batch_bundle_for_outward: DF.Check
+		auto_create_serial_batch_entries_for_outward: DF.Check
 		auto_indent: DF.Check
 		auto_insert_price_list_rate_if_missing: DF.Check
 		auto_reserve_serial_and_batch: DF.Check
@@ -42,8 +42,9 @@ class StockSettings(Document):
 		auto_reserve_stock_for_sales_order_on_purchase: DF.Check
 		clean_description_html: DF.Check
 		disable_serial_no_and_batch_selector: DF.Check
-		do_not_update_serial_batch_on_creation_of_auto_bundle: DF.Check
+		do_not_update_serial_batch_on_auto_creation: DF.Check
 		do_not_use_batchwise_valuation: DF.Check
+		enable_rack_and_bin: DF.Check
 		enable_serial_and_batch_no_for_item: DF.Check
 		enable_stock_reservation: DF.Check
 		item_group: DF.Link | None
@@ -56,7 +57,7 @@ class StockSettings(Document):
 		reorder_email_notify: DF.Check
 		role_allowed_to_create_edit_back_dated_transactions: DF.Link | None
 		role_allowed_to_over_deliver_receive: DF.Link | None
-		set_serial_and_batch_bundle_naming_based_on_naming_series: DF.Check
+		sample_retention_warehouse: DF.Link | None
 		show_barcode_field: DF.Check
 		stock_auth_role: DF.Link | None
 		stock_frozen_upto: DF.Date | None
@@ -64,7 +65,6 @@ class StockSettings(Document):
 		stock_uom: DF.Link | None
 		update_existing_price_list_rate: DF.Check
 		update_price_list_based_on: DF.Literal["Rate", "Price List Rate"]
-		use_inline_serial_batch_editor: DF.Check
 		use_naming_series: DF.Check
 		use_serial_batch_fields: DF.Check
 		validate_material_transfer_warehouses: DF.Check
@@ -80,7 +80,6 @@ class StockSettings(Document):
 			"set_qty_in_transactions_based_on_serial_no_input",
 			"use_serial_batch_fields",
 			"enable_serial_and_batch_no_for_item",
-			"set_serial_and_batch_bundle_naming_based_on_naming_series",
 		]:
 			frappe.db.set_default(key, self.get(key, ""))
 
@@ -122,7 +121,7 @@ class StockSettings(Document):
 		if not doc_before_save:
 			return
 
-		if not frappe.db.exists("Serial and Batch Bundle", {"docstatus": 1}):
+		if not frappe.db.exists("Stock Location Ledger", {"docstatus": 1}):
 			return
 
 		if doc_before_save.do_not_use_batchwise_valuation and not self.do_not_use_batchwise_valuation:
@@ -144,7 +143,7 @@ class StockSettings(Document):
 			doc_before_save.enable_serial_and_batch_no_for_item
 			and not self.enable_serial_and_batch_no_for_item
 		):
-			if frappe.db.exists("Serial and Batch Bundle", {"docstatus": 1}):
+			if frappe.db.exists("Stock Location Ledger", {"docstatus": 1}):
 				frappe.throw(
 					_(
 						"Cannot disable Serial and Batch No for Item, as there are existing records for serial / batch."

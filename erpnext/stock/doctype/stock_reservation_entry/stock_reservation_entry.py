@@ -9,7 +9,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder import Case
 from frappe.query_builder.functions import Max, Min, Sum
-from frappe.utils import cint, flt, nowdate, nowtime, parse_json
+from frappe.utils import cint, flt, parse_json
 
 from erpnext.stock.utils import get_or_make_bin, get_stock_balance
 
@@ -23,7 +23,9 @@ class StockReservationEntry(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.stock.doctype.serial_and_batch_entry.serial_and_batch_entry import SerialandBatchEntry
+		from erpnext.stock.doctype.stock_reservation_serial_batch.stock_reservation_serial_batch import (
+			StockReservationSerialBatch,
+		)
 
 		amended_from: DF.Link | None
 		available_qty: DF.Float
@@ -47,7 +49,7 @@ class StockReservationEntry(Document):
 		project: DF.Link | None
 		reservation_based_on: DF.Literal["Qty", "Serial and Batch"]
 		reserved_qty: DF.Float
-		sb_entries: DF.Table[SerialandBatchEntry]
+		sb_entries: DF.Table[StockReservationSerialBatch]
 		status: DF.Literal[
 			"Draft",
 			"Partially Reserved",
@@ -524,7 +526,7 @@ class StockReservationEntry(Document):
 		"""Updates `Reserved Stock` in Bin."""
 
 		bin_name = get_or_make_bin(self.item_code, self.warehouse)
-		bin_doc = frappe.get_cached_doc("Bin", bin_name)
+		bin_doc = frappe.get_cached_doc("Stock Level", bin_name)
 		bin_doc.update_reserved_stock()
 
 	def update_status(self, status: str | None = None, update_modified: bool = True) -> None:
@@ -720,7 +722,7 @@ def get_available_qty_to_reserve(
 		# FIRST reservations, when no SRE rows exist yet); postgres has no gap locks, so gate on the
 		# Bin row (exists once there is stock), then lock the matching SREs in a plain SELECT.
 		if frappe.db.db_type == "postgres":
-			bin_table = frappe.qb.DocType("Bin")
+			bin_table = frappe.qb.DocType("Stock Level")
 			(
 				frappe.qb.from_(bin_table)
 				.select(bin_table.name)
@@ -751,7 +753,7 @@ def get_available_serial_nos_to_reserve(
 ) -> list[tuple]:
 	"""Returns Available Serial Nos to Reserve (Available Serial Nos - Reserved Serial Nos)` for Item, Warehouse and Batch combination."""
 
-	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+	from erpnext.stock.serial_batch_bundle import (
 		get_available_serial_nos,
 	)
 
@@ -771,7 +773,7 @@ def get_available_serial_nos_to_reserve(
 		available_serial_nos_list = [tuple(d.values()) for d in available_serial_nos]
 
 		sre = frappe.qb.DocType("Stock Reservation Entry")
-		sb_entry = frappe.qb.DocType("Serial and Batch Entry")
+		sb_entry = frappe.qb.DocType("Stock Reservation Serial Batch")
 		query = (
 			frappe.qb.from_(sre)
 			.left_join(sb_entry)
@@ -961,7 +963,7 @@ def get_sre_reserved_serial_nos_details(
 	"""Returns a dict of `Serial No` reserved in Stock Reservation Entry. The dict is like {serial_no: sre_name, ...}"""
 
 	sre = frappe.qb.DocType("Stock Reservation Entry")
-	sb_entry = frappe.qb.DocType("Serial and Batch Entry")
+	sb_entry = frappe.qb.DocType("Stock Reservation Serial Batch")
 	query = (
 		frappe.qb.from_(sre)
 		.inner_join(sb_entry)
@@ -987,7 +989,7 @@ def get_sre_reserved_batch_nos_details(item_code: str, warehouse: str, batch_nos
 	"""Returns a dict of `Batch Qty` reserved in Stock Reservation Entry. The dict is like {batch_no: qty, ...}"""
 
 	sre = frappe.qb.DocType("Stock Reservation Entry")
-	sb_entry = frappe.qb.DocType("Serial and Batch Entry")
+	sb_entry = frappe.qb.DocType("Stock Reservation Serial Batch")
 	query = (
 		frappe.qb.from_(sre)
 		.inner_join(sb_entry)
@@ -1047,7 +1049,7 @@ def get_serial_batch_entries_for_voucher(sre_names: list[str]) -> list[dict]:
 	"""Returns a list of `Serial and Batch Entries` for the provided voucher."""
 
 	sre = frappe.qb.DocType("Stock Reservation Entry")
-	sb_entry = frappe.qb.DocType("Serial and Batch Entry")
+	sb_entry = frappe.qb.DocType("Stock Reservation Serial Batch")
 
 	return (
 		frappe.qb.from_(sre)
@@ -1064,30 +1066,94 @@ def get_serial_batch_entries_for_voucher(sre_names: list[str]) -> list[dict]:
 	).run(as_dict=True)
 
 
-def get_ssb_bundle_for_voucher(sre_list) -> object:
-	"""Returns a new `Serial and Batch Bundle` against the provided SRE."""
+def get_reserved_serial_batch_for_delivery(
+	so_field: str, table_name: str, doc: object, row: object
+) -> tuple[list, dict] | None:
+	"""Resolves the exact serial/batch composition reserved against a Sales Order Item (or, for
+	a packed item, its Sales Order Packed Item) straight from the Stock Reservation Entry.
 
-	sb_entries = get_serial_batch_entries_for_voucher([sre.name for sre in sre_list])
+	Used only as a fallback when the row itself has no `serial_no`/`batch_no` set - i.e. the
+	reservation spans more batches than a single `batch_no` Link field can hold, so the mapper
+	could not preview it. Resolving this way (through the persisted `so_detail` link) works
+	regardless of a client round-trip between mapping the document and submitting it, unlike a
+	runtime attribute set at mapping time."""
 
-	if sb_entries:
-		bundle = frappe.new_doc("Serial and Batch Bundle")
-		bundle.type_of_transaction = "Outward"
-		bundle.voucher_type = "Delivery Note"
-		bundle.posting_date = nowdate()
-		bundle.posting_time = nowtime()
+	so_no, so_detail = _get_so_link_for_row(so_field, table_name, doc, row)
+	if not so_no or not so_detail:
+		return None
 
-		for field in ("item_code", "warehouse", "has_serial_no", "has_batch_no"):
-			setattr(bundle, field, sre_list[0][field])
+	sre_list = frappe.get_all(
+		"Stock Reservation Entry",
+		filters={
+			"docstatus": 1,
+			"voucher_type": "Sales Order",
+			"voucher_no": so_no,
+			"voucher_detail_no": so_detail,
+			"warehouse": row.warehouse,
+			"reservation_based_on": "Serial and Batch",
+		},
+		fields=["name", "has_serial_no"],
+		order_by="creation",
+	)
+	if not sre_list:
+		return None
 
-		for sb_entry in sb_entries:
-			bundle.append("entries", sb_entry)
+	# get_serial_batch_entries_for_voucher already scopes to undelivered SREs/entries and
+	# returns each entry's remaining (qty - delivered_qty), so a partially delivered
+	# reservation is naturally capped here without an extra delivered_qty filter above.
+	entries = get_serial_batch_entries_for_voucher([d.name for d in sre_list])
+	if not entries:
+		return None
 
-		if frappe.flags.in_test:
-			bundle.flags.ignore_mandatory = True
+	return _cap_entries_to_qty(entries, row, sre_list[0].has_serial_no)
 
-		bundle.save()
 
-		return bundle
+def _get_so_link_for_row(so_field: str, table_name: str, doc: object, row: object) -> tuple[str, str]:
+	"""Returns (Sales Order name, Sales Order Item/Packed Item name) that `row` fulfills."""
+
+	if table_name != "packed_items":
+		return row.get(so_field), row.get("so_detail")
+
+	parent_item = doc.get("items", {"name": row.parent_detail_docname})
+	if not parent_item:
+		return None, None
+
+	parent_item = parent_item[0]
+	so_detail = frappe.db.get_value(
+		"Packed Item",
+		{
+			"parent_detail_docname": parent_item.get("so_detail"),
+			"parent_item": parent_item.item_code,
+			"item_code": row.item_code,
+			"warehouse": row.warehouse,
+		},
+		"name",
+	)
+	return parent_item.get(so_field), so_detail
+
+
+def _cap_entries_to_qty(entries: list, row: object, has_serial_no: bool) -> tuple[list, dict] | None:
+	"""Caps reserved serial/batch entries to the qty this row is actually delivering - a
+	partially delivered reservation can hold more undelivered qty than this one delivery."""
+
+	qty_to_be_delivered = abs(flt(row.get("stock_qty") or row.get("qty")))
+	serial_nos, batch_qty, picked_qty = [], defaultdict(float), 0
+
+	for entry in entries:
+		if picked_qty >= qty_to_be_delivered:
+			break
+
+		qty = 1 if has_serial_no else min(abs(entry.qty), qty_to_be_delivered - picked_qty)
+		if entry.serial_no:
+			serial_nos.append(entry.serial_no)
+		elif entry.batch_no:
+			batch_qty[entry.batch_no] += qty
+		picked_qty += qty
+
+	if not serial_nos and not batch_qty:
+		return None
+
+	return serial_nos, dict(batch_qty)
 
 
 def has_reserved_stock(voucher_type: str, voucher_no: str, voucher_detail_no: str | None = None) -> bool:
@@ -1232,33 +1298,42 @@ class StockReservation:
 
 			sre.save()
 
-			if item.get("serial_and_batch_bundles"):
+			if item.get("voucher_detail_nos"):
 				sre.reservation_based_on = "Serial and Batch"
-				self.set_serial_batch(sre, item.serial_and_batch_bundles)
+				self.set_serial_batch(
+					sre, item.get("from_voucher_type"), item.get("from_voucher_no"), item.voucher_detail_nos
+				)
 
 			sre.submit()
 			is_sre_created = True
 
 		return is_sre_created
 
-	def set_serial_batch(self, sre, serial_batch_bundles):
-		bundle_details = frappe.get_all(
-			"Serial and Batch Entry",
-			fields=["serial_no", "batch_no", "qty"],
-			filters={"parent": ("in", serial_batch_bundles)},
-			order_by="creation",
-		)
+	def set_serial_batch(self, sre, voucher_type, voucher_no, voucher_detail_nos):
+		from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import get_voucher_entries
 
-		for detail in bundle_details:
-			sre.append(
-				"sb_entries",
-				{
-					"serial_no": detail.serial_no,
-					"batch_no": detail.batch_no,
-					"qty": abs(detail.qty),
-					"warehouse": sre.warehouse,
-				},
+		for voucher_detail_no in voucher_detail_nos:
+			entries = get_voucher_entries(
+				voucher_type,
+				voucher_no,
+				voucher_detail_no,
+				warehouse=sre.warehouse,
+				fields=["serial_no", "batch_no", "qty"],
 			)
+			if not entries:
+				entries = get_voucher_entries(
+					voucher_type, voucher_no, voucher_detail_no, fields=["serial_no", "batch_no", "qty"]
+				)
+			for detail in entries:
+				sre.append(
+					"sb_entries",
+					{
+						"serial_no": detail.serial_no,
+						"batch_no": detail.batch_no,
+						"qty": abs(detail.qty),
+						"warehouse": sre.warehouse,
+					},
+				)
 
 	def throw_stock_not_exists_error(self, idx, item_code, warehouse):
 		if idx:
@@ -1486,7 +1561,7 @@ class StockReservation:
 			docnames = [docnames]
 
 		sre = frappe.qb.DocType("Stock Reservation Entry")
-		sabb_entry = frappe.qb.DocType("Serial and Batch Entry")
+		sabb_entry = frappe.qb.DocType("Stock Reservation Serial Batch")
 
 		query = (
 			frappe.qb.from_(sre)
@@ -1648,7 +1723,6 @@ def create_stock_reservation_entries_for_so_items(
 			)
 			so_item.from_voucher_no = item.get("from_voucher_no")
 			so_item.from_voucher_detail_no = item.get("from_voucher_detail_no")
-			so_item.serial_and_batch_bundle = item.get("serial_and_batch_bundle")
 
 			items.append(so_item)
 
@@ -1784,27 +1858,38 @@ def create_stock_reservation_entries_for_so_items(
 			sre.from_voucher_no = item.from_voucher_no
 			sre.from_voucher_detail_no = item.from_voucher_detail_no
 
-		if item.get("serial_and_batch_bundle"):
-			sbb = frappe.get_doc("Serial and Batch Bundle", item.serial_and_batch_bundle)
-			sre.reservation_based_on = "Serial and Batch"
+		if from_voucher_type and (has_serial_no or has_batch_no):
+			from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import get_voucher_entries
 
-			index, picked_qty = 0, 0
-			while index < len(sbb.entries) and picked_qty < qty_to_be_reserved:
-				entry = sbb.entries[index]
-				qty = 1 if has_serial_no else min(abs(entry.qty), qty_to_be_reserved - picked_qty)
+			source_entries = get_voucher_entries(
+				from_voucher_type,
+				item.from_voucher_no,
+				item.from_voucher_detail_no,
+				item.warehouse,
+				fields=["serial_no", "batch_no", "qty", "warehouse"],
+				is_outward=1 if from_voucher_type == "Pick List" else 0,
+			)
 
-				sre.append(
-					"sb_entries",
-					{
-						"serial_no": entry.serial_no,
-						"batch_no": entry.batch_no,
-						"qty": qty,
-						"warehouse": entry.warehouse,
-					},
-				)
+			if source_entries:
+				sre.reservation_based_on = "Serial and Batch"
 
-				index += 1
-				picked_qty += qty
+				index, picked_qty = 0, 0
+				while index < len(source_entries) and picked_qty < qty_to_be_reserved:
+					entry = source_entries[index]
+					qty = 1 if has_serial_no else min(abs(entry.qty), qty_to_be_reserved - picked_qty)
+
+					sre.append(
+						"sb_entries",
+						{
+							"serial_no": entry.serial_no,
+							"batch_no": entry.batch_no,
+							"qty": qty,
+							"warehouse": entry.warehouse,
+						},
+					)
+
+					index += 1
+					picked_qty += qty
 
 		sre.save()
 		sre.submit()
@@ -1908,7 +1993,7 @@ def get_stock_reservation_entries_for_voucher(
 
 def update_serial_batch_delivered_qty(row, name, is_cancelled=False):
 	if row.serial_nos:
-		doctype = frappe.qb.DocType("Serial and Batch Entry")
+		doctype = frappe.qb.DocType("Stock Reservation Serial Batch")
 		query = (
 			frappe.qb.update(doctype)
 			.set(doctype.delivered_qty, (doctype.delivered_qty + (1 if not is_cancelled else -1)))
@@ -1919,7 +2004,7 @@ def update_serial_batch_delivered_qty(row, name, is_cancelled=False):
 
 	elif row.batches:
 		for batch_no, qty in row.batches.items():
-			doctype = frappe.qb.DocType("Serial and Batch Entry")
+			doctype = frappe.qb.DocType("Stock Reservation Serial Batch")
 			query = (
 				frappe.qb.update(doctype)
 				.set(doctype.delivered_qty, (doctype.delivered_qty + (qty if not is_cancelled else -1 * qty)))
@@ -1931,7 +2016,7 @@ def update_serial_batch_delivered_qty(row, name, is_cancelled=False):
 
 def get_reserved_materials(voucher_no):
 	doctype = frappe.qb.DocType("Stock Reservation Entry")
-	serial_batch_doc = frappe.qb.DocType("Serial and Batch Entry")
+	serial_batch_doc = frappe.qb.DocType("Stock Reservation Serial Batch")
 
 	query = (
 		frappe.qb.from_(doctype)

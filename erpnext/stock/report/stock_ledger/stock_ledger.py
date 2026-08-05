@@ -80,7 +80,9 @@ def execute(filters=None):
 		item_detail = item_details[sle.item_code]
 
 		sle.update(item_detail)
-		if bundle_info := bundle_details.get(sle.serial_and_batch_bundle):
+		bundle_key = (sle.voucher_type, sle.voucher_no, sle.voucher_detail_no, sle.warehouse)
+		bundle_info = bundle_details.get(bundle_key)
+		if bundle_info:
 			data.extend(get_segregated_bundle_entries(sle, bundle_info, batch_balance_dict, filters))
 			continue
 
@@ -232,27 +234,34 @@ def get_segregated_bundle_entries(sle, bundle_details, batch_balance_dict, filte
 
 
 def get_serial_batch_bundle_details(sl_entries, filters=None):
-	bundle_details = []
-	for sle in sl_entries:
-		if sle.serial_and_batch_bundle:
-			bundle_details.append(sle.serial_and_batch_bundle)
-
-	if not bundle_details:
+	voucher_nos = list({sle.voucher_no for sle in sl_entries})
+	if not voucher_nos:
 		return frappe._dict({})
 
-	query_filers = {"parent": ("in", bundle_details)}
+	query_filers = {"voucher_no": ("in", voucher_nos), "docstatus": 1}
 	if filters.get("batch_no"):
 		query_filers["batch_no"] = filters.batch_no
 
 	_bundle_details = frappe._dict({})
 	batch_entries = frappe.get_all(
-		"Serial and Batch Entry",
+		"Stock Location Ledger",
 		filters=query_filers,
-		fields=["parent", "qty", "incoming_rate", "stock_value_difference", "batch_no", "serial_no"],
-		order_by="parent, idx",
+		fields=[
+			"voucher_type",
+			"voucher_no",
+			"voucher_detail_no",
+			"warehouse",
+			"qty",
+			"incoming_rate",
+			"stock_value_difference",
+			"batch_no",
+			"serial_no",
+		],
+		order_by="voucher_no, voucher_detail_no, idx",
 	)
 	for entry in batch_entries:
-		_bundle_details.setdefault(entry.parent, []).append(entry)
+		key = (entry.voucher_type, entry.voucher_no, entry.voucher_detail_no, entry.warehouse)
+		_bundle_details.setdefault(key, []).append(entry)
 
 	return _bundle_details
 
@@ -410,14 +419,6 @@ def get_columns(filters):
 				"width": 100,
 			},
 			{
-				"label": _("Serial and Batch Bundle"),
-				"fieldname": "serial_and_batch_bundle",
-				"fieldtype": "Link",
-				"options": "Serial and Batch Bundle",
-				"width": 150,
-				"hidden": not filters.get("segregate_serial_batch_bundle"),
-			},
-			{
 				"label": _("Batch"),
 				"fieldname": "batch_no",
 				"fieldtype": "Link",
@@ -473,8 +474,8 @@ def get_stock_ledger_entries(filters, items):
 			sle.voucher_type,
 			sle.qty_after_transaction,
 			sle.stock_value_difference,
-			sle.serial_and_batch_bundle,
 			sle.voucher_no,
+			sle.voucher_detail_no,
 			sle.stock_value,
 			sle.batch_no,
 			sle.serial_no,
@@ -500,12 +501,10 @@ def get_stock_ledger_entries(filters, items):
 			query = query.where(sle[field] == filters.get(field))
 
 	if filters.get("batch_no"):
-		bundles = get_serial_and_batch_bundles(filters)
+		detail_nos = get_serial_batch_voucher_detail_nos(filters)
 
-		if bundles:
-			query = query.where(
-				(sle.serial_and_batch_bundle.isin(bundles)) | (sle.batch_no == filters.batch_no)
-			)
+		if detail_nos:
+			query = query.where((sle.voucher_detail_no.isin(detail_nos)) | (sle.batch_no == filters.batch_no))
 		else:
 			query = query.where(sle.batch_no == filters.batch_no)
 
@@ -514,24 +513,17 @@ def get_stock_ledger_entries(filters, items):
 	return query.run(as_dict=True)
 
 
-def get_serial_and_batch_bundles(filters):
-	SBB = frappe.qb.DocType("Serial and Batch Bundle")
-	SBE = frappe.qb.DocType("Serial and Batch Entry")
+def get_serial_batch_voucher_detail_nos(filters):
+	sll = frappe.qb.DocType("Stock Location Ledger")
 
 	query = (
-		frappe.qb.from_(SBE)
-		.inner_join(SBB)
-		.on(SBE.parent == SBB.name)
-		.select(SBE.parent)
-		.where(
-			(SBB.docstatus == 1)
-			& (SBB.has_batch_no == 1)
-			& (SBB.voucher_no.notnull())
-			& (SBE.batch_no == filters.batch_no)
-		)
+		frappe.qb.from_(sll)
+		.select(sll.voucher_detail_no)
+		.distinct()
+		.where((sll.docstatus == 1) & (sll.voucher_no.notnull()) & (sll.batch_no == filters.batch_no))
 	)
 
-	return query.run(pluck=SBE.parent)
+	return query.run(pluck=sll.voucher_detail_no)
 
 
 def get_inventory_dimension_fields():
@@ -644,11 +636,16 @@ def get_opening_balance_from_batch(filters, columns, sl_entries):
 			opening_data[field] = 0.0
 
 	table = frappe.qb.DocType("Stock Ledger Entry")
-	sabb_table = frappe.qb.DocType("Serial and Batch Entry")
+	sabb_table = frappe.qb.DocType("Stock Location Ledger")
 	query = (
 		frappe.qb.from_(table)
 		.inner_join(sabb_table)
-		.on(table.serial_and_batch_bundle == sabb_table.parent)
+		.on(
+			(sabb_table.voucher_type == table.voucher_type)
+			& (sabb_table.voucher_no == table.voucher_no)
+			& (sabb_table.voucher_detail_no == table.voucher_detail_no)
+			& (sabb_table.warehouse == table.warehouse)
+		)
 		.select(
 			Sum(sabb_table.qty).as_("qty"),
 			Sum(sabb_table.stock_value_difference).as_("stock_value"),

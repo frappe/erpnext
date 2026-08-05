@@ -761,7 +761,6 @@ class GrossProfitGenerator:
 				packed_item_row = row.copy()
 				packed_item_row.warehouse = packed_item.warehouse
 				packed_item_row.qty = packed_item.total_qty * -1
-				packed_item_row.serial_and_batch_bundle = packed_item.serial_and_batch_bundle
 				buying_amount += self.get_buying_amount(packed_item_row, packed_item.item_code)
 
 		return flt(buying_amount, self.currency_precision)
@@ -869,9 +868,6 @@ class GrossProfitGenerator:
 					"item_code": item_code,
 				}
 			)
-
-			if row.serial_and_batch_bundle:
-				args.update({"serial_and_batch_bundle": row.serial_and_batch_bundle})
 
 			average_buying_rate = get_incoming_rate(args)
 			self.average_buying_rate[key] = flt(average_buying_rate)
@@ -985,7 +981,6 @@ class GrossProfitGenerator:
 			SalesInvoiceItem.name.as_("item_row"),
 			SalesInvoice.is_return,
 			SalesInvoiceItem.cost_center,
-			SalesInvoiceItem.serial_and_batch_bundle,
 			SalesInvoiceItem.delivered_by_supplier,
 		)
 
@@ -1197,7 +1192,6 @@ class GrossProfitGenerator:
 				"is_return": row.is_return,
 				"cost_center": row.cost_center,
 				"invoice": row.parent,
-				"serial_and_batch_bundle": row.serial_and_batch_bundle,
 			}
 		)
 
@@ -1249,7 +1243,6 @@ class GrossProfitGenerator:
 				pki.rate,
 				(pki.rate * pki.qty).as_("base_amount"),
 				pki.parent_detail_docname,
-				pki.serial_and_batch_bundle,
 			)
 			.where(pki.docstatus == 1)
 		)

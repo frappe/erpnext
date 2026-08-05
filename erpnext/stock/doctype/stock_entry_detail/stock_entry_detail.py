@@ -70,7 +70,6 @@ class StockEntryDetail(Document):
 		sample_quantity: DF.Int
 		scio_detail: DF.Data | None
 		sco_rm_detail: DF.Data | None
-		serial_and_batch_bundle: DF.Link | None
 		serial_no: DF.Text | None
 		set_basic_rate_manually: DF.Check
 		ste_detail: DF.Data | None
@@ -203,25 +202,3 @@ class StockEntryDetail(Document):
 
 		# get actual stock at source warehouse
 		self.actual_qty = previous_sle.get("qty_after_transaction") or 0
-
-	def delink_asset_repair_sabb(self, asset_repair):
-		if not self.serial_and_batch_bundle:
-			return
-
-		voucher_detail_no = frappe.db.get_value(
-			"Asset Repair Consumed Item",
-			{"parent": asset_repair, "serial_and_batch_bundle": self.serial_and_batch_bundle},
-			"name",
-		)
-
-		if not voucher_detail_no:
-			return
-
-		doc = frappe.get_doc("Serial and Batch Bundle", self.serial_and_batch_bundle)
-		doc.db_set(
-			{
-				"voucher_type": "Asset Repair",
-				"voucher_no": asset_repair,
-				"voucher_detail_no": voucher_detail_no,
-			}
-		)

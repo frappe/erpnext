@@ -98,7 +98,7 @@ def get_stock_summary(
 
 def get_stock_details(warehouse, start=0, item_code=None, item_group=None):
 	item_table = frappe.qb.DocType("Item")
-	bin_table = frappe.qb.DocType("Bin")
+	bin_table = frappe.qb.DocType("Stock Level")
 
 	query = (
 		frappe.qb.from_(bin_table)

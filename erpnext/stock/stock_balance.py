@@ -19,7 +19,7 @@ def repost(only_actual=False, allow_negative_stock=False, allow_zero_rate=False,
 		existing_allow_negative_stock = frappe.get_single_value("Stock Settings", "allow_negative_stock")
 		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 1)
 
-	item_warehouses = frappe.get_all("Bin", fields=["item_code", "warehouse"], as_list=True)
+	item_warehouses = frappe.get_all("Stock Level", fields=["item_code", "warehouse"], as_list=True)
 	item_warehouses += frappe.get_all(
 		"Stock Ledger Entry", fields=["item_code", "warehouse"], distinct=True, as_list=True
 	)
@@ -296,7 +296,7 @@ def set_stock_balance_as_per_serial_no(
 	if not posting_time:
 		posting_time = nowtime()
 
-	bin_dt = frappe.qb.DocType("Bin")
+	bin_dt = frappe.qb.DocType("Stock Level")
 	item = frappe.qb.DocType("Item")
 	query = (
 		frappe.qb.from_(bin_dt)

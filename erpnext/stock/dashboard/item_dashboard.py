@@ -17,7 +17,7 @@ def get_data(
 	sort_order: str = "desc",
 ):
 	"""Return data to render the item dashboard"""
-	if not frappe.has_permission("Bin", "read"):
+	if not frappe.has_permission("Stock Level", "read"):
 		return []
 
 	filters = []
@@ -54,7 +54,7 @@ def get_data(
 		return []
 
 	items = frappe.db.get_all(
-		"Bin",
+		"Stock Level",
 		fields=[
 			"item_code",
 			"warehouse",

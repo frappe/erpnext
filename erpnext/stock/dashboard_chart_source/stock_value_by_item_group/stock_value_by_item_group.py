@@ -39,7 +39,7 @@ def get(
 
 
 def get_stock_value_by_item_group(company):
-	doctype = frappe.qb.DocType("Bin")
+	doctype = frappe.qb.DocType("Stock Level")
 	item_doctype = frappe.qb.DocType("Item")
 
 	warehouse_filters = [["is_group", "=", 0]]

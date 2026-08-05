@@ -53,8 +53,8 @@ class TestNegativeBatchReport(ERPNextTestSuite):
 		batch = self.receive_batch(item, 10, "2026-06-10")
 
 		sle = frappe.get_all("Stock Ledger Entry", filters={"item_code": item}, pluck="name")[0]
-		entry = frappe.get_all("Serial and Batch Entry", filters={"batch_no": batch}, pluck="name")[0]
-		frappe.db.set_value("Serial and Batch Entry", entry, "qty", -3)
+		entry = frappe.get_all("Stock Location Ledger", filters={"batch_no": batch}, pluck="name")[0]
+		frappe.db.set_value("Stock Location Ledger", entry, "qty", -3)
 		frappe.db.set_value("Stock Ledger Entry", sle, {"actual_qty": -3, "qty_after_transaction": -3})
 
 		data = self.run_report(item)

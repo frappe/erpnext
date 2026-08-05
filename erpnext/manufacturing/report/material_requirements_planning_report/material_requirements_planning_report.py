@@ -129,7 +129,7 @@ class MaterialRequirementsPlanningReport:
 
 		_bin_details = frappe._dict({})
 
-		doctype = frappe.qb.DocType("Bin")
+		doctype = frappe.qb.DocType("Stock Level")
 		query = (
 			frappe.qb.from_(doctype)
 			.select(

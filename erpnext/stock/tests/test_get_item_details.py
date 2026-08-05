@@ -121,6 +121,9 @@ class TestGetItemDetail(ERPNextTestSuite):
 		self.assertEqual(dn.items[0].rate, 75)
 
 		# Test 2 : On saving the DN, item's batch will be fetched and rate will be updated from Item Price
+		# (batch auto-fetch on save is part of the use_serial_batch_fields flow, which is no longer
+		# the sitewide default)
+		dn.items[0].use_serial_batch_fields = 1
 		dn.save()
 		self.assertEqual(dn.items[0].batch_no, "BATCH01")
 		self.assertEqual(dn.items[0].rate, 50)

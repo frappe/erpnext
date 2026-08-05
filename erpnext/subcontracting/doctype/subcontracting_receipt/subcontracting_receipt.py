@@ -165,6 +165,9 @@ class SubcontractingReceipt(SubcontractingController):
 		self.set_supplied_items_cost_center()
 		self.set_supplied_items_inventory_dimensions()
 
+	def on_update(self):
+		self.flush_deferred_supplied_ledgers()
+
 	def on_submit(self):
 		self.validate_closed_subcontracting_order()
 		self.validate_bom_required_qty()
@@ -184,17 +187,11 @@ class SubcontractingReceipt(SubcontractingController):
 		self.auto_create_purchase_receipt()
 		self.update_job_card()
 
-	def on_update(self):
-		for table_field in ["items", "supplied_items"]:
-			if self.get(table_field):
-				self.set_serial_and_batch_bundle(table_field)
-
 	def on_cancel(self):
 		self.ignore_linked_doctypes = (
 			"GL Entry",
 			"Stock Ledger Entry",
 			"Repost Item Valuation",
-			"Serial and Batch Bundle",
 		)
 		self.validate_closed_subcontracting_order()
 		self.update_status_updater_args()
@@ -365,10 +362,7 @@ class SubcontractingReceipt(SubcontractingController):
 			== "BOM"
 			and self.supplied_items
 		):
-			if not any(
-				item.serial_and_batch_bundle or item.batch_no or item.serial_no
-				for item in self.supplied_items
-			):
+			if not any(item.batch_no or item.serial_no for item in self.supplied_items):
 				self.supplied_items = []
 			else:
 				self.update_rate_for_supplied_items()

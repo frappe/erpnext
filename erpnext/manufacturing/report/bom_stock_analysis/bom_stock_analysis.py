@@ -192,7 +192,7 @@ def batch_fetch_purchase_rates(bom_data):
 
 def get_stock_qty_by_item(filters):
 	"""One row per item_code, so joining it to BOM Item cannot multiply either side's sum."""
-	bin = frappe.qb.DocType("Bin")
+	bin = frappe.qb.DocType("Stock Level")
 
 	query = (
 		frappe.qb.from_(bin)
@@ -322,7 +322,7 @@ def get_manufacturer_records():
 def get_producible_fg_items(filters):
 	BOM_ITEM = frappe.qb.DocType("BOM Item")
 	BOM = frappe.qb.DocType("BOM")
-	BIN = frappe.qb.DocType("Bin")
+	BIN = frappe.qb.DocType("Stock Level")
 	WH = frappe.qb.DocType("Warehouse")
 
 	warehouse = filters.get("warehouse")

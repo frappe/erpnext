@@ -17,7 +17,7 @@ def execute():
 
 def delete_broken_bins():
 	# delete useless bins
-	frappe.db.sql("delete from `tabBin` where item_code is null or warehouse is null")
+	frappe.db.sql("delete from `tabStock Level` where item_code is null or warehouse is null")
 
 
 def delete_and_patch_duplicate_bins():
@@ -39,7 +39,7 @@ def delete_and_patch_duplicate_bins():
 		item_code = duplicate_bin.item_code
 		warehouse = duplicate_bin.warehouse
 		existing_bins = frappe.get_list(
-			"Bin",
+			"Stock Level",
 			filters={"item_code": item_code, "warehouse": warehouse},
 			fields=["name"],
 			order_by="creation",
@@ -49,7 +49,7 @@ def delete_and_patch_duplicate_bins():
 		existing_bins.pop()
 
 		for broken_bin in existing_bins:
-			frappe.delete_doc("Bin", broken_bin.name)
+			frappe.delete_doc("Stock Level", broken_bin.name)
 
 		qty_dict = {
 			"reserved_qty": get_reserved_qty(item_code, warehouse),

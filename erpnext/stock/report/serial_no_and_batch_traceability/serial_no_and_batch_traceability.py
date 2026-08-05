@@ -145,30 +145,26 @@ class ReportData:
 		return source_data
 
 	def get_data_from_sabb(self, row):
-		sabb = frappe.qb.DocType("Serial and Batch Bundle")
-		sabb_entry = frappe.qb.DocType("Serial and Batch Entry")
+		sll = frappe.qb.DocType("Stock Location Ledger")
 
 		query = (
-			frappe.qb.from_(sabb)
-			.inner_join(sabb_entry)
-			.on(sabb.name == sabb_entry.parent)
+			frappe.qb.from_(sll)
 			.select(
-				sabb_entry.qty,
-				sabb_entry.warehouse,
-				sabb_entry.posting_datetime,
+				sll.qty,
+				sll.warehouse,
+				sll.posting_datetime,
 			)
 			.where(
-				(sabb.voucher_type == row.reference_doctype)
-				& (sabb.voucher_no == row.reference_name)
-				& (sabb.is_cancelled == 0)
-				& (sabb_entry.docstatus == 1)
+				(sll.voucher_type == row.reference_doctype)
+				& (sll.voucher_no == row.reference_name)
+				& (sll.docstatus == 1)
 			)
 		)
 
 		if row.batch_no:
-			query = query.where(sabb_entry.batch_no == row.batch_no)
+			query = query.where(sll.batch_no == row.batch_no)
 		else:
-			query = query.where(sabb_entry.serial_no == row.serial_no)
+			query = query.where(sll.serial_no == row.serial_no)
 
 		results = query.run(as_dict=True)
 		return results[0] if results else {}
@@ -279,16 +275,17 @@ class ReportData:
 	def get_materials(self, sabb_data):
 		stock_entry = frappe.qb.DocType("Stock Entry")
 		stock_entry_detail = frappe.qb.DocType("Stock Entry Detail")
-		sabb_entry = frappe.qb.DocType("Serial and Batch Entry")
+		sll = frappe.qb.DocType("Stock Location Ledger")
 
 		query = (
 			frappe.qb.from_(stock_entry)
 			.inner_join(stock_entry_detail)
 			.on(stock_entry.name == stock_entry_detail.parent)
-			.left_join(sabb_entry)
+			.left_join(sll)
 			.on(
-				(stock_entry_detail.serial_and_batch_bundle == sabb_entry.parent)
-				& (sabb_entry.docstatus == 1)
+				(sll.voucher_no == stock_entry.name)
+				& (sll.voucher_detail_no == stock_entry_detail.name)
+				& (sll.docstatus == 1)
 			)
 			.select(
 				stock_entry_detail.s_warehouse.as_("warehouse"),
@@ -306,9 +303,9 @@ class ReportData:
 					)
 					* sabb_data.qty
 				).as_("qty"),
-				sabb_entry.batch_no,
-				sabb_entry.serial_no,
-				sabb_entry.qty.as_("quantity"),
+				sll.batch_no,
+				sll.serial_no,
+				sll.qty.as_("quantity"),
 			)
 			.where(
 				(stock_entry.docstatus == 1)
@@ -339,33 +336,29 @@ class ReportData:
 		if not type_of_transaction:
 			type_of_transaction = "Outward"
 
-		SABB = frappe.qb.DocType("Serial and Batch Bundle")
-		SABE = frappe.qb.DocType("Serial and Batch Entry")
+		sll = frappe.qb.DocType("Stock Location Ledger")
+		item = frappe.qb.DocType("Item")
 
 		query = (
-			frappe.qb.from_(SABB)
-			.inner_join(SABE)
-			.on(SABB.name == SABE.parent)
+			frappe.qb.from_(sll)
+			.left_join(item)
+			.on(sll.item_code == item.name)
 			.select(
-				SABB.voucher_type.as_("reference_doctype"),
-				SABB.voucher_no.as_("reference_name"),
-				SABE.batch_no,
-				SABE.serial_no,
-				SABE.qty,
-				SABB.item_code,
-				SABB.item_name,
-				SABB.posting_datetime,
-				SABB.warehouse,
+				sll.voucher_type.as_("reference_doctype"),
+				sll.voucher_no.as_("reference_name"),
+				sll.batch_no,
+				sll.serial_no,
+				sll.qty,
+				sll.item_code,
+				item.item_name,
+				sll.posting_datetime,
+				sll.warehouse,
 			)
-			.where(
-				(SABB.is_cancelled == 0)
-				& (SABE.docstatus == 1)
-				& (SABB.type_of_transaction == type_of_transaction)
-			)
-			.orderby(SABB.posting_datetime)
+			.where((sll.docstatus == 1) & (sll.type_of_transaction == type_of_transaction))
+			.orderby(sll.posting_datetime)
 		)
 
-		query = query.where((SABE.serial_no == value) | (SABE.batch_no == value))
+		query = query.where((sll.serial_no == value) | (sll.batch_no == value))
 
 		return query.run(as_dict=True)
 
@@ -380,7 +373,7 @@ class ReportData:
 			key = (fg_item.item_code, row.reference_name)
 
 			if key not in batch_details:
-				serial_no, batch_no = self.get_serial_batch_no(fg_item.serial_and_batch_bundle)
+				serial_no, batch_no = self.get_serial_batch_no(fg_item)
 				fg_item.update(
 					{
 						"work_order": ste.work_order,
@@ -405,9 +398,9 @@ class ReportData:
 			"Stock Entry Detail",
 			{"parent": reference_name, "is_finished_item": 1},
 			[
+				"name",
 				"item_code",
 				"item_name",
-				"serial_and_batch_bundle",
 				"qty",
 				"parenttype as reference_doctype",
 				"parent as reference_name",
@@ -416,15 +409,19 @@ class ReportData:
 			as_dict=True,
 		)
 
-	def get_serial_batch_no(self, serial_and_batch_bundle):
-		sabb_details = frappe.db.get_value(
-			"Serial and Batch Entry",
-			{"parent": serial_and_batch_bundle},
+	def get_serial_batch_no(self, fg_item):
+		sll_details = frappe.db.get_value(
+			"Stock Location Ledger",
+			{
+				"voucher_no": fg_item.reference_name,
+				"voucher_detail_no": fg_item.name,
+				"docstatus": 1,
+			},
 			["batch_no", "serial_no"],
 			as_dict=True,
 		)
 
-		return (sabb_details.serial_no, sabb_details.batch_no) if sabb_details else (None, None)
+		return (sll_details.serial_no, sll_details.batch_no) if sll_details else (None, None)
 
 	def get_columns(self, has_serial_no=None, has_batch_no=None):
 		columns = [

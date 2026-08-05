@@ -240,7 +240,7 @@ def get_data(filters=None):
 def get_item_warehouse_combinations(filters: dict | None = None) -> dict:
 	filters = frappe._dict(filters or {})
 
-	bin = frappe.qb.DocType("Bin")
+	bin = frappe.qb.DocType("Stock Level")
 	item = frappe.qb.DocType("Item")
 	warehouse = frappe.qb.DocType("Warehouse")
 

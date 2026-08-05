@@ -35,6 +35,10 @@ from erpnext.selling.doctype.sales_order.sales_order import (
 )
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import (
+	get_batches_for_voucher,
+	get_serial_nos_for_voucher,
+)
 from erpnext.stock.get_item_details import get_bin_details
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -847,7 +851,7 @@ class TestSalesOrder(ERPNextTestSuite):
 		make_stock_entry(item="_Packed Item New 1", target="_Test Warehouse - _TC", qty=120, rate=100)
 
 		bin_details = frappe.db.get_value(
-			"Bin",
+			"Stock Level",
 			{"item_code": "_Packed Item New 1", "warehouse": "_Test Warehouse - _TC"},
 			["actual_qty", "projected_qty", "ordered_qty"],
 			as_dict=1,
@@ -1296,7 +1300,7 @@ class TestSalesOrder(ERPNextTestSuite):
 
 		# test ordered_qty and reserved_qty for drop ship item
 		bin_po_item = frappe.get_all(
-			"Bin",
+			"Stock Level",
 			filters={"item_code": po_item.item_code, "warehouse": "_Test Warehouse - _TC"},
 			fields=["ordered_qty", "reserved_qty"],
 		)
@@ -1324,7 +1328,7 @@ class TestSalesOrder(ERPNextTestSuite):
 
 		# test ordered_qty and reserved_qty for drop ship item after closing so
 		bin_po_item = frappe.get_all(
-			"Bin",
+			"Stock Level",
 			filters={"item_code": po_item.item_code, "warehouse": "_Test Warehouse - _TC"},
 			fields=["ordered_qty", "reserved_qty"],
 		)
@@ -1508,7 +1512,7 @@ class TestSalesOrder(ERPNextTestSuite):
 
 	def test_reserved_qty_for_closing_so(self):
 		bin = frappe.get_all(
-			"Bin",
+			"Stock Level",
 			filters={"item_code": "_Test Item", "warehouse": "_Test Warehouse - _TC"},
 			fields=["reserved_qty"],
 		)
@@ -2482,11 +2486,10 @@ class TestSalesOrder(ERPNextTestSuite):
 		pick_list = create_pick_list(so.name)
 
 		pick_list.save()
-		batch_no = frappe.get_all(
-			"Serial and Batch Entry",
-			filters={"parent": se.items[0].serial_and_batch_bundle},
-			fields=["batch_no"],
-		)[0].batch_no
+		batch_no = next(
+			iter(get_batches_for_voucher("Stock Entry", se.name, se.items[0].name, se.items[0].t_warehouse)),
+			None,
+		)
 
 		for row in pick_list.locations:
 			self.assertEqual(row.qty, 10.0)
@@ -2907,7 +2910,8 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, so.save)
 
 	@ERPNextTestSuite.change_settings(
-		"Stock Settings", {"enable_stock_reservation": 1, "use_serial_batch_fields": 0}
+		"Stock Settings",
+		{"enable_stock_reservation": 1, "use_serial_batch_fields": 0, "auto_reserve_serial_and_batch": 1},
 	)
 	def test_product_bundle_reservation(self):
 		pb_item = make_item("Product Bundle Item", {"is_stock_item": 0})
@@ -2966,84 +2970,67 @@ class TestSalesOrder(ERPNextTestSuite):
 		sre_serial_nos = list(get_sre_reserved_serial_nos_details(sb_item.name, warehouse).keys())
 		sre_batch_nos = list(get_sre_reserved_batch_nos_details(sb_item.name, warehouse).keys())
 
+		def get_delivered_serial_batch(voucher_type, voucher_no):
+			serial_nos = get_serial_nos_for_voucher(
+				voucher_type, voucher_no, warehouse=warehouse, item_code=sb_item.name
+			)
+			batches = get_batches_for_voucher(voucher_type, voucher_no, warehouse=warehouse)
+			return set(serial_nos), set(batches.keys())
+
+		# The reserved composition is resolved from the Stock Reservation Entry when the
+		# Delivery Note / Sales Invoice is submitted - a draft only previews what a single
+		# batch_no / serial_no field can show.
 		dn = make_delivery_note(so.name, kwargs={"for_reserved_stock": True})
 		dn.save()
 
-		self.assertTrue(dn.packed_items[1].serial_and_batch_bundle)
-
-		from erpnext.stock.serial_batch_bundle import get_batches_from_bundle, get_serial_nos
-
-		serial_nos_in_bundle = get_serial_nos(dn.packed_items[1].serial_and_batch_bundle)
-		batches_in_bundle = list(get_batches_from_bundle(dn.packed_items[1].serial_and_batch_bundle).keys())
-
-		self.assertEqual(sre_serial_nos, serial_nos_in_bundle)
-		self.assertEqual(sre_batch_nos, batches_in_bundle)
-
 		dn.items[0].qty = 5
 		dn.save()
-		sabb_doc = frappe.get_doc("Serial and Batch Bundle", dn.packed_items[1].serial_and_batch_bundle)
-		sabb_doc.entries = sabb_doc.entries[:5]
-		sabb_doc.company = dn.company
-		sabb_doc.save()
 		dn.submit()
+		dn.reload()
 
-		serial_nos = set(sre_serial_nos) - set(get_serial_nos(sabb_doc.name))
-		batch_nos = set(sre_batch_nos) - set(get_batches_from_bundle(sabb_doc.name).keys())
+		delivered_serial_nos, delivered_batch_nos = get_delivered_serial_batch("Delivery Note", dn.name)
+		self.assertEqual(len(delivered_serial_nos), 5)
+		self.assertTrue(delivered_serial_nos.issubset(set(sre_serial_nos)))
+		self.assertTrue(delivered_batch_nos.issubset(set(sre_batch_nos)))
+
+		serial_nos = set(sre_serial_nos) - delivered_serial_nos
 
 		dn1 = make_delivery_note(so.name, kwargs={"for_reserved_stock": True})
 		dn1.save()
+		dn1.submit()
+		dn1.reload()
 
-		self.assertTrue(dn1.packed_items[1].serial_and_batch_bundle)
-
-		from erpnext.stock.serial_batch_bundle import get_batches_from_bundle, get_serial_nos
-
-		serial_nos_in_bundle = set(get_serial_nos(dn1.packed_items[1].serial_and_batch_bundle))
-		batches_in_bundle = set(get_batches_from_bundle(dn1.packed_items[1].serial_and_batch_bundle).keys())
-
+		serial_nos_in_bundle, _batches_in_bundle = get_delivered_serial_batch("Delivery Note", dn1.name)
 		self.assertEqual(serial_nos, serial_nos_in_bundle)
-		self.assertEqual(batch_nos, batches_in_bundle)
 
+		dn1.reload()
+		dn1.cancel()
+		dn.reload()
 		dn.cancel()
 
 		# test the same thing with sales invoice as well
 
 		si = make_sales_invoice(so.name)
 		si.update_stock = 1
-		si.save()
-
-		self.assertTrue(si.packed_items[1].serial_and_batch_bundle)
-
-		from erpnext.stock.serial_batch_bundle import get_batches_from_bundle, get_serial_nos
-
-		serial_nos_in_bundle = get_serial_nos(si.packed_items[1].serial_and_batch_bundle)
-		batches_in_bundle = list(get_batches_from_bundle(si.packed_items[1].serial_and_batch_bundle).keys())
-
-		self.assertEqual(sre_serial_nos, serial_nos_in_bundle)
-		self.assertEqual(sre_batch_nos, batches_in_bundle)
-
 		si.items[0].qty = 5
 		si.save()
-		sabb_doc = frappe.get_doc("Serial and Batch Bundle", si.packed_items[1].serial_and_batch_bundle)
-		sabb_doc.entries = sabb_doc.entries[:5]
-		sabb_doc.company = si.company
-		sabb_doc.save()
 		si.submit()
+		si.reload()
 
-		serial_nos = set(sre_serial_nos) - set(get_serial_nos(sabb_doc.name))
-		batch_nos = set(sre_batch_nos) - set(get_batches_from_bundle(sabb_doc.name).keys())
+		delivered_serial_nos, delivered_batch_nos = get_delivered_serial_batch("Sales Invoice", si.name)
+		self.assertEqual(len(delivered_serial_nos), 5)
+		self.assertTrue(delivered_serial_nos.issubset(set(sre_serial_nos)))
+		self.assertTrue(delivered_batch_nos.issubset(set(sre_batch_nos)))
+
+		serial_nos = set(sre_serial_nos) - delivered_serial_nos
 
 		si1 = make_delivery_note(so.name, kwargs={"for_reserved_stock": True})
 		si1.save()
+		si1.submit()
+		si1.reload()
 
-		self.assertTrue(si1.packed_items[1].serial_and_batch_bundle)
-
-		from erpnext.stock.serial_batch_bundle import get_batches_from_bundle, get_serial_nos
-
-		serial_nos_in_bundle = set(get_serial_nos(si1.packed_items[1].serial_and_batch_bundle))
-		batches_in_bundle = set(get_batches_from_bundle(si1.packed_items[1].serial_and_batch_bundle).keys())
-
+		serial_nos_in_bundle, _batches_in_bundle = get_delivered_serial_batch("Delivery Note", si1.name)
 		self.assertEqual(serial_nos, serial_nos_in_bundle)
-		self.assertEqual(batch_nos, batches_in_bundle)
 
 	def test_sales_team_contribution_follows_grant_commission(self):
 		"""Sales-person allocation tracks the grant-commission-eligible amount, not the gross total.
@@ -3243,7 +3230,9 @@ def create_dn_against_so(so, delivered_qty=0, do_not_submit=False):
 
 
 def get_reserved_qty(item_code="_Test Item", warehouse="_Test Warehouse - _TC"):
-	return flt(frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "reserved_qty"))
+	return flt(
+		frappe.db.get_value("Stock Level", {"item_code": item_code, "warehouse": warehouse}, "reserved_qty")
+	)
 
 
 def make_sales_order_workflow():

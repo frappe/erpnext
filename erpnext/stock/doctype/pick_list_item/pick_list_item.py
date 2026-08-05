@@ -34,7 +34,6 @@ class PickListItem(Document):
 		qty: DF.Float
 		sales_order: DF.Link | None
 		sales_order_item: DF.Data | None
-		serial_and_batch_bundle: DF.Link | None
 		serial_no: DF.SmallText | None
 		stock_qty: DF.Float
 		stock_reserved_qty: DF.Float

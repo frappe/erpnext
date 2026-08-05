@@ -211,13 +211,6 @@ class AssetRepair(AccountsController):
 
 			self.make_gl_entries()
 
-	def cancel_sabb(self):
-		for row in self.stock_items:
-			if sabb := row.serial_and_batch_bundle:
-				row.db_set("serial_and_batch_bundle", None)
-				doc = frappe.get_doc("Serial and Batch Bundle", sabb)
-				doc.cancel()
-
 	def on_cancel(self):  # nosemgrep
 		if self.get("capitalize_repair_cost"):
 			self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry")
@@ -229,8 +222,6 @@ class AssetRepair(AccountsController):
 			depreciation_note = self.get_depreciation_note()
 			reschedule_depreciation(self.asset_doc, depreciation_note)
 			self.add_asset_activity()
-
-		self.cancel_sabb()
 
 	def after_delete(self):
 		frappe.get_lazy_doc("Asset", self.asset).set_status()
@@ -284,7 +275,7 @@ class AssetRepair(AccountsController):
 					"item_code": stock_item.item_code,
 					"qty": stock_item.consumed_quantity,
 					"basic_rate": stock_item.valuation_rate,
-					"serial_and_batch_bundle": stock_item.serial_and_batch_bundle,
+					"serial_no": stock_item.serial_no,
 					**accounting_dimensions,
 				},
 			)
@@ -293,21 +284,11 @@ class AssetRepair(AccountsController):
 		stock_entry.submit()
 
 	def validate_serial_no(self, stock_item):
-		if not stock_item.serial_and_batch_bundle and frappe.get_cached_value(
+		if not stock_item.serial_no and frappe.get_cached_value(
 			"Item", stock_item.item_code, "has_serial_no"
 		):
-			msg = _("Serial No Bundle is mandatory for Item {0}").format(stock_item.item_code)
-			frappe.throw(msg, title=_("Missing Serial No Bundle"))
-
-		if stock_item.serial_and_batch_bundle:
-			values_to_update = {
-				"type_of_transaction": "Outward",
-				"voucher_type": "Stock Entry",
-			}
-
-			frappe.db.set_value(
-				"Serial and Batch Bundle", stock_item.serial_and_batch_bundle, values_to_update
-			)
+			msg = _("Serial No is mandatory for Item {0}").format(stock_item.item_code)
+			frappe.throw(msg, title=_("Missing Serial No"))
 
 	def make_gl_entries(self, cancel=False):
 		if flt(self.total_repair_cost) > 0:

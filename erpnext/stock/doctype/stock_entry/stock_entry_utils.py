@@ -8,7 +8,6 @@ import frappe
 from frappe.utils import cint, flt, today
 
 import erpnext
-from erpnext.stock.utils import get_combine_datetime
 
 if TYPE_CHECKING:
 	from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry
@@ -53,16 +52,6 @@ def make_stock_entry(**args):
 	:do_not_save: Optional flag
 	:do_not_submit: Optional flag
 	"""
-	from erpnext.stock.serial_batch_bundle import SerialBatchCreation
-
-	def process_serial_numbers(serial_nos_list):
-		serial_nos_list = [
-			"\n".join(serial_num["serial_no"] for serial_num in serial_nos_list if serial_num.serial_no)
-		]
-
-		uniques = list(set(serial_nos_list[0].split("\n")))
-
-		return "\n".join(uniques)
 
 	s = frappe.new_doc("Stock Entry")
 	args = frappe._dict(args)
@@ -133,71 +122,52 @@ def make_stock_entry(**args):
 	if not args.expense_account and s.is_opening == "No":
 		args.expense_account = frappe.get_value("Company", s.company, "stock_adjustment_account")
 
-	# We can find out the serial number using the batch source document
-	serial_number = args.serial_no
+	base_row = {
+		"item_code": args.item,
+		"s_warehouse": args.source,
+		"t_warehouse": args.target,
+		"basic_rate": args.rate or args.basic_rate,
+		"conversion_factor": args.conversion_factor or 1.0,
+		"cost_center": args.cost_center,
+		"expense_account": args.expense_account,
+		"sample_quantity": frappe.get_value("Item", args.item, "sample_quantity") or 0,
+	}
 
-	bundle_id = None
-	if not args.use_serial_batch_fields and (args.serial_no or args.batch_no or args.batches):
-		batches = frappe._dict({})
-		if args.batch_no:
-			batches = frappe._dict({args.batch_no: args.qty})
-		elif args.batches:
-			batches = args.batches
-
-		posting_datetime = None
-		if s.posting_date and s.posting_time:
-			posting_datetime = get_combine_datetime(s.posting_date, s.posting_time)
-
-		bundle_id = (
-			SerialBatchCreation(
+	if args.batches and not args.use_serial_batch_fields:
+		# A single row's plain batch_no field only holds one batch - multi-batch selection
+		# needs one row per batch instead of a single row referencing several.
+		for batch_no, batch_qty in args.batches.items():
+			s.append(
+				"items",
 				{
-					"item_code": args.item,
-					"warehouse": args.source or args.target,
-					"voucher_type": "Stock Entry",
-					"total_qty": args.qty * (-1 if args.source else 1),
-					"batches": batches,
-					"serial_nos": args.serial_no,
-					"type_of_transaction": "Outward" if args.source else "Inward",
-					"company": s.company,
-					"posting_datetime": posting_datetime,
-					"rate": args.rate or args.basic_rate,
-					"do_not_submit": True,
-				}
+					**base_row,
+					"qty": batch_qty,
+					"transfer_qty": flt(batch_qty) * (flt(args.conversion_factor) or 1.0),
+					"batch_no": batch_no,
+					"use_serial_batch_fields": 1,
+				},
 			)
-			.make_serial_and_batch_bundle()
-			.name
-		)
-
-		args["serial_no"] = ""
-		args["batch_no"] = ""
-
 	else:
-		args.serial_no = serial_number
-
-	s.append(
-		"items",
-		{
-			"item_code": args.item,
-			"s_warehouse": args.source,
-			"t_warehouse": args.target,
-			"qty": args.qty,
-			"serial_and_batch_bundle": bundle_id,
-			"basic_rate": args.rate or args.basic_rate,
-			"conversion_factor": args.conversion_factor or 1.0,
-			"transfer_qty": flt(args.qty) * (flt(args.conversion_factor) or 1.0),
-			"serial_no": args.serial_no,
-			"batch_no": args.batch_no,
-			"cost_center": args.cost_center,
-			"expense_account": args.expense_account,
-			"use_serial_batch_fields": args.use_serial_batch_fields,
-			"sample_quantity": frappe.get_value("Item", args.item, "sample_quantity") or 0,
-		},
-	)
+		use_serial_batch_fields = cint(args.use_serial_batch_fields) or cint(
+			bool(args.serial_no or args.batch_no)
+		)
+		s.append(
+			"items",
+			{
+				**base_row,
+				"qty": args.qty,
+				"transfer_qty": flt(args.qty) * (flt(args.conversion_factor) or 1.0),
+				"serial_no": args.serial_no,
+				"batch_no": args.batch_no,
+				"use_serial_batch_fields": use_serial_batch_fields,
+			},
+		)
 
 	s.set_stock_entry_type()
 
 	if not args.do_not_save:
 		s.insert()
+
 		if not args.do_not_submit:
 			s.submit()
 

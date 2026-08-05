@@ -34,7 +34,7 @@ def get_bin_details(
 
 	row = frappe._dict(frappe.parse_json(row))
 
-	bin = frappe.qb.DocType("Bin")
+	bin = frappe.qb.DocType("Stock Level")
 	subquery = _bin_warehouse_subquery(bin, company, row, for_warehouse, all_warehouse)
 	query = (
 		frappe.qb.from_(bin)

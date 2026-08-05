@@ -41,14 +41,6 @@ _SO_FIELDS = [
 	"parenttype as voucher_type",
 	"delivered_qty",
 ]
-_SERIAL_BATCH_FIELDS = [
-	"`tabSerial and Batch Entry`.`serial_no`",
-	"`tabSerial and Batch Entry`.`batch_no`",
-	"`tabSerial and Batch Entry`.`qty`",
-	"`tabSerial and Batch Bundle`.`warehouse`",
-	"`tabSerial and Batch Bundle`.`item_code`",
-	"`tabSerial and Batch Bundle`.`voucher_detail_no`",
-]
 
 
 class WorkOrderStockReservation:
@@ -221,8 +213,7 @@ class WorkOrderStockReservation:
 				items[row.item_code] = self._material_reservation_row(stock_entry, row, voucher_detail_no)
 			else:
 				items[row.item_code]["stock_qty"] += row.transfer_qty
-				if row.serial_and_batch_bundle:
-					items[row.item_code]["serial_and_batch_bundles"].append(row.serial_and_batch_bundle)
+				items[row.item_code]["voucher_detail_nos"].append(row.name)
 
 		return items
 
@@ -238,7 +229,7 @@ class WorkOrderStockReservation:
 				"from_voucher_no": stock_entry.name,
 				"from_voucher_type": stock_entry.doctype,
 				"from_voucher_detail_no": row.name,
-				"serial_and_batch_bundles": [row.serial_and_batch_bundle],
+				"voucher_detail_nos": [row.name],
 			}
 		)
 
@@ -283,6 +274,7 @@ class WorkOrderStockReservation:
 				items[row.item_code] = self._fg_reservation_row(item, row, reserved_qty, stock_entry)
 			else:
 				items[row.item_code]["stock_qty"] += reserved_qty
+				items[row.item_code]["voucher_detail_nos"].append(row.name)
 
 	@staticmethod
 	def _is_reservable_fg_row(row, item, warehouse):
@@ -316,7 +308,7 @@ class WorkOrderStockReservation:
 				"from_voucher_no": stock_entry.name,
 				"from_voucher_type": stock_entry.doctype,
 				"from_voucher_detail_no": row.name,
-				"serial_and_batch_bundles": [row.serial_and_batch_bundle],
+				"voucher_detail_nos": [row.name],
 			}
 		)
 
@@ -739,18 +731,12 @@ def get_row_wise_serial_batch(work_order, purpose=None):
 
 
 def _serial_batch_entries(stock_entries):
-	return frappe.get_all(
-		"Serial and Batch Bundle",
-		fields=_SERIAL_BATCH_FIELDS,
-		filters=[
-			["Serial and Batch Bundle", "voucher_type", "=", "Stock Entry"],
-			["Serial and Batch Bundle", "voucher_no", "in", stock_entries],
-			["Serial and Batch Bundle", "voucher_detail_no", "is", "set"],
-			["Serial and Batch Bundle", "docstatus", "<", 2],
-			["Serial and Batch Bundle", "is_cancelled", "=", 0],
-			["Serial and Batch Entry", "qty", "<", 0],
-		],
+	from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import (
+		get_ledgers_from_stock_location_ledger,
 	)
+
+	rows = get_ledgers_from_stock_location_ledger(voucher_type="Stock Entry", voucher_no=stock_entries)
+	return [row for row in rows if row.voucher_detail_no and row.qty < 0]
 
 
 def _accumulate_serial_batch(row_wise_serial_batch, entry):

@@ -3,7 +3,7 @@ import frappe
 from erpnext.tests.utils import ERPNextTestSuite
 
 INDEXED_FIELDS = {
-	"Bin": ["item_code"],
+	"Stock Level": ["item_code"],
 	"GL Entry": ["voucher_no", "posting_date", "company", "party"],
 	"Purchase Order Item": ["item_code"],
 }

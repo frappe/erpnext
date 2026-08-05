@@ -242,7 +242,7 @@ def get_columns():
 
 
 def get_bin_list(filters):
-	bin = frappe.qb.DocType("Bin")
+	bin = frappe.qb.DocType("Stock Level")
 	query = (
 		frappe.qb.from_(bin)
 		.select(
@@ -290,7 +290,7 @@ def get_bin_list(filters):
 def get_item_map(item_code, include_uom):
 	"""Optimization: get only the item doc and re_order_levels table"""
 
-	bin = frappe.qb.DocType("Bin")
+	bin = frappe.qb.DocType("Stock Level")
 	item = frappe.qb.DocType("Item")
 
 	# alive = end_of_life unset / future / MariaDB zero-date '0000-00-00' (an invalid date literal on

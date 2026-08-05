@@ -228,7 +228,7 @@ erpnext.queries.setup_warehouse_query = function (frm) {
 		var filters = erpnext.queries.warehouse(frm.doc);
 		if (row.item_code) {
 			$.extend(filters, { query: "erpnext.controllers.queries.warehouse_query" });
-			filters["filters"].push(["Bin", "item_code", "=", row.item_code]);
+			filters["filters"].push(["Stock Level", "item_code", "=", row.item_code]);
 		}
 		return filters;
 	});

@@ -215,7 +215,10 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		self.assertEqual(wo.qty, 2)
 
 	def test_rm_return(self):
-		from erpnext.stock.serial_batch_bundle import get_batch_nos, get_serial_nos
+		from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import (
+			get_batches_for_voucher,
+			get_serial_nos_for_voucher,
+		)
 
 		so, scio = create_so_scio()
 
@@ -223,8 +226,14 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		rm_in.items[3].qty = 2
 		rm_in.submit()
 
-		serial_nos = get_serial_nos(rm_in.items[3].serial_and_batch_bundle)
-		batch_nos = list(get_batch_nos(rm_in.items[3].serial_and_batch_bundle).keys())
+		serial_nos = get_serial_nos_for_voucher(
+			"Stock Entry", rm_in.name, rm_in.items[3].name, rm_in.items[3].t_warehouse
+		)
+		batch_nos = list(
+			get_batches_for_voucher(
+				"Stock Entry", rm_in.name, rm_in.items[3].name, rm_in.items[3].t_warehouse
+			).keys()
+		)
 
 		scio.reload()
 		rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
@@ -235,18 +244,34 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		rm_in.items[0].qty = 1
 		rm_in.submit()
 
-		serial_nos += get_serial_nos(rm_in.items[0].serial_and_batch_bundle)
-		batch_nos += list(get_batch_nos(rm_in.items[0].serial_and_batch_bundle).keys())
+		serial_nos += get_serial_nos_for_voucher(
+			"Stock Entry", rm_in.name, rm_in.items[0].name, rm_in.items[0].t_warehouse
+		)
+		batch_nos += list(
+			get_batches_for_voucher(
+				"Stock Entry", rm_in.name, rm_in.items[0].name, rm_in.items[0].t_warehouse
+			).keys()
+		)
 
 		scio.reload()
 		rm_return = frappe.new_doc("Stock Entry").update(scio.make_rm_return())
 		rm_return.submit()
 
 		self.assertEqual(
-			sorted(get_serial_nos(rm_return.items[-1].serial_and_batch_bundle)), sorted(serial_nos)
+			sorted(
+				get_serial_nos_for_voucher(
+					"Stock Entry", rm_return.name, rm_return.items[-1].name, rm_return.items[-1].s_warehouse
+				)
+			),
+			sorted(serial_nos),
 		)
 		self.assertEqual(
-			sorted(list(get_batch_nos(rm_return.items[-1].serial_and_batch_bundle).keys())), sorted(batch_nos)
+			sorted(
+				get_batches_for_voucher(
+					"Stock Entry", rm_return.name, rm_return.items[-1].name, rm_return.items[-1].s_warehouse
+				).keys()
+			),
+			sorted(batch_nos),
 		)
 
 	def test_subcontracting_delivery(self):
@@ -266,7 +291,9 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		scio.reload()
 		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
 		wo.skip_transfer = 1
-		wo.required_items[-1].source_warehouse = "Stores - _TC"
+		next(
+			item for item in wo.required_items if item.item_code == "Self RM"
+		).source_warehouse = "Stores - _TC"
 		wo.submit()
 
 		manufacture = frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture"))

@@ -5,7 +5,7 @@
 import copy
 
 import frappe
-from frappe.utils import add_days, cint, flt, nowtime, today
+from frappe.utils import add_days, cint, flt, today
 
 import erpnext
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
@@ -25,11 +25,11 @@ from erpnext.controllers.tests.test_subcontracting_controller import (
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import get_gl_entries
-from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
-	get_batch_from_bundle,
-	make_serial_batch_bundle,
-)
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import (
+	get_batches_for_voucher,
+	has_bundled_entries,
+)
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 	create_stock_reconciliation,
 )
@@ -817,7 +817,12 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 			)
 
 			se.reload()
-			rm_batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+			rm_batch_no = next(
+				iter(
+					get_batches_for_voucher("Stock Entry", se.name, se.items[0].name, se.items[0].t_warehouse)
+				),
+				None,
+			)
 
 		service_items = [
 			{
@@ -832,27 +837,20 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		sco = get_subcontracting_order(service_items=service_items)
 		scr = make_subcontracting_receipt(sco.name)
 		scr.save()
-		scr.reload()
-
-		bundle_doc = make_serial_batch_bundle(
-			{
-				"item_code": scr.supplied_items[0].rm_item_code,
-				"warehouse": "_Test Warehouse 1 - _TC",
-				"voucher_type": "Subcontracting Receipt",
-				"posting_date": today(),
-				"posting_time": nowtime(),
-				"qty": -1,
-				"batches": frappe._dict({rm_batch_no: 1}),
-				"type_of_transaction": "Outward",
-				"do_not_submit": True,
-			}
-		)
-
-		scr.supplied_items[0].serial_and_batch_bundle = bundle_doc.name
 		scr.submit()
 		scr.reload()
 
-		batch_no = get_batch_from_bundle(scr.supplied_items[0].serial_and_batch_bundle)
+		batch_no = next(
+			iter(
+				get_batches_for_voucher(
+					"Subcontracting Receipt",
+					scr.name,
+					scr.supplied_items[0].name,
+					scr.supplier_warehouse,
+				)
+			),
+			None,
+		)
 		self.assertEqual(batch_no, rm_batch_no)
 		self.assertEqual(scr.items[0].rm_cost_per_qty, 300)
 		self.assertEqual(scr.items[0].service_cost_per_qty, 100)
@@ -918,7 +916,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		]
 		sco = get_subcontracting_order(service_items=service_items)
 
-		frappe.db.set_single_value("Stock Settings", "auto_create_serial_and_batch_bundle_for_outward", 1)
+		frappe.db.set_single_value("Stock Settings", "auto_create_serial_batch_entries_for_outward", 1)
 		scr = make_subcontracting_receipt(sco.name)
 		scr.save()
 		scr.submit()
@@ -926,18 +924,13 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		for row in scr.supplied_items:
 			self.assertEqual(row.rate, 300.00)
-			self.assertTrue(row.serial_and_batch_bundle)
-			serial_and_batch_bundle = frappe.db.get_value(
-				"Stock Ledger Entry",
-				{"voucher_no": scr.name, "voucher_detail_no": row.name},
-				"serial_and_batch_bundle",
+			self.assertTrue(
+				has_bundled_entries("Subcontracting Receipt", scr.name, row.name, scr.supplier_warehouse)
 			)
-
-			self.assertTrue(serial_and_batch_bundle)
 
 		self.assertEqual(scr.items[0].rm_cost_per_qty, 900)
 		self.assertEqual(scr.items[0].service_cost_per_qty, 100)
-		frappe.db.set_single_value("Stock Settings", "auto_create_serial_and_batch_bundle_for_outward", 0)
+		frappe.db.set_single_value("Stock Settings", "auto_create_serial_batch_entries_for_outward", 0)
 
 	def test_subcontracting_receipt_valuation_for_fg_with_auto_created_serial_batch_bundle(self):
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 0)
@@ -1003,7 +996,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		]
 		sco = get_subcontracting_order(service_items=service_items)
 
-		frappe.db.set_single_value("Stock Settings", "auto_create_serial_and_batch_bundle_for_outward", 1)
+		frappe.db.set_single_value("Stock Settings", "auto_create_serial_batch_entries_for_outward", 1)
 		scr = make_subcontracting_receipt(sco.name)
 		scr.save()
 		scr.submit()
@@ -1011,14 +1004,9 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		for row in scr.supplied_items:
 			self.assertEqual(row.rate, 300.00)
-			self.assertTrue(row.serial_and_batch_bundle)
-			auto_created_serial_batch = frappe.db.get_value(
-				"Stock Ledger Entry",
-				{"voucher_no": scr.name, "voucher_detail_no": row.name},
-				"auto_created_serial_and_batch_bundle",
+			self.assertTrue(
+				has_bundled_entries("Subcontracting Receipt", scr.name, row.name, scr.supplier_warehouse)
 			)
-
-			self.assertTrue(auto_created_serial_batch)
 
 		self.assertEqual(scr.items[0].rm_cost_per_qty, 900)
 		self.assertEqual(scr.items[0].service_cost_per_qty, 100)
@@ -1031,7 +1019,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		self.assertEqual(flt(valuation_rate), flt(1000))
 
-		frappe.db.set_single_value("Stock Settings", "auto_create_serial_and_batch_bundle_for_outward", 0)
+		frappe.db.set_single_value("Stock Settings", "auto_create_serial_batch_entries_for_outward", 0)
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
 
 	def test_subcontracting_receipt_raw_material_rate(self):
@@ -1289,22 +1277,10 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 			}
 		).insert(ignore_permissions=True)
 
-		serial_batch_bundle = frappe.get_doc(
-			{
-				"doctype": "Serial and Batch Bundle",
-				"company": sco.company,
-				"item_code": fg_item,
-				"warehouse": sco.items[0].warehouse,
-				"has_batch_no": 1,
-				"type_of_transaction": "Inward",
-				"voucher_type": "Subcontracting Receipt",
-				"entries": [{"batch_no": batch_doc.name, "qty": 100}],
-			}
-		).insert(ignore_permissions=True)
-
 		# Step - 7: Create Subcontracting Receipt
 		scr = make_subcontracting_receipt(sco.name)
-		scr.items[0].serial_and_batch_bundle = serial_batch_bundle.name
+		scr.items[0].use_serial_batch_fields = 1
+		scr.items[0].batch_no = batch_doc.name
 		scr.save()
 		scr.submit()
 		scr.load_from_db()
@@ -1643,14 +1619,15 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 			).insert()
 
 		scr = make_subcontracting_receipt(sco.name)
-		self.assertFalse(scr.items[0].serial_and_batch_bundle)
 		scr.items[0].use_serial_batch_fields = 1
 		scr.items[0].batch_no = batch_no
 
 		scr.save()
 		scr.submit()
 		scr.reload()
-		self.assertTrue(scr.items[0].serial_and_batch_bundle)
+		self.assertTrue(
+			has_bundled_entries("Subcontracting Receipt", scr.name, scr.items[0].name, scr.items[0].warehouse)
+		)
 
 	def test_use_serial_batch_fields_for_subcontracting_receipt_with_rejected_qty(self):
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
@@ -1718,7 +1695,6 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		rej_warehouse = create_warehouse("_Test Subcontract Warehouse For Rejected Qty")
 
 		scr = make_subcontracting_receipt(sco.name)
-		self.assertFalse(scr.items[0].serial_and_batch_bundle)
 		scr.items[0].use_serial_batch_fields = 1
 		scr.items[0].batch_no = batch_no
 		scr.items[0].received_qty = 10
@@ -1729,8 +1705,14 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		scr.save()
 		scr.submit()
 		scr.reload()
-		self.assertTrue(scr.items[0].serial_and_batch_bundle)
-		self.assertTrue(scr.items[0].rejected_serial_and_batch_bundle)
+		self.assertTrue(
+			has_bundled_entries("Subcontracting Receipt", scr.name, scr.items[0].name, scr.items[0].warehouse)
+		)
+		self.assertTrue(
+			has_bundled_entries(
+				"Subcontracting Receipt", scr.name, scr.items[0].name, scr.items[0].rejected_warehouse
+			)
+		)
 
 	def test_subcontracting_receipt_for_batch_materials_without_use_serial_batch_fields(self):
 		from erpnext.controllers.subcontracting_controller import make_rm_stock_entry
@@ -1771,7 +1753,12 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 			)
 
 			se.reload()
-			rm_batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+			rm_batch_no = next(
+				iter(
+					get_batches_for_voucher("Stock Entry", se.name, se.items[0].name, se.items[0].t_warehouse)
+				),
+				None,
+			)
 
 		service_items = [
 			{
@@ -1817,7 +1804,20 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		self.assertEqual(scr.supplied_items[0].consumed_qty, 2)
 		self.assertEqual(scr.supplied_items[0].batch_no, rm_batch_no)
-		self.assertEqual(get_batch_from_bundle(scr.supplied_items[0].serial_and_batch_bundle), rm_batch_no)
+		self.assertEqual(
+			next(
+				iter(
+					get_batches_for_voucher(
+						"Subcontracting Receipt",
+						scr.name,
+						scr.supplied_items[0].name,
+						scr.supplier_warehouse,
+					)
+				),
+				None,
+			),
+			rm_batch_no,
+		)
 
 		scr = make_subcontracting_receipt(sco.name)
 		scr.items[0].qty = 2
@@ -1826,7 +1826,20 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		self.assertEqual(scr.supplied_items[0].consumed_qty, 2)
 		self.assertEqual(scr.supplied_items[0].batch_no, rm_batch_no)
-		self.assertEqual(get_batch_from_bundle(scr.supplied_items[0].serial_and_batch_bundle), rm_batch_no)
+		self.assertEqual(
+			next(
+				iter(
+					get_batches_for_voucher(
+						"Subcontracting Receipt",
+						scr.name,
+						scr.supplied_items[0].name,
+						scr.supplier_warehouse,
+					)
+				),
+				None,
+			),
+			rm_batch_no,
+		)
 
 		scr = make_subcontracting_receipt(sco.name)
 		scr.items[0].qty = 6
@@ -1835,7 +1848,20 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		self.assertEqual(scr.supplied_items[0].consumed_qty, 6)
 		self.assertEqual(scr.supplied_items[0].batch_no, rm_batch_no)
-		self.assertEqual(get_batch_from_bundle(scr.supplied_items[0].serial_and_batch_bundle), rm_batch_no)
+		self.assertEqual(
+			next(
+				iter(
+					get_batches_for_voucher(
+						"Subcontracting Receipt",
+						scr.name,
+						scr.supplied_items[0].name,
+						scr.supplier_warehouse,
+					)
+				),
+				None,
+			),
+			rm_batch_no,
+		)
 
 		sco.reload()
 		self.assertEqual(sco.status, "Completed")
@@ -1875,7 +1901,14 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 			se1.reload()
 
-			second_batch_no = get_batch_from_bundle(se1.items[0].serial_and_batch_bundle)
+			second_batch_no = next(
+				iter(
+					get_batches_for_voucher(
+						"Stock Entry", se1.name, se1.items[0].name, se1.items[0].t_warehouse
+					)
+				),
+				None,
+			)
 
 		service_items = [
 			{
@@ -1897,7 +1930,14 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		scr.submit()
 		scr.reload()
 
-		batch_no = get_batch_from_bundle(scr.supplied_items[0].serial_and_batch_bundle)
+		batch_no = next(
+			iter(
+				get_batches_for_voucher(
+					"Subcontracting Receipt", scr.name, scr.supplied_items[0].name, scr.supplier_warehouse
+				)
+			),
+			None,
+		)
 		self.assertEqual(batch_no, second_batch_no)
 		self.assertEqual(scr.items[0].rm_cost_per_qty, 300)
 		self.assertEqual(scr.items[0].service_cost_per_qty, 100)
@@ -1924,7 +1964,10 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 			rate=300,
 		)
 
-		batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+		batch_no = next(
+			iter(get_batches_for_voucher("Stock Entry", se.name, se.items[0].name, se.items[0].t_warehouse)),
+			None,
+		)
 
 		service_items = [
 			{

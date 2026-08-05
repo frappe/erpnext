@@ -12,7 +12,7 @@ from .stock_entry_base import BaseStockEntry
 
 
 class StockEntrySABB(BaseStockEntry):
-	def make_serial_and_batch_bundle_for_outward(self):
+	def make_serial_batch_ledgers_for_outward(self):
 		serial_or_batch_items = get_serial_or_batch_items(self.doc.items)
 		if not serial_or_batch_items:
 			return
@@ -26,62 +26,78 @@ class StockEntrySABB(BaseStockEntry):
 			if row.item_code not in serial_or_batch_items:
 				continue
 
-			bundle_doc = self._create_or_update_bundle_for_row(
+			entries = self._create_or_update_bundle_for_row(
 				row, serial_nos, batch_nos, already_picked_serial_nos
 			)
-			if not bundle_doc:
+			if not entries:
 				continue
 
-			for entry in bundle_doc.entries:
-				if entry.serial_no:
-					already_picked_serial_nos.append(entry.serial_no)
-
-			row.serial_and_batch_bundle = bundle_doc.name
+			for entry in entries:
+				if entry.get("serial_no"):
+					already_picked_serial_nos.append(entry["serial_no"])
 
 	def _create_or_update_bundle_for_row(self, row, serial_nos, batch_nos, already_picked_serial_nos):
-		if row.serial_and_batch_bundle and abs(row.transfer_qty) != abs(
-			frappe.get_cached_value("Serial and Batch Bundle", row.serial_and_batch_bundle, "total_qty")
-		):
-			return SerialBatchCreation(
-				{
-					"item_code": row.item_code,
-					"warehouse": row.s_warehouse,
-					"serial_and_batch_bundle": row.serial_and_batch_bundle,
-					"type_of_transaction": "Outward",
-					"ignore_serial_nos": already_picked_serial_nos,
-					"qty": row.transfer_qty * -1,
-				}
-			).update_serial_and_batch_entries(
-				serial_nos=serial_nos.get(row.name), batch_nos=batch_nos.get(row.name)
-			)
+		from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import get_voucher_entries
 
-		if not row.serial_and_batch_bundle and frappe.get_single_value(
-			"Stock Settings", "auto_create_serial_and_batch_bundle_for_outward"
+		existing = get_voucher_entries(
+			self.doc.doctype,
+			self.doc.name,
+			row.name,
+			row.s_warehouse,
+			fields=["serial_no", "batch_no", "rack", "bin", "qty"],
+			is_outward=1,
+		)
+		if not existing and not frappe.get_single_value(
+			"Stock Settings", "auto_create_serial_batch_entries_for_outward"
 		):
-			return SerialBatchCreation(
-				{
-					"item_code": row.item_code,
-					"warehouse": row.s_warehouse,
-					"posting_datetime": get_combine_datetime(self.doc.posting_date, self.doc.posting_time),
-					"voucher_type": self.doc.doctype,
-					"voucher_detail_no": row.name,
-					"qty": row.transfer_qty * -1,
-					"ignore_serial_nos": already_picked_serial_nos,
-					"type_of_transaction": "Outward",
-					"company": self.doc.company,
-					"do_not_submit": True,
-				}
-			).make_serial_and_batch_bundle(
-				serial_nos=serial_nos.get(row.name), batch_nos=batch_nos.get(row.name)
-			)
+			return None
 
-		return None
+		return SerialBatchCreation(
+			{
+				"item_code": row.item_code,
+				"warehouse": row.s_warehouse,
+				"posting_datetime": get_combine_datetime(self.doc.posting_date, self.doc.posting_time),
+				"voucher_type": self.doc.doctype,
+				"voucher_no": self.doc.name,
+				"voucher_detail_no": row.name,
+				"qty": row.transfer_qty * -1,
+				"ignore_serial_nos": already_picked_serial_nos,
+				"type_of_transaction": "Outward",
+				"company": self.doc.company,
+			}
+		).make_location_ledger_entries(
+			serial_nos=serial_nos.get(row.name),
+			batch_nos=batch_nos.get(row.name),
+			rows=self.get_reusable_entry_rows(row, existing, serial_nos, batch_nos),
+		)
+
+	def get_reusable_entry_rows(self, row, existing, serial_nos, batch_nos):
+		"""An explicit composition from the inline editor (rack/bin included) must survive the
+		submit-time refresh - rebuild via auto-pick only when the row qty no longer matches."""
+		if not existing or serial_nos.get(row.name) or batch_nos.get(row.name):
+			return None
+
+		precision = row.precision("transfer_qty")
+		total = sum(abs(flt(entry.qty)) for entry in existing)
+		if flt(total, precision) != flt(abs(row.transfer_qty), precision):
+			return None
+
+		return [
+			{
+				"serial_no": entry.serial_no,
+				"batch_no": entry.batch_no,
+				"rack": entry.rack,
+				"bin": entry.bin,
+				"qty": abs(flt(entry.qty)),
+			}
+			for entry in existing
+		]
 
 	def get_serial_nos_and_batches_from_sres(self, scio_detail, only_pending=True):
 		serial_nos, batch_nos = [], frappe._dict()
 
 		table = frappe.qb.DocType("Stock Reservation Entry")
-		child_table = frappe.qb.DocType("Serial and Batch Entry")
+		child_table = frappe.qb.DocType("Stock Reservation Serial Batch")
 		query = (
 			frappe.qb.from_(table)
 			.join(child_table)
@@ -111,21 +127,20 @@ class StockEntrySABB(BaseStockEntry):
 				"Subcontracting Delivery",
 				"Subcontracting Return",
 			]:
-				if not row.serial_and_batch_bundle:
-					serial_nos_list, batch_nos_list = self.get_serial_nos_and_batches_from_sres(
-						row.scio_detail, only_pending=self.doc.purpose != "Subcontracting Return"
-					)
+				serial_nos_list, batch_nos_list = self.get_serial_nos_and_batches_from_sres(
+					row.scio_detail, only_pending=self.doc.purpose != "Subcontracting Return"
+				)
 
-					if len(batch_nos_list) > 1:
-						row.use_serial_batch_fields = 0
+				if len(batch_nos_list) > 1:
+					row.use_serial_batch_fields = 0
 
-					if row.use_serial_batch_fields:
-						if serial_nos_list and not row.serial_no:
-							row.serial_no = "\n".join(serial_nos_list)
-						if batch_nos_list and not row.batch_no:
-							row.batch_no = next(iter(batch_nos_list.keys()))
+				if row.use_serial_batch_fields:
+					if serial_nos_list and not row.serial_no:
+						row.serial_no = "\n".join(serial_nos_list)
+					if batch_nos_list and not row.batch_no:
+						row.batch_no = next(iter(batch_nos_list.keys()))
 
-					serial_nos[row.name], batch_nos[row.name] = serial_nos_list, batch_nos_list
+				serial_nos[row.name], batch_nos[row.name] = serial_nos_list, batch_nos_list
 
 		return serial_nos, batch_nos
 
@@ -182,7 +197,7 @@ class StockEntrySABB(BaseStockEntry):
 
 		new_items_to_add = []
 		for d in self.doc.items:
-			if d.serial_and_batch_bundle or d.serial_no or d.batch_no:
+			if d.serial_no or d.batch_no:
 				continue
 
 			key = (d.item_code, d.s_warehouse)
@@ -253,88 +268,6 @@ class StockEntrySABB(BaseStockEntry):
 		self.doc.set("items", sorted_items)
 
 
-def create_serial_and_batch_bundle(parent_doc, row, child, type_of_transaction=None):
-	item_details = frappe.get_cached_value(
-		"Item", child.item_code, ["has_serial_no", "has_batch_no"], as_dict=1
-	)
-	if not (item_details.has_serial_no or item_details.has_batch_no):
-		return
-	doc = _make_bundle_doc(parent_doc, child, type_of_transaction or "Inward")
-	_populate_bundle_entries(doc, row, child)
-	if not doc.entries:
-		return None
-	return doc.insert(ignore_permissions=True).name
-
-
-def _make_bundle_doc(parent_doc, child, type_of_transaction):
-	return frappe.get_doc(
-		{
-			"doctype": "Serial and Batch Bundle",
-			"voucher_type": "Stock Entry",
-			"item_code": child.item_code,
-			"warehouse": child.warehouse,
-			"type_of_transaction": type_of_transaction,
-			"posting_date": parent_doc.posting_date,
-			"posting_time": parent_doc.posting_time,
-		}
-	)
-
-
-def _populate_bundle_entries(doc, row, child):
-	precision = frappe.get_precision("Stock Entry Detail", "qty")
-	if row.serial_nos and row.batches_to_be_consume:
-		_append_serial_batch_entries(doc, row, child, precision)
-	elif row.serial_nos:
-		doc.has_serial_no = 1
-		for serial_no in row.serial_nos:
-			doc.append("entries", {"serial_no": serial_no, "warehouse": row.warehouse, "qty": -1})
-	elif row.batches_to_be_consume:
-		_append_batch_entries(doc, row)
-
-
-def _append_serial_batch_entries(doc, row, child, precision):
-	doc.has_serial_no = 1
-	doc.has_batch_no = 1
-	batchwise_serial_nos = get_batchwise_serial_nos(child.item_code, row)
-	for batch_no, qty in row.batches_to_be_consume.items():
-		while flt(qty, precision) > 0:
-			qty -= 1
-			doc.append(
-				"entries",
-				{
-					"batch_no": batch_no,
-					"serial_no": batchwise_serial_nos.get(batch_no).pop(0),
-					"warehouse": row.warehouse,
-					"qty": -1,
-				},
-			)
-
-
-def _append_batch_entries(doc, row):
-	precision = frappe.get_precision("Serial and Batch Entry", "qty")
-	doc.has_batch_no = 1
-	for batch_no, qty in row.batches_to_be_consume.items():
-		if flt(qty, precision) > 0:
-			doc.append(
-				"entries", {"batch_no": batch_no, "warehouse": row.warehouse, "qty": flt(qty, precision) * -1}
-			)
-
-
-def get_batchwise_serial_nos(item_code, row):
-	batchwise_serial_nos = {}
-
-	for batch_no in row.batches_to_be_consume:
-		serial_nos = frappe.get_all(
-			"Serial No",
-			filters={"item_code": item_code, "batch_no": batch_no, "name": ("in", row.serial_nos)},
-		)
-
-		if serial_nos:
-			batchwise_serial_nos[batch_no] = sorted([serial_no.name for serial_no in serial_nos])
-
-	return batchwise_serial_nos
-
-
 @frappe.whitelist()
 def get_expired_batch_items():
 	expired_batches = get_expired_batches()
@@ -344,7 +277,7 @@ def get_expired_batch_items():
 
 
 def _enrich_expired_batches_with_stock(expired_batches):
-	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_auto_batch_nos
+	from erpnext.stock.serial_batch_bundle import get_auto_batch_nos
 
 	expired_batches_stock = get_auto_batch_nos(
 		frappe._dict({"batch_no": list(expired_batches.keys()), "for_stock_levels": True})

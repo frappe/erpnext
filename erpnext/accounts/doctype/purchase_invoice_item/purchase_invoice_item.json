@@ -68,13 +68,11 @@
   "warehouse_section",
   "warehouse",
   "add_serial_batch_bundle",
-  "serial_and_batch_bundle",
   "use_serial_batch_fields",
   "col_br_wh",
   "from_warehouse",
   "quality_inspection",
   "rejected_warehouse",
-  "rejected_serial_and_batch_bundle",
   "serial_batch_entries_section",
   "serial_batch_entries_html",
   "rejected_serial_batch_entries_section",
@@ -906,26 +904,6 @@
    "print_hide": 1
   },
   {
-   "depends_on": "eval:doc.use_serial_batch_fields === 0 || doc.docstatus === 1",
-   "fieldname": "serial_and_batch_bundle",
-   "fieldtype": "Link",
-   "label": "Serial and Batch Bundle",
-   "no_copy": 1,
-   "options": "Serial and Batch Bundle",
-   "print_hide": 1,
-   "search_index": 1
-  },
-  {
-   "depends_on": "eval:doc.use_serial_batch_fields === 0 || doc.docstatus === 1",
-   "fieldname": "rejected_serial_and_batch_bundle",
-   "fieldtype": "Link",
-   "label": "Rejected Serial and Batch Bundle",
-   "no_copy": 1,
-   "options": "Serial and Batch Bundle",
-   "print_hide": 1,
-   "search_index": 1
-  },
-  {
    "fieldname": "wip_composite_asset",
    "fieldtype": "Link",
    "label": "WIP Composite Asset",
@@ -948,7 +926,7 @@
   {
    "fieldname": "serial_batch_entries_section",
    "fieldtype": "Section Break",
-   "label": "Serial / Batch Entries"
+   "label": "Stock Location Entries"
   },
   {
    "fieldname": "serial_batch_entries_html",
@@ -957,7 +935,7 @@
   {
    "fieldname": "rejected_serial_batch_entries_section",
    "fieldtype": "Section Break",
-   "label": "Rejected Serial / Batch Entries"
+   "label": "Rejected Stock Location Entries"
   },
   {
    "fieldname": "rejected_serial_batch_entries_html",
@@ -1032,7 +1010,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-07-18 10:00:00.000000",
+ "modified": "2026-08-03 11:30:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",

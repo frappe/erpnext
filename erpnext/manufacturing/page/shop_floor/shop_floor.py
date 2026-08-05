@@ -673,7 +673,7 @@ def _get_on_hand_map(items) -> dict[tuple[str, str], float]:
 		return {}
 
 	bin_rows = frappe.get_all(
-		"Bin",
+		"Stock Level",
 		filters={
 			"item_code": ["in", list({p[0] for p in pairs})],
 			"warehouse": ["in", list({p[1] for p in pairs})],

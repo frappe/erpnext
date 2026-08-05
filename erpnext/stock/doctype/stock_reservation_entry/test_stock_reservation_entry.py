@@ -11,6 +11,10 @@ from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_orde
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import (
+	get_voucher_entries,
+	has_bundled_entries,
+)
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 	cancel_stock_reservation_entries,
 	get_sre_reserved_qty_details_for_voucher,
@@ -177,7 +181,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 			"enable_stock_reservation": 1,
 			"auto_reserve_serial_and_batch": 0,
 			"pick_serial_and_batch_based_on": "FIFO",
-			"auto_create_serial_and_batch_bundle_for_outward": 1,
+			"auto_create_serial_batch_entries_for_outward": 1,
 		},
 	)
 	def test_stock_reservation_against_sales_order(self) -> None:
@@ -466,7 +470,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 			self.assertEqual(rows[0].reserved_qty, 10)
 			self.assertEqual(rows[0].reservation_based_on, "Serial and Batch")
 			pinned = frappe.get_all(
-				"Serial and Batch Entry",
+				"Stock Reservation Serial Batch",
 				filters={"parent": rows[0].name, "parentfield": "sb_entries"},
 			)
 			self.assertGreaterEqual(len(pinned), 1, "serial/batch entries should be pinned on the SRE")
@@ -493,8 +497,8 @@ class TestStockReservationEntry(ERPNextTestSuite):
 	)
 	def test_serial_and_batch_reserved_stock_delivery_and_cancel(self) -> None:
 		# Regression: delivering a serial/batch reserved Sales Order used to crash with
-		# "Serial and Batch Bundle None not found" when the delivered serial/batch was carried in the
-		# row's serial_no/batch_no fields (use_serial_batch_fields) rather than a bundle. Delivery
+		# a missing-ledger lookup when the delivered serial/batch was carried in the row's
+		# serial_no/batch_no fields (use_serial_batch_fields). Delivery
 		# must mark the reservation delivered, and cancelling the Delivery Note must restore it.
 		items_details = create_items()
 		create_material_receipt(items_details, self.warehouse, qty=10)
@@ -656,9 +660,9 @@ class TestStockReservationEntry(ERPNextTestSuite):
 			self.assertEqual(sre_details.delivered_qty, sre_details.reserved_qty)
 
 		sre = frappe.qb.DocType("Stock Reservation Entry")
-		sb_entry = frappe.qb.DocType("Serial and Batch Entry")
+		sb_entry = frappe.qb.DocType("Stock Reservation Serial Batch")
 		for item in dn.items:
-			if item.serial_and_batch_bundle:
+			if has_bundled_entries(dn.doctype, dn.name, item.name, item.warehouse):
 				reserved_sb_entries = (
 					frappe.qb.from_(sre)
 					.inner_join(sb_entry)
@@ -678,13 +682,13 @@ class TestStockReservationEntry(ERPNextTestSuite):
 
 					reserved_sb_details.add((sb_details.serial_no, sb_details.batch_no, -1 * sb_details.qty))
 
-				delivered_sb_entries = frappe.db.get_all(
-					"Serial and Batch Entry",
-					filters={"parent": item.serial_and_batch_bundle},
-					fields=["serial_no", "batch_no", "qty"],
-					as_list=True,
+				sb_fields = ["serial_no", "batch_no", "qty"]
+				dn_entries = get_voucher_entries(
+					dn.doctype, dn.name, item.name, item.warehouse, fields=sb_fields
 				)
-				delivered_sb_details: set[tuple] = set(delivered_sb_entries)
+				delivered_sb_details: set[tuple] = {
+					(row.serial_no, row.batch_no, row.qty) for row in dn_entries
+				}
 
 				# Test - 6: Reserved Serial/Batch Nos should be equal to Delivered Serial/Batch Nos.
 				self.assertSetEqual(reserved_sb_details, delivered_sb_details)
@@ -708,7 +712,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 
 			if sre_details.reservation_based_on == "Serial and Batch":
 				sb_entries = frappe.db.get_all(
-					"Serial and Batch Entry",
+					"Stock Reservation Serial Batch",
 					filters={"parenttype": "Stock Reservation Entry", "parent": sre_details.name},
 					fields=["delivered_qty"],
 				)
@@ -762,19 +766,17 @@ class TestStockReservationEntry(ERPNextTestSuite):
 			self.assertEqual(item.stock_reserved_qty, sre_details.reserved_qty)
 
 		sre = frappe.qb.DocType("Stock Reservation Entry")
-		sb_entry = frappe.qb.DocType("Serial and Batch Entry")
+		sb_entry = frappe.qb.DocType("Stock Reservation Serial Batch")
 		for location in pl.locations:
 			# Test - 2: Reserved Qty should be updated in Pick List Item.
 			self.assertEqual(location.stock_reserved_qty, location.qty)
 
-			if location.serial_and_batch_bundle:
-				picked_sb_entries = frappe.db.get_all(
-					"Serial and Batch Entry",
-					filters={"parent": location.serial_and_batch_bundle},
-					fields=["serial_no", "batch_no", "qty"],
-					as_list=True,
+			if has_bundled_entries("Pick List", pl.name, location.name, location.warehouse):
+				sb_fields = ["serial_no", "batch_no", "qty"]
+				pl_entries = get_voucher_entries(
+					"Pick List", pl.name, location.name, location.warehouse, fields=sb_fields
 				)
-				picked_sb_details: set[tuple] = set(picked_sb_entries)
+				picked_sb_details: set[tuple] = {(row.serial_no, row.batch_no, row.qty) for row in pl_entries}
 
 				reserved_sb_entries = (
 					frappe.qb.from_(sre)
@@ -861,22 +863,21 @@ class TestStockReservationEntry(ERPNextTestSuite):
 			# Test - 2: SRE Reserved Qty should be equal to PR Item Qty.
 			self.assertEqual(reserved_qty, item.qty)
 
-			if item.serial_and_batch_bundle:
-				sb_details = frappe.db.get_all(
-					"Serial and Batch Entry",
-					filters={"parent": item.serial_and_batch_bundle},
-					fields=["serial_no", "batch_no", "qty"],
-					as_list=True,
+			if has_bundled_entries("Purchase Receipt", pr.name, item.name, item.warehouse):
+				sb_fields = ["serial_no", "batch_no", "qty"]
+				pr_entries = get_voucher_entries(
+					"Purchase Receipt", pr.name, item.name, item.warehouse, fields=sb_fields
 				)
+				sb_details = {(row.serial_no, row.batch_no, row.qty) for row in pr_entries}
 				reserved_sb_details = frappe.db.get_all(
-					"Serial and Batch Entry",
+					"Stock Reservation Serial Batch",
 					filters={"parent": sre},
 					fields=["serial_no", "batch_no", "qty"],
 					as_list=True,
 				)
 
 				# Test - 3: Reserved Serial/Batch Nos should be equal to PR Item Serial/Batch Nos.
-				self.assertEqual(set(sb_details), set(reserved_sb_details))
+				self.assertEqual(sb_details, set(reserved_sb_details))
 
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
@@ -966,7 +967,7 @@ def make_batch_item():
 
 def get_reserved_batch_nos(sales_order: str) -> set:
 	sre = frappe.qb.DocType("Stock Reservation Entry")
-	sb_entry = frappe.qb.DocType("Serial and Batch Entry")
+	sb_entry = frappe.qb.DocType("Stock Reservation Serial Batch")
 
 	batch_nos = (
 		frappe.qb.from_(sre)

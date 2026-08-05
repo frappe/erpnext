@@ -631,7 +631,7 @@ class Item(Document):
 		).run()
 
 	def on_trash(self):
-		frappe.db.delete("Bin", {"item_code": self.name})
+		frappe.db.delete("Stock Level", {"item_code": self.name})
 		frappe.db.delete("Item Price", {"item_code": self.name})
 		for variant_of in frappe.get_all("Item", filters={"variant_of": self.name}):
 			frappe.delete_doc("Item", variant_of.name)
@@ -661,7 +661,7 @@ class Item(Document):
 			self.recalculate_bin_qty(new_name)
 
 	def delete_old_bins(self, old_name):
-		frappe.db.delete("Bin", {"item_code": old_name})
+		frappe.db.delete("Stock Level", {"item_code": old_name})
 
 	def validate_duplicate_item_in_stock_reconciliation(self, old_name, new_name):
 		sri = frappe.qb.DocType("Stock Reconciliation Item")
@@ -740,7 +740,7 @@ class Item(Document):
 		)
 
 		# Delete all existing bins to avoid duplicate bins for the same item and warehouse
-		frappe.db.delete("Bin", {"item_code": new_name})
+		frappe.db.delete("Stock Level", {"item_code": new_name})
 
 		for warehouse in repost_stock_for_warehouses:
 			repost_stock(new_name, warehouse)
@@ -1145,8 +1145,8 @@ class Item(Document):
 			frappe.throw(msg, title=_("Linked with submitted documents"))
 
 	def validate_serialized_change_with_bundle(self):
-		"""Block turning a serialized item non-serialized while any Serial and Batch Bundle still exists
-		for it. Such bundles carry the item's serial numbers; the user must delete or cancel them first."""
+		"""Block turning a serialized item non-serialized while any serial movement still exists
+		for it in Stock Location Ledger."""
 		if self.is_new() or self.has_serial_no or not self._doc_before_save:
 			return
 
@@ -1154,13 +1154,12 @@ class Item(Document):
 		if not self._doc_before_save.has_serial_no:
 			return
 
-		# Draft (docstatus 0) or submitted (docstatus 1) bundles block the change; cancelled ones don't.
-		if frappe.db.count("Serial and Batch Bundle", {"item_code": self.name, "docstatus": ("<", 2)}):
+		if frappe.db.count("Stock Location Ledger", {"item_code": self.name, "docstatus": ("<", 2)}):
 			frappe.throw(
 				_(
-					"Cannot change Item {0} from serialized to non-serialized because a Serial and Batch Bundle exists for it. Please delete or cancel the Serial and Batch Bundle first."
+					"Cannot change Item {0} from serialized to non-serialized because serial number records exist for it."
 				).format(frappe.bold(self.name)),
-				title=_("Serial and Batch Bundle Exists"),
+				title=_("Serial No Records Exist"),
 			)
 
 	def _get_linked_submitted_documents(self, changed_fields: list[str]) -> dict[str, str] | None:
@@ -1424,7 +1423,7 @@ def check_stock_uom_with_bin(item, stock_uom):
 			)
 
 	bin_list = frappe.get_all(
-		"Bin",
+		"Stock Level",
 		filters={"item_code": item, "stock_uom": ["!=", stock_uom]},
 		or_filters=[
 			["reserved_qty", ">", 0],
@@ -1444,7 +1443,7 @@ def check_stock_uom_with_bin(item, stock_uom):
 		)
 
 	# No SLE or documents against item. Bin UOM can be changed safely.
-	bin_dt = frappe.qb.DocType("Bin")
+	bin_dt = frappe.qb.DocType("Stock Level")
 	frappe.qb.update(bin_dt).set(bin_dt.stock_uom, stock_uom).where(bin_dt.item_code == item).run()
 
 
@@ -1748,7 +1747,7 @@ def set_opening_stock_serial_batch_bundle(stock_reco):
 	if not (item_details.has_serial_no or item_details.has_batch_no):
 		return
 
-	bundle = SerialBatchCreation(
+	SerialBatchCreation(
 		{
 			"item_code": row.item_code,
 			"warehouse": row.warehouse,
@@ -1761,15 +1760,9 @@ def set_opening_stock_serial_batch_bundle(stock_reco):
 			"avg_rate": row.valuation_rate,
 			"type_of_transaction": "Inward",
 			"company": stock_reco.company,
-			"do_not_submit": True,
+			"ledger_is_outward": 0,
 		}
-	).make_serial_and_batch_bundle()
-
-	if not bundle:
-		return
-
-	row.db_set("serial_and_batch_bundle", bundle.name, update_modified=False)
-	row.serial_and_batch_bundle = bundle.name
+	).make_location_ledger_entries()
 
 
 def get_default_warehouse_for_opening_stock(item, company: str, warehouse: str | None):

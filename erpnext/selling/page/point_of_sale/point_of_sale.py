@@ -192,7 +192,7 @@ def get_items(
 		query = query.where(item_group_condition)
 
 	if hide_unavailable_items:
-		bin_dt = frappe.qb.DocType("Bin")
+		bin_dt = frappe.qb.DocType("Stock Level")
 		query = (
 			query.left_join(bin_dt)
 			.on(bin_dt.item_code == item.name)

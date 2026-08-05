@@ -12,10 +12,11 @@ from frappe.utils import add_days, cstr, flt, nowdate, nowtime
 from erpnext.accounts.utils import get_stock_and_account_balance
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
-from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
-	get_batch_from_bundle,
-	get_serial_nos_from_bundle,
-	make_serial_batch_bundle,
+from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import (
+	get_batches_for_voucher,
+	get_serial_nos_for_voucher,
+	get_voucher_entries,
+	has_bundled_entries,
 )
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 	EmptyStockReconciliationItemsError,
@@ -23,6 +24,9 @@ from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 )
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.stock_ledger import get_previous_sle, update_entries_after
+from erpnext.stock.tests.serial_batch_bundle_test_utils import (
+	make_serial_batch_bundle,
+)
 from erpnext.stock.tests.test_utils import StockTestMixin
 from erpnext.stock.utils import (
 	get_combine_datetime,
@@ -162,9 +166,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			item_code=serial_item_code, warehouse=serial_warehouse, qty=5, rate=200
 		)
 
-		serial_nos = frappe.get_doc(
-			"Serial and Batch Bundle", sr.items[0].serial_and_batch_bundle
-		).get_serial_nos()
+		serial_nos = get_serial_nos_for_voucher(sr.doctype, sr.name, sr.items[0].name, serial_warehouse)
 		self.assertEqual(len(serial_nos), 5)
 
 		args = {
@@ -173,7 +175,6 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			"qty": -5,
 			"posting_date": add_days(sr.posting_date, 1),
 			"posting_time": nowtime(),
-			"serial_and_batch_bundle": sr.items[0].serial_and_batch_bundle,
 		}
 
 		valuation_rate = get_incoming_rate(args)
@@ -185,9 +186,15 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			item_code=serial_item_code, warehouse=serial_warehouse, qty=5, rate=300, serial_no=serial_nos
 		)
 
-		sn_doc = frappe.get_doc("Serial and Batch Bundle", sr.items[0].serial_and_batch_bundle)
+		new_serial_nos = [
+			r.serial_no
+			for r in get_voucher_entries(
+				sr.doctype, sr.name, sr.items[0].name, serial_warehouse, fields=["serial_no"], is_outward=0
+			)
+			if r.serial_no
+		]
 
-		self.assertEqual(len(sn_doc.get_serial_nos()), 5)
+		self.assertEqual(len(new_serial_nos), 5)
 
 		args = {
 			"item_code": serial_item_code,
@@ -195,7 +202,6 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			"qty": -5,
 			"posting_date": add_days(sr.posting_date, 1),
 			"posting_time": nowtime(),
-			"serial_and_batch_bundle": sr.items[0].serial_and_batch_bundle,
 		}
 
 		valuation_rate = get_incoming_rate(args)
@@ -233,7 +239,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 		sr.submit()
 		sr.load_from_db()
 
-		batch_no = get_batch_from_bundle(sr.items[0].serial_and_batch_bundle)
+		batch_no = next(iter(get_batches_for_voucher(sr.doctype, sr.name, sr.items[0].name, warehouse)), None)
 		self.assertTrue(batch_no)
 		to_delete_records.append(sr.name)
 
@@ -246,7 +252,6 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			"warehouse": warehouse,
 			"posting_date": nowdate(),
 			"posting_time": nowtime(),
-			"serial_and_batch_bundle": sr1.items[0].serial_and_batch_bundle,
 		}
 
 		valuation_rate = get_incoming_rate(args)
@@ -279,9 +284,9 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 
 		sr = create_stock_reconciliation(item_code=item.item_code, warehouse=warehouse, qty=1, rate=100)
 
-		batch_no = get_batch_from_bundle(sr.items[0].serial_and_batch_bundle)
+		batch_no = next(iter(get_batches_for_voucher(sr.doctype, sr.name, sr.items[0].name, warehouse)), None)
 
-		serial_nos = get_serial_nos_from_bundle(sr.items[0].serial_and_batch_bundle)
+		serial_nos = get_serial_nos_for_voucher(sr.doctype, sr.name, sr.items[0].name, warehouse)
 		self.assertEqual(len(serial_nos), 1)
 		self.assertEqual(frappe.db.get_value("Serial No", serial_nos[0], "batch_no"), batch_no)
 
@@ -314,13 +319,24 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 		stock_reco = create_stock_reconciliation(
 			item_code=item.item_code, warehouse=warehouse, qty=1, rate=100
 		)
-		batch_no = get_batch_from_bundle(stock_reco.items[0].serial_and_batch_bundle)
-		reco_serial_no = get_serial_nos_from_bundle(stock_reco.items[0].serial_and_batch_bundle)[0]
+		batch_no = next(
+			iter(
+				get_batches_for_voucher(
+					stock_reco.doctype, stock_reco.name, stock_reco.items[0].name, warehouse
+				)
+			),
+			None,
+		)
+		reco_serial_no = get_serial_nos_for_voucher(
+			stock_reco.doctype, stock_reco.name, stock_reco.items[0].name, warehouse
+		)[0]
 
 		stock_entry = make_stock_entry(
 			item_code=item.item_code, target=warehouse, qty=1, basic_rate=100, batch_no=batch_no
 		)
-		serial_no_2 = get_serial_nos_from_bundle(stock_entry.items[0].serial_and_batch_bundle)[0]
+		serial_no_2 = get_serial_nos_for_voucher(
+			stock_entry.doctype, stock_entry.name, stock_entry.items[0].name, stock_entry.items[0].t_warehouse
+		)[0]
 
 		# Check Batch qty after 2 transactions
 		batch_qty = get_batch_qty(batch_no, warehouse, item.item_code)
@@ -533,14 +549,14 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			item_code=item_code, warehouse=warehouse, qty=5, rate=120, posting_date=add_days(nowdate(), 12)
 		)
 		old_bin_qty = frappe.db.get_value(
-			"Bin", {"item_code": item_code, "warehouse": warehouse}, "actual_qty"
+			"Stock Level", {"item_code": item_code, "warehouse": warehouse}, "actual_qty"
 		)
 
 		create_stock_reconciliation(
 			item_code=item_code, warehouse=warehouse, qty=11, rate=100, posting_date=add_days(nowdate(), 11)
 		)
 		new_bin_qty = frappe.db.get_value(
-			"Bin", {"item_code": item_code, "warehouse": warehouse}, "actual_qty"
+			"Stock Level", {"item_code": item_code, "warehouse": warehouse}, "actual_qty"
 		)
 
 		self.assertEqual(old_bin_qty + 1, new_bin_qty)
@@ -549,23 +565,21 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 		create_batch_item_with_batch("Testing Batch Item 1", "001")
 		create_batch_item_with_batch("Testing Batch Item 2", "002")
 
-		doc = frappe.get_doc(
-			{
-				"doctype": "Serial and Batch Bundle",
-				"item_code": "Testing Batch Item 1",
-				"warehouse": "_Test Warehouse - _TC",
-				"voucher_type": "Stock Reconciliation",
-				"entries": [
-					{
-						"batch_no": "002",
-						"qty": 1,
-						"incoming_rate": 100,
-					}
-				],
-			}
+		self.assertRaises(
+			frappe.ValidationError,
+			make_serial_batch_bundle,
+			frappe._dict(
+				{
+					"item_code": "Testing Batch Item 1",
+					"warehouse": "_Test Warehouse - _TC",
+					"voucher_type": "Stock Reconciliation",
+					"qty": 1,
+					"rate": 100,
+					"batches": {"002": 1},
+					"type_of_transaction": "Inward",
+				}
+			),
 		)
-
-		self.assertRaises(frappe.ValidationError, doc.save)
 
 	def test_serial_no_cancellation(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
@@ -580,7 +594,9 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 		warehouse = "_Test Warehouse - _TC"
 
 		se1 = make_stock_entry(item_code=item_code, target=warehouse, qty=10, basic_rate=700)
-		serial_nos = get_serial_nos_from_bundle(se1.items[0].serial_and_batch_bundle)
+		serial_nos = get_serial_nos_for_voucher(
+			se1.doctype, se1.name, se1.items[0].name, se1.items[0].t_warehouse
+		)
 		# reduce 1 item
 		serial_nos.pop()
 		new_serial_nos = serial_nos
@@ -619,6 +635,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			item_code=item.name,
 			warehouse=warehouse,
 			serial_no=["SR-CREATED-SR-NO"],
+			reconcile_all_serial_batch=0,
 			qty=1,
 			do_not_submit=True,
 			rate=100,
@@ -691,7 +708,10 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			item_code=item_code, posting_time="09:00:00", target=warehouse, qty=100, basic_rate=700
 		)
 
-		batch_no = get_batch_from_bundle(se1.items[0].serial_and_batch_bundle)
+		batch_no = next(
+			iter(get_batches_for_voucher(se1.doctype, se1.name, se1.items[0].name, se1.items[0].t_warehouse)),
+			None,
+		)
 
 		# Removed 50 Qty, Balace Qty 50
 		make_stock_entry(
@@ -714,10 +734,16 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 		)
 
 		stock_reco.reload()
-		stock_reco_sabb = stock_reco.items[0].serial_and_batch_bundle
-		posting_datetime = frappe.db.get_value("Serial and Batch Bundle", stock_reco_sabb, "posting_datetime")
+		entries = get_voucher_entries(
+			stock_reco.doctype,
+			stock_reco.name,
+			stock_reco.items[0].name,
+			warehouse,
+			fields=["posting_datetime"],
+		)
 		self.assertEqual(
-			posting_datetime, get_combine_datetime(stock_reco.posting_date, stock_reco.posting_time)
+			entries[0].posting_datetime,
+			get_combine_datetime(stock_reco.posting_date, stock_reco.posting_time),
 		)
 
 		sle = frappe.get_all(
@@ -875,7 +901,10 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			rate=100,
 			posting_date=add_days(nowdate(), -5),
 		)
-		batch_no = get_batch_from_bundle(pr.items[0].serial_and_batch_bundle)
+		batch_no = next(
+			iter(get_batches_for_voucher(pr.doctype, pr.name, pr.items[0].name, pr.items[0].warehouse)),
+			None,
+		)
 
 		# Reconcile the batch to 10 @ 500 => difference 5000 - 1000 = 4000
 		reco = create_stock_reconciliation(
@@ -925,7 +954,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			rate=100,
 			posting_date=add_days(nowdate(), -5),
 		)
-		serial_nos = get_serial_nos_from_bundle(pr.items[0].serial_and_batch_bundle)
+		serial_nos = get_serial_nos_for_voucher(pr.doctype, pr.name, pr.items[0].name, pr.items[0].warehouse)
 
 		# Reconcile the serial nos to 5 @ 500 => difference 2500 - 500 = 2000
 		reco = create_stock_reconciliation(
@@ -994,23 +1023,23 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 				qty=0.0,
 			)
 
-			serial_batch_bundle = frappe.get_all(
+			stock_ledgers = frappe.get_all(
 				"Stock Ledger Entry",
 				{"item_code": item_code, "warehouse": warehouse, "is_cancelled": 0, "voucher_no": _reco.name},
-				"serial_and_batch_bundle",
+				"name",
 			)
 
-			self.assertEqual(len(serial_batch_bundle), 1)
+			self.assertEqual(len(stock_ledgers), 1)
 
 			_reco.cancel()
 
-			serial_batch_bundle = frappe.get_all(
+			stock_ledgers = frappe.get_all(
 				"Stock Ledger Entry",
 				{"item_code": item_code, "warehouse": warehouse, "is_cancelled": 0, "voucher_no": _reco.name},
-				"serial_and_batch_bundle",
+				"name",
 			)
 
-			self.assertEqual(len(serial_batch_bundle), 0)
+			self.assertEqual(len(stock_ledgers), 0)
 
 	def test_backdated_purchase_receipt_with_stock_reco(self):
 		item_code = self.make_item(
@@ -1030,7 +1059,9 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 		)
 		pr1.reload()
 
-		serial_nos = sorted(get_serial_nos_from_bundle(pr1.items[0].serial_and_batch_bundle))[:5]
+		serial_nos = sorted(
+			get_serial_nos_for_voucher(pr1.doctype, pr1.name, pr1.items[0].name, pr1.items[0].warehouse)
+		)[:5]
 
 		# Step - 2: Create a Stock Reconciliation
 		sr1 = create_stock_reconciliation(
@@ -1088,7 +1119,10 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			basic_rate=100,
 			posting_date=add_days(nowdate(), -2),
 		)
-		batch1 = get_batch_from_bundle(se1.items[0].serial_and_batch_bundle)
+		batch1 = next(
+			iter(get_batches_for_voucher(se1.doctype, se1.name, se1.items[0].name, se1.items[0].t_warehouse)),
+			None,
+		)
 
 		se2 = make_stock_entry(
 			item_code=item.name,
@@ -1097,7 +1131,10 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			basic_rate=100,
 			posting_date=add_days(nowdate(), -2),
 		)
-		batch2 = get_batch_from_bundle(se2.items[0].serial_and_batch_bundle)
+		batch2 = next(
+			iter(get_batches_for_voucher(se2.doctype, se2.name, se2.items[0].name, se2.items[0].t_warehouse)),
+			None,
+		)
 
 		se3 = make_stock_entry(
 			item_code=item.name,
@@ -1106,7 +1143,10 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			basic_rate=100,
 			posting_date=add_days(nowdate(), -2),
 		)
-		batch3 = get_batch_from_bundle(se3.items[0].serial_and_batch_bundle)
+		batch3 = next(
+			iter(get_batches_for_voucher(se3.doctype, se3.name, se3.items[0].name, se3.items[0].t_warehouse)),
+			None,
+		)
 
 		se3 = make_stock_entry(
 			item_code=item.name,
@@ -1192,9 +1232,9 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 		)
 
 		sr.reload()
-		self.assertTrue(sr.items[0].serial_and_batch_bundle)
-		self.assertFalse(sr.items[0].current_serial_and_batch_bundle)
-		batch = get_batch_from_bundle(sr.items[0].serial_and_batch_bundle)
+		self.assertTrue(has_bundled_entries(sr.doctype, sr.name, sr.items[0].name, warehouse, is_outward=0))
+		self.assertFalse(has_bundled_entries(sr.doctype, sr.name, sr.items[0].name, warehouse, is_outward=1))
+		batch = next(iter(get_batches_for_voucher(sr.doctype, sr.name, sr.items[0].name, warehouse)), None)
 
 		se1 = make_stock_entry(
 			item_code=item.name,
@@ -1204,12 +1244,15 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			posting_date=add_days(nowdate(), -2),
 		)
 
-		batch1 = get_batch_from_bundle(se1.items[0].serial_and_batch_bundle)
+		batch1 = next(
+			iter(get_batches_for_voucher(se1.doctype, se1.name, se1.items[0].name, se1.items[0].t_warehouse)),
+			None,
+		)
 		self.assertNotEqual(batch1, batch)
 
 		sr.reload()
-		self.assertTrue(sr.items[0].serial_and_batch_bundle)
-		self.assertFalse(sr.items[0].current_serial_and_batch_bundle)
+		self.assertTrue(has_bundled_entries(sr.doctype, sr.name, sr.items[0].name, warehouse, is_outward=0))
+		self.assertFalse(has_bundled_entries(sr.doctype, sr.name, sr.items[0].name, warehouse, is_outward=1))
 
 	def test_not_reconcile_all_batch(self):
 		from erpnext.stock.doctype.batch.batch import get_batch_qty
@@ -1237,7 +1280,10 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 				posting_date=nowdate(),
 			)
 
-			batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+			batch_no = next(
+				iter(get_batches_for_voucher(se.doctype, se.name, se.items[0].name, se.items[0].t_warehouse)),
+				None,
+			)
 			batches.append(frappe._dict({"batch_no": batch_no, "qty": qty}))
 
 		sr = create_stock_reconciliation(
@@ -1253,9 +1299,10 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 		self.assertEqual(sr.difference_amount, 98900.0)
 
 		self.assertTrue(sr.items[0].current_valuation_rate)
-		current_sabb = sr.items[0].current_serial_and_batch_bundle
-		doc = frappe.get_doc("Serial and Batch Bundle", current_sabb)
-		for row in doc.entries:
+		current_entries = get_voucher_entries(
+			sr.doctype, sr.name, sr.items[0].name, warehouse, fields=["batch_no", "qty"], is_outward=1
+		)
+		for row in current_entries:
 			self.assertEqual(row.batch_no, batches[0].batch_no)
 			self.assertEqual(row.qty, batches[0].qty * -1)
 
@@ -1269,9 +1316,11 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 
 		sr.cancel()
 
-		for row in frappe.get_all(
-			"Serial and Batch Bundle", fields=["docstatus"], filters={"voucher_no": sr.name}
-		):
+		ledger_rows = frappe.get_all(
+			"Stock Location Ledger", fields=["docstatus"], filters={"voucher_no": sr.name}
+		)
+		self.assertTrue(ledger_rows)
+		for row in ledger_rows:
 			self.assertEqual(row.docstatus, 2)
 
 	def test_not_reconcile_all_serial_nos(self):
@@ -1298,7 +1347,9 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 				posting_date=nowdate(),
 			)
 
-			serial_nos.extend(get_serial_nos_from_bundle(se.items[0].serial_and_batch_bundle))
+			serial_nos.extend(
+				get_serial_nos_for_voucher(se.doctype, se.name, se.items[0].name, se.items[0].t_warehouse)
+			)
 
 		sr = create_stock_reconciliation(
 			item_code=item.name,
@@ -1310,20 +1361,32 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 		)
 
 		sr.reload()
-		current_sabb = sr.items[0].current_serial_and_batch_bundle
-		doc = frappe.get_doc("Serial and Batch Bundle", current_sabb)
-		for row in doc.entries:
-			self.assertEqual(row.serial_no, serial_nos[row.idx - 1])
+		reconciled = set(serial_nos[0:5])
 
-		sabb = sr.items[0].serial_and_batch_bundle
-		doc = frappe.get_doc("Serial and Batch Bundle", sabb)
-		for row in doc.entries:
+		current_entries = get_voucher_entries(
+			sr.doctype, sr.name, sr.items[0].name, warehouse, fields=["serial_no"], is_outward=1
+		)
+		self.assertEqual({row.serial_no for row in current_entries}, reconciled)
+
+		new_entries = get_voucher_entries(
+			sr.doctype,
+			sr.name,
+			sr.items[0].name,
+			warehouse,
+			fields=["serial_no", "qty", "incoming_rate"],
+			is_outward=0,
+		)
+		self.assertEqual({row.serial_no for row in new_entries}, reconciled)
+		for row in new_entries:
 			self.assertEqual(row.qty, 1)
 			self.assertAlmostEqual(row.incoming_rate, 1000.00)
-			self.assertEqual(row.serial_no, serial_nos[row.idx - 1])
 
 	def test_stock_reco_with_legacy_batch(self):
 		from erpnext.stock.doctype.batch.batch import get_batch_qty
+		from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import (
+			submit_stock_location_ledgers,
+			upsert_draft_ledger_entries,
+		)
 
 		batch_item_code = self.make_item(
 			"Test Batch Item Legacy Batch 1",
@@ -1388,6 +1451,18 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			doc.flags.ignore_validate = True
 			doc.submit()
 			doc.reload()
+
+			upsert_draft_ledger_entries(
+				[{"batch_no": batch_id, "qty": qty, "incoming_rate": valuation}],
+				voucher_type="Stock Entry",
+				voucher_no=f"LEGACY-SE-{i}",
+				voucher_detail_no=f"legacy-row-{i}",
+				warehouse=warehouse,
+				item_code=batch_item_code,
+				company="_Test Company",
+				posting_datetime=doc.posting_datetime,
+			)
+			submit_stock_location_ledgers("Stock Entry", f"LEGACY-SE-{i}")
 
 		frappe.flags.ignore_serial_batch_bundle_validation = False
 		frappe.flags.use_serial_and_batch_fields = False
@@ -1494,7 +1569,10 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			basic_rate=100,
 		)
 
-		batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+		batch_no = next(
+			iter(get_batches_for_voucher(se.doctype, se.name, se.items[0].name, se.items[0].t_warehouse)),
+			None,
+		)
 
 		se = make_stock_entry(
 			posting_date="2024-11-01",
@@ -1521,9 +1599,8 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			}
 		)
 
-		sabb_doc = frappe.get_doc("Serial and Batch Bundle", doc.serial_and_batch_bundle)
-		for row in sabb_doc.entries:
-			row.db_set("qty", -20)
+		for entry in get_voucher_entries(se.doctype, se.name, se.items[0].name, se.items[0].s_warehouse):
+			frappe.db.set_value("Stock Location Ledger", entry.name, "qty", -20)
 
 		batch_qty = get_batch_qty(batch_no, warehouse, item_code, consider_negative_batches=True)
 		self.assertEqual(batch_qty, -10)
@@ -1544,8 +1621,12 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 		sr.submit()
 		sr.reload()
 
-		self.assertTrue(sr.items[0].current_serial_and_batch_bundle)
-		self.assertFalse(sr.items[0].serial_and_batch_bundle)
+		self.assertTrue(has_bundled_entries(sr.doctype, sr.name, sr.items[0].name, warehouse, is_outward=0))
+		self.assertFalse(has_bundled_entries(sr.doctype, sr.name, sr.items[0].name, warehouse, is_outward=1))
+
+		entries = get_voucher_entries(sr.doctype, sr.name, sr.items[0].name, warehouse, fields=["qty"])
+		self.assertEqual(sum(flt(d.qty) for d in entries), 10.0)
+		self.assertEqual(get_batch_qty(batch_no, warehouse, item_code, consider_negative_batches=True), 0.0)
 
 	def test_stock_reco_batch_item_current_valuation(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
@@ -1572,7 +1653,10 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			basic_rate=100,
 		)
 
-		batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+		batch_no = next(
+			iter(get_batches_for_voucher(se.doctype, se.name, se.items[0].name, se.items[0].t_warehouse)),
+			None,
+		)
 
 		sr = create_stock_reconciliation(
 			item_code=item_code, warehouse=warehouse, qty=0, rate=100, do_not_save=1
@@ -1614,7 +1698,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 		self.assertEqual(sr.items[0].current_qty, 0)
 		self.assertEqual(sr.items[0].current_valuation_rate, 0)
 
-		batch_no = get_batch_from_bundle(sr.items[0].serial_and_batch_bundle)
+		batch_no = next(iter(get_batches_for_voucher(sr.doctype, sr.name, sr.items[0].name, warehouse)), None)
 		stock_ledgers = frappe.get_all(
 			"Stock Ledger Entry",
 			filters={"voucher_no": sr.name, "is_cancelled": 0},
@@ -1673,7 +1757,9 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			use_serial_batch_fields=1,
 		)
 
-		serial_no = get_serial_nos_from_bundle(se.items[0].serial_and_batch_bundle)[0]
+		serial_no = get_serial_nos_for_voucher(
+			se.doctype, se.name, se.items[0].name, se.items[0].t_warehouse
+		)[0]
 		status = frappe.get_value(
 			"Serial No",
 			serial_no,
@@ -1753,8 +1839,13 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 				rate=100,
 				posting_date=add_days(nowdate(), -3),
 			)
-			bundle = pr.items[0].serial_and_batch_bundle
-			batch_wise_serial_nos[get_batch_from_bundle(bundle)] = get_serial_nos_from_bundle(bundle)
+			batch = next(
+				iter(get_batches_for_voucher(pr.doctype, pr.name, pr.items[0].name, pr.items[0].warehouse)),
+				None,
+			)
+			batch_wise_serial_nos[batch] = get_serial_nos_for_voucher(
+				pr.doctype, pr.name, pr.items[0].name, pr.items[0].warehouse
+			)
 
 		first_batch, second_batch = batch_wise_serial_nos
 		serial_nos = batch_wise_serial_nos[second_batch]
@@ -1790,10 +1881,14 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 
 		reco.load_from_db()
 		self.assertEqual(reco.items[0].current_qty, 3)
-		self.assertEqual(
-			sorted(get_serial_nos_from_bundle(reco.items[0].current_serial_and_batch_bundle)),
-			sorted(serial_nos),
+		current_serials = sorted(
+			r.serial_no
+			for r in get_voucher_entries(
+				reco.doctype, reco.name, reco.items[0].name, warehouse, fields=["serial_no"], is_outward=1
+			)
+			if r.serial_no
 		)
+		self.assertEqual(current_serials, sorted(serial_nos))
 		self.assertEqual(get_batch_qty(second_batch, warehouse, item_code), 2)
 		self.assertEqual(get_batch_qty(first_batch, warehouse, item_code), 5)
 
@@ -1843,7 +1938,9 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			purpose="Opening Stock",
 		)
 
-		batch_no = get_batch_from_bundle(reco.items[0].serial_and_batch_bundle)
+		batch_no = next(
+			iter(get_batches_for_voucher(reco.doctype, reco.name, reco.items[0].name, warehouse)), None
+		)
 
 		make_stock_entry(
 			item_code=item_code,
@@ -1906,9 +2003,9 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 		batch_qty = get_batch_qty(batch_no, warehouse, item_code)
 		self.assertEqual(batch_qty, 4)
 
-	def test_sabb_cancel_on_stock_reco_cancellation(self):
+	def test_ledger_entries_cancelled_on_stock_reco_cancellation(self):
 		item_code = self.make_item(
-			"Test Item for SABB Cancel on Stock Reco Cancellation",
+			"Test Item for Ledger Cancel on Stock Reco Cancellation",
 			{
 				"is_stock_item": 1,
 				"has_batch_no": 1,
@@ -1930,7 +2027,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 
 		sr.reload()
 
-		batch_no = get_batch_from_bundle(sr.items[0].serial_and_batch_bundle)
+		batch_no = next(iter(get_batches_for_voucher(sr.doctype, sr.name, sr.items[0].name, warehouse)), None)
 
 		sr1 = create_stock_reconciliation(
 			item_code=item_code,
@@ -1943,22 +2040,21 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 
 		sr1.reload()
 
-		current_serial_and_batch_bundle = sr1.items[0].current_serial_and_batch_bundle
-		serial_and_batch_bundle = sr1.items[0].serial_and_batch_bundle
-
-		self.assertTrue(current_serial_and_batch_bundle)
-		self.assertTrue(serial_and_batch_bundle)
+		self.assertTrue(
+			has_bundled_entries(sr1.doctype, sr1.name, sr1.items[0].name, warehouse, is_outward=1)
+		)
+		self.assertTrue(
+			has_bundled_entries(sr1.doctype, sr1.name, sr1.items[0].name, warehouse, is_outward=0)
+		)
 
 		sr1.cancel()
 
-		for sabb in [serial_and_batch_bundle, current_serial_and_batch_bundle]:
-			docstatus = frappe.db.get_value(
-				"Serial and Batch Bundle",
-				sabb,
-				"docstatus",
-			)
-
-			self.assertEqual(docstatus, 2)
+		ledger_rows = frappe.get_all(
+			"Stock Location Ledger", fields=["docstatus"], filters={"voucher_no": sr1.name}
+		)
+		self.assertTrue(ledger_rows)
+		for row in ledger_rows:
+			self.assertEqual(row.docstatus, 2)
 
 	def test_stock_reco_with_opening_stock_with_diff_inventory(self):
 		from erpnext.stock.doctype.inventory_dimension.test_inventory_dimension import (
@@ -2078,7 +2174,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			purpose="Opening Stock",
 		)
 
-		serial_no = get_serial_nos_from_bundle(reco.items[0].serial_and_batch_bundle)[0]
+		serial_no = get_serial_nos_for_voucher(reco.doctype, reco.name, reco.items[0].name, warehouse)[0]
 
 		create_delivery_note(
 			item_code=item_code, warehouse=warehouse, qty=1, rate=100, posting_date=nowdate()
@@ -2203,33 +2299,14 @@ def create_stock_reconciliation(**args):
 		or frappe.get_cached_value("Cost Center", filters={"is_group": 0, "company": sr.company})
 	)
 
-	bundle_id = None
-	if not args.use_serial_batch_fields and (args.batch_no or args.serial_no) and args.qty:
-		batches = frappe._dict({})
-		if args.batch_no:
-			batches[args.batch_no] = args.qty
-
-		bundle_id = make_serial_batch_bundle(
-			frappe._dict(
-				{
-					"item_code": args.item_code or "_Test Item",
-					"warehouse": args.warehouse or "_Test Warehouse - _TC",
-					"qty": args.qty,
-					"voucher_type": "Stock Reconciliation",
-					"batches": batches,
-					"rate": args.rate,
-					"serial_nos": args.serial_no,
-					"posting_date": sr.posting_date,
-					"posting_time": sr.posting_time,
-					"type_of_transaction": "Inward" if args.qty > 0 else "Outward",
-					"company": args.company or "_Test Company",
-					"do_not_submit": True,
-				}
-			)
-		).name
-
 	if args.reconcile_all_serial_batch is None:
 		args.reconcile_all_serial_batch = 1
+
+	picks_own_entries = (
+		not args.use_serial_batch_fields
+		and not args.reconcile_all_serial_batch
+		and (args.serial_no or args.batch_no)
+	)
 
 	sr.append(
 		"items",
@@ -2237,17 +2314,19 @@ def create_stock_reconciliation(**args):
 			"item_code": args.item_code or "_Test Item",
 			"warehouse": args.warehouse or "_Test Warehouse - _TC",
 			"qty": args.qty,
-			"reconcile_all_serial_batch": args.reconcile_all_serial_batch,
+			"reconcile_all_serial_batch": 1 if picks_own_entries else args.reconcile_all_serial_batch,
 			"valuation_rate": args.rate,
 			"serial_no": args.serial_no if args.use_serial_batch_fields else None,
 			"batch_no": args.batch_no if args.use_serial_batch_fields else None,
-			"serial_and_batch_bundle": bundle_id,
 			"use_serial_batch_fields": args.use_serial_batch_fields,
 		},
 	)
 
 	if not args.do_not_save:
 		sr.insert()
+		if picks_own_entries:
+			set_new_state_ledger_entries(sr, args)
+
 		try:
 			if not args.do_not_submit:
 				sr.submit()
@@ -2257,6 +2336,44 @@ def create_stock_reconciliation(**args):
 		sr.load_from_db()
 
 	return sr
+
+
+def set_new_state_ledger_entries(sr, args):
+	"""Stands in for the inline Serial / Batch editor: writes the target composition as draft
+	Stock Location Ledger rows (is_outward=0) against the saved row, then unchecks
+	reconcile_all_serial_batch so the reconciliation scopes itself to just that composition."""
+	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+	from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import (
+		upsert_draft_ledger_entries,
+	)
+	from erpnext.stock.serial_batch_bundle import combine_datetime
+
+	row = sr.items[0]
+	if args.serial_no:
+		serial_nos = args.serial_no if isinstance(args.serial_no, list) else get_serial_nos(args.serial_no)
+		entries = [{"serial_no": serial_no, "qty": 1} for serial_no in serial_nos]
+	else:
+		entries = [{"batch_no": args.batch_no, "qty": flt(args.qty)}]
+
+	upsert_draft_ledger_entries(
+		entries,
+		voucher_type=sr.doctype,
+		voucher_no=sr.name,
+		voucher_detail_no=row.name,
+		warehouse=row.warehouse,
+		item_code=row.item_code,
+		company=sr.company,
+		posting_datetime=combine_datetime(sr.posting_date, sr.posting_time),
+		is_outward=0,
+	)
+
+	row.db_set(
+		{
+			"reconcile_all_serial_batch": 0,
+			"qty": sum(flt(entry["qty"]) for entry in entries),
+		}
+	)
+	sr.reload()
 
 
 def set_valuation_method(item_code, valuation_method):

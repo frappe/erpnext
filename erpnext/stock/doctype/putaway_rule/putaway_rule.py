@@ -123,7 +123,7 @@ def apply_putaway_rule(
 		source_warehouse = item.get("s_warehouse")
 		serial_nos = []
 		if item.get("serial_no"):
-			serial_nos = get_serial_nos(item.get("serial_no"))
+			serial_nos = list(get_serial_nos(item.get("serial_no")))
 
 		item.conversion_factor = flt(item.conversion_factor) or 1.0
 		pending_qty, item_code = flt(item.qty), item.item_code
@@ -295,8 +295,6 @@ def add_row(item, to_allocate, warehouse, updated_table, rule=None, serial_nos=N
 
 	if serial_nos:
 		new_updated_table_row.serial_no = get_serial_nos_to_allocate(serial_nos, to_allocate)
-
-	new_updated_table_row.serial_and_batch_bundle = ""
 
 	updated_table.append(new_updated_table_row)
 	return updated_table

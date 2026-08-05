@@ -19,7 +19,7 @@ def get_item_list(wo_list, filters):
 	out = []
 
 	if wo_list:
-		bin = frappe.qb.DocType("Bin")
+		bin = frappe.qb.DocType("Stock Level")
 		bom = frappe.qb.DocType("BOM")
 		bom_item = frappe.qb.DocType("BOM Item")
 

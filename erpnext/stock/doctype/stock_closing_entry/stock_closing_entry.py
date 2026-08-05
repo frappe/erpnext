@@ -7,7 +7,8 @@ import frappe
 from frappe import _
 from frappe.desk.form.load import get_attachments
 from frappe.model.document import Document
-from frappe.utils import add_days, get_date_str, get_link_to_form, nowtime, parse_json
+from frappe.query_builder import Case, Order
+from frappe.utils import add_days, flt, get_date_str, get_link_to_form, parse_json
 from frappe.utils.background_jobs import enqueue
 from frappe.utils.caching import request_cache
 
@@ -148,6 +149,7 @@ class StockClosingEntry(Document):
 	def remove_stock_closing(self):
 		table = frappe.qb.DocType("Stock Closing Balance")
 		frappe.qb.from_(table).delete().where(table.stock_closing_entry == self.name).run()
+		reset_stock_closing_cache()
 
 	@frappe.whitelist(methods=["POST"])
 	def enqueue_job(self):
@@ -183,7 +185,10 @@ class StockClosingEntry(Document):
 			new_doc = frappe.new_doc("Stock Closing Balance")
 			new_doc.update(row)
 			new_doc.posting_date = self.to_date
-			new_doc.posting_time = nowtime()
+			# The snapshot absorbs every entry dated on or before to_date, so its floor must sit at
+			# the very end of that day - a mid-day timestamp would let same-day entries be counted
+			# both inside the snapshot and again by live readers.
+			new_doc.posting_time = "23:59:59.999999"
 			new_doc.posting_datetime = get_combine_datetime(self.to_date, new_doc.posting_time)
 			new_doc.stock_closing_entry = self.name
 			new_doc.company = self.company
@@ -209,10 +214,138 @@ def prepare_closing_stock_balance(name):
 	try:
 		doc.create_stock_closing_balance_entries()
 		doc.db_set("status", "Completed")
+		reset_stock_closing_cache()
 	except Exception:
 		frappe.db.rollback()
 		doc.db_set("status", "Failed")
 		doc.log_error(title="Stock Closing Entry Failed")
+
+
+def reset_stock_closing_cache():
+	for attr in ("has_completed_stock_closing", "last_completed_stock_closing"):
+		if hasattr(frappe.local, attr):
+			delattr(frappe.local, attr)
+
+
+def has_completed_stock_closing() -> bool:
+	if not hasattr(frappe.local, "has_completed_stock_closing"):
+		frappe.local.has_completed_stock_closing = bool(
+			frappe.db.exists("Stock Closing Entry", {"docstatus": 1, "status": "Completed"})
+		)
+
+	return frappe.local.has_completed_stock_closing
+
+
+def get_closing_balance_for_batch(item_code, warehouse, batch_no):
+	"""Latest completed snapshot row for one (item, warehouse, batch) key. Ledger rows dated at
+	or before its posting_datetime are absorbed into the snapshot and must not be counted again."""
+	if not (batch_no and has_completed_stock_closing()):
+		return None
+
+	balance = frappe.qb.DocType("Stock Closing Balance")
+	entry = frappe.qb.DocType("Stock Closing Entry")
+
+	rows = (
+		frappe.qb.from_(balance)
+		.inner_join(entry)
+		.on(balance.stock_closing_entry == entry.name)
+		.select(
+			balance.actual_qty,
+			# StockClosing accumulates value into stock_value_difference; summed over the whole
+			# window it IS the closing stock value (stock_value itself is never populated).
+			balance.stock_value_difference.as_("stock_value"),
+			balance.posting_datetime,
+		)
+		.where(
+			(entry.docstatus == 1)
+			& (entry.status == "Completed")
+			& (balance.item_code == item_code)
+			& (balance.warehouse == warehouse)
+			& (balance.batch_no == batch_no)
+		)
+		.orderby(balance.posting_datetime, order=Order.desc)
+		.limit(1)
+	).run(as_dict=True)
+
+	return _clamp_negative_stock_value(rows[0]) if rows else None
+
+
+def _clamp_negative_stock_value(row):
+	"""Legacy data can carry outgoing rates above the incoming rate (e.g. a serial received at
+	1000 but consumed at 2000), leaving the snapshot value negative while qty is not - such a
+	value is a data anomaly and would poison every seeded valuation, so floor it at zero. A
+	negative value alongside negative qty is legitimate negative stock and is kept."""
+	if flt(row.stock_value) < 0 and flt(row.actual_qty) >= 0:
+		row.stock_value = 0.0
+
+	return row
+
+
+def get_closing_balances_for_batches(kwargs) -> dict:
+	"""Snapshot rows keyed by (batch_no, warehouse) matching an availability query's filters,
+	keeping only the latest snapshot per key."""
+	if not has_completed_stock_closing():
+		return {}
+
+	balance = frappe.qb.DocType("Stock Closing Balance")
+	entry = frappe.qb.DocType("Stock Closing Entry")
+
+	query = (
+		frappe.qb.from_(balance)
+		.inner_join(entry)
+		.on(balance.stock_closing_entry == entry.name)
+		.select(
+			balance.batch_no,
+			balance.warehouse,
+			balance.actual_qty,
+			balance.stock_value_difference.as_("stock_value"),
+			balance.posting_datetime,
+		)
+		.where(
+			(entry.docstatus == 1)
+			& (entry.status == "Completed")
+			& (balance.batch_no.isnotnull())
+			& (balance.batch_no != "")
+		)
+		.orderby(balance.posting_datetime, order=Order.desc)
+	)
+
+	for field in ("item_code", "warehouse", "batch_no", "company"):
+		value = kwargs.get(field)
+		if not value:
+			continue
+
+		if isinstance(value, list):
+			query = query.where(balance[field].isin(value))
+		else:
+			query = query.where(balance[field] == value)
+
+	closing_rows = {}
+	for row in query.run(as_dict=True):
+		closing_rows.setdefault((row.batch_no, row.warehouse), _clamp_negative_stock_value(row))
+
+	return closing_rows
+
+
+def get_last_completed_closing(company):
+	if not has_completed_stock_closing():
+		return None
+
+	cache = getattr(frappe.local, "last_completed_stock_closing", None)
+	if cache is None:
+		cache = frappe.local.last_completed_stock_closing = {}
+
+	if company not in cache:
+		entries = frappe.get_all(
+			"Stock Closing Entry",
+			fields=["name", "to_date"],
+			filters={"company": company, "docstatus": 1, "status": "Completed"},
+			order_by="to_date desc",
+			limit=1,
+		)
+		cache[company] = entries[0] if entries else None
+
+	return cache[company]
 
 
 class StockClosing:
@@ -386,13 +519,25 @@ class StockClosing:
 					query = query.where(table[key] == value)
 
 		if doctype == "Stock Ledger Entry":
-			sabb_table = frappe.qb.DocType("Serial and Batch Entry")
-			query = query.left_join(sabb_table).on(
-				(sabb_table.parent == table.serial_and_batch_bundle) & (table.has_batch_no == 1)
+			# A single SLE can aggregate several batches moved in one transaction (its own
+			# batch_no field only holds one); join Stock Location Ledger to split it back out
+			# per batch. Match is_outward to the SLE's own direction so a Stock Reconciliation's
+			# reversal leg and new-state leg (same voucher tuple, opposite directions) don't both
+			# fan out against this one SLE row.
+			sll_table = frappe.qb.DocType("Stock Location Ledger")
+			query = query.left_join(sll_table).on(
+				(sll_table.voucher_type == table.voucher_type)
+				& (sll_table.voucher_no == table.voucher_no)
+				& (sll_table.voucher_detail_no == table.voucher_detail_no)
+				& (sll_table.item_code == table.item_code)
+				& (sll_table.warehouse == table.warehouse)
+				& (sll_table.docstatus == 1)
+				& (sll_table.is_outward == Case().when(table.actual_qty < 0, 1).else_(0))
+				& (table.has_batch_no == 1)
 			)
-			query = query.select(sabb_table.batch_no.as_("sabb_batch_no"))
-			query = query.select(sabb_table.qty.as_("sabb_qty"))
-			query = query.select(sabb_table.stock_value_difference.as_("sabb_stock_value_difference"))
+			query = query.select(sll_table.batch_no.as_("sabb_batch_no"))
+			query = query.select(sll_table.qty.as_("sabb_qty"))
+			query = query.select(sll_table.stock_value_difference.as_("sabb_stock_value_difference"))
 
 		return query.run(as_dict=True)
 

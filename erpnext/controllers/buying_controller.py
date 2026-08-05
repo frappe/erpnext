@@ -67,7 +67,6 @@ class BuyingController(SubcontractingController):
 
 		if self.doctype in ("Purchase Receipt", "Purchase Invoice"):
 			self.update_valuation_rate()
-			self.set_serial_and_batch_bundle()
 
 	def onload(self):
 		super().onload()
@@ -132,56 +131,86 @@ class BuyingController(SubcontractingController):
 		frappe.throw(msg)
 
 	def create_package_for_transfer(self) -> None:
-		"""Create serial and batch package for Sourece Warehouse in case of inter transfer."""
+		"""Create serial and batch entries for Source Warehouse in case of inter transfer."""
 
 		if self.is_internal_transfer() and (
 			self.doctype == "Purchase Receipt" or (self.doctype == "Purchase Invoice" and self.update_stock)
 		):
 			field = "delivery_note_item" if self.doctype == "Purchase Receipt" else "sales_invoice_item"
-
-			doctype = "Delivery Note Item" if self.doctype == "Purchase Receipt" else "Sales Invoice Item"
+			child_doctype = (
+				"Delivery Note Item" if self.doctype == "Purchase Receipt" else "Sales Invoice Item"
+			)
+			source_doctype = "Delivery Note" if self.doctype == "Purchase Receipt" else "Sales Invoice"
 
 			ids = [d.get(field) for d in self.get("items") if d.get(field)]
-			bundle_ids = {}
+			source_parents = {}
 			if ids:
-				for bundle in frappe.get_all(
-					doctype, filters={"name": ("in", ids)}, fields=["serial_and_batch_bundle", "name"]
+				for row in frappe.get_all(
+					child_doctype, filters={"name": ("in", ids)}, fields=["parent", "name"]
 				):
-					bundle_ids[bundle.name] = bundle.serial_and_batch_bundle
+					source_parents[row.name] = row.parent
 
-			if not bundle_ids:
+			if not source_parents:
 				return
 
+			from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import (
+				get_voucher_entries,
+				upsert_draft_ledger_entries,
+			)
+
 			for item in self.get("items"):
-				if item.get(field) and not item.serial_and_batch_bundle and bundle_ids.get(item.get(field)):
-					item.serial_and_batch_bundle = self.make_package_for_transfer(
-						bundle_ids.get(item.get(field)),
-						item.from_warehouse,
-						type_of_transaction="Outward",
-						do_not_submit=True,
-						qty=item.qty,
+				source_detail = item.get(field)
+				source_parent = source_parents.get(source_detail)
+				if not source_parent:
+					continue
+
+				source_entries = get_voucher_entries(
+					source_doctype,
+					source_parent,
+					source_detail,
+					warehouse=item.from_warehouse,
+					fields=["serial_no", "batch_no", "qty"],
+				)
+				if not source_entries:
+					source_entries = get_voucher_entries(
+						source_doctype,
+						source_parent,
+						source_detail,
+						fields=["serial_no", "batch_no", "qty"],
+						is_outward=1,
 					)
-				elif (
-					not self.is_new()
-					and item.serial_and_batch_bundle
-					and next(
-						(
-							old_item
-							for old_item in self.get_doc_before_save().items
-							if old_item.name == item.name and old_item.qty != item.qty
-						),
-						None,
-					)
-					and len(
-						sabe := frappe.get_all(
-							"Serial and Batch Entry",
-							filters={"parent": item.serial_and_batch_bundle, "serial_no": ["is", "not set"]},
-							pluck="name",
-						)
-					)
-					== 1
-				):
-					frappe.set_value("Serial and Batch Entry", sabe[0], "qty", item.qty)
+
+				if not source_entries:
+					continue
+
+				upsert_draft_ledger_entries(
+					self.get_transfer_entries_for_qty(source_entries, item),
+					voucher_type=self.doctype,
+					voucher_no=self.name,
+					voucher_detail_no=item.name,
+					warehouse=item.from_warehouse,
+					item_code=item.item_code,
+					company=self.company,
+				)
+
+	def get_transfer_entries_for_qty(self, source_entries, item):
+		entries = [
+			{"serial_no": e.serial_no, "batch_no": e.batch_no, "qty": -abs(flt(e.qty))}
+			for e in source_entries
+		]
+
+		row_qty = flt(item.get("stock_qty")) or flt(item.get("qty"))
+		if not row_qty:
+			return entries
+
+		serial_entries = [e for e in entries if e["serial_no"]]
+		if serial_entries:
+			return serial_entries[: cint(row_qty)] + [e for e in entries if not e["serial_no"]]
+
+		if len(entries) == 1 and entries[0]["batch_no"]:
+			entries[0]["qty"] = -row_qty
+
+		return entries
 
 	def set_rate_for_standalone_debit_note(self):
 		if self.get("is_return") and self.get("update_stock") and not self.return_against:
@@ -195,7 +224,6 @@ class BuyingController(SubcontractingController):
 							"posting_date": self.get("posting_date"),
 							"posting_time": self.get("posting_time"),
 							"qty": row.qty,
-							"serial_and_batch_bundle": row.get("serial_and_batch_bundle"),
 							"company": self.company,
 							"voucher_type": self.doctype,
 							"voucher_no": self.name,
@@ -679,7 +707,6 @@ class BuyingController(SubcontractingController):
 						"posting_date": self.get("posting_date") or self.get("transaction_date"),
 						"posting_time": posting_time,
 						"qty": -1 * flt(d.get("stock_qty")),
-						"serial_and_batch_bundle": d.get("serial_and_batch_bundle"),
 						"company": self.company,
 						"voucher_type": self.doctype,
 						"voucher_no": self.name,
@@ -780,14 +807,6 @@ class BuyingController(SubcontractingController):
 						(not cint(self.is_return) and self.docstatus == 1)
 						or (cint(self.is_return) and self.docstatus == 2)
 					):
-						serial_and_batch_bundle = d.get("serial_and_batch_bundle")
-						if self.is_internal_transfer() and self.is_return and self.docstatus == 2:
-							serial_and_batch_bundle = frappe.db.get_value(
-								"Stock Ledger Entry",
-								{"voucher_detail_no": d.name, "warehouse": d.from_warehouse},
-								"serial_and_batch_bundle",
-							)
-
 						from_warehouse_sle = self.get_sl_entries(
 							d,
 							{
@@ -796,33 +815,24 @@ class BuyingController(SubcontractingController):
 								"outgoing_rate": d.rate,
 								"recalculate_rate": 1,
 								"dependant_sle_voucher_detail_no": d.name,
-								"serial_and_batch_bundle": serial_and_batch_bundle,
 							},
 						)
 
 						sl_entries.append(from_warehouse_sle)
 
-					type_of_transaction = "Inward"
-					if self.docstatus == 2:
-						type_of_transaction = "Outward"
-
 					sle = self.get_sl_entries(
 						d,
 						{
 							"actual_qty": flt(pr_qty),
-							"serial_and_batch_bundle": (
-								d.serial_and_batch_bundle
-								if not self.is_internal_transfer()
-								or self.is_return
-								or (self.is_internal_transfer() and self.docstatus == 2)
-								else self.get_package_for_target_warehouse(
-									d,
-									type_of_transaction=type_of_transaction,
-									via_landed_cost_voucher=via_landed_cost_voucher,
-								)
-							),
 						},
 					)
+
+					if self.is_internal_transfer() and not self.is_return and self.docstatus == 1:
+						from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import (
+							duplicate_location_entries_for_transfer,
+						)
+
+						duplicate_location_entries_for_transfer(sle)
 
 					if self.is_return:
 						outgoing_rate = get_rate_for_return(
@@ -833,7 +843,6 @@ class BuyingController(SubcontractingController):
 							{
 								"outgoing_rate": outgoing_rate,
 								"recalculate_rate": 1,
-								"serial_and_batch_bundle": d.serial_and_batch_bundle,
 							}
 						)
 						if d.from_warehouse:
@@ -853,27 +862,21 @@ class BuyingController(SubcontractingController):
 						(not cint(self.is_return) and self.docstatus == 2)
 						or (cint(self.is_return) and self.docstatus == 1)
 					):
-						serial_and_batch_bundle = None
-						if self.is_internal_transfer() and self.docstatus == 2:
-							serial_and_batch_bundle = frappe.db.get_value(
-								"Stock Ledger Entry",
-								{"voucher_detail_no": d.name, "warehouse": d.warehouse},
-								"serial_and_batch_bundle",
-							)
-
 						from_warehouse_sle = self.get_sl_entries(
 							d,
 							{
 								"actual_qty": -1 * pr_qty,
 								"warehouse": d.from_warehouse,
 								"recalculate_rate": 1,
-								"serial_and_batch_bundle": (
-									self.get_package_for_target_warehouse(d, d.from_warehouse, "Inward")
-									if self.is_internal_transfer() and self.is_return
-									else serial_and_batch_bundle
-								),
 							},
 						)
+
+						if self.is_internal_transfer() and self.is_return:
+							from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import (
+								duplicate_location_entries_for_transfer,
+							)
+
+							duplicate_location_entries_for_transfer(from_warehouse_sle)
 
 						sl_entries.append(from_warehouse_sle)
 
@@ -892,7 +895,6 @@ class BuyingController(SubcontractingController):
 							),
 							"incoming_rate": valuation_rate_for_rejected_item if not self.is_return else 0.0,
 							"outgoing_rate": valuation_rate_for_rejected_item if self.is_return else 0.0,
-							"serial_and_batch_bundle": d.rejected_serial_and_batch_bundle,
 						},
 					)
 				)
@@ -901,32 +903,6 @@ class BuyingController(SubcontractingController):
 			sl_entries,
 			allow_negative_stock=allow_negative_stock,
 			via_landed_cost_voucher=via_landed_cost_voucher,
-		)
-
-	def get_package_for_target_warehouse(
-		self, item, warehouse=None, type_of_transaction=None, via_landed_cost_voucher=None
-	) -> str:
-		if via_landed_cost_voucher and item.get("warehouse"):
-			if sabb := frappe.db.get_value(
-				"Serial and Batch Bundle",
-				{
-					"voucher_detail_no": item.name,
-					"warehouse": item.get("warehouse"),
-					"docstatus": 1,
-					"is_cancelled": 0,
-				},
-				"name",
-			):
-				return sabb
-
-		if not item.serial_and_batch_bundle:
-			return ""
-
-		if not warehouse:
-			warehouse = item.warehouse
-
-		return self.make_package_for_transfer(
-			item.serial_and_batch_bundle, warehouse, type_of_transaction=type_of_transaction
 		)
 
 	def update_ordered_and_reserved_qty(self):

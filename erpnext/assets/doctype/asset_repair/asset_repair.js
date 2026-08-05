@@ -3,8 +3,6 @@
 
 frappe.ui.form.on("Asset Repair", {
 	setup: function (frm) {
-		frm.ignore_doctypes_on_cancel_all = ["Serial and Batch Bundle"];
-
 		frm.fields_dict.cost_center.get_query = function (doc) {
 			return {
 				filters: {
@@ -58,32 +56,10 @@ frappe.ui.form.on("Asset Repair", {
 				},
 			};
 		});
-
-		frm.set_query("serial_and_batch_bundle", "stock_items", (doc, cdt, cdn) => {
-			let row = locals[cdt][cdn];
-			return {
-				filters: {
-					item_code: row.item_code,
-					voucher_type: doc.doctype,
-					voucher_no: ["in", [doc.name, ""]],
-					is_cancelled: 0,
-				},
-			};
-		});
 	},
 
 	refresh: function (frm) {
 		frm.events.show_general_ledger(frm);
-
-		let sbb_field = frm.get_docfield("stock_items", "serial_and_batch_bundle");
-		if (sbb_field) {
-			sbb_field.get_route_options_for_new_doc = (row) => {
-				return {
-					item_code: row.doc.item_code,
-					voucher_type: frm.doc.doctype,
-				};
-			};
-		}
 		if (frm.doc.asset) {
 			frappe.db.get_value("Asset", frm.doc.asset, "status").then(({ message }) => {
 				frm.set_df_property(
@@ -251,9 +227,6 @@ frappe.ui.form.on("Asset Repair Consumed Item", {
 				new erpnext.SerialBatchPackageSelector(frm, item, (r) => {
 					if (r) {
 						frappe.model.set_value(item.doctype, item.name, {
-							serial_and_batch_bundle: r.name,
-							use_serial_batch_fields: 0,
-							valuation_rate: r.avg_rate,
 							consumed_quantity: Math.abs(r.total_qty),
 						});
 					}

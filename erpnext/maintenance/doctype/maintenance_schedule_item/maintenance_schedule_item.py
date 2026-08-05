@@ -25,7 +25,6 @@ class MaintenanceScheduleItem(Document):
 		periodicity: DF.Literal["", "Weekly", "Monthly", "Quarterly", "Half Yearly", "Yearly", "Random"]
 		sales_order: DF.Link | None
 		sales_person: DF.Link | None
-		serial_and_batch_bundle: DF.Link | None
 		serial_no: DF.SmallText | None
 		start_date: DF.Date
 	# end: auto-generated types

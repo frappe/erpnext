@@ -13,10 +13,8 @@ from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import in
 from erpnext.accounts.doctype.pos_invoice.pos_invoice import make_sales_return
 from erpnext.accounts.doctype.pos_invoice.test_pos_invoice import create_pos_invoice
 from erpnext.accounts.doctype.pos_opening_entry.test_pos_opening_entry import create_opening_entry
-from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
-	get_serial_nos_from_bundle,
-)
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import get_serial_nos_for_voucher
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -381,7 +379,11 @@ class TestPOSInvoiceMergeLog(ERPNextTestSuite):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 
 		se = make_serialized_item(self)
-		serial_no = get_serial_nos_from_bundle(se.get("items")[0].serial_and_batch_bundle)[0]
+		serial_no = sorted(
+			get_serial_nos_for_voucher(
+				"Stock Entry", se.name, se.get("items")[0].name, se.get("items")[0].t_warehouse
+			)
+		)[0]
 
 		pos_inv = create_pos_invoice(
 			item_code="_Test Serialized Item With Series",

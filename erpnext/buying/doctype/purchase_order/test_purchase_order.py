@@ -709,7 +709,7 @@ class TestPurchaseOrder(ERPNextTestSuite):
 
 	def test_ordered_qty_for_closing_po(self):
 		bin = frappe.get_all(
-			"Bin",
+			"Stock Level",
 			filters={"item_code": "_Test Item", "warehouse": "_Test Warehouse - _TC"},
 			fields=["ordered_qty"],
 		)
@@ -1792,8 +1792,12 @@ def create_pr_against_po(po, received_qty=4):
 
 
 def get_ordered_qty(item_code="_Test Item", warehouse="_Test Warehouse - _TC"):
-	return flt(frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "ordered_qty"))
+	return flt(
+		frappe.db.get_value("Stock Level", {"item_code": item_code, "warehouse": warehouse}, "ordered_qty")
+	)
 
 
 def get_requested_qty(item_code="_Test Item", warehouse="_Test Warehouse - _TC"):
-	return flt(frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "indented_qty"))
+	return flt(
+		frappe.db.get_value("Stock Level", {"item_code": item_code, "warehouse": warehouse}, "indented_qty")
+	)

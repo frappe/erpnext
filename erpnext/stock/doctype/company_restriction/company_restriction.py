@@ -25,7 +25,6 @@ COMPANY_RESTRICTION_EXEMPT_DOCTYPES = frozenset(
 		"Repost Item Valuation",
 		"Repost Payment Ledger",
 		"Serial No",
-		"Serial and Batch Bundle",
 		"Unreconcile Payment",
 	}
 )

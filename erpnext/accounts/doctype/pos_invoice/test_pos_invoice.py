@@ -3,7 +3,6 @@
 import copy
 
 import frappe
-from frappe import _
 
 from erpnext.accounts.doctype.mode_of_payment.test_mode_of_payment import (
 	set_default_account_for_mode_of_payment,
@@ -12,12 +11,12 @@ from erpnext.accounts.doctype.pos_invoice.pos_invoice import make_sales_return
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import PartialPaymentValidationError
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
-	get_batch_from_bundle,
-	get_serial_nos_from_bundle,
-	make_serial_batch_bundle,
-)
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import (
+	get_batches_for_voucher,
+	get_serial_nos_for_voucher,
+	has_bundled_entries,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -264,7 +263,9 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 			expense_account="Cost of Goods Sold - _TC",
 		)
 
-		serial_nos = get_serial_nos_from_bundle(se.get("items")[0].serial_and_batch_bundle)
+		serial_nos = get_serial_nos_for_voucher(
+			"Stock Entry", se.name, se.get("items")[0].name, se.get("items")[0].t_warehouse
+		)
 
 		pos = create_pos_invoice(
 			company="_Test Company",
@@ -290,7 +291,13 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		pos_return.insert()
 		pos_return.submit()
 		self.assertEqual(
-			get_serial_nos_from_bundle(pos_return.get("items")[0].serial_and_batch_bundle)[0], serial_nos[0]
+			get_serial_nos_for_voucher(
+				"POS Invoice",
+				pos_return.name,
+				pos_return.get("items")[0].name,
+				pos_return.get("items")[0].warehouse,
+			)[0],
+			serial_nos[0],
 		)
 
 	def test_partial_pos_returns(self):
@@ -304,7 +311,9 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 			expense_account="Cost of Goods Sold - _TC",
 		)
 
-		serial_nos = get_serial_nos_from_bundle(se.get("items")[0].serial_and_batch_bundle)
+		serial_nos = get_serial_nos_for_voucher(
+			"Stock Entry", se.name, se.get("items")[0].name, se.get("items")[0].t_warehouse
+		)
 
 		pos = create_pos_invoice(
 			company="_Test Company",
@@ -337,13 +346,12 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		pos_return1.submit()
 		pos_return1.reload()
 
-		bundle_id = frappe.get_doc(
-			"Serial and Batch Bundle", pos_return1.get("items")[0].serial_and_batch_bundle
-		)
-
-		bundle_id.load_from_db()
-
-		serial_no = bundle_id.entries[0].serial_no
+		serial_no = get_serial_nos_for_voucher(
+			"POS Invoice",
+			pos_return1.name,
+			pos_return1.get("items")[0].name,
+			pos_return1.get("items")[0].warehouse,
+		)[0]
 		self.assertEqual(serial_no, serial_nos[0])
 
 		# partial return 2
@@ -354,7 +362,12 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		pos_return2.submit()
 
 		self.assertEqual(pos_return2.get("items")[0].qty, -1)
-		serial_no = get_serial_nos_from_bundle(pos_return2.get("items")[0].serial_and_batch_bundle)[0]
+		serial_no = get_serial_nos_for_voucher(
+			"POS Invoice",
+			pos_return2.name,
+			pos_return2.get("items")[0].name,
+			pos_return2.get("items")[0].warehouse,
+		)[0]
 		self.assertEqual(serial_no, serial_nos[1])
 
 	def test_pos_change_amount(self):
@@ -448,7 +461,9 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 			expense_account="Cost of Goods Sold - _TC",
 		)
 
-		serial_nos = get_serial_nos_from_bundle(se.get("items")[0].serial_and_batch_bundle)
+		serial_nos = get_serial_nos_for_voucher(
+			"Stock Entry", se.name, se.get("items")[0].name, se.get("items")[0].t_warehouse
+		)
 
 		pos = create_pos_invoice(
 			company="_Test Company",
@@ -499,7 +514,9 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 			expense_account="Cost of Goods Sold - _TC",
 		)
 
-		serial_nos = get_serial_nos_from_bundle(se.get("items")[0].serial_and_batch_bundle)
+		serial_nos = get_serial_nos_for_voucher(
+			"Stock Entry", se.name, se.get("items")[0].name, se.get("items")[0].t_warehouse
+		)
 
 		si = create_sales_invoice(
 			company="_Test Company",
@@ -549,7 +566,12 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 			cost_center="Main - _TC",
 			expense_account="Cost of Goods Sold - _TC",
 		)
-		serial_nos = get_serial_nos_from_bundle(se.get("items")[0].serial_and_batch_bundle)[0] + "wrong"
+		serial_nos = (
+			get_serial_nos_for_voucher(
+				"Stock Entry", se.name, se.get("items")[0].name, se.get("items")[0].t_warehouse
+			)[0]
+			+ "wrong"
+		)
 
 		pos = create_pos_invoice(
 			company="_Test Company",
@@ -580,7 +602,9 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 			cost_center="Main - _TC",
 			expense_account="Cost of Goods Sold - _TC",
 		)
-		serial_nos = get_serial_nos_from_bundle(se.get("items")[0].serial_and_batch_bundle)
+		serial_nos = get_serial_nos_for_voucher(
+			"Stock Entry", se.name, se.get("items")[0].name, se.get("items")[0].t_warehouse
+		)
 
 		# make a pos invoice
 		pos = create_pos_invoice(
@@ -702,11 +726,11 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		self.assertEqual(after_redeem_lp_details.loyalty_points, 9)
 
 	def test_pos_batch_reservation(self):
-		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-			get_auto_batch_nos,
-		)
 		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 			create_batch_item_with_batch,
+		)
+		from erpnext.stock.serial_batch_bundle import (
+			get_auto_batch_nos,
 		)
 
 		create_batch_item_with_batch("_BATCH ITEM Test For Reserve", "TestBatch-RS 02")
@@ -719,7 +743,10 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 
 		se.reload()
 
-		batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+		batch_no = next(
+			iter(get_batches_for_voucher("Stock Entry", se.name, se.items[0].name, se.items[0].t_warehouse)),
+			None,
+		)
 
 		# POS Invoice 1, for the batch without bundle
 		pos_inv1 = create_pos_invoice(item="_BATCH ITEM Test For Reserve", rate=300, qty=15, do_not_save=1)
@@ -751,7 +778,11 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		pos_inv2.save()
 		pos_inv2.submit()
 		pos_inv2.reload()
-		self.assertTrue(pos_inv2.items[0].serial_and_batch_bundle)
+		self.assertTrue(
+			has_bundled_entries(
+				"POS Invoice", pos_inv2.name, pos_inv2.items[0].name, pos_inv2.items[0].warehouse
+			)
+		)
 
 		batches = get_auto_batch_nos(
 			frappe._dict({"item_code": "_BATCH ITEM Test For Reserve", "warehouse": "_Test Warehouse - _TC"})
@@ -765,11 +796,11 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		"""
 		Test POS Invoice reserved qty for batch without bundle with return invoices.
 		"""
-		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-			get_auto_batch_nos,
-		)
 		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 			create_batch_item_with_batch,
+		)
+		from erpnext.stock.serial_batch_bundle import (
+			get_auto_batch_nos,
 		)
 
 		create_batch_item_with_batch("_Batch Item Reserve Return", "TestBatch-RR 01")
@@ -782,7 +813,10 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 
 		se.reload()
 
-		batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+		batch_no = next(
+			iter(get_batches_for_voucher("Stock Entry", se.name, se.items[0].name, se.items[0].t_warehouse)),
+			None,
+		)
 
 		# POS Invoice for the batch without bundle
 		pos_inv = create_pos_invoice(item="_Batch Item Reserve Return", rate=300, qty=15, do_not_save=1)
@@ -809,13 +843,12 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 				self.assertEqual(batch.qty, 30)
 
 	def test_pos_batch_item_qty_validation(self):
-		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-			BatchNegativeStockError,
-		)
+		"""Negative-stock enforcement now happens on Stock Location Ledger submit, not at
+		bundle-creation time - so this needs an actual second POS Invoice submit to trigger it."""
 		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 			create_batch_item_with_batch,
 		)
-		from erpnext.stock.serial_batch_bundle import SerialBatchCreation
+		from erpnext.stock.stock_ledger import NegativeStockError
 
 		create_batch_item_with_batch("_BATCH ITEM", "TestBatch 01")
 		item = frappe.get_doc("Item", "_BATCH ITEM")
@@ -838,23 +871,16 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		pos_inv1.save()
 		pos_inv1.submit()
 
-		pos_inv2 = create_pos_invoice(item=item.name, rate=300, qty=2, do_not_submit=1)
-
-		sn_doc = SerialBatchCreation(
-			{
-				"item_code": item.name,
-				"warehouse": pos_inv2.items[0].warehouse,
-				"voucher_type": "POS Invoice",
-				"voucher_no": pos_inv2.name,
-				"qty": 2,
-				"avg_rate": 300,
-				"batches": frappe._dict({"TestBatch 01": 2}),
-				"type_of_transaction": "Outward",
-				"company": pos_inv2.company,
-			}
+		pos_inv2 = create_pos_invoice(
+			item=item.name, rate=300, qty=2, do_not_submit=1, batch_no="TestBatch 01"
 		)
+		pos_inv2.append(
+			"payments",
+			{"mode_of_payment": "Cash", "amount": 600},
+		)
+		pos_inv2.save()
 
-		self.assertRaises(BatchNegativeStockError, sn_doc.make_serial_and_batch_bundle)
+		self.assertRaises(NegativeStockError, pos_inv2.submit)
 
 		# teardown
 		pos_inv1.reload()
@@ -909,10 +935,14 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 
 		se = make_serialized_item(self)
-		serial_no = get_serial_nos_from_bundle(se.get("items")[0].serial_and_batch_bundle)[0]
+		serial_no = get_serial_nos_for_voucher(
+			"Stock Entry", se.name, se.get("items")[0].name, se.get("items")[0].t_warehouse
+		)[0]
 
 		dn = create_delivery_note(item_code="_Test Serialized Item With Series", serial_no=[serial_no])
-		delivered_serial_no = get_serial_nos_from_bundle(dn.get("items")[0].serial_and_batch_bundle)[0]
+		delivered_serial_no = get_serial_nos_for_voucher(
+			"Delivery Note", dn.name, dn.get("items")[0].name, dn.get("items")[0].warehouse
+		)[0]
 
 		self.assertEqual(serial_no, delivered_serial_no)
 
@@ -1036,40 +1066,15 @@ def create_pos_invoice(**args):
 
 	pos_inv.set_missing_values()
 
-	bundle_id = None
-	if not args.use_serial_batch_fields and (args.get("batch_no") or args.get("serial_no")):
-		type_of_transaction = args.type_of_transaction or "Outward"
+	use_serial_batch_fields = bool(
+		args.use_serial_batch_fields or args.get("batch_no") or args.get("serial_no")
+	)
 
-		if pos_inv.is_return:
-			type_of_transaction = "Inward"
-
-		qty = args.get("qty") or 1
-		qty *= -1 if type_of_transaction == "Outward" else 1
-		batches = {}
-		if args.get("batch_no"):
-			batches = frappe._dict({args.batch_no: qty})
-
-		bundle_id = make_serial_batch_bundle(
-			frappe._dict(
-				{
-					"item_code": args.item or args.item_code or "_Test Item",
-					"warehouse": args.warehouse or "_Test Warehouse - _TC",
-					"qty": qty,
-					"batches": batches,
-					"voucher_type": "Delivery Note",
-					"serial_nos": args.serial_no,
-					"posting_date": pos_inv.posting_date,
-					"posting_time": pos_inv.posting_time,
-					"type_of_transaction": type_of_transaction,
-					"do_not_submit": True,
-					"ignore_sabb_validation": args.ignore_sabb_validation,
-				}
-			)
-		).name
-
-		if not bundle_id:
-			msg = f"Serial No {args.serial_no} not available for Item {args.item}"
-			frappe.throw(_(msg))
+	# Callers pass whatever get_serial_nos_for_voucher() handed them, which is a list - the row
+	# field is newline separated text.
+	serial_no = args.serial_no
+	if isinstance(serial_no, list | tuple):
+		serial_no = "\n".join(serial_no)
 
 	pos_invoice_item = {
 		"warehouse": args.warehouse or "_Test Warehouse - _TC",
@@ -1078,10 +1083,9 @@ def create_pos_invoice(**args):
 		"income_account": args.income_account or "Sales - _TC",
 		"expense_account": args.expense_account or "Cost of Goods Sold - _TC",
 		"cost_center": args.cost_center or "_Test Cost Center - _TC",
-		"serial_and_batch_bundle": bundle_id,
-		"use_serial_batch_fields": args.use_serial_batch_fields,
-		"serial_no": args.serial_no if args.use_serial_batch_fields else None,
-		"batch_no": args.batch_no if args.use_serial_batch_fields else None,
+		"use_serial_batch_fields": use_serial_batch_fields,
+		"serial_no": serial_no if use_serial_batch_fields else None,
+		"batch_no": args.batch_no if use_serial_batch_fields else None,
 	}
 	# append in pos invoice items without item_code by checking flag without_item_code
 	if args.without_item_code:
@@ -1107,7 +1111,7 @@ def create_pos_invoice(**args):
 		pos_inv.insert()
 		if not args.do_not_submit:
 			pos_inv.submit()
-			if args.use_serial_batch_fields:
+			if use_serial_batch_fields:
 				pos_inv.reload()
 		else:
 			pos_inv.payment_schedule = []

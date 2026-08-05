@@ -174,14 +174,20 @@ def get_stock_ledger_entries_for_batch_no(filters):
 
 def get_stock_ledger_entries_for_batch_bundle(filters):
 	sle = frappe.qb.DocType("Stock Ledger Entry")
-	batch_package = frappe.qb.DocType("Serial and Batch Entry")
+	batch_package = frappe.qb.DocType("Stock Location Ledger")
 
 	to_date = get_datetime(str(filters.to_date) + " 23:59:59")
 
 	query = (
 		frappe.qb.from_(sle)
 		.inner_join(batch_package)
-		.on(batch_package.parent == sle.serial_and_batch_bundle)
+		.on(
+			(batch_package.voucher_type == sle.voucher_type)
+			& (batch_package.voucher_no == sle.voucher_no)
+			& (batch_package.voucher_detail_no == sle.voucher_detail_no)
+			& (batch_package.warehouse == sle.warehouse)
+			& (batch_package.docstatus != 2)
+		)
 		.select(
 			# item_code/warehouse/posting_date are constant per grouped voucher_no+batch_no+warehouse
 			# (a batch belongs to one item; warehouse mirrors the grouped batch_package.warehouse;

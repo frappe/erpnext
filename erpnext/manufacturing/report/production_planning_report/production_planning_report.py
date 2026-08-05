@@ -215,7 +215,7 @@ class ProductionPlanReport:
 			self.warehouses.extend(self.mrp_warehouses)
 
 		for d in frappe.get_all(
-			"Bin",
+			"Stock Level",
 			fields=["warehouse", "item_code", "actual_qty", "ordered_qty", "projected_qty"],
 			filters={"item_code": ("in", self.item_codes), "warehouse": ("in", self.warehouses)},
 		):

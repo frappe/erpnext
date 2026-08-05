@@ -601,6 +601,7 @@ def repost(doc):
 				notify_error_to_stock_managers(doc, message)
 				doc.set_status("Failed")
 	finally:
+		frappe.flags.through_repost_item_valuation = False
 		if not frappe.in_test:
 			frappe.db.commit()
 

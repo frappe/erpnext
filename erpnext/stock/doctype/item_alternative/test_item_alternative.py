@@ -80,7 +80,7 @@ class TestItemAlternative(ERPNextTestSuite):
 		]
 
 		reserved_qty_for_sub_contract = frappe.db.get_value(
-			"Bin",
+			"Stock Level",
 			{"item_code": "Test FG A RW 1", "warehouse": "_Test Warehouse - _TC"},
 			"reserved_qty_for_sub_contract",
 		)
@@ -100,7 +100,7 @@ class TestItemAlternative(ERPNextTestSuite):
 		doc.save()
 		doc.submit()
 		after_transfer_reserved_qty_for_sub_contract = frappe.db.get_value(
-			"Bin",
+			"Stock Level",
 			{"item_code": "Test FG A RW 1", "warehouse": "_Test Warehouse - _TC"},
 			"reserved_qty_for_sub_contract",
 		)
@@ -134,7 +134,7 @@ class TestItemAlternative(ERPNextTestSuite):
 		)
 
 		reserved_qty_for_production = frappe.db.get_value(
-			"Bin",
+			"Stock Level",
 			{"item_code": "Test FG A RW 1", "warehouse": "_Test Warehouse - _TC"},
 			"reserved_qty_for_production",
 		)
@@ -151,7 +151,7 @@ class TestItemAlternative(ERPNextTestSuite):
 
 		ste.submit()
 		reserved_qty_for_production_after_transfer = frappe.db.get_value(
-			"Bin",
+			"Stock Level",
 			{"item_code": "Test FG A RW 1", "warehouse": "_Test Warehouse - _TC"},
 			"reserved_qty_for_production",
 		)

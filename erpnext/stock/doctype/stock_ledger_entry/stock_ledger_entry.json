@@ -14,12 +14,11 @@
   "posting_time",
   "posting_datetime",
   "is_adjustment_entry",
-  "auto_created_serial_and_batch_bundle",
+  "auto_created_serial_batch",
   "column_break_6",
   "voucher_type",
   "voucher_no",
   "voucher_detail_no",
-  "serial_and_batch_bundle",
   "dependant_sle_voucher_detail_no",
   "section_break_11",
   "recalculate_rate",
@@ -316,13 +315,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "serial_and_batch_bundle",
-   "fieldtype": "Link",
-   "label": "Serial and Batch Bundle",
-   "options": "Serial and Batch Bundle",
-   "search_index": 1
-  },
-  {
    "default": "0",
    "fetch_from": "item_code.has_batch_no",
    "fieldname": "has_batch_no",
@@ -344,10 +336,9 @@
   },
   {
    "default": "0",
-   "depends_on": "serial_and_batch_bundle",
-   "fieldname": "auto_created_serial_and_batch_bundle",
+   "fieldname": "auto_created_serial_batch",
    "fieldtype": "Check",
-   "label": "Auto Created Serial and Batch Bundle"
+   "label": "Auto Created Serial / Batch Entries"
   },
   {
    "fieldname": "posting_datetime",
@@ -363,7 +354,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-26 19:07:43.537450",
+ "modified": "2026-07-26 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Ledger Entry",

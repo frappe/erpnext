@@ -121,7 +121,7 @@ frappe.ui.form.on("Stock Reservation Entry", {
 	},
 });
 
-frappe.ui.form.on("Serial and Batch Entry", {
+frappe.ui.form.on("Stock Reservation Serial Batch", {
 	sb_entries_add(frm, cdt, cdn) {
 		if (frm.doc.warehouse) {
 			frappe.model.set_value(cdt, cdn, "warehouse", frm.doc.warehouse);

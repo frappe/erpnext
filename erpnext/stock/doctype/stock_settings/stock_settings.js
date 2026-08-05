@@ -5,24 +5,14 @@ frappe.ui.form.on("Stock Settings", {
 	refresh: function (frm) {
 		if (!frm.naming_controller) frm.naming_controller = new frappe.ui.NamingSeriesController(frm);
 		const item_display = frm.doc.item_naming_by === "Naming Series";
-		const serial_and_batch_naming_display =
-			frm.doc.set_serial_and_batch_bundle_naming_based_on_naming_series;
 
 		frm.set_df_property("naming_series_details", "hidden", !item_display);
 		frm.set_df_property("configure", "hidden", !item_display);
-		frm.set_df_property("naming_series_preview", "hidden", !serial_and_batch_naming_display);
-		frm.set_df_property("configure_series", "hidden", !serial_and_batch_naming_display);
 
 		if (item_display) {
 			frm.naming_controller.load_master_series("Item", "naming_series_details");
 		} else {
 			frm.doc.naming_series_details = "";
-		}
-
-		if (serial_and_batch_naming_display) {
-			frm.naming_controller.load_master_series("Serial and Batch Bundle", "naming_series_preview");
-		} else {
-			frm.doc.naming_series_preview = "";
 		}
 
 		frm.naming_controller.render_table("transaction_naming_html", get_transactions(frm));
@@ -43,24 +33,8 @@ frappe.ui.form.on("Stock Settings", {
 		frm.naming_controller.render_table("transaction_naming_html", get_transactions(frm));
 	},
 
-	set_serial_and_batch_bundle_naming_based_on_naming_series(frm) {
-		const display = frm.doc.set_serial_and_batch_bundle_naming_based_on_naming_series;
-		frm.set_df_property("naming_series_preview", "hidden", !display);
-		frm.set_df_property("configure_series", "hidden", !display);
-		if (display) {
-			frm.naming_controller.load_master_series("Serial and Batch Bundle", "naming_series_preview");
-		} else {
-			frm.doc.naming_series_preview = "";
-			frm.refresh_field("naming_series_preview");
-		}
-	},
-
 	configure(frm) {
 		configure_naming_series(frm, "Item", "naming_series_details");
-	},
-
-	configure_series(frm) {
-		configure_naming_series(frm, "Serial and Batch Bundle", "naming_series_preview");
 	},
 
 	enable_serial_and_batch_no_for_item(frm) {
@@ -124,7 +98,6 @@ function get_transactions(frm) {
 		{ label: __("Material Request"), doctype: "Material Request" },
 		{ label: __("Pick List"), doctype: "Pick List" },
 		{ label: __("Stock Reconciliation"), doctype: "Stock Reconciliation" },
-		{ label: __("Serial and Batch Bundle"), doctype: "Serial and Batch Bundle" },
 	];
 
 	if (frm.doc.item_naming_by !== "Naming Series") {

@@ -88,7 +88,7 @@ def get_item_warehouse_quantity_map():
 	bin_projected = {
 		(b.item_code, b.warehouse): flt(b.projected_qty)
 		for b in frappe.get_all(
-			"Bin",
+			"Stock Level",
 			filters={"item_code": ["in", component_items]},
 			fields=["item_code", "warehouse", "projected_qty"],
 		)

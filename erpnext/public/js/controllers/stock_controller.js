@@ -16,8 +16,7 @@ erpnext.stock.StockController = class StockController extends frappe.ui.form.Con
 	}
 
 	set_route_options_for_new_doc() {
-		// While creating a Batch or Serial and Batch Bundle from the link
-		// field, copy details from the line item to the new form
+		// While creating a Batch from the link field, copy details from the line item to the new form
 		if (!this.frm.fields_dict.items) return;
 
 		let batch_no_field = this.frm.get_docfield("items", "batch_no");
@@ -25,17 +24,6 @@ erpnext.stock.StockController = class StockController extends frappe.ui.form.Con
 			batch_no_field.get_route_options_for_new_doc = (row) => {
 				return {
 					item: row.doc.item_code,
-				};
-			};
-		}
-
-		let sbb_field = this.frm.get_docfield("items", "serial_and_batch_bundle");
-		if (sbb_field) {
-			sbb_field.get_route_options_for_new_doc = (row) => {
-				return {
-					item_code: row.doc.item_code,
-					warehouse: row.doc.warehouse || row.doc.s_warehouse || row.doc.t_warehouse,
-					voucher_type: this.frm.doc.doctype,
 				};
 			};
 		}

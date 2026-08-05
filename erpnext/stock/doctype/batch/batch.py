@@ -256,10 +256,7 @@ def get_batch_qty(
 	:param item_code: Optional - give qty for this item
 	:param for_stock_levels: True consider expired batches"""
 
-	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-		combine_datetime,
-		get_auto_batch_nos,
-	)
+	from erpnext.stock.serial_batch_bundle import combine_datetime, get_auto_batch_nos
 
 	batchwise_qty = defaultdict(float)
 	kwargs = frappe._dict(
@@ -309,24 +306,6 @@ def split_batch(batch_no: str, item_code: str, warehouse: str, qty: float, new_b
 
 	company = frappe.db.get_value("Warehouse", warehouse, "company")
 
-	from_bundle_id = make_batch_bundle(
-		item_code=item_code,
-		warehouse=warehouse,
-		batches=frappe._dict({batch_no: qty}),
-		company=company,
-		type_of_transaction="Outward",
-		qty=qty,
-	)
-
-	to_bundle_id = make_batch_bundle(
-		item_code=item_code,
-		warehouse=warehouse,
-		batches=frappe._dict({batch.name: qty}),
-		company=company,
-		type_of_transaction="Inward",
-		qty=qty,
-	)
-
 	stock_entry = frappe.get_doc(
 		doctype="Stock Entry",
 		purpose="Repack",
@@ -336,9 +315,16 @@ def split_batch(batch_no: str, item_code: str, warehouse: str, qty: float, new_b
 				item_code=item_code,
 				qty=qty,
 				s_warehouse=warehouse,
-				serial_and_batch_bundle=from_bundle_id,
+				batch_no=batch_no,
+				use_serial_batch_fields=1,
 			),
-			dict(item_code=item_code, qty=qty, t_warehouse=warehouse, serial_and_batch_bundle=to_bundle_id),
+			dict(
+				item_code=item_code,
+				qty=qty,
+				t_warehouse=warehouse,
+				batch_no=batch.name,
+				use_serial_batch_fields=1,
+			),
 		],
 	)
 	stock_entry.set_stock_entry_type()
@@ -346,38 +332,6 @@ def split_batch(batch_no: str, item_code: str, warehouse: str, qty: float, new_b
 	stock_entry.submit()
 
 	return batch.name
-
-
-def make_batch_bundle(
-	item_code: str,
-	warehouse: str,
-	batches: dict[str, float],
-	company: str,
-	type_of_transaction: str,
-	qty: float,
-):
-	from frappe.utils import nowtime, today
-
-	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import combine_datetime
-	from erpnext.stock.serial_batch_bundle import SerialBatchCreation
-
-	return (
-		SerialBatchCreation(
-			{
-				"item_code": item_code,
-				"warehouse": warehouse,
-				"posting_datetime": combine_datetime(today(), nowtime()),
-				"voucher_type": "Stock Entry",
-				"qty": qty,
-				"type_of_transaction": type_of_transaction,
-				"company": company,
-				"batches": batches,
-				"do_not_submit": True,
-			}
-		)
-		.make_serial_and_batch_bundle()
-		.name
-	)
 
 
 def validate_serial_no_with_batch(serial_nos, item_code):
@@ -432,10 +386,7 @@ def get_pos_reserved_batch_qty(filters: dict | str):
 
 
 def get_available_batches(kwargs):
-	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-		combine_datetime,
-		get_auto_batch_nos,
-	)
+	from erpnext.stock.serial_batch_bundle import combine_datetime, get_auto_batch_nos
 
 	if kwargs.get("posting_date"):
 		kwargs["posting_datetime"] = combine_datetime(kwargs.get("posting_date"), kwargs.get("posting_time"))
@@ -454,14 +405,3 @@ def get_available_batches(kwargs):
 			batchwise_qty[key] += batch.get("qty")
 
 	return batchwise_qty
-
-
-def get_batch_no(bundle_id):
-	from erpnext.stock.serial_batch_bundle import get_batch_nos
-
-	batches = defaultdict(float)
-
-	for batch_id, d in get_batch_nos(bundle_id).items():
-		batches[batch_id] += abs(d.get("qty"))
-
-	return batches

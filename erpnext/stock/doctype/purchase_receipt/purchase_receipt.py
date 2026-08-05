@@ -440,7 +440,6 @@ class PurchaseReceipt(BuyingController):
 			"GL Entry",
 			"Stock Ledger Entry",
 			"Repost Item Valuation",
-			"Serial and Batch Bundle",
 		)
 		self.delete_auto_created_batches()
 		self.set_consumed_qty_in_subcontract_order()

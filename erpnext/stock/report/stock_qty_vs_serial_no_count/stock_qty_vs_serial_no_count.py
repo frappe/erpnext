@@ -57,7 +57,9 @@ def get_data(warehouse, show_disabled_items):
 		)
 
 		actual_qty = frappe.db.get_value(
-			"Bin", fieldname=["actual_qty"], filters={"warehouse": warehouse, "item_code": item.item_code}
+			"Stock Level",
+			fieldname=["actual_qty"],
+			filters={"warehouse": warehouse, "item_code": item.item_code},
 		)
 
 		# frappe.db.get_value returns null if no record exist.

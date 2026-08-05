@@ -25,7 +25,7 @@ $.extend(erpnext, {
 			return;
 		}
 
-		let fields = ["serial_and_batch_bundle", "use_serial_batch_fields", "serial_no", "batch_no"];
+		let fields = ["use_serial_batch_fields", "serial_no", "batch_no"];
 
 		if (
 			[
@@ -48,11 +48,7 @@ $.extend(erpnext, {
 		}
 
 		if (["Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"].includes(frm.doc.doctype)) {
-			fields.push(
-				"add_serial_batch_for_rejected_qty",
-				"rejected_serial_and_batch_bundle",
-				"rejected_serial_no"
-			);
+			fields.push("add_serial_batch_for_rejected_qty", "rejected_serial_no");
 		}
 
 		let child_name = "items";
@@ -82,11 +78,7 @@ $.extend(erpnext, {
 
 				if (
 					frm.doc.doctype === "Subcontracting Receipt" &&
-					![
-						"add_serial_batch_for_rejected_qty",
-						"rejected_serial_and_batch_bundle",
-						"rejected_serial_no",
-					].includes(field)
+					!["add_serial_batch_for_rejected_qty", "rejected_serial_no"].includes(field)
 				) {
 					frm.fields_dict["supplied_items"].grid.update_docfield_property(
 						field,
@@ -218,9 +210,11 @@ $.extend(erpnext.utils, {
 			return;
 		}
 
-		let bundle_ids = frm.doc.items.filter((d) => d.serial_and_batch_bundle);
+		let serial_batch_rows = frm.doc.items.filter(
+			(d) => d.serial_no || d.batch_no || d.use_serial_batch_fields
+		);
 
-		if (bundle_ids?.length) {
+		if (serial_batch_rows?.length) {
 			frm.add_custom_button(
 				__("Serial / Batch Nos"),
 				() => {
@@ -485,7 +479,7 @@ $.extend(erpnext.utils, {
 		}
 	},
 
-	pick_serial_and_batch_bundle(frm, cdt, cdn, type_of_transaction, warehouse_field) {
+	pick_serial_and_batch_entries(frm, cdt, cdn, type_of_transaction, warehouse_field) {
 		let item_row = frappe.get_doc(cdt, cdn);
 		item_row.type_of_transaction = type_of_transaction;
 
@@ -496,7 +490,6 @@ $.extend(erpnext.utils, {
 			new erpnext.SerialBatchPackageSelector(frm, item_row, (r) => {
 				if (r) {
 					let update_values = {
-						serial_and_batch_bundle: r.name,
 						qty: Math.abs(r.total_qty),
 					};
 

@@ -40,7 +40,7 @@ class TestStockProjectedQty(ERPNextTestSuite):
 		item = "_Test Item"
 		make_stock_entry(item_code=item, qty=100, to_warehouse=WAREHOUSE, basic_rate=100)
 
-		bin_doc = frappe.get_doc("Bin", {"item_code": item, "warehouse": WAREHOUSE})
+		bin_doc = frappe.get_doc("Stock Level", {"item_code": item, "warehouse": WAREHOUSE})
 		bin_doc.update(
 			{
 				"actual_qty": 100,

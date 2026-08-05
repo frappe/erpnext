@@ -41,8 +41,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		this.barcode_scanner = new erpnext.utils.BarcodeScanner({ frm: this.frm });
 
 		this.set_fields_onload_for_line_item();
-		this.frm.ignore_doctypes_on_cancel_all = ["Serial and Batch Bundle"];
-
 		frappe.flags.hide_serial_batch_dialog = true;
 		frappe.ui.form.on(this.frm.doctype + " Item", "rate", function (frm, cdt, cdn) {
 			var item = frappe.get_doc(cdt, cdn);
@@ -218,20 +216,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				erpnext.accounts.dimensions.copy_dimension_from_first_row(frm, cdt, cdn, "items");
 			},
 		});
-
-		if (this.frm.fields_dict["items"].grid.get_field("serial_and_batch_bundle")) {
-			this.frm.set_query("serial_and_batch_bundle", "items", function (doc, cdt, cdn) {
-				let item_row = locals[cdt][cdn];
-				return {
-					filters: {
-						item_code: item_row.item_code,
-						voucher_type: doc.doctype,
-						voucher_no: ["in", [doc.name, ""]],
-						is_cancelled: 0,
-					},
-				};
-			});
-		}
 
 		if (this.frm.fields_dict["items"].grid.get_field("batch_no")) {
 			this.frm.set_query("batch_no", "items", function (doc, cdt, cdn) {
@@ -861,7 +845,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 							child_doctype: item.doctype,
 							child_docname: item.name,
 							use_serial_batch_fields: item.use_serial_batch_fields,
-							serial_and_batch_bundle: item.serial_and_batch_bundle,
 						},
 					},
 
@@ -3412,7 +3395,6 @@ erpnext.show_serial_batch_selector = function (frm, item_row, callback, on_close
 	new erpnext.SerialBatchPackageSelector(frm, item_row, (r) => {
 		if (r) {
 			let update_values = {
-				serial_and_batch_bundle: r.name,
 				qty: Math.abs(r.total_qty),
 			};
 

@@ -4,7 +4,7 @@
 import frappe
 from frappe import qb
 from frappe.query_builder.functions import Sum
-from frappe.utils import add_days, add_months, flt, get_first_day, nowdate, nowtime, today
+from frappe.utils import add_days, add_months, flt, get_first_day, nowdate
 
 from erpnext.assets.doctype.asset.asset import (
 	get_asset_account,
@@ -21,9 +21,8 @@ from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_sched
 	get_asset_depr_schedule_doc,
 )
 from erpnext.stock.doctype.item.test_item import create_item
-from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
-	get_serial_nos_from_bundle,
-	make_serial_batch_bundle,
+from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import (
+	get_serial_nos_for_voucher,
 )
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -121,8 +120,9 @@ class TestAssetRepair(ERPNextTestSuite):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 
 		stock_entry = make_serialized_item(self)
-		bundle_id = stock_entry.get("items")[0].serial_and_batch_bundle
-		serial_nos = get_serial_nos_from_bundle(bundle_id)
+		serial_nos = get_serial_nos_for_voucher(
+			"Stock Entry", stock_entry.name, stock_entry.items[0].name, stock_entry.items[0].t_warehouse
+		)
 		serial_no = serial_nos[0]
 
 		# should not raise any error
@@ -398,25 +398,6 @@ def create_asset_repair(**args):
 		asset_repair.stock_consumption = 1
 		warehouse = args.warehouse or create_warehouse("Test Warehouse", company=asset.company)
 
-		bundle = None
-		if args.serial_no:
-			bundle = make_serial_batch_bundle(
-				frappe._dict(
-					{
-						"item_code": args.item_code,
-						"warehouse": warehouse,
-						"company": frappe.get_cached_value("Warehouse", warehouse, "company"),
-						"qty": (flt(args.stock_qty) or 1) * -1,
-						"voucher_type": "Asset Repair",
-						"type_of_transaction": "Asset Repair",
-						"serial_nos": args.serial_no,
-						"posting_date": today(),
-						"posting_time": nowtime(),
-						"do_not_submit": 1,
-					}
-				)
-			).name
-
 		asset_repair.append(
 			"stock_items",
 			{
@@ -424,7 +405,7 @@ def create_asset_repair(**args):
 				"warehouse": warehouse,
 				"valuation_rate": args.rate if args.get("rate") is not None else 100,
 				"consumed_quantity": args.qty or 1,
-				"serial_and_batch_bundle": bundle,
+				"serial_no": "\n".join(args.serial_no) if args.serial_no else None,
 			},
 		)
 

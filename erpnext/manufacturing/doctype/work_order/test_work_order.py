@@ -27,16 +27,36 @@ from erpnext.manufacturing.doctype.work_order.work_order import (
 )
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import create_item, make_item
-from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
-	get_batch_from_bundle,
-	get_serial_nos_from_bundle,
-	make_serial_batch_bundle,
-)
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.stock_entry import test_stock_entry
+from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import (
+	get_batches_for_voucher,
+	get_serial_nos_for_voucher,
+	get_voucher_entries,
+	has_bundled_entries,
+)
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.utils import get_bin
 from erpnext.tests.utils import ERPNextTestSuite
+
+
+def get_se_row_serial_nos(row, warehouse=None):
+	return get_serial_nos_for_voucher(
+		"Stock Entry", row.parent, row.name, warehouse or row.t_warehouse or row.s_warehouse
+	)
+
+
+def get_se_row_batch_no(row, warehouse=None):
+	batches = get_batches_for_voucher(
+		"Stock Entry", row.parent, row.name, warehouse or row.t_warehouse or row.s_warehouse
+	)
+	return next(iter(batches), None)
+
+
+def se_row_has_entries(row, warehouse=None):
+	return has_bundled_entries(
+		"Stock Entry", row.parent, row.name, warehouse or row.t_warehouse or row.s_warehouse
+	)
 
 
 class TestWorkOrder(ERPNextTestSuite):
@@ -48,7 +68,9 @@ class TestWorkOrder(ERPNextTestSuite):
 	def check_planned_qty(self):
 		planned0 = (
 			frappe.db.get_value(
-				"Bin", {"item_code": "_Test FG Item", "warehouse": "_Test Warehouse 1 - _TC"}, "planned_qty"
+				"Stock Level",
+				{"item_code": "_Test FG Item", "warehouse": "_Test Warehouse 1 - _TC"},
+				"planned_qty",
 			)
 			or 0
 		)
@@ -56,7 +78,9 @@ class TestWorkOrder(ERPNextTestSuite):
 		wo_order = make_wo_order_test_record()
 
 		planned1 = frappe.db.get_value(
-			"Bin", {"item_code": "_Test FG Item", "warehouse": "_Test Warehouse 1 - _TC"}, "planned_qty"
+			"Stock Level",
+			{"item_code": "_Test FG Item", "warehouse": "_Test Warehouse 1 - _TC"},
+			"planned_qty",
 		)
 
 		self.assertEqual(planned1, planned0 + 10)
@@ -84,7 +108,9 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("Work Order", wo_order.name, "produced_qty"), 4)
 
 		planned2 = frappe.db.get_value(
-			"Bin", {"item_code": "_Test FG Item", "warehouse": "_Test Warehouse 1 - _TC"}, "planned_qty"
+			"Stock Level",
+			{"item_code": "_Test FG Item", "warehouse": "_Test Warehouse 1 - _TC"},
+			"planned_qty",
 		)
 
 		self.assertEqual(planned2, planned0 + 6)
@@ -636,14 +662,18 @@ class TestWorkOrder(ERPNextTestSuite):
 		fg_warehouse = "_Test Warehouse 1 - _TC"
 
 		planned_before = (
-			frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": fg_warehouse}, "planned_qty")
+			frappe.db.get_value(
+				"Stock Level", {"item_code": item_code, "warehouse": fg_warehouse}, "planned_qty"
+			)
 			or 0
 		)
 
 		wo = make_wo_order_test_record(item=item_code, fg_warehouse=fg_warehouse, qty=10)
 
 		planned_after_submit = (
-			frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": fg_warehouse}, "planned_qty")
+			frappe.db.get_value(
+				"Stock Level", {"item_code": item_code, "warehouse": fg_warehouse}, "planned_qty"
+			)
 			or 0
 		)
 		self.assertEqual(planned_after_submit, planned_before + 10)
@@ -653,7 +683,9 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("Work Order", wo.name, "status"), "Closed")
 
 		planned_after_close = (
-			frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": fg_warehouse}, "planned_qty")
+			frappe.db.get_value(
+				"Stock Level", {"item_code": item_code, "warehouse": fg_warehouse}, "planned_qty"
+			)
 			or 0
 		)
 		self.assertEqual(planned_after_close, planned_before)
@@ -829,25 +861,23 @@ class TestWorkOrder(ERPNextTestSuite):
 				self.assertEqual(row.item_code, fg_item)
 				self.assertEqual(row.qty, 10)
 
-				bundle_id = frappe.get_doc("Serial and Batch Bundle", row.serial_and_batch_bundle)
-				for bundle_row in bundle_id.get("entries"):
-					self.assertIn(bundle_row.batch_no, batches)
-					batches.remove(bundle_row.batch_no)
+				self.assertIn(row.batch_no, batches)
+				batches.remove(row.batch_no)
 
 		ste1.submit()
 
 		remaining_batches = []
 		ste1 = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 20))
+		fg_qty = 0.0
 		for row in ste1.get("items"):
 			if row.is_finished_item:
 				self.assertEqual(row.item_code, fg_item)
-				self.assertEqual(row.qty, 20)
+				fg_qty += row.qty
 
-				bundle_id = frappe.get_doc("Serial and Batch Bundle", row.serial_and_batch_bundle)
-				for bundle_row in bundle_id.get("entries"):
-					self.assertIn(bundle_row.batch_no, batches)
-					remaining_batches.append(bundle_row.batch_no)
+				self.assertIn(row.batch_no, batches)
+				remaining_batches.append(row.batch_no)
 
+		self.assertEqual(fg_qty, 20)
 		self.assertEqual(sorted(remaining_batches), sorted(batches))
 
 		frappe.db.set_single_value("Manufacturing Settings", "make_serial_no_batch_from_work_order", 0)
@@ -1349,10 +1379,8 @@ class TestWorkOrder(ERPNextTestSuite):
 			stock_entry.set_work_order_details()
 			for row in stock_entry.items:
 				if row.item_code == fg_item:
-					self.assertTrue(row.serial_and_batch_bundle)
-					self.assertEqual(
-						sorted(get_serial_nos_from_bundle(row.serial_and_batch_bundle)), sorted(serial_nos)
-					)
+					self.assertTrue(row.serial_no)
+					self.assertEqual(sorted(get_serial_nos(row.serial_no)), sorted(serial_nos))
 
 		except frappe.MandatoryError:
 			self.fail("Batch generation causing failing in Work Order")
@@ -1389,15 +1417,10 @@ class TestWorkOrder(ERPNextTestSuite):
 			stock_entry.set_work_order_details()
 			for row in stock_entry.items:
 				if row.item_code == fg_item:
-					self.assertTrue(row.serial_and_batch_bundle)
-					self.assertEqual(
-						sorted(get_serial_nos_from_bundle(row.serial_and_batch_bundle)), sorted(serial_nos)
-					)
-
-					sn_doc = frappe.get_doc("Serial and Batch Bundle", row.serial_and_batch_bundle)
-					for row in sn_doc.entries:
-						self.assertTrue(row.serial_no)
-						self.assertTrue(row.batch_no)
+					self.assertTrue(row.serial_no)
+					self.assertEqual(sorted(get_serial_nos(row.serial_no)), sorted(serial_nos))
+					for serial_no in get_serial_nos(row.serial_no):
+						self.assertTrue(frappe.db.get_value("Serial No", serial_no, "batch_no"))
 
 		except frappe.MandatoryError:
 			self.fail("Batch generation causing failing in Work Order")
@@ -1657,7 +1680,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		ste_doc.submit()
 		ste_doc.load_from_db()
 
-		batch_no = get_batch_from_bundle(ste_doc.items[0].serial_and_batch_bundle)
+		batch_no = get_se_row_batch_no(ste_doc.items[0])
 
 		wo_doc = make_wo_order_test_record(production_item=fg_item, qty=4)
 		transferred_ste_doc = frappe.get_doc(
@@ -1665,22 +1688,8 @@ class TestWorkOrder(ERPNextTestSuite):
 		)
 
 		transferred_ste_doc.items[0].qty = 4
-		transferred_ste_doc.items[0].serial_and_batch_bundle = make_serial_batch_bundle(
-			frappe._dict(
-				{
-					"item_code": batch_item,
-					"warehouse": "Stores - _TC",
-					"company": transferred_ste_doc.company,
-					"qty": 4,
-					"voucher_type": "Stock Entry",
-					"batches": frappe._dict({batch_no: 4}),
-					"posting_date": transferred_ste_doc.posting_date,
-					"posting_time": transferred_ste_doc.posting_time,
-					"type_of_transaction": "Outward",
-					"do_not_submit": True,
-				}
-			)
-		).name
+		transferred_ste_doc.items[0].batch_no = batch_no
+		transferred_ste_doc.items[0].use_serial_batch_fields = 1
 
 		transferred_ste_doc.submit()
 		transferred_ste_doc.load_from_db()
@@ -1691,9 +1700,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		manufacture_ste_doc1.load_from_db()
 
 		# Batch no should be same as transferred Batch no
-		self.assertEqual(
-			get_batch_from_bundle(manufacture_ste_doc1.items[0].serial_and_batch_bundle), batch_no
-		)
+		self.assertEqual(get_se_row_batch_no(manufacture_ste_doc1.items[0]), batch_no)
 		self.assertEqual(manufacture_ste_doc1.items[0].qty, 1)
 
 		# Second Manufacture stock entry
@@ -1701,14 +1708,15 @@ class TestWorkOrder(ERPNextTestSuite):
 		manufacture_ste_doc2.submit()
 		manufacture_ste_doc2.load_from_db()
 
-		self.assertTrue(manufacture_ste_doc2.items[0].serial_and_batch_bundle)
-		bundle_doc = frappe.get_doc(
-			"Serial and Batch Bundle", manufacture_ste_doc2.items[0].serial_and_batch_bundle
-		)
-
-		for d in bundle_doc.entries:
-			self.assertEqual(d.batch_no, batch_no)
-			self.assertEqual(abs(d.qty), 2)
+		self.assertTrue(se_row_has_entries(manufacture_ste_doc2.items[0]))
+		for batch_no_used, qty in get_batches_for_voucher(
+			"Stock Entry",
+			manufacture_ste_doc2.name,
+			manufacture_ste_doc2.items[0].name,
+			manufacture_ste_doc2.items[0].s_warehouse,
+		).items():
+			self.assertEqual(batch_no_used, batch_no)
+			self.assertEqual(abs(qty), 2)
 
 	def test_backflushed_serial_no_raw_materials_based_on_transferred(self):
 		frappe.db.set_single_value(
@@ -1728,7 +1736,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		ste_doc.submit()
 		ste_doc.reload()
 
-		serial_nos_list = sorted(get_serial_nos_from_bundle(ste_doc.items[0].serial_and_batch_bundle))
+		serial_nos_list = sorted(get_se_row_serial_nos(ste_doc.items[0]))
 
 		wo_doc = make_wo_order_test_record(production_item=fg_item, qty=4)
 		transferred_ste_doc = frappe.get_doc(
@@ -1745,7 +1753,7 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		# Serial nos should be same as transferred Serial nos
 		self.assertEqual(
-			sorted(get_serial_nos_from_bundle(manufacture_ste_doc1.items[0].serial_and_batch_bundle)),
+			sorted(get_se_row_serial_nos(manufacture_ste_doc1.items[0])),
 			serial_nos_list[0:1],
 		)
 		self.assertEqual(manufacture_ste_doc1.items[0].qty, 1)
@@ -1778,10 +1786,7 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		serial_nos = []
 		for row in ste_doc.items:
-			bundle_doc = frappe.get_doc("Serial and Batch Bundle", row.serial_and_batch_bundle)
-
-			for d in bundle_doc.entries:
-				serial_nos.append(d.serial_no)
+			serial_nos.extend(get_se_row_serial_nos(row))
 
 		wo_doc = make_wo_order_test_record(production_item=fg_item, qty=4)
 		transferred_ste_doc = frappe.get_doc(
@@ -1789,22 +1794,8 @@ class TestWorkOrder(ERPNextTestSuite):
 		)
 
 		transferred_ste_doc.items[0].qty = 4
-		transferred_ste_doc.items[0].serial_and_batch_bundle = make_serial_batch_bundle(
-			frappe._dict(
-				{
-					"item_code": transferred_ste_doc.get("items")[0].item_code,
-					"warehouse": transferred_ste_doc.get("items")[0].s_warehouse,
-					"company": transferred_ste_doc.company,
-					"qty": 4,
-					"type_of_transaction": "Outward",
-					"voucher_type": "Stock Entry",
-					"serial_nos": serial_nos,
-					"posting_date": transferred_ste_doc.posting_date,
-					"posting_time": transferred_ste_doc.posting_time,
-					"do_not_submit": True,
-				}
-			)
-		).name
+		transferred_ste_doc.items[0].serial_no = "\n".join(serial_nos)
+		transferred_ste_doc.items[0].use_serial_batch_fields = 1
 
 		transferred_ste_doc.submit()
 		transferred_ste_doc.load_from_db()
@@ -1815,11 +1806,12 @@ class TestWorkOrder(ERPNextTestSuite):
 		manufacture_ste_doc1.load_from_db()
 
 		# Batch no & Serial Nos should be same as transferred Batch no & Serial Nos
-		bundle = manufacture_ste_doc1.items[0].serial_and_batch_bundle
-		self.assertTrue(bundle)
-
-		bundle_doc = frappe.get_doc("Serial and Batch Bundle", bundle)
-		for d in bundle_doc.entries:
+		row = manufacture_ste_doc1.items[0]
+		entries = get_voucher_entries(
+			"Stock Entry", row.parent, row.name, row.s_warehouse, fields=["serial_no", "batch_no"]
+		)
+		self.assertTrue(entries)
+		for d in entries:
 			self.assertTrue(d.serial_no)
 			self.assertTrue(d.batch_no)
 			batch_no = frappe.get_cached_value("Serial No", d.serial_no, "batch_no")
@@ -1831,11 +1823,12 @@ class TestWorkOrder(ERPNextTestSuite):
 		manufacture_ste_doc2.submit()
 		manufacture_ste_doc2.load_from_db()
 
-		bundle = manufacture_ste_doc2.items[0].serial_and_batch_bundle
-		self.assertTrue(bundle)
-
-		bundle_doc = frappe.get_doc("Serial and Batch Bundle", bundle)
-		for d in bundle_doc.entries:
+		row = manufacture_ste_doc2.items[0]
+		entries = get_voucher_entries(
+			"Stock Entry", row.parent, row.name, row.s_warehouse, fields=["serial_no", "batch_no"]
+		)
+		self.assertTrue(entries)
+		for d in entries:
 			self.assertTrue(d.serial_no)
 			self.assertTrue(d.batch_no)
 			serial_nos.remove(d.serial_no)
@@ -1860,7 +1853,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		ste_doc.submit()
 		ste_doc.reload()
 
-		batch_no = get_batch_from_bundle(ste_doc.items[0].serial_and_batch_bundle)
+		batch_no = get_se_row_batch_no(ste_doc.items[0])
 
 		wo_doc = make_wo_order_test_record(production_item=fg_item, qty=4)
 		# action taken upon Start button:
@@ -1871,10 +1864,8 @@ class TestWorkOrder(ERPNextTestSuite):
 		transferred_ste_doc.submit()
 		transferred_ste_doc.reload()
 
-		self.assertTrue(transferred_ste_doc.items[0].serial_and_batch_bundle)
-		self.assertEqual(
-			get_batch_from_bundle(transferred_ste_doc.items[0].serial_and_batch_bundle), batch_no
-		)
+		self.assertTrue(se_row_has_entries(transferred_ste_doc.items[0]))
+		self.assertEqual(get_se_row_batch_no(transferred_ste_doc.items[0]), batch_no)
 		self.assertEqual(transferred_ste_doc.items[0].qty, 4.0)
 
 		# Make additional consumption and link to WO
@@ -1902,10 +1893,8 @@ class TestWorkOrder(ERPNextTestSuite):
 		manufacture_ste_doc.reload()
 
 		self.assertTrue(len(mfr_items), 2)
-		self.assertTrue(manufacture_ste_doc.items[0].serial_and_batch_bundle)
-		self.assertEqual(
-			get_batch_from_bundle(manufacture_ste_doc.items[0].serial_and_batch_bundle), batch_no
-		)
+		self.assertTrue(se_row_has_entries(manufacture_ste_doc.items[0]))
+		self.assertEqual(get_se_row_batch_no(manufacture_ste_doc.items[0]), batch_no)
 		self.assertEqual(manufacture_ste_doc.items[0].qty, 4.0)
 
 	def test_backflushed_serial_no_raw_materials_based_on_transferred_autosabb(self):
@@ -1926,7 +1915,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		ste_doc.submit()
 		ste_doc.reload()
 
-		serial_nos_list = sorted(get_serial_nos_from_bundle(ste_doc.items[0].serial_and_batch_bundle))
+		serial_nos_list = sorted(get_se_row_serial_nos(ste_doc.items[0]))
 
 		wo_doc = make_wo_order_test_record(production_item=fg_item, qty=4)
 		transferred_ste_doc = frappe.get_doc(
@@ -1936,9 +1925,9 @@ class TestWorkOrder(ERPNextTestSuite):
 		transferred_ste_doc.submit()
 		transferred_ste_doc.reload()
 
-		self.assertTrue(transferred_ste_doc.items[0].serial_and_batch_bundle)
+		self.assertTrue(se_row_has_entries(transferred_ste_doc.items[0]))
 		self.assertEqual(
-			sorted(get_serial_nos_from_bundle(transferred_ste_doc.items[0].serial_and_batch_bundle)),
+			sorted(get_se_row_serial_nos(transferred_ste_doc.items[0])),
 			serial_nos_list,
 		)
 		self.assertEqual(transferred_ste_doc.items[0].qty, 4.0)
@@ -1968,9 +1957,9 @@ class TestWorkOrder(ERPNextTestSuite):
 		manufacture_ste_doc.reload()
 
 		self.assertTrue(len(mfr_items), 2)
-		self.assertTrue(manufacture_ste_doc.items[0].serial_and_batch_bundle)
+		self.assertTrue(se_row_has_entries(manufacture_ste_doc.items[0]))
 		self.assertEqual(
-			sorted(get_serial_nos_from_bundle(manufacture_ste_doc.items[0].serial_and_batch_bundle)),
+			sorted(get_se_row_serial_nos(manufacture_ste_doc.items[0])),
 			serial_nos_list,
 		)
 		self.assertEqual(manufacture_ste_doc.items[0].qty, 4.0)
@@ -1992,8 +1981,8 @@ class TestWorkOrder(ERPNextTestSuite):
 		ste_doc.submit()
 		ste_doc.reload()
 
-		serial_nos_list = sorted(get_serial_nos_from_bundle(ste_doc.items[0].serial_and_batch_bundle))
-		batch_no = get_batch_from_bundle(ste_doc.items[0].serial_and_batch_bundle)
+		serial_nos_list = sorted(get_se_row_serial_nos(ste_doc.items[0]))
+		batch_no = get_se_row_batch_no(ste_doc.items[0])
 
 		wo_doc = make_wo_order_test_record(production_item=fg_item, qty=4)
 		transferred_ste_doc = frappe.get_doc(
@@ -2003,33 +1992,29 @@ class TestWorkOrder(ERPNextTestSuite):
 		transferred_ste_doc.submit()
 		transferred_ste_doc.reload()
 
-		self.assertTrue(transferred_ste_doc.items[0].serial_and_batch_bundle)
+		self.assertTrue(se_row_has_entries(transferred_ste_doc.items[0]))
 		self.assertEqual(
-			sorted(get_serial_nos_from_bundle(transferred_ste_doc.items[0].serial_and_batch_bundle)),
+			sorted(get_se_row_serial_nos(transferred_ste_doc.items[0])),
 			serial_nos_list,
 		)
-		self.assertEqual(
-			get_batch_from_bundle(transferred_ste_doc.items[0].serial_and_batch_bundle), batch_no
-		)
+		self.assertEqual(get_se_row_batch_no(transferred_ste_doc.items[0]), batch_no)
 		self.assertEqual(transferred_ste_doc.items[0].qty, 4.0)
 
 		manufacture_ste_doc = frappe.get_doc(make_stock_entry(wo_doc.name, "Manufacture", 4))
 		manufacture_ste_doc.submit()
 		manufacture_ste_doc.reload()
 
-		self.assertTrue(manufacture_ste_doc.items[0].serial_and_batch_bundle)
+		self.assertTrue(se_row_has_entries(manufacture_ste_doc.items[0]))
 		self.assertEqual(
-			sorted(get_serial_nos_from_bundle(manufacture_ste_doc.items[0].serial_and_batch_bundle)),
+			sorted(get_se_row_serial_nos(manufacture_ste_doc.items[0])),
 			serial_nos_list,
 		)
-		self.assertEqual(
-			get_batch_from_bundle(manufacture_ste_doc.items[0].serial_and_batch_bundle), batch_no
-		)
+		self.assertEqual(get_se_row_batch_no(manufacture_ste_doc.items[0]), batch_no)
 		self.assertEqual(manufacture_ste_doc.items[0].qty, 4.0)
 
-		bundle = manufacture_ste_doc.items[0].serial_and_batch_bundle
-		bundle_doc = frappe.get_doc("Serial and Batch Bundle", bundle)
-		qty = sum(e.qty for e in bundle_doc.entries)
+		row = manufacture_ste_doc.items[0]
+		entries = get_voucher_entries("Stock Entry", row.parent, row.name, row.s_warehouse, fields=["qty"])
+		qty = sum(e.qty for e in entries)
 		self.assertEqual(qty, -4.0)
 
 	###
@@ -2547,7 +2532,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		stock_entry.submit()
 		stock_entry.reload()
 
-		batch_no = get_batch_from_bundle(stock_entry.items[0].serial_and_batch_bundle)
+		batch_no = get_se_row_batch_no(stock_entry.items[0])
 
 		stock_entry = frappe.get_doc(
 			make_stock_entry(wo_order.name, "Material Consumption for Manufacture", 10)
@@ -3205,24 +3190,12 @@ class TestWorkOrder(ERPNextTestSuite):
 		rm_receipt_1 = make_stock_entry_test_record(
 			item_code=rm_item, purpose="Material Receipt", target=wip_wh, qty=6, basic_rate=100
 		)
-		rm_batch_1 = get_batch_from_bundle(
-			frappe.db.get_value(
-				"Stock Entry Detail",
-				{"parent": rm_receipt_1.name, "item_code": rm_item},
-				"serial_and_batch_bundle",
-			)
-		)
+		rm_batch_1 = get_se_row_batch_no(rm_receipt_1.items[0])
 
 		rm_receipt_2 = make_stock_entry_test_record(
 			item_code=rm_item, purpose="Material Receipt", target=wip_wh, qty=6, basic_rate=100
 		)
-		rm_batch_2 = get_batch_from_bundle(
-			frappe.db.get_value(
-				"Stock Entry Detail",
-				{"parent": rm_receipt_2.name, "item_code": rm_item},
-				"serial_and_batch_bundle",
-			)
-		)
+		rm_batch_2 = get_se_row_batch_no(rm_receipt_2.items[0])
 
 		self.assertNotEqual(rm_batch_1, rm_batch_2, "Two receipts must create two distinct RM batches")
 
@@ -3266,16 +3239,16 @@ class TestWorkOrder(ERPNextTestSuite):
 		# FG row: must use fg_batch_1 exclusively (fg_batch_2 must not appear)
 		fg_row = next((i for i in stock_entry.items if i.item_code == fg_item), None)
 		self.assertIsNotNone(fg_row)
-		self.assertTrue(fg_row.serial_and_batch_bundle, "FG row must have a serial_and_batch_bundle")
-		self.assertEqual(get_batch_from_bundle(fg_row.serial_and_batch_bundle), fg_batch_1)
-		self.assertNotEqual(get_batch_from_bundle(fg_row.serial_and_batch_bundle), fg_batch_2)
+		self.assertTrue(se_row_has_entries(fg_row), "FG row must have serial/batch ledger entries")
+		self.assertEqual(get_se_row_batch_no(fg_row), fg_batch_1)
+		self.assertNotEqual(get_se_row_batch_no(fg_row), fg_batch_2)
 
 		# RM row: must use rm_batch_1 exclusively (rm_batch_2 must not appear)
 		rm_row = next((i for i in stock_entry.items if i.item_code == rm_item), None)
 		self.assertIsNotNone(rm_row)
-		self.assertTrue(rm_row.serial_and_batch_bundle, "RM row must have a serial_and_batch_bundle")
-		self.assertEqual(get_batch_from_bundle(rm_row.serial_and_batch_bundle), rm_batch_1)
-		self.assertNotEqual(get_batch_from_bundle(rm_row.serial_and_batch_bundle), rm_batch_2)
+		self.assertTrue(se_row_has_entries(rm_row), "RM row must have serial/batch ledger entries")
+		self.assertEqual(get_se_row_batch_no(rm_row), rm_batch_1)
+		self.assertNotEqual(get_se_row_batch_no(rm_row), rm_batch_2)
 
 		# RM qty: 2 FG disassembled x 2 RM per FG = 4
 		self.assertAlmostEqual(rm_row.qty, 4.0, places=3)
@@ -3312,25 +3285,13 @@ class TestWorkOrder(ERPNextTestSuite):
 		rm_receipt_1 = make_stock_entry_test_record(
 			item_code=rm_item, purpose="Material Receipt", target=wip_wh, qty=6, basic_rate=100
 		)
-		rm_serials_1 = get_serial_nos_from_bundle(
-			frappe.db.get_value(
-				"Stock Entry Detail",
-				{"parent": rm_receipt_1.name, "item_code": rm_item},
-				"serial_and_batch_bundle",
-			)
-		)
+		rm_serials_1 = get_se_row_serial_nos(rm_receipt_1.items[0])
 		self.assertEqual(len(rm_serials_1), 6)
 
 		rm_receipt_2 = make_stock_entry_test_record(
 			item_code=rm_item, purpose="Material Receipt", target=wip_wh, qty=6, basic_rate=100
 		)
-		rm_serials_2 = get_serial_nos_from_bundle(
-			frappe.db.get_value(
-				"Stock Entry Detail",
-				{"parent": rm_receipt_2.name, "item_code": rm_item},
-				"serial_and_batch_bundle",
-			)
-		)
+		rm_serials_2 = get_se_row_serial_nos(rm_receipt_2.items[0])
 		self.assertEqual(len(rm_serials_2), 6)
 		self.assertFalse(
 			set(rm_serials_1) & set(rm_serials_2), "Two receipts must produce disjoint RM serial sets"
@@ -3378,8 +3339,8 @@ class TestWorkOrder(ERPNextTestSuite):
 		# FG row: 2 serials consumed — must be subset of fg_serials_1, disjoint from fg_serials_2
 		fg_row = next((i for i in stock_entry.items if i.item_code == fg_item), None)
 		self.assertIsNotNone(fg_row)
-		self.assertTrue(fg_row.serial_and_batch_bundle, "FG row must have a serial_and_batch_bundle")
-		fg_dasm_serials = get_serial_nos_from_bundle(fg_row.serial_and_batch_bundle)
+		self.assertTrue(se_row_has_entries(fg_row), "FG row must have serial/batch ledger entries")
+		fg_dasm_serials = get_se_row_serial_nos(fg_row)
 		self.assertEqual(len(fg_dasm_serials), disassemble_qty)
 		self.assertTrue(set(fg_dasm_serials).issubset(set(fg_serials_1)))
 		self.assertFalse(
@@ -3389,8 +3350,8 @@ class TestWorkOrder(ERPNextTestSuite):
 		# RM row: 4 serials returned (2 FG x 2 RM each) — subset of rm_serials_1, disjoint from rm_serials_2
 		rm_row = next((i for i in stock_entry.items if i.item_code == rm_item), None)
 		self.assertIsNotNone(rm_row)
-		self.assertTrue(rm_row.serial_and_batch_bundle, "RM row must have a serial_and_batch_bundle")
-		rm_dasm_serials = get_serial_nos_from_bundle(rm_row.serial_and_batch_bundle)
+		self.assertTrue(se_row_has_entries(rm_row), "RM row must have serial/batch ledger entries")
+		rm_dasm_serials = get_se_row_serial_nos(rm_row)
 		self.assertEqual(len(rm_dasm_serials), disassemble_qty * 2)
 		self.assertTrue(set(rm_dasm_serials).issubset(set(rm_serials_1)))
 		self.assertFalse(
@@ -3619,14 +3580,12 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		ste = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 4))
 		ste.items[0].use_serial_batch_fields = 1
-		ste.items[0].serial_no = "\n".join(
-			get_serial_nos_from_bundle(rec_se.items[0].serial_and_batch_bundle)
-		)
+		ste.items[0].serial_no = "\n".join(get_se_row_serial_nos(rec_se.items[0]))
 		ste.insert()
 		ste.submit()
 
 		ste.reload()
-		serial_nos = get_serial_nos_from_bundle(ste.items[0].serial_and_batch_bundle)
+		serial_nos = get_se_row_serial_nos(ste.items[0])
 		for row in serial_nos:
 			status = frappe.db.get_value("Serial No", row, "status")
 			self.assertEqual(status, "Consumed")
@@ -4120,7 +4079,7 @@ class TestWorkOrder(ERPNextTestSuite):
 				basic_rate=100,
 			)
 
-			itemwise_batches[row.item_code] = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+			itemwise_batches[row.item_code] = get_se_row_batch_no(se.items[0])
 
 		wo = make_wo_order_test_record(
 			item=production_item,
@@ -4149,7 +4108,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		transfer_entry.submit()
 
 		for row in transfer_entry.items:
-			batch_no = get_batch_from_bundle(row.serial_and_batch_bundle)
+			batch_no = get_se_row_batch_no(row)
 			self.assertEqual(batch_no, itemwise_batches[row.item_code])
 
 	def test_work_order_valuation_auto_pick(self):
@@ -4193,11 +4152,11 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(stock_entry.items[0].valuation_rate, 200)
 
 		original_value = frappe.db.get_single_value(
-			"Stock Settings", "auto_create_serial_and_batch_bundle_for_outward"
+			"Stock Settings", "auto_create_serial_batch_entries_for_outward"
 		)
 		original_based_on = frappe.db.get_single_value("Stock Settings", "pick_serial_and_batch_based_on")
 
-		frappe.db.set_single_value("Stock Settings", "auto_create_serial_and_batch_bundle_for_outward", 1)
+		frappe.db.set_single_value("Stock Settings", "auto_create_serial_batch_entries_for_outward", 1)
 		frappe.db.set_single_value("Stock Settings", "pick_serial_and_batch_based_on", "Expiry")
 
 		stock_entry = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 5))
@@ -4205,13 +4164,13 @@ class TestWorkOrder(ERPNextTestSuite):
 		stock_entry.submit()
 		stock_entry.reload()
 
-		batch_no = get_batch_from_bundle(stock_entry.items[0].serial_and_batch_bundle)
+		batch_no = get_se_row_batch_no(stock_entry.items[0])
 		self.assertEqual(batch_no, batches[1])
 		self.assertEqual(stock_entry.items[0].valuation_rate, 200)
 		self.assertEqual(stock_entry.items[1].valuation_rate, 200)
 
 		frappe.db.set_single_value(
-			"Stock Settings", "auto_create_serial_and_batch_bundle_for_outward", original_value
+			"Stock Settings", "auto_create_serial_batch_entries_for_outward", original_value
 		)
 		frappe.db.set_single_value("Stock Settings", "pick_serial_and_batch_based_on", original_based_on)
 
@@ -4484,7 +4443,7 @@ class TestWorkOrder(ERPNextTestSuite):
 			value = _reserved_item[(row.item_code, row.s_warehouse)]
 			self.assertEqual(row.qty, value.reserved_qty)
 			if value.serial_nos:
-				serial_nos = get_serial_nos_from_bundle(row.serial_and_batch_bundle)
+				serial_nos = get_se_row_serial_nos(row, row.s_warehouse)
 				self.assertEqual(sorted(serial_nos), sorted(value.serial_nos))
 
 			if value.batch_nos:
@@ -4502,7 +4461,7 @@ class TestWorkOrder(ERPNextTestSuite):
 
 			value = _before_reserved_item[(row.item_code, row.s_warehouse)]
 			if row.serial_no:
-				serial_nos = get_serial_nos_from_bundle(row.serial_and_batch_bundle)
+				serial_nos = get_se_row_serial_nos(row, row.s_warehouse)
 				for sn in serial_nos:
 					self.assertIn(sn, value.serial_nos)
 					value.serial_nos.remove(sn)
@@ -4511,7 +4470,7 @@ class TestWorkOrder(ERPNextTestSuite):
 				self.assertIn(row.batch_no, value.batch_nos)
 				value.batch_nos[row.batch_no] -= row.qty
 				if row.serial_no:
-					sns = get_serial_nos_from_bundle(row.serial_and_batch_bundle)
+					sns = get_se_row_serial_nos(row, row.s_warehouse)
 					for sn in sns:
 						self.assertIn(sn, value.serial_batches[row.batch_no])
 						value.serial_batches[row.batch_no].remove(sn)
@@ -4527,14 +4486,14 @@ class TestWorkOrder(ERPNextTestSuite):
 			value = _before_reserved_item[(row.item_code, row.s_warehouse)]
 
 			if row.serial_no:
-				serial_nos = get_serial_nos_from_bundle(row.serial_and_batch_bundle)
+				serial_nos = get_se_row_serial_nos(row, row.s_warehouse)
 				self.assertEqual(sorted(serial_nos), sorted(value.serial_nos))
 
 			if row.batch_no:
 				self.assertIn(row.batch_no, value.batch_nos)
 				self.assertEqual(value.batch_nos[row.batch_no], row.qty)
 				if row.serial_no:
-					sns = get_serial_nos_from_bundle(row.serial_and_batch_bundle)
+					sns = get_se_row_serial_nos(row, row.s_warehouse)
 					self.assertEqual(sorted(sns), sorted(value.serial_batches[row.batch_no]))
 
 		frappe.db.set_single_value(
@@ -5111,7 +5070,7 @@ class TestWorkOrder(ERPNextTestSuite):
 
 def get_reserved_entries(voucher_no, warehouse=None):
 	doctype = frappe.qb.DocType("Stock Reservation Entry")
-	sabb = frappe.qb.DocType("Serial and Batch Entry")
+	sabb = frappe.qb.DocType("Stock Reservation Serial Batch")
 
 	query = (
 		frappe.qb.from_(doctype)
@@ -5175,7 +5134,7 @@ def make_stock_in_entries_and_get_batches(rm_item, source_warehouse, wip_warehou
 		stock_entry.submit()
 		stock_entry.reload()
 
-		batch_no = get_batch_from_bundle(stock_entry.items[0].serial_and_batch_bundle)
+		batch_no = get_se_row_batch_no(stock_entry.items[0])
 		batch_doc = frappe.get_doc("Batch", batch_no)
 
 		# keep early expiry date for the batch having rate 200
@@ -5192,7 +5151,7 @@ def make_stock_in_entries_and_get_batches(rm_item, source_warehouse, wip_warehou
 		)
 		stock_entry.submit()
 		stock_entry.reload()
-		batch_no = get_batch_from_bundle(stock_entry.items[0].serial_and_batch_bundle)
+		batch_no = get_se_row_batch_no(stock_entry.items[0])
 		batch_doc = frappe.get_doc("Batch", batch_no)
 		batch_doc.db_set("expiry_date", add_to_date(now(), days=10))
 

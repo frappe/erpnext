@@ -21,8 +21,7 @@
   "reference",
   "serial_no",
   "sales_order",
-  "column_break_ugqr",
-  "serial_and_batch_bundle"
+  "column_break_ugqr"
  ],
  "fields": [
   {
@@ -151,20 +150,12 @@
   {
    "fieldname": "column_break_ugqr",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "serial_and_batch_bundle",
-   "fieldtype": "Link",
-   "label": "Serial and Batch Bundle",
-   "no_copy": 1,
-   "options": "Serial and Batch Bundle",
-   "print_hide": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-03-27 13:10:03.992727",
+ "modified": "2026-07-23 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Maintenance",
  "name": "Maintenance Schedule Item",

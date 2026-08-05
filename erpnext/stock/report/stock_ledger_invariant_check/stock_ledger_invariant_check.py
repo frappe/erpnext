@@ -25,7 +25,6 @@ SLE_FIELDS = (
 	"stock_value_difference",
 	"valuation_rate",
 	"voucher_detail_no",
-	"serial_and_batch_bundle",
 )
 
 
@@ -58,7 +57,17 @@ def add_invariant_check_fields(sles, filters):
 	currency_precision = (
 		cint(frappe.db.get_single_value("System Settings", "currency_precision")) or float_precision
 	)
+	item_details = frappe.get_cached_value(
+		"Item", filters.item_code, ["has_serial_no", "has_batch_no"], as_dict=True
+	)
 	for idx, sle in enumerate(sles):
+		if (
+			not sle.serial_no
+			and not sle.batch_no
+			and (item_details.has_serial_no or item_details.has_batch_no)
+		):
+			set_serial_batch_from_location_ledger(sle, filters.warehouse)
+
 		if sle.batch_no:
 			sle.use_batchwise_valuation = frappe.db.get_value(
 				"Batch", sle.batch_no, "use_batchwise_valuation", cache=True
@@ -69,11 +78,7 @@ def add_invariant_check_fields(sles, filters):
 
 		balance_qty += sle.actual_qty
 		balance_stock_value += sle.stock_value_difference
-		if (
-			sle.voucher_type == "Stock Reconciliation"
-			and not sle.batch_no
-			and not sle.serial_and_batch_bundle
-		):
+		if sle.voucher_type == "Stock Reconciliation" and not sle.batch_no:
 			balance_qty = frappe.db.get_value("Stock Reconciliation Item", sle.voucher_detail_no, "qty")
 			if balance_qty is None:
 				balance_qty = sle.qty_after_transaction
@@ -104,11 +109,28 @@ def add_invariant_check_fields(sles, filters):
 	return sles
 
 
+def set_serial_batch_from_location_ledger(sle, warehouse):
+	from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import get_voucher_entries
+
+	entries = get_voucher_entries(
+		sle.voucher_type,
+		sle.voucher_no,
+		sle.voucher_detail_no,
+		warehouse,
+		fields=["serial_no", "batch_no"],
+	)
+	serial_nos = sorted({entry.serial_no for entry in entries if entry.serial_no})
+	if serial_nos:
+		sle.serial_no = "\n".join(serial_nos)
+
+	batches = sorted({entry.batch_no for entry in entries if entry.batch_no})
+	if batches:
+		sle.batch_no = batches[0]
+
+
 def maintains_fifo_queue(sle):
 	# no queue is maintained for serialized/batchwise-valued stock
-	return not (
-		sle.serial_and_batch_bundle or sle.serial_no or (sle.batch_no and sle.use_batchwise_valuation)
-	)
+	return not (sle.serial_no or (sle.batch_no and sle.use_batchwise_valuation))
 
 
 def add_fifo_fields(sle, prev_sle):
@@ -181,12 +203,6 @@ def get_columns():
 			"fieldtype": "Link",
 			"label": _("Batch"),
 			"options": "Batch",
-		},
-		{
-			"fieldname": "serial_and_batch_bundle",
-			"fieldtype": "Link",
-			"label": _("Serial and Batch Bundle"),
-			"options": "Serial and Batch Bundle",
 		},
 		{
 			"fieldname": "use_batchwise_valuation",

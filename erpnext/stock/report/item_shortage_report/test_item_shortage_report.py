@@ -17,7 +17,7 @@ class TestItemShortageReport(ERPNextTestSuite):
 		so = make_sales_order(item_code=item)
 
 		reserved_qty, projected_qty = frappe.db.get_value(
-			"Bin",
+			"Stock Level",
 			{
 				"item_code": item,
 				"warehouse": so.items[0].warehouse,

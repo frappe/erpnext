@@ -42,7 +42,7 @@ class StockLedgerEntry(Document):
 		from frappe.types import DF
 
 		actual_qty: DF.Float
-		auto_created_serial_and_batch_bundle: DF.Check
+		auto_created_serial_batch: DF.Check
 		batch_no: DF.Data | None
 		company: DF.Link | None
 		dependant_sle_voucher_detail_no: DF.Data | None
@@ -60,7 +60,6 @@ class StockLedgerEntry(Document):
 		project: DF.Link | None
 		qty_after_transaction: DF.Float
 		recalculate_rate: DF.Check
-		serial_and_batch_bundle: DF.Link | None
 		serial_no: DF.LongText | None
 		stock_queue: DF.LongText | None
 		stock_uom: DF.Link | None
@@ -174,7 +173,7 @@ class StockLedgerEntry(Document):
 	def on_submit(self):
 		self.check_stock_frozen_date()
 
-		# Added to handle few test cases where serial_and_batch_bundles are not required
+		# Added to handle few test cases where serial / batch entries are not required
 		if frappe.in_test and frappe.flags.ignore_serial_batch_bundle_validation:
 			return
 
@@ -234,11 +233,8 @@ class StockLedgerEntry(Document):
 			self.throw_error_message(f"Item {self.item_code} must be a stock Item")
 
 		if item_detail.has_serial_no or item_detail.has_batch_no:
-			if not self.serial_and_batch_bundle and not self.is_standard_cost_revaluation():
+			if not self.is_standard_cost_revaluation() and not self.has_sll_native_entries():
 				self.throw_error_message(f"Serial No / Batch No are mandatory for Item {self.item_code}")
-
-		if self.serial_and_batch_bundle and not item_detail.has_serial_no and not item_detail.has_batch_no:
-			self.throw_error_message(f"Serial No and Batch No are not allowed for Item {self.item_code}")
 
 	def is_standard_cost_revaluation(self):
 		"""A Standard Cost item is revalued through a Stock Reconciliation that changes the rate only
@@ -248,6 +244,14 @@ class StockLedgerEntry(Document):
 		return self.voucher_type == "Stock Reconciliation" and is_standard_cost_item(
 			self.item_code, self.company
 		)
+
+	def has_sll_native_entries(self):
+		"""Serial/batch composition is persisted straight to Stock Location Ledger, keyed by the
+		voucher tuple - this is how "composition exists" is told apart from "no serial/batch data
+		was ever provided"."""
+		from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import has_bundled_entries
+
+		return has_bundled_entries(self.voucher_type, self.voucher_no, self.voucher_detail_no, self.warehouse)
 
 	def throw_error_message(self, message, exception=frappe.ValidationError):
 		frappe.throw(_(message), exception)

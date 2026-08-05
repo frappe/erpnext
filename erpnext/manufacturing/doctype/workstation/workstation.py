@@ -298,7 +298,7 @@ def get_raw_materials(job_card: str):
 
 		row.stock_qty = (
 			frappe.db.get_value(
-				"Bin",
+				"Stock Level",
 				{
 					"item_code": row.item_code,
 					"warehouse": warehouse,

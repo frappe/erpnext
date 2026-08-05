@@ -8,15 +8,6 @@ frappe.ui.form.on("Job Card", {
 			filters: { work_order: frm.doc.work_order },
 		}));
 
-		frm.set_query("serial_and_batch_bundle", () => ({
-			filters: {
-				item_code: frm.doc.production_item,
-				voucher_type: frm.doc.doctype,
-				voucher_no: ["in", [frm.doc.name, ""]],
-				is_cancelled: 0,
-			},
-		}));
-
 		frm.set_query("item_code", "secondary_items", () => ({
 			filters: { disabled: 0 },
 		}));
@@ -190,15 +181,6 @@ frappe.ui.form.on("Job Card", {
 				if (r.message.transfer_material_against == "Work Order" && !doc.operation_row_id) {
 					frm.set_df_property("items", "hidden", 1);
 				}
-			});
-		}
-
-		const sbb_field = frm.get_docfield("serial_and_batch_bundle");
-		if (sbb_field) {
-			sbb_field.get_route_options_for_new_doc = () => ({
-				item_code: doc.production_item,
-				warehouse: doc.wip_warehouse,
-				voucher_type: doc.doctype,
 			});
 		}
 	},

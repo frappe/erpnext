@@ -3,7 +3,7 @@
  "creation": "2020-07-20 21:01:04.495481",
  "docstatus": 0,
  "doctype": "Number Card",
- "document_type": "Bin",
+ "document_type": "Stock Level",
  "filters_json": "[]",
  "function": "Sum",
  "idx": 0,

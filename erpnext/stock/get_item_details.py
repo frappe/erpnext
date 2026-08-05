@@ -174,10 +174,8 @@ def get_item_details(
 	if not source_row:
 		out.update(get_pricing_rule_for_item(ctx, doc=doc, for_validate=for_validate))
 
-	if (
-		frappe.get_single_value("Stock Settings", "auto_create_serial_and_batch_bundle_for_outward")
-		and not ctx.get("serial_and_batch_bundle")
-		and (ctx.get("use_serial_batch_fields") or ctx.get("doctype") == "POS Invoice")
+	if frappe.get_single_value("Stock Settings", "auto_create_serial_batch_entries_for_outward") and (
+		ctx.get("use_serial_batch_fields") or ctx.get("doctype") == "POS Invoice"
 	):
 		update_stock(ctx, out, doc)
 
@@ -1611,7 +1609,7 @@ def get_conversion_factor(item_code: str | None, uom: str):
 def get_projected_qty(item_code: str, warehouse: str):
 	return {
 		"projected_qty": frappe.db.get_value(
-			"Bin", {"item_code": item_code, "warehouse": warehouse}, "projected_qty"
+			"Stock Level", {"item_code": item_code, "warehouse": warehouse}, "projected_qty"
 		)
 	}
 
@@ -1629,7 +1627,7 @@ def get_bin_details(
 
 		warehouses = get_child_warehouses(warehouse) if include_child_warehouses else [warehouse]
 
-		bin = frappe.qb.DocType("Bin")
+		bin = frappe.qb.DocType("Stock Level")
 		bin_details = (
 			frappe.qb.from_(bin)
 			.select(
@@ -1647,7 +1645,7 @@ def get_bin_details(
 
 
 def get_company_total_stock(item_code, company):
-	bin = frappe.qb.DocType("Bin")
+	bin = frappe.qb.DocType("Stock Level")
 	wh = frappe.qb.DocType("Warehouse")
 
 	return (
@@ -1816,7 +1814,7 @@ def get_valuation_rate(item_code: str, company: str, warehouse: str | None = Non
 			)
 
 		return frappe.db.get_value(
-			"Bin", {"item_code": item_code, "warehouse": warehouse}, ["valuation_rate"], as_dict=True
+			"Stock Level", {"item_code": item_code, "warehouse": warehouse}, ["valuation_rate"], as_dict=True
 		) or {"valuation_rate": item.get("valuation_rate") or 0}
 
 	elif not item.get("is_stock_item"):

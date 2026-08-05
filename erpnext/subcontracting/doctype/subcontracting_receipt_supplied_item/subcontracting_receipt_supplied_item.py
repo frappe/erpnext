@@ -33,7 +33,6 @@ class SubcontractingReceiptSuppliedItem(Document):
 		reference_name: DF.Data | None
 		required_qty: DF.Float
 		rm_item_code: DF.Link | None
-		serial_and_batch_bundle: DF.Link | None
 		serial_no: DF.Text | None
 		stock_uom: DF.Link | None
 		subcontracting_order: DF.Link | None

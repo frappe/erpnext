@@ -283,7 +283,7 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		)
 
 		bin_before_sco = frappe.db.get_value(
-			"Bin",
+			"Stock Level",
 			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "_Test Item"},
 			fieldname=["reserved_qty_for_sub_contract", "projected_qty", "modified"],
 			as_dict=1,
@@ -303,7 +303,7 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		sco = get_subcontracting_order(service_items=service_items)
 
 		bin_after_sco = frappe.db.get_value(
-			"Bin",
+			"Stock Level",
 			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "_Test Item"},
 			fieldname=["reserved_qty_for_sub_contract", "projected_qty", "modified"],
 			as_dict=1,
@@ -348,7 +348,7 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		ste.submit()
 
 		bin_after_rm_transfer = frappe.db.get_value(
-			"Bin",
+			"Stock Level",
 			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "_Test Item"},
 			fieldname="reserved_qty_for_sub_contract",
 			as_dict=1,
@@ -363,7 +363,7 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		# Cancel Stock Entry(Send to Subcontractor)
 		ste.cancel()
 		bin_after_cancel_ste = frappe.db.get_value(
-			"Bin",
+			"Stock Level",
 			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "_Test Item"},
 			fieldname="reserved_qty_for_sub_contract",
 			as_dict=1,
@@ -379,7 +379,7 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		sco.reload()
 		sco.cancel()
 		bin_after_cancel_sco = frappe.db.get_value(
-			"Bin",
+			"Stock Level",
 			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "_Test Item"},
 			fieldname="reserved_qty_for_sub_contract",
 			as_dict=1,
@@ -402,7 +402,7 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		)
 
 		bin_before_sco = frappe.db.get_value(
-			"Bin",
+			"Stock Level",
 			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "_Test Item"},
 			fieldname="reserved_qty_for_sub_contract",
 			as_dict=1,
@@ -443,7 +443,7 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		self.assertEqual(open_sco.status, "Open")
 
 		bin_before_close = frappe.db.get_value(
-			"Bin",
+			"Stock Level",
 			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "_Test Item"},
 			fieldname=["reserved_qty_for_sub_contract", "projected_qty"],
 			as_dict=1,
@@ -460,7 +460,7 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		self.assertEqual(sco.status, "Closed")
 
 		bin_after_close = frappe.db.get_value(
-			"Bin",
+			"Stock Level",
 			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "_Test Item"},
 			fieldname=["reserved_qty_for_sub_contract", "projected_qty"],
 			as_dict=1,
@@ -773,7 +773,7 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		]
 
 		ordered_qty = frappe.db.get_value(
-			"Bin",
+			"Stock Level",
 			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "Subcontracted Item SA8"},
 			fieldname="ordered_qty",
 		)
@@ -783,7 +783,7 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		sco.reload()
 
 		new_ordered_qty = frappe.db.get_value(
-			"Bin",
+			"Stock Level",
 			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "Subcontracted Item SA8"},
 			fieldname="ordered_qty",
 		)
@@ -803,7 +803,7 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		scr.submit()
 
 		new_ordered_qty = frappe.db.get_value(
-			"Bin",
+			"Stock Level",
 			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "Subcontracted Item SA8"},
 			fieldname="ordered_qty",
 		)
@@ -814,7 +814,7 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		scr.cancel()
 
 		new_ordered_qty = frappe.db.get_value(
-			"Bin",
+			"Stock Level",
 			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "Subcontracted Item SA8"},
 			fieldname="ordered_qty",
 		)
@@ -826,7 +826,7 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		from erpnext.stock.doctype.material_request.test_material_request import make_material_request
 
 		requested_qty = frappe.db.get_value(
-			"Bin",
+			"Stock Level",
 			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "Subcontracted Item SA8"},
 			fieldname="indented_qty",
 		)
@@ -841,7 +841,7 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		self.assertEqual(mr.docstatus, 1)
 
 		new_requested_qty = frappe.db.get_value(
-			"Bin",
+			"Stock Level",
 			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "Subcontracted Item SA8"},
 			fieldname="indented_qty",
 		)
@@ -869,7 +869,7 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		self.assertTrue(sco.items[0].material_request_item)
 
 		new_requested_qty = frappe.db.get_value(
-			"Bin",
+			"Stock Level",
 			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "Subcontracted Item SA8"},
 			fieldname="indented_qty",
 		)

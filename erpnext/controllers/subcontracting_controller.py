@@ -13,14 +13,16 @@ from frappe.utils import cint, flt, get_link_to_form
 
 from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.doctype.batch.batch import get_batch_qty
-from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import (
+	get_voucher_wise_serial_batch_from_sll,
+)
+from erpnext.stock.serial_batch_bundle import (
+	SerialBatchCreation,
 	combine_datetime,
 	get_auto_batch_nos,
 	get_available_serial_nos,
-	get_voucher_wise_serial_batch_from_bundle,
 )
-from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-from erpnext.stock.serial_batch_bundle import SerialBatchCreation, get_serial_nos_from_bundle
 from erpnext.stock.utils import get_incoming_rate
 
 
@@ -81,7 +83,6 @@ class SubcontractingController(StockController):
 						"voucher_type": self.doctype,
 						"voucher_no": self.name,
 						"company": self.company,
-						"serial_and_batch_bundle": row.serial_and_batch_bundle,
 						"voucher_detail_no": row.name,
 						"batch_no": row.batch_no,
 						"serial_no": row.serial_no,
@@ -331,7 +332,6 @@ class SubcontractingController(StockController):
 				se_detail.basic_rate.as_("rate"),
 				se_detail.amount,
 				se_detail.serial_no,
-				se_detail.serial_and_batch_bundle,
 				se_detail.uom,
 				se_detail.subcontracted_item.as_("main_item_code"),
 				se_detail.stock_uom,
@@ -386,9 +386,6 @@ class SubcontractingController(StockController):
 			"parent as voucher_no",
 		]
 
-		if self.subcontract_data.receipt_supplied_items_field != "Purchase Receipt Item Supplied":
-			fields.append("serial_and_batch_bundle")
-
 		return frappe.get_all(
 			self.subcontract_data.receipt_supplied_items_field,
 			fields=fields,
@@ -413,7 +410,7 @@ class SubcontractingController(StockController):
 
 		voucher_nos = [d.voucher_no for d in consumed_materials if d.voucher_no]
 		voucher_bundle_data = (
-			get_voucher_wise_serial_batch_from_bundle(
+			get_voucher_wise_serial_batch_from_sll(
 				voucher_no=voucher_nos,
 				is_outward=1,
 				get_subcontracted_item=("Subcontracting Receipt Supplied Item", "main_item_code"),
@@ -475,7 +472,7 @@ class SubcontractingController(StockController):
 
 		voucher_nos = [row.voucher_no for row in transferred_items]
 		voucher_bundle_data = (
-			get_voucher_wise_serial_batch_from_bundle(
+			get_voucher_wise_serial_batch_from_sll(
 				voucher_no=voucher_nos,
 				is_outward=0,
 				get_subcontracted_item=("Stock Entry Detail", "subcontracted_item"),
@@ -542,7 +539,7 @@ class SubcontractingController(StockController):
 		self.set(self.raw_material_table, [])
 		for item in self._doc_before_save.supplied_items:
 			if item.reference_name in self.__changed_name:
-				self.__remove_serial_and_batch_bundle(item)
+				self.__delete_serial_batch_ledgers(item)
 				continue
 
 			if item.reference_name not in self.__reference_name:
@@ -553,9 +550,10 @@ class SubcontractingController(StockController):
 
 			i += 1
 
-	def __remove_serial_and_batch_bundle(self, item):
-		if item.get("serial_and_batch_bundle"):
-			frappe.delete_doc("Serial and Batch Bundle", item.serial_and_batch_bundle, force=True)
+	def __delete_serial_batch_ledgers(self, item):
+		from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import delete_draft_ledgers
+
+		delete_draft_ledgers("Subcontracting Receipt", self.name, item.name, self.supplier_warehouse)
 
 	def _get_materials_from_bom(self, item_code, bom_no, exploded_item=0):
 		data = []
@@ -623,7 +621,7 @@ class SubcontractingController(StockController):
 		if self.alternative_item_details.get(bom_item.rm_item_code):
 			bom_item.update(self.alternative_item_details[bom_item.rm_item_code])
 
-	def __set_serial_and_batch_bundle(self, item_row, rm_obj, qty):
+	def __set_serial_batch_ledgers(self, item_row, rm_obj, qty):
 		key = (rm_obj.rm_item_code, item_row.item_code, item_row.get(self.subcontract_data.order_field))
 		if not self.available_materials.get(key):
 			return
@@ -640,24 +638,42 @@ class SubcontractingController(StockController):
 		elif self.available_materials.get(key) and self.available_materials[key]["batch_no"]:
 			batches = self.__get_batch_nos_for_bundle(qty, key)
 
-		bundle = SerialBatchCreation(
+		if not rm_obj.get("use_serial_batch_fields") and len(batches) == 1:
+			# A one-batch slice is safe to denormalize onto the row: the on-submit old-fields
+			# pass rebuilds batch x consumed_qty from it, which equals the slice. A multi-batch
+			# slice has no faithful single-field representation, so the field stays empty.
+			rm_obj.batch_no = next(iter(batches))
+
+		if not rm_obj.name:
+			# A freshly built supplied row has no name yet, and the ledger upsert keys on
+			# voucher_detail_no - defer until after save assigns names, keeping the sliced
+			# composition (the slice above already consumed available_materials).
+			self.flags.setdefault("deferred_supplied_ledgers", []).append((rm_obj, serial_nos, batches, qty))
+			return
+
+		self.__create_supplied_ledger_entries(rm_obj, serial_nos, batches, qty)
+
+	def __create_supplied_ledger_entries(self, rm_obj, serial_nos, batches, qty):
+		SerialBatchCreation(
 			frappe._dict(
 				{
 					"company": self.company,
 					"item_code": rm_obj.rm_item_code,
 					"warehouse": self.supplier_warehouse,
 					"qty": qty,
-					"serial_nos": serial_nos,
-					"batches": batches,
-					"posting_datetime": combine_datetime(self.posting_date, self.posting_time),
 					"voucher_type": "Subcontracting Receipt",
-					"do_not_submit": True,
+					"voucher_no": self.name,
+					"voucher_detail_no": rm_obj.name,
+					"posting_datetime": combine_datetime(self.posting_date, self.posting_time),
 					"type_of_transaction": "Outward" if qty > 0 else "Inward",
 				}
 			)
-		).make_serial_and_batch_bundle()
+		).make_location_ledger_entries(serial_nos=serial_nos, batch_nos=batches)
 
-		return bundle.name
+	def flush_deferred_supplied_ledgers(self):
+		for rm_obj, serial_nos, batches, qty in self.flags.pop("deferred_supplied_ledgers", []):
+			if rm_obj.name:
+				self.__create_supplied_ledger_entries(rm_obj, serial_nos, batches, qty)
 
 	def __get_batch_nos_for_bundle(self, qty, key):
 		available_batches = defaultdict(float)
@@ -712,7 +728,6 @@ class SubcontractingController(StockController):
 		else:
 			rm_obj.consumed_qty = flt(qty, rm_obj.precision("consumed_qty"))
 			rm_obj.required_qty = flt(bom_item.required_qty or qty, rm_obj.precision("required_qty"))
-			rm_obj.serial_and_batch_bundle = None
 			setattr(
 				rm_obj, self.subcontract_data.order_field, item_row.get(self.subcontract_data.order_field)
 			)
@@ -724,9 +739,13 @@ class SubcontractingController(StockController):
 
 		if self.doctype == "Subcontracting Receipt":
 			if not use_serial_batch_fields:
-				rm_obj.serial_and_batch_bundle = self.__set_serial_and_batch_bundle(
-					item_row, rm_obj, rm_obj.consumed_qty
-				)
+				# bom_item is the transfer row's detail dict, so append() copied ITS serial/batch
+				# text onto this row - stale for this receipt's own consumption, and the on-submit
+				# old-fields pass would trust it over the drafts sliced below. A single-batch
+				# display pointer is restored from the slice inside __set_serial_batch_ledgers.
+				rm_obj.serial_no = None
+				rm_obj.batch_no = None
+				self.__set_serial_batch_ledgers(item_row, rm_obj, rm_obj.consumed_qty)
 
 				self.set_rate_for_supplied_items(rm_obj, item_row)
 			elif self.backflush_based_on == "BOM":
@@ -760,17 +779,15 @@ class SubcontractingController(StockController):
 				}
 			)
 
-			if item_details.has_serial_no and not row.serial_and_batch_bundle and not row.serial_no:
+			if item_details.has_serial_no and not row.serial_no:
 				serial_nos = get_available_serial_nos(kwargs)
 				if serial_nos:
 					serial_nos = [sn.get("serial_no") for sn in serial_nos]
 					serial_nos = get_filtered_serial_nos(serial_nos, self, "supplied_items")
 					row.serial_no = "\n".join(serial_nos)
 
-			elif (
-				item_details.has_batch_no
-				and not row.serial_and_batch_bundle
-				and (not row.batch_no or self.batch_has_not_available(row.batch_no, row.consumed_qty))
+			elif item_details.has_batch_no and (
+				not row.batch_no or self.batch_has_not_available(row.batch_no, row.consumed_qty)
 			):
 				batches = get_auto_batch_nos(kwargs)
 				if batches:
@@ -837,9 +854,6 @@ class SubcontractingController(StockController):
 			}
 		)
 
-		if rm_obj.serial_and_batch_bundle:
-			args["serial_and_batch_bundle"] = rm_obj.serial_and_batch_bundle
-
 		if rm_obj.use_serial_batch_fields:
 			args["batch_no"] = rm_obj.batch_no
 			args["serial_no"] = rm_obj.serial_no
@@ -867,7 +881,6 @@ class SubcontractingController(StockController):
 				elif qty > 0 and batch_qty > 0:
 					qty -= batch_qty
 					new_rm_obj = self.append(self.raw_material_table, bom_item)
-					new_rm_obj.serial_and_batch_bundle = None
 					new_rm_obj.use_serial_batch_fields = 1
 					new_rm_obj.reference_name = item_row.name
 					self.__set_batch_no_as_per_qty(item_row, new_rm_obj, batch_no, batch_qty)
@@ -975,19 +988,7 @@ class SubcontractingController(StockController):
 						)
 					] -= row.qty
 
-	def __set_rate_for_serial_and_batch_bundle(self):
-		if self.doctype != "Subcontracting Receipt":
-			return
-
-		for row in self.get(self.raw_material_table):
-			if not row.get("serial_and_batch_bundle"):
-				continue
-
-			row.rate = frappe.get_cached_value(
-				"Serial and Batch Bundle", row.serial_and_batch_bundle, "avg_rate"
-			)
-
-	def __modify_serial_and_batch_bundle(self):
+	def __modify_serial_batch_ledgers(self):
 		if self.is_new():
 			return
 
@@ -998,42 +999,22 @@ class SubcontractingController(StockController):
 			if self.__changed_name and item_row.name in self.__changed_name:
 				continue
 
-			modified_data = self.__get_bundle_to_modify(item_row.name)
-			if modified_data:
-				serial_nos = []
-				batches = frappe._dict({})
-				key = (
-					modified_data.rm_item_code,
-					item_row.item_code,
-					item_row.get(self.subcontract_data.order_field),
-				)
+			modified_row = self.__get_row_to_modify(item_row.name)
+			if modified_row:
+				self.__set_serial_batch_ledgers(item_row, modified_row, modified_row.consumed_qty)
 
-				if self.available_materials.get(key) and self.available_materials[key]["serial_no"]:
-					serial_nos = self.__get_serial_nos_for_bundle(modified_data.consumed_qty, key)
+	def __get_row_to_modify(self, name):
+		from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import (
+			get_voucher_serial_batch_qty,
+		)
 
-				elif self.available_materials.get(key) and self.available_materials[key]["batch_no"]:
-					batches = self.__get_batch_nos_for_bundle(modified_data.consumed_qty, key)
-
-				SerialBatchCreation(
-					{
-						"item_code": modified_data.rm_item_code,
-						"warehouse": self.supplier_warehouse,
-						"serial_and_batch_bundle": modified_data.serial_and_batch_bundle,
-						"type_of_transaction": "Outward",
-						"serial_nos": serial_nos,
-						"batches": batches,
-						"qty": modified_data.consumed_qty * -1,
-					}
-				).update_serial_and_batch_entries()
-
-	def __get_bundle_to_modify(self, name):
 		for row in self.get("supplied_items"):
-			if row.reference_name == name and row.serial_and_batch_bundle:
-				if row.consumed_qty != abs(
-					frappe.get_cached_value(
-						"Serial and Batch Bundle", row.serial_and_batch_bundle, "total_qty"
-					)
-				):
+			if row.reference_name == name:
+				current_entries = get_voucher_serial_batch_qty(
+					"Subcontracting Receipt", self.name, row.name, self.supplier_warehouse
+				)
+				current_qty = sum(abs(flt(e.qty)) for e in current_entries)
+				if current_entries and row.consumed_qty != current_qty:
 					return row
 
 	def __prepare_supplied_or_received_items(self):
@@ -1043,8 +1024,7 @@ class SubcontractingController(StockController):
 		self.get_available_materials()
 		self.__remove_changed_rows()
 		self.__set_supplied_or_received_items()
-		self.__modify_serial_and_batch_bundle()
-		self.__set_rate_for_serial_and_batch_bundle()
+		self.__modify_serial_batch_ledgers()
 
 	def __validate_batch_no(self, row, key):
 		if row.get("batch_no") and row.get("batch_no") not in self.__transferred_items.get(key).get(
@@ -1059,8 +1039,18 @@ class SubcontractingController(StockController):
 			frappe.throw(msg, title=_("Incorrect Batch Consumed"))
 
 	def __validate_serial_no(self, row, key):
-		if row.get("serial_and_batch_bundle") and self.__transferred_items.get(key).get("serial_no"):
-			serial_nos = get_serial_nos_from_bundle(row.get("serial_and_batch_bundle"))
+		if self.__transferred_items.get(key).get("serial_no"):
+			from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import (
+				get_serial_nos_for_voucher,
+			)
+
+			serial_nos = (
+				get_serial_nos(row.serial_no)
+				if row.get("serial_no")
+				else get_serial_nos_for_voucher(
+					self.doctype, self.name, row.name, row.get("warehouse") or self.supplier_warehouse
+				)
+			)
 			incorrect_sn = set(serial_nos).difference(self.__transferred_items.get(key).get("serial_no"))
 
 			if incorrect_sn:
@@ -1206,7 +1196,6 @@ class SubcontractingController(StockController):
 							item,
 							{
 								"warehouse": item.rejected_warehouse,
-								"serial_and_batch_bundle": item.get("rejected_serial_and_batch_bundle"),
 								"actual_qty": flt(item.rejected_qty) * flt(item.conversion_factor),
 								"incoming_rate": 0.0,
 							},
@@ -1276,7 +1265,7 @@ class SubcontractingController(StockController):
 			for item in self.get("supplied_items"):
 				if self.supplier_warehouse:
 					actual_qty = frappe.db.get_value(
-						"Bin",
+						"Stock Level",
 						{"item_code": item.rm_item_code, "warehouse": self.supplier_warehouse},
 						"actual_qty",
 					)
@@ -1417,7 +1406,6 @@ def make_rm_stock_entry(
 									or rm_item.get("reserve_warehouse"),
 									"t_warehouse": source_doc.supplier_warehouse,
 									"stock_uom": rm_item.get("stock_uom"),
-									"serial_and_batch_bundle": rm_item.get("serial_and_batch_bundle"),
 									"main_item_code": fg_item_code,
 									"subcontracted_item": fg_item_code,
 									"allow_alternative_item": item_wh.get(rm_item_code, {}).get(
@@ -1504,9 +1492,6 @@ def make_return_stock_entry_for_subcontract(
 		for _key, value in available_materials.items():
 			if not value.qty:
 				continue
-
-			if item_details := value.get("item_details"):
-				item_details["serial_and_batch_bundle"] = None
 
 			if value.batch_no:
 				for batch_no, qty in value.batch_no.items():

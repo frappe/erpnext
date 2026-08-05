@@ -86,7 +86,6 @@ class SalesInvoiceItem(Document):
 		sales_invoice_item: DF.Data | None
 		sales_order: DF.Link | None
 		scio_detail: DF.Data | None
-		serial_and_batch_bundle: DF.Link | None
 		serial_no: DF.Text | None
 		service_end_date: DF.Date | None
 		service_start_date: DF.Date | None
@@ -118,7 +117,7 @@ class SalesInvoiceItem(Document):
 		if self.item_code and self.warehouse:
 			self.actual_qty = (
 				frappe.db.get_value(
-					"Bin", {"item_code": self.item_code, "warehouse": self.warehouse}, "actual_qty"
+					"Stock Level", {"item_code": self.item_code, "warehouse": self.warehouse}, "actual_qty"
 				)
 				or 0
 			)

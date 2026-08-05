@@ -16,9 +16,6 @@ from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
 	create_landed_cost_voucher,
 )
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
-from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
-	make_serial_batch_bundle,
-)
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import BackDatedStockTransaction
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
@@ -1710,22 +1707,6 @@ def create_delivery_note_entries_for_batchwise_item_valuation_test(dn_entry_list
 		so = make_sales_order(rate=rate, qty=qty, item=item, warehouse=warehouse, against_blanket_order=0)
 
 		dn = make_delivery_note(so.name)
-
-		dn.items[0].serial_and_batch_bundle = make_serial_batch_bundle(
-			frappe._dict(
-				{
-					"item_code": dn.items[0].item_code,
-					"qty": dn.items[0].qty * (-1 if not dn.is_return else 1),
-					"batches": frappe._dict({batch_no: qty}),
-					"type_of_transaction": "Outward",
-					"warehouse": dn.items[0].warehouse,
-					"posting_date": dn.posting_date,
-					"posting_time": dn.posting_time,
-					"voucher_type": "Delivery Note",
-					"do_not_submit": 1,
-				}
-			)
-		).name
 
 		dn.items[0].batch_no = batch_no
 		dn.insert()

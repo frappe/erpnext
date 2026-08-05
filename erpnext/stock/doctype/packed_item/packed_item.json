@@ -25,7 +25,6 @@
   "pick_serial_and_batch",
   "use_serial_batch_fields",
   "column_break_11",
-  "serial_and_batch_bundle",
   "serial_batch_entries_section",
   "serial_batch_entries_html",
   "section_break_bgys",
@@ -281,15 +280,6 @@
   },
   {
    "depends_on": "eval:doc.use_serial_batch_fields === 0 || doc.docstatus === 1",
-   "fieldname": "serial_and_batch_bundle",
-   "fieldtype": "Link",
-   "label": "Serial and Batch Bundle",
-   "no_copy": 1,
-   "options": "Serial and Batch Bundle",
-   "print_hide": 1
-  },
-  {
-   "depends_on": "eval:doc.use_serial_batch_fields === 0 || doc.docstatus === 1",
    "fieldname": "pick_serial_and_batch",
    "fieldtype": "Button",
    "label": "Pick Serial / Batch No"
@@ -303,7 +293,7 @@
   {
    "fieldname": "serial_batch_entries_section",
    "fieldtype": "Section Break",
-   "label": "Serial / Batch Entries"
+   "label": "Stock Location Entries"
   },
   {
    "fieldname": "serial_batch_entries_html",
@@ -349,7 +339,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-07-18 10:00:00.000000",
+ "modified": "2026-08-03 11:30:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packed Item",

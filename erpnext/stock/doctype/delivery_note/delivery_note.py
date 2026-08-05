@@ -262,7 +262,7 @@ class DeliveryNote(SellingController):
 		for d in self.get("items"):
 			if d.item_code and d.warehouse:
 				actual_qty = frappe.db.get_value(
-					"Bin", {"item_code": d.item_code, "warehouse": d.warehouse}, "actual_qty"
+					"Stock Level", {"item_code": d.item_code, "warehouse": d.warehouse}, "actual_qty"
 				)
 				d.actual_qty = flt(actual_qty) or 0
 
@@ -286,7 +286,7 @@ class DeliveryNote(SellingController):
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_with_previous_doc()
-		self.set_serial_and_batch_bundle_from_pick_list()
+		self.set_serial_batch_ledgers_from_pick_list()
 		make_packing_list(self)
 		self.update_current_stock()
 
@@ -414,7 +414,7 @@ class DeliveryNote(SellingController):
 		bin_map = {}
 		for warehouse, item_codes in warehouse_item_codes.items():
 			for b in frappe.get_all(
-				"Bin",
+				"Stock Level",
 				filters={"item_code": ["in", item_codes], "warehouse": warehouse},
 				fields=["item_code", "actual_qty", "projected_qty"],
 			):
@@ -536,7 +536,6 @@ class DeliveryNote(SellingController):
 			"GL Entry",
 			"Stock Ledger Entry",
 			"Repost Item Valuation",
-			"Serial and Batch Bundle",
 		)
 
 		self.delete_auto_created_batches()

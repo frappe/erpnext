@@ -262,6 +262,7 @@ erpnext.patches.v15_0.rename_subcontracting_fields
 erpnext.patches.v15_0.unset_incorrect_additional_discount_percentage
 erpnext.patches.v16_0.convert_commission_rate_to_percent
 erpnext.patches.v16_0.convert_hide_currency_symbol_to_check
+erpnext.patches.v16_0.rename_bin_to_stock_level
 
 [post_model_sync]
 erpnext.patches.v15_0.rename_gross_purchase_amount_to_net_purchase_amount
@@ -374,7 +375,6 @@ erpnext.patches.v15_0.rename_purchase_receipt_amount_to_purchase_amount
 erpnext.patches.v14_0.enable_set_priority_for_pricing_rules #1
 erpnext.patches.v15_0.rename_number_of_depreciations_booked_to_opening_booked_depreciations
 erpnext.patches.v15_0.add_default_operations
-erpnext.patches.v15_0.enable_old_serial_batch_fields
 erpnext.patches.v15_0.update_warehouse_field_in_asset_repair_consumed_item_doctype
 erpnext.patches.v15_0.update_asset_repair_field_in_stock_entry
 erpnext.patches.v15_0.update_total_number_of_booked_depreciations
@@ -437,15 +437,12 @@ erpnext.patches.v16_0.set_invoice_type_in_pos_settings
 erpnext.patches.v15_0.update_fieldname_in_accounting_dimension_filter
 erpnext.patches.v16_0.make_workstation_operating_components #1
 erpnext.patches.v16_0.set_reporting_currency
-erpnext.patches.v16_0.set_posting_datetime_for_sabb_and_drop_indexes
-erpnext.patches.v16_0.update_serial_no_reference_name
 erpnext.patches.v16_0.update_account_categories_for_existing_accounts
 erpnext.patches.v16_0.create_company_custom_fields
 erpnext.patches.v16_0.rename_subcontracted_quantity
 erpnext.patches.v16_0.add_new_stock_entry_types
 erpnext.patches.v15_0.set_asset_status_if_not_already_set
 erpnext.patches.v15_0.toggle_legacy_controller_for_period_closing
-erpnext.patches.v16_0.update_serial_batch_entries #11-01-2026 10:00:00
 erpnext.patches.v16_0.set_company_wise_warehouses
 erpnext.patches.v16_0.set_valuation_method_on_companies
 erpnext.patches.v15_0.migrate_old_item_wise_tax_detail_data_to_table
@@ -490,7 +487,6 @@ erpnext.patches.v16_0.rename_secondary_item_type_field
 erpnext.patches.v16_0.submit_existing_product_bundles #1
 erpnext.patches.v16_0.migrate_subscription_generate_invoice_at
 erpnext.patches.v16_0.rename_subscription_billing_period_fields
-erpnext.patches.v16_0.drop_redundant_serial_no_index_from_sabb
 erpnext.patches.v16_0.set_default_close_opportunity_after_days
 execute:frappe.db.set_single_value("Accounts Settings", "pcv_job_timeout", 3600)
 erpnext.patches.v16_0.backfill_pick_list_transferred_qty
@@ -508,3 +504,6 @@ erpnext.patches.v16_0.move_warehouse_defaults_to_company
 erpnext.patches.v16_0.backfill_repost_accounting_ledger_status
 erpnext.patches.v16_0.merge_seeded_item_group_root
 erpnext.patches.v16_0.set_stock_uom_in_job_card
+erpnext.patches.v16_0.migrate_serial_batch_entry_to_stock_location_ledger
+erpnext.patches.v16_0.delete_serial_and_batch_bundle_doctypes
+erpnext.patches.v16_0.rename_auto_serial_batch_stock_settings_fields

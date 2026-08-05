@@ -17,54 +17,53 @@ def execute(filters=None):
 def get_data(filters):
 	filter_conditions = get_filter_conditions(filters)
 
-	return frappe.get_all(
-		"Serial and Batch Bundle",
+	data = frappe.get_all(
+		"Stock Location Ledger",
 		fields=[
-			"`tabSerial and Batch Bundle`.`voucher_type`",
-			"`tabSerial and Batch Bundle`.`posting_datetime` as posting_date",
-			"`tabSerial and Batch Bundle`.`name`",
-			"`tabSerial and Batch Bundle`.`company`",
-			"`tabSerial and Batch Bundle`.`voucher_no`",
-			"`tabSerial and Batch Bundle`.`item_code`",
-			"`tabSerial and Batch Bundle`.`item_name`",
-			"`tabSerial and Batch Entry`.`serial_no`",
-			"`tabSerial and Batch Entry`.`batch_no`",
-			"`tabSerial and Batch Entry`.`warehouse`",
-			"`tabSerial and Batch Entry`.`incoming_rate`",
-			"`tabSerial and Batch Entry`.`stock_value_difference`",
-			"`tabSerial and Batch Entry`.`qty`",
+			"voucher_type",
+			"posting_datetime as posting_date",
+			"name",
+			"company",
+			"voucher_no",
+			"item_code",
+			"serial_no",
+			"batch_no",
+			"warehouse",
+			"incoming_rate",
+			"stock_value_difference",
+			"qty",
 		],
 		filters=filter_conditions,
 		order_by="posting_datetime",
 	)
+	set_item_names(data)
+	return data
+
+
+def set_item_names(data):
+	for row in data:
+		row.item_name = frappe.get_cached_value("Item", row.item_code, "item_name")
 
 
 def get_filter_conditions(filters):
 	filter_conditions = [
-		["Serial and Batch Bundle", "docstatus", "=", 1],
-		["Serial and Batch Bundle", "is_cancelled", "=", 0],
+		["Stock Location Ledger", "docstatus", "=", 1],
 	]
 
-	for field in ["voucher_type", "voucher_no", "item_code", "warehouse", "company"]:
+	for field in ["voucher_type", "voucher_no", "item_code", "warehouse", "company", "serial_no", "batch_no"]:
 		if filters.get(field):
-			if field == "voucher_no":
-				filter_conditions.append(["Serial and Batch Bundle", field, "in", filters.get(field)])
-			else:
-				filter_conditions.append(["Serial and Batch Bundle", field, "=", filters.get(field)])
+			operator = "in" if field == "voucher_no" else "="
+			filter_conditions.append(["Stock Location Ledger", field, operator, filters.get(field)])
 
 	if filters.get("from_date") and filters.get("to_date"):
 		filter_conditions.append(
 			[
-				"Serial and Batch Bundle",
+				"Stock Location Ledger",
 				"posting_datetime",
 				"between",
 				[filters.get("from_date"), filters.get("to_date")],
 			]
 		)
-
-	for field in ["serial_no", "batch_no"]:
-		if filters.get(field):
-			filter_conditions.append(["Serial and Batch Entry", field, "=", filters.get(field)])
 
 	return filter_conditions
 
@@ -79,10 +78,10 @@ def get_columns(filters, data):
 			"width": 120,
 		},
 		{
-			"label": _("Serial and Batch Bundle"),
+			"label": _("Stock Location Ledger"),
 			"fieldname": "name",
 			"fieldtype": "Link",
-			"options": "Serial and Batch Bundle",
+			"options": "Stock Location Ledger",
 			"width": 110,
 		},
 		{"label": _("Posting Date"), "fieldname": "posting_date", "fieldtype": "Date", "width": 100},
@@ -182,18 +181,17 @@ def get_columns(filters, data):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_voucher_type(doctype: Any, txt: str, searchfield: Any, start: int, page_len: int, filters: dict):
-	child_doctypes = frappe.get_all(
-		"DocField",
-		filters={"fieldname": "serial_and_batch_bundle"},
-		fields=["parent"],
+	query_filters = {}
+	if txt:
+		query_filters["voucher_type"] = ["like", f"%{txt}%"]
+
+	return frappe.get_all(
+		"Stock Location Ledger",
+		filters=query_filters,
+		fields=["voucher_type"],
+		as_list=True,
 		distinct=True,
 	)
-
-	query_filters = {"options": ["in", [d.parent for d in child_doctypes]]}
-	if txt:
-		query_filters["parent"] = ["like", f"%{txt}%"]
-
-	return frappe.get_all("DocField", filters=query_filters, fields=["parent"], as_list=True, distinct=True)
 
 
 @frappe.whitelist()
@@ -205,18 +203,13 @@ def get_serial_nos(doctype: Any, txt: str, searchfield: Any, start: int, page_le
 		query_filters["serial_no"] = ["like", f"%{txt}%"]
 
 	if filters.get("voucher_no"):
-		serial_batch_bundle = frappe.get_cached_value(
-			"Serial and Batch Bundle",
-			{"voucher_no": ("in", filters.get("voucher_no")), "docstatus": 1, "is_cancelled": 0},
-			"name",
-		)
-
-		query_filters["parent"] = serial_batch_bundle
+		query_filters["voucher_no"] = ("in", filters.get("voucher_no"))
+		query_filters["docstatus"] = 1
 		if not txt:
 			query_filters["serial_no"] = ("is", "set")
 
 		return frappe.get_all(
-			"Serial and Batch Entry", filters=query_filters, fields=["serial_no"], as_list=True
+			"Stock Location Ledger", filters=query_filters, fields=["serial_no"], as_list=True, distinct=True
 		)
 
 	else:
@@ -233,18 +226,13 @@ def get_batch_nos(doctype: Any, txt: str, searchfield: Any, start: int, page_len
 		query_filters["batch_no"] = ["like", f"%{txt}%"]
 
 	if filters.get("voucher_no"):
-		serial_batch_bundle = frappe.get_cached_value(
-			"Serial and Batch Bundle",
-			{"voucher_no": ("in", filters.get("voucher_no")), "docstatus": 1, "is_cancelled": 0},
-			"name",
-		)
-
-		query_filters["parent"] = serial_batch_bundle
+		query_filters["voucher_no"] = ("in", filters.get("voucher_no"))
+		query_filters["docstatus"] = 1
 		if not txt:
 			query_filters["batch_no"] = ("is", "set")
 
 		return frappe.get_all(
-			"Serial and Batch Entry", filters=query_filters, fields=["batch_no"], as_list=True
+			"Stock Location Ledger", filters=query_filters, fields=["batch_no"], as_list=True, distinct=True
 		)
 
 	else:

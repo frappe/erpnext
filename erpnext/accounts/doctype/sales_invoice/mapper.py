@@ -222,7 +222,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			target.purchase_order = source.purchase_order
 			target.po_detail = source.purchase_order_item
 
-		if (source.get("serial_no") or source.get("batch_no")) and not source.get("serial_and_batch_bundle"):
+		if source.get("serial_no") or source.get("batch_no"):
 			target.use_serial_batch_fields = 1
 
 	item_field_map = {

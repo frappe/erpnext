@@ -115,7 +115,6 @@ class JobCard(Document):
 		secondary_items: DF.Table[JobCardSecondaryItem]
 		semi_fg_bom: DF.Link | None
 		sequence_id: DF.Int
-		serial_and_batch_bundle: DF.Link | None
 		serial_no: DF.SmallText | None
 		skip_material_transfer: DF.Check
 		source_warehouse: DF.Link | None

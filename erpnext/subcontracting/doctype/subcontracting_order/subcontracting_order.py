@@ -381,7 +381,7 @@ class SubcontractingOrder(SubcontractingController):
 							"from_voucher_no": stock_entry,
 							"from_voucher_type": "Stock Entry",
 							"from_voucher_detail_no": item_dict[item.name]["reference_voucher_detail_no"],
-							"serial_and_batch_bundles": item_dict[item.name]["serial_and_batch_bundles"],
+							"voucher_detail_nos": item_dict[item.name]["voucher_detail_nos"],
 						}
 					)
 				elif self.production_plan:

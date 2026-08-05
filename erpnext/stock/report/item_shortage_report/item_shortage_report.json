@@ -15,7 +15,7 @@
  "owner": "Administrator",
  "prepared_report": 0,
  "query": "",
- "ref_doctype": "Bin",
+ "ref_doctype": "Stock Level",
  "report_name": "Item Shortage Report",
  "report_type": "Script Report",
  "roles": [

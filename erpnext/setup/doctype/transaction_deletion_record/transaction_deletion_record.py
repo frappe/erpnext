@@ -682,7 +682,7 @@ class TransactionDeletionRecord(Document):
 
 			warehouses = frappe.get_all("Warehouse", filters={"company": self.company}, pluck="name")
 			if warehouses:
-				frappe.db.delete("Bin", {"warehouse": ["in", warehouses]})
+				frappe.db.delete("Stock Level", {"warehouse": ["in", warehouses]})
 			self.db_set("delete_bin_data_status", "Completed")
 		self.enqueue_task(task="Delete Leads and Addresses")
 

@@ -151,17 +151,6 @@ def get_serial_nos(serial_no):
 	return [s.strip() for s in cstr(serial_no).strip().replace(",", "\n").split("\n") if s.strip()]
 
 
-def get_serial_nos_from_sle_list(bundles):
-	table = frappe.qb.DocType("Serial and Batch Entry")
-	query = frappe.qb.from_(table).select(table.parent, table.serial_no).where(table.parent.isin(bundles))
-	data = query.run(as_dict=True)
-
-	result = {}
-	for d in data:
-		result.setdefault(d.parent, []).append(d.serial_no)
-	return result
-
-
 def clean_serial_no_string(serial_no: str) -> str:
 	if not serial_no:
 		return ""
@@ -293,7 +282,7 @@ def fetch_serial_numbers(filters, qty, do_not_include=None):
 
 
 def get_serial_nos_for_outward(kwargs):
-	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+	from erpnext.stock.serial_batch_bundle import (
 		get_available_serial_nos,
 	)
 

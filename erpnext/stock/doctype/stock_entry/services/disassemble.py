@@ -435,15 +435,29 @@ class DisassembleStockEntry(BaseStockEntry):
 			self._set_serial_batch_for_disassembly_from_available_materials()
 
 	def _set_serial_batch_for_disassembly_from_stock_entry(self):
-		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-			get_voucher_wise_serial_batch_from_bundle,
-		)
+		from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import get_voucher_entries
 
 		source_fg_qty = flt(
 			frappe.db.get_value("Stock Entry", self.doc.source_stock_entry, "fg_completed_qty")
 		)
 		scale_factor = flt(self.doc.fg_completed_qty) / source_fg_qty if source_fg_qty else 0
-		bundle_data = get_voucher_wise_serial_batch_from_bundle(voucher_no=[self.doc.source_stock_entry])
+
+		entries = get_voucher_entries(
+			"Stock Entry",
+			self.doc.source_stock_entry,
+			fields=["item_code", "warehouse", "serial_no", "batch_no", "qty"],
+		)
+		bundle_data = {}
+		for entry in entries:
+			key = (entry.item_code, entry.warehouse, self.doc.source_stock_entry)
+			group = bundle_data.setdefault(
+				key, frappe._dict({"serial_nos": [], "batch_nos": defaultdict(float)})
+			)
+			if entry.serial_no:
+				group.serial_nos.append(entry.serial_no)
+			if entry.batch_no:
+				group.batch_nos[entry.batch_no] += entry.qty
+
 		source_rows_by_name = {r.name: r for r in self.get_items_from_manufacture_stock_entry()}
 		for row in self.doc.items:
 			if not row.ste_detail:
@@ -514,7 +528,7 @@ class DisassembleStockEntry(BaseStockEntry):
 			return
 
 		warehouse = row.s_warehouse or row.t_warehouse
-		bundle_doc = SerialBatchCreation(
+		SerialBatchCreation(
 			{
 				"item_code": row.item_code,
 				"warehouse": warehouse,
@@ -525,11 +539,9 @@ class DisassembleStockEntry(BaseStockEntry):
 				"qty": row.transfer_qty,
 				"type_of_transaction": "Inward" if row.t_warehouse else "Outward",
 				"company": self.doc.company,
-				"do_not_submit": True,
 			}
-		).make_serial_and_batch_bundle(serial_nos=serial_nos, batch_nos=batches)
+		).make_location_ledger_entries(serial_nos=serial_nos, batch_nos=batches)
 
-		row.serial_and_batch_bundle = bundle_doc.name
 		row.use_serial_batch_fields = 0
 
 	def update_disassembled_order(self):
@@ -641,7 +653,6 @@ def _build_stock_entry_base_query(se, sed, work_order):
 			sed.stock_uom,
 			sed.expense_account,
 			sed.cost_center,
-			sed.serial_and_batch_bundle,
 			sed.batch_no,
 			sed.serial_no,
 			se.purpose,
@@ -665,14 +676,28 @@ def _apply_stock_entry_purpose_filter(query, se, sed, stock_entry_doc):
 
 
 def _enrich_with_bundle_data(data, stock_entry_doc):
-	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-		get_voucher_wise_serial_batch_from_bundle,
-	)
-
 	voucher_nos = [row.get("name") for row in data if row.get("name")]
 	if not voucher_nos:
 		return
-	bundle_data = get_voucher_wise_serial_batch_from_bundle(voucher_no=voucher_nos)
+
+	sll = frappe.qb.DocType("Stock Location Ledger")
+	entries = (
+		frappe.qb.from_(sll)
+		.select(sll.item_code, sll.warehouse, sll.voucher_no, sll.serial_no, sll.batch_no, sll.qty)
+		.where(
+			(sll.voucher_type == "Stock Entry") & (sll.voucher_no.isin(voucher_nos)) & (sll.docstatus == 1)
+		)
+	).run(as_dict=True)
+
+	bundle_data = {}
+	for entry in entries:
+		key = (entry.item_code, entry.warehouse, entry.voucher_no)
+		group = bundle_data.setdefault(key, frappe._dict({"serial_nos": [], "batch_nos": defaultdict(float)}))
+		if entry.serial_no:
+			group.serial_nos.append(entry.serial_no)
+		if entry.batch_no:
+			group.batch_nos[entry.batch_no] += entry.qty
+
 	for row in data:
 		key = _get_bundle_key(row, stock_entry_doc)
 		if bundle_data.get(key):

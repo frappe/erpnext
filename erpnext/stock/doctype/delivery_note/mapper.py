@@ -553,7 +553,7 @@ def make_inter_company_transaction(doctype: str, source_name: str, target_doc=No
 		if source.get("use_serial_batch_fields"):
 			target.set("use_serial_batch_fields", 1)
 
-		if (source.get("serial_no") or source.get("batch_no")) and not source.get("serial_and_batch_bundle"):
+		if source.get("serial_no") or source.get("batch_no"):
 			target.set("use_serial_batch_fields", 1)
 
 	doclist = get_mapped_doc(

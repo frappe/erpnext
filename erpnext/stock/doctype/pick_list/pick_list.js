@@ -26,8 +26,6 @@ frappe.ui.form.on("Pick List", {
 	},
 
 	setup: (frm) => {
-		frm.ignore_doctypes_on_cancel_all = ["Serial and Batch Bundle"];
-
 		frm.set_indicator_formatter("item_code", function (doc) {
 			return doc.stock_qty === 0 ? "red" : "green";
 		});
@@ -68,18 +66,6 @@ frappe.ui.form.on("Pick List", {
 				filters: {
 					item_code: row.item_code,
 					warehouse: row.warehouse,
-				},
-			};
-		});
-
-		frm.set_query("serial_and_batch_bundle", "locations", (doc, cdt, cdn) => {
-			let row = locals[cdt][cdn];
-			return {
-				filters: {
-					item_code: row.item_code,
-					voucher_type: doc.doctype,
-					voucher_no: ["in", [doc.name, ""]],
-					is_cancelled: 0,
 				},
 			};
 		});
@@ -181,17 +167,6 @@ frappe.ui.form.on("Pick List", {
 					);
 				}
 			}
-		}
-
-		let sbb_field = frm.get_docfield("locations", "serial_and_batch_bundle");
-		if (sbb_field) {
-			sbb_field.get_route_options_for_new_doc = (row) => {
-				return {
-					item_code: row.doc.item_code,
-					warehouse: row.doc.warehouse,
-					voucher_type: frm.doc.doctype,
-				};
-			};
 		}
 	},
 	work_order: (frm) => {
@@ -405,9 +380,13 @@ frappe.ui.form.on("Pick List Item", {
 				new erpnext.SerialBatchPackageSelector(frm, item, (r) => {
 					if (r) {
 						let qty = Math.abs(r.total_qty);
+						let serial_nos = (r.entries || []).filter((e) => e.serial_no).map((e) => e.serial_no);
+						let batch_no = (r.entries || []).find((e) => e.batch_no)?.batch_no;
+
 						frappe.model.set_value(item.doctype, item.name, {
-							serial_and_batch_bundle: r.name,
-							use_serial_batch_fields: 0,
+							use_serial_batch_fields: 1,
+							serial_no: serial_nos.length ? serial_nos.join("\n") : null,
+							batch_no: batch_no || null,
 							qty: qty / flt(item.conversion_factor || 1, precision("conversion_factor", item)),
 						});
 					}

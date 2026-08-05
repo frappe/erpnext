@@ -46,7 +46,6 @@ class SubcontractingReceiptItem(Document):
 		received_qty: DF.Float
 		reference_name: DF.Data | None
 		rejected_qty: DF.Float
-		rejected_serial_and_batch_bundle: DF.Link | None
 		rejected_serial_no: DF.SmallText | None
 		rejected_warehouse: DF.Link | None
 		returned_qty: DF.Float
@@ -54,7 +53,6 @@ class SubcontractingReceiptItem(Document):
 		rm_supp_cost: DF.Currency
 		schedule_date: DF.Date | None
 		secondary_items_cost_per_qty: DF.Currency
-		serial_and_batch_bundle: DF.Link | None
 		serial_no: DF.SmallText | None
 		service_cost_per_qty: DF.Currency
 		service_expense_account: DF.Link | None

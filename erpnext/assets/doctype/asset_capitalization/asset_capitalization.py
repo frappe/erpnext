@@ -98,10 +98,6 @@ class AssetCapitalization(StockController):
 		self.calculate_totals()
 		self.set_title()
 
-	def on_update(self):
-		if self.stock_items:
-			self.set_serial_and_batch_bundle(table_name="stock_items")
-
 	def before_submit(self):
 		self.validate_source_mandatory()
 		# self.create_target_asset()
@@ -118,7 +114,6 @@ class AssetCapitalization(StockController):
 			"GL Entry",
 			"Stock Ledger Entry",
 			"Repost Item Valuation",
-			"Serial and Batch Bundle",
 			"Asset",
 			"Asset Movement",
 		)
@@ -332,7 +327,6 @@ class AssetCapitalization(StockController):
 				"voucher_no": self.name,
 				"company": self.company,
 				"allow_zero_valuation": cint(item.get("allow_zero_valuation_rate")),
-				"serial_and_batch_bundle": item.serial_and_batch_bundle,
 			}
 		)
 
@@ -366,10 +360,7 @@ class AssetCapitalization(StockController):
 		sl_entries = []
 
 		for d in self.stock_items:
-			sle = self.get_sl_entries(
-				d,
-				{"actual_qty": -flt(d.stock_qty), "serial_and_batch_bundle": d.serial_and_batch_bundle},
-			)
+			sle = self.get_sl_entries(d, {"actual_qty": -flt(d.stock_qty)})
 			sl_entries.append(sle)
 
 		# reverse sl entries if cancel
@@ -577,7 +568,6 @@ def get_consumed_stock_item_details(ctx: ItemDetailsCtx):
 				"company": ctx.company,
 				"serial_no": ctx.serial_no,
 				"batch_no": ctx.batch_no,
-				"serial_and_batch_bundle": ctx.serial_and_batch_bundle,
 			}
 		)
 		out.update(get_warehouse_details(incoming_rate_args))

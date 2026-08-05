@@ -530,7 +530,6 @@ def get_batch_no(doctype: str, txt: str, searchfield: str, start: int, page_len:
 	page_len = 300
 
 	batches = get_batches_from_stock_ledger_entries(searchfields, txt, filters, start, page_len)
-	batches.extend(get_batches_from_serial_and_batch_bundle(searchfields, txt, filters, start, page_len))
 
 	filtered_batches = get_filterd_batches(batches)
 
@@ -577,27 +576,28 @@ def get_filterd_batches(data):
 
 
 def get_batches_from_stock_ledger_entries(searchfields, txt, filters, start=0, page_len=100):
-	stock_ledger_entry = frappe.qb.DocType("Stock Ledger Entry")
+	location_ledger = frappe.qb.DocType("Stock Location Ledger")
 	batch_table = frappe.qb.DocType("Batch")
 
 	expiry_date = filters.get("posting_date") or today()
 
 	query = (
-		frappe.qb.from_(stock_ledger_entry)
+		frappe.qb.from_(location_ledger)
 		.inner_join(batch_table)
-		.on(batch_table.name == stock_ledger_entry.batch_no)
+		.on(batch_table.name == location_ledger.batch_no)
 		.select(
-			stock_ledger_entry.batch_no,
-			Sum(stock_ledger_entry.actual_qty).as_("qty"),
+			location_ledger.batch_no,
+			Sum(location_ledger.qty).as_("qty"),
 		)
-		.where(stock_ledger_entry.is_cancelled == 0)
+		.where(location_ledger.docstatus == 1)
+		.where(location_ledger.voucher_type != "Pick List")
 		.where(
-			(stock_ledger_entry.item_code == filters.get("item_code"))
+			(location_ledger.item_code == filters.get("item_code"))
 			& (batch_table.disabled == 0)
-			& (stock_ledger_entry.batch_no.isnotnull())
+			& (location_ledger.batch_no.isnotnull())
 		)
-		.groupby(stock_ledger_entry.batch_no, stock_ledger_entry.warehouse, batch_table.name)
-		.having(Sum(stock_ledger_entry.actual_qty) != 0)
+		.groupby(location_ledger.batch_no, location_ledger.warehouse, batch_table.name)
+		.having(Sum(location_ledger.qty) != 0)
 		.offset(start)
 		.limit(page_len)
 	)
@@ -605,7 +605,7 @@ def get_batches_from_stock_ledger_entries(searchfields, txt, filters, start=0, p
 	if not filters.get("is_inward"):
 		if filters.get("posting_date") and filters.get("posting_time"):
 			query = query.where(
-				stock_ledger_entry.posting_datetime
+				location_ledger.posting_datetime
 				<= get_combine_datetime(filters.get("posting_date"), filters.get("posting_time"))
 			)
 
@@ -622,7 +622,7 @@ def get_batches_from_stock_ledger_entries(searchfields, txt, filters, start=0, p
 	)
 
 	if filters.get("warehouse"):
-		query = query.where(stock_ledger_entry.warehouse == filters.get("warehouse"))
+		query = query.where(location_ledger.warehouse == filters.get("warehouse"))
 
 	for field in searchfields:
 		query = query.select(batch_table[field])
@@ -635,72 +635,6 @@ def get_batches_from_stock_ledger_entries(searchfields, txt, filters, start=0, p
 		query = query.where(txt_condition)
 
 	return query.run(as_list=1) or []
-
-
-def get_batches_from_serial_and_batch_bundle(searchfields, txt, filters, start=0, page_len=100):
-	bundle = frappe.qb.DocType("Serial and Batch Entry")
-	stock_ledger_entry = frappe.qb.DocType("Stock Ledger Entry")
-	batch_table = frappe.qb.DocType("Batch")
-
-	expiry_date = filters.get("posting_date") or today()
-
-	bundle_query = (
-		frappe.qb.from_(bundle)
-		.inner_join(stock_ledger_entry)
-		.on(bundle.parent == stock_ledger_entry.serial_and_batch_bundle)
-		.inner_join(batch_table)
-		.on(batch_table.name == bundle.batch_no)
-		.select(
-			bundle.batch_no,
-			Sum(bundle.qty).as_("qty"),
-		)
-		.where(stock_ledger_entry.is_cancelled == 0)
-		.where(
-			(stock_ledger_entry.item_code == filters.get("item_code"))
-			& (batch_table.disabled == 0)
-			& (stock_ledger_entry.serial_and_batch_bundle.isnotnull())
-		)
-		.groupby(bundle.batch_no, bundle.warehouse, batch_table.name)
-		.having(Sum(bundle.qty) != 0)
-		.offset(start)
-		.limit(page_len)
-	)
-
-	if not filters.get("is_inward"):
-		if filters.get("posting_date") and filters.get("posting_time"):
-			bundle_query = bundle_query.where(
-				stock_ledger_entry.posting_datetime
-				<= get_combine_datetime(filters.get("posting_date"), filters.get("posting_time"))
-			)
-
-	if not filters.get("include_expired_batches"):
-		bundle_query = bundle_query.where(
-			(batch_table.expiry_date >= expiry_date) | (batch_table.expiry_date.isnull())
-		)
-
-	bundle_query = bundle_query.select(
-		Case()
-		.when(batch_table.manufacturing_date.isnotnull(), Concat("MFG-", batch_table.manufacturing_date))
-		.as_("manufacturing_date"),
-		Case()
-		.when(batch_table.expiry_date.isnotnull(), Concat("EXP-", batch_table.expiry_date))
-		.as_("expiry_date"),
-	)
-
-	if filters.get("warehouse"):
-		bundle_query = bundle_query.where(stock_ledger_entry.warehouse == filters.get("warehouse"))
-
-	for field in searchfields:
-		bundle_query = bundle_query.select(batch_table[field])
-
-	if txt:
-		txt_condition = batch_table.name.like(f"%{txt}%")
-		for field in [*searchfields, "name"]:
-			txt_condition |= batch_table[field].like(f"%{txt}%")
-
-		bundle_query = bundle_query.where(txt_condition)
-
-	return bundle_query.run(as_list=1)
 
 
 @frappe.whitelist()
@@ -912,11 +846,11 @@ def warehouse_query(doctype: str, txt: str, searchfield: str, start: int, page_l
 		warehouse_field = meta.get("title_field")
 
 	wh = frappe.qb.DocType("Warehouse")
-	bin_dt = frappe.qb.DocType("Bin")
+	bin_dt = frappe.qb.DocType("Stock Level")
 
 	# Bin filters go on the LEFT JOIN so warehouses without a matching Bin row are still returned
 	join_condition = bin_dt.warehouse == wh.name
-	for condition in get_filter_conditions_qb("Bin", filter_dict.get("Bin")):
+	for condition in get_filter_conditions_qb("Stock Level", filter_dict.get("Stock Level")):
 		join_condition &= condition
 
 	# Base the query on Warehouse so get_query applies its user-permission match conditions;

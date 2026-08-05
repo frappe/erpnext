@@ -256,7 +256,7 @@
    "depends_on": "eval: (doc.has_serial_no || doc.has_batch_no) && doc.reservation_based_on == \"Serial and Batch\"",
    "fieldname": "sb_entries",
    "fieldtype": "Table",
-   "options": "Serial and Batch Entry",
+   "options": "Stock Reservation Serial Batch",
    "read_only_depends_on": "eval: (doc.delivered_qty > 0)"
   },
   {
@@ -342,7 +342,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-05 11:46:28.992976",
+ "modified": "2026-07-21 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reservation Entry",

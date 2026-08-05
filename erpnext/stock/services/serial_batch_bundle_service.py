@@ -1,19 +1,19 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-"""Serial & Batch Bundle handling for stock transactions.
+"""Serial / batch composition handling for stock transactions.
 
 Extracted from ``StockController``. Owns creation, validation and teardown of
-Serial and Batch Bundles for a stock voucher. The controller keeps thin
-delegators for methods reached from other doctypes / ``run_method``; internal
-helpers live here only.
+serial/batch Stock Location Ledger entries for a stock voucher. The controller
+keeps thin delegators for methods reached from other doctypes / ``run_method``;
+internal helpers live here only.
 """
 
 from collections import defaultdict
 
 import frappe
 from frappe import _, bold
-from frappe.utils import cstr, flt, get_link_to_form, getdate
+from frappe.utils import cint, cstr, flt, get_link_to_form, getdate
 
 from erpnext.controllers.sales_and_purchase_return import (
 	available_serial_batch_for_return,
@@ -21,87 +21,12 @@ from erpnext.controllers.sales_and_purchase_return import (
 	make_serial_batch_bundle_for_return,
 )
 from erpnext.stock.doctype.batch.batch import get_batch_qty
-from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-	combine_datetime,
-	get_type_of_transaction,
-)
+from erpnext.stock.serial_batch_bundle import combine_datetime, get_type_of_transaction
 
 
 class SerialBatchBundleService:
 	def __init__(self, doc) -> None:
 		self.doc = doc
-
-	def validate_warehouse_of_sabb(self):
-		if self.doc.is_internal_transfer():
-			return
-
-		doc_before_save = self.doc.get_doc_before_save()
-
-		for row in self.doc.items:
-			if not row.get("serial_and_batch_bundle"):
-				continue
-
-			sabb_details = frappe.db.get_value(
-				"Serial and Batch Bundle",
-				row.serial_and_batch_bundle,
-				["type_of_transaction", "warehouse", "has_serial_no"],
-				as_dict=True,
-			)
-			if not sabb_details:
-				continue
-
-			if sabb_details.type_of_transaction != "Outward":
-				continue
-
-			warehouse = row.get("warehouse") or row.get("s_warehouse")
-			if sabb_details.warehouse != warehouse:
-				frappe.throw(
-					_(
-						"Row #{0}: Warehouse {1} does not match with the warehouse {2} in Serial and Batch Bundle {3}."
-					).format(row.idx, warehouse, sabb_details.warehouse, row.serial_and_batch_bundle)
-				)
-
-			if self.doc.doctype == "Stock Reconciliation":
-				continue
-
-			if sabb_details.has_serial_no and doc_before_save and doc_before_save.get("items"):
-				prev_row = doc_before_save.get("items", {"idx": row.idx})
-				if prev_row and prev_row[0].serial_and_batch_bundle != row.serial_and_batch_bundle:
-					sabb_doc = frappe.get_doc("Serial and Batch Bundle", row.serial_and_batch_bundle)
-					sabb_doc.validate_serial_no_status()
-
-	def validate_duplicate_serial_and_batch_bundle(self, table_name):
-		if not self.doc.get(table_name):
-			return
-
-		sbb_list = []
-		for item in self.doc.get(table_name):
-			if item.get("serial_and_batch_bundle"):
-				sbb_list.append(item.get("serial_and_batch_bundle"))
-
-			if item.get("rejected_serial_and_batch_bundle"):
-				sbb_list.append(item.get("rejected_serial_and_batch_bundle"))
-
-		if sbb_list:
-			SLE = frappe.qb.DocType("Stock Ledger Entry")
-			data = (
-				frappe.qb.from_(SLE)
-				.select(SLE.voucher_type, SLE.voucher_no, SLE.serial_and_batch_bundle)
-				.where(
-					(SLE.docstatus == 1)
-					& (SLE.serial_and_batch_bundle.notnull())
-					& (SLE.serial_and_batch_bundle.isin(sbb_list))
-				)
-				.limit(1)
-			).run(as_dict=True)
-
-			if data:
-				data = data[0]
-				frappe.throw(
-					_("Serial and Batch Bundle {0} is already used in {1} {2}.").format(
-						frappe.bold(data.serial_and_batch_bundle), data.voucher_type, data.voucher_no
-					)
-				)
 
 	def validate_serialized_batch(self):
 		from erpnext.exceptions import BatchExpiredError
@@ -182,14 +107,8 @@ class SerialBatchBundleService:
 			if not item_code or not self.is_serial_batch_item(item_code):
 				continue
 
-			if (
-				not via_landed_cost_voucher
-				and row.serial_and_batch_bundle
-				and (row.serial_no or row.batch_no)
-			):
-				self.validate_serial_nos_and_batches_with_bundle(row)
-
 			if not row.serial_no and not row.batch_no and not row.get("rejected_serial_no"):
+				self.apply_reserved_serial_batch(row, table_name)
 				continue
 
 			if not row.use_serial_batch_fields and (
@@ -197,9 +116,7 @@ class SerialBatchBundleService:
 			):
 				row.use_serial_batch_fields = 1
 
-			if row.use_serial_batch_fields and (
-				not row.serial_and_batch_bundle and not row.get("rejected_serial_and_batch_bundle")
-			):
+			if row.use_serial_batch_fields:
 				bundle_details = {
 					"item_code": row.get("rm_item_code") or row.item_code,
 					"posting_datetime": combine_datetime(self.doc.posting_date, self.doc.posting_time),
@@ -213,6 +130,12 @@ class SerialBatchBundleService:
 					"do_not_submit": True if not via_landed_cost_voucher else False,
 				}
 
+				if self.doc.doctype == "Stock Reconciliation":
+					# The reversal leg shares this voucher tuple and is written separately by
+					# make_bundle_for_current_qty - scope the refresh to the new-state leg so it
+					# isn't wiped along with it.
+					bundle_details["ledger_is_outward"] = 0
+
 				if self.doc.is_internal_transfer() and row.get("from_warehouse") and not self.doc.is_return:
 					self.update_bundle_details(bundle_details, table_name, row)
 					bundle_details["type_of_transaction"] = "Outward"
@@ -224,10 +147,62 @@ class SerialBatchBundleService:
 				if row.get("qty") or row.get("consumed_qty") or row.get("stock_qty"):
 					self.update_bundle_details(bundle_details, table_name, row, parent_details=parent_details)
 					self.create_serial_batch_bundle(bundle_details, row)
+					self.sync_capped_serial_nos_on_return(bundle_details, row)
 
 				if row.get("rejected_qty"):
 					self.update_bundle_details(bundle_details, table_name, row, is_rejected=True)
 					self.create_serial_batch_bundle(bundle_details, row)
+
+	def sync_capped_serial_nos_on_return(self, bundle_details, row):
+		"""A partial return's mapped row keeps the original's full serial list while the
+		composition covers only the returned qty - later returns subtract this row's text,
+		so it must reflect what was actually returned."""
+		if not self.doc.get("is_return") or not bundle_details.get("serial_nos"):
+			return
+
+		capped = "\n".join(bundle_details["serial_nos"])
+		if row.serial_no != capped:
+			row.db_set("serial_no", capped, update_modified=False)
+
+	def apply_reserved_serial_batch(self, row, table_name) -> bool:
+		"""Fallback for a Delivery Note / Sales Invoice row fulfilling a Stock Reservation Entry
+		that spans more than one batch - a single `batch_no` field can't preview that, so the
+		mapper leaves the row with no serial_no/batch_no set. Resolve the exact composition from
+		the SRE here (via the row's persisted `so_detail` link) and write the Stock Location
+		Ledger entries for it directly. No-op for anything else - most rows are handled by the
+		normal serial_no/batch_no path above."""
+		if self.doc.doctype not in ("Delivery Note", "Sales Invoice"):
+			return False
+
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			get_reserved_serial_batch_for_delivery,
+		)
+
+		so_field = "sales_order" if self.doc.doctype == "Sales Invoice" else "against_sales_order"
+		composition = get_reserved_serial_batch_for_delivery(so_field, table_name, self.doc, row)
+		if not composition:
+			return False
+
+		from erpnext.stock.serial_batch_bundle import SerialBatchCreation
+
+		serial_nos, batch_nos = composition
+		SerialBatchCreation(
+			{
+				"item_code": row.item_code,
+				"warehouse": row.warehouse,
+				"posting_datetime": combine_datetime(self.doc.posting_date, self.doc.posting_time),
+				"voucher_type": self.doc.doctype,
+				"voucher_no": self.doc.name,
+				"voucher_detail_no": row.name,
+				"company": self.doc.company,
+				"type_of_transaction": "Outward",
+				"ledger_is_outward": 1,
+				"use_serial_batch_fields": 1,
+				"do_not_submit": True,
+			}
+		).make_location_ledger_entries(serial_nos=serial_nos, batch_nos=batch_nos)
+		row.use_serial_batch_fields = 1
+		return True
 
 	def get_parent_details_for_packed_items(self):
 		parent_details = frappe._dict()
@@ -249,9 +224,7 @@ class SerialBatchBundleService:
 			self.make_bundle_for_rejected_qty(table_name)
 
 	def make_bundle_for_rejected_qty(self, table_name=None):
-		field, reference_ids = self.get_reference_ids(
-			table_name, "rejected_qty", "rejected_serial_and_batch_bundle"
-		)
+		field, reference_ids = self.get_reference_ids(table_name, "rejected_qty")
 
 		if not reference_ids:
 			return
@@ -279,11 +252,10 @@ class SerialBatchBundleService:
 				data = filter_serial_batches(
 					self.doc, data, row, warehouse_field=warehouse_field, qty_field=qty_field
 				)
-				bundle = make_serial_batch_bundle_for_return(data, row, self.doc, warehouse_field, qty_field)
+				make_serial_batch_bundle_for_return(data, row, self.doc, warehouse_field, qty_field)
 				if row.get("return_qty_from_rejected_warehouse"):
 					row.db_set(
 						{
-							"serial_and_batch_bundle": bundle,
 							"batch_no": "",
 							"serial_no": "",
 						}
@@ -291,7 +263,6 @@ class SerialBatchBundleService:
 				else:
 					row.db_set(
 						{
-							"rejected_serial_and_batch_bundle": bundle,
 							"batch_no": "",
 							"rejected_serial_no": "",
 						}
@@ -318,19 +289,22 @@ class SerialBatchBundleService:
 
 			if data := available_dict.get(value):
 				data = filter_serial_batches(self.doc, data, row)
-				bundle = make_serial_batch_bundle_for_return(data, row, self.doc)
+				entries = make_serial_batch_bundle_for_return(data, row, self.doc)
 				row.db_set(
 					{
-						"serial_and_batch_bundle": bundle,
 						"batch_no": "",
 						"serial_no": "",
 					}
 				)
 
-				if self.doc.doctype in ["Sales Invoice", "Delivery Note"]:
-					row.db_set(
-						"incoming_rate", frappe.db.get_value("Serial and Batch Bundle", bundle, "avg_rate")
+				if self.doc.doctype in ["Sales Invoice", "Delivery Note"] and entries:
+					total_qty = sum(abs(flt(e.get("qty"))) for e in entries)
+					avg_rate = (
+						sum(abs(flt(e.get("qty"))) * flt(e.get("incoming_rate")) for e in entries) / total_qty
+						if total_qty
+						else 0
 					)
+					row.db_set("incoming_rate", avg_rate)
 
 	def get_value_for_packed_item(self, row):
 		parent_items = self.doc.get("items", {"name": row.parent_detail_docname})
@@ -340,7 +314,7 @@ class SerialBatchBundleService:
 
 		return None
 
-	def get_reference_ids(self, table_name, qty_field=None, bundle_field=None) -> tuple[str, list[str]]:
+	def get_reference_ids(self, table_name, qty_field=None) -> tuple[str, list[str]]:
 		field = {
 			"Sales Invoice": "sales_invoice_item",
 			"Delivery Note": "dn_detail",
@@ -348,9 +322,6 @@ class SerialBatchBundleService:
 			"Purchase Invoice": "purchase_invoice_item",
 			"POS Invoice": "pos_invoice_item",
 		}.get(self.doc.doctype)
-
-		if not bundle_field:
-			bundle_field = "serial_and_batch_bundle"
 
 		if not qty_field:
 			qty_field = "qty"
@@ -370,14 +341,13 @@ class SerialBatchBundleService:
 					and (row.get("return_qty_from_rejected_warehouse") or row.get("rejected_warehouse"))
 				)
 				and not row.get("use_serial_batch_fields")
-				and not row.get(bundle_field)
 			):
 				reference_ids.append(row.get(field))
 
 			if table_name == "packed_items" and row.get("parent_detail_docname"):
 				parent_rows = self.doc.get("items", {"name": row.parent_detail_docname}) or []
 				for d in parent_rows:
-					if d.get(field) and not d.get(bundle_field):
+					if d.get(field):
 						reference_ids.append(d.get(field))
 
 		return field, reference_ids
@@ -424,7 +394,7 @@ class SerialBatchBundleService:
 			type_of_transaction = "Inward" if not self.doc.is_return else "Outward"
 			qty = flt(
 				row.get("rejected_qty") * row.get("conversion_factor", 1.0),
-				frappe.get_precision("Serial and Batch Entry", "qty"),
+				frappe.get_precision("Stock Location Ledger", "qty"),
 			)
 			warehouse = row.get("rejected_warehouse")
 
@@ -441,6 +411,16 @@ class SerialBatchBundleService:
 				warehouse = parent_details[row.parent_detail_docname].warehouse
 			bundle_details["voucher_detail_no"] = parent_details[row.parent_detail_docname].name
 
+		serial_nos_list = get_serial_nos(serial_nos) if serial_nos else None
+		# The row can list more serials than this movement covers: a supplied-items row keeps
+		# every transferred serial while consuming fewer (and on partial transfers some are not
+		# even in the supplier warehouse - let auto-pick resolve from actual availability), and
+		# a partial return's mapped row keeps the original invoice's full list (return the
+		# first N of it).
+		cap = cint(abs(flt(qty)))
+		if serial_nos_list and cap and len(serial_nos_list) > cap:
+			serial_nos_list = None if table_name == "supplied_items" else serial_nos_list[:cap]
+
 		bundle_details.update(
 			{
 				"qty": qty,
@@ -448,7 +428,7 @@ class SerialBatchBundleService:
 				"type_of_transaction": type_of_transaction,
 				"warehouse": warehouse,
 				"batches": frappe._dict({row.batch_no: qty}) if row.batch_no else None,
-				"serial_nos": get_serial_nos(serial_nos) if serial_nos else None,
+				"serial_nos": serial_nos_list,
 				"batch_no": row.batch_no,
 			}
 		)
@@ -456,55 +436,10 @@ class SerialBatchBundleService:
 	def create_serial_batch_bundle(self, bundle_details, row):
 		from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 
-		sn_doc = SerialBatchCreation(bundle_details).make_serial_and_batch_bundle()
-
-		field = "serial_and_batch_bundle"
-		if bundle_details.get("is_rejected"):
-			field = "rejected_serial_and_batch_bundle"
-
-		row.set(field, sn_doc.name)
-		row.db_set({field: sn_doc.name})
-
-	def validate_serial_nos_and_batches_with_bundle(self, row):
-		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-
-		throw_error = False
-		if row.serial_no:
-			serial_nos = frappe.get_all(
-				"Serial and Batch Entry",
-				fields=["serial_no"],
-				filters={"parent": row.serial_and_batch_bundle},
-			)
-			serial_nos = sorted([cstr(d.serial_no) for d in serial_nos])
-			parsed_serial_nos = get_serial_nos(row.serial_no)
-
-			if len(serial_nos) != len(parsed_serial_nos):
-				throw_error = True
-			elif serial_nos != parsed_serial_nos:
-				for serial_no in serial_nos:
-					if serial_no not in parsed_serial_nos:
-						throw_error = True
-						break
-
-		elif row.batch_no:
-			batches = sorted(
-				frappe.get_all(
-					"Serial and Batch Entry",
-					filters={"parent": row.serial_and_batch_bundle},
-					pluck="batch_no",
-					distinct=True,
-				)
-			)
-
-			if batches != [row.batch_no]:
-				throw_error = True
-
-		if throw_error:
-			frappe.throw(
-				_(
-					"At row {0}: Serial and Batch Bundle {1} has already been created. Please remove the values from the serial no or batch no fields."
-				).format(row.idx, row.serial_and_batch_bundle)
-			)
+		# SLL-native: entries are persisted directly as draft Stock Location Ledger rows,
+		# keyed by (voucher_type, voucher_no, voucher_detail_no, warehouse) - no Serial and
+		# Batch Bundle document is created, so no bundle-name field to set on the row.
+		SerialBatchCreation(bundle_details).make_location_ledger_entries()
 
 	def set_use_serial_batch_fields(self):
 		if frappe.get_single_value("Stock Settings", "use_serial_batch_fields"):
@@ -517,72 +452,8 @@ class SerialBatchBundleService:
 				continue
 
 			for row in self.doc.get(table_name):
-				update_values = {}
 				if row.get("batch_no"):
-					update_values["batch_no"] = None
-
-				if row.get("serial_and_batch_bundle"):
-					update_values["serial_and_batch_bundle"] = None
-					frappe.db.set_value(
-						"Serial and Batch Bundle", row.serial_and_batch_bundle, {"is_cancelled": 1}
-					)
-
-					frappe.db.set_value(
-						"Serial and Batch Entry", {"parent": row.serial_and_batch_bundle}, {"is_cancelled": 1}
-					)
-
-				if update_values:
-					row.db_set(update_values)
-
-				if table_name == "items" and row.get("rejected_serial_and_batch_bundle"):
-					frappe.db.set_value(
-						"Serial and Batch Bundle", row.rejected_serial_and_batch_bundle, {"is_cancelled": 1}
-					)
-
-					frappe.db.set_value(
-						"Serial and Batch Entry",
-						{"parent": row.rejected_serial_and_batch_bundle},
-						{"is_cancelled": 1},
-					)
-
-					row.db_set("rejected_serial_and_batch_bundle", None)
-
-				if row.get("current_serial_and_batch_bundle"):
-					row.db_set("current_serial_and_batch_bundle", None)
-
-	def set_serial_and_batch_bundle(self, table_name=None, ignore_validate=False):
-		if not table_name:
-			table_name = "items"
-
-		QTY_FIELD = {
-			"serial_and_batch_bundle": "qty",
-			"current_serial_and_batch_bundle": "current_qty",
-			"rejected_serial_and_batch_bundle": "rejected_qty",
-		}
-
-		for row in self.doc.get(table_name):
-			for field in QTY_FIELD.keys():
-				if row.get(field):
-					frappe.get_doc("Serial and Batch Bundle", row.get(field)).set_serial_and_batch_values(
-						self.doc, row, qty_field=QTY_FIELD[field]
-					)
-
-	def make_package_for_transfer(
-		self, serial_and_batch_bundle, warehouse, type_of_transaction=None, do_not_submit=None, qty=0
-	):
-		from erpnext.controllers.stock_controller import make_bundle_for_material_transfer
-
-		return make_bundle_for_material_transfer(
-			is_new=self.doc.is_new(),
-			docstatus=self.doc.docstatus,
-			voucher_type=self.doc.doctype,
-			voucher_no=self.doc.name,
-			serial_and_batch_bundle=serial_and_batch_bundle,
-			warehouse=warehouse,
-			type_of_transaction=type_of_transaction,
-			do_not_submit=do_not_submit,
-			qty=qty,
-		)
+					row.db_set("batch_no", None)
 
 	def validate_reserved_batches(self):
 		if not frappe.db.get_single_value("Stock Settings", "enable_stock_reservation"):
@@ -592,7 +463,7 @@ class SerialBatchBundleService:
 			return
 
 		batches = frappe.get_all(
-			"Serial and Batch Entry",
+			"Stock Location Ledger",
 			filters={
 				"voucher_type": self.doc.doctype,
 				"voucher_no": self.doc.name,
@@ -630,7 +501,7 @@ class SerialBatchBundleService:
 			if outstanding > 0:
 				reservations[key].append(row)
 
-		precision = frappe.get_precision("Serial and Batch Entry", "qty")
+		precision = frappe.get_precision("Stock Location Ledger", "qty")
 		for (batch_no, warehouse), reserved_qty in outstanding_qty.items():
 			if flt(reserved_qty, precision) <= 0:
 				continue
@@ -667,7 +538,7 @@ class SerialBatchBundleService:
 
 	def get_reserved_batches(self, batches):
 		doctype = frappe.qb.DocType("Stock Reservation Entry")
-		child_doc = frappe.qb.DocType("Serial and Batch Entry")
+		child_doc = frappe.qb.DocType("Stock Reservation Serial Batch")
 
 		return (
 			frappe.qb.from_(doctype)

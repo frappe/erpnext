@@ -452,7 +452,7 @@ class SubcontractingInwardController:
 		serial_nos, batch_nos = [], frappe._dict()
 
 		table = frappe.qb.DocType("Stock Reservation Entry")
-		child_table = frappe.qb.DocType("Serial and Batch Entry")
+		child_table = frappe.qb.DocType("Stock Reservation Serial Batch")
 		query = (
 			frappe.qb.from_(table)
 			.join(child_table)
@@ -1031,9 +1031,20 @@ class SubcontractingInwardController:
 				item.db_set("scio_detail", None)
 
 	def create_stock_reservation_entries_for_inward(self):
+		from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import get_voucher_entries
+
 		if self.purpose == "Receive from Customer":
 			for item in self.items:
 				item.reload()
+				warehouse = item.t_warehouse or item.s_warehouse
+				entries = get_voucher_entries(
+					"Subcontracting Inward Order",
+					self.subcontracting_inward_order,
+					item.scio_detail,
+					warehouse,
+					fields=["serial_no", "batch_no", "qty"],
+				)
+
 				sre = frappe.new_doc("Stock Reservation Entry")
 				sre.company = self.company
 				sre.voucher_type = "Subcontracting Inward Order"
@@ -1042,22 +1053,20 @@ class SubcontractingInwardController:
 				sre.voucher_detail_no = item.scio_detail
 				sre.item_code = item.item_code
 				sre.stock_uom = item.stock_uom
-				sre.warehouse = item.t_warehouse or item.s_warehouse
+				sre.warehouse = warehouse
 				sre.has_serial_no = frappe.get_cached_value("Item", item.item_code, "has_serial_no")
 				sre.has_batch_no = frappe.get_cached_value("Item", item.item_code, "has_batch_no")
-				sre.reservation_based_on = "Qty" if not item.serial_and_batch_bundle else "Serial and Batch"
-				if item.serial_and_batch_bundle:
-					sabb = frappe.get_doc("Serial and Batch Bundle", item.serial_and_batch_bundle)
-					for entry in sabb.entries:
-						sre.append(
-							"sb_entries",
-							{
-								"serial_no": entry.serial_no,
-								"batch_no": entry.batch_no,
-								"qty": entry.qty,
-								"warehouse": entry.warehouse,
-							},
-						)
+				sre.reservation_based_on = "Qty" if not entries else "Serial and Batch"
+				for entry in entries:
+					sre.append(
+						"sb_entries",
+						{
+							"serial_no": entry.serial_no,
+							"batch_no": entry.batch_no,
+							"qty": entry.qty,
+							"warehouse": warehouse,
+						},
+					)
 				sre.submit()
 			frappe.msgprint(_("Stock Reservation Entries Created"), alert=True, indicator="green")
 
@@ -1068,7 +1077,7 @@ class SubcontractingInwardController:
 
 				if serial_list or batch_list:
 					table = frappe.qb.DocType("Stock Reservation Entry")
-					child_table = frappe.qb.DocType("Serial and Batch Entry")
+					child_table = frappe.qb.DocType("Stock Reservation Serial Batch")
 					query = (
 						frappe.qb.from_(table)
 						.join(child_table)
@@ -1087,25 +1096,34 @@ class SubcontractingInwardController:
 						query = query.where(child_table.batch_no.isin(batch_list))
 					result = query.run(as_dict=True)
 
+					returned_batches = frappe._dict()
+					if batch_list and not serial_list:
+						from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import (
+							get_batches_for_voucher,
+						)
+
+						returned_batches = get_batches_for_voucher(
+							"Stock Entry", self.name, item.name, item.s_warehouse
+						)
+
 					qty_to_deliver = {row.sre_name: 0 for row in result}
 					consumed_qty = {batch: 0 for batch in batch_list}
 					for row in result:
 						if serial_list:
-							frappe.get_doc("Serial and Batch Entry", row.sbe_name).db_set(
+							frappe.get_doc("Stock Reservation Serial Batch", row.sbe_name).db_set(
 								"delivered_qty", 1 if self._action == "submit" else 0
 							)
 							qty_to_deliver[row.sre_name] += row.qty
 						elif batch_list and not serial_list:
-							sabe_qty = abs(
-								frappe.get_value(
-									"Serial and Batch Entry",
-									{"parent": item.serial_and_batch_bundle, "batch_no": row.batch_no},
-									"qty",
-								)
-							)
+							# The reservation frees only as much of this batch as the return
+							# actually carries - the return's own ledger rows are that record
+							# (the inward order's rows are consumed by the transfer entries).
+							returned_qty = abs(flt(returned_batches.get(row.batch_no)))
+							qty = min(row.qty, returned_qty - consumed_qty[row.batch_no])
+							if qty <= 0:
+								continue
 
-							qty = min(row.qty, sabe_qty)
-							sbe_doc = frappe.get_doc("Serial and Batch Entry", row.sbe_name)
+							sbe_doc = frappe.get_doc("Stock Reservation Serial Batch", row.sbe_name)
 							sbe_doc.db_set(
 								"delivered_qty",
 								sbe_doc.delivered_qty + (qty if self._action == "submit" else -qty),

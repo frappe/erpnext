@@ -103,8 +103,7 @@ erpnext.PointOfSale.ItemDetails = class {
 
 		const serialized = item_row.has_serial_no;
 		const batched = item_row.has_batch_no;
-		const no_bundle_selected =
-			!item_row.serial_and_batch_bundle && !item_row.serial_no && !item_row.batch_no;
+		const no_bundle_selected = !item_row.serial_no && !item_row.batch_no;
 
 		if ((serialized && no_bundle_selected) || (batched && no_bundle_selected)) {
 			frappe.show_alert({

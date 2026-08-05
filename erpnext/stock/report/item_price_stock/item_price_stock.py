@@ -63,7 +63,7 @@ def get_data(filters, columns):
 
 def get_item_price_qty_data(filters):
 	item_price = frappe.qb.DocType("Item Price")
-	bin = frappe.qb.DocType("Bin")
+	bin = frappe.qb.DocType("Stock Level")
 
 	query = (
 		frappe.qb.from_(item_price)

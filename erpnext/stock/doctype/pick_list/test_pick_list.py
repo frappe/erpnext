@@ -16,16 +16,21 @@ from erpnext.stock.doctype.pick_list.mapper import (
 	create_stock_entry,
 )
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
-from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
-	get_batch_from_bundle,
-	get_serial_nos_from_bundle,
-	make_serial_batch_bundle,
-)
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import (
+	get_batches_for_voucher,
+	get_serial_nos_for_voucher,
+	get_voucher_entries,
+	has_bundled_entries,
+)
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 	EmptyStockReconciliationItemsError,
 )
 from erpnext.tests.utils import ERPNextTestSuite
+
+
+def _first_batch(voucher_type, voucher_no, voucher_detail_no, warehouse):
+	return next(iter(get_batches_for_voucher(voucher_type, voucher_no, voucher_detail_no, warehouse)), None)
 
 
 class TestPickList(ERPNextTestSuite):
@@ -190,20 +195,8 @@ class TestPickList(ERPNextTestSuite):
 						"valuation_rate": 100,
 						"reconcile_all_serial_batch": 1,
 						"qty": 5,
-						"serial_and_batch_bundle": make_serial_batch_bundle(
-							frappe._dict(
-								{
-									"item_code": "_Test Serialized Item",
-									"warehouse": "_Test Warehouse - _TC",
-									"qty": 5,
-									"rate": 100,
-									"type_of_transaction": "Inward",
-									"do_not_submit": True,
-									"voucher_type": "Stock Reconciliation",
-									"serial_nos": serial_nos,
-								}
-							)
-						).name,
+						"serial_no": "\n".join(serial_nos),
+						"use_serial_batch_fields": 1,
 					}
 				],
 			}
@@ -246,7 +239,15 @@ class TestPickList(ERPNextTestSuite):
 		self.assertEqual(pick_list.locations[0].warehouse, "_Test Warehouse - _TC")
 		self.assertEqual(pick_list.locations[0].qty, 5)
 		self.assertEqual(
-			get_serial_nos_from_bundle(pick_list.locations[0].serial_and_batch_bundle), serial_nos
+			sorted(
+				get_serial_nos_for_voucher(
+					pick_list.doctype,
+					pick_list.name,
+					pick_list.locations[0].name,
+					pick_list.locations[0].warehouse,
+				)
+			),
+			sorted(serial_nos),
 		)
 
 	def test_pick_list_shows_batch_no_for_batched_item(self):
@@ -264,7 +265,7 @@ class TestPickList(ERPNextTestSuite):
 		pr1 = make_purchase_receipt(item_code="Batched Item", qty=1, rate=100.0)
 
 		pr1.load_from_db()
-		oldest_batch_no = get_batch_from_bundle(pr1.items[0].serial_and_batch_bundle)
+		oldest_batch_no = _first_batch(pr1.doctype, pr1.name, pr1.items[0].name, pr1.items[0].warehouse)
 
 		pr2 = make_purchase_receipt(item_code="Batched Item", qty=2, rate=100.0)
 
@@ -429,8 +430,10 @@ class TestPickList(ERPNextTestSuite):
 		pr1 = make_purchase_receipt(item_code="Batched and Serialised Item", qty=2, rate=100.0)
 
 		pr1.load_from_db()
-		oldest_batch_no = get_batch_from_bundle(pr1.items[0].serial_and_batch_bundle)
-		oldest_serial_nos = get_serial_nos_from_bundle(pr1.items[0].serial_and_batch_bundle)
+		oldest_batch_no = _first_batch(pr1.doctype, pr1.name, pr1.items[0].name, pr1.items[0].warehouse)
+		oldest_serial_nos = sorted(
+			get_serial_nos_for_voucher(pr1.doctype, pr1.name, pr1.items[0].name, pr1.items[0].warehouse)
+		)
 
 		pr2 = make_purchase_receipt(item_code="Batched and Serialised Item", qty=2, rate=100.0)
 
@@ -454,10 +457,24 @@ class TestPickList(ERPNextTestSuite):
 		pick_list.reload()
 
 		self.assertEqual(
-			get_batch_from_bundle(pick_list.locations[0].serial_and_batch_bundle), oldest_batch_no
+			_first_batch(
+				pick_list.doctype,
+				pick_list.name,
+				pick_list.locations[0].name,
+				pick_list.locations[0].warehouse,
+			),
+			oldest_batch_no,
 		)
 		self.assertEqual(
-			get_serial_nos_from_bundle(pick_list.locations[0].serial_and_batch_bundle), oldest_serial_nos
+			sorted(
+				get_serial_nos_for_voucher(
+					pick_list.doctype,
+					pick_list.name,
+					pick_list.locations[0].name,
+					pick_list.locations[0].warehouse,
+				)
+			),
+			oldest_serial_nos,
 		)
 
 		pick_list.cancel()
@@ -829,7 +846,7 @@ class TestPickList(ERPNextTestSuite):
 		)
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 0})
-	def test_sales_invoice_from_pick_list_copies_serial_and_batch_bundle(self):
+	def test_sales_invoice_from_pick_list_copies_serial_and_batch_nos(self):
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 0)
 
 		warehouse = "_Test Warehouse - _TC"
@@ -846,8 +863,12 @@ class TestPickList(ERPNextTestSuite):
 		).name
 
 		stock_entry = make_stock_entry(item=item, to_warehouse=warehouse, qty=2, basic_rate=100)
-		batch_no = get_batch_from_bundle(stock_entry.items[0].serial_and_batch_bundle)
-		serial_nos = get_serial_nos_from_bundle(stock_entry.items[0].serial_and_batch_bundle)
+		batch_no = _first_batch(
+			stock_entry.doctype, stock_entry.name, stock_entry.items[0].name, stock_entry.items[0].t_warehouse
+		)
+		serial_nos = get_serial_nos_for_voucher(
+			stock_entry.doctype, stock_entry.name, stock_entry.items[0].name, stock_entry.items[0].t_warehouse
+		)
 		sales_order = make_sales_order(item_code=item, warehouse=warehouse, qty=2, rate=100)
 
 		pick_list = frappe.get_doc(
@@ -876,38 +897,31 @@ class TestPickList(ERPNextTestSuite):
 
 		from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 
-		pick_list.locations[0].serial_and_batch_bundle = (
-			SerialBatchCreation(
-				{
-					"item_code": item,
-					"warehouse": warehouse,
-					"voucher_type": "Pick List",
-					"voucher_no": pick_list.name,
-					"voucher_detail_no": pick_list.locations[0].name,
-					"qty": -2,
-					"batches": frappe._dict({batch_no: 2}),
-					"serial_nos": serial_nos,
-					"type_of_transaction": "Outward",
-					"company": "_Test Company",
-					"do_not_submit": True,
-				}
-			)
-			.make_serial_and_batch_bundle()
-			.name
-		)
-		pick_list.locations[0].db_set(
+		SerialBatchCreation(
 			{
-				"use_serial_batch_fields": 0,
-				"batch_no": None,
-				"serial_no": None,
-				"serial_and_batch_bundle": pick_list.locations[0].serial_and_batch_bundle,
+				"item_code": item,
+				"warehouse": warehouse,
+				"voucher_type": "Pick List",
+				"voucher_no": pick_list.name,
+				"voucher_detail_no": pick_list.locations[0].name,
+				"qty": -2,
+				"batches": frappe._dict({batch_no: 2}),
+				"serial_nos": serial_nos,
+				"type_of_transaction": "Outward",
+				"company": "_Test Company",
+				"ledger_is_outward": 1,
 			}
-		)
+		).make_location_ledger_entries()
+
 		pick_list.reload()
 		pick_list_item = pick_list.locations[0]
 
 		self.assertFalse(pick_list_item.use_serial_batch_fields)
-		self.assertTrue(pick_list_item.serial_and_batch_bundle)
+		self.assertTrue(
+			has_bundled_entries(
+				pick_list.doctype, pick_list.name, pick_list_item.name, pick_list_item.warehouse, is_outward=1
+			)
+		)
 
 		sales_invoice = create_delivery(pick_list.name, target="Sales Invoice")
 		sales_invoice_item = sales_invoice.items[0]
@@ -915,17 +929,37 @@ class TestPickList(ERPNextTestSuite):
 		self.assertEqual(sales_invoice_item.against_pick_list, pick_list.name)
 		self.assertEqual(sales_invoice_item.pick_list_item, pick_list_item.name)
 		self.assertFalse(sales_invoice_item.use_serial_batch_fields)
-		self.assertTrue(sales_invoice_item.serial_and_batch_bundle)
-		self.assertNotEqual(
-			sales_invoice_item.serial_and_batch_bundle, pick_list_item.serial_and_batch_bundle
+		self.assertTrue(
+			has_bundled_entries(
+				sales_invoice.doctype,
+				sales_invoice.name,
+				sales_invoice_item.name,
+				sales_invoice_item.warehouse,
+			)
 		)
 		self.assertEqual(
-			get_batch_from_bundle(sales_invoice_item.serial_and_batch_bundle),
-			get_batch_from_bundle(pick_list_item.serial_and_batch_bundle),
+			_first_batch(
+				sales_invoice.doctype,
+				sales_invoice.name,
+				sales_invoice_item.name,
+				sales_invoice_item.warehouse,
+			),
+			_first_batch(pick_list.doctype, pick_list.name, pick_list_item.name, pick_list_item.warehouse),
 		)
 		self.assertEqual(
-			set(get_serial_nos_from_bundle(sales_invoice_item.serial_and_batch_bundle)),
-			set(get_serial_nos_from_bundle(pick_list_item.serial_and_batch_bundle)),
+			set(
+				get_serial_nos_for_voucher(
+					sales_invoice.doctype,
+					sales_invoice.name,
+					sales_invoice_item.name,
+					sales_invoice_item.warehouse,
+				)
+			),
+			set(
+				get_serial_nos_for_voucher(
+					pick_list.doctype, pick_list.name, pick_list_item.name, pick_list_item.warehouse
+				)
+			),
 		)
 
 	def test_sales_invoice_from_sales_order_pick_list_updates_sales_order(self):
@@ -1069,7 +1103,7 @@ class TestPickList(ERPNextTestSuite):
 		# pick half the qty
 		for loc in pl.locations:
 			self.assertEqual(loc.qty, 25.0)
-			self.assertTrue(loc.serial_and_batch_bundle)
+			self.assertTrue(has_bundled_entries(pl.doctype, pl.name, loc.name, loc.warehouse))
 
 		pl.save()
 		pl.submit()
@@ -1081,12 +1115,10 @@ class TestPickList(ERPNextTestSuite):
 		# pick half the qty
 		for loc in pl1.locations:
 			self.assertEqual(loc.qty, 5.0)
-			self.assertTrue(loc.serial_and_batch_bundle)
+			self.assertTrue(has_bundled_entries(pl1.doctype, pl1.name, loc.name, loc.warehouse))
 
-			data = frappe.get_all(
-				"Serial and Batch Entry",
-				fields=["qty", "batch_no"],
-				filters={"parent": loc.serial_and_batch_bundle},
+			data = get_voucher_entries(
+				pl1.doctype, pl1.name, loc.name, loc.warehouse, fields=["qty", "batch_no"]
 			)
 
 			for d in data:
@@ -1114,15 +1146,9 @@ class TestPickList(ERPNextTestSuite):
 		# pick half the qty
 		for loc in pl.locations:
 			self.assertEqual(loc.qty, 25.0)
-			self.assertTrue(loc.serial_and_batch_bundle)
+			self.assertTrue(has_bundled_entries(pl.doctype, pl.name, loc.name, loc.warehouse))
 
-			data = frappe.get_all(
-				"Serial and Batch Entry",
-				fields=["serial_no"],
-				filters={"parent": loc.serial_and_batch_bundle},
-			)
-
-			picked_serial_nos = [d.serial_no for d in data]
+			picked_serial_nos = get_serial_nos_for_voucher(pl.doctype, pl.name, loc.name, loc.warehouse)
 			self.assertEqual(len(picked_serial_nos), 25)
 
 		so1 = make_sales_order(item_code=item, qty=10.0, rate=100)
@@ -1131,12 +1157,10 @@ class TestPickList(ERPNextTestSuite):
 		# pick half the qty
 		for loc in pl1.locations:
 			self.assertEqual(loc.qty, 10.0)
-			self.assertTrue(loc.serial_and_batch_bundle)
+			self.assertTrue(has_bundled_entries(pl1.doctype, pl1.name, loc.name, loc.warehouse))
 
-			data = frappe.get_all(
-				"Serial and Batch Entry",
-				fields=["qty", "batch_no"],
-				filters={"parent": loc.serial_and_batch_bundle},
+			data = get_voucher_entries(
+				pl1.doctype, pl1.name, loc.name, loc.warehouse, fields=["qty", "batch_no", "serial_no"]
 			)
 
 			self.assertEqual(len(data), 10)
@@ -1781,9 +1805,9 @@ class TestPickList(ERPNextTestSuite):
 		).name
 
 		se = make_stock_entry(item=item, to_warehouse=warehouse, qty=10)
-		batch1 = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+		batch1 = _first_batch(se.doctype, se.name, se.items[0].name, se.items[0].t_warehouse)
 		se = make_stock_entry(item=item, to_warehouse=warehouse, qty=10)
-		batch2 = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+		batch2 = _first_batch(se.doctype, se.name, se.items[0].name, se.items[0].t_warehouse)
 
 		so = make_sales_order(item_code=item, qty=10, rate=100)
 

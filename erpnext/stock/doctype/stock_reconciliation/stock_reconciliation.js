@@ -6,7 +6,7 @@ frappe.provide("erpnext.accounts.dimensions");
 
 frappe.ui.form.on("Stock Reconciliation", {
 	setup(frm) {
-		frm.ignore_doctypes_on_cancel_all = ["Serial and Batch Bundle", "Item Standard Cost"];
+		frm.ignore_doctypes_on_cancel_all = ["Item Standard Cost"];
 		frm.barcode_scanner = new erpnext.utils.BarcodeScanner({
 			frm: frm,
 			uom_field: "stock_uom",
@@ -31,18 +31,6 @@ frappe.ui.form.on("Stock Reconciliation", {
 			return {
 				filters: {
 					item: item.item_code,
-				},
-			};
-		});
-
-		frm.set_query("serial_and_batch_bundle", "items", (doc, cdt, cdn) => {
-			let row = locals[cdt][cdn];
-			return {
-				filters: {
-					item_code: row.item_code,
-					voucher_type: doc.doctype,
-					voucher_no: ["in", [doc.name, ""]],
-					is_cancelled: 0,
 				},
 			};
 		});
@@ -84,9 +72,7 @@ frappe.ui.form.on("Stock Reconciliation", {
 	set_fields_onload_for_line_item(frm) {
 		if (frm.is_new() && frm.doc?.items && cint(frappe.user_defaults?.use_serial_batch_fields) === 1) {
 			frm.doc.items.forEach((item) => {
-				if (!item.serial_and_batch_bundle) {
-					frappe.model.set_value(item.doctype, item.name, "use_serial_batch_fields", 1);
-				}
+				frappe.model.set_value(item.doctype, item.name, "use_serial_batch_fields", 1);
 			});
 		}
 	},
@@ -287,10 +273,7 @@ frappe.ui.form.on("Stock Reconciliation Item", {
 	batch_no(frm, cdt, cdn) {
 		let row = locals[cdt][cdn];
 		if (row.batch_no) {
-			frappe.model.set_value(cdt, cdn, {
-				use_serial_batch_fields: 1,
-				serial_and_batch_bundle: "",
-			});
+			frappe.model.set_value(cdt, cdn, "use_serial_batch_fields", 1);
 
 			frm.events.set_valuation_rate_and_qty(frm, cdt, cdn);
 		}
@@ -313,10 +296,7 @@ frappe.ui.form.on("Stock Reconciliation Item", {
 		var child = locals[cdt][cdn];
 
 		if (child.serial_no) {
-			frappe.model.set_value(cdt, cdn, {
-				use_serial_batch_fields: 1,
-				serial_and_batch_bundle: "",
-			});
+			frappe.model.set_value(cdt, cdn, "use_serial_batch_fields", 1);
 
 			const serial_nos = child.serial_no.trim().split("\n");
 			frappe.model.set_value(cdt, cdn, "qty", serial_nos.length);
@@ -335,7 +315,7 @@ frappe.ui.form.on("Stock Reconciliation Item", {
 	},
 
 	add_serial_batch_bundle(frm, cdt, cdn) {
-		erpnext.utils.pick_serial_and_batch_bundle(frm, cdt, cdn, "Inward");
+		erpnext.utils.pick_serial_and_batch_entries(frm, cdt, cdn, "Inward");
 	},
 });
 

@@ -310,6 +310,10 @@ class LandedCostVoucher(Document):
 			)
 
 	def update_landed_cost(self):
+		from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import (
+			revive_cancelled_ledgers_for_voucher,
+		)
+
 		for d in self.get("purchase_receipts"):
 			doc = frappe.get_doc(d.receipt_document_type, d.receipt_document)
 			# check if there are {qty} assets created and linked to this receipt document
@@ -346,6 +350,7 @@ class LandedCostVoucher(Document):
 
 			# update stock & gl entries for submit state of PR
 			doc.docstatus = 1
+			revive_cancelled_ledgers_for_voucher(d.receipt_document_type, d.receipt_document)
 			doc.make_bundle_using_old_serial_batch_fields(via_landed_cost_voucher=True)
 			doc.update_stock_ledger(allow_negative_stock=True, via_landed_cost_voucher=True)
 			if d.receipt_document_type == "Purchase Receipt":

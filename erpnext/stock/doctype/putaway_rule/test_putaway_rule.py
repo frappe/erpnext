@@ -6,11 +6,11 @@ import frappe
 from erpnext.stock.doctype.batch.test_batch import make_new_batch
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
-from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
-	get_batch_from_bundle,
-	get_serial_nos_from_bundle,
-)
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import (
+	get_batches_for_voucher,
+	get_serial_nos_for_voucher,
+)
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.tests.utils import ERPNextTestSuite
@@ -364,8 +364,13 @@ class TestPutawayRule(ERPNextTestSuite):
 		pr.submit()
 		pr.load_from_db()
 
-		batch_no = get_batch_from_bundle(pr.items[0].serial_and_batch_bundle)
-		serial_nos = get_serial_nos_from_bundle(pr.items[0].serial_and_batch_bundle)
+		pr_row = pr.items[0]
+		batch_no = next(
+			iter(get_batches_for_voucher("Purchase Receipt", pr.name, pr_row.name, pr_row.warehouse)), None
+		)
+		serial_nos = sorted(
+			get_serial_nos_for_voucher("Purchase Receipt", pr.name, pr_row.name, pr_row.warehouse)
+		)
 
 		stock_entry = make_stock_entry(
 			item_code="Water Bottle",
@@ -380,21 +385,53 @@ class TestPutawayRule(ERPNextTestSuite):
 		stock_entry.submit()
 		stock_entry.load_from_db()
 
-		self.assertEqual(stock_entry.items[0].t_warehouse, self.warehouse_1)
-		self.assertEqual(stock_entry.items[0].qty, 3)
-		self.assertEqual(stock_entry.items[0].putaway_rule, rule_1.name)
+		se_row_0 = stock_entry.items[0]
+		self.assertEqual(se_row_0.t_warehouse, self.warehouse_1)
+		self.assertEqual(se_row_0.qty, 3)
+		self.assertEqual(se_row_0.putaway_rule, rule_1.name)
 		self.assertEqual(
-			get_serial_nos_from_bundle(stock_entry.items[0].serial_and_batch_bundle), serial_nos[0:3]
+			sorted(
+				get_serial_nos_for_voucher(
+					"Stock Entry", stock_entry.name, se_row_0.name, se_row_0.t_warehouse
+				)
+			),
+			serial_nos[0:3],
 		)
-		self.assertEqual(get_batch_from_bundle(stock_entry.items[0].serial_and_batch_bundle), batch_no)
+		self.assertEqual(
+			next(
+				iter(
+					get_batches_for_voucher(
+						"Stock Entry", stock_entry.name, se_row_0.name, se_row_0.t_warehouse
+					)
+				),
+				None,
+			),
+			batch_no,
+		)
 
-		self.assertEqual(stock_entry.items[1].t_warehouse, self.warehouse_2)
-		self.assertEqual(stock_entry.items[1].qty, 2)
-		self.assertEqual(stock_entry.items[1].putaway_rule, rule_2.name)
+		se_row_1 = stock_entry.items[1]
+		self.assertEqual(se_row_1.t_warehouse, self.warehouse_2)
+		self.assertEqual(se_row_1.qty, 2)
+		self.assertEqual(se_row_1.putaway_rule, rule_2.name)
 		self.assertEqual(
-			get_serial_nos_from_bundle(stock_entry.items[1].serial_and_batch_bundle), serial_nos[3:5]
+			sorted(
+				get_serial_nos_for_voucher(
+					"Stock Entry", stock_entry.name, se_row_1.name, se_row_1.t_warehouse
+				)
+			),
+			serial_nos[3:5],
 		)
-		self.assertEqual(get_batch_from_bundle(stock_entry.items[1].serial_and_batch_bundle), batch_no)
+		self.assertEqual(
+			next(
+				iter(
+					get_batches_for_voucher(
+						"Stock Entry", stock_entry.name, se_row_1.name, se_row_1.t_warehouse
+					)
+				),
+				None,
+			),
+			batch_no,
+		)
 
 		self.assertUnchangedItemsOnResave(stock_entry)
 

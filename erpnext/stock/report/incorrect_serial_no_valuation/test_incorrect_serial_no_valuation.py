@@ -68,7 +68,7 @@ class TestIncorrectSerialNoValuation(ERPNextTestSuite):
 		# corrupt the outgoing valuation so the serial's in (100) and out no longer cancel:
 		# net qty is 0 but a residual value remains, which the report must flag
 		frappe.db.set_value(
-			"Serial and Batch Entry",
+			"Stock Location Ledger",
 			{"serial_no": serial_no, "qty": ["<", 0]},
 			"incoming_rate",
 			60,

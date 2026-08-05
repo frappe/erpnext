@@ -1589,8 +1589,12 @@ class TestJobCard(ERPNextTestSuite):
 		"""Batch produced by an operation should auto-pull into the next operation's
 		semi-finished consumption row (skip-transfer Manufacture entry)."""
 		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+		from erpnext.stock.doctype.batch.batch import get_batch_qty
 		from erpnext.stock.doctype.item.test_item import make_item
-		from erpnext.stock.serial_batch_bundle import get_batches_from_bundle
+		from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import (
+			get_batches_for_voucher,
+			has_bundled_entries,
+		)
 
 		frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 0)
 		frappe.db.set_single_value("Manufacturing Settings", "make_serial_no_batch_from_work_order", 0)
@@ -1697,8 +1701,10 @@ class TestJobCard(ERPNextTestSuite):
 
 		me_a.reload()
 		sfg_fg_row = next(r for r in me_a.items if r.is_finished_item and r.item_code == sfg)
-		self.assertTrue(sfg_fg_row.serial_and_batch_bundle)
-		produced_batches = get_batches_from_bundle(sfg_fg_row.serial_and_batch_bundle)
+		self.assertTrue(has_bundled_entries(me_a.doctype, me_a.name, sfg_fg_row.name, sfg_fg_row.t_warehouse))
+		produced_batches = get_batches_for_voucher(
+			me_a.doctype, me_a.name, sfg_fg_row.name, sfg_fg_row.t_warehouse
+		)
 
 		# Operation B -> consumes the SFG; its batch should be auto-pulled from Operation A
 		jc_b = frappe.get_doc(
@@ -1720,19 +1726,24 @@ class TestJobCard(ERPNextTestSuite):
 
 		sfg_consume_row = next(r for r in me_b.items if r.item_code == sfg and r.s_warehouse)
 		self.assertTrue(
-			sfg_consume_row.serial_and_batch_bundle,
+			sfg_consume_row.batch_no,
 			"Previous operation's batch was not auto-pulled into the semi-finished consumption row",
 		)
-		consumed_batches = get_batches_from_bundle(sfg_consume_row.serial_and_batch_bundle)
+		consumed_batches = frappe._dict(
+			{sfg_consume_row.batch_no: get_batch_qty(sfg_consume_row.batch_no, sfg_consume_row.s_warehouse)}
+		)
 		self.assertEqual(set(consumed_batches.keys()), set(produced_batches.keys()))
 
 	def test_semi_fg_auto_pull_with_uom_conversion(self):
 		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+		from erpnext.stock.doctype.batch.batch import get_batch_qty
 		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.stock.doctype.stock_entry.services.manufacturing import (
 			set_previous_operation_serial_batch,
 		)
-		from erpnext.stock.serial_batch_bundle import get_batches_from_bundle
+		from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import (
+			get_batches_for_voucher,
+		)
 
 		frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 0)
 		frappe.db.set_single_value("Manufacturing Settings", "make_serial_no_batch_from_work_order", 0)
@@ -1839,7 +1850,9 @@ class TestJobCard(ERPNextTestSuite):
 		me_a.reload()
 
 		sfg_fg_row = next(r for r in me_a.items if r.is_finished_item and r.item_code == sfg)
-		produced_batches = get_batches_from_bundle(sfg_fg_row.serial_and_batch_bundle)
+		produced_batches = get_batches_for_voucher(
+			me_a.doctype, me_a.name, sfg_fg_row.name, sfg_fg_row.t_warehouse
+		)
 
 		se = frappe.new_doc("Stock Entry")
 		se.company = "_Test Company"
@@ -1859,18 +1872,16 @@ class TestJobCard(ERPNextTestSuite):
 		)
 		set_previous_operation_serial_batch(se, row)
 
-		self.assertTrue(row.serial_and_batch_bundle)
-		self.assertEqual(
-			abs(frappe.db.get_value("Serial and Batch Bundle", row.serial_and_batch_bundle, "total_qty")),
-			5.0,
-		)
+		self.assertTrue(row.use_serial_batch_fields)
+		self.assertTrue(row.batch_no)
+		self.assertEqual(abs(flt(get_batch_qty(row.batch_no, warehouse))), 5.0)
 
 		se.save()
 		se.submit()
 		se.reload()
 
 		row = se.items[0]
-		consumed_batches = get_batches_from_bundle(row.serial_and_batch_bundle)
+		consumed_batches = get_batches_for_voucher(se.doctype, se.name, row.name, row.s_warehouse)
 		self.assertEqual(set(consumed_batches.keys()), set(produced_batches.keys()))
 		self.assertEqual(abs(sum(consumed_batches.values())), 5.0)
 

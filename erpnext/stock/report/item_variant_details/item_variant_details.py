@@ -141,7 +141,7 @@ def get_open_sales_orders_count(variants_list):
 
 def get_stock_details_map(variant_list):
 	stock_details = frappe.db.get_all(
-		"Bin",
+		"Stock Level",
 		fields=[
 			{"SUM": "planned_qty", "as": "planned_qty"},
 			{"SUM": "actual_qty", "as": "actual_qty"},

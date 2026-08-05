@@ -15,11 +15,11 @@ from erpnext.manufacturing.doctype.work_order.work_order import OverProductionEr
 from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import create_item, make_item
-from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
-	get_batch_from_bundle,
-	get_serial_nos_from_bundle,
-)
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import (
+	get_batches_for_voucher,
+	get_serial_nos_for_voucher,
+)
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 	create_stock_reconciliation,
 )
@@ -1399,19 +1399,19 @@ class TestProductionPlan(ERPNextTestSuite):
 		from erpnext.stock.utils import get_or_make_bin
 
 		bin_name = get_or_make_bin("Raw Material Item 1", "_Test Warehouse - _TC")
-		before_qty = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
+		before_qty = flt(frappe.db.get_value("Stock Level", bin_name, "reserved_qty_for_production_plan"))
 
 		pln = create_production_plan(item_code="Test Production Item 1")
 
 		bin_name = get_or_make_bin("Raw Material Item 1", "_Test Warehouse - _TC")
-		after_qty = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
+		after_qty = flt(frappe.db.get_value("Stock Level", bin_name, "reserved_qty_for_production_plan"))
 
 		self.assertEqual(after_qty - before_qty, 1)
 		pln = frappe.get_doc("Production Plan", pln.name)
 		pln.cancel()
 
 		bin_name = get_or_make_bin("Raw Material Item 1", "_Test Warehouse - _TC")
-		after_qty = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
+		after_qty = flt(frappe.db.get_value("Stock Level", bin_name, "reserved_qty_for_production_plan"))
 
 		pln.reload()
 		self.assertEqual(pln.docstatus, 2)
@@ -1421,12 +1421,12 @@ class TestProductionPlan(ERPNextTestSuite):
 		from erpnext.stock.utils import get_or_make_bin
 
 		bin_name = get_or_make_bin("Raw Material Item 1", "_Test Warehouse - _TC")
-		before_qty = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
+		before_qty = flt(frappe.db.get_value("Stock Level", bin_name, "reserved_qty_for_production_plan"))
 
 		pln = create_production_plan(item_code="Test Production Item 1")
 
 		bin_name = get_or_make_bin("Raw Material Item 1", "_Test Warehouse - _TC")
-		after_qty = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
+		after_qty = flt(frappe.db.get_value("Stock Level", bin_name, "reserved_qty_for_production_plan"))
 
 		self.assertEqual(after_qty - before_qty, 1)
 
@@ -1451,7 +1451,7 @@ class TestProductionPlan(ERPNextTestSuite):
 			work_orders.append(wo_doc)
 
 		bin_name = get_or_make_bin("Raw Material Item 1", "_Test Warehouse - _TC")
-		after_qty = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
+		after_qty = flt(frappe.db.get_value("Stock Level", bin_name, "reserved_qty_for_production_plan"))
 
 		self.assertEqual(after_qty, before_qty)
 
@@ -1466,7 +1466,7 @@ class TestProductionPlan(ERPNextTestSuite):
 			s = frappe.get_doc(make_se_from_wo(rm_work_order.name, "Material Transfer for Manufacture", 1))
 			s.submit()
 			bin_name = get_or_make_bin("Raw Material Item 1", "_Test Warehouse - _TC")
-			after_qty = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
+			after_qty = flt(frappe.db.get_value("Stock Level", bin_name, "reserved_qty_for_production_plan"))
 
 			self.assertEqual(after_qty, before_qty)
 
@@ -1474,12 +1474,12 @@ class TestProductionPlan(ERPNextTestSuite):
 		from erpnext.stock.utils import get_or_make_bin
 
 		bin_name = get_or_make_bin("Raw Material Item 1", "_Test Warehouse - _TC")
-		before_qty = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
+		before_qty = flt(frappe.db.get_value("Stock Level", bin_name, "reserved_qty_for_production_plan"))
 
 		pln = create_production_plan(item_code="Test Production Item 1", planned_qty=10)
 
 		bin_name = get_or_make_bin("Raw Material Item 1", "_Test Warehouse - _TC")
-		after_qty = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
+		after_qty = flt(frappe.db.get_value("Stock Level", bin_name, "reserved_qty_for_production_plan"))
 
 		self.assertEqual(after_qty - before_qty, 10)
 
@@ -1505,7 +1505,7 @@ class TestProductionPlan(ERPNextTestSuite):
 			plans.append(pln.name)
 
 		bin_name = get_or_make_bin("Raw Material Item 1", "_Test Warehouse - _TC")
-		after_qty = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
+		after_qty = flt(frappe.db.get_value("Stock Level", bin_name, "reserved_qty_for_production_plan"))
 
 		self.assertEqual(after_qty, before_qty)
 		non_completed_plans = get_non_completed_production_plans()
@@ -1529,7 +1529,7 @@ class TestProductionPlan(ERPNextTestSuite):
 		make_bom(item=fg_item, raw_materials=[bom_item], source_warehouse="_Test Warehouse - _TC")
 
 		bin_name = get_or_make_bin(bom_item, "_Test Warehouse - _TC")
-		before_qty = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
+		before_qty = flt(frappe.db.get_value("Stock Level", bin_name, "reserved_qty_for_production_plan"))
 
 		pln = create_production_plan(
 			item_code=fg_item, planned_qty=100, ignore_existing_ordered_qty=1, stock_uom="_Test UOM 1"
@@ -1539,7 +1539,9 @@ class TestProductionPlan(ERPNextTestSuite):
 			self.assertEqual(row.uom, "Nos")
 			self.assertEqual(row.quantity, 4)
 
-			reserved_qty = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
+			reserved_qty = flt(
+				frappe.db.get_value("Stock Level", bin_name, "reserved_qty_for_production_plan")
+			)
 			self.assertEqual(reserved_qty - before_qty, 100.0)
 
 		pln.submit_material_request = 1
@@ -1556,7 +1558,9 @@ class TestProductionPlan(ERPNextTestSuite):
 			wo_doc.fg_warehouse = "_Test Warehouse - _TC"
 			wo_doc.submit()
 
-		reserved_qty_after_mr = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
+		reserved_qty_after_mr = flt(
+			frappe.db.get_value("Stock Level", bin_name, "reserved_qty_for_production_plan")
+		)
 		self.assertEqual(reserved_qty_after_mr, before_qty)
 
 	def test_reserved_qty_for_production_plan_with_partial_stock(self):
@@ -1569,7 +1573,7 @@ class TestProductionPlan(ERPNextTestSuite):
 		make_stock_entry(item_code=rm_item, qty=4, rate=100, target="_Test Warehouse - _TC")
 
 		bin_name = get_or_make_bin(rm_item, "_Test Warehouse - _TC")
-		before_qty = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
+		before_qty = flt(frappe.db.get_value("Stock Level", bin_name, "reserved_qty_for_production_plan"))
 
 		pln = create_production_plan(item_code=fg_item, planned_qty=10, ignore_existing_ordered_qty=1)
 
@@ -1577,13 +1581,13 @@ class TestProductionPlan(ERPNextTestSuite):
 		self.assertEqual(row.required_bom_qty, 10)
 		self.assertEqual(row.quantity, 6)
 
-		after_qty = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
+		after_qty = flt(frappe.db.get_value("Stock Level", bin_name, "reserved_qty_for_production_plan"))
 		self.assertEqual(after_qty - before_qty, 10)
 
 		pln.reload()
 		pln.cancel()
 
-		after_cancel = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
+		after_cancel = flt(frappe.db.get_value("Stock Level", bin_name, "reserved_qty_for_production_plan"))
 		self.assertEqual(after_cancel, before_qty)
 
 	def _plan_with_shared_raw_material(self, rm_item, qty_per_order):
@@ -2138,7 +2142,7 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		before_qty = flt(
 			frappe.db.get_value(
-				"Bin",
+				"Stock Level",
 				{"item_code": "Frame Assembly", "warehouse": sub_assembly_warehouse},
 				"reserved_qty_for_production_plan",
 			)
@@ -2159,7 +2163,7 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		after_qty = flt(
 			frappe.db.get_value(
-				"Bin",
+				"Stock Level",
 				{"item_code": "Frame Assembly", "warehouse": sub_assembly_warehouse},
 				"reserved_qty_for_production_plan",
 			)
@@ -2195,7 +2199,7 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		after_qty = flt(
 			frappe.db.get_value(
-				"Bin",
+				"Stock Level",
 				{"item_code": "Frame Assembly", "warehouse": sub_assembly_warehouse},
 				"reserved_qty_for_production_plan",
 			)
@@ -2277,20 +2281,20 @@ class TestProductionPlan(ERPNextTestSuite):
 		pln.submit()
 
 		bin_name = get_or_make_bin(rm_item, rm_warehouse)
-		before_qty = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
+		before_qty = flt(frappe.db.get_value("Stock Level", bin_name, "reserved_qty_for_production_plan"))
 
 		pln.reload()
 		pln.set_status(close=True, update_bin=True)
 
 		bin_name = get_or_make_bin(rm_item, rm_warehouse)
-		after_qty = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
+		after_qty = flt(frappe.db.get_value("Stock Level", bin_name, "reserved_qty_for_production_plan"))
 		self.assertAlmostEqual(after_qty, before_qty - 10)
 
 		pln.reload()
 		pln.set_status(close=False, update_bin=True)
 
 		bin_name = get_or_make_bin(rm_item, rm_warehouse)
-		after_qty = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
+		after_qty = flt(frappe.db.get_value("Stock Level", bin_name, "reserved_qty_for_production_plan"))
 		self.assertAlmostEqual(after_qty, before_qty)
 
 	def test_min_order_qty_in_pp(self):
@@ -2916,7 +2920,9 @@ class TestProductionPlan(ERPNextTestSuite):
 			"SN Raw Material For SR 3",
 		]:
 			se = make_stock_entry(item_code=item_code, target=warehouse, qty=5, basic_rate=100)
-			additional_serial_nos.extend(get_serial_nos_from_bundle(se.items[0].serial_and_batch_bundle))
+			additional_serial_nos.extend(
+				get_serial_nos_for_voucher("Stock Entry", se.name, se.items[0].name, se.items[0].t_warehouse)
+			)
 
 		self.assertTrue(additional_serial_nos)
 
@@ -2933,7 +2939,7 @@ class TestProductionPlan(ERPNextTestSuite):
 		reserved_entries = sre.get_reserved_entries("Production Plan", plan.name)
 		self.assertEqual(len(reserved_entries), 45)
 		serial_nos_res_for_pp = frappe.get_all(
-			"Serial and Batch Entry",
+			"Stock Reservation Serial Batch",
 			filters={"parent": ("in", [x.name for x in reserved_entries]), "docstatus": 1},
 			pluck="serial_no",
 		)
@@ -2951,7 +2957,7 @@ class TestProductionPlan(ERPNextTestSuite):
 			sre = StockReservation(wo_doc)
 			reserved_entries = sre.get_reserved_entries("Work Order", wo_doc.name)
 			serial_nos_res_for_wo = frappe.get_all(
-				"Serial and Batch Entry",
+				"Stock Reservation Serial Batch",
 				filters={"parent": ("in", [x.name for x in reserved_entries]), "docstatus": 1},
 				pluck="serial_no",
 			)
@@ -3064,8 +3070,10 @@ class TestProductionPlan(ERPNextTestSuite):
 			"Batch Raw Material For SR 3",
 		]:
 			se = make_stock_entry(item_code=item_code, target=warehouse, qty=5, basic_rate=100)
-			batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
-			additional_batches.append(batch_no)
+			batches = get_batches_for_voucher(
+				"Stock Entry", se.name, se.items[0].name, se.items[0].t_warehouse
+			)
+			additional_batches.append(next(iter(batches), None))
 
 		self.assertTrue(additional_batches)
 
@@ -3082,7 +3090,7 @@ class TestProductionPlan(ERPNextTestSuite):
 		reserved_entries = sre.get_reserved_entries("Production Plan", plan.name)
 		self.assertEqual(len(reserved_entries), 9)
 		batches_reserved_for_pp = frappe.get_all(
-			"Serial and Batch Entry",
+			"Stock Reservation Serial Batch",
 			filters={"parent": ("in", [x.name for x in reserved_entries]), "docstatus": 1},
 			pluck="batch_no",
 		)
@@ -3100,7 +3108,7 @@ class TestProductionPlan(ERPNextTestSuite):
 			sre = StockReservation(wo_doc)
 			reserved_entries = sre.get_reserved_entries("Work Order", wo_doc.name)
 			batches_reserved_for_wo = frappe.get_all(
-				"Serial and Batch Entry",
+				"Stock Reservation Serial Batch",
 				filters={"parent": ("in", [x.name for x in reserved_entries]), "docstatus": 1},
 				pluck="batch_no",
 			)

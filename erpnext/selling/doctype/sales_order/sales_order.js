@@ -225,7 +225,7 @@ frappe.ui.form.on("Sales Order", {
 			};
 			if (row.item_code) {
 				query.query = "erpnext.controllers.queries.warehouse_query";
-				query.filters.push(["Bin", "item_code", "=", row.item_code]);
+				query.filters.push(["Stock Level", "item_code", "=", row.item_code]);
 			}
 			return query;
 		});

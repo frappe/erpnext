@@ -16,16 +16,15 @@ from erpnext.stock import get_warehouse_account_map
 from erpnext.stock.doctype.item.test_item import create_item, make_item
 from erpnext.stock.doctype.material_request.mapper import make_purchase_order
 from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_invoice
-from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-	SerialNoDuplicateError,
-	SerialNoExistsInFutureTransactionError,
-)
-from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
-	get_batch_from_bundle,
-	get_serial_nos_from_bundle,
-	make_serial_batch_bundle,
+from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import (
+	get_batches_for_voucher,
+	get_serial_nos_for_voucher,
+	get_voucher_entries,
+	has_bundled_entries,
 )
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+from erpnext.stock.serial_batch_bundle import SerialNoDuplicateError, SerialNoExistsInFutureTransactionError
+from erpnext.stock.tests.serial_batch_bundle_test_utils import make_serial_batch_bundle
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -203,7 +202,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
 		existing_bin_qty, existing_bin_stock_value = frappe.db.get_value(
-			"Bin",
+			"Stock Level",
 			{"item_code": "_Test Item", "warehouse": "_Test Warehouse - _TC"},
 			["actual_qty", "stock_value"],
 		)
@@ -214,7 +213,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			)
 
 		existing_bin_qty, existing_bin_stock_value = frappe.db.get_value(
-			"Bin",
+			"Stock Level",
 			{"item_code": "_Test Item", "warehouse": "_Test Warehouse - _TC"},
 			["actual_qty", "stock_value"],
 		)
@@ -235,7 +234,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(stock_value_difference, 250)
 
 		current_bin_stock_value = frappe.db.get_value(
-			"Bin", {"item_code": "_Test Item", "warehouse": "_Test Warehouse - _TC"}, "stock_value"
+			"Stock Level", {"item_code": "_Test Item", "warehouse": "_Test Warehouse - _TC"}, "stock_value"
 		)
 		self.assertEqual(current_bin_stock_value, existing_bin_stock_value + 250)
 
@@ -279,15 +278,9 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		pr = make_purchase_receipt(item_code=item.name, qty=2, rate=500)
 		pr.load_from_db()
 
-		bundle_id = frappe.db.get_value(
-			"Stock Ledger Entry",
-			{"voucher_type": "Purchase Receipt", "voucher_no": pr.name, "item_code": item.name},
-			"serial_and_batch_bundle",
+		serial_nos = sorted(
+			get_serial_nos_for_voucher("Purchase Receipt", pr.name, pr.items[0].name, pr.items[0].warehouse)
 		)
-
-		serial_nos = get_serial_nos_from_bundle(bundle_id)
-
-		self.assertEqual(get_serial_nos_from_bundle(pr.items[0].serial_and_batch_bundle), serial_nos)
 
 		bundle_id = make_serial_batch_bundle(
 			frappe._dict(
@@ -305,12 +298,18 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			)
 		)
 
-		self.assertRaises(SerialNoDuplicateError, bundle_id.make_serial_and_batch_bundle)
+		entries = bundle_id.resolve_entries()
+		self.assertRaises(SerialNoDuplicateError, bundle_id.validate_serial_nos_duplicate, entries)
 
 		# Then made delivery note to remove the serial nos from stock
 		dn = create_delivery_note(item_code=item.name, qty=2, rate=1500, serial_no=serial_nos)
 		dn.load_from_db()
-		self.assertEqual(get_serial_nos_from_bundle(dn.items[0].serial_and_batch_bundle), serial_nos)
+		self.assertEqual(
+			sorted(
+				get_serial_nos_for_voucher("Delivery Note", dn.name, dn.items[0].name, dn.items[0].warehouse)
+			),
+			serial_nos,
+		)
 
 		posting_date = add_days(today(), -3)
 
@@ -332,7 +331,10 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			)
 		)
 
-		self.assertRaises(SerialNoExistsInFutureTransactionError, bundle_id.make_serial_and_batch_bundle)
+		entries = bundle_id.resolve_entries()
+		self.assertRaises(
+			SerialNoExistsInFutureTransactionError, bundle_id.check_future_entries_exists, entries
+		)
 
 		# Try to receive same serial nos with different company with backdated.
 		bundle_id = make_serial_batch_bundle(
@@ -352,7 +354,10 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			)
 		)
 
-		self.assertRaises(SerialNoExistsInFutureTransactionError, bundle_id.make_serial_and_batch_bundle)
+		entries = bundle_id.resolve_entries()
+		self.assertRaises(
+			SerialNoExistsInFutureTransactionError, bundle_id.check_future_entries_exists, entries
+		)
 
 		# Receive the same serial nos after the delivery note posting date and time
 		make_purchase_receipt(item_code=item.name, qty=2, rate=500, serial_no=serial_nos)
@@ -401,7 +406,11 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 	def test_serial_no_warehouse(self):
 		pr = make_purchase_receipt(item_code="_Test Serialized Item With Series", qty=1)
-		pr_row_1_serial_no = get_serial_nos_from_bundle(pr.get("items")[0].serial_and_batch_bundle)[0]
+		pr_row_1_serial_no = sorted(
+			get_serial_nos_for_voucher(
+				"Purchase Receipt", pr.name, pr.get("items")[0].name, pr.get("items")[0].warehouse
+			)
+		)[0]
 
 		self.assertEqual(
 			frappe.db.get_value("Serial No", pr_row_1_serial_no, "warehouse"), pr.get("items")[0].warehouse
@@ -430,14 +439,18 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		pr.submit()
 		pr.load_from_db()
 
-		accepted_serial_nos = get_serial_nos_from_bundle(pr.get("items")[0].serial_and_batch_bundle)
+		accepted_serial_nos = get_serial_nos_for_voucher(
+			"Purchase Receipt", pr.name, pr.get("items")[0].name, pr.get("items")[0].warehouse
+		)
 		self.assertEqual(len(accepted_serial_nos), 3)
 		for serial_no in accepted_serial_nos:
 			self.assertEqual(
 				frappe.db.get_value("Serial No", serial_no, "warehouse"), pr.get("items")[0].warehouse
 			)
 
-		rejected_serial_nos = get_serial_nos_from_bundle(pr.get("items")[0].rejected_serial_and_batch_bundle)
+		rejected_serial_nos = get_serial_nos_for_voucher(
+			"Purchase Receipt", pr.name, pr.get("items")[0].name, pr.get("items")[0].rejected_warehouse
+		)
 		self.assertEqual(len(rejected_serial_nos), 2)
 		for serial_no in rejected_serial_nos:
 			self.assertEqual(
@@ -660,7 +673,11 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		pr = make_purchase_receipt(item_code="_Test Serialized Item With Series", qty=1)
 
-		serial_no = get_serial_nos_from_bundle(pr.get("items")[0].serial_and_batch_bundle)[0]
+		serial_no = sorted(
+			get_serial_nos_for_voucher(
+				"Purchase Receipt", pr.name, pr.get("items")[0].name, pr.get("items")[0].warehouse
+			)
+		)[0]
 
 		_check_serial_no_values(serial_no, {"warehouse": "_Test Warehouse - _TC"})
 
@@ -796,12 +813,12 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		pr_doc = make_purchase_receipt(item_code=item_code, qty=1, serial_no=serial_no)
 		pr_doc.load_from_db()
 
-		bundle_id = pr_doc.items[0].serial_and_batch_bundle
-		self.assertEqual(serial_no[0], get_serial_nos_from_bundle(bundle_id)[0])
-
-		voucher_no = frappe.db.get_value("Serial and Batch Bundle", bundle_id, "voucher_no")
-
-		self.assertEqual(voucher_no, pr_doc.name)
+		self.assertEqual(
+			serial_no[0],
+			get_serial_nos_for_voucher(
+				"Purchase Receipt", pr_doc.name, pr_doc.items[0].name, pr_doc.items[0].warehouse
+			)[0],
+		)
 		pr_doc.cancel()
 
 		# check for the auto created serial nos
@@ -812,13 +829,10 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		new_pr_doc = make_purchase_receipt(item_code=item_code, qty=1)
 		new_pr_doc.load_from_db()
 
-		bundle_id = new_pr_doc.items[0].serial_and_batch_bundle
-		serial_no = get_serial_nos_from_bundle(bundle_id)[0]
+		serial_no = get_serial_nos_for_voucher(
+			"Purchase Receipt", new_pr_doc.name, new_pr_doc.items[0].name, new_pr_doc.items[0].warehouse
+		)[0]
 		self.assertTrue(serial_no)
-
-		voucher_no = frappe.db.get_value("Serial and Batch Bundle", bundle_id, "voucher_no")
-
-		self.assertEqual(voucher_no, new_pr_doc.name)
 
 		new_pr_doc.cancel()
 
@@ -1145,23 +1159,23 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		sle_entries = frappe.get_all(
 			"Stock Ledger Entry",
 			filters={"voucher_type": "Purchase Receipt", "voucher_no": pr.name},
-			fields=["serial_and_batch_bundle", "actual_qty"],
+			fields=["actual_qty"],
 		)
 		self.assertEqual(len(sle_entries), 2)
 
-		inward_sabb = frappe.get_all(
-			"Serial and Batch Bundle",
-			filters={
-				"voucher_type": "Purchase Receipt",
-				"voucher_no": pr.name,
-				"total_qty": (">", 0),
-				"docstatus": 1,
-			},
-			pluck="name",
-		)
-		self.assertEqual(len(inward_sabb), 1)
+		def get_inward_value():
+			return frappe.get_all(
+				"Stock Location Ledger",
+				filters={
+					"voucher_type": "Purchase Receipt",
+					"voucher_no": pr.name,
+					"docstatus": 1,
+					"is_outward": 0,
+				},
+				fields=[{"SUM": "stock_value_difference", "as": "total"}],
+			)[0].total
 
-		original_cost = frappe.db.get_value("Serial and Batch Bundle", inward_sabb[0], "total_amount")
+		original_cost = get_inward_value()
 
 		make_landed_cost_voucher(
 			company=pr.company,
@@ -1175,26 +1189,12 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		sle_entries = frappe.get_all(
 			"Stock Ledger Entry",
 			filters={"voucher_type": "Purchase Receipt", "voucher_no": pr.name, "is_cancelled": 0},
-			fields=["serial_and_batch_bundle", "actual_qty"],
+			fields=["actual_qty"],
 		)
 		self.assertEqual(len(sle_entries), 2)
 
-		new_inward_sabb = frappe.get_all(
-			"Serial and Batch Bundle",
-			filters={
-				"voucher_type": "Purchase Receipt",
-				"voucher_no": pr.name,
-				"total_qty": (">", 0),
-				"docstatus": 1,
-			},
-			pluck="name",
-		)
-		self.assertEqual(len(new_inward_sabb), 1)
-
-		new_cost = frappe.db.get_value("Serial and Batch Bundle", new_inward_sabb[0], "total_amount")
+		new_cost = get_inward_value()
 		self.assertEqual(new_cost, original_cost + 100)
-
-		self.assertEqual(new_inward_sabb[0], inward_sabb[0])
 
 	def test_stock_transfer_from_purchase_receipt_with_valuation(self):
 		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
@@ -2152,7 +2152,12 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		)
 
 		pi.load_from_db()
-		batch_no = get_batch_from_bundle(pi.items[0].serial_and_batch_bundle)
+		batch_no = next(
+			iter(
+				get_batches_for_voucher("Purchase Receipt", pi.name, pi.items[0].name, pi.items[0].warehouse)
+			),
+			None,
+		)
 		self.assertTrue(batch_no)
 
 		frappe.db.set_value("Batch", batch_no, "expiry_date", add_days(today(), -1))
@@ -2616,7 +2621,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(ste7.items[0].valuation_rate, 275.00)
 
 		available_qty = frappe.db.get_value(
-			"Bin",
+			"Stock Level",
 			{"item_code": item_code, "warehouse": warehouse},
 			"actual_qty",
 		)
@@ -2832,9 +2837,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			create_stock_reconciliation,
 		)
 
-		frappe.db.set_single_value(
-			"Stock Settings", "do_not_update_serial_batch_on_creation_of_auto_bundle", 0
-		)
+		frappe.db.set_single_value("Stock Settings", "do_not_update_serial_batch_on_auto_creation", 0)
 
 		item_code = make_item(
 			"_Test Use Serial Fields Item Serial Item",
@@ -2859,12 +2862,14 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		self.assertEqual(pr.items[0].use_serial_batch_fields, 1)
 		self.assertTrue(pr.items[0].serial_no)
-		self.assertTrue(pr.items[0].serial_and_batch_bundle)
+		self.assertTrue(
+			has_bundled_entries("Purchase Receipt", pr.name, pr.items[0].name, pr.items[0].warehouse)
+		)
 
-		sbb_doc = frappe.get_doc("Serial and Batch Bundle", pr.items[0].serial_and_batch_bundle)
-
-		for row in sbb_doc.entries:
-			self.assertIn(row.serial_no, serial_nos)
+		for serial_no in get_serial_nos_for_voucher(
+			"Purchase Receipt", pr.name, pr.items[0].name, pr.items[0].warehouse
+		):
+			self.assertIn(serial_no, serial_nos)
 
 		serial_nos.remove("SNU-TSFISI-000015")
 
@@ -2886,14 +2891,22 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(len(new_serial_nos), 4)
 		self.assertEqual(sr.items[0].qty, 4)
 		self.assertEqual(sr.items[0].use_serial_batch_fields, 1)
-		self.assertFalse(sr.items[0].current_serial_and_batch_bundle)
-		self.assertFalse(sr.items[0].serial_and_batch_bundle)
+		self.assertFalse(
+			has_bundled_entries(sr.doctype, sr.name, sr.items[0].name, sr.items[0].warehouse, is_outward=1)
+		)
+		self.assertFalse(
+			has_bundled_entries(sr.doctype, sr.name, sr.items[0].name, sr.items[0].warehouse, is_outward=0)
+		)
 		self.assertTrue(sr.items[0].current_serial_no)
 		sr.submit()
 
 		sr.reload()
-		self.assertTrue(sr.items[0].current_serial_and_batch_bundle)
-		self.assertTrue(sr.items[0].serial_and_batch_bundle)
+		self.assertTrue(
+			has_bundled_entries(sr.doctype, sr.name, sr.items[0].name, sr.items[0].warehouse, is_outward=1)
+		)
+		self.assertTrue(
+			has_bundled_entries(sr.doctype, sr.name, sr.items[0].name, sr.items[0].warehouse, is_outward=0)
+		)
 
 		serial_no_status = frappe.db.get_value("Serial No", "SNU-TSFISI-000015", "status")
 
@@ -2906,19 +2919,20 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			use_serial_batch_fields=1,
 		)
 
-		self.assertTrue(dn.items[0].serial_and_batch_bundle)
+		self.assertTrue(
+			has_bundled_entries("Delivery Note", dn.name, dn.items[0].name, dn.items[0].warehouse)
+		)
 		self.assertEqual(dn.items[0].qty, 4)
-		doc = frappe.get_doc("Serial and Batch Bundle", dn.items[0].serial_and_batch_bundle)
-		for row in doc.entries:
-			self.assertIn(row.serial_no, new_serial_nos)
+		for serial_no in get_serial_nos_for_voucher(
+			"Delivery Note", dn.name, dn.items[0].name, dn.items[0].warehouse
+		):
+			self.assertIn(serial_no, new_serial_nos)
 
 		for sn in new_serial_nos:
 			serial_no_status = frappe.db.get_value("Serial No", sn, "status")
 			self.assertNotEqual(serial_no_status, "Active")
 
-		frappe.db.set_single_value(
-			"Stock Settings", "do_not_update_serial_batch_on_creation_of_auto_bundle", 1
-		)
+		frappe.db.set_single_value("Stock Settings", "do_not_update_serial_batch_on_auto_creation", 1)
 
 	def test_sle_qty_after_transaction(self):
 		item = make_item(
@@ -3019,9 +3033,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			},
 		).name
 
-		frappe.db.set_single_value(
-			"Stock Settings", "do_not_update_serial_batch_on_creation_of_auto_bundle", 0
-		)
+		frappe.db.set_single_value("Stock Settings", "do_not_update_serial_batch_on_auto_creation", 0)
 
 		pr = make_purchase_receipt(
 			item_code=item_code,
@@ -3030,12 +3042,15 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		)
 
 		self.assertTrue(pr.items[0].batch_no)
-		batch_no = get_batch_from_bundle(pr.items[0].serial_and_batch_bundle)
+		batch_no = next(
+			iter(
+				get_batches_for_voucher("Purchase Receipt", pr.name, pr.items[0].name, pr.items[0].warehouse)
+			),
+			None,
+		)
 		self.assertEqual(pr.items[0].batch_no, batch_no)
 
-		frappe.db.set_single_value(
-			"Stock Settings", "do_not_update_serial_batch_on_creation_of_auto_bundle", 1
-		)
+		frappe.db.set_single_value("Stock Settings", "do_not_update_serial_batch_on_auto_creation", 1)
 
 	def test_pr_billed_amount_against_return_entry(self):
 		from erpnext.accounts.doctype.purchase_invoice.mapper import make_debit_note
@@ -3198,8 +3213,10 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		pr.reload()
 
 		for row in pr.items:
-			self.assertTrue(row.serial_and_batch_bundle)
-			self.assertTrue(row.rejected_serial_and_batch_bundle)
+			self.assertTrue(has_bundled_entries("Purchase Receipt", pr.name, row.name, row.warehouse))
+			self.assertTrue(
+				has_bundled_entries("Purchase Receipt", pr.name, row.name, row.rejected_warehouse)
+			)
 
 			if row.item_code == batch_item:
 				self.assertEqual(row.batch_no, batch_no)
@@ -3256,7 +3273,9 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		inward_entry.reload()
 
 		for row in inward_entry.items:
-			self.assertTrue(row.serial_and_batch_bundle)
+			self.assertTrue(
+				has_bundled_entries("Purchase Receipt", inward_entry.name, row.name, row.warehouse)
+			)
 
 		inter_transfer_dn = create_delivery_note(
 			item_code=inward_entry.items[0].item_code,
@@ -3268,7 +3287,17 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			rate=500,
 			warehouse="Stores - TCP1",
 			target_warehouse="Work In Progress - TCP1",
-			batch_no=get_batch_from_bundle(inward_entry.items[0].serial_and_batch_bundle),
+			batch_no=next(
+				iter(
+					get_batches_for_voucher(
+						"Purchase Receipt",
+						inward_entry.name,
+						inward_entry.items[0].name,
+						inward_entry.items[0].warehouse,
+					)
+				),
+				None,
+			),
 			use_serial_batch_fields=1,
 			do_not_submit=1,
 		)
@@ -3286,7 +3315,12 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 				"warehouse": "Stores - TCP1",
 				"target_warehouse": "Work In Progress - TCP1",
 				"serial_no": "\n".join(
-					get_serial_nos_from_bundle(inward_entry.items[1].serial_and_batch_bundle)
+					get_serial_nos_for_voucher(
+						"Purchase Receipt",
+						inward_entry.name,
+						inward_entry.items[1].name,
+						inward_entry.items[1].warehouse,
+					)
 				),
 				"use_serial_batch_fields": 1,
 			},
@@ -3300,7 +3334,9 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			else:
 				self.assertEqual(row.rate, 250.0)
 
-			self.assertTrue(row.serial_and_batch_bundle)
+			self.assertTrue(
+				has_bundled_entries("Delivery Note", inter_transfer_dn.name, row.name, row.warehouse)
+			)
 
 		inter_transfer_pr = make_inter_company_purchase_receipt(inter_transfer_dn.name)
 		for row in inter_transfer_pr.items:
@@ -3314,17 +3350,25 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			else:
 				self.assertEqual(row.rate, 250.0)
 
-			self.assertTrue(row.serial_and_batch_bundle)
+			self.assertTrue(
+				has_bundled_entries("Purchase Receipt", inter_transfer_pr.name, row.name, row.warehouse)
+			)
 
 		inter_transfer_pr_return = make_return_doc("Purchase Receipt", inter_transfer_pr.name)
 
 		inter_transfer_pr_return.submit()
 		inter_transfer_pr_return.reload()
 		for row in inter_transfer_pr_return.items:
-			self.assertTrue(row.serial_and_batch_bundle)
+			self.assertTrue(
+				has_bundled_entries(
+					"Purchase Receipt", inter_transfer_pr_return.name, row.name, row.warehouse
+				)
+			)
 			if row.item_code == serial_item_doc.name:
 				self.assertEqual(row.rate, 250.0)
-				serial_nos = get_serial_nos_from_bundle(row.serial_and_batch_bundle)
+				serial_nos = get_serial_nos_for_voucher(
+					"Purchase Receipt", inter_transfer_pr_return.name, row.name, row.warehouse
+				)
 				for sn in serial_nos:
 					serial_no_details = frappe.db.get_value(
 						"Serial No", sn, ["status", "warehouse"], as_dict=1
@@ -3342,7 +3386,9 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		inter_transfer_dn_return.reload()
 
 		for row in inter_transfer_dn_return.items:
-			self.assertTrue(row.serial_and_batch_bundle)
+			self.assertTrue(
+				has_bundled_entries("Delivery Note", inter_transfer_dn_return.name, row.name, row.warehouse)
+			)
 
 	def test_internal_transfer_with_serial_batch_items_without_use_serial_batch_fields(self):
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
@@ -3395,7 +3441,9 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		inward_entry.reload()
 
 		for row in inward_entry.items:
-			self.assertTrue(row.serial_and_batch_bundle)
+			self.assertTrue(
+				has_bundled_entries("Purchase Receipt", inward_entry.name, row.name, row.warehouse)
+			)
 
 		inter_transfer_dn = create_delivery_note(
 			item_code=inward_entry.items[0].item_code,
@@ -3407,7 +3455,17 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			rate=500,
 			warehouse="Stores - TCP1",
 			target_warehouse="Work In Progress - TCP1",
-			batch_no=get_batch_from_bundle(inward_entry.items[0].serial_and_batch_bundle),
+			batch_no=next(
+				iter(
+					get_batches_for_voucher(
+						"Purchase Receipt",
+						inward_entry.name,
+						inward_entry.items[0].name,
+						inward_entry.items[0].warehouse,
+					)
+				),
+				None,
+			),
 			use_serial_batch_fields=0,
 			do_not_submit=1,
 		)
@@ -3425,7 +3483,12 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 				"warehouse": "Stores - TCP1",
 				"target_warehouse": "Work In Progress - TCP1",
 				"serial_no": "\n".join(
-					get_serial_nos_from_bundle(inward_entry.items[1].serial_and_batch_bundle)
+					get_serial_nos_for_voucher(
+						"Purchase Receipt",
+						inward_entry.name,
+						inward_entry.items[1].name,
+						inward_entry.items[1].warehouse,
+					)
 				),
 				"use_serial_batch_fields": 0,
 			},
@@ -3439,7 +3502,9 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			else:
 				self.assertEqual(row.rate, 250.0)
 
-			self.assertTrue(row.serial_and_batch_bundle)
+			self.assertTrue(
+				has_bundled_entries("Delivery Note", inter_transfer_dn.name, row.name, row.warehouse)
+			)
 
 		inter_transfer_pr = make_inter_company_purchase_receipt(inter_transfer_dn.name)
 		for row in inter_transfer_pr.items:
@@ -3453,17 +3518,25 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			else:
 				self.assertEqual(row.rate, 250.0)
 
-			self.assertTrue(row.serial_and_batch_bundle)
+			self.assertTrue(
+				has_bundled_entries("Purchase Receipt", inter_transfer_pr.name, row.name, row.warehouse)
+			)
 
 		inter_transfer_pr_return = make_return_doc("Purchase Receipt", inter_transfer_pr.name)
 
 		inter_transfer_pr_return.submit()
 		inter_transfer_pr_return.reload()
 		for row in inter_transfer_pr_return.items:
-			self.assertTrue(row.serial_and_batch_bundle)
+			self.assertTrue(
+				has_bundled_entries(
+					"Purchase Receipt", inter_transfer_pr_return.name, row.name, row.warehouse
+				)
+			)
 			if row.item_code == serial_item_doc.name:
 				self.assertEqual(row.rate, 250.0)
-				serial_nos = get_serial_nos_from_bundle(row.serial_and_batch_bundle)
+				serial_nos = get_serial_nos_for_voucher(
+					"Purchase Receipt", inter_transfer_pr_return.name, row.name, row.warehouse
+				)
 				for sn in serial_nos:
 					serial_no_details = frappe.db.get_value(
 						"Serial No", sn, ["status", "warehouse"], as_dict=1
@@ -3481,7 +3554,9 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		inter_transfer_dn_return.reload()
 
 		for row in inter_transfer_dn_return.items:
-			self.assertTrue(row.serial_and_batch_bundle)
+			self.assertTrue(
+				has_bundled_entries("Delivery Note", inter_transfer_dn_return.name, row.name, row.warehouse)
+			)
 
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
 
@@ -3541,7 +3616,12 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		)
 
 		pi.reload()
-		batch_no = get_batch_from_bundle(pi.items[0].serial_and_batch_bundle)
+		batch_no = next(
+			iter(
+				get_batches_for_voucher("Purchase Receipt", pi.name, pi.items[0].name, pi.items[0].warehouse)
+			),
+			None,
+		)
 
 		se = make_stock_entry(
 			purpose="Material Issue",
@@ -3559,8 +3639,9 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(se.items[0].valuation_rate, 0)
 		self.assertEqual(se.items[0].basic_rate, 0)
 
-		sabb_doc = frappe.get_doc("Serial and Batch Bundle", se.items[0].serial_and_batch_bundle)
-		for row in sabb_doc.entries:
+		for row in get_voucher_entries(
+			"Stock Entry", se.name, se.items[0].name, se.items[0].s_warehouse, fields=["incoming_rate"]
+		):
 			self.assertEqual(row.incoming_rate, 0)
 
 	def test_purchase_return_from_accepted_and_rejected_warehouse(self):
@@ -3588,28 +3669,41 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		)
 
 		pr.reload()
-		self.assertTrue(pr.items[0].serial_and_batch_bundle)
-		self.assertTrue(pr.items[0].rejected_serial_and_batch_bundle)
+		self.assertTrue(
+			has_bundled_entries("Purchase Receipt", pr.name, pr.items[0].name, pr.items[0].warehouse)
+		)
+		self.assertTrue(
+			has_bundled_entries("Purchase Receipt", pr.name, pr.items[0].name, pr.items[0].rejected_warehouse)
+		)
 
 		return_pr = make_purchase_return(pr.name)
 		return_pr.submit()
 
 		return_pr.reload()
-		self.assertTrue(return_pr.items[0].serial_and_batch_bundle)
-		self.assertTrue(return_pr.items[0].rejected_serial_and_batch_bundle)
-
-		self.assertEqual(
-			return_pr.items[0].qty,
-			frappe.db.get_value(
-				"Serial and Batch Bundle", return_pr.items[0].serial_and_batch_bundle, "total_qty"
-			),
+		self.assertTrue(
+			has_bundled_entries(
+				"Purchase Receipt", return_pr.name, return_pr.items[0].name, return_pr.items[0].warehouse
+			)
+		)
+		self.assertTrue(
+			has_bundled_entries(
+				"Purchase Receipt",
+				return_pr.name,
+				return_pr.items[0].name,
+				return_pr.items[0].rejected_warehouse,
+			)
 		)
 
+		def return_leg_qty(warehouse):
+			return sum(
+				get_batches_for_voucher(
+					"Purchase Receipt", return_pr.name, return_pr.items[0].name, warehouse
+				).values()
+			)
+
+		self.assertEqual(return_pr.items[0].qty, return_leg_qty(return_pr.items[0].warehouse))
 		self.assertEqual(
-			return_pr.items[0].rejected_qty,
-			frappe.db.get_value(
-				"Serial and Batch Bundle", return_pr.items[0].rejected_serial_and_batch_bundle, "total_qty"
-			),
+			return_pr.items[0].rejected_qty, return_leg_qty(return_pr.items[0].rejected_warehouse)
 		)
 
 	def test_manufacturing_and_expiry_date_for_batch(self):
@@ -3634,9 +3728,16 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		)
 
 		pr.reload()
-		self.assertTrue(pr.items[0].serial_and_batch_bundle)
+		self.assertTrue(
+			has_bundled_entries("Purchase Receipt", pr.name, pr.items[0].name, pr.items[0].warehouse)
+		)
 
-		batch_no = get_batch_from_bundle(pr.items[0].serial_and_batch_bundle)
+		batch_no = next(
+			iter(
+				get_batches_for_voucher("Purchase Receipt", pr.name, pr.items[0].name, pr.items[0].warehouse)
+			),
+			None,
+		)
 		batch = frappe.get_doc("Batch", batch_no)
 		self.assertEqual(batch.manufacturing_date, getdate(today()))
 		self.assertEqual(batch.expiry_date, getdate(add_days(today(), 5)))
@@ -3961,13 +4062,30 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			rate=300,
 			posting_date=today(),
 			use_serial_batch_fields=1,
-			batch_no=get_batch_from_bundle(pr.items[0].serial_and_batch_bundle),
+			batch_no=next(
+				iter(
+					get_batches_for_voucher(
+						"Purchase Receipt", pr.name, pr.items[0].name, pr.items[0].warehouse
+					)
+				),
+				None,
+			),
 		)
 		dn.reload()
-		bundle = dn.items[0].serial_and_batch_bundle
 
-		valuation_rate = frappe.db.get_value("Serial and Batch Bundle", bundle, "avg_rate")
-		self.assertEqual(valuation_rate, 100.0)
+		def dn_avg_rate():
+			rows = get_voucher_entries(
+				"Delivery Note",
+				dn.name,
+				dn.items[0].name,
+				dn.items[0].warehouse,
+				fields=["qty", "incoming_rate"],
+			)
+			total_qty = sum(flt(r.qty) for r in rows)
+			total_amount = sum(flt(r.qty) * flt(r.incoming_rate) for r in rows)
+			return total_amount / total_qty if total_qty else 0.0
+
+		self.assertEqual(dn_avg_rate(), 100.0)
 
 		doc = frappe.get_doc("Stock Settings")
 		doc.do_not_use_batchwise_valuation = 1
@@ -3976,8 +4094,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		pr.repost_future_sle_and_gle(force=True)
 
-		valuation_rate = frappe.db.get_value("Serial and Batch Bundle", bundle, "avg_rate")
-		self.assertEqual(valuation_rate, 150)
+		self.assertEqual(dn_avg_rate(), 150)
 
 		doc = frappe.get_doc("Stock Settings")
 		doc.do_not_use_batchwise_valuation = 0
@@ -4050,7 +4167,9 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		inward_entry.reload()
 
 		for row in inward_entry.items:
-			self.assertTrue(row.serial_and_batch_bundle)
+			self.assertTrue(
+				has_bundled_entries("Purchase Receipt", inward_entry.name, row.name, row.warehouse)
+			)
 
 		inter_transfer_dn = create_delivery_note(
 			item_code=inward_entry.items[0].item_code,
@@ -4062,7 +4181,17 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			rate=500,
 			warehouse="Stores - TCP1",
 			target_warehouse="Work In Progress - TCP1",
-			batch_no=get_batch_from_bundle(inward_entry.items[0].serial_and_batch_bundle),
+			batch_no=next(
+				iter(
+					get_batches_for_voucher(
+						"Purchase Receipt",
+						inward_entry.name,
+						inward_entry.items[0].name,
+						inward_entry.items[0].warehouse,
+					)
+				),
+				None,
+			),
 			use_serial_batch_fields=0,
 			do_not_submit=1,
 		)
@@ -4080,7 +4209,12 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 				"warehouse": "Stores - TCP1",
 				"target_warehouse": "Work In Progress - TCP1",
 				"serial_no": "\n".join(
-					get_serial_nos_from_bundle(inward_entry.items[1].serial_and_batch_bundle)
+					get_serial_nos_for_voucher(
+						"Purchase Receipt",
+						inward_entry.name,
+						inward_entry.items[1].name,
+						inward_entry.items[1].warehouse,
+					)
 				),
 				"use_serial_batch_fields": 0,
 			},
@@ -4094,7 +4228,9 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			else:
 				self.assertEqual(row.rate, 250.0)
 
-			self.assertTrue(row.serial_and_batch_bundle)
+			self.assertTrue(
+				has_bundled_entries("Delivery Note", inter_transfer_dn.name, row.name, row.warehouse)
+			)
 
 		inter_transfer_pr = make_inter_company_purchase_receipt(inter_transfer_dn.name)
 		for row in inter_transfer_pr.items:
@@ -4108,7 +4244,9 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			else:
 				self.assertEqual(row.rate, 250.0)
 
-			self.assertTrue(row.serial_and_batch_bundle)
+			self.assertTrue(
+				has_bundled_entries("Purchase Receipt", inter_transfer_pr.name, row.name, row.warehouse)
+			)
 
 		inter_transfer_pr.cancel()
 		inter_transfer_dn.cancel()
@@ -4120,7 +4258,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
-		frappe.db.set_single_value("Stock Settings", "auto_create_serial_and_batch_bundle_for_outward", 0)
+		frappe.db.set_single_value("Stock Settings", "auto_create_serial_batch_entries_for_outward", 0)
 
 		prepare_data_for_internal_transfer()
 
@@ -4166,7 +4304,9 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		inward_entry.reload()
 
 		for row in inward_entry.items:
-			self.assertTrue(row.serial_and_batch_bundle)
+			self.assertTrue(
+				has_bundled_entries("Purchase Receipt", inward_entry.name, row.name, row.warehouse)
+			)
 
 		inter_transfer_dn = create_delivery_note(
 			item_code=inward_entry.items[0].item_code,
@@ -4178,7 +4318,17 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			rate=500,
 			warehouse="Stores - TCP1",
 			target_warehouse="Work In Progress - TCP1",
-			batch_no=get_batch_from_bundle(inward_entry.items[0].serial_and_batch_bundle),
+			batch_no=next(
+				iter(
+					get_batches_for_voucher(
+						"Purchase Receipt",
+						inward_entry.name,
+						inward_entry.items[0].name,
+						inward_entry.items[0].warehouse,
+					)
+				),
+				None,
+			),
 			use_serial_batch_fields=1,
 			do_not_submit=1,
 		)
@@ -4196,7 +4346,12 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 				"warehouse": "Stores - TCP1",
 				"target_warehouse": "Work In Progress - TCP1",
 				"serial_no": "\n".join(
-					get_serial_nos_from_bundle(inward_entry.items[1].serial_and_batch_bundle)
+					get_serial_nos_for_voucher(
+						"Purchase Receipt",
+						inward_entry.name,
+						inward_entry.items[1].name,
+						inward_entry.items[1].warehouse,
+					)
 				),
 				"use_serial_batch_fields": 1,
 			},
@@ -4210,7 +4365,9 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			else:
 				self.assertEqual(row.rate, 250.0)
 
-			self.assertTrue(row.serial_and_batch_bundle)
+			self.assertTrue(
+				has_bundled_entries("Delivery Note", inter_transfer_dn.name, row.name, row.warehouse)
+			)
 
 		inter_transfer_pr = make_inter_company_purchase_receipt(inter_transfer_dn.name)
 		for row in inter_transfer_pr.items:
@@ -4224,11 +4381,13 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			else:
 				self.assertEqual(row.rate, 250.0)
 
-			self.assertTrue(row.serial_and_batch_bundle)
+			self.assertTrue(
+				has_bundled_entries("Purchase Receipt", inter_transfer_pr.name, row.name, row.warehouse)
+			)
 
 		inter_transfer_pr.cancel()
 		inter_transfer_dn.cancel()
-		frappe.db.set_single_value("Stock Settings", "auto_create_serial_and_batch_bundle_for_outward", 1)
+		frappe.db.set_single_value("Stock Settings", "auto_create_serial_batch_entries_for_outward", 1)
 
 	def test_sles_with_same_posting_datetime_and_creation(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
@@ -4363,8 +4522,20 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		pr.submit()
 		pr.reload()
 
-		batch_no = get_batch_from_bundle(pr.items[0].serial_and_batch_bundle)
-		rejected_batch_no = get_batch_from_bundle(pr.items[0].rejected_serial_and_batch_bundle)
+		batch_no = next(
+			iter(
+				get_batches_for_voucher("Purchase Receipt", pr.name, pr.items[0].name, pr.items[0].warehouse)
+			),
+			None,
+		)
+		rejected_batch_no = next(
+			iter(
+				get_batches_for_voucher(
+					"Purchase Receipt", pr.name, pr.items[0].name, pr.items[0].rejected_warehouse
+				)
+			),
+			None,
+		)
 
 		self.assertEqual(batch_no, rejected_batch_no)
 
@@ -4376,40 +4547,60 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		for row in return_entry.items:
 			if row.item_code == batch_item:
-				bundle_data = frappe.get_all(
-					"Serial and Batch Entry",
-					filters={"parent": row.serial_and_batch_bundle},
-					pluck="incoming_rate",
-				)
+				bundle_data = [
+					e.incoming_rate
+					for e in get_voucher_entries(
+						"Purchase Receipt",
+						return_entry.name,
+						row.name,
+						row.warehouse,
+						fields=["incoming_rate"],
+					)
+				]
 
 				for incoming_rate in bundle_data:
 					self.assertEqual(incoming_rate, 300.00)
 			else:
-				bundle_data = frappe.get_all(
-					"Serial and Batch Entry",
-					filters={"parent": row.serial_and_batch_bundle},
-					pluck="incoming_rate",
-				)
+				bundle_data = [
+					e.incoming_rate
+					for e in get_voucher_entries(
+						"Purchase Receipt",
+						return_entry.name,
+						row.name,
+						row.warehouse,
+						fields=["incoming_rate"],
+					)
+				]
 
 				for incoming_rate in bundle_data:
 					self.assertEqual(incoming_rate, 100.00)
 
 		for row in return_entry.items:
 			if row.item_code == batch_item:
-				bundle_data = frappe.get_all(
-					"Serial and Batch Entry",
-					filters={"parent": row.rejected_serial_and_batch_bundle},
-					pluck="incoming_rate",
-				)
+				bundle_data = [
+					e.incoming_rate
+					for e in get_voucher_entries(
+						"Purchase Receipt",
+						return_entry.name,
+						row.name,
+						row.rejected_warehouse,
+						fields=["incoming_rate"],
+					)
+				]
 
 				for incoming_rate in bundle_data:
 					self.assertEqual(incoming_rate, 0)
 			else:
-				bundle_data = frappe.get_all(
-					"Serial and Batch Entry",
-					filters={"parent": row.rejected_serial_and_batch_bundle},
-					pluck="incoming_rate",
-				)
+				bundle_data = [
+					e.incoming_rate
+					for e in get_voucher_entries(
+						"Purchase Receipt",
+						return_entry.name,
+						row.name,
+						row.rejected_warehouse,
+						fields=["incoming_rate"],
+					)
+				]
 
 				for incoming_rate in bundle_data:
 					self.assertEqual(incoming_rate, 0)
@@ -4488,8 +4679,20 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		pr.submit()
 		pr.reload()
 
-		batch_no = get_batch_from_bundle(pr.items[0].serial_and_batch_bundle)
-		rejected_batch_no = get_batch_from_bundle(pr.items[0].rejected_serial_and_batch_bundle)
+		batch_no = next(
+			iter(
+				get_batches_for_voucher("Purchase Receipt", pr.name, pr.items[0].name, pr.items[0].warehouse)
+			),
+			None,
+		)
+		rejected_batch_no = next(
+			iter(
+				get_batches_for_voucher(
+					"Purchase Receipt", pr.name, pr.items[0].name, pr.items[0].rejected_warehouse
+				)
+			),
+			None,
+		)
 
 		self.assertEqual(batch_no, rejected_batch_no)
 
@@ -4501,40 +4704,60 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		for row in return_entry.items:
 			if row.item_code == batch_item:
-				bundle_data = frappe.get_all(
-					"Serial and Batch Entry",
-					filters={"parent": row.serial_and_batch_bundle},
-					pluck="incoming_rate",
-				)
+				bundle_data = [
+					e.incoming_rate
+					for e in get_voucher_entries(
+						"Purchase Receipt",
+						return_entry.name,
+						row.name,
+						row.warehouse,
+						fields=["incoming_rate"],
+					)
+				]
 
 				for incoming_rate in bundle_data:
 					self.assertEqual(incoming_rate, 300.00)
 			else:
-				bundle_data = frappe.get_all(
-					"Serial and Batch Entry",
-					filters={"parent": row.serial_and_batch_bundle},
-					pluck="incoming_rate",
-				)
+				bundle_data = [
+					e.incoming_rate
+					for e in get_voucher_entries(
+						"Purchase Receipt",
+						return_entry.name,
+						row.name,
+						row.warehouse,
+						fields=["incoming_rate"],
+					)
+				]
 
 				for incoming_rate in bundle_data:
 					self.assertEqual(incoming_rate, 100.00)
 
 		for row in return_entry.items:
 			if row.item_code == batch_item:
-				bundle_data = frappe.get_all(
-					"Serial and Batch Entry",
-					filters={"parent": row.rejected_serial_and_batch_bundle},
-					pluck="incoming_rate",
-				)
+				bundle_data = [
+					e.incoming_rate
+					for e in get_voucher_entries(
+						"Purchase Receipt",
+						return_entry.name,
+						row.name,
+						row.rejected_warehouse,
+						fields=["incoming_rate"],
+					)
+				]
 
 				for incoming_rate in bundle_data:
 					self.assertEqual(incoming_rate, 0)
 			else:
-				bundle_data = frappe.get_all(
-					"Serial and Batch Entry",
-					filters={"parent": row.rejected_serial_and_batch_bundle},
-					pluck="incoming_rate",
-				)
+				bundle_data = [
+					e.incoming_rate
+					for e in get_voucher_entries(
+						"Purchase Receipt",
+						return_entry.name,
+						row.name,
+						row.rejected_warehouse,
+						fields=["incoming_rate"],
+					)
+				]
 
 				for incoming_rate in bundle_data:
 					self.assertEqual(incoming_rate, 0)
@@ -4597,7 +4820,9 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		).name
 
 		pr = make_purchase_receipt(item_code=item_code, qty=1, rate=100, use_serial_batch_fields=1)
-		serial_no = get_serial_nos_from_bundle(pr.items[0].serial_and_batch_bundle)[0]
+		serial_no = sorted(
+			get_serial_nos_for_voucher("Purchase Receipt", pr.name, pr.items[0].name, pr.items[0].warehouse)
+		)[0]
 
 		status = frappe.db.get_value("Serial No", serial_no, "status")
 		self.assertEqual(status, "Active")
@@ -4633,12 +4858,23 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		).name
 
 		pr1 = make_purchase_receipt(item_code=sn_item_code, qty=5, rate=100, use_serial_batch_fields=1)
-		pr1_serial_nos = get_serial_nos_from_bundle(pr1.items[0].serial_and_batch_bundle)
+		pr1_serial_nos = sorted(
+			get_serial_nos_for_voucher(
+				"Purchase Receipt", pr1.name, pr1.items[0].name, pr1.items[0].warehouse
+			)
+		)
 
 		serial_no_pr = make_purchase_receipt(
 			item_code=sn_item_code, qty=5, rate=100, use_serial_batch_fields=1
 		)
-		serial_no_pr_serial_nos = get_serial_nos_from_bundle(serial_no_pr.items[0].serial_and_batch_bundle)
+		serial_no_pr_serial_nos = sorted(
+			get_serial_nos_for_voucher(
+				"Purchase Receipt",
+				serial_no_pr.name,
+				serial_no_pr.items[0].name,
+				serial_no_pr.items[0].warehouse,
+			)
+		)
 
 		sn_return = make_purchase_return(serial_no_pr.name)
 		sn_return.items[0].qty = -1
@@ -4666,12 +4902,29 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		).name
 
 		pr1 = make_purchase_receipt(item_code=batch_item_code, qty=5, rate=100, use_serial_batch_fields=1)
-		batch_no = get_batch_from_bundle(pr1.items[0].serial_and_batch_bundle)
+		batch_no = next(
+			iter(
+				get_batches_for_voucher(
+					"Purchase Receipt", pr1.name, pr1.items[0].name, pr1.items[0].warehouse
+				)
+			),
+			None,
+		)
 
 		batch_no_pr = make_purchase_receipt(
 			item_code=batch_item_code, qty=5, rate=100, use_serial_batch_fields=1
 		)
-		original_batch_no = get_batch_from_bundle(batch_no_pr.items[0].serial_and_batch_bundle)
+		original_batch_no = next(
+			iter(
+				get_batches_for_voucher(
+					"Purchase Receipt",
+					batch_no_pr.name,
+					batch_no_pr.items[0].name,
+					batch_no_pr.items[0].warehouse,
+				)
+			),
+			None,
+		)
 
 		batch_return = make_purchase_return(batch_no_pr.name)
 		batch_return.items[0].qty = -1
@@ -4800,8 +5053,12 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		prepare_data_for_internal_transfer()
 
-		def get_sabb_qty(sabb):
-			return frappe.get_value("Serial and Batch Bundle", sabb, "total_qty")
+		def get_sabb_qty(row):
+			# Internal-transfer PR rows only get a pre-submit draft leg at from_warehouse
+			# (see SerialBatchBundleService.make_bundle_using_old_serial_batch_fields) - the
+			# accepted-side leg at row.warehouse is only created once the document submits.
+			warehouse = row.get("from_warehouse") or row.warehouse
+			return sum(get_batches_for_voucher("Purchase Receipt", pr.name, row.name, warehouse).values())
 
 		item = make_item("Item with only Batch", {"has_batch_no": 1})
 		item.create_new_batch = 1
@@ -4832,14 +5089,14 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		pr.save()
 
 		# Test 1 - Check if SABB qty is changed on first save
-		self.assertEqual(abs(get_sabb_qty(pr.items[0].serial_and_batch_bundle)), 8)
+		self.assertEqual(abs(get_sabb_qty(pr.items[0])), 8)
 
 		pr.items[0].qty = 6
 		pr.items[0].received_qty = 6
 		pr.save()
 
 		# Test 2 - Check if SABB qty is changed when saved again
-		self.assertEqual(abs(get_sabb_qty(pr.items[0].serial_and_batch_bundle)), 6)
+		self.assertEqual(abs(get_sabb_qty(pr.items[0])), 6)
 
 		pr.items[0].qty = 12
 		pr.items[0].received_qty = 12
@@ -5545,6 +5802,68 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		self.assertEqual(frappe.parse_json(stock_queue), [[20, 0.0]])
 
+	def test_purchase_return_valuation_for_batchwise_valuation_batch(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		item_code = make_item(
+			"Test Purchase Return Batchwise Valn Item",
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"batch_number_series": "BN-TPRBWV-.#####",
+			},
+		).name
+
+		batch_no = "BN-TPRBWV-00001"
+		batch = frappe.new_doc("Batch").update({"batch_id": batch_no, "item": item_code}).insert()
+		self.assertEqual(batch.use_batchwise_valuation, 1)
+
+		warehouse = "_Test Warehouse - _TC"
+		pr = make_purchase_receipt(
+			item_code=item_code,
+			qty=100,
+			rate=1000,
+			warehouse=warehouse,
+			batch_no=batch_no,
+			use_serial_batch_fields=1,
+		)
+		make_purchase_receipt(
+			item_code=item_code,
+			qty=100,
+			rate=400,
+			warehouse=warehouse,
+			batch_no=batch_no,
+			use_serial_batch_fields=1,
+		)
+		create_delivery_note(
+			item_code=item_code,
+			qty=100,
+			warehouse=warehouse,
+			batch_no=batch_no,
+			use_serial_batch_fields=1,
+		)
+
+		return_pr = make_return_doc("Purchase Receipt", pr.name)
+		return_pr.submit()
+
+		sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": return_pr.name, "is_cancelled": 0},
+			["stock_value_difference", "qty_after_transaction", "stock_value"],
+			as_dict=True,
+		)
+		self.assertEqual(flt(sle.qty_after_transaction), 0.0)
+		self.assertEqual(flt(sle.stock_value_difference, 2), -70000.0)
+		self.assertEqual(flt(sle.stock_value, 2), 0.0)
+
+		sll_rate = frappe.db.get_value(
+			"Stock Location Ledger",
+			{"voucher_no": return_pr.name, "docstatus": 1},
+			"incoming_rate",
+		)
+		self.assertEqual(flt(sll_rate, 2), 700.0)
+
 	def test_negative_stock_error_for_purchase_return(self):
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
@@ -5562,7 +5881,12 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			warehouse="_Test Warehouse - _TC",
 		)
 
-		batch_no = get_batch_from_bundle(pr.items[0].serial_and_batch_bundle)
+		batch_no = next(
+			iter(
+				get_batches_for_voucher("Purchase Receipt", pr.name, pr.items[0].name, pr.items[0].warehouse)
+			),
+			None,
+		)
 
 		make_purchase_receipt(
 			item_code=item_code,
@@ -5693,7 +6017,14 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			warehouse="_Test Warehouse - _TC",
 		)
 
-		batch1 = get_batch_from_bundle(pr1.items[0].serial_and_batch_bundle)
+		batch1 = next(
+			iter(
+				get_batches_for_voucher(
+					"Purchase Receipt", pr1.name, pr1.items[0].name, pr1.items[0].warehouse
+				)
+			),
+			None,
+		)
 
 		pr2 = make_purchase_receipt(
 			item_code=item_code,
@@ -5703,7 +6034,14 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			warehouse="_Test Warehouse - _TC",
 		)
 
-		batch2 = get_batch_from_bundle(pr2.items[0].serial_and_batch_bundle)
+		batch2 = next(
+			iter(
+				get_batches_for_voucher(
+					"Purchase Receipt", pr2.name, pr2.items[0].name, pr2.items[0].warehouse
+				)
+			),
+			None,
+		)
 
 		make_stock_entry(
 			item_code=item_code,
@@ -5762,7 +6100,14 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			warehouse="_Test Warehouse - _TC",
 		)
 
-		batch1 = get_batch_from_bundle(pr1.items[0].serial_and_batch_bundle)
+		batch1 = next(
+			iter(
+				get_batches_for_voucher(
+					"Purchase Receipt", pr1.name, pr1.items[0].name, pr1.items[0].warehouse
+				)
+			),
+			None,
+		)
 
 		make_stock_entry(
 			item_code=item_code,
@@ -5779,8 +6124,13 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		make_purchase_entry.submit()
 		make_purchase_entry.reload()
 
-		sabb = frappe.get_doc("Serial and Batch Bundle", make_purchase_entry.items[0].serial_and_batch_bundle)
-		for row in sabb.entries:
+		for row in get_voucher_entries(
+			"Purchase Receipt",
+			make_purchase_entry.name,
+			make_purchase_entry.items[0].name,
+			"_Test Warehouse 1 - _TC",
+			fields=["warehouse", "incoming_rate"],
+		):
 			self.assertEqual(row.warehouse, "_Test Warehouse 1 - _TC")
 			self.assertEqual(row.incoming_rate, 100)
 
@@ -6362,29 +6712,9 @@ def make_purchase_receipt(**args):
 	item_code = args.item or args.item_code or "_Test Item"
 	uom = args.uom or frappe.db.get_value("Item", item_code, "stock_uom") or "_Test UOM"
 
-	bundle_id = None
-	if not args.use_serial_batch_fields and (args.get("batch_no") or args.get("serial_no")):
-		batches = {}
-		if args.get("batch_no"):
-			batches = frappe._dict({args.batch_no: qty})
-
-		serial_nos = args.get("serial_no") or []
-
-		bundle_id = make_serial_batch_bundle(
-			frappe._dict(
-				{
-					"item_code": item_code,
-					"warehouse": args.warehouse or "_Test Warehouse - _TC",
-					"qty": qty,
-					"batches": batches,
-					"voucher_type": "Purchase Receipt",
-					"serial_nos": serial_nos,
-					"posting_date": args.posting_date or today(),
-					"posting_time": args.posting_time,
-					"do_not_submit": 1,
-				}
-			)
-		).name
+	picks_own_entries = not args.use_serial_batch_fields and (
+		args.get("batch_no") or args.get("batches") or args.get("serial_no")
+	)
 
 	pr.append(
 		"items",
@@ -6400,7 +6730,6 @@ def make_purchase_receipt(**args):
 			"rate": args.rate if args.rate is not None else 50,
 			"conversion_factor": args.conversion_factor or 1.0,
 			"stock_qty": flt(qty) * (flt(args.conversion_factor) or 1.0),
-			"serial_and_batch_bundle": bundle_id,
 			"stock_uom": args.stock_uom or "_Test UOM",
 			"uom": uom,
 			"cost_center": args.cost_center or frappe.get_cached_value("Company", pr.company, "cost_center"),
@@ -6426,8 +6755,43 @@ def make_purchase_receipt(**args):
 
 	if not args.do_not_save:
 		pr.insert()
+		if picks_own_entries:
+			set_receipt_ledger_entries(pr, args)
 		if not args.do_not_submit:
 			pr.submit()
 		pr.load_from_db()
 
 	return pr
+
+
+def set_receipt_ledger_entries(pr, args):
+	"""Stands in for the inline Serial / Batch editor: writes the requested composition as draft
+	Stock Location Ledger rows against the saved row. Only for rows that don't set
+	use_serial_batch_fields - those carry their composition on the row's own serial_no/batch_no
+	fields instead."""
+	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+	from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import (
+		upsert_draft_ledger_entries,
+	)
+	from erpnext.stock.serial_batch_bundle import combine_datetime
+
+	row = pr.items[0]
+	sign = -1 if pr.is_return else 1
+
+	if args.get("serial_no"):
+		serial_nos = args.serial_no if isinstance(args.serial_no, list) else get_serial_nos(args.serial_no)
+		entries = [{"serial_no": serial_no, "qty": sign} for serial_no in serial_nos]
+	else:
+		batches = args.get("batches") or {args.batch_no: abs(flt(row.qty))}
+		entries = [{"batch_no": batch_no, "qty": sign * abs(flt(qty))} for batch_no, qty in batches.items()]
+
+	upsert_draft_ledger_entries(
+		entries,
+		voucher_type=pr.doctype,
+		voucher_no=pr.name,
+		voucher_detail_no=row.name,
+		warehouse=row.warehouse,
+		item_code=row.item_code,
+		company=pr.company,
+		posting_datetime=combine_datetime(pr.posting_date, pr.posting_time),
+	)

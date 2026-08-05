@@ -1127,7 +1127,7 @@ def get_valuation_rate(data):
 def _get_avg_valuation_rate_from_bins(item_code, company, data):
 	from pypika import Case
 
-	bin_table = frappe.qb.DocType("Bin")
+	bin_table = frappe.qb.DocType("Stock Level")
 	wh_table = frappe.qb.DocType("Warehouse")
 	item_valuation = (
 		frappe.qb.from_(bin_table)

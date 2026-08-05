@@ -995,7 +995,7 @@ def reset_item_valuation_rate(item_code, warehouse_list=None, qty=None, rate=Non
 		# balance in one warehouse can cancel the reset qty elsewhere and make the
 		# average collapse to 0, which is a source of flaky BOM-cost failures.
 		warehouse_list = frappe.get_all(
-			"Bin", filters={"item_code": item_code, "actual_qty": ["!=", 0]}, pluck="warehouse"
+			"Stock Level", filters={"item_code": item_code, "actual_qty": ["!=", 0]}, pluck="warehouse"
 		)
 
 		if not warehouse_list:

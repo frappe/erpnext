@@ -17,7 +17,7 @@ def execute():
 
 	for d in query.run(as_dict=True):
 		frappe.db.set_value(
-			"Bin",
+			"Stock Level",
 			{"item_code": d.item_code, "warehouse": d.warehouse},
 			"reserved_stock",
 			d.reserved_stock,

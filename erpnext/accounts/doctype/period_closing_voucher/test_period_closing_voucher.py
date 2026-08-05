@@ -473,9 +473,6 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 
 	def test_batch_valuation_seeded_from_stock_closing_after_period_closing(self):
 		from erpnext.stock.doctype.item.test_item import make_item
-		from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
-			get_batch_from_bundle,
-		)
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 		item = make_item(
@@ -495,7 +492,10 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 			company="Test PCV Company",
 			posting_date="2021-03-15",
 		)
-		batch_no = get_batch_from_bundle(se1.items[0].serial_and_batch_bundle)
+		batch_no = frappe.db.get_value(
+			"Stock Location Ledger", {"voucher_no": se1.name, "docstatus": 1}, "batch_no"
+		)
+		self.assertTrue(batch_no)
 		make_stock_entry(
 			item_code=item.name,
 			qty=10,

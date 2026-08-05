@@ -177,7 +177,7 @@ class TestItemStandardCost(ERPNextTestSuite):
 		self.assertEqual(reco_status, 1)
 
 		stock_value = frappe.db.get_value(
-			"Bin", {"item_code": item.name, "warehouse": TEST_WAREHOUSE}, "stock_value"
+			"Stock Level", {"item_code": item.name, "warehouse": TEST_WAREHOUSE}, "stock_value"
 		)
 		self.assertEqual(flt(stock_value), 1300)
 
@@ -222,7 +222,7 @@ class TestItemStandardCost(ERPNextTestSuite):
 		self.assertEqual(flt(sle(se2).stock_value), 3500)
 
 		bin_data = frappe.db.get_value(
-			"Bin",
+			"Stock Level",
 			{"item_code": item.name, "warehouse": TEST_WAREHOUSE},
 			["actual_qty", "stock_value"],
 			as_dict=True,
@@ -266,7 +266,7 @@ class TestItemStandardCost(ERPNextTestSuite):
 		def stock_value():
 			return flt(
 				frappe.db.get_value(
-					"Bin", {"item_code": item.name, "warehouse": TEST_WAREHOUSE}, "stock_value"
+					"Stock Level", {"item_code": item.name, "warehouse": TEST_WAREHOUSE}, "stock_value"
 				)
 			)
 
@@ -305,7 +305,7 @@ class TestItemStandardCost(ERPNextTestSuite):
 
 		self.assertEqual(flt(get_item_standard_rate(item.name, PI_COMPANY)), 130)
 		stock_value = frappe.db.get_value(
-			"Bin", {"item_code": item.name, "warehouse": PI_STORES}, "stock_value"
+			"Stock Level", {"item_code": item.name, "warehouse": PI_STORES}, "stock_value"
 		)
 		self.assertEqual(flt(stock_value), 1300)
 
@@ -329,7 +329,7 @@ class TestItemStandardCost(ERPNextTestSuite):
 		self.assertEqual(reco.docstatus, 1)
 
 		bin_data = frappe.db.get_value(
-			"Bin",
+			"Stock Level",
 			{"item_code": item.name, "warehouse": PI_STORES},
 			["actual_qty", "stock_value"],
 			as_dict=True,
@@ -376,7 +376,7 @@ class TestItemStandardCost(ERPNextTestSuite):
 		self.assertEqual(flt(get_item_standard_rate(item.name, PI_COMPANY)), 100)
 
 		bin_data = frappe.db.get_value(
-			"Bin",
+			"Stock Level",
 			{"item_code": item.name, "warehouse": PI_STORES},
 			["actual_qty", "stock_value"],
 			as_dict=True,
@@ -690,7 +690,7 @@ class TestItemStandardCost(ERPNextTestSuite):
 
 		for warehouse, qty in ((PI_STORES, 3), (PI_FG, 2)):
 			stock_value = frappe.db.get_value(
-				"Bin", {"item_code": item.name, "warehouse": warehouse}, "stock_value"
+				"Stock Level", {"item_code": item.name, "warehouse": warehouse}, "stock_value"
 			)
 			self.assertEqual(flt(stock_value), qty * 150)
 
@@ -724,7 +724,7 @@ class TestItemStandardCost(ERPNextTestSuite):
 
 		for warehouse, qty in ((PI_STORES, 3), (PI_FG, 2)):
 			stock_value = frappe.db.get_value(
-				"Bin", {"item_code": item.name, "warehouse": warehouse}, "stock_value"
+				"Stock Level", {"item_code": item.name, "warehouse": warehouse}, "stock_value"
 			)
 			self.assertEqual(flt(stock_value), qty * 150)
 
@@ -892,6 +892,6 @@ class TestItemStandardCost(ERPNextTestSuite):
 		self.assertGreaterEqual(str(reco_time), str(se_time))
 
 		stock_value = frappe.db.get_value(
-			"Bin", {"item_code": item.name, "warehouse": TEST_WAREHOUSE}, "stock_value"
+			"Stock Level", {"item_code": item.name, "warehouse": TEST_WAREHOUSE}, "stock_value"
 		)
 		self.assertEqual(flt(stock_value), 1500)

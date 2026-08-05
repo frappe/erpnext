@@ -259,11 +259,11 @@ class TestStockAgeing(ERPNextTestSuite):
 		self.assertEqual(queue[1][0], 10.0)
 
 	def test_item_filter_supports_multi_select_values(self):
-		bundle = frappe.qb.DocType("Serial and Batch Bundle")
-		query = frappe.qb.from_(bundle).select(bundle.name)
+		ledger = frappe.qb.DocType("Stock Location Ledger")
+		query = frappe.qb.from_(ledger).select(ledger.name)
 
 		filtered_query = FIFOSlots(frappe._dict(item_code=["Item A"]), [])._apply_filter(
-			query, bundle, "item_code"
+			query, ledger, "item_code"
 		)
 
 		sql = filtered_query.get_sql()
@@ -361,7 +361,6 @@ class TestStockAgeing(ERPNextTestSuite):
 				has_batch_no=False,
 				serial_no=None,
 				batch_no=None,
-				serial_and_batch_bundle=None,
 			)
 
 		filters = frappe._dict(company="_Test Company", to_date="2026-02-15", ranges=["30", "60", "90"])
@@ -1987,7 +1986,6 @@ class TestStockAgeing(ERPNextTestSuite):
 				has_serial_no=False,
 				serial_no=None,
 				batch_no=None,
-				serial_and_batch_bundle="SABB-00001294",
 			),
 		]
 
@@ -2002,8 +2000,8 @@ class TestStockAgeing(ERPNextTestSuite):
 		from frappe.utils import add_days, getdate, nowdate
 
 		from erpnext.stock.doctype.item.test_item import make_item
-		from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
-			get_batch_from_bundle,
+		from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import (
+			get_batches_for_voucher,
 		)
 		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 			create_stock_reconciliation,
@@ -2031,7 +2029,17 @@ class TestStockAgeing(ERPNextTestSuite):
 			posting_date=add_days(base_date, -2),
 			posting_time="10:00:00",
 		)
-		batch_no = get_batch_from_bundle(opening_reco.items[0].serial_and_batch_bundle)
+		batch_no = next(
+			iter(
+				get_batches_for_voucher(
+					opening_reco.doctype,
+					opening_reco.name,
+					opening_reco.items[0].name,
+					opening_reco.items[0].warehouse,
+				)
+			),
+			None,
+		)
 		frappe.db.set_value("Batch", batch_no, "use_batchwise_valuation", 1)
 
 		create_stock_reconciliation(
@@ -2067,8 +2075,8 @@ class TestStockAgeing(ERPNextTestSuite):
 		from frappe.utils import add_days, nowdate
 
 		from erpnext.stock.doctype.item.test_item import make_item
-		from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
-			get_batch_from_bundle,
+		from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import (
+			get_batches_for_voucher,
 		)
 		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 			create_stock_reconciliation,
@@ -2096,7 +2104,17 @@ class TestStockAgeing(ERPNextTestSuite):
 			posting_date=add_days(base_date, -2),
 			posting_time="10:00:00",
 		)
-		batch_no = get_batch_from_bundle(reco.items[0].serial_and_batch_bundle)
+		batch_no = next(
+			iter(
+				get_batches_for_voucher(
+					reco.doctype,
+					reco.name,
+					reco.items[0].name,
+					reco.items[0].warehouse,
+				)
+			),
+			None,
+		)
 		frappe.db.set_value("Batch", batch_no, "use_batchwise_valuation", 1)
 
 		create_stock_reconciliation(

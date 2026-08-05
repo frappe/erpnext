@@ -12,14 +12,14 @@ from frappe.utils import add_days, nowdate, random_string
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
-from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
-	get_batch_from_bundle,
-	get_serial_nos_from_bundle,
-)
 from erpnext.stock.doctype.serial_no.serial_no import *
 from erpnext.stock.doctype.serial_no.serial_no import update_maintenance_status
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
+from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import (
+	get_batches_for_voucher,
+	get_serial_nos_for_voucher,
+)
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -48,7 +48,9 @@ class TestSerialNo(ERPNextTestSuite):
 
 	def test_inter_company_transfer(self):
 		se = make_serialized_item(self, target_warehouse="_Test Warehouse - _TC")
-		serial_nos = get_serial_nos_from_bundle(se.get("items")[0].serial_and_batch_bundle)
+		serial_nos = sorted(
+			get_serial_nos_for_voucher("Stock Entry", se.name, se.items[0].name, se.items[0].t_warehouse)
+		)
 
 		create_delivery_note(item_code="_Test Serialized Item With Series", qty=1, serial_no=[serial_nos[0]])
 
@@ -78,7 +80,9 @@ class TestSerialNo(ERPNextTestSuite):
 		Try to cancel intermediate receipts/deliveries to test if it is blocked.
 		"""
 		se = make_serialized_item(self, target_warehouse="_Test Warehouse - _TC")
-		serial_nos = get_serial_nos_from_bundle(se.get("items")[0].serial_and_batch_bundle)
+		serial_nos = sorted(
+			get_serial_nos_for_voucher("Stock Entry", se.name, se.items[0].name, se.items[0].t_warehouse)
+		)
 
 		sn_doc = frappe.get_doc("Serial No", serial_nos[0])
 
@@ -139,7 +143,9 @@ class TestSerialNo(ERPNextTestSuite):
 		"""
 		# Receipt in **first** company
 		se = make_serialized_item(self, target_warehouse="_Test Warehouse - _TC")
-		serial_nos = get_serial_nos_from_bundle(se.get("items")[0].serial_and_batch_bundle)
+		serial_nos = sorted(
+			get_serial_nos_for_voucher("Stock Entry", se.name, se.items[0].name, se.items[0].t_warehouse)
+		)
 		sn_doc = frappe.get_doc("Serial No", serial_nos[0])
 
 		# Delivery from first company
@@ -211,15 +217,12 @@ class TestSerialNo(ERPNextTestSuite):
 			item_code=item_code, to_warehouse=warehouse, qty=1, rate=113, serial_no=[serial_nos[1]]
 		)
 
-		out = create_delivery_note(item_code=item_code, qty=1, serial_no=[serial_nos[0]], do_not_submit=True)
-
-		bundle = out.items[0].serial_and_batch_bundle
-		doc = frappe.get_doc("Serial and Batch Bundle", bundle)
-		doc.entries[0].serial_no = serial_nos[1]
-		doc.save()
-
-		out.save()
-		out.submit()
+		out = create_delivery_note(
+			item_code=item_code,
+			qty=1,
+			serial_no=[serial_nos[1]],
+			use_serial_batch_fields=1,
+		)
 
 		value_diff = frappe.db.get_value(
 			"Stock Ledger Entry",
@@ -245,12 +248,30 @@ class TestSerialNo(ERPNextTestSuite):
 		in1.reload()
 		in2.reload()
 
-		batch1 = get_batch_from_bundle(in1.items[0].serial_and_batch_bundle)
-		batch2 = get_batch_from_bundle(in2.items[0].serial_and_batch_bundle)
+		batch1 = next(
+			iter(
+				get_batches_for_voucher("Stock Entry", in1.name, in1.items[0].name, in1.items[0].t_warehouse)
+			),
+			None,
+		)
+		batch2 = next(
+			iter(
+				get_batches_for_voucher("Stock Entry", in2.name, in2.items[0].name, in2.items[0].t_warehouse)
+			),
+			None,
+		)
 
 		batch_wise_serials = {
-			batch1: get_serial_nos_from_bundle(in1.items[0].serial_and_batch_bundle),
-			batch2: get_serial_nos_from_bundle(in2.items[0].serial_and_batch_bundle),
+			batch1: sorted(
+				get_serial_nos_for_voucher(
+					"Stock Entry", in1.name, in1.items[0].name, in1.items[0].t_warehouse
+				)
+			),
+			batch2: sorted(
+				get_serial_nos_for_voucher(
+					"Stock Entry", in2.name, in2.items[0].name, in2.items[0].t_warehouse
+				)
+			),
 		}
 
 		# Test FIFO
@@ -458,7 +479,7 @@ class TestSerialNo(ERPNextTestSuite):
 
 
 def get_auto_serial_nos(kwargs):
-	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+	from erpnext.stock.serial_batch_bundle import (
 		get_available_serial_nos,
 	)
 

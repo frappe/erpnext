@@ -238,7 +238,7 @@ class ItemStandardCost(Document):
 		return get_datetime(last_datetime).strftime("%H:%M:%S.%f") if last_datetime else nowtime()
 
 	def get_warehouse_wise_balance(self):
-		bin_table = frappe.qb.DocType("Bin")
+		bin_table = frappe.qb.DocType("Stock Level")
 		warehouse = frappe.qb.DocType("Warehouse")
 		return (
 			frappe.qb.from_(bin_table)

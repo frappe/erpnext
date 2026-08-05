@@ -17,7 +17,7 @@ def execute():
 	)
 
 	for item_code, warehouse in {(row.item_code, row.warehouse) for row in rows}:
-		bin_name = frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse})
+		bin_name = frappe.db.get_value("Stock Level", {"item_code": item_code, "warehouse": warehouse})
 		if not bin_name:
 			continue
-		frappe.get_doc("Bin", bin_name, for_update=True).recalculate_values()
+		frappe.get_doc("Stock Level", bin_name, for_update=True).recalculate_values()

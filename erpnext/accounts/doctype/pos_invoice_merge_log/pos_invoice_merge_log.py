@@ -136,9 +136,7 @@ class POSInvoiceMergeLog(Document):
 		pos_invoice_docs = [frappe.get_cached_doc("POS Invoice", d.pos_invoice) for d in self.pos_invoices]
 
 		self.update_pos_invoices(pos_invoice_docs)
-		self.serial_and_batch_bundle_reference_for_pos_invoice()
 		self.cancel_linked_invoices()
-		self.delink_serial_and_batch_bundle()
 
 	def process_merging_into_sales_invoice(self, data):
 		sales_invoice = self.get_new_sales_invoice()
@@ -241,8 +239,6 @@ class POSInvoiceMergeLog(Document):
 					si_item.sales_invoice_item = get_sales_invoice_item_from_consolidated_invoice(
 						doc.return_against, item.pos_invoice_item
 					)
-				if item.serial_and_batch_bundle:
-					si_item.serial_and_batch_bundle = item.serial_and_batch_bundle
 				items.append(si_item)
 				old_new_item_map[item.name] = si_item
 
@@ -380,44 +376,6 @@ class POSInvoiceMergeLog(Document):
 			doc.set_status(update=True)
 			doc.save()
 
-	def serial_and_batch_bundle_reference_for_pos_invoice(self):
-		for d in self.pos_invoices:
-			pos_invoice = frappe.get_doc("POS Invoice", d.pos_invoice)
-			for table_name in ["items", "packed_items"]:
-				pos_invoice.set_serial_and_batch_bundle(table_name)
-
-	def delink_serial_and_batch_bundle(self):
-		bundles = self.get_serial_and_batch_bundles()
-		if not bundles:
-			return
-
-		sle_table = frappe.qb.DocType("Stock Ledger Entry")
-		query = (
-			frappe.qb.update(sle_table)
-			.set(sle_table.serial_and_batch_bundle, None)
-			.where(sle_table.serial_and_batch_bundle.isin(bundles) & sle_table.is_cancelled == 1)
-		)
-
-		query.run()
-
-	def get_serial_and_batch_bundles(self):
-		pos_invoices = []
-		for d in self.pos_invoices:
-			pos_invoices.append(d.pos_invoice)
-
-		if pos_invoices:
-			return frappe.get_all(
-				"POS Invoice Item",
-				filters={
-					"docstatus": 1,
-					"parent": ["in", pos_invoices],
-					"serial_and_batch_bundle": ["is", "set"],
-				},
-				pluck="serial_and_batch_bundle",
-			)
-
-		return []
-
 	def cancel_linked_invoices(self):
 		invoices = [self.consolidated_invoice, self.consolidated_credit_note]
 		if not invoices:
@@ -545,7 +503,7 @@ def split_invoices(invoices):
 
 	for pos_invoice in pos_return_docs:
 		for item in pos_invoice.items:
-			if not item.serial_no and not item.serial_and_batch_bundle:
+			if not item.serial_no:
 				continue
 
 			return_against_is_added = any(

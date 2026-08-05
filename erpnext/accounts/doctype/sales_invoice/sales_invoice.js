@@ -42,7 +42,6 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 			"Repost Accounting Ledger",
 			"Unreconcile Payment",
 			"Unreconcile Payment Entries",
-			"Serial and Batch Bundle",
 			"Bank Transaction",
 			"Packing Slip",
 		];

@@ -75,7 +75,6 @@ class DeliveryNoteItem(Document):
 		rate_with_margin: DF.Currency
 		received_qty: DF.Float
 		returned_qty: DF.Float
-		serial_and_batch_bundle: DF.Link | None
 		serial_no: DF.Text | None
 		si_detail: DF.Data | None
 		so_detail: DF.Data | None

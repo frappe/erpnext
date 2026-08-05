@@ -79,7 +79,6 @@ class PurchaseReceiptItem(Document):
 		received_qty: DF.Float
 		received_stock_qty: DF.Float
 		rejected_qty: DF.Float
-		rejected_serial_and_batch_bundle: DF.Link | None
 		rejected_serial_no: DF.Text | None
 		rejected_warehouse: DF.Link | None
 		retain_sample: DF.Check
@@ -91,7 +90,6 @@ class PurchaseReceiptItem(Document):
 		sales_order_item: DF.Data | None
 		sample_quantity: DF.Int
 		schedule_date: DF.Date | None
-		serial_and_batch_bundle: DF.Link | None
 		serial_no: DF.Text | None
 		stock_qty: DF.Float
 		stock_uom: DF.Link

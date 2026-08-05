@@ -7,7 +7,7 @@ def execute():
 	bin_details = frappe.db.sql(
 		"""
 		SELECT item_code, warehouse
-		FROM `tabBin`""",
+		FROM `tabStock Level`""",
 		as_dict=1,
 	)
 

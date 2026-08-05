@@ -6,7 +6,7 @@ def execute():
 
 	frappe.db.sql(
 		"""
-        UPDATE `tabBin` b
+        UPDATE `tabStock Level` b
         INNER JOIN `tabWarehouse` w ON b.warehouse = w.name
         SET b.company = w.company
         WHERE b.company IS NULL OR b.company = ''

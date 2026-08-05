@@ -46,14 +46,9 @@ class StockController(AccountsController):
 
 		super().validate()
 
-		if self.docstatus == 0:
-			for table_name in ["items", "packed_items", "supplied_items"]:
-				sbb.validate_duplicate_serial_and_batch_bundle(table_name)
-
 		if not self.get("is_return"):
 			self.validate_inspection()
 
-		sbb.validate_warehouse_of_sabb()
 		sbb.validate_serialized_batch()
 		sbb.clean_serial_nos()
 		self.validate_customer_provided_item()
@@ -244,20 +239,6 @@ class StockController(AccountsController):
 		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
 
 		return SerialBatchBundleService(self).delete_auto_created_batches()
-
-	def set_serial_and_batch_bundle(self, table_name=None, ignore_validate=False):
-		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
-
-		return SerialBatchBundleService(self).set_serial_and_batch_bundle(table_name, ignore_validate)
-
-	def make_package_for_transfer(
-		self, serial_and_batch_bundle, warehouse, type_of_transaction=None, do_not_submit=None, qty=0
-	):
-		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
-
-		return SerialBatchBundleService(self).make_package_for_transfer(
-			serial_and_batch_bundle, warehouse, type_of_transaction, do_not_submit, qty
-		)
 
 	def get_sl_entries(self, d, args):
 		from erpnext.stock.services.stock_ledger_service import StockLedgerService
@@ -476,9 +457,13 @@ class StockController(AccountsController):
 
 					working_qty = 0
 					if sre_doc.reservation_based_on == "Serial and Batch":
-						sbb = frappe.get_doc("Serial and Batch Bundle", item.serial_and_batch_bundle)
+						from erpnext.stock.doctype.stock_location_ledger.stock_location_ledger import (
+							get_voucher_serial_batch_qty,
+						)
+
+						sbb_entries = get_voucher_serial_batch_qty(self.doctype, self.name, item.name)
 						if sre_doc.has_serial_no:
-							serial_nos = [d.serial_no for d in sbb.entries]
+							serial_nos = [d.serial_no for d in sbb_entries]
 							for entry in sre_doc.sb_entries:
 								if entry.serial_no in serial_nos:
 									entry.delivered_qty = 1 if self._action == "submit" else 0
@@ -486,7 +471,7 @@ class StockController(AccountsController):
 									working_qty += 1
 									serial_nos.remove(entry.serial_no)
 						else:
-							batch_qty = {d.batch_no: -1 * d.qty for d in sbb.entries}
+							batch_qty = {d.batch_no: -1 * d.qty for d in sbb_entries}
 							for entry in sre_doc.sb_entries:
 								if entry.batch_no in batch_qty:
 									delivered_qty = min(
@@ -855,60 +840,6 @@ def create_item_wise_repost_entries(
 		repost_entries.append(repost_entry)
 
 	return repost_entries
-
-
-def make_bundle_for_material_transfer(**kwargs):
-	if isinstance(kwargs, dict):
-		kwargs = frappe._dict(kwargs)
-
-	bundle_doc = frappe.get_doc("Serial and Batch Bundle", kwargs.serial_and_batch_bundle)
-
-	if not kwargs.type_of_transaction:
-		kwargs.type_of_transaction = "Inward"
-
-	bundle_doc = frappe.copy_doc(bundle_doc)
-	bundle_doc.docstatus = 0
-	bundle_doc.warehouse = kwargs.warehouse
-	bundle_doc.type_of_transaction = kwargs.type_of_transaction
-	bundle_doc.voucher_type = kwargs.voucher_type
-	bundle_doc.voucher_no = "" if kwargs.is_new or kwargs.docstatus == 2 else kwargs.voucher_no
-	bundle_doc.is_cancelled = 0
-
-	qty = 0
-	if (
-		len(bundle_doc.entries) == 1
-		and flt(kwargs.qty) < flt(bundle_doc.total_qty)
-		and not bundle_doc.has_serial_no
-	):
-		qty = kwargs.qty
-
-	for row in bundle_doc.entries:
-		row.is_outward = 0
-		row.qty = abs(qty or row.qty)
-		row.stock_value_difference = abs(row.stock_value_difference)
-		if kwargs.type_of_transaction == "Outward":
-			row.qty *= -1
-			row.stock_value_difference *= row.stock_value_difference
-			row.is_outward = 1
-
-		row.warehouse = kwargs.warehouse
-		row.posting_datetime = bundle_doc.posting_datetime
-		row.voucher_type = bundle_doc.voucher_type
-		row.voucher_no = bundle_doc.voucher_no
-		row.voucher_detail_no = bundle_doc.voucher_detail_no
-		row.type_of_transaction = bundle_doc.type_of_transaction
-		row.item_code = bundle_doc.item_code
-
-	bundle_doc.set_incoming_rate()
-	bundle_doc.calculate_qty_and_amount()
-	bundle_doc.flags.ignore_permissions = True
-	bundle_doc.flags.ignore_validate = True
-	if kwargs.do_not_submit:
-		bundle_doc.save(ignore_permissions=True)
-	else:
-		bundle_doc.submit()
-
-	return bundle_doc.name
 
 
 def get_item_wise_inventory_account_map(rows, company):

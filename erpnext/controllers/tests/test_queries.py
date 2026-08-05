@@ -98,7 +98,7 @@ class TestQueries(ERPNextTestSuite):
 	def test_warehouse_query(self):
 		query = add_default_params(queries.warehouse_query, "Account")
 
-		wh = query(filters=[["Bin", "item_code", "=", "_Test Item"]])
+		wh = query(filters=[["Stock Level", "item_code", "=", "_Test Item"]])
 		self.assertGreaterEqual(len(wh), 1)
 
 	def test_get_batch_numbers_query(self):

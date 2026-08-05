@@ -40,11 +40,12 @@
   "validate_material_transfer_warehouses",
   "serial_and_batch_item_settings_tab",
   "enable_serial_and_batch_no_for_item",
+  "column_break_rack_bin",
+  "enable_rack_and_bin",
   "section_break_7",
   "pick_serial_and_batch_based_on",
   "allow_existing_serial_no",
   "use_serial_batch_fields",
-  "use_inline_serial_batch_editor",
   "disable_serial_no_and_batch_selector",
   "section_break_gnhq",
   "allow_negative_stock_for_batch",
@@ -52,11 +53,8 @@
   "use_naming_series",
   "naming_series_prefix",
   "auto_bundle_section",
-  "auto_create_serial_and_batch_bundle_for_outward",
-  "do_not_update_serial_batch_on_creation_of_auto_bundle",
-  "set_serial_and_batch_bundle_naming_based_on_naming_series",
-  "naming_series_preview",
-  "configure_series",
+  "auto_create_serial_batch_entries_for_outward",
+  "do_not_update_serial_batch_on_auto_creation",
   "column_break_pjkx",
   "stock_reservation_tab",
   "enable_stock_reservation",
@@ -310,7 +308,7 @@
   {
    "fieldname": "serial_and_batch_item_settings_tab",
    "fieldtype": "Tab Break",
-   "label": "Serial & Batch Item"
+   "label": "Serial, Batch or Rack and Bin"
   },
   {
    "fieldname": "price_list_defaults_section",
@@ -347,18 +345,18 @@
   },
   {
    "default": "FIFO",
-   "depends_on": "auto_create_serial_and_batch_bundle_for_outward",
+   "depends_on": "auto_create_serial_batch_entries_for_outward",
    "fieldname": "pick_serial_and_batch_based_on",
    "fieldtype": "Select",
    "label": "Pick Serial / Batch Based On",
-   "mandatory_depends_on": "auto_create_serial_and_batch_bundle_for_outward",
+   "mandatory_depends_on": "auto_create_serial_batch_entries_for_outward",
    "options": "FIFO\nLIFO\nExpiry"
   },
   {
    "default": "1",
-   "fieldname": "auto_create_serial_and_batch_bundle_for_outward",
+   "fieldname": "auto_create_serial_batch_entries_for_outward",
    "fieldtype": "Check",
-   "label": "Auto create Serial and Batch Bundle for outward"
+   "label": "Auto create Serial / Batch entries for outward"
   },
   {
    "default": "1",
@@ -408,8 +406,8 @@
    "label": "Auto reserve Stock for Sales Order on Purchase"
   },
   {
-   "default": "1",
-   "description": "On submission of the stock transaction, system will auto create the Serial and Batch Bundle based on the Serial No / Batch fields.",
+   "default": "0",
+   "description": "On submission of the stock transaction, system will auto create the Serial / Batch entries based on the Serial No / Batch fields.",
    "fieldname": "use_serial_batch_fields",
    "fieldtype": "Check",
    "label": "Use Serial / Batch fields"
@@ -417,7 +415,7 @@
   {
    "default": "1",
    "description": "If enabled, do not update serial / batch values in the stock transactions on creation of auto Serial \n / Batch Bundle. ",
-   "fieldname": "do_not_update_serial_batch_on_creation_of_auto_bundle",
+   "fieldname": "do_not_update_serial_batch_on_auto_creation",
    "fieldtype": "Check",
    "label": "Do not update Serial / Batch on creation of auto bundle"
   },
@@ -454,12 +452,6 @@
    "fieldname": "auto_reserve_stock",
    "fieldtype": "Check",
    "label": "Auto reserve stock"
-  },
-  {
-   "default": "0",
-   "fieldname": "set_serial_and_batch_bundle_naming_based_on_naming_series",
-   "fieldtype": "Check",
-   "label": "Set Serial and Batch Bundle Naming Based on Naming Series"
   },
   {
    "depends_on": "enable_serial_and_batch_no_for_item",
@@ -515,6 +507,10 @@
    "label": "Activate Serial / Batch No for Item"
   },
   {
+   "fieldname": "column_break_rack_bin",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "internal_transfer_rules_section",
    "fieldtype": "Section Break",
    "label": "Internal Transfer Rules"
@@ -555,21 +551,7 @@
   {
    "fieldname": "auto_bundle_section",
    "fieldtype": "Section Break",
-   "label": "Serial and Batch Bundle"
-  },
-  {
-   "fieldname": "naming_series_preview",
-   "fieldtype": "Small Text",
-   "hidden": 1,
-   "is_virtual": 1,
-   "label": "Naming Series options",
-   "read_only": 1
-  },
-  {
-   "fieldname": "configure_series",
-   "fieldtype": "Button",
-   "hidden": 1,
-   "label": "Configure Series"
+   "label": "Serial and Batch Entries"
   },
   {
    "fieldname": "column_break_pjkx",
@@ -580,12 +562,11 @@
    "fieldtype": "Section Break"
   },
   {
-   "default": "1",
-   "depends_on": "eval:!doc.use_serial_batch_fields",
-   "description": "Show an inline editable table for serial numbers / batches on the item row instead of the dialog",
-   "fieldname": "use_inline_serial_batch_editor",
+   "default": "0",
+   "description": "Show Rack and Bin columns in the inline Serial / Batch table to record the physical spot of the stock",
+   "fieldname": "enable_rack_and_bin",
    "fieldtype": "Check",
-   "label": "Use Inline Serial / Batch Editor"
+   "label": "Enable Rack and Bin"
   }
  ],
  "icon": "icon-cog",
@@ -593,7 +574,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-08-01 23:35:02.896836",
+ "modified": "2026-08-03 19:10:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",
