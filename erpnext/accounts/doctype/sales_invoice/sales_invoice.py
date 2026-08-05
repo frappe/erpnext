@@ -1165,6 +1165,7 @@ class SalesInvoice(SellingController):
 		child_tables = {
 			"items": ("income_account", "expense_account", "discount_account"),
 			"taxes": ("account_head",),
+			"payments": ("account",),
 		}
 		self.needs_repost = self.check_if_fields_updated(fields_to_check, child_tables)
 		if self.needs_repost:

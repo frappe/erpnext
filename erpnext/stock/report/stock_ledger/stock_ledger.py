@@ -6,8 +6,10 @@ import copy
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import cint, flt, get_datetime
+from pypika import Order
+from pypika.analytics import RowNumber
 
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -52,14 +54,15 @@ def execute(filters=None):
 
 	data = []
 	conversion_factors = []
-	if opening_row:
-		data.append(opening_row)
+	opening_rows = opening_row if isinstance(opening_row, list) else ([opening_row] if opening_row else [])
+	for row in opening_rows:
+		data.append(row)
 		conversion_factors.append(0)
 
 	actual_qty = stock_value = 0
-	if opening_row:
-		actual_qty = opening_row.get("qty_after_transaction")
-		stock_value = opening_row.get("stock_value")
+	if opening_rows:
+		actual_qty = opening_rows[0].get("qty_after_transaction", 0)
+		stock_value = opening_rows[0].get("stock_value", 0)
 
 	available_serial_nos = {}
 
@@ -692,43 +695,120 @@ def get_opening_balance(filters, columns, sl_entries, inv_dimension_wise_value=N
 	if not (filters.item_code and filters.warehouse and filters.from_date):
 		return
 
-	from erpnext.stock.stock_ledger import get_previous_sle
+	item_codes = filters.item_code
+	if isinstance(item_codes, str):
+		item_codes = [item_codes]
 
-	project = None
-	if filters.get("project") and not frappe.get_all(
-		"Inventory Dimension", filters={"reference_document": "Project"}
-	):
-		project = filters.get("project")
+	warehouses = get_matching_warehouses(filters.warehouse)
+	if not warehouses:
+		return
 
-	last_entry = get_previous_sle(
-		{
-			"item_code": filters.item_code,
-			"warehouse_condition": get_warehouse_condition(filters.warehouse),
-			"posting_date": filters.from_date,
-			"posting_time": "00:00:00",
-			"project": project,
-		},
-		for_report=True,
+	sle_doctype = frappe.qb.DocType("Stock Ledger Entry")
+	sr_doctype = frappe.qb.DocType("Stock Reconciliation")
+
+	opening_reco_query = (
+		frappe.qb.from_(sle_doctype)
+		.inner_join(sr_doctype)
+		.on(sle_doctype.voucher_no == sr_doctype.name)
+		.select(sle_doctype.voucher_no)
+		.where(sle_doctype.docstatus < 2)
+		.where(sle_doctype.is_cancelled == 0)
+		.where(sle_doctype.item_code.isin(item_codes))
+		.where(sle_doctype.warehouse.isin(warehouses))
+		.where(sle_doctype.voucher_type == "Stock Reconciliation")
+		.where(sle_doctype.posting_date == filters.from_date)
+		.where(sr_doctype.purpose == "Opening Stock")
 	)
 
-	# check if any SLEs are actually Opening Stock Reconciliation
-	for sle in list(sl_entries):
-		if (
-			sle.get("voucher_type") == "Stock Reconciliation"
-			and sle.posting_date == filters.from_date
-			and frappe.db.get_value("Stock Reconciliation", sle.voucher_no, "purpose") == "Opening Stock"
-		):
-			last_entry = sle
-			sl_entries.remove(sle)
+	opening_reco_vouchers = set(opening_reco_query.run(pluck=True))
 
-	row = {
+	if opening_reco_vouchers:
+		sl_entries[:] = [sle for sle in sl_entries if sle.get("voucher_no") not in opening_reco_vouchers]
+
+	sle_cond = (sle_doctype.posting_date < filters.from_date) | (
+		(sle_doctype.posting_date == filters.from_date) & (sle_doctype.posting_time == "00:00:00")
+	)
+	if opening_reco_vouchers:
+		sle_cond = sle_cond | (
+			(sle_doctype.posting_date == filters.from_date)
+			& (sle_doctype.voucher_no.isin(list(opening_reco_vouchers)))
+		)
+
+	subq = (
+		frappe.qb.from_(sle_doctype)
+		.select(
+			sle_doctype.qty_after_transaction,
+			sle_doctype.stock_value,
+			RowNumber()
+			.over(sle_doctype.item_code, sle_doctype.warehouse)
+			.orderby(sle_doctype.posting_datetime, sle_doctype.creation, sle_doctype.name, order=Order.desc)
+			.as_("rn"),
+		)
+		.where(sle_doctype.docstatus < 2)
+		.where(sle_doctype.is_cancelled == 0)
+		.where(sle_doctype.item_code.isin(item_codes))
+		.where(sle_doctype.warehouse.isin(warehouses))
+		.where(sle_cond)
+	)
+
+	for field in ["voucher_no", "project", "company"]:
+		if filters.get(field):
+			subq = subq.where(sle_doctype[field] == filters.get(field))
+
+	inventory_dimension_fields = get_inventory_dimension_fields()
+	if inventory_dimension_fields:
+		for fieldname in inventory_dimension_fields:
+			if filters.get(fieldname):
+				subq = subq.where(sle_doctype[fieldname].isin(filters.get(fieldname)))
+
+	query = (
+		frappe.qb.from_(subq)
+		.select(
+			IfNull(Sum(subq.qty_after_transaction), 0.0).as_("total_qty"),
+			IfNull(Sum(subq.stock_value), 0.0).as_("total_stock_value"),
+		)
+		.where(subq.rn == 1)
+	)
+
+	res = query.run(as_dict=True)
+
+	total_qty = flt(res[0].total_qty) if res else 0.0
+	total_stock_value = flt(res[0].total_stock_value) if res else 0.0
+	valuation_rate = flt(total_stock_value / total_qty) if total_qty else 0.0
+
+	return {
 		"item_code": _("'Opening'"),
-		"qty_after_transaction": last_entry.get("qty_after_transaction", 0),
-		"valuation_rate": last_entry.get("valuation_rate", 0),
-		"stock_value": last_entry.get("stock_value", 0),
+		"qty_after_transaction": total_qty,
+		"valuation_rate": valuation_rate,
+		"stock_value": total_stock_value,
 	}
 
-	return row
+
+def get_matching_warehouses(warehouses):
+	if not warehouses:
+		return []
+
+	if isinstance(warehouses, str):
+		warehouses = [warehouses]
+
+	warehouse_details = frappe.get_all(
+		"Warehouse",
+		filters={"name": ("in", warehouses)},
+		fields=["lft", "rgt"],
+	)
+
+	if not warehouse_details:
+		return warehouses
+
+	wh = frappe.qb.DocType("Warehouse")
+	cond = None
+	for d in warehouse_details:
+		c = (wh.lft >= d.lft) & (wh.rgt <= d.rgt)
+		cond = c if cond is None else (cond | c)
+
+	matching = (frappe.qb.from_(wh).select(wh.name).where(cond)).run(pluck=True)
+
+	return matching if matching else warehouses
 
 
 def get_warehouse_condition(warehouses):
@@ -784,7 +864,15 @@ def get_opening_balance_for_inv_dimension(filters, inv_dimension_wise_value):
 	if not filters.item_code or not filters.warehouse or not filters.from_date:
 		return
 
-	if len(filters.get("item_code")) > 1 or len(filters.get("warehouse")) > 1:
+	item_codes = filters.get("item_code")
+	if isinstance(item_codes, str):
+		item_codes = [item_codes]
+
+	warehouses = filters.get("warehouse")
+	if isinstance(warehouses, str):
+		warehouses = [warehouses]
+
+	if len(item_codes) > 1 or len(warehouses) > 1:
 		return
 
 	sl_doctype = frappe.qb.DocType("Stock Ledger Entry")
@@ -804,17 +892,11 @@ def get_opening_balance_for_inv_dimension(filters, inv_dimension_wise_value):
 		)
 	)
 
-	if filters.get("item_code"):
-		if isinstance(filters.item_code, list | tuple):
-			query = query.where(sl_doctype.item_code.isin(filters.item_code))
-		else:
-			query = query.where(sl_doctype.item_code == filters.item_code)
+	if item_codes:
+		query = query.where(sl_doctype.item_code.isin(item_codes))
 
-	if filters.get("warehouse"):
-		if isinstance(filters.warehouse, list | tuple):
-			query = query.where(sl_doctype.warehouse.isin(filters.warehouse))
-		else:
-			query = query.where(sl_doctype.warehouse == filters.warehouse)
+	if warehouses:
+		query = query.where(sl_doctype.warehouse.isin(warehouses))
 
 	for key, value in inv_dimension_wise_value.items():
 		if isinstance(value, list | tuple):

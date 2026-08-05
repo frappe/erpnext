@@ -101,6 +101,32 @@ def validate_standard_cost_posting_date(sl_entries):
 			)
 
 
+def validate_stock_frozen_by_closing_entry(sl_entries):
+	from erpnext.stock.doctype.stock_closing_entry.stock_closing_entry import (
+		get_closing_entry_for_closed_period,
+	)
+
+	company = sl_entries[0].get("company")
+	if not company:
+		company = frappe.get_cached_value("Warehouse", sl_entries[0].get("warehouse"), "company")
+
+	closing_entry = get_closing_entry_for_closed_period(company)
+	if not closing_entry:
+		return
+
+	for sle in sl_entries:
+		if sle.get("posting_date") and getdate(sle.get("posting_date")) <= getdate(closing_entry.to_date):
+			frappe.throw(
+				_(
+					"Stock transactions dated on or before {0} are frozen because the period is closed and the Stock Closing Entry {1} has been generated. To make changes, cancel the Period Closing Voucher first."
+				).format(
+					frappe.bold(format_date(closing_entry.to_date)),
+					get_link_to_form("Stock Closing Entry", closing_entry.name),
+				),
+				title=_("Stock Frozen"),
+			)
+
+
 def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_voucher=False):
 	"""Create SL entries from SL entry dicts
 
@@ -118,6 +144,8 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 		# Sorted so two vouchers touching the same pairs can't take the gates in opposite order.
 		for pair in sorted({(d.get("item_code"), d.get("warehouse")) for d in sl_entries}):
 			sle_processing_gate(*pair)
+
+		validate_stock_frozen_by_closing_entry(sl_entries)
 
 		cancelled = sl_entries[0].get("is_cancelled")
 		if cancelled:
