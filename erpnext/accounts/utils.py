@@ -2700,9 +2700,22 @@ def sync_auto_reconcile_config(auto_reconciliation_job_trigger: int = 15):
 	)
 	method = "erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.trigger_reconciliation_for_queued_docs"
 
-	sch_event = frappe.get_doc(
+	sch_event_name = frappe.db.get_value(
 		"Scheduler Event", {"scheduled_against": "Process Payment Reconciliation", "method": method}
 	)
+	if not sch_event_name:
+		sch_event_name = (
+			frappe.get_doc(
+				{
+					"doctype": "Scheduler Event",
+					"scheduled_against": "Process Payment Reconciliation",
+					"method": method,
+				}
+			)
+			.insert(ignore_permissions=True)
+			.name
+		)
+
 	if frappe.db.get_value("Scheduled Job Type", {"method": method}):
 		frappe.get_doc(
 			"Scheduled Job Type",
@@ -2712,21 +2725,21 @@ def sync_auto_reconcile_config(auto_reconciliation_job_trigger: int = 15):
 		).update(
 			{
 				"cron_format": f"0/{auto_reconciliation_job_trigger} * * * *",
-				"scheduler_event": sch_event.name,
+				"scheduler_event": sch_event_name,
 			}
-		).save()
+		).save(ignore_permissions=True)
 	else:
 		frappe.get_doc(
 			{
 				"doctype": "Scheduled Job Type",
 				"method": method,
-				"scheduler_event": sch_event.name,
+				"scheduler_event": sch_event_name,
 				"cron_format": f"0/{auto_reconciliation_job_trigger} * * * *",
 				"create_log": True,
 				"stopped": False,
 				"frequency": "Cron",
 			}
-		).save()
+		).insert(ignore_permissions=True)
 
 
 def get_link_fields_grouped_by_option(doctype):
