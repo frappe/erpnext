@@ -18,6 +18,9 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 )
 from erpnext.accounts.utils import get_account_currency, get_fiscal_year
 from erpnext.controllers.accounts_controller import AccountsController
+from erpnext.stock.doctype.stock_closing_entry.stock_closing_entry import (
+	SCOPE_FIELDS as STOCK_CLOSING_SCOPE_FIELDS,
+)
 from erpnext.stock.utils import get_stock_value_on
 
 
@@ -204,11 +207,7 @@ class PeriodClosingVoucher(AccountsController):
 		return flt(balance[0][0]) if balance else 0.0
 
 	def validate_stock_closing_entry(self):
-		status = frappe.db.get_value(
-			"Stock Closing Entry",
-			{"company": self.company, "to_date": self.period_end_date, "docstatus": 1},
-			"status",
-		)
+		status = frappe.db.get_value("Stock Closing Entry", self.get_stock_closing_entry_filters(), "status")
 
 		if status == "Completed":
 			return
@@ -223,10 +222,20 @@ class PeriodClosingVoucher(AccountsController):
 
 		frappe.throw(
 			_(
-				"Create a Stock Closing Entry with To Date as {0} before submitting the Period Closing Voucher."
+				"Create a Stock Closing Entry for the entire company with To Date as {0} before submitting the Period Closing Voucher."
 			).format(frappe.bold(formatdate(self.period_end_date))),
 			title=_("Stock Closing Entry Required"),
 		)
+
+	def get_stock_closing_entry_filters(self):
+		filters = {"company": self.company, "to_date": self.period_end_date, "docstatus": 1}
+
+		meta = frappe.get_meta("Stock Closing Entry")
+		for fieldname in STOCK_CLOSING_SCOPE_FIELDS:
+			if meta.has_field(fieldname):
+				filters[fieldname] = ("is", "not set")
+
+		return filters
 
 	def on_submit(self):
 		self.db_set("gle_processing_status", "In Progress")

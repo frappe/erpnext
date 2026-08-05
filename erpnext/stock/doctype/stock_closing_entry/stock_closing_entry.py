@@ -13,6 +13,8 @@ from frappe.utils.background_jobs import enqueue
 
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 
+SCOPE_FIELDS = ("warehouse", "item_code", "item_group", "warehouse_type")
+
 
 class StockClosingEntry(Document):
 	# begin: auto-generated types
@@ -68,7 +70,7 @@ class StockClosingEntry(Document):
 			)
 		)
 
-		for fieldname in ["warehouse", "item_code", "item_group", "warehouse_type"]:
+		for fieldname in SCOPE_FIELDS:
 			if self.get(fieldname):
 				query = query.where(table[fieldname] == self.get(fieldname))
 

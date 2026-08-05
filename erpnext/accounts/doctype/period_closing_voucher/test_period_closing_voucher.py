@@ -310,8 +310,23 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 	def test_stock_validations_before_period_closing(self):
 		from unittest.mock import patch
 
+		from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
+
 		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		create_custom_fields(
+			{
+				"Stock Closing Entry": [
+					{
+						"fieldname": "warehouse",
+						"label": "Warehouse",
+						"fieldtype": "Link",
+						"options": "Warehouse",
+					}
+				]
+			}
+		)
 
 		item = make_item("Test PCV Stock Item", {"is_stock_item": 1})
 		se = make_stock_entry(
@@ -332,11 +347,19 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 				"company": "Test PCV Company",
 				"from_date": pcv.period_start_date,
 				"to_date": pcv.period_end_date,
+				"warehouse": "Stores - TPC",
 			}
 		).insert()
 
 		with patch("erpnext.stock.doctype.stock_closing_entry.stock_closing_entry.enqueue"):
 			sce.submit()
+
+		sce.db_set("status", "Completed")
+
+		pcv.reload()
+		self.assertRaisesRegex(frappe.ValidationError, "Create a Stock Closing Entry", pcv.submit)
+
+		frappe.db.set_value("Stock Closing Entry", sce.name, {"warehouse": None, "status": "In Progress"})
 
 		pcv.reload()
 		self.assertRaisesRegex(frappe.ValidationError, "is not completed yet", pcv.submit)
