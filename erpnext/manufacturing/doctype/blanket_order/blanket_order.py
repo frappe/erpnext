@@ -149,7 +149,11 @@ def make_order(source_name: str):
 		"Blanket Order",
 		source_name,
 		{
-			"Blanket Order": {"doctype": doctype, "postprocess": update_doc},
+			"Blanket Order": {
+				"doctype": doctype,
+				"field_no_map": ["naming_series"],
+				"postprocess": update_doc,
+			},
 			"Blanket Order Item": {
 				"doctype": doctype + " Item",
 				"field_map": {"rate": "blanket_order_rate", "parent": "blanket_order"},
