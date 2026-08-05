@@ -99,7 +99,7 @@ class TestBlanketOrder(FrappeTestCase):
 	)
 	def test_stock_over_delivery_role_does_not_bypass_blanket_order_allowance(self):
 		test_user = frappe.get_doc("User", "test@example.com")
-		test_user.add_roles("Stock Manager")
+		test_user.add_roles("Accounts User", "Stock Manager")
 
 		frappe.clear_cache()
 		for blanket_order_type, doctype, date_field in (
