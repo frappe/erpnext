@@ -299,6 +299,23 @@ class TestProject(ERPNextTestSuite):
 		project.save()
 		self.assertEqual(project.percent_complete, 100)
 
+	def test_on_hold_project_keeps_status(self):
+		project, tasks = self._project_with_tasks("Task Completion", 4)
+
+		# an On hold project is not auto-flipped to Completed even at 100%
+		project.status = "On hold"
+		for task in tasks:
+			frappe.db.set_value("Task", task, "status", "Completed")
+		project.update_percent_complete()
+		self.assertEqual(project.percent_complete, 100)
+		self.assertEqual(project.status, "On hold")
+
+		# nor auto-flipped back to Open when below 100%
+		frappe.db.set_value("Task", tasks[0], "status", "Open")
+		project.update_percent_complete()
+		self.assertEqual(project.percent_complete, 75)
+		self.assertEqual(project.status, "On hold")
+
 	def _create_portal_user(self, email):
 		"""A user with no Project-related role, so read access can only come from
 		control_access_for_project_users() sharing the doc with them."""

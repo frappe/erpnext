@@ -6,6 +6,8 @@ from frappe.utils import today
 
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+from erpnext.stock.doctype.warehouse.warehouse import get_warehouses_based_on_account
 from erpnext.stock.report.stock_and_account_value_comparison.stock_and_account_value_comparison import (
 	create_reposting_entries,
 	execute,
@@ -55,3 +57,22 @@ class TestStockAndAccountValueComparison(ERPNextTestSuite):
 			filters={"based_on": "Item and Warehouse", "item_code": item},
 		)
 		self.assertFalse(item_wh_rivs, "Purchase vouchers must not be reposted Item-and-Warehouse based")
+
+	def test_child_account_override_excluded_from_group_account(self):
+		# A group warehouse carries an inventory account; a child (e.g. Goods-in-Transit) can override
+		# it with its own account. get_warehouses_based_on_account must return only warehouses whose
+		# effective account matches, excluding the overriding child.
+		group = create_warehouse("_Test SAVC Group WH", {"is_group": 1}, company=PI_COMPANY)
+		group_account = frappe.get_value("Warehouse", group, "account")
+
+		inheriting = create_warehouse(
+			"_Test SAVC Inherit WH", {"parent_warehouse": group, "account": group_account}, company=PI_COMPANY
+		)
+		overriding = create_warehouse(
+			"_Test SAVC Transit WH", {"parent_warehouse": group}, company=PI_COMPANY
+		)
+
+		warehouses = get_warehouses_based_on_account(group_account, PI_COMPANY)
+
+		self.assertIn(inheriting, warehouses)
+		self.assertNotIn(overriding, warehouses)

@@ -234,15 +234,18 @@ def get_item_groups(pos_profile):
 		for data in pos_profile.get("item_groups"):
 			item_groups.extend(
 				[
-					"%s" % frappe.db.escape(d.name)
+					d.name
 					for d in get_child_nodes("Item Group", data.item_group)
 					if not permitted_item_groups or d.name in permitted_item_groups
 				]
 			)
 
 	if not item_groups and permitted_item_groups:
-		item_groups = ["%s" % frappe.db.escape(d) for d in permitted_item_groups]
+		item_groups = list(permitted_item_groups)
 
+	# Return raw Item Group names; the callers parameterize them via the query builder
+	# (item_group.isin(...)) / frappe.get_all, which escapes them once. Pre-escaping here would
+	# double-escape (item_group IN ('''X''')) and match nothing.
 	return list(set(item_groups))
 
 
