@@ -948,6 +948,8 @@ class TestPurchaseOrder(FrappeTestCase):
 		# self.assertEqual(po.payment_terms_template, pi.payment_terms_template)
 		compare_payment_schedules(self, po, pi)
 
+	@change_settings("Selling Settings", {"maintain_same_sales_rate": 1})
+	@change_settings("Buying Settings", {"maintain_same_rate": 1})
 	def test_internal_transfer_flow(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 		from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
@@ -958,9 +960,6 @@ class TestPurchaseOrder(FrappeTestCase):
 			make_sales_invoice,
 		)
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
-
-		frappe.db.set_single_value("Selling Settings", "maintain_same_sales_rate", 1)
-		frappe.db.set_single_value("Buying Settings", "maintain_same_rate", 1)
 
 		prepare_data_for_internal_transfer()
 		supplier = "_Test Internal Supplier 2"

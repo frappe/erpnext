@@ -101,6 +101,7 @@ class StockSettings(Document):
 			)
 
 		self.validate_warehouses()
+		self.validate_over_delivery_receipt_allowance()
 		self.cant_change_valuation_method()
 		self.validate_clean_description_html()
 		self.validate_pending_reposts()
@@ -109,6 +110,10 @@ class StockSettings(Document):
 		self.change_precision_for_for_sales()
 		self.change_precision_for_purchase()
 		self.validate_do_not_use_batchwise_valuation()
+
+	def validate_over_delivery_receipt_allowance(self):
+		if not self.over_delivery_receipt_allowance:
+			self.role_allowed_to_over_deliver_receive = None
 
 	def validate_do_not_use_batchwise_valuation(self):
 		doc_before_save = self.get_doc_before_save()
