@@ -6,8 +6,8 @@ import copy
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import Sum
-from frappe.utils import add_days, flt, fmt_money, formatdate, getdate
+from frappe.query_builder.functions import Max, Sum
+from frappe.utils import add_days, flt, fmt_money, formatdate, get_link_to_form, getdate
 
 from erpnext import is_perpetual_inventory_enabled
 from erpnext.accounts.doctype.account_closing_balance.account_closing_balance import (
@@ -19,9 +19,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 from erpnext.accounts.general_ledger import check_freezing_date, is_immutable_ledger_enabled
 from erpnext.accounts.utils import get_account_currency, get_fiscal_year
 from erpnext.controllers.accounts_controller import AccountsController
-from erpnext.stock.doctype.stock_closing_entry.stock_closing_entry import (
-	SCOPE_FIELDS as STOCK_CLOSING_SCOPE_FIELDS,
-)
+from erpnext.stock.doctype.stock_closing_entry.stock_closing_entry import apply_unscoped_filters
 from erpnext.stock.utils import get_stock_value_on
 
 
@@ -219,12 +217,24 @@ class PeriodClosingVoucher(AccountsController):
 		return flt(balance[0][0]) if balance else 0.0
 
 	def validate_stock_closing_entry(self):
-		status = frappe.db.get_value("Stock Closing Entry", self.get_stock_closing_entry_filters(), "status")
+		closing_entry = frappe.db.get_value(
+			"Stock Closing Entry",
+			apply_unscoped_filters(
+				{"company": self.company, "to_date": self.period_end_date, "docstatus": 1}
+			),
+			["name", "status", "modified"],
+			as_dict=True,
+		)
 
-		if status == "Completed":
-			return
+		if not closing_entry:
+			frappe.throw(
+				_(
+					"Create a Stock Closing Entry for the entire company with To Date as {0} before submitting the Period Closing Voucher."
+				).format(frappe.bold(formatdate(self.period_end_date))),
+				title=_("Stock Closing Entry Required"),
+			)
 
-		if status:
+		if closing_entry.status != "Completed":
 			frappe.throw(
 				_(
 					"The Stock Closing Entry for {0} is not completed yet. Wait for it to complete before submitting the Period Closing Voucher."
@@ -232,22 +242,23 @@ class PeriodClosingVoucher(AccountsController):
 				title=_("Stock Closing Entry In Progress"),
 			)
 
-		frappe.throw(
-			_(
-				"Create a Stock Closing Entry for the entire company with To Date as {0} before submitting the Period Closing Voucher."
-			).format(frappe.bold(formatdate(self.period_end_date))),
-			title=_("Stock Closing Entry Required"),
-		)
+		self.validate_stock_closing_entry_is_fresh(closing_entry)
 
-	def get_stock_closing_entry_filters(self):
-		filters = {"company": self.company, "to_date": self.period_end_date, "docstatus": 1}
+	def validate_stock_closing_entry_is_fresh(self, closing_entry):
+		sle = frappe.qb.DocType("Stock Ledger Entry")
+		last_change = (
+			frappe.qb.from_(sle)
+			.select(Max(sle.modified))
+			.where((sle.company == self.company) & (sle.posting_date <= self.period_end_date))
+		).run()
 
-		meta = frappe.get_meta("Stock Closing Entry")
-		for fieldname in STOCK_CLOSING_SCOPE_FIELDS:
-			if meta.has_field(fieldname):
-				filters[fieldname] = ("is", "not set")
-
-		return filters
+		if last_change and last_change[0][0] and last_change[0][0] > closing_entry.modified:
+			frappe.throw(
+				_(
+					"Stock transactions were created or modified after the Stock Closing Entry {0} was generated. Regenerate it before submitting the Period Closing Voucher."
+				).format(get_link_to_form("Stock Closing Entry", closing_entry.name)),
+				title=_("Stock Closing Entry Outdated"),
+			)
 
 	def on_submit(self):
 		self.db_set("gle_processing_status", "In Progress")
