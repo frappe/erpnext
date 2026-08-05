@@ -6,8 +6,10 @@ import copy
 
 import frappe
 from frappe import _
-from frappe.utils import add_days, flt, formatdate, getdate
+from frappe.query_builder.functions import Sum
+from frappe.utils import add_days, flt, fmt_money, formatdate, getdate
 
+from erpnext import is_perpetual_inventory_enabled
 from erpnext.accounts.doctype.account_closing_balance.account_closing_balance import (
 	make_closing_entries,
 )
@@ -17,6 +19,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 from erpnext.accounts.general_ledger import check_freezing_date, is_immutable_ledger_enabled
 from erpnext.accounts.utils import get_account_currency, get_fiscal_year
 from erpnext.controllers.accounts_controller import AccountsController
+from erpnext.stock.utils import get_stock_value_on
 
 
 class PeriodClosingVoucher(AccountsController):
@@ -140,6 +143,102 @@ class PeriodClosingVoucher(AccountsController):
 		company_currency = frappe.get_cached_value("Company", self.company, "default_currency")
 		if account_currency != company_currency:
 			frappe.throw(_("Currency of the Closing Account must be {0}").format(company_currency))
+
+	def before_submit(self):
+		if not self.has_stock_transactions():
+			return
+
+		self.validate_stock_accounts_balance()
+		self.validate_stock_closing_entry()
+
+	def has_stock_transactions(self):
+		if not is_perpetual_inventory_enabled(self.company):
+			return False
+
+		return bool(
+			frappe.db.exists(
+				"Stock Ledger Entry",
+				{
+					"company": self.company,
+					"is_cancelled": 0,
+					"posting_date": ("<=", self.period_end_date),
+				},
+			)
+		)
+
+	def validate_stock_accounts_balance(self):
+		precision = frappe.get_precision("GL Entry", "debit")
+		account_balance = flt(self.get_stock_accounts_balance(), precision)
+		stock_value = flt(
+			get_stock_value_on(posting_date=self.period_end_date, company=self.company), precision
+		)
+
+		if account_balance == stock_value:
+			return
+
+		currency = frappe.get_cached_value("Company", self.company, "default_currency")
+		frappe.throw(
+			_(
+				"The closing balance {0} of the Stock Asset accounts does not match the closing value {1} of the Stock Balance report as on {2}. Resolve the difference using the Stock Ledger Variance report before closing the period."
+			).format(
+				frappe.bold(fmt_money(account_balance, currency=currency)),
+				frappe.bold(fmt_money(stock_value, currency=currency)),
+				frappe.bold(formatdate(self.period_end_date)),
+			),
+			title=_("Stock Value Mismatch"),
+		)
+
+	def get_stock_accounts_balance(self):
+		gle = frappe.qb.DocType("GL Entry")
+		account = frappe.qb.DocType("Account")
+
+		stock_accounts = (
+			frappe.qb.from_(account)
+			.select(account.name)
+			.where(
+				(account.account_type == "Stock")
+				& (account.company == self.company)
+				& (account.is_group == 0)
+			)
+		)
+
+		balance = (
+			frappe.qb.from_(gle)
+			.select(Sum(gle.debit - gle.credit))
+			.where(
+				(gle.company == self.company)
+				& (gle.is_cancelled == 0)
+				& (gle.posting_date <= self.period_end_date)
+				& gle.account.isin(stock_accounts)
+			)
+		).run()
+
+		return flt(balance[0][0]) if balance else 0.0
+
+	def validate_stock_closing_entry(self):
+		status = frappe.db.get_value(
+			"Stock Closing Entry",
+			{"company": self.company, "to_date": self.period_end_date, "docstatus": 1},
+			"status",
+		)
+
+		if status == "Completed":
+			return
+
+		if status:
+			frappe.throw(
+				_(
+					"The Stock Closing Entry for {0} is not completed yet. Wait for it to complete before submitting the Period Closing Voucher."
+				).format(frappe.bold(formatdate(self.period_end_date))),
+				title=_("Stock Closing Entry In Progress"),
+			)
+
+		frappe.throw(
+			_(
+				"Create a Stock Closing Entry with To Date as {0} before submitting the Period Closing Voucher."
+			).format(frappe.bold(formatdate(self.period_end_date))),
+			title=_("Stock Closing Entry Required"),
+		)
 
 	def on_submit(self):
 		self.db_set("gle_processing_status", "In Progress")
