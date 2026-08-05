@@ -9,8 +9,50 @@ from frappe.desk.form.load import get_attachments
 from frappe.model.document import Document
 from frappe.utils import add_days, get_date_str, get_link_to_form, nowtime, parse_json
 from frappe.utils.background_jobs import enqueue
+from frappe.utils.caching import request_cache
 
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
+
+SCOPE_FIELDS = ("warehouse", "item_code", "item_group", "warehouse_type")
+
+
+def apply_unscoped_filters(filters):
+	meta = frappe.get_meta("Stock Closing Entry")
+	for fieldname in SCOPE_FIELDS:
+		if meta.has_field(fieldname):
+			filters[fieldname] = ("is", "not set")
+
+	return filters
+
+
+def get_closing_entry_for_closed_period(company):
+	closed_upto = frappe.db.get_value(
+		"Period Closing Voucher", {"docstatus": 1, "company": company}, [{"MAX": "period_end_date"}]
+	)
+	if not closed_upto:
+		return None
+
+	return _get_completed_closing_entry(company, str(closed_upto))
+
+
+@request_cache
+def _get_completed_closing_entry(company, closed_upto):
+	filters = apply_unscoped_filters(
+		{
+			"company": company,
+			"docstatus": 1,
+			"status": "Completed",
+			"to_date": ("<=", closed_upto),
+		}
+	)
+
+	return frappe.db.get_value(
+		"Stock Closing Entry",
+		filters,
+		["name", "to_date"],
+		order_by="to_date desc",
+		as_dict=True,
+	)
 
 
 class StockClosingEntry(Document):
@@ -66,7 +108,7 @@ class StockClosingEntry(Document):
 			)
 		)
 
-		for fieldname in ["warehouse", "item_code", "item_group", "warehouse_type"]:
+		for fieldname in SCOPE_FIELDS:
 			if self.get(fieldname):
 				query = query.where(table[fieldname] == self.get(fieldname))
 
@@ -84,14 +126,30 @@ class StockClosingEntry(Document):
 		self.enqueue_job()
 
 	def on_cancel(self):
+		self.validate_closed_period_lock()
 		self.set_status(save=True)
 		self.remove_stock_closing()
+
+	def validate_closed_period_lock(self):
+		pcv = frappe.db.get_value(
+			"Period Closing Voucher",
+			{"company": self.company, "docstatus": 1, "period_end_date": (">=", self.to_date)},
+			"name",
+		)
+
+		if pcv:
+			frappe.throw(
+				_(
+					"Stock Closing Entry {0} belongs to a closed accounting period. Cancel the Period Closing Voucher {1} first."
+				).format(self.name, get_link_to_form("Period Closing Voucher", pcv)),
+				title=_("Closed Period"),
+			)
 
 	def remove_stock_closing(self):
 		table = frappe.qb.DocType("Stock Closing Balance")
 		frappe.qb.from_(table).delete().where(table.stock_closing_entry == self.name).run()
 
-	@frappe.whitelist()
+	@frappe.whitelist(methods=["POST"])
 	def enqueue_job(self):
 		self.db_set("status", "In Progress")
 		enqueue(prepare_closing_stock_balance, name=self.name, queue="long", timeout=1500)
@@ -101,8 +159,9 @@ class StockClosingEntry(Document):
 			).format(self.name)
 		)
 
-	@frappe.whitelist()
+	@frappe.whitelist(methods=["POST"])
 	def regenerate_closing_balance(self):
+		self.validate_closed_period_lock()
 		self.remove_stock_closing()
 		self.enqueue_job()
 

@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
-from frappe.utils import today
+from frappe.utils import flt, today
 
 from erpnext.accounts.doctype.finance_book.test_finance_book import create_finance_book
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
@@ -385,6 +385,218 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 		# the fast path must carry per-dimension opening balances, not aggregates or zeros
 		self.assertEqual(acb_figures["Cash"][key_for(cc1)], 400)
 		self.assertEqual(acb_figures["Cash"][key_for(cc2)], 200)
+
+	def test_stock_validations_before_period_closing(self):
+		from unittest.mock import patch
+
+		from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
+
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		create_custom_fields(
+			{
+				"Stock Closing Entry": [
+					{
+						"fieldname": "warehouse",
+						"label": "Warehouse",
+						"fieldtype": "Link",
+						"options": "Warehouse",
+					}
+				]
+			}
+		)
+
+		item = make_item("Test PCV Stock Item", {"is_stock_item": 1})
+		se = make_stock_entry(
+			item_code=item.name,
+			qty=10,
+			rate=100,
+			to_warehouse="Stores - TPC",
+			company="Test PCV Company",
+			posting_date="2021-03-15",
+		)
+
+		pcv = self.make_period_closing_voucher(posting_date="2021-03-31", submit=False)
+		self.assertRaisesRegex(frappe.ValidationError, "Create a Stock Closing Entry", pcv.submit)
+
+		sce = frappe.get_doc(
+			{
+				"doctype": "Stock Closing Entry",
+				"company": "Test PCV Company",
+				"from_date": pcv.period_start_date,
+				"to_date": pcv.period_end_date,
+				"warehouse": "Stores - TPC",
+			}
+		).insert()
+
+		with patch("erpnext.stock.doctype.stock_closing_entry.stock_closing_entry.enqueue"):
+			sce.submit()
+
+		sce.db_set("status", "Completed")
+
+		pcv.reload()
+		self.assertRaisesRegex(frappe.ValidationError, "Create a Stock Closing Entry", pcv.submit)
+
+		frappe.db.set_value("Stock Closing Entry", sce.name, {"warehouse": None, "status": "In Progress"})
+
+		pcv.reload()
+		self.assertRaisesRegex(frappe.ValidationError, "is not completed yet", pcv.submit)
+
+		sce.create_stock_closing_balance_entries()
+		sce.db_set("status", "Completed")
+
+		sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": se.name},
+			["name", "stock_value_difference"],
+			as_dict=1,
+		)
+		frappe.db.set_value(
+			"Stock Ledger Entry", sle.name, "stock_value_difference", sle.stock_value_difference + 100
+		)
+
+		pcv.reload()
+		self.assertRaisesRegex(frappe.ValidationError, "does not match", pcv.submit)
+
+		frappe.db.set_value(
+			"Stock Ledger Entry", sle.name, "stock_value_difference", sle.stock_value_difference
+		)
+
+		pcv.reload()
+		self.assertRaisesRegex(frappe.ValidationError, "Regenerate", pcv.submit)
+
+		self.rebuild_stock_closing_balance(sce)
+		pcv.reload()
+		pcv.submit()
+		self.assertEqual(pcv.docstatus, 1)
+
+	def test_batch_valuation_seeded_from_stock_closing_after_period_closing(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+			get_batch_from_bundle,
+		)
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		item = make_item(
+			"Test PCV Batch Item",
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TPCVB.####",
+			},
+		)
+		se1 = make_stock_entry(
+			item_code=item.name,
+			qty=10,
+			rate=100,
+			to_warehouse="Stores - TPC",
+			company="Test PCV Company",
+			posting_date="2021-03-15",
+		)
+		batch_no = get_batch_from_bundle(se1.items[0].serial_and_batch_bundle)
+		make_stock_entry(
+			item_code=item.name,
+			qty=10,
+			rate=200,
+			to_warehouse="Stores - TPC",
+			company="Test PCV Company",
+			posting_date="2021-06-15",
+			batch_no=batch_no,
+		)
+
+		pcv = self.make_period_closing_voucher(posting_date="2021-03-31", submit=False)
+		sce = self.make_completed_stock_closing_entry(pcv.period_start_date, pcv.period_end_date)
+		pcv.reload()
+		pcv.submit()
+
+		outward = make_stock_entry(
+			item_code=item.name,
+			qty=5,
+			from_warehouse="Stores - TPC",
+			company="Test PCV Company",
+			posting_date="2022-04-01",
+			batch_no=batch_no,
+		)
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": outward.name, "is_cancelled": 0},
+			"stock_value_difference",
+		)
+		self.assertEqual(flt(stock_value_difference, 2), -750.0)
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"frozen",
+			make_stock_entry,
+			item_code=item.name,
+			qty=1,
+			rate=100,
+			to_warehouse="Stores - TPC",
+			company="Test PCV Company",
+			posting_date="2021-05-01",
+		)
+		self.assertRaisesRegex(frappe.ValidationError, "frozen", se1.cancel)
+		self.assertRaisesRegex(frappe.ValidationError, "closed accounting period", sce.cancel)
+
+	def test_period_closing_blocks_stale_stock_closing_entry(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		item = make_item("Test PCV Stock Item", {"is_stock_item": 1})
+		make_stock_entry(
+			item_code=item.name,
+			qty=10,
+			rate=100,
+			to_warehouse="Stores - TPC",
+			company="Test PCV Company",
+			posting_date="2021-03-15",
+		)
+
+		pcv = self.make_period_closing_voucher(posting_date="2021-03-31", submit=False)
+		sce = self.make_completed_stock_closing_entry(pcv.period_start_date, pcv.period_end_date)
+
+		make_stock_entry(
+			item_code=item.name,
+			qty=5,
+			rate=100,
+			to_warehouse="Stores - TPC",
+			company="Test PCV Company",
+			posting_date="2021-05-01",
+		)
+
+		pcv.reload()
+		self.assertRaisesRegex(frappe.ValidationError, "Regenerate", pcv.submit)
+
+		self.rebuild_stock_closing_balance(sce)
+		pcv.reload()
+		pcv.submit()
+		self.assertEqual(pcv.docstatus, 1)
+
+	def make_completed_stock_closing_entry(self, from_date, to_date):
+		from unittest.mock import patch
+
+		sce = frappe.get_doc(
+			{
+				"doctype": "Stock Closing Entry",
+				"company": "Test PCV Company",
+				"from_date": from_date,
+				"to_date": to_date,
+			}
+		).insert()
+
+		with patch("erpnext.stock.doctype.stock_closing_entry.stock_closing_entry.enqueue"):
+			sce.submit()
+
+		sce.create_stock_closing_balance_entries()
+		sce.db_set("status", "Completed")
+		return sce
+
+	def rebuild_stock_closing_balance(self, sce):
+		sce.remove_stock_closing()
+		sce.create_stock_closing_balance_entries()
+		sce.db_set("status", "Completed")
 
 	def make_period_closing_voucher(self, posting_date, submit=True):
 		surplus_account = create_account()
