@@ -461,14 +461,10 @@ def unset_existing_data(company):
 	frappe.db.set_value("Company", company, update_values, update_values)
 
 	# remove accounts data from various doctypes
-	for doctype in [
-		"Account",
-		"Party Account",
-		"Mode of Payment Account",
-		"Tax Withholding Account",
-		"Sales Taxes and Charges Template",
-		"Purchase Taxes and Charges Template",
-	]:
+	for doctype in ["Account", "Sales Taxes and Charges Template", "Purchase Taxes and Charges Template"]:
+		frappe.get_query(doctype, delete=True, filters={"company": company}, ignore_permissions=False).run()
+
+	for doctype in ["Party Account", "Mode of Payment Account", "Tax Withholding Account"]:
 		frappe.get_query(doctype, delete=True, filters={"company": company}, ignore_permissions=True).run()
 
 
