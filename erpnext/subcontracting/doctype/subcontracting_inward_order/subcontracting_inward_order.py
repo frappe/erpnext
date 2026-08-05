@@ -381,29 +381,6 @@ class SubcontractingInwardOrder(SubcontractingController):
 			ignore_child_tables=True,
 		)
 
-<<<<<<< HEAD
-		stock_entry.purpose = "Receive from Customer"
-		stock_entry.subcontracting_inward_order = self.name
-
-		stock_entry.set_stock_entry_type()
-
-		for rm_item in self.received_items:
-			if not rm_item.required_qty or not rm_item.is_customer_provided_item:
-				continue
-
-			items_dict = {
-				rm_item.get("rm_item_code"): {
-					"scio_detail": rm_item.get("name"),
-					"qty": calculate_qty_as_per_bom(rm_item),
-					"to_warehouse": rm_item.get("warehouse"),
-					"stock_uom": rm_item.get("stock_uom"),
-				}
-			}
-
-			stock_entry.add_to_stock_entry_detail(items_dict)
-
-=======
->>>>>>> 0691c7c7bc (refactor: move functionality in postprocess for mapped doc)
 		if target_doc:
 			return stock_entry
 		else:
@@ -451,25 +428,6 @@ class SubcontractingInwardOrder(SubcontractingController):
 			ignore_child_tables=True,
 		)
 
-<<<<<<< HEAD
-		stock_entry.purpose = "Return Raw Material to Customer"
-		stock_entry.set_stock_entry_type()
-		stock_entry.subcontracting_inward_order = self.name
-
-		for rm_item in self.received_items:
-			items_dict = {
-				rm_item.get("rm_item_code"): {
-					"scio_detail": rm_item.get("name"),
-					"qty": rm_item.received_qty - rm_item.work_order_qty - rm_item.returned_qty,
-					"from_warehouse": rm_item.get("warehouse"),
-					"stock_uom": rm_item.get("stock_uom"),
-				}
-			}
-
-			stock_entry.add_to_stock_entry_detail(items_dict)
-
-=======
->>>>>>> 0691c7c7bc (refactor: move functionality in postprocess for mapped doc)
 		if target_doc:
 			return stock_entry
 		else:
@@ -548,62 +506,6 @@ class SubcontractingInwardOrder(SubcontractingController):
 			ignore_child_tables=True,
 		)
 
-<<<<<<< HEAD
-		stock_entry.purpose = "Subcontracting Delivery"
-		stock_entry.set_stock_entry_type()
-		stock_entry.subcontracting_inward_order = self.name
-		scio_details = []
-
-		allow_over = frappe.get_single_value("Selling Settings", "allow_delivery_of_overproduced_qty")
-		for fg_item in self.items:
-			qty = (
-				fg_item.produced_qty
-				if allow_over
-				else min(fg_item.qty, fg_item.produced_qty) - fg_item.delivered_qty
-			)
-			if qty < 0:
-				continue
-
-			scio_details.append(fg_item.name)
-			items_dict = {
-				fg_item.item_code: {
-					"qty": qty,
-					"from_warehouse": fg_item.delivery_warehouse,
-					"stock_uom": fg_item.stock_uom,
-					"scio_detail": fg_item.name,
-					"is_finished_item": 1,
-				}
-			}
-
-			stock_entry.add_to_stock_entry_detail(items_dict)
-
-		if (
-			frappe.get_single_value("Selling Settings", "deliver_secondary_items")
-			and self.secondary_items
-			and scio_details
-		):
-			secondary_items = [
-				secondary_item
-				for secondary_item in self.secondary_items
-				if secondary_item.reference_name in scio_details
-			]
-			for secondary_item in secondary_items:
-				qty = secondary_item.produced_qty - secondary_item.delivered_qty
-				if qty > 0:
-					items_dict = {
-						secondary_item.item_code: {
-							"qty": secondary_item.produced_qty - secondary_item.delivered_qty,
-							"from_warehouse": secondary_item.warehouse,
-							"stock_uom": secondary_item.stock_uom,
-							"scio_detail": secondary_item.name,
-							"type": secondary_item.type,
-						}
-					}
-
-					stock_entry.add_to_stock_entry_detail(items_dict)
-
-=======
->>>>>>> 0691c7c7bc (refactor: move functionality in postprocess for mapped doc)
 		if target_doc:
 			return stock_entry
 		else:
@@ -651,28 +553,6 @@ class SubcontractingInwardOrder(SubcontractingController):
 			ignore_child_tables=True,
 		)
 
-<<<<<<< HEAD
-		stock_entry.purpose = "Subcontracting Return"
-		stock_entry.set_stock_entry_type()
-
-		for fg_item in self.items:
-			qty = fg_item.delivered_qty - fg_item.returned_qty
-			if qty < 0:
-				continue
-
-			items_dict = {
-				fg_item.item_code: {
-					"qty": qty,
-					"stock_uom": fg_item.stock_uom,
-					"scio_detail": fg_item.name,
-					"is_finished_item": 1,
-				}
-			}
-
-			stock_entry.add_to_stock_entry_detail(items_dict)
-
-=======
->>>>>>> 0691c7c7bc (refactor: move functionality in postprocess for mapped doc)
 		if target_doc:
 			return stock_entry
 		else:
