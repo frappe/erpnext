@@ -4,23 +4,34 @@
 import frappe
 from frappe.utils import add_days, today
 
-from erpnext.maintenance.doctype.maintenance_schedule.test_maintenance_schedule import (
-	make_serial_item_with_serial,
-)
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.stock.report.stock_ledger.stock_ledger import execute
 from erpnext.tests.utils import ERPNextTestSuite
 
+WAREHOUSE = "Stores - _TC"
 
-class TestStockLedgerReeport(ERPNextTestSuite):
-	def setUp(self) -> None:
-		make_serial_item_with_serial(self, "_Test Stock Report Serial Item")
-		self.filters = frappe._dict(
+
+class TestStockLedgerReport(ERPNextTestSuite):
+	"""Correctness tests for the Stock Ledger report.
+
+	A shared `make_movements`/`run` pair keeps each test small without persisting
+	any data: movements are created per test and rolled back, while the report runs
+	read-only. Tests reuse bootstrap items and transact in `Stores - _TC`, which
+	starts clean (zero balance) for these items.
+	"""
+
+	def make_movements(self, item_code, movements):
+		for movement in movements:
+			make_stock_entry(item_code=item_code, **movement)
+
+	def run_report(self, item_code, from_date=None, to_date=None):
+		filters = frappe._dict(
 			company="_Test Company",
-			from_date=today(),
-			to_date=add_days(today(), 30),
-			item_code=["_Test Stock Report Serial Item"],
+			from_date=from_date or add_days(today(), -1),
+			to_date=to_date or today(),
+			item_code=[item_code],
+			warehouse=WAREHOUSE,
 		)
-<<<<<<< HEAD
-=======
 		return list(execute(filters)[1])
 
 	def test_in_out_quantities_and_running_balance(self):
@@ -323,4 +334,3 @@ class TestStockLedgerReeport(ERPNextTestSuite):
 			opening_rows[0]["qty_after_transaction"],
 			sum(sle.qty_after_transaction for sle in sle_rows),
 		)
->>>>>>> 0dbe410414 (fix(stock): handle multi-item opening balance in Stock Ledger report (#57591))
