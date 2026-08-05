@@ -820,19 +820,79 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 				"Serial and Batch Bundle", self.sle.serial_and_batch_bundle, "total_amount"
 			)
 		else:
+<<<<<<< HEAD
 			entries = self.get_batch_stock_before_date()
+=======
+			# Serialize concurrent valuations of this (item, warehouse) on postgres. MariaDB's
+			# grouped FOR UPDATE + gap locks do this via the history reads below; postgres has no
+			# gap locks, and row-locking the whole history writes a lock marker on every tuple --
+			# a txn-scoped advisory lock (released at commit/rollback) serializes without either.
+			if frappe.db.db_type == "postgres":
+				frappe.db.transaction_advisory_lock(
+					("batch-valuation", self.sle.item_code, self.sle.warehouse)
+				)
+
+>>>>>>> d71fc3b774 (feat: validate stock value and stock closing entry before period closing (#57811))
 			self.stock_value_change = 0.0
 			self.batch_avg_rate = defaultdict(float)
 			self.available_qty = defaultdict(float)
 			self.stock_value_differece = defaultdict(float)
 
-			for ledger in entries:
+			self.seed_from_stock_closing_balance()
+
+			for ledger in self.get_batch_stock_before_date():
 				self.stock_value_differece[ledger.batch_no] += flt(ledger.incoming_rate)
 				self.available_qty[ledger.batch_no] += flt(ledger.qty)
 
 			self.calculate_avg_rate_from_deprecarated_ledgers()
 			self.calculate_avg_rate_for_non_batchwise_valuation()
 			self.set_stock_value_difference()
+
+	def seed_from_stock_closing_balance(self):
+		self.stock_closing_from_datetime = None
+		closing_entry = self.get_closing_entry_for_seeding()
+		if not closing_entry:
+			return
+
+		from erpnext.stock.utils import get_combine_datetime
+
+		self.stock_closing_from_datetime = get_combine_datetime(
+			add_days(closing_entry.to_date, 1), "00:00:00"
+		)
+
+		for row in self.get_stock_closing_balance_entries(closing_entry.name):
+			self.stock_value_differece[row.batch_no] += flt(row.stock_value_difference)
+			self.available_qty[row.batch_no] += flt(row.actual_qty)
+
+	def get_closing_entry_for_seeding(self):
+		from erpnext.stock.doctype.stock_closing_entry.stock_closing_entry import (
+			get_closing_entry_for_closed_period,
+		)
+
+		if not self.batchwise_valuation_batches or not self.sle.posting_date:
+			return None
+
+		company = self.sle.company or frappe.get_cached_value("Warehouse", self.sle.warehouse, "company")
+		closing_entry = get_closing_entry_for_closed_period(company)
+		if not closing_entry or getdate(self.sle.posting_date) <= getdate(closing_entry.to_date):
+			return None
+
+		return closing_entry
+
+	def get_stock_closing_balance_entries(self, closing_entry):
+		table = frappe.qb.DocType("Stock Closing Balance")
+
+		return (
+			frappe.qb.from_(table)
+			.select(table.batch_no, table.actual_qty, table.stock_value_difference)
+			.where(
+				(table.stock_closing_entry == closing_entry)
+				& (table.item_code == self.sle.item_code)
+				& (table.warehouse == self.sle.warehouse)
+				& table.batch_no.isin(self.batchwise_valuation_batches)
+				& (table.inventory_dimension_key.isnull() | (table.inventory_dimension_key == ""))
+			)
+		).run(as_dict=True)
 
 	def get_batch_stock_before_date(self) -> list[dict]:
 		# Get batch wise stock value difference from Serial and Batch Bundle considering time condition
@@ -881,6 +941,33 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 
 			timestamp_condition |= (child.posting_datetime == self.sle.posting_datetime) & tie_condition
 
+<<<<<<< HEAD
+=======
+		conditions = (
+			(child.item_code == self.sle.item_code)
+			& (child.warehouse == self.sle.warehouse)
+			& (child.batch_no.isin(self.batchwise_valuation_batches))
+			& (child.docstatus == 1)
+			& (child.type_of_transaction.isin(["Inward", "Outward"]))
+		)
+
+		# Important to exclude the current voucher detail no / voucher no to calculate the correct stock value difference
+		if self.sle.voucher_detail_no:
+			conditions &= child.voucher_detail_no != self.sle.voucher_detail_no
+		elif self.sle.voucher_no:
+			conditions &= child.voucher_no != self.sle.voucher_no
+
+		conditions &= child.voucher_type != "Pick List"
+		if timestamp_condition:
+			conditions &= timestamp_condition
+
+		if self.stock_closing_from_datetime:
+			conditions &= child.posting_datetime >= self.stock_closing_from_datetime
+
+		# MariaDB carries a row lock on the grouped query below; on postgres the caller
+		# (calculate_avg_rate) serializes via a txn-scoped advisory lock on (item, warehouse)
+		# instead of row-locking the whole history (FOR UPDATE is invalid with GROUP BY there).
+>>>>>>> d71fc3b774 (feat: validate stock value and stock closing entry before period closing (#57811))
 		query = (
 			frappe.qb.from_(child)
 			.select(

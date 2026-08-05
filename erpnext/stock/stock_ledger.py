@@ -56,6 +56,81 @@ class SerialNoExistsInFutureTransaction(frappe.ValidationError):
 	pass
 
 
+<<<<<<< HEAD
+=======
+def validate_standard_cost_posting_date(sl_entries):
+	"""R2: a Standard Cost item's stock transaction cannot be dated before the latest Item
+	Standard Cost effective date. A backdated entry would slip in behind the standard-rate
+	revaluation, making its on-hand snapshot stale and forcing a repost — which Standard Cost
+	deliberately avoids. Enforced here so every stock voucher is covered uniformly."""
+	from erpnext.stock.utils import get_valuation_method
+
+	checked = {}
+	for sle in sl_entries:
+		item_code = sle.get("item_code")
+		company = sle.get("company")
+		posting_date = sle.get("posting_date")
+		if not item_code or not company or not posting_date:
+			continue
+
+		key = (item_code, company)
+		if key not in checked:
+			latest_isc = None
+			if get_valuation_method(item_code, company) == "Standard Cost":
+				latest_isc = frappe.db.get_value(
+					"Item Standard Cost",
+					{"item_code": item_code, "company": company, "docstatus": 1},
+					["name", "effective_date"],
+					order_by="effective_date desc",
+					as_dict=True,
+				)
+			checked[key] = latest_isc
+
+		latest_isc = checked[key]
+		if latest_isc and getdate(posting_date) < getdate(latest_isc.effective_date):
+			effective_date = frappe.bold(frappe.format(latest_isc.effective_date, "Date"))
+			frappe.throw(
+				_(
+					"Cannot post Standard Cost item {0} on {1}: it is before {2}, the effective date of its latest Standard Valuation Rate {3}."
+				).format(
+					get_link_to_form("Item", item_code),
+					frappe.bold(frappe.format(posting_date, "Date")),
+					effective_date,
+					get_link_to_form("Item Standard Cost", latest_isc.name),
+				)
+				+ "<br><br>"
+				+ _("Post this entry on or after {0}.").format(effective_date),
+				title=_("Backdated Entry Not Allowed"),
+			)
+
+
+def validate_stock_frozen_by_closing_entry(sl_entries):
+	from erpnext.stock.doctype.stock_closing_entry.stock_closing_entry import (
+		get_closing_entry_for_closed_period,
+	)
+
+	company = sl_entries[0].get("company")
+	if not company:
+		company = frappe.get_cached_value("Warehouse", sl_entries[0].get("warehouse"), "company")
+
+	closing_entry = get_closing_entry_for_closed_period(company)
+	if not closing_entry:
+		return
+
+	for sle in sl_entries:
+		if sle.get("posting_date") and getdate(sle.get("posting_date")) <= getdate(closing_entry.to_date):
+			frappe.throw(
+				_(
+					"Stock transactions dated on or before {0} are frozen because the period is closed and the Stock Closing Entry {1} has been generated. To make changes, cancel the Period Closing Voucher first."
+				).format(
+					frappe.bold(format_date(closing_entry.to_date)),
+					get_link_to_form("Stock Closing Entry", closing_entry.name),
+				),
+				title=_("Stock Frozen"),
+			)
+
+
+>>>>>>> d71fc3b774 (feat: validate stock value and stock closing entry before period closing (#57811))
 def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_voucher=False):
 	"""Create SL entries from SL entry dicts
 
@@ -70,6 +145,15 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 	from erpnext.controllers.stock_controller import future_sle_exists
 
 	if sl_entries:
+<<<<<<< HEAD
+=======
+		# Sorted so two vouchers touching the same pairs can't take the gates in opposite order.
+		for pair in sorted({(d.get("item_code"), d.get("warehouse")) for d in sl_entries}):
+			sle_processing_gate(*pair)
+
+		validate_stock_frozen_by_closing_entry(sl_entries)
+
+>>>>>>> d71fc3b774 (feat: validate stock value and stock closing entry before period closing (#57811))
 		cancelled = sl_entries[0].get("is_cancelled")
 		if cancelled:
 			validate_cancellation(sl_entries)
