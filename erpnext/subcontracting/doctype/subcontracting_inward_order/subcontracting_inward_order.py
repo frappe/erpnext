@@ -486,7 +486,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 								"s_warehouse": secondary_item.warehouse,
 								"stock_uom": secondary_item.stock_uom,
 								"scio_detail": secondary_item.name,
-								"secondary_item_type": secondary_item.secondary_item_type,
+								"type": secondary_item.type,
 							},
 						)
 
