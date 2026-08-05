@@ -6,20 +6,11 @@ import frappe
 
 
 def get_context(context):
-	project_user = frappe.db.get_value(
-		"Project User",
-		{"parent": frappe.form_dict.project, "user": frappe.session.user},
-		["user", "view_attachments", "hide_timesheets"],
-		as_dict=True,
-	)
-	if frappe.session.user != "Administrator" and (not project_user or frappe.session.user == "Guest"):
-		raise frappe.PermissionError
+	project_user = validate_and_get_project_user(project=frappe.form_dict.project)
 
 	context.no_cache = 1
 	context.show_sidebar = True
 	project = frappe.get_doc("Project", frappe.form_dict.project)
-
-	project.has_permission("read")
 
 	project.tasks = get_tasks(
 		project.name, start=0, item_status="open", search=frappe.form_dict.get("search")
@@ -66,6 +57,7 @@ def get_tasks(project, start=0, search=None, item_status=None):
 
 @frappe.whitelist()
 def get_task_html(project: str, start: int = 0, item_status: str | None = None):
+	validate_and_get_project_user(project=project)
 	return frappe.render_template(
 		"erpnext/templates/includes/projects/project_tasks.html",
 		{
@@ -106,6 +98,7 @@ def get_timesheets(project, start=0, search=None):
 
 @frappe.whitelist()
 def get_timesheet_html(project: str, start: int = 0):
+	validate_and_get_project_user(project=project)
 	return frappe.render_template(
 		"erpnext/templates/includes/projects/project_timesheets.html",
 		{"doc": {"timesheets": get_timesheets(project, start)}},
@@ -119,3 +112,12 @@ def get_attachments(project):
 		filters={"attached_to_name": project, "attached_to_doctype": "Project", "is_private": 0},
 		fields=["file_name", "file_url", "file_size"],
 	)
+
+
+def validate_and_get_project_user(project: str):
+	project_doc = frappe.get_doc("Project", project)
+	project_doc.check_permission()
+
+	project_user = next((d for d in project_doc.users if d.user == frappe.session.user), None)
+
+	return project_user

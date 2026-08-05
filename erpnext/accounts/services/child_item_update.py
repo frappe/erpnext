@@ -314,7 +314,7 @@ class ChildItemUpdater:
 
 @frappe.whitelist()
 def update_child_qty_rate(
-	parent_doctype: str, trans_items: str, parent_doctype_name: str, child_docname: str = "items"
+	parent_doctype: str, trans_items: str | list, parent_doctype_name: str, child_docname: str = "items"
 ) -> None:
 	ChildItemUpdater(parent_doctype, parent_doctype_name, child_docname).update(trans_items)
 
@@ -432,6 +432,7 @@ def validate_and_delete_children(parent, data, ordered_item=None) -> bool:
 
 	for d in deleted_children:
 		validate_child_on_delete(d, parent, ordered_item)
+		d.flags.ignore_permissions = True
 		d.cancel()
 		d.delete()
 

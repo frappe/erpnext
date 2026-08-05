@@ -1,0 +1,28 @@
+{
+ "applies_to_doctype": "Item Price",
+ "creation": "2026-07-03 14:17:42.389041",
+ "docstatus": 0,
+ "doctype": "DocType Settings Map",
+ "idx": 0,
+ "is_active": 1,
+ "is_standard": 1,
+ "mappings": [
+  {
+   "setting_field": "auto_insert_price_list_rate_if_missing",
+   "settings_doctype": "Stock Settings"
+  },
+  {
+   "setting_field": "update_existing_price_list_rate",
+   "settings_doctype": "Stock Settings"
+  },
+  {
+   "setting_field": "update_price_list_based_on",
+   "settings_doctype": "Stock Settings"
+  }
+ ],
+ "modified": "2026-07-03 14:18:10.406964",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Item Price (Standard)",
+ "owner": "Administrator"
+}

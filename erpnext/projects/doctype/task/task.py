@@ -7,6 +7,7 @@ import json
 import frappe
 from frappe import _, throw
 from frappe.desk.form.assign_to import clear, close_all_assignments
+from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import Max, Min, Sum
 from frappe.utils import add_days, add_to_date, date_diff, flt, get_link_to_form, getdate, today
@@ -392,7 +393,9 @@ def set_tasks_as_overdue():
 
 
 @frappe.whitelist()
-def make_timesheet(source_name: str, target_doc: dict | None = None, ignore_permissions: bool = False):
+def make_timesheet(
+	source_name: str, target_doc: str | dict | Document | None = None, ignore_permissions: bool = False
+):
 	def set_missing_values(source: dict, target: dict) -> None:
 		target.parent_project = source.project
 		target.append(

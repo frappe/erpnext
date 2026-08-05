@@ -8,7 +8,7 @@ from frappe.model.mapper import get_mapped_doc
 
 
 @frappe.whitelist()
-def make_quotation(source_name: str, target_doc: str | Document | None = None):
+def make_quotation(source_name: str, target_doc: str | dict | Document | None = None):
 	def set_missing_values(source, target):
 		_set_missing_values(source, target)
 
@@ -38,7 +38,7 @@ def make_quotation(source_name: str, target_doc: str | Document | None = None):
 
 
 @frappe.whitelist()
-def make_opportunity(source_name: str, target_doc: str | Document | None = None):
+def make_opportunity(source_name: str, target_doc: str | dict | Document | None = None):
 	def set_missing_values(source, target):
 		_set_missing_values(source, target)
 
@@ -62,7 +62,7 @@ def make_opportunity(source_name: str, target_doc: str | Document | None = None)
 
 
 @frappe.whitelist()
-def make_payment_entry(source_name: str, target_doc: str | Document | None = None):
+def make_payment_entry(source_name: str, target_doc: str | dict | Document | None = None):
 	def set_missing_values(source, target):
 		_set_missing_values(source, target)
 

@@ -49,6 +49,29 @@ def get_columns():
 	return columns
 
 
+def apply_representative_lines(rows, sales_orders):
+	"""Fill item_name/description from one real Sales Order Item line per group.
+
+	Both are editable per line, so an order listing the same item twice holds several values per
+	group. Aggregating them sorts text, and MariaDB folds case while PostgreSQL orders by byte
+	value, so the engines pick differently. Take the first line by idx.
+	"""
+	representative = {}
+	if sales_orders:
+		for line in frappe.get_all(
+			"Sales Order Item",
+			filters={"parent": ("in", sales_orders), "docstatus": 1},
+			fields=["parent", "item_code", "item_name", "description"],
+			order_by="idx",
+		):
+			representative.setdefault((line.parent, line.item_code), line)
+
+	for row in rows:
+		line = representative.get((row.name, row.item_code))
+		row.item_name = line.item_name if line else None
+		row.description = line.description if line else None
+
+
 def get_data():
 	so = frappe.qb.DocType("Sales Order")
 	so_item = frappe.qb.DocType("Sales Order Item")
@@ -58,10 +81,9 @@ def get_data():
 		.on(so.name == so_item.parent)
 		.select(
 			so_item.item_code,
-			# non-grouped columns are constant per grouped so.name / item_code -> Max() keeps the
-			# GROUP BY valid on postgres while returning the same value MySQL picked.
-			Max(so_item.item_name).as_("item_name"),
-			Max(so_item.description).as_("description"),
+			# the Sales Order columns are functionally dependent on the grouped so.name, so Max()
+			# returns their single value. item_name/description belong to the line and are editable
+			# per line, so they come from a representative line below.
 			so.name,
 			Max(so.transaction_date).as_("transaction_date"),
 			Max(so.customer).as_("customer"),
@@ -75,6 +97,7 @@ def get_data():
 	)
 
 	sales_orders = [row.name for row in sales_order_entry]
+	apply_representative_lines(sales_order_entry, sales_orders)
 	mr_records = frappe.get_all(
 		"Material Request Item",
 		{"sales_order": ("in", sales_orders), "docstatus": 1},

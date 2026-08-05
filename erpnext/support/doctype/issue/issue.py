@@ -269,7 +269,7 @@ def update_issue(contact, method):
 
 
 @frappe.whitelist()
-def make_task(source_name: str, target_doc: str | Document | None = None):
+def make_task(source_name: str, target_doc: str | dict | Document | None = None):
 	return get_mapped_doc("Issue", source_name, {"Issue": {"doctype": "Task"}}, target_doc)
 
 

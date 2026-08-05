@@ -550,6 +550,15 @@ class PickList(TransactionBase):
 	def set_item_locations(self, save: bool = False):
 		self.validate_for_qty()
 		items = self.aggregate_item_qty()
+
+		# Serialize concurrent allocations per item on postgres. MariaDB's gap locks on the
+		# picked-items locking read below already make two simultaneous allocations take turns;
+		# postgres locking reads can't see the rows another in-flight allocation is inserting, so
+		# both could claim the same stock. Sorted so overlapping documents can't deadlock.
+		if frappe.db.db_type == "postgres" and hasattr(frappe.db, "transaction_advisory_lock"):
+			for item_code in sorted({d.item_code for d in items}):
+				frappe.db.transaction_advisory_lock(("pick-allocate", item_code))
+
 		picked_items_details = self.get_picked_items_details(items)
 		self.item_location_map = frappe._dict()
 

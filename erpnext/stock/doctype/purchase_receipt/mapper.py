@@ -56,7 +56,7 @@ def get_returned_qty_map(purchase_receipt: str) -> dict:
 
 @frappe.whitelist()
 def make_purchase_invoice(
-	source_name: str | None, target_doc: str | Document | None = None, args: dict | str | None = None
+	source_name: str | None, target_doc: str | dict | Document | None = None, args: dict | str | None = None
 ):
 	if args is None:
 		args = {}
@@ -179,14 +179,14 @@ def make_purchase_return_against_rejected_warehouse(source_name: str):
 
 
 @frappe.whitelist()
-def make_purchase_return(source_name: str, target_doc: str | Document | None = None):
+def make_purchase_return(source_name: str, target_doc: str | dict | Document | None = None):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
 
 	return make_return_doc("Purchase Receipt", source_name, target_doc)
 
 
 @frappe.whitelist()
-def make_stock_entry(source_name: str, target_doc: str | Document | None = None):
+def make_stock_entry(source_name: str, target_doc: str | dict | Document | None = None):
 	def set_missing_values(source, target):
 		target.stock_entry_type = "Material Transfer"
 		target.purpose = "Material Transfer"
@@ -246,5 +246,5 @@ def make_stock_entry(source_name: str, target_doc: str | Document | None = None)
 
 
 @frappe.whitelist()
-def make_inter_company_delivery_note(source_name: str, target_doc: str | Document | None = None):
+def make_inter_company_delivery_note(source_name: str, target_doc: str | dict | Document | None = None):
 	return make_inter_company_transaction("Purchase Receipt", source_name, target_doc)

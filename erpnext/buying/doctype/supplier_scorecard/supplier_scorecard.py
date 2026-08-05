@@ -201,14 +201,16 @@ def make_all_scorecards(docname: str):
 
 	while (start_date < todays) and (end_date <= todays):
 		# check to make sure there is no scorecard period already created
+		# (inclusive bounds: a single-day period — supplier created on a month's
+		# last day — must match its own window, else it is re-created every run)
 		scorecards = frappe.get_all(
 			"Supplier Scorecard Period",
 			fields=["name"],
 			filters={
 				"scorecard": docname,
 				"docstatus": 1,
-				"start_date": ["<", end_date],
-				"end_date": [">", start_date],
+				"start_date": ["<=", end_date],
+				"end_date": [">=", start_date],
 			},
 			order_by="end_date desc",
 		)

@@ -219,7 +219,7 @@ def append_row_as_charges(items, tax, reference_row, summary_data):
 # Preflight for successful e-invoice export.
 def sales_invoice_validate(doc):
 	# Validate company
-	if doc.doctype != "Sales Invoice":
+	if doc.doctype != "Sales Invoice" or doc.is_opening == "Yes":
 		return
 
 	if not doc.company_address:
@@ -303,7 +303,7 @@ def sales_invoice_validate(doc):
 # Ensure payment details are valid for e-invoice.
 def sales_invoice_on_submit(doc, method):
 	# Validate payment details
-	if get_company_country(doc.company) not in [
+	if doc.is_opening == "Yes" or get_company_country(doc.company) not in [
 		"Italy",
 		"Italia",
 		"Italian Republic",
@@ -369,7 +369,7 @@ def generate_single_invoice(docname: str):
 
 # Delete e-invoice attachment on cancel.
 def sales_invoice_on_cancel(doc, method):
-	if get_company_country(doc.company) not in [
+	if doc.is_opening == "Yes" or get_company_country(doc.company) not in [
 		"Italy",
 		"Italia",
 		"Italian Republic",

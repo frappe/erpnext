@@ -38,9 +38,10 @@ class WorkOrderCreationService:
 		self.doc = doc
 
 	def get_production_items(self):
+		bom_warehouse_map = self.get_bom_source_warehouse_map(self.doc.po_items)
 		item_dict = {}
 		for d in self.doc.po_items:
-			item_details = self._production_item_details(d)
+			item_details = self._production_item_details(d, bom_warehouse_map)
 			if self.doc.get_items_from == "Material Request":
 				item_details["qty"] = d.planned_qty
 				key = (d.item_code, d.material_request_item, d.warehouse, d.planned_start_date)
@@ -52,7 +53,20 @@ class WorkOrderCreationService:
 				item_dict[key] = item_details
 		return item_dict
 
-	def _production_item_details(self, d):
+	def get_bom_source_warehouse_map(self, rows):
+		bom_names = {row.bom_no for row in rows if row.bom_no}
+		if not bom_names:
+			return {}
+		return dict(
+			frappe.get_all(
+				"BOM",
+				filters={"name": ["in", list(bom_names)]},
+				fields=["name", "default_source_warehouse"],
+				as_list=True,
+			)
+		)
+
+	def _production_item_details(self, d, bom_warehouse_map):
 		details = {
 			"production_item": d.item_code,
 			"use_multi_level_bom": d.include_exploded_items,
@@ -70,7 +84,7 @@ class WorkOrderCreationService:
 			"product_bundle_item": d.product_bundle_item,
 			"planned_start_date": d.planned_start_date,
 			"project": self.doc.project,
-			"source_warehouse": frappe.get_value("BOM", d.bom_no, "default_source_warehouse"),
+			"source_warehouse": bom_warehouse_map.get(d.bom_no),
 		}
 		if not details["project"] and d.sales_order:
 			details["project"] = frappe.get_cached_value("Sales Order", d.sales_order, "project")
@@ -112,6 +126,7 @@ class WorkOrderCreationService:
 				wo_list.append(work_order)
 
 	def make_work_order_for_subassembly_items(self, wo_list, subcontracted_po, default_warehouses):
+		bom_warehouse_map = self.get_bom_source_warehouse_map(self.doc.sub_assembly_items)
 		for row in self.doc.sub_assembly_items:
 			if row.type_of_manufacturing == "Subcontract":
 				subcontracted_po.setdefault(row.supplier, []).append(row)
@@ -119,16 +134,16 @@ class WorkOrderCreationService:
 			if row.type_of_manufacturing == "Material Request":
 				continue
 
-			work_order = self._sub_assembly_work_order(row, default_warehouses)
+			work_order = self._sub_assembly_work_order(row, default_warehouses, bom_warehouse_map)
 			if work_order:
 				wo_list.append(work_order)
 
-	def _sub_assembly_work_order(self, row, default_warehouses):
+	def _sub_assembly_work_order(self, row, default_warehouses, bom_warehouse_map):
 		if flt(row.qty) <= flt(row.ordered_qty):
 			return None
 
 		work_order_data = {
-			"source_warehouse": frappe.get_value("BOM", row.bom_no, "default_source_warehouse"),
+			"source_warehouse": bom_warehouse_map.get(row.bom_no),
 			"wip_warehouse": default_warehouses.get("wip_warehouse"),
 			"fg_warehouse": default_warehouses.get("fg_warehouse"),
 			"scrap_warehouse": default_warehouses.get("scrap_warehouse"),

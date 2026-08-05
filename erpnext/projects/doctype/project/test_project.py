@@ -332,6 +332,51 @@ class TestProject(ERPNextTestSuite):
 		self.assertEqual(project.percent_complete, 100)
 		self.assertEqual(project.status, "Cancelled")
 
+	def test_on_hold_project_keeps_status(self):
+		project, tasks = self._project_with_tasks("Task Completion", 4)
+
+		# an On hold project is not auto-flipped to Completed even at 100%
+		project.status = "On hold"
+		for task in tasks:
+			frappe.db.set_value("Task", task, "status", "Completed")
+		project.update_percent_complete()
+		self.assertEqual(project.percent_complete, 100)
+		self.assertEqual(project.status, "On hold")
+
+		# nor auto-flipped back to Open when below 100%
+		frappe.db.set_value("Task", tasks[0], "status", "Open")
+		project.update_percent_complete()
+		self.assertEqual(project.percent_complete, 75)
+		self.assertEqual(project.status, "On hold")
+
+	def test_percent_complete_manual(self):
+		project, tasks = self._project_with_tasks("Manual", 2)
+
+		# manual value is preserved on save, even with linked tasks
+		project.percent_complete = 42
+		project.save()
+		self.assertEqual(project.percent_complete, 42)
+
+		# task updates do not overwrite the manual value
+		frappe.db.set_value("Task", tasks[0], "status", "Completed")
+		project.update_percent_complete()
+		self.assertEqual(project.percent_complete, 42)
+
+		# out-of-range values are rejected
+		project.percent_complete = 150
+		self.assertRaises(frappe.ValidationError, project.save)
+		project.reload()
+
+		project.percent_complete = -10
+		self.assertRaises(frappe.ValidationError, project.save)
+		project.reload()
+
+		# Completed status forces 100 regardless of the manual value
+		project.percent_complete = 42
+		project.status = "Completed"
+		project.save()
+		self.assertEqual(project.percent_complete, 100)
+
 	def test_percent_complete_by_task_progress(self):
 		project, tasks = self._project_with_tasks("Task Progress", 2)
 
@@ -435,6 +480,61 @@ class TestProject(ERPNextTestSuite):
 		project.set_consumed_material_cost()
 		self.assertEqual(project.total_consumed_material_cost, sum(row.amount for row in issue.items))
 		self.assertGreater(project.total_consumed_material_cost, 0)
+
+	def _create_portal_user(self, email):
+		"""A user with no Project-related role, so read access can only come from
+		control_access_for_project_users() sharing the doc with them."""
+		if not frappe.db.exists("User", email):
+			frappe.get_doc(
+				{
+					"doctype": "User",
+					"email": email,
+					"first_name": "Portal",
+					"send_welcome_email": 0,
+				}
+			).insert(ignore_permissions=True)
+		return email
+
+	def test_new_project_grants_access_to_its_users(self):
+		member = self._create_portal_user(f"new_proj_member_{frappe.generate_hash(length=6)}@example.com")
+
+		project = frappe.get_doc(
+			doctype="Project",
+			project_name=f"_Test New Project Access {frappe.generate_hash(length=6)}",
+			status="Open",
+			company="_Test Company",
+		)
+		project.append("users", {"user": member, "welcome_email_sent": 1})
+		project.insert()  # must not raise
+
+		self.assertTrue(project.has_permission(user=member))
+		shared_with = [d.user for d in frappe.share.get_users("Project", project.name)]
+		self.assertIn(member, shared_with)
+
+	def test_adding_and_removing_project_user_updates_access(self):
+		stays = self._create_portal_user(f"stays_{frappe.generate_hash(length=6)}@example.com")
+		leaves = self._create_portal_user(f"leaves_{frappe.generate_hash(length=6)}@example.com")
+
+		project = frappe.get_doc(
+			doctype="Project",
+			project_name=f"_Test Project User Membership {frappe.generate_hash(length=6)}",
+			status="Open",
+			company="_Test Company",
+		)
+		project.append("users", {"user": stays, "welcome_email_sent": 1})
+		project.insert()
+		self.assertTrue(project.has_permission(user=stays))
+
+		# adding a user on update (not insert) must also grant them access
+		project.append("users", {"user": leaves, "welcome_email_sent": 1})
+		project.save()
+		self.assertTrue(project.has_permission(user=leaves))
+
+		# removing a user must revoke the share that was granted for membership
+		project.users = [d for d in project.users if d.user != leaves]
+		project.save()
+		self.assertFalse(project.has_permission(user=leaves))
+		self.assertTrue(project.has_permission(user=stays))
 
 
 def get_project(name, template):

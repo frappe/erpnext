@@ -8,7 +8,6 @@
  "document_type": "Document",
  "engine": "InnoDB",
  "field_order": [
-  "title",
   "naming_series",
   "purchase_order",
   "supplier",
@@ -55,6 +54,7 @@
   "additional_costs",
   "total_additional_costs",
   "tab_other_info",
+  "title",
   "order_status_section",
   "status",
   "column_break_39",
@@ -69,10 +69,8 @@
  "fields": [
   {
    "allow_on_submit": 1,
-   "default": "{supplier_name}",
    "fieldname": "title",
    "fieldtype": "Data",
-   "hidden": 1,
    "label": "Title",
    "no_copy": 1,
    "print_hide": 1
@@ -494,7 +492,7 @@
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-14 10:31:40.682892",
+ "modified": "2026-07-27 11:20:14.512336",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Order",

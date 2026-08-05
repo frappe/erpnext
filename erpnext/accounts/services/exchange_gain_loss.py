@@ -195,7 +195,7 @@ def make_exchange_gain_loss_journal(
 
 def is_payable_account(reference_doctype: str, account: str) -> bool:
 	if reference_doctype == "Purchase Invoice" or (
-		reference_doctype == "Journal Entry"
+		reference_doctype in ("Journal Entry", "Payment Entry")
 		and frappe.get_cached_value("Account", account, "account_type") == "Payable"
 	):
 		return True

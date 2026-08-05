@@ -4,7 +4,7 @@
 import json
 
 import frappe
-from frappe.utils import flt, nowtime, today
+from frappe.utils import add_days, add_to_date, flt, nowtime, today
 
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
@@ -1603,3 +1603,224 @@ class TestSerialandBatchBundleLogic(ERPNextTestSuite):
 		serialized.append("entries", {"qty": 5})
 		serialized.calculate_total_qty(save=False)
 		self.assertEqual(serialized.total_qty, 1)
+
+	def test_get_bundle_wise_serial_nos(self):
+		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+			get_bundle_wise_serial_nos,
+		)
+
+		item_code = make_item(properties={"has_serial_no": 1, "serial_no_series": "TEST-BWSN-.#####"}).name
+
+		bundles = []
+		for _ in range(2):
+			se = make_stock_entry(
+				item_code=item_code,
+				target="_Test Warehouse - _TC",
+				qty=3,
+				rate=100,
+			)
+			bundles.append(se.items[0].serial_and_batch_bundle)
+
+		data = [frappe._dict(serial_and_batch_bundle=bundle) for bundle in bundles]
+
+		self.assertEqual(get_bundle_wise_serial_nos([], {}), {})
+
+		bundle_wise_serial_nos = get_bundle_wise_serial_nos(data, {})
+		for bundle in bundles:
+			self.assertEqual(sorted(bundle_wise_serial_nos[bundle]), get_serial_nos_from_bundle(bundle))
+
+		# check_serial_nos must restrict the result to the requested serial nos
+		serial_no = get_serial_nos_from_bundle(bundles[0])[0]
+		bundle_wise_serial_nos = get_bundle_wise_serial_nos(
+			data, {"check_serial_nos": True, "serial_nos": [serial_no]}
+		)
+
+		self.assertNotIn(bundles[1], bundle_wise_serial_nos)
+		self.assertEqual(bundle_wise_serial_nos[bundles[0]], [serial_no])
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"auto_create_serial_and_batch_bundle_for_outward": 1}
+	)
+	def test_batchwise_valuation_for_same_posting_datetime_entries(self):
+		# an inward at a different rate and multiple outward rows with the same
+		# item and warehouse share the same posting datetime, the tie-breaking
+		# must include the same-timestamp entries which are already part of the
+		# ledger and must not let the outward rows count each other
+		item_code = make_item(
+			"Test Batchwise Same Posting Datetime Item 1",
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TBSPD-ITEM1-.#####",
+				"valuation_method": "FIFO",
+			},
+		).name
+
+		warehouse = "_Test Warehouse - _TC"
+
+		receipt = make_stock_entry(
+			item_code=item_code,
+			qty=10,
+			rate=100,
+			target=warehouse,
+			posting_date=add_days(today(), -5),
+			posting_time="12:00:00",
+		)
+
+		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
+		self.assertTrue(frappe.db.get_value("Batch", batch_no, "use_batchwise_valuation"))
+
+		# same posting datetime as the outward rows below, at a different rate
+		make_stock_entry(
+			item_code=item_code,
+			qty=20,
+			rate=250,
+			target=warehouse,
+			batch_no=batch_no,
+			use_serial_batch_fields=1,
+			posting_date=add_days(today(), -3),
+			posting_time="12:00:00",
+		)
+
+		issue = make_stock_entry(
+			item_code=item_code,
+			qty=2,
+			source=warehouse,
+			posting_date=add_days(today(), -3),
+			posting_time="12:00:00",
+			do_not_save=True,
+		)
+
+		for qty in [3, 4]:
+			issue.append(
+				"items",
+				{
+					"item_code": item_code,
+					"s_warehouse": warehouse,
+					"qty": qty,
+					"conversion_factor": 1,
+				},
+			)
+
+		issue.save()
+		issue.submit()
+
+		# (10 * 100 + 20 * 250) / 30 = 200
+		self.assert_batchwise_outgoing_rate(item_code, outgoing_rate=200.0, balance_value=4200.0)
+
+		# backdated receipt reposts the same posting datetime cluster
+		make_stock_entry(
+			item_code=item_code,
+			qty=10,
+			rate=100,
+			target=warehouse,
+			batch_no=batch_no,
+			use_serial_batch_fields=1,
+			posting_date=add_days(today(), -4),
+			posting_time="12:00:00",
+		)
+
+		# (20 * 100 + 20 * 250) / 40 = 175
+		self.assert_batchwise_outgoing_rate(item_code, outgoing_rate=175.0, balance_value=5425.0)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"auto_create_serial_and_batch_bundle_for_outward": 1}
+	)
+	def test_batchwise_valuation_when_bundle_created_before_the_sle(self):
+		# a bundle can be created (drafted) much before / after its SLE, the
+		# tie-breaking for the same posting datetime entries must follow the
+		# SLE creation and not the bundle creation
+		item_code = make_item(
+			"Test Batchwise Same Posting Datetime Item 2",
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TBSPD-ITEM2-.#####",
+				"valuation_method": "FIFO",
+			},
+		).name
+
+		warehouse = "_Test Warehouse - _TC"
+
+		receipt = make_stock_entry(
+			item_code=item_code,
+			qty=10,
+			rate=100,
+			target=warehouse,
+			posting_date=add_days(today(), -5),
+			posting_time="12:00:00",
+		)
+
+		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
+
+		# inward at a different rate, same posting datetime as the outward below
+		inward = make_stock_entry(
+			item_code=item_code,
+			qty=10,
+			rate=200,
+			target=warehouse,
+			batch_no=batch_no,
+			use_serial_batch_fields=1,
+			posting_date=add_days(today(), -3),
+			posting_time="12:00:00",
+		)
+
+		outward = make_stock_entry(
+			item_code=item_code,
+			qty=10,
+			source=warehouse,
+			posting_date=add_days(today(), -3),
+			posting_time="12:00:00",
+		)
+
+		# simulate the inward's bundle drafted after the outward's SLE, the
+		# bundle creation timeline no longer matches the SLE creation timeline
+		outward_sle_creation = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": outward.name, "is_cancelled": 0},
+			"creation",
+		)
+
+		frappe.db.set_value(
+			"Serial and Batch Bundle",
+			inward.items[0].serial_and_batch_bundle,
+			"creation",
+			add_to_date(outward_sle_creation, minutes=30),
+			update_modified=False,
+		)
+
+		repost = frappe.get_doc(
+			{
+				"doctype": "Repost Item Valuation",
+				"based_on": "Item and Warehouse",
+				"item_code": item_code,
+				"warehouse": warehouse,
+				"posting_date": add_days(today(), -6),
+				"posting_time": "00:00:00",
+				"allow_negative_stock": 1,
+			}
+		)
+
+		repost.submit()
+
+		# (10 * 100 + 10 * 200) / 20 = 150, the inward precedes the outward as
+		# per the SLE creation even though its bundle was created afterwards
+		self.assert_batchwise_outgoing_rate(item_code, outgoing_rate=150.0, balance_value=1500.0)
+
+	def assert_batchwise_outgoing_rate(self, item_code, outgoing_rate, balance_value):
+		sl_entries = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"item_code": item_code, "is_cancelled": 0},
+			fields=["actual_qty", "stock_value_difference", "stock_value"],
+			order_by="posting_datetime, creation",
+		)
+
+		for sle in sl_entries:
+			if sle.actual_qty > 0:
+				continue
+
+			self.assertEqual(flt(sle.stock_value_difference, 2), flt(sle.actual_qty * outgoing_rate, 2))
+
+		self.assertEqual(flt(sl_entries[-1].stock_value, 2), flt(balance_value, 2))

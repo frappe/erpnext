@@ -220,7 +220,7 @@ def make_inter_company_journal_entry(name: str, voucher_type: str, company: str)
 
 
 @frappe.whitelist()
-def make_reverse_journal_entry(source_name: str, target_doc: str | Document | None = None) -> Document:
+def make_reverse_journal_entry(source_name: str, target_doc: str | dict | Document | None = None) -> Document:
 	"""Map a submitted Journal Entry to a reversing one (debits and credits swapped)."""
 	existing_reverse = frappe.db.exists("Journal Entry", {"reversal_of": source_name, "docstatus": 1})
 	if existing_reverse:
