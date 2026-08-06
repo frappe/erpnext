@@ -49,6 +49,7 @@ class Company(NestedSet):
 		asset_received_but_not_billed: DF.Link | None
 		auto_err_frequency: DF.Literal["Daily", "Weekly", "Monthly"]
 		auto_exchange_rate_revaluation: DF.Check
+		bank_charges_account: DF.Link | None
 		book_advance_payments_in_separate_party_account: DF.Check
 		capital_work_in_progress_account: DF.Link | None
 		chart_of_accounts: DF.Literal[None]
@@ -366,6 +367,7 @@ class Company(NestedSet):
 			["Stock Delivered But Not Billed Account", "stock_delivered_but_not_billed"],
 			["Stock Adjustment Account", "stock_adjustment_account"],
 			["Write Off Account", "write_off_account"],
+			["Bank Charges Account", "bank_charges_account"],
 			["Default Payment Discount Account", "default_discount_account"],
 			["Unrealized Profit / Loss Account", "unrealized_profit_loss_account"],
 			["Exchange Gain / Loss Account", "exchange_gain_loss_account"],

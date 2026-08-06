@@ -53,6 +53,7 @@ def boot_session(bootinfo):
 				"enable_perpetual_inventory",
 				"country",
 				"exchange_gain_loss_account",
+				"bank_charges_account",
 			],
 			limit_page_length=0,  # intentionally unbounded: all companies are needed for boot
 		)

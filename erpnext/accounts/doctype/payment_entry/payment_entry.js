@@ -1293,6 +1293,7 @@ frappe.ui.form.on("Payment Entry", {
 		if (!row) {
 			const company_defaults = frappe.get_doc(":Company", frm.doc.company);
 			const account =
+				company_defaults?.bank_charges_account ||
 				company_defaults?.[account_fieldname] ||
 				(await prompt_for_missing_account(frm, account_fieldname));
 
@@ -1847,7 +1848,7 @@ frappe.ui.form.on("Payment Entry Deduction", {
 	before_deductions_remove: function (doc, cdt, cdn) {
 		const row = frappe.get_doc(cdt, cdn);
 		if (row.is_exchange_gain_loss && row.amount) {
-			frappe.throw(__("Cannot delete Exchange Gain/Loss row"));
+			frappe.throw(__("Cannot delete a system-generated deduction row"));
 		}
 	},
 
