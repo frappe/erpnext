@@ -443,10 +443,7 @@ class SerialandBatchBundle(Document):
 				if row.serial_no:
 					valuation_rate = valuation_details["serial_nos"].get(row.serial_no)
 				else:
-					# a batch emptied before the return has no average - fall back to the original rate
-					valuation_rate = batchwise_avg_rates.get(row.batch_no) or valuation_details[
-						"batches"
-					].get(row.batch_no)
+					valuation_rate = valuation_details["batches"].get(row.batch_no)
 
 				if frappe.flags.through_repost_item_valuation and not valuation_rate:
 					# if different serial nos / batches are returned
@@ -456,6 +453,12 @@ class SerialandBatchBundle(Document):
 					else:
 						batches = sorted(list(valuation_details["batches"].keys()))
 						valuation_rate = valuation_details["batches"].get(batches[cint(row.idx) - 1])
+
+				# a batch with an available balance goes out at its current average rate (a
+				# valid 0.0 included); the original receipt rate applies only when there is
+				# no balance to average
+				if not row.serial_no and row.batch_no in batchwise_avg_rates:
+					valuation_rate = batchwise_avg_rates[row.batch_no]
 
 				row.incoming_rate = flt(valuation_rate)
 				row.stock_value_difference = flt(row.qty) * flt(row.incoming_rate)
@@ -514,8 +517,13 @@ class SerialandBatchBundle(Document):
 		# machinery never runs for them
 		sle = self.get_sle_for_outward_transaction()
 		sle.batch_nos = {batch_no: sle.batch_nos[batch_no] for batch_no in batchwise_batches}
+		sle.batchwise_valuation_batches = batchwise_batches
 		sn_obj = BatchNoValuation(sle=sle, item_code=self.item_code, warehouse=self.warehouse)
-		return {batch_no: abs(flt(sn_obj.batch_avg_rate.get(batch_no))) for batch_no in batchwise_batches}
+		return {
+			batch_no: abs(flt(sn_obj.batch_avg_rate.get(batch_no)))
+			for batch_no in batchwise_batches
+			if flt(sn_obj.available_qty.get(batch_no))
+		}
 
 	def validate_returned_serial_batch_no(self, return_against, row, original_inv_details):
 		if frappe.flags.through_repost_item_valuation and not frappe.in_test:
