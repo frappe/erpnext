@@ -1,5 +1,6 @@
 import frappe
 
+from erpnext.accounts.utils import sync_auto_reconcile_config
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -40,3 +41,4 @@ class TestAccountsSettings(ERPNextTestSuite):
 	@staticmethod
 	def _restore_trigger(value):
 		frappe.db.set_single_value("Accounts Settings", "auto_reconciliation_job_trigger", value)
+		sync_auto_reconcile_config(value)

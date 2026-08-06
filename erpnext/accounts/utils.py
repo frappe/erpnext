@@ -2701,7 +2701,9 @@ def sync_auto_reconcile_config(auto_reconciliation_job_trigger: int = 15):
 	method = "erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.trigger_reconciliation_for_queued_docs"
 
 	sch_event_name = frappe.db.get_value(
-		"Scheduler Event", {"scheduled_against": "Process Payment Reconciliation", "method": method}
+		"Scheduler Event",
+		{"scheduled_against": "Process Payment Reconciliation", "method": method},
+		for_update=True,
 	)
 	if not sch_event_name:
 		sch_event_name = (
