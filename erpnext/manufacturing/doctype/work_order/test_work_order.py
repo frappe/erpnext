@@ -1680,6 +1680,14 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual([row.item_code for row in mr.items], [selected.item_code])
 		self.assertEqual(mr.items[0].qty, flt(selected.required_qty) * 4 / 10)
 
+	def test_material_request_rejects_nonpositive_qty(self):
+		work_order = make_wo_order_test_record(
+			planned_start_date=now(), qty=10, source_warehouse="Stores - _TC"
+		)
+
+		self.assertRaises(frappe.ValidationError, make_material_request, work_order.name, for_qty=0)
+		self.assertRaises(frappe.ValidationError, make_material_request, work_order.name, for_qty=-1)
+
 	def test_backflushed_batch_raw_materials_based_on_transferred(self):
 		frappe.db.set_single_value(
 			"Manufacturing Settings",
