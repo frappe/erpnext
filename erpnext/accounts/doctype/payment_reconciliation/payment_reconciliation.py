@@ -18,6 +18,7 @@ from erpnext.accounts.doctype.process_payment_reconciliation.process_payment_rec
 	is_any_doc_running,
 )
 from erpnext.accounts.services.advances import get_advance_payment_entries_for_regional
+from erpnext.accounts.services.exchange_gain_loss import get_exchange_gain_loss_account
 from erpnext.accounts.utils import (
 	QueryPaymentLedger,
 	create_gain_loss_journal,
@@ -485,9 +486,6 @@ class PaymentReconciliation(Document):
 			"Accounts Settings", "exchange_gain_loss_posting_date", cache=True
 		)
 		invoice_exchange_map = self.get_invoice_exchange_map(args.get("invoices"), args.get("payments"))
-		default_exchange_gain_loss_account = frappe.get_cached_value(
-			"Company", self.company, "exchange_gain_loss_account"
-		)
 
 		entries = []
 		for pay in args.get("payments"):
@@ -507,7 +505,10 @@ class PaymentReconciliation(Document):
 					pay["exchange_rate"] = invoice_exchange_map.get(pay.get("reference_name"))
 
 				res.difference_amount = self.get_difference_amount(pay, inv, res["allocated_amount"])
-				res.difference_account = default_exchange_gain_loss_account
+				is_gain = (
+					res.difference_amount > 0 if self.party_type == "Customer" else res.difference_amount < 0
+				)
+				res.difference_account = get_exchange_gain_loss_account(self.company, is_gain)
 				res.exchange_rate = inv.get("exchange_rate")
 				res.update({"gain_loss_posting_date": pay.get("posting_date")})
 				if not pay.get("is_advance"):

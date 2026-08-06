@@ -103,7 +103,9 @@ class Company(NestedSet):
 		enable_provisional_accounting_for_non_stock_items: DF.Check
 		enable_stock_delivered_but_not_billed: DF.Check
 		exception_budget_approver_role: DF.Link | None
+		exchange_gain_account: DF.Link | None
 		exchange_gain_loss_account: DF.Link | None
+		exchange_loss_account: DF.Link | None
 		existing_company: DF.Link | None
 		expenses_added_to_stock_account: DF.Link | None
 		expenses_added_to_stock_contra_account: DF.Link | None
@@ -369,6 +371,8 @@ class Company(NestedSet):
 			["Default Payment Discount Account", "default_discount_account"],
 			["Unrealized Profit / Loss Account", "unrealized_profit_loss_account"],
 			["Exchange Gain / Loss Account", "exchange_gain_loss_account"],
+			["Exchange Gain Account", "exchange_gain_account"],
+			["Exchange Loss Account", "exchange_loss_account"],
 			["Unrealized Exchange Gain / Loss Account", "unrealized_exchange_gain_loss_account"],
 			["Round Off Account", "round_off_account"],
 			["Default Deferred Revenue Account", "default_deferred_revenue_account"],
@@ -791,6 +795,20 @@ class Company(NestedSet):
 			)
 
 			self.db_set("exchange_gain_loss_account", exchange_gain_loss_acct)
+
+		if not self.exchange_gain_account:
+			exchange_gain_acct = frappe.db.get_value(
+				"Account", {"account_name": _("Exchange Gain"), "company": self.name, "is_group": 0}
+			)
+
+			self.db_set("exchange_gain_account", exchange_gain_acct)
+
+		if not self.exchange_loss_account:
+			exchange_loss_acct = frappe.db.get_value(
+				"Account", {"account_name": _("Exchange Loss"), "company": self.name, "is_group": 0}
+			)
+
+			self.db_set("exchange_loss_account", exchange_loss_acct)
 
 		if not self.disposal_account:
 			disposal_acct = frappe.db.get_value(
