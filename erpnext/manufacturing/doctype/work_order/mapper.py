@@ -523,15 +523,35 @@ def _set_pick_list_item_qty(source, target, source_parent, for_qty, max_finished
 
 
 @frappe.whitelist()
-def make_material_request(source_name: str, target_doc: str | dict | Document | None = None):
+def make_material_request(
+	source_name: str, target_doc: str | dict | Document | None = None, for_qty: float | None = None
+):
 	frappe.has_permission("Material Request", "create", throw=True)
 
-	doc = get_mapped_doc("Work Order", source_name, _material_request_mapping(), target_doc)
+	# make_mapped_doc sets js `args` into `frappe.flags.args`
+	if not for_qty and frappe.flags.args:
+		for_qty = frappe.flags.args.for_qty
+
+	work_order = frappe.db.get_value(
+		"Work Order", source_name, ["qty", "material_transferred_for_manufacturing"], as_dict=True
+	)
+	for_qty = flt(for_qty) or _pending_transfer_qty(work_order)
+	postprocess = partial(
+		_set_material_request_item, for_qty=for_qty, max_finished_goods_qty=flt(work_order.qty)
+	)
+
+	doc = get_mapped_doc("Work Order", source_name, _material_request_mapping(postprocess), target_doc)
 	doc.material_request_type = "Material Transfer"
 	return doc
 
 
-def _material_request_mapping():
+def _pending_transfer_qty(work_order):
+	"""Fallback when no qty is passed: whatever is still to be transferred, else the full qty."""
+	pending = flt(work_order.qty) - flt(work_order.material_transferred_for_manufacturing)
+	return pending if pending > 0 else flt(work_order.qty)
+
+
+def _material_request_mapping(postprocess):
 	return {
 		"Work Order": {
 			"doctype": "Material Request",
@@ -541,19 +561,26 @@ def _material_request_mapping():
 		"Work Order Item": {
 			"doctype": "Material Request Item",
 			"field_map": [
-				("required_qty", "qty"),
 				("stock_uom", "uom"),
 				("source_warehouse", "from_warehouse"),
 			],
-			"postprocess": _set_material_request_item,
+			"postprocess": postprocess,
 			"condition": lambda doc: abs(doc.transferred_qty) < abs(doc.required_qty),
 		},
 	}
 
 
-def _set_material_request_item(source, target, source_parent):
+def _set_material_request_item(source, target, source_parent, for_qty, max_finished_goods_qty):
+	pending_to_issue = flt(source.required_qty) - flt(source.transferred_qty)
+	desire_to_transfer = flt(source.required_qty) / max_finished_goods_qty * flt(for_qty)
+
+	qty = min(desire_to_transfer, pending_to_issue)
+	if qty <= 0:
+		target.delete()
+		return
+
 	target.warehouse = source_parent.wip_warehouse
-	target.qty = flt(source.required_qty) - flt(source.transferred_qty)
+	target.qty = qty
 	target.schedule_date = nowdate()
 
 
