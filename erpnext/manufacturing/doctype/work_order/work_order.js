@@ -1169,11 +1169,21 @@ erpnext.work_order = {
 		}
 	},
 
-	make_material_request: function (frm) {
-		frappe.model.open_mapped_doc({
-			method: "erpnext.manufacturing.doctype.work_order.mapper.make_material_request",
-			frm,
-		});
+	make_material_request: function (frm, purpose = "Material Transfer for Manufacture") {
+		const max = this.get_max_transferable_qty(frm, purpose);
+
+		const get_material_request = (for_qty) =>
+			frappe.model.open_mapped_doc({
+				method: "erpnext.manufacturing.doctype.work_order.mapper.make_material_request",
+				frm,
+				args: { for_qty: for_qty },
+			});
+
+		if (max <= 0) {
+			get_material_request(frm.doc.qty);
+		} else {
+			this.show_prompt_for_qty_input(frm, purpose).then((data) => get_material_request(data.qty));
+		}
 	},
 
 	create_pick_list: function (frm, purpose = "Material Transfer for Manufacture") {

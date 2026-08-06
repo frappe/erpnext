@@ -523,15 +523,25 @@ def _set_pick_list_item_qty(source, target, source_parent, for_qty, max_finished
 
 
 @frappe.whitelist()
-def make_material_request(source_name: str, target_doc: str | dict | Document | None = None):
+def make_material_request(
+	source_name: str, target_doc: str | dict | Document | None = None, for_qty: float | None = None
+):
 	frappe.has_permission("Material Request", "create", throw=True)
 
-	doc = get_mapped_doc("Work Order", source_name, _material_request_mapping(), target_doc)
+	if for_qty is None and frappe.flags.args:
+		for_qty = frappe.flags.args.for_qty
+
+	fraction = 1.0
+	if for_qty:
+		fraction = flt(for_qty) / flt(frappe.db.get_value("Work Order", source_name, "qty"))
+
+	postprocess = partial(_set_material_request_item, fraction=fraction)
+	doc = get_mapped_doc("Work Order", source_name, _material_request_mapping(postprocess), target_doc)
 	doc.material_request_type = "Material Transfer"
 	return doc
 
 
-def _material_request_mapping():
+def _material_request_mapping(postprocess):
 	return {
 		"Work Order": {
 			"doctype": "Material Request",
@@ -541,19 +551,19 @@ def _material_request_mapping():
 		"Work Order Item": {
 			"doctype": "Material Request Item",
 			"field_map": [
-				("required_qty", "qty"),
 				("stock_uom", "uom"),
 				("source_warehouse", "from_warehouse"),
 			],
-			"postprocess": _set_material_request_item,
+			"postprocess": postprocess,
 			"condition": lambda doc: abs(doc.transferred_qty) < abs(doc.required_qty),
 		},
 	}
 
 
-def _set_material_request_item(source, target, source_parent):
+def _set_material_request_item(source, target, source_parent, fraction):
+	pending_qty = flt(source.required_qty) - flt(source.transferred_qty)
 	target.warehouse = source_parent.wip_warehouse
-	target.qty = flt(source.required_qty) - flt(source.transferred_qty)
+	target.qty = min(flt(source.required_qty) * fraction, pending_qty)
 	target.schedule_date = nowdate()
 
 
