@@ -533,7 +533,7 @@ frappe.ui.form.on("Material Request", {
 				},
 			],
 			primary_action_label: __("Create"),
-			primary_action: async function (values) {
+			primary_action: function (values) {
 				const item_suppliers = (values.items || []).filter((row) => row.__checked);
 				if (!item_suppliers.length) {
 					frappe.throw(__("Select at least one Item"));
@@ -565,10 +565,6 @@ frappe.ui.form.on("Material Request", {
 							`<b>${pending_qty}</b>`,
 						])
 					);
-				}
-
-				if (!(await erpnext.utils.confirm_if_drafts_exist(frm.doc, "Purchase Order"))) {
-					return;
 				}
 
 				frappe.call({
