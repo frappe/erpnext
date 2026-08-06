@@ -1638,6 +1638,48 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(work_order.material_transferred_for_manufacturing, 0.0)
 		self.assertEqual(work_order.status, "In Process")
 
+	def test_material_request_qty_scales_with_requested_qty(self):
+		work_order = make_wo_order_test_record(
+			planned_start_date=now(), qty=10, source_warehouse="Stores - _TC"
+		)
+		required_qty = {row.item_code: flt(row.required_qty) for row in work_order.required_items}
+
+		mr = make_material_request(work_order.name, for_qty=4)
+		self.assertEqual(len(mr.items), len(required_qty))
+		for row in mr.items:
+			self.assertEqual(row.qty, required_qty[row.item_code] * 4 / 10)
+
+		mr = make_material_request(work_order.name)
+		for row in mr.items:
+			self.assertEqual(row.qty, required_qty[row.item_code])
+
+	def test_material_request_qty_capped_at_pending_qty(self):
+		work_order = make_wo_order_test_record(
+			planned_start_date=now(), qty=10, source_warehouse="Stores - _TC"
+		)
+		partially_transferred = work_order.required_items[0]
+		partially_transferred.db_set("transferred_qty", flt(partially_transferred.required_qty) - 1)
+		work_order.reload()
+
+		mr = make_material_request(work_order.name, for_qty=10)
+		requested_qty = {row.item_code: row.qty for row in mr.items}
+		self.assertEqual(requested_qty[partially_transferred.item_code], 1)
+
+	def test_material_request_maps_only_selected_rows(self):
+		work_order = make_wo_order_test_record(
+			planned_start_date=now(), qty=10, source_warehouse="Stores - _TC"
+		)
+		selected = work_order.required_items[0]
+
+		try:
+			frappe.flags.selected_children = {"required_items": [selected.name]}
+			mr = make_material_request(work_order.name, for_qty=4)
+		finally:
+			frappe.flags.selected_children = None
+
+		self.assertEqual([row.item_code for row in mr.items], [selected.item_code])
+		self.assertEqual(mr.items[0].qty, flt(selected.required_qty) * 4 / 10)
+
 	def test_backflushed_batch_raw_materials_based_on_transferred(self):
 		frappe.db.set_single_value(
 			"Manufacturing Settings",
