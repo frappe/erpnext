@@ -356,7 +356,7 @@ class ShopFloor {
 		// Hero image = the current operation's workstation. No item-image fallback — when the
 		// workstation has no image uploaded we show its initials, never the product image.
 		const image = wo.workstation_image
-			? `<img src="${wo.workstation_image}" alt="">`
+			? `<img src="${frappe.utils.escape_html(wo.workstation_image)}" alt="">`
 			: `<span class="sf-wo-image-fallback">${frappe.get_abbr(wo.workstation_name || item, 2)}</span>`;
 
 		const workstation_line = wo.workstation_name
@@ -370,7 +370,9 @@ class ShopFloor {
 		const wip_pct = Math.min(cint(wo.per_in_progress), 100 - done_pct);
 
 		return `
-			<div class="sf-wo-card" data-sf-focusable data-kind="wo" data-name="${wo.name}" tabindex="0">
+			<div class="sf-wo-card" data-sf-focusable data-kind="wo" data-name="${frappe.utils.escape_html(
+				wo.name
+			)}" tabindex="0">
 				<div class="sf-wo-top">
 					<div class="sf-wo-image">${image}</div>
 					<div class="sf-wo-head">
@@ -378,7 +380,9 @@ class ShopFloor {
 						${workstation_line}
 						<div class="sf-wo-id">
 							<span class="sf-wo-status-dot ${wo.status_colour}" title="${frappe.utils.escape_html(__(wo.status))}"></span>
-							<a href="/app/work-order/${wo.name}" onclick="event.stopPropagation()">${wo.name}</a>
+							<a href="/app/work-order/${encodeURIComponent(
+								wo.name
+							)}" onclick="event.stopPropagation()">${frappe.utils.escape_html(wo.name)}</a>
 						</div>
 					</div>
 				</div>
@@ -405,7 +409,7 @@ class ShopFloor {
 		this.board_container
 			.find(".sf-wo-card")
 			.removeClass("sf-selected")
-			.filter(`[data-name="${name}"]`)
+			.filter(`[data-name="${$.escapeSelector(name)}"]`)
 			.addClass("sf-selected");
 		// The detail pane reuses the operator rendering for a single work order.
 		this.detail_container.html(`
@@ -414,7 +418,9 @@ class ShopFloor {
 			"Back"
 		)} (Esc)</button>
 				<span class="sf-detail-title">${frappe.utils.escape_html(name)}</span>
-				<a class="btn btn-default btn-sm" href="/app/work-order/${name}" target="_blank">${__("Open")}</a>
+				<a class="btn btn-default btn-sm" href="/app/work-order/${encodeURIComponent(name)}" target="_blank">${__(
+			"Open"
+		)}</a>
 			</div>
 			<div class="sf-detail-body"></div>
 		`);
@@ -1235,7 +1241,7 @@ class ShopFloor {
 		const pad = (n) => (n < 10 ? "0" + n : String(n));
 
 		const scope = $container || this.wrapper;
-		const timer = scope.find(`.mes-job-timer[data-job-card="${jc_name}"]`);
+		const timer = scope.find(`.mes-job-timer[data-job-card="${$.escapeSelector(jc_name)}"]`);
 		timer.find(".h").text(pad(h));
 		timer.find(".m").text(pad(m));
 		timer.find(".s").text(pad(s));
