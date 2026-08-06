@@ -5,7 +5,7 @@ frappe.ui.form.on("Work Order", {
 	setup: function (frm) {
 		frm.custom_make_buttons = {
 			"Stock Entry": "Start",
-			"Pick List": "Create Pick List",
+			"Pick List": "Pick List",
 			"Job Card": "Create Job Card",
 		};
 
@@ -818,13 +818,21 @@ erpnext.work_order = {
 
 					if (pending_to_transfer && frm.doc.status != "Stopped") {
 						frm.has_start_btn = true;
-						frm.add_custom_button(__("Create Pick List"), function () {
-							erpnext.work_order.create_pick_list(frm);
-						});
+						frm.add_custom_button(
+							__("Pick List"),
+							function () {
+								erpnext.work_order.create_pick_list(frm);
+							},
+							__("Create")
+						);
 
-						frm.add_custom_button(__("Material Request"), function () {
-							erpnext.work_order.make_material_request(frm);
-						});
+						frm.add_custom_button(
+							__("Material Request"),
+							function () {
+								erpnext.work_order.make_material_request(frm);
+							},
+							__("Create")
+						);
 
 						var start_btn = frm.add_custom_button(__("Start"), function () {
 							erpnext.work_order.make_se(frm, "Material Transfer for Manufacture");
@@ -861,7 +869,7 @@ erpnext.work_order = {
 											frappe.set_route("Form", stock_entry.doctype, stock_entry.name);
 										});
 								},
-								__("Make")
+								__("Create")
 							);
 						}
 					}
@@ -895,7 +903,7 @@ erpnext.work_order = {
 										backflush_raw_materials_based_on
 									);
 								},
-								__("Make")
+								__("Create")
 							);
 						}
 					}
