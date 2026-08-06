@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-08-02 10:09+0000\n"
-"PO-Revision-Date: 2026-08-05 10:02\n"
+"PO-Revision-Date: 2026-08-06 10:02\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Bosnian\n"
 "MIME-Version: 1.0\n"
@@ -789,9 +789,9 @@ msgstr "<h4>Primjer Predloška Ugovora</h4>\n\n"
 "-Važi do: {{ end_date }}\n"
 "</pre>\n\n"
 "<h4>Kako dobiti imena polja</h4>\n\n"
-"<p>Nazivi polja koje možete koristiti u svom predlošku ugovora su polja u ugovoru za koje izradi predložak. Možete saznati polja bilo kojeg dokumenta putem Podešavanja &gt; Prilagodi prikaz obrasca i odabir vrste dokumenta (npr. Ugovor)</p>\n\n"
+"<p>Nazivi polja koje možete koristiti u svom predlošku ugovora su polja u ugovoru za koje izradi predložak. Možete saznati polja bilo kojeg dokumenta putem Podešavanja &gt; Prilagodi prikaz obrasca i odabir tipa dokumenta (npr. Ugovor)</p>\n\n"
 "<h4>Predložak</h4>\n\n"
-"<p>Predložci se kompajliraju koristeći Jinja Templating Language. Da saznate više o Jinji, <a class=\"strong\" href=\"http://jinja.pocoo.org/docs/dev/templates/\">pročitajte ovu dokumentaciju.</a></p>"
+"<p>Predložci se kompajliraju koristeći Jinja Templating Language. Da saznate više o Jinji, <a class=\"strong\" href=\"http://jinja.pocoo.org/docs/dev/templates/\">pročitaj ovu dokumentaciju.</a></p>"
 
 #. Content of the 'Terms and Conditions Help' (HTML) field in DocType 'Terms
 #. and Conditions'
@@ -2926,11 +2926,11 @@ msgstr "Dodaj Bilješku"
 
 #: banking/src/components/features/BankReconciliation/RecordPaymentModalContent.tsx:879
 msgid "Add a charge to the payment entry with the difference amount"
-msgstr "Dodajte naplatu u unos plaćanja s iznosom razlike"
+msgstr "Dodaj naplatu u unos plaćanja s iznosom razlike"
 
 #: banking/src/components/features/BankReconciliation/RecordPaymentModalContent.tsx:863
 msgid "Add a charge to the payment entry with the unallocated amount"
-msgstr "Dodajte naplatu u unos plaćanja s nedodjeljnim iznosom"
+msgstr "Dodaj naplatu u unos plaćanja s nedodjeljnim iznosom"
 
 #: banking/src/components/features/BankReconciliation/BankEntryModalContent.tsx:776
 msgid "Add a row with the difference amount"
@@ -2942,7 +2942,7 @@ msgstr "Dodaj sve račune na koje želite podijeliti transakciju."
 
 #: erpnext/accounts/doctype/repost_accounting_ledger/repost_accounting_ledger.py:92
 msgid "Add atleast one voucher to repost."
-msgstr "Dodajte barem jedan verifikat za ponovno knjiženje."
+msgstr "Dodaj barem jedan verifikat za ponovno knjiženje."
 
 #: erpnext/www/book_appointment/index.html:42
 msgid "Add details"
@@ -3405,7 +3405,7 @@ msgstr "Adresa & Kontakt"
 
 #: erpnext/accounts/custom/address.py:35
 msgid "Address needs to be linked to a Company. Please add a row for Company in the Links table."
-msgstr "Adresa mora biti povezana s firmom. Dodajte red za firmu u tabeli Veze."
+msgstr "Adresa mora biti povezana s firmom. Dodaj red za firmu u tabeli Veze."
 
 #. Description of the 'Determine Address Tax Category from' (Select) field in
 #. DocType 'Accounts Settings'
@@ -3966,7 +3966,7 @@ msgstr "Sve Prodajno Osoblje"
 #. Description of a DocType
 #: erpnext/setup/doctype/sales_person/sales_person.json
 msgid "All Sales Transactions can be tagged against multiple Sales Persons so that you can set and monitor targets."
-msgstr "Sve prodajne transakcije mogu se označiti naspram više prodajnih osoba kako biste mogli postaviti i nadzirati ciljeve."
+msgstr "Sve prodajne transakcije mogu se odabrati naspram više prodajnih osoba kako biste mogli postaviti i nadzirati ciljeve."
 
 #. Option for the 'Send To' (Select) field in DocType 'SMS Center'
 #: erpnext/selling/doctype/sms_center/sms_center.json
@@ -4055,7 +4055,7 @@ msgstr "Sve odabrani artikli su već preneseni na ovu listu odabira"
 #. in DocType 'CRM Settings'
 #: erpnext/crm/doctype/crm_settings/crm_settings.json
 msgid "All the Comments and Emails will be copied from one document to another newly created document(Lead -> Opportunity -> Quotation) throughout the CRM documents."
-msgstr "Svi komentari i e-pošta kopirat će se iz jednog dokumenta u drugi novostvoreni dokument (Potencijalni Klijent -> Prilika-> Ponuda) kroz dokumente Prodajne Podrške."
+msgstr "Svi komentari i e-pošta kopirat će se iz jednog dokumenta u drugi novoizrađeni dokument (Potencijalni Klijent -> Prilika-> Ponuda) kroz dokumente Prodajne Podrške."
 
 #: erpnext/selling/page/point_of_sale/pos_past_order_summary.js:204
 msgid "All the items have already been returned."
@@ -5598,7 +5598,7 @@ msgstr "Termin se može zakazati samo do {0} dana unaprijed."
 
 #: erpnext/crm/doctype/appointment/appointment.py:79
 msgid "Appointment cannot be scheduled for a past time."
-msgstr "Termin se ne može zakazati za prošlu vrijeme."
+msgstr "Termin se ne može zakazati za prošlo vrijeme."
 
 #: erpnext/crm/doctype/appointment/appointment.py:98
 msgid "Appointment cannot be scheduled on a holiday."
@@ -5664,11 +5664,11 @@ msgstr "Jeste li sigurni da želite izbrisati sve demo podatke?"
 #: erpnext/stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.js:51
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.js:100
 msgid "Are you sure you want to create Reposting Entries?"
-msgstr "Jeste li sigurni da želite stvoriti ponovno knjiženje unosa?"
+msgstr "Jeste li sigurni da želite izraditi ponovno knjiženje unosa?"
 
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.js:66
 msgid "Are you sure you want to create a Reposting Entry?"
-msgstr "Jeste li sigurni da želite stvoriti ponovno knjiženje unosa?"
+msgstr "Jeste li sigurni da želite izraditi ponovno knjiženje unosa?"
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:499
 msgid "Are you sure you want to delete this Item?"
@@ -6455,7 +6455,7 @@ msgstr "Red {0}: Serijski Broj je obavezan za Artikal {1}"
 
 #: erpnext/stock/services/serial_batch_bundle_service.py:504
 msgid "At row {0}: Serial and Batch Bundle {1} has already been created. Please remove the values from the serial no or batch no fields."
-msgstr "U Redu {0}: Serijski i Šaržni Paket {1} je već stvoren. Uklonite vrijednosti iz polja za serijski ili šaržni broj."
+msgstr "U Redu {0}: Serijski i Šaržni Paket {1} je već izrađen. Uklonite vrijednosti iz polja za serijski ili šaržni broj."
 
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:123
 msgid "At row {0}: set Parent Row No for item {1}"
@@ -6729,7 +6729,7 @@ msgstr "Automatska izrada Podizvođačkom Naloga"
 #. Label of the auto_create_assets (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Auto create assets on purchase"
-msgstr "Automatski stvori sredstava pri nabavi"
+msgstr "Automatski izradi sredstava pri nabavi"
 
 #. Label of the auto_insert_price_list_rate_if_missing (Check) field in DocType
 #. 'Stock Settings'
@@ -6796,7 +6796,7 @@ msgstr "Automatski Izradi Novi Šaržu"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Automatically add Taxes and Charges from Item Tax Template"
-msgstr "Automatski dodajte PDV i Naknade iz Predloška za PDV na Artikal"
+msgstr "Automatski dodaj PDV i Naknade iz Predloška za PDV na Artikal"
 
 #. Label of the add_taxes_from_taxes_and_charges_template (Check) field in
 #. DocType 'Accounts Settings'
@@ -7013,7 +7013,7 @@ msgstr "Prosječna Cjena"
 #. Label of the avg_response_time (Duration) field in DocType 'Issue'
 #: erpnext/support/doctype/issue/issue.json
 msgid "Average Response Time"
-msgstr "Prosječno Vreme Odziva"
+msgstr "Prosječno Vreme Odgovora"
 
 #. Description of the 'Lead Time in days' (Int) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -7770,7 +7770,7 @@ msgstr "Bankovni Nacrt"
 
 #: banking/src/components/features/BankReconciliation/BankEntryModalContent.tsx:98
 msgid "Bank Entries Created"
-msgstr "Bankovni Unosi Stvoreni"
+msgstr "Bankovni Unosi Izrađeni"
 
 #. Option for the 'Classify As' (Select) field in DocType 'Bank Transaction
 #. Rule'
@@ -7792,7 +7792,7 @@ msgstr "Bankovni Unos"
 
 #: banking/src/components/features/BankReconciliation/BankEntryModalContent.tsx:295
 msgid "Bank Entry Created"
-msgstr "Bankovni Unos Stvoren"
+msgstr "Bankovni Unos Izrađen"
 
 #. Label of the bank_entry_type (Select) field in DocType 'Bank Transaction
 #. Rule'
@@ -8362,12 +8362,12 @@ msgstr "Šarža nije izrađena za artikal {0} jer nema Broj Šarže."
 #. 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Batch number will be auto-created in format AAAA.00001 if not specified in transactions. Leave blank to always enter batch numbers manually."
-msgstr "Broj šarže bit će automatski stvoren u formatu AAAA.00001 ako nije naveden u transakcijama. Ostavite prazno da biste uvijek ručno unosili brojeve šarže."
+msgstr "Broj šarže bit će automatski izrađen u formatu AAAA.00001 ako nije naveden u transakcijama. Ostavite prazno da biste uvijek ručno unosili brojeve šarže."
 
 #. Description of the 'Has Expiry Date' (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Batch number will be created based on expiry date. Expiry dates can be set in the Batch master."
-msgstr "Broj šarže bit će stvoren na temelju datuma isteka. Datumi isteka mogu se postaviti u Postavkama Šarže."
+msgstr "Broj šarže bit će izrađen na temelju datuma isteka. Datumi isteka mogu se postaviti u Postavkama Šarže."
 
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:384
 msgid "Batch {0} and Warehouse"
@@ -9949,7 +9949,7 @@ msgstr "Nije moguće izraditi knjigovodstvene unose naspram onemogućenih račun
 
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.py:146
 msgid "Cannot create more Subcontracting Orders against the Purchase Order {0}."
-msgstr "Ne može se stvoriti više Podugovornih Naloga na osnovu Naloga Nabave {0}."
+msgstr "Ne može se izraditi više Podugovornih Naloga na osnovu Naloga Nabave {0}."
 
 #: erpnext/controllers/sales_and_purchase_return.py:444
 msgid "Cannot create return for consolidated invoice {0}."
@@ -10998,7 +10998,7 @@ msgstr "Zatvorite Predmet nakon (dana)"
 
 #: erpnext/accounts/doctype/invoice_discounting/invoice_discounting.js:69
 msgid "Close Loan"
-msgstr "Zatvori Zajam"
+msgstr "Zatvori Kredit"
 
 #. Label of the close_opportunity_after_days (Int) field in DocType 'CRM
 #. Settings'
@@ -12182,7 +12182,7 @@ msgstr "Proizvedena Količina"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:1737
 msgid "Completed Quantity ({0}), Pending Quantity ({1}) and Process Loss Quantity ({2}) must add up to the Qty to Manufacture ({3})."
-msgstr "Izvršena Količina ({0}), Količina na Čekanju ({1}) i Količina Gubitka u Procesu ({2}) moraju se zbrajati do Količine za Proizvodnju ({3})."
+msgstr "Završena Količina ({0}), Količina na Čekanju ({1}) i Količina Gubitka u Procesu ({2}) moraju se zbrajati do Količine za Proizvodnju ({3})."
 
 #: erpnext/manufacturing/doctype/job_card/job_card.js:280
 #: erpnext/public/js/shop_floor/shop_floor.js:825
@@ -14068,7 +14068,7 @@ msgstr "Stvarajednu grupisanu imovinu umjesto pojedinačnih kada se nabavlja na 
 #. 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Creates an Item Price automatically when the item is saved"
-msgstr "Automatski stvori cjenu artikla kada se artikal spremi"
+msgstr "Automatski izradi cjenu artikla kada se artikal spremi"
 
 #: erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.js:140
 msgid "Creating Accounts..."
@@ -17662,7 +17662,7 @@ msgstr "Rastavljena Količina"
 
 #: erpnext/accounts/doctype/invoice_discounting/invoice_discounting.js:64
 msgid "Disburse Loan"
-msgstr "Isplati Zajam"
+msgstr "Isplati Kredit"
 
 #. Option for the 'Status' (Select) field in DocType 'Invoice Discounting'
 #: erpnext/accounts/doctype/invoice_discounting/invoice_discounting.json
@@ -21632,7 +21632,7 @@ msgstr "Za individualnog Dobavljača"
 
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py:379
 msgid "For item <b>{0}</b>, only <b>{1}</b> assets have been created or linked to <b>{2}</b>. Please create or link <b>{3}</b> more assets with the respective document."
-msgstr "Za artikal <b>{0}</b>, samo <b>{1}</b> imovina je stvorena ili povezana s <b>{2}</b>. Stvori ili poveži još <b>{3}</b> imovine s odgovarajućim dokumentom."
+msgstr "Za artikal <b>{0}</b>, samo <b>{1}</b> imovina je izrađena ili povezana s <b>{2}</b>. Izradi ili poveži još <b>{3}</b> imovine s odgovarajućim dokumentom."
 
 #: erpnext/controllers/status_updater.py:303
 msgid "For item {0}, rate must be a positive number. To allow negative rates, enable {1} in {2}"
@@ -21646,7 +21646,7 @@ msgstr "Za stare serijske brojeve, nemojte preuzimati nabvnu cjenu iz serijskog 
 
 #: erpnext/manufacturing/doctype/bom/bom.py:400
 msgid "For operation {0} at row {1}, please add raw materials or set a BOM against it."
-msgstr "Za radnju {0} u redu {1}, molimo dodajte sirovine ili postavi Sastavnicu naspram nje."
+msgstr "Za radnju {0} u redu {1}, molimo dodaj sirovine ili postavi Sastavnicu naspram nje."
 
 #: erpnext/manufacturing/doctype/work_order/mapper.py:383
 msgid "For operation {0}: Quantity ({1}) can not be greater than pending quantity ({2})"
@@ -23856,7 +23856,7 @@ msgstr "Ako je <b>Omogućeno</b> - Usaglašavanje se dešava na <b>Datum Knjiže
 
 #: erpnext/accounts/doctype/loyalty_program/loyalty_program.js:34
 msgid "If Auto Opt In is checked, then the customers will be automatically linked with the concerned Loyalty Program (on save)"
-msgstr "Ako je automatska registracija označena, tada će klijenti biti automatski povezani sa dotičnim Programom Lojalnosti (prilikom spremanja)"
+msgstr "Ako je automatska registracija odabrana, tada će klijenti biti automatski povezani sa dotičnim Programom Lojalnosti (prilikom spremanja)"
 
 #. Description of the 'Cost Center' (Link) field in DocType 'Journal Entry
 #. Account'
@@ -24118,7 +24118,7 @@ msgstr "Ako je omogućeno, sistem će dozvoliti korisnicima da uređuju sirovine
 #. in DocType 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "If enabled, the system will generate an accounting entry for materials rejected in the Purchase Receipt."
-msgstr "Ako je omogućeno, sistem će stvoriti knjigovodstveni unos za odbijene materijale u Nabavnom Računu."
+msgstr "Ako je omogućeno, sistem će izraditi knjigovodstveni unos za odbijene materijale u Nabavnom Računu."
 
 #. Description of the 'Enable Item-wise Inventory Account' (Check) field in
 #. DocType 'Company'
@@ -28000,7 +28000,7 @@ msgstr "Cjena Artikla se pojavljuje više puta na osnovu Cjenovnika, Dobavljača
 
 #: erpnext/stock/doctype/item/item.py:186
 msgid "Item Price created at rate {0}"
-msgstr "Cjena Artikla stvorena po stopi {0}"
+msgstr "Cjena Artikla izrađena po stopi {0}"
 
 #: erpnext/stock/get_item_details.py:1160
 msgid "Item Price updated for {0} in Price List {1}"
@@ -28341,7 +28341,7 @@ msgstr "Artikal Radnji"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:676
 msgid "Item rate has been updated to zero as Allow Zero Valuation Rate is checked for item {0}"
-msgstr "Cjena Artikla je ažurirana na nulu jer je Dozvoli Nultu Stopu Vrednovanja označena za artikal {0}"
+msgstr "Cjena Artikla je ažurirana na nulu jer je Dozvoli Nultu Stopu Vrednovanja odabrana za artikal {0}"
 
 #: erpnext/stock/doctype/material_request/material_request.py:231
 msgid "Item rates have been updated based on the selected Buying Price List {0}"
@@ -30955,7 +30955,7 @@ msgstr "Uporedi i Uskladi"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:62
 msgid "Match or Create"
-msgstr "Uskladi ili Stvori"
+msgstr "Uskladi ili Izradi"
 
 #. Label of the transfer_match_days (Int) field in DocType 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
@@ -32253,7 +32253,7 @@ msgstr "Za datum {0} postoji više fiskalnih godina. Postavi poduzeće u Fiskaln
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:957
 msgid "Multiple items cannot be marked as finished item"
-msgstr "Više artikala se ne mogu označiti kao gotov proizvod"
+msgstr "Više artikala se ne mogu odabrati kao gotov proizvod"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:33
 msgid "Music"
@@ -32900,7 +32900,7 @@ msgstr "Nove fakture će se izraditi prema rasporedu čak i ako su trenutne fakt
 
 #: erpnext/support/doctype/issue/issue.js:126
 msgid "New issue created: {0}"
-msgstr "Novi zahtjev stvoren: {0}"
+msgstr "Novi zahtjev izrađen: {0}"
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:261
 msgid "New release date should be in the future"
@@ -35664,7 +35664,7 @@ msgstr "Kasa Faktura nije podnešena"
 
 #: erpnext/accounts/doctype/pos_closing_entry/pos_closing_entry.py:130
 msgid "POS Invoice isn't created by user {0}"
-msgstr "Korisnik {0} nije stvorio Kasa Fakturu"
+msgstr "Korisnik {0} nije izradio Kasa Fakturu"
 
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:208
 msgid "POS Invoice should have the field {0} checked."
@@ -37339,7 +37339,7 @@ msgstr "Platni Zahtjevi ne mogu se izraditi naspram: {0}"
 #. in DocType 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Payment Requests made from Sales / Purchase Invoice will be put in Draft explicitly"
-msgstr "Zahtjevi Plaćanja stvoren iz Prodajne / Nabavne Fakture bit će eksplicitno stavljeni u Nacrt"
+msgstr "Zahtjevi Plaćanja izrađen iz Prodajne / Nabavne Fakture bit će eksplicitno stavljeni u Nacrt"
 
 #. Label of the payment_schedule (Data) field in DocType 'Overdue Payment'
 #. Label of the payment_schedule (Link) field in DocType 'Payment Reference'
@@ -47634,7 +47634,7 @@ msgstr "Red #{0}: Šarža {1} je već istekla."
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:417
 msgid "Row #{0}: The job card item reference is missing. Kindly create the stock entry from the job card. If you have added the row manually then you won't be able to add job card item reference."
-msgstr "Red #{0}: Nedostaje referenca artikla na radnoj kartici. Stvori unos zaliha iz radne kartice. Ako ste red dodali ručno, nećete moći dodati referencu artikla na radnu karticu."
+msgstr "Red #{0}: Nedostaje referenca artikla na radnoj kartici. Izradi unos zaliha iz radne kartice. Ako ste red dodali ručno, nećete moći dodati referencu artikla na radnu karticu."
 
 #: erpnext/accounts/doctype/pos_invoice_merge_log/pos_invoice_merge_log.py:103
 msgid "Row #{0}: The original Invoice {1} of return invoice {2} is not consolidated."
@@ -50129,7 +50129,7 @@ msgstr "Odabrani Početni Unos Kase bi trebao biti otvoren."
 
 #: erpnext/accounts/doctype/sales_invoice/mapper.py:158
 msgid "Selected Price List should have buying and selling fields checked."
-msgstr "Odabrani Cjenovnik treba da ima označena polja za Nabavu i Prodaju."
+msgstr "Odabrani Cjenovnik treba da ima odabrana polja za Nabavu i Prodaju."
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:123
 msgid "Selected Print Format does not exist."
@@ -53118,7 +53118,7 @@ msgstr "Unos Zaliha {0} je izrađen"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:1785
 msgid "Stock Entry {0} has been created"
-msgstr "Unos Zaliha {0} je stvoren"
+msgstr "Unos Zaliha {0} je izrađen"
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:997
 msgid "Stock Entry {0} is not submitted"
@@ -56619,7 +56619,7 @@ msgstr "Faktura nije u potpunosti dodijeljena jer postoji razlika od {0}."
 
 #: erpnext/controllers/buying_controller.py:1263
 msgid "The item {item} is not marked as {type_of} item. You can enable it as {type_of} item from its Item master."
-msgstr "Artikal {item} nije označen kao {type_of} artikal. Možete ga omogućiti kao {type_of} Artikal u Postavkama Artikla."
+msgstr "Artikal {item} nije odabran kao {type_of} artikal. Možete ga omogućiti kao {type_of} Artikal u Postavkama Artikla."
 
 #: erpnext/stock/doctype/item/item.py:682
 msgid "The items {0} and {1} are present in the following {2} :"
@@ -56627,7 +56627,7 @@ msgstr "Artikli {0} i {1} se nalaze u sljedećem {2} :"
 
 #: erpnext/controllers/buying_controller.py:1256
 msgid "The items {items} are not marked as {type_of} item. You can enable them as {type_of} item from their Item masters."
-msgstr "Artikli {items} nisu označeni kao {type_of} artikli. Možete ih omogućiti kao {type_of} artikle u Postavkama Artikala."
+msgstr "Artikli {items} nisu odabrani kao {type_of} artikli. Možete ih omogućiti kao {type_of} artikle u Postavkama Artikala."
 
 #: erpnext/manufacturing/doctype/workstation/workstation.py:527
 msgid "The job card {0} is in {1} state and you cannot complete it."
@@ -57098,7 +57098,7 @@ msgstr "Ovo omogućava izradu prodajnih naloga iz ponuda kojima je istekao rok v
 
 #: erpnext/assets/doctype/asset/asset.py:438
 msgid "This asset category is marked as non-depreciable. Please disable depreciation calculation or choose a different category."
-msgstr "Ova kategorija imovine je označena kao neamortizujuća. Onemogući obračun amortizacije ili odaberi drugu kategoriju."
+msgstr "Ova kategorija imovine je odabrana kao neamortizujuća. Onemogući obračun amortizacije ili odaberi drugu kategoriju."
 
 #. Description of the 'Allow negative stock' (Check) field in DocType 'Stock
 #. Settings'
@@ -57288,7 +57288,7 @@ msgstr "Ova radnja zahtijeva Kontrolu Kvalitete, ali nije konfiguriran predloža
 
 #: erpnext/stock/doctype/delivery_note/delivery_note.js:509
 msgid "This option can be checked to edit the 'Posting Date' and 'Posting Time' fields."
-msgstr "Ova opcija se može označiti za uređivanje polja 'Datum Knjiženja' i 'Vrijeme Knjiženja'."
+msgstr "Ova opcija se može odabrati za uređivanje polja 'Datum Knjiženja' i 'Vrijeme Knjiženja'."
 
 #. Description of the 'Raise Material Request when stock reaches re-order
 #. level' (Check) field in DocType 'Stock Settings'
@@ -59238,7 +59238,7 @@ msgstr "Transakcije naspram Poduzeća već postoje! Kontni Plan se može uvesti 
 #. 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
 msgid "Transactions are blocked when the outstanding balance exceeds the credit limit. When Restrict Customer Over Billing is enabled, new invoices are also blocked when the customer's overdue amount exceeds the Overdue Limit."
-msgstr "Transakcije se blokiraju kada preostali dug premaši kreditni limit. Kada je omogućena opcija Ograniči Prekomjerno Fakturisanja Klijenta, nove fakture se također blokiraju kada iznos dospjelih obaveza klijenta premaši granicu za dospjele obaveze."
+msgstr "Transakcije se blokiraju kada preostali dug premaši kreditnu granicu. Kada je omogućena opcija Ograniči Prekomjerno Fakturisanja Klijenta, nove fakture se također blokiraju kada iznos dospjelih obaveza klijenta premaši granicu za dospjele obaveze."
 
 #: banking/src/components/features/BankStatementImporter/CSV/StatementDetails.tsx:239
 msgid "Transactions to be imported into the system"
@@ -61129,11 +61129,11 @@ msgstr "Stopa Vrednovanja artikla prema Prodajnoj Fakturi (samo za interne trans
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:2010
 #: erpnext/accounts/services/taxes.py:322
 msgid "Valuation type charges can not be marked as Inclusive"
-msgstr "Naknade za tip vrijednovanja ne mogu biti označene kao Inkluzivne"
+msgstr "Naknade za tip vrijednovanja ne mogu biti odabrane kao Inkluzivne"
 
 #: erpnext/public/js/controllers/accounts.js:228
 msgid "Valuation type charges cannot be marked as Inclusive"
-msgstr "Naknade tipa procjene vrijednosti ne mogu biti označene kao uključene."
+msgstr "Naknade tipa procjene vrijednosti ne mogu biti odabrane kao uključene."
 
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.js:58
 msgid "Value (G - D)"
@@ -62118,13 +62118,13 @@ msgstr "Upozori pri novim Zahtjevima za Ponudu"
 #. in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Warn or stop if Item rate is changed in Delivery Notes and Sales Invoices generated from a Sales Order."
-msgstr "Upozori ili zaustavi ako se cjena artikla promijeni u Otpremnicama i Prodajnim Fakturama stvorenih iz Prodajnog Naloga."
+msgstr "Upozori ili zaustavi ako se cjena artikla promijeni u Otpremnicama i Prodajnim Fakturama izrađenih iz Prodajnog Naloga."
 
 #. Description of the 'Maintain same rate throughout the purchase  cycle'
 #. (Check) field in DocType 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "Warn or stop if Item rate is changed in Purchase Invoice or Purchase Receipt generated from a Purchase Order."
-msgstr "Upozori ili zaustavi ako se cjena artikla promijeni u fakturi ili potvrdi o nabavi stvorenoj iz naloga nabave."
+msgstr "Upozori ili zaustavi ako se cjena artikla promijeni u fakturi ili potvrdi o nabavi izrađenoj iz naloga nabave."
 
 #: erpnext/projects/doctype/timesheet_detail/timesheet_detail.py:134
 msgid "Warning - Row {0}: Billing Hours are more than Actual Hours"
@@ -64185,7 +64185,7 @@ msgstr "{0} mora biti negativan u povratnom dokumentu"
 
 #: erpnext/accounts/doctype/sales_invoice/services/inter_company.py:60
 msgid "{0} not allowed to transact with {1}. Please change the Company or add the Company in the 'Allowed To Transact With'-Section in the Customer record."
-msgstr "{0} nije dozvoljeno obavljati transakcije sa {1}. Promijeni poduzeće ili dodaj poduzeće u sekciju 'Dozvoljena Transakcija s' u zapisu klijenata."
+msgstr "{0} nije dozvoljeno obavljati transakcije sa {1}. Promijeni poduzeće ili dodaj poduzeće u odjeljak 'Dozvoljena Transakcija s' u zapisu klijenata."
 
 #: erpnext/manufacturing/doctype/bom/services/costing.py:63
 msgid "{0} not found for item {1}"
