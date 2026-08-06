@@ -559,10 +559,11 @@ def _material_request_item_row(
 		or row.get("default_warehouse")
 		or item_group_defaults.get("default_warehouse")
 	)
+	precision = frappe.get_precision("Material Request Plan Item", "quantity")
 	return {
 		"item_code": row.item_code,
 		"item_name": row.item_name,
-		"quantity": required_qty / conversion_factor,
+		"quantity": flt(required_qty / conversion_factor, precision),
 		"conversion_factor": conversion_factor,
 		"required_bom_qty": row.get("qty"),
 		"stock_uom": row.get("stock_uom"),
@@ -639,7 +640,7 @@ def _add_remaining_purchase_request(item, new_mr_items, required_qty, consider_m
 	if frappe.db.get_value("UOM", purchase_uom, "must_be_whole_number"):
 		required_qty = ceil(required_qty)
 
-	item["quantity"] = required_qty / item.get("conversion_factor")
+	item["quantity"] = flt(required_qty / item.get("conversion_factor"), precision)
 	new_mr_items.append(item)
 
 
