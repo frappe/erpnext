@@ -533,7 +533,6 @@ def _adjust_required_qty_for_uom(row, required_qty):
 					row["purchase_uom"], row["stock_uom"], row.item_code
 				)
 			)
-			required_qty = required_qty / row["conversion_factor"]
 
 	if frappe.db.get_value("UOM", row["purchase_uom"], "must_be_whole_number"):
 		required_qty = ceil(required_qty)
