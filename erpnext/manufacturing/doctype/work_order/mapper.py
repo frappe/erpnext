@@ -532,7 +532,9 @@ def make_material_request(
 		for_qty = frappe.flags.args.for_qty
 
 	fraction = 1.0
-	if for_qty:
+	if for_qty is not None:
+		if flt(for_qty) <= 0:
+			frappe.throw(_("Quantity must be greater than zero."))
 		fraction = flt(for_qty) / flt(frappe.db.get_value("Work Order", source_name, "qty"))
 
 	postprocess = partial(_set_material_request_item, fraction=fraction)
