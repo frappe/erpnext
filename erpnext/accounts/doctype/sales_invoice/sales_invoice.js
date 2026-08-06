@@ -1180,7 +1180,16 @@ frappe.ui.form.on("Sales Invoice", {
 		}
 
 		frm.set_df_property("update_stock", "read_only", frm.doc.has_subcontracted);
-		frm.toggle_display("update_stock", !frm.doc.has_subcontracted);
+		// frm.set_df_property mutates a per-document copy, not the doctype's shared field
+		// metadata, so this always reflects the original (Customize Form) hidden value.
+		const hidden_by_customization = cint(
+			frappe.meta.get_docfield("Sales Invoice", "update_stock")?.hidden
+		);
+		frm.set_df_property(
+			"update_stock",
+			"hidden",
+			cint(frm.doc.has_subcontracted) || hidden_by_customization
+		);
 	},
 });
 
