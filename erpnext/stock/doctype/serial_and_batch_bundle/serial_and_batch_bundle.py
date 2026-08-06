@@ -404,6 +404,13 @@ class SerialandBatchBundle(Document):
 
 			valuation_method = get_valuation_method(self.item_code)
 
+			# An outward return must go out at the batch's current average rate for a
+			# batchwise valuation batch. The original receipt rate is only correct while
+			# the batch still holds stock at that rate; once other receipts have changed
+			# the average, removing at the original rate strands a residue in the batch
+			# value (negative when returning the costlier receipt).
+			batchwise_avg_rates = self.get_batchwise_return_avg_rates()
+
 			stock_queue = []
 			non_batchwise_batches = []
 			if not self.has_serial_no and valuation_method == "FIFO":
@@ -426,7 +433,10 @@ class SerialandBatchBundle(Document):
 				if row.serial_no:
 					valuation_rate = valuation_details["serial_nos"].get(row.serial_no)
 				else:
-					valuation_rate = valuation_details["batches"].get(row.batch_no)
+					# a batch emptied before the return has no average - fall back to the original rate
+					valuation_rate = batchwise_avg_rates.get(row.batch_no) or valuation_details[
+						"batches"
+					].get(row.batch_no)
 
 				if frappe.flags.through_repost_item_valuation and not valuation_rate:
 					# if different serial nos / batches are returned
@@ -464,6 +474,36 @@ class SerialandBatchBundle(Document):
 
 		elif self.type_of_transaction == "Inward":
 			self.set_incoming_rate_for_inward_transaction(row, save, prev_sle=prev_sle)
+
+	def get_batchwise_return_avg_rates(self):
+		from erpnext.stock.utils import get_valuation_method
+
+		if self.type_of_transaction != "Outward" or self.has_serial_no:
+			return {}
+
+		batch_nos = [d.batch_no for d in self.entries if d.batch_no]
+		if not batch_nos:
+			return {}
+
+		if get_valuation_method(self.item_code) == "Moving Average" and frappe.db.get_single_value(
+			"Stock Settings", "do_not_use_batchwise_valuation"
+		):
+			return {}
+
+		batchwise_batches = frappe.get_all(
+			"Batch",
+			filters={"name": ("in", batch_nos), "use_batchwise_valuation": 1},
+			pluck="name",
+		)
+		if not batchwise_batches:
+			return {}
+
+		# scoped to batchwise batches only, so BatchNoValuation's non-batchwise
+		# machinery never runs for them
+		sle = self.get_sle_for_outward_transaction()
+		sle.batch_nos = {batch_no: sle.batch_nos[batch_no] for batch_no in batchwise_batches}
+		sn_obj = BatchNoValuation(sle=sle, item_code=self.item_code, warehouse=self.warehouse)
+		return {batch_no: abs(flt(sn_obj.batch_avg_rate.get(batch_no))) for batch_no in batchwise_batches}
 
 	def validate_returned_serial_batch_no(self, return_against, row, original_inv_details):
 		if frappe.flags.through_repost_item_valuation:
