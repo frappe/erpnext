@@ -90,6 +90,7 @@ class Task(NestedSet):
 		self.validate_completed_on()
 		self.set_default_end_date_if_missing()
 		self.validate_parent_is_group()
+		self.validate_web_form_project_permission()
 
 	def validate_dates(self):
 		self.validate_from_to_dates("exp_start_date", "exp_end_date")
@@ -312,6 +313,23 @@ class Task(NestedSet):
 		)
 		if project_user:
 			return True
+
+	def validate_web_form_project_permission(self):
+		project_unchanged = not self.is_new() and self.project == self.get_db_value("project")
+
+		if (
+			not frappe.flags.in_web_form
+			or not self.project
+			or project_unchanged
+			or frappe.has_permission("Project", "write", doc=self.project)
+			or self.has_webform_permission()
+		):
+			return
+
+		frappe.throw(
+			_("You are not permitted to create a Task for Project {0}").format(self.project),
+			frappe.PermissionError,
+		)
 
 	def populate_depends_on(self):
 		if self.parent_task:
