@@ -798,6 +798,18 @@ class JournalEntry(AccountsController):
 						)
 					)
 
+				if reference_type == "Purchase Invoice" and invoice.invoice_is_blocked():
+					msg = (
+						_("{0} {1} is blocked and on hold until {2}.").format(
+							invoice.doctype, invoice.name, invoice.release_date
+						)
+						if invoice.release_date
+						else _("{0} {1} is blocked.").format(
+							invoice.doctype, invoice.name, invoice.release_date
+						)
+					)
+					frappe.throw(msg)
+
 	def set_against_account(self):
 		accounts_debited, accounts_credited = [], []
 		if self.voucher_type in ("Deferred Revenue", "Deferred Expense"):
