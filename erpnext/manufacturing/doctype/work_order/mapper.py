@@ -9,6 +9,7 @@ the controller; work_order.py re-exports them for backward compatibility.
 """
 
 import json
+import math
 from functools import partial
 
 import frappe
@@ -479,11 +480,9 @@ def create_pick_list(
 	if for_qty is None:
 		for_qty = frappe.parse_json(target_doc or "{}").get("for_qty")
 
-	if flt(for_qty) <= 0:
-		frappe.throw(_("Quantity must be greater than zero."))
-
+	for_qty = _validated_for_qty(for_qty)
 	work_order = frappe.get_doc("Work Order", source_name)
-	allocation = _allocate_material_demand(work_order, flt(for_qty) / flt(work_order.qty))
+	allocation = _allocate_material_demand(work_order, for_qty / flt(work_order.qty))
 	postprocess = partial(_set_pick_list_item_qty, allocation_by_item=allocation)
 
 	doc = get_mapped_doc("Work Order", source_name, _pick_list_mapping(postprocess, allocation), target_doc)
@@ -533,6 +532,13 @@ def _allocate_material_demand(work_order, fraction):
 	return allocation
 
 
+def _validated_for_qty(for_qty):
+	qty = flt(for_qty)
+	if not math.isfinite(qty) or qty <= 0:
+		frappe.throw(_("Quantity must be greater than zero."))
+	return qty
+
+
 def _validate_material_is_pending(rows):
 	if not rows:
 		frappe.throw(
@@ -566,9 +572,7 @@ def make_material_request(
 	work_order = frappe.get_doc("Work Order", source_name)
 	fraction = 1.0
 	if for_qty is not None:
-		if flt(for_qty) <= 0:
-			frappe.throw(_("Quantity must be greater than zero."))
-		fraction = flt(for_qty) / flt(work_order.qty)
+		fraction = _validated_for_qty(for_qty) / flt(work_order.qty)
 
 	allocation = _allocate_material_demand(work_order, fraction)
 	postprocess = partial(_set_material_request_item, allocation_by_item=allocation)
