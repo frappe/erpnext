@@ -500,36 +500,50 @@ def _pick_list_mapping(postprocess, allocation):
 			"doctype": "Pick List Item",
 			"field_no_map": ["transferred_qty"],
 			"postprocess": postprocess,
-			"condition": lambda doc: doc.item_code in allocation,
+			"condition": lambda doc: _allocation_key(doc) in allocation,
 		},
 	}
 
 
 def _allocate_material_demand(work_order, fraction):
-	"""Qty to request per item: the fraction of the item's total requirement, capped
-	at what is still pending.
+	"""Qty to request per (item, source warehouse, operation) group: the fraction of
+	the group's requirement, drawn from the item's pending pool in row order.
 
-	Aggregated across duplicate rows of the same item: required_qty accumulates per
-	row, while the covered counters (transferred, requested, picked) are stamped as
-	item-wide totals on every duplicate row, so they are read once per item. The
-	first mapped row of an item takes the whole allocation and duplicate rows
-	collapse, since Material Request rejects repeated items.
+	The covered counters (transferred, requested, picked) are stamped as item-wide
+	totals on every row of an item, so the pool is per item while allocation keeps
+	warehouse and operation splits. Rows identical on all three keys merge; whether
+	a material request may carry the same item on several rows is governed by the
+	Buying Settings duplicate-item validation, as before.
 	"""
-	required = {}
-	covered = {}
+	required_by_item = {}
+	covered_by_item = {}
+	required_by_group = {}
 	for row in work_order.required_items:
-		required[row.item_code] = required.get(row.item_code, 0.0) + flt(row.required_qty)
-		covered.setdefault(
+		required_by_item[row.item_code] = required_by_item.get(row.item_code, 0.0) + flt(row.required_qty)
+		covered_by_item.setdefault(
 			row.item_code,
 			flt(row.transferred_qty) + flt(row.requested_qty) + flt(row.picked_qty),
 		)
+		key = _allocation_key(row)
+		required_by_group[key] = required_by_group.get(key, 0.0) + flt(row.required_qty)
+
+	pending_pool = {
+		item_code: required_qty - covered_by_item[item_code]
+		for item_code, required_qty in required_by_item.items()
+	}
 
 	allocation = {}
-	for item_code, required_qty in required.items():
-		qty = min(required_qty * fraction, required_qty - covered[item_code])
+	for key, required_qty in required_by_group.items():
+		item_code = key[0]
+		qty = min(required_qty * fraction, pending_pool[item_code])
 		if qty > 0:
-			allocation[item_code] = qty
+			allocation[key] = qty
+			pending_pool[item_code] -= qty
 	return allocation
+
+
+def _allocation_key(row):
+	return (row.item_code, row.source_warehouse, row.operation)
 
 
 def _validated_for_qty(for_qty):
@@ -548,7 +562,7 @@ def _validate_material_is_pending(rows):
 
 
 def _set_pick_list_item_qty(source, target, source_parent, allocation_by_item):
-	qty = allocation_by_item.pop(source.item_code, 0.0)
+	qty = allocation_by_item.pop(_allocation_key(source), 0.0)
 	if qty <= 0:
 		target.delete()
 		return
@@ -598,13 +612,13 @@ def _material_request_mapping(postprocess, allocation):
 				("source_warehouse", "from_warehouse"),
 			],
 			"postprocess": postprocess,
-			"condition": lambda doc: doc.item_code in allocation,
+			"condition": lambda doc: _allocation_key(doc) in allocation,
 		},
 	}
 
 
 def _set_material_request_item(source, target, source_parent, allocation_by_item):
-	qty = allocation_by_item.pop(source.item_code, 0.0)
+	qty = allocation_by_item.pop(_allocation_key(source), 0.0)
 	if qty <= 0:
 		target.delete()
 		return
