@@ -1478,6 +1478,8 @@ def get_material_request_items(
 				)
 			)
 
+			required_qty = required_qty / row["conversion_factor"]
+
 	if frappe.db.get_value("UOM", row["purchase_uom"], "must_be_whole_number"):
 		required_qty = ceil(required_qty)
 
@@ -1496,11 +1498,10 @@ def get_material_request_items(
 			get_conversion_factor(row.item_code, item_details.purchase_uom).get("conversion_factor") or 1.0
 		)
 
-	precision = frappe.get_precision("Material Request Plan Item", "quantity")
 	return {
 		"item_code": row.item_code,
 		"item_name": row.item_name,
-		"quantity": flt(required_qty / conversion_factor, precision),
+		"quantity": required_qty / conversion_factor,
 		"conversion_factor": conversion_factor,
 		"required_bom_qty": row.get("qty"),
 		"stock_uom": row.get("stock_uom"),
@@ -1909,7 +1910,7 @@ def get_materials_from_other_locations(
 		if frappe.db.get_value("UOM", purchase_uom, "must_be_whole_number"):
 			required_qty = ceil(required_qty)
 
-		item["quantity"] = flt(required_qty / item.get("conversion_factor"), precision)
+		item["quantity"] = required_qty / item.get("conversion_factor")
 
 		new_mr_items.append(item)
 
