@@ -201,6 +201,7 @@
    "fieldtype": "Float",
    "hidden": 1,
    "label": "Conversion Factor",
+   "precision": "9",
    "read_only": 1
   },
   {
@@ -635,7 +636,11 @@
  "idx": 1,
  "istable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2026-03-09 15:11:16.977539",
+=======
+ "modified": "2026-08-07 17:31:31.732720",
+>>>>>>> 69a35a12cb (fix: declare precision 9 on all conversion_factor fields)
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Receipt Item",
