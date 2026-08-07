@@ -177,7 +177,8 @@
   {
    "fieldname": "conversion_factor",
    "fieldtype": "Float",
-   "label": "Conversion Factor"
+   "label": "Conversion Factor",
+   "precision": "9"
   },
   {
    "fieldname": "rate_amount_section",
@@ -327,7 +328,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-11-05 19:00:38.646539",
+ "modified": "2026-08-07 17:31:31.732720",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Item",
