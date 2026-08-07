@@ -1453,7 +1453,7 @@ def get_item_details(item_code, company=None):
 
 
 @frappe.whitelist()
-def get_uom_conv_factor(uom, stock_uom):
+def get_uom_conv_factor(uom: str | None, stock_uom: str | None):
 	"""Get UOM conversion factor from uom to stock_uom
 	e.g. uom = "Kg", stock_uom = "Gram" then returns 1000.0
 	"""
