@@ -1892,11 +1892,35 @@ class TestWorkOrder(ERPNextTestSuite):
 		duplicate.db_insert()
 		work_order.reload()
 
-		mr = make_material_request(work_order.name, for_qty=4)
+		with self.change_settings("Buying Settings", {"allow_multiple_items": 1}):
+			mr = make_material_request(work_order.name, for_qty=4)
 		rows = {row.from_warehouse: flt(row.qty) for row in mr.items if row.item_code == first.item_code}
 		self.assertEqual(len(rows), 2)
 		self.assertAlmostEqual(rows["Stores - _TC"], flt(first.required_qty) * 4 / 10, places=6)
 		self.assertAlmostEqual(rows["_Test Warehouse 1 - _TC"], 5 * 4 / 10, places=6)
+
+	def test_allocation_collapses_groups_when_multiple_items_disallowed(self):
+		work_order = make_wo_order_test_record(
+			planned_start_date=now(), qty=10, source_warehouse="Stores - _TC"
+		)
+		first = work_order.required_items[0]
+		duplicate = work_order.append(
+			"required_items",
+			{
+				"item_code": first.item_code,
+				"required_qty": 5,
+				"stock_uom": first.stock_uom,
+				"source_warehouse": "_Test Warehouse 1 - _TC",
+				"docstatus": 1,
+			},
+		)
+		duplicate.db_insert()
+		work_order.reload()
+
+		mr = self.submit_material_request(work_order.name, for_qty=4)
+		rows = [row for row in mr.items if row.item_code == first.item_code]
+		self.assertEqual(len(rows), 1)
+		self.assertAlmostEqual(flt(rows[0].qty), (flt(first.required_qty) + 5) * 4 / 10, places=6)
 
 	def test_remainder_allocation_splits_proportionally_across_groups(self):
 		work_order = make_wo_order_test_record(
@@ -1918,9 +1942,8 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		with self.change_settings("Buying Settings", {"allow_multiple_items": 1}):
 			self.submit_material_request(work_order.name, for_qty=4)
-
-		work_order.reload()
-		remainder = make_material_request(work_order.name, for_qty=10)
+			work_order.reload()
+			remainder = make_material_request(work_order.name, for_qty=10)
 		rows = {
 			row.from_warehouse: flt(row.qty) for row in remainder.items if row.item_code == first.item_code
 		}
@@ -1947,7 +1970,8 @@ class TestWorkOrder(ERPNextTestSuite):
 			row.db_insert()
 		work_order.reload()
 
-		mr = make_material_request(work_order.name, for_qty=4)
+		with self.change_settings("Buying Settings", {"allow_multiple_items": 1}):
+			mr = make_material_request(work_order.name, for_qty=4)
 		rows = [flt(row.qty) for row in mr.items if row.item_code == first.item_code]
 		self.assertEqual(len(rows), 3)
 		self.assertAlmostEqual(sum(rows), (flt(first.required_qty) + 10) * 4 / 10, places=6)
