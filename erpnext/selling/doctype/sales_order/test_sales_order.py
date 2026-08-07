@@ -40,14 +40,6 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestSalesOrder(ERPNextTestSuite):
-	@ERPNextTestSuite.change_settings(
-		"Stock Settings",
-		{
-			"auto_insert_price_list_rate_if_missing": 1,
-			"update_existing_price_list_rate": 1,
-			"update_price_list_based_on": "Rate",
-		},
-	)
 	def test_stock_qty_rounded_to_field_precision(self):
 		item_doc = make_item(properties={"stock_uom": "Kg"})
 		item_doc.append("uoms", {"uom": "Litre", "conversion_factor": 0.6})
@@ -61,6 +53,14 @@ class TestSalesOrder(ERPNextTestSuite):
 		row = so.items[0]
 		self.assertEqual(row.stock_qty, flt(3333.333 * 0.6, row.precision("stock_qty")))
 
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"auto_insert_price_list_rate_if_missing": 1,
+			"update_existing_price_list_rate": 1,
+			"update_price_list_based_on": "Rate",
+		},
+	)
 	def test_sales_order_expired_item_price(self):
 		price_list = "_Test Price List"
 
