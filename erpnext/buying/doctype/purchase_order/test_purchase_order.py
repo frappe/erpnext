@@ -347,6 +347,47 @@ class TestPurchaseOrder(ERPNextTestSuite):
 			existing_ordered_qty_in_new_warehouse + 7,
 		)
 
+	def test_update_child_adding_new_item_without_any_default_warehouse(self):
+		stock_item = make_item("_Test PO Item Without Default Warehouse", {"is_stock_item": 1}).name
+		service_item = make_item("_Test PO Item Non Stock", {"is_stock_item": 0}).name
+
+		po = create_purchase_order(do_not_save=1)
+		po.save()
+		po.submit()
+		first_item_of_po = po.get("items")[0]
+
+		company_default = frappe.db.get_value("Company", po.company, "default_warehouse")
+		frappe.db.set_value("Company", po.company, "default_warehouse", None)
+		self.addCleanup(frappe.db.set_value, "Company", po.company, "default_warehouse", company_default)
+
+		def get_trans_items(item_code):
+			return json.dumps(
+				[
+					{
+						"item_code": first_item_of_po.item_code,
+						"rate": first_item_of_po.rate,
+						"qty": first_item_of_po.qty,
+						"docname": first_item_of_po.name,
+					},
+					{"item_code": item_code, "rate": 200, "qty": 7},
+				]
+			)
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Cannot find a default warehouse",
+			update_child_qty_rate,
+			"Purchase Order",
+			get_trans_items(stock_item),
+			po.name,
+		)
+
+		update_child_qty_rate("Purchase Order", get_trans_items(service_item), po.name)
+
+		po.reload()
+		self.assertEqual(po.get("items")[-1].item_code, service_item)
+		self.assertFalse(po.get("items")[-1].warehouse)
+
 	def test_update_child_removing_item(self):
 		po = create_purchase_order(do_not_save=1)
 		po.items[0].qty = 4
