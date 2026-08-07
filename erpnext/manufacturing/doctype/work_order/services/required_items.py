@@ -9,6 +9,7 @@ callers and the whitelisted entry point keep working unchanged.
 """
 
 import frappe
+from frappe import _
 from frappe.utils import flt
 from pypika import functions as fn
 
@@ -197,6 +198,106 @@ class RequiredItemsService:
 		returned_dict = self._material_transfer_qty_by_item(is_return=1)
 		for row in self.doc.required_items:
 			row.db_set("returned_qty", (returned_dict.get(row.item_code) or 0.0), update_modified=False)
+
+	def validate_incoming_material_demand(self, incoming_qty_by_item):
+		"""Reject demand exceeding the pending requirement, recomputed from source.
+
+		Callers must load the work order with for_update=True so concurrent submits
+		serialize on the work order row.
+		"""
+		required_by_item = {}
+		uom_by_item = {}
+		for row in self.doc.required_items:
+			required_by_item[row.item_code] = required_by_item.get(row.item_code, 0.0) + flt(row.required_qty)
+			uom_by_item.setdefault(row.item_code, row.stock_uom)
+
+		transferred = self._material_transfer_qty_by_item(is_return=0)
+		requested = self._material_request_pending_qty_by_item()
+		picked = self._pick_list_pending_qty_by_item()
+
+		for item_code, incoming_qty in incoming_qty_by_item.items():
+			if item_code not in required_by_item:
+				continue
+
+			pending = (
+				required_by_item[item_code]
+				- flt(transferred.get(item_code))
+				- flt(requested.get(item_code))
+				- flt(picked.get(item_code))
+			)
+			if flt(incoming_qty - pending, 6) > 0:
+				frappe.throw(
+					_("Only {0} {1} of {2} is pending in Work Order {3}.").format(
+						max(pending, 0.0), uom_by_item[item_code], item_code, self.doc.name
+					),
+					title=_("Exceeds Pending Qty"),
+				)
+
+	def update_requested_qty_for_required_items(self):
+		"""Refresh per-row qty requested via open Material Requests but not yet transferred."""
+		requested_items = self._material_request_pending_qty_by_item()
+		for row in self.doc.required_items:
+			row.db_set("requested_qty", (requested_items.get(row.item_code) or 0.0), update_modified=False)
+
+	def _material_request_pending_qty_by_item(self):
+		mr = frappe.qb.DocType("Material Request")
+		mr_item = frappe.qb.DocType("Material Request Item")
+		query = (
+			frappe.qb.from_(mr)
+			.inner_join(mr_item)
+			.on(mr_item.parent == mr.name)
+			.select(mr_item.item_code, fn.Sum(mr_item.stock_qty - mr_item.ordered_qty).as_("qty"))
+			.where(
+				(mr.docstatus == 1)
+				& (mr.work_order == self.doc.name)
+				& (mr.material_request_type == "Material Transfer")
+				& (mr.status != "Stopped")
+				& (mr_item.stock_qty > mr_item.ordered_qty)
+			)
+			.groupby(mr_item.item_code)
+		)
+		return frappe._dict({d.item_code: flt(d.qty) for d in query.run(as_dict=1)})
+
+	def update_picked_qty_for_required_items(self):
+		"""Refresh per-row qty picked via open Pick Lists but not yet transferred.
+
+		Pick list rows sourced from a live material request are excluded: those units
+		are already counted in requested_qty, and a pick list inherits work_order from
+		its material request during mapping. Once that material request is stopped or
+		cancelled it no longer contributes to requested_qty, so its picked rows count
+		here instead.
+		"""
+		picked_items = self._pick_list_pending_qty_by_item()
+		for row in self.doc.required_items:
+			row.db_set("picked_qty", (picked_items.get(row.item_code) or 0.0), update_modified=False)
+
+	def _pick_list_pending_qty_by_item(self):
+		pick_list = frappe.qb.DocType("Pick List")
+		pick_list_item = frappe.qb.DocType("Pick List Item")
+		mr = frappe.qb.DocType("Material Request")
+		query = (
+			frappe.qb.from_(pick_list)
+			.inner_join(pick_list_item)
+			.on(pick_list_item.parent == pick_list.name)
+			.left_join(mr)
+			.on(pick_list_item.material_request == mr.name)
+			.select(
+				pick_list_item.item_code,
+				fn.Sum(pick_list_item.picked_qty - pick_list_item.transferred_qty).as_("qty"),
+			)
+			.where(
+				(pick_list.docstatus == 1)
+				& (pick_list.work_order == self.doc.name)
+				& (pick_list_item.picked_qty > pick_list_item.transferred_qty)
+				& (
+					(fn.Coalesce(pick_list_item.material_request_item, "") == "")
+					| (mr.docstatus != 1)
+					| (mr.status == "Stopped")
+				)
+			)
+			.groupby(pick_list_item.item_code)
+		)
+		return frappe._dict({d.item_code: flt(d.qty) for d in query.run(as_dict=1)})
 
 	def _material_transfer_qty_by_item(self, is_return):
 		ste = frappe.qb.DocType("Stock Entry")

@@ -508,3 +508,4 @@ erpnext.patches.v16_0.move_warehouse_defaults_to_company
 erpnext.patches.v16_0.backfill_repost_accounting_ledger_status
 erpnext.patches.v16_0.merge_seeded_item_group_root
 erpnext.patches.v16_0.set_stock_uom_in_job_card
+erpnext.patches.v16_0.set_work_order_requested_and_picked_qty

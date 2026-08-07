@@ -315,7 +315,8 @@
    "fieldtype": "Link",
    "label": "Work Order",
    "options": "Work Order",
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "terms_tab",
@@ -376,7 +377,7 @@
  "idx": 70,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-30 11:04:31.517204",
+ "modified": "2026-08-07 10:30:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request",
