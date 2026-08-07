@@ -1037,11 +1037,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2026-06-03 13:17:36.145788",
-=======
  "modified": "2026-08-07 17:31:31.732720",
->>>>>>> 69a35a12cb (fix: declare precision 9 on all conversion_factor fields)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",
