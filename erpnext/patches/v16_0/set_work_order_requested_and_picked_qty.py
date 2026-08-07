@@ -4,11 +4,8 @@ from erpnext.manufacturing.doctype.work_order.services.required_items import Req
 
 
 def execute():
-	"""Backfill Work Order Item requested_qty and picked_qty from documents with open demand.
-
-	Fully transferred, stopped, or completed documents contribute nothing, so their
-	work orders keep the field default of zero and are skipped.
-	"""
+	"""Backfill requested_qty and picked_qty for work orders with open demand;
+	fulfilled documents leave the zero default."""
 	work_orders = set(
 		frappe.get_all(
 			"Material Request",

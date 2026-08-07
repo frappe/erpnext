@@ -506,15 +506,8 @@ def _pick_list_mapping(postprocess, allocation):
 
 
 def _allocate_material_demand(work_order, fraction):
-	"""Qty to request per (item, source warehouse, operation row) group: the fraction
-	of the group's requirement, drawn from the item's pending pool in row order.
-
-	The covered counters (transferred, requested, picked) are stamped as item-wide
-	totals on every row of an item, so the pool is per item while allocation keeps
-	warehouse and operation splits. Rows identical on all three keys merge; whether
-	a material request may carry the same item on several rows is governed by the
-	Buying Settings duplicate-item validation, as before.
-	"""
+	"""Fraction of each (item, warehouse, operation row) group's requirement, drawn
+	in row order from the item's pending pool (covered counters are item-wide)."""
 	required_by_item = {}
 	covered_by_item = {}
 	required_by_group = {}
@@ -543,7 +536,7 @@ def _allocate_material_demand(work_order, fraction):
 
 
 def _allocation_key(row):
-	"""Manually added rows carry no operation_row_id, so their operation label splits them."""
+	"""Manual rows have no operation_row_id; their operation label splits them."""
 	return (row.item_code, row.source_warehouse, cint(row.operation_row_id) or row.operation)
 
 

@@ -437,8 +437,7 @@ class MaterialRequest(BuyingController):
 		self.update_requested_qty_in_work_order()
 
 	def update_requested_qty_in_work_order(self):
-		"""Refresh both demand counters: stopping or cancelling this request also
-		changes whether its pick lists count towards picked_qty."""
+		"""Refresh both counters: stop and cancel also flip pick list coverage."""
 		if not self.work_order or self.material_request_type != "Material Transfer":
 			return
 

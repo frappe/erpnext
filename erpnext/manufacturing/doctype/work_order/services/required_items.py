@@ -200,11 +200,8 @@ class RequiredItemsService:
 			row.db_set("returned_qty", (returned_dict.get(row.item_code) or 0.0), update_modified=False)
 
 	def validate_incoming_material_demand(self, incoming_qty_by_item):
-		"""Reject demand exceeding the pending requirement, recomputed from source.
-
-		Callers must load the work order with for_update=True so concurrent submits
-		serialize on the work order row.
-		"""
+		"""Reject demand exceeding the pending requirement; callers must hold the
+		work order row lock (for_update=True)."""
 		required_by_item = {}
 		uom_by_item = {}
 		for row in self.doc.required_items:
@@ -259,14 +256,8 @@ class RequiredItemsService:
 		return frappe._dict({d.item_code: flt(d.qty) for d in query.run(as_dict=1)})
 
 	def update_picked_qty_for_required_items(self):
-		"""Refresh per-row qty picked via open Pick Lists but not yet transferred.
-
-		Pick list rows sourced from a live material request are excluded: those units
-		are already counted in requested_qty, and a pick list inherits work_order from
-		its material request during mapping. Once that material request is stopped or
-		cancelled it no longer contributes to requested_qty, so its picked rows count
-		here instead.
-		"""
+		"""Refresh per-row qty picked but not yet transferred. Rows of a live material
+		request count as requested_qty instead, until that request stops or cancels."""
 		picked_items = self._pick_list_pending_qty_by_item()
 		for row in self.doc.required_items:
 			row.db_set("picked_qty", (picked_items.get(row.item_code) or 0.0), update_modified=False)
