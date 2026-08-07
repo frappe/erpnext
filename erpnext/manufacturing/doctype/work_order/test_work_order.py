@@ -1898,6 +1898,35 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertAlmostEqual(rows["Stores - _TC"], flt(first.required_qty) * 4 / 10, places=6)
 		self.assertAlmostEqual(rows["_Test Warehouse 1 - _TC"], 5 * 4 / 10, places=6)
 
+	def test_remainder_allocation_splits_proportionally_across_groups(self):
+		work_order = make_wo_order_test_record(
+			planned_start_date=now(), qty=10, source_warehouse="Stores - _TC"
+		)
+		first = work_order.required_items[0]
+		duplicate = work_order.append(
+			"required_items",
+			{
+				"item_code": first.item_code,
+				"required_qty": 5,
+				"stock_uom": first.stock_uom,
+				"source_warehouse": "_Test Warehouse 1 - _TC",
+				"docstatus": 1,
+			},
+		)
+		duplicate.db_insert()
+		work_order.reload()
+
+		with self.change_settings("Buying Settings", {"allow_multiple_items": 1}):
+			self.submit_material_request(work_order.name, for_qty=4)
+
+		work_order.reload()
+		remainder = make_material_request(work_order.name, for_qty=10)
+		rows = {
+			row.from_warehouse: flt(row.qty) for row in remainder.items if row.item_code == first.item_code
+		}
+		self.assertAlmostEqual(rows["Stores - _TC"], flt(first.required_qty) * 6 / 10, places=6)
+		self.assertAlmostEqual(rows["_Test Warehouse 1 - _TC"], 5 * 6 / 10, places=6)
+
 	def test_allocation_splits_manual_rows_by_operation_label(self):
 		work_order = make_wo_order_test_record(
 			planned_start_date=now(), qty=10, source_warehouse="Stores - _TC"
