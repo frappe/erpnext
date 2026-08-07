@@ -417,6 +417,26 @@ def bom(
 	return query.run()
 
 
+def get_additional_project_filter_conditions(proj, filters, exclude_fields):
+	from frappe.database.operator_map import OPERATOR_MAP
+
+	conditions = []
+	valid_fieldnames = {df.fieldname for df in frappe.get_meta("Project").fields}
+
+	for fieldname, value in filters.items():
+		if fieldname in exclude_fields or fieldname not in valid_fieldnames:
+			continue
+
+		if isinstance(value, list | tuple) and len(value) == 2 and value[0] in OPERATOR_MAP:
+			operator, val = value
+		else:
+			operator, val = "=", value
+
+		conditions.append(OPERATOR_MAP[operator](proj[fieldname], val))
+
+	return conditions
+
+
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_project_name(
@@ -434,6 +454,10 @@ def get_project_name(
 
 		if filters.get("company"):
 			qb_filter_and_conditions.append(proj.company == filters.get("company"))
+
+		qb_filter_and_conditions.extend(
+			get_additional_project_filter_conditions(proj, filters, exclude_fields={"customer", "company"})
+		)
 
 	qb_filter_and_conditions.append(proj.status.notin(["Completed", "Cancelled", "On hold"]))
 
