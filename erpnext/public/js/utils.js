@@ -730,6 +730,7 @@ erpnext.utils.update_child_items = function (opts) {
 			qty: d.qty,
 			rate: d.rate,
 			uom: d.uom,
+			warehouse: d.warehouse,
 			fg_item: d.fg_item,
 			fg_item_qty: d.fg_item_qty,
 			description: d.description,
@@ -822,6 +823,7 @@ erpnext.utils.update_child_items = function (opts) {
 								item_name,
 								bom_no,
 								description,
+								warehouse,
 							} = r.message;
 							const row = dialog.fields_dict.trans_items.df.data.find(
 								(row) => row.name == me.doc.name
@@ -835,6 +837,7 @@ erpnext.utils.update_child_items = function (opts) {
 									item_name: item_name,
 									bom_no: bom_no,
 									description: me.doc.description || description,
+									warehouse: me.doc.docname ? me.doc.warehouse : warehouse,
 								});
 								dialog.fields_dict.trans_items.grid.refresh();
 							}
@@ -922,11 +925,38 @@ erpnext.utils.update_child_items = function (opts) {
 		});
 	}
 
+<<<<<<< HEAD
 	if (
 		["Purchase Order", "Sales Order"].includes(frm.doc.doctype) &&
 		frm.doc.is_subcontracted &&
 		!frm.doc.is_old_subcontracting_flow
 	) {
+=======
+	const warehouse_df = child_meta.fields.find((f) => f.fieldname == "warehouse");
+	if (warehouse_df) {
+		fields.splice(3, 0, {
+			fieldtype: "Link",
+			fieldname: "warehouse",
+			options: "Warehouse",
+			in_list_view: 1,
+			label: __(warehouse_df.label),
+			// only new rows may set it, existing rows would leave their
+			// reserved qty stranded in the previous warehouse's bin
+			read_only_depends_on: "eval:doc.docname",
+			get_query: () => {
+				return {
+					filters: {
+						company: frm.doc.company,
+						is_group: 0,
+						disabled: 0,
+					},
+				};
+			},
+		});
+	}
+
+	if (["Purchase Order", "Sales Order"].includes(frm.doc.doctype) && frm.doc.is_subcontracted) {
+>>>>>>> 55fe269046 (fix: allow selecting a warehouse for new items in the update items dialog (#57876))
 		fields.push(
 			{
 				fieldtype: "Link",
