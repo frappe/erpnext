@@ -140,7 +140,8 @@
   {
    "fieldname": "conversion_factor",
    "fieldtype": "Float",
-   "label": "Conversion Factor"
+   "label": "Conversion Factor",
+   "precision": "9"
   },
   {
    "fetch_from": "item_code.stock_uom",
@@ -264,7 +265,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-11-05 21:15:55.187671",
+ "modified": "2026-08-07 17:31:31.732720",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Creator Item",
