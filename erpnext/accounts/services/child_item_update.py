@@ -367,7 +367,7 @@ def get_new_child_item_warehouse(p_doc, item, trans_item: dict, child_doctype: s
 	warehouse = trans_item.get("warehouse") or get_item_warehouse_(p_doc, item, overwrite_warehouse=True)
 
 	if not warehouse:
-		if child_doctype == "Sales Order Item":
+		if is_warehouse_required_for_new_child_item(child_doctype, item, trans_item):
 			frappe.throw(
 				_(
 					"Cannot find a default warehouse for item {0}. Please select one in the Update Items dialog, or set a default in the Item Master or in the Company."
@@ -379,6 +379,17 @@ def get_new_child_item_warehouse(p_doc, item, trans_item: dict, child_doctype: s
 	validate_disabled_warehouse(warehouse)
 	is_group_warehouse(warehouse)
 	return warehouse
+
+
+def is_warehouse_required_for_new_child_item(child_doctype: str, item, trans_item: dict) -> bool:
+	"""Sales Order always needs one; buying documents only for stock rows, as in validate_stock_item_warehouse."""
+	if child_doctype == "Sales Order Item":
+		return True
+
+	if child_doctype in ("Purchase Order Item", "Supplier Quotation Item"):
+		return bool(item.is_stock_item and flt(trans_item.get("qty")) and not item.delivered_by_supplier)
+
+	return False
 
 
 def validate_child_on_delete(row, parent, ordered_item=None) -> None:
