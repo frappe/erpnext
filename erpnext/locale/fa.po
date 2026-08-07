@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-08-02 10:09+0000\n"
-"PO-Revision-Date: 2026-08-06 10:01\n"
+"PO-Revision-Date: 2026-08-07 10:33\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -13782,7 +13782,7 @@ msgstr ""
 #. Label of the created_through_portal (Check) field in DocType 'Appointment'
 #: erpnext/crm/doctype/appointment/appointment.json
 msgid "Created through Portal"
-msgstr ""
+msgstr "ایجاد شده از طریق پورتال"
 
 #: erpnext/buying/doctype/supplier_scorecard/supplier_scorecard.py:251
 msgid "Created {0} scorecards for {1} between:"
@@ -16358,7 +16358,7 @@ msgstr "سرنخ ها و آدرس ها را حذف کنید"
 #. in DocType 'Appointment Booking Settings'
 #: erpnext/crm/doctype/appointment_booking_settings/appointment_booking_settings.json
 msgid "Delete Permanently"
-msgstr ""
+msgstr "حذف دائمی"
 
 #. Label of the delete_transactions_status (Select) field in DocType
 #. 'Transaction Deletion Record'
@@ -18340,7 +18340,7 @@ msgstr "تکرار ردیف {0} با همان {1}"
 
 #: erpnext/accounts/doctype/repost_accounting_ledger/repost_accounting_ledger.py:110
 msgid "Duplicate vouchers found. Remove the duplicate vouchers to continue to repost."
-msgstr ""
+msgstr "سندهای مالی تکراری پیدا شدند. برای ادامه‌ی بازثبت، سندهای مالی تکراری را حذف کنید."
 
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:157
 msgid "Duplicate {0} found in the table"
@@ -18913,7 +18913,7 @@ msgstr "برای رزرو موجودی جزئی، Allow Partial Reservation را
 #. Booking Settings'
 #: erpnext/crm/doctype/appointment_booking_settings/appointment_booking_settings.json
 msgid "Enable Appointment Booking Through Portal"
-msgstr ""
+msgstr "فعال‌سازی رزرو وقت ملاقات از طریق پورتال"
 
 #. Label of the enable_scheduling (Check) field in DocType 'Appointment Booking
 #. Settings'
@@ -23296,7 +23296,7 @@ msgstr "لیست تعطیلات"
 
 #: erpnext/crm/doctype/appointment_booking_settings/appointment_booking_settings.py:89
 msgid "Holiday List - {0} is not valid for current date."
-msgstr ""
+msgstr "لیست تعطیلات - {0} برای تاریخ فعلی معتبر نیست."
 
 #. Label of the holiday_list_name (Data) field in DocType 'Holiday List'
 #: erpnext/setup/doctype/holiday_list/holiday_list.json
@@ -24268,7 +24268,7 @@ msgstr "به دقیقه"
 #. DocType 'Appointment Booking Settings'
 #: erpnext/crm/doctype/appointment_booking_settings/appointment_booking_settings.json
 msgid "In Minutes (min: 15 mins, max: 60 mins)"
-msgstr ""
+msgstr "به دقیقه (حداقل: ۱۵ دقیقه، حداکثر: ۶۰ دقیقه)"
 
 #: erpnext/accounts/report/accounts_payable/accounts_payable.js:149
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.js:181
@@ -27931,7 +27931,7 @@ msgstr "آیتم {0} را نمی‌توان به عنوان یک زیر مونت
 
 #: erpnext/stock/doctype/material_request/material_request.py:694
 msgid "Item {0} cannot be ordered more than once"
-msgstr ""
+msgstr "آیتم {0} را نمی‌توان بیش از یک بار سفارش داد"
 
 #: erpnext/manufacturing/doctype/blanket_order/blanket_order.py:197
 msgid "Item {0} cannot be ordered more than {1} against Blanket Order {2}."
@@ -44513,7 +44513,7 @@ msgstr "بازنشر در پس‌زمینه شروع شد"
 #. Items'
 #: erpnext/accounts/doctype/repost_accounting_ledger_items/repost_accounting_ledger_items.json
 msgid "Reposted"
-msgstr ""
+msgstr "بازثبت شد"
 
 #. Label of the reposting_data_file (Attach) field in DocType 'Repost Item
 #. Valuation'
@@ -44541,7 +44541,7 @@ msgstr ""
 #. 'Repost Accounting Ledger Items'
 #: erpnext/accounts/doctype/repost_accounting_ledger_items/repost_accounting_ledger_items.json
 msgid "Reposting Status"
-msgstr ""
+msgstr "وضعیت بازثبت"
 
 #. Label of the vouchers_based_on_item_and_warehouse_section (Section Break)
 #. field in DocType 'Repost Item Valuation'
@@ -55339,7 +55339,7 @@ msgstr "ردیف‌های زیر تکراری هستند:"
 
 #: erpnext/accounts/doctype/repost_accounting_ledger/repost_accounting_ledger.py:130
 msgid "The following vouchers are not submitted: {0}"
-msgstr ""
+msgstr "سندهای مالی زیر ارسال نمی‌شوند: {0}"
 
 #: erpnext/stock/doctype/material_request/material_request.py:1062
 msgid "The following {0} were created: {1}"
@@ -55851,7 +55851,7 @@ msgstr "این سند توسط {0} {1} برای مورد {4} بیش از حد م
 
 #: erpnext/templates/emails/appointment_confirmed.html:6
 msgid "This email was sent from {0}"
-msgstr ""
+msgstr "این ایمیل از {0} ارسال شده است"
 
 #: erpnext/stock/doctype/delivery_note/delivery_note.js:496
 msgid "This field is used to set the 'Customer'."
@@ -55997,7 +55997,7 @@ msgstr "این فیلتر مورد قبلاً برای {0} اعمال شده ا�
 
 #: erpnext/templates/emails/confirm_appointment.html:4
 msgid "This link is valid for {0} minutes"
-msgstr ""
+msgstr "این لینک به مدت {0} دقیقه معتبر است"
 
 #: erpnext/www/banking.py:35
 msgid "This method is only meant for developer mode"
@@ -56118,7 +56118,7 @@ msgstr "این مقدار باید زمانی استفاده شود که هیچ 
 
 #: erpnext/www/book_appointment/verify/index.py:18
 msgid "This verification link is invalid. Please book the appointment again."
-msgstr ""
+msgstr "این لینک تأیید نامعتبر است. لطفاً دوباره وقت ملاقات رزرو کنید."
 
 #: banking/src/components/features/Settings/Preferences.tsx:86
 msgid "This will automatically run transaction matching rules on unreconciled transactions every hour."
@@ -58546,7 +58546,7 @@ msgstr ""
 
 #: erpnext/accounts/doctype/repost_accounting_ledger/repost_accounting_ledger.py:375
 msgid "Unable to Repost Accounting Ledger"
-msgstr ""
+msgstr "امکان بازثبت دفتر حسابداری وجود ندارد"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:477
 msgid "Unable to fetch DocType details. Please contact system administrator."
@@ -60036,7 +60036,7 @@ msgstr "سرمایه‌گذاری خطرپذیر"
 #. 'Appointment Booking Settings'
 #: erpnext/crm/doctype/appointment_booking_settings/appointment_booking_settings.json
 msgid "Verification Link Expiry Duration"
-msgstr ""
+msgstr "مدت زمان انقضای لینک تأیید"
 
 #. Label of the verification_token (Data) field in DocType 'Appointment'
 #: erpnext/crm/doctype/appointment/appointment.json
@@ -60049,7 +60049,7 @@ msgstr "تأیید انجام نشد لطفاً پیوند را بررسی کن�
 
 #: erpnext/www/book_appointment/verify/index.py:38
 msgid "Verification link has expired."
-msgstr ""
+msgstr "لینک تأیید اعتبار منقضی شده است."
 
 #. Label of the verified_by (Data) field in DocType 'Quality Inspection'
 #: erpnext/stock/doctype/quality_inspection/quality_inspection.json
