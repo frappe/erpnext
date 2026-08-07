@@ -476,7 +476,12 @@ def create_pick_list(
 ):
 	frappe.has_permission("Pick List", "create", throw=True)
 
-	for_qty = for_qty or frappe.parse_json(target_doc).get("for_qty")
+	if for_qty is None:
+		for_qty = frappe.parse_json(target_doc or "{}").get("for_qty")
+
+	if flt(for_qty) <= 0:
+		frappe.throw(_("Quantity must be greater than zero."))
+
 	max_finished_goods_qty = frappe.db.get_value("Work Order", source_name, "qty")
 	postprocess = partial(
 		_set_pick_list_item_qty, for_qty=for_qty, max_finished_goods_qty=max_finished_goods_qty
