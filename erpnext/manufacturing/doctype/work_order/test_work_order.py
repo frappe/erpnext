@@ -1688,6 +1688,199 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, make_material_request, work_order.name, for_qty=0)
 		self.assertRaises(frappe.ValidationError, make_material_request, work_order.name, for_qty=-1)
 
+	def test_pick_list_rejects_nonpositive_qty(self):
+		from erpnext.manufacturing.doctype.work_order.mapper import create_pick_list
+
+		work_order = make_wo_order_test_record(
+			planned_start_date=now(), qty=10, source_warehouse="Stores - _TC"
+		)
+
+		self.assertRaises(frappe.ValidationError, create_pick_list, work_order.name, for_qty=0)
+		self.assertRaises(frappe.ValidationError, create_pick_list, work_order.name, for_qty=-1)
+		self.assertRaises(frappe.ValidationError, create_pick_list, work_order.name)
+
+	def submit_material_request(self, work_order_name, for_qty=None):
+		mr = make_material_request(work_order_name, for_qty=for_qty)
+		mr.schedule_date = today()
+		for item in mr.items:
+			item.schedule_date = today()
+		mr.insert()
+		mr.submit()
+		return mr
+
+	def receive_test_fg_raw_materials(self):
+		test_stock_entry.make_stock_entry(
+			item_code="_Test Item", target="Stores - _TC", qty=100, basic_rate=5000.0
+		)
+		test_stock_entry.make_stock_entry(
+			item_code="_Test Item Home Desktop 100", target="Stores - _TC", qty=100, basic_rate=1000.0
+		)
+
+	def test_requested_qty_tracks_open_material_requests(self):
+		work_order = make_wo_order_test_record(
+			planned_start_date=now(), qty=10, source_warehouse="Stores - _TC"
+		)
+
+		mr = self.submit_material_request(work_order.name, for_qty=4)
+		mr_qty = {row.item_code: flt(row.qty) for row in mr.items}
+
+		work_order.reload()
+		for row in work_order.required_items:
+			self.assertEqual(row.requested_qty, mr_qty[row.item_code])
+
+		remainder_mr = make_material_request(work_order.name, for_qty=10)
+		for row in remainder_mr.items:
+			required_row = next(item for item in work_order.required_items if item.item_code == row.item_code)
+			self.assertEqual(row.qty, flt(required_row.required_qty) - mr_qty[row.item_code])
+
+		mr.cancel()
+		work_order.reload()
+		for row in work_order.required_items:
+			self.assertEqual(row.requested_qty, 0)
+
+	def test_requested_qty_moves_to_transferred_qty_on_stock_entry(self):
+		from erpnext.stock.doctype.material_request.mapper import make_stock_entry as mr_to_stock_entry
+
+		self.receive_test_fg_raw_materials()
+		work_order = make_wo_order_test_record(
+			planned_start_date=now(), qty=10, source_warehouse="Stores - _TC"
+		)
+
+		mr = self.submit_material_request(work_order.name, for_qty=4)
+		mr_qty = {row.item_code: flt(row.qty) for row in mr.items}
+
+		stock_entry = frappe.get_doc(mr_to_stock_entry(mr.name))
+		stock_entry.insert()
+		stock_entry.submit()
+
+		work_order.reload()
+		for row in work_order.required_items:
+			self.assertEqual(row.requested_qty, 0)
+			self.assertEqual(row.transferred_qty, mr_qty[row.item_code])
+
+		remainder_mr = make_material_request(work_order.name)
+		for row in remainder_mr.items:
+			required_row = next(item for item in work_order.required_items if item.item_code == row.item_code)
+			self.assertEqual(row.qty, flt(required_row.required_qty) - mr_qty[row.item_code])
+
+	def test_picked_qty_tracks_open_pick_lists(self):
+		from erpnext.manufacturing.doctype.work_order.mapper import create_pick_list
+
+		self.receive_test_fg_raw_materials()
+		work_order = make_wo_order_test_record(
+			planned_start_date=now(), qty=10, source_warehouse="Stores - _TC"
+		)
+
+		pick_list = create_pick_list(work_order.name, for_qty=4)
+		pick_list.insert()
+		pick_list.submit()
+		picked_qty = {row.item_code: flt(row.stock_qty) for row in pick_list.locations}
+
+		work_order.reload()
+		for row in work_order.required_items:
+			self.assertEqual(row.picked_qty, picked_qty[row.item_code])
+
+		remainder_pick_list = create_pick_list(work_order.name, for_qty=10)
+		for row in remainder_pick_list.locations:
+			required_row = next(item for item in work_order.required_items if item.item_code == row.item_code)
+			self.assertEqual(row.qty, flt(required_row.required_qty) - picked_qty[row.item_code])
+
+		remainder_pick_list.insert()
+		remainder_pick_list.submit()
+		self.assertRaises(frappe.ValidationError, create_pick_list, work_order.name, for_qty=10)
+
+	def test_material_request_submit_rejects_exceeding_pending_qty(self):
+		work_order = make_wo_order_test_record(
+			planned_start_date=now(), qty=10, source_warehouse="Stores - _TC"
+		)
+
+		def full_draft():
+			mr = make_material_request(work_order.name)
+			mr.schedule_date = today()
+			for item in mr.items:
+				item.schedule_date = today()
+			mr.insert()
+			return mr
+
+		first, second = full_draft(), full_draft()
+		first.submit()
+		self.assertRaises(frappe.ValidationError, second.submit)
+
+	def test_picked_qty_counts_pick_list_of_stopped_material_request(self):
+		from erpnext.stock.doctype.material_request.mapper import create_pick_list as mr_to_pick_list
+
+		self.receive_test_fg_raw_materials()
+		work_order = make_wo_order_test_record(
+			planned_start_date=now(), qty=10, source_warehouse="Stores - _TC"
+		)
+
+		mr = self.submit_material_request(work_order.name, for_qty=4)
+		mr_qty = {row.item_code: flt(row.qty) for row in mr.items}
+
+		pick_list = mr_to_pick_list(mr.name)
+		pick_list.insert()
+		pick_list.submit()
+
+		work_order.reload()
+		for row in work_order.required_items:
+			self.assertEqual(row.requested_qty, mr_qty[row.item_code])
+			self.assertEqual(row.picked_qty, 0)
+
+		mr.reload()
+		mr.update_status("Stopped")
+
+		work_order.reload()
+		for row in work_order.required_items:
+			self.assertEqual(row.requested_qty, 0)
+			self.assertEqual(row.picked_qty, mr_qty[row.item_code])
+
+	def test_pending_demand_shared_across_duplicate_item_rows(self):
+		work_order = make_wo_order_test_record(
+			planned_start_date=now(), qty=10, source_warehouse="Stores - _TC"
+		)
+		first = work_order.required_items[0]
+		duplicate = work_order.append(
+			"required_items",
+			{
+				"item_code": first.item_code,
+				"required_qty": 5,
+				"stock_uom": first.stock_uom,
+				"source_warehouse": first.source_warehouse,
+				"docstatus": 1,
+			},
+		)
+		duplicate.db_insert()
+		work_order.reload()
+		total_required = flt(first.required_qty) + 5
+
+		mr = self.submit_material_request(work_order.name, for_qty=4)
+		requested = sum(flt(row.qty) for row in mr.items if row.item_code == first.item_code)
+		self.assertAlmostEqual(requested, total_required * 4 / 10, places=6)
+
+		work_order.reload()
+		for row in work_order.required_items:
+			if row.item_code == first.item_code:
+				self.assertAlmostEqual(row.requested_qty, requested, places=6)
+
+		remainder_mr = make_material_request(work_order.name, for_qty=10)
+		remainder = sum(flt(row.qty) for row in remainder_mr.items if row.item_code == first.item_code)
+		self.assertAlmostEqual(remainder, total_required - requested, places=6)
+
+	def test_pick_list_rejects_over_pick_against_material_request(self):
+		from erpnext.stock.doctype.material_request.mapper import create_pick_list as mr_to_pick_list
+
+		self.receive_test_fg_raw_materials()
+		work_order = make_wo_order_test_record(
+			planned_start_date=now(), qty=10, source_warehouse="Stores - _TC"
+		)
+
+		mr = self.submit_material_request(work_order.name, for_qty=4)
+		pick_list = mr_to_pick_list(mr.name)
+		pick_list.insert()
+		pick_list.locations[0].picked_qty = flt(pick_list.locations[0].stock_qty) + 1
+
+		self.assertRaises(frappe.ValidationError, pick_list.submit)
+
 	def test_backflushed_batch_raw_materials_based_on_transferred(self):
 		frappe.db.set_single_value(
 			"Manufacturing Settings",
