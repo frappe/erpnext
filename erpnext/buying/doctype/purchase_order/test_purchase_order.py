@@ -724,6 +724,30 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		below_minimum.items[0].conversion_factor = 0.6
 		self.assertRaises(frappe.ValidationError, below_minimum.insert)
 
+	def test_marginal_min_order_qty_overage_toast(self):
+		original_precision = frappe.db.get_default("float_precision")
+		frappe.db.set_default("float_precision", "3")
+		self.addCleanup(frappe.db.set_default, "float_precision", original_precision)
+
+		if not frappe.db.exists("UOM", "Gram"):
+			frappe.get_doc({"doctype": "UOM", "uom_name": "Gram"}).insert()
+
+		item_doc = make_item(properties={"min_order_qty": 50000, "stock_uom": "Gram"})
+		item_doc.append("uoms", {"uom": "Pound", "conversion_factor": 453.592292197})
+		item_doc.save()
+		item = item_doc.name
+
+		def insert_po(qty):
+			po = create_purchase_order(item_code=item, qty=qty, do_not_save=1)
+			po.items[0].uom = "Pound"
+			po.items[0].conversion_factor = 453.592292197
+			frappe.clear_messages()
+			po.insert()
+			return any("minimum order qty" in d.get("message", "") for d in frappe.get_message_log())
+
+		self.assertTrue(insert_po(110.232))
+		self.assertFalse(insert_po(150))
+
 	def test_uom_integer_check_tolerates_conversion_dust(self):
 		from erpnext.utilities.transaction_base import UOMMustBeIntegerError
 
