@@ -707,6 +707,23 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		po = create_purchase_order(qty=3.4, do_not_save=True)
 		self.assertRaises(UOMMustBeIntegerError, po.insert)
 
+	def test_min_order_qty_with_uom_conversion_dust(self):
+		item_doc = make_item(properties={"min_order_qty": 2000, "stock_uom": "Kg"})
+		item_doc.append("uoms", {"uom": "Litre", "conversion_factor": 0.6})
+		item_doc.save()
+		item = item_doc.name
+
+		precision = frappe.get_precision("Purchase Order Item", "stock_qty")
+		po = create_purchase_order(item_code=item, qty=flt(2000 / 0.6, precision), do_not_save=1)
+		po.items[0].uom = "Litre"
+		po.items[0].conversion_factor = 0.6
+		po.insert()
+
+		below_minimum = create_purchase_order(item_code=item, qty=3000, do_not_save=1)
+		below_minimum.items[0].uom = "Litre"
+		below_minimum.items[0].conversion_factor = 0.6
+		self.assertRaises(frappe.ValidationError, below_minimum.insert)
+
 	def test_ordered_qty_for_closing_po(self):
 		bin = frappe.get_all(
 			"Bin",
