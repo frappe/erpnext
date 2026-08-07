@@ -844,7 +844,7 @@ erpnext.utils.update_child_items = function (opts) {
 									item_name: item_name,
 									bom_no: bom_no,
 									description: me.doc.description || description,
-									warehouse: me.doc.warehouse || warehouse,
+									warehouse: me.doc.docname ? me.doc.warehouse : warehouse,
 								});
 								dialog.fields_dict.trans_items.grid.refresh();
 							}
