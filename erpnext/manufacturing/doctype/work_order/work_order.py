@@ -2,7 +2,9 @@
 # License: GNU General Public License v3. See license.txt
 
 import json
+import math
 from collections import defaultdict
+from functools import partial
 
 import frappe
 from dateutil.relativedelta import relativedelta
@@ -2246,6 +2248,97 @@ class WorkOrder(Document):
 		for row in self.required_items:
 			row.db_set("returned_qty", returned_by_row[row.name], update_modified=False)
 
+	def validate_incoming_material_demand(self, incoming_qty_by_item):
+		"""Reject demand exceeding the pending requirement; callers must hold the
+		work order row lock (for_update=True)."""
+		required_by_item = {}
+		uom_by_item = {}
+		for row in self.required_items:
+			required_by_item[row.item_code] = required_by_item.get(row.item_code, 0.0) + flt(row.required_qty)
+			uom_by_item.setdefault(row.item_code, row.stock_uom)
+
+		transferred = self._material_transfer_qty_by_item(is_return=0)
+		requested = self._material_request_pending_qty_by_item()
+		picked = self._pick_list_pending_qty_by_item()
+
+		for item_code, incoming_qty in incoming_qty_by_item.items():
+			if item_code not in required_by_item:
+				continue
+
+			pending = (
+				required_by_item[item_code]
+				- flt(transferred.get(item_code))
+				- flt(requested.get(item_code))
+				- flt(picked.get(item_code))
+			)
+			if flt(incoming_qty - pending, 6) > 0:
+				frappe.throw(
+					_("Only {0} {1} of {2} is pending in Work Order {3}.").format(
+						max(pending, 0.0), uom_by_item[item_code], item_code, self.name
+					),
+					title=_("Exceeds Pending Qty"),
+				)
+
+	def update_requested_qty_for_required_items(self):
+		"""Refresh per-row qty requested via open Material Requests but not yet transferred."""
+		requested_items = self._material_request_pending_qty_by_item()
+		for row in self.required_items:
+			row.db_set("requested_qty", (requested_items.get(row.item_code) or 0.0), update_modified=False)
+
+	def _material_request_pending_qty_by_item(self):
+		mr = frappe.qb.DocType("Material Request")
+		mr_item = frappe.qb.DocType("Material Request Item")
+		query = (
+			frappe.qb.from_(mr)
+			.inner_join(mr_item)
+			.on(mr_item.parent == mr.name)
+			.select(mr_item.item_code, fn.Sum(mr_item.stock_qty - mr_item.ordered_qty).as_("qty"))
+			.where(
+				(mr.docstatus == 1)
+				& (mr.work_order == self.name)
+				& (mr.material_request_type == "Material Transfer")
+				& (mr.status != "Stopped")
+				& (mr_item.stock_qty > mr_item.ordered_qty)
+			)
+			.groupby(mr_item.item_code)
+		)
+		return frappe._dict({d.item_code: flt(d.qty) for d in query.run(as_dict=1)})
+
+	def update_picked_qty_for_required_items(self):
+		"""Refresh per-row qty picked but not yet transferred. Rows of a live material
+		request count as requested_qty instead, until that request stops or cancels."""
+		picked_items = self._pick_list_pending_qty_by_item()
+		for row in self.required_items:
+			row.db_set("picked_qty", (picked_items.get(row.item_code) or 0.0), update_modified=False)
+
+	def _pick_list_pending_qty_by_item(self):
+		pick_list = frappe.qb.DocType("Pick List")
+		pick_list_item = frappe.qb.DocType("Pick List Item")
+		mr = frappe.qb.DocType("Material Request")
+		query = (
+			frappe.qb.from_(pick_list)
+			.inner_join(pick_list_item)
+			.on(pick_list_item.parent == pick_list.name)
+			.left_join(mr)
+			.on(pick_list_item.material_request == mr.name)
+			.select(
+				pick_list_item.item_code,
+				fn.Sum(pick_list_item.picked_qty - pick_list_item.transferred_qty).as_("qty"),
+			)
+			.where(
+				(pick_list.docstatus == 1)
+				& (pick_list.work_order == self.name)
+				& (pick_list_item.picked_qty > pick_list_item.transferred_qty)
+				& (
+					(fn.Coalesce(pick_list_item.material_request_item, "") == "")
+					| (mr.docstatus != 1)
+					| (mr.status == "Stopped")
+				)
+			)
+			.groupby(pick_list_item.item_code)
+		)
+		return frappe._dict({d.item_code: flt(d.qty) for d in query.run(as_dict=1)})
+
 	def update_consumed_qty_for_required_items(self):
 		"""
 		Update consumed qty from submitted stock entries
@@ -3708,43 +3801,16 @@ def get_work_order_operation_data(work_order, operation, workstation):
 
 @frappe.whitelist()
 def create_pick_list(source_name: str, target_doc: str | dict | None = None, for_qty: float | None = None):
-	for_qty = for_qty or json.loads(target_doc).get("for_qty")
-	max_finished_goods_qty = frappe.db.get_value("Work Order", source_name, "qty")
+	if for_qty is None:
+		for_qty = frappe.parse_json(target_doc or "{}").get("for_qty")
 
-	def update_item_quantity(source, target, source_parent):
-		pending_to_issue = flt(source.required_qty) - flt(source.transferred_qty)
-		desire_to_transfer = flt(source.required_qty) / max_finished_goods_qty * flt(for_qty)
+	for_qty = _validated_for_qty(for_qty)
+	work_order = frappe.get_doc("Work Order", source_name)
+	allocation = _allocate_material_demand(work_order, for_qty / flt(work_order.qty))
+	postprocess = partial(_set_pick_list_item_qty, allocation_by_item=allocation)
 
-		qty = 0
-		if desire_to_transfer <= pending_to_issue:
-			qty = desire_to_transfer
-		elif pending_to_issue > 0:
-			qty = pending_to_issue
-
-		if qty:
-			target.qty = qty
-			target.stock_qty = qty
-			target.uom = frappe.get_value("Item", source.item_code, "stock_uom")
-			target.stock_uom = target.uom
-			target.conversion_factor = 1
-		else:
-			target.delete()
-
-	doc = get_mapped_doc(
-		"Work Order",
-		source_name,
-		{
-			"Work Order": {"doctype": "Pick List", "validation": {"docstatus": ["=", 1]}},
-			"Work Order Item": {
-				"doctype": "Pick List Item",
-				"field_no_map": ["transferred_qty"],
-				"postprocess": update_item_quantity,
-				"condition": lambda doc: abs(doc.transferred_qty) < abs(doc.required_qty),
-			},
-		},
-		target_doc,
-	)
-
+	doc = get_mapped_doc("Work Order", source_name, _pick_list_mapping(postprocess, allocation), target_doc)
+	_validate_material_is_pending(doc.locations)
 	doc.purpose = "Material Transfer for Manufacture"
 	doc.for_qty = for_qty
 
@@ -3752,6 +3818,98 @@ def create_pick_list(source_name: str, target_doc: str | dict | None = None, for
 		doc.set_item_locations()
 
 	return doc
+
+
+def _pick_list_mapping(postprocess, allocation):
+	return {
+		"Work Order": {"doctype": "Pick List", "validation": {"docstatus": ["=", 1]}},
+		"Work Order Item": {
+			"doctype": "Pick List Item",
+			"field_no_map": ["transferred_qty"],
+			"postprocess": postprocess,
+			"condition": lambda doc: _allocation_key(doc) in allocation,
+		},
+	}
+
+
+def _allocate_material_demand(work_order, fraction):
+	"""Fraction of each (item, warehouse, operation row) group's requirement, capped
+	at the group's proportional share of the item's pending pool."""
+	required_by_item = {}
+	covered_by_item = {}
+	required_by_group = {}
+	for row in work_order.required_items:
+		required_by_item[row.item_code] = required_by_item.get(row.item_code, 0.0) + flt(row.required_qty)
+		covered_by_item.setdefault(
+			row.item_code,
+			flt(row.transferred_qty) + flt(row.requested_qty) + flt(row.picked_qty),
+		)
+		key = _allocation_key(row)
+		required_by_group[key] = required_by_group.get(key, 0.0) + flt(row.required_qty)
+
+	pending_pool = {
+		item_code: required_qty - covered_by_item[item_code]
+		for item_code, required_qty in required_by_item.items()
+	}
+
+	allocation = {}
+	for key, required_qty in required_by_group.items():
+		item_code = key[0]
+		if required_by_item[item_code] <= 0:
+			continue
+
+		pool_share = pending_pool[item_code] * required_qty / required_by_item[item_code]
+		qty = min(required_qty * fraction, pool_share)
+		if qty > 0:
+			allocation[key] = qty
+	return allocation
+
+
+def _allocation_key(row):
+	"""Manual rows have no operation_row_id; their operation label splits them."""
+	return (row.item_code, row.source_warehouse, cint(row.operation_row_id) or row.operation)
+
+
+def _merge_allocation_per_item(allocation):
+	"""Material Request rejects repeated item codes unless Buying Settings allows them."""
+	merged = {}
+	key_by_item = {}
+	for key, qty in allocation.items():
+		item_code = key[0]
+		if item_code in key_by_item:
+			merged[key_by_item[item_code]] += qty
+		else:
+			key_by_item[item_code] = key
+			merged[key] = qty
+	return merged
+
+
+def _validated_for_qty(for_qty):
+	qty = flt(for_qty)
+	if not math.isfinite(qty) or qty <= 0:
+		frappe.throw(_("Quantity must be greater than zero."))
+	return qty
+
+
+def _validate_material_is_pending(rows):
+	if not rows:
+		frappe.throw(
+			_("All required items have already been transferred, requested or picked."),
+			title=_("No Pending Materials"),
+		)
+
+
+def _set_pick_list_item_qty(source, target, source_parent, allocation_by_item):
+	qty = allocation_by_item.pop(_allocation_key(source), 0.0)
+	if qty <= 0:
+		target.delete()
+		return
+
+	target.qty = qty
+	target.stock_qty = qty
+	target.uom = frappe.get_value("Item", source.item_code, "stock_uom")
+	target.stock_uom = target.uom
+	target.conversion_factor = 1
 
 
 def get_reserved_qty_for_production(
@@ -3828,15 +3986,32 @@ def _earlier_operation_making_item(wo, wo_item):
 
 
 @frappe.whitelist()
-def make_material_request(source_name: str, target_doc: str | dict | None = None):
+def make_material_request(
+	source_name: str, target_doc: str | dict | None = None, for_qty: float | None = None
+):
 	frappe.has_permission("Material Request", "create", throw=True)
 
-	doc = get_mapped_doc("Work Order", source_name, _material_request_mapping(), target_doc)
+	if for_qty is None and frappe.flags.args:
+		for_qty = frappe.flags.args.for_qty
+
+	work_order = frappe.get_doc("Work Order", source_name)
+	fraction = 1.0
+	if for_qty is not None:
+		fraction = _validated_for_qty(for_qty) / flt(work_order.qty)
+
+	allocation = _allocate_material_demand(work_order, fraction)
+	if not cint(frappe.db.get_single_value("Buying Settings", "allow_multiple_items")):
+		allocation = _merge_allocation_per_item(allocation)
+	postprocess = partial(_set_material_request_item, allocation_by_item=allocation)
+	doc = get_mapped_doc(
+		"Work Order", source_name, _material_request_mapping(postprocess, allocation), target_doc
+	)
+	_validate_material_is_pending(doc.items)
 	doc.material_request_type = "Material Transfer"
 	return doc
 
 
-def _material_request_mapping():
+def _material_request_mapping(postprocess, allocation):
 	return {
 		"Work Order": {
 			"doctype": "Material Request",
@@ -3849,15 +4024,20 @@ def _material_request_mapping():
 				("stock_uom", "uom"),
 				("source_warehouse", "from_warehouse"),
 			],
-			"postprocess": _set_material_request_item,
-			"condition": lambda doc: abs(doc.transferred_qty) < abs(doc.required_qty),
+			"postprocess": postprocess,
+			"condition": lambda doc: _allocation_key(doc) in allocation,
 		},
 	}
 
 
-def _set_material_request_item(source, target, source_parent):
+def _set_material_request_item(source, target, source_parent, allocation_by_item):
+	qty = allocation_by_item.pop(_allocation_key(source), 0.0)
+	if qty <= 0:
+		target.delete()
+		return
+
 	target.warehouse = source_parent.wip_warehouse
-	target.qty = flt(source.required_qty) - flt(source.transferred_qty)
+	target.qty = qty
 	target.schedule_date = nowdate()
 
 
