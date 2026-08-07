@@ -1687,6 +1687,12 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, make_material_request, work_order.name, for_qty=0)
 		self.assertRaises(frappe.ValidationError, make_material_request, work_order.name, for_qty=-1)
+		self.assertRaises(
+			frappe.ValidationError, make_material_request, work_order.name, for_qty=float("inf")
+		)
+		self.assertRaises(
+			frappe.ValidationError, make_material_request, work_order.name, for_qty=float("nan")
+		)
 
 	def test_pick_list_rejects_nonpositive_qty(self):
 		from erpnext.manufacturing.doctype.work_order.mapper import create_pick_list
@@ -1697,6 +1703,8 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, create_pick_list, work_order.name, for_qty=0)
 		self.assertRaises(frappe.ValidationError, create_pick_list, work_order.name, for_qty=-1)
+		self.assertRaises(frappe.ValidationError, create_pick_list, work_order.name, for_qty=float("inf"))
+		self.assertRaises(frappe.ValidationError, create_pick_list, work_order.name, for_qty=float("nan"))
 		self.assertRaises(frappe.ValidationError, create_pick_list, work_order.name)
 
 	def submit_material_request(self, work_order_name, for_qty=None):
