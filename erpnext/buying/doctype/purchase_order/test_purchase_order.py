@@ -320,6 +320,7 @@ class TestPurchaseOrder(ERPNextTestSuite):
 
 		po.load_from_db()
 		existing_ordered_qty = get_ordered_qty()
+		existing_ordered_qty_in_new_warehouse = get_ordered_qty(warehouse="_Test Warehouse 2 - _TC")
 		first_item_of_po = po.get("items")[0]
 
 		trans_item = json.dumps(
@@ -330,16 +331,21 @@ class TestPurchaseOrder(ERPNextTestSuite):
 					"qty": first_item_of_po.qty,
 					"docname": first_item_of_po.name,
 				},
-				{"item_code": "_Test Item", "rate": 200, "qty": 7},
+				{"item_code": "_Test Item", "rate": 200, "qty": 7, "warehouse": "_Test Warehouse 2 - _TC"},
 			]
 		)
 		update_child_qty_rate("Purchase Order", trans_item, po.name)
 
 		po.reload()
 		self.assertEqual(len(po.get("items")), 2)
+		self.assertEqual(po.get("items")[-1].warehouse, "_Test Warehouse 2 - _TC")
 		self.assertEqual(po.status, "To Receive and Bill")
-		# ordered qty should increase on row addition
-		self.assertEqual(get_ordered_qty(), existing_ordered_qty + 7)
+		# ordered qty should increase on row addition, in the warehouse passed for the new row
+		self.assertEqual(get_ordered_qty(), existing_ordered_qty)
+		self.assertEqual(
+			get_ordered_qty(warehouse="_Test Warehouse 2 - _TC"),
+			existing_ordered_qty_in_new_warehouse + 7,
+		)
 
 	def test_update_child_removing_item(self):
 		po = create_purchase_order(do_not_save=1)

@@ -616,6 +616,34 @@ class TestSalesOrder(ERPNextTestSuite):
 			so.name,
 		)
 
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Group node warehouse",
+			update_child_qty_rate,
+			"Sales Order",
+			get_trans_item("_Test Warehouse Group - _TC"),
+			so.name,
+		)
+
+		if not frappe.db.exists("Warehouse", "_Test Disabled Warehouse - _TC"):
+			frappe.get_doc(
+				{
+					"doctype": "Warehouse",
+					"warehouse_name": "_Test Disabled Warehouse",
+					"company": "_Test Company",
+					"disabled": 1,
+				}
+			).insert()
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Disabled Warehouse",
+			update_child_qty_rate,
+			"Sales Order",
+			get_trans_item("_Test Disabled Warehouse - _TC"),
+			so.name,
+		)
+
 		update_child_qty_rate("Sales Order", get_trans_item("_Test Warehouse 2 - _TC"), so.name)
 
 		so.reload()
@@ -628,27 +656,45 @@ class TestSalesOrder(ERPNextTestSuite):
 	def test_update_child_adding_new_item_without_any_default_warehouse(self):
 		item_code = make_item("_Test Item Without Default Warehouse", {"is_stock_item": 1}).name
 		so = make_sales_order(item_code="_Test Item", qty=4)
+		existing_item = so.get("items")[0]
 
 		# a company gets a default warehouse when its warehouses are created
 		company_default = frappe.db.get_value("Company", so.company, "default_warehouse")
 		frappe.db.set_value("Company", so.company, "default_warehouse", None)
 		self.addCleanup(frappe.db.set_value, "Company", so.company, "default_warehouse", company_default)
 
-		def get_trans_item(warehouse=None):
-			row = {"item_code": item_code, "rate": 200, "qty": 7}
+		def get_trans_items(warehouse=None):
+			new_row = {"item_code": item_code, "rate": 200, "qty": 7}
 			if warehouse:
-				row["warehouse"] = warehouse
+				new_row["warehouse"] = warehouse
 
-			return json.dumps([row])
+			return json.dumps(
+				[
+					{
+						"item_code": existing_item.item_code,
+						"rate": existing_item.rate,
+						"qty": existing_item.qty,
+						"docname": existing_item.name,
+					},
+					new_row,
+				]
+			)
 
 		# no default in the Item Master, Item Group, Brand or Company
-		self.assertRaises(
-			frappe.ValidationError, update_child_qty_rate, "Sales Order", get_trans_item(), so.name
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Cannot find a default warehouse",
+			update_child_qty_rate,
+			"Sales Order",
+			get_trans_items(),
+			so.name,
 		)
 
-		update_child_qty_rate("Sales Order", get_trans_item("_Test Warehouse - _TC"), so.name)
+		update_child_qty_rate("Sales Order", get_trans_items("_Test Warehouse - _TC"), so.name)
 
 		so.reload()
+		self.assertEqual(len(so.get("items")), 2)
+		self.assertEqual(so.get("items")[0].warehouse, existing_item.warehouse)
 		self.assertEqual(so.get("items")[-1].item_code, item_code)
 		self.assertEqual(so.get("items")[-1].warehouse, "_Test Warehouse - _TC")
 
