@@ -5,12 +5,8 @@
 import unittest
 
 import frappe
-<<<<<<< HEAD
 from frappe.tests.utils import change_settings
-from frappe.utils import flt, nowdate
-=======
 from frappe.utils import add_days, flt, nowdate
->>>>>>> 0bb0f6d689 (test(journal_entry): added test cases for blocked purchase invoices)
 
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.accounts.doctype.journal_entry.journal_entry import StockAccountInvalidTransaction
