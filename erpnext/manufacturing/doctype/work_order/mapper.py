@@ -506,8 +506,8 @@ def _pick_list_mapping(postprocess, allocation):
 
 
 def _allocate_material_demand(work_order, fraction):
-	"""Fraction of each (item, warehouse, operation row) group's requirement, drawn
-	in row order from the item's pending pool (covered counters are item-wide)."""
+	"""Fraction of each (item, warehouse, operation row) group's requirement, capped
+	at the group's proportional share of the item's pending pool."""
 	required_by_item = {}
 	covered_by_item = {}
 	required_by_group = {}
@@ -528,10 +528,13 @@ def _allocate_material_demand(work_order, fraction):
 	allocation = {}
 	for key, required_qty in required_by_group.items():
 		item_code = key[0]
-		qty = min(required_qty * fraction, pending_pool[item_code])
+		if required_by_item[item_code] <= 0:
+			continue
+
+		pool_share = pending_pool[item_code] * required_qty / required_by_item[item_code]
+		qty = min(required_qty * fraction, pool_share)
 		if qty > 0:
 			allocation[key] = qty
-			pending_pool[item_code] -= qty
 	return allocation
 
 
