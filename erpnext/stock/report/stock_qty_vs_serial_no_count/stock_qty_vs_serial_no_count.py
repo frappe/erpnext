@@ -4,8 +4,10 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder import Order
 from frappe.query_builder.functions import Coalesce
-from frappe.utils import flt, get_datetime
+from frappe.utils import flt
+from pypika import analytics as an
 
 
 def execute(filters=None):
@@ -154,42 +156,58 @@ def get_last_ledger_moves(item_code, serial_nos):
 
 
 def get_last_bundle_moves(item_code, serial_nos):
-	entry = frappe.qb.DocType("Serial and Batch Entry")
-	bundle = frappe.qb.DocType("Serial and Batch Bundle")
-
 	last_moves = {}
 	for start in range(0, len(serial_nos), SYNC_CHUNK_SIZE):
-		rows = (
-			frappe.qb.from_(entry)
-			.inner_join(bundle)
-			.on(entry.parent == bundle.name)
-			.select(
-				entry.serial_no,
-				entry.qty,
-				Coalesce(entry.warehouse, bundle.warehouse).as_("warehouse"),
-				bundle.voucher_type,
-				bundle.posting_date,
-				bundle.posting_time,
-				bundle.creation,
-			)
-			.where(
-				(bundle.docstatus == 1)
-				& (Coalesce(bundle.is_cancelled, 0) == 0)
-				& (bundle.item_code == item_code)
-				& (entry.serial_no.isin(serial_nos[start : start + SYNC_CHUNK_SIZE]))
-			)
-		).run(as_dict=True)
-
-		for row in rows:
-			posting_datetime = get_datetime(
-				f"{row.posting_date or '1900-01-01'} {row.posting_time or '00:00:00'}"
-			)
-			key = (posting_datetime, row.creation)
-			if row.serial_no not in last_moves or key >= last_moves[row.serial_no].sort_key:
-				row.sort_key = key
-				last_moves[row.serial_no] = row
+		for row in get_last_bundle_moves_chunk(item_code, serial_nos[start : start + SYNC_CHUNK_SIZE]):
+			last_moves[row.serial_no] = row
 
 	return last_moves
+
+
+def get_last_bundle_moves_chunk(item_code, serial_nos):
+	"""A bundle can be created much before its Stock Ledger Entry, so same-posting-datetime
+	ties are broken on the creation of the bundle's own SLE. The SLE join also keeps only
+	real stock movements - reservation bundles (Pick List) carry no SLE."""
+	entry = frappe.qb.DocType("Serial and Batch Entry")
+	bundle = frappe.qb.DocType("Serial and Batch Bundle")
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+
+	row_number = (
+		an.RowNumber()
+		.over(entry.serial_no)
+		.orderby(bundle.posting_date, order=Order.desc)
+		.orderby(bundle.posting_time, order=Order.desc)
+		.orderby(sle.creation, order=Order.desc)
+	)
+
+	ranked = (
+		frappe.qb.from_(entry)
+		.inner_join(bundle)
+		.on(entry.parent == bundle.name)
+		.inner_join(sle)
+		.on(sle.serial_and_batch_bundle == bundle.name)
+		.select(
+			entry.serial_no,
+			entry.qty,
+			Coalesce(entry.warehouse, bundle.warehouse).as_("warehouse"),
+			bundle.voucher_type,
+			row_number.as_("row_no"),
+		)
+		.where(
+			(bundle.docstatus == 1)
+			& (Coalesce(bundle.is_cancelled, 0) == 0)
+			& (sle.is_cancelled == 0)
+			& (bundle.item_code == item_code)
+			& (entry.serial_no.isin(serial_nos))
+		)
+	).as_("ranked")
+
+	return (
+		frappe.qb.from_(ranked)
+		.select(ranked.serial_no, ranked.qty, ranked.warehouse, ranked.voucher_type)
+		.where(ranked.row_no == 1)
+		.run(as_dict=True)
+	)
 
 
 def set_legacy_last_moves(item_code, serial_nos, last_moves):
