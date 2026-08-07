@@ -240,10 +240,8 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 
 	unblock_invoice() {
 		const me = this;
-		frappe.call({
-			method: "erpnext.accounts.doctype.purchase_invoice.purchase_invoice.unblock_invoice",
-			args: { name: me.frm.doc.name },
-			callback: (r) => me.frm.reload_doc(),
+		me.frm.call("unblock_invoice", null, () => {
+			me.frm.reload_doc();
 		});
 	}
 
@@ -294,15 +292,16 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 
 		this.dialog.set_primary_action(__("Save"), function () {
 			const dialog_data = me.dialog.get_values();
-			frappe.call({
-				method: "erpnext.accounts.doctype.purchase_invoice.purchase_invoice.block_invoice",
-				args: {
-					name: me.frm.doc.name,
+			me.frm.call(
+				"block_invoice",
+				{
 					hold_comment: dialog_data.hold_comment,
 					release_date: dialog_data.release_date,
 				},
-				callback: (r) => me.frm.reload_doc(),
-			});
+				() => {
+					me.frm.reload_doc();
+				}
+			);
 			me.dialog.hide();
 		});
 
@@ -341,10 +340,9 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 	}
 
 	set_release_date(data) {
-		return frappe.call({
-			method: "erpnext.accounts.doctype.purchase_invoice.purchase_invoice.change_release_date",
-			args: data,
-			callback: (r) => this.frm.reload_doc(),
+		const me = this;
+		return me.frm.call("change_release_date", { release_date: data.release_date }, () => {
+			me.frm.reload_doc();
 		});
 	}
 
