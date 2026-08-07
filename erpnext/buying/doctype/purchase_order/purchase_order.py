@@ -310,12 +310,13 @@ class PurchaseOrder(BuyingController):
 			itemwise_qty.setdefault(d.item_code, 0)
 			itemwise_qty[d.item_code] += flt(d.stock_qty)
 
+		precision = self.items[0].precision("stock_qty")
 		for item_code, qty in itemwise_qty.items():
-			if flt(qty) < flt(itemwise_min_order_qty.get(item_code)):
+			if flt(qty, precision) < flt(itemwise_min_order_qty.get(item_code), precision):
 				frappe.throw(
 					_(
 						"Item {0}: Ordered qty {1} cannot be less than minimum order qty {2} (defined in Item)."
-					).format(item_code, qty, itemwise_min_order_qty.get(item_code))
+					).format(item_code, flt(qty, precision), itemwise_min_order_qty.get(item_code))
 				)
 
 	def get_schedule_dates(self):
