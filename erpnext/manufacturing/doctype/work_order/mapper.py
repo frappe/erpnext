@@ -543,7 +543,8 @@ def _allocate_material_demand(work_order, fraction):
 
 
 def _allocation_key(row):
-	return (row.item_code, row.source_warehouse, cint(row.operation_row_id))
+	"""Manually added rows carry no operation_row_id, so their operation label splits them."""
+	return (row.item_code, row.source_warehouse, cint(row.operation_row_id) or row.operation)
 
 
 def _validated_for_qty(for_qty):
