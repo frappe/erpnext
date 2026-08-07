@@ -506,8 +506,8 @@ def _pick_list_mapping(postprocess, allocation):
 
 
 def _allocate_material_demand(work_order, fraction):
-	"""Qty to request per (item, source warehouse, operation) group: the fraction of
-	the group's requirement, drawn from the item's pending pool in row order.
+	"""Qty to request per (item, source warehouse, operation row) group: the fraction
+	of the group's requirement, drawn from the item's pending pool in row order.
 
 	The covered counters (transferred, requested, picked) are stamped as item-wide
 	totals on every row of an item, so the pool is per item while allocation keeps
@@ -543,7 +543,7 @@ def _allocate_material_demand(work_order, fraction):
 
 
 def _allocation_key(row):
-	return (row.item_code, row.source_warehouse, row.operation)
+	return (row.item_code, row.source_warehouse, cint(row.operation_row_id))
 
 
 def _validated_for_qty(for_qty):
