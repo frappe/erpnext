@@ -1874,6 +1874,30 @@ class TestWorkOrder(ERPNextTestSuite):
 		remainder = sum(flt(row.qty) for row in remainder_mr.items if row.item_code == first.item_code)
 		self.assertAlmostEqual(remainder, total_required - requested, places=6)
 
+	def test_allocation_splits_by_source_warehouse(self):
+		work_order = make_wo_order_test_record(
+			planned_start_date=now(), qty=10, source_warehouse="Stores - _TC"
+		)
+		first = work_order.required_items[0]
+		duplicate = work_order.append(
+			"required_items",
+			{
+				"item_code": first.item_code,
+				"required_qty": 5,
+				"stock_uom": first.stock_uom,
+				"source_warehouse": "_Test Warehouse 1 - _TC",
+				"docstatus": 1,
+			},
+		)
+		duplicate.db_insert()
+		work_order.reload()
+
+		mr = make_material_request(work_order.name, for_qty=4)
+		rows = {row.from_warehouse: flt(row.qty) for row in mr.items if row.item_code == first.item_code}
+		self.assertEqual(len(rows), 2)
+		self.assertAlmostEqual(rows["Stores - _TC"], flt(first.required_qty) * 4 / 10, places=6)
+		self.assertAlmostEqual(rows["_Test Warehouse 1 - _TC"], 5 * 4 / 10, places=6)
+
 	def test_pick_list_rejects_over_pick_against_material_request(self):
 		from erpnext.stock.doctype.material_request.mapper import create_pick_list as mr_to_pick_list
 
