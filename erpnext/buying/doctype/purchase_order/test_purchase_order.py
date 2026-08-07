@@ -743,6 +743,19 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		fractional.items[0].conversion_factor = 0.6
 		self.assertRaises(UOMMustBeIntegerError, fractional.insert)
 
+	def test_stock_qty_rounded_to_field_precision(self):
+		item_doc = make_item(properties={"stock_uom": "Kg"})
+		item_doc.append("uoms", {"uom": "Litre", "conversion_factor": 0.6})
+		item_doc.save()
+
+		po = create_purchase_order(item_code=item_doc.name, qty=3333.333, do_not_save=1)
+		po.items[0].uom = "Litre"
+		po.items[0].conversion_factor = 0.6
+		po.insert()
+
+		row = po.items[0]
+		self.assertEqual(row.stock_qty, flt(3333.333 * 0.6, row.precision("stock_qty")))
+
 	def test_ordered_qty_for_closing_po(self):
 		bin = frappe.get_all(
 			"Bin",

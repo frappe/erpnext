@@ -48,6 +48,19 @@ class TestSalesOrder(ERPNextTestSuite):
 			"update_price_list_based_on": "Rate",
 		},
 	)
+	def test_stock_qty_rounded_to_field_precision(self):
+		item_doc = make_item(properties={"stock_uom": "Kg"})
+		item_doc.append("uoms", {"uom": "Litre", "conversion_factor": 0.6})
+		item_doc.save()
+
+		so = make_sales_order(item_code=item_doc.name, qty=3333.333, do_not_save=1)
+		so.items[0].uom = "Litre"
+		so.items[0].conversion_factor = 0.6
+		so.insert()
+
+		row = so.items[0]
+		self.assertEqual(row.stock_qty, flt(3333.333 * 0.6, row.precision("stock_qty")))
+
 	def test_sales_order_expired_item_price(self):
 		price_list = "_Test Price List"
 
