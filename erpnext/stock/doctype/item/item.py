@@ -860,7 +860,17 @@ class Item(Document):
 				frappe.throw(_("Item {0} is not a template item.").format(frappe.bold(self.variant_of)))
 
 			if based_on == "Item Attribute":
+				previous_doc = self.get_doc_before_save()
+				saved_attributes = (
+					{(row.attribute, row.attribute_value) for row in previous_doc.attributes}
+					if previous_doc
+					else set()
+				)
+
 				for d in self.attributes:
+					if (d.attribute, d.attribute_value) in saved_attributes:
+						continue
+
 					if not frappe.db.exists(
 						"Item Variant Attribute", {"attribute": d.attribute, "parent": self.variant_of}
 					):
@@ -1498,7 +1508,7 @@ def get_uom_conv_factor(uom: str | None, stock_uom: str | None):
 		"UOM Conversion Factor", {"to_uom": from_uom, "from_uom": to_uom}, ["value"], as_dict=1
 	)
 	if inverse_match:
-		return 1 / inverse_match.value
+		return flt(1 / inverse_match.value, frappe.get_precision("UOM Conversion Factor", "value"))
 
 	# This attempts to try and get conversion from intermediate UOM.
 	# case:
@@ -1518,7 +1528,7 @@ def get_uom_conv_factor(uom: str | None, stock_uom: str | None):
 	)
 
 	if intermediate_match:
-		return intermediate_match[0].value
+		return flt(intermediate_match[0].value, frappe.get_precision("UOM Conversion Factor", "value"))
 
 
 @frappe.whitelist()

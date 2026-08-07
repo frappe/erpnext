@@ -102,6 +102,70 @@ class TestBOM(ERPNextTestSuite):
 			self.assertNotIn(rm_normal, items_dict)
 
 	@timeout
+	def test_get_items_amount_uses_each_lines_own_rate(self):
+		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		rm = make_item(properties={"is_stock_item": 1, "valuation_rate": 10, "stock_uom": "Nos"})
+		if not any(row.uom == "Box" for row in rm.uoms):
+			rm.append("uoms", {"uom": "Box", "conversion_factor": 5})
+			rm.save()
+
+		fg_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		bom = make_bom(item=fg_item, raw_materials=[rm.name], rm_qty=2, do_not_save=True)
+		bom.append("items", {"item_code": rm.name, "qty": 3, "uom": "Box", "stock_uom": "Nos"})
+		bom.save()
+		bom.submit()
+
+		lines = [row for row in bom.items if row.item_code == rm.name]
+		self.assertEqual(len(lines), 2)
+		self.assertEqual(len({flt(row.rate) for row in lines}), 2)
+
+		requested_qty = 2
+		expected = sum(flt(row.qty) * flt(row.rate) for row in lines) / flt(bom.quantity) * requested_qty
+		items_dict = get_bom_items_as_dict(bom.name, "_Test Company", qty=requested_qty, fetch_exploded=0)
+
+		self.assertEqual(len([row for row in items_dict if row == rm.name]), 1)
+		self.assertAlmostEqual(flt(items_dict[rm.name].amount), expected, places=2)
+
+	@timeout
+	def test_get_items_takes_line_columns_from_one_line(self):
+		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		rm = make_item(properties={"is_stock_item": 1, "valuation_rate": 10})
+		fg_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+
+		first_warehouse = create_warehouse("_Test BOM Line A")
+		second_warehouse = create_warehouse("_Test BOM Line B")
+
+		bom = make_bom(item=fg_item, raw_materials=[rm.name], rm_qty=2, do_not_save=True)
+		bom.items[0].description = "bbb first line"
+		bom.items[0].source_warehouse = first_warehouse
+		bom.append(
+			"items",
+			{
+				"item_code": rm.name,
+				"qty": 3,
+				"uom": rm.stock_uom,
+				"stock_uom": rm.stock_uom,
+				"description": "ccc second line",
+				"source_warehouse": second_warehouse,
+			},
+		)
+		bom.save()
+		bom.submit()
+
+		items_dict = get_bom_items_as_dict(bom.name, "_Test Company", qty=1, fetch_exploded=0)
+		row = items_dict[rm.name]
+
+		# "ccc" sorts above "bbb" on either engine, so an aggregated description would win here;
+		# the value must instead come from the first line, together with that line's warehouse
+		self.assertEqual(row.description, "bbb first line")
+		self.assertEqual(row.source_warehouse, first_warehouse)
+
+	@timeout
 	def test_default_bom(self):
 		def _get_default_bom_in_item():
 			return cstr(frappe.db.get_value("Item", "_Test FG Item 2", "default_bom"))

@@ -445,33 +445,44 @@ class TestCustomer(ERPNextTestSuite):
 		overdue = get_customer_overdue_amount("_Test Customer", "_Test Company")
 
 		settings = frappe.get_single("Accounts Settings")
-		settings.enable_overdue_billing_threshold = 1
-		settings.role_allowed_to_bypass_overdue_billing = None
-		settings.save()
-		set_overdue_billing_threshold("_Test Customer", "_Test Company", overdue - 100)
+		original_enable = settings.enable_overdue_billing_threshold
+		original_bypass_role = settings.role_allowed_to_bypass_overdue_billing
+		try:
+			settings.enable_overdue_billing_threshold = 1
+			settings.role_allowed_to_bypass_overdue_billing = None
+			settings.save()
+			set_overdue_billing_threshold("_Test Customer", "_Test Company", overdue - 100)
 
-		# overdue is over the threshold and the user has no bypass role -> blocked
-		si = create_sales_invoice(do_not_submit=True)
-		self.assertRaises(frappe.ValidationError, si.submit)
+			# overdue is over the threshold and the user has no bypass role -> blocked
+			si = create_sales_invoice(do_not_submit=True)
+			self.assertRaises(frappe.ValidationError, si.submit)
 
-		# a user holding the bypass role can still submit
-		settings.role_allowed_to_bypass_overdue_billing = "Accounts Manager"
-		settings.save()
-		si = create_sales_invoice(do_not_submit=True)
-		si.submit()
-		self.assertEqual(si.docstatus, 1)
+			# a user holding the bypass role can still submit
+			settings.role_allowed_to_bypass_overdue_billing = "Accounts Manager"
+			settings.save()
+			si = create_sales_invoice(do_not_submit=True)
+			si.submit()
+			self.assertEqual(si.docstatus, 1)
 
-		# threshold still crossed, but the feature is off -> never blocked
-		settings.enable_overdue_billing_threshold = 0
-		settings.role_allowed_to_bypass_overdue_billing = None
-		settings.save()
-		si = create_sales_invoice(do_not_submit=True)
-		si.submit()
-		self.assertEqual(si.docstatus, 1)
+			# threshold still crossed, but the feature is off -> never blocked
+			settings.enable_overdue_billing_threshold = 0
+			settings.role_allowed_to_bypass_overdue_billing = None
+			settings.save()
+			si = create_sales_invoice(do_not_submit=True)
+			si.submit()
+			self.assertEqual(si.docstatus, 1)
+		finally:
+			settings.enable_overdue_billing_threshold = original_enable
+			settings.role_allowed_to_bypass_overdue_billing = original_bypass_role
+			settings.save()
 
 	def test_overdue_billing_threshold_falls_back_to_customer_group(self):
 		customer_group = frappe.get_cached_value("Customer", "_Test Customer", "customer_group")
 		group = frappe.get_doc("Customer Group", customer_group)
+		customer = frappe.get_doc("Customer", "_Test Customer")
+		self._restore_credit_limits_after(group)
+		self._restore_credit_limits_after(customer)
+
 		group.credit_limits = []
 		group.append("credit_limits", {"company": "_Test Company", "overdue_billing_threshold": 5000})
 		group.save()
@@ -482,6 +493,22 @@ class TestCustomer(ERPNextTestSuite):
 		# a threshold on the customer wins over the group
 		set_overdue_billing_threshold("_Test Customer", "_Test Company", 2000)
 		self.assertEqual(get_overdue_billing_threshold("_Test Customer", "_Test Company"), 2000)
+
+		# a 0 on the customer inherits the group's limit
+		set_overdue_billing_threshold("_Test Customer", "_Test Company", 0)
+		self.assertEqual(get_overdue_billing_threshold("_Test Customer", "_Test Company"), 5000)
+
+	def _restore_credit_limits_after(self, doc):
+		original = [row.as_dict(no_default_fields=True) for row in doc.credit_limits]
+
+		def restore():
+			fresh = frappe.get_doc(doc.doctype, doc.name)
+			fresh.credit_limits = []
+			for row in original:
+				fresh.append("credit_limits", row)
+			fresh.save()
+
+		self.addCleanup(restore)
 
 	def test_overdue_threshold_row_without_credit_limit(self):
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice

@@ -3079,11 +3079,14 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		old_perpetual_inventory = erpnext.is_perpetual_inventory_enabled("_Test Company")
 		frappe.local.enable_perpetual_inventory["_Test Company"] = 1
+		old_inventory_account = frappe.db.get_value("Company", "_Test Company", "default_inventory_account")
 		frappe.db.set_value(
 			"Company",
 			"_Test Company",
-			"stock_received_but_not_billed",
-			"Stock Received But Not Billed - _TC",
+			{
+				"stock_received_but_not_billed": "Stock Received But Not Billed - _TC",
+				"default_inventory_account": "Stock In Hand - _TC",
+			},
 		)
 
 		pr = make_purchase_receipt(qty=10, rate=1000, do_not_submit=1)
@@ -3119,6 +3122,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		)
 		self.assertCountEqual(expected_gle, gl_entries)
 		frappe.local.enable_perpetual_inventory["_Test Company"] = old_perpetual_inventory
+		frappe.db.set_value("Company", "_Test Company", "default_inventory_account", old_inventory_account)
 
 	def test_purchase_receipt_with_use_serial_batch_field_for_rejected_qty(self):
 		batch_item = make_item(
@@ -5541,6 +5545,66 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		self.assertEqual(frappe.parse_json(stock_queue), [[20, 0.0]])
 
+	def test_purchase_return_valuation_for_batchwise_valuation_batch(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		item_code = make_item(
+			"Test Purchase Return Batchwise Valn Item",
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"batch_number_series": "BN-TPRBWV-.#####",
+			},
+		).name
+
+		batch_no = "BN-TPRBWV-00001"
+		batch = frappe.new_doc("Batch").update({"batch_id": batch_no, "item": item_code}).insert()
+		self.assertEqual(batch.use_batchwise_valuation, 1)
+
+		warehouse = "_Test Warehouse - _TC"
+		pr = make_purchase_receipt(
+			item_code=item_code,
+			qty=100,
+			rate=1000,
+			warehouse=warehouse,
+			batch_no=batch_no,
+			use_serial_batch_fields=1,
+		)
+		make_purchase_receipt(
+			item_code=item_code,
+			qty=100,
+			rate=400,
+			warehouse=warehouse,
+			batch_no=batch_no,
+			use_serial_batch_fields=1,
+		)
+		create_delivery_note(
+			item_code=item_code,
+			qty=100,
+			warehouse=warehouse,
+			batch_no=batch_no,
+			use_serial_batch_fields=1,
+		)
+
+		return_pr = make_return_doc("Purchase Receipt", pr.name)
+		return_pr.submit()
+
+		sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": return_pr.name, "is_cancelled": 0},
+			["stock_value_difference", "qty_after_transaction", "stock_value", "serial_and_batch_bundle"],
+			as_dict=True,
+		)
+		self.assertEqual(flt(sle.qty_after_transaction), 0.0)
+		self.assertEqual(flt(sle.stock_value_difference, 2), -70000.0)
+		self.assertEqual(flt(sle.stock_value, 2), 0.0)
+
+		rate = frappe.db.get_value(
+			"Serial and Batch Entry", {"parent": sle.serial_and_batch_bundle}, "incoming_rate"
+		)
+		self.assertEqual(flt(rate, 2), 700.0)
+
 	def test_negative_stock_error_for_purchase_return(self):
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
@@ -6131,17 +6195,31 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		# already received against this PO line, excluding pr2 itself, is pr1's 4
 		self.assertEqual(pr2.get_already_received_qty(po.name, po_detail), 4.0)
 
-	def test_check_next_docstatus_blocks_with_submitted_invoice(self):
-		"""check_next_docstatus must flag a submitted Purchase Invoice drawn from the receipt —
-		covers the converted child-table get_all (Purchase Invoice Item, docstatus=1)."""
+	def test_cancel_blocked_by_submitted_invoice_rolls_back(self):
+		"""A submitted Purchase Invoice must block cancelling its Purchase Receipt. Frappe's backlink
+		check rejects the cancel only after on_cancel has run stock, GL, and status work, so the whole
+		transaction has to roll back: the receipt stays submitted with no leaked ledger entries."""
 		pr = make_purchase_receipt()
 		pi = make_purchase_invoice(pr.name)
 		pi.insert()
 		pi.submit()
 
-		with self.assertRaises(frappe.ValidationError) as cm:
-			pr.check_next_docstatus()
-		self.assertIn("is already submitted", str(cm.exception))
+		pr.reload()
+		status_before = pr.status
+		sle_before = frappe.db.count("Stock Ledger Entry", {"voucher_no": pr.name})
+		gle_before = frappe.db.count("GL Entry", {"voucher_no": pr.name})
+
+		frappe.db.savepoint("before_blocked_cancel")
+		with self.assertRaises(frappe.LinkExistsError) as cm:
+			pr.cancel()
+		self.assertIn(pi.name, str(cm.exception))
+		frappe.db.rollback(save_point="before_blocked_cancel")  # mimic the request-level rollback
+
+		pr.reload()
+		self.assertEqual(pr.docstatus, 1)
+		self.assertEqual(pr.status, status_before)
+		self.assertEqual(frappe.db.count("Stock Ledger Entry", {"voucher_no": pr.name}), sle_before)
+		self.assertEqual(frappe.db.count("GL Entry", {"voucher_no": pr.name}), gle_before)
 
 
 def create_asset_category_for_pr_test():

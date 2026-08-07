@@ -423,6 +423,45 @@ class TestItem(ERPNextTestSuite):
 
 		self.assertRaises(InvalidItemAttributeValueError, attribute.save)
 
+	def test_disabled_attribute_blocks_only_attribute_changes(self):
+		frappe.delete_doc_if_exists("Item", "_Test Disabled Attribute Template-L", force=1)
+		frappe.delete_doc_if_exists("Item", "_Test Disabled Attribute Template", force=1)
+		frappe.delete_doc_if_exists("Item Attribute", "_Test Disabled Size", force=1)
+
+		attribute = frappe.get_doc(
+			{
+				"doctype": "Item Attribute",
+				"attribute_name": "_Test Disabled Size",
+				"item_attribute_values": [
+					{"attribute_value": "Large", "abbr": "L"},
+					{"attribute_value": "Small", "abbr": "S"},
+				],
+			}
+		).insert()
+
+		template = make_item(
+			"_Test Disabled Attribute Template",
+			{
+				"has_variants": 1,
+				"variant_based_on": "Item Attribute",
+				"attributes": [{"attribute": attribute.name}],
+			},
+		)
+
+		variant = create_variant(template.name, {attribute.name: "Large"})
+		variant.save()
+
+		attribute.disabled = 1
+		attribute.save()
+
+		variant.reload()
+		variant.description = "Edited after the attribute was disabled"
+		variant.save()
+
+		variant.reload()
+		variant.attributes[0].attribute_value = "Small"
+		self.assertRaises(frappe.ValidationError, variant.save)
+
 	def test_rename_attribute_value_updates_variants(self):
 		frappe.delete_doc_if_exists("Item", "_Test Variant Item-L", force=1)
 

@@ -69,6 +69,14 @@ class PlantFloor(Document):
 def get_stock_summary(
 	warehouse: str, start: int = 0, item_code: str | None = None, item_group: str | None = None
 ):
+	frappe.has_permission("Warehouse", doc=warehouse, throw=True)
+
+	if item_code:
+		frappe.has_permission("Item", doc=item_code, throw=True)
+
+	if item_group:
+		frappe.has_permission("Item Group", doc=item_group, throw=True)
+
 	stock_details = get_stock_details(warehouse, start=start, item_code=item_code, item_group=item_group)
 
 	max_count = 0.0

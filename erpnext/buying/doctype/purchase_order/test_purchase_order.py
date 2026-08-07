@@ -216,6 +216,21 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		po2.items[0].qty = 110
 		self.assertRaises(OverAllowanceError, po2.submit)
 
+		# Stock over-delivery role must not bypass over-ordering against Material Request.
+		with self.change_settings(
+			"Stock Settings", {"role_allowed_to_over_deliver_receive": "Stock Manager"}
+		):
+			test_user = frappe.get_doc("User", "test@example.com")
+			test_user.add_roles("Stock Manager")
+
+			mr3 = make_material_request(qty=100)
+			po3 = make_purchase_order(mr3.name)
+			po3.supplier = "_Test Supplier"
+			po3.items[0].qty = 110
+			with self.set_user("test@example.com"):
+				po3.flags.ignore_permissions = True
+				self.assertRaises(OverAllowanceError, po3.submit)
+
 		# cleanup
 		frappe.db.set_single_value("Buying Settings", "over_order_allowance", 0)
 		frappe.db.set_single_value("Stock Settings", "over_delivery_receipt_allowance", 0)
@@ -692,6 +707,42 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		po = create_purchase_order(qty=3.4, do_not_save=True)
 		self.assertRaises(UOMMustBeIntegerError, po.insert)
 
+	def test_min_order_qty_with_uom_conversion_dust(self):
+		item_doc = make_item(properties={"min_order_qty": 2000, "stock_uom": "Kg"})
+		item_doc.append("uoms", {"uom": "Litre", "conversion_factor": 0.6})
+		item_doc.save()
+		item = item_doc.name
+
+		precision = frappe.get_precision("Purchase Order Item", "stock_qty")
+		po = create_purchase_order(item_code=item, qty=flt(2000 / 0.6, precision), do_not_save=1)
+		po.items[0].uom = "Litre"
+		po.items[0].conversion_factor = 0.6
+		po.insert()
+
+		below_minimum = create_purchase_order(item_code=item, qty=3000, do_not_save=1)
+		below_minimum.items[0].uom = "Litre"
+		below_minimum.items[0].conversion_factor = 0.6
+		self.assertRaises(frappe.ValidationError, below_minimum.insert)
+
+	def test_uom_integer_check_tolerates_conversion_dust(self):
+		from erpnext.utilities.transaction_base import UOMMustBeIntegerError
+
+		item_doc = make_item(properties={"stock_uom": "Nos"})
+		item_doc.append("uoms", {"uom": "Kg", "conversion_factor": 0.6})
+		item_doc.save()
+		item = item_doc.name
+
+		precision = frappe.get_precision("Purchase Order Item", "stock_qty")
+		po = create_purchase_order(item_code=item, qty=flt(2000 / 0.6, precision), do_not_save=1)
+		po.items[0].uom = "Kg"
+		po.items[0].conversion_factor = 0.6
+		po.insert()
+
+		fractional = create_purchase_order(item_code=item, qty=3333.9, do_not_save=1)
+		fractional.items[0].uom = "Kg"
+		fractional.items[0].conversion_factor = 0.6
+		self.assertRaises(UOMMustBeIntegerError, fractional.insert)
+
 	def test_ordered_qty_for_closing_po(self):
 		bin = frappe.get_all(
 			"Bin",
@@ -1044,6 +1095,8 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		# self.assertEqual(po.payment_terms_template, pi.payment_terms_template)
 		compare_payment_schedules(self, po, pi)
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"maintain_same_sales_rate": 1})
+	@ERPNextTestSuite.change_settings("Buying Settings", {"maintain_same_rate": 1})
 	def test_internal_transfer_flow(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 		from erpnext.accounts.doctype.sales_invoice.mapper import (
@@ -1054,9 +1107,6 @@ class TestPurchaseOrder(ERPNextTestSuite):
 			make_sales_invoice,
 		)
 		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
-
-		frappe.db.set_single_value("Selling Settings", "maintain_same_sales_rate", 1)
-		frappe.db.set_single_value("Buying Settings", "maintain_same_rate", 1)
 
 		prepare_data_for_internal_transfer()
 		supplier = "_Test Internal Supplier 2"
@@ -1496,6 +1546,7 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		self.assertEqual(pi_2.status, "Paid")
 		self.assertEqual(po.status, "Completed")
 
+	@ERPNextTestSuite.change_settings("Buying Settings", {"maintain_same_rate": 0})
 	def test_purchase_order_over_billing_missing_item(self):
 		item1 = make_item(
 			"_Test Item for Overbilling",

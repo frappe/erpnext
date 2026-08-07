@@ -356,7 +356,7 @@ class ShopFloor {
 		// Hero image = the current operation's workstation. No item-image fallback — when the
 		// workstation has no image uploaded we show its initials, never the product image.
 		const image = wo.workstation_image
-			? `<img src="${wo.workstation_image}" alt="">`
+			? `<img src="${frappe.utils.escape_html(wo.workstation_image)}" alt="">`
 			: `<span class="sf-wo-image-fallback">${frappe.get_abbr(wo.workstation_name || item, 2)}</span>`;
 
 		const workstation_line = wo.workstation_name
@@ -370,7 +370,9 @@ class ShopFloor {
 		const wip_pct = Math.min(cint(wo.per_in_progress), 100 - done_pct);
 
 		return `
-			<div class="sf-wo-card" data-sf-focusable data-kind="wo" data-name="${wo.name}" tabindex="0">
+			<div class="sf-wo-card" data-sf-focusable data-kind="wo" data-name="${frappe.utils.escape_html(
+				wo.name
+			)}" tabindex="0">
 				<div class="sf-wo-top">
 					<div class="sf-wo-image">${image}</div>
 					<div class="sf-wo-head">
@@ -378,7 +380,9 @@ class ShopFloor {
 						${workstation_line}
 						<div class="sf-wo-id">
 							<span class="sf-wo-status-dot ${wo.status_colour}" title="${frappe.utils.escape_html(__(wo.status))}"></span>
-							<a href="/app/work-order/${wo.name}" onclick="event.stopPropagation()">${wo.name}</a>
+							<a href="/app/work-order/${encodeURIComponent(
+								wo.name
+							)}" onclick="event.stopPropagation()">${frappe.utils.escape_html(wo.name)}</a>
 						</div>
 					</div>
 				</div>
@@ -405,7 +409,7 @@ class ShopFloor {
 		this.board_container
 			.find(".sf-wo-card")
 			.removeClass("sf-selected")
-			.filter(`[data-name="${name}"]`)
+			.filter(`[data-name="${$.escapeSelector(name)}"]`)
 			.addClass("sf-selected");
 		// The detail pane reuses the operator rendering for a single work order.
 		this.detail_container.html(`
@@ -414,7 +418,9 @@ class ShopFloor {
 			"Back"
 		)} (Esc)</button>
 				<span class="sf-detail-title">${frappe.utils.escape_html(name)}</span>
-				<a class="btn btn-default btn-sm" href="/app/work-order/${name}" target="_blank">${__("Open")}</a>
+				<a class="btn btn-default btn-sm" href="/app/work-order/${encodeURIComponent(name)}" target="_blank">${__(
+			"Open"
+		)}</a>
 			</div>
 			<div class="sf-detail-body"></div>
 		`);
@@ -786,16 +792,20 @@ class ShopFloor {
 			pending = flt(jc.pending_qty);
 		}
 
+		const qty_with_uom = (qty) => `${flt(qty)} ${jc.stock_uom || ""}`.trim();
+
 		const fields = [
 			{
 				fieldtype: "Float",
-				label: __("Qty to Manufacture"),
+				label: __("Qty to Manufacture in this Cycle"),
 				fieldname: "for_quantity",
 				reqd: 1,
 				default: pending,
+				description: __("Completed, Pending and Process Loss quantities must add up to this."),
 				change() {
 					const d = me.session_dialog;
 					d.set_value("completed_qty", d.get_value("for_quantity"));
+					d.set_value("pending_qty", 0);
 					d.set_value("process_loss_qty", 0);
 				},
 			},
@@ -807,8 +817,23 @@ class ShopFloor {
 				default: pending,
 				change() {
 					const d = me.session_dialog;
-					const remaining = flt(d.get_value("for_quantity")) - flt(d.get_value("completed_qty"));
-					if (remaining > 0 && remaining !== flt(d.get_value("pending_qty"))) {
+					const remaining =
+						flt(d.get_value("for_quantity")) -
+						flt(d.get_value("completed_qty")) -
+						flt(d.get_value("process_loss_qty"));
+
+					if (remaining < 0) {
+						const max_completed_qty =
+							flt(d.get_value("for_quantity")) - flt(d.get_value("process_loss_qty"));
+						d.set_value("completed_qty", max_completed_qty);
+						frappe.throw(
+							__("Completed Quantity cannot be greater than {0}", [
+								qty_with_uom(max_completed_qty),
+							])
+						);
+					}
+
+					if (remaining !== flt(d.get_value("pending_qty"))) {
 						d.set_value("pending_qty", remaining);
 					}
 				},
@@ -818,13 +843,26 @@ class ShopFloor {
 				label: __("Pending Quantity"),
 				fieldname: "pending_qty",
 				default: 0.0,
+				description: __("Qty left for a later cycle or for another job card."),
 				change() {
 					const d = me.session_dialog;
 					const pl =
 						flt(d.get_value("for_quantity")) -
 						flt(d.get_value("completed_qty")) -
 						flt(d.get_value("pending_qty"));
-					if (pl >= 0 && pl !== flt(d.get_value("process_loss_qty"))) {
+
+					if (pl < 0) {
+						d.set_value("pending_qty", 0);
+						frappe.throw(
+							__("Pending Quantity cannot be greater than {0}", [
+								qty_with_uom(
+									flt(d.get_value("for_quantity")) - flt(d.get_value("completed_qty"))
+								),
+							])
+						);
+					}
+
+					if (pl !== flt(d.get_value("process_loss_qty"))) {
 						d.set_value("process_loss_qty", pl);
 					}
 				},
@@ -834,13 +872,26 @@ class ShopFloor {
 				label: __("Process Loss Quantity"),
 				fieldname: "process_loss_qty",
 				default: 0.0,
+				description: __("Qty scrapped in this cycle, nobody will produce it."),
 				change() {
 					const d = me.session_dialog;
 					const remaining =
 						flt(d.get_value("for_quantity")) -
 						flt(d.get_value("completed_qty")) -
 						flt(d.get_value("process_loss_qty"));
-					if (remaining >= 0 && remaining !== flt(d.get_value("pending_qty"))) {
+
+					if (remaining < 0) {
+						d.set_value("process_loss_qty", 0);
+						frappe.throw(
+							__("Process Loss Quantity cannot be greater than {0}", [
+								qty_with_uom(
+									flt(d.get_value("for_quantity")) - flt(d.get_value("completed_qty"))
+								),
+							])
+						);
+					}
+
+					if (remaining !== flt(d.get_value("pending_qty"))) {
 						d.set_value("pending_qty", remaining);
 					}
 				},
@@ -1190,7 +1241,7 @@ class ShopFloor {
 		const pad = (n) => (n < 10 ? "0" + n : String(n));
 
 		const scope = $container || this.wrapper;
-		const timer = scope.find(`.mes-job-timer[data-job-card="${jc_name}"]`);
+		const timer = scope.find(`.mes-job-timer[data-job-card="${$.escapeSelector(jc_name)}"]`);
 		timer.find(".h").text(pad(h));
 		timer.find(".m").text(pad(m));
 		timer.find(".s").text(pad(s));

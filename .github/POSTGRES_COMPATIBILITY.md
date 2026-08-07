@@ -170,6 +170,13 @@ audit of these fixes found four recurring mistakes:
 - **Fabricated arithmetic** — `Sum(x) * Max(y)` where `y` varies within the group invents a
   number no row ever had (and `Max` biases it upward) — poisonous when it feeds validation,
   budgets, valuation, or GL/stock values. Fix per-row: `Sum(x * y)`.
+- **Collation-dependent pick (text columns)** — `Max()`/`Min()` over text is a *sort*, and the two
+  engines sort text differently: MariaDB's `utf8mb4` collations fold case, PostgreSQL (as CI runs
+  it) orders by byte value. `MAX('abc', 'ABD')` is `ABD` on MariaDB and `abc` on PostgreSQL. So a
+  `Max()` over a text column that varies **in case** within its group is a live P2 divergence, not
+  the arbitrary-pick preservation the wrap is usually justified as. Confirmed on CI; see #56241.
+  Note a local macOS PostgreSQL gives a **false all-clear** — its collation happens to agree with
+  MariaDB on case. Fix: take a representative row rather than sorting text.
 - **Wrong bound** — where the value has a semantic, pick the bound deliberately:
   `Min(schedule_date)` for a "required by", `Min(idx)` for first-line ordering, a qty-weighted
   average for a rate. A blind `Max` can understate urgency or overstate a figure.

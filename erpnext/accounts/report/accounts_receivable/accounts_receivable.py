@@ -107,6 +107,7 @@ class ReceivablePayableReport:
 
 	def get_data(self):
 		self.get_sales_invoices_or_customers_based_on_sales_person()
+		self.get_invoices_based_on_sales_partner()
 
 		# Get invoice details like bill_no, due_date etc for all invoices
 		self.get_invoice_details()
@@ -240,6 +241,12 @@ class ReceivablePayableReport:
 				ple.party in self.sales_person_records.get("Customer", [])
 				or ple.against_voucher_no in self.sales_person_records.get("Sales Invoice", [])
 			):
+				return
+
+		if self.filters.get("sales_partner"):
+			# a return is folded onto the invoice it settles, so match that invoice's
+			# partner (like the sales_person filter above), not the return's own
+			if ple.against_voucher_no not in self.sales_partner_invoices:
 				return
 
 		if self.filters.get("ignore_accounts"):
@@ -459,7 +466,7 @@ class ReceivablePayableReport:
 					"company": self.filters.company,
 					"docstatus": 1,
 				},
-				fields=["name", "due_date", "po_no"],
+				fields=["name", "due_date", "po_no", "sales_partner"],
 			)
 			for d in si_list:
 				self.invoice_details.setdefault(d.name, d)
@@ -910,6 +917,22 @@ class ReceivablePayableReport:
 			for d in records:
 				self.sales_person_records.setdefault(d.parenttype, set()).add(d.parent)
 
+	def get_invoices_based_on_sales_partner(self):
+		if not self.filters.get("sales_partner"):
+			return
+
+		self.sales_partner_invoices = set(
+			frappe.get_all(
+				"Sales Invoice",
+				filters={
+					"sales_partner": self.filters.get("sales_partner"),
+					"docstatus": 1,
+					"company": self.filters.company,
+				},
+				pluck="name",
+			)
+		)
+
 	def prepare_conditions(self):
 		self.qb_selection_filter = []
 		self.or_filters = []
@@ -1018,15 +1041,6 @@ class ReceivablePayableReport:
 
 			self.qb_selection_filter.append(Criterion.any([customer_ptt, sales_ptt]))
 
-		if self.filters.get("sales_partner"):
-			self.qb_selection_filter.append(
-				self.ple.party.isin(
-					qb.from_(self.customer)
-					.select(self.customer.name)
-					.where(self.customer.default_sales_partner == self.filters.get("sales_partner"))
-				)
-			)
-
 	def exclude_employee_transaction(self):
 		self.qb_selection_filter.append(self.ple.party_type != "Employee")
 
@@ -1114,9 +1128,6 @@ class ReceivablePayableReport:
 		if party not in self.party_details:
 			if self.account_type == "Receivable":
 				fields = ["customer_name", "territory", "customer_group", "customer_primary_contact"]
-
-				if self.filters.get("sales_partner"):
-					fields.append("default_sales_partner")
 
 				self.party_details[party] = frappe.db.get_value(
 					"Customer",
@@ -1247,7 +1258,7 @@ class ReceivablePayableReport:
 				self.add_column(label=_("Sales Person"), fieldname="sales_person", fieldtype="Data")
 
 			if self.filters.sales_partner:
-				self.add_column(label=_("Sales Partner"), fieldname="default_sales_partner", fieldtype="Data")
+				self.add_column(label=_("Sales Partner"), fieldname="sales_partner", fieldtype="Data")
 
 		if self.filters.account_type == "Payable":
 			self.add_column(
