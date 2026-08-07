@@ -724,6 +724,25 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		below_minimum.items[0].conversion_factor = 0.6
 		self.assertRaises(frappe.ValidationError, below_minimum.insert)
 
+	def test_uom_integer_check_tolerates_conversion_dust(self):
+		from erpnext.utilities.transaction_base import UOMMustBeIntegerError
+
+		item_doc = make_item(properties={"stock_uom": "Nos"})
+		item_doc.append("uoms", {"uom": "Kg", "conversion_factor": 0.6})
+		item_doc.save()
+		item = item_doc.name
+
+		precision = frappe.get_precision("Purchase Order Item", "stock_qty")
+		po = create_purchase_order(item_code=item, qty=flt(2000 / 0.6, precision), do_not_save=1)
+		po.items[0].uom = "Kg"
+		po.items[0].conversion_factor = 0.6
+		po.insert()
+
+		fractional = create_purchase_order(item_code=item, qty=3333.9, do_not_save=1)
+		fractional.items[0].uom = "Kg"
+		fractional.items[0].conversion_factor = 0.6
+		self.assertRaises(UOMMustBeIntegerError, fractional.insert)
+
 	def test_ordered_qty_for_closing_po(self):
 		bin = frappe.get_all(
 			"Bin",
