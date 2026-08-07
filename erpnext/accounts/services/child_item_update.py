@@ -360,22 +360,24 @@ def set_order_defaults(
 
 
 def get_new_child_item_warehouse(p_doc, item, trans_item: dict, child_doctype: str) -> str | None:
-	"""Return the warehouse picked in the Update Items dialog, else the configured default."""
-	if warehouse := trans_item.get("warehouse"):
-		# the parent is submitted, so its validate() never runs these
-		validate_warehouse_company(warehouse, p_doc.company)
-		validate_disabled_warehouse(warehouse)
-		is_group_warehouse(warehouse)
-		return warehouse
+	"""Return the warehouse picked in the Update Items dialog, else the configured default.
 
-	warehouse = get_item_warehouse_(p_doc, item, overwrite_warehouse=True)
-	if not warehouse and child_doctype == "Sales Order Item":
-		frappe.throw(
-			_(
-				"Cannot find a default warehouse for item {0}. Please select one in the Update Items dialog, or set a default in the Item Master or in the Company."
-			).format(frappe.bold(item.item_code))
-		)
+	Validates whichever warehouse was resolved, since a submitted parent skips validate().
+	"""
+	warehouse = trans_item.get("warehouse") or get_item_warehouse_(p_doc, item, overwrite_warehouse=True)
 
+	if not warehouse:
+		if child_doctype == "Sales Order Item":
+			frappe.throw(
+				_(
+					"Cannot find a default warehouse for item {0}. Please select one in the Update Items dialog, or set a default in the Item Master or in the Company."
+				).format(frappe.bold(item.item_code))
+			)
+		return None
+
+	validate_warehouse_company(warehouse, p_doc.company)
+	validate_disabled_warehouse(warehouse)
+	is_group_warehouse(warehouse)
 	return warehouse
 
 
