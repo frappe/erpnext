@@ -543,6 +543,20 @@ def _allocation_key(row):
 	return (row.item_code, row.source_warehouse, cint(row.operation_row_id) or row.operation)
 
 
+def _merge_allocation_per_item(allocation):
+	"""Material Request rejects repeated item codes unless Buying Settings allows them."""
+	merged = {}
+	key_by_item = {}
+	for key, qty in allocation.items():
+		item_code = key[0]
+		if item_code in key_by_item:
+			merged[key_by_item[item_code]] += qty
+		else:
+			key_by_item[item_code] = key
+			merged[key] = qty
+	return merged
+
+
 def _validated_for_qty(for_qty):
 	qty = flt(for_qty)
 	if not math.isfinite(qty) or qty <= 0:
@@ -586,6 +600,8 @@ def make_material_request(
 		fraction = _validated_for_qty(for_qty) / flt(work_order.qty)
 
 	allocation = _allocate_material_demand(work_order, fraction)
+	if not cint(frappe.db.get_single_value("Buying Settings", "allow_multiple_items")):
+		allocation = _merge_allocation_per_item(allocation)
 	postprocess = partial(_set_material_request_item, allocation_by_item=allocation)
 	doc = get_mapped_doc(
 		"Work Order", source_name, _material_request_mapping(postprocess, allocation), target_doc
