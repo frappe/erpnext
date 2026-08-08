@@ -2292,12 +2292,21 @@ class TestJobCardLogic(ERPNextTestSuite):
 	def test_semi_fg_job_card_is_exempt_from_transfer_qty_check(self):
 		jc = frappe.new_doc("Job Card")
 		jc.track_semi_finished_goods = 1
+		jc.skip_material_transfer = 1
 		jc.for_quantity = 10
 		jc.transferred_qty = 0
 		jc.append("items", {"item_code": "_Test Item"})
 
 		jc.validate_transfer_qty()
 
+		# with transfer enabled, a legacy card without an FG item keeps the strict check
+		jc.skip_material_transfer = 0
+		self.assertRaises(frappe.ValidationError, jc.validate_transfer_qty)
+
+		jc.finished_good = "_Test Item"
+		jc.validate_transfer_qty()
+
+		jc.finished_good = None
 		jc.track_semi_finished_goods = 0
 		self.assertRaises(frappe.ValidationError, jc.validate_transfer_qty)
 >>>>>>> 4b3904c6d7 (test: semi FG job card is exempt from the legacy transfer qty check)
