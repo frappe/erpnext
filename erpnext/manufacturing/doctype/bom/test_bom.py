@@ -811,6 +811,53 @@ class TestBOM(ERPNextTestSuite):
 		for row in bom.items:
 			self.assertEqual(row.stock_uom, "Kg")
 
+	@timeout
+	def test_track_semi_finished_goods_requires_finished_good_on_operations(self):
+		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+		from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
+
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		sfg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100.0}).name
+		make_workstation({"workstation": "_Test SFG Workstation"})
+		for operation in ("_Test SFG Operation", "_Test SFG Final Operation"):
+			make_operation({"operation": operation, "workstation": "_Test SFG Workstation"})
+
+		bom = frappe.new_doc("BOM")
+		bom.company = "_Test Company"
+		bom.item = fg_item
+		bom.quantity = 1
+		bom.with_operations = 1
+		bom.track_semi_finished_goods = 1
+		bom.append(
+			"operations",
+			{
+				"operation": "_Test SFG Operation",
+				"workstation": "_Test SFG Workstation",
+				"time_in_mins": 30,
+			},
+		)
+		bom.append(
+			"operations",
+			{
+				"operation": "_Test SFG Final Operation",
+				"workstation": "_Test SFG Workstation",
+				"time_in_mins": 30,
+				"is_final_finished_good": 1,
+			},
+		)
+		bom.append("items", {"item_code": rm_item, "qty": 1, "operation_row_id": 1})
+		bom.append("items", {"item_code": sfg_item, "qty": 1, "operation_row_id": 2})
+
+		# the first operation produces nothing derivable: no FG item, no BOM to take it from
+		self.assertRaises(frappe.ValidationError, bom.insert)
+
+		bom.operations[0].finished_good = sfg_item
+		bom.insert()
+
+		# the final operation's FG item is derived from the BOM's own item
+		self.assertEqual(bom.operations[1].finished_good, fg_item)
+
 
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})
