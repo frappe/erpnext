@@ -804,9 +804,7 @@ class JournalEntry(AccountsController):
 							invoice.doctype, invoice.name, invoice.release_date
 						)
 						if invoice.release_date
-						else _("{0} {1} is blocked.").format(
-							invoice.doctype, invoice.name, invoice.release_date
-						)
+						else _("{0} {1} is blocked.").format(invoice.doctype, invoice.name)
 					)
 					frappe.throw(msg)
 
