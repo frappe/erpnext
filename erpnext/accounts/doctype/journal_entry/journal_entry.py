@@ -7,7 +7,7 @@ import json
 import frappe
 from frappe import _, msgprint, scrub
 from frappe.core.doctype.submission_queue.submission_queue import queue_submission
-from frappe.utils import comma_and, cstr, flt, fmt_money, formatdate, get_link_to_form, nowdate
+from frappe.utils import comma_and, cstr, flt, fmt_money, formatdate, get_link_to_form, getdate, nowdate
 
 import erpnext
 from erpnext.accounts.deferred_revenue import get_deferred_booking_accounts
@@ -798,13 +798,20 @@ class JournalEntry(AccountsController):
 						)
 					)
 
-				if reference_type == "Purchase Invoice" and invoice.invoice_is_blocked():
+				if reference_type == "Purchase Invoice":
+					on_hold, release_date = frappe.db.get_value(
+						reference_type, reference_name, ["on_hold", "release_date"]
+					)
+
+					if not on_hold or (release_date and getdate(release_date) <= getdate(nowdate())):
+						continue
+
 					msg = (
 						_("{0} {1} is blocked and on hold until {2}.").format(
-							invoice.doctype, invoice.name, invoice.release_date
+							reference_type, reference_name, release_date
 						)
-						if invoice.release_date
-						else _("{0} {1} is blocked.").format(invoice.doctype, invoice.name)
+						if release_date
+						else _("{0} {1} is blocked.").format(reference_type, reference_name)
 					)
 					frappe.throw(msg)
 
