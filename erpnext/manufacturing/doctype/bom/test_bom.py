@@ -1024,6 +1024,102 @@ class TestBOM(ERPNextTestSuite):
 		self.assertEqual(len(rows_for(rm_item, 2)), 1)
 		self.assertEqual(flt(rows_for(rm_item, 2)[0].qty), 5.0)
 
+	@timeout
+	def test_operation_bom_materials_expand_on_single_pass_submit(self):
+		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+		from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
+
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		sfg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100.0}).name
+		make_workstation({"workstation": "_Test SFG Workstation"})
+		for operation in ("_Test SFG Operation", "_Test SFG Final Operation"):
+			make_operation({"operation": operation, "workstation": "_Test SFG Workstation"})
+
+		sfg_bom = frappe.new_doc("BOM", company="_Test Company", item=sfg_item, quantity=1)
+		sfg_bom.append("items", {"item_code": rm_item, "qty": 1})
+		sfg_bom.insert()
+		sfg_bom.submit()
+
+		bom = frappe.new_doc("BOM")
+		bom.company = "_Test Company"
+		bom.item = fg_item
+		bom.quantity = 1
+		bom.with_operations = 1
+		bom.track_semi_finished_goods = 1
+		bom.append(
+			"operations",
+			{
+				"operation": "_Test SFG Operation",
+				"workstation": "_Test SFG Workstation",
+				"time_in_mins": 30,
+				"bom_no": sfg_bom.name,
+			},
+		)
+		bom.append(
+			"operations",
+			{
+				"operation": "_Test SFG Final Operation",
+				"workstation": "_Test SFG Workstation",
+				"time_in_mins": 30,
+				"is_final_finished_good": 1,
+			},
+		)
+		bom.append("items", {"item_code": sfg_item, "qty": 1, "operation_row_id": 2})
+		bom.submit()
+
+		self.assertEqual(bom.docstatus, 1)
+		self.assertEqual(bom.operations[0].finished_good, sfg_item)
+		self.assertTrue(
+			any(row.item_code == rm_item and cint(row.operation_row_id) == 1 for row in bom.items)
+		)
+
+	@timeout
+	def test_final_operation_must_produce_the_bom_item(self):
+		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+		from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
+
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		sfg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100.0}).name
+		make_workstation({"workstation": "_Test SFG Workstation"})
+		for operation in ("_Test SFG Operation", "_Test SFG Final Operation"):
+			make_operation({"operation": operation, "workstation": "_Test SFG Workstation"})
+
+		bom = frappe.new_doc("BOM")
+		bom.company = "_Test Company"
+		bom.item = fg_item
+		bom.quantity = 1
+		bom.with_operations = 1
+		bom.track_semi_finished_goods = 1
+		bom.append(
+			"operations",
+			{
+				"operation": "_Test SFG Operation",
+				"workstation": "_Test SFG Workstation",
+				"time_in_mins": 30,
+				"finished_good": sfg_item,
+			},
+		)
+		bom.append(
+			"operations",
+			{
+				"operation": "_Test SFG Final Operation",
+				"workstation": "_Test SFG Workstation",
+				"time_in_mins": 30,
+				"is_final_finished_good": 1,
+				"finished_good": sfg_item,
+			},
+		)
+		bom.append("items", {"item_code": rm_item, "qty": 1, "operation_row_id": 1})
+		bom.append("items", {"item_code": sfg_item, "qty": 1, "operation_row_id": 2})
+
+		# the final operation claims to produce the semi FG, not this BOM's item
+		self.assertRaises(frappe.ValidationError, bom.insert)
+
+		bom.operations[1].finished_good = fg_item
+		bom.insert()
+
 
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})
