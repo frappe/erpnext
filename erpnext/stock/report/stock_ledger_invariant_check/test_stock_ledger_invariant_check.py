@@ -59,6 +59,21 @@ class TestStockLedgerInvariantCheck(ERPNextTestSuite):
 		self.assertEqual(len(data), 2)  # incorrect entry + one before it for context
 		self.assertEqual(data[-1].name, sle.name)
 
+	def test_moving_average_item_skips_fifo_queue_checks(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item(properties={"valuation_method": "Moving Average"}).name
+		make_stock_entry(item_code=item, to_warehouse=WAREHOUSE, qty=10, rate=100)
+		make_stock_entry(item_code=item, from_warehouse=WAREHOUSE, qty=4)
+
+		data = self.run_report(item_code=item)
+		self.assertTrue(data)
+		for row in data:
+			self.assertIsNone(row.fifo_qty_diff)
+			self.assertIsNone(row.fifo_value_diff)
+
+		self.assertEqual(self.run_report(item_code=item, show_incorrect_entries=1), [])
+
 	def test_batch_item_skips_fifo_queue_checks(self):
 		from erpnext.stock.doctype.item.test_item import make_item
 
