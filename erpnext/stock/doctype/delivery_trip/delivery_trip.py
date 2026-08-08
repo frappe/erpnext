@@ -430,7 +430,7 @@ def notify_customers(delivery_trip: str):
 			frappe.sendmail(
 				recipients=contact_info.email_id,
 				subject=dispatch_template.subject,
-				message=frappe.render_template(dispatch_template.response, context),
+				message=frappe.render_template(dispatch_template.response, context, restrict_globals=True),
 				attachments=get_attachments(stop),
 			)
 
