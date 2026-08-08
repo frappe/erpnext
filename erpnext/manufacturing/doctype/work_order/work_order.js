@@ -290,8 +290,7 @@ frappe.ui.form.on("Work Order", {
 	},
 
 	set_fg_warehouse_mandatory(frm) {
-		let mandatory = frm.doc.skip_transfer === 1 || frm.doc.track_semi_finished_goods === 1 ? false : true;
-		frm.toggle_reqd("fg_warehouse", mandatory);
+		frm.toggle_reqd("fg_warehouse", frm.doc.skip_transfer !== 1);
 	},
 
 	add_custom_button_to_return_components: function (frm) {
