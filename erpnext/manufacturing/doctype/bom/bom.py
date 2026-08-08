@@ -313,6 +313,19 @@ class BOM(WebsiteGenerator):
 
 		fg_items = []
 		for row in self.operations:
+			if row.bom_no and not row.finished_good:
+				row.finished_good = frappe.get_cached_value("BOM", row.bom_no, "item")
+
+			if row.is_final_finished_good and not row.finished_good:
+				row.finished_good = self.item
+
+			if not row.finished_good:
+				frappe.throw(
+					_(
+						"Row #{0}: FG / Semi FG Item is required for the operation {1} as 'Track Semi Finished Goods' is enabled."
+					).format(row.idx, bold(row.operation)),
+				)
+
 			if not row.is_final_finished_good:
 				continue
 
