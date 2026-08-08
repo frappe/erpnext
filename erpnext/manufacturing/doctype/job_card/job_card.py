@@ -1824,10 +1824,11 @@ class JobCard(Document):
 	def build_manufacture_stock_entry(self):
 		from erpnext.stock.doctype.stock_entry_type.stock_entry_type import ManufactureEntry
 
+		consumed_process_loss = self.get_consumed_process_loss()
 		return ManufactureEntry(
 			{
-				"for_quantity": self.get_qty_to_produce() - self.manufactured_qty,
-				"process_loss_qty": max(self.process_loss_qty - self.get_consumed_process_loss(), 0),
+				"for_quantity": self.get_qty_to_produce() - self.manufactured_qty - consumed_process_loss,
+				"process_loss_qty": max(self.process_loss_qty - consumed_process_loss, 0),
 				"job_card": self.name,
 				"skip_material_transfer": self.skip_material_transfer,
 				"backflush_from_wip_warehouse": self.backflush_from_wip_warehouse,
