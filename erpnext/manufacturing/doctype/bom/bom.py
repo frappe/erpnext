@@ -870,6 +870,27 @@ class BOM(WebsiteGenerator):
 
 		self.save()
 
+<<<<<<< HEAD
+=======
+	def _add_raw_material_row(self, operation_row_id, row):
+		row = parse_json(row)
+
+		row.update(get_item_details(row.get("item_code")))
+		row.operation_row_id = operation_row_id
+
+		item_row = self.get_item_data(row.item_code, operation_row_id)
+
+		if item_row:
+			item_row.qty = row.get("qty")
+		else:
+			row.idx = None
+			row.name = None
+			row.do_not_explode = 1
+			row.is_sub_assembly_item = self.is_sub_assembly_item(row.item_code)
+
+			self.append("items", row)
+
+>>>>>>> 24f1f3dea8 (fix: add raw material to its operation even when another operation uses the item)
 	def is_sub_assembly_item(self, item_code):
 		if not self.operations:
 			return False
@@ -880,9 +901,9 @@ class BOM(WebsiteGenerator):
 
 		return False
 
-	def get_item_data(self, name):
+	def get_item_data(self, item_code, operation_row_id):
 		for row in self.items:
-			if row.item_code == name:
+			if row.item_code == item_code and cint(row.operation_row_id) == cint(operation_row_id):
 				return row
 
 	@frappe.whitelist()
