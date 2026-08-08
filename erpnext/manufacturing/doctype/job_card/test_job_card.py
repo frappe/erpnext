@@ -1447,6 +1447,204 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertEqual(flt(job_card.manufactured_qty), 3)
 		self.assertEqual(job_card.status, "Completed")
 
+	def test_semi_fg_process_loss_rolls_up_to_work_order(self):
+		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		warehouse = "Stores - _TC"
+		rm = make_item("Process Loss Rollup RM 1", {"is_stock_item": 1}).name
+		fg = make_item("Process Loss Rollup FG 1", {"is_stock_item": 1}).name
+
+		fg_bom = frappe.new_doc(
+			"BOM",
+			company="_Test Company",
+			item=fg,
+			quantity=1,
+			with_operations=1,
+			track_semi_finished_goods=1,
+		)
+		fg_bom.append("items", {"item_code": rm, "qty": 1, "operation_row_id": 1})
+
+		operation = {
+			"operation": "Process Loss Rollup Op A",
+			"workstation": "_Test Workstation A",
+			"finished_good": fg,
+			"finished_good_qty": 1,
+			"is_final_finished_good": 1,
+			"sequence_id": 1,
+			"time_in_mins": 60,
+			"source_warehouse": warehouse,
+			"fg_warehouse": warehouse,
+			"skip_material_transfer": 1,
+		}
+
+		make_workstation(operation)
+		make_operation(operation)
+		fg_bom.append("operations", operation)
+		fg_bom.insert()
+		fg_bom.submit()
+
+		work_order = make_wo_order_test_record(
+			item=fg,
+			qty=10,
+			source_warehouse=warehouse,
+			fg_warehouse=warehouse,
+			bom_no=fg_bom.name,
+			skip_transfer=1,
+			do_not_save=True,
+		)
+		work_order.operations[0].time_in_mins = 60
+		work_order.save()
+		work_order.submit()
+
+		make_stock_entry(item_code=rm, target=warehouse, qty=100, basic_rate=100)
+
+		job_card = self.get_first_job_card(work_order.name)
+		job_card.append("time_logs", {"from_time": "2024-05-01 08:00:00"})
+		job_card.save()
+
+		job_card.complete_job_card(
+			qty=8,
+			for_quantity=10,
+			pending_qty=0,
+			process_loss_qty=2,
+			end_time="2024-05-01 09:00:00",
+		)
+
+		job_card.reload()
+		self.assertEqual(flt(job_card.process_loss_qty), 2)
+
+		job_card.submit()
+		frappe.get_doc(job_card.make_stock_entry_for_semi_fg_item()).submit()
+
+		self.assertEqual(
+			flt(
+				frappe.db.get_value("Work Order Operation", work_order.operations[0].name, "process_loss_qty")
+			),
+			2,
+		)
+
+		work_order.reload()
+		self.assertEqual(flt(work_order.produced_qty), 8)
+		self.assertEqual(flt(work_order.process_loss_qty), 2)
+		self.assertEqual(work_order.status, "Completed")
+
+	def test_semi_fg_process_loss_of_an_intermediate_operation_rolls_up_to_work_order(self):
+		"""Loss booked by an earlier operation shrinks what the final operation can produce,
+		so it has to show up on the work order even though the final operation loses nothing."""
+		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		warehouse = "Stores - _TC"
+		rm = make_item("Intermediate Loss RM 1", {"is_stock_item": 1}).name
+		sfg = make_item("Intermediate Loss SFG 1", {"is_stock_item": 1}).name
+		fg = make_item("Intermediate Loss FG 1", {"is_stock_item": 1}).name
+
+		sfg_bom = frappe.new_doc("BOM", company="_Test Company", item=sfg, quantity=1)
+		sfg_bom.append("items", {"item_code": rm, "qty": 1})
+		sfg_bom.insert()
+		sfg_bom.submit()
+
+		fg_bom = frappe.new_doc(
+			"BOM",
+			company="_Test Company",
+			item=fg,
+			quantity=1,
+			with_operations=1,
+			track_semi_finished_goods=1,
+		)
+
+		operations = [
+			{
+				"operation": "Intermediate Loss Op A",
+				"finished_good": sfg,
+				"bom_no": sfg_bom.name,
+				"sequence_id": 1,
+			},
+			{
+				"operation": "Intermediate Loss Op B",
+				"finished_good": fg,
+				"is_final_finished_good": 1,
+				"sequence_id": 2,
+			},
+		]
+
+		for row in operations:
+			row.update(
+				{
+					"workstation": "_Test Workstation A",
+					"finished_good_qty": 1,
+					"time_in_mins": 60,
+					"source_warehouse": warehouse,
+					"fg_warehouse": warehouse,
+					"skip_material_transfer": 1,
+				}
+			)
+			make_workstation(row)
+			make_operation(row)
+			fg_bom.append("operations", row)
+
+		fg_bom.append("items", {"item_code": sfg, "qty": 1, "operation_row_id": 2})
+		fg_bom.insert()
+		fg_bom.submit()
+
+		work_order = make_wo_order_test_record(
+			item=fg,
+			qty=10,
+			source_warehouse=warehouse,
+			fg_warehouse=warehouse,
+			bom_no=fg_bom.name,
+			skip_transfer=1,
+			do_not_save=True,
+		)
+		for row in work_order.operations:
+			row.time_in_mins = 60
+		work_order.save()
+		work_order.submit()
+
+		make_stock_entry(item_code=rm, target=warehouse, qty=100, basic_rate=100)
+
+		def get_job_card(operation):
+			return frappe.get_doc(
+				"Job Card",
+				frappe.db.get_value(
+					"Job Card",
+					{"work_order": work_order.name, "operation": operation, "docstatus": 0},
+					"name",
+				),
+			)
+
+		jc_a = get_job_card("Intermediate Loss Op A")
+		jc_a.append("time_logs", {"from_time": "2024-06-01 08:00:00"})
+		jc_a.save()
+		jc_a.complete_job_card(
+			qty=8, for_quantity=10, pending_qty=0, process_loss_qty=2, end_time="2024-06-01 09:00:00"
+		)
+		jc_a.reload()
+		jc_a.submit()
+		frappe.get_doc(jc_a.make_stock_entry_for_semi_fg_item()).submit()
+
+		work_order.reload()
+		self.assertEqual(flt(work_order.process_loss_qty), 2)
+
+		# Operation A handed over only 8 units, so the final operation works on 8.
+		jc_b = get_job_card("Intermediate Loss Op B")
+		jc_b.for_quantity = 8
+		for row in jc_b.items:
+			row.required_qty = 8
+		jc_b.append(
+			"time_logs",
+			{"from_time": "2024-06-02 08:00:00", "to_time": "2024-06-02 09:00:00", "completed_qty": 8},
+		)
+		jc_b.save()
+		jc_b.submit()
+		frappe.get_doc(jc_b.make_stock_entry_for_semi_fg_item()).submit()
+
+		work_order.reload()
+		self.assertEqual(flt(work_order.produced_qty), 8)
+		self.assertEqual(flt(work_order.process_loss_qty), 2)
+		self.assertEqual(work_order.status, "Completed")
+
 	def test_semi_fg_sequence_needs_previous_operations_manufactured(self):
 		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
 		from erpnext.stock.doctype.item.test_item import make_item
