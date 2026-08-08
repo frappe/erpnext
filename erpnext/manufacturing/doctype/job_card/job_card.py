@@ -1674,10 +1674,18 @@ class JobCard(Document):
 
 		from erpnext.stock.doctype.stock_entry_type.stock_entry_type import ManufactureEntry
 
+<<<<<<< HEAD
 		ste = ManufactureEntry(
 			{
 				"for_quantity": self.for_quantity - self.manufactured_qty,
 				"process_loss_qty": max(self.process_loss_qty - get_consumed_process_loss(), 0),
+=======
+		consumed_process_loss = self.get_consumed_process_loss()
+		return ManufactureEntry(
+			{
+				"for_quantity": self.get_qty_to_produce() - self.manufactured_qty - consumed_process_loss,
+				"process_loss_qty": max(self.process_loss_qty - consumed_process_loss, 0),
+>>>>>>> b8dd886cd4 (fix: generate the next manufacture entry net of booked process loss)
 				"job_card": self.name,
 				"skip_material_transfer": self.skip_material_transfer,
 				"backflush_from_wip_warehouse": self.backflush_from_wip_warehouse,
