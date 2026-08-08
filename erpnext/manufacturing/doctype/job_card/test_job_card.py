@@ -1977,6 +1977,25 @@ class TestJobCardLogic(ERPNextTestSuite):
 		self.assertFalse(jc.has_overlap(2, sequential))
 		self.assertTrue(jc.has_overlap(2, overlapping))
 
+	def test_previous_operation_shortfall_from_process_loss_gets_the_right_message(self):
+		jc = frappe.new_doc("Job Card")
+		jc.operation = "_Test Painting"
+		jc.stock_uom = "Nos"
+		row = frappe._dict(
+			operation="_Test Assembly", manufactured_qty=8, process_loss_qty=2, finished_good=None
+		)
+
+		with self.assertRaises(OperationSequenceError) as loss_error:
+			jc.validate_previous_operation_manufactured_qty(row, 10)
+		self.assertIn("process loss", str(loss_error.exception))
+
+		row.process_loss_qty = 0
+		with self.assertRaises(OperationSequenceError) as pending_error:
+			jc.validate_previous_operation_manufactured_qty(row, 10)
+		self.assertIn("Submit the manufacturing entry", str(pending_error.exception))
+
+		jc.validate_previous_operation_manufactured_qty(row, 8)
+
 	def test_semi_fg_job_card_is_exempt_from_transfer_qty_check(self):
 		jc = frappe.new_doc("Job Card")
 		jc.track_semi_finished_goods = 1
