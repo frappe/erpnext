@@ -813,15 +813,10 @@ class BOM(WebsiteGenerator):
 		row.update(get_item_details(row.get("item_code")))
 		row.operation_row_id = operation_row_id
 
-		item_row = self.get_item_data(row.name) if row.name else None
+		item_row = self.get_item_data(row.item_code, operation_row_id)
 
 		if item_row:
-			item_row.update(
-				{
-					"item_code": row.get("item_code"),
-					"qty": row.get("qty"),
-				}
-			)
+			item_row.qty = row.get("qty")
 		else:
 			row.idx = None
 			row.name = None
@@ -840,9 +835,9 @@ class BOM(WebsiteGenerator):
 
 		return False
 
-	def get_item_data(self, name):
+	def get_item_data(self, item_code, operation_row_id):
 		for row in self.items:
-			if row.item_code == name:
+			if row.item_code == item_code and cint(row.operation_row_id) == cint(operation_row_id):
 				return row
 
 	@frappe.whitelist()
