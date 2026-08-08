@@ -194,8 +194,7 @@ def get_last_bundle_moves_chunk(item_code, serial_nos):
 	row_number = (
 		an.RowNumber()
 		.over(entry.serial_no)
-		.orderby(bundle.posting_date, order=Order.desc)
-		.orderby(bundle.posting_time, order=Order.desc)
+		.orderby(Coalesce(entry.posting_datetime, bundle.posting_datetime), order=Order.desc)
 		.orderby(sle.creation, order=Order.desc)
 	)
 
