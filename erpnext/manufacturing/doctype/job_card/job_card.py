@@ -1111,6 +1111,9 @@ class JobCard(Document):
 		wo.calculate_operating_cost()
 		wo.set_actual_dates()
 
+		if wo.track_semi_finished_goods:
+			wo.set_process_loss_qty()
+
 		if time_data:
 			wo.status = "In Process"
 
