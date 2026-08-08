@@ -1545,6 +1545,235 @@ class TestPricingRule(ERPNextTestSuite):
 		debit_note.delete()
 		pi.cancel()
 
+	def test_pricing_rule_retained_across_so_dn_si(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_invoice
+
+		item_code = make_item(
+			f"_Test Pricing Rule Carryover Item {frappe.generate_hash(length=8)}",
+			{"is_stock_item": 0},
+		).name
+		july_rule = august_rule = so = dn = si = None
+
+		try:
+			july_rule = make_pricing_rule(
+				title=f"_Test July Pricing Rule {frappe.generate_hash(length=8)}",
+				item_code=item_code,
+				selling=1,
+				rate_or_discount="Rate",
+				rate=1000,
+				valid_from="2026-07-01",
+				valid_upto="2026-07-31",
+				priority=1,
+			)
+			august_rule = make_pricing_rule(
+				title=f"_Test August Pricing Rule {frappe.generate_hash(length=8)}",
+				item_code=item_code,
+				selling=1,
+				rate_or_discount="Rate",
+				rate=2000,
+				valid_from="2026-08-01",
+				valid_upto="2026-08-31",
+				priority=1,
+			)
+
+			so = make_sales_order(transaction_date="2026-07-15", item_code=item_code, qty=1)
+			self.assertEqual(so.items[0].rate, 1000)
+
+			# Later edits to the source Pricing Rule must not alter mapped documents.
+			july_rule.rate = 1200
+			july_rule.save()
+
+			# Create Delivery Note in August from July Sales Order.
+			dn_target = frappe.new_doc("Delivery Note")
+			dn_target.posting_date = "2026-08-05"
+			dn = make_delivery_note(so.name, dn_target)
+			dn.save()
+			self.assertEqual(dn.items[0].rate, 1000)
+			dn.submit()
+
+			# Create Sales Invoice in August from August Delivery Note.
+			si_target = frappe.new_doc("Sales Invoice")
+			si_target.posting_date = "2026-08-05"
+			si = make_sales_invoice(dn.name, si_target)
+			si.set_posting_time = 1
+			si.posting_date = "2026-08-05"
+			si.due_date = "2026-08-05"
+			for schedule in si.get("payment_schedule"):
+				schedule.due_date = "2026-08-05"
+			si.save()
+			self.assertEqual(si.items[0].rate, 1000)
+			si.submit()
+			self.assertEqual(si.items[0].rate, 1000)
+		finally:
+			for doc in [si, dn, so]:
+				if doc and frappe.db.exists(doc.doctype, doc.name):
+					doc.reload()
+					if doc.docstatus == 1:
+						doc.cancel()
+					elif doc.docstatus == 0:
+						doc.delete()
+			for rule in [july_rule, august_rule]:
+				if rule:
+					rule.db_set("disable", 1)
+
+	def test_previous_document_reference_fields_skip_new_pricing_rule_lookup(self):
+		from erpnext.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_for_item
+
+		item_code = make_item(
+			f"_Test Pricing Rule Prevdoc Fields Item {frappe.generate_hash(length=8)}",
+			{"is_stock_item": 0},
+		).name
+		selling_rule = buying_rule = None
+
+		try:
+			selling_rule = make_pricing_rule(
+				title=f"_Test Selling Prevdoc Rule {frappe.generate_hash(length=8)}",
+				item_code=item_code,
+				selling=1,
+				rate_or_discount="Rate",
+				rate=2000,
+				valid_from="2026-08-01",
+				valid_upto="2026-08-31",
+				priority=1,
+			)
+			buying_rule = make_pricing_rule(
+				title=f"_Test Buying Prevdoc Rule {frappe.generate_hash(length=8)}",
+				item_code=item_code,
+				buying=1,
+				rate_or_discount="Rate",
+				rate=2000,
+				valid_from="2026-08-01",
+				valid_upto="2026-08-31",
+				priority=1,
+			)
+
+			previous_document_field_cases = [
+				("Sales Order", "selling", "quotation_item"),
+				("Sales Order", "selling", "purchase_order_item"),
+				("Delivery Note", "selling", "so_detail"),
+				("Delivery Note", "selling", "si_detail"),
+				("Delivery Note", "selling", "dn_detail"),
+				("Sales Invoice", "selling", "so_detail"),
+				("Sales Invoice", "selling", "dn_detail"),
+				("Sales Invoice", "selling", "sales_invoice_item"),
+				("Sales Invoice", "selling", "pos_invoice_item"),
+				("POS Invoice", "selling", "so_detail"),
+				("POS Invoice", "selling", "dn_detail"),
+				("POS Invoice", "selling", "pos_invoice_item"),
+				("Purchase Order", "buying", "supplier_quotation_item"),
+				("Purchase Receipt", "buying", "purchase_order_item"),
+				("Purchase Receipt", "buying", "purchase_receipt_item"),
+				("Purchase Receipt", "buying", "delivery_note_item"),
+				("Purchase Receipt", "buying", "purchase_invoice_item"),
+				("Purchase Invoice", "buying", "po_detail"),
+				("Purchase Invoice", "buying", "pr_detail"),
+				("Purchase Invoice", "buying", "purchase_invoice_item"),
+				("Purchase Invoice", "buying", "sales_invoice_item"),
+			]
+
+			for doctype, transaction_type, fieldname in previous_document_field_cases:
+				args = frappe._dict(
+					{
+						"doctype": doctype,
+						"name": None,
+						"parent": None,
+						"parenttype": doctype,
+						"item_code": item_code,
+						"transaction_type": transaction_type,
+						"transaction_date": "2026-08-05",
+						"company": "_Test Company",
+						"customer": "_Test Customer" if transaction_type == "selling" else None,
+						"supplier": "_Test Supplier" if transaction_type == "buying" else None,
+						"ignore_pricing_rule": 0,
+						fieldname: "source-row",
+					}
+				)
+				self.assertFalse(get_pricing_rule_for_item(args).get("pricing_rules"))
+
+			args = frappe._dict(
+				{
+					"doctype": "Sales Invoice",
+					"name": None,
+					"parent": None,
+					"parenttype": "Sales Invoice",
+					"item_code": item_code,
+					"transaction_type": "selling",
+					"transaction_date": "2026-08-05",
+					"company": "_Test Company",
+					"customer": "_Test Customer",
+					"ignore_pricing_rule": 0,
+					"so_detail": "source-row",
+					"pricing_rules": [selling_rule.name],
+				}
+			)
+			self.assertEqual(
+				get_pricing_rule_for_item(args).get("pricing_rules"), frappe.as_json([selling_rule.name])
+			)
+
+			args = frappe._dict(
+				{
+					"doctype": "Purchase Order",
+					"name": None,
+					"parent": None,
+					"parenttype": "Purchase Order",
+					"item_code": item_code,
+					"transaction_type": "buying",
+					"transaction_date": "2026-08-05",
+					"company": "_Test Company",
+					"supplier": "_Test Supplier",
+					"ignore_pricing_rule": 0,
+					"sales_order_item": "source-row",
+				}
+			)
+			self.assertTrue(get_pricing_rule_for_item(args).get("pricing_rules"))
+		finally:
+			for rule in [selling_rule, buying_rule]:
+				if rule:
+					rule.db_set("disable", 1)
+
+	def test_mapped_sales_order_rate_retained_without_source_pricing_rule(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
+
+		item_code = make_item(
+			f"_Test Pricing Rule Manual Rate Item {frappe.generate_hash(length=8)}",
+			{"is_stock_item": 0},
+		).name
+		august_rule = so = dn = None
+
+		try:
+			august_rule = make_pricing_rule(
+				title=f"_Test August Pricing Rule {frappe.generate_hash(length=8)}",
+				item_code=item_code,
+				selling=1,
+				rate_or_discount="Rate",
+				rate=2000,
+				valid_from="2026-08-01",
+				valid_upto="2026-08-31",
+				priority=1,
+			)
+
+			so = make_sales_order(transaction_date="2026-07-15", item_code=item_code, qty=1, rate=1500)
+			self.assertEqual(so.items[0].rate, 1500)
+			self.assertFalse(so.items[0].pricing_rules)
+
+			dn_target = frappe.new_doc("Delivery Note")
+			dn_target.posting_date = "2026-08-05"
+			dn = make_delivery_note(so.name, dn_target)
+			dn.save()
+			self.assertEqual(dn.items[0].rate, 1500)
+			self.assertFalse(dn.items[0].pricing_rules)
+		finally:
+			for doc in [dn, so]:
+				if doc and frappe.db.exists(doc.doctype, doc.name):
+					doc.reload()
+					if doc.docstatus == 1:
+						doc.cancel()
+					elif doc.docstatus == 0:
+						doc.delete()
+			if august_rule:
+				august_rule.db_set("disable", 1)
+
 
 def make_pricing_rule(**args):
 	args = frappe._dict(args)
@@ -1572,6 +1801,8 @@ def make_pricing_rule(**args):
 			"apply_multiple_pricing_rules": args.apply_multiple_pricing_rules or 0,
 			"has_priority": args.has_priority or 0,
 			"enforce_free_item_qty": args.dont_enforce_free_item_qty or 0,
+			"valid_from": args.valid_from,
+			"valid_upto": args.valid_upto,
 		}
 	)
 
