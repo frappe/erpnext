@@ -1301,23 +1301,25 @@ class update_entries_after:
 					and not sle.get("batch_no")
 					and not sle.get("serial_and_batch_bundle")
 				):
-					rate = get_incoming_rate(
-						{
-							"item_code": sle.item_code,
-							"warehouse": sle.warehouse,
-							"posting_date": sle.posting_date,
-							"posting_time": sle.posting_time,
-							"qty": sle.actual_qty,
-							"serial_no": sle.get("serial_no"),
-							"batch_no": sle.get("batch_no"),
-							"serial_and_batch_bundle": sle.get("serial_and_batch_bundle"),
-							"company": sle.company,
-							"voucher_type": sle.voucher_type,
-							"voucher_no": sle.voucher_no,
-							"allow_zero_valuation": self.allow_zero_rate,
-							"sle": sle.name,
-						}
-					)
+					rate = flt(self.wh_data.valuation_rate)
+					if not rate:
+						rate = get_incoming_rate(
+							{
+								"item_code": sle.item_code,
+								"warehouse": sle.warehouse,
+								"posting_date": sle.posting_date,
+								"posting_time": sle.posting_time,
+								"qty": sle.actual_qty,
+								"serial_no": sle.get("serial_no"),
+								"batch_no": sle.get("batch_no"),
+								"serial_and_batch_bundle": sle.get("serial_and_batch_bundle"),
+								"company": sle.company,
+								"voucher_type": sle.voucher_type,
+								"voucher_no": sle.voucher_no,
+								"allow_zero_valuation": self.allow_zero_rate,
+								"sle": sle.name,
+							}
+						)
 
 					if not rate and sle.voucher_type in ["Delivery Note", "Sales Invoice"]:
 						rate = get_rate_for_return(
