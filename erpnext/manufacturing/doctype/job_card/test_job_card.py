@@ -1608,10 +1608,14 @@ class TestJobCard(ERPNextTestSuite):
 		jc_b.process_loss_qty = 2
 		jc_b.submit()
 
-		# book 1 of the 3 finished units now; the full process loss goes with this first entry
+		# book 1 of the 3 finished units now; the full process loss goes with this first entry,
+		# so it accounts for 3 of 5 and its materials are trimmed to the same share
 		first = frappe.get_doc(jc_b.make_stock_entry_for_semi_fg_item())
 		fg_row = next(row for row in first.items if row.is_finished_item)
 		fg_row.qty = 1
+		for row in first.items:
+			if row.s_warehouse and not row.is_finished_item:
+				row.qty = flt(row.qty) * 3 / 5
 		first.save()
 		first.submit()
 
@@ -1625,6 +1629,17 @@ class TestJobCard(ERPNextTestSuite):
 
 		jc_b.reload()
 		self.assertEqual(flt(jc_b.manufactured_qty), 3.0)
+
+		# across both entries, consumption adds up to the job card's requirement of 5, no more
+		consumed = frappe.get_all(
+			"Stock Entry Detail",
+			filters={"parent": ["in", [first.name, second.name]], "s_warehouse": ["is", "set"]},
+			fields=["item_code", {"SUM": "qty", "as": "qty"}],
+			group_by="item_code",
+		)
+		self.assertTrue(consumed)
+		for row in consumed:
+			self.assertEqual(flt(row.qty), 5.0, f"{row.item_code} mis-consumed across partial entries")
 
 	def test_update_after_submit_keeps_manufacture_entry_intact(self):
 		work_order = self.make_semi_fg_work_order("PL Update")
