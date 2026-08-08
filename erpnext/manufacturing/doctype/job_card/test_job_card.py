@@ -1588,6 +1588,44 @@ class TestJobCard(ERPNextTestSuite):
 			frappe.db.get_value("Job Card", {"work_order": work_order.name, "operation": operation}, "name"),
 		)
 
+	def test_partial_manufacture_entry_then_finish(self):
+		work_order = self.make_semi_fg_work_order("PL Partial")
+
+		jc_a = self.get_semi_fg_job_card(work_order, "PL Partial Op A")
+		jc_a.append(
+			"time_logs",
+			{"from_time": "2024-01-01 08:00:00", "to_time": "2024-01-01 09:00:00", "completed_qty": 5},
+		)
+		jc_a.submit()
+		frappe.get_doc(jc_a.make_stock_entry_for_semi_fg_item()).submit()
+
+		jc_b = self.get_semi_fg_job_card(work_order, "PL Partial Op B")
+		jc_b.append(
+			"time_logs",
+			{"from_time": "2024-02-01 08:00:00", "to_time": "2024-02-01 09:00:00", "completed_qty": 3},
+		)
+		jc_b.pending_qty = 0
+		jc_b.process_loss_qty = 2
+		jc_b.submit()
+
+		# book 1 of the 3 finished units now; the full process loss goes with this first entry
+		first = frappe.get_doc(jc_b.make_stock_entry_for_semi_fg_item())
+		fg_row = next(row for row in first.items if row.is_finished_item)
+		fg_row.qty = 1
+		first.save()
+		first.submit()
+
+		# the follow-up entry must be generated net of the already-booked loss and still submit
+		jc_b.reload()
+		second = frappe.get_doc(jc_b.make_stock_entry_for_semi_fg_item())
+		fg_row = next(row for row in second.items if row.is_finished_item)
+		self.assertEqual(flt(fg_row.qty), 2.0)
+		self.assertEqual(flt(second.process_loss_qty), 0.0)
+		second.submit()
+
+		jc_b.reload()
+		self.assertEqual(flt(jc_b.manufactured_qty), 3.0)
+
 	def test_stale_manufacture_draft_cannot_over_produce_without_operation_bom(self):
 		work_order = self.make_semi_fg_work_order("PL NoBom")
 
