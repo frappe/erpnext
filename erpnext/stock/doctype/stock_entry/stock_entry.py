@@ -1482,6 +1482,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if self.purpose != "Manufacture" or not self.job_card:
 			return
 
+		if self._action == "update_after_submit":
+			return
+
 		job_card = frappe.get_doc("Job Card", self.job_card)
 		if job_card.is_corrective_job_card or job_card.is_subcontracted:
 			return
