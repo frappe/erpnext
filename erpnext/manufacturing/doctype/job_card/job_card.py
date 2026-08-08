@@ -1041,7 +1041,32 @@ class JobCard(Document):
 			)
 
 	def update_work_order_data(self, for_quantity, process_loss_qty, pending_qty, time_in_mins, wo):
+<<<<<<< HEAD
 		workstation_hour_rate = frappe.get_value("Workstation", self.workstation, "hour_rate")
+=======
+		time_data = self.get_operation_time_data()
+
+		for data in wo.operations:
+			if data.get("name") == self.operation_id:
+				self.update_wo_operation_row(
+					data, for_quantity, process_loss_qty, pending_qty, time_in_mins, time_data
+				)
+
+		wo.flags.ignore_validate_update_after_submit = True
+		wo.update_operation_status()
+		wo.calculate_operating_cost()
+		wo.set_actual_dates()
+
+		if wo.track_semi_finished_goods:
+			wo.set_process_loss_qty()
+
+		if time_data:
+			wo.status = "In Process"
+
+		wo.save()
+
+	def get_operation_time_data(self):
+>>>>>>> 0eb61c9fac (fix: roll up process loss to the work order for semi finished goods)
 		jc = frappe.qb.DocType("Job Card")
 		jctl = frappe.qb.DocType("Job Card Time Log")
 
