@@ -1,6 +1,8 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+import json
+
 import frappe
 
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -57,6 +59,19 @@ class TestStockLedgerInvariantCheck(ERPNextTestSuite):
 
 		data = self.run_report(item_code=item, show_incorrect_entries=1)
 		self.assertEqual(len(data), 2)  # incorrect entry + one before it for context
+		self.assertEqual(data[-1].name, sle.name)
+
+	def test_show_incorrect_entries_catches_queue_mismatch(self):
+		item = self.make_movements()
+
+		sle = frappe.get_last_doc(
+			"Stock Ledger Entry", {"item_code": item, "warehouse": WAREHOUSE, "is_cancelled": 0}
+		)
+		tampered_queue = json.dumps([[sle.qty_after_transaction + 5, 100]])
+		frappe.db.set_value("Stock Ledger Entry", sle.name, "stock_queue", tampered_queue)
+
+		data = self.run_report(item_code=item, show_incorrect_entries=1)
+		self.assertEqual(len(data), 2)
 		self.assertEqual(data[-1].name, sle.name)
 
 	def test_moving_average_item_skips_fifo_queue_checks(self):
