@@ -328,14 +328,14 @@ class RequestforQuotation(BuyingController):
 
 		message_template = self.mfs_html if self.use_html else self.message_for_supplier
 		# nosemgrep: frappe-semgrep-rules.rules.security.frappe-ssti
-		rendered_message = frappe.render_template(message_template, doc_args)
+		rendered_message = frappe.render_template(message_template, doc_args, restrict_globals=True)
 
 		subject_source = (
 			self.subject
 			or frappe.get_value("Email Template", self.email_template, "subject")
 			or _("Request for Quotation")
 		)
-		rendered_subject = frappe.render_template(subject_source, doc_args)
+		rendered_subject = frappe.render_template(subject_source, doc_args, restrict_globals=True)
 		if preview:
 			return {
 				"message": rendered_message,
