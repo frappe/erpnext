@@ -917,7 +917,7 @@ class WorkOrder(Document):
 	def validate_warehouse(self):
 		if not self.wip_warehouse and not self.skip_transfer:
 			frappe.throw(_("Work-in-Progress Warehouse is required before Submit"))
-		if not self.fg_warehouse:
+		if not self.fg_warehouse and not self.track_semi_finished_goods:
 			frappe.throw(_("Target Warehouse is required before Submit"))
 
 	def before_submit(self):
