@@ -4903,7 +4903,17 @@ class TestWorkOrder(ERPNextTestSuite):
 		wo.wip_warehouse = "_Test Warehouse - _TC"
 		wo.validate_warehouse()
 
+<<<<<<< HEAD
 >>>>>>> f61f6523b9 (test: WIP warehouse required for work orders tracking semi finished goods)
+=======
+		# the top-level target warehouse stays optional; operations may carry their own
+		wo.fg_warehouse = None
+		wo.validate_warehouse()
+
+		wo.track_semi_finished_goods = 0
+		self.assertRaises(frappe.ValidationError, wo.validate_warehouse)
+
+>>>>>>> db99657c47 (test: target warehouse stays optional for semi FG work orders)
 
 def get_reserved_entries(voucher_no, warehouse=None):
 	doctype = frappe.qb.DocType("Stock Reservation Entry")
