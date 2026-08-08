@@ -132,6 +132,7 @@
    "label": "Conversion Factor",
    "oldfieldname": "conversion_factor",
    "oldfieldtype": "Currency",
+   "precision": "9",
    "read_only": 1
   },
   {
@@ -207,7 +208,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-03-27 13:10:26.235916",
+ "modified": "2026-08-07 17:31:31.732720",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Receipt Item Supplied",

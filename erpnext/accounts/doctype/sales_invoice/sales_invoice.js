@@ -587,7 +587,12 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 		super.set_dynamic_labels();
 		this.frm.events.hide_fields(this.frm);
 		const hide_update_stock = cint(this.frm.doc.is_debit_note) || cint(this.frm.doc.has_subcontracted);
-		this.frm.set_df_property("update_stock", "hidden", hide_update_stock);
+		// frm.set_df_property mutates a per-document copy, not the doctype's shared field
+		// metadata, so this always reflects the original (Customize Form) hidden value.
+		const hidden_by_customization = cint(
+			frappe.meta.get_docfield("Sales Invoice", "update_stock")?.hidden
+		);
+		this.frm.set_df_property("update_stock", "hidden", hide_update_stock || hidden_by_customization);
 	}
 
 	items_on_form_rendered() {

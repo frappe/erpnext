@@ -1508,7 +1508,7 @@ def get_uom_conv_factor(uom: str | None, stock_uom: str | None):
 		"UOM Conversion Factor", {"to_uom": from_uom, "from_uom": to_uom}, ["value"], as_dict=1
 	)
 	if inverse_match:
-		return 1 / inverse_match.value
+		return flt(1 / inverse_match.value, frappe.get_precision("UOM Conversion Factor", "value"))
 
 	# This attempts to try and get conversion from intermediate UOM.
 	# case:
@@ -1528,7 +1528,7 @@ def get_uom_conv_factor(uom: str | None, stock_uom: str | None):
 	)
 
 	if intermediate_match:
-		return intermediate_match[0].value
+		return flt(intermediate_match[0].value, frappe.get_precision("UOM Conversion Factor", "value"))
 
 
 @frappe.whitelist()

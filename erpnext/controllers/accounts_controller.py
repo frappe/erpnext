@@ -1039,9 +1039,16 @@ class AccountsController(TransactionBase):
 			party_account = self.credit_to
 			dr_or_cr = "debit_in_account_currency"
 
+		from erpnext.accounts.services.exchange_gain_loss import get_exchange_gain_loss_account
+
 		lst = []
 		for d in self.get("advances"):
 			if flt(d.allocated_amount) > 0:
+				is_gain = (
+					flt(d.get("exchange_gain_loss")) > 0
+					if party_type == "Customer"
+					else flt(d.get("exchange_gain_loss")) < 0
+				)
 				args = frappe._dict(
 					{
 						"voucher_type": d.reference_type,
@@ -1068,9 +1075,7 @@ class AccountsController(TransactionBase):
 							else self.grand_total
 						),
 						"outstanding_amount": self.outstanding_amount,
-						"difference_account": frappe.get_cached_value(
-							"Company", self.company, "exchange_gain_loss_account"
-						),
+						"difference_account": get_exchange_gain_loss_account(self.company, is_gain),
 						"exchange_gain_loss": flt(d.get("exchange_gain_loss")),
 						"difference_posting_date": d.get("difference_posting_date"),
 					}
