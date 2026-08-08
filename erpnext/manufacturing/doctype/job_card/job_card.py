@@ -845,7 +845,7 @@ class JobCard(Document):
 					)
 
 	def validate_transfer_qty(self):
-		if self.track_semi_finished_goods:
+		if self.track_semi_finished_goods and self.skip_material_transfer:
 			return
 
 		if (
