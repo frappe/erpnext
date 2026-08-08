@@ -2302,3 +2302,15 @@ class TestJobCardLogic(ERPNextTestSuite):
 		self.assertTrue(jc.has_overlap(1, sequential))
 		self.assertFalse(jc.has_overlap(2, sequential))
 		self.assertTrue(jc.has_overlap(2, overlapping))
+
+	def test_semi_fg_job_card_is_exempt_from_transfer_qty_check(self):
+		jc = frappe.new_doc("Job Card")
+		jc.track_semi_finished_goods = 1
+		jc.for_quantity = 10
+		jc.transferred_qty = 0
+		jc.append("items", {"item_code": "_Test Item"})
+
+		jc.validate_transfer_qty()
+
+		jc.track_semi_finished_goods = 0
+		self.assertRaises(frappe.ValidationError, jc.validate_transfer_qty)
