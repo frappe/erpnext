@@ -272,7 +272,7 @@
    "fieldtype": "Link",
    "label": "Work-in-Progress Warehouse",
    "link_filters": "[[\"Warehouse\",\"disabled\",\"=\",0],[\"Warehouse\",\"is_group\",\"=\",0]]",
-   "mandatory_depends_on": "eval:(!doc.skip_transfer || doc.from_wip_warehouse) && !doc.track_semi_finished_goods",
+   "mandatory_depends_on": "eval:!doc.skip_transfer || doc.from_wip_warehouse",
    "options": "Warehouse"
   },
   {
@@ -739,7 +739,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-03 21:35:34.175667",
+ "modified": "2026-08-08 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",
