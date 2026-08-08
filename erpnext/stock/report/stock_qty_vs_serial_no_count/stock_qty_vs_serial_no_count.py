@@ -6,8 +6,10 @@ import frappe
 from frappe import _
 from frappe.query_builder import Order
 from frappe.query_builder.functions import Coalesce
-from frappe.utils import flt
+from frappe.utils import cstr, flt
 from pypika import analytics as an
+
+from erpnext.stock.serial_batch_bundle import get_serial_no_status
 
 
 def execute(filters=None):
@@ -83,14 +85,21 @@ def get_data(warehouse, show_disabled_items):
 	return data
 
 
-DELIVERED_VOUCHER_TYPES = ("Delivery Note", "Sales Invoice", "POS Invoice")
 SYNC_CHUNK_SIZE = 1000
 
 
 @frappe.whitelist(methods=["POST"])
-def sync_serial_no_status(warehouse, item_code=None):
+def sync_serial_no_status(warehouse: str, item_code: str | None = None):
 	if not frappe.has_permission("Serial No", "write"):
 		frappe.throw(_("Not permitted to update Serial No"), frappe.PermissionError)
+
+	warehouse = cstr(warehouse)
+	item_code = cstr(item_code) if item_code else None
+	if not frappe.db.exists("Warehouse", warehouse):
+		frappe.throw(_("Warehouse {0} does not exist").format(warehouse))
+
+	if item_code and not frappe.db.exists("Item", item_code):
+		frappe.throw(_("Item {0} does not exist").format(item_code))
 
 	frappe.enqueue(
 		sync_serial_no_status_for_warehouse,
@@ -136,15 +145,25 @@ def sync_serial_no_status_for_item(item_code, warehouse):
 
 
 def set_serial_no_state_from_ledger(serial_no, row):
-	if row and flt(row.qty) > 0:
-		values = {"warehouse": row.warehouse, "status": "Active"}
-	elif row:
-		status = "Delivered" if row.voucher_type in DELIVERED_VOUCHER_TYPES else "Inactive"
-		values = {"warehouse": None, "status": status}
-	else:
-		values = {"warehouse": None, "status": "Inactive"}
+	if not row:
+		frappe.db.set_value(
+			"Serial No", serial_no, {"warehouse": None, "status": "Inactive"}, update_modified=False
+		)
+		return
 
-	frappe.db.set_value("Serial No", serial_no, values, update_modified=False)
+	status = get_serial_no_status(
+		frappe._dict(
+			actual_qty=flt(row.qty),
+			warehouse=row.warehouse,
+			voucher_type=row.voucher_type,
+			voucher_no=row.voucher_no,
+			is_cancelled=0,
+		)
+	)
+	warehouse = row.warehouse if status == "Active" else None
+	frappe.db.set_value(
+		"Serial No", serial_no, {"warehouse": warehouse, "status": status}, update_modified=False
+	)
 
 
 def get_last_ledger_moves(item_code, serial_nos):
@@ -190,6 +209,7 @@ def get_last_bundle_moves_chunk(item_code, serial_nos):
 			entry.qty,
 			Coalesce(entry.warehouse, bundle.warehouse).as_("warehouse"),
 			bundle.voucher_type,
+			bundle.voucher_no,
 			row_number.as_("row_no"),
 		)
 		.where(
@@ -203,7 +223,7 @@ def get_last_bundle_moves_chunk(item_code, serial_nos):
 
 	return (
 		frappe.qb.from_(ranked)
-		.select(ranked.serial_no, ranked.qty, ranked.warehouse, ranked.voucher_type)
+		.select(ranked.serial_no, ranked.qty, ranked.warehouse, ranked.voucher_type, ranked.voucher_no)
 		.where(ranked.row_no == 1)
 		.run(as_dict=True)
 	)
@@ -218,7 +238,7 @@ def set_legacy_last_moves(item_code, serial_nos, last_moves):
 	rows = frappe.get_all(
 		"Stock Ledger Entry",
 		filters={"item_code": item_code, "is_cancelled": 0, "serial_no": ("is", "set")},
-		fields=["serial_no", "actual_qty", "warehouse", "voucher_type"],
+		fields=["serial_no", "actual_qty", "warehouse", "voucher_type", "voucher_no"],
 		order_by="posting_datetime asc, creation asc",
 	)
 
@@ -227,5 +247,8 @@ def set_legacy_last_moves(item_code, serial_nos, last_moves):
 		for serial_no in get_serial_nos(row.serial_no):
 			if serial_no in pending:
 				last_moves[serial_no] = frappe._dict(
-					qty=qty, warehouse=row.warehouse, voucher_type=row.voucher_type
+					qty=qty,
+					warehouse=row.warehouse,
+					voucher_type=row.voucher_type,
+					voucher_no=row.voucher_no,
 				)
