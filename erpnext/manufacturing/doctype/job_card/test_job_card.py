@@ -1509,6 +1509,114 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertEqual(flt(fg_row.qty), 3.0)
 		me_b.submit()
 
+	def make_semi_fg_work_order(self, prefix, qty=5):
+		"""Two-operation semi FG work order: Op A makes the SFG from RM 1, final Op B
+		consumes it. Both operations skip material transfer; stock is pre-seeded."""
+		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		warehouse = "Stores - _TC"
+		rm1 = make_item(f"{prefix} RM 1", {"is_stock_item": 1}).name
+		rm2 = make_item(f"{prefix} RM 2", {"is_stock_item": 1}).name
+		sfg = make_item(f"{prefix} SFG 1", {"is_stock_item": 1}).name
+		fg1 = make_item(f"{prefix} FG 1", {"is_stock_item": 1}).name
+
+		sfg_bom = frappe.new_doc("BOM", company="_Test Company", item=sfg, quantity=1)
+		sfg_bom.append("items", {"item_code": rm1, "qty": 1})
+		sfg_bom.insert()
+		sfg_bom.submit()
+
+		fg_bom = frappe.new_doc(
+			"BOM",
+			company="_Test Company",
+			item=fg1,
+			quantity=1,
+			with_operations=1,
+			track_semi_finished_goods=1,
+		)
+		operation1 = {
+			"operation": f"{prefix} Op A",
+			"workstation": "_Test Workstation A",
+			"finished_good": sfg,
+			"bom_no": sfg_bom.name,
+			"finished_good_qty": 1,
+			"sequence_id": 1,
+			"time_in_mins": 60,
+			"source_warehouse": warehouse,
+			"fg_warehouse": warehouse,
+			"skip_material_transfer": 1,
+		}
+		operation2 = {
+			"operation": f"{prefix} Op B",
+			"workstation": "_Test Workstation A",
+			"finished_good": fg1,
+			"finished_good_qty": 1,
+			"is_final_finished_good": 1,
+			"sequence_id": 2,
+			"time_in_mins": 60,
+			"source_warehouse": warehouse,
+			"fg_warehouse": warehouse,
+			"skip_material_transfer": 1,
+		}
+		make_workstation(operation1)
+		make_operation(operation1)
+		make_operation(operation2)
+		fg_bom.append("operations", operation1)
+		fg_bom.append("operations", operation2)
+		fg_bom.append("items", {"item_code": rm2, "qty": 1})
+		fg_bom.append("items", {"item_code": sfg, "qty": 1, "operation_row_id": 2})
+		fg_bom.insert()
+		fg_bom.submit()
+
+		work_order = make_wo_order_test_record(
+			item=fg1,
+			qty=qty,
+			source_warehouse=warehouse,
+			fg_warehouse=warehouse,
+			bom_no=fg_bom.name,
+			skip_transfer=1,
+		)
+
+		for item_code in (rm1, rm2, sfg):
+			make_stock_entry(item_code=item_code, target=warehouse, qty=10, basic_rate=100)
+
+		return work_order
+
+	def get_semi_fg_job_card(self, work_order, operation):
+		return frappe.get_doc(
+			"Job Card",
+			frappe.db.get_value("Job Card", {"work_order": work_order.name, "operation": operation}, "name"),
+		)
+
+	def test_stale_manufacture_draft_cannot_over_produce_without_operation_bom(self):
+		work_order = self.make_semi_fg_work_order("PL NoBom")
+
+		jc_a = self.get_semi_fg_job_card(work_order, "PL NoBom Op A")
+		jc_a.append(
+			"time_logs",
+			{"from_time": "2024-01-01 08:00:00", "to_time": "2024-01-01 09:00:00", "completed_qty": 5},
+		)
+		jc_a.submit()
+		frappe.get_doc(jc_a.make_stock_entry_for_semi_fg_item()).submit()
+
+		# Op B has no operation BOM, so its entries carry no For Quantity to validate against
+		jc_b = self.get_semi_fg_job_card(work_order, "PL NoBom Op B")
+		jc_b.append(
+			"time_logs",
+			{"from_time": "2024-02-01 08:00:00", "to_time": "2024-02-01 09:00:00", "completed_qty": 3},
+		)
+		jc_b.pending_qty = 0
+		jc_b.process_loss_qty = 2
+		jc_b.submit()
+
+		draft_one = frappe.get_doc(jc_b.make_stock_entry_for_semi_fg_item())
+		draft_two = frappe.get_doc(jc_b.make_stock_entry_for_semi_fg_item())
+
+		draft_one.submit()
+
+		stale = frappe.get_doc("Stock Entry", draft_two.name)
+		self.assertRaises(frappe.ValidationError, stale.submit)
+
 	def test_semi_fg_auto_pull_with_uom_conversion(self):
 		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
 		from erpnext.stock.doctype.item.test_item import make_item
