@@ -845,6 +845,9 @@ class JobCard(Document):
 					)
 
 	def validate_transfer_qty(self):
+		if self.track_semi_finished_goods:
+			return
+
 		if (
 			not self.finished_good
 			and not self.is_corrective_job_card
