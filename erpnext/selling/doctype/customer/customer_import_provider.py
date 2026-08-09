@@ -184,7 +184,10 @@ class CustomerImportProvider(ImportProvider):
 			if flagged or primary is None:
 				primary = address
 		if primary:
-			frappe.db.set_value("Address", primary.name, "is_primary_address", 1)
+			# Save (not db.set_value) so Address.validate_preferred_address() clears any
+			# existing primary address on the party — a raw write would leave two flagged.
+			primary.is_primary_address = 1
+			primary.save()
 			customer.db_set("customer_primary_address", primary.name)
 			customer.db_set("primary_address", get_address_display(primary.name))
 
