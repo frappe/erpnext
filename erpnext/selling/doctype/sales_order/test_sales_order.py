@@ -2646,6 +2646,17 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		so = make_sales_order(item_code=fg_item, qty=10, rate=50, warehouse=fg_warehouse, do_not_save=1)
 		self.assertRaises(frappe.ValidationError, so.save)
 
+	def test_sales_team_allocated_percentage_tolerates_floating_point_drift(self):
+		# 10.0 + 58.02 + 31.98 accumulates to 100.00000000000001 in binary floating point
+		so = make_sales_order(do_not_save=True)
+		for sales_person, percentage in (
+			("_Test Sales Person", 10.0),
+			("_Test Sales Person 1", 58.02),
+			("_Test Sales Person 2", 31.98),
+		):
+			so.append("sales_team", {"sales_person": sales_person, "allocated_percentage": percentage})
+		so.save()
+
 
 def compare_payment_schedules(doc, doc1, doc2):
 	for index, schedule in enumerate(doc1.get("payment_schedule")):

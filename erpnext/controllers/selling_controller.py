@@ -236,7 +236,7 @@ class SellingController(StockController):
 
 			total += sales_person.allocated_percentage
 
-		if sales_team and total != 100.0:
+		if sales_team and flt(total, self.precision("allocated_percentage", "sales_team")) != 100.0:
 			throw(_("Total allocated percentage for sales team should be 100"))
 
 	def validate_sales_team(self, sales_team):
