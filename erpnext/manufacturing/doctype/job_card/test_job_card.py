@@ -22,6 +22,7 @@ from erpnext.manufacturing.doctype.job_card.job_card import (
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 from erpnext.manufacturing.doctype.work_order.work_order import WorkOrder, make_work_order
 from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
+from erpnext.patches.v16_0.set_stock_uom_in_job_card import execute as set_stock_uom_in_job_card
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.tests.utils import ERPNextTestSuite
@@ -900,6 +901,55 @@ class TestJobCard(ERPNextTestSuite):
 				pluck="name",
 			)[0],
 		)
+
+	def test_stock_uom_is_set_from_the_produced_item(self):
+		work_order = make_wo_order_test_record(item="_Test FG Item 2", qty=5)
+
+		job_card = self.get_first_job_card(work_order.name)
+		item_code = job_card.finished_good or job_card.production_item
+
+		self.assertEqual(job_card.stock_uom, frappe.db.get_value("Item", item_code, "stock_uom"))
+
+	def test_stock_uom_patch_backfills_legacy_job_cards(self):
+		suffix = random_string(8)
+		finished_good = create_item(f"Stock UOM Patch FG {suffix}", stock_uom="Kg")
+		production_item = create_item(f"Stock UOM Patch Product {suffix}", stock_uom="Nos")
+
+		finished_good_job_card = self.get_first_job_card(
+			make_wo_order_test_record(item="_Test FG Item 2", qty=5).name
+		)
+		production_item_job_card = self.get_first_job_card(
+			make_wo_order_test_record(item="_Test FG Item 2", qty=6).name
+		)
+
+		frappe.db.set_value(
+			"Job Card",
+			finished_good_job_card.name,
+			{
+				"finished_good": finished_good.name,
+				"production_item": production_item.name,
+				"stock_uom": None,
+			},
+			update_modified=False,
+		)
+		frappe.db.set_value(
+			"Job Card",
+			production_item_job_card.name,
+			{"finished_good": None, "production_item": production_item.name, "stock_uom": None},
+			update_modified=False,
+		)
+
+		set_stock_uom_in_job_card()
+
+		self.assertEqual(frappe.db.get_value("Job Card", finished_good_job_card.name, "stock_uom"), "Kg")
+		self.assertEqual(frappe.db.get_value("Job Card", production_item_job_card.name, "stock_uom"), "Nos")
+
+		frappe.db.set_value(
+			"Job Card", finished_good_job_card.name, "stock_uom", "Nos", update_modified=False
+		)
+		set_stock_uom_in_job_card()
+
+		self.assertEqual(frappe.db.get_value("Job Card", finished_good_job_card.name, "stock_uom"), "Nos")
 
 	def test_completion_qty_reduces_for_quantity_without_process_loss(self):
 		work_order = make_wo_order_test_record(item="_Test FG Item 2", qty=5)
@@ -2633,6 +2683,13 @@ class TestJobCard(ERPNextTestSuite):
 		jc.finished_good = None
 		jc.track_semi_finished_goods = 0
 		self.assertRaises(frappe.ValidationError, jc.validate_transfer_qty)
+
+	def test_qty_in_messages_carries_the_uom(self):
+		jc = frappe.new_doc("Job Card")
+		jc.stock_uom = "Nos"
+
+		self.assertEqual(jc.get_qty_with_uom(5), "5.0 Nos")
+		self.assertEqual(jc.get_qty_with_uom(0), "0.0 Nos")
 
 	def test_completion_qty_split_must_add_up(self):
 		jc = frappe.new_doc("Job Card")
