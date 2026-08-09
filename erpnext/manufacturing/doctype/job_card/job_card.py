@@ -1236,7 +1236,7 @@ class JobCard(Document):
 	def set_status(self, update_status=False):
 		self.status = {0: "Open", 1: "Submitted", 2: "Cancelled"}[self.docstatus or 0]
 		if self.finished_good and self.docstatus == 1:
-			if (self.manufactured_qty + self.process_loss_qty) >= self.for_quantity:
+			if (self.manufactured_qty + self.process_loss_qty) >= self.get_qty_to_produce():
 				self.status = "Completed"
 			elif self.transferred_qty > 0 or self.skip_material_transfer:
 				self.status = "Work In Progress"
@@ -1267,7 +1267,8 @@ class JobCard(Document):
 				self.status = "Work In Progress"
 
 			if self.docstatus == 1 and (
-				self.for_quantity <= (self.total_completed_qty + self.process_loss_qty) or not self.items
+				self.get_qty_to_produce() <= (self.total_completed_qty + self.process_loss_qty)
+				or not self.items
 			):
 				self.status = "Completed"
 
@@ -1280,53 +1281,10 @@ class JobCard(Document):
 		if self.workstation:
 			self.update_workstation_status()
 
-<<<<<<< HEAD
-=======
 	def get_qty_to_produce(self):
 		"""Qty this job card is expected to produce, the pending qty is left to another job card."""
 		return flt(self.for_quantity) - flt(self.pending_qty)
 
-	def set_finished_good_status(self):
-		# Only reached for a submitted job card (docstatus == 1) with a finished good, see set_status().
-		qty_to_produce = self.get_qty_to_produce()
-
-		if (self.manufactured_qty + self.process_loss_qty) >= qty_to_produce:
-			self.status = "Completed"
-		elif (self.total_completed_qty + self.process_loss_qty) >= qty_to_produce:
-			# Production is done and the card is submitted, but the finished goods have not been
-			# booked into stock yet (Manufacture Stock Entry pending) — distinct from active WIP.
-			self.status = "To Manufacture"
-		elif self.transferred_qty > 0 or self.skip_material_transfer:
-			self.status = "Work In Progress"
-
-	def set_non_semi_fg_status(self):
-		if self.items:
-			item_data = frappe.get_all(
-				"Job Card Item",
-				filters={"parent": self.name},
-				fields=["transferred_qty", "required_qty"],
-			)
-			all_transferred = item_data and all(
-				flt(d.transferred_qty) >= flt(d.required_qty) for d in item_data
-			)
-			any_transferred = any(flt(d.transferred_qty) > 0 for d in item_data)
-
-			if all_transferred:
-				self.status = "Material Transferred"
-			elif any_transferred:
-				self.status = "Partially Transferred"
-		elif flt(self.for_quantity) <= flt(self.transferred_qty):
-			self.status = "Material Transferred"
-
-		if self.time_logs:
-			self.status = "Work In Progress"
-
-		if self.docstatus == 1 and (
-			self.get_qty_to_produce() <= (self.total_completed_qty + self.process_loss_qty) or not self.items
-		):
-			self.status = "Completed"
-
->>>>>>> 970039d8ec (fix(job_card): leave the pending qty out of the job card's own output (#57686))
 	def set_wip_warehouse(self):
 		if not self.wip_warehouse:
 			self.wip_warehouse = frappe.get_cached_value("Company", self.company, "default_wip_warehouse")
@@ -1625,13 +1583,8 @@ class JobCard(Document):
 
 		ste = ManufactureEntry(
 			{
-<<<<<<< HEAD
-				"for_quantity": self.for_quantity - self.manufactured_qty,
-				"process_loss_qty": max(self.process_loss_qty - get_consumed_process_loss(), 0),
-=======
 				"for_quantity": self.get_qty_to_produce() - self.manufactured_qty,
-				"process_loss_qty": max(self.process_loss_qty - self.get_consumed_process_loss(), 0),
->>>>>>> 970039d8ec (fix(job_card): leave the pending qty out of the job card's own output (#57686))
+				"process_loss_qty": max(self.process_loss_qty - get_consumed_process_loss(), 0),
 				"job_card": self.name,
 				"skip_material_transfer": self.skip_material_transfer,
 				"backflush_from_wip_warehouse": self.backflush_from_wip_warehouse,
