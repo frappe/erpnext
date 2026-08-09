@@ -1821,13 +1821,13 @@ class TestJobCard(ERPNextTestSuite):
 		jc = frappe.new_doc("Job Card")
 		jc.for_quantity = 5
 
-		jc.validate_complete_job_card_qty(
+		jc.validate_completion_qty_split(
 			frappe._dict(for_quantity=5, qty=3, pending_qty=2, process_loss_qty=0)
 		)
 
 		self.assertRaises(
 			frappe.ValidationError,
-			jc.validate_complete_job_card_qty,
+			jc.validate_completion_qty_split,
 			frappe._dict(for_quantity=3, qty=3, pending_qty=2, process_loss_qty=0),
 		)
 
