@@ -1344,31 +1344,19 @@ class JobCard(Document):
 		if data and len(data) > 0:
 			current_operation_qty = flt(data[0].completed_qty)
 
-<<<<<<< HEAD
 		current_operation_qty += flt(self.total_completed_qty)
 
-		data = frappe.get_all(
-=======
-		for row in self.get_previous_operations():
-			if self.track_semi_finished_goods:
-				self.validate_previous_operation_manufactured_qty(row, current_operation_qty)
-			else:
-				self.validate_previous_operation(row, current_operation_qty)
-
-	def get_previous_operations(self):
 		previous_operations = frappe.get_all(
->>>>>>> 3bd3354152 (fix(job_card): require the previous operation to be manufactured (#57684))
 			"Work Order Operation",
 			fields=["name", "operation", "status", "completed_qty", "sequence_id"],
 			filters={"docstatus": 1, "parent": self.work_order, "sequence_id": ("<", self.sequence_id)},
 			order_by="sequence_id, idx",
 		)
 
-<<<<<<< HEAD
 		message = "Job Card {}: As per the sequence of the operations in the work order {}".format(
 			bold(self.name), bold(get_link_to_form("Work Order", self.work_order))
 		)
-=======
+
 		if self.track_semi_finished_goods and previous_operations:
 			manufactured_qty = self.get_manufactured_qty_per_operation(
 				[row.name for row in previous_operations]
@@ -1377,27 +1365,11 @@ class JobCard(Document):
 			for row in previous_operations:
 				row.manufactured_qty = flt(manufactured_qty.get(row.name))
 
-		return previous_operations
+		for row in previous_operations:
+			if self.track_semi_finished_goods:
+				self.validate_previous_operation_manufactured_qty(row, current_operation_qty)
+				continue
 
-	def get_manufactured_qty_per_operation(self, operation_ids):
-		job_card = frappe.qb.DocType("Job Card")
-
-		data = (
-			frappe.qb.from_(job_card)
-			.select(job_card.operation_id, Sum(job_card.manufactured_qty))
-			.where(
-				(job_card.work_order == self.work_order)
-				& (job_card.docstatus == 1)
-				& (IfNull(job_card.is_corrective_job_card, 0) == 0)
-				& (job_card.operation_id.isin(operation_ids))
-			)
-			.groupby(job_card.operation_id)
-		).run()
-
-		return dict(data)
->>>>>>> 3bd3354152 (fix(job_card): require the previous operation to be manufactured (#57684))
-
-		for row in data:
 			if not row.completed_qty:
 				frappe.throw(
 					_("{0}, complete the operation {1} before the operation {2}.").format(
@@ -1425,6 +1397,23 @@ class JobCard(Document):
 						bold(row.operation),
 					)
 				)
+
+	def get_manufactured_qty_per_operation(self, operation_ids):
+		job_card = frappe.qb.DocType("Job Card")
+
+		data = (
+			frappe.qb.from_(job_card)
+			.select(job_card.operation_id, Sum(job_card.manufactured_qty))
+			.where(
+				(job_card.work_order == self.work_order)
+				& (job_card.docstatus == 1)
+				& (IfNull(job_card.is_corrective_job_card, 0) == 0)
+				& (job_card.operation_id.isin(operation_ids))
+			)
+			.groupby(job_card.operation_id)
+		).run()
+
+		return dict(data)
 
 	def validate_previous_operation_manufactured_qty(self, row, current_operation_qty):
 		manufactured_qty = flt(row.manufactured_qty)
