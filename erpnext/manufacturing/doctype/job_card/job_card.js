@@ -99,7 +99,8 @@ frappe.ui.form.on("Job Card", {
 			doc.docstatus === 1 &&
 			!doc.is_subcontracted &&
 			(doc.skip_material_transfer || doc.transferred_qty > 0) &&
-			flt(doc.manufactured_qty) + flt(doc.process_loss_qty) < flt(doc.for_quantity);
+			flt(doc.manufactured_qty) + flt(doc.process_loss_qty) <
+				flt(doc.for_quantity) - flt(doc.pending_qty);
 
 		if (!can_make_stock_entry) return;
 
@@ -243,13 +244,15 @@ frappe.ui.form.on("Job Card", {
 		const fields = [
 			{
 				fieldtype: "Float",
-				label: __("Qty to Manufacture"),
+				label: __("Qty to Manufacture in this Cycle"),
 				fieldname: "for_quantity",
 				reqd: 1,
 				default: pending_qty,
+				description: __("Completed, Pending and Process Loss quantities must add up to this."),
 				change() {
 					const dialog = frm.job_completion_dialog;
 					dialog.set_value("completed_qty", dialog.get_value("for_quantity"));
+					dialog.set_value("pending_qty", 0);
 					dialog.set_value("process_loss_qty", 0);
 				},
 			},
@@ -261,8 +264,21 @@ frappe.ui.form.on("Job Card", {
 				default: pending_qty,
 				change() {
 					const dialog = frm.job_completion_dialog;
-					const remaining = dialog.get_value("for_quantity") - dialog.get_value("completed_qty");
-					if (remaining > 0 && remaining != dialog.get_value("pending_qty")) {
+					const remaining =
+						dialog.get_value("for_quantity") -
+						dialog.get_value("completed_qty") -
+						dialog.get_value("process_loss_qty");
+
+					if (remaining < 0) {
+						const max_completed_qty =
+							flt(dialog.get_value("for_quantity")) - flt(dialog.get_value("process_loss_qty"));
+						dialog.set_value("completed_qty", max_completed_qty);
+						frappe.throw(
+							__("Completed Quantity cannot be greater than {0}", [max_completed_qty])
+						);
+					}
+
+					if (remaining != dialog.get_value("pending_qty")) {
 						dialog.set_value("pending_qty", remaining);
 					}
 				},
@@ -272,13 +288,25 @@ frappe.ui.form.on("Job Card", {
 				label: __("Pending Quantity"),
 				fieldname: "pending_qty",
 				default: 0.0,
+				description: __("Qty left for a later cycle or for another job card."),
 				change() {
 					const dialog = frm.job_completion_dialog;
 					const process_loss_qty =
 						dialog.get_value("for_quantity") -
 						dialog.get_value("completed_qty") -
 						dialog.get_value("pending_qty");
-					if (process_loss_qty >= 0 && process_loss_qty != dialog.get_value("process_loss_qty")) {
+
+					if (process_loss_qty < 0) {
+						dialog.set_value("pending_qty", 0);
+						frappe.throw(
+							__("Pending Quantity cannot be greater than {0}", [
+								flt(dialog.get_value("for_quantity")) -
+									flt(dialog.get_value("completed_qty")),
+							])
+						);
+					}
+
+					if (process_loss_qty != dialog.get_value("process_loss_qty")) {
 						dialog.set_value("process_loss_qty", process_loss_qty);
 					}
 				},
@@ -287,13 +315,25 @@ frappe.ui.form.on("Job Card", {
 				fieldtype: "Float",
 				label: __("Process Loss Quantity"),
 				fieldname: "process_loss_qty",
+				description: __("Qty scrapped in this cycle, nobody will produce it."),
 				onchange() {
 					const dialog = frm.job_completion_dialog;
 					const remaining =
 						dialog.get_value("for_quantity") -
 						dialog.get_value("completed_qty") -
 						dialog.get_value("process_loss_qty");
-					if (remaining >= 0 && remaining != dialog.get_value("pending_qty")) {
+
+					if (remaining < 0) {
+						dialog.set_value("process_loss_qty", 0);
+						frappe.throw(
+							__("Process Loss Quantity cannot be greater than {0}", [
+								flt(dialog.get_value("for_quantity")) -
+									flt(dialog.get_value("completed_qty")),
+							])
+						);
+					}
+
+					if (remaining != dialog.get_value("pending_qty")) {
 						dialog.set_value("pending_qty", remaining);
 					}
 				},
@@ -357,9 +397,8 @@ frappe.ui.form.on("Job Card", {
 					},
 				});
 			},
-			__("Enter Value"),
-			__("Update"),
-			__("Set Finished Good Quantity")
+			__("Complete Job"),
+			__("Update")
 		);
 	},
 
@@ -383,46 +422,6 @@ frappe.ui.form.on("Job Card", {
 				frm.reload_doc();
 			},
 		});
-	},
-
-	make_finished_good(frm) {
-		const fields = [
-			{
-				fieldtype: "Float",
-				label: __("Completed Quantity"),
-				fieldname: "qty",
-				reqd: 1,
-				default: frm.doc.for_quantity - frm.doc.manufactured_qty,
-			},
-			{
-				fieldtype: "Datetime",
-				label: __("End Time"),
-				fieldname: "end_time",
-				default: frappe.datetime.now_datetime(),
-			},
-		];
-
-		frappe.prompt(
-			fields,
-			(data) => {
-				if (data.qty <= 0) {
-					frappe.throw(__("Quantity should be greater than 0"));
-				}
-
-				frm.call({
-					method: "make_finished_good",
-					doc: frm.doc,
-					args: { qty: data.qty, end_time: data.end_time },
-					callback(r) {
-						const doc = frappe.model.sync(r.message);
-						frappe.set_route("Form", doc[0].doctype, doc[0].name);
-					},
-				});
-			},
-			__("Enter Value"),
-			__("Update"),
-			__("Set Finished Good Quantity")
-		);
 	},
 
 	setup_quality_inspection(frm) {
