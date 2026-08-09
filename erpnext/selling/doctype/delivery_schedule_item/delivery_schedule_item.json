@@ -38,6 +38,7 @@
    "fieldname": "conversion_factor",
    "fieldtype": "Float",
    "label": "Conversion Factor",
+   "precision": "9",
    "read_only": 1
   },
   {
@@ -106,7 +107,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-08-21 18:11:30.134073",
+ "modified": "2026-08-07 17:31:31.732720",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Delivery Schedule Item",

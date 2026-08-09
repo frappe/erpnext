@@ -6,6 +6,7 @@ import frappe
 from frappe.utils import add_days, add_years, cint, flt, getdate, nowdate, today
 from frappe.utils.data import getdate as convert_to_date
 
+from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
@@ -185,6 +186,53 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 				},
 			],
 		)
+		return je
+
+	def setup_split_exchange_accounts(self):
+		gain_account = create_account(
+			account_name="_Test PR Split Exchange Gain",
+			parent_account="Indirect Expenses - _TC",
+			company=self.company,
+		)
+		loss_account = create_account(
+			account_name="_Test PR Split Exchange Loss",
+			parent_account="Indirect Expenses - _TC",
+			company=self.company,
+		)
+		frappe.db.set_value("Company", self.company, "exchange_gain_account", gain_account)
+		frappe.db.set_value("Company", self.company, "exchange_loss_account", loss_account)
+		self.addCleanup(frappe.db.set_value, "Company", self.company, "exchange_gain_account", "")
+		self.addCleanup(frappe.db.set_value, "Company", self.company, "exchange_loss_account", "")
+		return gain_account, loss_account
+
+	def create_foreign_currency_sales_invoice(self, conversion_rate):
+		si = self.create_sales_invoice(
+			qty=1, rate=100, posting_date=nowdate(), do_not_save=True, do_not_submit=True
+		)
+		si.customer = self.customer_usd
+		si.currency = "USD"
+		si.conversion_rate = conversion_rate
+		si.debit_to = self.debtors_usd
+		si.save().submit()
+		return si
+
+	def create_foreign_currency_journal_payment(self, debtors_account, exchange_rate):
+		je = self.create_journal_entry(self.bank, debtors_account, 100, nowdate())
+		je.multi_currency = 1
+		je.accounts[0].exchange_rate = 1
+		je.accounts[0].credit_in_account_currency = 0
+		je.accounts[0].credit = 0
+		je.accounts[0].debit_in_account_currency = 100 * exchange_rate
+		je.accounts[0].debit = 100 * exchange_rate
+		je.accounts[1].party_type = "Customer"
+		je.accounts[1].party = self.customer_usd
+		je.accounts[1].exchange_rate = exchange_rate
+		je.accounts[1].credit_in_account_currency = 100
+		je.accounts[1].credit = 100 * exchange_rate
+		je.accounts[1].debit_in_account_currency = 0
+		je.accounts[1].debit = 0
+		je.save()
+		je.submit()
 		return je
 
 	def test_voucher_outstanding_metadata_comes_from_one_ledger_entry(self):
@@ -955,6 +1003,85 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		self.assertEqual(
 			frappe.db.get_value("Journal Entry", jea_parent.parent, "voucher_type"), "Exchange Gain Or Loss"
 		)
+
+	def test_exchange_gain_loss_split_default_account(self):
+		gain_account, loss_account = self.setup_split_exchange_accounts()
+
+		self.create_foreign_currency_sales_invoice(conversion_rate=80)
+		self.create_foreign_currency_journal_payment(self.debtors_usd, exchange_rate=85)
+
+		pr = self.create_payment_reconciliation()
+		pr.party = self.customer_usd
+		pr.receivable_payable_account = self.debtors_usd
+		pr.get_unreconciled_entries()
+
+		invoices = [x.as_dict() for x in pr.invoices]
+		payments = [x.as_dict() for x in pr.payments]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+
+		self.assertEqual(pr.allocation[0].difference_amount, 500)
+		self.assertEqual(pr.allocation[0].difference_account, gain_account)
+		pr.reconcile()
+
+		self.create_foreign_currency_sales_invoice(conversion_rate=85)
+		self.create_foreign_currency_journal_payment(self.debtors_usd, exchange_rate=80)
+
+		pr = self.create_payment_reconciliation()
+		pr.party = self.customer_usd
+		pr.receivable_payable_account = self.debtors_usd
+		pr.get_unreconciled_entries()
+
+		invoices = [x.as_dict() for x in pr.invoices]
+		payments = [x.as_dict() for x in pr.payments]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+
+		self.assertEqual(pr.allocation[0].difference_amount, -500)
+		self.assertEqual(pr.allocation[0].difference_account, loss_account)
+
+	def test_payment_reconciliation_difference_account_override(self):
+		_, loss_account = self.setup_split_exchange_accounts()
+		override_account = create_account(
+			account_name="_Test PR Override Exchange Account",
+			parent_account="Indirect Expenses - _TC",
+			company=self.company,
+		)
+
+		si = self.create_foreign_currency_sales_invoice(conversion_rate=85)
+		self.create_foreign_currency_journal_payment(self.debtors_usd, exchange_rate=80)
+
+		pr = self.create_payment_reconciliation()
+		pr.party = self.customer_usd
+		pr.receivable_payable_account = self.debtors_usd
+		pr.get_unreconciled_entries()
+
+		invoices = [x.as_dict() for x in pr.invoices]
+		payments = [x.as_dict() for x in pr.payments]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+
+		# Default, computed from the split company fields, is pre-filled onto the row...
+		self.assertEqual(pr.allocation[0].difference_amount, -500)
+		self.assertEqual(pr.allocation[0].difference_account, loss_account)
+
+		# ...but the user can override it in the "Select Difference Account" dialog before reconciling,
+		# and that explicit choice must be what actually gets booked, not the computed default.
+		pr.allocation[0].difference_account = override_account
+		pr.reconcile()
+
+		jea_parent = frappe.db.get_all(
+			"Journal Entry Account",
+			filters={"account": self.debtors_usd, "docstatus": 1, "reference_name": si.name, "credit": 500},
+			fields=["parent"],
+		)[0]
+		self.assertEqual(
+			frappe.db.get_value("Journal Entry", jea_parent.parent, "voucher_type"), "Exchange Gain Or Loss"
+		)
+
+		gain_loss_line_account = frappe.db.get_value(
+			"Journal Entry Account",
+			{"parent": jea_parent.parent, "account": ["!=", self.debtors_usd]},
+			"account",
+		)
+		self.assertEqual(gain_loss_line_account, override_account)
 
 	def test_difference_amount_via_negative_debit_or_credit_journal_entry(self):
 		# Make Sale Invoice

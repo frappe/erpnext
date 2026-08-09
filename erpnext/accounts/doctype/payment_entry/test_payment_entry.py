@@ -950,6 +950,61 @@ class TestPaymentEntry(ERPNextTestSuite):
 		outstanding_amount = flt(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"))
 		self.assertEqual(outstanding_amount, 0)
 
+	def test_exchange_gain_loss_split_accounts(self):
+		gain_account = create_account(
+			account_name="_Test Exchange Gain",
+			parent_account="Indirect Expenses - _TC",
+			company="_Test Company",
+		)
+		loss_account = create_account(
+			account_name="_Test Exchange Loss",
+			parent_account="Indirect Expenses - _TC",
+			company="_Test Company",
+		)
+		frappe.db.set_value("Company", "_Test Company", "exchange_gain_account", gain_account)
+		frappe.db.set_value("Company", "_Test Company", "exchange_loss_account", loss_account)
+		self.addCleanup(frappe.db.set_value, "Company", "_Test Company", "exchange_gain_account", "")
+		self.addCleanup(frappe.db.set_value, "Company", "_Test Company", "exchange_loss_account", "")
+
+		si_gain = create_sales_invoice(
+			customer="_Test Customer USD",
+			debit_to="_Test Receivable USD - _TC",
+			currency="USD",
+			conversion_rate=50,
+		)
+		pe_gain = get_payment_entry("Sales Invoice", si_gain.name, bank_account="_Test Bank USD - _TC")
+		pe_gain.reference_no = "1"
+		pe_gain.reference_date = "2016-01-01"
+		pe_gain.source_exchange_rate = 55
+		pe_gain.save()
+		self.assertEqual(pe_gain.references[0].exchange_gain_loss, 500)
+		pe_gain.submit()
+
+		self.assertEqual(self.get_gain_loss_journal_account(pe_gain.name), gain_account)
+
+		si_loss = create_sales_invoice(
+			customer="_Test Customer USD",
+			debit_to="_Test Receivable USD - _TC",
+			currency="USD",
+			conversion_rate=55,
+		)
+		pe_loss = get_payment_entry("Sales Invoice", si_loss.name, bank_account="_Test Bank USD - _TC")
+		pe_loss.reference_no = "2"
+		pe_loss.reference_date = "2016-01-01"
+		pe_loss.source_exchange_rate = 50
+		pe_loss.save()
+		self.assertEqual(pe_loss.references[0].exchange_gain_loss, -500)
+		pe_loss.submit()
+
+		self.assertEqual(self.get_gain_loss_journal_account(pe_loss.name), loss_account)
+
+	def get_gain_loss_journal_account(self, payment_entry_name: str) -> str | None:
+		return frappe.db.get_value(
+			"Journal Entry Account",
+			{"reference_type": "Payment Entry", "reference_name": payment_entry_name, "docstatus": 1},
+			"account",
+		)
+
 	def test_payment_entry_against_sales_invoice_with_cost_centre(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 

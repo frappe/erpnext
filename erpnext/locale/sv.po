@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-08-02 10:09+0000\n"
-"PO-Revision-Date: 2026-08-04 09:44\n"
+"PO-Revision-Date: 2026-08-06 10:02\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -18542,7 +18542,7 @@ msgstr "Påminnelse Typ"
 
 #: erpnext/accounts/doctype/pos_profile/pos_profile.py:178
 msgid "Duplicate Customer Group"
-msgstr "Kopiera Kund Grupp"
+msgstr "Duplicera Kund Grupp"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:190
 msgid "Duplicate DocType"
@@ -18554,11 +18554,11 @@ msgstr "Dubblett Post. Kontrollera Auktorisering Regel {0}"
 
 #: erpnext/assets/doctype/asset/asset.py:418
 msgid "Duplicate Finance Book"
-msgstr "Kopiera Bokslut Register"
+msgstr "Duplicera Bokslut Register"
 
 #: erpnext/accounts/doctype/pos_profile/pos_profile.py:172
 msgid "Duplicate Item Group"
-msgstr "Kopiera Artikel Grupp"
+msgstr "Duplicera Artikel Grupp"
 
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:102
 msgid "Duplicate Item Under Same Parent"
@@ -18576,7 +18576,7 @@ msgstr "Duplicera Kassa Fällt"
 #: erpnext/accounts/doctype/pos_closing_entry/pos_closing_entry.py:106
 #: erpnext/accounts/doctype/pos_invoice_merge_log/pos_invoice_merge_log.py:64
 msgid "Duplicate POS Invoices found"
-msgstr "Kopia av Kassa Fakturor hittad"
+msgstr "Dubblett av Kassa Fakturor hittad"
 
 #: erpnext/accounts/doctype/payment_request/payment_request.py:155
 msgid "Duplicate Payment Schedule selected"
@@ -18584,7 +18584,7 @@ msgstr "Duplicerad Betalning Schema vald"
 
 #: erpnext/projects/doctype/project/project.js:83
 msgid "Duplicate Project with Tasks"
-msgstr "Kopiera Projekt med Uppgifter"
+msgstr "Duplicera Projekt med Uppgifter"
 
 #: erpnext/accounts/doctype/pos_closing_entry/pos_closing_entry.py:159
 msgid "Duplicate Sales Invoices found"
@@ -18604,7 +18604,7 @@ msgstr "Kopia av Kund Grupp finns i Kund Grupp Tabell"
 
 #: erpnext/stock/doctype/item_manufacturer/item_manufacturer.py:44
 msgid "Duplicate entry against the item code {0} and manufacturer {1}"
-msgstr "Kopiera post mot Artikel Kod {0} och Producent {1}"
+msgstr "Duplicera post mot artikel kod {0} och producent {1}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:189
 msgid "Duplicate entry: {0}{1}"
@@ -18612,19 +18612,19 @@ msgstr "Duplicerad post: {0}{1}"
 
 #: erpnext/accounts/doctype/pos_profile/pos_profile.py:172
 msgid "Duplicate item group found in the item group table"
-msgstr "Kopiera Artikel Grupp hittad i Artikel Grupp Tabell"
+msgstr "Dubblett av Artikel Grupp hittad i Artikel Grupp Tabell"
 
 #: erpnext/accounts/doctype/dunning_type/dunning_type.py:133
 msgid "Duplicate languages found on Dunning Letter Text. Keep only one of them."
-msgstr "Det finns flera språk i påminnelse brev. Behåll endast ett språk."
+msgstr "Det finns flera språk i Påminnelse Brev. Behåll endast ett språk."
 
 #: erpnext/projects/doctype/project/project.js:186
 msgid "Duplicate project has been created"
-msgstr "Kopia av Projekt är skapad"
+msgstr "Dubblett av Projekt är skapad"
 
 #: erpnext/utilities/transaction_base.py:112
 msgid "Duplicate row {0} with same {1}"
-msgstr "Kopiera Rad {0} med samma {1}"
+msgstr "Duplicera Rad {0} med samma {1}"
 
 #: erpnext/accounts/doctype/repost_accounting_ledger/repost_accounting_ledger.py:110
 msgid "Duplicate vouchers found. Remove the duplicate vouchers to continue to repost."
@@ -18632,7 +18632,7 @@ msgstr "Dubbletter av verifikat hittades. Ta bort dubbletter för att fortsätta
 
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:157
 msgid "Duplicate {0} found in the table"
-msgstr "Kopia {0} hittades i Tabell"
+msgstr "Dubblett {0} hittades i Tabell"
 
 #. Label of the duration (Int) field in DocType 'Task'
 #: erpnext/projects/doctype/task/task.json
@@ -47176,7 +47176,7 @@ msgstr "Rad # #{0}: Avskrivning Start Datum erfordras"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:336
 msgid "Row #{0}: Duplicate entry in References {1} {2}"
-msgstr "Rad # {0}: Duplikat Post i Referenser {1} {2}"
+msgstr "Rad #{0}: Dubblett Post i Referenser {1} {2}"
 
 #: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py:113
 msgid "Row #{0}: Either Party ID or Party Name is required"

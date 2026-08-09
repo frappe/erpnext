@@ -5,7 +5,7 @@ frappe.ui.form.on("Work Order", {
 	setup: function (frm) {
 		frm.custom_make_buttons = {
 			"Stock Entry": "Start",
-			"Pick List": "Create Pick List",
+			"Pick List": "Pick List",
 			"Job Card": "Create Job Card",
 		};
 
@@ -818,13 +818,21 @@ erpnext.work_order = {
 
 					if (pending_to_transfer && frm.doc.status != "Stopped") {
 						frm.has_start_btn = true;
-						frm.add_custom_button(__("Create Pick List"), function () {
-							erpnext.work_order.create_pick_list(frm);
-						});
+						frm.add_custom_button(
+							__("Pick List"),
+							function () {
+								erpnext.work_order.create_pick_list(frm);
+							},
+							__("Create")
+						);
 
-						frm.add_custom_button(__("Material Request"), function () {
-							erpnext.work_order.make_material_request(frm);
-						});
+						frm.add_custom_button(
+							__("Material Request"),
+							function () {
+								erpnext.work_order.make_material_request(frm);
+							},
+							__("Create")
+						);
 
 						var start_btn = frm.add_custom_button(__("Start"), function () {
 							erpnext.work_order.make_se(frm, "Material Transfer for Manufacture");
@@ -844,7 +852,10 @@ erpnext.work_order = {
 								function () {
 									let purpose = "Material Transfer for Manufacture";
 									erpnext.work_order
-										.show_prompt_for_qty_input(frm, purpose, qty, 1)
+										.show_prompt_for_qty_input(frm, purpose, {
+											qty: qty,
+											additional_transfer_entry: 1,
+										})
 										.then((data) => {
 											return frappe.xcall(
 												"erpnext.manufacturing.doctype.work_order.mapper.make_stock_entry",
@@ -861,7 +872,7 @@ erpnext.work_order = {
 											frappe.set_route("Form", stock_entry.doctype, stock_entry.name);
 										});
 								},
-								__("Make")
+								__("Create")
 							);
 						}
 					}
@@ -895,7 +906,7 @@ erpnext.work_order = {
 										backflush_raw_materials_based_on
 									);
 								},
-								__("Make")
+								__("Create")
 							);
 						}
 					}
@@ -1030,6 +1041,26 @@ erpnext.work_order = {
 		return flt(max, precision("qty"));
 	},
 
+	get_max_requestable_qty: (frm) => {
+		const required = {};
+		const covered = {};
+		(frm.doc.required_items || []).forEach((row) => {
+			required[row.item_code] = (required[row.item_code] || 0) + flt(row.required_qty);
+			if (!(row.item_code in covered)) {
+				covered[row.item_code] =
+					flt(row.transferred_qty) + flt(row.requested_qty) + flt(row.picked_qty);
+			}
+		});
+
+		let max_fraction = 0;
+		Object.keys(required).forEach((item_code) => {
+			if (required[item_code] <= 0) return;
+			const pending = required[item_code] - covered[item_code];
+			max_fraction = Math.max(max_fraction, pending / required[item_code]);
+		});
+		return flt(max_fraction * flt(frm.doc.qty), precision("qty"));
+	},
+
 	show_disassembly_prompt: function (frm) {
 		let max_qty = flt(frm.doc.produced_qty - frm.doc.disassembled_qty);
 
@@ -1084,20 +1115,20 @@ erpnext.work_order = {
 		});
 	},
 
-	show_prompt_for_qty_input: function (frm, purpose, qty, additional_transfer_entry) {
-		let max = !additional_transfer_entry ? this.get_max_transferable_qty(frm, purpose) : qty;
+	show_prompt_for_qty_input: function (frm, purpose, { qty, additional_transfer_entry, target } = {}) {
+		let max = qty == null ? this.get_max_transferable_qty(frm, purpose) : qty;
 
 		let fields = [
 			{
 				fieldtype: "Float",
-				label: __("Qty for {0}", [__(purpose)]),
+				label: __("Qty for {0}", [target || __(purpose)]),
 				fieldname: "qty",
 				description: __("Max: {0}", [max]),
 				default: max,
 			},
 		];
 
-		if (!additional_transfer_entry) {
+		if (!additional_transfer_entry && !target) {
 			fields.push({
 				fieldtype: "Check",
 				label: __("Consider Process Loss"),
@@ -1119,6 +1150,11 @@ erpnext.work_order = {
 				(data) => {
 					max += (frm.doc.qty * (frm.doc.__onload.overproduction_percentage || 0.0)) / 100;
 
+					if (!data.qty || data.qty <= 0) {
+						frappe.msgprint(__("Quantity must be greater than zero."));
+						reject();
+						return;
+					}
 					if (data.qty > max) {
 						frappe.msgprint(__("Quantity must not be more than {0}", [max]));
 						reject();
@@ -1161,15 +1197,32 @@ erpnext.work_order = {
 		}
 	},
 
-	make_material_request: function (frm) {
-		frappe.model.open_mapped_doc({
-			method: "erpnext.manufacturing.doctype.work_order.mapper.make_material_request",
-			frm,
-		});
+	make_material_request: function (frm, purpose = "Material Transfer for Manufacture") {
+		const max = this.get_max_requestable_qty(frm);
+		if (max <= 0) {
+			frappe.msgprint(__("All required items have already been transferred, requested or picked."));
+			return;
+		}
+
+		const get_material_request = (for_qty) =>
+			frappe.model.open_mapped_doc({
+				method: "erpnext.manufacturing.doctype.work_order.mapper.make_material_request",
+				frm,
+				args: { for_qty: for_qty },
+			});
+
+		this.show_prompt_for_qty_input(frm, purpose, {
+			qty: max,
+			target: __("Material Request"),
+		}).then((data) => get_material_request(data.qty));
 	},
 
 	create_pick_list: function (frm, purpose = "Material Transfer for Manufacture") {
-		const max = this.get_max_transferable_qty(frm, purpose);
+		const max = this.get_max_requestable_qty(frm);
+		if (max <= 0) {
+			frappe.msgprint(__("All required items have already been transferred, requested or picked."));
+			return;
+		}
 
 		const get_pick_list = (for_qty) =>
 			frappe
@@ -1182,11 +1235,10 @@ erpnext.work_order = {
 					frappe.set_route("Form", pick_list.doctype, pick_list.name);
 				});
 
-		if (max <= 0) {
-			get_pick_list(frm.doc.qty);
-		} else {
-			this.show_prompt_for_qty_input(frm, purpose).then((data) => get_pick_list(data.qty));
-		}
+		this.show_prompt_for_qty_input(frm, purpose, {
+			qty: max,
+			target: __("Pick List"),
+		}).then((data) => get_pick_list(data.qty));
 	},
 
 	make_consumption_se: function (frm, backflush_raw_materials_based_on) {

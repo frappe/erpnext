@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-08-02 10:09+0000\n"
-"PO-Revision-Date: 2026-08-05 10:02\n"
+"PO-Revision-Date: 2026-08-06 10:02\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -39010,7 +39010,7 @@ msgstr "لطفاً یک یادداشت تحویل را انتخاب کنید"
 
 #: erpnext/crm/doctype/appointment_booking_settings/appointment_booking_settings.py:81
 msgid "Please select a Holiday List to enable Appointment Scheduling."
-msgstr ""
+msgstr "لطفا برای فعال کردن زمان‌بندی قرار ملاقات، یک لیست تعطیلات انتخاب کنید."
 
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.py:152
 msgid "Please select a Subcontracting Purchase Order."
@@ -39096,7 +39096,7 @@ msgstr ""
 
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.py:1356
 msgid "Please select a valid {0}"
-msgstr ""
+msgstr "لطفا یک {0} معتبر انتخاب کنید"
 
 #: erpnext/selling/doctype/quotation/quotation.js:245
 msgid "Please select a value for {0} quotation_to {1}"
@@ -44133,7 +44133,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/bin/bin.js:10
 msgid "Recalculate Values"
-msgstr ""
+msgstr "محاسبه مجدد مقادیر"
 
 #. Option for the 'Status' (Select) field in DocType 'Asset'
 #. Option for the 'Purpose' (Select) field in DocType 'Asset Movement'
@@ -49365,7 +49365,7 @@ msgstr "زمانبند غیرفعال است. نمی‌توان حساب‌ها 
 
 #: erpnext/accounts/doctype/repost_accounting_ledger/repost_accounting_ledger.py:232
 msgid "Scheduler is inactive. Reposting will only run once background jobs are processed."
-msgstr ""
+msgstr "زمان‌بند غیرفعال است. ارسال مجدد فقط زمانی اجرا می‌شود که کارهای پس‌زمینه پردازش شوند."
 
 #. Label of the schedules (Table) field in DocType 'Maintenance Schedule'
 #: erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.json
@@ -49811,7 +49811,7 @@ msgstr "انتخاب آدرس تامین کننده"
 
 #: erpnext/stock/doctype/material_request/material_request.js:449
 msgid "Select Supplier for Items"
-msgstr ""
+msgstr "انتخاب تامین کننده برای آیتم‌ها"
 
 #: erpnext/stock/doctype/batch/batch.js:150
 msgid "Select Target Warehouse"
@@ -49865,7 +49865,7 @@ msgstr "یک تامین کننده انتخاب کنید"
 #: erpnext/stock/doctype/material_request/mapper.py:230
 #: erpnext/stock/doctype/material_request/material_request.js:553
 msgid "Select a Supplier for Item {0}"
-msgstr ""
+msgstr "انتخاب یک تأمین‌کننده برای آیتم {0}"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:49
 msgid "Select a bank account to reconcile"
@@ -49910,7 +49910,7 @@ msgstr "از هر مجموعه یک آیتم را برای استفاده در �
 #: erpnext/stock/doctype/material_request/mapper.py:211
 #: erpnext/stock/doctype/material_request/material_request.js:540
 msgid "Select at least one Item"
-msgstr ""
+msgstr "حداقل یک آیتم را انتخاب کنید"
 
 #: erpnext/stock/doctype/item/item.js:1256
 msgid "Select at least one attribute value."
@@ -50249,7 +50249,7 @@ msgstr "ارسال با پیوست"
 #: erpnext/accounts/doctype/payment_request/payment_request.js:51
 #: erpnext/accounts/doctype/payment_request/payment_request.js:55
 msgid "Sending Email"
-msgstr ""
+msgstr "ارسال ایمیل"
 
 #. Option for the 'Detected Amount Format' (Select) field in DocType 'Bank
 #. Statement Import Log'
@@ -51134,7 +51134,7 @@ msgstr "تنظیم تامین کننده"
 
 #: erpnext/stock/doctype/material_request/material_request.js:456
 msgid "Set Supplier for All Items"
-msgstr ""
+msgstr "تنظیم تأمین‌کننده برای همه آیتم‌ها"
 
 #. Label of the set_target_warehouse (Link) field in DocType 'Sales Invoice'
 #. Label of the set_warehouse (Link) field in DocType 'Purchase Order'
@@ -61276,7 +61276,7 @@ msgstr ""
 #. Label of the verification_token (Data) field in DocType 'Appointment'
 #: erpnext/crm/doctype/appointment/appointment.json
 msgid "Verification Token"
-msgstr ""
+msgstr "توکن تأیید"
 
 #: erpnext/www/book_appointment/verify/index.html:15
 msgid "Verification failed please check the link"
@@ -62147,7 +62147,7 @@ msgstr ""
 
 #: erpnext/templates/emails/appointment_confirmed.html:3
 msgid "We look forward to meeting you"
-msgstr ""
+msgstr "مشتاق دیدار شما هستیم"
 
 #: banking/src/pages/BankStatementImporter.tsx:169
 msgid "We support uploading CSV, XLSX, XLS and PDF files. Please make sure the file contains the correct columns."

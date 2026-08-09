@@ -888,7 +888,7 @@ def make_bundle_for_material_transfer(**kwargs):
 		row.stock_value_difference = abs(row.stock_value_difference)
 		if kwargs.type_of_transaction == "Outward":
 			row.qty *= -1
-			row.stock_value_difference *= row.stock_value_difference
+			row.stock_value_difference *= -1
 			row.is_outward = 1
 
 		row.warehouse = kwargs.warehouse
