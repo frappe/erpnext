@@ -352,6 +352,7 @@
   {
    "collapsible": 1,
    "collapsible_depends_on": "eval:doc.on_hold",
+   "depends_on": "eval:doc.on_hold",
    "fieldname": "sb_14",
    "fieldtype": "Section Break",
    "label": "Hold Invoice"
@@ -1662,7 +1663,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-12 23:54:21.263951",
+ "modified": "2026-08-05 15:40:16.519774",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
