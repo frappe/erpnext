@@ -3215,6 +3215,17 @@ class TestSalesOrder(ERPNextTestSuite):
 			so.save()
 			self.assertEqual(sum(d.allocated_percentage for d in so.sales_team), 100)
 
+		with self.subTest("floating-point drift in the total is tolerated"):
+			# 10.0 + 58.02 + 31.98 accumulates to 100.00000000000001 in binary floating point
+			so = make_sales_order(do_not_save=True)
+			for sales_person, percentage in (
+				("_Test Sales Person", 10.0),
+				("_Test Sales Person 1", 58.02),
+				("_Test Sales Person 2", 31.98),
+			):
+				so.append("sales_team", {"sales_person": sales_person, "allocated_percentage": percentage})
+			so.save()
+
 	def test_sales_team_disabled_sales_person_rejected(self):
 		frappe.db.set_value("Sales Person", "_Test Sales Person 2", "enabled", 0)
 		try:
