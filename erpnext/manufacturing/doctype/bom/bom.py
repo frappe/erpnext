@@ -854,7 +854,7 @@ class BOM(WebsiteGenerator):
 				self.add_materials_from_bom(row.finished_good, row.bom_no, row.idx, qty=row.finished_good_qty)
 
 	@frappe.whitelist()
-	def add_raw_materials(self, operation_row_id, items):
+	def add_raw_materials(self, operation_row_id: str, items: str | list[dict]) -> None:
 		if isinstance(items, str):
 			items = parse_json(items)
 
