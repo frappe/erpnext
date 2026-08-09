@@ -1236,7 +1236,7 @@ class JobCard(Document):
 	def set_status(self, update_status=False):
 		self.status = {0: "Open", 1: "Submitted", 2: "Cancelled"}[self.docstatus or 0]
 		if self.finished_good and self.docstatus == 1:
-			if (self.manufactured_qty + self.process_loss_qty) >= self.for_quantity:
+			if (self.manufactured_qty + self.process_loss_qty) >= self.get_qty_to_produce():
 				self.status = "Completed"
 			elif self.transferred_qty > 0 or self.skip_material_transfer:
 				self.status = "Work In Progress"
@@ -1267,7 +1267,8 @@ class JobCard(Document):
 				self.status = "Work In Progress"
 
 			if self.docstatus == 1 and (
-				self.for_quantity <= (self.total_completed_qty + self.process_loss_qty) or not self.items
+				self.get_qty_to_produce() <= (self.total_completed_qty + self.process_loss_qty)
+				or not self.items
 			):
 				self.status = "Completed"
 
@@ -1279,6 +1280,10 @@ class JobCard(Document):
 
 		if self.workstation:
 			self.update_workstation_status()
+
+	def get_qty_to_produce(self):
+		"""Qty this job card is expected to produce, the pending qty is left to another job card."""
+		return flt(self.for_quantity) - flt(self.pending_qty)
 
 	def set_wip_warehouse(self):
 		if not self.wip_warehouse:
@@ -1645,7 +1650,7 @@ class JobCard(Document):
 
 		ste = ManufactureEntry(
 			{
-				"for_quantity": self.for_quantity - self.manufactured_qty,
+				"for_quantity": self.get_qty_to_produce() - self.manufactured_qty,
 				"process_loss_qty": max(self.process_loss_qty - get_consumed_process_loss(), 0),
 				"job_card": self.name,
 				"skip_material_transfer": self.skip_material_transfer,

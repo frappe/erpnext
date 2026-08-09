@@ -1334,6 +1334,96 @@ class TestJobCard(ERPNextTestSuite):
 			8,
 		)
 
+	def test_semi_fg_pending_qty_is_left_to_another_job_card(self):
+		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		warehouse = "Stores - _TC"
+		rm = make_item("Pending Qty RM 1", {"is_stock_item": 1}).name
+		fg = make_item("Pending Qty FG 1", {"is_stock_item": 1}).name
+
+		fg_bom = frappe.new_doc(
+			"BOM",
+			company="_Test Company",
+			item=fg,
+			quantity=1,
+			with_operations=1,
+			track_semi_finished_goods=1,
+		)
+		fg_bom.append("items", {"item_code": rm, "qty": 1, "operation_row_id": 1})
+
+		operation = {
+			"operation": "Pending Qty Op A",
+			"workstation": "_Test Workstation A",
+			"finished_good": fg,
+			"finished_good_qty": 1,
+			"is_final_finished_good": 1,
+			"sequence_id": 1,
+			"time_in_mins": 60,
+			"source_warehouse": warehouse,
+			"fg_warehouse": warehouse,
+			"skip_material_transfer": 1,
+		}
+
+		make_workstation(operation)
+		make_operation(operation)
+		fg_bom.append("operations", operation)
+		fg_bom.insert()
+		fg_bom.submit()
+
+		work_order = make_wo_order_test_record(
+			item=fg,
+			qty=5,
+			source_warehouse=warehouse,
+			fg_warehouse=warehouse,
+			bom_no=fg_bom.name,
+			skip_transfer=1,
+			do_not_save=True,
+		)
+		work_order.operations[0].time_in_mins = 60
+		work_order.save()
+		work_order.submit()
+
+		make_stock_entry(item_code=rm, target=warehouse, qty=100, basic_rate=100)
+
+		job_card = frappe.get_doc(
+			"Job Card",
+			frappe.get_all(
+				"Job Card",
+				filters={"work_order": work_order.name},
+				order_by="sequence_id, creation",
+				limit=1,
+				pluck="name",
+			)[0],
+		)
+		job_card.append("time_logs", {"from_time": "2024-04-01 08:00:00"})
+		job_card.save()
+
+		job_card.complete_job_card(
+			qty=3,
+			for_quantity=5,
+			pending_qty=2,
+			process_loss_qty=0,
+			end_time="2024-04-01 09:00:00",
+		)
+
+		job_card.reload()
+		self.assertEqual(flt(job_card.for_quantity), 5)
+		self.assertEqual(flt(job_card.pending_qty), 2)
+		self.assertEqual(flt(job_card.process_loss_qty), 0)
+
+		job_card.submit()
+		self.assertEqual(job_card.status, "Work In Progress")
+
+		manufacturing_entry = frappe.get_doc(job_card.make_stock_entry_for_semi_fg_item())
+		finished_item = next(row for row in manufacturing_entry.items if row.is_finished_item)
+		self.assertEqual(flt(finished_item.qty), 3)
+		manufacturing_entry.submit()
+
+		job_card.reload()
+		self.assertEqual(flt(job_card.manufactured_qty), 3)
+		self.assertEqual(job_card.status, "Completed")
+
 	def test_semi_fg_sequence_needs_previous_operations_manufactured(self):
 		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
 		from erpnext.stock.doctype.item.test_item import make_item
