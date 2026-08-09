@@ -3753,7 +3753,7 @@ def get_new_child_item_warehouse(p_doc, item, trans_item: dict, child_doctype: s
 		if is_warehouse_required_for_new_child_item(child_doctype, item, trans_item):
 			frappe.throw(
 				_(
-					"Cannot find a default warehouse for item {0}. Please select one in the Update Items dialog, or set a default in the Item Master or in the Company."
+					"Cannot find a default warehouse for item {0}. Please select one in the Update Items dialog, or set a default in the Item Master or in Stock Settings."
 				).format(frappe.bold(item.item_code))
 			)
 		return None

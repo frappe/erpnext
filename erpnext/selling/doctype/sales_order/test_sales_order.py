@@ -629,10 +629,11 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		so = make_sales_order(item_code="_Test Item", qty=4)
 		existing_item = so.get("items")[0]
 
-		# a company gets a default warehouse when its warehouses are created
-		company_default = frappe.db.get_value("Company", so.company, "default_warehouse")
-		frappe.db.set_value("Company", so.company, "default_warehouse", None)
-		self.addCleanup(frappe.db.set_value, "Company", so.company, "default_warehouse", company_default)
+		stock_settings_default = frappe.db.get_single_value("Stock Settings", "default_warehouse")
+		frappe.db.set_single_value("Stock Settings", "default_warehouse", None)
+		self.addCleanup(
+			frappe.db.set_single_value, "Stock Settings", "default_warehouse", stock_settings_default
+		)
 
 		def get_trans_items(warehouse=None):
 			new_row = {"item_code": item_code, "rate": 200, "qty": 7}
@@ -651,7 +652,7 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 				]
 			)
 
-		# no default in the Item Master, Item Group, Brand or Company
+		# no default in the Item Master, Item Group, Brand or Stock Settings
 		self.assertRaisesRegex(
 			frappe.ValidationError,
 			"Cannot find a default warehouse",
