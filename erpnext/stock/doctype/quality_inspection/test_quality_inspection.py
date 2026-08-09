@@ -1,12 +1,8 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors and Contributors
 # See license.txt
 
-<<<<<<< HEAD
-=======
-from contextlib import contextmanager
 from unittest.mock import patch
 
->>>>>>> e8a6884d5e (test: doc_update published for reference on Quality Inspection submit)
 import frappe
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import nowdate
