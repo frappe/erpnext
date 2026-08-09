@@ -3238,7 +3238,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 		entry_qty = flt(finished_qty + flt(self.process_loss_qty), precision)
 
 		if entry_qty > pending_qty:
-			uom = job_card.stock_uom
+			item_code = job_card.finished_good or job_card.production_item
+			uom = frappe.get_cached_value("Item", item_code, "stock_uom")
 			frappe.throw(
 				_(
 					"The Job Card {0} has only {1} left to produce, but this entry books {2} ({3} finished goods and {4} process loss). Cancel or update its other manufacture entries first."
