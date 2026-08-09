@@ -9,9 +9,9 @@ sections in import schema and creates linked records during row import.
 
 import frappe
 from frappe import _
-
 from frappe.core.doctype.data_import.import_provider import ImportProvider
 from frappe.core.doctype.data_import.importer import INSERT, UPDATE
+
 from erpnext.selling.doctype.customer.mapper import parse_full_name
 
 
@@ -94,7 +94,7 @@ class SupplierImportProvider(ImportProvider):
 
 	def _create_contacts(self, supplier, rows):
 		primary = None
-		for index, row in enumerate(rows):
+		for row in rows:
 			row = dict(row)
 			email = row.pop("email_id", None)
 			mobile = row.pop("mobile_no", None)
@@ -122,7 +122,8 @@ class SupplierImportProvider(ImportProvider):
 			if mobile:
 				contact.add_phone(mobile, is_primary_mobile_no=True)
 			contact.insert()
-			if flagged or (primary is None and index == 0):
+			# First created contact is the default primary; an explicit flag overrides.
+			if flagged or primary is None:
 				primary = contact
 		if primary:
 			frappe.db.set_value("Contact", primary.name, "is_primary_contact", 1)
@@ -155,7 +156,7 @@ class SupplierImportProvider(ImportProvider):
 		from frappe.contacts.doctype.address.address import get_address_display
 
 		primary = None
-		for index, row in enumerate(rows):
+		for row in rows:
 			row = dict(row)
 			flagged = frappe.utils.cint(row.pop("is_primary_address", 0))
 			if not row.get("address_line1"):
@@ -170,7 +171,9 @@ class SupplierImportProvider(ImportProvider):
 				}
 			)
 			address.insert()
-			if flagged or (primary is None and index == 0):
+			# First created address is the default primary; an explicit flag overrides.
+			# (Must not key off the loop index — skipped rows would leave no primary.)
+			if flagged or primary is None:
 				primary = address
 		if primary:
 			frappe.db.set_value("Address", primary.name, "is_primary_address", 1)

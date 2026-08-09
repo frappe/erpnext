@@ -9,7 +9,6 @@ them as child tables in the import and wires up the links + primary flags in ``i
 
 import frappe
 from frappe import _
-
 from frappe.core.doctype.data_import.import_provider import ImportProvider
 from frappe.core.doctype.data_import.importer import INSERT, UPDATE
 
@@ -48,19 +47,8 @@ class CustomerImportProvider(ImportProvider):
 			doc = payload.doc
 			row = payload.rows[0].row_number if payload.rows else None
 			for contact in doc.get("contacts") or []:
-				# TODO: Need to Confirm if need to throw Error is Contact First Name not present. For now not throwing Warning.
-				# first_name, _last_name, company_name = self._resolve_contact_names(doc, dict(contact))
-				# if (contact.get("email_id") or contact.get("mobile_no")) and not (first_name or company_name):
+				# A Contact is only useful with a way to reach it — warn when both are missing.
 				if not (contact.get("email_id") or contact.get("mobile_no")):
-					# warnings.append(
-					# 	{
-					# 		"row": row,
-					# 		"message": _("Contact in row {0} is missing a First Name").format(
-					# 			row
-					# 		),
-					# 	}
-					# )
-					# Report exactly which fields are missing
 					missing = [
 						label
 						for field, label in (("email_id", _("Email")), ("mobile_no", _("Mobile No")))
@@ -113,17 +101,13 @@ class CustomerImportProvider(ImportProvider):
 
 	def _create_contacts(self, customer, rows):
 		primary = None
-		for index, row in enumerate(rows):
+		for row in rows:
 			row = dict(row)
 			email = row.pop("email_id", None)
 			mobile = row.pop("mobile_no", None)
 			flagged = frappe.utils.cint(row.pop("is_primary_contact", 0))
 
 			first_name, last_name, company_name = self._resolve_contact_names(customer, row)
-
-			# TODO: Check if first_name or company_name is required for Contact creation. For now lets create Contact even if both are missing, as long as email or mobile is present.
-			# if not first_name and not company_name:
-			# 	continue
 
 			contact_values = {k: v for k, v in row.items() if v not in (None, "")}
 			if first_name:
@@ -145,7 +129,8 @@ class CustomerImportProvider(ImportProvider):
 			if mobile:
 				contact.add_phone(mobile, is_primary_mobile_no=True)
 			contact.insert()
-			if flagged or (primary is None and index == 0):
+			# First created contact is the default primary; an explicit flag overrides.
+			if flagged or primary is None:
 				primary = contact
 		if primary:
 			frappe.db.set_value("Contact", primary.name, "is_primary_contact", 1)
@@ -179,7 +164,7 @@ class CustomerImportProvider(ImportProvider):
 		from frappe.contacts.doctype.address.address import get_address_display
 
 		primary = None
-		for index, row in enumerate(rows):
+		for row in rows:
 			row = dict(row)
 			flagged = frappe.utils.cint(row.pop("is_primary_address", 0))
 			if not row.get("address_line1"):
@@ -194,7 +179,9 @@ class CustomerImportProvider(ImportProvider):
 				}
 			)
 			address.insert()
-			if flagged or (primary is None and index == 0):
+			# First created address is the default primary; an explicit flag overrides.
+			# (Must not key off the loop index — skipped rows would leave no primary.)
+			if flagged or primary is None:
 				primary = address
 		if primary:
 			frappe.db.set_value("Address", primary.name, "is_primary_address", 1)
