@@ -496,9 +496,4 @@ erpnext.patches.v16_0.rename_ar_ap_ageing_filter
 erpnext.patches.v16_0.fix_subcontracting_titles
 erpnext.patches.v16_0.backfill_repost_accounting_ledger_status
 erpnext.patches.v16_0.merge_seeded_item_group_root
-<<<<<<< HEAD
-=======
-erpnext.patches.v16_0.set_stock_uom_in_job_card
-erpnext.patches.v16_0.set_work_order_requested_and_picked_qty
 erpnext.patches.v16_0.rename_italy_customer_name_fields
->>>>>>> 110d0a38a6 (fix(regional): rename Italy's duplicate Customer name fields)
