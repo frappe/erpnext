@@ -264,6 +264,9 @@ class StatusUpdater(Document):
 
 	def validate_qty(self):
 		"""Validates qty at row level"""
+		selling_doctypes = ("Sales Order", "Sales Invoice", "Delivery Note")
+		buying_doctypes = ("Purchase Order", "Purchase Invoice", "Purchase Receipt")
+
 		for args in self.status_updater:
 			if "target_ref_field" not in args or args.get("validate_qty") is False:
 				# if target_ref_field is not specified or validate_qty is explicitly set to False, skip validation
@@ -291,11 +294,8 @@ class StatusUpdater(Document):
 				if hasattr(d, "qty") and flt(d.qty) > 0 and self.get("is_return"):
 					frappe.throw(_("For an item {0}, quantity must be negative number").format(d.item_code))
 
-				if (
-					not selling_negative_rate_allowed and self.doctype in ["Sales Invoice", "Delivery Note"]
-				) or (
-					not buying_negative_rate_allowed
-					and self.doctype in ["Purchase Invoice", "Purchase Receipt"]
+				if (not selling_negative_rate_allowed and self.doctype in selling_doctypes) or (
+					not buying_negative_rate_allowed and self.doctype in buying_doctypes
 				):
 					if hasattr(d, "item_code") and hasattr(d, "rate") and flt(d.rate) < 0:
 						frappe.throw(
@@ -306,7 +306,7 @@ class StatusUpdater(Document):
 								frappe.bold(_("`Allow Negative rates for Items`")),
 								get_link_to_form(
 									"Selling Settings"
-									if self.doctype in ["Sales Invoice", "Delivery Note"]
+									if self.doctype in selling_doctypes
 									else "Buying Settings"
 								),
 							),
