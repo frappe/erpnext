@@ -54,6 +54,28 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		po.save()
 		self.assertEqual(po.items[1].qty, 1)
 
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_negative_rates_for_items": 0})
+	def test_purchase_order_negative_grand_total_blocked_without_setting(self):
+		po = create_purchase_order(qty=1, rate=100, do_not_save=True)
+		po.append("items", {"item_code": "_Test Item 2", "qty": 1, "rate": -150, "schedule_date": nowdate()})
+		self.assertRaises(frappe.ValidationError, po.save)
+
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_negative_rates_for_items": 1})
+	def test_purchase_order_negative_grand_total_allowed_with_setting(self):
+		"""Use a negative rate to represent a credit while order quantities remain positive."""
+		po = create_purchase_order(qty=1, rate=100, do_not_save=True)
+		po.append("items", {"item_code": "_Test Item 2", "qty": 1, "rate": -150, "schedule_date": nowdate()})
+		po.save()
+		po.submit()
+		self.assertEqual(po.docstatus, 1)
+		self.assertTrue(po.base_grand_total < 0)
+
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_negative_rates_for_items": 1})
+	def test_purchase_order_negative_rate_setting_does_not_allow_negative_quantity(self):
+		po = create_purchase_order(qty=1, rate=100, do_not_save=True)
+		po.append("items", {"item_code": "_Test Item 2", "qty": -1, "rate": 100})
+		self.assertRaises(frappe.ValidationError, po.save)
+
 	def test_purchase_order_zero_qty(self):
 		po = create_purchase_order(qty=0, do_not_save=True)
 
