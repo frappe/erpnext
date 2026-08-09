@@ -5461,6 +5461,24 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(flt(qty_by_item.get(item_a)), 10.0)
 		self.assertEqual(flt(qty_by_item.get(item_b)), 10.0)
 
+	def test_wip_warehouse_required_when_tracking_semi_finished_goods(self):
+		wo = frappe.new_doc("Work Order")
+		wo.track_semi_finished_goods = 1
+		wo.skip_transfer = 0
+		wo.fg_warehouse = "_Test Warehouse 1 - _TC"
+
+		self.assertRaises(frappe.ValidationError, wo.validate_warehouse)
+
+		wo.wip_warehouse = "_Test Warehouse - _TC"
+		wo.validate_warehouse()
+
+		# the top-level target warehouse stays optional; operations may carry their own
+		wo.fg_warehouse = None
+		wo.validate_warehouse()
+
+		wo.track_semi_finished_goods = 0
+		self.assertRaises(frappe.ValidationError, wo.validate_warehouse)
+
 
 def get_reserved_entries(voucher_no, warehouse=None):
 	doctype = frappe.qb.DocType("Stock Reservation Entry")

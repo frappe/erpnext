@@ -891,6 +891,9 @@ class JobCard(Document):
 			frappe.msgprint(message, alert=True, indicator="orange")
 
 	def validate_transfer_qty(self):
+		if self.track_semi_finished_goods and self.skip_material_transfer:
+			return
+
 		if (
 			not self.finished_good
 			and not self.is_corrective_job_card
@@ -1110,6 +1113,9 @@ class JobCard(Document):
 		wo.update_operation_status()
 		wo.calculate_operating_cost()
 		wo.set_actual_dates()
+
+		if wo.track_semi_finished_goods:
+			wo.set_process_loss_qty()
 
 		if time_data:
 			wo.status = "In Process"
@@ -1461,12 +1467,12 @@ class JobCard(Document):
 		)
 
 		if self.track_semi_finished_goods and previous_operations:
-			manufactured_qty = self.get_manufactured_qty_per_operation(
-				[row.name for row in previous_operations]
-			)
+			totals = self.get_manufactured_qty_per_operation([row.name for row in previous_operations])
 
 			for row in previous_operations:
-				row.manufactured_qty = flt(manufactured_qty.get(row.name))
+				operation_totals = totals.get(row.name)
+				row.manufactured_qty = flt(operation_totals and operation_totals.manufactured_qty)
+				row.process_loss_qty = flt(operation_totals and operation_totals.process_loss_qty)
 
 		return previous_operations
 
@@ -1475,7 +1481,11 @@ class JobCard(Document):
 
 		data = (
 			frappe.qb.from_(job_card)
-			.select(job_card.operation_id, Sum(job_card.manufactured_qty))
+			.select(
+				job_card.operation_id,
+				Sum(job_card.manufactured_qty).as_("manufactured_qty"),
+				Sum(job_card.process_loss_qty).as_("process_loss_qty"),
+			)
 			.where(
 				(job_card.work_order == self.work_order)
 				& (job_card.docstatus == 1)
@@ -1483,9 +1493,9 @@ class JobCard(Document):
 				& (job_card.operation_id.isin(operation_ids))
 			)
 			.groupby(job_card.operation_id)
-		).run()
+		).run(as_dict=True)
 
-		return dict(data)
+		return {row.operation_id: row for row in data}
 
 	def get_current_operation_completed_qty(self):
 		current_operation_qty = 0.0
@@ -1537,18 +1547,34 @@ class JobCard(Document):
 				OperationSequenceError,
 			)
 
-		if manufactured_qty < current_operation_qty:
+		if manufactured_qty >= current_operation_qty:
+			return
+
+		if manufactured_qty + flt(row.process_loss_qty) >= current_operation_qty:
 			frappe.throw(
 				_(
-					"The completed quantity {0} of an operation {1} cannot be greater than the manufactured quantity {2} of a previous operation {3}. Submit the manufacturing entry for the operation {3} first."
+					"The completed quantity {0} of an operation {1} cannot be greater than the manufactured quantity {2} of a previous operation {3}, as {4} was booked as process loss there."
 				).format(
 					bold(self.get_qty_with_uom(current_operation_qty)),
 					bold(self.operation),
 					bold(self.get_qty_with_uom(manufactured_qty, row.finished_good)),
 					bold(row.operation),
+					bold(self.get_qty_with_uom(flt(row.process_loss_qty), row.finished_good)),
 				),
 				OperationSequenceError,
 			)
+
+		frappe.throw(
+			_(
+				"The completed quantity {0} of an operation {1} cannot be greater than the manufactured quantity {2} of a previous operation {3}. Submit the manufacturing entry for the operation {3} first."
+			).format(
+				bold(self.get_qty_with_uom(current_operation_qty)),
+				bold(self.operation),
+				bold(self.get_qty_with_uom(manufactured_qty, row.finished_good)),
+				bold(row.operation),
+			),
+			OperationSequenceError,
+		)
 
 	def validate_work_order(self):
 		if self.is_work_order_closed():
@@ -1801,10 +1827,11 @@ class JobCard(Document):
 	def build_manufacture_stock_entry(self):
 		from erpnext.stock.doctype.stock_entry_type.stock_entry_type import ManufactureEntry
 
+		consumed_process_loss = self.get_consumed_process_loss()
 		return ManufactureEntry(
 			{
-				"for_quantity": self.get_qty_to_produce() - self.manufactured_qty,
-				"process_loss_qty": max(self.process_loss_qty - self.get_consumed_process_loss(), 0),
+				"for_quantity": self.get_qty_to_produce() - self.manufactured_qty - consumed_process_loss,
+				"process_loss_qty": max(self.process_loss_qty - consumed_process_loss, 0),
 				"job_card": self.name,
 				"skip_material_transfer": self.skip_material_transfer,
 				"backflush_from_wip_warehouse": self.backflush_from_wip_warehouse,

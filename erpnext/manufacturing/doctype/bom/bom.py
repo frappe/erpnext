@@ -314,6 +314,7 @@ class BOM(WebsiteGenerator):
 		self.clear_inspection()
 		self.validate_main_item()
 		self.validate_currency()
+		self.set_operation_finished_goods()
 		self.set_materials_based_on_operation_bom()
 		self.set_conversion_rate()
 		self.set_plc_conversion_rate()
@@ -340,14 +341,41 @@ class BOM(WebsiteGenerator):
 		self.set_fg_cost_allocation()
 		self.validate_total_cost_allocation()
 
+	def set_operation_finished_goods(self):
+		"""Fill each operation's FG item where it is unambiguous: the final operation produces
+		this BOM's item, an operation with a BOM produces that BOM's item. Runs before
+		set_materials_based_on_operation_bom so derived rows get their materials expanded."""
+		if not self.track_semi_finished_goods:
+			return
+
+		for row in self.operations:
+			if row.is_final_finished_good and not row.finished_good:
+				row.finished_good = self.item
+			elif row.bom_no and not row.finished_good:
+				row.finished_good = frappe.get_cached_value("BOM", row.bom_no, "item")
+
 	def validate_semi_finished_goods(self):
 		if not self.track_semi_finished_goods or not self.operations:
 			return
 
 		fg_items = []
 		for row in self.operations:
+			if not row.finished_good:
+				frappe.throw(
+					_(
+						"Row #{0}: FG / Semi FG Item is required for the operation {1} as 'Track Semi Finished Goods' is enabled."
+					).format(row.idx, bold(row.operation)),
+				)
+
 			if not row.is_final_finished_good:
 				continue
+
+			if row.finished_good != self.item:
+				frappe.throw(
+					_(
+						"Row #{0}: The operation {1} has 'Is Final Finished Good' checked, so its FG / Semi FG Item must be {2}."
+					).format(row.idx, bold(row.operation), bold(self.item)),
+				)
 
 			fg_items.append(row.finished_good)
 
@@ -800,15 +828,10 @@ class BOM(WebsiteGenerator):
 		row.update(get_item_details(row.get("item_code")))
 		row.operation_row_id = operation_row_id
 
-		item_row = self.get_item_data(row.name) if row.name else None
+		item_row = self.get_item_data(row.item_code, operation_row_id)
 
 		if item_row:
-			item_row.update(
-				{
-					"item_code": row.get("item_code"),
-					"qty": row.get("qty"),
-				}
-			)
+			item_row.qty = row.get("qty")
 		else:
 			row.idx = None
 			row.name = None
@@ -827,9 +850,9 @@ class BOM(WebsiteGenerator):
 
 		return False
 
-	def get_item_data(self, name):
+	def get_item_data(self, item_code, operation_row_id):
 		for row in self.items:
-			if row.item_code == name:
+			if row.item_code == item_code and cint(row.operation_row_id) == cint(operation_row_id):
 				return row
 
 	@frappe.whitelist()
