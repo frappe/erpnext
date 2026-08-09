@@ -33,11 +33,7 @@ from erpnext.selling.doctype.sales_order.sales_order import (
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.get_item_details import get_bin_details
-<<<<<<< HEAD
-=======
 from erpnext.stock.utils import InvalidWarehouseCompany
-from erpnext.tests.utils import ERPNextTestSuite
->>>>>>> 55fe269046 (fix: allow selecting a warehouse for new items in the update items dialog (#57876))
 
 
 class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
