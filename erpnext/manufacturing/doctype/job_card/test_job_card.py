@@ -1831,6 +1831,12 @@ class TestJobCard(ERPNextTestSuite):
 			frappe._dict(for_quantity=3, qty=3, pending_qty=2, process_loss_qty=0),
 		)
 
+		self.assertRaises(
+			frappe.ValidationError,
+			jc.validate_completion_qty_split,
+			frappe._dict(for_quantity=1, qty=0.3334, pending_qty=0.3334, process_loss_qty=0.3334),
+		)
+
 
 def create_bom_with_multiple_operations():
 	"Create a BOM with multiple operations and Material Transfer against Job Card"

@@ -1567,7 +1567,11 @@ class JobCard(Document):
 			return
 
 		precision = self.precision("total_completed_qty")
-		accounted_qty = flt(kwargs.qty) + flt(kwargs.pending_qty) + flt(kwargs.process_loss_qty)
+		accounted_qty = flt(
+			flt(kwargs.qty, precision)
+			+ flt(kwargs.pending_qty, precision)
+			+ flt(kwargs.process_loss_qty, precision)
+		)
 
 		if flt(accounted_qty, precision) == flt(kwargs.for_quantity, precision):
 			return
