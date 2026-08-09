@@ -2114,6 +2114,26 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertEqual(s.additional_costs[2].amount, 480)
 		self.assertEqual(s.additional_costs[3].amount, 480)
 
+	def test_completion_qty_split_must_add_up(self):
+		jc = frappe.new_doc("Job Card")
+		jc.for_quantity = 5
+
+		jc.validate_completion_qty_split(
+			frappe._dict(for_quantity=5, qty=3, pending_qty=2, process_loss_qty=0)
+		)
+
+		self.assertRaises(
+			frappe.ValidationError,
+			jc.validate_completion_qty_split,
+			frappe._dict(for_quantity=3, qty=3, pending_qty=2, process_loss_qty=0),
+		)
+
+		self.assertRaises(
+			frappe.ValidationError,
+			jc.validate_completion_qty_split,
+			frappe._dict(for_quantity=1, qty=0.3334, pending_qty=0.3334, process_loss_qty=0.3334),
+		)
+
 
 def create_bom_with_multiple_operations():
 	"Create a BOM with multiple operations and Material Transfer against Job Card"
