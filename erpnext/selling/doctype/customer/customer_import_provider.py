@@ -133,6 +133,11 @@ class CustomerImportProvider(ImportProvider):
 			if flagged or primary is None:
 				primary = contact
 		if primary:
+			# Contact has no cross-contact auto-demotion (unlike Address's
+			# validate_preferred_address), so explicitly demote any other primary Contact on
+			# this party first — otherwise get_default_contact may return a Contact other
+			# than customer_primary_contact.
+			_demote_other_primary_contacts("Customer", customer.name, primary.name)
 			frappe.db.set_value("Contact", primary.name, "is_primary_contact", 1)
 			customer.db_set("customer_primary_contact", primary.name)
 			customer.db_set("mobile_no", primary.mobile_no)
@@ -190,6 +195,20 @@ class CustomerImportProvider(ImportProvider):
 			primary.save()
 			customer.db_set("customer_primary_address", primary.name)
 			customer.db_set("primary_address", get_address_display(primary.name))
+
+
+def _demote_other_primary_contacts(link_doctype: str, link_name: str, keep: str) -> None:
+	"""Clear ``is_primary_contact`` on the party's other Contacts (keeps ``keep``)."""
+	linked = frappe.get_all(
+		"Dynamic Link",
+		filters={"link_doctype": link_doctype, "link_name": link_name, "parenttype": "Contact"},
+		pluck="parent",
+	)
+	for other in frappe.get_all(
+		"Contact", filters={"name": ["in", linked or [""]], "is_primary_contact": 1}, pluck="name"
+	):
+		if other != keep:
+			frappe.db.set_value("Contact", other, "is_primary_contact", 0)
 
 
 def _doctype_docfields(doctype: str, prefer_plain_label: bool = False) -> list[dict]:
