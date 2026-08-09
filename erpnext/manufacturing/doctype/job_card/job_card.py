@@ -1041,32 +1041,7 @@ class JobCard(Document):
 			)
 
 	def update_work_order_data(self, for_quantity, process_loss_qty, pending_qty, time_in_mins, wo):
-<<<<<<< HEAD
 		workstation_hour_rate = frappe.get_value("Workstation", self.workstation, "hour_rate")
-=======
-		time_data = self.get_operation_time_data()
-
-		for data in wo.operations:
-			if data.get("name") == self.operation_id:
-				self.update_wo_operation_row(
-					data, for_quantity, process_loss_qty, pending_qty, time_in_mins, time_data
-				)
-
-		wo.flags.ignore_validate_update_after_submit = True
-		wo.update_operation_status()
-		wo.calculate_operating_cost()
-		wo.set_actual_dates()
-
-		if wo.track_semi_finished_goods:
-			wo.set_process_loss_qty()
-
-		if time_data:
-			wo.status = "In Process"
-
-		wo.save()
-
-	def get_operation_time_data(self):
->>>>>>> 0eb61c9fac (fix: roll up process loss to the work order for semi finished goods)
 		jc = frappe.qb.DocType("Job Card")
 		jctl = frappe.qb.DocType("Job Card Time Log")
 
@@ -1100,6 +1075,9 @@ class JobCard(Document):
 		wo.update_operation_status()
 		wo.calculate_operating_cost()
 		wo.set_actual_dates()
+
+		if wo.track_semi_finished_goods:
+			wo.set_process_loss_qty()
 
 		if time_data:
 			wo.status = "In Process"
@@ -1367,57 +1345,6 @@ class JobCard(Document):
 		if not (self.work_order and self.sequence_id):
 			return
 
-<<<<<<< HEAD
-=======
-		current_operation_qty = self.get_current_operation_completed_qty()
-
-		for row in self.get_previous_operations():
-			if self.track_semi_finished_goods:
-				self.validate_previous_operation_manufactured_qty(row, current_operation_qty)
-			else:
-				self.validate_previous_operation(row, current_operation_qty)
-
-	def get_previous_operations(self):
-		previous_operations = frappe.get_all(
-			"Work Order Operation",
-			fields=["name", "operation", "status", "completed_qty", "sequence_id", "finished_good"],
-			filters={"docstatus": 1, "parent": self.work_order, "sequence_id": ("<", self.sequence_id)},
-			order_by="sequence_id, idx",
-		)
-
-		if self.track_semi_finished_goods and previous_operations:
-			totals = self.get_manufactured_qty_per_operation([row.name for row in previous_operations])
-
-			for row in previous_operations:
-				operation_totals = totals.get(row.name)
-				row.manufactured_qty = flt(operation_totals and operation_totals.manufactured_qty)
-				row.process_loss_qty = flt(operation_totals and operation_totals.process_loss_qty)
-
-		return previous_operations
-
-	def get_manufactured_qty_per_operation(self, operation_ids):
-		job_card = frappe.qb.DocType("Job Card")
-
-		data = (
-			frappe.qb.from_(job_card)
-			.select(
-				job_card.operation_id,
-				Sum(job_card.manufactured_qty).as_("manufactured_qty"),
-				Sum(job_card.process_loss_qty).as_("process_loss_qty"),
-			)
-			.where(
-				(job_card.work_order == self.work_order)
-				& (job_card.docstatus == 1)
-				& (IfNull(job_card.is_corrective_job_card, 0) == 0)
-				& (job_card.operation_id.isin(operation_ids))
-			)
-			.groupby(job_card.operation_id)
-		).run(as_dict=True)
-
-		return {row.operation_id: row for row in data}
-
-	def get_current_operation_completed_qty(self):
->>>>>>> 1e22695eae (fix: stop asking for a manufacturing entry when process loss explains the shortfall)
 		current_operation_qty = 0.0
 		data = self.get_current_operation_data()
 		if data and len(data) > 0:
@@ -1453,7 +1380,6 @@ class JobCard(Document):
 					OperationSequenceError,
 				)
 
-<<<<<<< HEAD
 			if row.completed_qty < current_operation_qty:
 				frappe.throw(
 					_(
@@ -1465,49 +1391,6 @@ class JobCard(Document):
 						bold(row.operation),
 					)
 				)
-=======
-		if not manufactured_qty:
-			frappe.throw(
-				_(
-					"Job Card {0}: As per the sequence of the operations in the work order {1}, submit the manufacturing entry for the operation {2} before the operation {3}."
-				).format(
-					bold(self.name),
-					bold(get_link_to_form("Work Order", self.work_order)),
-					bold(row.operation),
-					bold(self.operation),
-				),
-				OperationSequenceError,
-			)
-
-		if manufactured_qty >= current_operation_qty:
-			return
-
-		if manufactured_qty + flt(row.process_loss_qty) >= current_operation_qty:
-			frappe.throw(
-				_(
-					"The completed quantity {0} of an operation {1} cannot be greater than the manufactured quantity {2} of a previous operation {3}, as {4} was booked as process loss there."
-				).format(
-					bold(self.get_qty_with_uom(current_operation_qty)),
-					bold(self.operation),
-					bold(self.get_qty_with_uom(manufactured_qty, row.finished_good)),
-					bold(row.operation),
-					bold(self.get_qty_with_uom(flt(row.process_loss_qty), row.finished_good)),
-				),
-				OperationSequenceError,
-			)
->>>>>>> 1e22695eae (fix: stop asking for a manufacturing entry when process loss explains the shortfall)
-
-		frappe.throw(
-			_(
-				"The completed quantity {0} of an operation {1} cannot be greater than the manufactured quantity {2} of a previous operation {3}. Submit the manufacturing entry for the operation {3} first."
-			).format(
-				bold(self.get_qty_with_uom(current_operation_qty)),
-				bold(self.operation),
-				bold(self.get_qty_with_uom(manufactured_qty, row.finished_good)),
-				bold(row.operation),
-			),
-			OperationSequenceError,
-		)
 
 	def validate_work_order(self):
 		if self.is_work_order_closed():
@@ -1684,33 +1567,27 @@ class JobCard(Document):
 				_("Job Card {0} has been completed").format(get_link_to_form("Job Card", self.name))
 			)
 
+	def get_consumed_process_loss(self):
+		table = frappe.qb.DocType("Stock Entry")
+		query = (
+			frappe.qb.from_(table)
+			.select(Sum(table.process_loss_qty))
+			.where((table.purpose == "Manufacture") & (table.job_card == self.name) & (table.docstatus == 1))
+		)
+		return query.run()[0][0] or 0
+
 	@frappe.whitelist()
 	def make_stock_entry_for_semi_fg_item(self, auto_submit: bool = False):
-		def get_consumed_process_loss():
-			table = frappe.qb.DocType("Stock Entry")
-			query = (
-				frappe.qb.from_(table)
-				.select(Sum(table.process_loss_qty))
-				.where(
-					(table.purpose == "Manufacture") & (table.job_card == self.name) & (table.docstatus == 1)
-				)
-			)
-			return query.run()[0][0] or 0
-
 		from erpnext.stock.doctype.stock_entry_type.stock_entry_type import ManufactureEntry
 
-<<<<<<< HEAD
+		consumed_process_loss = self.get_consumed_process_loss()
 		ste = ManufactureEntry(
 			{
-				"for_quantity": self.for_quantity - self.manufactured_qty,
-				"process_loss_qty": max(self.process_loss_qty - get_consumed_process_loss(), 0),
-=======
-		consumed_process_loss = self.get_consumed_process_loss()
-		return ManufactureEntry(
-			{
-				"for_quantity": self.get_qty_to_produce() - self.manufactured_qty - consumed_process_loss,
+				"for_quantity": self.for_quantity
+				- self.pending_qty
+				- self.manufactured_qty
+				- consumed_process_loss,
 				"process_loss_qty": max(self.process_loss_qty - consumed_process_loss, 0),
->>>>>>> b8dd886cd4 (fix: generate the next manufacture entry net of booked process loss)
 				"job_card": self.name,
 				"skip_material_transfer": self.skip_material_transfer,
 				"backflush_from_wip_warehouse": self.backflush_from_wip_warehouse,

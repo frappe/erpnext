@@ -4839,59 +4839,6 @@ class TestWorkOrder(ERPNextTestSuite):
 		# generated qty (3.0 for 8 units) differs from the BOM-scaled qty (7.5 for 20 units)
 		self.assertEqual(flt(row.qty, 6), 3.0)
 
-<<<<<<< HEAD
-=======
-	def test_transferred_qty_not_misattributed_between_item_and_its_substitute(self):
-		"""When one item is transferred both for itself and as a substitute for another required item,
-		each transfer must be credited to the right required item.
-
-		_material_transfer_qty_by_item grouped Stock Entry Detail by item_code only and picked
-		Max(original_item); for item B transferred once for itself (original_item NULL) and once as a
-		substitute for A (original_item=A), Max picked A and credited B's whole transfer to A, leaving
-		B at 0. Grouping by (item_code, original_item) and accumulating into the keyed dict attributes
-		each transfer correctly, deterministically on MariaDB and Postgres.
-		"""
-		from erpnext.manufacturing.doctype.work_order.services.required_items import RequiredItemsService
-
-		source_warehouse = "Stores - _TC"
-		fg_item = make_item("Test WO SelfSub FG", {"is_stock_item": 1}).name
-		item_a = make_item("Test WO SelfSub RM A", {"is_stock_item": 1, "allow_alternative_item": 1}).name
-		item_b = make_item("Test WO SelfSub RM B", {"is_stock_item": 1, "allow_alternative_item": 1}).name
-
-		# B is a registered alternative for A
-		if not frappe.db.exists("Item Alternative", {"item_code": item_a, "alternative_item_code": item_b}):
-			frappe.get_doc(
-				{
-					"doctype": "Item Alternative",
-					"item_code": item_a,
-					"alternative_item_code": item_b,
-					"two_way": 1,
-				}
-			).insert()
-
-		# stock B generously (covers B-for-A plus B-for-itself)
-		for item, qty in ((item_a, 50), (item_b, 100)):
-			test_stock_entry.make_stock_entry(
-				item_code=item, target=source_warehouse, qty=qty, basic_rate=100
-			)
-
-		make_bom(item=fg_item, source_warehouse=source_warehouse, raw_materials=[item_a, item_b])
-		wo = make_wo_order_test_record(item=fg_item, qty=10, source_warehouse=source_warehouse)
-
-		transfer = frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 10))
-		transfer.save()
-		# substitute B for the A line; the existing B line stays as B's own transfer
-		for d in transfer.items:
-			if d.item_code == item_a:
-				d.item_code = item_b
-				d.original_item = item_a
-		transfer.submit()
-
-		qty_by_item = RequiredItemsService(wo)._material_transfer_qty_by_item(is_return=0)
-		# B transferred as a substitute for A -> credited to A; B transferred for itself -> credited to B.
-		self.assertEqual(flt(qty_by_item.get(item_a)), 10.0)
-		self.assertEqual(flt(qty_by_item.get(item_b)), 10.0)
-
 	def test_wip_warehouse_required_when_tracking_semi_finished_goods(self):
 		wo = frappe.new_doc("Work Order")
 		wo.track_semi_finished_goods = 1
@@ -4903,9 +4850,6 @@ class TestWorkOrder(ERPNextTestSuite):
 		wo.wip_warehouse = "_Test Warehouse - _TC"
 		wo.validate_warehouse()
 
-<<<<<<< HEAD
->>>>>>> f61f6523b9 (test: WIP warehouse required for work orders tracking semi finished goods)
-=======
 		# the top-level target warehouse stays optional; operations may carry their own
 		wo.fg_warehouse = None
 		wo.validate_warehouse()
@@ -4913,7 +4857,6 @@ class TestWorkOrder(ERPNextTestSuite):
 		wo.track_semi_finished_goods = 0
 		self.assertRaises(frappe.ValidationError, wo.validate_warehouse)
 
->>>>>>> db99657c47 (test: target warehouse stays optional for semi FG work orders)
 
 def get_reserved_entries(voucher_no, warehouse=None):
 	doctype = frappe.qb.DocType("Stock Reservation Entry")

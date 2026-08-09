@@ -883,6 +883,12 @@ class WorkOrder(Document):
 		return flt(query.run()[0][0])
 
 	def set_process_loss_qty(self):
+		self.db_set("process_loss_qty", self._process_loss_qty())
+
+	def _process_loss_qty(self):
+		if self.track_semi_finished_goods:
+			return flt(sum(flt(row.process_loss_qty) for row in self.operations))
+
 		table = frappe.qb.DocType("Stock Entry")
 		process_loss_qty = (
 			frappe.qb.from_(table)
@@ -892,7 +898,7 @@ class WorkOrder(Document):
 			)
 		).run()[0][0]
 
-		self.db_set("process_loss_qty", flt(process_loss_qty))
+		return flt(process_loss_qty)
 
 	def update_production_plan_status(self):
 		production_plan = frappe.get_doc("Production Plan", self.production_plan)

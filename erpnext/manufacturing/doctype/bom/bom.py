@@ -305,10 +305,9 @@ class BOM(WebsiteGenerator):
 		self.set_fg_cost_allocation()
 		self.validate_total_cost_allocation()
 
-<<<<<<< HEAD
 		if self.docstatus == 1:
 			self.validate_raw_materials_of_operation()
-=======
+
 	def set_operation_finished_goods(self):
 		"""Fill each operation's FG item where it is unambiguous: the final operation produces
 		this BOM's item, an operation with a BOM produces that BOM's item. Runs before
@@ -321,7 +320,6 @@ class BOM(WebsiteGenerator):
 				row.finished_good = self.item
 			elif row.bom_no and not row.finished_good:
 				row.finished_good = frappe.get_cached_value("BOM", row.bom_no, "item")
->>>>>>> 1e2e87daac (fix: derive operation FG items before material expansion, keep the final one the BOM's item)
 
 	def validate_semi_finished_goods(self):
 		if not self.track_semi_finished_goods or not self.operations:
@@ -866,17 +864,10 @@ class BOM(WebsiteGenerator):
 			row.update(get_item_details(row.get("item_code")))
 			row.operation_row_id = operation_row_id
 
-			item_row = None
-			if row.name:
-				item_row = self.get_item_data(row.name)
+			item_row = self.get_item_data(row.item_code, operation_row_id)
 
 			if item_row:
-				item_row.update(
-					{
-						"item_code": row.get("item_code"),
-						"qty": row.get("qty"),
-					}
-				)
+				item_row.qty = row.get("qty")
 			else:
 				row.idx = None
 				row.name = None
@@ -887,27 +878,6 @@ class BOM(WebsiteGenerator):
 
 		self.save()
 
-<<<<<<< HEAD
-=======
-	def _add_raw_material_row(self, operation_row_id, row):
-		row = parse_json(row)
-
-		row.update(get_item_details(row.get("item_code")))
-		row.operation_row_id = operation_row_id
-
-		item_row = self.get_item_data(row.item_code, operation_row_id)
-
-		if item_row:
-			item_row.qty = row.get("qty")
-		else:
-			row.idx = None
-			row.name = None
-			row.do_not_explode = 1
-			row.is_sub_assembly_item = self.is_sub_assembly_item(row.item_code)
-
-			self.append("items", row)
-
->>>>>>> 24f1f3dea8 (fix: add raw material to its operation even when another operation uses the item)
 	def is_sub_assembly_item(self, item_code):
 		if not self.operations:
 			return False

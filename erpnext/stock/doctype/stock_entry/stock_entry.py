@@ -3197,23 +3197,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if process_loss_qty and flt(self.process_loss_qty, precision) != flt(process_loss_qty, precision):
 			self.process_loss_qty = flt(process_loss_qty, precision)
 
-			frappe.msgprint(
-				_("The Process Loss Qty has been reset as per the job card's Process Loss Qty"),
-				alert=True,
-			)
+			frappe.msgprint(_("The Process Loss Qty has reset as per job cards Process Loss Qty"), alert=True)
 
-<<<<<<< HEAD
-			if data and data[0].process_loss_qty:
-				process_loss_qty = data[0].process_loss_qty
-				if flt(self.process_loss_qty, precision) != flt(process_loss_qty, precision):
-					self.process_loss_qty = flt(process_loss_qty, precision)
-
-					frappe.msgprint(
-						_("The Process Loss Qty has reset as per job cards Process Loss Qty"), alert=True
-					)
-
-=======
->>>>>>> 1b335973b7 (fix: scope manufacture entry process loss to its own job card)
 		if not self.process_loss_percentage and not self.process_loss_qty:
 			self.process_loss_percentage = frappe.get_cached_value(
 				"BOM", self.bom_no, "process_loss_percentage"
@@ -3243,7 +3228,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		precision = frappe.get_precision("Stock Entry Detail", "qty")
 		pending_qty = flt(
-			flt(job_card.get_qty_to_produce())
+			flt(job_card.for_quantity)
+			- flt(job_card.pending_qty)
 			- flt(job_card.manufactured_qty)
 			- flt(job_card.get_consumed_process_loss()),
 			precision,

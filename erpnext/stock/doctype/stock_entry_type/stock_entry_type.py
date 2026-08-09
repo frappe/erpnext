@@ -126,6 +126,7 @@ class ManufactureEntry:
 				available_serial_batches = self.get_transferred_serial_batches()
 
 			production_share = self.get_production_share()
+			items_to_remove = []
 			for item_code, _dict in item_dict.items():
 				_dict.from_warehouse = self.source_wh.get(item_code) or self.wip_warehouse
 				_dict.to_warehouse = ""
@@ -143,10 +144,14 @@ class ManufactureEntry:
 					remaining_qty = max(flt(_dict.qty) - flt(_dict.consumed_qty), 0)
 					_dict.qty = min(flt(_dict.qty) * production_share, remaining_qty)
 					if not _dict.qty:
+						items_to_remove.append(item_code)
 						continue
 
 					if self.skip_material_transfer:
 						set_previous_operation_serial_batch(self.stock_entry, _dict)
+
+			for item_code in items_to_remove:
+				item_dict.pop(item_code)
 
 			self.stock_entry.add_to_stock_entry_detail(item_dict)
 
