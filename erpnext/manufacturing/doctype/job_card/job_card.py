@@ -1345,9 +1345,9 @@ class JobCard(Document):
 
 		current_operation_qty += flt(self.total_completed_qty)
 
-		data = frappe.get_all(
+		previous_operations = frappe.get_all(
 			"Work Order Operation",
-			fields=["operation", "status", "completed_qty", "sequence_id"],
+			fields=["name", "operation", "status", "completed_qty", "sequence_id"],
 			filters={"docstatus": 1, "parent": self.work_order, "sequence_id": ("<", self.sequence_id)},
 			order_by="sequence_id, idx",
 		)
@@ -1356,7 +1356,19 @@ class JobCard(Document):
 			bold(self.name), bold(get_link_to_form("Work Order", self.work_order))
 		)
 
-		for row in data:
+		if self.track_semi_finished_goods and previous_operations:
+			manufactured_qty = self.get_manufactured_qty_per_operation(
+				[row.name for row in previous_operations]
+			)
+
+			for row in previous_operations:
+				row.manufactured_qty = flt(manufactured_qty.get(row.name))
+
+		for row in previous_operations:
+			if self.track_semi_finished_goods:
+				self.validate_previous_operation_manufactured_qty(row, current_operation_qty)
+				continue
+
 			if not row.completed_qty:
 				frappe.throw(
 					_("{0}, complete the operation {1} before the operation {2}.").format(
@@ -1384,6 +1396,52 @@ class JobCard(Document):
 						bold(row.operation),
 					)
 				)
+
+	def get_manufactured_qty_per_operation(self, operation_ids):
+		job_card = frappe.qb.DocType("Job Card")
+
+		data = (
+			frappe.qb.from_(job_card)
+			.select(job_card.operation_id, Sum(job_card.manufactured_qty))
+			.where(
+				(job_card.work_order == self.work_order)
+				& (job_card.docstatus == 1)
+				& (IfNull(job_card.is_corrective_job_card, 0) == 0)
+				& (job_card.operation_id.isin(operation_ids))
+			)
+			.groupby(job_card.operation_id)
+		).run()
+
+		return dict(data)
+
+	def validate_previous_operation_manufactured_qty(self, row, current_operation_qty):
+		manufactured_qty = flt(row.manufactured_qty)
+
+		if not manufactured_qty:
+			frappe.throw(
+				_(
+					"Job Card {0}: As per the sequence of the operations in the work order {1}, submit the manufacturing entry for the operation {2} before the operation {3}."
+				).format(
+					bold(self.name),
+					bold(get_link_to_form("Work Order", self.work_order)),
+					bold(row.operation),
+					bold(self.operation),
+				),
+				OperationSequenceError,
+			)
+
+		if manufactured_qty < current_operation_qty:
+			frappe.throw(
+				_(
+					"The completed quantity {0} of an operation {1} cannot be greater than the manufactured quantity {2} of a previous operation {3}. Submit the manufacturing entry for the operation {3} first."
+				).format(
+					bold(current_operation_qty),
+					bold(self.operation),
+					bold(manufactured_qty),
+					bold(row.operation),
+				),
+				OperationSequenceError,
+			)
 
 	def validate_work_order(self):
 		if self.is_work_order_closed():
