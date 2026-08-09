@@ -925,13 +925,6 @@ erpnext.utils.update_child_items = function (opts) {
 		});
 	}
 
-<<<<<<< HEAD
-	if (
-		["Purchase Order", "Sales Order"].includes(frm.doc.doctype) &&
-		frm.doc.is_subcontracted &&
-		!frm.doc.is_old_subcontracting_flow
-	) {
-=======
 	const warehouse_df = child_meta.fields.find((f) => f.fieldname == "warehouse");
 	if (warehouse_df) {
 		fields.splice(3, 0, {
@@ -955,8 +948,11 @@ erpnext.utils.update_child_items = function (opts) {
 		});
 	}
 
-	if (["Purchase Order", "Sales Order"].includes(frm.doc.doctype) && frm.doc.is_subcontracted) {
->>>>>>> 55fe269046 (fix: allow selecting a warehouse for new items in the update items dialog (#57876))
+	if (
+		["Purchase Order", "Sales Order"].includes(frm.doc.doctype) &&
+		frm.doc.is_subcontracted &&
+		!frm.doc.is_old_subcontracting_flow
+	) {
 		fields.push(
 			{
 				fieldtype: "Link",
