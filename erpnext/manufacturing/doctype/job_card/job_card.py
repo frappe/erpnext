@@ -1572,7 +1572,16 @@ class JobCard(Document):
 		if isinstance(kwargs, dict):
 			kwargs = frappe._dict(kwargs)
 
+		self.set_for_quantity(kwargs)
 		self.validate_complete_job_card_qty(kwargs)
+
+	def set_for_quantity(self, kwargs):
+		"""Qty to Manufacture of the completion dialog covers the current cycle only,
+		so the qty completed by the earlier cycles of this job card is kept."""
+		if not flt(kwargs.for_quantity):
+			return
+
+		self.for_quantity = flt(self.total_completed_qty) + flt(kwargs.for_quantity)
 
 	def validate_docstatus(self):
 		if self.docstatus == 2:
