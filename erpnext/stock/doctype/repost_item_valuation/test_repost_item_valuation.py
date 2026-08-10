@@ -688,6 +688,38 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 					)
 				)
 
+	def test_missing_or_corrupt_reposting_data_file_fails_loudly(self):
+		from erpnext.stock.stock_ledger import get_reposting_data
+
+		self.assertRaises(
+			frappe.ValidationError, get_reposting_data, "/files/non-existent-repost-data.json.gz"
+		)
+
+		riv = frappe.get_doc(
+			{
+				"doctype": "Repost Item Valuation",
+				"based_on": "Item and Warehouse",
+				"company": "_Test Company",
+				"item_code": "_Test Item",
+				"warehouse": "_Test Warehouse - _TC",
+				"posting_date": today(),
+			}
+		).insert(ignore_permissions=True)
+
+		attached = frappe.get_doc(
+			{
+				"doctype": "File",
+				"file_name": "corrupt_repost_data.json.gz",
+				"content": "not gzip content",
+				"attached_to_doctype": riv.doctype,
+				"attached_to_name": riv.name,
+				"attached_to_field": "reposting_data_file",
+			}
+		).insert(ignore_permissions=True)
+		riv.db_set("reposting_data_file", attached.file_url)
+
+		self.assertRaises(frappe.ValidationError, get_reposting_data, attached.file_url)
+
 	def test_clear_attachment_skips_referenced_data_file(self):
 		riv = frappe.get_doc(
 			{
