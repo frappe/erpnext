@@ -332,6 +332,8 @@ def update_invoice_payment_schedule(
 	invoice_name: str,
 	payment_term: str | None,
 	allocated_amount: float,
+	payment_currency: str | None,
+	payment_exchange_rate: float | None,
 	cancel: bool = False,
 ) -> None:
 	if not payment_term or invoice_type not in ("Sales Invoice", "Purchase Invoice"):
@@ -343,12 +345,11 @@ def update_invoice_payment_schedule(
 	):
 		return
 
-	party_type, party = invoice.get_party()
-	party_account_currency = invoice.party_account_currency or get_party_account_currency(
-		party_type, party, invoice.company
-	)
-	if invoice.currency != invoice.company_currency and party_account_currency == invoice.company_currency:
-		allocated_amount = flt(allocated_amount / invoice.conversion_rate, invoice.precision("grand_total"))
+	if payment_currency and payment_currency != invoice.currency:
+		allocated_amount = flt(
+			allocated_amount * flt(payment_exchange_rate) / invoice.conversion_rate,
+			invoice.precision("grand_total"),
+		)
 
 	base_allocated_amount = flt(
 		allocated_amount * invoice.conversion_rate, invoice.precision("base_grand_total")
@@ -367,7 +368,11 @@ def update_invoice_payment_schedule(
 			payment_schedule.base_outstanding,
 			payment_schedule.base_outstanding + (change * base_allocated_amount),
 		)
-		.where((payment_schedule.parent == invoice_name) & (payment_schedule.payment_term == payment_term))
+		.where(
+			(payment_schedule.parent == invoice_name)
+			& (payment_schedule.parenttype == invoice_type)
+			& (payment_schedule.payment_term == payment_term)
+		)
 	).run()
 
 

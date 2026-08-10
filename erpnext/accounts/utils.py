@@ -1056,6 +1056,8 @@ def remove_ref_doc_link_from_jv(
 			jea.payment_term,
 			jea.debit_in_account_currency,
 			jea.credit_in_account_currency,
+			jea.account_currency,
+			jea.exchange_rate,
 		)
 		.where((jea.reference_type == ref_type) & (jea.reference_name == ref_no) & (jea.docstatus.lt(2)))
 	)
@@ -1067,6 +1069,8 @@ def remove_ref_doc_link_from_jv(
 			allocation.reference_name,
 			allocation.payment_term,
 			max(allocation.debit_in_account_currency, allocation.credit_in_account_currency),
+			allocation.account_currency,
+			allocation.exchange_rate,
 			cancel=True,
 		)
 
@@ -1140,11 +1144,24 @@ def remove_ref_doc_link_from_pe(
 	for row in reference_rows:
 		linked_pe.add(row.parent)
 		row_names.add(row.name)
+		payment_entry = frappe.get_cached_doc("Payment Entry", row.parent)
+		payment_currency = (
+			payment_entry.paid_from_account_currency
+			if payment_entry.payment_type == "Receive"
+			else payment_entry.paid_to_account_currency
+		)
+		payment_exchange_rate = (
+			payment_entry.source_exchange_rate
+			if payment_entry.payment_type == "Receive"
+			else payment_entry.target_exchange_rate
+		)
 		update_invoice_payment_schedule(
 			row.reference_doctype,
 			row.reference_name,
 			row.payment_term,
 			row.allocated_amount,
+			payment_currency,
+			payment_exchange_rate,
 			cancel=True,
 		)
 

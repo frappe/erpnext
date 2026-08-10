@@ -366,6 +366,8 @@ class JournalEntry(AccountsController):
 				account.reference_name,
 				account.payment_term,
 				max(account.debit_in_account_currency, account.credit_in_account_currency),
+				account.account_currency,
+				account.exchange_rate,
 				cancel=True,
 			)
 

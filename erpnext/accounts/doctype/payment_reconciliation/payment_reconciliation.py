@@ -419,13 +419,24 @@ class PaymentReconciliation(Document):
 		)
 
 		currency_data = get_currency_data(invoices, self.company)
+		invoice_names = {
+			doctype: [invoice.voucher_no for invoice in invoices if invoice.voucher_type == doctype]
+			for doctype in ("Sales Invoice", "Purchase Invoice")
+		}
+		payment_terms_templates = {
+			(doctype, name): template
+			for doctype, names in invoice_names.items()
+			if names
+			for name, template in frappe.get_all(
+				doctype,
+				filters={"name": ("in", names)},
+				fields=["name", "payment_terms_template"],
+				as_list=True,
+			)
+		}
 		entries = []
 		for invoice in invoices:
-			payment_terms_template = (
-				frappe.db.get_value(invoice.voucher_type, invoice.voucher_no, "payment_terms_template")
-				if invoice.voucher_type in ("Sales Invoice", "Purchase Invoice")
-				else None
-			)
+			payment_terms_template = payment_terms_templates.get((invoice.voucher_type, invoice.voucher_no))
 			entries.extend(
 				get_split_invoice_rows(invoice, payment_terms_template, currency_data)
 				if payment_terms_template
@@ -608,11 +619,14 @@ class PaymentReconciliation(Document):
 		if entry_list:
 			reconcile_against_document(entry_list, skip_ref_details_update_for_pe, self.dimensions)
 			for entry in entry_list:
+				payment_currency, payment_exchange_rate = self.get_payment_currency_and_exchange_rate(entry)
 				update_invoice_payment_schedule(
 					entry.against_voucher_type,
 					entry.against_voucher,
 					entry.payment_term,
 					entry.allocated_amount,
+					payment_currency,
+					payment_exchange_rate,
 				)
 
 		if dr_or_cr_notes:
@@ -643,6 +657,22 @@ class PaymentReconciliation(Document):
 		msgprint(_("Successfully Reconciled"))
 
 		self.get_unreconciled_entries()
+
+	def get_payment_currency_and_exchange_rate(self, entry):
+		if entry.voucher_type == "Journal Entry":
+			return frappe.db.get_value(
+				"Journal Entry Account",
+				entry.voucher_detail_no,
+				["account_currency", "exchange_rate"],
+			) or (None, None)
+
+		if entry.voucher_type == "Payment Entry":
+			payment_entry = frappe.get_cached_doc("Payment Entry", entry.voucher_no)
+			if payment_entry.payment_type == "Receive":
+				return payment_entry.paid_from_account_currency, payment_entry.source_exchange_rate
+			return payment_entry.paid_to_account_currency, payment_entry.target_exchange_rate
+
+		return None, None
 
 	def get_payment_details(self, row, dr_or_cr):
 		payment_details = frappe._dict(
