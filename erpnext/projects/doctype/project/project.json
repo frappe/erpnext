@@ -17,7 +17,6 @@
   "project_template",
   "priority",
   "department",
-  "is_active",
   "percent_complete",
   "section_break_18",
   "expected_start_date",
@@ -86,7 +85,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "Open\nOn hold\nCompleted\nCancelled",
+   "options": "Open\nOn hold\nCompleted\nDisabled\nCancelled",
    "search_index": 1
   },
   {
@@ -98,14 +97,6 @@
    "oldfieldname": "project_type",
    "oldfieldtype": "Data",
    "options": "Project Type"
-  },
-  {
-   "fieldname": "is_active",
-   "fieldtype": "Select",
-   "label": "Is Active",
-   "oldfieldname": "is_active",
-   "oldfieldtype": "Select",
-   "options": "Yes\nNo"
   },
   {
    "default": "Task Completion",
@@ -484,7 +475,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 4,
- "modified": "2026-07-21 11:23:22.000000",
+ "modified": "2026-08-10 12:54:36.669444",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",
@@ -552,7 +543,7 @@
  ],
  "quick_entry": 1,
  "row_format": "Dynamic",
- "search_fields": "project_name,customer, status, priority, is_active",
+ "search_fields": "project_name,customer, status, priority",
  "show_name_in_global_search": 1,
  "show_title_field_in_link": 1,
  "sort_field": "creation",
