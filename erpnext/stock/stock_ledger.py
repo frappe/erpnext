@@ -35,6 +35,7 @@ from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry impor
 	get_sre_reserved_batch_nos_details,
 	get_sre_reserved_serial_nos_details,
 )
+from erpnext.stock.services import stock_ledger_writer
 from erpnext.stock.utils import (
 	get_combine_datetime,
 	get_incoming_outgoing_rate_for_cancel,
@@ -269,31 +270,11 @@ def validate_cancellation(kargs):
 
 
 def set_as_cancel(voucher_type, voucher_no):
-	sle = frappe.qb.DocType("Stock Ledger Entry")
-	(
-		frappe.qb.update(sle)
-		.set(sle.is_cancelled, 1)
-		.set(sle.modified, now())
-		.set(sle.modified_by, frappe.session.user)
-		.where((sle.voucher_type == voucher_type) & (sle.voucher_no == voucher_no) & (sle.is_cancelled == 0))
-	).run()
+	stock_ledger_writer.flag_voucher_cancelled(voucher_type, voucher_no)
 
 
 def make_entry(args, allow_negative_stock=False, via_landed_cost_voucher=False):
-	args["doctype"] = "Stock Ledger Entry"
-	sle = frappe.get_doc(args)
-	sle.flags.ignore_permissions = 1
-	sle.allow_negative_stock = allow_negative_stock
-	sle.via_landed_cost_voucher = via_landed_cost_voucher
-	if args.get("is_cancelled"):
-		sle.flags.ignore_links = True
-	sle.submit()
-
-	# Added to handle the case when the stock ledger entry is created from the repostig
-	if args.get("creation_time") and args.get("voucher_type") == "Stock Reconciliation":
-		sle.db_set("creation", args.get("creation_time"))
-
-	return sle
+	return stock_ledger_writer.submit_new(args, allow_negative_stock, via_landed_cost_voucher)
 
 
 # A repost waits this long for another repost's per-(item, warehouse) gate before giving up. Kept
@@ -1204,7 +1185,7 @@ class update_entries_after:
 
 		sle.doctype = "Stock Ledger Entry"
 		sle.modified = now()
-		frappe.get_doc(sle).db_update()
+		stock_ledger_writer.write_valuation(sle)
 
 		self.prev_sle_dict[key] = sle
 
@@ -2269,28 +2250,7 @@ def update_qty_in_future_sle(args, allow_negative_stock=False):
 	if args.voucher_type == "Stock Reconciliation":
 		qty_shift = get_stock_reco_qty_shift(args)
 
-	sle = frappe.qb.DocType("Stock Ledger Entry")
-
-	future_condition = sle.posting_datetime > posting_datetime
-	if args.get("creation") and not args.get("is_cancelled"):
-		future_condition = future_condition | (
-			(sle.posting_datetime == posting_datetime) & (sle.creation > args.get("creation"))
-		)
-
-	query = frappe.qb.update(sle).where(
-		(sle.item_code == args.get("item_code"))
-		& (sle.warehouse == args.get("warehouse"))
-		& (sle.is_cancelled == 0)
-		& future_condition
-	)
-
-	# find the next nearest stock reco so that we only recalculate SLEs till that point
-	next_stock_reco_detail = get_next_stock_reco(args)
-	if next_stock_reco_detail:
-		query = query.where(get_datetime_limit_condition(sle, next_stock_reco_detail[0]))
-
-	new_qty = sle.qty_after_transaction + qty_shift
-
+	standard_rate = None
 	if get_valuation_method(args.get("item_code"), args.get("company")) == "Standard Cost":
 		# Standard Cost inventory is always carried at the standard rate, so a backdated entry only
 		# shifts future balances — no full repost is needed. Update qty and value in place:
@@ -2303,13 +2263,10 @@ def update_qty_in_future_sle(args, allow_negative_stock=False):
 			get_item_standard_rate(args.get("item_code"), args.get("company"), args.get("posting_date"))
 		)
 
-		# Set stock_value before qty_after_transaction: MariaDB evaluates SET left-to-right with the
-		# already-updated values, so stock_value must be computed while qty still holds its pre-shift
-		# value. (Postgres uses pre-update values throughout, so the result is the same either way.)
-		query = query.set(sle.stock_value, new_qty * standard_rate)
-
-	query = query.set(sle.qty_after_transaction, new_qty)
-	query.run()
+	# limit the recalculation to the next nearest stock reco
+	stock_ledger_writer.shift_future_qty(
+		args, qty_shift, next_stock_reco_detail=get_next_stock_reco(args), standard_rate=standard_rate
+	)
 
 	validate_negative_qty_in_future_sle(args, allow_negative_stock)
 
