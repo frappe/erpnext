@@ -789,6 +789,9 @@ class SerialNoValuation(DeprecatedSerialNoValuation):
 		return is_rejected(self.sle.voucher_type, self.sle.voucher_detail_no, self.sle.warehouse)
 
 	def get_incoming_rate(self):
+		if not self.sle.actual_qty and self.sle.voucher_type == "Stock Reconciliation":
+			return 0.0
+
 		return abs(flt(self.stock_value_change) / flt(self.sle.actual_qty))
 
 	def get_incoming_rate_of_serial_no(self, serial_no):
