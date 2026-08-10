@@ -12,9 +12,9 @@ from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+	_get_stock_reservation_entries_for_voucher,
 	cancel_stock_reservation_entries,
 	get_sre_reserved_qty_details_for_voucher,
-	get_stock_reservation_entries_for_voucher,
 	has_reserved_stock,
 )
 from erpnext.stock.utils import get_stock_balance
@@ -284,7 +284,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 			self.assertTrue(has_reserved_stock("Sales Order", so.name))
 
 			for item in so.items:
-				sre_details = get_stock_reservation_entries_for_voucher(
+				sre_details = _get_stock_reservation_entries_for_voucher(
 					"Sales Order", so.name, item.name, fields=["reserved_qty", "status"]
 				)[0]
 				self.assertEqual(item.stock_reserved_qty, sre_details.reserved_qty)
@@ -354,7 +354,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 			dn1.submit()
 
 			for item in so.items:
-				sre_details = get_stock_reservation_entries_for_voucher(
+				sre_details = _get_stock_reservation_entries_for_voucher(
 					"Sales Order", so.name, item.name, fields=["delivered_qty", "status"]
 				)[0]
 				self.assertGreater(sre_details.delivered_qty, 0)
@@ -371,7 +371,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 				dn2.submit()
 
 			for item in so.items:
-				sre_details = get_stock_reservation_entries_for_voucher(
+				sre_details = _get_stock_reservation_entries_for_voucher(
 					"Sales Order",
 					so.name,
 					item.name,
@@ -415,7 +415,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 		so.load_from_db()
 
 		for item in so.items:
-			sre_details = get_stock_reservation_entries_for_voucher(
+			sre_details = _get_stock_reservation_entries_for_voucher(
 				"Sales Order", so.name, item.name, fields=["status", "reserved_qty"]
 			)[0]
 
@@ -430,7 +430,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 		dn.submit()
 
 		for item in so.items:
-			sre_details = get_stock_reservation_entries_for_voucher(
+			sre_details = _get_stock_reservation_entries_for_voucher(
 				"Sales Order", so.name, item.name, fields=["status", "delivered_qty", "reserved_qty"]
 			)[0]
 
@@ -478,7 +478,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 		so.load_from_db()
 
 		for item in so.items:
-			sre_details = get_stock_reservation_entries_for_voucher(
+			sre_details = _get_stock_reservation_entries_for_voucher(
 				"Sales Order",
 				so.name,
 				item.name,
@@ -539,7 +539,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 		so.load_from_db()
 
 		for item in so.items:
-			sre_details = get_stock_reservation_entries_for_voucher(
+			sre_details = _get_stock_reservation_entries_for_voucher(
 				"Sales Order", so.name, item.name, fields=["reserved_qty"]
 			)[0]
 
