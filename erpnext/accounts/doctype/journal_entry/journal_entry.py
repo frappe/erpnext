@@ -152,15 +152,10 @@ class JournalEntry(AccountsController):
 		self.validate_company_in_accounting_dimension()
 		self.validate_advance_accounts()
 
-<<<<<<< HEAD
 		if self.docstatus == 0:
 			self.apply_tax_withholding()
-		if self.is_new() or not self.title:
-=======
-		JournalTaxWithholding(self).on_validate()
 
 		if not self.title or (self.is_new() and self.amended_from):
->>>>>>> 02118e7ba0 (fix: preserve custom title on new JV (#57987))
 			self.title = self.get_title()
 
 	def validate_advance_accounts(self):
