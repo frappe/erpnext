@@ -4,7 +4,7 @@
 
 import frappe
 from frappe.defaults import get_user_default
-from frappe.utils import cint
+from frappe.utils import cint, getdate
 
 from erpnext.accounts.utils import get_fiscal_years
 
@@ -56,17 +56,35 @@ def boot_session(bootinfo):
 		)
 
 		party_account_types = frappe.db.sql(""" select name, ifnull(account_type, '') from `tabParty Type`""")
-		fiscal_year = get_fiscal_years(
-			frappe.utils.nowdate(), company=get_user_default("company"), boolean=True
-		)
+		fiscal_year = get_current_or_nearest_fiscal_year()
 		if fiscal_year:
-			bootinfo.current_fiscal_year = fiscal_year[0]
+			bootinfo.current_fiscal_year = fiscal_year
 		bootinfo.party_account_types = frappe._dict(party_account_types)
 
 		bootinfo.sysdefaults.demo_company = frappe.db.get_single_value("Global Defaults", "demo_company")
 		bootinfo.sysdefaults.default_ageing_range = frappe.db.get_single_value(
 			"Accounts Settings", "default_ageing_range"
 		)
+
+
+def get_current_or_nearest_fiscal_year():
+	company = get_user_default("company")
+	fiscal_year = get_fiscal_years(frappe.utils.nowdate(), company=company, boolean=True)
+	if fiscal_year:
+		return fiscal_year[0]
+	return get_nearest_fiscal_year(company)
+
+
+def get_nearest_fiscal_year(company):
+	today = getdate(frappe.utils.nowdate())
+	nearest = None
+	for fiscal_year in get_fiscal_years(company=company):
+		nearest = fiscal_year
+		if getdate(fiscal_year.year_start_date) <= today:
+			break
+	if not nearest:
+		return None
+	return (nearest.name, nearest.year_start_date, nearest.year_end_date)
 
 
 def update_page_info(bootinfo):

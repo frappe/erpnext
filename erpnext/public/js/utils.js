@@ -445,8 +445,8 @@ $.extend(erpnext.utils, {
 		let fiscal_year = "";
 		if (
 			frappe.boot.current_fiscal_year &&
-			date >= frappe.boot.current_fiscal_year[1] &&
-			date <= frappe.boot.current_fiscal_year[2]
+			(date == today ||
+				(date >= frappe.boot.current_fiscal_year[1] && date <= frappe.boot.current_fiscal_year[2]))
 		) {
 			if (with_dates) fiscal_year = frappe.boot.current_fiscal_year;
 			else fiscal_year = frappe.boot.current_fiscal_year[0];
