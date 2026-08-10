@@ -107,8 +107,10 @@ def get_item_details(
 	_preprocess_ctx(ctx)
 	for_validate = parse_json(for_validate)
 	overwrite_warehouse = parse_json(overwrite_warehouse)
+	ignore_permissions = isinstance(doc, Document) and doc.flags.ignore_permissions
 	item = frappe.get_cached_doc("Item", ctx.item_code)
-	item.check_permission()
+	if not ignore_permissions:
+		item.check_permission()
 	validate_item_details(ctx, item)
 
 	doc = frappe.parse_json(doc)

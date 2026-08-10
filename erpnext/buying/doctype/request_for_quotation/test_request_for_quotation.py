@@ -8,6 +8,7 @@ import frappe
 from frappe.tests import change_settings
 from frappe.utils import nowdate
 
+from erpnext.accounts.party import get_party_account
 from erpnext.buying.doctype.request_for_quotation.mapper import (
 	create_supplier_quotation,
 	make_supplier_quotation_from_rfq,
@@ -175,10 +176,22 @@ class TestRequestforQuotation(ERPNextTestSuite):
 		frappe.form_dict.name = None
 
 	def test_make_supplier_quotation_from_portal(self):
-		rfq = make_request_for_quotation()
+		portal_user = frappe.new_doc(
+			"User",
+			email=frappe.generate_hash() + "@example.com",
+			first_name="Supplier Portal User",
+			roles=[{"role": "Supplier"}],
+			send_welcome_email=False,
+			user_type="Website User",
+		).insert()
+		rfq = make_request_for_quotation(portal_user=portal_user.name)
 		rfq.get("items")[0].rate = 100
 		rfq.supplier = rfq.suppliers[0].supplier
-		supplier_quotation_name = create_supplier_quotation(rfq)
+
+		with self.set_user(portal_user.name):
+			with self.assertRaises(frappe.PermissionError):
+				get_party_account("Supplier", rfq.supplier, rfq.company)
+			supplier_quotation_name = create_supplier_quotation(rfq)
 
 		supplier_quotation_doc = frappe.get_doc("Supplier Quotation", supplier_quotation_name)
 
@@ -339,7 +352,7 @@ def make_request_for_quotation(**args):
 		rfq.append("suppliers", data)
 		frappe.new_doc(
 			"Portal User",
-			user="Administrator",
+			user=args.portal_user or "Administrator",
 			parent=data.get("supplier"),
 			parentfield="portal_users",
 			parenttype="Supplier",
