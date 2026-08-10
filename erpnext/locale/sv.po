@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-08-09 09:47+0000\n"
-"PO-Revision-Date: 2026-08-09 11:04\n"
+"PO-Revision-Date: 2026-08-10 11:06\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -4062,7 +4062,7 @@ msgstr "Alla plockade artiklar har redan överförts mot denna plocklista"
 #: erpnext/manufacturing/doctype/work_order/work_order.js:1203
 #: erpnext/manufacturing/doctype/work_order/work_order.js:1223
 msgid "All required items have already been transferred, requested or picked."
-msgstr ""
+msgstr "Alla nödvändiga artiklar har redan överförts, beställts eller plockats."
 
 #. Description of the 'Carry Forward Communication and Comments' (Check) field
 #. in DocType 'CRM Settings'
@@ -4695,7 +4695,7 @@ msgstr "Redan Importerad"
 
 #: erpnext/accounts/bulk_payment.py:94
 msgid "Already Paid"
-msgstr ""
+msgstr "Redan Betald"
 
 #: erpnext/stock/doctype/pick_list/pick_list.py:1191
 msgid "Already Picked"
@@ -10053,7 +10053,7 @@ msgstr "Kan inte hitta Artikel med denna Streck/QR Kod"
 
 #: erpnext/accounts/services/child_item_update.py:372
 msgid "Cannot find a default warehouse for item {0}. Please select one in the Update Items dialog, or set a default in the Item Master or in the Company."
-msgstr ""
+msgstr "Kan inte hitta standard lager för artikel {0}. Välj lager i Uppdatera Artiklar dialogruta eller ange ett standardlager i Artikel Inställningar eller i Bolag."
 
 #: erpnext/accounts/party.py:1118
 msgid "Cannot merge {0} '{1}' into '{2}' as both have existing accounting entries in different currencies for company '{3}'."
@@ -11043,7 +11043,7 @@ msgstr "Stängda Dokument"
 
 #: erpnext/stock/doctype/stock_closing_entry/stock_closing_entry.py:145
 msgid "Closed Period"
-msgstr ""
+msgstr "Stängd Period"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:1132
 msgid "Closed Work Order can not be stopped or Re-opened"
@@ -14008,7 +14008,7 @@ msgstr "Skapa Produktion lager post för färdiga artiklar?"
 
 #: erpnext/accounts/doctype/period_closing_voucher/period_closing_voucher.py:231
 msgid "Create a Stock Closing Entry for the entire company with To Date as {0} before submitting the Period Closing Voucher."
-msgstr ""
+msgstr "Skapa Lager Stängning Post för hela bolaget med Till datum som {0} innan Period Stängning Verifikat godkänns."
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:683
 msgid "Create a journal entry for expenses, income or split transactions"
@@ -14068,7 +14068,7 @@ msgstr "Skapad via Portal"
 
 #: erpnext/accounts/bulk_payment.py:39
 msgid "Created {0} draft Payment Entries"
-msgstr ""
+msgstr "Skapade {0} utkast till Betalning Poster"
 
 #: erpnext/buying/doctype/supplier_scorecard/supplier_scorecard.py:232
 msgid "Created {0} scorecards for {1} between:"
@@ -19955,11 +19955,11 @@ msgstr "Exempel: Serie Nummer {0} reserverad i {1}."
 
 #: erpnext/manufacturing/doctype/work_order/services/required_items.py:230
 msgid "Exceeds Pending Qty"
-msgstr ""
+msgstr "Överskrider Väntande Kvantitet"
 
 #: erpnext/stock/doctype/pick_list/pick_list.py:277
 msgid "Exceeds Requested Qty"
-msgstr ""
+msgstr "Överstiger Begärd Kvantitet"
 
 #. Label of the exception_budget_approver_role (Link) field in DocType
 #. 'Company'
@@ -19992,7 +19992,7 @@ msgstr "Inställning"
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:254
 #: erpnext/setup/doctype/company/company.py:801
 msgid "Exchange Gain"
-msgstr ""
+msgstr "Valutakurs Vinst"
 
 #. Label of the exchange_gain__loss_section (Section Break) field in DocType
 #. 'Company'
@@ -20008,7 +20008,7 @@ msgstr "Valutaväxling Resultat Konto"
 #. Label of the exchange_gain_account (Link) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Exchange Gain Account"
-msgstr ""
+msgstr "Valutakusr Vinst Konto"
 
 #. Option for the 'Entry Type' (Select) field in DocType 'Journal Entry'
 #: erpnext/accounts/doctype/journal_entry/journal_entry.json
@@ -20039,12 +20039,12 @@ msgstr "Valutaväxling Resultat Belopp har bokförts genom {0}"
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:236
 #: erpnext/setup/doctype/company/company.py:808
 msgid "Exchange Loss"
-msgstr ""
+msgstr "Valutakurs Förlust"
 
 #. Label of the exchange_loss_account (Link) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Exchange Loss Account"
-msgstr ""
+msgstr "Valutakurs Förlust Konto"
 
 #. Label of the exchange_rate (Float) field in DocType 'Advance Payment Ledger
 #. Entry'
@@ -26008,7 +26008,7 @@ msgstr "Ogiltig Fråga"
 
 #: erpnext/stock/doctype/quality_inspection/quality_inspection.py:325
 msgid "Invalid Reading"
-msgstr ""
+msgstr "Ogiltig Avläsning"
 
 #: erpnext/selling/page/point_of_sale/pos_past_order_summary.js:202
 msgid "Invalid Return"
@@ -26357,7 +26357,7 @@ msgstr "Faktura kan inte skapas för noll fakturerbar tid"
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:852
 msgid "Invoice is not blocked. Block the invoice to change the release date."
-msgstr ""
+msgstr "Faktura är inte spärrad. Spärra faktura för att ändra utgivning datum."
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:171
 #: erpnext/accounts/report/accounts_payable/accounts_payable.html:139
@@ -28559,7 +28559,7 @@ msgstr "Artikel {0}: Order Kvantitet {1} kan inte vara lägre än minimum order 
 
 #: erpnext/buying/doctype/purchase_order/purchase_order.py:342
 msgid "Item {0}: Ordered qty {1} {2} exceeds the minimum order qty {3} {2} by {4} {2} due to purchase UOM rounding."
-msgstr ""
+msgstr "Artikel {0}: Order kvantitet {1} {2} överskrider lägsta order kvantitet {3} {2} med {4} {2} på grund av inköp enhet avrundning."
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.js:600
 msgid "Item {0}: {1} qty produced. "
@@ -33105,7 +33105,7 @@ msgstr "Ingen Kassa Profil hittad. Skapa ny Kassa Profil"
 
 #: erpnext/manufacturing/doctype/work_order/mapper.py:571
 msgid "No Pending Materials"
-msgstr ""
+msgstr "Ingen Väntande Material"
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:1124
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:1200
@@ -33424,7 +33424,7 @@ msgstr "Inga öppna Uppgifter"
 
 #: erpnext/accounts/bulk_payment.py:127
 msgid "No outstanding amount for the selected invoice(s)."
-msgstr ""
+msgstr "Det finns inget utestående belopp för den eller de valda fakturor."
 
 #: erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py:360
 msgid "No outstanding invoices found"
@@ -33629,7 +33629,7 @@ msgstr "Ingen av Artiklar har någon förändring i kvantitet eller värde."
 #: erpnext/accounts/bulk_payment.py:22
 #: erpnext/accounts/report/accounts_payable/accounts_payable.js:244
 msgid "None of the selected invoices are payable"
-msgstr ""
+msgstr "Ingen av valda fakturor är förfallna till betalning"
 
 #. Label of the section_normal_balances (Tab Break) field in DocType 'Process
 #. Period Closing Voucher'
@@ -33742,7 +33742,7 @@ msgstr "Ej Tillåtet redigera stängd konto {0}"
 
 #: erpnext/accounts/bulk_payment.py:109
 msgid "Not available"
-msgstr ""
+msgstr "Ej tillgängligt"
 
 #: erpnext/templates/form_grid/stock_entry_grid.html:26
 msgid "Not in Stock"
@@ -33762,7 +33762,7 @@ msgstr "Ej tillåtet att läsa Jobbkort"
 
 #: erpnext/stock/report/stock_qty_vs_serial_no_count/stock_qty_vs_serial_no_count.py:94
 msgid "Not permitted to update Serial No"
-msgstr ""
+msgstr "Det är inte tillåtet att uppdatera serienummer"
 
 #: erpnext/manufacturing/doctype/bom_update_log/bom_update_log_list.js:21
 msgid "Note: Automatic log deletion only applies to logs of type <i>Update Cost</i>"
@@ -34346,7 +34346,7 @@ msgstr "Endast {0} stöds"
 
 #: erpnext/manufacturing/doctype/work_order/services/required_items.py:227
 msgid "Only {0} {1} of {2} is pending in Work Order {3}."
-msgstr ""
+msgstr "Endast {0} {1} av {2} väntar i Arbetsorder {3}."
 
 #. Label of the open_activities_html (HTML) field in DocType 'Lead'
 #. Label of the open_activities_html (HTML) field in DocType 'Opportunity'
@@ -37092,7 +37092,7 @@ msgstr "Betalning Poster"
 
 #: erpnext/accounts/report/accounts_payable/accounts_payable.js:367
 msgid "Payment Entries are created as drafts for your review"
-msgstr ""
+msgstr "Betalning poster skapas som utkast för din granskning"
 
 #: erpnext/accounts/utils.py:1161
 msgid "Payment Entries {0} are un-linked"
@@ -39289,7 +39289,7 @@ msgstr "Välj värde för {0} Försäljning Offert {1}"
 
 #: erpnext/stock/report/stock_qty_vs_serial_no_count/stock_qty_vs_serial_no_count.js:9
 msgid "Please select a warehouse first."
-msgstr ""
+msgstr "Välj lager först."
 
 #: erpnext/assets/doctype/asset_repair/asset_repair.js:203
 msgid "Please select an item code before setting the warehouse."
@@ -42101,7 +42101,7 @@ msgstr "Inköp Faktura Statistik"
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:328
 msgid "Purchase Invoice can be held after submitting."
-msgstr ""
+msgstr "Inköp Faktura kan hållas efter godkännande."
 
 #: erpnext/assets/doctype/asset/asset.py:340
 msgid "Purchase Invoice cannot be made against an existing asset {0}"
@@ -42109,7 +42109,7 @@ msgstr "Inköp Faktura kan inte skapas mot befintlig tillgång {0}"
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:862
 msgid "Purchase Invoice without any outstanding amount cannot be held."
-msgstr ""
+msgstr "Inköp Faktura utan utestående belopp kan inte hållas."
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:952
 msgid "Purchase Invoices"
@@ -46476,7 +46476,7 @@ msgstr "Retur Skapad"
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:325
 msgid "Return Purchase Invoice cannot be held."
-msgstr ""
+msgstr "Retur Inköp Faktura kan inte hållas."
 
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:327
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:127
@@ -47566,7 +47566,7 @@ msgstr "Rad # {0}: Kvantitet för Artikel {1} kan inte vara noll."
 
 #: erpnext/crm/doctype/opportunity/opportunity.py:151
 msgid "Row #{0}: Quantity must be greater than 0 for Item {1}"
-msgstr ""
+msgstr "Rad #{0}: Kvantitet måste vara högre än 0 för artikel {1}"
 
 #: erpnext/controllers/subcontracting_inward_controller.py:544
 msgid "Row #{0}: Quantity of Item {1} cannot be more than {2} {3} against Subcontracting Inward Order {4}"
@@ -47584,7 +47584,7 @@ msgstr "Rad #{0}: Pris måste vara samma som {1}: {2} ({3} / {4}) "
 
 #: erpnext/stock/doctype/quality_inspection/quality_inspection.py:316
 msgid "Row #{0}: Reading {1} {2} is not a valid number in the {3} number format. Use {4} as the decimal separator."
-msgstr ""
+msgstr "Rad #{0}: Avläsning {1} {2} är inte giltigt nummer i {3} nummer format. Använd {4} som decimalavgränsare."
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.js:1247
 msgid "Row #{0}: Reference Document Type must be one of Purchase Order, Purchase Invoice or Journal Entry"
@@ -47811,7 +47811,7 @@ msgstr "Rad #{0}: artikel {1} är redan plockad."
 
 #: erpnext/stock/doctype/pick_list/pick_list.py:274
 msgid "Row #{0}: picked qty {1} {2} exceeds the pending qty in Material Request {3}."
-msgstr ""
+msgstr "Rad #{0}: plockad kvantitet {1} {2} överstiger väntande kvantitet i Material Begäran {3}."
 
 #: erpnext/accounts/doctype/pos_closing_entry/pos_closing_entry.py:142
 #: erpnext/accounts/doctype/pos_closing_entry/pos_closing_entry.py:207
@@ -48153,7 +48153,7 @@ msgstr "Rad # {0}: Kvantitet måste vara högre än 0."
 
 #: erpnext/manufacturing/doctype/blanket_order/blanket_order.py:124
 msgid "Row {0}: Quantity must be greater than zero."
-msgstr ""
+msgstr "Rad {0}: Kvantitet måste vara högre än noll."
 
 #: erpnext/accounts/doctype/sales_invoice/services/timesheet_billing.py:24
 msgid "Row {0}: Sales Invoice {1} is already created for {2}"
@@ -50759,7 +50759,7 @@ msgstr "Serie Nummer erfordras för Artikel {0}"
 
 #: erpnext/stock/report/stock_qty_vs_serial_no_count/stock_qty_vs_serial_no_count.py:111
 msgid "Serial No status sync has been queued. Reload the report after a few minutes."
-msgstr ""
+msgstr "Synkronisering av serienummer status har placerats i kö. Ladda om rapport efter några minuter."
 
 #: erpnext/public/js/utils/serial_batch_inline_editor.js:724
 msgid "Serial No {0} already added"
@@ -53146,15 +53146,15 @@ msgstr "Lager Stängning Post"
 
 #: erpnext/accounts/doctype/period_closing_voucher/period_closing_voucher.py:242
 msgid "Stock Closing Entry In Progress"
-msgstr ""
+msgstr "Lager Stängning Post Pågår"
 
 #: erpnext/accounts/doctype/period_closing_voucher/period_closing_voucher.py:260
 msgid "Stock Closing Entry Outdated"
-msgstr ""
+msgstr "Lager Stängning Post Föråldrad"
 
 #: erpnext/accounts/doctype/period_closing_voucher/period_closing_voucher.py:234
 msgid "Stock Closing Entry Required"
-msgstr ""
+msgstr "Lager Stängning Post Erfordras"
 
 #: erpnext/stock/doctype/stock_closing_entry/stock_closing_entry.py:120
 msgid "Stock Closing Entry {0} already exists for the selected date range"
@@ -53162,7 +53162,7 @@ msgstr "Lager Stängning Post {0} finns redan för vald datumintervall"
 
 #: erpnext/stock/doctype/stock_closing_entry/stock_closing_entry.py:142
 msgid "Stock Closing Entry {0} belongs to a closed accounting period. Cancel the Period Closing Voucher {1} first."
-msgstr ""
+msgstr "Lager Stängning Post {0} tillhör stängd bokföring period. Annullera först Period Stängning Verifikation {1}."
 
 #: erpnext/stock/doctype/stock_closing_entry/stock_closing_entry.py:157
 msgid "Stock Closing Entry {0} has been queued for processing, the system will take some time to complete it."
@@ -53285,7 +53285,7 @@ msgstr "Lager Kostnader"
 
 #: erpnext/stock/stock_ledger.py:125
 msgid "Stock Frozen"
-msgstr ""
+msgstr "Lager Låst"
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:37
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:60
@@ -53840,7 +53840,7 @@ msgstr "Lager Värde"
 
 #: erpnext/accounts/doctype/period_closing_voucher/period_closing_voucher.py:189
 msgid "Stock Value Mismatch"
-msgstr ""
+msgstr "Lagervärde Avvikelse"
 
 #. Label of a chart in the Stock Workspace
 #: erpnext/stock/workspace/stock/stock.json
@@ -53918,7 +53918,7 @@ msgstr "Lager transaktioner före {0} är stängda"
 
 #: erpnext/stock/stock_ledger.py:119
 msgid "Stock transactions dated on or before {0} are frozen because the period is closed and the Stock Closing Entry {1} has been generated. To make changes, cancel the Period Closing Voucher first."
-msgstr ""
+msgstr "Lager transaktioner daterade den eller före {0} är låsta eftersom period är stängd och lager stängning post {1} är skapad. För att göra ändringar, avbryt först period stängning verifikation."
 
 #. Description of the 'Freeze stocks older than (days)' (Int) field in DocType
 #. 'Stock Settings'
@@ -53928,7 +53928,7 @@ msgstr "Lager Transaktioner som är äldre än angiven antal dagar kan inte änd
 
 #: erpnext/accounts/doctype/period_closing_voucher/period_closing_voucher.py:257
 msgid "Stock transactions were created or modified after the Stock Closing Entry {0} was generated. Regenerate it before submitting the Period Closing Voucher."
-msgstr ""
+msgstr "Lager transaktioner skapades eller ändrades efter att lager stängning post {0} skapades. Skapa den på nytt innan godkännande av period stängning verifikat."
 
 #. Description of the 'Auto reserve Stock for Sales Order on Purchase' (Check)
 #. field in DocType 'Stock Settings'
@@ -55253,7 +55253,7 @@ msgstr "Synkronisera Nu"
 
 #: erpnext/stock/report/stock_qty_vs_serial_no_count/stock_qty_vs_serial_no_count.js:6
 msgid "Sync Serial No Status"
-msgstr ""
+msgstr "Synkronisera Serienummer Status"
 
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.js:36
 msgid "Sync Started"
@@ -56574,7 +56574,7 @@ msgstr "Serie och Parti Paket {0} är inte giltigt för denna transaktion. \"Typ
 
 #: erpnext/accounts/doctype/period_closing_voucher/period_closing_voucher.py:239
 msgid "The Stock Closing Entry for {0} is not completed yet. Wait for it to complete before submitting the Period Closing Voucher."
-msgstr ""
+msgstr "Lager Stängning Post för {0} är inte slutförd ännu. Vänta tills den är klar innan period stängning verifikation godkänns."
 
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.js:17
 msgid "The Stock Entry of type 'Manufacture' is known as backflush. Raw materials being consumed to manufacture finished goods is known as backflushing. <br><br> When creating Manufacture Entry, raw-material items are backflushed based on BOM of production item. If you want raw-material items to be backflushed based on Material Transfer entry made against that Work Order instead, then you can set it under this field."
@@ -56622,7 +56622,7 @@ msgstr "Parti {0} är reserverad för {1} i lager {2} och återstående kvantite
 
 #: erpnext/accounts/doctype/period_closing_voucher/period_closing_voucher.py:182
 msgid "The closing balance {0} of the Stock Asset accounts does not match the closing value {1} of the Stock Balance report as on {2}. Resolve the difference using the Stock Ledger Variance report before closing the period."
-msgstr ""
+msgstr "Stängning saldo {0} för Lager Tillgång konton stämmer inte med stängning värde {1} i lager saldo rapport per {2}. Åtgärda skillnaden med hjälp av lager avvikelse rapport innan period avslutas."
 
 #: erpnext/regional/report/vat_audit_report/vat_audit_report.py:41
 msgid "The company {0} is not in South Africa. VAT Audit Report is only available for companies in South Africa."
@@ -57603,7 +57603,7 @@ msgstr "Detta kommer att begränsa användar åtkomst till annan Personal Regist
 
 #: erpnext/stock/report/stock_qty_vs_serial_no_count/stock_qty_vs_serial_no_count.js:16
 msgid "This will update the warehouse and status of Serial Nos counted in {0} to match the stock ledger. Continue?"
-msgstr ""
+msgstr "Detta kommer att uppdatera lager och status för Serienummer som räknats i {0} så att de stämmer med lager register. Vill du fortsätta?"
 
 #: erpnext/controllers/selling_controller.py:901
 msgid "This {0} will be treated as material transfer."
@@ -63285,7 +63285,7 @@ msgstr "Du har inte tillåtelse att lägga till eller ta bort {0} i Tillåtna Bo
 
 #: erpnext/projects/doctype/task/task.py:330
 msgid "You are not permitted to create a Task for Project {0}"
-msgstr ""
+msgstr "Du har inte behörighet att skapa Uppgift för Projekt {0}"
 
 #: erpnext/stock/doctype/pick_list/pick_list.py:594
 msgid "You are picking more than required quantity for the item {0}. Check if there is any other pick list created for the sales order {1}."
@@ -64001,7 +64001,7 @@ msgstr "{0} Åtgärder: {1}"
 
 #: erpnext/accounts/report/accounts_payable/accounts_payable.js:368
 msgid "{0} Payment Entries"
-msgstr ""
+msgstr "{0} Betalning Poster"
 
 #: erpnext/stock/doctype/material_request/material_request.py:271
 msgid "{0} Request for {1}"
@@ -64164,11 +64164,11 @@ msgstr "{0} poster hämtade"
 
 #: erpnext/accounts/bulk_payment.py:41
 msgid "{0} excluded (not payable)"
-msgstr ""
+msgstr "{0} exkluderade (ej betalningsbar)"
 
 #: erpnext/accounts/bulk_payment.py:43
 msgid "{0} failed (see Error Log)"
-msgstr ""
+msgstr "{0} misslyckades (se fellogg)"
 
 #: erpnext/accounts/utils.py:138
 #: erpnext/projects/doctype/activity_cost/activity_cost.py:40
@@ -64201,7 +64201,7 @@ msgstr "{0} på rad {1}"
 
 #: erpnext/accounts/report/accounts_payable/accounts_payable.js:389
 msgid "{0} invoice(s) excluded"
-msgstr ""
+msgstr "{0} fakturor exkluderade"
 
 #: erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:66
 msgid "{0} is a child company."
@@ -64551,7 +64551,7 @@ msgstr "{0} {1} är associerad med {2}, men Parti Konto är {3}"
 
 #: erpnext/accounts/doctype/journal_entry/services/reference_validator.py:209
 msgid "{0} {1} is blocked and on hold until {2}."
-msgstr ""
+msgstr "{0} {1} är blockerad och parkerad tills {2}."
 
 #: erpnext/controllers/selling_controller.py:509
 #: erpnext/controllers/subcontracting_controller.py:1156
