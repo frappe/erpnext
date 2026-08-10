@@ -145,7 +145,7 @@
    "reqd": 1
   },
   {
-   "default": "1",
+   "default": "0",
    "fieldname": "allow_negative_stock",
    "fieldtype": "Check",
    "label": "Allow Negative Stock"
@@ -272,7 +272,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-16 17:30:42.715321",
+ "modified": "2026-08-10 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Repost Item Valuation",

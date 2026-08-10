@@ -224,7 +224,10 @@ class RepostItemValuation(Document):
 			self.item_code = None
 			self.warehouse = None
 
-		self.allow_negative_stock = 1
+		if not self.allow_negative_stock:
+			self.allow_negative_stock = cint(
+				frappe.db.get_single_value("Stock Settings", "allow_negative_stock")
+			)
 
 	def on_cancel(self):
 		self.clear_attachment()

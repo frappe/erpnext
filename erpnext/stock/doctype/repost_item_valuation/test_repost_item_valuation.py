@@ -147,6 +147,30 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 			self.assertEqual(riv.company, "_Test Company with perpetual inventory")
 			self.assertEqual(riv.warehouse, "Stores - TCP1")
 
+	def test_repost_respects_global_negative_stock_setting(self):
+		def make_draft_riv(**overrides):
+			args = {
+				"doctype": "Repost Item Valuation",
+				"based_on": "Item and Warehouse",
+				"company": "_Test Company",
+				"item_code": "_Test Item",
+				"warehouse": "_Test Warehouse - _TC",
+				"posting_date": today(),
+			}
+			args.update(overrides)
+			return frappe.get_doc(args).insert(ignore_permissions=True)
+
+		with self.change_settings("Stock Settings", {"allow_negative_stock": 0}):
+			riv = make_draft_riv()
+			self.assertEqual(riv.allow_negative_stock, 0)
+
+			explicit_riv = make_draft_riv(allow_negative_stock=1)
+			self.assertEqual(explicit_riv.allow_negative_stock, 1)
+
+		with self.change_settings("Stock Settings", {"allow_negative_stock": 1}):
+			riv = make_draft_riv()
+			self.assertEqual(riv.allow_negative_stock, 1)
+
 	def test_deduplication(self):
 		def _assert_status(doc, status):
 			doc.load_from_db()
