@@ -506,18 +506,15 @@ class PurchaseReceipt(BuyingController):
 		BillingStatusService(self).update_billing_status(update_modified)
 
 	def enable_recalculate_rate_in_sles(self):
+		from erpnext.stock.services import stock_ledger_writer
+
 		rejected_warehouses = frappe.get_all(
 			"Purchase Receipt Item", filters={"parent": self.name}, pluck="rejected_warehouse"
 		)
 
-		sle_table = frappe.qb.DocType("Stock Ledger Entry")
-		(
-			frappe.qb.update(sle_table)
-			.set(sle_table.recalculate_rate, 1)
-			.where(sle_table.voucher_no == self.name)
-			.where(sle_table.voucher_type == "Purchase Receipt")
-			.where(sle_table.warehouse.notin(rejected_warehouses))
-		).run()
+		stock_ledger_writer.set_fields_for_voucher(
+			"Purchase Receipt", self.name, {"recalculate_rate": 1}, except_warehouses=rejected_warehouses
+		)
 
 
 def get_stock_value_difference(voucher_no, voucher_detail_no, warehouse):

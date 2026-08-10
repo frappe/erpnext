@@ -924,7 +924,12 @@ class TransactionDeletionRecord(Document):
 			frappe.db.delete(table, {"parent": ["in", reference_doc_names]})
 
 	def delete_docs_linked_with_specified_company(self, doctype, reference_doc_names):
-		frappe.db.delete(doctype, {"name": ("in", reference_doc_names)})
+		if doctype == "Stock Ledger Entry":
+			from erpnext.stock.services import stock_ledger_writer
+
+			stock_ledger_writer.delete_rows(reference_doc_names)
+		else:
+			frappe.db.delete(doctype, {"name": ("in", reference_doc_names)})
 
 	@staticmethod
 	def get_naming_series_prefix(naming_series: str, doctype_name: str) -> str:

@@ -506,14 +506,20 @@ def rename_temporarily_named_docs(doctype):
 			oldname = doc.name
 			set_name_from_naming_options(autoname, doc)
 			newname = doc.name
-			dt = frappe.qb.DocType(doctype)
-			(
-				frappe.qb.update(dt)
-				.set(dt.name, newname)
-				.set(dt.to_rename, 0)
-				.set(dt.modified, now())
-				.where(dt.name == oldname)
-			).run()
+
+			if doctype == "Stock Ledger Entry":
+				from erpnext.stock.services import stock_ledger_writer
+
+				stock_ledger_writer.rename_row(oldname, newname)
+			else:
+				dt = frappe.qb.DocType(doctype)
+				(
+					frappe.qb.update(dt)
+					.set(dt.name, newname)
+					.set(dt.to_rename, 0)
+					.set(dt.modified, now())
+					.where(dt.name == oldname)
+				).run()
 
 			for hook_type in ("on_gle_rename", "on_sle_rename"):
 				for hook in frappe.get_hooks(hook_type):

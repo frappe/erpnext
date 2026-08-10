@@ -12,6 +12,7 @@ from erpnext.stock.deprecated_serial_batch import (
 	DeprecatedBatchNoValuation,
 	DeprecatedSerialNoValuation,
 )
+from erpnext.stock.services import stock_ledger_writer
 from erpnext.stock.valuation import round_off_if_near_zero
 
 CONSUMED_SERIAL_NO_STOCK_ENTRY_PURPOSES = (
@@ -127,7 +128,7 @@ class SerialBatchBundle:
 				type_of_transaction="Inward" if self.sle.actual_qty > 0 else "Outward",
 				do_not_submit=0,
 			)
-			self.sle.db_set({"serial_and_batch_bundle": new_bundle_id})
+			stock_ledger_writer.set_fields(self.sle, {"serial_and_batch_bundle": new_bundle_id})
 
 	def make_serial_batch_no_bundle(self):
 		self.validate_item()
@@ -209,7 +210,9 @@ class SerialBatchBundle:
 
 	def set_serial_and_batch_bundle(self, sn_doc):
 		self.sle.auto_created_serial_and_batch_bundle = 1
-		self.sle.db_set({"serial_and_batch_bundle": sn_doc.name, "auto_created_serial_and_batch_bundle": 1})
+		stock_ledger_writer.set_fields(
+			self.sle, {"serial_and_batch_bundle": sn_doc.name, "auto_created_serial_and_batch_bundle": 1}
+		)
 
 		if sn_doc.is_rejected:
 			frappe.db.set_value(
@@ -1270,7 +1273,9 @@ class SerialBatchCreation:
 			if self.get("sle"):
 				doc.flags.ignore_validate = True
 				doc.save()
-				self.sle.db_set("serial_and_batch_bundle", doc.name, update_modified=False)
+				stock_ledger_writer.set_fields(
+					self.sle, {"serial_and_batch_bundle": doc.name}, update_modified=False
+				)
 
 			if doc.flags.ignore_validate:
 				doc.flags.ignore_validate = False

@@ -38,6 +38,20 @@ def submit_new(
 	return sle
 
 
+def insert_raw(args: dict) -> "Document":
+	"""Insert a draft SLE skipping validations and link checks.
+
+	Exists only for console repair tooling
+	(``stock_balance.set_stock_balance_as_per_serial_no``); everything else
+	must go through :func:`submit_new`.
+	"""
+	sle = frappe.get_doc(args)
+	sle.flags.ignore_validate = True
+	sle.flags.ignore_links = True
+	sle.insert()
+	return sle
+
+
 def set_fields(sle: "Document | str", values: dict, update_modified: bool = True) -> None:
 	"""Update fields on one SLE row; ``sle`` is a Document or a name."""
 	if isinstance(sle, str):
@@ -69,6 +83,58 @@ def flag_voucher_cancelled(voucher_type: str, voucher_no: str) -> None:
 		.set(sle.modified_by, frappe.session.user)
 		.where((sle.voucher_type == voucher_type) & (sle.voucher_no == voucher_no) & (sle.is_cancelled == 0))
 	).run()
+
+
+def set_fields_for_voucher(
+	voucher_type: str, voucher_no: str, values: dict, except_warehouses: list[str] | None = None
+) -> None:
+	"""Bulk-update fields on all of a voucher's SLE rows."""
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	query = frappe.qb.update(sle).where((sle.voucher_type == voucher_type) & (sle.voucher_no == voucher_no))
+	if except_warehouses:
+		query = query.where(sle.warehouse.notin(except_warehouses))
+	for field, value in values.items():
+		query = query.set(sle[field], value)
+	query.run()
+
+
+def clear_bundle_links(bundle_names: list[str]) -> None:
+	"""Null the bundle link on cancelled SLEs referencing these bundles (POS merge delink)."""
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	(
+		frappe.qb.update(sle)
+		.set(sle.serial_and_batch_bundle, None)
+		.where(sle.serial_and_batch_bundle.isin(bundle_names) & (sle.is_cancelled == 1))
+	).run()
+
+
+def rename_row(oldname: str, newname: str) -> None:
+	"""Rename a temporarily named SLE row to its final series name (hourly rename job)."""
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	(
+		frappe.qb.update(sle)
+		.set(sle.name, newname)
+		.set(sle.to_rename, 0)
+		.set(sle.modified, now())
+		.where(sle.name == oldname)
+	).run()
+
+
+def delete_for_voucher(voucher_type: str, voucher_no: str) -> None:
+	"""Hard-delete a voucher's SLE rows.
+
+	Only reached from document deletion with Accounts Settings
+	``delete_linked_ledger_entries`` enabled; cancellation never deletes.
+	"""
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	frappe.qb.from_(sle).delete().where(
+		(sle.voucher_type == voucher_type) & (sle.voucher_no == voucher_no)
+	).run()
+
+
+def delete_rows(names: list[str]) -> None:
+	"""Hard-delete SLE rows by name (per-company transaction deletion job)."""
+	frappe.db.delete("Stock Ledger Entry", {"name": ("in", names)})
 
 
 def shift_future_qty(

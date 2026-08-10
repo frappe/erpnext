@@ -1444,10 +1444,12 @@ class SerialandBatchBundle(Document):
 		self.delink_serial_and_batch_bundle()
 
 	def delink_serial_and_batch_bundle(self):
+		from erpnext.stock.services import stock_ledger_writer
+
 		sles = frappe.get_all("Stock Ledger Entry", filters={"serial_and_batch_bundle": self.name})
 
 		for sle in sles:
-			frappe.db.set_value("Stock Ledger Entry", sle.name, "serial_and_batch_bundle", None)
+			stock_ledger_writer.set_fields(sle.name, {"serial_and_batch_bundle": None})
 
 	@property
 	def child_table(self):

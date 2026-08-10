@@ -342,10 +342,9 @@ def set_stock_balance_as_per_serial_no(
 			"serial_no": "",
 		}
 
-		sle_doc = frappe.get_doc(sle_dict)
-		sle_doc.flags.ignore_validate = True
-		sle_doc.flags.ignore_links = True
-		sle_doc.insert()
+		from erpnext.stock.services import stock_ledger_writer
+
+		sle_doc = stock_ledger_writer.insert_raw(sle_dict)
 
 		args = sle_dict.copy()
 		args.update({"sle_id": sle_doc.name})

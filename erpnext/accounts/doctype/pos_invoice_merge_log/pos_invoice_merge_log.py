@@ -387,18 +387,13 @@ class POSInvoiceMergeLog(Document):
 				pos_invoice.set_serial_and_batch_bundle(table_name)
 
 	def delink_serial_and_batch_bundle(self):
+		from erpnext.stock.services import stock_ledger_writer
+
 		bundles = self.get_serial_and_batch_bundles()
 		if not bundles:
 			return
 
-		sle_table = frappe.qb.DocType("Stock Ledger Entry")
-		query = (
-			frappe.qb.update(sle_table)
-			.set(sle_table.serial_and_batch_bundle, None)
-			.where(sle_table.serial_and_batch_bundle.isin(bundles) & sle_table.is_cancelled == 1)
-		)
-
-		query.run()
+		stock_ledger_writer.clear_bundle_links(bundles)
 
 	def get_serial_and_batch_bundles(self):
 		pos_invoices = []
