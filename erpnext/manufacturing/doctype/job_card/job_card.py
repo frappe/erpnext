@@ -901,6 +901,27 @@ class JobCard(Document):
 				).format(self.name)
 			)
 
+	def validate_material_transfer_completed(self):
+		"""Block starting/completing the Job Card until the required raw materials
+		have been transferred.
+
+		When the BOM has "Transfer Material Against" set to "Job Card", the Job Card
+		gets its raw materials populated in `items`. Those must be issued to production
+		via a submitted "Material Transfer for Manufacture" Stock Entry (which fills each
+		row's `transferred_qty`) before production is executed. `skip_material_transfer`
+		lets the user intentionally bypass this.
+		"""
+		if self.skip_material_transfer or self.is_corrective_job_card or not self.items:
+			return
+
+		if any(flt(row.transferred_qty) < flt(row.required_qty) for row in self.items):
+			frappe.throw(
+				_(
+					"Material Transfer for Manufacture must be completed before the Job Card {0} can be started or completed. Enable 'Skip Material Transfer' to bypass this."
+				).format(bold(self.name)),
+				title=_("Material Transfer Pending"),
+			)
+
 	def validate_job_card(self):
 		if self.work_order and frappe.get_cached_value("Work Order", self.work_order, "status") == "Stopped":
 			frappe.throw(
@@ -1578,6 +1599,7 @@ class JobCard(Document):
 		frappe.has_permission("Job Card", "write", doc=self, throw=True)
 
 		self.validate_docstatus()
+		self.validate_material_transfer_completed()
 
 		if isinstance(kwargs, dict):
 			kwargs = frappe._dict(kwargs)
@@ -1593,6 +1615,7 @@ class JobCard(Document):
 		frappe.has_permission("Job Card", "write", doc=self, throw=True)
 
 		self.validate_docstatus()
+		self.validate_material_transfer_completed()
 
 		if isinstance(kwargs, dict):
 			kwargs = frappe._dict(kwargs)
