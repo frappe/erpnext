@@ -903,21 +903,28 @@ class JobCard(Document):
 
 	def validate_material_transfer_completed(self):
 		"""Block starting/completing the Job Card until the required raw materials
-		have been transferred.
+		have been issued to production.
 
 		When the BOM has "Transfer Material Against" set to "Job Card", the Job Card
 		gets its raw materials populated in `items`. Those must be issued to production
 		via a submitted "Material Transfer for Manufacture" Stock Entry (which fills each
-		row's `transferred_qty`) before production is executed. `skip_material_transfer`
+		row's `transferred_qty`) before production is executed.
+
+		Only a *missing* transfer is blocked here (a required item with nothing
+		transferred), not a partial one: staged production runs legitimately transfer
+		material for just the quantity being produced, and full-quantity coverage is
+		already enforced at submit by `validate_transfer_qty`. `skip_material_transfer`
 		lets the user intentionally bypass this.
 		"""
 		if self.skip_material_transfer or self.is_corrective_job_card or not self.items:
 			return
 
-		if any(flt(row.transferred_qty) < flt(row.required_qty) for row in self.items):
+		if any(
+			flt(row.required_qty) > 0 and flt(row.transferred_qty) <= 0 for row in self.items
+		):
 			frappe.throw(
 				_(
-					"Material Transfer for Manufacture must be completed before the Job Card {0} can be started or completed. Enable 'Skip Material Transfer' to bypass this."
+					"Material Transfer for Manufacture must be done before the Job Card {0} can be started or completed. Enable 'Skip Material Transfer' to bypass this."
 				).format(bold(self.name)),
 				title=_("Material Transfer Pending"),
 			)

@@ -584,10 +584,17 @@ frappe.ui.form.on("Job Card", {
 
 		// ── Determine which action buttons to show ────────────────────────
 		const has_remaining_qty = doc.for_quantity + doc.process_loss_qty > doc.total_completed_qty;
-		const pending_transfer =
-			has_items && doc.items.some((row) => flt(row.transferred_qty) < flt(row.required_qty));
+		// A required material with nothing transferred blocks execution (mirrors the
+		// server-side `validate_material_transfer_completed`). Partial transfers are
+		// allowed so staged production runs remain usable.
+		const no_material_transferred =
+			has_items &&
+			doc.items.some((row) => flt(row.required_qty) > 0 && flt(row.transferred_qty) <= 0);
 		const materials_ready =
-			doc.skip_material_transfer || !has_items || !pending_transfer;
+			doc.skip_material_transfer ||
+			doc.is_corrective_job_card ||
+			!has_items ||
+			!no_material_transferred;
 
 		let last_row = {};
 		const has_sub_ops_or_pending_qty = doc.sub_operations?.length || doc.pending_qty > 0;
