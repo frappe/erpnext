@@ -421,6 +421,13 @@ def make_delivery_note(
 	return target_doc
 
 
+def get_qty_net_of_returns(so_item) -> float:
+	"""Ordered qty, less the returns the customer is still holding."""
+	qty = flt(so_item.qty)
+
+	return min(qty, max(qty - flt(so_item.returned_qty), flt(so_item.delivered_qty)))
+
+
 @frappe.whitelist()
 def make_sales_invoice(
 	source_name: str,
@@ -496,7 +503,7 @@ def make_sales_invoice(
 		target.qty = (
 			source.qty - get_billed_qty(source.name)
 			if (source.qty and source.billed_amt)
-			else (source.qty if is_unit_price_row(source) else source.qty - source.returned_qty)
+			else (source.qty if is_unit_price_row(source) else get_qty_net_of_returns(source))
 		)
 
 		if source_parent.project:
