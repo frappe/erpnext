@@ -59,10 +59,21 @@ def make_supplier_quotation_from_rfq(
 def create_supplier_quotation(doc: str | Document | dict):
 	doc = frappe.parse_json(doc)
 
+	if not all(
+		(
+			isinstance(doc.get("name"), str),
+			isinstance(doc.get("supplier"), str),
+			isinstance(doc.get("items"), list),
+		)
+	):
+		frappe.throw(_("Not Permitted"), frappe.PermissionError)
+
 	if frappe.session.user not in frappe.get_all(
 		"Portal User", {"parent": doc.get("supplier")}, pluck="user"
 	):
 		frappe.throw(_("Not Permitted"), frappe.PermissionError)
+
+	rfq = validate_supplier_quotation_data(doc)
 
 	sq_doc = frappe.get_doc(
 		{
@@ -76,7 +87,7 @@ def create_supplier_quotation(doc: str | Document | dict):
 			or frappe.db.get_single_value("Buying Settings", "buying_price_list"),
 		}
 	)
-	add_items(sq_doc, doc.get("supplier"), doc.get("items"))
+	add_items(sq_doc, doc.get("supplier"), doc.get("items"), rfq)
 	sq_doc.flags.ignore_permissions = True
 	sq_doc.run_method("set_missing_values")
 	sq_doc.save()
@@ -84,23 +95,45 @@ def create_supplier_quotation(doc: str | Document | dict):
 	return sq_doc.name
 
 
-def add_items(sq_doc, supplier, items):
+def validate_supplier_quotation_data(doc):
+	if not frappe.db.exists("Request for Quotation", doc.get("name")) or any(
+		not isinstance(item.get("name"), str) or not isinstance(item.get("item_code"), str)
+		for item in doc.get("items")
+	):
+		frappe.throw(_("Not Permitted"), frappe.PermissionError)
+
+	rfq = frappe.get_doc("Request for Quotation", doc.get("name"))
+	rfq_items = {(item.name, item.item_code) for item in rfq.items}
+	submitted_items = {(item.get("name"), item.get("item_code")) for item in doc.get("items")}
+	is_supplier_invited = doc.get("supplier") in {row.supplier for row in rfq.suppliers}
+
+	if (
+		rfq.docstatus != 1
+		or not is_supplier_invited
+		or len(doc.get("items")) != len(rfq.items)
+		or submitted_items != rfq_items
+	):
+		frappe.throw(_("Not Permitted"), frappe.PermissionError)
+
+	return rfq
+
+
+def add_items(sq_doc, supplier, items, rfq):
+	rfq_items = {item.name: item for item in rfq.items}
 	for data in items:
 		if isinstance(data, dict):
 			data = frappe._dict(data)
 
-		create_rfq_items(sq_doc, supplier, data)
+		create_rfq_items(sq_doc, supplier, rfq_items[data.name], data)
 
 
-def create_rfq_items(sq_doc, supplier, data):
-	args = {}
+def create_rfq_items(sq_doc, supplier, rfq_item, data):
+	args = {"qty": data.get("qty"), "rate": data.get("rate")}
 
 	for field in [
 		"item_code",
 		"item_name",
 		"description",
-		"qty",
-		"rate",
 		"conversion_factor",
 		"warehouse",
 		"material_request",
@@ -109,14 +142,14 @@ def create_rfq_items(sq_doc, supplier, data):
 		"uom",
 		"cost_center",
 	]:
-		args[field] = data.get(field)
+		args[field] = rfq_item.get(field)
 
 	args.update(
 		{
-			"request_for_quotation_item": data.name,
-			"request_for_quotation": data.parent,
+			"request_for_quotation_item": rfq_item.name,
+			"request_for_quotation": rfq_item.parent,
 			"supplier_part_no": frappe.db.get_value(
-				"Item Supplier", {"parent": data.item_code, "supplier": supplier}, "supplier_part_no"
+				"Item Supplier", {"parent": rfq_item.item_code, "supplier": supplier}, "supplier_part_no"
 			),
 		}
 	)

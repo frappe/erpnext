@@ -185,13 +185,21 @@ class TestRequestforQuotation(ERPNextTestSuite):
 			user_type="Website User",
 		).insert()
 		rfq = make_request_for_quotation(portal_user=portal_user.name)
-		rfq.get("items")[0].rate = 100
-		rfq.supplier = rfq.suppliers[0].supplier
+		portal_doc = frappe.parse_json(rfq.as_json())
+		portal_doc.supplier = rfq.suppliers[0].supplier
+		portal_doc["items"][0]["rate"] = 100
 
 		with self.set_user(portal_user.name):
 			with self.assertRaises(frappe.PermissionError):
-				get_party_account("Supplier", rfq.supplier, rfq.company)
-			supplier_quotation_name = create_supplier_quotation(rfq)
+				get_party_account("Supplier", portal_doc.supplier, rfq.company)
+
+			item_code = portal_doc["items"][0]["item_code"]
+			portal_doc["items"][0]["item_code"] = "Unauthorized Item"
+			with self.assertRaises(frappe.PermissionError):
+				create_supplier_quotation(frappe.as_json(portal_doc))
+			portal_doc["items"][0]["item_code"] = item_code
+
+			supplier_quotation_name = create_supplier_quotation(frappe.as_json(portal_doc))
 
 		supplier_quotation_doc = frappe.get_doc("Supplier Quotation", supplier_quotation_name)
 
