@@ -22,6 +22,10 @@ frappe.ui.form.on("Request for Quotation", {
 			};
 		};
 
+		frm.set_query("supplier", "suppliers", function () {
+			return { filters: { disabled: 0 } };
+		});
+
 		frm.set_query("warehouse", "items", () => ({
 			filters: {
 				company: frm.doc.company,
