@@ -2833,3 +2833,17 @@ class TestJobCardLogic(ERPNextTestSuite):
 		jc.finished_good = None
 		jc.track_semi_finished_goods = 0
 		self.assertRaises(frappe.ValidationError, jc.validate_transfer_qty)
+
+	def test_material_transfer_is_required_before_starting_or_completing_job(self):
+		jc = frappe.new_doc("Job Card")
+		jc.for_quantity = 10
+		jc.append("items", {"required_qty": 10, "transferred_qty": 0})
+
+		for action, kwargs in (
+			(jc.start_timer, {"start_time": now(), "employees": []}),
+			(
+				jc.complete_job_card,
+				{"qty": 10, "for_quantity": 10, "pending_qty": 0, "process_loss_qty": 0},
+			),
+		):
+			self.assertRaises(frappe.ValidationError, action, **kwargs)
