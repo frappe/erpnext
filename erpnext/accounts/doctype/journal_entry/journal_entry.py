@@ -329,6 +329,7 @@ class JournalEntry(AccountsController):
 
 		# References for this Journal are removed on the `on_cancel` event in accounts_controller
 		super().on_cancel()
+		self.reverse_payment_schedule_allocations()
 
 		from_doc_events = getattr(self, "ignore_linked_doctypes", ())
 		self.ignore_linked_doctypes = (
@@ -355,6 +356,18 @@ class JournalEntry(AccountsController):
 		self.unlink_inter_company_jv()
 		AssetService(self).unlink_asset_adjustment_entry()
 		self.update_invoice_discounting()
+
+	def reverse_payment_schedule_allocations(self):
+		from erpnext.accounts.services.payment_schedule import update_invoice_payment_schedule
+
+		for account in self.accounts:
+			update_invoice_payment_schedule(
+				account.reference_type,
+				account.reference_name,
+				account.payment_term,
+				max(account.debit_in_account_currency, account.credit_in_account_currency),
+				cancel=True,
+			)
 
 	def get_title(self):
 		return self.pay_to_recd_from or self.accounts[0].account

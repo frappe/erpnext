@@ -8,7 +8,10 @@ from frappe.utils.data import getdate as convert_to_date
 
 from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
-from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
+from erpnext.accounts.doctype.payment_entry.test_payment_entry import (
+	create_payment_entry,
+	create_payment_terms_template,
+)
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.party import get_party_account
@@ -643,6 +646,48 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		# check PR tool output
 		self.assertEqual(len(pr.get("invoices")), 0)
 		self.assertEqual(len(pr.get("payments")), 0)
+
+	def test_journal_against_invoice_with_payment_terms(self):
+		create_payment_terms_template()
+		template = frappe.get_doc("Payment Terms Template", "Test Receivable Template")
+		template.terms[0].invoice_portion = 30
+		template.terms[1].invoice_portion = 70
+		template.save()
+
+		si = self.create_sales_invoice(qty=1, rate=100, do_not_save=True, do_not_submit=True)
+		si.payment_terms_template = "Test Receivable Template"
+		si.save().submit()
+
+		je = self.create_journal_entry(self.bank, self.debit_to, 100)
+		je.accounts[1].party_type = "Customer"
+		je.accounts[1].party = self.customer
+		je.save().submit()
+
+		pr = self.create_payment_reconciliation()
+		pr.invoice_name = si.name
+		pr.payment_name = je.name
+		pr.get_unreconciled_entries()
+		self.assertEqual(len(pr.invoices), 2)
+
+		pr.allocate_entries(
+			frappe._dict(
+				{
+					"invoices": [invoice.as_dict() for invoice in pr.invoices],
+					"payments": [payment.as_dict() for payment in pr.payments],
+				}
+			)
+		)
+		pr.reconcile()
+
+		si.reload()
+		self.assertEqual([term.outstanding for term in si.payment_schedule], [0, 0])
+
+		je.reload().cancel()
+		si.reload()
+		self.assertEqual(
+			[term.outstanding for term in si.payment_schedule],
+			[term.payment_amount for term in si.payment_schedule],
+		)
 
 	def test_negative_debit_or_credit_journal_against_invoice(self):
 		transaction_date = nowdate()

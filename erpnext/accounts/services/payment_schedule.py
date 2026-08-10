@@ -327,6 +327,50 @@ class PaymentScheduleService:
 		self.validate_payment_schedule_amount()
 
 
+def update_invoice_payment_schedule(
+	invoice_type: str,
+	invoice_name: str,
+	payment_term: str | None,
+	allocated_amount: float,
+	cancel: bool = False,
+) -> None:
+	if not payment_term or invoice_type not in ("Sales Invoice", "Purchase Invoice"):
+		return
+
+	invoice = frappe.get_cached_doc(invoice_type, invoice_name)
+	if not frappe.db.get_value(
+		"Payment Terms Template", invoice.payment_terms_template, "allocate_payment_based_on_payment_terms"
+	):
+		return
+
+	party_type, party = invoice.get_party()
+	party_account_currency = invoice.party_account_currency or get_party_account_currency(
+		party_type, party, invoice.company
+	)
+	if invoice.currency != invoice.company_currency and party_account_currency == invoice.company_currency:
+		allocated_amount = flt(allocated_amount / invoice.conversion_rate, invoice.precision("grand_total"))
+
+	base_allocated_amount = flt(
+		allocated_amount * invoice.conversion_rate, invoice.precision("base_grand_total")
+	)
+	payment_schedule = frappe.qb.DocType("Payment Schedule")
+	change = 1 if cancel else -1
+	(
+		frappe.qb.update(payment_schedule)
+		.set(payment_schedule.paid_amount, payment_schedule.paid_amount - (change * allocated_amount))
+		.set(
+			payment_schedule.base_paid_amount,
+			payment_schedule.base_paid_amount - (change * base_allocated_amount),
+		)
+		.set(payment_schedule.outstanding, payment_schedule.outstanding + (change * allocated_amount))
+		.set(
+			payment_schedule.base_outstanding,
+			payment_schedule.base_outstanding + (change * base_allocated_amount),
+		)
+		.where((payment_schedule.parent == invoice_name) & (payment_schedule.payment_term == payment_term))
+	).run()
+
+
 def linked_order_has_payment_terms_template(po_or_so, doctype) -> str | None:
 	return frappe.get_value(doctype, po_or_so, "payment_terms_template")
 

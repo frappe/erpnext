@@ -721,6 +721,7 @@ def update_reference_in_journal_entry(d, journal_entry, do_not_save=False):
 
 	new_row.set("reference_type", d["against_voucher_type"])
 	new_row.set("reference_name", d["against_voucher"])
+	new_row.set("payment_term", d.get("payment_term"))
 
 	new_row.against_account = cstr(jv_detail.against_account)
 	new_row.is_advance = cstr(jv_detail.is_advance)
@@ -749,6 +750,7 @@ def update_reference_in_payment_entry(
 		"total_amount": d.grand_total,
 		"outstanding_amount": d.outstanding_amount,
 		"allocated_amount": d.allocated_amount,
+		"payment_term": d.get("payment_term"),
 		"exchange_rate": d.exchange_rate
 		if d.difference_amount is not None
 		else payment_entry.get_exchange_rate(),
@@ -1042,7 +1044,31 @@ def unlink_ref_doc_from_payment_entries(ref_doc: object = None, payment_name: st
 def remove_ref_doc_link_from_jv(
 	ref_type: str | None = None, ref_no: str | None = None, payment_name: str | None = None
 ):
+	from erpnext.accounts.services.payment_schedule import update_invoice_payment_schedule
+
 	jea = qb.DocType("Journal Entry Account")
+
+	payment_schedule_allocations = (
+		qb.from_(jea)
+		.select(
+			jea.reference_type,
+			jea.reference_name,
+			jea.payment_term,
+			jea.debit_in_account_currency,
+			jea.credit_in_account_currency,
+		)
+		.where((jea.reference_type == ref_type) & (jea.reference_name == ref_no) & (jea.docstatus.lt(2)))
+	)
+	if payment_name:
+		payment_schedule_allocations = payment_schedule_allocations.where(jea.parent == payment_name)
+	for allocation in payment_schedule_allocations.run(as_dict=True):
+		update_invoice_payment_schedule(
+			allocation.reference_type,
+			allocation.reference_name,
+			allocation.payment_term,
+			max(allocation.debit_in_account_currency, allocation.credit_in_account_currency),
+			cancel=True,
+		)
 
 	linked_jv = (
 		qb.from_(jea)
@@ -1109,9 +1135,18 @@ def remove_ref_doc_link_from_pe(
 	linked_pe = set()
 	row_names = set()
 
+	from erpnext.accounts.services.payment_schedule import update_invoice_payment_schedule
+
 	for row in reference_rows:
 		linked_pe.add(row.parent)
 		row_names.add(row.name)
+		update_invoice_payment_schedule(
+			row.reference_doctype,
+			row.reference_name,
+			row.payment_term,
+			row.allocated_amount,
+			cancel=True,
+		)
 
 	from erpnext.accounts.doctype.payment_request.payment_request import (
 		update_payment_requests_as_per_pe_references,
