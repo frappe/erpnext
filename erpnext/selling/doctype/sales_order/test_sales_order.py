@@ -288,6 +288,37 @@ class TestSalesOrder(ERPNextTestSuite):
 		si1 = make_sales_invoice(so.name)
 		self.assertEqual(len(si1.get("items")), 0)
 
+	def test_make_sales_invoice_after_return_and_redelivery(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		so = make_sales_order(qty=10, rate=100)
+		dn = create_dn_against_so(so.name, 10)
+
+		# rebuild the return from the dict the way a client save does: Delivery Note only wires
+		# up the `returned_qty` status updater when `is_return` is set as the controller is built
+		dn_return = frappe.get_doc(make_sales_return(dn.name).as_dict())
+		dn_return.insert()
+		dn_return.submit()
+
+		create_dn_against_so(so.name, 10)
+
+		so.load_from_db()
+		item = so.get("items")[0]
+		self.assertEqual(item.delivered_qty, 10)
+		# returned_qty only counts up, the re-delivery never clears it
+		self.assertEqual(item.returned_qty, 10)
+
+		si = make_sales_invoice(so.name)
+		self.assertEqual(si.get("items")[0].qty, 10)
+
+	def test_make_sales_invoice_bills_ordered_qty_for_partial_delivery(self):
+		so = make_sales_order(qty=10, rate=100)
+		create_dn_against_so(so.name, 4)
+
+		# an undelivered qty is still billable, only returns reduce it
+		si = make_sales_invoice(so.name)
+		self.assertEqual(si.get("items")[0].qty, 10)
+
 	def test_so_billed_amount_against_return_entry(self):
 		from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return
 
