@@ -120,13 +120,18 @@ class StockLedgerEntry(Document):
 
 	def get_available_qty_after_prev_transaction(self, dimensions):
 		sle = frappe.qb.DocType("Stock Ledger Entry")
+		# Same-instant rows (e.g. sibling rows of this voucher) count as previous;
+		# before insert self.creation is unset and every existing row precedes this one.
+		same_instant_earlier = sle.posting_datetime == self.posting_datetime
+		if self.creation:
+			same_instant_earlier &= sle.creation < self.creation
 		available_qty_query = (
 			frappe.qb.from_(sle)
 			.select(Sum(sle.actual_qty))
 			.where(
 				(sle.item_code == self.item_code)
 				& (sle.warehouse == self.warehouse)
-				& (sle.posting_datetime < self.posting_datetime)
+				& ((sle.posting_datetime < self.posting_datetime) | same_instant_earlier)
 				& (sle.company == self.company)
 				& (sle.is_cancelled == 0)
 			)

@@ -492,6 +492,48 @@ class TestInventoryDimension(ERPNextTestSuite):
 
 		self.assertEqual(site_name, "Site 1")
 
+	def test_validate_negative_stock_same_instant_sibling_rows(self):
+		item_code = "Test Negative Inv Dimension Sibling Item"
+		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 1)
+		create_item(item_code)
+
+		create_inventory_dimension(
+			apply_to_all_doctypes=1,
+			dimension_name="Inv Site",
+			reference_document="Inv Site",
+			document_type="Inv Site",
+			validate_negative_stock=1,
+		)
+
+		warehouse = create_warehouse("Negative Stock Sibling Warehouse")
+
+		receipt = make_stock_entry(item_code=item_code, target=warehouse, qty=8, do_not_submit=True)
+		receipt.items[0].to_inv_site = "Site 1"
+		receipt.submit()
+
+		# Two sibling rows issuing 5 each share one posting_datetime; each row alone
+		# fits the balance of 8, together they drive the dimension to -2.
+		issue = make_stock_entry(item_code=item_code, source=warehouse, qty=5, do_not_submit=True)
+		issue.items[0].inv_site = "Site 1"
+		first = issue.items[0]
+		issue.append(
+			"items",
+			{
+				"item_code": first.item_code,
+				"qty": first.qty,
+				"uom": first.uom,
+				"stock_uom": first.stock_uom,
+				"conversion_factor": first.conversion_factor,
+				"transfer_qty": first.transfer_qty,
+				"s_warehouse": first.s_warehouse,
+				"expense_account": first.expense_account,
+				"cost_center": first.cost_center,
+				"basic_rate": first.basic_rate,
+				"inv_site": "Site 1",
+			},
+		)
+		self.assertRaises(InventoryDimensionNegativeStockError, issue.submit)
+
 	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_validate_negative_stock_with_multiple_dimension(self):
 		item_code = "Test Negative Multi Inventory Dimension Item"
