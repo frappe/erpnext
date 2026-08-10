@@ -4,7 +4,7 @@
 import frappe
 
 from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
-from erpnext.manufacturing.report.bom_explorer.bom_explorer import execute
+from erpnext.manufacturing.report.bom_explorer.bom_explorer import build_exploded_rows, execute
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -78,3 +78,36 @@ class TestBOMExplorer(ERPNextTestSuite):
 		# The leaf belongs to the sub-assembly, so it is exploded one level deeper.
 		self.assertEqual(rows_by_item[leaf_item]["indent"], 1)
 		self.assertEqual(rows_by_item[leaf_item]["bom_level"], 1)
+
+	def test_nested_bom_quantity_is_normalized_by_output_quantity(self):
+		parent_bom = create_nested_bom(
+			{"parent": {"sub": {"leaf": {}}}},
+			prefix="_Test explorer quantity ",
+		)
+		sub_bom = frappe.get_doc("BOM", parent_bom.items[0].bom_no)
+
+		# Two sub-assemblies are required; each sub-BOM produces three units from nine leaves.
+		frappe.db.set_value("BOM", sub_bom.name, "quantity", 3)
+		frappe.db.set_value("BOM Item", sub_bom.items[0].name, {"qty": 9, "stock_qty": 9})
+		frappe.db.set_value("BOM Item", parent_bom.items[0].name, {"qty": 2, "stock_qty": 2})
+
+		data = self.run_report(parent_bom.name)
+		leaf_row = next(row for row in data if row["item_code"] == "_Test explorer quantity leaf")
+
+		self.assertEqual(leaf_row["qty"], 6)
+
+	def test_nested_bom_uses_stock_qty_at_every_level(self):
+		children_map = {
+			"root": [
+				frappe._dict(item_code="parent", idx=1, bom_no="parent-bom", bom_qty=2, qty=8, stock_qty=16)
+			],
+			"parent-bom": [
+				frappe._dict(item_code="child", idx=1, bom_no="child-bom", bom_qty=3, qty=4, stock_qty=12)
+			],
+			"child-bom": [frappe._dict(item_code="raw-material", idx=1, bom_no="", qty=2)],
+		}
+		data = []
+
+		build_exploded_rows("root", children_map, data)
+
+		self.assertEqual([row["qty"] for row in data], [8, 32, 64])
