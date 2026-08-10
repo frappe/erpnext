@@ -137,7 +137,7 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 	        such cases certain validations need to be ignored (like negative
 	                        stock)
 	"""
-	from erpnext.controllers.stock_controller import future_sle_exists
+	from erpnext.controllers.stock_controller import future_sle_exists, invalidate_future_sle_cache
 
 	if sl_entries:
 		# Sorted so two vouchers touching the same pairs can't take the gates in opposite order.
@@ -194,6 +194,8 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 				frappe.msgprint(
 					_("Item {0} ignored since it is not a stock item").format(args.get("item_code"))
 				)
+
+		invalidate_future_sle_cache(sl_entries[0].get("voucher_type"), sl_entries[0].get("voucher_no"))
 
 
 def repost_current_voucher(args, allow_negative_stock=False, via_landed_cost_voucher=False, cancelled=False):
