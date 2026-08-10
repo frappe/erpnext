@@ -99,3 +99,61 @@ class TestReceivedItemsToBeBilled(ERPNextTestSuite):
 			"Receipt dated after the cutoff should be excluded",
 		)
 		self.assertIsNotNone(self.get_row(self.run_report(posting_date="2026-06-30"), pr.name))
+
+	def test_child_project_user_permission_filters_receipts(self):
+		from frappe.permissions import add_user_permission
+
+		test_user = f"non-billed-report-{frappe.generate_hash(length=6)}@example.com"
+		frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": test_user,
+				"first_name": "Non Billed Report User",
+				"send_welcome_email": 0,
+				"roles": [{"role": "Stock User"}],
+			}
+		).insert(ignore_permissions=True)
+
+		allowed_project = frappe.get_doc(
+			doctype="Project",
+			project_name=f"Allowed Project {frappe.generate_hash(length=6)}",
+			company="_Test Company",
+			status="Open",
+		).insert()
+		restricted_project = frappe.get_doc(
+			doctype="Project",
+			project_name=f"Restricted Project {frappe.generate_hash(length=6)}",
+			company="_Test Company",
+			status="Open",
+		).insert()
+
+		def make_receipt(project):
+			purchase_receipt = make_purchase_receipt(
+				item_code="_Test Item",
+				qty=1,
+				rate=100,
+				supplier="_Test Supplier",
+				posting_date="2026-06-01",
+				do_not_submit=True,
+			)
+			purchase_receipt.project = None
+			purchase_receipt.items[0].project = project
+			purchase_receipt.save().submit()
+			frappe.db.set_value("Purchase Receipt", purchase_receipt.name, "project", None)
+			return purchase_receipt
+
+		allowed_receipt = make_receipt(allowed_project.name)
+		restricted_receipt = make_receipt(restricted_project.name)
+
+		frappe.db.set_single_value("System Settings", "apply_strict_user_permissions", 0)
+		add_user_permission("Project", allowed_project.name, test_user, ignore_permissions=True)
+
+		with self.set_user(test_user):
+			self.assertIsNotNone(
+				self.get_row(self.run_report(purchase_receipt=allowed_receipt.name), allowed_receipt.name)
+			)
+			self.assertIsNone(
+				self.get_row(
+					self.run_report(purchase_receipt=restricted_receipt.name), restricted_receipt.name
+				)
+			)

@@ -10,8 +10,8 @@ from erpnext import get_default_currency
 
 
 def get_ordered_to_be_billed_data(args, filters=None):
-	doctype, party = args.get("doctype"), args.get("party")
-	child_tab = doctype + " Item"
+	doctype_name, party = args.get("doctype"), args.get("party")
+	child_tab = doctype_name + " Item"
 	precision = (
 		get_field_precision(
 			frappe.get_meta(child_tab).get_field("billed_amt"), currency=get_default_currency()
@@ -19,7 +19,7 @@ def get_ordered_to_be_billed_data(args, filters=None):
 		or 2
 	)
 
-	doctype = frappe.qb.DocType(doctype)
+	doctype = frappe.qb.DocType(doctype_name)
 	child_doctype = frappe.qb.DocType(child_tab)
 	item = frappe.qb.DocType("Item")
 
@@ -27,13 +27,16 @@ def get_ordered_to_be_billed_data(args, filters=None):
 	project_field = get_project_field(doctype, child_doctype, party)
 
 	query = (
-		frappe.qb.from_(doctype)
-		.inner_join(child_doctype)
-		.on(doctype.name == child_doctype.parent)
+		frappe.qb.get_query(
+			child_tab,
+			fields=[doctype.name],
+			parent_doctype=doctype_name,
+			ignore_permissions=False,
+			apply_child_user_permissions=True,
+		)
 		.join(item)
 		.on(item.name == child_doctype.item_code)
 		.select(
-			doctype.name,
 			doctype[args.get("date")].as_("date"),
 			doctype[party],
 			doctype[party + "_name"],
