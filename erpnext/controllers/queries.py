@@ -1133,19 +1133,14 @@ def get_filtered_child_rows(
 ):
 	table = frappe.qb.DocType(doctype)
 	query = (
-		frappe.qb.from_(table)
+		frappe.get_query(table, filters=filters)
 		.select(
-			table.name,
 			Concat("#", table.idx, ", ", table.item_code),
 		)
 		.orderby(table.idx)
 		.offset(start)
 		.limit(page_len)
 	)
-
-	if filters:
-		for field, value in filters.items():
-			query = query.where(table[field] == value)
 
 	if txt:
 		txt += "%"
