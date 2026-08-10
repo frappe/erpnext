@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-08-09 09:47+0000\n"
-"PO-Revision-Date: 2026-08-09 11:01\n"
+"PO-Revision-Date: 2026-08-10 11:05\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Korean\n"
 "MIME-Version: 1.0\n"
@@ -47321,7 +47321,7 @@ msgstr "달리기..."
 
 #: erpnext/selling/report/pending_so_items_for_purchase_request/pending_so_items_for_purchase_request.py:28
 msgid "S.O. No."
-msgstr "그래서 아니요."
+msgstr ""
 
 #. Label of the scio_detail (Data) field in DocType 'Sales Invoice Item'
 #. Label of the scio_detail (Data) field in DocType 'Stock Entry Detail'
