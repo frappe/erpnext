@@ -172,9 +172,10 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 					)
 					sle["outgoing_rate"] = 0.0
 
-			if sle.get("actual_qty") or sle.get("voucher_type") == "Stock Reconciliation":
-				sle_doc = make_entry(sle, allow_negative_stock, via_landed_cost_voucher)
+			if not (sle.get("actual_qty") or sle.get("voucher_type") == "Stock Reconciliation"):
+				continue
 
+			sle_doc = make_entry(sle, allow_negative_stock, via_landed_cost_voucher)
 			args = sle_doc.as_dict()
 			args["posting_datetime"] = get_combine_datetime(args.posting_date, args.posting_time)
 
