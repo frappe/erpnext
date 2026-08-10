@@ -779,6 +779,38 @@ class TestSubscription(ERPNextTestSuite):
 		subscription.reload()
 		self.assertEqual(subscription.status, "Active")
 
+	def test_cancelled_subscription_stays_cancelled_after_payment_and_reprocess(self):
+		# https://github.com/frappe/erpnext/issues/57761
+		subscription = create_subscription(
+			start_date=nowdate(),
+			generate_invoice_at="Prepaid (bill at period start)",
+			submit_invoice=1,
+			cancel_at_period_end=1,
+		)
+		subscription.process(posting_date=nowdate())
+		invoice = subscription.get_current_invoice()
+		self.assertGreater(invoice.outstanding_amount, 0)
+
+		subscription.cancel_subscription()
+		self.assertEqual(subscription.status, "Cancelled")
+		cancelation_date = getdate(subscription.cancelation_date)
+		self.assertIsNotNone(cancelation_date)
+
+		payment_entry = get_payment_entry(invoice.doctype, invoice.name, bank_account="_Test Bank - _TC")
+		payment_entry.reference_no = "12345"
+		payment_entry.reference_date = nowdate()
+		payment_entry.submit()
+
+		subscription.reload()
+		self.assertEqual(subscription.status, "Cancelled")
+		self.assertEqual(getdate(subscription.cancelation_date), cancelation_date)
+
+		invoice_count = len(subscription.invoices)
+		subscription.process()
+		subscription.reload()
+		self.assertEqual(subscription.status, "Cancelled")
+		self.assertEqual(len(subscription.invoices), invoice_count)
+
 	def test_first_invoice_generated_on_create_for_prepaid(self):
 		subscription = create_subscription(
 			start_date=nowdate(),

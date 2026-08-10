@@ -653,6 +653,55 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 		# incoming rate after reposting should be 150
 		self.assertSLEs(se, [{"incoming_rate": 150}])
 
+	def test_repost_multi_line_moving_average_return(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		item = self.make_item(properties={"valuation_method": "Moving Average"}).name
+		warehouse = "_Test Warehouse - _TC"
+
+		make_purchase_receipt(item_code=item, qty=100, rate=100, warehouse=warehouse)
+
+		pr = make_purchase_receipt(item_code=item, qty=400, rate=200, warehouse=warehouse, do_not_submit=1)
+		for qty in (100, 300, 100):
+			pr.append(
+				"items",
+				{
+					"item_code": item,
+					"warehouse": warehouse,
+					"qty": qty,
+					"received_qty": qty,
+					"rate": 200,
+					"uom": pr.items[0].uom,
+					"conversion_factor": 1.0,
+				},
+			)
+		pr.save()
+		pr.submit()
+
+		return_pr = make_return_doc(pr.doctype, pr.name)
+		return_pr.save()
+		return_pr.submit()
+
+		expected_sles = [
+			{"outgoing_rate": 190.0, "valuation_rate": 190.0, "qty_after_transaction": 600.0},
+			{"outgoing_rate": 190.0, "valuation_rate": 190.0, "qty_after_transaction": 500.0},
+			{"outgoing_rate": 190.0, "valuation_rate": 190.0, "qty_after_transaction": 200.0},
+			{"outgoing_rate": 190.0, "valuation_rate": 190.0, "qty_after_transaction": 100.0},
+		]
+
+		for _ in range(2):
+			riv = frappe.get_doc(
+				doctype="Repost Item Valuation",
+				based_on="Transaction",
+				voucher_type=pr.doctype,
+				voucher_no=pr.name,
+				posting_date=pr.posting_date,
+				posting_time=pr.posting_time,
+			)
+			riv.submit()
+
+			self.assertSLEs(return_pr, expected_sles)
+
 	def test_remove_attached_file(self):
 		item_code = make_item("_Test Remove Attached File Item", properties={"is_stock_item": 1})
 

@@ -240,6 +240,45 @@ class PickList(TransactionBase):
 	def before_submit(self):
 		self.validate_sales_order()
 		self.validate_picked_items()
+		self.validate_pending_qty_in_work_order()
+
+	def validate_pending_qty_in_work_order(self):
+		"""Rows covered by a live material request must stay within that request;
+		every other row must fit the work order's pending requirement."""
+		if not self.work_order:
+			return
+
+		from erpnext.manufacturing.doctype.work_order.services.required_items import RequiredItemsService
+
+		work_order = frappe.get_doc("Work Order", self.work_order, for_update=True)
+		live_requests = {}
+		request_pending = {}
+		incoming = {}
+
+		for row in self.locations:
+			if row.material_request not in live_requests:
+				live_requests[row.material_request] = is_live_material_request(row.material_request)
+
+			if not (row.material_request_item and live_requests[row.material_request]):
+				incoming[row.item_code] = incoming.get(row.item_code, 0.0) + flt(row.picked_qty)
+				continue
+
+			if row.material_request_item not in request_pending:
+				stock_qty, ordered_qty = frappe.db.get_value(
+					"Material Request Item", row.material_request_item, ["stock_qty", "ordered_qty"]
+				)
+				request_pending[row.material_request_item] = flt(stock_qty) - flt(ordered_qty)
+
+			if flt(row.picked_qty - request_pending[row.material_request_item], 6) > 0:
+				frappe.throw(
+					_("Row #{0}: picked qty {1} {2} exceeds the pending qty in Material Request {3}.").format(
+						row.idx, row.picked_qty, row.stock_uom, row.material_request
+					),
+					title=_("Exceeds Requested Qty"),
+				)
+			request_pending[row.material_request_item] -= flt(row.picked_qty)
+
+		RequiredItemsService(work_order).validate_incoming_material_demand(incoming)
 
 	def validate_sales_order(self):
 		"""Raises an exception if the `Sales Order` has reserved stock."""
@@ -281,6 +320,7 @@ class PickList(TransactionBase):
 		self.update_bundle_picked_qty()
 		self.update_reference_qty()
 		self.update_sales_order_picking_status()
+		self.update_picked_qty_in_work_order()
 		self.update_prevdoc_status()
 
 	def validate_expired_batches(self):
@@ -358,6 +398,7 @@ class PickList(TransactionBase):
 		self.update_bundle_picked_qty()
 		self.update_reference_qty()
 		self.update_sales_order_picking_status()
+		self.update_picked_qty_in_work_order()
 		self.delink_serial_and_batch_bundle()
 		self.update_prevdoc_status()
 
@@ -493,6 +534,15 @@ class PickList(TransactionBase):
 
 		for sales_order in sales_orders:
 			frappe.get_doc("Sales Order", sales_order, for_update=True).update_picking_status()
+
+	def update_picked_qty_in_work_order(self):
+		if not self.work_order:
+			return
+
+		from erpnext.manufacturing.doctype.work_order.services.required_items import RequiredItemsService
+
+		work_order = frappe.get_doc("Work Order", self.work_order)
+		RequiredItemsService(work_order).update_picked_qty_for_required_items()
 
 	@frappe.whitelist()
 	def create_stock_reservation_entries(self, notify: bool = True) -> None:
@@ -936,6 +986,15 @@ def update_pick_list_status(pick_list):
 	if pick_list:
 		doc = frappe.get_doc("Pick List", pick_list)
 		doc.run_method("update_status")
+		doc.update_picked_qty_in_work_order()
+
+
+def is_live_material_request(material_request):
+	if not material_request:
+		return False
+
+	docstatus, status = frappe.db.get_value("Material Request", material_request, ["docstatus", "status"])
+	return docstatus == 1 and status != "Stopped"
 
 
 def get_picked_items_qty(items, contains_packed_items=False) -> list[dict]:

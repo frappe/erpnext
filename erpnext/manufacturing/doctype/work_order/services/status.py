@@ -291,6 +291,12 @@ class StatusService:
 		)
 
 	def set_process_loss_qty(self):
+		self.doc.db_set("process_loss_qty", self._process_loss_qty())
+
+	def _process_loss_qty(self):
+		if self.doc.track_semi_finished_goods:
+			return flt(sum(flt(row.process_loss_qty) for row in self.doc.operations))
+
 		table = frappe.qb.DocType("Stock Entry")
 		process_loss_qty = (
 			frappe.qb.from_(table)
@@ -302,7 +308,7 @@ class StatusService:
 			)
 		).run()[0][0]
 
-		self.doc.db_set("process_loss_qty", flt(process_loss_qty))
+		return flt(process_loss_qty)
 
 	def update_production_plan_status(self):
 		production_plan = frappe.get_doc("Production Plan", self.doc.production_plan)
