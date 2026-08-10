@@ -821,10 +821,13 @@ class JournalEntry(AccountsController):
 				amounts.pay_to_recd_from,
 				"customer_name" if amounts.party_type == "Customer" else "supplier_name",
 			)
-			if amounts.bank_amount:
-				total_amount, currency = amounts.bank_amount, amounts.bank_account_currency
-			else:
-				total_amount, currency = amounts.party_amount, amounts.party_account_currency
+		else:
+			self.pay_to_recd_from = None
+
+		if amounts.bank_amount:
+			total_amount, currency = amounts.bank_amount, amounts.bank_account_currency
+		else:
+			total_amount, currency = amounts.party_amount, amounts.party_account_currency
 
 		self.set_total_amount(total_amount, currency)
 
