@@ -617,16 +617,21 @@ class PaymentReconciliation(Document):
 				reconciled_entry.append(payment_details)
 
 		if entry_list:
+			for entry in entry_list:
+				(
+					entry.payment_currency,
+					entry.payment_exchange_rate,
+				) = self.get_payment_currency_and_exchange_rate(entry)
+
 			reconcile_against_document(entry_list, skip_ref_details_update_for_pe, self.dimensions)
 			for entry in entry_list:
-				payment_currency, payment_exchange_rate = self.get_payment_currency_and_exchange_rate(entry)
 				update_invoice_payment_schedule(
 					entry.against_voucher_type,
 					entry.against_voucher,
 					entry.payment_term,
 					entry.allocated_amount,
-					payment_currency,
-					payment_exchange_rate,
+					entry.payment_currency,
+					entry.payment_exchange_rate,
 				)
 
 		if dr_or_cr_notes:
