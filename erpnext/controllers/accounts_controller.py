@@ -283,6 +283,7 @@ class AccountsController(TransactionBase):
 			if self.is_return:
 				self.validate_qty()
 			else:
+				self.clear_stale_deferred_fields()
 				self.validate_deferred_start_and_end_date()
 
 		self.validate_inter_company_reference()
@@ -666,6 +667,23 @@ class AccountsController(TransactionBase):
 	def validate_auto_repeat_subscription_dates(self):
 		if self.get("from_date") and self.get("to_date") and getdate(self.from_date) > getdate(self.to_date):
 			frappe.throw(_("To Date cannot be before From Date"), title=_("Invalid Auto Repeat Date"))
+
+	def clear_stale_deferred_fields(self):
+		field_map = {
+			"Sales Invoice": "deferred_revenue_account",
+			"Purchase Invoice": "deferred_expense_account",
+		}
+		account_field = field_map.get(self.doctype)
+
+		for item in self.get("items"):
+			if item.get("enable_deferred_revenue") or item.get("enable_deferred_expense"):
+				continue
+
+			item.service_start_date = None
+			item.service_end_date = None
+			item.service_stop_date = None
+			if account_field:
+				item.set(account_field, None)
 
 	def validate_deferred_start_and_end_date(self):
 		for d in self.items:
