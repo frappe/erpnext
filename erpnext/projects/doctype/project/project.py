@@ -50,7 +50,6 @@ class Project(Document):
 		from_time: DF.Time | None
 		gross_margin: DF.Currency
 		holiday_list: DF.Link | None
-		is_active: DF.Literal["Yes", "No"]
 		message: DF.Text | None
 		naming_series: DF.Literal["PROJ-.####"]
 		notes: DF.TextEditor | None
@@ -63,7 +62,7 @@ class Project(Document):
 		project_type: DF.Link | None
 		sales_order: DF.Link | None
 		second_email: DF.Time | None
-		status: DF.Literal["Open", "On hold", "Completed", "Cancelled"]
+		status: DF.Literal["Open", "On hold", "Completed", "Cancelled", "Disabled"]
 		subject: DF.Data | None
 		to_time: DF.Time | None
 		total_billable_amount: DF.Currency
@@ -312,8 +311,8 @@ class Project(Document):
 			if self.percent_complete_method in ("Task Progress", "Task Weight") and total > 0:
 				self.percent_complete = flt(self.get_task_progress(), 2)
 
-		# don't update status if it is manually set to cancelled or on hold
-		if self.status in ("Cancelled", "On hold"):
+		# don't update status if it is manually set to cancelled, on hold, or disabled
+		if self.status in ("Cancelled", "On hold", "Disabled"):
 			return
 
 		self.validate_completed_status()

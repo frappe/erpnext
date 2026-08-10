@@ -12,17 +12,10 @@ frappe.query_reports["Project Summary"] = {
 			reqd: 1,
 		},
 		{
-			fieldname: "is_active",
-			label: __("Is Active"),
-			fieldtype: "Select",
-			options: "\nYes\nNo",
-			default: "Yes",
-		},
-		{
 			fieldname: "status",
 			label: __("Status"),
 			fieldtype: "Select",
-			options: "\nOpen\nOn hold\nCompleted\nCancelled",
+			options: "\nOpen\nOn hold\nCompleted\nCancelled\nDisabled",
 			default: "Open",
 		},
 		{
