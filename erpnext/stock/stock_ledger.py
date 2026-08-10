@@ -26,7 +26,7 @@ from frappe.utils import (
 )
 
 import erpnext
-from erpnext.stock.doctype.bin.bin import update_qty as update_bin_qty
+from erpnext.stock.doctype.bin.bin import update_qty_from_sle
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 	get_auto_batch_nos,
@@ -190,7 +190,7 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 				repost_current_voucher(
 					args, allow_negative_stock, via_landed_cost_voucher, cancelled=cancelled
 				)
-				update_bin_qty(bin_name, args)
+				update_qty_from_sle(bin_name, args)
 			else:
 				frappe.msgprint(
 					_("Item {0} ignored since it is not a stock item").format(args.get("item_code"))
