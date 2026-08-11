@@ -1573,6 +1573,32 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 			item_code=item_code, source=warehouse, qty=470.84, rate=100, posting_date=add_days(today(), -1)
 		)
 
+	def test_zero_qty_row_is_skipped(self):
+		"""A zero-qty non-reconciliation row must be skipped entirely: no SLE,
+		no crash, no reprocessing of the previous row's entry."""
+		from erpnext.stock.stock_ledger import make_sl_entries
+
+		item = make_item(properties={"is_stock_item": 1})
+		voucher_no = f"zero-qty-{uuid4()}"
+
+		make_sl_entries(
+			[
+				frappe._dict(
+					item_code=item.name,
+					warehouse="_Test Warehouse - _TC",
+					company="_Test Company",
+					posting_date=today(),
+					posting_time="12:00:00",
+					voucher_type="Stock Entry",
+					voucher_no=voucher_no,
+					actual_qty=0,
+					stock_uom=item.stock_uom,
+				)
+			]
+		)
+
+		self.assertFalse(frappe.db.exists("Stock Ledger Entry", {"voucher_no": voucher_no}))
+
 
 def create_repack_entry(**args):
 	args = frappe._dict(args)
