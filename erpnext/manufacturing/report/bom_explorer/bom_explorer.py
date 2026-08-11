@@ -24,6 +24,7 @@ def get_exploded_items(bom, data, indent=0, qty=1):
 		fields=[
 			"qty",
 			"bom_no",
+			"bom_no.quantity as child_bom_qty",
 			"stock_qty",
 			"item_code",
 			"item_name",
@@ -51,12 +52,11 @@ def get_exploded_items(bom, data, indent=0, qty=1):
 			}
 		)
 		if item.bom_no:
-			child_bom_qty = frappe.get_cached_value("BOM", item.bom_no, "quantity")
 			get_exploded_items(
 				item.bom_no,
 				data,
 				indent=indent + 1,
-				qty=qty * item.stock_qty / child_bom_qty,
+				qty=qty * item.stock_qty / item.child_bom_qty,
 			)
 
 
