@@ -112,6 +112,7 @@ class TestWarehouse(FrappeTestCase):
 			frappe.delete_doc("Account", "Extra Inventory Account - _TCIF")
 
 		warehouse = frappe.get_doc("Warehouse", {"company": company, "is_group": 0})
+		warehouse.db_set("account", None)
 		single_account = frappe.db.get_value(
 			"Account", {"account_type": "Stock", "is_group": 0, "company": company}, "name"
 		)
@@ -249,6 +250,11 @@ def create_ambiguous_inventory_account_warehouse():
 	)
 	for warehouse_name in warehouses:
 		frappe.db.set_value("Warehouse", warehouse_name, "account", single_account)
+
+	for group_warehouse in frappe.get_all(
+		"Warehouse", filters={"company": company, "is_group": 1}, pluck="name"
+	):
+		frappe.db.set_value("Warehouse", group_warehouse, "account", None)
 
 	warehouse = frappe.get_doc("Warehouse", warehouses[0])
 	warehouse.db_set({"account": None, "disabled": 0})
