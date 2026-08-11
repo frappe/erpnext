@@ -471,7 +471,7 @@ def make_sales_invoice(
 			if source.qty and source.billed_amt:
 				billable_qty -= get_billed_qty_by_item().get(source.name, 0)
 
-			pending_qty_by_item[source.name] = max(flt(billable_qty), 0)
+			pending_qty_by_item[source.name] = max(flt(billable_qty, source.precision("qty")), 0)
 
 		return pending_qty_by_item[source.name]
 
