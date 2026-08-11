@@ -72,6 +72,67 @@ class TestTransactionDeletionRecord(ERPNextTestSuite):
 		tasks_containing_company = frappe.get_all("Task", filters={"company": "_Test Company 7"})
 		self.assertEqual(tasks_containing_company, [])
 
+	def test_lead_deletion_uses_document_lifecycle(self):
+		company = "_Test Company 7"
+		lead = frappe.get_doc(
+			{"doctype": "Lead", "first_name": "_Test Transaction Deletion Lead", "company": company}
+		).insert()
+		contact = frappe.get_doc(
+			{
+				"doctype": "Contact",
+				"first_name": "_Test Transaction Deletion Contact",
+				"links": [
+					{"link_doctype": "Lead", "link_name": lead.name},
+					{"link_doctype": "Customer", "link_name": "_Test Customer"},
+				],
+			}
+		).insert()
+		address = frappe.get_doc(
+			{
+				"doctype": "Address",
+				"address_title": "_Test Transaction Deletion Address",
+				"address_type": "Office",
+				"address_line1": "_Test Address Line",
+				"city": "_Test City",
+				"country": "India",
+				"links": [{"link_doctype": "Lead", "link_name": lead.name}],
+			}
+		).insert()
+
+		create_and_submit_transaction_deletion_doc(company)
+
+		self.assertFalse(frappe.db.exists("Lead", lead.name))
+		self.assertFalse(frappe.db.exists("Address", address.name))
+		self.assertTrue(frappe.db.exists("Contact", contact.name))
+		self.assertFalse(
+			frappe.db.exists(
+				"Dynamic Link",
+				{
+					"parent": contact.name,
+					"parenttype": "Contact",
+					"link_doctype": "Lead",
+					"link_name": lead.name,
+				},
+			)
+		)
+		self.assertTrue(
+			frappe.db.exists(
+				"Dynamic Link",
+				{
+					"parent": contact.name,
+					"parenttype": "Contact",
+					"link_doctype": "Customer",
+					"link_name": "_Test Customer",
+				},
+			)
+		)
+		self.assertTrue(
+			frappe.db.exists("Deleted Document", {"deleted_doctype": "Lead", "deleted_name": lead.name})
+		)
+		self.assertTrue(
+			frappe.db.exists("Deleted Document", {"deleted_doctype": "Address", "deleted_name": address.name})
+		)
+
 	def test_company_transaction_deletion_request(self):
 		"""Test creation via company deletion request method"""
 		from erpnext.setup.doctype.company.company import create_transaction_deletion_request

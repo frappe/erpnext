@@ -687,7 +687,6 @@ class TransactionDeletionRecord(Document):
 		self.enqueue_task(task="Delete Leads and Addresses")
 
 	def delete_lead_addresses(self):
-		"""Delete addresses to which leads are linked"""
 		self.validate_doc_status()
 		if self.delete_leads_and_addresses_status == "Pending":
 			if not self._is_any_doctype_in_deletion_list(["Lead"]):
@@ -696,36 +695,7 @@ class TransactionDeletionRecord(Document):
 				return
 
 			leads = frappe.db.get_all("Lead", filters={"company": self.company}, pluck="name")
-			addresses = []
 			if leads:
-				addresses = frappe.db.get_all(
-					"Dynamic Link", filters={"link_name": ("in", leads)}, pluck="parent"
-				)
-				if addresses:
-					address = qb.DocType("Address")
-					dl1 = qb.DocType("Dynamic Link")
-					dl2 = qb.DocType("Dynamic Link")
-
-					qb.from_(address).delete().where(
-						(address.name.isin(addresses))
-						& (
-							address.name.notin(
-								qb.from_(dl1)
-								.join(dl2)
-								.on((dl1.parent == dl2.parent) & (dl1.link_doctype != dl2.link_doctype))
-								.select(dl1.parent)
-								.distinct()
-							)
-						)
-					).run()
-
-					dynamic_link = qb.DocType("Dynamic Link")
-					qb.from_(dynamic_link).delete().where(
-						(dynamic_link.link_doctype == "Lead")
-						& (dynamic_link.parenttype == "Address")
-						& (dynamic_link.link_name.isin(leads))
-					).run()
-
 				customer = qb.DocType("Customer")
 				qb.update(customer).set(customer.lead_name, None).where(customer.lead_name.isin(leads)).run()
 
@@ -820,14 +790,17 @@ class TransactionDeletionRecord(Document):
 
 						reference_doc_names = [r.name for r in reference_docs]
 
-						self.delete_version_log(docfield.doctype_name, reference_doc_names)
-						self.delete_communications(docfield.doctype_name, reference_doc_names)
-						self.delete_comments(docfield.doctype_name, reference_doc_names)
-						self.unlink_attachments(docfield.doctype_name, reference_doc_names)
-						self.delete_child_tables(docfield.doctype_name, reference_doc_names)
-						self.delete_docs_linked_with_specified_company(
-							docfield.doctype_name, reference_doc_names
-						)
+						if docfield.doctype_name == "Lead":
+							frappe.delete_doc("Lead", reference_doc_names, ignore_permissions=True)
+						else:
+							self.delete_version_log(docfield.doctype_name, reference_doc_names)
+							self.delete_communications(docfield.doctype_name, reference_doc_names)
+							self.delete_comments(docfield.doctype_name, reference_doc_names)
+							self.unlink_attachments(docfield.doctype_name, reference_doc_names)
+							self.delete_child_tables(docfield.doctype_name, reference_doc_names)
+							self.delete_docs_linked_with_specified_company(
+								docfield.doctype_name, reference_doc_names
+							)
 						processed = int(docfield.no_of_docs) + len(reference_doc_names)
 						frappe.db.set_value(docfield.doctype, docfield.name, "no_of_docs", processed)
 					else:
