@@ -79,7 +79,7 @@ def _preprocess_ctx(ctx):
 @erpnext.normalize_ctx_input(ItemDetailsCtx)
 def get_item_details(
 	ctx: ItemDetailsCtx,
-	doc: Document | str | None = None,
+	doc: Document | str | dict | None = None,
 	for_validate: bool | None = False,
 	overwrite_warehouse: bool = True,
 ):
