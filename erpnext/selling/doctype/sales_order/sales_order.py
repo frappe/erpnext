@@ -284,6 +284,9 @@ class SalesOrder(SellingController):
 
 			validate_coupon_code(self.coupon_code)
 
+		if not self.get("is_subcontracted"):
+			self.enable_auto_reserve_stock()
+
 		make_packing_list(self)
 
 		self.validate_with_previous_doc()
@@ -298,8 +301,6 @@ class SalesOrder(SellingController):
 			self.advance_payment_status = "Not Requested"
 
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
-		if not self.get("is_subcontracted"):
-			self.enable_auto_reserve_stock()
 
 	def validate_fg_item_for_subcontracting(self):
 		if self.is_subcontracted:
