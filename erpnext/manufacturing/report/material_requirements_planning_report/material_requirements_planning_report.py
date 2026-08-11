@@ -267,22 +267,17 @@ class MaterialRequirementsPlanningReport:
 
 	def get_detailed_view_chart_data(self, data):
 		chart_data = frappe._dict({})
-		i = 0
 
 		sorted_data = sorted(data, key=lambda x: getdate(x.get("delivery_date")))
 		for row in sorted_data:
-			if getdate(row.deliver_date) < getdate(today()):
-				continue
-
 			if not row.delivery_date:
 				continue
 
-			if i == 10:
-				break
+			if getdate(row.delivery_date) < getdate(today()):
+				continue
 
 			delivery_date = formatdate(row.delivery_date, "dd MMM")
 			if delivery_date not in chart_data:
-				i += 1
 				chart_data[delivery_date] = frappe._dict(
 					{
 						"demand": 0.0,
