@@ -30,6 +30,7 @@ from erpnext.stock.doctype.serial_no.serial_no import *
 from erpnext.stock.doctype.stock_entry.stock_entry import (
 	DuplicateEntryForWorkOrderError,
 	FinishedGoodError,
+	ManufacturedQtyMandatoryError,
 	get_pending_work_orders,
 	make_stock_in_entry,
 )
@@ -1302,6 +1303,18 @@ class TestStockEntry(ERPNextTestSuite):
 		):
 			within_allowance = frappe.get_doc(make_wo_stock_entry(wo.name, "Manufacture", 1))
 			within_allowance.insert()
+
+	def test_manufacture_blocked_without_manufactured_qty(self):
+		from erpnext.manufacturing.doctype.work_order.mapper import (
+			make_stock_entry as make_wo_stock_entry,
+		)
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+
+		wo = make_wo_order_test_record(qty=1, source_warehouse="_Test Warehouse - _TC", skip_transfer=1)
+
+		mfg = frappe.get_doc(make_wo_stock_entry(wo.name, "Manufacture", 1))
+		mfg.fg_completed_qty = 0
+		self.assertRaises(ManufacturedQtyMandatoryError, mfg.insert)
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"action_if_quality_inspection_is_rejected": "Stop"})
 	def test_quality_inspection_required_for_manufacture(self):

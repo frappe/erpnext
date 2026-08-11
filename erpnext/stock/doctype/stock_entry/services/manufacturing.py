@@ -25,6 +25,10 @@ class DuplicateEntryForWorkOrderError(frappe.ValidationError):
 	pass
 
 
+class ManufacturedQtyMandatoryError(frappe.ValidationError):
+	pass
+
+
 class OperationsNotCompleteError(frappe.ValidationError):
 	pass
 
@@ -282,6 +286,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 	def validate(self):
 		self.validate_warehouse()
 		self.validate_raw_materials_exists()
+		self.validate_manufactured_qty()
 		self.check_if_operations_completed()
 		self.check_duplicate_entry_for_work_order()
 		self.validate_component_and_quantities()
@@ -390,6 +395,14 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 	def validate_work_order(self):
 		if not self.doc.work_order:
 			frappe.throw(_("Work Order is mandatory"))
+
+	def validate_manufactured_qty(self):
+		"""Without fg_completed_qty, submit never updates or validates the work order's produced qty."""
+		if not self.wo_doc or self.wo_doc.track_semi_finished_goods:
+			return
+
+		if not self.doc.fg_completed_qty:
+			frappe.throw(_("For Quantity (Manufactured Qty) is mandatory"), ManufacturedQtyMandatoryError)
 
 	def check_if_operations_completed(self):
 		"""Require operation (job card) completion before manufacture, so operating costs are captured."""
@@ -950,6 +963,7 @@ class MaterialConsumptionForManufactureStockEntry(ManufactureStockEntry):
 
 	def validate(self):
 		self.validate_work_order()
+		self.validate_manufactured_qty()
 		self.check_if_operations_completed()
 
 	def add_items(self):
