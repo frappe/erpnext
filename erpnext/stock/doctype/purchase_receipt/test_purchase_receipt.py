@@ -950,12 +950,14 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 	def test_pr_billing_status_with_mixed_direct_and_po_invoice(self):
 		"""A receipt with partial direct billing consumes PO-invoiced amount through
 		the amount-capped branch. The consumed qty must shrink along with the amount,
-		otherwise the next receipt divides by a stale qty and is under-billed.
+		otherwise the next receipt divides by a stale qty and is under-billed. The
+		repair patch must also recalculate values stored before the fix.
 
 		Flow:
 		1. PO (Qty: 10, Rate: 500) -> PI for Qty 5 (Amount 2500)
 		2. PO -> PR1 (Qty 3), then a direct PI for 500 against PR1
 		3. PO -> PR2 (Qty 3) -> reallocation must leave both receipts fully billed
+		4. Seed the old under-billed values -> the repair patch must restore them
 		"""
 		from erpnext.buying.doctype.purchase_order.mapper import (
 			make_purchase_invoice as make_purchase_invoice_from_po,
@@ -992,6 +994,40 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		# PR2 gets the remaining 1500 (3 qty worth), not 1500 * 3/5 = 900.
 		pr2.load_from_db()
+		self.assertEqual(pr2.get("items")[0].billed_amt, 1500)
+		self.assertEqual(pr2.per_billed, 100)
+		self.assertEqual(pr2.status, "Completed")
+
+		from erpnext.patches.v16_0 import recalculate_mixed_purchase_receipt_billing_status
+
+		purchase_order_item = po.items[0].name
+		frappe.db.set_value(
+			"Purchase Receipt Item",
+			pr2.items[0].name,
+			"billed_amt",
+			900,
+			update_modified=False,
+		)
+		frappe.db.set_value(
+			"Purchase Receipt",
+			pr2.name,
+			{"per_billed": 60, "status": "Partly Billed"},
+			update_modified=False,
+		)
+
+		with patch.object(
+			recalculate_mixed_purchase_receipt_billing_status,
+			"get_candidate_purchase_order_items",
+			return_value=[purchase_order_item],
+		):
+			recalculate_mixed_purchase_receipt_billing_status.execute()
+
+			pr2.load_from_db()
+			modified_after_repair = pr2.modified
+			recalculate_mixed_purchase_receipt_billing_status.execute()
+			pr2.load_from_db()
+			self.assertEqual(pr2.modified, modified_after_repair)
+
 		self.assertEqual(pr2.get("items")[0].billed_amt, 1500)
 		self.assertEqual(pr2.per_billed, 100)
 		self.assertEqual(pr2.status, "Completed")
