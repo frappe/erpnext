@@ -25,6 +25,11 @@ def execute():
 
 def get_affected_purchase_order_items() -> list[str]:
 	purchase_order_items = get_candidate_purchase_order_items()
+	if purchase_order_items:
+		purchase_order_items = exclude_purchase_order_items_with_invoice_created_receipts(
+			purchase_order_items
+		)
+
 	if not purchase_order_items:
 		return []
 
@@ -53,6 +58,21 @@ def get_affected_purchase_order_items() -> list[str]:
 		)
 		> 0
 	]
+
+
+def exclude_purchase_order_items_with_invoice_created_receipts(purchase_order_items: list[str]) -> list[str]:
+	invoice_created_receipt_items = set(
+		frappe.get_all(
+			"Purchase Receipt Item",
+			filters={
+				"purchase_order_item": ("in", purchase_order_items),
+				"purchase_invoice_item": ("is", "set"),
+				"docstatus": 1,
+			},
+			pluck="purchase_order_item",
+		)
+	)
+	return [item for item in purchase_order_items if item not in invoice_created_receipt_items]
 
 
 def get_candidate_purchase_order_items() -> list[str]:
