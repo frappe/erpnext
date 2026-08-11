@@ -8,6 +8,7 @@ from frappe.utils import cint, flt
 import erpnext
 from erpnext.accounts.general_ledger import process_gl_map
 from erpnext.accounts.utils import get_account_currency
+from erpnext.stock import get_warehouse_account
 from erpnext.stock.services.base_stock_gl_composer import BaseStockGLComposer
 
 
@@ -312,11 +313,14 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 					supplier_warehouse_account = None
 					supplier_warehouse_account_currency = None
 					if doc.supplier_warehouse:
-						if _inv_dict := doc.get_inventory_account_dict(
-							d, inventory_account_map, "supplier_warehouse"
-						):
-							supplier_warehouse_account = _inv_dict["account"]
-							supplier_warehouse_account_currency = _inv_dict["account_currency"]
+						supplier_warehouse_account = get_warehouse_account(
+							frappe.get_cached_doc("Warehouse", doc.supplier_warehouse),
+							raise_error=bool(flt(d.rm_supp_cost)),
+						)
+						if supplier_warehouse_account:
+							supplier_warehouse_account_currency = get_account_currency(
+								supplier_warehouse_account
+							)
 
 					if (
 						flt(stock_value_diff) == flt(d.rm_supp_cost)
