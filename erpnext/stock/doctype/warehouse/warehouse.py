@@ -52,10 +52,18 @@ class Warehouse(NestedSet):
 
 		self.name = self.warehouse_name
 
+	def before_insert(self):
+		if (
+			self.company
+			and not self.flags.ignore_inventory_account_validation
+			and frappe.get_cached_value("Company", self.company, "enable_perpetual_inventory")
+		):
+			get_warehouse_account(self, get_warehouse_account_map(self.company))
+
 	def onload(self):
 		"""load account name for General Ledger Report"""
 		if self.company and cint(frappe.db.get_value("Company", self.company, "enable_perpetual_inventory")):
-			account = self.account or get_warehouse_account(self)
+			account = self.account or get_warehouse_account(self, raise_error=False)
 
 			if account:
 				self.set_onload("account", account)
