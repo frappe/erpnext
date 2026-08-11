@@ -52,14 +52,6 @@ class Warehouse(NestedSet):
 
 		self.name = self.warehouse_name
 
-	def before_insert(self):
-		if (
-			self.company
-			and not self.flags.ignore_inventory_account_validation
-			and frappe.get_cached_value("Company", self.company, "enable_perpetual_inventory")
-		):
-			get_warehouse_account(self, get_warehouse_account_map(self.company))
-
 	def onload(self):
 		"""load account name for General Ledger Report"""
 		if self.company and cint(frappe.db.get_value("Company", self.company, "enable_perpetual_inventory")):
@@ -70,7 +62,27 @@ class Warehouse(NestedSet):
 		load_address_and_contact(self)
 
 	def validate(self):
+		self.validate_inventory_account()
 		self.warn_about_multiple_warehouse_account()
+
+	def validate_inventory_account(self):
+		if (
+			not self.is_new()
+			or not self.company
+			or self.flags.ignore_inventory_account_validation
+			or not frappe.get_cached_value("Company", self.company, "enable_perpetual_inventory")
+		):
+			return
+
+		warehouse = frappe._dict(self.as_dict())
+		if not self.account and self.parent_warehouse:
+			parent_bounds = frappe.db.get_value(
+				"Warehouse", self.parent_warehouse, ["lft", "rgt"], as_dict=True
+			)
+			if parent_bounds:
+				warehouse.update(parent_bounds)
+
+		get_warehouse_account(warehouse)
 
 	def on_update(self):
 		self.update_nsm_model()
