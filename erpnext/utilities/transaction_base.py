@@ -356,6 +356,17 @@ class TransactionBase(StatusUpdater):
 		if not item_obj.item_code:
 			return
 
+		# Do not carry item-specific values from the previously selected item.
+		for fieldname in (
+			"weight_per_unit",
+			"weight_uom",
+			"uom",
+			"conversion_factor",
+			"barcode",
+			"pricing_rules",
+		):
+			item_obj.set(fieldname, None)
+
 		# 'item_details' has latest item related values
 		item_details = self.fetch_item_details(item_obj)
 
