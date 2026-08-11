@@ -513,6 +513,8 @@ class JobCard(Document):
 			)
 
 	def add_time_log(self, args):
+		self.validate_transfer_qty()
+
 		last_row = []
 		employees = args.employees
 		if isinstance(employees, str):

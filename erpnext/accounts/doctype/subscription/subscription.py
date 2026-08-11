@@ -222,6 +222,9 @@ class Subscription(Document):
 		"""
 		Sets the status of the `Subscription`
 		"""
+		if self.status == "Cancelled":
+			return
+
 		if self.is_trialling():
 			self.status = "Trialling"
 		elif self.status == "Active" and self.end_date and getdate(posting_date) > getdate(self.end_date):
@@ -558,6 +561,11 @@ class Subscription(Document):
 		1. `process_for_active`
 		2. `process_for_past_due`
 		"""
+		# Snapshot before update_subscription_period() below can roll this forward,
+		# so the cancel_at_period_end check further down still targets the period
+		# that just ended, not the next one.
+		current_period_end = self.current_invoice_end
+
 		if not self.is_current_invoice_generated(
 			self.current_invoice_start, self.current_invoice_end
 		) and self.can_generate_new_invoice(posting_date):
@@ -567,8 +575,8 @@ class Subscription(Document):
 			self.update_subscription_period()
 
 		if self.cancel_at_period_end and (
-			getdate(posting_date) >= getdate(self.current_invoice_end)
-			or getdate(posting_date) >= getdate(self.end_date)
+			getdate(posting_date) >= getdate(current_period_end)
+			or (self.end_date and getdate(posting_date) >= getdate(self.end_date))
 		):
 			self.cancel_subscription()
 
