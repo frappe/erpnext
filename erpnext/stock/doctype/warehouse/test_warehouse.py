@@ -112,6 +112,7 @@ class TestWarehouse(FrappeTestCase):
 			frappe.delete_doc("Account", "Extra Inventory Account - _TCIF")
 
 		warehouse = frappe.get_doc("Warehouse", {"company": company, "is_group": 0})
+		warehouse.db_set("account", None)
 		single_account = frappe.db.get_value(
 			"Account", {"account_type": "Stock", "is_group": 0, "company": company}, "name"
 		)
@@ -124,6 +125,101 @@ class TestWarehouse(FrappeTestCase):
 			company=company,
 		)
 		self.assertRaises(frappe.ValidationError, get_warehouse_account, warehouse)
+
+	def test_unrelated_warehouse_without_inventory_account_is_ignored(self):
+		from erpnext.stock import get_warehouse_account_map
+
+		company, warehouse = create_ambiguous_inventory_account_warehouse()
+		warehouse_account_map = get_warehouse_account_map(company)
+		resolved_warehouse = next(iter(warehouse_account_map))
+
+		self.assertNotIn(warehouse.name, warehouse_account_map)
+		self.assertTrue(warehouse_account_map[resolved_warehouse].account)
+
+	def test_direct_warehouse_account_map_lookup_remains_strict(self):
+		from erpnext.stock import get_warehouse_account_map
+
+		company, warehouse = create_ambiguous_inventory_account_warehouse()
+
+		with self.assertRaises(frappe.ValidationError):
+			get_warehouse_account_map(company)[warehouse.name]
+
+	def test_new_warehouse_requires_inventory_account(self):
+		company, _warehouse = create_ambiguous_inventory_account_warehouse()
+		frappe.db.set_value("Company", company, "enable_perpetual_inventory", 1)
+		parent_warehouse = frappe.db.get_value("Warehouse", {"company": company, "is_group": 1}, "name")
+		frappe.db.set_value("Warehouse", parent_warehouse, "account", None)
+		warehouse = frappe.get_doc(
+			{
+				"doctype": "Warehouse",
+				"warehouse_name": "Missing Inventory Account",
+				"parent_warehouse": parent_warehouse,
+				"company": company,
+			}
+		)
+
+		self.assertRaisesRegex(frappe.ValidationError, "Missing Inventory Account - _TCIF", warehouse.insert)
+
+	def test_new_warehouse_can_inherit_inventory_account(self):
+		from erpnext.stock import get_warehouse_account
+
+		company, _warehouse = create_ambiguous_inventory_account_warehouse()
+		frappe.db.set_value("Company", company, "enable_perpetual_inventory", 1)
+		parent_warehouse = frappe.db.get_value("Warehouse", {"company": company, "is_group": 1}, "name")
+		inventory_account = frappe.db.get_value(
+			"Account", {"company": company, "account_type": "Stock", "is_group": 0}, "name"
+		)
+		frappe.db.set_value("Warehouse", parent_warehouse, "account", inventory_account)
+
+		warehouse = frappe.get_doc(
+			{
+				"doctype": "Warehouse",
+				"warehouse_name": "Inherited Inventory Account",
+				"parent_warehouse": parent_warehouse,
+				"company": company,
+			}
+		).insert()
+
+		self.assertEqual(get_warehouse_account(warehouse), inventory_account)
+
+	def test_new_warehouse_inherits_from_parent_created_in_same_transaction(self):
+		from erpnext.stock import get_warehouse_account
+
+		company, _warehouse = create_ambiguous_inventory_account_warehouse()
+		frappe.db.set_value("Company", company, "enable_perpetual_inventory", 1)
+		root_warehouse = frappe.db.get_value("Warehouse", {"company": company, "is_group": 1}, "name")
+		inventory_account = frappe.db.get_value(
+			"Account", {"company": company, "account_type": "Stock", "is_group": 0}, "name"
+		)
+
+		parent_warehouse = frappe.get_doc(
+			{
+				"doctype": "Warehouse",
+				"warehouse_name": "New Parent Warehouse",
+				"parent_warehouse": root_warehouse,
+				"company": company,
+				"is_group": 1,
+				"account": inventory_account,
+			}
+		).insert()
+		child_warehouse = frappe.get_doc(
+			{
+				"doctype": "Warehouse",
+				"warehouse_name": "New Child Warehouse",
+				"parent_warehouse": parent_warehouse.name,
+				"company": company,
+			}
+		).insert()
+
+		self.assertEqual(get_warehouse_account(child_warehouse), inventory_account)
+
+	def test_warehouse_onload_allows_missing_inventory_account(self):
+		company, warehouse = create_ambiguous_inventory_account_warehouse()
+		frappe.db.set_value("Company", company, "enable_perpetual_inventory", 1)
+
+		warehouse.run_method("onload")
+
+		self.assertNotIn("account", warehouse.get_onload())
 
 
 def create_inventory_fallback_company():
@@ -140,6 +236,38 @@ def create_inventory_fallback_company():
 			}
 		).insert(ignore_permissions=True)
 	return company
+
+
+def create_ambiguous_inventory_account_warehouse():
+	company = create_inventory_fallback_company()
+	frappe.db.set_value("Company", company, "default_inventory_account", None)
+
+	single_account = frappe.db.get_value(
+		"Account", {"account_type": "Stock", "is_group": 0, "company": company}, "name"
+	)
+	warehouses = frappe.get_all(
+		"Warehouse", filters={"company": company, "is_group": 0}, pluck="name", order_by="name"
+	)
+	for warehouse_name in warehouses:
+		frappe.db.set_value("Warehouse", warehouse_name, "account", single_account)
+
+	for group_warehouse in frappe.get_all(
+		"Warehouse", filters={"company": company, "is_group": 1}, pluck="name"
+	):
+		frappe.db.set_value("Warehouse", group_warehouse, "account", None)
+
+	warehouse = frappe.get_doc("Warehouse", warehouses[0])
+	warehouse.db_set({"account": None, "disabled": 0})
+
+	if not frappe.db.exists("Account", "Extra Inventory Account - _TCIF"):
+		create_account(
+			account_name="Extra Inventory Account",
+			parent_account=frappe.db.get_value("Account", single_account, "parent_account"),
+			account_type="Stock",
+			company=company,
+		)
+
+	return company, warehouse
 
 
 def create_warehouse(warehouse_name, properties=None, company=None):
