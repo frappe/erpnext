@@ -727,6 +727,7 @@ def get_company_default_account_fields():
 		"stock_delivered_but_not_billed": "Stock Delivered But Not Billed Account",
 		"stock_adjustment_account": "Stock Adjustment Account",
 		"write_off_account": "Write Off Account",
+		"bank_charges_account": "Bank Charges Account",
 		"default_discount_account": "Default Payment Discount Account",
 		"unrealized_profit_loss_account": "Unrealized Profit / Loss Account",
 		"exchange_gain_loss_account": "Exchange Gain / Loss Account",
