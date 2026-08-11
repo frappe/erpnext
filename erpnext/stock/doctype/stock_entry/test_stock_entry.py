@@ -1297,6 +1297,12 @@ class TestStockEntry(ERPNextTestSuite):
 		duplicate = frappe.get_doc(make_wo_stock_entry(wo.name, "Manufacture", 1))
 		self.assertRaises(DuplicateEntryForWorkOrderError, duplicate.insert)
 
+		with self.change_settings(
+			"Manufacturing Settings", {"overproduction_percentage_for_work_order": 100}
+		):
+			within_allowance = frappe.get_doc(make_wo_stock_entry(wo.name, "Manufacture", 1))
+			within_allowance.insert()
+
 	@ERPNextTestSuite.change_settings("Stock Settings", {"action_if_quality_inspection_is_rejected": "Stop"})
 	def test_quality_inspection_required_for_manufacture(self):
 		from erpnext.exceptions import QualityInspectionRejectedError, QualityInspectionRequiredError
