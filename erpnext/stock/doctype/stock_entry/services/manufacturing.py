@@ -436,7 +436,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		)
 
 	def check_duplicate_entry_for_work_order(self):
-		"""Block another manufacture entry once existing entries already cover the full work order qty."""
+		"""Block another manufacture entry once existing entries already cover the work order qty plus allowance."""
 		if not self.wo_doc or self.wo_doc.track_semi_finished_goods:
 			return
 
@@ -453,7 +453,11 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		if not other_entries:
 			return
 
-		if self.get_fg_qty_already_entered(other_entries) >= flt(self.wo_doc.qty):
+		allowance_percentage = flt(
+			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order")
+		)
+		allowed_qty = flt(self.wo_doc.qty) + (allowance_percentage / 100 * flt(self.wo_doc.qty))
+		if self.get_fg_qty_already_entered(other_entries) >= allowed_qty:
 			frappe.throw(
 				_("Stock Entries already created for Work Order {0}: {1}").format(
 					self.doc.work_order, ", ".join(other_entries)
