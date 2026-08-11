@@ -787,6 +787,13 @@ class Company(NestedSet):
 
 			self.db_set("write_off_account", write_off_acct)
 
+		if not self.bank_charges_account:
+			bank_charges_acct = frappe.db.get_value(
+				"Account", {"account_name": _("Bank Charges"), "company": self.name, "is_group": 0}
+			)
+
+			self.db_set("bank_charges_account", bank_charges_acct)
+
 		if not self.exchange_gain_loss_account:
 			exchange_gain_loss_acct = frappe.db.get_value(
 				"Account", {"account_name": _("Exchange Gain/Loss"), "company": self.name, "is_group": 0}
