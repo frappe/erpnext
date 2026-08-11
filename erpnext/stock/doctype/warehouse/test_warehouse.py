@@ -164,7 +164,7 @@ class TestWarehouse(ERPNextTestSuite):
 			}
 		)
 
-		self.assertRaises(frappe.ValidationError, warehouse.insert)
+		self.assertRaisesRegex(frappe.ValidationError, "Missing Inventory Account - _TCIF", warehouse.insert)
 
 	def test_new_warehouse_can_inherit_inventory_account(self):
 		from erpnext.stock import get_warehouse_account
@@ -187,6 +187,37 @@ class TestWarehouse(ERPNextTestSuite):
 		).insert()
 
 		self.assertEqual(get_warehouse_account(warehouse), inventory_account)
+
+	def test_new_warehouse_inherits_from_parent_created_in_same_transaction(self):
+		from erpnext.stock import get_warehouse_account
+
+		company, _warehouse = create_ambiguous_inventory_account_warehouse()
+		frappe.db.set_value("Company", company, "enable_perpetual_inventory", 1)
+		root_warehouse = frappe.db.get_value("Warehouse", {"company": company, "is_group": 1}, "name")
+		inventory_account = frappe.db.get_value(
+			"Account", {"company": company, "account_type": "Stock", "is_group": 0}, "name"
+		)
+
+		parent_warehouse = frappe.get_doc(
+			{
+				"doctype": "Warehouse",
+				"warehouse_name": "New Parent Warehouse",
+				"parent_warehouse": root_warehouse,
+				"company": company,
+				"is_group": 1,
+				"account": inventory_account,
+			}
+		).insert()
+		child_warehouse = frappe.get_doc(
+			{
+				"doctype": "Warehouse",
+				"warehouse_name": "New Child Warehouse",
+				"parent_warehouse": parent_warehouse.name,
+				"company": company,
+			}
+		).insert()
+
+		self.assertEqual(get_warehouse_account(child_warehouse), inventory_account)
 
 	def test_warehouse_onload_allows_missing_inventory_account(self):
 		company, warehouse = create_ambiguous_inventory_account_warehouse()
