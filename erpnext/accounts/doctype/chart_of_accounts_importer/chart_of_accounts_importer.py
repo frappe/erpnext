@@ -455,6 +455,7 @@ def unset_existing_data(company):
 	frappe.db.set_value("Company", company, update_values, update_values)
 
 	# remove accounts data from various doctypes
+<<<<<<< HEAD
 	for doctype in [
 		"Account",
 		"Party Account",
@@ -465,6 +466,13 @@ def unset_existing_data(company):
 	]:
 		dt = frappe.qb.DocType(doctype)
 		frappe.qb.from_(dt).where(dt.company == company).delete().run()
+=======
+	for doctype in ["Account", "Sales Taxes and Charges Template", "Purchase Taxes and Charges Template"]:
+		frappe.get_query(doctype, delete=True, filters={"company": company}, ignore_permissions=False).run()
+>>>>>>> 89e2c3c3e5 (fix: allow non-admin roles to import chart of accounts (#57454))
+
+	for doctype in ["Party Account", "Mode of Payment Account", "Tax Withholding Account"]:
+		frappe.get_query(doctype, delete=True, filters={"company": company}, ignore_permissions=True).run()
 
 
 def set_default_accounts(company):
