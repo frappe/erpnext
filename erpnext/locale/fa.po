@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-08-09 09:47+0000\n"
-"PO-Revision-Date: 2026-08-09 11:02\n"
+"PO-Revision-Date: 2026-08-11 11:06\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -26428,7 +26428,7 @@ msgstr "قرارداد فرعی شده است"
 #. Label of the is_sub_contracted_item (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Is Subcontracted Item"
-msgstr ""
+msgstr "آیا آیتم پیمانکاری فرعی است"
 
 #. Label of the is_tax_withholding_account (Check) field in DocType 'Advance
 #. Taxes and Charges'
@@ -28294,7 +28294,7 @@ msgstr "زمان برنامه‌ریزی شده کارت کار"
 #. Name of a DocType
 #: erpnext/manufacturing/doctype/job_card_secondary_item/job_card_secondary_item.json
 msgid "Job Card Secondary Item"
-msgstr ""
+msgstr "آیتم فرعی کارت کار"
 
 #. Name of a report
 #. Label of a Link in the Manufacturing Workspace
@@ -42717,7 +42717,7 @@ msgstr "ثبت درخواست مواد زمانی که موجودی به سطح 
 #. Label of the complaint_raised_by (Data) field in DocType 'Warranty Claim'
 #: erpnext/support/doctype/warranty_claim/warranty_claim.json
 msgid "Raised By"
-msgstr ""
+msgstr "مطرح شده توسط"
 
 #. Label of the raised_by (Data) field in DocType 'Issue'
 #: erpnext/support/doctype/issue/issue.json
@@ -45147,7 +45147,7 @@ msgstr "بازنشانی قرارداد سطح سرویس."
 #. Label of the resignation_letter_date (Date) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Resignation Letter Date"
-msgstr ""
+msgstr "تاریخ نامه استعفا"
 
 #. Label of the sb_00 (Section Break) field in DocType 'Quality Action'
 #. Label of the resolution (Text Editor) field in DocType 'Quality Action
