@@ -249,6 +249,26 @@ class TestJobCard(FrappeTestCase):
 		# JC is Completed with excess transfer
 		self.assertEqual(job_card.status, "Completed")
 
+	def test_job_card_time_log_blocked_until_material_transfer(self):
+		"Time logs must wait for the transfer when RMs move against Job Card."
+		self.transfer_material_against = "Job Card"
+		self.source_warehouse = "Stores - _TC"
+
+		self.generate_required_stock(self.work_order)
+		job_card = frappe.get_last_doc("Job Card", {"work_order": self.work_order.name})
+
+		self.assertRaises(
+			frappe.ValidationError, job_card.add_time_log, frappe._dict(start_time=now(), employees=[])
+		)
+
+		transfer_entry = make_stock_entry_from_jc(job_card.name)
+		transfer_entry.insert()
+		transfer_entry.submit()
+
+		job_card.reload()
+		job_card.add_time_log(frappe._dict(start_time=now(), employees=[]))
+		self.assertTrue(job_card.time_logs)
+
 	@change_settings("Manufacturing Settings", {"job_card_excess_transfer": 0})
 	def test_job_card_excess_material_transfer_block(self):
 		self.transfer_material_against = "Job Card"
