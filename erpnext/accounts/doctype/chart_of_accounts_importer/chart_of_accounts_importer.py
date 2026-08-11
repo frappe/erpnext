@@ -83,16 +83,20 @@ def import_coa(file_name: str, company: str):
 
 	# delete existing data for accounts
 	frappe.has_permission("Company", "write", company, throw=True)
-	validate_company(company)
-	unset_existing_data(company)
 
 	# create accounts
 	file_doc, extension = get_file(file_name)
+	validate_accounts(file_doc, extension)
 
 	if extension == "csv":
 		data = generate_data_from_csv(file_doc)
 	else:
 		data = generate_data_from_excel(file_doc, extension)
+
+	validate_columns(data)
+
+	validate_company(company)
+	unset_existing_data(company)
 
 	frappe.local.flags.ignore_root_company_validation = True
 	forest = build_forest(data)
