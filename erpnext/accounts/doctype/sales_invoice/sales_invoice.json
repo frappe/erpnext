@@ -297,7 +297,6 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Tax Id",
-   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -1940,6 +1939,7 @@
    "allow_on_submit": 1,
    "fieldname": "additional_discount_account",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Discount Account",
    "options": "Account"
   },
@@ -2360,7 +2360,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2026-06-21 12:46:13.250145",
+ "modified": "2026-08-11 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
