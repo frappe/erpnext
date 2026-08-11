@@ -158,9 +158,9 @@ def _item_query_filters(filters):
 
 def _item_query_or_filters(txt, searchfields, query_filters):
 	if not txt:
-		return {}
+		return []
 
-	or_filters = {s_field: ("like", f"%{txt}%") for s_field in searchfields}
+	or_filters = [[s_field, "like", f"%{txt}%"] for s_field in searchfields]
 	barcodes = frappe.get_all(
 		"Item Barcode",
 		fields=["parent as item_code"],
@@ -169,7 +169,7 @@ def _item_query_or_filters(txt, searchfields, query_filters):
 	)
 	barcode_codes = [d.item_code for d in barcodes]
 	if barcode_codes:
-		or_filters["name"] = ("in", barcode_codes)
+		or_filters.append(["name", "in", barcode_codes])
 	return or_filters
 
 
