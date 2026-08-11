@@ -1577,10 +1577,10 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 
 	query_filters = {"disabled": 0, "ifnull(end_of_life, '3099-12-31')": (">", today())}
 
-	or_cond_filters = {}
+	or_cond_filters = []
 	if txt:
 		for s_field in searchfields:
-			or_cond_filters[s_field] = ("like", f"%{txt}%")
+			or_cond_filters.append([s_field, "like", f"%{txt}%"])
 
 		barcodes = frappe.get_all(
 			"Item Barcode",
@@ -1590,7 +1590,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 
 		barcodes = [d.item_code for d in barcodes]
 		if barcodes:
-			or_cond_filters["name"] = ("in", barcodes)
+			or_cond_filters.append(["name", "in", barcodes])
 
 	if filters and filters.get("item_code"):
 		has_variants = frappe.get_cached_value("Item", filters.get("item_code"), "has_variants")
