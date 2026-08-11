@@ -350,11 +350,7 @@ class TransactionBase(StatusUpdater):
 		)
 
 	@frappe.whitelist()
-<<<<<<< HEAD
-	def process_item_selection(self, item_idx):
-=======
 	def process_item_selection(self, item_idx: int, reset_item_details: bool = False):
->>>>>>> e8c890a844 (fix(selling): preserve explicit UOM during item selection)
 		# Server side 'item' doc. Update this to reflect in UI
 		item_obj = self.get("items", {"idx": item_idx})[0]
 
