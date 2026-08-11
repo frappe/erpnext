@@ -10,6 +10,7 @@ import frappe.utils
 from frappe import _, qb
 from frappe.contacts.doctype.address.address import get_company_address
 from frappe.desk.notifications import clear_doctype_notifications
+from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
 from frappe.query_builder.functions import Sum
@@ -1327,7 +1328,12 @@ def get_qty_net_of_returns(so_item) -> float:
 
 
 @frappe.whitelist()
-def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, args=None):
+def make_sales_invoice(
+	source_name: str,
+	target_doc: str | dict | Document | None = None,
+	ignore_permissions: bool = False,
+	args: str | dict | None = None,
+):
 	if args is None:
 		args = {}
 	if isinstance(args, str):
