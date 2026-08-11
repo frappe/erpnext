@@ -557,6 +557,33 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		var me = this;
 		frappe.flags.dialog_set = false;
 
+<<<<<<< HEAD
+=======
+		// Experimental: This will be removed once stability is achieved.
+		if (!frappe.boot.sysdefaults.use_legacy_js_reactivity) {
+			var item = frappe.get_doc(cdt, cdn);
+
+			frappe.call({
+				doc: doc,
+				method: "process_item_selection",
+				args: {
+					item_idx: item.idx,
+					reset_item_details: true,
+				},
+				callback: function (r) {
+					if (!r.exc) {
+						me.frm.refresh_fields();
+						me.show_batch_dialog_if_required(item);
+					}
+				},
+			});
+		} else {
+			me.process_item_selection(doc, cdt, cdn);
+		}
+	}
+
+	process_item_selection(doc, cdt, cdn) {
+>>>>>>> e8c890a844 (fix(selling): preserve explicit UOM during item selection)
 		var item = frappe.get_doc(cdt, cdn);
 		var update_stock = 0, show_batch_dialog = 0;
 		item.weight_per_unit = 0;
