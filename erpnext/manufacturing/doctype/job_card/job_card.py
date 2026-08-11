@@ -1579,6 +1579,7 @@ class JobCard(Document):
 	def start_timer(self, **kwargs):
 		frappe.has_permission("Job Card", "write", doc=self, throw=True)
 		self.validate_docstatus()
+		self.validate_transfer_qty()
 
 		if isinstance(kwargs, dict):
 			kwargs = frappe._dict(kwargs)
@@ -1596,6 +1597,7 @@ class JobCard(Document):
 
 		frappe.has_permission("Job Card", "write", doc=self, throw=True)
 		self.validate_docstatus()
+		self.validate_transfer_qty()
 
 		if isinstance(kwargs, dict):
 			kwargs = frappe._dict(kwargs)
