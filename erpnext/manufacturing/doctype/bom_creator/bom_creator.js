@@ -208,13 +208,6 @@ frappe.ui.form.on("BOM Creator", {
 });
 
 frappe.ui.form.on("BOM Creator Item", {
-	item_code(frm, cdt, cdn) {
-		let item = frappe.get_doc(cdt, cdn);
-		if (item.item_code && item.is_root) {
-			frappe.model.set_value(cdt, cdn, "fg_item", item.item_code);
-		}
-	},
-
 	do_not_explode(frm, cdt, cdn) {
 		let item = frappe.get_doc(cdt, cdn);
 		if (!item.do_not_explode) {
@@ -237,6 +230,31 @@ frappe.ui.form.on("BOM Creator Item", {
 });
 
 erpnext.bom.BomConfigurator = class BomConfigurator extends erpnext.TransactionController {
+	item_code(doc, cdt, cdn) {
+		// BOM Creator is not a TransactionBase doc, so skip the inherited item details pipeline
+		let item = frappe.get_doc(cdt, cdn);
+		if (cdt !== "BOM Creator Item" || !item.item_code) {
+			return;
+		}
+
+		if (item.is_root) {
+			frappe.model.set_value(cdt, cdn, "fg_item", item.item_code);
+		}
+
+		// the row can be pointed at another item before this resolves
+		let selected_item = item.item_code;
+		frappe.db.get_value("Item", selected_item, "stock_uom").then((r) => {
+			if (!r.message || item.item_code !== selected_item) {
+				return;
+			}
+
+			frappe.model.set_value(cdt, cdn, {
+				uom: r.message.stock_uom,
+				conversion_factor: 1,
+			});
+		});
+	}
+
 	conversion_rate(doc) {
 		if (this.frm.doc.currency === this.get_company_currency()) {
 			this.frm.set_value("conversion_rate", 1.0);
