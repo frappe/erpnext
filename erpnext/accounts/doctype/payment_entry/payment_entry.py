@@ -1140,7 +1140,10 @@ class PaymentEntry(AccountsController):
 				("bank_charges_account", "exchange_gain_loss_account", "cost_center"),
 				as_dict=True,
 			)
-			account = values.bank_charges_account or values.exchange_gain_loss_account
+			is_single_currency = self.paid_from_account_currency == self.paid_to_account_currency
+			account = (
+				is_single_currency and values.bank_charges_account
+			) or values.exchange_gain_loss_account
 
 			missing_fields = {"exchange_gain_loss_account": account, "cost_center": values.cost_center}
 			for fieldname, value in missing_fields.items():

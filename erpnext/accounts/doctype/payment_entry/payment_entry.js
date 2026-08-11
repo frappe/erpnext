@@ -1292,8 +1292,10 @@ frappe.ui.form.on("Payment Entry", {
 
 		if (!row) {
 			const company_defaults = frappe.get_doc(":Company", frm.doc.company);
+			const is_single_currency =
+				frm.doc.paid_from_account_currency === frm.doc.paid_to_account_currency;
 			const account =
-				company_defaults?.bank_charges_account ||
+				(is_single_currency && company_defaults?.bank_charges_account) ||
 				company_defaults?.[account_fieldname] ||
 				(await prompt_for_missing_account(frm, account_fieldname));
 
