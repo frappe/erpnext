@@ -825,6 +825,9 @@ class TestPaymentEntry(ERPNextTestSuite):
 		self.validate_gl_entries(pe.name, expected_gle)
 
 	def test_cross_currency_transfer_ignores_bank_charges_account(self):
+		exchange_gain_loss_account = frappe.db.get_value(
+			"Company", "_Test Company", "exchange_gain_loss_account"
+		)
 		bank_charges_account = create_account(
 			parent_account="Indirect Expenses - _TC",
 			account_name="_Test Bank Charges",
@@ -849,7 +852,7 @@ class TestPaymentEntry(ERPNextTestSuite):
 		pe.set_exchange_rate()
 		pe.set_amounts()
 
-		self.assertEqual(pe.deductions[0].account, "_Test Exchange Gain/Loss - _TC")
+		self.assertEqual(pe.deductions[0].account, exchange_gain_loss_account)
 		self.assertEqual(pe.deductions[0].amount, 500)
 		pe.deductions[0].cost_center = "_Test Cost Center - _TC"
 
@@ -861,7 +864,7 @@ class TestPaymentEntry(ERPNextTestSuite):
 			for d in [
 				["_Test Bank USD - _TC", 0, 5000, None],
 				["_Test Bank - _TC", 4500, 0, None],
-				["_Test Exchange Gain/Loss - _TC", 500.0, 0, None],
+				[exchange_gain_loss_account, 500.0, 0, None],
 			]
 		)
 
