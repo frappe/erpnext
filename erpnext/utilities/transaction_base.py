@@ -350,23 +350,28 @@ class TransactionBase(StatusUpdater):
 		)
 
 	@frappe.whitelist()
+<<<<<<< HEAD
 	def process_item_selection(self, item_idx):
+=======
+	def process_item_selection(self, item_idx: int, reset_item_details: bool = False):
+>>>>>>> e8c890a844 (fix(selling): preserve explicit UOM during item selection)
 		# Server side 'item' doc. Update this to reflect in UI
 		item_obj = self.get("items", {"idx": item_idx})[0]
 
 		if not item_obj.item_code:
 			return
 
-		# Do not carry item-specific values from the previously selected item.
-		for fieldname in (
-			"weight_per_unit",
-			"weight_uom",
-			"uom",
-			"conversion_factor",
-			"barcode",
-			"pricing_rules",
-		):
-			item_obj.set(fieldname, None)
+		if cint(reset_item_details):
+			# Do not carry item-specific values from the previously selected item.
+			for fieldname in (
+				"weight_per_unit",
+				"weight_uom",
+				"uom",
+				"conversion_factor",
+				"barcode",
+				"pricing_rules",
+			):
+				item_obj.set(fieldname, None)
 
 		# 'item_details' has latest item related values
 		item_details = self.fetch_item_details(item_obj)
