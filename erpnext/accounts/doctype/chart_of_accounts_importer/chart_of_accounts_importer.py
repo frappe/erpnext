@@ -70,7 +70,11 @@ def validate_company(company: str):
 		frappe.throw(msg, title=_("Wrong Company"))
 
 	if frappe.db.get_all("GL Entry", {"company": company}, "name", limit=1):
-		return False
+		frappe.throw(
+			_(
+				"Transactions against the Company already exist! Chart of Accounts can only be imported for a Company with no transactions."
+			)
+		)
 
 
 @frappe.whitelist()
@@ -79,6 +83,7 @@ def import_coa(file_name: str, company: str):
 
 	# delete existing data for accounts
 	frappe.has_permission("Company", "write", company, throw=True)
+	validate_company(company)
 	unset_existing_data(company)
 
 	# create accounts
@@ -452,8 +457,22 @@ def get_mandatory_account_types():
 
 
 def unset_existing_data(company):
-	# remove accounts data from company
+	# User Permission Check for Deletion
+	company_accounts_count = frappe.get_query(
+		"Account", fields=[{"COUNT": "name"}], filters={"company": company}
+	).run()[0][0]
+	company_accounts_user_has_access_to = frappe.get_query(
+		"Account", fields=[{"COUNT": "name"}], filters={"company": company}, ignore_permissions=False
+	).run()[0][0]
 
+	if company_accounts_count != company_accounts_user_has_access_to:
+		frappe.throw(
+			_("Accounts cannot be removed, as user doesn't have access to all the accounts of {0}").format(
+				frappe.bold(company)
+			)
+		)
+
+	# remove accounts data from company
 	fieldnames = get_linked_fields("Account").get("Company", {}).get("fieldname", [])
 	linked = [{"fieldname": name} for name in fieldnames]
 	update_values = {d.get("fieldname"): "" for d in linked}
@@ -461,11 +480,15 @@ def unset_existing_data(company):
 	frappe.db.set_value("Company", company, update_values, update_values)
 
 	# remove accounts data from various doctypes
-	for doctype in ["Account", "Sales Taxes and Charges Template", "Purchase Taxes and Charges Template"]:
-		frappe.get_query(doctype, delete=True, filters={"company": company}, ignore_permissions=False).run()
-
-	for doctype in ["Party Account", "Mode of Payment Account", "Tax Withholding Account"]:
-		frappe.get_query(doctype, delete=True, filters={"company": company}, ignore_permissions=True).run()
+	for doctype in [
+		"Account",
+		"Sales Taxes and Charges Template",
+		"Purchase Taxes and Charges Template",
+		"Party Account",
+		"Mode of Payment Account",
+		"Tax Withholding Account",
+	]:
+		frappe.get_query(doctype, delete=True, filters={"company": company}).run()
 
 
 def set_default_accounts(company):
