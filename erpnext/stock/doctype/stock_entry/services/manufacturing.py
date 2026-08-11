@@ -405,7 +405,11 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 				self.throw_operations_not_complete_error(row, total_completed_qty)
 
 	def throw_operations_not_complete_error(self, operation_row, total_completed_qty):
-		job_card = frappe.db.get_value("Job Card", {"operation_id": operation_row.name}, "name")
+		job_card = frappe.db.get_value(
+			"Job Card",
+			{"operation_id": operation_row.name, "docstatus": ("<", 2), "is_corrective_job_card": 0},
+			"name",
+		)
 		if not job_card:
 			frappe.throw(
 				_("Work Order {0}: Job Card not found for the operation {1}").format(
