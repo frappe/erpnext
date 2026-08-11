@@ -21,6 +21,10 @@ from .serial_batch import create_serial_and_batch_bundle
 from .stock_entry_base import BaseStockEntry
 
 
+class DuplicateEntryForWorkOrderError(frappe.ValidationError):
+	pass
+
+
 class OperationsNotCompleteError(frappe.ValidationError):
 	pass
 
@@ -279,6 +283,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		self.validate_warehouse()
 		self.validate_raw_materials_exists()
 		self.check_if_operations_completed()
+		self.check_duplicate_entry_for_work_order()
 		self.validate_component_and_quantities()
 		self.validate_finished_good_serial_batch_for_work_order()
 
@@ -429,6 +434,50 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			),
 			OperationsNotCompleteError,
 		)
+
+	def check_duplicate_entry_for_work_order(self):
+		"""Block another manufacture entry once existing entries already cover the work order qty plus allowance."""
+		if not self.wo_doc or self.wo_doc.track_semi_finished_goods:
+			return
+
+		other_entries = frappe.get_all(
+			"Stock Entry",
+			filters={
+				"work_order": self.doc.work_order,
+				"purpose": self.doc.purpose,
+				"docstatus": ["!=", 2],
+				"name": ["!=", self.doc.name],
+			},
+			pluck="name",
+		)
+		if not other_entries:
+			return
+
+		allowance_percentage = flt(
+			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order")
+		)
+		allowed_qty = flt(self.wo_doc.qty) + (allowance_percentage / 100 * flt(self.wo_doc.qty))
+		if self.get_fg_qty_already_entered(other_entries) >= allowed_qty:
+			frappe.throw(
+				_("Stock Entries already created for Work Order {0}: {1}").format(
+					self.doc.work_order, ", ".join(other_entries)
+				),
+				DuplicateEntryForWorkOrderError,
+			)
+
+	def get_fg_qty_already_entered(self, other_entries):
+		child = frappe.qb.DocType("Stock Entry Detail")
+		qty = (
+			frappe.qb.from_(child)
+			.select(Sum(child.transfer_qty))
+			.where(
+				child.parent.isin(other_entries)
+				& (child.item_code == self.wo_doc.production_item)
+				& (child.s_warehouse.isnull() | (child.s_warehouse == ""))
+			)
+			.run()
+		)[0][0]
+		return flt(qty)
 
 	def add_items(self):
 		self.add_raw_materials()
