@@ -1,4 +1,4 @@
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests.utils import FrappeTestCase, change_settings
 
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.controllers.taxes_and_totals import calculate_taxes_and_totals
@@ -60,7 +60,7 @@ class TestTaxesAndTotals(AccountsTestMixin, FrappeTestCase):
 		self.assertAlmostEqual(so.net_total, 1272.73, places=2)
 		self.assertEqual(so.grand_total, 1400)
 
-	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	@change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_distributed_discount_amount_with_rounding_adjustment(self):
 		so = make_sales_order(do_not_save=1)
 		so.apply_discount_on = "Net Total"
