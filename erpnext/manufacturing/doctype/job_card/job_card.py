@@ -1106,6 +1106,268 @@ class JobCard(Document):
 
 		frappe.db.set_value("Workstation", self.workstation, "status", status)
 
+<<<<<<< HEAD
+=======
+	def add_time_logs(self, **kwargs):
+		kwargs = frappe._dict(kwargs)
+		if not kwargs.employees and kwargs.to_time:
+			for row in self.time_logs:
+				if not row.to_time and row.from_time:
+					row.to_time = kwargs.to_time
+					row.time_in_mins = time_diff_in_minutes(row.to_time, row.from_time)
+
+					if kwargs.completed_qty:
+						row.completed_qty = kwargs.completed_qty
+					row.db_update()
+		else:
+			self.add_time_logs_for_employess(kwargs)
+
+		self.validate_time_logs(save=True)
+		self.save()
+
+	def add_time_logs_for_employess(self, kwargs):
+		update_status = False
+
+		for employee in kwargs.employees:
+			kwargs.employee = employee.get("employee")
+			if kwargs.from_time and not kwargs.to_time:
+				self.add_new_time_log_for_employee(kwargs)
+			elif not kwargs.from_time and not kwargs.to_time and kwargs.completed_qty:
+				self.update_completed_qty_for_employee(kwargs)
+				update_status = True
+			else:
+				self.close_time_log_for_employee(kwargs)
+				update_status = True
+
+			self.set_status(update_status=update_status)
+
+	def add_new_time_log_for_employee(self, kwargs):
+		if kwargs.qty:
+			kwargs.completed_qty = kwargs.qty
+
+		row = self.append("time_logs", kwargs)
+		row.db_update()
+		self.db_set("status", "Work In Progress")
+
+	def update_completed_qty_for_employee(self, kwargs):
+		for row in self.time_logs:
+			if row.employee != kwargs.employee:
+				continue
+
+			row.completed_qty = kwargs.completed_qty
+			row.db_update()
+
+	def close_time_log_for_employee(self, kwargs):
+		for row in self.time_logs:
+			if row.to_time or row.employee != kwargs.employee:
+				continue
+
+			row.to_time = kwargs.to_time
+			row.time_in_mins = time_diff_in_minutes(row.to_time, row.from_time)
+			if kwargs.get("sub_operation"):
+				row.operation = kwargs.get("sub_operation")
+
+			if kwargs.employees[-1].get("employee") == row.employee:
+				row.completed_qty = kwargs.completed_qty
+
+			row.db_update()
+
+	def update_workstation_status(self):
+		status_map = {
+			"Open": "Off",
+			"Work In Progress": "Production",
+			"Completed": "Off",
+			"On Hold": "Idle",
+		}
+
+		job_cards = frappe.get_all(
+			"Job Card",
+			fields=["name", "status"],
+			filters={"workstation": self.workstation, "docstatus": 0, "status": ("!=", "Completed")},
+			order_by="status desc",
+		)
+
+		if not job_cards:
+			frappe.db.set_value("Workstation", self.workstation, "status", "Off")
+
+		for row in job_cards:
+			frappe.db.set_value("Workstation", self.workstation, "status", status_map.get(row.status))
+			return
+
+	@frappe.whitelist()
+	def start_timer(self, **kwargs):
+		frappe.has_permission("Job Card", "write", doc=self, throw=True)
+
+		self.validate_docstatus()
+		self.validate_transfer_qty()
+
+		if isinstance(kwargs, dict):
+			kwargs = frappe._dict(kwargs)
+
+		if isinstance(kwargs.employees, str):
+			kwargs.employees = [{"employee": kwargs.employees}]
+
+		if kwargs.start_time:
+			self.add_time_logs(from_time=kwargs.start_time, employees=kwargs.employees)
+
+	@frappe.whitelist()
+	def complete_job_card(self, **kwargs):
+		frappe.has_permission("Job Card", "write", doc=self, throw=True)
+
+		self.validate_docstatus()
+		self.validate_transfer_qty()
+
+		if isinstance(kwargs, dict):
+			kwargs = frappe._dict(kwargs)
+
+		self.validate_complete_job_card_qty(kwargs)
+		self.set_for_quantity(kwargs)
+
+		self.pending_qty = flt(kwargs.pending_qty)
+		self.process_loss_qty = flt(kwargs.process_loss_qty)
+
+		self.add_completion_time_logs(kwargs)
+
+		if kwargs.auto_submit:
+			self.auto_submit_job_card(kwargs.auto_submit)
+
+	def set_for_quantity(self, kwargs):
+		"""Qty to Manufacture of the completion dialog covers the current cycle only,
+		so the qty completed by the earlier cycles of this job card is kept."""
+		if not flt(kwargs.for_quantity):
+			return
+
+		self.for_quantity = flt(self.total_completed_qty) + flt(kwargs.for_quantity)
+
+	def validate_docstatus(self):
+		if self.docstatus == 2:
+			frappe.throw(_("Cancelled Job Card cannot be processed."))
+
+		if self.docstatus == 1:
+			frappe.throw(_("Submitted Job Card cannot be processed."))
+
+	def validate_complete_job_card_qty(self, kwargs):
+		if flt(kwargs.pending_qty) and flt(kwargs.pending_qty) < 0:
+			frappe.throw(_("Pending quantity cannot be negative."))
+
+		if flt(kwargs.process_loss_qty) and flt(kwargs.process_loss_qty) < 0:
+			frappe.throw(_("Process loss quantity cannot be negative."))
+
+		if flt(kwargs.pending_qty) and flt(kwargs.pending_qty) > self.for_quantity:
+			frappe.throw(_("Pending quantity cannot be greater than the for quantity."))
+
+		self.validate_completion_qty_split(kwargs)
+
+	def validate_completion_qty_split(self, kwargs):
+		if not flt(kwargs.for_quantity):
+			return
+
+		precision = self.precision("total_completed_qty")
+		accounted_qty = flt(kwargs.qty) + flt(kwargs.pending_qty) + flt(kwargs.process_loss_qty)
+
+		if flt(accounted_qty, precision) == flt(kwargs.for_quantity, precision):
+			return
+
+		frappe.throw(
+			_(
+				"Completed Quantity ({0}), Pending Quantity ({1}) and Process Loss Quantity ({2}) must add up to the Qty to Manufacture ({3})."
+			).format(
+				bold(self.get_qty_with_uom(kwargs.qty)),
+				bold(self.get_qty_with_uom(kwargs.pending_qty)),
+				bold(self.get_qty_with_uom(kwargs.process_loss_qty)),
+				bold(self.get_qty_with_uom(kwargs.for_quantity)),
+			)
+		)
+
+	def add_completion_time_logs(self, kwargs):
+		if kwargs.end_time:
+			self.add_time_logs(
+				to_time=kwargs.end_time,
+				completed_qty=kwargs.qty,
+				employees=self.employee,
+				sub_operation=kwargs.get("sub_operation"),
+			)
+
+			if self.docstatus == 1:
+				self.update_work_order()
+		else:
+			self.add_time_logs(completed_qty=kwargs.qty, employees=self.employee)
+			self.save()
+
+	def auto_submit_job_card(self, auto_submit):
+		self.submit()
+
+		if not self.finished_good:
+			return
+
+		self.make_stock_entry_for_semi_fg_item(auto_submit)
+		frappe.msgprint(_("Job Card {0} has been completed").format(get_link_to_form("Job Card", self.name)))
+
+	@frappe.whitelist()
+	def make_stock_entry_for_semi_fg_item(self, auto_submit: bool = False):
+		frappe.has_permission("Job Card", "write", doc=self, throw=True)
+		frappe.has_permission("Stock Entry", "create", throw=True)
+
+		ste = self.build_manufacture_stock_entry()
+		self.populate_manufacture_stock_entry(ste)
+
+		if auto_submit:
+			ste.stock_entry.submit()
+		else:
+			ste.stock_entry.save()
+
+		frappe.msgprint(
+			_("Stock Entry {0} has been created").format(
+				get_link_to_form("Stock Entry", ste.stock_entry.name)
+			)
+		)
+
+		return ste.stock_entry.as_dict()
+
+	def get_consumed_process_loss(self):
+		table = frappe.qb.DocType("Stock Entry")
+		query = (
+			frappe.qb.from_(table)
+			.select(Sum(table.process_loss_qty))
+			.where((table.purpose == "Manufacture") & (table.job_card == self.name) & (table.docstatus == 1))
+		)
+		return query.run()[0][0] or 0
+
+	def build_manufacture_stock_entry(self):
+		from erpnext.stock.doctype.stock_entry_type.stock_entry_type import ManufactureEntry
+
+		consumed_process_loss = self.get_consumed_process_loss()
+		return ManufactureEntry(
+			{
+				"for_quantity": self.get_qty_to_produce() - self.manufactured_qty - consumed_process_loss,
+				"process_loss_qty": max(self.process_loss_qty - consumed_process_loss, 0),
+				"job_card": self.name,
+				"skip_material_transfer": self.skip_material_transfer,
+				"backflush_from_wip_warehouse": self.backflush_from_wip_warehouse,
+				"work_order": self.work_order,
+				"purpose": "Manufacture",
+				"production_item": self.finished_good,
+				"company": self.company,
+				"wip_warehouse": self.wip_warehouse,
+				"fg_warehouse": self.target_warehouse,
+				"bom_no": self.semi_fg_bom,
+				"project": frappe.db.get_value("Work Order", self.work_order, "project"),
+			}
+		)
+
+	def populate_manufacture_stock_entry(self, ste):
+		from erpnext.stock.doctype.stock_entry.services.manufacturing import ManufactureStockEntry
+
+		ste.make_stock_entry()
+		ste.stock_entry.flags.ignore_mandatory = True
+		wo_doc = frappe.get_doc("Work Order", self.work_order)
+		add_additional_cost(ste.stock_entry, wo_doc, self)
+		ManufactureStockEntry(ste.stock_entry).add_secondary_items_from_job_card()
+		for row in ste.stock_entry.items:
+			if (row.secondary_item_type or row.is_legacy_scrap_item) and not row.t_warehouse:
+				row.t_warehouse = self.target_warehouse
+
+>>>>>>> 808b2e2984 (fix: require material transfer before job card start and completion)
 
 @frappe.whitelist()
 def make_time_log(args):

@@ -296,9 +296,130 @@ frappe.ui.form.on("Job Card", {
 	prepare_timer_buttons: function (frm) {
 		frm.trigger("make_dashboard");
 
+<<<<<<< HEAD
 		if (!frm.doc.started_time && !frm.doc.current_time) {
 			frm.add_custom_button(__("Start Job"), () => {
 				if ((frm.doc.employee && !frm.doc.employee.length) || !frm.doc.employee) {
+=======
+		const { doc } = frm;
+		const { time_logs, status } = doc;
+
+		// ── Determine which action buttons to show ────────────────────────
+		const has_remaining_qty = doc.for_quantity + doc.process_loss_qty > doc.total_completed_qty;
+		const pending_transfer =
+			has_items && doc.items.some((row) => flt(row.transferred_qty) < flt(row.required_qty));
+		const materials_ready = doc.skip_material_transfer || !pending_transfer;
+
+		let last_row = {};
+		const has_sub_ops_or_pending_qty = doc.sub_operations?.length || doc.pending_qty > 0;
+		if (has_sub_ops_or_pending_qty && time_logs?.length) {
+			last_row = get_last_row(time_logs);
+		}
+
+		const no_time_logs_yet = !time_logs?.length;
+		const pending_qty_cycle_done = flt(doc.pending_qty) > 0.0 && last_row?.to_time;
+		const sub_operation_cycle_done = doc.sub_operations?.length && last_row?.to_time;
+		const should_show_start =
+			(no_time_logs_yet || pending_qty_cycle_done || sub_operation_cycle_done) && !doc.is_paused;
+
+		const last_log_complete = time_logs?.length && time_logs[time_logs.length - 1].to_time;
+		const is_on_hold = status === "On Hold";
+		const is_actively_running = !!(
+			time_logs?.length &&
+			!last_log_complete &&
+			!is_on_hold &&
+			!doc.is_paused
+		);
+
+		let show_start = false,
+			show_pause = false,
+			show_resume = false,
+			show_complete = false,
+			is_timer_running = false;
+
+		if (has_remaining_qty && materials_ready) {
+			const manufactured_qty = doc.manufactured_qty || doc.total_completed_qty;
+			const qty_yet_to_manufacture = doc.for_quantity - (manufactured_qty + doc.process_loss_qty);
+
+			if (should_show_start) {
+				show_start = true;
+			} else if (doc.is_paused) {
+				show_resume = true;
+			} else if (qty_yet_to_manufacture > 0) {
+				show_pause = true;
+				show_complete = true;
+				is_timer_running = true;
+			}
+		}
+
+		// ── Timer color reflects job state ────────────────────────────────
+		const [timer_color, timer_bg, timer_border] = [
+			"var(--gray-600,#6b7280)",
+			"var(--gray-100,#f3f4f6)",
+			"var(--gray-300,#d1d5db)",
+		];
+
+		// ── Action button HTML ────────────────────────────────────────────
+		const btn = (cls, icon_path, label, icon_color) => `
+			<button class="btn btn-sm ${cls}" style="display:inline-flex;align-items:center;gap:5px;font-weight:600;padding:6px 14px;">
+				${frappe.utils.icon(icon_path, "sm", "", "", "", "", icon_color)}
+				${label}
+			</button>`;
+
+		const icons = {
+			play: { d: '<polygon points="5 3 19 12 5 21 5 3"/>', fill: "currentColor", stroke: "none" },
+			pause: {
+				d: '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>',
+				fill: "currentColor",
+				stroke: "none",
+			},
+			check: { d: '<polyline points="20 6 9 17 4 12"/>', sw: 3 },
+		};
+
+		const buttons_html = [
+			show_start && btn("btn-primary jcd-btn-start", "play", __("Start Job")),
+			show_resume && btn("btn-primary jcd-btn-resume", "play", __("Resume Job")),
+			show_pause && btn("btn-default jcd-btn-pause", "pause", __("Pause Job")),
+			show_complete && btn("btn-primary jcd-btn-complete", "check", __("Complete Job"), "white"),
+		]
+			.filter(Boolean)
+			.join("");
+
+		// ── Render widget ─────────────────────────────────────────────────
+		wrapper.append(`
+			<div class="job-card-dashboard-widget"
+				style="border:1px solid var(--border-color);border-radius:var(--border-radius-lg,8px);
+					background:var(--card-bg,#fff);padding:16px 20px;margin-bottom:16px;">
+				<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+					<div>
+						<div style="font-size:10px;color:var(--text-muted);font-weight:600;
+							text-transform:uppercase;letter-spacing:0.6px;margin-bottom:6px;">
+							${__("Elapsed Time")}
+						</div>
+						<div style="display:flex;align-items:center;gap:8px;">
+							${frappe.utils.icon("clock-4", "md", "", "", "", "", timer_color)}
+							<span class="jcd-stopwatch"
+								style="font-family:var(--monospace-font,'Courier New',monospace);
+								font-size:28px;font-weight:700;letter-spacing:2px;color:${timer_color};">
+								00:00:00
+							</span>
+						</div>
+					</div>
+					<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+						${buttons_html}
+					</div>
+				</div>
+			</div>`);
+
+		// ── Wire up button click handlers ─────────────────────────────────
+		if (show_start) {
+			wrapper.find(".jcd-btn-start").on("click", () => {
+				const has_no_employee = !frm.doc.employee || !frm.doc.employee.length;
+
+				if (has_no_employee) {
+					// Capture the start time only when the employee dialog is submitted, not on click,
+					// so the time spent selecting the operator is not counted as worked time.
+>>>>>>> 808b2e2984 (fix: require material transfer before job card start and completion)
 					frappe.prompt(
 						{
 							fieldtype: "Table MultiSelect",
