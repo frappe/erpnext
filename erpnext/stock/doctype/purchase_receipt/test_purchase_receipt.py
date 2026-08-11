@@ -862,6 +862,76 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		po.reload()
 		po.cancel()
 
+	def test_billing_repair_patch_skips_invoice_created_receipts(self):
+		"""A Purchase Receipt created from a Purchase Invoice keeps billed_amt = amount
+		by definition. When such a receipt coexists with a receipt made directly from
+		the PO, the stored total can exceed the PO-invoiced amount, but the repair
+		patch must leave those PO Items alone instead of stripping the invoice-created
+		receipt.
+
+		Flow:
+		1. PO (Qty: 10, Rate: 500) -> PI for Qty 5 (Amount 2500)
+		2. PO -> PR1 (Qty 5, direct) -> absorbs the full 2500 (fully billed)
+		3. PI -> PR2 (Qty 5, created from the invoice) -> billed 2500 via invoice link
+		"""
+		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import (
+			make_purchase_receipt as make_purchase_receipt_from_pi,
+		)
+		from erpnext.buying.doctype.purchase_order.purchase_order import (
+			make_purchase_invoice as make_purchase_invoice_from_po,
+		)
+		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		po = create_purchase_order()
+
+		pi = make_purchase_invoice_from_po(po.name)
+		pi.get("items")[0].qty = 5
+		pi.submit()
+
+		pr_direct = make_purchase_receipt(po.name)
+		pr_direct.get("items")[0].received_qty = 5
+		pr_direct.get("items")[0].qty = 5
+		pr_direct.submit()
+
+		pr_direct.load_from_db()
+		self.assertEqual(pr_direct.get("items")[0].billed_amt, 2500)
+		self.assertEqual(pr_direct.per_billed, 100)
+
+		pr_from_invoice = make_purchase_receipt_from_pi(pi.name)
+		pr_from_invoice.submit()
+
+		pr_from_invoice.load_from_db()
+		self.assertEqual(pr_from_invoice.get("items")[0].billed_amt, 2500)
+		self.assertEqual(pr_from_invoice.per_billed, 100)
+
+		from erpnext.patches.v16_0 import recalculate_purchase_receipt_billing_status
+
+		purchase_order_item = po.items[0].name
+		with patch.object(
+			recalculate_purchase_receipt_billing_status,
+			"get_candidate_purchase_order_items",
+			return_value=[purchase_order_item],
+		):
+			self.assertEqual(
+				recalculate_purchase_receipt_billing_status.get_affected_purchase_order_items(), []
+			)
+			recalculate_purchase_receipt_billing_status.execute()
+
+		pr_direct.load_from_db()
+		self.assertEqual(pr_direct.get("items")[0].billed_amt, 2500)
+		pr_from_invoice.load_from_db()
+		self.assertEqual(pr_from_invoice.get("items")[0].billed_amt, 2500)
+		self.assertEqual(pr_from_invoice.status, "Completed")
+
+		pr_from_invoice.cancel()
+		pr_direct.reload()
+		pr_direct.cancel()
+		pi.reload()
+		pi.cancel()
+		po.reload()
+		po.cancel()
+
 	def test_serial_no_against_purchase_receipt(self):
 		item_code = "Test Manual Created Serial No"
 		if not frappe.db.exists("Item", item_code):
