@@ -32,7 +32,7 @@ from erpnext.exceptions import (
 )
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
-from erpnext.stock import get_warehouse_account_map
+from erpnext.stock import get_warehouse_account, get_warehouse_account_map
 from erpnext.stock.doctype.batch.batch import get_batch_qty
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import (
 	get_evaluated_inventory_dimension,
@@ -268,7 +268,9 @@ class StockController(AccountsController):
 	def use_item_inventory_account(self):
 		return frappe.get_cached_value("Company", self.company, "enable_item_wise_inventory_account")
 
-	def get_inventory_account_dict(self, row, inventory_account_map, warehouse_field=None):
+	def get_inventory_account_dict(
+		self, row, inventory_account_map, warehouse_field=None, *, raise_error=True
+	):
 		account_dict = frappe._dict()
 
 		if isinstance(row, dict):
@@ -297,8 +299,15 @@ class StockController(AccountsController):
 		if not warehouse:
 			warehouse = self.get(warehouse_field)
 
-		if warehouse and warehouse in inventory_account_map:
-			account_dict = inventory_account_map[warehouse]
+		if warehouse:
+			account_dict = inventory_account_map.get(warehouse)
+			if not account_dict and raise_error:
+				account = get_warehouse_account(frappe.get_cached_doc("Warehouse", warehouse))
+				account_dict = frappe._dict(
+					account=account,
+					account_currency=frappe.get_cached_value("Account", account, "account_currency"),
+				)
+				inventory_account_map[warehouse] = account_dict
 
 		return account_dict
 

@@ -17,6 +17,7 @@ from erpnext.accounts.utils import get_account_currency
 from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_enabled
 from erpnext.controllers.accounts_controller import merge_taxes
 from erpnext.controllers.buying_controller import BuyingController
+from erpnext.stock import get_warehouse_account
 from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_transaction
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import StockReservation
 from erpnext.stock.serial_batch_bundle import (
@@ -765,11 +766,15 @@ class PurchaseReceipt(BuyingController):
 					supplier_warehouse_account = None
 					supplier_warehouse_account_currency = None
 					if self.supplier_warehouse:
-						if _inv_dict := self.get_inventory_account_dict(
-							d, inventory_account_map, "supplier_warehouse"
-						):
-							supplier_warehouse_account = _inv_dict["account"]
-							supplier_warehouse_account_currency = _inv_dict["account_currency"]
+						# The account is optional only when this lookup can skip a duplicate entry.
+						supplier_warehouse_account = get_warehouse_account(
+							frappe.get_cached_doc("Warehouse", self.supplier_warehouse),
+							raise_error=bool(flt(d.rm_supp_cost)),
+						)
+						if supplier_warehouse_account:
+							supplier_warehouse_account_currency = get_account_currency(
+								supplier_warehouse_account
+							)
 
 					# If PR is sub-contracted and fg item rate is zero
 					# in that case if account for source and target warehouse are same,
