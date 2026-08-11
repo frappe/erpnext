@@ -2,6 +2,8 @@
 # See license.txt
 
 
+from unittest.mock import patch
+
 import frappe
 
 from erpnext.tests.utils import ERPNextTestSuite
@@ -51,3 +53,32 @@ class TestStockSettings(ERPNextTestSuite):
 		)
 
 		item.delete()
+
+	def test_unrelated_change_does_not_update_item_metadata(self):
+		settings = frappe.get_single("Stock Settings")
+		settings.allow_partial_reservation = not settings.allow_partial_reservation
+
+		with (
+			patch("erpnext.utilities.naming.set_by_naming_series") as set_by_naming_series,
+			patch("frappe.make_property_setter") as make_property_setter,
+		):
+			settings.save()
+
+		set_by_naming_series.assert_not_called()
+		make_property_setter.assert_not_called()
+
+	def test_item_metadata_updates_when_related_settings_change(self):
+		settings = frappe.get_single("Stock Settings")
+		settings.item_naming_by = (
+			"Item Code" if settings.item_naming_by == "Naming Series" else "Naming Series"
+		)
+		settings.show_barcode_field = not settings.show_barcode_field
+
+		with (
+			patch("erpnext.utilities.naming.set_by_naming_series") as set_by_naming_series,
+			patch("frappe.make_property_setter") as make_property_setter,
+		):
+			settings.save()
+
+		set_by_naming_series.assert_called_once()
+		self.assertEqual(make_property_setter.call_count, 3)
