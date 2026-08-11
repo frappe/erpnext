@@ -2825,6 +2825,7 @@ def get_operation_details(name, work_order, parent_bom):
 	for row in work_order.operations:
 		if row.name == name:
 			return {
+				"idx": row.idx,
 				"workstation": row.workstation,
 				"workstation_type": row.workstation_type,
 				"source_warehouse": row.source_warehouse,
