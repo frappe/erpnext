@@ -777,6 +777,64 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		po.reload()
 		po.cancel()
 
+	def test_pr_billing_status_for_po_invoice_across_multiple_receipts(self):
+		"""When a Purchase Invoice is raised directly from a PO and the invoiced qty
+		spans more than one Purchase Receipt, the billed amount must be split between
+		the receipts (FIFO), not duplicated. A receipt with no amount left to consume
+		must not show as fully billed / Completed.
+
+		Flow:
+		1. PO (Qty: 10, Rate: 500) -> PI for Qty 5 (Amount 2500)
+		2. PO -> PR1 (Qty 3) -> gets 1500 billed (fully billed)
+		3. PO -> PR2 (Qty 3) -> gets the remaining 1000 billed (partly billed)
+		"""
+		from erpnext.buying.doctype.purchase_order.mapper import (
+			make_purchase_invoice as make_purchase_invoice_from_po,
+		)
+		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		# Qty: 10, Rate: 500
+		po = create_purchase_order()
+
+		pi = make_purchase_invoice_from_po(po.name)
+		pi.get("items")[0].qty = 5
+		pi.submit()
+
+		pr1 = make_purchase_receipt(po.name)
+		pr1.posting_date = today()
+		pr1.posting_time = "08:00"
+		pr1.get("items")[0].received_qty = 3
+		pr1.get("items")[0].qty = 3
+		pr1.submit()
+
+		pr2 = make_purchase_receipt(po.name)
+		pr2.posting_date = today()
+		pr2.posting_time = "10:00"
+		pr2.get("items")[0].received_qty = 3
+		pr2.get("items")[0].qty = 3
+		pr2.submit()
+
+		# PR1 consumes 3 * 500 = 1500 out of the 2500 invoiced -> fully billed.
+		pr1.load_from_db()
+		self.assertEqual(pr1.get("items")[0].billed_amt, 1500)
+		self.assertEqual(pr1.per_billed, 100)
+		self.assertEqual(pr1.status, "Completed")
+
+		# PR2 must only get the remaining 1000 (not 1500 again) -> partly billed.
+		pr2.load_from_db()
+		self.assertEqual(pr2.get("items")[0].billed_amt, 1000)
+		self.assertEqual(flt(pr2.per_billed, 2), 66.67)
+		self.assertEqual(pr2.status, "Partly Billed")
+
+		pr2.cancel()
+		pr1.reload()
+		pr1.cancel()
+		pi.reload()
+		pi.cancel()
+		po.reload()
+		po.cancel()
+
 	def test_serial_no_against_purchase_receipt(self):
 		item_code = "Test Manual Created Serial No"
 		if not frappe.db.exists("Item", item_code):
