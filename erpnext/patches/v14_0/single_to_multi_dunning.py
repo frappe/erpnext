@@ -63,9 +63,10 @@ def execute():
 
 def get_accounts_closing_date():
 	"""Get the date when accounts were frozen/closed"""
-	accounts_frozen_till = frappe.db.get_single_value(
-		"Accounts Settings", "acc_frozen_upto"
-	)  # always returns datetime.date
+	accounts_frozen_till = None
+	if frappe.get_meta("Accounts Settings").has_field("acc_frozen_upto"):
+		# freezing settings moved to Company in v16
+		accounts_frozen_till = frappe.db.get_single_value("Accounts Settings", "acc_frozen_upto")
 
 	period_closing_date = frappe.db.get_value(
 		"Period Closing Voucher", {"docstatus": 1}, "period_end_date", order_by="period_end_date desc"
