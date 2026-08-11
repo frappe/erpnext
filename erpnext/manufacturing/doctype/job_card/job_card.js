@@ -296,7 +296,16 @@ frappe.ui.form.on("Job Card", {
 	prepare_timer_buttons: function (frm) {
 		frm.trigger("make_dashboard");
 
+		const transfer_pending =
+			!frm.doc.is_corrective_job_card &&
+			(frm.doc.items || []).length &&
+			flt(frm.doc.transferred_qty) < flt(frm.doc.for_quantity);
+
 		if (!frm.doc.started_time && !frm.doc.current_time) {
+			if (transfer_pending) {
+				return;
+			}
+
 			frm.add_custom_button(__("Start Job"), () => {
 				if ((frm.doc.employee && !frm.doc.employee.length) || !frm.doc.employee) {
 					frappe.prompt(
