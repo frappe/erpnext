@@ -313,7 +313,6 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 					supplier_warehouse_account = None
 					supplier_warehouse_account_currency = None
 					if doc.supplier_warehouse:
-						# The account is optional only when this lookup can skip a duplicate entry.
 						supplier_warehouse_account = get_warehouse_account(
 							frappe.get_cached_doc("Warehouse", doc.supplier_warehouse),
 							raise_error=bool(flt(d.rm_supp_cost)),
