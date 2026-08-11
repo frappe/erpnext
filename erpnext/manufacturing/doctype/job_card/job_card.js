@@ -598,7 +598,7 @@ frappe.ui.form.on("Job Card", {
 		const has_remaining_qty = doc.for_quantity + doc.process_loss_qty > doc.total_completed_qty;
 		const pending_transfer =
 			has_items && doc.items.some((row) => flt(row.transferred_qty) < flt(row.required_qty));
-		const materials_ready = doc.skip_material_transfer || !pending_transfer;
+		const materials_ready = doc.skip_material_transfer || doc.is_corrective_job_card || !pending_transfer;
 
 		let last_row = {};
 		const has_sub_ops_or_pending_qty = doc.sub_operations?.length || doc.pending_qty > 0;
