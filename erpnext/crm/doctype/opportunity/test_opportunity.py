@@ -65,6 +65,15 @@ class TestOpportunity(unittest.TestCase):
 		frappe.db.set_value("Customer", "_Test Customer", "disabled", 0)
 		make_opportunity(with_items=0)
 
+	def test_disabled_lead_not_blocked(self):
+		# Lead.disabled isn't enforced anywhere else (e.g. the Lead picker query only
+		# excludes Converted leads), so it shouldn't block Opportunity creation either.
+		lead_doc = make_lead()
+		frappe.db.set_value("Lead", lead_doc.name, "disabled", 1)
+
+		opp_doc = make_opportunity(opportunity_from="Lead", lead=lead_doc.name)
+		self.assertEqual(opp_doc.party_name, lead_doc.name)
+
 	def test_carry_forward_of_email_and_comments(self):
 		frappe.db.set_single_value("CRM Settings", "carry_forward_communication_and_comments", 1)
 		lead_doc = make_lead()
