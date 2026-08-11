@@ -84,14 +84,7 @@ class SellingSettings(Document):
 		]:
 			frappe.db.set_default(key, self.get(key, ""))
 
-		from erpnext.utilities.naming import set_by_naming_series
-
-		set_by_naming_series(
-			"Customer",
-			"customer_name",
-			self.get("cust_master_name") == "Naming Series",
-			hide_name_field=False,
-		)
+		self.update_customer_naming_settings()
 
 		self.validate_fallback_to_default_price_list()
 
@@ -100,6 +93,19 @@ class SellingSettings(Document):
 
 		if old_doc and old_doc.enable_utm != self.enable_utm:
 			toggle_utm_analytics_section(not self.enable_utm)
+
+	def update_customer_naming_settings(self):
+		if not self.has_value_changed("cust_master_name"):
+			return
+
+		from erpnext.utilities.naming import set_by_naming_series
+
+		set_by_naming_series(
+			"Customer",
+			"customer_name",
+			self.get("cust_master_name") == "Naming Series",
+			hide_name_field=False,
+		)
 
 	def validate_fallback_to_default_price_list(self):
 		if (
