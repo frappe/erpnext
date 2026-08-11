@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-08-09 09:47+0000\n"
-"PO-Revision-Date: 2026-08-09 11:05\n"
+"PO-Revision-Date: 2026-08-11 11:07\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -26806,7 +26806,7 @@ msgstr "قرارداد فرعی شده است"
 #. Label of the is_sub_contracted_item (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Is Subcontracted Item"
-msgstr ""
+msgstr "آیا آیتم پیمانکاری فرعی است"
 
 #. Label of the is_tax_withholding_account (Check) field in DocType 'Advance
 #. Taxes and Charges'
@@ -28694,7 +28694,7 @@ msgstr "زمان برنامه‌ریزی شده کارت کار"
 #. Name of a DocType
 #: erpnext/manufacturing/doctype/job_card_secondary_item/job_card_secondary_item.json
 msgid "Job Card Secondary Item"
-msgstr ""
+msgstr "آیتم فرعی کارت کار"
 
 #: erpnext/public/js/shop_floor/shop_floor.js:1119
 msgid "Job Card Submitted"
@@ -33532,7 +33532,7 @@ msgstr "هیچ یک از آیتم‌ها هیچ تغییری در مقدار ی�
 #: erpnext/accounts/bulk_payment.py:22
 #: erpnext/accounts/report/accounts_payable/accounts_payable.js:244
 msgid "None of the selected invoices are payable"
-msgstr ""
+msgstr "هیچ یک از فاکتورهای انتخاب شده قابل پرداخت نیستند"
 
 #. Label of the section_normal_balances (Tab Break) field in DocType 'Process
 #. Period Closing Voucher'
@@ -33645,7 +33645,7 @@ msgstr "مجاز به ویرایش حساب ثابت {0} نیست"
 
 #: erpnext/accounts/bulk_payment.py:109
 msgid "Not available"
-msgstr ""
+msgstr "در دسترس نیست"
 
 #: erpnext/templates/form_grid/stock_entry_grid.html:26
 msgid "Not in Stock"
@@ -43597,7 +43597,7 @@ msgstr "ثبت درخواست مواد زمانی که موجودی به سطح 
 #. Label of the complaint_raised_by (Data) field in DocType 'Warranty Claim'
 #: erpnext/support/doctype/warranty_claim/warranty_claim.json
 msgid "Raised By"
-msgstr ""
+msgstr "مطرح شده توسط"
 
 #. Label of the raised_by (Data) field in DocType 'Issue'
 #: erpnext/support/doctype/issue/issue.json
@@ -46053,7 +46053,7 @@ msgstr "بازنشانی قرارداد سطح سرویس."
 #. Label of the resignation_letter_date (Date) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Resignation Letter Date"
-msgstr ""
+msgstr "تاریخ نامه استعفا"
 
 #. Label of the sb_00 (Section Break) field in DocType 'Quality Action'
 #. Label of the resolution (Text Editor) field in DocType 'Quality Action
@@ -64058,7 +64058,7 @@ msgstr ""
 
 #: erpnext/accounts/bulk_payment.py:43
 msgid "{0} failed (see Error Log)"
-msgstr ""
+msgstr "{0} ناموفق بود (به گزارش خطا مراجعه کنید)"
 
 #: erpnext/accounts/utils.py:138
 #: erpnext/projects/doctype/activity_cost/activity_cost.py:40
@@ -64091,7 +64091,7 @@ msgstr "{0} در ردیف {1}"
 
 #: erpnext/accounts/report/accounts_payable/accounts_payable.js:389
 msgid "{0} invoice(s) excluded"
-msgstr ""
+msgstr "{0} فاکتور مستثنی شدند"
 
 #: erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:66
 msgid "{0} is a child company."
