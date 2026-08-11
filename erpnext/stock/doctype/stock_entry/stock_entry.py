@@ -40,6 +40,7 @@ from .services.disassemble import DisassembleStockEntry
 from .services.manufacturing import (
 	ManufactureStockEntry,
 	MaterialConsumptionForManufactureStockEntry,
+	OperationsNotCompleteError,
 	RepackStockEntry,
 )
 from .services.material_receipt_issue import MaterialIssueStockEntry, MaterialReceiptStockEntry

@@ -34,6 +34,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.stock_entry import test_stock_entry
+from erpnext.stock.doctype.stock_entry.stock_entry import OperationsNotCompleteError
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.utils import get_bin
 from erpnext.tests.utils import ERPNextTestSuite
@@ -508,6 +509,18 @@ class TestWorkOrder(ERPNextTestSuite):
 		stock_entries.reverse()
 		for stock_entry in stock_entries:
 			stock_entry.cancel()
+
+	@timeout(seconds=60)
+	def test_manufacture_blocked_until_operations_completed(self):
+		bom = frappe.get_doc(
+			"BOM", {"docstatus": 1, "with_operations": 1, "company": "_Test Company", "has_variants": 0}
+		)
+		work_order = make_wo_order_test_record(
+			item=bom.item, qty=1, bom_no=bom.name, source_warehouse="_Test Warehouse - _TC", skip_transfer=1
+		)
+
+		stock_entry = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 1))
+		self.assertRaises(OperationsNotCompleteError, stock_entry.insert)
 
 	def test_work_order_material_transferred_qty_with_process_loss(self):
 		stock_entries = []

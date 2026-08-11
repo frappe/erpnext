@@ -21,6 +21,10 @@ from .serial_batch import create_serial_and_batch_bundle
 from .stock_entry_base import BaseStockEntry
 
 
+class OperationsNotCompleteError(frappe.ValidationError):
+	pass
+
+
 class BaseManufactureStockEntry(BaseStockEntry):
 	def set_default_warehouse(self):
 		for row in self.doc.items:
@@ -274,6 +278,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 	def validate(self):
 		self.validate_warehouse()
 		self.validate_raw_materials_exists()
+		self.check_if_operations_completed()
 		self.validate_component_and_quantities()
 		self.validate_finished_good_serial_batch_for_work_order()
 
@@ -380,6 +385,50 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 	def validate_work_order(self):
 		if not self.doc.work_order:
 			frappe.throw(_("Work Order is mandatory"))
+
+	def check_if_operations_completed(self):
+		"""Require operation (job card) completion before manufacture, so operating costs are captured."""
+		if not self.wo_doc or self.wo_doc.track_semi_finished_goods:
+			return
+
+		allowance_percentage = flt(
+			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order")
+		)
+		total_completed_qty = flt(self.doc.fg_completed_qty) + flt(self.wo_doc.produced_qty)
+		precision = self.doc.precision("fg_completed_qty")
+
+		for row in self.wo_doc.operations:
+			allowed_qty = (
+				row.completed_qty + row.process_loss_qty + (allowance_percentage / 100 * row.completed_qty)
+			)
+			if flt(total_completed_qty, precision) > flt(allowed_qty, precision):
+				self.throw_operations_not_complete_error(row, total_completed_qty)
+
+	def throw_operations_not_complete_error(self, operation_row, total_completed_qty):
+		job_card = frappe.db.get_value(
+			"Job Card",
+			{"operation_id": operation_row.name, "docstatus": ("<", 2), "is_corrective_job_card": 0},
+			"name",
+		)
+		if not job_card:
+			frappe.throw(
+				_("Work Order {0}: Job Card not found for the operation {1}").format(
+					self.doc.work_order, operation_row.operation
+				)
+			)
+
+		frappe.throw(
+			_(
+				"Row #{0}: Operation {1} is not completed for {2} qty of finished goods in Work Order {3}. Please update operation status via Job Card {4}."
+			).format(
+				operation_row.idx,
+				bold(operation_row.operation),
+				bold(total_completed_qty),
+				get_link_to_form("Work Order", self.doc.work_order),
+				get_link_to_form("Job Card", job_card),
+			),
+			OperationsNotCompleteError,
+		)
 
 	def add_items(self):
 		self.add_raw_materials()
@@ -852,6 +901,7 @@ class MaterialConsumptionForManufactureStockEntry(ManufactureStockEntry):
 
 	def validate(self):
 		self.validate_work_order()
+		self.check_if_operations_completed()
 
 	def add_items(self):
 		if self.backflush_based_on == "BOM" or self.wo_doc.skip_transfer:
