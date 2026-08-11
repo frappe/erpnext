@@ -1122,7 +1122,12 @@ def get_qty_net_of_returns(so_item) -> float:
 
 
 @frappe.whitelist()
-def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, args=None):
+def make_sales_invoice(
+	source_name: str,
+	target_doc: str | dict | Document | None = None,
+	ignore_permissions: bool = False,
+	args: str | dict | None = None,
+):
 	if args is None:
 		args = {}
 	if isinstance(args, str):
