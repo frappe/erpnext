@@ -76,6 +76,8 @@ def validate_company(company: str):
 			)
 		)
 
+	validate_user_perms(company)
+
 
 @frappe.whitelist()
 def import_coa(file_name: str, company: str):
@@ -96,6 +98,7 @@ def import_coa(file_name: str, company: str):
 	validate_columns(data)
 
 	validate_company(company)
+
 	unset_existing_data(company)
 
 	frappe.local.flags.ignore_root_company_validation = True
@@ -461,21 +464,6 @@ def get_mandatory_account_types():
 
 
 def unset_existing_data(company):
-	# User Permission Check for Deletion
-	company_accounts_count = frappe.get_query(
-		"Account", fields=[{"COUNT": "name"}], filters={"company": company}
-	).run()[0][0]
-	company_accounts_user_has_access_to = frappe.get_query(
-		"Account", fields=[{"COUNT": "name"}], filters={"company": company}, ignore_permissions=False
-	).run()[0][0]
-
-	if company_accounts_count != company_accounts_user_has_access_to:
-		frappe.throw(
-			_("Accounts cannot be removed, as user doesn't have access to all the accounts of {0}").format(
-				frappe.bold(company)
-			)
-		)
-
 	# remove accounts data from company
 	fieldnames = get_linked_fields("Account").get("Company", {}).get("fieldname", [])
 	linked = [{"fieldname": name} for name in fieldnames]
@@ -493,6 +481,23 @@ def unset_existing_data(company):
 		"Tax Withholding Account",
 	]:
 		frappe.get_query(doctype, delete=True, filters={"company": company}).run()
+
+
+def validate_user_perms(company):
+	# User Permission Check for Account Deletion
+	company_accounts_count = frappe.get_query(
+		"Account", fields=[{"COUNT": "name"}], filters={"company": company}
+	).run()[0][0]
+	company_accounts_user_has_access_to = frappe.get_query(
+		"Account", fields=[{"COUNT": "name"}], filters={"company": company}, ignore_permissions=False
+	).run()[0][0]
+
+	if company_accounts_count != company_accounts_user_has_access_to:
+		frappe.throw(
+			_("Accounts cannot be removed, as user doesn't have access to all the accounts of {0}").format(
+				frappe.bold(company)
+			)
+		)
 
 
 def set_default_accounts(company):
