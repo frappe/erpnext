@@ -662,8 +662,9 @@ class Company(NestedSet):
 	def validate_perpetual_inventory(self):
 		if not self.get("__islocal"):
 			if cint(self.enable_perpetual_inventory) == 1 and not self.default_inventory_account:
-				frappe.msgprint(
-					_("Set default inventory account for perpetual inventory"), alert=True, indicator="orange"
+				frappe.throw(
+					_("Please set Default Inventory Account for perpetual inventory to work correctly"),
+					title=_("Default Inventory Account Missing"),
 				)
 
 		doc_before_save = self.get_doc_before_save()

@@ -96,6 +96,10 @@ frappe.ui.form.on("Company", {
 		});
 	},
 
+	enable_perpetual_inventory: function (frm) {
+		frm.toggle_reqd("default_inventory_account", frm.doc.enable_perpetual_inventory);
+	},
+
 	company_name: function (frm) {
 		if (frm.doc.__islocal) {
 			// add missing " " arg in split method
@@ -127,6 +131,7 @@ frappe.ui.form.on("Company", {
 		erpnext.company.setup_queries(frm);
 
 		frm.toggle_display("address_html", !frm.is_new());
+		frm.toggle_reqd("default_inventory_account", frm.doc.enable_perpetual_inventory);
 
 		if (!frm.is_new()) {
 			frm.doc.abbr && frm.set_df_property("abbr", "read_only", 1);
