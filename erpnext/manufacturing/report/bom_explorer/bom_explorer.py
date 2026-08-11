@@ -25,10 +25,12 @@ def fetch_exploded_bom_items(root_bom):
 	recursive CTE -- replaces a query-per-node walk with a single query. UNION keeps it cycle-safe
 	and fetches each sub-BOM's items only once even when it is reused across the tree."""
 	bom_item = frappe.qb.DocType("BOM Item")
+	child_bom = frappe.qb.DocType("BOM").as_("child_bom")
 	tree = frappe.qb.Table("exploded_bom")
 	fields = [
 		bom_item.parent,
 		bom_item.qty,
+		bom_item.stock_qty,
 		bom_item.bom_no,
 		bom_item.item_code,
 		bom_item.item_name,
@@ -46,7 +48,11 @@ def fetch_exploded_bom_items(root_bom):
 		.where(tree.bom_no != "")
 	)
 	rows = (
-		frappe.qb.with_(seed + recursion, "exploded_bom", recursive=True).from_(tree).select(tree.star)
+		frappe.qb.with_(seed + recursion, "exploded_bom", recursive=True)
+		.from_(tree)
+		.left_join(child_bom)
+		.on(tree.bom_no == child_bom.name)
+		.select(tree.star, child_bom.quantity.as_("child_bom_qty"))
 	).run(as_dict=True)
 
 	children_map = defaultdict(list)
@@ -71,7 +77,13 @@ def build_exploded_rows(bom, children_map, data, indent=0, qty=1):
 			}
 		)
 		if item.bom_no:
-			build_exploded_rows(item.bom_no, children_map, data, indent + 1, item.qty)
+			build_exploded_rows(
+				item.bom_no,
+				children_map,
+				data,
+				indent + 1,
+				qty * item.stock_qty / item.child_bom_qty,
+			)
 
 
 def get_columns():
