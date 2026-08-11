@@ -21,7 +21,7 @@ def get_exploded_items(bom, data, indent=0, qty=1):
 	exploded_items = frappe.get_all(
 		"BOM Item",
 		filters={"parent": bom},
-		fields=["qty", "bom_no", "qty", "item_code", "item_name", "description", "uom", "idx"],
+		fields=["qty", "bom_no", "stock_qty", "item_code", "item_name", "description", "uom", "idx"],
 		order_by="idx ASC",
 	)
 
@@ -40,7 +40,13 @@ def get_exploded_items(bom, data, indent=0, qty=1):
 			}
 		)
 		if item.bom_no:
-			get_exploded_items(item.bom_no, data, indent=indent + 1, qty=item.qty)
+			child_bom_qty = frappe.get_cached_value("BOM", item.bom_no, "quantity")
+			get_exploded_items(
+				item.bom_no,
+				data,
+				indent=indent + 1,
+				qty=qty * item.stock_qty / child_bom_qty,
+			)
 
 
 def get_columns():
