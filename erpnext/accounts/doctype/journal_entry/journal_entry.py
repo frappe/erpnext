@@ -162,7 +162,7 @@ class JournalEntry(AccountsController):
 
 		JournalTaxWithholding(self).on_validate()
 
-		if self.is_new() or not self.title:
+		if not self.title or (self.is_new() and self.amended_from):
 			self.title = self.get_title()
 
 	def validate_advance_accounts(self):
@@ -905,6 +905,16 @@ class JournalEntry(AccountsController):
 							reference_type, reference_name, invoice.outstanding_amount
 						)
 					)
+
+				if reference_type == "Purchase Invoice" and invoice.invoice_is_blocked():
+					msg = (
+						_("{0} {1} is blocked and on hold until {2}.").format(
+							invoice.doctype, invoice.name, invoice.release_date
+						)
+						if invoice.release_date
+						else _("{0} {1} is blocked.").format(invoice.doctype, invoice.name)
+					)
+					frappe.throw(msg)
 
 	def set_against_account(self):
 		accounts_debited, accounts_credited = [], []

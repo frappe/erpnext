@@ -251,6 +251,7 @@
    "fieldname": "conversion_factor",
    "fieldtype": "Float",
    "label": "UOM Conversion Factor",
+   "precision": "9",
    "print_hide": 1,
    "read_only": 1,
    "reqd": 1
@@ -1035,7 +1036,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-02-22 16:40:00.200328",
+ "modified": "2026-08-07 17:31:31.732720",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order Item",

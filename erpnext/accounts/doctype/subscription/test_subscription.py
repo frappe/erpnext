@@ -614,6 +614,32 @@ class TestSubscription(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, subscription.process, posting_date=add_days(start_date, 7))
 
+	def test_subscription_cancels_at_period_end_without_end_date(self):
+		# https://github.com/frappe/erpnext/issues/57761 -- generate_invoice() rolls
+		# current_invoice_end forward to the next period before this check runs, so
+		# with no end_date to fall back on, cancel_at_period_end must compare
+		# against the period that just ended, not the (already advanced) next one.
+		create_plan(
+			plan_name="_Test plan name 11",
+			cost=80,
+			currency="INR",
+			billing_interval="Day",
+			billing_interval_count=3,
+		)
+		subscription = create_subscription(
+			start_date=nowdate(),
+			cancel_at_period_end=1,
+			generate_invoice_at="End of the current subscription period",
+			plans=[{"plan": "_Test plan name 11", "qty": 1}],
+		)
+		self.assertEqual(len(subscription.invoices), 0)
+		period_end = subscription.current_invoice_end
+
+		subscription.process(posting_date=period_end)
+
+		self.assertEqual(subscription.status, "Cancelled")
+		self.assertEqual(len(subscription.invoices), 1)
+
 	def test_invoice_generated_when_scheduler_runs_one_day_late(self):
 		# The trigger date (period end) is long past, yet catch-up still bills the period
 		# on creation (Bug 1: the check is `>= trigger`, not `== trigger`).
@@ -773,6 +799,38 @@ class TestSubscription(ERPNextTestSuite):
 		# Subscription status should now be Active (via on_update_after_submit hook)
 		subscription.reload()
 		self.assertEqual(subscription.status, "Active")
+
+	def test_cancelled_subscription_stays_cancelled_after_payment_and_reprocess(self):
+		# https://github.com/frappe/erpnext/issues/57761
+		subscription = create_subscription(
+			start_date=nowdate(),
+			generate_invoice_at="Beginning of the current subscription period",
+			submit_invoice=1,
+			cancel_at_period_end=1,
+		)
+		subscription.process(posting_date=nowdate())
+		invoice = subscription.get_current_invoice()
+		self.assertGreater(invoice.outstanding_amount, 0)
+
+		subscription.cancel_subscription()
+		self.assertEqual(subscription.status, "Cancelled")
+		cancelation_date = getdate(subscription.cancelation_date)
+		self.assertIsNotNone(cancelation_date)
+
+		payment_entry = get_payment_entry(invoice.doctype, invoice.name, bank_account="_Test Bank - _TC")
+		payment_entry.reference_no = "12345"
+		payment_entry.reference_date = nowdate()
+		payment_entry.submit()
+
+		subscription.reload()
+		self.assertEqual(subscription.status, "Cancelled")
+		self.assertEqual(getdate(subscription.cancelation_date), cancelation_date)
+
+		invoice_count = len(subscription.invoices)
+		subscription.process()
+		subscription.reload()
+		self.assertEqual(subscription.status, "Cancelled")
+		self.assertEqual(len(subscription.invoices), invoice_count)
 
 	def test_first_invoice_generated_on_create_for_prepaid(self):
 		subscription = create_subscription(
