@@ -1,6 +1,8 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from unittest.mock import patch
+
 import frappe
 from frappe.utils import add_days, cint, cstr, flt, get_datetime, getdate, nowtime, today
 from pypika import functions as fn
@@ -822,6 +824,46 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(pr1.status, "Completed")
 
 		# PR2 must only get the remaining 1000 (not 1500 again) -> partly billed.
+		pr2.load_from_db()
+		self.assertEqual(pr2.get("items")[0].billed_amt, 1000)
+		self.assertEqual(flt(pr2.per_billed, 2), 66.67)
+		self.assertEqual(pr2.status, "Partly Billed")
+
+		from erpnext.patches.v16_0 import recalculate_purchase_receipt_billing_status
+
+		purchase_order_item = po.items[0].name
+		with patch.object(
+			recalculate_purchase_receipt_billing_status,
+			"get_candidate_purchase_order_items",
+			return_value=[purchase_order_item],
+		):
+			self.assertEqual(
+				recalculate_purchase_receipt_billing_status.get_affected_purchase_order_items(), []
+			)
+
+			frappe.db.set_value(
+				"Purchase Receipt Item",
+				pr2.items[0].name,
+				"billed_amt",
+				1500,
+				update_modified=False,
+			)
+			frappe.db.set_value(
+				"Purchase Receipt",
+				pr2.name,
+				{"per_billed": 100, "status": "Completed"},
+				update_modified=False,
+			)
+
+			self.assertEqual(
+				recalculate_purchase_receipt_billing_status.get_affected_purchase_order_items(),
+				[purchase_order_item],
+			)
+			recalculate_purchase_receipt_billing_status.execute()
+			self.assertEqual(
+				recalculate_purchase_receipt_billing_status.get_affected_purchase_order_items(), []
+			)
+
 		pr2.load_from_db()
 		self.assertEqual(pr2.get("items")[0].billed_amt, 1000)
 		self.assertEqual(flt(pr2.per_billed, 2), 66.67)
