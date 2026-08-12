@@ -480,7 +480,7 @@ def update_plan_row_dates(plan, proposal, use_item_dates=0, item_dates=None):
 
 
 def set_finished_good_start_date(fg_row, rows, use_item_dates, item_dates):
-	if not use_item_dates:
-		fg_row.db_set("planned_start_date", rows[fg_row.name]["start"], update_modified=False)
-	elif (item_dates or {}).get(fg_row.name):
+	if use_item_dates and (item_dates or {}).get(fg_row.name):
 		fg_row.db_set("planned_start_date", item_dates[fg_row.name], update_modified=False)
+	else:
+		fg_row.db_set("planned_start_date", rows[fg_row.name]["start"], update_modified=False)

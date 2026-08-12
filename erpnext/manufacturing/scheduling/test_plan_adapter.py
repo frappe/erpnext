@@ -145,7 +145,9 @@ class TestPlanAdapter(ERPNextTestSuite):
 		fg_one, fg_two = plan.po_items
 		self.assertEqual(get_datetime(fg_two.planned_start_date), day_two)
 		self.assertEqual(get_datetime(fg_two.planned_end_date), add_to_date(day_two, minutes=60))
-		self.assertEqual(get_datetime(fg_one.planned_start_date), day_one)
+		# no dialog date for the first row, so its computed start (after both
+		# sub-assemblies and the operation gap) is persisted to match the calendar
+		self.assertEqual(get_datetime(fg_one.planned_start_date), add_to_date(day_one, minutes=250))
 		self.assertEqual(get_datetime(fg_one.planned_end_date), add_to_date(day_one, minutes=310))
 
 		for row in plan.sub_assembly_items:

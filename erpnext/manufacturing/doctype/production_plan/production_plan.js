@@ -288,7 +288,7 @@ frappe.ui.form.on("Production Plan", {
 					fieldtype: "Check",
 					default: 0,
 					description: __(
-						"Set a start date per assembly item below; its sub-assemblies are scheduled from the same date. The Start Date above is the earliest limit and is used for rows without a date."
+						"Set a start date per assembly item below; its sub-assemblies are scheduled from the same date. The Start Date above is the earliest limit. Rows with a date here keep it as entered; other rows get the computed start written back."
 					),
 				},
 				{
