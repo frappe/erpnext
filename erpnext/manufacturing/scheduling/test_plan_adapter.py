@@ -170,9 +170,7 @@ class TestPlanAdapter(ERPNextTestSuite):
 
 		# the cleared date no longer constrains the chain, so the item schedules
 		# freely from the dialog start date instead of the stale persisted one
-		self.assertEqual(
-			get_datetime(plan.po_items[0].planned_start_date), add_to_date(day_one, minutes=250)
-		)
+		self.assertEqual(get_datetime(plan.po_items[0].planned_start_date), add_to_date(day_one, minutes=250))
 
 	def test_manual_schedule_entry_creation_is_blocked(self):
 		plan = self.make_plan()
