@@ -185,6 +185,17 @@ def make_corrective_job_card(
 				"field_map": {
 					"name": "for_job_card",
 				},
+				# A corrective job card only reworks an operation, it does not produce the
+				# finished good again, so the production details of the source card are not carried over.
+				"field_no_map": [
+					"finished_good",
+					"semi_fg_bom",
+					"manufactured_qty",
+					"transferred_qty",
+					"total_completed_qty",
+					"process_loss_qty",
+					"pending_qty",
+				],
 			}
 		},
 		target_doc,

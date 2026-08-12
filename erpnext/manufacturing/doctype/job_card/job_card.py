@@ -179,7 +179,7 @@ class JobCard(Document):
 			self.validate_semi_finished_goods()
 
 	def validate_semi_finished_goods(self):
-		if not self.track_semi_finished_goods or self.is_subcontracted:
+		if not self.track_semi_finished_goods or self.is_subcontracted or self.is_corrective_job_card:
 			return
 
 		if self.items and not self.transferred_qty and not self.skip_material_transfer:

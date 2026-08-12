@@ -102,6 +102,7 @@ frappe.ui.form.on("Job Card", {
 			doc.track_semi_finished_goods &&
 			doc.docstatus === 1 &&
 			!doc.is_subcontracted &&
+			!doc.is_corrective_job_card &&
 			(doc.skip_material_transfer || doc.transferred_qty > 0) &&
 			flt(doc.manufactured_qty) + flt(doc.process_loss_qty) <
 				flt(doc.for_quantity) - flt(doc.pending_qty);
@@ -165,7 +166,7 @@ frappe.ui.form.on("Job Card", {
 
 		frm.events.setup_material_transfer_buttons(frm, has_items);
 
-		if (doc.docstatus == 1 && !doc.is_corrective_job_card && !doc.finished_good) {
+		if (doc.docstatus == 1 && !doc.is_corrective_job_card) {
 			frm.trigger("setup_corrective_job_card");
 		}
 
