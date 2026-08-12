@@ -24,7 +24,9 @@ def get_schedule_preview(
 	plan = frappe.get_doc("Production Plan", production_plan)
 	plan.check_permission("read")
 
-	return run_engine(plan, get_datetime(start_date), cint(use_item_dates), parse_item_dates(item_dates))
+	proposal = run_engine(plan, get_datetime(start_date), cint(use_item_dates), parse_item_dates(item_dates))
+	proposal["orders_exist"] = has_orders_against_plan(plan)
+	return proposal
 
 
 @frappe.whitelist(methods=["POST"])
@@ -75,6 +77,22 @@ def validate_plan_for_scheduling(plan):
 
 	if plan.status in ("Completed", "Closed"):
 		frappe.throw(_("Cannot schedule a Production Plan with status {0}").format(_(plan.status)))
+
+	if has_orders_against_plan(plan):
+		frappe.throw(
+			_(
+				"Work Orders / Purchase Orders have already been created against this Production Plan. Cancel them before re-scheduling."
+			)
+		)
+
+
+def has_orders_against_plan(plan):
+	if frappe.db.exists("Work Order", {"production_plan": plan.name, "docstatus": ("<", 2)}):
+		return True
+
+	return bool(
+		frappe.db.exists("Purchase Order Item", {"production_plan": plan.name, "docstatus": ("<", 2)})
+	)
 
 
 def run_engine(plan, start_date, use_item_dates=0, item_dates=None):

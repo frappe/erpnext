@@ -85,6 +85,8 @@ class TestPlanAdapter(ERPNextTestSuite):
 			work_order.submit()
 			self.assert_job_card_matches_schedule(plan, work_order)
 
+		self.assertRaises(frappe.ValidationError, apply_schedule, plan.name, start_date)
+
 	def assert_job_card_matches_schedule(self, plan, work_order):
 		plan_row = work_order.production_plan_item or work_order.production_plan_sub_assembly_item
 		entries = frappe.get_all(

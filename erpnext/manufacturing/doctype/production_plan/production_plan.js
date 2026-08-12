@@ -391,12 +391,18 @@ frappe.ui.form.on("Production Plan", {
 					.join(", ")}</div>`
 			: "";
 
+		let locked_note = proposal.orders_exist
+			? `<div class="schedule-preview-warning">${__(
+					"Work Orders / Purchase Orders already exist against this plan, so the schedule is locked. Cancel them to re-schedule."
+			  )}</div>`
+			: "";
+
 		let dialog_options = {
 			title: __("Schedule Preview"),
 			size: "extra-large",
 		};
 
-		if (!unscheduled.length) {
+		if (!unscheduled.length && !proposal.orders_exist) {
 			dialog_options.primary_action_label = __("Apply Schedule");
 			dialog_options.primary_action = () => {
 				dialog.hide();
@@ -409,6 +415,7 @@ frappe.ui.form.on("Production Plan", {
 		dialog.$body.html(`
 			${frm.events.get_preview_styles()}
 			${frm.events.get_preview_summary_html(proposal, ordered)}
+			${locked_note}
 			${warning}
 			<div class="schedule-preview-table-wrapper">
 				<table class="table schedule-preview-table">
