@@ -40,6 +40,7 @@
   "column_break_igxl",
   "skip_available_sub_assembly_item",
   "combine_sub_items",
+  "no_of_shifts",
   "get_sub_assembly_items",
   "section_break_g4ip",
   "sub_assembly_items",
@@ -446,6 +447,12 @@
    "fieldname": "reserve_stock",
    "fieldtype": "Check",
    "label": "Reserve Stock"
+  },
+  {
+   "description": "Used by scheduling when an item has no BOM operations: scales the Item Lead Time daily capacity to this many shifts.",
+   "fieldname": "no_of_shifts",
+   "fieldtype": "Int",
+   "label": "No of Shifts"
   }
  ],
  "grid_page_length": 50,
@@ -453,7 +460,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-07 00:00:00.000000",
+ "modified": "2026-08-12 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan",
