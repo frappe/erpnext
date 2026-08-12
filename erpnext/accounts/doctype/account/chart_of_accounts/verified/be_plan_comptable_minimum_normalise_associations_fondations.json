@@ -632,32 +632,25 @@
         "CLASSE 4 : DETTES À UN AN AU PLUS": {
             "root_type": "Liability",
             "Dettes à plus d'un an échéant dans l'année": {
-                "account_number": "42",
-                "account_type": "Current Liability"
+                "account_number": "42"
             },
             "Dettes financières": {
                 "Établissements de crédit – Emprunts en compte à terme fixe": {
-                    "account_number": "430",
-                    "account_type": "Current Liability"
+                    "account_number": "430"
                 },
                 "Établissements de crédit – Promesses": {
-                    "account_number": "431",
-                    "account_type": "Current Liability"
+                    "account_number": "431"
                 },
                 "Établissements de crédit – Crédits d'acceptation": {
-                    "account_number": "432",
-                    "account_type": "Current Liability"
+                    "account_number": "432"
                 },
                 "Établissements de crédit – Dettes en compte courant": {
-                    "account_number": "433",
-                    "account_type": "Current Liability"
+                    "account_number": "433"
                 },
                 "Autres emprunts": {
-                    "account_number": "439",
-                    "account_type": "Current Liability"
+                    "account_number": "439"
                 },
-                "account_number": "43",
-                "account_type": "Current Liability"
+                "account_number": "43"
             },
             "Dettes commerciales": {
                 "Fournisseurs": {
@@ -729,118 +722,90 @@
             },
             "Comptes de régularisation et d'attente": {
                 "Charges à reporter": {
-                    "account_number": "490",
-                    "account_type": "Current Liability"
+                    "account_number": "490"
                 },
                 "Produits acquis": {
-                    "account_number": "491",
-                    "account_type": "Current Liability"
+                    "account_number": "491"
                 },
                 "Charges à imputer": {
-                    "account_number": "492",
-                    "account_type": "Current Liability"
+                    "account_number": "492"
                 },
                 "Produits à reporter": {
-                    "account_number": "493",
-                    "account_type": "Current Liability"
+                    "account_number": "493"
                 },
                 "Comptes d'attente": {
-                    "account_number": "499",
-                    "account_type": "Current Liability"
+                    "account_number": "499"
                 },
-                "account_number": "49",
-                "account_type": "Current Liability"
+                "account_number": "49"
             },
             "Obligations et coupons échus": {
-                "account_number": "480",
-                "account_type": "Current Liability"
+                "account_number": "480"
             },
             "Subsides à rembourser": {
-                "account_number": "483",
-                "account_type": "Current Liability"
+                "account_number": "483"
             },
             "Cautionnements reçus en numéraire": {
-                "account_number": "488",
-                "account_type": "Current Liability"
+                "account_number": "488"
             },
             "Autres dettes diverses": {
                 "Productives d’intérêts": {
-                    "account_number": "4890",
-                    "account_type": "Current Liability"
+                    "account_number": "4890"
                 },
                 "Non productives d’intérêts ou assorties d’un intérêt anormalement faible": {
-                    "account_number": "4891",
-                    "account_type": "Current Liability"
+                    "account_number": "4891"
                 },
-                "account_number": "489",
-                "account_type": "Current Liability"
+                "account_number": "489"
             }
         },
         "CLASSE 5 : PLACEMENTS DE TRÉSORERIE ET VALEURS DISPONIBLES": {
             "root_type": "Asset",
             "Placements de trésorerie autres que actions et parts, titres à revenu fixe et dépôts à terme": {
                 "Valeur d'acquisition": {
-                    "account_number": "500",
-                    "account_type": "Current Asset"
+                    "account_number": "500"
                 },
                 "Réductions de valeurs actées (-)": {
-                    "account_number": "509",
-                    "account_type": "Current Asset"
+                    "account_number": "509"
                 },
-                "account_number": "50",
-                "account_type": "Current Asset"
+                "account_number": "50"
             },
             "Actions et parts": {
                 "Valeur d'acquisition": {
-                    "account_number": "510",
-                    "account_type": "Current Asset"
+                    "account_number": "510"
                 },
                 "Montants non appelés (-)": {
-                    "account_number": "511",
-                    "account_type": "Current Asset"
+                    "account_number": "511"
                 },
                 "Réductions de valeur actées (-)": {
-                    "account_number": "519",
-                    "account_type": "Current Asset"
+                    "account_number": "519"
                 },
-                "account_number": "51",
-                "account_type": "Current Asset"
+                "account_number": "51"
             },
             "Titres à revenu fixe": {
                 "Valeur d'acquisition": {
-                    "account_number": "520",
-                    "account_type": "Current Asset"
+                    "account_number": "520"
                 },
                 "Réductions de valeurs actées (-)": {
-                    "account_number": "529",
-                    "account_type": "Current Asset"
+                    "account_number": "529"
                 },
-                "account_number": "52",
-                "account_type": "Current Asset"
+                "account_number": "52"
             },
             "Dépôts à terme": {
                 "De plus d'un an": {
-                    "account_number": "530",
-                    "account_type": "Current Asset"
+                    "account_number": "530"
                 },
                 "De plus d'un mois et à un an au plus": {
-                    "account_number": "531",
-                    "account_type": "Current Asset"
+                    "account_number": "531"
                 },
                 "D'un mois au plus": {
-                    "account_number": "532",
-                    "account_type": "Current Asset"
+                    "account_number": "532"
                 },
                 "Réductions de valeur actées (-)": {
-                    "account_number": "539",
-                    "account_type": "Current Asset"
+                    "account_number": "539"
                 },
-                "account_number": "53",
-                "account_type": "Current Asset"
+                "account_number": "53"
             },
             "Valeurs échues à l'encaissement": {
-                "account_number": "54",
-                "account_type": "Current Asset"
+                "account_number": "54"
             },
             "Établissements de crédit": {
                 "Banque": {
