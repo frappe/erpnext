@@ -434,7 +434,6 @@ def replace_schedule_entries(plan, proposal):
 
 
 def make_schedule_entry(plan, row_name, row, block):
-	subject_parts = [row["item_code"], block.get("operation"), block.get("workstation")]
 	return frappe.get_doc(
 		{
 			"doctype": "Production Plan Schedule",
@@ -449,9 +448,22 @@ def make_schedule_entry(plan, row_name, row, block):
 			"to_time": block["to_time"],
 			"duration_mins": block["duration_mins"],
 			"task_key": block["task_key"],
-			"subject": " | ".join(part for part in subject_parts if part),
+			"subject": get_entry_subject(row, block),
 		}
 	)
+
+
+def get_entry_subject(row, block):
+	item_name = frappe.get_cached_value("Item", row["item_code"], "item_name") or row["item_code"]
+
+	if row["row_type"] == "Raw Material":
+		activity = _("Procurement")
+	elif block.get("workstation") and block.get("operation"):
+		activity = block["operation"]
+	else:
+		activity = _("Production")
+
+	return f"{item_name} · {activity}"
 
 
 def update_plan_row_dates(plan, proposal, use_item_dates=0, item_dates=None):
