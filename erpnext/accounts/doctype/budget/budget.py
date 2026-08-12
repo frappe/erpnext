@@ -98,13 +98,13 @@ class Budget(Document):
 					frappe.throw(_("Budget cannot be assigned against Group Account {0}").format(d.account))
 				elif account_details.company != self.company:
 					frappe.throw(
-						_("Account {0} does not belongs to company {1}").format(d.account, self.company)
+						_("Account {0} does not belong to company {1}").format(d.account, self.company)
 					)
 				elif account_details.report_type != "Profit and Loss":
 					frappe.throw(
 						_(
 							"Budget cannot be assigned against {0}, as its Root Type is not of Income or Expense"
-						).format(self.account)
+						).format(d.account)
 					)
 
 				if d.account in account_list:
