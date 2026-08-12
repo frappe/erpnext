@@ -38,8 +38,11 @@ from erpnext.stock.utils import get_incoming_rate
 
 from .services.disassemble import DisassembleStockEntry
 from .services.manufacturing import (
+	DuplicateEntryForWorkOrderError,
+	ManufacturedQtyMandatoryError,
 	ManufactureStockEntry,
 	MaterialConsumptionForManufactureStockEntry,
+	OperationsNotCompleteError,
 	RepackStockEntry,
 )
 from .services.material_receipt_issue import MaterialIssueStockEntry, MaterialReceiptStockEntry

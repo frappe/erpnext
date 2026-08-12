@@ -54,6 +54,7 @@
   "default_receivable_account",
   "default_payable_account",
   "write_off_account",
+  "bank_charges_account",
   "unrealized_profit_loss_account",
   "column_break0",
   "allow_account_creation_against_child_company",
@@ -387,6 +388,15 @@
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
    "label": "Write Off Account",
+   "no_copy": 1,
+   "options": "Account"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "bank_charges_account",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Bank Charges Account",
    "no_copy": 1,
    "options": "Account"
   },

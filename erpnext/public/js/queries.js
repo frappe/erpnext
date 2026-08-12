@@ -12,6 +12,10 @@ $.extend(erpnext.queries, {
 		return { query: "erpnext.controllers.queries.lead_query" };
 	},
 
+	customer: function () {
+		return { filters: { disabled: 0 } };
+	},
+
 	item: function (filters) {
 		var args = { query: "erpnext.controllers.queries.item_query" };
 		if (filters) args["filters"] = filters;

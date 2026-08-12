@@ -110,18 +110,6 @@ frappe.ui.form.on("Chart of Accounts Importer", {
 				args: {
 					company: frm.doc.company,
 				},
-				callback: function (r) {
-					if (r.message === false) {
-						frm.set_value("company", "");
-						frappe.throw(
-							__(
-								"Transactions against the Company already exist! Chart of Accounts can only be imported for a Company with no transactions."
-							)
-						);
-					} else {
-						frm.trigger("refresh");
-					}
-				},
 			});
 		}
 	},

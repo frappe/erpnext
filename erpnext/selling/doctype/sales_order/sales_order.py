@@ -238,6 +238,9 @@ class SalesOrder(SellingController):
 
 			validate_coupon_code(self.coupon_code)
 
+		if not self.get("is_subcontracted"):
+			SalesOrderStockReservation(self).enable_auto_reserve_stock()
+
 		make_packing_list(self)
 
 		self.validate_with_previous_doc()
@@ -247,8 +250,6 @@ class SalesOrder(SellingController):
 		StatusService(self).set_default_statuses()
 
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
-		if not self.get("is_subcontracted"):
-			SalesOrderStockReservation(self).enable_auto_reserve_stock()
 
 	def set_has_unit_price_items(self):
 		"""

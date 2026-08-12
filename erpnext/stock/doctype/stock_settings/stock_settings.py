@@ -84,22 +84,8 @@ class StockSettings(Document):
 		]:
 			frappe.db.set_default(key, self.get(key, ""))
 
-		from erpnext.utilities.naming import set_by_naming_series
-
-		set_by_naming_series(
-			"Item",
-			"item_code",
-			self.get("item_naming_by") == "Naming Series",
-			hide_name_field=True,
-			make_mandatory=0,
-		)
-
-		# show/hide barcode field
-		for name in ["barcode", "barcodes", "scan_barcode"]:
-			frappe.make_property_setter(
-				{"fieldname": name, "property": "hidden", "value": 0 if self.show_barcode_field else 1},
-				validate_fields_for_doctype=False,
-			)
+		self.update_item_naming_settings()
+		self.update_barcode_field_visibility()
 
 		self.validate_over_delivery_receipt_allowance()
 		self.validate_serial_and_batch_no_settings()
@@ -112,6 +98,30 @@ class StockSettings(Document):
 		self.change_precision_for_purchase()
 		self.change_precision_for_stock_entry()
 		self.validate_do_not_use_batchwise_valuation()
+
+	def update_item_naming_settings(self):
+		if not self.has_value_changed("item_naming_by"):
+			return
+
+		from erpnext.utilities.naming import set_by_naming_series
+
+		set_by_naming_series(
+			"Item",
+			"item_code",
+			self.get("item_naming_by") == "Naming Series",
+			hide_name_field=True,
+			make_mandatory=0,
+		)
+
+	def update_barcode_field_visibility(self):
+		if not self.has_value_changed("show_barcode_field"):
+			return
+
+		for name in ["barcode", "barcodes", "scan_barcode"]:
+			frappe.make_property_setter(
+				{"fieldname": name, "property": "hidden", "value": 0 if self.show_barcode_field else 1},
+				validate_fields_for_doctype=False,
+			)
 
 	def validate_over_delivery_receipt_allowance(self):
 		if not self.over_delivery_receipt_allowance:

@@ -51,9 +51,9 @@ class SubcontractingService:
 		if not doc.is_subcontracted:
 			return
 
-		finished_goods_without_service_item = {
-			d.fg_item for d in doc.items if (not d.item_code and d.fg_item)
-		}
+		finished_goods_without_service_item = list(
+			{d.fg_item for d in doc.items if (not d.item_code and d.fg_item)}
+		)
 
 		if subcontracting_boms := get_subcontracting_boms_for_finished_goods(
 			finished_goods_without_service_item
