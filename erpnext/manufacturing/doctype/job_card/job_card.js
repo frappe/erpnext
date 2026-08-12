@@ -117,7 +117,9 @@ frappe.ui.form.on("Job Card", {
 		const show_material_tables =
 			backflush_based_on_material_transfer ||
 			frm.doc.__onload?.transfer_material_against === "Job Card" ||
-			Boolean(frm.doc.track_semi_finished_goods);
+			Boolean(frm.doc.track_semi_finished_goods) ||
+			Boolean(frm.doc.items?.length) ||
+			Boolean(frm.doc.secondary_items?.length);
 
 		frm.toggle_display(
 			["section_break_8", "items", "secondary_items_section", "secondary_items"],
