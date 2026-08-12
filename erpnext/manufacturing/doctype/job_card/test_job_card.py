@@ -582,6 +582,76 @@ class TestJobCard(ERPNextTestSuite):
 		work_order.reload()
 		self.assertEqual(work_order.material_transferred_for_manufacturing, min(completed_qty))
 
+	def test_corrective_job_card_requires_operation_details(self):
+		job_card = frappe.get_last_doc("Job Card", {"work_order": self.work_order.name})
+
+		with self.assertRaisesRegex(frappe.ValidationError, "Corrective Operation is required"):
+			make_corrective_job_card(job_card.name, for_operation=job_card.operation)
+
+		with self.assertRaisesRegex(frappe.ValidationError, "For Operation is required"):
+			make_corrective_job_card(job_card.name, operation=job_card.operation)
+
+	def test_corrective_job_card_does_not_copy_total_completed_qty(self):
+		job_card = frappe.get_last_doc("Job Card", {"work_order": self.work_order.name})
+		job_card.append(
+			"time_logs",
+			{"from_time": now(), "to_time": add_to_date(now(), hours=1), "completed_qty": 1},
+		)
+		job_card.save()
+		self.assertEqual(job_card.total_completed_qty, 1)
+
+		corrective_job_card = make_corrective_job_card(
+			job_card.name,
+			operation=job_card.operation,
+			for_operation=job_card.operation,
+		)
+
+		self.assertEqual(corrective_job_card.total_completed_qty, 0)
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"backflush_raw_materials_based_on": "Material Transferred for Manufacture"}
+	)
+	def test_corrective_job_card_does_not_autofill_items(self):
+		self.transfer_material_against = "Job Card"
+		job_card = frappe.get_last_doc("Job Card", {"work_order": self.work_order.name})
+		frappe.db.set_value("BOM", job_card.bom_no, "backflush_based_on", "")
+		self.assertTrue(job_card.items)
+
+		corrective_job_card = make_corrective_job_card(
+			job_card.name,
+			operation=job_card.operation,
+			for_operation=job_card.operation,
+		)
+
+		self.assertFalse(corrective_job_card.items)
+		corrective_job_card.get_required_items()
+		self.assertFalse(corrective_job_card.items)
+		self.assertEqual(
+			corrective_job_card.get_onload("backflush_raw_materials_based_on"),
+			"Material Transferred for Manufacture",
+		)
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM"})
+	def test_corrective_job_card_uses_bom_backflush_setting(self):
+		job_card = frappe.get_last_doc("Job Card", {"work_order": self.work_order.name})
+		frappe.db.set_value(
+			"BOM",
+			job_card.bom_no,
+			"backflush_based_on",
+			"Material Transferred for Manufacture",
+		)
+
+		corrective_job_card = make_corrective_job_card(
+			job_card.name,
+			operation=job_card.operation,
+			for_operation=job_card.operation,
+		)
+
+		self.assertEqual(
+			corrective_job_card.get_onload("backflush_raw_materials_based_on"),
+			"Material Transferred for Manufacture",
+		)
+
 	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings", {"add_corrective_operation_cost_in_finished_good_valuation": 1}
 	)

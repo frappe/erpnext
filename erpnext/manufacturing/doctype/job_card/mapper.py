@@ -164,17 +164,24 @@ def make_corrective_job_card(
 	for_operation: str | None = None,
 	target_doc: str | dict | Document | None = None,
 ):
+	if not operation:
+		frappe.throw(_("Corrective Operation is required"))
+
+	if not for_operation:
+		frappe.throw(_("For Operation is required"))
+
 	def set_missing_values(source, target):
 		target.is_corrective_job_card = 1
 		target.operation = operation
 		target.for_operation = for_operation
+		target.total_completed_qty = 0
 
 		target.set("time_logs", [])
 		target.set("employee", [])
 		target.set("items", [])
 		target.set("sub_operations", [])
 		target.set_sub_operations()
-		target.get_required_items()
+		target.set_onload("backflush_raw_materials_based_on", target.get_backflush_raw_materials_based_on())
 
 	doclist = get_mapped_doc(
 		"Job Card",

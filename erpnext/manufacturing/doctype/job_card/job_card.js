@@ -96,6 +96,40 @@ frappe.ui.form.on("Job Card", {
 		}
 	},
 
+	set_corrective_job_card_labels(frm) {
+		const is_corrective_job_card = Boolean(frm.doc.is_corrective_job_card);
+
+		frm.set_df_property(
+			"for_quantity",
+			"label",
+			is_corrective_job_card ? __("Qty To Correct") : __("Qty To Manufacture")
+		);
+		frm.set_df_property(
+			"total_completed_qty",
+			"label",
+			is_corrective_job_card ? __("Total Corrected Qty") : __("Total Completed Qty")
+		);
+	},
+
+	toggle_material_tables(frm) {
+		const backflush_based_on_material_transfer =
+			frm.doc.__onload?.backflush_raw_materials_based_on === "Material Transferred for Manufacture";
+		const show_material_tables = frm.doc.is_corrective_job_card
+			? backflush_based_on_material_transfer
+			: Boolean(frm.doc.track_semi_finished_goods) ||
+			  backflush_based_on_material_transfer ||
+			  frm.doc.__onload?.transfer_material_against === "Job Card";
+
+		frm.toggle_display(
+			["section_break_8", "items", "secondary_items_section", "secondary_items"],
+			show_material_tables
+		);
+	},
+
+	track_semi_finished_goods(frm) {
+		frm.trigger("toggle_material_tables");
+	},
+
 	setup_stock_entry(frm) {
 		const { doc } = frm;
 		const can_make_stock_entry =
@@ -140,6 +174,8 @@ frappe.ui.form.on("Job Card", {
 		}
 
 		frm.trigger("make_fields_read_only");
+		frm.trigger("set_corrective_job_card_labels");
+		frm.trigger("toggle_material_tables");
 
 		if (!frm.is_new() && doc.__onload?.work_order_closed) {
 			frm.disable_save();
@@ -464,6 +500,7 @@ frappe.ui.form.on("Job Card", {
 						label: __("Corrective Operation"),
 						options: "Operation",
 						fieldname: "operation",
+						reqd: 1,
 						get_query() {
 							return { filters: { is_corrective_operation: 1 } };
 						},
@@ -473,6 +510,7 @@ frappe.ui.form.on("Job Card", {
 						label: __("For Operation"),
 						options: "Operation",
 						fieldname: "for_operation",
+						reqd: 1,
 						get_query() {
 							return { filters: { name: ["in", operations] } };
 						},
@@ -482,10 +520,11 @@ frappe.ui.form.on("Job Card", {
 				frappe.prompt(
 					fields,
 					(d) => frm.events.make_corrective_job_card(frm, d.operation, d.for_operation),
-					__("Select Corrective Operation")
+					__("Select Corrective Operation"),
+					__("Create")
 				);
 			},
-			__("Make")
+			__("Create")
 		);
 	},
 
@@ -816,6 +855,10 @@ frappe.ui.form.on("Job Card", {
 	},
 
 	for_quantity(frm) {
+		if (frm.doc.is_corrective_job_card) {
+			return;
+		}
+
 		frm.doc.items = [];
 		frm.call({
 			method: "get_required_items",
