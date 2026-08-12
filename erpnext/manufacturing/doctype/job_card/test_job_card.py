@@ -583,6 +583,72 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertEqual(work_order.material_transferred_for_manufacturing, min(completed_qty))
 
 	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings",
+		{
+			"backflush_raw_materials_based_on": "Material Transferred for Manufacture",
+			"overproduction_percentage_for_work_order": 0,
+		},
+	)
+	def test_corrective_job_card_transfer_excluded_from_transferred_qty(self):
+		from erpnext.manufacturing.doctype.work_order.mapper import (
+			make_stock_entry as make_stock_entry_for_wo,
+		)
+
+		wo = make_wo_order_test_record(
+			item="_Test FG Item 2",
+			qty=4,
+			transfer_material_against="Work Order",
+			source_warehouse=self.source_warehouse,
+		)
+		self.generate_required_stock(wo)
+
+		transfer = frappe.get_doc(
+			make_stock_entry_for_wo(wo.name, "Material Transfer for Manufacture", qty=4)
+		)
+		transfer.submit()
+
+		job_card = frappe.get_last_doc("Job Card", {"work_order": wo.name})
+		job_card.append(
+			"time_logs",
+			{"from_time": now(), "to_time": add_to_date(now(), hours=1), "completed_qty": 4},
+		)
+		job_card.submit()
+
+		corrective_operation = frappe.get_doc(
+			doctype="Operation", is_corrective_operation=1, name=frappe.generate_hash()
+		).insert()
+		corrective_job_card = make_corrective_job_card(
+			job_card.name, operation=corrective_operation.name, for_operation=job_card.operation
+		)
+		corrective_job_card.for_quantity = 2
+		rm_item = wo.required_items[0]
+		corrective_job_card.append(
+			"items",
+			{
+				"item_code": rm_item.item_code,
+				"source_warehouse": rm_item.source_warehouse,
+				"uom": frappe.db.get_value("Item", rm_item.item_code, "stock_uom"),
+				"required_qty": 2,
+			},
+		)
+		corrective_job_card.insert()
+
+		corrective_transfer = make_stock_entry_from_jc(corrective_job_card.name)
+		corrective_transfer.submit()
+
+		wo.reload()
+		self.assertEqual(wo.material_transferred_for_manufacturing, 4)
+
+		original_qty = sum(row.qty for row in transfer.items if row.item_code == rm_item.item_code)
+		manufacture = frappe.get_doc(make_stock_entry_for_wo(wo.name, "Manufacture", qty=4))
+		consumed = sum(
+			row.qty
+			for row in manufacture.items
+			if row.item_code == rm_item.item_code and row.s_warehouse and not row.is_finished_item
+		)
+		self.assertEqual(flt(consumed), flt(original_qty + 2))
+
+	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings", {"add_corrective_operation_cost_in_finished_good_valuation": 1}
 	)
 	def test_corrective_costing(self):
