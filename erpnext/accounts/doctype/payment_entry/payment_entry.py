@@ -750,6 +750,13 @@ class PaymentEntry(AccountsController):
 			and not cint(tax.is_tax_withholding_account)
 		]
 
+	def get_advance_tax_total(self, in_account_currency: bool = False):
+		"""Total advance tax, in company currency unless `in_account_currency`."""
+		total = sum(flt(tax.base_tax_amount) for tax in self.get_advance_tax_rows())
+		if in_account_currency:
+			total = flt(total / self.get_party_exchange_rate(), self.precision("paid_amount"))
+		return total
+
 	def compute_advance_tax_breakdown(self, in_account_currency: bool = False):
 		"""Advance tax per reference row as `{ref_row_name: {account_head: tax_amount}}`.
 
@@ -808,13 +815,15 @@ class PaymentEntry(AccountsController):
 				tax_sum = flt(sum(breakdown.get(ref.name, {}).values()), ref_precision)
 				ref.allocated_gross_amount = flt(flt(ref.allocated_amount) + tax_sum, ref_precision)
 
-		# Read by `set_advances` when an invoice consumes the unallocated remainder.
+		# Read by `set_advances` when an invoice consumes the unallocated remainder. Grossed up by
+		# advance tax only, like the reference rows: a `Deduct` row is withheld from the payment and
+		# already sits inside the net, so grossing up by `paid_amount` would overstate the remainder.
 		precision = self.precision("paid_amount")
-		party_paid_amount = self.get_party_paid_amount()
-		total_net_paid = party_paid_amount - self.get_included_taxes(in_account_currency=True)
+		total_net_paid = self.get_party_paid_amount() - self.get_included_taxes(in_account_currency=True)
+		advance_tax = self.get_advance_tax_total(in_account_currency=True)
 		if flt(self.unallocated_amount) and total_net_paid:
 			self.unallocated_gross_amount = flt(
-				flt(self.unallocated_amount) * party_paid_amount / total_net_paid, precision
+				flt(self.unallocated_amount) * (total_net_paid + advance_tax) / total_net_paid, precision
 			)
 		else:
 			self.unallocated_gross_amount = flt(self.unallocated_amount)

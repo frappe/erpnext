@@ -360,6 +360,34 @@ class TestPaymentEntry(ERPNextTestSuite):
 		pe.save()
 		self.assertEqual(flt(pe.references[0].allocated_gross_amount, 2), 100.0)
 
+	def test_unallocated_gross_matches_allocated_gross_with_deduction(self):
+		"""The same money must be worth the same whether it sits allocated or unallocated."""
+		so = make_sales_order(qty=1, rate=1000)
+		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Cash - _TC")
+		pe.paid_from = "Debtors - _TC"
+		for rate, add_deduct in ((19, "Add"), (5, "Deduct")):
+			pe.append(
+				"taxes",
+				{
+					"account_head": "_Test Account Service Tax - _TC",
+					"charge_type": "On Paid Amount",
+					"rate": rate,
+					"add_deduct_tax": add_deduct,
+					"included_in_paid_amount": 1,
+					"description": f"{add_deduct} {rate}%",
+				},
+			)
+
+		pe.allocate_amount_to_references(
+			paid_amount=pe.paid_amount, paid_amount_change=True, allocate_payment_amount=True
+		)
+		pe.save()
+		allocated_gross = flt(pe.references[0].allocated_gross_amount, 2)
+
+		pe.references[0].allocated_amount = 0
+		pe.save()
+		self.assertEqual(flt(pe.unallocated_gross_amount, 2), allocated_gross)
+
 	def test_allocated_gross_amount_excludes_withholding(self):
 		"""Tax-withholding rows (is_tax_withholding_account=1) do not contribute to gross."""
 		so = make_sales_order(qty=1, rate=119)

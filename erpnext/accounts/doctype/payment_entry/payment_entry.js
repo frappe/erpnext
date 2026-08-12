@@ -1119,19 +1119,25 @@ frappe.ui.form.on("Payment Entry", {
 	},
 
 	get_gross_net_ratio: function (frm) {
-		// Ratio of gross to net paid amount.
+		// Mirrors `compute_advance_tax_breakdown`: only advance tax grosses the net up. A `Deduct`
+		// row is withheld from the payment and already sits inside the net.
 		const is_pay = frm.doc.payment_type === "Pay";
 		const exchange_rate =
 			(is_pay ? flt(frm.doc.target_exchange_rate) : flt(frm.doc.source_exchange_rate)) || 1;
 		let included_taxes = 0;
+		let advance_taxes = 0;
 		for (const tax of frm.doc.taxes || []) {
 			if (!cint(tax.included_in_paid_amount)) continue;
 			const amount = flt(tax.base_tax_amount) / exchange_rate;
-			included_taxes += tax.add_deduct_tax === "Deduct" ? -amount : amount;
+			if (tax.add_deduct_tax === "Deduct") {
+				included_taxes -= amount;
+			} else {
+				included_taxes += amount;
+				if (!cint(tax.is_tax_withholding_account)) advance_taxes += amount;
+			}
 		}
-		const gross_party_amount = flt(is_pay ? frm.doc.received_amount : frm.doc.paid_amount);
-		const net = gross_party_amount - included_taxes;
-		return net ? gross_party_amount / net : 1;
+		const net = flt(is_pay ? frm.doc.received_amount : frm.doc.paid_amount) - included_taxes;
+		return net ? (net + advance_taxes) / net : 1;
 	},
 
 	refresh_allocated_gross_amounts: function (frm) {
