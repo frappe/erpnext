@@ -1001,8 +1001,21 @@ class calculate_taxes_and_totals:
 
 	def calculate_total_advance(self):
 		if not self.doc.docstatus.is_cancelled():
+			# Re-derive gross so manual edits to allocated_amount propagate.
+			for adv in self.doc.get("advances"):
+				advance_net = flt(adv.advance_amount)
+				advance_gross = flt(adv.get("advance_gross_amount")) or advance_net
+				if advance_net and advance_gross:
+					adv.allocated_gross_amount = flt(
+						flt(adv.allocated_amount) * advance_gross / advance_net,
+						adv.precision("allocated_gross_amount"),
+					)
+
 			total_allocated_amount = sum(
-				flt(adv.allocated_amount, adv.precision("allocated_amount"))
+				flt(
+					adv.get("allocated_gross_amount") or adv.allocated_amount,
+					adv.precision("allocated_amount"),
+				)
 				for adv in self.doc.get("advances")
 			)
 

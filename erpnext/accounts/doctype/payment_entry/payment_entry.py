@@ -147,6 +147,7 @@ class PaymentEntry(AccountsController):
 		total_allocated_amount: DF.Currency
 		total_taxes_and_charges: DF.Currency
 		unallocated_amount: DF.Currency
+		unallocated_gross_amount: DF.Currency
 	# end: auto-generated types
 
 	def __init__(self, *args, **kwargs):
@@ -184,6 +185,7 @@ class PaymentEntry(AccountsController):
 		self.apply_taxes()
 		self.set_amounts_after_tax()
 		self.clear_unallocated_reference_document_rows()
+		self.set_allocated_gross_amount()
 		self.validate_transaction_reference()
 		self.set_title()
 		self.set_remarks()
@@ -729,6 +731,95 @@ class PaymentEntry(AccountsController):
 						_("{0} {1} must be submitted").format(_(d.reference_doctype), d.reference_name)
 					)
 
+	def get_party_paid_amount(self):
+		"""Gross amount in party account currency: `paid_amount` for Receive, `received_amount` for Pay."""
+		return flt(self.paid_amount if self.payment_type == "Receive" else self.received_amount)
+
+	def get_party_exchange_rate(self):
+		"""Party account currency to company currency. Party side is `paid_from` for Receive, `paid_to` for Pay."""
+		rate = self.source_exchange_rate if self.payment_type == "Receive" else self.target_exchange_rate
+		return flt(rate) or 1
+
+	def get_advance_tax_rows(self):
+		"""Included taxes collected on top of the advance. Deductions and withholding are posted against the party instead."""
+		return [
+			tax
+			for tax in self.get("taxes") or []
+			if cint(tax.included_in_paid_amount)
+			and tax.add_deduct_tax == "Add"
+			and not cint(tax.is_tax_withholding_account)
+		]
+
+	def compute_advance_tax_breakdown(self, in_account_currency: bool = False):
+		"""Advance tax per reference row as `{ref_row_name: {account_head: tax_amount}}`.
+
+		Each row's share is `tax * allocated_amount / total_net_paid`, so it depends only
+		on its own allocation. Tax on the unallocated portion stays in the tax account.
+		Company currency unless `in_account_currency`.
+		"""
+		references = self.get("references") or []
+		if not references:
+			return {}
+
+		precision = self.precision("allocated_amount", references[0])
+		rate = self.get_party_exchange_rate()
+
+		tax_by_account = {}
+		for tax in self.get_advance_tax_rows():
+			amount = flt(tax.tax_amount)
+			if in_account_currency:
+				amount = flt(amount / rate, precision)
+			tax_by_account[tax.account_head] = tax_by_account.get(tax.account_head, 0.0) + amount
+
+		breakdown = {ref.name: {} for ref in references}
+		total_net_paid = self.get_party_paid_amount() - self.get_included_taxes(in_account_currency=True)
+		if not tax_by_account or not total_net_paid:
+			return breakdown
+
+		total_allocated = sum(flt(r.allocated_amount) for r in references)
+		fully_allocated = flt(total_allocated, precision) == flt(total_net_paid, precision)
+
+		# Only absorb the rounding remainder when nothing is left unallocated.
+		for account_head, total_amount in tax_by_account.items():
+			running = 0.0
+			for i, ref in enumerate(references):
+				is_last = i == len(references) - 1
+				if is_last and fully_allocated:
+					share = total_amount - running
+				else:
+					share = flt(total_amount * flt(ref.allocated_amount) / total_net_paid, precision)
+					running += share
+				breakdown[ref.name][account_head] = flt(
+					breakdown[ref.name].get(account_head, 0.0) + share, precision
+				)
+
+		return breakdown
+
+	def set_allocated_gross_amount(self):
+		"""Set `allocated_gross_amount` per reference row and `unallocated_gross_amount` on the entry."""
+		# `set_amounts` runs before `apply_taxes`, so percentage based taxes were still 0 there.
+		self.set_unallocated_amount()
+		self.set_difference_amount()
+
+		references = self.get("references") or []
+		if references:
+			ref_precision = self.precision("allocated_amount", references[0])
+			breakdown = self.compute_advance_tax_breakdown(in_account_currency=True)
+			for ref in references:
+				tax_sum = flt(sum(breakdown.get(ref.name, {}).values()), ref_precision)
+				ref.allocated_gross_amount = flt(flt(ref.allocated_amount) + tax_sum, ref_precision)
+
+		# Read by `set_advances` when an invoice consumes the unallocated remainder.
+		precision = self.precision("paid_amount")
+		party_paid_amount = self.get_party_paid_amount()
+		total_net_paid = party_paid_amount - self.get_included_taxes(in_account_currency=True)
+		if flt(self.unallocated_amount) and total_net_paid:
+			self.unallocated_gross_amount = flt(
+				flt(self.unallocated_amount) * party_paid_amount / total_net_paid, precision
+			)
+		else:
+			self.unallocated_gross_amount = flt(self.unallocated_amount)
+
 	def get_valid_reference_doctypes(self):
 		if self.party_type == "Customer":
 			return ("Sales Order", "Sales Invoice", "Journal Entry", "Dunning", "Payment Entry")
@@ -1194,11 +1285,6 @@ class PaymentEntry(AccountsController):
 			self.difference_amount - total_deductions, self.precision("difference_amount")
 		)
 
-	def get_party_exchange_rate(self):
-		"""Party account currency to company currency. Party side is `paid_from` for Receive, `paid_to` for Pay."""
-		rate = self.source_exchange_rate if self.payment_type == "Receive" else self.target_exchange_rate
-		return flt(rate) or 1
-
 	def get_included_taxes(self, in_account_currency: bool = False):
 		"""Signed sum of included-in-paid-amount taxes, in company currency unless `in_account_currency`."""
 		rate = self.get_party_exchange_rate()
@@ -1206,12 +1292,10 @@ class PaymentEntry(AccountsController):
 		for tax in self.get("taxes"):
 			if not tax.included_in_paid_amount:
 				continue
-
 			amount = flt(tax.base_tax_amount)
 			if in_account_currency:
 				amount = flt(amount / rate, self.precision("paid_amount"))
 			included_taxes += amount if tax.add_deduct_tax == "Add" else -amount
-
 		return included_taxes
 
 	# Paid amount is auto allocated in the reference document by default.
@@ -1438,6 +1522,87 @@ class PaymentEntry(AccountsController):
 			item=self,
 		)
 		gl_entries.append(gle)
+
+		if invoice.reference_doctype in ("Sales Invoice", "Purchase Invoice"):
+			self._add_advance_tax_reversal_for_reference(gl_entries, invoice, account, posting_date)
+
+	def _add_advance_tax_reversal_for_reference(self, gl_entries, invoice, party_account, posting_date):
+		"""Reverse this reference's share of the advance tax against the party account.
+
+		A pair of legs is emitted per tax account even when the amount is 0: on submit
+		`merge_similar_entries` drops them, on cancel `make_reverse_gl_entries` needs them
+		to match the original posting via `voucher_detail_no`, which `remove_ref_doc_link_from_pe`
+		has by then zeroed out.
+		"""
+		tax_accounts = list(dict.fromkeys(tax.account_head for tax in self.get_advance_tax_rows()))
+		if not tax_accounts:
+			return
+
+		invoice_breakdown = self.compute_advance_tax_breakdown().get(invoice.name, {})
+
+		# Advance taxes are validated to be on company currency accounts, so convert back.
+		party_to_company_rate = self.get_party_exchange_rate()
+
+		for account_head in tax_accounts:
+			tax_amount = flt(invoice_breakdown.get(account_head, 0.0))
+
+			tax_in_party_currency = flt(tax_amount / party_to_company_rate)
+			tax_in_transaction_currency = (
+				tax_in_party_currency
+				if self.party_account_currency == self.transaction_currency
+				else flt(tax_amount / self.transaction_exchange_rate)
+			)
+
+			# Same direction as the allocated_amount leg above.
+			party_dr_or_cr = "credit" if self.payment_type == "Receive" else "debit"
+			tax_dr_or_cr = "debit" if party_dr_or_cr == "credit" else "credit"
+
+			party_gle = self.get_gl_dict(
+				{
+					"party_type": self.party_type,
+					"party": self.party,
+					"account": party_account,
+					"account_currency": self.party_account_currency,
+					"cost_center": self.cost_center,
+					"voucher_type": "Payment Entry",
+					"voucher_no": self.name,
+					"voucher_detail_no": invoice.name,
+					party_dr_or_cr: tax_amount,
+					party_dr_or_cr + "_in_account_currency": tax_in_party_currency,
+					party_dr_or_cr + "_in_transaction_currency": tax_in_transaction_currency,
+					"against_voucher_type": invoice.reference_doctype,
+					"against_voucher": invoice.reference_name,
+					"advance_voucher_type": invoice.advance_voucher_type,
+					"advance_voucher_no": invoice.advance_voucher_no,
+					"posting_date": posting_date,
+				},
+				item=self,
+			)
+			gl_entries.append(party_gle)
+
+			tax_gle = self.get_gl_dict(
+				{
+					"account": account_head,
+					"account_currency": self.company_currency,
+					"cost_center": self.cost_center,
+					"voucher_type": "Payment Entry",
+					"voucher_no": self.name,
+					"voucher_detail_no": invoice.name,
+					tax_dr_or_cr: tax_amount,
+					tax_dr_or_cr + "_in_account_currency": tax_amount,
+					tax_dr_or_cr + "_in_transaction_currency": flt(
+						tax_amount / self.transaction_exchange_rate
+					),
+					"against_voucher_type": "Payment Entry",
+					"against_voucher": self.name,
+					"advance_voucher_type": invoice.advance_voucher_type,
+					"advance_voucher_no": invoice.advance_voucher_no,
+					"posting_date": posting_date,
+					"post_net_value": True,
+				},
+				item=self,
+			)
+			gl_entries.append(tax_gle)
 
 	def get_party_account_for_taxes(self):
 		if self.payment_type == "Receive":

@@ -31,14 +31,27 @@ def set_advances(doc) -> None:
 	)
 
 	doc.set("advances", [])
-	advance_allocated = 0
+	# Allocate on gross, so the invoice clears by what the party actually paid. Sources
+	# without advance tax report gross == net and behave as before.
+	advance_allocated_gross = 0
 	for d in res:
 		if doc.get("party_account_currency") == doc.company_currency:
 			amount = doc.get("base_rounded_total") or doc.base_grand_total
 		else:
 			amount = doc.get("rounded_total") or doc.grand_total
-		allocated_amount = min(amount - advance_allocated, d.amount)
-		advance_allocated += flt(allocated_amount)
+
+		source_net = flt(d.amount)
+		# Only advances booked in a separate party account reverse their tax on
+		# consumption, so only those can be cleared by the gross.
+		if d.get("book_advance_payments_in_separate_party_account"):
+			source_gross = flt(d.get("source_gross_amount")) or source_net
+		else:
+			source_gross = source_net
+
+		remaining_gross = max(flt(amount - advance_allocated_gross), 0)
+		allocated_gross_amount = min(remaining_gross, source_gross)
+		allocated_amount = allocated_gross_amount * source_net / source_gross if source_gross else 0
+		advance_allocated_gross += flt(allocated_gross_amount)
 
 		advance_row = {
 			"doctype": doc.doctype + " Advance",
@@ -46,8 +59,10 @@ def set_advances(doc) -> None:
 			"reference_name": d.reference_name,
 			"reference_row": d.reference_row,
 			"remarks": d.remarks,
-			"advance_amount": flt(d.amount),
+			"advance_amount": source_net,
+			"advance_gross_amount": source_gross,
 			"allocated_amount": allocated_amount,
+			"allocated_gross_amount": allocated_gross_amount,
 			"ref_exchange_rate": flt(d.exchange_rate),
 			"difference_posting_date": doc.posting_date,
 		}
@@ -218,7 +233,10 @@ def delink_advance_entries(doc, linked_doc_name: str) -> None:
 			consider_for_total_advance = False
 
 		if consider_for_total_advance:
-			total_allocated_amount += flt(adv.allocated_amount, adv.precision("allocated_amount"))
+			total_allocated_amount += flt(
+				adv.get("allocated_gross_amount") or adv.allocated_amount,
+				adv.precision("allocated_amount"),
+			)
 
 	frappe.db.set_value(doc.doctype, doc.name, "total_advance", total_allocated_amount, update_modified=False)
 
@@ -399,6 +417,7 @@ def get_advance_payment_entries(
 		q = q.inner_join(payment_ref).on(payment_entry.name == payment_ref.parent)
 		q = q.select(
 			(payment_ref.allocated_amount).as_("amount"),
+			(payment_ref.allocated_gross_amount).as_("source_gross_amount"),
 			(payment_ref.name).as_("reference_row"),
 			(payment_ref.reference_name).as_("against_order"),
 			(payment_entry.book_advance_payments_in_separate_party_account),
@@ -412,7 +431,10 @@ def get_advance_payment_entries(
 
 	if include_unallocated:
 		q = get_common_query(party_type, party, party_account, default_advance_account, limit, condition)
-		q = q.select((payment_entry.unallocated_amount).as_("amount"))
+		q = q.select(
+			(payment_entry.unallocated_amount).as_("amount"),
+			(payment_entry.unallocated_gross_amount).as_("source_gross_amount"),
+		)
 		q = q.where(payment_entry.unallocated_amount > 0)
 
 		payment_entries += list(q.run(as_dict=True))

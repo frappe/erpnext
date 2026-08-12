@@ -18,6 +18,7 @@
   "total_amount",
   "outstanding_amount",
   "allocated_amount",
+  "allocated_gross_amount",
   "exchange_rate",
   "exchange_gain_loss",
   "account",
@@ -90,6 +91,13 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Allocated"
+  },
+  {
+   "description": "Gross amount allocated against this reference (allocated_amount + this reference's share of included-in-paid-amount advance taxes). Computed server-side from the taxes table on save.",
+   "fieldname": "allocated_gross_amount",
+   "fieldtype": "Currency",
+   "label": "Allocated Gross",
+   "read_only": 1
   },
   {
    "depends_on": "eval:(doc.reference_doctype=='Purchase Invoice')",
@@ -176,7 +184,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-01-05 14:18:03.286224",
+ "modified": "2026-05-13 13:46:15.593583",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry Reference",
