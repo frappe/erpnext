@@ -276,7 +276,7 @@ class MaterialRequirementsPlanningReport:
 			if getdate(row.delivery_date) < getdate(today()):
 				continue
 
-			delivery_date = formatdate(row.delivery_date, "dd MMM")
+			delivery_date = getdate(row.delivery_date)
 			if delivery_date not in chart_data:
 				chart_data[delivery_date] = frappe._dict(
 					{
@@ -293,6 +293,7 @@ class MaterialRequirementsPlanningReport:
 
 		demand_data = []
 		supply_data = []
+		delivery_dates = list(chart_data)
 		for row in chart_data:
 			value = chart_data[row]
 
@@ -301,7 +302,7 @@ class MaterialRequirementsPlanningReport:
 
 		return {
 			"data": {
-				"labels": list(chart_data.keys()),
+				"labels": self.get_detailed_chart_labels(delivery_dates),
 				"datasets": [
 					{
 						"name": _("Demand"),
@@ -318,6 +319,10 @@ class MaterialRequirementsPlanningReport:
 			"colors": ["#7cd6fd", "green"],
 			"title": _("Demand vs Supply"),
 		}
+
+	def get_detailed_chart_labels(self, delivery_dates):
+		date_format = "dd MMM yyyy" if len({date.year for date in delivery_dates}) > 1 else "dd MMM"
+		return [formatdate(date, date_format) for date in delivery_dates]
 
 	def get_bucket_view_chart_data(self, data):
 		chart_data = frappe._dict({})
