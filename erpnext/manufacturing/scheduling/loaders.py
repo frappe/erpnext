@@ -50,9 +50,7 @@ def get_workstation_calendar(row, settings):
 
 	holidays = set()
 	if row.holiday_list and not cint(settings.allow_production_on_holidays):
-		holidays = set(
-			frappe.get_all("Holiday", filters={"parent": row.holiday_list}, pluck="holiday_date")
-		)
+		holidays = set(frappe.get_all("Holiday", filters={"parent": row.holiday_list}, pluck="holiday_date"))
 
 	return ResourceCalendar(daily_windows=daily_windows, holidays=holidays)
 
@@ -74,9 +72,7 @@ def add_booked_intervals(load, doctype, resource_names, from_date, drafts_only):
 		.on(child.parent == job_card.name)
 		.select(job_card.workstation, child.from_time, child.to_time)
 		.where(
-			job_card.workstation.isin(resource_names)
-			& child.to_time.notnull()
-			& (child.to_time > from_date)
+			job_card.workstation.isin(resource_names) & child.to_time.notnull() & (child.to_time > from_date)
 		)
 	)
 

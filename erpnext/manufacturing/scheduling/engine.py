@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import datetime
+import itertools
 from collections import defaultdict
 
 from erpnext.manufacturing.scheduling.models import (
@@ -151,7 +152,8 @@ class SchedulingEngine:
 			if blocks and (best is None or blocks[0].start > best[1][0].start):
 				best = (resource, blocks)
 
-		earliest_bound = max(filter(None, [task.earliest_start, not_before]), default=None)
+		bounds = [bound for bound in (task.earliest_start, not_before) if bound]
+		earliest_bound = max(bounds, default=None)
 		if best is None or (earliest_bound and best[1][0].start < earliest_bound):
 			return False
 
@@ -223,7 +225,7 @@ class SchedulingEngine:
 		)
 
 		segments = []
-		for segment_start, segment_end in zip(points, points[1:], strict=False):
+		for segment_start, segment_end in itertools.pairwise(points):
 			concurrent = sum(1 for iv in overlapping if iv.start < segment_end and iv.end > segment_start)
 			if concurrent < resource.capacity:
 				if segments and segments[-1][1] == segment_start:
@@ -253,9 +255,7 @@ def cut_segment(segment_start, segment_end, take_mins, forward):
 
 def topological_order(tasks: list[Task]) -> tuple[list[Task], list[str]]:
 	by_key = {task.key: task for task in tasks}
-	pending_deps = {
-		task.key: {dep for dep in task.depends_on if dep in by_key} for task in tasks
-	}
+	pending_deps = {task.key: {dep for dep in task.depends_on if dep in by_key} for task in tasks}
 	dependents = defaultdict(list)
 	for task in tasks:
 		for dep in pending_deps[task.key]:

@@ -491,8 +491,8 @@ frappe.ui.form.on("Production Plan", {
 			: "";
 		let item = `${indent_html}
 			<span class="${is_fg ? "item-fg" : ""}${is_material ? " text-muted" : ""}">${frappe.utils.escape_html(
-				row.item_code
-			)}</span>`;
+			row.item_code
+		)}</span>`;
 		let detail = is_material
 			? `<span class="text-muted">${__("Procurement")}</span>`
 			: frappe.utils.escape_html(workstations.join(", ") || "-");

@@ -17,7 +17,7 @@ class Interval:
 	start: datetime.datetime
 	end: datetime.datetime
 
-	def overlaps(self, other: "Interval") -> bool:
+	def overlaps(self, other: Interval) -> bool:
 		return self.start < other.end and self.end > other.start
 
 	def duration_mins(self) -> float:

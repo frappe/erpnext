@@ -139,9 +139,7 @@ class TestPlanAdapter(ERPNextTestSuite):
 		plan.get_sub_assembly_items()
 		plan.submit()
 
-		apply_schedule(
-			plan.name, day_one, use_item_dates=1, item_dates={plan.po_items[1].name: str(day_two)}
-		)
+		apply_schedule(plan.name, day_one, use_item_dates=1, item_dates={plan.po_items[1].name: str(day_two)})
 		plan.reload()
 
 		fg_one, fg_two = plan.po_items
@@ -166,9 +164,7 @@ class TestPlanAdapter(ERPNextTestSuite):
 		}
 
 		with patch.object(plan_adapter, "run_engine", return_value=incomplete):
-			self.assertRaises(
-				frappe.ValidationError, apply_schedule, plan.name, "2026-11-02 09:00:00"
-			)
+			self.assertRaises(frappe.ValidationError, apply_schedule, plan.name, "2026-11-02 09:00:00")
 
 	@change_settings("Manufacturing Settings", {"mins_between_operations": 10, "allow_overtime": 0})
 	def test_schedule_considers_raw_material_lead_time(self):
