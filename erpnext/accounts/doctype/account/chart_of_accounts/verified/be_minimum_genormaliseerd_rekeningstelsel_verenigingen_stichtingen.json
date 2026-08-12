@@ -87,12 +87,12 @@
                 "account_number": "16",
                 "account_type": "Liability"
             },
-            "Schulden op meer dan een jaar": {
+            "Schulden op meer dan één jaar": {
                 "Achtergestelde leningen": {
                     "account_number": "170",
                     "account_type": "Liability"
                 },
-                "Niet achtergestelde obligatieleningen": {
+                "Niet-achtergestelde obligatieleningen": {
                     "account_number": "171",
                     "account_type": "Liability"
                 },
@@ -601,7 +601,7 @@
                     "account_type": "Tax"
                 },
                 "Terug te vorderen belastingen en voorheffingen": {
-                    "tot 4127 Andere Belgische belastingen": {
+                    "Andere Belgische belastingen": {
                         "account_number": "4125",
                         "account_type": "Receivable"
                     },
@@ -650,16 +650,16 @@
                 "account_number": "42"
             },
             "Financiële schulden": {
-                "Kredietinstellingen – Leningen op rekening met vaste termijn": {
+                "Kredietinstellingen - Leningen op rekening met vaste termijn": {
                     "account_number": "430"
                 },
-                "Kredietinstellingen – Promessen": {
+                "Kredietinstellingen - Promessen": {
                     "account_number": "431"
                 },
-                "Kredietinstellingen – Acceptkredieten": {
+                "Kredietinstellingen - Acceptkredieten": {
                     "account_number": "432"
                 },
-                "Kredietinstellingen – Schulden op rekening-courant": {
+                "Kredietinstellingen - Schulden op rekening-courant": {
                     "account_number": "433"
                 },
                 "Overige leningen": {
@@ -685,7 +685,7 @@
             },
             "Schulden met betrekking tot belastingen, bezoldigingen en sociale lasten": {
                 "Geraamd bedrag der belastingschulden": {
-                    "tot 4507 Andere Belgische belastingen": {
+                    "Andere Belgische belastingen": {
                         "account_number": "4505",
                         "account_type": "Payable"
                     },
@@ -701,7 +701,7 @@
                     "account_type": "Tax"
                 },
                 "Te betalen belastingen en taksen": {
-                    "tot 4527 Andere Belgische belastingen": {
+                    "Andere Belgische belastingen": {
                         "account_number": "4525",
                         "account_type": "Payable"
                     },
@@ -808,7 +808,7 @@
                 "Op meer dan één jaar": {
                     "account_number": "530"
                 },
-                "Op meer dan een maand en op ten hoogste één jaar": {
+                "Op meer dan één maand en op ten hoogste één jaar": {
                     "account_number": "531"
                 },
                 "Op ten hoogste één maand": {
@@ -831,7 +831,7 @@
                 "account_type": "Bank"
             },
             "Kassen": {
-                "tot 577 Kassen-contanten": {
+                "Kassen-contanten": {
                     "account_number": "570",
                     "account_type": "Cash"
                 },
@@ -891,7 +891,7 @@
                         "account_number": "6094",
                         "account_type": "Stock Adjustment"
                     },
-                    "van gekochte onroerende goederen, bestemd voor verkoop": {
+                    "van gekochte onroerende goederen bestemd voor verkoop": {
                         "account_number": "6095",
                         "account_type": "Stock Adjustment"
                     },
@@ -969,7 +969,7 @@
                 "account_type": "Expense Account"
             },
             "Afschrijvingen, waardeverminderingen en voorzieningen voor risico's en kosten": {
-                "Afschrijvingen en waardeverminderingen op vaste activa toevoeging": {
+                "Afschrijvingen en waardeverminderingen op vaste activa-toevoeging": {
                     "Afschrijvingen op oprichtingskosten": {
                         "account_number": "6300",
                         "account_type": "Depreciation"
@@ -1089,7 +1089,7 @@
                     "account_number": "638",
                     "account_type": "Expense Account"
                 },
-                "Voorzieningen voor andere risico’s en kosten": {
+                "Voorzieningen voor andere risico's en kosten": {
                     "Toevoeging": {
                         "account_number": "6390",
                         "account_type": "Expense Account"
@@ -1222,7 +1222,7 @@
                     "account_type": "Expense Account"
                 },
                 "Voorzieningen voor niet-recurrente risico's en kosten": {
-                    "Voorzieningen voor niet-recurrente bedrijfsrisico’s en kosten": {
+                    "Voorzieningen voor niet-recurrente bedrijfsrisico's en -kosten": {
                         "Toevoeging": {
                             "account_number": "66200",
                             "account_type": "Expense Account"
@@ -1234,7 +1234,7 @@
                         "account_number": "6620",
                         "account_type": "Expense Account"
                     },
-                    "Voorzieningen voor niet-recurrente financiële risico’s en kosten": {
+                    "Voorzieningen voor niet-recurrente financiële risico's en -kosten": {
                         "Toevoeging": {
                             "account_number": "66210",
                             "account_type": "Expense Account"
@@ -1286,7 +1286,7 @@
                         "account_number": "6700",
                         "account_type": "Expense Account"
                     },
-                    "Geactiveerde overschotten van betaalde belastingen en voorheffingen (–)": {
+                    "Geactiveerde overschotten van betaalde belastingen en voorheffingen (-)": {
                         "account_number": "6701",
                         "account_type": "Expense Account"
                     },
@@ -1321,7 +1321,7 @@
                     "account_number": "680",
                     "account_type": "Expense Account"
                 },
-                "Overboeking naar de belastingvrije reserve": {
+                "Overboeking naar de belastingvrije reserves": {
                     "account_number": "689",
                     "account_type": "Expense Account"
                 },
@@ -1469,11 +1469,11 @@
                     "account_type": "Income Account"
                 },
                 "Terugneming van voorzieningen voor niet-recurrente risico's en kosten": {
-                    "Terugneming van voorzieningen voor niet-recurrente bedrijfsrisico’s en kosten": {
+                    "Terugneming van voorzieningen voor niet-recurrente bedrijfsrisico's en -kosten": {
                         "account_number": "7620",
                         "account_type": "Income Account"
                     },
-                    "Terugneming van voorzieningen voor niet-recurrente financiële risico’s en kosten": {
+                    "Terugneming van voorzieningen voor niet-recurrente financiële risico's en -kosten": {
                         "account_number": "7621",
                         "account_type": "Income Account"
                     },

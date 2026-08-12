@@ -9,7 +9,7 @@
                     "account_number": "100",
                     "account_type": "Equity"
                 },
-                "Niet opgevraagd kapitaal (–)": {
+                "Niet opgevraagd kapitaal (-)": {
                     "account_number": "101",
                     "account_type": "Equity"
                 },
@@ -104,7 +104,7 @@
                 "account_number": "13",
                 "account_type": "Equity"
             },
-            "Overgedragen winst of Overgedragen verlies (–)": {
+            "Overgedragen winst of Overgedragen verlies (-)": {
                 "account_number": "14",
                 "account_type": "Equity"
             },
@@ -213,7 +213,7 @@
                         "account_number": "1750",
                         "account_type": "Liability"
                     },
-                    "Te betalen wissel": {
+                    "Te betalen wissels": {
                         "account_number": "1751",
                         "account_type": "Liability"
                     },
@@ -243,7 +243,7 @@
         "KLASSE 2 : OPRICHTINGSKOSTEN, VASTE ACTIVA EN VORDERINGEN OP MEER DAN ÉÉN JAAR": {
             "root_type": "Asset",
             "Oprichtingskosten": {
-                "Kosten van oprichting, kapitaalverhoging of verhoging van de inbreng": {
+                "Kosten van oprichting, kapitaalverhoging of verhoging van de inbreng": {
                     "account_number": "200",
                     "account_type": "Fixed Asset"
                 },
@@ -352,7 +352,7 @@
                         "account_number": "2800",
                         "account_type": "Fixed Asset"
                     },
-                    "Nog te storten bedragen (–)": {
+                    "Nog te storten bedragen (-)": {
                         "account_number": "2801",
                         "account_type": "Fixed Asset"
                     },
@@ -360,7 +360,7 @@
                         "account_number": "2808",
                         "account_type": "Fixed Asset"
                     },
-                    "Geboekte waardeverminderingen (–)": {
+                    "Geboekte waardeverminderingen (-)": {
                         "account_number": "2809",
                         "account_type": "Fixed Asset"
                     },
@@ -384,7 +384,7 @@
                         "account_number": "2817",
                         "account_type": "Fixed Asset"
                     },
-                    "Geboekte waardeverminderingen (–)": {
+                    "Geboekte waardeverminderingen (-)": {
                         "account_number": "2819",
                         "account_type": "Fixed Asset"
                     },
@@ -396,7 +396,7 @@
                         "account_number": "2820",
                         "account_type": "Fixed Asset"
                     },
-                    "Nog te storten bedragen (–)": {
+                    "Nog te storten bedragen (-)": {
                         "account_number": "2821",
                         "account_type": "Fixed Asset"
                     },
@@ -404,7 +404,7 @@
                         "account_number": "2828",
                         "account_type": "Fixed Asset"
                     },
-                    "Geboekte waardeverminderingen (–)": {
+                    "Geboekte waardeverminderingen (-)": {
                         "account_number": "2829",
                         "account_type": "Fixed Asset"
                     },
@@ -428,7 +428,7 @@
                         "account_number": "2837",
                         "account_type": "Fixed Asset"
                     },
-                    "Geboekte waardeverminderingen (–)": {
+                    "Geboekte waardeverminderingen (-)": {
                         "account_number": "2839",
                         "account_type": "Fixed Asset"
                     },
@@ -440,7 +440,7 @@
                         "account_number": "2840",
                         "account_type": "Fixed Asset"
                     },
-                    "Nog te storten bedragen (–)": {
+                    "Nog te storten bedragen (-)": {
                         "account_number": "2841",
                         "account_type": "Fixed Asset"
                     },
@@ -448,7 +448,7 @@
                         "account_number": "2848",
                         "account_type": "Fixed Asset"
                     },
-                    "Geboekte waardeverminderingen (–)": {
+                    "Geboekte waardeverminderingen (-)": {
                         "account_number": "2849",
                         "account_type": "Fixed Asset"
                     },
@@ -472,7 +472,7 @@
                         "account_number": "2857",
                         "account_type": "Fixed Asset"
                     },
-                    "Geboekte waardeverminderingen (–)": {
+                    "Geboekte waardeverminderingen (-)": {
                         "account_number": "2859",
                         "account_type": "Fixed Asset"
                     },
@@ -504,7 +504,7 @@
                         "account_number": "2907",
                         "account_type": "Receivable"
                     },
-                    "Geboekte waardeverminderingen (–)": {
+                    "Geboekte waardeverminderingen (-)": {
                         "account_number": "2909",
                         "account_type": "Receivable"
                     },
@@ -524,7 +524,7 @@
                         "account_number": "2917",
                         "account_type": "Receivable"
                     },
-                    "Geboekte waardeverminderingen (–)": {
+                    "Geboekte waardeverminderingen (-)": {
                         "account_number": "2919",
                         "account_type": "Receivable"
                     },
@@ -554,7 +554,7 @@
                     "account_number": "310",
                     "account_type": "Stock"
                 },
-                "Geboekte waarde verminderingen (–)": {
+                "Geboekte waardeverminderingen (-)": {
                     "account_number": "319",
                     "account_type": "Stock"
                 },
@@ -566,7 +566,7 @@
                     "account_number": "320",
                     "account_type": "Stock"
                 },
-                "Geboekte waardeverminderingen (–)": {
+                "Geboekte waardeverminderingen (-)": {
                     "account_number": "329",
                     "account_type": "Stock"
                 },
@@ -578,7 +578,7 @@
                     "account_number": "330",
                     "account_type": "Stock"
                 },
-                "Geboekte waardeverminderingen (–)": {
+                "Geboekte waardeverminderingen (-)": {
                     "account_number": "339",
                     "account_type": "Stock"
                 },
@@ -590,7 +590,7 @@
                     "account_number": "340",
                     "account_type": "Stock"
                 },
-                "Geboekte waardeverminderingen (–)": {
+                "Geboekte waardeverminderingen (-)": {
                     "account_number": "349",
                     "account_type": "Stock"
                 },
@@ -602,7 +602,7 @@
                     "account_number": "350",
                     "account_type": "Stock"
                 },
-                "Geboekte waardeverminderingen (–)": {
+                "Geboekte waardeverminderingen (-)": {
                     "account_number": "359",
                     "account_type": "Stock"
                 },
@@ -614,7 +614,7 @@
                     "account_number": "360",
                     "account_type": "Stock"
                 },
-                "Geboekte waardeverminderingen (–)": {
+                "Geboekte waardeverminderingen (-)": {
                     "account_number": "369",
                     "account_type": "Stock"
                 },
@@ -630,7 +630,7 @@
                     "account_number": "371",
                     "account_type": "Stock"
                 },
-                "Geboekte waardeverminderingen (–)": {
+                "Geboekte waardeverminderingen (-)": {
                     "account_number": "379",
                     "account_type": "Stock"
                 },
@@ -664,7 +664,7 @@
                     "account_number": "407",
                     "account_type": "Receivable"
                 },
-                "Geboekte waardeverminderingen (–)": {
+                "Geboekte waardeverminderingen (-)": {
                     "account_number": "409",
                     "account_type": "Receivable"
                 },
@@ -704,7 +704,7 @@
                     "account_number": "418",
                     "account_type": "Receivable"
                 },
-                "Geboekte waardeverminderingen (–)": {
+                "Geboekte waardeverminderingen (-)": {
                     "account_number": "419",
                     "account_type": "Receivable"
                 },
@@ -880,22 +880,22 @@
                 "Aanschaffingswaarde": {
                     "account_number": "520"
                 },
-                "Geboekte waardeverminderingen (–)": {
+                "Geboekte waardeverminderingen (-)": {
                     "account_number": "529"
                 },
                 "account_number": "52"
             },
             "Termijndeposito's": {
-                "Op meer dan een jaar": {
+                "Op meer dan één jaar": {
                     "account_number": "530"
                 },
-                "Op meer dan een maand en op ten hoogste een jaar": {
+                "Op meer dan één maand en op ten hoogste één jaar": {
                     "account_number": "531"
                 },
-                "Op ten hoogste een maand": {
+                "Op ten hoogste één maand": {
                     "account_number": "532"
                 },
-                "Geboekte waardeverminderingen (–)": {
+                "Geboekte waardeverminderingen (-)": {
                     "account_number": "539"
                 },
                 "account_number": "53"
@@ -951,7 +951,7 @@
                     "account_number": "605",
                     "account_type": "Expense Account"
                 },
-                "Ontvangen kortingen, ristorno's en rabatten (–)": {
+                "Ontvangen kortingen, ristorno's en rabatten (-)": {
                     "account_number": "608",
                     "account_type": "Expense Account"
                 },
@@ -995,7 +995,7 @@
             },
             "Bezoldigingen, sociale lasten en pensioenen": {
                 "Bezoldigingen en rechtstreekse sociale voordelen": {
-                    "Bestuurders of zaakvoerder": {
+                    "Bestuurders of zaakvoerders": {
                         "account_number": "6200",
                         "account_type": "Expense Account"
                     },
@@ -1075,7 +1075,7 @@
                         "account_number": "6310",
                         "account_type": "Depreciation"
                     },
-                    "Terugneming (–)": {
+                    "Terugneming (-)": {
                         "account_number": "6311",
                         "account_type": "Depreciation"
                     },
@@ -1087,19 +1087,19 @@
                         "account_number": "6320",
                         "account_type": "Depreciation"
                     },
-                    "Terugneming (–)": {
+                    "Terugneming (-)": {
                         "account_number": "6321",
                         "account_type": "Depreciation"
                     },
                     "account_number": "632",
                     "account_type": "Depreciation"
                 },
-                "Waardeverminderingen op handelsvorderingen op meer dan een jaar": {
+                "Waardeverminderingen op handelsvorderingen op meer dan één jaar": {
                     "Toevoeging": {
                         "account_number": "6330",
                         "account_type": "Depreciation"
                     },
-                    "Terugneming (–)": {
+                    "Terugneming (-)": {
                         "account_number": "6331",
                         "account_type": "Depreciation"
                     },
@@ -1111,7 +1111,7 @@
                         "account_number": "6340",
                         "account_type": "Depreciation"
                     },
-                    "Terugneming (–)": {
+                    "Terugneming (-)": {
                         "account_number": "6341",
                         "account_type": "Depreciation"
                     },
@@ -1123,7 +1123,7 @@
                         "account_number": "6350",
                         "account_type": "Depreciation"
                     },
-                    "Besteding en terugneming (–)": {
+                    "Besteding en terugneming (-)": {
                         "account_number": "6351",
                         "account_type": "Depreciation"
                     },
@@ -1135,7 +1135,7 @@
                         "account_number": "6360",
                         "account_type": "Depreciation"
                     },
-                    "Besteding en terugneming (–)": {
+                    "Besteding en terugneming (-)": {
                         "account_number": "6361",
                         "account_type": "Depreciation"
                     },
@@ -1147,7 +1147,7 @@
                         "account_number": "6370",
                         "account_type": "Depreciation"
                     },
-                    "Besteding en terugneming (–)": {
+                    "Besteding en terugneming (-)": {
                         "account_number": "6371",
                         "account_type": "Depreciation"
                     },
@@ -1186,7 +1186,7 @@
                     "account_number": "643",
                     "account_type": "Expense Account"
                 },
-                "Als herstructureringskosten geactiveerde bedrijfskosten (–)": {
+                "Als herstructureringskosten geactiveerde bedrijfskosten (-)": {
                     "account_number": "649",
                     "account_type": "Expense Account"
                 },
@@ -1203,7 +1203,7 @@
                         "account_number": "6501",
                         "account_type": "Expense Account"
                     },
-                    "Geactiveerde intercalaire interesten (–)": {
+                    "Geactiveerde intercalaire interesten (-)": {
                         "account_number": "6502",
                         "account_type": "Expense Account"
                     },
@@ -1215,7 +1215,7 @@
                         "account_number": "6510",
                         "account_type": "Expense Account"
                     },
-                    "Terugneming (–)": {
+                    "Terugneming (-)": {
                         "account_number": "6511",
                         "account_type": "Expense Account"
                     },
@@ -1243,7 +1243,7 @@
                         "account_number": "6560",
                         "account_type": "Expense Account"
                     },
-                    "Bestedingen en terugnemingen (–)": {
+                    "Bestedingen en terugnemingen (-)": {
                         "account_number": "6561",
                         "account_type": "Expense Account"
                     },
@@ -1295,7 +1295,7 @@
                         "account_number": "6620",
                         "account_type": "Expense Account"
                     },
-                    "Voorzieningen voor niet-recurrente financiële risico's en kosten": {
+                    "Voorzieningen voor niet-recurrente financiële risico's en -kosten": {
                         "Toevoeging": {
                             "account_number": "66210",
                             "account_type": "Expense Account"
@@ -1347,7 +1347,7 @@
                         "account_number": "6700",
                         "account_type": "Expense Account"
                     },
-                    "Geactiveerde overschotten van betaalde belastingen en voorheffingen (–)": {
+                    "Geactiveerde overschotten van betaalde belastingen en voorheffingen (-)": {
                         "account_number": "6701",
                         "account_type": "Expense Account"
                     },
@@ -1445,7 +1445,7 @@
         "KLASSE 7 : OPBRENGSTEN": {
             "root_type": "Income",
             "Omzet": {
-                "Toegekende kortingen, ristorno's en rabatten (–)": {
+                "Toegekende kortingen, ristorno's en rabatten (-)": {
                     "account_number": "708",
                     "account_type": "Income Account"
                 },
@@ -1453,19 +1453,19 @@
                 "account_type": "Income Account"
             },
             "Wijzigingen in de voorraden en in de bestellingen in uitvoering": {
-                "in de voorraad goederen in bewerking": {
+                "In de voorraad goederen in bewerking": {
                     "account_number": "712",
                     "account_type": "Income Account"
                 },
-                "in de voorraad gereed product": {
+                "In de voorraad gereed product": {
                     "account_number": "713",
                     "account_type": "Income Account"
                 },
-                "in de voorraad onroerende goederen bestemd voor verkoop": {
+                "In de voorraad onroerende goederen bestemd voor verkoop": {
                     "account_number": "715",
                     "account_type": "Income Account"
                 },
-                "in de bestellingen in uitvoering": {
+                "In de bestellingen in uitvoering": {
                     "Aanschaffingswaarde": {
                         "account_number": "7170",
                         "account_type": "Income Account"
@@ -1558,7 +1558,7 @@
                         "account_number": "7620",
                         "account_type": "Income Account"
                     },
-                    "Terugneming van voorzieningen voor niet-recurrente financiële risico's en kosten": {
+                    "Terugneming van voorzieningen voor niet-recurrente financiële risico's en -kosten": {
                         "account_number": "7621",
                         "account_type": "Income Account"
                     },

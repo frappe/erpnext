@@ -9,7 +9,7 @@
                     "account_number": "100",
                     "account_type": "Equity"
                 },
-                "Capital non appelé (–)": {
+                "Capital non appelé (-)": {
                     "account_number": "101",
                     "account_type": "Equity"
                 },
@@ -104,7 +104,7 @@
                 "account_number": "13",
                 "account_type": "Equity"
             },
-            "Bénéfice reporté ou perte reportée (–)": {
+            "Bénéfice reporté ou perte reportée (-)": {
                 "account_number": "14",
                 "account_type": "Equity"
             },
@@ -352,7 +352,7 @@
                         "account_number": "2800",
                         "account_type": "Fixed Asset"
                     },
-                    "Montants non appelés (–)": {
+                    "Montants non appelés (-)": {
                         "account_number": "2801",
                         "account_type": "Fixed Asset"
                     },
@@ -396,7 +396,7 @@
                         "account_number": "2820",
                         "account_type": "Fixed Asset"
                     },
-                    "Montants non appelés (–)": {
+                    "Montants non appelés (-)": {
                         "account_number": "2821",
                         "account_type": "Fixed Asset"
                     },
@@ -440,7 +440,7 @@
                         "account_number": "2840",
                         "account_type": "Fixed Asset"
                     },
-                    "Montants non appelés (–)": {
+                    "Montants non appelés (-)": {
                         "account_number": "2841",
                         "account_type": "Fixed Asset"
                     },
@@ -542,7 +542,7 @@
                     "account_number": "300",
                     "account_type": "Stock"
                 },
-                "Réductions de valeur actées (–)": {
+                "Réductions de valeur actées (-)": {
                     "account_number": "309",
                     "account_type": "Stock"
                 },
@@ -554,7 +554,7 @@
                     "account_number": "310",
                     "account_type": "Stock"
                 },
-                "Réductions de valeur actées (–)": {
+                "Réductions de valeur actées (-)": {
                     "account_number": "319",
                     "account_type": "Stock"
                 },
@@ -566,7 +566,7 @@
                     "account_number": "320",
                     "account_type": "Stock"
                 },
-                "Réductions de valeur actées (–)": {
+                "Réductions de valeur actées (-)": {
                     "account_number": "329",
                     "account_type": "Stock"
                 },
@@ -578,7 +578,7 @@
                     "account_number": "330",
                     "account_type": "Stock"
                 },
-                "Réductions de valeur actées (–)": {
+                "Réductions de valeur actées (-)": {
                     "account_number": "339",
                     "account_type": "Stock"
                 },
@@ -590,19 +590,19 @@
                     "account_number": "340",
                     "account_type": "Stock"
                 },
-                "Réductions de valeur actées (–)": {
+                "Réductions de valeur actées (-)": {
                     "account_number": "349",
                     "account_type": "Stock"
                 },
                 "account_number": "34",
                 "account_type": "Stock"
             },
-            "Immeubles destinés à la vente": {
+            "Immeubles destinés à la vente": {
                 "Valeur d'acquisition": {
                     "account_number": "350",
                     "account_type": "Stock"
                 },
-                "Réductions de valeur actées (–)": {
+                "Réductions de valeur actées (-)": {
                     "account_number": "359",
                     "account_type": "Stock"
                 },
@@ -614,7 +614,7 @@
                     "account_number": "360",
                     "account_type": "Stock"
                 },
-                "Réductions de valeur actées (–)": {
+                "Réductions de valeur actées (-)": {
                     "account_number": "369",
                     "account_type": "Stock"
                 },
@@ -630,7 +630,7 @@
                     "account_number": "371",
                     "account_type": "Stock"
                 },
-                "Réductions de valeur actées (–)": {
+                "Réductions de valeur actées (-)": {
                     "account_number": "379",
                     "account_type": "Stock"
                 },
@@ -704,7 +704,7 @@
                     "account_number": "418",
                     "account_type": "Receivable"
                 },
-                "Réductions de valeur actées (–)": {
+                "Réductions de valeur actées (-)": {
                     "account_number": "419",
                     "account_type": "Receivable"
                 },
@@ -714,7 +714,7 @@
         },
         "CLASSE 4 : DETTES À UN AN AU PLUS": {
             "root_type": "Liability",
-            "Dettes à plus d'un an échéant dans l'année (16) (même subdivision que le compte 17)": {
+            "Dettes à plus d'un an échéant dans l'année (16) (même subdivision que le compte 17)": {
                 "account_number": "42"
             },
             "Dettes financières": {
@@ -802,7 +802,7 @@
                 "Dividendes et tantièmes d'exercices antérieurs": {
                     "account_number": "470"
                 },
-                "Dividendes de l’exercice": {
+                "Dividendes de l'exercice": {
                     "account_number": "471"
                 },
                 "Tantièmes de l'exercice": {
@@ -880,7 +880,7 @@
                 "Valeur d'acquisition": {
                     "account_number": "520"
                 },
-                "Réductions de valeur actées (–)": {
+                "Réductions de valeur actées (-)": {
                     "account_number": "529"
                 },
                 "account_number": "52"
@@ -895,7 +895,7 @@
                 "D'un mois au plus": {
                     "account_number": "532"
                 },
-                "Réductions de valeur actées (–)": {
+                "Réductions de valeur actées (-)": {
                     "account_number": "539"
                 },
                 "account_number": "53"
@@ -951,7 +951,7 @@
                     "account_number": "605",
                     "account_type": "Expense Account"
                 },
-                "Remises, ristournes et rabais (–)": {
+                "Remises, ristournes et rabais (-)": {
                     "account_number": "608",
                     "account_type": "Expense Account"
                 },
@@ -1075,7 +1075,7 @@
                         "account_number": "6310",
                         "account_type": "Depreciation"
                     },
-                    "Reprises (–)": {
+                    "Reprises (-)": {
                         "account_number": "6311",
                         "account_type": "Depreciation"
                     },
@@ -1087,7 +1087,7 @@
                         "account_number": "6320",
                         "account_type": "Depreciation"
                     },
-                    "Reprises (–)": {
+                    "Reprises (-)": {
                         "account_number": "6321",
                         "account_type": "Depreciation"
                     },
@@ -1099,7 +1099,7 @@
                         "account_number": "6330",
                         "account_type": "Depreciation"
                     },
-                    "Reprises (–)": {
+                    "Reprises (-)": {
                         "account_number": "6331",
                         "account_type": "Depreciation"
                     },
@@ -1111,7 +1111,7 @@
                         "account_number": "6340",
                         "account_type": "Depreciation"
                     },
-                    "Reprises (–)": {
+                    "Reprises (-)": {
                         "account_number": "6341",
                         "account_type": "Depreciation"
                     },
@@ -1123,19 +1123,19 @@
                         "account_number": "6350",
                         "account_type": "Depreciation"
                     },
-                    "Utilisations et reprises (–)": {
+                    "Utilisations et reprises (-)": {
                         "account_number": "6351",
                         "account_type": "Depreciation"
                     },
                     "account_number": "635",
                     "account_type": "Depreciation"
                 },
-                "Provisions pour grosses réparations et gros entretiens": {
+                "Provisions pour grosses réparations et gros entretien": {
                     "Dotations": {
                         "account_number": "6360",
                         "account_type": "Depreciation"
                     },
-                    "Utilisations et reprises (–)": {
+                    "Utilisations et reprises (-)": {
                         "account_number": "6361",
                         "account_type": "Depreciation"
                     },
@@ -1147,7 +1147,7 @@
                         "account_number": "6370",
                         "account_type": "Depreciation"
                     },
-                    "Utilisations et reprises (–)": {
+                    "Utilisations et reprises (-)": {
                         "account_number": "6371",
                         "account_type": "Depreciation"
                     },
@@ -1159,7 +1159,7 @@
                         "account_number": "6380",
                         "account_type": "Expense Account"
                     },
-                    "Utilisations et reprises (–)": {
+                    "Utilisations et reprises (-)": {
                         "account_number": "6381",
                         "account_type": "Expense Account"
                     },
@@ -1170,7 +1170,7 @@
                 "account_type": "Expense Account"
             },
             "Autres charges d'exploitation": {
-                "Charges fiscales d’exploitation": {
+                "Charges fiscales d'exploitation": {
                     "account_number": "640",
                     "account_type": "Expense Account"
                 },
@@ -1186,7 +1186,7 @@
                     "account_number": "643",
                     "account_type": "Expense Account"
                 },
-                "Charges d'exploitation portées à l'actif au titre de frais de restructuration (–)": {
+                "Charges d'exploitation portées à l'actif au titre de frais de restructuration (-)": {
                     "account_number": "649",
                     "account_type": "Expense Account"
                 },
@@ -1203,7 +1203,7 @@
                         "account_number": "6501",
                         "account_type": "Expense Account"
                     },
-                    "Intérêts intercalaires portés à l'actif (–)": {
+                    "Intérêts intercalaires portés à l'actif (-)": {
                         "account_number": "6502",
                         "account_type": "Expense Account"
                     },
@@ -1215,7 +1215,7 @@
                         "account_number": "6510",
                         "account_type": "Expense Account"
                     },
-                    "Reprises (–)": {
+                    "Reprises (-)": {
                         "account_number": "6511",
                         "account_type": "Expense Account"
                     },
@@ -1243,7 +1243,7 @@
                         "account_number": "6560",
                         "account_type": "Expense Account"
                     },
-                    "Utilisations et reprises (–)": {
+                    "Utilisations et reprises (-)": {
                         "account_number": "6561",
                         "account_type": "Expense Account"
                     },
@@ -1261,7 +1261,7 @@
                 "account_number": "65",
                 "account_type": "Expense Account"
             },
-            "Charges d’exploitation et charges financières non récurrentes": {
+            "Charges d'exploitation et charges financières non récurrentes": {
                 "Amortissements et réductions de valeur non récurrents (dotations)": {
                     "sur frais d'établissement": {
                         "account_number": "6600",
@@ -1283,12 +1283,12 @@
                     "account_type": "Expense Account"
                 },
                 "Provisions pour risques et charges non récurrents": {
-                    "Provisions pour risques et charges d’exploitation non récurrents": {
+                    "Provisions pour risques et charges d'exploitation non récurrents": {
                         "Dotations": {
                             "account_number": "66200",
                             "account_type": "Expense Account"
                         },
-                        "Utilisation (-)": {
+                        "Utilisations (-)": {
                             "account_number": "66201",
                             "account_type": "Expense Account"
                         },
@@ -1300,7 +1300,7 @@
                             "account_number": "66210",
                             "account_type": "Expense Account"
                         },
-                        "Utilisation (-)": {
+                        "Utilisations (-)": {
                             "account_number": "66211",
                             "account_type": "Expense Account"
                         },
@@ -1342,12 +1342,12 @@
                 "account_type": "Expense Account"
             },
             "Impôts sur le résultat": {
-                "Impôts belges sur le résultat de l’exercice": {
+                "Impôts belges sur le résultat de l'exercice": {
                     "Impôts et précomptes dus ou versés": {
                         "account_number": "6700",
                         "account_type": "Expense Account"
                     },
-                    "Excédent de versements d'impôts et de précomptes porté à l’actif (–)": {
+                    "Excédent de versements d'impôts et de précomptes porté à l'actif (-)": {
                         "account_number": "6701",
                         "account_type": "Expense Account"
                     },
@@ -1374,7 +1374,7 @@
                     "account_number": "671",
                     "account_type": "Expense Account"
                 },
-                "Impôts étrangers sur le résultat de l’exercice": {
+                "Impôts étrangers sur le résultat de l'exercice": {
                     "account_number": "672",
                     "account_type": "Expense Account"
                 },
@@ -1445,27 +1445,27 @@
         "CLASSE 7 : PRODUITS": {
             "root_type": "Income",
             "Chiffre d'affaires": {
-                "Remises, ristournes et rabais accordés (–)": {
+                "Remises, ristournes et rabais accordés (-)": {
                     "account_number": "708",
                     "account_type": "Income Account"
                 },
                 "account_number": "70",
                 "account_type": "Income Account"
             },
-            "Variation des stocks et des commandes en cours d’exécution": {
-                "des en-cours de fabrication": {
+            "Variation des stocks et des commandes en cours d'exécution": {
+                "Des en-cours de fabrication": {
                     "account_number": "712",
                     "account_type": "Income Account"
                 },
-                "des produits finis": {
+                "Des produits finis": {
                     "account_number": "713",
                     "account_type": "Income Account"
                 },
-                "des immeubles construits destinés à la vente": {
+                "Des immeubles construits destinés à la vente": {
                     "account_number": "715",
                     "account_type": "Income Account"
                 },
-                "des commandes en cours d'exécution": {
+                "Des commandes en cours d'exécution": {
                     "Valeur d'acquisition": {
                         "account_number": "7170",
                         "account_type": "Income Account"
@@ -1493,7 +1493,7 @@
                     "account_number": "741",
                     "account_type": "Income Account"
                 },
-                "Plus-values sur réalisations de créances commerciales": {
+                "Plus-values sur réalisation de créances commerciales": {
                     "account_number": "742",
                     "account_type": "Income Account"
                 },
@@ -1554,7 +1554,7 @@
                     "account_type": "Income Account"
                 },
                 "Reprises de provisions pour risques et charges non récurrents": {
-                    "Reprises de provisions pour risques et charges d’exploitation non récurrents": {
+                    "Reprises de provisions pour risques et charges d'exploitation non récurrents": {
                         "account_number": "7620",
                         "account_type": "Income Account"
                     },

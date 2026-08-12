@@ -4,7 +4,7 @@
     "tree": {
         "CLASSE 1 : FONDS ASSOCIATIFS ET DE LA FONDATION": {
             "root_type": "Equity",
-            "Fonds de l’association ou de la fondation": {
+            "Fonds de l'association ou de la fondation": {
                 "account_number": "10",
                 "account_type": "Equity"
             },
@@ -21,7 +21,7 @@
                     "account_number": "122",
                     "account_type": "Equity"
                 },
-                "Reprises de réductions de valeurs sur placements de trésorerie": {
+                "Reprises de réductions de valeur sur placements de trésorerie": {
                     "account_number": "124",
                     "account_type": "Equity"
                 },
@@ -37,7 +37,7 @@
                     "account_number": "131",
                     "account_type": "Equity"
                 },
-                "Réserves immunisés": {
+                "Réserves immunisées": {
                     "account_number": "132",
                     "account_type": "Equity"
                 },
@@ -68,7 +68,7 @@
                     "account_number": "161",
                     "account_type": "Liability"
                 },
-                "Provisions pour grosses réparations et gros entretiens": {
+                "Provisions pour grosses réparations et gros entretien": {
                     "account_number": "162",
                     "account_type": "Liability"
                 },
@@ -101,7 +101,7 @@
                     "account_type": "Liability"
                 },
                 "Établissements de crédit": {
-                    "Dettes en comptes": {
+                    "Dettes en compte": {
                         "account_number": "1730",
                         "account_type": "Liability"
                     },
@@ -141,11 +141,11 @@
                     "account_type": "Liability"
                 },
                 "Autres dettes": {
-                    "Productives d’intérêts": {
+                    "Productives d'intérêts": {
                         "account_number": "1790",
                         "account_type": "Liability"
                     },
-                    "Non productives dintérêts ou assorties d’un intérêt anormalement faible": {
+                    "Non productives d'intérêts ou assorties d'un intérêt anormalement faible": {
                         "account_number": "1791",
                         "account_type": "Liability"
                     },
@@ -163,7 +163,7 @@
                     "account_number": "200",
                     "account_type": "Fixed Asset"
                 },
-                "Frais d'émission d'emprunt": {
+                "Frais d'émission d'emprunts": {
                     "account_number": "201",
                     "account_type": "Fixed Asset"
                 },
@@ -235,7 +235,7 @@
                 "account_type": "Fixed Asset"
             },
             "Immobilisations détenues en location-financement et droits similaires": {
-                "Terrains et construction": {
+                "Terrains et constructions": {
                     "account_number": "250",
                     "account_type": "Fixed Asset"
                 },
@@ -300,7 +300,7 @@
                         "account_number": "2817",
                         "account_type": "Fixed Asset"
                     },
-                    "Réductions de valeurs actées (-)": {
+                    "Réductions de valeur actées (-)": {
                         "account_number": "2819",
                         "account_type": "Fixed Asset"
                     },
@@ -320,7 +320,7 @@
                         "account_number": "2828",
                         "account_type": "Fixed Asset"
                     },
-                    "Réductions de valeurs actées (-)": {
+                    "Réductions de valeur actées (-)": {
                         "account_number": "2829",
                         "account_type": "Fixed Asset"
                     },
@@ -344,7 +344,7 @@
                         "account_number": "2837",
                         "account_type": "Fixed Asset"
                     },
-                    "Réductions de valeurs actées (-)": {
+                    "Réductions de valeur actées (-)": {
                         "account_number": "2839",
                         "account_type": "Fixed Asset"
                     },
@@ -364,7 +364,7 @@
                         "account_number": "2848",
                         "account_type": "Fixed Asset"
                     },
-                    "Réductions de valeurs actées (-)": {
+                    "Réductions de valeur actées (-)": {
                         "account_number": "2849",
                         "account_type": "Fixed Asset"
                     },
@@ -388,7 +388,7 @@
                         "account_number": "2857",
                         "account_type": "Fixed Asset"
                     },
-                    "Réductions de valeurs actées (-)": {
+                    "Réductions de valeur actées (-)": {
                         "account_number": "2859",
                         "account_type": "Fixed Asset"
                     },
@@ -420,7 +420,7 @@
                         "account_number": "2907",
                         "account_type": "Receivable"
                     },
-                    "Réductions de valeurs actées (-)": {
+                    "Réductions de valeur actées (-)": {
                         "account_number": "2909",
                         "account_type": "Receivable"
                     },
@@ -440,7 +440,7 @@
                         "account_number": "2912",
                         "account_type": "Receivable"
                     },
-                    "Créances non productives d’intérêts ou assorties d’un intérêt anormalement faible": {
+                    "Créances non productives d'intérêts ou assorties d'un intérêt anormalement faible": {
                         "account_number": "2915",
                         "account_type": "Receivable"
                     },
@@ -448,7 +448,7 @@
                         "account_number": "2916",
                         "account_type": "Receivable"
                     },
-                    "Réductions de valeurs actées (-)": {
+                    "Réductions de valeur actées (-)": {
                         "account_number": "2919",
                         "account_type": "Receivable"
                     },
@@ -521,7 +521,7 @@
                 "account_number": "34",
                 "account_type": "Stock"
             },
-            "Immeubles destinés a la vente": {
+            "Immeubles destinés à la vente": {
                 "Valeur d'acquisition": {
                     "account_number": "350",
                     "account_type": "Stock"
@@ -588,7 +588,7 @@
                     "account_number": "407",
                     "account_type": "Receivable"
                 },
-                "Réductions de valeurs actées (-)": {
+                "Réductions de valeur actées (-)": {
                     "account_number": "409",
                     "account_type": "Receivable"
                 },
@@ -596,7 +596,7 @@
                 "account_type": "Receivable"
             },
             "Autres créances": {
-                "Tva à récupérer": {
+                "TVA à récupérer": {
                     "account_number": "411",
                     "account_type": "Tax"
                 },
@@ -620,7 +620,7 @@
                     "account_number": "414",
                     "account_type": "Receivable"
                 },
-                "Créances non productives d’intérêts ou assorties d’un intérêt anormalement faible": {
+                "Créances non productives d'intérêts ou assorties d'un intérêt anormalement faible": {
                     "account_number": "415",
                     "account_type": "Receivable"
                 },
@@ -636,7 +636,7 @@
                     "account_number": "418",
                     "account_type": "Receivable"
                 },
-                "Réductions de valeurs actées (-)": {
+                "Réductions de valeur actées (-)": {
                     "account_number": "419",
                     "account_type": "Receivable"
                 },
@@ -650,16 +650,16 @@
                 "account_number": "42"
             },
             "Dettes financières": {
-                "Établissements de crédit – Emprunts en compte à terme fixe": {
+                "Établissements de crédit - Emprunts en compte à terme fixe": {
                     "account_number": "430"
                 },
-                "Établissements de crédit – Promesses": {
+                "Établissements de crédit - Promesses": {
                     "account_number": "431"
                 },
-                "Établissements de crédit – Crédits d'acceptation": {
+                "Établissements de crédit - Crédits d'acceptation": {
                     "account_number": "432"
                 },
-                "Établissements de crédit – Dettes en compte courant": {
+                "Établissements de crédit - Dettes en compte courant": {
                     "account_number": "433"
                 },
                 "Autres emprunts": {
@@ -696,7 +696,7 @@
                     "account_number": "450",
                     "account_type": "Payable"
                 },
-                "Tva à payer": {
+                "TVA à payer": {
                     "account_number": "451",
                     "account_type": "Tax"
                 },
@@ -763,10 +763,10 @@
                 "account_number": "488"
             },
             "Autres dettes diverses": {
-                "Productives d’intérêts": {
+                "Productives d'intérêts": {
                     "account_number": "4890"
                 },
-                "Non productives d’intérêts ou assorties d’un intérêt anormalement faible": {
+                "Non productives d'intérêts ou assorties d'un intérêt anormalement faible": {
                     "account_number": "4891"
                 },
                 "account_number": "489"
@@ -778,7 +778,7 @@
                 "Valeur d'acquisition": {
                     "account_number": "500"
                 },
-                "Réductions de valeurs actées (-)": {
+                "Réductions de valeur actées (-)": {
                     "account_number": "509"
                 },
                 "account_number": "50"
@@ -799,7 +799,7 @@
                 "Valeur d'acquisition": {
                     "account_number": "520"
                 },
-                "Réductions de valeurs actées (-)": {
+                "Réductions de valeur actées (-)": {
                     "account_number": "529"
                 },
                 "account_number": "52"
@@ -878,7 +878,7 @@
                     "account_number": "608",
                     "account_type": "Expense Account"
                 },
-                "Variation des stocks": {
+                "Variations des stocks": {
                     "de matières premières": {
                         "account_number": "6090",
                         "account_type": "Stock Adjustment"
@@ -902,7 +902,7 @@
                 "account_type": "Expense Account"
             },
             "Services et biens divers": {
-                "Personnel intérimaire et personnes mises à la disposition de l’association ou de la fondation": {
+                "Personnel intérimaire et personnes mises à la disposition de l'association ou de la fondation": {
                     "account_number": "617",
                     "account_type": "Expense Account"
                 },
@@ -982,11 +982,11 @@
                         "account_number": "6302",
                         "account_type": "Depreciation"
                     },
-                    "Dotation aux réductions de valeurs sur immobilisations incorporelles": {
+                    "Dotation aux réductions de valeur sur immobilisations incorporelles": {
                         "account_number": "6308",
                         "account_type": "Depreciation"
                     },
-                    "Dotation aux réductions de valeurs sur immobilisations corporelles": {
+                    "Dotation aux réductions de valeur sur immobilisations corporelles": {
                         "account_number": "6309",
                         "account_type": "Depreciation"
                     },
@@ -1053,7 +1053,7 @@
                     "account_number": "635",
                     "account_type": "Depreciation"
                 },
-                "Provisions pour grosses réparations et gros entretiens": {
+                "Provisions pour grosses réparations et gros entretien": {
                     "Dotations": {
                         "account_number": "6360",
                         "account_type": "Depreciation"
@@ -1125,7 +1125,7 @@
                     "account_number": "644",
                     "account_type": "Expense Account"
                 },
-                "Charges d'exploitation portées à l'actif au titre de frais de restructuration (–)": {
+                "Charges d'exploitation portées à l'actif au titre de frais de restructuration (-)": {
                     "account_number": "649",
                     "account_type": "Expense Account"
                 },
@@ -1200,7 +1200,7 @@
                 "account_number": "65",
                 "account_type": "Expense Account"
             },
-            "Charges d’exploitation ou financières non récurrentes": {
+            "Charges d'exploitation ou financières non récurrentes": {
                 "Amortissements et réductions de valeur non récurrents (dotations)": {
                     "sur frais d'établissement": {
                         "account_number": "6600",
@@ -1222,7 +1222,7 @@
                     "account_type": "Expense Account"
                 },
                 "Provisions pour risques et charges non récurrents": {
-                    "Provisions pour risques et charges d’exploitation non récurrents": {
+                    "Provisions pour risques et charges d'exploitation non récurrents": {
                         "Dotations": {
                             "account_number": "66200",
                             "account_type": "Expense Account"
@@ -1239,7 +1239,7 @@
                             "account_number": "66210",
                             "account_type": "Expense Account"
                         },
-                        "Utilisation (-)": {
+                        "Utilisations (-)": {
                             "account_number": "66211",
                             "account_type": "Expense Account"
                         },
@@ -1269,7 +1269,7 @@
                     "account_number": "668",
                     "account_type": "Expense Account"
                 },
-                "Charges d’exploitation portées à l’actif au titre de frais de restructuration (-)": {
+                "Charges d'exploitation portées à l'actif au titre de frais de restructuration (-)": {
                     "account_number": "6690",
                     "account_type": "Expense Account"
                 },
@@ -1281,12 +1281,12 @@
                 "account_type": "Expense Account"
             },
             "Impôts": {
-                "Impôts belges sur le résultat de l’exercice": {
+                "Impôts belges sur le résultat de l'exercice": {
                     "Impôts et précomptes dus ou versés": {
                         "account_number": "6700",
                         "account_type": "Expense Account"
                     },
-                    "Excédent de versements d'impôts et de précomptes porté à l’actif (–)": {
+                    "Excédent de versements d'impôts et de précomptes porté à l'actif (-)": {
                         "account_number": "6701",
                         "account_type": "Expense Account"
                     },
@@ -1355,7 +1355,7 @@
                 "account_number": "70",
                 "account_type": "Income Account"
             },
-            "Variation des stocks et des commandes en cours d’exécution": {
+            "Variation des stocks et des commandes en cours d'exécution": {
                 "Des en-cours de fabrication": {
                     "account_number": "712",
                     "account_type": "Income Account"
@@ -1407,7 +1407,7 @@
                 "account_number": "73",
                 "account_type": "Income Account"
             },
-            "Autres produits d’exploitation": {
+            "Autres produits d'exploitation": {
                 "Plus-values sur réalisations courantes d'immobilisations corporelles": {
                     "account_number": "741",
                     "account_type": "Income Account"
@@ -1469,7 +1469,7 @@
                     "account_type": "Income Account"
                 },
                 "Reprises de provisions pour risques et charges non récurrents": {
-                    "Reprises de provisions pour risques et charges d’exploitation non récurrents": {
+                    "Reprises de provisions pour risques et charges d'exploitation non récurrents": {
                         "account_number": "7620",
                         "account_type": "Income Account"
                     },
@@ -1507,8 +1507,8 @@
                 "account_number": "77",
                 "account_type": "Income Account"
             },
-            "Prélèvement sur les réserves immunisées et les impôts différés": {
-                "Prélèvement sur les impôts différés": {
+            "Prélèvements sur les réserves immunisées et les impôts différés": {
+                "Prélèvements sur les impôts différés": {
                     "account_number": "780",
                     "account_type": "Income Account"
                 },
