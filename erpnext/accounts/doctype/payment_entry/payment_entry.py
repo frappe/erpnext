@@ -732,16 +732,16 @@ class PaymentEntry(AccountsController):
 					)
 
 	def get_party_paid_amount(self):
-		"""Gross amount in party account currency: `paid_amount` for Receive, `received_amount` for Pay."""
+		"""Gross amount in party account currency."""
 		return flt(self.paid_amount if self.payment_type == "Receive" else self.received_amount)
 
 	def get_party_exchange_rate(self):
-		"""Party account currency to company currency. Party side is `paid_from` for Receive, `paid_to` for Pay."""
+		"""Rate from party account currency to company currency. The party side is `paid_from` on Receive."""
 		rate = self.source_exchange_rate if self.payment_type == "Receive" else self.target_exchange_rate
 		return flt(rate) or 1
 
 	def get_advance_tax_rows(self):
-		"""Included taxes collected on top of the advance. Deductions and withholding are posted against the party instead."""
+		"""Included taxes collected on top of the advance. Deductions and withholding post against the party."""
 		return [
 			tax
 			for tax in self.get("taxes") or []
@@ -753,9 +753,8 @@ class PaymentEntry(AccountsController):
 	def compute_advance_tax_breakdown(self, in_account_currency: bool = False):
 		"""Advance tax per reference row as `{ref_row_name: {account_head: tax_amount}}`.
 
-		Each row's share is `tax * allocated_amount / total_net_paid`, so it depends only
-		on its own allocation. Tax on the unallocated portion stays in the tax account.
-		Company currency unless `in_account_currency`.
+		Each row's share depends only on its own allocation, so tax on the unallocated
+		portion stays in the tax account. Company currency unless `in_account_currency`.
 		"""
 		references = self.get("references") or []
 		if not references:
@@ -779,11 +778,11 @@ class PaymentEntry(AccountsController):
 		total_allocated = sum(flt(r.allocated_amount) for r in references)
 		fully_allocated = flt(total_allocated, precision) == flt(total_net_paid, precision)
 
-		# Only absorb the rounding remainder when nothing is left unallocated.
 		for account_head, total_amount in tax_by_account.items():
 			running = 0.0
 			for i, ref in enumerate(references):
 				is_last = i == len(references) - 1
+				# Only absorb the rounding remainder when nothing is left unallocated.
 				if is_last and fully_allocated:
 					share = total_amount - running
 				else:
@@ -797,7 +796,7 @@ class PaymentEntry(AccountsController):
 
 	def set_allocated_gross_amount(self):
 		"""Set `allocated_gross_amount` per reference row and `unallocated_gross_amount` on the entry."""
-		# `set_amounts` runs before `apply_taxes`, so percentage based taxes were still 0 there.
+		# `set_amounts` runs before `apply_taxes`, so percentage-based taxes were still 0 there.
 		self.set_unallocated_amount()
 		self.set_difference_amount()
 
@@ -1529,10 +1528,10 @@ class PaymentEntry(AccountsController):
 	def _add_advance_tax_reversal_for_reference(self, gl_entries, invoice, party_account, posting_date):
 		"""Reverse this reference's share of the advance tax against the party account.
 
-		A pair of legs is emitted per tax account even when the amount is 0: on submit
-		`merge_similar_entries` drops them, on cancel `make_reverse_gl_entries` needs them
-		to match the original posting via `voucher_detail_no`, which `remove_ref_doc_link_from_pe`
-		has by then zeroed out.
+		A pair of legs is emitted per tax account even when the share is 0: by cancel time
+		`remove_ref_doc_link_from_pe` has zeroed `allocated_amount`, so these legs rebuild as 0
+		and `make_reverse_gl_entries` still needs them to match on `voucher_detail_no`.
+		`merge_similar_entries` drops the empty legs on submit.
 		"""
 		tax_accounts = list(dict.fromkeys(tax.account_head for tax in self.get_advance_tax_rows()))
 		if not tax_accounts:
@@ -1555,7 +1554,6 @@ class PaymentEntry(AccountsController):
 				else flt(tax_amount / self.transaction_exchange_rate)
 			)
 
-			# Same direction as the allocated_amount leg above.
 			party_dr_or_cr = "credit" if self.payment_type == "Receive" else "debit"
 			tax_dr_or_cr = "debit" if party_dr_or_cr == "credit" else "credit"
 

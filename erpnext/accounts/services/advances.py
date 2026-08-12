@@ -31,8 +31,7 @@ def set_advances(doc) -> None:
 	)
 
 	doc.set("advances", [])
-	# Allocate on gross, so the invoice clears by what the party actually paid. Sources
-	# without advance tax report gross == net and behave as before.
+	# Allocate on gross, so the invoice clears by what the party actually paid.
 	advance_allocated_gross = 0
 	for d in res:
 		if doc.get("party_account_currency") == doc.company_currency:
@@ -41,8 +40,7 @@ def set_advances(doc) -> None:
 			amount = doc.get("rounded_total") or doc.grand_total
 
 		source_net = flt(d.amount)
-		# Only advances booked in a separate party account reverse their tax on
-		# consumption, so only those can be cleared by the gross.
+		# Only advances in a separate party account reverse tax on consumption, so only those clear by gross.
 		if d.get("book_advance_payments_in_separate_party_account"):
 			source_gross = flt(d.get("source_gross_amount")) or source_net
 		else:

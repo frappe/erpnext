@@ -93,7 +93,6 @@
    "label": "Allocated"
   },
   {
-   "description": "Gross amount allocated against this reference (allocated_amount + this reference's share of included-in-paid-amount advance taxes). Computed server-side from the taxes table on save.",
    "fieldname": "allocated_gross_amount",
    "fieldtype": "Currency",
    "label": "Allocated Gross",
@@ -184,7 +183,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-05-13 13:46:15.593583",
+ "modified": "2026-08-12 10:15:22.410338",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry Reference",

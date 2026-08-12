@@ -1119,7 +1119,7 @@ frappe.ui.form.on("Payment Entry", {
 	},
 
 	get_gross_net_ratio: function (frm) {
-		// Gross over net paid amount, 1 when there are no included-in-paid-amount taxes.
+		// Ratio of gross to net paid amount.
 		const is_pay = frm.doc.payment_type === "Pay";
 		const exchange_rate =
 			(is_pay ? flt(frm.doc.target_exchange_rate) : flt(frm.doc.source_exchange_rate)) || 1;
