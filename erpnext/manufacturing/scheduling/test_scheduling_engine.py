@@ -94,6 +94,23 @@ class TestSchedulingEngine(unittest.TestCase):
 		self.assertEqual(result.assignments["t1"].resource, "WS-B")
 		self.assertEqual(result.assignments["t1"].start, dt(12, 9))
 
+	def test_four_jobs_run_concurrently_on_two_capacity_two_machines(self):
+		resources = [
+			Resource("Mold-A", calendar=day_shift_calendar(), capacity=2, resource_type="Molding"),
+			Resource("Mold-B", calendar=day_shift_calendar(), capacity=2, resource_type="Molding"),
+		]
+		engine = SchedulingEngine(resources)
+		tasks = [Task(f"t{i}", duration_mins=120, resource_type="Molding") for i in range(4)]
+
+		result = engine.schedule(tasks, anchor=dt(12, 9))
+
+		self.assertEqual([a.start for a in result.assignments.values()], [dt(12, 9)] * 4)
+		machines = sorted(a.resource for a in result.assignments.values())
+		self.assertEqual(machines, ["Mold-A", "Mold-A", "Mold-B", "Mold-B"])
+
+		overflow = engine.schedule([Task("t5", duration_mins=120, resource_type="Molding")], anchor=dt(12, 9))
+		self.assertEqual(overflow.assignments["t5"].start, dt(12, 11))
+
 	def test_priority_wins_contention(self):
 		tasks = [
 			Task("low", duration_mins=120, resource="WS-A", priority=1),
