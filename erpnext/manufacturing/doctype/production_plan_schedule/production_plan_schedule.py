@@ -1,6 +1,8 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+import frappe
+from frappe import _
 from frappe.model.document import Document
 
 
@@ -28,11 +30,15 @@ class ProductionPlanSchedule(Document):
 		workstation: DF.Link | None
 	# end: auto-generated types
 
-	pass
+	def before_insert(self):
+		if not self.flags.from_scheduler:
+			frappe.throw(
+				_(
+					"Production Plan Schedule entries cannot be created manually. Use the Schedule Items action on the Production Plan."
+				)
+			)
 
 
 def on_doctype_update():
-	import frappe
-
 	frappe.db.add_index("Production Plan Schedule", ["production_plan"])
 	frappe.db.add_index("Production Plan Schedule", ["workstation", "from_time"])

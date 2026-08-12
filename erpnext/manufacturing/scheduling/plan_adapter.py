@@ -430,7 +430,9 @@ def replace_schedule_entries(plan, proposal):
 
 	for row_name, row in proposal["rows"].items():
 		for block in row["blocks"]:
-			make_schedule_entry(plan, row_name, row, block).insert(ignore_permissions=True)
+			entry = make_schedule_entry(plan, row_name, row, block)
+			entry.flags.from_scheduler = True
+			entry.insert(ignore_permissions=True)
 
 
 def make_schedule_entry(plan, row_name, row, block):

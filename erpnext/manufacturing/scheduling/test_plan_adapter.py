@@ -153,6 +153,20 @@ class TestPlanAdapter(ERPNextTestSuite):
 		for row in plan.sub_assembly_items:
 			self.assertGreaterEqual(get_datetime(row.schedule_date), day_one)
 
+	def test_manual_schedule_entry_creation_is_blocked(self):
+		plan = self.make_plan()
+		entry = frappe.get_doc(
+			{
+				"doctype": "Production Plan Schedule",
+				"production_plan": plan.name,
+				"item_code": "Test PPS FG",
+				"from_time": "2026-11-02 09:00:00",
+				"to_time": "2026-11-02 10:00:00",
+			}
+		)
+
+		self.assertRaises(frappe.ValidationError, entry.insert)
+
 	def test_incomplete_proposal_is_not_applied(self):
 		from unittest.mock import patch
 
