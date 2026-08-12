@@ -249,7 +249,7 @@ class TestJournalEntry(ERPNextTestSuite):
 		self.check_gl_entries()
 
 	def test_disallow_reversal_of_a_reversal_journal_entry(self):
-		from erpnext.accounts.doctype.journal_entry.mapper import make_reverse_journal_entry
+		from erpnext.accounts.doctype.journal_entry.journal_entry import make_reverse_journal_entry
 
 		jv = make_journal_entry("_Test Bank - _TC", "Sales - _TC", 100, submit=True)
 
