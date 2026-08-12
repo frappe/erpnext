@@ -293,10 +293,13 @@ class RequiredItemsService:
 	def _material_transfer_qty_by_item(self, is_return):
 		ste = frappe.qb.DocType("Stock Entry")
 		ste_child = frappe.qb.DocType("Stock Entry Detail")
+		job_card = frappe.qb.DocType("Job Card")
 		query = (
 			frappe.qb.from_(ste)
 			.inner_join(ste_child)
 			.on(ste_child.parent == ste.name)
+			.left_join(job_card)
+			.on(ste.job_card == job_card.name)
 			# original_item becomes the output dict key below, so it must stay coherent per row: the
 			# same item_code can be transferred both for itself (original_item NULL) and as a substitute
 			# for another required item (original_item set). Max() over a single item_code group could
@@ -309,13 +312,29 @@ class RequiredItemsService:
 				fn.Sum(ste_child.transfer_qty).as_("qty"),
 			)
 			.where(self._material_transfer_filter(ste, is_return))
+			.where(fn.Coalesce(job_card.is_corrective_job_card, 0) == 0)
 			.groupby(ste_child.item_code, ste_child.original_item)
 		)
 		qty_by_item = frappe._dict()
 		for d in query.run(as_dict=1) or []:
 			key = d.original_item or d.item_code
 			qty_by_item[key] = (qty_by_item.get(key) or 0.0) + flt(d.qty)
+
+		if is_return:
+			return self._cap_returned_qty_to_transferred(qty_by_item)
+
 		return qty_by_item
+
+	def _cap_returned_qty_to_transferred(self, returned_qty_by_item):
+		# Work Order returns combine regular and corrective stock without a Job Card link.
+		# Cap each return at the regular transfer total so corrective quantities stay neutral.
+		transferred_qty_by_item = self._material_transfer_qty_by_item(is_return=0)
+		return frappe._dict(
+			{
+				item_code: min(flt(returned_qty), flt(transferred_qty_by_item.get(item_code)))
+				for item_code, returned_qty in returned_qty_by_item.items()
+			}
+		)
 
 	def _material_transfer_filter(self, ste, is_return):
 		return (
@@ -357,6 +376,11 @@ class RequiredItemsService:
 			return
 
 		if stock_entry.purpose != "Material Transfer for Manufacture":
+			return
+
+		if stock_entry.job_card and frappe.get_cached_value(
+			"Job Card", stock_entry.job_card, "is_corrective_job_card"
+		):
 			return
 
 		additional_items = self._additional_items_by_code(stock_entry)
