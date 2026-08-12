@@ -766,7 +766,7 @@ class PaymentEntry(AccountsController):
 
 		tax_by_account = {}
 		for tax in self.get_advance_tax_rows():
-			amount = flt(tax.tax_amount)
+			amount = flt(tax.base_tax_amount)
 			if in_account_currency:
 				amount = flt(amount / rate, precision)
 			tax_by_account[tax.account_head] = tax_by_account.get(tax.account_head, 0.0) + amount
@@ -1546,7 +1546,9 @@ class PaymentEntry(AccountsController):
 		for account_head in tax_accounts:
 			tax_amount = flt(invoice_breakdown.get(account_head, 0.0))
 
-			tax_in_party_currency = flt(tax_amount / party_to_company_rate)
+			tax_in_party_currency = flt(
+				tax_amount / party_to_company_rate, self.precision("allocated_amount", invoice)
+			)
 			tax_in_transaction_currency = (
 				tax_in_party_currency
 				if self.party_account_currency == self.transaction_currency

@@ -708,6 +708,96 @@ class TestPaymentEntry(ERPNextTestSuite):
 		# producing a value > 30,000 — i.e. > 10x the actual USD gross.
 		self.assertAlmostEqual(flt(pe.references[0].allocated_gross_amount, 2), 2499.93, delta=0.10)
 
+	def test_advance_tax_reversal_gl_multicurrency(self):
+		"""A USD advance in an INR company: the tax legs are booked in company currency on
+		the tax account and converted back to party currency on the receivable, so the
+		invoice clears by the full gross and the ledger balances in both currencies."""
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
+
+		advance_usd = create_account(
+			parent_account="Current Assets - _TC",
+			account_name="Advances Received USD",
+			company="_Test Company",
+			account_type="Receivable",
+			account_currency="USD",
+		)
+		previous = frappe.db.get_value("Company", "_Test Company", "default_advance_received_account")
+		frappe.db.set_value(
+			"Company",
+			"_Test Company",
+			{
+				"book_advance_payments_in_separate_party_account": 1,
+				"default_advance_received_account": advance_usd,
+			},
+		)
+		self.addCleanup(
+			frappe.db.set_value,
+			"Company",
+			"_Test Company",
+			{
+				"book_advance_payments_in_separate_party_account": 0,
+				"default_advance_received_account": previous,
+			},
+		)
+
+		so = make_sales_order(
+			customer="_Test Customer USD", currency="USD", qty=1, rate=1190, do_not_save=True
+		)
+		so.conversion_rate = 82.5
+		so.plc_conversion_rate = 82.5
+		so.insert()
+		so.submit()
+
+		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Bank USD - _TC")
+		pe.reference_no, pe.reference_date = "MC-GL-1", nowdate()
+		pe.source_exchange_rate = pe.target_exchange_rate = 82.5
+		pe.paid_amount = pe.received_amount = 1190
+		pe.references[0].allocated_amount = 1000
+		pe.append(
+			"taxes",
+			{
+				"account_head": "_Test Account Service Tax - _TC",
+				"charge_type": "On Paid Amount",
+				"rate": 19,
+				"add_deduct_tax": "Add",
+				"included_in_paid_amount": 1,
+				"description": "VAT 19%",
+			},
+		)
+		pe.save()
+
+		# `calculate_taxes` writes both fields in company currency.
+		self.assertEqual(pe.taxes[0].tax_amount, pe.taxes[0].base_tax_amount)
+		self.assertAlmostEqual(flt(pe.taxes[0].base_tax_amount, 2), 190 * 82.5, delta=1.0)
+		self.assertAlmostEqual(flt(pe.get_included_taxes(in_account_currency=True), 2), 190.0, delta=0.05)
+		self.assertAlmostEqual(flt(pe.references[0].allocated_gross_amount, 2), 1190.0, delta=0.05)
+		pe.submit()
+
+		si = make_sales_invoice(so.name)
+		si.allocate_advances_automatically = 1
+		si.due_date = nowdate()
+		si.save()
+		si.submit()
+		si.reload()
+		self.assertEqual(flt(si.outstanding_amount, 2), 0.0)
+
+		rows = frappe.db.get_all(
+			"GL Entry",
+			filters={"voucher_no": pe.name, "is_cancelled": 0},
+			fields=["account", "debit", "credit", "debit_in_account_currency", "credit_in_account_currency"],
+		)
+		self.assertAlmostEqual(sum(flt(r.debit) for r in rows), sum(flt(r.credit) for r in rows), places=2)
+		# Receivable is relieved by the full gross in party currency.
+		receivable = [r for r in rows if r.account == "_Test Receivable USD - _TC"]
+		self.assertAlmostEqual(
+			sum(flt(r.credit_in_account_currency) - flt(r.debit_in_account_currency) for r in receivable),
+			1190.0,
+			delta=0.05,
+		)
+		# Tax account nets to zero once the advance is consumed.
+		tax_rows = [r for r in rows if r.account == "_Test Account Service Tax - _TC"]
+		self.assertAlmostEqual(sum(flt(r.credit) - flt(r.debit) for r in tax_rows), 0.0, delta=0.05)
+
 	def test_allocated_gross_amount_multicurrency_pay(self):
 		"""Pay direction: the party side is `paid_to`, so the gross/net ratio must be
 		anchored on `received_amount` and `target_exchange_rate`, not on the bank-side
