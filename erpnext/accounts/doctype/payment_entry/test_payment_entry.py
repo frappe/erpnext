@@ -736,6 +736,60 @@ class TestPaymentEntry(ERPNextTestSuite):
 		# producing a value > 30,000 — i.e. > 10x the actual USD gross.
 		self.assertAlmostEqual(flt(pe.references[0].allocated_gross_amount, 2), 2499.93, delta=0.10)
 
+	def test_allocated_gross_matches_reversal_legs_multicurrency(self):
+		"""The stored gross must round like the GL reversal legs, or a cent is left outstanding."""
+		so = make_sales_order(
+			customer="_Test Customer USD", currency="USD", qty=3, rate=333.33, do_not_save=True
+		)
+		so.conversion_rate = so.plc_conversion_rate = 82.5
+		so.insert()
+		so.submit()
+
+		so2 = make_sales_order(
+			customer="_Test Customer USD", currency="USD", qty=1, rate=777.77, do_not_save=True
+		)
+		so2.conversion_rate = so2.plc_conversion_rate = 82.5
+		so2.insert()
+		so2.submit()
+
+		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Bank USD - _TC")
+		pe.reference_no, pe.reference_date = "MC-ROUND-1", nowdate()
+		pe.source_exchange_rate = pe.target_exchange_rate = 82.5
+		pe.append(
+			"references",
+			{
+				"reference_doctype": "Sales Order",
+				"reference_name": so2.name,
+				"total_amount": so2.grand_total,
+				"outstanding_amount": so2.grand_total,
+				"allocated_amount": 0,
+			},
+		)
+		pe.append(
+			"taxes",
+			{
+				"account_head": "_Test Account Service Tax - _TC",
+				"charge_type": "On Paid Amount",
+				"rate": 19,
+				"add_deduct_tax": "Add",
+				"included_in_paid_amount": 1,
+				"description": "VAT 19%",
+			},
+		)
+		pe.paid_amount = pe.received_amount = flt(so.grand_total + so2.grand_total, 2)
+		pe.allocate_amount_to_references(
+			paid_amount=pe.paid_amount, paid_amount_change=True, allocate_payment_amount=True
+		)
+		pe.save()
+
+		rate = pe.get_party_exchange_rate()
+		breakdown = pe.compute_advance_tax_breakdown()
+		for ref in pe.references:
+			precision = pe.precision("allocated_amount", ref)
+			posted = sum(flt(a / rate, precision) for a in breakdown.get(ref.name, {}).values())
+			stored = flt(ref.allocated_gross_amount - ref.allocated_amount, precision)
+			self.assertEqual(stored, flt(posted, precision))
+
 	def test_advance_tax_reversal_gl_multicurrency(self):
 		"""A USD advance in an INR company: the tax legs are booked in company currency on
 		the tax account and converted back to party currency on the receivable, so the

@@ -1119,8 +1119,7 @@ frappe.ui.form.on("Payment Entry", {
 	},
 
 	get_gross_net_ratio: function (frm) {
-		// Mirrors `compute_advance_tax_breakdown`: only advance tax grosses the net up. A `Deduct`
-		// row is withheld from the payment and already sits inside the net.
+		// Only advance tax grosses the net up; a `Deduct` row already sits inside the net.
 		const is_pay = frm.doc.payment_type === "Pay";
 		const exchange_rate =
 			(is_pay ? flt(frm.doc.target_exchange_rate) : flt(frm.doc.source_exchange_rate)) || 1;

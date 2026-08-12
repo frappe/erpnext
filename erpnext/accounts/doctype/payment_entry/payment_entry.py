@@ -757,24 +757,21 @@ class PaymentEntry(AccountsController):
 			total = flt(total / self.get_party_exchange_rate(), self.precision("paid_amount"))
 		return total
 
-	def compute_advance_tax_breakdown(self, in_account_currency: bool = False):
-		"""Advance tax per reference row as `{ref_row_name: {account_head: tax_amount}}`.
+	def compute_advance_tax_breakdown(self):
+		"""Advance tax per reference row in company currency, as `{ref_row: {account_head: amount}}`.
 
 		Each row's share depends only on its own allocation, so tax on the unallocated
-		portion stays in the tax account. Company currency unless `in_account_currency`.
+		portion stays in the tax account.
 		"""
 		references = self.get("references") or []
 		if not references:
 			return {}
 
 		precision = self.precision("allocated_amount", references[0])
-		rate = self.get_party_exchange_rate()
 
 		tax_by_account = {}
 		for tax in self.get_advance_tax_rows():
 			amount = flt(tax.base_tax_amount)
-			if in_account_currency:
-				amount = flt(amount / rate, precision)
 			tax_by_account[tax.account_head] = tax_by_account.get(tax.account_head, 0.0) + amount
 
 		breakdown = {ref.name: {} for ref in references}
@@ -810,14 +807,16 @@ class PaymentEntry(AccountsController):
 		references = self.get("references") or []
 		if references:
 			ref_precision = self.precision("allocated_amount", references[0])
-			breakdown = self.compute_advance_tax_breakdown(in_account_currency=True)
+			rate = self.get_party_exchange_rate()
+			# Round like the reversal legs do, or the stored gross drifts a cent from the posted GL.
+			breakdown = self.compute_advance_tax_breakdown()
 			for ref in references:
-				tax_sum = flt(sum(breakdown.get(ref.name, {}).values()), ref_precision)
+				tax_sum = sum(
+					flt(amount / rate, ref_precision) for amount in breakdown.get(ref.name, {}).values()
+				)
 				ref.allocated_gross_amount = flt(flt(ref.allocated_amount) + tax_sum, ref_precision)
 
-		# Read by `set_advances` when an invoice consumes the unallocated remainder. Grossed up by
-		# advance tax only, like the reference rows: a `Deduct` row is withheld from the payment and
-		# already sits inside the net, so grossing up by `paid_amount` would overstate the remainder.
+		# Grossed up by advance tax only, like the reference rows above.
 		precision = self.precision("paid_amount")
 		total_net_paid = self.get_party_paid_amount() - self.get_included_taxes(in_account_currency=True)
 		advance_tax = self.get_advance_tax_total(in_account_currency=True)
