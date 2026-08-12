@@ -152,19 +152,13 @@ class JobCard(Document):
 	def onload(self):
 		excess_transfer = frappe.db.get_single_value("Manufacturing Settings", "job_card_excess_transfer")
 		self.set_onload("job_card_excess_transfer", excess_transfer)
-		self.set_onload("backflush_raw_materials_based_on", self.get_backflush_raw_materials_based_on())
-		self.set_onload("transfer_material_against", self.get_transfer_material_against())
+		self.set_onload("backflush_raw_materials_based_on", get_backflush_based_on(self.bom_no))
+		self.set_onload(
+			"transfer_material_against",
+			frappe.get_cached_value("Work Order", self.work_order, "transfer_material_against"),
+		)
 		self.set_onload("work_order_closed", self.is_work_order_closed())
 		self.set_onload("has_stock_entry", self.has_stock_entry())
-
-	def get_backflush_raw_materials_based_on(self):
-		return get_backflush_based_on(self.bom_no)
-
-	def get_transfer_material_against(self):
-		if not self.work_order:
-			return None
-
-		return frappe.get_cached_value("Work Order", self.work_order, "transfer_material_against")
 
 	def on_discard(self):
 		self.db_set("status", "Cancelled")

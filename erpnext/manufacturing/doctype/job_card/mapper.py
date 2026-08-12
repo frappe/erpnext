@@ -7,6 +7,7 @@ from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import flt
 
+from erpnext.manufacturing.doctype.bom.bom import get_backflush_based_on
 from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import (
 	get_subcontracting_boms_for_finished_goods,
 )
@@ -181,7 +182,7 @@ def make_corrective_job_card(
 		target.set("items", [])
 		target.set("sub_operations", [])
 		target.set_sub_operations()
-		target.set_onload("backflush_raw_materials_based_on", target.get_backflush_raw_materials_based_on())
+		target.set_onload("backflush_raw_materials_based_on", get_backflush_based_on(target.bom_no))
 
 	doclist = get_mapped_doc(
 		"Job Card",
