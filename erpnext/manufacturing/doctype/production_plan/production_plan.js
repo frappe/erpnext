@@ -383,22 +383,28 @@ frappe.ui.form.on("Production Plan", {
 
 		let unscheduled = Object.entries(proposal.unscheduled || {});
 		let warning = unscheduled.length
-			? `<div class="schedule-preview-warning">${__("Could not schedule {0} task(s)", [
-					unscheduled.length,
-			  ])}: ${unscheduled
+			? `<div class="schedule-preview-warning">${__(
+					"Could not schedule {0} task(s), so this proposal cannot be applied",
+					[unscheduled.length]
+			  )}: ${unscheduled
 					.map(([key, reason]) => `${frappe.utils.escape_html(key)} (${reason})`)
 					.join(", ")}</div>`
 			: "";
 
-		let dialog = new frappe.ui.Dialog({
+		let dialog_options = {
 			title: __("Schedule Preview"),
 			size: "extra-large",
-			primary_action_label: __("Apply Schedule"),
-			primary_action: () => {
+		};
+
+		if (!unscheduled.length) {
+			dialog_options.primary_action_label = __("Apply Schedule");
+			dialog_options.primary_action = () => {
 				dialog.hide();
 				frm.events.apply_schedule(frm, values);
-			},
-		});
+			};
+		}
+
+		let dialog = new frappe.ui.Dialog(dialog_options);
 
 		dialog.$body.html(`
 			${frm.events.get_preview_styles()}

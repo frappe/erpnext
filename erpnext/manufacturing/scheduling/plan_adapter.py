@@ -41,6 +41,7 @@ def apply_schedule(
 	use_item_dates = cint(use_item_dates)
 	item_dates = parse_item_dates(item_dates)
 	proposal = run_engine(plan, get_datetime(start_date), use_item_dates, item_dates)
+	validate_complete_proposal(proposal)
 	replace_schedule_entries(plan, proposal)
 	update_plan_row_dates(plan, proposal, use_item_dates, item_dates)
 	plan.notify_update()
@@ -53,6 +54,19 @@ def parse_item_dates(item_dates):
 		return {}
 
 	return {row: get_datetime(date) for row, date in frappe.parse_json(item_dates).items() if date}
+
+
+def validate_complete_proposal(proposal):
+	unscheduled = proposal.get("unscheduled") or {}
+	if not unscheduled:
+		return
+
+	reasons = "<br>".join(f"{key}: {reason}" for key, reason in unscheduled.items())
+	frappe.throw(
+		_("Cannot apply an incomplete schedule. {0} task(s) could not be placed:<br>{1}").format(
+			len(unscheduled), reasons
+		)
+	)
 
 
 def validate_plan_for_scheduling(plan):

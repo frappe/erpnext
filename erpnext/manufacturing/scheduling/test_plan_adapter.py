@@ -151,6 +151,23 @@ class TestPlanAdapter(ERPNextTestSuite):
 		for row in plan.sub_assembly_items:
 			self.assertGreaterEqual(get_datetime(row.schedule_date), day_one)
 
+	def test_incomplete_proposal_is_not_applied(self):
+		from unittest.mock import patch
+
+		from erpnext.manufacturing.scheduling import plan_adapter
+
+		plan = self.make_plan()
+		incomplete = {
+			"rows": {},
+			"unscheduled": {"task": "no capacity within horizon"},
+			"completion_date": None,
+		}
+
+		with patch.object(plan_adapter, "run_engine", return_value=incomplete):
+			self.assertRaises(
+				frappe.ValidationError, apply_schedule, plan.name, "2026-11-02 09:00:00"
+			)
+
 	@change_settings("Manufacturing Settings", {"mins_between_operations": 10, "allow_overtime": 0})
 	def test_schedule_considers_raw_material_lead_time(self):
 		if frappe.db.exists("Item Lead Time", "Test PPS RM"):
