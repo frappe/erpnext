@@ -1154,12 +1154,19 @@ frappe.ui.form.on("Payment Entry", {
 
 	taxes_changed: function (frm) {
 		frm.events.apply_taxes(frm);
-		// Included taxes change how much is left to allocate, so redistribute it.
-		frm.events.allocate_party_amount_against_ref_docs(
-			frm,
-			frm.doc.payment_type == "Receive" ? frm.doc.paid_amount : frm.doc.received_amount,
-			false
-		);
+
+		// Included taxes change how much is left to allocate. Only redistribute when allocation is
+		// automatic, as re-allocating with the flag off would zero the rows the user typed by hand.
+		if (frappe.flags.allocate_payment_amount) {
+			frm.events.allocate_party_amount_against_ref_docs(
+				frm,
+				frm.doc.payment_type == "Receive" ? frm.doc.paid_amount : frm.doc.received_amount,
+				false
+			);
+		} else {
+			frm.events.refresh_allocated_gross_amounts(frm);
+			frm.events.set_unallocated_amount(frm);
+		}
 	},
 
 	set_total_allocated_amount: function (frm) {
