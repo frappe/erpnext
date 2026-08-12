@@ -1,4 +1,4 @@
-# Production Scheduling Engine — Design
+# Production Scheduling Engine - Design
 
 Status: **Phases 1–2 implemented**, plus the Work Order/Job Card date-sync slice of
 Phase 3. `plan_adapter.py` builds the plan task graph and backs the "Schedule Items"
@@ -8,7 +8,7 @@ Production Plan Schedule entries created only when the user applies the proposal
 ## 1. Problem
 
 Production Plan today carries dates (`po_items.planned_start_date`,
-`sub_assembly_items.schedule_date`) but nothing computes them — users type them in.
+`sub_assembly_items.schedule_date`) but nothing computes them - users type them in.
 The only real scheduling in ERPNext happens at the very end of the chain: when a Work
 Order is submitted, Job Cards are placed one at a time (first-fit, forward-only) against
 workstation working hours and existing bookings. Consequences:
@@ -18,7 +18,7 @@ workstation working hours and existing bookings. Consequences:
 - There is no backward ("we must ship on X, when must we start?") scheduling anywhere.
 - Rescheduling after a disruption means resubmitting work orders one by one.
 
-## 2. Reference model — Epicor Kinetic
+## 2. Reference model - Epicor Kinetic
 
 Concepts worth adopting, and their fate in this design:
 
@@ -38,7 +38,7 @@ Not adopted (out of scope): sequence-optimization to minimize changeovers, multi
 transfer scheduling, capable-to-promise quoting. Epicor itself ships those only in the
 APS add-on.
 
-## 3. ERPNext today — inventory and gaps
+## 3. ERPNext today - inventory and gaps
 
 What exists and is reused as-is:
 
@@ -73,7 +73,7 @@ Gaps this design closes:
 ## 4. Architecture
 
 **Pure core, thin adapters.** The engine (`engine.py`, `models.py`, `calendars.py`)
-imports nothing from Frappe — it consumes plain tasks/resources/intervals and returns a
+imports nothing from Frappe - it consumes plain tasks/resources/intervals and returns a
 proposal. All DB access lives in `loaders.py` (build inputs from doctypes) and, later,
 in per-document adapters (persist outputs). This is what makes the engine reusable by
 Production Plan, Work Order, and MRP alike, and testable without a site.
@@ -91,17 +91,17 @@ Production Plan, Work Order, and MRP alike, and testable without a site.
 
 ### Core model (`models.py`)
 
-- `Interval(start, end)` — half-open time block.
-- `Resource(name, capacity, calendar)` — a workstation or any capacity-bearing thing
+- `Interval(start, end)` - half-open time block.
+- `Resource(name, capacity, calendar)` - a workstation or any capacity-bearing thing
   (a supplier lane, a subcontractor) with a `ResourceCalendar`.
-- `ResourceCalendar(daily_windows, holidays)` — daily shift windows (empty = 24×7,
+- `ResourceCalendar(daily_windows, holidays)` - daily shift windows (empty = 24×7,
   i.e. overtime allowed or no working hours maintained) plus holiday dates.
 - `Task(key, duration_mins, resource, resource_type, depends_on, earliest_start,
-  due_date, priority)` — one operation, or one whole row when no operations exist
+  due_date, priority)` - one operation, or one whole row when no operations exist
   (duration then comes from Item Lead Time).
-- `Assignment(task_key, resource, blocks)` — where a task landed; `blocks` are the
+- `Assignment(task_key, resource, blocks)` - where a task landed; `blocks` are the
   scheduling blocks (a task may split across shifts/days).
-- `ScheduleResult(assignments, unscheduled)` — the proposal; `unscheduled` carries a
+- `ScheduleResult(assignments, unscheduled)` - the proposal; `unscheduled` carries a
   reason (no resource, beyond horizon) instead of throwing.
 
 ### Algorithm (`engine.py`)
@@ -118,13 +118,13 @@ Forward, finite (the default):
 4. Walk the resource's calendar windows from the ready time; in FINITE mode a
    sub-window only counts when concurrent load < capacity (segment sweep over interval
    boundaries). Consume windows into blocks until the duration is exhausted.
-5. Placed blocks join the in-run load immediately, so later tasks — same plan or
-   another document in the same run — see them. This is what fixed the "two plans
+5. Placed blocks join the in-run load immediately, so later tasks - same plan or
+   another document in the same run - see them. This is what fixed the "two plans
    scheduled back-to-back don't see each other" caveat of the earlier prototype.
 
 Backward: reverse topological order; latest end = min(due date, successor starts − gap);
 blocks are consumed walking the calendar backward. If the computed start lands before
-the anchor (today), the task — and transitively its successors — are re-placed forward
+the anchor (today), the task - and transitively its successors - are re-placed forward
 from the anchor: Epicor's "backward with forward fallback", so an impossible due date
 degrades into "earliest possible" rather than an error.
 
@@ -133,19 +133,19 @@ Comparing FINITE vs INFINITE end dates for the same tasks *is* the overload repo
 
 ### Task-graph construction (`loaders.py`)
 
-- `build_bom_operation_tasks(bom_no, qty, prefix)` — one task per BOM Operation,
+- `build_bom_operation_tasks(bom_no, qty, prefix)` - one task per BOM Operation,
   time scaled `time_in_mins × qty / bom.quantity` (`fixed_time` unscaled). Operations
   sharing a `sequence_id` become parallel siblings; each sequence group depends on the
-  previous group — same semantics Work Order applies today.
+  previous group - same semantics Work Order applies today.
 - Production Plan graph (Phase 2): per FG row, each sub-assembly row expands to its BOM
   operation chain (or a single lead-time task when the BOM has no operations /
   subcontracted); FG tasks depend on the terminal tasks of its sub-assemblies. This
   replaces the level-wave approximation of the earlier prototype with true
   per-parent dependency edges.
-- `get_workstation_resources(...)` — Resource per Workstation; 24×7 calendar when
+- `get_workstation_resources(...)` - Resource per Workstation; 24×7 calendar when
   `allow_overtime` is on or no working hours are maintained; holidays dropped when
   `allow_production_on_holidays` is on.
-- `get_booked_load(resources, from_date)` — intervals from open Job Cards
+- `get_booked_load(resources, from_date)` - intervals from open Job Cards
   (Scheduled Time rows of untouched drafts + Time Logs), the same sources today's
   overlap checks read.
 
@@ -153,9 +153,9 @@ Comparing FINITE vs INFINITE end dates for the same tasks *is* the overload repo
 
 | Phase | Deliverable | Persists to |
 |---|---|---|
-| **1 (this package)** | Engine core + loaders + unit tests. Dry-run only, nothing wired. | — |
-| **2 (built)** | Production Plan adapter (`plan_adapter.py`): "Schedule Items" runs the engine over the plan's task graph; what-if preview dialog shows the proposal, and only Apply writes `schedule_date`/`schedule_end_date` + `planned_start_date`/`planned_end_date` and materializes **Production Plan Schedule** rows (new non-submittable doctype, one row per scheduling block) — viewed shift-wise through Frappe's Calendar view with plan/workstation/item filters. Rows without BOM operations use Item Lead Time durations, scalable by the new `no_of_shifts` field on Production Plan. "Use Item Wise Start Dates" anchors each assembly item's chain to its own row `planned_start_date` (dialog date = global floor); in that mode row start dates are inputs and stay as entered, only end dates are written. Backward-from-delivery-date remains pending | plan child rows + Production Plan Schedule |
-| 3 | Work Order / Job Card unification: WO submission asks the engine for placement instead of the recursive first-fit in `schedule_time_logs`; job cards become the persisted form of engine blocks. Global reschedule = one engine run over all open job cards. **First slice built:** when a WO originates from a scheduled plan row, its auto-created Job Cards are seeded from the Production Plan Schedule blocks (same times, same workstation, one scheduled row per block) instead of re-running first-fit — plan calendar and job cards match exactly. Fallback to first-fit when no schedule exists, qty is batch-split, or an operation repeats in the routing | Job Card Scheduled Time |
+| **1 (this package)** | Engine core + loaders + unit tests. Dry-run only, nothing wired. | - |
+| **2 (built)** | Production Plan adapter (`plan_adapter.py`): "Schedule Items" runs the engine over the plan's task graph; what-if preview dialog shows the proposal, and only Apply writes `schedule_date`/`schedule_end_date` + `planned_start_date`/`planned_end_date` and materializes **Production Plan Schedule** rows (new non-submittable doctype, one row per scheduling block) - viewed shift-wise through Frappe's Calendar view with plan/workstation/item filters. Rows without BOM operations use Item Lead Time durations, scalable by the new `no_of_shifts` field on Production Plan. "Use Item Wise Start Dates" anchors each assembly item's chain to its own row `planned_start_date` (dialog date = global floor); in that mode row start dates are inputs and stay as entered, only end dates are written. Backward-from-delivery-date remains pending | plan child rows + Production Plan Schedule |
+| 3 | Work Order / Job Card unification: WO submission asks the engine for placement instead of the recursive first-fit in `schedule_time_logs`; job cards become the persisted form of engine blocks. Global reschedule = one engine run over all open job cards. **First slice built:** when a WO originates from a scheduled plan row, its auto-created Job Cards are seeded from the Production Plan Schedule blocks (same times, same workstation, one scheduled row per block) instead of re-running first-fit - plan calendar and job cards match exactly. Fallback to first-fit when no schedule exists, qty is batch-split, or an operation repeats in the routing | Job Card Scheduled Time |
 | 4 | MRP/MPS integration: planned-order release/due dates come from a backward engine run (load-aware when finite is chosen) instead of `delivery_date − cumulative_lead_time`; purchased items keep Item Lead Time durations on infinite supplier lanes | MPS Planned Order |
 | 5 | Boards & schema extras: resource Gantt board (drag = pin `earliest_start`), overload report (finite vs infinite), per-operation setup/queue time fields, `priority` field on Production Plan / Work Order | UI + new fields |
 
@@ -181,7 +181,7 @@ other once 1–2 land.
 
 - Should FINITE be the default for Production Plan scheduling, with INFINITE only in
   reports? (Epicor defaults resources to finite; proposal: yes.)
-- Material-constrained scheduling (don't start before raw material PO arrival) — Phase 4
+- Material-constrained scheduling (don't start before raw material PO arrival) - Phase 4
   via MRP pegging, or earlier as a simple `earliest_start` from Material Request dates?
 - Multi-company/multi-plant: scope resources per company now (proposal) or add a
   plant dimension to `Resource` immediately?
