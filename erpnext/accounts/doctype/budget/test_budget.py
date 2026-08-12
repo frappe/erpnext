@@ -357,6 +357,16 @@ class TestBudget(unittest.TestCase):
 
 		self.assertRaises(BudgetError, jv.submit)
 
+	def test_budget_against_balance_sheet_account(self):
+		budget = frappe.new_doc("Budget")
+		budget.budget_against = "Cost Center"
+		budget.cost_center = "_Test Cost Center - _TC"
+		budget.company = "_Test Company"
+		budget.fiscal_year = get_fiscal_year(nowdate())[0]
+		budget.append("accounts", {"account": "_Test Bank - _TC", "budget_amount": 200000})
+
+		self.assertRaisesRegex(frappe.ValidationError, "_Test Bank - _TC", budget.insert)
+
 
 def set_total_expense_zero(posting_date, budget_against_field=None, budget_against_CC=None):
 	if budget_against_field == "project":
