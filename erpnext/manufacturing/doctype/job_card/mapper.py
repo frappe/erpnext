@@ -172,6 +172,11 @@ def make_corrective_job_card(
 		frappe.throw(_("For Operation is required"))
 
 	def set_missing_values(source, target):
+		if source.track_semi_finished_goods:
+			frappe.throw(
+				_("Corrective Job Cards cannot be created for Work Orders that track semi-finished goods")
+			)
+
 		target.is_corrective_job_card = 1
 		target.operation = operation
 		target.for_operation = for_operation

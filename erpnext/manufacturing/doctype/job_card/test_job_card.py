@@ -591,6 +591,17 @@ class TestJobCard(ERPNextTestSuite):
 		with self.assertRaisesRegex(frappe.ValidationError, "For Operation is required"):
 			make_corrective_job_card(job_card.name, operation=job_card.operation)
 
+	def test_corrective_job_card_not_allowed_for_tracked_semi_finished_goods(self):
+		job_card = frappe.get_last_doc("Job Card", {"work_order": self.work_order.name})
+		job_card.db_set("track_semi_finished_goods", 1)
+
+		with self.assertRaisesRegex(frappe.ValidationError, "track semi-finished goods"):
+			make_corrective_job_card(
+				job_card.name,
+				operation=job_card.operation,
+				for_operation=job_card.operation,
+			)
+
 	def test_corrective_job_card_does_not_copy_total_completed_qty(self):
 		job_card = frappe.get_last_doc("Job Card", {"work_order": self.work_order.name})
 		job_card.append(
