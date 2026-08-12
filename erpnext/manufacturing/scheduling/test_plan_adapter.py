@@ -153,6 +153,27 @@ class TestPlanAdapter(ERPNextTestSuite):
 		for row in plan.sub_assembly_items:
 			self.assertGreaterEqual(get_datetime(row.schedule_date), day_one)
 
+	@change_settings("Manufacturing Settings", {"mins_between_operations": 10, "allow_overtime": 0})
+	def test_cleared_item_date_frees_the_chain(self):
+		day_one = get_datetime("2026-12-01 09:00:00")
+		day_two = get_datetime("2026-12-02 09:00:00")
+
+		plan = self.make_plan()
+		fg_row = plan.po_items[0].name
+
+		apply_schedule(plan.name, day_one, use_item_dates=1, item_dates={fg_row: str(day_two)})
+		plan.reload()
+		self.assertEqual(get_datetime(plan.po_items[0].planned_start_date), day_two)
+
+		apply_schedule(plan.name, day_one, use_item_dates=1, item_dates={})
+		plan.reload()
+
+		# the cleared date no longer constrains the chain, so the item schedules
+		# freely from the dialog start date instead of the stale persisted one
+		self.assertEqual(
+			get_datetime(plan.po_items[0].planned_start_date), add_to_date(day_one, minutes=250)
+		)
+
 	def test_manual_schedule_entry_creation_is_blocked(self):
 		plan = self.make_plan()
 		entry = frappe.get_doc(

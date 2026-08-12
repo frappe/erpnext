@@ -131,7 +131,7 @@ def build_plan_tasks(plan, use_item_dates=0, item_dates=None):
 		register_tasks(fg_tasks, fg_row.name, "Finished Good", fg_row.item_code, tasks, task_info)
 
 		if use_item_dates:
-			row_date = (item_dates or {}).get(fg_row.name) or fg_row.planned_start_date
+			row_date = (item_dates or {}).get(fg_row.name)
 			if row_date:
 				set_chain_earliest_start(row_date, sub_rows, row_bounds, fg_tasks)
 
