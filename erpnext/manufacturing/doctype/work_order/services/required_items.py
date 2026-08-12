@@ -293,10 +293,13 @@ class RequiredItemsService:
 	def _material_transfer_qty_by_item(self, is_return):
 		ste = frappe.qb.DocType("Stock Entry")
 		ste_child = frappe.qb.DocType("Stock Entry Detail")
+		job_card = frappe.qb.DocType("Job Card")
 		query = (
 			frappe.qb.from_(ste)
 			.inner_join(ste_child)
 			.on(ste_child.parent == ste.name)
+			.left_join(job_card)
+			.on(ste.job_card == job_card.name)
 			# original_item becomes the output dict key below, so it must stay coherent per row: the
 			# same item_code can be transferred both for itself (original_item NULL) and as a substitute
 			# for another required item (original_item set). Max() over a single item_code group could
@@ -309,6 +312,7 @@ class RequiredItemsService:
 				fn.Sum(ste_child.transfer_qty).as_("qty"),
 			)
 			.where(self._material_transfer_filter(ste, is_return))
+			.where(fn.Coalesce(job_card.is_corrective_job_card, 0) == 0)
 			.groupby(ste_child.item_code, ste_child.original_item)
 		)
 		qty_by_item = frappe._dict()
