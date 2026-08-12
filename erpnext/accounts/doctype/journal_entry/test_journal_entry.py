@@ -301,6 +301,27 @@ class TestJournalEntry(ERPNextTestSuite):
 
 		self.check_gl_entries()
 
+	def test_disallow_reversal_of_a_reversal_journal_entry(self):
+		from erpnext.accounts.doctype.journal_entry.mapper import make_reverse_journal_entry
+
+		jv = make_journal_entry("_Test Bank - _TC", "Sales - _TC", 100, submit=True)
+
+		rjv = make_reverse_journal_entry(jv.name)
+		rjv.posting_date = nowdate()
+		rjv.submit()
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"is already a Reverse Journal Entry",
+			make_reverse_journal_entry,
+			rjv.name,
+		)
+
+		# the guard must not disclose the reversal to a user who cannot read the entry
+		frappe.set_user("Guest")
+		self.addCleanup(frappe.set_user, "Administrator")
+		self.assertRaises(frappe.PermissionError, make_reverse_journal_entry, rjv.name)
+
 	def test_disallow_change_in_account_currency_for_a_party(self):
 		# create jv in USD
 		jv = make_journal_entry("_Test Bank USD - _TC", "_Test Receivable USD - _TC", 100, save=False)
