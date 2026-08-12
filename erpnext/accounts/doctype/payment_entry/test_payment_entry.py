@@ -219,6 +219,62 @@ class TestPaymentEntry(ERPNextTestSuite):
 		self.assertEqual(pe.references[0].reference_name, si.name)
 		self.assertEqual(pe.references[0].outstanding_amount, si.outstanding_amount)
 
+	def test_allocate_amount_to_references_subtracts_included_taxes(self):
+		"""Allocating the gross leaves a non-zero difference_amount, blocking save."""
+		so = make_sales_order(qty=1, rate=119)
+		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Cash - _TC")
+		pe.paid_from = "Debtors - _TC"
+		pe.paid_amount = pe.received_amount = 119
+		pe.append(
+			"taxes",
+			{
+				"account_head": "_Test Account Service Tax - _TC",
+				"charge_type": "On Paid Amount",
+				"rate": 19,
+				"add_deduct_tax": "Add",
+				"included_in_paid_amount": 1,
+				"description": "VAT 19%",
+			},
+		)
+		pe.apply_taxes()
+
+		pe.allocate_amount_to_references(
+			paid_amount=119, paid_amount_change=True, allocate_payment_amount=True
+		)
+
+		self.assertEqual(flt(pe.references[0].allocated_amount, 2), 100.0)
+		pe.save()
+		self.assertEqual(flt(pe.difference_amount, 2), 0.0)
+
+	def test_allocate_amount_to_references_refreshes_stale_taxes(self):
+		"""A shrinking paid_amount leaves stale tax rows; allocation must refresh them."""
+		so = make_sales_order(qty=1, rate=1190)
+		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Cash - _TC")
+		pe.paid_from = "Debtors - _TC"
+		pe.paid_amount = pe.received_amount = 1190
+		pe.append(
+			"taxes",
+			{
+				"account_head": "_Test Account Service Tax - _TC",
+				"charge_type": "On Paid Amount",
+				"rate": 19,
+				"add_deduct_tax": "Add",
+				"included_in_paid_amount": 1,
+				"description": "VAT 19%",
+			},
+		)
+		pe.apply_taxes()
+		self.assertEqual(flt(pe.taxes[0].tax_amount, 2), 190.0)
+
+		pe.paid_amount = pe.received_amount = 1000
+		pe.base_paid_amount = pe.base_received_amount = 1000
+		pe.allocate_amount_to_references(
+			paid_amount=1000, paid_amount_change=True, allocate_payment_amount=True
+		)
+
+		self.assertEqual(flt(pe.taxes[0].tax_amount, 2), 159.66)
+		self.assertEqual(flt(pe.references[0].allocated_amount, 2), 840.34)
+
 	def test_payment_entry_against_pi(self):
 		pi = make_purchase_invoice(
 			supplier="_Test Supplier USD",

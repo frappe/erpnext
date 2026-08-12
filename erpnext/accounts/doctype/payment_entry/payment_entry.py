@@ -1194,16 +1194,23 @@ class PaymentEntry(AccountsController):
 			self.difference_amount - total_deductions, self.precision("difference_amount")
 		)
 
-	def get_included_taxes(self):
+	def get_party_exchange_rate(self):
+		"""Party account currency to company currency. Party side is `paid_from` for Receive, `paid_to` for Pay."""
+		rate = self.source_exchange_rate if self.payment_type == "Receive" else self.target_exchange_rate
+		return flt(rate) or 1
+
+	def get_included_taxes(self, in_account_currency: bool = False):
+		"""Signed sum of included-in-paid-amount taxes, in company currency unless `in_account_currency`."""
+		rate = self.get_party_exchange_rate()
 		included_taxes = 0
 		for tax in self.get("taxes"):
 			if not tax.included_in_paid_amount:
 				continue
 
-			if tax.add_deduct_tax == "Add":
-				included_taxes += flt(tax.base_tax_amount)
-			else:
-				included_taxes -= flt(tax.base_tax_amount)
+			amount = flt(tax.base_tax_amount)
+			if in_account_currency:
+				amount = flt(amount / rate, self.precision("paid_amount"))
+			included_taxes += amount if tax.add_deduct_tax == "Add" else -amount
 
 		return included_taxes
 
@@ -1652,6 +1659,10 @@ class PaymentEntry(AccountsController):
 		total_positive_outstanding_including_order = 0
 		total_negative_outstanding = 0
 		paid_amount -= sum(flt(d.amount, precision) for d in self.deductions)
+		# Included taxes are not allocatable; `apply_taxes` first, as `tax_amount` may be stale.
+		if any(cint(tax.included_in_paid_amount) for tax in self.get("taxes")):
+			self.apply_taxes()
+			paid_amount = flt(paid_amount - self.get_included_taxes(in_account_currency=True), precision)
 
 		for ref in self.references:
 			reference_outstanding_amount = flt(ref.outstanding_amount)
