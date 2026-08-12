@@ -183,6 +183,10 @@ def make_corrective_job_card(
 		target.set("sub_operations", [])
 		target.set_sub_operations()
 		target.set_onload("backflush_raw_materials_based_on", get_backflush_based_on(target.bom_no))
+		target.set_onload(
+			"transfer_material_against",
+			frappe.get_cached_value("Work Order", target.work_order, "transfer_material_against"),
+		)
 
 	doclist = get_mapped_doc(
 		"Job Card",

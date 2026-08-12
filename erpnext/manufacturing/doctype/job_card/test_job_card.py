@@ -652,6 +652,21 @@ class TestJobCard(ERPNextTestSuite):
 			"Material Transferred for Manufacture",
 		)
 
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM"})
+	def test_corrective_job_card_uses_work_order_transfer_setting(self):
+		self.transfer_material_against = "Job Card"
+		job_card = frappe.get_last_doc("Job Card", {"work_order": self.work_order.name})
+		frappe.db.set_value("BOM", job_card.bom_no, "backflush_based_on", "BOM")
+
+		corrective_job_card = make_corrective_job_card(
+			job_card.name,
+			operation=job_card.operation,
+			for_operation=job_card.operation,
+		)
+
+		self.assertEqual(corrective_job_card.get_onload("backflush_raw_materials_based_on"), "BOM")
+		self.assertEqual(corrective_job_card.get_onload("transfer_material_against"), "Job Card")
+
 	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings", {"add_corrective_operation_cost_in_finished_good_valuation": 1}
 	)
