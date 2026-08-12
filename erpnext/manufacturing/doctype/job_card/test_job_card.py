@@ -586,6 +586,9 @@ class TestJobCard(ERPNextTestSuite):
 		from erpnext.manufacturing.doctype.work_order.mapper import (
 			make_stock_entry as make_stock_entry_for_wo,
 		)
+		from erpnext.manufacturing.doctype.work_order.mapper import (
+			make_stock_return_entry,
+		)
 
 		wo = make_wo_order_test_record(
 			item="_Test FG Item 2",
@@ -615,6 +618,14 @@ class TestJobCard(ERPNextTestSuite):
 			job_card.name, operation=corrective_operation.name, for_operation=job_card.operation
 		)
 		corrective_job_card.for_quantity = 1
+		corrective_item = create_item(f"Corrective Item {frappe.generate_hash(length=8)}")
+		corrective_source_warehouse = wo.required_items[0].source_warehouse
+		make_stock_entry(
+			item_code=corrective_item.name,
+			target=corrective_source_warehouse,
+			qty=1,
+			basic_rate=100,
+		)
 		for row in wo.required_items:
 			corrective_job_card.append(
 				"items",
@@ -625,14 +636,38 @@ class TestJobCard(ERPNextTestSuite):
 					"required_qty": flt(row.required_qty) / 4,
 				},
 			)
+		corrective_job_card.append(
+			"items",
+			{
+				"item_code": corrective_item.name,
+				"source_warehouse": corrective_source_warehouse,
+				"uom": corrective_item.stock_uom,
+				"required_qty": 1,
+			},
+		)
 		corrective_job_card.insert()
 
 		corrective_transfer = make_stock_entry_from_jc(corrective_job_card.name)
 		corrective_transfer.submit()
 
 		wo.reload()
+		self.assertNotIn(corrective_item.name, [row.item_code for row in wo.required_items])
 		for row in wo.required_items:
 			self.assertEqual(flt(row.transferred_qty), flt(row.required_qty) / 2)
+
+		stock_return = make_stock_return_entry(wo.name)
+		stock_return.company = wo.company
+		returned_by_item = {
+			row.item_code: flt(row.transfer_qty) for row in stock_return.items if row.item_code
+		}
+		self.assertEqual(returned_by_item[corrective_item.name], 1)
+		for row in wo.required_items:
+			self.assertGreater(returned_by_item[row.item_code], flt(row.transferred_qty))
+
+		stock_return.submit()
+		wo.reload()
+		for row in wo.required_items:
+			self.assertEqual(flt(row.returned_qty), flt(row.transferred_qty))
 
 	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings", {"add_corrective_operation_cost_in_finished_good_valuation": 1}

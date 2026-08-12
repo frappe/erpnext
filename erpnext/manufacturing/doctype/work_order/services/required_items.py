@@ -319,7 +319,22 @@ class RequiredItemsService:
 		for d in query.run(as_dict=1) or []:
 			key = d.original_item or d.item_code
 			qty_by_item[key] = (qty_by_item.get(key) or 0.0) + flt(d.qty)
+
+		if is_return:
+			return self._cap_returned_qty_to_transferred(qty_by_item)
+
 		return qty_by_item
+
+	def _cap_returned_qty_to_transferred(self, returned_qty_by_item):
+		# Work Order returns combine regular and corrective stock without a Job Card link.
+		# Cap each return at the regular transfer total so corrective quantities stay neutral.
+		transferred_qty_by_item = self._material_transfer_qty_by_item(is_return=0)
+		return frappe._dict(
+			{
+				item_code: min(flt(returned_qty), flt(transferred_qty_by_item.get(item_code)))
+				for item_code, returned_qty in returned_qty_by_item.items()
+			}
+		)
 
 	def _material_transfer_filter(self, ste, is_return):
 		return (
@@ -361,6 +376,11 @@ class RequiredItemsService:
 			return
 
 		if stock_entry.purpose != "Material Transfer for Manufacture":
+			return
+
+		if stock_entry.job_card and frappe.get_cached_value(
+			"Job Card", stock_entry.job_card, "is_corrective_job_card"
+		):
 			return
 
 		additional_items = self._additional_items_by_code(stock_entry)
