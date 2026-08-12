@@ -514,14 +514,12 @@ class SellingController(StockController):
 
 	def set_incoming_rate(self):
 		def reset_incoming_rate():
+			old_items = old_doc.get("items") + (old_doc.get("packed_items") or [])
 			old_item = next(
-				(
-					item
-					for item in (old_doc.get("items") + (old_doc.get("packed_items") or []))
-					if item.name == d.name
-				),
-				None,
+				(item for item in old_items if item.name == (d.get("_amended_from") or d.name)), None
 			)
+			if not old_item and self.is_new() and self.amended_from:
+				old_item = next((item for item in old_items if item.idx == d.idx), None)
 			if old_item:
 				old_qty = flt(old_item.get("stock_qty") or old_item.get("actual_qty") or old_item.get("qty"))
 				if (
@@ -555,6 +553,9 @@ class SellingController(StockController):
 		is_standalone = self.is_return and not self.return_against
 
 		old_doc = self.get_doc_before_save()
+		if not old_doc and self.amended_from:
+			old_doc = frappe.get_doc(self.doctype, self.amended_from)
+
 		items = self.get("items") + (self.get("packed_items") or [])
 		for d in items:
 			if not frappe.get_cached_value("Item", d.item_code, "is_stock_item"):
