@@ -195,6 +195,10 @@
                     "account_number": "213",
                     "account_type": "Fixed Asset"
                 },
+                "Amortissements et réductions de valeur actées (-)": {
+                    "account_number": "219",
+                    "account_type": "Accumulated Depreciation"
+                },
                 "account_number": "21",
                 "account_type": "Fixed Asset"
             },
@@ -214,6 +218,10 @@
                 "Autres droits réels sur des immeubles": {
                     "account_number": "223",
                     "account_type": "Fixed Asset"
+                },
+                "Amortissements et réductions de valeur actées (-)": {
+                    "account_number": "229",
+                    "account_type": "Accumulated Depreciation"
                 },
                 "account_number": "22",
                 "account_type": "Fixed Asset"
@@ -238,6 +246,10 @@
                 "Mobilier et matériel roulant": {
                     "account_number": "252",
                     "account_type": "Fixed Asset"
+                },
+                "Amortissements et réductions de valeur actées (-)": {
+                    "account_number": "259",
+                    "account_type": "Accumulated Depreciation"
                 },
                 "account_number": "25",
                 "account_type": "Fixed Asset"
@@ -548,6 +560,9 @@
                 },
                 "account_number": "37",
                 "account_type": "Stock"
+            },
+            "Stock livré non facturé": {
+                "account_type": "Stock Delivered But Not Billed"
             }
         },
         "CLASSE 4 : CRÉANCES À UN AN AU PLUS": {
@@ -663,7 +678,7 @@
                 },
                 "Factures à recevoir": {
                     "account_number": "444",
-                    "account_type": "Payable"
+                    "account_type": "Stock Received But Not Billed"
                 },
                 "account_number": "44",
                 "account_type": "Payable"
@@ -853,7 +868,7 @@
                 },
                 "Achats de marchandises": {
                     "account_number": "604",
-                    "account_type": "Expense Account"
+                    "account_type": "Cost of Goods Sold"
                 },
                 "Achats d'immeubles destinés à la vente": {
                     "account_number": "605",
@@ -866,22 +881,22 @@
                 "Variation des stocks": {
                     "de matières premières": {
                         "account_number": "6090",
-                        "account_type": "Expense Account"
+                        "account_type": "Stock Adjustment"
                     },
                     "de fournitures": {
                         "account_number": "6091",
-                        "account_type": "Expense Account"
+                        "account_type": "Stock Adjustment"
                     },
                     "de marchandises": {
                         "account_number": "6094",
-                        "account_type": "Expense Account"
+                        "account_type": "Stock Adjustment"
                     },
                     "d'immeubles destinés à la vente": {
                         "account_number": "6095",
-                        "account_type": "Expense Account"
+                        "account_type": "Stock Adjustment"
                     },
                     "account_number": "609",
-                    "account_type": "Expense Account"
+                    "account_type": "Stock Adjustment"
                 },
                 "account_number": "60",
                 "account_type": "Expense Account"
@@ -894,6 +909,9 @@
                 "Rémunérations et pensions des administrateurs, hors contrat de travail": {
                     "account_number": "618",
                     "account_type": "Expense Account"
+                },
+                "Frais accessoires d'achat inclus dans la valeur des stocks": {
+                    "account_type": "Expenses Included In Valuation"
                 },
                 "account_number": "61",
                 "account_type": "Expense Account"
