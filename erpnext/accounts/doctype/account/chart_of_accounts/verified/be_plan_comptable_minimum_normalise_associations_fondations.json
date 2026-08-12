@@ -405,109 +405,83 @@
             "Créances à plus d'un an": {
                 "Créances commerciales": {
                     "Clients": {
-                        "account_number": "2900",
-                        "account_type": "Receivable"
+                        "account_number": "2900"
                     },
                     "Effets à recevoir": {
-                        "account_number": "2901",
-                        "account_type": "Receivable"
+                        "account_number": "2901"
                     },
                     "Acomptes versés": {
-                        "account_number": "2906",
-                        "account_type": "Receivable"
+                        "account_number": "2906"
                     },
                     "Créances douteuses": {
-                        "account_number": "2907",
-                        "account_type": "Receivable"
+                        "account_number": "2907"
                     },
                     "Réductions de valeur actées (-)": {
-                        "account_number": "2909",
-                        "account_type": "Receivable"
+                        "account_number": "2909"
                     },
-                    "account_number": "290",
-                    "account_type": "Receivable"
+                    "account_number": "290"
                 },
                 "Autres créances": {
                     "Créances en compte": {
-                        "account_number": "2910",
-                        "account_type": "Receivable"
+                        "account_number": "2910"
                     },
                     "Effets à recevoir": {
-                        "account_number": "2911",
-                        "account_type": "Receivable"
+                        "account_number": "2911"
                     },
                     "Subsides à recevoir": {
-                        "account_number": "2912",
-                        "account_type": "Receivable"
+                        "account_number": "2912"
                     },
                     "Créances non productives d'intérêts ou assorties d'un intérêt anormalement faible": {
-                        "account_number": "2915",
-                        "account_type": "Receivable"
+                        "account_number": "2915"
                     },
                     "Créances douteuses": {
-                        "account_number": "2916",
-                        "account_type": "Receivable"
+                        "account_number": "2916"
                     },
                     "Réductions de valeur actées (-)": {
-                        "account_number": "2919",
-                        "account_type": "Receivable"
+                        "account_number": "2919"
                     },
-                    "account_number": "291",
-                    "account_type": "Receivable"
+                    "account_number": "291"
                 },
-                "account_number": "29",
-                "account_type": "Receivable"
+                "account_number": "29"
             }
         },
         "CLASSE 3 : STOCKS ET COMMANDES EN COURS D'EXÉCUTION": {
             "root_type": "Asset",
             "Matières premières": {
                 "Valeur d'acquisition": {
-                    "account_number": "300",
-                    "account_type": "Stock"
+                    "account_number": "300"
                 },
                 "Réductions de valeur actées (-)": {
-                    "account_number": "309",
-                    "account_type": "Stock"
+                    "account_number": "309"
                 },
-                "account_number": "30",
-                "account_type": "Stock"
+                "account_number": "30"
             },
             "Fournitures": {
                 "Valeur d'acquisition": {
-                    "account_number": "310",
-                    "account_type": "Stock"
+                    "account_number": "310"
                 },
                 "Réductions de valeur actées (-)": {
-                    "account_number": "319",
-                    "account_type": "Stock"
+                    "account_number": "319"
                 },
-                "account_number": "31",
-                "account_type": "Stock"
+                "account_number": "31"
             },
             "En-cours de fabrication": {
                 "Valeur d'acquisition": {
-                    "account_number": "320",
-                    "account_type": "Stock"
+                    "account_number": "320"
                 },
                 "Réductions de valeur actées (-)": {
-                    "account_number": "329",
-                    "account_type": "Stock"
+                    "account_number": "329"
                 },
-                "account_number": "32",
-                "account_type": "Stock"
+                "account_number": "32"
             },
             "Produits finis": {
                 "Valeur d'acquisition": {
-                    "account_number": "330",
-                    "account_type": "Stock"
+                    "account_number": "330"
                 },
                 "Réductions de valeur actées (-)": {
-                    "account_number": "339",
-                    "account_type": "Stock"
+                    "account_number": "339"
                 },
-                "account_number": "33",
-                "account_type": "Stock"
+                "account_number": "33"
             },
             "Marchandises": {
                 "Valeur d'acquisition": {
@@ -515,51 +489,40 @@
                     "account_type": "Stock"
                 },
                 "Réductions de valeur actées (-)": {
-                    "account_number": "349",
-                    "account_type": "Stock"
+                    "account_number": "349"
                 },
                 "account_number": "34",
                 "account_type": "Stock"
             },
             "Immeubles destinés à la vente": {
                 "Valeur d'acquisition": {
-                    "account_number": "350",
-                    "account_type": "Stock"
+                    "account_number": "350"
                 },
                 "Réductions de valeur actées (-)": {
-                    "account_number": "359",
-                    "account_type": "Stock"
+                    "account_number": "359"
                 },
-                "account_number": "35",
-                "account_type": "Stock"
+                "account_number": "35"
             },
             "Acomptes versés sur achats pour stocks": {
                 "Acomptes versés": {
-                    "account_number": "360",
-                    "account_type": "Stock"
+                    "account_number": "360"
                 },
                 "Réductions de valeur actées (-)": {
-                    "account_number": "369",
-                    "account_type": "Stock"
+                    "account_number": "369"
                 },
-                "account_number": "36",
-                "account_type": "Stock"
+                "account_number": "36"
             },
             "Commandes en cours d'exécution": {
                 "Valeur d'acquisition": {
-                    "account_number": "370",
-                    "account_type": "Stock"
+                    "account_number": "370"
                 },
                 "Bénéfice pris en compte": {
-                    "account_number": "371",
-                    "account_type": "Stock"
+                    "account_number": "371"
                 },
                 "Réductions de valeur actées (-)": {
-                    "account_number": "379",
-                    "account_type": "Stock"
+                    "account_number": "379"
                 },
-                "account_number": "37",
-                "account_type": "Stock"
+                "account_number": "37"
             },
             "Stock livré non facturé": {
                 "account_type": "Stock Delivered But Not Billed"
@@ -581,16 +544,14 @@
                     "account_type": "Receivable"
                 },
                 "Acomptes versés": {
-                    "account_number": "406",
-                    "account_type": "Receivable"
+                    "account_number": "406"
                 },
                 "Créances douteuses": {
                     "account_number": "407",
                     "account_type": "Receivable"
                 },
                 "Réductions de valeur actées (-)": {
-                    "account_number": "409",
-                    "account_type": "Receivable"
+                    "account_number": "409"
                 },
                 "account_number": "40",
                 "account_type": "Receivable"
@@ -602,46 +563,35 @@
                 },
                 "Impôts et précomptes à récupérer": {
                     "Autres impôts et taxes belges (4125 à 4127)": {
-                        "account_number": "4125",
-                        "account_type": "Receivable"
+                        "account_number": "4125"
                     },
                     "Impôts et taxes étrangers": {
-                        "account_number": "4128",
-                        "account_type": "Receivable"
+                        "account_number": "4128"
                     },
-                    "account_number": "412",
-                    "account_type": "Receivable"
+                    "account_number": "412"
                 },
                 "Subsides à recevoir": {
-                    "account_number": "413",
-                    "account_type": "Receivable"
+                    "account_number": "413"
                 },
                 "Produits à recevoir": {
-                    "account_number": "414",
-                    "account_type": "Receivable"
+                    "account_number": "414"
                 },
                 "Créances non productives d'intérêts ou assorties d'un intérêt anormalement faible": {
-                    "account_number": "415",
-                    "account_type": "Receivable"
+                    "account_number": "415"
                 },
                 "Créances diverses": {
-                    "account_number": "416",
-                    "account_type": "Receivable"
+                    "account_number": "416"
                 },
                 "Créances douteuses": {
-                    "account_number": "417",
-                    "account_type": "Receivable"
+                    "account_number": "417"
                 },
                 "Cautionnements versés en numéraire": {
-                    "account_number": "418",
-                    "account_type": "Receivable"
+                    "account_number": "418"
                 },
                 "Réductions de valeur actées (-)": {
-                    "account_number": "419",
-                    "account_type": "Receivable"
+                    "account_number": "419"
                 },
-                "account_number": "41",
-                "account_type": "Receivable"
+                "account_number": "41"
             }
         },
         "CLASSE 4 : DETTES À UN AN AU PLUS": {
@@ -686,15 +636,12 @@
             "Dettes fiscales, salariales et sociales": {
                 "Dettes fiscales estimées": {
                     "Autres impôts et taxes belges (4505 à 4507)": {
-                        "account_number": "4505",
-                        "account_type": "Payable"
+                        "account_number": "4505"
                     },
                     "Impôts et taxes étrangers": {
-                        "account_number": "4508",
-                        "account_type": "Payable"
+                        "account_number": "4508"
                     },
-                    "account_number": "450",
-                    "account_type": "Payable"
+                    "account_number": "450"
                 },
                 "TVA à payer": {
                     "account_number": "451",
@@ -702,38 +649,29 @@
                 },
                 "Impôts et taxes à payer": {
                     "Autres impôts et taxes belges (4525 à 4527)": {
-                        "account_number": "4525",
-                        "account_type": "Payable"
+                        "account_number": "4525"
                     },
                     "Impôts et taxes étrangers": {
-                        "account_number": "4528",
-                        "account_type": "Payable"
+                        "account_number": "4528"
                     },
-                    "account_number": "452",
-                    "account_type": "Payable"
+                    "account_number": "452"
                 },
                 "Précomptes retenus": {
-                    "account_number": "453",
-                    "account_type": "Payable"
+                    "account_number": "453"
                 },
                 "Office national de la Sécurité sociale": {
-                    "account_number": "454",
-                    "account_type": "Payable"
+                    "account_number": "454"
                 },
                 "Rémunérations": {
-                    "account_number": "455",
-                    "account_type": "Payable"
+                    "account_number": "455"
                 },
                 "Pécules de vacances": {
-                    "account_number": "456",
-                    "account_type": "Payable"
+                    "account_number": "456"
                 },
                 "Autres dettes sociales": {
-                    "account_number": "459",
-                    "account_type": "Payable"
+                    "account_number": "459"
                 },
-                "account_number": "45",
-                "account_type": "Payable"
+                "account_number": "45"
             },
             "Comptes de régularisation et d'attente": {
                 "Charges à reporter": {

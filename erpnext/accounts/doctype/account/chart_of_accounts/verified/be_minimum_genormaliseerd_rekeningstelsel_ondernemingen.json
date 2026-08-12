@@ -489,101 +489,77 @@
             "Vorderingen op meer dan één jaar": {
                 "Handelsvorderingen": {
                     "Handelsdebiteuren": {
-                        "account_number": "2900",
-                        "account_type": "Receivable"
+                        "account_number": "2900"
                     },
                     "Te innen wissels": {
-                        "account_number": "2901",
-                        "account_type": "Receivable"
+                        "account_number": "2901"
                     },
                     "Vooruitbetalingen": {
-                        "account_number": "2906",
-                        "account_type": "Receivable"
+                        "account_number": "2906"
                     },
                     "Dubieuze debiteuren": {
-                        "account_number": "2907",
-                        "account_type": "Receivable"
+                        "account_number": "2907"
                     },
                     "Geboekte waardeverminderingen (-)": {
-                        "account_number": "2909",
-                        "account_type": "Receivable"
+                        "account_number": "2909"
                     },
-                    "account_number": "290",
-                    "account_type": "Receivable"
+                    "account_number": "290"
                 },
                 "Overige vorderingen": {
                     "Vorderingen op rekening": {
-                        "account_number": "2910",
-                        "account_type": "Receivable"
+                        "account_number": "2910"
                     },
                     "Te innen wissels": {
-                        "account_number": "2911",
-                        "account_type": "Receivable"
+                        "account_number": "2911"
                     },
                     "Dubieuze debiteuren": {
-                        "account_number": "2917",
-                        "account_type": "Receivable"
+                        "account_number": "2917"
                     },
                     "Geboekte waardeverminderingen (-)": {
-                        "account_number": "2919",
-                        "account_type": "Receivable"
+                        "account_number": "2919"
                     },
-                    "account_number": "291",
-                    "account_type": "Receivable"
+                    "account_number": "291"
                 },
-                "account_number": "29",
-                "account_type": "Receivable"
+                "account_number": "29"
             }
         },
         "KLASSE 3 : VOORRADEN EN BESTELLINGEN IN UITVOERING": {
             "root_type": "Asset",
             "Grondstoffen": {
                 "Aanschaffingswaarde": {
-                    "account_number": "300",
-                    "account_type": "Stock"
+                    "account_number": "300"
                 },
                 "Geboekte waardeverminderingen (-)": {
-                    "account_number": "309",
-                    "account_type": "Stock"
+                    "account_number": "309"
                 },
-                "account_number": "30",
-                "account_type": "Stock"
+                "account_number": "30"
             },
             "Hulpstoffen": {
                 "Aanschaffingswaarde": {
-                    "account_number": "310",
-                    "account_type": "Stock"
+                    "account_number": "310"
                 },
                 "Geboekte waardeverminderingen (-)": {
-                    "account_number": "319",
-                    "account_type": "Stock"
+                    "account_number": "319"
                 },
-                "account_number": "31",
-                "account_type": "Stock"
+                "account_number": "31"
             },
             "Goederen in bewerking": {
                 "Aanschaffingswaarde": {
-                    "account_number": "320",
-                    "account_type": "Stock"
+                    "account_number": "320"
                 },
                 "Geboekte waardeverminderingen (-)": {
-                    "account_number": "329",
-                    "account_type": "Stock"
+                    "account_number": "329"
                 },
-                "account_number": "32",
-                "account_type": "Stock"
+                "account_number": "32"
             },
             "Gereed product": {
                 "Aanschaffingswaarde": {
-                    "account_number": "330",
-                    "account_type": "Stock"
+                    "account_number": "330"
                 },
                 "Geboekte waardeverminderingen (-)": {
-                    "account_number": "339",
-                    "account_type": "Stock"
+                    "account_number": "339"
                 },
-                "account_number": "33",
-                "account_type": "Stock"
+                "account_number": "33"
             },
             "Handelsgoederen": {
                 "Aanschaffingswaarde": {
@@ -591,51 +567,40 @@
                     "account_type": "Stock"
                 },
                 "Geboekte waardeverminderingen (-)": {
-                    "account_number": "349",
-                    "account_type": "Stock"
+                    "account_number": "349"
                 },
                 "account_number": "34",
                 "account_type": "Stock"
             },
             "Onroerende goederen bestemd voor verkoop": {
                 "Aanschaffingswaarde": {
-                    "account_number": "350",
-                    "account_type": "Stock"
+                    "account_number": "350"
                 },
                 "Geboekte waardeverminderingen (-)": {
-                    "account_number": "359",
-                    "account_type": "Stock"
+                    "account_number": "359"
                 },
-                "account_number": "35",
-                "account_type": "Stock"
+                "account_number": "35"
             },
             "Vooruitbetalingen op voorraadinkopen": {
                 "Vooruitbetalingen": {
-                    "account_number": "360",
-                    "account_type": "Stock"
+                    "account_number": "360"
                 },
                 "Geboekte waardeverminderingen (-)": {
-                    "account_number": "369",
-                    "account_type": "Stock"
+                    "account_number": "369"
                 },
-                "account_number": "36",
-                "account_type": "Stock"
+                "account_number": "36"
             },
             "Bestellingen in uitvoering": {
                 "Aanschaffingswaarde": {
-                    "account_number": "370",
-                    "account_type": "Stock"
+                    "account_number": "370"
                 },
                 "Toegerekende winst": {
-                    "account_number": "371",
-                    "account_type": "Stock"
+                    "account_number": "371"
                 },
                 "Geboekte waardeverminderingen (-)": {
-                    "account_number": "379",
-                    "account_type": "Stock"
+                    "account_number": "379"
                 },
-                "account_number": "37",
-                "account_type": "Stock"
+                "account_number": "37"
             },
             "Geleverde voorraad, niet gefactureerd": {
                 "account_type": "Stock Delivered But Not Billed"
@@ -657,24 +622,21 @@
                     "account_type": "Receivable"
                 },
                 "Vooruitbetalingen": {
-                    "account_number": "406",
-                    "account_type": "Receivable"
+                    "account_number": "406"
                 },
                 "Dubieuze debiteuren": {
                     "account_number": "407",
                     "account_type": "Receivable"
                 },
                 "Geboekte waardeverminderingen (-)": {
-                    "account_number": "409",
-                    "account_type": "Receivable"
+                    "account_number": "409"
                 },
                 "account_number": "40",
                 "account_type": "Receivable"
             },
             "Overige vorderingen": {
                 "Opgevraagd, niet gestort kapitaal of inbreng": {
-                    "account_number": "410",
-                    "account_type": "Receivable"
+                    "account_number": "410"
                 },
                 "Terug te vorderen btw": {
                     "account_number": "411",
@@ -682,34 +644,26 @@
                 },
                 "Terug te vorderen belastingen en voorheffingen": {
                     "Buitenlandse belastingen": {
-                        "account_number": "4128",
-                        "account_type": "Receivable"
+                        "account_number": "4128"
                     },
-                    "account_number": "412",
-                    "account_type": "Receivable"
+                    "account_number": "412"
                 },
                 "Te innen opbrengsten": {
-                    "account_number": "414",
-                    "account_type": "Receivable"
+                    "account_number": "414"
                 },
                 "Diverse vorderingen": {
-                    "account_number": "416",
-                    "account_type": "Receivable"
+                    "account_number": "416"
                 },
                 "Dubieuze debiteuren": {
-                    "account_number": "417",
-                    "account_type": "Receivable"
+                    "account_number": "417"
                 },
                 "Borgtochten betaald in contanten": {
-                    "account_number": "418",
-                    "account_type": "Receivable"
+                    "account_number": "418"
                 },
                 "Geboekte waardeverminderingen (-)": {
-                    "account_number": "419",
-                    "account_type": "Receivable"
+                    "account_number": "419"
                 },
-                "account_number": "41",
-                "account_type": "Receivable"
+                "account_number": "41"
             }
         },
         "KLASSE 4 : SCHULDEN OP TEN HOOGSTE ÉÉN JAAR": {
@@ -754,11 +708,9 @@
             "Schulden met betrekking tot belastingen, bezoldigingen en sociale lasten": {
                 "Geraamd bedrag der belastingschulden": {
                     "Buitenlandse belastingen en taksen": {
-                        "account_number": "4508",
-                        "account_type": "Payable"
+                        "account_number": "4508"
                     },
-                    "account_number": "450",
-                    "account_type": "Payable"
+                    "account_number": "450"
                 },
                 "Te betalen btw": {
                     "account_number": "451",
@@ -766,34 +718,26 @@
                 },
                 "Te betalen belastingen en taksen": {
                     "Buitenlandse belastingen en taksen": {
-                        "account_number": "4528",
-                        "account_type": "Payable"
+                        "account_number": "4528"
                     },
-                    "account_number": "452",
-                    "account_type": "Payable"
+                    "account_number": "452"
                 },
                 "Ingehouden voorheffingen": {
-                    "account_number": "453",
-                    "account_type": "Payable"
+                    "account_number": "453"
                 },
                 "Rijksdienst voor Sociale Zekerheid": {
-                    "account_number": "454",
-                    "account_type": "Payable"
+                    "account_number": "454"
                 },
                 "Bezoldigingen": {
-                    "account_number": "455",
-                    "account_type": "Payable"
+                    "account_number": "455"
                 },
                 "Vakantiegeld": {
-                    "account_number": "456",
-                    "account_type": "Payable"
+                    "account_number": "456"
                 },
                 "Andere sociale schulden": {
-                    "account_number": "459",
-                    "account_type": "Payable"
+                    "account_number": "459"
                 },
-                "account_number": "45",
-                "account_type": "Payable"
+                "account_number": "45"
             },
             "Vooruitbetalingen op bestellingen": {
                 "account_number": "46"
