@@ -23,6 +23,8 @@ from erpnext.manufacturing.doctype.work_order.services.reservation import (
 from erpnext.manufacturing.doctype.work_order.services.status import StatusService
 from erpnext.stock.utils import get_bin, get_latest_stock_qty
 
+_FULL_TRANSFER_TOLERANCE = 0.001
+
 
 class RequiredItemsService:
 	def __init__(self, doc):
@@ -176,7 +178,10 @@ class RequiredItemsService:
 		self.doc.db_set("material_transferred_for_manufacturing", covered_qty)
 
 	def _transfer_covered_qty(self):
-		"""Finished-good qty covered by net transferred raw materials, None when unmeasurable."""
+		"""Finished-good qty covered by net transferred raw materials, None when unmeasurable.
+		Fractions marginally below a landmark (full transfer, transfer allowance) snap to it
+		so UOM-conversion rounding losses do not leave a full transfer marginally short.
+		"""
 		required_by_item = {}
 		for row in self.doc.required_items:
 			if not row.include_item_in_manufacturing or flt(row.required_qty) <= 0:
@@ -192,8 +197,16 @@ class RequiredItemsService:
 			for item_code, required_qty in required_by_item.items()
 		)
 		allowance = StatusService(self.doc).get_qty_allowance("Material Transfer for Manufacture")
-		covered_qty = min(min_fraction, 1.0 + allowance / 100.0) * flt(self.doc.qty)
+		allowance_fraction = 1.0 + allowance / 100.0
+		min_fraction = self._snap_fraction(min_fraction, (1.0, allowance_fraction))
+		covered_qty = min(min_fraction, allowance_fraction) * flt(self.doc.qty)
 		return flt(covered_qty, self.doc.precision("material_transferred_for_manufacturing"))
+
+	def _snap_fraction(self, fraction, landmarks):
+		for landmark in landmarks:
+			if fraction < landmark and landmark - fraction <= _FULL_TRANSFER_TOLERANCE:
+				return landmark
+		return fraction
 
 	def _net_transferred_qty_by_item(self):
 		transferred = self._material_transfer_qty_by_item(is_return=0, exclude_additional=True)
