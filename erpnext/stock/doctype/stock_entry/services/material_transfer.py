@@ -394,7 +394,9 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 
 	def _validate_transfer_within_allowance(self):
 		"""Reject a transfer whose For Quantity, on top of the effective qty already
-		transferred, exceeds the planned qty plus the transfer allowance."""
+		transferred, exceeds the planned qty plus the transfer allowance. The projection
+		is bounded by the claim sum, which already excludes corrective job card and
+		additional transfer entries, so claim-less coverage never consumes the budget."""
 		from erpnext.manufacturing.doctype.work_order.services.status import StatusService
 		from erpnext.manufacturing.doctype.work_order.work_order import StockOverProductionError
 
@@ -405,10 +407,14 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 		if self.wo_doc.operations and self.wo_doc.transfer_material_against == "Job Card":
 			return
 
-		allowance = StatusService(self.wo_doc).get_qty_allowance("Material Transfer for Manufacture")
+		status_service = StatusService(self.wo_doc)
+		allowance = status_service.get_qty_allowance("Material Transfer for Manufacture")
 		allowed_qty = flt(self.wo_doc.qty) * (1.0 + allowance / 100.0)
 		transferred_qty = flt(self.wo_doc.material_transferred_for_manufacturing)
-		projected_qty = transferred_qty + flt(self.doc.fg_completed_qty)
+		claimed_qty = status_service.get_transferred_or_manufactured_qty(
+			"Material Transfer for Manufacture", "material_transferred_for_manufacturing"
+		)
+		projected_qty = min(transferred_qty + flt(self.doc.fg_completed_qty), claimed_qty)
 		precision = self.wo_doc.precision("material_transferred_for_manufacturing")
 		if flt(projected_qty, precision) <= flt(allowed_qty, precision):
 			return
