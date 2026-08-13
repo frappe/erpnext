@@ -1594,6 +1594,9 @@ def get_child_warehouses(warehouse):
 	return get_child_warehouses(warehouse)
 
 
+ITEM_PRICES_LIMIT = 10
+
+
 @frappe.whitelist()
 def get_item_prices(item_code: str):
 	"""Fetch valid item prices for the item prices tab."""
@@ -1621,14 +1624,13 @@ def get_item_prices(item_code: str):
 		.where(ItemPrice.docstatus != 2)
 		.where((ItemPrice.valid_upto.isnull()) | (ItemPrice.valid_upto >= today))
 		.orderby(ItemPrice.price_list)
-		.limit(11)
+		.limit(ITEM_PRICES_LIMIT + 1)
 		.run(as_dict=True)
 	)
 
-	has_more = len(prices) == 11
 	return {
-		"prices": prices[:10],
-		"has_more": has_more,
+		"prices": prices[:ITEM_PRICES_LIMIT],
+		"has_more": len(prices) > ITEM_PRICES_LIMIT,
 	}
 
 

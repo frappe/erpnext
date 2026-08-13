@@ -142,6 +142,21 @@ frappe.ui.form.on("Production Plan", {
 				__("View")
 			);
 
+			frm.add_custom_button(
+				__("Production Schedule"),
+				() => {
+					frappe.route_options = { production_plan: frm.doc.name };
+					frappe.set_route("List", "Production Plan Schedule", "Calendar");
+				},
+				__("View")
+			);
+
+			if (!["Completed", "Closed"].includes(frm.doc.status)) {
+				frm.add_custom_button(__("Schedule Items"), () => {
+					frm.events.show_schedule_dialog(frm);
+				});
+			}
+
 			let has_create_buttons = false;
 
 			if (frm.doc.status !== "Completed") {
@@ -246,6 +261,324 @@ frappe.ui.form.on("Production Plan", {
 		</table>`;
 
 		set_field_options("projected_qty_formula", projected_qty_formula);
+	},
+
+	show_schedule_dialog(frm) {
+		let items_data = frm.doc.po_items.map((row) => ({
+			plan_row: row.name,
+			item_code: row.item_code,
+			planned_qty: row.planned_qty,
+			start_date: row.planned_start_date,
+		}));
+
+		let dialog = new frappe.ui.Dialog({
+			title: __("Schedule Production Plan"),
+			size: "large",
+			fields: [
+				{
+					label: __("Start Date"),
+					fieldname: "start_date",
+					fieldtype: "Datetime",
+					reqd: 1,
+					default: frappe.datetime.now_datetime(),
+				},
+				{
+					label: __("Use Item Wise Start Dates"),
+					fieldname: "use_item_dates",
+					fieldtype: "Check",
+					default: 0,
+					description: __(
+						"Set a start date per assembly item below; its sub-assemblies are scheduled from the same date. The Start Date above is the earliest limit. Rows with a date here keep it as entered; clear a date to let the system schedule that item freely and write back the computed start."
+					),
+				},
+				{
+					label: __("Item Wise Start Dates"),
+					fieldname: "items",
+					fieldtype: "Table",
+					depends_on: "eval:doc.use_item_dates",
+					cannot_add_rows: true,
+					cannot_delete_rows: true,
+					in_place_edit: true,
+					data: items_data,
+					get_data: () => items_data,
+					fields: [
+						{
+							fieldname: "plan_row",
+							fieldtype: "Data",
+							hidden: 1,
+						},
+						{
+							label: __("Item"),
+							fieldname: "item_code",
+							fieldtype: "Link",
+							options: "Item",
+							in_list_view: 1,
+							read_only: 1,
+							columns: 3,
+						},
+						{
+							label: __("Planned Qty"),
+							fieldname: "planned_qty",
+							fieldtype: "Float",
+							in_list_view: 1,
+							read_only: 1,
+							columns: 2,
+						},
+						{
+							label: __("Start Date"),
+							fieldname: "start_date",
+							fieldtype: "Datetime",
+							in_list_view: 1,
+							columns: 4,
+						},
+					],
+				},
+			],
+			primary_action_label: __("Preview"),
+			primary_action: (values) => {
+				dialog.hide();
+				frm.events.fetch_schedule_preview(frm, frm.events.get_schedule_args(frm, values));
+			},
+		});
+
+		dialog.show();
+	},
+
+	get_schedule_args(frm, values) {
+		let item_dates = {};
+		if (values.use_item_dates) {
+			(values.items || []).forEach((row) => {
+				if (row.plan_row && row.start_date) {
+					item_dates[row.plan_row] = row.start_date;
+				}
+			});
+		}
+
+		return {
+			production_plan: frm.doc.name,
+			start_date: values.start_date,
+			use_item_dates: values.use_item_dates,
+			item_dates: item_dates,
+		};
+	},
+
+	fetch_schedule_preview(frm, args) {
+		frappe.call({
+			method: "erpnext.manufacturing.scheduling.plan_adapter.get_schedule_preview",
+			type: "GET",
+			args: args,
+			freeze: true,
+			freeze_message: __("Calculating Schedule..."),
+			callback: (r) => {
+				if (!r.exc) {
+					frm.events.show_schedule_preview(frm, args, r.message);
+				}
+			},
+		});
+	},
+
+	show_schedule_preview(frm, values, proposal) {
+		let ordered = frm.events.get_ordered_preview_rows(proposal);
+		let rows_html = ordered.map((row) => frm.events.get_preview_row_html(row)).join("");
+
+		let unscheduled = Object.entries(proposal.unscheduled || {});
+		let warning = unscheduled.length
+			? `<div class="schedule-preview-warning">${__(
+					"Could not schedule {0} task(s), so this proposal cannot be applied",
+					[unscheduled.length]
+			  )}: ${unscheduled
+					.map(([key, reason]) => `${frappe.utils.escape_html(key)} (${reason})`)
+					.join(", ")}</div>`
+			: "";
+
+		let locked_note = proposal.orders_exist
+			? `<div class="schedule-preview-warning">${__(
+					"Work Orders / Purchase Orders already exist against this plan, so the schedule is locked. Cancel them to re-schedule."
+			  )}</div>`
+			: "";
+
+		let dialog_options = {
+			title: __("Schedule Preview"),
+			size: "extra-large",
+		};
+
+		if (!unscheduled.length && !proposal.orders_exist) {
+			dialog_options.primary_action_label = __("Apply Schedule");
+			dialog_options.primary_action = () => {
+				dialog.hide();
+				frm.events.apply_schedule(frm, values);
+			};
+		}
+
+		let dialog = new frappe.ui.Dialog(dialog_options);
+
+		dialog.$body.html(`
+			${frm.events.get_preview_styles()}
+			${frm.events.get_preview_summary_html(proposal, ordered)}
+			${locked_note}
+			${warning}
+			<div class="schedule-preview-table-wrapper">
+				<table class="table schedule-preview-table">
+					<thead><tr>
+						<th>${__("Item")}</th>
+						<th>${__("Workstations")}</th>
+						<th>${__("Start")}</th>
+						<th>${__("End")}</th>
+						<th>${__("Starts In")}</th>
+					</tr></thead>
+					<tbody>${rows_html}</tbody>
+				</table>
+			</div>
+		`);
+		dialog.show();
+	},
+
+	get_ordered_preview_rows(proposal) {
+		let entries = Object.entries(proposal.rows || {}).map(([name, row]) => ({ name, ...row }));
+		let by_start = (a, b) => (a.start < b.start ? -1 : 1);
+
+		let materials = entries.filter((row) => row.row_type === "Raw Material").sort(by_start);
+		let finished_goods = entries.filter((row) => row.row_type === "Finished Good").sort(by_start);
+		let sub_assemblies = entries
+			.filter((row) => !["Finished Good", "Raw Material"].includes(row.row_type))
+			.sort(by_start);
+
+		let used_materials = new Set();
+		let materials_for = (consumer, indent) =>
+			materials
+				.filter((material) => (material.consumers || []).includes(consumer))
+				.map((material) => {
+					used_materials.add(material.name);
+					return { ...material, indent };
+				});
+
+		let ordered = [];
+		finished_goods.forEach((fg) => {
+			ordered.push(fg);
+			let children = [
+				...sub_assemblies
+					.filter((sub) => sub.parent_row === fg.name)
+					.map((sub) => ({ ...sub, indent: 1 })),
+				...materials_for(fg.name, 1),
+			].sort(by_start);
+
+			children.forEach((child) => {
+				ordered.push(child);
+				if (child.row_type !== "Raw Material") {
+					ordered.push(...materials_for(child.name, 2));
+				}
+			});
+		});
+
+		sub_assemblies
+			.filter((sub) => !finished_goods.some((fg) => fg.name === sub.parent_row))
+			.forEach((sub) => {
+				ordered.push(sub);
+				ordered.push(...materials_for(sub.name, 1));
+			});
+
+		ordered.push(...materials.filter((material) => !used_materials.has(material.name)));
+
+		return ordered;
+	},
+
+	get_preview_row_html(row) {
+		let workstations = [...new Set(row.blocks.map((block) => block.workstation).filter(Boolean))];
+		let is_fg = row.row_type === "Finished Good";
+		let is_material = row.row_type === "Raw Material";
+		let indent_html = row.indent
+			? `<span class="sub-indent" style="margin-left: ${(row.indent - 1) * 20}px">↳</span>`
+			: "";
+		let item = `${indent_html}
+			<span class="${is_fg ? "item-fg" : ""}${is_material ? " text-muted" : ""}">${frappe.utils.escape_html(
+			row.item_code
+		)}</span>`;
+		let detail = is_material
+			? `<span class="text-muted">${__("Procurement")}</span>`
+			: frappe.utils.escape_html(workstations.join(", ") || "-");
+
+		let starts_in = schedule_starts_in(row.start);
+
+		return `<tr>
+			<td class="item-cell">${item}</td>
+			<td class="text-muted">${detail}</td>
+			<td>${format_schedule_date(row.start)}</td>
+			<td>${format_schedule_date(row.end)}</td>
+			<td class="starts-in">
+				<span class="starts-in-pill ${starts_in.color}">${starts_in.label}</span>
+			</td>
+		</tr>`;
+	},
+
+	get_preview_summary_html(proposal, ordered) {
+		let starts = ordered.map((row) => row.start).sort();
+		let total = starts.length ? schedule_duration_label(starts[0], proposal.completion_date) : "-";
+
+		return `<div class="schedule-preview-summary">
+			<div class="summary-block">
+				<div class="summary-label">${__("Expected Completion")}</div>
+				<div class="summary-value">${format_schedule_date(proposal.completion_date)}</div>
+			</div>
+			<div class="summary-block">
+				<div class="summary-label">${__("Total Duration")}</div>
+				<div class="summary-value">${total}</div>
+			</div>
+			<div class="summary-block">
+				<div class="summary-label">${__("Items")}</div>
+				<div class="summary-value">${Object.keys(proposal.rows || {}).length}</div>
+			</div>
+		</div>`;
+	},
+
+	get_preview_styles() {
+		return `<style>
+			.schedule-preview-summary { display: flex; gap: 12px; margin-bottom: 12px; }
+			.schedule-preview-summary .summary-block {
+				flex: 1; background-color: var(--bg-color); border: 1px solid var(--border-color);
+				border-radius: var(--border-radius-md); padding: 8px 12px;
+			}
+			.schedule-preview-summary .summary-label { font-size: var(--text-sm); color: var(--text-muted); }
+			.schedule-preview-summary .summary-value { font-weight: 600; margin-top: 2px; }
+			.schedule-preview-warning {
+				background-color: var(--bg-red); color: var(--text-on-red);
+				border-radius: var(--border-radius-md); padding: 8px 12px; margin-bottom: 12px;
+				font-size: var(--text-sm);
+			}
+			.schedule-preview-table-wrapper { max-height: 55vh; overflow-y: auto; }
+			.schedule-preview-table th { position: sticky; top: 0; background-color: var(--fg-color); }
+			.schedule-preview-table td, .schedule-preview-table th { padding: 8px 10px; }
+			.schedule-preview-table .item-cell .item-fg { font-weight: 600; }
+			.schedule-preview-table .sub-indent { color: var(--text-muted); margin: 0 4px 0 12px; }
+			.schedule-preview-table .indicator-pill { margin-left: 6px; }
+			.schedule-preview-table .starts-in { white-space: nowrap; }
+			.starts-in-pill {
+				display: inline-block; padding: 2px 10px; border-radius: 999px;
+				font-size: var(--text-sm); font-weight: 500;
+			}
+			.starts-in-pill.green { background-color: var(--bg-green); color: var(--text-on-green); }
+			.starts-in-pill.orange { background-color: var(--bg-orange); color: var(--text-on-orange); }
+			.starts-in-pill.gray { background-color: var(--bg-gray); color: var(--text-on-gray); }
+		</style>`;
+	},
+
+	apply_schedule(frm, args) {
+		frappe.call({
+			method: "erpnext.manufacturing.scheduling.plan_adapter.apply_schedule",
+			args: args,
+			freeze: true,
+			freeze_message: __("Applying Schedule..."),
+			callback: (r) => {
+				if (!r.exc) {
+					frappe.show_alert({
+						message: __("Schedule applied. Expected completion on {0}", [
+							frappe.datetime.str_to_user(r.message.completion_date),
+						]),
+						indicator: "green",
+					});
+					frm.reload_doc();
+				}
+			},
+		});
 	},
 
 	get_items_for_work_order(frm) {
@@ -768,3 +1101,41 @@ frappe.tour["Production Plan"] = [
 		description: __("To add subcontracted Item's raw materials if include exploded items is disabled."),
 	},
 ];
+
+function format_schedule_date(value) {
+	if (!value) {
+		return "-";
+	}
+
+	return moment(value).format("Do MMMM YYYY, h:mm A");
+}
+
+function schedule_duration_parts(total_mins) {
+	let days = Math.floor(total_mins / 1440);
+	let hours = Math.floor((total_mins % 1440) / 60);
+	let minutes = Math.round(total_mins % 60);
+
+	let parts = [];
+	if (days) parts.push(__("{0}d", [days]));
+	if (hours) parts.push(__("{0}h", [hours]));
+	if (!days && minutes) parts.push(__("{0}m", [minutes]));
+
+	return parts.join(" ");
+}
+
+function schedule_starts_in(start) {
+	let mins = moment(start).diff(moment(), "minutes");
+	if (mins <= 0) {
+		return { label: moment(start).fromNow(), color: "gray" };
+	}
+
+	return {
+		label: __("in {0}", [schedule_duration_parts(mins) || __("a moment")]),
+		color: mins >= 1440 ? "green" : "orange",
+	};
+}
+
+function schedule_duration_label(from_time, to_time) {
+	let mins = moment(to_time).diff(moment(from_time), "minutes");
+	return schedule_duration_parts(Math.max(mins, 0)) || "-";
+}
