@@ -185,6 +185,9 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 	def _cap_completed_qty_to_material_coverage(self):
 		if not self._should_cap_completed_qty():
 			return
+		# Keep an excessive claim intact so the Work Order allowance check can reject it.
+		if not self._is_overproduction_allowed(flt(self.wo_doc.qty)):
+			return
 
 		required_qty, transferred_qty = self._get_work_order_material_qty()
 		if not required_qty:
