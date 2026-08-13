@@ -1169,10 +1169,11 @@ class PaymentEntry(AccountsController):
 			if d.exchange_rate is None:
 				d.exchange_rate = 1
 
-			allocated_amount_in_ref_exchange_rate = flt(
-				flt(d.allocated_amount) * flt(d.exchange_rate), self.precision("base_paid_amount")
-			)
-			d.exchange_gain_loss = base_allocated_amount - allocated_amount_in_ref_exchange_rate
+			# The party leg clears the reference by the gross, so the rate difference is on the gross.
+			settled_amount = flt(d.allocated_gross_amount) or flt(d.allocated_amount)
+			d.exchange_gain_loss = flt(
+				settled_amount * flt(exchange_rate), self.precision("base_paid_amount")
+			) - flt(settled_amount * flt(d.exchange_rate), self.precision("base_paid_amount"))
 		return base_allocated_amount
 
 	def set_total_allocated_amount(self):

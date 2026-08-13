@@ -1275,6 +1275,59 @@ class TestPaymentEntry(ERPNextTestSuite):
 		self.assertEqual(flt(ref.allocated_gross_amount, 2), 1000.0)
 		self.assertEqual(flt(pe.unallocated_gross_amount, 2), 190.0)
 
+	def test_advance_exchange_gain_loss_follows_gross(self):
+		"""The party leg clears the invoice by the gross, so the rate difference must be
+		booked on the gross or the receivable keeps a company-currency residue."""
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
+
+		self.enable_advance_in_separate_party_account(account_currency="USD")
+		so = make_sales_order(
+			customer="_Test Customer USD", currency="USD", qty=1, rate=1190, do_not_save=True
+		)
+		so.conversion_rate = so.plc_conversion_rate = 82.5
+		so.insert()
+		so.submit()
+
+		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Bank USD - _TC")
+		pe.reference_no, pe.reference_date = "FX-GROSS-1", nowdate()
+		pe.source_exchange_rate = pe.target_exchange_rate = 82.5
+		pe.paid_amount = pe.received_amount = 1190
+		pe.references[0].allocated_amount = 1000
+		pe.append(
+			"taxes",
+			{
+				"account_head": "_Test Account Service Tax - _TC",
+				"charge_type": "On Paid Amount",
+				"rate": 19,
+				"add_deduct_tax": "Add",
+				"included_in_paid_amount": 1,
+				"description": "VAT 19%",
+			},
+		)
+		pe.save()
+		pe.submit()
+
+		si = make_sales_invoice(so.name)
+		si.conversion_rate = si.plc_conversion_rate = 85.0
+		si.allocate_advances_automatically = 1
+		si.save()
+		si.submit()
+
+		si.reload()
+		self.assertEqual(flt(si.outstanding_amount, 2), 0.0)
+		# 1190 USD * (85.0 - 82.5); on the net it would have been 2500.00, leaving 475 behind.
+		self.assertEqual(flt(si.advances[0].exchange_gain_loss, 2), -2975.0)
+
+		# Receivable is flat in both currencies once the gain/loss journal is in.
+		balance = frappe.db.sql(
+			"""SELECT sum(debit - credit), sum(debit_in_account_currency - credit_in_account_currency)
+			FROM `tabGL Entry`
+			WHERE account = %s AND party = %s AND is_cancelled = 0""",
+			(si.debit_to, si.customer),
+		)[0]
+		self.assertEqual(flt(balance[0], 2), 0.0)
+		self.assertEqual(flt(balance[1], 2), 0.0)
+
 	def test_payment_entry_against_pi(self):
 		pi = make_purchase_invoice(
 			supplier="_Test Supplier USD",

@@ -151,8 +151,10 @@ def set_advance_gain_or_loss(doc) -> None:
 	for d in doc.get("advances"):
 		advance_exchange_rate = d.ref_exchange_rate
 		if d.allocated_amount and doc.conversion_rate != advance_exchange_rate:
-			base_allocated_amount_in_ref_rate = advance_exchange_rate * d.allocated_amount
-			base_allocated_amount_in_inv_rate = doc.conversion_rate * d.allocated_amount
+			# The party leg clears the invoice by the gross, so the rate difference is on the gross.
+			allocated = flt(d.get("allocated_gross_amount")) or flt(d.allocated_amount)
+			base_allocated_amount_in_ref_rate = advance_exchange_rate * allocated
+			base_allocated_amount_in_inv_rate = doc.conversion_rate * allocated
 			difference = base_allocated_amount_in_ref_rate - base_allocated_amount_in_inv_rate
 
 			d.exchange_gain_loss = difference
