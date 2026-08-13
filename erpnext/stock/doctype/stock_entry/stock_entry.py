@@ -1298,6 +1298,21 @@ class StockEntry(StockController, SubcontractingInwardController):
 	def _cap_completed_qty_to_material_coverage(self):
 		if not self._should_cap_completed_qty():
 			return
+		# Keep an excessive claim intact so the Work Order allowance check can reject it.
+		max_qty = flt(self.pro_doc.qty)
+		overproduction_percentage = flt(
+			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order")
+		)
+		extra_materials_percentage = flt(
+			frappe.db.get_single_value("Manufacturing Settings", "transfer_extra_materials_percentage")
+		)
+		to_transfer_qty = flt(self.pro_doc.material_transferred_for_manufacturing) + flt(
+			self.fg_completed_qty
+		)
+		limit_percentage = extra_materials_percentage or overproduction_percentage
+		transfer_limit_qty = max_qty + (max_qty * limit_percentage / 100)
+		if transfer_limit_qty < to_transfer_qty:
+			return
 
 		required_qty, transferred_qty = self._get_work_order_material_qty()
 		if not required_qty:
