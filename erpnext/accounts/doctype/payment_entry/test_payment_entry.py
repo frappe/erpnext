@@ -1170,6 +1170,46 @@ class TestPaymentEntry(ERPNextTestSuite):
 			si.submit()
 			self.assertEqual(flt(si.outstanding_amount, 2), 0.0)
 
+	def test_order_advance_paid_covers_advance_tax(self):
+		"""An order paid in full must not look underpaid before it is invoiced. The tax
+		sits in the tax account until consumption, so the ledger alone is short by it."""
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
+
+		self.enable_advance_in_separate_party_account()
+		so = make_sales_order(qty=1, rate=1190)
+		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Cash - _TC")
+		pe.paid_amount = pe.received_amount = 1190
+		pe.base_paid_amount = pe.base_received_amount = 1190
+		pe.append(
+			"taxes",
+			{
+				"account_head": "_Test Account Service Tax - _TC",
+				"charge_type": "On Paid Amount",
+				"rate": 19,
+				"add_deduct_tax": "Add",
+				"included_in_paid_amount": 1,
+				"description": "VAT 19%",
+			},
+		)
+		pe.allocate_amount_to_references(
+			paid_amount=1190, paid_amount_change=True, allocate_payment_amount=True
+		)
+		pe.save()
+		pe.submit()
+
+		# 1000 net reached the ledger; the 190 of tax is still on the reference row.
+		so.reload()
+		self.assertEqual(flt(so.advance_paid, 2), 1190.0)
+
+		# Consuming it moves the tax into the ledger — it must not be counted twice.
+		si = make_sales_invoice(so.name)
+		si.allocate_advances_automatically = 1
+		si.save()
+		si.submit()
+
+		so.reload()
+		self.assertEqual(flt(so.advance_paid, 2), 1190.0)
+
 	def test_payment_entry_against_pi(self):
 		pi = make_purchase_invoice(
 			supplier="_Test Supplier USD",

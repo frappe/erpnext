@@ -172,6 +172,31 @@ def calculate_total_advance_from_ledger(doc) -> list:
 	)
 
 
+def get_unconsumed_advance_tax(doc) -> float:
+	"""Advance tax held against `doc` that has not reached the ledger yet.
+
+	An included tax is credited to the tax account at payment time, so the party
+	account only ever sees the net. The rest reaches the ledger when an invoice
+	consumes the advance and the reversal leg posts against the party.
+	"""
+	ref = frappe.qb.DocType("Payment Entry Reference")
+	pe = frappe.qb.DocType("Payment Entry")
+	amount = (
+		frappe.qb.from_(ref)
+		.inner_join(pe)
+		.on(ref.parent == pe.name)
+		.select(Sum(ref.allocated_gross_amount - ref.allocated_amount))
+		.where(
+			(ref.reference_doctype == doc.doctype)
+			& (ref.reference_name == doc.name)
+			& (pe.docstatus == 1)
+			& (pe.book_advance_payments_in_separate_party_account == 1)
+		)
+		.run()
+	)
+	return flt(amount[0][0]) if amount else 0.0
+
+
 def set_total_advance_paid(doc) -> None:
 	"""Update advance_paid field and payment status from the ledger."""
 	advance = calculate_total_advance_from_ledger(doc)
@@ -182,6 +207,9 @@ def set_total_advance_paid(doc) -> None:
 		advance_paid = flt(advance.amount, doc.precision("advance_paid"))
 		if advance.account_currency:
 			frappe.db.set_value(doc.doctype, doc.name, "party_account_currency", advance.account_currency)
+
+	# The order is settled by the gross the party paid, not by the net the ledger holds.
+	advance_paid = flt(advance_paid + get_unconsumed_advance_tax(doc), doc.precision("advance_paid"))
 
 	doc.db_set("advance_paid", advance_paid)
 	set_advance_payment_status(doc)
