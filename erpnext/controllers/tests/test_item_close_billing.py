@@ -246,3 +246,20 @@ class TestDeliveryNoteItemClose(ERPNextTestSuite):
 		note.reload()
 		self.assertEqual([(row.returned_qty, row.closed) for row in note.items], before)
 		self.assertEqual(note.per_returned, per_returned_before)
+
+	def test_closing_the_unbilled_row_completes_the_note(self):
+		"""The point of the feature: a written off row stops holding billing open."""
+		note = self.make_delivery_note()
+		invoice = make_sales_invoice(note.name)
+		invoice.items = [item for item in invoice.items if item.item_code == self.first_item]
+		invoice.insert()
+		invoice.submit()
+
+		note.reload()
+		self.assertEqual(note.per_billed, 50)
+
+		self.close_items(note, [note.items[1]])
+
+		self.assertEqual(note.per_billed, 100)
+		self.assertEqual(note.status, "Completed")
+
