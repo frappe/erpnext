@@ -15,6 +15,9 @@ from pypika import functions as fn
 
 from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
 from erpnext.manufacturing.doctype.work_order.mapper import check_if_scrap_warehouse_mandatory
+from erpnext.manufacturing.doctype.work_order.services.material_coverage import (
+	get_minimum_material_coverage_fraction,
+)
 from erpnext.manufacturing.doctype.work_order.services.reservation import (
 	WorkOrderStockReservation,
 	get_consumed_qty,
@@ -161,22 +164,15 @@ class RequiredItemsService:
 		self.recompute_material_transferred_for_manufacturing(transferred_items)
 
 	def recompute_material_transferred_for_manufacturing(self, transferred_items):
-		"""Set material_transferred_for_manufacturing based on actual item-level transfers, not fg_completed_qty."""
+		"""Set transferred quantity from the raw materials that have actually moved."""
 		# Job Card transfers use the minimum completed quantity across operations.
 		if self.doc.operations and self.doc.transfer_material_against == "Job Card":
 			return
 
-		# When fg_completed_qty > 0 (direct stock entries, excess transfer), preserve the
-		# SUM(fg_completed_qty) approach so excess-transfer tracking works correctly.
-		sum_fg_completed_qty = StatusService(self.doc).get_transferred_or_manufactured_qty(
+		claimed_qty = StatusService(self.doc).get_transferred_or_manufactured_qty(
 			"Material Transfer for Manufacture", "material_transferred_for_manufacturing"
 		)
-		if sum_fg_completed_qty:
-			self.doc.db_set("material_transferred_for_manufacturing", sum_fg_completed_qty)
-			return
 
-		# Pick list flow sets fg_completed_qty=0; use min-fraction of actual item transfers
-		# so partial availability does not prematurely mark the work order as fully transferred.
 		required_by_item = {}
 		for row in self.doc.required_items:
 			if not row.include_item_in_manufacturing or flt(row.required_qty) <= 0:
@@ -186,12 +182,13 @@ class RequiredItemsService:
 		if not required_by_item:
 			return
 
-		min_fraction = min(
-			flt(transferred_items.get(item_code) or 0) / required_qty
-			for item_code, required_qty in required_by_item.items()
+		min_fraction = get_minimum_material_coverage_fraction(
+			required_by_item,
+			transferred_items,
+			self.doc.precision("required_qty", "required_items"),
 		)
-		min_fraction = min(min_fraction, 1.0)
-		material_transferred = min_fraction * flt(self.doc.qty)
+		covered_qty = min_fraction * flt(self.doc.qty)
+		material_transferred = min(covered_qty, max(flt(self.doc.qty), claimed_qty))
 		self.doc.db_set("material_transferred_for_manufacturing", material_transferred)
 
 	def update_returned_qty(self):
