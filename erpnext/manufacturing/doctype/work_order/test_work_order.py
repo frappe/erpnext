@@ -1664,15 +1664,31 @@ class TestWorkOrder(ERPNextTestSuite):
 		)
 		partial_work_order.db_set("material_transferred_for_manufacturing", 1.99, update_modified=False)
 
+		terminal_work_orders = []
+		for status in ("Stopped", "Closed", "Completed"):
+			terminal_work_order = make_wo_order_test_record(planned_start_date=now(), qty=2)
+			for row in terminal_work_order.required_items:
+				row.db_set("transferred_qty", row.required_qty, update_modified=False)
+			terminal_work_order.db_set(
+				{"material_transferred_for_manufacturing": 1.99, "status": status},
+				update_modified=False,
+			)
+			terminal_work_orders.append(terminal_work_order)
+
 		updates = get_precision_affected_work_orders()
 		self.assertIn(work_order.name, updates)
 		self.assertNotIn(partial_work_order.name, updates)
+		for terminal_work_order in terminal_work_orders:
+			self.assertNotIn(terminal_work_order.name, updates)
 
 		execute()
 		work_order.reload()
 		partial_work_order.reload()
 		self.assertEqual(work_order.material_transferred_for_manufacturing, work_order.qty)
 		self.assertEqual(partial_work_order.material_transferred_for_manufacturing, 1.99)
+		for terminal_work_order in terminal_work_orders:
+			terminal_work_order.reload()
+			self.assertEqual(terminal_work_order.material_transferred_for_manufacturing, 1.99)
 
 	def test_status_in_process_when_only_one_required_item_transferred(self):
 		"""Stock Entry created from a Pick List that picked only one of the required items:
