@@ -1331,6 +1331,34 @@ class TestPaymentEntry(ERPNextTestSuite):
 		self.assertEqual(flt(ref.allocated_amount, 2), 840.34)
 		self.assertEqual(flt(ref.allocated_gross_amount, 2), 1000.0)
 
+	def test_hand_typed_allocation_cannot_overpay_reference_gross(self):
+		"""A net allocation the user types is settled by its gross, so the gross is what has
+		to fit the reference. Without the cap the order ends up over-paid."""
+		self.enable_advance_in_separate_party_account()
+		so = make_sales_order(qty=1, rate=1190)
+
+		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Cash - _TC")
+		pe.append(
+			"taxes",
+			{
+				"account_head": "_Test Account Service Tax - _TC",
+				"charge_type": "On Paid Amount",
+				"rate": 19,
+				"add_deduct_tax": "Add",
+				"included_in_paid_amount": 1,
+				"description": "VAT 19%",
+			},
+		)
+		pe.paid_amount = pe.received_amount = 1785
+		pe.base_paid_amount = pe.base_received_amount = 1785
+		# 1100 net is 1309 gross against an order that only owes 1190.
+		pe.references[0].allocated_amount = 1100
+		pe.save()
+
+		ref = pe.references[0]
+		self.assertEqual(flt(ref.allocated_gross_amount, 2), 1190.0)
+		self.assertEqual(flt(ref.allocated_amount, 2), 1000.0)
+
 	def test_larger_invoice_consumes_full_advance_gross(self):
 		"""An invoice bigger than the advance must take the whole gross. Capping
 		against the leftover outstanding (already net of this advance) would

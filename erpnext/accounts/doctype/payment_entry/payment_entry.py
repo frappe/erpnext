@@ -812,6 +812,10 @@ class PaymentEntry(AccountsController):
 		# `set_amounts` ran before `apply_taxes`, so percentage-based taxes were still 0 there.
 		grosses_up = bool(self.book_advance_payments_in_separate_party_account)
 
+		# Only the entry's own save carries what the user typed; reconciliation and unlink reach
+		# here on a stored entry, where the row's outstanding no longer reflects this allocation.
+		caps = self.docstatus.is_draft() or self.is_new()
+
 		references = self.get("references") or []
 		if references:
 			ref_precision = self.precision("allocated_amount", references[0])
@@ -825,7 +829,13 @@ class PaymentEntry(AccountsController):
 					if ref.reference_doctype in ADVANCE_GROSS_REFERENCE_TYPES
 					else 0
 				)
-				ref.allocated_gross_amount = flt(flt(ref.allocated_amount) + tax_sum, ref_precision)
+				gross = flt(flt(ref.allocated_amount) + tax_sum, ref_precision)
+				outstanding = flt(ref.outstanding_amount, ref_precision)
+				# The party leg settles the reference by the gross, so that is what has to fit.
+				if caps and tax_sum and outstanding > 0 and gross > outstanding:
+					ref.allocated_amount = flt(ref.allocated_amount * outstanding / gross, ref_precision)
+					gross = outstanding
+				ref.allocated_gross_amount = gross
 
 		# Exchange gain/loss follows the gross, which `set_amounts` ran too early to see.
 		self.set_amounts()
