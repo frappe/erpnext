@@ -671,6 +671,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		if not flt(item_args["qty"], frappe.get_precision("Stock Entry Detail", "qty")):
 			return
 		if is_return:
+			item_args["original_item"] = row.original_item
 			item_args["s_warehouse"], item_args["t_warehouse"] = row.s_warehouse, row.t_warehouse
 		else:
 			item_args["t_warehouse"], item_args["s_warehouse"] = None, row.warehouse
