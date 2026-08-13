@@ -25,9 +25,9 @@ from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category 
 from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
 from erpnext.accounts.party import (
 	CROSS_PARTY_FIELD_NO_MAP,
+	_get_party_details,
 	get_due_date,
 	get_party_account,
-	get_party_details,
 )
 from erpnext.accounts.utils import (
 	cancel_exchange_gain_loss_journal,
@@ -2266,9 +2266,9 @@ def make_delivery_note(source_name, target_doc=None):
 					"cost_center": "cost_center",
 				},
 				"postprocess": update_item,
-				"condition": lambda doc: doc.delivered_by_supplier != 1
-				and not doc.dn_detail
-				and doc.qty - doc.delivered_qty > 0,
+				"condition": lambda doc: (
+					doc.delivered_by_supplier != 1 and not doc.dn_detail and doc.qty - doc.delivered_qty > 0
+				),
 			},
 			"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "reset_value": True},
 			"Sales Team": {
@@ -2737,7 +2737,7 @@ def update_taxes(
 	master_doctype=None,
 ):
 	# Update Party Details
-	party_details = get_party_details(
+	party_details = _get_party_details(
 		party=party,
 		party_type=party_type,
 		company=company,
