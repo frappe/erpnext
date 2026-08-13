@@ -32,6 +32,9 @@ from erpnext.manufacturing.doctype.bom.bom import (
 	get_scrap_items_from_sub_assemblies,
 	validate_bom_no,
 )
+from erpnext.manufacturing.doctype.work_order.services.material_coverage import (
+	get_minimum_material_coverage_fraction,
+)
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.batch.batch import get_batch_qty
@@ -1239,8 +1242,10 @@ class StockEntry(StockController):
 		return required_qty, transferred_qty
 
 	def _get_covered_work_order_qty(self, required_qty, transferred_qty):
-		min_fraction = min(
-			flt(transferred_qty.get(item_code)) / qty for item_code, qty in required_qty.items()
+		min_fraction = get_minimum_material_coverage_fraction(
+			required_qty,
+			transferred_qty,
+			self.pro_doc.precision("required_qty", "required_items"),
 		)
 		return min_fraction * flt(self.pro_doc.qty)
 
