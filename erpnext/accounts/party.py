@@ -49,6 +49,10 @@ SALES_TRANSACTION_TYPES = {
 }
 TRANSACTION_TYPES = PURCHASE_TRANSACTION_TYPES | SALES_TRANSACTION_TYPES
 
+# Doctypes whose receivable/payable account (debit_to / credit_to) is recalculated
+# for the new party, so their currency must follow the same party, not a stale caller value.
+INVOICE_DOCTYPES = {"POS Invoice", "Sales Invoice", "Purchase Invoice"}
+
 # Party-derived fields that must NOT be auto-copied by `get_mapped_doc` when the
 # source and target documents belong to different parties (e.g. Sales Order →
 # Purchase Order or inter-company Sales Invoice → Purchase Invoice).
@@ -141,7 +145,13 @@ def _get_party_details(
 		ptype = "select" if frappe.only_has_select_perm(party_type) else "read"
 		frappe.has_permission(party_type, ptype, party, throw=True)
 
-	currency = party.get("default_currency") or currency or get_company_currency(company)
+	if doctype in INVOICE_DOCTYPES:
+		# `credit_to` / `debit_to` above was just recalculated for the new party, so the
+		# currency must follow it too instead of falling back to a caller-supplied value
+		# that is actually the previous party's stale currency (see erpnext.utils.get_party_details).
+		currency = party.get("default_currency") or get_company_currency(company)
+	else:
+		currency = party.get("default_currency") or currency or get_company_currency(company)
 
 	party_address, shipping_address = set_address_details(
 		party_details,
@@ -405,7 +415,7 @@ def set_price_list(party_details, party, party_type, given_price_list, pos=None)
 
 
 def set_account_and_due_date(party, account, party_type, company, posting_date, bill_date, doctype):
-	if doctype not in ["POS Invoice", "Sales Invoice", "Purchase Invoice"]:
+	if doctype not in INVOICE_DOCTYPES:
 		# not an invoice
 		return {party_type.lower(): party}
 
