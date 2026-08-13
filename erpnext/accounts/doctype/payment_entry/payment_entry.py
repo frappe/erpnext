@@ -60,6 +60,10 @@ class InvalidPaymentEntry(ValidationError):
 	pass
 
 
+# Orders hold the advance tax until an invoice consumes it and reverses it against the party.
+ADVANCE_GROSS_REFERENCE_TYPES = ("Sales Order", "Purchase Order", "Sales Invoice", "Purchase Invoice")
+
+
 class PaymentEntry(AccountsController):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
@@ -805,25 +809,42 @@ class PaymentEntry(AccountsController):
 
 	def set_allocated_gross_amount(self):
 		"""Set `allocated_gross_amount` per reference row and `unallocated_gross_amount` on the entry."""
-		# `set_amounts` runs before `apply_taxes`, so percentage-based taxes were still 0 there.
-		self.set_unallocated_amount()
-		self.set_difference_amount()
+		# `set_amounts` ran before `apply_taxes`, so percentage-based taxes were still 0 there.
+		grosses_up = bool(self.book_advance_payments_in_separate_party_account)
 
 		references = self.get("references") or []
 		if references:
 			ref_precision = self.precision("allocated_amount", references[0])
 			rate = self.get_party_exchange_rate()
 			# Round like the reversal legs do, or the stored gross drifts a cent from the posted GL.
-			breakdown = self.compute_advance_tax_breakdown()
+			breakdown = self.compute_advance_tax_breakdown() if grosses_up else {}
 			for ref in references:
-				tax_sum = sum(
-					flt(amount / rate, ref_precision) for amount in breakdown.get(ref.name, {}).values()
+				# Journal and payment references never reverse the tax, so they settle by the net.
+				tax_sum = (
+					sum(flt(amount / rate, ref_precision) for amount in breakdown.get(ref.name, {}).values())
+					if ref.reference_doctype in ADVANCE_GROSS_REFERENCE_TYPES
+					else 0
 				)
-				ref.allocated_gross_amount = flt(flt(ref.allocated_amount) + tax_sum, ref_precision)
+				gross = flt(flt(ref.allocated_amount) + tax_sum, ref_precision)
+				# `outstanding_amount` only caps rows this entry has not booked against yet.
+				outstanding = (
+					flt(ref.outstanding_amount, ref_precision)
+					if self.docstatus.is_draft() or ref.is_new()
+					else 0
+				)
+				# Callers allocate in net, so shrink the party leg to what the gross may settle.
+				if tax_sum and outstanding > 0 and gross > outstanding:
+					ref.allocated_amount = flt(ref.allocated_amount * outstanding / gross, ref_precision)
+					gross = outstanding
+				ref.allocated_gross_amount = gross
+
+		# Allocations may have shrunk to fit, and exchange gain/loss follows the gross.
+		self.set_amounts()
 
 		# Grossed up by advance tax only, like the reference rows above.
 		self.unallocated_gross_amount = flt(
-			flt(self.unallocated_amount) * self.get_gross_net_ratio(), self.precision("paid_amount")
+			flt(self.unallocated_amount) * (self.get_gross_net_ratio() if grosses_up else 1),
+			self.precision("paid_amount"),
 		)
 
 	def get_valid_reference_doctypes(self):

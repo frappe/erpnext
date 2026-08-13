@@ -27,13 +27,14 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestPaymentEntry(ERPNextTestSuite):
-	def enable_advance_in_separate_party_account(self, company="_Test Company"):
+	def enable_advance_in_separate_party_account(self, company="_Test Company", account_currency=None):
 		"""Book advances in a separate party account for the duration of one test."""
 		advance_account = create_account(
 			parent_account="Current Assets - _TC",
-			account_name="Advances Received For Tax Test",
+			account_name=f"Advances Received For Tax Test {account_currency or ''}".strip(),
 			company=company,
 			account_type="Receivable",
+			account_currency=account_currency,
 		)
 		previous = frappe.db.get_value("Company", company, "default_advance_received_account")
 		frappe.db.set_value(
@@ -257,9 +258,9 @@ class TestPaymentEntry(ERPNextTestSuite):
 
 	def test_allocated_gross_amount_single_reference(self):
 		"""Single reference + 19% included-in-paid-amount tax → gross resolves to 119."""
+		advance_account = self.enable_advance_in_separate_party_account()
 		so = make_sales_order(qty=1, rate=119)
 		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Cash - _TC")
-		pe.paid_from = "Debtors - _TC"
 		pe.paid_amount = pe.received_amount = 119
 		pe.references[0].allocated_amount = 100
 
@@ -289,9 +290,9 @@ class TestPaymentEntry(ERPNextTestSuite):
 		pe.submit()
 		self.assertEqual(pe.docstatus, 1)
 
-		# GL: Debtors Cr 100, VAT Cr 19, Cash Dr 119.
+		# GL: advance account Cr 100, VAT Cr 19, Cash Dr 119.
 		expected_gle = {
-			"Debtors - _TC": ("Debtors - _TC", 0, 100, pe.name),
+			advance_account: (advance_account, 0, 100, pe.name),
 			"_Test Account Service Tax - _TC": (
 				"_Test Account Service Tax - _TC",
 				0,
@@ -304,10 +305,10 @@ class TestPaymentEntry(ERPNextTestSuite):
 
 	def test_allocated_gross_amount_proportional_split(self):
 		"""A tax row distributes proportionally across all references by allocated_amount."""
+		self.enable_advance_in_separate_party_account()
 		so1 = make_sales_order(qty=1, rate=119)
 		so2 = make_sales_order(qty=1, rate=119)
 		pe = get_payment_entry("Sales Order", so1.name, bank_account="_Test Cash - _TC")
-		pe.paid_from = "Debtors - _TC"
 		pe.paid_amount = pe.received_amount = 238
 		pe.references[0].allocated_amount = 100
 		pe.append(
@@ -619,7 +620,8 @@ class TestPaymentEntry(ERPNextTestSuite):
 			},
 		)
 		pe.save()
-		self.assertEqual(flt(pe.references[0].allocated_gross_amount, 2), 119.0)
+		# Nothing grosses up here, so the reference must not claim more than the party leg moves.
+		self.assertEqual(flt(pe.references[0].allocated_gross_amount, 2), 100.0)
 		pe.submit()
 
 		si = make_sales_invoice(so.name)
@@ -690,6 +692,7 @@ class TestPaymentEntry(ERPNextTestSuite):
 		via the exchange rate so `allocated_gross_amount` stays in USD."""
 		# USD SO at uneven amount; deliberate 17% VAT (instead of even 19%/20%) and a
 		# realistic uneven USD->INR rate to surface any FX mishandling.
+		self.enable_advance_in_separate_party_account(account_currency="USD")
 		so = make_sales_order(
 			customer="_Test Customer USD",
 			currency="USD",
@@ -738,6 +741,7 @@ class TestPaymentEntry(ERPNextTestSuite):
 
 	def test_allocated_gross_matches_reversal_legs_multicurrency(self):
 		"""The stored gross must round like the GL reversal legs, or a cent is left outstanding."""
+		self.enable_advance_in_separate_party_account(account_currency="USD")
 		so = make_sales_order(
 			customer="_Test Customer USD", currency="USD", qty=3, rate=333.33, do_not_save=True
 		)
@@ -924,11 +928,11 @@ class TestPaymentEntry(ERPNextTestSuite):
 		`clear_unallocated_reference_document_rows`."""
 		from erpnext.accounts.utils import remove_ref_doc_link_from_pe
 
-		# Two SOs fully covering a 1547.39 gross advance + 17% VAT (net 1322.56).
-		so1 = make_sales_order(qty=1, rate=850.00)
-		so2 = make_sales_order(qty=1, rate=697.39)
+		# Two SOs with room to spare for a 1547.39 gross advance + 17% VAT (net 1322.56).
+		self.enable_advance_in_separate_party_account()
+		so1 = make_sales_order(qty=1, rate=900.00)
+		so2 = make_sales_order(qty=1, rate=750.00)
 		pe = get_payment_entry("Sales Order", so1.name, bank_account="_Test Cash - _TC")
-		pe.paid_from = "Debtors - _TC"
 		pe.paid_amount = pe.received_amount = 1547.39
 		pe.references[0].allocated_amount = 700.00
 		pe.append(
@@ -1034,9 +1038,10 @@ class TestPaymentEntry(ERPNextTestSuite):
 		"""When refs cover only part of the PE's net, each ref gets exactly its own
 		`allocated_amount * tax_rate` — not the full tax pro-rated across refs. The
 		un-attributed remainder stays with the unallocated portion."""
-		so = make_sales_order(qty=1, rate=600.00)
+		self.enable_advance_in_separate_party_account()
+		# Order is worth more than the allocation, so the gross is not capped by it.
+		so = make_sales_order(qty=1, rate=1500.00)
 		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Cash - _TC")
-		pe.paid_from = "Debtors - _TC"
 		# Pay 1547.39 (net 1322.56 + tax 224.83) but only allocate 600 of net to the SO.
 		pe.paid_amount = pe.received_amount = 1547.39
 		pe.references[0].allocated_amount = 600.00
@@ -1209,6 +1214,66 @@ class TestPaymentEntry(ERPNextTestSuite):
 
 		so.reload()
 		self.assertEqual(flt(so.advance_paid, 2), 1190.0)
+
+	def test_reconciled_advance_does_not_overpay_invoice(self):
+		"""The reconciliation tool allocates the net it sees in the ledger. Grossing that
+		up would credit the party more than the invoice is worth."""
+		advance_account = self.enable_advance_in_separate_party_account()
+
+		pe = create_payment_entry(
+			party_type="Customer",
+			party="_Test Customer",
+			payment_type="Receive",
+			paid_from="Debtors - _TC",
+			paid_to="_Test Cash - _TC",
+			paid_amount=1190,
+		)
+		pe.append(
+			"taxes",
+			{
+				"account_head": "_Test Account Service Tax - _TC",
+				"charge_type": "On Paid Amount",
+				"rate": 19,
+				"add_deduct_tax": "Add",
+				"included_in_paid_amount": 1,
+				"description": "VAT 19%",
+			},
+		)
+		pe.save()
+		pe.submit()
+		self.assertEqual(flt(pe.unallocated_amount, 2), 1000.0)
+		self.assertEqual(flt(pe.unallocated_gross_amount, 2), 1190.0)
+
+		si = create_sales_invoice(qty=1, rate=1000, customer="_Test Customer")
+
+		pr = frappe.get_doc("Payment Reconciliation")
+		pr.company = "_Test Company"
+		pr.party_type = "Customer"
+		pr.party = "_Test Customer"
+		pr.receivable_payable_account = si.debit_to
+		pr.default_advance_account = advance_account
+		pr.payment_name = pe.name
+		pr.invoice_name = si.name
+		pr.get_unreconciled_entries()
+		pr.allocate_entries(
+			frappe._dict(
+				{
+					"invoices": [x.as_dict() for x in pr.get("invoices")],
+					"payments": [x.as_dict() for x in pr.get("payments")],
+				}
+			)
+		)
+		pr.reconcile()
+
+		si.reload()
+		self.assertEqual(flt(si.outstanding_amount, 2), 0.0)
+
+		# 840.34 of net plus its 159.66 of tax settle the invoice; the rest stays an advance.
+		pe.reload()
+		ref = next(r for r in pe.references if r.reference_name == si.name)
+		self.assertEqual(flt(ref.allocated_amount, 2), 840.34)
+		self.assertEqual(flt(ref.allocated_gross_amount, 2), 1000.0)
+		self.assertEqual(flt(pe.unallocated_gross_amount, 2), 190.0)
 
 	def test_payment_entry_against_pi(self):
 		pi = make_purchase_invoice(

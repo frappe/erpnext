@@ -1119,6 +1119,17 @@ frappe.ui.form.on("Payment Entry", {
 	},
 
 	get_gross_net_ratio: function (frm) {
+		// Mirrors `set_liability_account`: any reference other than an order makes this a
+		// normal payment, and then nothing reverses the tax back onto the party later.
+		if (
+			!cint(frm.doc.book_advance_payments_in_separate_party_account) ||
+			!(frm.doc.references || []).every((row) =>
+				frm.events.get_order_doctypes(frm).includes(row.reference_doctype)
+			)
+		) {
+			return 1;
+		}
+
 		// Only advance tax grosses the net up; a `Deduct` row already sits inside the net.
 		const is_pay = frm.doc.payment_type === "Pay";
 		const exchange_rate =
