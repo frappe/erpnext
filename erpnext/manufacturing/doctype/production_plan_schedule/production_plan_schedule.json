@@ -150,13 +150,14 @@
  ],
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-08-12 18:00:00.000000",
+ "modified": "2026-08-13 11:00:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan Schedule",
  "owner": "Administrator",
  "permissions": [
   {
+   "delete": 1,
    "email": 1,
    "export": 1,
    "print": 1,
@@ -166,6 +167,7 @@
    "share": 1
   },
   {
+   "delete": 1,
    "email": 1,
    "export": 1,
    "print": 1,

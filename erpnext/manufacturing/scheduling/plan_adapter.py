@@ -100,7 +100,11 @@ def run_engine(plan, start_date, use_item_dates=0, item_dates=None):
 	settings = frappe.get_cached_doc("Manufacturing Settings")
 
 	resources = loaders.get_workstation_resources()
-	load = loaders.get_booked_load([r.name for r in resources], start_date) if resources else {}
+	load = (
+		loaders.get_booked_load([r.name for r in resources], start_date, exclude_plan=plan.name)
+		if resources
+		else {}
+	)
 	engine = SchedulingEngine(
 		resources,
 		existing_load=load,

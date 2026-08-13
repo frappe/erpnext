@@ -5,6 +5,7 @@ import frappe
 from frappe.tests.utils import change_settings
 from frappe.utils import add_to_date, get_datetime
 
+from erpnext.manufacturing.doctype.job_card.job_card import OverlapError
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import (
 	create_production_plan,
 	make_bom,
@@ -171,6 +172,82 @@ class TestPlanAdapter(ERPNextTestSuite):
 		# the cleared date no longer constrains the chain, so the item schedules
 		# freely from the dialog start date instead of the stale persisted one
 		self.assertEqual(get_datetime(plan.po_items[0].planned_start_date), add_to_date(day_one, minutes=250))
+
+	@change_settings("Manufacturing Settings", {"mins_between_operations": 10, "allow_overtime": 0})
+	def test_other_plan_schedule_blocks_are_treated_as_load(self):
+		start_date = get_datetime("2027-01-04 09:00:00")
+		plan_one = self.make_plan()
+		apply_schedule(plan_one.name, start_date)
+
+		own_preview = get_schedule_preview(plan_one.name, start_date)
+		own_starts = sorted(
+			row["start"] for row in own_preview["rows"].values() if row["row_type"] == "Sub Assembly"
+		)
+		self.assertEqual(own_starts[0], start_date)
+
+		plan_two = self.make_plan()
+		preview = get_schedule_preview(plan_two.name, start_date)
+		self.assertFalse(preview["unscheduled"])
+		self.assert_no_block_overlap(plan_one.name, preview)
+
+		plan_one.reload()
+		plan_one.cancel()
+		preview_after_cancel = get_schedule_preview(plan_two.name, start_date)
+		two_starts = sorted(
+			row["start"] for row in preview_after_cancel["rows"].values() if row["row_type"] == "Sub Assembly"
+		)
+		self.assertEqual(two_starts[0], start_date)
+
+	def assert_no_block_overlap(self, plan_name, preview):
+		entries = frappe.get_all(
+			"Production Plan Schedule",
+			filters={"production_plan": plan_name},
+			fields=["workstation", "from_time", "to_time"],
+		)
+		blocks = [
+			block for row in preview["rows"].values() for block in row["blocks"] if block.get("workstation")
+		]
+		self.assertTrue(entries)
+		self.assertTrue(blocks)
+
+		for entry in entries:
+			for block in blocks:
+				overlaps = get_datetime(entry.from_time) < block["to_time"] and block[
+					"from_time"
+				] < get_datetime(entry.to_time)
+				self.assertFalse(overlaps, f"{block['task_key']} overlaps a block of {plan_name}")
+
+	def test_schedule_entry_overlap_validation(self):
+		workstation = "Test PPS WS Cap2"
+		if not frappe.db.exists("Workstation", workstation):
+			make_workstation(workstation=workstation, production_capacity=2)
+
+		plan = self.make_plan()
+
+		def make_entry(from_time, to_time):
+			entry = frappe.get_doc(
+				{
+					"doctype": "Production Plan Schedule",
+					"production_plan": plan.name,
+					"row_type": "Finished Good",
+					"item_code": "Test PPS FG",
+					"workstation": workstation,
+					"from_time": from_time,
+					"to_time": to_time,
+				}
+			)
+			entry.flags.from_scheduler = True
+			return entry
+
+		make_entry("2027-02-01 09:00:00", "2027-02-01 10:00:00").insert()
+		make_entry("2027-02-01 09:30:00", "2027-02-01 10:30:00").insert()
+
+		self.assertRaises(OverlapError, make_entry("2027-02-01 09:45:00", "2027-02-01 10:15:00").insert)
+		self.assertRaises(
+			frappe.ValidationError, make_entry("2027-02-01 12:00:00", "2027-02-01 11:00:00").insert
+		)
+
+		make_entry("2027-02-01 10:30:00", "2027-02-01 11:30:00").insert()
 
 	def test_manual_schedule_entry_creation_is_blocked(self):
 		plan = self.make_plan()

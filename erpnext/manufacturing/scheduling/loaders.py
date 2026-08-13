@@ -55,10 +55,11 @@ def get_workstation_calendar(row, settings):
 	return ResourceCalendar(daily_windows=daily_windows, holidays=holidays)
 
 
-def get_booked_load(resource_names, from_date):
+def get_booked_load(resource_names, from_date, exclude_plan=None):
 	load = defaultdict(list)
 	add_booked_intervals(load, "Job Card Scheduled Time", resource_names, from_date, drafts_only=True)
 	add_booked_intervals(load, "Job Card Time Log", resource_names, from_date, drafts_only=False)
+	add_plan_schedule_intervals(load, resource_names, from_date, exclude_plan)
 	return load
 
 
@@ -83,6 +84,44 @@ def add_booked_intervals(load, doctype, resource_names, from_date, drafts_only):
 
 	for row in query.run(as_dict=True):
 		load[row.workstation].append(Interval(get_datetime(row.from_time), get_datetime(row.to_time)))
+
+
+def add_plan_schedule_intervals(load, resource_names, from_date, exclude_plan):
+	schedule = frappe.qb.DocType("Production Plan Schedule")
+	plan = frappe.qb.DocType("Production Plan")
+
+	query = (
+		frappe.qb.from_(schedule)
+		.join(plan)
+		.on(schedule.production_plan == plan.name)
+		.select(schedule.workstation, schedule.from_time, schedule.to_time)
+		.where(
+			schedule.workstation.isin(resource_names)
+			& (schedule.to_time > from_date)
+			& (plan.docstatus < 2)
+			& (plan.status != "Closed")
+			& schedule.production_plan.notin(get_plans_with_job_cards())
+		)
+	)
+
+	if exclude_plan:
+		query = query.where(schedule.production_plan != exclude_plan)
+
+	for row in query.run(as_dict=True):
+		load[row.workstation].append(Interval(get_datetime(row.from_time), get_datetime(row.to_time)))
+
+
+def get_plans_with_job_cards():
+	job_card = frappe.qb.DocType("Job Card")
+	work_order = frappe.qb.DocType("Work Order")
+
+	return (
+		frappe.qb.from_(job_card)
+		.join(work_order)
+		.on(job_card.work_order == work_order.name)
+		.select(work_order.production_plan)
+		.where((job_card.docstatus < 2) & (work_order.production_plan != ""))
+	)
 
 
 def build_bom_operation_tasks(bom_no, qty, prefix, earliest_start=None, priority=0):
