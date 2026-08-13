@@ -262,4 +262,3 @@ class TestDeliveryNoteItemClose(ERPNextTestSuite):
 
 		self.assertEqual(note.per_billed, 100)
 		self.assertEqual(note.status, "Completed")
-
