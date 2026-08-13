@@ -28,7 +28,7 @@ class ItemPrice(Document):
 		currency: DF.Link | None
 		customer: DF.Link | None
 		item_code: DF.Link
-		item_description: DF.Text | None
+		item_description: DF.TextEditor | None
 		item_name: DF.Data | None
 		lead_time_days: DF.Int
 		note: DF.Text | None

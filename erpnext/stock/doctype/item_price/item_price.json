@@ -89,7 +89,7 @@
   },
   {
    "fieldname": "item_description",
-   "fieldtype": "Text",
+   "fieldtype": "Text Editor",
    "label": "Item Description",
    "read_only": 1
   },
@@ -224,7 +224,7 @@
  "idx": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-04-02 22:18:00.450641",
+ "modified": "2026-08-12 13:14:41.847412",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Price",
