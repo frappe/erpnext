@@ -279,7 +279,11 @@ class PurchaseInvoice(BuyingController):
 		self.check_conversion_rate()
 		self.validate_credit_to_acc()
 		self.clear_unallocated_advances("Purchase Invoice Advance", "advances")
+<<<<<<< HEAD
 		self.check_on_hold_or_closed_status()
+=======
+		self.check_purchase_order_on_hold_or_close("purchase_order", exclude_if_field="purchase_receipt")
+>>>>>>> fd728dacca (fix(buying): allow purchase returns against a closed purchase order (#58126))
 		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
@@ -1707,7 +1711,11 @@ class PurchaseInvoice(BuyingController):
 
 		super().on_cancel()
 
+<<<<<<< HEAD
 		self.check_on_hold_or_closed_status()
+=======
+		self.check_purchase_order_on_hold_or_close("purchase_order", exclude_if_field="purchase_receipt")
+>>>>>>> fd728dacca (fix(buying): allow purchase returns against a closed purchase order (#58126))
 
 		if self.is_return and not self.update_billed_amount_in_purchase_order:
 			# NOTE status updating bypassed for is_return

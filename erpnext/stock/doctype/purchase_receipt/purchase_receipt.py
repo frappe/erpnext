@@ -262,7 +262,11 @@ class PurchaseReceipt(BuyingController):
 		self.validate_cwip_accounts()
 		self.validate_provisional_expense_account()
 
+<<<<<<< HEAD
 		self.check_on_hold_or_closed_status()
+=======
+		self.check_purchase_order_on_hold_or_close("purchase_order")
+>>>>>>> fd728dacca (fix(buying): allow purchase returns against a closed purchase order (#58126))
 
 		if getdate(self.posting_date) > getdate(nowdate()):
 			throw(_("Posting Date cannot be future date"))
@@ -407,7 +411,11 @@ class PurchaseReceipt(BuyingController):
 	def on_cancel(self):
 		super().on_cancel()
 
+<<<<<<< HEAD
 		self.check_on_hold_or_closed_status()
+=======
+		self.check_purchase_order_on_hold_or_close("purchase_order")
+>>>>>>> fd728dacca (fix(buying): allow purchase returns against a closed purchase order (#58126))
 
 		self.update_prevdoc_status()
 		self.update_billing_status()
