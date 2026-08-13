@@ -1658,6 +1658,44 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(work_order.material_transferred_for_manufacturing, 1.0)
 		self.assertEqual(work_order.status, "In Process")
 
+	def test_material_transferred_reduced_by_alternative_item_returns(self):
+		"""Returned alternative items must reduce coverage of the required item they substituted."""
+		work_order = make_wo_order_test_record(planned_start_date=now(), qty=2)
+		alternative_item = make_item(
+			"Alternative RM For WO Coverage", {"is_stock_item": 1, "stock_uom": "_Test UOM"}
+		)
+		test_stock_entry.make_stock_entry(
+			item_code=alternative_item.name, target="_Test Warehouse - _TC", qty=10, basic_rate=100.0
+		)
+		test_stock_entry.make_stock_entry(
+			item_code="_Test Item Home Desktop 100", target="_Test Warehouse - _TC", qty=10, basic_rate=1000.0
+		)
+
+		transfer_entry = frappe.get_doc(
+			make_stock_entry(work_order.name, "Material Transfer for Manufacture", 2)
+		)
+		for item in transfer_entry.items:
+			if item.item_code == "_Test Item":
+				item.item_code = alternative_item.name
+				item.original_item = "_Test Item"
+		transfer_entry.submit()
+
+		work_order.reload()
+		self.assertEqual(work_order.material_transferred_for_manufacturing, 2.0)
+
+		return_entry = make_stock_return_entry(work_order.name)
+		return_entry.company = work_order.company
+		for row in list(return_entry.items):
+			if row.item_code != alternative_item.name:
+				return_entry.remove(row)
+		self.assertEqual(return_entry.items[0].original_item, "_Test Item")
+		return_entry.items[0].qty = 1
+		return_entry.save()
+		return_entry.submit()
+
+		work_order.reload()
+		self.assertEqual(work_order.material_transferred_for_manufacturing, 1.0)
+
 	def test_status_in_process_when_only_one_required_item_transferred(self):
 		"""Stock Entry created from a Pick List that picked only one of the required items:
 		min-fraction keeps material_transferred_for_manufacturing at 0, but the work order must
