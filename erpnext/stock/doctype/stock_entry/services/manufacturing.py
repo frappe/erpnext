@@ -791,9 +791,10 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		for row in self._consumption_entries:
 			row.warehouse = row.s_warehouse
 			buckets = self._get_available_buckets(row.item_code, row.warehouse)
-			self._deduct_consumed_qty(buckets, flt(row.qty))
 			if row.serial_and_batch_bundle:
 				self._deduct_consumed_serial_batch(buckets, row.serial_and_batch_bundle)
+			else:
+				self._deduct_consumed_qty(buckets, flt(row.qty))
 
 	def _get_available_buckets(self, item_code, warehouse):
 		return [
@@ -812,11 +813,16 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 	def _deduct_consumed_serial_batch(self, buckets, sabb_name):
 		_details = self.get_sabb_details(sabb_name)
 		if _details.serial_nos:
-			for serial_no in _details.serial_nos:
-				self._get_serial_no_bucket(buckets, serial_no).serial_nos.remove(serial_no)
+			self._deduct_consumed_serial_nos(buckets, _details.serial_nos)
 		elif _details.batches:
 			for batch_no, qty in _details.batches.items():
 				self._deduct_consumed_batch_qty(buckets, batch_no, -qty)
+
+	def _deduct_consumed_serial_nos(self, buckets, serial_nos):
+		for serial_no in serial_nos:
+			bucket = self._get_serial_no_bucket(buckets, serial_no)
+			bucket.serial_nos.remove(serial_no)
+			bucket.qty -= 1
 
 	def _get_serial_no_bucket(self, buckets, serial_no):
 		for bucket in buckets:
@@ -831,8 +837,10 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		for bucket in holders[:-1]:
 			deducted = min(max(flt(bucket.batches[batch_no]), 0.0), consumed_qty)
 			bucket.batches[batch_no] -= deducted
+			bucket.qty -= deducted
 			consumed_qty -= deducted
 		holders[-1].batches[batch_no] -= consumed_qty
+		holders[-1].qty -= consumed_qty
 
 	def add_additional_cost(self):
 		if not self.wo_doc:

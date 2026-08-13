@@ -1728,14 +1728,12 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(returned_by_item["_Test Item Home Desktop 100"], 2)
 		self.assertEqual(work_order.material_transferred_for_manufacturing, 1.0)
 
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"backflush_raw_materials_based_on": "Material Transferred for Manufacture"}
+	)
 	def test_return_after_consumption_distributes_across_attributions(self):
 		"""Manufacture consumption carries no original_item; it must drain attribution
 		buckets in transfer order so the return entry reflects what remains."""
-		frappe.db.set_single_value(
-			"Manufacturing Settings",
-			"backflush_raw_materials_based_on",
-			"Material Transferred for Manufacture",
-		)
 		work_order = make_wo_order_test_record(planned_start_date=now(), qty=2)
 		test_stock_entry.make_stock_entry(
 			item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=5000.0
