@@ -312,6 +312,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.calculate_rate_and_amount()
 		self.validate_putaway_capacity()
 		self.validate_component_and_quantities()
+		self._cap_completed_qty_to_material_coverage()
 		self.validate_finished_good_serial_batch_for_work_order()
 		# Stock Entry overrides validate() without calling super(), so the shared mandatory
 		# inventory dimension check must be invoked explicitly here.
@@ -1293,6 +1294,52 @@ class StockEntry(StockController, SubcontractingInwardController):
 					),
 					title=_("Missing Item"),
 				)
+
+	def _cap_completed_qty_to_material_coverage(self):
+		if not self._should_cap_completed_qty():
+			return
+
+		required_qty, transferred_qty = self._get_work_order_material_qty()
+		if not required_qty:
+			return
+
+		covered_before = self._get_covered_work_order_qty(required_qty, transferred_qty)
+		for row in self.items:
+			item_code = row.original_item or row.item_code
+			if row.s_warehouse and item_code in required_qty:
+				transferred_qty[item_code] += flt(row.qty) * flt(row.conversion_factor or 1)
+
+		covered_after = self._get_covered_work_order_qty(required_qty, transferred_qty)
+		covered_by_entry = flt(max(covered_after - covered_before, 0), self.precision("fg_completed_qty"))
+		self.fg_completed_qty = min(flt(self.fg_completed_qty), covered_by_entry)
+
+	def _should_cap_completed_qty(self):
+		if self.get("_action") != "submit":
+			return False
+		if not self.pro_doc or not self.fg_completed_qty:
+			return False
+		if self.is_return or self.get("is_additional_transfer_entry"):
+			return False
+		return not (self.pro_doc.operations and self.pro_doc.transfer_material_against == "Job Card")
+
+	def _get_work_order_material_qty(self):
+		required_qty = {}
+		transferred_qty = {}
+		for row in self.pro_doc.required_items:
+			if not row.include_item_in_manufacturing or flt(row.required_qty) <= 0:
+				continue
+			required_qty[row.item_code] = required_qty.get(row.item_code, 0.0) + flt(row.required_qty)
+			# Duplicate required-item rows each hold the aggregate transferred quantity.
+			transferred_qty[row.item_code] = max(
+				transferred_qty.get(row.item_code, 0.0), flt(row.transferred_qty)
+			)
+		return required_qty, transferred_qty
+
+	def _get_covered_work_order_qty(self, required_qty, transferred_qty):
+		min_fraction = min(
+			flt(transferred_qty.get(item_code)) / qty for item_code, qty in required_qty.items()
+		)
+		return min_fraction * flt(self.pro_doc.qty)
 
 	def _validate_no_excess_transfer(self):
 		if self.is_return:

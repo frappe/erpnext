@@ -720,29 +720,9 @@ class WorkOrder(Document):
 		return status
 
 	def _has_transferred_material(self):
-		"""True if any raw material transferred against this work order via a pick list or a
-		material request is still, net of returns, in WIP (these leave
-		material_transferred_for_manufacturing at 0 via the min-fraction rule)."""
+		"""True if any raw material transferred against this work order is still in WIP."""
 		ste = frappe.qb.DocType("Stock Entry")
 		ste_child = frappe.qb.DocType("Stock Entry Detail")
-		mr_ste = frappe.qb.DocType("Stock Entry")
-		mr_child = frappe.qb.DocType("Stock Entry Detail")
-		# Stock Entry only carries `material_request` at the child-row level, so a Stock
-		# Entry is "MR-sourced" if *any* of its rows link back to a Material Request against
-		# this work order; the join to mr_ste keeps this scoped to this work order's entries
-		# instead of scanning every Material-Request-linked row in the system.
-		mr_sourced_stock_entries = (
-			frappe.qb.from_(mr_child)
-			.inner_join(mr_ste)
-			.on(mr_ste.name == mr_child.parent)
-			.select(mr_child.parent)
-			.where(
-				(mr_child.material_request.isnotnull())
-				& (mr_ste.work_order == self.name)
-				& (mr_ste.docstatus == 1)
-				& (mr_ste.purpose == "Material Transfer for Manufacture")
-			)
-		)
 		common_filters = (
 			(ste.work_order == self.name)
 			& (ste.docstatus == 1)
@@ -753,11 +733,7 @@ class WorkOrder(Document):
 			.inner_join(ste_child)
 			.on(ste_child.parent == ste.name)
 			.select(Sum(ste_child.transfer_qty))
-			.where(
-				common_filters
-				& (ste.is_return == 0)
-				& (ste.pick_list.isnotnull() | ste.name.isin(mr_sourced_stock_entries))
-			)
+			.where(common_filters & (ste.is_return == 0))
 		).run()[0][0]
 		# Returns don't carry their own pick_list/material_request reference, so net every
 		# return against this work order to correctly clear WIP after a full return.
@@ -1808,22 +1784,15 @@ class WorkOrder(Document):
 		return frappe._dict({d.original_item or d.item_code: d.qty for d in data})
 
 	def recompute_material_transferred_for_manufacturing(self, transferred_items):
-		"""Set material_transferred_for_manufacturing based on actual item-level transfers, not fg_completed_qty."""
+		"""Set transferred quantity from the raw materials that have actually moved."""
 		# Job Card transfers use the minimum completed quantity across operations.
 		if self.operations and self.transfer_material_against == "Job Card":
 			return
 
-		# When fg_completed_qty > 0 (direct stock entries, excess transfer), preserve the
-		# SUM(fg_completed_qty) approach so excess-transfer tracking works correctly.
-		sum_fg_completed_qty = self.get_transferred_or_manufactured_qty(
+		claimed_qty = self.get_transferred_or_manufactured_qty(
 			"Material Transfer for Manufacture", "material_transferred_for_manufacturing"
 		)
-		if sum_fg_completed_qty:
-			self.db_set("material_transferred_for_manufacturing", sum_fg_completed_qty)
-			return
 
-		# Pick list flow sets fg_completed_qty=0; use min-fraction of actual item transfers
-		# so partial availability does not prematurely mark the work order as fully transferred.
 		required_by_item = {}
 		for row in self.required_items:
 			if not row.include_item_in_manufacturing or flt(row.required_qty) <= 0:
@@ -1837,8 +1806,8 @@ class WorkOrder(Document):
 			flt(transferred_items.get(item_code) or 0) / required_qty
 			for item_code, required_qty in required_by_item.items()
 		)
-		min_fraction = min(min_fraction, 1.0)
-		material_transferred = min_fraction * flt(self.qty)
+		covered_qty = min_fraction * flt(self.qty)
+		material_transferred = min(covered_qty, max(flt(self.qty), claimed_qty))
 		self.db_set("material_transferred_for_manufacturing", material_transferred)
 
 	def update_qty_in_stock_reservation(self, row, transferred_qty, row_wise_serial_batch):
