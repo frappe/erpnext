@@ -6,11 +6,8 @@ from collections import OrderedDict
 
 import frappe
 from frappe import _, qb, query_builder, scrub
-<<<<<<< HEAD
 from frappe.database.schema import get_definition
-=======
 from frappe.permissions import get_allowed_docs_for_doctype
->>>>>>> 8b09ba429e (fix: apply Sales Person user permissions in Accounts Receivable)
 from frappe.query_builder import Criterion
 from frappe.query_builder.functions import Date, Substring, Sum
 from frappe.utils import cint, cstr, flt, getdate, nowdate
@@ -932,25 +929,11 @@ class ReceivablePayableReport:
 
 		if self.filters.get("sales_person"):
 			lft, rgt = frappe.db.get_value("Sales Person", self.filters.get("sales_person"), ["lft", "rgt"])
-<<<<<<< HEAD
-
-			# nosemgrep
-			records = frappe.db.sql(
-				"""
-				select distinct parent, parenttype
-				from `tabSales Team` steam
-				where parenttype in ('Customer', 'Sales Invoice')
-					and exists(select name from `tabSales Person` where lft >= %s and rgt <= %s and name = steam.sales_person)
-			""",
-				(lft, rgt),
-				as_dict=1,
-=======
 			sp = frappe.qb.DocType("Sales Person")
 			conditions.append(
 				steam.sales_person.isin(
 					frappe.qb.from_(sp).select(sp.name).where((sp.lft >= lft) & (sp.rgt <= rgt))
 				)
->>>>>>> 8b09ba429e (fix: apply Sales Person user permissions in Accounts Receivable)
 			)
 
 		records = (
