@@ -790,11 +790,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2026-07-27 12:00:00.000000",
-=======
  "modified": "2026-08-13 14:48:13.211701",
->>>>>>> 84cdd0daf0 (fix: describe stale exchange rate settings)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
