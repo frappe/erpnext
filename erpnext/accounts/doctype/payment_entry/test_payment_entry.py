@@ -1275,6 +1275,105 @@ class TestPaymentEntry(ERPNextTestSuite):
 		self.assertEqual(flt(ref.allocated_gross_amount, 2), 1000.0)
 		self.assertEqual(flt(pe.unallocated_gross_amount, 2), 190.0)
 
+	def test_reconciled_advance_does_not_overpay_invoice_without_ref_details(self):
+		"""Process Payment Reconciliation skips the reference details update for multi-currency,
+		so the row does not know its outstanding yet. The cap still has to hold."""
+		advance_account = self.enable_advance_in_separate_party_account()
+
+		pe = create_payment_entry(
+			party_type="Customer",
+			party="_Test Customer",
+			payment_type="Receive",
+			paid_from="Debtors - _TC",
+			paid_to="_Test Cash - _TC",
+			paid_amount=1190,
+		)
+		pe.append(
+			"taxes",
+			{
+				"account_head": "_Test Account Service Tax - _TC",
+				"charge_type": "On Paid Amount",
+				"rate": 19,
+				"add_deduct_tax": "Add",
+				"included_in_paid_amount": 1,
+				"description": "VAT 19%",
+			},
+		)
+		pe.save()
+		pe.submit()
+
+		si = create_sales_invoice(qty=1, rate=1000, customer="_Test Customer")
+
+		pr = frappe.get_doc("Payment Reconciliation")
+		pr.company = "_Test Company"
+		pr.party_type = "Customer"
+		pr.party = "_Test Customer"
+		pr.receivable_payable_account = si.debit_to
+		pr.default_advance_account = advance_account
+		pr.payment_name = pe.name
+		pr.invoice_name = si.name
+		pr.get_unreconciled_entries()
+		pr.allocate_entries(
+			frappe._dict(
+				{
+					"invoices": [x.as_dict() for x in pr.get("invoices")],
+					"payments": [x.as_dict() for x in pr.get("payments")],
+				}
+			)
+		)
+		pr.reconcile_allocations(skip_ref_details_update_for_pe=True)
+
+		si.reload()
+		self.assertEqual(flt(si.outstanding_amount, 2), 0.0)
+
+		pe.reload()
+		ref = next(r for r in pe.references if r.reference_name == si.name)
+		self.assertEqual(flt(ref.allocated_amount, 2), 840.34)
+		self.assertEqual(flt(ref.allocated_gross_amount, 2), 1000.0)
+
+	def test_larger_invoice_consumes_full_advance_gross(self):
+		"""An invoice bigger than the advance must take the whole gross. Capping
+		against the leftover outstanding (already net of this advance) would
+		under-consume the deposit."""
+		self.enable_advance_in_separate_party_account()
+		pe = create_payment_entry(
+			party_type="Customer",
+			party="_Test Customer",
+			payment_type="Receive",
+			paid_from="Debtors - _TC",
+			paid_to="_Test Cash - _TC",
+			paid_amount=1190,
+		)
+		pe.append(
+			"taxes",
+			{
+				"account_head": "_Test Account Service Tax - _TC",
+				"charge_type": "On Paid Amount",
+				"rate": 19,
+				"add_deduct_tax": "Add",
+				"included_in_paid_amount": 1,
+				"description": "VAT 19%",
+			},
+		)
+		pe.save()
+		pe.submit()
+
+		si = create_sales_invoice(qty=1, rate=1428, customer="_Test Customer", do_not_save=True)
+		si.disable_rounded_total = 1
+		si.allocate_advances_automatically = 1
+		si.insert()
+		si.submit()
+
+		si.reload()
+		self.assertEqual(flt(si.advances[0].allocated_amount, 2), 1000.0)
+		self.assertEqual(flt(si.advances[0].allocated_gross_amount, 2), 1190.0)
+		self.assertEqual(flt(si.outstanding_amount, 2), 238.0)
+
+		pe.reload()
+		ref = next(r for r in pe.references if r.reference_name == si.name)
+		self.assertEqual(flt(ref.allocated_amount, 2), 1000.0)
+		self.assertEqual(flt(ref.allocated_gross_amount, 2), 1190.0)
+
 	def test_advance_exchange_gain_loss_follows_gross(self):
 		"""The party leg clears the invoice by the gross, so the rate difference must be
 		booked on the gross or the receivable keeps a company-currency residue."""

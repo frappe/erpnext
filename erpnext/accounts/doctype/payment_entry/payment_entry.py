@@ -825,20 +825,9 @@ class PaymentEntry(AccountsController):
 					if ref.reference_doctype in ADVANCE_GROSS_REFERENCE_TYPES
 					else 0
 				)
-				gross = flt(flt(ref.allocated_amount) + tax_sum, ref_precision)
-				# `outstanding_amount` only caps rows this entry has not booked against yet.
-				outstanding = (
-					flt(ref.outstanding_amount, ref_precision)
-					if self.docstatus.is_draft() or ref.is_new()
-					else 0
-				)
-				# Callers allocate in net, so shrink the party leg to what the gross may settle.
-				if tax_sum and outstanding > 0 and gross > outstanding:
-					ref.allocated_amount = flt(ref.allocated_amount * outstanding / gross, ref_precision)
-					gross = outstanding
-				ref.allocated_gross_amount = gross
+				ref.allocated_gross_amount = flt(flt(ref.allocated_amount) + tax_sum, ref_precision)
 
-		# Allocations may have shrunk to fit, and exchange gain/loss follows the gross.
+		# Exchange gain/loss follows the gross, which `set_amounts` ran too early to see.
 		self.set_amounts()
 
 		# Grossed up by advance tax only, like the reference rows above.

@@ -807,6 +807,35 @@ def update_reference_in_payment_entry(
 			update_ref_details_only_for=[(d.against_voucher_type, d.against_voucher)],
 			reference_exchange_details=reference_exchange_details,
 		)
+	# Reconciliation matches net against gross outstanding and does not pass
+	# outstanding_amount. The invoice path does, and has already capped.
+	if d.get("outstanding_amount") is None:
+		from erpnext.accounts.doctype.payment_entry.payment_entry import (
+			ADVANCE_GROSS_REFERENCE_TYPES,
+			get_reference_details,
+		)
+
+		if (
+			payment_entry.book_advance_payments_in_separate_party_account
+			and row.reference_doctype in ADVANCE_GROSS_REFERENCE_TYPES
+		):
+			precision = row.precision("allocated_amount")
+			outstanding = flt(row.outstanding_amount, precision)
+			# Multi-currency reconciliation skips the reference details update.
+			if not outstanding:
+				outstanding = flt(
+					get_reference_details(
+						row.reference_doctype,
+						row.reference_name,
+						payment_entry.party_account_currency,
+						payment_entry.party_type,
+						payment_entry.party,
+					).outstanding_amount,
+					precision,
+				)
+			gross = flt(flt(row.allocated_amount) * payment_entry.get_gross_net_ratio(), precision)
+			if outstanding > 0 and gross > outstanding:
+				row.allocated_amount = flt(row.allocated_amount * outstanding / gross, precision)
 	payment_entry.set_amounts()
 	payment_entry.set_allocated_gross_amount()
 
