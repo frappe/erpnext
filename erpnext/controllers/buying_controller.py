@@ -981,6 +981,14 @@ class BuyingController(SubcontractingController):
 			item.serial_and_batch_bundle, warehouse, type_of_transaction=type_of_transaction
 		)
 
+	def check_purchase_order_on_hold_or_close(self, ref_fieldname, exclude_if_field=None):
+		if self.get("is_return"):
+			return
+
+		self.check_for_on_hold_or_closed_status(
+			"Purchase Order", ref_fieldname, exclude_if_field=exclude_if_field
+		)
+
 	def update_ordered_and_reserved_qty(self):
 		po_map = {}
 		for d in self.get("items"):
@@ -994,7 +1002,7 @@ class BuyingController(SubcontractingController):
 			if po and po_item_rows:
 				po_obj = frappe.get_lazy_doc("Purchase Order", po)
 
-				if po_obj.status in ["Closed", "Cancelled"]:
+				if po_obj.status == "Cancelled" or (po_obj.status == "Closed" and not self.get("is_return")):
 					frappe.throw(
 						_("{doctype} {name} is cancelled or closed.").format(
 							doctype=frappe.bold(_("Purchase Order")),
