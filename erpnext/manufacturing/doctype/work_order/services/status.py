@@ -10,7 +10,7 @@ callers (job cards, sales orders, production plans, patches) keep working.
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import cint, flt, get_link_to_form
 
 from erpnext.stock.stock_balance import get_planned_qty, update_bin_qty
@@ -278,7 +278,13 @@ class StatusService:
 				.where(child.is_finished_item == 1)
 			)
 		else:
-			query = query.select(Sum(parent.fg_completed_qty))
+			job_card = frappe.qb.DocType("Job Card")
+			query = (
+				query.left_join(job_card)
+				.on(parent.job_card == job_card.name)
+				.where(IfNull(job_card.is_corrective_job_card, 0) == 0)
+				.select(Sum(parent.fg_completed_qty))
+			)
 
 		return flt(query.run()[0][0])
 

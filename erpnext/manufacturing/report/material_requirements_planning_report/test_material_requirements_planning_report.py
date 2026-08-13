@@ -2,11 +2,13 @@
 # See license.txt
 
 import frappe
-from frappe.utils import add_days, flt, today
+from frappe.tests.classes.context_managers import freeze_time
+from frappe.utils import add_days, flt, formatdate, today
 
 from erpnext.accounts.doctype.tax_rule.test_tax_rule import make_tax_rule
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 from erpnext.manufacturing.report.material_requirements_planning_report.material_requirements_planning_report import (
+	MaterialRequirementsPlanningReport,
 	execute,
 	get_item_lead_time,
 	make_order,
@@ -21,6 +23,53 @@ TAX_TEMPLATE = "_Test Purchase Taxes and Charges Template - _TC"
 
 
 class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
+	def test_detailed_chart_includes_full_date_range(self):
+		with freeze_time("2026-08-12"):
+			start_date = add_days(today(), 1)
+			delivery_dates = [add_days(start_date, offset) for offset in range(12)]
+			rows = [make_chart_row(delivery_date) for delivery_date in delivery_dates]
+			rows.append(make_chart_row(delivery_dates[-1], planned_qty=2))
+
+			chart = MaterialRequirementsPlanningReport(frappe._dict()).get_detailed_view_chart_data(rows)
+
+			self.assertEqual(
+				chart["data"]["labels"],
+				[formatdate(delivery_date, "dd MMM") for delivery_date in delivery_dates],
+			)
+			self.assertEqual(chart["data"]["datasets"][0]["values"], [1] * 11 + [3])
+
+	def test_detailed_chart_distinguishes_delivery_dates_across_years(self):
+		with freeze_time("2026-08-12"):
+			delivery_dates = ["2026-08-15", "2027-08-15"]
+			rows = [
+				make_chart_row(delivery_dates[0]),
+				make_chart_row(delivery_dates[1], planned_qty=2),
+			]
+
+			chart = MaterialRequirementsPlanningReport(frappe._dict()).get_detailed_view_chart_data(rows)
+
+			self.assertEqual(
+				chart["data"]["labels"],
+				[formatdate(delivery_date, "dd MMM yyyy") for delivery_date in delivery_dates],
+			)
+			self.assertEqual(chart["data"]["datasets"][0]["values"], [1, 2])
+
+	def test_detailed_chart_excludes_past_and_empty_delivery_dates(self):
+		with freeze_time("2026-08-12"):
+			delivery_dates = [today(), add_days(today(), 1)]
+			rows = [
+				make_chart_row(add_days(today(), -1)),
+				make_chart_row(None),
+				*[make_chart_row(delivery_date) for delivery_date in delivery_dates],
+			]
+
+			chart = MaterialRequirementsPlanningReport(frappe._dict()).get_detailed_view_chart_data(rows)
+
+			self.assertEqual(
+				chart["data"]["labels"],
+				[formatdate(delivery_date, "dd MMM") for delivery_date in delivery_dates],
+			)
+
 	def test_manufacture_lead_time_is_not_int_truncated(self):
 		"""lead_time = 1440 / manufacturing_time_in_mins + buffer_time. Both columns are Int;
 		integer/integer division truncates on Postgres (1440/7 -> 205) while MariaDB yields a
@@ -81,6 +130,18 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		self.assertEqual(
 			purchase_order.grand_total, net_total + net_total * flt(template.taxes[0].rate) / 100
 		)
+
+
+def make_chart_row(delivery_date, planned_qty=1):
+	return frappe._dict(
+		{
+			"delivery_date": delivery_date,
+			"planned_qty": planned_qty,
+			"in_hand_qty": 0,
+			"po_ordered_qty": 0,
+			"wo_ordered_qty": 0,
+		}
+	)
 
 
 def make_mrp_plan(test_case, planned_qty=10, rm_qty=2):
