@@ -1169,20 +1169,25 @@ frappe.ui.form.on("Payment Entry", {
 	},
 
 	taxes_changed: function (frm) {
+		// A rate change only moves the split between net and tax, so each reference still owes the
+		// same gross. Re-deriving the net from it keeps hand-made allocations and the total intact.
+		const old_ratio = frm.events.get_gross_net_ratio(frm);
+		const gross_amounts = (frm.doc.references || []).map((row) => flt(row.allocated_amount) * old_ratio);
+
 		frm.events.apply_taxes(frm);
 
-		// Included taxes change how much is left to allocate. Only redistribute when allocation is
-		// automatic, as re-allocating with the flag off would zero the rows the user typed by hand.
-		if (frappe.flags.allocate_payment_amount) {
-			frm.events.allocate_party_amount_against_ref_docs(
-				frm,
-				frm.doc.payment_type == "Receive" ? frm.doc.paid_amount : frm.doc.received_amount,
-				false
-			);
-		} else {
-			frm.events.refresh_allocated_gross_amounts(frm);
-			frm.events.set_unallocated_amount(frm);
-		}
+		const ratio = frm.events.get_gross_net_ratio(frm);
+		const precision = frappe.meta.get_field_precision(
+			frappe.meta.get_docfield("Payment Entry Reference", "allocated_amount"),
+			frm.doc
+		);
+		(frm.doc.references || []).forEach((row, i) => {
+			row.allocated_amount = flt(gross_amounts[i] / ratio, precision);
+		});
+		frm.refresh_field("references");
+
+		frm.events.refresh_allocated_gross_amounts(frm);
+		frm.events.set_total_allocated_amount(frm);
 	},
 
 	set_total_allocated_amount: function (frm) {
