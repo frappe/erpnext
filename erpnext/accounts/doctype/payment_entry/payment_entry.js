@@ -1169,10 +1169,13 @@ frappe.ui.form.on("Payment Entry", {
 	},
 
 	taxes_changed: function (frm) {
-		// A rate change only moves the split between net and tax, so each reference still owes the
+		// A tax edit only moves the split between net and tax, so each reference still owes the
 		// same gross. Re-deriving the net from it keeps hand-made allocations and the total intact.
-		const old_ratio = frm.events.get_gross_net_ratio(frm);
-		const gross_amounts = (frm.doc.references || []).map((row) => flt(row.allocated_amount) * old_ratio);
+		// Read the stored gross: deriving it here would price the edited row, which already carries
+		// the new `included_in_paid_amount`, against amounts `apply_taxes` has not refreshed yet.
+		const gross_amounts = (frm.doc.references || []).map(
+			(row) => flt(row.allocated_gross_amount) || flt(row.allocated_amount)
+		);
 
 		frm.events.apply_taxes(frm);
 
