@@ -203,8 +203,8 @@ class StatusService:
 			return
 
 		if fieldname == "material_transferred_for_manufacturing":
-			# Owned by the net-coverage recomputation; the claimed fg_completed_qty is not
-			# validated here because item rows, not the claim, decide the stored value.
+			# Owned by the net-coverage recomputation; the per-entry allowance guard runs on
+			# stock entry submit, where the submitting entry's claim is known.
 			self.doc.refresh_material_transferred_for_manufacturing()
 			self.set_process_loss_qty()
 			self._update_produced_qty_in_so()

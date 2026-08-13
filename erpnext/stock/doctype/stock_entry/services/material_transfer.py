@@ -382,6 +382,7 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 			if self.doc.fg_completed_qty:
 				if self.doc.docstatus == 1:
 					self.wo_doc.add_additional_items(self.doc)
+					self._validate_transfer_within_allowance()
 				else:
 					self.wo_doc.remove_additional_items(self.doc)
 
@@ -390,6 +391,34 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 			self.wo_doc.run_method("update_status")
 			if not self.wo_doc.operations:
 				self.wo_doc.set_actual_dates()
+
+	def _validate_transfer_within_allowance(self):
+		"""Reject a transfer whose For Quantity, on top of the effective qty already
+		transferred, exceeds the planned qty plus the transfer allowance."""
+		from erpnext.manufacturing.doctype.work_order.services.status import StatusService
+		from erpnext.manufacturing.doctype.work_order.work_order import StockOverProductionError
+
+		if self.doc.is_return or self.doc.is_additional_transfer_entry:
+			return
+		if self.wo_doc.track_semi_finished_goods:
+			return
+		if self.wo_doc.operations and self.wo_doc.transfer_material_against == "Job Card":
+			return
+
+		allowance = StatusService(self.wo_doc).get_qty_allowance("Material Transfer for Manufacture")
+		allowed_qty = flt(self.wo_doc.qty) * (1.0 + allowance / 100.0)
+		transferred_qty = flt(self.wo_doc.material_transferred_for_manufacturing)
+		projected_qty = transferred_qty + flt(self.doc.fg_completed_qty)
+		precision = self.wo_doc.precision("material_transferred_for_manufacturing")
+		if flt(projected_qty, precision) <= flt(allowed_qty, precision):
+			return
+
+		frappe.throw(
+			_(
+				"For Quantity ({0}) with the already transferred quantity ({1}) cannot be greater than allowed quantity ({2}) in Work Order {3}"
+			).format(flt(self.doc.fg_completed_qty), transferred_qty, allowed_qty, self.wo_doc.name),
+			StockOverProductionError,
+		)
 
 
 class MaterialRequestStockEntry(BaseMaterialTransferStockEntry):
