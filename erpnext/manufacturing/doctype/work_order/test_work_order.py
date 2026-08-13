@@ -1480,9 +1480,10 @@ class TestWorkOrder(ERPNextTestSuite):
 		del transfer_entry.get("items")[0]  # transfer only one RM
 		transfer_entry.submit()
 
-		# WO's "Material Transferred for Mfg" shows all is transferred, one RM is pending
+		# For Quantity claimed 1, but the untouched RM caps the covered qty at 0
 		work_order.reload()
-		self.assertEqual(work_order.material_transferred_for_manufacturing, 1)
+		self.assertEqual(work_order.material_transferred_for_manufacturing, 0)
+		self.assertEqual(work_order.status, "In Process")
 		self.assertEqual(work_order.required_items[0].transferred_qty, 0)
 		self.assertEqual(work_order.required_items[1].transferred_qty, 2)
 
@@ -1563,6 +1564,41 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		work_order.reload()
 		self.assertEqual(work_order.material_transferred_for_manufacturing, 2.0)
+
+	def test_material_transferred_capped_by_actual_item_transfers(self):
+		"""A transfer entry claiming For Quantity for the whole work order while its rows
+		carry less must only count the covered qty; the remainder stays transferable."""
+		work_order = make_wo_order_test_record(planned_start_date=now(), qty=4)
+		test_stock_entry.make_stock_entry(
+			item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=5000.0
+		)
+		test_stock_entry.make_stock_entry(
+			item_code="_Test Item Home Desktop 100", target="_Test Warehouse - _TC", qty=10, basic_rate=1000.0
+		)
+
+		transfer_entry = frappe.get_doc(
+			make_stock_entry(work_order.name, "Material Transfer for Manufacture", 4)
+		)
+		for item in transfer_entry.items:
+			if item.item_code == "_Test Item":
+				item.qty = 1
+				item.transfer_qty = 1
+		transfer_entry.submit()
+
+		work_order.reload()
+		self.assertEqual(transfer_entry.fg_completed_qty, 4.0)
+		self.assertEqual(work_order.material_transferred_for_manufacturing, 1.0)
+		self.assertEqual(work_order.status, "In Process")
+
+		remainder_entry = frappe.get_doc(
+			make_stock_entry(work_order.name, "Material Transfer for Manufacture", 0)
+		)
+		self.assertEqual(remainder_entry.items[0].item_code, "_Test Item")
+		self.assertEqual(remainder_entry.items[0].qty, 3)
+		remainder_entry.submit()
+
+		work_order.reload()
+		self.assertEqual(work_order.material_transferred_for_manufacturing, 4.0)
 
 	def test_status_in_process_when_only_one_required_item_transferred(self):
 		"""Stock Entry created from a Pick List that picked only one of the required items:
