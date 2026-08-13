@@ -1334,6 +1334,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 	def _should_cap_completed_qty(self):
 		if self.get("_action") != "submit":
 			return False
+		if self.purpose != "Material Transfer for Manufacture":
+			return False
 		if not self.pro_doc or not self.fg_completed_qty:
 			return False
 		if self.is_return or self.get("is_additional_transfer_entry"):

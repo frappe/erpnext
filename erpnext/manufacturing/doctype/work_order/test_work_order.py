@@ -1521,6 +1521,14 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(remainder_entry.fg_completed_qty, 3)
 		self.assertEqual(work_order.material_transferred_for_manufacturing, 4)
 
+	def test_material_coverage_cap_skips_manufacture_entry(self):
+		work_order = make_wo_order_test_record(planned_start_date=now(), qty=1)
+		manufacture_entry = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 1))
+		manufacture_entry.pro_doc = work_order
+		manufacture_entry._action = "submit"
+
+		self.assertFalse(manufacture_entry._should_cap_completed_qty())
+
 	def test_material_transferred_min_fraction_on_partial_pick_list(self):
 		"""Pick-list flow (fg_completed_qty = 0): 'Material Transferred for Manufacturing'
 		must reflect the least-transferred required item (the bottleneck), instead of being
