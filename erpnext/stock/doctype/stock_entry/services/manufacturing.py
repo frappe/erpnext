@@ -669,6 +669,8 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		item_args["qty"] = ceil_qty_if_uom_has_whole_number(qty, row.uom)
 		item_args["transfer_qty"] = item_args["qty"]
 		if is_return:
+			if row.get("original_item"):
+				item_args["original_item"] = row.original_item
 			item_args["s_warehouse"], item_args["t_warehouse"] = row.s_warehouse, row.t_warehouse
 		else:
 			item_args["t_warehouse"], item_args["s_warehouse"] = None, row.warehouse
