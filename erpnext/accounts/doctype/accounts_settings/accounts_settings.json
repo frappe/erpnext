@@ -199,10 +199,12 @@
   },
   {
    "default": "1",
+   "description": "System will use the latest saved Currency Exchange rate on or before the transaction date, however old it is. <br>\nUncheck to ignore rates older than Stale Days and fetch a fresh rate from the exchange rate provider instead.",
    "fieldname": "allow_stale",
    "fieldtype": "Check",
    "in_list_view": 1,
-   "label": "Allow Stale Exchange Rates"
+   "label": "Allow Stale Exchange Rates",
+   "show_description_on_click": 1
   },
   {
    "default": "1",
@@ -796,7 +798,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-07-15 17:00:00.000000",
+ "modified": "2026-08-13 14:48:13.211701",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
