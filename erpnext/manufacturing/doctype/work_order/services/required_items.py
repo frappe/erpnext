@@ -148,7 +148,7 @@ class RequiredItemsService:
 					row, transferred_qty, row_wise_serial_batch
 				)
 
-		self.recompute_material_transferred_for_manufacturing(transferred_items)
+		self.recompute_material_transferred_for_manufacturing()
 
 	def refresh_material_transferred_for_manufacturing(self):
 		"""Recompute material_transferred_for_manufacturing only, without touching per-row
@@ -157,32 +157,26 @@ class RequiredItemsService:
 		"""
 		if self.doc.skip_transfer:
 			return
-		transferred_items = self._material_transfer_qty_by_item(is_return=0)
-		self.recompute_material_transferred_for_manufacturing(transferred_items)
+		self.recompute_material_transferred_for_manufacturing()
 
-	def recompute_material_transferred_for_manufacturing(self, transferred_items):
-		"""Set material_transferred_for_manufacturing to the claimed SUM(fg_completed_qty),
-		capped by the finished-good qty the transferred item quantities actually cover.
+	def recompute_material_transferred_for_manufacturing(self):
+		"""Set material_transferred_for_manufacturing to the finished-good qty covered by net
+		item-level transfers (transfers minus returns), capped at the transfer allowance.
+		Falls back to the claimed SUM(fg_completed_qty) when coverage is unmeasurable.
 		"""
 		# Job Card transfers use the minimum completed quantity across operations.
 		if self.doc.operations and self.doc.transfer_material_against == "Job Card":
 			return
 
-		claimed_qty = StatusService(self.doc).get_transferred_or_manufactured_qty(
-			"Material Transfer for Manufacture", "material_transferred_for_manufacturing"
-		)
-		covered_qty = self._transfer_covered_qty(transferred_items)
-
+		covered_qty = self._transfer_covered_qty()
 		if covered_qty is None:
-			if claimed_qty:
-				self.doc.db_set("material_transferred_for_manufacturing", claimed_qty)
-			return
+			covered_qty = StatusService(self.doc).get_transferred_or_manufactured_qty(
+				"Material Transfer for Manufacture", "material_transferred_for_manufacturing"
+			)
+		self.doc.db_set("material_transferred_for_manufacturing", covered_qty)
 
-		material_transferred = min(claimed_qty, covered_qty) if claimed_qty else covered_qty
-		self.doc.db_set("material_transferred_for_manufacturing", material_transferred)
-
-	def _transfer_covered_qty(self, transferred_items):
-		"""Finished-good qty covered by the transferred raw materials, None when unmeasurable."""
+	def _transfer_covered_qty(self):
+		"""Finished-good qty covered by net transferred raw materials, None when unmeasurable."""
 		required_by_item = {}
 		for row in self.doc.required_items:
 			if not row.include_item_in_manufacturing or flt(row.required_qty) <= 0:
@@ -192,12 +186,22 @@ class RequiredItemsService:
 		if not required_by_item:
 			return None
 
+		net_transferred = self._net_transferred_qty_by_item()
 		min_fraction = min(
-			flt(transferred_items.get(item_code) or 0) / required_qty
+			flt(net_transferred.get(item_code) or 0) / required_qty
 			for item_code, required_qty in required_by_item.items()
 		)
-		covered_qty = min(min_fraction, 1.0) * flt(self.doc.qty)
+		allowance = StatusService(self.doc).get_qty_allowance("Material Transfer for Manufacture")
+		covered_qty = min(min_fraction, 1.0 + allowance / 100.0) * flt(self.doc.qty)
 		return flt(covered_qty, self.doc.precision("material_transferred_for_manufacturing"))
+
+	def _net_transferred_qty_by_item(self):
+		transferred = self._material_transfer_qty_by_item(is_return=0, exclude_additional=True)
+		returned = self._material_transfer_qty_by_item(is_return=1, exclude_additional=True)
+		net = frappe._dict()
+		for item_code, qty in transferred.items():
+			net[item_code] = max(0.0, flt(qty) - flt(returned.get(item_code) or 0.0))
+		return net
 
 	def update_returned_qty(self):
 		returned_dict = self._material_transfer_qty_by_item(is_return=1)
@@ -295,7 +299,7 @@ class RequiredItemsService:
 		)
 		return frappe._dict({d.item_code: flt(d.qty) for d in query.run(as_dict=1)})
 
-	def _material_transfer_qty_by_item(self, is_return):
+	def _material_transfer_qty_by_item(self, is_return, exclude_additional=False):
 		ste = frappe.qb.DocType("Stock Entry")
 		ste_child = frappe.qb.DocType("Stock Entry Detail")
 		job_card = frappe.qb.DocType("Job Card")
@@ -316,7 +320,7 @@ class RequiredItemsService:
 				ste_child.original_item,
 				fn.Sum(ste_child.transfer_qty).as_("qty"),
 			)
-			.where(self._material_transfer_filter(ste, is_return))
+			.where(self._material_transfer_filter(ste, is_return, exclude_additional))
 			.where(fn.Coalesce(job_card.is_corrective_job_card, 0) == 0)
 			.groupby(ste_child.item_code, ste_child.original_item)
 		)
@@ -326,14 +330,16 @@ class RequiredItemsService:
 			qty_by_item[key] = (qty_by_item.get(key) or 0.0) + flt(d.qty)
 
 		if is_return:
-			return self._cap_returned_qty_to_transferred(qty_by_item)
+			return self._cap_returned_qty_to_transferred(qty_by_item, exclude_additional)
 
 		return qty_by_item
 
-	def _cap_returned_qty_to_transferred(self, returned_qty_by_item):
+	def _cap_returned_qty_to_transferred(self, returned_qty_by_item, exclude_additional=False):
 		# Work Order returns combine regular and corrective stock without a Job Card link.
 		# Cap each return at the regular transfer total so corrective quantities stay neutral.
-		transferred_qty_by_item = self._material_transfer_qty_by_item(is_return=0)
+		transferred_qty_by_item = self._material_transfer_qty_by_item(
+			is_return=0, exclude_additional=exclude_additional
+		)
 		return frappe._dict(
 			{
 				item_code: min(flt(returned_qty), flt(transferred_qty_by_item.get(item_code)))
@@ -341,13 +347,16 @@ class RequiredItemsService:
 			}
 		)
 
-	def _material_transfer_filter(self, ste, is_return):
-		return (
+	def _material_transfer_filter(self, ste, is_return, exclude_additional=False):
+		condition = (
 			(ste.docstatus == 1)
 			& (ste.work_order == self.doc.name)
 			& (ste.purpose == "Material Transfer for Manufacture")
 			& (ste.is_return == is_return)
 		)
+		if exclude_additional:
+			condition &= ste.is_additional_transfer_entry == 0
+		return condition
 
 	def update_consumed_qty_for_required_items(self):
 		"""

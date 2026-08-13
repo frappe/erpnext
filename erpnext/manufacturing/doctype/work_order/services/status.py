@@ -10,6 +10,7 @@ callers (job cards, sales orders, production plans, patches) keep working.
 
 import frappe
 from frappe import _
+from frappe.query_builder import Case
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import cint, flt, get_link_to_form
 
@@ -144,20 +145,20 @@ class StatusService:
 		return status
 
 	def _has_transferred_material(self):
-		"""True if any raw material was transferred against this work order, even when the
-		covered qty leaves material_transferred_for_manufacturing at 0."""
+		"""True if raw material net of returns remains transferred against this work order,
+		even when the covered qty leaves material_transferred_for_manufacturing at 0."""
 		ste = frappe.qb.DocType("Stock Entry")
 		ste_child = frappe.qb.DocType("Stock Entry Detail")
+		signed_qty = Case().when(ste.is_return == 1, -ste_child.transfer_qty).else_(ste_child.transfer_qty)
 		qty = (
 			frappe.qb.from_(ste)
 			.inner_join(ste_child)
 			.on(ste_child.parent == ste.name)
-			.select(Sum(ste_child.transfer_qty))
+			.select(Sum(signed_qty))
 			.where(
 				(ste.work_order == self.doc.name)
 				& (ste.docstatus == 1)
 				& (ste.purpose == "Material Transfer for Manufacture")
-				& (ste.is_return == 0)
 			)
 		).run()[0][0]
 		return flt(qty) > 0
@@ -201,8 +202,16 @@ class StatusService:
 		if self._skip_transfer_purpose(purpose):
 			return
 
+		if fieldname == "material_transferred_for_manufacturing":
+			# Owned by the net-coverage recomputation; the claimed fg_completed_qty is not
+			# validated here because item rows, not the claim, decide the stored value.
+			self.doc.refresh_material_transferred_for_manufacturing()
+			self.set_process_loss_qty()
+			self._update_produced_qty_in_so()
+			return
+
 		qty = self.get_transferred_or_manufactured_qty(purpose, fieldname)
-		completed_qty = self.doc.qty + (self._qty_allowance(purpose) / 100 * self.doc.qty)
+		completed_qty = self.doc.qty + (self.get_qty_allowance(purpose) / 100 * self.doc.qty)
 		if qty > completed_qty:
 			frappe.throw(
 				_("{0} ({1}) cannot be greater than planned quantity ({2}) in Work Order {3}").format(
@@ -222,7 +231,7 @@ class StatusService:
 			and self.doc.transfer_material_against == "Job Card"
 		)
 
-	def _qty_allowance(self, purpose):
+	def get_qty_allowance(self, purpose):
 		allowance = flt(
 			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order")
 		)
