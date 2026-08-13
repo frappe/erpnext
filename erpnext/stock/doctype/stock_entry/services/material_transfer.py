@@ -3,6 +3,10 @@ from frappe import _
 from frappe.query_builder.functions import Sum
 from frappe.utils import cstr, flt
 
+from erpnext.manufacturing.doctype.work_order.services.material_coverage import (
+	get_minimum_material_coverage_fraction,
+)
+
 from .manufacturing import _check_bom_component_qty, get_bom_items
 from .stock_entry_base import BaseStockEntry
 
@@ -226,8 +230,10 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 		return required_qty, transferred_qty
 
 	def _get_covered_work_order_qty(self, required_qty, transferred_qty):
-		min_fraction = min(
-			flt(transferred_qty.get(item_code)) / qty for item_code, qty in required_qty.items()
+		min_fraction = get_minimum_material_coverage_fraction(
+			required_qty,
+			transferred_qty,
+			self.wo_doc.precision("required_qty", "required_items"),
 		)
 		return min_fraction * flt(self.wo_doc.qty)
 
