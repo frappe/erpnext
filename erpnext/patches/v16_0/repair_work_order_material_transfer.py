@@ -55,6 +55,7 @@ def _get_candidate_rows():
 		)
 		.where(
 			(work_order.docstatus == 1)
+			& (work_order.status.notin(["Stopped", "Closed", "Completed"]))
 			& (fn.Coalesce(work_order.skip_transfer, 0) == 0)
 			& (fn.Coalesce(work_order.material_transferred_for_manufacturing, 0) < work_order.qty)
 			& (fn.Coalesce(work_order.transfer_material_against, "") != "Job Card")
