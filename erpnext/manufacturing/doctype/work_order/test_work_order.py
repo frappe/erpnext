@@ -1573,7 +1573,7 @@ class TestWorkOrder(ERPNextTestSuite):
 			item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=5000.0
 		)
 		test_stock_entry.make_stock_entry(
-			item_code="_Test Item Home Desktop 100", target="_Test Warehouse - _TC", qty=10, basic_rate=1000.0
+			item_code="_Test Item Home Desktop 100", target="_Test Warehouse - _TC", qty=20, basic_rate=1000.0
 		)
 
 		transfer_entry = frappe.get_doc(
@@ -1591,14 +1591,72 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(work_order.status, "In Process")
 
 		remainder_entry = frappe.get_doc(
-			make_stock_entry(work_order.name, "Material Transfer for Manufacture", 0)
+			make_stock_entry(work_order.name, "Material Transfer for Manufacture", 3)
 		)
-		self.assertEqual(remainder_entry.items[0].item_code, "_Test Item")
-		self.assertEqual(remainder_entry.items[0].qty, 3)
 		remainder_entry.submit()
 
 		work_order.reload()
 		self.assertEqual(work_order.material_transferred_for_manufacturing, 4.0)
+		self.assertEqual(work_order.required_items[0].transferred_qty, 4.0)
+
+	def test_material_transferred_counts_mixed_direct_and_pick_list_transfers(self):
+		"""Coverage from For Quantity = 0 entries (pick list / material request flow) must add
+		to coverage from claimed entries instead of being capped away by the claim."""
+		work_order = make_wo_order_test_record(planned_start_date=now(), qty=4)
+		test_stock_entry.make_stock_entry(
+			item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=5000.0
+		)
+		test_stock_entry.make_stock_entry(
+			item_code="_Test Item Home Desktop 100", target="_Test Warehouse - _TC", qty=10, basic_rate=1000.0
+		)
+
+		direct_entry = frappe.get_doc(
+			make_stock_entry(work_order.name, "Material Transfer for Manufacture", 1)
+		)
+		direct_entry.submit()
+
+		work_order.reload()
+		self.assertEqual(work_order.material_transferred_for_manufacturing, 1.0)
+
+		pick_list_style_entry = frappe.get_doc(
+			make_stock_entry(work_order.name, "Material Transfer for Manufacture", 0)
+		)
+		pick_list_style_entry.submit()
+
+		work_order.reload()
+		self.assertEqual(work_order.material_transferred_for_manufacturing, 4.0)
+		self.assertEqual(work_order.status, "In Process")
+
+	def test_material_transferred_reduced_by_returns(self):
+		"""Returning raw material from WIP must reduce material_transferred_for_manufacturing."""
+		work_order = make_wo_order_test_record(planned_start_date=now(), qty=2)
+		test_stock_entry.make_stock_entry(
+			item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=5000.0
+		)
+		test_stock_entry.make_stock_entry(
+			item_code="_Test Item Home Desktop 100", target="_Test Warehouse - _TC", qty=10, basic_rate=1000.0
+		)
+
+		transfer_entry = frappe.get_doc(
+			make_stock_entry(work_order.name, "Material Transfer for Manufacture", 2)
+		)
+		transfer_entry.submit()
+
+		work_order.reload()
+		self.assertEqual(work_order.material_transferred_for_manufacturing, 2.0)
+
+		return_entry = make_stock_return_entry(work_order.name)
+		return_entry.company = work_order.company
+		for row in list(return_entry.items):
+			if row.item_code != "_Test Item":
+				return_entry.remove(row)
+		return_entry.items[0].qty = 1
+		return_entry.save()
+		return_entry.submit()
+
+		work_order.reload()
+		self.assertEqual(work_order.material_transferred_for_manufacturing, 1.0)
+		self.assertEqual(work_order.status, "In Process")
 
 	def test_status_in_process_when_only_one_required_item_transferred(self):
 		"""Stock Entry created from a Pick List that picked only one of the required items:
