@@ -1117,6 +1117,59 @@ class TestPaymentEntry(ERPNextTestSuite):
 		self.assertEqual(flt(pe.taxes[0].tax_amount, 2), 159.66)
 		self.assertEqual(flt(pe.references[0].allocated_amount, 2), 840.34)
 
+	def test_auto_allocation_splits_advance_by_gross(self):
+		"""Two orders paid in full by one advance: each row takes its own gross.
+		Allocating the net pot against gross outstandings emptied it on the first row."""
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
+
+		self.enable_advance_in_separate_party_account()
+		so1 = make_sales_order(qty=1, rate=1190)
+		so2 = make_sales_order(qty=1, rate=595)
+
+		pe = get_payment_entry("Sales Order", so1.name, bank_account="_Test Cash - _TC")
+		pe.append(
+			"references",
+			{
+				"reference_doctype": "Sales Order",
+				"reference_name": so2.name,
+				"total_amount": so2.grand_total,
+				"outstanding_amount": so2.grand_total,
+				"allocated_amount": 0,
+			},
+		)
+		pe.append(
+			"taxes",
+			{
+				"account_head": "_Test Account Service Tax - _TC",
+				"charge_type": "On Paid Amount",
+				"rate": 19,
+				"add_deduct_tax": "Add",
+				"included_in_paid_amount": 1,
+				"description": "VAT 19%",
+			},
+		)
+		pe.paid_amount = pe.received_amount = 1785
+		pe.base_paid_amount = pe.base_received_amount = 1785
+		pe.allocate_amount_to_references(
+			paid_amount=1785, paid_amount_change=True, allocate_payment_amount=True
+		)
+
+		self.assertEqual(flt(pe.references[0].allocated_amount, 2), 1000.0)
+		self.assertEqual(flt(pe.references[1].allocated_amount, 2), 500.0)
+
+		pe.save()
+		self.assertEqual(flt(pe.references[0].allocated_gross_amount, 2), 1190.0)
+		self.assertEqual(flt(pe.references[1].allocated_gross_amount, 2), 595.0)
+		pe.submit()
+
+		# Each order's invoice clears in full: the advance covers its whole gross.
+		for so in (so1, so2):
+			si = make_sales_invoice(so.name)
+			si.allocate_advances_automatically = 1
+			si.save()
+			si.submit()
+			self.assertEqual(flt(si.outstanding_amount, 2), 0.0)
+
 	def test_payment_entry_against_pi(self):
 		pi = make_purchase_invoice(
 			supplier="_Test Supplier USD",

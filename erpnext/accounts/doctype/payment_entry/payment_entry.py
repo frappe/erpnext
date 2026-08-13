@@ -229,6 +229,10 @@ class PaymentEntry(AccountsController):
 			self.validate_for_repost()
 			self.repost_accounting_entries()
 
+	def has_only_order_references(self):
+		"""Orders keep a payment an advance; any other reference type makes it a normal payment."""
+		return not ({d.reference_doctype for d in self.references} - {"Sales Order", "Purchase Order"})
+
 	def set_liability_account(self):
 		# Auto setting liability account should only be done during 'draft' status
 		if self.docstatus > 0 or self.payment_type == "Internal Transfer":
@@ -257,15 +261,11 @@ class PaymentEntry(AccountsController):
 			self.is_opening = "No"
 			return
 
-		if self.references:
-			allowed_types = frozenset(["Sales Order", "Purchase Order"])
-			reference_types = set([x.reference_doctype for x in self.references])
-
-			# If there are referencers other than `allowed_types`, treat this as a normal payment entry
-			if reference_types - allowed_types:
-				self.book_advance_payments_in_separate_party_account = False
-				self.is_opening = "No"
-				return
+		# References other than orders make this a normal payment entry
+		if self.references and not self.has_only_order_references():
+			self.book_advance_payments_in_separate_party_account = False
+			self.is_opening = "No"
+			return
 
 		accounts = get_party_account(self.party_type, self.party, self.company, include_advance=True)
 
@@ -757,6 +757,11 @@ class PaymentEntry(AccountsController):
 			total = flt(total / self.get_party_exchange_rate(), self.precision("paid_amount"))
 		return total
 
+	def get_gross_net_ratio(self):
+		"""Gross per unit of net. References owe gross, while an advance holds only the net."""
+		net = self.get_party_paid_amount() - self.get_included_taxes(in_account_currency=True)
+		return (net + self.get_advance_tax_total(in_account_currency=True)) / net if net else 1
+
 	def compute_advance_tax_breakdown(self):
 		"""Advance tax per reference row in company currency, as `{ref_row: {account_head: amount}}`.
 
@@ -817,15 +822,9 @@ class PaymentEntry(AccountsController):
 				ref.allocated_gross_amount = flt(flt(ref.allocated_amount) + tax_sum, ref_precision)
 
 		# Grossed up by advance tax only, like the reference rows above.
-		precision = self.precision("paid_amount")
-		total_net_paid = self.get_party_paid_amount() - self.get_included_taxes(in_account_currency=True)
-		advance_tax = self.get_advance_tax_total(in_account_currency=True)
-		if flt(self.unallocated_amount) and total_net_paid:
-			self.unallocated_gross_amount = flt(
-				flt(self.unallocated_amount) * (total_net_paid + advance_tax) / total_net_paid, precision
-			)
-		else:
-			self.unallocated_gross_amount = flt(self.unallocated_amount)
+		self.unallocated_gross_amount = flt(
+			flt(self.unallocated_amount) * self.get_gross_net_ratio(), self.precision("paid_amount")
+		)
 
 	def get_valid_reference_doctypes(self):
 		if self.party_type == "Customer":
@@ -1833,12 +1832,23 @@ class PaymentEntry(AccountsController):
 		total_negative_outstanding = 0
 		paid_amount -= sum(flt(d.amount, precision) for d in self.deductions)
 		# Included taxes are not allocatable; `apply_taxes` first, as `tax_amount` may be stale.
+		gross_ratio = 1
 		if any(cint(tax.included_in_paid_amount) for tax in self.get("taxes")):
 			self.apply_taxes()
 			paid_amount = flt(paid_amount - self.get_included_taxes(in_account_currency=True), precision)
+			# Only an advance clears a reference by the gross the party paid, so compare net with net.
+			# Read the company setting, as `set_liability_account` only runs on save.
+			if self.has_only_order_references() and frappe.get_cached_value(
+				"Company", self.company, "book_advance_payments_in_separate_party_account"
+			):
+				gross_ratio = self.get_gross_net_ratio()
+
+		def _allocatable(outstanding_amount):
+			"""Outstanding amounts are gross; `allocated_amount` is stored net of advance tax."""
+			return flt(flt(outstanding_amount) / gross_ratio, precision)
 
 		for ref in self.references:
-			reference_outstanding_amount = flt(ref.outstanding_amount)
+			reference_outstanding_amount = _allocatable(ref.outstanding_amount)
 			abs_outstanding_amount = abs(reference_outstanding_amount)
 
 			if reference_outstanding_amount > 0:
@@ -1907,7 +1917,7 @@ class PaymentEntry(AccountsController):
 			for ref in self.references:
 				allocated_positive_outstanding, allocated_negative_outstanding = _allocation_to_unset_pr_row(
 					ref,
-					ref.outstanding_amount,
+					_allocatable(ref.outstanding_amount),
 					allocated_positive_outstanding,
 					allocated_negative_outstanding,
 				)
@@ -1919,6 +1929,13 @@ class PaymentEntry(AccountsController):
 				get_payment_request_outstanding_set_in_references(self.references) or {}
 			)
 			references_outstanding_amounts = get_references_outstanding_amount(self.references) or {}
+			if gross_ratio != 1:
+				payment_request_outstanding_amounts = {
+					k: _allocatable(v) for k, v in payment_request_outstanding_amounts.items()
+				}
+				references_outstanding_amounts = {
+					k: _allocatable(v) for k, v in references_outstanding_amounts.items()
+				}
 			remaining_references_allocated_amounts = references_outstanding_amounts.copy()
 
 			# Re allocate amount to those references which have PR set (Higher priority)
