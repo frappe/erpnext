@@ -372,6 +372,9 @@ class PurchaseReceipt(BuyingController):
 
 	# Check for Closed status
 	def check_on_hold_or_closed_status(self):
+		if self.get("is_return"):
+			return
+
 		check_list = []
 		for d in self.get("items"):
 			if d.meta.get_field("purchase_order") and d.purchase_order and d.purchase_order not in check_list:
