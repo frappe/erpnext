@@ -1480,9 +1480,11 @@ class TestWorkOrder(ERPNextTestSuite):
 		del transfer_entry.get("items")[0]  # transfer only one RM
 		transfer_entry.submit()
 
-		# WO's "Material Transferred for Mfg" shows all is transferred, one RM is pending
+		# One required item is still missing, so no finished-good quantity is covered yet.
 		work_order.reload()
-		self.assertEqual(work_order.material_transferred_for_manufacturing, 1)
+		self.assertEqual(transfer_entry.fg_completed_qty, 0)
+		self.assertEqual(work_order.material_transferred_for_manufacturing, 0)
+		self.assertEqual(work_order.status, "In Process")
 		self.assertEqual(work_order.required_items[0].transferred_qty, 0)
 		self.assertEqual(work_order.required_items[1].transferred_qty, 2)
 
@@ -1501,6 +1503,39 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(work_order.material_transferred_for_manufacturing, 1)
 		self.assertEqual(work_order.required_items[0].transferred_qty, 1)
 		self.assertEqual(work_order.required_items[1].transferred_qty, 2)
+
+	def test_material_transfer_claim_follows_actual_coverage(self):
+		work_order = make_wo_order_test_record(planned_start_date=now(), qty=4)
+		test_stock_entry.make_stock_entry(
+			item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=5000.0
+		)
+		test_stock_entry.make_stock_entry(
+			item_code="_Test Item Home Desktop 100",
+			target="_Test Warehouse - _TC",
+			qty=20,
+			basic_rate=1000.0,
+		)
+
+		transfer_entry = frappe.get_doc(
+			make_stock_entry(work_order.name, "Material Transfer for Manufacture", 4)
+		)
+		for row in transfer_entry.items:
+			if row.item_code == "_Test Item":
+				row.qty = 1
+		transfer_entry.submit()
+
+		work_order.reload()
+		self.assertEqual(transfer_entry.fg_completed_qty, 1)
+		self.assertEqual(work_order.material_transferred_for_manufacturing, 1)
+
+		remainder_entry = frappe.get_doc(
+			make_stock_entry(work_order.name, "Material Transfer for Manufacture", 3)
+		)
+		remainder_entry.submit()
+
+		work_order.reload()
+		self.assertEqual(remainder_entry.fg_completed_qty, 3)
+		self.assertEqual(work_order.material_transferred_for_manufacturing, 4)
 
 	def test_material_transferred_min_fraction_on_partial_pick_list(self):
 		"""Pick-list flow (fg_completed_qty = 0): 'Material Transferred for Manufacturing'
