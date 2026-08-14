@@ -396,6 +396,21 @@ class SalesInvoice(SellingController):
 		self.validate_write_off_account()
 		self.validate_account_for_change_amount()
 		self.validate_income_account()
+		self.validate_discount_accounting()
+
+	def validate_discount_accounting(self):
+		if not self.enable_discount_accounting:
+			return
+
+		for item in self.get("items"):
+			if flt(item.discount_amount) and not item.discount_account:
+				msgprint(
+					_("Row {0}: Please enter Discount Account").format(item.idx),
+					raise_exception=1,
+				)
+
+		if flt(self.discount_amount) and not self.additional_discount_account:
+			msgprint(_("Please enter Additional Discount Account"), raise_exception=1)
 
 	def validate_for_repost(self):
 		self.validate_write_off_account()
