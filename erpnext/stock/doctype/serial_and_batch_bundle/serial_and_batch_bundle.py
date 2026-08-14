@@ -1467,7 +1467,7 @@ class SerialandBatchBundle(Document):
 			else f"{self.voucher_type} Item"
 		)
 
-	def delink_refernce_from_voucher(self):
+	def delink_reference_from_voucher(self):
 		or_filters = {"serial_and_batch_bundle": self.name}
 
 		fields = ["name", "serial_and_batch_bundle"]
@@ -1850,7 +1850,7 @@ class SerialandBatchBundle(Document):
 
 	def on_trash(self):
 		self.validate_voucher_no_docstatus()
-		self.delink_refernce_from_voucher()
+		self.delink_reference_from_voucher()
 		self.delink_reference_from_batch()
 
 	@frappe.whitelist()
