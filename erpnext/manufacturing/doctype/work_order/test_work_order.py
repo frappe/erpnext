@@ -1690,9 +1690,7 @@ class TestWorkOrder(ERPNextTestSuite):
 			terminal_work_order.reload()
 			self.assertEqual(terminal_work_order.material_transferred_for_manufacturing, 1.99)
 
-	def test_return_attribution_when_item_doubles_as_alternative(self):
-		"""An item transferred both for its own requirement and as an alternative for
-		another requirement must return per attribution, not under one original_item."""
+	def _make_shared_alternative_transfer(self):
 		work_order = make_wo_order_test_record(planned_start_date=now(), qty=2)
 		test_stock_entry.make_stock_entry(
 			item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=5000.0
@@ -1706,6 +1704,11 @@ class TestWorkOrder(ERPNextTestSuite):
 				item.item_code = "_Test Item"
 				item.original_item = "_Test Item Home Desktop 100"
 		transfer_entry.submit()
+		return work_order
+
+	def test_return_attribution_when_item_doubles_as_alternative(self):
+		"""An item transferred for itself and as an alternative must return per requirement."""
+		work_order = self._make_shared_alternative_transfer()
 
 		work_order.reload()
 		self.assertEqual(work_order.material_transferred_for_manufacturing, 2.0)
@@ -1730,32 +1733,22 @@ class TestWorkOrder(ERPNextTestSuite):
 	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings", {"backflush_raw_materials_based_on": "Material Transferred for Manufacture"}
 	)
-	def test_return_after_consumption_distributes_across_attributions(self):
-		"""Manufacture consumption carries no original_item; it must drain attribution
-		buckets in transfer order so the return entry reflects what remains."""
-		work_order = make_wo_order_test_record(planned_start_date=now(), qty=2)
-		test_stock_entry.make_stock_entry(
-			item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=5000.0
-		)
-
-		transfer_entry = frappe.get_doc(
-			make_stock_entry(work_order.name, "Material Transfer for Manufacture", 2)
-		)
-		for item in transfer_entry.items:
-			if item.item_code == "_Test Item Home Desktop 100":
-				item.item_code = "_Test Item"
-				item.original_item = "_Test Item Home Desktop 100"
-		transfer_entry.submit()
+	def test_return_after_consumption_preserves_attribution(self):
+		work_order = self._make_shared_alternative_transfer()
 
 		manufacture_entry = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 1))
-		raw_material_rows = [row for row in manufacture_entry.items if row.s_warehouse]
-		self.assertEqual(sorted(row.qty for row in raw_material_rows), [1.0, 2.0])
+		consumed_by_attribution = {
+			row.original_item: row.qty for row in manufacture_entry.items if row.s_warehouse
+		}
+		self.assertEqual(consumed_by_attribution, {None: 1.0, "_Test Item Home Desktop 100": 2.0})
 		manufacture_entry.submit()
+		work_order.reload()
+		consumed_by_item = {row.item_code: row.consumed_qty for row in work_order.required_items}
+		self.assertEqual(consumed_by_item, {"_Test Item": 1.0, "_Test Item Home Desktop 100": 2.0})
 
 		return_entry = make_stock_return_entry(work_order.name)
-		self.assertEqual(len(return_entry.items), 1)
-		self.assertEqual(return_entry.items[0].original_item, "_Test Item Home Desktop 100")
-		self.assertEqual(return_entry.items[0].qty, 3)
+		available_by_attribution = {row.original_item: row.qty for row in return_entry.items}
+		self.assertEqual(available_by_attribution, {None: 1.0, "_Test Item Home Desktop 100": 2.0})
 
 	def test_status_in_process_when_only_one_required_item_transferred(self):
 		"""Stock Entry created from a Pick List that picked only one of the required items:

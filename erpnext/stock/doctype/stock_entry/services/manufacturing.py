@@ -664,6 +664,8 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 
 	def _append_transfer_based_rm(self, row, pending_qty_to_mfg):
 		item_args = self.get_item_dict(row)
+		if row.original_item:
+			item_args["original_item"] = row.original_item
 		is_return = self.doc.get("is_return")
 		qty = row.qty if is_return else (flt(row.qty) * flt(self.doc.fg_completed_qty)) / pending_qty_to_mfg
 		item_args["qty"] = ceil_qty_if_uom_has_whole_number(qty, row.uom)
@@ -671,7 +673,6 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		if not flt(item_args["qty"], frappe.get_precision("Stock Entry Detail", "qty")):
 			return
 		if is_return:
-			item_args["original_item"] = row.original_item
 			item_args["s_warehouse"], item_args["t_warehouse"] = row.s_warehouse, row.t_warehouse
 		else:
 			item_args["t_warehouse"], item_args["s_warehouse"] = None, row.warehouse
@@ -755,6 +756,8 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 				& (stock_entry.purpose == "Material Transfer for Manufacture")
 				& (stock_entry.docstatus == 1)
 			)
+			.orderby(stock_entry.creation)
+			.orderby(stock_entry.name)
 			.orderby(stock_entry_detail.idx)
 		).run(as_dict=1)
 
@@ -791,18 +794,25 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 	def remove_consumed_materials_from_available(self):
 		for row in self._consumption_entries:
 			row.warehouse = row.s_warehouse
-			buckets = self._get_available_buckets(row.item_code, row.warehouse)
+			buckets = self._get_available_buckets(row)
 			if row.serial_and_batch_bundle:
 				self._deduct_consumed_serial_batch(buckets, row.serial_and_batch_bundle)
 			else:
 				self._deduct_consumed_qty(buckets, flt(row.qty))
 
-	def _get_available_buckets(self, item_code, warehouse):
-		return [
+	def _get_available_buckets(self, row):
+		"""Use exact attribution when present; otherwise drain the direct item first."""
+		key = (row.item_code, row.warehouse, row.original_item or None)
+		if row.original_item and key in self.available_materials:
+			return [self.available_materials[key]]
+
+		buckets = [self.available_materials[key]] if key in self.available_materials else []
+		buckets.extend(
 			bucket
-			for key, bucket in self.available_materials.items()
-			if key[0] == item_code and key[1] == warehouse
-		]
+			for material_key, bucket in self.available_materials.items()
+			if material_key[:2] == key[:2] and material_key != key
+		)
+		return buckets
 
 	def _deduct_consumed_qty(self, buckets, consumed_qty):
 		for bucket in buckets[:-1]:
@@ -821,15 +831,12 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 
 	def _deduct_consumed_serial_nos(self, buckets, serial_nos):
 		for serial_no in serial_nos:
-			bucket = self._get_serial_no_bucket(buckets, serial_no)
+			bucket = next(
+				(bucket for bucket in buckets if bucket.serial_nos and serial_no in bucket.serial_nos),
+				buckets[-1],
+			)
 			bucket.serial_nos.remove(serial_no)
 			bucket.qty -= 1
-
-	def _get_serial_no_bucket(self, buckets, serial_no):
-		for bucket in buckets:
-			if bucket.serial_nos and serial_no in bucket.serial_nos:
-				return bucket
-		return buckets[-1]
 
 	def _deduct_consumed_batch_qty(self, buckets, batch_no, consumed_qty):
 		holders = [bucket for bucket in buckets if bucket.batches and batch_no in bucket.batches]
