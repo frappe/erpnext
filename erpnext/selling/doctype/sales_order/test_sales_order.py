@@ -11,6 +11,7 @@ from frappe.query_builder.functions import Sum
 from frappe.tests import change_settings
 from frappe.utils import add_days, flt, getdate, nowdate, today
 
+from erpnext.accounts.party import get_party_details
 from erpnext.controllers.accounts_controller import InvalidQtyError, get_due_date, update_child_qty_rate
 from erpnext.maintenance.doctype.maintenance_schedule.test_maintenance_schedule import (
 	make_maintenance_schedule,
@@ -3410,6 +3411,55 @@ class TestSalesOrder(ERPNextTestSuite):
 			self.assertEqual(make_sales_invoice(so.name).commission_rate, 7)
 		finally:
 			frappe.db.set_value("Item", "_Test Item", "grant_commission", original)
+
+	def test_shipping_contact_person_flows_to_delivery_note_and_sales_invoice(self):
+		billing_contact = "_Test Contact for _Test Customer-_Test Customer"
+		shipping_contact = "_Test Contact 2 for _Test Customer-_Test Customer"
+
+		so = make_sales_order(customer="_Test Customer", do_not_submit=True)
+		so.contact_person = billing_contact
+		so.shipping_contact_person = shipping_contact
+		so.save()
+
+		# fetch_from fills the display fields off the shipping contact, not the billing one
+		self.assertEqual(so.shipping_contact_display, "_Test Contact 2 for _Test Customer")
+		self.assertEqual(so.shipping_contact_email, "test_contact_two_customer@example.com")
+
+		so.submit()
+
+		dn = make_delivery_note(so.name)
+		self.assertEqual(dn.contact_person, billing_contact)
+		self.assertEqual(dn.shipping_contact_person, shipping_contact)
+
+		si = make_sales_invoice(so.name)
+		self.assertEqual(si.shipping_contact_person, shipping_contact)
+
+	def test_get_party_details_blanks_shipping_contact(self):
+		# unlike the billing contact there is no default to fall back on, so the keys must
+		# still come back as None — that is what clears the previous party's contact on the form
+		party_details = get_party_details(
+			party="_Test Customer",
+			party_type="Customer",
+			company="_Test Company",
+			doctype="Sales Order",
+		)
+		for fieldname in (
+			"shipping_contact_person",
+			"shipping_contact_display",
+			"shipping_contact_mobile",
+			"shipping_contact_email",
+		):
+			self.assertIn(fieldname, party_details)
+			self.assertIsNone(party_details[fieldname])
+
+		# purchase transactions have no such field, so the keys must not be added there
+		purchase_details = get_party_details(
+			party="_Test Supplier",
+			party_type="Supplier",
+			company="_Test Company",
+			doctype="Purchase Order",
+		)
+		self.assertNotIn("shipping_contact_person", purchase_details)
 
 
 def compare_payment_schedules(doc, doc1, doc2):
