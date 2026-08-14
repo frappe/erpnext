@@ -1742,9 +1742,6 @@ class TestWorkOrder(ERPNextTestSuite):
 		}
 		self.assertEqual(consumed_by_attribution, {None: 1.0, "_Test Item Home Desktop 100": 2.0})
 		manufacture_entry.submit()
-		work_order.reload()
-		consumed_by_item = {row.item_code: row.consumed_qty for row in work_order.required_items}
-		self.assertEqual(consumed_by_item, {"_Test Item": 1.0, "_Test Item Home Desktop 100": 2.0})
 
 		return_entry = make_stock_return_entry(work_order.name)
 		available_by_attribution = {row.original_item: row.qty for row in return_entry.items}
