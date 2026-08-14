@@ -8,6 +8,16 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 			? this.item.rejected_serial_and_batch_bundle
 			: this.item.serial_and_batch_bundle;
 
+		this.init();
+	}
+
+	async init() {
+		try {
+			this.based_on = await erpnext.stock.get_pick_serial_batch_based_on();
+		} catch (e) {
+			this.based_on = "FIFO";
+		}
+
 		this.make();
 		this.render_data();
 	}
@@ -390,7 +400,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 			{
 				fieldtype: "Select",
 				options: ["FIFO", "LIFO", "Expiry"],
-				default: "FIFO",
+				default: this.based_on,
 				fieldname: "based_on",
 				label: __("Fetch Based On"),
 				onchange: () => this.get_auto_data(),
@@ -536,7 +546,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 		}
 
 		if (!based_on) {
-			based_on = "FIFO";
+			based_on = this.based_on;
 		}
 
 		let warehouse = this.item.warehouse || this.item.s_warehouse;
