@@ -100,7 +100,7 @@ class TestReceivedItemsToBeBilled(ERPNextTestSuite):
 		)
 		self.assertIsNotNone(self.get_row(self.run_report(posting_date="2026-06-30"), pr.name))
 
-	def test_child_project_user_permission_filters_receipts(self):
+	def test_project_user_permission_filters_receipts(self):
 		from frappe.permissions import add_user_permission
 
 		test_user = f"non-billed-report-{frappe.generate_hash(length=6)}@example.com"
@@ -136,10 +136,8 @@ class TestReceivedItemsToBeBilled(ERPNextTestSuite):
 				posting_date="2026-06-01",
 				do_not_submit=True,
 			)
-			purchase_receipt.project = None
-			purchase_receipt.items[0].project = project
+			purchase_receipt.project = project
 			purchase_receipt.save().submit()
-			frappe.db.set_value("Purchase Receipt", purchase_receipt.name, "project", None)
 			return purchase_receipt
 
 		allowed_receipt = make_receipt(allowed_project.name)
