@@ -113,6 +113,9 @@ def add_plan_schedule_intervals(load, resource_names, from_date, exclude_plan):
 
 
 def has_job_cards_for_schedule_row(schedule):
+	"""A schedule block steps aside only for job cards that already carry booked load
+	(scheduled time or logged time). Batch-split or repeated-operation job cards created
+	with capacity planning disabled carry neither, so the block keeps reserving capacity."""
 	job_card = frappe.qb.DocType("Job Card")
 	work_order = frappe.qb.DocType("Work Order")
 
@@ -125,11 +128,22 @@ def has_job_cards_for_schedule_row(schedule):
 			(job_card.docstatus < 2)
 			& (work_order.production_plan == schedule.production_plan)
 			& (job_card.operation == schedule.operation)
+			& (has_scheduled_time(job_card) | (job_card.total_time_in_mins > 0))
 			& (
 				(work_order.production_plan_item == schedule.plan_row)
 				| (work_order.production_plan_sub_assembly_item == schedule.plan_row)
 			)
 		)
+	)
+
+
+def has_scheduled_time(job_card):
+	scheduled_time = frappe.qb.DocType("Job Card Scheduled Time")
+
+	return ExistsCriterion(
+		frappe.qb.from_(scheduled_time)
+		.select(scheduled_time.name)
+		.where(scheduled_time.parent == job_card.name)
 	)
 
 

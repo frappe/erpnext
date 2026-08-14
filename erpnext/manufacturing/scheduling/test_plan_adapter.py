@@ -37,7 +37,7 @@ class TestPlanAdapter(ERPNextTestSuite):
 		self.make_bom_with_operation("Test PPS FG", ["Test PPS SA 1", "Test PPS SA 2"], time_in_mins=30)
 		self.make_bom_with_operation("Test PPS FG 2", ["Test PPS RM"], time_in_mins=30)
 
-	def make_bom_with_operation(self, item, raw_materials, time_in_mins, operations=None):
+	def make_bom_with_operation(self, item, raw_materials, time_in_mins, operations=None, batch_size=0):
 		if frappe.db.exists("BOM", {"item": item, "docstatus": 1}):
 			return
 
@@ -50,6 +50,7 @@ class TestPlanAdapter(ERPNextTestSuite):
 					"workstation": self.workstation,
 					"time_in_mins": time_in_mins,
 					"hour_rate": 100,
+					"batch_size": batch_size,
 				},
 			)
 		bom.insert(ignore_permissions=True)
@@ -326,6 +327,57 @@ class TestPlanAdapter(ERPNextTestSuite):
 			for interval in loaders.get_booked_load([self.workstation], start_date)[self.workstation]
 		)
 		self.assertEqual(booked, expected)
+
+	@change_settings(
+		"Manufacturing Settings",
+		{"mins_between_operations": 10, "allow_overtime": 0, "disable_capacity_planning": 1},
+	)
+	def test_batch_split_job_cards_keep_schedule_load(self):
+		operation = "Test PPS Op Batch"
+		if not frappe.db.exists("Operation", operation):
+			make_operation(operation=operation, workstation=self.workstation)
+		frappe.db.set_value("Operation", operation, "create_job_card_based_on_batch_size", 1)
+
+		item = "Test PPS FG 4"
+		create_item(item, valuation_rate=100)
+		self.make_bom_with_operation(
+			item, ["Test PPS RM"], time_in_mins=30, operations=[operation], batch_size=1
+		)
+
+		plan = create_production_plan(
+			item_code=item, planned_qty=2, do_not_submit=True, skip_getting_mr_items=True
+		)
+		plan.submit()
+
+		start_date = get_datetime("2027-05-03 09:00:00")
+		apply_schedule(plan.name, start_date)
+
+		plan.reload()
+		plan.make_work_order()
+		work_order = frappe.get_doc("Work Order", {"production_plan": plan.name})
+		work_order.wip_warehouse = "Work In Progress - _TC"
+		work_order.fg_warehouse = work_order.fg_warehouse or "Finished Goods - _TC"
+		work_order.submit()
+
+		job_cards = frappe.get_all("Job Card", filters={"work_order": work_order.name}, pluck="name")
+		self.assertEqual(len(job_cards), 2)
+		self.assertFalse(
+			frappe.db.exists("Job Card Scheduled Time", {"parent": ("in", job_cards)}),
+		)
+
+		entries = frappe.get_all(
+			"Production Plan Schedule",
+			filters={"production_plan": plan.name, "workstation": self.workstation},
+			fields=["from_time", "to_time"],
+		)
+		self.assertTrue(entries)
+
+		booked = {
+			(interval.start, interval.end)
+			for interval in loaders.get_booked_load([self.workstation], start_date)[self.workstation]
+		}
+		for row in entries:
+			self.assertIn((get_datetime(row.from_time), get_datetime(row.to_time)), booked)
 
 	def test_manual_schedule_entry_creation_is_blocked(self):
 		plan = self.make_plan()
