@@ -89,15 +89,9 @@
   "enable_fuzzy_matching",
   "reports_tab",
   "remarks_section",
-<<<<<<< HEAD
-  "general_ledger_remarks_length",
-  "column_break_lvjk",
-  "receivable_payable_remarks_length",
-=======
   "disable_include_dimensions",
   "column_break_lvjk",
   "general_ledger_remarks_length",
->>>>>>> 3558ce3b59 (feat(accounts): opt-in 'Consider Accounting Dimension' filter on General Ledger Report (#58156))
   "accounts_receivable_payable_tuning_section",
   "receivable_payable_fetch_method",
   "default_ageing_range",
@@ -672,151 +666,12 @@
    "fieldname": "default_ageing_range",
    "fieldtype": "Data",
    "label": "Default Ageing Range"
-<<<<<<< HEAD
-=======
-  },
-  {
-   "fieldname": "chart_of_accounts_section",
-   "fieldtype": "Section Break",
-   "label": "Chart of Accounts"
-  },
-  {
-   "fieldname": "banking_section",
-   "fieldtype": "Section Break",
-   "label": "Banking"
-  },
-  {
-   "fieldname": "payment_request_section",
-   "fieldtype": "Section Break",
-   "label": "Payment Request"
-  },
-  {
-   "fieldname": "budget_section",
-   "fieldtype": "Section Break",
-   "label": "Budget"
-  },
-  {
-   "fieldname": "analytics_section",
-   "fieldtype": "Section Break",
-   "label": "Analytical Accounting"
-  },
-  {
-   "fieldname": "column_break_vtnr",
-   "fieldtype": "Column Break"
-  },
-  {
-   "default": "0",
-   "description": "Apply discounts and margins on products",
-   "fieldname": "enable_discounts_and_margin",
-   "fieldtype": "Check",
-   "label": "Enable Discounts and Margin"
-  },
-  {
-   "fieldname": "payments_tab",
-   "fieldtype": "Tab Break",
-   "label": "Payments"
-  },
-  {
-   "fieldname": "payment_options_section",
-   "fieldtype": "Section Break",
-   "label": "Payment Options"
-  },
-  {
-   "default": "0",
-   "documentation_url": "https://docs.frappe.io/erpnext/loyalty-program",
-   "fieldname": "enable_loyalty_point_program",
-   "fieldtype": "Check",
-   "label": "Enable Loyalty Point Program"
-  },
-  {
-   "fieldname": "column_break_ctam",
-   "fieldtype": "Column Break"
-  },
-  {
-   "default": "0",
-   "description": "Enable cost center, projects and other custom accounting dimensions",
-   "fieldname": "enable_accounting_dimensions",
-   "fieldtype": "Check",
-   "label": "Enable Accounting Dimensions"
-  },
-  {
-   "default": "1",
-   "description": "Enable Subscription tracking in invoice",
-   "fieldname": "enable_subscription",
-   "fieldtype": "Check",
-   "label": "Enable Subscription"
-  },
-  {
-   "default": "1",
-   "fieldname": "fetch_payment_schedule_in_payment_request",
-   "fieldtype": "Check",
-   "label": "Fetch Payment Schedule in Payment Request"
-  },
-  {
-   "default": "3",
-   "description": "Number of days to consider for matching transfers across bank accounts",
-   "fieldname": "transfer_match_days",
-   "fieldtype": "Int",
-   "label": "Match transfers within 'N' days",
-   "non_negative": 1
-  },
-  {
-   "default": "1",
-   "description": "If enabled, rule matching algorithm will run every hour",
-   "fieldname": "automatically_run_rules_on_unreconciled_transactions",
-   "fieldtype": "Check",
-   "label": "Automatically run rules on unreconciled transactions"
-  },
-  {
-   "fieldname": "repost_section",
-   "fieldtype": "Section Break",
-   "label": "Repost"
-  },
-  {
-   "fieldname": "repost_allowed_types",
-   "fieldtype": "Table",
-   "label": "Allowed DocTypes",
-   "options": "Repost Allowed Types"
-  },
-  {
-   "default": "0",
-   "description": "Runs a preview check on save before submission without making any actual changes.",
-   "fieldname": "preview_mode",
-   "fieldtype": "Check",
-   "label": "Preview mode"
-  },
-  {
-   "fieldname": "document_naming_tab",
-   "fieldtype": "Tab Break",
-   "label": "Document Naming"
-  },
-  {
-   "fieldname": "transaction_naming_html",
-   "fieldtype": "HTML"
-  },
-  {
-   "description": "Changing the account in any transaction of the DocTypes listed below will trigger a repost. To prevent reposting, remove the relevant DocType from the list.",
-   "fieldname": "column_break_mfor",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "stock_expense_section",
-   "fieldtype": "Section Break",
-   "label": "Stock Expense Accounting"
-  },
-  {
-   "default": "0",
-   "description": "Books Purchase Expense and Expenses Added To Stock account pairs against stock value. On enabling this, the accounts become mandatory in Company or Item Defaults for Purchase Receipt, Purchase Invoice, Stock Entry, Stock Reconciliation and Landed Cost Voucher",
-   "fieldname": "book_stock_expense_gl_entries",
-   "fieldtype": "Check",
-   "label": "Book Stock Expense GL Entries"
   },
   {
    "default": "0",
    "fieldname": "disable_include_dimensions",
    "fieldtype": "Check",
    "label": "Disable \"Consider Accounting Dimension\" Filter"
->>>>>>> 3558ce3b59 (feat(accounts): opt-in 'Consider Accounting Dimension' filter on General Ledger Report (#58156))
   }
  ],
  "icon": "icon-cog",
@@ -824,11 +679,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2026-06-24 12:59:41.868865",
-=======
  "modified": "2026-08-14 13:12:47.895908",
->>>>>>> 3558ce3b59 (feat(accounts): opt-in 'Consider Accounting Dimension' filter on General Ledger Report (#58156))
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

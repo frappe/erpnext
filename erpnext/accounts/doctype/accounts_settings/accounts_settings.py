@@ -44,11 +44,7 @@ class AccountsSettings(Document):
 		default_ageing_range: DF.Data | None
 		delete_linked_ledger_entries: DF.Check
 		determine_address_tax_category_from: DF.Literal["Billing Address", "Shipping Address"]
-<<<<<<< HEAD
-=======
 		disable_include_dimensions: DF.Check
-		enable_accounting_dimensions: DF.Check
->>>>>>> 3558ce3b59 (feat(accounts): opt-in 'Consider Accounting Dimension' filter on General Ledger Report (#58156))
 		enable_common_party_accounting: DF.Check
 		enable_fuzzy_matching: DF.Check
 		enable_immutable_ledger: DF.Check
