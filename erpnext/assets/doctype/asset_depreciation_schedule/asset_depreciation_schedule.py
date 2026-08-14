@@ -277,7 +277,7 @@ class AssetDepreciationSchedule(Document):
 		value_after_depreciation,
 	):
 		asset_doc.validate_asset_finance_books(row)
-		if not value_after_depreciation:
+		if value_after_depreciation is None:
 			value_after_depreciation = _get_value_after_depreciation_for_making_schedule(asset_doc, row)
 		row.value_after_depreciation = value_after_depreciation
 
