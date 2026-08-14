@@ -946,6 +946,26 @@ class TestStockEntry(ERPNextTestSuite):
 		with self.assertRaises(frappe.ValidationError):
 			service._validate_no_excess_transfer()
 
+	def test_tracked_consumption_deducts_matching_attribution_bucket(self):
+		from erpnext.stock.doctype.stock_entry.services.manufacturing import ManufactureStockEntry
+
+		service = ManufactureStockEntry(frappe._dict())
+		serial_buckets = [
+			frappe._dict(qty=2, serial_nos=["SERIAL-1", "SERIAL-2"]),
+			frappe._dict(qty=2, serial_nos=["SERIAL-3", "SERIAL-4"]),
+		]
+		service._deduct_consumed_serial_nos(serial_buckets, ["SERIAL-3"])
+		self.assertEqual([bucket.qty for bucket in serial_buckets], [2, 1])
+		self.assertEqual(serial_buckets[1].serial_nos, ["SERIAL-4"])
+
+		batch_buckets = [
+			frappe._dict(qty=2, batches={"BATCH-1": 2}),
+			frappe._dict(qty=3, batches={"BATCH-2": 3}),
+		]
+		service._deduct_consumed_batch_qty(batch_buckets, "BATCH-2", 1)
+		self.assertEqual([bucket.qty for bucket in batch_buckets], [2, 2])
+		self.assertEqual(batch_buckets[1].batches["BATCH-2"], 2)
+
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"material_consumption": 1})
 	def test_work_order_manufacture_with_material_consumption(self):
 		from erpnext.manufacturing.doctype.work_order.mapper import (
