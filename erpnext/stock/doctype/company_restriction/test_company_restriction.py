@@ -95,7 +95,7 @@ class TestCompanyRestriction(ERPNextTestSuite):
 				company="_Test Company",
 			)
 
-	def test_get_party_details_checks_company_permission(self):
+	def test_unrestricted_party_ignores_company_permission(self):
 		customer = make_customer("_Test Party Details Company Permission Customer")
 		user = self.make_user_with_roles("test_party_details_company@example.com", ["Sales User"])
 		permission = {
@@ -119,15 +119,14 @@ class TestCompanyRestriction(ERPNextTestSuite):
 			20,
 			filters={"disabled": 0, "company": "_Test Company"},
 		)
-		self.assertEqual(results, [])
+		self.assertIn(customer, [row[0] for row in results])
 
-		self.assertRaises(
-			frappe.PermissionError,
-			get_party_details,
+		details = get_party_details(
 			party=customer,
 			party_type="Customer",
 			company="_Test Company",
 		)
+		self.assertEqual(details.customer, customer)
 
 	def test_unrestricted_item_is_not_blocked(self):
 		item = make_item()

@@ -231,11 +231,6 @@ def party_query(
 		frappe.throw(_("Party query filters must be a dictionary"))
 
 	company = filters.pop("company", None)
-	if company:
-		ptype = "select" if frappe.only_has_select_perm("Company") else "read"
-		if not frappe.has_permission("Company", ptype, company):
-			return []
-
 	fields = get_fields(doctype, ["name", party_name_field])
 	party = DocType(doctype)
 	search_str = f"%{txt}%"

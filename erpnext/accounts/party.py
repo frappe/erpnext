@@ -202,9 +202,6 @@ def validate_party_company(party_type, party, company):
 	if not company or party_type not in ("Customer", "Supplier"):
 		return
 
-	ptype = "select" if frappe.only_has_select_perm("Company") else "read"
-	frappe.has_permission("Company", ptype, company, throw=True)
-
 	from erpnext.stock.doctype.company_restriction.company_restriction import (
 		validate_masters_for_company,
 	)
