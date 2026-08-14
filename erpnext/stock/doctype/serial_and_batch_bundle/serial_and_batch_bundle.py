@@ -1661,13 +1661,16 @@ class SerialandBatchBundle(Document):
 		)
 
 		precision = frappe.get_precision("Serial and Batch Entry", "qty")
+		posting_datetime = get_datetime(self.posting_datetime) if self.posting_datetime else None
 		for row in batchwise_entries:
 			if row.batch_no in available_qty:
 				available_qty[row.batch_no] += flt(row.qty)
 			else:
 				available_qty[row.batch_no] = flt(row.qty)
 
-			if flt(available_qty[row.batch_no], precision) < 0:
+			if flt(available_qty[row.batch_no], precision) < 0 and (
+				not posting_datetime or get_datetime(row.posting_datetime) >= posting_datetime
+			):
 				self.throw_negative_batch(
 					row.batch_no, available_qty[row.batch_no], precision, row.posting_datetime
 				)
