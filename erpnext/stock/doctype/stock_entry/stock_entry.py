@@ -45,7 +45,11 @@ from .services.manufacturing import (
 	OperationsNotCompleteError,
 	RepackStockEntry,
 )
-from .services.material_receipt_issue import MaterialIssueStockEntry, MaterialReceiptStockEntry
+from .services.material_receipt_issue import (
+	MaterialIssueStockEntry,
+	MaterialReceiptStockEntry,
+	SourceOnlyStockEntry,
+)
 from .services.material_transfer import (
 	MaterialRequestStockEntry,
 	MaterialTransferForManufactureStockEntry,
@@ -216,6 +220,10 @@ class StockEntry(StockController, SubcontractingInwardController):
 			"Send to Subcontractor": SendToSubcontractorStockEntry,
 			"Material Issue": MaterialIssueStockEntry,
 			"Material Receipt": MaterialReceiptStockEntry,
+			"Receive from Customer": MaterialReceiptStockEntry,
+			"Return Raw Material to Customer": SourceOnlyStockEntry,
+			"Subcontracting Delivery": SourceOnlyStockEntry,
+			"Subcontracting Return": MaterialReceiptStockEntry,
 		}
 
 		self.purpose_cls = purpose_map.get(self.purpose)
