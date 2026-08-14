@@ -28,12 +28,13 @@ def get_ordered_to_be_billed_data(args, filters=None):
 
 	query = (
 		frappe.qb.get_query(
-			child_tab,
+			doctype_name,
 			fields=[doctype.name],
-			parent_doctype=doctype_name,
 			ignore_permissions=False,
 			ignore_user_permissions=False,
 		)
+		.inner_join(child_doctype)
+		.on(doctype.name == child_doctype.parent)
 		.join(item)
 		.on(item.name == child_doctype.item_code)
 		.select(
