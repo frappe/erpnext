@@ -278,7 +278,7 @@
   },
   {
    "default": "0",
-   "description": "Block a new Sales Invoice when the customer's overdue amount exceeds the Overdue Limit set on the customer.",
+   "description": "Enabling this option prevents the creation of a new Sales Invoice when the customer has an overdue limit set and their outstanding overdue amount exceeds that limit.",
    "fieldname": "enable_overdue_billing_threshold",
    "fieldtype": "Check",
    "label": "Restrict Customer Over Billing"
