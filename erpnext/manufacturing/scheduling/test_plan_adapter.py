@@ -11,6 +11,7 @@ from erpnext.manufacturing.doctype.production_plan.test_production_plan import (
 	make_bom,
 )
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_operation, make_workstation
+from erpnext.manufacturing.scheduling import loaders
 from erpnext.manufacturing.scheduling.plan_adapter import apply_schedule, get_schedule_preview
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.tests.utils import ERPNextTestSuite
@@ -36,20 +37,21 @@ class TestPlanAdapter(ERPNextTestSuite):
 		self.make_bom_with_operation("Test PPS FG", ["Test PPS SA 1", "Test PPS SA 2"], time_in_mins=30)
 		self.make_bom_with_operation("Test PPS FG 2", ["Test PPS RM"], time_in_mins=30)
 
-	def make_bom_with_operation(self, item, raw_materials, time_in_mins):
+	def make_bom_with_operation(self, item, raw_materials, time_in_mins, operations=None):
 		if frappe.db.exists("BOM", {"item": item, "docstatus": 1}):
 			return
 
 		bom = make_bom(item=item, raw_materials=raw_materials, with_operations=1, do_not_save=True)
-		bom.append(
-			"operations",
-			{
-				"operation": self.operation,
-				"workstation": self.workstation,
-				"time_in_mins": time_in_mins,
-				"hour_rate": 100,
-			},
-		)
+		for operation in operations or [self.operation]:
+			bom.append(
+				"operations",
+				{
+					"operation": operation,
+					"workstation": self.workstation,
+					"time_in_mins": time_in_mins,
+					"hour_rate": 100,
+				},
+			)
 		bom.insert(ignore_permissions=True)
 		bom.submit()
 
@@ -275,6 +277,55 @@ class TestPlanAdapter(ERPNextTestSuite):
 		)
 
 		make_entry("2027-02-01 10:30:00", "2027-02-01 11:30:00").insert()
+
+	@change_settings(
+		"Manufacturing Settings",
+		{"mins_between_operations": 10, "allow_overtime": 0, "disable_capacity_planning": 0},
+	)
+	def test_partial_job_cards_keep_remaining_schedule_load(self):
+		operation_two = "Test PPS Op 2"
+		if not frappe.db.exists("Operation", operation_two):
+			make_operation(operation=operation_two, workstation=self.workstation)
+
+		item = "Test PPS FG 3"
+		create_item(item, valuation_rate=100)
+		self.make_bom_with_operation(
+			item, ["Test PPS RM"], time_in_mins=60, operations=[self.operation, operation_two]
+		)
+
+		plan = create_production_plan(
+			item_code=item, planned_qty=1, do_not_submit=True, skip_getting_mr_items=True
+		)
+		plan.submit()
+
+		start_date = get_datetime("2027-04-05 09:00:00")
+		apply_schedule(plan.name, start_date)
+
+		plan.reload()
+		plan.make_work_order()
+		work_order = frappe.get_doc("Work Order", {"production_plan": plan.name})
+		work_order.wip_warehouse = "Work In Progress - _TC"
+		work_order.fg_warehouse = work_order.fg_warehouse or "Finished Goods - _TC"
+		work_order.submit()
+
+		job_card = frappe.db.get_value(
+			"Job Card", {"work_order": work_order.name, "operation": operation_two}
+		)
+		frappe.delete_doc("Job Card", job_card)
+
+		entries = frappe.get_all(
+			"Production Plan Schedule",
+			filters={"production_plan": plan.name, "workstation": self.workstation},
+			fields=["from_time", "to_time"],
+		)
+		expected = sorted((get_datetime(row.from_time), get_datetime(row.to_time)) for row in entries)
+		self.assertEqual(len(expected), 2)
+
+		booked = sorted(
+			(interval.start, interval.end)
+			for interval in loaders.get_booked_load([self.workstation], start_date)[self.workstation]
+		)
+		self.assertEqual(booked, expected)
 
 	def test_manual_schedule_entry_creation_is_blocked(self):
 		plan = self.make_plan()

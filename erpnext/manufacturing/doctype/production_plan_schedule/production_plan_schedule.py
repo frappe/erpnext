@@ -54,6 +54,7 @@ class ProductionPlanSchedule(Document):
 		if not self.workstation:
 			return
 
+		frappe.db.get_value("Workstation", self.workstation, "name", for_update=True)
 		from_time, to_time = get_datetime(self.from_time), get_datetime(self.to_time)
 		bookings = get_overlapping_bookings(self, from_time, to_time)
 		if not bookings:

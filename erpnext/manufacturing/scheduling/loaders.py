@@ -124,6 +124,7 @@ def has_job_cards_for_schedule_row(schedule):
 		.where(
 			(job_card.docstatus < 2)
 			& (work_order.production_plan == schedule.production_plan)
+			& (job_card.operation == schedule.operation)
 			& (
 				(work_order.production_plan_item == schedule.plan_row)
 				| (work_order.production_plan_sub_assembly_item == schedule.plan_row)
