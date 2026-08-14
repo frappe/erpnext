@@ -323,12 +323,7 @@ class calculate_taxes_and_totals:
 			if not self.discount_amount_applied and item.qty and (total_tax_slope or total_tax_intercept):
 				amount = flt(item.amount) - total_tax_intercept
 
-<<<<<<< HEAD
-				item.net_amount = flt(amount / (1 + cumulated_tax_fraction), item.precision("net_amount"))
-=======
-				item._unrounded_net_amount = amount / (1 + total_tax_slope)
-				item.net_amount = flt(item._unrounded_net_amount, item.precision("net_amount"))
->>>>>>> 986cea2331 (feat: taxable-base resolver hook for custom charge types (#56175))
+				item.net_amount = flt(amount / (1 + total_tax_slope), item.precision("net_amount"))
 				item.net_rate = flt(item.net_amount / item.qty, item.precision("net_rate"))
 				item.discount_percentage = flt(
 					item.discount_percentage, item.precision("discount_percentage")
@@ -350,12 +345,6 @@ class calculate_taxes_and_totals:
 		if cint(tax.included_in_print_rate):
 			tax_rate = self._get_tax_rate(tax, item_tax_map)
 
-<<<<<<< HEAD
-=======
-			if tax_rate == NOT_APPLICABLE_TAX:
-				return tax_slope, tax_intercept
-
->>>>>>> 986cea2331 (feat: taxable-base resolver hook for custom charge types (#56175))
 			if tax.charge_type == "On Net Total":
 				tax_slope = tax_rate / 100.0
 
@@ -546,21 +535,7 @@ class calculate_taxes_and_totals:
 				)
 
 		elif tax.charge_type == "On Net Total":
-<<<<<<< HEAD
 			current_tax_amount = (tax_rate / 100.0) * item.net_amount
-=======
-			if tax.account_head in item_tax_map:
-				current_net_amount = item.net_amount
-			# Use unrounded net for inclusive taxes to avoid double rounding
-			if (
-				cint(tax.included_in_print_rate)
-				and not self.discount_amount_applied
-				and item._unrounded_net_amount is not None
-			):
-				current_tax_amount = (tax_rate / 100.0) * item._unrounded_net_amount
-			else:
-				current_tax_amount = (tax_rate / 100.0) * item.net_amount
->>>>>>> 986cea2331 (feat: taxable-base resolver hook for custom charge types (#56175))
 		elif tax.charge_type == "On Previous Row Amount":
 			current_tax_amount = (tax_rate / 100.0) * self.doc.get("taxes")[
 				cint(tax.row_id) - 1
@@ -573,18 +548,13 @@ class calculate_taxes_and_totals:
 			current_tax_amount = tax_rate * item.qty
 		else:
 			# Custom charge_type: rate applies to the resolver-provided base.
-			base = self.get_item_taxable_base(item, tax)
-			current_net_amount = base
-			current_tax_amount = (tax_rate / 100.0) * base
+			current_tax_amount = (tax_rate / 100.0) * self.get_item_taxable_base(item, tax)
 
 		if not (self.doc.get("is_consolidated") or tax.get("dont_recompute_tax")):
 			self.set_item_wise_tax(item, tax, tax_rate, current_tax_amount)
 
 		return current_tax_amount
 
-<<<<<<< HEAD
-	def set_item_wise_tax(self, item, tax, tax_rate, current_tax_amount):
-=======
 	def get_item_taxable_base(self, item, tax):
 		"""Per-item base a custom charge_type's rate is applied to.
 
@@ -614,8 +584,7 @@ class calculate_taxes_and_totals:
 		# fallback
 		return flt(item.net_amount)
 
-	def set_item_wise_tax(self, item, tax, tax_rate, current_tax_amount, current_net_amount):
->>>>>>> 986cea2331 (feat: taxable-base resolver hook for custom charge types (#56175))
+	def set_item_wise_tax(self, item, tax, tax_rate, current_tax_amount):
 		# store tax breakup for each item
 		key = item.item_code or item.item_name
 		item_wise_tax_amount = current_tax_amount * self.doc.conversion_rate

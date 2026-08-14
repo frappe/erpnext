@@ -2,19 +2,13 @@ from unittest import mock
 from unittest.mock import patch
 
 import frappe
-<<<<<<< HEAD
 from frappe.tests.utils import FrappeTestCase
-=======
 from frappe.utils import flt
->>>>>>> 986cea2331 (feat: taxable-base resolver hook for custom charge types (#56175))
 
 from erpnext.controllers.taxes_and_totals import calculate_taxes_and_totals
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
 
-<<<<<<< HEAD
-class TestTaxesAndTotals(FrappeTestCase):
-=======
 def resolve_on_gross(calc, item, tax):
 	# base = gross printed line amount
 	return flt(item.amount)
@@ -25,8 +19,7 @@ def resolve_on_mrp(calc, item, tax):
 	return flt(item.price_list_rate) * flt(item.qty)
 
 
-class TestTaxesAndTotals(ERPNextTestSuite):
->>>>>>> 986cea2331 (feat: taxable-base resolver hook for custom charge types (#56175))
+class TestTaxesAndTotals(FrappeTestCase):
 	def test_regional_round_off_accounts(self):
 		"""
 		Regional overrides cannot extend the list in-place — the return
