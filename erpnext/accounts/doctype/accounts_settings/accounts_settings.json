@@ -283,7 +283,7 @@
    "description": "Block a new Sales Invoice when the customer's overdue amount exceeds the Overdue Limit set on the customer.",
    "fieldname": "enable_overdue_billing_threshold",
    "fieldtype": "Check",
-   "label": "Restrict Customer Over Billing"
+   "label": "Prevent Sales Invoice when Customer is Overdue"
   },
   {
    "depends_on": "eval:doc.enable_overdue_billing_threshold",
@@ -797,7 +797,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-08-14 13:12:47.895908",
+ "modified": "2026-08-14 15:26:49.070889",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
