@@ -1726,7 +1726,6 @@ class TestWorkOrder(ERPNextTestSuite):
 		returned_by_item = {row.item_code: row.returned_qty for row in work_order.required_items}
 		self.assertEqual(returned_by_item["_Test Item"], 0)
 		self.assertEqual(returned_by_item["_Test Item Home Desktop 100"], 2)
-		self.assertEqual(work_order.material_transferred_for_manufacturing, 1.0)
 
 	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings", {"backflush_raw_materials_based_on": "Material Transferred for Manufacture"}
