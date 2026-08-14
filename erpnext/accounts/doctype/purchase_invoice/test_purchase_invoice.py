@@ -2609,6 +2609,39 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 				self.assertEqual(row.serial_no, "\n".join(serial_nos[:2]))
 				self.assertEqual(row.rejected_serial_no, serial_nos[2])
 
+	def test_purchase_invoice_return_against_closed_purchase_order(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		po = create_purchase_order(qty=2, rate=100)
+
+		invoices = []
+		for _ in range(2):
+			pi = make_pi_from_po(po.name)
+			pi.items[0].qty = 1
+			pi.submit()
+			invoices.append(pi)
+
+		make_return_doc("Purchase Invoice", invoices[0].name).submit()
+
+		po.reload()
+		po.update_status("Closed")
+
+		# a debit note against a closed Purchase Order should still go through,
+		# the same way a Sales Invoice return does against a closed Sales Order
+		debit_note = make_return_doc("Purchase Invoice", invoices[1].name)
+		debit_note.submit()
+
+		self.assertEqual(debit_note.docstatus, 1)
+		self.assertEqual(frappe.db.get_value("Purchase Order", po.name, "status"), "Closed")
+
+		# cancelling the debit note runs the same check on the closed order
+		debit_note.reload()
+		debit_note.cancel()
+
+		# a regular invoice against the closed order must still be blocked
+		blocked_pi = make_pi_from_po(po.name)
+		self.assertRaisesRegex(frappe.InvalidStatusError, "Closed", blocked_pi.save)
+
 	def test_make_pr_and_pi_from_po(self):
 		from erpnext.assets.doctype.asset.test_asset import create_asset_category
 
