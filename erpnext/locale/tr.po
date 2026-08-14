@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-08-09 09:47+0000\n"
-"PO-Revision-Date: 2026-08-11 23:07\n"
+"PO-Revision-Date: 2026-08-14 00:48\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -14585,7 +14585,7 @@ msgstr "Başka bir para birimi kullanılarak giriş yapıldıktan sonra para bir
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_engine.py:260
 msgid "Currency filters are currently unsupported in Custom Financial Report"
-msgstr ""
+msgstr "Özel Finansal Raporda para birimi filtreleri şu anda desteklenmiyor"
 
 #: erpnext/accounts/doctype/payment_entry/services/gl_composer.py:215
 #: erpnext/accounts/doctype/payment_entry/services/gl_composer.py:284
@@ -55476,7 +55476,7 @@ msgstr "Hedef Depo Stok Rezerve Edilemedi"
 
 #: erpnext/controllers/subcontracting_inward_controller.py:233
 msgid "Target Warehouse for Finished Good must be same as Finished Good Warehouse {0} in Work Order {1} linked to the Subcontracting Inward Order."
-msgstr ""
+msgstr "Mamul için Hedef Depo, Fason Giriş Siparişine bağlı {1} İş Emrindeki {0} Mamul Deposu ile aynı olmalıdır."
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:610
 msgid "Target Warehouse is required before Submit"
@@ -57431,7 +57431,7 @@ msgstr ""
 #. Header text in the CRM Workspace
 #: erpnext/crm/workspace/crm/crm.json
 msgid "This module is scheduled for deprecation and will be completely removed in version 17, please use <a href=\"http://frappe.io/crm\">Frappe CRM</a> instead."
-msgstr ""
+msgstr "Bu modül kullanımdan kaldırılacak ve sürüm 17'de tamamen çıkarılacaktır; lütfen bunun yerine <a href=\"http://frappe.io/crm\">Frappe CRM</a> kullanın."
 
 #. Header text in the Support Workspace
 #: erpnext/support/workspace/support/support.json
@@ -64444,7 +64444,7 @@ msgstr "{0} varyantları oluşturuldu."
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_engine.py:270
 msgid "{0} view is currently unsupported in Custom Financial Report"
-msgstr ""
+msgstr "{0} görünümü Özel Finansal Raporda şu anda desteklenmiyor"
 
 #: erpnext/stock/doctype/material_request/mapper.py:263
 msgid "{0} was set to today for items whose requested date has passed"
