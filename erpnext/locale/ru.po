@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-08-09 09:47+0000\n"
-"PO-Revision-Date: 2026-08-11 23:06\n"
+"PO-Revision-Date: 2026-08-14 00:48\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Russian\n"
 "MIME-Version: 1.0\n"
@@ -13074,13 +13074,13 @@ msgstr "Расходы"
 #. Label of the cost_allocation (Currency) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "Cost Allocation"
-msgstr ""
+msgstr "Распределение расходов"
 
 #. Label of the cost_allocation_per (Percent) field in DocType 'BOM Secondary
 #. Item'
 #: erpnext/manufacturing/doctype/bom_secondary_item/bom_secondary_item.json
 msgid "Cost Allocation %"
-msgstr ""
+msgstr "Распределение расходов %"
 
 #. Label of the cost_allocation__process_loss_section (Section Break) field in
 #. DocType 'BOM'
