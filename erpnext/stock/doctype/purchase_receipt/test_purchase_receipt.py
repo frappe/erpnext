@@ -703,6 +703,43 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		update_purchase_receipt_status(pr.name, "Closed")
 		self.assertEqual(frappe.db.get_value("Purchase Receipt", pr.name, "status"), "Closed")
 
+	def test_purchase_return_against_closed_purchase_order(self):
+		from erpnext.buying.doctype.purchase_order.purchase_order import (
+			make_purchase_receipt as make_pr_from_po,
+		)
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		po = create_purchase_order(qty=2, rate=100)
+
+		receipts = []
+		for _ in range(2):
+			pr = make_pr_from_po(po.name)
+			pr.items[0].qty = pr.items[0].received_qty = 1
+			pr.submit()
+			receipts.append(pr)
+
+		first_return = make_return_doc("Purchase Receipt", receipts[0].name)
+		first_return.submit()
+
+		po.reload()
+		po.update_status("Closed")
+
+		# a return against a closed Purchase Order should still go through,
+		# the same way a Delivery Note return does against a closed Sales Order
+		second_return = make_return_doc("Purchase Receipt", receipts[1].name)
+		second_return.submit()
+
+		self.assertEqual(second_return.docstatus, 1)
+		self.assertEqual(frappe.db.get_value("Purchase Order", po.name, "status"), "Closed")
+
+		# cancelling the return runs the same check on the closed order
+		second_return.cancel()
+
+		# a regular receipt against the closed order must still be blocked
+		blocked_pr = make_pr_from_po(po.name)
+		self.assertRaisesRegex(frappe.InvalidStatusError, "Closed", blocked_pr.save)
+
 	def test_pr_billing_status(self):
 		"""Flow:
 		1. PO -> PR1 -> PI
