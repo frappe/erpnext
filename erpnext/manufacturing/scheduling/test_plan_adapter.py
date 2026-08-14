@@ -379,6 +379,54 @@ class TestPlanAdapter(ERPNextTestSuite):
 		for row in entries:
 			self.assertIn((get_datetime(row.from_time), get_datetime(row.to_time)), booked)
 
+	@change_settings(
+		"Manufacturing Settings",
+		{"mins_between_operations": 10, "allow_overtime": 0, "disable_capacity_planning": 0},
+	)
+	def test_partially_covered_batch_split_restores_schedule_load(self):
+		operation = "Test PPS Op Batch"
+		if not frappe.db.exists("Operation", operation):
+			make_operation(operation=operation, workstation=self.workstation)
+		frappe.db.set_value("Operation", operation, "create_job_card_based_on_batch_size", 1)
+
+		item = "Test PPS FG 5"
+		create_item(item, valuation_rate=100)
+		self.make_bom_with_operation(
+			item, ["Test PPS RM"], time_in_mins=30, operations=[operation], batch_size=1
+		)
+
+		plan = create_production_plan(
+			item_code=item, planned_qty=2, do_not_submit=True, skip_getting_mr_items=True
+		)
+		plan.submit()
+
+		start_date = get_datetime("2027-06-07 09:00:00")
+		apply_schedule(plan.name, start_date)
+
+		plan.reload()
+		plan.make_work_order()
+		work_order = frappe.get_doc("Work Order", {"production_plan": plan.name})
+		work_order.wip_warehouse = "Work In Progress - _TC"
+		work_order.fg_warehouse = work_order.fg_warehouse or "Finished Goods - _TC"
+		work_order.submit()
+
+		job_cards = frappe.get_all("Job Card", filters={"work_order": work_order.name}, pluck="name")
+		self.assertEqual(len(job_cards), 2)
+		scheduled_rows = frappe.db.count("Job Card Scheduled Time", {"parent": ("in", job_cards)})
+		self.assertTrue(scheduled_rows)
+
+		booked = loaders.get_booked_load([self.workstation], start_date)[self.workstation]
+		self.assertEqual(len(booked), scheduled_rows)
+
+		frappe.delete_doc("Job Card", job_cards[1])
+
+		entry_count = frappe.db.count(
+			"Production Plan Schedule", {"production_plan": plan.name, "workstation": self.workstation}
+		)
+		remaining_rows = frappe.db.count("Job Card Scheduled Time", {"parent": ("in", job_cards)})
+		booked = loaders.get_booked_load([self.workstation], start_date)[self.workstation]
+		self.assertEqual(len(booked), remaining_rows + entry_count)
+
 	def test_manual_schedule_entry_creation_is_blocked(self):
 		plan = self.make_plan()
 		entry = frappe.get_doc(

@@ -9,7 +9,7 @@ from frappe.model.document import Document
 from frappe.utils import cint, get_datetime
 
 from erpnext.manufacturing.doctype.job_card.job_card import OverlapError
-from erpnext.manufacturing.scheduling.loaders import has_job_cards_for_schedule_row
+from erpnext.manufacturing.scheduling.loaders import filter_covered_schedule_rows
 
 
 class ProductionPlanSchedule(Document):
@@ -82,11 +82,18 @@ def get_schedule_bookings(doc, from_time, to_time):
 	schedule = frappe.qb.DocType("Production Plan Schedule")
 	plan = frappe.qb.DocType("Production Plan")
 
-	return (
+	rows = (
 		frappe.qb.from_(schedule)
 		.join(plan)
 		.on(schedule.production_plan == plan.name)
-		.select(schedule.name.as_("source"), schedule.from_time, schedule.to_time)
+		.select(
+			schedule.name.as_("source"),
+			schedule.from_time,
+			schedule.to_time,
+			schedule.production_plan,
+			schedule.plan_row,
+			schedule.operation,
+		)
 		.where(
 			(schedule.workstation == doc.workstation)
 			& (schedule.name != (doc.name or "New"))
@@ -94,10 +101,11 @@ def get_schedule_bookings(doc, from_time, to_time):
 			& (schedule.to_time > from_time)
 			& (plan.docstatus < 2)
 			& (plan.status != "Closed")
-			& has_job_cards_for_schedule_row(schedule).negate()
 		)
 		.for_update()
 	).run(as_dict=True)
+
+	return filter_covered_schedule_rows(rows)
 
 
 def get_job_card_bookings(doc, from_time, to_time, doctype, drafts_only):

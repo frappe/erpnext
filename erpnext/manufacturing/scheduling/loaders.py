@@ -5,7 +5,6 @@ from collections import defaultdict
 
 import frappe
 from frappe.utils import cint, flt, get_datetime, get_time
-from pypika.terms import ExistsCriterion
 
 from erpnext.manufacturing.scheduling.models import Interval, Resource, ResourceCalendar, Task
 
@@ -95,56 +94,108 @@ def add_plan_schedule_intervals(load, resource_names, from_date, exclude_plan):
 		frappe.qb.from_(schedule)
 		.join(plan)
 		.on(schedule.production_plan == plan.name)
-		.select(schedule.workstation, schedule.from_time, schedule.to_time)
+		.select(
+			schedule.workstation,
+			schedule.from_time,
+			schedule.to_time,
+			schedule.production_plan,
+			schedule.plan_row,
+			schedule.operation,
+		)
 		.where(
 			schedule.workstation.isin(resource_names)
 			& (schedule.to_time > from_date)
 			& (plan.docstatus < 2)
 			& (plan.status != "Closed")
-			& has_job_cards_for_schedule_row(schedule).negate()
 		)
 	)
 
 	if exclude_plan:
 		query = query.where(schedule.production_plan != exclude_plan)
 
-	for row in query.run(as_dict=True):
+	for row in filter_covered_schedule_rows(query.run(as_dict=True)):
 		load[row.workstation].append(Interval(get_datetime(row.from_time), get_datetime(row.to_time)))
 
 
-def has_job_cards_for_schedule_row(schedule):
-	"""A schedule block steps aside only for job cards that already carry booked load
-	(scheduled time or logged time). Batch-split or repeated-operation job cards created
-	with capacity planning disabled carry neither, so the block keeps reserving capacity."""
-	job_card = frappe.qb.DocType("Job Card")
-	work_order = frappe.qb.DocType("Work Order")
+def filter_covered_schedule_rows(rows):
+	"""A schedule block steps aside only when job cards carrying booked load (scheduled
+	time or logged time) cover the full quantity of its plan row and operation. Partial
+	coverage - a batch-split card deleted, capacity planning disabled - keeps the block,
+	trading double-booked load for never silently freeing a reserved interval."""
+	plans = {row.production_plan for row in rows}
+	if not plans:
+		return rows
 
-	return ExistsCriterion(
-		frappe.qb.from_(job_card)
-		.join(work_order)
-		.on(job_card.work_order == work_order.name)
-		.select(job_card.name)
-		.where(
-			(job_card.docstatus < 2)
-			& (work_order.production_plan == schedule.production_plan)
-			& (job_card.operation == schedule.operation)
-			& (has_scheduled_time(job_card) | (job_card.total_time_in_mins > 0))
-			& (
-				(work_order.production_plan_item == schedule.plan_row)
-				| (work_order.production_plan_sub_assembly_item == schedule.plan_row)
-			)
-		)
+	required, carried = get_job_card_coverage(plans)
+	return [row for row in rows if not is_operation_covered(row, required, carried)]
+
+
+def is_operation_covered(row, required, carried):
+	key = (row.production_plan, row.plan_row, row.operation)
+	needed = required.get(key)
+	return bool(needed) and flt(carried.get(key)) >= flt(needed)
+
+
+def get_job_card_coverage(production_plans):
+	work_orders = frappe.get_all(
+		"Work Order",
+		filters={"production_plan": ("in", list(production_plans)), "docstatus": ("<", 2)},
+		fields=[
+			"name",
+			"qty",
+			"production_plan",
+			"production_plan_item",
+			"production_plan_sub_assembly_item",
+		],
+	)
+	if not work_orders:
+		return {}, {}
+
+	return get_required_operation_qty(work_orders), get_carried_operation_qty(work_orders)
+
+
+def get_required_operation_qty(work_orders):
+	by_name = {row.name: row for row in work_orders}
+	required = defaultdict(float)
+	for operation_row in frappe.get_all(
+		"Work Order Operation", filters={"parent": ("in", list(by_name))}, fields=["parent", "operation"]
+	):
+		work_order = by_name[operation_row.parent]
+		add_operation_qty(required, work_order, operation_row.operation, flt(work_order.qty))
+
+	return required
+
+
+def get_carried_operation_qty(work_orders):
+	by_name = {row.name: row for row in work_orders}
+	job_cards = frappe.get_all(
+		"Job Card",
+		filters={"work_order": ("in", list(by_name)), "docstatus": ("<", 2)},
+		fields=["name", "work_order", "operation", "for_quantity", "total_time_in_mins"],
 	)
 
+	with_scheduled_time = get_job_cards_with_scheduled_time(job_cards)
+	carried = defaultdict(float)
+	for job_card in job_cards:
+		if flt(job_card.total_time_in_mins) or job_card.name in with_scheduled_time:
+			work_order = by_name[job_card.work_order]
+			add_operation_qty(carried, work_order, job_card.operation, flt(job_card.for_quantity))
 
-def has_scheduled_time(job_card):
-	scheduled_time = frappe.qb.DocType("Job Card Scheduled Time")
+	return carried
 
-	return ExistsCriterion(
-		frappe.qb.from_(scheduled_time)
-		.select(scheduled_time.name)
-		.where(scheduled_time.parent == job_card.name)
-	)
+
+def get_job_cards_with_scheduled_time(job_cards):
+	names = [job_card.name for job_card in job_cards]
+	if not names:
+		return set()
+
+	return set(frappe.get_all("Job Card Scheduled Time", filters={"parent": ("in", names)}, pluck="parent"))
+
+
+def add_operation_qty(bucket, work_order, operation, qty):
+	for plan_row in (work_order.production_plan_item, work_order.production_plan_sub_assembly_item):
+		if plan_row:
+			bucket[(work_order.production_plan, plan_row, operation)] += qty
 
 
 def build_bom_operation_tasks(bom_no, qty, prefix, earliest_start=None, priority=0):
