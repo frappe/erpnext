@@ -32,7 +32,7 @@ def get_ordered_to_be_billed_data(args, filters=None):
 			fields=[doctype.name],
 			parent_doctype=doctype_name,
 			ignore_permissions=False,
-			apply_child_user_permissions=True,
+			ignore_user_permissions=False,
 		)
 		.join(item)
 		.on(item.name == child_doctype.item_code)
