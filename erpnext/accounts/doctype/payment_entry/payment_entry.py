@@ -40,6 +40,7 @@ from erpnext.accounts.party import (
 	complete_contact_details,
 	get_default_contact,
 	get_party_account,
+	validate_party_company,
 )
 from erpnext.accounts.utils import (
 	cancel_exchange_gain_loss_journal,
@@ -2434,6 +2435,7 @@ def get_party_details(company: str, party_type: str, party: str, date: str, cost
 
 	ptype = "select" if frappe.only_has_select_perm(party_type) else "read"
 	frappe.has_permission(party_type, ptype, party, throw=True)
+	validate_party_company(party_type, party, company)
 
 	party_account = get_party_account(party_type, party, company)
 	account_currency = get_account_currency(party_account)

@@ -668,7 +668,10 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		qty = row.qty if is_return else (flt(row.qty) * flt(self.doc.fg_completed_qty)) / pending_qty_to_mfg
 		item_args["qty"] = ceil_qty_if_uom_has_whole_number(qty, row.uom)
 		item_args["transfer_qty"] = item_args["qty"]
+		if not flt(item_args["qty"], frappe.get_precision("Stock Entry Detail", "qty")):
+			return
 		if is_return:
+			item_args["original_item"] = row.original_item
 			item_args["s_warehouse"], item_args["t_warehouse"] = row.s_warehouse, row.t_warehouse
 		else:
 			item_args["t_warehouse"], item_args["s_warehouse"] = None, row.warehouse
@@ -758,7 +761,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 	def add_materials_from_transfer(self):
 		for row in self._transfer_entries:
 			row.warehouse = row.t_warehouse
-			key = (row.item_code, row.warehouse)
+			key = (row.item_code, row.warehouse, row.original_item or None)
 			if key not in self.available_materials:
 				self.available_materials[key] = frappe._dict(row)
 			else:
@@ -788,20 +791,57 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 	def remove_consumed_materials_from_available(self):
 		for row in self._consumption_entries:
 			row.warehouse = row.s_warehouse
-			key = (row.item_code, row.warehouse)
-			self.available_materials[key].qty -= row.qty
+			buckets = self._get_available_buckets(row.item_code, row.warehouse)
 			if row.serial_and_batch_bundle:
-				self._deduct_consumed_serial_batch(key, row.serial_and_batch_bundle)
+				self._deduct_consumed_serial_batch(buckets, row.serial_and_batch_bundle)
+			else:
+				self._deduct_consumed_qty(buckets, flt(row.qty))
 
-	def _deduct_consumed_serial_batch(self, key, sabb_name):
+	def _get_available_buckets(self, item_code, warehouse):
+		return [
+			bucket
+			for key, bucket in self.available_materials.items()
+			if key[0] == item_code and key[1] == warehouse
+		]
+
+	def _deduct_consumed_qty(self, buckets, consumed_qty):
+		for bucket in buckets[:-1]:
+			deducted = min(max(flt(bucket.qty), 0.0), consumed_qty)
+			bucket.qty -= deducted
+			consumed_qty -= deducted
+		buckets[-1].qty -= consumed_qty
+
+	def _deduct_consumed_serial_batch(self, buckets, sabb_name):
 		_details = self.get_sabb_details(sabb_name)
 		if _details.serial_nos:
-			for sn in _details.serial_nos:
-				self.available_materials[key].serial_nos.remove(sn)
+			self._deduct_consumed_serial_nos(buckets, _details.serial_nos)
 		elif _details.batches:
 			for batch_no, qty in _details.batches.items():
-				# qty is negative, so add instead of subtract
-				self.available_materials[key].batches[batch_no] += qty
+				self._deduct_consumed_batch_qty(buckets, batch_no, -qty)
+
+	def _deduct_consumed_serial_nos(self, buckets, serial_nos):
+		for serial_no in serial_nos:
+			bucket = self._get_serial_no_bucket(buckets, serial_no)
+			bucket.serial_nos.remove(serial_no)
+			bucket.qty -= 1
+
+	def _get_serial_no_bucket(self, buckets, serial_no):
+		for bucket in buckets:
+			if bucket.serial_nos and serial_no in bucket.serial_nos:
+				return bucket
+		return buckets[-1]
+
+	def _deduct_consumed_batch_qty(self, buckets, batch_no, consumed_qty):
+		holders = [bucket for bucket in buckets if bucket.batches and batch_no in bucket.batches]
+		if not holders:
+			holders = buckets[-1:]
+		for bucket in holders[:-1]:
+			deducted = min(max(flt(bucket.batches[batch_no]), 0.0), consumed_qty)
+			bucket.batches[batch_no] -= deducted
+			bucket.qty -= deducted
+			consumed_qty -= deducted
+		holders[-1].batches[batch_no] -= consumed_qty
+		holders[-1].qty -= consumed_qty
 
 	def add_additional_cost(self):
 		if not self.wo_doc:

@@ -12,8 +12,19 @@ $.extend(erpnext.queries, {
 		return { query: "erpnext.controllers.queries.lead_query" };
 	},
 
-	customer: function () {
-		return { filters: { disabled: 0 } };
+	party: function (doc) {
+		return {
+			query: "erpnext.controllers.queries.party_query",
+			filters: { disabled: 0, company: doc.company },
+		};
+	},
+
+	customer: function (doc) {
+		return erpnext.queries.party(doc);
+	},
+
+	supplier: function (doc) {
+		return erpnext.queries.party(doc);
 	},
 
 	item: function (filters) {
