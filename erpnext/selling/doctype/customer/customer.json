@@ -286,7 +286,6 @@
    "depends_on": "eval:!doc.__islocal",
    "fieldname": "address_contacts",
    "fieldtype": "Section Break",
-   "label": "Address and Contact",
    "options": "fa fa-map-marker"
   },
   {
@@ -318,6 +317,7 @@
    "description": "Select, to make the customer searchable with these fields",
    "fieldname": "primary_address_and_contact_detail",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Primary Address and Contact"
   },
   {
@@ -332,6 +332,7 @@
    "fetch_from": "customer_primary_contact.mobile_no",
    "fieldname": "mobile_no",
    "fieldtype": "Read Only",
+   "hidden": 1,
    "label": "Mobile No",
    "no_copy": 1,
    "options": "Mobile"
@@ -340,6 +341,7 @@
    "fetch_from": "customer_primary_contact.email_id",
    "fieldname": "email_id",
    "fieldtype": "Read Only",
+   "hidden": 1,
    "label": "Email Id",
    "no_copy": 1,
    "options": "Email"
@@ -359,6 +361,7 @@
   {
    "fieldname": "primary_address",
    "fieldtype": "Text Editor",
+   "hidden": 1,
    "label": "Primary Address",
    "no_copy": 1,
    "read_only": 1
@@ -696,7 +699,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2026-09-16 11:42:07.000000",
+ "modified": "2026-09-25 15:31:05.845989",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
