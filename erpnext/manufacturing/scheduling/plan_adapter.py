@@ -100,7 +100,11 @@ def run_engine(plan, start_date, use_item_dates=0, item_dates=None):
 	settings = frappe.get_cached_doc("Manufacturing Settings")
 
 	resources = loaders.get_workstation_resources()
-	load = loaders.get_booked_load([r.name for r in resources], start_date) if resources else {}
+	load = (
+		loaders.get_booked_load([r.name for r in resources], start_date, exclude_plan=plan.name)
+		if resources
+		else {}
+	)
 	engine = SchedulingEngine(
 		resources,
 		existing_load=load,
@@ -426,6 +430,7 @@ def build_proposal(plan, result, task_info):
 
 
 def replace_schedule_entries(plan, proposal):
+	lock_booked_workstations(proposal)
 	frappe.db.delete("Production Plan Schedule", {"production_plan": plan.name})
 
 	for row_name, row in proposal["rows"].items():
@@ -433,6 +438,21 @@ def replace_schedule_entries(plan, proposal):
 			entry = make_schedule_entry(plan, row_name, row, block)
 			entry.flags.from_scheduler = True
 			entry.insert(ignore_permissions=True)
+
+
+def lock_booked_workstations(proposal):
+	workstations = sorted(
+		{
+			block["workstation"]
+			for row in proposal["rows"].values()
+			for block in row["blocks"]
+			if block.get("workstation")
+		}
+	)
+	if workstations:
+		frappe.db.get_values(
+			"Workstation", {"name": ("in", workstations)}, "name", order_by="name", for_update=True
+		)
 
 
 def make_schedule_entry(plan, row_name, row, block):
