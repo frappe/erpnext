@@ -156,7 +156,7 @@ def _get_party_details(
 		dispatch_address,
 		ignore_permissions=ignore_permissions,
 	)
-	set_contact_details(party_details, party, party_type)
+	set_contact_details(party_details, party, party_type, doctype)
 	set_other_values(party_details, party, party_type)
 	set_price_list(party_details, party, party_type, price_list, pos_profile)
 
@@ -358,9 +358,21 @@ def complete_contact_details(party_details):
 	party_details.update(contact_details)
 
 
-def set_contact_details(party_details, party, party_type):
+def set_contact_details(party_details, party, party_type, doctype=None):
 	party_details.contact_person = get_default_contact(party_type, party.name)
 	complete_contact_details(party_details)
+
+	# the shipping contact is picked by the user, so it has no default to fall back on;
+	# blank it instead of carrying the previous party's contact over
+	if doctype and frappe.get_meta(doctype).has_field("shipping_contact_person"):
+		party_details.update(
+			{
+				"shipping_contact_person": None,
+				"shipping_contact_display": None,
+				"shipping_contact_mobile": None,
+				"shipping_contact_email": None,
+			}
+		)
 
 
 def set_other_values(party_details, party, party_type):
