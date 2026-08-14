@@ -217,6 +217,33 @@ class TestPlanAdapter(ERPNextTestSuite):
 				] < get_datetime(entry.to_time)
 				self.assertFalse(overlaps, f"{block['task_key']} overlaps a block of {plan_name}")
 
+	@change_settings(
+		"Manufacturing Settings",
+		{"mins_between_operations": 10, "allow_overtime": 0, "disable_capacity_planning": 0},
+	)
+	def test_partially_submitted_plan_keeps_schedule_load(self):
+		start_date = get_datetime("2027-03-01 09:00:00")
+		plan_one = self.make_plan()
+		apply_schedule(plan_one.name, start_date)
+
+		plan_one.reload()
+		plan_one.make_work_order()
+		work_order_name = frappe.get_all(
+			"Work Order",
+			filters={"production_plan": plan_one.name, "production_plan_sub_assembly_item": ("is", "set")},
+			pluck="name",
+		)[0]
+
+		work_order = frappe.get_doc("Work Order", work_order_name)
+		work_order.wip_warehouse = "Work In Progress - _TC"
+		work_order.fg_warehouse = work_order.fg_warehouse or "Finished Goods - _TC"
+		work_order.submit()
+
+		plan_two = self.make_plan()
+		preview = get_schedule_preview(plan_two.name, start_date)
+		self.assertFalse(preview["unscheduled"])
+		self.assert_no_block_overlap(plan_one.name, preview)
+
 	def test_schedule_entry_overlap_validation(self):
 		workstation = "Test PPS WS Cap2"
 		if not frappe.db.exists("Workstation", workstation):

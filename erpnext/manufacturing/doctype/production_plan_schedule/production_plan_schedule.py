@@ -9,7 +9,7 @@ from frappe.model.document import Document
 from frappe.utils import cint, get_datetime
 
 from erpnext.manufacturing.doctype.job_card.job_card import OverlapError
-from erpnext.manufacturing.scheduling.loaders import get_plans_with_job_cards
+from erpnext.manufacturing.scheduling.loaders import has_job_cards_for_schedule_row
 
 
 class ProductionPlanSchedule(Document):
@@ -93,8 +93,9 @@ def get_schedule_bookings(doc, from_time, to_time):
 			& (schedule.to_time > from_time)
 			& (plan.docstatus < 2)
 			& (plan.status != "Closed")
-			& schedule.production_plan.notin(get_plans_with_job_cards())
+			& has_job_cards_for_schedule_row(schedule).negate()
 		)
+		.for_update()
 	).run(as_dict=True)
 
 

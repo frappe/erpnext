@@ -5,6 +5,7 @@ from collections import defaultdict
 
 import frappe
 from frappe.utils import cint, flt, get_datetime, get_time
+from pypika.terms import ExistsCriterion
 
 from erpnext.manufacturing.scheduling.models import Interval, Resource, ResourceCalendar, Task
 
@@ -100,7 +101,7 @@ def add_plan_schedule_intervals(load, resource_names, from_date, exclude_plan):
 			& (schedule.to_time > from_date)
 			& (plan.docstatus < 2)
 			& (plan.status != "Closed")
-			& schedule.production_plan.notin(get_plans_with_job_cards())
+			& has_job_cards_for_schedule_row(schedule).negate()
 		)
 	)
 
@@ -111,16 +112,23 @@ def add_plan_schedule_intervals(load, resource_names, from_date, exclude_plan):
 		load[row.workstation].append(Interval(get_datetime(row.from_time), get_datetime(row.to_time)))
 
 
-def get_plans_with_job_cards():
+def has_job_cards_for_schedule_row(schedule):
 	job_card = frappe.qb.DocType("Job Card")
 	work_order = frappe.qb.DocType("Work Order")
 
-	return (
+	return ExistsCriterion(
 		frappe.qb.from_(job_card)
 		.join(work_order)
 		.on(job_card.work_order == work_order.name)
-		.select(work_order.production_plan)
-		.where((job_card.docstatus < 2) & (work_order.production_plan != ""))
+		.select(job_card.name)
+		.where(
+			(job_card.docstatus < 2)
+			& (work_order.production_plan == schedule.production_plan)
+			& (
+				(work_order.production_plan_item == schedule.plan_row)
+				| (work_order.production_plan_sub_assembly_item == schedule.plan_row)
+			)
+		)
 	)
 
 
