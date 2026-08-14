@@ -2039,6 +2039,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 		)
 		self.assertRaises(NegativeStockError, backdated.submit)
 
+<<<<<<< HEAD
 	def make_serial_item_for_valuation(self, item_code, use_serial_no_wise_valuation):
 		return make_item(
 			item_code,
@@ -2511,6 +2512,8 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, bundle.submit)
 
+=======
+>>>>>>> c18881b (fix: ignore historical negative batch stock in outward validation (backport #58148) (#58151))
 
 def get_batch_from_bundle(bundle):
 	from erpnext.stock.serial_batch_bundle import get_batch_nos
