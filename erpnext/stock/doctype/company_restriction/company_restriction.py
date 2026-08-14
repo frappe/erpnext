@@ -140,16 +140,20 @@ def validate_transaction_company(doc, method=None):
 		return
 
 	for doctype, names in get_master_references(doc).items():
-		if blocked := get_blocked_masters(doctype, names, company):
-			frappe.throw(
-				_("{0} {1} cannot be used with Company {2} because of Company Restrictions").format(
-					_(doctype),
-					comma_and([frappe.bold(name) for name in blocked], add_quotes=False),
-					frappe.bold(company),
-				),
-				CompanyRestrictionError,
-				title=_("Restricted to Other Companies"),
-			)
+		validate_masters_for_company(doctype, names, company)
+
+
+def validate_masters_for_company(doctype, names, company):
+	if blocked := get_blocked_masters(doctype, names, company):
+		frappe.throw(
+			_("{0} {1} cannot be used with Company {2} because of Company Restrictions").format(
+				_(doctype),
+				comma_and([frappe.bold(name) for name in blocked], add_quotes=False),
+				frappe.bold(company),
+			),
+			CompanyRestrictionError,
+			title=_("Restricted to Other Companies"),
+		)
 
 
 def get_master_references(doc):

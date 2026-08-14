@@ -476,6 +476,8 @@ frappe.ui.form.on("Payment Entry", {
 				return {
 					query: "erpnext.controllers.queries.employee_query",
 				};
+			} else if (["Customer", "Supplier"].includes(frm.doc.party_type)) {
+				return erpnext.queries.party(frm.doc);
 			} else if (frm.doc.party_type == "Shareholder") {
 				return {
 					filters: {

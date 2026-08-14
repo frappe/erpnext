@@ -140,6 +140,7 @@ def _get_party_details(
 	if not ignore_permissions:
 		ptype = "select" if frappe.only_has_select_perm(party_type) else "read"
 		frappe.has_permission(party_type, ptype, party, throw=True)
+		validate_party_company(party_type, party.name, company)
 
 	currency = party.get("default_currency") or currency or get_company_currency(company)
 
@@ -195,6 +196,17 @@ def _get_party_details(
 		party_details["tax_category"] = frappe.get_value("POS Profile", pos_profile, "tax_category")
 
 	return party_details
+
+
+def validate_party_company(party_type, party, company):
+	if not company or party_type not in ("Customer", "Supplier"):
+		return
+
+	from erpnext.stock.doctype.company_restriction.company_restriction import (
+		validate_masters_for_company,
+	)
+
+	validate_masters_for_company(party_type, [party], company)
 
 
 def set_address_details(
