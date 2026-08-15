@@ -909,15 +909,10 @@ def send():
 
 
 @frappe.whitelist()
-<<<<<<< HEAD
 def get_digest_msg(name):
-	return frappe.get_doc("Email Digest", name).get_msg_html()
-=======
-def get_digest_msg(name: str):
 	email_digest = frappe.get_doc("Email Digest", name)
 	email_digest.check_permission()
 	return email_digest.get_msg_html()
->>>>>>> c6b172999c (fix(email_digest): added permission check for `get_msg_html`)
 
 
 def get_incomes_expenses_for_period(account, from_date, to_date):
