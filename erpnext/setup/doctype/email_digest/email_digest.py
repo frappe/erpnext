@@ -903,14 +903,6 @@ def send():
 			ed_obj.send()
 
 
-<<<<<<< HEAD
-@frappe.whitelist()
-def get_digest_msg(name):
-	return frappe.get_doc("Email Digest", name).get_msg_html()
-
-
-=======
->>>>>>> 4cd8fbf1c0 (refactor(email_digest): convert `get_digest_msg` from module function to instance method (#58193))
 def get_incomes_expenses_for_period(account, from_date, to_date):
 	"""Get amounts for current and past periods"""
 
