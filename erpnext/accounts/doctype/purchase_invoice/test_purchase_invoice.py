@@ -560,7 +560,7 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		pr = frappe.new_doc("Purchase Receipt")
 		pr.currency = "USD"
 		pr.company = "_Test Company with perpetual inventory"
-		pr.conversion_rate = (70,)
+		pr.conversion_rate = 80
 		pr.supplier = "_Test Supplier USD"
 		pr.append(
 			"items",
@@ -574,21 +574,12 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		pr.submit()
 
 		pi = create_purchase_invoice(pr.name)
-		pi.conversion_rate = 80
+		pi.conversion_rate = 70
 		pi.credit_to = "_Test Payable USD - TCP1"
 		pi.insert()
 		pi.submit()
 
 		exchange_gain_loss_account = frappe.db.get_value("Company", pi.company, "exchange_gain_loss_account")
-		# fetching the latest GL Entry with exchange gain and loss account account
-		amount = frappe.db.get_value(
-			"GL Entry", {"account": exchange_gain_loss_account, "voucher_no": pi.name}, "debit"
-		)
-
-		discrepancy_caused_by_exchange_rate_diff = abs(
-			pi.items[1].base_net_amount - pr.items[1].base_net_amount
-		)
-
 		self.assertFalse(
 			frappe.db.exists("GL Entry", {"account": exchange_gain_loss_account, "voucher_no": pi.name})
 		)
