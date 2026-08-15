@@ -580,8 +580,6 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		pi.submit()
 
 		exchange_gain_loss_account = frappe.db.get_value("Company", pi.company, "exchange_gain_loss_account")
-<<<<<<< HEAD
-
 		# fetching the latest GL Entry with exchange gain and loss account account
 		amount = frappe.db.get_value(
 			"GL Entry", {"account": exchange_gain_loss_account, "voucher_no": pi.name}, "debit"
@@ -591,14 +589,10 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 			pi.items[1].base_net_amount - pr.items[1].base_net_amount
 		)
 
-		self.assertEqual(discrepancy_caused_by_exchange_rate_diff, amount)
-
-=======
 		self.assertFalse(
 			frappe.db.exists("GL Entry", {"account": exchange_gain_loss_account, "voucher_no": pi.name})
 		)
 
->>>>>>> 70a8a2d0c5 (feat: validate purchase receipt exchange rate parity on purchase invoice (#58177))
 	def test_purchase_invoice_change_naming_series(self):
 		pi = frappe.copy_doc(test_records[1])
 		pi.insert()
