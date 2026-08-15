@@ -291,6 +291,7 @@ class PurchaseInvoice(BuyingController):
 		self.validate_multiple_billing("Purchase Receipt", "pr_detail", "amount")
 		self.set_status()
 		self.validate_purchase_receipt_if_update_stock()
+		self.validate_exchange_rate_with_purchase_receipt()
 		validate_inter_company_party(
 			self.doctype, self.supplier, self.company, self.inter_company_invoice_reference
 		)
@@ -312,6 +313,47 @@ class PurchaseInvoice(BuyingController):
 
 		if total_billed_qty and total_received_qty:
 			self.per_received = total_received_qty / total_billed_qty * 100
+
+	def validate_exchange_rate_with_purchase_receipt(self):
+		if self.is_internal_transfer() or not erpnext.is_perpetual_inventory_enabled(self.company):
+			return
+
+		stock_items = self.get_stock_items()
+		receipts = {
+			item.purchase_receipt
+			for item in self.items
+			if item.purchase_receipt and item.item_code in stock_items
+		}
+		if not receipts:
+			return
+
+		if frappe.db.get_single_value("Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate"):
+			return
+
+		mismatched = [
+			f"{frappe.bold(row.name)} ({row.conversion_rate})"
+			for row in frappe.get_all(
+				"Purchase Receipt",
+				filters={"name": ("in", list(receipts))},
+				fields=["name", "currency", "conversion_rate"],
+			)
+			if row.currency == self.currency
+			and flt(row.conversion_rate)
+			and flt(row.conversion_rate) != flt(self.conversion_rate)
+		]
+		if not mismatched:
+			return
+
+		frappe.throw(
+			_(
+				"Exchange rate {0} does not match the exchange rate of Purchase Receipt {1}. Use the same exchange rate as the Purchase Receipt or enable {2} in {3} to adjust the landed cost based on this invoice."
+			).format(
+				frappe.bold(self.conversion_rate),
+				", ".join(mismatched),
+				frappe.bold(_("Set Landed Cost Based on Purchase Invoice Rate")),
+				get_link_to_form("Buying Settings", "Buying Settings", _("Buying Settings")),
+			)
+		)
 
 	def validate_invoice_hold(self):
 		if self.is_return:
