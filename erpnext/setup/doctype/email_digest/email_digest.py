@@ -958,7 +958,9 @@ def send():
 
 @frappe.whitelist()
 def get_digest_msg(name: str):
-	return frappe.get_doc("Email Digest", name).get_msg_html()
+	email_digest = frappe.get_doc("Email Digest", name)
+	email_digest.check_permission()
+	return email_digest.get_msg_html()
 
 
 def get_incomes_expenses_for_period(account, from_date, to_date):
