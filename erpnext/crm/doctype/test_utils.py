@@ -43,5 +43,5 @@ class TestCrmDoctypeUtils(ERPNextTestSuite):
 		).insert(ignore_permissions=True)
 
 		result = get_last_interaction(contact=contact.name)
-		self.assertIsNotNone(result["last_communication"])
-		self.assertEqual(result["last_communication"]["name"], comm.name)
+		self.assertIsNotNone(result["contact"]["last_communication"])
+		self.assertEqual(result["contact"]["last_communication"]["name"], comm.name)

@@ -7,32 +7,44 @@ def get_last_interaction(contact: str | None = None, lead: str | None = None):
 	if not contact and not lead:
 		return
 
-	last_communication = None
+	def get_communication_from_contact_link_documents(link_conditions):
+		nonlocal contact_last_communication
+
+		if not link_conditions:
+			return
+
+		link_conditions.update(sent_or_received="Received")
+		communication = frappe.get_list(
+			"Communication",
+			filters=link_conditions,
+			fields=["name", "content", "creation"],
+			order_by="creation desc",
+			limit=1,
+		)
+
+		if communication:
+			contact_last_communication.append(communication[0])
+
+	result = {}
+	contact_last_communication = []
+	lead_last_communication = None
 	last_issue = None
 	if contact:
-		communication = frappe.qb.DocType("Communication")
-		link_conditions = []
+		link_conditions = {}
 		contact = frappe.get_doc("Contact", contact)
 		for link in contact.links:
 			if link.link_doctype == "Customer":
 				last_issue = get_last_issue_from_customer(link.link_name)
-			link_conditions.append(
-				(communication.reference_doctype == link.link_doctype)
-				& (communication.reference_name == link.link_name)
+			link_conditions.update(
+				reference_doctype=link.link_doctype,
+				reference_name=link.link_name,
 			)
+			get_communication_from_contact_link_documents(link_conditions)
 
-		if link_conditions:
-			last_communication = (
-				frappe.qb.from_(communication)
-				.select(communication.name, communication.content)
-				.where((communication.sent_or_received == "Received") & Criterion.any(link_conditions))
-				.orderby(communication.creation)
-				.limit(1)
-				.run(as_dict=1)
-			)
+		contact_last_communication = sorted(contact_last_communication, key=lambda x: x["creation"])
 
 	if lead:
-		last_communication = frappe.get_all(
+		lead_last_communication = frappe.get_list(
 			"Communication",
 			filters={"reference_doctype": "Lead", "reference_name": lead, "sent_or_received": "Received"},
 			fields=["name", "content"],
@@ -40,9 +52,15 @@ def get_last_interaction(contact: str | None = None, lead: str | None = None):
 			limit=1,
 		)
 
-	last_communication = last_communication[0] if last_communication else None
+	result.update(
+		contact={
+			"last_communication": contact_last_communication[0] if contact_last_communication else None,
+			"last_issue": last_issue,
+		},
+		lead={"last_communication": lead_last_communication[0] if lead_last_communication else None},
+	)
 
-	return {"last_communication": last_communication, "last_issue": last_issue}
+	return result
 
 
 def get_last_issue_from_customer(customer_name):
