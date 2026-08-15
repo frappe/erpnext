@@ -411,7 +411,7 @@
   },
   {
    "default": "0",
-   "description": "Blocks all further accounting entries on this customer's account. Only users with the frozen-entries role can override.\n",
+   "description": "Blocks new transactions and further accounting entries on this customer's account. Only users with the role set in Company's \"Roles Allowed to Set and Edit Frozen Account Entries\" can transact.",
    "fieldname": "is_frozen",
    "fieldtype": "Check",
    "label": "Is Frozen",
@@ -696,7 +696,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2026-06-27 16:12:10.457900",
+ "modified": "2026-08-14 16:10:58.600553",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
