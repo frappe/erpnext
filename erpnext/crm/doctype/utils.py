@@ -1,4 +1,5 @@
 import frappe
+<<<<<<< HEAD
 
 
 @frappe.whitelist()
@@ -46,6 +47,8 @@ def get_last_interaction(contact=None, lead=None):
 	last_communication = last_communication[0] if last_communication else None
 
 	return {"last_communication": last_communication, "last_issue": last_issue}
+=======
+>>>>>>> 5a69bb9001 (fix(crm)!: remove unused `get_last_interaction` endpoint (#58214))
 
 
 def get_last_issue_from_customer(customer_name):
