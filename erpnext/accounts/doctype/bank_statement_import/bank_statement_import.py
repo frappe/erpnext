@@ -393,6 +393,7 @@ def get_import_status(docname: str):
 	import_status = {}
 
 	data_import = frappe.get_doc("Bank Statement Import", docname)
+	data_import.check_permission()
 	import_status["status"] = data_import.status
 
 	logs = frappe.get_all(
