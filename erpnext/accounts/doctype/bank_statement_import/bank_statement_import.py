@@ -103,6 +103,7 @@ class BankStatementImport(DataImport):
 		return False
 
 
+<<<<<<< HEAD
 @frappe.whitelist()
 def get_preview_from_template(data_import, import_file=None, google_sheets_url=None):
 	return frappe.get_doc("Bank Statement Import", data_import).get_preview_from_template(
@@ -113,17 +114,107 @@ def get_preview_from_template(data_import, import_file=None, google_sheets_url=N
 @frappe.whitelist()
 def form_start_import(data_import):
 	return frappe.get_doc("Bank Statement Import", data_import).start_import()
+=======
+@frappe.whitelist(methods=["POST"])
+def convert_mt940_to_csv(data_import: str, mt940_file_path: str):
+	doc = frappe.get_doc("Bank Statement Import", data_import)
+	doc.check_permission("write")
+
+	_file_doc, content = get_file(mt940_file_path)
+
+	is_mt940 = is_mt940_format(content)
+	if not is_mt940:
+		frappe.throw(_("The uploaded file does not appear to be in valid MT940 format."))
+
+	if is_mt940 and not doc.import_mt940_fromat:
+		frappe.throw(_("MT940 file detected. Please enable 'Import MT940 Format' to proceed."))
+
+	try:
+		# Preprocess MT940 content to fix statement number format issues
+		processed_content = preprocess_mt940_content(content)
+		transactions = mt940.parse(processed_content)
+	except Exception as e:
+		frappe.throw(_("Failed to parse MT940 format. Error: {0}").format(str(e)))
+
+	if not transactions:
+		frappe.throw(_("Parsed file is not in valid MT940 format or contains no transactions."))
+
+	# Use in-memory file buffer instead of writing to temp file
+	csv_buffer = io.StringIO()
+	writer = csv.writer(csv_buffer)
+
+	headers = ["Date", "Deposit", "Withdrawal", "Description", "Reference Number", "Bank Account", "Currency"]
+	writer.writerow(headers)
+
+	for txn in transactions:
+		txn_date = getattr(txn, "date", None)
+		raw_date = txn.data.get("date", "")
+
+		if txn_date:
+			date_str = txn_date.strftime("%Y-%m-%d")
+		elif isinstance(raw_date, date | datetime):
+			date_str = raw_date.strftime("%Y-%m-%d")
+		else:
+			date_str = str(raw_date)
+
+		raw_amount = str(txn.data.get("amount", ""))
+		parts = raw_amount.strip().split()
+		amount_value = float(parts[0]) if parts else 0.0
+
+		deposit = amount_value if amount_value > 0 else ""
+		withdrawal = abs(amount_value) if amount_value < 0 else ""
+		description = txn.data.get("transaction_details") or txn.data.get("extra_details") or ""
+		reference = get_transaction_reference(txn.data)
+		currency = txn.data.get("currency", "")
+
+		writer.writerow([date_str, deposit, withdrawal, description, reference, doc.bank_account, currency])
+
+	# Prepare in-memory CSV for upload
+	csv_content = csv_buffer.getvalue().encode("utf-8")
+	csv_buffer.close()
+
+	filename = f"{frappe.utils.now_datetime().strftime('%Y%m%d%H%M%S')}_converted_mt940.csv"
+
+	# Save to File Manager
+	saved_file = save_file(filename, csv_content, doc.doctype, doc.name, is_private=True, df="import_file")
+
+	return saved_file.file_url
+
+
+@frappe.whitelist()
+def get_preview_from_template(
+	data_import: str, import_file: str | None = None, google_sheets_url: str | None = None
+):
+	bsi = frappe.get_doc("Bank Statement Import", data_import)
+	bsi.check_permission()
+	return bsi.get_preview_from_template(import_file, google_sheets_url)
+
+
+@frappe.whitelist()
+def form_start_import(data_import: str):
+	bsi = frappe.get_doc("Bank Statement Import", data_import)
+	bsi.check_permission("write")
+	return bsi.start_import()
+>>>>>>> 2f82e0dd36 (fix(bank_statement_import): add missing permission check on multiple whitelisted methods (#58221))
 
 
 @frappe.whitelist()
 def download_errored_template(data_import_name):
 	data_import = frappe.get_doc("Bank Statement Import", data_import_name)
+	data_import.check_permission()
 	data_import.export_errored_rows()
 
 
 @frappe.whitelist()
+<<<<<<< HEAD
 def download_import_log(data_import_name):
 	return frappe.get_doc("Bank Statement Import", data_import_name).download_import_log()
+=======
+def download_import_log(data_import_name: str):
+	bsi = frappe.get_doc("Bank Statement Import", data_import_name)
+	bsi.check_permission()
+	return bsi.download_import_log()
+>>>>>>> 2f82e0dd36 (fix(bank_statement_import): add missing permission check on multiple whitelisted methods (#58221))
 
 
 def parse_data_from_template(raw_data):
