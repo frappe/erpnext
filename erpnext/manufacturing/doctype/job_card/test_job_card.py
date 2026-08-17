@@ -2384,6 +2384,113 @@ class TestJobCard(ERPNextTestSuite):
 			frappe.db.get_value("Job Card", {"work_order": work_order.name, "operation": operation}, "name"),
 		)
 
+	def submit_semi_fg_job_card_with_secondary_item(self, work_order, operation, item_code, stock_qty, day):
+		job_card = self.get_semi_fg_job_card(work_order, operation)
+		job_card.append(
+			"time_logs",
+			{
+				"from_time": f"2024-03-{day} 08:00:00",
+				"to_time": f"2024-03-{day} 09:00:00",
+				"completed_qty": job_card.for_quantity,
+			},
+		)
+		job_card.append(
+			"secondary_items",
+			{"item_code": item_code, "stock_qty": stock_qty, "secondary_item_type": "Scrap"},
+		)
+		job_card.submit()
+		return job_card
+
+	def test_secondary_items_scoped_per_job_card(self):
+		work_order = self.make_semi_fg_work_order("Secondary Scope")
+		scrap_item = create_item("Secondary Scope Scrap")
+
+		for operation, day in (("Secondary Scope Op A", "01"), ("Secondary Scope Op B", "02")):
+			job_card = self.submit_semi_fg_job_card_with_secondary_item(
+				work_order, operation, scrap_item.name, 2, day
+			)
+			manufacturing_entry = frappe.get_doc(job_card.make_stock_entry_for_semi_fg_item())
+			secondary_item = next((row for row in manufacturing_entry.items if row.secondary_item_type), None)
+			self.assertIsNotNone(secondary_item, f"secondary item missing for {operation}")
+			self.assertEqual(secondary_item.item_code, scrap_item.name)
+			self.assertEqual(secondary_item.qty, 2)
+			manufacturing_entry.submit()
+
+	def test_fully_used_secondary_item_is_not_added_to_partial_follow_up(self):
+		work_order = self.make_semi_fg_work_order("Secondary Used")
+		scrap_item = create_item("Secondary Used Scrap")
+		job_card = self.submit_semi_fg_job_card_with_secondary_item(
+			work_order, "Secondary Used Op A", scrap_item.name, 2, "04"
+		)
+
+		first = frappe.get_doc(job_card.make_stock_entry_for_semi_fg_item())
+		first.fg_completed_qty = 2
+		for row in first.items:
+			if row.is_finished_item:
+				row.qty = 2
+			elif row.s_warehouse:
+				row.qty = flt(row.qty) * 2 / 5
+		first.save()
+		first.submit()
+
+		job_card.reload()
+		follow_up = frappe.get_doc(job_card.make_stock_entry_for_semi_fg_item())
+		self.assertFalse(any(row.secondary_item_type for row in follow_up.items))
+
+	def test_over_booked_secondary_item_does_not_block_follow_up(self):
+		work_order = self.make_semi_fg_work_order("Secondary Over")
+		scrap_item = create_item("Secondary Over Scrap")
+		job_card = self.submit_semi_fg_job_card_with_secondary_item(
+			work_order, "Secondary Over Op A", scrap_item.name, 2, "05"
+		)
+
+		first = frappe.get_doc(job_card.make_stock_entry_for_semi_fg_item())
+		first.fg_completed_qty = 2
+		for row in first.items:
+			if row.is_finished_item:
+				row.qty = 2
+			elif row.secondary_item_type:
+				row.qty = 3
+			elif row.s_warehouse:
+				row.qty = flt(row.qty) * 2 / 5
+		first.save()
+		first.submit()
+
+		job_card.reload()
+		frappe.clear_messages()
+		follow_up = frappe.get_doc(job_card.make_stock_entry_for_semi_fg_item())
+		self.assertFalse(any(row.secondary_item_type for row in follow_up.items))
+
+		alerts = [msg for msg in frappe.get_message_log() if scrap_item.name in msg.get("message", "")]
+		self.assertTrue(alerts, "over booked secondary item was skipped without an alert")
+		self.assertIn(job_card.name, alerts[0].get("message"))
+
+	def test_over_booked_qty_is_measured_before_proration(self):
+		from erpnext.stock.doctype.stock_entry.services.manufacturing import ManufactureStockEntry
+
+		# A work order level entry prorates the balance, so the excess has to be taken before that
+		entry = ManufactureStockEntry(frappe.new_doc("Stock Entry", fg_completed_qty=2))
+		rows = [frappe._dict(item_code="_Test Item", stock_qty=10.0)]
+		entry._adjust_secondary_item_qtys(rows, {"_Test Item": 12.0}, pending_qty=10)
+
+		self.assertEqual(flt(rows[0].over_booked_qty), 2.0)
+		self.assertEqual(flt(rows[0].stock_qty), 0.0)
+
+	def test_used_qty_is_shared_across_rows_of_the_same_item(self):
+		from erpnext.stock.doctype.stock_entry.services.manufacturing import ManufactureStockEntry
+
+		# The same item under two secondary types makes two rows drawing on one used balance
+		entry = ManufactureStockEntry(frappe.new_doc("Stock Entry", fg_completed_qty=10))
+		rows = [
+			frappe._dict(item_code="_Test Item", secondary_item_type="Scrap", stock_qty=5.0),
+			frappe._dict(item_code="_Test Item", secondary_item_type="By-Product", stock_qty=5.0),
+		]
+		entry._adjust_secondary_item_qtys(rows, {"_Test Item": 8.0}, pending_qty=10)
+
+		self.assertEqual(flt(rows[0].stock_qty), 0.0)
+		self.assertEqual(flt(rows[1].stock_qty), 2.0)
+		self.assertEqual(flt(rows[1].over_booked_qty), 0.0)
+
 	def test_partial_manufacture_entry_then_finish(self):
 		work_order = self.make_semi_fg_work_order("PL Partial")
 
