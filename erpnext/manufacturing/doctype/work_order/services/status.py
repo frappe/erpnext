@@ -132,9 +132,7 @@ class StatusService:
 
 		status = (
 			"In Process"
-			if flt(self.doc.material_transferred_for_manufacturing) > 0
-			or self.doc.skip_transfer
-			or self._has_transferred_material()
+			if flt(self.doc.material_transferred_for_manufacturing) > 0 or self._has_transferred_material()
 			else "Not Started"
 		)
 		precision = frappe.get_precision("Work Order", "produced_qty")
