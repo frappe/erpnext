@@ -10,7 +10,7 @@ callers (job cards, sales orders, production plans, patches) keep working.
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import cint, flt, get_link_to_form
 
 from erpnext.stock.stock_balance import get_planned_qty, update_bin_qty
@@ -144,19 +144,9 @@ class StatusService:
 		return status
 
 	def _has_transferred_material(self):
-		"""True if any raw material was transferred against this work order via a pick list
-		or a material request (these leave material_transferred_for_manufacturing at 0 via
-		the min-fraction rule)."""
+		"""True if any raw material was transferred against this work order."""
 		ste = frappe.qb.DocType("Stock Entry")
 		ste_child = frappe.qb.DocType("Stock Entry Detail")
-		mr_child = frappe.qb.DocType("Stock Entry Detail")
-		# Stock Entry only carries `material_request` at the child-row level, so a Stock
-		# Entry is "MR-sourced" if *any* of its rows link back to a Material Request; once
-		# that's established, sum every row's transfer_qty, not just the linked ones (a
-		# manually appended extra row on the same entry has no material_request of its own).
-		mr_sourced_stock_entries = (
-			frappe.qb.from_(mr_child).select(mr_child.parent).where(mr_child.material_request.isnotnull())
-		)
 		qty = (
 			frappe.qb.from_(ste)
 			.inner_join(ste_child)
@@ -167,7 +157,6 @@ class StatusService:
 				& (ste.docstatus == 1)
 				& (ste.purpose == "Material Transfer for Manufacture")
 				& (ste.is_return == 0)
-				& (ste.pick_list.isnotnull() | ste.name.isin(mr_sourced_stock_entries))
 			)
 		).run()[0][0]
 		return flt(qty) > 0
@@ -278,7 +267,13 @@ class StatusService:
 				.where(child.is_finished_item == 1)
 			)
 		else:
-			query = query.select(Sum(parent.fg_completed_qty))
+			job_card = frappe.qb.DocType("Job Card")
+			query = (
+				query.left_join(job_card)
+				.on(parent.job_card == job_card.name)
+				.where(IfNull(job_card.is_corrective_job_card, 0) == 0)
+				.select(Sum(parent.fg_completed_qty))
+			)
 
 		return flt(query.run()[0][0])
 

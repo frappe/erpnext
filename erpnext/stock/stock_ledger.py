@@ -26,7 +26,7 @@ from frappe.utils import (
 )
 
 import erpnext
-from erpnext.stock.doctype.bin.bin import update_qty as update_bin_qty
+from erpnext.stock.doctype.bin.bin import update_qty_from_sle
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 	get_auto_batch_nos,
@@ -172,9 +172,10 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 					)
 					sle["outgoing_rate"] = 0.0
 
-			if sle.get("actual_qty") or sle.get("voucher_type") == "Stock Reconciliation":
-				sle_doc = make_entry(sle, allow_negative_stock, via_landed_cost_voucher)
+			if not (sle.get("actual_qty") or sle.get("voucher_type") == "Stock Reconciliation"):
+				continue
 
+			sle_doc = make_entry(sle, allow_negative_stock, via_landed_cost_voucher)
 			args = sle_doc.as_dict()
 			args["posting_datetime"] = get_combine_datetime(args.posting_date, args.posting_time)
 
@@ -189,7 +190,7 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 				repost_current_voucher(
 					args, allow_negative_stock, via_landed_cost_voucher, cancelled=cancelled
 				)
-				update_bin_qty(bin_name, args)
+				update_qty_from_sle(bin_name, args)
 			else:
 				frappe.msgprint(
 					_("Item {0} ignored since it is not a stock item").format(args.get("item_code"))
@@ -1935,18 +1936,6 @@ class update_entries_after:
 				frappe.throw(message, NegativeStockError, title=_("Insufficient Stock"))
 			else:
 				raise NegativeStockError(message)
-
-	def update_bin_data(self, sle):
-		bin_name = get_or_make_bin(sle.item_code, sle.warehouse)
-		values_to_update = {
-			"actual_qty": sle.qty_after_transaction,
-			"stock_value": sle.stock_value,
-		}
-
-		if sle.valuation_rate is not None:
-			values_to_update["valuation_rate"] = sle.valuation_rate
-
-		frappe.db.set_value("Bin", bin_name, values_to_update)
 
 	def update_bin(self):
 		# update bin for each warehouse

@@ -15,18 +15,23 @@ from pypika import functions as fn
 
 from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
 from erpnext.manufacturing.doctype.work_order.mapper import check_if_scrap_warehouse_mandatory
+from erpnext.manufacturing.doctype.work_order.services.material_coverage import (
+	get_minimum_material_coverage_fraction,
+)
 from erpnext.manufacturing.doctype.work_order.services.reservation import (
 	WorkOrderStockReservation,
 	get_consumed_qty,
 	get_row_wise_serial_batch,
 )
 from erpnext.manufacturing.doctype.work_order.services.status import StatusService
+from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.utils import get_bin, get_latest_stock_qty
 
 
 class RequiredItemsService:
 	def __init__(self, doc):
 		self.doc = doc
+		self._item_group_warehouses = {}
 
 	def update_required_items(self):
 		"""
@@ -113,7 +118,21 @@ class RequiredItemsService:
 	def _item_source_warehouse(self, item, reset_source_warehouse):
 		if reset_source_warehouse:
 			return self.doc.source_warehouse
-		return self.doc.source_warehouse or item.source_warehouse or item.default_warehouse
+		return (
+			self.doc.source_warehouse
+			or item.source_warehouse
+			or item.default_warehouse
+			or self._item_group_warehouse(item)
+		)
+
+	def _item_group_warehouse(self, item):
+		# components of a bom commonly share a group, look it up once for all of them
+		if item.item_group not in self._item_group_warehouses:
+			self._item_group_warehouses[item.item_group] = get_item_group_defaults(
+				item.item_code, self.doc.company
+			).get("default_warehouse")
+
+		return self._item_group_warehouses[item.item_group]
 
 	def _required_item_row(self, item, operation, source_warehouse):
 		return {
@@ -161,22 +180,15 @@ class RequiredItemsService:
 		self.recompute_material_transferred_for_manufacturing(transferred_items)
 
 	def recompute_material_transferred_for_manufacturing(self, transferred_items):
-		"""Set material_transferred_for_manufacturing based on actual item-level transfers, not fg_completed_qty."""
+		"""Set transferred quantity from the raw materials that have actually moved."""
 		# Job Card transfers use the minimum completed quantity across operations.
 		if self.doc.operations and self.doc.transfer_material_against == "Job Card":
 			return
 
-		# When fg_completed_qty > 0 (direct stock entries, excess transfer), preserve the
-		# SUM(fg_completed_qty) approach so excess-transfer tracking works correctly.
-		sum_fg_completed_qty = StatusService(self.doc).get_transferred_or_manufactured_qty(
+		claimed_qty = StatusService(self.doc).get_transferred_or_manufactured_qty(
 			"Material Transfer for Manufacture", "material_transferred_for_manufacturing"
 		)
-		if sum_fg_completed_qty:
-			self.doc.db_set("material_transferred_for_manufacturing", sum_fg_completed_qty)
-			return
 
-		# Pick list flow sets fg_completed_qty=0; use min-fraction of actual item transfers
-		# so partial availability does not prematurely mark the work order as fully transferred.
 		required_by_item = {}
 		for row in self.doc.required_items:
 			if not row.include_item_in_manufacturing or flt(row.required_qty) <= 0:
@@ -186,12 +198,13 @@ class RequiredItemsService:
 		if not required_by_item:
 			return
 
-		min_fraction = min(
-			flt(transferred_items.get(item_code) or 0) / required_qty
-			for item_code, required_qty in required_by_item.items()
+		min_fraction = get_minimum_material_coverage_fraction(
+			required_by_item,
+			transferred_items,
+			self.doc.precision("required_qty", "required_items"),
 		)
-		min_fraction = min(min_fraction, 1.0)
-		material_transferred = min_fraction * flt(self.doc.qty)
+		covered_qty = min_fraction * flt(self.doc.qty)
+		material_transferred = min(covered_qty, max(flt(self.doc.qty), claimed_qty))
 		self.doc.db_set("material_transferred_for_manufacturing", material_transferred)
 
 	def update_returned_qty(self):
@@ -293,10 +306,13 @@ class RequiredItemsService:
 	def _material_transfer_qty_by_item(self, is_return):
 		ste = frappe.qb.DocType("Stock Entry")
 		ste_child = frappe.qb.DocType("Stock Entry Detail")
+		job_card = frappe.qb.DocType("Job Card")
 		query = (
 			frappe.qb.from_(ste)
 			.inner_join(ste_child)
 			.on(ste_child.parent == ste.name)
+			.left_join(job_card)
+			.on(ste.job_card == job_card.name)
 			# original_item becomes the output dict key below, so it must stay coherent per row: the
 			# same item_code can be transferred both for itself (original_item NULL) and as a substitute
 			# for another required item (original_item set). Max() over a single item_code group could
@@ -309,13 +325,29 @@ class RequiredItemsService:
 				fn.Sum(ste_child.transfer_qty).as_("qty"),
 			)
 			.where(self._material_transfer_filter(ste, is_return))
+			.where(fn.Coalesce(job_card.is_corrective_job_card, 0) == 0)
 			.groupby(ste_child.item_code, ste_child.original_item)
 		)
 		qty_by_item = frappe._dict()
 		for d in query.run(as_dict=1) or []:
 			key = d.original_item or d.item_code
 			qty_by_item[key] = (qty_by_item.get(key) or 0.0) + flt(d.qty)
+
+		if is_return:
+			return self._cap_returned_qty_to_transferred(qty_by_item)
+
 		return qty_by_item
+
+	def _cap_returned_qty_to_transferred(self, returned_qty_by_item):
+		# Work Order returns combine regular and corrective stock without a Job Card link.
+		# Cap each return at the regular transfer total so corrective quantities stay neutral.
+		transferred_qty_by_item = self._material_transfer_qty_by_item(is_return=0)
+		return frappe._dict(
+			{
+				item_code: min(flt(returned_qty), flt(transferred_qty_by_item.get(item_code)))
+				for item_code, returned_qty in returned_qty_by_item.items()
+			}
+		)
 
 	def _material_transfer_filter(self, ste, is_return):
 		return (
@@ -357,6 +389,11 @@ class RequiredItemsService:
 			return
 
 		if stock_entry.purpose != "Material Transfer for Manufacture":
+			return
+
+		if stock_entry.job_card and frappe.get_cached_value(
+			"Job Card", stock_entry.job_card, "is_corrective_job_card"
+		):
 			return
 
 		additional_items = self._additional_items_by_code(stock_entry)

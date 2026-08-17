@@ -10,6 +10,7 @@ from erpnext.controllers.selling_controller import SellingController
 from erpnext.stock.doctype.delivery_note.services.billing_status import BillingStatusService
 from erpnext.stock.doctype.delivery_note.services.packing import PackingService
 from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
+from erpnext.stock.utils import get_bin_qty_map
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
@@ -118,6 +119,10 @@ class DeliveryNote(SellingController):
 		set_warehouse: DF.Link | None
 		shipping_address: DF.TextEditor | None
 		shipping_address_name: DF.Link | None
+		shipping_contact_display: DF.SmallText | None
+		shipping_contact_email: DF.Data | None
+		shipping_contact_mobile: DF.SmallText | None
+		shipping_contact_person: DF.Link | None
 		shipping_rule: DF.Link | None
 		status: DF.Literal[
 			"",
@@ -258,14 +263,6 @@ class DeliveryNote(SellingController):
 
 		super().before_print(settings)
 
-	def set_actual_qty(self):
-		for d in self.get("items"):
-			if d.item_code and d.warehouse:
-				actual_qty = frappe.db.get_value(
-					"Bin", {"item_code": d.item_code, "warehouse": d.warehouse}, "actual_qty"
-				)
-				d.actual_qty = flt(actual_qty) or 0
-
 	def so_required(self):
 		"""check in manage account if sales order required or not"""
 		if frappe.get_single_value("Selling Settings", "so_required") == "Yes":
@@ -404,28 +401,14 @@ class DeliveryNote(SellingController):
 		if not (self.get("_action") and self._action != "update_after_submit"):
 			return
 
-		warehouse_item_codes = {}
-		for d in self.get("items") + self.get("packed_items"):
-			warehouse_item_codes.setdefault(d.warehouse, set()).add(d.item_code)
-
-		if not warehouse_item_codes:
-			return
-
-		bin_map = {}
-		for warehouse, item_codes in warehouse_item_codes.items():
-			for b in frappe.get_all(
-				"Bin",
-				filters={"item_code": ["in", item_codes], "warehouse": warehouse},
-				fields=["item_code", "actual_qty", "projected_qty"],
-			):
-				bin_map[(b.item_code, warehouse)] = b
+		bin_qty_map = get_bin_qty_map(self.get("items") + self.get("packed_items"))
 
 		for d in self.get("items"):
-			bin_data = bin_map.get((d.item_code, d.warehouse))
+			bin_data = bin_qty_map.get((d.item_code, d.warehouse))
 			d.actual_qty = bin_data.actual_qty if bin_data else None
 
 		for d in self.get("packed_items"):
-			bin_data = bin_map.get((d.item_code, d.warehouse))
+			bin_data = bin_qty_map.get((d.item_code, d.warehouse))
 			if bin_data:
 				d.actual_qty = flt(bin_data.actual_qty)
 				d.projected_qty = flt(bin_data.projected_qty)

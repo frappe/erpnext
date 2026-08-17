@@ -12,6 +12,7 @@ from frappe.query_builder import DocType, Interval
 from frappe.query_builder.functions import Now
 from frappe.utils import flt, get_fullname
 
+from erpnext.accounts.party import validate_party_frozen_disabled
 from erpnext.crm.utils import (
 	CRMNote,
 	copy_comments,
@@ -132,6 +133,7 @@ class Opportunity(TransactionBase, CRMNote):
 		self.validate_item_details()
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_cust_name()
+		self.validate_party()
 		self.map_fields()
 		self.validate_qty()
 		self.set_exchange_rate()
@@ -354,6 +356,10 @@ class Opportunity(TransactionBase, CRMNote):
 			if self.has_active_quotation():
 				return False
 			return True
+
+	def validate_party(self) -> None:
+		if self.opportunity_from == "Customer":
+			validate_party_frozen_disabled(self.company, "Customer", self.party_name)
 
 	def validate_cust_name(self):
 		if self.party_name:

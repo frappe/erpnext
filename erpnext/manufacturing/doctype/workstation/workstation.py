@@ -242,7 +242,6 @@ class Workstation(Document):
 		for row in doc.time_logs:
 			if not row.to_time:
 				row.to_time = to_time
-				row.time_in_mins = time_diff_in_hours(row.to_time, row.from_time) / 60
 				row.completed_qty = qty
 
 		doc.save()

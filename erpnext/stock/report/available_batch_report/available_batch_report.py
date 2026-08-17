@@ -158,6 +158,9 @@ def get_batchwise_data_from_serial_batch_bundle(batchwise_data, filters):
 
 
 def get_query_based_on_filters(query, batch, table, filters):
+	if filters.company:
+		query = query.where(table.company == filters.company)
+
 	if filters.item_code:
 		query = query.where(table.item_code == filters.item_code)
 

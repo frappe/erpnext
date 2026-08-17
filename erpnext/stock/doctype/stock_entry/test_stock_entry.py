@@ -28,7 +28,9 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 )
 from erpnext.stock.doctype.serial_no.serial_no import *
 from erpnext.stock.doctype.stock_entry.stock_entry import (
+	DuplicateEntryForWorkOrderError,
 	FinishedGoodError,
+	ManufacturedQtyMandatoryError,
 	get_pending_work_orders,
 	make_stock_in_entry,
 )
@@ -58,6 +60,71 @@ class TestStockEntry(ERPNextTestSuite):
 	def setUp(self):
 		self.load_test_records("Stock Entry")
 		frappe.local.flags.dont_execute_stock_reposts = False
+
+	def test_subcontracting_inward_warehouse_direction(self):
+		source_warehouse = "_Test Warehouse - _TC"
+		target_warehouse = "_Test Warehouse 1 - _TC"
+
+		for purpose in ("Return Raw Material to Customer", "Subcontracting Delivery"):
+			with self.subTest(purpose=purpose):
+				stock_entry = frappe.new_doc("Stock Entry")
+				stock_entry.purpose = purpose
+				stock_entry.from_warehouse = source_warehouse
+				stock_entry.to_warehouse = target_warehouse
+				stock_entry.append(
+					"items",
+					{
+						"item_code": "_Test Item",
+						"t_warehouse": target_warehouse,
+						"cost_center": "Main - _TC",
+					},
+				)
+
+				stock_entry.before_validate()
+
+				self.assertEqual(stock_entry.from_warehouse, source_warehouse)
+				self.assertIsNone(stock_entry.to_warehouse)
+				self.assertEqual(stock_entry.items[0].s_warehouse, source_warehouse)
+				self.assertIsNone(stock_entry.items[0].t_warehouse)
+
+		for purpose in ("Receive from Customer", "Subcontracting Return"):
+			with self.subTest(purpose=purpose):
+				stock_entry = frappe.new_doc("Stock Entry")
+				stock_entry.purpose = purpose
+				stock_entry.from_warehouse = source_warehouse
+				stock_entry.to_warehouse = target_warehouse
+				stock_entry.append(
+					"items",
+					{
+						"item_code": "_Test Item",
+						"s_warehouse": source_warehouse,
+						"cost_center": "Main - _TC",
+					},
+				)
+
+				stock_entry.before_validate()
+
+				self.assertIsNone(stock_entry.from_warehouse)
+				self.assertEqual(stock_entry.to_warehouse, target_warehouse)
+				self.assertIsNone(stock_entry.items[0].s_warehouse)
+				self.assertEqual(stock_entry.items[0].t_warehouse, target_warehouse)
+
+	def test_subcontracting_inward_warehouse_is_mandatory(self):
+		purposes = {
+			"Return Raw Material to Customer": "Source Warehouse is required",
+			"Subcontracting Delivery": "Source Warehouse is required",
+			"Receive from Customer": "Target Warehouse is required",
+			"Subcontracting Return": "Target Warehouse is required",
+		}
+
+		for purpose, message in purposes.items():
+			with self.subTest(purpose=purpose):
+				stock_entry = frappe.new_doc("Stock Entry")
+				stock_entry.purpose = purpose
+				stock_entry.append("items", {"item_code": "_Test Item"})
+
+				with self.assertRaisesRegex(frappe.ValidationError, message):
+					stock_entry.validate()
 
 	def test_stock_entry_qty(self):
 		item_code = "_Test Item 2"
@@ -944,6 +1011,26 @@ class TestStockEntry(ERPNextTestSuite):
 		with self.assertRaises(frappe.ValidationError):
 			service._validate_no_excess_transfer()
 
+	def test_tracked_consumption_deducts_matching_attribution_bucket(self):
+		from erpnext.stock.doctype.stock_entry.services.manufacturing import ManufactureStockEntry
+
+		service = ManufactureStockEntry(frappe._dict())
+		serial_buckets = [
+			frappe._dict(qty=2, serial_nos=["SERIAL-1", "SERIAL-2"]),
+			frappe._dict(qty=2, serial_nos=["SERIAL-3", "SERIAL-4"]),
+		]
+		service._deduct_consumed_serial_nos(serial_buckets, ["SERIAL-3"])
+		self.assertEqual([bucket.qty for bucket in serial_buckets], [2, 1])
+		self.assertEqual(serial_buckets[1].serial_nos, ["SERIAL-4"])
+
+		batch_buckets = [
+			frappe._dict(qty=2, batches={"BATCH-1": 2}),
+			frappe._dict(qty=3, batches={"BATCH-2": 3}),
+		]
+		service._deduct_consumed_batch_qty(batch_buckets, "BATCH-2", 1)
+		self.assertEqual([bucket.qty for bucket in batch_buckets], [2, 2])
+		self.assertEqual(batch_buckets[1].batches["BATCH-2"], 2)
+
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"material_consumption": 1})
 	def test_work_order_manufacture_with_material_consumption(self):
 		from erpnext.manufacturing.doctype.work_order.mapper import (
@@ -1271,6 +1358,48 @@ class TestStockEntry(ERPNextTestSuite):
 				se_ok.reload()
 				se_ok.submit()
 				self.assertEqual(se_ok.docstatus, 1)
+
+	def test_duplicate_entry_for_work_order(self):
+		from erpnext.manufacturing.doctype.work_order.mapper import (
+			make_stock_entry as make_wo_stock_entry,
+		)
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+
+		wo = make_wo_order_test_record(qty=1)
+		make_stock_entry(item_code="_Test Item", target="Stores - _TC", qty=10, basic_rate=100)
+		make_stock_entry(
+			item_code="_Test Item Home Desktop 100", target="Stores - _TC", qty=10, basic_rate=100
+		)
+
+		transfer = frappe.get_doc(make_wo_stock_entry(wo.name, "Material Transfer for Manufacture", 1))
+		for d in transfer.get("items"):
+			d.s_warehouse = "Stores - _TC"
+		transfer.insert()
+		transfer.submit()
+
+		mfg = frappe.get_doc(make_wo_stock_entry(wo.name, "Manufacture", 1))
+		mfg.insert()
+
+		duplicate = frappe.get_doc(make_wo_stock_entry(wo.name, "Manufacture", 1))
+		self.assertRaises(DuplicateEntryForWorkOrderError, duplicate.insert)
+
+		with self.change_settings(
+			"Manufacturing Settings", {"overproduction_percentage_for_work_order": 100}
+		):
+			within_allowance = frappe.get_doc(make_wo_stock_entry(wo.name, "Manufacture", 1))
+			within_allowance.insert()
+
+	def test_manufacture_blocked_without_manufactured_qty(self):
+		from erpnext.manufacturing.doctype.work_order.mapper import (
+			make_stock_entry as make_wo_stock_entry,
+		)
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+
+		wo = make_wo_order_test_record(qty=1, source_warehouse="_Test Warehouse - _TC", skip_transfer=1)
+
+		mfg = frappe.get_doc(make_wo_stock_entry(wo.name, "Manufacture", 1))
+		mfg.fg_completed_qty = 0
+		self.assertRaises(ManufacturedQtyMandatoryError, mfg.insert)
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"action_if_quality_inspection_is_rejected": "Stop"})
 	def test_quality_inspection_required_for_manufacture(self):

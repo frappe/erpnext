@@ -61,16 +61,26 @@ def update_billed_amount_based_on_po(po_details: list, update_modified: bool = T
 				billed_amt_against_pr = flt(flt(billed_amt_against_po) * flt(pr_item.qty)) / flt(
 					billed_qty_against_po
 				)
+
+				# Deduct the amount and qty consumed by this PR so that the next PR
+				# against the same PO Item does not get billed for the same amount again.
+				po_billed_amt_details[pr_item.purchase_order_item]["billed_amt"] = (
+					billed_amt_against_po - billed_amt_against_pr
+				)
+				po_billed_amt_details[pr_item.purchase_order_item]["billed_qty"] = (
+					billed_qty_against_po - pr_item.qty
+				)
 			else:
 				pending_to_bill = flt(pr_item.amount) - billed_amt_against_pr
-				if pending_to_bill <= billed_amt_against_po:
-					billed_amt_against_pr += pending_to_bill
-					billed_amt_against_po -= pending_to_bill
-				else:
-					billed_amt_against_pr += billed_amt_against_po
-					billed_amt_against_po = 0
+				consumed_amt_against_po = min(pending_to_bill, billed_amt_against_po)
+				billed_amt_against_pr += consumed_amt_against_po
 
-				po_billed_amt_details[pr_item.purchase_order_item]["billed_amt"] = billed_amt_against_po
+				po_billed_amt_details[pr_item.purchase_order_item]["billed_amt"] = (
+					billed_amt_against_po - consumed_amt_against_po
+				)
+				po_billed_amt_details[pr_item.purchase_order_item]["billed_qty"] = billed_qty_against_po * (
+					1 - consumed_amt_against_po / billed_amt_against_po
+				)
 
 		if pr_item.billed_amt != billed_amt_against_pr:
 			# update existing doc if possible

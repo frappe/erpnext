@@ -105,6 +105,10 @@
   "shipping_address_section",
   "shipping_address_name",
   "shipping_address",
+  "shipping_contact_person",
+  "shipping_contact_display",
+  "shipping_contact_mobile",
+  "shipping_contact_email",
   "column_break_95",
   "dispatch_address_name",
   "dispatch_address",
@@ -357,6 +361,38 @@
    "read_only": 1
   },
   {
+   "fieldname": "shipping_contact_person",
+   "fieldtype": "Link",
+   "label": "Shipping Contact Person",
+   "options": "Contact",
+   "print_hide": 1
+  },
+  {
+   "fetch_from": "shipping_contact_person.full_name",
+   "fieldname": "shipping_contact_display",
+   "fieldtype": "Small Text",
+   "label": "Shipping Contact",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "shipping_contact_person.mobile_no",
+   "fieldname": "shipping_contact_mobile",
+   "fieldtype": "Small Text",
+   "label": "Shipping Contact Mobile No",
+   "options": "Phone",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "shipping_contact_person.email_id",
+   "fieldname": "shipping_contact_email",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Shipping Contact Email",
+   "options": "Email",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
    "fieldname": "contact_person",
    "fieldtype": "Link",
    "label": "Contact Person",
@@ -427,6 +463,7 @@
   },
   {
    "collapsible": 1,
+   "collapsible_depends_on": "eval:doc.currency && doc.currency != erpnext.get_currency(doc.company)",
    "fieldname": "currency_and_price_list",
    "fieldtype": "Section Break",
    "label": "Currency and Price List",
@@ -1472,7 +1509,7 @@
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-21 12:46:13.250145",
+ "modified": "2026-08-14 12:43:19.480555",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

@@ -114,15 +114,6 @@ class SalesInvoiceItem(Document):
 				)
 			)
 
-	def set_actual_qty(self):
-		if self.item_code and self.warehouse:
-			self.actual_qty = (
-				frappe.db.get_value(
-					"Bin", {"item_code": self.item_code, "warehouse": self.warehouse}, "actual_qty"
-				)
-				or 0
-			)
-
 	def set_income_account_for_fixed_asset(self, company: str):
 		"""Set income account for fixed asset item based on company's disposal account and cost center."""
 		if not self.is_fixed_asset:
