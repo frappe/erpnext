@@ -535,6 +535,8 @@ class GrossProfitGenerator:
 			base_amount = 0
 
 		for row in reversed(self.si_list):
+			sales_invoice_item = row.item_row
+
 			if self.filters.get("group_by") == "Monthly":
 				row.monthly = formatdate(row.posting_date, "MMM YYYY")
 
@@ -597,7 +599,7 @@ class GrossProfitGenerator:
 					row.buying_rate, row.base_rate = 0.0, 0.0
 
 			if self.is_not_invoice_row(row):
-				self.update_return_invoices(row)
+				self.update_return_invoices(row, sales_invoice_item)
 
 			if grouped_by_invoice and row.indent == 1.0:
 				buying_amount += row.buying_amount
@@ -624,11 +626,11 @@ class GrossProfitGenerator:
 		if self.grouped:
 			self.get_average_rate_based_on_group_by()
 
-	def update_return_invoices(self, row):
+	def update_return_invoices(self, row, sales_invoice_item):
 		if returned_invoice_items := self.returned_invoices.get(row.parent):
-			returned_item_rows = returned_invoice_items.get(row.item_row)
-			if returned_item_rows is None:
-				returned_item_rows = returned_invoice_items.get(row.item_code, [])
+			returned_item_rows = list(returned_invoice_items.get(sales_invoice_item, []))
+			if sales_invoice_item != row.item_code:
+				returned_item_rows.extend(returned_invoice_items.get(row.item_code, []))
 
 			for returned_item_row in returned_item_rows:
 				# returned_items 'qty' should be stateful

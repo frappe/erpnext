@@ -769,6 +769,57 @@ class TestGrossProfit(ERPNextTestSuite):
 		self.assertEqual([row.qty for row in invoice_rows], [3, 6])
 		self.assertEqual([row.buying_amount for row in invoice_rows], [150, 480])
 
+	def test_return_matches_sales_invoice_item_for_delivery_note(self):
+		make_stock_entry(
+			company=self.company,
+			item_code=self.item,
+			target=self.warehouse,
+			qty=4,
+			basic_rate=50,
+		)
+		delivery_note = self.create_delivery_note(qty=4, rate=100)
+		sales_invoice = make_sales_invoice(delivery_note.name).submit()
+		sales_return = make_sales_return(sales_invoice.name)
+		sales_return.items[0].qty = -1
+		sales_return.submit()
+
+		filters = frappe._dict(
+			company=sales_invoice.company,
+			from_date=sales_invoice.posting_date,
+			to_date=sales_invoice.posting_date,
+			group_by="Invoice",
+		)
+		_, data = execute(filters=filters)
+		invoice_row = next(
+			row for row in data if row.parent_invoice == sales_invoice.name and row.indent == 1
+		)
+		self.assertEqual(invoice_row.qty, 3)
+		self.assertEqual(invoice_row.selling_amount, 300)
+
+	def test_return_combines_linked_and_legacy_item_buckets(self):
+		sales_invoice = self.create_sales_invoice(qty=4, rate=100)
+		linked_return = make_sales_return(sales_invoice.name)
+		linked_return.items[0].qty = -1
+		linked_return.submit()
+
+		legacy_return = make_sales_return(sales_invoice.name)
+		legacy_return.items[0].qty = -1
+		legacy_return.submit()
+		frappe.db.set_value("Sales Invoice Item", legacy_return.items[0].name, "sales_invoice_item", None)
+
+		filters = frappe._dict(
+			company=sales_invoice.company,
+			from_date=sales_invoice.posting_date,
+			to_date=sales_invoice.posting_date,
+			group_by="Invoice",
+		)
+		_, data = execute(filters=filters)
+		invoice_row = next(
+			row for row in data if row.parent_invoice == sales_invoice.name and row.indent == 1
+		)
+		self.assertEqual(invoice_row.qty, 2)
+		self.assertEqual(invoice_row.selling_amount, 200)
+
 	def create_drop_ship_order(self, qty=10, selling_rate=100, buying_rate=80):
 		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice
 		from erpnext.selling.doctype.sales_order.mapper import make_purchase_order
