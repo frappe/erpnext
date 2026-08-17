@@ -10,7 +10,7 @@ from frappe import _, bold
 from frappe.model.document import Document
 from frappe.query_builder import Case
 from frappe.query_builder.functions import Coalesce, GroupConcat, Locate, Lower, Max, Replace, Sum
-from frappe.utils import cint, floor, flt, get_link_to_form
+from frappe.utils import cint, escape_html, floor, flt, get_link_to_form
 from frappe.utils.nestedset import get_descendants_of
 
 from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
@@ -1326,7 +1326,10 @@ def get_blocking_pick_lists_html(item_code, exclude_pick_list=None):
 	)
 	rows = "".join(
 		"<tr><td>{}</td><td>{}</td><td>{}</td><td style='text-align:right'>{}</td></tr>".format(
-			get_link_to_form("Pick List", d.pick_list), _(d.status), d.warehouse, flt(d.holding_qty)
+			get_link_to_form("Pick List", d.pick_list),
+			escape_html(_(d.status)),
+			escape_html(d.warehouse),
+			flt(d.holding_qty),
 		)
 		for d in holders
 	)
