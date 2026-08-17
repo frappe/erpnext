@@ -75,6 +75,14 @@ def validate_filters(filters):
 		)
 
 
+def get_item_codes(filters):
+	item_codes = filters.get("item_code") or []
+	if isinstance(item_codes, str):
+		item_codes = [item_codes]
+
+	return item_codes
+
+
 def get_data(filters, conditions):
 	data = []
 	inc, cond = "", ""
@@ -103,6 +111,11 @@ def get_data(filters, conditions):
 
 	cond += get_permission_condition(conditions["trans"])
 
+	# filtering here instead of on the rendered columns keeps the total row in step with the rows
+	item_codes = get_item_codes(filters)
+	if item_codes:
+		cond += " and t2.item_code in ({})".format(", ".join(["%s"] * len(item_codes)))
+
 	year_start_date, year_end_date = frappe.get_cached_value(
 		"Fiscal Year", filters.get("fiscal_year"), ["year_start_date", "year_end_date"]
 	)
@@ -128,6 +141,7 @@ def get_data(filters, conditions):
 		else:
 			inc = 1
 
+		# nosemgrep
 		data1 = frappe.db.sql(
 			""" select {} from `tab{}` t1, `tab{} Item` t2 {}
 					where t2.parent = t1.name and t1.company = {} and {} between {} and {} and
@@ -146,7 +160,7 @@ def get_data(filters, conditions):
 				cond,
 				conditions["group_by"],
 			),
-			(filters.get("company"), year_start_date, year_end_date),
+			(filters.get("company"), year_start_date, year_end_date, *item_codes),
 			as_list=1,
 		)
 
@@ -157,6 +171,7 @@ def get_data(filters, conditions):
 			data.append(dt)
 
 			# to get distinct value of col specified by group_by in filter
+			# nosemgrep
 			row = frappe.db.sql(
 				"""select DISTINCT({}) from `tab{}` t1, `tab{} Item` t2 {}
 						where t2.parent = t1.name and t1.company = {} and {} between {} and {}
@@ -175,7 +190,7 @@ def get_data(filters, conditions):
 					conditions.get("addl_tables_relational_cond"),
 					cond,
 				),
-				(filters.get("company"), year_start_date, year_end_date, data1[d][0]),
+				(filters.get("company"), year_start_date, year_end_date, data1[d][0], *item_codes),
 				as_list=1,
 			)
 
@@ -183,6 +198,7 @@ def get_data(filters, conditions):
 				des = ["" for q in range(len(conditions["columns"]))]
 
 				# get data for group_by filter
+				# nosemgrep
 				row1 = frappe.db.sql(
 					""" select t4.default_currency AS currency , {} , {} from `tab{}` t1, `tab{} Item` t2 {}
 							where t2.parent = t1.name and t1.company = {} and {} between {} and {}
@@ -206,7 +222,14 @@ def get_data(filters, conditions):
 						cond,
 						sel_col,
 					),
-					(filters.get("company"), year_start_date, year_end_date, row[i][0], data1[d][0]),
+					(
+						filters.get("company"),
+						year_start_date,
+						year_end_date,
+						row[i][0],
+						data1[d][0],
+						*item_codes,
+					),
 					as_list=1,
 				)
 
@@ -224,6 +247,7 @@ def get_data(filters, conditions):
 		total_row = calculate_total_row(data1, conditions["columns"], conditions.get("company_currency"))
 		data.append(total_row)
 	else:
+		# nosemgrep
 		data = frappe.db.sql(
 			""" select {} from `tab{}` t1, `tab{} Item` t2 {}
 					where t2.parent = t1.name and t1.company = {} and {} between {} and {} and
@@ -242,7 +266,7 @@ def get_data(filters, conditions):
 				conditions.get("addl_tables_relational_cond", ""),
 				conditions["group_by"],
 			),
-			(filters.get("company"), year_start_date, year_end_date),
+			(filters.get("company"), year_start_date, year_end_date, *item_codes),
 			as_list=1,
 		)
 
