@@ -364,10 +364,6 @@ frappe.ui.form.on("Pick List", {
 		});
 
 		dialog.$body.html(get_availability_html(rows));
-		dialog.$body.find(".pl-availability-toggle").on("click", function (e) {
-			e.preventDefault();
-			$(this).closest("tr").next(".pl-availability-detail").toggleClass("hidden");
-		});
 		dialog.show();
 	},
 
@@ -484,13 +480,10 @@ function get_availability_html(rows) {
 function get_availability_row_html(row) {
 	const has_detail = row.pick_lists.length || row.reservations.length;
 	const color = row.free_qty <= 0 ? "red" : has_detail ? "orange" : "green";
-	const item_cell = has_detail
-		? `<a href="#" class="pl-availability-toggle">${frappe.utils.escape_html(row.item_code)}</a>`
-		: frappe.utils.escape_html(row.item_code);
 
 	let html = `
 		<tr>
-			<td><span class="indicator ${color}"></span> ${item_cell}</td>
+			<td><span class="indicator ${color}"></span> ${frappe.utils.escape_html(row.item_code)}</td>
 			<td>${frappe.utils.escape_html(row.warehouse)}</td>
 			<td class="text-right">${format_float(row.actual_qty)}</td>
 			<td class="text-right">${format_float(row.picked_qty)}</td>
@@ -498,48 +491,34 @@ function get_availability_row_html(row) {
 			<td class="text-right"><b>${format_float(row.free_qty)}</b></td>
 		</tr>`;
 
-	if (has_detail) {
-		html += `<tr class="pl-availability-detail hidden"><td colspan="6">${get_holders_html(
-			row
-		)}</td></tr>`;
-	}
-
-	return html;
-}
-
-function get_holders_html(row) {
-	const rows = [];
-
 	row.pick_lists.forEach((d) => {
-		rows.push(`
-			<tr>
-				<td>${frappe.utils.get_form_link("Pick List", d.pick_list, true)}</td>
-				<td>${__(d.status)}</td>
-				<td>${frappe.utils.escape_html(d.batch_no || "")}</td>
-				<td class="text-right">${format_float(d.holding_qty)}</td>
-			</tr>`);
+		const batch = d.batch_no ? ` · ${frappe.utils.escape_html(d.batch_no)}` : "";
+		html += `
+		<tr class="text-muted">
+			<td colspan="3" style="padding-left: 40px">
+				↳ ${frappe.utils.get_form_link("Pick List", d.pick_list, true)} (${__(d.status)}${batch})
+			</td>
+			<td class="text-right">${format_float(d.holding_qty)}</td>
+			<td></td>
+			<td></td>
+		</tr>`;
 	});
 
 	row.reservations.forEach((d) => {
 		const against = frappe.utils.get_form_link(d.voucher_type, d.voucher_no, true);
-		rows.push(`
-			<tr>
-				<td>${frappe.utils.get_form_link("Stock Reservation Entry", d.name, true)} (${against})</td>
-				<td>${__(d.status)}</td>
-				<td></td>
-				<td class="text-right">${format_float(d.reserved_qty)}</td>
-			</tr>`);
+		const sre_link = frappe.utils.get_form_link("Stock Reservation Entry", d.name, true);
+		html += `
+		<tr class="text-muted">
+			<td colspan="3" style="padding-left: 40px">
+				↳ ${sre_link} · ${__("Reserved for {0}", [against])} (${__(d.status)})
+			</td>
+			<td></td>
+			<td class="text-right">${format_float(d.reserved_qty)}</td>
+			<td></td>
+		</tr>`;
 	});
 
-	const header = `
-		<tr>
-			<th>${__("Held By")}</th>
-			<th>${__("Status")}</th>
-			<th>${__("Batch No")}</th>
-			<th class="text-right">${__("Qty")}</th>
-		</tr>`;
-
-	return `<table class="table table-sm">${header}${rows.join("")}</table>`;
+	return html;
 }
 
 function get_item_details(item_code, uom = null, warehouse = null, company = null) {
