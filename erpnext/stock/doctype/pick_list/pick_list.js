@@ -542,7 +542,7 @@ function get_holding_documents_html(rows) {
 	return `
 		<h5 style="margin: 20px 0 10px;">${__("Stock Held By")}</h5>
 		<div class="text-muted" style="font-size: var(--text-sm); margin-bottom: 10px;">
-			${__("Complete or cancel these documents to release the stock.")}
+			${__("Cancel or delete these documents to release the stock.")}
 		</div>
 		${groups}`;
 }
