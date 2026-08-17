@@ -312,6 +312,7 @@ def get_operation_details(name, work_order, parent_bom):
 	for row in work_order.operations:
 		if row.name == name:
 			return {
+				"idx": row.idx,
 				"workstation": row.workstation,
 				"workstation_type": row.workstation_type,
 				"source_warehouse": row.source_warehouse,
@@ -389,7 +390,7 @@ def validate_operation_data(row):
 		)
 
 
-def create_job_card(work_order, row, enable_capacity_planning=False, auto_create=False):
+def create_job_card(work_order, row, enable_capacity_planning=False, auto_create=False, schedule_blocks=None):
 	doc = frappe.new_doc("Job Card")
 	doc.update(_job_card_values(work_order, row))
 
@@ -402,9 +403,9 @@ def create_job_card(work_order, row, enable_capacity_planning=False, auto_create
 		doc.set_secondary_items()
 
 	if auto_create:
-		_auto_create_job_card(doc, row, enable_capacity_planning)
+		_auto_create_job_card(doc, row, enable_capacity_planning, schedule_blocks)
 
-	if enable_capacity_planning:
+	if enable_capacity_planning or schedule_blocks:
 		# automatically added scheduling rows shouldn't change status to WIP
 		doc.db_set("status", "Open")
 
@@ -456,13 +457,30 @@ def _job_card_warehouse_values(work_order, row, qty):
 	}
 
 
-def _auto_create_job_card(doc, row, enable_capacity_planning):
+def _auto_create_job_card(doc, row, enable_capacity_planning, schedule_blocks=None):
 	doc.flags.ignore_mandatory = True
-	if enable_capacity_planning:
+	if schedule_blocks:
+		_apply_schedule_blocks(doc, schedule_blocks)
+	elif enable_capacity_planning:
 		doc.schedule_time_logs(row)
 
 	doc.insert()
 	frappe.msgprint(_("Job card {0} created").format(get_link_to_form("Job Card", doc.name)), alert=True)
+
+
+def _apply_schedule_blocks(doc, schedule_blocks):
+	if schedule_blocks[0].workstation:
+		doc.workstation = schedule_blocks[0].workstation
+
+	for block in schedule_blocks:
+		doc.append(
+			"scheduled_time_logs",
+			{
+				"from_time": block.from_time,
+				"to_time": block.to_time,
+				"time_in_mins": flt(block.duration_mins),
+			},
+		)
 
 
 def get_work_order_operation_data(work_order, operation, workstation):

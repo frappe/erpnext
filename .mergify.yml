@@ -91,3 +91,5 @@ pull_request_rules:
         commit_message_format:
           title: pr-title
           body: pr-body
+merge_queue:
+  queue_controls_comment: false

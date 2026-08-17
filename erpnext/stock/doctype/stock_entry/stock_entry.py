@@ -38,11 +38,18 @@ from erpnext.stock.utils import get_incoming_rate
 
 from .services.disassemble import DisassembleStockEntry
 from .services.manufacturing import (
+	DuplicateEntryForWorkOrderError,
+	ManufacturedQtyMandatoryError,
 	ManufactureStockEntry,
 	MaterialConsumptionForManufactureStockEntry,
+	OperationsNotCompleteError,
 	RepackStockEntry,
 )
-from .services.material_receipt_issue import MaterialIssueStockEntry, MaterialReceiptStockEntry
+from .services.material_receipt_issue import (
+	MaterialIssueStockEntry,
+	MaterialReceiptStockEntry,
+	SourceOnlyStockEntry,
+)
 from .services.material_transfer import (
 	MaterialRequestStockEntry,
 	MaterialTransferForManufactureStockEntry,
@@ -213,6 +220,10 @@ class StockEntry(StockController, SubcontractingInwardController):
 			"Send to Subcontractor": SendToSubcontractorStockEntry,
 			"Material Issue": MaterialIssueStockEntry,
 			"Material Receipt": MaterialReceiptStockEntry,
+			"Receive from Customer": MaterialReceiptStockEntry,
+			"Return Raw Material to Customer": SourceOnlyStockEntry,
+			"Subcontracting Delivery": SourceOnlyStockEntry,
+			"Subcontracting Return": MaterialReceiptStockEntry,
 		}
 
 		self.purpose_cls = purpose_map.get(self.purpose)
@@ -319,6 +330,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.validate_batch()
 		self.validate_inspection()
 		self.validate_fg_completed_qty()
+		self.validate_job_card_pending_production()
 		self.validate_difference_account()
 		self.validate_job_card_item()
 		self.set_purpose_for_stock_entry()
@@ -1452,22 +1464,14 @@ class StockEntry(StockController, SubcontractingInwardController):
 			return
 
 		precision = self.precision("process_loss_qty")
-		if self.work_order:
-			data = frappe.get_all(
-				"Work Order Operation",
-				filters={"parent": self.work_order},
-				fields=[{"MAX": "process_loss_qty", "as": "process_loss_qty"}],
+		process_loss_qty = self.get_pending_process_loss_qty()
+		if process_loss_qty and flt(self.process_loss_qty, precision) != flt(process_loss_qty, precision):
+			self.process_loss_qty = flt(process_loss_qty, precision)
+
+			frappe.msgprint(
+				_("The Process Loss Qty has been reset as per the job card's Process Loss Qty"),
+				alert=True,
 			)
-
-			if data and data[0].process_loss_qty:
-				process_loss_qty = data[0].process_loss_qty
-				if flt(self.process_loss_qty, precision) != flt(process_loss_qty, precision):
-					self.process_loss_qty = flt(process_loss_qty, precision)
-
-					frappe.msgprint(
-						_("The Process Loss Qty has been reset as per the job card's Process Loss Qty"),
-						alert=True,
-					)
 
 		if not self.process_loss_percentage and not self.process_loss_qty:
 			self.process_loss_percentage = frappe.get_cached_value(
@@ -1482,6 +1486,60 @@ class StockEntry(StockController, SubcontractingInwardController):
 			self.process_loss_percentage = flt(
 				(flt(self.process_loss_qty) / flt(self.fg_completed_qty)) * 100
 			)
+
+	def validate_job_card_pending_production(self):
+		"""A draft created before other entries were submitted must not book more than the job
+		card still has left; without this, a stale draft over-produces the finished good."""
+		if self.purpose != "Manufacture" or not self.job_card:
+			return
+
+		if self._action == "update_after_submit":
+			return
+
+		job_card = frappe.get_doc("Job Card", self.job_card)
+		if job_card.is_corrective_job_card or job_card.is_subcontracted:
+			return
+
+		precision = frappe.get_precision("Stock Entry Detail", "qty")
+		pending_qty = flt(
+			flt(job_card.get_qty_to_produce())
+			- flt(job_card.manufactured_qty)
+			- flt(job_card.get_consumed_process_loss()),
+			precision,
+		)
+		finished_qty = flt(sum(flt(d.transfer_qty) for d in self.items if d.is_finished_item), precision)
+		entry_qty = flt(finished_qty + flt(self.process_loss_qty), precision)
+
+		if entry_qty > pending_qty:
+			uom = job_card.stock_uom
+			frappe.throw(
+				_(
+					"The Job Card {0} has only {1} left to produce, but this entry books {2} ({3} finished goods and {4} process loss). Cancel or update its other manufacture entries first."
+				).format(
+					frappe.bold(self.job_card),
+					frappe.bold(f"{pending_qty} {uom}"),
+					frappe.bold(f"{entry_qty} {uom}"),
+					f"{finished_qty} {uom}",
+					f"{flt(self.process_loss_qty, precision)} {uom}",
+				)
+			)
+
+	def get_pending_process_loss_qty(self):
+		"""Loss this entry should still book: the job card's unbooked loss when the entry
+		belongs to one, else the largest operation loss on the work order (legacy flow)."""
+		if self.job_card:
+			job_card = frappe.get_doc("Job Card", self.job_card)
+			return max(flt(job_card.process_loss_qty) - flt(job_card.get_consumed_process_loss()), 0)
+
+		if self.work_order:
+			data = frappe.get_all(
+				"Work Order Operation",
+				filters={"parent": self.work_order},
+				fields=[{"MAX": "process_loss_qty", "as": "process_loss_qty"}],
+			)
+			return flt(data[0].process_loss_qty) if data else 0
+
+		return 0
 
 	def set_work_order_details(self):
 		if self.work_order:

@@ -132,3 +132,94 @@ def update_billed_amount_based_on_so(so_detail: str, update_modified: bool = Tru
 		updated_dn.append(dnd.parent)
 
 	return updated_dn
+
+
+def get_invoiced_qty_against_dn(
+	*, delivery_note: str | None = None, dn_detail: str | None = None
+) -> dict[str, float]:
+	"""Return directly invoiced qty, excluding returns that do not update DN billing."""
+	si = frappe.qb.DocType("Sales Invoice").as_("si")
+	si_item = frappe.qb.DocType("Sales Invoice Item").as_("si_item")
+
+	query = (
+		frappe.qb.from_(si_item)
+		.join(si)
+		.on(si.name == si_item.parent)
+		.select(si_item.dn_detail, Sum(si_item.qty).as_("qty"))
+		.where(
+			(si_item.docstatus == 1) & ((si.is_return == 0) | (si.update_billed_amount_in_delivery_note == 1))
+		)
+		.groupby(si_item.dn_detail)
+	)
+
+	if delivery_note:
+		query = query.where(si_item.delivery_note == delivery_note)
+	if dn_detail:
+		query = query.where(si_item.dn_detail == dn_detail)
+
+	return {row.dn_detail: flt(row.qty) for row in query.run(as_dict=True)}
+
+
+def get_invoiced_qty_based_on_so(so_detail: str) -> dict[str, float]:
+	"""Invoiced qty per Delivery Note Item, distributed FIFO like the amount side."""
+	si = frappe.qb.DocType("Sales Invoice").as_("si")
+	si_item = frappe.qb.DocType("Sales Invoice Item").as_("si_item")
+
+	billed_qty_against_so = (
+		frappe.qb.from_(si_item)
+		.join(si)
+		.on(si.name == si_item.parent)
+		.select(Sum(si_item.qty))
+		.where(
+			(si_item.so_detail == so_detail)
+			& ((si_item.dn_detail.isnull()) | (si_item.dn_detail == ""))
+			& (si_item.docstatus == 1)
+			& (si.update_stock == 0)
+		)
+		.run()
+	)
+	billed_qty_against_so = billed_qty_against_so and billed_qty_against_so[0][0] or 0
+
+	dn = frappe.qb.DocType("Delivery Note").as_("dn")
+	dn_item = frappe.qb.DocType("Delivery Note Item").as_("dn_item")
+
+	dn_details = (
+		frappe.qb.from_(dn)
+		.from_(dn_item)
+		.select(dn_item.name, dn_item.qty, dn_item.returned_qty, dn_item.si_detail)
+		.where(
+			(dn.name == dn_item.parent)
+			& (dn_item.so_detail == so_detail)
+			& (dn.docstatus == 1)
+			& (dn.is_return == 0)
+		)
+		.orderby(dn.posting_date, dn.posting_time, dn.name)
+		.run(as_dict=True)
+	)
+
+	qty_map = {}
+	for dnd in dn_details:
+		# Cap FIFO capacity at net delivered qty so returns free qty for later DNs
+		net_qty = flt(dnd.qty) - flt(dnd.returned_qty)
+
+		# If delivered against Sales Invoice
+		if dnd.si_detail:
+			billed_qty_against_dn = net_qty
+			billed_qty_against_so -= billed_qty_against_dn
+		else:
+			# Get billed qty directly against Delivery Note
+			billed_qty_against_dn = get_invoiced_qty_against_dn(dn_detail=dnd.name).get(dnd.name, 0)
+
+		# Distribute qty billed directly against SO between DNs based on FIFO
+		if billed_qty_against_so and billed_qty_against_dn < net_qty:
+			pending_to_bill = net_qty - billed_qty_against_dn
+			if pending_to_bill <= billed_qty_against_so:
+				billed_qty_against_dn += pending_to_bill
+				billed_qty_against_so -= pending_to_bill
+			else:
+				billed_qty_against_dn += billed_qty_against_so
+				billed_qty_against_so = 0
+
+		qty_map[dnd.name] = flt(billed_qty_against_dn)
+
+	return qty_map

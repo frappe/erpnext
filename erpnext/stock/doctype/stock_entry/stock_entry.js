@@ -627,13 +627,15 @@ frappe.ui.form.on("Stock Entry", {
 		frm.fields_dict["items"].grid.update_docfield_property(
 			"s_warehouse",
 			"in_list_view",
-			!["Material Receipt", "Receive from Customer"].includes(frm.doc.purpose)
+			!["Material Receipt", "Receive from Customer", "Subcontracting Return"].includes(frm.doc.purpose)
 		);
 
 		frm.fields_dict["items"].grid.update_docfield_property(
 			"t_warehouse",
 			"in_list_view",
-			!["Material Issue"].includes(frm.doc.purpose)
+			!["Material Issue", "Return Raw Material to Customer", "Subcontracting Delivery"].includes(
+				frm.doc.purpose
+			)
 		);
 
 		frm.fields_dict["items"].grid.reset_grid();

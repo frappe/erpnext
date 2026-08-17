@@ -49,6 +49,7 @@ class Company(NestedSet):
 		asset_received_but_not_billed: DF.Link | None
 		auto_err_frequency: DF.Literal["Daily", "Weekly", "Monthly"]
 		auto_exchange_rate_revaluation: DF.Check
+		bank_charges_account: DF.Link | None
 		book_advance_payments_in_separate_party_account: DF.Check
 		capital_work_in_progress_account: DF.Link | None
 		chart_of_accounts: DF.Literal[None]
@@ -368,6 +369,7 @@ class Company(NestedSet):
 			["Stock Delivered But Not Billed Account", "stock_delivered_but_not_billed"],
 			["Stock Adjustment Account", "stock_adjustment_account"],
 			["Write Off Account", "write_off_account"],
+			["Bank Charges Account", "bank_charges_account"],
 			["Default Payment Discount Account", "default_discount_account"],
 			["Unrealized Profit / Loss Account", "unrealized_profit_loss_account"],
 			["Exchange Gain / Loss Account", "exchange_gain_loss_account"],
@@ -520,6 +522,7 @@ class Company(NestedSet):
 			)
 			warehouse.flags.ignore_permissions = True
 			warehouse.flags.ignore_mandatory = True
+			warehouse.flags.ignore_inventory_account_validation = True
 			warehouse.insert()
 
 			if wh_detail["is_group"]:
@@ -788,6 +791,13 @@ class Company(NestedSet):
 			)
 
 			self.db_set("write_off_account", write_off_acct)
+
+		if not self.bank_charges_account:
+			bank_charges_acct = frappe.db.get_value(
+				"Account", {"account_name": _("Bank Charges"), "company": self.name, "is_group": 0}
+			)
+
+			self.db_set("bank_charges_account", bank_charges_acct)
 
 		if not self.exchange_gain_loss_account:
 			exchange_gain_loss_acct = frappe.db.get_value(

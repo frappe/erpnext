@@ -265,6 +265,9 @@ class QualityInspection(Document):
 					self.modified,
 				)
 
+		if self.reference_type and self.reference_name:
+			frappe.get_lazy_doc(self.reference_type, self.reference_name).notify_update()
+
 	def inspect_and_set_status(self):
 		for reading in self.readings:
 			if not reading.manual_inspection:  # dont auto set status if manual

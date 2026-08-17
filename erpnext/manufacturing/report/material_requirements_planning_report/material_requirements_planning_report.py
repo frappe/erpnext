@@ -267,22 +267,17 @@ class MaterialRequirementsPlanningReport:
 
 	def get_detailed_view_chart_data(self, data):
 		chart_data = frappe._dict({})
-		i = 0
 
 		sorted_data = sorted(data, key=lambda x: getdate(x.get("delivery_date")))
 		for row in sorted_data:
-			if getdate(row.deliver_date) < getdate(today()):
-				continue
-
 			if not row.delivery_date:
 				continue
 
-			if i == 10:
-				break
+			if getdate(row.delivery_date) < getdate(today()):
+				continue
 
-			delivery_date = formatdate(row.delivery_date, "dd MMM")
+			delivery_date = getdate(row.delivery_date)
 			if delivery_date not in chart_data:
-				i += 1
 				chart_data[delivery_date] = frappe._dict(
 					{
 						"demand": 0.0,
@@ -298,6 +293,7 @@ class MaterialRequirementsPlanningReport:
 
 		demand_data = []
 		supply_data = []
+		delivery_dates = list(chart_data)
 		for row in chart_data:
 			value = chart_data[row]
 
@@ -306,7 +302,7 @@ class MaterialRequirementsPlanningReport:
 
 		return {
 			"data": {
-				"labels": list(chart_data.keys()),
+				"labels": self.get_detailed_chart_labels(delivery_dates),
 				"datasets": [
 					{
 						"name": _("Demand"),
@@ -323,6 +319,10 @@ class MaterialRequirementsPlanningReport:
 			"colors": ["#7cd6fd", "green"],
 			"title": _("Demand vs Supply"),
 		}
+
+	def get_detailed_chart_labels(self, delivery_dates):
+		date_format = "dd MMM yyyy" if len({date.year for date in delivery_dates}) > 1 else "dd MMM"
+		return [formatdate(date, date_format) for date in delivery_dates]
 
 	def get_bucket_view_chart_data(self, data):
 		chart_data = frappe._dict({})
@@ -1326,13 +1326,7 @@ def make_order(selected_rows: str | list, company: str, warehouse: str | None = 
 
 def make_purchase_orders(purchase_orders, company, warehouse=None, mps=None):
 	for (supplier, release_date), items in purchase_orders.items():
-		po = frappe.new_doc("Purchase Order")
-		po.supplier = supplier
-		po.company = company
-		po.mps = mps
-		po.transaction_date = release_date
-		po.set("items", [])
-
+		po_items = []
 		for item in items:
 			uom = item.purchase_uom or item.uom
 			if not uom:
@@ -1345,23 +1339,33 @@ def make_purchase_orders(purchase_orders, company, warehouse=None, mps=None):
 			if flt(item.required_qty) < flt(item.min_order_qty):
 				item.required_qty = item.min_order_qty
 
-			po.append(
-				"items",
+			po_items.append(
 				{
 					"item_code": item.item_code,
 					"qty": item.required_qty,
 					"uom": uom,
 					"schedule_date": item.delivery_date if item.delivery_date else today(),
 					"warehouse": warehouse or item.default_warehouse,
-				},
+				}
 			)
 
-		if len(po.items) > 0:
-			po.insert()
-			frappe.msgprint(
-				_("Purchase Order {0} created").format(frappe.bold(po.name)),
-				alert=True,
-			)
+		if not po_items:
+			continue
+
+		po = frappe.new_doc("Purchase Order")
+		po.supplier = supplier
+		po.company = company
+		po.mps = mps
+		po.transaction_date = release_date
+		po.set("items", po_items)
+
+		po.run_method("set_missing_values")
+		po.insert()
+
+		frappe.msgprint(
+			_("Purchase Order {0} created").format(frappe.bold(po.name)),
+			alert=True,
+		)
 
 
 def make_work_orders(work_orders, company, warehouse=None, mps=None):

@@ -7,6 +7,7 @@ from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import flt
 
+from erpnext.manufacturing.doctype.bom.bom import get_backflush_based_on
 from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import (
 	get_subcontracting_boms_for_finished_goods,
 )
@@ -164,17 +165,33 @@ def make_corrective_job_card(
 	for_operation: str | None = None,
 	target_doc: str | dict | Document | None = None,
 ):
+	if not operation:
+		frappe.throw(_("Corrective Operation is required"))
+
+	if not for_operation:
+		frappe.throw(_("For Operation is required"))
+
 	def set_missing_values(source, target):
+		if source.track_semi_finished_goods:
+			frappe.throw(
+				_("Corrective Job Cards cannot be created for Work Orders that track semi-finished goods")
+			)
+
 		target.is_corrective_job_card = 1
 		target.operation = operation
 		target.for_operation = for_operation
+		target.total_completed_qty = 0
 
 		target.set("time_logs", [])
 		target.set("employee", [])
 		target.set("items", [])
 		target.set("sub_operations", [])
 		target.set_sub_operations()
-		target.get_required_items()
+		target.set_onload("backflush_raw_materials_based_on", get_backflush_based_on(target.bom_no))
+		target.set_onload(
+			"transfer_material_against",
+			frappe.get_cached_value("Work Order", target.work_order, "transfer_material_against"),
+		)
 
 	doclist = get_mapped_doc(
 		"Job Card",

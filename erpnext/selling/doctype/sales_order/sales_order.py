@@ -146,6 +146,10 @@ class SalesOrder(SellingController):
 		set_warehouse: DF.Link | None
 		shipping_address: DF.TextEditor | None
 		shipping_address_name: DF.Link | None
+		shipping_contact_display: DF.SmallText | None
+		shipping_contact_email: DF.Data | None
+		shipping_contact_mobile: DF.SmallText | None
+		shipping_contact_person: DF.Link | None
 		shipping_rule: DF.Link | None
 		skip_delivery_note: DF.Check
 		status: DF.Literal[
@@ -238,6 +242,9 @@ class SalesOrder(SellingController):
 
 			validate_coupon_code(self.coupon_code)
 
+		if not self.get("is_subcontracted"):
+			SalesOrderStockReservation(self).enable_auto_reserve_stock()
+
 		make_packing_list(self)
 
 		self.validate_with_previous_doc()
@@ -247,8 +254,6 @@ class SalesOrder(SellingController):
 		StatusService(self).set_default_statuses()
 
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
-		if not self.get("is_subcontracted"):
-			SalesOrderStockReservation(self).enable_auto_reserve_stock()
 
 	def set_has_unit_price_items(self):
 		"""

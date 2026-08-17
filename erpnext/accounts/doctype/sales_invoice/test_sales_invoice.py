@@ -114,6 +114,14 @@ class TestSalesInvoice(ERPNextTestSuite):
 		si.save()
 		self.assertEqual(si.items[0].qty, 1)
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_negative_rates_for_items": 1})
+	def test_sales_invoice_negative_grand_total_still_blocked_with_setting(self):
+		"""allow_negative_rates_for_items must not bypass the >=0 guard for a non-return
+		invoice, since invoices post to the GL (unlike Sales Order)."""
+		si = create_sales_invoice(qty=1, rate=100, do_not_save=True)
+		si.append("items", {"item_code": "_Test Item 2", "qty": 1, "rate": -150})
+		self.assertRaises(frappe.ValidationError, si.save)
+
 	def test_timestamp_change(self):
 		w = frappe.copy_doc(self.globalTestRecords["Sales Invoice"][0])
 		w.docstatus = 0

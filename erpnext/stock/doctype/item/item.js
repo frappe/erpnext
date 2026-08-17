@@ -856,57 +856,107 @@ $.extend(erpnext.item, {
 		}
 		frm.toggle_display("prices_html", true);
 
-		const requested_item = frm.doc.name;
-		const container = frm.fields_dict["prices_html"].$wrapper;
+		frappe.require("embedded_list.bundle.js", () => erpnext.item.build_prices_list(frm));
+	},
 
-		container.html(
-			`<div class="text-muted text-center" style="padding: 20px;">${__("Loading...")}</div>`
-		);
+	build_prices_list: function (frm) {
+		const item_code = frm.doc.name;
+		const container = frm.fields_dict["prices_html"].$wrapper.empty();
 
-		frappe.call({
-			method: "erpnext.stock.doctype.item.item.get_item_prices",
-			args: { item_code: requested_item },
-
-			callback: function (r) {
-				if (requested_item !== frm.doc.name) return;
-
-				if (!r.message) return;
-
-				const { prices, has_more } = r.message;
-
-				const html = frappe.render_template("item_prices", {
-					prices,
-					has_more,
-					item_code: requested_item,
-					stock_uom: frm.doc.stock_uom,
-				});
-
-				container.html(html);
-
-				container.find(".add-price-btn").on("click", () => {
-					const filters = {};
-					if (frm.doc.is_sales_item && !frm.doc.is_purchase_item) {
-						filters.selling = 1;
-					} else if (frm.doc.is_purchase_item && !frm.doc.is_sales_item) {
-						filters.buying = 1;
-					}
-					frappe.new_doc(
-						"Item Price",
-						{ item_code: requested_item, uom: frm.doc.stock_uom },
-						(dialog) => {
-							if (Object.keys(filters).length) {
-								dialog.fields_dict.price_list.get_query = () => ({ filters });
-							}
-						}
-					);
-				});
-
-				container.find(".price-row").on("click", function (e) {
-					if ($(e.target).is("a")) return;
-
-					frappe.set_route("Form", "Item Price", $(this).data("name"));
+		const list = new frappe.ui.EmbeddedList({
+			wrapper: $("<div></div>").appendTo(container),
+			description: __("All active prices for this item across buying and selling price lists."),
+			show_index: true,
+			show_search: false,
+			empty_icon: "tag",
+			empty_message: __("No active item prices found."),
+			add_button: {
+				label: __("Add Price"),
+				action: () => erpnext.item.new_item_price(frm),
+			},
+			on_row_click: (row) => frappe.set_route("Form", "Item Price", row.name),
+			get_data() {
+				return frappe
+					.xcall("erpnext.stock.doctype.item.item.get_item_prices", { item_code })
+					.then((r) => {
+						this._has_more = r.has_more;
+						return r.prices;
+					});
+			},
+			before_render() {
+				this._all_data.forEach((row) => {
+					row.price_type =
+						row.buying && row.selling
+							? __("Buy & Sell")
+							: row.buying
+							? __("Buying")
+							: __("Selling");
 				});
 			},
+			columns: [
+				{ label: __("Price List"), fieldname: "price_list" },
+				{
+					label: __("Type"),
+					type: "badge",
+					fieldname: "price_type",
+				},
+				{
+					label: __("Party"),
+					type: "link",
+					text: (row) => row.customer || row.supplier || "",
+					route: (row) => [
+						"Form",
+						row.customer ? "Customer" : "Supplier",
+						row.customer || row.supplier,
+					],
+				},
+				{
+					label: __("Rate"),
+					fieldname: "price_list_rate",
+					render: (row) => format_currency(row.price_list_rate, row.currency),
+				},
+				{
+					label: __("UOM"),
+					fieldname: "uom",
+					render: (row) => frappe.utils.escape_html(row.uom || frm.doc.stock_uom || ""),
+				},
+				{
+					label: __("Valid Upto"),
+					fieldname: "valid_upto",
+					render: (row) => (row.valid_upto ? frappe.datetime.str_to_user(row.valid_upto) : ""),
+				},
+			],
+		});
+
+		list.refresh().then(() => {
+			if (!list._has_more) return;
+			frappe.ui
+				.button({
+					label: __("View All Prices"),
+					variant: "subtle",
+					size: "sm",
+					onclick: () => {
+						frappe.route_options = { item_code };
+						frappe.set_route("List", "Item Price");
+					},
+				})
+				.appendTo(
+					$('<div class="flex justify-end" style="margin-bottom: 8px;"></div>').appendTo(container)
+				);
+		});
+	},
+
+	new_item_price: function (frm) {
+		const filters = {};
+		if (frm.doc.is_sales_item && !frm.doc.is_purchase_item) {
+			filters.selling = 1;
+		} else if (frm.doc.is_purchase_item && !frm.doc.is_sales_item) {
+			filters.buying = 1;
+		}
+		frappe.new_doc("Item Price", { item_code: frm.doc.name, uom: frm.doc.stock_uom }, (dialog) => {
+			if (Object.keys(filters).length) {
+				dialog.fields_dict.price_list.get_query = () => ({ filters });
+			}
 		});
 	},
 

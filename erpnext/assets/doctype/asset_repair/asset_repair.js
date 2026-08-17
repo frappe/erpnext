@@ -116,24 +116,39 @@ frappe.ui.form.on("Asset Repair", {
 	},
 
 	repair_status: (frm) => {
-		if (frm.doc.completion_date && frm.doc.repair_status == "Completed") {
-			frappe.call({
-				method: "erpnext.assets.doctype.asset_repair.asset_repair.get_downtime",
-				args: {
-					failure_date: frm.doc.failure_date,
-					completion_date: frm.doc.completion_date,
-				},
-				callback: function (r) {
-					if (r.message) {
-						frm.set_value("downtime", r.message + " Hrs");
-					}
-				},
-			});
-		}
-
 		if (frm.doc.repair_status == "Completed" && !frm.doc.completion_date) {
 			frm.set_value("completion_date", frappe.datetime.now_datetime());
 		}
+
+		frm.events.set_downtime(frm);
+	},
+
+	failure_date: (frm) => {
+		frm.events.set_downtime(frm);
+	},
+
+	completion_date: (frm) => {
+		frm.events.set_downtime(frm);
+	},
+
+	set_downtime: (frm) => {
+		if (frm.doc.repair_status != "Completed" || !frm.doc.failure_date || !frm.doc.completion_date) {
+			frm.set_value("downtime", null);
+			return;
+		}
+
+		frappe.call({
+			method: "erpnext.assets.doctype.asset_repair.asset_repair.get_downtime",
+			args: {
+				failure_date: frm.doc.failure_date,
+				completion_date: frm.doc.completion_date,
+			},
+			callback: function (r) {
+				if (r.message) {
+					frm.set_value("downtime", r.message + " Hrs");
+				}
+			},
+		});
 	},
 
 	stock_items_on_form_rendered() {

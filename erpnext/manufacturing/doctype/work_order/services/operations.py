@@ -104,16 +104,49 @@ class OperationsService:
 
 	def prepare_data_for_job_card(self, row, idx, plan_days, enable_capacity_planning):
 		self.set_operation_start_end_time(row, idx)
+		schedule_blocks = self.get_plan_schedule_blocks(row)
+
+		if schedule_blocks:
+			row.planned_start_time = schedule_blocks[0].from_time
+			row.planned_end_time = schedule_blocks[-1].to_time
 
 		job_card_doc = create_job_card(
-			self.doc, row, auto_create=True, enable_capacity_planning=enable_capacity_planning
+			self.doc,
+			row,
+			auto_create=True,
+			enable_capacity_planning=enable_capacity_planning and not schedule_blocks,
+			schedule_blocks=schedule_blocks,
 		)
 
-		if enable_capacity_planning and job_card_doc:
+		if schedule_blocks:
+			row.db_update()
+		elif enable_capacity_planning and job_card_doc:
 			row.planned_start_time = job_card_doc.scheduled_time_logs[-1].from_time
 			row.planned_end_time = job_card_doc.scheduled_time_logs[-1].to_time
 			self._validate_capacity_window(row, plan_days)
 			row.db_update()
+
+	def get_plan_schedule_blocks(self, row):
+		plan_row = self.doc.production_plan_item or self.doc.production_plan_sub_assembly_item
+		if not (self.doc.production_plan and plan_row):
+			return []
+
+		if flt(row.job_card_qty) != flt(self.doc.qty):
+			return []
+
+		if sum(1 for d in self.doc.operations if d.operation == row.operation) > 1:
+			return []
+
+		return frappe.get_all(
+			"Production Plan Schedule",
+			filters={
+				"production_plan": self.doc.production_plan,
+				"plan_row": plan_row,
+				"operation": row.operation,
+			},
+			fields=["from_time", "to_time", "duration_mins", "workstation"],
+			order_by="from_time",
+		)
 
 	def _validate_capacity_window(self, row, plan_days):
 		from erpnext.manufacturing.doctype.work_order.work_order import CapacityError

@@ -40,6 +40,7 @@ from erpnext.accounts.party import (
 	complete_contact_details,
 	get_default_contact,
 	get_party_account,
+	validate_party_company,
 )
 from erpnext.accounts.utils import (
 	cancel_exchange_gain_loss_journal,
@@ -1135,10 +1136,18 @@ class PaymentEntry(AccountsController):
 
 		if not exchange_gain_loss_row:
 			values = frappe.get_cached_value(
-				"Company", self.company, ("exchange_gain_loss_account", "cost_center"), as_dict=True
+				"Company",
+				self.company,
+				("bank_charges_account", "exchange_gain_loss_account", "cost_center"),
+				as_dict=True,
 			)
+			is_single_currency = self.paid_from_account_currency == self.paid_to_account_currency
+			account = (
+				is_single_currency and values.bank_charges_account
+			) or values.exchange_gain_loss_account
 
-			for fieldname, value in values.items():
+			missing_fields = {"exchange_gain_loss_account": account, "cost_center": values.cost_center}
+			for fieldname, value in missing_fields.items():
 				if value:
 					continue
 
@@ -1155,7 +1164,7 @@ class PaymentEntry(AccountsController):
 			exchange_gain_loss_row = self.append(
 				"deductions",
 				{
-					"account": values.exchange_gain_loss_account,
+					"account": account,
 					"cost_center": values.cost_center,
 					"is_exchange_gain_loss": 1,
 				},
@@ -2426,6 +2435,7 @@ def get_party_details(company: str, party_type: str, party: str, date: str, cost
 
 	ptype = "select" if frappe.only_has_select_perm(party_type) else "read"
 	frappe.has_permission(party_type, ptype, party, throw=True)
+	validate_party_company(party_type, party, company)
 
 	party_account = get_party_account(party_type, party, company)
 	account_currency = get_account_currency(party_account)

@@ -8,6 +8,16 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 			? this.item.rejected_serial_and_batch_bundle
 			: this.item.serial_and_batch_bundle;
 
+		this.init();
+	}
+
+	async init() {
+		try {
+			this.based_on = await erpnext.stock.get_pick_serial_batch_based_on();
+		} catch (e) {
+			this.based_on = "FIFO";
+		}
+
 		this.make();
 		this.render_data();
 	}
@@ -391,7 +401,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 			{
 				fieldtype: "Select",
 				options: ["FIFO", "LIFO", "Expiry"],
-				default: "FIFO",
+				default: this.based_on,
 				fieldname: "based_on",
 				label: __("Fetch Based On"),
 				onchange: () => this.get_auto_data(),
@@ -537,7 +547,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 		}
 
 		if (!based_on) {
-			based_on = "FIFO";
+			based_on = this.based_on;
 		}
 
 		let warehouse = this.item.warehouse || this.item.s_warehouse;
@@ -671,6 +681,27 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 			frappe.throw(__("Rejected Warehouse and Accepted Warehouse cannot be the same."));
 		}
 
+		let qty_to_fetch = flt(this.dialog.get_value("qty"));
+		let total_qty = entries.reduce((total, row) => total + (flt(row.qty) || 1.0), 0);
+
+		if (flt(total_qty, 6) !== flt(qty_to_fetch, 6)) {
+			const confirm_dialog = frappe.confirm(
+				__(
+					"<strong>Total qty</strong> of the rows (<strong>{0}</strong>) does not match the <strong>Qty to Fetch</strong> (<strong>{1}</strong>). Qty of the item will be changed to <strong>{0}</strong>. Are you sure want to proceed?",
+					[format_number(total_qty), format_number(qty_to_fetch)]
+				),
+				() => this.create_bundle_entries(entries, warehouse)
+			);
+			confirm_dialog.indicator = "blue";
+			confirm_dialog.set_indicator();
+
+			return;
+		}
+
+		this.create_bundle_entries(entries, warehouse);
+	}
+
+	create_bundle_entries(entries, warehouse) {
 		frappe
 			.call({
 				method: "erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.add_serial_batch_ledgers",
