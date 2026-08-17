@@ -53,5 +53,14 @@ erpnext.sales_trends_filters = {
 			options: "Company",
 			default: frappe.defaults.get_user_default("Company"),
 		},
+		{
+			fieldname: "item_code",
+			label: __("Item"),
+			fieldtype: "MultiSelectList",
+			options: "Item",
+			get_data: function (txt) {
+				return frappe.db.get_link_options("Item", txt);
+			},
+		},
 	],
 };
