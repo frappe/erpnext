@@ -124,6 +124,10 @@ frappe.ui.form.on("Pick List", {
 		frm.trigger("update_warehouse_property");
 		erpnext.toggle_serial_batch_fields(frm);
 
+		if ((frm.doc.locations || []).length && !["Completed", "Cancelled"].includes(frm.doc.status)) {
+			frm.add_custom_button(__("Stock Availability"), () => frm.events.show_stock_availability(frm));
+		}
+
 		if (frm.doc.docstatus === 1) {
 			const status_completed = frm.doc.status === "Completed";
 
@@ -326,6 +330,43 @@ frappe.ui.form.on("Pick List", {
 			},
 		});
 	},
+	show_stock_availability(frm) {
+		const seen = new Set();
+		const items = [];
+
+		(frm.doc.locations || []).forEach((row) => {
+			if (!row.item_code || !row.warehouse) return;
+
+			const key = `${row.item_code}||${row.warehouse}`;
+			if (seen.has(key)) return;
+
+			seen.add(key);
+			items.push({ item_code: row.item_code, warehouse: row.warehouse });
+		});
+
+		if (!items.length) {
+			frappe.msgprint(__("Add items with a warehouse in the Item Locations table"));
+			return;
+		}
+
+		frappe
+			.xcall("erpnext.stock.doctype.pick_list.pick_list.get_stock_availability", {
+				items: items,
+				pick_list: frm.doc.name,
+			})
+			.then((rows) => frm.events.render_stock_availability(rows));
+	},
+
+	render_stock_availability(rows) {
+		const dialog = new frappe.ui.Dialog({
+			title: __("Stock Availability"),
+			size: "extra-large",
+		});
+
+		dialog.$body.html(get_availability_html(rows));
+		dialog.show();
+	},
+
 	show_reserved_stock(frm) {
 		// Get the latest modified date from the locations table.
 		var to_date = moment(
@@ -416,6 +457,146 @@ frappe.ui.form.on("Pick List Item", {
 		});
 	},
 });
+
+function format_float(qty) {
+	return frappe.format(qty, { fieldtype: "Float" });
+}
+
+function get_availability_html(rows) {
+	return `
+		${get_availability_cards_html(rows)}
+		${get_availability_summary_html(rows)}
+		${get_holding_documents_html(rows)}`;
+}
+
+function get_availability_cards_html(rows) {
+	const blocked = rows.filter((row) => row.free_qty <= 0);
+	const held = rows.filter((row) => row.pick_lists.length || row.reservations.length);
+
+	const cards = [
+		{ label: __("Items"), value: rows.length, color: "var(--text-color)" },
+		{
+			label: __("Held by Other Documents"),
+			value: held.length,
+			color: held.length ? "var(--orange-500)" : "var(--green-500)",
+		},
+		{
+			label: __("Not Free to Pick"),
+			value: blocked.length,
+			color: blocked.length ? "var(--red-500)" : "var(--green-500)",
+		},
+	];
+
+	const card_html = cards
+		.map(
+			(card) => `
+			<div style="flex: 1; border: 1px solid var(--border-color); border-radius: var(--border-radius-md); padding: 12px 15px;">
+				<div class="text-muted" style="font-size: var(--text-sm); margin-bottom: 4px;">${card.label}</div>
+				<div style="font-size: var(--text-2xl); font-weight: 600; color: ${card.color};">${card.value}</div>
+			</div>`
+		)
+		.join("");
+
+	return `<div style="display: flex; gap: 15px; margin-bottom: 20px;">${card_html}</div>`;
+}
+
+function get_availability_summary_html(rows) {
+	const header = `
+		<tr>
+			<th>${__("Item")}</th>
+			<th>${__("Warehouse")}</th>
+			<th class="text-right">${__("Actual Qty")}</th>
+			<th class="text-right">${__("Held by Pick Lists")}</th>
+			<th class="text-right">${__("Reserved Qty")}</th>
+			<th class="text-right">${__("Free to Pick")}</th>
+		</tr>`;
+
+	const body = rows
+		.map((row) => {
+			const has_detail = row.pick_lists.length || row.reservations.length;
+			const color = row.free_qty <= 0 ? "red" : has_detail ? "orange" : "green";
+
+			return `
+			<tr>
+				<td><span class="indicator ${color}"></span> ${frappe.utils.escape_html(row.item_code)}</td>
+				<td>${frappe.utils.escape_html(row.warehouse)}</td>
+				<td class="text-right">${format_float(row.actual_qty)}</td>
+				<td class="text-right">${format_float(row.picked_qty)}</td>
+				<td class="text-right">${format_float(row.reserved_qty)}</td>
+				<td class="text-right"><b>${format_float(row.free_qty)}</b></td>
+			</tr>`;
+		})
+		.join("");
+
+	return `
+		<h5 style="margin-bottom: 10px;">${__("Availability")}</h5>
+		<table class="table table-bordered">${header}${body}</table>`;
+}
+
+function get_holding_documents_html(rows) {
+	const with_holders = rows.filter((row) => row.pick_lists.length || row.reservations.length);
+	if (!with_holders.length) return "";
+
+	const header = `
+		<tr>
+			<th style="width: 45%">${__("Item / Document")}</th>
+			<th>${__("Status")}</th>
+			<th>${__("Batch No")}</th>
+			<th class="text-right">${__("Qty")}</th>
+		</tr>`;
+
+	const body = with_holders.map((row) => get_holding_tree_rows_html(row)).join("");
+
+	return `
+		<h5 style="margin: 20px 0 10px;">${__("Stock Held By")}</h5>
+		<div class="text-muted" style="font-size: var(--text-sm); margin-bottom: 10px;">
+			${__("Cancel or delete these documents to release the stock.")}
+		</div>
+		<table class="table table-bordered">${header}${body}</table>`;
+}
+
+function get_holding_tree_rows_html(row) {
+	const total = row.picked_qty + row.reserved_qty;
+
+	let html = `
+		<tr style="background-color: var(--control-bg);">
+			<td colspan="3">
+				<span class="text-muted">${__("Item")}:</span>
+				<b>${frappe.utils.escape_html(row.item_code)}</b>
+				<span class="text-muted" style="margin: 0 8px;">·</span>
+				<span class="text-muted">${__("Warehouse")}:</span>
+				<b>${frappe.utils.escape_html(row.warehouse)}</b>
+			</td>
+			<td class="text-right"><b>${format_float(total)}</b></td>
+		</tr>`;
+
+	const child_cell = (content) =>
+		`<td style="padding-left: 30px;"><span class="text-muted">└─</span> ${content}</td>`;
+
+	row.pick_lists.forEach((d) => {
+		html += `
+		<tr>
+			${child_cell(frappe.utils.get_form_link("Pick List", d.pick_list, true))}
+			<td>${__(d.status)}</td>
+			<td>${frappe.utils.escape_html(d.batch_no || "")}</td>
+			<td class="text-right">${format_float(d.holding_qty)}</td>
+		</tr>`;
+	});
+
+	row.reservations.forEach((d) => {
+		const against = frappe.utils.get_form_link(d.voucher_type, d.voucher_no, true);
+		const sre_link = frappe.utils.get_form_link("Stock Reservation Entry", d.name, true);
+		html += `
+		<tr>
+			${child_cell(`${sre_link} · ${__("Reserved for {0}", [against])}`)}
+			<td>${__(d.status)}</td>
+			<td></td>
+			<td class="text-right">${format_float(d.reserved_qty)}</td>
+		</tr>`;
+	});
+
+	return html;
+}
 
 function get_item_details(item_code, uom = null, warehouse = null, company = null) {
 	if (item_code) {

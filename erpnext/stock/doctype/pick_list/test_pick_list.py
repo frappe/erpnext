@@ -93,6 +93,50 @@ class TestPickList(ERPNextTestSuite):
 		self.assertEqual(pick_list.locations[0].warehouse, "_Test Warehouse - _TC")
 		self.assertEqual(pick_list.locations[0].qty, 5)
 
+	def test_get_stock_availability(self):
+		from erpnext.stock.doctype.pick_list.pick_list import get_stock_availability
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=100, basic_rate=100)
+
+		pick_list = frappe.get_doc(
+			{
+				"doctype": "Pick List",
+				"company": "_Test Company",
+				"purpose": "Material Transfer",
+				"locations": [
+					{
+						"item_code": item,
+						"qty": 40,
+						"stock_qty": 40,
+						"picked_qty": 40,
+						"conversion_factor": 1,
+						"warehouse": "_Test Warehouse - _TC",
+					}
+				],
+			}
+		).save()
+
+		items = frappe.as_json([{"item_code": item, "warehouse": "_Test Warehouse - _TC"}])
+		rows = get_stock_availability(items)
+
+		self.assertEqual(len(rows), 1)
+		self.assertEqual(rows[0].actual_qty, 100.0)
+		self.assertEqual(rows[0].picked_qty, 40.0)
+		self.assertEqual(rows[0].reserved_qty, 0.0)
+		self.assertEqual(rows[0].free_qty, 60.0)
+		self.assertEqual([d.pick_list for d in rows[0].pick_lists], [pick_list.name])
+		self.assertEqual(rows[0].pick_lists[0].status, "Draft")
+
+		rows = get_stock_availability(items, pick_list=pick_list.name)
+		self.assertEqual(rows[0].picked_qty, 0.0)
+		self.assertEqual(rows[0].free_qty, 100.0)
+
+		pick_list.submit()
+		rows = get_stock_availability(items)
+		self.assertEqual(rows[0].picked_qty, 40.0)
+		self.assertEqual(rows[0].pick_lists[0].status, "Open")
+
 	def test_pick_list_splits_row_according_to_warehouse_availability(self):
 		try:
 			frappe.get_doc(
