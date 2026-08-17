@@ -24,8 +24,16 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 		this.dont_allow_new_row = opts.dont_allow_new_row;
 		// scanner will ask user to type the quantity instead of incrementing by 1
 		this.prompt_qty = opts.prompt_qty;
+		// scanner will ask to confirm the scanned quantity against the one a row was created
+		// with, e.g. the ordered quantity on a receipt mapped from a purchase order, and move
+		// whatever is left over to a row of its own
+		this.confirm_qty = opts.confirm_qty;
 
 		this.items_table_name = opts.items_table_name || "items";
+
+		// rows this scanner filled itself. scanning into one of them always increments it, only
+		// a row that was already in the document has a quantity worth confirming
+		this.scanned_rows = new Set();
 
 		// optional sound name to play when scan either fails or passes.
 		// see https://frappeframework.com/docs/v14/user/en/python-api/hooks#sounds
@@ -116,6 +124,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 		return new Promise((resolve, reject) => {
 			let cur_grid = this.frm.fields_dict[this.items_table_name].grid;
 			frappe.flags.trigger_from_barcode_scanner = true;
+			this.scanned_by_dialog = false;
 
 			const { item_code, barcode, batch_no, serial_no, uom, default_warehouse } = data;
 			let row = this.get_row_to_modify_on_scan(item_code, batch_no, uom, barcode, default_warehouse);
@@ -132,7 +141,6 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 				row = frappe.model.add_child(this.frm.doc, cur_grid.doctype, this.items_table_name);
 				// trigger any row add triggers defined on child table.
 				this.frm.script_manager.trigger(`${this.items_table_name}_add`, row.doctype, row.name);
-				this.frm.has_items = false;
 			}
 
 			if (this.is_duplicate_serial_no(row, serial_no)) {
@@ -141,22 +149,41 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 				return;
 			}
 
+			const is_scanned_row = is_new_row || this.scanned_rows.has(row.name);
+			this.scanned_rows.add(row.name);
+
 			frappe.run_serially([
 				() => this.set_selector_trigger_flag(data),
 				() => this.set_barcode(row, barcode),
 				() => this.set_warehouse(row),
 				() =>
-					this.set_item(row, item_code, barcode, batch_no, serial_no).then((qty) => {
-						this.show_scan_message(row.idx, !is_new_row, qty);
-					}),
-				() => this.set_serial_no(row, serial_no),
-				() => this.set_batch_no(row, batch_no),
+					this.set_item(row, item_code, barcode, batch_no, serial_no, is_scanned_row).then(
+						(qty) => {
+							// the dialog reports its own outcome, it resolves without a quantity
+							if (qty) {
+								this.show_scan_message(row.idx, !is_new_row, qty);
+							}
+						}
+					),
+				() => this.set_scanned_serial_and_batch(row, batch_no, serial_no),
 				() => this.clean_up(),
 				() => this.set_barcode_uom(row, uom),
 				() => this.revert_selector_flag(),
 				() => resolve(row),
 			]);
 		});
+	}
+
+	set_scanned_serial_and_batch(row, batch_no, serial_no) {
+		// the dialog wrote what was confirmed in it, the scanned values must not overwrite it
+		if (this.scanned_by_dialog) {
+			return;
+		}
+
+		return frappe.run_serially([
+			() => this.set_serial_no(row, serial_no),
+			() => this.set_batch_no(row, batch_no),
+		]);
 	}
 
 	// batch and serial selector is reduandant when all info can be added by scan
@@ -177,7 +204,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 		frappe.flags.trigger_from_barcode_scanner = false;
 	}
 
-	set_item(row, item_code, barcode, batch_no, serial_no) {
+	set_item(row, item_code, barcode, batch_no, serial_no, is_scanned_row) {
 		return new Promise((resolve) => {
 			const increment = async (value = 1) => {
 				const item_data = { item_code: item_code, use_serial_batch_fields: 1.0 };
@@ -191,19 +218,24 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 				frappe.prompt(__("Please enter quantity for item {0}", [item_code]), ({ value }) => {
 					increment(value).then((value) => resolve(value));
 				});
-			} else if (this.frm.has_items) {
-				this.prepare_item_for_scan(row, item_code, barcode, batch_no, serial_no);
+			} else if (this.confirm_qty && !is_scanned_row) {
+				this.prepare_item_for_scan(row, item_code, barcode, batch_no, serial_no, resolve);
 			} else {
 				increment().then((value) => resolve(value));
 			}
 		});
 	}
 
-	prepare_item_for_scan(row, item_code, barcode, batch_no, serial_no) {
+	prepare_item_for_scan(row, item_code, barcode, batch_no, serial_no, done) {
 		var me = this;
+		this.scanned_by_dialog = true;
+
 		this.dialog = new frappe.ui.Dialog({
 			title: __("Scan barcode for item {0}", [item_code]),
 			fields: me.get_fields_for_dialog(row, item_code, barcode, batch_no, serial_no),
+			// the scan is only finished once the dialog is gone, whether it was updated or
+			// dismissed. leaving it unfinished strands the scanner flags on the next scan
+			onhide: () => done(),
 		});
 
 		this.dialog.set_primary_action(__("Update"), () => {
@@ -221,9 +253,8 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 				() => this.set_serial_no(row, this.dialog.get_value("serial_no")),
 				() => this.add_child_for_remaining_qty(row),
 				() => this.clean_up(),
+				() => this.dialog.hide(),
 			]);
-
-			this.dialog.hide();
 		});
 
 		this.dialog.show();

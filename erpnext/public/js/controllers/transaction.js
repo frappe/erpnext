@@ -667,7 +667,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		this.set_dynamic_labels();
 		this.setup_sms();
 		this.setup_quality_inspection();
-		this.validate_has_items();
 		erpnext.utils.view_serial_batch_nos(this.frm);
 		this.set_route_options_for_new_doc();
 		erpnext.toggle_serial_batch_fields(this.frm);
@@ -688,11 +687,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				});
 			});
 		}
-	}
-
-	validate_has_items() {
-		let table = this.frm.doc.items;
-		this.frm.has_items = table && table.length && table[0].qty && table[0].item_code;
 	}
 
 	apply_default_taxes() {
