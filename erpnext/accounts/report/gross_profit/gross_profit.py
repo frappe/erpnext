@@ -519,6 +519,7 @@ class GrossProfitGenerator:
 
 		self.load_non_stock_items()
 		self.get_returned_invoice_items()
+		self.set_legacy_return_targets()
 		self.process()
 
 	def process(self):
@@ -629,7 +630,10 @@ class GrossProfitGenerator:
 	def update_return_invoices(self, row, sales_invoice_item):
 		if returned_invoice_items := self.returned_invoices.get(row.parent):
 			returned_item_rows = list(returned_invoice_items.get(sales_invoice_item, []))
-			if sales_invoice_item != row.item_code:
+			legacy_return_targets = self.legacy_return_targets.get((row.parent, row.item_code))
+			if sales_invoice_item != row.item_code and (
+				not legacy_return_targets or sales_invoice_item in legacy_return_targets
+			):
 				returned_item_rows.extend(returned_invoice_items.get(row.item_code, []))
 
 			for returned_item_row in returned_item_rows:
@@ -757,6 +761,20 @@ class GrossProfitGenerator:
 			self.returned_invoices.setdefault(inv.return_against, frappe._dict()).setdefault(
 				inv.sales_invoice_item or inv.item_code, []
 			).append(inv)
+
+	def set_legacy_return_targets(self):
+		self.legacy_return_targets = {}
+		for row in self.si_list:
+			if row.is_return or not row.parent:
+				continue
+
+			returned_invoice_items = self.returned_invoices.get(row.parent)
+			if (
+				returned_invoice_items
+				and returned_invoice_items.get(row.item_code)
+				and not returned_invoice_items.get(row.item_row)
+			):
+				self.legacy_return_targets.setdefault((row.parent, row.item_code), set()).add(row.item_row)
 
 	def skip_row(self, row):
 		if self.filters.get("group_by") != "Invoice":

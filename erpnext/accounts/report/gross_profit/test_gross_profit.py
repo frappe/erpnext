@@ -4,7 +4,7 @@ from frappe.utils import add_days, flt, get_first_day, get_last_day, nowdate
 
 from erpnext.accounts.doctype.sales_invoice.mapper import make_delivery_note, make_sales_return
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-from erpnext.accounts.report.gross_profit.gross_profit import execute
+from erpnext.accounts.report.gross_profit.gross_profit import GrossProfitGenerator, execute
 from erpnext.stock.doctype.delivery_note.mapper import make_sales_invoice
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.item.test_item import create_item
@@ -819,6 +819,77 @@ class TestGrossProfit(ERPNextTestSuite):
 		)
 		self.assertEqual(invoice_row.qty, 2)
 		self.assertEqual(invoice_row.selling_amount, 200)
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": True})
+	def test_legacy_return_prefers_item_without_linked_return(self):
+		sales_invoice = self.create_sales_invoice(qty=2, rate=100, do_not_submit=True)
+		second_item = frappe.copy_doc(sales_invoice.items[0], ignore_no_copy=False)
+		second_item.rate = 200
+		sales_invoice.append("items", second_item)
+		sales_invoice.submit()
+
+		linked_return = make_sales_return(sales_invoice.name)
+		linked_return.set("items", [linked_return.items[0]])
+		linked_return.items[0].qty = -1
+		linked_return.submit()
+
+		legacy_return = make_sales_return(sales_invoice.name)
+		legacy_return.set("items", [legacy_return.items[1]])
+		legacy_return.items[0].qty = -1
+		legacy_return.submit()
+		frappe.db.set_value("Sales Invoice Item", legacy_return.items[0].name, "sales_invoice_item", None)
+
+		filters = frappe._dict(
+			company=sales_invoice.company,
+			from_date=sales_invoice.posting_date,
+			to_date=sales_invoice.posting_date,
+			group_by="Invoice",
+		)
+		_, data = execute(filters=filters)
+		invoice_rows = [row for row in data if row.parent_invoice == sales_invoice.name and row.indent == 1]
+		invoice_rows.sort(key=lambda row: row["avg._selling_rate"])
+		self.assertEqual([row.qty for row in invoice_rows], [1, 1])
+		self.assertEqual([row.selling_amount for row in invoice_rows], [100, 200])
+
+	def test_legacy_return_does_not_override_linked_item_match(self):
+		invoice = "SINV-TEST-RETURN-ALLOCATION"
+		linked_item = "SINV-ITEM-LINKED"
+		unlinked_item = "SINV-ITEM-LEGACY"
+		generator = GrossProfitGenerator.__new__(GrossProfitGenerator)
+		generator.currency_precision = 3
+		generator.legacy_return_targets = {(invoice, self.item): {unlinked_item}}
+		generator.returned_invoices = frappe._dict(
+			{
+				invoice: frappe._dict(
+					{
+						linked_item: [frappe._dict(qty=-1, base_amount=-100)],
+						self.item: [frappe._dict(qty=-1, base_amount=-200)],
+					}
+				)
+			}
+		)
+		linked_row = frappe._dict(
+			parent=invoice,
+			item_code=self.item,
+			qty=2,
+			base_amount=200,
+			buying_rate=50,
+			delivered_by_supplier=False,
+		)
+		unlinked_row = frappe._dict(
+			parent=invoice,
+			item_code=self.item,
+			qty=2,
+			base_amount=400,
+			buying_rate=50,
+			delivered_by_supplier=False,
+		)
+
+		generator.update_return_invoices(linked_row, linked_item)
+		generator.update_return_invoices(unlinked_row, unlinked_item)
+
+		self.assertEqual((linked_row.qty, linked_row.base_amount), (1, 100))
+		self.assertEqual((unlinked_row.qty, unlinked_row.base_amount), (1, 200))
 
 	def create_drop_ship_order(self, qty=10, selling_rate=100, buying_rate=80):
 		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice
