@@ -903,7 +903,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 	def _query_used_secondary_items(self):
 		se = frappe.qb.DocType("Stock Entry")
 		sed = frappe.qb.DocType("Stock Entry Detail")
-		return (
+		query = (
 			frappe.qb.from_(se)
 			.inner_join(sed)
 			.on(sed.parent == se.name)
@@ -914,7 +914,12 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 				& (se.docstatus == 1)
 				& (se.purpose.isin(["Repack", "Manufacture"]))
 			)
-		).run(as_dict=1)
+		)
+
+		if self.doc.job_card:
+			query = query.where(se.job_card == self.doc.job_card)
+
+		return query.run(as_dict=1)
 
 	def get_completed_job_card_qty(self):
 		return flt(min([d.completed_qty for d in self.wo_doc.operations]))
