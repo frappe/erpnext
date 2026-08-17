@@ -124,6 +124,10 @@ frappe.ui.form.on("Pick List", {
 		frm.trigger("update_warehouse_property");
 		erpnext.toggle_serial_batch_fields(frm);
 
+		if ((frm.doc.locations || []).length && !["Completed", "Cancelled"].includes(frm.doc.status)) {
+			frm.add_custom_button(__("Stock Availability"), () => frm.events.show_stock_availability(frm));
+		}
+
 		if (frm.doc.docstatus === 1) {
 			const status_completed = frm.doc.status === "Completed";
 
@@ -326,6 +330,47 @@ frappe.ui.form.on("Pick List", {
 			},
 		});
 	},
+	show_stock_availability(frm) {
+		const seen = new Set();
+		const items = [];
+
+		(frm.doc.locations || []).forEach((row) => {
+			if (!row.item_code || !row.warehouse) return;
+
+			const key = `${row.item_code}||${row.warehouse}`;
+			if (seen.has(key)) return;
+
+			seen.add(key);
+			items.push({ item_code: row.item_code, warehouse: row.warehouse });
+		});
+
+		if (!items.length) {
+			frappe.msgprint(__("Add items with a warehouse in the Item Locations table"));
+			return;
+		}
+
+		frappe
+			.xcall("erpnext.stock.doctype.pick_list.pick_list.get_stock_availability", {
+				items: items,
+				pick_list: frm.doc.name,
+			})
+			.then((rows) => frm.events.render_stock_availability(rows));
+	},
+
+	render_stock_availability(rows) {
+		const dialog = new frappe.ui.Dialog({
+			title: __("Stock Availability"),
+			size: "extra-large",
+		});
+
+		dialog.$body.html(get_availability_html(rows));
+		dialog.$body.find(".pl-availability-toggle").on("click", function (e) {
+			e.preventDefault();
+			$(this).closest("tr").next(".pl-availability-detail").toggleClass("hidden");
+		});
+		dialog.show();
+	},
+
 	show_reserved_stock(frm) {
 		// Get the latest modified date from the locations table.
 		var to_date = moment(
@@ -416,6 +461,86 @@ frappe.ui.form.on("Pick List Item", {
 		});
 	},
 });
+
+function format_float(qty) {
+	return frappe.format(qty, { fieldtype: "Float" });
+}
+
+function get_availability_html(rows) {
+	const header = `
+		<tr>
+			<th>${__("Item")}</th>
+			<th>${__("Warehouse")}</th>
+			<th class="text-right">${__("Actual Qty")}</th>
+			<th class="text-right">${__("Held by Pick Lists")}</th>
+			<th class="text-right">${__("Reserved Qty")}</th>
+			<th class="text-right">${__("Free to Pick")}</th>
+		</tr>`;
+
+	const body = rows.map((row) => get_availability_row_html(row)).join("");
+	return `<table class="table table-bordered">${header}${body}</table>`;
+}
+
+function get_availability_row_html(row) {
+	const has_detail = row.pick_lists.length || row.reservations.length;
+	const color = row.free_qty <= 0 ? "red" : has_detail ? "orange" : "green";
+	const item_cell = has_detail
+		? `<a href="#" class="pl-availability-toggle">${frappe.utils.escape_html(row.item_code)}</a>`
+		: frappe.utils.escape_html(row.item_code);
+
+	let html = `
+		<tr>
+			<td><span class="indicator ${color}"></span> ${item_cell}</td>
+			<td>${frappe.utils.escape_html(row.warehouse)}</td>
+			<td class="text-right">${format_float(row.actual_qty)}</td>
+			<td class="text-right">${format_float(row.picked_qty)}</td>
+			<td class="text-right">${format_float(row.reserved_qty)}</td>
+			<td class="text-right"><b>${format_float(row.free_qty)}</b></td>
+		</tr>`;
+
+	if (has_detail) {
+		html += `<tr class="pl-availability-detail hidden"><td colspan="6">${get_holders_html(
+			row
+		)}</td></tr>`;
+	}
+
+	return html;
+}
+
+function get_holders_html(row) {
+	const rows = [];
+
+	row.pick_lists.forEach((d) => {
+		rows.push(`
+			<tr>
+				<td>${frappe.utils.get_form_link("Pick List", d.pick_list, true)}</td>
+				<td>${__(d.status)}</td>
+				<td>${frappe.utils.escape_html(d.batch_no || "")}</td>
+				<td class="text-right">${format_float(d.holding_qty)}</td>
+			</tr>`);
+	});
+
+	row.reservations.forEach((d) => {
+		const against = frappe.utils.get_form_link(d.voucher_type, d.voucher_no, true);
+		rows.push(`
+			<tr>
+				<td>${frappe.utils.get_form_link("Stock Reservation Entry", d.name, true)} (${against})</td>
+				<td>${__(d.status)}</td>
+				<td></td>
+				<td class="text-right">${format_float(d.reserved_qty)}</td>
+			</tr>`);
+	});
+
+	const header = `
+		<tr>
+			<th>${__("Held By")}</th>
+			<th>${__("Status")}</th>
+			<th>${__("Batch No")}</th>
+			<th class="text-right">${__("Qty")}</th>
+		</tr>`;
+
+	return `<table class="table table-sm">${header}${rows.join("")}</table>`;
+}
 
 function get_item_details(item_code, uom = null, warehouse = null, company = null) {
 	if (item_code) {
