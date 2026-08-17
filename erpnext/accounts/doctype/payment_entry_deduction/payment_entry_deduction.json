@@ -10,7 +10,8 @@
   "amount",
   "column_break_2",
   "is_exchange_gain_loss",
-  "description"
+  "description",
+  "dunning"
  ],
  "fields": [
   {
@@ -55,12 +56,21 @@
    "fieldtype": "Check",
    "label": "System Generated",
    "read_only": 1
+  },
+  {
+   "fieldname": "dunning",
+   "fieldtype": "Link",
+   "label": "Dunning",
+   "no_copy": 1,
+   "options": "Dunning",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-03-11 14:26:11.312950",
+ "modified": "2026-08-17 11:20:35.482913",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry Deduction",
