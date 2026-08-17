@@ -625,8 +625,11 @@ class GrossProfitGenerator:
 			self.get_average_rate_based_on_group_by()
 
 	def update_return_invoices(self, row):
-		if row.parent in self.returned_invoices and row.item_code in self.returned_invoices[row.parent]:
-			returned_item_rows = self.returned_invoices[row.parent][row.item_code]
+		if returned_invoice_items := self.returned_invoices.get(row.parent):
+			returned_item_rows = returned_invoice_items.get(row.item_row)
+			if returned_item_rows is None:
+				returned_item_rows = returned_invoice_items.get(row.item_code, [])
+
 			for returned_item_row in returned_item_rows:
 				# returned_items 'qty' should be stateful
 				if returned_item_row.qty != 0:
@@ -734,6 +737,7 @@ class GrossProfitGenerator:
 			.select(
 				si.name,
 				si_item.item_code,
+				si_item.sales_invoice_item,
 				si_item.stock_qty.as_("qty"),
 				si_item.base_net_amount.as_("base_amount"),
 				si.return_against,
@@ -749,7 +753,7 @@ class GrossProfitGenerator:
 		self.returned_invoices = frappe._dict()
 		for inv in returned_invoices:
 			self.returned_invoices.setdefault(inv.return_against, frappe._dict()).setdefault(
-				inv.item_code, []
+				inv.sales_invoice_item or inv.item_code, []
 			).append(inv)
 
 	def skip_row(self, row):

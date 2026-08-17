@@ -726,6 +726,49 @@ class TestGrossProfit(ERPNextTestSuite):
 		self.assertEqual(first_invoice_row.buying_amount, 160)
 		self.assertEqual(first_invoice_row.gross_profit, 40)
 
+	def test_drop_ship_return_matches_sales_invoice_item(self):
+		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice
+		from erpnext.selling.doctype.sales_order.mapper import make_purchase_order, make_sales_invoice
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item(
+			"_Test Drop Ship Consolidated Return Item",
+			properties={"is_stock_item": 1, "delivered_by_supplier": 1},
+		)
+		sales_orders = []
+		for qty, selling_rate, buying_rate in [(4, 100, 50), (6, 200, 80)]:
+			sales_order = make_sales_order(item=item.name, qty=qty, rate=selling_rate, do_not_submit=True)
+			sales_order.items[0].delivered_by_supplier = 1
+			sales_order.items[0].supplier = "_Test Supplier"
+			sales_order.submit()
+			sales_orders.append(sales_order)
+
+			purchase_order = make_purchase_order(sales_order.name, selected_items=[sales_order.items[0]])[0]
+			purchase_order.items[0].rate = buying_rate
+			purchase_order.supplier = "_Test Supplier"
+			purchase_order.submit()
+			make_purchase_invoice(purchase_order.name).submit()
+
+		sales_invoice = make_sales_invoice(sales_orders[0].name)
+		sales_invoice = make_sales_invoice(sales_orders[1].name, target_doc=sales_invoice).submit()
+		sales_return = make_sales_return(sales_invoice.name)
+		sales_return.set("items", [sales_return.items[0]])
+		sales_return.items[0].qty = -1
+		sales_return.submit()
+
+		filters = frappe._dict(
+			company=sales_invoice.company,
+			from_date=sales_invoice.posting_date,
+			to_date=sales_invoice.posting_date,
+			group_by="Invoice",
+		)
+		_, data = execute(filters=filters)
+		invoice_rows = [row for row in data if row.parent_invoice == sales_invoice.name and row.indent == 1]
+		invoice_rows.sort(key=lambda row: row["avg._selling_rate"])
+		self.assertEqual([row.qty for row in invoice_rows], [3, 6])
+		self.assertEqual([row.buying_amount for row in invoice_rows], [150, 480])
+
 	def create_drop_ship_order(self, qty=10, selling_rate=100, buying_rate=80):
 		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice
 		from erpnext.selling.doctype.sales_order.mapper import make_purchase_order
