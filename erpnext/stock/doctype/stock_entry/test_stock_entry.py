@@ -1031,6 +1031,22 @@ class TestStockEntry(ERPNextTestSuite):
 		self.assertEqual([bucket.qty for bucket in batch_buckets], [2, 2])
 		self.assertEqual(batch_buckets[1].batches["BATCH-2"], 2)
 
+	def test_consumption_prefers_exact_attribution_bucket(self):
+		from erpnext.stock.doctype.stock_entry.services.manufacturing import ManufactureStockEntry
+
+		service = ManufactureStockEntry(frappe._dict())
+		alternative = frappe._dict(original_item="REQUIRED-ITEM")
+		direct = frappe._dict(original_item=None)
+		service.available_materials = frappe._dict(
+			{("ITEM", "WIP", "REQUIRED-ITEM"): alternative, ("ITEM", "WIP", None): direct}
+		)
+
+		legacy_row = frappe._dict(item_code="ITEM", warehouse="WIP", original_item=None)
+		self.assertEqual(service._get_available_buckets(legacy_row), [direct, alternative])
+
+		attributed_row = frappe._dict(item_code="ITEM", warehouse="WIP", original_item="REQUIRED-ITEM")
+		self.assertEqual(service._get_available_buckets(attributed_row), [alternative])
+
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"material_consumption": 1})
 	def test_work_order_manufacture_with_material_consumption(self):
 		from erpnext.manufacturing.doctype.work_order.mapper import (
