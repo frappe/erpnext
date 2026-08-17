@@ -298,23 +298,22 @@ class StockEntryGLComposer(BaseStockGLComposer):
 				)
 
 				_inv_dict = doc.get_inventory_account_dict(item, inventory_account_map, "t_warehouse")
-				gl_entries.append(
-					self.get_gl_dict(
-						{
-							"account": entry.expense_account,
-							"against": _inv_dict["account"],
-							"cost_center": entry.dimensions.cost_center or item.cost_center,
-							"debit": 0.0,
-							"credit": credit_amount,
-							"remarks": _("Accounting Entry for LCV in Stock Entry {0}").format(doc.name),
-							"credit_in_account_currency": flt(entry.amount),
-							"account_currency": account_currency,
-							"project": entry.dimensions.project or item.project,
-							**get_custom_dimension_overrides(entry),
-						},
-						item=item,
-					)
+				gl_dict = self.get_gl_dict(
+					{
+						"account": entry.expense_account,
+						"against": _inv_dict["account"],
+						"cost_center": entry.dimensions.cost_center or item.cost_center,
+						"debit": 0.0,
+						"credit": credit_amount,
+						"remarks": _("Accounting Entry for LCV in Stock Entry {0}").format(doc.name),
+						"credit_in_account_currency": flt(entry.amount),
+						"account_currency": account_currency,
+						"project": entry.dimensions.project or item.project,
+					},
+					item=item,
 				)
+				gl_dict.update(get_custom_dimension_overrides(entry))
+				gl_entries.append(gl_dict)
 
 				# Reclass leg: keeps the item's dimensions so it nets against the base item entry
 				# posted to the same expense account.

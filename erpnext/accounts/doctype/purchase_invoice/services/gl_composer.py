@@ -277,22 +277,21 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 							if not (entry.amount or entry.base_amount):
 								continue
 
-							gl_entries.append(
-								self.get_gl_dict(
-									{
-										"account": entry.expense_account,
-										"against": item.expense_account,
-										"cost_center": entry.dimensions.cost_center or item.cost_center,
-										"remarks": doc.get("remarks") or _("Accounting Entry for Stock"),
-										"credit": flt(entry.base_amount),
-										"credit_in_account_currency": flt(entry.amount),
-										"credit_in_transaction_currency": item.net_amount,
-										"project": entry.dimensions.project or item.project or doc.project,
-										**get_custom_dimension_overrides(entry),
-									},
-									item=item,
-								)
+							gl_dict = self.get_gl_dict(
+								{
+									"account": entry.expense_account,
+									"against": item.expense_account,
+									"cost_center": entry.dimensions.cost_center or item.cost_center,
+									"remarks": doc.get("remarks") or _("Accounting Entry for Stock"),
+									"credit": flt(entry.base_amount),
+									"credit_in_account_currency": flt(entry.amount),
+									"credit_in_transaction_currency": item.net_amount,
+									"project": entry.dimensions.project or item.project or doc.project,
+								},
+								item=item,
 							)
+							gl_dict.update(get_custom_dimension_overrides(entry))
+							gl_entries.append(gl_dict)
 
 					# sub-contracting warehouse
 					if flt(item.rm_supp_cost):
