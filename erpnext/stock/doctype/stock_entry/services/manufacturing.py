@@ -861,7 +861,13 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			return
 
 		secondary_items = self.get_secondary_items_from_job_card()
+		precision = self.doc.precision("fg_completed_qty")
 		for row in secondary_items:
+			if flt(row.stock_qty, precision) <= 0:
+				if row.get("over_booked_qty"):
+					self.warn_over_booked_secondary_item(row)
+				continue
+
 			row.uom = row.uom or row.stock_uom
 			row.qty = ceil_qty_if_uom_has_whole_number(row.stock_qty, row.stock_uom)
 			row.transfer_qty = row.qty
@@ -871,6 +877,18 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			row.secondary_item_type = row.get("secondary_item_type")
 
 			self.doc.append("items", row)
+
+	def warn_over_booked_secondary_item(self, row):
+		"""Earlier entries booked more than the job cards hold, so the skipped row is not silent."""
+		frappe.msgprint(
+			_("Item {0} is over booked by {1} {2} against {3} and has been skipped").format(
+				bold(row.item_code),
+				bold(row.over_booked_qty),
+				row.stock_uom,
+				bold(self.doc.job_card or self.doc.work_order),
+			),
+			alert=True,
+		)
 
 	def get_secondary_items_from_job_card(self):
 		if not self.wo_doc.operations:
@@ -887,11 +905,25 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		return flt(self.get_completed_job_card_qty()) - flt(self.wo_doc.produced_qty)
 
 	def _adjust_secondary_item_qtys(self, secondary_items, used_secondary_items, pending_qty):
+		precision = self.doc.precision("fg_completed_qty")
+		# Rows are grouped per (item_code, secondary_item_type), so one item can hold several rows
+		# that draw on a single used balance.
+		last_row_per_item = {row.item_code: row for row in secondary_items}
+
 		for row in secondary_items:
-			row.stock_qty -= flt(used_secondary_items.get(row.item_code))
+			used = flt(used_secondary_items.get(row.item_code))
+			# A row can only absorb what it holds, so the rest is left for the rows after it.
+			consumed = min(max(flt(row.stock_qty), 0.0), used)
+			used_secondary_items[row.item_code] = used - consumed
+			row.stock_qty = flt(row.stock_qty) - consumed
+			# The excess no row could absorb, taken before proration so it is the real one and
+			# not this entry's share.
+			row.over_booked_qty = (
+				flt(used_secondary_items[row.item_code], precision)
+				if row is last_row_per_item.get(row.item_code)
+				else 0.0
+			)
 			row.stock_qty = row.stock_qty * flt(self.doc.fg_completed_qty) / flt(pending_qty)
-			if used_secondary_items.get(row.item_code):
-				used_secondary_items[row.item_code] -= row.stock_qty
 
 	def get_used_secondary_items(self):
 		data = self._query_used_secondary_items()
