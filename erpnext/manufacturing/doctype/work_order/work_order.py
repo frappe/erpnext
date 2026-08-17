@@ -34,6 +34,7 @@ from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings
 from erpnext.manufacturing.doctype.work_order.services.material_coverage import (
 	get_minimum_material_coverage_fraction,
 )
+from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.batch.batch import make_batch
 from erpnext.stock.doctype.item.item import get_item_defaults, validate_end_of_life
 from erpnext.stock.doctype.serial_no.serial_no import get_available_serial_nos, get_serial_nos
@@ -315,7 +316,18 @@ class WorkOrder(Document):
 		if not self.wip_warehouse and not self.skip_transfer:
 			self.wip_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_wip_warehouse")
 		if not self.fg_warehouse:
-			self.fg_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_fg_warehouse")
+			self.fg_warehouse = (
+				frappe.db.get_single_value("Manufacturing Settings", "default_fg_warehouse")
+				or self.get_production_item_warehouse()
+			)
+
+	def get_production_item_warehouse(self):
+		if not self.production_item:
+			return None
+
+		return get_item_defaults(self.production_item, self.company).get(
+			"default_warehouse"
+		) or get_item_group_defaults(self.production_item, self.company).get("default_warehouse")
 
 	def check_wip_warehouse_skip(self):
 		if self.skip_transfer and not self.from_wip_warehouse:
@@ -1232,7 +1244,10 @@ class WorkOrder(Document):
 							"description": item.description,
 							"allow_alternative_item": item.allow_alternative_item,
 							"required_qty": item.qty,
-							"source_warehouse": item.source_warehouse or item.default_warehouse,
+							"source_warehouse": item.source_warehouse
+							or item.default_warehouse
+							or self.source_warehouse
+							or get_item_group_defaults(item.item_code, self.company).get("default_warehouse"),
 							"include_item_in_manufacturing": item.include_item_in_manufacturing,
 						},
 					)
