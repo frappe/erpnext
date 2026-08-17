@@ -24,12 +24,14 @@ from erpnext.manufacturing.doctype.work_order.services.reservation import (
 	get_row_wise_serial_batch,
 )
 from erpnext.manufacturing.doctype.work_order.services.status import StatusService
+from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.utils import get_bin, get_latest_stock_qty
 
 
 class RequiredItemsService:
 	def __init__(self, doc):
 		self.doc = doc
+		self._item_group_warehouses = {}
 
 	def update_required_items(self):
 		"""
@@ -116,7 +118,21 @@ class RequiredItemsService:
 	def _item_source_warehouse(self, item, reset_source_warehouse):
 		if reset_source_warehouse:
 			return self.doc.source_warehouse
-		return self.doc.source_warehouse or item.source_warehouse or item.default_warehouse
+		return (
+			self.doc.source_warehouse
+			or item.source_warehouse
+			or item.default_warehouse
+			or self._item_group_warehouse(item)
+		)
+
+	def _item_group_warehouse(self, item):
+		# components of a bom commonly share a group, look it up once for all of them
+		if item.item_group not in self._item_group_warehouses:
+			self._item_group_warehouses[item.item_group] = get_item_group_defaults(
+				item.item_code, self.doc.company
+			).get("default_warehouse")
+
+		return self._item_group_warehouses[item.item_group]
 
 	def _required_item_row(self, item, operation, source_warehouse):
 		return {
