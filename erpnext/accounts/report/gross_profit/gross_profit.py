@@ -764,7 +764,7 @@ class GrossProfitGenerator:
 	def allocate_legacy_return_items(self):
 		source_invoice_items = {}
 		for row in reversed(self.si_list):
-			if row.is_return or not row.parent:
+			if row.is_return or not row.parent or self.skip_row(row):
 				continue
 
 			source_invoice_items.setdefault((row.parent, row.item_code), {}).setdefault(row.item_row, row.qty)

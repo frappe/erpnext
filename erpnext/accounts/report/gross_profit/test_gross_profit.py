@@ -857,6 +857,7 @@ class TestGrossProfit(ERPNextTestSuite):
 		unlinked_item = "SINV-ITEM-LEGACY"
 		generator = GrossProfitGenerator.__new__(GrossProfitGenerator)
 		generator.currency_precision = 3
+		generator.filters = frappe._dict(group_by="Invoice")
 		generator.returned_invoices = frappe._dict(
 			{invoice: frappe._dict({linked_item: [frappe._dict(qty=-1, base_amount=-100)]})}
 		)
@@ -891,6 +892,46 @@ class TestGrossProfit(ERPNextTestSuite):
 
 		self.assertEqual((linked_row.qty, linked_row.base_amount), (1, 100))
 		self.assertEqual((unlinked_row.qty, unlinked_row.base_amount), (0, 0))
+
+	def test_legacy_return_ignores_skipped_group_rows(self):
+		invoice = "SINV-TEST-SKIPPED-RETURN-ALLOCATION"
+		visible_item = "SINV-ITEM-WITH-PROJECT"
+		skipped_item = "SINV-ITEM-WITHOUT-PROJECT"
+		generator = GrossProfitGenerator.__new__(GrossProfitGenerator)
+		generator.currency_precision = 3
+		generator.filters = frappe._dict(group_by="Project")
+		generator.returned_invoices = frappe._dict(
+			{invoice: frappe._dict({visible_item: [frappe._dict(qty=-1, base_amount=-100)]})}
+		)
+		generator.legacy_returned_invoices = frappe._dict(
+			{invoice: frappe._dict({self.item: [frappe._dict(qty=-1, base_amount=-100)]})}
+		)
+		visible_row = frappe._dict(
+			parent=invoice,
+			item_code=self.item,
+			item_row=visible_item,
+			is_return=False,
+			project="_Test Project",
+			qty=2,
+			base_amount=200,
+			buying_rate=50,
+			delivered_by_supplier=False,
+		)
+		skipped_row = frappe._dict(
+			parent=invoice,
+			item_code=self.item,
+			item_row=skipped_item,
+			is_return=False,
+			project=None,
+			qty=1,
+		)
+
+		generator.si_list = [visible_row, skipped_row]
+		generator.allocate_legacy_return_items()
+		generator.update_return_invoices(visible_row, visible_item)
+
+		self.assertNotIn(skipped_item, generator.returned_invoices[invoice])
+		self.assertEqual((visible_row.qty, visible_row.base_amount), (0, 0))
 
 	def test_return_remainder_stays_available_for_next_row(self):
 		invoice = "SINV-TEST-RETURN-REMAINDER"
