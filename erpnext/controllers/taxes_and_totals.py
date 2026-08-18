@@ -826,8 +826,9 @@ class calculate_taxes_and_totals:
 						item.net_amount = flt(
 							item.net_amount + rounding_difference, item.precision("net_amount")
 						)
+						# net_amount went up by rounding_difference, so its discount share goes down
 						item.distributed_discount_amount = flt(
-							distributed_amount + rounding_difference,
+							distributed_amount - rounding_difference,
 							item.precision("distributed_discount_amount"),
 						)
 						net_total += rounding_difference
