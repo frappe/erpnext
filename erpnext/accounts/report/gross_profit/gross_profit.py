@@ -814,11 +814,11 @@ class GrossProfitGenerator:
 				break
 
 	def skip_row(self, row):
-		if self.filters.get("group_by") != "Invoice":
-			if not row.get(scrub(self.filters.get("group_by", ""))):
-				return True
+		group_by = self.filters.get("group_by")
+		if group_by in {"Invoice", "Monthly"}:
+			return False
 
-		return False
+		return not row.get(scrub(group_by))
 
 	def get_buying_amount_from_product_bundle(self, row, product_bundle):
 		buying_amount = 0.0

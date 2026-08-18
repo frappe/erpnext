@@ -933,6 +933,34 @@ class TestGrossProfit(ERPNextTestSuite):
 		self.assertNotIn(skipped_item, generator.returned_invoices[invoice])
 		self.assertEqual((visible_row.qty, visible_row.base_amount), (0, 0))
 
+	def test_monthly_group_allocates_legacy_return(self):
+		invoice = "SINV-TEST-MONTHLY-RETURN-ALLOCATION"
+		item_row = "SINV-ITEM-MONTHLY-RETURN"
+		generator = GrossProfitGenerator.__new__(GrossProfitGenerator)
+		generator.currency_precision = 3
+		generator.filters = frappe._dict(group_by="Monthly")
+		generator.returned_invoices = frappe._dict()
+		generator.legacy_returned_invoices = frappe._dict(
+			{invoice: frappe._dict({self.item: [frappe._dict(qty=-1, base_amount=-100)]})}
+		)
+		invoice_row = frappe._dict(
+			parent=invoice,
+			item_code=self.item,
+			item_row=item_row,
+			is_return=False,
+			posting_date=nowdate(),
+			qty=1,
+			base_amount=100,
+			buying_rate=50,
+			delivered_by_supplier=False,
+		)
+
+		generator.si_list = [invoice_row]
+		generator.allocate_legacy_return_items()
+		generator.update_return_invoices(invoice_row, item_row)
+
+		self.assertEqual((invoice_row.qty, invoice_row.base_amount), (0, 0))
+
 	def test_return_remainder_stays_available_for_next_row(self):
 		invoice = "SINV-TEST-RETURN-REMAINDER"
 		item_row = "SINV-ITEM-RETURN-REMAINDER"
