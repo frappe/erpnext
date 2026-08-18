@@ -3,7 +3,11 @@
 	if((df.fieldname !== "description" && df.fieldname !== "item_name") && val) { %}
 		<div class="row">
 			<div class="col-xs-4 ellipsis">
+<<<<<<< HEAD
 				<strong title="{%= __(df.label) %}">{%= __(df.label) %}:</strong>
+=======
+				<strong title="{%= frappe.utils.escape_html(__(df.label, null, df.parent)) %}">{%= frappe.utils.escape_html(__(df.label, null, df.parent)) %}:</strong>
+>>>>>>> ffb7a708e4 (fix: escape item, warehouse and label values in form grid templates)
 			</div>
 			<div class="col-xs-8">
 				{%= doc.get_formatted(df.fieldname) %}
