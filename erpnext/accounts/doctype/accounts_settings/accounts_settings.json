@@ -95,13 +95,14 @@
   "column_break_25",
   "reports_tab",
   "remarks_section",
-  "general_ledger_remarks_length",
-  "receivable_payable_remarks_length",
+  "disable_include_dimensions",
   "column_break_lvjk",
+  "general_ledger_remarks_length",
   "accounts_receivable_payable_tuning_section",
   "receivable_payable_fetch_method",
   "default_ageing_range",
   "column_break_ntmi",
+  "receivable_payable_remarks_length",
   "legacy_section",
   "ignore_is_opening_check_for_reporting",
   "tab_break_dpet",
@@ -199,10 +200,12 @@
   },
   {
    "default": "1",
+   "description": "System will use the latest saved Currency Exchange rate on or before the transaction date, however old it is. <br>\nUncheck to ignore rates older than Stale Days and fetch a fresh rate from the exchange rate provider instead.",
    "fieldname": "allow_stale",
    "fieldtype": "Check",
    "in_list_view": 1,
-   "label": "Allow Stale Exchange Rates"
+   "label": "Allow Stale Exchange Rates",
+   "show_description_on_click": 1
   },
   {
    "default": "1",
@@ -278,10 +281,10 @@
   },
   {
    "default": "0",
-   "description": "Block a new Sales Invoice when the customer's overdue amount exceeds the Overdue Limit set on the customer.",
+   "description": "Enabling this option prevents the creation of a new Sales Invoice when the customer has an overdue limit set and their outstanding overdue amount exceeds that limit.",
    "fieldname": "enable_overdue_billing_threshold",
    "fieldtype": "Check",
-   "label": "Restrict Customer Over Billing"
+   "label": "Prevent Sales Invoice when Customer is Overdue"
   },
   {
    "depends_on": "eval:doc.enable_overdue_billing_threshold",
@@ -475,7 +478,7 @@
   {
    "fieldname": "remarks_section",
    "fieldtype": "Section Break",
-   "label": "Remarks Column Length"
+   "label": "General Ledger Report"
   },
   {
    "default": "0",
@@ -549,7 +552,7 @@
   {
    "fieldname": "accounts_receivable_payable_tuning_section",
    "fieldtype": "Section Break",
-   "label": "Accounts Receivable / Payable Tuning"
+   "label": "Accounts Receivable / Payable Report"
   },
   {
    "fieldname": "legacy_section",
@@ -788,6 +791,12 @@
    "fieldname": "book_stock_expense_gl_entries",
    "fieldtype": "Check",
    "label": "Book Stock Expense GL Entries"
+  },
+  {
+   "default": "0",
+   "fieldname": "disable_include_dimensions",
+   "fieldtype": "Check",
+   "label": "Disable \"Consider Accounting Dimension\" Filter"
   }
  ],
  "grid_page_length": 50,
@@ -796,7 +805,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-07-15 17:00:00.000000",
+ "modified": "2026-08-14 15:26:49.070889",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

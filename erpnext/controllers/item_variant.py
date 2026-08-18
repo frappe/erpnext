@@ -346,6 +346,7 @@ def create_variant(item: str, args: dict | str, use_template_image: bool = False
 def enqueue_multiple_variant_creation(item: str, args: dict | str, use_template_image: bool = False):
 	use_template_image = frappe.parse_json(use_template_image)
 	# There can be innumerable attribute combinations, enqueue
+	frappe.has_permission("Item", ptype="create", throw=True)
 	variants = frappe.parse_json(args)
 	variants = {key: values for key, values in variants.items() if values}
 	if not variants:

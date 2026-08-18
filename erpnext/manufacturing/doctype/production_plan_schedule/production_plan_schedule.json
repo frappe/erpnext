@@ -1,0 +1,185 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-08-12 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 0,
+ "engine": "InnoDB",
+ "field_order": [
+  "subject",
+  "production_plan",
+  "company",
+  "column_break_main",
+  "row_type",
+  "plan_row",
+  "task_key",
+  "item_section",
+  "item_code",
+  "item_name",
+  "column_break_item",
+  "operation",
+  "workstation",
+  "schedule_section",
+  "from_time",
+  "column_break_time",
+  "to_time",
+  "duration_mins"
+ ],
+ "fields": [
+  {
+   "fieldname": "subject",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Subject",
+   "read_only": 1
+  },
+  {
+   "fieldname": "production_plan",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Production Plan",
+   "options": "Production Plan",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fetch_from": "production_plan.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_main",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "row_type",
+   "fieldtype": "Select",
+   "label": "Row Type",
+   "options": "Finished Good\nSub Assembly\nRaw Material",
+   "read_only": 1
+  },
+  {
+   "fieldname": "plan_row",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Plan Row",
+   "read_only": 1
+  },
+  {
+   "fieldname": "task_key",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Task Key",
+   "read_only": 1
+  },
+  {
+   "fieldname": "item_section",
+   "fieldtype": "Section Break",
+   "label": "Item & Operation"
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Item Code",
+   "options": "Item",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "item_code.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Item Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_item",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "operation",
+   "fieldtype": "Link",
+   "label": "Operation",
+   "options": "Operation",
+   "read_only": 1
+  },
+  {
+   "fieldname": "workstation",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Workstation",
+   "options": "Workstation",
+   "read_only": 1
+  },
+  {
+   "fieldname": "schedule_section",
+   "fieldtype": "Section Break",
+   "label": "Schedule"
+  },
+  {
+   "fieldname": "from_time",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "From Time",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_time",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "to_time",
+   "fieldtype": "Datetime",
+   "label": "To Time",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "duration_mins",
+   "fieldtype": "Float",
+   "label": "Duration (Mins)",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-08-13 11:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Production Plan Schedule",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Manufacturing User",
+   "share": 1
+  },
+  {
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Manufacturing Manager",
+   "share": 1
+  }
+ ],
+ "sort_field": "from_time",
+ "sort_order": "ASC",
+ "states": [],
+ "title_field": "subject",
+ "track_changes": 0
+}

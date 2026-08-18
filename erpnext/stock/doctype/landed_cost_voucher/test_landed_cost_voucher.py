@@ -221,8 +221,10 @@ class TestLandedCostVoucher(ERPNextTestSuite):
 
 		epi = is_perpetual_inventory_enabled(company_a)
 		company_doc = frappe.get_doc("Company", company_a)
+		old_inventory_account = company_doc.default_inventory_account
 		company_doc.enable_perpetual_inventory = 1
 		company_doc.stock_received_but_not_billed = srbnb
+		company_doc.default_inventory_account = "Stock In Hand - _TC"
 		company_doc.save()
 
 		pr = make_purchase_receipt(
@@ -250,7 +252,11 @@ class TestLandedCostVoucher(ERPNextTestSuite):
 		distribute_landed_cost_on_items(lcv)
 		lcv.submit()
 
-		frappe.db.set_value("Company", company_a, "enable_perpetual_inventory", epi)
+		frappe.db.set_value(
+			"Company",
+			company_a,
+			{"enable_perpetual_inventory": epi, "default_inventory_account": old_inventory_account},
+		)
 		frappe.local.enable_perpetual_inventory = {}
 
 	def test_landed_cost_voucher_for_zero_purchase_rate(self):

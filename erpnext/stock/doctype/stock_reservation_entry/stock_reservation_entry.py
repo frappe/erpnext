@@ -837,7 +837,9 @@ def get_sre_reserved_qty_for_items_and_warehouses(
 		.select(
 			sre.item_code,
 			sre.warehouse,
-			Sum(sre.reserved_qty - sre.delivered_qty).as_("reserved_qty"),
+			Sum(sre.reserved_qty - sre.delivered_qty - sre.transferred_qty - sre.consumed_qty).as_(
+				"reserved_qty"
+			),
 		)
 		.where(
 			(sre.docstatus == 1)
@@ -1091,7 +1093,7 @@ def get_ssb_bundle_for_voucher(sre_list) -> object:
 def has_reserved_stock(voucher_type: str, voucher_no: str, voucher_detail_no: str | None = None) -> bool:
 	"""Returns True if there is any Stock Reservation Entry for the given voucher."""
 
-	if get_stock_reservation_entries_for_voucher(
+	if _get_stock_reservation_entries_for_voucher(
 		voucher_type, voucher_no, voucher_detail_no, fields=["name"], ignore_status=True
 	):
 		return True
@@ -1199,7 +1201,7 @@ class StockReservation:
 
 			self.available_qty_to_reserve = self.get_available_qty_to_reserve(item_code, warehouse)
 			if not self.available_qty_to_reserve:
-				self.throw_stock_not_exists_error(item.idx, item_code, warehouse)
+				self.throw_stock_not_exists_error(item.get("idx"), item_code, warehouse)
 
 			self.qty_to_be_reserved = (
 				qty if self.available_qty_to_reserve >= qty else self.available_qty_to_reserve
@@ -1216,7 +1218,7 @@ class StockReservation:
 			sre.voucher_no = item.get("voucher_no") or self.doc.name
 			sre.voucher_detail_no = item.get(child_doctype) or item.name or item.get("voucher_detail_no")
 			sre.available_qty = self.available_qty_to_reserve
-			sre.voucher_qty = self.qty_to_be_reserved
+			sre.voucher_qty = qty
 			sre.reserved_qty = self.qty_to_be_reserved
 			sre.company = self.doc.company
 			sre.stock_uom = item_details.stock_uom
@@ -1259,13 +1261,16 @@ class StockReservation:
 			)
 
 	def throw_stock_not_exists_error(self, idx, item_code, warehouse):
-		frappe.msgprint(
-			_("Row #{0}: Stock not available to reserve for the Item {1} in Warehouse {2}.").format(
+		if idx:
+			msg = _("Row #{0}: Stock not available to reserve for the Item {1} in Warehouse {2}.").format(
 				idx, frappe.bold(item_code), frappe.bold(warehouse)
-			),
-			title=_("Stock Reservation"),
-			indicator="orange",
-		)
+			)
+		else:
+			msg = _("Stock not available to reserve for the Item {0} in Warehouse {1}.").format(
+				frappe.bold(item_code), frappe.bold(warehouse)
+			)
+
+		frappe.msgprint(msg, title=_("Stock Reservation"), indicator="orange")
 
 	def get_available_qty_to_reserve(self, item_code, warehouse, ignore_sre=None):
 		available_qty = get_stock_balance(item_code, warehouse)
@@ -1828,7 +1833,7 @@ def cancel_stock_reservation_entries(
 		sre_list = {}
 
 		if voucher_type and voucher_no:
-			sre_list = get_stock_reservation_entries_for_voucher(
+			sre_list = _get_stock_reservation_entries_for_voucher(
 				voucher_type, voucher_no, voucher_detail_no, fields=["name"]
 			)
 		elif from_voucher_type and from_voucher_no:
@@ -1871,6 +1876,21 @@ def get_stock_reservation_entries_for_voucher(
 ) -> list[dict]:
 	"""Returns list of Stock Reservation Entries against a Voucher."""
 
+	return _get_stock_reservation_entries_for_voucher(
+		voucher_type, voucher_no, voucher_detail_no, fields, ignore_status, ignore_permissions=False
+	)
+
+
+def _get_stock_reservation_entries_for_voucher(
+	voucher_type: str,
+	voucher_no: str,
+	voucher_detail_no: str | None = None,
+	fields: list[str] | None = None,
+	ignore_status: bool = False,
+	ignore_permissions: bool = True,
+) -> list[dict]:
+	"""Returns list of Stock Reservation Entries against a Voucher."""
+
 	if not fields or not isinstance(fields, list):
 		fields = [
 			"name",
@@ -1884,13 +1904,10 @@ def get_stock_reservation_entries_for_voucher(
 
 	sre = frappe.qb.DocType("Stock Reservation Entry")
 	query = (
-		frappe.qb.from_(sre)
+		frappe.get_query(sre, fields=fields, ignore_permissions=ignore_permissions)
 		.where((sre.docstatus == 1) & (sre.voucher_type == voucher_type) & (sre.voucher_no == voucher_no))
 		.orderby(sre.creation)
 	)
-
-	for field in fields:
-		query = query.select(sre[field])
 
 	if voucher_detail_no:
 		query = query.where(sre.voucher_detail_no == voucher_detail_no)

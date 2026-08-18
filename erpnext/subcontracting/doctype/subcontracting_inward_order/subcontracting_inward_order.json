@@ -8,7 +8,6 @@
  "document_type": "Document",
  "engine": "InnoDB",
  "field_order": [
-  "title",
   "naming_series",
   "sales_order",
   "customer",
@@ -29,6 +28,7 @@
   "service_items_section",
   "service_items",
   "tab_other_info",
+  "title",
   "order_status_section",
   "status",
   "per_raw_material_received",
@@ -43,10 +43,8 @@
  "fields": [
   {
    "allow_on_submit": 1,
-   "default": "{customer_name}",
    "fieldname": "title",
    "fieldtype": "Data",
-   "hidden": 1,
    "label": "Title",
    "no_copy": 1,
    "print_hide": 1
@@ -306,7 +304,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-26 17:16:21.697846",
+ "modified": "2026-07-27 11:20:14.512336",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Inward Order",

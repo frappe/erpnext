@@ -40,6 +40,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Supplier",
+   "link_filters": "[[\"Supplier\",\"disabled\",\"=\",0]]",
    "options": "Supplier",
    "reqd": 1
   },

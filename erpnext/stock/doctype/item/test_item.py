@@ -423,6 +423,45 @@ class TestItem(ERPNextTestSuite):
 
 		self.assertRaises(InvalidItemAttributeValueError, attribute.save)
 
+	def test_disabled_attribute_blocks_only_attribute_changes(self):
+		frappe.delete_doc_if_exists("Item", "_Test Disabled Attribute Template-L", force=1)
+		frappe.delete_doc_if_exists("Item", "_Test Disabled Attribute Template", force=1)
+		frappe.delete_doc_if_exists("Item Attribute", "_Test Disabled Size", force=1)
+
+		attribute = frappe.get_doc(
+			{
+				"doctype": "Item Attribute",
+				"attribute_name": "_Test Disabled Size",
+				"item_attribute_values": [
+					{"attribute_value": "Large", "abbr": "L"},
+					{"attribute_value": "Small", "abbr": "S"},
+				],
+			}
+		).insert()
+
+		template = make_item(
+			"_Test Disabled Attribute Template",
+			{
+				"has_variants": 1,
+				"variant_based_on": "Item Attribute",
+				"attributes": [{"attribute": attribute.name}],
+			},
+		)
+
+		variant = create_variant(template.name, {attribute.name: "Large"})
+		variant.save()
+
+		attribute.disabled = 1
+		attribute.save()
+
+		variant.reload()
+		variant.description = "Edited after the attribute was disabled"
+		variant.save()
+
+		variant.reload()
+		variant.attributes[0].attribute_value = "Small"
+		self.assertRaises(frappe.ValidationError, variant.save)
+
 	def test_rename_attribute_value_updates_variants(self):
 		frappe.delete_doc_if_exists("Item", "_Test Variant Item-L", force=1)
 
@@ -976,10 +1015,8 @@ class TestItem(ERPNextTestSuite):
 		)
 		self.consume_item_code_with_differet_stock_transactions(item_code=item.name)
 
-	@ERPNextTestSuite.change_settings(
-		"Stock Settings", {"sample_retention_warehouse": "_Test Warehouse - _TC"}
-	)
 	def test_retain_sample(self):
+		frappe.db.set_value("Company", "_Test Company", "sample_retention_warehouse", "_Test Warehouse - _TC")
 		item = make_item("_TestRetainSample", {"has_batch_no": 1, "retain_sample": 1, "sample_quantity": 1})
 
 		self.assertEqual(item.has_batch_no, 1)

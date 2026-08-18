@@ -90,6 +90,7 @@ class Task(NestedSet):
 		self.validate_completed_on()
 		self.set_default_end_date_if_missing()
 		self.validate_parent_is_group()
+		self.validate_web_form_project_permission()
 
 	def validate_dates(self):
 		self.validate_from_to_dates("exp_start_date", "exp_end_date")
@@ -121,19 +122,35 @@ class Task(NestedSet):
 		if not self.project or frappe.in_test:
 			return
 
-		if project_end_date := frappe.db.get_value("Project", self.project, "expected_end_date"):
-			project_end_date = getdate(project_end_date)
-			for fieldname in ("exp_start_date", "exp_end_date", "act_start_date", "act_end_date"):
-				task_date = self.get(fieldname)
-				if task_date and date_diff(project_end_date, getdate(task_date)) < 0:
-					frappe.throw(
-						_("{0}'s {1} cannot be after {2}'s Expected End Date.").format(
-							frappe.bold(frappe.get_desk_link("Task", self.name)),
-							_(self.meta.get_label(fieldname)),
-							frappe.bold(frappe.get_desk_link("Project", self.project)),
-						),
-						frappe.exceptions.InvalidDates,
-					)
+		project_start_date, project_end_date = frappe.db.get_value(
+			"Project", self.project, ["expected_start_date", "expected_end_date"]
+		)
+
+		for fieldname in ("exp_start_date", "exp_end_date", "act_start_date", "act_end_date"):
+			task_date = self.get(fieldname)
+			if not task_date:
+				continue
+			task_date = getdate(task_date)
+
+			if project_end_date and date_diff(getdate(project_end_date), task_date) < 0:
+				frappe.throw(
+					_("{0}'s {1} cannot be after {2}'s Expected End Date.").format(
+						get_link_to_form("Task", self.name),
+						_(self.meta.get_label(fieldname)),
+						get_link_to_form("Project", self.project),
+					),
+					frappe.exceptions.InvalidDates,
+				)
+
+			if project_start_date and date_diff(task_date, getdate(project_start_date)) < 0:
+				frappe.throw(
+					_("{0}'s {1} cannot be before {2}'s Expected Start Date.").format(
+						get_link_to_form("Task", self.name),
+						_(self.meta.get_label(fieldname)),
+						get_link_to_form("Project", self.project),
+					),
+					frappe.exceptions.InvalidDates,
+				)
 
 	def validate_status(self):
 		if self.is_template and self.status != "Template":
@@ -312,6 +329,23 @@ class Task(NestedSet):
 		)
 		if project_user:
 			return True
+
+	def validate_web_form_project_permission(self):
+		project_unchanged = not self.is_new() and self.project == self.get_db_value("project")
+
+		if (
+			not frappe.flags.in_web_form
+			or not self.project
+			or project_unchanged
+			or frappe.has_permission("Project", "write", doc=self.project)
+			or self.has_webform_permission()
+		):
+			return
+
+		frappe.throw(
+			_("You are not permitted to create a Task for Project {0}").format(self.project),
+			frappe.PermissionError,
+		)
 
 	def populate_depends_on(self):
 		if self.parent_task:

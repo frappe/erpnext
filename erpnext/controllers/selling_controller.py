@@ -254,7 +254,7 @@ class SellingController(StockController):
 
 			total += sales_person.allocated_percentage
 
-		if sales_team and total != 100.0:
+		if sales_team and flt(total, self.precision("allocated_percentage", "sales_team")) != 100.0:
 			throw(_("Total allocated percentage for sales team should be 100"))
 
 	def validate_sales_team(self, sales_team):
@@ -911,8 +911,8 @@ class SellingController(StockController):
 		if self.get("is_return"):
 			return
 
-		sample_retention_warehouse = frappe.db.get_single_value(
-			"Stock Settings", "sample_retention_warehouse"
+		sample_retention_warehouse = frappe.get_cached_value(
+			"Company", self.company, "sample_retention_warehouse"
 		)
 		if not sample_retention_warehouse:
 			return

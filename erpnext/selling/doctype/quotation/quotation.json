@@ -343,6 +343,7 @@
   },
   {
    "collapsible": 1,
+   "collapsible_depends_on": "eval:doc.currency && doc.currency != erpnext.get_currency(doc.company)",
    "fieldname": "currency_and_price_list",
    "fieldtype": "Section Break",
    "label": "Currency and Price List",
@@ -1144,7 +1145,7 @@
  "idx": 82,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-30 17:40:02.667637",
+ "modified": "2026-08-12 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

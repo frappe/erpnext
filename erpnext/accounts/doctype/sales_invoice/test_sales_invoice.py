@@ -114,6 +114,14 @@ class TestSalesInvoice(ERPNextTestSuite):
 		si.save()
 		self.assertEqual(si.items[0].qty, 1)
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_negative_rates_for_items": 1})
+	def test_sales_invoice_negative_grand_total_still_blocked_with_setting(self):
+		"""allow_negative_rates_for_items must not bypass the >=0 guard for a non-return
+		invoice, since invoices post to the GL (unlike Sales Order)."""
+		si = create_sales_invoice(qty=1, rate=100, do_not_save=True)
+		si.append("items", {"item_code": "_Test Item 2", "qty": 1, "rate": -150})
+		self.assertRaises(frappe.ValidationError, si.save)
+
 	def test_timestamp_change(self):
 		w = frappe.copy_doc(self.globalTestRecords["Sales Invoice"][0])
 		w.docstatus = 0
@@ -3207,13 +3215,20 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 		old_perpetual_inventory = erpnext.is_perpetual_inventory_enabled("_Test Company 1")
 		frappe.local.enable_perpetual_inventory["_Test Company 1"] = 1
+		old_inventory_account = frappe.db.get_value("Company", "_Test Company 1", "default_inventory_account")
 
 		frappe.db.set_value(
 			"Company",
 			"_Test Company 1",
-			"stock_received_but_not_billed",
-			"Stock Received But Not Billed - _TC1",
+			{
+				"stock_received_but_not_billed": "Stock Received But Not Billed - _TC1",
+				"default_inventory_account": "Stock In Hand - _TC1",
+			},
 		)
+
+		# companies are created with their Stores warehouse as Default Warehouse; clear it so the
+		# item genuinely maps without one
+		frappe.db.set_value("Company", "_Test Company 1", "default_warehouse", None)
 
 		# begin test
 		si = create_sales_invoice(
@@ -3251,6 +3266,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 		# tear down
 		frappe.local.enable_perpetual_inventory["_Test Company 1"] = old_perpetual_inventory
+		frappe.db.set_value("Company", "_Test Company 1", "default_inventory_account", old_inventory_account)
 		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", old_negative_stock)
 
 	def test_sle_for_target_warehouse(self):

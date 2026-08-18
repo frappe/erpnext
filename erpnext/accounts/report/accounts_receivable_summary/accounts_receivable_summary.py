@@ -132,8 +132,8 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 		if row.sales_person:
 			self.party_total[row.party].sales_person.append(row.get("sales_person", ""))
 
-		if self.filters.sales_partner:
-			self.party_total[row.party]["default_sales_partner"] = row.get("default_sales_partner", "")
+		if self.filters.sales_partner and row.get("sales_partner"):
+			self.party_total[row.party]["sales_partner"] = row.get("sales_partner")
 
 	def get_columns(self):
 		self.columns = []
@@ -193,7 +193,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 				self.add_column(label=_("Sales Person"), fieldname="sales_person", fieldtype="Data")
 
 			if self.filters.sales_partner:
-				self.add_column(label=_("Sales Partner"), fieldname="default_sales_partner", fieldtype="Data")
+				self.add_column(label=_("Sales Partner"), fieldname="sales_partner", fieldtype="Data")
 
 		else:
 			self.add_column(

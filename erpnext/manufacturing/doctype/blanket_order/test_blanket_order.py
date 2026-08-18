@@ -25,6 +25,7 @@ class TestBlanketOrder(ERPNextTestSuite):
 		so.submit()
 
 		self.assertEqual(so.doctype, "Sales Order")
+		self.assertNotEqual(so.naming_series, bo.naming_series)
 		self.assertEqual(len(so.get("items")), len(bo.get("items")))
 
 		# check the rate, quantity and updation for the ordered quantity
@@ -50,6 +51,7 @@ class TestBlanketOrder(ERPNextTestSuite):
 		po.submit()
 
 		self.assertEqual(po.doctype, "Purchase Order")
+		self.assertNotEqual(po.naming_series, bo.naming_series)
 		self.assertEqual(len(po.get("items")), len(bo.get("items")))
 
 		# check the rate, quantity and updation for the ordered quantity
@@ -90,6 +92,32 @@ class TestBlanketOrder(ERPNextTestSuite):
 
 		frappe.db.set_single_value("Buying Settings", "blanket_order_allowance", 10)
 		po.submit()
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"blanket_order_allowance": 0})
+	@ERPNextTestSuite.change_settings("Buying Settings", {"blanket_order_allowance": 0})
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"over_delivery_receipt_allowance": 10, "role_allowed_to_over_deliver_receive": "Stock Manager"},
+	)
+	def test_stock_over_delivery_role_does_not_bypass_blanket_order_allowance(self):
+		test_user = frappe.get_doc("User", "test@example.com")
+		test_user.add_roles("Stock Manager")
+
+		frappe.clear_cache()
+		for blanket_order_type, doctype, date_field in (
+			("Selling", "Sales Order", "delivery_date"),
+			("Purchasing", "Purchase Order", "schedule_date"),
+		):
+			bo = make_blanket_order(blanket_order_type=blanket_order_type, quantity=100)
+			frappe.flags.args.doctype = doctype
+			order = make_order(bo.name)
+			order.currency = get_company_currency(order.company)
+			setattr(order, date_field, today())
+			order.items[0].qty = 110
+
+			with self.set_user("test@example.com"):
+				order.flags.ignore_permissions = True
+				self.assertRaises(frappe.ValidationError, order.submit)
 
 	def test_blanket_order_over_order_aggregated_across_rows(self):
 		# the over-order check should sum the same item across multiple order rows
@@ -135,6 +163,26 @@ class TestBlanketOrder(ERPNextTestSuite):
 
 		bo = make_blanket_order(blanket_order_type="Purchasing", supplier=supplier, item_code=item_code)
 		self.assertEqual(bo.items[0].party_item_code, "SUPP-PART-1")
+
+	def test_blanket_order_zero_quantity(self):
+		bo = frappe.new_doc("Blanket Order")
+		bo.blanket_order_type = "Selling"
+		bo.company = "_Test Company"
+		bo.customer = "_Test Customer"
+		bo.from_date = today()
+		bo.to_date = add_months(today(), 12)
+
+		bo.append(
+			"items",
+			{
+				"item_code": "_Test Item",
+				"qty": 0,
+				"rate": 100,
+			},
+		)
+
+		with self.assertRaises(frappe.ValidationError):
+			bo.insert()
 
 
 def make_blanket_order(**args):

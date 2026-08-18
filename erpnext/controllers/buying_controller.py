@@ -355,7 +355,14 @@ class BuyingController(SubcontractingController):
 		if self.doctype == "Purchase Invoice" and not self.update_stock:
 			return
 
+		stock_items = self.get_stock_items()
+
 		for row in self.items:
+			# A service item holds no stock value, so there is nothing to book against it - and it
+			# must not make the expense accounts mandatory either.
+			if row.item_code not in stock_items:
+				continue
+
 			details = self.get_validated_purchase_expense_details(row.item_code)
 			if not details:
 				continue
@@ -363,6 +370,10 @@ class BuyingController(SubcontractingController):
 			amount = flt(row.valuation_rate * row.stock_qty, row.precision("base_amount"))
 			if row.landed_cost_voucher_amount:
 				amount -= flt(row.landed_cost_voucher_amount, row.precision("base_amount"))
+
+			if not amount:
+				# GL Entry rejects a row with neither a debit nor a credit.
+				continue
 
 			self.add_gl_entry(
 				gl_entries=gl_entries,
@@ -455,7 +466,7 @@ class BuyingController(SubcontractingController):
 					self.precision("item_tax_amount", item),
 				)
 
-				self.round_floats_in(item)
+				self.round_floats_in(item, do_not_round_fields=["conversion_factor"])
 				if flt(item.conversion_factor) == 0.0:
 					item.conversion_factor = (
 						get_conversion_factor(item.item_code, item.uom).get("conversion_factor") or 1.0
@@ -918,6 +929,13 @@ class BuyingController(SubcontractingController):
 			item.serial_and_batch_bundle, warehouse, type_of_transaction=type_of_transaction
 		)
 
+	def check_purchase_order_on_hold_or_close(self, ref_fieldname, exclude_if_field=None):
+		if self.get("is_return"):
+			return
+		self.check_for_on_hold_or_closed_status(
+			"Purchase Order", ref_fieldname, exclude_if_field=exclude_if_field
+		)
+
 	def update_ordered_and_reserved_qty(self):
 		po_map = {}
 		for d in self.get("items"):
@@ -931,7 +949,7 @@ class BuyingController(SubcontractingController):
 			if po and po_item_rows:
 				po_obj = frappe.get_lazy_doc("Purchase Order", po)
 
-				if po_obj.status in ["Closed", "Cancelled"]:
+				if po_obj.status == "Cancelled" or (po_obj.status == "Closed" and not self.get("is_return")):
 					frappe.throw(
 						_("{doctype} {name} is cancelled or closed.").format(
 							doctype=frappe.bold(_("Purchase Order")),

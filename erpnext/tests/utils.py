@@ -185,6 +185,7 @@ class BootStrapTestData:
 		self.make_loyalty_program()
 		self.make_shareholder()
 		self.make_sales_taxes_template()
+		self.make_purchase_taxes_template()
 		self.make_workstation()
 		self.make_operation()
 		self.make_bom()
@@ -246,7 +247,6 @@ class BootStrapTestData:
 		stock_settings = frappe.get_doc("Stock Settings")
 		stock_settings.item_naming_by = "Item Code"
 		stock_settings.valuation_method = "FIFO"
-		stock_settings.default_warehouse = frappe.db.get_value("Warehouse", {"warehouse_name": _("Stores")})
 		stock_settings.stock_uom = "Nos"
 		stock_settings.auto_indent = 1
 		stock_settings.auto_insert_price_list_rate_if_missing = 1
@@ -2341,6 +2341,29 @@ class BootStrapTestData:
 					}
 				],
 			},
+		]
+		self.make_records(["title", "company"], records)
+
+	def make_purchase_taxes_template(self):
+		records = [
+			{
+				"company": "_Test Company",
+				"doctype": "Purchase Taxes and Charges Template",
+				"title": "_Test Purchase Taxes and Charges Template",
+				"taxes": [
+					{
+						"account_head": "_Test Account VAT - _TC",
+						"add_deduct_tax": "Add",
+						"category": "Total",
+						"charge_type": "On Net Total",
+						"cost_center": "Main - _TC",
+						"description": "VAT",
+						"doctype": "Purchase Taxes and Charges",
+						"parentfield": "taxes",
+						"rate": 6,
+					}
+				],
+			}
 		]
 		self.make_records(["title", "company"], records)
 

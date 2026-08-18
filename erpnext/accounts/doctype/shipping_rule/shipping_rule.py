@@ -161,7 +161,14 @@ class ShippingRule(Document):
 			)
 			shipping_charge["add_deduct_tax"] = "Add"
 
-		existing_shipping_charge = doc.get("taxes", filters=shipping_charge)
+		shipping_charge_filters = shipping_charge.copy()
+		if not self.cost_center:
+			shipping_charge_filters["cost_center"] = (
+				"in",
+				(None, "", erpnext.get_default_cost_center(doc.company)),
+			)
+
+		existing_shipping_charge = doc.get("taxes", filters=shipping_charge_filters)
 		if existing_shipping_charge:
 			# take the last record found
 			existing_shipping_charge[-1].tax_amount = shipping_amount

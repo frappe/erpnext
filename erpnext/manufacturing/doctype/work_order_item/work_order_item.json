@@ -22,6 +22,8 @@
   "amount",
   "column_break_11",
   "transferred_qty",
+  "requested_qty",
+  "picked_qty",
   "consumed_qty",
   "returned_qty",
   "section_break_idhr",
@@ -91,6 +93,22 @@
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Transferred Qty",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:!parent.skip_transfer",
+   "fieldname": "requested_qty",
+   "fieldtype": "Float",
+   "label": "Requested Qty",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:!parent.skip_transfer",
+   "fieldname": "picked_qty",
+   "fieldtype": "Float",
+   "label": "Picked Qty",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -209,7 +227,7 @@
  "grid_page_length": 50,
  "istable": 1,
  "links": [],
- "modified": "2026-05-12 12:05:16.687866",
+ "modified": "2026-08-07 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order Item",

@@ -29,6 +29,7 @@ from erpnext.setup.doctype.company.company import update_company_current_month_s
 from erpnext.stock.doctype.delivery_note.services.billing_status import (
 	update_billed_amount_based_on_so,
 )
+from erpnext.stock.utils import get_bin_qty_map
 
 from .services.fixed_assets import FixedAssetService
 from .services.inter_company import (
@@ -201,6 +202,10 @@ class SalesInvoice(SellingController):
 		set_warehouse: DF.Link | None
 		shipping_address: DF.TextEditor | None
 		shipping_address_name: DF.Link | None
+		shipping_contact_display: DF.SmallText | None
+		shipping_contact_email: DF.Data | None
+		shipping_contact_mobile: DF.SmallText | None
+		shipping_contact_person: DF.Link | None
 		shipping_rule: DF.Link | None
 		status: DF.Literal[
 			"",
@@ -991,11 +996,17 @@ class SalesInvoice(SellingController):
 			)
 
 	def update_current_stock(self):
+		bin_qty_map = get_bin_qty_map(self.items + self.packed_items)
+
 		for item in self.items:
-			item.set_actual_qty()
+			if item.item_code and item.warehouse:
+				bin_data = bin_qty_map.get((item.item_code, item.warehouse))
+				item.actual_qty = bin_data.actual_qty if bin_data else 0
 
 		for packed_item in self.packed_items:
-			packed_item.set_actual_and_projected_qty()
+			bin_data = bin_qty_map.get((packed_item.item_code, packed_item.warehouse))
+			packed_item.actual_qty = bin_data.actual_qty if bin_data else 0
+			packed_item.projected_qty = bin_data.projected_qty if bin_data else 0
 
 	def update_packing_list(self):
 		if cint(self.update_stock) == 1:
@@ -1165,6 +1176,7 @@ class SalesInvoice(SellingController):
 		child_tables = {
 			"items": ("income_account", "expense_account", "discount_account"),
 			"taxes": ("account_head",),
+			"payments": ("account",),
 		}
 		self.needs_repost = self.check_if_fields_updated(fields_to_check, child_tables)
 		if self.needs_repost:

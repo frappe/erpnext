@@ -1,6 +1,8 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from unittest.mock import patch
+
 import frappe
 from frappe.query_builder.functions import Max
 from frappe.utils.nestedset import (
@@ -13,6 +15,8 @@ from frappe.utils.nestedset import (
 )
 
 from erpnext.tests.utils import ERPNextTestSuite
+
+TRANSLATED_ROOT = "Todos os Grupos de Itens"
 
 
 class TestItemGroup(ERPNextTestSuite):
@@ -203,6 +207,54 @@ class TestItemGroup(ERPNextTestSuite):
 			"_Test Item Group B - 3",
 			merge=True,
 		)
+
+	def test_preset_records_use_existing_root(self):
+		from erpnext.setup.setup_wizard.operations import install_fixtures
+
+		with patch.object(install_fixtures, "get_root_of", return_value=TRANSLATED_ROOT):
+			records = [
+				r for r in install_fixtures.get_preset_records("India") if r["doctype"] == "Item Group"
+			]
+
+		root_record, *child_records = records
+		self.assertEqual(root_record["item_group_name"], TRANSLATED_ROOT)
+		self.assertTrue(root_record["__condition"]())
+		self.assertEqual({r["parent_item_group"] for r in child_records}, {TRANSLATED_ROOT})
+
+		with patch.object(install_fixtures, "get_root_of", return_value="All Item Groups"):
+			root_record = next(
+				r for r in install_fixtures.get_preset_records("India") if r["doctype"] == "Item Group"
+			)
+		self.assertFalse(root_record["__condition"]())
+
+	def test_patch_merges_seeded_root_into_existing_root(self):
+		from erpnext.patches.v16_0.merge_seeded_item_group_root import execute
+
+		self._nest_root_under(TRANSLATED_ROOT)
+		self.assertEqual(
+			frappe.db.get_value("Item Group", "All Item Groups", "parent_item_group"), TRANSLATED_ROOT
+		)
+
+		execute()
+
+		self.assertFalse(frappe.db.exists("Item Group", "All Item Groups"))
+		self.assertEqual(
+			frappe.get_all("Item Group", filters={"parent_item_group": ("is", "not set")}, pluck="name"),
+			[TRANSLATED_ROOT],
+		)
+		self.assertEqual(
+			frappe.db.get_value("Item Group", "_Test Item Group B", "parent_item_group"), TRANSLATED_ROOT
+		)
+		self.test_basic_tree()
+
+	def _nest_root_under(self, new_root):
+		"""Recreate the tree left behind by seeding a root under a pre-existing one."""
+		frappe.get_doc({"doctype": "Item Group", "item_group_name": new_root, "is_group": 1}).insert()
+
+		ig = frappe.qb.DocType("Item Group")
+		frappe.qb.update(ig).set(ig.parent_item_group, "").where(ig.name == new_root).run()
+		frappe.qb.update(ig).set(ig.parent_item_group, new_root).where(ig.name == "All Item Groups").run()
+		rebuild_tree("Item Group")
 
 	def _move_it_back(self):
 		group_b = frappe.get_doc("Item Group", "_Test Item Group B")

@@ -99,6 +99,7 @@
    "fieldtype": "Float",
    "label": "Conversion Factor",
    "non_negative": 1,
+   "precision": "9",
    "reqd": 1
   },
   {
@@ -217,7 +218,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-06-16 16:51:40.000000",
+ "modified": "2026-08-07 17:31:31.732720",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Secondary Item",

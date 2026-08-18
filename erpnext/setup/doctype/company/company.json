@@ -54,6 +54,7 @@
   "default_receivable_account",
   "default_payable_account",
   "write_off_account",
+  "bank_charges_account",
   "unrealized_profit_loss_account",
   "column_break0",
   "allow_account_creation_against_child_company",
@@ -65,6 +66,8 @@
   "default_finance_book",
   "exchange_gain__loss_section",
   "exchange_gain_loss_account",
+  "exchange_gain_account",
+  "exchange_loss_account",
   "column_break_sttp",
   "unrealized_exchange_gain_loss_account",
   "round_off_section",
@@ -112,7 +115,6 @@
   "column_break_goals",
   "default_selling_terms",
   "default_sales_contact",
-  "default_warehouse_for_sales_return",
   "credit_limit",
   "transactions_annual_history",
   "purchase_expense_section",
@@ -140,10 +142,14 @@
   "stock_delivered_but_not_billed",
   "disable_sdbnb_in_sr",
   "default_provisional_account",
-  "default_in_transit_warehouse",
   "manufacturing_section",
   "default_operating_cost_account",
-  "column_break_9prc",
+  "warehouse_defaults_section",
+  "default_warehouse",
+  "sample_retention_warehouse",
+  "default_in_transit_warehouse",
+  "column_break_ware",
+  "default_warehouse_for_sales_return",
   "default_wip_warehouse",
   "default_fg_warehouse",
   "default_scrap_warehouse",
@@ -278,6 +284,7 @@
    "fieldname": "default_warehouse_for_sales_return",
    "fieldtype": "Link",
    "label": "Default Warehouse for Sales Return",
+   "link_filters": "[[\"Warehouse\",\"is_group\",\"=\",0],[\"Warehouse\",\"disabled\",\"=\",0]]",
    "options": "Warehouse"
   },
   {
@@ -386,10 +393,37 @@
   },
   {
    "depends_on": "eval:!doc.__islocal",
+   "fieldname": "bank_charges_account",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Bank Charges Account",
+   "no_copy": 1,
+   "options": "Account"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "exchange_gain_loss_account",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
    "label": "Exchange Gain / Loss Account",
+   "no_copy": 1,
+   "options": "Account"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "exchange_gain_account",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Exchange Gain Account",
+   "no_copy": 1,
+   "options": "Account"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "exchange_loss_account",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Exchange Loss Account",
    "no_copy": 1,
    "options": "Account"
   },
@@ -734,7 +768,32 @@
    "fieldname": "default_in_transit_warehouse",
    "fieldtype": "Link",
    "label": "Default In-Transit Warehouse",
+   "link_filters": "[[\"Warehouse\",\"is_group\",\"=\",0],[\"Warehouse\",\"disabled\",\"=\",0],[\"Warehouse\",\"warehouse_type\",\"=\",\"Transit\"]]",
    "options": "Warehouse"
+  },
+  {
+   "fieldname": "warehouse_defaults_section",
+   "fieldtype": "Section Break",
+   "label": "Warehouse Defaults"
+  },
+  {
+   "fieldname": "default_warehouse",
+   "fieldtype": "Link",
+   "label": "Default Warehouse",
+   "link_filters": "[[\"Warehouse\",\"is_group\",\"=\",0],[\"Warehouse\",\"disabled\",\"=\",0]]",
+   "options": "Warehouse"
+  },
+  {
+   "documentation_url": "https://docs.frappe.io/erpnext/retain-sample-stock",
+   "fieldname": "sample_retention_warehouse",
+   "fieldtype": "Link",
+   "label": "Sample Retention Warehouse",
+   "link_filters": "[[\"Warehouse\",\"is_group\",\"=\",0],[\"Warehouse\",\"disabled\",\"=\",0]]",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "column_break_ware",
+   "fieldtype": "Column Break"
   },
   {
    "depends_on": "eval:!doc.__islocal",
@@ -997,26 +1056,22 @@
    "fieldname": "default_wip_warehouse",
    "fieldtype": "Link",
    "label": " Default Work In Progress Warehouse ",
-   "link_filters": "[[\"Warehouse\",\"disabled\",\"=\",0]]",
+   "link_filters": "[[\"Warehouse\",\"is_group\",\"=\",0],[\"Warehouse\",\"disabled\",\"=\",0]]",
    "options": "Warehouse"
   },
   {
    "fieldname": "default_fg_warehouse",
    "fieldtype": "Link",
    "label": "Default Finished Goods Warehouse",
-   "link_filters": "[[\"Warehouse\",\"disabled\",\"=\",0]]",
+   "link_filters": "[[\"Warehouse\",\"is_group\",\"=\",0],[\"Warehouse\",\"disabled\",\"=\",0]]",
    "options": "Warehouse"
   },
   {
    "fieldname": "default_scrap_warehouse",
    "fieldtype": "Link",
    "label": "Default Scrap Warehouse",
-   "link_filters": "[[\"Warehouse\",\"disabled\",\"=\",0]]",
+   "link_filters": "[[\"Warehouse\",\"is_group\",\"=\",0],[\"Warehouse\",\"disabled\",\"=\",0]]",
    "options": "Warehouse"
-  },
-  {
-   "fieldname": "column_break_9prc",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "default_sales_contact",

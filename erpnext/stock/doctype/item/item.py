@@ -132,8 +132,8 @@ class Item(Document):
 		purchase_uom: DF.Link | None
 		quality_inspection_template: DF.Link | None
 		reorder_levels: DF.Table[ItemReorder]
-		retain_sample: DF.Check
 		restrict_to_companies: DF.Check
+		retain_sample: DF.Check
 		safety_stock: DF.Float
 		sales_tax_withholding_category: DF.Link | None
 		sales_uom: DF.Link | None
@@ -321,13 +321,11 @@ class Item(Document):
 		for default in self.item_defaults or [
 			frappe._dict({"company": frappe.defaults.get_defaults().company})
 		]:
-			default_warehouse = default.default_warehouse or frappe.get_single_value(
-				"Stock Settings", "default_warehouse"
-			)
-			if default_warehouse:
-				warehouse_company = frappe.db.get_value("Warehouse", default_warehouse, "company")
+			default_warehouse = default.default_warehouse
+			if not default_warehouse and default.company:
+				default_warehouse = frappe.get_cached_value("Company", default.company, "default_warehouse")
 
-			if not default_warehouse or warehouse_company != default.company:
+			if not default_warehouse:
 				default_warehouse = frappe.db.get_value(
 					"Warehouse", {"warehouse_name": _("Stores"), "company": default.company}
 				)
@@ -389,8 +387,10 @@ class Item(Document):
 				)
 
 	def validate_retain_sample(self):
-		if self.retain_sample and not frappe.get_single_value("Stock Settings", "sample_retention_warehouse"):
-			frappe.throw(_("Please select Sample Retention Warehouse in Stock Settings first"))
+		if self.retain_sample and not frappe.db.exists(
+			"Company", {"sample_retention_warehouse": ("is", "set")}
+		):
+			frappe.throw(_("Please select Sample Retention Warehouse in Company first"))
 		if self.retain_sample and not self.has_batch_no:
 			frappe.throw(
 				_(
@@ -860,7 +860,17 @@ class Item(Document):
 				frappe.throw(_("Item {0} is not a template item.").format(frappe.bold(self.variant_of)))
 
 			if based_on == "Item Attribute":
+				previous_doc = self.get_doc_before_save()
+				saved_attributes = (
+					{(row.attribute, row.attribute_value) for row in previous_doc.attributes}
+					if previous_doc
+					else set()
+				)
+
 				for d in self.attributes:
+					if (d.attribute, d.attribute_value) in saved_attributes:
+						continue
+
 					if not frappe.db.exists(
 						"Item Variant Attribute", {"attribute": d.attribute, "parent": self.variant_of}
 					):
@@ -1498,7 +1508,7 @@ def get_uom_conv_factor(uom: str | None, stock_uom: str | None):
 		"UOM Conversion Factor", {"to_uom": from_uom, "from_uom": to_uom}, ["value"], as_dict=1
 	)
 	if inverse_match:
-		return 1 / inverse_match.value
+		return flt(1 / inverse_match.value, frappe.get_precision("UOM Conversion Factor", "value"))
 
 	# This attempts to try and get conversion from intermediate UOM.
 	# case:
@@ -1518,7 +1528,7 @@ def get_uom_conv_factor(uom: str | None, stock_uom: str | None):
 	)
 
 	if intermediate_match:
-		return intermediate_match[0].value
+		return flt(intermediate_match[0].value, frappe.get_precision("UOM Conversion Factor", "value"))
 
 
 @frappe.whitelist()
@@ -1584,6 +1594,9 @@ def get_child_warehouses(warehouse):
 	return get_child_warehouses(warehouse)
 
 
+ITEM_PRICES_LIMIT = 10
+
+
 @frappe.whitelist()
 def get_item_prices(item_code: str):
 	"""Fetch valid item prices for the item prices tab."""
@@ -1611,14 +1624,13 @@ def get_item_prices(item_code: str):
 		.where(ItemPrice.docstatus != 2)
 		.where((ItemPrice.valid_upto.isnull()) | (ItemPrice.valid_upto >= today))
 		.orderby(ItemPrice.price_list)
-		.limit(11)
+		.limit(ITEM_PRICES_LIMIT + 1)
 		.run(as_dict=True)
 	)
 
-	has_more = len(prices) == 11
 	return {
-		"prices": prices[:10],
-		"has_more": has_more,
+		"prices": prices[:ITEM_PRICES_LIMIT],
+		"has_more": len(prices) > ITEM_PRICES_LIMIT,
 	}
 
 
@@ -1770,11 +1782,8 @@ def get_default_warehouse_for_opening_stock(item, company: str, warehouse: str |
 		if default.company == company and default.default_warehouse:
 			return default.default_warehouse
 
-	settings_warehouse = frappe.get_single_value("Stock Settings", "default_warehouse")
-	if settings_warehouse:
-		warehouse_company = frappe.db.get_value("Warehouse", settings_warehouse, "company")
-		if warehouse_company == company:
-			return settings_warehouse
+	if company_warehouse := frappe.get_cached_value("Company", company, "default_warehouse"):
+		return company_warehouse
 
 	stores_warehouse = frappe.db.get_value("Warehouse", {"warehouse_name": _("Stores"), "company": company})
 
@@ -1783,7 +1792,7 @@ def get_default_warehouse_for_opening_stock(item, company: str, warehouse: str |
 
 	frappe.throw(
 		_(
-			"No warehouse found for company {0}. Please set a Default Warehouse in Item Defaults or Stock Settings."
+			"No warehouse found for company {0}. Please set a Default Warehouse in Item Defaults or Company."
 		).format(frappe.bold(company))
 	)
 

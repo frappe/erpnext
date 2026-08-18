@@ -22,6 +22,7 @@ JOB_CARD_FIELDS = [
 	"total_completed_qty",
 	"for_quantity",
 	"process_loss_qty",
+	"stock_uom",
 	"finished_good",
 	"transferred_qty",
 	"status",

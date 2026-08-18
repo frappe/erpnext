@@ -23,9 +23,6 @@
   "allow_to_edit_stock_uom_qty_for_purchase",
   "allow_to_edit_stock_uom_qty_for_stock_entry",
   "allow_uom_with_conversion_rate_defined_in_item",
-  "warehouse_defaults_section",
-  "default_warehouse",
-  "sample_retention_warehouse",
   "stock_validations_tab",
   "negative_stock_section",
   "allow_negative_stock",
@@ -114,19 +111,6 @@
    "options": "UOM"
   },
   {
-   "fieldname": "default_warehouse",
-   "fieldtype": "Link",
-   "label": "Default Warehouse",
-   "options": "Warehouse"
-  },
-  {
-   "documentation_url": "https://docs.frappe.io/erpnext/retain-sample-stock",
-   "fieldname": "sample_retention_warehouse",
-   "fieldtype": "Link",
-   "label": "Sample Retention Warehouse",
-   "options": "Warehouse"
-  },
-  {
    "fieldname": "column_break_4",
    "fieldtype": "Column Break"
   },
@@ -141,7 +125,8 @@
    "description": "The percentage you are allowed to receive or deliver more against the quantity ordered. For example, if you have ordered 100 units, and your Allowance is 10%, then you are allowed to receive 110 units.",
    "fieldname": "over_delivery_receipt_allowance",
    "fieldtype": "Float",
-   "label": "Over Delivery/Receipt Allowance (%)"
+   "label": "Over Delivery/Receipt Allowance (%)",
+   "non_negative": 1
   },
   {
    "default": "Stop",
@@ -292,7 +277,8 @@
    "description": "The percentage you are allowed to transfer more against the quantity ordered. For example, if you have ordered 100 units, and your Allowance is 10%, then you are allowed transfer 110 units.",
    "fieldname": "mr_qty_allowance",
    "fieldtype": "Float",
-   "label": "Over Transfer Allowance (%)"
+   "label": "Over Transfer Allowance (%)",
+   "non_negative": 1
   },
   {
    "default": "0",
@@ -453,7 +439,8 @@
    "description": "The percentage you are allowed to pick more items in the pick list than the ordered quantity.",
    "fieldname": "over_picking_allowance",
    "fieldtype": "Percent",
-   "label": "Over Picking Allowance (%)"
+   "label": "Over Picking Allowance (%)",
+   "non_negative": 1
   },
   {
    "default": "1",
@@ -526,11 +513,6 @@
    "fieldname": "enable_serial_and_batch_no_for_item",
    "fieldtype": "Check",
    "label": "Activate Serial / Batch No for Item"
-  },
-  {
-   "fieldname": "warehouse_defaults_section",
-   "fieldtype": "Section Break",
-   "label": "Warehouse Defaults"
   },
   {
    "fieldname": "internal_transfer_rules_section",
@@ -611,7 +593,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-07-16 17:00:00.000000",
+ "modified": "2026-08-01 23:35:02.896836",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",

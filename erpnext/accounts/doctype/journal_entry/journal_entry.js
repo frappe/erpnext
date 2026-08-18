@@ -235,7 +235,7 @@ Object.assign(erpnext.journal_entry, {
 	lock_reversal_entry(frm) {
 		frm.fields
 			.filter((field) => field.has_input)
-			.filter((field) => field.df.fieldname != "posting_date")
+			.filter((field) => !["posting_date", "custom_remark", "remark"].includes(field.df.fieldname))
 			.forEach((field) => frm.set_df_property(field.df.fieldname, "read_only", 1));
 		frm.set_df_property("accounts", "read_only", 1);
 	},
@@ -249,7 +249,7 @@ Object.assign(erpnext.journal_entry, {
 			);
 		}
 
-		if (frm.doc.docstatus == 1) {
+		if (frm.doc.docstatus == 1 && !frm.doc.reversal_of) {
 			frm.add_custom_button(
 				__("Reverse Journal Entry"),
 				() => erpnext.journal_entry.reverse_journal_entry(frm),

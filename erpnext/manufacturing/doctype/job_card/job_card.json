@@ -13,10 +13,11 @@
   "work_order",
   "column_break_uqjq",
   "production_item",
+  "bom_no",
   "column_break_qrpg",
   "for_quantity",
   "column_break_yecz",
-  "bom_no",
+  "stock_uom",
   "section_break_oisd",
   "company",
   "naming_series",
@@ -164,6 +165,13 @@
    "label": "Qty To Manufacture"
   },
   {
+   "fieldname": "stock_uom",
+   "fieldtype": "Link",
+   "label": "Stock UOM",
+   "options": "UOM",
+   "read_only": 1
+  },
+  {
    "fieldname": "wip_warehouse",
    "fieldtype": "Link",
    "label": "WIP Warehouse",
@@ -244,6 +252,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:!doc.is_corrective_job_card",
    "fieldname": "requested_qty",
    "fieldtype": "Float",
    "label": "Requested Qty",
@@ -544,6 +553,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:!doc.is_corrective_job_card",
    "fieldname": "is_subcontracted",
    "fieldtype": "Check",
    "label": " Is Subcontracted",
@@ -596,6 +606,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:!doc.is_corrective_job_card",
    "fetch_from": "work_order.track_semi_finished_goods",
    "fieldname": "track_semi_finished_goods",
    "fieldtype": "Check",
@@ -689,7 +700,7 @@
  "grid_page_length": 50,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-23 12:00:00.000000",
+ "modified": "2026-08-12 15:28:19.126628",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",

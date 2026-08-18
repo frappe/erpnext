@@ -210,6 +210,23 @@ class AccountsController(TransactionBase):
 				)
 				frappe.msgprint(msg)
 
+	def is_negative_grand_total_allowed(self) -> bool:
+		"""Return True if this document may save with a negative grand total.
+
+		Sales Order and Purchase Order never post to the GL, so a negative
+		total is safe there whenever the user has explicitly opted into
+		negative rates via Selling/Buying Settings. Every other
+		AccountsController doctype (invoices, delivery notes, receipts,
+		quotations, ...) keeps relying on the `is_return` escape hatch only.
+		"""
+		if self.doctype == "Sales Order":
+			return bool(frappe.get_single_value("Selling Settings", "allow_negative_rates_for_items"))
+
+		if self.doctype == "Purchase Order":
+			return bool(frappe.get_single_value("Buying Settings", "allow_negative_rates_for_items"))
+
+		return False
+
 	def validate(self):
 		if not self.get("is_return") and not self.get("is_debit_note"):
 			self.validate_qty_is_not_zero()
@@ -236,7 +253,9 @@ class AccountsController(TransactionBase):
 			else:
 				from erpnext.accounts.services.deferred_accounting import DeferredAccountingService
 
-				DeferredAccountingService(self).validate_start_and_end_date()
+				deferred_service = DeferredAccountingService(self)
+				deferred_service.clear_stale_deferred_fields()
+				deferred_service.validate_start_and_end_date()
 
 		from erpnext.accounts.services.internal_transfer import InternalTransferService
 
@@ -260,7 +279,8 @@ class AccountsController(TransactionBase):
 			self.calculate_taxes_and_totals()
 
 			if not self.meta.get_field("is_return") or not self.is_return:
-				self.validate_value("base_grand_total", ">=", 0)
+				if not self.is_negative_grand_total_allowed():
+					self.validate_value("base_grand_total", ">=", 0)
 
 			validate_return(self)
 
@@ -1037,9 +1057,16 @@ class AccountsController(TransactionBase):
 			party_account = self.credit_to
 			dr_or_cr = "debit_in_account_currency"
 
+		from erpnext.accounts.services.exchange_gain_loss import get_exchange_gain_loss_account
+
 		lst = []
 		for d in self.get("advances"):
 			if flt(d.allocated_amount) > 0:
+				is_gain = (
+					flt(d.get("exchange_gain_loss")) > 0
+					if party_type == "Customer"
+					else flt(d.get("exchange_gain_loss")) < 0
+				)
 				args = frappe._dict(
 					{
 						"voucher_type": d.reference_type,
@@ -1066,9 +1093,7 @@ class AccountsController(TransactionBase):
 							else self.grand_total
 						),
 						"outstanding_amount": self.outstanding_amount,
-						"difference_account": frappe.get_cached_value(
-							"Company", self.company, "exchange_gain_loss_account"
-						),
+						"difference_account": get_exchange_gain_loss_account(self.company, is_gain),
 						"exchange_gain_loss": flt(d.get("exchange_gain_loss")),
 						"difference_posting_date": d.get("difference_posting_date"),
 					}

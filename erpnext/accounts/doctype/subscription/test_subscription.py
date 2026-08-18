@@ -18,7 +18,12 @@ from frappe.utils.data import (
 )
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
-from erpnext.accounts.doctype.subscription.subscription import Subscription, get_prorata_factor, process_all
+from erpnext.accounts.doctype.subscription.subscription import (
+	Subscription,
+	get_plan_dimensions,
+	get_prorata_factor,
+	process_all,
+)
 from erpnext.accounts.utils import update_subscription_on_invoice_update
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -774,6 +779,38 @@ class TestSubscription(ERPNextTestSuite):
 		subscription.reload()
 		self.assertEqual(subscription.status, "Active")
 
+	def test_cancelled_subscription_stays_cancelled_after_payment_and_reprocess(self):
+		# https://github.com/frappe/erpnext/issues/57761
+		subscription = create_subscription(
+			start_date=nowdate(),
+			generate_invoice_at="Prepaid (bill at period start)",
+			submit_invoice=1,
+			cancel_at_period_end=1,
+		)
+		subscription.process(posting_date=nowdate())
+		invoice = subscription.get_current_invoice()
+		self.assertGreater(invoice.outstanding_amount, 0)
+
+		subscription.cancel_subscription()
+		self.assertEqual(subscription.status, "Cancelled")
+		cancelation_date = getdate(subscription.cancelation_date)
+		self.assertIsNotNone(cancelation_date)
+
+		payment_entry = get_payment_entry(invoice.doctype, invoice.name, bank_account="_Test Bank - _TC")
+		payment_entry.reference_no = "12345"
+		payment_entry.reference_date = nowdate()
+		payment_entry.submit()
+
+		subscription.reload()
+		self.assertEqual(subscription.status, "Cancelled")
+		self.assertEqual(getdate(subscription.cancelation_date), cancelation_date)
+
+		invoice_count = len(subscription.invoices)
+		subscription.process()
+		subscription.reload()
+		self.assertEqual(subscription.status, "Cancelled")
+		self.assertEqual(len(subscription.invoices), invoice_count)
+
 	def test_first_invoice_generated_on_create_for_prepaid(self):
 		subscription = create_subscription(
 			start_date=nowdate(),
@@ -950,6 +987,47 @@ class TestSubscription(ERPNextTestSuite):
 		subscription.reload()
 		cells = {cell["date"]: cell for cell in subscription.get_billing_heatmap()}
 		self.assertEqual(cells[str(getdate(invoice.from_date))]["status"], "refunded")
+
+	def test_plan_dimensions_resolve_from_plan_then_item(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		# Plan-level cost center takes precedence.
+		create_plan(plan_name="_Test Sub Plan CC", cost=100, currency="INR")
+		frappe.db.set_value(
+			"Subscription Plan", "_Test Sub Plan CC", "cost_center", "_Test Cost Center - _TC"
+		)
+		self.assertEqual(
+			get_plan_dimensions("_Test Sub Plan CC", "_Test Company", "Customer").get("cost_center"),
+			"_Test Cost Center - _TC",
+		)
+
+		# No plan cost center: fall back to the item's company default (selling vs buying by party type).
+		item = make_item(
+			"_Test Sub Dimension Item",
+			{
+				"is_stock_item": 0,
+				"item_defaults": [
+					{
+						"company": "_Test Company",
+						"selling_cost_center": "_Test Cost Center - _TC",
+						"buying_cost_center": "_Test Cost Center 2 - _TC",
+					}
+				],
+			},
+		)
+		create_plan(plan_name="_Test Sub Plan No CC", cost=100, currency="INR", item=item.name)
+
+		self.assertEqual(
+			get_plan_dimensions("_Test Sub Plan No CC", "_Test Company", "Customer").get("cost_center"),
+			"_Test Cost Center - _TC",
+		)
+		self.assertEqual(
+			get_plan_dimensions("_Test Sub Plan No CC", "_Test Company", "Supplier").get("cost_center"),
+			"_Test Cost Center 2 - _TC",
+		)
+
+		# Without a company the item fallback is skipped.
+		self.assertNotIn("cost_center", get_plan_dimensions("_Test Sub Plan No CC"))
 
 
 def make_full_credit_note(invoice_name):

@@ -345,22 +345,28 @@ def update_pegged_currencies():
 
 
 def set_default_print_formats():
+	# For each doctype, prefer the newer builder-made "Modern with Images" format,
+	# falling back to the older "with Item Image" format if it isn't present.
 	default_map = {
-		"Sales Order": "Sales Order with Item Image",
-		"Sales Invoice": "Sales Invoice with Item Image",
-		"Delivery Note": "Delivery Note with Item Image",
-		"Purchase Order": "Purchase Order with Item Image",
-		"Purchase Invoice": "Purchase Invoice with Item Image",
-		"POS Invoice": "POS Invoice with Item Image",
-		"Quotation": "Quotation with Item Image",
-		"Request for Quotation": "Request for Quotation with Item Image",
+		"Sales Order": ["Sales Order Modern with Images", "Sales Order with Item Image"],
+		"Sales Invoice": ["Sales Invoice Modern with Images", "Sales Invoice with Item Image"],
+		"Delivery Note": ["Delivery Note Modern with Images", "Delivery Note with Item Image"],
+		"Purchase Order": ["Purchase Order Modern with Images", "Purchase Order with Item Image"],
+		"Purchase Invoice": ["Purchase Invoice Modern with Images", "Purchase Invoice with Item Image"],
+		"POS Invoice": ["POS Invoice Modern with Images", "POS Invoice with Item Image"],
+		"Quotation": ["Quotation Modern with Images", "Quotation with Item Image"],
+		"Request for Quotation": [
+			"Request for Quotation Modern with Images",
+			"Request for Quotation with Item Image",
+		],
 	}
 
-	for doctype, print_format in default_map.items():
+	for doctype, print_formats in default_map.items():
 		if frappe.get_meta(doctype).default_print_format:
 			continue
 
-		if not frappe.db.exists("Print Format", print_format):
+		print_format = next((pf for pf in print_formats if frappe.db.exists("Print Format", pf)), None)
+		if not print_format:
 			continue
 
 		frappe.make_property_setter(

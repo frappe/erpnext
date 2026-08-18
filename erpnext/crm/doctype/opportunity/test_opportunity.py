@@ -9,6 +9,7 @@ from erpnext.crm.doctype.lead.test_lead import make_lead
 from erpnext.crm.doctype.opportunity.mapper import make_quotation
 from erpnext.crm.doctype.opportunity.opportunity import auto_close_opportunity, get_item_details
 from erpnext.crm.utils import get_linked_communication_list
+from erpnext.exceptions import PartyDisabled
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -70,6 +71,23 @@ class TestOpportunity(ERPNextTestSuite):
 	def test_opportunity_item(self):
 		opportunity_doc = make_opportunity(with_items=1, rate=1100, qty=2)
 		self.assertEqual(opportunity_doc.total, 2200)
+
+	def test_disabled_customer_not_allowed(self):
+		frappe.db.set_value("Customer", "_Test Customer", "disabled", 1)
+
+		self.assertRaises(PartyDisabled, make_opportunity, with_items=0)
+
+		frappe.db.set_value("Customer", "_Test Customer", "disabled", 0)
+		make_opportunity(with_items=0)
+
+	def test_disabled_lead_not_blocked(self):
+		# Lead.disabled isn't enforced anywhere else (e.g. the Lead picker query only
+		# excludes Converted leads), so it shouldn't block Opportunity creation either.
+		lead_doc = make_lead()
+		frappe.db.set_value("Lead", lead_doc.name, "disabled", 1)
+
+		opp_doc = make_opportunity(opportunity_from="Lead", lead=lead_doc.name)
+		self.assertEqual(opp_doc.party_name, lead_doc.name)
 
 	def test_carry_forward_of_email_and_comments(self):
 		frappe.db.set_single_value("CRM Settings", "carry_forward_communication_and_comments", 1)

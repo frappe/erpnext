@@ -98,6 +98,21 @@ class TestAssetRepair(ERPNextTestSuite):
 		asset_repair = create_asset_repair(submit=1)
 		self.assertNotEqual(asset_repair.repair_status, "Pending")
 
+	def test_downtime_stays_in_sync_with_dates(self):
+		asset = create_asset(submit=1)
+		asset_repair = create_asset_repair(asset=asset)
+
+		asset_repair.failure_date = "2026-07-31 09:00:00"
+		asset_repair.completion_date = "2026-07-31 11:00:00"
+		asset_repair.repair_status = "Completed"
+		asset_repair.save()
+		self.assertEqual(asset_repair.downtime, "2.0 Hrs")
+
+		# editing a date must refresh downtime, not leave a stale value
+		asset_repair.completion_date = "2026-07-31 14:30:00"
+		asset_repair.save()
+		self.assertEqual(asset_repair.downtime, "5.5 Hrs")
+
 	def test_stock_items(self):
 		asset_repair = create_asset_repair(stock_consumption=1)
 		self.assertTrue(asset_repair.stock_consumption)

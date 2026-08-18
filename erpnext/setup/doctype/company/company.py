@@ -49,6 +49,7 @@ class Company(NestedSet):
 		asset_received_but_not_billed: DF.Link | None
 		auto_err_frequency: DF.Literal["Daily", "Weekly", "Monthly"]
 		auto_exchange_rate_revaluation: DF.Check
+		bank_charges_account: DF.Link | None
 		book_advance_payments_in_separate_party_account: DF.Check
 		capital_work_in_progress_account: DF.Link | None
 		chart_of_accounts: DF.Literal[None]
@@ -89,6 +90,7 @@ class Company(NestedSet):
 		default_sales_contact: DF.Link | None
 		default_scrap_warehouse: DF.Link | None
 		default_selling_terms: DF.Link | None
+		default_warehouse: DF.Link | None
 		default_warehouse_for_sales_return: DF.Link | None
 		default_wip_warehouse: DF.Link | None
 		depreciation_cost_center: DF.Link | None
@@ -102,7 +104,9 @@ class Company(NestedSet):
 		enable_provisional_accounting_for_non_stock_items: DF.Check
 		enable_stock_delivered_but_not_billed: DF.Check
 		exception_budget_approver_role: DF.Link | None
+		exchange_gain_account: DF.Link | None
 		exchange_gain_loss_account: DF.Link | None
+		exchange_loss_account: DF.Link | None
 		existing_company: DF.Link | None
 		expenses_added_to_stock_account: DF.Link | None
 		expenses_added_to_stock_contra_account: DF.Link | None
@@ -128,6 +132,7 @@ class Company(NestedSet):
 		round_off_cost_center: DF.Link | None
 		round_off_for_opening: DF.Link | None
 		sales_monthly_history: DF.SmallText | None
+		sample_retention_warehouse: DF.Link | None
 		series_for_depreciation_entry: DF.Data | None
 		service_expense_account: DF.Link | None
 		stock_adjustment_account: DF.Link | None
@@ -187,6 +192,7 @@ class Company(NestedSet):
 		self.validate_parent_company()
 		self.set_reporting_currency()
 		self.validate_inventory_account_settings()
+		self.validate_warehouses()
 		self.cant_change_valuation_method()
 		self.validate_pending_reposts(old_doc)
 		self.validate_sdbnb_configuration()
@@ -299,6 +305,42 @@ class Company(NestedSet):
 				title=_("Cannot Change Inventory Account Setting"),
 			)
 
+	def validate_warehouses(self):
+		for fieldname in (
+			"default_warehouse",
+			"sample_retention_warehouse",
+			"default_in_transit_warehouse",
+			"default_warehouse_for_sales_return",
+			"default_wip_warehouse",
+			"default_fg_warehouse",
+			"default_scrap_warehouse",
+		):
+			warehouse = self.get(fieldname)
+			if not warehouse:
+				continue
+
+			details = frappe.db.get_value("Warehouse", warehouse, ["is_group", "company"], as_dict=True)
+			if not details:
+				continue
+
+			label = _(self.meta.get_label(fieldname))
+
+			if details.is_group:
+				frappe.throw(
+					_(
+						"Group Warehouses cannot be used in transactions. Please change the value of {0}"
+					).format(bold(label)),
+					title=_("Incorrect Warehouse"),
+				)
+
+			if details.company != self.name:
+				frappe.throw(
+					_("{0} {1} does not belong to company {2}").format(
+						bold(label), bold(warehouse), bold(self.name)
+					),
+					title=_("Incorrect Warehouse"),
+				)
+
 	def validate_abbr(self):
 		if not self.abbr:
 			self.abbr = "".join(c[0] for c in self.company_name.split()).upper()
@@ -327,9 +369,12 @@ class Company(NestedSet):
 			["Stock Delivered But Not Billed Account", "stock_delivered_but_not_billed"],
 			["Stock Adjustment Account", "stock_adjustment_account"],
 			["Write Off Account", "write_off_account"],
+			["Bank Charges Account", "bank_charges_account"],
 			["Default Payment Discount Account", "default_discount_account"],
 			["Unrealized Profit / Loss Account", "unrealized_profit_loss_account"],
 			["Exchange Gain / Loss Account", "exchange_gain_loss_account"],
+			["Exchange Gain Account", "exchange_gain_account"],
+			["Exchange Loss Account", "exchange_loss_account"],
 			["Unrealized Exchange Gain / Loss Account", "unrealized_exchange_gain_loss_account"],
 			["Round Off Account", "round_off_account"],
 			["Default Deferred Revenue Account", "default_deferred_revenue_account"],
@@ -477,10 +522,16 @@ class Company(NestedSet):
 			)
 			warehouse.flags.ignore_permissions = True
 			warehouse.flags.ignore_mandatory = True
+			warehouse.flags.ignore_inventory_account_validation = True
 			warehouse.insert()
 
 			if wh_detail["is_group"]:
 				parent_warehouse = warehouse.name
+
+		if not self.default_warehouse:
+			stores = frappe.db.get_value("Warehouse", {"warehouse_name": _("Stores"), "company": self.name})
+			if stores:
+				self.db_set("default_warehouse", stores)
 
 	def create_default_accounts(self):
 		from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import create_charts
@@ -741,12 +792,33 @@ class Company(NestedSet):
 
 			self.db_set("write_off_account", write_off_acct)
 
+		if not self.bank_charges_account:
+			bank_charges_acct = frappe.db.get_value(
+				"Account", {"account_name": _("Bank Charges"), "company": self.name, "is_group": 0}
+			)
+
+			self.db_set("bank_charges_account", bank_charges_acct)
+
 		if not self.exchange_gain_loss_account:
 			exchange_gain_loss_acct = frappe.db.get_value(
 				"Account", {"account_name": _("Exchange Gain/Loss"), "company": self.name, "is_group": 0}
 			)
 
 			self.db_set("exchange_gain_loss_account", exchange_gain_loss_acct)
+
+		if not self.exchange_gain_account:
+			exchange_gain_acct = frappe.db.get_value(
+				"Account", {"account_name": _("Exchange Gain"), "company": self.name, "is_group": 0}
+			)
+
+			self.db_set("exchange_gain_account", exchange_gain_acct)
+
+		if not self.exchange_loss_account:
+			exchange_loss_acct = frappe.db.get_value(
+				"Account", {"account_name": _("Exchange Loss"), "company": self.name, "is_group": 0}
+			)
+
+			self.db_set("exchange_loss_account", exchange_loss_acct)
 
 		if not self.disposal_account:
 			disposal_acct = frappe.db.get_value(

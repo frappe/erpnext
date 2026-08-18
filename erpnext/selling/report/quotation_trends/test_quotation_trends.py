@@ -88,6 +88,37 @@ class TestQuotationTrends(ERPNextTestSuite):
 		labels, after = self.run_report(based_on="Customer")
 		self.assertEqual(self._cell(after, "Party", "_Test Customer", amt_col, labels) - before_amt, 300)
 
+	def test_lead_quotation_label_resolves_through_quotation_to(self):
+		"""party_name is a dynamic link, so the label must be resolved via quotation_to.
+
+		Looking the party up in Customer alone leaves a Lead's row blank, and looking in Customer
+		first returns the wrong record when a Lead and a Customer share a name.
+		"""
+		lead_name = "_Test Trends Lead Party"
+		if not frappe.db.exists("Lead", {"lead_name": lead_name}):
+			frappe.get_doc({"doctype": "Lead", "lead_name": lead_name}).insert()
+		lead = frappe.db.get_value("Lead", {"lead_name": lead_name}, ["name", "company_name"], as_dict=True)
+
+		quotation = frappe.new_doc("Quotation")
+		quotation.company = "_Test Company"
+		quotation.transaction_date = TXN_DATE
+		quotation.currency = "INR"
+		quotation.quotation_to = "Lead"
+		quotation.party_name = lead.name
+		quotation.append(
+			"items",
+			{"item_code": "_Test Item", "qty": 1, "rate": 100, "warehouse": "_Test Warehouse - _TC"},
+		)
+		quotation.insert()
+		quotation.submit()
+
+		labels, rows = self.run_report(based_on="Customer")
+		party_idx, name_idx = labels.index("Party"), labels.index("Party Name")
+		lead_rows = [row for row in rows if row[party_idx] == lead.name]
+
+		self.assertEqual(len(lead_rows), 1)
+		self.assertEqual(lead_rows[0][name_idx], lead.company_name or lead_name)
+
 	def test_group_by_chart_matches_table_total_with_mixed_group_sizes(self):
 		# _Test Item is quoted to two customers -> two detail rows under one header row.
 		# _Test Item 2 is quoted to only one customer -> exactly one detail row under its

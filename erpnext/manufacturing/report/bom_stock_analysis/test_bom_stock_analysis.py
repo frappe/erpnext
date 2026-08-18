@@ -1,13 +1,18 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 import frappe
-from frappe.utils import fmt_money
+from frappe.utils import flt, fmt_money
 
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 from erpnext.manufacturing.report.bom_stock_analysis.bom_stock_analysis import (
 	execute as bom_stock_analysis_report,
 )
+from erpnext.manufacturing.report.bom_stock_analysis.bom_stock_analysis import get_bom_data
 from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+	create_stock_reconciliation,
+)
+from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -145,6 +150,41 @@ class TestBOMStockAnalysis(ERPNextTestSuite):
 		The representative is phantom-preferring, so the phantom sub-BOM is still exploded.
 		"""
 		self._assert_phantom_exploded(*self._build_duplicate_component_bom(phantom_first=False))
+
+	def test_bom_data_is_not_multiplied_by_the_bin_join(self):
+		"""Bin joins one row per warehouse, BOM Item one per line -- neither sum may count the other.
+
+		With the component listed on two BOM lines and stocked in two warehouses, the join yields
+		four rows. Summing qty_consumed_per_unit over it counts each line once per warehouse, and
+		summing actual_qty counts each warehouse once per line.
+		"""
+		rm = make_item(properties={"is_stock_item": 1, "valuation_rate": 10})
+		fg = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+
+		bom = make_bom(item=fg, raw_materials=[rm.name], rm_qty=2, do_not_save=True)
+		bom.append(
+			"items",
+			{"item_code": rm.name, "qty": 3, "uom": rm.stock_uom, "stock_uom": rm.stock_uom},
+		)
+		bom.save()
+		bom.submit()
+
+		for suffix, qty in (("A", 6), ("B", 4)):
+			warehouse = create_warehouse(f"_Test BOM Stock Analysis {suffix}")
+			create_stock_reconciliation(item_code=rm.name, warehouse=warehouse, qty=qty, rate=10)
+
+		rows = [row for row in get_bom_data({"bom": bom.name}) if row.item_code == rm.name]
+		self.assertEqual(len(rows), 1)
+
+		lines = [line for line in bom.items if line.item_code == rm.name]
+		self.assertEqual(len(lines), 2)
+
+		self.assertAlmostEqual(
+			flt(rows[0].qty_per_unit),
+			sum(flt(line.qty_consumed_per_unit) for line in lines),
+			places=6,
+		)
+		self.assertAlmostEqual(flt(rows[0].actual_qty), 10.0, places=6)
 
 
 def split_data_and_footer(raw_data):

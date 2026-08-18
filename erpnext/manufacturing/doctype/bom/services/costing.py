@@ -225,7 +225,7 @@ class BOMCostingService:
 
 		for d in self.doc.get("items"):
 			old_rate = d.rate
-			if not self.doc.bom_creator and (d.is_stock_item or d.is_phantom_item):
+			if d.is_stock_item or d.is_phantom_item:
 				d.rate = self.get_rm_rate(self._rm_rate_args(d), notify=False)
 
 			self._set_item_amounts(d)

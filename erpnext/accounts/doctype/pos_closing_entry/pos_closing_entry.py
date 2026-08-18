@@ -219,7 +219,8 @@ class POSClosingEntry(StatusUpdater):
 		self.update_sales_invoices_closing_entry()
 
 	def before_cancel(self):
-		self.check_pce_is_cancellable()
+		if self.status != "Failed":
+			self.check_pce_is_cancellable()
 
 	def on_cancel(self):
 		unconsolidate_pos_invoices(closing_entry=self)

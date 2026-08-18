@@ -3,6 +3,10 @@ from frappe import _
 from frappe.query_builder.functions import Sum
 from frappe.utils import cstr, flt
 
+from erpnext.manufacturing.doctype.work_order.services.material_coverage import (
+	get_minimum_material_coverage_fraction,
+)
+
 from .manufacturing import _check_bom_component_qty, get_bom_items
 from .stock_entry_base import BaseStockEntry
 
@@ -179,7 +183,59 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 	def validate(self):
 		self.validate_warehouse()
 		self.validate_component_and_quantities()
+		self._cap_completed_qty_to_material_coverage()
 		self.validate_same_source_target_warehouse()
+
+	def _cap_completed_qty_to_material_coverage(self):
+		if not self._should_cap_completed_qty():
+			return
+		# Keep an excessive claim intact so the Work Order allowance check can reject it.
+		if not self._is_overproduction_allowed(flt(self.wo_doc.qty)):
+			return
+
+		required_qty, transferred_qty = self._get_work_order_material_qty()
+		if not required_qty:
+			return
+
+		covered_before = self._get_covered_work_order_qty(required_qty, transferred_qty)
+		for row in self.doc.items:
+			item_code = row.original_item or row.item_code
+			if row.s_warehouse and item_code in required_qty:
+				transferred_qty[item_code] += flt(row.qty) * flt(row.conversion_factor or 1)
+
+		covered_after = self._get_covered_work_order_qty(required_qty, transferred_qty)
+		covered_by_entry = flt(max(covered_after - covered_before, 0), self.doc.precision("fg_completed_qty"))
+		self.doc.fg_completed_qty = min(flt(self.doc.fg_completed_qty), covered_by_entry)
+
+	def _should_cap_completed_qty(self):
+		if self.doc.get("_action") != "submit":
+			return False
+		if not self.wo_doc or not self.doc.fg_completed_qty:
+			return False
+		if self.doc.is_return or self.doc.is_additional_transfer_entry:
+			return False
+		return not (self.wo_doc.operations and self.wo_doc.transfer_material_against == "Job Card")
+
+	def _get_work_order_material_qty(self):
+		required_qty = {}
+		transferred_qty = {}
+		for row in self.wo_doc.required_items:
+			if not row.include_item_in_manufacturing or flt(row.required_qty) <= 0:
+				continue
+			required_qty[row.item_code] = required_qty.get(row.item_code, 0.0) + flt(row.required_qty)
+			# Duplicate required-item rows each hold the aggregate transferred quantity.
+			transferred_qty[row.item_code] = max(
+				transferred_qty.get(row.item_code, 0.0), flt(row.transferred_qty)
+			)
+		return required_qty, transferred_qty
+
+	def _get_covered_work_order_qty(self, required_qty, transferred_qty):
+		min_fraction = get_minimum_material_coverage_fraction(
+			required_qty,
+			transferred_qty,
+			self.wo_doc.precision("required_qty", "required_items"),
+		)
+		return min_fraction * flt(self.wo_doc.qty)
 
 	def validate_component_and_quantities(self):
 		if self.doc.fg_completed_qty:
@@ -226,9 +282,11 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 			first_row_by_item.setdefault(key, item)
 
 		for key, transfer_qty in transfer_by_item.items():
-			pending_qty = pending_by_item[key]
+			item = first_row_by_item[key]
+			precision = item.precision("qty")
+			transfer_qty = flt(transfer_qty, precision)
+			pending_qty = flt(pending_by_item[key], precision)
 			if transfer_qty > pending_qty:
-				item = first_row_by_item[key]
 				frappe.throw(
 					_(
 						"Row #{0}: Cannot transfer {1} {2} of Item {3}. "
