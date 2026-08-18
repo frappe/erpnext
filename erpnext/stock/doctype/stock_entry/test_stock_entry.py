@@ -2961,7 +2961,7 @@ class TestStockEntry(ERPNextTestSuite):
 		)
 		self.assertEqual(
 			stock_entry_detail_meta.get_field("secondary_item_type").read_only_depends_on,
-			"eval:doc.set_basic_rate_manually",
+			"eval:doc.set_basic_rate_manually && doc.secondary_item_type",
 		)
 
 		rm_item = make_item(properties={"is_stock_item": 1}).name

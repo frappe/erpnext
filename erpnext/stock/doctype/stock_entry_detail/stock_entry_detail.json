@@ -679,7 +679,7 @@
    "fieldtype": "Select",
    "label": "Type",
    "options": "\nCo-Product\nBy-Product\nScrap\nAdditional Finished Good",
-   "read_only_depends_on": "eval:doc.set_basic_rate_manually"
+   "read_only_depends_on": "eval:doc.set_basic_rate_manually && doc.secondary_item_type"
   },
   {
    "fieldname": "bom_secondary_item",
