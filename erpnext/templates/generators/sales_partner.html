@@ -8,9 +8,15 @@
 <div class="partner-content" itemscope itemtype="http://schema.org/Organization">
 	<div class="row">
 		<div class="col-md-4">
+<<<<<<< HEAD
 			{% if logo -%}
 			<img itemprop="brand" src="{{ logo }}" class="partner-logo"
 				alt="{{ partner_name }}" title="{{ partner_name }}" />
+=======
+			{% if logo %}
+			<img itemprop="brand" src="{{ logo | abs_url | e }}" class="partner-logo"
+				alt="{{ partner_name | e }}" title="{{ partner_name | e }}" />
+>>>>>>> 9a4cb48429 (fix: escape partner logo url and partner name in partner pages)
 			<br><br>
 			{%- endif %}
 			<address>
