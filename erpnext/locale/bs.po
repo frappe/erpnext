@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-08-16 09:41+0000\n"
-"PO-Revision-Date: 2026-08-17 01:44\n"
+"PO-Revision-Date: 2026-08-18 01:44\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Bosnian\n"
 "MIME-Version: 1.0\n"
@@ -18607,7 +18607,7 @@ msgstr "Kopiraj Grupa Klijenta"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:190
 msgid "Duplicate DocType"
-msgstr "Dupliciraj DocType"
+msgstr "Dupliraj DocType"
 
 #: erpnext/setup/doctype/authorization_rule/authorization_rule.py:69
 msgid "Duplicate Entry. Please check Authorization Rule {0}"
@@ -18623,7 +18623,7 @@ msgstr "Kopiraj Grupu Artikla"
 
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:102
 msgid "Duplicate Item Under Same Parent"
-msgstr "Dupliciraj Artikal pod Istim Nadređenim"
+msgstr "Dupliraj Artikal pod Istim Nadređenim"
 
 #: erpnext/manufacturing/doctype/workstation/workstation.py:80
 #: erpnext/manufacturing/doctype/workstation_type/workstation_type.py:37
@@ -18632,7 +18632,7 @@ msgstr "Duplikat operativne komponente {0} je pronađen u operativnim komponenta
 
 #: erpnext/accounts/doctype/pos_settings/pos_settings.py:44
 msgid "Duplicate POS Fields"
-msgstr "Dupliciraj Kasa Polja"
+msgstr "Dupliraj Kasa Polja"
 
 #: erpnext/accounts/doctype/pos_closing_entry/pos_closing_entry.py:106
 #: erpnext/accounts/doctype/pos_invoice_merge_log/pos_invoice_merge_log.py:64
@@ -18669,7 +18669,7 @@ msgstr "Dupli unos naspram koda artikla {0} i proizvođača {1}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:189
 msgid "Duplicate entry: {0}{1}"
-msgstr "Dupliciraj unos: {0}{1}"
+msgstr "Dupliraj unos: {0}{1}"
 
 #: erpnext/accounts/doctype/pos_profile/pos_profile.py:172
 msgid "Duplicate item group found in the item group table"
