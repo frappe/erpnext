@@ -12,6 +12,7 @@
 			<img itemprop="brand" src="{{ logo | abs_url | e }}" class="partner-logo"
 				alt="{{ partner_name | e }}" title="{{ partner_name | e }}" />
 			<br><br>
+<<<<<<< HEAD
 			{%- endif %}
 			<address>
 				{% if partner_website -%}<p><a href="{{ partner_website }}"
@@ -20,6 +21,18 @@
 				{% if phone -%}<p itemprop="telephone">{{ phone }}</p>{%- endif %}
 				{% if email -%}<p itemprop="email"><span class="fa fa-envelope"></span> {{ email }}</p>{%- endif %}
 			</address>
+=======
+			{% endif %}
+			{% if addresses %}
+				{% for address in addresses %}
+					<address>
+						{% if address.partner_address %}<p itemprop="address">{{ address.partner_address | e }}</p>{% endif %}
+						{% if address.phone %}<p itemprop="telephone">{{ address.phone | e }}</p>{% endif %}
+						{% if address.email %}<p itemprop="email"><svg class="icon icon-xs"><use href="#icon-mail"></use></svg> {{ address.email | e }}</p>{% endif %}
+					</address>
+				{% endfor %}
+			{% endif %}
+>>>>>>> 02434ee98c (fix: escape partner introduction and address details in partner pages)
 		</div>
 		<div class="col-md-8">
 			<p>{{ description }}</p>
