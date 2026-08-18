@@ -3010,6 +3010,10 @@ class TestStockEntry(ERPNextTestSuite):
 		self.assertEqual(flt(fg_row.basic_amount), 700.0)
 		self.assertEqual(flt(se.value_difference), 0.0)
 
+		secondary_row.secondary_item_type = ""
+		with self.assertRaisesRegex(frappe.ValidationError, "Secondary Item Type"):
+			se.save()
+
 	def test_repack_allocates_cost_to_secondary_item(self):
 		"""A Repack secondary item takes its own BOM share, not the finished good's."""
 		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name

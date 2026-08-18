@@ -316,6 +316,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		if self.purpose in ("Manufacture", "Repack"):
 			self.mark_finished_and_secondary_items()
+			self.validate_manual_basic_rate()
 			if not self.job_card:
 				self.validate_finished_goods()
 			else:
@@ -926,6 +927,20 @@ class StockEntry(StockController, SubcontractingInwardController):
 				"Subcontracting Order" if self.get("subcontracting_order") else "Subcontracting Inward Order",
 				order,
 			)
+
+	def validate_manual_basic_rate(self):
+		if self.purpose != "Manufacture":
+			return
+
+		for row in self.items:
+			if row.set_basic_rate_manually and not row.secondary_item_type:
+				frappe.throw(
+					_("Row #{0}: {1} is required when {2} is enabled.").format(
+						row.idx,
+						frappe.bold(_("Secondary Item Type")),
+						frappe.bold(_("Set Basic Rate Manually")),
+					)
+				)
 
 	def mark_finished_and_secondary_items(self):
 		if self.purpose != "Repack" and any(
