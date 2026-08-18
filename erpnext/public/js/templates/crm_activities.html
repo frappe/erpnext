@@ -74,7 +74,7 @@
                                     </svg>
                                 </span>
                                 <a href="/app/event/{{ frappe.utils.escape_html(events[i].name) }}" title="{{ __('Open Event') }}">
-                                    {%= events[i].subject %}
+                                    {%= frappe.utils.escape_html(events[i].subject) %}
                                 </a>
                             </div>
                             <div class="checkbox">
