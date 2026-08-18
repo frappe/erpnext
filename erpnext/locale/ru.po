@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-08-16 09:41+0000\n"
-"PO-Revision-Date: 2026-08-17 01:43\n"
+"PO-Revision-Date: 2026-08-18 01:43\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Russian\n"
 "MIME-Version: 1.0\n"
@@ -13677,7 +13677,7 @@ msgstr "Создать клиента"
 #: erpnext/selling/onboarding_step/create_delivery_note/create_delivery_note.json
 #: erpnext/stock/onboarding_step/create_delivery_note/create_delivery_note.json
 msgid "Create Delivery Note"
-msgstr "РЎРѕР·РґР°С‚СЊ С‚СЂР°РЅСЃРїРѕСЂС‚РЅСѓСЋ РЅР°РєР»Р°РґРЅСѓСЋ"
+msgstr "Создать транспортную накладную"
 
 #: erpnext/stock/doctype/delivery_note/delivery_note_list.js:63
 msgid "Create Delivery Trip"
@@ -22909,7 +22909,7 @@ msgstr "Получить комплектующие изделия"
 
 #: erpnext/buying/doctype/supplier/supplier.js:160
 msgid "Get Supplier Group Details"
-msgstr "РџРѕР»СѓС‡РёС‚СЊ РґР°РЅРЅС‹Рµ Рѕ РіСЂСѓРїРїРµ РїРѕСЃС‚Р°РІС‰РёРєРѕРІ"
+msgstr ""
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.js:463
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.js:483
@@ -48073,7 +48073,7 @@ msgstr "Строка {0}: Счет {1} и Тип контрагента {2} им
 
 #: erpnext/accounts/doctype/journal_entry_template/journal_entry_template.py:58
 msgid "Row {0}: Account {1} does not belong to company {2}"
-msgstr "РЎС‚СЂРѕРєР° {0}: РЎС‡РµС‚ {1} РЅРµ РїСЂРёРЅР°РґР»РµР¶РёС‚ РєРѕРјРїР°РЅРёРё {2}"
+msgstr ""
 
 #: erpnext/projects/doctype/timesheet/timesheet.py:164
 msgid "Row {0}: Activity Type is mandatory."
@@ -53424,7 +53424,7 @@ msgstr "Подробности о запасах"
 
 #: erpnext/stock/doctype/stock_entry/services/manufacturing.py:475
 msgid "Stock Entries already created for Work Order {0}: {1}"
-msgstr "Р—Р°РїРёСЃРё РїРѕ Р·Р°РїР°СЃР°Рј СѓР¶Рµ СЃРѕР·РґР°РЅС‹ РґР»СЏ Р·Р°РєР°Р·Р° РЅР° СЂР°Р±РѕС‚Сѓ {0}: {1}"
+msgstr ""
 
 #. Label of the stock_entry (Link) field in DocType 'Journal Entry'
 #. Label of a Link in the Manufacturing Workspace
@@ -57223,7 +57223,7 @@ msgstr "Акций не существует с {0}"
 
 #: erpnext/stock/stock_ledger.py:1001
 msgid "The stock for the item {0} in the {1} warehouse was negative on the {2}. You should create a positive entry {3} before the date {4} and time {5} to post the correct valuation rate. For more details, please read the <a href='https://docs.erpnext.com/docs/user/manual/en/stock-adjustment-cogs-with-negative-stock'>documentation</a>."
-msgstr "Р—Р°РїР°СЃ С‚РѕРІР°СЂР° {0} РЅР° СЃРєР»Р°РґРµ {1} Р±С‹Р» РѕС‚СЂРёС†Р°С‚РµР»СЊРЅС‹Рј РЅР° {2}. Р’Р°Рј РЅСѓР¶РЅРѕ СЃРѕР·РґР°С‚СЊ РїРѕР»РѕР¶РёС‚РµР»СЊРЅСѓСЋ Р·Р°РїРёСЃСЊ {3} РґРѕ РґР°С‚С‹ {4} Рё РІСЂРµРјРµРЅРё {5}, С‡С‚РѕР±С‹ РєРѕСЂСЂРµРєС‚РЅРѕ Р·Р°С„РёРєСЃРёСЂРѕРІР°С‚СЊ СЃС‚РѕРёРјРѕСЃС‚СЊ. Р”Р»СЏ РїРѕР»СѓС‡РµРЅРёСЏ РїРѕРґСЂРѕР±РЅРѕР№ РёРЅС„РѕСЂРјР°С†РёРё, РїРѕР¶Р°Р»СѓР№СЃС‚Р°, РїСЂРѕС‡РёС‚Р°Р№С‚Рµ <a href='https://docs.erpnext.com/docs/user/manual/en/stock-adjustment-cogs-with-negative-stock'>РґРѕРєСѓРјРµРЅС‚Р°С†РёСЋ</a>."
+msgstr "Запас товара {0} на складе {1} был отрицательным на {2}. Вам нужно создать положительную запись {3} до даты {4} и времени {5}, чтобы корректно зафиксировать стоимость. Для получения подробной информации, пожалуйста, прочитайте <a href='https://docs.erpnext.com/docs/user/manual/en/stock-adjustment-cogs-with-negative-stock'>документацию</a>."
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:863
 msgid "The stock has been reserved for the following Items and Warehouses, un-reserve the same to {0} the Stock Reconciliation: <br /><br /> {1}"
@@ -57390,7 +57390,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/item/item.js:1658
 msgid "There are two options to maintain valuation of stock. FIFO (first in - first out) and Moving Average. To understand this topic in detail please visit <a href='https://docs.frappe.io/erpnext/user/manual/en/calculation-of-valuation-rate-in-fifo-and-moving-average' target='_blank'>Item Valuation, FIFO and Moving Average.</a>"
-msgstr "РЎСѓС‰РµСЃС‚РІСѓРµС‚ РґРІР° РІР°СЂРёР°РЅС‚Р° РІРµРґРµРЅРёСЏ РѕС†РµРЅРєРё Р·Р°РїР°СЃРѕРІ. FIFO (РїРµСЂРІС‹Рј РїСЂРёС€РµР» - РїРµСЂРІС‹Рј СѓС€РµР») Рё СЃРєРѕР»СЊР·СЏС‰Р°СЏ СЃСЂРµРґРЅСЏСЏ. Р§С‚РѕР±С‹ РїРѕРґСЂРѕР±РЅРѕ СЂР°Р·РѕР±СЂР°С‚СЊСЃСЏ РІ СЌС‚РѕР№ С‚РµРјРµ, РїРѕСЃРµС‚РёС‚Рµ <a href='https://docs.frappe.io/erpnext/user/manual/en/calculation-of-valuation-rate-in-fifo-and-moving-average' target='_blank'>РћС†РµРЅРєР° С‚РѕРІР°СЂР°, FIFO Рё СЃРєРѕР»СЊР·СЏС‰Р°СЏ СЃСЂРµРґРЅСЏСЏ.</a>"
+msgstr ""
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:982
 msgid "There are {0} unreconciled transactions before {1}."
