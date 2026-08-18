@@ -519,7 +519,7 @@ class GrossProfitGenerator:
 
 		self.load_non_stock_items()
 		self.get_returned_invoice_items()
-		self.set_legacy_return_targets()
+		self.allocate_legacy_return_items()
 		self.process()
 
 	def process(self):
@@ -630,11 +630,6 @@ class GrossProfitGenerator:
 	def update_return_invoices(self, row, sales_invoice_item):
 		if returned_invoice_items := self.returned_invoices.get(row.parent):
 			returned_item_rows = list(returned_invoice_items.get(sales_invoice_item, []))
-			legacy_return_targets = self.legacy_return_targets.get((row.parent, row.item_code))
-			if sales_invoice_item != row.item_code and (
-				not legacy_return_targets or sales_invoice_item in legacy_return_targets
-			):
-				returned_item_rows.extend(returned_invoice_items.get(row.item_code, []))
 
 			for returned_item_row in returned_item_rows:
 				# returned_items 'qty' should be stateful
@@ -646,10 +641,10 @@ class GrossProfitGenerator:
 						returned_item_row.base_amount = 0
 
 					else:
-						row.qty = 0
-						row.base_amount = 0
 						returned_item_row.qty += row.qty
 						returned_item_row.base_amount += row.base_amount
+						row.qty = 0
+						row.base_amount = 0
 
 			if row.delivered_by_supplier:
 				buying_amount = self.get_drop_ship_buying_amount(row)
@@ -757,24 +752,66 @@ class GrossProfitGenerator:
 		)
 
 		self.returned_invoices = frappe._dict()
+		self.legacy_returned_invoices = frappe._dict()
 		for inv in returned_invoices:
-			self.returned_invoices.setdefault(inv.return_against, frappe._dict()).setdefault(
+			invoice_returns = (
+				self.returned_invoices if inv.sales_invoice_item else self.legacy_returned_invoices
+			)
+			invoice_returns.setdefault(inv.return_against, frappe._dict()).setdefault(
 				inv.sales_invoice_item or inv.item_code, []
 			).append(inv)
 
-	def set_legacy_return_targets(self):
-		self.legacy_return_targets = {}
-		for row in self.si_list:
+	def allocate_legacy_return_items(self):
+		source_invoice_items = {}
+		for row in reversed(self.si_list):
 			if row.is_return or not row.parent:
 				continue
 
-			returned_invoice_items = self.returned_invoices.get(row.parent)
-			if (
-				returned_invoice_items
-				and returned_invoice_items.get(row.item_code)
-				and not returned_invoice_items.get(row.item_row)
-			):
-				self.legacy_return_targets.setdefault((row.parent, row.item_code), set()).add(row.item_row)
+			source_invoice_items.setdefault((row.parent, row.item_code), {}).setdefault(row.item_row, row.qty)
+
+		for invoice, legacy_invoice_items in self.legacy_returned_invoices.items():
+			returned_invoice_items = self.returned_invoices.setdefault(invoice, frappe._dict())
+			for item_code, legacy_item_rows in legacy_invoice_items.items():
+				targets = self.get_legacy_return_targets(
+					source_invoice_items.get((invoice, item_code), {}), returned_invoice_items
+				)
+				for legacy_item_row in legacy_item_rows:
+					self.allocate_legacy_return_item(legacy_item_row, targets, returned_invoice_items)
+
+	def get_legacy_return_targets(self, source_invoice_items, returned_invoice_items):
+		targets = []
+		for item_row, qty in source_invoice_items.items():
+			linked_return_qty = sum(
+				flt(returned_item.qty) for returned_item in returned_invoice_items.get(item_row, [])
+			)
+			if available_qty := max(flt(qty) + linked_return_qty, 0):
+				targets.append(frappe._dict(item_row=item_row, available_qty=available_qty))
+
+		targets.sort(key=lambda target: bool(returned_invoice_items.get(target.item_row)))
+		return targets
+
+	def allocate_legacy_return_item(self, legacy_item_row, targets, returned_invoice_items):
+		remaining_qty = abs(flt(legacy_item_row.qty))
+		remaining_base_amount = flt(legacy_item_row.base_amount)
+		if not remaining_qty:
+			return
+
+		qty_sign = -1 if legacy_item_row.qty < 0 else 1
+		for target in targets:
+			if not target.available_qty:
+				continue
+
+			allocated_qty = min(target.available_qty, remaining_qty)
+			allocated_item_row = frappe._dict(legacy_item_row.copy())
+			allocated_item_row.qty = qty_sign * allocated_qty
+			allocated_item_row.base_amount = remaining_base_amount * allocated_qty / remaining_qty
+			returned_invoice_items.setdefault(target.item_row, []).append(allocated_item_row)
+
+			target.available_qty -= allocated_qty
+			remaining_qty -= allocated_qty
+			remaining_base_amount -= allocated_item_row.base_amount
+			if not remaining_qty:
+				break
 
 	def skip_row(self, row):
 		if self.filters.get("group_by") != "Invoice":

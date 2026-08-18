@@ -851,45 +851,70 @@ class TestGrossProfit(ERPNextTestSuite):
 		self.assertEqual([row.qty for row in invoice_rows], [1, 1])
 		self.assertEqual([row.selling_amount for row in invoice_rows], [100, 200])
 
-	def test_legacy_return_does_not_override_linked_item_match(self):
+	def test_legacy_return_remainder_spills_into_linked_item(self):
 		invoice = "SINV-TEST-RETURN-ALLOCATION"
 		linked_item = "SINV-ITEM-LINKED"
 		unlinked_item = "SINV-ITEM-LEGACY"
 		generator = GrossProfitGenerator.__new__(GrossProfitGenerator)
 		generator.currency_precision = 3
-		generator.legacy_return_targets = {(invoice, self.item): {unlinked_item}}
 		generator.returned_invoices = frappe._dict(
-			{
-				invoice: frappe._dict(
-					{
-						linked_item: [frappe._dict(qty=-1, base_amount=-100)],
-						self.item: [frappe._dict(qty=-1, base_amount=-200)],
-					}
-				)
-			}
+			{invoice: frappe._dict({linked_item: [frappe._dict(qty=-1, base_amount=-100)]})}
+		)
+		generator.legacy_returned_invoices = frappe._dict(
+			{invoice: frappe._dict({self.item: [frappe._dict(qty=-2, base_amount=-200)]})}
 		)
 		linked_row = frappe._dict(
 			parent=invoice,
 			item_code=self.item,
-			qty=2,
-			base_amount=200,
+			item_row=linked_item,
+			is_return=False,
+			qty=3,
+			base_amount=300,
 			buying_rate=50,
 			delivered_by_supplier=False,
 		)
 		unlinked_row = frappe._dict(
 			parent=invoice,
 			item_code=self.item,
-			qty=2,
-			base_amount=400,
+			item_row=unlinked_item,
+			is_return=False,
+			qty=1,
+			base_amount=100,
 			buying_rate=50,
 			delivered_by_supplier=False,
 		)
 
+		generator.si_list = [unlinked_row, linked_row]
+		generator.allocate_legacy_return_items()
 		generator.update_return_invoices(linked_row, linked_item)
 		generator.update_return_invoices(unlinked_row, unlinked_item)
 
 		self.assertEqual((linked_row.qty, linked_row.base_amount), (1, 100))
-		self.assertEqual((unlinked_row.qty, unlinked_row.base_amount), (1, 200))
+		self.assertEqual((unlinked_row.qty, unlinked_row.base_amount), (0, 0))
+
+	def test_return_remainder_stays_available_for_next_row(self):
+		invoice = "SINV-TEST-RETURN-REMAINDER"
+		item_row = "SINV-ITEM-RETURN-REMAINDER"
+		returned_item = frappe._dict(qty=-2, base_amount=-200)
+		generator = GrossProfitGenerator.__new__(GrossProfitGenerator)
+		generator.currency_precision = 3
+		generator.returned_invoices = frappe._dict({invoice: frappe._dict({item_row: [returned_item]})})
+		first_row = frappe._dict(
+			parent=invoice,
+			item_code=self.item,
+			qty=1,
+			base_amount=100,
+			buying_rate=50,
+			delivered_by_supplier=False,
+		)
+		second_row = first_row.copy()
+
+		generator.update_return_invoices(first_row, item_row)
+		self.assertEqual((returned_item.qty, returned_item.base_amount), (-1, -100))
+
+		generator.update_return_invoices(second_row, item_row)
+		self.assertEqual((returned_item.qty, returned_item.base_amount), (0, 0))
+		self.assertEqual((first_row.qty, second_row.qty), (0, 0))
 
 	def create_drop_ship_order(self, qty=10, selling_rate=100, buying_rate=80):
 		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice
