@@ -2954,9 +2954,14 @@ class TestStockEntry(ERPNextTestSuite):
 		self.assertEqual(flt(se.value_difference), 0.0)
 
 	def test_manufacture_preserves_manually_set_secondary_item_rate(self):
-		manual_rate_field = frappe.get_meta("Stock Entry Detail").get_field("set_basic_rate_manually")
+		stock_entry_detail_meta = frappe.get_meta("Stock Entry Detail")
+		manual_rate_field = stock_entry_detail_meta.get_field("set_basic_rate_manually")
 		self.assertIn(
 			'parent.purpose==="Manufacture" && doc.secondary_item_type', manual_rate_field.depends_on
+		)
+		self.assertEqual(
+			stock_entry_detail_meta.get_field("secondary_item_type").read_only_depends_on,
+			"eval:doc.set_basic_rate_manually",
 		)
 
 		rm_item = make_item(properties={"is_stock_item": 1}).name
