@@ -280,13 +280,6 @@ frappe.ui.form.on("Job Card", {
 			pending_qty = frm.doc.pending_qty;
 		}
 
-		const max_completable_qty = frm.doc.__onload?.max_completable_qty;
-		let default_completed_qty = pending_qty;
-		if (max_completable_qty != null) {
-			default_completed_qty = Math.min(pending_qty, Math.max(flt(max_completable_qty), 0));
-		}
-		const default_process_loss_qty = flt(pending_qty - default_completed_qty);
-
 		const fields = [
 			{
 				fieldtype: "Float",
@@ -307,29 +300,9 @@ frappe.ui.form.on("Job Card", {
 				label: __("Completed Quantity"),
 				fieldname: "completed_qty",
 				reqd: 1,
-				default: default_completed_qty,
-				description:
-					max_completable_qty != null
-						? __("Max: {0}, as per the completed quantity of the previous operation.", [
-								get_qty_with_uom(Math.max(flt(max_completable_qty), 0), frm.doc.stock_uom),
-						  ])
-						: "",
+				default: pending_qty,
 				change() {
 					const dialog = frm.job_completion_dialog;
-
-					if (
-						max_completable_qty != null &&
-						flt(dialog.get_value("completed_qty")) > flt(max_completable_qty)
-					) {
-						dialog.set_value("completed_qty", Math.max(flt(max_completable_qty), 0));
-						frappe.throw(
-							__(
-								"Completed Quantity cannot be greater than {0}, as the previous operation has only completed that quantity.",
-								[get_qty_with_uom(Math.max(flt(max_completable_qty), 0), frm.doc.stock_uom)]
-							)
-						);
-					}
-
 					const remaining =
 						dialog.get_value("for_quantity") -
 						dialog.get_value("completed_qty") -
@@ -386,7 +359,6 @@ frappe.ui.form.on("Job Card", {
 				fieldtype: "Float",
 				label: __("Process Loss Quantity"),
 				fieldname: "process_loss_qty",
-				default: default_process_loss_qty,
 				description: __("Qty scrapped in this cycle, nobody will produce it."),
 				onchange() {
 					const dialog = frm.job_completion_dialog;
