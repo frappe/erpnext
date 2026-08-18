@@ -676,19 +676,9 @@ class TestGrossProfit(ERPNextTestSuite):
 		self.assertEqual(total[8], 0.0)  # gross profit %
 
 	def test_drop_ship(self):
-		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice
-		from erpnext.selling.doctype.sales_order.sales_order import make_purchase_order, make_sales_invoice
-		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 
-		item = make_item("_Test Drop Ship Item", properties={"is_stock_item": 1, "delivered_by_supplier": 1})
-
-		so = make_sales_order(item=item.name, qty=10, rate=100)
-		po = make_purchase_order(so.name, selected_items=[so.items[0]])[0]
-		po.items[0].rate = 80
-		po.supplier = "_Test Supplier"
-		po.submit()
-		make_purchase_invoice(po.name).submit()
+		so = self.create_drop_ship_order()
 		si = make_sales_invoice(so.name).submit()
 
 		filters = frappe._dict(
@@ -699,6 +689,58 @@ class TestGrossProfit(ERPNextTestSuite):
 		self.assertEqual(data[1].buying_amount, 800)
 		self.assertIsNone(data[1].buying_rate)
 		self.assertEqual(data[1]["gross_profit_%"], 20)
+
+	def test_drop_ship_partial_billing_and_return(self):
+		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
+
+		so = self.create_drop_ship_order()
+		first_invoice = make_sales_invoice(so.name)
+		first_invoice.items[0].qty = 4
+		first_invoice.submit()
+		second_invoice = make_sales_invoice(so.name).submit()
+
+		filters = frappe._dict(
+			company=first_invoice.company,
+			from_date=first_invoice.posting_date,
+			to_date=first_invoice.posting_date,
+			group_by="Invoice",
+		)
+		_, data = execute(filters=filters)
+		invoice_rows = {
+			row.parent_invoice: row
+			for row in data
+			if row.parent_invoice in {first_invoice.name, second_invoice.name} and row.indent == 1
+		}
+		self.assertEqual(invoice_rows[first_invoice.name].buying_amount, 320)
+		self.assertEqual(invoice_rows[second_invoice.name].buying_amount, 480)
+
+		sales_return = make_sales_return(first_invoice.name)
+		sales_return.items[0].qty = -2
+		sales_return.submit()
+
+		_, data = execute(filters=filters)
+		first_invoice_row = next(
+			row for row in data if row.parent_invoice == first_invoice.name and row.indent == 1
+		)
+		self.assertEqual(first_invoice_row.qty, 2)
+		self.assertEqual(first_invoice_row.buying_amount, 160)
+		self.assertEqual(first_invoice_row.gross_profit, 40)
+
+	def create_drop_ship_order(self, qty=10, selling_rate=100, buying_rate=80):
+		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice
+		from erpnext.selling.doctype.sales_order.sales_order import make_purchase_order
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item("_Test Drop Ship Item", properties={"is_stock_item": 1, "delivered_by_supplier": 1})
+		so = make_sales_order(item=item.name, qty=qty, rate=selling_rate)
+		purchase_order = make_purchase_order(so.name, selected_items=[so.items[0]])[0]
+		purchase_order.items[0].rate = buying_rate
+		purchase_order.supplier = "_Test Supplier"
+		purchase_order.submit()
+		make_purchase_invoice(purchase_order.name).submit()
+
+		return so
 
 	def create_rate_adjustment_debit_note(self, against_invoice, adjustment_rate, item_code=None):
 		"""Create a rate adjustment debit note with no stock movement."""
