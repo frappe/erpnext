@@ -589,6 +589,11 @@ class StockEntry(StockController, SubcontractingInwardController):
 		zero_valuation_items = []
 		finished_items_last = sorted(self.get("items"), key=lambda row: cint(row.is_finished_item))
 		for d in finished_items_last:
+			if d.set_basic_rate_manually and not self.can_set_basic_rate_manually(d):
+				d.set_basic_rate_manually = 0
+				if not d.s_warehouse:
+					d.basic_rate = 0
+
 			if d.s_warehouse or d.set_basic_rate_manually:
 				continue
 
@@ -610,6 +615,12 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		if zero_valuation_items:
 			self._notify_zero_valuation_rate(zero_valuation_items)
+
+	def can_set_basic_rate_manually(self, row) -> bool:
+		return bool(
+			(self.purpose == "Repack" and row.t_warehouse)
+			or (self.purpose == "Manufacture" and row.secondary_item_type)
+		)
 
 	def get_secondary_items_cost_basis(self, outgoing_items_cost) -> float:
 		"""The cost a BOM allocation splits: the consumed rows, or the entry that replaced them."""

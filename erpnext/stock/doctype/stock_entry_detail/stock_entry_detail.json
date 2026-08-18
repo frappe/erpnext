@@ -203,7 +203,8 @@
    "oldfieldname": "incoming_rate",
    "oldfieldtype": "Currency",
    "options": "Company:company:default_currency",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only_depends_on": "eval:((parent.purpose===\"Repack\" && (!doc.t_warehouse || !doc.set_basic_rate_manually)) || (parent.purpose===\"Manufacture\" && (!doc.secondary_item_type || !doc.set_basic_rate_manually)))"
   },
   {
    "fieldname": "basic_amount",

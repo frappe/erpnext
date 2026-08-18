@@ -2954,9 +2954,14 @@ class TestStockEntry(ERPNextTestSuite):
 		self.assertEqual(flt(se.value_difference), 0.0)
 
 	def test_manufacture_preserves_manually_set_secondary_item_rate(self):
-		manual_rate_field = frappe.get_meta("Stock Entry Detail").get_field("set_basic_rate_manually")
+		stock_entry_detail_meta = frappe.get_meta("Stock Entry Detail")
+		manual_rate_field = stock_entry_detail_meta.get_field("set_basic_rate_manually")
 		self.assertIn(
 			'parent.purpose==="Manufacture" && doc.secondary_item_type', manual_rate_field.depends_on
+		)
+		self.assertIn(
+			'parent.purpose==="Manufacture" && (!doc.secondary_item_type || !doc.set_basic_rate_manually)',
+			stock_entry_detail_meta.get_field("basic_rate").read_only_depends_on,
 		)
 
 		rm_item = make_item(properties={"is_stock_item": 1}).name
@@ -3004,6 +3009,12 @@ class TestStockEntry(ERPNextTestSuite):
 		self.assertEqual(flt(secondary_row.basic_amount), 300.0)
 		self.assertEqual(flt(fg_row.basic_amount), 700.0)
 		self.assertEqual(flt(se.value_difference), 0.0)
+
+		secondary_row.secondary_item_type = ""
+		se.save()
+
+		self.assertFalse(secondary_row.set_basic_rate_manually)
+		self.assertEqual(flt(secondary_row.basic_rate), 20.0)
 
 	def test_repack_allocates_cost_to_secondary_item(self):
 		"""A Repack secondary item takes its own BOM share, not the finished good's."""
