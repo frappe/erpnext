@@ -510,6 +510,7 @@ class GrossProfitGenerator:
 		self.average_buying_rate = {}
 		self.filters = frappe._dict(filters)
 		self.load_invoice_items()
+		self.load_drop_ship_buying_rates()
 		self.get_delivery_notes()
 
 		self.load_product_bundle()
@@ -640,10 +641,6 @@ class GrossProfitGenerator:
 					returned_item_row.qty = 0
 					returned_item_row.base_amount = 0
 
-<<<<<<< HEAD
-			if not row.delivered_by_supplier:
-				row.buying_amount = flt(flt(row.qty) * flt(row.buying_rate), self.currency_precision)
-=======
 				else:
 					returned_item_row.qty += row.qty
 					returned_item_row.base_amount += row.base_amount
@@ -656,7 +653,6 @@ class GrossProfitGenerator:
 				row.buying_amount = flt(buying_amount, self.currency_precision)
 		else:
 			row.buying_amount = flt(flt(row.qty) * flt(row.buying_rate), self.currency_precision)
->>>>>>> 27b06fcb61 (fix(accounts): match returns to source invoice items (#58250))
 
 	def get_average_rate_based_on_group_by(self):
 		for key in list(self.grouped):
@@ -734,11 +730,11 @@ class GrossProfitGenerator:
 		)
 
 	def get_returned_invoice_items(self):
-<<<<<<< HEAD
 		returned_invoices = frappe.db.sql(
 			"""
 			select
-				si.name, si_item.item_code, si_item.stock_qty as qty, si_item.base_net_amount as base_amount, si.return_against
+				si.name, si_item.item_code, si_item.sales_invoice_item, si_item.stock_qty as qty,
+				si_item.base_net_amount as base_amount, si.return_against
 			from
 				`tabSales Invoice` si, `tabSales Invoice Item` si_item
 			where
@@ -749,28 +745,6 @@ class GrossProfitGenerator:
 		""",
 			{"from_date": self.filters.from_date, "to_date": self.filters.to_date},
 			as_dict=1,
-=======
-		si = frappe.qb.DocType("Sales Invoice")
-		si_item = frappe.qb.DocType("Sales Invoice Item")
-		returned_invoices = (
-			frappe.qb.from_(si)
-			.inner_join(si_item)
-			.on(si.name == si_item.parent)
-			.select(
-				si.name,
-				si_item.item_code,
-				si_item.sales_invoice_item,
-				si_item.stock_qty.as_("qty"),
-				si_item.base_net_amount.as_("base_amount"),
-				si.return_against,
-			)
-			.where(
-				(si.docstatus == 1)
-				& (si.is_return == 1)
-				& si.posting_date.between(self.filters.from_date, self.filters.to_date)
-			)
-			.run(as_dict=1)
->>>>>>> 27b06fcb61 (fix(accounts): match returns to source invoice items (#58250))
 		)
 
 		self.returned_invoices = frappe._dict()
@@ -874,28 +848,12 @@ class GrossProfitGenerator:
 		# IMP NOTE
 		# stock_ledger_entries should already be filtered by item_code and warehouse and
 		# sorted by posting_date desc, posting_time desc
-		if (
-			row.delivered_by_supplier
-			and row.so_detail
-			and (
-				po_details := frappe.get_all(
-					"Purchase Order Item",
-					filters={"sales_order_item": row.so_detail, "docstatus": 1},
-					pluck="name",
-				)
-			)
-		):
-			from frappe.query_builder.functions import Sum
+		if row.delivered_by_supplier:
+			buying_amount = self.get_drop_ship_buying_amount(row)
+			if buying_amount is not None:
+				return buying_amount
 
-			table = frappe.qb.DocType("Purchase Invoice Item")
-			query = (
-				frappe.qb.from_(table)
-				.select(Sum(table.qty * table.base_net_rate))
-				.where((table.po_detail.isin(po_details)) & (table.docstatus == 1))
-			)
-			return flt(query.run()[0][0])
-
-		elif item_code in self.non_stock_items and (row.project or row.cost_center):
+		if item_code in self.non_stock_items and (row.project or row.cost_center):
 			# Issue 6089-Get last purchasing rate for non-stock item
 			item_rate = self.get_last_purchase_rate(item_code, row)
 			return flt(row.qty) * item_rate
@@ -925,6 +883,49 @@ class GrossProfitGenerator:
 				return flt(row.qty) * self.get_average_buying_rate(row, item_code)
 
 		return flt(row.qty) * self.get_average_buying_rate(row, item_code)
+
+	def load_drop_ship_buying_rates(self):
+		self.drop_ship_buying_rates = {}
+		sales_order_items = {
+			row.so_detail for row in self.si_list if row.delivered_by_supplier and row.so_detail
+		}
+		if not sales_order_items:
+			return
+
+		from frappe.query_builder.functions import Sum
+
+		purchase_order_item = frappe.qb.DocType("Purchase Order Item")
+		purchase_invoice_item = frappe.qb.DocType("Purchase Invoice Item")
+		buying_amounts = (
+			frappe.qb.from_(purchase_order_item)
+			.left_join(purchase_invoice_item)
+			.on(
+				(purchase_invoice_item.po_detail == purchase_order_item.name)
+				& (purchase_invoice_item.docstatus == 1)
+			)
+			.select(
+				purchase_order_item.sales_order_item,
+				Sum(purchase_invoice_item.qty * purchase_invoice_item.base_net_rate).as_("buying_amount"),
+				Sum(purchase_invoice_item.stock_qty).as_("stock_qty"),
+			)
+			.where(
+				(purchase_order_item.sales_order_item.isin(sales_order_items))
+				& (purchase_order_item.docstatus == 1)
+			)
+			.groupby(purchase_order_item.sales_order_item)
+			.run(as_dict=True)
+		)
+
+		for row in buying_amounts:
+			self.drop_ship_buying_rates[row.sales_order_item] = (
+				flt(row.buying_amount) / flt(row.stock_qty) if flt(row.stock_qty) else 0
+			)
+
+	def get_drop_ship_buying_amount(self, row):
+		if row.so_detail not in self.drop_ship_buying_rates:
+			return
+
+		return flt(row.qty) * self.drop_ship_buying_rates[row.so_detail]
 
 	def get_buying_amount_from_so_dn(self, sales_order, so_detail, item_code):
 		from frappe.query_builder.functions import Avg

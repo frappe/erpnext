@@ -4,13 +4,8 @@ from frappe.utils import add_days, flt, get_first_day, get_last_day, nowdate
 
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_delivery_note, make_sales_return
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-<<<<<<< HEAD
-from erpnext.accounts.report.gross_profit.gross_profit import execute
-from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
-=======
 from erpnext.accounts.report.gross_profit.gross_profit import GrossProfitGenerator, execute
-from erpnext.stock.doctype.delivery_note.mapper import make_sales_invoice
->>>>>>> 27b06fcb61 (fix(accounts): match returns to source invoice items (#58250))
+from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -681,19 +676,9 @@ class TestGrossProfit(ERPNextTestSuite):
 		self.assertEqual(total[8], 0.0)  # gross profit %
 
 	def test_drop_ship(self):
-		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice
-		from erpnext.selling.doctype.sales_order.sales_order import make_purchase_order, make_sales_invoice
-		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 
-		item = make_item("_Test Drop Ship Item", properties={"is_stock_item": 1, "delivered_by_supplier": 1})
-
-		so = make_sales_order(item=item.name, qty=10, rate=100)
-		po = make_purchase_order(so.name, selected_items=[so.items[0]])[0]
-		po.items[0].rate = 80
-		po.supplier = "_Test Supplier"
-		po.submit()
-		make_purchase_invoice(po.name).submit()
+		so = self.create_drop_ship_order()
 		si = make_sales_invoice(so.name).submit()
 
 		filters = frappe._dict(
@@ -705,10 +690,8 @@ class TestGrossProfit(ERPNextTestSuite):
 		self.assertIsNone(data[1].buying_rate)
 		self.assertEqual(data[1]["gross_profit_%"], 20)
 
-<<<<<<< HEAD
-=======
 	def test_drop_ship_partial_billing_and_return(self):
-		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
+		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 
 		so = self.create_drop_ship_order()
 		first_invoice = make_sales_invoice(so.name)
@@ -744,8 +727,8 @@ class TestGrossProfit(ERPNextTestSuite):
 		self.assertEqual(first_invoice_row.gross_profit, 40)
 
 	def test_drop_ship_return_matches_sales_invoice_item(self):
-		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice
-		from erpnext.selling.doctype.sales_order.mapper import make_purchase_order, make_sales_invoice
+		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice
+		from erpnext.selling.doctype.sales_order.sales_order import make_purchase_order, make_sales_invoice
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 		from erpnext.stock.doctype.item.test_item import make_item
 
@@ -1043,8 +1026,8 @@ class TestGrossProfit(ERPNextTestSuite):
 		self.assertEqual(invoice_row.buying_amount, 999999.9)
 
 	def create_drop_ship_order(self, qty=10, selling_rate=100, buying_rate=80):
-		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice
-		from erpnext.selling.doctype.sales_order.mapper import make_purchase_order
+		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice
+		from erpnext.selling.doctype.sales_order.sales_order import make_purchase_order
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 		from erpnext.stock.doctype.item.test_item import make_item
 
@@ -1058,7 +1041,6 @@ class TestGrossProfit(ERPNextTestSuite):
 
 		return so
 
->>>>>>> 27b06fcb61 (fix(accounts): match returns to source invoice items (#58250))
 	def create_rate_adjustment_debit_note(self, against_invoice, adjustment_rate, item_code=None):
 		"""Create a rate adjustment debit note with no stock movement."""
 		dn = self.create_sales_invoice(qty=1, rate=adjustment_rate, do_not_save=True, do_not_submit=True)
