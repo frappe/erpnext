@@ -985,6 +985,46 @@ class TestGrossProfit(ERPNextTestSuite):
 		self.assertEqual((returned_item.qty, returned_item.base_amount), (0, 0))
 		self.assertEqual((first_row.qty, second_row.qty), (0, 0))
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": True})
+	def test_return_keeps_buying_amount_of_unreturned_row(self):
+		unreturned_item = create_item(
+			"_Test Gross Profit Unreturned Item", warehouse=self.warehouse, company=self.company
+		)
+		make_stock_entry(
+			company=self.company,
+			item_code=unreturned_item.name,
+			target=self.warehouse,
+			qty=40000,
+			basic_rate=33.33333,
+		)
+		sales_invoice = self.create_sales_invoice(qty=1, rate=100, do_not_submit=True)
+		second_item = frappe.copy_doc(sales_invoice.items[0], ignore_no_copy=False)
+		second_item.item_code = unreturned_item.name
+		second_item.item_name = unreturned_item.name
+		second_item.qty = 30000
+		sales_invoice.append("items", second_item)
+		sales_invoice.submit()
+
+		sales_return = make_sales_return(sales_invoice.name)
+		sales_return.set("items", [sales_return.items[0]])
+		sales_return.items[0].qty = -1
+		sales_return.submit()
+
+		filters = frappe._dict(
+			company=sales_invoice.company,
+			from_date=sales_invoice.posting_date,
+			to_date=sales_invoice.posting_date,
+			group_by="Invoice",
+		)
+		_, data = execute(filters=filters)
+		invoice_row = next(
+			row
+			for row in data
+			if row.parent_invoice == sales_invoice.name and row.item_code == unreturned_item.name
+		)
+		self.assertEqual(invoice_row.qty, 30000)
+		self.assertEqual(invoice_row.buying_amount, 999999.9)
+
 	def create_drop_ship_order(self, qty=10, selling_rate=100, buying_rate=80):
 		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice
 		from erpnext.selling.doctype.sales_order.mapper import make_purchase_order
