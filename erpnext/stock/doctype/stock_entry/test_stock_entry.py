@@ -3011,7 +3011,8 @@ class TestStockEntry(ERPNextTestSuite):
 		self.assertEqual(flt(se.value_difference), 0.0)
 
 		secondary_row.secondary_item_type = ""
-		with self.assertRaisesRegex(frappe.ValidationError, "Secondary Item Type"):
+		secondary_item_type_label = stock_entry_detail_meta.get_label("secondary_item_type")
+		with self.assertRaisesRegex(frappe.ValidationError, secondary_item_type_label):
 			se.save()
 
 	def test_repack_allocates_cost_to_secondary_item(self):

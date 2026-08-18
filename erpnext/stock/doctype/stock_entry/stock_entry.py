@@ -937,8 +937,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 				frappe.throw(
 					_("Row #{0}: {1} is required when {2} is enabled.").format(
 						row.idx,
-						frappe.bold(_("Secondary Item Type")),
-						frappe.bold(_("Set Basic Rate Manually")),
+						frappe.bold(_(row.meta.get_label("secondary_item_type"))),
+						frappe.bold(_(row.meta.get_label("set_basic_rate_manually"))),
 					)
 				)
 
