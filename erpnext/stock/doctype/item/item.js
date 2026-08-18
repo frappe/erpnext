@@ -290,7 +290,10 @@ frappe.ui.form.on("Item", {
 		if (frm.doc.variant_of) {
 			frm.set_intro(
 				__("This Item is a Variant of {0} (Template).", [
-					`<a href="/app/item/${frm.doc.variant_of}" onclick="location.reload()">${frm.doc.variant_of}</a>`,
+					`<a href="${frappe.utils.get_form_link(
+						"Item",
+						frm.doc.variant_of
+					)}" onclick="location.reload()">${frappe.utils.escape_html(frm.doc.variant_of)}</a>`,
 				]),
 				true
 			);
