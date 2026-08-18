@@ -20,6 +20,7 @@ COMPANY = "_Test Company"
 WAREHOUSE = "_Test Warehouse - _TC"
 SUPPLIER = "_Test Supplier"
 TAX_TEMPLATE = "_Test Purchase Taxes and Charges Template - _TC"
+WIP_WAREHOUSE = "_Test Warehouse 1 - _TC"
 
 
 class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
@@ -104,6 +105,62 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		self.assertEqual(work_order.production_item, plan.fg_item)
 		self.assertEqual(work_order.bom_no, plan.bom)
 		self.assertEqual(work_order.qty, plan.planned_qty)
+
+	def test_make_order_skips_rows_that_are_already_covered(self):
+		"""
+		A row whose requirement is met by stock or by an order placed earlier has nothing left
+		to order. It must be left out instead of failing, and the rows beside it must still be
+		created.
+		"""
+		plan = make_mrp_plan(self)
+		covered_row, remaining_rows = plan.rows[0], plan.rows[1:]
+		self.assertTrue(remaining_rows, msg="the plan needs a second row to order")
+		covered_row.required_qty = 0
+
+		make_order(plan.rows, COMPANY, warehouse=WAREHOUSE, mps=plan.mps)
+
+		ordered_items = [
+			row.item_code
+			for doctype in ("Purchase Order", "Work Order")
+			for order in frappe.get_all(doctype, filters={"mps": plan.mps}, pluck="name")
+			for row in get_ordered_items(doctype, order)
+		]
+		self.assertNotIn(covered_row.item_code, ordered_items)
+		self.assertEqual(sorted(ordered_items), sorted([row.item_code for row in remaining_rows]))
+
+	def test_make_order_creates_nothing_when_every_row_is_covered(self):
+		plan = make_mrp_plan(self)
+		for row in plan.rows:
+			row.required_qty = 0
+
+		make_order(plan.rows, COMPANY, warehouse=WAREHOUSE, mps=plan.mps)
+
+		for doctype in ("Purchase Order", "Work Order"):
+			self.assertFalse(frappe.get_all(doctype, filters={"mps": plan.mps}, pluck="name"))
+
+	def test_make_order_ignores_a_requirement_left_over_by_rounding(self):
+		"""What is left of a covered row after subtracting is not a quantity worth ordering."""
+		plan = make_mrp_plan(self)
+		for row in plan.rows:
+			row.required_qty = 0.0000000001
+
+		make_order(plan.rows, COMPANY, warehouse=WAREHOUSE, mps=plan.mps)
+
+		for doctype in ("Purchase Order", "Work Order"):
+			self.assertFalse(frappe.get_all(doctype, filters={"mps": plan.mps}, pluck="name"))
+
+	def test_work_order_keeps_the_company_wip_warehouse(self):
+		"""
+		The item's own warehouse is where the finished goods go, the work in progress warehouse
+		stays the one the company keeps for it.
+		"""
+		plan = make_mrp_plan(self)
+		frappe.db.set_value("Company", COMPANY, "default_wip_warehouse", WIP_WAREHOUSE)
+
+		make_order(plan.rows, COMPANY, warehouse=WAREHOUSE, mps=plan.mps)
+
+		work_order = get_created_order(plan.mps, "Work Order")
+		self.assertEqual(work_order.wip_warehouse, WIP_WAREHOUSE)
 
 	def test_purchase_order_gets_defaults_from_set_missing_values(self):
 		plan = make_mrp_plan(self)
@@ -214,6 +271,14 @@ def make_mrp_plan(test_case, planned_qty=10, rm_qty=2):
 		rm_qty=rm_qty,
 		rows=rows,
 	)
+
+
+def get_ordered_items(doctype, order):
+	child_doctype = "Purchase Order Item" if doctype == "Purchase Order" else None
+	if not child_doctype:
+		return frappe.get_all(doctype, filters={"name": order}, fields=["production_item as item_code"])
+
+	return frappe.get_all(child_doctype, filters={"parent": order}, fields=["item_code"])
 
 
 def get_created_order(mps, doctype):
