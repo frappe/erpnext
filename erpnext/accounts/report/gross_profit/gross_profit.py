@@ -628,30 +628,31 @@ class GrossProfitGenerator:
 			self.get_average_rate_based_on_group_by()
 
 	def update_return_invoices(self, row, sales_invoice_item):
-		if returned_invoice_items := self.returned_invoices.get(row.parent):
-			returned_item_rows = list(returned_invoice_items.get(sales_invoice_item, []))
+		returned_item_rows = self.returned_invoices.get(row.parent, {}).get(sales_invoice_item)
+		if not returned_item_rows:
+			return
 
-			for returned_item_row in returned_item_rows:
-				# returned_items 'qty' should be stateful
-				if returned_item_row.qty != 0:
-					if row.qty >= abs(returned_item_row.qty):
-						row.qty += returned_item_row.qty
-						row.base_amount += flt(returned_item_row.base_amount, self.currency_precision)
-						returned_item_row.qty = 0
-						returned_item_row.base_amount = 0
+		for returned_item_row in returned_item_rows:
+			# returned_items 'qty' should be stateful
+			if returned_item_row.qty != 0:
+				if row.qty >= abs(returned_item_row.qty):
+					row.qty += returned_item_row.qty
+					row.base_amount += flt(returned_item_row.base_amount, self.currency_precision)
+					returned_item_row.qty = 0
+					returned_item_row.base_amount = 0
 
-					else:
-						returned_item_row.qty += row.qty
-						returned_item_row.base_amount += row.base_amount
-						row.qty = 0
-						row.base_amount = 0
+				else:
+					returned_item_row.qty += row.qty
+					returned_item_row.base_amount += row.base_amount
+					row.qty = 0
+					row.base_amount = 0
 
-			if row.delivered_by_supplier:
-				buying_amount = self.get_drop_ship_buying_amount(row)
-				if buying_amount is not None:
-					row.buying_amount = flt(buying_amount, self.currency_precision)
-			else:
-				row.buying_amount = flt(flt(row.qty) * flt(row.buying_rate), self.currency_precision)
+		if row.delivered_by_supplier:
+			buying_amount = self.get_drop_ship_buying_amount(row)
+			if buying_amount is not None:
+				row.buying_amount = flt(buying_amount, self.currency_precision)
+		else:
+			row.buying_amount = flt(flt(row.qty) * flt(row.buying_rate), self.currency_precision)
 
 	def get_average_rate_based_on_group_by(self):
 		for key in list(self.grouped):
