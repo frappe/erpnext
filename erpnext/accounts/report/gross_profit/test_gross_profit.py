@@ -676,14 +676,7 @@ class TestGrossProfit(ERPNextTestSuite):
 		self.assertEqual(total[8], 0.0)  # gross profit %
 
 	def test_drop_ship(self):
-<<<<<<< HEAD
-		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice
-		from erpnext.selling.doctype.sales_order.sales_order import make_purchase_order, make_sales_invoice
-		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-		from erpnext.stock.doctype.item.test_item import make_item
-=======
-		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
->>>>>>> d40679cffe (fix(accounts): allocate drop-ship cost by invoice quantity (#58226))
+		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 
 		so = self.create_drop_ship_order()
 		si = make_sales_invoice(so.name).submit()
@@ -698,7 +691,7 @@ class TestGrossProfit(ERPNextTestSuite):
 		self.assertEqual(data[1]["gross_profit_%"], 20)
 
 	def test_drop_ship_partial_billing_and_return(self):
-		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
+		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 
 		so = self.create_drop_ship_order()
 		first_invoice = make_sales_invoice(so.name)
@@ -734,8 +727,8 @@ class TestGrossProfit(ERPNextTestSuite):
 		self.assertEqual(first_invoice_row.gross_profit, 40)
 
 	def create_drop_ship_order(self, qty=10, selling_rate=100, buying_rate=80):
-		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice
-		from erpnext.selling.doctype.sales_order.mapper import make_purchase_order
+		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice
+		from erpnext.selling.doctype.sales_order.sales_order import make_purchase_order
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 		from erpnext.stock.doctype.item.test_item import make_item
 
