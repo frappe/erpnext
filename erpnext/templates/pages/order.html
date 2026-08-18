@@ -151,7 +151,7 @@
 	{% if doc.terms %}
 		<div class="terms-and-condition text-muted small">
 			<hr>
-			<p>{{ doc.terms }}</p>
+			<p>{{ frappe.sanitize_html(doc.terms) }}</p>
 		</div>
 	{% endif %}
 {% endblock %}
