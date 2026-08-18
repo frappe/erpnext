@@ -1021,6 +1021,38 @@ erpnext.work_order = {
 		return flt(max, precision("qty"));
 	},
 
+<<<<<<< HEAD
+=======
+	get_pending_operation_process_loss: (frm) => {
+		if (!(frm.doc.operations || []).length) {
+			return 0;
+		}
+
+		const total_loss = Math.max(...frm.doc.operations.map((row) => flt(row.process_loss_qty)));
+		return flt(Math.max(total_loss - flt(frm.doc.process_loss_qty), 0), precision("qty"));
+	},
+
+	get_max_requestable_qty: (frm) => {
+		const required = {};
+		const covered = {};
+		(frm.doc.required_items || []).forEach((row) => {
+			required[row.item_code] = (required[row.item_code] || 0) + flt(row.required_qty);
+			if (!(row.item_code in covered)) {
+				covered[row.item_code] =
+					flt(row.transferred_qty) + flt(row.requested_qty) + flt(row.picked_qty);
+			}
+		});
+
+		let max_fraction = 0;
+		Object.keys(required).forEach((item_code) => {
+			if (required[item_code] <= 0) return;
+			const pending = required[item_code] - covered[item_code];
+			max_fraction = Math.max(max_fraction, pending / required[item_code]);
+		});
+		return flt(max_fraction * flt(frm.doc.qty), precision("qty"));
+	},
+
+>>>>>>> b68324ce78 (fix: work order finish dialog with process loss qty from job card (#58256))
 	show_disassembly_prompt: function (frm) {
 		let max_qty = flt(frm.doc.produced_qty - frm.doc.disassembled_qty);
 
@@ -1075,8 +1107,18 @@ erpnext.work_order = {
 		});
 	},
 
+<<<<<<< HEAD
 	show_prompt_for_qty_input: function (frm, purpose, qty, additional_transfer_entry) {
 		let max = !additional_transfer_entry ? this.get_max_transferable_qty(frm, purpose) : qty;
+=======
+	show_prompt_for_qty_input: function (frm, purpose, { qty, additional_transfer_entry, target } = {}) {
+		let max = qty == null ? this.get_max_transferable_qty(frm, purpose) : qty;
+		if (purpose === "Manufacture") {
+			max = flt(Math.max(max - flt(frm.doc.process_loss_qty), 0), precision("qty"));
+		}
+		const pending_process_loss =
+			purpose === "Manufacture" ? this.get_pending_operation_process_loss(frm) : 0;
+>>>>>>> b68324ce78 (fix: work order finish dialog with process loss qty from job card (#58256))
 
 		let fields = [
 			{
@@ -1085,9 +1127,18 @@ erpnext.work_order = {
 				fieldname: "qty",
 				description: __("Max: {0}", [max]),
 				default: max,
+				onchange: function () {
+					if (pending_process_loss && frm.qty_prompt) {
+						frm.qty_prompt.set_value(
+							"finished_good_qty",
+							flt(Math.max(flt(this.value) - pending_process_loss, 0), precision("qty"))
+						);
+					}
+				},
 			},
 		];
 
+<<<<<<< HEAD
 		if (!additional_transfer_entry) {
 			fields.push({
 				fieldtype: "Check",
@@ -1100,8 +1151,27 @@ erpnext.work_order = {
 					} else {
 						frm.qty_prompt.set_value("qty", max);
 					}
+=======
+		if (pending_process_loss) {
+			fields.push(
+				{
+					fieldtype: "Float",
+					label: __("Process Loss Qty"),
+					fieldname: "process_loss_qty",
+					default: pending_process_loss,
+					read_only: 1,
+					description: __("Process loss booked against the operations of this work order."),
+>>>>>>> b68324ce78 (fix: work order finish dialog with process loss qty from job card (#58256))
 				},
-			});
+				{
+					fieldtype: "Float",
+					label: __("Finished Good Qty"),
+					fieldname: "finished_good_qty",
+					default: flt(Math.max(max - pending_process_loss, 0), precision("qty")),
+					read_only: 1,
+					description: __("Actual quantity of the finished good that will be manufactured."),
+				}
+			);
 		}
 
 		return new Promise((resolve, reject) => {
