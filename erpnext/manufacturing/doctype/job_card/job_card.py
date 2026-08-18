@@ -159,6 +159,8 @@ class JobCard(Document):
 		)
 		self.set_onload("work_order_closed", self.is_work_order_closed())
 		self.set_onload("has_stock_entry", self.has_stock_entry())
+		if self.docstatus == 0:
+			self.set_onload("max_completable_qty", self.get_max_completable_qty())
 
 	def on_discard(self):
 		self.db_set("status", "Cancelled")
@@ -1509,6 +1511,20 @@ class JobCard(Document):
 			current_operation_qty = flt(data[0].completed_qty)
 
 		return current_operation_qty + flt(self.total_completed_qty)
+
+	def get_max_completable_qty(self):
+		if self.is_corrective_job_card or not (self.work_order and self.sequence_id):
+			return None
+
+		previous_operations = self.get_previous_operations()
+		if not previous_operations:
+			return None
+
+		qty_field = "manufactured_qty" if self.track_semi_finished_goods else "completed_qty"
+		min_completed_qty = min(flt(row.get(qty_field)) for row in previous_operations)
+
+		precision = self.precision("total_completed_qty")
+		return flt(min_completed_qty - self.get_current_operation_completed_qty(), precision)
 
 	def validate_previous_operation(self, row, current_operation_qty):
 		if not row.completed_qty or (row.status != "Completed" and row.completed_qty < current_operation_qty):
