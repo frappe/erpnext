@@ -1308,15 +1308,32 @@ def make_order(selected_rows, company, warehouse=None, mps=None):
 	if not frappe.db.exists("Company", company):
 		frappe.throw(_("Company {0} does not exist").format(company))
 
+	qty_precision = frappe.get_precision("Purchase Order Item", "qty")
 	purchase_orders = {}
 	work_orders = []
+	covered_rows = 0
 	for row in selected_rows:
 		row = frappe._dict(row)
+		# what is left to order once stock and the orders already placed are counted. rounding
+		# to the precision an order is stored in, so what is left of a covered row after all the
+		# subtracting does not become an order line of its own
+		if flt(row.required_qty, qty_precision) <= 0:
+			covered_rows += 1
+			continue
+
 		if row.type_of_material == "Purchase":
 			purchase_orders.setdefault((row.default_supplier, row.release_date), []).append(row)
 
 		if row.type_of_material == "Manufacture" and row.bom_no:
 			work_orders.append(row)
+
+	if not purchase_orders and not work_orders:
+		frappe.msgprint(
+			_("Nothing to order, the selected rows are already covered by stock or existing orders")
+			if covered_rows
+			else _("Nothing to order from the selected rows")
+		)
+		return
 
 	if purchase_orders:
 		make_purchase_orders(purchase_orders, company, warehouse=warehouse, mps=mps)
