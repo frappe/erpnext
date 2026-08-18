@@ -3323,7 +3323,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 	def get_pending_process_loss_qty(self):
 		"""Loss this entry should still book: the job card's unbooked loss when the entry
-		belongs to one, else the largest operation loss on the work order (legacy flow)."""
+		belongs to one, else the unbooked portion of the largest operation loss on the work order."""
 		if self.job_card:
 			job_card = frappe.get_doc("Job Card", self.job_card)
 			return max(flt(job_card.process_loss_qty) - flt(job_card.get_consumed_process_loss()), 0)
@@ -3334,7 +3334,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 				filters={"parent": self.work_order},
 				fields=[{"MAX": "process_loss_qty", "as": "process_loss_qty"}],
 			)
-			return flt(data[0].process_loss_qty) if data else 0
+			max_operation_loss = flt(data[0].process_loss_qty) if data else 0
+			booked_loss = flt(frappe.db.get_value("Work Order", self.work_order, "process_loss_qty"))
+			return max(max_operation_loss - booked_loss, 0)
 
 		return 0
 

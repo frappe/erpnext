@@ -1019,6 +1019,42 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertEqual(wo_doc.process_loss_qty, 3)
 		self.assertEqual(wo_doc.status, "Completed")
 
+	def test_process_loss_booked_once_across_partial_entries(self):
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			make_stock_entry as make_stock_entry_for_wo,
+		)
+
+		wo_doc = self.make_two_operation_work_order()
+		job_cards = frappe.get_all(
+			"Job Card", filters={"work_order": wo_doc.name}, fields=["name"], order_by="sequence_id"
+		)
+
+		for index, row in enumerate(job_cards):
+			jc = frappe.get_doc("Job Card", row.name)
+			from_time = add_to_date(now(), minutes=index * 40)
+			jc.append(
+				"time_logs",
+				{"from_time": from_time, "to_time": add_to_date(from_time, minutes=30), "completed_qty": 7},
+			)
+			jc.save()
+			jc.submit()
+			self.assertEqual(jc.process_loss_qty, 3)
+
+		se1 = frappe.get_doc(make_stock_entry_for_wo(wo_doc.name, "Manufacture", 5))
+		se1.submit()
+		self.assertEqual(se1.process_loss_qty, 3)
+		self.assertEqual(flt(sum(d.qty for d in se1.items if d.is_finished_item)), 2)
+
+		se2 = frappe.get_doc(make_stock_entry_for_wo(wo_doc.name, "Manufacture", 5))
+		se2.submit()
+		self.assertEqual(flt(se2.process_loss_qty), 0)
+		self.assertEqual(flt(sum(d.qty for d in se2.items if d.is_finished_item)), 5)
+
+		wo_doc.reload()
+		self.assertEqual(wo_doc.process_loss_qty, 3)
+		self.assertEqual(wo_doc.produced_qty, 7)
+		self.assertEqual(wo_doc.status, "Completed")
+
 	def get_first_job_card(self, work_order):
 		return frappe.get_doc(
 			"Job Card",
