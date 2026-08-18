@@ -2672,6 +2672,18 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertEqual(s.items[3].item_code, "_Test Item")
 		self.assertEqual(s.items[3].transfer_qty, 2)
 
+		frappe.db.set_value(
+			"Stock Entry Detail",
+			s.items[3].name,
+			{"secondary_item_type": None, "is_legacy_scrap_item": 1},
+		)
+
+		from erpnext.stock.doctype.stock_entry.services.manufacturing import ManufactureStockEntry
+
+		stock_entry = frappe.get_doc({"doctype": "Stock Entry", "work_order": self.work_order.name})
+		used_secondary_items = ManufactureStockEntry(stock_entry).get_used_secondary_items()
+		self.assertEqual(used_secondary_items[("_Test Item", "Scrap")], 2)
+
 	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings", {"overproduction_percentage_for_work_order": 100}
 	)

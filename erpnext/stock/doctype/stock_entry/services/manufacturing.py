@@ -894,14 +894,13 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			key = (row.item_code, row.secondary_item_type or "")
 			row.stock_qty -= flt(used_secondary_items.get(key))
 			row.stock_qty = row.stock_qty * flt(self.doc.fg_completed_qty) / flt(pending_qty)
-			if used_secondary_items.get(key):
-				used_secondary_items[key] -= row.stock_qty
 
 	def get_used_secondary_items(self):
 		data = self._query_used_secondary_items()
 		used_secondary_items = defaultdict(float)
 		for row in data:
-			key = (row.item_code, row.secondary_item_type or "")
+			secondary_item_type = row.secondary_item_type or ("Scrap" if row.is_legacy_scrap_item else "")
+			key = (row.item_code, secondary_item_type)
 			used_secondary_items[key] += row.qty
 		return used_secondary_items
 
@@ -912,7 +911,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			frappe.qb.from_(se)
 			.inner_join(sed)
 			.on(sed.parent == se.name)
-			.select(sed.item_code, sed.secondary_item_type, sed.qty)
+			.select(sed.item_code, sed.secondary_item_type, sed.is_legacy_scrap_item, sed.qty)
 			.where(
 				(se.work_order == self.doc.work_order)
 				& ((sed.secondary_item_type.isnotnull()) | (sed.is_legacy_scrap_item == 1))
