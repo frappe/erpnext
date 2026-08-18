@@ -2953,6 +2953,58 @@ class TestStockEntry(ERPNextTestSuite):
 		self.assertEqual(flt(se.total_outgoing_value), 1000.0)
 		self.assertEqual(flt(se.value_difference), 0.0)
 
+	def test_manufacture_preserves_manually_set_secondary_item_rate(self):
+		manual_rate_field = frappe.get_meta("Stock Entry Detail").get_field("set_basic_rate_manually")
+		self.assertIn(
+			'parent.purpose==="Manufacture" && doc.secondary_item_type', manual_rate_field.depends_on
+		)
+
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		secondary_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 20}).name
+		warehouse = "_Test Warehouse - _TC"
+
+		make_stock_entry(item_code=rm_item, target=warehouse, qty=10, basic_rate=100)
+
+		se = frappe.new_doc("Stock Entry")
+		se.purpose = se.stock_entry_type = "Manufacture"
+		se.company = "_Test Company"
+		se.append(
+			"items", {"item_code": rm_item, "s_warehouse": warehouse, "qty": 10, "conversion_factor": 1}
+		)
+		se.append(
+			"items",
+			{
+				"item_code": fg_item,
+				"t_warehouse": warehouse,
+				"qty": 10,
+				"is_finished_item": 1,
+				"conversion_factor": 1,
+			},
+		)
+		se.append(
+			"items",
+			{
+				"item_code": secondary_item,
+				"t_warehouse": warehouse,
+				"qty": 5,
+				"secondary_item_type": "Scrap",
+				"conversion_factor": 1,
+				"set_basic_rate_manually": 1,
+				"basic_rate": 60,
+				"basic_amount": 300,
+			},
+		)
+		se.save()
+
+		secondary_row = next(d for d in se.items if d.secondary_item_type)
+		fg_row = next(d for d in se.items if d.is_finished_item)
+
+		self.assertEqual(flt(secondary_row.basic_rate), 60.0)
+		self.assertEqual(flt(secondary_row.basic_amount), 300.0)
+		self.assertEqual(flt(fg_row.basic_amount), 700.0)
+		self.assertEqual(flt(se.value_difference), 0.0)
+
 	def test_repack_allocates_cost_to_secondary_item(self):
 		"""A Repack secondary item takes its own BOM share, not the finished good's."""
 		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
