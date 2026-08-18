@@ -6,7 +6,7 @@
         {{ doc.name }}
       </div>
       <div class="col-xs-2 project-name">
-        {{ doc.project_name }}
+        {{ doc.project_name | e }}
       </div>
       <div class="col-xs-3 text-center">
         {% if doc.percent_complete %}

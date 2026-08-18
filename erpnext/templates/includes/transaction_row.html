@@ -12,7 +12,7 @@
 		</div>
 		<div class="col-sm-2">
 			<div class="small text-muted items-preview ellipsis ellipsis-width">
-				{{ doc.items_preview }}
+				{{ doc.items_preview | e }}
 			</div>
 		</div>
 		{% if doc.is_rounded_total_disabled() and doc.get('grand_total') %}
