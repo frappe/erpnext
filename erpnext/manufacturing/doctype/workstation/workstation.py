@@ -413,14 +413,8 @@ def get_workstations(**kwargs):
 
 	for d in data:
 		d.workstation_name = get_link_to_form("Workstation", d.name)
-<<<<<<< HEAD
-		d.status_image = d.on_status_image
-		d.background_color = color_map.get(d.status, "var(--red-600)")
-=======
 		d.status_image = frappe.utils.escape_html(d.on_status_image)
-		d.workstation_off = ""
-		d.color = color_map.get(d.status, "red")
->>>>>>> 25dfcb17c8 (fix: escape on status image for workstations in production status (#58279))
+		d.background_color = color_map.get(d.status, "var(--red-600)")
 		d.workstation_link = get_url_to_form("Workstation", d.name)
 		if d.status != "Production":
 			d.status_image = frappe.utils.escape_html(d.off_status_image)
