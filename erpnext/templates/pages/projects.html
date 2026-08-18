@@ -1,7 +1,7 @@
 {% extends "templates/web.html" %}
 
 {% block title %}
-  {{ doc.project_name }}
+  {{ doc.project_name | e }}
 {% endblock %}
 
 {% block head_include %}
@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block header %}
-  <h3 class="my-account-header">{{ doc.project_name }}</h3>
+  <h3 class="my-account-header">{{ doc.project_name | e }}</h3>
 {% endblock %}
 
 {% block style %}
