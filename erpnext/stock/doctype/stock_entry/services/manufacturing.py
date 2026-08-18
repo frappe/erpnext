@@ -915,7 +915,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			.select(sed.item_code, sed.secondary_item_type, sed.qty)
 			.where(
 				(se.work_order == self.doc.work_order)
-				& ((sed.secondary_item_type != "") | (sed.is_legacy_scrap_item == 1))
+				& ((sed.secondary_item_type.isnotnull()) | (sed.is_legacy_scrap_item == 1))
 				& (se.docstatus == 1)
 				& (se.purpose.isin(["Repack", "Manufacture"]))
 			)
