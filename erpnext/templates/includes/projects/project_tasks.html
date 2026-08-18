@@ -8,7 +8,7 @@
           <svg class="icon icon-xs"><use href="#icon-corner-down-right"></use></svg>
         </span>
       {% endif %}
-      {{ task.subject }}</a>
+      {{ task.subject | e }}</a>
   </div>
   <div class="col-sm-2">{{ task.status }}</div>
   <div class="col-sm-2 small text-muted">
