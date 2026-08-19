@@ -16,6 +16,17 @@ install_docs = [
 ]
 
 
+class WarehouseAccountMap(frappe._dict):
+	def __missing__(self, warehouse):
+		account = get_warehouse_account(frappe.get_cached_doc("Warehouse", warehouse))
+		account_details = frappe._dict(
+			account=account,
+			account_currency=frappe.get_cached_value("Account", account, "account_currency"),
+		)
+		self[warehouse] = account_details
+		return account_details
+
+
 def get_warehouse_account_map(company=None):
 	company_warehouse_account_map = company and frappe.flags.setdefault("warehouse_account_map", {}).get(
 		company
@@ -23,7 +34,7 @@ def get_warehouse_account_map(company=None):
 	warehouse_account_map = frappe.flags.warehouse_account_map
 
 	if not warehouse_account_map or not company_warehouse_account_map or frappe.flags.in_test:
-		warehouse_account = frappe._dict()
+		warehouse_account = WarehouseAccountMap()
 
 		filters = {}
 		if company:
@@ -37,7 +48,7 @@ def get_warehouse_account_map(company=None):
 			order_by="lft, rgt",
 		):
 			if not d.account:
-				d.account = get_warehouse_account(d, warehouse_account)
+				d.account = get_warehouse_account(d, warehouse_account, raise_error=False)
 
 			if d.account:
 				d.account_currency = frappe.db.get_value("Account", d.account, "account_currency", cache=True)
@@ -47,10 +58,13 @@ def get_warehouse_account_map(company=None):
 		else:
 			frappe.flags.warehouse_account_map = warehouse_account
 
-	return frappe.flags.warehouse_account_map.get(company) or frappe.flags.warehouse_account_map
+	if company:
+		return frappe.flags.warehouse_account_map.get(company, WarehouseAccountMap())
+
+	return frappe.flags.warehouse_account_map
 
 
-def get_warehouse_account(warehouse, warehouse_account=None):
+def get_warehouse_account(warehouse, warehouse_account=None, *, raise_error=True):
 	account = warehouse.account
 	if not account and warehouse.parent_warehouse:
 		if warehouse_account:
@@ -86,7 +100,7 @@ def get_warehouse_account(warehouse, warehouse_account=None):
 		if len(inventory_accounts) == 1:
 			account = inventory_accounts[0]
 
-	if not account and warehouse.company and not warehouse.is_group:
+	if raise_error and not account and warehouse.company and not warehouse.is_group:
 		frappe.throw(
 			_("Please set Account in Warehouse {0} or Default Inventory Account in Company {1}").format(
 				warehouse.name, warehouse.company

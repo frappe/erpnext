@@ -633,7 +633,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 		for item in self.items:
 			if flt(item.rate) and flt(item.qty):
-				if warehouse_account and warehouse_account.get(item.warehouse):
+				if warehouse_account is not None:
 					stock_value_diff = frappe.db.get_value(
 						"Stock Ledger Entry",
 						{
@@ -647,9 +647,11 @@ class SubcontractingReceipt(SubcontractingController):
 					)
 
 					accepted_warehouse_account = warehouse_account[item.warehouse]["account"]
-					supplier_warehouse_account = warehouse_account.get(self.supplier_warehouse, {}).get(
-						"account"
-					)
+					supplier_warehouse_details = warehouse_account.get(self.supplier_warehouse, {})
+					if flt(item.rm_supp_cost):
+						supplier_warehouse_details = warehouse_account[self.supplier_warehouse]
+
+					supplier_warehouse_account = supplier_warehouse_details.get("account")
 					remarks = self.get("remarks") or _("Accounting Entry for Stock")
 
 					# Accepted Warehouse Account (Debit)

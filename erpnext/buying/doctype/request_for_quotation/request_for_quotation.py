@@ -16,8 +16,8 @@ from frappe.utils.print_format import download_pdf
 from frappe.utils.user import get_user_fullname
 
 from erpnext.accounts.party import (
+	_get_party_details,
 	get_party_account_currency,
-	get_party_details,
 	validate_party_frozen_disabled,
 )
 from erpnext.buying.utils import validate_for_items
@@ -449,7 +449,7 @@ def make_supplier_quotation_from_rfq(source_name, target_doc=None, for_supplier=
 	def postprocess(source, target_doc):
 		if for_supplier:
 			target_doc.supplier = for_supplier
-			args = get_party_details(for_supplier, party_type="Supplier", ignore_permissions=True)
+			args = _get_party_details(for_supplier, party_type="Supplier", ignore_permissions=True)
 			target_doc.currency = args.currency or get_party_account_currency(
 				"Supplier", for_supplier, source.company
 			)

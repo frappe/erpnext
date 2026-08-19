@@ -1335,6 +1335,158 @@ class TestSerialandBatchBundle(FrappeTestCase):
 			batch_no="LSBRV-BATCH-0001",
 		)
 
+	def _setup_negative_batch_item(self, item_code, batches):
+		make_item(item_code, properties={"is_stock_item": 1, "has_batch_no": 1})
+		for batch_no in batches:
+			if not frappe.db.exists("Batch", batch_no):
+				frappe.get_doc(
+					{"doctype": "Batch", "batch_id": batch_no, "item": item_code, "company": "_Test Company"}
+				).insert(ignore_permissions=True)
+
+	def _allow_negative_stock_temporarily(self):
+		for field in ("allow_negative_stock", "allow_negative_stock_for_batch"):
+			original = frappe.db.get_single_value("Stock Settings", field)
+			frappe.db.set_single_value("Stock Settings", field, 1)
+			self.addCleanup(frappe.db.set_single_value, "Stock Settings", field, original)
+
+	def _disable_negative_stock(self):
+		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 0)
+		frappe.db.set_single_value("Stock Settings", "allow_negative_stock_for_batch", 0)
+
+	def test_historical_negative_batch_stock_does_not_block_outward(self):
+		from unittest.mock import patch
+
+		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+			BatchNegativeStockError,
+			SerialandBatchBundle,
+		)
+
+		item_code = "Test Hist Neg Batch Item"
+		ballast_batch, batch_no = "THNB-BALLAST-001", "THNB-BATCH-001"
+		self._setup_negative_batch_item(item_code, [ballast_batch, batch_no])
+		warehouse = "_Test Warehouse - _TC"
+
+		self._allow_negative_stock_temporarily()
+		make_stock_entry(
+			item_code=item_code,
+			qty=1000,
+			rate=100,
+			target=warehouse,
+			use_serial_batch_fields=True,
+			batch_no=ballast_batch,
+			posting_date=add_days(today(), -730),
+			posting_time="10:00:00",
+		)
+		make_stock_entry(
+			item_code=item_code,
+			qty=100,
+			rate=100,
+			target=warehouse,
+			use_serial_batch_fields=True,
+			batch_no=batch_no,
+			posting_date=add_days(today(), -365),
+			posting_time="10:00:00",
+		)
+		with patch.object(SerialandBatchBundle, "validate_negative_batch"):
+			make_stock_entry(
+				item_code=item_code,
+				qty=5,
+				source=warehouse,
+				use_serial_batch_fields=True,
+				batch_no=batch_no,
+				posting_date=add_days(today(), -730),
+				posting_time="11:00:00",
+			)
+		self._disable_negative_stock()
+
+		make_stock_entry(
+			item_code=item_code,
+			qty=10,
+			source=warehouse,
+			use_serial_batch_fields=True,
+			batch_no=batch_no,
+		)
+
+		outward = make_stock_entry(
+			item_code=item_code,
+			qty=200,
+			source=warehouse,
+			use_serial_batch_fields=True,
+			batch_no=batch_no,
+			do_not_submit=True,
+		)
+		self.assertRaises(BatchNegativeStockError, outward.submit)
+
+	def test_backdated_outward_cannot_make_future_batch_stock_negative(self):
+		from erpnext.stock.stock_ledger import NegativeStockError
+
+		item_code = "Test Future Neg Batch Item"
+		ballast_batch, batch_no = "TFNB-BALLAST-001", "TFNB-BATCH-001"
+		self._setup_negative_batch_item(item_code, [ballast_batch, batch_no])
+		warehouse = "_Test Warehouse - _TC"
+
+		make_stock_entry(
+			item_code=item_code,
+			qty=1000,
+			rate=100,
+			target=warehouse,
+			use_serial_batch_fields=True,
+			batch_no=ballast_batch,
+			posting_date=add_days(today(), -365),
+			posting_time="10:00:00",
+		)
+		make_stock_entry(
+			item_code=item_code,
+			qty=100,
+			rate=100,
+			target=warehouse,
+			use_serial_batch_fields=True,
+			batch_no=batch_no,
+			posting_date=add_days(today(), -365),
+			posting_time="11:00:00",
+		)
+		make_stock_entry(
+			item_code=item_code,
+			qty=90,
+			source=warehouse,
+			use_serial_batch_fields=True,
+			batch_no=batch_no,
+			posting_date=add_days(today(), -180),
+			posting_time="10:00:00",
+		)
+		make_stock_entry(
+			item_code=item_code,
+			qty=60,
+			rate=100,
+			target=warehouse,
+			use_serial_batch_fields=True,
+			batch_no=batch_no,
+			posting_date=add_days(today(), -30),
+			posting_time="10:00:00",
+		)
+
+		make_stock_entry(
+			item_code=item_code,
+			qty=5,
+			source=warehouse,
+			use_serial_batch_fields=True,
+			batch_no=batch_no,
+			posting_date=add_days(today(), -240),
+			posting_time="10:00:00",
+		)
+
+		backdated = make_stock_entry(
+			item_code=item_code,
+			qty=50,
+			source=warehouse,
+			use_serial_batch_fields=True,
+			batch_no=batch_no,
+			posting_date=add_days(today(), -240),
+			posting_time="11:00:00",
+			do_not_submit=True,
+		)
+		self.assertRaises(NegativeStockError, backdated.submit)
+
 
 def get_batch_from_bundle(bundle):
 	from erpnext.stock.serial_batch_bundle import get_batch_nos
