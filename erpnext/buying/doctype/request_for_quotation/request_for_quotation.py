@@ -15,11 +15,11 @@ from frappe.utils import get_url
 from frappe.utils.print_format import download_pdf
 from frappe.utils.user import get_user_fullname
 
-<<<<<<< HEAD
-from erpnext.accounts.party import _get_party_details, get_party_account_currency
-=======
-from erpnext.accounts.party import validate_party_frozen_disabled
->>>>>>> 4bf65ffc1d (fix: block disabled/frozen suppliers on Request for Quotation)
+from erpnext.accounts.party import (
+	_get_party_details,
+	get_party_account_currency,
+	validate_party_frozen_disabled,
+)
 from erpnext.buying.utils import validate_for_items
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.stock.doctype.material_request.material_request import set_missing_values
