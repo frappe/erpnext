@@ -784,14 +784,24 @@ class TestItem(ERPNextTestSuite):
 			"Test Item UOM", {"stock_uom": "Gram", "uoms": [dict(uom="Carat"), dict(uom="Kg")]}
 		)
 
-		for d in item_doc.uoms:
-			value = get_uom_conv_factor(d.uom, item_doc.stock_uom)
-			d.conversion_factor = value
-
 		self.assertEqual(item_doc.uoms[0].uom, "Carat")
 		self.assertEqual(item_doc.uoms[0].conversion_factor, 0.2)
 		self.assertEqual(item_doc.uoms[1].uom, "Kg")
 		self.assertEqual(item_doc.uoms[1].conversion_factor, 1000)
+
+	def test_item_uom_conversion_factor_overrides_global_factor(self):
+		custom_factor = 10.76
+		global_factor = get_uom_conv_factor("Square Meter", "Square Foot")
+		self.assertNotEqual(custom_factor, global_factor)
+
+		item = make_item(
+			properties={"stock_uom": "Square Foot"},
+			uoms=[{"uom": "Square Meter", "conversion_factor": custom_factor}],
+		)
+		item.reload()
+
+		conversion_factor = next(row.conversion_factor for row in item.uoms if row.uom == "Square Meter")
+		self.assertEqual(conversion_factor, custom_factor)
 
 	def test_uom_conv_intermediate(self):
 		factor = get_uom_conv_factor("Pound", "Gram")
