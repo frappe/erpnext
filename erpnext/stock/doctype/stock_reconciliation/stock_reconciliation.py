@@ -1179,12 +1179,15 @@ def get_item_and_warehouses(item_code, warehouse):
 	from frappe.utils.nestedset import get_descendants_of
 
 	items = []
+	stock_uom = frappe.get_cached_value("Item", item_code, "stock_uom")
 	if frappe.get_cached_value("Warehouse", warehouse, "is_group"):
 		childrens = get_descendants_of("Warehouse", warehouse, ignore_permissions=True, order_by="lft")
 		for ch_warehouse in childrens:
-			items.append(frappe._dict({"item_code": item_code, "warehouse": ch_warehouse}))
+			items.append(
+				frappe._dict({"item_code": item_code, "warehouse": ch_warehouse, "stock_uom": stock_uom})
+			)
 	else:
-		items = [frappe._dict({"item_code": item_code, "warehouse": warehouse})]
+		items = [frappe._dict({"item_code": item_code, "warehouse": warehouse, "stock_uom": stock_uom})]
 
 	return items
 
@@ -1194,7 +1197,8 @@ def get_items_for_stock_reco(warehouse, company):
 	items = frappe.db.sql(
 		f"""
 		select
-			i.name as item_code, i.item_name, bin.warehouse as warehouse, i.has_serial_no, i.has_batch_no
+			i.name as item_code, i.item_name, bin.warehouse as warehouse, i.has_serial_no, i.has_batch_no,
+			i.stock_uom
 		from
 			`tabBin` bin, `tabItem` i
 		where
@@ -1212,7 +1216,8 @@ def get_items_for_stock_reco(warehouse, company):
 	items += frappe.db.sql(
 		"""
 		select
-			i.name as item_code, i.item_name, id.default_warehouse as warehouse, i.has_serial_no, i.has_batch_no
+			i.name as item_code, i.item_name, id.default_warehouse as warehouse, i.has_serial_no,
+			i.has_batch_no, i.stock_uom
 		from
 			`tabItem` i, `tabItem Default` id
 		where
@@ -1258,6 +1263,7 @@ def get_item_data(row, qty, valuation_rate, serial_no=None):
 		"current_serial_no": serial_no,
 		"serial_no": serial_no,
 		"batch_no": row.get("batch_no"),
+		"stock_uom": row.get("stock_uom"),
 	}
 
 
@@ -1285,6 +1291,7 @@ def get_itemwise_batch(warehouse, posting_date, company, item_code=None):
 					"valuation_rate": row[9],
 					"item_name": row[1],
 					"batch_no": row[4],
+					"stock_uom": row[11],
 				}
 			)
 		)

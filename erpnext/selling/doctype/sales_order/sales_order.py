@@ -1331,8 +1331,8 @@ def get_qty_net_of_returns(so_item) -> float:
 def make_sales_invoice(
 	source_name: str,
 	target_doc: str | dict | Document | None = None,
-	ignore_permissions: bool = False,
 	args: str | dict | None = None,
+	ignore_permissions: bool = False,
 ):
 	if args is None:
 		args = {}
