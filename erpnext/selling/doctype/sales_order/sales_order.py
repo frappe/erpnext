@@ -349,7 +349,15 @@ class SalesOrder(SellingController):
 		return frappe.db.exists("Item", {"name": ["in", bundle_items], "is_stock_item": 1}) is not None
 
 	def set_skip_delivery_note(self):
+		if self.order_type == "Maintenance":
+			return
+
 		if not frappe.get_single_value("Selling Settings", "skip_delivery_note_for_service_items"):
+			for d in self.get("items"):
+				d.skip_delivery = 0
+
+			if self.order_type == "Sales":
+				self.skip_delivery_note = 0
 			return
 
 		for d in self.get("items"):
