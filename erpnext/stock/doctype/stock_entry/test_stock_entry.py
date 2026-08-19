@@ -61,6 +61,71 @@ class TestStockEntry(ERPNextTestSuite):
 		self.load_test_records("Stock Entry")
 		frappe.local.flags.dont_execute_stock_reposts = False
 
+	def test_subcontracting_inward_warehouse_direction(self):
+		source_warehouse = "_Test Warehouse - _TC"
+		target_warehouse = "_Test Warehouse 1 - _TC"
+
+		for purpose in ("Return Raw Material to Customer", "Subcontracting Delivery"):
+			with self.subTest(purpose=purpose):
+				stock_entry = frappe.new_doc("Stock Entry")
+				stock_entry.purpose = purpose
+				stock_entry.from_warehouse = source_warehouse
+				stock_entry.to_warehouse = target_warehouse
+				stock_entry.append(
+					"items",
+					{
+						"item_code": "_Test Item",
+						"t_warehouse": target_warehouse,
+						"cost_center": "Main - _TC",
+					},
+				)
+
+				stock_entry.before_validate()
+
+				self.assertEqual(stock_entry.from_warehouse, source_warehouse)
+				self.assertIsNone(stock_entry.to_warehouse)
+				self.assertEqual(stock_entry.items[0].s_warehouse, source_warehouse)
+				self.assertIsNone(stock_entry.items[0].t_warehouse)
+
+		for purpose in ("Receive from Customer", "Subcontracting Return"):
+			with self.subTest(purpose=purpose):
+				stock_entry = frappe.new_doc("Stock Entry")
+				stock_entry.purpose = purpose
+				stock_entry.from_warehouse = source_warehouse
+				stock_entry.to_warehouse = target_warehouse
+				stock_entry.append(
+					"items",
+					{
+						"item_code": "_Test Item",
+						"s_warehouse": source_warehouse,
+						"cost_center": "Main - _TC",
+					},
+				)
+
+				stock_entry.before_validate()
+
+				self.assertIsNone(stock_entry.from_warehouse)
+				self.assertEqual(stock_entry.to_warehouse, target_warehouse)
+				self.assertIsNone(stock_entry.items[0].s_warehouse)
+				self.assertEqual(stock_entry.items[0].t_warehouse, target_warehouse)
+
+	def test_subcontracting_inward_warehouse_is_mandatory(self):
+		purposes = {
+			"Return Raw Material to Customer": "Source Warehouse is required",
+			"Subcontracting Delivery": "Source Warehouse is required",
+			"Receive from Customer": "Target Warehouse is required",
+			"Subcontracting Return": "Target Warehouse is required",
+		}
+
+		for purpose, message in purposes.items():
+			with self.subTest(purpose=purpose):
+				stock_entry = frappe.new_doc("Stock Entry")
+				stock_entry.purpose = purpose
+				stock_entry.append("items", {"item_code": "_Test Item"})
+
+				with self.assertRaisesRegex(frappe.ValidationError, message):
+					stock_entry.validate()
+
 	def test_stock_entry_qty(self):
 		item_code = "_Test Item 2"
 		warehouse = "_Test Warehouse - _TC"
@@ -945,6 +1010,42 @@ class TestStockEntry(ERPNextTestSuite):
 		stock_entry.items[0].qty = 0.002
 		with self.assertRaises(frappe.ValidationError):
 			service._validate_no_excess_transfer()
+
+	def test_tracked_consumption_deducts_matching_attribution_bucket(self):
+		from erpnext.stock.doctype.stock_entry.services.manufacturing import ManufactureStockEntry
+
+		service = ManufactureStockEntry(frappe._dict())
+		serial_buckets = [
+			frappe._dict(qty=2, serial_nos=["SERIAL-1", "SERIAL-2"]),
+			frappe._dict(qty=2, serial_nos=["SERIAL-3", "SERIAL-4"]),
+		]
+		service._deduct_consumed_serial_nos(serial_buckets, ["SERIAL-3"])
+		self.assertEqual([bucket.qty for bucket in serial_buckets], [2, 1])
+		self.assertEqual(serial_buckets[1].serial_nos, ["SERIAL-4"])
+
+		batch_buckets = [
+			frappe._dict(qty=2, batches={"BATCH-1": 2}),
+			frappe._dict(qty=3, batches={"BATCH-2": 3}),
+		]
+		service._deduct_consumed_batch_qty(batch_buckets, "BATCH-2", 1)
+		self.assertEqual([bucket.qty for bucket in batch_buckets], [2, 2])
+		self.assertEqual(batch_buckets[1].batches["BATCH-2"], 2)
+
+	def test_consumption_prefers_exact_attribution_bucket(self):
+		from erpnext.stock.doctype.stock_entry.services.manufacturing import ManufactureStockEntry
+
+		service = ManufactureStockEntry(frappe._dict())
+		alternative = frappe._dict(original_item="REQUIRED-ITEM")
+		direct = frappe._dict(original_item=None)
+		service.available_materials = frappe._dict(
+			{("ITEM", "WIP", "REQUIRED-ITEM"): alternative, ("ITEM", "WIP", None): direct}
+		)
+
+		legacy_row = frappe._dict(item_code="ITEM", warehouse="WIP", original_item=None)
+		self.assertEqual(service._get_available_buckets(legacy_row), [direct, alternative])
+
+		attributed_row = frappe._dict(item_code="ITEM", warehouse="WIP", original_item="REQUIRED-ITEM")
+		self.assertEqual(service._get_available_buckets(attributed_row), [alternative])
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"material_consumption": 1})
 	def test_work_order_manufacture_with_material_consumption(self):

@@ -662,13 +662,16 @@ class StatusUpdater(Document):
 		update_data = {}
 
 		if args.get("target_parent_field"):
-			update_data[args.get("target_parent_field")] = self._calculate_target_parent_percentage(
-				args["name"],
-				args["target_parent_dt"],
-				args["target_dt"],
-				args["target_ref_field"],
-				args["target_field"],
-			)
+			if args.get("billing_percentage") is not None:
+				update_data[args.get("target_parent_field")] = args["billing_percentage"]
+			else:
+				update_data[args.get("target_parent_field")] = self._calculate_target_parent_percentage(
+					args["name"],
+					args["target_parent_dt"],
+					args["target_dt"],
+					args["target_ref_field"],
+					args["target_field"],
+				)
 			# update field
 			if args.get("status_field"):
 				update_data[args.get("status_field")] = self._determine_status(

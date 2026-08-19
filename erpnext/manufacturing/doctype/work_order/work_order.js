@@ -1053,6 +1053,15 @@ erpnext.work_order = {
 		return flt(max, precision("qty"));
 	},
 
+	get_pending_operation_process_loss: (frm) => {
+		if (!(frm.doc.operations || []).length) {
+			return 0;
+		}
+
+		const total_loss = Math.max(...frm.doc.operations.map((row) => flt(row.process_loss_qty)));
+		return flt(Math.max(total_loss - flt(frm.doc.process_loss_qty), 0), precision("qty"));
+	},
+
 	get_max_requestable_qty: (frm) => {
 		const required = {};
 		const covered = {};
@@ -1129,6 +1138,11 @@ erpnext.work_order = {
 
 	show_prompt_for_qty_input: function (frm, purpose, { qty, additional_transfer_entry, target } = {}) {
 		let max = qty == null ? this.get_max_transferable_qty(frm, purpose) : qty;
+		if (purpose === "Manufacture") {
+			max = flt(Math.max(max - flt(frm.doc.process_loss_qty), 0), precision("qty"));
+		}
+		const pending_process_loss =
+			purpose === "Manufacture" ? this.get_pending_operation_process_loss(frm) : 0;
 
 		let fields = [
 			{
@@ -1137,23 +1151,36 @@ erpnext.work_order = {
 				fieldname: "qty",
 				description: __("Max: {0}", [max]),
 				default: max,
+				onchange: function () {
+					if (pending_process_loss && frm.qty_prompt) {
+						frm.qty_prompt.set_value(
+							"finished_good_qty",
+							flt(Math.max(flt(this.value) - pending_process_loss, 0), precision("qty"))
+						);
+					}
+				},
 			},
 		];
 
-		if (!additional_transfer_entry && !target) {
-			fields.push({
-				fieldtype: "Check",
-				label: __("Consider Process Loss"),
-				fieldname: "consider_process_loss",
-				default: 0,
-				onchange: function () {
-					if (this.value) {
-						frm.qty_prompt.set_value("qty", max - frm.doc.process_loss_qty);
-					} else {
-						frm.qty_prompt.set_value("qty", max);
-					}
+		if (pending_process_loss) {
+			fields.push(
+				{
+					fieldtype: "Float",
+					label: __("Process Loss Qty"),
+					fieldname: "process_loss_qty",
+					default: pending_process_loss,
+					read_only: 1,
+					description: __("Process loss booked against the operations of this work order."),
 				},
-			});
+				{
+					fieldtype: "Float",
+					label: __("Finished Good Qty"),
+					fieldname: "finished_good_qty",
+					default: flt(Math.max(max - pending_process_loss, 0), precision("qty")),
+					read_only: 1,
+					description: __("Actual quantity of the finished good that will be manufactured."),
+				}
+			);
 		}
 
 		return new Promise((resolve, reject) => {
