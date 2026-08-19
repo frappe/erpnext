@@ -17,6 +17,7 @@ from erpnext.buying.doctype.request_for_quotation.request_for_quotation import (
 from erpnext.controllers.accounts_controller import InvalidQtyError
 from erpnext.crm.doctype.opportunity.opportunity import make_request_for_quotation as make_rfq
 from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
+from erpnext.exceptions import PartyDisabled
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.templates.pages.rfq import check_supplier_has_docname_access
 from erpnext.tests.utils import ERPNextTestSuite
@@ -57,6 +58,17 @@ class TestRequestforQuotation(ERPNextTestSuite):
 
 		self.assertEqual(rfq.get("suppliers")[0].quote_status, "Received")
 		self.assertEqual(rfq.get("suppliers")[1].quote_status, "Pending")
+
+	def test_rfq_blocked_for_disabled_supplier(self):
+		frappe.db.set_value("Supplier", "_Test Supplier", "disabled", 1)
+		rfq = make_request_for_quotation(
+			supplier_data=[{"supplier": "_Test Supplier", "supplier_name": "_Test Supplier"}],
+			do_not_save=True,
+		)
+		self.assertRaises(PartyDisabled, rfq.save)
+
+		frappe.db.set_value("Supplier", "_Test Supplier", "disabled", 0)
+		rfq.save()
 
 	def test_make_supplier_quotation(self):
 		rfq = make_request_for_quotation()
