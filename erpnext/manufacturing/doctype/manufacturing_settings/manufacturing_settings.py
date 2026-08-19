@@ -24,7 +24,6 @@ class ManufacturingSettings(Document):
 		allow_production_on_holidays: DF.Check
 		backflush_raw_materials_based_on: DF.Literal["BOM", "Material Transferred for Manufacture"]
 		capacity_planning_for_days: DF.Int
-		component_qty_tolerance: DF.Percent
 		disable_capacity_planning: DF.Check
 		enforce_time_logs: DF.Check
 		get_rm_cost_from_consumption_entry: DF.Check

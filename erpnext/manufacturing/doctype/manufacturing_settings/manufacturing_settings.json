@@ -12,7 +12,6 @@
   "column_break_3",
   "backflush_raw_materials_based_on",
   "validate_components_quantities_per_bom",
-  "component_qty_tolerance",
   "action_on_component_qty_breach",
   "bom_section",
   "update_bom_costs_automatically",
@@ -205,13 +204,6 @@
    "label": "Validate Components and Quantities Per BOM"
   },
   {
-   "depends_on": "eval:doc.validate_components_quantities_per_bom",
-   "description": "Allowed variance between consumed and BOM quantity. 0 means the quantities must match exactly. Can be overridden per BOM.",
-   "fieldname": "component_qty_tolerance",
-   "fieldtype": "Percent",
-   "label": "Component Qty Tolerance (%)"
-  },
-  {
    "default": "Stop",
    "depends_on": "eval:doc.validate_components_quantities_per_bom",
    "fieldname": "action_on_component_qty_breach",
@@ -261,7 +253,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-08-18 11:00:00.000000",
+ "modified": "2026-08-19 13:30:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing Settings",

@@ -1038,7 +1038,7 @@ def get_production_item_details(work_order=None, bom_no=None):
 def _check_bom_component_qty(doc, bom_items):
 	"""Validate that stock entry items match BOM quantities within the allowed tolerance."""
 	precision = frappe.get_precision("Stock Entry Detail", "qty")
-	tolerance = _get_component_qty_tolerance(doc.bom_no)
+	tolerance = flt(frappe.get_cached_value("BOM", doc.bom_no, "component_qty_tolerance"))
 
 	for row in _get_expected_component_qty(doc, bom_items):
 		matched_item = next(
@@ -1077,12 +1077,6 @@ def _get_expected_component_qty(doc, bom_items):
 			expected[row.item_code] = row
 
 	return list(expected.values())
-
-
-def _get_component_qty_tolerance(bom_no):
-	return flt(frappe.get_cached_value("BOM", bom_no, "component_qty_tolerance")) or flt(
-		frappe.db.get_single_value("Manufacturing Settings", "component_qty_tolerance")
-	)
 
 
 def _get_component_qty_message(doc, row, tolerance):

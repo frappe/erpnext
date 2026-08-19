@@ -767,7 +767,7 @@
    "show_description_on_click": 1
   },
   {
-   "description": "Allowed variance between consumed and BOM quantity when 'Validate Components and Quantities Per BOM' is enabled. If set, overrides the tolerance from Manufacturing Settings; if 0, the Manufacturing Settings tolerance applies.",
+   "description": "Allowed variance between consumed and BOM quantity when 'Validate Components and Quantities Per BOM' is enabled. 0 means the quantities must match exactly.",
    "fieldname": "component_qty_tolerance",
    "fieldtype": "Percent",
    "label": "Component Qty Tolerance (%)",
@@ -779,7 +779,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-19 13:00:00.000000",
+ "modified": "2026-08-19 13:30:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",

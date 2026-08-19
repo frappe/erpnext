@@ -1198,11 +1198,10 @@ class TestBOM(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, _check_bom_component_qty, doc, get_bom_items(bom.name, 0))
 
-		frappe.db.set_single_value("Manufacturing Settings", "component_qty_tolerance", 5)
-		self.addCleanup(frappe.db.set_single_value, "Manufacturing Settings", "component_qty_tolerance", 0)
+		frappe.db.set_value("BOM", bom.name, "component_qty_tolerance", 5)
 		_check_bom_component_qty(doc, get_bom_items(bom.name, 0))
 
-		frappe.db.set_single_value("Manufacturing Settings", "component_qty_tolerance", 0)
+		frappe.db.set_value("BOM", bom.name, "component_qty_tolerance", 0)
 		frappe.db.set_single_value("Manufacturing Settings", "action_on_component_qty_breach", "Warn")
 		self.addCleanup(
 			frappe.db.set_single_value, "Manufacturing Settings", "action_on_component_qty_breach", "Stop"
