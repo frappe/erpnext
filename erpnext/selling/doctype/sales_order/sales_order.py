@@ -356,8 +356,7 @@ class SalesOrder(SellingController):
 			for d in self.get("items"):
 				d.skip_delivery = 0
 
-			if self.order_type == "Sales":
-				self.skip_delivery_note = 0
+			self.skip_delivery_note = 0
 			return
 
 		for d in self.get("items"):
@@ -365,7 +364,7 @@ class SalesOrder(SellingController):
 
 		if self.get("items") and all(d.skip_delivery for d in self.get("items")):
 			self.skip_delivery_note = 1
-		elif self.order_type == "Sales":
+		else:
 			self.skip_delivery_note = 0
 
 	def requires_delivery(self, row):
