@@ -14,6 +14,8 @@ from frappe.utils import flt
 
 from erpnext.stock.get_item_details import get_item_details, get_price_list_rate
 
+WAREHOUSE_FIELDNAMES = ("warehouse", "target_warehouse")
+
 
 class PackedItem(Document):
 	# begin: auto-generated types
@@ -72,6 +74,7 @@ def make_packing_list(doc):
 	set_price_from_children = frappe.get_single_value("Selling Settings", "editable_bundle_item_rates")
 
 	stale_packed_items_table = get_indexed_packed_items_table(doc)
+	stale_item_warehouses = get_stale_item_warehouses(doc)
 
 	reset = reset_packing_list(doc)
 
@@ -96,7 +99,9 @@ def make_packing_list(doc):
 				pi_row.product_bundle = bundle_name
 				item_data = get_packed_item_details(bundle_item.item_code, doc.company)
 				update_packed_item_basic_data(item_row, pi_row, bundle_item, item_data)
-				update_packed_item_stock_data(item_row, pi_row, bundle_item, item_data, doc)
+				update_packed_item_stock_data(
+					item_row, pi_row, bundle_item, item_data, doc, stale_item_warehouses
+				)
 				update_packed_item_price_data(pi_row, item_data, doc)
 
 				if item_row.get("against_pick_list"):
@@ -115,6 +120,38 @@ def is_product_bundle(item_code: str) -> bool:
 	from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
 
 	return bool(get_active_product_bundle(item_code))
+
+
+def get_stale_item_warehouses(doc):
+	"""Warehouses each bundle item row carried when the document was last saved.
+
+	Used to tell a packed row that was following its bundle item from one that was
+	moved to a warehouse of its own.
+	"""
+	doc_before_save = doc.get_doc_before_save()
+	if not doc_before_save:
+		return {}
+
+	return {
+		item.name: {fieldname: item.get(fieldname) for fieldname in WAREHOUSE_FIELDNAMES}
+		for item in doc_before_save.get("items")
+	}
+
+
+def keep_following_bundle_item(pi_row, main_item_row, stale_warehouses, fieldname, packed_default=None):
+	"""Move a packed row along with its bundle item, unless it was moved on its own."""
+	warehouse = main_item_row.get(fieldname)
+	stale_warehouse = stale_warehouses.get(fieldname)
+	if not warehouse or warehouse == stale_warehouse:
+		return
+
+	# a bundle item that had no warehouse of its own was never something to be matched to,
+	# so a row still sitting on the packed item's default is following rather than placed
+	followed_warehouse = stale_warehouse or packed_default
+	if not followed_warehouse or pi_row.get(fieldname) != followed_warehouse:
+		return
+
+	pi_row.set(fieldname, warehouse)
 
 
 def get_indexed_packed_items_table(doc):
@@ -276,7 +313,9 @@ def update_packed_item_basic_data(main_item_row, pi_row, packing_item, item_data
 		pi_row.description = packing_item.get("description")
 
 
-def update_packed_item_stock_data(main_item_row, pi_row, packing_item, item_data, doc):
+def update_packed_item_stock_data(
+	main_item_row, pi_row, packing_item, item_data, doc, stale_item_warehouses=None
+):
 	# TODO batch_no, actual_batch_qty, incoming_rate
 	if main_item_row.get("so_detail"):
 		pi_row.warehouse = frappe.get_value(
@@ -299,6 +338,14 @@ def update_packed_item_stock_data(main_item_row, pi_row, packing_item, item_data
 
 	if not pi_row.target_warehouse:
 		pi_row.target_warehouse = main_item_row.get("target_warehouse")
+
+	# a row still sitting where the bundle item was keeps following it; one that was
+	# moved somewhere of its own is left alone
+	stale_warehouses = (stale_item_warehouses or {}).get(main_item_row.get("name")) or {}
+	keep_following_bundle_item(
+		pi_row, main_item_row, stale_warehouses, "warehouse", item_data.default_warehouse
+	)
+	keep_following_bundle_item(pi_row, main_item_row, stale_warehouses, "target_warehouse")
 
 	bin = get_packed_item_bin_qty(packing_item.item_code, pi_row.warehouse)
 	pi_row.actual_qty = flt(bin.get("actual_qty"))

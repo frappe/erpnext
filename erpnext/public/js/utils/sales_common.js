@@ -120,6 +120,7 @@ erpnext.sales_common = {
 
 				this.toggle_editable_price_list_rate();
 				this.change_warehouse_labels_for_return();
+				this.snapshot_item_warehouses();
 			}
 
 			company() {
@@ -285,7 +286,42 @@ erpnext.sales_common = {
 					frappe.model.set_value(cdt, cdn, "incoming_rate", 0.0);
 				}
 
+				this.move_packed_items_along(cdt, cdn, "warehouse");
 				this.set_actual_qty(doc, cdt, cdn);
+			}
+
+			target_warehouse(doc, cdt, cdn) {
+				this.move_packed_items_along(cdt, cdn, "target_warehouse");
+			}
+
+			snapshot_item_warehouses() {
+				// what each item row carried before the edit, to tell a packed row that was
+				// following its bundle item from one moved to a warehouse of its own
+				this._item_warehouses = {};
+				for (const item of this.frm.doc.items || []) {
+					this._item_warehouses[item.name] = {
+						warehouse: item.warehouse,
+						target_warehouse: item.target_warehouse,
+					};
+				}
+			}
+
+			move_packed_items_along(cdt, cdn, fieldname) {
+				// mirrors `keep_following_bundle_item` in packed_item.py, so the grid shows
+				// now what the next save would have done anyway. a row left on the packed
+				// item's own default is left to the save, which knows what that default is
+				const row = locals[cdt][cdn];
+				const stale = (this._item_warehouses || {})[row.name] || {};
+				const stale_warehouse = stale[fieldname];
+				this.snapshot_item_warehouses();
+
+				if (!stale_warehouse || row[fieldname] === stale_warehouse) return;
+
+				for (const packed of this.frm.doc.packed_items || []) {
+					if (packed.parent_detail_docname === row.name && packed[fieldname] === stale_warehouse) {
+						frappe.model.set_value(packed.doctype, packed.name, fieldname, row[fieldname]);
+					}
+				}
 			}
 
 			set_actual_qty(doc, cdt, cdn) {
