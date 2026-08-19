@@ -38,10 +38,13 @@ frappe.query_reports["General Ledger"] = {
 			label: __("Account"),
 			fieldtype: "MultiSelectList",
 			options: "Account",
-			get_data: function (txt) {
-				return frappe.db.get_link_options("Account", txt, {
-					company: frappe.query_report.get_filter_value("company"),
-				});
+			get_data: function (txt, for_select_all) {
+				return frappe.db.get_link_options(
+					"Account",
+					txt,
+					{ company: frappe.query_report.get_filter_value("company") },
+					for_select_all ? 25000 : undefined
+				);
 			},
 		},
 		{
@@ -75,13 +78,13 @@ frappe.query_reports["General Ledger"] = {
 			fieldtype: "MultiSelectList",
 			options: "party_type",
 			depends_on: "party_type",
-			get_data: function (txt) {
+			get_data: function (txt, for_select_all) {
 				if (!frappe.query_report.filters) return;
 
 				let party_type = frappe.query_report.get_filter_value("party_type");
 				if (!party_type) return;
 
-				return frappe.db.get_link_options(party_type, txt);
+				return frappe.db.get_link_options(party_type, txt, {}, for_select_all ? 25000 : undefined);
 			},
 			on_change: function () {
 				var party_type = frappe.query_report.get_filter_value("party_type");
@@ -154,10 +157,13 @@ frappe.query_reports["General Ledger"] = {
 			label: __("Cost Center"),
 			fieldtype: "MultiSelectList",
 			options: "Cost Center",
-			get_data: function (txt) {
-				return frappe.db.get_link_options("Cost Center", txt, {
-					company: frappe.query_report.get_filter_value("company"),
-				});
+			get_data: function (txt, for_select_all) {
+				return frappe.db.get_link_options(
+					"Cost Center",
+					txt,
+					{ company: frappe.query_report.get_filter_value("company") },
+					for_select_all ? 25000 : undefined
+				);
 			},
 		},
 		{
@@ -165,10 +171,13 @@ frappe.query_reports["General Ledger"] = {
 			label: __("Project"),
 			fieldtype: "MultiSelectList",
 			options: "Project",
-			get_data: function (txt) {
-				return frappe.db.get_link_options("Project", txt, {
-					company: frappe.query_report.get_filter_value("company"),
-				});
+			get_data: function (txt, for_select_all) {
+				return frappe.db.get_link_options(
+					"Project",
+					txt,
+					{ company: frappe.query_report.get_filter_value("company") },
+					for_select_all ? 25000 : undefined
+				);
 			},
 		},
 		{
