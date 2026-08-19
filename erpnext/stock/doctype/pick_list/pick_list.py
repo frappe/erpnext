@@ -940,13 +940,20 @@ class PickList(TransactionBase):
 		bundle_locations = defaultdict(list)
 		for location in self.locations:
 			if location.product_bundle_item:
-				bundle_locations[(location.sales_order_item, location.item_code)].append(location)
+				bundle_locations[
+					(
+						location.sales_order_item,
+						location.item_code,
+						location.warehouse,
+						location.batch_no or "",
+					)
+				].append(location)
 
 		if not bundle_locations:
 			return
 
 		delivered_component_qty = self._get_delivered_bundle_component_qty(
-			{sales_order_item for sales_order_item, _item_code in bundle_locations}
+			{bundle_key[0] for bundle_key in bundle_locations}
 		)
 		updates = {}
 		for bundle_key, locations in bundle_locations.items():
@@ -970,7 +977,8 @@ class PickList(TransactionBase):
 		delivered_qty = defaultdict(float)
 		for parenttype in ("Delivery Note", "Sales Invoice"):
 			for row in self._get_delivered_packed_items(parenttype, sales_order_items):
-				delivered_qty[(row.so_detail, row.item_code)] += flt(row.delivered_qty)
+				key = (row.so_detail, row.item_code, row.warehouse, row.batch_no or "")
+				delivered_qty[key] += flt(row.delivered_qty)
 
 		return delivered_qty
 
@@ -1001,10 +1009,17 @@ class PickList(TransactionBase):
 			query.select(
 				transaction_item.so_detail,
 				packed_item.item_code,
+				packed_item.warehouse,
+				packed_item.batch_no,
 				Sum(packed_item.qty).as_("delivered_qty"),
 			)
 			.where(conditions)
-			.groupby(transaction_item.so_detail, packed_item.item_code)
+			.groupby(
+				transaction_item.so_detail,
+				packed_item.item_code,
+				packed_item.warehouse,
+				packed_item.batch_no,
+			)
 		).run(as_dict=True)
 
 	def _set_delivery_status_from_items(self):

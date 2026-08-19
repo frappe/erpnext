@@ -1278,6 +1278,59 @@ class TestPickList(ERPNextTestSuite):
 		self.assertEqual(pl.delivery_status, "Not Delivered")
 		self.assertEqual(pl.status, "Open")
 
+	def test_partial_bundle_delivery_with_split_pick_list_rows(self):
+		primary_warehouse = "_Test Warehouse - _TC"
+		secondary_warehouse = "_Test Warehouse 2 - _TC"
+		bundle, components = create_product_bundle([1, 1], warehouse=primary_warehouse)
+		make_stock_entry(item=components[0], to_warehouse=secondary_warehouse, qty=10)
+		so = make_sales_order(item_code=bundle, qty=3, rate=42)
+
+		pl = create_pick_list(so.name)
+		component_location = next(row for row in pl.locations if row.item_code == components[0])
+		component_location.qty = 1
+		component_location.stock_qty = 1
+		component_location.picked_qty = 1
+		pl.append(
+			"locations",
+			{
+				"item_code": component_location.item_code,
+				"warehouse": secondary_warehouse,
+				"qty": 2,
+				"stock_qty": 2,
+				"picked_qty": 2,
+				"uom": component_location.uom,
+				"conversion_factor": component_location.conversion_factor,
+				"stock_uom": component_location.stock_uom,
+				"sales_order": component_location.sales_order,
+				"sales_order_item": component_location.sales_order_item,
+				"product_bundle_item": component_location.product_bundle_item,
+			},
+		)
+		pl.pick_manually = 1
+		pl.save().submit()
+
+		dn = create_delivery_note(pl.name)
+		dn.items[0].qty = 1
+		dn.save().submit()
+		delivered_component = next(row for row in dn.packed_items if row.item_code == components[0])
+		self.assertEqual(delivered_component.warehouse, secondary_warehouse)
+
+		pl.reload()
+		for location in pl.locations:
+			if location.item_code == components[0]:
+				expected_qty = 1 if location.warehouse == secondary_warehouse else 0
+				self.assertEqual(location.delivered_qty, expected_qty)
+			else:
+				self.assertEqual(location.delivered_qty, 1)
+		self.assertEqual(pl.per_delivered, 33.333333)
+		self.assertEqual(pl.delivery_status, "Partly Delivered")
+		self.assertEqual(pl.status, "Partly Delivered")
+
+		dn.cancel()
+		pl.reload()
+		for location in pl.locations:
+			self.assertEqual(location.delivered_qty, 0)
+
 	def test_picklist_with_partial_bundles(self):
 		# from self.globalTestRecords
 		warehouse = "_Test Warehouse - _TC"
