@@ -280,7 +280,6 @@ def add_product_bundles_to_target(pick_list, target_doc, item_mapper, sales_orde
 		target_bundle_item.qty = pick_list._compute_picked_qty_for_bundle(
 			so_row, product_bundle_qty_map[value.item_code]
 		)
-		target_bundle_item.pick_list_item = value.pick_list_item
 		target_bundle_item.against_pick_list = pick_list.name
 		update_child_item(sales_order_item, target_bundle_item, target_doc)
 
