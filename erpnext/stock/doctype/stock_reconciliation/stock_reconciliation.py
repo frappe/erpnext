@@ -1179,12 +1179,15 @@ def get_item_and_warehouses(item_code, warehouse):
 	from frappe.utils.nestedset import get_descendants_of
 
 	items = []
+	stock_uom = frappe.get_cached_value("Item", item_code, "stock_uom")
 	if frappe.get_cached_value("Warehouse", warehouse, "is_group"):
 		childrens = get_descendants_of("Warehouse", warehouse, ignore_permissions=True, order_by="lft")
 		for ch_warehouse in childrens:
-			items.append(frappe._dict({"item_code": item_code, "warehouse": ch_warehouse}))
+			items.append(
+				frappe._dict({"item_code": item_code, "warehouse": ch_warehouse, "stock_uom": stock_uom})
+			)
 	else:
-		items = [frappe._dict({"item_code": item_code, "warehouse": warehouse})]
+		items = [frappe._dict({"item_code": item_code, "warehouse": warehouse, "stock_uom": stock_uom})]
 
 	return items
 
@@ -1209,6 +1212,7 @@ def get_items_for_stock_reco(warehouse, company):
 		as_dict=1,
 	)
 
+<<<<<<< HEAD
 	items += frappe.db.sql(
 		"""
 		select
@@ -1228,6 +1232,53 @@ def get_items_for_stock_reco(warehouse, company):
 	""",
 		(lft, rgt, company),
 		as_dict=1,
+=======
+	items = (
+		frappe.qb.from_(bin_dt)
+		.inner_join(item)
+		.on(item.name == bin_dt.item_code)
+		.select(
+			item.name.as_("item_code"),
+			item.item_name,
+			bin_dt.warehouse.as_("warehouse"),
+			item.has_serial_no,
+			item.has_batch_no,
+			item.stock_uom,
+		)
+		.where(
+			((item.disabled == 0) | item.disabled.isnull())
+			& (item.is_stock_item == 1)
+			& (item.has_variants == 0)
+			& bin_dt.warehouse.isin(warehouses_in_tree)
+		)
+		.run(as_dict=1)
+	)
+
+	# Item Default holds at most one row per (item, company) -- enforced at the app layer by
+	# Item.validate_item_defaults ("Cannot set multiple Item Defaults for a company"), though not by a
+	# DB-level unique constraint -- so the company filter already yields one row per item and the
+	# original `group by i.name` (an arbitrary-row collapse) is a no-op for valid data.
+	items += (
+		frappe.qb.from_(item)
+		.inner_join(item_default)
+		.on(item.name == item_default.parent)
+		.select(
+			item.name.as_("item_code"),
+			item.item_name,
+			item_default.default_warehouse.as_("warehouse"),
+			item.has_serial_no,
+			item.has_batch_no,
+			item.stock_uom,
+		)
+		.where(
+			item_default.default_warehouse.isin(warehouses_in_tree)
+			& (item.is_stock_item == 1)
+			& (item.has_variants == 0)
+			& ((item.disabled == 0) | item.disabled.isnull())
+			& (item_default.company == company)
+		)
+		.run(as_dict=1)
+>>>>>>> 3a6e17a03d (fix(stock): fetch item stock UOM in stock reconciliation (#58284))
 	)
 
 	# remove duplicates
@@ -1258,6 +1309,7 @@ def get_item_data(row, qty, valuation_rate, serial_no=None):
 		"current_serial_no": serial_no,
 		"serial_no": serial_no,
 		"batch_no": row.get("batch_no"),
+		"stock_uom": row.get("stock_uom"),
 	}
 
 
@@ -1285,6 +1337,7 @@ def get_itemwise_batch(warehouse, posting_date, company, item_code=None):
 					"valuation_rate": row[9],
 					"item_name": row[1],
 					"batch_no": row[4],
+					"stock_uom": row[11],
 				}
 			)
 		)
