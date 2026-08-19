@@ -1098,6 +1098,52 @@ class TestBOM(ERPNextTestSuite):
 		)
 
 	@timeout
+	def test_percentage_based_component_quantities(self):
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm1 = make_item(properties={"is_stock_item": 1, "valuation_rate": 100.0}).name
+		rm2 = make_item(properties={"is_stock_item": 1, "valuation_rate": 100.0}).name
+		rm3 = make_item(properties={"is_stock_item": 1, "valuation_rate": 100.0}).name
+
+		bom = frappe.new_doc("BOM")
+		bom.company = "_Test Company"
+		bom.item = fg_item
+		bom.quantity = 200
+		bom.set_qty_based_on_percentage = 1
+		bom.append("items", {"item_code": rm1, "percentage": 40, "qty": 1})
+		bom.append("items", {"item_code": rm2, "percentage": 35, "qty": 1})
+		bom.append("items", {"item_code": rm3, "is_balance_item": 1, "qty": 1})
+		bom.insert()
+
+		self.assertEqual(flt(bom.items[0].qty), 80)
+		self.assertEqual(flt(bom.items[1].qty), 70)
+		self.assertEqual(flt(bom.items[2].percentage), 25)
+		self.assertEqual(flt(bom.items[2].qty), 50)
+
+	@timeout
+	def test_percentage_total_must_be_100(self):
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm1 = make_item(properties={"is_stock_item": 1, "valuation_rate": 100.0}).name
+		rm2 = make_item(properties={"is_stock_item": 1, "valuation_rate": 100.0}).name
+
+		bom = frappe.new_doc("BOM")
+		bom.company = "_Test Company"
+		bom.item = fg_item
+		bom.quantity = 100
+		bom.set_qty_based_on_percentage = 1
+		bom.append("items", {"item_code": rm1, "percentage": 40, "qty": 1})
+		bom.append("items", {"item_code": rm2, "percentage": 30, "qty": 1})
+
+		self.assertRaises(frappe.ValidationError, bom.insert)
+
+		bom.items[1].percentage = 0
+		self.assertRaises(frappe.ValidationError, bom.insert)
+
+		bom.items[1].percentage = 60
+		bom.with_operations = 1
+		bom.track_semi_finished_goods = 1
+		self.assertRaisesRegex(frappe.ValidationError, "Track Semi Finished Goods", bom.insert)
+
+	@timeout
 	def test_final_operation_must_produce_the_bom_item(self):
 		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
 		from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation

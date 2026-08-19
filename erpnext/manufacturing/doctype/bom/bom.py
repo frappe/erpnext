@@ -184,6 +184,7 @@ class BOM(WebsiteGenerator):
 		routing: DF.Link | None
 		secondary_items: DF.Table[BOMSecondaryItem]
 		secondary_items_cost: DF.Currency
+		set_qty_based_on_percentage: DF.Check
 		set_rate_of_sub_assembly_item_based_on_bom: DF.Check
 		show_in_website: DF.Check
 		show_items: DF.Check
@@ -321,6 +322,7 @@ class BOM(WebsiteGenerator):
 		self.validate_uom_is_interger()
 
 	def _validate_materials_and_cost(self):
+		self.set_qty_from_percentage()
 		self.set_bom_material_details()
 		self.set_secondary_items_details()
 		self.validate_materials()
@@ -700,6 +702,82 @@ class BOM(WebsiteGenerator):
 
 		if not self.quantity:
 			frappe.throw(_("Quantity should be greater than 0"))
+
+	def set_qty_from_percentage(self):
+		if not self.set_qty_based_on_percentage or not self.get("items"):
+			return
+
+		if self.track_semi_finished_goods:
+			frappe.throw(
+				_(
+					"'Set Component Quantities Based On Percentage' cannot be used together with 'Track Semi Finished Goods', as the component rows are derived from the operation BOMs."
+				),
+				title=_("Invalid Formulation"),
+			)
+
+		percentage_rows = self.get("items")
+		for row in percentage_rows:
+			if not flt(row.percentage) and not row.is_balance_item:
+				frappe.throw(
+					_(
+						"Row #{0}: A Percentage is required for the Item {1} as 'Set Component Quantities Based On Percentage' is enabled."
+					).format(row.idx, bold(row.item_code)),
+					title=_("Invalid Formulation"),
+				)
+
+		self._set_balance_item_percentage(percentage_rows)
+		self._validate_total_percentage(percentage_rows)
+
+		for row in percentage_rows:
+			if not row.uom:
+				row.uom = frappe.get_cached_value("Item", row.item_code, "stock_uom")
+
+			row.qty = flt(
+				flt(row.percentage) / 100 * flt(self.quantity) * self._uom_factor_from_batch_uom(row),
+				row.precision("qty"),
+			)
+
+	def _validate_total_percentage(self, percentage_rows):
+		total = sum(flt(row.percentage) for row in percentage_rows)
+		if abs(total - 100) > 0.0001:
+			frappe.throw(
+				_(
+					"The percentages of the components must total 100%. The current total is {0}%. To fill the remaining percentage automatically, mark one component as Balance Item."
+				).format(flt(total)),
+				title=_("Invalid Formulation"),
+			)
+
+	def _set_balance_item_percentage(self, percentage_rows):
+		balance_rows = [row for row in percentage_rows if row.is_balance_item]
+		if not balance_rows:
+			return
+
+		if len(balance_rows) > 1:
+			frappe.throw(_("Only one component can be marked as Balance Item."))
+
+		remaining = 100 - sum(flt(row.percentage) for row in percentage_rows if not row.is_balance_item)
+		if remaining <= 0:
+			frappe.throw(
+				_(
+					"The other components already total {0}%, so no percentage remains for the Balance Item {1}."
+				).format(flt(100 - remaining), bold(balance_rows[0].item_code)),
+				title=_("Invalid Formulation"),
+			)
+
+		balance_rows[0].percentage = remaining
+
+	def _uom_factor_from_batch_uom(self, row):
+		from erpnext.stock.doctype.item.item import get_uom_conv_factor
+
+		factor = get_uom_conv_factor(self.uom, row.uom)
+		if not factor:
+			frappe.throw(
+				_(
+					"Row #{0}: The quantity of the Item {1} cannot be derived from its percentage because there is no UOM Conversion Factor from {2} to {3}."
+				).format(row.idx, bold(row.item_code), bold(self.uom), bold(row.uom))
+			)
+
+		return flt(factor)
 
 	def validate_currency(self):
 		if self.rm_cost_as_per == "Price List":
