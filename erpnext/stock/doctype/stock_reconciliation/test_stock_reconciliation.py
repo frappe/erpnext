@@ -141,6 +141,7 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 			"_Test Stock Reco Item",
 			is_stock_item=1,
 			valuation_rate=100,
+			stock_uom="_Test UOM",
 			warehouse="_Test Warehouse Ledger 1 - _TC",
 			opening_stock=100,
 		)
@@ -148,8 +149,8 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		items = get_items("_Test Warehouse Group 1 - _TC", nowdate(), nowtime(), "_Test Company")
 
 		self.assertEqual(
-			["_Test Stock Reco Item", "_Test Warehouse Ledger 1 - _TC", 100],
-			[items[0]["item_code"], items[0]["warehouse"], items[0]["qty"]],
+			["_Test Stock Reco Item", "_Test Warehouse Ledger 1 - _TC", 100, "_Test UOM"],
+			[items[0]["item_code"], items[0]["warehouse"], items[0]["qty"], items[0]["stock_uom"]],
 		)
 
 	def test_stock_reco_for_serialized_item(self):

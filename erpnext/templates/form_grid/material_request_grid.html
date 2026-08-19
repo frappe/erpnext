@@ -11,9 +11,9 @@
 {% } else { %}
 	<div class="row">
 		<div class="col-sm-4">
-            <span class="indicator {%= (doc.qty<=doc.ordered_qty) ? "green" : "orange" %}">{%= doc.item_code %}</strong>
+            <span class="indicator {%= (doc.qty<=doc.ordered_qty) ? "green" : "orange" %}">{%= frappe.utils.escape_html(doc.item_code) %}</strong>
 			{% if(doc.item_name != doc.item_code) { %}
-				<br>{%= doc.item_name %}{% } %}
+				<br>{%= frappe.utils.escape_html(doc.item_name) %}{% } %}
             <!-- {% if(doc.item_name != doc.description) { %}
                 <p>{%= doc.description %}</p>{% } %} -->
 			{% include "templates/form_grid/includes/visible_cols.html" %}
@@ -35,7 +35,7 @@
 			{% if(doc.warehouse) { %}
 				<span class="label label-default" title="{%= __("For Warehouse") %}"
                     style="margin-right: 10px;">
-					{%= doc.warehouse %}
+					{%= frappe.utils.escape_html(doc.warehouse) %}
 				</span>
 			{% } %}
         </div>
@@ -43,7 +43,7 @@
 		<!-- qty -->
 		<div class="col-sm-2 text-right">
 			{%= doc.get_formatted("qty") %}
-			<span class="small">{%= doc.uom || doc.stock_uom %}</span>
+			<span class="small">{%= frappe.utils.escape_html(doc.uom || doc.stock_uom) %}</span>
 		</div>
 	</div>
 {% } %}

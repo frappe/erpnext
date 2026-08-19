@@ -89,13 +89,14 @@
   "enable_fuzzy_matching",
   "reports_tab",
   "remarks_section",
-  "general_ledger_remarks_length",
+  "disable_include_dimensions",
   "column_break_lvjk",
-  "receivable_payable_remarks_length",
+  "general_ledger_remarks_length",
   "accounts_receivable_payable_tuning_section",
   "receivable_payable_fetch_method",
   "default_ageing_range",
   "column_break_ntmi",
+  "receivable_payable_remarks_length",
   "legacy_section",
   "ignore_is_opening_check_for_reporting",
   "payment_request_settings",
@@ -483,7 +484,7 @@
   {
    "fieldname": "remarks_section",
    "fieldtype": "Section Break",
-   "label": "Remarks Column Length"
+   "label": "General Ledger Report"
   },
   {
    "default": "0",
@@ -566,7 +567,7 @@
   {
    "fieldname": "accounts_receivable_payable_tuning_section",
    "fieldtype": "Section Break",
-   "label": "Accounts Receivable / Payable Tuning"
+   "label": "Accounts Receivable / Payable Report"
   },
   {
    "fieldname": "legacy_section",
@@ -665,6 +666,12 @@
    "fieldname": "default_ageing_range",
    "fieldtype": "Data",
    "label": "Default Ageing Range"
+  },
+  {
+   "default": "0",
+   "fieldname": "disable_include_dimensions",
+   "fieldtype": "Check",
+   "label": "Disable \"Consider Accounting Dimension\" Filter"
   }
  ],
  "icon": "icon-cog",
@@ -672,7 +679,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-06-24 12:59:41.868865",
+ "modified": "2026-08-14 13:12:47.895908",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

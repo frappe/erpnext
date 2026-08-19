@@ -7,6 +7,7 @@ import json
 import frappe
 from frappe import _, msgprint, scrub
 from frappe.core.doctype.submission_queue.submission_queue import queue_submission
+from frappe.model.document import Document
 from frappe.utils import comma_and, cstr, flt, fmt_money, formatdate, get_link_to_form, getdate, nowdate
 
 import erpnext
@@ -1892,7 +1893,21 @@ def make_inter_company_journal_entry(name, voucher_type, company):
 
 
 @frappe.whitelist()
-def make_reverse_journal_entry(source_name, target_doc=None):
+def make_reverse_journal_entry(source_name: str, target_doc: str | dict | Document | None = None) -> Document:
+	# `get_mapped_doc` checks this as well, but the guard below discloses which entry
+	# reverses which, so read access has to be settled before it runs
+	if not frappe.has_permission("Journal Entry", doc=source_name):
+		frappe.throw(_("Not permitted"), frappe.PermissionError)
+
+	reversal_of = frappe.db.get_value("Journal Entry", source_name, "reversal_of")
+	if reversal_of:
+		frappe.throw(
+			_("{0} is already a Reverse Journal Entry of {1}. Cancel it instead of reversing it.").format(
+				get_link_to_form("Journal Entry", source_name),
+				get_link_to_form("Journal Entry", reversal_of),
+			)
+		)
+
 	from frappe.model.mapper import get_mapped_doc
 
 	def post_process(source, target):

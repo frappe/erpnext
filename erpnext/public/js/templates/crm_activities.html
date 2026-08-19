@@ -30,13 +30,13 @@
 										<use href="#icon-small-message"></use>
 									</svg>
 								</span>
-								<a href="/app/todo/{{ tasks[i].name }}" title="{{ __('Open Task') }}">
+								<a href="/app/todo/{{ frappe.utils.escape_html(tasks[i].name) }}" title="{{ __('Open Task') }}">
 									{%= tasks[i].description %}
 								</a>
 							</div>
 							<div class="checkbox">
 								<input type="checkbox" class="completion-checkbox"
-									name="{{tasks[i].name}}" title="{{ __('Mark As Closed') }}">
+									name="{{ frappe.utils.escape_html(tasks[i].name) }}" title="{{ __('Mark As Closed') }}">
 							</div>
 						</div>
 						{% if(tasks[i].date) { %}
@@ -73,13 +73,13 @@
                                         <use href="#icon-{{ icon_set[events[i].event_category] || 'calendar' }}"></use>
                                     </svg>
                                 </span>
-                                <a href="/app/event/{{ events[i].name }}" title="{{ __('Open Event') }}">
-                                    {%= events[i].subject %}
+                                <a href="/app/event/{{ frappe.utils.escape_html(events[i].name) }}" title="{{ __('Open Event') }}">
+                                    {%= frappe.utils.escape_html(events[i].subject) %}
                                 </a>
                             </div>
                             <div class="checkbox">
                                 <input type="checkbox" class="completion-checkbox"
-                                    name="{{ events[i].name }}" title="{{ __('Mark As Closed') }}">
+                                    name="{{ frappe.utils.escape_html(events[i].name) }}" title="{{ __('Mark As Closed') }}">
                             </div>
                         </div>
                         <div class="text-muted ml-1">

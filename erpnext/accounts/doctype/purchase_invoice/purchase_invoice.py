@@ -291,6 +291,7 @@ class PurchaseInvoice(BuyingController):
 		self.validate_multiple_billing("Purchase Receipt", "pr_detail", "amount")
 		self.set_status()
 		self.validate_purchase_receipt_if_update_stock()
+		self.validate_exchange_rate_with_purchase_receipt()
 		validate_inter_company_party(
 			self.doctype, self.supplier, self.company, self.inter_company_invoice_reference
 		)
@@ -312,6 +313,47 @@ class PurchaseInvoice(BuyingController):
 
 		if total_billed_qty and total_received_qty:
 			self.per_received = total_received_qty / total_billed_qty * 100
+
+	def validate_exchange_rate_with_purchase_receipt(self):
+		if self.is_internal_transfer() or not erpnext.is_perpetual_inventory_enabled(self.company):
+			return
+
+		stock_items = self.get_stock_items()
+		receipts = {
+			item.purchase_receipt
+			for item in self.items
+			if item.purchase_receipt and item.item_code in stock_items
+		}
+		if not receipts:
+			return
+
+		if frappe.db.get_single_value("Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate"):
+			return
+
+		mismatched = [
+			f"{frappe.bold(row.name)} ({row.conversion_rate})"
+			for row in frappe.get_all(
+				"Purchase Receipt",
+				filters={"name": ("in", list(receipts))},
+				fields=["name", "currency", "conversion_rate"],
+			)
+			if row.currency == self.currency
+			and flt(row.conversion_rate)
+			and flt(row.conversion_rate) != flt(self.conversion_rate)
+		]
+		if not mismatched:
+			return
+
+		frappe.throw(
+			_(
+				"Exchange rate {0} does not match the exchange rate of Purchase Receipt {1}. Use the same exchange rate as the Purchase Receipt or enable {2} in {3} to adjust the landed cost based on this invoice."
+			).format(
+				frappe.bold(self.conversion_rate),
+				", ".join(mismatched),
+				frappe.bold(_("Set Landed Cost Based on Purchase Invoice Rate")),
+				get_link_to_form("Buying Settings", "Buying Settings", _("Buying Settings")),
+			)
+		)
 
 	def validate_invoice_hold(self):
 		if self.is_return:
@@ -396,6 +438,9 @@ class PurchaseInvoice(BuyingController):
 		self.party_account_currency = account.account_currency
 
 	def check_on_hold_or_closed_status(self):
+		if self.get("is_return"):
+			return
+
 		check_list = []
 
 		for d in self.get("items"):
@@ -1375,7 +1420,20 @@ class PurchaseInvoice(BuyingController):
 			)
 
 			if flt(stock_amount, net_amt_precision) != flt(warehouse_debit_amount, net_amt_precision):
-				cost_of_goods_sold_account = self.get_company_default("default_expense_account")
+				stock_asset_rbnb = (
+					self.get_company_default("asset_received_but_not_billed", ignore_validation=True)
+					if item.is_fixed_asset
+					else self.get_company_default("stock_received_but_not_billed", ignore_validation=True)
+				)
+				fallback_account = (
+					(item.expense_account or stock_asset_rbnb)
+					if self.is_return
+					else (stock_asset_rbnb or item.expense_account)
+				)
+				cost_of_goods_sold_account = (
+					self.get_company_default("default_expense_account", ignore_validation=True)
+					or fallback_account
+				)
 				stock_adjustment_amt = stock_amount - warehouse_debit_amount
 
 				gl_entries.append(
@@ -1400,7 +1458,20 @@ class PurchaseInvoice(BuyingController):
 			and warehouse_debit_amount
 			!= flt(voucher_wise_stock_value.get((item.name, item.warehouse)), net_amt_precision)
 		):
-			cost_of_goods_sold_account = self.get_company_default("default_expense_account")
+			stock_asset_rbnb = (
+				self.get_company_default("asset_received_but_not_billed", ignore_validation=True)
+				if item.is_fixed_asset
+				else self.get_company_default("stock_received_but_not_billed", ignore_validation=True)
+			)
+			fallback_account = (
+				(item.expense_account or stock_asset_rbnb)
+				if self.is_return
+				else (stock_asset_rbnb or item.expense_account)
+			)
+			cost_of_goods_sold_account = (
+				self.get_company_default("default_expense_account", ignore_validation=True)
+				or fallback_account
+			)
 			stock_amount = flt(voucher_wise_stock_value.get((item.name, item.warehouse)), net_amt_precision)
 			stock_adjustment_amt = warehouse_debit_amount - stock_amount
 

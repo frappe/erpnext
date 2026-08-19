@@ -44,6 +44,7 @@ class AccountsSettings(Document):
 		default_ageing_range: DF.Data | None
 		delete_linked_ledger_entries: DF.Check
 		determine_address_tax_category_from: DF.Literal["Billing Address", "Shipping Address"]
+		disable_include_dimensions: DF.Check
 		enable_common_party_accounting: DF.Check
 		enable_fuzzy_matching: DF.Check
 		enable_immutable_ledger: DF.Check
