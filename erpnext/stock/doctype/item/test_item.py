@@ -829,6 +829,24 @@ class TestItem(ERPNextTestSuite):
 
 		self.assertEqual(factor, 0.12)
 
+	def test_uom_conv_intermediate_with_shared_target_is_deterministic(self):
+		make_uom_conversion_factor("_Test 3 Kg Bag", "Kg", 3)
+		make_uom_conversion_factor("_Test 25 Kg Bag", "Kg", 25)
+		make_uom_conversion_factor("_Test 3 Kg Bag", "Kg", 6)
+		make_uom_conversion_factor("_Test 25 Kg Bag", "Kg", 20)
+
+		factor = get_uom_conv_factor("_Test 3 Kg Bag", "_Test 25 Kg Bag")
+
+		self.assertEqual(factor, 0.12)
+
+	def test_uom_conv_intermediate_with_shared_target_ignores_zero_divisor(self):
+		make_uom_conversion_factor("_Test 3 Kg Bag", "Kg", 3)
+		make_uom_conversion_factor("_Test 25 Kg Bag", "Kg", 0)
+
+		factor = get_uom_conv_factor("_Test 3 Kg Bag", "_Test 25 Kg Bag")
+
+		self.assertIsNone(factor)
+
 	def test_uom_conv_base_case(self):
 		factor = get_uom_conv_factor("m", "m")
 		self.assertEqual(factor, 1.0)
