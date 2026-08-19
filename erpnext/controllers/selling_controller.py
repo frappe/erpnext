@@ -560,7 +560,8 @@ class SellingController(StockController):
 					reset_incoming_rate()
 
 				if (
-					not d.incoming_rate
+					(not d.incoming_rate or self.is_new())
+					and not is_standalone
 					or self.is_internal_transfer()
 					or (get_valuation_method(d.item_code) == "Moving Average" and self.get("is_return"))
 				):
