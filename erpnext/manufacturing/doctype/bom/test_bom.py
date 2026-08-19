@@ -1098,6 +1098,110 @@ class TestBOM(ERPNextTestSuite):
 		)
 
 	@timeout
+	def test_percentage_based_component_quantities(self):
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm1 = make_item(properties={"is_stock_item": 1, "valuation_rate": 100.0}).name
+		rm2 = make_item(properties={"is_stock_item": 1, "valuation_rate": 100.0}).name
+		rm3 = make_item(properties={"is_stock_item": 1, "valuation_rate": 100.0}).name
+
+		bom = frappe.new_doc("BOM")
+		bom.company = "_Test Company"
+		bom.item = fg_item
+		bom.quantity = 200
+		bom.set_qty_based_on_percentage = 1
+		bom.append("items", {"item_code": rm1, "percentage": 40, "qty": 1})
+		bom.append("items", {"item_code": rm2, "percentage": 35, "qty": 1})
+		bom.append("items", {"item_code": rm3, "is_balance_item": 1, "qty": 1})
+		bom.insert()
+
+		self.assertEqual(flt(bom.items[0].qty), 80)
+		self.assertEqual(flt(bom.items[1].qty), 70)
+		self.assertEqual(flt(bom.items[2].percentage), 25)
+		self.assertEqual(flt(bom.items[2].qty), 50)
+
+	@timeout
+	def test_percentage_total_must_be_100(self):
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm1 = make_item(properties={"is_stock_item": 1, "valuation_rate": 100.0}).name
+		rm2 = make_item(properties={"is_stock_item": 1, "valuation_rate": 100.0}).name
+
+		bom = frappe.new_doc("BOM")
+		bom.company = "_Test Company"
+		bom.item = fg_item
+		bom.quantity = 100
+		bom.set_qty_based_on_percentage = 1
+		bom.append("items", {"item_code": rm1, "percentage": 40, "qty": 1})
+		bom.append("items", {"item_code": rm2, "percentage": 30, "qty": 1})
+
+		self.assertRaises(frappe.ValidationError, bom.insert)
+
+	@timeout
+	def test_fixed_qty_component_does_not_scale(self):
+		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
+
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100.0}).name
+		catalyst = make_item(properties={"is_stock_item": 1, "valuation_rate": 100.0}).name
+
+		bom = frappe.new_doc("BOM")
+		bom.company = "_Test Company"
+		bom.item = fg_item
+		bom.quantity = 10
+		bom.append("items", {"item_code": rm_item, "qty": 5})
+		bom.append("items", {"item_code": catalyst, "qty": 2, "is_fixed_qty": 1})
+		bom.insert()
+
+		for fetch_exploded in (0, 1):
+			items_dict = get_bom_items_as_dict(
+				bom=bom.name, company="_Test Company", qty=20, fetch_exploded=fetch_exploded
+			)
+			self.assertEqual(flt(items_dict[rm_item]["qty"]), 10)
+			self.assertEqual(flt(items_dict[catalyst]["qty"]), 2)
+
+	@timeout
+	def test_component_qty_tolerance(self):
+		from erpnext.stock.doctype.stock_entry.services.manufacturing import (
+			_check_bom_component_qty,
+			get_bom_items,
+		)
+
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100.0}).name
+
+		bom = frappe.new_doc("BOM")
+		bom.company = "_Test Company"
+		bom.item = fg_item
+		bom.quantity = 10
+		bom.append("items", {"item_code": rm_item, "qty": 50})
+		bom.insert()
+		bom.submit()
+
+		from types import SimpleNamespace
+
+		doc = SimpleNamespace(
+			bom_no=bom.name,
+			fg_completed_qty=10,
+			items=[
+				frappe._dict(
+					s_warehouse="_Test Warehouse - _TC", item_code=rm_item, original_item=None, qty=52
+				)
+			],
+		)
+
+		self.assertRaises(frappe.ValidationError, _check_bom_component_qty, doc, get_bom_items(bom.name, 0))
+
+		frappe.db.set_single_value("Manufacturing Settings", "component_qty_tolerance", 5)
+		self.addCleanup(frappe.db.set_single_value, "Manufacturing Settings", "component_qty_tolerance", 0)
+		_check_bom_component_qty(doc, get_bom_items(bom.name, 0))
+
+		frappe.db.set_single_value("Manufacturing Settings", "component_qty_tolerance", 0)
+		frappe.db.set_single_value("Manufacturing Settings", "action_on_component_qty_breach", "Warn")
+		self.addCleanup(
+			frappe.db.set_single_value, "Manufacturing Settings", "action_on_component_qty_breach", "Stop"
+		)
+		_check_bom_component_qty(doc, get_bom_items(bom.name, 0))
+
+	@timeout
 	def test_final_operation_must_produce_the_bom_item(self):
 		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
 		from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation

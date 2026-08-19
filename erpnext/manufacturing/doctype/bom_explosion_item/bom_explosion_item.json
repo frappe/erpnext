@@ -26,7 +26,8 @@
   "amount",
   "include_item_in_manufacturing",
   "sourced_by_supplier",
-  "is_sub_assembly_item"
+  "is_sub_assembly_item",
+  "is_fixed_qty"
  ],
  "fields": [
   {
@@ -174,13 +175,20 @@
    "label": "Is Sub Assembly Item",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_fixed_qty",
+   "fieldtype": "Check",
+   "label": "Fixed Qty",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-08-12 20:02:32.694836",
+ "modified": "2026-08-18 11:00:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Explosion Item",

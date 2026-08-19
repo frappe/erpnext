@@ -150,6 +150,7 @@ class BOM(WebsiteGenerator):
 		bom_creator_item: DF.Data | None
 		buying_price_list: DF.Link | None
 		company: DF.Link
+		component_qty_tolerance: DF.Percent
 		conversion_rate: DF.Float
 		cost_allocation: DF.Currency
 		cost_allocation_per: DF.Percent
@@ -184,6 +185,7 @@ class BOM(WebsiteGenerator):
 		routing: DF.Link | None
 		secondary_items: DF.Table[BOMSecondaryItem]
 		secondary_items_cost: DF.Currency
+		set_qty_based_on_percentage: DF.Check
 		set_rate_of_sub_assembly_item_based_on_bom: DF.Check
 		show_in_website: DF.Check
 		show_items: DF.Check
@@ -321,6 +323,7 @@ class BOM(WebsiteGenerator):
 		self.validate_uom_is_interger()
 
 	def _validate_materials_and_cost(self):
+		self.set_qty_from_percentage()
 		self.set_bom_material_details()
 		self.set_secondary_items_details()
 		self.validate_materials()
@@ -700,6 +703,68 @@ class BOM(WebsiteGenerator):
 
 		if not self.quantity:
 			frappe.throw(_("Quantity should be greater than 0"))
+
+	def set_qty_from_percentage(self):
+		if not self.set_qty_based_on_percentage:
+			return
+
+		percentage_rows = [row for row in self.get("items") if flt(row.percentage) or row.is_balance_item]
+		if not percentage_rows:
+			return
+
+		self._set_balance_item_percentage(percentage_rows)
+		self._validate_total_percentage(percentage_rows)
+
+		for row in percentage_rows:
+			if not row.uom:
+				row.uom = frappe.get_cached_value("Item", row.item_code, "stock_uom")
+
+			row.qty = flt(
+				flt(row.percentage) / 100 * flt(self.quantity) * self._uom_factor_from_batch_uom(row),
+				row.precision("qty"),
+			)
+
+	def _validate_total_percentage(self, percentage_rows):
+		total = sum(flt(row.percentage) for row in percentage_rows)
+		if abs(total - 100) > 0.0001:
+			frappe.throw(
+				_(
+					"The percentages of the components must total 100%. The current total is {0}%. To fill the remaining percentage automatically, mark one component as Balance Item."
+				).format(flt(total)),
+				title=_("Invalid Formulation"),
+			)
+
+	def _set_balance_item_percentage(self, percentage_rows):
+		balance_rows = [row for row in percentage_rows if row.is_balance_item]
+		if not balance_rows:
+			return
+
+		if len(balance_rows) > 1:
+			frappe.throw(_("Only one component can be marked as Balance Item."))
+
+		remaining = 100 - sum(flt(row.percentage) for row in percentage_rows if not row.is_balance_item)
+		if remaining <= 0:
+			frappe.throw(
+				_(
+					"The other components already total {0}%, so no percentage remains for the Balance Item {1}."
+				).format(flt(100 - remaining), bold(balance_rows[0].item_code)),
+				title=_("Invalid Formulation"),
+			)
+
+		balance_rows[0].percentage = remaining
+
+	def _uom_factor_from_batch_uom(self, row):
+		from erpnext.stock.doctype.item.item import get_uom_conv_factor
+
+		factor = get_uom_conv_factor(self.uom, row.uom)
+		if not factor:
+			frappe.throw(
+				_(
+					"Row #{0}: The quantity of the Item {1} cannot be derived from its percentage because there is no UOM Conversion Factor from {2} to {3}."
+				).format(row.idx, bold(row.item_code), bold(self.uom), bold(row.uom))
+			)
+
+		return flt(factor)
 
 	def validate_currency(self):
 		if self.rm_cost_as_per == "Price List":
@@ -1307,6 +1372,7 @@ def _get_bom_item_tables(opts):
 	return frappe._dict(
 		bom_item=bom_item,
 		qty_field_col=qty_field_col,
+		supports_fixed_qty=not opts.fetch_secondary_items,
 		bom_doc=frappe.qb.DocType("BOM"),
 		item_doc=frappe.qb.DocType("Item"),
 		item_default=frappe.qb.DocType("Item Default"),
@@ -1314,6 +1380,12 @@ def _get_bom_item_tables(opts):
 
 
 def _build_base_bom_items_query(bom, company, qty, t):
+	from frappe.query_builder import Case
+
+	qty_expr = t.qty_field_col / IfNull(t.bom_doc.quantity, 1) * qty
+	if t.supports_fixed_qty:
+		qty_expr = Case().when(t.bom_item.is_fixed_qty == 1, t.qty_field_col).else_(qty_expr)
+
 	return (
 		frappe.qb.from_(t.bom_item)
 		.join(t.bom_doc)
@@ -1329,7 +1401,7 @@ def _build_base_bom_items_query(bom, company, qty, t):
 			# returns the value MySQL picked arbitrarily while making the GROUP BY valid on postgres.
 			Min(t.bom_item.idx).as_("idx"),
 			Max(t.item_doc.item_name).as_("item_name"),
-			(Sum(t.qty_field_col / IfNull(t.bom_doc.quantity, 1)) * qty).as_("qty"),
+			Sum(qty_expr).as_("qty"),
 			Max(t.item_doc.image).as_("image"),
 			Max(t.bom_doc.project).as_("project"),
 			Max(t.item_doc.stock_uom).as_("stock_uom"),
