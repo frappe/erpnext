@@ -1480,7 +1480,7 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:doc.order_type == 'Maintenance';",
+   "depends_on": "eval:doc.order_type == 'Maintenance' || doc.skip_delivery_note",
    "fieldname": "skip_delivery_note",
    "fieldtype": "Check",
    "hide_days": 1,

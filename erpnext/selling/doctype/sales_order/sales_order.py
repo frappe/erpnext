@@ -222,6 +222,7 @@ class SalesOrder(SellingController):
 
 	def validate(self):
 		super().validate()
+		self.set_skip_delivery_note()
 		self.validate_delivery_date()
 		self.validate_proj_cust()
 		self.validate_po()
@@ -346,6 +347,27 @@ class SalesOrder(SellingController):
 			return False
 
 		return frappe.db.exists("Item", {"name": ["in", bundle_items], "is_stock_item": 1}) is not None
+
+	def set_skip_delivery_note(self):
+		if not frappe.get_single_value("Selling Settings", "skip_delivery_note_for_service_items"):
+			return
+
+		for d in self.get("items"):
+			d.skip_delivery = cint(not cint(d.delivered_by_supplier) and not self.requires_delivery(d))
+
+		if self.get("items") and all(d.skip_delivery for d in self.get("items")):
+			self.skip_delivery_note = 1
+		elif self.order_type == "Sales":
+			self.skip_delivery_note = 0
+
+	def requires_delivery(self, row):
+		is_stock_item, is_fixed_asset = frappe.get_cached_value(
+			"Item", row.item_code, ["is_stock_item", "is_fixed_asset"]
+		)
+		if is_stock_item or is_fixed_asset:
+			return True
+
+		return self.has_product_bundle(row.item_code) and self.product_bundle_has_stock_item(row.item_code)
 
 	def validate_sales_mntc_quotation(self):
 		quotation_names = [d.prevdoc_docname for d in self.get("items") if d.prevdoc_docname]

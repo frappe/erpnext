@@ -307,8 +307,10 @@ def make_delivery_note(
 				return False
 
 		return (
-			(abs(doc.delivered_qty) < abs(doc.qty)) or is_unit_price_row(doc)
-		) and doc.delivered_by_supplier != 1
+			((abs(doc.delivered_qty) < abs(doc.qty)) or is_unit_price_row(doc))
+			and doc.delivered_by_supplier != 1
+			and not cint(doc.skip_delivery)
+		)
 
 	def update_item(source, target, source_parent):
 		target.base_amount = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.base_rate)
