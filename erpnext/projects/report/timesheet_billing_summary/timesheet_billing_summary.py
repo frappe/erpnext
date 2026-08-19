@@ -1,6 +1,9 @@
 import frappe
 from frappe import _
 from frappe.model.docstatus import DocStatus
+from frappe.utils import getdate
+
+VALUE_FIELDNAMES = ("hours", "billing_hours", "billing_amount")
 
 
 def execute(filters=None):
@@ -10,7 +13,10 @@ def execute(filters=None):
 	columns = get_columns(filters, group_fieldname)
 
 	data = get_data(filters, group_fieldname)
-	return columns, data
+
+	# the report totals itself in `get_total_row`: frappe's total row counts a group and its
+	# children as separate rows, and the datatable hides it anyway in tree mode
+	return columns, data, None, None, None, 1
 
 
 def get_columns(filters, group_fieldname=None):
@@ -39,13 +45,12 @@ def get_columns(filters, group_fieldname=None):
 		},
 	}
 	columns = []
-	if group_fieldname:
-		columns.append(group_columns.get(group_fieldname))
-		columns.extend(
-			column for column in group_columns.values() if column.get("fieldname") != group_fieldname
-		)
-	else:
-		columns.extend(group_columns.values())
+	if group_fieldname in group_columns:
+		# the grouped column labels the group rows: keep it visible even when it is filtered too
+		group_columns[group_fieldname]["hidden"] = 0
+		columns.append(group_columns.pop(group_fieldname))
+
+	columns.extend(group_columns.values())
 
 	columns.extend(
 		[
@@ -112,13 +117,20 @@ def get_data(filters, group_fieldname=None):
 		order_by="`tabTimesheet Detail`.from_time",
 	)
 
-	return group_by(data, group_fieldname) if group_fieldname else data
+	if not data:
+		return data
+
+	if group_fieldname:
+		data = group_by(data, group_fieldname)
+
+	data.append(get_total_row(data))
+	return data
 
 
 def group_by(data, fieldname):
 	groups = {}
 	for row in data:
-		groups.setdefault(row.get(fieldname), []).append(row)
+		groups.setdefault(get_group_value(row, fieldname), []).append(row)
 
 	grouped_data = []
 	for group in sorted(groups, key=lambda g: (g is None, g)):
@@ -150,3 +162,25 @@ def group_by(data, fieldname):
 		grouped_data.extend(child_rows)
 
 	return grouped_data
+
+
+def get_group_value(row, fieldname):
+	value = row.get(fieldname)
+	# `date` is `Timesheet Detail.from_time`, a datetime: everything logged on a day is one group
+	return getdate(value) if fieldname == "date" and value else value
+
+
+def get_total_row(data):
+	total_row = dict.fromkeys(VALUE_FIELDNAMES, 0.0)
+	# quoted so that the Link column renders it as plain text instead of a broken link
+	total_row["timesheet"] = f"'{_('Total')}'"
+	total_row["indent"] = 0
+
+	for row in data:
+		# a group already carries its children's values: adding both would count them twice
+		if row.get("indent"):
+			continue
+		for value_fieldname in VALUE_FIELDNAMES:
+			total_row[value_fieldname] += row.get(value_fieldname) or 0
+
+	return total_row
