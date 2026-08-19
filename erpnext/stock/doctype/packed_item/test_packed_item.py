@@ -438,3 +438,69 @@ class TestPackedItem(ERPNextTestSuite):
 		for d in expected_returns:
 			d.qty /= 2
 		self.assertReturns(expected_returns, dn_ret.packed_items)
+
+	def test_changing_bundle_item_warehouse_moves_packed_rows(self):
+		"Test packed items follow the bundle item row when its warehouse is changed."
+		other_warehouse = "Stores - _TC"
+		so = make_sales_order(item_code=self.bundle, qty=1, warehouse=self.warehouse, do_not_submit=True)
+
+		self.assertEqual([row.warehouse for row in so.packed_items], [self.warehouse] * 2)
+
+		so.items[0].warehouse = other_warehouse
+		so.save()
+
+		self.assertEqual([row.warehouse for row in so.packed_items], [other_warehouse] * 2)
+
+	def test_overridden_packed_row_warehouse_is_kept(self):
+		"Test a packed row set to its own warehouse is left where it is."
+		other_warehouse = "Stores - _TC"
+		so = make_sales_order(item_code=self.bundle, qty=1, warehouse=self.warehouse, do_not_submit=True)
+
+		so.packed_items[0].warehouse = other_warehouse
+		so.save()
+
+		so.items[0].warehouse = "Finished Goods - _TC"
+		so.save()
+
+		# the row that was following the bundle item moves, the overridden one stays put
+		self.assertEqual(so.packed_items[0].warehouse, other_warehouse)
+		self.assertEqual(so.packed_items[1].warehouse, "Finished Goods - _TC")
+
+	def test_changing_bundle_item_target_warehouse_moves_packed_rows(self):
+		"Test packed items follow the bundle item row when its target warehouse is changed."
+		so = make_sales_order(item_code=self.bundle, qty=1, warehouse=self.warehouse, do_not_submit=True)
+		so.items[0].target_warehouse = "Stores - _TC"
+		so.save()
+
+		self.assertEqual([row.target_warehouse for row in so.packed_items], ["Stores - _TC"] * 2)
+
+		so.items[0].target_warehouse = "Finished Goods - _TC"
+		so.save()
+
+		self.assertEqual([row.target_warehouse for row in so.packed_items], ["Finished Goods - _TC"] * 2)
+
+	def test_packed_row_on_its_own_default_follows_a_late_warehouse(self):
+		"Test a packed row left on the packed item's default follows the bundle item later."
+		component = make_item(
+			properties={
+				"is_stock_item": 1,
+				"item_defaults": [{"company": "_Test Company", "default_warehouse": self.warehouse}],
+			}
+		).name
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		bundle_doc = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": bundle})
+		bundle_doc.append("items", {"item_code": component, "qty": 2})
+		bundle_doc.insert()
+		bundle_doc.submit()
+
+		so = make_sales_order(item_code=bundle, qty=1, do_not_submit=True)
+		# a bundle item row carrying no warehouse of its own: the packed row was left on the
+		# packed item's default, which `set_missing_values` would otherwise fill in for us
+		frappe.db.set_value("Sales Order Item", so.items[0].name, "warehouse", None)
+		frappe.db.set_value("Packed Item", so.packed_items[0].name, "warehouse", self.warehouse)
+		so.reload()
+
+		so.items[0].warehouse = "Stores - _TC"
+		so.save()
+
+		self.assertEqual(so.packed_items[0].warehouse, "Stores - _TC")
