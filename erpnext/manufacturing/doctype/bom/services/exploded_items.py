@@ -7,7 +7,7 @@ from operator import itemgetter
 
 import frappe
 from frappe.query_builder.functions import IfNull
-from frappe.utils import flt
+from frappe.utils import cint, flt
 
 
 class BOMExplodedItemsService:
@@ -49,9 +49,7 @@ class BOMExplodedItemsService:
 		)
 
 	def add_to_cur_exploded_items(self, args):
-		key = args.item_code
-		if args.operation:
-			key = (args.item_code, args.operation)
+		key = (args.item_code, args.operation or "", cint(args.get("is_fixed_qty")))
 
 		if self.doc.cur_exploded_items.get(key):
 			self.doc.cur_exploded_items[key]["stock_qty"] += args.stock_qty

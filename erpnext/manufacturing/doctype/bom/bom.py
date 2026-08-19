@@ -705,12 +705,18 @@ class BOM(WebsiteGenerator):
 			frappe.throw(_("Quantity should be greater than 0"))
 
 	def set_qty_from_percentage(self):
-		if not self.set_qty_based_on_percentage:
+		if not self.set_qty_based_on_percentage or not self.get("items"):
 			return
 
-		percentage_rows = [row for row in self.get("items") if flt(row.percentage) or row.is_balance_item]
-		if not percentage_rows:
-			return
+		percentage_rows = self.get("items")
+		for row in percentage_rows:
+			if not flt(row.percentage) and not row.is_balance_item:
+				frappe.throw(
+					_(
+						"Row #{0}: A Percentage is required for the Item {1} as 'Set Component Quantities Based On Percentage' is enabled."
+					).format(row.idx, bold(row.item_code)),
+					title=_("Invalid Formulation"),
+				)
 
 		self._set_balance_item_percentage(percentage_rows)
 		self._validate_total_percentage(percentage_rows)

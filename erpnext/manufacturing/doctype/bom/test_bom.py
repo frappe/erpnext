@@ -1135,6 +1135,9 @@ class TestBOM(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, bom.insert)
 
+		bom.items[1].percentage = 0
+		self.assertRaises(frappe.ValidationError, bom.insert)
+
 	@timeout
 	def test_fixed_qty_component_does_not_scale(self):
 		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict

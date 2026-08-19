@@ -996,7 +996,8 @@ class RepackStockEntry(BaseManufactureStockEntry):
 
 		for row in bom_items:
 			row.s_warehouse = self.doc.from_warehouse
-			row.qty = row.qty * self.doc.fg_completed_qty
+			if not row.get("is_fixed_qty"):
+				row.qty = row.qty * self.doc.fg_completed_qty
 			row.transfer_qty = row.qty
 			if not row.uom:
 				row.uom = row.stock_uom
@@ -1039,10 +1040,7 @@ def _check_bom_component_qty(doc, bom_items):
 	precision = frappe.get_precision("Stock Entry Detail", "qty")
 	tolerance = _get_component_qty_tolerance(doc.bom_no)
 
-	for row in bom_items:
-		if not row.get("is_fixed_qty"):
-			row.qty = row.qty * doc.fg_completed_qty
-
+	for row in _get_expected_component_qty(doc, bom_items):
 		matched_item = next(
 			(
 				item
@@ -1066,6 +1064,19 @@ def _check_bom_component_qty(doc, bom_items):
 			_report_component_qty_breach(
 				_get_component_qty_message(doc, row, tolerance), _("Incorrect Component Quantity")
 			)
+
+
+def _get_expected_component_qty(doc, bom_items):
+	expected = {}
+	for row in bom_items:
+		qty = flt(row.qty) if row.get("is_fixed_qty") else flt(row.qty) * flt(doc.fg_completed_qty)
+		if existing_row := expected.get(row.item_code):
+			existing_row.qty += qty
+		else:
+			row.qty = qty
+			expected[row.item_code] = row
+
+	return list(expected.values())
 
 
 def _get_component_qty_tolerance(bom_no):
@@ -1166,10 +1177,11 @@ def _add_bom_table_specific_fields(query, doctype, table_name):
 def _deduplicate_bom_items(items):
 	item_dict = {}
 	for item in items:
-		if item.item_code in item_dict:
-			item_dict[item.item_code].qty += item.qty
+		key = (item.item_code, cint(item.get("is_fixed_qty")))
+		if key in item_dict:
+			item_dict[key].qty += item.qty
 		else:
-			item_dict[item.item_code] = item
+			item_dict[key] = item
 	return list(item_dict.values())
 
 
