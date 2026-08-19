@@ -27,6 +27,12 @@ const virtual_field_map = {
 };
 
 frappe.ui.form.on("Item", {
+	stock_uom(frm) {
+		// Each factor is relative to Stock UOM and becomes invalid when it changes.
+		frm.clear_table("uoms");
+		frm.refresh_field("uoms");
+	},
+
 	valuation_method(frm) {
 		if (!frm.is_new() && frm.doc.valuation_method === "Moving Average") {
 			let stock_exists = frm.doc.__onload && frm.doc.__onload.stock_exists ? 1 : 0;
