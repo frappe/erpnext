@@ -4,7 +4,7 @@
 from random import randint
 
 import frappe
-from frappe.utils import flt, today
+from frappe.utils import add_days, flt, today
 
 from erpnext.selling.doctype.sales_order.mapper import create_pick_list, make_delivery_note
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
@@ -716,6 +716,52 @@ class TestStockReservationEntry(ERPNextTestSuite):
 				for sb_entry in sb_entries:
 					# Test - 9: After Delivery Note cancellation, SB Entry Delivered Qty should be `0`.
 					self.assertEqual(sb_entry.delivered_qty, 0)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"allow_negative_stock": 0,
+			"enable_stock_reservation": 1,
+			"auto_reserve_serial_and_batch": 1,
+			"pick_serial_and_batch_based_on": "LIFO",
+		},
+	)
+	def test_auto_reserve_batch_ignores_future_stock(self) -> None:
+		item = make_batch_item()
+		voucher_date = add_days(today(), -1)
+
+		available_batch = frappe.get_doc(doctype="Batch", item=item.name).insert().name
+		make_stock_entry(
+			item_code=item.name,
+			qty=1,
+			to_warehouse=self.warehouse,
+			rate=100,
+			batch_no=available_batch,
+			posting_date=voucher_date,
+			posting_time="23:59:00",
+		)
+
+		future_batch = frappe.get_doc(doctype="Batch", item=item.name).insert().name
+		make_stock_entry(
+			item_code=item.name,
+			qty=1,
+			to_warehouse=self.warehouse,
+			rate=100,
+			batch_no=future_batch,
+			posting_date=add_days(today(), 1),
+			posting_time="00:01:00",
+		)
+
+		so = make_sales_order(
+			item_code=item.name,
+			warehouse=self.warehouse,
+			qty=1,
+			transaction_date=voucher_date,
+		)
+		so.db_set("transaction_time", None)
+		so.create_stock_reservation_entries()
+
+		self.assertSetEqual(get_reserved_batch_nos(so.name), {available_batch})
 
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
