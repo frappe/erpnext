@@ -939,11 +939,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2025-03-03 17:39:38.459977",
-=======
  "modified": "2026-08-12 12:00:00.000000",
->>>>>>> 4a8342496e (fix: keep Currency and Price List section open for foreign currency (#58074))
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation",

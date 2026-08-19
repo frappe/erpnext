@@ -1308,11 +1308,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2026-07-28 12:20:11.284370",
-=======
  "modified": "2026-08-12 12:00:00.000000",
->>>>>>> 4a8342496e (fix: keep Currency and Price List section open for foreign currency (#58074))
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
