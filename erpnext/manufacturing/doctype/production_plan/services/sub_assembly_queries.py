@@ -4,6 +4,7 @@
 """Sub-assembly resolution helpers for Production Plan."""
 
 import frappe
+from frappe.query_builder import Case
 from frappe.query_builder.functions import Count, IfNull, Max, Sum
 from frappe.utils import flt
 from frappe.utils.caching import request_cache
@@ -75,7 +76,9 @@ def _add_sub_assembly_child(
 	precision,
 	skip_available,
 ):
-	required_qty = (d.stock_qty / d.parent_bom_qty) * flt(to_produce_qty)
+	required_qty = (
+		flt(d.stock_qty) if d.get("is_fixed_qty") else (d.stock_qty / d.parent_bom_qty) * flt(to_produce_qty)
+	)
 	stock_qty = _resolve_available_sub_assembly(
 		d, required_qty, sub_assembly_items, bin_details, company, warehouse, skip_available
 	)
@@ -236,7 +239,14 @@ def _sub_assembly_rm_columns(bei, bom, item, item_default, item_uom, planned_qty
 	# on postgres. The remaining columns are functionally dependent on the grouped item; Max() returns
 	# their single value on both engines.
 	return [
-		(IfNull(Sum(bei.stock_qty / IfNull(bom.quantity, 1)), 0) * planned_qty).as_("qty"),
+		IfNull(
+			Sum(
+				Case()
+				.when(bei.is_fixed_qty == 1, bei.stock_qty)
+				.else_(bei.stock_qty / IfNull(bom.quantity, 1) * planned_qty)
+			),
+			0,
+		).as_("qty"),
 		Max(item.item_name).as_("item_name"),
 		Max(item.name).as_("item_code"),
 		Max(bei.description).as_("description"),

@@ -708,6 +708,14 @@ class BOM(WebsiteGenerator):
 		if not self.set_qty_based_on_percentage or not self.get("items"):
 			return
 
+		if self.track_semi_finished_goods:
+			frappe.throw(
+				_(
+					"'Set Component Quantities Based On Percentage' cannot be used together with 'Track Semi Finished Goods', as the component rows are derived from the operation BOMs."
+				),
+				title=_("Invalid Formulation"),
+			)
+
 		percentage_rows = self.get("items")
 		for row in percentage_rows:
 			if not flt(row.percentage) and not row.is_balance_item:
