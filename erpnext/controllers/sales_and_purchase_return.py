@@ -241,6 +241,8 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
 				frappe.throw(
 					_("Item {0} has already been returned").format(args.item_code), StockOverReturnError
 				)
+			elif doc.doctype == "Sales Invoice" and not flt(args.get(column)):
+				frappe.throw(_("{0} must be negative in return document").format(label))
 			elif abs(flt(current_stock_qty, field_precision)) > max_returnable_qty:
 				frappe.throw(
 					_("Row # {0}: Cannot return more than {1} for Item {2}").format(
