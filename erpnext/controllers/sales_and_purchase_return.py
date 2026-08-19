@@ -813,7 +813,7 @@ def get_rate_for_return(
 	if not (rate and return_against) and voucher_type in ["Sales Invoice", "Delivery Note"]:
 		rate = frappe.db.get_value(f"{voucher_type} Item", voucher_detail_no, "incoming_rate")
 
-		if not rate and sle:
+		if rate is None and sle:
 			rate = get_incoming_rate(
 				{
 					"item_code": sle.item_code,
