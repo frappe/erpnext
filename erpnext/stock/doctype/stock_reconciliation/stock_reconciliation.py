@@ -1180,7 +1180,8 @@ def get_items_for_stock_reco(warehouse, company):
 	items = frappe.db.sql(
 		f"""
 		select
-			i.name as item_code, i.item_name, bin.warehouse as warehouse, i.has_serial_no, i.has_batch_no
+			i.name as item_code, i.item_name, bin.warehouse as warehouse, i.has_serial_no, i.has_batch_no,
+			i.stock_uom
 		from
 			`tabBin` bin, `tabItem` i
 		where
@@ -1195,11 +1196,11 @@ def get_items_for_stock_reco(warehouse, company):
 		as_dict=1,
 	)
 
-<<<<<<< HEAD
 	items += frappe.db.sql(
 		"""
 		select
-			i.name as item_code, i.item_name, id.default_warehouse as warehouse, i.has_serial_no, i.has_batch_no
+			i.name as item_code, i.item_name, id.default_warehouse as warehouse, i.has_serial_no,
+			i.has_batch_no, i.stock_uom
 		from
 			`tabItem` i, `tabItem Default` id
 		where
@@ -1215,53 +1216,6 @@ def get_items_for_stock_reco(warehouse, company):
 	""",
 		(lft, rgt, company),
 		as_dict=1,
-=======
-	items = (
-		frappe.qb.from_(bin_dt)
-		.inner_join(item)
-		.on(item.name == bin_dt.item_code)
-		.select(
-			item.name.as_("item_code"),
-			item.item_name,
-			bin_dt.warehouse.as_("warehouse"),
-			item.has_serial_no,
-			item.has_batch_no,
-			item.stock_uom,
-		)
-		.where(
-			((item.disabled == 0) | item.disabled.isnull())
-			& (item.is_stock_item == 1)
-			& (item.has_variants == 0)
-			& bin_dt.warehouse.isin(warehouses_in_tree)
-		)
-		.run(as_dict=1)
-	)
-
-	# Item Default holds at most one row per (item, company) -- enforced at the app layer by
-	# Item.validate_item_defaults ("Cannot set multiple Item Defaults for a company"), though not by a
-	# DB-level unique constraint -- so the company filter already yields one row per item and the
-	# original `group by i.name` (an arbitrary-row collapse) is a no-op for valid data.
-	items += (
-		frappe.qb.from_(item)
-		.inner_join(item_default)
-		.on(item.name == item_default.parent)
-		.select(
-			item.name.as_("item_code"),
-			item.item_name,
-			item_default.default_warehouse.as_("warehouse"),
-			item.has_serial_no,
-			item.has_batch_no,
-			item.stock_uom,
-		)
-		.where(
-			item_default.default_warehouse.isin(warehouses_in_tree)
-			& (item.is_stock_item == 1)
-			& (item.has_variants == 0)
-			& ((item.disabled == 0) | item.disabled.isnull())
-			& (item_default.company == company)
-		)
-		.run(as_dict=1)
->>>>>>> 3a6e17a03d (fix(stock): fetch item stock UOM in stock reconciliation (#58284))
 	)
 
 	# remove duplicates
