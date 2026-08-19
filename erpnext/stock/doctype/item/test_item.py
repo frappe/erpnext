@@ -984,7 +984,10 @@ class TestItem(ERPNextTestSuite):
 		item.reload()
 		item.stock_uom = "Nos"
 		item.save()
-		self.assertEqual(len(item.uoms), 1)
+		self.assertEqual(
+			[(row.uom, row.conversion_factor) for row in item.uoms],
+			[("Nos", 1)],
+		)
 
 	def test_validate_stock_item(self):
 		self.assertRaises(frappe.ValidationError, validate_is_stock_item, "_Test Non Stock Item")
