@@ -1654,6 +1654,96 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		)
 		frappe.db.set_value("Company", "_Test Company", "exchange_gain_loss_account", original_account)
 
+	def test_stock_adjustment_account_fallbacks_when_default_expense_account_unset(self):
+		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import PurchaseInvoice
+
+		class StockAdjustmentInvoice:
+			company = "_Test Company"
+			conversion_rate = 1
+			update_stock = 1
+			is_internal_supplier = 0
+			return_against = None
+			project = None
+
+			def __init__(self, is_return, defaults):
+				self.is_return = is_return
+				self.defaults = defaults
+
+			def get(self, fieldname):
+				return None
+
+			def get_company_default(self, fieldname, ignore_validation=False):
+				return self.defaults.get(fieldname)
+
+			def get_gl_dict(self, args, *unused_args, **unused_kwargs):
+				return frappe._dict(args)
+
+		def make_invoice(is_return, defaults):
+			return StockAdjustmentInvoice(is_return, defaults)
+
+		def make_item(is_fixed_asset=0, expense_account="Item Expense - _TC"):
+			return frappe._dict(
+				{
+					"name": "row-1",
+					"warehouse": "Stores - _TC",
+					"valuation_rate": 10,
+					"qty": 10,
+					"conversion_factor": 1,
+					"base_net_amount": 100,
+					"item_tax_amount": 0,
+					"landed_cost_voucher_amount": 0,
+					"sales_incoming_rate": 0,
+					"is_fixed_asset": is_fixed_asset,
+					"expense_account": expense_account,
+					"cost_center": "Main - _TC",
+					"project": None,
+					"precision": lambda fieldname: 2,
+				}
+			)
+
+		defaults = {
+			"default_expense_account": None,
+			"stock_received_but_not_billed": "Stock Received But Not Billed - _TC",
+			"asset_received_but_not_billed": "Asset Received But Not Billed - _TC",
+		}
+		test_cases = (
+			(
+				"company default expense",
+				0,
+				make_item(),
+				{**defaults, "default_expense_account": "Default Expense - _TC"},
+				"Default Expense - _TC",
+			),
+			("stock rbnb", 0, make_item(), defaults, "Stock Received But Not Billed - _TC"),
+			(
+				"asset rbnb",
+				0,
+				make_item(is_fixed_asset=1),
+				defaults,
+				"Asset Received But Not Billed - _TC",
+			),
+			("return item expense", 1, make_item(), defaults, "Item Expense - _TC"),
+			(
+				"return without item expense",
+				1,
+				make_item(expense_account=None),
+				defaults,
+				"Stock Received But Not Billed - _TC",
+			),
+		)
+
+		for label, is_return, item, company_defaults, expected_account in test_cases:
+			with self.subTest(label=label):
+				invoice = make_invoice(is_return, company_defaults)
+				gl_entries = []
+				PurchaseInvoice.make_stock_adjustment_entry(
+					invoice, gl_entries, item, {(item.name, item.warehouse): 90}, "INR"
+				)
+
+				self.assertEqual(gl_entries[0].account, expected_account)
+				self.assertEqual(gl_entries[0].debit, 10)
+				self.assertEqual(gl_entries[0].debit_in_transaction_currency, 10)
+
 	@change_settings("Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1})
 	def test_purchase_invoice_advance_taxes(self):
 		from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
