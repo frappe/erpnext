@@ -563,14 +563,7 @@ class SellingController(StockController):
 					(not d.incoming_rate or self.is_new())
 					and not is_standalone
 					or self.is_internal_transfer()
-<<<<<<< HEAD
 					or (get_valuation_method(d.item_code) == "Moving Average" and self.get("is_return"))
-=======
-					or (
-						get_valuation_method(d.item_code, self.company) == "Moving Average"
-						and self.get("is_return")
-					)
->>>>>>> 2524af4758 (fix: new docs should refetch incoming rates (#58097))
 				):
 					d.incoming_rate = get_incoming_rate(
 						{
