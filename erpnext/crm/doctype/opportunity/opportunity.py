@@ -350,7 +350,7 @@ class Opportunity(TransactionBase, CRMNote):
 
 	def validate_party(self) -> None:
 		if self.opportunity_from == "Customer":
-			validate_party_frozen_disabled(self.company, "Customer", self.party_name)
+			validate_party_frozen_disabled("Customer", self.party_name)
 
 	def validate_cust_name(self):
 		if self.party_name:

@@ -10,13 +10,9 @@ from erpnext.crm.doctype.lead.lead import make_customer
 from erpnext.crm.doctype.lead.test_lead import make_lead
 from erpnext.crm.doctype.opportunity.opportunity import make_quotation
 from erpnext.crm.utils import get_linked_communication_list
-<<<<<<< HEAD
+from erpnext.exceptions import PartyDisabled
 
 test_records = frappe.get_test_records("Opportunity")
-=======
-from erpnext.exceptions import PartyDisabled
-from erpnext.tests.utils import ERPNextTestSuite
->>>>>>> 90937ce6d9 (fix: block disabled/frozen customers on Opportunity)
 
 
 class TestOpportunity(unittest.TestCase):
