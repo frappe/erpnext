@@ -936,7 +936,6 @@ class PickList(TransactionBase):
 		return int(flt(min(possible_bundles.values()), precision or 6)) if possible_bundles else 0
 
 	def update_bundle_delivered_qty(self):
-		"""Update all Pick List rows represented by delivered bundle items."""
 		bundle_locations = defaultdict(list)
 		for location in self.locations:
 			if location.product_bundle_item:
@@ -946,6 +945,7 @@ class PickList(TransactionBase):
 						location.item_code,
 						location.warehouse,
 						location.batch_no or "",
+						location.serial_no or "",
 					)
 				].append(location)
 
@@ -977,7 +977,13 @@ class PickList(TransactionBase):
 		delivered_qty = defaultdict(float)
 		for parenttype in ("Delivery Note", "Sales Invoice"):
 			for row in self._get_delivered_packed_items(parenttype, sales_order_items):
-				key = (row.so_detail, row.item_code, row.warehouse, row.batch_no or "")
+				key = (
+					row.so_detail,
+					row.item_code,
+					row.warehouse,
+					row.batch_no or "",
+					row.serial_no or "",
+				)
 				delivered_qty[key] += flt(row.delivered_qty)
 
 		return delivered_qty
@@ -1011,6 +1017,7 @@ class PickList(TransactionBase):
 				packed_item.item_code,
 				packed_item.warehouse,
 				packed_item.batch_no,
+				packed_item.serial_no,
 				Sum(packed_item.qty).as_("delivered_qty"),
 			)
 			.where(conditions)
@@ -1019,6 +1026,7 @@ class PickList(TransactionBase):
 				packed_item.item_code,
 				packed_item.warehouse,
 				packed_item.batch_no,
+				packed_item.serial_no,
 			)
 		).run(as_dict=True)
 
