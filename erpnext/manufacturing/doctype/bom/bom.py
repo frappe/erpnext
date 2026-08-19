@@ -150,7 +150,6 @@ class BOM(WebsiteGenerator):
 		bom_creator_item: DF.Data | None
 		buying_price_list: DF.Link | None
 		company: DF.Link
-		component_qty_tolerance: DF.Percent
 		conversion_rate: DF.Float
 		cost_allocation: DF.Currency
 		cost_allocation_per: DF.Percent
@@ -1386,7 +1385,6 @@ def _get_bom_item_tables(opts):
 	return frappe._dict(
 		bom_item=bom_item,
 		qty_field_col=qty_field_col,
-		supports_fixed_qty=not opts.fetch_secondary_items,
 		bom_doc=frappe.qb.DocType("BOM"),
 		item_doc=frappe.qb.DocType("Item"),
 		item_default=frappe.qb.DocType("Item Default"),
@@ -1394,12 +1392,6 @@ def _get_bom_item_tables(opts):
 
 
 def _build_base_bom_items_query(bom, company, qty, t):
-	from frappe.query_builder import Case
-
-	qty_expr = t.qty_field_col / IfNull(t.bom_doc.quantity, 1) * qty
-	if t.supports_fixed_qty:
-		qty_expr = Case().when(t.bom_item.is_fixed_qty == 1, t.qty_field_col).else_(qty_expr)
-
 	return (
 		frappe.qb.from_(t.bom_item)
 		.join(t.bom_doc)
@@ -1415,7 +1407,7 @@ def _build_base_bom_items_query(bom, company, qty, t):
 			# returns the value MySQL picked arbitrarily while making the GROUP BY valid on postgres.
 			Min(t.bom_item.idx).as_("idx"),
 			Max(t.item_doc.item_name).as_("item_name"),
-			Sum(qty_expr).as_("qty"),
+			(Sum(t.qty_field_col / IfNull(t.bom_doc.quantity, 1)) * qty).as_("qty"),
 			Max(t.item_doc.image).as_("image"),
 			Max(t.bom_doc.project).as_("project"),
 			Max(t.item_doc.stock_uom).as_("stock_uom"),

@@ -996,8 +996,7 @@ class RepackStockEntry(BaseManufactureStockEntry):
 
 		for row in bom_items:
 			row.s_warehouse = self.doc.from_warehouse
-			if not row.get("is_fixed_qty"):
-				row.qty = row.qty * self.doc.fg_completed_qty
+			row.qty = row.qty * self.doc.fg_completed_qty
 			row.transfer_qty = row.qty
 			if not row.uom:
 				row.uom = row.stock_uom
@@ -1036,11 +1035,10 @@ def get_production_item_details(work_order=None, bom_no=None):
 
 
 def _check_bom_component_qty(doc, bom_items):
-	"""Validate that stock entry items match BOM quantities within the allowed tolerance."""
+	"""Validate that stock entry items match BOM quantities."""
 	precision = frappe.get_precision("Stock Entry Detail", "qty")
-	tolerance = flt(frappe.get_cached_value("BOM", doc.bom_no, "component_qty_tolerance"))
-
-	for row in _get_expected_component_qty(doc, bom_items):
+	for row in bom_items:
+		row.qty = row.qty * doc.fg_completed_qty
 		matched_item = next(
 			(
 				item
@@ -1050,58 +1048,25 @@ def _check_bom_component_qty(doc, bom_items):
 			),
 			None,
 		)
-		if not matched_item:
-			_report_component_qty_breach(
+		if matched_item:
+			if flt(row.qty, precision) != flt(matched_item.qty, precision):
+				frappe.throw(
+					_(
+						"For the item {0}, the consumed quantity should be {1} according to the BOM {2}."
+					).format(
+						bold(row.item_code),
+						flt(row.qty),
+						get_link_to_form("BOM", doc.bom_no),
+					),
+					title=_("Incorrect Component Quantity"),
+				)
+		else:
+			frappe.throw(
 				_("According to the BOM {0}, the Item '{1}' is missing in the stock entry.").format(
 					get_link_to_form("BOM", doc.bom_no), bold(row.item_code)
 				),
-				_("Missing Item"),
+				title=_("Missing Item"),
 			)
-			continue
-
-		allowed_variance = flt(flt(row.qty) * tolerance / 100, precision)
-		if abs(flt(matched_item.qty, precision) - flt(row.qty, precision)) > allowed_variance:
-			_report_component_qty_breach(
-				_get_component_qty_message(doc, row, tolerance), _("Incorrect Component Quantity")
-			)
-
-
-def _get_expected_component_qty(doc, bom_items):
-	expected = {}
-	for row in bom_items:
-		qty = flt(row.qty) if row.get("is_fixed_qty") else flt(row.qty) * flt(doc.fg_completed_qty)
-		if existing_row := expected.get(row.item_code):
-			existing_row.qty += qty
-		else:
-			row.qty = qty
-			expected[row.item_code] = row
-
-	return list(expected.values())
-
-
-def _get_component_qty_message(doc, row, tolerance):
-	if tolerance:
-		return _(
-			"For the item {0}, the consumed quantity should be between {1} and {2} according to the BOM {3} and the tolerance of {4}%."
-		).format(
-			bold(row.item_code),
-			flt(row.qty) * (1 - tolerance / 100),
-			flt(row.qty) * (1 + tolerance / 100),
-			get_link_to_form("BOM", doc.bom_no),
-			flt(tolerance),
-		)
-
-	return _("For the item {0}, the consumed quantity should be {1} according to the BOM {2}.").format(
-		bold(row.item_code), flt(row.qty), get_link_to_form("BOM", doc.bom_no)
-	)
-
-
-def _report_component_qty_breach(message, title):
-	action = frappe.db.get_single_value("Manufacturing Settings", "action_on_component_qty_breach") or "Stop"
-	if action == "Warn":
-		frappe.msgprint(message, title=title, indicator="orange")
-	else:
-		frappe.throw(message, title=title)
 
 
 def get_bom_items(bom_no, use_multi_level_bom=None, qty=None, fetch_secondary_items=False):
@@ -1119,15 +1084,8 @@ def get_bom_items(bom_no, use_multi_level_bom=None, qty=None, fetch_secondary_it
 
 
 def _run_bom_items_query(bom_no, table_name, qty):
-	from frappe.query_builder import Case
-
 	bom_doc = frappe.qb.DocType("BOM")
 	doctype = frappe.qb.DocType(table_name)
-
-	qty_expr = doctype.stock_qty / bom_doc.quantity * qty
-	if table_name != "BOM Secondary Item":
-		qty_expr = Case().when(doctype.is_fixed_qty == 1, doctype.stock_qty).else_(qty_expr)
-
 	query = (
 		frappe.qb.from_(doctype)
 		.inner_join(bom_doc)
@@ -1137,7 +1095,7 @@ def _run_bom_items_query(bom_no, table_name, qty):
 			doctype.item_name,
 			doctype.stock_uom,
 			doctype.description,
-			qty_expr.as_("qty"),
+			(doctype.stock_qty / bom_doc.quantity.as_("qty") * qty).as_("qty"),
 			doctype.rate.as_("basic_rate"),
 		)
 		.where((bom_doc.name == bom_no) & (bom_doc.docstatus == 1))
@@ -1159,23 +1117,18 @@ def _add_bom_table_specific_fields(query, doctype, table_name):
 		)
 	if table_name == "BOM Item":
 		return query.select(
-			doctype.allow_alternative_item,
-			doctype.uom,
-			doctype.conversion_factor,
-			doctype.bom_no,
-			doctype.is_fixed_qty,
+			doctype.allow_alternative_item, doctype.uom, doctype.conversion_factor, doctype.bom_no
 		)
-	return query.select(doctype.is_fixed_qty)
+	return query
 
 
 def _deduplicate_bom_items(items):
 	item_dict = {}
 	for item in items:
-		key = (item.item_code, cint(item.get("is_fixed_qty")))
-		if key in item_dict:
-			item_dict[key].qty += item.qty
+		if item.item_code in item_dict:
+			item_dict[item.item_code].qty += item.qty
 		else:
-			item_dict[key] = item
+			item_dict[item.item_code] = item
 	return list(item_dict.values())
 
 

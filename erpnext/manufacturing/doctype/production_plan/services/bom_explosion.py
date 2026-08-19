@@ -4,7 +4,6 @@
 """BOM explosion helpers for Production Plan material planning."""
 
 import frappe
-from frappe.query_builder import Case
 from frappe.query_builder.functions import Count, IfNull, Max, Min, Sum
 from frappe.utils.caching import request_cache
 
@@ -116,14 +115,7 @@ def _exploded_item_columns(bei, bom, item, item_default, item_uom, planned_qty):
 	# their single value. The BOM-line columns come from a representative line instead; see
 	# _apply_representative_lines.
 	return [
-		IfNull(
-			Sum(
-				Case()
-				.when(bei.is_fixed_qty == 1, bei.stock_qty)
-				.else_(bei.stock_qty / IfNull(bom.quantity, 1) * planned_qty)
-			),
-			0,
-		).as_("qty"),
+		(IfNull(Sum(bei.stock_qty / IfNull(bom.quantity, 1)), 0) * planned_qty).as_("qty"),
 		Max(item.item_name).as_("item_name"),
 		Max(item.name).as_("item_code"),
 		Max(bei.description).as_("description"),
@@ -200,14 +192,7 @@ def _subitems_query(company, bom_no, include_non_stock_items, parent_qty, planne
 
 
 def _subitem_columns(bom_item, bom, item, item_default, item_uom, parent_qty, planned_qty):
-	qty = IfNull(
-		Sum(
-			Case()
-			.when(bom_item.is_fixed_qty == 1, bom_item.stock_qty)
-			.else_(bom_item.stock_qty / IfNull(bom.quantity, 1) * parent_qty * planned_qty)
-		),
-		0,
-	).as_("qty")
+	qty = IfNull(parent_qty * Sum(bom_item.stock_qty / IfNull(bom.quantity, 1)) * planned_qty, 0).as_("qty")
 	# only item_code is grouped; the remaining item-attribute columns are functionally dependent on it,
 	# so Max() returns their single value on both engines. is_phantom_item is the exception: the same
 	# item_code can sit on a phantom line and a real-RM line in one BOM, and get_subitems() drops any

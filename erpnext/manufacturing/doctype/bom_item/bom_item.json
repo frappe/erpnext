@@ -45,7 +45,6 @@
   "sourced_by_supplier",
   "is_sub_assembly_item",
   "is_phantom_item",
-  "is_fixed_qty",
   "is_balance_item"
  ],
  "fields": [
@@ -338,13 +337,6 @@
   },
   {
    "default": "0",
-   "description": "Quantity stays constant regardless of the qty to manufacture (catalysts, vessel charges)",
-   "fieldname": "is_fixed_qty",
-   "fieldtype": "Check",
-   "label": "Fixed Qty"
-  },
-  {
-   "default": "0",
    "depends_on": "eval:parent.set_qty_based_on_percentage",
    "description": "This component absorbs the percentage remaining after all other percentage rows",
    "fieldname": "is_balance_item",
@@ -356,7 +348,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-08-19 12:00:00.000000",
+ "modified": "2026-08-19 14:00:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Item",

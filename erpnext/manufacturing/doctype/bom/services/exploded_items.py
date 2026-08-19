@@ -7,7 +7,7 @@ from operator import itemgetter
 
 import frappe
 from frappe.query_builder.functions import IfNull
-from frappe.utils import cint, flt
+from frappe.utils import flt
 
 
 class BOMExplodedItemsService:
@@ -44,12 +44,13 @@ class BOMExplodedItemsService:
 				"rate": flt(d.base_rate) / (flt(d.conversion_factor) or 1.0),
 				"include_item_in_manufacturing": d.include_item_in_manufacturing,
 				"sourced_by_supplier": d.sourced_by_supplier,
-				"is_fixed_qty": d.is_fixed_qty,
 			}
 		)
 
 	def add_to_cur_exploded_items(self, args):
-		key = (args.item_code, args.operation or "", cint(args.get("is_fixed_qty")))
+		key = args.item_code
+		if args.operation:
+			key = (args.item_code, args.operation)
 
 		if self.doc.cur_exploded_items.get(key):
 			self.doc.cur_exploded_items[key]["stock_qty"] += args.stock_qty
@@ -83,7 +84,6 @@ class BOMExplodedItemsService:
 				bom_item.rate,
 				bom_item.include_item_in_manufacturing,
 				bom_item.sourced_by_supplier,
-				bom_item.is_fixed_qty,
 				qty_consumed_per_unit,
 			)
 			.where((bom.name == bom_no) & (bom.docstatus == 1))
@@ -99,14 +99,11 @@ class BOMExplodedItemsService:
 				"operation": d["operation"] or operation,
 				"description": d["description"],
 				"stock_uom": d["stock_uom"],
-				"stock_qty": d["stock_qty"]
-				if d.get("is_fixed_qty")
-				else d["qty_consumed_per_unit"] * stock_qty,
+				"stock_qty": d["qty_consumed_per_unit"] * stock_qty,
 				"rate": flt(d["rate"]),
 				"include_item_in_manufacturing": d.get("include_item_in_manufacturing", 0),
 				"sourced_by_supplier": d.get("sourced_by_supplier", 0),
 				"is_sub_assembly_item": d.get("is_sub_assembly_item", 0),
-				"is_fixed_qty": d.get("is_fixed_qty", 0),
 			}
 		)
 

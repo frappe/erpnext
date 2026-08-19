@@ -17,7 +17,6 @@ class ManufacturingSettings(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		action_on_component_qty_breach: DF.Literal["Stop", "Warn"]
 		add_corrective_operation_cost_in_finished_good_valuation: DF.Check
 		allow_editing_of_items_and_quantities_in_work_order: DF.Check
 		allow_overtime: DF.Check
