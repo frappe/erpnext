@@ -774,6 +774,7 @@ $.extend(erpnext.journal_entry, {
 		} else {
 			erpnext.journal_entry.clear_fields(frm, dt, dn);
 		}
+<<<<<<< HEAD
 	},
 	set_amount_on_last_row: function (frm, dt, dn) {
 		let row = locals[dt][dn];
@@ -805,5 +806,8 @@ $.extend(erpnext.journal_entry, {
 		row.bank_account = null;
 
 		frm.refresh_field("accounts");
+=======
+		frm.get_field("accounts").grid.refresh_row(cdn);
+>>>>>>> 275844d496 (fix(journal-entry): avoid full grid re-render per row in set_exchange_rate (#58328))
 	},
 });
