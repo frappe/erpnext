@@ -163,7 +163,7 @@ class BaseManufactureStockEntry(BaseStockEntry):
 			{
 				"conversion_factor": 1,
 				"uom": item_details.stock_uom,
-				"qty": ceil_qty_if_uom_has_whole_number(fg_item_qty, item_details.stock_uom),
+				"qty": fg_item_qty,
 				"t_warehouse": self.doc.to_warehouse
 				or frappe.get_cached_value("BOM", self.doc.bom_no, "default_target_warehouse"),
 				"s_warehouse": None,
