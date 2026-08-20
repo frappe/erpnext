@@ -1015,6 +1015,33 @@ class TestWorkOrder(ERPNextTestSuite):
 		stock_entry = frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture"))
 		self.assertRaises(frappe.ValidationError, stock_entry.save)
 
+	def test_manufacture_entry_fg_qty_not_rounded_for_whole_number_uom(self):
+		from erpnext.utilities.transaction_base import UOMMustBeIntegerError
+
+		fg_item = "Test FG Item Whole Number UOM"
+		rm_item = "Test RM Item Whole Number UOM"
+		uom = "Test Whole Number UOM"
+
+		if not frappe.db.exists("UOM", uom):
+			frappe.get_doc({"doctype": "UOM", "uom_name": uom}).insert()
+		frappe.db.set_value("UOM", uom, "must_be_whole_number", 0)
+
+		make_item(fg_item, {"is_stock_item": 1, "include_item_in_manufacturing": 1, "stock_uom": uom})
+		make_item(rm_item, {"is_stock_item": 1, "include_item_in_manufacturing": 1})
+
+		if not frappe.db.exists("BOM", {"item": fg_item}):
+			make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=1)
+
+		wo = make_wo_order_test_record(
+			item=fg_item, qty=2, skip_transfer=1, source_warehouse="_Test Warehouse - _TC"
+		)
+		frappe.db.set_value("UOM", uom, "must_be_whole_number", 1)
+
+		stock_entry = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 0.5))
+		fg_row = next(row for row in stock_entry.items if row.is_finished_item)
+		self.assertEqual(fg_row.qty, 0.5)
+		self.assertRaises(UOMMustBeIntegerError, stock_entry.save)
+
 	def test_wo_completion_with_pl_bom(self):
 		from erpnext.manufacturing.doctype.bom.test_bom import (
 			create_bom_with_process_loss_item,
