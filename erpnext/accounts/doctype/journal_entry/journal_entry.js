@@ -572,6 +572,7 @@ $.extend(erpnext.journal_entry, {
 		} else {
 			erpnext.journal_entry.set_debit_credit_in_company_currency(frm, cdt, cdn);
 		}
+<<<<<<< HEAD
 		refresh_field("exchange_rate", cdn, "accounts");
 	},
 
@@ -737,5 +738,8 @@ $.extend(erpnext.journal_entry, {
 			}
 		}
 		refresh_field("accounts");
+=======
+		frm.get_field("accounts").grid.refresh_row(cdn);
+>>>>>>> 275844d496 (fix(journal-entry): avoid full grid re-render per row in set_exchange_rate (#58328))
 	},
 });
