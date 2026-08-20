@@ -286,6 +286,19 @@ erpnext.sales_common = {
 				}
 
 				this.set_actual_qty(doc, cdt, cdn);
+
+				if (cdt !== "Packed Item" && doc.packed_items) {
+					doc.packed_items
+						.filter((item) => item.parent_detail_docname === cdn)
+						.forEach((item) => {
+							frappe.model.set_value(
+								item.doctype,
+								item.name,
+								"warehouse",
+								locals[cdt][cdn].warehouse
+							);
+						});
+				}
 			}
 
 			set_actual_qty(doc, cdt, cdn) {
