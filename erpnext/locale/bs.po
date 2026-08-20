@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-08-16 09:41+0000\n"
-"PO-Revision-Date: 2026-08-18 01:44\n"
+"PO-Revision-Date: 2026-08-20 02:36\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Bosnian\n"
 "MIME-Version: 1.0\n"
@@ -343,7 +343,7 @@ msgstr "'Trajanje Važenja Verifikacijskog Linka' mora biti između 15 i 60 minu
 
 #: erpnext/accounts/doctype/bank_account/bank_account.py:79
 msgid "'{0}' account is already used by {1}. Use another account."
-msgstr "Račun '{0}' već koristi {1}. Koristite drugi račun."
+msgstr "Račun '{0}' već koristi {1}. Koristi drugi račun."
 
 #: erpnext/accounts/doctype/pos_settings/pos_settings.py:44
 msgid "'{0}' has been already added."
@@ -48100,7 +48100,7 @@ msgstr "Red {0}: Dodijeljeni iznos {1} mora biti manji ili jednak preostalom izn
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:810
 msgid "Row {0}: As {1} is enabled, raw materials cannot be added to {2} entry. Use {3} entry to consume raw materials."
-msgstr "Red {0}: Kako je {1} omogućen, sirovine se ne mogu dodati u {2} unos. Koristite {3} unos za potrošnju sirovina."
+msgstr "Red {0}: Kako je {1} omogućen, sirovine se ne mogu dodati u {2} unos. Koristi {3} unos za potrošnju sirovina."
 
 #: erpnext/stock/doctype/material_request/material_request.py:625
 msgid "Row {0}: Bill of Materials not found for the Item {1}"
@@ -60958,7 +60958,7 @@ msgstr "Hitno"
 
 #: erpnext/accounts/doctype/repost_payment_ledger/repost_payment_ledger.js:36
 msgid "Use 'Repost in background' button to trigger background job. Job can only be triggered when document is in Queued or Failed status."
-msgstr "Koristite dugme 'Ponovo knjiži u pozadini' da pokrenete posao u pozadini. Zadatak se može pokrenuti samo kada je dokument u stanju čekanja ili neuspješan."
+msgstr "Koristi dugme 'Ponovo knjiži u pozadini' da pokrenete posao u pozadini. Zadatak se može pokrenuti samo kada je dokument u stanju čekanja ili neuspješan."
 
 #. Description of the 'Advanced Filtering' (Check) field in DocType 'Financial
 #. Report Row'
@@ -61105,7 +61105,7 @@ msgstr "Koristi Devizni Kurs Datuma Transakcije"
 
 #: erpnext/projects/doctype/project/project.py:671
 msgid "Use a name that is different from previous project name"
-msgstr "Koristite naziv koji se razlikuje od naziva prethodnog projekta"
+msgstr "Koristi naziv koji se razlikuje od naziva prethodnog projekta"
 
 #. Label of the use_for_shopping_cart (Check) field in DocType 'Tax Rule'
 #: erpnext/accounts/doctype/tax_rule/tax_rule.json
@@ -61122,13 +61122,13 @@ msgstr "Koristi stari Kontroler Proračuna"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Use legacy controller for Period Closing Voucher"
-msgstr "Koristite stari kontroler za Verifikat Zatvaranje Perioda"
+msgstr "Koristi stari kontroler za Verifikat Zatvaranje Perioda"
 
 #. Label of the fallback_to_default_price_list (Check) field in DocType
 #. 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Use prices from Default Price List as fallback"
-msgstr "Koristite cjene iz Standard Cjenovnika kao Rezervnu Opciju"
+msgstr "Koristi cjene iz Standard Cjenovnika kao Rezervnu Opciju"
 
 #. Description of the 'No of Shifts' (Int) field in DocType 'Production Plan'
 #: erpnext/manufacturing/doctype/production_plan/production_plan.json
@@ -64110,7 +64110,7 @@ msgstr "po satu"
 
 #: erpnext/stock/stock_ledger.py:2251
 msgid "performing either one below:"
-msgstr "izvodi bilo koje dolje:"
+msgstr "izvodi bilo koje niže:"
 
 #. Description of the 'Product Bundle Item' (Data) field in DocType 'Pick List
 #. Item'
