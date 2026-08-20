@@ -84,7 +84,7 @@ class TestTimesheetBillingSummary(ERPNextTestSuite):
 		denied_project = frappe.get_doc(
 			{
 				"doctype": "Project",
-				"project_name": f"_Test TBS Denied {frappe.generate_hash(length=6)}",
+				"project_name": "_Test TBS Denied",
 				"company": "_Test Company",
 			}
 		).insert()
@@ -99,7 +99,7 @@ class TestTimesheetBillingSummary(ERPNextTestSuite):
 		user = frappe.get_doc(
 			{
 				"doctype": "User",
-				"email": f"timesheet-summary-{frappe.generate_hash(length=6)}@example.com",
+				"email": "timesheet-summary@example.com",
 				"first_name": "Timesheet Summary",
 				"enabled": 1,
 				"send_welcome_email": 0,
