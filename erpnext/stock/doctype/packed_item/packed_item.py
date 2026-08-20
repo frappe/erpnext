@@ -279,15 +279,22 @@ def update_packed_item_basic_data(main_item_row, pi_row, packing_item, item_data
 def update_packed_item_stock_data(main_item_row, pi_row, packing_item, item_data, doc):
 	# TODO batch_no, actual_batch_qty, incoming_rate
 	if main_item_row.get("so_detail"):
-		pi_row.warehouse = frappe.get_value(
-			"Packed Item",
-			{
-				"parent_detail_docname": main_item_row.so_detail,
-				"parent_item": main_item_row.item_code,
-				"item_code": packing_item.item_code,
-			},
-			"warehouse",
+		warehouse, reserve_stock = (
+			frappe.get_value(
+				"Packed Item",
+				{
+					"parent_detail_docname": main_item_row.so_detail,
+					"parent_item": main_item_row.item_code,
+					"item_code": packing_item.item_code,
+				},
+				["warehouse", "reserve_stock"],
+			)
+			or None,
+			None,
 		)
+
+		if reserve_stock:
+			pi_row.warehouse = warehouse
 
 	if not pi_row.warehouse and not doc.amended_from:
 		fetch_warehouse = doc.get("is_pos") or item_data.is_stock_item or not item_data.default_warehouse
