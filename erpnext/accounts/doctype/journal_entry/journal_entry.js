@@ -677,6 +677,6 @@ Object.assign(erpnext.journal_entry, {
 		} else {
 			erpnext.journal_entry.set_debit_credit_in_company_currency(frm, cdt, cdn);
 		}
-		frm.refresh_field("accounts");
+		frm.get_field("accounts").grid.refresh_row(cdn);
 	},
 });
