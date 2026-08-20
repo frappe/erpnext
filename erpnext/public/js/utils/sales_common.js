@@ -289,7 +289,11 @@ erpnext.sales_common = {
 
 				if (cdt !== "Packed Item" && doc.packed_items) {
 					doc.packed_items
-						.filter((item) => item.parent_detail_docname === cdn)
+						.filter(
+							(item) =>
+								item.parent_detail_docname === cdn ||
+								parseInt(item.parent_detail_docname) === locals[cdt][cdn].idx
+						)
 						.forEach((item) => {
 							frappe.model.set_value(
 								item.doctype,
