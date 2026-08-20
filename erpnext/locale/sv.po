@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-08-16 09:41+0000\n"
-"PO-Revision-Date: 2026-08-17 01:43\n"
+"PO-Revision-Date: 2026-08-20 02:35\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -36153,7 +36153,7 @@ msgstr "Sidbrytning efter varje SoA"
 
 #: banking/src/components/features/BankStatementImporter/PDF/PDFTableEditor.tsx:302
 msgid "Page preview"
-msgstr "Förhandsgranska Sida"
+msgstr "Förhandsvisa Sida"
 
 #. Option for the 'Status' (Select) field in DocType 'Payment Request'
 #. Option for the 'Status' (Select) field in DocType 'POS Invoice'
@@ -40391,17 +40391,17 @@ msgstr "Förhindrar att system automatiskt använder pris från senaste inköp t
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.js:268
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.json
 msgid "Preview Email"
-msgstr "Förhandsgranska E-post"
+msgstr "Förhandsvisa E-post"
 
 #. Label of the download_materials_request_plan_section_section (Section Break)
 #. field in DocType 'Production Plan'
 #: erpnext/manufacturing/doctype/production_plan/production_plan.json
 msgid "Preview Required Materials"
-msgstr "Förhandsgranska Erfordrad Material"
+msgstr "Förhandsvisa Erfordrad Material"
 
 #: banking/src/components/features/BankStatementImporter/CSV/StatementDetails.tsx:230
 msgid "Preview Transactions"
-msgstr "Förhandsgranska Transaktioner"
+msgstr "Förhandsvisa Transaktioner"
 
 #. Label of the preview_mode (Check) field in DocType 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
