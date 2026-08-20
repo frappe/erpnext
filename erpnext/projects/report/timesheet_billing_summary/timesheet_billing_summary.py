@@ -1,5 +1,6 @@
 import frappe
 from frappe import _
+from frappe.desk.query_report import get_filtered_data
 from frappe.model.docstatus import DocStatus
 from frappe.utils import getdate
 
@@ -12,11 +13,14 @@ def execute(filters=None):
 	filters = frappe._dict(filters or {})
 	columns = get_columns(filters, group_fieldname)
 
-	data = get_data(filters, group_fieldname)
+	data = get_data(filters)
+	data = get_filtered_data("Timesheet", columns, data, frappe.session.user)
+	report_summary = get_report_summary(data)
 
-	# the report totals itself in `get_total_row`: frappe's total row counts a group and its
-	# children as separate rows, and the datatable hides it anyway in tree mode
-	return columns, data, None, None, None, 1
+	if group_fieldname:
+		data = group_by(data, group_fieldname)
+
+	return columns, data, None, None, report_summary, 1
 
 
 def get_columns(filters, group_fieldname=None):
@@ -86,7 +90,7 @@ def get_columns(filters, group_fieldname=None):
 	return columns
 
 
-def get_data(filters, group_fieldname=None):
+def get_data(filters):
 	_filters = []
 	if filters.get("employee"):
 		_filters.append(("employee", "=", filters.get("employee")))
@@ -117,13 +121,6 @@ def get_data(filters, group_fieldname=None):
 		order_by="`tabTimesheet Detail`.from_time",
 	)
 
-	if not data:
-		return data
-
-	if group_fieldname:
-		data = group_by(data, group_fieldname)
-
-	data.append(get_total_row(data))
 	return data
 
 
@@ -170,17 +167,32 @@ def get_group_value(row, fieldname):
 	return getdate(value) if fieldname == "date" and value else value
 
 
-def get_total_row(data):
-	total_row = dict.fromkeys(VALUE_FIELDNAMES, 0.0)
-	# quoted so that the Link column renders it as plain text instead of a broken link
-	total_row["timesheet"] = f"'{_('Total')}'"
-	total_row["indent"] = 0
+def get_report_summary(data):
+	if not data:
+		return None
 
+	totals = dict.fromkeys(VALUE_FIELDNAMES, 0.0)
 	for row in data:
-		# a group already carries its children's values: adding both would count them twice
-		if row.get("indent"):
-			continue
 		for value_fieldname in VALUE_FIELDNAMES:
-			total_row[value_fieldname] += row.get(value_fieldname) or 0
+			totals[value_fieldname] += row.get(value_fieldname) or 0
 
-	return total_row
+	return [
+		{
+			"value": totals["hours"],
+			"indicator": "Blue",
+			"label": _("Total Working Hours"),
+			"datatype": "Float",
+		},
+		{
+			"value": totals["billing_hours"],
+			"indicator": "Blue",
+			"label": _("Total Billing Hours"),
+			"datatype": "Float",
+		},
+		{
+			"value": totals["billing_amount"],
+			"indicator": "Green",
+			"label": _("Total Billing Amount"),
+			"datatype": "Currency",
+		},
+	]
