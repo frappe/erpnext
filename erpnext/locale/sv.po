@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-08-16 09:41+0000\n"
-"PO-Revision-Date: 2026-08-20 02:35\n"
+"PO-Revision-Date: 2026-08-21 02:30\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -29827,7 +29827,7 @@ msgstr "Begränsad till tolv tecken"
 #. Settings'
 #: erpnext/stock/doctype/stock_reposting_settings/stock_reposting_settings.json
 msgid "Limits don't apply on"
-msgstr "Begränsningar gäller inte för"
+msgstr "Begränsning gäller inte för"
 
 #. Label of the reference_code (Data) field in DocType 'Financial Report Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
