@@ -1442,7 +1442,7 @@ def validate_conversion_rate(ctx: frappe._dict, meta):
 	validate_conversion_rate(
 		ctx.currency,
 		ctx.conversion_rate,
-		_(meta.get_label("conversion_rate"), context=meta.name),
+		meta.get_translated_label("conversion_rate"),
 		ctx.company,
 	)
 
@@ -1464,7 +1464,7 @@ def validate_conversion_rate(ctx: frappe._dict, meta):
 			validate_conversion_rate(
 				ctx.price_list_currency,
 				ctx.plc_conversion_rate,
-				_(meta.get_label("plc_conversion_rate"), context=meta.name),
+				meta.get_translated_label("plc_conversion_rate"),
 				ctx.company,
 			)
 
