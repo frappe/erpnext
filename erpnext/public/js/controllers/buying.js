@@ -263,7 +263,7 @@ erpnext.buying = {
 						frappe.msgprint(
 							__("Row #{0}: {1} can not be negative for item {2}", [
 								item.idx,
-								__(frappe.meta.get_label(cdt, fieldnames[i], cdn)),
+								__(frappe.meta.get_label(cdt, fieldnames[i], cdn), null, cdt),
 								item.item_code,
 							])
 						);

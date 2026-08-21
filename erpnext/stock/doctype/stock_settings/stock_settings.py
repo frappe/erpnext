@@ -264,8 +264,15 @@ class StockSettings(Document):
 				_(
 					"You have enabled {0} and {1} in {2}. This can lead to prices from the default price list being inserted in the transaction price list."
 				).format(
-					"<i>{}</i>".format(_(self.meta.get_label("auto_insert_price_list_rate_if_missing"))),
-					"<i>{}</i>".format(_(selling_meta.get_label("fallback_to_default_price_list"))),
+					"<i>{}</i>".format(
+						_(self.meta.get_label("auto_insert_price_list_rate_if_missing"), context=self.doctype)
+					),
+					"<i>{}</i>".format(
+						_(
+							selling_meta.get_label("fallback_to_default_price_list"),
+							context=selling_meta.name,
+						)
+					),
 					frappe.bold(_("Selling Settings")),
 				)
 			)

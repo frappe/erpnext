@@ -272,7 +272,10 @@ class Item(Document):
 					_(
 						'Image in the description has been removed. To disable this behavior, uncheck "{0}" in {1}.'
 					).format(
-						frappe.get_meta("Stock Settings").get_label("clean_description_html"),
+						_(
+							frappe.get_meta("Stock Settings").get_label("clean_description_html"),
+							context="Stock Settings",
+						),
 						get_link_to_form("Stock Settings"),
 					),
 					alert=True,
@@ -424,8 +427,8 @@ class Item(Document):
 				frappe.throw(
 					_("Taxes row #{0}: {1} cannot be smaller than {2}").format(
 						tax.idx,
-						bold(_(tax.meta.get_label("maximum_net_rate"))),
-						bold(_(tax.meta.get_label("minimum_net_rate"))),
+						bold(_(tax.meta.get_label("maximum_net_rate"), context=tax.doctype)),
+						bold(_(tax.meta.get_label("minimum_net_rate"), context=tax.doctype)),
 					)
 				)
 
@@ -702,7 +705,9 @@ class Item(Document):
 
 		if new_properties != [cstr(self.get(field)) for field in field_list]:
 			msg = _("To merge, following properties must be same for both items")
-			msg += ": \n" + ", ".join([_(self.meta.get_label(fld)) for fld in field_list])
+			msg += ": \n" + ", ".join(
+				[_(self.meta.get_label(fld), context=self.doctype) for fld in field_list]
+			)
 			frappe.throw(msg, title=_("Cannot Merge"), exc=DataValidationError)
 
 	def validate_duplicate_product_bundles_before_merge(self, old_name, new_name):
@@ -1134,7 +1139,9 @@ class Item(Document):
 			return
 
 		if linked_doc := self._get_linked_submitted_documents(changed_fields):
-			changed_field_labels = [frappe.bold(_(self.meta.get_label(f))) for f in changed_fields]
+			changed_field_labels = [
+				frappe.bold(_(self.meta.get_label(f), context=self.doctype)) for f in changed_fields
+			]
 			msg = _(
 				"As there are existing submitted transactions against item {0}, you can not change the value of {1}."
 			).format(self.name, ", ".join(changed_field_labels))

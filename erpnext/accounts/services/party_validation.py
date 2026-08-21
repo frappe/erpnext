@@ -183,7 +183,7 @@ class PartyValidator:
 			):
 				frappe.throw(
 					_("{0} does not belong to the Company {1}.").format(
-						_(doc.meta.get_label(field)), frappe.bold(doc.company)
+						_(doc.meta.get_label(field), context=doc.doctype), frappe.bold(doc.company)
 					)
 				)
 

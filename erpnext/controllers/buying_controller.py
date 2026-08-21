@@ -304,8 +304,8 @@ class BuyingController(SubcontractingController):
 				frappe.throw(
 					_("Row #{idx}: {from_warehouse_field} and {to_warehouse_field} cannot be same.").format(
 						idx=item.idx,
-						from_warehouse_field=_(item.meta.get_label("from_warehouse")),
-						to_warehouse_field=_(item.meta.get_label("warehouse")),
+						from_warehouse_field=_(item.meta.get_label("from_warehouse"), context=item.doctype),
+						to_warehouse_field=_(item.meta.get_label("warehouse"), context=item.doctype),
 					)
 				)
 
@@ -710,7 +710,7 @@ class BuyingController(SubcontractingController):
 					frappe.throw(
 						_("Row #{idx}: {field_label} is mandatory.").format(
 							idx=d.idx,
-							field_label=_(d.meta.get_label("conversion_factor")),
+							field_label=_(d.meta.get_label("conversion_factor"), context=d.doctype),
 						)
 					)
 				d.stock_qty = flt(d.qty) * flt(d.conversion_factor)
@@ -757,7 +757,9 @@ class BuyingController(SubcontractingController):
 				frappe.throw(
 					_("Row #{idx}: {field_label} can not be negative for item {item_code}.").format(
 						idx=item_row["idx"],
-						field_label=_(frappe.get_meta(item_row.doctype).get_label(fieldname)),
+						field_label=_(
+							frappe.get_meta(item_row.doctype).get_label(fieldname), context=item_row.doctype
+						),
 						item_code=frappe.bold(item_row["item_code"]),
 					)
 				)
@@ -1210,14 +1212,14 @@ class BuyingController(SubcontractingController):
 					frappe.throw(
 						_("Row #{idx}: {schedule_date} cannot be before {transaction_date}.").format(
 							idx=d.idx,
-							schedule_date=_(self.meta.get_label("schedule_date")),
-							transaction_date=_(self.meta.get_label("transaction_date")),
+							schedule_date=_(self.meta.get_label("schedule_date"), context=self.doctype),
+							transaction_date=_(self.meta.get_label("transaction_date"), context=self.doctype),
 						)
 					)
 		else:
 			frappe.throw(
 				_("Please enter the {schedule_date}.").format(
-					schedule_date=_(self.meta.get_label("schedule_date"))
+					schedule_date=_(self.meta.get_label("schedule_date"), context=self.doctype)
 				)
 			)
 
