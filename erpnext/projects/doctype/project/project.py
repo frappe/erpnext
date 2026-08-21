@@ -596,6 +596,10 @@ def create_duplicate_project(prev_doc, project_name):
 
 	prev_doc = json.loads(prev_doc)
 
+	# prev_doc is caller-supplied, but the tasks below are read from the db by name
+	if source_name := prev_doc.get("name"):
+		frappe.has_permission("Project", "read", source_name, throw=True)
+
 	if project_name == prev_doc.get("name"):
 		frappe.throw(_("Use a name that is different from previous project name"))
 
