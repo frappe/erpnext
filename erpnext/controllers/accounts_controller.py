@@ -524,7 +524,7 @@ class AccountsController(TransactionBase):
 					_(
 						"Please set {0} to {1}, the same account that was used in the original invoice {2}."
 					).format(
-						frappe.bold(_(self.meta.get_label(cr_dr_account_field), context=self.doctype)),
+						frappe.bold(self.meta.get_translated_label(cr_dr_account_field)),
 						frappe.bold(original_account),
 						frappe.bold(self.return_against),
 					)

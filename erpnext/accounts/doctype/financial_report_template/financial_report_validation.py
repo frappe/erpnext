@@ -443,9 +443,7 @@ class AccountFilterValidator(Validator):
 				return "Field and operator must be strings"
 
 			display = (
-				field
-				if advanced_filtering
-				else _(self.account_meta.get_label(field), context=self.account_meta.name)
+				field if advanced_filtering else self.account_meta.get_translated_label(field)
 			) or field
 
 			if field not in account_fields:

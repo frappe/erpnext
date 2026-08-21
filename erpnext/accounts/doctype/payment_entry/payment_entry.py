@@ -278,7 +278,7 @@ class PaymentEntry(AccountsController):
 		if not liability_account:
 			throw(
 				_("Please set default {0} in Company {1}").format(
-					frappe.bold(_(frappe.get_meta("Company").get_label(fieldname), context="Company")),
+					frappe.bold(frappe.get_meta("Company").get_translated_label(fieldname)),
 					frappe.bold(self.company),
 				)
 			)
@@ -662,9 +662,7 @@ class PaymentEntry(AccountsController):
 	def validate_mandatory(self):
 		for field in ("paid_amount", "received_amount", "source_exchange_rate", "target_exchange_rate"):
 			if not self.get(field):
-				frappe.throw(
-					_("{0} is mandatory").format(_(self.meta.get_label(field), context=self.doctype))
-				)
+				frappe.throw(_("{0} is mandatory").format(self.meta.get_translated_label(field)))
 
 	def validate_reference_documents(self):
 		valid_reference_doctypes = self.get_valid_reference_doctypes()
@@ -1154,7 +1152,7 @@ class PaymentEntry(AccountsController):
 				if value:
 					continue
 
-				label = _(frappe.get_meta("Company").get_label(fieldname), context="Company")
+				label = frappe.get_meta("Company").get_translated_label(fieldname)
 				return frappe.msgprint(
 					_("Please set {0} in Company {1} to account for Exchange Gain / Loss").format(
 						label, get_link_to_form("Company", self.company)

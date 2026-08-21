@@ -1019,7 +1019,7 @@ class BOM(WebsiteGenerator):
 		if not self.transfer_material_against and not self.track_semi_finished_goods and not self.is_new():
 			frappe.throw(
 				_("Setting {0} is required").format(
-					_(self.meta.get_label("transfer_material_against"), context=self.doctype)
+					self.meta.get_translated_label("transfer_material_against")
 				),
 				title=_("Missing value"),
 			)
