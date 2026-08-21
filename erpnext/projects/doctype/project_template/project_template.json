@@ -34,7 +34,7 @@
   }
  ],
  "links": [],
- "modified": "2025-03-12 14:20:57.301906",
+ "modified": "2026-08-21 23:11:46.618525",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project Template",
@@ -52,6 +52,14 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "role": "Projects Manager",
+   "select": 1
+  },
+  {
+   "role": "Projects User",
+   "select": 1
   }
  ],
  "quick_entry": 1,

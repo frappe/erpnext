@@ -582,7 +582,7 @@
    "link_fieldname": "pos_profile"
   }
  ],
- "modified": "2026-02-10 14:24:48.597412",
+ "modified": "2026-08-21 23:11:45.419667",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",
@@ -606,6 +606,10 @@
    "read": 1,
    "report": 1,
    "role": "Accounts User"
+  },
+  {
+   "role": "Sales Manager",
+   "select": 1
   }
  ],
  "row_format": "Dynamic",

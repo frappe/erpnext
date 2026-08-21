@@ -74,7 +74,7 @@
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-17 11:53:17.940039",
+ "modified": "2026-08-21 23:11:45.858553",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Plant Floor",
@@ -92,6 +92,10 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "role": "Manufacturing User",
+   "select": 1
   }
  ],
  "row_format": "Dynamic",

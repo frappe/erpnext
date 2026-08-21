@@ -61,7 +61,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-03-27 13:06:34.976117",
+ "modified": "2026-08-21 23:11:38.864427",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Maintenance Team",
@@ -78,9 +78,14 @@
    "role": "Manufacturing User",
    "share": 1,
    "write": 1
+  },
+  {
+   "role": "Quality Manager",
+   "select": 1
   }
  ],
  "quick_entry": 1,
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
