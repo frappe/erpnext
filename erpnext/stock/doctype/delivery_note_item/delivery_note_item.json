@@ -257,6 +257,7 @@
    "fieldname": "conversion_factor",
    "fieldtype": "Float",
    "label": "UOM Conversion Factor",
+   "precision": "9",
    "print_hide": 1,
    "read_only": 1,
    "reqd": 1
@@ -982,7 +983,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-07-18 10:00:00.000000",
+ "modified": "2026-08-07 17:31:31.732720",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",

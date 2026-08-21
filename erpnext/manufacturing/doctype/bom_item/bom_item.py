@@ -25,6 +25,7 @@ class BOMItem(Document):
 		has_variants: DF.Check
 		image: DF.Attach | None
 		include_item_in_manufacturing: DF.Check
+		is_balance_item: DF.Check
 		is_phantom_item: DF.Check
 		is_stock_item: DF.Check
 		is_sub_assembly_item: DF.Check
@@ -36,6 +37,7 @@ class BOMItem(Document):
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
+		percentage: DF.Percent
 		qty: DF.Float
 		qty_consumed_per_unit: DF.Float
 		rate: DF.Currency

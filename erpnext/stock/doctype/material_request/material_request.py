@@ -273,6 +273,7 @@ class MaterialRequest(BuyingController):
 	def on_submit(self):
 		self.update_requested_qty_in_production_plan()
 		self.update_requested_qty()
+		self.update_requested_qty_in_work_order()
 		if self.material_request_type == "Purchase":
 			self.update_prevdoc_status()
 			if frappe.db.exists("Budget", {"applicable_on_material_request": 1, "docstatus": 1}):
@@ -283,6 +284,20 @@ class MaterialRequest(BuyingController):
 
 	def before_submit(self):
 		self.set_status(update=True)
+		self.validate_pending_qty_in_work_order()
+
+	def validate_pending_qty_in_work_order(self):
+		if not self.work_order or self.material_request_type != "Material Transfer":
+			return
+
+		from erpnext.manufacturing.doctype.work_order.services.required_items import RequiredItemsService
+
+		work_order = frappe.get_doc("Work Order", self.work_order, for_update=True)
+		incoming = {}
+		for row in self.items:
+			incoming[row.item_code] = incoming.get(row.item_code, 0.0) + flt(row.stock_qty)
+
+		RequiredItemsService(work_order).validate_incoming_material_demand(incoming)
 
 	def before_cancel(self):
 		# if MRQ is already closed, no point saving the document
@@ -301,6 +316,7 @@ class MaterialRequest(BuyingController):
 		self.status_can_change(status)
 		self.set_status(update=True, status=status)
 		self.update_requested_qty()
+		self.update_requested_qty_in_work_order()
 
 	def status_can_change(self, status):
 		"""
@@ -330,6 +346,7 @@ class MaterialRequest(BuyingController):
 	def on_cancel(self):
 		self.update_requested_qty_in_production_plan(cancel=True)
 		self.update_requested_qty()
+		self.update_requested_qty_in_work_order()
 		if self.material_request_type == "Purchase":
 			self.update_prevdoc_status()
 
@@ -416,6 +433,19 @@ class MaterialRequest(BuyingController):
 			},
 			update_modified,
 		)
+
+		self.update_requested_qty_in_work_order()
+
+	def update_requested_qty_in_work_order(self):
+		"""Refresh both counters: stop and cancel also flip pick list coverage."""
+		if not self.work_order or self.material_request_type != "Material Transfer":
+			return
+
+		from erpnext.manufacturing.doctype.work_order.services.required_items import RequiredItemsService
+
+		service = RequiredItemsService(frappe.get_doc("Work Order", self.work_order))
+		service.update_requested_qty_for_required_items()
+		service.update_picked_qty_for_required_items()
 
 	def update_requested_qty(self, mr_item_rows=None):
 		"""update requested qty (before ordered_qty is updated)"""

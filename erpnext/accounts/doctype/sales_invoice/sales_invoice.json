@@ -170,6 +170,10 @@
   "shipping_address_section",
   "shipping_address_name",
   "shipping_address",
+  "shipping_contact_person",
+  "shipping_contact_display",
+  "shipping_contact_mobile",
+  "shipping_contact_email",
   "shipping_addr_col_break",
   "dispatch_address_name",
   "dispatch_address",
@@ -297,7 +301,6 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Tax Id",
-   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -591,6 +594,46 @@
    "read_only": 1
   },
   {
+   "fieldname": "shipping_contact_person",
+   "fieldtype": "Link",
+   "hide_days": 1,
+   "hide_seconds": 1,
+   "label": "Shipping Contact Person",
+   "options": "Contact",
+   "print_hide": 1
+  },
+  {
+   "fetch_from": "shipping_contact_person.full_name",
+   "fieldname": "shipping_contact_display",
+   "fieldtype": "Small Text",
+   "hide_days": 1,
+   "hide_seconds": 1,
+   "label": "Shipping Contact",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "shipping_contact_person.mobile_no",
+   "fieldname": "shipping_contact_mobile",
+   "fieldtype": "Small Text",
+   "hide_days": 1,
+   "hide_seconds": 1,
+   "label": "Shipping Contact Mobile No",
+   "options": "Phone",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "shipping_contact_person.email_id",
+   "fieldname": "shipping_contact_email",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "hide_days": 1,
+   "hide_seconds": 1,
+   "label": "Shipping Contact Email",
+   "options": "Email",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
    "fieldname": "company_address",
    "fieldtype": "Link",
    "hide_days": 1,
@@ -610,6 +653,7 @@
   },
   {
    "collapsible": 1,
+   "collapsible_depends_on": "eval:doc.currency && doc.currency != erpnext.get_currency(doc.company)",
    "depends_on": "customer",
    "fieldname": "currency_and_price_list",
    "fieldtype": "Section Break",
@@ -1940,6 +1984,7 @@
    "allow_on_submit": 1,
    "fieldname": "additional_discount_account",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Discount Account",
    "options": "Account"
   },
@@ -2360,7 +2405,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2026-06-21 12:46:13.250145",
+ "modified": "2026-08-14 12:43:19.480555",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

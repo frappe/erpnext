@@ -865,7 +865,17 @@ class Item(Document):
 				frappe.throw(_("Item {0} is not a template item.").format(frappe.bold(self.variant_of)))
 
 			if based_on == "Item Attribute":
+				previous_doc = self.get_doc_before_save()
+				saved_attributes = (
+					{(row.attribute, row.attribute_value) for row in previous_doc.attributes}
+					if previous_doc
+					else set()
+				)
+
 				for d in self.attributes:
+					if (d.attribute, d.attribute_value) in saved_attributes:
+						continue
+
 					if not frappe.db.exists(
 						"Item Variant Attribute", {"attribute": d.attribute, "parent": self.variant_of}
 					):
@@ -1025,6 +1035,9 @@ class Item(Document):
 	def validate_uom_conversion_factor(self):
 		if self.uoms:
 			for d in self.uoms:
+				if d.conversion_factor:
+					continue
+
 				value = get_uom_conv_factor(d.uom, self.stock_uom)
 				if value:
 					d.conversion_factor = value
@@ -1504,8 +1517,8 @@ def get_uom_conv_factor(uom: str | None, stock_uom: str | None):
 	inverse_match = frappe.db.get_value(
 		"UOM Conversion Factor", {"to_uom": from_uom, "from_uom": to_uom}, ["value"], as_dict=1
 	)
-	if inverse_match:
-		return 1 / inverse_match.value
+	if inverse_match and inverse_match.value:
+		return flt(1 / inverse_match.value, frappe.get_precision("UOM Conversion Factor", "value"))
 
 	# This attempts to try and get conversion from intermediate UOM.
 	# case:
@@ -1514,18 +1527,34 @@ def get_uom_conv_factor(uom: str | None, stock_uom: str | None):
 	# therefore	 kg -> mg = 1000  / 0.001 = 1,000,000
 	first = frappe.qb.DocType("UOM Conversion Factor").as_("first")
 	second = frappe.qb.DocType("UOM Conversion Factor").as_("second")
-	intermediate_match = (
+	# Conversion pairs are not unique, so document names provide stable tie-breakers.
+	shared_source_match = (
 		frappe.qb.from_(first)
 		.join(second)
 		.on(first.from_uom == second.from_uom)
 		.select((first.value / second.value).as_("value"))
-		.where((first.to_uom == to_uom) & (second.to_uom == from_uom))
+		.where((first.to_uom == to_uom) & (second.to_uom == from_uom) & (second.value != 0))
+		.orderby(first.name, second.name)
 		.limit(1)
 		.run(as_dict=1)
 	)
 
-	if intermediate_match:
-		return intermediate_match[0].value
+	if shared_source_match:
+		return flt(shared_source_match[0].value, frappe.get_precision("UOM Conversion Factor", "value"))
+
+	shared_target_match = (
+		frappe.qb.from_(first)
+		.join(second)
+		.on(first.to_uom == second.to_uom)
+		.select((first.value / second.value).as_("value"))
+		.where((first.from_uom == from_uom) & (second.from_uom == to_uom) & (second.value != 0))
+		.orderby(first.name, second.name)
+		.limit(1)
+		.run(as_dict=1)
+	)
+
+	if shared_target_match:
+		return flt(shared_target_match[0].value, frappe.get_precision("UOM Conversion Factor", "value"))
 
 
 @frappe.whitelist()
@@ -1591,6 +1620,9 @@ def get_child_warehouses(warehouse):
 	return get_child_warehouses(warehouse)
 
 
+ITEM_PRICES_LIMIT = 10
+
+
 @frappe.whitelist()
 def get_item_prices(item_code: str):
 	"""Fetch valid item prices for the item prices tab."""
@@ -1618,14 +1650,13 @@ def get_item_prices(item_code: str):
 		.where(ItemPrice.docstatus != 2)
 		.where((ItemPrice.valid_upto.isnull()) | (ItemPrice.valid_upto >= today))
 		.orderby(ItemPrice.price_list)
-		.limit(11)
+		.limit(ITEM_PRICES_LIMIT + 1)
 		.run(as_dict=True)
 	)
 
-	has_more = len(prices) == 11
 	return {
-		"prices": prices[:10],
-		"has_more": has_more,
+		"prices": prices[:ITEM_PRICES_LIMIT],
+		"has_more": len(prices) > ITEM_PRICES_LIMIT,
 	}
 
 

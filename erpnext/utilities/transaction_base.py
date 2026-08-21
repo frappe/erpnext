@@ -349,12 +349,24 @@ class TransactionBase(StatusUpdater):
 		)
 
 	@frappe.whitelist()
-	def process_item_selection(self, item_idx: int):
+	def process_item_selection(self, item_idx: int, reset_item_details: bool = False):
 		# Server side 'item' doc. Update this to reflect in UI
 		item_obj = self.get("items", {"idx": item_idx})[0]
 
 		if not item_obj.item_code:
 			return
+
+		if cint(reset_item_details):
+			# Do not carry item-specific values from the previously selected item.
+			for fieldname in (
+				"weight_per_unit",
+				"weight_uom",
+				"uom",
+				"conversion_factor",
+				"barcode",
+				"pricing_rules",
+			):
+				item_obj.set(fieldname, None)
 
 		# 'item_details' has latest item related values
 		item_details = self.fetch_item_details(item_obj)
@@ -547,7 +559,9 @@ class TransactionBase(StatusUpdater):
 		from erpnext.stock.get_item_details import apply_price_list
 
 		args = {
-			"items": [x.as_dict() for x in self.items],
+			# pass child_docname so the maintain-same-rate lock in apply_price_list can
+			# match each row, consistent with the desk (JS) callers
+			"items": [{**x.as_dict(), "child_docname": x.name} for x in self.items],
 			"customer": self.customer or self.party_name,
 			"quotation_to": self.quotation_to,
 			"customer_group": self.customer_group,
@@ -616,13 +630,13 @@ def validate_uom_is_integer(doc, uom_field, qty_fields, child_dt=None):
 			for f in qty_fields:
 				qty = d.get(f)
 				if qty:
-					precision = d.precision(f)
-					if abs(cint(qty) - flt(qty, precision)) > 0.0000001:
+					qty = flt(qty, d.precision(f))
+					if qty != cint(qty):
 						frappe.throw(
 							_(
 								"Row {1}: Quantity ({0}) cannot be a fraction. To allow this, disable '{2}' in UOM {3}."
 							).format(
-								flt(qty, precision),
+								qty,
 								d.idx,
 								frappe.bold(_("Must be Whole Number")),
 								frappe.bold(d.get(uom_field)),

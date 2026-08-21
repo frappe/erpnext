@@ -249,6 +249,7 @@
    "fieldname": "conversion_factor",
    "fieldtype": "Float",
    "label": "UOM Conversion Factor",
+   "precision": "9",
    "print_hide": 1,
    "reqd": 1
   },
@@ -886,6 +887,7 @@
    "allow_on_submit": 1,
    "fieldname": "discount_account",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Discount Account",
    "options": "Account"
   },
@@ -1066,7 +1068,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-07-18 10:00:00.000000",
+ "modified": "2026-08-11 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",

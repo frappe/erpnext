@@ -2,6 +2,7 @@
 # See license.txt
 
 from contextlib import contextmanager
+from unittest.mock import patch
 
 import frappe
 from frappe.utils import nowdate
@@ -77,6 +78,27 @@ class TestQualityInspection(ERPNextTestSuite):
 
 		qa.delete()
 		dn.delete()
+
+	def test_doc_update_published_for_reference_on_submit(self):
+		"""Submitting a QI publishes doc_update so open reference forms resync their timestamp."""
+		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
+		qa = create_quality_inspection(
+			reference_type="Delivery Note", reference_name=dn.name, do_not_submit=True
+		)
+
+		with patch.object(frappe, "publish_realtime") as publish_realtime:
+			qa.submit()
+
+		reference_updates = [
+			call
+			for call in publish_realtime.call_args_list
+			if call.args and call.args[0] == "doc_update" and call.kwargs.get("docname") == dn.name
+		]
+		self.assertEqual(len(reference_updates), 1)
+
+		message = reference_updates[0].args[1]
+		self.assertEqual(message["doctype"], "Delivery Note")
+		self.assertEqual(message["modified"], frappe.db.get_value("Delivery Note", dn.name, "modified"))
 
 	def test_value_based_qi_readings(self):
 		# Test QI based on acceptance values (Non formula)

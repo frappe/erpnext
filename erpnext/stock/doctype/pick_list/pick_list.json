@@ -80,7 +80,8 @@
    "fieldname": "work_order",
    "fieldtype": "Link",
    "label": "Work Order",
-   "options": "Work Order"
+   "options": "Work Order",
+   "search_index": 1
   },
   {
    "fieldname": "locations",
@@ -278,7 +279,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-01 14:27:50.617011",
+ "modified": "2026-08-07 10:30:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",

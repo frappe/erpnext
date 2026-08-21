@@ -54,6 +54,7 @@
   "default_receivable_account",
   "default_payable_account",
   "write_off_account",
+  "bank_charges_account",
   "unrealized_profit_loss_account",
   "column_break0",
   "allow_account_creation_against_child_company",
@@ -65,6 +66,8 @@
   "default_finance_book",
   "exchange_gain__loss_section",
   "exchange_gain_loss_account",
+  "exchange_gain_account",
+  "exchange_loss_account",
   "column_break_sttp",
   "unrealized_exchange_gain_loss_account",
   "round_off_section",
@@ -390,10 +393,37 @@
   },
   {
    "depends_on": "eval:!doc.__islocal",
+   "fieldname": "bank_charges_account",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Bank Charges Account",
+   "no_copy": 1,
+   "options": "Account"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "exchange_gain_loss_account",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
    "label": "Exchange Gain / Loss Account",
+   "no_copy": 1,
+   "options": "Account"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "exchange_gain_account",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Exchange Gain Account",
+   "no_copy": 1,
+   "options": "Account"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "exchange_loss_account",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Exchange Loss Account",
    "no_copy": 1,
    "options": "Account"
   },

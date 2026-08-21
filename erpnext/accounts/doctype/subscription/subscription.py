@@ -278,6 +278,9 @@ class Subscription(Document):
 		"""
 		Sets the status of the `Subscription`
 		"""
+		if self.status == STATUS_CANCELLED:
+			return
+
 		self._set_current_invoice_dates()
 		if self.is_trialling():
 			self.status = STATUS_TRIALING
@@ -673,7 +676,7 @@ class Subscription(Document):
 
 		if self.cancel_at_period_end and (
 			getdate(posting_date) >= getdate(self.next_billing_period_end)
-			or getdate(posting_date) >= getdate(self.end_date)
+			or (self.end_date and getdate(posting_date) >= getdate(self.end_date))
 		):
 			self.cancel_subscription()
 

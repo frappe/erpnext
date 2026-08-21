@@ -14,7 +14,7 @@ class TestSupplierQuotationComparison(ERPNextTestSuite):
 	"""The report lists Supplier Quotation item lines so quotes for the same item can
 	be compared across suppliers."""
 
-	def make_quotation(self, supplier, qty, rate, uom=None):
+	def make_quotation(self, supplier, qty, rate, uom=None, submit=True):
 		item = {"item_code": ITEM, "qty": qty, "rate": rate, "warehouse": "_Test Warehouse - _TC"}
 		if uom:
 			item["uom"] = uom
@@ -29,7 +29,8 @@ class TestSupplierQuotationComparison(ERPNextTestSuite):
 			}
 		)
 		sq.insert()
-		sq.submit()
+		if submit:
+			sq.submit()
 		return sq
 
 	def run_report(self, **extra):
@@ -64,3 +65,21 @@ class TestSupplierQuotationComparison(ERPNextTestSuite):
 		self.assertIn(sq2.name, quotes)
 		self.assertEqual(quotes[sq1.name]["base_rate"], 100)
 		self.assertEqual(quotes[sq2.name]["base_rate"], 120)
+
+	def test_status_filter(self):
+		draft = self.make_quotation("_Test Supplier", qty=10, rate=100, submit=False)
+		submitted = self.make_quotation("_Test Supplier 1", qty=10, rate=120)
+
+		def names(**extra):
+			return {r["quotation"] for r in self.run_report(item_code=ITEM, **extra)}
+
+		# default (Submitted) hides drafts
+		self.assertNotIn(draft.name, names(status="Submitted"))
+		self.assertIn(submitted.name, names(status="Submitted"))
+		# Draft shows only drafts
+		self.assertIn(draft.name, names(status="Draft"))
+		self.assertNotIn(submitted.name, names(status="Draft"))
+		# blank shows both
+		both = names(status="")
+		self.assertIn(draft.name, both)
+		self.assertIn(submitted.name, both)

@@ -289,51 +289,6 @@ def get_items_based_on_default_supplier(supplier: str):
 
 
 @frappe.whitelist()
-def make_purchase_order_based_on_supplier(
-	source_name: str, target_doc: str | dict | Document | None = None, args: dict | None = None
-):
-	mr = source_name
-
-	supplier_items = get_items_based_on_default_supplier(args.get("supplier"))
-
-	def postprocess(source, target_doc):
-		target_doc.supplier = args.get("supplier")
-		if getdate(target_doc.schedule_date) < getdate(nowdate()):
-			target_doc.schedule_date = None
-		target_doc.set(
-			"items",
-			[d for d in target_doc.get("items") if d.get("item_code") in supplier_items and d.get("qty") > 0],
-		)
-
-		set_missing_values(source, target_doc)
-
-	target_doc = get_mapped_doc(
-		"Material Request",
-		mr,
-		{
-			"Material Request": {
-				"doctype": "Purchase Order",
-			},
-			"Material Request Item": {
-				"doctype": "Purchase Order Item",
-				"field_map": [
-					["name", "material_request_item"],
-					["parent", "material_request"],
-					["uom", "stock_uom"],
-					["uom", "uom"],
-				],
-				"postprocess": update_item,
-				"condition": lambda doc: doc.ordered_qty < doc.qty,
-			},
-		},
-		target_doc,
-		postprocess,
-	)
-
-	return target_doc
-
-
-@frappe.whitelist()
 def make_supplier_quotation(source_name: str, target_doc: str | dict | Document | None = None):
 	def postprocess(source, target_doc):
 		set_missing_values(source, target_doc)

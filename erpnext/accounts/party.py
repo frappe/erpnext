@@ -140,6 +140,7 @@ def _get_party_details(
 	if not ignore_permissions:
 		ptype = "select" if frappe.only_has_select_perm(party_type) else "read"
 		frappe.has_permission(party_type, ptype, party, throw=True)
+		validate_party_company(party_type, party.name, company)
 
 	currency = party.get("default_currency") or currency or get_company_currency(company)
 
@@ -155,7 +156,7 @@ def _get_party_details(
 		dispatch_address,
 		ignore_permissions=ignore_permissions,
 	)
-	set_contact_details(party_details, party, party_type)
+	set_contact_details(party_details, party, party_type, doctype)
 	set_other_values(party_details, party, party_type)
 	set_price_list(party_details, party, party_type, price_list, pos_profile)
 
@@ -195,6 +196,17 @@ def _get_party_details(
 		party_details["tax_category"] = frappe.get_value("POS Profile", pos_profile, "tax_category")
 
 	return party_details
+
+
+def validate_party_company(party_type, party, company):
+	if not company or party_type not in ("Customer", "Supplier"):
+		return
+
+	from erpnext.stock.doctype.company_restriction.company_restriction import (
+		validate_masters_for_company,
+	)
+
+	validate_masters_for_company(party_type, [party], company)
 
 
 def set_address_details(
@@ -346,9 +358,21 @@ def complete_contact_details(party_details):
 	party_details.update(contact_details)
 
 
-def set_contact_details(party_details, party, party_type):
+def set_contact_details(party_details, party, party_type, doctype=None):
 	party_details.contact_person = get_default_contact(party_type, party.name)
 	complete_contact_details(party_details)
+
+	# the shipping contact is picked by the user, so it has no default to fall back on;
+	# blank it instead of carrying the previous party's contact over
+	if doctype and frappe.get_meta(doctype).has_field("shipping_contact_person"):
+		party_details.update(
+			{
+				"shipping_contact_person": None,
+				"shipping_contact_display": None,
+				"shipping_contact_mobile": None,
+				"shipping_contact_email": None,
+			}
+		)
 
 
 def set_other_values(party_details, party, party_type):
@@ -865,9 +889,11 @@ def validate_account_party_type(self):
 
 
 def get_dashboard_info(party_type, party, loyalty_program=None):
-	current_fiscal_year = get_fiscal_year(nowdate(), as_dict=True)
-
 	doctype = "Sales Invoice" if party_type == "Customer" else "Purchase Invoice"
+	if not frappe.has_permission(doctype, "read"):
+		return None
+
+	current_fiscal_year = get_fiscal_year(nowdate(), as_dict=True)
 
 	companies = frappe.get_list(
 		doctype, filters={"docstatus": 1, party_type.lower(): party}, distinct=1, fields=["company"]

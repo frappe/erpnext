@@ -23,7 +23,10 @@ frappe.query_reports["Production Plan Summary"] = {
 
 		if (column.fieldname == "item_code") {
 			var color = data.pending_qty > 0 ? "red" : "green";
-			value = `<a style='color:${color}' href="/app/item/${data["item_code"]}" data-doctype="Item">${data["item_code"]}</a>`;
+			value = `<a style='color:${color}' href="${frappe.utils.get_form_link(
+				"Item",
+				data["item_code"]
+			)}" data-doctype="Item">${frappe.utils.escape_html(data["item_code"])}</a>`;
 		}
 
 		return value;

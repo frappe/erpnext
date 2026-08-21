@@ -184,6 +184,7 @@ class BOM(WebsiteGenerator):
 		routing: DF.Link | None
 		secondary_items: DF.Table[BOMSecondaryItem]
 		secondary_items_cost: DF.Currency
+		set_qty_based_on_percentage: DF.Check
 		set_rate_of_sub_assembly_item_based_on_bom: DF.Check
 		show_in_website: DF.Check
 		show_items: DF.Check
@@ -314,12 +315,14 @@ class BOM(WebsiteGenerator):
 		self.clear_inspection()
 		self.validate_main_item()
 		self.validate_currency()
+		self.set_operation_finished_goods()
 		self.set_materials_based_on_operation_bom()
 		self.set_conversion_rate()
 		self.set_plc_conversion_rate()
 		self.validate_uom_is_interger()
 
 	def _validate_materials_and_cost(self):
+		self.set_qty_from_percentage()
 		self.set_bom_material_details()
 		self.set_secondary_items_details()
 		self.validate_materials()
@@ -340,14 +343,41 @@ class BOM(WebsiteGenerator):
 		self.set_fg_cost_allocation()
 		self.validate_total_cost_allocation()
 
+	def set_operation_finished_goods(self):
+		"""Fill each operation's FG item where it is unambiguous: the final operation produces
+		this BOM's item, an operation with a BOM produces that BOM's item. Runs before
+		set_materials_based_on_operation_bom so derived rows get their materials expanded."""
+		if not self.track_semi_finished_goods:
+			return
+
+		for row in self.operations:
+			if row.is_final_finished_good and not row.finished_good:
+				row.finished_good = self.item
+			elif row.bom_no and not row.finished_good:
+				row.finished_good = frappe.get_cached_value("BOM", row.bom_no, "item")
+
 	def validate_semi_finished_goods(self):
 		if not self.track_semi_finished_goods or not self.operations:
 			return
 
 		fg_items = []
 		for row in self.operations:
+			if not row.finished_good:
+				frappe.throw(
+					_(
+						"Row #{0}: FG / Semi FG Item is required for the operation {1} as 'Track Semi Finished Goods' is enabled."
+					).format(row.idx, bold(row.operation)),
+				)
+
 			if not row.is_final_finished_good:
 				continue
+
+			if row.finished_good != self.item:
+				frappe.throw(
+					_(
+						"Row #{0}: The operation {1} has 'Is Final Finished Good' checked, so its FG / Semi FG Item must be {2}."
+					).format(row.idx, bold(row.operation), bold(self.item)),
+				)
 
 			fg_items.append(row.finished_good)
 
@@ -673,6 +703,82 @@ class BOM(WebsiteGenerator):
 		if not self.quantity:
 			frappe.throw(_("Quantity should be greater than 0"))
 
+	def set_qty_from_percentage(self):
+		if not self.set_qty_based_on_percentage or not self.get("items"):
+			return
+
+		if self.track_semi_finished_goods:
+			frappe.throw(
+				_(
+					"'Set Component Quantities Based On Percentage' cannot be used together with 'Track Semi Finished Goods', as the component rows are derived from the operation BOMs."
+				),
+				title=_("Invalid Formulation"),
+			)
+
+		percentage_rows = self.get("items")
+		for row in percentage_rows:
+			if not flt(row.percentage) and not row.is_balance_item:
+				frappe.throw(
+					_(
+						"Row #{0}: A Percentage is required for the Item {1} as 'Set Component Quantities Based On Percentage' is enabled."
+					).format(row.idx, bold(row.item_code)),
+					title=_("Invalid Formulation"),
+				)
+
+		self._set_balance_item_percentage(percentage_rows)
+		self._validate_total_percentage(percentage_rows)
+
+		for row in percentage_rows:
+			if not row.uom:
+				row.uom = frappe.get_cached_value("Item", row.item_code, "stock_uom")
+
+			row.qty = flt(
+				flt(row.percentage) / 100 * flt(self.quantity) * self._uom_factor_from_batch_uom(row),
+				row.precision("qty"),
+			)
+
+	def _validate_total_percentage(self, percentage_rows):
+		total = sum(flt(row.percentage) for row in percentage_rows)
+		if abs(total - 100) > 0.0001:
+			frappe.throw(
+				_(
+					"The percentages of the components must total 100%. The current total is {0}%. To fill the remaining percentage automatically, mark one component as Balance Item."
+				).format(flt(total)),
+				title=_("Invalid Formulation"),
+			)
+
+	def _set_balance_item_percentage(self, percentage_rows):
+		balance_rows = [row for row in percentage_rows if row.is_balance_item]
+		if not balance_rows:
+			return
+
+		if len(balance_rows) > 1:
+			frappe.throw(_("Only one component can be marked as Balance Item."))
+
+		remaining = 100 - sum(flt(row.percentage) for row in percentage_rows if not row.is_balance_item)
+		if remaining <= 0:
+			frappe.throw(
+				_(
+					"The other components already total {0}%, so no percentage remains for the Balance Item {1}."
+				).format(flt(100 - remaining), bold(balance_rows[0].item_code)),
+				title=_("Invalid Formulation"),
+			)
+
+		balance_rows[0].percentage = remaining
+
+	def _uom_factor_from_batch_uom(self, row):
+		from erpnext.stock.doctype.item.item import get_uom_conv_factor
+
+		factor = get_uom_conv_factor(self.uom, row.uom)
+		if not factor:
+			frappe.throw(
+				_(
+					"Row #{0}: The quantity of the Item {1} cannot be derived from its percentage because there is no UOM Conversion Factor from {2} to {3}."
+				).format(row.idx, bold(row.item_code), bold(self.uom), bold(row.uom))
+			)
+
+		return flt(factor)
+
 	def validate_currency(self):
 		if self.rm_cost_as_per == "Price List":
 			price_list_currency = frappe.db.get_value("Price List", self.buying_price_list, "currency")
@@ -800,15 +906,10 @@ class BOM(WebsiteGenerator):
 		row.update(get_item_details(row.get("item_code")))
 		row.operation_row_id = operation_row_id
 
-		item_row = self.get_item_data(row.name) if row.name else None
+		item_row = self.get_item_data(row.item_code, operation_row_id)
 
 		if item_row:
-			item_row.update(
-				{
-					"item_code": row.get("item_code"),
-					"qty": row.get("qty"),
-				}
-			)
+			item_row.qty = row.get("qty")
 		else:
 			row.idx = None
 			row.name = None
@@ -827,9 +928,9 @@ class BOM(WebsiteGenerator):
 
 		return False
 
-	def get_item_data(self, name):
+	def get_item_data(self, item_code, operation_row_id):
 		for row in self.items:
-			if row.item_code == name:
+			if row.item_code == item_code and cint(row.operation_row_id) == cint(operation_row_id):
 				return row
 
 	@frappe.whitelist()

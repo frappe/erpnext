@@ -4,7 +4,7 @@
 import frappe
 
 from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
-from erpnext.manufacturing.report.bom_explorer.bom_explorer import execute
+from erpnext.manufacturing.report.bom_explorer.bom_explorer import build_exploded_rows, execute
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -78,3 +78,55 @@ class TestBOMExplorer(ERPNextTestSuite):
 		# The leaf belongs to the sub-assembly, so it is exploded one level deeper.
 		self.assertEqual(rows_by_item[leaf_item]["indent"], 1)
 		self.assertEqual(rows_by_item[leaf_item]["bom_level"], 1)
+
+	def test_nested_bom_uses_stock_qty_for_output_normalization(self):
+		parent_bom = create_nested_bom(
+			{"parent": {"sub": {"leaf": {}}}},
+			prefix="_Test explorer converted quantity ",
+		)
+		sub_bom = frappe.get_doc("BOM", parent_bom.items[0].bom_no)
+
+		# The parent needs two boxes (20 units). The child BOM produces five units per batch.
+		frappe.db.set_value("BOM", sub_bom.name, "quantity", 5)
+		frappe.db.set_value("BOM Item", sub_bom.items[0].name, {"qty": 3, "stock_qty": 3})
+		frappe.db.set_value(
+			"BOM Item",
+			parent_bom.items[0].name,
+			{"qty": 2, "uom": "Box", "conversion_factor": 10, "stock_qty": 20},
+		)
+
+		data = self.run_report(parent_bom.name)
+		rows_by_item = {row["item_code"]: row for row in data}
+
+		self.assertEqual(rows_by_item["_Test explorer converted quantity sub"]["qty"], 2)
+		self.assertEqual(rows_by_item["_Test explorer converted quantity leaf"]["qty"], 12)
+
+	def test_nested_bom_multiplies_qty_at_every_level(self):
+		children_map = {
+			"root": [
+				frappe._dict(
+					item_code="parent",
+					idx=1,
+					bom_no="parent-bom",
+					child_bom_qty=1,
+					qty=8,
+					stock_qty=8,
+				)
+			],
+			"parent-bom": [
+				frappe._dict(
+					item_code="child",
+					idx=1,
+					bom_no="child-bom",
+					child_bom_qty=1,
+					qty=4,
+					stock_qty=4,
+				)
+			],
+			"child-bom": [frappe._dict(item_code="raw-material", idx=1, bom_no="", qty=2, stock_qty=2)],
+		}
+		data = []
+
+		build_exploded_rows("root", children_map, data)
+
+		self.assertEqual([row["qty"] for row in data], [8, 32, 64])

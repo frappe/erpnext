@@ -11,5 +11,6 @@ def get_data():
 			{"label": _("Transactions"), "items": ["Work Order", "Material Request"]},
 			{"label": _("Subcontract"), "items": ["Purchase Order"]},
 			{"label": _("Reservation"), "items": ["Stock Reservation Entry"]},
+			{"label": _("Schedule"), "items": ["Production Plan Schedule"]},
 		],
 	}

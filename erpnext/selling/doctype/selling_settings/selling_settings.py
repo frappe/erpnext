@@ -84,14 +84,7 @@ class SellingSettings(Document):
 		]:
 			frappe.db.set_default(key, self.get(key, ""))
 
-		from erpnext.utilities.naming import set_by_naming_series
-
-		set_by_naming_series(
-			"Customer",
-			"customer_name",
-			self.get("cust_master_name") == "Naming Series",
-			hide_name_field=False,
-		)
+		self.update_customer_naming_settings()
 
 		self.validate_fallback_to_default_price_list()
 
@@ -100,6 +93,19 @@ class SellingSettings(Document):
 
 		if old_doc and old_doc.enable_utm != self.enable_utm:
 			toggle_utm_analytics_section(not self.enable_utm)
+
+	def update_customer_naming_settings(self):
+		if not self.has_value_changed("cust_master_name"):
+			return
+
+		from erpnext.utilities.naming import set_by_naming_series
+
+		set_by_naming_series(
+			"Customer",
+			"customer_name",
+			self.get("cust_master_name") == "Naming Series",
+			hide_name_field=False,
+		)
 
 	def validate_fallback_to_default_price_list(self):
 		if (
@@ -126,6 +132,9 @@ class SellingSettings(Document):
 			)
 
 	def toggle_hide_tax_id(self):
+		if not self.has_value_changed("hide_tax_id"):
+			return
+
 		_hide_tax_id = cint(self.hide_tax_id)
 
 		# Make property setters to hide tax_id fields
@@ -138,6 +147,9 @@ class SellingSettings(Document):
 			)
 
 	def toggle_editable_rate_for_bundle_items(self):
+		if not self.has_value_changed("editable_bundle_item_rates"):
+			return
+
 		editable_bundle_item_rates = cint(self.editable_bundle_item_rates)
 
 		make_property_setter(
@@ -150,6 +162,9 @@ class SellingSettings(Document):
 		)
 
 	def toggle_discount_accounting_fields(self):
+		if not self.has_value_changed("enable_discount_accounting"):
+			return
+
 		enable_discount_accounting = cint(self.enable_discount_accounting)
 
 		make_property_setter(

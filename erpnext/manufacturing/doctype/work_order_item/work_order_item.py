@@ -31,8 +31,10 @@ class WorkOrderItem(Document):
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
+		picked_qty: DF.Float
 		rate: DF.Currency
 		required_qty: DF.Float
+		requested_qty: DF.Float
 		returned_qty: DF.Float
 		source_warehouse: DF.Link | None
 		stock_reserved_qty: DF.Float

@@ -164,7 +164,14 @@ def validate_returned_items(doc):
 				):
 					frappe.throw(_("Warehouse is mandatory"))
 
-			if doc.doctype in ("Purchase Invoice", "Purchase Receipt", "Subcontracting Receipt"):
+			if doc.doctype in (
+				"Purchase Invoice",
+				"Purchase Receipt",
+				"Subcontracting Receipt",
+				"Sales Invoice",
+				"Delivery Note",
+				"POS Invoice",
+			):
 				if flt(d.qty) < 0 or flt(d.get("received_qty")) < 0:
 					items_returned = True
 			else:
@@ -810,7 +817,7 @@ def get_rate_for_return(
 	if not (rate and return_against) and voucher_type in ["Sales Invoice", "Delivery Note"]:
 		rate = frappe.db.get_value(f"{voucher_type} Item", voucher_detail_no, "incoming_rate")
 
-		if not rate and sle:
+		if rate is None and sle:
 			rate = get_incoming_rate(
 				{
 					"item_code": sle.item_code,

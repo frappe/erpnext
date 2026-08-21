@@ -25,6 +25,7 @@ class TestBlanketOrder(ERPNextTestSuite):
 		so.submit()
 
 		self.assertEqual(so.doctype, "Sales Order")
+		self.assertNotEqual(so.naming_series, bo.naming_series)
 		self.assertEqual(len(so.get("items")), len(bo.get("items")))
 
 		# check the rate, quantity and updation for the ordered quantity
@@ -50,6 +51,7 @@ class TestBlanketOrder(ERPNextTestSuite):
 		po.submit()
 
 		self.assertEqual(po.doctype, "Purchase Order")
+		self.assertNotEqual(po.naming_series, bo.naming_series)
 		self.assertEqual(len(po.get("items")), len(bo.get("items")))
 
 		# check the rate, quantity and updation for the ordered quantity
@@ -161,6 +163,26 @@ class TestBlanketOrder(ERPNextTestSuite):
 
 		bo = make_blanket_order(blanket_order_type="Purchasing", supplier=supplier, item_code=item_code)
 		self.assertEqual(bo.items[0].party_item_code, "SUPP-PART-1")
+
+	def test_blanket_order_zero_quantity(self):
+		bo = frappe.new_doc("Blanket Order")
+		bo.blanket_order_type = "Selling"
+		bo.company = "_Test Company"
+		bo.customer = "_Test Customer"
+		bo.from_date = today()
+		bo.to_date = add_months(today(), 12)
+
+		bo.append(
+			"items",
+			{
+				"item_code": "_Test Item",
+				"qty": 0,
+				"rate": 100,
+			},
+		)
+
+		with self.assertRaises(frappe.ValidationError):
+			bo.insert()
 
 
 def make_blanket_order(**args):

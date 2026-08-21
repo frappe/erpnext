@@ -60,8 +60,9 @@ from erpnext.manufacturing.doctype.work_order.services.reservation import (
 from erpnext.manufacturing.doctype.work_order.services.status import (
 	StatusService,
 )
+from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.batch.batch import make_batch
-from erpnext.stock.doctype.item.item import validate_end_of_life
+from erpnext.stock.doctype.item.item import get_item_defaults, validate_end_of_life
 from erpnext.stock.doctype.serial_no.serial_no import get_available_serial_nos
 from erpnext.stock.utils import validate_warehouse_company
 from erpnext.utilities.transaction_base import validate_uom_is_integer
@@ -568,7 +569,18 @@ class WorkOrder(Document):
 		if not self.wip_warehouse and not self.skip_transfer:
 			self.wip_warehouse = frappe.get_cached_value("Company", self.company, "default_wip_warehouse")
 		if not self.fg_warehouse:
-			self.fg_warehouse = frappe.get_cached_value("Company", self.company, "default_fg_warehouse")
+			self.fg_warehouse = (
+				frappe.get_cached_value("Company", self.company, "default_fg_warehouse")
+				or self.get_production_item_warehouse()
+			)
+
+	def get_production_item_warehouse(self):
+		if not self.production_item:
+			return None
+
+		return get_item_defaults(self.production_item, self.company).get(
+			"default_warehouse"
+		) or get_item_group_defaults(self.production_item, self.company).get("default_warehouse")
 
 	def check_wip_warehouse_skip(self):
 		if self.skip_transfer and not self.from_wip_warehouse:
@@ -601,12 +613,9 @@ class WorkOrder(Document):
 			)
 
 	def validate_warehouse(self):
-		if self.track_semi_finished_goods:
-			return
-
 		if not self.wip_warehouse and not self.skip_transfer:
 			frappe.throw(_("Work-in-Progress Warehouse is required before Submit"))
-		if not self.fg_warehouse:
+		if not self.fg_warehouse and not self.track_semi_finished_goods:
 			frappe.throw(_("Target Warehouse is required before Submit"))
 
 	def before_submit(self):
