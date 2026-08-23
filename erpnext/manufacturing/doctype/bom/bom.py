@@ -395,7 +395,18 @@ class BOM(WebsiteGenerator):
 			)
 
 	def validate_secondary_items(self):
+		seen_items = set()
 		for item in self.secondary_items:
+			# every consumer merges secondary rows by item code, so duplicates cannot keep
+			# their own quantities, percentages or valuation mode
+			if item.item_code in seen_items:
+				frappe.throw(
+					_("Row #{0}: Item {1} is added more than once in the Secondary Items table.").format(
+						item.idx, get_link_to_form("Item", item.item_code)
+					)
+				)
+			seen_items.add(item.item_code)
+
 			if not item.use_valuation_rate and item.item_code == self.item:
 				frappe.throw(
 					_(
