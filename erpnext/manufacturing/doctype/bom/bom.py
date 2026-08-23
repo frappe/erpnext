@@ -488,13 +488,19 @@ class BOM(WebsiteGenerator):
 
 	def set_fg_cost_allocation(self):
 		total_secondary_items_per = 0
+		valuation_rate_cost = 0
 		for item in self.secondary_items:
+			if item.use_valuation_rate:
+				item.cost_allocation_per = 0
+				valuation_rate_cost += flt(item.cost)
 			total_secondary_items_per += item.cost_allocation_per
 
 		if self.cost_allocation_per == 100 and total_secondary_items_per:
 			self.cost_allocation_per -= total_secondary_items_per
 
-		self.cost_allocation = self.raw_material_cost * (self.cost_allocation_per / 100)
+		self.cost_allocation = (self.raw_material_cost - valuation_rate_cost) * (
+			self.cost_allocation_per / 100
+		)
 
 	def validate_total_cost_allocation(self):
 		total_cost_allocation_per = self.cost_allocation_per

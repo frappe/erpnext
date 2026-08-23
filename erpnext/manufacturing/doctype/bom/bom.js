@@ -767,7 +767,8 @@ var get_bom_material_detail = function (doc, cdt, cdn, secondary_items) {
 				conversion_factor: d.conversion_factor,
 				sourced_by_supplier: d.sourced_by_supplier,
 				do_not_explode: d.do_not_explode,
-				fetch_rate: !secondary_items,
+				fetch_rate: !secondary_items || !!d.use_valuation_rate,
+				use_valuation_rate: d.use_valuation_rate,
 			},
 			callback: function (r) {
 				$.extend(d, r.message);
@@ -1029,8 +1030,14 @@ frappe.tour["BOM"] = [
 ];
 
 frappe.ui.form.on("BOM Secondary Item", {
-	item_code(frm, cdt, cdn) {
-		const { item_code } = locals[cdt][cdn];
+	use_valuation_rate(frm, cdt, cdn) {
+		const row = locals[cdt][cdn];
+		if (row.use_valuation_rate) {
+			frappe.model.set_value(cdt, cdn, "cost_allocation_per", 0);
+			get_bom_material_detail(frm.doc, cdt, cdn, true);
+		} else {
+			frappe.model.set_value(cdt, cdn, "rate", 0);
+		}
 	},
 });
 

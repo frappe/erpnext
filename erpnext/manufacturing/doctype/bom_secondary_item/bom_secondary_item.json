@@ -6,9 +6,6 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "rate",
-  "column_break_gres",
-  "use_valuation_rate",
   "section_break_sbnk",
   "item_code",
   "item_name",
@@ -25,16 +22,17 @@
   "column_break_wsra",
   "image_nygv",
   "section_break_ielf",
+  "use_valuation_rate",
   "cost_allocation_per",
   "process_loss_per",
   "column_break_gtbl",
+  "rate",
   "cost",
   "base_cost",
   "process_loss_qty"
  ],
  "fields": [
   {
-   "depends_on": "eval:!doc.use_valuation_rate",
    "fieldname": "secondary_item_type",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -103,7 +101,6 @@
    "reqd": 1
   },
   {
-   "depends_on": "eval:!doc.use_valuation_rate",
    "fieldname": "section_break_ielf",
    "fieldtype": "Section Break"
   },
@@ -143,6 +140,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:!doc.use_valuation_rate",
    "fieldname": "cost_allocation_per",
    "fieldtype": "Percent",
    "label": "Cost Allocation %",
@@ -182,17 +180,11 @@
    "reqd": 1
   },
   {
-   "fieldname": "column_break_gres",
-   "fieldtype": "Column Break"
-  },
-  {
    "default": "0",
-   "depends_on": "use_valuation_rate",
+   "description": "Value this item at its valuation rate and deduct it from the raw material cost, like the pre-v16 scrap items. The remaining cost is allocated by percentage among the other items.",
    "fieldname": "use_valuation_rate",
    "fieldtype": "Check",
-   "label": "Use Valuation Rate",
-   "no_copy": 1,
-   "read_only": 1
+   "label": "Use Valuation Rate"
   },
   {
    "depends_on": "eval:doc.use_valuation_rate",

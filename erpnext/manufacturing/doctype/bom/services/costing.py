@@ -36,7 +36,12 @@ class BOMCostingService:
 		return flt(rate) * flt(self.doc.plc_conversion_rate or 1) / (self.doc.conversion_rate or 1)
 
 	def _raw_material_rate(self, arg, notify):
-		from erpnext.manufacturing.doctype.bom.bom import get_bom_item_rate
+		from erpnext.manufacturing.doctype.bom.bom import get_bom_item_rate, get_valuation_rate
+
+		# Valuation-rate secondary items are always valued at valuation rate,
+		# regardless of the BOM's rm_cost_as_per method.
+		if arg.get("use_valuation_rate"):
+			return get_valuation_rate(arg)
 
 		# Customer Provided parts and Supplier sourced parts will have zero rate
 		if frappe.db.get_value("Item", arg["item_code"], "is_customer_provided_item") or arg.get(
@@ -261,23 +266,44 @@ class BOMCostingService:
 		)
 
 	def calculate_secondary_items_costs(self, save=False):
-		"""Fetch RM rate as per today's valuation rate and calculate totals"""
+		"""Cost valuation-rate rows at valuation rate, then split the remaining raw
+		material cost among the other rows by their cost allocation percentage."""
 		total_sm_cost = 0
 		base_total_sm_cost = 0
 		precision = self.doc.precision("raw_material_cost")
+		allocation_basis = flt(self.doc.raw_material_cost) - self._set_valuation_rate_secondary_costs(
+			precision, save
+		)
 
 		for d in self.doc.get("secondary_items"):
 			if not d.use_valuation_rate:
-				d.cost = flt(self.doc.raw_material_cost * (d.cost_allocation_per / 100), precision)
+				d.cost = flt(allocation_basis * (d.cost_allocation_per / 100), precision)
 				d.base_cost = flt(d.cost * self.doc.conversion_rate, precision)
-
-				total_sm_cost += d.cost
-				base_total_sm_cost += d.base_cost
 				if save:
 					d.db_update()
 
+			total_sm_cost += d.cost
+			base_total_sm_cost += d.base_cost
+
 		self.doc.secondary_items_cost = total_sm_cost
 		self.doc.base_secondary_items_cost = base_total_sm_cost
+
+	def _set_valuation_rate_secondary_costs(self, precision, save) -> float:
+		total = 0.0
+		for d in self.doc.get("secondary_items"):
+			if not d.use_valuation_rate:
+				continue
+
+			d.rate = self.get_rm_rate(
+				{"item_code": d.item_code, "company": self.doc.company, "use_valuation_rate": 1}
+			)
+			d.cost = flt(flt(d.rate) * flt(d.stock_qty), precision)
+			d.base_cost = flt(d.cost * self.doc.conversion_rate, precision)
+			total += d.cost
+			if save:
+				d.db_update()
+
+		return total
 
 	def calculate_exploded_cost(self):
 		"Set exploded row cost from it's parent BOM."
