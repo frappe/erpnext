@@ -1172,6 +1172,79 @@ class TestStockEntry(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, ste.submit)
 
+	def test_manufacture_entry_with_use_valuation_rate_secondary_item(self):
+		from erpnext.manufacturing.doctype.work_order.mapper import (
+			make_stock_entry as _make_stock_entry,
+		)
+
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		scrap_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 50}).name
+		by_product = make_item(properties={"is_stock_item": 1}).name
+
+		make_stock_entry(item_code=rm_item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+
+		bom_doc = frappe.new_doc("BOM")
+		bom_doc.item = fg_item
+		bom_doc.quantity = 1
+		bom_doc.company = "_Test Company"
+		bom_doc.currency = "INR"
+		bom_doc.append(
+			"items",
+			{"item_code": rm_item, "qty": 10, "rate": 100.0, "source_warehouse": "_Test Warehouse - _TC"},
+		)
+		bom_doc.append(
+			"secondary_items",
+			{"item_code": scrap_item, "secondary_item_type": "Scrap", "qty": 2, "use_valuation_rate": 1},
+		)
+		bom_doc.append(
+			"secondary_items",
+			{
+				"item_code": by_product,
+				"secondary_item_type": "By-Product",
+				"qty": 1,
+				"cost_allocation_per": 10,
+			},
+		)
+		bom_doc.save()
+		bom_doc.submit()
+
+		work_order = frappe.new_doc("Work Order")
+		work_order.update(
+			{
+				"company": "_Test Company",
+				"fg_warehouse": "_Test Warehouse 1 - _TC",
+				"production_item": fg_item,
+				"bom_no": bom_doc.name,
+				"qty": 1.0,
+				"stock_uom": frappe.db.get_value("Item", fg_item, "stock_uom"),
+				"skip_transfer": 1,
+			}
+		)
+		work_order.get_items_and_operations_from_bom()
+		work_order.submit()
+
+		entry = frappe.get_doc(_make_stock_entry(work_order.name, "Manufacture", 1))
+		entry.insert()
+
+		rm_cost = sum(d.basic_amount for d in entry.items if d.s_warehouse)
+		self.assertEqual(rm_cost, 1000)
+
+		# valuation rate row is valued at its valuation rate and deducted from the
+		# basis; the percentage rows and the finished good split the remainder
+		scrap_row = next(d for d in entry.items if d.use_valuation_rate)
+		self.assertEqual(scrap_row.basic_rate, 50)
+		self.assertEqual(scrap_row.basic_amount, 100)
+
+		by_product_row = next(d for d in entry.items if d.secondary_item_type == "By-Product")
+		self.assertEqual(by_product_row.basic_amount, 90)
+
+		fg_row = next(d for d in entry.items if d.is_finished_item)
+		self.assertEqual(fg_row.basic_amount, 810)
+
+		incoming_cost = sum(d.basic_amount for d in entry.items if not d.s_warehouse)
+		self.assertEqual(incoming_cost, rm_cost)
+
 	def test_quality_check_for_secondary_item(self):
 		from erpnext.manufacturing.doctype.work_order.mapper import (
 			make_stock_entry as _make_stock_entry,
