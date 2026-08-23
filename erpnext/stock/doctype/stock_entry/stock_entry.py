@@ -683,7 +683,12 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 			if self.bom_no:
 				d.basic_rate *= bom_cost_allocation_per / 100
-		elif d.secondary_item_type and d.bom_secondary_item and not d.use_valuation_rate:
+		elif is_costed_out_of_finished_item(d):
+			# Recomputed every time: a rate fetched before the target warehouse was set
+			# must not stick to the row.
+			d.basic_rate = self.get_row_valuation_rate(d, raise_error_if_no_rate)
+			has_derived_rate = True
+		elif d.secondary_item_type and d.bom_secondary_item:
 			cost_allocation_per = flt(
 				frappe.get_value("BOM Secondary Item", d.bom_secondary_item, "cost_allocation_per")
 			)
@@ -695,22 +700,25 @@ class StockEntry(StockController, SubcontractingInwardController):
 		# A rate of zero that was derived rather than left unset is a real cost. Falling back to
 		# the item's valuation here would value free inputs, or an unallocated row, as output.
 		if not d.basic_rate and not d.allow_zero_valuation_rate and not has_derived_rate:
-			d.basic_rate = get_valuation_rate(
-				d.item_code,
-				d.t_warehouse,
-				self.doctype,
-				self.name,
-				d.allow_zero_valuation_rate,
-				currency=erpnext.get_company_currency(self.company),
-				company=self.company,
-				raise_error_if_no_rate=raise_error_if_no_rate,
-				batch_no=d.batch_no,
-				serial_and_batch_bundle=d.serial_and_batch_bundle,
-			)
+			d.basic_rate = self.get_row_valuation_rate(d, raise_error_if_no_rate)
 
 		# do not round off basic rate to avoid precision loss
 		d.basic_rate = flt(d.basic_rate)
 		d.basic_amount = flt(flt(d.transfer_qty) * flt(d.basic_rate), d.precision("basic_amount"))
+
+	def get_row_valuation_rate(self, d, raise_error_if_no_rate):
+		return get_valuation_rate(
+			d.item_code,
+			d.t_warehouse,
+			self.doctype,
+			self.name,
+			d.allow_zero_valuation_rate,
+			currency=erpnext.get_company_currency(self.company),
+			company=self.company,
+			raise_error_if_no_rate=raise_error_if_no_rate,
+			batch_no=d.batch_no,
+			serial_and_batch_bundle=d.serial_and_batch_bundle,
+		)
 
 	def _notify_zero_valuation_rate(self, items):
 		if len(items) > 1:
