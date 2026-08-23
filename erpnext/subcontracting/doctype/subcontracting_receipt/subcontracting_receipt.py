@@ -403,17 +403,16 @@ class SubcontractingReceipt(SubcontractingController):
 							* (secondary_item.cost_allocation_per / 100)
 						) / qty
 					else:
-						rate = (
-							get_valuation_rate(
-								secondary_item.item_code,
-								self.set_warehouse,
-								self.doctype,
-								self.name,
-								currency=erpnext.get_company_currency(self.company),
-								company=self.company,
-							)
-							or secondary_item.rate
+						rate = get_valuation_rate(
+							secondary_item.item_code,
+							self.set_warehouse,
+							self.doctype,
+							self.name,
+							currency=erpnext.get_company_currency(self.company),
+							company=self.company,
 						)
+						if not rate and secondary_item.stock_qty:
+							rate = flt(secondary_item.cost) / flt(secondary_item.stock_qty)
 
 					self.append(
 						"items",

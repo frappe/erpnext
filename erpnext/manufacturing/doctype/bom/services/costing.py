@@ -9,7 +9,7 @@ delegating stubs so external callers (bom_update_log, etc.) keep working.
 
 import frappe
 from frappe import _
-from frappe.utils import flt
+from frappe.utils import flt, nowdate, nowtime
 
 
 class BOMCostingService:
@@ -36,12 +36,13 @@ class BOMCostingService:
 		return flt(rate) * flt(self.doc.plc_conversion_rate or 1) / (self.doc.conversion_rate or 1)
 
 	def _raw_material_rate(self, arg, notify):
-		from erpnext.manufacturing.doctype.bom.bom import get_bom_item_rate, get_valuation_rate
+		from erpnext.manufacturing.doctype.bom.bom import get_bom_item_rate
+		from erpnext.stock.utils import get_incoming_rate
 
-		# Valuation-rate secondary items are always valued at valuation rate,
+		# Valuation-rate secondary items are always valued at their incoming rate,
 		# regardless of the BOM's rm_cost_as_per method.
 		if arg.get("use_valuation_rate"):
-			return get_valuation_rate(arg)
+			return get_incoming_rate(arg, raise_error_if_no_rate=False)
 
 		# Customer Provided parts and Supplier sourced parts will have zero rate
 		if frappe.db.get_value("Item", arg["item_code"], "is_customer_provided_item") or arg.get(
@@ -294,16 +295,25 @@ class BOMCostingService:
 			if not d.use_valuation_rate:
 				continue
 
-			d.rate = self.get_rm_rate(
-				{"item_code": d.item_code, "company": self.doc.company, "use_valuation_rate": 1}
-			)
-			d.cost = flt(flt(d.rate) * flt(d.stock_qty), precision)
+			rate = self.get_rm_rate(self._secondary_item_rate_args(d))
+			d.cost = flt(flt(rate) * flt(d.stock_qty), precision)
 			d.base_cost = flt(d.cost * self.doc.conversion_rate, precision)
 			total += d.cost
 			if save:
 				d.db_update()
 
 		return total
+
+	def _secondary_item_rate_args(self, d):
+		return {
+			"item_code": d.item_code,
+			"company": self.doc.company,
+			"warehouse": self.doc.default_target_warehouse,
+			"posting_date": nowdate(),
+			"posting_time": nowtime(),
+			"qty": d.stock_qty,
+			"use_valuation_rate": 1,
+		}
 
 	def calculate_exploded_cost(self):
 		"Set exploded row cost from it's parent BOM."

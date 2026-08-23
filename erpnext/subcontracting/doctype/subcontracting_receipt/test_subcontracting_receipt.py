@@ -1193,7 +1193,6 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 				{
 					"item_code": item,
 					"stock_qty": 1 * (idx + 1),
-					"rate": 10 * (idx + 1),
 					"use_valuation_rate": 1,
 				},
 			)

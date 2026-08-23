@@ -1109,7 +1109,6 @@ def _run_bom_items_query(bom_no, table_name, qty):
 			doctype.stock_uom,
 			doctype.description,
 			(doctype.stock_qty / bom_doc.quantity.as_("qty") * qty).as_("qty"),
-			doctype.rate.as_("basic_rate"),
 		)
 		.where((bom_doc.name == bom_no) & (bom_doc.docstatus == 1))
 		.orderby(doctype.idx)
@@ -1128,6 +1127,7 @@ def _add_bom_table_specific_fields(query, doctype, table_name):
 			doctype.use_valuation_rate,
 			doctype.conversion_factor,
 		)
+	query = query.select(doctype.rate.as_("basic_rate"))
 	if table_name == "BOM Item":
 		return query.select(
 			doctype.allow_alternative_item, doctype.uom, doctype.conversion_factor, doctype.bom_no

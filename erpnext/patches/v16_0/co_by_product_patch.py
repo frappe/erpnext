@@ -22,8 +22,10 @@ def copy_doctypes():
 
 
 def insert_into_bom():
-	fields = ["item_code", "item_name", "stock_uom", "stock_qty", "rate"]
-	data = frappe.get_all("BOM Scrap Item", {"docstatus": ("<", 2)}, ["parent", *fields])
+	fields = ["item_code", "item_name", "stock_uom", "stock_qty"]
+	data = frappe.get_all(
+		"BOM Scrap Item", {"docstatus": ("<", 2)}, ["parent", *fields, "amount", "base_amount"]
+	)
 	grouped_data = defaultdict(list)
 	for item in data:
 		grouped_data[item.parent].append(item)
@@ -42,6 +44,8 @@ def insert_into_bom():
 					"qty": item.stock_qty,
 					"use_valuation_rate": 1,
 					"secondary_item_type": "Scrap",
+					"cost": item.amount,
+					"base_cost": item.base_amount,
 				}
 			)
 			secondary_item.insert()

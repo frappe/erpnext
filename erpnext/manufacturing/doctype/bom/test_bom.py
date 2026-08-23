@@ -543,7 +543,7 @@ class TestBOM(ERPNextTestSuite):
 		fg_item_non_whole, fg_item_whole, bom_item = create_process_loss_bom_items()
 
 		bom_doc = create_bom_with_process_loss_item(
-			fg_item_non_whole, bom_item, scrap_qty=2, scrap_rate=0, process_loss_percentage=110
+			fg_item_non_whole, bom_item, scrap_qty=2, process_loss_percentage=110
 		)
 		#  PL can't be > 100
 		self.assertRaises(frappe.ValidationError, bom_doc.submit)
@@ -605,7 +605,6 @@ class TestBOM(ERPNextTestSuite):
 		bom_doc.save()
 
 		scrap_row = bom_doc.secondary_items[0]
-		self.assertEqual(scrap_row.rate, 50)
 		self.assertEqual(scrap_row.cost, 100)
 		self.assertEqual(scrap_row.cost_allocation_per, 0)
 
@@ -640,7 +639,6 @@ class TestBOM(ERPNextTestSuite):
 		bom_doc.update_cost()
 		bom_doc.reload()
 
-		self.assertEqual(bom_doc.secondary_items[0].rate, 80)
 		self.assertEqual(bom_doc.secondary_items[0].cost, 160)
 		self.assertEqual(bom_doc.total_cost, 840)
 
@@ -1344,7 +1342,7 @@ def reset_item_valuation_rate(item_code, warehouse_list=None, qty=None, rate=Non
 
 
 def create_bom_with_process_loss_item(
-	fg_item, bom_item, scrap_qty=0, scrap_rate=0, fg_qty=2, process_loss_percentage=0, company=None
+	fg_item, bom_item, scrap_qty=0, fg_qty=2, process_loss_percentage=0, company=None
 ):
 	bom_doc = frappe.new_doc("BOM")
 	bom_doc.item = fg_item.item_code
@@ -1370,7 +1368,6 @@ def create_bom_with_process_loss_item(
 				"stock_qty": scrap_qty,
 				"uom": fg_item.stock_uom,
 				"stock_uom": fg_item.stock_uom,
-				"rate": scrap_rate,
 			},
 		)
 

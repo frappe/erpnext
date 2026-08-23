@@ -26,7 +26,6 @@
   "cost_allocation_per",
   "process_loss_per",
   "column_break_gtbl",
-  "rate",
   "cost",
   "base_cost",
   "process_loss_qty"
@@ -181,19 +180,11 @@
   },
   {
    "default": "0",
-   "description": "Value this item at its valuation rate and deduct it from the raw material cost, like the pre-v16 scrap items. The remaining cost is allocated by percentage among the other items.",
+   "description": "Value this item at its incoming rate and deduct it from the raw material cost, like the pre-v16 scrap items. The remaining cost is allocated by percentage among the other items.",
    "fieldname": "use_valuation_rate",
    "fieldtype": "Check",
-   "label": "Use Valuation Rate"
-  },
-  {
-   "depends_on": "eval:doc.use_valuation_rate",
-   "fieldname": "rate",
-   "fieldtype": "Currency",
-   "label": "Rate",
-   "no_copy": 1,
-   "non_negative": 1,
-   "read_only": 1
+   "label": "Use Valuation Rate",
+   "show_description_on_click": 1
   },
   {
    "default": "0",
