@@ -1488,7 +1488,6 @@ def _add_secondary_item_columns(query, t, stock_item_condition):
 		Max(t.bom_item.process_loss_per).as_("process_loss_per"),
 		Max(t.bom_item.secondary_item_type).as_("secondary_item_type"),
 		Max(t.bom_item.name).as_("name"),
-		Max(t.bom_item.use_valuation_rate).as_("use_valuation_rate"),
 	).where(stock_item_condition)
 
 	return query, [t.bom_item.item_code]
