@@ -1090,8 +1090,8 @@ class TestStockEntry(ERPNextTestSuite):
 				rm_cost += d.amount
 		fg_cost = next(filter(lambda x: x.item_code == "_Test FG Item", s.get("items"))).amount
 		secondary_item_cost = next(
-			filter(lambda x: x.secondary_item_type or x.use_valuation_rate, s.get("items"))
-		).amount
+			x.amount for x in s.get("items") if x.secondary_item_type or x.use_valuation_rate
+		)
 
 		self.assertEqual(fg_cost, flt(rm_cost - secondary_item_cost, 2))
 
