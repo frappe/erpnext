@@ -906,17 +906,14 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 
 	def _adjust_secondary_item_qtys(self, secondary_items, used_secondary_items, pending_qty):
 		for row in secondary_items:
-			key = (row.item_code, row.secondary_item_type or "")
-			row.stock_qty -= flt(used_secondary_items.get(key))
+			row.stock_qty -= flt(used_secondary_items.get(get_secondary_item_key(row)))
 			row.stock_qty = row.stock_qty * flt(self.doc.fg_completed_qty) / flt(pending_qty)
 
 	def get_used_secondary_items(self):
 		data = self._query_used_secondary_items()
 		used_secondary_items = defaultdict(float)
 		for row in data:
-			secondary_item_type = row.secondary_item_type or ("Scrap" if row.use_valuation_rate else "")
-			key = (row.item_code, secondary_item_type)
-			used_secondary_items[key] += row.qty
+			used_secondary_items[get_secondary_item_key(row)] += row.qty
 		return used_secondary_items
 
 	def _query_used_secondary_items(self):
@@ -926,7 +923,13 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			frappe.qb.from_(se)
 			.inner_join(sed)
 			.on(sed.parent == se.name)
-			.select(sed.item_code, sed.secondary_item_type, sed.use_valuation_rate, sed.qty)
+			.select(
+				sed.item_code,
+				sed.secondary_item_type,
+				sed.use_valuation_rate,
+				sed.qty,
+				sed.bom_secondary_item,
+			)
 			.where(
 				(se.work_order == self.doc.work_order)
 				& ((sed.secondary_item_type.isnotnull()) | (sed.use_valuation_rate == 1))
@@ -1182,6 +1185,18 @@ def get_secondary_items_from_sub_assemblies(bom_no):
 	return items
 
 
+def get_secondary_item_key(row):
+	"""Identity of a secondary output: its BOM row when linked, else (item, type).
+
+	Grouping only by (item, type) would merge rows that different BOMs of the same work
+	order produce, and one BOM row's percentage or valuation mode would then govern the
+	other BOMs' quantities too."""
+	if row.get("bom_secondary_item"):
+		return row.bom_secondary_item
+
+	return (row.item_code, row.secondary_item_type or ("Scrap" if row.get("use_valuation_rate") else ""))
+
+
 def get_secondary_items_from_job_card(work_order, jc_name=None):
 	job_card = frappe.qb.DocType("Job Card")
 	job_card_secondary_item = frappe.qb.DocType("Job Card Secondary Item")
@@ -1191,12 +1206,12 @@ def get_secondary_items_from_job_card(work_order, jc_name=None):
 		.select(
 			Sum(job_card_secondary_item.stock_qty).as_("stock_qty"),
 			job_card_secondary_item.item_code,
-			# stock_uom and the secondary-item BOM link are constant per grouped
-			# (item_code, secondary_item_type) -> Max() returns their single value. item_name and
-			# description are editable per line, so they come from a representative line below.
+			# stock_uom is constant per grouped item_code -> Max() returns its single value.
+			# item_name and description are editable per line, so they come from a
+			# representative line below.
 			Max(job_card_secondary_item.stock_uom).as_("stock_uom"),
 			job_card_secondary_item.secondary_item_type,
-			Max(job_card_secondary_item.bom_secondary_item).as_("bom_secondary_item"),
+			job_card_secondary_item.bom_secondary_item,
 		)
 		.join(job_card_secondary_item)
 		.on(job_card_secondary_item.parent == job_card.name)
@@ -1205,7 +1220,11 @@ def get_secondary_items_from_job_card(work_order, jc_name=None):
 			& (job_card.work_order == work_order)
 			& (job_card.docstatus == 1)
 		)
-		.groupby(job_card_secondary_item.item_code, job_card_secondary_item.secondary_item_type)
+		.groupby(
+			job_card_secondary_item.item_code,
+			job_card_secondary_item.secondary_item_type,
+			job_card_secondary_item.bom_secondary_item,
+		)
 		.orderby(Min(job_card_secondary_item.idx))
 	)
 
