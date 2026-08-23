@@ -1,0 +1,27 @@
+name: Review translation PRs
+description: "Posts review comments with relevant translation changes that are hard to inspect in the diff view."
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize, ready_for_review]
+    paths:
+      - "**/*.po"
+      - "**/*.pot"
+
+concurrency:
+  group: po-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  review-po-pr:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+
+    steps:
+      - uses: alyf-de/po-review-action@5928f84d6bc9094f9ad6e2c5780f01c0044b800e # v1.1.1
+        with:
+          hidden-po-files: eo.po
