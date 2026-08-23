@@ -577,6 +577,74 @@ class TestBOM(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, bom_doc.save)
 
 	@timeout
+	def test_secondary_item_use_valuation_rate(self):
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		scrap_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 50}).name
+		by_product = make_item(properties={"is_stock_item": 1}).name
+
+		bom_doc = frappe.new_doc("BOM")
+		bom_doc.item = fg_item
+		bom_doc.quantity = 1
+		bom_doc.company = "_Test Company"
+		bom_doc.currency = "INR"
+		bom_doc.append("items", {"item_code": rm_item, "qty": 10, "rate": 100.0})
+		bom_doc.append(
+			"secondary_items",
+			{"item_code": scrap_item, "secondary_item_type": "Scrap", "qty": 2, "use_valuation_rate": 1},
+		)
+		bom_doc.append(
+			"secondary_items",
+			{
+				"item_code": by_product,
+				"secondary_item_type": "By-Product",
+				"qty": 1,
+				"cost_allocation_per": 10,
+			},
+		)
+		bom_doc.save()
+
+		scrap_row = bom_doc.secondary_items[0]
+		self.assertEqual(scrap_row.rate, 50)
+		self.assertEqual(scrap_row.cost, 100)
+		self.assertEqual(scrap_row.cost_allocation_per, 0)
+
+		# the by-product's percentage applies to the cost net of the valuation rate rows
+		self.assertEqual(bom_doc.raw_material_cost, 1000)
+		self.assertEqual(bom_doc.secondary_items[1].cost, 90)
+		self.assertEqual(bom_doc.cost_allocation_per, 90)
+		self.assertEqual(bom_doc.cost_allocation, 810)
+		self.assertEqual(bom_doc.secondary_items_cost, 190)
+		self.assertEqual(bom_doc.total_cost, 810)
+
+	@timeout
+	def test_secondary_item_valuation_rate_refreshed_on_update_cost(self):
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		scrap_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 50}).name
+
+		bom_doc = frappe.new_doc("BOM")
+		bom_doc.item = fg_item
+		bom_doc.quantity = 1
+		bom_doc.company = "_Test Company"
+		bom_doc.currency = "INR"
+		bom_doc.append("items", {"item_code": rm_item, "qty": 10, "rate": 100.0})
+		bom_doc.append(
+			"secondary_items",
+			{"item_code": scrap_item, "secondary_item_type": "Scrap", "qty": 2, "use_valuation_rate": 1},
+		)
+		bom_doc.save()
+		bom_doc.submit()
+
+		frappe.db.set_value("Item", scrap_item, "valuation_rate", 80)
+		bom_doc.update_cost()
+		bom_doc.reload()
+
+		self.assertEqual(bom_doc.secondary_items[0].rate, 80)
+		self.assertEqual(bom_doc.secondary_items[0].cost, 160)
+		self.assertEqual(bom_doc.total_cost, 840)
+
+	@timeout
 	def test_bom_item_query(self):
 		query = partial(
 			item_query,
