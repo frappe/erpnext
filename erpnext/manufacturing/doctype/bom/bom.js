@@ -767,6 +767,7 @@ var get_bom_material_detail = function (doc, cdt, cdn, secondary_items) {
 				conversion_factor: d.conversion_factor,
 				sourced_by_supplier: d.sourced_by_supplier,
 				do_not_explode: d.do_not_explode,
+				source_warehouse: d.source_warehouse,
 				fetch_rate: !secondary_items,
 			},
 			callback: function (r) {
@@ -954,6 +955,9 @@ frappe.ui.form.on("BOM Operation", "workstation_type", function (frm, cdt, cdn) 
 
 frappe.ui.form.on("BOM Item", {
 	do_not_explode: function (frm, cdt, cdn) {
+		get_bom_material_detail(frm.doc, cdt, cdn, false);
+	},
+	source_warehouse: function (frm, cdt, cdn) {
 		get_bom_material_detail(frm.doc, cdt, cdn, false);
 	},
 });

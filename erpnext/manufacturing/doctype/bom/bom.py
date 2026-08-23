@@ -575,6 +575,7 @@ class BOM(WebsiteGenerator):
 					"conversion_factor": item.conversion_factor,
 					"sourced_by_supplier": item.sourced_by_supplier,
 					"do_not_explode": item.do_not_explode,
+					"source_warehouse": item.source_warehouse,
 					"fetch_rate": True,
 				}
 			)
@@ -1216,7 +1217,7 @@ def _get_price_list_item_rate(args, bom_doc):
 
 def get_valuation_rate(data):
 	"""
-	1) Get average valuation rate from all warehouses
+	1) Get average valuation rate from the row's source warehouse if set, else from all warehouses
 	2) If no value, get last valuation rate from SLE
 	3) If no value, get valuation rate from Item
 	"""
@@ -1255,8 +1256,12 @@ def _get_avg_valuation_rate_from_bins(item_code, company, data):
 		.where((bin_table.item_code == item_code) & (wh_table.company == company))
 	)
 
+	warehouse = data.get("source_warehouse")
 	if data.get("set_rate_based_on_warehouse") and data.get("warehouse"):
-		item_valuation = item_valuation.where(bin_table.warehouse == data.get("warehouse"))
+		warehouse = data.get("warehouse")
+
+	if warehouse:
+		item_valuation = item_valuation.where(bin_table.warehouse == warehouse)
 
 	return item_valuation.run(as_dict=True)[0].get("valuation_rate")
 

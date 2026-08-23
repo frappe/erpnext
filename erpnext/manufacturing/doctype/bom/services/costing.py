@@ -254,6 +254,7 @@ class BOMCostingService:
 			"conversion_factor": d.conversion_factor,
 			"sourced_by_supplier": d.sourced_by_supplier,
 			"is_phantom_item": d.is_phantom_item,
+			"source_warehouse": d.source_warehouse,
 		}
 
 	def _set_item_amounts(self, d):
