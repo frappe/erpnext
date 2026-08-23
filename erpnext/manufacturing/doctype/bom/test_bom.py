@@ -594,14 +594,13 @@ class TestBOM(ERPNextTestSuite):
 		)
 		bom_doc.append(
 			"secondary_items",
-			{
-				"item_code": scrap_item,
-				"secondary_item_type": "By-Product",
-				"qty": 1,
-				"cost_allocation_per": 10,
-			},
+			{"item_code": scrap_item, "secondary_item_type": "Scrap", "qty": 1, "cost_allocation_per": 10},
 		)
 		self.assertRaises(frappe.ValidationError, bom_doc.save)
+
+		# the same item with a different type is a distinct secondary output
+		bom_doc.secondary_items[1].secondary_item_type = "By-Product"
+		bom_doc.save()
 
 	@timeout
 	def test_secondary_item_use_valuation_rate(self):
