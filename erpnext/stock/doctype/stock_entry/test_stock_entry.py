@@ -1245,6 +1245,12 @@ class TestStockEntry(ERPNextTestSuite):
 		incoming_cost = sum(d.basic_amount for d in entry.items if not d.s_warehouse)
 		self.assertEqual(incoming_cost, rm_cost)
 
+		# a stale rate, e.g. fetched before the target warehouse was set, must not stick
+		scrap_row.basic_rate = 999
+		entry.save()
+		scrap_row = next(d for d in entry.items if d.use_valuation_rate)
+		self.assertEqual(scrap_row.basic_rate, 50)
+
 	def test_quality_check_for_secondary_item(self):
 		from erpnext.manufacturing.doctype.work_order.mapper import (
 			make_stock_entry as _make_stock_entry,
