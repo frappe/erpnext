@@ -697,6 +697,7 @@ class TestBOM(ERPNextTestSuite):
 
 		self.assertEqual(bom_doc.secondary_items[0].cost, 160)
 		self.assertEqual(bom_doc.total_cost, 840)
+		self.assertEqual(bom_doc.cost_allocation, 840)
 
 	@timeout
 	def test_bom_item_query(self):
