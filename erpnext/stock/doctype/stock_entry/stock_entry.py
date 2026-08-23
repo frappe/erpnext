@@ -683,10 +683,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 			if self.bom_no:
 				d.basic_rate *= bom_cost_allocation_per / 100
-		elif is_costed_out_of_finished_item(d):
-			d.basic_rate = get_incoming_rate(self.get_args_for_incoming_rate(d), raise_error_if_no_rate)
-			has_derived_rate = True
-		elif d.secondary_item_type and d.bom_secondary_item:
+		elif d.secondary_item_type and d.bom_secondary_item and not d.use_valuation_rate:
 			cost_allocation_per = flt(
 				frappe.get_value("BOM Secondary Item", d.bom_secondary_item, "cost_allocation_per")
 			)

@@ -180,7 +180,7 @@
   },
   {
    "default": "0",
-   "description": "Value this item at its incoming rate and deduct it from the raw material cost, like the pre-v16 scrap items. The remaining cost is allocated by percentage among the other items.",
+   "description": "Value this item at its valuation rate and deduct it from the raw material cost, like the pre-v16 scrap items. The remaining cost is allocated by percentage among the other items.",
    "fieldname": "use_valuation_rate",
    "fieldtype": "Check",
    "label": "Use Valuation Rate",
