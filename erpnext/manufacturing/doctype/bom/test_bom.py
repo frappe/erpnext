@@ -577,6 +577,33 @@ class TestBOM(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, bom_doc.save)
 
 	@timeout
+	def test_duplicate_secondary_item_not_allowed(self):
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		scrap_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 50}).name
+
+		bom_doc = frappe.new_doc("BOM")
+		bom_doc.item = fg_item
+		bom_doc.quantity = 1
+		bom_doc.company = "_Test Company"
+		bom_doc.currency = "INR"
+		bom_doc.append("items", {"item_code": rm_item, "qty": 1, "rate": 100.0})
+		bom_doc.append(
+			"secondary_items",
+			{"item_code": scrap_item, "secondary_item_type": "Scrap", "qty": 1, "use_valuation_rate": 1},
+		)
+		bom_doc.append(
+			"secondary_items",
+			{
+				"item_code": scrap_item,
+				"secondary_item_type": "By-Product",
+				"qty": 1,
+				"cost_allocation_per": 10,
+			},
+		)
+		self.assertRaises(frappe.ValidationError, bom_doc.save)
+
+	@timeout
 	def test_secondary_item_use_valuation_rate(self):
 		fg_item = make_item(properties={"is_stock_item": 1}).name
 		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
