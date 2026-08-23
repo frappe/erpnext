@@ -2170,9 +2170,11 @@ def get_valuation_rate(
 				& (table.warehouse == warehouse)
 				& (table.batch_no == batch_no)
 				& (table.is_cancelled == 0)
-				& ((table.voucher_no != voucher_no) | (table.voucher_type != voucher_type))
 			)
 		)
+		if voucher_no:
+			# Comparing against a None voucher_no yields NULL, which filters out every row
+			query = query.where((table.voucher_no != voucher_no) | (table.voucher_type != voucher_type))
 
 		last_valuation_rate = query.run()
 		if last_valuation_rate and last_valuation_rate[0][0] is not None:
@@ -2198,7 +2200,7 @@ def get_valuation_rate(
 
 	# Get valuation rate from last sle for the same item and warehouse
 	sle_entry = frappe.qb.DocType("Stock Ledger Entry")
-	if last_valuation_rate := (
+	last_sle_query = (
 		frappe.qb.from_(sle_entry)
 		.select(sle_entry.valuation_rate)
 		.where(
@@ -2206,12 +2208,18 @@ def get_valuation_rate(
 			& (sle_entry.warehouse == warehouse)
 			& (sle_entry.valuation_rate >= 0)
 			& (sle_entry.is_cancelled == 0)
-			& ~((sle_entry.voucher_no == voucher_no) & (sle_entry.voucher_type == voucher_type))
 		)
 		.orderby(sle_entry.posting_datetime, order=frappe.qb.desc)
 		.orderby(sle_entry.creation, order=frappe.qb.desc)
 		.limit(1)
-	).run():
+	)
+	if voucher_no:
+		# Comparing against a None voucher_no yields NULL, which filters out every row
+		last_sle_query = last_sle_query.where(
+			~((sle_entry.voucher_no == voucher_no) & (sle_entry.voucher_type == voucher_type))
+		)
+
+	if last_valuation_rate := last_sle_query.run():
 		return flt(last_valuation_rate[0][0])
 
 	if fallbacks:
