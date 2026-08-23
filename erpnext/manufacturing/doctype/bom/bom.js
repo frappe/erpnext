@@ -1032,6 +1032,8 @@ frappe.ui.form.on("BOM Secondary Item", {
 		const row = locals[cdt][cdn];
 		if (row.use_valuation_rate) {
 			frappe.model.set_value(cdt, cdn, "cost_allocation_per", 0);
+		} else {
+			frappe.model.set_value(cdt, cdn, { cost: 0, base_cost: 0 });
 		}
 	},
 });
