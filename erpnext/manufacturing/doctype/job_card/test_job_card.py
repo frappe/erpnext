@@ -2813,6 +2813,88 @@ class TestJobCard(ERPNextTestSuite):
 		used_secondary_items = ManufactureStockEntry(stock_entry).get_used_secondary_items()
 		self.assertEqual(used_secondary_items[("_Test Item", "Scrap")], 2)
 
+	def test_secondary_items_from_multiple_boms_stay_separate(self):
+		"""Rows linked to different BOM rows keep their own quantity and valuation mode."""
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		secondary_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 50}).name
+
+		bom_links = []
+		for cost_allocation_per in (0, 10):
+			fg_item = make_item(properties={"is_stock_item": 1}).name
+			rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+
+			bom_doc = frappe.new_doc("BOM")
+			bom_doc.item = fg_item
+			bom_doc.quantity = 1
+			bom_doc.company = "_Test Company"
+			bom_doc.currency = "INR"
+			bom_doc.append("items", {"item_code": rm_item, "qty": 1, "rate": 100.0})
+			bom_doc.append(
+				"secondary_items",
+				{
+					"item_code": secondary_item,
+					"secondary_item_type": "Scrap",
+					"qty": 1,
+					"cost_allocation_per": cost_allocation_per,
+					"use_valuation_rate": 0 if cost_allocation_per else 1,
+				},
+			)
+			bom_doc.save()
+			bom_doc.submit()
+			bom_links.append(bom_doc.secondary_items[0].name)
+
+		for row in frappe.get_doc("BOM", self.work_order.bom_no).items:
+			make_stock_entry(
+				item_code=row.item_code,
+				target="_Test Warehouse - _TC",
+				qty=10,
+				basic_rate=100,
+			)
+
+		job_card = frappe.get_last_doc("Job Card", {"work_order": self.work_order.name})
+		job_card.append(
+			"secondary_items",
+			{
+				"item_code": secondary_item,
+				"stock_qty": 2,
+				"secondary_item_type": "Scrap",
+				"bom_secondary_item": bom_links[0],
+			},
+		)
+		job_card.append(
+			"secondary_items",
+			{
+				"item_code": secondary_item,
+				"stock_qty": 3,
+				"secondary_item_type": "Scrap",
+				"bom_secondary_item": bom_links[1],
+			},
+		)
+		job_card.append(
+			"time_logs",
+			{
+				"from_time": "2009-01-01 12:06:25",
+				"to_time": "2009-01-01 12:37:25",
+				"completed_qty": job_card.for_quantity,
+			},
+		)
+		job_card.save()
+		job_card.submit()
+
+		from erpnext.manufacturing.doctype.work_order.mapper import (
+			make_stock_entry as make_stock_entry_for_wo,
+		)
+
+		s = frappe.get_doc(make_stock_entry_for_wo(self.work_order.name, "Manufacture"))
+
+		rows = {d.bom_secondary_item: d for d in s.items if d.item_code == secondary_item}
+		self.assertEqual(len(rows), 2)
+		self.assertEqual(rows[bom_links[0]].qty, 2)
+		self.assertTrue(rows[bom_links[0]].use_valuation_rate)
+		self.assertEqual(rows[bom_links[1]].qty, 3)
+		self.assertFalse(rows[bom_links[1]].use_valuation_rate)
+
 	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings", {"overproduction_percentage_for_work_order": 100}
 	)
