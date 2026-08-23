@@ -9,7 +9,7 @@ delegating stubs so external callers (bom_update_log, etc.) keep working.
 
 import frappe
 from frappe import _
-from frappe.utils import flt, nowdate, nowtime
+from frappe.utils import flt
 
 
 class BOMCostingService:
@@ -37,14 +37,10 @@ class BOMCostingService:
 
 	def _raw_material_rate(self, arg, notify):
 		from erpnext.manufacturing.doctype.bom.bom import get_bom_item_rate, get_valuation_rate
-		from erpnext.stock.utils import get_incoming_rate
 
-		# Valuation-rate secondary items ignore the BOM's rm_cost_as_per method: incoming
-		# rate at the target warehouse when one is set, else the same all-warehouse
-		# average the raw materials use.
+		# Valuation-rate secondary items ignore the BOM's rm_cost_as_per method: bin-average
+		# valuation like the raw materials, scoped to the default target warehouse when set.
 		if arg.get("use_valuation_rate"):
-			if arg.get("warehouse"):
-				return get_incoming_rate(arg, raise_error_if_no_rate=False)
 			return get_valuation_rate(arg)
 
 		# Customer Provided parts and Supplier sourced parts will have zero rate
@@ -257,7 +253,7 @@ class BOMCostingService:
 			"conversion_factor": d.conversion_factor,
 			"sourced_by_supplier": d.sourced_by_supplier,
 			"is_phantom_item": d.is_phantom_item,
-			"source_warehouse": d.source_warehouse,
+			"source_warehouse": d.source_warehouse or self.doc.default_source_warehouse,
 		}
 
 	def _set_item_amounts(self, d):
@@ -313,9 +309,7 @@ class BOMCostingService:
 			"item_code": d.item_code,
 			"company": self.doc.company,
 			"warehouse": self.doc.default_target_warehouse,
-			"posting_date": nowdate(),
-			"posting_time": nowtime(),
-			"qty": d.stock_qty,
+			"set_rate_based_on_warehouse": 1,
 			"use_valuation_rate": 1,
 		}
 

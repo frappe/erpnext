@@ -767,7 +767,7 @@ var get_bom_material_detail = function (doc, cdt, cdn, secondary_items) {
 				conversion_factor: d.conversion_factor,
 				sourced_by_supplier: d.sourced_by_supplier,
 				do_not_explode: d.do_not_explode,
-				source_warehouse: d.source_warehouse,
+				source_warehouse: d.source_warehouse || doc.default_source_warehouse,
 				fetch_rate: !secondary_items,
 			},
 			callback: function (r) {

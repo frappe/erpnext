@@ -575,7 +575,7 @@ class BOM(WebsiteGenerator):
 					"conversion_factor": item.conversion_factor,
 					"sourced_by_supplier": item.sourced_by_supplier,
 					"do_not_explode": item.do_not_explode,
-					"source_warehouse": item.source_warehouse,
+					"source_warehouse": item.source_warehouse or self.default_source_warehouse,
 					"fetch_rate": True,
 				}
 			)
@@ -1217,7 +1217,9 @@ def _get_price_list_item_rate(args, bom_doc):
 
 def get_valuation_rate(data):
 	"""
-	1) Get average valuation rate from the row's source warehouse if set, else from all warehouses
+	1) Get average valuation rate from the scoping warehouse if one is passed
+	   (source warehouse for raw materials, default target warehouse for secondary
+	   items), else from all warehouses
 	2) If no value, get last valuation rate from SLE
 	3) If no value, get valuation rate from Item
 	"""
