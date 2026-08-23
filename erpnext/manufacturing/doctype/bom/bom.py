@@ -156,7 +156,7 @@ class BOM(WebsiteGenerator):
 		currency: DF.Link
 		default_source_warehouse: DF.Link | None
 		default_target_warehouse: DF.Link | None
-		description: DF.SmallText | None
+		description: DF.TextEditor | None
 		exploded_items: DF.Table[BOMExplosionItem]
 		fg_based_operating_cost: DF.Check
 		has_variants: DF.Check
