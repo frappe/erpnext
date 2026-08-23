@@ -36,13 +36,16 @@ class BOMCostingService:
 		return flt(rate) * flt(self.doc.plc_conversion_rate or 1) / (self.doc.conversion_rate or 1)
 
 	def _raw_material_rate(self, arg, notify):
-		from erpnext.manufacturing.doctype.bom.bom import get_bom_item_rate
+		from erpnext.manufacturing.doctype.bom.bom import get_bom_item_rate, get_valuation_rate
 		from erpnext.stock.utils import get_incoming_rate
 
-		# Valuation-rate secondary items are always valued at their incoming rate,
-		# regardless of the BOM's rm_cost_as_per method.
+		# Valuation-rate secondary items ignore the BOM's rm_cost_as_per method: incoming
+		# rate at the target warehouse when one is set, else the same all-warehouse
+		# average the raw materials use.
 		if arg.get("use_valuation_rate"):
-			return get_incoming_rate(arg, raise_error_if_no_rate=False)
+			if arg.get("warehouse"):
+				return get_incoming_rate(arg, raise_error_if_no_rate=False)
+			return get_valuation_rate(arg)
 
 		# Customer Provided parts and Supplier sourced parts will have zero rate
 		if frappe.db.get_value("Item", arg["item_code"], "is_customer_provided_item") or arg.get(
