@@ -639,6 +639,39 @@ class TestBOM(ERPNextTestSuite):
 		bom_doc.save()
 		self.assertEqual(bom_doc.items[0].rate, 75)
 
+		bom_doc.default_source_warehouse = "_Test Warehouse 1 - _TC"
+		bom_doc.save()
+		self.assertEqual(bom_doc.items[0].rate, 50)
+
+	@timeout
+	def test_secondary_item_rate_scoped_to_target_warehouse(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		scrap_item = make_item(properties={"is_stock_item": 1}).name
+
+		make_stock_entry(item_code=scrap_item, target="_Test Warehouse - _TC", qty=10, basic_rate=40)
+		make_stock_entry(item_code=scrap_item, target="_Test Warehouse 1 - _TC", qty=10, basic_rate=20)
+
+		bom_doc = frappe.new_doc("BOM")
+		bom_doc.item = fg_item
+		bom_doc.quantity = 1
+		bom_doc.company = "_Test Company"
+		bom_doc.currency = "INR"
+		bom_doc.default_target_warehouse = "_Test Warehouse - _TC"
+		bom_doc.append("items", {"item_code": rm_item, "qty": 10, "rate": 100.0})
+		bom_doc.append(
+			"secondary_items",
+			{"item_code": scrap_item, "secondary_item_type": "Scrap", "qty": 1, "use_valuation_rate": 1},
+		)
+		bom_doc.save()
+		self.assertEqual(bom_doc.secondary_items[0].cost, 40)
+
+		bom_doc.default_target_warehouse = None
+		bom_doc.save()
+		self.assertEqual(bom_doc.secondary_items[0].cost, 30)
+
 	@timeout
 	def test_secondary_item_valuation_rate_refreshed_on_update_cost(self):
 		fg_item = make_item(properties={"is_stock_item": 1}).name
