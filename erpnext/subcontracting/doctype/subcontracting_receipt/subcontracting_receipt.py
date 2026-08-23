@@ -387,7 +387,7 @@ class SubcontractingReceipt(SubcontractingController):
 						item.received_qty * (per_unit - (secondary_item.process_loss_qty / bom.quantity)),
 						item.precision("qty"),
 					)
-					if not secondary_item.is_legacy:
+					if not secondary_item.use_valuation_rate:
 						lcv_cost_per_qty = (
 							flt(item.landed_cost_voucher_amount) / flt(item.qty) if flt(item.qty) else 0.0
 						)
@@ -419,12 +419,12 @@ class SubcontractingReceipt(SubcontractingController):
 						"items",
 						{
 							"secondary_item_type": secondary_item.secondary_item_type,
-							"is_legacy_scrap_item": secondary_item.is_legacy,
+							"use_valuation_rate": secondary_item.use_valuation_rate,
 							"reference_name": item.name,
 							"item_code": secondary_item.item_code,
 							"item_name": secondary_item.item_name,
 							"qty": received_qty
-							if not secondary_item.is_legacy
+							if not secondary_item.use_valuation_rate
 							else flt(item.qty) * (flt(secondary_item.stock_qty) / flt(bom.quantity)),
 							"received_qty": received_qty,
 							"process_loss_qty": received_qty - qty,
@@ -446,7 +446,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 	def remove_secondary_items(self):
 		for item in list(self.items):
-			if item.secondary_item_type or item.is_legacy_scrap_item:
+			if item.secondary_item_type or item.use_valuation_rate:
 				self.remove(item)
 			else:
 				item.secondary_items_cost_per_qty = 0
@@ -505,10 +505,10 @@ class SubcontractingReceipt(SubcontractingController):
 
 		secondary_items_cost_map = {}
 		for item in self.get("items") or []:
-			if item.secondary_item_type or item.is_legacy_scrap_item:
+			if item.secondary_item_type or item.use_valuation_rate:
 				qty = (
 					flt(item.qty)
-					if item.is_legacy_scrap_item
+					if item.use_valuation_rate
 					else (flt(item.received_qty) - flt(item.process_loss_qty))
 				)
 				item.amount = qty * flt(item.rate)
@@ -520,7 +520,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 		total_qty = total_amount = 0
 		for item in self.get("items") or []:
-			if not item.secondary_item_type and not item.is_legacy_scrap_item:
+			if not item.secondary_item_type and not item.use_valuation_rate:
 				if item.qty:
 					if item.name in rm_cost_map:
 						item.rm_supp_cost = rm_cost_map[item.name]
@@ -563,7 +563,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 	def validate_secondary_items(self):
 		for item in self.items:
-			if item.secondary_item_type or item.is_legacy_scrap_item:
+			if item.secondary_item_type or item.use_valuation_rate:
 				if not item.qty:
 					frappe.throw(
 						_("Row #{0}: Secondary Item Qty cannot be zero").format(item.idx),

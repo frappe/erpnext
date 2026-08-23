@@ -40,7 +40,7 @@ class BaseManufactureStockEntry(BaseStockEntry):
 				not row.s_warehouse
 				and self.doc.from_warehouse
 				and not row.is_finished_item
-				and not row.is_legacy_scrap_item
+				and not row.use_valuation_rate
 				and not row.secondary_item_type
 			):
 				row.s_warehouse = self.doc.from_warehouse
@@ -49,7 +49,7 @@ class BaseManufactureStockEntry(BaseStockEntry):
 			elif (
 				not row.t_warehouse
 				and self.doc.to_warehouse
-				and (row.is_finished_item or row.is_legacy_scrap_item or row.secondary_item_type)
+				and (row.is_finished_item or row.use_valuation_rate or row.secondary_item_type)
 			):
 				row.t_warehouse = self.doc.to_warehouse
 				row.s_warehouse = None
@@ -98,7 +98,7 @@ class BaseManufactureStockEntry(BaseStockEntry):
 		secondary_items = get_secondary_items(self.doc.bom_no, self.doc.work_order)
 		for row in secondary_items:
 			item_args = self.get_item_dict(row)
-			item_args["is_legacy_scrap_item"] = bool(row.get("is_legacy"))
+			item_args["use_valuation_rate"] = bool(row.get("use_valuation_rate"))
 			item_args["secondary_item_type"] = row.secondary_item_type
 			item_args["bom_secondary_item"] = row.name
 
@@ -870,7 +870,6 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			row.transfer_qty = row.qty
 			row.s_warehouse = None
 			row.t_warehouse = row.warehouse or self.doc.to_warehouse
-			row.is_legacy_scrap_item = row.is_legacy
 			row.secondary_item_type = row.get("secondary_item_type")
 
 			self.doc.append("items", row)
@@ -899,7 +898,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		data = self._query_used_secondary_items()
 		used_secondary_items = defaultdict(float)
 		for row in data:
-			secondary_item_type = row.secondary_item_type or ("Scrap" if row.is_legacy_scrap_item else "")
+			secondary_item_type = row.secondary_item_type or ("Scrap" if row.use_valuation_rate else "")
 			key = (row.item_code, secondary_item_type)
 			used_secondary_items[key] += row.qty
 		return used_secondary_items
@@ -911,10 +910,10 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			frappe.qb.from_(se)
 			.inner_join(sed)
 			.on(sed.parent == se.name)
-			.select(sed.item_code, sed.secondary_item_type, sed.is_legacy_scrap_item, sed.qty)
+			.select(sed.item_code, sed.secondary_item_type, sed.use_valuation_rate, sed.qty)
 			.where(
 				(se.work_order == self.doc.work_order)
-				& ((sed.secondary_item_type.isnotnull()) | (sed.is_legacy_scrap_item == 1))
+				& ((sed.secondary_item_type.isnotnull()) | (sed.use_valuation_rate == 1))
 				& (se.docstatus == 1)
 				& (se.purpose.isin(["Repack", "Manufacture"]))
 			)
@@ -1120,7 +1119,7 @@ def _add_bom_table_specific_fields(query, doctype, table_name):
 			doctype.uom,
 			doctype.process_loss_per,
 			doctype.secondary_item_type,
-			doctype.is_legacy,
+			doctype.use_valuation_rate,
 			doctype.conversion_factor,
 		)
 	if table_name == "BOM Item":

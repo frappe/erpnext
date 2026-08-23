@@ -1194,7 +1194,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 					"item_code": item,
 					"stock_qty": 1 * (idx + 1),
 					"rate": 10 * (idx + 1),
-					"is_legacy": 1,
+					"use_valuation_rate": 1,
 				},
 			)
 		bom.save()
@@ -1220,7 +1220,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		scr.get_secondary_items()
 
 		scr_secondary_items = set(
-			[item.item_code for item in scr.items if item.secondary_item_type or item.is_legacy_scrap_item]
+			[item.item_code for item in scr.items if item.secondary_item_type or item.use_valuation_rate]
 		)
 		self.assertEqual(len(scr.items), 3)  # 1 FG Item + 2 Scrap Items
 		self.assertEqual(scr_secondary_items, set(secondary_items))

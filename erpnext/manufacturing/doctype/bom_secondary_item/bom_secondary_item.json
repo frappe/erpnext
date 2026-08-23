@@ -8,7 +8,7 @@
  "field_order": [
   "rate",
   "column_break_gres",
-  "is_legacy",
+  "use_valuation_rate",
   "section_break_sbnk",
   "item_code",
   "item_name",
@@ -34,12 +34,12 @@
  ],
  "fields": [
   {
-   "depends_on": "eval:!doc.is_legacy",
+   "depends_on": "eval:!doc.use_valuation_rate",
    "fieldname": "secondary_item_type",
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Type",
-   "mandatory_depends_on": "eval:!doc.is_legacy",
+   "mandatory_depends_on": "eval:!doc.use_valuation_rate",
    "options": "\nCo-Product\nBy-Product\nScrap\nAdditional Finished Good"
   },
   {
@@ -103,7 +103,7 @@
    "reqd": 1
   },
   {
-   "depends_on": "eval:!doc.is_legacy",
+   "depends_on": "eval:!doc.use_valuation_rate",
    "fieldname": "section_break_ielf",
    "fieldtype": "Section Break"
   },
@@ -187,15 +187,15 @@
   },
   {
    "default": "0",
-   "depends_on": "is_legacy",
-   "fieldname": "is_legacy",
+   "depends_on": "use_valuation_rate",
+   "fieldname": "use_valuation_rate",
    "fieldtype": "Check",
-   "label": "Is Legacy",
+   "label": "Use Valuation Rate",
    "no_copy": 1,
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.is_legacy",
+   "depends_on": "eval:doc.use_valuation_rate",
    "fieldname": "rate",
    "fieldtype": "Currency",
    "label": "Rate",

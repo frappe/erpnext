@@ -24,7 +24,7 @@ erpnext.stock.is_incoming_qi_purpose = (purpose) =>
 erpnext.stock.row_requires_quality_inspection = (purpose, row) => {
 	if (
 		erpnext.stock.secondary_item_purposes.includes(purpose) &&
-		(row.secondary_item_type || row.is_legacy_scrap_item)
+		(row.secondary_item_type || row.use_valuation_rate)
 	)
 		return false;
 	if (purpose === "Manufacture") return !!row.is_finished_item;

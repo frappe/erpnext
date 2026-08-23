@@ -20,7 +20,6 @@ class BOMSecondaryItem(Document):
 		cost_allocation_per: DF.Percent
 		description: DF.TextEditor | None
 		image: DF.AttachImage | None
-		is_legacy: DF.Check
 		item_code: DF.Link
 		item_name: DF.Data | None
 		parent: DF.Data
@@ -34,6 +33,7 @@ class BOMSecondaryItem(Document):
 		stock_qty: DF.Float
 		stock_uom: DF.Link | None
 		uom: DF.Link
+		use_valuation_rate: DF.Check
 	# end: auto-generated types
 
 	pass

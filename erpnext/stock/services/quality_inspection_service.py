@@ -55,7 +55,7 @@ SECONDARY_ITEM_PURPOSES = ("Manufacture", "Repack", "Disassemble")
 
 def is_inspection_exempt_secondary_row(doc, row) -> bool:
 	"""Whether the row is a secondary item on a document that produces secondary items."""
-	if not (row.get("secondary_item_type") or row.get("is_legacy_scrap_item")):
+	if not (row.get("secondary_item_type") or row.get("use_valuation_rate")):
 		return False
 
 	if doc.doctype == "Stock Entry":
@@ -67,7 +67,7 @@ def is_inspection_exempt_secondary_row(doc, row) -> bool:
 def stock_entry_row_requires_inspection(purpose, row):
 	"""Check if this Stock Entry row need a Quality Inspection."""
 	if purpose in SECONDARY_ITEM_PURPOSES and (
-		row.get("secondary_item_type") or row.get("is_legacy_scrap_item")
+		row.get("secondary_item_type") or row.get("use_valuation_rate")
 	):
 		return False
 	if purpose == "Manufacture":

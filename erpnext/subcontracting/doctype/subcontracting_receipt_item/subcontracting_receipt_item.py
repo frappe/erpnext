@@ -25,7 +25,6 @@ class SubcontractingReceiptItem(Document):
 		expense_account: DF.Link | None
 		image: DF.Attach | None
 		include_exploded_items: DF.Check
-		is_legacy_scrap_item: DF.Check
 		item_code: DF.Link
 		item_name: DF.Data | None
 		job_card: DF.Link | None
@@ -64,6 +63,7 @@ class SubcontractingReceiptItem(Document):
 		subcontracting_receipt_item: DF.Data | None
 		secondary_item_type: DF.Literal["", "Co-Product", "By-Product", "Scrap", "Additional Finished Good"]
 		use_serial_batch_fields: DF.Check
+		use_valuation_rate: DF.Check
 		warehouse: DF.Link | None
 	# end: auto-generated types
 

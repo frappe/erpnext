@@ -317,7 +317,7 @@ class JobCard(Document):
 			"bom_secondary_item": values.name,
 		}
 
-		if not values.is_legacy:
+		if not values.use_valuation_rate:
 			secondary_item["stock_qty"] -= flt(
 				secondary_item["stock_qty"] * (values.process_loss_per / 100),
 				self.precision("for_quantity"),
@@ -1878,7 +1878,7 @@ class JobCard(Document):
 		add_additional_cost(ste.stock_entry, wo_doc, self)
 		ManufactureStockEntry(ste.stock_entry).add_secondary_items_from_job_card()
 		for row in ste.stock_entry.items:
-			if (row.secondary_item_type or row.is_legacy_scrap_item) and not row.t_warehouse:
+			if (row.secondary_item_type or row.use_valuation_rate) and not row.t_warehouse:
 				row.t_warehouse = self.target_warehouse
 
 

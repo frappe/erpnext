@@ -208,7 +208,7 @@ class WorkOrder(Document):
 			.where(
 				(parent.work_order == self.name)
 				& (parent.docstatus == 1)
-				& ((child.secondary_item_type != "") | (child.is_legacy_scrap_item == 1))
+				& ((child.secondary_item_type != "") | (child.use_valuation_rate == 1))
 			)
 			.select(
 				child.item_code,

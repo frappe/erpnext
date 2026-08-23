@@ -1090,7 +1090,7 @@ class TestStockEntry(ERPNextTestSuite):
 				rm_cost += d.amount
 		fg_cost = next(filter(lambda x: x.item_code == "_Test FG Item", s.get("items"))).amount
 		secondary_item_cost = next(
-			filter(lambda x: x.secondary_item_type or x.is_legacy_scrap_item, s.get("items"))
+			filter(lambda x: x.secondary_item_type or x.use_valuation_rate, s.get("items"))
 		).amount
 
 		self.assertEqual(fg_cost, flt(rm_cost - secondary_item_cost, 2))
@@ -1210,7 +1210,7 @@ class TestStockEntry(ERPNextTestSuite):
 					basic_rate=row.basic_rate or 100,
 				)
 
-			if row.secondary_item_type or row.is_legacy_scrap_item:
+			if row.secondary_item_type or row.use_valuation_rate:
 				row.item_code = secondary_item
 				row.uom = frappe.db.get_value("Item", secondary_item, "stock_uom")
 				row.stock_uom = frappe.db.get_value("Item", secondary_item, "stock_uom")
@@ -1219,15 +1219,11 @@ class TestStockEntry(ERPNextTestSuite):
 		stock_entry.save()
 
 		self.assertTrue(
-			[
-				row.item_code
-				for row in stock_entry.items
-				if row.secondary_item_type or row.is_legacy_scrap_item
-			]
+			[row.item_code for row in stock_entry.items if row.secondary_item_type or row.use_valuation_rate]
 		)
 
 		for row in stock_entry.items:
-			if not row.secondary_item_type and not row.is_legacy_scrap_item:
+			if not row.secondary_item_type and not row.use_valuation_rate:
 				qc = frappe.get_doc(
 					{
 						"doctype": "Quality Inspection",
@@ -1247,7 +1243,7 @@ class TestStockEntry(ERPNextTestSuite):
 		stock_entry.reload()
 		stock_entry.submit()
 		for row in stock_entry.items:
-			if row.secondary_item_type or row.is_legacy_scrap_item:
+			if row.secondary_item_type or row.use_valuation_rate:
 				self.assertFalse(row.quality_inspection)
 			else:
 				self.assertTrue(row.quality_inspection)

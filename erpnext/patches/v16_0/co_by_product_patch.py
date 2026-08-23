@@ -40,7 +40,7 @@ def insert_into_bom():
 					"uom": item.stock_uom,
 					"conversion_factor": 1,
 					"qty": item.stock_qty,
-					"is_legacy": 1,
+					"use_valuation_rate": 1,
 					"secondary_item_type": "Scrap",
 				}
 			)
@@ -100,12 +100,12 @@ def bulk_insert(parent_doctype, old_doctype, new_doctype, old_fields, new_fields
 def rename_fields():
 	rename_field("BOM", "scrap_material_cost", "secondary_items_cost")
 	rename_field("BOM", "base_scrap_material_cost", "base_secondary_items_cost")
-	rename_field("Stock Entry Detail", "is_scrap_item", "is_legacy_scrap_item")
+	rename_field("Stock Entry Detail", "is_scrap_item", "use_valuation_rate")
 	rename_field(
 		"Manufacturing Settings",
 		"set_op_cost_and_scrap_from_sub_assemblies",
 		"set_op_cost_and_secondary_items_from_sub_assemblies",
 	)
 	rename_field("Selling Settings", "deliver_scrap_items", "deliver_secondary_items")
-	rename_field("Subcontracting Receipt Item", "is_scrap_item", "is_legacy_scrap_item")
+	rename_field("Subcontracting Receipt Item", "is_scrap_item", "use_valuation_rate")
 	rename_field("Subcontracting Receipt Item", "scrap_cost_per_qty", "secondary_items_cost_per_qty")

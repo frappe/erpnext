@@ -230,7 +230,7 @@ class DisassembleStockEntry(BaseStockEntry):
 			"t_warehouse": t_warehouse,
 			"is_finished_item": source_row.is_finished_item,
 			"secondary_item_type": source_row.secondary_item_type,
-			"is_legacy_scrap_item": source_row.is_legacy_scrap_item,
+			"use_valuation_rate": source_row.use_valuation_rate,
 			"bom_secondary_item": source_row.bom_secondary_item,
 			"bom_no": source_row.bom_no,
 			"use_serial_batch_fields": 1 if (source_row.batch_no or source_row.serial_no) else 0,
@@ -284,7 +284,7 @@ class DisassembleStockEntry(BaseStockEntry):
 			for field in fields:
 				item_args[field] = row.get(field)
 
-			item_args["is_legacy_scrap_item"] = row.get("is_legacy")
+			item_args["use_valuation_rate"] = row.get("use_valuation_rate")
 			item_args["s_warehouse"] = self.doc.from_warehouse
 			item_args["uom"] = item_args.get("uom") or item_args.get("stock_uom")
 			item_args["bom_secondary_item"] = row.get("name")
@@ -330,7 +330,7 @@ class DisassembleStockEntry(BaseStockEntry):
 			SED.conversion_factor,
 			SED.is_finished_item,
 			SED.secondary_item_type,
-			SED.is_legacy_scrap_item,
+			SED.use_valuation_rate,
 			SED.bom_secondary_item,
 			SED.batch_no,
 			SED.serial_no,
@@ -397,7 +397,7 @@ class DisassembleStockEntry(BaseStockEntry):
 				SED.stock_uom,
 				SED.is_finished_item,
 				SED.secondary_item_type,
-				SED.is_legacy_scrap_item,
+				SED.use_valuation_rate,
 				SED.bom_secondary_item,
 				SED.batch_no,
 				SED.serial_no,

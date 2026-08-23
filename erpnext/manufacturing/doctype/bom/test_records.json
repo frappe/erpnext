@@ -46,7 +46,7 @@
    "rate": 2000.0,
    "stock_uom": "_Test UOM",
    "secondary_item_type": "Scrap",
-   "is_legacy": 1
+   "use_valuation_rate": 1
   }
   ],
   "items": [

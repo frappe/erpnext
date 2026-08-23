@@ -46,7 +46,6 @@ class StockEntryDetail(Document):
 		has_item_scanned: DF.Check
 		image: DF.Attach | None
 		is_finished_item: DF.Check
-		is_legacy_scrap_item: DF.Check
 		item_code: DF.Link
 		item_group: DF.Data | None
 		item_name: DF.Data | None
@@ -82,6 +81,7 @@ class StockEntryDetail(Document):
 		secondary_item_type: DF.Literal["", "Co-Product", "By-Product", "Scrap", "Additional Finished Good"]
 		uom: DF.Link
 		use_serial_batch_fields: DF.Check
+		use_valuation_rate: DF.Check
 		valuation_rate: DF.Currency
 	# end: auto-generated types
 

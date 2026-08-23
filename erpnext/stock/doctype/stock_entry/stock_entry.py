@@ -83,7 +83,7 @@ def is_costed_out_of_finished_item(row) -> bool:
 	A secondary item that is not linked to a BOM has no cost allocation of its own, so it is
 	valued the way the legacy scrap item was: its cost is deducted from the finished good.
 	"""
-	return bool(row.is_legacy_scrap_item or (row.secondary_item_type and not row.bom_secondary_item))
+	return bool(row.use_valuation_rate or (row.secondary_item_type and not row.bom_secondary_item))
 
 
 class StockEntry(StockController, SubcontractingInwardController):
@@ -804,7 +804,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 	def _validate_no_raw_materials_in_manufacture_entry(self, settings):
 		for item in self.items:
-			if not item.is_finished_item and not item.secondary_item_type and not item.is_legacy_scrap_item:
+			if not item.is_finished_item and not item.secondary_item_type and not item.use_valuation_rate:
 				label = frappe.get_meta(settings.doctype).get_translated_label(
 					"get_rm_cost_from_consumption_entry"
 				)
@@ -944,7 +944,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		for d in self.items:
 			if d.t_warehouse and not d.s_warehouse:
-				if d.secondary_item_type or d.is_legacy_scrap_item:
+				if d.secondary_item_type or d.use_valuation_rate:
 					d.is_finished_item = 0
 				elif self.purpose == "Repack" or d.item_code == finished_item:
 					d.is_finished_item = 1

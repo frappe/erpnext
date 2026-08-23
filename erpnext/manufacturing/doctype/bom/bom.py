@@ -397,7 +397,7 @@ class BOM(WebsiteGenerator):
 
 	def validate_secondary_items(self):
 		for item in self.secondary_items:
-			if not item.is_legacy and item.item_code == self.item:
+			if not item.use_valuation_rate and item.item_code == self.item:
 				frappe.throw(
 					_(
 						"Row #{0}: Finished Good Item {1} cannot be added in the Secondary Items table."
@@ -1087,7 +1087,8 @@ class BOM(WebsiteGenerator):
 
 	def has_scrap_items(self):
 		return any(
-			d.get("secondary_item_type") == "Scrap" or d.get("is_legacy") for d in self.get("secondary_items")
+			d.get("secondary_item_type") == "Scrap" or d.get("use_valuation_rate")
+			for d in self.get("secondary_items")
 		)
 
 	def validate_bom_currency(self, item):
@@ -1475,7 +1476,7 @@ def _add_secondary_item_columns(query, t, stock_item_condition):
 		Max(t.bom_item.process_loss_per).as_("process_loss_per"),
 		Max(t.bom_item.secondary_item_type).as_("secondary_item_type"),
 		Max(t.bom_item.name).as_("name"),
-		Max(t.bom_item.is_legacy).as_("is_legacy"),
+		Max(t.bom_item.use_valuation_rate).as_("use_valuation_rate"),
 	).where(stock_item_condition)
 
 	return query, [t.bom_item.item_code]

@@ -2804,7 +2804,7 @@ class TestJobCard(ERPNextTestSuite):
 		frappe.db.set_value(
 			"Stock Entry Detail",
 			s.items[3].name,
-			{"secondary_item_type": None, "is_legacy_scrap_item": 1},
+			{"secondary_item_type": None, "use_valuation_rate": 1},
 		)
 
 		from erpnext.stock.doctype.stock_entry.services.manufacturing import ManufactureStockEntry
