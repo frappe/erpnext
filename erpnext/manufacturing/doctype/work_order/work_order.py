@@ -187,11 +187,14 @@ class WorkOrder(Document):
 			.where(
 				(parent.work_order == self.name)
 				& (parent.docstatus == 1)
-				& ((child.type != "") | (child.is_legacy_scrap_item == 1))
+				& ((child.secondary_item_type != "") | (child.is_legacy_scrap_item == 1))
 			)
 			.select(
 				child.item_code,
-				Case().when(child.is_legacy_scrap_item == 1, "Scrap (Legacy)").else_(child.type).as_("type"),
+				Case()
+				.when(child.is_legacy_scrap_item == 1, "Scrap (Legacy)")
+				.else_(child.secondary_item_type)
+				.as_("secondary_item_type"),
 				child.qty,
 				child.uom,
 				child.amount,
@@ -207,7 +210,7 @@ class WorkOrder(Document):
 				filters={"name": self.bom_no},
 				fields=[
 					"secondary_items.item_code",
-					"secondary_items.type",
+					"secondary_items.secondary_item_type",
 					"secondary_items.qty",
 					"secondary_items.uom",
 					"secondary_items.cost as amount",

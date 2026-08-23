@@ -444,7 +444,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 			my_filters.extend(
 				[
 					"and",
-					["items.type", "is", "not set"],
+					["items.secondary_item_type", "is", "not set"],
 					"and",
 					["items.is_legacy_scrap_item", "=", 0],
 				]
