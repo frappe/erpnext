@@ -861,6 +861,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			return
 
 		secondary_items = self.get_secondary_items_from_job_card()
+		use_valuation_rate_map = self.get_use_valuation_rate_map(secondary_items)
 		for row in secondary_items:
 			if row.stock_qty <= 0:
 				continue
@@ -870,15 +871,24 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			row.transfer_qty = row.qty
 			row.s_warehouse = None
 			row.t_warehouse = row.warehouse or self.doc.to_warehouse
-			row.use_valuation_rate = self.get_use_valuation_rate(row.bom_secondary_item)
+			row.use_valuation_rate = use_valuation_rate_map.get(row.bom_secondary_item, 0)
 			row.secondary_item_type = row.get("secondary_item_type")
 
 			self.doc.append("items", row)
 
-	def get_use_valuation_rate(self, bom_secondary_item) -> int:
-		if not bom_secondary_item:
-			return 0
-		return cint(frappe.db.get_value("BOM Secondary Item", bom_secondary_item, "use_valuation_rate"))
+	def get_use_valuation_rate_map(self, secondary_items) -> dict:
+		names = [row.bom_secondary_item for row in secondary_items if row.bom_secondary_item]
+		if not names:
+			return {}
+
+		return dict(
+			frappe.get_all(
+				"BOM Secondary Item",
+				filters={"name": ("in", names)},
+				fields=["name", "use_valuation_rate"],
+				as_list=True,
+			)
+		)
 
 	def get_secondary_items_from_job_card(self):
 		if not self.wo_doc.operations:
