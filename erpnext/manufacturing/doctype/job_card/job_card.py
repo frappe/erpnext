@@ -317,11 +317,10 @@ class JobCard(Document):
 			"bom_secondary_item": values.name,
 		}
 
-		if not values.use_valuation_rate:
-			secondary_item["stock_qty"] -= flt(
-				secondary_item["stock_qty"] * (values.process_loss_per / 100),
-				self.precision("for_quantity"),
-			)
+		secondary_item["stock_qty"] -= flt(
+			secondary_item["stock_qty"] * (flt(values.process_loss_per) / 100),
+			self.precision("for_quantity"),
+		)
 
 		self.append("secondary_items", secondary_item)
 

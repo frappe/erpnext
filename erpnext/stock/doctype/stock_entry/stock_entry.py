@@ -587,7 +587,12 @@ class StockEntry(StockController, SubcontractingInwardController):
 		secondary_items_cost_basis = self.get_secondary_items_cost_basis(outgoing_items_cost)
 
 		zero_valuation_items = []
-		finished_items_last = sorted(self.get("items"), key=lambda row: cint(row.is_finished_item))
+		# Valuation-rate rows first: their value is deducted from the basis the percentage
+		# allocated rows and the finished good split, so it must be known before those.
+		finished_items_last = sorted(
+			self.get("items"),
+			key=lambda row: (cint(row.is_finished_item), cint(not is_costed_out_of_finished_item(row))),
+		)
 		for d in finished_items_last:
 			if d.s_warehouse or d.set_basic_rate_manually:
 				continue
@@ -678,12 +683,13 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 			if self.bom_no:
 				d.basic_rate *= bom_cost_allocation_per / 100
-		elif d.secondary_item_type and d.bom_secondary_item:
+		elif d.secondary_item_type and d.bom_secondary_item and not d.use_valuation_rate:
 			cost_allocation_per = flt(
 				frappe.get_value("BOM Secondary Item", d.bom_secondary_item, "cost_allocation_per")
 			)
 			if flt(d.transfer_qty):
-				d.basic_rate = (secondary_items_cost_basis * (cost_allocation_per / 100)) / d.transfer_qty
+				allocation_basis = secondary_items_cost_basis - self.get_costed_out_items_cost()
+				d.basic_rate = (allocation_basis * (cost_allocation_per / 100)) / d.transfer_qty
 				has_derived_rate = True
 
 		# A rate of zero that was derived rather than left unset is a real cost. Falling back to
@@ -771,13 +777,15 @@ class StockEntry(StockController, SubcontractingInwardController):
 				)
 				return flt(outgoing_items_cost / total_fg_qty)
 
+	def get_costed_out_items_cost(self) -> float:
+		"""Total value of the rows that are deducted from the cost the other incoming rows split."""
+		return sum(flt(d.basic_amount) for d in self.get("items") if is_costed_out_of_finished_item(d))
+
 	def get_basic_rate_for_manufactured_item(
 		self, finished_item_qty, outgoing_items_cost=0, has_consumption_basis=False
 	) -> float:
 		settings = frappe.get_single("Manufacturing Settings")
-		scrap_items_cost = sum(
-			[flt(d.basic_amount) for d in self.get("items") if is_costed_out_of_finished_item(d)]
-		)
+		scrap_items_cost = self.get_costed_out_items_cost()
 
 		if settings.material_consumption:
 			outgoing_items_cost = self._get_rm_cost_for_manufacture(
