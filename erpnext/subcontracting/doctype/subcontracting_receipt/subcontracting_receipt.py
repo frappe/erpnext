@@ -16,7 +16,7 @@ from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.get_item_details import get_default_cost_center, get_default_expense_account
-from erpnext.stock.stock_ledger import get_valuation_rate
+from erpnext.stock.utils import get_incoming_rate
 
 from .mapper import (
 	make_purchase_receipt,
@@ -403,13 +403,18 @@ class SubcontractingReceipt(SubcontractingController):
 							* (secondary_item.cost_allocation_per / 100)
 						) / qty
 					else:
-						rate = get_valuation_rate(
-							secondary_item.item_code,
-							self.set_warehouse,
-							self.doctype,
-							self.name,
-							currency=erpnext.get_company_currency(self.company),
-							company=self.company,
+						rate = get_incoming_rate(
+							{
+								"item_code": secondary_item.item_code,
+								"warehouse": self.set_warehouse,
+								"posting_date": self.posting_date,
+								"posting_time": self.posting_time,
+								"qty": received_qty,
+								"company": self.company,
+								"voucher_type": self.doctype,
+								"voucher_no": self.name,
+							},
+							raise_error_if_no_rate=False,
 						)
 						if not rate and secondary_item.stock_qty:
 							rate = flt(secondary_item.cost) / flt(secondary_item.stock_qty)
