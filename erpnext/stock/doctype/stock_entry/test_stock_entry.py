@@ -1251,6 +1251,18 @@ class TestStockEntry(ERPNextTestSuite):
 		scrap_row = next(d for d in entry.items if d.use_valuation_rate)
 		self.assertEqual(scrap_row.basic_rate, 50)
 
+	def test_valuation_rate_lookup_without_voucher_no(self):
+		from erpnext.stock.stock_ledger import get_valuation_rate
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=5, basic_rate=77)
+
+		# unsaved documents pass no voucher_no; the lookup must still find the last SLE
+		rate = get_valuation_rate(
+			item, "_Test Warehouse - _TC", "Stock Entry", None, raise_error_if_no_rate=False
+		)
+		self.assertEqual(rate, 77)
+
 	def test_quality_check_for_secondary_item(self):
 		from erpnext.manufacturing.doctype.work_order.mapper import (
 			make_stock_entry as _make_stock_entry,
