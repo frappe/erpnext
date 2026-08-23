@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-08-16 09:41+0000\n"
-"PO-Revision-Date: 2026-08-17 01:43\n"
+"PO-Revision-Date: 2026-08-23 02:59\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -22508,7 +22508,7 @@ msgstr "دفتر کل"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "General Ledger Report"
-msgstr ""
+msgstr "گزارش دفتر کل"
 
 #. Label of the general_ledger_remarks_length (Int) field in DocType 'Accounts
 #. Settings'
@@ -26090,7 +26090,7 @@ msgstr ""
 
 #: erpnext/controllers/queries.py:227
 msgid "Invalid party type: {0}"
-msgstr ""
+msgstr "نوع طرف نامعتبر: {0}"
 
 #: erpnext/public/js/utils/serial_batch_inline_editor.js:773
 msgid "Invalid range. Use the format {0}"
@@ -27226,7 +27226,7 @@ msgstr "آیتم"
 #. Schedule'
 #: erpnext/manufacturing/doctype/production_plan_schedule/production_plan_schedule.json
 msgid "Item & Operation"
-msgstr ""
+msgstr "آیتم و عملیات"
 
 #: erpnext/stock/report/bom_search/bom_search.js:8
 msgid "Item 1"
