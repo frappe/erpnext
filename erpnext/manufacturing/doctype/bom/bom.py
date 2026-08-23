@@ -397,15 +397,16 @@ class BOM(WebsiteGenerator):
 	def validate_secondary_items(self):
 		seen_items = set()
 		for item in self.secondary_items:
-			# every consumer merges secondary rows by item code, so duplicates cannot keep
-			# their own quantities, percentages or valuation mode
-			if item.item_code in seen_items:
+			# every consumer merges secondary rows by item and type, so duplicates cannot
+			# keep their own quantities, percentages or valuation mode
+			key = (item.item_code, item.secondary_item_type or "")
+			if key in seen_items:
 				frappe.throw(
-					_("Row #{0}: Item {1} is added more than once in the Secondary Items table.").format(
-						item.idx, get_link_to_form("Item", item.item_code)
-					)
+					_(
+						"Row #{0}: Item {1} is already added with the same Type in the Secondary Items table."
+					).format(item.idx, get_link_to_form("Item", item.item_code))
 				)
-			seen_items.add(item.item_code)
+			seen_items.add(key)
 
 			if not item.use_valuation_rate and item.item_code == self.item:
 				frappe.throw(
@@ -1491,17 +1492,18 @@ def _add_exploded_item_columns(query, t, bom, amount_col, stock_item_condition):
 
 
 def _add_secondary_item_columns(query, t, stock_item_condition):
-	# non-grouped columns are constant per grouped item_code -> Max() keeps the GROUP BY valid on
-	# postgres while returning the same value MySQL picked arbitrarily.
+	# grouped by (item_code, secondary_item_type), which the BOM keeps unique, so every Max()
+	# below returns the single grouped row's own value while keeping the GROUP BY valid on
+	# postgres.
 	query = query.select(
 		Max(t.item_doc.description).as_("description"),
 		Max(t.bom_item.cost_allocation_per).as_("cost_allocation_per"),
 		Max(t.bom_item.process_loss_per).as_("process_loss_per"),
-		Max(t.bom_item.secondary_item_type).as_("secondary_item_type"),
+		t.bom_item.secondary_item_type,
 		Max(t.bom_item.name).as_("name"),
 	).where(stock_item_condition)
 
-	return query, [t.bom_item.item_code]
+	return query, [t.bom_item.item_code, t.bom_item.secondary_item_type]
 
 
 def _add_normal_item_columns(query, t, amount_col, stock_item_condition, track_semi_finished_goods):
@@ -1541,6 +1543,9 @@ def _add_normal_item_columns(query, t, amount_col, stock_item_condition, track_s
 
 def _add_bom_item_to_dict(item_dict, item, company, opts):
 	key = item.item_code
+	if opts.fetch_secondary_items:
+		key = (item.item_code, item.secondary_item_type or "")
+
 	if item.operation_row_id:
 		key = (item.item_code, item.operation_row_id)
 

@@ -1103,7 +1103,7 @@ def get_bom_items(bom_no, use_multi_level_bom=None, qty=None, fetch_secondary_it
 		table_name = "BOM Explosion Item" if use_multi_level_bom else "BOM Item"
 
 	items = _run_bom_items_query(bom_no, table_name, qty)
-	return _deduplicate_bom_items(items)
+	return _deduplicate_bom_items(items, by_type=fetch_secondary_items)
 
 
 def _run_bom_items_query(bom_no, table_name, qty):
@@ -1145,13 +1145,14 @@ def _add_bom_table_specific_fields(query, doctype, table_name):
 	return query
 
 
-def _deduplicate_bom_items(items):
+def _deduplicate_bom_items(items, by_type=False):
 	item_dict = {}
 	for item in items:
-		if item.item_code in item_dict:
-			item_dict[item.item_code].qty += item.qty
+		key = (item.item_code, item.get("secondary_item_type") or "") if by_type else item.item_code
+		if key in item_dict:
+			item_dict[key].qty += item.qty
 		else:
-			item_dict[item.item_code] = item
+			item_dict[key] = item
 	return list(item_dict.values())
 
 

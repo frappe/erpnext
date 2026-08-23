@@ -304,8 +304,9 @@ class JobCard(Document):
 			fetch_exploded=0,
 			fetch_secondary_items=1,
 		)
-		for item_code, values in items_dict.items():
-			self.append_secondary_item(item_code, frappe._dict(values))
+		for values in items_dict.values():
+			values = frappe._dict(values)
+			self.append_secondary_item(values.item_code, values)
 
 	def append_secondary_item(self, item_code, values):
 		secondary_item = {
