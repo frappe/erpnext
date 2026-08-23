@@ -617,6 +617,29 @@ class TestBOM(ERPNextTestSuite):
 		self.assertEqual(bom_doc.total_cost, 810)
 
 	@timeout
+	def test_rm_rate_scoped_to_source_warehouse(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+
+		make_stock_entry(item_code=rm_item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		make_stock_entry(item_code=rm_item, target="_Test Warehouse 1 - _TC", qty=10, basic_rate=50)
+
+		bom_doc = frappe.new_doc("BOM")
+		bom_doc.item = fg_item
+		bom_doc.quantity = 1
+		bom_doc.company = "_Test Company"
+		bom_doc.currency = "INR"
+		bom_doc.append("items", {"item_code": rm_item, "qty": 1, "source_warehouse": "_Test Warehouse - _TC"})
+		bom_doc.save()
+		self.assertEqual(bom_doc.items[0].rate, 100)
+
+		bom_doc.items[0].source_warehouse = None
+		bom_doc.save()
+		self.assertEqual(bom_doc.items[0].rate, 75)
+
+	@timeout
 	def test_secondary_item_valuation_rate_refreshed_on_update_cost(self):
 		fg_item = make_item(properties={"is_stock_item": 1}).name
 		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
