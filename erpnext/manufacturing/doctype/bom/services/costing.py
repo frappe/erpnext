@@ -147,6 +147,7 @@ class BOMCostingService:
 		self.calculate_op_cost(update_hour_rate)
 		self.calculate_rm_cost(save=save_updates)
 		self.calculate_secondary_items_costs(save=save_updates)
+		self.doc.set_fg_cost_allocation()
 		if save_updates:
 			# not via doc event, table is not regenerated and needs updation
 			self.calculate_exploded_cost()

@@ -340,7 +340,6 @@ class BOM(WebsiteGenerator):
 		self.set_default_uom()
 		self.validate_semi_finished_goods()
 		self.validate_secondary_items()
-		self.set_fg_cost_allocation()
 		self.validate_total_cost_allocation()
 
 	def set_operation_finished_goods(self):
