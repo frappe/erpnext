@@ -1,7 +1,8 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-const NOT_APPLICABLE_TAX = "N/A";
+// mirror of erpnext.stock.get_item_details.NOT_APPLICABLE_TAX
+erpnext.NOT_APPLICABLE_TAX = "N/A";
 
 // Per-charge_type base resolvers, mirror of the `erpnext_taxable_base_resolvers`
 // server hook. A localization registers `fn(calc, item, tax)` returning the per-item
@@ -302,7 +303,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		if(cint(tax.included_in_print_rate)) {
 			var tax_rate = this._get_tax_rate(tax, item_tax_map);
 
-			if (tax_rate === NOT_APPLICABLE_TAX) {
+			if (tax_rate === erpnext.NOT_APPLICABLE_TAX) {
 				return [tax_slope, tax_intercept];
 			}
 
@@ -347,8 +348,8 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	_get_tax_rate(tax, item_tax_map) {
 		if (tax.account_head in item_tax_map) {
 			let rate = item_tax_map[tax.account_head];
-			if (rate === NOT_APPLICABLE_TAX) {
-				return NOT_APPLICABLE_TAX;
+			if (rate === erpnext.NOT_APPLICABLE_TAX) {
+				return erpnext.NOT_APPLICABLE_TAX;
 			}
 			return flt(rate, precision("rate", tax));
 		}
@@ -391,7 +392,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			}
 
 			$.each(item_tax_map, function(tax, rate) {
-				if (rate === NOT_APPLICABLE_TAX) {
+				if (rate === erpnext.NOT_APPLICABLE_TAX) {
 					return;
 				}
 				let found = (me.frm.doc.taxes || []).find(d => d.account_head === tax);
@@ -537,7 +538,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		var current_tax_amount = 0.0;
 		var current_net_amount = 0.0;
 
-		if (tax_rate === NOT_APPLICABLE_TAX) {
+		if (tax_rate === erpnext.NOT_APPLICABLE_TAX) {
 			return [current_net_amount, current_tax_amount];
 		}
 

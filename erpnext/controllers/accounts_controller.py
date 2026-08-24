@@ -1295,7 +1295,10 @@ class AccountsController(TransactionBase):
 			if isinstance(item_tax_rate, str):
 				item_tax_rate = parse_json(item_tax_rate)
 
-			for account_head, _rate in item_tax_rate.items():
+			for account_head, rate in item_tax_rate.items():
+				if rate == NOT_APPLICABLE_TAX:
+					continue
+
 				row = self.get_tax_row(account_head)
 
 				if not row:
