@@ -79,6 +79,48 @@ class BuyingController(SubcontractingController):
 				),
 			)
 
+<<<<<<< HEAD
+=======
+		if self.get("company") and not self.get("terms"):
+			if not self.get("tc_name"):
+				self.tc_name = frappe.get_value("Company", self.company, "default_buying_terms")
+			self.set_missing_terms()
+
+	def validate_posting_date_with_po(self):
+		po_list = {x.purchase_order for x in self.items if x.purchase_order}
+
+		if not po_list:
+			return
+
+		invalid_po = []
+		po_dates = frappe._dict(
+			frappe.get_all(
+				"Purchase Order",
+				filters={"name": ["in", po_list]},
+				fields=["name", "transaction_date"],
+				as_list=True,
+			)
+		)
+
+		for po in po_list:
+			po_date = po_dates[po]
+			if getdate(po_date) > getdate(self.posting_date):
+				invalid_po.append((get_link_to_form("Purchase Order", po), format_date(po_date)))
+
+		if not invalid_po:
+			return
+
+		msg = _("<p>Posting Date {0} cannot be before Purchase Order date for the following:</p><ul>").format(
+			frappe.bold(format_date(self.posting_date))
+		)
+
+		for po, date in invalid_po:
+			msg += f"<li>{po} ({date})</li>"
+		msg += "</ul>"
+
+		frappe.throw(msg)
+
+>>>>>>> 59d80b29c4 (fix: render missing terms before printing (#58358))
 	def create_package_for_transfer(self) -> None:
 		"""Create serial and batch package for Sourece Warehouse in case of inter transfer."""
 

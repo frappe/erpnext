@@ -39,6 +39,14 @@ class SellingController(StockController):
 				),
 			)
 
+<<<<<<< HEAD
+=======
+		if self.get("company") and not self.get("terms"):
+			if not self.get("tc_name"):
+				self.tc_name = frappe.get_value("Company", self.company, "default_selling_terms")
+			self.set_missing_terms()
+
+>>>>>>> 59d80b29c4 (fix: render missing terms before printing (#58358))
 	def validate(self):
 		super().validate()
 		self.validate_items()
