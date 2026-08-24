@@ -899,6 +899,13 @@ class Company(NestedSet):
 		"""
 		Trash accounts and cost centers for this company if no gl entry exists
 		"""
+		if frappe.db.get_single_value("Global Defaults", "demo_company") == self.name:
+			frappe.throw(
+				_("{0} is the site's Demo Company and cannot be deleted directly. Use {1} instead.").format(
+					bold(self.name), bold(_("Delete Demo Data"))
+				)
+			)
+
 		NestedSet.validate_if_child_exists(self)
 		frappe.utils.nestedset.update_nsm(self)
 
