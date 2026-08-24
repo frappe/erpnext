@@ -14,6 +14,8 @@ erpnext.financial_statements = {
 		return get_filter_value("report_template") ? null : custom_format;
 	},
 
+	// NOTE: keep in sync with `get_xlsx_styles` in financial_report_engine.py —
+	// any style added, removed or changed here must be mirrored there, and vice versa.
 	formatter: function (value, row, column, data, default_formatter, filter) {
 		if (erpnext.financial_statements.is_blank_row(data)) return "";
 
