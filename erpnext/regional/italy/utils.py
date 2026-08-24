@@ -8,6 +8,7 @@ from frappe.utils.file_manager import remove_file
 
 from erpnext.controllers.taxes_and_totals import get_itemised_tax
 from erpnext.regional.italy import state_codes
+from erpnext.stock.get_item_details import NOT_APPLICABLE_TAX
 
 
 def update_itemised_tax_data(doc):
@@ -171,13 +172,20 @@ def get_invoice_summary(items, taxes):
 
 		# Check item tax rates if tax rate is zero.
 		if tax.rate == 0:
+			key = None
 			for item in items:
 				item_tax_rate = item.item_tax_rate
 				if isinstance(item.item_tax_rate, str):
 					item_tax_rate = json.loads(item.item_tax_rate)
 
 				if item_tax_rate and tax.account_head in item_tax_rate:
-					key = cstr(item_tax_rate[tax.account_head])
+					rate = item_tax_rate[tax.account_head]
+					if rate == NOT_APPLICABLE_TAX:
+						# the tax does not apply to this item, so the item belongs
+						# to another summary block and must not be counted here
+						continue
+
+					key = cstr(rate)
 					if key not in summary_data:
 						summary_data.setdefault(
 							key,
@@ -195,10 +203,15 @@ def get_invoice_summary(items, taxes):
 						summary_data[key]["tax_exemption_reason"] = tax.tax_exemption_reason
 						summary_data[key]["tax_exemption_law"] = tax.tax_exemption_law
 
-			if summary_data.get("0.0") and tax.charge_type in [
-				"On Previous Row Total",
-				"On Previous Row Amount",
-			]:
+			if (
+				key
+				and summary_data.get("0.0")
+				and tax.charge_type
+				in [
+					"On Previous Row Total",
+					"On Previous Row Amount",
+				]
+			):
 				summary_data[key]["taxable_amount"] = tax.total
 
 			if summary_data == {}:  # Implies that Zero VAT has not been set on any item.
