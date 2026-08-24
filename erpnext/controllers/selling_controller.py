@@ -215,7 +215,7 @@ class SellingController(StockController):
 		if not (0 <= self.commission_rate <= 100.0):
 			throw(
 				"{} {}".format(
-					_(self.meta.get_label("commission_rate")),
+					self.meta.get_translated_label("commission_rate"),
 					_("must be between 0 and 100"),
 				)
 			)
@@ -306,7 +306,7 @@ class SellingController(StockController):
 					bold(ref_rate_field),
 					bold("net rate"),
 					bold(rate),
-					bold(frappe.get_meta("Selling Settings").get_label("validate_selling_price")),
+					bold(frappe.get_meta("Selling Settings").get_translated_label("validate_selling_price")),
 					get_link_to_form("Selling Settings"),
 				),
 				title=_("Invalid Selling Price"),

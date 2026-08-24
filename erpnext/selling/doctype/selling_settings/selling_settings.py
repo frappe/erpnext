@@ -118,8 +118,10 @@ class SellingSettings(Document):
 				_(
 					"You have enabled {0} and {1} in {2}. This can lead to prices from the default price list being inserted into the transaction price list."
 				).format(
-					"<i>{}</i>".format(_(self.meta.get_label("fallback_to_default_price_list"))),
-					"<i>{}</i>".format(_(stock_meta.get_label("auto_insert_price_list_rate_if_missing"))),
+					"<i>{}</i>".format(self.meta.get_translated_label("fallback_to_default_price_list")),
+					"<i>{}</i>".format(
+						stock_meta.get_translated_label("auto_insert_price_list_rate_if_missing")
+					),
 					frappe.bold(_("Stock Settings")),
 				)
 			)

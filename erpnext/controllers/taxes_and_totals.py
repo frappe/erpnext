@@ -157,7 +157,7 @@ class calculate_taxes_and_totals:
 			validate_conversion_rate(
 				self.doc.currency,
 				self.doc.conversion_rate,
-				self.doc.meta.get_label("conversion_rate"),
+				self.doc.meta.get_translated_label("conversion_rate"),
 				self.doc.company,
 			)
 

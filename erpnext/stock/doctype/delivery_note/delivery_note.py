@@ -370,7 +370,7 @@ class DeliveryNote(SellingController):
 			if missing_label and missing_label != "No Label":
 				errors.append(
 					_("The field {0} in row {1} is not set").format(
-						frappe.bold(_(missing_label)), frappe.bold(item.idx)
+						frappe.bold(_(missing_label, context=item.doctype)), frappe.bold(item.idx)
 					)
 				)
 
