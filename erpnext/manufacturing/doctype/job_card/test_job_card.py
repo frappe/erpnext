@@ -2408,9 +2408,19 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertEqual(flt(fg_row.qty), 3.0)
 		me_b.submit()
 
-	def make_semi_fg_work_order(self, prefix, qty=5):
-		"""Two-operation semi FG work order: Op A makes the SFG from RM 1, final Op B
-		consumes it. Both operations skip material transfer; stock is pre-seeded."""
+	def test_semi_fg_job_card_transfer_keeps_completed_qty(self):
+		work_order = self.make_semi_fg_work_order("JC Transfer", skip_material_transfer=False)
+		job_card = self.get_semi_fg_job_card(work_order, "JC Transfer Op A")
+
+		transfer_entry = make_stock_entry_from_jc(job_card.name)
+		transfer_entry.submit()
+
+		job_card.reload()
+		self.assertEqual(transfer_entry.fg_completed_qty, job_card.for_quantity)
+		self.assertEqual(job_card.transferred_qty, job_card.for_quantity)
+
+	def make_semi_fg_work_order(self, prefix, qty=5, skip_material_transfer=True):
+		"""Create a two-operation semi-finished-goods Work Order with pre-seeded stock."""
 		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
 		from erpnext.stock.doctype.item.test_item import make_item
 
@@ -2443,7 +2453,7 @@ class TestJobCard(ERPNextTestSuite):
 			"time_in_mins": 60,
 			"source_warehouse": warehouse,
 			"fg_warehouse": warehouse,
-			"skip_material_transfer": 1,
+			"skip_material_transfer": skip_material_transfer,
 		}
 		operation2 = {
 			"operation": f"{prefix} Op B",
@@ -2455,7 +2465,7 @@ class TestJobCard(ERPNextTestSuite):
 			"time_in_mins": 60,
 			"source_warehouse": warehouse,
 			"fg_warehouse": warehouse,
-			"skip_material_transfer": 1,
+			"skip_material_transfer": skip_material_transfer,
 		}
 		make_workstation(operation1)
 		make_operation(operation1)

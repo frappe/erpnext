@@ -212,7 +212,7 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 			return False
 		if not self.wo_doc or not self.doc.fg_completed_qty:
 			return False
-		if self.doc.is_return or self.doc.is_additional_transfer_entry:
+		if self.doc.job_card or self.doc.is_return or self.doc.is_additional_transfer_entry:
 			return False
 		return not (self.wo_doc.operations and self.wo_doc.transfer_material_against == "Job Card")
 
