@@ -58,30 +58,70 @@ def make_supplier_quotation_from_rfq(
 @frappe.whitelist(methods=["POST"])
 def create_supplier_quotation(doc: str | Document | dict):
 	doc = frappe.parse_json(doc)
+	supplier = doc.get("supplier")
 
-	if frappe.session.user not in frappe.get_all(
-		"Portal User", {"parent": doc.get("supplier")}, pluck="user"
-	):
+	if frappe.session.user not in frappe.get_all("Portal User", {"parent": supplier}, pluck="user"):
 		frappe.throw(_("Not Permitted"), frappe.PermissionError)
+
+	validate_existing_supplier_quotation(supplier, doc.get("items"))
 
 	sq_doc = frappe.get_doc(
 		{
 			"doctype": "Supplier Quotation",
-			"supplier": doc.get("supplier"),
+			"supplier": supplier,
 			"terms": doc.get("terms"),
 			"company": doc.get("company"),
 			"currency": doc.get("currency")
-			or get_party_account_currency("Supplier", doc.get("supplier"), doc.get("company")),
+			or get_party_account_currency("Supplier", supplier, doc.get("company")),
 			"buying_price_list": doc.get("buying_price_list")
 			or frappe.db.get_single_value("Buying Settings", "buying_price_list"),
 		}
 	)
-	add_items(sq_doc, doc.get("supplier"), doc.get("items"))
+	add_items(sq_doc, supplier, doc.get("items"))
 	sq_doc.flags.ignore_permissions = True
 	sq_doc.run_method("set_missing_values")
 	sq_doc.save()
 	frappe.msgprint(_("Supplier Quotation {0} Created").format(sq_doc.name))
 	return sq_doc.name
+
+
+def validate_existing_supplier_quotation(supplier, items):
+	request_for_quotations = {item.get("parent") for item in items if item.get("parent")}
+	if not request_for_quotations:
+		return
+
+	rfq = frappe.qb.DocType("Request for Quotation")
+	(
+		frappe.qb.from_(rfq)
+		.select(rfq.name)
+		.where(rfq.name.isin(request_for_quotations))
+		.orderby(rfq.name)
+		.for_update()
+	).run()
+
+	sq = frappe.qb.DocType("Supplier Quotation")
+	sqi = frappe.qb.DocType("Supplier Quotation Item")
+	existing_quotation = (
+		frappe.qb.from_(sq)
+		.inner_join(sqi)
+		.on(sq.name == sqi.parent)
+		.select(sq.name, sqi.request_for_quotation)
+		.where(
+			(sq.docstatus < 2)
+			& (sq.supplier == supplier)
+			& (sqi.request_for_quotation.isin(request_for_quotations))
+		)
+		.limit(1)
+	).run(as_dict=True)
+
+	if existing_quotation:
+		existing_quotation = existing_quotation[0]
+		frappe.throw(
+			_("Supplier Quotation {0} already exists against Request for Quotation {1}").format(
+				frappe.bold(existing_quotation.name),
+				frappe.bold(existing_quotation.request_for_quotation),
+			)
+		)
 
 
 def add_items(sq_doc, supplier, items):
