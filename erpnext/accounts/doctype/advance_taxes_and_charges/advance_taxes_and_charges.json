@@ -21,12 +21,10 @@
   "rate",
   "section_break_9",
   "currency",
-  "net_amount",
   "tax_amount",
   "total",
   "allocated_amount",
   "column_break_13",
-  "base_net_amount",
   "base_tax_amount",
   "base_total"
  ],
@@ -183,22 +181,6 @@
    "fieldtype": "Link",
    "label": "Account Currency",
    "options": "Currency",
-   "read_only": 1
-  },
-  {
-   "description": "Basis for tax calculation",
-   "fieldname": "net_amount",
-   "fieldtype": "Currency",
-   "label": "Net Amount",
-   "options": "currency",
-   "read_only": 1
-  },
-  {
-   "description": "Basis for tax calculation",
-   "fieldname": "base_net_amount",
-   "fieldtype": "Currency",
-   "label": "Net Amount (Company Currency)",
-   "options": "Company:company:default_currency",
    "read_only": 1
   }
  ],
