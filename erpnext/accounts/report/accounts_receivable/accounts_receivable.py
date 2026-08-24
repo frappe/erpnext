@@ -193,7 +193,8 @@ class ReceivablePayableReport:
 
 		if (ple.voucher_type == ple.against_voucher_type and ple.voucher_no == ple.against_voucher_no) or (
 			ple.voucher_type in ("Payment Entry", "Journal Entry")
-			and ple.against_voucher_type in self.advance_payment_doctypes
+			and ple.against_voucher_type
+			in (*self.advance_payment_doctypes, "Sales Invoice", "Purchase Invoice")
 		):
 			self.voucher_balance[key].cost_center = ple.cost_center
 			self.voucher_balance[key].project = ple.project
