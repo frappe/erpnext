@@ -158,3 +158,141 @@ class TestTaxesAndTotals(FrappeTestCase):
 		self.assertEqual(so.rounding_adjustment, 0)
 		self.assertEqual(so.base_rounded_total, 0)
 		self.assertEqual(so.base_rounding_adjustment, 0)
+
+	def test_tax_net_amount_with_not_applicable_item_tax(self):
+		"""Each tax row records only the net of the items it actually applies to.
+
+		Two items of 100 each, one per template. Template A applies VAT 7 and
+		marks VAT 19 not applicable, template B does the reverse. Both tax rows
+		must report a net_amount of 100, not the full net total of 200.
+		"""
+		vat_7 = "_Test Account VAT - _TC"
+		vat_19 = "_Test Account Service Tax - _TC"
+
+		templates = {}
+		for title, rows in {
+			"_Test NA Template A": [(vat_7, 7, 0), (vat_19, 0, 1)],
+			"_Test NA Template B": [(vat_7, 0, 1), (vat_19, 19, 0)],
+		}.items():
+			doc = frappe.new_doc("Item Tax Template")
+			doc.title = title
+			doc.company = "_Test Company"
+			for tax_type, tax_rate, not_applicable in rows:
+				doc.append(
+					"taxes",
+					{"tax_type": tax_type, "tax_rate": tax_rate, "not_applicable": not_applicable},
+				)
+			templates[title] = doc.insert().name
+
+		so = make_sales_order(do_not_save=True)
+		so.items = []
+		for title in templates:
+			so.append(
+				"items",
+				{
+					"item_code": "_Test Item",
+					"qty": 1,
+					"rate": 100,
+					"warehouse": "_Test Warehouse - _TC",
+					"item_tax_template": templates[title],
+				},
+			)
+
+		so.set("taxes", [])
+		for account_head in (vat_7, vat_19):
+			so.append(
+				"taxes",
+				{
+					"charge_type": "On Net Total",
+					"account_head": account_head,
+					"description": account_head,
+					"rate": 0,
+					"cost_center": "_Test Cost Center - _TC",
+				},
+			)
+
+		so.save()
+
+		self.assertEqual(so.net_total, 200.0)
+		self.assertEqual(so.taxes[0].net_amount, 100.0)
+		self.assertEqual(so.taxes[0].tax_amount, 7.0)
+		self.assertEqual(so.taxes[1].net_amount, 100.0)
+		self.assertEqual(so.taxes[1].tax_amount, 19.0)
+
+	def test_inclusive_tax_with_not_applicable_item_tax(self):
+		"""An inclusive tax row meeting an item that marks it not applicable must
+		contribute no fraction, instead of raising in get_current_tax_fraction."""
+		vat_19 = "_Test Account Service Tax - _TC"
+
+		template = frappe.new_doc("Item Tax Template")
+		template.title = "_Test NA Template Inclusive"
+		template.company = "_Test Company"
+		template.append("taxes", {"tax_type": vat_19, "tax_rate": 0, "not_applicable": 1})
+		template.insert()
+
+		so = make_sales_order(do_not_save=True)
+		so.items = []
+		so.append(
+			"items",
+			{
+				"item_code": "_Test Item",
+				"qty": 1,
+				"rate": 119,
+				"warehouse": "_Test Warehouse - _TC",
+				"item_tax_template": template.name,
+			},
+		)
+		so.set("taxes", [])
+		so.append(
+			"taxes",
+			{
+				"charge_type": "On Net Total",
+				"account_head": vat_19,
+				"description": vat_19,
+				"rate": 19,
+				"included_in_print_rate": 1,
+				"cost_center": "_Test Cost Center - _TC",
+			},
+		)
+
+		so.save()
+
+		# the tax does not apply, so nothing is backed out of the printed rate
+		self.assertEqual(so.net_total, 119.0)
+		self.assertEqual(so.taxes[0].tax_amount, 0.0)
+		self.assertEqual(so.taxes[0].net_amount, 0.0)
+		self.assertEqual(so.grand_total, 119.0)
+
+	def test_tax_net_amount_survives_grand_total_discount(self):
+		"""A discount on Grand Total re-runs the calculation with
+		discount_amount_applied set. net_amount is reset on that second pass, so
+		it has to be accumulated there too instead of being left at zero."""
+		so = make_sales_order(do_not_save=True)
+		so.items = []
+		so.append(
+			"items",
+			{
+				"item_code": "_Test Item",
+				"qty": 10,
+				"rate": 100,
+				"warehouse": "_Test Warehouse - _TC",
+			},
+		)
+		so.set("taxes", [])
+		so.append(
+			"taxes",
+			{
+				"charge_type": "On Net Total",
+				"account_head": "_Test Account VAT - _TC",
+				"description": "VAT",
+				"rate": 19,
+				"cost_center": "_Test Cost Center - _TC",
+			},
+		)
+		so.apply_discount_on = "Grand Total"
+		so.discount_amount = 100
+
+		calculate_taxes_and_totals(so)
+
+		self.assertEqual(so.taxes[0].net_amount, so.net_total)
+		self.assertEqual(so.grand_total, 1090.0)
