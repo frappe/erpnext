@@ -327,8 +327,8 @@ class TestJobCard(ERPNextTestSuite):
 
 		job_card.reload()
 
-		self.assertEqual(transfer_entry_1.fg_completed_qty, 2)
-		self.assertEqual(job_card.transferred_qty, 2)
+		self.assertEqual(transfer_entry_1.fg_completed_qty, 0)
+		self.assertEqual(job_card.transferred_qty, 0)
 
 		# transfer second RM
 		transfer_entry_2 = make_stock_entry_from_jc(job_card_name)
@@ -336,9 +336,24 @@ class TestJobCard(ERPNextTestSuite):
 		transfer_entry_2.insert()
 		transfer_entry_2.submit()
 
-		# 'For Quantity' here will be 0 since
-		# transfer was made for 2 fg qty in first transfer Stock Entry
-		self.assertEqual(transfer_entry_2.fg_completed_qty, 0)
+		self.assertEqual(transfer_entry_2.fg_completed_qty, 2)
+		job_card.reload()
+		self.assertEqual(job_card.transferred_qty, 2)
+
+	def test_job_card_partial_material_transfer_qty(self):
+		self.transfer_material_against = "Job Card"
+		self.source_warehouse = "Stores - _TC"
+		self.generate_required_stock(self.work_order)
+
+		job_card = frappe.get_last_doc("Job Card", {"work_order": self.work_order.name})
+		transfer_entry = make_stock_entry_from_jc(job_card.name)
+		for row in transfer_entry.items:
+			row.qty /= 2
+		transfer_entry.submit()
+
+		job_card.reload()
+		self.assertEqual(transfer_entry.fg_completed_qty, 1)
+		self.assertEqual(job_card.transferred_qty, 1)
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"job_card_excess_transfer": 1})
 	def test_job_card_excess_material_transfer(self):
