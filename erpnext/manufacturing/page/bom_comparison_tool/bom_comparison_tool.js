@@ -95,7 +95,7 @@ erpnext.BOMComparisonTool = class BOMComparisonTool {
 					let [fieldname, value1, value2] = change;
 					return `
 						<tr>
-							<td>${frappe.meta.get_label(doctype, fieldname)}</td>
+							<td>${frappe.meta.get_translated_label(doctype, fieldname)}</td>
 							<td>${frappe.utils.escape_html(cstr(value1))}</td>
 							<td>${frappe.utils.escape_html(cstr(value2))}</td>
 						</tr>
@@ -146,7 +146,7 @@ erpnext.BOMComparisonTool = class BOMComparisonTool {
 								return `
 						<tr>
 							${th}
-							<td>${frappe.meta.get_label(child_doctype, fieldname)}</td>
+							<td>${frappe.meta.get_translated_label(child_doctype, fieldname)}</td>
 							<td>${frappe.utils.escape_html(cstr(value1))}</td>
 							<td>${frappe.utils.escape_html(cstr(value2))}</td>
 						</tr>

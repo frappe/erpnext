@@ -45,7 +45,7 @@ frappe.ready(function () {
 			dataType: "json",
 			data: {
 				cmd: "erpnext.templates.pages.projects.get_" + item + "_html",
-				project: "{{ doc.name }}",
+				project: frappe.utils.get_url_arg("project"),
 				item_status: item_status,
 			},
 			success: function (data) {
@@ -80,7 +80,7 @@ frappe.ready(function () {
 			dataType: "json",
 			data: {
 				cmd: "erpnext.templates.pages.projects.get_" + item + "_html",
-				project: "{{ doc.name }}",
+				project: frappe.utils.get_url_arg("project"),
 				start: start,
 				item_status: item_status,
 			},
@@ -96,7 +96,7 @@ frappe.ready(function () {
 
 	var close_item = function (item, item_name) {
 		var args = {
-			project: "{{ doc.name }}",
+			project: frappe.utils.get_url_arg("project"),
 			item_name: item_name,
 		};
 		frappe.call({

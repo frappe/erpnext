@@ -94,10 +94,15 @@ frappe.query_reports["Accounts Payable"] = {
 			options: get_party_type_options(),
 			on_change: function () {
 				frappe.query_report.set_filter_value("party", "");
-				frappe.query_report.toggle_filter_display(
-					"supplier_group",
-					frappe.query_report.get_filter_value("party_type") !== "Supplier"
-				);
+				let is_supplier = frappe.query_report.get_filter_value("party_type") === "Supplier";
+				let supplier_group_filter = frappe.query_report.get_filter("supplier_group");
+				if (supplier_group_filter) {
+					supplier_group_filter.df.hidden = !is_supplier;
+				}
+				frappe.query_report.toggle_filter_display("supplier_group", !is_supplier);
+				if (!is_supplier) {
+					frappe.query_report.set_filter_value("supplier_group", []);
+				}
 			},
 		},
 		{
@@ -234,20 +239,36 @@ function create_payment_entries_from_payable_report(report) {
 		return;
 	}
 
-	// build per-(supplier, party_account) summary to match backend grouping key
+	// validate against live state: only unpaid/partly-paid invoices with real outstanding are payable
+	frappe.call({
+		method: "erpnext.accounts.bulk_payment.get_payable_invoices",
+		args: { invoices: rows.map((r) => ({ voucher_no: r.voucher_no })) },
+		callback: ({ message }) => {
+			const { payable = [], excluded = [], currency } = message || {};
+			if (!payable.length) {
+				frappe.msgprint(__("None of the selected invoices are payable"));
+				return;
+			}
+			show_create_payment_entries_dialog(report, payable, excluded, currency);
+		},
+	});
+}
+
+function show_create_payment_entries_dialog(report, payable, excluded, currency) {
+	// group by (supplier, party_account) for the overview — matches the backend grouping key
 	const supplierMap = {};
-	for (const r of rows) {
-		const key = `${r.party}||${r.party_account}`;
+	for (const inv of payable) {
+		const key = `${inv.supplier}||${inv.party_account}`;
 		if (!supplierMap[key]) {
 			supplierMap[key] = {
-				supplier: r.party,
-				party_account: r.party_account,
+				supplier: inv.supplier,
+				party_account: inv.party_account,
 				count: 0,
 				outstanding: 0,
 			};
 		}
 		supplierMap[key].count += 1;
-		supplierMap[key].outstanding += r.outstanding || 0;
+		supplierMap[key].outstanding += inv.outstanding || 0;
 	}
 
 	const overviewFields = [
@@ -284,24 +305,36 @@ function create_payment_entries_from_payable_report(report) {
 		},
 	];
 
+	const fields = [];
+	if (excluded.length) {
+		fields.push({ fieldtype: "HTML", fieldname: "excluded_note", options: excluded_note_html(excluded) });
+	}
+	fields.push({
+		fieldname: "supplier_overview",
+		fieldtype: "Table",
+		label: __("Supplier Overview"),
+		cannot_add_rows: true,
+		cannot_delete_rows: true,
+		fields: overviewFields,
+		data: Object.values(supplierMap).map((d) => ({
+			supplier: d.supplier,
+			party_account: d.party_account,
+			invoices: d.count,
+			payable_amount: d.outstanding,
+		})),
+	});
+
+	const pe_count = Object.keys(supplierMap).length;
+	const grand_total = Object.values(supplierMap).reduce((sum, d) => sum + d.outstanding, 0);
+	fields.push({
+		fieldtype: "HTML",
+		fieldname: "summary_footer",
+		options: summary_footer_html(pe_count, grand_total, currency),
+	});
+
 	const dialog = new frappe.ui.Dialog({
 		title: __("Create Payment Entries"),
-		fields: [
-			{
-				fieldname: "supplier_overview",
-				fieldtype: "Table",
-				label: __("Supplier Overview"),
-				cannot_add_rows: true,
-				cannot_delete_rows: true,
-				fields: overviewFields,
-				data: Object.values(supplierMap).map((d) => ({
-					supplier: d.supplier,
-					party_account: d.party_account,
-					invoices: d.count,
-					payable_amount: d.outstanding,
-				})),
-			},
-		],
+		fields: fields,
 		primary_action_label: __("Create"),
 		secondary_action_label: __("Cancel"),
 		secondary_action() {
@@ -311,38 +344,57 @@ function create_payment_entries_from_payable_report(report) {
 		primary_action() {
 			dialog.hide();
 
-			const groupedKeys = new Set(
-				Object.values(supplierMap)
-					.filter((d) => d.count > 1)
-					.map((d) => `${d.supplier}||${d.party_account}`)
-			);
-
-			const grouped_invoices = [];
-			const ungrouped_invoices = [];
-			for (const r of rows) {
-				const payload = {
-					voucher_no: r.voucher_no,
-					supplier: r.party,
-					party_account: r.party_account,
-				};
-				(groupedKeys.has(`${r.party}||${r.party_account}`)
-					? grouped_invoices
-					: ungrouped_invoices
-				).push(payload);
-			}
+			// backend re-derives supplier/party_account and grouping from live data
+			const invoices = payable.map((inv) => ({ voucher_no: inv.voucher_no }));
 
 			const clearSelection = () => report.datatable.rowmanager.checkAll(false);
 
 			frappe
 				.call({
 					method: "erpnext.accounts.bulk_payment.create_payment_entries",
-					args: { grouped_invoices, ungrouped_invoices },
+					args: { invoices },
 				})
 				.then(clearSelection)
 				.catch(clearSelection);
 		},
 	});
 	dialog.show();
+}
+
+function summary_footer_html(pe_count, grand_total, currency) {
+	return `<div style="
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-top: var(--margin-sm);
+			font-size: var(--text-sm);
+		">
+			<span class="text-muted">${__("Payment Entries are created as drafts for your review")}</span>
+			<span>${__("{0} Payment Entries", [pe_count])} ·
+				<strong>${format_currency(grand_total, currency)}</strong></span>
+		</div>`;
+}
+
+function excluded_note_html(excluded) {
+	const counts = {};
+	for (const e of excluded) {
+		counts[e.reason] = (counts[e.reason] || 0) + 1;
+	}
+	const summary = Object.entries(counts)
+		.map(([reason, n]) => `${n} ${reason}`)
+		.join(", ");
+	return `<div style="
+			background-color: var(--bg-yellow);
+			color: var(--text-on-yellow);
+			font-size: var(--text-sm);
+			border-radius: var(--border-radius);
+			padding: var(--padding-sm) var(--padding-md);
+			margin-bottom: var(--margin-sm);
+		">
+			<span style="font-weight: var(--weight-medium);">${__("{0} invoice(s) excluded", [
+				excluded.length,
+			])}</span>: ${frappe.utils.escape_html(summary)}
+		</div>`;
 }
 
 erpnext.utils.add_dimensions("Accounts Payable", 10);

@@ -163,6 +163,58 @@ class TestTransactionDeletionRecord(ERPNextTestSuite):
 				# Task should have company field set
 				self.assertIsNotNone(row.company_field, "Task should have company_field set after import")
 
+	def test_csv_import_tolerates_short_rows(self):
+		"""Test that CSV rows omitting trailing columns are imported with an auto-detected company_field"""
+		company = "_Test Company 7"
+
+		tdr = frappe.new_doc("Transaction Deletion Record")
+		tdr.company = company
+		tdr.insert()
+
+		# Row omits the trailing company_field and child_doctypes columns; csv.DictReader fills
+		# them with None, which used to raise on None.strip().
+		csv_content = "doctype_name,company_field,child_doctypes\nSales Invoice\n"
+		result = tdr.import_to_delete_template_method(csv_content)
+		tdr.reload()
+
+		self.assertEqual(result["imported"], 1)
+		self.assertEqual(len(tdr.doctypes_to_delete), 1)
+
+		row = tdr.doctypes_to_delete[0]
+		self.assertEqual(row.doctype_name, "Sales Invoice")
+		# company_field was not provided, so it should be auto-detected as "company"
+		self.assertEqual(row.company_field, "company")
+
+	def test_csv_import_all_skipped_rows_preserves_existing_to_delete_list(self):
+		"""Test that an all-skipped CSV import does not wipe an existing To Delete list"""
+		company = "_Test Company 7"
+		create_task(company)
+
+		tdr = frappe.new_doc("Transaction Deletion Record")
+		tdr.company = company
+		tdr.insert()
+		tdr.generate_to_delete_list()
+		tdr.reload()
+
+		original_doctype_names = [row.doctype_name for row in tdr.doctypes_to_delete]
+		self.assertGreater(len(original_doctype_names), 0)
+
+		protected_doctype = "DocType"
+		nonexistent_doctype = "Nonexistent Doctype For Import Test"
+		csv_content = (
+			"doctype_name,company_field,child_doctypes\n"
+			f"{protected_doctype},,\n"
+			f"{nonexistent_doctype},,\n"
+		)
+		result = tdr.import_to_delete_template_method(csv_content)
+
+		self.assertEqual(result["imported"], 0)
+		self.assertGreater(result["skipped"], 0)
+
+		tdr.reload()
+		self.assertEqual(len(tdr.doctypes_to_delete), len(original_doctype_names))
+		self.assertEqual([row.doctype_name for row in tdr.doctypes_to_delete], original_doctype_names)
+
 	def test_progress_tracking(self):
 		"""Test that deleted checkbox is marked when DocType deletion completes"""
 		company = "_Test Company 7"

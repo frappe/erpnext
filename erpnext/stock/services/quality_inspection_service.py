@@ -50,9 +50,25 @@ QI_OUTGOING_PURPOSES = (
 )
 
 
+SECONDARY_ITEM_PURPOSES = ("Manufacture", "Repack", "Disassemble")
+
+
+def is_inspection_exempt_secondary_row(doc, row) -> bool:
+	"""Whether the row is a secondary item on a document that produces secondary items."""
+	if not (row.get("secondary_item_type") or row.get("is_legacy_scrap_item")):
+		return False
+
+	if doc.doctype == "Stock Entry":
+		return doc.purpose in SECONDARY_ITEM_PURPOSES
+
+	return True
+
+
 def stock_entry_row_requires_inspection(purpose, row):
 	"""Check if this Stock Entry row need a Quality Inspection."""
-	if row.get("secondary_item_type") or row.get("is_legacy_scrap_item"):
+	if purpose in SECONDARY_ITEM_PURPOSES and (
+		row.get("secondary_item_type") or row.get("is_legacy_scrap_item")
+	):
 		return False
 	if purpose == "Manufacture":
 		return bool(row.is_finished_item)
@@ -88,7 +104,7 @@ class QualityInspectionService:
 			elif self.doc.doctype == "Stock Entry":
 				qi_required = stock_entry_row_requires_inspection(self.doc.purpose, row)
 
-			if row.get("secondary_item_type") or row.get("is_legacy_scrap_item"):
+			if is_inspection_exempt_secondary_row(self.doc, row):
 				continue
 
 			if qi_required:  # validate row only if inspection is required on item level

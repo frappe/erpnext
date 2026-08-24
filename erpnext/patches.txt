@@ -504,3 +504,13 @@ execute:frappe.db.set_single_value("Stock Settings", "use_inline_serial_batch_ed
 erpnext.patches.v16_0.recalculate_bins_for_production_plan_items
 erpnext.patches.v16_0.rename_ar_ap_ageing_filter
 erpnext.patches.v16_0.fix_subcontracting_titles
+erpnext.patches.v16_0.move_warehouse_defaults_to_company
+erpnext.patches.v16_0.backfill_repost_accounting_ledger_status
+erpnext.patches.v16_0.merge_seeded_item_group_root
+erpnext.patches.v16_0.set_stock_uom_in_job_card
+erpnext.patches.v16_0.set_work_order_requested_and_picked_qty
+erpnext.patches.v16_0.rename_italy_customer_name_fields
+erpnext.patches.v16_0.recalculate_purchase_receipt_billing_status
+erpnext.patches.v16_0.recalculate_mixed_purchase_receipt_billing_status
+erpnext.patches.v16_0.repair_work_order_material_transfer
+erpnext.patches.v16_0.remove_frappe_crm_custom_fields

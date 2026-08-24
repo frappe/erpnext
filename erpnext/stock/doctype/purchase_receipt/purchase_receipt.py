@@ -257,7 +257,7 @@ class PurchaseReceipt(BuyingController):
 		self.validate_cwip_accounts()
 		ProvisionalAccountingService(self).validate_provisional_expense_account()
 
-		self.check_for_on_hold_or_closed_status("Purchase Order", "purchase_order")
+		self.check_purchase_order_on_hold_or_close("purchase_order")
 
 		if getdate(self.posting_date) > getdate(nowdate()):
 			throw(_("Posting Date cannot be a future date"))
@@ -423,31 +423,10 @@ class PurchaseReceipt(BuyingController):
 						row.received_qty,
 					)
 
-	def check_next_docstatus(self):
-		submit_rv = frappe.get_all(
-			"Purchase Invoice Item",
-			filters={"purchase_receipt": self.name, "docstatus": 1},
-			fields=["parent"],
-			as_list=True,
-			limit=1,
-		)
-		if submit_rv:
-			frappe.throw(_("Purchase Invoice {0} is already submitted").format(submit_rv[0][0]))
-
 	def on_cancel(self):
 		super().on_cancel()
 
-		self.check_for_on_hold_or_closed_status("Purchase Order", "purchase_order")
-		# Check if Purchase Invoice has been submitted against current Purchase Order
-		submitted = frappe.get_all(
-			"Purchase Invoice Item",
-			filters={"purchase_receipt": self.name, "docstatus": 1},
-			fields=["parent"],
-			as_list=True,
-			limit=1,
-		)
-		if submitted:
-			frappe.throw(_("Purchase Invoice {0} is already submitted").format(submitted[0][0]))
+		self.check_purchase_order_on_hold_or_close("purchase_order")
 
 		self.update_prevdoc_status()
 		self.update_billing_status()

@@ -134,15 +134,15 @@ def get_data_without_qty_to_make(filters):
 	for row in raw_rows:
 		data.append(
 			{
-				"item": row[0],
-				"description": row[1],
-				"from_bom_no": row[2],
-				"qty_per_unit": fmt_qty(row[3]),
-				"available_qty": fmt_qty(row[4]),
+				"item": row.item_code,
+				"description": row.description,
+				"from_bom_no": row.from_bom_no,
+				"qty_per_unit": fmt_qty(row.qty_per_unit),
+				"available_qty": fmt_qty(row.available_qty),
 			}
 		)
 
-	min_producible = min((row[5] or 0) for row in raw_rows) if raw_rows else 0
+	min_producible = min((row.producible_qty or 0) for row in raw_rows) if raw_rows else 0
 	# blank spacer row
 	data.append({})
 
@@ -190,27 +190,14 @@ def batch_fetch_purchase_rates(bom_data):
 	}
 
 
-def get_bom_data(filters):
-	bom_item_table = "BOM Explosion Item" if filters.get("show_exploded_view") else "BOM Item"
-
-	bom_item = frappe.qb.DocType(bom_item_table)
+def get_stock_qty_by_item(filters):
+	"""One row per item_code, so joining it to BOM Item cannot multiply either side's sum."""
 	bin = frappe.qb.DocType("Bin")
 
 	query = (
-		frappe.qb.from_(bom_item)
-		.left_join(bin)
-		.on(bom_item.item_code == bin.item_code)
-		.select(
-			bom_item.item_code,
-			# non-grouped columns are constant per grouped item_code -> Max() keeps the GROUP BY valid
-			Max(bom_item.description).as_("description"),
-			Max(bom_item.parent).as_("from_bom_no"),
-			Sum(bom_item.qty_consumed_per_unit).as_("qty_per_unit"),
-			IfNull(Sum(bin.actual_qty), 0).as_("actual_qty"),
-		)
-		.where((bom_item.parent == filters.get("bom")) & (bom_item.parenttype == "BOM"))
-		.groupby(bom_item.item_code)
-		.orderby(Min(bom_item.idx))
+		frappe.qb.from_(bin)
+		.select(bin.item_code, Sum(bin.actual_qty).as_("actual_qty"))
+		.groupby(bin.item_code)
 	)
 
 	if filters.get("warehouse"):
@@ -233,30 +220,64 @@ def get_bom_data(filters):
 		else:
 			query = query.where(bin.warehouse == filters.get("warehouse"))
 
+	return query
+
+
+def get_bom_data(filters):
+	bom_item_table = "BOM Explosion Item" if filters.get("show_exploded_view") else "BOM Item"
+
+	bom_item = frappe.qb.DocType(bom_item_table)
+	stock_qty = get_stock_qty_by_item(filters).as_("stock_qty")
+
+	base = frappe.qb.from_(bom_item)
+	base = base.join(stock_qty) if filters.get("warehouse") else base.left_join(stock_qty)
+
+	query = (
+		base.on(bom_item.item_code == stock_qty.item_code)
+		.select(
+			bom_item.item_code,
+			# non-grouped columns are constant per grouped item_code -> Max() keeps the GROUP BY valid
+			Max(bom_item.parent).as_("from_bom_no"),
+			Sum(bom_item.qty_consumed_per_unit).as_("qty_per_unit"),
+			IfNull(Max(stock_qty.actual_qty), 0).as_("actual_qty"),
+		)
+		.where((bom_item.parent == filters.get("bom")) & (bom_item.parenttype == "BOM"))
+		.groupby(bom_item.item_code)
+		.orderby(Min(bom_item.idx))
+	)
+
 	data = query.run(as_dict=True)
 
+	# description belongs to a BOM line, not to the item, so a component listed more than once holds
+	# several values per group. Max() over text is a sort and the engines sort text differently
+	# (MariaDB folds case, PostgreSQL orders by byte value), so read it off one real line instead.
+	# For BOM Item that same line also supplies bom_no + is_phantom_item, which drive whether and
+	# which sub-BOM explode_phantom_boms recurses into and so must stay coherent with each other:
+	# the first line, upgraded to the first phantom line if any exists, so a phantom sub-BOM is never
+	# dropped just because a non-phantom line happens to be listed first.
+	fields = ["item_code", "description"]
 	if bom_item_table == "BOM Item":
-		# bom_no + is_phantom_item drive whether/which sub-BOM explode_phantom_boms recurses into, so
-		# they must come from the SAME BOM Item line. Aggregating each independently (Max) could pair a
-		# bom_no from one line with is_phantom_item from another when an item_code repeats in the BOM.
-		# Rows are grouped by item_code (one qty_per_unit total per component), so pick one coherent
-		# representative line: the first line, but upgrade to the first phantom line if any exists, so a
-		# phantom sub-BOM is never dropped just because a non-phantom line happens to be listed first.
-		representative = {}
-		for line in frappe.get_all(
-			"BOM Item",
-			filters={"parent": filters.get("bom"), "parenttype": "BOM"},
-			fields=["item_code", "bom_no", "is_phantom_item"],
-			order_by="idx",
-		):
-			existing = representative.get(line.item_code)
-			if existing is None or (line.is_phantom_item and not existing.is_phantom_item):
-				representative[line.item_code] = line
-		for row in data:
-			line = representative.get(row.item_code)
-			if line:
-				row.bom_no = line.bom_no
-				row.is_phantom_item = line.is_phantom_item
+		fields += ["bom_no", "is_phantom_item"]
+
+	representative = {}
+	for line in frappe.get_all(
+		bom_item_table,
+		filters={"parent": filters.get("bom"), "parenttype": "BOM"},
+		fields=fields,
+		order_by="idx",
+	):
+		existing = representative.get(line.item_code)
+		if existing is None or (line.get("is_phantom_item") and not existing.get("is_phantom_item")):
+			representative[line.item_code] = line
+
+	for row in data:
+		line = representative.get(row.item_code)
+		row.description = line.description if line else None
+		if bom_item_table == "BOM Item":
+			row.bom_no = line.bom_no if line else None
+			row.is_phantom_item = line.is_phantom_item if line else None
+
+	if bom_item_table == "BOM Item":
 		return explode_phantom_boms(data, filters)
 
 	return data
@@ -337,15 +358,37 @@ def get_producible_fg_items(filters):
 			BOM_ITEM.item_code,
 			# Sum() below makes this an aggregate query; the other columns are constant per grouped
 			# item_code -> Max() keeps them valid on postgres with the same value MySQL picked.
-			Max(BOM_ITEM.description).as_("description"),
+			# description is not: it belongs to the line, so it comes from a representative one below.
 			Max(BOM_ITEM.parent).as_("from_bom_no"),
 			Max(BOM_ITEM.stock_qty / BOM.quantity).as_("qty_per_unit"),
 			Max(IfNull(bin_subquery.actual_qty, 0)).as_("available_qty"),
-			Floor(Max(bin_subquery.actual_qty) / ((Sum(BOM_ITEM.stock_qty)) / Max(BOM.quantity))),
+			Floor(Max(bin_subquery.actual_qty) / ((Sum(BOM_ITEM.stock_qty)) / Max(BOM.quantity))).as_(
+				"producible_qty"
+			),
 		)
 		.where((BOM_ITEM.parent == filters.get("bom")) & (BOM_ITEM.parenttype == "BOM"))
 		.groupby(BOM_ITEM.item_code)
 		.orderby(Min(BOM_ITEM.idx))
 	)
 
-	return query.run(as_list=True)
+	rows = query.run(as_dict=True)
+	descriptions = get_representative_descriptions("BOM Item", filters.get("bom"))
+	for row in rows:
+		row.description = descriptions.get(row.item_code)
+
+	return rows
+
+
+def get_representative_descriptions(doctype, bom):
+	"""First line by idx per item_code. description belongs to a line, not an item, so aggregating it
+	sorts text -- and MariaDB folds case while PostgreSQL orders by byte value."""
+	descriptions = {}
+	for line in frappe.get_all(
+		doctype,
+		filters={"parent": bom, "parenttype": "BOM"},
+		fields=["item_code", "description"],
+		order_by="idx",
+	):
+		descriptions.setdefault(line.item_code, line.description)
+
+	return descriptions

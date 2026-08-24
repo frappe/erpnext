@@ -32,18 +32,7 @@ class BOMConfigurator {
 	}
 
 	bind_events() {
-		frappe.views.trees["BOM Configurator"].events = {
-			frm: this.frm,
-			add_item: this.add_item,
-			add_sub_assembly: this.add_sub_assembly,
-			set_query_for_workstation: this.set_query_for_workstation,
-			get_sub_assembly_modal_fields: this.get_sub_assembly_modal_fields,
-			convert_to_sub_assembly: this.convert_to_sub_assembly,
-			delete_node: this.delete_node,
-			edit_bom: this.edit_bom,
-			load_tree: this.load_tree,
-			set_default_qty: this.set_default_qty,
-		};
+		frappe.views.trees["BOM Configurator"].events = this;
 	}
 
 	tree_options() {

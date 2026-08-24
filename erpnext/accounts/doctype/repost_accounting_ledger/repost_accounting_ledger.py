@@ -7,7 +7,14 @@ import frappe
 from frappe import _, qb
 from frappe.desk.form.linked_with import get_child_tables_of_doctypes
 from frappe.model.document import Document
+from frappe.utils.background_jobs import create_job_id, is_job_enqueued
 from frappe.utils.data import comma_and
+from frappe.utils.scheduler import is_scheduler_inactive
+
+# a batch has to finish well within the timeout of the job reposting it
+MAX_VOUCHERS_PER_REPOST = 50
+
+HANDLED_VOUCHER_STATUSES = ("Reposted", "Skipped")
 
 
 class RepostAccountingLedger(Document):
@@ -26,6 +33,11 @@ class RepostAccountingLedger(Document):
 		amended_from: DF.Link | None
 		company: DF.Link | None
 		delete_cancelled_entries: DF.Check
+		error_log: DF.Code | None
+		scheduled_job: DF.Link | None
+		status: DF.Literal[
+			"", "Queued", "In Progress", "Partially Reposted", "Completed", "Failed", "Cancelled"
+		]
 		vouchers: DF.Table[RepostAccountingLedgerItems]
 	# end: auto-generated types
 
@@ -35,6 +47,11 @@ class RepostAccountingLedger(Document):
 
 	def validate(self):
 		self.validate_vouchers()
+		self.validate_repost_preconditions()
+
+	def validate_repost_preconditions(self):
+		"""The checks a repost queued days ago could have outlived, re-run before it touches
+		the ledger. Vouchers cancelled since are skipped one by one while reposting."""
 		self.validate_for_closed_fiscal_year()
 		self.validate_for_deferred_accounting()
 
@@ -71,8 +88,52 @@ class RepostAccountingLedger(Document):
 						frappe.throw(_("Cannot Resubmit Ledger entries for vouchers in Closed fiscal year."))
 
 	def validate_vouchers(self):
-		if self.vouchers:
-			validate_docs_for_voucher_types([x.voucher_type for x in self.vouchers])
+		if not self.vouchers:
+			frappe.throw(_("Add atleast one voucher to repost."))
+
+		if len(self.vouchers) > MAX_VOUCHERS_PER_REPOST:
+			frappe.throw(
+				_("Cannot repost more than {0} vouchers at once. Split them into multiple documents.").format(
+					MAX_VOUCHERS_PER_REPOST
+				)
+			)
+
+		validate_docs_for_voucher_types([x.voucher_type for x in self.vouchers])
+
+		self.validate_no_duplicate_vouchers()
+		self.validate_vouchers_are_submitted()
+
+	def validate_no_duplicate_vouchers(self):
+		vouchers = [(x.voucher_type, x.voucher_no) for x in self.vouchers]
+
+		if len(vouchers) != len(set(vouchers)):
+			frappe.throw(_("Duplicate vouchers found. Remove the duplicate vouchers to continue to repost."))
+
+	def validate_vouchers_are_submitted(self):
+		voucher_type_wise_map = {}
+		for d in self.vouchers:
+			voucher_type_wise_map.setdefault(d.voucher_type, [])
+			voucher_type_wise_map[d.voucher_type].append(d.voucher_no)
+
+		non_submitted_vouchers = []
+		for key in voucher_type_wise_map.keys():
+			non_submitted_vouchers.extend(
+				frappe.get_all(
+					key,
+					filters={"name": ["in", voucher_type_wise_map[key]], "docstatus": ["!=", 1]},
+					pluck="name",
+				)
+			)
+
+		if non_submitted_vouchers:
+			frappe.throw(
+				_("The following vouchers are not submitted: {0}").format(
+					comma_and(non_submitted_vouchers, add_quotes=True)
+				)
+			)
+
+	def on_discard(self):
+		self.db_set("status", "Cancelled")
 
 	def get_existing_ledger_entries(self):
 		vouchers = [x.voucher_no for x in self.vouchers]
@@ -137,80 +198,245 @@ class RepostAccountingLedger(Document):
 		return rendered_page
 
 	def on_submit(self):
-		if len(self.vouchers) > 5:
-			job_name = "repost_accounting_ledger_" + self.name
-			frappe.enqueue(
-				method="erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger.start_repost",
-				account_repost_doc=self.name,
-				is_async=True,
-				job_name=job_name,
-				enqueue_after_commit=True,
+		self.start_repost()
+
+	def before_cancel(self):
+		self._raise_error_if_reposting_in_progress()
+
+	def on_cancel(self):
+		self.db_set("status", "Cancelled")
+
+	def _raise_error_if_reposting_in_progress(self):
+		if self.scheduled_job and is_job_enqueued(_repost_job_id(self.name)):
+			frappe.throw(_("Reposting is still in progress in background."))
+
+	@frappe.whitelist()
+	def start_repost(self):
+		if self.docstatus != 1:
+			frappe.throw(_("Reposting can be started only for submitted document."))
+
+		# under a row lock, so two concurrent starts cannot both get past here
+		status = frappe.db.get_value(self.doctype, self.name, "status", for_update=True)
+		if status in ("Completed", "Cancelled"):
+			frappe.throw(_("Reposting cannot be started when status is {0}.").format(status))
+
+		# `Queued` and `In Progress` are held back by the job, not by the status: a worker that
+		# died leaves the status behind and the document has to stay restartable
+		self._raise_error_if_reposting_in_progress()
+
+		self.check_permission("write")
+
+		# workers pick up enqueued jobs whether or not the scheduler runs, so this is a warning
+		if is_scheduler_inactive():
+			frappe.msgprint(
+				_("Scheduler is inactive. Reposting will only run once background jobs are processed."),
+				alert=True,
+				indicator="orange",
 			)
-			frappe.msgprint(_("Repost has started in the background"))
-		else:
-			start_repost(self.name)
+
+		self.db_set({"status": "Queued", "scheduled_job": create_job_id(_repost_job_id(self.name))})
+		_enqueue_repost(self.name)
+		frappe.msgprint(_("Repost has started in the background"), alert=True, indicator="blue")
 
 
-@frappe.whitelist()
-def start_repost(account_repost_doc: str | None = None) -> None:
-	from erpnext.accounts.general_ledger import make_reverse_gl_entries
+def _repost_job_id(repost_doc_name: str) -> str:
+	"""Derived from the document, so a repost can only ever have one job."""
+	return f"repost_accounting_ledger::{repost_doc_name}"
+
+
+def _enqueue_repost(repost_doc_name: str) -> None:
+	"""Hand the repost to a background worker.
+
+	Tests run it in the foreground, inside their own transaction: documents edited after submit
+	repost themselves through `repost_accounting_entries`, and tests across apps assert on the
+	ledger right after doing so.
+	"""
+	frappe.enqueue(
+		method="erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger.repost",
+		repost_doc_name=repost_doc_name,
+		commit=not frappe.in_test,
+		queue="long",
+		timeout=1500,
+		job_id=_repost_job_id(repost_doc_name),
+		deduplicate=True,
+		enqueue_after_commit=True,
+		now=frappe.in_test,
+	)
+
+
+def _lock_vouchers(vouchers) -> dict:
+	"""Lock every voucher up front so a concurrent repost cannot touch the same GL entries.
+
+	Returns them keyed by voucher, so reposting does not load them again. These are file locks
+	under the site directory: they serialise nothing across hosts that do not share it, and a
+	worker killed outright leaves them behind until they expire.
+	"""
+	locked_docs = {}
+	try:
+		for x in vouchers:
+			doc = frappe.get_doc(x.voucher_type, x.voucher_no)
+			doc.lock()
+			locked_docs[(x.voucher_type, x.voucher_no)] = doc
+	except Exception:
+		for doc in locked_docs.values():
+			doc.unlock()
+		raise
+	return locked_docs
+
+
+def repost(repost_doc_name: str, commit: bool = True):
+	"""Repost every voucher of the document, one transaction at a time.
+
+	`commit` says whether this call owns the transaction. The background job does, and commits
+	after every voucher so progress survives a crash; a caller inside its own passes `False`.
+	"""
+	from erpnext.accounts.utils import _delete_accounting_ledger_entries, _delete_adv_pl_entries
 
 	frappe.flags.through_repost_accounting_ledger = True
-	if account_repost_doc:
-		repost_doc = frappe.get_doc("Repost Accounting Ledger", account_repost_doc)
-		repost_doc.check_permission("write")
 
-		if repost_doc.docstatus == 1:
-			# Prevent repost on invoices with deferred accounting
-			repost_doc.validate_for_deferred_accounting()
+	repost_doc = frappe.get_doc("Repost Accounting Ledger", repost_doc_name)
+	locked_docs = {}
 
-			for x in repost_doc.vouchers:
-				doc = frappe.get_doc(x.voucher_type, x.voucher_no)
+	try:
+		repost_doc.validate_repost_preconditions()
+
+		# a retry leaves the vouchers it is done with alone: they are not locked, not loaded
+		# and not reposted again
+		pending = [x for x in repost_doc.vouchers if x.status not in HANDLED_VOUCHER_STATUSES]
+		locked_docs = _lock_vouchers(pending)
+
+		repost_doc.db_set("status", "In Progress", commit=commit)
+
+		for position, x in enumerate(pending, start=1):
+			frappe.publish_progress(
+				position * 100 / len(pending),
+				doctype=repost_doc.doctype,
+				docname=repost_doc.name,
+				description=_("Reposting {0} {1}").format(x.voucher_type, x.voucher_no),
+			)
+
+			save_point = "reposting"
+			frappe.db.savepoint(save_point=save_point)
+			try:
+				doc = locked_docs[(x.voucher_type, x.voucher_no)]
+
+				if doc.docstatus == 2:
+					x.db_set({"status": "Skipped", "traceback": ""})
+					continue
 
 				if repost_doc.delete_cancelled_entries:
-					frappe.db.delete(
-						"GL Entry", filters={"voucher_type": doc.doctype, "voucher_no": doc.name}
-					)
-					frappe.db.delete(
-						"Payment Ledger Entry", filters={"voucher_type": doc.doctype, "voucher_no": doc.name}
-					)
-					frappe.db.delete(
-						"Advance Payment Ledger Entry",
-						filters={"voucher_type": doc.doctype, "voucher_no": doc.name},
-					)
+					_delete_accounting_ledger_entries(doc.doctype, doc.name)
+					_delete_adv_pl_entries(doc.doctype, doc.name)
 
-				if doc.doctype in ["Sales Invoice", "Purchase Invoice"]:
-					if not repost_doc.delete_cancelled_entries:
-						doc.docstatus = 2
-						doc.make_gl_entries_on_cancel(from_repost=True)
+				_repost_vouchers(doc, repost_doc.delete_cancelled_entries)
+			except Exception:
+				frappe.db.rollback(save_point=save_point)
 
-					doc.docstatus = 1
-					if doc.doctype == "Sales Invoice":
-						doc.force_set_against_income_account()
-					else:
-						doc.force_set_against_expense_account()
-					doc.make_gl_entries()
+				x.db_set({"status": "Failed", "traceback": frappe.get_traceback()})
+			else:
+				x.db_set({"status": "Reposted", "traceback": ""})
+			finally:
+				if commit:
+					frappe.db.commit()  # nosemgrep
 
-				elif doc.doctype == "Purchase Receipt":
-					if not repost_doc.delete_cancelled_entries:
-						doc.docstatus = 2
-						doc.make_gl_entries_on_cancel(from_repost=True)
+	except Exception:
+		if commit:
+			frappe.db.rollback()
 
-					doc.docstatus = 1
-					doc.make_gl_entries(from_repost=True)
+		_record_repost_failure(repost_doc, commit=commit)
+		raise
+	else:
+		repost_doc.db_set({"status": _derive_status(repost_doc), "error_log": ""}, notify=True)
+	finally:
+		for doc in locked_docs.values():
+			doc.unlock()
+		if commit:
+			frappe.db.commit()  # nosemgrep
 
-				elif doc.doctype in ["Payment Entry", "Journal Entry", "Expense Claim"]:
-					if not repost_doc.delete_cancelled_entries:
-						doc.make_gl_entries(1)
-					doc.make_gl_entries()
-				elif doc.doctype in frappe.get_hooks("repost_allowed_doctypes"):
-					if hasattr(doc, "make_gl_entries") and callable(doc.make_gl_entries):
-						if not repost_doc.delete_cancelled_entries:
-							if "cancel" in inspect.getfullargspec(doc.make_gl_entries):
-								doc.make_gl_entries(cancel=1)
-							else:
-								make_reverse_gl_entries(voucher_type=doc.doctype, voucher_no=doc.name)
-						doc.make_gl_entries()
+
+def _derive_status(repost_doc) -> str:
+	"""Vouchers are committed one by one, so the status follows what was actually handled."""
+	handled = sum(1 for voucher in repost_doc.vouchers if voucher.status in HANDLED_VOUCHER_STATUSES)
+
+	if handled == len(repost_doc.vouchers):
+		return "Completed"
+	elif handled == 0:
+		return "Failed"
+
+	return "Partially Reposted"
+
+
+def _record_repost_failure(repost_doc, commit=False) -> None:
+	"""Persist the traceback of a run that could not finish, without discarding its progress."""
+	# the traceback with frame locals goes to the Error Log, which is permissioned separately
+	traceback = frappe.get_traceback()
+
+	frappe.log_error(
+		title=_("Unable to Repost Accounting Ledger"),
+		reference_doctype=repost_doc.doctype,
+		reference_name=repost_doc.name,
+	)
+
+	frappe.db.set_value(
+		repost_doc.doctype, repost_doc.name, {"error_log": traceback, "status": _derive_status(repost_doc)}
+	)
+
+	if commit:
+		frappe.db.commit()
+
+
+def _repost_vouchers(doc, delete_cancelled_entries: bool | int | None):
+	if doc.doctype in ["Sales Invoice", "Purchase Invoice"]:
+		_repost_invoices(doc, delete_cancelled_entries)
+
+	elif doc.doctype == "Purchase Receipt":
+		_repost_purchase_receipt(doc, delete_cancelled_entries)
+
+	elif doc.doctype in ["Payment Entry", "Journal Entry"]:
+		_repost_pe_je(doc, delete_cancelled_entries)
+
+	elif doc.doctype in frappe.get_hooks("repost_allowed_doctypes"):
+		_repost_allowed_hook_doctypes(doc, delete_cancelled_entries)
+
+
+def _repost_invoices(invoice_doc, delete_cancelled_entries):
+	if not delete_cancelled_entries:
+		invoice_doc.docstatus = 2
+		invoice_doc.make_gl_entries_on_cancel(from_repost=True)
+
+	invoice_doc.docstatus = 1
+	if invoice_doc.doctype == "Sales Invoice":
+		invoice_doc.force_set_against_income_account()
+	else:
+		invoice_doc.force_set_against_expense_account()
+	invoice_doc.make_gl_entries()
+
+
+def _repost_purchase_receipt(receipt_doc, delete_cancelled_entries):
+	if not delete_cancelled_entries:
+		receipt_doc.docstatus = 2
+		receipt_doc.make_gl_entries_on_cancel(from_repost=True)
+
+	receipt_doc.docstatus = 1
+	receipt_doc.make_gl_entries(from_repost=True)
+
+
+def _repost_pe_je(entry_doc, delete_cancelled_entries):
+	if not delete_cancelled_entries:
+		entry_doc.make_gl_entries(cancel=1)
+	entry_doc.make_gl_entries()
+
+
+def _repost_allowed_hook_doctypes(repost_doc, delete_cancelled_entries: bool | int | None):
+	from erpnext.accounts.general_ledger import make_reverse_gl_entries
+
+	if hasattr(repost_doc, "make_gl_entries") and callable(repost_doc.make_gl_entries):
+		if not delete_cancelled_entries:
+			if "cancel" in inspect.getfullargspec(repost_doc.make_gl_entries).args:
+				repost_doc.make_gl_entries(cancel=1)
+			else:
+				make_reverse_gl_entries(voucher_type=repost_doc.doctype, voucher_no=repost_doc.name)
+		repost_doc.make_gl_entries()
 
 
 def get_allowed_types_from_settings(child_doc: bool = False):

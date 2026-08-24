@@ -3,17 +3,6 @@
 
 frappe.ui.form.on("Stock Settings", {
 	refresh: function (frm) {
-		let filters = function () {
-			return {
-				filters: {
-					is_group: 0,
-				},
-			};
-		};
-
-		frm.set_query("default_warehouse", filters);
-		frm.set_query("sample_retention_warehouse", filters);
-
 		if (!frm.naming_controller) frm.naming_controller = new frappe.ui.NamingSeriesController(frm);
 		const item_display = frm.doc.item_naming_by === "Naming Series";
 		const serial_and_batch_naming_display =

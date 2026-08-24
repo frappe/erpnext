@@ -72,6 +72,7 @@ class AccountsSettings(Document):
 		default_ageing_range: DF.Data | None
 		delete_linked_ledger_entries: DF.Check
 		determine_address_tax_category_from: DF.Literal["Billing Address", "Shipping Address"]
+		disable_include_dimensions: DF.Check
 		enable_accounting_dimensions: DF.Check
 		enable_common_party_accounting: DF.Check
 		enable_discounts_and_margin: DF.Check
@@ -203,8 +204,8 @@ class AccountsSettings(Document):
 		if self.add_taxes_from_item_tax_template and self.add_taxes_from_taxes_and_charges_template:
 			frappe.throw(
 				_("You cannot enable both the settings '{0}' and '{1}'.").format(
-					frappe.bold(_(self.meta.get_label("add_taxes_from_item_tax_template"))),
-					frappe.bold(_(self.meta.get_label("add_taxes_from_taxes_and_charges_template"))),
+					frappe.bold(self.meta.get_translated_label("add_taxes_from_item_tax_template")),
+					frappe.bold(self.meta.get_translated_label("add_taxes_from_taxes_and_charges_template")),
 				),
 				title=_("Auto Tax Settings Error"),
 			)

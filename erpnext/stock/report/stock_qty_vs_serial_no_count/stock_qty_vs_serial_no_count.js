@@ -2,6 +2,30 @@
 // For license information, please see license.txt
 
 frappe.query_reports["Stock Qty vs Serial No Count"] = {
+	onload: function (report) {
+		report.page.add_inner_button(__("Sync Serial No Status"), () => {
+			const warehouse = report.get_filter_value("warehouse");
+			if (!warehouse) {
+				frappe.msgprint(__("Please select a warehouse first."));
+				return;
+			}
+
+			frappe.confirm(
+				__(
+					"This will update the warehouse and status of Serial Nos counted in {0} to match the stock ledger. Continue?",
+					[warehouse.bold()]
+				),
+				() => {
+					frappe.call({
+						method: "erpnext.stock.report.stock_qty_vs_serial_no_count.stock_qty_vs_serial_no_count.sync_serial_no_status",
+						args: { warehouse: warehouse },
+						freeze: true,
+					});
+				}
+			);
+		});
+	},
+
 	filters: [
 		{
 			fieldname: "company",

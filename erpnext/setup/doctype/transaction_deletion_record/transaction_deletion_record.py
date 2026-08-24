@@ -510,15 +510,16 @@ class TransactionDeletionRecord(Document):
 		if "doctype_name" not in (reader.fieldnames or []):
 			frappe.throw(_("Invalid CSV format. Expected column: doctype_name"))
 
-		self.doctypes_to_delete = []
 		protected = _get_protected_doctypes_internal()
 
-		imported_count = 0
+		imported_rows = []
 		skipped = []
 
 		for row in reader:
-			doctype_name = row.get("doctype_name", "").strip()
-			company_field = row.get("company_field", "").strip() or None
+			# csv.DictReader fills absent trailing fields with None, so the dict.get default
+			# never fires: coerce to "" before stripping.
+			doctype_name = (row.get("doctype_name") or "").strip()
+			company_field = (row.get("company_field") or "").strip() or None
 
 			if not doctype_name:
 				continue
@@ -558,18 +559,24 @@ class TransactionDeletionRecord(Document):
 					details = self._get_to_delete_row_infos(doctype_name, db_company_fields[0])
 					import_company_field = db_company_fields[0]
 
-			self.append(
-				"doctypes_to_delete",
+			imported_rows.append(
 				{
 					"doctype_name": doctype_name,
 					"company_field": import_company_field,
 					"document_count": details["document_count"],
 					"child_doctypes": details["child_doctypes"],
-				},
+				}
 			)
-			imported_count += 1
 
-		self.save()
+		imported_count = len(imported_rows)
+
+		# Only replace the existing To Delete list once we have at least one valid row, so an
+		# all-invalid CSV does not silently wipe a previously generated list.
+		if imported_rows:
+			self.doctypes_to_delete = []
+			for imported_row in imported_rows:
+				self.append("doctypes_to_delete", imported_row)
+			self.save()
 
 		if skipped:
 			frappe.msgprint(

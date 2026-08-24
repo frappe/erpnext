@@ -12,6 +12,21 @@ $.extend(erpnext.queries, {
 		return { query: "erpnext.controllers.queries.lead_query" };
 	},
 
+	party: function (doc) {
+		return {
+			query: "erpnext.controllers.queries.party_query",
+			filters: { disabled: 0, company: doc.company },
+		};
+	},
+
+	customer: function (doc) {
+		return erpnext.queries.party(doc);
+	},
+
+	supplier: function (doc) {
+		return erpnext.queries.party(doc);
+	},
+
 	item: function (filters) {
 		var args = { query: "erpnext.controllers.queries.item_query" };
 		if (filters) args["filters"] = filters;
@@ -31,7 +46,7 @@ $.extend(erpnext.queries, {
 			cur_frm.scroll_to_field("customer");
 			frappe.show_alert({
 				message: __("Please set {0} first.", [
-					__(frappe.meta.get_label(doc.doctype, "customer", doc.name)),
+					frappe.meta.get_translated_label(doc.doctype, "customer", doc.name),
 				]),
 				indicator: "orange",
 			});
@@ -46,7 +61,11 @@ $.extend(erpnext.queries, {
 				cur_frm.scroll_to_field(frappe.dynamic_link.fieldname);
 				frappe.show_alert({
 					message: __("Please set {0} first.", [
-						__(frappe.meta.get_label(doc.doctype, frappe.dynamic_link.fieldname, doc.name)),
+						frappe.meta.get_translated_label(
+							doc.doctype,
+							frappe.dynamic_link.fieldname,
+							doc.name
+						),
 					]),
 					indicator: "orange",
 				});
@@ -64,7 +83,9 @@ $.extend(erpnext.queries, {
 
 	company_contact_query: function (doc) {
 		if (!doc.company) {
-			frappe.throw(__("Please set {0}", [__(frappe.meta.get_label(doc.doctype, "company", doc.name))]));
+			frappe.throw(
+				__("Please set {0}", [frappe.meta.get_translated_label(doc.doctype, "company", doc.name)])
+			);
 		}
 
 		return {
@@ -79,7 +100,11 @@ $.extend(erpnext.queries, {
 				cur_frm.scroll_to_field(frappe.dynamic_link.fieldname);
 				frappe.show_alert({
 					message: __("Please set {0} first.", [
-						__(frappe.meta.get_label(doc.doctype, frappe.dynamic_link.fieldname, doc.name)),
+						frappe.meta.get_translated_label(
+							doc.doctype,
+							frappe.dynamic_link.fieldname,
+							doc.name
+						),
 					]),
 					indicator: "orange",
 				});
@@ -100,7 +125,7 @@ $.extend(erpnext.queries, {
 			cur_frm.scroll_to_field("company");
 			frappe.show_alert({
 				message: __("Please set {0} first.", [
-					__(frappe.meta.get_label(doc.doctype, "company", doc.name)),
+					frappe.meta.get_translated_label(doc.doctype, "company", doc.name),
 				]),
 				indicator: "orange",
 			});
@@ -131,7 +156,7 @@ $.extend(erpnext.queries, {
 			cur_frm.scroll_to_field("supplier");
 			frappe.show_alert({
 				message: __("Please set {0} first.", [
-					__(frappe.meta.get_label(doc.doctype, "supplier", doc.name)),
+					frappe.meta.get_translated_label(doc.doctype, "supplier", doc.name),
 				]),
 				indicator: "orange",
 			});
@@ -145,7 +170,7 @@ $.extend(erpnext.queries, {
 			cur_frm.scroll_to_field("lead");
 			frappe.show_alert({
 				message: __("Please specify a {0} first.", [
-					__(frappe.meta.get_label(doc.doctype, "lead", doc.name)),
+					frappe.meta.get_translated_label(doc.doctype, "lead", doc.name),
 				]),
 				indicator: "orange",
 			});

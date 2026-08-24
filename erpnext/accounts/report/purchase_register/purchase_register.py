@@ -553,8 +553,8 @@ def get_invoice_tax_map(invoice_list, invoice_expense_map, expense_accounts, inc
 			else:
 				invoice_expense_map[d.parent][d.account_head] = flt(d.tax_amount)
 		else:
-			invoice_tax_map.setdefault(d.parent, frappe._dict()).setdefault(d.account_head, [])
-			invoice_tax_map[d.parent][d.account_head] = flt(d.tax_amount)
+			invoice_tax_map.setdefault(d.parent, frappe._dict()).setdefault(d.account_head, 0.0)
+			invoice_tax_map[d.parent][d.account_head] += flt(d.tax_amount)
 
 	return invoice_expense_map, invoice_tax_map
 

@@ -15,7 +15,7 @@ from frappe.utils.caching import request_cache
 from frappe.utils.nestedset import NestedSet
 from pypika.terms import ExistsCriterion
 
-from erpnext.stock import get_warehouse_account
+from erpnext.stock import get_warehouse_account, get_warehouse_account_map
 
 
 class Warehouse(NestedSet):
@@ -63,7 +63,7 @@ class Warehouse(NestedSet):
 
 	def onload(self):
 		if self.company and cint(frappe.db.get_value("Company", self.company, "enable_perpetual_inventory")):
-			account = self.account or get_warehouse_account(self)
+			account = self.account or get_warehouse_account(self, raise_error=False)
 
 			if account:
 				self.set_onload("account", account)
@@ -71,7 +71,27 @@ class Warehouse(NestedSet):
 		self.set_onload("stock_exists", self.check_if_sle_exists(non_cancelled_only=True))
 
 	def validate(self):
+		self.validate_inventory_account()
 		self.warn_about_multiple_warehouse_account()
+
+	def validate_inventory_account(self):
+		if (
+			not self.is_new()
+			or not self.company
+			or self.flags.ignore_inventory_account_validation
+			or not frappe.get_cached_value("Company", self.company, "enable_perpetual_inventory")
+		):
+			return
+
+		warehouse = frappe._dict(self.as_dict())
+		if not self.account and self.parent_warehouse:
+			parent_bounds = frappe.db.get_value(
+				"Warehouse", self.parent_warehouse, ["lft", "rgt"], as_dict=True
+			)
+			if parent_bounds:
+				warehouse.update(parent_bounds)
+
+		get_warehouse_account(warehouse)
 
 	def on_update(self):
 		self.update_nsm_model()
@@ -220,11 +240,19 @@ def get_child_warehouses(warehouse):
 
 def get_warehouses_based_on_account(account, company=None):
 	warehouses = []
+	warehouse_account_map = None
 	for d in frappe.get_all(
 		"Warehouse", fields=["name", "is_group"], filters={"account": account, "disabled": 0}
 	):
 		if d.is_group:
-			warehouses.extend(get_child_warehouses(d.name))
+			# Keep only children whose effective account matches; a child can override the group's account
+			if warehouse_account_map is None:
+				warehouse_account_map = get_warehouse_account_map(company)
+			warehouses.extend(
+				w
+				for w in get_child_warehouses(d.name)
+				if (warehouse_account_map.get(w) or {}).get("account") == account
+			)
 		else:
 			warehouses.append(d.name)
 

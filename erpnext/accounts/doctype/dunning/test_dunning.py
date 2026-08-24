@@ -123,6 +123,41 @@ class TestDunning(ERPNextTestSuite):
 		self.assertEqual(sales_invoice.status, "Overdue")
 		self.assertEqual(dunning.status, "Unresolved")
 
+	def test_payment_against_invoice_with_multiple_overdue_installments_in_dunning(self):
+		"""
+		When an invoice has more than one overdue installment, its Dunning holds one
+		Overdue Payment row per installment. Submitting a Payment Entry for the invoice
+		must resolve the Dunning without raising a TimestampMismatchError caused by the
+		same Dunning being loaded and saved more than once.
+		"""
+		create_payment_terms_template_for_dunning()
+		# Post far enough in the past that BOTH installments (5 and 10 credit days) are overdue.
+		sales_invoice = create_sales_invoice_against_cost_center(
+			posting_date=add_days(today(), -15),
+			qty=1,
+			rate=100,
+			do_not_submit=True,
+		)
+		sales_invoice.payment_terms_template = "_Test 50-50 for Dunning"
+		sales_invoice.submit()
+
+		dunning = create_dunning_from_sales_invoice(sales_invoice.name)
+		# Two overdue installments -> two overdue payment rows for the same invoice.
+		self.assertEqual(len(dunning.overdue_payments), 2)
+		dunning.submit()
+		self.assertEqual(dunning.status, "Unresolved")
+
+		# Pay the invoice in full. This previously raised TimestampMismatchError on the Dunning.
+		pe = get_payment_entry("Sales Invoice", sales_invoice.name)
+		pe.reference_no, pe.reference_date = "3", nowdate()
+		pe.insert()
+		pe.submit()
+
+		sales_invoice.reload()
+		dunning.reload()
+		self.assertEqual(sales_invoice.outstanding_amount, 0)
+		self.assertEqual(dunning.status, "Resolved")
+
 	def test_dunning_resolution_from_credit_note(self):
 		"""
 		Test that dunning is resolved when a credit note is issued against the original invoice.

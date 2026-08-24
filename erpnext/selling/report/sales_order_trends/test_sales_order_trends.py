@@ -31,11 +31,41 @@ class TestSalesOrderTrends(ERPNextTestSuite):
 		self.assertTrue(columns)
 		self.assertTrue(any("_Test Item" in [str(cell) for cell in row] for row in data))
 
+	def test_customer_labels_come_from_the_master_not_a_stored_snapshot(self):
+		"""territory and customer_name must be the Customer master's, not one order's snapshot.
+
+		Both are stored per transaction and editable, so historical orders can hold different values
+		for one customer. Aggregating them with Max() is a text sort, and MariaDB (case-folding) and
+		PostgreSQL (byte order) resolve it differently, so the two engines could label the same row
+		differently. The master's values are functionally dependent on the grouped customer, so they
+		are the same on both engines by construction.
+		"""
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+		from erpnext.selling.report.sales_order_trends.sales_order_trends import execute
+
+		make_sales_order(customer="_Test Customer", item_code="_Test Item", qty=3, rate=100)
+		so2 = make_sales_order(customer="_Test Customer", item_code="_Test Item", qty=2, rate=100)
+		frappe.db.set_value("Sales Order", so2.name, "territory", "_Test Territory Rest Of The World")
+
+		master_territory, master_name = frappe.db.get_value(
+			"Customer", "_Test Customer", ["territory", "customer_name"]
+		)
+
+		columns, data, _chart_none, _chart = execute(
+			{"company": "_Test Company", "period": "Monthly", "based_on": "Customer"}
+		)
+
+		self.assertTrue(columns)
+		customer_rows = [row for row in data if row[0] == "_Test Customer"]
+		self.assertEqual(len(customer_rows), 1)
+		self.assertEqual(customer_rows[0][1], master_name)
+		self.assertEqual(customer_rows[0][2], master_territory)
+
 	def test_customer_with_divergent_stored_territory_stays_one_row(self):
 		# territory (and customer_name) are stored per-transaction fields; historical sales docs can hold a
-		# different value for the same customer. trends groups by t1.customer only and aggregates these with
-		# Max(), so the report stays one row per customer on both MariaDB and Postgres. Grouping by territory
-		# (the pre-fix behaviour) would split the customer into two rows.
+		# different value for the same customer. The report reads both from the Customer master, so it stays
+		# one row per customer on both MariaDB and Postgres. Grouping by the stored territory would split
+		# the customer into two rows.
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 		from erpnext.selling.report.sales_order_trends.sales_order_trends import execute
 

@@ -68,7 +68,7 @@ frappe.query_reports["Serial No and Batch Traceability"] = {
 function getTraceabilityLink({ type, value, original_value, item_code, data, filter_values }) {
 	if (!value) return value;
 
-	const base_url = type === "batch_no" ? "/app/batch/" : "/app/serial-no/";
+	const link_doctype = type === "batch_no" ? "Batch" : "Serial No";
 	const filter_list = filter_values[type]; // either batches or serial_nos
 
 	let css_class = "ellipsis";
@@ -84,7 +84,10 @@ function getTraceabilityLink({ type, value, original_value, item_code, data, fil
 		css_class = data.direction === "Backward" ? "ellipsis text-success" : "ellipsis text-danger";
 	}
 
-	return `<a class="${css_class}" href="${base_url}${original_value}">${original_value}</a>`;
+	return `<a class="${css_class}" href="${frappe.utils.get_form_link(
+		link_doctype,
+		original_value
+	)}">${frappe.utils.escape_html(original_value)}</a>`;
 }
 
 function custom_formatter(value, row, column, data, default_formatter) {

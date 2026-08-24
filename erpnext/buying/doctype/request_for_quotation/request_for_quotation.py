@@ -13,6 +13,7 @@ from frappe.utils import get_url
 from frappe.utils.print_format import download_pdf
 from frappe.utils.user import get_user_fullname
 
+from erpnext.accounts.party import validate_party_frozen_disabled
 from erpnext.buying.utils import validate_for_items
 from erpnext.controllers.buying_controller import BuyingController
 
@@ -122,6 +123,8 @@ class RequestforQuotation(BuyingController):
 
 	def validate_supplier_list(self):
 		for d in self.suppliers:
+			validate_party_frozen_disabled(self.company, "Supplier", d.supplier)
+
 			prevent_rfqs = frappe.db.get_value("Supplier", d.supplier, "prevent_rfqs")
 			if prevent_rfqs:
 				standing = frappe.db.get_value("Supplier Scorecard", d.supplier, "status")
@@ -324,14 +327,14 @@ class RequestforQuotation(BuyingController):
 
 		message_template = self.mfs_html if self.use_html else self.message_for_supplier
 		# nosemgrep: frappe-semgrep-rules.rules.security.frappe-ssti
-		rendered_message = frappe.render_template(message_template, doc_args)
+		rendered_message = frappe.render_template(message_template, doc_args, restrict_globals=True)
 
 		subject_source = (
 			self.subject
 			or frappe.get_value("Email Template", self.email_template, "subject")
 			or _("Request for Quotation")
 		)
-		rendered_subject = frappe.render_template(subject_source, doc_args)
+		rendered_subject = frappe.render_template(subject_source, doc_args, restrict_globals=True)
 		if preview:
 			return {
 				"message": rendered_message,

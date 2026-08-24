@@ -521,8 +521,10 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 			)
 
 	def get_stock_variance_account(self, item):
-		"""For Standard Cost items the purchase-price-vs-standard difference is a Purchase Price
-		Variance; for all other items it keeps the existing behaviour (default expense account)."""
+		"""Return the account for stock valuation difference.
+		Standard Cost items use the Purchase Price Variance account. Other items use
+		the default expense account, falling back to the item expense account for
+		returns and the stock/asset received but not billed account for non-returns."""
 		from erpnext.stock.doctype.item_standard_cost.item_standard_cost import (
 			get_purchase_price_variance_account,
 		)
@@ -530,7 +532,25 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 
 		if item.item_code and get_valuation_method(item.item_code, self.doc.company) == "Standard Cost":
 			return get_purchase_price_variance_account(item.item_code, self.doc.company)
-		return self.doc.get_company_default("default_expense_account")
+
+		# 1. Primary choice: Company Default Expense / COGS Account
+		default_expense = self.doc.get_company_default("default_expense_account", ignore_validation=True)
+		if default_expense:
+			return default_expense
+
+		# 2. If default_expense_account is NOT set (Unconfigured):
+		# For returns, fall back to item.expense_account
+		if self.doc.is_return and item.expense_account:
+			return item.expense_account
+
+		# For non-returns, fall back to the clearing account used by Purchase Receipts.
+		stock_asset_rbnb = (
+			self.doc.get_company_default("asset_received_but_not_billed", ignore_validation=True)
+			if item.is_fixed_asset
+			else self.doc.get_company_default("stock_received_but_not_billed", ignore_validation=True)
+		)
+
+		return stock_asset_rbnb or item.expense_account
 
 	def make_stock_adjustment_entry(self, gl_entries, item, voucher_wise_stock_value, account_currency):
 		doc = self.doc

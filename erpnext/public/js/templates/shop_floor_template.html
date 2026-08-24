@@ -704,7 +704,7 @@
 							<div class="mes-job mes-job--next-up" data-sf-focusable data-kind="job">
 								<div class="mes-job-image">
 									{% if (slot.item_image) { %}
-										<img src="{{ slot.item_image }}" alt="">
+										<img src="{{ frappe.utils.escape_html(slot.item_image) }}" alt="">
 									{% } else { %}
 										<span class="mes-job-image-fallback">{{ frappe.get_abbr(slot.finished_good || slot.production_item, 2) }}</span>
 									{% } %}
@@ -715,7 +715,7 @@
 										{% if (slot.is_subcontracted) { %}
 											<span class="indicator-pill no-indicator-dot purple">{{ __("Subcontract") }}</span>
 										{% } %}
-										<a class="mes-job-id" href="/app/job-card/{{ slot.name }}">{{ slot.name }}</a>
+										<a class="mes-job-id" href="/app/job-card/{{ frappe.utils.escape_html(slot.name) }}">{{ slot.name }}</a>
 									</div>
 									<div class="mes-job-sub">
 										{{ slot.operation }} · {{ format_number(slot.for_quantity, null, 0) }} {{ slot.fg_uom || '' }}
@@ -724,11 +724,11 @@
 								</div>
 								<div class="mes-job-next-action">
 									{% if (slot._materials_ready) { %}
-										<button class="btn btn-primary mes-btn-start" data-job-card="{{ slot.name }}">
+										<button class="btn btn-primary mes-btn-start" data-job-card="{{ frappe.utils.escape_html(slot.name) }}">
 											{{ __("Start Job") }} &rarr;
 										</button>
 									{% } else { %}
-										<button class="btn btn-default mes-btn-transfer" data-job-card="{{ slot.name }}">
+										<button class="btn btn-default mes-btn-transfer" data-job-card="{{ frappe.utils.escape_html(slot.name) }}">
 											{{ __("Transfer Materials") }}
 										</button>
 									{% } %}
@@ -740,7 +740,7 @@
 									<div class="mes-job-body">
 										<div class="mes-job-image">
 											{% if (slot.item_image) { %}
-												<img src="{{ slot.item_image }}" alt="">
+												<img src="{{ frappe.utils.escape_html(slot.item_image) }}" alt="">
 											{% } else { %}
 												<span class="mes-job-image-fallback">{{ frappe.get_abbr(slot.finished_good || slot.production_item, 2) }}</span>
 											{% } %}
@@ -748,7 +748,7 @@
 										<div class="mes-job-info">
 											<div class="mes-job-title">{{ slot.finished_good || slot.production_item }}</div>
 											<div class="mes-job-meta">
-												<a class="mes-job-id" href="/app/job-card/{{ slot.name }}">{{ slot.name }}</a>
+												<a class="mes-job-id" href="/app/job-card/{{ frappe.utils.escape_html(slot.name) }}">{{ slot.name }}</a>
 												<span class="indicator-pill no-indicator-dot {{ slot.status_colour }}">{{ __(slot.status) }}</span>
 												{% if (slot.is_subcontracted) { %}
 													<span class="indicator-pill no-indicator-dot purple">{{ __("Subcontract") }}</span>
@@ -758,31 +758,31 @@
 												{% } else if (slot.qc && slot.qc.status === 'Rejected') { %}
 													<span class="indicator-pill no-indicator-dot red">{{ __("QC Rejected") }}</span>
 												{% } else if (slot.qc && slot.qc.required) { %}
-													<span class="indicator-pill no-indicator-dot orange mes-qc-pill" data-job-card="{{ slot.name }}" style="cursor: pointer;" title="{{ __("Run quality check") }}">{{ __("QC Required") }}</span>
+													<span class="indicator-pill no-indicator-dot orange mes-qc-pill" data-job-card="{{ frappe.utils.escape_html(slot.name) }}" style="cursor: pointer;" title="{{ __("Run quality check") }}">{{ __("QC Required") }}</span>
 												{% } else if (slot.qc && slot.qc.has_checklist) { %}
-													<span class="indicator-pill no-indicator-dot blue mes-qc-pill" data-job-card="{{ slot.name }}" style="cursor: pointer;" title="{{ __("Run quality check") }}">{{ __("QC Available") }}</span>
+													<span class="indicator-pill no-indicator-dot blue mes-qc-pill" data-job-card="{{ frappe.utils.escape_html(slot.name) }}" style="cursor: pointer;" title="{{ __("Run quality check") }}">{{ __("QC Available") }}</span>
 												{% } %}
 											</div>
 											<div class="mes-job-sub">
 												{{ slot.operation }} · {{ format_number(slot.total_completed_qty, null, 0) }}/{{ format_number(slot.for_quantity, null, 0) }} {{ slot.fg_uom || '' }}
-												{% if (slot.work_order) { %} · <a href="/app/work-order/{{ slot.work_order }}">{{ slot.work_order }}</a>{% } %}
+												{% if (slot.work_order) { %} · <a href="/app/work-order/{{ frappe.utils.escape_html(slot.work_order) }}">{{ slot.work_order }}</a>{% } %}
 											</div>
 										</div>
 									</div>
 									<div class="mes-job-controls">
-										<div class="mes-job-timer" data-job-card="{{ slot.name }}">
+										<div class="mes-job-timer" data-job-card="{{ frappe.utils.escape_html(slot.name) }}">
 											<span class="h">00</span><span class="colon">:</span><span class="m">00</span><span class="colon">:</span><span class="s">00</span>
 										</div>
 										<div class="mes-job-actions">
 											{% if (slot.is_paused) { %}
-												<button class="btn btn-primary btn-block mes-btn-resume" data-job-card="{{ slot.name }}">
+												<button class="btn btn-primary btn-block mes-btn-resume" data-job-card="{{ frappe.utils.escape_html(slot.name) }}">
 													{{ __("Resume Job") }}
 												</button>
 											{% } else { %}
-												<button class="btn btn-default mes-btn-pause" data-job-card="{{ slot.name }}">
+												<button class="btn btn-default mes-btn-pause" data-job-card="{{ frappe.utils.escape_html(slot.name) }}">
 													{{ __("Pause") }}
 												</button>
-												<button class="btn btn-primary mes-btn-end-session" data-job-card="{{ slot.name }}" data-qty="{{ slot.for_quantity }}">
+												<button class="btn btn-primary mes-btn-end-session" data-job-card="{{ frappe.utils.escape_html(slot.name) }}" data-qty="{{ slot.for_quantity }}">
 													{{ __("End Session") }}
 												</button>
 											{% } %}
@@ -800,7 +800,7 @@
 						{% var ready_n = slot.materials.filter((x) => x.status === 'ready').length; %}
 						{% var avail_n = slot.materials.filter((x) => x.status === 'available').length; %}
 						{% var short_n = slot.materials.filter((x) => x.status === 'short').length; %}
-						<div class="mes-materials-inline{{ short_n > 0 || avail_n > 0 ? ' is-open' : '' }}" data-job-card="{{ slot.name }}">
+						<div class="mes-materials-inline{{ short_n > 0 || avail_n > 0 ? ' is-open' : '' }}" data-job-card="{{ frappe.utils.escape_html(slot.name) }}">
 							<div class="mes-materials-summary">
 								<span class="mes-materials-summary-row">
 									<span class="mes-materials-summary-left">
@@ -814,7 +814,7 @@
 										</span>
 									</span>
 									{% if (slot.make_material_request && !slot._is_next_up) { %}
-										<button class="btn btn-default btn-sm mes-btn-transfer mes-materials-summary-btn" data-job-card="{{ slot.name }}" onclick="event.stopPropagation()">
+										<button class="btn btn-default btn-sm mes-btn-transfer mes-materials-summary-btn" data-job-card="{{ frappe.utils.escape_html(slot.name) }}" onclick="event.stopPropagation()">
 											{{ __("Transfer Materials") }}
 										</button>
 									{% } %}
@@ -843,7 +843,7 @@
 					{% } %}
 
 					{% if (slot && slot.instructions) { %}
-						<div class="mes-instructions-inline" data-job-card="{{ slot.name }}">
+						<div class="mes-instructions-inline" data-job-card="{{ frappe.utils.escape_html(slot.name) }}">
 							<div class="mes-instructions-summary">
 								<span class="mes-instructions-toggle">{{ frappe.utils.icon("es-line-down", "sm") }}</span>
 								<span>{{ __("Work Instructions") }}</span>
@@ -889,19 +889,19 @@
 				</div>
 				<div class="mes-row-item">
 					<div class="mes-row-image">
-						{% if (jc.item_image) { %}<img src="{{ jc.item_image }}" alt="">{% } else { %}<span class="mes-row-image-fallback">{{ frappe.get_abbr(jc.finished_good || jc.production_item, 2) }}</span>{% } %}
+						{% if (jc.item_image) { %}<img src="{{ frappe.utils.escape_html(jc.item_image) }}" alt="">{% } else { %}<span class="mes-row-image-fallback">{{ frappe.get_abbr(jc.finished_good || jc.production_item, 2) }}</span>{% } %}
 					</div>
-					<div class="mes-row-title" title="{{ jc.finished_good || jc.production_item }}">{{ jc.finished_good || jc.production_item }}</div>
+					<div class="mes-row-title" title="{{ frappe.utils.escape_html(jc.finished_good || jc.production_item) }}">{{ jc.finished_good || jc.production_item }}</div>
 				</div>
 				<div class="mes-row-operation">{{ jc.operation }}</div>
-				<div class="mes-row-id"><a href="/app/job-card/{{ jc.name }}">{{ jc.name }}</a></div>
+				<div class="mes-row-id"><a href="/app/job-card/{{ frappe.utils.escape_html(jc.name) }}">{{ jc.name }}</a></div>
 				<div class="mes-row-qty">
 					{{ format_number(jc.total_completed_qty, null, 0) }} / {{ format_number(jc.for_quantity, null, 0) }}
 					<span class="mes-row-qty-uom">{{ jc.fg_uom || '' }}</span>
 				</div>
 				<div class="mes-row-info"></div>
 				<div class="mes-row-action">
-					<button class="btn btn-default btn-sm mes-btn-submit" data-job-card="{{ jc.name }}">
+					<button class="btn btn-default btn-sm mes-btn-submit" data-job-card="{{ frappe.utils.escape_html(jc.name) }}">
 						{{ __("Submit") }}
 					</button>
 				</div>
@@ -930,19 +930,19 @@
 				</div>
 				<div class="mes-row-item">
 					<div class="mes-row-image">
-						{% if (jc.item_image) { %}<img src="{{ jc.item_image }}" alt="">{% } else { %}<span class="mes-row-image-fallback">{{ frappe.get_abbr(jc.finished_good || jc.production_item, 2) }}</span>{% } %}
+						{% if (jc.item_image) { %}<img src="{{ frappe.utils.escape_html(jc.item_image) }}" alt="">{% } else { %}<span class="mes-row-image-fallback">{{ frappe.get_abbr(jc.finished_good || jc.production_item, 2) }}</span>{% } %}
 					</div>
-					<div class="mes-row-title" title="{{ jc.finished_good || jc.production_item }}">{{ jc.finished_good || jc.production_item }}</div>
+					<div class="mes-row-title" title="{{ frappe.utils.escape_html(jc.finished_good || jc.production_item) }}">{{ jc.finished_good || jc.production_item }}</div>
 				</div>
 				<div class="mes-row-operation">{{ jc.operation }}</div>
-				<div class="mes-row-id"><a href="/app/job-card/{{ jc.name }}">{{ jc.name }}</a></div>
+				<div class="mes-row-id"><a href="/app/job-card/{{ frappe.utils.escape_html(jc.name) }}">{{ jc.name }}</a></div>
 				<div class="mes-row-qty">
 					{{ format_number(jc.total_completed_qty, null, 0) }} / {{ format_number(jc.for_quantity, null, 0) }}
 					<span class="mes-row-qty-uom">{{ jc.fg_uom || '' }}</span>
 				</div>
 				<div class="mes-row-info"></div>
 				<div class="mes-row-action">
-					<button class="btn btn-default btn-sm mes-btn-make-entry" data-job-card="{{ jc.name }}">
+					<button class="btn btn-default btn-sm mes-btn-make-entry" data-job-card="{{ frappe.utils.escape_html(jc.name) }}">
 						{{ __("Make Stock Entry") }}
 					</button>
 				</div>
@@ -972,12 +972,12 @@
 				</div>
 				<div class="mes-row-item">
 					<div class="mes-row-image">
-						{% if (jc.item_image) { %}<img src="{{ jc.item_image }}" alt="">{% } else { %}<span class="mes-row-image-fallback">{{ frappe.get_abbr(jc.finished_good || jc.production_item, 2) }}</span>{% } %}
+						{% if (jc.item_image) { %}<img src="{{ frappe.utils.escape_html(jc.item_image) }}" alt="">{% } else { %}<span class="mes-row-image-fallback">{{ frappe.get_abbr(jc.finished_good || jc.production_item, 2) }}</span>{% } %}
 					</div>
-					<div class="mes-row-title" title="{{ jc.finished_good || jc.production_item }}">{{ jc.finished_good || jc.production_item }}</div>
+					<div class="mes-row-title" title="{{ frappe.utils.escape_html(jc.finished_good || jc.production_item) }}">{{ jc.finished_good || jc.production_item }}</div>
 				</div>
 				<div class="mes-row-operation">{{ jc.operation }}</div>
-				<div class="mes-row-id"><a href="/app/job-card/{{ jc.name }}">{{ jc.name }}</a></div>
+				<div class="mes-row-id"><a href="/app/job-card/{{ frappe.utils.escape_html(jc.name) }}">{{ jc.name }}</a></div>
 				<div class="mes-row-qty">
 					{{ format_number(jc.for_quantity, null, 0) }}
 					<span class="mes-row-qty-uom">{{ jc.fg_uom || '' }}</span>
@@ -987,11 +987,11 @@
 				</div>
 				<div class="mes-row-action">
 					{% if (jc._materials_ready) { %}
-						<button class="btn btn-default btn-sm mes-btn-start" data-job-card="{{ jc.name }}">
+						<button class="btn btn-default btn-sm mes-btn-start" data-job-card="{{ frappe.utils.escape_html(jc.name) }}">
 							{{ __("Start") }}
 						</button>
 					{% } else { %}
-						<button class="btn btn-default btn-sm mes-btn-transfer" data-job-card="{{ jc.name }}">
+						<button class="btn btn-default btn-sm mes-btn-transfer" data-job-card="{{ frappe.utils.escape_html(jc.name) }}">
 							{{ __("Transfer") }}
 						</button>
 					{% } %}
@@ -1022,12 +1022,12 @@
 				</div>
 				<div class="mes-row-item">
 					<div class="mes-row-image">
-						{% if (jc.item_image) { %}<img src="{{ jc.item_image }}" alt="">{% } else { %}<span class="mes-row-image-fallback">{{ frappe.get_abbr(jc.finished_good || jc.production_item, 2) }}</span>{% } %}
+						{% if (jc.item_image) { %}<img src="{{ frappe.utils.escape_html(jc.item_image) }}" alt="">{% } else { %}<span class="mes-row-image-fallback">{{ frappe.get_abbr(jc.finished_good || jc.production_item, 2) }}</span>{% } %}
 					</div>
-					<div class="mes-row-title" title="{{ jc.finished_good || jc.production_item }}">{{ jc.finished_good || jc.production_item }}</div>
+					<div class="mes-row-title" title="{{ frappe.utils.escape_html(jc.finished_good || jc.production_item) }}">{{ jc.finished_good || jc.production_item }}</div>
 				</div>
 				<div class="mes-row-operation">{{ jc.operation }}</div>
-				<div class="mes-row-id"><a href="/app/job-card/{{ jc.name }}">{{ jc.name }}</a></div>
+				<div class="mes-row-id"><a href="/app/job-card/{{ frappe.utils.escape_html(jc.name) }}">{{ jc.name }}</a></div>
 				<div class="mes-row-qty">
 					{{ format_number(jc.total_completed_qty, null, 0) }} / {{ format_number(jc.for_quantity, null, 0) }}
 					<span class="mes-row-qty-uom">{{ jc.fg_uom || '' }}</span>
@@ -1060,12 +1060,12 @@
 				</div>
 				<div class="mes-row-item">
 					<div class="mes-row-image">
-						{% if (s.item_image) { %}<img src="{{ s.item_image }}" alt="">{% } else { %}<span class="mes-row-image-fallback">{{ frappe.get_abbr(s.finished_good || s.production_item, 2) }}</span>{% } %}
+						{% if (s.item_image) { %}<img src="{{ frappe.utils.escape_html(s.item_image) }}" alt="">{% } else { %}<span class="mes-row-image-fallback">{{ frappe.get_abbr(s.finished_good || s.production_item, 2) }}</span>{% } %}
 					</div>
-					<div class="mes-row-title" title="{{ s.finished_good || s.production_item }}">{{ s.finished_good || s.production_item }}</div>
+					<div class="mes-row-title" title="{{ frappe.utils.escape_html(s.finished_good || s.production_item) }}">{{ s.finished_good || s.production_item }}</div>
 				</div>
 				<div class="mes-row-operation">{{ s.operation }}</div>
-				<div class="mes-row-id"><a href="/app/job-card/{{ s.name }}">{{ s.name }}</a></div>
+				<div class="mes-row-id"><a href="/app/job-card/{{ frappe.utils.escape_html(s.name) }}">{{ s.name }}</a></div>
 				<div class="mes-row-qty">
 					{{ format_number(s.total_completed_qty, null, 0) }} / {{ format_number(s.for_quantity, null, 0) }}
 					{% if (cint(s.process_loss_qty) > 0) { %}<div class="mes-row-qty-sub">{{ __("Loss") }}: {{ format_number(s.process_loss_qty, null, 0) }}</div>{% } %}
