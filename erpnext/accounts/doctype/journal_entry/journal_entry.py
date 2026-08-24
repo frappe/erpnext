@@ -7,7 +7,8 @@ import json
 import frappe
 from frappe import _, msgprint, scrub
 from frappe.core.doctype.submission_queue.submission_queue import queue_submission
-from frappe.utils import comma_and, cstr, flt, fmt_money, formatdate, get_link_to_form, nowdate
+from frappe.model.document import Document
+from frappe.utils import comma_and, cstr, flt, fmt_money, formatdate, get_link_to_form, getdate, nowdate
 
 import erpnext
 from erpnext.accounts.deferred_revenue import get_deferred_booking_accounts
@@ -21,6 +22,7 @@ from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger 
 from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import (
 	get_party_tax_withholding_details,
 )
+from erpnext.accounts.general_ledger import validate_opening_entry_against_pcv
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.utils import (
 	cancel_exchange_gain_loss_journal,
@@ -123,6 +125,9 @@ class JournalEntry(AccountsController):
 		if not self.is_opening:
 			self.is_opening = "No"
 
+		if self.is_opening == "Yes":
+			validate_opening_entry_against_pcv(self.company)
+
 		self.clearance_date = None
 
 		self.validate_party()
@@ -150,7 +155,8 @@ class JournalEntry(AccountsController):
 
 		if self.docstatus == 0:
 			self.apply_tax_withholding()
-		if self.is_new() or not self.title:
+
+		if not self.title or (self.is_new() and self.amended_from):
 			self.title = self.get_title()
 
 	def validate_advance_accounts(self):
@@ -794,6 +800,23 @@ class JournalEntry(AccountsController):
 						)
 					)
 
+				if reference_type == "Purchase Invoice":
+					on_hold, release_date = frappe.db.get_value(
+						reference_type, reference_name, ["on_hold", "release_date"]
+					)
+
+					if not on_hold or (release_date and getdate(release_date) <= getdate(nowdate())):
+						continue
+
+					msg = (
+						_("{0} {1} is blocked and on hold until {2}.").format(
+							reference_type, reference_name, release_date
+						)
+						if release_date
+						else _("{0} {1} is blocked.").format(reference_type, reference_name)
+					)
+					frappe.throw(msg)
+
 	def set_against_account(self):
 		accounts_debited, accounts_credited = [], []
 		if self.voucher_type in ("Deferred Revenue", "Deferred Expense"):
@@ -1184,7 +1207,11 @@ class JournalEntry(AccountsController):
 		self.validate_total_debit_and_credit()
 
 	def get_values(self):
-		cond = f" and outstanding_amount <= {self.write_off_amount}" if flt(self.write_off_amount) > 0 else ""
+		cond = (
+			f" and outstanding_amount <= {flt(self.write_off_amount)}"
+			if flt(self.write_off_amount) > 0
+			else ""
+		)
 
 		if self.write_off_based_on == "Accounts Receivable":
 			return frappe.db.sql(
@@ -1866,7 +1893,21 @@ def make_inter_company_journal_entry(name, voucher_type, company):
 
 
 @frappe.whitelist()
-def make_reverse_journal_entry(source_name, target_doc=None):
+def make_reverse_journal_entry(source_name: str, target_doc: str | dict | Document | None = None) -> Document:
+	# `get_mapped_doc` checks this as well, but the guard below discloses which entry
+	# reverses which, so read access has to be settled before it runs
+	if not frappe.has_permission("Journal Entry", doc=source_name):
+		frappe.throw(_("Not permitted"), frappe.PermissionError)
+
+	reversal_of = frappe.db.get_value("Journal Entry", source_name, "reversal_of")
+	if reversal_of:
+		frappe.throw(
+			_("{0} is already a Reverse Journal Entry of {1}. Cancel it instead of reversing it.").format(
+				get_link_to_form("Journal Entry", source_name),
+				get_link_to_form("Journal Entry", reversal_of),
+			)
+		)
+
 	from frappe.model.mapper import get_mapped_doc
 
 	def post_process(source, target):

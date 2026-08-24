@@ -29,7 +29,8 @@ class TestCustomer(FrappeTestCase):
 			make_test_records("Item")
 
 	def tearDown(self):
-		set_credit_limit("_Test Customer", "_Test Company", 0)
+		if frappe.db.exists("Customer", "_Test Customer"):
+			set_credit_limit("_Test Customer", "_Test Company", 0)
 
 	def test_get_customer_group_details(self):
 		doc = frappe.new_doc("Customer Group")
@@ -66,7 +67,7 @@ class TestCustomer(FrappeTestCase):
 		doc.delete()
 
 	def test_party_details(self):
-		from erpnext.accounts.party import get_party_details
+		from erpnext.accounts.party import _get_party_details
 
 		to_check = {
 			"selling_price_list": None,
@@ -90,7 +91,7 @@ class TestCustomer(FrappeTestCase):
 			"Contact", "_Test Contact for _Test Customer-_Test Customer", "is_primary_contact", 1
 		)
 
-		details = get_party_details("_Test Customer")
+		details = _get_party_details("_Test Customer")
 
 		for key, value in to_check.items():
 			val = details.get(key)
@@ -100,13 +101,13 @@ class TestCustomer(FrappeTestCase):
 			self.assertEqual(value, val)
 
 	def test_party_details_tax_category(self):
-		from erpnext.accounts.party import get_party_details
+		from erpnext.accounts.party import _get_party_details
 
 		frappe.delete_doc_if_exists("Address", "_Test Address With Tax Category-Billing")
 		frappe.delete_doc_if_exists("Address", "_Test Address With Tax Category-Shipping")
 
 		# Tax Category without Address
-		details = get_party_details("_Test Customer With Tax Category")
+		details = _get_party_details("_Test Customer With Tax Category")
 		self.assertEqual(details.tax_category, "_Test Tax Category 1")
 
 		billing_address = frappe.get_doc(
@@ -140,13 +141,13 @@ class TestCustomer(FrappeTestCase):
 		# Tax Category from Billing Address
 		settings.determine_address_tax_category_from = "Billing Address"
 		settings.save()
-		details = get_party_details("_Test Customer With Tax Category")
+		details = _get_party_details("_Test Customer With Tax Category")
 		self.assertEqual(details.tax_category, "_Test Tax Category 2")
 
 		# Tax Category from Shipping Address
 		settings.determine_address_tax_category_from = "Shipping Address"
 		settings.save()
-		details = get_party_details("_Test Customer With Tax Category")
+		details = _get_party_details("_Test Customer With Tax Category")
 		self.assertEqual(details.tax_category, "_Test Tax Category 3")
 
 		# Rollback
@@ -385,6 +386,34 @@ class TestCustomer(FrappeTestCase):
 		self.assertEqual(first, "John")
 		self.assertEqual(middle, "Michael")
 		self.assertEqual(last, "Doe")
+
+	def test_portal_user_contact_link(self):
+		user_email = frappe.generate_hash() + "@example.com"
+		user = frappe.new_doc("User")
+		user.email = user_email
+		user.first_name = "Test Portal Customer User"
+		user.send_welcome_email = False
+		user.insert(ignore_permissions=True)
+
+		contact = frappe.new_doc("Contact")
+		contact.first_name = "Test Portal Customer User"
+		contact.add_email(user_email, is_primary=1)
+		contact.links = []
+		contact.insert(ignore_permissions=True)
+
+		customer = frappe.get_doc(
+			{
+				"doctype": "Customer",
+				"customer_name": "Test Portal Contact Customer",
+				"customer_type": "Individual",
+				"customer_group": "_Test Customer Group",
+			}
+		)
+		customer.append("portal_users", {"user": user.name})
+		customer.insert()
+
+		contact.reload()
+		self.assertTrue(contact.has_link("Customer", customer.name))
 
 
 def get_customer_dict(customer_name):

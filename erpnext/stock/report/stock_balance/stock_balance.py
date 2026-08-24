@@ -15,7 +15,11 @@ from frappe.utils.nestedset import get_descendants_of
 import erpnext
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
-from erpnext.stock.report.stock_ageing.stock_ageing import FIFOSlots, get_average_age
+from erpnext.stock.report.stock_ageing.stock_ageing import (
+	FIFOSlots,
+	get_average_age,
+	normalize_fifo_queue,
+)
 from erpnext.stock.utils import add_additional_uom_columns
 
 
@@ -96,8 +100,6 @@ class StockBalanceReport:
 			self.filters["show_warehouse_wise_stock"] = True
 			item_wise_fifo_queue = FIFOSlots(self.filters, self.sle_entries).generate()
 
-		_func = itemgetter(1)
-
 		del self.sle_entries
 
 		sre_details = self.get_sre_reserved_qty_details()
@@ -122,15 +124,7 @@ class StockBalanceReport:
 
 				stock_ageing_data = {"average_age": 0, "earliest_age": 0, "latest_age": 0}
 				if opening_fifo_queue:
-					fifo_queue = sorted(filter(_func, opening_fifo_queue), key=_func)
-					if not fifo_queue:
-						continue
-
-					to_date = self.to_date
-					stock_ageing_data["average_age"] = get_average_age(fifo_queue, to_date)
-					stock_ageing_data["earliest_age"] = date_diff(to_date, fifo_queue[0][1])
-					stock_ageing_data["latest_age"] = date_diff(to_date, fifo_queue[-1][1])
-					stock_ageing_data["fifo_queue"] = fifo_queue
+					stock_ageing_data.update(get_stock_ageing_data(opening_fifo_queue, self.to_date))
 
 				report_data.update(stock_ageing_data)
 
@@ -272,12 +266,13 @@ class StockBalanceReport:
 				qty_dict.opening_qty -= self.stock_reco_voucher_wise_count.get(entry.voucher_detail_no, 0)
 				qty_dict.bal_qty = 0.0
 				qty_diff = flt(entry.actual_qty)
+				value_diff = flt(entry.stock_value_difference)
 			else:
 				qty_diff = flt(entry.qty_after_transaction) - flt(qty_dict.bal_qty)
+				value_diff = flt(entry.stock_value) - flt(qty_dict.bal_val)
 		else:
 			qty_diff = flt(entry.actual_qty)
-
-		value_diff = flt(entry.stock_value_difference)
+			value_diff = flt(entry.stock_value_difference)
 
 		if entry.posting_date < self.from_date or entry.voucher_no in self.opening_vouchers.get(
 			entry.voucher_type, []
@@ -389,8 +384,9 @@ class StockBalanceReport:
 				sle.batch_no,
 				sle.serial_no,
 				sle.serial_and_batch_bundle,
-				sle.has_serial_no,
 				sle.voucher_detail_no,
+				item_table.has_serial_no,
+				item_table.has_batch_no,
 				item_table.item_group,
 				item_table.stock_uom,
 				item_table.item_name,
@@ -686,6 +682,21 @@ class StockBalanceReport:
 			row[1] = getdate(row[1])
 
 		return opening_fifo_queue
+
+
+def get_stock_ageing_data(fifo_queue: list, to_date: str) -> dict:
+	stock_ageing_data = {"average_age": 0, "earliest_age": 0, "latest_age": 0}
+	fifo_queue = sorted(filter(itemgetter(1), normalize_fifo_queue(fifo_queue)), key=itemgetter(1))
+
+	if not fifo_queue:
+		return stock_ageing_data
+
+	stock_ageing_data["average_age"] = get_average_age(fifo_queue, to_date)
+	stock_ageing_data["earliest_age"] = date_diff(to_date, fifo_queue[0][1])
+	stock_ageing_data["latest_age"] = date_diff(to_date, fifo_queue[-1][1])
+	stock_ageing_data["fifo_queue"] = fifo_queue
+
+	return stock_ageing_data
 
 
 def filter_items_with_no_transactions(

@@ -7,6 +7,7 @@ from frappe import _
 from frappe.utils import flt, getdate
 from pypika import Tuple
 
+from erpnext.accounts.report.utils import validate_mandatory_date_range
 from erpnext.accounts.utils import get_currency_precision
 
 
@@ -33,9 +34,7 @@ def execute(filters=None):
 
 def validate_filters(filters):
 	"""Validate if dates are properly set"""
-	filters = frappe._dict(filters or {})
-	if filters.from_date > filters.to_date:
-		frappe.throw(_("From Date must be before To Date"))
+	validate_mandatory_date_range(filters or {})
 
 
 def get_result(filters, tds_accounts, tax_category_map, net_total_map):

@@ -19,7 +19,8 @@
   "qty",
   "accounting_dimensions_section",
   "cost_center",
-  "dimension_col_break"
+  "dimension_col_break",
+  "project"
  ],
  "fields": [
   {
@@ -79,6 +80,7 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Outstanding Amount",
+   "options": "Company:company:default_currency",
    "reqd": 1
   },
   {
@@ -111,11 +113,17 @@
    "fieldname": "invoice_number",
    "fieldtype": "Data",
    "label": "Invoice Number"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2022-03-21 19:31:45.382656",
+ "modified": "2026-07-03 15:17:11.938499",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Opening Invoice Creation Tool Item",

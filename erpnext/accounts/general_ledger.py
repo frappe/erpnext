@@ -697,10 +697,17 @@ def make_reverse_gl_entries(
 			partial_cancel=partial_cancel,
 		)
 		validate_accounting_period(gl_entries)
-		check_freezing_date(gl_entries[0]["posting_date"], adv_adj)
 
 		is_opening = any(d.get("is_opening") == "Yes" for d in gl_entries)
-		validate_against_pcv(is_opening, gl_entries[0]["posting_date"], gl_entries[0]["company"])
+
+		if immutable_ledger_enabled:
+			validation_date = posting_date or frappe.form_dict.get("posting_date") or getdate()
+		else:
+			validation_date = posting_date if posting_date else gl_entries[0]["posting_date"]
+
+		check_freezing_date(validation_date, adv_adj)
+		validate_against_pcv(is_opening, validation_date, gl_entries[0]["company"])
+
 		if partial_cancel:
 			# Partial cancel is only used by `Advance` in separate account feature.
 			# Only cancel GL entries for unlinked reference using `voucher_detail_no`
@@ -765,7 +772,7 @@ def make_reverse_gl_entries(
 
 			if immutable_ledger_enabled:
 				new_gle["is_cancelled"] = 0
-				new_gle["posting_date"] = frappe.form_dict.get("posting_date") or getdate()
+				new_gle["posting_date"] = posting_date or frappe.form_dict.get("posting_date") or getdate()
 			elif posting_date:
 				new_gle["posting_date"] = posting_date
 
@@ -797,12 +804,23 @@ def check_freezing_date(posting_date, adv_adj=False):
 				)
 
 
-def validate_against_pcv(is_opening, posting_date, company):
-	if is_opening and frappe.db.exists("Period Closing Voucher", {"docstatus": 1, "company": company}):
+def validate_opening_entry_against_pcv(company):
+	if frappe.db.exists("Period Closing Voucher", {"docstatus": 1, "company": company}):
 		frappe.throw(
-			_("Opening Entry can not be created after Period Closing Voucher is created."),
+			_(
+				"A Period Closing Voucher is already submitted and an Opening Entry can no longer be created. {0} to learn more."
+			).format(
+				'<a href="https://docs.frappe.io/erpnext/period-closing-voucher#14-pcv-and-opening-entries" target="_blank" rel="noopener">'
+				+ _("Read the docs")
+				+ "</a>"
+			),
 			title=_("Invalid Opening Entry"),
 		)
+
+
+def validate_against_pcv(is_opening, posting_date, company):
+	if is_opening:
+		validate_opening_entry_against_pcv(company)
 
 	# Local import so you don't have to touch file-level imports
 	from frappe.query_builder.functions import Max

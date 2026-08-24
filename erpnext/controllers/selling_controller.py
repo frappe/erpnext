@@ -12,7 +12,7 @@ from erpnext.controllers.sales_and_purchase_return import get_rate_for_return, i
 from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.doctype.item.item import set_item_default
 from erpnext.stock.get_item_details import get_bin_details, get_conversion_factor
-from erpnext.stock.utils import get_incoming_rate, get_valuation_method
+from erpnext.stock.utils import get_combine_datetime, get_incoming_rate, get_valuation_method
 
 
 class SellingController(StockController):
@@ -53,6 +53,7 @@ class SellingController(StockController):
 		self.validate_for_duplicate_items()
 		self.validate_target_warehouse()
 		self.validate_auto_repeat_subscription_dates()
+		self.validate_sample_retention_warehouse()
 		for table_field in ["items", "packed_items"]:
 			if self.get(table_field):
 				self.set_serial_and_batch_bundle(table_field)
@@ -235,7 +236,7 @@ class SellingController(StockController):
 
 			total += sales_person.allocated_percentage
 
-		if sales_team and total != 100.0:
+		if sales_team and flt(total, self.precision("allocated_percentage", "sales_team")) != 100.0:
 			throw(_("Total allocated percentage for sales team should be 100"))
 
 	def validate_sales_team(self, sales_team):
@@ -559,7 +560,8 @@ class SellingController(StockController):
 					reset_incoming_rate()
 
 				if (
-					not d.incoming_rate
+					(not d.incoming_rate or self.is_new())
+					and not is_standalone
 					or self.is_internal_transfer()
 					or (get_valuation_method(d.item_code) == "Moving Average" and self.get("is_return"))
 				):
@@ -874,6 +876,26 @@ class SellingController(StockController):
 
 		validate_item_type(self, "is_sales_item", "sales")
 
+	def validate_sample_retention_warehouse(self):
+		if self.get("is_return"):
+			return
+
+		sample_retention_warehouse = frappe.db.get_single_value(
+			"Stock Settings", "sample_retention_warehouse"
+		)
+		if not sample_retention_warehouse:
+			return
+
+		items = self.get("items") + (self.get("packed_items"))
+		for item in items:
+			if item.get("warehouse") == sample_retention_warehouse:
+				frappe.throw(
+					_("Row {0}: Cannot sell item {1} from Sample Retention Warehouse {2}").format(
+						item.idx, frappe.bold(item.item_code), frappe.bold(sample_retention_warehouse)
+					),
+					title=_("Not Allowed"),
+				)
+
 	def update_stock_reservation_entries(self) -> None:
 		"""Updates Delivered Qty in Stock Reservation Entries."""
 
@@ -1063,8 +1085,7 @@ def get_serial_and_batch_bundle(child, parent, delivery_note_child=None):
 			"voucher_type": parent.doctype,
 			"voucher_no": parent.name if parent.docstatus < 2 else None,
 			"voucher_detail_no": delivery_note_child.name if delivery_note_child else child.name,
-			"posting_date": parent.posting_date,
-			"posting_time": parent.posting_time,
+			"posting_datetime": get_combine_datetime(parent.posting_date, parent.posting_time),
 			"qty": child.qty,
 			"type_of_transaction": "Outward" if child.qty > 0 and parent.docstatus < 2 else "Inward",
 			"company": parent.company,

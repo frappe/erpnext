@@ -26,7 +26,7 @@ frappe.ui.form.on("Sales Order", {
 			let color;
 			if (!doc.qty && frm.doc.has_unit_price_items) {
 				color = "yellow";
-			} else if (doc.stock_qty <= doc.actual_qty) {
+			} else if (doc.stock_qty - doc.delivered_qty <= doc.actual_qty) {
 				color = "green";
 			} else {
 				color = "orange";
@@ -589,6 +589,11 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 		super.onload(doc, dt, dn);
 	}
 
+	company() {
+		super.company();
+		erpnext.accounts.dimensions.update_dimension(this.frm, this.frm.doctype);
+	}
+
 	refresh(doc, dt, dn) {
 		var me = this;
 		super.refresh();
@@ -773,11 +778,13 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 				}
 				// payment request
 				if (flt(doc.per_billed) < 100 + frappe.boot.sysdefaults.over_billing_allowance) {
-					this.frm.add_custom_button(
-						__("Payment Request"),
-						() => this.make_payment_request(),
-						__("Create")
-					);
+					if (frappe.boot.user.in_create.includes("Payment Request")) {
+						this.frm.add_custom_button(
+							__("Payment Request"),
+							() => this.make_payment_request(),
+							__("Create")
+						);
+					}
 
 					if (frappe.model.can_create("Payment Entry")) {
 						this.frm.add_custom_button(

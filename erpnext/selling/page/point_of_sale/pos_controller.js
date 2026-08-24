@@ -40,15 +40,6 @@ erpnext.PointOfSale.Controller = class {
 				in_list_view: 1,
 				label: __("Opening Amount"),
 				options: "company:company_currency",
-				onchange: function () {
-					dialog.fields_dict.balance_details.df.data.some((d) => {
-						if (d.idx == this.doc.idx) {
-							d.opening_amount = this.value;
-							dialog.fields_dict.balance_details.grid.refresh();
-							return true;
-						}
-					});
-				},
 			},
 		];
 		const fetch_pos_payment_methods = () => {
@@ -174,8 +165,8 @@ erpnext.PointOfSale.Controller = class {
 	set_opening_entry_status() {
 		this.page.set_title_sub(
 			`<span class="indicator orange">
-				<a class="text-muted" href="#Form/POS%20Opening%20Entry/${this.pos_opening}">
-					Opened at ${frappe.datetime.str_to_user(this.pos_opening_time)}
+				<a class="text-muted" href="#Form/POS%20Opening%20Entry/${encodeURIComponent(this.pos_opening)}">
+					Opened at ${frappe.utils.escape_html(frappe.datetime.str_to_user(this.pos_opening_time))}
 				</a>
 			</span>`
 		);

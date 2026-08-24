@@ -6,12 +6,14 @@ frappe.provide("erpnext.cheque_print");
 frappe.ui.form.on("Cheque Print Template", {
 	refresh: function (frm) {
 		if (!frm.doc.__islocal) {
-			frm.add_custom_button(
-				frm.doc.has_print_format ? __("Update Print Format") : __("Create Print Format"),
-				function () {
-					erpnext.cheque_print.view_cheque_print(frm);
-				}
-			).addClass("btn-primary");
+			if (frappe.user.has_role("System Manager")) {
+				frm.add_custom_button(
+					frm.doc.has_print_format ? __("Update Print Format") : __("Create Print Format"),
+					function () {
+						erpnext.cheque_print.view_cheque_print(frm);
+					}
+				).addClass("btn-primary");
+			}
 
 			$(frm.fields_dict.cheque_print_preview.wrapper).empty();
 

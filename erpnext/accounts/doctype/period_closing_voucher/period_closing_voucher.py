@@ -15,6 +15,7 @@ from erpnext.accounts.doctype.account_closing_balance.account_closing_balance im
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 )
+from erpnext.accounts.general_ledger import check_freezing_date, is_immutable_ledger_enabled
 from erpnext.accounts.utils import get_account_currency, get_fiscal_year
 from erpnext.controllers.accounts_controller import AccountsController
 
@@ -46,6 +47,14 @@ class PeriodClosingVoucher(AccountsController):
 		self.block_if_future_closing_voucher_exists()
 		self.check_closing_account_type()
 		self.check_closing_account_currency()
+		self.validate_accounts_not_frozen()
+
+	def validate_accounts_not_frozen(self, for_cancellation=False):
+		posting_date = self.period_end_date
+		if for_cancellation and is_immutable_ledger_enabled():
+			posting_date = getdate()
+
+		check_freezing_date(posting_date, self.company)
 
 	def validate_start_and_end_date(self):
 		self.fy_start_date, self.fy_end_date = frappe.db.get_value(
@@ -147,6 +156,7 @@ class PeriodClosingVoucher(AccountsController):
 			"Process Period Closing Voucher",
 		)
 		self.block_if_future_closing_voucher_exists()
+		self.validate_accounts_not_frozen(for_cancellation=True)
 
 		if not frappe.get_single_value("Accounts Settings", "use_legacy_controller_for_pcv"):
 			self.cancel_process_pcv_docs()

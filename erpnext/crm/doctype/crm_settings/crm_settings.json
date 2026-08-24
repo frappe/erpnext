@@ -14,12 +14,17 @@
   "opportunity_section",
   "close_opportunity_after_days",
   "column_break_9",
+  "enable_opportunity_creation_from_contact_us",
   "quotation_section",
   "default_valid_till",
   "section_break_13",
   "carry_forward_communication_and_comments",
   "column_break_junk",
-  "update_timestamp_on_new_communication"
+  "update_timestamp_on_new_communication",
+  "frappe_crm_section",
+  "enable_frappe_crm_data_synchronization",
+  "column_break_jbzj",
+  "allowed_users"
  ],
  "fields": [
   {
@@ -98,13 +103,43 @@
    "fieldname": "update_timestamp_on_new_communication",
    "fieldtype": "Check",
    "label": "Update timestamp on new communication"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_opportunity_creation_from_contact_us",
+   "fieldtype": "Check",
+   "label": "Enable Opportunity Creation from Contact Us"
+  },
+  {
+   "fieldname": "frappe_crm_section",
+   "fieldtype": "Section Break",
+   "label": "Frappe CRM"
+  },
+  {
+   "fieldname": "column_break_jbzj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "allowed_users",
+   "fieldtype": "Table MultiSelect",
+   "hidden": 1,
+   "label": "Allowed Users",
+   "options": "Frappe CRM Allowed User",
+   "permlevel": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_frappe_crm_data_synchronization",
+   "fieldtype": "Check",
+   "label": "Enable Frappe CRM Data Synchronization",
+   "permlevel": 1
   }
  ],
  "icon": "fa fa-cog",
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-01-16 16:12:14.889455",
+ "modified": "2026-07-01 01:09:16.461470",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "CRM Settings",
@@ -136,6 +171,16 @@
    "print": 1,
    "read": 1,
    "role": "Sales Master Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "delete": 1,
+   "email": 1,
+   "permlevel": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
    "share": 1,
    "write": 1
   }

@@ -23,15 +23,20 @@ frappe.ui.form.on("Driver", {
 	},
 
 	transporter: function (frm, cdt, cdn) {
-		// this assumes that supplier's address has same title as supplier's name
 		if (!frm.doc.transporter) return;
-		frappe.db
-			.get_doc("Address", null, { address_title: frm.doc.transporter })
-			.then((r) => {
-				frappe.model.set_value(cdt, cdn, "address", r.name);
-			})
-			.catch((err) => {
-				console.log(err);
-			});
+
+		const transporter = frm.doc.transporter;
+		frappe.call({
+			method: "frappe.contacts.doctype.address.address.get_default_address",
+			args: {
+				doctype: "Supplier",
+				name: transporter,
+			},
+			callback: function (r) {
+				if (frm.doc.transporter === transporter) {
+					frappe.model.set_value(cdt, cdn, "address", r.message);
+				}
+			},
+		});
 	},
 });

@@ -31,6 +31,7 @@ class OpeningInvoiceCreationTool(Document):
 		create_missing_party: DF.Check
 		invoice_type: DF.Literal["Sales", "Purchase"]
 		invoices: DF.Table[OpeningInvoiceCreationToolItem]
+		project: DF.Link | None
 	# end: auto-generated types
 
 	def onload(self):
@@ -121,6 +122,17 @@ class OpeningInvoiceCreationTool(Document):
 			if not row.get(scrub(d)):
 				frappe.throw(mandatory_error_msg.format(row.idx, d, self.invoice_type))
 
+		self.validate_temporary_opening_account(row)
+
+	def validate_temporary_opening_account(self, row):
+		account_type = frappe.get_cached_value("Account", row.temporary_opening_account, "account_type")
+		if account_type != "Temporary":
+			frappe.throw(
+				_("Row #{0}: {1} account is not of type {2}").format(
+					row.idx, row.temporary_opening_account, "Temporary"
+				)
+			)
+
 	def get_invoices(self):
 		invoices = []
 		for row in self.invoices:
@@ -190,6 +202,7 @@ class OpeningInvoiceCreationTool(Document):
 					"description": row.item_name or "Opening Invoice Item",
 					income_expense_account_field: row.temporary_opening_account,
 					"cost_center": cost_center,
+					"project": row.get("project") or self.get("project"),
 				}
 			)
 
@@ -253,22 +266,32 @@ class OpeningInvoiceCreationTool(Document):
 def start_import(invoices):
 	errors = 0
 	names = []
+	total = len(invoices)
 	for idx, d in enumerate(invoices):
+		# Scope each invoice to a savepoint so a failure only undoes that invoice.
+		# A plain rollback() would discard the whole transaction — including invoices
+		# imported earlier in this batch and the error logs of earlier failures (the
+		# latter only survive on mariadb because the Error Log table is MyISAM; on
+		# postgres they would be lost). Rolling back to a savepoint keeps both.
+		savepoint = f"opening_invoice_{frappe.generate_hash(length=8)}"
+		frappe.db.savepoint(savepoint)
+		is_last = idx == total - 1
 		try:
 			invoice_number = None
 			if d.invoice_number:
 				invoice_number = d.invoice_number
-			publish(idx, len(invoices), d.doctype)
 			doc = frappe.get_doc(d)
 			doc.flags.ignore_mandatory = True
 			doc.insert(set_name=invoice_number)
 			doc.submit()
 			frappe.db.commit()
 			names.append(doc.name)
+			publish(idx, total, d.doctype, errors=errors if is_last else None)
 		except Exception:
 			errors += 1
 			frappe.db.rollback()
 			doc.log_error("Opening invoice creation failed")
+			publish(idx, total, d.doctype, errors=errors if is_last else None)
 	if errors:
 		frappe.msgprint(
 			_("You had {} errors while creating opening invoices. Check {} for more details").format(
@@ -280,7 +303,7 @@ def start_import(invoices):
 	return names
 
 
-def publish(index, total, doctype):
+def publish(index, total, doctype, errors=None):
 	frappe.publish_realtime(
 		"opening_invoice_creation_progress",
 		dict(
@@ -288,6 +311,7 @@ def publish(index, total, doctype):
 			message=_("Creating {} out of {} {}").format(index + 1, total, doctype),
 			count=index + 1,
 			total=total,
+			errors=errors,
 		),
 		user=frappe.session.user,
 	)

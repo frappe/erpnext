@@ -11,6 +11,7 @@
   "disabled",
   "column_break_24",
   "use_batchwise_valuation",
+  "allow_negative_stock_for_batch",
   "sb_batch",
   "batch_id",
   "item",
@@ -58,6 +59,7 @@
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Item",
+   "link_filters": "[\n    [\"Item\", \"has_batch_no\", \"=\", 1],\n    [\"Item\", \"is_stock_item\", \"=\", 1]\n]",
    "oldfieldname": "item",
    "oldfieldtype": "Link",
    "options": "Item",
@@ -201,6 +203,14 @@
    "label": "Use Batch-wise Valuation",
    "read_only": 1,
    "set_only_once": 1
+  },
+  {
+   "default": "0",
+   "description": "If enabled, the system will allow negative stock entries for this batch, overriding the 'Allow negative stock for Batch' setting in Stock Settings. This may lead to incorrect valuation rates, so it is recommended to avoid using this option.",
+   "fieldname": "allow_negative_stock_for_batch",
+   "fieldtype": "Check",
+   "label": "Allow Negative Stock for Batch",
+   "no_copy": 1
   }
  ],
  "icon": "fa fa-archive",
@@ -208,7 +218,7 @@
  "image_field": "image",
  "links": [],
  "max_attachments": 5,
- "modified": "2023-11-09 12:17:28.339975",
+ "modified": "2026-06-17 12:17:28.339975",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Batch",

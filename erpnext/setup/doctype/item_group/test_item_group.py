@@ -16,6 +16,8 @@ from frappe.utils.nestedset import (
 
 test_records = frappe.get_test_records("Item Group")
 
+TRANSLATED_ROOT = "Todos os Grupos de Itens"
+
 
 class TestItem(unittest.TestCase):
 	def test_basic_tree(self, records=None):
@@ -233,4 +235,47 @@ class TestItem(unittest.TestCase):
 			"_Test Item Group B",
 			"_Test Item Group B - 3",
 			merge=True,
+		)
+
+	def test_patch_merges_seeded_root_into_existing_root(self):
+		from erpnext.patches.v16_0.merge_seeded_item_group_root import execute
+
+		self.nest_root_under(TRANSLATED_ROOT)
+		self.assertEqual(
+			frappe.db.get_value("Item Group", "All Item Groups", "parent_item_group"), TRANSLATED_ROOT
+		)
+
+		execute()
+
+		self.assertFalse(frappe.db.exists("Item Group", "All Item Groups"))
+		self.assertEqual(self.get_root_names(), [TRANSLATED_ROOT])
+		self.assertEqual(
+			frappe.db.get_value("Item Group", "_Test Item Group B", "parent_item_group"), TRANSLATED_ROOT
+		)
+		self.test_basic_tree()
+
+		# restore the original root name for the tests that follow
+		frappe.rename_doc("Item Group", TRANSLATED_ROOT, "All Item Groups")
+		self.assertEqual(self.get_root_names(), ["All Item Groups"])
+		self.test_basic_tree()
+
+	def nest_root_under(self, new_root):
+		"""Recreate the tree left behind by seeding a root under a pre-existing one."""
+		frappe.get_doc(
+			{
+				"doctype": "Item Group",
+				"item_group_name": new_root,
+				"is_group": 1,
+				"parent_item_group": "All Item Groups",
+			}
+		).insert()
+
+		ig = frappe.qb.DocType("Item Group")
+		frappe.qb.update(ig).set(ig.parent_item_group, "").where(ig.name == new_root).run()
+		frappe.qb.update(ig).set(ig.parent_item_group, new_root).where(ig.name == "All Item Groups").run()
+		rebuild_tree("Item Group", "parent_item_group")
+
+	def get_root_names(self):
+		return frappe.db.sql_list(
+			"""select name from `tabItem Group` where ifnull(parent_item_group, '')=''"""
 		)

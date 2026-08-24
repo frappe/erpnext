@@ -1257,6 +1257,223 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 		self.assertEqual(sle[0].qty_after_transaction, 105)
 		self.assertEqual(sle[0].actual_qty, 100)
 
+	def test_update_qty_in_future_sle_shifts_same_timestamp_later_entry(self):
+		# update_qty_in_future_sle treats "future" as strictly after the current entry in the
+		# (posting_datetime, creation) order. An entry sharing the exact posting timestamp but created
+		# later must still have its running balance shifted; comparing posting_datetime alone would skip
+		# it. The current entry itself (same timestamp, same creation) must not be shifted.
+		from erpnext.stock.stock_ledger import update_qty_in_future_sle
+
+		item = make_item().name
+		warehouse = "_Test Warehouse - _TC"
+
+		receipt1 = make_purchase_receipt(
+			item_code=item,
+			warehouse=warehouse,
+			qty=10,
+			rate=10,
+			posting_date="2021-01-01",
+			posting_time="02:00:00",
+		)
+		time.sleep(1)
+		receipt2 = make_purchase_receipt(
+			item_code=item,
+			warehouse=warehouse,
+			qty=20,
+			rate=10,
+			posting_date="2021-01-01",
+			posting_time="02:00:00",  # identical timestamp, later creation
+		)
+
+		def sle(voucher):
+			return frappe.db.get_value(
+				"Stock Ledger Entry",
+				{"voucher_no": voucher.name, "is_cancelled": 0},
+				["name", "posting_date", "posting_time", "creation", "qty_after_transaction"],
+				as_dict=True,
+			)
+
+		sle1, sle2 = sle(receipt1), sle(receipt2)
+		self.assertEqual(sle1.qty_after_transaction, 10)
+		self.assertEqual(sle2.qty_after_transaction, 30)
+
+		# Simulate a +5 qty shift originating at receipt1's ledger position.
+		args = frappe._dict(
+			{
+				"item_code": item,
+				"warehouse": warehouse,
+				"voucher_type": "Purchase Receipt",
+				"voucher_no": receipt1.name,
+				"posting_date": sle1.posting_date,
+				"posting_time": sle1.posting_time,
+				"creation": sle1.creation,
+				"actual_qty": 5,
+			}
+		)
+		update_qty_in_future_sle(args, allow_negative_stock=True)
+
+		# receipt2 (same timestamp, later creation) is shifted; receipt1 (the current entry) is not.
+		self.assertEqual(frappe.db.get_value("Stock Ledger Entry", sle2.name, "qty_after_transaction"), 35)
+		self.assertEqual(frappe.db.get_value("Stock Ledger Entry", sle1.name, "qty_after_transaction"), 10)
+
+	def test_cancel_first_of_two_same_timestamp_entries(self):
+		# Two receipts of the same item+warehouse at the exact same posting timestamp: balances 10 -> 20.
+		# Cancelling the first must leave the second standing alone on a zero base (qty 10), not
+		# double-decremented. The same-timestamp sibling is corrected by the cancellation reprocessing,
+		# so update_qty_in_future_sle must not shift it again.
+		item = make_item().name
+		warehouse = "_Test Warehouse - _TC"
+
+		receipt1 = make_purchase_receipt(
+			item_code=item,
+			warehouse=warehouse,
+			qty=10,
+			rate=10,
+			posting_date="2026-06-01",
+			posting_time="10:00:00",
+		)
+		time.sleep(1)
+		receipt2 = make_purchase_receipt(
+			item_code=item,
+			warehouse=warehouse,
+			qty=10,
+			rate=10,
+			posting_date="2026-06-01",
+			posting_time="10:00:00",  # identical timestamp, later creation
+		)
+
+		def qty_after(voucher):
+			return frappe.db.get_value(
+				"Stock Ledger Entry",
+				{"voucher_no": voucher.name, "is_cancelled": 0},
+				"qty_after_transaction",
+			)
+
+		self.assertEqual(qty_after(receipt1), 10)
+		self.assertEqual(qty_after(receipt2), 20)
+
+		receipt1.cancel()
+
+		# receipt2 now sits on a zero base -> 10 (not 0 from a double shift, nor a negative-stock error).
+		self.assertEqual(qty_after(receipt2), 10)
+
+	def test_cancel_shifts_same_timestamp_delivery_notes(self):
+		item = make_item("Test Shifts Same Timestamp Multiple DNs").name
+		warehouse = "_Test Warehouse - _TC"
+		posting_date = today()
+		posting_time = "10:00:00"
+
+		make_stock_entry(
+			item_code=item,
+			to_warehouse=warehouse,
+			qty=100,
+			rate=10,
+			posting_date=posting_date,
+			posting_time="09:00:00",
+		)
+
+		dns = []
+		for i in range(5):
+			dns.append(
+				create_delivery_note(
+					item_code=item,
+					warehouse=warehouse,
+					qty=20,
+					rate=10 * i,
+					posting_date=posting_date,
+					posting_time=posting_time,
+				)
+			)
+			time.sleep(1)
+
+		dn = dns[2]
+		dn.cancel()
+
+		expected_qty_after_transaction_of_dns3 = 40
+		qty_after_transaction_of_dns3 = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": dns[3].name, "is_cancelled": 0},
+			"qty_after_transaction",
+		)
+
+		self.assertEqual(expected_qty_after_transaction_of_dns3, qty_after_transaction_of_dns3)
+
+	def test_cancel_updates_bin_stock_value_when_no_sle_shares_timestamp(self):
+		item = make_item("Test Cancel Bin Stock Value Lone Timestamp").name
+		warehouse = "_Test Warehouse - _TC"
+		posting_date = today()
+
+		make_stock_entry(
+			item_code=item,
+			to_warehouse=warehouse,
+			qty=100,
+			rate=10,
+			posting_date=posting_date,
+			posting_time="09:00:00",
+		)
+
+		dn = create_delivery_note(
+			item_code=item,
+			warehouse=warehouse,
+			qty=20,
+			rate=10,
+			posting_date=posting_date,
+			posting_time="10:00:00",
+		)
+
+		dn.cancel()
+
+		# Nothing else sits on the delivery note's posting datetime, so the cancellation leaves no
+		# live SLE to reprocess. The bin must still fall back to the receipt's stock value.
+		bin_qty, bin_stock_value = frappe.db.get_value(
+			"Bin", {"item_code": item, "warehouse": warehouse}, ["actual_qty", "stock_value"]
+		)
+
+		self.assertEqual(bin_qty, 100)
+		self.assertEqual(bin_stock_value, 1000)
+
+	def test_get_next_stock_reco_respects_creation_order(self):
+		# A stock reco sharing the exact posting timestamp of the current entry must only count as the
+		# "next" reco when it was created after that entry. A reco created before it actually precedes
+		# the entry and must not bound (truncate) the qty-shift range.
+		from erpnext.stock.stock_ledger import get_next_stock_reco
+
+		item = make_item().name
+		warehouse = "_Test Warehouse - _TC"
+
+		reco = create_stock_reconciliation(
+			item_code=item,
+			warehouse=warehouse,
+			qty=10,
+			rate=100,
+			posting_date="2021-01-01",
+			posting_time="02:00:00",
+		)
+		reco_sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": reco.name, "is_cancelled": 0},
+			["posting_date", "posting_time", "creation"],
+			as_dict=True,
+		)
+
+		base_kwargs = {
+			"item_code": item,
+			"warehouse": warehouse,
+			"voucher_no": "SOME-OTHER-VOUCHER",
+			"posting_date": reco_sle.posting_date,
+			"posting_time": reco_sle.posting_time,
+		}
+
+		# Current entry created AFTER the reco at the same timestamp -> reco precedes it -> not returned.
+		after = {**base_kwargs, "creation": add_to_date(reco_sle.creation, seconds=5)}
+		self.assertFalse(get_next_stock_reco(after))
+
+		# Current entry created BEFORE the reco at the same timestamp -> reco follows it -> returned.
+		before = {**base_kwargs, "creation": add_to_date(reco_sle.creation, seconds=-5)}
+		result = get_next_stock_reco(before)
+		self.assertTrue(result)
+		self.assertEqual(result[0].voucher_no, reco.name)
+
 	@change_settings("System Settings", {"float_precision": 3, "currency_precision": 2})
 	def test_transfer_invariants(self):
 		"""Extact stock value should be transferred."""

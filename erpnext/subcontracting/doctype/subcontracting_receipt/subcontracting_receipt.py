@@ -161,7 +161,6 @@ class SubcontractingReceipt(SubcontractingController):
 
 	def on_submit(self):
 		self.validate_closed_subcontracting_order()
-		self.validate_available_qty_for_consumption()
 		self.validate_bom_required_qty()
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
@@ -506,32 +505,6 @@ class SubcontractingReceipt(SubcontractingController):
 					_("Row #{0}: Accepted Warehouse and Rejected Warehouse cannot be same").format(item.idx)
 				)
 
-	def validate_available_qty_for_consumption(self):
-		if (
-			frappe.db.get_single_value("Buying Settings", "backflush_raw_materials_of_subcontract_based_on")
-			== "BOM"
-		):
-			return
-
-		for item in self.get("supplied_items"):
-			precision = item.precision("consumed_qty")
-			if (
-				item.available_qty_for_consumption
-				and flt(item.available_qty_for_consumption, precision) - flt(item.consumed_qty, precision) < 0
-			):
-				msg = _(
-					"""Row {0}: Consumed Qty {1} {2} must be less than or equal to Available Qty For Consumption
-					{3} {4} in Consumed Items Table."""
-				).format(
-					item.idx,
-					flt(item.consumed_qty, precision),
-					item.stock_uom,
-					flt(item.available_qty_for_consumption, precision),
-					item.stock_uom,
-				)
-
-				frappe.throw(msg)
-
 	def validate_bom_required_qty(self):
 		if (
 			frappe.db.get_single_value("Buying Settings", "backflush_raw_materials_of_subcontract_based_on")
@@ -660,7 +633,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 		for item in self.items:
 			if flt(item.rate) and flt(item.qty):
-				if warehouse_account and warehouse_account.get(item.warehouse):
+				if warehouse_account is not None:
 					stock_value_diff = frappe.db.get_value(
 						"Stock Ledger Entry",
 						{
@@ -674,9 +647,11 @@ class SubcontractingReceipt(SubcontractingController):
 					)
 
 					accepted_warehouse_account = warehouse_account[item.warehouse]["account"]
-					supplier_warehouse_account = warehouse_account.get(self.supplier_warehouse, {}).get(
-						"account"
-					)
+					supplier_warehouse_details = warehouse_account.get(self.supplier_warehouse, {})
+					if flt(item.rm_supp_cost):
+						supplier_warehouse_details = warehouse_account[self.supplier_warehouse]
+
+					supplier_warehouse_account = supplier_warehouse_details.get("account")
 					remarks = self.get("remarks") or _("Accounting Entry for Stock")
 
 					# Accepted Warehouse Account (Debit)

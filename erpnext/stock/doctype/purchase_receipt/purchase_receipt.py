@@ -372,6 +372,9 @@ class PurchaseReceipt(BuyingController):
 
 	# Check for Closed status
 	def check_on_hold_or_closed_status(self):
+		if self.get("is_return"):
+			return
+
 		check_list = []
 		for d in self.get("items"):
 			if d.meta.get_field("purchase_order") and d.purchase_order and d.purchase_order not in check_list:
@@ -404,29 +407,10 @@ class PurchaseReceipt(BuyingController):
 		self.set_consumed_qty_in_subcontract_order()
 		self.reserve_stock_for_sales_order()
 
-	def check_next_docstatus(self):
-		submit_rv = frappe.db.sql(
-			"""select t1.name
-			from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2
-			where t1.name = t2.parent and t2.purchase_receipt = %s and t1.docstatus = 1""",
-			(self.name),
-		)
-		if submit_rv:
-			frappe.throw(_("Purchase Invoice {0} is already submitted").format(self.submit_rv[0][0]))
-
 	def on_cancel(self):
 		super().on_cancel()
 
 		self.check_on_hold_or_closed_status()
-		# Check if Purchase Invoice has been submitted against current Purchase Order
-		submitted = frappe.db.sql(
-			"""select t1.name
-			from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2
-			where t1.name = t2.parent and t2.purchase_receipt = %s and t1.docstatus = 1""",
-			self.name,
-		)
-		if submitted:
-			frappe.throw(_("Purchase Invoice {0} is already submitted").format(submitted[0][0]))
 
 		self.update_prevdoc_status()
 		self.update_billing_status()
@@ -493,6 +477,7 @@ class PurchaseReceipt(BuyingController):
 				remarks=remarks,
 				against_account=stock_asset_rbnb,
 				account_currency=account_currency,
+				project=item.project,
 				item=item,
 			)
 
@@ -510,14 +495,7 @@ class PurchaseReceipt(BuyingController):
 				else flt(item.net_amount, item.precision("net_amount"))
 			)
 
-			outgoing_amount = (
-				flt((item.base_net_amount / item.received_qty) * item.qty, item.precision("base_net_amount"))
-				if item.received_qty
-				and frappe.get_single_value(
-					"Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice"
-				)
-				else item.base_net_amount
-			)
+			outgoing_amount = item.base_net_amount
 			if self.is_internal_transfer() and item.valuation_rate:
 				outgoing_amount = abs(get_stock_value_difference(self.name, item.name, item.from_warehouse))
 				credit_amount = outgoing_amount
@@ -542,6 +520,7 @@ class PurchaseReceipt(BuyingController):
 					against_account=stock_asset_account_name,
 					debit_in_account_currency=-1 * flt(outgoing_amount, item.precision("base_net_amount")),
 					account_currency=account_currency,
+					project=item.project,
 					item=item,
 				)
 
@@ -566,6 +545,7 @@ class PurchaseReceipt(BuyingController):
 							against_account=self.supplier,
 							debit_in_account_currency=-1 * discrepancy_caused_by_exchange_rate_difference,
 							account_currency=account_currency,
+							project=item.project,
 							item=item,
 						)
 
@@ -579,6 +559,7 @@ class PurchaseReceipt(BuyingController):
 							against_account=self.supplier,
 							debit_in_account_currency=-1 * discrepancy_caused_by_exchange_rate_difference,
 							account_currency=account_currency,
+							project=item.project,
 							item=item,
 						)
 
@@ -631,7 +612,7 @@ class PurchaseReceipt(BuyingController):
 
 		def make_sub_contracting_gl_entries(item):
 			# sub-contracting warehouse
-			if flt(item.rm_supp_cost) and warehouse_account.get(self.supplier_warehouse):
+			if flt(item.rm_supp_cost):
 				self.add_gl_entry(
 					gl_entries=gl_entries,
 					account=supplier_warehouse_account,
@@ -641,6 +622,7 @@ class PurchaseReceipt(BuyingController):
 					remarks=remarks,
 					against_account=stock_asset_account_name,
 					account_currency=supplier_warehouse_account_currency,
+					project=item.project,
 					item=item,
 				)
 
@@ -672,6 +654,9 @@ class PurchaseReceipt(BuyingController):
 					self.get_company_default("default_expense_account", ignore_validation=True)
 					or stock_asset_rbnb
 				)
+
+				if self.is_return and item.expense_account:
+					loss_account = item.expense_account
 
 				cost_center = item.cost_center or frappe.get_cached_value(
 					"Company", self.company, "cost_center"
@@ -736,22 +721,22 @@ class PurchaseReceipt(BuyingController):
 					stock_value_diff = (
 						flt(d.base_net_amount) + flt(d.item_tax_amount) + flt(d.landed_cost_voucher_amount)
 					)
-				elif warehouse_account.get(d.warehouse):
+				elif d.warehouse:
 					stock_value_diff = get_stock_value_difference(self.name, d.name, d.warehouse)
 					stock_asset_account_name = warehouse_account[d.warehouse]["account"]
-					supplier_warehouse_account = warehouse_account.get(self.supplier_warehouse, {}).get(
-						"account"
-					)
-					supplier_warehouse_account_currency = warehouse_account.get(
-						self.supplier_warehouse, {}
-					).get("account_currency")
+					supplier_warehouse_details = warehouse_account.get(self.supplier_warehouse, {})
+					if flt(d.rm_supp_cost):
+						supplier_warehouse_details = warehouse_account[self.supplier_warehouse]
+
+					supplier_warehouse_account = supplier_warehouse_details.get("account")
+					supplier_warehouse_account_currency = supplier_warehouse_details.get("account_currency")
 
 					# If PR is sub-contracted and fg item rate is zero
 					# in that case if account for source and target warehouse are same,
 					# then GL entries should not be posted
 					if (
 						flt(stock_value_diff) == flt(d.rm_supp_cost)
-						and warehouse_account.get(self.supplier_warehouse)
+						and supplier_warehouse_account
 						and stock_asset_account_name == supplier_warehouse_account
 					):
 						continue
@@ -1254,7 +1239,7 @@ def get_billed_qty_amount_against_purchase_receipt(pr_doc):
 		.on(parent_table.name == table.parent)
 		.select(
 			table.pr_detail,
-			fn.Sum(table.amount * parent_table.conversion_rate).as_("amount"),
+			fn.Sum(table.base_net_amount).as_("amount"),
 			fn.Sum(table.qty).as_("qty"),
 		)
 		.where((table.pr_detail.isin(pr_names)) & (table.docstatus == 1))
@@ -1300,7 +1285,7 @@ def get_billed_qty_amount_against_purchase_order(pr_doc):
 			.select(
 				table.po_detail,
 				fn.Sum(table.qty).as_("qty"),
-				fn.Sum(table.amount * parent_table.conversion_rate).as_("amount"),
+				fn.Sum(table.base_net_amount).as_("amount"),
 			)
 			.where((table.po_detail.isin(po_names)) & (table.docstatus == 1) & (table.pr_detail.isnull()))
 			.groupby(table.po_detail)

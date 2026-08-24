@@ -4,6 +4,7 @@ import json
 import frappe
 import pytz
 from frappe import _
+from frappe.rate_limiter import rate_limit
 from frappe.utils.data import get_system_timezone
 
 WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
@@ -12,10 +13,13 @@ no_cache = 1
 
 
 def get_context(context):
-	is_enabled = frappe.db.get_single_value("Appointment Booking Settings", "enable_scheduling")
-	if is_enabled:
-		return context
-	else:
+	handle_appointment_booking_disabled()
+
+	return context
+
+
+def handle_appointment_booking_disabled():
+	if not frappe.get_single_value("Appointment Booking Settings", "enable_appointment_portal"):
 		frappe.redirect_to_message(
 			_("Appointment Scheduling Disabled"),
 			_("Appointment Scheduling has been disabled for this site"),
@@ -27,9 +31,9 @@ def get_context(context):
 
 @frappe.whitelist(allow_guest=True)
 def get_appointment_settings():
-	settings = frappe.get_cached_value(
+	handle_appointment_booking_disabled()
+	settings = frappe.get_single_value(
 		"Appointment Booking Settings",
-		None,
 		["advance_booking_days", "appointment_duration", "success_redirect_url"],
 		as_dict=True,
 	)
@@ -38,6 +42,7 @@ def get_appointment_settings():
 
 @frappe.whitelist(allow_guest=True)
 def get_timezones():
+	handle_appointment_booking_disabled()
 	import pytz
 
 	return pytz.all_timezones
@@ -46,6 +51,7 @@ def get_timezones():
 @frappe.whitelist(allow_guest=True)
 def get_appointment_slots(date, timezone):
 	# Convert query to local timezones
+	handle_appointment_booking_disabled()
 	format_string = "%Y-%m-%d %H:%M:%S"
 	query_start_time = datetime.datetime.strptime(date + " 00:00:00", format_string)
 	query_end_time = datetime.datetime.strptime(date + " 23:59:59", format_string)
@@ -54,9 +60,15 @@ def get_appointment_slots(date, timezone):
 	now = convert_to_guest_timezone(timezone, datetime.datetime.now())
 
 	# Database queries
-	settings = frappe.get_doc("Appointment Booking Settings")
+	settings = frappe.get_single_value(
+		"Appointment Booking Settings",
+		["holiday_list", "appointment_duration", "number_of_agents", "availability_of_slots"],
+		as_dict=True,
+	)
 	holiday_list = frappe.get_doc("Holiday List", settings.holiday_list)
 	timeslots = get_available_slots_between(query_start_time, query_end_time, settings)
+	# fetch the day's booked slots once instead of querying per timeslot
+	booked_times = get_booked_slot_times_for(timeslots, settings.appointment_duration)
 
 	# Filter and convert timeslots
 	converted_timeslots = []
@@ -67,7 +79,7 @@ def get_appointment_slots(date, timezone):
 			converted_timeslots.append(dict(time=converted_timeslot, availability=False))
 			continue
 		# Check availability
-		if check_availabilty(timeslot, settings) and converted_timeslot >= now:
+		if is_slot_available(timeslot, booked_times, settings) and converted_timeslot >= now:
 			converted_timeslots.append(dict(time=converted_timeslot, availability=True))
 		else:
 			converted_timeslots.append(dict(time=converted_timeslot, availability=False))
@@ -93,8 +105,10 @@ def get_available_slots_between(query_start_time, query_end_time, settings):
 	return timeslots
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist(allow_guest=True, methods=["POST"])
+@rate_limit(limit=5, seconds=300)
 def create_appointment(date, time, tz, contact):
+	handle_appointment_booking_disabled()
 	format_string = "%Y-%m-%d %H:%M:%S"
 	scheduled_time = datetime.datetime.strptime(date + " " + time, format_string)
 	# Strip tzinfo from datetime objects since it's handled by the doctype
@@ -104,13 +118,13 @@ def create_appointment(date, time, tz, contact):
 	# Create a appointment document from form
 	appointment = frappe.new_doc("Appointment")
 	appointment.scheduled_time = scheduled_time
-	contact = json.loads(contact)
+	contact = frappe.parse_json(contact)
 	appointment.customer_name = contact.get("name", None)
 	appointment.customer_phone_number = contact.get("number", None)
 	appointment.customer_skype = contact.get("skype", None)
 	appointment.customer_details = contact.get("notes", None)
 	appointment.customer_email = contact.get("email", None)
-	appointment.status = "Open"
+	appointment.created_through_portal = 1
 	appointment.insert(ignore_permissions=True)
 	return appointment
 
@@ -140,8 +154,23 @@ def convert_to_system_timezone(guest_tz, datetimeobject):
 	return datetimeobject
 
 
-def check_availabilty(timeslot, settings):
-	return frappe.db.count("Appointment", {"scheduled_time": timeslot}) < settings.number_of_agents
+def get_booked_slot_times_for(timeslots, appointment_duration):
+	if not timeslots:
+		return []
+
+	from erpnext.crm.doctype.appointment.appointment import get_booked_slot_times
+
+	duration = datetime.timedelta(minutes=appointment_duration)
+	return get_booked_slot_times(min(timeslots) - duration, max(timeslots) + duration)
+
+
+def is_slot_available(timeslot, booked_times, settings):
+	# mirror the server capacity check: count non-Closed appointments whose
+	# duration window overlaps this slot, without a per-slot query
+	duration = datetime.timedelta(minutes=settings.appointment_duration)
+	lower, upper = timeslot - duration, timeslot + duration
+	overlapping = sum(1 for booked in booked_times if lower < booked < upper)
+	return overlapping < settings.number_of_agents
 
 
 def _is_holiday(date, holiday_list):

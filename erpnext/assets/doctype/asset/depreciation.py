@@ -81,7 +81,7 @@ def post_depreciation_entries(date=None):
 			)
 
 		try:
-			make_depreciation_entry(
+			_make_depreciation_entry(
 				asset_depr_schedule_name,
 				date,
 				sch_start_idx,
@@ -139,7 +139,7 @@ def get_depreciable_asset_depr_schedules_data(date):
 def make_depreciation_entry_for_all_asset_depr_schedules(asset_doc, date=None):
 	for row in asset_doc.get("finance_books"):
 		asset_depr_schedule_name = get_asset_depr_schedule_name(asset_doc.name, "Active", row.finance_book)
-		make_depreciation_entry(asset_depr_schedule_name, date)
+		_make_depreciation_entry(asset_depr_schedule_name, date)
 
 
 def get_acc_frozen_upto():
@@ -186,6 +186,30 @@ def get_depreciation_cost_center_and_depreciation_series_for_company():
 
 @frappe.whitelist()
 def make_depreciation_entry(
+	asset_depr_schedule_name,
+	date=None,
+	sch_start_idx=None,
+	sch_end_idx=None,
+	credit_and_debit_accounts=None,
+	depreciation_cost_center_and_depreciation_series=None,
+	accounting_dimensions=None,
+):
+	asset_depr_schedule_doc = frappe.get_doc("Asset Depreciation Schedule", asset_depr_schedule_name)
+	frappe.has_permission("Asset Depreciation Schedule", "write", asset_depr_schedule_doc, throw=True)
+	frappe.has_permission("Asset", "write", asset_depr_schedule_doc.asset, throw=True)
+
+	return _make_depreciation_entry(
+		asset_depr_schedule_name,
+		date,
+		sch_start_idx,
+		sch_end_idx,
+		credit_and_debit_accounts,
+		depreciation_cost_center_and_depreciation_series,
+		accounting_dimensions,
+	)
+
+
+def _make_depreciation_entry(
 	asset_depr_schedule_name,
 	date=None,
 	sch_start_idx=None,
@@ -395,6 +419,7 @@ def get_comma_separated_links(names, doctype):
 
 @frappe.whitelist()
 def scrap_asset(asset_name, scrap_date=None):
+	frappe.has_permission("Asset", "write", asset_name, throw=True)
 	asset = frappe.get_doc("Asset", asset_name)
 
 	if asset.docstatus != 1:
@@ -472,6 +497,7 @@ def validate_scrap_date(scrap_date, today_date, purchase_date, calculate_depreci
 
 @frappe.whitelist()
 def restore_asset(asset_name):
+	frappe.has_permission("Asset", "write", asset_name, throw=True)
 	asset = frappe.get_doc("Asset", asset_name)
 
 	reverse_depreciation_entry_made_after_disposal(asset, asset.disposal_date)

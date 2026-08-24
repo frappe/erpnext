@@ -7,7 +7,7 @@ from collections import defaultdict
 
 import frappe
 from frappe import _, bold, qb, throw
-from frappe.model.workflow import get_workflow_name, is_transition_condition_satisfied
+from frappe.model.workflow import get_workflow_name
 from frappe.query_builder import Criterion, DocType
 from frappe.query_builder.custom import ConstantColumn
 from frappe.query_builder.functions import Abs, Sum
@@ -69,10 +69,17 @@ from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 from erpnext.stock.get_item_details import (
 	NOT_APPLICABLE_TAX,
 	_get_item_tax_template,
+	_get_item_tax_template_from_item_group,
+	get_bin_details,
 	get_conversion_factor,
 	get_item_details,
 	get_item_tax_map,
 	get_item_warehouse,
+)
+from erpnext.stock.utils import (
+	is_group_warehouse,
+	validate_disabled_warehouse,
+	validate_warehouse_company,
 )
 from erpnext.utilities.regional import temporary_flag
 from erpnext.utilities.transaction_base import TransactionBase
@@ -140,6 +147,26 @@ class AccountsController(TransactionBase):
 			if self.doctype in relevant_docs:
 				self.set_payment_schedule()
 
+	def before_insert(self):
+		self.clear_clearance_date_on_amend()
+
+	def clear_clearance_date_on_amend(self):
+		"""Drop the bank reconciliation clearance date copied over while amending.
+
+		The framework copies `no_copy` fields when amending, so a reconciled
+		voucher would carry a stale clearance date into its amendment even though
+		the linked bank transaction gets unreconciled on cancellation.
+		"""
+		if not self.get("amended_from"):
+			return
+
+		if self.meta.has_field("clearance_date"):
+			self.clearance_date = None
+
+		for payment in self.get("payments") or []:
+			if payment.meta.has_field("clearance_date"):
+				payment.clearance_date = None
+
 	def remove_bundle_for_non_stock_invoices(self):
 		has_sabb = False
 		if self.doctype in ("Sales Invoice", "Purchase Invoice") and not self.update_stock:
@@ -177,7 +204,7 @@ class AccountsController(TransactionBase):
 		if not get_meta(self.doctype).has_field("outstanding_amount"):
 			return
 
-		if self.get("is_return") and self.return_against and not self.get("is_pos"):
+		if self.get("is_return") and self.return_against and not (self.get("is_pos") or self.get("is_paid")):
 			against_voucher_outstanding = frappe.get_value(
 				self.doctype, self.return_against, "outstanding_amount"
 			)
@@ -237,6 +264,7 @@ class AccountsController(TransactionBase):
 			if self.is_return:
 				self.validate_qty()
 			else:
+				self.clear_stale_deferred_fields()
 				self.validate_deferred_start_and_end_date()
 
 		self.validate_inter_company_reference()
@@ -326,6 +354,7 @@ class AccountsController(TransactionBase):
 		# Determine if drop ship applies
 		is_drop_ship = self.doctype in {
 			"Purchase Order",
+			"Purchase Invoice",
 			"Sales Order",
 			"Sales Invoice",
 		} and self.is_drop_ship(self.items)
@@ -621,6 +650,23 @@ class AccountsController(TransactionBase):
 		if self.get("from_date") and self.get("to_date") and getdate(self.from_date) > getdate(self.to_date):
 			frappe.throw(_("To Date cannot be before From Date"), title=_("Invalid Auto Repeat Date"))
 
+	def clear_stale_deferred_fields(self):
+		field_map = {
+			"Sales Invoice": "deferred_revenue_account",
+			"Purchase Invoice": "deferred_expense_account",
+		}
+		account_field = field_map.get(self.doctype)
+
+		for item in self.get("items"):
+			if item.get("enable_deferred_revenue") or item.get("enable_deferred_expense"):
+				continue
+
+			item.service_start_date = None
+			item.service_end_date = None
+			item.service_stop_date = None
+			if account_field:
+				item.set(account_field, None)
+
 	def validate_deferred_start_and_end_date(self):
 		for d in self.items:
 			if d.get("enable_deferred_revenue") or d.get("enable_deferred_expense"):
@@ -674,6 +720,8 @@ class AccountsController(TransactionBase):
 			self.validate_non_invoice_documents_schedule()
 
 	def before_print(self, settings=None):
+		self.set_missing_terms()
+
 		if self.doctype in [
 			"Purchase Order",
 			"Sales Order",
@@ -696,6 +744,16 @@ class AccountsController(TransactionBase):
 
 		set_print_templates_for_item_table(self, settings)
 		set_print_templates_for_taxes(self, settings)
+
+	def set_missing_terms(self):
+		if not self.get("tc_name") or self.get("terms"):
+			return
+
+		from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import (
+			get_terms_and_conditions,
+		)
+
+		self.terms = get_terms_and_conditions(self.tc_name, self.as_dict())
 
 	def calculate_paid_amount(self):
 		if hasattr(self, "is_pos") or hasattr(self, "is_paid"):
@@ -1847,7 +1905,7 @@ class AccountsController(TransactionBase):
 
 	def is_payable_account(self, reference_doctype, account):
 		if reference_doctype == "Purchase Invoice" or (
-			reference_doctype == "Journal Entry"
+			reference_doctype in ("Journal Entry", "Payment Entry")
 			and frappe.get_cached_value("Account", account, "account_type") == "Payable"
 		):
 			return True
@@ -3647,6 +3705,10 @@ def set_child_tax_template_and_map(item, child_item, parent_doc):
 	}
 
 	child_item.item_tax_template = _get_item_tax_template(args, item.taxes)
+
+	if not child_item.get("item_tax_template"):
+		child_item.item_tax_template = _get_item_tax_template_from_item_group(args, item.item_group)
+
 	if child_item.get("item_tax_template"):
 		child_item.item_tax_rate = get_item_tax_map(
 			parent_doc.get("company"), child_item.item_tax_template, as_json=True
@@ -3699,26 +3761,52 @@ def set_order_defaults(parent_doctype, parent_doctype_name, child_doctype, child
 	child_item.update({date_fieldname: trans_item.get(date_fieldname) or p_doc.get(date_fieldname)})
 	child_item.stock_uom = item.stock_uom
 	child_item.uom = trans_item.get("uom") or item.stock_uom
-	child_item.warehouse = get_item_warehouse(item, p_doc, overwrite_warehouse=True)
+	child_item.warehouse = get_new_child_item_warehouse(p_doc, item, trans_item, child_doctype)
 	conversion_factor = flt(get_conversion_factor(item.item_code, child_item.uom).get("conversion_factor"))
 	child_item.conversion_factor = flt(trans_item.get("conversion_factor")) or conversion_factor
+	child_item.update(get_bin_details(child_item.item_code, child_item.warehouse, p_doc.get("company")))
 
 	if child_doctype in ["Purchase Order Item", "Supplier Quotation Item"]:
 		# Initialized value will update in parent validation
 		child_item.base_rate = 1
 		child_item.base_amount = 1
-	if child_doctype == "Sales Order Item":
-		child_item.warehouse = get_item_warehouse(item, p_doc, overwrite_warehouse=True)
-		if not child_item.warehouse:
-			frappe.throw(
-				_(
-					"Cannot find a default warehouse for item {0}. Please set one in the Item Master or in Stock Settings."
-				).format(frappe.bold(item.item_code))
-			)
 
 	set_child_tax_template_and_map(item, child_item, p_doc)
 	add_taxes_from_tax_template(child_item, p_doc)
 	return child_item
+
+
+def get_new_child_item_warehouse(p_doc, item, trans_item: dict, child_doctype: str) -> str | None:
+	"""Return the warehouse picked in the Update Items dialog, else the configured default.
+
+	Validates whichever warehouse was resolved, since a submitted parent skips validate().
+	"""
+	warehouse = trans_item.get("warehouse") or get_item_warehouse(item, p_doc, overwrite_warehouse=True)
+
+	if not warehouse:
+		if is_warehouse_required_for_new_child_item(child_doctype, item, trans_item):
+			frappe.throw(
+				_(
+					"Cannot find a default warehouse for item {0}. Please select one in the Update Items dialog, or set a default in the Item Master or in Stock Settings."
+				).format(frappe.bold(item.item_code))
+			)
+		return None
+
+	validate_warehouse_company(warehouse, p_doc.company)
+	validate_disabled_warehouse(warehouse)
+	is_group_warehouse(warehouse)
+	return warehouse
+
+
+def is_warehouse_required_for_new_child_item(child_doctype: str, item, trans_item: dict) -> bool:
+	"""Sales Order always needs one; buying documents only for stock rows, as in validate_stock_item_warehouse."""
+	if child_doctype == "Sales Order Item":
+		return True
+
+	if child_doctype in ("Purchase Order Item", "Supplier Quotation Item"):
+		return bool(item.is_stock_item and flt(trans_item.get("qty")) and not item.delivered_by_supplier)
+
+	return False
 
 
 def validate_child_on_delete(row, parent, ordered_item=None):
@@ -3811,7 +3899,9 @@ def validate_and_delete_children(parent, data, ordered_item=None) -> bool:
 
 
 @frappe.whitelist()
-def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, child_docname="items"):
+def update_child_qty_rate(
+	parent_doctype: str, trans_items: str, parent_doctype_name: str, child_docname: str = "items"
+):
 	from erpnext.buying.doctype.supplier_quotation.supplier_quotation import get_purchased_items
 	from erpnext.selling.doctype.quotation.quotation import get_ordered_items
 
@@ -3837,14 +3927,12 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 		current_state = doc.get(workflow_doc.workflow_state_field)
 		roles = frappe.get_roles()
 
-		transitions = []
-		for transition in workflow_doc.transitions:
-			if transition.next_state == current_state and transition.allowed in roles:
-				if not is_transition_condition_satisfied(transition, doc):
-					continue
-				transitions.append(transition.as_dict())
+		allowed = any(
+			state.state == current_state and (not state.allow_edit or state.allow_edit in roles)
+			for state in workflow_doc.states
+		)
 
-		if not transitions:
+		if not allowed:
 			frappe.throw(
 				_("You are not allowed to update as per the conditions set in {} Workflow.").format(
 					get_link_to_form("Workflow", workflow)

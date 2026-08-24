@@ -61,6 +61,9 @@ before_install = [
 ]
 after_install = "erpnext.setup.install.after_install"
 
+after_app_install = "erpnext.setup.install.after_app_install"
+after_app_uninstall = "erpnext.setup.install.after_app_uninstall"
+
 boot_session = "erpnext.startup.boot.boot_session"
 notification_config = "erpnext.startup.notifications.get_notification_config"
 get_help_messages = "erpnext.utilities.activation.get_help_messages"
@@ -355,6 +358,9 @@ doc_events = {
 	"Event": {
 		"after_insert": "erpnext.crm.utils.link_events_with_prospect",
 	},
+	"Contact Us Settings": {
+		"on_update": "erpnext.crm.utils.disable_opportunity_creation_on_contact_us_disabled",
+	},
 	"Sales Invoice": {
 		"on_submit": [
 			"erpnext.regional.create_transaction_log",
@@ -425,6 +431,7 @@ scheduler_events = {
 	],
 	"hourly_long": [],
 	"hourly_maintenance": [
+		"erpnext.crm.doctype.appointment.appointment.handle_expired_unverified_appointments",
 		"erpnext.stock.doctype.repost_item_valuation.repost_item_valuation.repost_entries",
 		"erpnext.utilities.bulk_transaction.retry",
 		"erpnext.projects.doctype.project.project.collect_project_status",
@@ -590,16 +597,16 @@ regional_overrides = {
 		"erpnext.controllers.accounts_controller.validate_regional": "erpnext.regional.italy.utils.sales_invoice_validate",
 	},
 }
-user_privacy_documents = [
+user_data_fields = [
 	{
 		"doctype": "Lead",
-		"match_field": "email_id",
-		"personal_fields": ["phone", "mobile_no", "fax", "website", "lead_name"],
+		"filter_by": "email_id",
+		"redact_fields": ["phone", "mobile_no", "fax", "website", "lead_name"],
 	},
 	{
 		"doctype": "Opportunity",
-		"match_field": "contact_email",
-		"personal_fields": ["contact_mobile", "contact_display", "customer_name"],
+		"filter_by": "contact_email",
+		"redact_fields": ["contact_mobile", "contact_display", "customer_name"],
 	},
 ]
 

@@ -96,3 +96,29 @@ frappe.ui.form.on("Subscription", {
 		});
 	},
 });
+
+frappe.ui.form.on("Subscription Plan Detail", {
+	plan: function (frm, cdt, cdn) {
+		const row = locals[cdt][cdn];
+		if (!row.plan) return;
+		const requested_plan = row.plan;
+
+		frappe.call({
+			method: "erpnext.accounts.doctype.subscription.subscription.get_plan_dimensions",
+			args: {
+				plan: requested_plan,
+				company: frm.doc.company,
+				party_type: frm.doc.party_type,
+			},
+			callback: function (r) {
+				if (!r.message || locals[cdt]?.[cdn]?.plan !== requested_plan) return;
+				// Only fill dimensions left empty, so a manual entry or an earlier plan is never overwritten.
+				for (const [dimension, value] of Object.entries(r.message)) {
+					if (frm.fields_dict[dimension] && !frm.doc[dimension]) {
+						frm.set_value(dimension, value);
+					}
+				}
+			},
+		});
+	},
+});

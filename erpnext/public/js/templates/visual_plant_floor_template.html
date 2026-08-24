@@ -1,4 +1,5 @@
 {% $.each(workstations, (idx, row) => { %}
+	{% const row_workstation_name = frappe.utils.escape_html(row.name); %}
 	<div class="workstation-wrapper">
 		<div class="workstation-status text-right">
 			{% if(row.status == "Production") { %}
@@ -17,14 +18,14 @@
 					{% if(row.status_image) { %}
 						<img class="workstation-image-cls" src="{{row.status_image}}">
 					{% } else { %}
-						<div class="workstation-image-cls workstation-abbr">{{frappe.get_abbr(row.name, 2)}}</div>
+						<div class="workstation-image-cls workstation-abbr">{{frappe.get_abbr(row_workstation_name, 2)}}</div>
 					{% } %}
 				</a>
 			</div>
 		</div>
 		<div class="workstation-card" style="display: grid;">
-			<span class="ellipsis" title="{{row.name}}">
-				{{row.workstation_name}}
+			<span class="ellipsis" title="{{row_workstation_name}}">
+				{{row_workstation_name}}
 			</span>
 		</div>
 	</div>

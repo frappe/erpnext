@@ -162,7 +162,7 @@ class PurchaseOrder(BuyingController):
 		taxes_and_charges_deducted: DF.Currency
 		tc_name: DF.Link | None
 		terms: DF.TextEditor | None
-		title: DF.Data
+		title: DF.Data | None
 		to_date: DF.Date | None
 		total: DF.Currency
 		total_net_weight: DF.Float
@@ -662,7 +662,7 @@ class PurchaseOrder(BuyingController):
 
 	def update_subcontracting_order_status(self):
 		from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
-			update_subcontracting_order_status as update_sco_status,
+			set_subcontracting_order_status as update_sco_status,
 		)
 
 		if self.is_subcontracted and not self.is_old_subcontracting_flow:

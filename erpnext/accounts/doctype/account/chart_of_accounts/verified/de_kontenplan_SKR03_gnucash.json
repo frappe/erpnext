@@ -34,6 +34,13 @@
 					"account_number": "0430",
 					"account_type": "Fixed Asset"
 				},
+				"Anlagen im Bau": {
+					"is_group": 1,
+					"Andere Anlagen, Betriebs- und Geschäftsausstattung im Bau": {
+						"account_number": "0498",
+						"account_type": "Capital Work in Progress"
+					}
+				},
 				"Accumulated Depreciation": {
 					"account_type": "Accumulated Depreciation"
 				}
@@ -317,13 +324,21 @@
 				"account_number": "3800",
 				"account_type": "Expenses Included In Asset Valuation"
 			},
+			"Bestandsveränderungen Roh-, Hilfs- und Betriebsstoffe sowie bezogene Waren": {
+				"account_number": "3960",
+				"account_type": "Stock Adjustment"
+			},
 			"Herstellungskosten": {
 				"account_number": "4996",
 				"account_type": "Cost of Goods Sold"
 			},
+			"Anlagenabgänge Sachanlagen (Restbuchwert bei Buchverlust)": {
+				"account_number": "2310",
+				"account_type": "Expense Account"
+			},
 			"Verluste aus dem Abgang von Gegenständen des Anlagevermögens": {
 				"account_number": "2320",
-				"account_type": "Stock Adjustment"
+				"account_type": "Expense Account"
 			},
 			"Verwaltungskosten": {
 				"account_number": "4997",
@@ -340,7 +355,7 @@
 				"is_group": 1,
 				"Abschreibungen auf Sachanlagen (ohne AfA auf Kfz und Gebäude)": {
 					"account_number": "4830",
-					"account_type": "Accumulated Depreciation"
+					"account_type": "Depreciation"
 				},
 				"Abschreibungen auf Gebäude": {
 					"account_number": "4831",

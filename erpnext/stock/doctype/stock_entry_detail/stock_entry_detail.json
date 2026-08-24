@@ -68,6 +68,7 @@
   "col_break6",
   "material_request",
   "material_request_item",
+  "pick_list_item",
   "original_item",
   "reference_section",
   "against_stock_entry",
@@ -337,7 +338,6 @@
    "print_hide": 1
   },
   {
-   "default": ":Company",
    "depends_on": "eval:cint(erpnext.is_perpetual_inventory_enabled(parent.company))",
    "fieldname": "cost_center",
    "fieldtype": "Link",
@@ -413,6 +413,16 @@
    "label": "Material Request Item",
    "no_copy": 1,
    "options": "Material Request Item",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "pick_list_item",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Pick List Item",
+   "no_copy": 1,
+   "options": "Pick List Item",
    "print_hide": 1,
    "read_only": 1
   },
@@ -616,7 +626,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-04-27 11:40:38.294196",
+ "modified": "2026-07-06 18:17:18.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Detail",

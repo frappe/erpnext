@@ -262,7 +262,6 @@ execute:frappe.rename_doc("Report", "TDS Payable Monthly", "Tax Withholding Deta
 erpnext.patches.v14_0.update_proprietorship_to_individual
 erpnext.patches.v15_0.rename_subcontracting_fields
 erpnext.patches.v15_0.unset_incorrect_additional_discount_percentage
-erpnext.patches.v16_0.create_company_custom_fields
 
 [post_model_sync]
 erpnext.patches.v15_0.create_asset_depreciation_schedules_from_assets
@@ -422,6 +421,7 @@ execute:frappe.db.set_single_value("Accounts Settings", "fetch_valuation_rate_fo
 erpnext.patches.v15_0.add_company_payment_gateway_account
 erpnext.patches.v15_0.update_uae_zero_rated_fetch
 erpnext.patches.v15_0.update_fieldname_in_accounting_dimension_filter
+erpnext.patches.v16_0.create_company_custom_fields
 erpnext.patches.v15_0.set_asset_status_if_not_already_set
 erpnext.patches.v15_0.toggle_legacy_controller_for_period_closing
 execute:frappe.db.set_single_value("Accounts Settings", "show_party_balance", 1)
@@ -433,3 +433,19 @@ erpnext.patches.v15_0.replace_http_with_https_in_sales_partner
 erpnext.patches.v16_0.add_portal_redirects
 erpnext.patches.v16_0.update_order_qty_and_requested_qty_based_on_mr_and_po
 erpnext.patches.v16_0.depends_on_inv_dimensions
+erpnext.patches.v16_0.clear_procedures_from_receivable_report
+erpnext.patches.v16_0.migrate_address_contact_custom_fields
+erpnext.patches.v15_0.set_main_item_code_in_material_request_plan_item
+erpnext.patches.v16_0.set_posting_datetime_for_sabb_and_drop_indexes
+execute:frappe.db.set_single_value("Accounts Settings", "pcv_job_timeout", 3600)
+erpnext.patches.v15_0.backfill_sla_link_filters_on_custom_field
+erpnext.patches.v15_0.backfill_sla_link_filters_on_docfield
+erpnext.patches.v16_0.crm_settings_handle_allowed_users_for_frappe_crm
+erpnext.patches.v16_0.backfill_pick_list_transferred_qty
+erpnext.patches.v16_0.access_control_for_project_users
+erpnext.patches.v16_0.rename_ar_ap_ageing_filter
+erpnext.patches.v15_0.fix_titles
+erpnext.patches.v16_0.backfill_repost_accounting_ledger_status
+erpnext.patches.v16_0.merge_seeded_item_group_root
+erpnext.patches.v16_0.repair_work_order_material_transfer
+erpnext.patches.v16_0.remove_frappe_crm_custom_fields

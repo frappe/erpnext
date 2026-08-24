@@ -202,15 +202,14 @@ class POSProfile(Document):
 	def set_defaults(self, include_current_pos=True):
 		frappe.defaults.clear_default("is_pos")
 
-		if not include_current_pos:
-			condition = " where pfu.name != '%s' and pfu.default = 1 " % self.name.replace("'", "'")
-		else:
-			condition = " where pfu.default = 1 "
+		pfu = frappe.qb.DocType("POS Profile User")
 
-		pos_view_users = frappe.db.sql_list(
-			f"""select pfu.user
-			from `tabPOS Profile User` as pfu {condition}"""
-		)
+		query = frappe.qb.from_(pfu).select(pfu.user).where(pfu.default == 1)
+
+		if not include_current_pos:
+			query = query.where(pfu.name != self.name)
+
+		pos_view_users = query.run(as_list=1, pluck=True)
 
 		for user in pos_view_users:
 			if user:
@@ -309,32 +308,3 @@ def pos_profile_query(doctype, txt, searchfield, start, page_len, filters):
 		)
 
 	return pos_profile
-
-
-@frappe.whitelist()
-def set_default_profile(pos_profile, company):
-	modified = now()
-	user = frappe.session.user
-
-	if pos_profile and company:
-		frappe.db.sql(
-			""" update `tabPOS Profile User` pfu, `tabPOS Profile` pf
-			set
-				pfu.default = 0, pf.modified = %s, pf.modified_by = %s
-			where
-				pfu.user = %s and pf.name = pfu.parent and pf.company = %s
-				and pfu.default = 1""",
-			(modified, user, user, company),
-			auto_commit=1,
-		)
-
-		frappe.db.sql(
-			""" update `tabPOS Profile User` pfu, `tabPOS Profile` pf
-			set
-				pfu.default = 1, pf.modified = %s, pf.modified_by = %s
-			where
-				pfu.user = %s and pf.name = pfu.parent and pf.company = %s and pf.name = %s
-			""",
-			(modified, user, user, company, pos_profile),
-			auto_commit=1,
-		)

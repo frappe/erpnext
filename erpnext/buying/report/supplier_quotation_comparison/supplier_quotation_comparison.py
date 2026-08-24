@@ -58,12 +58,19 @@ def get_data(filters):
 		)
 		.where(
 			(sq_item.parent == sq.name)
-			& (sq_item.docstatus < 2)
 			& (sq.company == filters.get("company"))
 			& (sq.transaction_date.between(filters.get("from_date"), filters.get("to_date")))
 		)
 		.orderby(sq.transaction_date, sq_item.item_code)
 	)
+
+	# blank -> Draft + Submitted, else filter to the chosen docstatus
+	if filters.get("status") == "Draft":
+		query = query.where(sq_item.docstatus == 0)
+	elif filters.get("status") == "Submitted":
+		query = query.where(sq_item.docstatus == 1)
+	else:
+		query = query.where(sq_item.docstatus < 2)
 
 	if filters.get("item_code"):
 		query = query.where(sq_item.item_code == filters.get("item_code"))
@@ -297,7 +304,8 @@ def get_message():
 
 
 @frappe.whitelist()
-def set_default_supplier(item_code, supplier, company):
+def set_default_supplier(item_code: str, supplier: str, company: str):
+	frappe.has_permission("Item", "write", doc=item_code, throw=True)
 	frappe.db.set_value(
 		"Item Default",
 		{"parent": item_code, "company": company},

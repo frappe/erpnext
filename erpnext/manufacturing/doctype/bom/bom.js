@@ -75,6 +75,9 @@ frappe.ui.form.on("BOM", {
 
 	with_operations: function (frm) {
 		frm.set_df_property("fg_based_operating_cost", "hidden", frm.doc.with_operations ? 1 : 0);
+		if (frm.doc.routing && frm.doc.with_operations && !frm.doc.operations.length) {
+			frm.trigger("routing");
+		}
 	},
 
 	fg_based_operating_cost: function (frm) {
@@ -170,7 +173,9 @@ frappe.ui.form.on("BOM", {
 			frm.set_intro(
 				__("This is a Template BOM and will be used to make the work order for {0} of the item {1}", [
 					`<a class="variants-intro">variants</a>`,
-					`<a href="/app/item/${frm.doc.item}">${frm.doc.item}</a>`,
+					`<a href="${frappe.utils.get_form_link("Item", frm.doc.item)}">${frappe.utils.escape_html(
+						frm.doc.item
+					)}</a>`,
 				]),
 				true
 			);
@@ -438,7 +443,11 @@ frappe.ui.form.on("BOM", {
 	},
 
 	routing(frm) {
-		if (frm.doc.routing) {
+		// Refetch operations whenever the routing is (re)selected, so that
+		// changing the routing - e.g. on a new BOM version copied from another
+		// BOM - replaces the operations with those of the newly selected routing
+		// instead of keeping the old ones.
+		if (frm.doc.routing && frm.doc.with_operations) {
 			frappe.call({
 				doc: frm.doc,
 				method: "get_routing",

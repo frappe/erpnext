@@ -10,7 +10,11 @@ from frappe import _
 from frappe.query_builder.functions import Count
 from frappe.utils import cint, flt, getdate
 
-from erpnext.stock.report.stock_ageing.stock_ageing import FIFOSlots, get_average_age
+from erpnext.stock.report.stock_ageing.stock_ageing import (
+	FIFOSlots,
+	get_average_age,
+	normalize_fifo_queue,
+)
 from erpnext.stock.report.stock_analytics.stock_analytics import (
 	get_item_details,
 	get_items,
@@ -68,6 +72,7 @@ def execute(filters=None):
 		fifo_queue = item_ageing[item]["fifo_queue"]
 		average_age = 0.00
 		if fifo_queue:
+			fifo_queue = normalize_fifo_queue(fifo_queue)
 			average_age = get_average_age(fifo_queue, filters["to_date"])
 
 		row += [average_age]

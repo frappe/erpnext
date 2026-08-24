@@ -20,6 +20,7 @@ class MaterialRequestPlanItem(Document):
 		from_warehouse: DF.Link | None
 		item_code: DF.Link
 		item_name: DF.Data | None
+		main_item_code: DF.Data | None
 		material_request_type: DF.Literal[
 			"", "Purchase", "Material Transfer", "Material Issue", "Manufacture", "Customer Provided"
 		]

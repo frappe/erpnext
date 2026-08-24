@@ -5,6 +5,7 @@ from erpnext.accounts.report.tax_withholding_details.tax_withholding_details imp
 	get_result,
 	get_tds_docs,
 )
+from erpnext.accounts.report.utils import validate_mandatory_date_range
 from erpnext.accounts.utils import get_fiscal_year
 
 
@@ -33,8 +34,7 @@ def execute(filters=None):
 
 def validate_filters(filters):
 	"""Validate if dates are properly set and lie in the same fiscal year"""
-	if filters.from_date > filters.to_date:
-		frappe.throw(_("From Date must be before To Date"))
+	validate_mandatory_date_range(filters)
 
 	from_year = get_fiscal_year(filters.from_date)[0]
 	to_year = get_fiscal_year(filters.to_date)[0]

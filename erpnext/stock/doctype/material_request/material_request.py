@@ -19,6 +19,7 @@ from erpnext.buying.utils import check_on_hold_or_closed_status, validate_for_it
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
 from erpnext.stock.doctype.item.item import get_item_defaults
+from erpnext.stock.get_item_details import get_price_list_rate_for
 from erpnext.stock.stock_balance import get_indented_qty, update_bin_qty
 
 form_grid_templates = {"items": "templates/form_grid/material_request_grid.html"}
@@ -169,8 +170,46 @@ class MaterialRequest(BuyingController):
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 		self.reset_default_field_value("set_from_warehouse", "items", "from_warehouse")
 
+		if self.buying_price_list and not frappe.get_value("Price List", self.buying_price_list, "buying"):
+			self.buying_price_list = None
+
 		if not self.buying_price_list:
-			self.buying_price_list = frappe.defaults.get_defaults().buying_price_list
+			buying_price_list = frappe.defaults.get_defaults().buying_price_list
+			if frappe.has_permission("Price List", "read", buying_price_list):
+				self.buying_price_list = buying_price_list
+
+	def on_update(self):
+		if not self.is_new() and self.buying_price_list and self.has_value_changed("buying_price_list"):
+			self.update_item_rates()
+
+	def update_item_rates(self):
+		price_not_uom_dependent = frappe.get_value(
+			"Price List", self.buying_price_list, "price_not_uom_dependent"
+		)
+		for item in self.items:
+			rate = get_price_list_rate_for(
+				frappe._dict(
+					{
+						"price_list": self.buying_price_list,
+						"uom": item.uom,
+						"transaction_date": self.transaction_date,
+						"qty": item.qty,
+						"stock_uom": item.stock_uom,
+						"conversion_factor": item.conversion_factor,
+						"price_list_uom_dependant": price_not_uom_dependent,
+					}
+				),
+				item.item_code,
+			)
+			if rate is not None:
+				item.db_set({"rate": rate, "amount": flt(rate * item.qty, item.precision("amount"))})
+
+		frappe.msgprint(
+			_("Item rates have been updated based on the selected Buying Price List {0}").format(
+				self.buying_price_list
+			),
+			alert=True,
+		)
 
 	def before_update_after_submit(self):
 		self.validate_schedule_date()
@@ -209,7 +248,7 @@ class MaterialRequest(BuyingController):
 
 	def check_modified_date(self):
 		mod_db = frappe.db.sql("""select modified from `tabMaterial Request` where name = %s""", self.name)
-		date_diff = frappe.db.sql(f"""select TIMEDIFF('{mod_db[0][0]}', '{cstr(self.modified)}')""")
+		date_diff = frappe.db.sql("""select TIMEDIFF(%s, %s)""", (mod_db[0][0], cstr(self.modified)))
 
 		if date_diff and date_diff[0][0]:
 			frappe.throw(_("{0} {1} has been modified. Please refresh.").format(_(self.doctype), self.name))
@@ -781,7 +820,10 @@ def raise_work_orders(material_request):
 
 	for d in mr.items:
 		if (d.stock_qty - d.ordered_qty) > 0:
-			if frappe.db.exists("BOM", {"item": d.item_code, "is_default": 1}):
+			if frappe.db.exists("BOM", {"item": d.item_code, "is_default": 1, "is_active": 1}) or (
+				(variant_of := frappe.get_value("Item", d.item_code, "variant_of"))
+				and frappe.db.exists("BOM", {"item": variant_of, "is_default": 1, "is_active": 1})
+			):
 				wo_order = frappe.new_doc("Work Order")
 				wo_order.update(
 					{

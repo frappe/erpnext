@@ -9,6 +9,13 @@ cur_frm.add_fetch("bank", "swift_number", "swift_number");
 
 frappe.ui.form.on("Bank Guarantee", {
 	setup: function (frm) {
+		frm.set_query("reference_doctype", function () {
+			return {
+				filters: {
+					name: ["in", ["Sales Order", "Purchase Order"]],
+				},
+			};
+		});
 		frm.set_query("bank_account", function () {
 			return {
 				filters: {

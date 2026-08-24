@@ -195,7 +195,12 @@ class TestPaymentRequest(FrappeTestCase):
 			return_doc=1,
 		)
 
-		pe = pr.set_as_paid()
+		pe = pr.create_payment_entry(submit=False)
+		pe.source_exchange_rate = 50
+		pe.target_exchange_rate = 50
+		pe.set_amounts()
+		pe.insert(ignore_permissions=True)
+		pe.submit()
 
 		expected_gle = dict(
 			(d[0], d)
@@ -281,7 +286,12 @@ class TestPaymentRequest(FrappeTestCase):
 		pr = make_payment_request(dt=po_doc.doctype, dn=po_doc.name, recipient_id="nabin@erpnext.com")
 		pr = frappe.get_doc(pr).save().submit()
 
-		pe = pr.create_payment_entry()
+		pe = pr.create_payment_entry(submit=False)
+		pe.target_exchange_rate = 80
+		pe.paid_amount = 800
+		pe.set_amounts()
+		pe.insert(ignore_permissions=True)
+		pe.submit()
 		self.assertEqual(pe.base_paid_amount, 800)
 		self.assertEqual(pe.paid_amount, 800)
 		self.assertEqual(pe.base_received_amount, 800)
@@ -607,6 +617,22 @@ class TestPaymentRequest(FrappeTestCase):
 		pr_2 = make_payment_request(dt="Purchase Invoice", dn=pi.name, mute_email=1)
 		pi.load_from_db()
 		self.assertEqual(pr_2.grand_total, pi.outstanding_amount)
+
+	def test_payment_entry_reference_details_fetched_from_invoice(self):
+		pi = make_purchase_invoice(currency="INR", qty=1, rate=94500)
+		pi.submit()
+
+		pr = make_payment_request(dt="Purchase Invoice", dn=pi.name, mute_email=1, submit_doc=0, return_doc=1)
+		pr.grand_total = 94000
+		pr.submit()
+
+		pe = pr.create_payment_entry(submit=False)
+
+		self.assertEqual(pe.references[0].reference_name, pi.name)
+		self.assertEqual(pe.references[0].total_amount, pi.grand_total)
+		self.assertEqual(pe.references[0].outstanding_amount, pi.outstanding_amount)
+		self.assertEqual(pe.references[0].allocated_amount, 94000)
+		self.assertEqual(pe.paid_amount, 94000)
 
 	def test_consider_journal_entry_and_return_invoice(self):
 		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry

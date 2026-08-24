@@ -126,11 +126,13 @@
    "label": "Image"
   },
   {
+   "default": "1",
    "fetch_from": "operation.batch_size",
    "fetch_if_empty": 1,
    "fieldname": "batch_size",
-   "fieldtype": "Int",
-   "label": "Batch Size"
+   "fieldtype": "Float",
+   "label": "Batch Size",
+   "non_negative": 1
   },
   {
    "depends_on": "eval:doc.parenttype == \"Routing\" || !parent.routing",
@@ -196,12 +198,13 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-02-17 15:33:28.495850",
+ "modified": "2026-05-27 12:09:44.797434",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Operation",
  "owner": "Administrator",
  "permissions": [],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

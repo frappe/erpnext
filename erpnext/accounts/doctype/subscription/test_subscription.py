@@ -17,7 +17,7 @@ from frappe.utils.data import (
 	nowdate,
 )
 
-from erpnext.accounts.doctype.subscription.subscription import get_prorata_factor
+from erpnext.accounts.doctype.subscription.subscription import get_plan_dimensions, get_prorata_factor
 
 test_dependencies = ("UOM", "Item Group", "Item")
 
@@ -279,6 +279,59 @@ class TestSubscription(FrappeTestCase):
 
 		settings.cancel_after_grace = default_grace_period_action
 		settings.save()
+
+	def test_cancelled_subscription_stays_cancelled_after_payment_and_reprocess(self):
+		# https://github.com/frappe/erpnext/issues/57761
+		subscription = create_subscription(
+			start_date=nowdate(), generate_invoice_at="Beginning of the current subscription period"
+		)
+		subscription.process(posting_date=nowdate())  # generate first invoice
+		invoice = subscription.get_current_invoice()
+		self.assertIsNotNone(invoice)
+
+		invoice.db_set("outstanding_amount", 0)
+		invoice.db_set("status", "Paid")
+
+		subscription.cancel_subscription()
+		self.assertEqual(subscription.status, "Cancelled")
+		cancelation_date = getdate(subscription.cancelation_date)
+
+		subscription.set_subscription_status()
+		self.assertEqual(subscription.status, "Cancelled")
+		self.assertEqual(getdate(subscription.cancelation_date), cancelation_date)
+
+		subscription.cancel_at_period_end = 1
+		subscription.end_date = None
+		invoice_count = len(subscription.invoices)
+		subscription.process()
+		self.assertEqual(subscription.status, "Cancelled")
+		self.assertEqual(len(subscription.invoices), invoice_count)
+
+	def test_subscription_cancels_at_period_end_without_end_date(self):
+		# https://github.com/frappe/erpnext/issues/57761 -- generate_invoice() rolls
+		# current_invoice_end forward to the next period before this check runs, so
+		# with no end_date to fall back on, cancel_at_period_end must compare
+		# against the period that just ended, not the (already advanced) next one.
+		create_plan(
+			plan_name="_Test plan name 11",
+			cost=80,
+			currency="INR",
+			billing_interval="Day",
+			billing_interval_count=3,
+		)
+		subscription = create_subscription(
+			start_date=nowdate(),
+			generate_invoice_at="End of the current subscription period",
+			plans=[{"plan": "_Test plan name 11", "qty": 1}],
+		)
+		subscription.cancel_at_period_end = 1
+		self.assertEqual(len(subscription.invoices), 0)
+		period_end = subscription.current_invoice_end
+
+		subscription.process(posting_date=period_end)
+
+		self.assertEqual(subscription.status, "Cancelled")
+		self.assertEqual(len(subscription.invoices), 1)
 
 	def test_subscription_restart_and_process(self):
 		settings = frappe.get_single("Subscription Settings")
@@ -582,6 +635,48 @@ class TestSubscription(FrappeTestCase):
 		)
 		subscription.process(nowdate())
 		self.assertEqual(len(subscription.invoices), 1)
+
+	def test_plan_dimensions_resolve_from_plan_then_item(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		# Plan-level cost center takes precedence.
+		create_plan(plan_name="_Test Sub Plan CC", cost=100, currency="INR")
+		frappe.db.set_value(
+			"Subscription Plan", "_Test Sub Plan CC", "cost_center", "_Test Cost Center - _TC"
+		)
+		self.assertEqual(
+			get_plan_dimensions("_Test Sub Plan CC", "_Test Company", "Customer").get("cost_center"),
+			"_Test Cost Center - _TC",
+		)
+
+		# No plan cost center: fall back to the item's company default (selling vs buying by party type).
+		item = make_item(
+			"_Test Sub Dimension Item",
+			{
+				"is_stock_item": 0,
+				"item_defaults": [
+					{
+						"company": "_Test Company",
+						"default_warehouse": "_Test Warehouse - _TC",
+						"selling_cost_center": "_Test Cost Center - _TC",
+						"buying_cost_center": "_Test Cost Center 2 - _TC",
+					}
+				],
+			},
+		)
+		create_plan(plan_name="_Test Sub Plan No CC", cost=100, currency="INR", item=item.name)
+
+		self.assertEqual(
+			get_plan_dimensions("_Test Sub Plan No CC", "_Test Company", "Customer").get("cost_center"),
+			"_Test Cost Center - _TC",
+		)
+		self.assertEqual(
+			get_plan_dimensions("_Test Sub Plan No CC", "_Test Company", "Supplier").get("cost_center"),
+			"_Test Cost Center 2 - _TC",
+		)
+
+		# Without a company the item fallback is skipped.
+		self.assertNotIn("cost_center", get_plan_dimensions("_Test Sub Plan No CC"))
 
 
 def make_plans():

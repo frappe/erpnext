@@ -21,6 +21,7 @@
   "min_order_qty",
   "section_break_8",
   "sales_order",
+  "main_item_code",
   "bin_qty_section",
   "actual_qty",
   "requested_qty",
@@ -112,6 +113,14 @@
    "fieldtype": "Link",
    "label": "Sales Order",
    "options": "Sales Order",
+   "read_only": 1
+  },
+  {
+   "fieldname": "main_item_code",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Main Item Code",
+   "no_copy": 1,
    "read_only": 1
   },
   {

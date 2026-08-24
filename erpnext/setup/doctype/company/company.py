@@ -74,6 +74,7 @@ class Company(NestedSet):
 		default_operating_cost_account: DF.Link | None
 		default_payable_account: DF.Link | None
 		default_provisional_account: DF.Link | None
+		default_purchase_price_variance_account: DF.Link | None
 		default_receivable_account: DF.Link | None
 		default_sales_contact: DF.Link | None
 		default_selling_terms: DF.Link | None
@@ -345,6 +346,7 @@ class Company(NestedSet):
 			)
 			warehouse.flags.ignore_permissions = True
 			warehouse.flags.ignore_mandatory = True
+			warehouse.flags.ignore_inventory_account_validation = True
 			warehouse.insert()
 
 			if wh_detail["is_group"]:

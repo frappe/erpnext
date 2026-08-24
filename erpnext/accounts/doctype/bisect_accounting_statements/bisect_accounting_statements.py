@@ -121,7 +121,7 @@ class BisectAccountingStatements(Document):
 
 				cur_node.save()
 
-	@frappe.whitelist()
+	@frappe.whitelist(methods=["POST"])
 	def build_tree(self):
 		frappe.db.delete("Bisect Nodes")
 

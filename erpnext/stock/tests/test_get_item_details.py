@@ -35,6 +35,86 @@ class TestGetItemDetail(FrappeTestCase):
 		details = get_item_details(args)
 		self.assertEqual(details.get("price_list_rate"), 100)
 
+	def test_bin_details_for_selling_doctypes(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		item_code = make_item(properties={"is_stock_item": 1}).name
+
+		make_purchase_receipt(item_code=item_code, warehouse="_Test Warehouse - _TC", qty=100, rate=100)
+		make_purchase_receipt(item_code=item_code, warehouse="_Test Warehouse 1 - _TC", qty=50, rate=100)
+
+		args = frappe._dict(
+			{
+				"item_code": item_code,
+				"warehouse": "_Test Warehouse - _TC",
+				"company": "_Test Company",
+				"customer": "_Test Customer",
+				"currency": "INR",
+				"conversion_rate": 1.0,
+				"price_list": "_Test Price List",
+				"price_list_currency": "INR",
+				"plc_conversion_rate": 1.0,
+				"transaction_date": None,
+				"name": None,
+				"ignore_pricing_rule": 1,
+				"qty": 1,
+			}
+		)
+
+		for doctype in ("Sales Order", "Quotation", "Sales Invoice", "Delivery Note", "Purchase Order"):
+			with self.subTest(doctype=doctype):
+				details = get_item_details(args.copy().update({"doctype": doctype}))
+
+				self.assertEqual(details.get("actual_qty"), 100)
+				self.assertEqual(details.get("company_total_stock"), 150)
+
+	def test_fetch_asset_category_expense_account_on_purchase_receipt(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		asset_category = "Test Expense Account Asset Category"
+		if not frappe.db.exists("Asset Category", asset_category):
+			frappe.get_doc(
+				{
+					"doctype": "Asset Category",
+					"asset_category_name": asset_category,
+					"enable_cwip_accounting": 0,
+					"depreciation_method": "Straight Line",
+					"total_number_of_depreciations": 12,
+					"frequency_of_depreciation": 1,
+					"accounts": [
+						{
+							"company_name": "_Test Company",
+							"fixed_asset_account": "_Test Fixed Asset - _TC",
+							"accumulated_depreciation_account": "_Test Accumulated Depreciations - _TC",
+							"depreciation_expense_account": "_Test Depreciations - _TC",
+						}
+					],
+				}
+			).insert()
+
+		asset_item = make_item(
+			"Test Expense Account Asset Item",
+			{"is_stock_item": 0, "is_fixed_asset": 1, "asset_category": asset_category},
+		).item_code
+
+		args = frappe._dict(
+			{
+				"item_code": asset_item,
+				"company": "_Test Company",
+				"conversion_rate": 1.0,
+				"price_list_currency": "USD",
+				"plc_conversion_rate": 1.0,
+				"doctype": "Purchase Receipt",
+				"supplier": "_Test Supplier",
+				"price_list": "_Test Buying Price List",
+				"ignore_pricing_rule": 1,
+				"qty": 1,
+			}
+		)
+		details = get_item_details(args)
+		self.assertEqual(details.get("expense_account"), "_Test Fixed Asset - _TC")
+
 	# making this test in get_item_details test file as feat/fix is present in that method
 	def test_fetch_price_from_list_rate_on_doc_save(self):
 		# create item

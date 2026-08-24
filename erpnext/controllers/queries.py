@@ -17,6 +17,7 @@ from pypika import Order
 import erpnext
 from erpnext.accounts.utils import build_qb_match_conditions
 from erpnext.stock.get_item_details import _get_item_tax_template
+from erpnext.stock.utils import get_combine_datetime
 
 
 # searches for active employees
@@ -305,7 +306,9 @@ def bom(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_project_name(doctype, txt, searchfield, start, page_len, filters):
+def get_project_name(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict | None = None
+):
 	proj = qb.DocType("Project")
 	qb_filter_and_conditions = []
 	qb_filter_or_conditions = []
@@ -320,7 +323,7 @@ def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 		if filters.get("company"):
 			qb_filter_and_conditions.append(proj.company == filters.get("company"))
 
-	qb_filter_and_conditions.append(proj.status.notin(["Completed", "Cancelled"]))
+	qb_filter_and_conditions.append(proj.status.notin(["Completed", "Cancelled", "On hold"]))
 
 	q = qb.from_(proj)
 
@@ -369,10 +372,14 @@ def get_delivery_notes_to_be_billed(
 		.where((DeliveryNote.docstatus == 1) & (DeliveryNote.is_return == 0) & (DeliveryNote.per_billed > 0))
 	)
 
+	query = frappe.qb.get_query(
+		"Delivery Note",
+		fields=fields,
+		filters=filters,
+	)
+
 	query = (
-		frappe.qb.from_(DeliveryNote)
-		.select(*[DeliveryNote[f] for f in fields])
-		.where(
+		query.where(
 			(DeliveryNote.docstatus == 1)
 			& (DeliveryNote.status.notin(["Stopped", "Closed"]))
 			& (DeliveryNote[searchfield].like(f"%{txt}%"))
@@ -386,12 +393,11 @@ def get_delivery_notes_to_be_billed(
 				)
 			)
 		)
+		.orderby(DeliveryNote[searchfield], order=Order.asc)
+		.limit(page_len)
+		.offset(start)
 	)
-	if filters and isinstance(filters, dict):
-		for key, value in filters.items():
-			query = query.where(DeliveryNote[key] == value)
 
-	query = query.orderby(DeliveryNote[searchfield], order=Order.asc).limit(page_len).offset(start)
 	return query.run(as_dict=as_dict)
 
 
@@ -476,6 +482,13 @@ def get_batches_from_stock_ledger_entries(searchfields, txt, filters, start=0, p
 		.limit(page_len)
 	)
 
+	if not filters.get("is_inward"):
+		if filters.get("posting_date") and filters.get("posting_time"):
+			query = query.where(
+				stock_ledger_entry.posting_datetime
+				<= get_combine_datetime(filters.get("posting_date"), filters.get("posting_time"))
+			)
+
 	if not filters.get("include_expired_batches"):
 		query = query.where((batch_table.expiry_date >= expiry_date) | (batch_table.expiry_date.isnull()))
 
@@ -528,6 +541,13 @@ def get_batches_from_serial_and_batch_bundle(searchfields, txt, filters, start=0
 		.offset(start)
 		.limit(page_len)
 	)
+
+	if not filters.get("is_inward"):
+		if filters.get("posting_date") and filters.get("posting_time"):
+			bundle_query = bundle_query.where(
+				stock_ledger_entry.posting_datetime
+				<= get_combine_datetime(filters.get("posting_date"), filters.get("posting_time"))
+			)
 
 	if not filters.get("include_expired_batches"):
 		bundle_query = bundle_query.where(
@@ -947,19 +967,14 @@ def get_payment_terms_for_references(doctype, txt, searchfield, start, page_len,
 def get_filtered_child_rows(doctype, txt, searchfield, start, page_len, filters) -> list:
 	table = frappe.qb.DocType(doctype)
 	query = (
-		frappe.qb.from_(table)
+		frappe.get_query(table, filters=filters)
 		.select(
-			table.name,
 			Concat("#", table.idx, ", ", table.item_code),
 		)
 		.orderby(table.idx)
 		.offset(start)
 		.limit(page_len)
 	)
-
-	if filters:
-		for field, value in filters.items():
-			query = query.where(table[field] == value)
 
 	if txt:
 		txt += "%"

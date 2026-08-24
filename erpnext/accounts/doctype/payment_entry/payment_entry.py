@@ -1197,9 +1197,9 @@ class PaymentEntry(AccountsController):
 				continue
 
 			if tax.add_deduct_tax == "Add":
-				included_taxes += tax.base_tax_amount
+				included_taxes += flt(tax.base_tax_amount)
 			else:
-				included_taxes -= tax.base_tax_amount
+				included_taxes -= flt(tax.base_tax_amount)
 
 		return included_taxes
 
@@ -1301,7 +1301,13 @@ class PaymentEntry(AccountsController):
 		self.add_deductions_gl_entries(gl_entries)
 		self.add_tax_gl_entries(gl_entries)
 		add_regional_gl_entries(gl_entries, self)
+		self.set_transaction_currency_and_rate_in_gl_map(gl_entries)
 		return gl_entries
+
+	def set_transaction_currency_and_rate_in_gl_map(self, gl_entries):
+		for gle in gl_entries:
+			gle.setdefault("transaction_currency", self.transaction_currency)
+			gle.setdefault("transaction_exchange_rate", self.transaction_exchange_rate)
 
 	def make_gl_entries(self, cancel=0, adv_adj=0):
 		gl_entries = self.build_gl_map()
@@ -2279,6 +2285,9 @@ def get_outstanding_reference_documents(args, validate=False):
 	if args.get("party_type") == "Member":
 		return
 
+	if args.get("party_type") and args.get("party"):
+		frappe.has_permission(args["party_type"], "read", args["party"], throw=True)
+
 	if not args.get("get_outstanding_invoices") and not args.get("get_orders_to_be_billed"):
 		args["get_outstanding_invoices"] = True
 
@@ -2688,6 +2697,9 @@ def get_party_details(company, party_type, party, date, cost_center=None):
 	if not frappe.db.exists(party_type, party):
 		frappe.throw(_("{0} {1} does not exist").format(_(party_type), party))
 
+	ptype = "select" if frappe.only_has_select_perm(party_type) else "read"
+	frappe.has_permission(party_type, ptype, party, throw=True)
+
 	party_account = get_party_account(party_type, party, company)
 	account_currency = get_account_currency(party_account)
 	account_balance = (
@@ -2704,7 +2716,7 @@ def get_party_details(company, party_type, party, date, cost_center=None):
 	)
 	if party_type in ["Customer", "Supplier"]:
 		party_bank_account = get_party_bank_account(party_type, party)
-		bank_account = get_default_company_bank_account(company, party_type, party)
+		bank_account = get_default_company_bank_account(company, party_type, party, ignore_permissions=False)
 
 	return {
 		"party_account": party_account,
@@ -2788,7 +2800,8 @@ def get_reference_details(
 ):
 	total_amount = outstanding_amount = exchange_rate = account = None
 
-	ref_doc = frappe.get_doc(reference_doctype, reference_name)
+	frappe.has_permission(reference_doctype, "read", reference_name, throw=True)
+	ref_doc = frappe.get_lazy_doc(reference_doctype, reference_name)
 	company_currency = ref_doc.get("company_currency") or erpnext.get_company_currency(ref_doc.company)
 
 	# Only applies for Reverse Payment Entries
@@ -2804,9 +2817,7 @@ def get_reference_details(
 			exchange_rate = get_exchange_rate(party_account_currency, company_currency, ref_doc.posting_date)
 		else:
 			exchange_rate = 1
-			outstanding_amount, total_amount = get_outstanding_on_journal_entry(
-				reference_name, party_type, party
-			)
+		outstanding_amount, total_amount = get_outstanding_on_journal_entry(reference_name, party_type, party)
 
 	elif reference_doctype == "Payment Entry":
 		if reverse_payment_details := frappe.db.get_all(
@@ -3034,7 +3045,7 @@ def get_payment_entry(
 				pe, doc, discount_amount, base_total_discount_loss, party_account_currency
 			)
 
-		pe.set_exchange_rate(ref_doc=doc)
+		pe.set_exchange_rate()
 		pe.set_amounts()
 
 	# If PE is created from PR directly, then no need to find open PRs for the references
@@ -3311,13 +3322,11 @@ def set_paid_amount_and_received_amount(
 			company_currency = frappe.get_cached_value("Company", doc.get("company"), "default_currency")
 			if bank and company_currency != bank.account_currency:
 				# doc currency can be different from bank currency
-				posting_date = doc.get("posting_date") or doc.get("transaction_date")
-				conversion_rate = get_exchange_rate(
-					bank.account_currency, party_account_currency, posting_date
-				)
+				conversion_rate = get_exchange_rate(bank.account_currency, party_account_currency)
 				received_amount = paid_amount / conversion_rate
 			else:
-				received_amount = paid_amount * doc.get("conversion_rate", 1)
+				conversion_rate = get_exchange_rate(doc.get("currency", company_currency), company_currency)
+				received_amount = paid_amount * conversion_rate
 
 		# if payment type is pay, then paid amount and received amount are swapped
 		if payment_type == "Pay":
@@ -3599,3 +3608,16 @@ def make_payment_order(source_name, target_doc=None):
 @erpnext.allow_regional
 def add_regional_gl_entries(gl_entries, doc):
 	return
+
+
+@frappe.whitelist()
+def get_linked_bank_transactions(payment_entry: str) -> list:
+	frappe.has_permission("Payment Entry", ptype="read", doc=payment_entry, throw=True)
+	return frappe.get_all(
+		"Bank Transaction Payments",
+		filters={
+			"payment_document": "Payment Entry",
+			"payment_entry": payment_entry,
+		},
+		pluck="parent",
+	)

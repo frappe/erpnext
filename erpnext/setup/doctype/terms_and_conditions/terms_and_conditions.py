@@ -21,6 +21,7 @@ class TermsandConditions(Document):
 		from frappe.types import DF
 
 		buying: DF.Check
+		copy_attachments_to_transaction: DF.Check
 		disabled: DF.Check
 		selling: DF.Check
 		terms: DF.TextEditor | None
@@ -29,7 +30,7 @@ class TermsandConditions(Document):
 
 	def validate(self):
 		if self.terms:
-			validate_template(self.terms)
+			validate_template(self.terms, restrict_globals=True)
 		if not cint(self.buying) and not cint(self.selling) and not cint(self.hr) and not cint(self.disabled):
 			throw(_("At least one of the Applicable Modules should be selected"))
 
@@ -39,7 +40,10 @@ def get_terms_and_conditions(template_name, doc):
 	if isinstance(doc, str):
 		doc = json.loads(doc)
 
-	terms_and_conditions = frappe.get_doc("Terms and Conditions", template_name)
+	tnc = frappe.get_cached_doc("Terms and Conditions", template_name)
+	tnc.check_permission()
 
-	if terms_and_conditions.terms:
-		return frappe.render_template(terms_and_conditions.terms, doc)
+	if not tnc.terms:
+		return
+
+	return frappe.render_template(tnc.terms, doc, restrict_globals=1)

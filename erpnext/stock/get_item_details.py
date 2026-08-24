@@ -12,6 +12,7 @@ from frappe.model.utils import get_fetch_values
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import add_days, add_months, cint, cstr, flt, get_link_to_form, getdate, parse_json
 
+import erpnext
 from erpnext import get_company_currency
 from erpnext.accounts.doctype.pricing_rule.pricing_rule import (
 	get_pricing_rule_for_item,
@@ -64,6 +65,7 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 	for_validate = process_string_args(for_validate)
 	overwrite_warehouse = process_string_args(overwrite_warehouse)
 	item = frappe.get_cached_doc("Item", args.item_code)
+	item.check_permission()
 	validate_item_details(args, item)
 
 	if isinstance(doc, str):
@@ -178,10 +180,9 @@ def update_bin_details(args, out, doc):
 		out.update(get_bin_details(args.item_code, args.get("from_warehouse")))
 
 	elif out.get("warehouse"):
-		company = args.company if (doc and doc.get("doctype") == "Purchase Order") else None
-
-		# calculate company_total_stock only for po
-		bin_details = get_bin_details(args.item_code, out.warehouse, company, include_child_warehouses=True)
+		bin_details = get_bin_details(
+			args.item_code, out.warehouse, args.company, include_child_warehouses=True
+		)
 
 		out.update(bin_details)
 
@@ -412,12 +413,26 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 
 	expense_account = None
 
-	if args.get("doctype") == "Purchase Invoice" and item.is_fixed_asset:
-		from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
+	if item.is_fixed_asset:
+		from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_enabled
 
-		expense_account = get_asset_category_account(
-			fieldname="fixed_asset_account", item=args.item_code, company=args.company
-		)
+		if is_cwip_accounting_enabled(item.asset_category):
+			expense_account = get_asset_account(
+				"capital_work_in_progress_account",
+				asset_category=item.asset_category,
+				company=args.company,
+			)
+		elif args.get("doctype") in (
+			"Purchase Invoice",
+			"Purchase Receipt",
+			"Purchase Order",
+			"Material Request",
+		):
+			from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
+
+			expense_account = get_asset_category_account(
+				fieldname="fixed_asset_account", item=args.item_code, company=args.company
+			)
 
 	# Set the UOM to the Default Sales UOM or Default Purchase UOM if configured in the Item Master
 	if not args.get("uom"):
@@ -520,10 +535,21 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 			args.name, args.conversion_rate, item.name, out.conversion_factor
 		)
 
+	expense_account_field = "default_expense_account"
+	if (
+		item.is_stock_item
+		and erpnext.is_perpetual_inventory_enabled(args.company)
+		and (
+			args.doctype == "Purchase Receipt"
+			or (args.doctype == "Purchase Invoice" and args.get("update_stock"))
+		)
+	):
+		expense_account_field = "stock_received_but_not_billed"
+
 	# if default specified in item is for another company, fetch from company
 	for d in [
 		["Account", "income_account", "default_income_account"],
-		["Account", "expense_account", "default_expense_account"],
+		["Account", "expense_account", expense_account_field],
 		["Cost Center", "cost_center", "cost_center"],
 		["Warehouse", "warehouse", ""],
 	]:
@@ -673,6 +699,7 @@ def get_item_tax_info(company, tax_category, item_codes, item_rates=None, item_t
 	return out
 
 
+# nosemgrep: frappe-semgrep-rules.rules.security.missing-argument-type-hint
 @frappe.whitelist()
 def get_item_tax_template(args, item=None, out=None):
 	if isinstance(args, str):
@@ -689,16 +716,24 @@ def get_item_tax_template(args, item=None, out=None):
 		item_tax_template = _get_item_tax_template(args, item.taxes, out)
 
 	if not item_tax_template:
-		item_group = item.item_group
-		while item_group and not item_tax_template:
-			item_group_doc = frappe.get_cached_doc("Item Group", item_group)
-			item_tax_template = _get_item_tax_template(args, item_group_doc.taxes, out)
-			item_group = item_group_doc.parent_item_group
+		item_tax_template = _get_item_tax_template_from_item_group(args, item.item_group, out)
 
 	if out and args.get("child_doctype") and item_tax_template:
 		out.update(get_fetch_values(args.get("child_doctype"), "item_tax_template", item_tax_template))
 
 	return item_tax_template
+
+
+def _get_item_tax_template_from_item_group(args, item_group, out=None):
+	from frappe.utils.nestedset import get_ancestors_of
+
+	ancestors = get_ancestors_of("Item Group", item_group)
+	for group in [item_group, *ancestors]:
+		group_doc = frappe.get_cached_doc("Item Group", group)
+		item_tax_template = _get_item_tax_template(args, group_doc.taxes, out)
+		if item_tax_template:
+			return item_tax_template
+	return None
 
 
 def _get_item_tax_template(args, taxes, out=None, for_validate=False):
@@ -1036,10 +1071,11 @@ def insert_item_price(args):
 				currency=args.currency,
 				uom=args.stock_uom,
 				price_list=args.price_list,
+				valid_from=transaction_date,
 			)
 			item_price.insert()
 			frappe.msgprint(
-				_("Item Price Added for {0} in Price List {1}").format(
+				_("Item Price added for {0} in Price List - {1}").format(
 					get_link_to_form("Item", args.item_code), args.price_list
 				),
 				alert=True,
@@ -1060,11 +1096,14 @@ def insert_item_price(args):
 				"currency": args.currency,
 				"price_list_rate": price_list_rate,
 				"uom": args.stock_uom,
+				"valid_from": transaction_date,
 			}
 		)
 		item_price.insert()
 		frappe.msgprint(
-			_("Item Price added for {0} in Price List {1}").format(args.item_code, args.price_list),
+			_("Item Price added for {0} in Price List - {1}").format(
+				get_link_to_form("Item", args.item_code), args.price_list
+			),
 			alert=True,
 		)
 
@@ -1484,6 +1523,11 @@ def apply_price_list(args, as_doc=False, doc=None):
 def apply_price_list_on_item(args, doc=None):
 	item_doc = frappe.db.get_value("Item", args.item_code, ["name", "variant_of"], as_dict=1)
 	item_details = get_price_list_rate(args, item_doc)
+
+	args.conversion_factor = flt(args.conversion_factor) or get_conversion_factor(
+		args.item_code, args.uom
+	).get("conversion_factor", 1)
+	args.stock_qty = flt(args.qty) * flt(args.conversion_factor)
 	item_details.update(get_pricing_rule_for_item(args, doc=doc))
 
 	return item_details

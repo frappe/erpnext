@@ -43,6 +43,7 @@ class StockEntryDetail(Document):
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
+		pick_list_item: DF.Link | None
 		po_detail: DF.Data | None
 		project: DF.Link | None
 		putaway_rule: DF.Link | None

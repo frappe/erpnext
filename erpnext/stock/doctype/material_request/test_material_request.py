@@ -795,6 +795,28 @@ class TestMaterialRequest(FrappeTestCase):
 		mr = frappe.get_doc("Material Request", mr.name)
 		self.assertEqual(mr.per_ordered, 100)
 
+	def test_fractional_conversion_factor_for_purchase(self):
+		item = create_item("_Test Fractional Conversion Item", stock_uom="Kg", is_purchase_item=1)
+		conversion_factor = 0.453592292
+
+		mr = make_material_request(
+			item_code=item.name,
+			qty=1000,
+			uom="Pound",
+			conversion_factor=conversion_factor,
+		)
+		mr.reload()
+
+		self.assertEqual(mr.items[0].conversion_factor, conversion_factor)
+
+		po = make_purchase_order(mr.name)
+		po.supplier = "_Test Supplier"
+		po.insert()
+		po.reload()
+
+		self.assertEqual(po.items[0].conversion_factor, conversion_factor)
+		self.assertEqual(po.items[0].stock_qty, mr.items[0].stock_qty)
+
 	def test_customer_provided_parts_mr(self):
 		create_item("CUST-0987", is_customer_provided_item=1, customer="_Test Customer", is_purchase_item=0)
 		existing_requested_qty = self._get_requested_qty("_Test Customer", "_Test Warehouse - _TC")
@@ -994,6 +1016,52 @@ class TestMaterialRequest(FrappeTestCase):
 		self.assertIsNone(se.to_warehouse)
 		se.save()
 		se.submit()
+
+	def test_mr_status_for_mixed_direct_and_transit_transfer(self):
+		material_request = make_material_request(
+			material_request_type="Material Transfer",
+			item_code="_Test Item Home Desktop 100",
+			qty=5,
+		)
+
+		in_transit_wh = get_in_transit_warehouse(material_request.company)
+
+		# Make stock available
+		self._insert_stock_entry(20.0, 20.0)
+
+		# Direct Transfer for 3 Qty
+		direct_transfer = make_stock_entry(material_request.name)
+		direct_transfer.items[0].update(
+			{
+				"qty": 3,
+				"transfer_qty": 3,
+				"s_warehouse": "_Test Warehouse 1 - _TC",
+			}
+		)
+		direct_transfer.save()
+		direct_transfer.submit()
+
+		# In Transit Transfer for remaining 2 Qty
+		transit_transfer = make_in_transit_stock_entry(material_request.name, in_transit_wh)
+		transit_transfer.items[0].update(
+			{
+				"qty": 2,
+				"s_warehouse": "_Test Warehouse 1 - _TC",
+			}
+		)
+		transit_transfer.save()
+		transit_transfer.submit()
+
+		# Complete End Transit
+		end_transit = make_stock_in_entry(transit_transfer.name)
+		end_transit.save()
+		end_transit.submit()
+
+		material_request.reload()
+
+		self.assertEqual(material_request.per_ordered, 100)
+		self.assertEqual(material_request.status, "Transferred")
+		self.assertEqual(material_request.transfer_status, "Completed")
 
 
 def get_in_transit_warehouse(company):

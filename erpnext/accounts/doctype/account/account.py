@@ -119,6 +119,7 @@ class Account(NestedSet):
 		self.validate_account_currency()
 		self.validate_root_company_and_sync_account_to_children()
 		self.validate_receivable_payable_account_type()
+		self.validate_stock_account_type_change()
 
 	def validate_parent_child_account_type(self):
 		if self.parent_account:
@@ -206,6 +207,36 @@ class Account(NestedSet):
 				)
 				frappe.msgprint(msg)
 				self.add_comment("Comment", msg)
+
+	def validate_stock_account_type_change(self):
+		doc_before_save = self.get_doc_before_save()
+		if not (doc_before_save and doc_before_save.account_type == "Stock"):
+			return
+
+		if self.account_type == "Stock":
+			return
+
+		if self.stock_ledger_entry_exists():
+			frappe.throw(
+				_(
+					"The account type of {0} cannot be changed from {1} because stock ledger entries exist against it."
+				).format(frappe.bold(self.name), frappe.bold(_("Stock")))
+			)
+
+	def stock_ledger_entry_exists(self):
+		from erpnext.stock import get_warehouse_account_map
+
+		warehouse_account = get_warehouse_account_map(self.company)
+		warehouses = [wh for wh, details in warehouse_account.items() if details.account == self.name]
+		if not warehouses:
+			return False
+
+		return bool(
+			frappe.db.count(
+				"Stock Ledger Entry",
+				filters={"warehouse": ("in", warehouses), "is_cancelled": 0},
+			)
+		)
 
 	def validate_root_details(self):
 		doc_before_save = self.get_doc_before_save()
@@ -517,6 +548,7 @@ def get_account_autoname(account_number, account_name, company):
 def update_account_number(name, account_name, account_number=None, from_descendant=False):
 	_ensure_idle_system()
 	account = frappe.get_cached_doc("Account", name)
+	account.check_permission("write")
 	if not account:
 		return
 
@@ -578,9 +610,11 @@ def update_account_number(name, account_name, account_number=None, from_descenda
 @frappe.whitelist()
 def merge_account(old, new):
 	_ensure_idle_system()
-	# Validate properties before merging
 	new_account = frappe.get_cached_doc("Account", new)
 	old_account = frappe.get_cached_doc("Account", old)
+
+	new_account.check_permission("write")
+	old_account.check_permission("write")
 
 	if not new_account:
 		throw(_("Account {0} does not exist").format(new))

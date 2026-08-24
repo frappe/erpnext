@@ -11,7 +11,7 @@ from frappe.utils.data import nowtime
 import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
-from erpnext.accounts.party import get_party_details
+from erpnext.accounts.party import _get_party_details
 from erpnext.buying.utils import update_last_purchase_rate, validate_for_items
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
 from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
@@ -165,7 +165,7 @@ class BuyingController(SubcontractingController):
 		# set contact and address details for supplier, if they are not mentioned
 		if getattr(self, "supplier", None):
 			self.update_if_missing(
-				get_party_details(
+				_get_party_details(
 					self.supplier,
 					party_type="Supplier",
 					doctype=self.doctype,
@@ -358,23 +358,13 @@ class BuyingController(SubcontractingController):
 					)
 					valuation_amount_adjustment -= item.item_tax_amount
 
-				self.round_floats_in(item)
+				self.round_floats_in(item, do_not_round_fields=["conversion_factor"])
 				if flt(item.conversion_factor) == 0.0:
 					item.conversion_factor = (
 						get_conversion_factor(item.item_code, item.uom).get("conversion_factor") or 1.0
 					)
 
-				net_rate = (
-					flt(
-						(item.base_net_amount / item.received_qty) * item.qty,
-						item.precision("base_net_amount"),
-					)
-					if item.received_qty
-					and frappe.get_single_value(
-						"Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice"
-					)
-					else item.base_net_amount
-				)
+				net_rate = item.base_net_amount
 				if item.sales_incoming_rate:  # for internal transfer
 					net_rate = item.qty * item.sales_incoming_rate
 
@@ -765,7 +755,7 @@ class BuyingController(SubcontractingController):
 			if po and po_item_rows:
 				po_obj = frappe.get_doc("Purchase Order", po)
 
-				if po_obj.status in ["Closed", "Cancelled"]:
+				if po_obj.status == "Cancelled" or (po_obj.status == "Closed" and not self.get("is_return")):
 					frappe.throw(
 						_("{0} {1} is cancelled or closed").format(_("Purchase Order"), po),
 						frappe.InvalidStatusError,

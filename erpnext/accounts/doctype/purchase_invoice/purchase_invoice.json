@@ -352,6 +352,7 @@
   {
    "collapsible": 1,
    "collapsible_depends_on": "eval:doc.on_hold",
+   "depends_on": "eval:doc.on_hold",
    "fieldname": "sb_14",
    "fieldtype": "Section Break",
    "label": "Hold Invoice"
@@ -1397,8 +1398,10 @@
    "fetch_from": "supplier.represents_company",
    "fieldname": "represents_company",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Represents Company",
-   "options": "Company"
+   "options": "Company",
+   "read_only": 1
   },
   {
    "depends_on": "eval:doc.update_stock && doc.is_internal_supplier",
@@ -1660,7 +1663,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-17 20:44:00.221219",
+ "modified": "2026-08-05 15:40:16.519774",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

@@ -1239,7 +1239,7 @@ def get_values_from_purchase_doc(purchase_doc_name, item_code, doctype):
 	return {
 		"company": purchase_doc.company,
 		"purchase_date": purchase_doc.get("posting_date"),
-		"gross_purchase_amount": flt(first_item.base_net_amount),
+		"gross_purchase_amount": flt(first_item.valuation_rate) * flt(first_item.qty),
 		"asset_quantity": first_item.qty,
 		"cost_center": first_item.cost_center or purchase_doc.get("cost_center"),
 		"asset_location": first_item.get("asset_location"),

@@ -166,6 +166,8 @@ class AssetCapitalization(StockController):
 				if d.meta.has_field(k) and (not d.get(k) or k in force_fields):
 					d.set(k, v)
 
+		self.split_valuation_rate_for_grouped_stock_items()
+
 		for d in self.asset_items:
 			args = self.as_dict()
 			args.update(d.as_dict())
@@ -186,6 +188,30 @@ class AssetCapitalization(StockController):
 			for k, v in service_item_details.items():
 				if d.meta.has_field(k) and (not d.get(k) or k in force_fields):
 					d.set(k, v)
+
+	def split_valuation_rate_for_grouped_stock_items(self):
+		groups = {}
+		for d in self.stock_items:
+			if d.item_code and d.warehouse and not (d.serial_no or d.batch_no or d.serial_and_batch_bundle):
+				groups.setdefault((d.item_code, d.warehouse), []).append(d)
+
+		for rows in groups.values():
+			if len(rows) < 2:
+				continue
+
+			cumulative_qty = 0.0
+			prev_cumulative_value = 0.0
+			for d in rows:
+				cumulative_qty += flt(d.stock_qty)
+				args = self.get_args_for_incoming_rate(d)
+				args["qty"] = -1 * cumulative_qty
+				cumulative_rate = flt(get_incoming_rate(args, raise_error_if_no_rate=False))
+				cumulative_value = cumulative_rate * cumulative_qty
+
+				row_value = cumulative_value - prev_cumulative_value
+				d.valuation_rate = flt(row_value / d.stock_qty) if flt(d.stock_qty) else 0.0
+				d.amount = flt(flt(d.stock_qty) * d.valuation_rate, d.precision("amount"))
+				prev_cumulative_value = cumulative_value
 
 	def validate_target_item(self):
 		target_item = frappe.get_cached_doc("Item", self.target_item_code)
@@ -337,6 +363,8 @@ class AssetCapitalization(StockController):
 				args = self.get_args_for_incoming_rate(d)
 				warehouse_details = get_warehouse_details(args)
 				d.update(warehouse_details)
+
+		self.split_valuation_rate_for_grouped_stock_items()
 
 	@frappe.whitelist()
 	def set_asset_values(self):
@@ -734,6 +762,7 @@ def get_target_asset_details(asset=None, company=None):
 
 @frappe.whitelist()
 def get_consumed_stock_item_details(args):
+	frappe.has_permission("Stock Ledger Entry", throw=True)
 	if isinstance(args, str):
 		args = json.loads(args)
 
@@ -743,6 +772,7 @@ def get_consumed_stock_item_details(args):
 	item = frappe._dict()
 	if args.item_code:
 		item = frappe.get_cached_doc("Item", args.item_code)
+		item.check_permission()
 
 	out.item_name = item.item_name
 	out.batch_no = None
@@ -752,6 +782,8 @@ def get_consumed_stock_item_details(args):
 	out.stock_uom = item.stock_uom
 
 	out.warehouse = get_item_warehouse(item, args, overwrite_warehouse=True) if item else None
+	if out.warehouse:
+		frappe.has_permission("Warehouse", doc=out.warehouse, throw=True)
 
 	# Cost Center
 	item_defaults = get_item_defaults(item.name, args.company)
@@ -792,6 +824,9 @@ def get_warehouse_details(args):
 
 	out = {}
 	if args.warehouse and args.item_code:
+		frappe.has_permission("Item", doc=args.item_code, throw=True)
+		frappe.has_permission("Warehouse", doc=args.warehouse, throw=True)
+		frappe.has_permission("Stock Ledger Entry", throw=True)
 		out = {
 			"actual_qty": get_previous_sle(args).get("qty_after_transaction") or 0,
 			"valuation_rate": get_incoming_rate(args, raise_error_if_no_rate=False),

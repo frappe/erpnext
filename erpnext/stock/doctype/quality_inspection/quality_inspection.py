@@ -253,6 +253,9 @@ class QualityInspection(Document):
 					self.modified,
 				)
 
+		if self.reference_type and self.reference_name:
+			frappe.get_lazy_doc(self.reference_type, self.reference_name).notify_update()
+
 	def inspect_and_set_status(self):
 		for reading in self.readings:
 			if not reading.manual_inspection:  # dont auto set status if manual
@@ -392,10 +395,10 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 
 		return frappe.db.sql(
 			f"""
-				SELECT distinct item_code, item_name
+				SELECT distinct `tab{from_doctype}`.item_code, `tab{from_doctype}`.item_name
 				FROM `tab{from_doctype}`
 				JOIN `tab{parent_doctype}` ON `tab{parent_doctype}`.name = `tab{from_doctype}`.parent
-				WHERE parent=%(parent)s and `tab{parent_doctype}`.docstatus < 2 and item_code like %(txt)s
+				WHERE `tab{from_doctype}`.parent=%(parent)s and `tab{parent_doctype}`.docstatus < 2 and `tab{from_doctype}`.item_code like %(txt)s
 				{qi_condition} {cond} {mcond}
 				ORDER BY item_code limit {cint(page_len)} offset {cint(start)}
 			""",

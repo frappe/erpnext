@@ -44,6 +44,7 @@ class AccountsSettings(Document):
 		default_ageing_range: DF.Data | None
 		delete_linked_ledger_entries: DF.Check
 		determine_address_tax_category_from: DF.Literal["Billing Address", "Shipping Address"]
+		disable_include_dimensions: DF.Check
 		enable_common_party_accounting: DF.Check
 		enable_fuzzy_matching: DF.Check
 		enable_immutable_ledger: DF.Check
@@ -60,7 +61,8 @@ class AccountsSettings(Document):
 		merge_similar_account_heads: DF.Check
 		over_billing_allowance: DF.Currency
 		post_change_gl_entries: DF.Check
-		receivable_payable_fetch_method: DF.Literal["Buffered Cursor", "UnBuffered Cursor", "Raw SQL"]
+		pcv_job_timeout: DF.Int
+		receivable_payable_fetch_method: DF.Literal["Buffered Cursor", "UnBuffered Cursor"]
 		receivable_payable_remarks_length: DF.Int
 		reconciliation_queue_size: DF.Int
 		role_allowed_to_over_bill: DF.Link | None
@@ -170,11 +172,3 @@ class AccountsSettings(Document):
 				),
 				title=_("Auto Tax Settings Error"),
 			)
-
-	@frappe.whitelist()
-	def drop_ar_sql_procedures(self):
-		from erpnext.accounts.report.accounts_receivable.accounts_receivable import InitSQLProceduresForAR
-
-		frappe.db.sql(f"drop function if exists {InitSQLProceduresForAR.genkey_function_name}")
-		frappe.db.sql(f"drop procedure if exists {InitSQLProceduresForAR.init_procedure_name}")
-		frappe.db.sql(f"drop procedure if exists {InitSQLProceduresForAR.allocate_procedure_name}")

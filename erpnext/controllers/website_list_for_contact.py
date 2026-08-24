@@ -7,7 +7,9 @@ import json
 import frappe
 from frappe import _
 from frappe.modules.utils import get_module_app
-from frappe.utils import flt, has_common
+from frappe.query_builder import Criterion
+from frappe.query_builder.functions import Lower
+from frappe.utils import cint, flt, has_common
 from frappe.utils.user import is_website_user
 
 
@@ -178,13 +180,17 @@ def get_list_for_transactions(
 
 
 def rfq_transaction_list(parties_doctype, doctype, parties, limit_start, limit_page_length):
-	data = frappe.db.sql(
-		"""select distinct parent as name, supplier from `tab{doctype}`
-			where supplier = '{supplier}' and docstatus=1  order by modified desc limit {start}, {len}""".format(
-			doctype=parties_doctype, supplier=parties[0], start=limit_start, len=limit_page_length
-		),
-		as_dict=1,
-	)
+	party = frappe.qb.DocType(parties_doctype)
+	data = (
+		frappe.qb.from_(party)
+		# creation must be selected: Postgres requires SELECT DISTINCT order-by exprs in the select list
+		.select(party.parent.as_("name"), party.supplier, party.creation)
+		.distinct()
+		.where((party.supplier == parties[0]) & (party.docstatus == 1))
+		.orderby(party.creation, order=frappe.qb.desc)
+		.limit(limit_page_length)
+		.offset(limit_start)
+	).run(as_dict=True)
 
 	return post_process(doctype, data)
 
@@ -302,3 +308,63 @@ def add_role_for_portal_user(portal_user, role):
 
 	user_doc.add_roles(role)
 	frappe.msgprint(_("Added {1} Role to User {0}.").format(frappe.bold(user_doc.name), role), alert=True)
+
+
+def link_portal_users_to_contacts(doc):
+	"""When portal users are added to Supplier/Customer, link them to the Contact profile."""
+	# a User's name is its (lowercased) email, so portal_users are already the emails
+	portal_users = {p.user for p in doc.get("portal_users") or [] if p.user}
+	if not portal_users:
+		return
+
+	before = doc.get_doc_before_save()
+	if before:
+		previous_users = {p.user for p in before.get("portal_users") or [] if p.user}
+		if portal_users == previous_users:
+			return
+
+	portal_users = list(portal_users)
+
+	contact = frappe.qb.DocType("Contact")
+	contact_email = frappe.qb.DocType("Contact Email")
+
+	query = (
+		frappe.qb.from_(contact)
+		.left_join(contact_email)
+		.on(contact_email.parent == contact.name)
+		.select(contact.name)
+		.distinct()
+	)
+
+	conditions = [
+		contact.user.isin(portal_users),
+		Lower(contact.email_id).isin(portal_users),
+		Lower(contact_email.email_id).isin(portal_users),
+	]
+
+	query = query.where(Criterion.any(conditions))
+	contacts = query.run(pluck=True)
+
+	if not contacts:
+		return
+
+	dynamic_link = frappe.qb.DocType("Dynamic Link")
+	existing_links = (
+		frappe.qb.from_(dynamic_link)
+		.select(dynamic_link.parent)
+		.where(
+			(dynamic_link.parenttype == "Contact")
+			& (dynamic_link.parent.isin(contacts))
+			& (dynamic_link.link_doctype == doc.doctype)
+			& (dynamic_link.link_name == doc.name)
+		)
+		.run(pluck=True)
+	)
+
+	contacts_to_link = [name for name in contacts if name not in existing_links]
+
+	for name in contacts_to_link:
+		contact_doc = frappe.get_doc("Contact", name)
+		if not contact_doc.has_link(doc.doctype, doc.name):
+			contact_doc.append("links", {"link_doctype": doc.doctype, "link_name": doc.name})
+			contact_doc.save(ignore_permissions=True)

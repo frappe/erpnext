@@ -98,12 +98,12 @@ class Budget(Document):
 					frappe.throw(_("Budget cannot be assigned against Group Account {0}").format(d.account))
 				elif account_details.company != self.company:
 					frappe.throw(
-						_("Account {0} does not belongs to company {1}").format(d.account, self.company)
+						_("Account {0} does not belong to company {1}").format(d.account, self.company)
 					)
 				elif account_details.report_type != "Profit and Loss":
 					frappe.throw(
 						_(
-							"Budget cannot be assigned against {0}, as it's not an Income or Expense account"
+							"Budget cannot be assigned against {0}, as its Root Type is not of Income or Expense"
 						).format(d.account)
 					)
 
@@ -425,11 +425,11 @@ def get_ordered_amount(args):
 
 
 def get_other_condition(args, for_doc):
-	condition = "expense_account = '%s'" % (args.expense_account)
+	condition = f"expense_account = {frappe.db.escape(args.expense_account)}"
 	budget_against_field = args.get("budget_against_field")
 
 	if budget_against_field and args.get(budget_against_field):
-		condition += f" and child.{budget_against_field} = '{args.get(budget_against_field)}'"
+		condition += f" and child.{budget_against_field} = {frappe.db.escape(args.get(budget_against_field))}"
 
 	if args.get("fiscal_year"):
 		date_field = "schedule_date" if for_doc == "Material Request" else "transaction_date"
@@ -437,8 +437,7 @@ def get_other_condition(args, for_doc):
 			"Fiscal Year", args.get("fiscal_year"), ["year_start_date", "year_end_date"]
 		)
 
-		condition += f""" and parent.{date_field}
-			between '{start_date}' and '{end_date}' """
+	condition += f" and parent.{date_field} between {frappe.db.escape(str(start_date))} and {frappe.db.escape(str(end_date))}"
 
 	return condition
 

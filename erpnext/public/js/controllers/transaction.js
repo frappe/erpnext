@@ -362,8 +362,13 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			}, __("Create"));
 		}
 
-		const inspection_type = ["Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"].includes(this.frm.doc.doctype)
-			? "Incoming" : "Outgoing";
+		const incoming_doctypes = ["Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"];
+		const incoming_purposes = ["Manufacture", "Material Receipt"];
+		const inspection_type =
+			incoming_doctypes.includes(this.frm.doc.doctype) ||
+			(this.frm.doc.doctype === "Stock Entry" && incoming_purposes.includes(this.frm.doc.purpose))
+				? "Incoming"
+				: "Outgoing";
 
 		let quality_inspection_field = this.frm.get_docfield("items", "quality_inspection");
 		quality_inspection_field.get_route_options_for_new_doc = function(row) {
@@ -418,7 +423,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			}
 		})
 	}
-
 	onload_post_render() {
 		if(this.frm.doc.__islocal && !(this.frm.doc.taxes || []).length
 			&& !this.frm.doc.__onload?.load_after_mapping) {
@@ -557,9 +561,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		var update_stock = 0, show_batch_dialog = 0;
 		item.weight_per_unit = 0;
 		item.weight_uom = '';
-		if(!item.barcode){
-			item.uom = null // make UOM blank to update the existing UOM when item changes
-		}
+		item.uom = null // make UOM blank to update the existing UOM when item changes
 		item.conversion_factor = 0;
 
 		if(['Sales Invoice', 'Purchase Invoice'].includes(this.frm.doc.doctype)) {
@@ -659,15 +661,23 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 								},
 								async () => {
 									// for internal customer instead of pricing rule directly apply valuation rate on item
-									const fetch_valuation_rate_for_internal_transactions = await frappe.db.get_single_value(
-										"Accounts Settings", "fetch_valuation_rate_for_internal_transaction"
-									);
-									if ((me.frm.doc.is_internal_customer || me.frm.doc.is_internal_supplier) && fetch_valuation_rate_for_internal_transactions) {
-										me.get_incoming_rate(item, me.frm.posting_date, me.frm.posting_time,
-											me.frm.doc.doctype, me.frm.doc.company);
-									} else {
-										me.frm.script_manager.trigger("price_list_rate", cdt, cdn);
+									if ((me.frm.doc.is_internal_customer || me.frm.doc.is_internal_supplier)) {
+										const fetch_valuation_rate_for_internal_transactions = await frappe.db.get_single_value(
+											"Accounts Settings", "fetch_valuation_rate_for_internal_transaction"
+										);
+										if (fetch_valuation_rate_for_internal_transactions) {
+											me.get_incoming_rate(
+												item,
+												me.frm.posting_date,
+												me.frm.posting_time,
+												me.frm.doc.doctype,
+												me.frm.doc.company
+											);
+											return;
+										}
 									}
+
+									me.frm.script_manager.trigger("price_list_rate", cdt, cdn);
 								},
 								() => {
 									if (me.frm.doc.is_internal_customer || me.frm.doc.is_internal_supplier) {
@@ -995,13 +1005,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 		var set_party_account = function(set_pricing) {
 			if (["Sales Invoice", "Purchase Invoice"].includes(me.frm.doc.doctype)) {
-				if(me.frm.doc.doctype=="Sales Invoice") {
-					var party_type = "Customer";
-					var party_account_field = 'debit_to';
-				} else {
-					var party_type = "Supplier";
-					var party_account_field = 'credit_to';
-				}
+				let party_type = me.frm.doc.doctype == "Sales Invoice" ? "Customer" : "Supplier";
+				let party_account_field = me.frm.doc.doctype == "Sales Invoice" ? "debit_to" : "credit_to";
 
 				var party = me.frm.doc[frappe.model.scrub(party_type)];
 				if(party && me.frm.doc.company && (!me.frm.doc.__onload?.load_after_mapping || !me.frm.doc[party_account_field])) {
@@ -1032,7 +1037,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			["Purchase Order", "Purchase Receipt", "Purchase Invoice"].includes(this.frm.doctype) &&
 			!this.frm.doc.shipping_address
 		) {
-			let is_drop_ship = me.frm.doc.items.some((item) => item.delivered_by_supplier);
+			const is_drop_ship = me.frm.doc.items.some((item) => item.delivered_by_supplier);
 
 			if (!is_drop_ship) {
 				erpnext.utils.get_shipping_address(this.frm, function() {
@@ -1415,7 +1420,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			let first_row = this.frm.doc.items[0];
 			if (!first_row) {
 				return false
-			};
+			}
 
 			let mapped_rows = mappped_fields.filter(d => first_row[d])
 
@@ -1587,7 +1592,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			this.frm.set_currency_labels(["operating_cost", "hour_rate"], this.frm.doc.currency, "operations");
 			this.frm.set_currency_labels(["base_operating_cost", "base_hour_rate"], company_currency, "operations");
 
-			var item_grid = this.frm.fields_dict["operations"].grid;
+			let item_grid = this.frm.fields_dict["operations"].grid;
 			$.each(["base_operating_cost", "base_hour_rate"], function(i, fname) {
 				if(frappe.meta.get_docfield(item_grid.doctype, fname))
 					item_grid.set_column_disp(fname, me.frm.doc.currency != company_currency);
@@ -1598,7 +1603,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			this.frm.set_currency_labels(["rate", "amount"], this.frm.doc.currency, "scrap_items");
 			this.frm.set_currency_labels(["base_rate", "base_amount"], company_currency, "scrap_items");
 
-			var item_grid = this.frm.fields_dict["scrap_items"].grid;
+			let item_grid = this.frm.fields_dict["scrap_items"].grid;
 			$.each(["base_rate", "base_amount"], function(i, fname) {
 				if(frappe.meta.get_docfield(item_grid.doctype, fname))
 					item_grid.set_column_disp(fname, me.frm.doc.currency != company_currency);
@@ -1993,7 +1998,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				row_to_modify[key] = pr_row[key];
 			}
 
-			if (this.frm.doc.hasOwnProperty("is_pos") && this.frm.doc.is_pos) {
+			if (Object.prototype.hasOwnProperty.call(this.frm.doc, "is_pos") && this.frm.doc.is_pos) {
 				let r = await frappe.db.get_value("POS Profile", this.frm.doc.pos_profile, "cost_center");
 				if (r.message.cost_center) {
 					row_to_modify["cost_center"] = r.message.cost_center;
@@ -2225,8 +2230,12 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				},
 				callback: function(r) {
 					if (!r.exc) {
-						$.each(me.frm.doc.items || [], function(i, item) {
-							if (item.name && r.message.hasOwnProperty(item.name) && r.message[item.name].item_tax_template) {
+						$.each(me.frm.doc.items || [], function (i, item) {
+							if (
+								item.name &&
+								Object.prototype.hasOwnProperty.call(r.message, item.name) &&
+								r.message[item.name].item_tax_template
+							) {
 								item.item_tax_template = r.message[item.name].item_tax_template;
 								item.item_tax_rate = r.message[item.name].item_tax_rate;
 								me.add_taxes_from_item_tax_template(item.item_tax_rate);
@@ -2467,6 +2476,13 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		];
 
 		const me = this;
+		const incoming_doctypes = ["Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"];
+		const incoming_purposes = ["Manufacture", "Material Receipt"];
+		const inspection_type =
+			incoming_doctypes.includes(this.frm.doc.doctype) ||
+			(this.frm.doc.doctype === "Stock Entry" && incoming_purposes.includes(this.frm.doc.purpose))
+				? "Incoming"
+				: "Outgoing";
 		const dialog = new frappe.ui.Dialog({
 			title: __("Select Items for Quality Inspection"),
 			size: "extra-large",
@@ -2506,11 +2522,29 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			method: "erpnext.controllers.stock_controller.check_item_quality_inspection",
 			args: {
 				doctype: this.frm.doc.doctype,
-				items: this.frm.doc.items
+				docstatus: this.frm.doc.docstatus,
+				items: this.frm.doc.items,
 			},
 			freeze: true,
 			callback: function (r) {
-				r.message.forEach(item => {
+				if (r.message.length == 0) {
+					let type = inspection_type === "Incoming" ? "Purchase" : "Delivery";
+					let fieldname =
+						inspection_type === "Incoming"
+							? "Inspection Required before Purchase"
+							: "Inspection Required before Delivery";
+
+					frappe.msgprint({
+						title: __("Quality Inspection Not Configured"),
+						message: __(`Enable <b>{0}</b> on the Item master to proceed with {1} inspection.`, [
+							fieldname,
+							type,
+						]),
+					});
+					return;
+				}
+
+				r.message.forEach((item) => {
 					if (me.has_inspection_required(item)) {
 						let dialog_items = dialog.fields_dict.items;
 						dialog_items.df.data.push({

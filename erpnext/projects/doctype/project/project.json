@@ -83,7 +83,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "Open\nCompleted\nCancelled",
+   "options": "Open\nOn hold\nCompleted\nCancelled",
    "search_index": 1
   },
   {
@@ -117,7 +117,7 @@
    "fieldtype": "Percent",
    "label": "% Completed",
    "no_copy": 1,
-   "read_only": 1
+   "read_only_depends_on": "eval:doc.percent_complete_method != 'Manual'"
   },
   {
    "fieldname": "column_break_5",
@@ -176,6 +176,7 @@
    "fieldtype": "Link",
    "in_global_search": 1,
    "label": "Customer",
+   "no_copy": 1,
    "oldfieldname": "customer",
    "oldfieldtype": "Link",
    "options": "Customer",
@@ -190,6 +191,7 @@
    "fieldname": "sales_order",
    "fieldtype": "Link",
    "label": "Sales Order",
+   "no_copy": 1,
    "options": "Sales Order"
   },
   {
@@ -203,13 +205,15 @@
    "fieldname": "users",
    "fieldtype": "Table",
    "label": "Users",
-   "options": "Project User"
+   "options": "Project User",
+   "permlevel": 1
   },
   {
    "fieldname": "copied_from",
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Copied From",
+   "permlevel": 1,
    "read_only": 1
   },
   {
@@ -462,13 +466,25 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 4,
- "modified": "2025-08-21 17:57:58.314809",
+ "modified": "2026-07-21 11:23:22.000000",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",
  "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
+  {
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "permlevel": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Projects Manager",
+   "share": 1,
+   "write": 1
+  },
   {
    "create": 1,
    "delete": 1,

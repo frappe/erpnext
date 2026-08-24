@@ -93,11 +93,19 @@ $.extend(erpnext.utils, {
 					]),
 					"blue"
 				);
+				var info = company_wise_info[0];
+				var is_advance = info.balance_label !== "Total Unpaid";
+				var indicator_label =
+					info.balance_label === "Total Advance Paid"
+						? __("Total Advance Paid: {0}", [format_currency(info.balance_amount, info.currency)])
+						: info.balance_label === "Total Advance Received"
+						? __("Total Advance Received: {0}", [
+								format_currency(info.balance_amount, info.currency),
+						  ])
+						: __("Total Unpaid: {0}", [format_currency(info.balance_amount, info.currency)]);
 				frm.dashboard.add_indicator(
-					__("Total Unpaid: {0}", [
-						format_currency(company_wise_info[0].total_unpaid, company_wise_info[0].currency),
-					]),
-					company_wise_info[0].total_unpaid ? "orange" : "green"
+					indicator_label,
+					is_advance ? "green" : info.balance_amount ? "orange" : "green"
 				);
 
 				if (company_wise_info[0].loyalty_points) {
@@ -140,7 +148,14 @@ $.extend(erpnext.utils, {
 		frm.dashboard.stats_area_row.addClass("flex");
 		frm.dashboard.stats_area_row.css("flex-wrap", "wrap");
 
-		var color = info.total_unpaid ? "orange" : "green";
+		var is_advance = info.balance_label !== "Total Unpaid";
+		var color = is_advance ? "green" : info.balance_amount ? "orange" : "green";
+		var balance_label_text =
+			info.balance_label === "Total Advance Paid"
+				? __("Total Advance Paid")
+				: info.balance_label === "Total Advance Received"
+				? __("Total Advance Received")
+				: __("Total Unpaid");
 
 		var indicator = $(
 			'<div class="flex-column col-xs-6">' +
@@ -154,8 +169,10 @@ $.extend(erpnext.utils, {
 				'<div class="badge-link small" style="margin-bottom:10px">' +
 				'<span class="indicator ' +
 				color +
-				'">Total Unpaid: ' +
-				format_currency(info.total_unpaid, info.currency) +
+				'">' +
+				balance_label_text +
+				": " +
+				format_currency(info.balance_amount, info.currency) +
 				"</span></div>" +
 				"</div>"
 		).appendTo(frm.dashboard.stats_area_row);
@@ -631,6 +648,7 @@ erpnext.utils.update_child_items = function (opts) {
 			qty: d.qty,
 			rate: d.rate,
 			uom: d.uom,
+			warehouse: d.warehouse,
 			fg_item: d.fg_item,
 			fg_item_qty: d.fg_item_qty,
 		};
@@ -651,6 +669,7 @@ erpnext.utils.update_child_items = function (opts) {
 			read_only: 0,
 			disabled: 0,
 			label: __("Item Code"),
+			formatter: (value) => value,
 			get_query: function () {
 				let filters;
 				if (frm.doc.doctype == "Sales Order") {
@@ -709,8 +728,14 @@ erpnext.utils.update_child_items = function (opts) {
 					},
 					callback: function (r) {
 						if (r.message) {
-							const { qty, price_list_rate: rate, uom, conversion_factor, bom_no } = r.message;
-
+							const {
+								qty,
+								price_list_rate: rate,
+								uom,
+								conversion_factor,
+								bom_no,
+								warehouse,
+							} = r.message;
 							const row = dialog.fields_dict.trans_items.df.data.find(
 								(doc) => doc.idx == me.doc.idx
 							);
@@ -721,6 +746,7 @@ erpnext.utils.update_child_items = function (opts) {
 									qty: me.doc.qty || qty,
 									rate: me.doc.rate || rate,
 									bom_no: bom_no,
+									warehouse: me.doc.docname ? me.doc.warehouse : warehouse,
 								});
 								dialog.fields_dict.trans_items.grid.refresh();
 							}
@@ -791,6 +817,29 @@ erpnext.utils.update_child_items = function (opts) {
 			fieldname: "conversion_factor",
 			label: __("Conversion Factor"),
 			precision: get_precision("conversion_factor"),
+		});
+	}
+
+	const warehouse_df = child_meta.fields.find((f) => f.fieldname == "warehouse");
+	if (warehouse_df) {
+		fields.splice(3, 0, {
+			fieldtype: "Link",
+			fieldname: "warehouse",
+			options: "Warehouse",
+			in_list_view: 1,
+			label: __(warehouse_df.label),
+			// only new rows may set it, existing rows would leave their
+			// reserved qty stranded in the previous warehouse's bin
+			read_only_depends_on: "eval:doc.docname",
+			get_query: () => {
+				return {
+					filters: {
+						company: frm.doc.company,
+						is_group: 0,
+						disabled: 0,
+					},
+				};
+			},
 		});
 	}
 

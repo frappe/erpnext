@@ -94,7 +94,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 			erpnext.accounts.ledger_preview.show_stock_ledger_preview(this.frm);
 		}
 
-		if (doc.docstatus == 1 && doc.outstanding_amount != 0) {
+		if (doc.docstatus == 1 && doc.outstanding_amount != 0 && frappe.model.can_create("Payment Entry")) {
 			this.frm.add_custom_button(__("Payment"), () => this.make_payment_entry(), __("Create"));
 			this.frm.page.set_inner_btn_group_as_primary(__("Create"));
 		}
@@ -136,13 +136,15 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 			}
 
 			if (doc.outstanding_amount > 0) {
-				cur_frm.add_custom_button(
-					__("Payment Request"),
-					function () {
-						me.make_payment_request();
-					},
-					__("Create")
-				);
+				if (frappe.boot.user.in_create.includes("Payment Request")) {
+					this.frm.add_custom_button(
+						__("Payment Request"),
+						function () {
+							me.make_payment_request();
+						},
+						__("Create")
+					);
+				}
 				this.frm.add_custom_button(
 					__("Invoice Discounting"),
 					this.make_invoice_discounting.bind(this),
@@ -178,12 +180,31 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 						: "Inter Company Purchase Invoice";
 
 				me.frm.add_custom_button(
-					button_label,
+					__(button_label),
 					function () {
 						me.make_inter_company_invoice();
 					},
 					__("Create")
 				);
+
+				frappe.call({
+					method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.get_received_items",
+					args: {
+						reference_name: me.frm.doc.name,
+						doctype: "Purchase Invoice",
+						reference_fieldname: "sales_invoice_item",
+					},
+					callback: function (r) {
+						if (r.exc) return;
+						const received_items = r.message || {};
+						const has_pending_qty = me.frm.doc.items.some(
+							(item) => flt(item.qty) - flt(received_items[item.name] || 0) > 0
+						);
+						if (!has_pending_qty) {
+							me.frm.remove_custom_button(__(button_label), __("Create"));
+						}
+					},
+				});
 			}
 		}
 

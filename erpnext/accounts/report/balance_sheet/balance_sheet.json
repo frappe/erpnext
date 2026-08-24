@@ -6,7 +6,7 @@
  "doctype": "Report", 
  "idx": 2, 
  "is_standard": "Yes", 
- "modified": "2018-09-07 12:18:21.850851", 
+ "modified": "2026-06-22 13:38:25.236839",
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Balance Sheet", 
@@ -15,6 +15,11 @@
  "ref_doctype": "GL Entry", 
  "report_name": "Balance Sheet", 
  "report_type": "Script Report", 
+ "doctype_to_sync": [
+  {
+   "doc_type": "GL Entry"
+  }
+ ],
  "roles": [
   {
    "role": "Accounts User"
@@ -25,5 +30,7 @@
   {
    "role": "Auditor"
   }
- ]
+ ],
+ "synced_report": 0,
+ "timeout": 0
 }

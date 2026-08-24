@@ -787,7 +787,7 @@ class BOM(WebsiteGenerator):
 
 		for d in self.get("items"):
 			old_rate = d.rate
-			if not self.bom_creator and d.is_stock_item:
+			if d.is_stock_item:
 				d.rate = self.get_rm_rate(
 					{
 						"company": self.company,
@@ -1367,18 +1367,71 @@ def add_non_stock_items_cost(stock_entry, work_order, expense_account):
 
 
 def add_operations_cost(stock_entry, work_order=None, expense_account=None):
-	from erpnext.stock.doctype.stock_entry.stock_entry import get_operating_cost_per_unit
+	from erpnext.stock.doctype.stock_entry.stock_entry import (
+		get_consumed_operating_cost,
+		get_operating_cost_per_unit,
+	)
 
-	operating_cost_per_unit = get_operating_cost_per_unit(work_order, stock_entry.bom_no)
-
-	if operating_cost_per_unit:
-		stock_entry.append(
-			"additional_costs",
-			{
+	def append_operating_cost(amount, operation=None, qty=None):
+		if amount:
+			row = {
 				"expense_account": expense_account,
 				"description": _("Operating Cost as per Work Order / BOM"),
-				"amount": operating_cost_per_unit * flt(stock_entry.fg_completed_qty),
-			},
+				"amount": flt(
+					amount,
+					frappe.get_precision("Landed Cost Taxes and Charges", "amount"),
+				),
+				"has_operating_cost": 1,
+			}
+			if operation:
+				row["operation_id"] = operation.name
+			if qty is not None:
+				row["qty"] = qty
+			stock_entry.append(
+				"additional_costs",
+				row,
+			)
+
+	if (
+		work_order
+		and stock_entry.bom_no
+		and frappe.db.get_single_value("Manufacturing Settings", "set_op_cost_and_scrap_from_sub_assemblies")
+		and work_order.get("use_multi_level_bom")
+	):
+		operating_cost_per_unit = get_operating_cost_per_unit(work_order, stock_entry.bom_no)
+		append_operating_cost(
+			operating_cost_per_unit * flt(stock_entry.fg_completed_qty),
+			qty=flt(stock_entry.fg_completed_qty),
+		)
+	elif work_order and work_order.get("operations"):
+		for operation in work_order.get("operations"):
+			qty = flt(stock_entry.fg_completed_qty)
+			amount = 0
+
+			if flt(operation.completed_qty):
+				consumed_cost = get_consumed_operating_cost(
+					work_order.name, stock_entry.bom_no, operation.name
+				)
+				remaining_cost = flt(
+					flt(operation.actual_operating_cost) - flt(consumed_cost.get("consumed_cost")),
+					operation.precision("actual_operating_cost"),
+				)
+				remaining_qty = flt(operation.completed_qty) - flt(consumed_cost.get("consumed_qty"))
+
+				if remaining_cost <= 0 or remaining_qty <= 0:
+					continue
+
+				qty = min(remaining_qty, flt(stock_entry.fg_completed_qty))
+				amount = remaining_cost / remaining_qty * qty
+			elif work_order.qty:
+				amount = flt(operation.planned_operating_cost) / flt(work_order.qty) * qty
+
+			append_operating_cost(amount, operation=operation, qty=qty)
+	else:
+		operating_cost_per_unit = get_operating_cost_per_unit(work_order, stock_entry.bom_no)
+		append_operating_cost(
+			operating_cost_per_unit * flt(stock_entry.fg_completed_qty),
+			qty=flt(stock_entry.fg_completed_qty),
 		)
 
 	if work_order and work_order.additional_operating_cost and work_order.qty:
@@ -1524,10 +1577,10 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 
 	query_filters = {"disabled": 0, "ifnull(end_of_life, '3099-12-31')": (">", today())}
 
-	or_cond_filters = {}
+	or_cond_filters = []
 	if txt:
 		for s_field in searchfields:
-			or_cond_filters[s_field] = ("like", f"%{txt}%")
+			or_cond_filters.append([s_field, "like", f"%{txt}%"])
 
 		barcodes = frappe.get_all(
 			"Item Barcode",
@@ -1537,7 +1590,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 
 		barcodes = [d.item_code for d in barcodes]
 		if barcodes:
-			or_cond_filters["name"] = ("in", barcodes)
+			or_cond_filters.append(["name", "in", barcodes])
 
 	if filters and filters.get("item_code"):
 		has_variants = frappe.get_cached_value("Item", filters.get("item_code"), "has_variants")

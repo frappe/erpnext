@@ -65,6 +65,7 @@ class AssetRepair(AccountsController):
 			self.set_stock_items_cost()
 		self.calculate_total_repair_cost()
 		self.validate_purchase_invoice_status()
+		self.set_downtime()
 
 	def validate_purchase_invoice_status(self):
 		if self.purchase_invoice:
@@ -77,12 +78,15 @@ class AssetRepair(AccountsController):
 				)
 
 	def validate_asset(self):
-		if self.asset_doc.status in ("Sold", "Fully Depreciated", "Scrapped"):
+		if self.asset_doc.status in ("Sold", "Scrapped"):
 			frappe.throw(
 				_("Asset {0} is in {1} status and cannot be repaired.").format(
 					get_link_to_form("Asset", self.asset), self.asset_doc.status
 				)
 			)
+		if self.asset_doc.get_status() == "Fully Depreciated":
+			self.capitalize_repair_cost = 0
+			self.increase_in_asset_life = 0
 
 	def validate_dates(self):
 		if self.completion_date and (getdate(self.failure_date) > getdate(self.completion_date)):
@@ -211,6 +215,13 @@ class AssetRepair(AccountsController):
 	def check_repair_status(self):
 		if self.repair_status == "Pending":
 			frappe.throw(_("Please update Repair Status."))
+
+	def set_downtime(self):
+		# keep downtime in sync with the entered dates, regardless of edit order
+		if self.repair_status == "Completed" and self.failure_date and self.completion_date:
+			self.downtime = f"{get_downtime(self.failure_date, self.completion_date)} Hrs"
+		else:
+			self.downtime = None
 
 	def check_for_stock_items_and_warehouse(self):
 		if not self.get("stock_items"):

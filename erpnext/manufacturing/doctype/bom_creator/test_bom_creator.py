@@ -6,10 +6,6 @@ import random
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-from erpnext.manufacturing.doctype.bom_creator.bom_creator import (
-	add_item,
-	add_sub_assembly,
-)
 from erpnext.stock.doctype.item.test_item import make_item
 
 
@@ -38,8 +34,7 @@ class TestBOMCreator(FrappeTestCase):
 			conversion_rate=1,
 		)
 
-		add_sub_assembly(
-			parent=doc.name,
+		doc.add_sub_assembly(
 			fg_item=final_product,
 			fg_reference_id=doc.name,
 			bom_item={
@@ -91,8 +86,7 @@ class TestBOMCreator(FrappeTestCase):
 			conversion_rate=1,
 		)
 
-		add_item(
-			parent=doc.name,
+		doc.add_item(
 			fg_item=final_product,
 			fg_reference_id=doc.name,
 			item_code="Pedal Assembly",
@@ -133,8 +127,7 @@ class TestBOMCreator(FrappeTestCase):
 			conversion_rate=1,
 		)
 
-		add_item(
-			parent=doc.name,
+		doc.add_item(
 			fg_item=final_product,
 			fg_reference_id=doc.name,
 			item_code="Pedal Assembly",
@@ -144,9 +137,8 @@ class TestBOMCreator(FrappeTestCase):
 		doc.reload()
 		self.assertEqual(doc.items[0].is_expandable, 0)
 
-		add_sub_assembly(
+		doc.add_sub_assembly(
 			convert_to_sub_assembly=1,
-			parent=doc.name,
 			fg_item=final_product,
 			fg_reference_id=doc.items[0].name,
 			bom_item={
@@ -199,8 +191,7 @@ class TestBOMCreator(FrappeTestCase):
 			conversion_rate=1,
 		)
 
-		add_item(
-			parent=doc.name,
+		doc.add_item(
 			fg_item=final_product,
 			fg_reference_id=doc.name,
 			item_code="Pedal Assembly",
@@ -210,9 +201,8 @@ class TestBOMCreator(FrappeTestCase):
 		doc.reload()
 		self.assertEqual(doc.items[0].is_expandable, 0)
 
-		add_sub_assembly(
+		doc.add_sub_assembly(
 			convert_to_sub_assembly=1,
-			parent=doc.name,
 			fg_item=final_product,
 			fg_reference_id=doc.items[0].name,
 			bom_item={

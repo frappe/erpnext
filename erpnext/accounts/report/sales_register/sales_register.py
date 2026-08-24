@@ -151,7 +151,13 @@ def _execute(filters, additional_table_columns=None):
 		)
 
 		if inv.doctype == "Sales Invoice":
-			row.update({"debit": inv.base_grand_total, "credit": 0.0})
+			# credit only settlements the invoice itself posts to the receivable (mirrors its GL)
+			row.update(
+				{
+					"debit": inv.base_grand_total,
+					"credit": get_in_invoice_receivable_credit(inv),
+				}
+			)
 		else:
 			row.update({"debit": 0.0, "credit": inv.base_grand_total})
 		data.append(row)
@@ -165,6 +171,14 @@ def _execute(filters, additional_table_columns=None):
 			res[row].update({"balance": running_balance})
 
 	return columns, res, None, None, None, include_payments
+
+
+def get_in_invoice_receivable_credit(inv):
+	# amount the invoice settles against its own receivable, matching the invoice's GL entries
+	credit = flt(inv.loyalty_amount)  # loyalty redemption, POS or not
+	if inv.is_pos:  # POS payments and write-off credit the receivable only on POS invoices
+		credit += flt(inv.base_paid_amount) - flt(inv.base_change_amount) + flt(inv.base_write_off_amount)
+	return credit
 
 
 def get_columns(invoice_list, additional_table_columns, include_payments=False):
@@ -433,6 +447,11 @@ def get_invoices(filters, additional_query_columns):
 			si.base_net_total,
 			si.base_grand_total,
 			si.base_rounded_total,
+			si.is_pos,
+			si.base_paid_amount,
+			si.base_change_amount,
+			si.base_write_off_amount,
+			si.loyalty_amount,
 			si.outstanding_amount,
 			si.is_internal_customer,
 			si.represents_company,

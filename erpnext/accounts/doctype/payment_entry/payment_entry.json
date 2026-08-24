@@ -350,7 +350,7 @@
    "reqd": 1
   },
   {
-   "depends_on": "doc.received_amount",
+   "depends_on": "eval:doc.received_amount;",
    "fieldname": "base_received_amount",
    "fieldtype": "Currency",
    "label": "Received Amount (Company Currency)",
@@ -800,7 +800,7 @@
    "table_fieldname": "payment_entries"
   }
  ],
- "modified": "2025-05-15 18:01:04.013025",
+ "modified": "2026-05-15 13:31:01.166010",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",

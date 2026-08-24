@@ -23,7 +23,12 @@ from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category 
 	get_party_tax_withholding_details,
 )
 from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
-from erpnext.accounts.party import get_due_date, get_party_account, get_party_details
+from erpnext.accounts.party import (
+	CROSS_PARTY_FIELD_NO_MAP,
+	_get_party_details,
+	get_due_date,
+	get_party_account,
+)
 from erpnext.accounts.utils import (
 	cancel_exchange_gain_loss_journal,
 	get_account_currency,
@@ -450,8 +455,8 @@ class SalesInvoice(SellingController):
 		self.calculate_taxes_and_totals()
 
 	def before_save(self):
-		self.set_account_for_mode_of_payment()
 		self.set_paid_amount()
+		self.set_account_for_mode_of_payment()
 
 	def before_submit(self):
 		self.add_remarks()
@@ -786,6 +791,13 @@ class SalesInvoice(SellingController):
 	def set_paid_amount(self):
 		paid_amount = 0.0
 		base_paid_amount = 0.0
+
+		if not cint(self.is_pos) and self.is_return:
+			self.set("payments", [])
+			self.paid_amount = paid_amount
+			self.base_paid_amount = base_paid_amount
+			return
+
 		for data in self.payments:
 			data.base_amount = flt(data.amount * self.conversion_rate, self.precision("base_paid_amount"))
 			paid_amount += data.amount
@@ -2254,9 +2266,9 @@ def make_delivery_note(source_name, target_doc=None):
 					"cost_center": "cost_center",
 				},
 				"postprocess": update_item,
-				"condition": lambda doc: doc.delivered_by_supplier != 1
-				and not doc.dn_detail
-				and doc.qty - doc.delivered_qty > 0,
+				"condition": lambda doc: (
+					doc.delivered_by_supplier != 1 and not doc.dn_detail and doc.qty - doc.delivered_qty > 0
+				),
 			},
 			"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "reset_value": True},
 			"Sales Team": {
@@ -2526,7 +2538,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			"rate": "rate",
 		},
 		"postprocess": update_item,
-		"condition": lambda doc: doc.qty > 0,
+		"condition": lambda doc: doc.qty - received_items.get(doc.name, 0.0) > 0,
 	}
 
 	if doctype in ["Sales Invoice", "Sales Order"]:
@@ -2559,18 +2571,25 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 				"doctype": target_doctype,
 				"postprocess": update_details,
 				"set_target_warehouse": "set_from_warehouse",
-				"field_no_map": ["taxes_and_charges", "set_warehouse", "shipping_address", "cost_center"],
+				"field_no_map": [*CROSS_PARTY_FIELD_NO_MAP, "set_warehouse", "cost_center"],
 			},
 			doctype + " Item": item_field_map,
 		},
 		target_doc,
 		set_missing_values,
 	)
-
+	if not doclist.get("items"):
+		frappe.throw(
+			_(
+				"Cannot create Intercompany {0}. All items in the source {1} have already been fully invoiced. "
+				"Please check the existing linked {2}s."
+			).format(target_doctype, doctype, target_doctype)
+		)
 	return doclist
 
 
-def get_received_items(reference_name, doctype, reference_fieldname):
+@frappe.whitelist()
+def get_received_items(reference_name: str, doctype: str, reference_fieldname: str):
 	reference_field = "inter_company_invoice_reference"
 	if doctype == "Purchase Order":
 		reference_field = "inter_company_order_reference"
@@ -2583,20 +2602,19 @@ def get_received_items(reference_name, doctype, reference_fieldname):
 	target_doctypes = frappe.get_all(
 		doctype,
 		filters=filters,
-		as_list=True,
+		pluck="name",
 	)
-
+	received_items_map = {}
 	if target_doctypes:
-		target_doctypes = list(target_doctypes[0])
-
-	received_items_map = frappe._dict(
-		frappe.get_all(
+		received_items_data = frappe.get_all(
 			doctype + " Item",
 			filters={"parent": ("in", target_doctypes)},
 			fields=[reference_fieldname, "qty"],
-			as_list=1,
 		)
-	)
+		for item in received_items_data:
+			key = item.get(reference_fieldname)
+			if key:
+				received_items_map[key] = received_items_map.get(key, 0.0) + flt(item.qty)
 
 	return received_items_map
 
@@ -2719,7 +2737,7 @@ def update_taxes(
 	master_doctype=None,
 ):
 	# Update Party Details
-	party_details = get_party_details(
+	party_details = _get_party_details(
 		party=party,
 		party_type=party_type,
 		company=company,
@@ -2866,8 +2884,6 @@ def create_dunning(source_name, target_doc=None, ignore_permissions=False):
 	from frappe.model.mapper import get_mapped_doc
 
 	def postprocess_dunning(source, target):
-		from erpnext.accounts.doctype.dunning.dunning import get_dunning_letter_text
-
 		dunning_type = frappe.db.exists("Dunning Type", {"is_default": 1, "company": source.company})
 		if dunning_type:
 			dunning_type = frappe.get_doc("Dunning Type", dunning_type)
@@ -2876,14 +2892,8 @@ def create_dunning(source_name, target_doc=None, ignore_permissions=False):
 			target.dunning_fee = dunning_type.dunning_fee
 			target.income_account = dunning_type.income_account
 			target.cost_center = dunning_type.cost_center
-			letter_text = get_dunning_letter_text(
-				dunning_type=dunning_type.name, doc=target.as_dict(), language=source.language
-			)
-
-			if letter_text:
-				target.body_text = letter_text.get("body_text")
-				target.closing_text = letter_text.get("closing_text")
-				target.language = letter_text.get("language")
+			target.language = source.language
+			target.get_dunning_letter_text()
 
 		# update outstanding from doc
 		if source.payment_schedule and len(source.payment_schedule) == 1:

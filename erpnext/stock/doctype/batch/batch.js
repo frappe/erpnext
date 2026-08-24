@@ -70,6 +70,7 @@ frappe.ui.form.on("Batch", {
 					item_code: frm.doc.item,
 					for_stock_levels: for_stock_levels,
 					consider_negative_batches: 1,
+					ignore_reserved_stock: 1,
 				},
 				callback: (r) => {
 					if (!r.message) {

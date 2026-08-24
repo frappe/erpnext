@@ -10,6 +10,7 @@ import frappe.utils
 from frappe import _, qb
 from frappe.contacts.doctype.address.address import get_company_address
 from frappe.desk.notifications import clear_doctype_notifications
+from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
 from frappe.query_builder.functions import Sum
@@ -20,7 +21,7 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	update_linked_doc,
 	validate_inter_company_party,
 )
-from erpnext.accounts.party import get_party_account
+from erpnext.accounts.party import CROSS_PARTY_FIELD_NO_MAP, get_party_account
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
 	validate_against_blanket_order,
@@ -385,7 +386,7 @@ class SalesOrder(SellingController):
 				and not cint(d.delivered_by_supplier)
 			):
 				frappe.throw(
-					_("Delivery warehouse required for stock item {0}").format(d.item_code), WarehouseRequired
+					_("Source warehouse required for stock item {0}").format(d.item_code), WarehouseRequired
 				)
 
 	def validate_with_previous_doc(self):
@@ -1113,8 +1114,20 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 	return target_doc
 
 
+def get_qty_net_of_returns(so_item) -> float:
+	"""Return the ordered quantity billable after returns and re-deliveries."""
+	qty = flt(so_item.qty)
+
+	return min(qty, max(qty - flt(so_item.returned_qty), flt(so_item.delivered_qty)))
+
+
 @frappe.whitelist()
-def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, args=None):
+def make_sales_invoice(
+	source_name: str,
+	target_doc: str | dict | Document | None = None,
+	args: str | dict | None = None,
+	ignore_permissions: bool = False,
+):
 	if args is None:
 		args = {}
 	if isinstance(args, str):
@@ -1122,9 +1135,39 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, a
 
 	# 0 qty is accepted, as the qty is uncertain for some items
 	has_unit_price_items = frappe.db.get_value("Sales Order", source_name, "has_unit_price_items")
+	billed_qty_by_item = None
+	pending_qty_by_item = {}
 
 	def is_unit_price_row(source):
 		return has_unit_price_items and source.qty == 0
+
+	def get_billed_qty_by_item():
+		nonlocal billed_qty_by_item
+
+		if billed_qty_by_item is None:
+			invoice_item = frappe.qb.DocType("Sales Invoice Item")
+			sales_order_item = frappe.qb.DocType("Sales Order Item")
+			rows = (
+				frappe.qb.from_(invoice_item)
+				.inner_join(sales_order_item)
+				.on(invoice_item.so_detail == sales_order_item.name)
+				.select(invoice_item.so_detail, Sum(invoice_item.qty).as_("qty"))
+				.where((invoice_item.docstatus == 1) & (sales_order_item.parent == source_name))
+				.groupby(invoice_item.so_detail)
+			).run(as_dict=True)
+			billed_qty_by_item = {row.so_detail: flt(row.qty) for row in rows}
+
+		return billed_qty_by_item
+
+	def get_pending_qty(source):
+		if source.name not in pending_qty_by_item:
+			billable_qty = get_qty_net_of_returns(source)
+			if source.qty and source.billed_amt:
+				billable_qty -= get_billed_qty_by_item().get(source.name, 0)
+
+			pending_qty_by_item[source.name] = max(flt(billable_qty, source.precision("qty")), 0)
+
+		return pending_qty_by_item[source.name]
 
 	def postprocess(source, target):
 		set_missing_values(source, target)
@@ -1155,17 +1198,6 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, a
 		target.debit_to = get_party_account("Customer", source.customer, source.company)
 
 	def update_item(source, target, source_parent):
-		def get_billed_qty(so_item_name):
-			from frappe.query_builder.functions import Sum
-
-			table = frappe.qb.DocType("Sales Invoice Item")
-			query = (
-				frappe.qb.from_(table)
-				.select(Sum(table.qty).as_("qty"))
-				.where((table.docstatus == 1) & (table.so_detail == so_item_name))
-			)
-			return query.run(pluck="qty")[0] or 0
-
 		if source_parent.has_unit_price_items:
 			# 0 Amount rows (as seen in Unit Price Items) should be mapped as it is
 			pending_amount = flt(source.amount) - flt(source.billed_amt)
@@ -1174,11 +1206,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, a
 			target.amount = flt(source.amount) - flt(source.billed_amt)
 
 		target.base_amount = target.amount * flt(source_parent.conversion_rate)
-		target.qty = (
-			source.qty - get_billed_qty(source.name)
-			if (source.qty and source.billed_amt)
-			else (source.qty if is_unit_price_row(source) else source.qty - source.returned_qty)
-		)
+		target.qty = source.qty if is_unit_price_row(source) else get_pending_qty(source)
 
 		if source_parent.project:
 			target.cost_center = frappe.db.get_value("Project", source_parent.project, "cost_center")
@@ -1214,12 +1242,16 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, a
 					"parent": "sales_order",
 				},
 				"postprocess": update_item,
-				"condition": lambda doc: (
+				"condition": lambda doc: select_item(doc)
+				and (
 					True
 					if is_unit_price_row(doc)
-					else (doc.qty and (doc.base_amount == 0 or abs(doc.billed_amt) < abs(doc.amount)))
-				)
-				and select_item(doc),
+					else (
+						doc.qty
+						and (doc.base_amount == 0 or abs(doc.billed_amt) < abs(doc.amount))
+						and get_pending_qty(doc) > 0
+					)
+				),
 			},
 			"Sales Taxes and Charges": {
 				"doctype": "Sales Taxes and Charges",
@@ -1332,7 +1364,9 @@ def get_events(start, end, filters=None):
 
 
 @frappe.whitelist()
-def make_purchase_order_for_default_supplier(source_name, selected_items=None, target_doc=None):
+def make_purchase_order_for_default_supplier(
+	source_name: str, selected_items: str | list | None = None, target_doc: str | Document | None = None
+):
 	"""Creates Purchase Order for each Supplier. Returns a list of doc objects."""
 
 	from erpnext.setup.utils import get_exchange_rate
@@ -1361,7 +1395,6 @@ def make_purchase_order_for_default_supplier(source_name, selected_items=None, t
 		target.shipping_rule = ""
 		target.tc_name = ""
 		target.terms = ""
-		target.payment_terms_template = ""
 		target.payment_schedule = []
 
 		default_price_list = frappe.get_value("Supplier", supplier, "default_price_list")
@@ -1418,16 +1451,7 @@ def make_purchase_order_for_default_supplier(source_name, selected_items=None, t
 			{
 				"Sales Order": {
 					"doctype": "Purchase Order",
-					"field_no_map": [
-						"address_display",
-						"contact_display",
-						"contact_mobile",
-						"contact_email",
-						"contact_person",
-						"taxes_and_charges",
-						"shipping_address",
-						"dispatch_address",
-					],
+					"field_no_map": [*CROSS_PARTY_FIELD_NO_MAP],
 					"validation": {"docstatus": ["=", 1]},
 				},
 				"Sales Order Item": {
@@ -1492,7 +1516,9 @@ def make_purchase_order_for_default_supplier(source_name, selected_items=None, t
 
 
 @frappe.whitelist()
-def make_purchase_order(source_name, selected_items=None, target_doc=None):
+def make_purchase_order(
+	source_name: str, selected_items: str | list | None = None, target_doc: str | Document | None = None
+):
 	if not selected_items:
 		return
 
@@ -1520,7 +1546,6 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 		target.shipping_rule = ""
 		target.tc_name = ""
 		target.terms = ""
-		target.payment_terms_template = ""
 		target.payment_schedule = []
 
 		if is_drop_ship_order(target):
@@ -1559,16 +1584,7 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 		{
 			"Sales Order": {
 				"doctype": "Purchase Order",
-				"field_no_map": [
-					"address_display",
-					"contact_display",
-					"contact_mobile",
-					"contact_email",
-					"contact_person",
-					"taxes_and_charges",
-					"shipping_address",
-					"dispatch_address",
-				],
+				"field_no_map": [*CROSS_PARTY_FIELD_NO_MAP],
 				"validation": {"docstatus": ["=", 1]},
 			},
 			"Sales Order Item": {

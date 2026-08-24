@@ -7,7 +7,7 @@
  "doctype": "Report", 
  "idx": 3, 
  "is_standard": "Yes", 
- "modified": "2017-03-06 05:52:06.235584", 
+ "modified": "2026-07-01 13:37:44.167999",
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Accounts Receivable", 
@@ -15,6 +15,11 @@
  "ref_doctype": "Sales Invoice", 
  "report_name": "Accounts Receivable", 
  "report_type": "Script Report", 
+ "doctype_to_sync": [
+  {
+   "doc_type": "Payment Ledger Entry"
+  }
+ ],
  "roles": [
   {
    "role": "Accounts Manager"
@@ -22,5 +27,7 @@
   {
    "role": "Accounts User"
   }
- ]
+ ],
+ "snapshot_report": 0,
+ "timeout": 0
 }

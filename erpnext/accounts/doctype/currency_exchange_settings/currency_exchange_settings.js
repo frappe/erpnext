@@ -11,22 +11,28 @@ frappe.ui.form.on("Currency Exchange Settings", {
 			},
 			callback: function (r) {
 				if (r && r.message) {
+					let result = [],
+						params = {};
 					if (frm.doc.service_provider == "exchangerate.host") {
-						let result = ["result"];
-						let params = {
+						result = ["result"];
+						params = {
 							date: "{transaction_date}",
 							from: "{from_currency}",
 							to: "{to_currency}",
 						};
-						add_param(frm, r.message, params, result);
 					} else if (["frankfurter.app", "frankfurter.dev"].includes(frm.doc.service_provider)) {
-						let result = ["rates", "{to_currency}"];
-						let params = {
+						result = ["rates", "{to_currency}"];
+						params = {
 							base: "{from_currency}",
 							symbols: "{to_currency}",
 						};
-						add_param(frm, r.message, params, result);
+					} else if (frm.doc.service_provider == "frankfurter.dev - v2") {
+						result = ["rate"];
+						params = {
+							date: "{transaction_date}",
+						};
 					}
+					add_param(frm, r.message, params, result);
 				}
 			},
 		});

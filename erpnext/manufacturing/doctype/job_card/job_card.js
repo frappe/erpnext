@@ -72,8 +72,9 @@ frappe.ui.form.on("Job Card", {
 		frm.toggle_enable("for_quantity", !has_stock_entry);
 
 		if (!frm.is_new() && has_items && frm.doc.docstatus < 2) {
-			let to_request = frm.doc.for_quantity > frm.doc.transferred_qty;
-			let excess_transfer_allowed = frm.doc.__onload.job_card_excess_transfer;
+			const excess_transfer_allowed = frm.doc.__onload.job_card_excess_transfer;
+			const to_transfer = frm.doc.items.some((row) => flt(row.transferred_qty) < flt(row.required_qty));
+			const to_request = to_transfer;
 
 			if (to_request || excess_transfer_allowed) {
 				frm.add_custom_button(
@@ -84,10 +85,6 @@ frappe.ui.form.on("Job Card", {
 					__("Create")
 				);
 			}
-
-			// check if any row has untransferred materials
-			// in case of multiple items in JC
-			let to_transfer = frm.doc.items.some((row) => row.transferred_qty < row.required_qty);
 
 			if (to_transfer || excess_transfer_allowed) {
 				frm.add_custom_button(
@@ -120,7 +117,8 @@ frappe.ui.form.on("Job Card", {
 			frm.doc.docstatus == 0 &&
 			!frm.is_new() &&
 			(frm.doc.for_quantity > frm.doc.total_completed_qty || !frm.doc.for_quantity) &&
-			(frm.doc.items || !frm.doc.items.length || frm.doc.for_quantity == frm.doc.transferred_qty)
+			(!frm.doc.items.length ||
+				!frm.doc.items.some((row) => flt(row.transferred_qty) < flt(row.required_qty)))
 		) {
 			// if Job Card is link to Work Order, the job card must not be able to start if Work Order not "Started"
 			// and if stock mvt for WIP is required
@@ -298,7 +296,16 @@ frappe.ui.form.on("Job Card", {
 	prepare_timer_buttons: function (frm) {
 		frm.trigger("make_dashboard");
 
+		const transfer_pending =
+			!frm.doc.is_corrective_job_card &&
+			(frm.doc.items || []).length &&
+			flt(frm.doc.transferred_qty) < flt(frm.doc.for_quantity);
+
 		if (!frm.doc.started_time && !frm.doc.current_time) {
+			if (transfer_pending) {
+				return;
+			}
+
 			frm.add_custom_button(__("Start Job"), () => {
 				if ((frm.doc.employee && !frm.doc.employee.length) || !frm.doc.employee) {
 					frappe.prompt(

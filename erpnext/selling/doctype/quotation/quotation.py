@@ -147,6 +147,9 @@ class Quotation(SellingController):
 
 		make_packing_list(self)
 
+	def after_insert(self):
+		self.carry_forward_communication()
+
 	def before_submit(self):
 		self.set_has_alternative_item()
 
@@ -302,6 +305,18 @@ class Quotation(SellingController):
 		self.set_status(update=True)
 		self.update_opportunity("Open")
 		self.update_lead()
+
+	def carry_forward_communication(self):
+		from erpnext.crm.utils import copy_comments, link_communications
+
+		if not (
+			self.opportunity
+			and frappe.get_single_value("CRM Settings", "carry_forward_communication_and_comments")
+		):
+			return
+
+		copy_comments("Opportunity", self.opportunity, self)
+		link_communications("Opportunity", self.opportunity, self)
 
 	def print_other_charges(self, docname):
 		print_lst = []
@@ -560,7 +575,9 @@ def _make_customer(source_name, ignore_permissions=False):
 	if quotation.quotation_to == "Customer":
 		return frappe.get_doc("Customer", quotation.party_name)
 	elif quotation.quotation_to == "CRM Deal":
-		return frappe.get_doc("Customer", {"crm_deal": quotation.party_name})
+		customer_name = frappe.get_value("Customer", {"crm_deal": quotation.party_name})
+		if customer_name:
+			return frappe.get_doc("Customer", customer_name)
 
 	# Check if a Customer already exists for the Lead or Prospect.
 	existing_customer = None

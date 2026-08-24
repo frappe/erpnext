@@ -61,7 +61,7 @@ class Project(Document):
 		project_type: DF.Link | None
 		sales_order: DF.Link | None
 		second_email: DF.Time | None
-		status: DF.Literal["Open", "Completed", "Cancelled"]
+		status: DF.Literal["Open", "On hold", "Completed", "Cancelled"]
 		subject: DF.Data | None
 		to_time: DF.Time | None
 		total_billable_amount: DF.Currency
@@ -93,6 +93,7 @@ class Project(Document):
 	def validate(self):
 		if not self.is_new():
 			self.copy_from_template()  # nosemgrep
+			self.control_access_for_project_users()
 		self.send_welcome_email()
 		self.update_costing()
 		self.update_percent_complete()
@@ -207,6 +208,7 @@ class Project(Document):
 		self.copy_from_template()  # nosemgrep
 		if self.sales_order:
 			frappe.db.set_value("Sales Order", self.sales_order, "project", self.name)
+		self.control_access_for_project_users()
 
 	def on_trash(self):
 		frappe.db.set_value("Sales Order", {"project": self.name}, "project", "")
@@ -222,6 +224,8 @@ class Project(Document):
 		if self.percent_complete_method == "Manual":
 			if self.status == "Completed":
 				self.percent_complete = 100
+			elif flt(self.percent_complete) < 0 or flt(self.percent_complete) > 100:
+				frappe.throw(_("% Complete must be between 0 and 100"))
 			return
 
 		total = frappe.db.count("Task", dict(project=self.name))
@@ -264,8 +268,8 @@ class Project(Document):
 					pct_complete += row["progress"] * frappe.utils.safe_div(row["task_weight"], weight_sum)
 				self.percent_complete = flt(flt(pct_complete), 2)
 
-		# don't update status if it is cancelled
-		if self.status == "Cancelled":
+		# don't update status if it is manually set to cancelled or on hold
+		if self.status in ("Cancelled", "On hold"):
 			return
 
 		self.status = "Completed" if self.percent_complete == 100 else "Open"
@@ -376,6 +380,34 @@ class Project(Document):
 						content=content,
 					)
 					user.welcome_email_sent = 1
+
+	def control_access_for_project_users(self):
+		def revoke_access_for_project_users(removed_users):
+			users = set([d.user for d in frappe.share.get_users(self.doctype, self.name)])
+			for user in removed_users:
+				if user not in users:
+					continue
+
+				frappe.share.remove(self.doctype, self.name, user)
+
+		def grant_access_for_project_users(new_users):
+			for user in new_users:
+				frappe.share.add_docshare(self.doctype, self.name, user=user)
+
+		current_users = set([d.user for d in self.users])
+		old_doc = self.get_doc_before_save()
+
+		if not old_doc:
+			grant_access_for_project_users(current_users)
+			return
+
+		previous_users = set([d.user for d in old_doc.users])
+
+		new_users = current_users - previous_users
+		removed_users = previous_users - current_users
+
+		revoke_access_for_project_users(removed_users)
+		grant_access_for_project_users(new_users)
 
 
 def get_timeline_data(doctype: str, name: str) -> dict[int, int]:
@@ -717,7 +749,7 @@ def set_project_status(project, status):
 		frappe.throw(_("Status must be Cancelled or Completed"))
 
 	project = frappe.get_doc("Project", project)
-	frappe.has_permission(doc=project, throw=True)
+	project.check_permission("write")
 
 	for task in frappe.get_all("Task", dict(project=project.name)):
 		frappe.db.set_value("Task", task.name, "status", status)

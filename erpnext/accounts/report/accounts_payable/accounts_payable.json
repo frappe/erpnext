@@ -7,7 +7,7 @@
  "doctype": "Report", 
  "idx": 3, 
  "is_standard": "Yes", 
- "modified": "2017-02-24 20:09:46.150861", 
+ "modified": "2026-07-01 13:37:41.185347",
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Accounts Payable", 
@@ -15,6 +15,11 @@
  "ref_doctype": "Purchase Invoice", 
  "report_name": "Accounts Payable", 
  "report_type": "Script Report", 
+ "doctype_to_sync": [
+  {
+   "doc_type": "Payment Ledger Entry"
+  }
+ ],
  "roles": [
   {
    "role": "Accounts User"
@@ -28,5 +33,7 @@
   {
    "role": "Auditor"
   }
- ]
+ ],
+ "snapshot_report": 0,
+ "timeout": 0
 }
