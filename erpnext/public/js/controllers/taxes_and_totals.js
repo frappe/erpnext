@@ -444,11 +444,14 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 					}
 				}
 
+				// net_amount is the taxable basis, it feeds no total and is always
+				// accumulated, unlike tax_amount which is kept from the first pass
+				tax.net_amount += current_net_amount;
+
 				// accumulate tax amount into tax.tax_amount
 				if (tax.charge_type != "Actual" &&
 					!(me.discount_amount_applied && me.frm.doc.apply_discount_on=="Grand Total")) {
 					tax.tax_amount += current_tax_amount;
-					tax.net_amount += current_net_amount;
 				}
 
 				// store tax_amount for current item as it will be used for

@@ -450,12 +450,15 @@ class calculate_taxes_and_totals:
 					if n == len(self._items) - 1:
 						current_tax_amount += actual_tax_dict[tax.idx]
 
+				# net_amount is the taxable basis, it feeds no total and is always
+				# accumulated, unlike tax_amount which is kept from the first pass
+				tax.net_amount += current_net_amount
+
 				# accumulate tax amount into tax.tax_amount
 				if tax.charge_type != "Actual" and not (
 					self.discount_amount_applied and self.doc.apply_discount_on == "Grand Total"
 				):
 					tax.tax_amount += current_tax_amount
-					tax.net_amount += current_net_amount
 
 				# store tax_amount for current item as it will be used for
 				# charge type = 'On Previous Row Amount'
