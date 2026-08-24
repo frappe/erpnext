@@ -351,7 +351,7 @@ class calculate_taxes_and_totals:
 			tax_rate = self._get_tax_rate(tax, item_tax_map)
 
 			if tax_rate == NOT_APPLICABLE_TAX:
-				return current_tax_fraction, inclusive_tax_amount_per_qty
+				return tax_slope, tax_intercept
 
 			if tax.charge_type == "On Net Total":
 				tax_slope = tax_rate / 100.0
