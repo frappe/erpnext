@@ -494,20 +494,6 @@ def create_supplier_quotation(doc: str | Document | dict):
 	if frappe.session.user not in frappe.get_all("Portal User", {"parent": supplier}, pluck="user"):
 		frappe.throw(_("Not Permitted"), frappe.PermissionError)
 
-<<<<<<< HEAD
-	try:
-		sq_doc = frappe.get_doc(
-			{
-				"doctype": "Supplier Quotation",
-				"supplier": doc.get("supplier"),
-				"terms": doc.get("terms"),
-				"company": doc.get("company"),
-				"currency": doc.get("currency")
-				or get_party_account_currency("Supplier", doc.get("supplier"), doc.get("company")),
-				"buying_price_list": doc.get("buying_price_list")
-				or frappe.db.get_value("Buying Settings", None, "buying_price_list"),
-			}
-=======
 	validate_existing_supplier_quotation(supplier, doc.get("items"))
 
 	sq_doc = frappe.get_doc(
@@ -566,7 +552,6 @@ def validate_existing_supplier_quotation(supplier, items):
 				frappe.bold(existing_quotation.name),
 				frappe.bold(existing_quotation.request_for_quotation),
 			)
->>>>>>> 39e15c7b2d (fix: prevent duplicate supplier quotations from portal)
 		)
 
 
