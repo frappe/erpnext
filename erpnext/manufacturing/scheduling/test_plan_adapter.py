@@ -445,14 +445,20 @@ class TestPlanAdapter(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, entry.insert)
 
-	def test_amended_plan_keeps_sub_assembly_links(self):
+	def test_cancelled_plan_clears_computed_rows(self):
 		plan = self.make_plan()
 		plan.cancel()
 
-		amended = frappe.copy_doc(plan)
+		self.assertFalse(frappe.get_all("Production Plan Sub Assembly Item", filters={"parent": plan.name}))
+		self.assertFalse(frappe.get_all("Material Request Plan Item", filters={"parent": plan.name}))
+
+		amended = frappe.copy_doc(frappe.get_doc("Production Plan", plan.name))
 		amended.amended_from = plan.name
 		amended.docstatus = 0
-		amended.po_items[0].planned_qty = 5
+		amended.insert()
+		self.assertFalse(amended.sub_assembly_items)
+
+		amended.get_sub_assembly_items()
 		amended.submit()
 
 		self.assertTrue(amended.sub_assembly_items)
@@ -462,117 +468,6 @@ class TestPlanAdapter(ERPNextTestSuite):
 		tasks, task_info = build_plan_tasks(amended)
 		scheduled_items = {info["item_code"] for info in task_info.values()}
 		self.assertIn(amended.sub_assembly_items[0].production_item, scheduled_items)
-
-	def test_amended_plan_relinks_rows_by_item(self):
-		plan = create_production_plan(
-			item_code="Test PPS FG",
-			planned_qty=2,
-			use_multi_level_bom=1,
-			do_not_submit=True,
-			skip_getting_mr_items=True,
-		)
-		plan.append(
-			"po_items",
-			{
-				"use_multi_level_bom": 1,
-				"item_code": "Test PPS FG 2",
-				"bom_no": frappe.db.get_value("Item", "Test PPS FG 2", "default_bom"),
-				"planned_qty": 2,
-				"stock_uom": "Nos",
-				"warehouse": plan.po_items[0].warehouse,
-			},
-		)
-		plan.save()
-		plan.get_sub_assembly_items()
-		plan.submit()
-		plan.cancel()
-
-		amended = frappe.copy_doc(plan)
-		amended.amended_from = plan.name
-		amended.docstatus = 0
-		amended.po_items.reverse()
-		for idx, row in enumerate(amended.po_items, 1):
-			row.idx = idx
-		amended.submit()
-
-		fg_row = next(d for d in amended.po_items if d.item_code == "Test PPS FG")
-		self.assertTrue(amended.sub_assembly_items)
-		for row in amended.sub_assembly_items:
-			self.assertEqual(row.production_plan_item, fg_row.name)
-
-	def test_amended_plan_relinks_duplicate_rows(self):
-		plan = create_production_plan(
-			item_code="Test PPS FG",
-			planned_qty=2,
-			use_multi_level_bom=1,
-			do_not_submit=True,
-			skip_getting_mr_items=True,
-		)
-		plan.append(
-			"po_items",
-			{
-				"use_multi_level_bom": 1,
-				"item_code": "Test PPS FG",
-				"bom_no": plan.po_items[0].bom_no,
-				"planned_qty": 3,
-				"stock_uom": "Nos",
-				"warehouse": plan.po_items[0].warehouse,
-			},
-		)
-		plan.save()
-		plan.get_sub_assembly_items()
-		plan.submit()
-		plan.cancel()
-
-		amended = frappe.copy_doc(plan)
-		amended.amended_from = plan.name
-		amended.docstatus = 0
-		amended.po_items.reverse()
-		for idx, row in enumerate(amended.po_items, 1):
-			row.idx = idx
-		amended.submit()
-
-		qty_by_name = {d.name: flt(d.planned_qty) for d in amended.po_items}
-		self.assertTrue(amended.sub_assembly_items)
-		for row in amended.sub_assembly_items:
-			self.assertEqual(flt(row.qty), qty_by_name[row.production_plan_item])
-
-	def test_amended_edited_duplicate_rows_unlink(self):
-		plan = create_production_plan(
-			item_code="Test PPS FG",
-			planned_qty=2,
-			use_multi_level_bom=1,
-			do_not_submit=True,
-			skip_getting_mr_items=True,
-		)
-		plan.append(
-			"po_items",
-			{
-				"use_multi_level_bom": 1,
-				"item_code": "Test PPS FG",
-				"bom_no": plan.po_items[0].bom_no,
-				"planned_qty": 3,
-				"stock_uom": "Nos",
-				"warehouse": plan.po_items[0].warehouse,
-			},
-		)
-		plan.save()
-		plan.get_sub_assembly_items()
-		plan.submit()
-		plan.cancel()
-
-		amended = frappe.copy_doc(plan)
-		amended.amended_from = plan.name
-		amended.docstatus = 0
-		amended.po_items.reverse()
-		for idx, row in enumerate(amended.po_items, 1):
-			row.idx = idx
-			row.planned_qty += 5
-		amended.submit()
-
-		self.assertTrue(amended.sub_assembly_items)
-		for row in amended.sub_assembly_items:
-			self.assertIsNone(row.production_plan_item)
 
 	def test_material_row_schedule_date_fallbacks(self):
 		from erpnext.manufacturing.scheduling.plan_adapter import get_material_row_schedule_date

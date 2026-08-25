@@ -238,62 +238,10 @@ class ProductionPlan(Document):
 		"""
 		new_name_map = {d.temporary_name: d.name for d in self.po_items if d.temporary_name}
 		actual_names = {d.name for d in self.po_items}
-		amended_name_map = self._get_amended_row_name_map(actual_names)
 
 		for sub_assy in self.sub_assembly_items:
 			if sub_assy.production_plan_item not in actual_names:
-				sub_assy.production_plan_item = new_name_map.get(
-					sub_assy.production_plan_item
-				) or amended_name_map.get(sub_assy.production_plan_item)
-
-	def _get_amended_row_name_map(self, actual_names):
-		if not self.amended_from:
-			return {}
-
-		if all(d.production_plan_item in actual_names for d in self.sub_assembly_items):
-			return {}
-
-		old_rows = frappe.get_all(
-			"Production Plan Item",
-			filters={"parent": self.amended_from, "parenttype": "Production Plan"},
-			fields=["name", "item_code", "bom_no", "sales_order", "warehouse", "planned_qty"],
-			order_by="idx",
-		)
-		return self._match_amended_rows(old_rows)
-
-	def _match_amended_rows(self, old_rows):
-		name_map = {}
-		unclaimed = {d.name for d in self.po_items}
-		for detailed in (True, False):
-			self._match_amended_rows_pass(old_rows, name_map, unclaimed, detailed)
-
-		for row in old_rows:
-			name_map.setdefault(row.name, None)
-		return name_map
-
-	def _match_amended_rows_pass(self, old_rows, name_map, unclaimed, detailed):
-		def row_key(row):
-			key = (row.get("item_code"), row.get("bom_no"))
-			if detailed:
-				key += (row.get("sales_order"), row.get("warehouse"), flt(row.get("planned_qty")))
-			return key
-
-		buckets = {}
-		for d in sorted(self.po_items, key=lambda d: d.idx):
-			if d.name in unclaimed:
-				buckets.setdefault(row_key(d), []).append(d.name)
-
-		pending = [row for row in old_rows if not name_map.get(row.name)]
-		pending_counts = {}
-		for row in pending:
-			pending_counts[row_key(row)] = pending_counts.get(row_key(row), 0) + 1
-
-		for row in pending:
-			names = buckets.get(row_key(row))
-			ambiguous = not detailed and (not names or len(names) > 1 or pending_counts[row_key(row)] > 1)
-			if names and not ambiguous:
-				name_map[row.name] = names.pop(0)
-				unclaimed.discard(name_map[row.name])
+				sub_assy.production_plan_item = new_name_map.get(sub_assy.production_plan_item)
 
 	def calculate_total_produced_qty(self):
 		self.total_produced_qty = 0
@@ -326,9 +274,17 @@ class ProductionPlan(Document):
 		self.update_bin_qty()
 		self.update_sales_order()
 		self.update_stock_reservation()
+		self.delete_sub_assembly_and_material_rows()
 
 	def delete_production_plan_schedule(self):
 		frappe.db.delete("Production Plan Schedule", {"production_plan": self.name})
+
+	def delete_sub_assembly_and_material_rows(self):
+		for doctype in ("Production Plan Sub Assembly Item", "Material Request Plan Item"):
+			frappe.db.delete(doctype, {"parent": self.name, "parenttype": "Production Plan"})
+
+		self.set("sub_assembly_items", [])
+		self.set("mr_items", [])
 
 	def update_stock_reservation(self):
 		if not self.reserve_stock:
