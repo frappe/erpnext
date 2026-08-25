@@ -67,9 +67,12 @@ def get_gl_dict(doc, args: dict, account_currency: str | None = None, item=None)
 	accounting_dimensions = get_accounting_dimensions()
 	dimension_dict = frappe._dict()
 	for dimension in accounting_dimensions:
-		dimension_dict[dimension] = doc.get(dimension)
+		value = doc.get(dimension)
 		if item and item.get(dimension):
-			dimension_dict[dimension] = item.get(dimension)
+			value = item.get(dimension)
+		if isinstance(value, list | dict):
+			continue
+		dimension_dict[dimension] = value
 
 	gl_dict.update(dimension_dict)
 	gl_dict.update(args)
