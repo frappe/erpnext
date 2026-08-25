@@ -7,7 +7,7 @@ from collections import defaultdict
 
 import frappe
 from frappe import _
-from frappe.utils import cint, flt, get_datetime
+from frappe.utils import cint, flt, get_datetime, getdate
 
 from erpnext.manufacturing.scheduling import loaders
 from erpnext.manufacturing.scheduling.engine import SchedulingEngine
@@ -126,7 +126,7 @@ def build_plan_tasks(plan, use_item_dates=0, item_dates=None):
 		fg_deps = get_finished_good_dependencies(fg_row, sub_rows, row_bounds)
 
 		fg_tasks, first_keys, _terminal = build_row_tasks(
-			plan, fg_row.bom_no, fg_row.item_code, flt(fg_row.planned_qty), False, fg_row.name, ctx.lead_times
+			plan, fg_row.bom_no, fg_row.item_code, flt(fg_row.planned_qty), False, fg_row.name, ctx
 		)
 		wire_dependencies(fg_tasks, fg_deps)
 		wire_material_dependencies(
@@ -151,6 +151,10 @@ def get_build_context(plan):
 		item for items in bom_materials.values() for item in items if item not in produced_items
 	}
 	lead_times = get_lead_time_details(plan, material_items)
+	supplier_lead_times = get_supplier_lead_times(material_items | produced_items)
+	material_lead_days, material_suppliers = get_material_lead_days(
+		material_items, lead_times, supplier_lead_times, get_chosen_suppliers(plan)
+	)
 
 	return frappe._dict(
 		bom_materials={
@@ -158,11 +162,39 @@ def get_build_context(plan):
 			for bom, items in bom_materials.items()
 		},
 		lead_times=lead_times,
-		material_lead_days=get_material_lead_days(material_items, lead_times),
+		supplier_lead_times=supplier_lead_times,
+		material_lead_days=material_lead_days,
+		material_suppliers=material_suppliers,
 		material_tasks={},
 		tasks=[],
 		task_info={},
 	)
+
+
+def get_supplier_lead_times(item_codes):
+	if not item_codes:
+		return {}
+
+	table = frappe.qb.DocType("Item Lead Time Supplier")
+	rows = (
+		frappe.qb.from_(table)
+		.select(table.parent, table.supplier, table.purchase_time, table.buffer_time, table.is_default)
+		.where(table.parent.isin(list(item_codes)) & (table.parenttype == "Item Lead Time"))
+		.run(as_dict=True)
+	)
+
+	grouped = defaultdict(dict)
+	for row in rows:
+		grouped[row.parent][row.supplier] = row
+	return dict(grouped)
+
+
+def get_chosen_suppliers(plan):
+	chosen = defaultdict(set)
+	for row in plan.get("mr_items") or []:
+		if row.get("supplier"):
+			chosen[row.item_code].add(row.supplier)
+	return chosen
 
 
 def get_bom_materials(plan):
@@ -182,8 +214,8 @@ def get_bom_materials(plan):
 	return materials
 
 
-def get_material_lead_days(material_items, lead_times):
-	missing = [item for item in material_items if item not in lead_times]
+def get_material_lead_days(material_items, lead_times, supplier_lead_times, chosen_suppliers):
+	missing = [item for item in material_items if item not in lead_times and item not in supplier_lead_times]
 	item_master_days = {}
 	if missing:
 		item_master_days = dict(
@@ -192,15 +224,32 @@ def get_material_lead_days(material_items, lead_times):
 			)
 		)
 
-	lead_days = {}
+	lead_days, suppliers = {}, {}
 	for item in material_items:
-		lead_time = lead_times.get(item)
-		if lead_time:
-			lead_days[item] = cint(lead_time.purchase_time) + cint(lead_time.buffer_time)
-		else:
-			lead_days[item] = cint(item_master_days.get(item))
+		days, supplier = resolve_purchase_lead_time(
+			lead_times.get(item), supplier_lead_times.get(item), chosen_suppliers.get(item)
+		)
+		lead_days[item] = cint(item_master_days.get(item)) if days is None else days
+		if supplier:
+			suppliers[item] = supplier
 
-	return lead_days
+	return lead_days, suppliers
+
+
+def resolve_purchase_lead_time(lead_time, supplier_rows, chosen_suppliers=None):
+	rows = supplier_rows or {}
+	candidates = [rows[supplier] for supplier in chosen_suppliers or [] if supplier in rows]
+	row = (
+		max(candidates, key=lambda r: (cint(r.purchase_time) + cint(r.buffer_time), r.supplier))
+		if candidates
+		else next((r for r in rows.values() if r.is_default), None)
+	)
+
+	if row:
+		return cint(row.purchase_time) + cint(row.buffer_time), row.supplier
+	if lead_time:
+		return cint(lead_time.purchase_time) + cint(lead_time.buffer_time), None
+	return None, None
 
 
 def wire_material_dependencies(bom_no, first_tasks, ctx, consumer_row=None):
@@ -229,6 +278,7 @@ def get_material_task(item_code, lead_days, ctx, consumer_row=None):
 			"item_code": item_code,
 			"operation": None,
 			"parent_row": None,
+			"supplier": ctx.material_suppliers.get(item_code),
 			"consumers": [],
 		}
 
@@ -250,10 +300,19 @@ def set_chain_earliest_start(row_date, sub_rows, row_bounds, fg_tasks):
 
 def build_sub_assembly_tasks(plan, sub_rows, ctx):
 	row_bounds = {}
+	row_suppliers = {}
 	for row in sub_rows:
 		subcontracted = row.type_of_manufacturing == "Subcontract"
+		row_suppliers[row.name] = get_subcontract_supplier(row, ctx) if subcontracted else None
 		row_tasks, first_keys, terminal_keys = build_row_tasks(
-			plan, row.bom_no, row.production_item, flt(row.qty), subcontracted, row.name, ctx.lead_times
+			plan,
+			row.bom_no,
+			row.production_item,
+			flt(row.qty),
+			subcontracted,
+			row.name,
+			ctx,
+			row_suppliers[row.name],
 		)
 		row_bounds[row.name] = (first_keys, terminal_keys, row_tasks)
 		if not subcontracted:
@@ -280,9 +339,19 @@ def build_sub_assembly_tasks(plan, sub_rows, ctx):
 			ctx.tasks,
 			ctx.task_info,
 			parent_row=row.production_plan_item,
+			supplier=row_suppliers[row.name],
 		)
 
 	return row_bounds
+
+
+def get_subcontract_supplier(row, ctx):
+	if row.supplier:
+		return row.supplier
+
+	rows = ctx.supplier_lead_times.get(row.production_item) or {}
+	default_row = next((r for r in rows.values() if r.is_default), None)
+	return default_row.supplier if default_row else None
 
 
 def get_first_tasks(bounds):
@@ -305,7 +374,9 @@ def wire_dependencies(first_tasks, dependency_keys):
 		task.depends_on = list(dict.fromkeys([*task.depends_on, *dependency_keys]))
 
 
-def register_tasks(row_tasks, row_name, row_type, item_code, tasks, task_info, parent_row=None):
+def register_tasks(
+	row_tasks, row_name, row_type, item_code, tasks, task_info, parent_row=None, supplier=None
+):
 	for task in row_tasks:
 		tasks.append(task)
 		task_info[task.key] = {
@@ -314,19 +385,26 @@ def register_tasks(row_tasks, row_name, row_type, item_code, tasks, task_info, p
 			"item_code": item_code,
 			"operation": task.label,
 			"parent_row": parent_row,
+			"supplier": supplier,
 		}
 
 
-def build_row_tasks(plan, bom_no, item_code, qty, subcontracted, prefix, lead_times):
+def build_row_tasks(plan, bom_no, item_code, qty, subcontracted, prefix, ctx, supplier=None):
 	if not subcontracted and bom_no and frappe.get_cached_value("BOM", bom_no, "with_operations"):
 		row_tasks, terminal_keys = loaders.build_bom_operation_tasks(bom_no, qty, prefix)
 		if row_tasks:
 			first_keys = [task.key for task in row_tasks if not task.depends_on]
 			return row_tasks, first_keys, terminal_keys
 
-	duration = get_lead_time_duration_mins(
-		lead_times.get(item_code), qty, subcontracted, cint(plan.get("no_of_shifts"))
-	)
+	lead_time = ctx.lead_times.get(item_code)
+	if subcontracted:
+		supplier_row = (ctx.supplier_lead_times.get(item_code) or {}).get(supplier)
+		if supplier_row:
+			lead_time = frappe._dict(
+				purchase_time=supplier_row.purchase_time, buffer_time=supplier_row.buffer_time
+			)
+
+	duration = get_lead_time_duration_mins(lead_time, qty, subcontracted, cint(plan.get("no_of_shifts")))
 	task = Task(key=prefix, duration_mins=duration)
 	return [task], [task.key], [task.key]
 
@@ -338,20 +416,34 @@ def get_lead_time_duration_mins(lead_time, qty, subcontracted, no_of_shifts):
 	if subcontracted:
 		return max(cint(lead_time.purchase_time) + cint(lead_time.buffer_time), 1) * 1440.0
 
-	days = 0
+	buffer_mins = cint(lead_time.buffer_time) * 1440.0
+	days_needed = get_days_needed(lead_time, qty, no_of_shifts)
+	if not days_needed:
+		return max(buffer_mins, 1440.0)
+
+	full_days = math.ceil(days_needed) - 1
+	partial_day_mins = (days_needed - full_days) * get_daily_working_mins(lead_time, no_of_shifts)
+	return full_days * 1440.0 + partial_day_mins + buffer_mins
+
+
+def get_days_needed(lead_time, qty, no_of_shifts):
 	capacity = get_daily_capacity(lead_time, no_of_shifts)
 	if capacity:
-		days = math.ceil(qty / capacity)
-	elif lead_time.manufacturing_time_in_mins:
-		minutes_per_day = (
-			(no_of_shifts or cint(lead_time.no_of_shift) or 1)
-			* (cint(lead_time.shift_time_in_hours) or 8)
-			* 60
-			* (cint(lead_time.no_of_workstations) or 1)
-		)
-		days = math.ceil(cint(lead_time.manufacturing_time_in_mins) * qty / minutes_per_day)
+		return qty / capacity
 
-	return max(days + cint(lead_time.buffer_time), 1) * 1440.0
+	if lead_time.manufacturing_time_in_mins:
+		minutes_per_day = get_daily_working_mins(lead_time, no_of_shifts) * (
+			cint(lead_time.no_of_workstations) or 1
+		)
+		return cint(lead_time.manufacturing_time_in_mins) * qty / minutes_per_day
+
+	return 0
+
+
+def get_daily_working_mins(lead_time, no_of_shifts):
+	return (
+		(no_of_shifts or cint(lead_time.no_of_shift) or 1) * (cint(lead_time.shift_time_in_hours) or 8) * 60.0
+	)
 
 
 def get_daily_capacity(lead_time, no_of_shifts):
@@ -400,6 +492,7 @@ def build_proposal(plan, result, task_info):
 				"row_type": info["row_type"],
 				"item_code": info["item_code"],
 				"parent_row": info.get("parent_row"),
+				"supplier": info.get("supplier"),
 				"consumers": info.get("consumers") or [],
 			}
 		)
@@ -466,6 +559,7 @@ def make_schedule_entry(plan, row_name, row, block):
 			"item_code": row["item_code"],
 			"operation": block.get("operation") if block.get("workstation") else None,
 			"workstation": block.get("workstation"),
+			"supplier": row.get("supplier"),
 			"from_time": block["from_time"],
 			"to_time": block["to_time"],
 			"duration_mins": block["duration_mins"],
@@ -499,6 +593,16 @@ def update_plan_row_dates(plan, proposal, use_item_dates=0, item_dates=None):
 		if row.name in rows:
 			row.db_set("schedule_date", rows[row.name]["start"], update_modified=False)
 			row.db_set("schedule_end_date", rows[row.name]["end"], update_modified=False)
+
+	update_material_request_row_dates(plan, rows)
+
+
+def update_material_request_row_dates(plan, rows):
+	material_rows = {row["item_code"]: row for row in rows.values() if row.get("row_type") == "Raw Material"}
+	for row in plan.get("mr_items") or []:
+		material = material_rows.get(row.item_code)
+		if material:
+			row.db_set("schedule_date", getdate(material["end"]), update_modified=False)
 
 
 def set_finished_good_start_date(fg_row, rows, use_item_dates, item_dates):

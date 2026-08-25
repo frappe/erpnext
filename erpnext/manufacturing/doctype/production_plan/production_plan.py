@@ -238,10 +238,28 @@ class ProductionPlan(Document):
 		"""
 		new_name_map = {d.temporary_name: d.name for d in self.po_items if d.temporary_name}
 		actual_names = {d.name for d in self.po_items}
+		amended_name_map = self._get_amended_row_name_map(actual_names)
 
 		for sub_assy in self.sub_assembly_items:
 			if sub_assy.production_plan_item not in actual_names:
-				sub_assy.production_plan_item = new_name_map.get(sub_assy.production_plan_item)
+				sub_assy.production_plan_item = new_name_map.get(
+					sub_assy.production_plan_item
+				) or amended_name_map.get(sub_assy.production_plan_item)
+
+	def _get_amended_row_name_map(self, actual_names):
+		if not self.amended_from:
+			return {}
+
+		if all(d.production_plan_item in actual_names for d in self.sub_assembly_items):
+			return {}
+
+		new_names_by_idx = {d.idx: d.name for d in self.po_items}
+		old_rows = frappe.get_all(
+			"Production Plan Item",
+			filters={"parent": self.amended_from, "parenttype": "Production Plan"},
+			fields=["name", "idx"],
+		)
+		return {row.name: new_names_by_idx.get(row.idx) for row in old_rows}
 
 	def calculate_total_produced_qty(self):
 		self.total_produced_qty = 0
@@ -270,9 +288,13 @@ class ProductionPlan(Document):
 	def on_cancel(self):
 		self.db_set("status", "Cancelled")
 		self.delete_draft_work_order()
+		self.delete_production_plan_schedule()
 		self.update_bin_qty()
 		self.update_sales_order()
 		self.update_stock_reservation()
+
+	def delete_production_plan_schedule(self):
+		frappe.db.delete("Production Plan Schedule", {"production_plan": self.name})
 
 	def update_stock_reservation(self):
 		if not self.reserve_stock:

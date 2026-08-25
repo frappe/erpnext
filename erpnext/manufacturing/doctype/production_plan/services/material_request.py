@@ -161,6 +161,7 @@ def get_items_for_material_requests(
 	mr_items = _apply_other_locations(
 		doc, mr_items, warehouses, ignore_ordered_qty, get_parent_warehouse_data
 	)
+	_set_default_suppliers(mr_items, doc.get("company"))
 
 	if not mr_items:
 		_warn_no_mr_items(doc)
@@ -462,6 +463,59 @@ def _apply_other_locations(doc, mr_items, warehouses, ignore_ordered_qty, get_pa
 			consider_minimum_order_qty=doc.get("consider_minimum_order_qty"),
 		)
 	return new_mr_items
+
+
+def _set_default_suppliers(mr_items, company):
+	procurement_types = ("Purchase", "Subcontracting")
+	items = {
+		row.get("item_code") for row in mr_items if row.get("material_request_type") in procurement_types
+	}
+	if not items:
+		return
+
+	lead_time_suppliers = _get_default_lead_time_suppliers(items)
+	item_default_suppliers = _get_item_default_suppliers(items, company)
+
+	for row in mr_items:
+		if row.get("material_request_type") not in procurement_types or row.get("supplier"):
+			continue
+
+		item_code = row.get("item_code")
+		supplier = lead_time_suppliers.get(item_code) or item_default_suppliers.get(item_code)
+		if supplier:
+			row["supplier"] = supplier
+
+
+def _get_default_lead_time_suppliers(items):
+	table = frappe.qb.DocType("Item Lead Time Supplier")
+	rows = (
+		frappe.qb.from_(table)
+		.select(table.parent, table.supplier)
+		.where(
+			table.parent.isin(list(items)) & (table.parenttype == "Item Lead Time") & (table.is_default == 1)
+		)
+		.run(as_dict=True)
+	)
+	return {row.parent: row.supplier for row in rows}
+
+
+def _get_item_default_suppliers(items, company):
+	if not company:
+		return {}
+
+	table = frappe.qb.DocType("Item Default")
+	rows = (
+		frappe.qb.from_(table)
+		.select(table.parent, table.default_supplier)
+		.where(
+			table.parent.isin(list(items))
+			& (table.parenttype == "Item")
+			& (table.company == company)
+			& table.default_supplier.isnotnull()
+		)
+		.run(as_dict=True)
+	)
+	return {row.parent: row.default_supplier for row in rows}
 
 
 def _warn_no_mr_items(doc):
