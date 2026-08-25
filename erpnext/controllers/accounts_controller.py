@@ -67,6 +67,7 @@ from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.item.item import get_uom_conv_factor
 from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 from erpnext.stock.get_item_details import (
+	NOT_APPLICABLE_TAX,
 	_get_item_tax_template,
 	_get_item_tax_template_from_item_group,
 	get_bin_details,
@@ -1294,7 +1295,10 @@ class AccountsController(TransactionBase):
 			if isinstance(item_tax_rate, str):
 				item_tax_rate = parse_json(item_tax_rate)
 
-			for account_head, _rate in item_tax_rate.items():
+			for account_head, rate in item_tax_rate.items():
+				if rate == NOT_APPLICABLE_TAX:
+					continue
+
 				row = self.get_tax_row(account_head)
 
 				if not row:
@@ -3721,8 +3725,11 @@ def add_taxes_from_tax_template(child_item, parent_doc, db_insert=True):
 
 	if child_item.get("item_tax_rate") and add_taxes_from_item_tax_template:
 		tax_map = json.loads(child_item.get("item_tax_rate"))
-		for tax_type in tax_map:
-			tax_rate = flt(tax_map[tax_type])
+		for tax_type, tax_rate in tax_map.items():
+			if tax_rate == NOT_APPLICABLE_TAX:
+				continue
+
+			tax_rate = flt(tax_rate)
 			taxes = parent_doc.get("taxes") or []
 			# add new row for tax head only if missing
 			found = any(tax.account_head == tax_type for tax in taxes)

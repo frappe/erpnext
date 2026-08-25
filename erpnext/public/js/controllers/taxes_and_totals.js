@@ -1,6 +1,9 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
+// mirror of erpnext.stock.get_item_details.NOT_APPLICABLE_TAX
+erpnext.NOT_APPLICABLE_TAX = "N/A";
+
 // Per-charge_type base resolvers, mirror of the `erpnext_taxable_base_resolvers`
 // server hook. A localization registers `fn(calc, item, tax)` returning the per-item
 // base, so the client preview matches the server for custom charge types.
@@ -300,6 +303,10 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		if(cint(tax.included_in_print_rate)) {
 			var tax_rate = this._get_tax_rate(tax, item_tax_map);
 
+			if (tax_rate === erpnext.NOT_APPLICABLE_TAX) {
+				return [tax_slope, tax_intercept];
+			}
+
 			if(tax.charge_type == "On Net Total") {
 				tax_slope = (tax_rate / 100.0);
 
@@ -339,8 +346,14 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	}
 
 	_get_tax_rate(tax, item_tax_map) {
-		return (Object.keys(item_tax_map).indexOf(tax.account_head) != -1) ?
-			flt(item_tax_map[tax.account_head], precision("rate", tax)) : tax.rate;
+		if (tax.account_head in item_tax_map) {
+			let rate = item_tax_map[tax.account_head];
+			if (rate === erpnext.NOT_APPLICABLE_TAX) {
+				return erpnext.NOT_APPLICABLE_TAX;
+			}
+			return flt(rate, precision("rate", tax));
+		}
+		return tax.rate;
 	}
 
 	calculate_net_total() {
@@ -379,6 +392,9 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			}
 
 			$.each(item_tax_map, function(tax, rate) {
+				if (rate === erpnext.NOT_APPLICABLE_TAX) {
+					return;
+				}
 				let found = (me.frm.doc.taxes || []).find(d => d.account_head === tax);
 				if (!found) {
 					let child = frappe.model.add_child(me.frm.doc, "taxes");
@@ -429,11 +445,14 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 					}
 				}
 
+				// net_amount is the taxable basis, it feeds no total and is always
+				// accumulated, unlike tax_amount which is kept from the first pass
+				tax.net_amount += current_net_amount;
+
 				// accumulate tax amount into tax.tax_amount
 				if (tax.charge_type != "Actual" &&
 					!(me.discount_amount_applied && me.frm.doc.apply_discount_on=="Grand Total")) {
 					tax.tax_amount += current_tax_amount;
-					tax.net_amount += current_net_amount;
 				}
 
 				// store tax_amount for current item as it will be used for
@@ -518,6 +537,10 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		var tax_rate = this._get_tax_rate(tax, item_tax_map);
 		var current_tax_amount = 0.0;
 		var current_net_amount = 0.0;
+
+		if (tax_rate === erpnext.NOT_APPLICABLE_TAX) {
+			return [current_net_amount, current_tax_amount];
+		}
 
 		// To set row_id by default as previous row.
 		if(["On Previous Row Amount", "On Previous Row Total"].includes(tax.charge_type)) {
