@@ -269,7 +269,7 @@
    "link_fieldname": "default_bank_account"
   }
  ],
- "modified": "2026-04-11 19:46:27.609994",
+ "modified": "2026-08-21 23:11:39.585456",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Account",
@@ -299,6 +299,22 @@
    "role": "Accounts User",
    "share": 1,
    "write": 1
+  },
+  {
+   "role": "Purchase Manager",
+   "select": 1
+  },
+  {
+   "role": "Purchase Master Manager",
+   "select": 1
+  },
+  {
+   "role": "Sales Master Manager",
+   "select": 1
+  },
+  {
+   "role": "Sales User",
+   "select": 1
   }
  ],
  "row_format": "Dynamic",
