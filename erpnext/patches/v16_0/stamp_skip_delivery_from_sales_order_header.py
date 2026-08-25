@@ -24,11 +24,3 @@ def execute():
 		.where((soi.parenttype == "Sales Order") & soi.parent.isin(exempt_orders))
 		.run()
 	)
-
-	(
-		frappe.qb.update(so)
-		.set(so.per_delivered, 100)
-		.set(so.delivery_status, "Not Applicable")
-		.where(so.name.isin(exempt_orders))
-		.run()
-	)
