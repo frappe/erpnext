@@ -1224,6 +1224,14 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertEqual(len(scr.items), 3)  # 1 FG Item + 2 Scrap Items
 		self.assertEqual(scr_secondary_items, set(secondary_items))
 
+		# without a document level warehouse the rows fall back to the FG row's warehouse
+		scr.set_warehouse = None
+		scr.get_secondary_items()
+		fg_warehouse = next(item.warehouse for item in scr.items if item.bom)
+		for item in scr.items:
+			if item.secondary_item_type or item.use_valuation_rate:
+				self.assertEqual(item.warehouse, fg_warehouse)
+
 		scr.submit()
 
 	def test_subcontracting_receipt_cancel_with_batch(self):
