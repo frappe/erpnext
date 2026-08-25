@@ -39,6 +39,42 @@ class TestBOM(ERPNextTestSuite):
 		self.assertEqual(len(items_dict.values()), 2)
 
 	@timeout
+	def test_get_items_keeps_repeated_operation_rows_separate(self):
+		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
+		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+
+		operation = make_operation(
+			{"operation": "_Test Repeated Operation", "workstation": "_Test Workstation 1"}
+		)
+		finished_good = make_item(properties={"is_stock_item": 1}).name
+		raw_material = make_item(properties={"is_stock_item": 1}).name
+		bom = frappe.new_doc(
+			"BOM",
+			company="_Test Company",
+			item=finished_good,
+			quantity=1,
+			with_operations=1,
+		)
+		for _ in range(2):
+			bom.append(
+				"operations",
+				{
+					"operation": operation.name,
+					"workstation": "_Test Workstation 1",
+					"time_in_mins": 30,
+				},
+			)
+
+		bom.append("items", {"item_code": raw_material, "qty": 1, "operation_row_id": 1})
+		bom.append("items", {"item_code": raw_material, "qty": 2, "operation_row_id": 2})
+		bom.insert()
+
+		items = get_bom_items_as_dict(bom.name, bom.company, qty=1, fetch_exploded=0)
+
+		self.assertEqual(items[(raw_material, 1)].qty, 1)
+		self.assertEqual(items[(raw_material, 2)].qty, 2)
+
+	@timeout
 	def test_get_items_exploded(self):
 		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
 
