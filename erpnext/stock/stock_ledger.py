@@ -587,16 +587,6 @@ class update_entries_after:
 		previous_sle = get_previous_sle_of_current_voucher(args)
 		if previous_sle:
 			self.prev_sle_dict[(args.get("item_code"), args.get("warehouse"))] = previous_sle
-		else:
-			self.prev_sle_dict[(args.get("item_code"), args.get("warehouse"))] = frappe._dict(
-				{
-					"qty_after_transaction": 0.0,
-					"valuation_rate": 0.0,
-					"stock_value": 0.0,
-					"prev_stock_value": 0.0,
-					"stock_queue": [],
-				}
-			)
 
 		warehouse_dict.previous_sle = previous_sle
 
@@ -1799,6 +1789,30 @@ class update_entries_after:
 				updated_values["valuation_rate"] = flt(data.valuation_rate)
 
 			frappe.db.set_value("Bin", bin_name, updated_values, update_modified=True)
+
+		self.reset_bin_without_stock_ledger_entries()
+
+	def reset_bin_without_stock_ledger_entries(self):
+		"""Reset the bin when its ledger has no entries left, prev_sle_dict never covers that case."""
+		item_code, warehouse = self.args.get("item_code"), self.args.get("warehouse")
+		if not item_code or not warehouse or (item_code, warehouse) in self.prev_sle_dict:
+			return
+
+		if frappe.db.exists(
+			"Stock Ledger Entry", {"item_code": item_code, "warehouse": warehouse, "is_cancelled": 0}
+		):
+			return
+
+		bin_name = frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse})
+		if not bin_name:
+			return
+
+		frappe.db.set_value(
+			"Bin",
+			bin_name,
+			{"actual_qty": 0.0, "stock_value": 0.0, "valuation_rate": 0.0},
+			update_modified=True,
+		)
 
 
 def get_sle_against_current_voucher(kwargs):
