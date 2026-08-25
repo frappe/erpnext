@@ -1232,6 +1232,14 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 			if item.secondary_item_type or item.use_valuation_rate:
 				self.assertEqual(item.warehouse, fg_warehouse)
 
+		# valuation rate rows are repriced at their warehouse on every save
+		make_stock_entry(item_code=secondary_item_1, target="_Test Warehouse - _TC", qty=5, basic_rate=40)
+		vr_row = next(item for item in scr.items if item.item_code == secondary_item_1)
+		vr_row.warehouse = "_Test Warehouse - _TC"
+		scr.save()
+		vr_row = next(item for item in scr.items if item.item_code == secondary_item_1)
+		self.assertEqual(vr_row.rate, 40)
+
 		scr.submit()
 
 	def test_subcontracting_receipt_cancel_with_batch(self):
