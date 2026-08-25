@@ -66,6 +66,19 @@ frappe.query_reports["Purchase Analytics"] = {
 			reqd: 1,
 		},
 		{
+			fieldname: "curves",
+			label: __("Curves"),
+			fieldtype: "Select",
+			options: [
+				{ value: "select", label: __("Select") },
+				{ value: "all", label: __("All") },
+				{ value: "non-zeros", label: __("Non-Zeros") },
+				{ value: "total", label: __("Total Only") },
+			],
+			default: "select",
+			reqd: 1,
+		},
+		{
 			fieldname: "show_aggregate_value_from_subsidiary_companies",
 			label: __("Show Aggregate Value from Subsidiary Companies"),
 			fieldtype: "Check",
