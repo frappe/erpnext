@@ -181,6 +181,7 @@ class POSInvoice(SalesInvoice):
 		total_advance: DF.Currency
 		total_billing_amount: DF.Currency
 		total_commission: DF.Currency
+		total_commission_in_transaction_currency: DF.Currency
 		total_net_weight: DF.Float
 		total_qty: DF.Float
 		total_taxes_and_charges: DF.Currency

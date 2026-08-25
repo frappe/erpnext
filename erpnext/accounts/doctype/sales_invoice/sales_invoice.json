@@ -208,6 +208,7 @@
   "column_break10",
   "commission_rate",
   "total_commission",
+  "total_commission_in_transaction_currency",
   "sales_team_section",
   "sales_team",
   "edit_printing_settings",
@@ -1810,11 +1811,20 @@
    "fieldtype": "Currency",
    "hide_days": 1,
    "hide_seconds": 1,
-   "label": "Total Commission",
+   "label": "Total Commission (Company Currency)",
    "no_copy": 1,
    "oldfieldname": "total_commission",
    "oldfieldtype": "Currency",
    "options": "Company:company:default_currency",
+   "print_hide": 1
+  },
+  {
+   "depends_on": "eval:doc.sales_partner",
+   "fieldname": "total_commission_in_transaction_currency",
+   "fieldtype": "Currency",
+   "label": "Total Commission (Transaction Currency)",
+   "no_copy": 1,
+   "options": "currency",
    "print_hide": 1
   },
   {
@@ -2405,7 +2415,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2026-08-14 12:43:19.480555",
+ "modified": "2026-08-25 16:01:21.338942",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

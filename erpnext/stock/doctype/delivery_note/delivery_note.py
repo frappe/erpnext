@@ -145,6 +145,7 @@ class DeliveryNote(SellingController):
 		title: DF.Data | None
 		total: DF.Currency
 		total_commission: DF.Currency
+		total_commission_in_transaction_currency: DF.Currency
 		total_net_weight: DF.Float
 		total_qty: DF.Float
 		total_taxes_and_charges: DF.Currency

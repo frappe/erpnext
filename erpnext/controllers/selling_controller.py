@@ -221,6 +221,15 @@ class SellingController(StockController):
 			self.precision("total_commission"),
 		)
 
+		if self.meta.get_field("total_commission_in_transaction_currency"):
+			amount_eligible_in_transaction_currency = sum(
+				item.net_amount for item in self.items if item.grant_commission
+			)
+			self.total_commission_in_transaction_currency = flt(
+				amount_eligible_in_transaction_currency * self.commission_rate / 100.0,
+				self.precision("total_commission_in_transaction_currency"),
+			)
+
 	def calculate_contribution(self):
 		if not self.meta.get_field("sales_team"):
 			return
