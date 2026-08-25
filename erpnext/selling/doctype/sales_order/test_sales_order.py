@@ -107,25 +107,22 @@ class TestSalesOrder(ERPNextTestSuite):
 		mr.reload()
 		self.assertRaises(frappe.ValidationError, make_material_request, so.name)
 
-	def test_sales_order_skip_delivery_note(self):
-		so = make_sales_order(do_not_submit=True)
+	@ERPNextTestSuite.change_settings("Selling Settings", {"skip_delivery_note_for_service_items": 1})
+	def test_maintenance_order_completes_with_service_items(self):
+		service_item = make_item("_Test Service Item For Skip DN", {"is_stock_item": 0}).name
+		so = make_sales_order(item_code=service_item, qty=2, rate=100, do_not_submit=True)
 		so.order_type = "Maintenance"
-		so.skip_delivery_note = 1
-		so.append(
-			"items",
-			{
-				"item_code": "_Test Item 2",
-				"qty": 2,
-				"rate": 100,
-			},
-		)
 		so.save()
 		so.submit()
 
-		so.reload()
+		self.assertEqual(so.items[0].skip_delivery, 1)
+		self.assertEqual(flt(so.per_delivered), 100)
+		self.assertEqual(so.delivery_status, "Not Applicable")
+
 		si = make_sales_invoice(so.name)
 		si.insert()
 		si.submit()
+
 		so.reload()
 		self.assertEqual(so.status, "Completed")
 
@@ -133,9 +130,12 @@ class TestSalesOrder(ERPNextTestSuite):
 	def test_auto_skip_delivery_note_for_service_items(self):
 		service_item = make_item("_Test Service Item For Skip DN", {"is_stock_item": 0}).name
 		so = make_sales_order(item_code=service_item, qty=2, rate=100)
+		so.reload()
 
 		self.assertEqual(so.items[0].skip_delivery, 1)
-		self.assertEqual(so.skip_delivery_note, 1)
+		self.assertEqual(flt(so.per_delivered), 100)
+		self.assertEqual(so.delivery_status, "Not Applicable")
+		self.assertEqual(so.status, "To Bill")
 
 		si = make_sales_invoice(so.name)
 		si.insert()
@@ -161,7 +161,6 @@ class TestSalesOrder(ERPNextTestSuite):
 			]
 		)
 
-		self.assertEqual(so.skip_delivery_note, 0)
 		self.assertEqual(so.items[0].skip_delivery, 0)
 		self.assertEqual(so.items[1].skip_delivery, 1)
 
@@ -190,14 +189,13 @@ class TestSalesOrder(ERPNextTestSuite):
 		so = make_sales_order(item_code="_Test Bundle Parent For Skip DN", qty=1, rate=100)
 
 		self.assertEqual(so.items[0].skip_delivery, 0)
-		self.assertEqual(so.skip_delivery_note, 0)
 
 	def test_service_item_needs_delivery_when_setting_disabled(self):
 		service_item = make_item("_Test Service Item For Skip DN", {"is_stock_item": 0}).name
 		so = make_sales_order(item_code=service_item, qty=1, rate=100)
 
 		self.assertEqual(so.items[0].skip_delivery, 0)
-		self.assertEqual(so.skip_delivery_note, 0)
+		self.assertEqual(flt(so.per_delivered), 0)
 
 		si = make_sales_invoice(so.name)
 		si.insert()
@@ -212,63 +210,15 @@ class TestSalesOrder(ERPNextTestSuite):
 		so = make_sales_order(item_code=service_item, qty=1, rate=100, do_not_submit=True)
 
 		self.assertEqual(so.items[0].skip_delivery, 1)
-		self.assertEqual(so.skip_delivery_note, 1)
+		self.assertEqual(flt(so.per_delivered), 100)
+		self.assertEqual(so.delivery_status, "Not Applicable")
 
 		with self.change_settings("Selling Settings", {"skip_delivery_note_for_service_items": 0}):
 			so.save()
 
 		self.assertEqual(so.items[0].skip_delivery, 0)
-		self.assertEqual(so.skip_delivery_note, 0)
-
-	@ERPNextTestSuite.change_settings("Selling Settings", {"skip_delivery_note_for_service_items": 1})
-	def test_stale_skip_delivery_cleared_for_shopping_cart_order(self):
-		service_item = make_item("_Test Service Item For Skip DN", {"is_stock_item": 0}).name
-		so = make_sales_order(item_code=service_item, qty=1, rate=100, do_not_submit=True)
-
-		self.assertEqual(so.skip_delivery_note, 1)
-
-		so.order_type = "Shopping Cart"
-		with self.change_settings("Selling Settings", {"skip_delivery_note_for_service_items": 0}):
-			so.save()
-
-		self.assertEqual(so.items[0].skip_delivery, 0)
-		self.assertEqual(so.skip_delivery_note, 0)
-
-	@ERPNextTestSuite.change_settings("Selling Settings", {"skip_delivery_note_for_service_items": 1})
-	def test_auto_skip_delivery_cleared_on_switch_to_maintenance(self):
-		service_item = make_item("_Test Service Item For Skip DN", {"is_stock_item": 0}).name
-		so = make_sales_order(item_code=service_item, qty=1, rate=100, do_not_submit=True)
-
-		self.assertEqual(so.items[0].skip_delivery, 1)
-		self.assertEqual(so.skip_delivery_note, 1)
-
-		so.order_type = "Maintenance"
-		so.save()
-
-		self.assertEqual(so.items[0].skip_delivery, 0)
-		self.assertEqual(so.skip_delivery_note, 0)
-
-	@ERPNextTestSuite.change_settings("Selling Settings", {"skip_delivery_note_for_service_items": 1})
-	def test_manual_maintenance_exemption_preserved_on_save(self):
-		so = make_sales_order(do_not_submit=True)
-		so.order_type = "Maintenance"
-		so.skip_delivery_note = 1
-		so.save()
-
-		self.assertEqual(so.skip_delivery_note, 1)
-
-		so.save()
-		self.assertEqual(so.skip_delivery_note, 1)
-
-	@ERPNextTestSuite.change_settings("Selling Settings", {"skip_delivery_note_for_service_items": 1})
-	def test_manual_skip_delivery_note_not_cleared_for_maintenance(self):
-		so = make_sales_order(do_not_submit=True)
-		so.order_type = "Maintenance"
-		so.skip_delivery_note = 1
-		so.save()
-
-		self.assertEqual(so.skip_delivery_note, 1)
-		self.assertEqual(so.items[0].skip_delivery, 0)
+		self.assertEqual(flt(so.per_delivered), 0)
+		self.assertEqual(so.delivery_status, "Not Delivered")
 
 	@ERPNextTestSuite.change_settings(
 		"Selling Settings", {"allow_multiple_items": 1, "allow_negative_rates_for_items": 1}

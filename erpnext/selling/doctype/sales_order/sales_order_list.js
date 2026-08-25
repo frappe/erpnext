@@ -10,7 +10,6 @@ frappe.listview_settings["Sales Order"] = {
 		"advance_payment_status",
 		"order_type",
 		"name",
-		"skip_delivery_note",
 	],
 	get_indicator: function (doc) {
 		if (doc.status === "Closed") {
@@ -23,7 +22,7 @@ frappe.listview_settings["Sales Order"] = {
 			return [__("Completed"), "green", "status,=,Completed"];
 		} else if (doc.advance_payment_status === "Requested") {
 			return [__("To Pay"), "gray", "advance_payment_status,=,Requested"];
-		} else if (!doc.skip_delivery_note && flt(doc.per_delivered) < 100) {
+		} else if (flt(doc.per_delivered) < 100) {
 			if (frappe.datetime.get_diff(doc.delivery_date) < 0) {
 				// not delivered & overdue
 				return [
@@ -56,8 +55,6 @@ frappe.listview_settings["Sales Order"] = {
 		) {
 			// to bill
 			return [__("To Bill"), "orange", "per_delivered,=,100|per_billed,<,100|status,!=,Closed"];
-		} else if (doc.skip_delivery_note && flt(doc.per_billed) < 100) {
-			return [__("To Bill"), "orange", "per_billed,<,100|status,!=,Closed"];
 		}
 	},
 	onload: function (listview) {

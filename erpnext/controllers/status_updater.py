@@ -48,11 +48,11 @@ status_map = {
 		],
 		[
 			"To Bill",
-			"eval:(self.per_delivered >= 100 or self.skip_delivery_note) and self.per_billed < 100 and self.docstatus == 1",
+			"eval:self.per_delivered >= 100 and self.per_billed < 100 and self.docstatus == 1",
 		],
 		[
 			"To Deliver",
-			"eval:self.per_delivered < 100 and self.per_billed >= 100 and self.docstatus == 1 and not self.skip_delivery_note",
+			"eval:self.per_delivered < 100 and self.per_billed >= 100 and self.docstatus == 1",
 		],
 		[
 			"To Pay",
@@ -60,7 +60,7 @@ status_map = {
 		],
 		[
 			"Completed",
-			"eval:(self.per_delivered >= 100 or self.skip_delivery_note) and self.per_billed >= 100 and self.docstatus == 1",
+			"eval:self.per_delivered >= 100 and self.per_billed >= 100 and self.docstatus == 1",
 		],
 		["Cancelled", "eval:self.docstatus==2"],
 		["Closed", "eval:self.status=='Closed' and self.docstatus != 2"],
@@ -616,6 +616,9 @@ class StatusUpdater(Document):
 			filters=filters,
 			fields=[target_ref_field, target_field],
 		)
+
+		if exclude_field and not child_records:
+			return 100
 
 		# For operator dicts, the alias is in the "as" key; for strings, use the field name directly
 		ref_key = target_ref_field.get("as") if isinstance(target_ref_field, dict) else target_ref_field
