@@ -87,7 +87,7 @@
    "link_fieldname": "incoterm"
   }
  ],
- "modified": "2022-11-17 22:35:52.084553",
+ "modified": "2026-08-21 23:11:42.839127",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Incoterm",
@@ -157,8 +157,25 @@
   {
    "read": 1,
    "role": "Stock User"
+  },
+  {
+   "role": "Delivery Manager",
+   "select": 1
+  },
+  {
+   "role": "Delivery User",
+   "select": 1
+  },
+  {
+   "role": "Maintenance Manager",
+   "select": 1
+  },
+  {
+   "role": "Maintenance User",
+   "select": 1
   }
  ],
+ "row_format": "Dynamic",
  "show_title_field_in_link": 1,
  "sort_field": "name",
  "sort_order": "ASC",

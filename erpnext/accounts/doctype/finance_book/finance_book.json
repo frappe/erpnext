@@ -20,7 +20,7 @@
  ],
  "icon": "fa fa-book",
  "links": [],
- "modified": "2024-03-27 13:09:44.514241",
+ "modified": "2026-08-21 23:11:42.386104",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Finance Book",
@@ -55,9 +55,22 @@
    "report": 1,
    "role": "Auditor",
    "share": 1
+  },
+  {
+   "role": "HR Manager",
+   "select": 1
+  },
+  {
+   "role": "Manufacturing Manager",
+   "select": 1
+  },
+  {
+   "role": "Quality Manager",
+   "select": 1
   }
  ],
  "quick_entry": 1,
+ "row_format": "Dynamic",
  "search_fields": "finance_book_name",
  "sort_field": "creation",
  "sort_order": "DESC",

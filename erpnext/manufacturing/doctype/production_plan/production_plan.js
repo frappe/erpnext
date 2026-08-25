@@ -493,9 +493,12 @@ frappe.ui.form.on("Production Plan", {
 			<span class="${is_fg ? "item-fg" : ""}${is_material ? " text-muted" : ""}">${frappe.utils.escape_html(
 			row.item_code
 		)}</span>`;
+		let procurement_label = row.supplier
+			? __("Procurement ({0})", [frappe.utils.escape_html(row.supplier)])
+			: __("Procurement");
 		let detail = is_material
-			? `<span class="text-muted">${__("Procurement")}</span>`
-			: frappe.utils.escape_html(workstations.join(", ") || "-");
+			? `<span class="text-muted">${procurement_label}</span>`
+			: frappe.utils.escape_html(workstations.join(", ") || row.supplier || "-");
 
 		let starts_in = schedule_starts_in(row.start);
 

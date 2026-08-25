@@ -270,9 +270,21 @@ class ProductionPlan(Document):
 	def on_cancel(self):
 		self.db_set("status", "Cancelled")
 		self.delete_draft_work_order()
+		self.delete_production_plan_schedule()
 		self.update_bin_qty()
 		self.update_sales_order()
 		self.update_stock_reservation()
+		self.delete_sub_assembly_and_material_rows()
+
+	def delete_production_plan_schedule(self):
+		frappe.db.delete("Production Plan Schedule", {"production_plan": self.name})
+
+	def delete_sub_assembly_and_material_rows(self):
+		for doctype in ("Production Plan Sub Assembly Item", "Material Request Plan Item"):
+			frappe.db.delete(doctype, {"parent": self.name, "parenttype": "Production Plan"})
+
+		self.set("sub_assembly_items", [])
+		self.set("mr_items", [])
 
 	def update_stock_reservation(self):
 		if not self.reserve_stock:

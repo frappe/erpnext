@@ -149,7 +149,7 @@
  "icon": "fa fa-truck",
  "idx": 1,
  "links": [],
- "modified": "2026-07-22 14:53:27.315435",
+ "modified": "2026-08-21 23:11:49.532098",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Shipping Rule",
@@ -195,6 +195,38 @@
    "role": "Sales Master Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "role": "Delivery Manager",
+   "select": 1
+  },
+  {
+   "role": "Delivery User",
+   "select": 1
+  },
+  {
+   "role": "Maintenance Manager",
+   "select": 1
+  },
+  {
+   "role": "Maintenance User",
+   "select": 1
+  },
+  {
+   "role": "Manufacturing Manager",
+   "select": 1
+  },
+  {
+   "role": "Purchase Manager",
+   "select": 1
+  },
+  {
+   "role": "Purchase User",
+   "select": 1
+  },
+  {
+   "role": "Stock Manager",
+   "select": 1
   }
  ],
  "row_format": "Dynamic",

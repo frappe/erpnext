@@ -52,7 +52,7 @@
   }
  ],
  "links": [],
- "modified": "2026-03-29 00:00:00.000000",
+ "modified": "2026-08-21 23:11:49.416348",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Shipment Parcel Template",
@@ -69,9 +69,14 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "role": "Stock Manager",
+   "select": 1
   }
  ],
  "quick_entry": 1,
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
