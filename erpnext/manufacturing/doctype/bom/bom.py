@@ -1572,7 +1572,12 @@ def _add_normal_item_columns(query, t, amount_col, stock_item_condition, track_s
 	if track_semi_finished_goods:
 		group_by = [t.bom_item.item_code, t.bom_item.operation_row_id, t.item_doc.stock_uom]
 	else:
-		group_by = [t.bom_item.item_code, t.item_doc.stock_uom, t.bom_item.operation]
+		group_by = [
+			t.bom_item.item_code,
+			t.bom_item.operation_row_id,
+			t.item_doc.stock_uom,
+			t.bom_item.operation,
+		]
 	group_by += [t.bom_item.bom_no, t.bom_item.is_phantom_item]
 
 	return query, group_by
@@ -1585,8 +1590,7 @@ def _add_bom_item_to_dict(item_dict, item, company, opts):
 
 	if item.operation_row_id:
 		key = (item.item_code, item.operation_row_id)
-
-	if item.operation:
+	elif item.operation:
 		key = (item.item_code, item.operation)
 
 	if item.get("is_phantom_item"):
