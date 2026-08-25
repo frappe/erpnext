@@ -167,9 +167,10 @@ def get_transaction_reference(txn_data: dict) -> str:
 	).strip()
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def convert_mt940_to_csv(data_import, mt940_file_path):
 	doc = frappe.get_doc("Bank Statement Import", data_import)
+	doc.check_permission("write")
 
 	_file_doc, content = get_file(mt940_file_path)
 
@@ -234,26 +235,30 @@ def convert_mt940_to_csv(data_import, mt940_file_path):
 
 @frappe.whitelist()
 def get_preview_from_template(data_import, import_file=None, google_sheets_url=None):
-	return frappe.get_doc("Bank Statement Import", data_import).get_preview_from_template(
-		import_file, google_sheets_url
-	)
+	bsi = frappe.get_doc("Bank Statement Import", data_import)
+	bsi.check_permission()
+	return bsi.get_preview_from_template(import_file, google_sheets_url)
 
 
 @frappe.whitelist()
 def form_start_import(data_import):
-	job_id = frappe.get_doc("Bank Statement Import", data_import).start_import()
-	return job_id is not None
+	bsi = frappe.get_doc("Bank Statement Import", data_import)
+	bsi.check_permission("write")
+	return bsi.start_import()
 
 
 @frappe.whitelist()
 def download_errored_template(data_import_name):
 	data_import = frappe.get_doc("Bank Statement Import", data_import_name)
+	data_import.check_permission()
 	data_import.export_errored_rows()
 
 
 @frappe.whitelist()
 def download_import_log(data_import_name):
-	return frappe.get_doc("Bank Statement Import", data_import_name).download_import_log()
+	bsi = frappe.get_doc("Bank Statement Import", data_import_name)
+	bsi.check_permission()
+	return bsi.download_import_log()
 
 
 def is_mt940_format(content: str) -> bool:
@@ -392,6 +397,7 @@ def get_import_status(docname):
 	import_status = {}
 
 	data_import = frappe.get_doc("Bank Statement Import", docname)
+	data_import.check_permission()
 	import_status["status"] = data_import.status
 
 	logs = frappe.get_all(

@@ -43,18 +43,10 @@ class SellingController(StockController):
 				),
 			)
 
-		if (
-			self.get("company")
-			and (
-				default_selling_terms := frappe.get_value(
-					"Company", self.get("company"), "default_selling_terms"
-				)
-			)
-			and not self.get("tc_name")
-			and not self.get("terms")
-		):
-			self.tc_name = default_selling_terms
-			self.terms = frappe.get_value("Terms and Conditions", self.get("tc_name"), "terms")
+		if self.get("company") and not self.get("terms"):
+			if not self.get("tc_name"):
+				self.tc_name = frappe.get_value("Company", self.company, "default_selling_terms")
+			self.set_missing_terms()
 
 	def validate(self):
 		super().validate()
@@ -573,12 +565,12 @@ class SellingController(StockController):
 					reset_incoming_rate()
 
 				if (
-					not d.incoming_rate
+					(not d.incoming_rate or self.is_new())
+					and not is_standalone
 					or self.is_internal_transfer()
 					or (
 						get_valuation_method(d.item_code, self.company) == "Moving Average"
 						and self.get("is_return")
-						and not is_standalone
 					)
 				):
 					d.incoming_rate = get_incoming_rate(
