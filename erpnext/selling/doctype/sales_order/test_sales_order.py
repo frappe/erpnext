@@ -235,6 +235,32 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertEqual(so.skip_delivery_note, 0)
 
 	@ERPNextTestSuite.change_settings("Selling Settings", {"skip_delivery_note_for_service_items": 1})
+	def test_auto_skip_delivery_cleared_on_switch_to_maintenance(self):
+		service_item = make_item("_Test Service Item For Skip DN", {"is_stock_item": 0}).name
+		so = make_sales_order(item_code=service_item, qty=1, rate=100, do_not_submit=True)
+
+		self.assertEqual(so.items[0].skip_delivery, 1)
+		self.assertEqual(so.skip_delivery_note, 1)
+
+		so.order_type = "Maintenance"
+		so.save()
+
+		self.assertEqual(so.items[0].skip_delivery, 0)
+		self.assertEqual(so.skip_delivery_note, 0)
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"skip_delivery_note_for_service_items": 1})
+	def test_manual_maintenance_exemption_preserved_on_save(self):
+		so = make_sales_order(do_not_submit=True)
+		so.order_type = "Maintenance"
+		so.skip_delivery_note = 1
+		so.save()
+
+		self.assertEqual(so.skip_delivery_note, 1)
+
+		so.save()
+		self.assertEqual(so.skip_delivery_note, 1)
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"skip_delivery_note_for_service_items": 1})
 	def test_manual_skip_delivery_note_not_cleared_for_maintenance(self):
 		so = make_sales_order(do_not_submit=True)
 		so.order_type = "Maintenance"
