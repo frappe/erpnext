@@ -238,18 +238,24 @@ def get_material_lead_days(material_items, lead_times, supplier_lead_times, chos
 
 def resolve_purchase_lead_time(lead_time, supplier_rows, chosen_suppliers=None):
 	rows = supplier_rows or {}
-	candidates = [rows[supplier] for supplier in chosen_suppliers or [] if supplier in rows]
-	row = (
-		max(candidates, key=lambda r: (cint(r.purchase_time) + cint(r.buffer_time), r.supplier))
-		if candidates
-		else next((r for r in rows.values() if r.is_default), None)
-	)
+	item_days = cint(lead_time.purchase_time) + cint(lead_time.buffer_time) if lead_time else None
 
-	if row:
-		return cint(row.purchase_time) + cint(row.buffer_time), row.supplier
-	if lead_time:
-		return cint(lead_time.purchase_time) + cint(lead_time.buffer_time), None
-	return None, None
+	candidates = []
+	for supplier in chosen_suppliers or []:
+		if supplier in rows:
+			candidates.append(
+				(cint(rows[supplier].purchase_time) + cint(rows[supplier].buffer_time), supplier)
+			)
+		elif item_days is not None:
+			candidates.append((item_days, supplier))
+
+	if candidates:
+		return max(candidates)
+
+	default_row = next((r for r in rows.values() if r.is_default), None)
+	if default_row:
+		return cint(default_row.purchase_time) + cint(default_row.buffer_time), default_row.supplier
+	return (item_days, None) if lead_time else (None, None)
 
 
 def wire_material_dependencies(bom_no, first_tasks, ctx, consumer_row=None):
@@ -600,22 +606,50 @@ def update_plan_row_dates(plan, proposal, use_item_dates=0, item_dates=None):
 def update_material_request_row_dates(plan, rows):
 	material_rows = {row["item_code"]: row for row in rows.values() if row.get("row_type") == "Raw Material"}
 	supplier_lead_times = get_supplier_lead_times(set(material_rows))
+	fallback_lead_days = get_fallback_lead_days(plan, set(material_rows))
 	for row in plan.get("mr_items") or []:
 		material = material_rows.get(row.item_code)
 		if material:
 			row.db_set(
 				"schedule_date",
-				get_material_row_schedule_date(row, material, supplier_lead_times),
+				get_material_row_schedule_date(row, material, supplier_lead_times, fallback_lead_days),
 				update_modified=False,
 			)
 
 
-def get_material_row_schedule_date(row, material, supplier_lead_times):
-	lead_row = (supplier_lead_times.get(row.item_code) or {}).get(row.get("supplier"))
-	if not lead_row:
-		return getdate(material["end"])
+def get_fallback_lead_days(plan, item_codes):
+	lead_times = get_lead_time_details(plan, item_codes)
+	missing = [item for item in item_codes if not lead_times.get(item)]
+	master_days = {}
+	if missing:
+		master_days = dict(
+			frappe.get_all(
+				"Item", filters={"name": ("in", missing)}, fields=["name", "lead_time_days"], as_list=True
+			)
+		)
 
-	days = cint(lead_row.purchase_time) + cint(lead_row.buffer_time)
+	days = {}
+	for item in item_codes:
+		lead_time = lead_times.get(item)
+		days[item] = (
+			cint(lead_time.purchase_time) + cint(lead_time.buffer_time)
+			if lead_time
+			else cint(master_days.get(item))
+		)
+	return days
+
+
+def get_material_row_schedule_date(row, material, supplier_lead_times, fallback_lead_days):
+	supplier = row.get("supplier")
+	lead_row = (supplier_lead_times.get(row.item_code) or {}).get(supplier)
+	days = None
+	if lead_row:
+		days = cint(lead_row.purchase_time) + cint(lead_row.buffer_time)
+	elif supplier:
+		days = fallback_lead_days.get(row.item_code)
+
+	if not days:
+		return getdate(material["end"])
 	return getdate(add_to_date(get_datetime(material["start"]), days=days))
 
 

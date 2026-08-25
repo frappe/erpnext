@@ -538,7 +538,7 @@ class TestPlanAdapter(ERPNextTestSuite):
 
 	@change_settings("Manufacturing Settings", {"mins_between_operations": 10, "allow_overtime": 0})
 	def test_split_supplier_rows_keep_own_schedule_dates(self):
-		suppliers = ["Test PPS Supplier A", "Test PPS Supplier B"]
+		suppliers = ["Test PPS Supplier A", "Test PPS Supplier B", "Test PPS Supplier C"]
 		self.make_supplier_lead_time("Test PPS RM", suppliers)
 
 		plan = create_production_plan(
@@ -579,6 +579,7 @@ class TestPlanAdapter(ERPNextTestSuite):
 		)
 		self.assertEqual(schedule_dates[suppliers[0]], getdate(add_to_date(start_date, days=3)))
 		self.assertEqual(schedule_dates[suppliers[1]], getdate(add_to_date(start_date, days=6)))
+		self.assertEqual(schedule_dates[suppliers[2]], getdate(add_to_date(start_date, days=4)))
 
 	def test_plan_cancel_deletes_schedule_entries(self):
 		plan = self.make_plan()
@@ -648,6 +649,14 @@ class TestPlanAdapter(ERPNextTestSuite):
 		self.assertEqual(resolve_purchase_lead_time(lead_time, supplier_rows), (3, "Supplier A"))
 		self.assertEqual(resolve_purchase_lead_time(lead_time, None), (4, None))
 		self.assertEqual(resolve_purchase_lead_time(None, None), (None, None))
+		self.assertEqual(
+			resolve_purchase_lead_time(lead_time, supplier_rows, {"Supplier C"}), (4, "Supplier C")
+		)
+		self.assertEqual(
+			resolve_purchase_lead_time(lead_time, supplier_rows, {"Supplier A", "Supplier C"}),
+			(4, "Supplier C"),
+		)
+		self.assertEqual(resolve_purchase_lead_time(None, supplier_rows, {"Supplier C"}), (3, "Supplier A"))
 
 	def make_supplier_lead_time(self, item_code, suppliers):
 		for supplier in suppliers:
