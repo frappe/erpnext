@@ -3,7 +3,7 @@
 
 import frappe
 from frappe.tests.utils import change_settings
-from frappe.utils import add_to_date, get_datetime, getdate
+from frappe.utils import add_to_date, flt, get_datetime, getdate
 
 from erpnext.manufacturing.doctype.job_card.job_card import OverlapError
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import (
@@ -481,6 +481,7 @@ class TestPlanAdapter(ERPNextTestSuite):
 				"warehouse": plan.po_items[0].warehouse,
 			},
 		)
+		plan.save()
 		plan.get_sub_assembly_items()
 		plan.submit()
 		plan.cancel()
@@ -497,6 +498,43 @@ class TestPlanAdapter(ERPNextTestSuite):
 		self.assertTrue(amended.sub_assembly_items)
 		for row in amended.sub_assembly_items:
 			self.assertEqual(row.production_plan_item, fg_row.name)
+
+	def test_amended_plan_relinks_duplicate_rows(self):
+		plan = create_production_plan(
+			item_code="Test PPS FG",
+			planned_qty=2,
+			use_multi_level_bom=1,
+			do_not_submit=True,
+			skip_getting_mr_items=True,
+		)
+		plan.append(
+			"po_items",
+			{
+				"use_multi_level_bom": 1,
+				"item_code": "Test PPS FG",
+				"bom_no": plan.po_items[0].bom_no,
+				"planned_qty": 3,
+				"stock_uom": "Nos",
+				"warehouse": plan.po_items[0].warehouse,
+			},
+		)
+		plan.save()
+		plan.get_sub_assembly_items()
+		plan.submit()
+		plan.cancel()
+
+		amended = frappe.copy_doc(plan)
+		amended.amended_from = plan.name
+		amended.docstatus = 0
+		amended.po_items.reverse()
+		for idx, row in enumerate(amended.po_items, 1):
+			row.idx = idx
+		amended.submit()
+
+		qty_by_name = {d.name: flt(d.planned_qty) for d in amended.po_items}
+		self.assertTrue(amended.sub_assembly_items)
+		for row in amended.sub_assembly_items:
+			self.assertEqual(flt(row.qty), qty_by_name[row.production_plan_item])
 
 	@change_settings("Manufacturing Settings", {"mins_between_operations": 10, "allow_overtime": 0})
 	def test_split_supplier_rows_keep_own_schedule_dates(self):

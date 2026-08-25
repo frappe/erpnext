@@ -253,21 +253,39 @@ class ProductionPlan(Document):
 		if all(d.production_plan_item in actual_names for d in self.sub_assembly_items):
 			return {}
 
-		new_rows = {}
-		for d in sorted(self.po_items, key=lambda d: d.idx):
-			new_rows.setdefault((d.item_code, d.bom_no), []).append(d.name)
-
 		old_rows = frappe.get_all(
 			"Production Plan Item",
 			filters={"parent": self.amended_from, "parenttype": "Production Plan"},
-			fields=["name", "item_code", "bom_no"],
+			fields=["name", "item_code", "bom_no", "sales_order", "warehouse", "planned_qty"],
 			order_by="idx",
 		)
+		return self._match_amended_rows(old_rows)
+
+	def _match_amended_rows(self, old_rows):
+		def row_key(row, detailed):
+			key = (row.get("item_code"), row.get("bom_no"))
+			if detailed:
+				key += (row.get("sales_order"), row.get("warehouse"), flt(row.get("planned_qty")))
+			return key
 
 		name_map = {}
+		unclaimed = {d.name for d in self.po_items}
+		for detailed in (True, False):
+			buckets = {}
+			for d in sorted(self.po_items, key=lambda d: d.idx):
+				if d.name in unclaimed:
+					buckets.setdefault(row_key(d, detailed), []).append(d.name)
+
+			for row in old_rows:
+				if name_map.get(row.name):
+					continue
+				names = buckets.get(row_key(row, detailed))
+				if names:
+					name_map[row.name] = names.pop(0)
+					unclaimed.discard(name_map[row.name])
+
 		for row in old_rows:
-			names = new_rows.get((row.item_code, row.bom_no))
-			name_map[row.name] = names.pop(0) if names else None
+			name_map.setdefault(row.name, None)
 		return name_map
 
 	def calculate_total_produced_qty(self):
