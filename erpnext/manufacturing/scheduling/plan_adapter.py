@@ -631,11 +631,10 @@ def get_fallback_lead_days(plan, item_codes):
 	days = {}
 	for item in item_codes:
 		lead_time = lead_times.get(item)
-		days[item] = (
-			cint(lead_time.purchase_time) + cint(lead_time.buffer_time)
-			if lead_time
-			else cint(master_days.get(item))
-		)
+		if lead_time:
+			days[item] = cint(lead_time.purchase_time) + cint(lead_time.buffer_time)
+		else:
+			days[item] = cint(master_days.get(item)) or None
 	return days
 
 
@@ -648,7 +647,7 @@ def get_material_row_schedule_date(row, material, supplier_lead_times, fallback_
 	elif supplier:
 		days = fallback_lead_days.get(row.item_code)
 
-	if not days:
+	if days is None:
 		return getdate(material["end"])
 	return getdate(add_to_date(get_datetime(material["start"]), days=days))
 

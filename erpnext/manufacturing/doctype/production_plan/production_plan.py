@@ -262,31 +262,38 @@ class ProductionPlan(Document):
 		return self._match_amended_rows(old_rows)
 
 	def _match_amended_rows(self, old_rows):
-		def row_key(row, detailed):
+		name_map = {}
+		unclaimed = {d.name for d in self.po_items}
+		for detailed in (True, False):
+			self._match_amended_rows_pass(old_rows, name_map, unclaimed, detailed)
+
+		for row in old_rows:
+			name_map.setdefault(row.name, None)
+		return name_map
+
+	def _match_amended_rows_pass(self, old_rows, name_map, unclaimed, detailed):
+		def row_key(row):
 			key = (row.get("item_code"), row.get("bom_no"))
 			if detailed:
 				key += (row.get("sales_order"), row.get("warehouse"), flt(row.get("planned_qty")))
 			return key
 
-		name_map = {}
-		unclaimed = {d.name for d in self.po_items}
-		for detailed in (True, False):
-			buckets = {}
-			for d in sorted(self.po_items, key=lambda d: d.idx):
-				if d.name in unclaimed:
-					buckets.setdefault(row_key(d, detailed), []).append(d.name)
+		buckets = {}
+		for d in sorted(self.po_items, key=lambda d: d.idx):
+			if d.name in unclaimed:
+				buckets.setdefault(row_key(d), []).append(d.name)
 
-			for row in old_rows:
-				if name_map.get(row.name):
-					continue
-				names = buckets.get(row_key(row, detailed))
-				if names:
-					name_map[row.name] = names.pop(0)
-					unclaimed.discard(name_map[row.name])
+		pending = [row for row in old_rows if not name_map.get(row.name)]
+		pending_counts = {}
+		for row in pending:
+			pending_counts[row_key(row)] = pending_counts.get(row_key(row), 0) + 1
 
-		for row in old_rows:
-			name_map.setdefault(row.name, None)
-		return name_map
+		for row in pending:
+			names = buckets.get(row_key(row))
+			ambiguous = not detailed and (not names or len(names) > 1 or pending_counts[row_key(row)] > 1)
+			if names and not ambiguous:
+				name_map[row.name] = names.pop(0)
+				unclaimed.discard(name_map[row.name])
 
 	def calculate_total_produced_qty(self):
 		self.total_produced_qty = 0

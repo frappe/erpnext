@@ -452,6 +452,7 @@ class TestPlanAdapter(ERPNextTestSuite):
 		amended = frappe.copy_doc(plan)
 		amended.amended_from = plan.name
 		amended.docstatus = 0
+		amended.po_items[0].planned_qty = 5
 		amended.submit()
 
 		self.assertTrue(amended.sub_assembly_items)
@@ -535,6 +536,65 @@ class TestPlanAdapter(ERPNextTestSuite):
 		self.assertTrue(amended.sub_assembly_items)
 		for row in amended.sub_assembly_items:
 			self.assertEqual(flt(row.qty), qty_by_name[row.production_plan_item])
+
+	def test_amended_edited_duplicate_rows_unlink(self):
+		plan = create_production_plan(
+			item_code="Test PPS FG",
+			planned_qty=2,
+			use_multi_level_bom=1,
+			do_not_submit=True,
+			skip_getting_mr_items=True,
+		)
+		plan.append(
+			"po_items",
+			{
+				"use_multi_level_bom": 1,
+				"item_code": "Test PPS FG",
+				"bom_no": plan.po_items[0].bom_no,
+				"planned_qty": 3,
+				"stock_uom": "Nos",
+				"warehouse": plan.po_items[0].warehouse,
+			},
+		)
+		plan.save()
+		plan.get_sub_assembly_items()
+		plan.submit()
+		plan.cancel()
+
+		amended = frappe.copy_doc(plan)
+		amended.amended_from = plan.name
+		amended.docstatus = 0
+		amended.po_items.reverse()
+		for idx, row in enumerate(amended.po_items, 1):
+			row.idx = idx
+			row.planned_qty += 5
+		amended.submit()
+
+		self.assertTrue(amended.sub_assembly_items)
+		for row in amended.sub_assembly_items:
+			self.assertIsNone(row.production_plan_item)
+
+	def test_material_row_schedule_date_fallbacks(self):
+		from erpnext.manufacturing.scheduling.plan_adapter import get_material_row_schedule_date
+
+		material = {
+			"start": get_datetime("2026-11-16 09:00:00"),
+			"end": get_datetime("2026-11-22 09:00:00"),
+		}
+		row = frappe._dict(item_code="Test PPS RM", supplier="Test PPS Supplier C")
+
+		self.assertEqual(
+			get_material_row_schedule_date(row, material, {}, {"Test PPS RM": 0}), getdate("2026-11-16")
+		)
+		self.assertEqual(
+			get_material_row_schedule_date(row, material, {}, {"Test PPS RM": None}), getdate("2026-11-22")
+		)
+		self.assertEqual(
+			get_material_row_schedule_date(
+				frappe._dict(item_code="Test PPS RM"), material, {}, {"Test PPS RM": 4}
+			),
+			getdate("2026-11-22"),
+		)
 
 	@change_settings("Manufacturing Settings", {"mins_between_operations": 10, "allow_overtime": 0})
 	def test_split_supplier_rows_keep_own_schedule_dates(self):
