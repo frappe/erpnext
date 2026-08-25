@@ -15,6 +15,11 @@ def execute(filters=None):
 	filters = frappe._dict(filters or {})
 	# Special report showing all doctype totals on a single chart; overrides some filters
 	if filters.doc_type == "All":
+		if filters.entity:
+			# the tree is forced to Customer below, so drop anything picked for another tree
+			filters.entity = frappe.get_all(
+				"Customer", filters={"name": ["in", filters.entity]}, pluck="name"
+			)
 		filters.tree_type = "Customer"
 		filters.value_quantity = "Value"
 		filters.curves = "total"
@@ -53,6 +58,7 @@ def append_report(dt, org, new):
 class Analytics:
 	def __init__(self, filters=None):
 		self.filters = frappe._dict(filters or {})
+		self.entities = self.filters.get("entity") or []
 		if self.filters.doc_type == "Payment Entry" and self.filters.value_quantity == "Quantity":
 			frappe.throw(_("Only Value available for Payment Entry"))
 		self.date_field = (
@@ -263,6 +269,9 @@ class Analytics:
 		if self.filters.doc_type in ["Sales Invoice", "Purchase Invoice", "Payment Entry"]:
 			filters.update({"is_opening": "No"})
 
+		if self.entities:
+			filters[entity.split(" as ")[0]] = ["in", self.entities]
+
 		self.entries = frappe.qb.get_query(
 			table=self.filters.doc_type,
 			fields=[entity, entity_name, value_field, self.date_field],
@@ -289,7 +298,7 @@ class Analytics:
 		doctype = DocType(self.filters.doc_type)
 		doctype_item = DocType(f"{self.filters.doc_type} Item")
 
-		self.entries = (
+		query = (
 			frappe.qb.from_(doctype_item)
 			.join(doctype)
 			.on(doctype.name == doctype_item.parent)
@@ -301,7 +310,12 @@ class Analytics:
 				doctype[self.date_field],
 			)
 			.where((doctype_item.docstatus == 1) & (doctype.name.isin(permitted_names)))
-		).run(as_dict=True)
+		)
+
+		if self.entities:
+			query = query.where(doctype_item.item_code.isin(self.entities))
+
+		self.entries = query.run(as_dict=True)
 
 		self.entity_names = {}
 		for d in self.entries:
@@ -330,6 +344,18 @@ class Analytics:
 		if self.filters.doc_type in ["Sales Invoice", "Purchase Invoice", "Payment Entry"]:
 			filters.update({"is_opening": "No"})
 
+		if self.entities:
+			if self.filters.tree_type == "Supplier Group":
+				# the entity column holds the supplier, mapped to its group later
+				filters["supplier"] = [
+					"in",
+					frappe.get_all(
+						"Supplier", filters={"supplier_group": ["in", self.entities]}, pluck="name"
+					),
+				]
+			else:
+				filters[entity_field.split(" as ")[0]] = ["in", self.entities]
+
 		self.entries = frappe.qb.get_query(
 			table=self.filters.doc_type,
 			fields=[entity_field, value_field, self.date_field],
@@ -353,7 +379,7 @@ class Analytics:
 		doctype = DocType(self.filters.doc_type)
 		doctype_item = DocType(f"{self.filters.doc_type} Item")
 
-		self.entries = (
+		query = (
 			frappe.qb.from_(doctype_item)
 			.join(doctype)
 			.on(doctype.name == doctype_item.parent)
@@ -363,7 +389,12 @@ class Analytics:
 				doctype[self.date_field],
 			)
 			.where((doctype_item.docstatus == 1) & (doctype.name.isin(permitted_names)))
-		).run(as_dict=True)
+		)
+
+		if self.entities:
+			query = query.where(doctype_item.item_group.isin(self.entities))
+
+		self.entries = query.run(as_dict=True)
 
 		self.get_groups()
 
@@ -387,6 +418,9 @@ class Analytics:
 
 		if self.filters.doc_type in ["Sales Invoice", "Purchase Invoice", "Payment Entry"]:
 			filters.update({"is_opening": "No"})
+
+		if self.entities:
+			filters["project"] = ["in", self.entities]
 
 		self.entries = frappe.qb.get_query(
 			table=self.filters.doc_type,
@@ -515,6 +549,14 @@ class Analytics:
 			fields=["name", "lft", "rgt", f"{parent} as parent"],
 			order_by="lft",
 		)
+
+		if self.entities:
+			selected = [d for d in self.group_entries if d.name in self.entities]
+			keep = {d.name for d in selected}
+			for d in self.group_entries:
+				if any(d.lft <= s.lft and d.rgt >= s.rgt for s in selected):
+					keep.add(d.name)
+			self.group_entries = [d for d in self.group_entries if d.name in keep]
 
 		for d in self.group_entries:
 			if d.parent:

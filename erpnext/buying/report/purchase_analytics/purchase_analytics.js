@@ -10,6 +10,26 @@ frappe.query_reports["Purchase Analytics"] = {
 			options: ["Supplier Group", "Supplier", "Item Group", "Item"],
 			default: "Supplier",
 			reqd: 1,
+			on_change: function () {
+				const entity_filter = frappe.query_report.get_filter("entity");
+				if (entity_filter) {
+					entity_filter.df.label = __(frappe.query_report.get_filter_value("tree_type"));
+					entity_filter.set_value([]);
+					entity_filter.refresh();
+				}
+				frappe.query_report.refresh();
+			},
+		},
+		{
+			fieldname: "entity",
+			label: __("Entity"),
+			fieldtype: "MultiSelectList",
+			get_data: function (txt) {
+				const tree_type = frappe.query_report.get_filter_value("tree_type");
+				if (!tree_type || tree_type === "Order Type") return [];
+				return frappe.db.get_link_options(tree_type, txt);
+			},
+			depends_on: "eval:doc.tree_type != 'Order Type'",
 		},
 		{
 			fieldname: "doc_type",
