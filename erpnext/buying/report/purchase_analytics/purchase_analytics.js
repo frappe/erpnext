@@ -71,64 +71,57 @@ frappe.query_reports["Purchase Analytics"] = {
 			fieldtype: "Check",
 		},
 	],
+	build_chart_data(row_indices) {
+		const chart_data = frappe.query_report.chart_options.data;
+
+		return {
+			labels: chart_data.labels,
+			datasets: row_indices.map((row_index) => chart_data.datasets[row_index]).filter(Boolean),
+		};
+	},
+	sync_chart(datatable) {
+		const visible_rows = datatable.purchase_analytics_visible_rows.map(Number);
+		const visible_row_set = new Set(visible_rows);
+		const checked_rows = datatable.rowmanager
+			.getCheckedRows()
+			.map(Number)
+			.filter((row_index) => visible_row_set.has(row_index));
+		const chart_data = this.build_chart_data(checked_rows.length ? checked_rows : visible_rows);
+		const chart_options = Object.assign({}, frappe.query_report.chart_options, {
+			data: chart_data,
+		});
+
+		frappe.query_report.render_chart(chart_options);
+		frappe.query_report.raw_chart_data = chart_data;
+	},
+	after_datatable_render(datatable) {
+		clearTimeout(datatable.purchase_analytics_chart_update);
+		datatable.rowmanager.checkMap = [];
+		datatable.purchase_analytics_visible_rows = datatable.datamanager.getAllRowIndices();
+		if (datatable.purchase_analytics_filter_rows) return;
+
+		// DataTable does not expose a filter event, so use its resolved visible row indices.
+		const filter_rows = datatable.datamanager.filterRows.bind(datatable.datamanager);
+		datatable.purchase_analytics_filter_rows = filter_rows;
+		datatable.datamanager.filterRows = (...args) =>
+			filter_rows(...args).then((result) => {
+				datatable.purchase_analytics_visible_rows = result.rowsToShow;
+				this.sync_chart(datatable);
+				return result;
+			});
+	},
 	get_datatable_options(options) {
+		const report_settings = this;
+
 		return Object.assign(options, {
 			checkboxColumn: true,
 			events: {
-				onCheckRow: function (data) {
-					if (!data) return;
-
-					const data_doctype = $(data[2].html)[0].attributes.getNamedItem("data-doctype").value;
-					const tree_type = frappe.query_report.filters[0].value;
-					if (data_doctype != tree_type) return;
-
-					let row_name = data[2].content;
-					let length = data.length;
-					let row_values = "";
-
-					if (tree_type == "Supplier") {
-						row_values = data.slice(4, length - 1).map(function (column) {
-							return column.content;
-						});
-					} else if (tree_type == "Item") {
-						row_values = data.slice(5, length - 1).map(function (column) {
-							return column.content;
-						});
-					} else {
-						row_values = data.slice(3, length - 1).map(function (column) {
-							return column.content;
-						});
-					}
-
-					let entry = {
-						name: row_name,
-						values: row_values,
-					};
-
-					let raw_data = frappe.query_report.chart.data;
-					let new_datasets = raw_data.datasets;
-
-					let element_found = new_datasets.some((element, index, array) => {
-						if (element.name == row_name) {
-							array.splice(index, 1);
-							return true;
-						}
-						return false;
+				onCheckRow() {
+					const datatable = frappe.query_report.datatable;
+					clearTimeout(datatable.purchase_analytics_chart_update);
+					datatable.purchase_analytics_chart_update = setTimeout(() => {
+						report_settings.sync_chart(datatable);
 					});
-
-					if (!element_found) {
-						new_datasets.push(entry);
-					}
-					let new_data = {
-						labels: raw_data.labels,
-						datasets: new_datasets,
-					};
-					const new_options = Object.assign({}, frappe.query_report.chart_options, {
-						data: new_data,
-					});
-					frappe.query_report.render_chart(new_options);
-
-					frappe.query_report.raw_chart_data = new_data;
 				},
 			},
 		});
