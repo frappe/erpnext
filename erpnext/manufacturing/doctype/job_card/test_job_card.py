@@ -20,6 +20,7 @@ from erpnext.manufacturing.doctype.job_card.mapper import (
 from erpnext.manufacturing.doctype.job_card.mapper import (
 	make_stock_entry as make_stock_entry_from_jc,
 )
+from erpnext.manufacturing.doctype.work_order.mapper import create_job_card
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 from erpnext.manufacturing.doctype.work_order.work_order import WorkOrder, make_work_order
 from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
@@ -553,6 +554,38 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertEqual(len(transfer_entry.items), 1)
 		self.assertEqual(transfer_entry.items[0].item_code, "_Test Item")
 		self.assertEqual(transfer_entry.items[0].qty, 2)
+
+	def test_required_items_are_scoped_to_repeated_operation_row(self):
+		work_order = make_wo_order_test_record(
+			item="_Test FG Item 2",
+			qty=1,
+			transfer_material_against="Job Card",
+			do_not_submit=True,
+		)
+		operation = work_order.operations[0]
+		work_order.append(
+			"operations",
+			{
+				"operation": operation.operation,
+				"workstation": operation.workstation,
+				"time_in_mins": operation.time_in_mins,
+				"hour_rate": operation.hour_rate,
+				"sequence_id": operation.sequence_id + 1,
+			},
+		)
+
+		for operation_row_id, item in enumerate(work_order.required_items, start=1):
+			item.operation = operation.operation
+			item.operation_row_id = operation_row_id
+
+		work_order.save()
+		second_operation = work_order.operations[1]
+		second_operation.job_card_qty = work_order.qty
+		job_card = create_job_card(work_order, second_operation)
+
+		self.assertEqual(
+			[item.item_code for item in job_card.items], [work_order.required_items[1].item_code]
+		)
 
 	def test_work_order_transferred_qty_with_multiple_job_cards(self):
 		create_bom_with_multiple_operations()
