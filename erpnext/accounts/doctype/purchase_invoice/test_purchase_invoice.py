@@ -513,6 +513,12 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		)
 
 		frappe.db.set_single_value("Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate", 0)
+		self.addCleanup(
+			frappe.db.set_single_value,
+			"Buying Settings",
+			"set_landed_cost_based_on_purchase_invoice_rate",
+			original_value,
+		)
 
 		pr = make_purchase_receipt(
 			company="_Test Company with perpetual inventory",
@@ -524,25 +530,15 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		pi = create_purchase_invoice(pr.name)
 		pi.conversion_rate = 80
 
+		self.assertRaises(frappe.ValidationError, pi.insert)
+
+		pi.conversion_rate = 70
 		pi.insert()
 		pi.submit()
 
-		# Get exchnage gain and loss account
 		exchange_gain_loss_account = frappe.db.get_value("Company", pi.company, "exchange_gain_loss_account")
-
-		# fetching the latest GL Entry with exchange gain and loss account account
-		amount = frappe.db.get_value(
-			"GL Entry", {"account": exchange_gain_loss_account, "voucher_no": pi.name}, "debit"
-		)
-
-		discrepancy_caused_by_exchange_rate_diff = abs(
-			pi.items[0].base_net_amount - pr.items[0].base_net_amount
-		)
-
-		self.assertEqual(discrepancy_caused_by_exchange_rate_diff, amount)
-
-		frappe.db.set_single_value(
-			"Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate", original_value
+		self.assertFalse(
+			frappe.db.exists("GL Entry", {"account": exchange_gain_loss_account, "voucher_no": pi.name})
 		)
 
 	def test_purchase_invoice_with_exchange_rate_difference_for_non_stock_item(self):
@@ -550,11 +546,21 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 			make_purchase_invoice as create_purchase_invoice,
 		)
 
-		# Creating Purchase Invoice with USD currency
+		original_value = frappe.db.get_single_value(
+			"Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate"
+		)
+		frappe.db.set_single_value("Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate", 0)
+		self.addCleanup(
+			frappe.db.set_single_value,
+			"Buying Settings",
+			"set_landed_cost_based_on_purchase_invoice_rate",
+			original_value,
+		)
+
 		pr = frappe.new_doc("Purchase Receipt")
 		pr.currency = "USD"
 		pr.company = "_Test Company with perpetual inventory"
-		pr.conversion_rate = (70,)
+		pr.conversion_rate = 80
 		pr.supplier = "_Test Supplier USD"
 		pr.append(
 			"items",
@@ -564,33 +570,19 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 				"rate": 100,
 			},
 		)
-		pr.append(
-			"items",
-			{"item_code": "_Test Item", "qty": 1, "rate": 5, "warehouse": "Stores - TCP1"},
-		)
 		pr.insert()
 		pr.submit()
 
-		# Createing purchase invoice against Purchase Receipt
 		pi = create_purchase_invoice(pr.name)
-		pi.conversion_rate = 80
+		pi.conversion_rate = 70
 		pi.credit_to = "_Test Payable USD - TCP1"
 		pi.insert()
 		pi.submit()
 
-		# Get exchnage gain and loss account
 		exchange_gain_loss_account = frappe.db.get_value("Company", pi.company, "exchange_gain_loss_account")
-
-		# fetching the latest GL Entry with exchange gain and loss account account
-		amount = frappe.db.get_value(
-			"GL Entry", {"account": exchange_gain_loss_account, "voucher_no": pi.name}, "debit"
+		self.assertFalse(
+			frappe.db.exists("GL Entry", {"account": exchange_gain_loss_account, "voucher_no": pi.name})
 		)
-
-		discrepancy_caused_by_exchange_rate_diff = abs(
-			pi.items[1].base_net_amount - pr.items[1].base_net_amount
-		)
-
-		self.assertEqual(discrepancy_caused_by_exchange_rate_diff, amount)
 
 	def test_purchase_invoice_change_naming_series(self):
 		pi = frappe.copy_doc(test_records[1])
@@ -1662,6 +1654,96 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		)
 		frappe.db.set_value("Company", "_Test Company", "exchange_gain_loss_account", original_account)
 
+	def test_stock_adjustment_account_fallbacks_when_default_expense_account_unset(self):
+		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import PurchaseInvoice
+
+		class StockAdjustmentInvoice:
+			company = "_Test Company"
+			conversion_rate = 1
+			update_stock = 1
+			is_internal_supplier = 0
+			return_against = None
+			project = None
+
+			def __init__(self, is_return, defaults):
+				self.is_return = is_return
+				self.defaults = defaults
+
+			def get(self, fieldname):
+				return None
+
+			def get_company_default(self, fieldname, ignore_validation=False):
+				return self.defaults.get(fieldname)
+
+			def get_gl_dict(self, args, *unused_args, **unused_kwargs):
+				return frappe._dict(args)
+
+		def make_invoice(is_return, defaults):
+			return StockAdjustmentInvoice(is_return, defaults)
+
+		def make_item(is_fixed_asset=0, expense_account="Item Expense - _TC"):
+			return frappe._dict(
+				{
+					"name": "row-1",
+					"warehouse": "Stores - _TC",
+					"valuation_rate": 10,
+					"qty": 10,
+					"conversion_factor": 1,
+					"base_net_amount": 100,
+					"item_tax_amount": 0,
+					"landed_cost_voucher_amount": 0,
+					"sales_incoming_rate": 0,
+					"is_fixed_asset": is_fixed_asset,
+					"expense_account": expense_account,
+					"cost_center": "Main - _TC",
+					"project": None,
+					"precision": lambda fieldname: 2,
+				}
+			)
+
+		defaults = {
+			"default_expense_account": None,
+			"stock_received_but_not_billed": "Stock Received But Not Billed - _TC",
+			"asset_received_but_not_billed": "Asset Received But Not Billed - _TC",
+		}
+		test_cases = (
+			(
+				"company default expense",
+				0,
+				make_item(),
+				{**defaults, "default_expense_account": "Default Expense - _TC"},
+				"Default Expense - _TC",
+			),
+			("stock rbnb", 0, make_item(), defaults, "Stock Received But Not Billed - _TC"),
+			(
+				"asset rbnb",
+				0,
+				make_item(is_fixed_asset=1),
+				defaults,
+				"Asset Received But Not Billed - _TC",
+			),
+			("return item expense", 1, make_item(), defaults, "Item Expense - _TC"),
+			(
+				"return without item expense",
+				1,
+				make_item(expense_account=None),
+				defaults,
+				"Stock Received But Not Billed - _TC",
+			),
+		)
+
+		for label, is_return, item, company_defaults, expected_account in test_cases:
+			with self.subTest(label=label):
+				invoice = make_invoice(is_return, company_defaults)
+				gl_entries = []
+				PurchaseInvoice.make_stock_adjustment_entry(
+					invoice, gl_entries, item, {(item.name, item.warehouse): 90}, "INR"
+				)
+
+				self.assertEqual(gl_entries[0].account, expected_account)
+				self.assertEqual(gl_entries[0].debit, 10)
+				self.assertEqual(gl_entries[0].debit_in_transaction_currency, 10)
+
 	@change_settings("Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1})
 	def test_purchase_invoice_advance_taxes(self):
 		from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
@@ -2608,6 +2690,39 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 			else:
 				self.assertEqual(row.serial_no, "\n".join(serial_nos[:2]))
 				self.assertEqual(row.rejected_serial_no, serial_nos[2])
+
+	def test_purchase_invoice_return_against_closed_purchase_order(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		po = create_purchase_order(qty=2, rate=100)
+
+		invoices = []
+		for _ in range(2):
+			pi = make_pi_from_po(po.name)
+			pi.items[0].qty = 1
+			pi.submit()
+			invoices.append(pi)
+
+		make_return_doc("Purchase Invoice", invoices[0].name).submit()
+
+		po.reload()
+		po.update_status("Closed")
+
+		# a debit note against a closed Purchase Order should still go through,
+		# the same way a Sales Invoice return does against a closed Sales Order
+		debit_note = make_return_doc("Purchase Invoice", invoices[1].name)
+		debit_note.submit()
+
+		self.assertEqual(debit_note.docstatus, 1)
+		self.assertEqual(frappe.db.get_value("Purchase Order", po.name, "status"), "Closed")
+
+		# cancelling the debit note runs the same check on the closed order
+		debit_note.reload()
+		debit_note.cancel()
+
+		# a regular invoice against the closed order must still be blocked
+		blocked_pi = make_pi_from_po(po.name)
+		self.assertRaisesRegex(frappe.InvalidStatusError, "Closed", blocked_pi.save)
 
 	def test_make_pr_and_pi_from_po(self):
 		from erpnext.assets.doctype.asset.test_asset import create_asset_category

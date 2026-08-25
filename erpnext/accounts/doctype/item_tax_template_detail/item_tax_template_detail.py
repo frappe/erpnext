@@ -14,6 +14,7 @@ class ItemTaxTemplateDetail(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+		not_applicable: DF.Check
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data

@@ -87,3 +87,35 @@ class TestSalesAndPurchaseReturn(FrappeTestCase):
 		return_si.items[0].qty = 0
 
 		self.assertRaises(frappe.ValidationError, return_si.save)
+
+	def test_sales_invoice_partial_return_with_different_stock_uom(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item_properties = {"is_stock_item": 1, "stock_uom": "Kg"}
+		if frappe.get_meta("Item").has_field("gst_hsn_code") and frappe.db.exists("GST HSN Code", "010121"):
+			item_properties["gst_hsn_code"] = "010121"
+
+		item = make_item(
+			"_Test SI Return Different Stock UOM",
+			item_properties,
+			uoms=[{"uom": "Nos", "conversion_factor": 0.013888889}],
+		)
+
+		si = create_sales_invoice(item_code=item.name, qty=48, do_not_save=True)
+		si.items[0].uom = "Nos"
+		si.items[0].stock_uom = "Kg"
+		si.items[0].conversion_factor = 0.013888889
+		si.save().submit()
+		self.addCleanup(self._cancel_and_delete, "Sales Invoice", si.name)
+
+		first_return = make_return_doc(si.doctype, si.name)
+		first_return.items[0].qty = -24
+		first_return.save().submit()
+		self.addCleanup(self._cancel_and_delete, "Sales Invoice", first_return.name)
+
+		second_return = make_return_doc(si.doctype, si.name)
+		self.assertEqual(second_return.items[0].qty, -24)
+		second_return.save().submit()
+		self.addCleanup(self._cancel_and_delete, "Sales Invoice", second_return.name)
