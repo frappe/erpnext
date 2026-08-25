@@ -4092,12 +4092,27 @@ class TestSalesInvoice(ERPNextTestSuite):
 			si.save()
 			self.assertEqual(si.amount_eligible_for_commission, 500)
 			self.assertEqual(si.total_commission, total_commission)
+			self.assertEqual(si.total_commission_in_transaction_currency, total_commission)
 
 		# Test invalid values
 		for commission_rate in (101, -1):
 			si.reload()
 			si.commission_rate = commission_rate
 			self.assertRaises(frappe.ValidationError, si.save)
+
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings", {"allow_multi_currency_invoices_against_single_party_account": 1}
+	)
+	def test_sales_commission_in_transaction_currency(self):
+		frappe.db.set_value("Item", "_Test Item", "grant_commission", 1)
+		foreign_currency_si = create_sales_invoice(
+			currency="USD", conversion_rate=80, rate=100, do_not_save=True
+		)
+		foreign_currency_si.commission_rate = 10
+		foreign_currency_si.save()
+
+		self.assertEqual(foreign_currency_si.total_commission, 800)
+		self.assertEqual(foreign_currency_si.total_commission_in_transaction_currency, 10)
 
 	def test_sales_invoice_submission_post_account_freezing_date(self):
 		frappe.db.set_value("Company", "_Test Company", "accounts_frozen_till_date", add_days(getdate(), 1))

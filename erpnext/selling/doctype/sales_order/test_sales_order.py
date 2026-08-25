@@ -3358,7 +3358,7 @@ class TestSalesOrder(ERPNextTestSuite):
 			frappe.db.set_value("Sales Person", "_Test Sales Person 2", "enabled", 1)
 
 	def test_sales_partner_commission(self):
-		"""Sales Partner commission: total_commission = amount_eligible_for_commission * rate / 100."""
+		"""Sales Partner commission is available in company and transaction currencies."""
 		frappe.db.set_value("Item", "_Test Item", "grant_commission", 1)
 		try:
 			so = make_sales_order(qty=10, rate=100, do_not_save=True)
@@ -3367,7 +3367,16 @@ class TestSalesOrder(ERPNextTestSuite):
 			so.save()
 
 			self.assertEqual(so.amount_eligible_for_commission, 1000)
-			self.assertEqual(so.total_commission, 70)  # 1000 * 7%
+			self.assertEqual(so.total_commission, 70)
+			self.assertEqual(so.total_commission_in_transaction_currency, 70)
+
+			foreign_currency_so = make_sales_order(qty=10, rate=100, currency="USD", do_not_save=True)
+			foreign_currency_so.conversion_rate = 80
+			foreign_currency_so.sales_partner = "_Test Sales Partner India - 1"
+			foreign_currency_so.commission_rate = 7
+			foreign_currency_so.save()
+			self.assertEqual(foreign_currency_so.total_commission, 5600)
+			self.assertEqual(foreign_currency_so.total_commission_in_transaction_currency, 70)
 
 			with self.subTest("commission rate above 100 is rejected"):
 				so.commission_rate = 101
@@ -3390,6 +3399,7 @@ class TestSalesOrder(ERPNextTestSuite):
 			self.assertEqual(duplicate.sales_partner, "_Test Sales Partner India - 1")
 			self.assertFalse(duplicate.commission_rate)
 			self.assertFalse(duplicate.total_commission)
+			self.assertFalse(duplicate.total_commission_in_transaction_currency)
 			self.assertFalse(duplicate.amount_eligible_for_commission)
 		finally:
 			frappe.db.set_value("Item", "_Test Item", "grant_commission", 1)
