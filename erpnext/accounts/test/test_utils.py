@@ -4,6 +4,7 @@ from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_ent
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.party import get_party_shipping_address
 from erpnext.accounts.utils import (
+	get_currency_precision,
 	get_future_stock_vouchers,
 	get_voucherwise_gl_entries,
 	get_zero_cutoff,
@@ -154,3 +155,18 @@ class TestUtils(ERPNextTestSuite):
 		self.assertEqual(get_zero_cutoff(None), 0.005)
 		self.assertEqual(get_zero_cutoff("EUR"), 0.005)
 		self.assertEqual(get_zero_cutoff("BHD"), 0.0005)
+
+	def test_get_currency_precision_respects_zero_and_fallback(self):
+		currency_precision = frappe.db.get_default("currency_precision")
+		number_format = frappe.db.get_default("number_format")
+
+		try:
+			frappe.db.set_default("number_format", "#,###.##")
+			frappe.db.set_default("currency_precision", "0")
+			self.assertEqual(get_currency_precision(), 0)
+
+			frappe.db.set_default("currency_precision", "")
+			self.assertEqual(get_currency_precision(), 2)
+		finally:
+			frappe.db.set_default("currency_precision", currency_precision or "")
+			frappe.db.set_default("number_format", number_format or "#,###.##")
