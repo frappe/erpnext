@@ -443,6 +443,20 @@ class SubcontractingReceipt(SubcontractingController):
 			self.calculate_additional_costs()
 			self.calculate_items_qty_and_amount()
 
+	def get_secondary_item_valuation_rate(self, item):
+		"""Valuation at the row's warehouse; keeps the stored rate when none is found."""
+		return (
+			get_valuation_rate(
+				item.item_code,
+				item.warehouse or self.set_warehouse,
+				self.doctype,
+				self.name,
+				currency=erpnext.get_company_currency(self.company),
+				company=self.company,
+			)
+			or item.rate
+		)
+
 	def remove_secondary_items(self):
 		for item in list(self.items):
 			if item.secondary_item_type or item.use_valuation_rate:
@@ -505,6 +519,10 @@ class SubcontractingReceipt(SubcontractingController):
 		secondary_items_cost_map = {}
 		for item in self.get("items") or []:
 			if item.secondary_item_type or item.use_valuation_rate:
+				if item.use_valuation_rate:
+					# Recomputed every time: a rate fetched against another warehouse
+					# must not stick to the row when the warehouse changes.
+					item.rate = self.get_secondary_item_valuation_rate(item)
 				qty = (
 					flt(item.qty)
 					if item.use_valuation_rate
