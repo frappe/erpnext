@@ -53,7 +53,7 @@
    "depends_on": "eval:doc.is_exchange_gain_loss",
    "fieldname": "is_exchange_gain_loss",
    "fieldtype": "Check",
-   "label": "Is Exchange Gain / Loss?",
+   "label": "System Generated",
    "read_only": 1
   }
  ],

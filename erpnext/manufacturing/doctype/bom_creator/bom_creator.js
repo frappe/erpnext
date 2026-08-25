@@ -208,13 +208,6 @@ frappe.ui.form.on("BOM Creator", {
 });
 
 frappe.ui.form.on("BOM Creator Item", {
-	item_code(frm, cdt, cdn) {
-		let item = frappe.get_doc(cdt, cdn);
-		if (item.item_code && item.is_root) {
-			frappe.model.set_value(cdt, cdn, "fg_item", item.item_code);
-		}
-	},
-
 	do_not_explode(frm, cdt, cdn) {
 		let item = frappe.get_doc(cdt, cdn);
 		if (!item.do_not_explode) {
@@ -237,6 +230,20 @@ frappe.ui.form.on("BOM Creator Item", {
 });
 
 erpnext.bom.BomConfigurator = class BomConfigurator extends erpnext.TransactionController {
+	item_code(doc, cdt, cdn) {
+		if (cdt !== "BOM Creator Item") {
+			return;
+		}
+
+		let item = frappe.get_doc(cdt, cdn);
+		if (item.item_code && item.is_root) {
+			frappe.model.set_value(cdt, cdn, "fg_item", item.item_code);
+		}
+
+		// BOM Creator does not support TransactionController's server-side item selection.
+		return this.process_item_selection(doc, cdt, cdn);
+	}
+
 	conversion_rate(doc) {
 		if (this.frm.doc.currency === this.get_company_currency()) {
 			this.frm.set_value("conversion_rate", 1.0);

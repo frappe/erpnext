@@ -204,7 +204,7 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 	set_dynamic_field_label() {
 		if (this.frm.doc.quotation_to == "Customer") {
 			this.frm.set_df_property("party_name", "label", "Customer");
-			this.frm.fields_dict.party_name.get_query = null;
+			this.frm.fields_dict.party_name.get_query = erpnext.queries.customer;
 		} else if (this.frm.doc.quotation_to == "Lead") {
 			this.frm.set_df_property("party_name", "label", "Lead");
 			this.frm.fields_dict.party_name.get_query = function () {

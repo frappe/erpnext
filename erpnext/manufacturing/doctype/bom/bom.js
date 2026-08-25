@@ -172,6 +172,19 @@ frappe.ui.form.on("BOM", {
 		frm.fields_dict["operations"].grid.reset_grid();
 	},
 
+	toggle_percentage_field(frm) {
+		let show = Boolean(frm.doc.set_qty_based_on_percentage);
+
+		frm.fields_dict["items"].grid.update_docfield_property("percentage", "in_list_view", show);
+		frm.fields_dict["items"].grid.update_docfield_property("percentage", "hidden", !show);
+		frm.fields_dict["items"].grid.update_docfield_property("qty", "read_only", show);
+		frm.fields_dict["items"].grid.reset_grid();
+	},
+
+	set_qty_based_on_percentage(frm) {
+		frm.trigger("toggle_percentage_field");
+	},
+
 	with_operations: function (frm) {
 		frm.set_df_property("fg_based_operating_cost", "hidden", frm.doc.with_operations ? 1 : 0);
 		frm.trigger("toggle_fields_for_semi_finished_goods");
@@ -213,6 +226,7 @@ frappe.ui.form.on("BOM", {
 		frm.toggle_enable("item", frm.doc.__islocal);
 
 		frm.trigger("toggle_fields_for_semi_finished_goods");
+		frm.trigger("toggle_percentage_field");
 
 		frm.set_indicator_formatter("item_code", function (doc) {
 			if (doc.original_item) {
@@ -309,7 +323,9 @@ frappe.ui.form.on("BOM", {
 			frm.set_intro(
 				__("This is a Template BOM and will be used to make the work order for {0} of the item {1}", [
 					`<a class="variants-intro">variants</a>`,
-					`<a href="/app/item/${frm.doc.item}">${frm.doc.item}</a>`,
+					`<a href="${frappe.utils.get_form_link("Item", frm.doc.item)}">${frappe.utils.escape_html(
+						frm.doc.item
+					)}</a>`,
 				]),
 				true
 			);

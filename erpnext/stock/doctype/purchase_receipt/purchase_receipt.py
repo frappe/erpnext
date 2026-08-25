@@ -257,7 +257,7 @@ class PurchaseReceipt(BuyingController):
 		self.validate_cwip_accounts()
 		ProvisionalAccountingService(self).validate_provisional_expense_account()
 
-		self.check_for_on_hold_or_closed_status("Purchase Order", "purchase_order")
+		self.check_purchase_order_on_hold_or_close("purchase_order")
 
 		if getdate(self.posting_date) > getdate(nowdate()):
 			throw(_("Posting Date cannot be a future date"))
@@ -426,7 +426,7 @@ class PurchaseReceipt(BuyingController):
 	def on_cancel(self):
 		super().on_cancel()
 
-		self.check_for_on_hold_or_closed_status("Purchase Order", "purchase_order")
+		self.check_purchase_order_on_hold_or_close("purchase_order")
 
 		self.update_prevdoc_status()
 		self.update_billing_status()

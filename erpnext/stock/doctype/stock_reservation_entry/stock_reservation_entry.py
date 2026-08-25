@@ -9,9 +9,9 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder import Case
 from frappe.query_builder.functions import Max, Min, Sum
-from frappe.utils import cint, flt, nowdate, nowtime, parse_json
+from frappe.utils import cint, flt, get_datetime, now_datetime, nowdate, nowtime, parse_json
 
-from erpnext.stock.utils import get_or_make_bin, get_stock_balance
+from erpnext.stock.utils import get_combine_datetime, get_or_make_bin, get_stock_balance
 
 
 class StockReservationEntry(Document):
@@ -245,7 +245,7 @@ class StockReservationEntry(Document):
 		]
 		for d in mandatory:
 			if not self.get(d):
-				msg = _("{0} is required").format(_(self.meta.get_label(d)))
+				msg = _("{0} is required").format(self.meta.get_translated_label(d))
 				frappe.throw(msg)
 
 	def validate_group_warehouse(self) -> None:
@@ -298,11 +298,13 @@ class StockReservationEntry(Document):
 
 			self.reservation_based_on = "Serial and Batch"
 			self.sb_entries.clear()
+
 			kwargs = frappe._dict(
 				{
 					"item_code": self.item_code,
 					"warehouse": self.warehouse,
 					"qty": abs(self.reserved_qty) or 0,
+					"posting_datetime": self.get_voucher_posting_datetime(),
 					"based_on": based_on
 					or frappe.get_single_value("Stock Settings", "pick_serial_and_batch_based_on"),
 				}
@@ -340,6 +342,37 @@ class StockReservationEntry(Document):
 							"warehouse": self.warehouse,
 						},
 					)
+
+	def get_voucher_posting_datetime(self):
+		reservation_datetime = now_datetime()
+		meta = frappe.get_meta(self.voucher_type)
+		if meta.has_field("posting_datetime"):
+			if posting_datetime := frappe.db.get_value(
+				self.voucher_type, self.voucher_no, "posting_datetime"
+			):
+				return min(get_datetime(posting_datetime), reservation_datetime)
+
+		for date_field, time_field in (
+			("posting_date", "posting_time"),
+			("transaction_date", "transaction_time"),
+		):
+			if not meta.has_field(date_field):
+				continue
+
+			fields = [date_field]
+			if meta.has_field(time_field):
+				fields.append(time_field)
+
+			values = frappe.db.get_value(self.voucher_type, self.voucher_no, fields, as_dict=True)
+			if not values or not values.get(date_field):
+				continue
+
+			posting_datetime = get_combine_datetime(
+				values.get(date_field), values.get(time_field) or "23:59:59.999999"
+			)
+			return min(posting_datetime, reservation_datetime)
+
+		return reservation_datetime
 
 	def validate_reservation_based_on_serial_and_batch(self) -> None:
 		"""Validates `Reserved Qty`, `Serial and Batch Nos` when `Reservation Based On` is `Serial and Batch`."""
@@ -1093,7 +1126,7 @@ def get_ssb_bundle_for_voucher(sre_list) -> object:
 def has_reserved_stock(voucher_type: str, voucher_no: str, voucher_detail_no: str | None = None) -> bool:
 	"""Returns True if there is any Stock Reservation Entry for the given voucher."""
 
-	if get_stock_reservation_entries_for_voucher(
+	if _get_stock_reservation_entries_for_voucher(
 		voucher_type, voucher_no, voucher_detail_no, fields=["name"], ignore_status=True
 	):
 		return True
@@ -1833,7 +1866,7 @@ def cancel_stock_reservation_entries(
 		sre_list = {}
 
 		if voucher_type and voucher_no:
-			sre_list = get_stock_reservation_entries_for_voucher(
+			sre_list = _get_stock_reservation_entries_for_voucher(
 				voucher_type, voucher_no, voucher_detail_no, fields=["name"]
 			)
 		elif from_voucher_type and from_voucher_no:
@@ -1876,6 +1909,21 @@ def get_stock_reservation_entries_for_voucher(
 ) -> list[dict]:
 	"""Returns list of Stock Reservation Entries against a Voucher."""
 
+	return _get_stock_reservation_entries_for_voucher(
+		voucher_type, voucher_no, voucher_detail_no, fields, ignore_status, ignore_permissions=False
+	)
+
+
+def _get_stock_reservation_entries_for_voucher(
+	voucher_type: str,
+	voucher_no: str,
+	voucher_detail_no: str | None = None,
+	fields: list[str] | None = None,
+	ignore_status: bool = False,
+	ignore_permissions: bool = True,
+) -> list[dict]:
+	"""Returns list of Stock Reservation Entries against a Voucher."""
+
 	if not fields or not isinstance(fields, list):
 		fields = [
 			"name",
@@ -1889,13 +1937,10 @@ def get_stock_reservation_entries_for_voucher(
 
 	sre = frappe.qb.DocType("Stock Reservation Entry")
 	query = (
-		frappe.qb.from_(sre)
+		frappe.get_query(sre, fields=fields, ignore_permissions=ignore_permissions)
 		.where((sre.docstatus == 1) & (sre.voucher_type == voucher_type) & (sre.voucher_no == voucher_no))
 		.orderby(sre.creation)
 	)
-
-	for field in fields:
-		query = query.select(sre[field])
 
 	if voucher_detail_no:
 		query = query.where(sre.voucher_detail_no == voucher_detail_no)

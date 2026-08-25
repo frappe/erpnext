@@ -38,11 +38,18 @@ from erpnext.stock.utils import get_incoming_rate
 
 from .services.disassemble import DisassembleStockEntry
 from .services.manufacturing import (
+	DuplicateEntryForWorkOrderError,
+	ManufacturedQtyMandatoryError,
 	ManufactureStockEntry,
 	MaterialConsumptionForManufactureStockEntry,
+	OperationsNotCompleteError,
 	RepackStockEntry,
 )
-from .services.material_receipt_issue import MaterialIssueStockEntry, MaterialReceiptStockEntry
+from .services.material_receipt_issue import (
+	MaterialIssueStockEntry,
+	MaterialReceiptStockEntry,
+	SourceOnlyStockEntry,
+)
 from .services.material_transfer import (
 	MaterialRequestStockEntry,
 	MaterialTransferForManufactureStockEntry,
@@ -213,6 +220,10 @@ class StockEntry(StockController, SubcontractingInwardController):
 			"Send to Subcontractor": SendToSubcontractorStockEntry,
 			"Material Issue": MaterialIssueStockEntry,
 			"Material Receipt": MaterialReceiptStockEntry,
+			"Receive from Customer": MaterialReceiptStockEntry,
+			"Return Raw Material to Customer": SourceOnlyStockEntry,
+			"Subcontracting Delivery": SourceOnlyStockEntry,
+			"Subcontracting Return": MaterialReceiptStockEntry,
 		}
 
 		self.purpose_cls = purpose_map.get(self.purpose)
@@ -794,7 +805,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 	def _validate_no_raw_materials_in_manufacture_entry(self, settings):
 		for item in self.items:
 			if not item.is_finished_item and not item.secondary_item_type and not item.is_legacy_scrap_item:
-				label = frappe.get_meta(settings.doctype).get_label("get_rm_cost_from_consumption_entry")
+				label = frappe.get_meta(settings.doctype).get_translated_label(
+					"get_rm_cost_from_consumption_entry"
+				)
 				frappe.throw(
 					_(
 						"Row {0}: As {1} is enabled, raw materials cannot be added to {2} entry. Use {3} entry to consume raw materials."
@@ -1436,6 +1449,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 	@frappe.whitelist()
 	def get_items(self):
+		if self.pick_list:
+			return
+
 		self.set("items", [])
 		if self.purpose_cls and hasattr(self.purpose_cls, "add_items"):
 			self.purpose_cls(self).add_items()

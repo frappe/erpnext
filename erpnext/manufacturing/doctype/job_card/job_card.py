@@ -27,7 +27,11 @@ from erpnext.controllers.stock_controller import (
 	QualityInspectionNotSubmittedError,
 	QualityInspectionRejectedError,
 )
-from erpnext.manufacturing.doctype.bom.bom import add_additional_cost, get_bom_items_as_dict
+from erpnext.manufacturing.doctype.bom.bom import (
+	add_additional_cost,
+	get_backflush_based_on,
+	get_bom_items_as_dict,
+)
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import (
 	get_mins_between_operations,
 )
@@ -148,8 +152,15 @@ class JobCard(Document):
 	def onload(self):
 		excess_transfer = frappe.db.get_single_value("Manufacturing Settings", "job_card_excess_transfer")
 		self.set_onload("job_card_excess_transfer", excess_transfer)
+		self.set_onload("backflush_raw_materials_based_on", get_backflush_based_on(self.bom_no))
+		self.set_onload(
+			"transfer_material_against",
+			frappe.get_cached_value("Work Order", self.work_order, "transfer_material_against"),
+		)
 		self.set_onload("work_order_closed", self.is_work_order_closed())
 		self.set_onload("has_stock_entry", self.has_stock_entry())
+		if self.docstatus == 0:
+			self.set_onload("max_completable_qty", self.get_max_completable_qty())
 
 	def on_discard(self):
 		self.db_set("status", "Cancelled")
@@ -786,7 +797,7 @@ class JobCard(Document):
 	def get_required_items(self):
 		frappe.has_permission("Job Card", "write", doc=self, throw=True)
 
-		if not self.get("work_order"):
+		if self.is_corrective_job_card or not self.get("work_order"):
 			return
 
 		doc = frappe.get_doc("Work Order", self.get("work_order"))
@@ -806,11 +817,7 @@ class JobCard(Document):
 				)
 			)
 
-		if not (
-			self.get("operation") == d.operation
-			or self.operation_row_id == d.operation_row_id
-			or self.is_corrective_job_card
-		):
+		if not (self.get("operation") == d.operation or self.operation_row_id == d.operation_row_id):
 			return
 
 		self.append(
@@ -1505,6 +1512,20 @@ class JobCard(Document):
 
 		return current_operation_qty + flt(self.total_completed_qty)
 
+	def get_max_completable_qty(self):
+		if self.is_corrective_job_card or not (self.work_order and self.sequence_id):
+			return None
+
+		previous_operations = self.get_previous_operations()
+		if not previous_operations:
+			return None
+
+		qty_field = "manufactured_qty" if self.track_semi_finished_goods else "completed_qty"
+		min_completed_qty = min(flt(row.get(qty_field)) for row in previous_operations)
+
+		precision = self.precision("total_completed_qty")
+		return flt(min_completed_qty - self.get_current_operation_completed_qty(), precision)
+
 	def validate_previous_operation(self, row, current_operation_qty):
 		if not row.completed_qty or (row.status != "Completed" and row.completed_qty < current_operation_qty):
 			frappe.throw(
@@ -1692,6 +1713,7 @@ class JobCard(Document):
 		frappe.has_permission("Job Card", "write", doc=self, throw=True)
 
 		self.validate_docstatus()
+		self.validate_transfer_qty()
 
 		if isinstance(kwargs, dict):
 			kwargs = frappe._dict(kwargs)
@@ -1707,6 +1729,7 @@ class JobCard(Document):
 		frappe.has_permission("Job Card", "write", doc=self, throw=True)
 
 		self.validate_docstatus()
+		self.validate_transfer_qty()
 
 		if isinstance(kwargs, dict):
 			kwargs = frappe._dict(kwargs)

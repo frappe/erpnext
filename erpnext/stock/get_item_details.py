@@ -79,7 +79,7 @@ def _preprocess_ctx(ctx):
 @erpnext.normalize_ctx_input(ItemDetailsCtx)
 def get_item_details(
 	ctx: ItemDetailsCtx,
-	doc: Document | str | None = None,
+	doc: Document | str | dict | None = None,
 	for_validate: bool | None = False,
 	overwrite_warehouse: bool = True,
 ):
@@ -1440,7 +1440,10 @@ def validate_conversion_rate(ctx: frappe._dict, meta):
 
 	# validate currency conversion rate
 	validate_conversion_rate(
-		ctx.currency, ctx.conversion_rate, meta.get_label("conversion_rate"), ctx.company
+		ctx.currency,
+		ctx.conversion_rate,
+		meta.get_translated_label("conversion_rate"),
+		ctx.company,
 	)
 
 	ctx.conversion_rate = flt(
@@ -1461,7 +1464,7 @@ def validate_conversion_rate(ctx: frappe._dict, meta):
 			validate_conversion_rate(
 				ctx.price_list_currency,
 				ctx.plc_conversion_rate,
-				meta.get_label("plc_conversion_rate"),
+				meta.get_translated_label("plc_conversion_rate"),
 				ctx.company,
 			)
 

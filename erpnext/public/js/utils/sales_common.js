@@ -49,6 +49,7 @@ erpnext.sales_common = {
 				);
 
 				me.frm.set_query("contact_person", erpnext.queries.contact_query);
+				me.frm.set_query("shipping_contact_person", erpnext.queries.contact_query);
 				me.frm.set_query("company_contact_person", erpnext.queries.company_contact_query);
 				me.frm.set_query("customer_address", erpnext.queries.address_query);
 				me.frm.set_query("shipping_address_name", erpnext.queries.address_query);
@@ -285,6 +286,23 @@ erpnext.sales_common = {
 				}
 
 				this.set_actual_qty(doc, cdt, cdn);
+
+				if (cdt !== "Packed Item" && doc.packed_items) {
+					doc.packed_items
+						.filter(
+							(item) =>
+								item.parent_detail_docname === cdn ||
+								parseInt(item.parent_detail_docname) === locals[cdt][cdn].idx
+						)
+						.forEach((item) => {
+							frappe.model.set_value(
+								item.doctype,
+								item.name,
+								"warehouse",
+								locals[cdt][cdn].warehouse
+							);
+						});
+				}
 			}
 
 			set_actual_qty(doc, cdt, cdn) {
@@ -335,12 +353,10 @@ erpnext.sales_common = {
 					this.frm.set_value("commission_rate", 100);
 					frappe.throw(
 						__("{0} cannot be greater than 100", [
-							__(
-								frappe.meta.get_label(
-									this.frm.doc.doctype,
-									"commission_rate",
-									this.frm.doc.name
-								)
+							frappe.meta.get_translated_label(
+								this.frm.doc.doctype,
+								"commission_rate",
+								this.frm.doc.name
 							),
 						])
 					);

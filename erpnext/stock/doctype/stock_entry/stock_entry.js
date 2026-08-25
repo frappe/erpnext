@@ -87,29 +87,15 @@ frappe.ui.form.on("Stock Entry", {
 
 		frm.set_query("batch_no", "items", function (doc, cdt, cdn) {
 			let item = locals[cdt][cdn];
-			let filters = {};
 
 			if (!item.item_code) {
 				frappe.throw(__("Please enter Item Code to get Batch Number"));
 			} else {
-				if (
-					[
-						"Material Transfer for Manufacture",
-						"Manufacture",
-						"Repack",
-						"Send to Subcontractor",
-						"Receive from Customer",
-					].includes(doc.purpose)
-				) {
-					filters = {
-						item_code: item.item_code,
-						posting_date: frm.doc.posting_date || frappe.datetime.nowdate(),
-					};
-				} else {
-					filters = {
-						item_code: item.item_code,
-					};
-				}
+				const filters = {
+					item_code: item.item_code,
+					posting_date: frm.doc.posting_date || frappe.datetime.nowdate(),
+					posting_time: frm.doc.posting_time || frappe.datetime.now_time(),
+				};
 
 				// User could want to select a manually created empty batch (no warehouse)
 				// or a pre-existing batch
@@ -189,6 +175,13 @@ frappe.ui.form.on("Stock Entry", {
 		if (frm.doc.job_card && frm.doc.purpose === "Manufacture") {
 			frm.set_df_property("fg_completed_qty", "read_only", 1);
 			frm.set_df_property("get_items", "hidden", 1);
+		}
+
+		if (frm.doc.pick_list) {
+			frm.set_df_property("get_items", "hidden", 1);
+			if (!frm.doc.job_card) {
+				frm.set_df_property("fg_completed_qty", "read_only", 1);
+			}
 		}
 	},
 
@@ -627,13 +620,15 @@ frappe.ui.form.on("Stock Entry", {
 		frm.fields_dict["items"].grid.update_docfield_property(
 			"s_warehouse",
 			"in_list_view",
-			!["Material Receipt", "Receive from Customer"].includes(frm.doc.purpose)
+			!["Material Receipt", "Receive from Customer", "Subcontracting Return"].includes(frm.doc.purpose)
 		);
 
 		frm.fields_dict["items"].grid.update_docfield_property(
 			"t_warehouse",
 			"in_list_view",
-			!["Material Issue"].includes(frm.doc.purpose)
+			!["Material Issue", "Return Raw Material to Customer", "Subcontracting Delivery"].includes(
+				frm.doc.purpose
+			)
 		);
 
 		frm.fields_dict["items"].grid.reset_grid();
@@ -1417,10 +1412,14 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 		) {
 			frappe.model.remove_from_locals("Work Order", this.frm.doc.work_order);
 		}
+
+		if (this.frm.doc.pick_list) {
+			frappe.model.remove_from_locals("Pick List", this.frm.doc.pick_list);
+		}
 	}
 
 	fg_completed_qty() {
-		if (!this.frm.doc.job_card) {
+		if (!this.frm.doc.job_card && !this.frm.doc.pick_list) {
 			this.get_items();
 		}
 	}

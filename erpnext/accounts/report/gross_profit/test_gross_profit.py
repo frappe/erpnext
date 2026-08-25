@@ -4,7 +4,7 @@ from frappe.utils import add_days, flt, get_first_day, get_last_day, nowdate
 
 from erpnext.accounts.doctype.sales_invoice.mapper import make_delivery_note, make_sales_return
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-from erpnext.accounts.report.gross_profit.gross_profit import execute
+from erpnext.accounts.report.gross_profit.gross_profit import GrossProfitGenerator, execute
 from erpnext.stock.doctype.delivery_note.mapper import make_sales_invoice
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.item.test_item import create_item
@@ -676,19 +676,9 @@ class TestGrossProfit(ERPNextTestSuite):
 		self.assertEqual(total[8], 0.0)  # gross profit %
 
 	def test_drop_ship(self):
-		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice
-		from erpnext.selling.doctype.sales_order.mapper import make_purchase_order, make_sales_invoice
-		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
 
-		item = make_item("_Test Drop Ship Item", properties={"is_stock_item": 1, "delivered_by_supplier": 1})
-
-		so = make_sales_order(item=item.name, qty=10, rate=100)
-		po = make_purchase_order(so.name, selected_items=[so.items[0]])[0]
-		po.items[0].rate = 80
-		po.supplier = "_Test Supplier"
-		po.submit()
-		make_purchase_invoice(po.name).submit()
+		so = self.create_drop_ship_order()
 		si = make_sales_invoice(so.name).submit()
 
 		filters = frappe._dict(
@@ -699,6 +689,357 @@ class TestGrossProfit(ERPNextTestSuite):
 		self.assertEqual(data[1].buying_amount, 800)
 		self.assertIsNone(data[1].buying_rate)
 		self.assertEqual(data[1]["gross_profit_%"], 20)
+
+	def test_drop_ship_partial_billing_and_return(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
+
+		so = self.create_drop_ship_order()
+		first_invoice = make_sales_invoice(so.name)
+		first_invoice.items[0].qty = 4
+		first_invoice.submit()
+		second_invoice = make_sales_invoice(so.name).submit()
+
+		filters = frappe._dict(
+			company=first_invoice.company,
+			from_date=first_invoice.posting_date,
+			to_date=first_invoice.posting_date,
+			group_by="Invoice",
+		)
+		_, data = execute(filters=filters)
+		invoice_rows = {
+			row.parent_invoice: row
+			for row in data
+			if row.parent_invoice in {first_invoice.name, second_invoice.name} and row.indent == 1
+		}
+		self.assertEqual(invoice_rows[first_invoice.name].buying_amount, 320)
+		self.assertEqual(invoice_rows[second_invoice.name].buying_amount, 480)
+
+		sales_return = make_sales_return(first_invoice.name)
+		sales_return.items[0].qty = -2
+		sales_return.submit()
+
+		_, data = execute(filters=filters)
+		first_invoice_row = next(
+			row for row in data if row.parent_invoice == first_invoice.name and row.indent == 1
+		)
+		self.assertEqual(first_invoice_row.qty, 2)
+		self.assertEqual(first_invoice_row.buying_amount, 160)
+		self.assertEqual(first_invoice_row.gross_profit, 40)
+
+	def test_drop_ship_return_matches_sales_invoice_item(self):
+		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice
+		from erpnext.selling.doctype.sales_order.mapper import make_purchase_order, make_sales_invoice
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item(
+			"_Test Drop Ship Consolidated Return Item",
+			properties={"is_stock_item": 1, "delivered_by_supplier": 1},
+		)
+		sales_orders = []
+		for qty, selling_rate, buying_rate in [(4, 100, 50), (6, 200, 80)]:
+			sales_order = make_sales_order(item=item.name, qty=qty, rate=selling_rate, do_not_submit=True)
+			sales_order.items[0].delivered_by_supplier = 1
+			sales_order.items[0].supplier = "_Test Supplier"
+			sales_order.submit()
+			sales_orders.append(sales_order)
+
+			purchase_order = make_purchase_order(sales_order.name, selected_items=[sales_order.items[0]])[0]
+			purchase_order.items[0].rate = buying_rate
+			purchase_order.supplier = "_Test Supplier"
+			purchase_order.submit()
+			make_purchase_invoice(purchase_order.name).submit()
+
+		sales_invoice = make_sales_invoice(sales_orders[0].name)
+		sales_invoice = make_sales_invoice(sales_orders[1].name, target_doc=sales_invoice).submit()
+		sales_return = make_sales_return(sales_invoice.name)
+		sales_return.set("items", [sales_return.items[0]])
+		sales_return.items[0].qty = -1
+		sales_return.submit()
+
+		filters = frappe._dict(
+			company=sales_invoice.company,
+			from_date=sales_invoice.posting_date,
+			to_date=sales_invoice.posting_date,
+			group_by="Invoice",
+		)
+		_, data = execute(filters=filters)
+		invoice_rows = [row for row in data if row.parent_invoice == sales_invoice.name and row.indent == 1]
+		invoice_rows.sort(key=lambda row: row["avg._selling_rate"])
+		self.assertEqual([row.qty for row in invoice_rows], [3, 6])
+		self.assertEqual([row.buying_amount for row in invoice_rows], [150, 480])
+
+	def test_return_matches_sales_invoice_item_for_delivery_note(self):
+		make_stock_entry(
+			company=self.company,
+			item_code=self.item,
+			target=self.warehouse,
+			qty=4,
+			basic_rate=50,
+		)
+		delivery_note = self.create_delivery_note(qty=4, rate=100)
+		sales_invoice = make_sales_invoice(delivery_note.name).submit()
+		sales_return = make_sales_return(sales_invoice.name)
+		sales_return.items[0].qty = -1
+		sales_return.submit()
+
+		filters = frappe._dict(
+			company=sales_invoice.company,
+			from_date=sales_invoice.posting_date,
+			to_date=sales_invoice.posting_date,
+			group_by="Invoice",
+		)
+		_, data = execute(filters=filters)
+		invoice_row = next(
+			row for row in data if row.parent_invoice == sales_invoice.name and row.indent == 1
+		)
+		self.assertEqual(invoice_row.qty, 3)
+		self.assertEqual(invoice_row.selling_amount, 300)
+
+	def test_return_combines_linked_and_legacy_item_buckets(self):
+		sales_invoice = self.create_sales_invoice(qty=4, rate=100)
+		linked_return = make_sales_return(sales_invoice.name)
+		linked_return.items[0].qty = -1
+		linked_return.submit()
+
+		legacy_return = make_sales_return(sales_invoice.name)
+		legacy_return.items[0].qty = -1
+		legacy_return.submit()
+		frappe.db.set_value("Sales Invoice Item", legacy_return.items[0].name, "sales_invoice_item", None)
+
+		filters = frappe._dict(
+			company=sales_invoice.company,
+			from_date=sales_invoice.posting_date,
+			to_date=sales_invoice.posting_date,
+			group_by="Invoice",
+		)
+		_, data = execute(filters=filters)
+		invoice_row = next(
+			row for row in data if row.parent_invoice == sales_invoice.name and row.indent == 1
+		)
+		self.assertEqual(invoice_row.qty, 2)
+		self.assertEqual(invoice_row.selling_amount, 200)
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": True})
+	def test_legacy_return_prefers_item_without_linked_return(self):
+		sales_invoice = self.create_sales_invoice(qty=2, rate=100, do_not_submit=True)
+		second_item = frappe.copy_doc(sales_invoice.items[0], ignore_no_copy=False)
+		second_item.rate = 200
+		sales_invoice.append("items", second_item)
+		sales_invoice.submit()
+
+		linked_return = make_sales_return(sales_invoice.name)
+		linked_return.set("items", [linked_return.items[0]])
+		linked_return.items[0].qty = -1
+		linked_return.submit()
+
+		legacy_return = make_sales_return(sales_invoice.name)
+		legacy_return.set("items", [legacy_return.items[1]])
+		legacy_return.items[0].qty = -1
+		legacy_return.submit()
+		frappe.db.set_value("Sales Invoice Item", legacy_return.items[0].name, "sales_invoice_item", None)
+
+		filters = frappe._dict(
+			company=sales_invoice.company,
+			from_date=sales_invoice.posting_date,
+			to_date=sales_invoice.posting_date,
+			group_by="Invoice",
+		)
+		_, data = execute(filters=filters)
+		invoice_rows = [row for row in data if row.parent_invoice == sales_invoice.name and row.indent == 1]
+		invoice_rows.sort(key=lambda row: row["avg._selling_rate"])
+		self.assertEqual([row.qty for row in invoice_rows], [1, 1])
+		self.assertEqual([row.selling_amount for row in invoice_rows], [100, 200])
+
+	def test_legacy_return_remainder_spills_into_linked_item(self):
+		invoice = "SINV-TEST-RETURN-ALLOCATION"
+		linked_item = "SINV-ITEM-LINKED"
+		unlinked_item = "SINV-ITEM-LEGACY"
+		generator = GrossProfitGenerator.__new__(GrossProfitGenerator)
+		generator.currency_precision = 3
+		generator.filters = frappe._dict(group_by="Invoice")
+		generator.returned_invoices = frappe._dict(
+			{invoice: frappe._dict({linked_item: [frappe._dict(qty=-1, base_amount=-100)]})}
+		)
+		generator.legacy_returned_invoices = frappe._dict(
+			{invoice: frappe._dict({self.item: [frappe._dict(qty=-2, base_amount=-200)]})}
+		)
+		linked_row = frappe._dict(
+			parent=invoice,
+			item_code=self.item,
+			item_row=linked_item,
+			is_return=False,
+			qty=3,
+			base_amount=300,
+			buying_rate=50,
+			delivered_by_supplier=False,
+		)
+		unlinked_row = frappe._dict(
+			parent=invoice,
+			item_code=self.item,
+			item_row=unlinked_item,
+			is_return=False,
+			qty=1,
+			base_amount=100,
+			buying_rate=50,
+			delivered_by_supplier=False,
+		)
+
+		generator.si_list = [unlinked_row, linked_row]
+		generator.allocate_legacy_return_items()
+		generator.update_return_invoices(linked_row, linked_item)
+		generator.update_return_invoices(unlinked_row, unlinked_item)
+
+		self.assertEqual((linked_row.qty, linked_row.base_amount), (1, 100))
+		self.assertEqual((unlinked_row.qty, unlinked_row.base_amount), (0, 0))
+
+	def test_legacy_return_ignores_skipped_group_rows(self):
+		invoice = "SINV-TEST-SKIPPED-RETURN-ALLOCATION"
+		visible_item = "SINV-ITEM-WITH-PROJECT"
+		skipped_item = "SINV-ITEM-WITHOUT-PROJECT"
+		generator = GrossProfitGenerator.__new__(GrossProfitGenerator)
+		generator.currency_precision = 3
+		generator.filters = frappe._dict(group_by="Project")
+		generator.returned_invoices = frappe._dict(
+			{invoice: frappe._dict({visible_item: [frappe._dict(qty=-1, base_amount=-100)]})}
+		)
+		generator.legacy_returned_invoices = frappe._dict(
+			{invoice: frappe._dict({self.item: [frappe._dict(qty=-1, base_amount=-100)]})}
+		)
+		visible_row = frappe._dict(
+			parent=invoice,
+			item_code=self.item,
+			item_row=visible_item,
+			is_return=False,
+			project="_Test Project",
+			qty=2,
+			base_amount=200,
+			buying_rate=50,
+			delivered_by_supplier=False,
+		)
+		skipped_row = frappe._dict(
+			parent=invoice,
+			item_code=self.item,
+			item_row=skipped_item,
+			is_return=False,
+			project=None,
+			qty=1,
+		)
+
+		generator.si_list = [visible_row, skipped_row]
+		generator.allocate_legacy_return_items()
+		generator.update_return_invoices(visible_row, visible_item)
+
+		self.assertNotIn(skipped_item, generator.returned_invoices[invoice])
+		self.assertEqual((visible_row.qty, visible_row.base_amount), (0, 0))
+
+	def test_monthly_group_allocates_legacy_return(self):
+		invoice = "SINV-TEST-MONTHLY-RETURN-ALLOCATION"
+		item_row = "SINV-ITEM-MONTHLY-RETURN"
+		generator = GrossProfitGenerator.__new__(GrossProfitGenerator)
+		generator.currency_precision = 3
+		generator.filters = frappe._dict(group_by="Monthly")
+		generator.returned_invoices = frappe._dict()
+		generator.legacy_returned_invoices = frappe._dict(
+			{invoice: frappe._dict({self.item: [frappe._dict(qty=-1, base_amount=-100)]})}
+		)
+		invoice_row = frappe._dict(
+			parent=invoice,
+			item_code=self.item,
+			item_row=item_row,
+			is_return=False,
+			posting_date=nowdate(),
+			qty=1,
+			base_amount=100,
+			buying_rate=50,
+			delivered_by_supplier=False,
+		)
+
+		generator.si_list = [invoice_row]
+		generator.allocate_legacy_return_items()
+		generator.update_return_invoices(invoice_row, item_row)
+
+		self.assertEqual((invoice_row.qty, invoice_row.base_amount), (0, 0))
+
+	def test_return_remainder_stays_available_for_next_row(self):
+		invoice = "SINV-TEST-RETURN-REMAINDER"
+		item_row = "SINV-ITEM-RETURN-REMAINDER"
+		returned_item = frappe._dict(qty=-2, base_amount=-200)
+		generator = GrossProfitGenerator.__new__(GrossProfitGenerator)
+		generator.currency_precision = 3
+		generator.returned_invoices = frappe._dict({invoice: frappe._dict({item_row: [returned_item]})})
+		first_row = frappe._dict(
+			parent=invoice,
+			item_code=self.item,
+			qty=1,
+			base_amount=100,
+			buying_rate=50,
+			delivered_by_supplier=False,
+		)
+		second_row = first_row.copy()
+
+		generator.update_return_invoices(first_row, item_row)
+		self.assertEqual((returned_item.qty, returned_item.base_amount), (-1, -100))
+
+		generator.update_return_invoices(second_row, item_row)
+		self.assertEqual((returned_item.qty, returned_item.base_amount), (0, 0))
+		self.assertEqual((first_row.qty, second_row.qty), (0, 0))
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": True})
+	def test_return_keeps_buying_amount_of_unreturned_row(self):
+		unreturned_item = create_item(
+			"_Test Gross Profit Unreturned Item", warehouse=self.warehouse, company=self.company
+		)
+		make_stock_entry(
+			company=self.company,
+			item_code=unreturned_item.name,
+			target=self.warehouse,
+			qty=40000,
+			basic_rate=33.33333,
+		)
+		sales_invoice = self.create_sales_invoice(qty=1, rate=100, do_not_submit=True)
+		second_item = frappe.copy_doc(sales_invoice.items[0], ignore_no_copy=False)
+		second_item.item_code = unreturned_item.name
+		second_item.item_name = unreturned_item.name
+		second_item.qty = 30000
+		sales_invoice.append("items", second_item)
+		sales_invoice.submit()
+
+		sales_return = make_sales_return(sales_invoice.name)
+		sales_return.set("items", [sales_return.items[0]])
+		sales_return.items[0].qty = -1
+		sales_return.submit()
+
+		filters = frappe._dict(
+			company=sales_invoice.company,
+			from_date=sales_invoice.posting_date,
+			to_date=sales_invoice.posting_date,
+			group_by="Invoice",
+		)
+		_, data = execute(filters=filters)
+		invoice_row = next(
+			row
+			for row in data
+			if row.parent_invoice == sales_invoice.name and row.item_code == unreturned_item.name
+		)
+		self.assertEqual(invoice_row.qty, 30000)
+		self.assertEqual(invoice_row.buying_amount, 999999.9)
+
+	def create_drop_ship_order(self, qty=10, selling_rate=100, buying_rate=80):
+		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice
+		from erpnext.selling.doctype.sales_order.mapper import make_purchase_order
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item("_Test Drop Ship Item", properties={"is_stock_item": 1, "delivered_by_supplier": 1})
+		so = make_sales_order(item=item.name, qty=qty, rate=selling_rate)
+		purchase_order = make_purchase_order(so.name, selected_items=[so.items[0]])[0]
+		purchase_order.items[0].rate = buying_rate
+		purchase_order.supplier = "_Test Supplier"
+		purchase_order.submit()
+		make_purchase_invoice(purchase_order.name).submit()
+
+		return so
 
 	def create_rate_adjustment_debit_note(self, against_invoice, adjustment_rate, item_code=None):
 		"""Create a rate adjustment debit note with no stock movement."""

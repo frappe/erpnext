@@ -358,7 +358,7 @@
   },
   {
    "default": "0",
-   "description": "Frozen suppliers block ledger entries until unfrozen. Use this to temporarily lock accounting activity without disabling the supplier.",
+   "description": "Frozen suppliers block new transactions and ledger entries until unfrozen. Only users with the role set in Company's \"Roles Allowed to Set and Edit Frozen Account Entries\" can transact.",
    "fieldname": "is_frozen",
    "fieldtype": "Check",
    "label": "Is Frozen"
@@ -378,6 +378,7 @@
   {
    "fieldname": "primary_address_and_contact_detail_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Primary Address and Contact"
   },
   {
@@ -392,6 +393,7 @@
    "fetch_from": "supplier_primary_contact.mobile_no",
    "fieldname": "mobile_no",
    "fieldtype": "Read Only",
+   "hidden": 1,
    "label": "Mobile No",
    "no_copy": 1
   },
@@ -399,12 +401,14 @@
    "fetch_from": "supplier_primary_contact.email_id",
    "fieldname": "email_id",
    "fieldtype": "Read Only",
+   "hidden": 1,
    "label": "Email ID",
    "no_copy": 1
   },
   {
    "fieldname": "primary_address",
    "fieldtype": "Text Editor",
+   "hidden": 1,
    "label": "Primary Address Preview",
    "no_copy": 1,
    "read_only": 1
@@ -588,7 +592,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2026-07-23 10:00:00.000000",
+ "modified": "2026-08-14 16:10:58.600553",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",

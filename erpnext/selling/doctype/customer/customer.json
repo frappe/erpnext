@@ -282,7 +282,6 @@
    "depends_on": "eval:!doc.__islocal",
    "fieldname": "address_contacts",
    "fieldtype": "Section Break",
-   "label": "Address and Contact",
    "options": "fa fa-map-marker"
   },
   {
@@ -314,6 +313,7 @@
    "description": "Select, to make the customer searchable with these fields",
    "fieldname": "primary_address_and_contact_detail",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Primary Address and Contact"
   },
   {
@@ -328,6 +328,7 @@
    "fetch_from": "customer_primary_contact.mobile_no",
    "fieldname": "mobile_no",
    "fieldtype": "Read Only",
+   "hidden": 1,
    "label": "Mobile No",
    "no_copy": 1,
    "options": "Mobile"
@@ -336,6 +337,7 @@
    "fetch_from": "customer_primary_contact.email_id",
    "fieldname": "email_id",
    "fieldtype": "Read Only",
+   "hidden": 1,
    "label": "Email Id",
    "no_copy": 1,
    "options": "Email"
@@ -355,6 +357,7 @@
   {
    "fieldname": "primary_address",
    "fieldtype": "Text Editor",
+   "hidden": 1,
    "label": "Primary Address",
    "no_copy": 1,
    "read_only": 1
@@ -407,7 +410,7 @@
   },
   {
    "default": "0",
-   "description": "Blocks all further accounting entries on this customer's account. Only users with the frozen-entries role can override.\n",
+   "description": "Blocks new transactions and further accounting entries on this customer's account. Only users with the role set in Company's \"Roles Allowed to Set and Edit Frozen Account Entries\" can transact.",
    "fieldname": "is_frozen",
    "fieldtype": "Check",
    "label": "Is Frozen",
@@ -524,19 +527,19 @@
   },
   {
    "default": "0",
+   "description": "If checked, this Customer is only available for transactions in the companies listed below.",
    "fieldname": "restrict_to_companies",
    "fieldtype": "Check",
    "label": "Restrict to Companies",
-   "description": "If checked, this Customer is only available for transactions in the companies listed below.",
    "permlevel": 1
   },
   {
+   "depends_on": "eval:doc.restrict_to_companies",
    "fieldname": "allowed_companies",
    "fieldtype": "Table MultiSelect",
    "label": "Allowed Companies",
-   "options": "Company Restriction",
-   "depends_on": "eval:doc.restrict_to_companies",
    "mandatory_depends_on": "eval:doc.restrict_to_companies",
+   "options": "Company Restriction",
    "permlevel": 1
   },
   {
@@ -727,7 +730,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2026-07-23 12:00:00.000000",
+ "modified": "2026-08-14 16:10:58.600553",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

@@ -5,10 +5,10 @@ window.doc={{ doc.as_json() }};
 
 $(document).ready(function() {
 	new rfq();
-	doc.supplier = "{{ doc.supplier }}"
-	doc.currency = "{{ doc.currency }}"
-	doc.number_format = "{{ doc.number_format }}"
-	doc.buying_price_list = "{{ doc.buying_price_list }}"
+	doc.supplier = {{ doc.supplier | tojson }}
+	doc.currency = {{ doc.currency | tojson }}
+	doc.number_format = {{ doc.number_format | tojson }}
+	doc.buying_price_list = {{ doc.buying_price_list | tojson }}
 });
 
 rfq = class rfq {
