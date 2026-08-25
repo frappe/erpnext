@@ -52,6 +52,10 @@ class TestAccountingDimension(ERPNextTestSuite):
 		self.assertEqual(gle.get("department"), "_Test Department - _TC")
 		self.assertEqual(gle1.get("department"), "_Test Department - _TC")
 
+	def test_child_table_not_allowed_as_dimension(self):
+		dimension = frappe.get_doc({"doctype": "Accounting Dimension", "document_type": "Sales Team"})
+		self.assertRaises(frappe.ValidationError, dimension.insert)
+
 	def test_mandatory(self):
 		location = frappe.get_doc("Accounting Dimension", "Location")
 		location.dimension_defaults[0].mandatory_for_bs = True
