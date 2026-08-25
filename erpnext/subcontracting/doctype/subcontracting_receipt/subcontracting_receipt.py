@@ -147,10 +147,12 @@ class SubcontractingReceipt(SubcontractingController):
 
 		super().validate()
 
-		if self.is_new() and self.get("_action") == "save" and not frappe.in_test:
-			self.get_secondary_items()
-
 		self.set_missing_values()
+
+		# after set_missing_values, so the secondary rates are computed from the same
+		# calculated per-qty costs the Get Secondary Items button uses
+		if self.is_new() and self.get("_action") == "save" and not frappe.in_test:
+			self.get_secondary_items(recalculate_rate=True)
 
 		if self.get("_action") == "submit":
 			self.validate_secondary_items()
@@ -380,6 +382,7 @@ class SubcontractingReceipt(SubcontractingController):
 		for item in list(self.items):
 			if item.bom:
 				bom = frappe.get_doc("BOM", item.bom)
+				warehouse = self.set_warehouse or item.warehouse
 				for secondary_item in bom.secondary_items:
 					per_unit = secondary_item.stock_qty / bom.quantity
 					received_qty = flt(item.received_qty * per_unit, item.precision("received_qty"))
@@ -398,14 +401,11 @@ class SubcontractingReceipt(SubcontractingController):
 							+ flt(lcv_cost_per_qty)
 							+ flt(item.service_cost_per_qty)
 						) * flt(item.received_qty)
-						rate = (
-							(item.amount if self.is_new() else fg_item_cost)
-							* (secondary_item.cost_allocation_per / 100)
-						) / qty
+						rate = (fg_item_cost * (secondary_item.cost_allocation_per / 100)) / qty
 					else:
 						rate = get_valuation_rate(
 							secondary_item.item_code,
-							self.set_warehouse,
+							warehouse,
 							self.doctype,
 							self.name,
 							currency=erpnext.get_company_currency(self.company),
@@ -434,7 +434,7 @@ class SubcontractingReceipt(SubcontractingController):
 							"additional_cost_per_qty": 0,
 							"secondary_items_cost_per_qty": 0,
 							"amount": qty * rate,
-							"warehouse": self.set_warehouse,
+							"warehouse": warehouse,
 							"rejected_warehouse": self.rejected_warehouse,
 						},
 					)
