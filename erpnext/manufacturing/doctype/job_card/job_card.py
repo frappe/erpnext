@@ -817,7 +817,12 @@ class JobCard(Document):
 				)
 			)
 
-		if not (self.get("operation") == d.operation or self.operation_row_id == d.operation_row_id):
+		if self.operation_row_id and d.operation_row_id:
+			is_current_operation = self.operation_row_id == d.operation_row_id
+		else:
+			is_current_operation = self.get("operation") == d.operation
+
+		if not is_current_operation:
 			return
 
 		self.append(
