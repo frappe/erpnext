@@ -466,7 +466,7 @@ erpnext.patches.v16_0.migrate_transaction_deletion_task_flags_to_status # 2
 erpnext.patches.v16_0.set_ordered_qty_in_quotation_item
 erpnext.patches.v16_0.update_company_custom_field_in_bin
 erpnext.patches.v15_0.replace_http_with_https_in_sales_partner
-erpnext.patches.v16_0.migrate_asset_type_checkboxes_to_select
+erpnext.patches.v16_0.migrate_asset_type_checkboxes_to_select #2026-08-18
 erpnext.patches.v15_0.delete_quotation_lost_record_detail
 erpnext.patches.v16_0.add_portal_redirects
 erpnext.patches.v16_0.update_order_qty_and_requested_qty_based_on_mr_and_po
