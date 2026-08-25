@@ -181,6 +181,32 @@ frappe.ui.form.on("Stock Entry", {
 		if (!check_should_not_attach_bom_items(frm.doc.bom_no)) {
 			erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
 		}
+<<<<<<< HEAD
+=======
+
+		if (frm.doc.purpose == "Receive from Customer") {
+			frm.set_query("against_fg", "items", function () {
+				return {
+					query: "erpnext.controllers.subcontracting_inward_controller.get_fg_reference_names",
+					filters: {
+						parent: frm.doc.subcontracting_inward_order,
+					},
+				};
+			});
+		}
+
+		if (frm.doc.job_card && frm.doc.purpose === "Manufacture") {
+			frm.set_df_property("fg_completed_qty", "read_only", 1);
+			frm.set_df_property("get_items", "hidden", 1);
+		}
+
+		if (frm.doc.pick_list) {
+			frm.set_df_property("get_items", "hidden", 1);
+			if (!frm.doc.job_card) {
+				frm.set_df_property("fg_completed_qty", "read_only", 1);
+			}
+		}
+>>>>>>> 01e0844 (fix(stock): keep pick list links when refetching stock entry items)
 	},
 
 	setup_quality_inspection: function (frm) {
@@ -1356,10 +1382,20 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 		) {
 			frappe.model.remove_from_locals("Work Order", this.frm.doc.work_order);
 		}
+
+		if (this.frm.doc.pick_list) {
+			frappe.model.remove_from_locals("Pick List", this.frm.doc.pick_list);
+		}
 	}
 
 	fg_completed_qty() {
+<<<<<<< HEAD
 		this.get_items();
+=======
+		if (!this.frm.doc.job_card && !this.frm.doc.pick_list) {
+			this.get_items();
+		}
+>>>>>>> 01e0844 (fix(stock): keep pick list links when refetching stock entry items)
 	}
 
 	get_items() {
