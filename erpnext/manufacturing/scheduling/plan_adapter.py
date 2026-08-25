@@ -7,7 +7,7 @@ from collections import defaultdict
 
 import frappe
 from frappe import _
-from frappe.utils import cint, flt, get_datetime, getdate
+from frappe.utils import add_to_date, cint, flt, get_datetime, getdate
 
 from erpnext.manufacturing.scheduling import loaders
 from erpnext.manufacturing.scheduling.engine import SchedulingEngine
@@ -599,10 +599,24 @@ def update_plan_row_dates(plan, proposal, use_item_dates=0, item_dates=None):
 
 def update_material_request_row_dates(plan, rows):
 	material_rows = {row["item_code"]: row for row in rows.values() if row.get("row_type") == "Raw Material"}
+	supplier_lead_times = get_supplier_lead_times(set(material_rows))
 	for row in plan.get("mr_items") or []:
 		material = material_rows.get(row.item_code)
 		if material:
-			row.db_set("schedule_date", getdate(material["end"]), update_modified=False)
+			row.db_set(
+				"schedule_date",
+				get_material_row_schedule_date(row, material, supplier_lead_times),
+				update_modified=False,
+			)
+
+
+def get_material_row_schedule_date(row, material, supplier_lead_times):
+	lead_row = (supplier_lead_times.get(row.item_code) or {}).get(row.get("supplier"))
+	if not lead_row:
+		return getdate(material["end"])
+
+	days = cint(lead_row.purchase_time) + cint(lead_row.buffer_time)
+	return getdate(add_to_date(get_datetime(material["start"]), days=days))
 
 
 def set_finished_good_start_date(fg_row, rows, use_item_dates, item_dates):

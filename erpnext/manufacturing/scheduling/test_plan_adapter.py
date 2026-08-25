@@ -462,6 +462,86 @@ class TestPlanAdapter(ERPNextTestSuite):
 		scheduled_items = {info["item_code"] for info in task_info.values()}
 		self.assertIn(amended.sub_assembly_items[0].production_item, scheduled_items)
 
+	def test_amended_plan_relinks_rows_by_item(self):
+		plan = create_production_plan(
+			item_code="Test PPS FG",
+			planned_qty=2,
+			use_multi_level_bom=1,
+			do_not_submit=True,
+			skip_getting_mr_items=True,
+		)
+		plan.append(
+			"po_items",
+			{
+				"use_multi_level_bom": 1,
+				"item_code": "Test PPS FG 2",
+				"bom_no": frappe.db.get_value("Item", "Test PPS FG 2", "default_bom"),
+				"planned_qty": 2,
+				"stock_uom": "Nos",
+				"warehouse": plan.po_items[0].warehouse,
+			},
+		)
+		plan.get_sub_assembly_items()
+		plan.submit()
+		plan.cancel()
+
+		amended = frappe.copy_doc(plan)
+		amended.amended_from = plan.name
+		amended.docstatus = 0
+		amended.po_items.reverse()
+		for idx, row in enumerate(amended.po_items, 1):
+			row.idx = idx
+		amended.submit()
+
+		fg_row = next(d for d in amended.po_items if d.item_code == "Test PPS FG")
+		self.assertTrue(amended.sub_assembly_items)
+		for row in amended.sub_assembly_items:
+			self.assertEqual(row.production_plan_item, fg_row.name)
+
+	@change_settings("Manufacturing Settings", {"mins_between_operations": 10, "allow_overtime": 0})
+	def test_split_supplier_rows_keep_own_schedule_dates(self):
+		suppliers = ["Test PPS Supplier A", "Test PPS Supplier B"]
+		self.make_supplier_lead_time("Test PPS RM", suppliers)
+
+		plan = create_production_plan(
+			item_code="Test PPS FG",
+			planned_qty=2,
+			use_multi_level_bom=1,
+			do_not_submit=True,
+			skip_getting_mr_items=True,
+		)
+		plan.get_sub_assembly_items()
+		for supplier in suppliers:
+			plan.append(
+				"mr_items",
+				{
+					"item_code": "Test PPS RM",
+					"warehouse": "_Test Warehouse - _TC",
+					"quantity": 2,
+					"material_request_type": "Purchase",
+					"supplier": supplier,
+				},
+			)
+		plan.submit()
+
+		start_date = get_datetime("2026-11-09 09:00:00")
+		preview = get_schedule_preview(plan.name, start_date)
+		material_row = preview["rows"]["material:Test PPS RM"]
+		self.assertEqual(material_row["supplier"], suppliers[1])
+		self.assertEqual(material_row["end"], add_to_date(start_date, days=6))
+
+		apply_schedule(plan.name, start_date)
+		schedule_dates = dict(
+			frappe.get_all(
+				"Material Request Plan Item",
+				filters={"parent": plan.name, "item_code": "Test PPS RM"},
+				fields=["supplier", "schedule_date"],
+				as_list=True,
+			)
+		)
+		self.assertEqual(schedule_dates[suppliers[0]], getdate(add_to_date(start_date, days=3)))
+		self.assertEqual(schedule_dates[suppliers[1]], getdate(add_to_date(start_date, days=6)))
+
 	def test_plan_cancel_deletes_schedule_entries(self):
 		plan = self.make_plan()
 		apply_schedule(plan.name, "2026-11-02 09:00:00")

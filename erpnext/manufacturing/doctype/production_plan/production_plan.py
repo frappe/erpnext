@@ -253,13 +253,22 @@ class ProductionPlan(Document):
 		if all(d.production_plan_item in actual_names for d in self.sub_assembly_items):
 			return {}
 
-		new_names_by_idx = {d.idx: d.name for d in self.po_items}
+		new_rows = {}
+		for d in sorted(self.po_items, key=lambda d: d.idx):
+			new_rows.setdefault((d.item_code, d.bom_no), []).append(d.name)
+
 		old_rows = frappe.get_all(
 			"Production Plan Item",
 			filters={"parent": self.amended_from, "parenttype": "Production Plan"},
-			fields=["name", "idx"],
+			fields=["name", "item_code", "bom_no"],
+			order_by="idx",
 		)
-		return {row.name: new_names_by_idx.get(row.idx) for row in old_rows}
+
+		name_map = {}
+		for row in old_rows:
+			names = new_rows.get((row.item_code, row.bom_no))
+			name_map[row.name] = names.pop(0) if names else None
+		return name_map
 
 	def calculate_total_produced_qty(self):
 		self.total_produced_qty = 0
