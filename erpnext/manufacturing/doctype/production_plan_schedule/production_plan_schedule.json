@@ -19,6 +19,7 @@
   "column_break_item",
   "operation",
   "workstation",
+  "supplier",
   "schedule_section",
   "from_time",
   "column_break_time",
@@ -118,6 +119,14 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.row_type == 'Raw Material' || doc.supplier",
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "label": "Supplier",
+   "options": "Supplier",
+   "read_only": 1
+  },
+  {
    "fieldname": "schedule_section",
    "fieldtype": "Section Break",
    "label": "Schedule"
@@ -150,7 +159,7 @@
  ],
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-08-13 11:00:00.000000",
+ "modified": "2026-08-22 11:00:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan Schedule",
