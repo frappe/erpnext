@@ -525,6 +525,7 @@ class WorkOrder(Document):
 				.select(SalesOrder.name, SalesOrder.project, SalesOrderItem.delivery_date)
 				.where(
 					(SalesOrderItem.skip_delivery == 0)
+					& (SalesOrder.skip_delivery_note == 0)
 					& (SalesOrder.docstatus == 1)
 					& (SalesOrder.name == self.sales_order)
 					& (
@@ -546,6 +547,7 @@ class WorkOrder(Document):
 					.where(
 						(SalesOrder.name == self.sales_order)
 						& (SalesOrderItem.skip_delivery == 0)
+						& (SalesOrder.skip_delivery_note == 0)
 						& (SalesOrderItem.item_code == PackedItem.parent_item)
 						& (SalesOrder.docstatus == 1)
 						& (PackedItem.item_code == production_item)

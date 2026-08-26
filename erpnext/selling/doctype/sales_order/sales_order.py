@@ -151,6 +151,7 @@ class SalesOrder(SellingController):
 		shipping_contact_mobile: DF.SmallText | None
 		shipping_contact_person: DF.Link | None
 		shipping_rule: DF.Link | None
+		skip_delivery_note: DF.Check
 		status: DF.Literal[
 			"",
 			"Draft",
@@ -357,6 +358,9 @@ class SalesOrder(SellingController):
 		self.set_delivery_progress()
 
 	def delivery_not_required(self):
+		if cint(self.get("skip_delivery_note")):
+			return True
+
 		return bool(self.get("items")) and all(cint(d.skip_delivery) for d in self.get("items"))
 
 	def set_delivery_progress(self):
@@ -798,6 +802,7 @@ def get_events(start: str, end: str, filters: str | dict | None = None):
 		)
 		.distinct()
 		.where(SalesOrderItem.skip_delivery == 0)
+		.where(SalesOrder.skip_delivery_note == 0)
 		.where(SalesOrder.docstatus < 2)
 		.where(SalesOrderItem.delivery_date.between(start, end))
 		.where(SalesOrderItem.delivery_date.isnotnull())

@@ -22,6 +22,7 @@
   "delivery_date",
   "column_break1",
   "tax_id",
+  "skip_delivery_note",
   "has_unit_price_items",
   "is_subcontracted",
   "amended_from",
@@ -1698,6 +1699,16 @@
   },
   {
    "default": "0",
+   "fieldname": "skip_delivery_note",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Skip Delivery Note",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
    "fieldname": "has_unit_price_items",
    "fieldtype": "Check",
    "hidden": 1,
@@ -1814,7 +1825,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-25 10:00:00.000000",
+ "modified": "2026-08-26 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

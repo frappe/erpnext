@@ -1025,7 +1025,9 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 							item.delivered_by_supplier === 0 &&
 							item.qty > flt(item.delivered_qty)
 					);
-					allow_delivery = this.frm.doc.has_unit_price_items || items_are_deliverable;
+					allow_delivery =
+						!this.frm.doc.skip_delivery_note &&
+						(this.frm.doc.has_unit_price_items || items_are_deliverable);
 
 					if (this.frm.has_perm("submit")) {
 						if (flt(doc.per_delivered) < 100 || flt(doc.per_billed) < 100) {
