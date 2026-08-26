@@ -7,6 +7,7 @@ import json
 import frappe
 from frappe import _, throw
 from frappe.model import child_table_fields, default_fields
+from frappe.model.document import Document
 from frappe.model.meta import get_field_precision
 from frappe.model.utils import get_fetch_values
 from frappe.query_builder.functions import IfNull, Sum
@@ -34,10 +35,6 @@ purchase_doctypes = [
 	"Purchase Invoice",
 ]
 
-# For each transaction, the child-row link field(s) that point to the source
-# document item, mapped to that source item doctype. When "maintain same rate" is
-# on, a mapped row keeps the persisted source pricing (read straight from that row),
-# so an unsaved edit on the target row can never lock in a non-source rate.
 maintain_same_rate_source_fields = {
 	"Purchase Order": {"supplier_quotation_item": "Supplier Quotation Item"},
 	"Purchase Receipt": {"purchase_order_item": "Purchase Order Item"},
@@ -62,7 +59,7 @@ NOT_APPLICABLE_TAX = "N/A"
 @frappe.whitelist()
 def get_item_details(
 	args: dict | str,
-	doc: dict | str | None = None,
+	doc: Document | dict | str | None = None,
 	for_validate: bool | str = False,
 	overwrite_warehouse: bool | str = True,
 ):
@@ -187,12 +184,7 @@ def remove_standard_fields(details):
 
 
 def get_rate_locked_source_row(args, doc):
-	"""Return the persisted source-document row a mapped target row is locked to.
-
-	The rate is read from the linked source row in the database (not the mutable
-	target row), so a re-fetch always restores the source pricing the maintain-same-
-	rate validator checks against, even after an unsaved edit on the target row.
-	"""
+	"""Reads the source row from the DB, not the mutable target row, so an unsaved edit can't override the locked rate."""
 	if isinstance(doc, str):
 		doc = json.loads(doc)
 
@@ -206,8 +198,7 @@ def get_rate_locked_source_row(args, doc):
 
 	for link_field, source_doctype in source_fields.items():
 		if source_name := row.get(link_field):
-			# a direct read would bypass permissions; only return source pricing to a
-			# caller allowed to read the source document
+			# don't leak another document's pricing to a caller without read access
 			source = frappe.db.get_value(
 				source_doctype, source_name, [*LOCKED_RATE_FIELDS, "parent", "parenttype"], as_dict=True
 			)
@@ -229,10 +220,7 @@ def maintain_same_rate_enabled(transaction_args):
 
 
 def lock_source_rate(out, source_row):
-	"""Copy the source row's whole pricing block onto out so a mapped row keeps its
-	exact rate. Pricing rules are skipped for these rows, so nothing re-derives it and
-	the manual discount or margin that made rate differ from price_list_rate survives.
-	"""
+	"""Copies the full pricing block so a manual discount or margin on the source row survives."""
 	out.price_list_rate = flt(source_row.get("price_list_rate")) or flt(source_row.get("rate"))
 	out.rate = flt(source_row.get("rate"))
 	out.discount_percentage = flt(source_row.get("discount_percentage"))
