@@ -5,7 +5,7 @@
 import frappe
 from frappe import _
 from frappe.query_builder import Order
-from frappe.query_builder.functions import Coalesce
+from frappe.query_builder.functions import Coalesce, Sum
 from frappe.utils import cstr, flt
 from pypika import analytics as an
 
@@ -44,7 +44,20 @@ def get_columns():
 	return columns
 
 
+def get_warehouses(warehouse):
+	if frappe.db.get_value("Warehouse", warehouse, "is_group"):
+		from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
+
+		return get_child_warehouses(warehouse)
+
+	return [warehouse]
+
+
 def get_data(warehouse, show_disabled_items):
+	# A group (parent) warehouse holds no stock itself; stock lives in its child
+	# warehouses. Expand it to all its descendants so the report aggregates them.
+	warehouses = get_warehouses(warehouse)
+
 	filters = {"has_serial_no": True}
 	if not show_disabled_items:
 		filters["disabled"] = False
@@ -59,16 +72,23 @@ def get_data(warehouse, show_disabled_items):
 	for item in serial_item_list:
 		total_serial_no = frappe.db.count(
 			"Serial No",
-			filters={"item_code": item.item_code, "status": ("in", status_list), "warehouse": warehouse},
+			filters={
+				"item_code": item.item_code,
+				"status": ("in", status_list),
+				"warehouse": ("in", warehouses),
+			},
 		)
 
-		actual_qty = frappe.db.get_value(
-			"Bin", fieldname=["actual_qty"], filters={"warehouse": warehouse, "item_code": item.item_code}
-		)
+		bin_table = frappe.qb.DocType("Bin")
+		bin_qty = (
+			frappe.qb.from_(bin_table)
+			.select(Sum(bin_table.actual_qty))
+			.where(bin_table.item_code == item.item_code)
+			.where(bin_table.warehouse.isin(warehouses))
+		).run()
 
-		# frappe.db.get_value returns null if no record exist.
-		if not actual_qty:
-			actual_qty = 0
+		# Sum is null when no Bin record exists for the item in these warehouses.
+		actual_qty = flt(bin_qty[0][0]) if bin_qty else 0
 
 		difference = total_serial_no - actual_qty
 

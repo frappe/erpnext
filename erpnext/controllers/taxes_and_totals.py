@@ -19,7 +19,11 @@ from erpnext.controllers.accounts_controller import (
 	validate_inclusive_tax,
 	validate_taxes_and_charges,
 )
-from erpnext.stock.get_item_details import _get_item_tax_template, get_item_tax_map
+from erpnext.stock.get_item_details import (
+	NOT_APPLICABLE_TAX,
+	_get_item_tax_template,
+	get_item_tax_map,
+)
 from erpnext.utilities.regional import temporary_flag
 
 
@@ -275,6 +279,7 @@ class calculate_taxes_and_totals:
 				tax.item_wise_tax_detail = {}
 
 			tax_fields = [
+				"net_amount",
 				"total",
 				"tax_amount_after_discount_amount",
 				"tax_amount_for_current_item",
@@ -345,6 +350,9 @@ class calculate_taxes_and_totals:
 		if cint(tax.included_in_print_rate):
 			tax_rate = self._get_tax_rate(tax, item_tax_map)
 
+			if tax_rate == NOT_APPLICABLE_TAX:
+				return tax_slope, tax_intercept
+
 			if tax.charge_type == "On Net Total":
 				tax_slope = tax_rate / 100.0
 
@@ -376,9 +384,12 @@ class calculate_taxes_and_totals:
 
 	def _get_tax_rate(self, tax, item_tax_map):
 		if tax.account_head in item_tax_map:
-			return flt(item_tax_map.get(tax.account_head), self.doc.precision("rate", tax))
-		else:
-			return tax.rate
+			rate = item_tax_map[tax.account_head]
+			if rate == NOT_APPLICABLE_TAX:
+				return NOT_APPLICABLE_TAX
+			return flt(rate, self.doc.precision("rate", tax))
+
+		return tax.rate
 
 	def calculate_net_total(self):
 		self.doc.total_qty = (
@@ -426,15 +437,22 @@ class calculate_taxes_and_totals:
 			item_tax_map = self._load_item_tax_rate(item.item_tax_rate)
 			for i, tax in enumerate(doc.taxes):
 				# tax_amount represents the amount of tax for the current step
-				current_tax_amount = self.get_current_tax_amount(item, tax, item_tax_map)
+				current_net_amount, current_tax_amount = self.get_current_tax_and_net_amount(
+					item, tax, item_tax_map
+				)
 				if frappe.flags.round_row_wise_tax:
 					current_tax_amount = flt(current_tax_amount, tax.precision("tax_amount"))
+					current_net_amount = flt(current_net_amount, tax.precision("net_amount"))
 
 				# Adjust divisional loss to the last item
 				if tax.charge_type == "Actual":
 					actual_tax_dict[tax.idx] -= current_tax_amount
 					if n == len(self._items) - 1:
 						current_tax_amount += actual_tax_dict[tax.idx]
+
+				# net_amount is the taxable basis, it feeds no total and is always
+				# accumulated, unlike tax_amount which is kept from the first pass
+				tax.net_amount += current_net_amount
 
 				# accumulate tax amount into tax.tax_amount
 				if tax.charge_type != "Actual" and not (
@@ -486,7 +504,9 @@ class calculate_taxes_and_totals:
 
 		for i, tax in enumerate(doc.taxes):
 			self.round_off_totals(tax)
-			self._set_in_company_currency(tax, ["tax_amount", "tax_amount_after_discount_amount"])
+			self._set_in_company_currency(
+				tax, ["tax_amount", "tax_amount_after_discount_amount", "net_amount"]
+			)
 
 			self.round_off_base_values(tax)
 			self.set_cumulative_total(i, tax)
@@ -517,8 +537,17 @@ class calculate_taxes_and_totals:
 			tax.total = flt(self.doc.get("taxes")[row_idx - 1].total + tax_amount, tax.precision("total"))
 
 	def get_current_tax_amount(self, item, tax, item_tax_map):
+		# kept for backwards compatibility with callers outside this module
+		_, current_tax_amount = self.get_current_tax_and_net_amount(item, tax, item_tax_map)
+		return current_tax_amount
+
+	def get_current_tax_and_net_amount(self, item, tax, item_tax_map):
 		tax_rate = self._get_tax_rate(tax, item_tax_map)
 		current_tax_amount = 0.0
+		current_net_amount = 0.0
+
+		if tax_rate == NOT_APPLICABLE_TAX:
+			return current_net_amount, current_tax_amount
 
 		if tax.charge_type == "Actual":
 			# distribute the tax amount proportionally to each item row
@@ -528,23 +557,25 @@ class calculate_taxes_and_totals:
 				if not item.get("apply_tds") or not self.doc.tax_withholding_net_total:
 					current_tax_amount = 0.0
 				else:
-					current_tax_amount = item.net_amount * actual / self.doc.tax_withholding_net_total
+					current_net_amount = item.net_amount
+					current_tax_amount = current_net_amount * actual / self.doc.tax_withholding_net_total
 			else:
+				current_net_amount = item.net_amount
 				current_tax_amount = (
-					item.net_amount * actual / self.doc.net_total if self.doc.net_total else 0.0
+					current_net_amount * actual / self.doc.net_total if self.doc.net_total else 0.0
 				)
 
 		elif tax.charge_type == "On Net Total":
+			current_net_amount = item.net_amount
 			current_tax_amount = (tax_rate / 100.0) * item.net_amount
 		elif tax.charge_type == "On Previous Row Amount":
-			current_tax_amount = (tax_rate / 100.0) * self.doc.get("taxes")[
-				cint(tax.row_id) - 1
-			].tax_amount_for_current_item
+			current_net_amount = self.doc.get("taxes")[cint(tax.row_id) - 1].tax_amount_for_current_item
+			current_tax_amount = (tax_rate / 100.0) * current_net_amount
 		elif tax.charge_type == "On Previous Row Total":
-			current_tax_amount = (tax_rate / 100.0) * self.doc.get("taxes")[
-				cint(tax.row_id) - 1
-			].grand_total_for_current_item
+			current_net_amount = self.doc.get("taxes")[cint(tax.row_id) - 1].grand_total_for_current_item
+			current_tax_amount = (tax_rate / 100.0) * current_net_amount
 		elif tax.charge_type == "On Item Quantity":
+			# don't sum current net amount: net_amount field is currency-denominated
 			current_tax_amount = tax_rate * item.qty
 		else:
 			# Custom charge_type: rate applies to the resolver-provided base.
@@ -553,7 +584,7 @@ class calculate_taxes_and_totals:
 		if not (self.doc.get("is_consolidated") or tax.get("dont_recompute_tax")):
 			self.set_item_wise_tax(item, tax, tax_rate, current_tax_amount)
 
-		return current_tax_amount
+		return current_net_amount, current_tax_amount
 
 	def get_item_taxable_base(self, item, tax):
 		"""Per-item base a custom charge_type's rate is applied to.
