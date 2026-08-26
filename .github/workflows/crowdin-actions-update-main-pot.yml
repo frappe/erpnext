@@ -33,7 +33,7 @@ jobs:
           restore-keys: crowdin-${{ github.ref_name }}-
 
       - name: Upload main.pot to Crowdin
-        uses: crowdin/github-action@v2
+        uses: crowdin/github-action@8f01d54f70f1713ee3f09d82c2bbb2daeac28689 # v2.17.1
         with:
           config: crowdin.yml
           upload_sources: true
