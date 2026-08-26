@@ -9,6 +9,9 @@ from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import cint, comma_and, flt, get_link_to_form, getdate, nowdate
 
+from erpnext.manufacturing.doctype.work_order.services.material_coverage import (
+	get_minimum_material_coverage_fraction,
+)
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults
@@ -33,6 +36,44 @@ def get_source_item_for_qty(item, qty):
 	source_item.stock_qty = flt(qty) * flt(item.conversion_factor)
 
 	return source_item
+
+
+def get_job_card_qty_for_material_request(source, for_quantity):
+	required_qty = {}
+	transferred_qty = {}
+	for row in frappe.get_all(
+		"Job Card Item",
+		filters={"parent": source.job_card},
+		fields=["name", "required_qty", "transferred_qty"],
+	):
+		if flt(row.required_qty) > 0:
+			required_qty[row.name] = flt(row.required_qty)
+			transferred_qty[row.name] = flt(row.transferred_qty)
+
+	if not required_qty:
+		return for_quantity
+
+	has_job_card_item = False
+	entry_transferred_qty = transferred_qty.copy()
+	for row in source.items:
+		if row.job_card_item in required_qty:
+			has_job_card_item = True
+			qty = flt(row.stock_qty) - flt(row.ordered_qty)
+			if qty > 0:
+				entry_transferred_qty[row.job_card_item] += qty
+
+	if not has_job_card_item:
+		return for_quantity
+
+	precision = frappe.get_precision("Job Card Item", "required_qty")
+	covered_before = (
+		get_minimum_material_coverage_fraction(required_qty, transferred_qty, precision) * for_quantity
+	)
+	covered_after = (
+		get_minimum_material_coverage_fraction(required_qty, entry_transferred_qty, precision) * for_quantity
+	)
+
+	return flt(max(covered_after - covered_before, 0))
 
 
 def update_item(obj, target, source_parent):
@@ -373,7 +414,9 @@ def make_stock_entry(source_name: str, target_doc: str | dict | Document | None 
 
 			if job_card_details and job_card_details[0]:
 				target.bom_no = job_card_details[0].bom_no
-				target.fg_completed_qty = job_card_details[0].for_quantity
+				target.fg_completed_qty = get_job_card_qty_for_material_request(
+					source, job_card_details[0].for_quantity
+				)
 				target.from_bom = 1
 
 		if source.work_order:
@@ -385,8 +428,9 @@ def make_stock_entry(source_name: str, target_doc: str | dict | Document | None 
 				target.bom_no = work_order_details.bom_no
 				target.use_multi_level_bom = work_order_details.use_multi_level_bom
 				target.from_bom = 1
-				# not fg-qty-driven, mirrors the Pick List -> Stock Entry transfer for this Work Order
-				target.fg_completed_qty = 0
+				if not source.job_card:
+					# not fg-qty-driven, mirrors the Pick List -> Stock Entry transfer for this Work Order
+					target.fg_completed_qty = 0
 
 	doclist = get_mapped_doc(
 		"Material Request",
