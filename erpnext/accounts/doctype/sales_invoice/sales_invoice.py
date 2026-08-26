@@ -614,6 +614,7 @@ class SalesInvoice(SellingController):
 					"percent_join_field": "sales_order",
 					"status_field": "delivery_status",
 					"keyword": "Delivered",
+					"exclude_field": "skip_delivery",
 					"second_source_dt": "Delivery Note Item",
 					"second_source_field": "qty",
 					"second_join_field": "so_detail",

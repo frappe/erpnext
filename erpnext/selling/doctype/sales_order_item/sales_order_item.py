@@ -83,6 +83,7 @@ class SalesOrderItem(Document):
 		requested_qty: DF.Float
 		reserve_stock: DF.Check
 		returned_qty: DF.Float
+		skip_delivery: DF.Check
 		stock_qty: DF.Float
 		stock_reserved_qty: DF.Float
 		stock_uom: DF.Link | None

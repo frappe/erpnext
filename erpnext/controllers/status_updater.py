@@ -605,13 +605,20 @@ class StatusUpdater(Document):
 
 	@staticmethod
 	def _calculate_target_parent_percentage(
-		name, target_parent_dt, target_dt, target_ref_field, target_field
+		name, target_parent_dt, target_dt, target_ref_field, target_field, exclude_field=None
 	):
+		filters = {"parent": name, "parenttype": target_parent_dt}
+		if exclude_field:
+			filters[exclude_field] = 0
+
 		child_records = frappe.get_all(
 			target_dt,
-			filters={"parent": name, "parenttype": target_parent_dt},
+			filters=filters,
 			fields=[target_ref_field, target_field],
 		)
+
+		if exclude_field and not child_records:
+			return 100
 
 		# For operator dicts, the alias is in the "as" key; for strings, use the field name directly
 		ref_key = target_ref_field.get("as") if isinstance(target_ref_field, dict) else target_ref_field
@@ -671,6 +678,7 @@ class StatusUpdater(Document):
 					args["target_dt"],
 					args["target_ref_field"],
 					args["target_field"],
+					args.get("exclude_field"),
 				)
 			# update field
 			if args.get("status_field"):

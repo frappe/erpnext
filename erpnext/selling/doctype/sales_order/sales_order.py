@@ -222,6 +222,7 @@ class SalesOrder(SellingController):
 
 	def validate(self):
 		super().validate()
+		self.set_skip_delivery()
 		self.validate_delivery_date()
 		self.validate_proj_cust()
 		self.validate_po()
@@ -268,7 +269,7 @@ class SalesOrder(SellingController):
 
 	def validate_po(self):
 		# validate p.o date v/s delivery date
-		if self.po_date and not self.skip_delivery_note:
+		if self.po_date and not self.delivery_not_required():
 			for d in self.get("items"):
 				if d.delivery_date and getdate(self.po_date) > getdate(d.delivery_date):
 					frappe.throw(
@@ -277,7 +278,7 @@ class SalesOrder(SellingController):
 						)
 					)
 
-		if self.po_no and self.customer and not self.skip_delivery_note:
+		if self.po_no and self.customer and not self.delivery_not_required():
 			so = frappe.db.get_value(
 				"Sales Order",
 				filters={
@@ -347,6 +348,44 @@ class SalesOrder(SellingController):
 
 		return frappe.db.exists("Item", {"name": ["in", bundle_items], "is_stock_item": 1}) is not None
 
+	def set_skip_delivery(self):
+		enabled = cint(frappe.get_single_value("Selling Settings", "skip_delivery_note_for_service_items"))
+		for d in self.get("items"):
+			d.skip_delivery = cint(
+				bool(enabled) and not cint(d.delivered_by_supplier) and not self.requires_delivery(d)
+			)
+
+		self.set_delivery_progress()
+
+	def delivery_not_required(self):
+		if cint(self.get("skip_delivery_note")):
+			return True
+
+		return bool(self.get("items")) and all(cint(d.skip_delivery) for d in self.get("items"))
+
+	def set_delivery_progress(self):
+		if self.delivery_not_required():
+			self.per_delivered = 100
+			self.delivery_status = "Not Applicable"
+			return
+
+		deliverable = [d for d in self.get("items") if not cint(d.skip_delivery)]
+		total_qty = sum(abs(flt(d.qty)) for d in deliverable)
+		delivered_qty = sum(min(abs(flt(d.delivered_qty)), abs(flt(d.qty))) for d in deliverable)
+		self.per_delivered = round(delivered_qty / total_qty * 100, 6) if total_qty else 0
+
+		if self.delivery_status == "Not Applicable":
+			self.delivery_status = self._determine_status(self.per_delivered, "Delivered")
+
+	def requires_delivery(self, row):
+		is_stock_item, is_fixed_asset = frappe.get_cached_value(
+			"Item", row.item_code, ["is_stock_item", "is_fixed_asset"]
+		)
+		if is_stock_item or is_fixed_asset:
+			return True
+
+		return self.has_product_bundle(row.item_code) and self.product_bundle_has_stock_item(row.item_code)
+
 	def validate_sales_mntc_quotation(self):
 		quotation_names = [d.prevdoc_docname for d in self.get("items") if d.prevdoc_docname]
 
@@ -364,7 +403,7 @@ class SalesOrder(SellingController):
 				frappe.msgprint(_("Quotation {0} not of type {1}").format(d.prevdoc_docname, self.order_type))
 
 	def validate_delivery_date(self):
-		if self.order_type == "Sales" and not self.skip_delivery_note:
+		if self.order_type == "Sales" and not self.delivery_not_required():
 			delivery_date_list = [d.delivery_date for d in self.get("items") if d.delivery_date]
 			max_delivery_date = max(delivery_date_list) if delivery_date_list else None
 			if (max_delivery_date and not self.delivery_date) or (
@@ -762,6 +801,7 @@ def get_events(start: str, end: str, filters: str | dict | None = None):
 			SalesOrderItem.delivery_date,
 		)
 		.distinct()
+		.where(SalesOrderItem.skip_delivery == 0)
 		.where(SalesOrder.skip_delivery_note == 0)
 		.where(SalesOrder.docstatus < 2)
 		.where(SalesOrderItem.delivery_date.between(start, end))

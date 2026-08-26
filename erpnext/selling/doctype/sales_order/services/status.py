@@ -50,6 +50,9 @@ class StatusService:
 		tot_qty, delivered_qty = 0.0, 0.0
 
 		for item in doc.items:
+			if item.skip_delivery:
+				continue
+
 			if item.delivered_by_supplier:
 				item_delivered_qty = frappe.get_all(
 					"Purchase Order Item",

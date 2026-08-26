@@ -107,27 +107,118 @@ class TestSalesOrder(ERPNextTestSuite):
 		mr.reload()
 		self.assertRaises(frappe.ValidationError, make_material_request, so.name)
 
-	def test_sales_order_skip_delivery_note(self):
-		so = make_sales_order(do_not_submit=True)
+	@ERPNextTestSuite.change_settings("Selling Settings", {"skip_delivery_note_for_service_items": 1})
+	def test_maintenance_order_completes_with_service_items(self):
+		service_item = make_item("_Test Service Item For Skip DN", {"is_stock_item": 0}).name
+		so = make_sales_order(item_code=service_item, qty=2, rate=100, do_not_submit=True)
 		so.order_type = "Maintenance"
-		so.skip_delivery_note = 1
-		so.append(
-			"items",
-			{
-				"item_code": "_Test Item 2",
-				"qty": 2,
-				"rate": 100,
-			},
-		)
 		so.save()
 		so.submit()
 
-		so.reload()
+		self.assertEqual(so.items[0].skip_delivery, 1)
+		self.assertEqual(flt(so.per_delivered), 100)
+		self.assertEqual(so.delivery_status, "Not Applicable")
+
 		si = make_sales_invoice(so.name)
 		si.insert()
 		si.submit()
+
 		so.reload()
 		self.assertEqual(so.status, "Completed")
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"skip_delivery_note_for_service_items": 1})
+	def test_auto_skip_delivery_note_for_service_items(self):
+		service_item = make_item("_Test Service Item For Skip DN", {"is_stock_item": 0}).name
+		so = make_sales_order(item_code=service_item, qty=2, rate=100)
+		so.reload()
+
+		self.assertEqual(so.items[0].skip_delivery, 1)
+		self.assertEqual(flt(so.per_delivered), 100)
+		self.assertEqual(so.delivery_status, "Not Applicable")
+		self.assertEqual(so.status, "To Bill")
+
+		si = make_sales_invoice(so.name)
+		si.insert()
+		si.submit()
+
+		so.reload()
+		self.assertEqual(so.status, "Completed")
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"skip_delivery_note_for_service_items": 1})
+	def test_mixed_sales_order_with_service_items(self):
+		service_item = make_item("_Test Service Item For Skip DN", {"is_stock_item": 0}).name
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, rate=100)
+
+		so = make_sales_order(
+			item_list=[
+				{
+					"item_code": "_Test Item",
+					"qty": 2,
+					"rate": 100,
+					"warehouse": "_Test Warehouse - _TC",
+				},
+				{"item_code": service_item, "qty": 1, "rate": 50},
+			]
+		)
+
+		self.assertEqual(so.items[0].skip_delivery, 0)
+		self.assertEqual(so.items[1].skip_delivery, 1)
+
+		dn = make_delivery_note(so.name)
+		self.assertEqual(len(dn.items), 1)
+		self.assertEqual(dn.items[0].item_code, "_Test Item")
+		dn.insert()
+		dn.submit()
+
+		so.reload()
+		self.assertEqual(flt(so.per_delivered), 100)
+
+		si = make_sales_invoice(so.name)
+		si.insert()
+		si.submit()
+
+		so.reload()
+		self.assertEqual(so.status, "Completed")
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"skip_delivery_note_for_service_items": 1})
+	def test_no_skip_delivery_for_bundle_with_stock_items(self):
+		make_item("_Test Bundle Parent For Skip DN", {"is_stock_item": 0})
+		make_item("_Test Bundle Child For Skip DN", {"is_stock_item": 1})
+		make_product_bundle("_Test Bundle Parent For Skip DN", ["_Test Bundle Child For Skip DN"], 1)
+
+		so = make_sales_order(item_code="_Test Bundle Parent For Skip DN", qty=1, rate=100)
+
+		self.assertEqual(so.items[0].skip_delivery, 0)
+
+	def test_service_item_needs_delivery_when_setting_disabled(self):
+		service_item = make_item("_Test Service Item For Skip DN", {"is_stock_item": 0}).name
+		so = make_sales_order(item_code=service_item, qty=1, rate=100)
+
+		self.assertEqual(so.items[0].skip_delivery, 0)
+		self.assertEqual(flt(so.per_delivered), 0)
+
+		si = make_sales_invoice(so.name)
+		si.insert()
+		si.submit()
+
+		so.reload()
+		self.assertEqual(so.status, "To Deliver")
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"skip_delivery_note_for_service_items": 1})
+	def test_stale_skip_delivery_cleared_after_setting_disabled(self):
+		service_item = make_item("_Test Service Item For Skip DN", {"is_stock_item": 0}).name
+		so = make_sales_order(item_code=service_item, qty=1, rate=100, do_not_submit=True)
+
+		self.assertEqual(so.items[0].skip_delivery, 1)
+		self.assertEqual(flt(so.per_delivered), 100)
+		self.assertEqual(so.delivery_status, "Not Applicable")
+
+		with self.change_settings("Selling Settings", {"skip_delivery_note_for_service_items": 0}):
+			so.save()
+
+		self.assertEqual(so.items[0].skip_delivery, 0)
+		self.assertEqual(flt(so.per_delivered), 0)
+		self.assertEqual(so.delivery_status, "Not Delivered")
 
 	@ERPNextTestSuite.change_settings(
 		"Selling Settings", {"allow_multiple_items": 1, "allow_negative_rates_for_items": 1}

@@ -144,6 +144,7 @@ class ChildItemUpdater:
 			if parent.is_against_so():
 				parent.update_status_updater()
 		elif self.parent_doctype == "Sales Order":
+			parent.set_skip_delivery()
 			parent.check_credit_limit()
 
 		for idx, row in enumerate(parent.get(self.child_docname), start=1):
