@@ -642,6 +642,7 @@ frappe.ui.form.on("Payment Entry", {
 
 	set_account_currency_and_balance: function (frm, account, currency_field, callback_function) {
 		var company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
+		var previous_account_currency = frm.doc[currency_field] || company_currency;
 		if (frm.doc.posting_date && account) {
 			frappe.call({
 				method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_account_details",
@@ -655,6 +656,9 @@ frappe.ui.form.on("Payment Entry", {
 						frappe.run_serially([
 							() => frm.set_value(currency_field, r.message["account_currency"]),
 							() => {
+								let account_currency_changed =
+									r.message["account_currency"] != previous_account_currency;
+
 								if (
 									frm.doc.payment_type == "Receive" &&
 									currency_field == "paid_to_account_currency"
@@ -663,6 +667,14 @@ frappe.ui.form.on("Payment Entry", {
 										["reference_no", "reference_date"],
 										r.message["account_type"] == "Bank" ? 1 : 0
 									);
+									if (
+										account_currency_changed &&
+										frm.doc.received_amount &&
+										frm.doc.paid_amount
+									) {
+										frm.set_value("target_exchange_rate", 0);
+										frm.set_value("received_amount", 0);
+									}
 									if (!frm.doc.received_amount && frm.doc.paid_amount)
 										frm.events.paid_amount(frm);
 								} else if (
@@ -674,6 +686,14 @@ frappe.ui.form.on("Payment Entry", {
 										r.message["account_type"] == "Bank" ? 1 : 0
 									);
 
+									if (
+										account_currency_changed &&
+										frm.doc.paid_amount &&
+										frm.doc.received_amount
+									) {
+										frm.set_value("source_exchange_rate", 0);
+										frm.set_value("paid_amount", 0);
+									}
 									if (!frm.doc.paid_amount && frm.doc.received_amount)
 										frm.events.received_amount(frm);
 
@@ -772,6 +792,23 @@ frappe.ui.form.on("Payment Entry", {
 			// set_unallocated_amount is called by below method,
 			// no need trigger separately
 			frm.events.set_total_allocated_amount(frm);
+		} else if (
+			frm.doc.received_amount &&
+			frm.doc.source_exchange_rate &&
+			frm.doc.paid_from_account_currency != frm.doc.paid_to_account_currency
+		) {
+			const target_rate =
+				flt(frm.doc.target_exchange_rate) ||
+				(company_currency == frm.doc.paid_to_account_currency ? 1 : 0);
+			if (target_rate) {
+				frm.set_value("base_received_amount", flt(frm.doc.received_amount) * target_rate);
+				frm.set_value("base_paid_amount", frm.doc.base_received_amount);
+				frm.set_value(
+					"paid_amount",
+					flt(frm.doc.base_paid_amount) / flt(frm.doc.source_exchange_rate)
+				);
+				frm.events.set_total_allocated_amount(frm);
+			}
 		}
 		frm.set_paid_amount_based_on_received_amount = false;
 
@@ -804,6 +841,23 @@ frappe.ui.form.on("Payment Entry", {
 			// set_unallocated_amount is called by below method,
 			// no need trigger separately
 			frm.events.set_total_allocated_amount(frm);
+		} else if (
+			frm.doc.paid_amount &&
+			frm.doc.target_exchange_rate &&
+			frm.doc.paid_from_account_currency != frm.doc.paid_to_account_currency
+		) {
+			const source_rate =
+				flt(frm.doc.source_exchange_rate) ||
+				(company_currency == frm.doc.paid_from_account_currency ? 1 : 0);
+			if (source_rate) {
+				frm.set_value("base_paid_amount", flt(frm.doc.paid_amount) * source_rate);
+				frm.set_value("base_received_amount", frm.doc.base_paid_amount);
+				frm.set_value(
+					"received_amount",
+					flt(frm.doc.base_received_amount) / flt(frm.doc.target_exchange_rate)
+				);
+				frm.events.set_total_allocated_amount(frm);
+			}
 		}
 
 		// Make read only if Accounts Settings doesn't allow stale rates
