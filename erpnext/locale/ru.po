@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-08-23 09:41+0000\n"
-"PO-Revision-Date: 2026-08-24 03:03\n"
+"PO-Revision-Date: 2026-08-26 03:38\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Russian\n"
 "MIME-Version: 1.0\n"
@@ -22943,7 +22943,7 @@ msgstr "Получить комплектующие изделия"
 
 #: erpnext/buying/doctype/supplier/supplier.js:160
 msgid "Get Supplier Group Details"
-msgstr ""
+msgstr "Получить данные о группе поставщиков"
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.js:463
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.js:483
@@ -48187,7 +48187,7 @@ msgstr "Строка {0}: Счет {1} и Тип контрагента {2} им
 
 #: erpnext/accounts/doctype/journal_entry_template/journal_entry_template.py:58
 msgid "Row {0}: Account {1} does not belong to company {2}"
-msgstr ""
+msgstr "Строка {0}: Счет {1} не принадлежит компании {2}"
 
 #: erpnext/projects/doctype/timesheet/timesheet.py:164
 msgid "Row {0}: Activity Type is mandatory."
@@ -53583,7 +53583,7 @@ msgstr "Подробности о запасах"
 
 #: erpnext/stock/doctype/stock_entry/services/manufacturing.py:475
 msgid "Stock Entries already created for Work Order {0}: {1}"
-msgstr ""
+msgstr "Записи по запасам уже созданы для заказа на работу {0}: {1}"
 
 #. Label of the stock_entry (Link) field in DocType 'Journal Entry'
 #. Label of a Link in the Manufacturing Workspace
@@ -57569,7 +57569,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/item/item.js:1667
 msgid "There are two options to maintain valuation of stock. FIFO (first in - first out) and Moving Average. To understand this topic in detail please visit <a href='https://docs.frappe.io/erpnext/user/manual/en/calculation-of-valuation-rate-in-fifo-and-moving-average' target='_blank'>Item Valuation, FIFO and Moving Average.</a>"
-msgstr ""
+msgstr "Существует два варианта ведения оценки запасов. FIFO (первым пришел - первым ушел) и скользящая средняя. Чтобы подробно разобраться в этой теме, посетите <a href='https://docs.frappe.io/erpnext/user/manual/en/calculation-of-valuation-rate-in-fifo-and-moving-average' target='_blank'>Оценка товара, FIFO и скользящая средняя.</a>"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:982
 msgid "There are {0} unreconciled transactions before {1}."
