@@ -147,10 +147,12 @@ class SubcontractingReceipt(SubcontractingController):
 
 		super().validate()
 
-		if self.is_new() and self.get("_action") == "save" and not frappe.in_test:
-			self.get_secondary_items()
-
 		self.set_missing_values()
+
+		# after set_missing_values, so the secondary rates are computed from the same
+		# calculated per-qty costs the Get Secondary Items button uses
+		if self.is_new() and self.get("_action") == "save" and not frappe.in_test:
+			self.get_secondary_items(recalculate_rate=True)
 
 		if self.get("_action") == "submit":
 			self.validate_secondary_items()
@@ -380,6 +382,7 @@ class SubcontractingReceipt(SubcontractingController):
 		for item in list(self.items):
 			if item.bom:
 				bom = frappe.get_doc("BOM", item.bom)
+				warehouse = self.set_warehouse or item.warehouse
 				for secondary_item in bom.secondary_items:
 					per_unit = secondary_item.stock_qty / bom.quantity
 					received_qty = flt(item.received_qty * per_unit, item.precision("received_qty"))
@@ -387,7 +390,7 @@ class SubcontractingReceipt(SubcontractingController):
 						item.received_qty * (per_unit - (secondary_item.process_loss_qty / bom.quantity)),
 						item.precision("qty"),
 					)
-					if not secondary_item.is_legacy:
+					if secondary_item.valuation_method not in ("Valuation Rate", "Manual"):
 						lcv_cost_per_qty = (
 							flt(item.landed_cost_voucher_amount) / flt(item.qty) if flt(item.qty) else 0.0
 						)
@@ -398,33 +401,35 @@ class SubcontractingReceipt(SubcontractingController):
 							+ flt(lcv_cost_per_qty)
 							+ flt(item.service_cost_per_qty)
 						) * flt(item.received_qty)
+						rate = (fg_item_cost * (secondary_item.cost_allocation_per / 100)) / qty
+					elif secondary_item.valuation_method == "Manual":
 						rate = (
-							(item.amount if self.is_new() else fg_item_cost)
-							* (secondary_item.cost_allocation_per / 100)
-						) / qty
-					else:
-						rate = (
-							get_valuation_rate(
-								secondary_item.item_code,
-								self.set_warehouse,
-								self.doctype,
-								self.name,
-								currency=erpnext.get_company_currency(self.company),
-								company=self.company,
-							)
-							or secondary_item.rate
+							flt(secondary_item.cost) / flt(secondary_item.stock_qty)
+							if flt(secondary_item.stock_qty)
+							else 0
 						)
+					else:
+						rate = get_valuation_rate(
+							secondary_item.item_code,
+							warehouse,
+							self.doctype,
+							self.name,
+							currency=erpnext.get_company_currency(self.company),
+							company=self.company,
+						)
+						if not rate and secondary_item.stock_qty:
+							rate = flt(secondary_item.cost) / flt(secondary_item.stock_qty)
 
 					self.append(
 						"items",
 						{
 							"secondary_item_type": secondary_item.secondary_item_type,
-							"is_legacy_scrap_item": secondary_item.is_legacy,
+							"valuation_method": secondary_item.valuation_method,
 							"reference_name": item.name,
 							"item_code": secondary_item.item_code,
 							"item_name": secondary_item.item_name,
 							"qty": received_qty
-							if not secondary_item.is_legacy
+							if secondary_item.valuation_method not in ("Valuation Rate", "Manual")
 							else flt(item.qty) * (flt(secondary_item.stock_qty) / flt(bom.quantity)),
 							"received_qty": received_qty,
 							"process_loss_qty": received_qty - qty,
@@ -435,7 +440,7 @@ class SubcontractingReceipt(SubcontractingController):
 							"additional_cost_per_qty": 0,
 							"secondary_items_cost_per_qty": 0,
 							"amount": qty * rate,
-							"warehouse": self.set_warehouse,
+							"warehouse": warehouse,
 							"rejected_warehouse": self.rejected_warehouse,
 						},
 					)
@@ -444,9 +449,23 @@ class SubcontractingReceipt(SubcontractingController):
 			self.calculate_additional_costs()
 			self.calculate_items_qty_and_amount()
 
+	def get_secondary_item_valuation_rate(self, item):
+		"""Valuation at the row's warehouse; keeps the stored rate when none is found."""
+		return (
+			get_valuation_rate(
+				item.item_code,
+				item.warehouse or self.set_warehouse,
+				self.doctype,
+				self.name,
+				currency=erpnext.get_company_currency(self.company),
+				company=self.company,
+			)
+			or item.rate
+		)
+
 	def remove_secondary_items(self):
 		for item in list(self.items):
-			if item.secondary_item_type or item.is_legacy_scrap_item:
+			if item.secondary_item_type or item.valuation_method:
 				self.remove(item)
 			else:
 				item.secondary_items_cost_per_qty = 0
@@ -505,10 +524,14 @@ class SubcontractingReceipt(SubcontractingController):
 
 		secondary_items_cost_map = {}
 		for item in self.get("items") or []:
-			if item.secondary_item_type or item.is_legacy_scrap_item:
+			if item.secondary_item_type or item.valuation_method:
+				if item.valuation_method == "Valuation Rate":
+					# Recomputed every time: a rate fetched against another warehouse
+					# must not stick to the row when the warehouse changes.
+					item.rate = self.get_secondary_item_valuation_rate(item)
 				qty = (
 					flt(item.qty)
-					if item.is_legacy_scrap_item
+					if item.valuation_method in ("Valuation Rate", "Manual")
 					else (flt(item.received_qty) - flt(item.process_loss_qty))
 				)
 				item.amount = qty * flt(item.rate)
@@ -520,7 +543,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 		total_qty = total_amount = 0
 		for item in self.get("items") or []:
-			if not item.secondary_item_type and not item.is_legacy_scrap_item:
+			if not item.secondary_item_type and not item.valuation_method:
 				if item.qty:
 					if item.name in rm_cost_map:
 						item.rm_supp_cost = rm_cost_map[item.name]
@@ -563,7 +586,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 	def validate_secondary_items(self):
 		for item in self.items:
-			if item.secondary_item_type or item.is_legacy_scrap_item:
+			if item.secondary_item_type or item.valuation_method:
 				if not item.qty:
 					frappe.throw(
 						_("Row #{0}: Secondary Item Qty cannot be zero").format(item.idx),

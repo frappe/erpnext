@@ -36,7 +36,12 @@ class BOMCostingService:
 		return flt(rate) * flt(self.doc.plc_conversion_rate or 1) / (self.doc.conversion_rate or 1)
 
 	def _raw_material_rate(self, arg, notify):
-		from erpnext.manufacturing.doctype.bom.bom import get_bom_item_rate
+		from erpnext.manufacturing.doctype.bom.bom import get_bom_item_rate, get_valuation_rate
+
+		# Valuation Rate secondary items ignore the BOM's rm_cost_as_per method: bin-average
+		# valuation like the raw materials, scoped to the default target warehouse when set.
+		if arg.get("force_valuation_rate"):
+			return get_valuation_rate(arg)
 
 		# Customer Provided parts and Supplier sourced parts will have zero rate
 		if frappe.db.get_value("Item", arg["item_code"], "is_customer_provided_item") or arg.get(
@@ -142,6 +147,7 @@ class BOMCostingService:
 		self.calculate_op_cost(update_hour_rate)
 		self.calculate_rm_cost(save=save_updates)
 		self.calculate_secondary_items_costs(save=save_updates)
+		self.doc.set_fg_cost_allocation()
 		if save_updates:
 			# not via doc event, table is not regenerated and needs updation
 			self.calculate_exploded_cost()
@@ -248,6 +254,7 @@ class BOMCostingService:
 			"conversion_factor": d.conversion_factor,
 			"sourced_by_supplier": d.sourced_by_supplier,
 			"is_phantom_item": d.is_phantom_item,
+			"source_warehouse": d.source_warehouse or self.doc.default_source_warehouse,
 		}
 
 	def _set_item_amounts(self, d):
@@ -261,23 +268,55 @@ class BOMCostingService:
 		)
 
 	def calculate_secondary_items_costs(self, save=False):
-		"""Fetch RM rate as per today's valuation rate and calculate totals"""
+		"""Valuation Rate and Manual rows carry their own cost, deducted from the raw
+		material cost; the % of FG Cost rows split the remainder by their percentage."""
 		total_sm_cost = 0
 		base_total_sm_cost = 0
 		precision = self.doc.precision("raw_material_cost")
+		allocation_basis = flt(self.doc.raw_material_cost) - self._set_own_cost_secondary_items(
+			precision, save
+		)
 
 		for d in self.doc.get("secondary_items"):
-			if not d.is_legacy:
-				d.cost = flt(self.doc.raw_material_cost * (d.cost_allocation_per / 100), precision)
+			if d.valuation_method not in ("Valuation Rate", "Manual"):
+				d.cost = flt(allocation_basis * (d.cost_allocation_per / 100), precision)
 				d.base_cost = flt(d.cost * self.doc.conversion_rate, precision)
-
-				total_sm_cost += d.cost
-				base_total_sm_cost += d.base_cost
 				if save:
 					d.db_update()
 
+			total_sm_cost += d.cost
+			base_total_sm_cost += d.base_cost
+
 		self.doc.secondary_items_cost = total_sm_cost
 		self.doc.base_secondary_items_cost = base_total_sm_cost
+
+	def _set_own_cost_secondary_items(self, precision, save) -> float:
+		"""Cost of the rows valued on their own: fetched for Valuation Rate, kept for Manual."""
+		total = 0.0
+		for d in self.doc.get("secondary_items"):
+			if d.valuation_method == "Valuation Rate":
+				rate = self.get_rm_rate(self._secondary_item_rate_args(d))
+				d.cost = flt(flt(rate) * flt(d.stock_qty), precision)
+			elif d.valuation_method == "Manual":
+				d.cost = flt(d.cost, precision)
+			else:
+				continue
+
+			d.base_cost = flt(d.cost * self.doc.conversion_rate, precision)
+			total += d.cost
+			if save:
+				d.db_update()
+
+		return total
+
+	def _secondary_item_rate_args(self, d):
+		return {
+			"item_code": d.item_code,
+			"company": self.doc.company,
+			"warehouse": self.doc.default_target_warehouse,
+			"set_rate_based_on_warehouse": 1,
+			"force_valuation_rate": 1,
+		}
 
 	def calculate_exploded_cost(self):
 		"Set exploded row cost from it's parent BOM."

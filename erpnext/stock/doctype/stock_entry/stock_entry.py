@@ -83,7 +83,10 @@ def is_costed_out_of_finished_item(row) -> bool:
 	A secondary item that is not linked to a BOM has no cost allocation of its own, so it is
 	valued the way the legacy scrap item was: its cost is deducted from the finished good.
 	"""
-	return bool(row.is_legacy_scrap_item or (row.secondary_item_type and not row.bom_secondary_item))
+	return bool(
+		row.valuation_method in ("Valuation Rate", "Manual")
+		or (row.secondary_item_type and not row.bom_secondary_item)
+	)
 
 
 class StockEntry(StockController, SubcontractingInwardController):
@@ -599,9 +602,16 @@ class StockEntry(StockController, SubcontractingInwardController):
 		secondary_items_cost_basis = self.get_secondary_items_cost_basis(outgoing_items_cost)
 
 		zero_valuation_items = []
-		finished_items_last = sorted(self.get("items"), key=lambda row: cint(row.is_finished_item))
+		# Own-cost rows first: their value is deducted from the basis the percentage
+		# allocated rows and the finished good split, so it must be known before those.
+		finished_items_last = sorted(
+			self.get("items"),
+			key=lambda row: (cint(row.is_finished_item), cint(not is_costed_out_of_finished_item(row))),
+		)
 		for d in finished_items_last:
 			if d.s_warehouse or d.set_basic_rate_manually:
+				if d.set_basic_rate_manually:
+					d.basic_amount = flt(flt(d.transfer_qty) * flt(d.basic_rate), d.precision("basic_amount"))
 				continue
 
 			# Zero-qty secondary items carry no inventory value; skip rate calculation
@@ -690,33 +700,42 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 			if self.bom_no:
 				d.basic_rate *= bom_cost_allocation_per / 100
+		elif is_costed_out_of_finished_item(d):
+			# Recomputed every time: a rate fetched before the target warehouse was set
+			# must not stick to the row.
+			d.basic_rate = self.get_row_valuation_rate(d, raise_error_if_no_rate)
+			has_derived_rate = True
 		elif d.secondary_item_type and d.bom_secondary_item:
 			cost_allocation_per = flt(
 				frappe.get_value("BOM Secondary Item", d.bom_secondary_item, "cost_allocation_per")
 			)
 			if flt(d.transfer_qty):
-				d.basic_rate = (secondary_items_cost_basis * (cost_allocation_per / 100)) / d.transfer_qty
+				allocation_basis = secondary_items_cost_basis - self.get_costed_out_items_cost()
+				d.basic_rate = (allocation_basis * (cost_allocation_per / 100)) / d.transfer_qty
 				has_derived_rate = True
 
 		# A rate of zero that was derived rather than left unset is a real cost. Falling back to
 		# the item's valuation here would value free inputs, or an unallocated row, as output.
 		if not d.basic_rate and not d.allow_zero_valuation_rate and not has_derived_rate:
-			d.basic_rate = get_valuation_rate(
-				d.item_code,
-				d.t_warehouse,
-				self.doctype,
-				self.name,
-				d.allow_zero_valuation_rate,
-				currency=erpnext.get_company_currency(self.company),
-				company=self.company,
-				raise_error_if_no_rate=raise_error_if_no_rate,
-				batch_no=d.batch_no,
-				serial_and_batch_bundle=d.serial_and_batch_bundle,
-			)
+			d.basic_rate = self.get_row_valuation_rate(d, raise_error_if_no_rate)
 
 		# do not round off basic rate to avoid precision loss
 		d.basic_rate = flt(d.basic_rate)
 		d.basic_amount = flt(flt(d.transfer_qty) * flt(d.basic_rate), d.precision("basic_amount"))
+
+	def get_row_valuation_rate(self, d, raise_error_if_no_rate):
+		return get_valuation_rate(
+			d.item_code,
+			d.t_warehouse,
+			self.doctype,
+			self.name,
+			d.allow_zero_valuation_rate,
+			currency=erpnext.get_company_currency(self.company),
+			company=self.company,
+			raise_error_if_no_rate=raise_error_if_no_rate,
+			batch_no=d.batch_no,
+			serial_and_batch_bundle=d.serial_and_batch_bundle,
+		)
 
 	def _notify_zero_valuation_rate(self, items):
 		if len(items) > 1:
@@ -783,20 +802,32 @@ class StockEntry(StockController, SubcontractingInwardController):
 				)
 				return flt(outgoing_items_cost / total_fg_qty)
 
+	def get_costed_out_items_cost(self) -> float:
+		"""Total value of the rows that are deducted from the cost the other incoming rows split."""
+		return sum(flt(d.basic_amount) for d in self.get("items") if is_costed_out_of_finished_item(d))
+
 	def get_basic_rate_for_manufactured_item(
 		self, finished_item_qty, outgoing_items_cost=0, has_consumption_basis=False
 	) -> float:
 		settings = frappe.get_single("Manufacturing Settings")
-		scrap_items_cost = sum(
-			[flt(d.basic_amount) for d in self.get("items") if is_costed_out_of_finished_item(d)]
-		)
+		scrap_items_cost = self.get_costed_out_items_cost()
 
 		if settings.material_consumption:
 			outgoing_items_cost = self._get_rm_cost_for_manufacture(
 				settings, finished_item_qty, outgoing_items_cost, has_consumption_basis
 			)
 
+		self.validate_costed_out_items_cost(outgoing_items_cost, scrap_items_cost)
 		return flt((outgoing_items_cost - scrap_items_cost) / finished_item_qty)
+
+	def validate_costed_out_items_cost(self, outgoing_items_cost, costed_out_cost):
+		"""The finished good cannot absorb a negative cost."""
+		if flt(costed_out_cost) > flt(outgoing_items_cost):
+			frappe.throw(
+				_(
+					"The cost of the secondary items valued on their own ({0}) cannot exceed the consumed material cost ({1})."
+				).format(frappe.bold(flt(costed_out_cost)), frappe.bold(flt(outgoing_items_cost)))
+			)
 
 	def _get_rm_cost_for_manufacture(
 		self, settings, finished_item_qty, outgoing_items_cost, has_consumption_basis=False
@@ -816,7 +847,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 	def _validate_no_raw_materials_in_manufacture_entry(self, settings):
 		for item in self.items:
-			if not item.is_finished_item and not item.secondary_item_type and not item.is_legacy_scrap_item:
+			if not item.is_finished_item and not item.secondary_item_type and not item.valuation_method:
 				label = frappe.get_meta(settings.doctype).get_translated_label(
 					"get_rm_cost_from_consumption_entry"
 				)
@@ -956,7 +987,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		for d in self.items:
 			if d.t_warehouse and not d.s_warehouse:
-				if d.secondary_item_type or d.is_legacy_scrap_item:
+				if d.secondary_item_type or d.valuation_method:
 					d.is_finished_item = 0
 				elif self.purpose == "Repack" or d.item_code == finished_item:
 					d.is_finished_item = 1
