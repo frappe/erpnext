@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-08-23 09:41+0000\n"
-"PO-Revision-Date: 2026-08-24 03:04\n"
+"PO-Revision-Date: 2026-08-26 11:43\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Bosnian\n"
 "MIME-Version: 1.0\n"
@@ -9833,7 +9833,7 @@ msgstr "Otkaži kada se završi period"
 
 #: erpnext/stock/doctype/pick_list/pick_list.js:553
 msgid "Cancel or delete these documents to release the stock."
-msgstr "Otkažite ili izbrišite ove dokumente da biste oslobodili zalihe."
+msgstr "Otkažite ili obriši ove dokumente da biste oslobodili zalihe."
 
 #. Label of the cancelation_date (Date) field in DocType 'Subscription'
 #: erpnext/accounts/doctype/subscription/subscription.json
@@ -9941,7 +9941,7 @@ msgstr "Nije moguće promijeniti atribute nakon transakcije zaliha. Napravi novi
 
 #: erpnext/stock/doctype/item/item.py:1163
 msgid "Cannot change Item {0} from serialized to non-serialized because a Serial and Batch Bundle exists for it. Please delete or cancel the Serial and Batch Bundle first."
-msgstr "Nije moguće promijenuti artikal {0} iz serijaliziranog u neserijalizirani jer za njega postoji Serijski i Šaržni paket. Prvo izbrišite ili otkažite Serijski i Šaržni paket."
+msgstr "Nije moguće promijenuti artikal {0} iz serijaliziranog u neserijalizirani jer za njega postoji Serijski i Šaržni paket. Prvo obriši ili otkažite Serijski i Šaržni paket."
 
 #: erpnext/accounts/doctype/accounting_dimension/accounting_dimension.py:74
 msgid "Cannot change Reference Document Type."
@@ -16683,7 +16683,7 @@ msgstr "Sažetak Odgođenih Zadataka"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Delete Accounting and Stock Ledger entries on deletion of transaction"
-msgstr "Izbriši unose Knjigovodstva i Registra Zaliha pri brisanju Transakcije"
+msgstr "Obriši unose Knjigovodstva i Registra Zaliha pri brisanju Transakcije"
 
 #: erpnext/public/js/utils/serial_batch_inline_editor.js:1061
 msgid "Delete All"
@@ -16693,23 +16693,23 @@ msgstr "Obriši sve"
 #. Deletion Record'
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.json
 msgid "Delete Bins"
-msgstr "Izbriši Spremnike"
+msgstr "Obriši Spremnike"
 
 #. Label of the delete_cancelled_entries (Check) field in DocType 'Repost
 #. Accounting Ledger'
 #: erpnext/accounts/doctype/repost_accounting_ledger/repost_accounting_ledger.json
 msgid "Delete Cancelled Ledger Entries"
-msgstr "Izbrišite poništene unose iz Registra"
+msgstr "Obriši poništene unose iz Registra"
 
 #. Label of a standard navbar item
 #. Type: Action
 #: erpnext/hooks.py erpnext/public/js/utils/demo.js:5
 msgid "Delete Demo Data"
-msgstr "Izbriši Demo Podatke"
+msgstr "Obriši Demo Podatke"
 
 #: erpnext/stock/doctype/inventory_dimension/inventory_dimension.js:66
 msgid "Delete Dimension"
-msgstr "Izbriši Dimenziju"
+msgstr "Obriši Dimenziju"
 
 #. Label of the delete_leads_and_addresses_status (Select) field in DocType
 #. 'Transaction Deletion Record'
@@ -16721,14 +16721,14 @@ msgstr "Izriši Potencijalne Klijente i Adrese"
 #. in DocType 'Appointment Booking Settings'
 #: erpnext/crm/doctype/appointment_booking_settings/appointment_booking_settings.json
 msgid "Delete Permanently"
-msgstr "Trajno Izbriši"
+msgstr "Trajno Obriši"
 
 #. Label of the delete_transactions_status (Select) field in DocType
 #. 'Transaction Deletion Record'
 #: erpnext/setup/doctype/company/company.js:193
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.json
 msgid "Delete Transactions"
-msgstr "Izbriši Transakcije"
+msgstr "Obriši Transakcije"
 
 #: erpnext/setup/doctype/company/company.js:263
 msgid "Delete all the Transactions for {0}"
@@ -20750,7 +20750,7 @@ msgstr "Brisanje pravila nije uspjelo."
 
 #: erpnext/setup/demo.py:77
 msgid "Failed to erase demo data, please delete the demo company manually."
-msgstr "Brisanje demo podataka nije uspjelo, izbrišite demo poduzeće ručno."
+msgstr "Brisanje demo podataka nije uspjelo, obriši demo poduzeće ručno."
 
 #: erpnext/accounts/doctype/payment_request/payment_request.py:287
 msgid "Failed to initiate payment with {0}. Please try again or contact support."
@@ -38909,7 +38909,7 @@ msgstr "Izradi Nabavni Račun ili Nabavnu Fakturu za artikal {0}"
 
 #: erpnext/stock/doctype/item/item.py:719
 msgid "Please delete Product Bundle {0}, before merging {1} into {2}"
-msgstr "Izbriši Artikal Paket {0}, prije spajanja {1} u {2}"
+msgstr "Obriši Artikal Paket {0}, prije spajanja {1} u {2}"
 
 #: erpnext/assets/doctype/asset/depreciation.py:582
 msgid "Please disable workflow temporarily for Journal Entry {0}"
@@ -65223,7 +65223,7 @@ msgstr "{0}: ukloni nevažeću vrijednost(i) {1}"
 
 #: erpnext/stock/doctype/item/item.js:1268
 msgid "{0}: select the typed value {1} from the list or clear it"
-msgstr "{0}: odaberi unesenu vrijednost {1} s liste ili je obrišite"
+msgstr "{0}: odaberi unesenu vrijednost {1} s liste ili je obriši"
 
 #: erpnext/controllers/accounts_controller.py:513
 msgid "{0}: {1} does not belong to the Company: {2}"
