@@ -18,12 +18,7 @@ def execute(filters=None):
 class Analytics:
 	def __init__(self, filters=None):
 		self.filters = frappe._dict(filters or {})
-<<<<<<< HEAD
-=======
 		self.entities = self.filters.get("entity") or []
-		if self.filters.doc_type == "Payment Entry" and self.filters.value_quantity == "Quantity":
-			frappe.throw(_("Only Value available for Payment Entry"))
->>>>>>> 3f29cdf (feat(analytics): filter sales and purchase analytics by entity (#58402))
 		self.date_field = (
 			"transaction_date"
 			if self.filters.doc_type in ["Sales Order", "Purchase Order"]

@@ -85,8 +85,6 @@ frappe.query_reports["Purchase Analytics"] = {
 			default: "Monthly",
 			reqd: 1,
 		},
-<<<<<<< HEAD
-=======
 		{
 			fieldname: "curves",
 			label: __("Curves"),
@@ -100,12 +98,6 @@ frappe.query_reports["Purchase Analytics"] = {
 			default: "select",
 			reqd: 1,
 		},
-		{
-			fieldname: "show_aggregate_value_from_subsidiary_companies",
-			label: __("Show Aggregate Value from Subsidiary Companies"),
-			fieldtype: "Check",
-		},
->>>>>>> 3f29cdf (feat(analytics): filter sales and purchase analytics by entity (#58402))
 	],
 	get_datatable_options(options) {
 		return Object.assign(options, {

@@ -2,11 +2,11 @@
 # See license.txt
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import flt
 
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.buying.report.purchase_analytics.purchase_analytics import execute
-from erpnext.tests.utils import ERPNextTestSuite
 
 COMPANY = "_Test Company"
 SUPPLIER = "_Test Supplier"
@@ -16,7 +16,7 @@ FROM_DATE = "2019-04-01"
 TO_DATE = "2019-06-30"
 
 
-class TestPurchaseAnalytics(ERPNextTestSuite):
+class TestPurchaseAnalytics(FrappeTestCase):
 	"""purchase_analytics reuses the shared Analytics engine; these tests lock its
 	wiring (doc_type=Purchase Order) across the Supplier Group / Item Group trees."""
 

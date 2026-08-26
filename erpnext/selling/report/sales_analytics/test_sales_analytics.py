@@ -3,12 +3,12 @@
 
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import flt
 
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.selling.report.sales_analytics.sales_analytics import execute
-from erpnext.tests.utils import ERPNextTestSuite
 
 # Bootstrap masters reused as-is (see erpnext/tests/utils.py):
 #   "_Test Customer" -> customer_group "_Test Customer Group", territory "_Test Territory"
@@ -24,27 +24,47 @@ FROM_DATE = "2019-04-01"
 TO_DATE = "2019-06-30"
 
 
-class TestSalesAnalytics(ERPNextTestSuite):
+class TestSalesAnalytics(FrappeTestCase):
 	def setUp(self):
 		frappe.set_user("Administrator")
+		self.created_docs = []
 		# Two submitted Sales Orders for the bootstrap customer inside the report window.
 		# These roll up into the tree roots the converted tree/order-type queries build.
 		self.orders = [
-			make_sales_order(
-				company=COMPANY,
-				customer=CUSTOMER,
-				qty=5,
-				rate=100,
-				transaction_date="2019-04-10",
-			),
-			make_sales_order(
-				company=COMPANY,
-				customer=CUSTOMER,
-				qty=3,
-				rate=100,
-				transaction_date="2019-05-15",
-			),
+			self.make_so(qty=5, rate=100, transaction_date="2019-04-10"),
+			self.make_so(qty=3, rate=100, transaction_date="2019-05-15"),
 		]
+
+	def tearDown(self):
+		for doctype, name in reversed(self.created_docs):
+			if not frappe.db.exists(doctype, name):
+				continue
+
+			doc = frappe.get_doc(doctype, name)
+			if doc.docstatus == 1:
+				doc.cancel()
+			frappe.delete_doc(doctype, name, force=True)
+
+		super().tearDown()
+
+	def make_so(self, qty, rate, transaction_date, order_type=None):
+		so = make_sales_order(
+			company=COMPANY,
+			customer=CUSTOMER,
+			qty=qty,
+			rate=rate,
+			transaction_date=transaction_date,
+			do_not_save=True,
+		)
+		# v15's test helper does not populate these hidden analytics dimensions.
+		so.customer_group = CUSTOMER_GROUP
+		so.territory = TERRITORY
+		if order_type:
+			so.order_type = order_type
+		so.insert()
+		so.submit()
+		self.created_docs.append((so.doctype, so.name))
+		return so
 
 	def _base_filters(self, **overrides):
 		filters = {
@@ -160,16 +180,12 @@ class TestSalesAnalytics(ERPNextTestSuite):
 		postgres, so the report sorts the order-type rows in python (key=str.casefold) to keep them in a
 		deterministic, case-insensitive order identical on both engines."""
 		for order_type in ("Shopping Cart", "Maintenance", "Sales"):  # created out of sorted order
-			so = make_sales_order(
-				company=COMPANY,
-				customer=CUSTOMER,
+			self.make_so(
 				qty=1,
 				rate=100,
 				transaction_date="2019-04-12",
-				do_not_submit=True,
+				order_type=order_type,
 			)
-			so.order_type = order_type
-			so.submit()
 
 		columns, data, *_ = execute(self._base_filters(tree_type="Order Type"))
 
@@ -213,6 +229,7 @@ class TestSalesAnalytics(ERPNextTestSuite):
 			rate=250,
 			transaction_date="2019-04-10",
 		)
+		self.created_docs.append((po.doctype, po.name))
 		po_value = flt(po.base_net_total)
 		self.assertGreater(po_value, 0)
 
