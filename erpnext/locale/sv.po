@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-08-09 09:47+0000\n"
-"PO-Revision-Date: 2026-08-10 11:05\n"
+"PO-Revision-Date: 2026-08-26 11:43\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -740,7 +740,7 @@ msgid "<h3>Currency Exchange Settings Help</h3>\n"
 "<p>There are 3 variables that could be used within the endpoint, result key and in values of the parameter.</p>\n"
 "<p>Exchange rate between {from_currency} and {to_currency} on {transaction_date} is fetched by the API.</p>\n"
 "<p>Example: If your endpoint is exchange.com/2021-08-01, then, you will have to input exchange.com/{transaction_date}</p>"
-msgstr "<h3>Valutaväxling Inställningar Hjälp</h3>\n"
+msgstr "<h3>Växelkurs Inställningar Hjälp</h3>\n"
 "<p>Det finns 3 variabler som kan användas av slutpunkt, resultat nyckel och i parameter värde.</p>\n"
 "<p>Växelkurs mellan {from_currency} och {to_currency} {transaction_date} hämtas av API.</p>\n"
 "<p>Exempel: Om slutpunkt är exchange.com/2021-08-01 måste du ange exchange.com/{transaction_date}</p>"
@@ -1079,7 +1079,7 @@ msgstr "Helg Lista kan läggas till för att utesluta dessa dagar för Arbetssta
 
 #: erpnext/crm/doctype/lead/lead.py:142
 msgid "A Lead requires either a person's name or an organization's name"
-msgstr "Potentiell Kund kräver antingen person namn eller bolag namn"
+msgstr "Potentiell Kund erfordrar antingen person namn eller bolag namn"
 
 #: erpnext/stock/doctype/packing_slip/packing_slip.py:84
 msgid "A Packing Slip can only be created for Draft Delivery Note."
@@ -1229,7 +1229,7 @@ msgstr "Service Avtal Utgång Datum"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "AP Summary"
-msgstr "Skulder Översikt"
+msgstr "Skuldöversikt"
 
 #. Label of the api_details_section (Section Break) field in DocType 'Currency
 #. Exchange Settings'
@@ -1240,7 +1240,7 @@ msgstr "API Detaljer"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "AR Summary"
-msgstr "Fordringar Översikt"
+msgstr "Fordringöversikt"
 
 #. Label of the awb_number (Data) field in DocType 'Shipment'
 #: erpnext/stock/doctype/shipment/shipment.json
@@ -2254,7 +2254,7 @@ msgstr "Fordring Rabatt Konto"
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.js:205
 #: erpnext/accounts/report/accounts_receivable_summary/accounts_receivable_summary.json
 msgid "Accounts Receivable Summary"
-msgstr "Fordringar Översikt"
+msgstr "Fordringöversikt"
 
 #. Label of the accounts_receivable_unpaid (Link) field in DocType 'Invoice
 #. Discounting'
@@ -5232,7 +5232,7 @@ msgstr "Tillämpad Dimension"
 #. Description of the 'Holiday List' (Link) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Applicable Holiday List"
-msgstr "Tillämpligt Helg Lista"
+msgstr "Tillämplig Helg Lista"
 
 #. Label of the applicable_modules_section (Section Break) field in DocType
 #. 'Terms and Conditions'
@@ -5250,22 +5250,22 @@ msgstr "Tillämplig På Konto"
 #. Label of the to_designation (Link) field in DocType 'Authorization Rule'
 #: erpnext/setup/doctype/authorization_rule/authorization_rule.json
 msgid "Applicable To (Designation)"
-msgstr "Tillämpligt för (Befattning)"
+msgstr "Tillämplig för (Befattning)"
 
 #. Label of the to_emp (Link) field in DocType 'Authorization Rule'
 #: erpnext/setup/doctype/authorization_rule/authorization_rule.json
 msgid "Applicable To (Employee)"
-msgstr "Tillämpligt för (Personal)"
+msgstr "Tillämplig för (Personal)"
 
 #. Label of the system_role (Link) field in DocType 'Authorization Rule'
 #: erpnext/setup/doctype/authorization_rule/authorization_rule.json
 msgid "Applicable To (Role)"
-msgstr "Tillämpligt för (Roll)"
+msgstr "Tillämplig för (Roll)"
 
 #. Label of the system_user (Link) field in DocType 'Authorization Rule'
 #: erpnext/setup/doctype/authorization_rule/authorization_rule.json
 msgid "Applicable To (User)"
-msgstr "Tillämpligt för (Användare)"
+msgstr "Tillämplig för (Användare)"
 
 #. Label of the countries (Table) field in DocType 'Price List'
 #: erpnext/stock/doctype/price_list/price_list.json
@@ -5281,19 +5281,19 @@ msgstr "Användare"
 #. Description of the 'Transporter' (Link) field in DocType 'Driver'
 #: erpnext/setup/doctype/driver/driver.json
 msgid "Applicable for external driver"
-msgstr "Tillämpligt för extern Förare"
+msgstr "Tillämplig för extern Förare"
 
 #: erpnext/regional/italy/setup.py:162
 msgid "Applicable if the company is SpA, SApA or SRL"
-msgstr "Tillämpligt om bolag är SpA, SApA eller SRL"
+msgstr "Tillämplig om bolag är SpA, SApA eller SRL"
 
 #: erpnext/regional/italy/setup.py:171
 msgid "Applicable if the company is a limited liability company"
-msgstr "Tillämpligt om bolag är Aktie Bolag"
+msgstr "Tillämplig om bolag är Aktie Bolag"
 
 #: erpnext/regional/italy/setup.py:122
 msgid "Applicable if the company is an Individual or a Proprietorship"
-msgstr "Tillämpligt om bolag är en individ eller ett Privat Bolag"
+msgstr "Tillämplig om bolag är en individ eller ett Privat Bolag"
 
 #. Label of the applicable_on_cumulative_expense (Check) field in DocType
 #. 'Budget'
@@ -5305,7 +5305,7 @@ msgstr "Tillämplig på Ackumulerad Kostnad"
 #. 'Budget'
 #: erpnext/accounts/doctype/budget/budget.json
 msgid "Applicable on Material Request"
-msgstr "Tillämpligt på Material Begäran"
+msgstr "Tillämplig på Material Begäran"
 
 #. Description of the 'Allow Partial Payment' (Check) field in DocType 'POS
 #. Profile'
@@ -5316,13 +5316,13 @@ msgstr "Tillämplig på Kassa Faktura"
 #. Label of the applicable_on_purchase_order (Check) field in DocType 'Budget'
 #: erpnext/accounts/doctype/budget/budget.json
 msgid "Applicable on Purchase Order"
-msgstr "Tillämpligt på Inköp Order"
+msgstr "Tillämplig på Inköp Order"
 
 #. Label of the applicable_on_booking_actual_expenses (Check) field in DocType
 #. 'Budget'
 #: erpnext/accounts/doctype/budget/budget.json
 msgid "Applicable on booking actual expenses"
-msgstr "Tillämpligt vid Bokföring av Faktiska Kostnader"
+msgstr "Tillämplig vid Bokföring av Faktiska Kostnader"
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:10
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:10
@@ -5532,7 +5532,7 @@ msgstr "Tid Bokning Bekräftelse"
 
 #: erpnext/crm/doctype/appointment/appointment.py:189
 msgid "Appointment Confirmed"
-msgstr "Tidsbokning Bekräftad"
+msgstr "Tid Bokning Bekräftad"
 
 #: erpnext/www/book_appointment/index.js:237
 msgid "Appointment Created Successfully"
@@ -5554,7 +5554,7 @@ msgstr "Tid Bokning Varar (Minuter)"
 #. 'Appointment Booking Settings'
 #: erpnext/crm/doctype/appointment_booking_settings/appointment_booking_settings.json
 msgid "Appointment Scheduling"
-msgstr "Tidsbokning Schemaläggning"
+msgstr "Tid Bokning Schemaläggning"
 
 #: erpnext/www/book_appointment/index.py:24
 msgid "Appointment Scheduling Disabled"
@@ -5566,7 +5566,7 @@ msgstr "Tid Bokning är Inaktiverad för denna Webbplats"
 
 #: erpnext/crm/doctype/appointment_booking_settings/appointment_booking_settings.py:101
 msgid "Appointment Scheduling needs to be enabled for Appointment Booking through portal."
-msgstr "Tidsbokning Schemaläggning måste vara aktiverad för Tidsbokning via portal."
+msgstr "Tid Bokning Schemaläggning måste vara aktiverad för Tid Bokning via portal."
 
 #. Label of the appointment_with (Link) field in DocType 'Appointment'
 #: erpnext/crm/doctype/appointment/appointment.json
@@ -5575,31 +5575,31 @@ msgstr "Tid Bokning med"
 
 #: erpnext/crm/doctype/appointment/appointment.py:86
 msgid "Appointment can only be scheduled up to {0} day(s) in advance."
-msgstr "Tidsbokning kan endast schemaläggas upp till {0} dag(ar) i förväg."
+msgstr "Tid Bokning kan endast schemaläggas upp till {0} dag(ar) i förväg."
 
 #: erpnext/crm/doctype/appointment/appointment.py:79
 msgid "Appointment cannot be scheduled for a past time."
-msgstr "Tidsbokning kan inte schemaläggas för förfluten tid."
+msgstr "Tid Bokning kan inte schemaläggas för förfluten tid."
 
 #: erpnext/crm/doctype/appointment/appointment.py:98
 msgid "Appointment cannot be scheduled on a holiday."
-msgstr "Tidsbokning kan inte schemaläggas på helgdag."
+msgstr "Tid Bokning kan inte schemaläggas på helgdag."
 
 #: erpnext/www/book_appointment/verify/index.py:28
 msgid "Appointment has been closed. Please book the appointment again."
-msgstr "Tidsbokning har stängts. Boka igen."
+msgstr "Tid Bokning har stängts. Boka igen."
 
 #: erpnext/www/book_appointment/verify/index.py:33
 msgid "Appointment is already verified."
-msgstr "Tidsbokning är redan bekräftad."
+msgstr "Tid Bokning är redan bekräftad."
 
 #: erpnext/crm/doctype/appointment/appointment.py:116
 msgid "Appointment must be scheduled within the available slot timings."
-msgstr "Tidsbokning måste schemaläggas inom tillgänglig tidsintervall."
+msgstr "Tid Bokning måste schemaläggas inom tillgänglig tidsintervall."
 
 #: erpnext/crm/doctype/appointment/appointment.py:66
 msgid "Appointments created manually cannot have 'Unverified' status."
-msgstr "Tidsbokningar som skapas manuellt kan inte ha ”Overifierad” status."
+msgstr "Tid Bokningar som skapas manuellt kan inte ha ”Overifierad” status."
 
 #. Label of the approving_role (Link) field in DocType 'Authorization Rule'
 #: erpnext/setup/doctype/authorization_rule/authorization_rule.json
@@ -6349,7 +6349,7 @@ msgstr "På Rad {0}: I Serie och Parti Paket {1} måste dokument status vara 1 o
 
 #: erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py:84
 msgid "At least one account with exchange gain or loss is required"
-msgstr "Minst ett konto med Valutaväxling Resultat erfordras"
+msgstr "Minst ett konto med Växelkurs Resultat erfordras"
 
 #: erpnext/assets/doctype/asset/asset.py:1293
 msgid "At least one asset has to be selected."
@@ -9884,7 +9884,7 @@ msgstr "Kan inte dra av när an kategori \"Värdering\" eller \"Värdering och T
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.js:1854
 msgid "Cannot delete Exchange Gain/Loss row"
-msgstr "Kan inte ta bort Valutaväxling Resultat rad"
+msgstr "Kan inte ta bort Växelkurs Resultat rad"
 
 #: erpnext/stock/doctype/serial_no/serial_no.py:120
 msgid "Cannot delete Serial No {0}, as it is used in stock transactions"
@@ -14325,7 +14325,7 @@ msgstr "Cup"
 #: erpnext/setup/doctype/currency_exchange/currency_exchange.json
 #: erpnext/workspace_sidebar/accounts_setup.json
 msgid "Currency Exchange"
-msgstr "Valutaväxling"
+msgstr "Växelkurs"
 
 #. Label of the currency_exchange_section (Section Break) field in DocType
 #. 'Accounts Settings'
@@ -14336,21 +14336,21 @@ msgstr "Valutaväxling"
 #: erpnext/workspace_sidebar/accounts_setup.json
 #: erpnext/workspace_sidebar/erpnext_settings.json
 msgid "Currency Exchange Settings"
-msgstr "Valutaväxling Inställningar"
+msgstr "Växelkurs Inställningar"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/currency_exchange_settings_details/currency_exchange_settings_details.json
 msgid "Currency Exchange Settings Details"
-msgstr "Valutaväxling Inställning Detaljer"
+msgstr "Växelkurs Inställning Detaljer"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/currency_exchange_settings_result/currency_exchange_settings_result.json
 msgid "Currency Exchange Settings Result"
-msgstr "Valutaväxling Inställning Resultat"
+msgstr "Växelkurs Inställning Resultat"
 
 #: erpnext/setup/doctype/currency_exchange/currency_exchange.py:55
 msgid "Currency Exchange must be applicable for Buying or for Selling."
-msgstr "Valutaväxling måste vara tillämplig för Inköp eller Försäljning."
+msgstr "Växelkurs måste vara tillämplig för Inköp eller Försäljning."
 
 #. Label of the currency_and_price_list (Section Break) field in DocType 'POS
 #. Invoice'
@@ -18183,7 +18183,7 @@ msgstr "Driftstopp Tid (Timmar)"
 #: erpnext/manufacturing/workspace/manufacturing/manufacturing.json
 #: erpnext/workspace_sidebar/manufacturing.json
 msgid "Downtime Analysis"
-msgstr "Driftstopp Analys"
+msgstr "Driftstopp Statistik"
 
 #. Name of a DocType
 #. Label of a Link in the Manufacturing Workspace
@@ -19009,7 +19009,7 @@ msgstr "Aktivera Tillåt Partiell Reservation i Lager Inställningar för att re
 #. Booking Settings'
 #: erpnext/crm/doctype/appointment_booking_settings/appointment_booking_settings.json
 msgid "Enable Appointment Booking Through Portal"
-msgstr "Aktivera Tidsbokning via Portal"
+msgstr "Aktivera Tid Bokning via Portal"
 
 #. Label of the enable_scheduling (Check) field in DocType 'Appointment Booking
 #. Settings'
@@ -19280,7 +19280,7 @@ msgstr "Aktivera för att göra denna leverantör valbar som transportör på F�
 #. Description of the 'Retain Sample' (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Enable to reserve a small sample from each batch for any analysis arising ahead"
-msgstr "Aktivera för att reservera litet prov från varje parti för analys som uppstår senare"
+msgstr "Aktivera för att reservera litet prov från varje parti för statistik som uppstår senare"
 
 #. Label of the enable_tracking_sales_commissions (Check) field in DocType
 #. 'Selling Settings'
@@ -19752,17 +19752,17 @@ msgstr "Inställning"
 #. 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Exchange Gain / Loss"
-msgstr "Valutaväxling Resultat"
+msgstr "Växelkurs Resultat"
 
 #. Label of the exchange_gain_loss_account (Link) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Exchange Gain / Loss Account"
-msgstr "Valutaväxling Resultat Konto"
+msgstr "Växelkurs Resultat Konto"
 
 #. Option for the 'Entry Type' (Select) field in DocType 'Journal Entry'
 #: erpnext/accounts/doctype/journal_entry/journal_entry.json
 msgid "Exchange Gain Or Loss"
-msgstr "Valutaväxling Resultat"
+msgstr "Växelkurs Resultat"
 
 #. Label of the exchange_gain_loss (Currency) field in DocType 'Payment Entry
 #. Reference'
@@ -19777,12 +19777,12 @@ msgstr "Valutaväxling Resultat"
 #: erpnext/accounts/doctype/sales_invoice_advance/sales_invoice_advance.json
 #: erpnext/setup/doctype/company/company.py:677
 msgid "Exchange Gain/Loss"
-msgstr "Valutaväxling Resultat"
+msgstr "Växelkurs Resultat"
 
 #: erpnext/controllers/accounts_controller.py:1809
 #: erpnext/controllers/accounts_controller.py:1894
 msgid "Exchange Gain/Loss amount has been booked through {0}"
-msgstr "Valutaväxling Resultat Belopp har bokförts genom {0}"
+msgstr "Växelkurs Resultat Belopp har bokförts genom {0}"
 
 #. Label of the exchange_rate (Float) field in DocType 'Advance Payment Ledger
 #. Entry'
@@ -23282,7 +23282,7 @@ msgstr "Här kan du välja överordnade för Personal. Baserat på detta kommer 
 
 #: erpnext/setup/doctype/holiday_list/holiday_list.js:77
 msgid "Here, your weekly offs are pre-populated based on the previous selections. You can add more rows to also add public and national holidays individually."
-msgstr "Här är dina veckoledigheter förifyllda baserat på tidigare val. Du kan lägga till fler rader för att även lägga till allmänna och nationella helgdagar individuellt."
+msgstr "Här är dina veckofrånvaro förifyllda baserat på tidigare val. Du kan lägga till fler rader för att även lägga till allmänna och nationella helgdagar individuellt."
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -23725,7 +23725,7 @@ msgstr "Om aktiverad, kommer utskrift av detta dokument att bifogas till varje e
 #. (Check) field in DocType 'Stock Reposting Settings'
 #: erpnext/stock/doctype/stock_reposting_settings/stock_reposting_settings.json
 msgid "If enabled, a weekly scheduler scans the Stock Ledger Variance for item-warehouses with incorrect valuation in the current financial year and auto-creates Item & Warehouse based reposts to fix them."
-msgstr "Om aktiverad, en veckovis schemaläggare skannar Lager Register Avvikelse efter lager artikel med felaktig värdering under innevarande bokföring år och automatiskt skapar Artikel & Lager baserade ombokningar för att fixa dem."
+msgstr "Om aktiverad, veckovis schemaläggare skannar Lager Register Avvikelse efter lager artikel med felaktig värdering under innevarande bokföring år och automatiskt skapar Artikel & Lager baserade ombokningar för att fixa dem."
 
 #. Description of the 'Enable discount accounting for selling' (Check) field in
 #. DocType 'Selling Settings'
@@ -26208,7 +26208,7 @@ msgstr "Är Rabatterad"
 #. Deduction'
 #: erpnext/accounts/doctype/payment_entry_deduction/payment_entry_deduction.json
 msgid "Is Exchange Gain / Loss?"
-msgstr "Är Valutaväxling Resultat?"
+msgstr "Är Växelkurs Resultat?"
 
 #. Label of the is_expandable (Check) field in DocType 'BOM Creator Item'
 #: erpnext/manufacturing/doctype/bom_creator_item/bom_creator_item.json
@@ -29270,7 +29270,7 @@ msgstr "Begränsad till tolv tecken"
 #. Settings'
 #: erpnext/stock/doctype/stock_reposting_settings/stock_reposting_settings.json
 msgid "Limits don't apply on"
-msgstr "Begränsningar gäller inte för"
+msgstr "Begränsning gäller inte för"
 
 #. Label of the reference_code (Data) field in DocType 'Financial Report Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
@@ -32703,7 +32703,7 @@ msgstr "Inga extra fält tillgängliga"
 
 #: erpnext/crm/doctype/appointment/appointment.py:103
 msgid "No availability of slots are found. Please add on Appointment Booking Settings."
-msgstr "Inga lediga tider hittades. Lägg till detta i Tidsbokning Inställningar."
+msgstr "Inga lediga tider hittades. Lägg till detta i Tid Bokning Inställningar."
 
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1367
 msgid "No available quantity to reserve for item {0} in warehouse {1}"
@@ -32905,7 +32905,7 @@ msgstr "Inga utestående fakturor hittades"
 
 #: erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py:353
 msgid "No outstanding invoices require exchange rate revaluation"
-msgstr "Inga utestående fakturor kräver växelkurs omvärdering"
+msgstr "Inga utestående fakturor erfordrar växelkurs omvärdering"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:2454
 msgid "No outstanding {0} found for the {1} {2} which qualify the filters you have specified."
@@ -33021,7 +33021,7 @@ msgstr "Inga verifikat hittades för denna transaktion"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2637
 msgid "No {0} found for Inter Company Transactions."
-msgstr "Ingen {0} hittades för Inter Bolag Transaktioner."
+msgstr "{0} hittades inte för Inter Bolag Transaktioner."
 
 #. Label of the no_of_employees (Select) field in DocType 'Prospect'
 #: erpnext/crm/doctype/prospect/prospect.json
@@ -35007,7 +35007,7 @@ msgstr "PDF Tabeller"
 
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.py:930
 msgid "PDF statement support requires the 'pdfplumber' library to be installed."
-msgstr "Stöd för PDF kontoutdrag kräver att bibliotek \"pdfplumber\" är installerad."
+msgstr "Stöd för PDF kontoutdrag erfordrar att bibliotek \"pdfplumber\" är installerad."
 
 #. Label of the pin (Data) field in DocType 'Warehouse'
 #: erpnext/stock/doctype/warehouse/warehouse.json
@@ -35418,7 +35418,7 @@ msgstr "Sidbrytning efter varje SoA"
 
 #: banking/src/components/features/BankStatementImporter/PDF/PDFTableEditor.tsx:302
 msgid "Page preview"
-msgstr "Förhandsgranska Sida"
+msgstr "Förhandsvisa Sida"
 
 #. Option for the 'Status' (Select) field in DocType 'Payment Request'
 #. Option for the 'Status' (Select) field in DocType 'POS Invoice'
@@ -37911,7 +37911,7 @@ msgstr "Lägg till Tillfällig Öppning Konto i Kontoplan"
 
 #: erpnext/crm/doctype/appointment/appointment.py:95
 msgid "Please add a valid Holiday List on Appointment Booking Settings."
-msgstr "Lägg till giltig Helgdag Lista i Tidsbokning Inställningar."
+msgstr "Lägg till giltig Helgdag Lista i Tid Bokning Inställningar."
 
 #: erpnext/accounts/doctype/bank_transaction_rule/bank_transaction_rule.py:119
 msgid "Please add an account for the Bank Entry rule."
@@ -38073,11 +38073,11 @@ msgstr "Skapa inte mer än 500 Artiklar åt gång"
 
 #: erpnext/accounts/doctype/budget/budget.py:182
 msgid "Please enable Applicable on Booking Actual Expenses"
-msgstr "Aktivera Tillämpligt vid Bokföring av Faktiska Kostnader"
+msgstr "Aktivera Tillämplig vid Bokföring av Faktiska Kostnader"
 
 #: erpnext/accounts/doctype/budget/budget.py:178
 msgid "Please enable Applicable on Purchase Order and Applicable on Booking Actual Expenses"
-msgstr "Aktivera Tillämpligt vid Inköp Order och Tillämpligt vid Bokföring av Faktiska Kostnader"
+msgstr "Aktivera Tillämplig vid Inköp Order och Tillämplig vid Bokföring av Faktiska Kostnader"
 
 #: erpnext/stock/doctype/pick_list/pick_list.py:323
 msgid "Please enable Use Old Serial / Batch Fields to make_bundle"
@@ -38296,7 +38296,7 @@ msgstr "Fyll i Försäljning Order Tabell"
 
 #: erpnext/crm/doctype/appointment_booking_settings/appointment_booking_settings.py:57
 msgid "Please fill up the Availability of Slots table to enable Appointment Scheduling."
-msgstr "Fyll i tabell ”Lediga Tider” för att aktivera Tidsbokning Schemaläggning."
+msgstr "Fyll i tabell ”Lediga Tider” för att aktivera Tid Bokning Schemaläggning."
 
 #: erpnext/stock/doctype/shipment/shipment.js:277
 msgid "Please first set Full Name, Email and Phone for the user"
@@ -38540,7 +38540,7 @@ msgstr "Välj Försäljning Följesedel"
 
 #: erpnext/crm/doctype/appointment_booking_settings/appointment_booking_settings.py:81
 msgid "Please select a Holiday List to enable Appointment Scheduling."
-msgstr "Välj Helgdag Lista för att aktivera Tidsbokning Schemaläggning."
+msgstr "Välj Helgdag Lista för att aktivera Tid Bokning Schemaläggning."
 
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.py:153
 msgid "Please select a Subcontracting Purchase Order."
@@ -38847,7 +38847,7 @@ msgstr "Ange Org.Nr. for Kund '%s'"
 
 #: erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py:364
 msgid "Please set Unrealized Exchange Gain/Loss Account in Company {0}"
-msgstr "Ange Orealiserat Valutaväxling Resultat Konto i Bolag {0}"
+msgstr "Ange Orealiserat Växelkurs Resultat Konto i Bolag {0}"
 
 #: erpnext/regional/report/vat_audit_report/vat_audit_report.py:56
 msgid "Please set VAT Accounts in {0}"
@@ -38920,7 +38920,7 @@ msgstr "Ange Standard Kassa eller Bank Konto i Betalning Sätt {}"
 
 #: erpnext/accounts/utils.py:2522
 msgid "Please set default Exchange Gain/Loss Account in Company {}"
-msgstr "Ange Standard Valutaväxling Resultat Konto för Bolag {}"
+msgstr "Ange Standard Växelkurs Resultat Konto för Bolag {}"
 
 #: erpnext/assets/doctype/asset_repair/asset_repair.py:389
 msgid "Please set default Expense Account in Company {0}"
@@ -39017,7 +39017,7 @@ msgstr "Ange {0} i {1} eller i Artikel Standard Inställningar {2}"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:1160
 msgid "Please set {0} in Company {1} to account for Exchange Gain / Loss"
-msgstr "Ange {0} i Bolag {1} för att bokföra valutaväxling resultat"
+msgstr "Ange {0} i Bolag {1} för att bokföra växelkurs resultat"
 
 #: erpnext/controllers/accounts_controller.py:618
 msgid "Please set {0} to {1}, the same account that was used in the original invoice {2}."
@@ -39296,7 +39296,7 @@ msgstr "Registrering Datum kan inte vara i framtiden"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Posting Date inheritance for exchange gain / loss"
-msgstr "Bokföring Datum arv för valutaväxling resultat"
+msgstr "Bokföring Datum arv för växelkurs resultat"
 
 #: erpnext/public/js/controllers/transaction.js:1139
 msgid "Posting Date will change to today's date as Edit Posting Date and Time is unchecked. Are you sure want to proceed?"
@@ -39538,17 +39538,17 @@ msgstr "Förhindrar att system automatiskt använder pris från senaste inköp t
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.js:267
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.json
 msgid "Preview Email"
-msgstr "Förhandsgranska E-post"
+msgstr "Förhandsvisa E-post"
 
 #. Label of the download_materials_request_plan_section_section (Section Break)
 #. field in DocType 'Production Plan'
 #: erpnext/manufacturing/doctype/production_plan/production_plan.json
 msgid "Preview Required Materials"
-msgstr "Förhandsgranska Erfordrad Material"
+msgstr "Förhandsvisa Erfordrad Material"
 
 #: banking/src/components/features/BankStatementImporter/CSV/StatementDetails.tsx:230
 msgid "Preview Transactions"
-msgstr "Förhandsgranska Transaktioner"
+msgstr "Förhandsvisa Transaktioner"
 
 #: erpnext/accounts/report/balance_sheet/balance_sheet.py:191
 #: erpnext/accounts/report/consolidated_financial_statement/consolidated_financial_statement.py:142
@@ -40053,7 +40053,7 @@ msgstr "Skriv ut"
 #. Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "Print Receipt on Order Complete"
-msgstr "Skriv ut kvitto när Order är klar"
+msgstr "Skriv ut när Order är klar"
 
 #: erpnext/setup/install.py:108
 msgid "Print UOM after Quantity"
@@ -44374,7 +44374,7 @@ msgstr "Tog bort {0} rader med noll dokument antal. Spara för att ändringarna 
 
 #: erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py:87
 msgid "Removing rows without exchange gain or loss"
-msgstr "Tar bort rader utan Valutaväxling Resultat"
+msgstr "Tar bort rader utan Växelkurs Resultat"
 
 #. Description of the 'Allow Rename Attribute Value' (Check) field in DocType
 #. 'Item Variant Settings'
@@ -45908,7 +45908,7 @@ msgstr "Roll att avisera vid Avskrivning Fel"
 #. 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Roles Allowed to Set and Edit Frozen Account Entries"
-msgstr "Roller som har behörighet att skapa och redigera stängda konto poster"
+msgstr "Roller som får Ange och Redigera Låsta Konto Poster"
 
 #. Label of the root (Link) field in DocType 'Bisect Nodes'
 #: erpnext/accounts/doctype/bisect_nodes/bisect_nodes.json
@@ -58970,7 +58970,7 @@ msgstr "Okvalificerad"
 #. 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Unrealized Exchange Gain/Loss Account"
-msgstr "Orealiserad Valutaväxling Resultat Konto"
+msgstr "Orealiserad Växelkurs Resultat Konto"
 
 #. Label of the unrealized_profit_loss_account (Link) field in DocType
 #. 'Purchase Invoice'
@@ -59007,12 +59007,12 @@ msgstr "Ångra Avstämning"
 #: erpnext/workspace_sidebar/invoicing.json
 #: erpnext/workspace_sidebar/payments.json
 msgid "Unreconcile Payment"
-msgstr "Ångra Betalning Avstämning"
+msgstr "Ångrad Betalning Avstämning"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/unreconcile_payment_entries/unreconcile_payment_entries.json
 msgid "Unreconcile Payment Entries"
-msgstr "Ångra Betalning Avstämning Post"
+msgstr "Ångrad Betalning Avstämning Post"
 
 #: erpnext/accounts/doctype/bank_transaction/bank_transaction.js:40
 msgid "Unreconcile Transaction"
@@ -62887,11 +62887,11 @@ msgstr "{0} är erfodrad för konto {1}"
 
 #: erpnext/public/js/controllers/taxes_and_totals.js:132
 msgid "{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}"
-msgstr "{0} är erfordrad. Kanske Valutaväxling Post är inte skapad för {1} till {2}"
+msgstr "{0} är erfordrad. Kanske Växelkurs Post är inte skapad för {1} till {2}"
 
 #: erpnext/controllers/accounts_controller.py:3212
 msgid "{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}."
-msgstr "{0} är erfordrad. Kanske Valutaväxling Post är inte skapad för {1} till {2}."
+msgstr "{0} är erfordrad. Kanske Växelkurs Post är inte skapad för {1} till {2}."
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1929
 msgid "{0} is not a CSV file."
