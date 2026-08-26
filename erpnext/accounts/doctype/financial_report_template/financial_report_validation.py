@@ -12,13 +12,21 @@ from frappe import _
 from frappe.database.operator_map import OPERATOR_MAP
 
 
+def get_formula_field_label(data_source: str) -> str:
+	# Must mirror the `labels` map in financial_report_template.js (update_formula_label),
+	labels = {
+		"Account Data": _("Account Filter"),
+		"Custom API": _("API Method Path"),
+	}
+	return labels.get(data_source, _("Calculation Formula"))
+
+
 @dataclass
 class ValidationIssue:
 	"""Represents a single validation issue"""
 
 	message: str
 	row_idx: int | None = None
-	field: str | None = None
 	details: dict[str, Any] = None
 
 	def __post_init__(self):
@@ -26,9 +34,9 @@ class ValidationIssue:
 			self.details = {}
 
 	def __str__(self) -> str:
-		prefix = _("Row {0}:").format(self.row_idx) + " " if self.row_idx else ""
-		field_info = _("[{0}]").format(self.field) + " " if self.field else ""
-		return f"{prefix}{field_info}{self.message}"
+		if self.row_idx:
+			return _("Row {0}: {1}", context="Financial Report Template").format(self.row_idx, self.message)
+		return self.message
 
 
 @dataclass
@@ -167,7 +175,9 @@ class TemplateStructureValidator(Validator):
 				if not row.calculation_formula:
 					result.add_error(
 						ValidationIssue(
-							message=_("Formula is required for {0}").format(row.data_source),
+							message=_("{0} is required for {1}").format(
+								get_formula_field_label(row.data_source), row.data_source
+							),
 							row_idx=row.idx,
 						)
 					)
@@ -286,9 +296,10 @@ class CalculationFormulaValidator(Validator):
 		if not row.calculation_formula:
 			result.add_error(
 				ValidationIssue(
-					message=_("Formula is required for Calculated Amount"),
+					message=_("{0} is required for Calculated Amount").format(
+						get_formula_field_label(row.data_source)
+					),
 					row_idx=row.idx,
-					field=_("Formula"),
 				)
 			)
 			return result
@@ -392,9 +403,10 @@ class AccountFilterValidator(Validator):
 		if not row.calculation_formula:
 			result.add_error(
 				ValidationIssue(
-					message=_("Account filter is required for Account Data"),
+					message=_("{0} is required for Account Data").format(
+						get_formula_field_label(row.data_source)
+					),
 					row_idx=row.idx,
-					field=_("Formula"),
 				)
 			)
 			return result
@@ -410,18 +422,18 @@ class AccountFilterValidator(Validator):
 			if error:
 				result.add_error(
 					ValidationIssue(
-						message=error,
+						message=_("{0}: {1}").format(get_formula_field_label(row.data_source), error),
 						row_idx=row.idx,
-						field=_("Account Filter"),
 					)
 				)
 
 		except json.JSONDecodeError as e:
 			result.add_error(
 				ValidationIssue(
-					message=_("Invalid JSON format: {0}").format(str(e)),
+					message=_("{0}: Invalid JSON format: {1}").format(
+						get_formula_field_label(row.data_source), str(e)
+					),
 					row_idx=row.idx,
-					field=_("Account Filter"),
 				)
 			)
 
@@ -511,9 +523,10 @@ class FormulaValidator(Validator):
 		if "." not in api_path:
 			result.add_error(
 				ValidationIssue(
-					message=_("Custom API path should be in format: app.module.method"),
+					message=_("{0} should be in format: app.module.method").format(
+						get_formula_field_label(row.data_source)
+					),
 					row_idx=row.idx,
-					field=_("Formula"),
 				)
 			)
 			return result
@@ -527,18 +540,18 @@ class FormulaValidator(Validator):
 				result.add_error(
 					ValidationIssue(
 						message=_(
-							"Method '{0}' not found in module '{1}' (might be environment-specific)"
-						).format(method_name, module_path),
+							"{0}: Method '{1}' not found in module '{2}' (might be environment-specific)"
+						).format(get_formula_field_label(row.data_source), method_name, module_path),
 						row_idx=row.idx,
-						field=_("Formula"),
 					)
 				)
 		except Exception as e:
 			result.add_error(
 				ValidationIssue(
-					message=_("Could not validate API path: {0}").format(str(e)),
+					message=_("Could not validate {0}: {1}").format(
+						get_formula_field_label(row.data_source), str(e)
+					),
 					row_idx=row.idx,
-					field=_("Formula"),
 				)
 			)
 
