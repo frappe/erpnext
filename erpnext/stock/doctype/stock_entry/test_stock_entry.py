@@ -3416,6 +3416,7 @@ class TestStockEntry(ERPNextTestSuite):
 				"qty": 5,
 				"cost_allocation_per": 25,
 				"process_loss_per": 0,
+				"valuation_method": "% of FG Cost",
 			},
 		)
 		bom.insert()
@@ -3477,6 +3478,7 @@ class TestStockEntry(ERPNextTestSuite):
 				"qty": 5,
 				"cost_allocation_per": 0,
 				"process_loss_per": 0,
+				"valuation_method": "% of FG Cost",
 			},
 		)
 		bom.insert()
@@ -3533,6 +3535,7 @@ class TestStockEntry(ERPNextTestSuite):
 				"qty": 5,
 				"cost_allocation_per": 25,
 				"process_loss_per": 0,
+				"valuation_method": "% of FG Cost",
 			},
 		)
 		bom.insert()
