@@ -1,0 +1,162 @@
+{
+ "app": "erpnext",
+ "creation": "2026-08-26 23:30:00",
+ "docstatus": 0,
+ "doctype": "Dock",
+ "idx": 0,
+ "items": [
+  {
+   "added": 0,
+   "hidden": 0,
+   "icon": "landmark",
+   "sidebar": "Accounts",
+   "title": "Accounts"
+  },
+  {
+   "added": 0,
+   "hidden": 0,
+   "icon": "handshake",
+   "sidebar": "CRM",
+   "title": "CRM"
+  },
+  {
+   "added": 0,
+   "hidden": 0,
+   "icon": "shopping-cart",
+   "sidebar": "Buying",
+   "title": "Buying"
+  },
+  {
+   "added": 0,
+   "hidden": 0,
+   "icon": "folder-kanban",
+   "sidebar": "Projects",
+   "title": "Projects"
+  },
+  {
+   "added": 0,
+   "hidden": 0,
+   "icon": "store",
+   "sidebar": "Selling",
+   "title": "Selling"
+  },
+  {
+   "added": 0,
+   "hidden": 0,
+   "icon": "sliders-horizontal",
+   "sidebar": "Setup",
+   "title": "Setup"
+  },
+  {
+   "added": 0,
+   "hidden": 0,
+   "icon": "building-2",
+   "sidebar": "Manufacturing",
+   "title": "Manufacturing"
+  },
+  {
+   "added": 0,
+   "hidden": 0,
+   "icon": "package",
+   "sidebar": "Stock",
+   "title": "Stock"
+  },
+  {
+   "added": 0,
+   "hidden": 0,
+   "icon": "headset",
+   "sidebar": "Support",
+   "title": "Support"
+  },
+  {
+   "added": 0,
+   "hidden": 0,
+   "icon": "pocket-knife",
+   "sidebar": "Utilities",
+   "title": "Utilities"
+  },
+  {
+   "added": 0,
+   "hidden": 0,
+   "icon": "archive",
+   "sidebar": "Assets",
+   "title": "Assets"
+  },
+  {
+   "added": 0,
+   "hidden": 0,
+   "icon": "panels-top-left",
+   "sidebar": "Portal",
+   "title": "Portal"
+  },
+  {
+   "added": 0,
+   "hidden": 0,
+   "icon": "wrench",
+   "sidebar": "Maintenance",
+   "title": "Maintenance"
+  },
+  {
+   "added": 0,
+   "hidden": 0,
+   "icon": "globe",
+   "sidebar": "Regional",
+   "title": "Regional"
+  },
+  {
+   "added": 0,
+   "hidden": 0,
+   "icon": "plug",
+   "sidebar": "ERPNext Integrations",
+   "title": "Integrations"
+  },
+  {
+   "added": 0,
+   "hidden": 0,
+   "icon": "shield-check",
+   "sidebar": "Quality Management",
+   "title": "Quality"
+  },
+  {
+   "added": 0,
+   "hidden": 0,
+   "icon": "messages-square",
+   "sidebar": "Communication",
+   "title": "Communication"
+  },
+  {
+   "added": 0,
+   "hidden": 0,
+   "icon": "phone",
+   "sidebar": "Telephony",
+   "title": "Telephony"
+  },
+  {
+   "added": 0,
+   "hidden": 0,
+   "icon": "layers",
+   "sidebar": "Bulk Transaction",
+   "title": "Bulk Transaction"
+  },
+  {
+   "added": 0,
+   "hidden": 0,
+   "icon": "factory",
+   "sidebar": "Subcontracting",
+   "title": "Subcontracting"
+  },
+  {
+   "added": 0,
+   "hidden": 0,
+   "icon": "file-code",
+   "sidebar": "EDI",
+   "title": "EDI"
+  }
+ ],
+ "modified": "2026-08-26 23:30:00.000000",
+ "modified_by": "Administrator",
+ "name": "erpnext",
+ "owner": "Administrator",
+ "standard": 1,
+ "user": ""
+}
