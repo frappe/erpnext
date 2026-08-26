@@ -785,6 +785,10 @@ class StockEntry(StockController, SubcontractingInwardController):
 		)
 
 	def get_basic_rate_for_repacked_items(self, finished_item_qty, outgoing_items_cost):
+		costed_out_cost = self.get_costed_out_items_cost()
+		self.validate_costed_out_items_cost(outgoing_items_cost, costed_out_cost)
+		outgoing_items_cost -= costed_out_cost
+
 		finished_items = [
 			d.item_code for d in self.get("items") if d.is_finished_item and not d.set_basic_rate_manually
 		]
