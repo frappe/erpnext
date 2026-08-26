@@ -318,11 +318,18 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 		if not wo:
 			return
 
-		pending_by_item = {}
+		required_by_item = {}
+		transferred_by_item = {}
 		for r in wo.required_items:
-			pending_by_item[r.item_code] = (
-				pending_by_item.get(r.item_code, 0.0) + flt(r.required_qty) - flt(r.transferred_qty)
+			required_by_item[r.item_code] = required_by_item.get(r.item_code, 0.0) + flt(r.required_qty)
+			transferred_by_item[r.item_code] = max(
+				transferred_by_item.get(r.item_code, 0.0), flt(r.transferred_qty)
 			)
+
+		pending_by_item = {
+			item_code: required_qty - transferred_by_item[item_code]
+			for item_code, required_qty in required_by_item.items()
+		}
 
 		transfer_by_item = {}
 		first_row_by_item = {}
