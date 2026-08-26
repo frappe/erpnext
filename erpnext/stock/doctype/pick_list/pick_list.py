@@ -1508,6 +1508,7 @@ def add_product_bundles_to_delivery_note(
 @frappe.whitelist()
 def create_stock_entry(pick_list: str | dict):
 	pick_list = frappe.get_doc(frappe.parse_json(pick_list))
+	pick_list.check_permission("read")
 	validate_item_locations(pick_list)
 
 	stock_entry = frappe.new_doc("Stock Entry")
