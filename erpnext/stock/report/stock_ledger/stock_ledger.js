@@ -43,7 +43,7 @@ frappe.query_reports["Stock Ledger"] = {
 			label: __("Items"),
 			fieldtype: "MultiSelectList",
 			options: "Item",
-			get_data: async function (txt) {
+			get_data: async function (txt, for_select_all) {
 				let { message: data } = await frappe.call({
 					method: "erpnext.controllers.queries.item_query",
 					args: {
@@ -51,7 +51,7 @@ frappe.query_reports["Stock Ledger"] = {
 						txt: txt,
 						searchfield: "name",
 						start: 0,
-						page_len: 10,
+						page_len: for_select_all ? 25000 : 10,
 						filters: {},
 						as_dict: 1,
 					},

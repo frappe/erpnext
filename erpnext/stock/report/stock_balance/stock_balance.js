@@ -40,7 +40,7 @@ frappe.query_reports["Stock Balance"] = {
 			fieldtype: "MultiSelectList",
 			width: "80",
 			options: "Item",
-			get_data: async function (txt) {
+			get_data: async function (txt, for_select_all) {
 				let item_group = frappe.query_report.get_filter_value("item_group");
 
 				let filters = {
@@ -55,7 +55,7 @@ frappe.query_reports["Stock Balance"] = {
 						txt: txt,
 						searchfield: "name",
 						start: 0,
-						page_len: 10,
+						page_len: for_select_all ? 25000 : 10,
 						filters: filters,
 						as_dict: 1,
 					},

@@ -41,7 +41,7 @@ frappe.query_reports["Warehouse wise Item Balance Age and Value"] = {
 			fieldtype: "MultiSelectList",
 			width: "80",
 			options: "Item",
-			get_data: async function (txt) {
+			get_data: async function (txt, for_select_all) {
 				const item_group = frappe.query_report.get_filter_value("item_group");
 
 				let { message: data } = await frappe.call({
@@ -51,7 +51,7 @@ frappe.query_reports["Warehouse wise Item Balance Age and Value"] = {
 						txt: txt,
 						searchfield: "name",
 						start: 0,
-						page_len: 10,
+						page_len: for_select_all ? 25000 : 10,
 						filters: {
 							...(item_group && { item_group }),
 							is_stock_item: 1,
