@@ -1333,6 +1333,70 @@ class TestLandedCostVoucher(ERPNextTestSuite):
 
 			self.assertFalse(gl_entries)
 
+	def test_landed_cost_voucher_does_not_change_qty_across_stock_reco(self):
+		"""LCV cost updates must not change quantity after a batch stock reconciliation."""
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+			create_stock_reconciliation,
+		)
+
+		company = "_Test Company with perpetual inventory"
+		warehouse = "Stores - TCP1"
+		item = make_item(
+			properties={"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "LCVRECO-.####"}
+		).name
+		first_batch = frappe.get_doc({"doctype": "Batch", "item": item}).insert().name
+		second_batch = frappe.get_doc({"doctype": "Batch", "item": item}).insert().name
+
+		# Inspect the immediate LCV result before a queued repost repairs it.
+		frappe.flags.dont_execute_stock_reposts = True
+		self.addCleanup(frappe.flags.pop, "dont_execute_stock_reposts", None)
+
+		receipt = make_purchase_receipt(
+			company=company,
+			warehouse=warehouse,
+			item_code=item,
+			qty=100,
+			rate=10,
+			use_serial_batch_fields=1,
+			batch_no=first_batch,
+			posting_date=add_days(today(), -30),
+		)
+		make_purchase_receipt(
+			company=company,
+			warehouse=warehouse,
+			item_code=item,
+			qty=60,
+			rate=10,
+			use_serial_batch_fields=1,
+			batch_no=second_batch,
+			posting_date=add_days(today(), -28),
+		)
+		create_stock_reconciliation(
+			company=company,
+			warehouse=warehouse,
+			item_code=item,
+			qty=55,
+			rate=10,
+			use_serial_batch_fields=1,
+			batch_no=second_batch,
+			posting_date=add_days(today(), -20),
+		)
+
+		def closing_balance():
+			return frappe.get_all(
+				"Stock Ledger Entry",
+				filters={"item_code": item, "warehouse": warehouse, "is_cancelled": 0},
+				fields=["qty_after_transaction"],
+				order_by="posting_datetime desc, creation desc",
+				limit=1,
+			)[0].qty_after_transaction
+
+		balance_before = closing_balance()
+		create_landed_cost_voucher("Purchase Receipt", receipt.name, company)
+
+		self.assertEqual(closing_balance(), balance_before)
+
 
 def make_landed_cost_voucher(**args):
 	args = frappe._dict(args)
