@@ -94,10 +94,15 @@ frappe.query_reports["Accounts Payable"] = {
 			options: get_party_type_options(),
 			on_change: function () {
 				frappe.query_report.set_filter_value("party", "");
-				frappe.query_report.toggle_filter_display(
-					"supplier_group",
-					frappe.query_report.get_filter_value("party_type") !== "Supplier"
-				);
+				let is_supplier = frappe.query_report.get_filter_value("party_type") === "Supplier";
+				let supplier_group_filter = frappe.query_report.get_filter("supplier_group");
+				if (supplier_group_filter) {
+					supplier_group_filter.df.hidden = !is_supplier;
+				}
+				frappe.query_report.toggle_filter_display("supplier_group", !is_supplier);
+				if (!is_supplier) {
+					frappe.query_report.set_filter_value("supplier_group", []);
+				}
 			},
 		},
 		{
