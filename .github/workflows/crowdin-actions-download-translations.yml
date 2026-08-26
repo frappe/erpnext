@@ -35,7 +35,7 @@ jobs:
           upload_sources: false
           upload_translations: false
           download_translations: true
-          crowdin_branch_name: ${{ matrix.branch }}
+          crowdin_branch_name: "[frappe.erpnext] ${{ matrix.branch }}"
           skip_ref_checkout: true
           localization_branch_name: l10n_crowdin_${{ matrix.branch }}
           create_pull_request: true
