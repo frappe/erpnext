@@ -26,10 +26,9 @@ class ValidationIssue:
 			self.details = {}
 
 	def __str__(self) -> str:
-		prefix = f"Row {self.row_idx}: " if self.row_idx else ""
-		field_info = f"[{self.field}] " if self.field else ""
-		message = f"{prefix}{field_info}{self.message}"
-		return _(message)
+		prefix = _("Row {0}: ").format(self.row_idx) if self.row_idx else ""
+		field_info = _("[{0}] ").format(self.field) if self.field else ""
+		return f"{prefix}{field_info}{self.message}"
 
 
 @dataclass
@@ -131,7 +130,9 @@ class TemplateStructureValidator(Validator):
 			if not re.match(r"^[A-Za-z][A-Za-z0-9_-]*$", ref_code):
 				result.add_error(
 					ValidationIssue(
-						message=f"Invalid line reference format: '{ref_code}'. Must start with letter and contain only letters, numbers, underscores, and hyphens",
+						message=_(
+							"Invalid line reference format: '{0}'. Must start with letter and contain only letters, numbers, underscores, and hyphens"
+						).format(ref_code),
 						row_idx=row.idx,
 					)
 				)
@@ -140,7 +141,7 @@ class TemplateStructureValidator(Validator):
 			if ref_code in used_codes:
 				result.add_error(
 					ValidationIssue(
-						message=f"Duplicate line reference: '{ref_code}'",
+						message=_("Duplicate line reference: '{0}'").format(ref_code),
 						row_idx=row.idx,
 					)
 				)
@@ -156,7 +157,7 @@ class TemplateStructureValidator(Validator):
 			if row.data_source == "Account Data" and not row.balance_type:
 				result.add_error(
 					ValidationIssue(
-						message="Balance Type is required for Account Data",
+						message=_("Balance Type is required for Account Data"),
 						row_idx=row.idx,
 					)
 				)
@@ -166,7 +167,7 @@ class TemplateStructureValidator(Validator):
 				if not row.calculation_formula:
 					result.add_error(
 						ValidationIssue(
-							message=f"Formula is required for {row.data_source}",
+							message=_("Formula is required for {0}").format(row.data_source),
 							row_idx=row.idx,
 						)
 					)
@@ -223,7 +224,7 @@ class DependencyValidator(Validator):
 				cycle = [*path[cycle_start:], node]
 				result.add_error(
 					ValidationIssue(
-						message=f"Circular dependency detected: {' → '.join(cycle)}",
+						message=_("Circular dependency detected: {0}").format(" → ".join(cycle)),
 					)
 				)
 				return
@@ -255,7 +256,7 @@ class DependencyValidator(Validator):
 				row_idx = self._get_row_idx(ref_code)
 				result.add_error(
 					ValidationIssue(
-						message=f"Line References undefined in Formula: {', '.join(undefined)}",
+						message=_("Line References undefined in Formula: {0}").format(", ".join(undefined)),
 						row_idx=row_idx,
 					)
 				)
@@ -285,9 +286,9 @@ class CalculationFormulaValidator(Validator):
 		if not row.calculation_formula:
 			result.add_error(
 				ValidationIssue(
-					message="Formula is required for Calculated Amount",
+					message=_("Formula is required for Calculated Amount"),
 					row_idx=row.idx,
-					field="Formula",
+					field=_("Formula"),
 				)
 			)
 			return result
@@ -299,7 +300,7 @@ class CalculationFormulaValidator(Validator):
 		if not self._are_parentheses_balanced(formula):
 			result.add_error(
 				ValidationIssue(
-					message="Formula has unbalanced parentheses",
+					message=_("Formula has unbalanced parentheses"),
 					row_idx=row.idx,
 				)
 			)
@@ -311,7 +312,7 @@ class CalculationFormulaValidator(Validator):
 		if row.reference_code and row.reference_code in refs:
 			result.add_error(
 				ValidationIssue(
-					message=f"Formula references itself ('{row.reference_code}')",
+					message=_("Formula references itself ('{0}')").format(row.reference_code),
 					row_idx=row.idx,
 				)
 			)
@@ -321,7 +322,7 @@ class CalculationFormulaValidator(Validator):
 		if undefined:
 			result.add_error(
 				ValidationIssue(
-					message=f"Formula references undefined codes: {', '.join(undefined)}",
+					message=_("Formula references undefined codes: {0}").format(", ".join(undefined)),
 					row_idx=row.idx,
 				)
 			)
@@ -331,7 +332,7 @@ class CalculationFormulaValidator(Validator):
 		if eval_error:
 			result.add_error(
 				ValidationIssue(
-					message=f"Formula evaluation error: {eval_error}",
+					message=_("Formula evaluation error: {0}").format(eval_error),
 					row_idx=row.idx,
 				)
 			)
@@ -368,7 +369,7 @@ class CalculationFormulaValidator(Validator):
 			result = frappe.safe_eval(formula, eval_globals=None, eval_locals=context)
 
 			if not isinstance(result, (int, float)):  # noqa: UP038
-				return f"Formula must return a numeric value, got {type(result).__name__}"
+				return _("Formula must return a numeric value, got {0}").format(type(result).__name__)
 
 			return None
 		except Exception as e:
@@ -391,9 +392,9 @@ class AccountFilterValidator(Validator):
 		if not row.calculation_formula:
 			result.add_error(
 				ValidationIssue(
-					message="Account filter is required for Account Data",
+					message=_("Account filter is required for Account Data"),
 					row_idx=row.idx,
-					field="Formula",
+					field=_("Formula"),
 				)
 			)
 			return result
@@ -411,16 +412,16 @@ class AccountFilterValidator(Validator):
 					ValidationIssue(
 						message=error,
 						row_idx=row.idx,
-						field="Account Filter",
+						field=_("Account Filter"),
 					)
 				)
 
 		except json.JSONDecodeError as e:
 			result.add_error(
 				ValidationIssue(
-					message=f"Invalid JSON format: {e!s}",
+					message=_("Invalid JSON format: {0}").format(e),
 					row_idx=row.idx,
-					field="Account Filter",
+					field=_("Account Filter"),
 				)
 			)
 
@@ -435,38 +436,38 @@ class AccountFilterValidator(Validator):
 		# simple condition: [field, operator, value]
 		if isinstance(filter_config, list):
 			if len(filter_config) != 3:
-				return "Filter must be [field, operator, value]"
+				return _("Filter must be [field, operator, value]")
 
 			field, operator, value = filter_config
 
 			if not isinstance(field, str) or not isinstance(operator, str):
-				return "Field and operator must be strings"
+				return _("Field and operator must be strings")
 
 			display = (
 				field if advanced_filtering else self.account_meta.get_translated_label(field)
 			) or field
 
 			if field not in account_fields:
-				return f"Field '{display}' is not a valid Account field"
+				return _("Field '{0}' is not a valid Account field").format(display)
 
 			if operator.casefold() not in OPERATOR_MAP:
-				return f"Invalid operator '{operator}'"
+				return _("Invalid operator '{0}'").format(operator)
 
 			if operator in ["in", "not in"] and not isinstance(value, list):
-				return f"Operator '{operator}' requires a list value"
+				return _("Operator '{0}' requires a list value").format(operator)
 
 		# logical condition: {"and": [condition1, condition2]}
 		elif isinstance(filter_config, dict):
 			if len(filter_config) != 1:
-				return "Logical condition must have exactly one operator"
+				return _("Logical condition must have exactly one operator")
 
 			op = next(iter(filter_config.keys())).lower()
 			if op not in ["and", "or"]:
-				return "Logical operators must be 'and' or 'or'"
+				return _("Logical operators must be 'and' or 'or'")
 
 			conditions = filter_config[next(iter(filter_config.keys()))]
 			if not isinstance(conditions, list) or len(conditions) < 1:
-				return "Logical conditions need at least 1 sub-condition"
+				return _("Logical conditions need at least 1 sub-condition")
 
 			# recursive
 			for condition in conditions:
@@ -474,7 +475,7 @@ class AccountFilterValidator(Validator):
 				if error:
 					return error
 		else:
-			return "Filter must be a list or dict"
+			return _("Filter must be a list or dict")
 
 		return None
 
@@ -510,9 +511,9 @@ class FormulaValidator(Validator):
 		if "." not in api_path:
 			result.add_error(
 				ValidationIssue(
-					message="Custom API path should be in format: app.module.method",
+					message=_("Custom API path should be in format: app.module.method"),
 					row_idx=row.idx,
-					field="Formula",
+					field=_("Formula"),
 				)
 			)
 			return result
@@ -525,17 +526,19 @@ class FormulaValidator(Validator):
 			if not hasattr(module, method_name):
 				result.add_error(
 					ValidationIssue(
-						message=f"Method '{method_name}' not found in module '{module_path}' (might be environment-specific)",
+						message=_(
+							"Method '{0}' not found in module '{1}' (might be environment-specific)"
+						).format(method_name, module_path),
 						row_idx=row.idx,
-						field="Formula",
+						field=_("Formula"),
 					)
 				)
 		except Exception as e:
 			result.add_error(
 				ValidationIssue(
-					message=f"Could not validate API path: {e!s}",
+					message=_("Could not validate API path: {0}").format(e),
 					row_idx=row.idx,
-					field="Formula",
+					field=_("Formula"),
 				)
 			)
 
