@@ -59,9 +59,13 @@ LOCKED_RATE_FIELDS = [
 NOT_APPLICABLE_TAX = "N/A"
 
 
-
 @frappe.whitelist()
-def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=True):
+def get_item_details(
+	args: dict | str,
+	doc: dict | str | None = None,
+	for_validate: bool | str = False,
+	overwrite_warehouse: bool | str = True,
+):
 	"""
 	args = {
 	        "item_code": "",
@@ -213,13 +217,13 @@ def get_rate_locked_source_row(args, doc):
 	return None
 
 
-def maintain_same_rate_enabled(args):
-	if (args.parenttype or args.doctype) in purchase_doctypes:
-		if args.get("is_internal_supplier"):
+def maintain_same_rate_enabled(transaction_args):
+	if (transaction_args.parenttype or transaction_args.doctype) in purchase_doctypes:
+		if transaction_args.get("is_internal_supplier"):
 			return False
 		return bool(cint(frappe.get_cached_value("Buying Settings", "None", "maintain_same_rate")))
 
-	if args.get("is_internal_customer"):
+	if transaction_args.get("is_internal_customer"):
 		return False
 	return bool(cint(frappe.get_cached_value("Selling Settings", "None", "maintain_same_sales_rate")))
 
