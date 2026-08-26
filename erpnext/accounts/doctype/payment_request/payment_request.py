@@ -710,7 +710,7 @@ def make_payment_request(**args):
 		if not party_account_currency:
 			party_account = get_party_account(party_type, ref_doc.get(party_type.lower()), ref_doc.company)
 			party_account_currency = get_account_currency(party_account)
-
+		is_a_subscription = 1 if ref_doc.get("subscription") else 0
 		pr.update(
 			{
 				"payment_gateway_account": gateway_account.get("name"),
@@ -742,12 +742,25 @@ def make_payment_request(**args):
 					or gateway_account.get("payment_channel", "Email") != "Email"
 				),
 				"phone_number": args.get("phone_number") if args.get("phone_number") else None,
+				"is_a_subscription": is_a_subscription,
 			}
 		)
 
 		if selected_payment_schedules:
 			apply_payment_references(pr, payment_reference)
+		if is_a_subscription:
+			values = get_subscription_details(ref_doc.doctype, ref_doc.name)
 
+			pr.set(
+				"subscription_plans",
+				[
+					{
+						"plan": row.plan,
+						"qty": row.qty,
+					}
+					for row in values
+				],
+			)
 		# Dimensions
 		pr.update(
 			{
@@ -1061,6 +1074,7 @@ def get_dummy_message(doc):
 
 
 @frappe.whitelist()
+<<<<<<< HEAD
 def get_subscription_details(reference_doctype, reference_name):
 	if reference_doctype == "Sales Invoice":
 		subscriptions = frappe.db.sql(
@@ -1074,6 +1088,27 @@ def get_subscription_details(reference_doctype, reference_name):
 			for plan in plans:
 				subscription_plans.append(plan)
 		return subscription_plans
+=======
+def get_subscription_details(reference_doctype: str, reference_name: str):
+	if reference_doctype != "Sales Invoice":
+		return []
+
+	subscription = frappe.db.get_value("Sales Invoice", reference_name, "subscription")
+
+	if not subscription:
+		return []
+
+	subscription_plan = frappe.get_all(
+		"Subscription Plan Detail",
+		filters={"parent": subscription, "parenttype": "Subscription", "parentfield": "plans"},
+		fields=[
+			"plan",
+			"qty",
+		],
+	)
+
+	return subscription_plan
+>>>>>>> 1b81db4 (fix/payment-request-subscription-plans-population (#57494))
 
 
 @frappe.whitelist()
