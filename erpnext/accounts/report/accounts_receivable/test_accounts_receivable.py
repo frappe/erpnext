@@ -1339,6 +1339,28 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 		row = report[1][0]
 		self.assertEqual(expected_data_after_payment, [row.voucher_no, row.cost_center, row.outstanding])
 
+	def test_cost_center_on_payment_before_invoice(self):
+		filters = {
+			"company": self.company,
+			"party_type": "Customer",
+			"party": [self.customer],
+			"report_date": today(),
+			"range": "30, 60, 90, 120",
+		}
+
+		si = self.create_sales_invoice(no_payment_schedule=True, do_not_submit=True)
+		si.posting_date = add_days(today(), 1)
+		si.due_date = si.posting_date
+		si.payment_schedule[0].due_date = si.posting_date
+		si.save().submit()
+
+		pe = self.create_payment_entry(si.name, do_not_submit=True)
+		pe.cost_center = self.cost_center
+		pe.save().submit()
+
+		row = next(row for row in execute(filters)[1] if row.voucher_no == pe.name)
+		self.assertEqual(row.cost_center, pe.cost_center)
+
 	def test_payment_terms_template_filters(self):
 		from erpnext.controllers.accounts_controller import get_payment_terms
 
