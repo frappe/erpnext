@@ -434,6 +434,7 @@ class StockController(AccountsController):
 		voucher_detail_no=None,
 		item=None,
 		posting_date=None,
+		dimensions=None,
 	):
 		from erpnext.accounts.services.base_gl_composer import add_gl_entry
 
@@ -453,6 +454,7 @@ class StockController(AccountsController):
 			voucher_detail_no,
 			item,
 			posting_date,
+			dimensions,
 		)
 
 	def update_stock_reservation_entries(self):
