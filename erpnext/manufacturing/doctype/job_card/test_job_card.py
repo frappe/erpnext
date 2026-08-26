@@ -340,6 +340,43 @@ class TestJobCard(ERPNextTestSuite):
 		job_card.reload()
 		self.assertEqual(job_card.transferred_qty, 2)
 
+	def test_material_request_stock_entry_uses_incremental_job_card_coverage(self):
+		from erpnext.stock.doctype.material_request.mapper import make_stock_entry
+
+		self.transfer_material_against = "Job Card"
+		self.source_warehouse = "Stores - _TC"
+		job_card_name = frappe.db.get_value("Job Card", {"work_order": self.work_order.name})
+		job_card = frappe.get_doc("Job Card", job_card_name)
+		self.assertEqual(len(job_card.items), 2)
+
+		mr = make_material_request(job_card.name)
+		mr.schedule_date = today()
+		mr.submit()
+
+		completed_row, limiting_row = mr.items
+		frappe.db.set_value(
+			"Job Card Item", completed_row.job_card_item, "transferred_qty", completed_row.stock_qty
+		)
+		frappe.db.set_value(
+			"Job Card Item",
+			limiting_row.job_card_item,
+			"transferred_qty",
+			flt(limiting_row.stock_qty) / 2,
+		)
+		frappe.db.set_value(completed_row.doctype, completed_row.name, "ordered_qty", completed_row.stock_qty)
+		frappe.db.set_value(
+			limiting_row.doctype,
+			limiting_row.name,
+			"ordered_qty",
+			flt(limiting_row.stock_qty) / 2,
+		)
+		mr.reload()
+
+		stock_entry = make_stock_entry(mr.name)
+		self.assertEqual(len(stock_entry.items), 1)
+		self.assertEqual(stock_entry.items[0].job_card_item, limiting_row.job_card_item)
+		self.assertEqual(stock_entry.fg_completed_qty, job_card.for_quantity / 2)
+
 	def test_job_card_partial_material_transfer_qty(self):
 		self.transfer_material_against = "Job Card"
 		self.source_warehouse = "Stores - _TC"
@@ -1006,6 +1043,7 @@ class TestJobCard(ERPNextTestSuite):
 		work_order = make_wo_with_transfer_against_jc()
 
 		job_card_name = frappe.db.get_value("Job Card", {"work_order": work_order.name}, "name")
+		for_quantity = frappe.get_value("Job Card", job_card_name, "for_quantity")
 
 		mr = make_material_request(job_card_name)
 		mr.schedule_date = today()
@@ -1017,6 +1055,32 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertEqual(ste.job_card, job_card_name)
 		self.assertEqual(ste.from_bom, 1.0)
 		self.assertEqual(ste.bom_no, work_order.bom_no)
+		self.assertEqual(ste.fg_completed_qty, for_quantity)
+
+		partial_work_order = make_wo_with_transfer_against_jc()
+		partial_job_card_name = frappe.db.get_value(
+			"Job Card", {"work_order": partial_work_order.name}, "name"
+		)
+		partial_for_quantity = frappe.get_value("Job Card", partial_job_card_name, "for_quantity")
+
+		partial_mr = make_material_request(partial_job_card_name)
+		partial_mr.schedule_date = today()
+		partial_mr.set_from_warehouse = partial_work_order.source_warehouse
+		for row in partial_mr.items:
+			row.from_warehouse = partial_work_order.source_warehouse
+			row.qty = flt(row.qty) / 2
+			row.stock_qty = flt(row.stock_qty) / 2
+		partial_mr.submit()
+
+		partial_ste = make_stock_entry(partial_mr.name)
+		self.assertEqual(partial_ste.fg_completed_qty, partial_for_quantity / 2)
+
+		for row in partial_mr.items:
+			frappe.db.set_value(row.doctype, row.name, "ordered_qty", flt(row.stock_qty) / 2)
+		partial_mr.reload()
+
+		repeated_ste = make_stock_entry(partial_mr.name)
+		self.assertEqual(repeated_ste.fg_completed_qty, partial_for_quantity / 4)
 
 	def test_job_card_material_transfer_via_pick_list(self):
 		from erpnext.stock.doctype.material_request.mapper import create_pick_list
