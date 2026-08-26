@@ -1554,6 +1554,53 @@ class TestStockEntry(ERPNextTestSuite):
 		manual_row.basic_rate = 600
 		self.assertRaises(frappe.ValidationError, entry.save)
 
+	def test_repack_entry_with_valuation_rate_secondary_item(self):
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		scrap_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 50}).name
+
+		make_stock_entry(item_code=rm_item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+
+		bom_doc = frappe.new_doc("BOM")
+		bom_doc.item = fg_item
+		bom_doc.quantity = 1
+		bom_doc.company = "_Test Company"
+		bom_doc.currency = "INR"
+		bom_doc.append("items", {"item_code": rm_item, "qty": 10, "rate": 100.0})
+		bom_doc.append(
+			"secondary_items",
+			{
+				"item_code": scrap_item,
+				"secondary_item_type": "Scrap",
+				"qty": 2,
+				"valuation_method": "Valuation Rate",
+			},
+		)
+		bom_doc.save()
+		bom_doc.submit()
+
+		entry = frappe.new_doc("Stock Entry")
+		entry.company = "_Test Company"
+		entry.purpose = "Repack"
+		entry.set_stock_entry_type()
+		entry.from_bom = 1
+		entry.bom_no = bom_doc.name
+		entry.fg_completed_qty = 1
+		entry.from_warehouse = "_Test Warehouse - _TC"
+		entry.to_warehouse = "_Test Warehouse 1 - _TC"
+		entry.get_items()
+		entry.insert()
+
+		# the repacked good absorbs the consumed cost net of the own-cost rows
+		scrap_row = next(d for d in entry.items if d.valuation_method == "Valuation Rate")
+		self.assertEqual(scrap_row.basic_amount, 100)
+		fg_row = next(d for d in entry.items if d.is_finished_item)
+		self.assertEqual(fg_row.basic_amount, 900)
+
+		outgoing = sum(d.basic_amount for d in entry.items if d.s_warehouse)
+		incoming = sum(d.basic_amount for d in entry.items if not d.s_warehouse)
+		self.assertEqual(incoming, outgoing)
+
 	def test_valuation_rate_lookup_without_voucher_no(self):
 		from erpnext.stock.stock_ledger import get_valuation_rate
 
