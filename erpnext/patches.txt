@@ -489,7 +489,11 @@ erpnext.patches.v16_0.remove_mandatory_from_inv_dimension_fields
 erpnext.patches.v15_0.backfill_sla_link_filters_on_custom_field
 erpnext.patches.v15_0.backfill_sla_link_filters_on_docfield
 erpnext.patches.v16_0.crm_settings_handle_allowed_users_for_frappe_crm
+<<<<<<< HEAD
 erpnext.patches.v16_0.backfill_pick_list_transferred_qty
+=======
+erpnext.patches.v16_0.create_accounting_dimensions_in_landed_cost_taxes_and_charges
+>>>>>>> 918e5a2 (fix(stock): carry accounting dimensions from Landed Cost Voucher char… (#56981))
 erpnext.patches.v16_0.access_control_for_project_users
 erpnext.patches.v16_0.enable_book_stock_expense_gl_entries
 erpnext.patches.v16_0.rename_ar_ap_ageing_filter

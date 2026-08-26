@@ -1978,6 +1978,7 @@ class StockController(AccountsController):
 		voucher_detail_no=None,
 		item=None,
 		posting_date=None,
+		dimensions=None,
 	):
 		gl_entry = {
 			"account": account,
@@ -1988,6 +1989,7 @@ class StockController(AccountsController):
 			"remarks": remarks,
 		}
 
+<<<<<<< HEAD
 		if project:
 			gl_entry.update({"project": project})
 
@@ -2004,6 +2006,26 @@ class StockController(AccountsController):
 			gl_entry.update({"posting_date": posting_date})
 
 		gl_entries.append(self.get_gl_dict(gl_entry, item=item))
+=======
+		add_gl_entry(
+			self,
+			gl_entries,
+			account,
+			cost_center,
+			debit,
+			credit,
+			remarks,
+			against_account,
+			debit_in_account_currency,
+			credit_in_account_currency,
+			account_currency,
+			project,
+			voucher_detail_no,
+			item,
+			posting_date,
+			dimensions,
+		)
+>>>>>>> 918e5a2 (fix(stock): carry accounting dimensions from Landed Cost Voucher char… (#56981))
 
 	def update_stock_reservation_entries(self):
 		def get_sre_list():
