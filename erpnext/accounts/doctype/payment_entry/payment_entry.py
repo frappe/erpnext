@@ -1118,8 +1118,14 @@ class PaymentEntry(AccountsController):
 			)
 
 	def set_exchange_gain_loss(self):
+		other_deductions = 0
+		if self.payment_type == "Internal Transfer":
+			other_deductions = sum(
+				flt(row.amount) for row in self.get("deductions") if not row.is_exchange_gain_loss
+			)
+
 		exchange_gain_loss = flt(
-			self.base_paid_amount - self.base_received_amount,
+			self.base_paid_amount - self.base_received_amount - other_deductions,
 			self.precision("amount", "deductions"),
 		)
 
