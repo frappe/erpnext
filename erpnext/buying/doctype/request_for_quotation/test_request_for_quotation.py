@@ -200,6 +200,18 @@ class TestRequestforQuotation(ERPNextTestSuite):
 		self.assertEqual(supplier_quotation_doc.get("items")[0].qty, 5)
 		self.assertEqual(supplier_quotation_doc.get("items")[0].amount, 500)
 
+	def test_make_duplicate_supplier_quotation_from_portal(self):
+		rfq = make_request_for_quotation()
+		rfq.supplier = rfq.suppliers[0].supplier
+		supplier_quotation = frappe.get_doc("Supplier Quotation", create_supplier_quotation(rfq))
+		supplier_quotation.submit()
+
+		with self.assertRaisesRegex(frappe.ValidationError, "already exists"):
+			create_supplier_quotation(rfq)
+
+		supplier_quotation.cancel()
+		self.assertTrue(create_supplier_quotation(rfq))
+
 	def test_make_multi_uom_supplier_quotation(self):
 		item_code = "_Test Multi UOM RFQ Item"
 		if not frappe.db.exists("Item", item_code):

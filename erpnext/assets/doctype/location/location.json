@@ -143,7 +143,7 @@
  ],
  "is_tree": 1,
  "links": [],
- "modified": "2025-04-29 13:53:13.488906",
+ "modified": "2026-08-21 23:11:43.994913",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Location",
@@ -198,6 +198,10 @@
    "role": "Stock Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "role": "Quality Manager",
+   "select": 1
   }
  ],
  "quick_entry": 1,

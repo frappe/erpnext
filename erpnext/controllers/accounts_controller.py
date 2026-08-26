@@ -524,7 +524,7 @@ class AccountsController(TransactionBase):
 					_(
 						"Please set {0} to {1}, the same account that was used in the original invoice {2}."
 					).format(
-						frappe.bold(_(self.meta.get_label(cr_dr_account_field), context=self.doctype)),
+						frappe.bold(self.meta.get_translated_label(cr_dr_account_field)),
 						frappe.bold(original_account),
 						frappe.bold(self.return_against),
 					)
@@ -535,6 +535,8 @@ class AccountsController(TransactionBase):
 			frappe.throw(_("To Date cannot be before From Date"), title=_("Invalid Auto Repeat Date"))
 
 	def before_print(self, settings=None):
+		self.set_missing_terms()
+
 		if self.doctype in [
 			"Purchase Order",
 			"Sales Order",
@@ -557,6 +559,16 @@ class AccountsController(TransactionBase):
 
 		set_print_templates_for_item_table(self, settings)
 		set_print_templates_for_taxes(self, settings)
+
+	def set_missing_terms(self):
+		if not self.get("tc_name") or self.get("terms"):
+			return
+
+		from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import (
+			get_terms_and_conditions,
+		)
+
+		self.terms = get_terms_and_conditions(self.tc_name, self.as_dict())
 
 	def calculate_paid_amount(self):
 		if hasattr(self, "is_pos") or hasattr(self, "is_paid"):

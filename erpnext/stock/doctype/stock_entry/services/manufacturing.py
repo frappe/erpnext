@@ -862,6 +862,9 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 
 		secondary_items = self.get_secondary_items_from_job_card()
 		for row in secondary_items:
+			if row.stock_qty <= 0:
+				continue
+
 			row.uom = row.uom or row.stock_uom
 			row.qty = ceil_qty_if_uom_has_whole_number(row.stock_qty, row.stock_uom)
 			row.transfer_qty = row.qty
@@ -888,33 +891,38 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 
 	def _adjust_secondary_item_qtys(self, secondary_items, used_secondary_items, pending_qty):
 		for row in secondary_items:
-			row.stock_qty -= flt(used_secondary_items.get(row.item_code))
+			key = (row.item_code, row.secondary_item_type or "")
+			row.stock_qty -= flt(used_secondary_items.get(key))
 			row.stock_qty = row.stock_qty * flt(self.doc.fg_completed_qty) / flt(pending_qty)
-			if used_secondary_items.get(row.item_code):
-				used_secondary_items[row.item_code] -= row.stock_qty
 
 	def get_used_secondary_items(self):
 		data = self._query_used_secondary_items()
 		used_secondary_items = defaultdict(float)
 		for row in data:
-			used_secondary_items[row.item_code] += row.qty
+			secondary_item_type = row.secondary_item_type or ("Scrap" if row.is_legacy_scrap_item else "")
+			key = (row.item_code, secondary_item_type)
+			used_secondary_items[key] += row.qty
 		return used_secondary_items
 
 	def _query_used_secondary_items(self):
 		se = frappe.qb.DocType("Stock Entry")
 		sed = frappe.qb.DocType("Stock Entry Detail")
-		return (
+		query = (
 			frappe.qb.from_(se)
 			.inner_join(sed)
 			.on(sed.parent == se.name)
-			.select(sed.item_code, sed.qty)
+			.select(sed.item_code, sed.secondary_item_type, sed.is_legacy_scrap_item, sed.qty)
 			.where(
 				(se.work_order == self.doc.work_order)
 				& ((sed.secondary_item_type.isnotnull()) | (sed.is_legacy_scrap_item == 1))
 				& (se.docstatus == 1)
 				& (se.purpose.isin(["Repack", "Manufacture"]))
 			)
-		).run(as_dict=1)
+		)
+		if self.doc.job_card:
+			query = query.where(se.job_card == self.doc.job_card)
+
+		return query.run(as_dict=1)
 
 	def get_completed_job_card_qty(self):
 		return flt(min([d.completed_qty for d in self.wo_doc.operations]))

@@ -944,6 +944,33 @@ class TestMaterialRequest(ERPNextTestSuite):
 		for perm in permissions:
 			perm.delete()
 
+	def test_auto_email_single_company_without_user_permission(self):
+		from unittest.mock import patch
+
+		from erpnext.stock.reorder_item import get_email_list
+
+		users = ["test_reorder_single_1@example.com", "test_reorder_single_2@example.com"]
+		for user in users:
+			if not frappe.db.exists("User", user):
+				frappe.get_doc(
+					{
+						"doctype": "User",
+						"email": user,
+						"first_name": user,
+						"send_notifications": 0,
+						"enabled": 1,
+						"user_type": "System User",
+						"roles": [{"role": "Purchase Manager"}],
+					}
+				).insert(ignore_permissions=True)
+
+		# single company: managers without any Company User Permission must still be emailed
+		with patch("frappe.db.count", return_value=1):
+			emails = get_email_list("_Test Company")
+
+		for user in users:
+			self.assertIn(user, emails)
+
 	def test_manufacture_type_status_over_wo(self):
 		from erpnext.stock.doctype.material_request.material_request import raise_work_orders
 

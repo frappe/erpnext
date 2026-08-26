@@ -84,18 +84,10 @@ class BuyingController(SubcontractingController):
 				),
 			)
 
-		if (
-			self.get("company")
-			and (
-				default_buying_terms := frappe.get_value(
-					"Company", self.get("company"), "default_buying_terms"
-				)
-			)
-			and not self.get("tc_name")
-			and not self.get("terms")
-		):
-			self.tc_name = default_buying_terms
-			self.terms = frappe.get_value("Terms and Conditions", self.get("tc_name"), "terms")
+		if self.get("company") and not self.get("terms"):
+			if not self.get("tc_name"):
+				self.tc_name = frappe.get_value("Company", self.company, "default_buying_terms")
+			self.set_missing_terms()
 
 	def validate_posting_date_with_po(self):
 		po_list = {x.purchase_order for x in self.items if x.purchase_order}
@@ -304,8 +296,8 @@ class BuyingController(SubcontractingController):
 				frappe.throw(
 					_("Row #{idx}: {from_warehouse_field} and {to_warehouse_field} cannot be same.").format(
 						idx=item.idx,
-						from_warehouse_field=_(item.meta.get_label("from_warehouse")),
-						to_warehouse_field=_(item.meta.get_label("warehouse")),
+						from_warehouse_field=item.meta.get_translated_label("from_warehouse"),
+						to_warehouse_field=item.meta.get_translated_label("warehouse"),
 					)
 				)
 
@@ -710,7 +702,7 @@ class BuyingController(SubcontractingController):
 					frappe.throw(
 						_("Row #{idx}: {field_label} is mandatory.").format(
 							idx=d.idx,
-							field_label=_(d.meta.get_label("conversion_factor")),
+							field_label=d.meta.get_translated_label("conversion_factor"),
 						)
 					)
 				d.stock_qty = flt(d.qty) * flt(d.conversion_factor)
@@ -757,7 +749,7 @@ class BuyingController(SubcontractingController):
 				frappe.throw(
 					_("Row #{idx}: {field_label} can not be negative for item {item_code}.").format(
 						idx=item_row["idx"],
-						field_label=_(frappe.get_meta(item_row.doctype).get_label(fieldname)),
+						field_label=frappe.get_meta(item_row.doctype).get_translated_label(fieldname),
 						item_code=frappe.bold(item_row["item_code"]),
 					)
 				)
@@ -1210,14 +1202,14 @@ class BuyingController(SubcontractingController):
 					frappe.throw(
 						_("Row #{idx}: {schedule_date} cannot be before {transaction_date}.").format(
 							idx=d.idx,
-							schedule_date=_(self.meta.get_label("schedule_date")),
-							transaction_date=_(self.meta.get_label("transaction_date")),
+							schedule_date=self.meta.get_translated_label("schedule_date"),
+							transaction_date=self.meta.get_translated_label("transaction_date"),
 						)
 					)
 		else:
 			frappe.throw(
 				_("Please enter the {schedule_date}.").format(
-					schedule_date=_(self.meta.get_label("schedule_date"))
+					schedule_date=self.meta.get_translated_label("schedule_date")
 				)
 			)
 

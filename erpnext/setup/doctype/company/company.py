@@ -323,7 +323,7 @@ class Company(NestedSet):
 			if not details:
 				continue
 
-			label = _(self.meta.get_label(fieldname))
+			label = self.meta.get_translated_label(fieldname)
 
 			if details.is_group:
 				frappe.throw(

@@ -327,8 +327,8 @@ class TestJobCard(ERPNextTestSuite):
 
 		job_card.reload()
 
-		self.assertEqual(transfer_entry_1.fg_completed_qty, 2)
-		self.assertEqual(job_card.transferred_qty, 2)
+		self.assertEqual(transfer_entry_1.fg_completed_qty, 0)
+		self.assertEqual(job_card.transferred_qty, 0)
 
 		# transfer second RM
 		transfer_entry_2 = make_stock_entry_from_jc(job_card_name)
@@ -336,9 +336,24 @@ class TestJobCard(ERPNextTestSuite):
 		transfer_entry_2.insert()
 		transfer_entry_2.submit()
 
-		# 'For Quantity' here will be 0 since
-		# transfer was made for 2 fg qty in first transfer Stock Entry
-		self.assertEqual(transfer_entry_2.fg_completed_qty, 0)
+		self.assertEqual(transfer_entry_2.fg_completed_qty, 2)
+		job_card.reload()
+		self.assertEqual(job_card.transferred_qty, 2)
+
+	def test_job_card_partial_material_transfer_qty(self):
+		self.transfer_material_against = "Job Card"
+		self.source_warehouse = "Stores - _TC"
+		self.generate_required_stock(self.work_order)
+
+		job_card = frappe.get_last_doc("Job Card", {"work_order": self.work_order.name})
+		transfer_entry = make_stock_entry_from_jc(job_card.name)
+		for row in transfer_entry.items:
+			row.qty /= 2
+		transfer_entry.submit()
+
+		job_card.reload()
+		self.assertEqual(transfer_entry.fg_completed_qty, 1)
+		self.assertEqual(job_card.transferred_qty, 1)
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"job_card_excess_transfer": 1})
 	def test_job_card_excess_material_transfer(self):
@@ -1507,15 +1522,14 @@ class TestJobCard(ERPNextTestSuite):
 			return bom
 
 		rm1 = create_item("RM 1")
-		scrap1 = create_item("Scrap 1")
+		shared_scrap = create_item("Shared Scrap")
 		sfg = create_item("SFG 1")
-		sfg_bom = create_bom(rm1.name, sfg.name, scrap1.name)
+		sfg_bom = create_bom(rm1.name, sfg.name, shared_scrap.name)
 
 		rm2 = create_item("RM 2")
 		fg1 = create_item("FG 1")
-		scrap2 = create_item("Scrap 2")
 		scrap_extra = create_item("Scrap Extra")
-		fg_bom = create_bom(rm2.name, fg1.name, scrap2.name, submit=False)
+		fg_bom = create_bom(rm2.name, fg1.name, shared_scrap.name, submit=False)
 		fg_bom.with_operations = 1
 		fg_bom.track_semi_finished_goods = 1
 
@@ -1596,7 +1610,7 @@ class TestJobCard(ERPNextTestSuite):
 		manufacturing_entry = frappe.get_doc(job_card.make_stock_entry_for_semi_fg_item())
 		manufacturing_entry.submit()
 
-		self.assertEqual(manufacturing_entry.items[2].item_code, scrap1.name)
+		self.assertEqual(manufacturing_entry.items[2].item_code, shared_scrap.name)
 		self.assertEqual(manufacturing_entry.items[2].qty, 9)
 		self.assertEqual(flt(manufacturing_entry.items[2].basic_rate, 3), 5.556)
 		self.assertEqual(manufacturing_entry.items[3].item_code, scrap_extra.name)
@@ -1637,7 +1651,7 @@ class TestJobCard(ERPNextTestSuite):
 		sfg_row = next(row for row in manufacturing_entry.items if row.item_code == sfg.name)
 		self.assertEqual(flt(sfg_row.basic_rate, 3), 95.0)
 
-		self.assertEqual(manufacturing_entry.items[2].item_code, scrap2.name)
+		self.assertEqual(manufacturing_entry.items[2].item_code, shared_scrap.name)
 		self.assertEqual(manufacturing_entry.items[2].qty, 9)
 		self.assertEqual(flt(manufacturing_entry.items[2].basic_rate, 3), 5.278)
 
@@ -2409,9 +2423,19 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertEqual(flt(fg_row.qty), 3.0)
 		me_b.submit()
 
-	def make_semi_fg_work_order(self, prefix, qty=5):
-		"""Two-operation semi FG work order: Op A makes the SFG from RM 1, final Op B
-		consumes it. Both operations skip material transfer; stock is pre-seeded."""
+	def test_semi_fg_job_card_transfer_keeps_completed_qty(self):
+		work_order = self.make_semi_fg_work_order("JC Transfer", skip_material_transfer=False)
+		job_card = self.get_semi_fg_job_card(work_order, "JC Transfer Op A")
+
+		transfer_entry = make_stock_entry_from_jc(job_card.name)
+		transfer_entry.submit()
+
+		job_card.reload()
+		self.assertEqual(transfer_entry.fg_completed_qty, job_card.for_quantity)
+		self.assertEqual(job_card.transferred_qty, job_card.for_quantity)
+
+	def make_semi_fg_work_order(self, prefix, qty=5, skip_material_transfer=True):
+		"""Create a two-operation semi-finished-goods Work Order with pre-seeded stock."""
 		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
 		from erpnext.stock.doctype.item.test_item import make_item
 
@@ -2444,7 +2468,7 @@ class TestJobCard(ERPNextTestSuite):
 			"time_in_mins": 60,
 			"source_warehouse": warehouse,
 			"fg_warehouse": warehouse,
-			"skip_material_transfer": 1,
+			"skip_material_transfer": skip_material_transfer,
 		}
 		operation2 = {
 			"operation": f"{prefix} Op B",
@@ -2456,7 +2480,7 @@ class TestJobCard(ERPNextTestSuite):
 			"time_in_mins": 60,
 			"source_warehouse": warehouse,
 			"fg_warehouse": warehouse,
-			"skip_material_transfer": 1,
+			"skip_material_transfer": skip_material_transfer,
 		}
 		make_workstation(operation1)
 		make_operation(operation1)
@@ -2776,6 +2800,18 @@ class TestJobCard(ERPNextTestSuite):
 
 		self.assertEqual(s.items[3].item_code, "_Test Item")
 		self.assertEqual(s.items[3].transfer_qty, 2)
+
+		frappe.db.set_value(
+			"Stock Entry Detail",
+			s.items[3].name,
+			{"secondary_item_type": None, "is_legacy_scrap_item": 1},
+		)
+
+		from erpnext.stock.doctype.stock_entry.services.manufacturing import ManufactureStockEntry
+
+		stock_entry = frappe.get_doc({"doctype": "Stock Entry", "work_order": self.work_order.name})
+		used_secondary_items = ManufactureStockEntry(stock_entry).get_used_secondary_items()
+		self.assertEqual(used_secondary_items[("_Test Item", "Scrap")], 2)
 
 	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings", {"overproduction_percentage_for_work_order": 100}

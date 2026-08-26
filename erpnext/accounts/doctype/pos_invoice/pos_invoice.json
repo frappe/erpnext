@@ -1643,7 +1643,7 @@
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-12 12:00:00.000000",
+ "modified": "2026-08-21 23:11:45.029925",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice",
@@ -1686,6 +1686,14 @@
    "permlevel": 1,
    "read": 1,
    "role": "All"
+  },
+  {
+   "role": "Sales Manager",
+   "select": 1
+  },
+  {
+   "role": "Sales User",
+   "select": 1
   }
  ],
  "row_format": "Dynamic",

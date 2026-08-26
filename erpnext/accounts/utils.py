@@ -1168,7 +1168,7 @@ def get_company_default(company: str, fieldname: str, ignore_validation: bool = 
 	if not ignore_validation and not value:
 		throw(
 			_("Please set default {0} in Company {1}").format(
-				_(frappe.get_meta("Company").get_label(fieldname)), company
+				frappe.get_meta("Company").get_translated_label(fieldname), company
 			)
 		)
 
@@ -1200,12 +1200,12 @@ def fix_total_debit_credit():
 
 
 def get_currency_precision():
-	precision = cint(frappe.db.get_default("currency_precision"))
-	if not precision:
-		number_format = frappe.db.get_default("number_format") or "#,###.##"
-		precision = get_number_format_info(number_format)[2]
+	currency_precision = frappe.db.get_default("currency_precision")
+	if currency_precision not in (None, ""):
+		return cint(currency_precision)
 
-	return precision
+	number_format = frappe.db.get_default("number_format") or "#,###.##"
+	return get_number_format_info(number_format)[2]
 
 
 def get_fraction_units(currency: str) -> int:

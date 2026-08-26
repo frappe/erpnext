@@ -136,7 +136,7 @@ class Task(NestedSet):
 				frappe.throw(
 					_("{0}'s {1} cannot be after {2}'s Expected End Date.").format(
 						get_link_to_form("Task", self.name),
-						_(self.meta.get_label(fieldname)),
+						self.meta.get_translated_label(fieldname),
 						get_link_to_form("Project", self.project),
 					),
 					frappe.exceptions.InvalidDates,
@@ -146,7 +146,7 @@ class Task(NestedSet):
 				frappe.throw(
 					_("{0}'s {1} cannot be before {2}'s Expected Start Date.").format(
 						get_link_to_form("Task", self.name),
-						_(self.meta.get_label(fieldname)),
+						self.meta.get_translated_label(fieldname),
 						get_link_to_form("Project", self.project),
 					),
 					frappe.exceptions.InvalidDates,

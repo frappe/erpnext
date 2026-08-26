@@ -370,7 +370,7 @@ class DeliveryNote(SellingController):
 			if missing_label and missing_label != "No Label":
 				errors.append(
 					_("The field {0} in row {1} is not set").format(
-						frappe.bold(_(missing_label)), frappe.bold(item.idx)
+						frappe.bold(_(missing_label, context=item.doctype)), frappe.bold(item.idx)
 					)
 				)
 
@@ -463,7 +463,6 @@ class DeliveryNote(SellingController):
 
 	def on_submit(self):
 		self.validate_packed_qty()
-		self.update_pick_list_status()
 
 		# Check for Approving Authority
 		frappe.get_cached_doc("Authorization Control").validate_approving_authority(
@@ -472,6 +471,7 @@ class DeliveryNote(SellingController):
 
 		# update delivered qty in sales order
 		self.update_prevdoc_status()
+		self.update_pick_list_status()
 		self.update_billing_status()
 
 		if not self.is_return:

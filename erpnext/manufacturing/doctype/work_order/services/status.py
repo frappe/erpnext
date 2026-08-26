@@ -203,7 +203,10 @@ class StatusService:
 		if qty > completed_qty:
 			frappe.throw(
 				_("{0} ({1}) cannot be greater than planned quantity ({2}) in Work Order {3}").format(
-					_(self.doc.meta.get_label(fieldname)), qty, completed_qty, self.doc.name
+					self.doc.meta.get_translated_label(fieldname),
+					qty,
+					completed_qty,
+					self.doc.name,
 				),
 				StockOverProductionError,
 			)

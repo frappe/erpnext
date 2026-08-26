@@ -71,6 +71,20 @@ def make_item(item_code=None, properties=None, uoms=None, barcode=None):
 	return item
 
 
+def make_uom_conversion_factor(from_uom, to_uom, value, category="Mass"):
+	for uom in (from_uom, to_uom):
+		if not frappe.db.exists("UOM", uom):
+			frappe.get_doc(doctype="UOM", uom_name=uom, category=category).insert()
+
+	return frappe.get_doc(
+		doctype="UOM Conversion Factor",
+		category=category,
+		from_uom=from_uom,
+		to_uom=to_uom,
+		value=value,
+	).insert()
+
+
 class TestItem(ERPNextTestSuite):
 	def setUp(self):
 		super().setUp()
@@ -784,18 +798,54 @@ class TestItem(ERPNextTestSuite):
 			"Test Item UOM", {"stock_uom": "Gram", "uoms": [dict(uom="Carat"), dict(uom="Kg")]}
 		)
 
-		for d in item_doc.uoms:
-			value = get_uom_conv_factor(d.uom, item_doc.stock_uom)
-			d.conversion_factor = value
-
 		self.assertEqual(item_doc.uoms[0].uom, "Carat")
 		self.assertEqual(item_doc.uoms[0].conversion_factor, 0.2)
 		self.assertEqual(item_doc.uoms[1].uom, "Kg")
 		self.assertEqual(item_doc.uoms[1].conversion_factor, 1000)
 
+	def test_item_uom_conversion_factor_overrides_global_factor(self):
+		custom_factor = 10.76
+		global_factor = get_uom_conv_factor("Square Meter", "Square Foot")
+		self.assertNotEqual(custom_factor, global_factor)
+
+		item = make_item(
+			properties={"stock_uom": "Square Foot"},
+			uoms=[{"uom": "Square Meter", "conversion_factor": custom_factor}],
+		)
+		item.reload()
+
+		conversion_factor = next(row.conversion_factor for row in item.uoms if row.uom == "Square Meter")
+		self.assertEqual(conversion_factor, custom_factor)
+
 	def test_uom_conv_intermediate(self):
 		factor = get_uom_conv_factor("Pound", "Gram")
 		self.assertAlmostEqual(factor, 453.592, 3)
+
+	def test_uom_conv_intermediate_with_shared_target(self):
+		make_uom_conversion_factor("_Test 3 Kg Bag", "Kg", 3)
+		make_uom_conversion_factor("_Test 25 Kg Bag", "Kg", 25)
+
+		factor = get_uom_conv_factor("_Test 3 Kg Bag", "_Test 25 Kg Bag")
+
+		self.assertEqual(factor, 0.12)
+
+	def test_uom_conv_intermediate_with_shared_target_is_deterministic(self):
+		make_uom_conversion_factor("_Test 3 Kg Bag", "Kg", 3)
+		make_uom_conversion_factor("_Test 25 Kg Bag", "Kg", 25)
+		make_uom_conversion_factor("_Test 3 Kg Bag", "Kg", 6)
+		make_uom_conversion_factor("_Test 25 Kg Bag", "Kg", 20)
+
+		factor = get_uom_conv_factor("_Test 3 Kg Bag", "_Test 25 Kg Bag")
+
+		self.assertEqual(factor, 0.12)
+
+	def test_uom_conv_intermediate_with_shared_target_ignores_zero_divisor(self):
+		make_uom_conversion_factor("_Test 3 Kg Bag", "Kg", 3)
+		make_uom_conversion_factor("_Test 25 Kg Bag", "Kg", 0)
+
+		factor = get_uom_conv_factor("_Test 3 Kg Bag", "_Test 25 Kg Bag")
+
+		self.assertIsNone(factor)
 
 	def test_uom_conv_base_case(self):
 		factor = get_uom_conv_factor("m", "m")
@@ -974,7 +1024,10 @@ class TestItem(ERPNextTestSuite):
 		item.reload()
 		item.stock_uom = "Nos"
 		item.save()
-		self.assertEqual(len(item.uoms), 1)
+		self.assertEqual(
+			[(row.uom, row.conversion_factor) for row in item.uoms],
+			[("Nos", 1)],
+		)
 
 	def test_validate_stock_item(self):
 		self.assertRaises(frappe.ValidationError, validate_is_stock_item, "_Test Non Stock Item")

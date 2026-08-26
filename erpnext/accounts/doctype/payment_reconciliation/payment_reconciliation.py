@@ -647,7 +647,7 @@ class PaymentReconciliation(Document):
 	def check_mandatory_to_fetch(self):
 		for fieldname in ["company", "party_type", "party", "receivable_payable_account"]:
 			if not self.get(fieldname):
-				frappe.throw(_("Please select {0} first").format(_(self.meta.get_label(fieldname))))
+				frappe.throw(_("Please select {0} first").format(self.meta.get_translated_label(fieldname)))
 
 	def validate_entries(self):
 		if not self.get("invoices"):

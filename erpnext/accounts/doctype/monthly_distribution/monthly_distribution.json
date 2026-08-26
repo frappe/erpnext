@@ -46,7 +46,7 @@
  "icon": "fa fa-bar-chart",
  "idx": 1,
  "links": [],
- "modified": "2024-03-27 13:10:05.873547",
+ "modified": "2026-08-21 23:11:44.908490",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Monthly Distribution",
@@ -69,8 +69,13 @@
    "read": 1,
    "report": 1,
    "role": "Accounts Manager"
+  },
+  {
+   "role": "Sales Master Manager",
+   "select": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": []

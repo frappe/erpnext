@@ -22,6 +22,7 @@
   "image",
   "image_view",
   "quantity_and_rate",
+  "percentage",
   "qty",
   "uom",
   "col_break2",
@@ -43,7 +44,8 @@
   "column_break_33",
   "sourced_by_supplier",
   "is_sub_assembly_item",
-  "is_phantom_item"
+  "is_phantom_item",
+  "is_balance_item"
  ],
  "fields": [
   {
@@ -136,12 +138,22 @@
   },
   {
    "columns": 2,
+   "depends_on": "eval:parent.set_qty_based_on_percentage",
+   "fieldname": "percentage",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Percentage (%)",
+   "read_only_depends_on": "eval:doc.is_balance_item"
+  },
+  {
+   "columns": 2,
    "fieldname": "qty",
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Qty",
    "oldfieldname": "qty",
    "oldfieldtype": "Currency",
+   "read_only_depends_on": "eval:parent.set_qty_based_on_percentage",
    "reqd": 1
   },
   {
@@ -322,13 +334,21 @@
    "fieldtype": "Check",
    "label": "Is Phantom Item",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:parent.set_qty_based_on_percentage",
+   "description": "This component absorbs the percentage remaining after all other percentage rows",
+   "fieldname": "is_balance_item",
+   "fieldtype": "Check",
+   "label": "Is Balance Item"
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-08-07 17:31:31.732720",
+ "modified": "2026-08-19 14:00:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Item",

@@ -1159,7 +1159,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2026-07-26 21:14:52.739814",
+ "modified": "2026-08-21 23:11:40.429841",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
@@ -1229,6 +1229,10 @@
    "report": 1,
    "role": "HR Manager",
    "write": 1
+  },
+  {
+   "role": "Desk User",
+   "select": 1
   }
  ],
  "row_format": "Dynamic",
