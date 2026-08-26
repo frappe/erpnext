@@ -10,7 +10,7 @@ callers and the whitelisted entry point keep working unchanged.
 
 import frappe
 from frappe import _
-from frappe.utils import flt
+from frappe.utils import cint, flt
 from pypika import functions as fn
 
 from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
@@ -61,8 +61,12 @@ class RequiredItemsService:
 				stock_bin.update_reserved_qty_for_production()
 
 	def get_items_and_operations_from_bom(self):
-		self.set_required_items()
-		self.doc.set_work_order_operations()
+		if self.doc.use_multi_level_bom:
+			self.doc.set_work_order_operations()
+			self.set_required_items()
+		else:
+			self.set_required_items()
+			self.doc.set_work_order_operations()
 
 		return check_if_scrap_warehouse_mandatory(self.doc.bom_no)
 
@@ -81,6 +85,8 @@ class RequiredItemsService:
 
 		if not (self.doc.bom_no and self.doc.qty):
 			return
+		if self.doc.is_new() and self.doc.use_multi_level_bom and not self._has_operation_identities():
+			self.doc.set_work_order_operations()
 
 		operations = self.doc.get("operations") or []
 		operation = operations[0].operation if len(operations) == 1 else None
@@ -95,9 +101,14 @@ class RequiredItemsService:
 		self.set_available_qty()
 
 	def _reset_required_qty(self, item_dict, operation):
+		items_by_operation = {
+			self._required_item_identity(item, self._work_order_operation_row_id(item)): item
+			for item in item_dict.values()
+		}
 		for d in self.doc.get("required_items"):
-			if item_dict.get(d.item_code):
-				d.required_qty = item_dict.get(d.item_code).get("qty")
+			item = items_by_operation.get(self._required_item_identity(d, d.operation_row_id))
+			if item:
+				d.required_qty = item.qty
 
 			if not d.operation:
 				d.operation = operation
@@ -147,8 +158,34 @@ class RequiredItemsService:
 			"required_qty": item.qty,
 			"source_warehouse": source_warehouse,
 			"include_item_in_manufacturing": item.include_item_in_manufacturing,
-			"operation_row_id": item.operation_row_id,
+			"operation_row_id": self._work_order_operation_row_id(item),
 		}
+
+	def _work_order_operation_row_id(self, item):
+		if not item.operation_bom:
+			return item.operation_row_id
+
+		for operation in self.doc.operations:
+			if operation.bom == item.operation_bom and cint(operation.bom_operation_row_id) == cint(
+				item.operation_row_id
+			):
+				return operation.idx
+
+		frappe.throw(
+			_("Could not map operation row {0} from BOM {1} to the Work Order.").format(
+				item.operation_row_id, item.operation_bom
+			)
+		)
+
+	def _has_operation_identities(self):
+		return self.doc.operations and all(
+			operation.bom and operation.bom_operation_row_id for operation in self.doc.operations
+		)
+
+	@staticmethod
+	def _required_item_identity(item, operation_row_id):
+		operation_row_id = cint(operation_row_id)
+		return (item.item_code, operation_row_id, None if operation_row_id else item.operation)
 
 	def update_transferred_qty_for_required_items(self):
 		if self.doc.skip_transfer:

@@ -41,6 +41,39 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestWorkOrder(ERPNextTestSuite):
+	def test_reset_required_qty_for_legacy_operation_rows(self):
+		from erpnext.manufacturing.doctype.work_order.services.required_items import RequiredItemsService
+
+		work_order = frappe.new_doc("Work Order")
+		work_order.append(
+			"required_items",
+			{"item_code": "Legacy RM", "operation": "Legacy Operation 1", "required_qty": 1},
+		)
+		work_order.append(
+			"required_items",
+			{"item_code": "Legacy RM", "operation": "Legacy Operation 2", "required_qty": 1},
+		)
+		item_dict = {
+			("Legacy RM", "Legacy Operation 1"): frappe._dict(
+				item_code="Legacy RM",
+				operation="Legacy Operation 1",
+				operation_bom=None,
+				operation_row_id=0,
+				qty=2,
+			),
+			("Legacy RM", "Legacy Operation 2"): frappe._dict(
+				item_code="Legacy RM",
+				operation="Legacy Operation 2",
+				operation_bom=None,
+				operation_row_id=0,
+				qty=3,
+			),
+		}
+
+		RequiredItemsService(work_order)._reset_required_qty(item_dict, operation=None)
+
+		self.assertEqual([row.required_qty for row in work_order.required_items], [2, 3])
+
 	def setUp(self):
 		self.warehouse = "_Test Warehouse 2 - _TC"
 		self.item = "_Test Item"

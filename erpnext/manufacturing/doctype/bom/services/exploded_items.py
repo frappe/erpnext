@@ -24,17 +24,24 @@ class BOMExplodedItemsService:
 		self.doc.cur_exploded_items = {}
 		for d in self.doc.get("items"):
 			if d.bom_no:
-				self.get_child_exploded_items(d.bom_no, d.stock_qty, d.operation)
+				self.get_child_exploded_items(
+					d.bom_no,
+					d.stock_qty,
+					d.operation,
+					d.operation_row_id,
+					self.doc.name if d.operation_row_id else None,
+				)
 			elif d.item_code:
 				self.add_to_cur_exploded_items(self._exploded_item_row(d))
 
-	@staticmethod
-	def _exploded_item_row(d):
+	def _exploded_item_row(self, d):
 		return frappe._dict(
 			{
 				"item_code": d.item_code,
 				"item_name": d.item_name,
 				"operation": d.operation,
+				"operation_row_id": d.operation_row_id,
+				"operation_bom": self.doc.name if d.operation_row_id else None,
 				"is_sub_assembly_item": d.is_sub_assembly_item,
 				"source_warehouse": d.source_warehouse,
 				"description": d.description,
@@ -49,7 +56,9 @@ class BOMExplodedItemsService:
 
 	def add_to_cur_exploded_items(self, args):
 		key = args.item_code
-		if args.operation:
+		if args.operation_row_id:
+			key = (args.item_code, args.operation_bom, args.operation_row_id)
+		elif args.operation:
 			key = (args.item_code, args.operation)
 
 		if self.doc.cur_exploded_items.get(key):
@@ -57,10 +66,14 @@ class BOMExplodedItemsService:
 		else:
 			self.doc.cur_exploded_items[key] = args
 
-	def get_child_exploded_items(self, bom_no, stock_qty, operation=None):
+	def get_child_exploded_items(
+		self, bom_no, stock_qty, operation=None, operation_row_id=None, operation_bom=None
+	):
 		"""Add all items from Flat BOM of child BOM"""
 		for d in self._fetch_child_flat_bom_items(bom_no):
-			self.add_to_cur_exploded_items(self._child_exploded_row(d, stock_qty, operation))
+			self.add_to_cur_exploded_items(
+				self._child_exploded_row(d, stock_qty, operation, operation_row_id, operation_bom)
+			)
 
 	@staticmethod
 	def _fetch_child_flat_bom_items(bom_no):
@@ -78,6 +91,8 @@ class BOMExplodedItemsService:
 				bom_item.description,
 				bom_item.source_warehouse,
 				bom_item.operation,
+				bom_item.operation_row_id,
+				bom_item.operation_bom,
 				bom_item.is_sub_assembly_item,
 				bom_item.stock_uom,
 				bom_item.stock_qty,
@@ -90,13 +105,15 @@ class BOMExplodedItemsService:
 		).run(as_dict=1)
 
 	@staticmethod
-	def _child_exploded_row(d, stock_qty, operation):
+	def _child_exploded_row(d, stock_qty, operation, operation_row_id, operation_bom):
 		return frappe._dict(
 			{
 				"item_code": d["item_code"],
 				"item_name": d["item_name"],
 				"source_warehouse": d["source_warehouse"],
 				"operation": d["operation"] or operation,
+				"operation_row_id": d["operation_row_id"] or operation_row_id,
+				"operation_bom": d["operation_bom"] or operation_bom,
 				"description": d["description"],
 				"stock_uom": d["stock_uom"],
 				"stock_qty": d["qty_consumed_per_unit"] * stock_qty,

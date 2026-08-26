@@ -14,6 +14,7 @@
   "pending_qty",
   "column_break_4",
   "bom",
+  "bom_operation_row_id",
   "workstation_type",
   "workstation",
   "sequence_id",
@@ -71,6 +72,14 @@
    "no_copy": 1,
    "options": "BOM",
    "print_hide": 1
+  },
+  {
+   "fieldname": "bom_operation_row_id",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "BOM Operation Row ID",
+   "no_copy": 1,
+   "read_only": 1
   },
   {
    "fieldname": "description",

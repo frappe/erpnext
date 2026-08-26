@@ -3,6 +3,7 @@ from frappe import _
 from frappe.query_builder.functions import Sum
 from frappe.utils import cstr, flt
 
+from erpnext.manufacturing.doctype.job_card.job_card import is_same_operation
 from erpnext.manufacturing.doctype.work_order.services.material_coverage import (
 	get_minimum_material_coverage_fraction,
 )
@@ -256,7 +257,7 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 
 		work_order_required_by_item = {}
 		for row in self.wo_doc.required_items:
-			if not (job_card.operation == row.operation or job_card.operation_row_id == row.operation_row_id):
+			if not is_same_operation(job_card, row):
 				continue
 			work_order_required_by_item[row.item_code] = work_order_required_by_item.get(
 				row.item_code, 0.0
@@ -426,7 +427,8 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 		"""Gets Work Order Required Items for Material Transfer for Manufacture."""
 		work_order = self.wo_doc
 		consider_job_card = work_order.transfer_material_against == "Job Card" and self.doc.get("job_card")
-		job_card_items = self.get_job_card_item_codes() if consider_job_card else []
+		job_card = frappe.get_doc("Job Card", self.doc.job_card) if consider_job_card else None
+		job_card_items = self.get_job_card_item_codes() if job_card else []
 		wip_warehouse = self._resolve_wip_warehouse(work_order)
 		extra_pct = flt(
 			frappe.db.get_single_value("Manufacturing Settings", "transfer_extra_materials_percentage")
@@ -434,7 +436,7 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 		item_dict = frappe._dict()
 		for d in work_order.get("required_items"):
 			self._add_required_item(
-				item_dict, d, consider_job_card, job_card_items, wip_warehouse, extra_pct, work_order
+				item_dict, d, job_card, job_card_items, wip_warehouse, extra_pct, work_order
 			)
 		return item_dict
 
@@ -444,9 +446,9 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 		return None
 
 	def _add_required_item(
-		self, item_dict, d, consider_job_card, job_card_items, wip_warehouse, extra_pct, work_order
+		self, item_dict, d, job_card, job_card_items, wip_warehouse, extra_pct, work_order
 	):
-		if consider_job_card and d.item_code not in job_card_items:
+		if job_card and (d.item_code not in job_card_items or not is_same_operation(job_card, d)):
 			return
 		additional_qty = extra_pct * flt(d.required_qty) / 100 if extra_pct else 0.0
 		transfer_pending = (
@@ -457,7 +459,7 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 		can_transfer = transfer_pending or self.backflush_based_on == "Material Transferred for Manufacture"
 		if not can_transfer or not d.include_item_in_manufacturing:
 			return
-		self._build_required_item_row(item_dict, d, consider_job_card, wip_warehouse, work_order)
+		self._build_required_item_row(item_dict, d, bool(job_card), wip_warehouse, work_order)
 
 	def _build_required_item_row(self, item_dict, d, consider_job_card, wip_warehouse, work_order):
 		item_row = d.as_dict()

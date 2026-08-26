@@ -1096,7 +1096,9 @@ class TestStockEntry(ERPNextTestSuite):
 		)
 
 		bom_no, bom_operation_cost = frappe.db.get_value(
-			"BOM", {"item": "_Test FG Item 2", "is_default": 1, "docstatus": 1}, ["name", "operating_cost"]
+			"BOM",
+			{"item": "_Test FG Item 2", "is_default": 1, "docstatus": 1},
+			["name", "base_operating_cost"],
 		)
 
 		work_order = frappe.new_doc("Work Order")
@@ -1161,6 +1163,43 @@ class TestStockEntry(ERPNextTestSuite):
 		service._validate_no_excess_transfer()
 
 		stock_entry.items[0].qty = 0.002
+		with self.assertRaises(frappe.ValidationError):
+			service._validate_no_excess_transfer()
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM"})
+	def test_material_transfer_for_repeated_required_item_rows(self):
+		from erpnext.stock.doctype.stock_entry.services.material_transfer import (
+			MaterialTransferForManufactureStockEntry,
+		)
+
+		work_order = frappe.new_doc("Work Order")
+		for required_qty in (1, 2):
+			work_order.append(
+				"required_items",
+				{
+					"item_code": "_Test Item",
+					"required_qty": required_qty,
+					"transferred_qty": 1,
+				},
+			)
+
+		stock_entry = frappe.new_doc("Stock Entry")
+		stock_entry.work_order = "Test Work Order"
+		stock_entry.append(
+			"items",
+			{
+				"item_code": "_Test Item",
+				"s_warehouse": "_Test Warehouse - _TC",
+				"qty": 2,
+				"uom": "Nos",
+			},
+		)
+
+		service = MaterialTransferForManufactureStockEntry(stock_entry)
+		service._wo_doc = work_order
+		service._validate_no_excess_transfer()
+
+		stock_entry.items[0].qty = 2.1
 		with self.assertRaises(frappe.ValidationError):
 			service._validate_no_excess_transfer()
 
@@ -1282,6 +1321,8 @@ class TestStockEntry(ERPNextTestSuite):
 		)
 		work_order.insert()
 		work_order.submit()
+		for operation in work_order.operations:
+			operation.db_set("completed_qty", work_order.qty)
 
 		from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry
 

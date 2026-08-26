@@ -20,7 +20,6 @@ from erpnext.manufacturing.doctype.job_card.mapper import (
 from erpnext.manufacturing.doctype.job_card.mapper import (
 	make_stock_entry as make_stock_entry_from_jc,
 )
-from erpnext.manufacturing.doctype.work_order.mapper import create_job_card
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 from erpnext.manufacturing.doctype.work_order.work_order import WorkOrder, make_job_card, make_work_order
 from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
@@ -593,36 +592,273 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertEqual(transfer_entry.items[0].qty, 2)
 
 	def test_required_items_are_scoped_to_repeated_operation_row(self):
-		work_order = make_wo_order_test_record(
-			item="_Test FG Item 2",
-			qty=1,
-			transfer_material_against="Job Card",
-			do_not_submit=True,
+		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+
+		suffix = random_string(6)
+		operation = make_operation(
+			{
+				"operation": f"Repeated Operation {suffix}",
+				"workstation": "_Test Workstation 1",
+			}
 		)
-		operation = work_order.operations[0]
-		work_order.append(
+		finished_good = create_item(f"Repeated Operation FG {suffix}")
+		raw_material = create_item(f"Repeated Operation RM {suffix}")
+		source_warehouses = ("_Test Warehouse - _TC", "Stores - _TC")
+
+		bom = frappe.new_doc(
+			"BOM",
+			company="_Test Company",
+			item=finished_good.name,
+			quantity=1,
+			with_operations=1,
+			transfer_material_against="Job Card",
+		)
+		for sequence_id in (1, 2):
+			bom.append(
+				"operations",
+				{
+					"operation": operation.name,
+					"workstation": "_Test Workstation 1",
+					"time_in_mins": 30,
+					"sequence_id": sequence_id,
+				},
+			)
+		for operation_row_id, (required_qty, source_warehouse) in enumerate(
+			zip((1, 2), source_warehouses, strict=True), start=1
+		):
+			bom.append(
+				"items",
+				{
+					"item_code": raw_material.name,
+					"qty": required_qty,
+					"operation_row_id": operation_row_id,
+					"source_warehouse": source_warehouse,
+				},
+			)
+		bom.insert()
+		bom.submit()
+
+		work_order = make_work_order(
+			bom.name,
+			finished_good.name,
+			1,
+			company="_Test Company",
+			variant_items=[],
+			use_multi_level_bom=1,
+		)
+		work_order.wip_warehouse = "Work In Progress - _TC"
+		work_order.fg_warehouse = "Finished Goods - _TC"
+		work_order.planned_start_date = now()
+		work_order.submit()
+
+		self.assertEqual(work_order.use_multi_level_bom, 1)
+		self.assertEqual(
+			[(row.operation_row_id, row.required_qty) for row in work_order.required_items],
+			[(1, 1), (2, 2)],
+		)
+
+		frappe.db.set_value(
+			"Work Order Operation",
+			{"parent": work_order.name},
+			"bom_operation_row_id",
+			0,
+			update_modified=False,
+		)
+		from erpnext.patches.v16_0.rebuild_bom_explosion_operation_identity import execute
+
+		execute()
+		execute()
+		self.assertEqual(
+			frappe.get_all(
+				"Work Order Operation",
+				filters={"parent": work_order.name},
+				pluck="bom_operation_row_id",
+				order_by="idx",
+			),
+			[1, 2],
+		)
+
+		job_card = frappe.get_last_doc("Job Card", {"work_order": work_order.name, "operation_row_id": 2})
+		self.assertEqual(
+			[(row.item_code, row.required_qty) for row in job_card.items], [(raw_material.name, 2)]
+		)
+
+		make_stock_entry(
+			item_code=raw_material.name,
+			target=source_warehouses[1],
+			qty=2,
+			basic_rate=100,
+		)
+		transfer_entry = make_stock_entry_from_jc(job_card.name)
+		transfer_entry.get_items()
+
+		self.assertEqual(len(transfer_entry.items), 1)
+		self.assertEqual(transfer_entry.items[0].qty, 2)
+		self.assertEqual(transfer_entry.items[0].s_warehouse, source_warehouses[1])
+
+		transfer_entry.submit()
+		job_card.reload()
+		self.assertEqual(transfer_entry.fg_completed_qty, 1)
+		self.assertEqual(job_card.transferred_qty, 1)
+
+	def test_required_items_are_scoped_across_child_bom_operations(self):
+		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+
+		suffix = random_string(6)
+		child_boms = []
+		raw_materials = []
+		source_warehouses = ("_Test Warehouse - _TC", "Stores - _TC")
+		for child_number, source_warehouse in enumerate(source_warehouses, start=1):
+			operation = make_operation(
+				{
+					"operation": f"Nested Operation {child_number} {suffix}",
+					"workstation": "_Test Workstation 1",
+				}
+			)
+			child_item = create_item(f"Nested SFG {child_number} {suffix}")
+			raw_material = create_item(f"Nested RM {child_number} {suffix}")
+			child_bom = frappe.new_doc(
+				"BOM",
+				company="_Test Company",
+				item=child_item.name,
+				quantity=1,
+				with_operations=1,
+				transfer_material_against="Job Card",
+			)
+			child_bom.append(
+				"operations",
+				{
+					"operation": operation.name,
+					"workstation": "_Test Workstation 1",
+					"time_in_mins": 30,
+				},
+			)
+			child_bom.append(
+				"items",
+				{
+					"item_code": raw_material.name,
+					"qty": child_number,
+					"operation_row_id": 1,
+					"source_warehouse": source_warehouse,
+				},
+			)
+			child_bom.insert()
+			child_bom.submit()
+			child_boms.append(child_bom)
+			raw_materials.append(raw_material)
+
+		finished_good = create_item(f"Nested FG {suffix}")
+		final_operation = make_operation(
+			{
+				"operation": f"Nested Final Operation {suffix}",
+				"workstation": "_Test Workstation 1",
+			}
+		)
+		parent_bom = frappe.new_doc(
+			"BOM",
+			company="_Test Company",
+			item=finished_good.name,
+			quantity=1,
+			with_operations=1,
+			transfer_material_against="Job Card",
+		)
+		parent_bom.append(
 			"operations",
 			{
-				"operation": operation.operation,
-				"workstation": operation.workstation,
-				"time_in_mins": operation.time_in_mins,
-				"hour_rate": operation.hour_rate,
-				"sequence_id": operation.sequence_id + 1,
+				"operation": final_operation.name,
+				"workstation": "_Test Workstation 1",
+				"time_in_mins": 30,
+			},
+		)
+		for child_bom in (*child_boms, child_boms[0]):
+			parent_bom.append(
+				"items",
+				{"item_code": child_bom.item, "qty": 1, "bom_no": child_bom.name},
+			)
+		parent_bom.insert()
+		parent_bom.submit()
+
+		work_order = make_work_order(
+			parent_bom.name,
+			finished_good.name,
+			1,
+			company="_Test Company",
+			variant_items=[],
+			use_multi_level_bom=1,
+		)
+		work_order.wip_warehouse = "Work In Progress - _TC"
+		work_order.fg_warehouse = "Finished Goods - _TC"
+		work_order.planned_start_date = now()
+		work_order.qty = 2
+		work_order.submit()
+
+		operation_row_by_bom = {row.bom: row.idx for row in work_order.operations}
+		self.assertEqual(
+			[row.bom for row in work_order.operations].count(child_boms[0].name),
+			1,
+		)
+		self.assertEqual(
+			next(row.time_in_mins for row in work_order.operations if row.bom == child_boms[0].name),
+			60,
+		)
+		self.assertNotEqual(
+			operation_row_by_bom[child_boms[0].name], operation_row_by_bom[child_boms[1].name]
+		)
+		self.assertEqual(
+			{
+				row.item_code: (row.operation_row_id, row.required_qty, row.source_warehouse)
+				for row in work_order.required_items
+			},
+			{
+				raw_materials[0].name: (
+					operation_row_by_bom[child_boms[0].name],
+					4,
+					source_warehouses[0],
+				),
+				raw_materials[1].name: (
+					operation_row_by_bom[child_boms[1].name],
+					4,
+					source_warehouses[1],
+				),
 			},
 		)
 
-		for operation_row_id, item in enumerate(work_order.required_items, start=1):
-			item.operation = operation.operation
-			item.operation_row_id = operation_row_id
-
-		work_order.save()
-		second_operation = work_order.operations[1]
-		second_operation.job_card_qty = work_order.qty
-		job_card = create_job_card(work_order, second_operation)
-
+		copied_work_order = frappe.copy_doc(work_order, ignore_no_copy=False)
+		copied_work_order.docstatus = 0
+		copied_work_order.set_required_items()
+		self.assertTrue(all(row.bom and row.bom_operation_row_id for row in copied_work_order.operations))
 		self.assertEqual(
-			[item.item_code for item in job_card.items], [work_order.required_items[1].item_code]
+			{
+				row.item_code: (row.operation_row_id, row.required_qty)
+				for row in copied_work_order.required_items
+			},
+			{
+				raw_materials[0].name: (operation_row_by_bom[child_boms[0].name], 4),
+				raw_materials[1].name: (operation_row_by_bom[child_boms[1].name], 4),
+			},
 		)
+
+		for child_qty, (child_bom, raw_material, source_warehouse) in enumerate(
+			zip(child_boms, raw_materials, source_warehouses, strict=True), start=1
+		):
+			required_qty = child_qty * work_order.qty * (2 if child_bom == child_boms[0] else 1)
+			job_card = frappe.get_last_doc(
+				"Job Card",
+				{
+					"work_order": work_order.name,
+					"operation_row_id": operation_row_by_bom[child_bom.name],
+				},
+			)
+			self.assertEqual(
+				[(row.item_code, row.required_qty) for row in job_card.items],
+				[(raw_material.name, required_qty)],
+			)
+			transfer_entry = make_stock_entry_from_jc(job_card.name)
+			transfer_entry.get_items()
+			self.assertEqual(
+				[(row.item_code, row.qty, row.s_warehouse) for row in transfer_entry.items],
+				[(raw_material.name, required_qty, source_warehouse)],
+			)
 
 	def test_work_order_transferred_qty_with_multiple_job_cards(self):
 		create_bom_with_multiple_operations()

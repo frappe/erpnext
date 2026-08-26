@@ -22,6 +22,8 @@ class BOMExplosionItem(Document):
 		item_code: DF.Link | None
 		item_name: DF.Data | None
 		operation: DF.Link | None
+		operation_bom: DF.Data | None
+		operation_row_id: DF.Int
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data

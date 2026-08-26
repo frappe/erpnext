@@ -68,11 +68,43 @@ class TestBOM(ERPNextTestSuite):
 		bom.append("items", {"item_code": raw_material, "qty": 1, "operation_row_id": 1})
 		bom.append("items", {"item_code": raw_material, "qty": 2, "operation_row_id": 2})
 		bom.insert()
+		bom.submit()
 
-		items = get_bom_items_as_dict(bom.name, bom.company, qty=1, fetch_exploded=0)
+		for fetch_exploded in (0, 1):
+			items = get_bom_items_as_dict(bom.name, bom.company, qty=1, fetch_exploded=fetch_exploded)
+			operation_keys = (
+				[(raw_material, bom.name, row_id) for row_id in (1, 2)]
+				if fetch_exploded
+				else [(raw_material, row_id) for row_id in (1, 2)]
+			)
 
-		self.assertEqual(items[(raw_material, 1)].qty, 1)
-		self.assertEqual(items[(raw_material, 2)].qty, 2)
+			self.assertEqual(items[operation_keys[0]].qty, 1)
+			self.assertEqual(items[operation_keys[1]].qty, 2)
+
+		frappe.db.set_value(
+			"BOM Explosion Item",
+			{"parent": bom.name},
+			{"operation_bom": None, "operation_row_id": 0},
+			update_modified=False,
+		)
+
+		from erpnext.patches.v16_0.rebuild_bom_explosion_operation_identity import execute
+
+		execute()
+		execute()
+		operation_identity = frappe.get_all(
+			"BOM Explosion Item",
+			filters={"parent": bom.name},
+			fields=["operation_bom", "operation_row_id"],
+			order_by="operation_row_id",
+		)
+		self.assertEqual(
+			[(row.operation_bom, row.operation_row_id) for row in operation_identity],
+			[(bom.name, 1), (bom.name, 2)],
+		)
+
+		bom.cancel()
+		bom.delete()
 
 	@timeout
 	def test_get_items_exploded(self):
