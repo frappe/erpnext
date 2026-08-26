@@ -78,6 +78,17 @@ class LandedCostVoucher(Document):
 			self.get_items_from_purchase_receipts()
 
 		self.set_applicable_charges_on_item()
+<<<<<<< HEAD
+=======
+		self.set_total_vendor_invoices_cost()
+		# Runs last: needs the items table populated by get_items_from_purchase_receipts
+		self.validate_mandatory_dimensions()
+
+	def set_total_vendor_invoices_cost(self):
+		self.total_vendor_invoices_cost = 0.0
+		for row in self.vendor_invoices:
+			self.total_vendor_invoices_cost += flt(row.amount)
+>>>>>>> 918e5a2 (fix(stock): carry accounting dimensions from Landed Cost Voucher char… (#56981))
 
 	def validate_line_items(self):
 		for d in self.get("items"):
@@ -180,6 +191,104 @@ class LandedCostVoucher(Document):
 					title=_("Incorrect Account"),
 					exc=IncorrectCompanyValidationError,
 				)
+
+	def validate_mandatory_dimensions(self):
+		"""Flag missing mandatory dimensions on the charge row that causes them.
+
+		The landed cost charges are posted as part of the *receipt document's* ledger, so
+		without this the user sees a GL Entry error raised from the middle of
+		`update_landed_cost`, naming an account but not the voucher row responsible.
+		"""
+		from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+			get_accounting_dimensions,
+			get_checks_for_pl_and_bs_accounts,
+		)
+		from erpnext.accounts.doctype.accounting_dimension_filter.accounting_dimension_filter import (
+			get_dimension_filter_map,
+		)
+
+		if not is_perpetual_inventory_enabled(self.company):
+			return
+
+		company_checks = [
+			check
+			for check in get_checks_for_pl_and_bs_accounts()
+			if check.company == self.company and (check.mandatory_for_pl or check.mandatory_for_bs)
+		]
+		dimension_filter_map = get_dimension_filter_map()
+
+		if not company_checks and not dimension_filter_map:
+			return
+
+		labels = {d.fieldname: d.label for d in get_accounting_dimensions(as_list=False)}
+		receipts = {}
+
+		for tax in self.get("taxes"):
+			if not tax.expense_account:
+				continue
+
+			report_type = frappe.get_cached_value("Account", tax.expense_account, "report_type")
+
+			mandatory = {}
+			for check in company_checks:
+				is_mandatory = (
+					check.mandatory_for_pl if report_type == "Profit and Loss" else check.mandatory_for_bs
+				)
+				if is_mandatory:
+					mandatory[check.fieldname] = check.label
+
+			for (fieldname, account), dimension_filter in dimension_filter_map.items():
+				if account == tax.expense_account and dimension_filter.get("is_mandatory"):
+					mandatory.setdefault(fieldname, labels.get(fieldname) or frappe.unscrub(fieldname))
+
+			for fieldname, label in mandatory.items():
+				if tax.get(fieldname):
+					continue
+
+				for item in self.get("items"):
+					if self.get_receipt_dimension(receipts, item, fieldname):
+						continue
+
+					frappe.throw(
+						_(
+							"Row {0}: Accounting Dimension {1} is mandatory for account {2}."
+							" Set it on this Taxes and Charges row, or on Item Row {3} ({4})."
+						).format(
+							tax.idx,
+							frappe.bold(label),
+							frappe.bold(tax.expense_account),
+							item.idx,
+							frappe.bold(item.item_code),
+						),
+						title=_("Missing Accounting Dimension"),
+					)
+
+	def get_receipt_dimension(self, receipts, item, fieldname):
+		"""Resolve a dimension the way the GL composers do, minus the charge row itself.
+
+		Mirrors the composer fallback chain: LCV item row, then the receipt item row, then
+		the receipt document. Keep the two in step - if they disagree, this either blocks a
+		voucher that would have posted fine or lets one through that still fails downstream.
+		"""
+		if item.get(fieldname):
+			return item.get(fieldname)
+
+		key = (item.receipt_document_type, item.receipt_document)
+		if key not in receipts:
+			receipts[key] = frappe.get_doc(*key) if item.receipt_document else None
+
+		receipt = receipts[key]
+		if not receipt:
+			return None
+
+		row_fieldname = "stock_entry_item" if receipt.doctype == "Stock Entry" else "purchase_receipt_item"
+		receipt_row_name = item.get(row_fieldname)
+
+		for row in receipt.get("items") or []:
+			if row.name == receipt_row_name and row.get(fieldname):
+				return row.get(fieldname)
+
+		return receipt.get(fieldname)
 
 	def set_total_taxes_and_charges(self):
 		self.total_taxes_and_charges = sum(flt(d.base_amount) for d in self.get("taxes"))
@@ -379,3 +488,232 @@ def get_pr_items(purchase_receipt):
 		.orderby(pr_item.idx)
 		.run(as_dict=True)
 	)
+<<<<<<< HEAD
+=======
+
+	if purchase_receipt.receipt_document_type == "Subcontracting Receipt":
+		query = query.select(
+			pr_item.rate.as_("base_rate"),
+			pr_item.amount.as_("base_amount"),
+		)
+
+	elif purchase_receipt.receipt_document_type == "Stock Entry":
+		query = query.select(
+			pr_item.basic_rate.as_("base_rate"),
+			pr_item.basic_amount.as_("base_amount"),
+		)
+
+		query = query.where(pr_item.is_finished_item == 1)
+	else:
+		query = query.select(
+			pr_item.base_rate,
+			pr_item.base_amount,
+			pr_item.is_fixed_asset,
+		)
+
+	return query.run(as_dict=True)
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_vendor_invoices(
+	doctype: str, txt: str | None, searchfield: Any, start: int, page_len: int, filters: dict
+):
+	if not frappe.has_permission("Purchase Invoice", "read"):
+		return []
+
+	if txt and txt.lower().startswith(("select", "delete", "update")):
+		frappe.throw(_("Invalid search query"), title=_("Invalid Query"))
+
+	query = get_vendor_invoice_query(filters)
+
+	if txt:
+		query = query.where(frappe.qb.DocType(doctype).name.like(f"%{txt}%"))
+
+	if start:
+		query = query.limit(page_len).offset(start)
+
+	return query.run(as_list=True)
+
+
+def get_vendor_invoice_query(filters):
+	doctype = frappe.qb.DocType("Purchase Invoice")
+	child_doctype = frappe.qb.DocType("Purchase Invoice Item")
+	item = frappe.qb.DocType("Item")
+
+	query = (
+		frappe.qb.from_(doctype)
+		.inner_join(child_doctype)
+		.on(child_doctype.parent == doctype.name)
+		.inner_join(item)
+		.on(item.name == child_doctype.item_code)
+		.select(
+			doctype.name,
+			(doctype.base_total - doctype.claimed_landed_cost_amount).as_("unclaimed_amount"),
+		)
+		.where(
+			(doctype.docstatus == 1)
+			& (doctype.is_subcontracted == 0)
+			& (doctype.is_return == 0)
+			& (doctype.update_stock == 0)
+			& (doctype.company == filters.get("company"))
+			& (item.is_stock_item == 0)
+			# WHERE not HAVING: no GROUP BY here, and Postgres rejects HAVING on a SELECT alias
+			& ((doctype.base_total - doctype.claimed_landed_cost_amount) > 0)
+		)
+	)
+
+	if filters.get("name"):
+		query = query.where(doctype.name == filters.get("name"))
+
+	return query
+
+
+def set_landed_cost_voucher_amount(doc):
+	"""Set landed_cost_voucher_amount on the receipt document's items from submitted LCVs."""
+	for d in doc.get("items"):
+		lcv_item = frappe.qb.DocType("Landed Cost Item")
+		query = (
+			frappe.qb.from_(lcv_item)
+			.select(Sum(lcv_item.applicable_charges), Max(lcv_item.cost_center))
+			.where((lcv_item.docstatus == 1) & (lcv_item.receipt_document == doc.name))
+		)
+
+		if doc.doctype == "Stock Entry":
+			query = query.where(lcv_item.stock_entry_item == d.name)
+		else:
+			query = query.where(lcv_item.purchase_receipt_item == d.name)
+
+		lc_voucher_data = query.run(as_list=True)
+
+		d.landed_cost_voucher_amount = lc_voucher_data[0][0] if lc_voucher_data else 0.0
+		if not d.cost_center and lc_voucher_data and lc_voucher_data[0][1]:
+			d.db_set("cost_center", lc_voucher_data[0][1])
+
+
+def has_landed_cost_amount(doc):
+	for row in doc.items:
+		if row.get("landed_cost_voucher_amount"):
+			return True
+
+	return False
+
+
+def get_lcv_dimension_fields():
+	"""Every field whose value should travel from an LCV row onto the landed cost GL entry.
+
+	`get_accounting_dimensions()` covers custom dimensions only, so cost center and project
+	are prepended explicitly.
+	"""
+	from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+		get_accounting_dimensions,
+	)
+
+	return ["cost_center", "project", *get_accounting_dimensions()]
+
+
+def get_row_dimensions(tax_row, lcv_item, dimension_fields):
+	"""Resolve the dimensions of a landed cost charge: tax row first, then the LCV item row.
+
+	Blanks are left blank on purpose - the GL composers fall back to the receipt item and
+	then the receipt document from there.
+	"""
+	return frappe._dict(
+		{field: (tax_row.get(field) or lcv_item.get(field) or None) for field in dimension_fields}
+	)
+
+
+def get_custom_dimension_overrides(entry):
+	"""Custom dimension overrides for a landed cost GL entry.
+
+	Cost center and project are excluded because the composers pass them as explicit
+	arguments. Only truthy values are returned: `get_gl_dict` applies `args` last, so a
+	`None` here would wipe out the receipt item fallback instead of deferring to it.
+	"""
+	return {
+		dimension: value
+		for dimension, value in (entry.dimensions or {}).items()
+		if value and dimension not in ("cost_center", "project")
+	}
+
+
+def get_item_account_wise_lcv_entries(doc):
+	"""Landed cost charges for a receipt document, consumed by the GL composers.
+
+	Returns `{(item_code, receipt_row_name): [entry, ...]}` where each entry is a
+	`frappe._dict(expense_account, amount, base_amount, dimensions)`.
+
+	Charges are grouped by *(expense account, dimension values)* rather than by expense
+	account alone, so two tax rows - whether in one voucher or across vouchers - that post
+	to the same account with different dimensions stay separate GL entries instead of
+	silently collapsing into the first row's dimensions.
+	"""
+	if not has_landed_cost_amount(doc):
+		return
+
+	landed_cost_vouchers = frappe.get_all(
+		"Landed Cost Purchase Receipt",
+		fields=["parent"],
+		filters={"receipt_document": doc.name, "docstatus": 1},
+	)
+
+	if not landed_cost_vouchers:
+		return
+
+	item_account_wise_cost = {}
+	dimension_fields = get_lcv_dimension_fields()
+
+	row_fieldname = "purchase_receipt_item"
+	if doc.doctype == "Stock Entry":
+		row_fieldname = "stock_entry_item"
+
+	for lcv in landed_cost_vouchers:
+		landed_cost_voucher_doc = frappe.get_doc("Landed Cost Voucher", lcv.parent)
+
+		based_on_field = "applicable_charges"
+		# Use amount field for total item cost for manually cost distributed LCVs
+		if landed_cost_voucher_doc.distribute_charges_based_on != "Distribute Manually":
+			based_on_field = frappe.scrub(landed_cost_voucher_doc.distribute_charges_based_on)
+
+		total_item_cost = 0
+
+		if based_on_field:
+			for item in landed_cost_voucher_doc.items:
+				total_item_cost += item.get(based_on_field)
+
+		for item in landed_cost_voucher_doc.items:
+			if item.receipt_document == doc.name:
+				charges = item_account_wise_cost.setdefault((item.item_code, item.get(row_fieldname)), {})
+
+				for account in landed_cost_voucher_doc.taxes:
+					exchange_rate = account.exchange_rate or 1
+					dimensions = get_row_dimensions(account, item, dimension_fields)
+					group_key = (
+						account.expense_account,
+						tuple(dimensions.get(field) for field in dimension_fields),
+					)
+
+					item_row = charges.get(group_key)
+					if item_row is None:
+						item_row = charges[group_key] = frappe._dict(
+							expense_account=account.expense_account,
+							amount=0.0,
+							base_amount=0.0,
+							dimensions=dimensions,
+						)
+
+					if total_item_cost > 0:
+						item_row.amount += account.amount * item.get(based_on_field) / total_item_cost
+
+						item_row.base_amount += (
+							account.base_amount * item.get(based_on_field) / total_item_cost
+						)
+					else:
+						# Pre-existing behaviour: this adds the item's full applicable charges once
+						# per tax row. Unreachable for submitted vouchers, since
+						# validate_applicable_charges_for_item rejects a zero total.
+						item_row.amount += item.applicable_charges / exchange_rate
+						item_row.base_amount += item.applicable_charges
+
+	return {key: list(charges.values()) for key, charges in item_account_wise_cost.items()}
+>>>>>>> 918e5a2 (fix(stock): carry accounting dimensions from Landed Cost Voucher char… (#56981))
