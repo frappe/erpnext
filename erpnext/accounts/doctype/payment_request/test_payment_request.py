@@ -11,7 +11,10 @@ from frappe.utils import add_days, nowdate
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_terms_template
-from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
+from erpnext.accounts.doctype.payment_request.payment_request import (
+	get_subscription_details,
+	make_payment_request,
+)
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.doctype.subscription.test_subscription import (
@@ -2066,3 +2069,89 @@ class TestPaymentRequestV2Gateway(ERPNextTestSuite):
 		self.assertEqual(len(payment_request.subscription_plans), 0)
 		self.assertEqual(payment_request.reference_doctype, "Sales Invoice")
 		self.assertEqual(payment_request.reference_name, si.name)
+
+	def test_payment_request_with_subscription_for_purchase_invoice(self):
+		make_plans()
+
+		subscription_plan = frappe.get_doc("Subscription Plan", "_Test Plan Name")
+		subscription_plan.payment_gateway = "_Test Gateway - INR - _TC"
+		subscription_plan.save()
+
+		subscription = create_subscription(
+			party_type="Supplier",
+			party="_Test Supplier",
+			plans=[{"plan": "_Test Plan Name", "qty": 1}],
+			start_date=nowdate(),
+			generate_invoice_at="Prepaid (bill at period start)",
+			submit_invoice=1,
+		)
+		invoice_name = frappe.get_value(
+			"Purchase Invoice",
+			{
+				"subscription": subscription.name,
+				"docstatus": 1,
+				"is_return": 0,
+			},
+			"name",
+			order_by="from_date asc",
+		)
+
+		payment_request = make_payment_request(
+			dt="Purchase Invoice",
+			dn=invoice_name,
+			party_type="Supplier",
+			party="_Test Supplier",
+			recipient_id="test@example.com",
+		)
+
+		self.assertEqual(payment_request.is_a_subscription, 1)
+		self.assertEqual(len(payment_request.subscription_plans), 1)
+
+		subscription_plan = payment_request.subscription_plans[0]
+		self.assertEqual(subscription_plan.plan, "_Test Plan Name")
+		self.assertEqual(subscription_plan.qty, 1)
+		self.assertEqual(payment_request.reference_doctype, "Purchase Invoice")
+		self.assertEqual(payment_request.reference_name, invoice_name)
+
+	def test_payment_request_without_subscription_for_purchase_invoice(self):
+		pi = make_purchase_invoice()
+		payment_request = make_payment_request(
+			dt="Purchase Invoice",
+			dn=pi.name,
+			party_type="Supplier",
+			party=pi.supplier,
+			recipient_id="test@example.com",
+		)
+		self.assertEqual(payment_request.is_a_subscription, 0)
+		self.assertEqual(len(payment_request.subscription_plans), 0)
+		self.assertEqual(payment_request.reference_doctype, "Purchase Invoice")
+		self.assertEqual(payment_request.reference_name, pi.name)
+
+	def test_get_subscription_details_returns_empty_for_doctype_without_subscription_field(self):
+		so = make_sales_order()
+		self.assertEqual(get_subscription_details("Sales Order", so.name), [])
+
+	def test_get_subscription_details_requires_read_permission_on_reference(self):
+		si = create_sales_invoice()
+
+		restricted_user = "no-roles@example.com"
+		if not frappe.db.exists("User", restricted_user):
+			user = frappe.new_doc("User")
+			user.email = restricted_user
+			user.first_name = "No Roles"
+			user.send_welcome_email = 0
+			user.insert()
+
+		accounts_user = "accounts-user@example.com"
+		if not frappe.db.exists("User", accounts_user):
+			user = frappe.new_doc("User")
+			user.email = accounts_user
+			user.first_name = "Accounts"
+			user.send_welcome_email = 0
+			user.add_roles("Accounts User")
+
+		with self.set_user(restricted_user):
+			self.assertRaises(frappe.PermissionError, get_subscription_details, "Sales Invoice", si.name)
+
+		with self.set_user(accounts_user):
+			self.assertEqual(get_subscription_details("Sales Invoice", si.name), [])
