@@ -14,9 +14,15 @@ from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_pay
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.accounts.doctype.subscription.test_subscription import (
+	create_plan,
+	create_subscription,
+	make_plans,
+)
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.setup.utils import get_exchange_rate
+from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.tests.utils import ERPNextTestSuite
 
 PAYMENT_URL = "https://example.com/payment"
@@ -2009,3 +2015,54 @@ class TestPaymentRequestV2Gateway(ERPNextTestSuite):
 					call_kwargs = mock_log_error.call_args
 					self.assertIn("Payment Initialization Failed", str(call_kwargs))
 					self.assertIn("_Test Gateway", str(call_kwargs))
+
+	def test_payment_request_with_subscription(self):
+		make_plans()
+
+		subscription_plan = frappe.get_doc("Subscription Plan", "_Test Plan Name")
+		subscription_plan.payment_gateway = "_Test Gateway - INR - _TC"
+		subscription_plan.save()
+
+		subscription = create_subscription(
+			plans=[{"plan": "_Test Plan Name", "qty": 1}],
+			start_date=nowdate(),
+			generate_invoice_at="Prepaid (bill at period start)",
+			submit_invoice=1,
+		)
+		invoice_name = frappe.get_value(
+			"Sales Invoice",
+			{
+				"subscription": subscription.name,
+				"docstatus": 1,
+				"is_return": 0,
+			},
+			"name",
+			order_by="from_date asc",
+		)
+
+		payment_request = make_payment_request(
+			dt="Sales Invoice",
+			dn=invoice_name,
+			recipient_id="test@example.com",
+		)
+
+		self.assertEqual(payment_request.is_a_subscription, 1)
+		self.assertEqual(len(payment_request.subscription_plans), 1)
+
+		subscription_plan = payment_request.subscription_plans[0]
+		self.assertEqual(subscription_plan.plan, "_Test Plan Name")
+		self.assertEqual(subscription_plan.qty, 1)
+		self.assertEqual(payment_request.reference_doctype, "Sales Invoice")
+		self.assertEqual(payment_request.reference_name, invoice_name)
+
+	def test_payment_request_without_subscription(self):
+		si = create_sales_invoice()
+		payment_request = make_payment_request(
+			dt="Sales Invoice",
+			dn=si.name,
+			recipient_id="test@example.com",
+		)
+		self.assertEqual(payment_request.is_a_subscription, 0)
+		self.assertEqual(len(payment_request.subscription_plans), 0)
+		self.assertEqual(payment_request.reference_doctype, "Sales Invoice")
+		self.assertEqual(payment_request.reference_name, si.name)
