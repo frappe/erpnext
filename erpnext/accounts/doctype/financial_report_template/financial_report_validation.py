@@ -26,8 +26,8 @@ class ValidationIssue:
 			self.details = {}
 
 	def __str__(self) -> str:
-		prefix = _("Row {0}: ").format(self.row_idx) if self.row_idx else ""
-		field_info = _("[{0}] ").format(self.field) if self.field else ""
+		prefix = _("Row {0}:").format(self.row_idx) + " " if self.row_idx else ""
+		field_info = _("[{0}]").format(self.field) + " " if self.field else ""
 		return f"{prefix}{field_info}{self.message}"
 
 
@@ -419,7 +419,7 @@ class AccountFilterValidator(Validator):
 		except json.JSONDecodeError as e:
 			result.add_error(
 				ValidationIssue(
-					message=_("Invalid JSON format: {0}").format(e),
+					message=_("Invalid JSON format: {0}").format(str(e)),
 					row_idx=row.idx,
 					field=_("Account Filter"),
 				)
@@ -536,7 +536,7 @@ class FormulaValidator(Validator):
 		except Exception as e:
 			result.add_error(
 				ValidationIssue(
-					message=_("Could not validate API path: {0}").format(e),
+					message=_("Could not validate API path: {0}").format(str(e)),
 					row_idx=row.idx,
 					field=_("Formula"),
 				)
