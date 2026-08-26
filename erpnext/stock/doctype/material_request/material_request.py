@@ -112,6 +112,22 @@ class MaterialRequest(BuyingController):
 	def check_if_already_pulled(self):
 		pass
 
+	def validate_with_previous_doc(self):
+		super().validate_with_previous_doc(
+			{
+				"Sales Order": {
+					"ref_dn_field": "sales_order",
+					"compare_fields": [["company", "="]],
+				},
+				"Sales Order Item": {
+					"ref_dn_field": "sales_order_item",
+					"compare_fields": [["item_code", "="], ["uom", "="], ["conversion_factor", "="]],
+					"is_child_table": True,
+					"allow_duplicate_prev_row_id": True,
+				},
+			}
+		)
+
 	def validate_qty_against_so(self):
 		so_items = {}  # Format --> {'SO/00001': {'Item/001': 120, 'Item/002': 24}}
 		for d in self.get("items"):
@@ -157,6 +173,7 @@ class MaterialRequest(BuyingController):
 
 		self.validate_schedule_date()
 		self.check_for_on_hold_or_closed_status("Sales Order", "sales_order")
+		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_material_request_type()
 
