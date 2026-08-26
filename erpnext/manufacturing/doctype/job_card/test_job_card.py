@@ -1550,6 +1550,7 @@ class TestJobCard(ERPNextTestSuite):
 					"qty": 1,
 					"process_loss_per": 10,
 					"cost_allocation_per": 5,
+					"valuation_method": "% of FG Cost",
 					"secondary_item_type": "Scrap",
 				},
 			)

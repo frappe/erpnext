@@ -5529,6 +5529,7 @@ class TestWorkOrder(ERPNextTestSuite):
 				"item_name": scrap_item,
 				"qty": 3,
 				"cost_allocation_per": 25,
+				"valuation_method": "% of FG Cost",
 				"process_loss_per": 0,
 			},
 		)
@@ -5577,6 +5578,7 @@ class TestWorkOrder(ERPNextTestSuite):
 				"item_name": scrap_item,
 				"qty": 3,
 				"cost_allocation_per": 25,
+				"valuation_method": "% of FG Cost",
 				"process_loss_per": 0,
 			},
 		)

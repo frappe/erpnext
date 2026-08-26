@@ -63,7 +63,7 @@ class SubcontractingReceiptItem(Document):
 		subcontracting_receipt_item: DF.Data | None
 		secondary_item_type: DF.Literal["", "Co-Product", "By-Product", "Scrap", "Additional Finished Good"]
 		use_serial_batch_fields: DF.Check
-		valuation_method: DF.Literal["", "% of FG Cost", "Valuation Rate", "Manual"]
+		valuation_method: DF.Literal["", "Valuation Rate", "% of FG Cost", "Manual"]
 		warehouse: DF.Link | None
 	# end: auto-generated types
 

@@ -177,12 +177,12 @@
    "reqd": 1
   },
   {
-   "default": "% of FG Cost",
+   "default": "Valuation Rate",
    "description": "Valuation Rate and Manual value this item on its own and deduct that cost from the raw material cost, like the pre-v16 scrap items. % of FG Cost allocates a percentage of the remaining raw material cost.",
    "fieldname": "valuation_method",
    "fieldtype": "Select",
    "label": "Valuation Method",
-   "options": "% of FG Cost\nValuation Rate\nManual",
+   "options": "Valuation Rate\n% of FG Cost\nManual",
    "reqd": 1,
    "show_description_on_click": 1
   },

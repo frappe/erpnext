@@ -1362,6 +1362,7 @@ class TestStockEntry(ERPNextTestSuite):
 				"secondary_item_type": "By-Product",
 				"qty": 1,
 				"cost_allocation_per": 10,
+				"valuation_method": "% of FG Cost",
 			},
 		)
 		bom_doc.save()
@@ -1445,6 +1446,7 @@ class TestStockEntry(ERPNextTestSuite):
 				"secondary_item_type": "By-Product",
 				"qty": 1,
 				"cost_allocation_per": 10,
+				"valuation_method": "% of FG Cost",
 			},
 		)
 		bom_doc.save()

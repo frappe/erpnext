@@ -32,7 +32,7 @@ class BOMSecondaryItem(Document):
 		stock_qty: DF.Float
 		stock_uom: DF.Link | None
 		uom: DF.Link
-		valuation_method: DF.Literal["% of FG Cost", "Valuation Rate", "Manual"]
+		valuation_method: DF.Literal["Valuation Rate", "% of FG Cost", "Manual"]
 	# end: auto-generated types
 
 	pass
