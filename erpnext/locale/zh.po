@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-08-23 09:41+0000\n"
-"PO-Revision-Date: 2026-08-24 03:03\n"
+"PO-Revision-Date: 2026-08-26 03:38\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Chinese Simplified\n"
 "MIME-Version: 1.0\n"
@@ -52554,7 +52554,7 @@ msgstr ""
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Show balances in Chart of Accounts"
-msgstr ""
+msgstr "在会计科目表中显示余额"
 
 #. Label of the show_barcode_field (Check) field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
