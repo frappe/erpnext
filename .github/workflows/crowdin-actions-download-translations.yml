@@ -27,6 +27,7 @@ jobs:
         with:
           ref: ${{ matrix.branch }}
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Download translations and open PR
         uses: crowdin/github-action@8f01d54f70f1713ee3f09d82c2bbb2daeac28689 # v2.17.1
