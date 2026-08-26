@@ -18,6 +18,12 @@ def execute(filters=None):
 class Analytics:
 	def __init__(self, filters=None):
 		self.filters = frappe._dict(filters or {})
+<<<<<<< HEAD
+=======
+		self.entities = self.filters.get("entity") or []
+		if self.filters.doc_type == "Payment Entry" and self.filters.value_quantity == "Quantity":
+			frappe.throw(_("Only Value available for Payment Entry"))
+>>>>>>> 3f29cdf (feat(analytics): filter sales and purchase analytics by entity (#58402))
 		self.date_field = (
 			"transaction_date"
 			if self.filters.doc_type in ["Sales Order", "Purchase Order"]
@@ -61,6 +67,7 @@ class Analytics:
 		self.update_company_list_for_parent_company()
 		self.get_columns()
 		self.get_data()
+		self.filter_data_by_entities()
 		self.get_chart_data()
 
 		# Skipping total row for tree-view reports
@@ -324,6 +331,23 @@ class Analytics:
 			fields=[entity, value_field, self.date_field],
 			filters=filters,
 		)
+
+	def filter_data_by_entities(self):
+		if not self.entities:
+			return
+
+		entities = set(self.entities)
+		selected_data = []
+		for row in self.data:
+			if row["entity"] not in entities:
+				continue
+
+			row = row.copy()
+			if "indent" in row:
+				row["indent"] = 0
+			selected_data.append(row)
+
+		self.data = selected_data
 
 	def get_rows(self):
 		self.data = []
