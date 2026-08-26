@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-08-23 09:41+0000\n"
-"PO-Revision-Date: 2026-08-24 03:03\n"
+"PO-Revision-Date: 2026-08-26 11:44\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -749,7 +749,7 @@ msgid "<h3>Currency Exchange Settings Help</h3>\n"
 "<p>There are 3 variables that could be used within the endpoint, result key and in values of the parameter.</p>\n"
 "<p>Exchange rate between {from_currency} and {to_currency} on {transaction_date} is fetched by the API.</p>\n"
 "<p>Example: If your endpoint is exchange.com/2021-08-01, then, you will have to input exchange.com/{transaction_date}</p>"
-msgstr "<h3>Valutaväxling Inställningar Hjälp</h3>\n"
+msgstr "<h3>Växelkurs Inställningar Hjälp</h3>\n"
 "<p>Det finns 3 variabler som kan användas av slutpunkt, resultat nyckel och i parameter värde.</p>\n"
 "<p>Växelkurs mellan {from_currency} och {to_currency} {transaction_date} hämtas av API.</p>\n"
 "<p>Exempel: Om slutpunkt är exchange.com/2021-08-01 måste du ange exchange.com/{transaction_date}</p>"
@@ -1096,7 +1096,7 @@ msgstr "Helg Lista kan läggas till för att utesluta dessa dagar för Arbetssta
 
 #: erpnext/crm/doctype/lead/lead.py:140
 msgid "A Lead requires either a person's name or an organization's name"
-msgstr "Potentiell Kund kräver antingen person namn eller bolag namn"
+msgstr "Potentiell Kund erfordrar antingen person namn eller bolag namn"
 
 #: erpnext/stock/doctype/packing_slip/packing_slip.py:83
 msgid "A Packing Slip can only be created for a Draft Delivery Note."
@@ -6425,7 +6425,7 @@ msgstr "På rad {0}: Fält {1} erfordras för intern överföring"
 
 #: erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py:85
 msgid "At least one account with exchange gain or loss is required"
-msgstr "Minst ett konto med Valutaväxling Resultat erfordras"
+msgstr "Minst ett konto med Växelkurs Resultat erfordras"
 
 #: erpnext/assets/doctype/asset/mapper.py:168
 msgid "At least one asset has to be selected."
@@ -14591,7 +14591,7 @@ msgstr "Cup"
 #: erpnext/accounts/workspace/invoicing/invoicing.json
 #: erpnext/setup/doctype/currency_exchange/currency_exchange.json
 msgid "Currency Exchange"
-msgstr "Valutaväxling"
+msgstr "Växelkurs"
 
 #. Label of the currency_exchange_section (Section Break) field in DocType
 #. 'Accounts Settings'
@@ -14601,21 +14601,21 @@ msgstr "Valutaväxling"
 #: erpnext/accounts/doctype/currency_exchange_settings/currency_exchange_settings.json
 #: erpnext/workspace_sidebar/erpnext_settings.json
 msgid "Currency Exchange Settings"
-msgstr "Valutaväxling Inställningar"
+msgstr "Växelkurs Inställningar"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/currency_exchange_settings_details/currency_exchange_settings_details.json
 msgid "Currency Exchange Settings Details"
-msgstr "Valutaväxling Inställning Detaljer"
+msgstr "Växelkurs Inställning Detaljer"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/currency_exchange_settings_result/currency_exchange_settings_result.json
 msgid "Currency Exchange Settings Result"
-msgstr "Valutaväxling Inställning Resultat"
+msgstr "Växelkurs Inställning Resultat"
 
 #: erpnext/setup/doctype/currency_exchange/currency_exchange.py:55
 msgid "Currency Exchange must be applicable for Buying or for Selling."
-msgstr "Valutaväxling måste vara tillämplig för Inköp eller Försäljning."
+msgstr "Växelkurs måste vara tillämplig för Inköp eller Försäljning."
 
 #. Label of the currency_and_price_list (Section Break) field in DocType 'POS
 #. Invoice'
@@ -20092,12 +20092,12 @@ msgstr "Valutakurs Vinst"
 #. 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Exchange Gain / Loss"
-msgstr "Valutaväxling Resultat"
+msgstr "Växelkurs Resultat"
 
 #. Label of the exchange_gain_loss_account (Link) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Exchange Gain / Loss Account"
-msgstr "Valutaväxling Resultat Konto"
+msgstr "Växelkurs Resultat Konto"
 
 #. Label of the exchange_gain_account (Link) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
@@ -20107,7 +20107,7 @@ msgstr "Valutakusr Vinst Konto"
 #. Option for the 'Entry Type' (Select) field in DocType 'Journal Entry'
 #: erpnext/accounts/doctype/journal_entry/journal_entry.json
 msgid "Exchange Gain Or Loss"
-msgstr "Valutaväxling Resultat"
+msgstr "Växelkurs Resultat"
 
 #. Label of the exchange_gain_loss (Currency) field in DocType 'Payment Entry
 #. Reference'
@@ -20122,12 +20122,12 @@ msgstr "Valutaväxling Resultat"
 #: erpnext/accounts/doctype/sales_invoice_advance/sales_invoice_advance.json
 #: erpnext/setup/doctype/company/company.py:804
 msgid "Exchange Gain/Loss"
-msgstr "Valutaväxling Resultat"
+msgstr "Växelkurs Resultat"
 
 #: erpnext/accounts/services/exchange_gain_loss.py:120
 #: erpnext/accounts/services/exchange_gain_loss.py:195
 msgid "Exchange Gain/Loss amount has been booked through {0}"
-msgstr "Valutaväxling Resultat Belopp har bokförts genom {0}"
+msgstr "Växelkurs Resultat Belopp har bokförts genom {0}"
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:141
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:236
@@ -23711,7 +23711,7 @@ msgstr "Här kan du välja överordnade för Personal. Baserat på detta kommer 
 
 #: erpnext/setup/doctype/holiday_list/holiday_list.js:77
 msgid "Here, your weekly offs are pre-populated based on the previous selections. You can add more rows to also add public and national holidays individually."
-msgstr "Här är dina veckoledigheter förifyllda baserat på tidigare val. Du kan lägga till fler rader för att även lägga till allmänna och nationella helgdagar individuellt."
+msgstr "Här är dina veckofrånvaro förifyllda baserat på tidigare val. Du kan lägga till fler rader för att även lägga till allmänna och nationella helgdagar individuellt."
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -33610,7 +33610,7 @@ msgstr "Inga utestående fakturor hittades"
 
 #: erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py:358
 msgid "No outstanding invoices require exchange rate revaluation"
-msgstr "Inga utestående fakturor kräver växelkurs omvärdering"
+msgstr "Inga utestående fakturor erfordrar växelkurs omvärdering"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:2181
 msgid "No outstanding {0} found for the {1} {2} which qualify the filters you have specified."
@@ -33747,7 +33747,7 @@ msgstr "Inga arbetsordrar här."
 
 #: erpnext/accounts/doctype/sales_invoice/mapper.py:163
 msgid "No {0} found for Inter Company Transactions."
-msgstr "Ingen {0} hittades för Inter Bolag Transaktioner."
+msgstr "{0} hittades inte för Inter Bolag Transaktioner."
 
 #. Label of the no_of_employees (Select) field in DocType 'Prospect'
 #: erpnext/crm/doctype/prospect/prospect.json
@@ -35822,7 +35822,7 @@ msgstr "PDF Tabeller"
 
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.py:930
 msgid "PDF statement support requires the 'pdfplumber' library to be installed."
-msgstr "Stöd för PDF kontoutdrag kräver att bibliotek \"pdfplumber\" är installerad."
+msgstr "Stöd för PDF kontoutdrag erfordrar att bibliotek \"pdfplumber\" är installerad."
 
 #. Label of the pin (Data) field in DocType 'Warehouse'
 #: erpnext/stock/doctype/warehouse/warehouse.json
@@ -39716,7 +39716,7 @@ msgstr "Ange Org.Nr. for Kund '{0}'"
 
 #: erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py:369
 msgid "Please set Unrealized Exchange Gain/Loss Account in Company {0}"
-msgstr "Ange Orealiserat Valutaväxling Resultat Konto i Bolag {0}"
+msgstr "Ange Orealiserat Växelkurs Resultat Konto i Bolag {0}"
 
 #: erpnext/regional/report/vat_audit_report/vat_audit_report.py:54
 msgid "Please set VAT Accounts in {0}"
@@ -39802,7 +39802,7 @@ msgstr "Ange Standard Kassa eller Bank Konto i Betalning Sätt {0}"
 
 #: erpnext/accounts/utils.py:2589
 msgid "Please set default Exchange Gain/Loss Account in Company {0}"
-msgstr "Ange Standard Valutaväxling Resultat Konto för {0}"
+msgstr "Ange Standard Växelkurs Resultat Konto för {0}"
 
 #: erpnext/assets/doctype/asset_repair/services/gl_composer.py:92
 msgid "Please set default Expense Account in Company {0}"
@@ -39899,7 +39899,7 @@ msgstr "Ange {0} i {1} eller i Artikel Standard Inställningar {2}"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:1157
 msgid "Please set {0} in Company {1} to account for Exchange Gain / Loss"
-msgstr "Ange {0} i Bolag {1} för att bokföra valutaväxling resultat"
+msgstr "Ange {0} i Bolag {1} för att bokföra växelkurs resultat"
 
 #: erpnext/stock/doctype/stock_entry/services/manufacturing.py:1495
 msgid "Please set {0} in Company {1} to retain samples."
@@ -40194,7 +40194,7 @@ msgstr "Registrering Datum kan inte vara framtida datum"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Posting Date inheritance for exchange gain / loss"
-msgstr "Bokföring Datum arv för valutaväxling resultat"
+msgstr "Bokföring Datum arv för växelkurs resultat"
 
 #: erpnext/public/js/controllers/transaction.js:1161
 msgid "Posting Date will change to today's date as Edit Posting Date and Time is unchecked. Are you sure want to proceed?"
@@ -45541,7 +45541,7 @@ msgstr "Tog bort {0} rader med noll dokument antal. Spara för att ändringarna 
 
 #: erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py:88
 msgid "Removing rows without exchange gain or loss"
-msgstr "Tar bort rader utan Valutaväxling Resultat"
+msgstr "Tar bort rader utan Växelkurs Resultat"
 
 #. Description of the 'Allow Rename Attribute Value' (Check) field in DocType
 #. 'Item Variant Settings'
@@ -60722,7 +60722,7 @@ msgstr "Okvalificerad"
 #. 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Unrealized Exchange Gain/Loss Account"
-msgstr "Orealiserad Valutaväxling Resultat Konto"
+msgstr "Orealiserad Växelkurs Resultat Konto"
 
 #. Label of the unrealized_profit_loss_account (Link) field in DocType
 #. 'Purchase Invoice'
@@ -64773,11 +64773,11 @@ msgstr "{0} är erfodrad för konto {1}"
 
 #: erpnext/public/js/controllers/taxes_and_totals.js:137
 msgid "{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}"
-msgstr "{0} är erfordrad. Kanske Valutaväxling Post är inte skapad för {1} till {2}"
+msgstr "{0} är erfordrad. Kanske Växelkurs Post är inte skapad för {1} till {2}"
 
 #: erpnext/accounts/services/taxes.py:233
 msgid "{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}."
-msgstr "{0} är erfordrad. Kanske Valutaväxling Post är inte skapad för {1} till {2}."
+msgstr "{0} är erfordrad. Kanske Växelkurs Post är inte skapad för {1} till {2}."
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1953
 msgid "{0} is not a CSV file."
