@@ -38,15 +38,13 @@
  {
   "secondary_items":[
   {
-   "amount": 2000.0,
    "doctype": "BOM Secondary Item",
    "item_code": "_Test Item Home Desktop 100",
    "parentfield": "secondary_items",
    "stock_qty": 1.0,
-   "rate": 2000.0,
    "stock_uom": "_Test UOM",
    "secondary_item_type": "Scrap",
-   "is_legacy": 1
+   "valuation_method": "Valuation Rate"
   }
   ],
   "items": [

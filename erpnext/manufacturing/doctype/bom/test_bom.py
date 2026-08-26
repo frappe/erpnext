@@ -543,7 +543,7 @@ class TestBOM(ERPNextTestSuite):
 		fg_item_non_whole, fg_item_whole, bom_item = create_process_loss_bom_items()
 
 		bom_doc = create_bom_with_process_loss_item(
-			fg_item_non_whole, bom_item, scrap_qty=2, scrap_rate=0, process_loss_percentage=110
+			fg_item_non_whole, bom_item, scrap_qty=2, process_loss_percentage=110
 		)
 		#  PL can't be > 100
 		self.assertRaises(frappe.ValidationError, bom_doc.submit)
@@ -575,6 +575,210 @@ class TestBOM(ERPNextTestSuite):
 
 		# FG item of the BOM cannot also be a secondary item
 		self.assertRaises(frappe.ValidationError, bom_doc.save)
+
+	@timeout
+	def test_duplicate_secondary_item_not_allowed(self):
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		scrap_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 50}).name
+
+		bom_doc = frappe.new_doc("BOM")
+		bom_doc.item = fg_item
+		bom_doc.quantity = 1
+		bom_doc.company = "_Test Company"
+		bom_doc.currency = "INR"
+		bom_doc.append("items", {"item_code": rm_item, "qty": 1, "rate": 100.0})
+		bom_doc.append(
+			"secondary_items",
+			{
+				"item_code": scrap_item,
+				"secondary_item_type": "Scrap",
+				"qty": 1,
+				"valuation_method": "Valuation Rate",
+			},
+		)
+		bom_doc.append(
+			"secondary_items",
+			{"item_code": scrap_item, "secondary_item_type": "Scrap", "qty": 1, "cost_allocation_per": 10},
+		)
+		self.assertRaises(frappe.ValidationError, bom_doc.save)
+
+		# the same item with a different type is a distinct secondary output
+		bom_doc.secondary_items[1].secondary_item_type = "By-Product"
+		bom_doc.save()
+
+	@timeout
+	def test_secondary_item_manual_cost(self):
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		by_product = make_item(properties={"is_stock_item": 1}).name
+
+		bom_doc = frappe.new_doc("BOM")
+		bom_doc.item = fg_item
+		bom_doc.quantity = 1
+		bom_doc.company = "_Test Company"
+		bom_doc.currency = "INR"
+		bom_doc.append("items", {"item_code": rm_item, "qty": 10, "rate": 100.0})
+		bom_doc.append(
+			"secondary_items",
+			{
+				"item_code": by_product,
+				"secondary_item_type": "By-Product",
+				"qty": 1,
+				"valuation_method": "Manual",
+				"cost": 150,
+			},
+		)
+		bom_doc.save()
+
+		row = bom_doc.secondary_items[0]
+		self.assertEqual(row.cost, 150)
+		self.assertEqual(row.cost_allocation_per, 0)
+		self.assertEqual(bom_doc.secondary_items_cost, 150)
+		self.assertEqual(bom_doc.total_cost, 850)
+		self.assertEqual(bom_doc.cost_allocation, 850)
+
+		# a manual cost above the raw material cost would turn the finished good negative
+		bom_doc.secondary_items[0].cost = 1100
+		self.assertRaises(frappe.ValidationError, bom_doc.save)
+
+	@timeout
+	def test_secondary_item_valuation_rate_method(self):
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		scrap_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 50}).name
+		by_product = make_item(properties={"is_stock_item": 1}).name
+
+		bom_doc = frappe.new_doc("BOM")
+		bom_doc.item = fg_item
+		bom_doc.quantity = 1
+		bom_doc.company = "_Test Company"
+		bom_doc.currency = "INR"
+		bom_doc.append("items", {"item_code": rm_item, "qty": 10, "rate": 100.0})
+		bom_doc.append(
+			"secondary_items",
+			{
+				"item_code": scrap_item,
+				"secondary_item_type": "Scrap",
+				"qty": 2,
+				"valuation_method": "Valuation Rate",
+			},
+		)
+		bom_doc.append(
+			"secondary_items",
+			{
+				"item_code": by_product,
+				"secondary_item_type": "By-Product",
+				"qty": 1,
+				"cost_allocation_per": 10,
+			},
+		)
+		bom_doc.save()
+
+		scrap_row = bom_doc.secondary_items[0]
+		self.assertEqual(scrap_row.cost, 100)
+		self.assertEqual(scrap_row.cost_allocation_per, 0)
+
+		# the by-product's percentage applies to the cost net of the valuation rate rows
+		self.assertEqual(bom_doc.raw_material_cost, 1000)
+		self.assertEqual(bom_doc.secondary_items[1].cost, 90)
+		self.assertEqual(bom_doc.cost_allocation_per, 90)
+		self.assertEqual(bom_doc.cost_allocation, 810)
+		self.assertEqual(bom_doc.secondary_items_cost, 190)
+		self.assertEqual(bom_doc.total_cost, 810)
+
+	@timeout
+	def test_rm_rate_scoped_to_source_warehouse(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+
+		make_stock_entry(item_code=rm_item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		make_stock_entry(item_code=rm_item, target="_Test Warehouse 1 - _TC", qty=10, basic_rate=50)
+
+		bom_doc = frappe.new_doc("BOM")
+		bom_doc.item = fg_item
+		bom_doc.quantity = 1
+		bom_doc.company = "_Test Company"
+		bom_doc.currency = "INR"
+		bom_doc.append("items", {"item_code": rm_item, "qty": 1, "source_warehouse": "_Test Warehouse - _TC"})
+		bom_doc.save()
+		self.assertEqual(bom_doc.items[0].rate, 100)
+
+		bom_doc.items[0].source_warehouse = None
+		bom_doc.save()
+		self.assertEqual(bom_doc.items[0].rate, 75)
+
+		bom_doc.default_source_warehouse = "_Test Warehouse 1 - _TC"
+		bom_doc.save()
+		self.assertEqual(bom_doc.items[0].rate, 50)
+
+	@timeout
+	def test_secondary_item_rate_scoped_to_target_warehouse(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		scrap_item = make_item(properties={"is_stock_item": 1}).name
+
+		make_stock_entry(item_code=scrap_item, target="_Test Warehouse - _TC", qty=10, basic_rate=40)
+		make_stock_entry(item_code=scrap_item, target="_Test Warehouse 1 - _TC", qty=10, basic_rate=20)
+
+		bom_doc = frappe.new_doc("BOM")
+		bom_doc.item = fg_item
+		bom_doc.quantity = 1
+		bom_doc.company = "_Test Company"
+		bom_doc.currency = "INR"
+		bom_doc.default_target_warehouse = "_Test Warehouse - _TC"
+		bom_doc.append("items", {"item_code": rm_item, "qty": 10, "rate": 100.0})
+		bom_doc.append(
+			"secondary_items",
+			{
+				"item_code": scrap_item,
+				"secondary_item_type": "Scrap",
+				"qty": 1,
+				"valuation_method": "Valuation Rate",
+			},
+		)
+		bom_doc.save()
+		self.assertEqual(bom_doc.secondary_items[0].cost, 40)
+
+		bom_doc.default_target_warehouse = None
+		bom_doc.save()
+		self.assertEqual(bom_doc.secondary_items[0].cost, 30)
+
+	@timeout
+	def test_secondary_item_valuation_rate_refreshed_on_update_cost(self):
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		scrap_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 50}).name
+
+		bom_doc = frappe.new_doc("BOM")
+		bom_doc.item = fg_item
+		bom_doc.quantity = 1
+		bom_doc.company = "_Test Company"
+		bom_doc.currency = "INR"
+		bom_doc.append("items", {"item_code": rm_item, "qty": 10, "rate": 100.0})
+		bom_doc.append(
+			"secondary_items",
+			{
+				"item_code": scrap_item,
+				"secondary_item_type": "Scrap",
+				"qty": 2,
+				"valuation_method": "Valuation Rate",
+			},
+		)
+		bom_doc.save()
+		bom_doc.submit()
+
+		frappe.db.set_value("Item", scrap_item, "valuation_rate", 80)
+		bom_doc.update_cost()
+		bom_doc.reload()
+
+		self.assertEqual(bom_doc.secondary_items[0].cost, 160)
+		self.assertEqual(bom_doc.total_cost, 840)
+		self.assertEqual(bom_doc.cost_allocation, 840)
 
 	@timeout
 	def test_bom_item_query(self):
@@ -1276,7 +1480,7 @@ def reset_item_valuation_rate(item_code, warehouse_list=None, qty=None, rate=Non
 
 
 def create_bom_with_process_loss_item(
-	fg_item, bom_item, scrap_qty=0, scrap_rate=0, fg_qty=2, process_loss_percentage=0, company=None
+	fg_item, bom_item, scrap_qty=0, fg_qty=2, process_loss_percentage=0, company=None
 ):
 	bom_doc = frappe.new_doc("BOM")
 	bom_doc.item = fg_item.item_code
@@ -1302,7 +1506,6 @@ def create_bom_with_process_loss_item(
 				"stock_qty": scrap_qty,
 				"uom": fg_item.stock_uom,
 				"stock_uom": fg_item.stock_uom,
-				"rate": scrap_rate,
 			},
 		)
 

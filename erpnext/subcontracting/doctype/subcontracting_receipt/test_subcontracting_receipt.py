@@ -1193,8 +1193,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 				{
 					"item_code": item,
 					"stock_qty": 1 * (idx + 1),
-					"rate": 10 * (idx + 1),
-					"is_legacy": 1,
+					"valuation_method": "Valuation Rate",
 				},
 			)
 		bom.save()
@@ -1220,10 +1219,26 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		scr.get_secondary_items()
 
 		scr_secondary_items = set(
-			[item.item_code for item in scr.items if item.secondary_item_type or item.is_legacy_scrap_item]
+			[item.item_code for item in scr.items if item.secondary_item_type or item.valuation_method]
 		)
 		self.assertEqual(len(scr.items), 3)  # 1 FG Item + 2 Scrap Items
 		self.assertEqual(scr_secondary_items, set(secondary_items))
+
+		# without a document level warehouse the rows fall back to the FG row's warehouse
+		scr.set_warehouse = None
+		scr.get_secondary_items()
+		fg_warehouse = next(item.warehouse for item in scr.items if item.bom)
+		for item in scr.items:
+			if item.secondary_item_type or item.valuation_method:
+				self.assertEqual(item.warehouse, fg_warehouse)
+
+		# valuation rate rows are repriced at their warehouse on every save
+		make_stock_entry(item_code=secondary_item_1, target="_Test Warehouse - _TC", qty=5, basic_rate=40)
+		vr_row = next(item for item in scr.items if item.item_code == secondary_item_1)
+		vr_row.warehouse = "_Test Warehouse - _TC"
+		scr.save()
+		vr_row = next(item for item in scr.items if item.item_code == secondary_item_1)
+		self.assertEqual(vr_row.rate, 40)
 
 		scr.submit()
 
