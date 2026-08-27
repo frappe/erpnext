@@ -547,12 +547,17 @@ def get_timesheets_list(doctype, txt, filters, limit_start, limit_page_length=20
 		customer = contact.get_link_for("Customer")
 
 	if customer:
-		sales_invoices = frappe.get_all("Sales Invoice", filters={"customer": customer}, pluck="name")
+		customer_invoices = frappe.get_all(
+			"Sales Invoice", filters={"customer": customer}, fields=["name", "docstatus"]
+		)
+		sales_invoices = [invoice.name for invoice in customer_invoices if invoice.docstatus != 2]
+		cancelled_sales_invoices = [invoice.name for invoice in customer_invoices if invoice.docstatus == 2]
 		projects = frappe.get_all("Project", filters={"customer": customer}, pluck="name")
 
 		# Return timesheet related data to web portal.
 		table = frappe.qb.DocType("Timesheet")
 		child_table = frappe.qb.DocType("Timesheet Detail")
+		sales_invoice = Coalesce(table.sales_invoice, child_table.sales_invoice)
 		query = (
 			frappe.qb.from_(table)
 			.join(child_table)
@@ -562,7 +567,7 @@ def get_timesheets_list(doctype, txt, filters, limit_start, limit_page_length=20
 				child_table.activity_type,
 				table.status,
 				child_table.billing_hours,
-				Coalesce(table.sales_invoice, child_table.sales_invoice).as_("sales_invoice"),
+				sales_invoice.as_("sales_invoice"),
 				child_table.project,
 			)
 			.orderby(table.end_date)
@@ -580,6 +585,8 @@ def get_timesheets_list(doctype, txt, filters, limit_start, limit_page_length=20
 
 		if conditions:
 			query = query.where(frappe.qb.terms.Criterion.any(conditions))
+		if cancelled_sales_invoices:
+			query = query.where(sales_invoice.isnull() | sales_invoice.notin(cancelled_sales_invoices))
 
 		return query.run(as_dict=True)
 	else:
