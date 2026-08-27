@@ -10,7 +10,6 @@ from erpnext import get_company_currency
 from erpnext.accounts.party import get_default_price_list as get_party_default_price_list
 from erpnext.accounts.services.taxes import validate_conversion_rate
 from erpnext.setup.utils import get_exchange_rate
-from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.get_item_details import get_price_list_rate_for
 
 _ORDER_TYPE_CONFIG = {
@@ -115,8 +114,19 @@ def get_default_price_list(doc):
 def get_price_list_rates(doc, item_name=None):
 	price_list = doc.get(get_order_type_config(doc.blanket_order_type)["price_list_field"])
 	items = [item for item in doc.items if item.item_code and (not item_name or item.name == item_name)]
+	if not items:
+		return []
 	if not price_list:
 		return [{"name": item.name, "price_list_rate": 0, "base_price_list_rate": 0} for item in items]
+
+	stock_uoms = dict(
+		frappe.get_all(
+			"Item",
+			filters={"name": ("in", [item.item_code for item in items])},
+			fields=["name", "stock_uom"],
+			as_list=True,
+		)
+	)
 
 	ctx = frappe._dict(
 		{
@@ -128,7 +138,7 @@ def get_price_list_rates(doc, item_name=None):
 	)
 	rates = []
 	for item in items:
-		stock_uom = get_item_defaults(item.item_code, doc.company).get("stock_uom")
+		stock_uom = stock_uoms.get(item.item_code)
 		ctx.update(
 			{
 				"qty": flt(item.qty) or 1,
