@@ -222,7 +222,7 @@
    "label": "Rate",
    "options": "Company:company:default_currency",
    "print_width": "100px",
-   "read_only": 1,
+   "read_only_depends_on": "eval:doc.valuation_method != 'Manual'",
    "width": "100px"
   },
   {

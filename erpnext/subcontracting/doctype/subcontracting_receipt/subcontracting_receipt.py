@@ -396,10 +396,10 @@ class SubcontractingReceipt(SubcontractingController):
 						)
 						fg_item_cost = (
 							flt(item.rm_cost_per_qty)
-							+ flt(item.secondary_items_cost_per_qty)
 							+ flt(item.additional_cost_per_qty)
 							+ flt(lcv_cost_per_qty)
 							+ flt(item.service_cost_per_qty)
+							- flt(item.secondary_items_cost_per_qty)
 						) * flt(item.received_qty)
 						rate = (fg_item_cost * (secondary_item.cost_allocation_per / 100)) / qty
 					elif secondary_item.valuation_method == "Manual":
@@ -536,10 +536,12 @@ class SubcontractingReceipt(SubcontractingController):
 				)
 				item.amount = qty * flt(item.rate)
 
-				if item.reference_name in secondary_items_cost_map:
-					secondary_items_cost_map[item.reference_name] += item.amount
-				else:
-					secondary_items_cost_map[item.reference_name] = item.amount
+				# only rows valued on their own are deducted from the finished good;
+				# the percentage rows' share is the BOM's cost allocation multiplier
+				if item.valuation_method in ("Valuation Rate", "Manual"):
+					secondary_items_cost_map[item.reference_name] = (
+						secondary_items_cost_map.get(item.reference_name, 0) + item.amount
+					)
 
 		total_qty = total_amount = 0
 		for item in self.get("items") or []:
@@ -565,6 +567,7 @@ class SubcontractingReceipt(SubcontractingController):
 					+ flt(item.service_cost_per_qty)
 					+ flt(item.additional_cost_per_qty)
 					+ flt(lcv_cost_per_qty)
+					- flt(item.secondary_items_cost_per_qty)
 				)
 
 			if item.bom:
