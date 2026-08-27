@@ -10,6 +10,7 @@ from frappe.model.document import Document
 from frappe.query_builder.functions import Coalesce, Concat, Date, Round
 from frappe.utils import flt, get_datetime, getdate
 from frappe.utils.deprecations import deprecated
+from pypika.terms import ExistsCriterion
 
 from erpnext.setup.utils import get_exchange_rate
 
@@ -547,17 +548,32 @@ def get_timesheets_list(doctype, txt, filters, limit_start, limit_page_length=20
 		customer = contact.get_link_for("Customer")
 
 	if customer:
-		customer_invoices = frappe.get_all(
-			"Sales Invoice", filters={"customer": customer}, fields=["name", "docstatus"]
+		sales_invoices = frappe.get_all(
+			"Sales Invoice",
+			filters={"customer": customer, "docstatus": ["!=", 2]},
+			pluck="name",
 		)
-		sales_invoices = [invoice.name for invoice in customer_invoices if invoice.docstatus != 2]
-		cancelled_sales_invoices = [invoice.name for invoice in customer_invoices if invoice.docstatus == 2]
 		projects = frappe.get_all("Project", filters={"customer": customer}, pluck="name")
+		if not (sales_invoices or projects):
+			return []
 
 		# Return timesheet related data to web portal.
 		table = frappe.qb.DocType("Timesheet")
 		child_table = frappe.qb.DocType("Timesheet Detail")
-		sales_invoice = Coalesce(table.sales_invoice, child_table.sales_invoice)
+		sales_invoice = frappe.qb.DocType("Sales Invoice")
+		cancelled_invoice_detail = frappe.qb.DocType("Timesheet Detail").as_("cancelled_invoice_detail")
+		cancelled_header_invoice_exists = ExistsCriterion(
+			frappe.qb.from_(sales_invoice)
+			.select(sales_invoice.name)
+			.where((sales_invoice.docstatus == 2) & (sales_invoice.name == table.sales_invoice))
+		)
+		cancelled_detail_invoice_exists = ExistsCriterion(
+			frappe.qb.from_(cancelled_invoice_detail)
+			.join(sales_invoice)
+			.on(sales_invoice.name == cancelled_invoice_detail.sales_invoice)
+			.select(cancelled_invoice_detail.name)
+			.where((cancelled_invoice_detail.parent == table.name) & (sales_invoice.docstatus == 2))
+		)
 		query = (
 			frappe.qb.from_(table)
 			.join(child_table)
@@ -567,7 +583,7 @@ def get_timesheets_list(doctype, txt, filters, limit_start, limit_page_length=20
 				child_table.activity_type,
 				table.status,
 				child_table.billing_hours,
-				sales_invoice.as_("sales_invoice"),
+				Coalesce(table.sales_invoice, child_table.sales_invoice).as_("sales_invoice"),
 				child_table.project,
 			)
 			.orderby(table.end_date)
@@ -583,12 +599,12 @@ def get_timesheets_list(doctype, txt, filters, limit_start, limit_page_length=20
 		if projects:
 			conditions.append(child_table.project.isin(projects))
 
-		if conditions:
-			query = query.where(frappe.qb.terms.Criterion.any(conditions))
-		if cancelled_sales_invoices:
-			query = query.where(sales_invoice.isnull() | sales_invoice.notin(cancelled_sales_invoices))
-
-		return query.run(as_dict=True)
+		return (
+			query.where(frappe.qb.terms.Criterion.any(conditions))
+			.where(cancelled_header_invoice_exists.negate())
+			.where(cancelled_detail_invoice_exists.negate())
+			.run(as_dict=True)
+		)
 	else:
 		return {}
 

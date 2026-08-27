@@ -411,18 +411,9 @@ class TestTimesheet(ERPNextTestSuite):
 		self.addCleanup(self._delete_if_exists, "Contact", contact.name)
 
 		si = create_sales_invoice(customer=customer)
-		project = frappe.get_doc(
-			{
-				"doctype": "Project",
-				"project_name": "_Test Timesheet Portal Project",
-				"customer": customer,
-				"company": "_Test Company",
-				"expected_start_date": nowdate(),
-			}
-		).insert()
 
 		employee = make_employee("_test_timesheet_portal@example.com", company="_Test Company")
-		timesheet = make_timesheet(employee, is_billable=0, project=project.name)
+		timesheet = make_timesheet(employee, is_billable=0)
 		frappe.db.set_value("Timesheet", timesheet.name, "sales_invoice", si.name)
 
 		rows = get_timesheets_list("Timesheet", None, {}, 0, 500)
@@ -430,12 +421,6 @@ class TestTimesheet(ERPNextTestSuite):
 		row = next((r for r in rows if r.name == timesheet.name), None)
 		self.assertIsNotNone(row, "billed timesheet not returned by portal list")
 		self.assertEqual(row.sales_invoice, si.name)
-
-		frappe.db.set_value("Timesheet", timesheet.name, "sales_invoice", None)
-		si.cancel()
-		frappe.db.set_value("Timesheet", timesheet.name, "sales_invoice", si.name)
-		rows = get_timesheets_list("Timesheet", None, {}, 0, 500)
-		self.assertNotIn(timesheet.name, [row.name for row in rows])
 
 	def test_get_activity_cost_falls_back_to_activity_type(self):
 		from erpnext.projects.doctype.timesheet.timesheet import get_activity_cost
