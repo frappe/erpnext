@@ -785,9 +785,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		)
 
 	def get_basic_rate_for_repacked_items(self, finished_item_qty, outgoing_items_cost):
-		costed_out_cost = self.get_costed_out_items_cost()
-		self.validate_costed_out_items_cost(outgoing_items_cost, costed_out_cost)
-		outgoing_items_cost -= costed_out_cost
+		outgoing_items_cost -= self.get_costed_out_items_cost()
 
 		finished_items = [
 			d.item_code for d in self.get("items") if d.is_finished_item and not d.set_basic_rate_manually
@@ -821,17 +819,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 				settings, finished_item_qty, outgoing_items_cost, has_consumption_basis
 			)
 
-		self.validate_costed_out_items_cost(outgoing_items_cost, scrap_items_cost)
 		return flt((outgoing_items_cost - scrap_items_cost) / finished_item_qty)
-
-	def validate_costed_out_items_cost(self, outgoing_items_cost, costed_out_cost):
-		"""The finished good cannot absorb a negative cost."""
-		if flt(costed_out_cost) > flt(outgoing_items_cost):
-			frappe.throw(
-				_(
-					"The cost of the secondary items valued on their own ({0}) cannot exceed the consumed material cost ({1})."
-				).format(frappe.bold(flt(costed_out_cost)), frappe.bold(flt(outgoing_items_cost)))
-			)
 
 	def _get_rm_cost_for_manufacture(
 		self, settings, finished_item_qty, outgoing_items_cost, has_consumption_basis=False
