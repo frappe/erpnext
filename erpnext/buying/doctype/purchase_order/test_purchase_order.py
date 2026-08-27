@@ -794,10 +794,7 @@ class TestPurchaseOrder(ERPNextTestSuite):
 	def test_marginal_min_order_qty_overage_toast(self):
 		frappe.db.set_default("float_precision", "3")
 
-		if not frappe.db.exists("UOM", "Gram"):
-			frappe.get_doc({"doctype": "UOM", "uom_name": "Gram"}).insert()
-
-		item_doc = make_item(properties={"min_order_qty": 50000, "stock_uom": "Gram"})
+		item_doc = make_item(properties={"min_order_qty": 50000, "stock_uom": "_Test UOM 1"})
 		item_doc.append("uoms", {"uom": "Pound", "conversion_factor": 453.592292197})
 		item_doc.save()
 		item = item_doc.name
@@ -1795,24 +1792,10 @@ def create_po_for_sc_testing():
 
 
 def prepare_data_for_internal_transfer():
-	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
-	from erpnext.selling.doctype.customer.test_customer import create_internal_customer
 	from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 	from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 	company = "_Test Company with perpetual inventory"
-
-	create_internal_customer(
-		"_Test Internal Customer 2",
-		company,
-		company,
-	)
-
-	create_internal_supplier(
-		"_Test Internal Supplier 2",
-		company,
-		company,
-	)
 
 	warehouse = create_warehouse("_Test Internal Warehouse New 1", company=company)
 

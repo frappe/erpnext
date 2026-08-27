@@ -3817,25 +3817,12 @@ class TestSalesInvoice(ERPNextTestSuite):
 		# enable common party accounting
 		frappe.db.set_single_value("Accounts Settings", "enable_common_party_accounting", 1)
 
-		# create a dimension and make it mandatory
-		if not frappe.get_all("Accounting Dimension", filters={"document_type": "Department"}):
-			dim = frappe.get_doc(
-				{
-					"doctype": "Accounting Dimension",
-					"document_type": "Department",
-					"dimension_defaults": [{"company": "_Test Company", "mandatory_for_bs": True}],
-				}
-			)
-			dim.save()
-		else:
-			dim = frappe.get_doc(
-				"Accounting Dimension",
-				frappe.get_all("Accounting Dimension", filters={"document_type": "Department"})[0],
-			)
-			dim.disabled = False
-			dim.dimension_defaults = []
-			dim.append("dimension_defaults", {"company": "_Test Company", "mandatory_for_bs": True})
-			dim.save()
+		# make the shared department dimension mandatory
+		dim = frappe.get_doc("Accounting Dimension", {"document_type": "Department"})
+		dim.disabled = False
+		dim.dimension_defaults = []
+		dim.append("dimension_defaults", {"company": "_Test Company", "mandatory_for_bs": True})
+		dim.save()
 
 		# create a sales invoice
 		si = create_sales_invoice(
@@ -5790,12 +5777,6 @@ def create_internal_parties():
 	)
 
 	create_internal_customer(
-		customer_name="_Test Internal Customer 2",
-		represents_company="_Test Company with perpetual inventory",
-		allowed_to_interact_with="_Test Company with perpetual inventory",
-	)
-
-	create_internal_customer(
 		customer_name="_Test Internal Customer 3",
 		represents_company="_Test Company",
 		allowed_to_interact_with="_Test Company",
@@ -5813,12 +5794,6 @@ def create_internal_parties():
 		supplier_name="_Test Internal Supplier",
 		represents_company="Wind Power LLC",
 		allowed_to_interact_with="_Test Company 1",
-	)
-
-	create_internal_supplier(
-		supplier_name="_Test Internal Supplier 2",
-		represents_company="_Test Company with perpetual inventory",
-		allowed_to_interact_with="_Test Company with perpetual inventory",
 	)
 
 	create_internal_supplier(

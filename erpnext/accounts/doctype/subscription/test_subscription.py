@@ -1066,12 +1066,6 @@ def create_plan(**kwargs):
 
 
 def create_parties():
-	if not frappe.db.exists("Supplier", "_Test Supplier"):
-		supplier = frappe.new_doc("Supplier")
-		supplier.supplier_name = "_Test Supplier"
-		supplier.supplier_group = "All Supplier Groups"
-		supplier.insert()
-
 	if not frappe.db.exists("Customer", "_Test Subscription Customer"):
 		customer = frappe.new_doc("Customer")
 		customer.customer_name = "_Test Subscription Customer"

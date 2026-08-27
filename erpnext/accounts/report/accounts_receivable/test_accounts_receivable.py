@@ -869,9 +869,7 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 		self.assertEqual(rows_b[0].future_amount, 50.0)
 
 	def test_sales_person(self):
-		sales_person = frappe.get_doc(
-			{"doctype": "Sales Person", "sales_person_name": "John Clark", "enabled": True}
-		).insert()
+		sales_person = frappe.get_doc("Sales Person", "_Test Sales Person")
 		si = self.create_sales_invoice(do_not_submit=True)
 		si.append("sales_team", {"sales_person": sales_person.name, "allocated_percentage": 100})
 		si.save().submit()
@@ -1494,17 +1492,8 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 
 	def test_receivable_filtered_by_sales_partner(self):
 		frappe.set_user("Administrator")
-		partner_a, partner_b = "_Test AR Sales Partner A", "_Test AR Sales Partner B"
-		for partner in (partner_a, partner_b):
-			if not frappe.db.exists("Sales Partner", partner):
-				frappe.get_doc(
-					{
-						"doctype": "Sales Partner",
-						"partner_name": partner,
-						"commission_rate": 0,
-						"territory": "All Territories",
-					}
-				).insert()
+		partner_a = "_Test Sales Partner India - 1"
+		partner_b = "_Test Sales Partner India - 2"
 
 		def _si(sales_partner):
 			si = self.create_sales_invoice(no_payment_schedule=True, do_not_submit=True, qty=2)

@@ -82,8 +82,10 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("Item Price", all_item_prices[0].name, "price_list_rate"), 1000)
 
 	def test_sales_order_with_product_bundle_for_partial_material_request(self):
-		product_bundle = make_product_bundle(
-			"_Test Product Bundle Item", ["_Test Item", "_Test Item Home Desktop 100"]
+		from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
+
+		product_bundle = frappe.get_doc(
+			"Product Bundle", get_active_product_bundle("_Test Product Bundle Item")
 		)
 		so = make_sales_order(item_code=product_bundle.new_item_code, qty=2)
 		mr = make_material_request(so.name)

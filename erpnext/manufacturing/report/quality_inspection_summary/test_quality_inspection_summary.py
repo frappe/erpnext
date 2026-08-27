@@ -5,7 +5,6 @@ import frappe
 from frappe.utils import add_days, nowdate
 
 from erpnext.manufacturing.report.quality_inspection_summary.quality_inspection_summary import execute
-from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.quality_inspection.test_quality_inspection import (
 	create_quality_inspection,
 	make_minimal_job_card,
@@ -16,7 +15,6 @@ from erpnext.tests.utils import ERPNextTestSuite
 class TestQualityInspectionSummary(ERPNextTestSuite):
 	def setUp(self):
 		super().setUp()
-		create_item("_Test Item")
 		self.job_card = make_minimal_job_card(production_item="_Test Item")
 		self.qi = create_quality_inspection(
 			item_code="_Test Item",
