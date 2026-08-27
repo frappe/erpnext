@@ -9,6 +9,7 @@
  "field_order": [
   "item_code",
   "valuation_method",
+  "bom_secondary_item",
   "secondary_item_type",
   "column_break_2",
   "item_name",
@@ -644,6 +645,13 @@
    "fieldtype": "Select",
    "label": "Valuation Method",
    "options": "\nValuation Rate\n% of FG Cost\nManual",
+   "read_only": 1
+  },
+  {
+   "fieldname": "bom_secondary_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "BOM Secondary Item",
    "read_only": 1
   },
   {

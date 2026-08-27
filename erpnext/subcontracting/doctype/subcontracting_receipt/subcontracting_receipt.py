@@ -387,6 +387,32 @@ class SubcontractingReceipt(SubcontractingController):
 			self.calculate_additional_costs()
 			self.calculate_items_qty_and_amount()
 
+	def calculate_percentage_secondary_rows(self, percentage_rows, secondary_items_cost_map):
+		allocation_map = {}
+		names = [row.bom_secondary_item for row in percentage_rows if row.bom_secondary_item]
+		if names:
+			allocation_map = dict(
+				frappe.get_all(
+					"BOM Secondary Item",
+					filters={"name": ("in", names)},
+					fields=["name", "cost_allocation_per"],
+					as_list=True,
+				)
+			)
+
+		fg_rows = {row.name: row for row in self.get("items") if row.bom}
+		for item in percentage_rows:
+			qty = flt(item.received_qty) - flt(item.process_loss_qty)
+			fg_row = fg_rows.get(item.reference_name)
+			if qty and fg_row and item.bom_secondary_item in allocation_map:
+				item.rate = self.get_percentage_secondary_rate(
+					fg_row,
+					flt(allocation_map[item.bom_secondary_item]),
+					qty,
+					secondary_items_cost_map.get(item.reference_name, 0),
+				)
+			item.amount = qty * flt(item.rate)
+
 	def get_secondary_item_valuation_rate(self, item):
 		"""Valuation at the row's warehouse; keeps the stored rate when none is found."""
 		return (
@@ -432,6 +458,7 @@ class SubcontractingReceipt(SubcontractingController):
 			{
 				"secondary_item_type": secondary_item.secondary_item_type,
 				"valuation_method": secondary_item.valuation_method,
+				"bom_secondary_item": secondary_item.name,
 				"reference_name": item.name,
 				"item_code": secondary_item.item_code,
 				"item_name": secondary_item.item_name,
@@ -471,14 +498,19 @@ class SubcontractingReceipt(SubcontractingController):
 				rate = flt(secondary_item.cost) / flt(secondary_item.stock_qty)
 			return rate
 
-		lcv_cost_per_qty = flt(item.landed_cost_voucher_amount) / flt(item.qty) if flt(item.qty) else 0.0
+		return self.get_percentage_secondary_rate(item, secondary_item.cost_allocation_per, qty, own_cost)
+
+	def get_percentage_secondary_rate(self, fg_row, cost_allocation_per, qty, own_cost):
+		lcv_cost_per_qty = (
+			flt(fg_row.landed_cost_voucher_amount) / flt(fg_row.qty) if flt(fg_row.qty) else 0.0
+		)
 		fg_item_cost = (
-			flt(item.rm_cost_per_qty)
-			+ flt(item.additional_cost_per_qty)
+			flt(fg_row.rm_cost_per_qty)
+			+ flt(fg_row.additional_cost_per_qty)
 			+ flt(lcv_cost_per_qty)
-			+ flt(item.service_cost_per_qty)
-		) * flt(item.received_qty) - flt(own_cost)
-		return (fg_item_cost * (secondary_item.cost_allocation_per / 100)) / qty
+			+ flt(fg_row.service_cost_per_qty)
+		) * flt(fg_row.received_qty) - flt(own_cost)
+		return (fg_item_cost * (cost_allocation_per / 100)) / qty
 
 	def remove_secondary_items(self):
 		for item in list(self.items):
@@ -539,26 +571,27 @@ class SubcontractingReceipt(SubcontractingController):
 			else:
 				rm_cost_map[item.reference_name] = item.amount
 
+		# own-cost rows first: they are deducted from the finished good, and the
+		# percentage rows reprice from the basis net of them
 		secondary_items_cost_map = {}
+		percentage_rows = []
 		for item in self.get("items") or []:
-			if item.secondary_item_type or item.valuation_method:
+			if not (item.secondary_item_type or item.valuation_method):
+				continue
+
+			if item.valuation_method in ("Valuation Rate", "Manual"):
 				if item.valuation_method == "Valuation Rate":
 					# Recomputed every time: a rate fetched against another warehouse
 					# must not stick to the row when the warehouse changes.
 					item.rate = self.get_secondary_item_valuation_rate(item)
-				qty = (
-					flt(item.qty)
-					if item.valuation_method in ("Valuation Rate", "Manual")
-					else (flt(item.received_qty) - flt(item.process_loss_qty))
+				item.amount = flt(item.qty) * flt(item.rate)
+				secondary_items_cost_map[item.reference_name] = (
+					secondary_items_cost_map.get(item.reference_name, 0) + item.amount
 				)
-				item.amount = qty * flt(item.rate)
+			else:
+				percentage_rows.append(item)
 
-				# only rows valued on their own are deducted from the finished good;
-				# the percentage rows' share is the BOM's cost allocation multiplier
-				if item.valuation_method in ("Valuation Rate", "Manual"):
-					secondary_items_cost_map[item.reference_name] = (
-						secondary_items_cost_map.get(item.reference_name, 0) + item.amount
-					)
+		self.calculate_percentage_secondary_rows(percentage_rows, secondary_items_cost_map)
 
 		total_qty = total_amount = 0
 		for item in self.get("items") or []:

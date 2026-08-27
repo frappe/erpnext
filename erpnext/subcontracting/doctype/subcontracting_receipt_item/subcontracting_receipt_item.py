@@ -17,6 +17,7 @@ class SubcontractingReceiptItem(Document):
 		additional_cost_per_qty: DF.Currency
 		amount: DF.Currency
 		batch_no: DF.Link | None
+		bom_secondary_item: DF.Data | None
 		bom: DF.Link | None
 		brand: DF.Link | None
 		conversion_factor: DF.Float
