@@ -25,7 +25,7 @@ from erpnext.stock.doctype.item.item import (
 	validate_is_stock_item,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-from erpnext.stock.get_item_details import get_item_details
+from erpnext.stock.get_item_details import get_item_details, get_item_tax_map, get_item_tax_template
 from erpnext.tests.assertions import assert_raises_with_savepoint
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -304,27 +304,34 @@ class TestItem(ERPNextTestSuite):
 			},
 		}
 
-		for data in expected_item_tax_template:
-			details = get_item_details(
-				frappe._dict(
-					{
-						"item_code": data["item_code"],
-						"tax_category": data["tax_category"],
-						"company": "_Test Company",
-						"price_list": "_Test Price List",
-						"currency": "_Test Currency",
-						"doctype": "Sales Order",
-						"conversion_rate": 1,
-						"price_list_currency": "_Test Currency",
-						"plc_conversion_rate": 1,
-						"order_type": "Sales",
-						"customer": "_Test Customer",
-						"conversion_factor": 1,
-						"price_list_uom_dependant": 1,
-						"ignore_pricing_rule": 1,
-					}
-				)
+		for index, data in enumerate(expected_item_tax_template):
+			ctx = frappe._dict(
+				{
+					"item_code": data["item_code"],
+					"tax_category": data["tax_category"],
+					"company": "_Test Company",
+					"price_list": "_Test Price List",
+					"currency": "_Test Currency",
+					"doctype": "Sales Order",
+					"conversion_rate": 1,
+					"price_list_currency": "_Test Currency",
+					"plc_conversion_rate": 1,
+					"order_type": "Sales",
+					"customer": "_Test Customer",
+					"conversion_factor": 1,
+					"price_list_uom_dependant": 1,
+					"ignore_pricing_rule": 1,
+				}
 			)
+
+			if index == 0:
+				details = get_item_details(ctx)
+			else:
+				details = frappe._dict()
+				get_item_tax_template(ctx, out=details)
+				details.item_tax_rate = get_item_tax_map(
+					doc=ctx, tax_template=details.item_tax_template, as_json=True
+				)
 
 			self.assertEqual(details.item_tax_template, data["item_tax_template"])
 			self.assertEqual(
@@ -1214,13 +1221,13 @@ class TestItem(ERPNextTestSuite):
 		items = {
 			"Test Opening Stock for Serial No": {
 				"has_serial_no": 1,
-				"opening_stock": 5,
+				"opening_stock": 1,
 				"serial_no_series": "SN-TOPN-.####",
 				"valuation_rate": 100,
 			},
 			"Test Opening Stock for Batch No": {
 				"has_batch_no": 1,
-				"opening_stock": 5,
+				"opening_stock": 1,
 				"batch_number_series": "BCH-TOPN-.####",
 				"valuation_rate": 100,
 				"create_new_batch": 1,
@@ -1228,7 +1235,7 @@ class TestItem(ERPNextTestSuite):
 			"Test Opening Stock for Serial and Batch No": {
 				"has_serial_no": 1,
 				"has_batch_no": 1,
-				"opening_stock": 5,
+				"opening_stock": 1,
 				"batch_number_series": "SN-BCH-TOPN-.####",
 				"serial_no_series": "BCH-SN-TOPN-.####",
 				"valuation_rate": 100,
