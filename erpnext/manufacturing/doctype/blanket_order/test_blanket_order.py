@@ -1,13 +1,18 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
+from unittest.mock import patch
+
 import frappe
-from frappe.utils import add_months, today
+from frappe.utils import add_months, flt, today
 
 from erpnext import get_company_currency
+from erpnext.controllers.queries import get_blanket_orders
 from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.get_item_details import get_blanket_order_details
 from erpnext.tests.utils import ERPNextTestSuite
 
-from .blanket_order import make_order
+from . import blanket_order_pricing
+from .blanket_order import apply_price_list, make_order
 
 
 class TestBlanketOrder(ERPNextTestSuite):
@@ -139,21 +144,237 @@ class TestBlanketOrder(ERPNextTestSuite):
 		bo = make_blanket_order(blanket_order_type="Purchasing", supplier=supplier, item_code=item_code)
 		self.assertEqual(bo.items[0].party_item_code, "SUPP-PART-1")
 
+	def test_blanket_order_zero_quantity(self):
+		bo = frappe.new_doc("Blanket Order")
+		bo.blanket_order_type = "Selling"
+		bo.company = "_Test Company"
+		bo.customer = "_Test Customer"
+		bo.from_date = today()
+		bo.to_date = add_months(today(), 12)
+
+		bo.append(
+			"items",
+			{
+				"item_code": "_Test Item",
+				"qty": 0,
+				"rate": 100,
+			},
+		)
+
+		with self.assertRaises(frappe.ValidationError):
+			bo.insert()
+
+	def test_multicurrency_blanket_order(self):
+		company_currency = get_company_currency("_Test Company")
+		transaction_currency = "USD" if company_currency != "USD" else "EUR"
+		conversion_rate = 80
+		rate = 5
+
+		for blanket_order_type, target_doctypes in (
+			("Selling", ("Sales Order", "Quotation")),
+			("Purchasing", ("Purchase Order",)),
+		):
+			blanket_order = make_blanket_order(
+				blanket_order_type=blanket_order_type,
+				currency=transaction_currency,
+				conversion_rate=conversion_rate,
+				rate=rate,
+			)
+
+			self.assertEqual(blanket_order.currency, transaction_currency)
+			self.assertEqual(blanket_order.conversion_rate, conversion_rate)
+			self.assertEqual(blanket_order.items[0].base_rate, rate * conversion_rate)
+
+			for target_doctype in target_doctypes:
+				with self.subTest(target_doctype=target_doctype):
+					frappe.flags.args.doctype = target_doctype
+					target = make_order(blanket_order.name)
+
+					self.assertEqual(target.currency, transaction_currency)
+					self.assertEqual(target.conversion_rate, conversion_rate)
+					self.assertEqual(target.items[0].rate, rate)
+					self.assertEqual(target.items[0].base_rate, rate * conversion_rate)
+					self.assertEqual(target.items[0].blanket_order_rate, rate)
+					self.assertEqual(target.items[0].blanket_order, blanket_order.name)
+
+	def test_price_list_rates_and_mapping(self):
+		company = "_Test Company"
+		company_currency = get_company_currency(company)
+		transaction_currency = "USD" if company_currency != "USD" else "EUR"
+		conversion_rate = 80
+		price_list_rate = 800
+
+		for blanket_order_type, price_list_field, target_doctypes in (
+			("Selling", "selling_price_list", ("Sales Order", "Quotation")),
+			("Purchasing", "buying_price_list", ("Purchase Order",)),
+		):
+			blanket_order, price_list = make_priced_blanket_order(
+				blanket_order_type=blanket_order_type,
+				company=company,
+				currency=transaction_currency,
+				conversion_rate=conversion_rate,
+				price_list_rate=price_list_rate,
+				qty=1000,
+			)
+			blanket_order.insert()
+			blanket_order.submit()
+
+			expected_rate = price_list_rate / conversion_rate
+			self.assertEqual(blanket_order.price_list_currency, company_currency)
+			self.assertEqual(blanket_order.plc_conversion_rate, 1)
+			self.assertEqual(blanket_order.items[0].price_list_rate, expected_rate)
+			self.assertEqual(blanket_order.items[0].base_price_list_rate, price_list_rate)
+			self.assertEqual(blanket_order.items[0].rate, expected_rate)
+			self.assertEqual(blanket_order.items[0].base_rate, price_list_rate)
+
+			for target_doctype in target_doctypes:
+				with self.subTest(target_doctype=target_doctype):
+					frappe.flags.args.doctype = target_doctype
+					target = make_order(blanket_order.name)
+
+					self.assertEqual(target.get(price_list_field), price_list)
+					self.assertEqual(target.price_list_currency, company_currency)
+					self.assertEqual(target.plc_conversion_rate, 1)
+					self.assertEqual(target.items[0].price_list_rate, expected_rate)
+					self.assertEqual(target.items[0].base_price_list_rate, price_list_rate)
+					self.assertEqual(target.items[0].rate, expected_rate)
+					self.assertEqual(target.items[0].blanket_order, blanket_order.name)
+
+	def test_applying_price_list_ignores_empty_item_rows(self):
+		blanket_order = frappe.new_doc("Blanket Order")
+		blanket_order.blanket_order_type = "Selling"
+		blanket_order.company = "_Test Company"
+		blanket_order.customer = "_Test Customer"
+		blanket_order.from_date = today()
+		blanket_order.append("items", {})
+
+		pricing = apply_price_list(blanket_order.as_dict())
+
+		self.assertEqual(pricing["children"], [])
+
+	def test_price_list_rate_is_fetched_on_item_selection(self):
+		company = "_Test Company"
+		company_currency = get_company_currency(company)
+		price_list_rate = 800
+		blanket_order, _price_list = make_priced_blanket_order(
+			company=company,
+			currency=company_currency,
+			conversion_rate=1,
+			price_list_rate=price_list_rate,
+			qty=0,
+		)
+		item = blanket_order.items[0]
+
+		self.assertEqual(item.price_list_rate, price_list_rate)
+		self.assertEqual(item.rate, price_list_rate)
+
+	def test_price_list_conversion_uses_currency_precision(self):
+		company = "_Test Company"
+		company_currency = get_company_currency(company)
+		transaction_currency = "USD" if company_currency != "USD" else "EUR"
+		conversion_rate = 95.47
+		price_list_rate = 100
+		blanket_order, _price_list = make_priced_blanket_order(
+			company=company,
+			currency=transaction_currency,
+			conversion_rate=conversion_rate,
+			price_list_rate=price_list_rate,
+		)
+		item = blanket_order.items[0]
+		expected_rate = flt(price_list_rate / conversion_rate, item.precision("rate"))
+		expected_base_rate = flt(expected_rate * conversion_rate, item.precision("base_rate"))
+
+		self.assertFalse(frappe.get_meta("Blanket Order Item").get_field("rate").precision)
+		self.assertEqual(item.price_list_rate, expected_rate)
+		self.assertEqual(item.base_price_list_rate, expected_base_rate)
+		self.assertEqual(item.rate, expected_rate)
+		self.assertEqual(item.base_rate, expected_base_rate)
+
+		blanket_order.insert()
+		blanket_order.submit()
+
+		frappe.flags.args.doctype = "Sales Order"
+		sales_order = make_order(blanket_order.name)
+		sales_order.delivery_date = today()
+		sales_order.insert()
+
+		self.assertEqual(sales_order.items[0].price_list_rate, item.price_list_rate)
+		self.assertEqual(sales_order.items[0].base_price_list_rate, item.base_price_list_rate)
+		self.assertEqual(sales_order.items[0].rate, item.rate)
+		self.assertEqual(sales_order.items[0].base_rate, item.base_rate)
+
+	def test_applying_price_list_can_reset_conversion_rate(self):
+		company_currency = get_company_currency("_Test Company")
+		transaction_currency = "USD" if company_currency != "USD" else "EUR"
+		blanket_order, _price_list = make_priced_blanket_order(
+			currency=transaction_currency,
+			conversion_rate=80,
+			price_list_rate=100,
+		)
+
+		with patch(
+			"erpnext.manufacturing.doctype.blanket_order.blanket_order_pricing.get_exchange_rate",
+			return_value=95.47,
+		):
+			pricing = apply_price_list(blanket_order.as_dict(), reset_conversion_rate=True)
+
+		self.assertEqual(pricing["parent"]["conversion_rate"], 95.47)
+		expected_rate = flt(
+			100 / pricing["parent"]["conversion_rate"],
+			blanket_order.items[0].precision("rate"),
+		)
+		expected_base_rate = flt(
+			expected_rate * pricing["parent"]["conversion_rate"],
+			blanket_order.items[0].precision("base_rate"),
+		)
+		self.assertEqual(pricing["children"][0]["base_rate"], expected_base_rate)
+
+	def test_blanket_order_lookup_filters_currency(self):
+		company_currency = get_company_currency("_Test Company")
+		transaction_currency = "USD" if company_currency != "USD" else "EUR"
+		blanket_order = make_blanket_order(
+			blanket_order_type="Selling",
+			currency=transaction_currency,
+			conversion_rate=80,
+		)
+
+		filters = {
+			"company": blanket_order.company,
+			"currency": transaction_currency,
+			"blanket_order_type": "Selling",
+			"item": blanket_order.items[0].item_code,
+		}
+		matching_orders = get_blanket_orders("Blanket Order", "", "name", 0, 20, filters)
+		self.assertIn(blanket_order.name, [order[0] for order in matching_orders])
+
+		filters["currency"] = company_currency
+		other_currency_orders = get_blanket_orders("Blanket Order", "", "name", 0, 20, filters)
+		self.assertNotIn(blanket_order.name, [order[0] for order in other_currency_orders])
+
+		details = get_blanket_order_details(
+			{
+				"blanket_order": blanket_order.name,
+				"company": blanket_order.company,
+				"currency": company_currency,
+				"customer": blanket_order.customer,
+				"doctype": "Sales Order",
+				"item_code": blanket_order.items[0].item_code,
+				"transaction_date": today(),
+			}
+		)
+		self.assertFalse(details)
+
 
 def make_blanket_order(**args):
 	args = frappe._dict(args)
-	bo = frappe.new_doc("Blanket Order")
-	bo.blanket_order_type = args.blanket_order_type
-	bo.company = args.company or "_Test Company"
-
-	if args.blanket_order_type == "Selling":
-		bo.customer = args.customer or "_Test Customer"
-	else:
-		bo.supplier = args.supplier or "_Test Supplier"
-
-	bo.from_date = today()
-	bo.to_date = add_months(bo.from_date, months=12)
-
+	bo = new_blanket_order(
+		blanket_order_type=args.blanket_order_type,
+		company=args.company or "_Test Company",
+		currency=args.currency,
+		conversion_rate=args.conversion_rate or 1,
+		customer=args.customer,
+		supplier=args.supplier,
+	)
 	bo.append(
 		"items",
 		{
@@ -166,3 +387,84 @@ def make_blanket_order(**args):
 	bo.insert()
 	bo.submit()
 	return bo
+
+
+def make_priced_blanket_order(
+	blanket_order_type="Selling",
+	company="_Test Company",
+	currency=None,
+	conversion_rate=1,
+	price_list_rate=800,
+	qty=1,
+):
+	price_list = make_blanket_order_price_list(get_company_currency(company), price_list_rate)
+	blanket_order = new_blanket_order(
+		blanket_order_type=blanket_order_type,
+		company=company,
+		currency=currency,
+		conversion_rate=conversion_rate,
+	)
+	config = blanket_order_pricing.get_order_type_config(blanket_order_type)
+	blanket_order.set(config["price_list_field"], price_list)
+	item = blanket_order.append("items", {"item_code": "_Test Item", "qty": qty, "rate": 0})
+	pricing = apply_price_list(blanket_order.as_dict())
+	blanket_order.update(pricing["parent"])
+	item.update({key: value for key, value in pricing["children"][0].items() if key != "name"})
+
+	return blanket_order, price_list
+
+
+def new_blanket_order(
+	blanket_order_type,
+	company="_Test Company",
+	currency=None,
+	conversion_rate=1,
+	customer=None,
+	supplier=None,
+):
+	blanket_order = frappe.new_doc("Blanket Order")
+	blanket_order.blanket_order_type = blanket_order_type
+	blanket_order.company = company
+	blanket_order.currency = currency or get_company_currency(company)
+	blanket_order.conversion_rate = conversion_rate
+	blanket_order.from_date = today()
+	blanket_order.to_date = add_months(blanket_order.from_date, months=12)
+
+	config = blanket_order_pricing.get_order_type_config(blanket_order_type)
+	party = customer if config["party_field"] == "customer" else supplier
+	blanket_order.set(config["party_field"], party or f"_Test {config['party_type']}")
+
+	return blanket_order
+
+
+def make_blanket_order_price_list(currency, price_list_rate):
+	price_list = "_Test Blanket Order Price List"
+	if not frappe.db.exists("Price List", price_list):
+		frappe.get_doc(
+			{
+				"doctype": "Price List",
+				"price_list_name": price_list,
+				"currency": currency,
+				"selling": 1,
+				"buying": 1,
+			}
+		).insert()
+	else:
+		frappe.db.set_value("Price List", price_list, {"currency": currency, "selling": 1, "buying": 1})
+
+	item_price = frappe.db.get_value(
+		"Item Price", {"price_list": price_list, "item_code": "_Test Item"}, "name"
+	)
+	if item_price:
+		frappe.db.set_value("Item Price", item_price, "price_list_rate", price_list_rate)
+	else:
+		frappe.get_doc(
+			{
+				"doctype": "Item Price",
+				"price_list": price_list,
+				"item_code": "_Test Item",
+				"price_list_rate": price_list_rate,
+			}
+		).insert()
+
+	return price_list
