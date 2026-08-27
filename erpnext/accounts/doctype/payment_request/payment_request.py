@@ -1074,21 +1074,6 @@ def get_dummy_message(doc):
 
 
 @frappe.whitelist()
-<<<<<<< HEAD
-def get_subscription_details(reference_doctype, reference_name):
-	if reference_doctype == "Sales Invoice":
-		subscriptions = frappe.db.sql(
-			"""SELECT parent as sub_name FROM `tabSubscription Invoice` WHERE invoice=%s""",
-			reference_name,
-			as_dict=1,
-		)
-		subscription_plans = []
-		for subscription in subscriptions:
-			plans = frappe.get_doc("Subscription", subscription.sub_name).plans
-			for plan in plans:
-				subscription_plans.append(plan)
-		return subscription_plans
-=======
 def get_subscription_details(reference_doctype: str, reference_name: str):
 	if reference_doctype != "Sales Invoice":
 		return []
@@ -1108,7 +1093,6 @@ def get_subscription_details(reference_doctype: str, reference_name: str):
 	)
 
 	return subscription_plan
->>>>>>> 1b81db4 (fix/payment-request-subscription-plans-population (#57494))
 
 
 @frappe.whitelist()
