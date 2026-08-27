@@ -1201,6 +1201,17 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 			"secondary_items",
 			{"item_code": manual_item, "stock_qty": 1, "valuation_method": "Manual", "cost": 30},
 		)
+		percentage_item = make_item(properties={"is_stock_item": 1}).name
+		bom.append(
+			"secondary_items",
+			{
+				"item_code": percentage_item,
+				"secondary_item_type": "Co-Product",
+				"stock_qty": 1,
+				"valuation_method": "% of FG Cost",
+				"cost_allocation_per": 10,
+			},
+		)
 		bom.save()
 		bom.submit()
 
@@ -1226,8 +1237,8 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		scr_secondary_items = set(
 			[item.item_code for item in scr.items if item.secondary_item_type or item.valuation_method]
 		)
-		self.assertEqual(len(scr.items), 4)  # 1 FG Item + 3 Secondary Items
-		self.assertEqual(scr_secondary_items, {*secondary_items, manual_item})
+		self.assertEqual(len(scr.items), 5)  # 1 FG Item + 4 Secondary Items
+		self.assertEqual(scr_secondary_items, {*secondary_items, manual_item, percentage_item})
 
 		# without a document level warehouse the rows fall back to the FG row's warehouse
 		scr.set_warehouse = None
@@ -1236,6 +1247,20 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		for item in scr.items:
 			if item.secondary_item_type or item.valuation_method:
 				self.assertEqual(item.warehouse, fg_warehouse)
+
+		# the percentage row allocates from the cost net of the own-cost rows, so the
+		# received value equals the consumed value
+		scr.save()
+		fg_row = next(item for item in scr.items if item.bom)
+		fg_gross = (
+			flt(fg_row.rm_cost_per_qty)
+			+ flt(fg_row.service_cost_per_qty)
+			+ flt(fg_row.additional_cost_per_qty)
+		) * flt(fg_row.received_qty)
+		secondary_total = sum(
+			flt(row.amount) for row in scr.items if row.secondary_item_type or row.valuation_method
+		)
+		self.assertAlmostEqual(flt(fg_row.amount) + secondary_total, fg_gross, places=2)
 
 		# valuation rate rows are repriced at their warehouse on every save
 		make_stock_entry(item_code=secondary_item_1, target="_Test Warehouse - _TC", qty=5, basic_rate=40)
@@ -1254,17 +1279,20 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertEqual(manual_row.rate, 45)
 		self.assertEqual(manual_row.amount, 45 * manual_row.qty)
 
-		# the finished good's rate is net of the own-cost secondary rows
+		# the finished good's rate is its cost allocation share of the net cost
 		fg_row = next(item for item in scr.items if item.bom)
 		self.assertTrue(fg_row.secondary_items_cost_per_qty > 0)
-		self.assertEqual(
+		fg_percent = flt(frappe.get_value("BOM", fg_row.bom, "cost_allocation_per")) / 100
+		self.assertAlmostEqual(
 			flt(fg_row.rate),
-			flt(
+			(
 				flt(fg_row.rm_cost_per_qty)
 				+ flt(fg_row.service_cost_per_qty)
 				+ flt(fg_row.additional_cost_per_qty)
 				- flt(fg_row.secondary_items_cost_per_qty)
-			),
+			)
+			* fg_percent,
+			places=2,
 		)
 
 		scr.submit()
