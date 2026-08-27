@@ -1758,9 +1758,8 @@ class update_entries_after:
 		if not item_code or not warehouse or (item_code, warehouse) in self.prev_sle_dict:
 			return
 
-		if frappe.db.count(
-			"Stock Ledger Entry",
-			{"item_code": item_code, "warehouse": warehouse, "is_cancelled": 0},
+		if frappe.db.exists(
+			"Stock Ledger Entry", {"item_code": item_code, "warehouse": warehouse, "is_cancelled": 0}
 		):
 			return
 
