@@ -1,6 +1,7 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from unittest.mock import patch
 
 import frappe
 from frappe.utils.data import (
@@ -658,23 +659,15 @@ class TestSubscription(ERPNextTestSuite):
 		sub2 = create_subscription(start_date="2018-01-02")
 
 		processed = []
-		original_process = Subscription.process
-		original_rollback = frappe.db.rollback
 
 		def patched(self, posting_date=None):
 			processed.append(self.name)
 			if self.name == sub1.name:
 				raise frappe.ValidationError("forced failure")
 
-		Subscription.process = patched
-		# process_all calls frappe.db.rollback() on error which would otherwise wipe
-		# the test transaction; stub it so we can observe the iteration in isolation.
-		frappe.db.rollback = lambda *a, **kw: None
-		try:
+		# Stub transaction recovery so the test can observe the complete iteration in isolation.
+		with patch.object(Subscription, "process", patched), patch.object(frappe.db, "rollback"):
 			process_all([sub1.name, sub2.name])
-		finally:
-			Subscription.process = original_process
-			frappe.db.rollback = original_rollback
 
 		self.assertEqual(processed, [sub1.name, sub2.name])
 

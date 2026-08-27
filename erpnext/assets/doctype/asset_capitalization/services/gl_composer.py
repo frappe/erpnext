@@ -54,14 +54,16 @@ class AssetCapitalizationGLComposer(BaseStockGLComposer):
 		for item_row in doc.stock_items:
 			sle_list = self.sle_map.get(item_row.name)
 			if sle_list:
-				_inv_dict = doc.get_inventory_account_dict(item_row, self.inventory_account_map)
 				for sle in sle_list:
 					stock_value_difference = flt(sle.stock_value_difference, self.precision)
 
 					if erpnext.is_perpetual_inventory_enabled(doc.company):
+						_inv_dict = doc.get_inventory_account_dict(item_row, self.inventory_account_map)
 						account = _inv_dict["account"]
+						account_currency = _inv_dict["account_currency"]
 					else:
 						account = doc.get_company_default("default_expense_account")
+						account_currency = None
 
 					target_against.add(account)
 					gl_entries.append(
@@ -74,7 +76,7 @@ class AssetCapitalizationGLComposer(BaseStockGLComposer):
 								"remarks": doc.get("remarks") or "Accounting Entry for Stock",
 								"credit": -1 * stock_value_difference,
 							},
-							_inv_dict["account_currency"],
+							account_currency,
 							item=item_row,
 						)
 					)

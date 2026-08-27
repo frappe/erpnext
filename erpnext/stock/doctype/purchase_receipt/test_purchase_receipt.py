@@ -29,6 +29,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 )
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.get_item_details import get_conversion_factor
+from erpnext.tests.assertions import assert_raises_with_savepoint
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -6537,11 +6538,9 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		sle_before = frappe.db.count("Stock Ledger Entry", {"voucher_no": pr.name})
 		gle_before = frappe.db.count("GL Entry", {"voucher_no": pr.name})
 
-		frappe.db.savepoint("before_blocked_cancel")
-		with self.assertRaises(frappe.LinkExistsError) as cm:
+		with assert_raises_with_savepoint(self, frappe.LinkExistsError) as cm:
 			pr.cancel()
 		self.assertIn(pi.name, str(cm.exception))
-		frappe.db.rollback(save_point="before_blocked_cancel")  # mimic the request-level rollback
 
 		pr.reload()
 		self.assertEqual(pr.docstatus, 1)

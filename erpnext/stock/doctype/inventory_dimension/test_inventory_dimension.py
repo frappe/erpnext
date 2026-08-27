@@ -443,6 +443,8 @@ class TestInventoryDimension(ERPNextTestSuite):
 			document_type="Inv Site",
 			validate_negative_stock=1,
 		)
+		inv_dimension.db_set("validate_negative_stock", 1)
+		frappe.clear_cache(doctype="Inventory Dimension")
 
 		warehouse = create_warehouse("Negative Stock Warehouse")
 

@@ -102,11 +102,9 @@ def create_routing(**args):
 	doc.update(args)
 
 	if not args.do_not_save:
-		frappe.db.savepoint("create_routing")
-		try:
+		if not frappe.db.exists("Routing", args.routing_name):
 			doc.insert()
-		except frappe.DuplicateEntryError:
-			frappe.db.rollback(save_point="create_routing")
+		else:
 			doc = frappe.get_doc("Routing", args.routing_name)
 			doc.delete_key("operations")
 			for operation in args.operations:

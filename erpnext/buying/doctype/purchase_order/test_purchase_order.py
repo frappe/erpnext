@@ -378,9 +378,7 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		po.submit()
 		first_item_of_po = po.get("items")[0]
 
-		company_default = frappe.db.get_value("Company", po.company, "default_warehouse")
 		frappe.db.set_value("Company", po.company, "default_warehouse", None)
-		self.addCleanup(frappe.db.set_value, "Company", po.company, "default_warehouse", company_default)
 
 		def get_trans_items(item_code):
 			return json.dumps(
@@ -794,9 +792,7 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, below_minimum.insert)
 
 	def test_marginal_min_order_qty_overage_toast(self):
-		original_precision = frappe.db.get_default("float_precision")
 		frappe.db.set_default("float_precision", "3")
-		self.addCleanup(frappe.db.set_default, "float_precision", original_precision)
 
 		if not frappe.db.exists("UOM", "Gram"):
 			frappe.get_doc({"doctype": "UOM", "uom_name": "Gram"}).insert()

@@ -3,6 +3,7 @@
 
 import json
 import time
+from unittest.mock import patch
 from uuid import uuid4
 
 import frappe
@@ -1129,11 +1130,9 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 		# original amount
 		self.assertEqual(50, _get_stock_credit(final_consumption))
 
+	@patch.dict(frappe.flags, {"dont_execute_stock_reposts": True})
 	def test_tie_breaking(self):
 		from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import repost_entries
-
-		frappe.flags.dont_execute_stock_reposts = True
-		self.addCleanup(frappe.flags.pop, "dont_execute_stock_reposts")
 
 		item = make_item().name
 		warehouse = "_Test Warehouse - _TC"
