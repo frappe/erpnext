@@ -711,10 +711,7 @@ def make_payment_request(**args):
 			party_account = get_party_account(party_type, ref_doc.get(party_type.lower()), ref_doc.company)
 			party_account_currency = get_account_currency(party_account)
 
-<<<<<<< HEAD
-=======
 		subscription_plans = get_subscription_details(ref_doc.doctype, ref_doc.name)
->>>>>>> 4cfa429 (fix(accounts): resolve subscription plans for any reference doctype in Payment Request (#58438))
 		pr.update(
 			{
 				"payment_gateway_account": gateway_account.get("name"),
@@ -746,18 +743,13 @@ def make_payment_request(**args):
 					or gateway_account.get("payment_channel", "Email") != "Email"
 				),
 				"phone_number": args.get("phone_number") if args.get("phone_number") else None,
-<<<<<<< HEAD
-=======
 				"is_a_subscription": 1 if subscription_plans else 0,
->>>>>>> 4cfa429 (fix(accounts): resolve subscription plans for any reference doctype in Payment Request (#58438))
 			}
 		)
 
 		if selected_payment_schedules:
 			apply_payment_references(pr, payment_reference)
 
-<<<<<<< HEAD
-=======
 		if subscription_plans:
 			pr.set(
 				"subscription_plans",
@@ -769,7 +761,6 @@ def make_payment_request(**args):
 					for row in subscription_plans
 				],
 			)
->>>>>>> 4cfa429 (fix(accounts): resolve subscription plans for any reference doctype in Payment Request (#58438))
 		# Dimensions
 		pr.update(
 			{
@@ -1083,21 +1074,6 @@ def get_dummy_message(doc):
 
 
 @frappe.whitelist()
-<<<<<<< HEAD
-def get_subscription_details(reference_doctype, reference_name):
-	if reference_doctype == "Sales Invoice":
-		subscriptions = frappe.db.sql(
-			"""SELECT parent as sub_name FROM `tabSubscription Invoice` WHERE invoice=%s""",
-			reference_name,
-			as_dict=1,
-		)
-		subscription_plans = []
-		for subscription in subscriptions:
-			plans = frappe.get_doc("Subscription", subscription.sub_name).plans
-			for plan in plans:
-				subscription_plans.append(plan)
-		return subscription_plans
-=======
 def get_subscription_details(reference_doctype: str, reference_name: str) -> list[dict]:
 	frappe.has_permission(reference_doctype, "read", reference_name, throw=True)
 
@@ -1117,7 +1093,6 @@ def get_subscription_details(reference_doctype: str, reference_name: str) -> lis
 			"qty",
 		],
 	)
->>>>>>> 4cfa429 (fix(accounts): resolve subscription plans for any reference doctype in Payment Request (#58438))
 
 
 @frappe.whitelist()
