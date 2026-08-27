@@ -20,7 +20,7 @@ from erpnext.manufacturing.doctype.job_card.job_card import (
 	make_stock_entry as make_stock_entry_from_jc,
 )
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
-from erpnext.manufacturing.doctype.work_order.work_order import WorkOrder, make_work_order
+from erpnext.manufacturing.doctype.work_order.work_order import WorkOrder, make_job_card, make_work_order
 from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
 from erpnext.patches.v16_0.set_stock_uom_in_job_card import execute as set_stock_uom_in_job_card
 from erpnext.stock.doctype.item.test_item import create_item
@@ -1822,16 +1822,16 @@ class TestJobCard(ERPNextTestSuite):
 		job_card.save()
 
 		job_card.complete_job_card(
-			qty=3,
+			qty=2,
 			for_quantity=5,
-			pending_qty=2,
+			pending_qty=3,
 			process_loss_qty=0,
 			end_time="2024-04-01 09:00:00",
 		)
 
 		job_card.reload()
 		self.assertEqual(flt(job_card.for_quantity), 5)
-		self.assertEqual(flt(job_card.pending_qty), 2)
+		self.assertEqual(flt(job_card.pending_qty), 3)
 		self.assertEqual(flt(job_card.process_loss_qty), 0)
 
 		job_card.submit()
@@ -1839,12 +1839,28 @@ class TestJobCard(ERPNextTestSuite):
 
 		manufacturing_entry = frappe.get_doc(job_card.make_stock_entry_for_semi_fg_item())
 		finished_item = next(row for row in manufacturing_entry.items if row.is_finished_item)
-		self.assertEqual(flt(finished_item.qty), 3)
+		self.assertEqual(flt(finished_item.qty), 2)
 		manufacturing_entry.submit()
 
 		job_card.reload()
-		self.assertEqual(flt(job_card.manufactured_qty), 3)
+		self.assertEqual(flt(job_card.manufactured_qty), 2)
 		self.assertEqual(job_card.status, "Completed")
+
+		make_job_card(
+			work_order.name,
+			[
+				{
+					"name": work_order.operations[0].name,
+					"operation": "Pending Qty Op A",
+					"qty": 3,
+					"pending_qty": 3,
+				}
+			],
+		)
+		follow_up_job_card = frappe.get_last_doc(
+			"Job Card", {"work_order": work_order.name, "operation_id": work_order.operations[0].name}
+		)
+		self.assertEqual(flt(follow_up_job_card.for_quantity), 3)
 
 	def test_semi_fg_sequence_needs_previous_operations_manufactured(self):
 		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
