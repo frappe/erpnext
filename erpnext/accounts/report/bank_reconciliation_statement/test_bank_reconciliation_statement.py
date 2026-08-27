@@ -8,6 +8,7 @@ from erpnext.accounts.doctype.bank_clearance.test_bank_clearance import make_ban
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 from erpnext.accounts.report.bank_reconciliation_statement.bank_reconciliation_statement import (
 	execute,
+	get_entries,
 )
 from erpnext.tests.utils import ERPNextTestSuite, if_lending_app_installed
 
@@ -28,13 +29,28 @@ class TestBankReconciliationStatement(ERPNextTestSuite):
 				"company": "_Test Company",
 				"account": "_Test Bank Clearance - _TC",
 				"report_date": today(),
-				"include_entries_cleared_after_report_date": 1,
 			}
 		)
-		self.assertIn(payment_entry.name, [row.get("payment_entry") for row in execute(filters)[1]])
+		self.assertIn(payment_entry.name, [row.get("payment_entry") for row in get_entries(filters)])
+
+		included_data = execute(filters)[1]
+		self.assertIn(payment_entry.name, [row.get("payment_entry") for row in included_data])
+		included_outstanding = next(
+			row
+			for row in included_data
+			if row.get("payment_entry") == "Outstanding Cheques and Deposits to clear"
+		)
 
 		filters.include_entries_cleared_after_report_date = 0
-		self.assertNotIn(payment_entry.name, [row.get("payment_entry") for row in execute(filters)[1]])
+		filtered_data = execute(filters)[1]
+		self.assertNotIn(payment_entry.name, [row.get("payment_entry") for row in filtered_data])
+		filtered_outstanding = next(
+			row
+			for row in filtered_data
+			if row.get("payment_entry") == "Outstanding Cheques and Deposits to clear"
+		)
+		self.assertEqual(included_outstanding["debit"], filtered_outstanding["debit"])
+		self.assertEqual(included_outstanding["credit"], filtered_outstanding["credit"])
 
 	@if_lending_app_installed
 	def test_loan_entries_in_bank_reco_statement(self):
