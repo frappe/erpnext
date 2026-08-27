@@ -259,15 +259,16 @@ class JobCard(Document):
 		return wo_qty + (wo_qty * over_production_percentage / 100)
 
 	def get_total_job_card_qty(self):
-		job_card_qty = frappe.get_all(
-			"Job Card",
-			fields=[{"SUM": "for_quantity"}],
-			filters={
-				"work_order": self.work_order,
-				"operation_id": self.operation_id,
-				"docstatus": ["!=", 2],
-			},
-			as_list=1,
+		job_card = frappe.qb.DocType("Job Card")
+		job_card_qty = (
+			frappe.qb.from_(job_card)
+			.select(Sum(job_card.for_quantity - IfNull(job_card.pending_qty, 0)))
+			.where(
+				(job_card.work_order == self.work_order)
+				& (job_card.operation_id == self.operation_id)
+				& (job_card.docstatus != 2)
+			)
+			.run()
 		)
 		return flt(job_card_qty[0][0]) if job_card_qty else 0
 
