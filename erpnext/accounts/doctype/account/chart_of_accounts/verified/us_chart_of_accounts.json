@@ -79,10 +79,6 @@
 						"account_type": "Stock Received But Not Billed",
 						"account_category": "Stock Assets"
 					},
-					"Inventory Delivered But Not Billed": {
-						"account_number": "11430",
-						"account_category": "Stock Assets"
-					},
 					"account_number": "11400",
 					"account_category": "Stock Assets"
 				},
