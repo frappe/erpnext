@@ -984,8 +984,12 @@ def make_stock_entry(source_name: str, target_doc: str | dict | None = None):
 				target.bom_no = work_order_details.bom_no
 				target.use_multi_level_bom = work_order_details.use_multi_level_bom
 				target.from_bom = 1
-				# not fg-qty-driven, mirrors the Pick List -> Stock Entry transfer for this Work Order
-				target.fg_completed_qty = 0
+				if not source.job_card:
+					# not fg-qty-driven, mirrors the Pick List -> Stock Entry transfer for this Work Order
+					target.fg_completed_qty = 0
+
+		if source.job_card:
+			target.cap_completed_qty_to_material_coverage()
 
 	doclist = get_mapped_doc(
 		"Material Request",
