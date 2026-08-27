@@ -10,6 +10,7 @@ from frappe.contacts.address_and_contact import (
 	load_address_and_contact,
 )
 from frappe.model.naming import set_name_by_naming_series, set_name_from_naming_options
+from frappe.utils import get_link_to_form
 
 from erpnext.accounts.party import (
 	get_dashboard_info,
@@ -184,10 +185,15 @@ class Supplier(TransactionBase):
 		)
 
 		if internal_supplier:
+			internal_supplier_link = get_link_to_form("Supplier", internal_supplier)
 			frappe.throw(
-				_("Internal Supplier for company {0} already exists").format(
-					frappe.bold(self.represents_company)
-				)
+				_(
+					"Internal Supplier {0} already exists for {1}. Disable it to make this Supplier internal."
+				).format(
+					internal_supplier_link,
+					frappe.bold(self.represents_company),
+				),
+				title=_("Internal Supplier Already Exists"),
 			)
 
 	def create_primary_contact(self):
