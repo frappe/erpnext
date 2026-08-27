@@ -41,6 +41,12 @@ frappe.query_reports["Bank Reconciliation Statement"] = {
 			reqd: 1,
 		},
 		{
+			fieldname: "include_entries_cleared_after_report_date",
+			label: __("Include Entries Cleared After Report Date"),
+			fieldtype: "Check",
+			default: 1,
+		},
+		{
 			fieldname: "include_pos_transactions",
 			label: __("Include POS Transactions"),
 			fieldtype: "Check",

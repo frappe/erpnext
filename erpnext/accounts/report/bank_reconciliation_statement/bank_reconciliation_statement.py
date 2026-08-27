@@ -159,7 +159,7 @@ def get_journal_entries(filters):
 			(je.docstatus == 1)
 			& (jea.account == filters.account)
 			& (je.posting_date <= filters.report_date)
-			& (je.clearance_date.isnull() | (je.clearance_date > filters.report_date))
+			& get_clearance_date_condition(je, filters)
 			& (je.company == filters.company)
 			& ((je.is_opening.isnull()) | (je.is_opening == "No"))
 		)
@@ -194,7 +194,7 @@ def get_payment_entries(filters):
 			(pe.docstatus == 1)
 			& ((pe.paid_from == filters.account) | (pe.paid_to == filters.account))
 			& (pe.posting_date <= filters.report_date)
-			& (pe.clearance_date.isnull() | (pe.clearance_date > filters.report_date))
+			& get_clearance_date_condition(pe, filters)
 			& (pe.company == filters.company)
 		)
 		.orderby(pe.posting_date)
@@ -226,7 +226,7 @@ def get_purchase_invoices(filters):
 			& (pi.is_paid == 1)
 			& (pi.cash_bank_account == filters.account)
 			& (pi.posting_date <= filters.report_date)
-			& (pi.clearance_date.isnull() | (pi.clearance_date > filters.report_date))
+			& get_clearance_date_condition(pi, filters)
 			& (pi.company == filters.company)
 		)
 		.orderby(pi.posting_date)
@@ -258,12 +258,19 @@ def get_pos_entries(filters):
 			(si_payment.account == filters.account)
 			& (si.docstatus == 1)
 			& (si.posting_date <= filters.report_date)
-			& (si_payment.clearance_date.isnull() | (si_payment.clearance_date > filters.report_date))
+			& get_clearance_date_condition(si_payment, filters)
 			& (si.company == filters.company)
 		)
 		.orderby(si.posting_date)
 		.orderby(si_payment.name, order=Order.desc)
 	).run(as_dict=True)
+
+
+def get_clearance_date_condition(document, filters):
+	condition = document.clearance_date.isnull()
+	if filters.get("include_entries_cleared_after_report_date"):
+		condition |= document.clearance_date > filters.report_date
+	return condition
 
 
 def get_amounts_not_reflected_in_system(filters):
