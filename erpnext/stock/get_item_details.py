@@ -1551,6 +1551,11 @@ def get_pos_profile(company: str, pos_profile: str | None = None, user: str | No
 	if not user:
 		user = frappe.session["user"]
 
+	allowed_pos_profiles = frappe.get_list("POS Profile", pluck="name")
+
+	if not allowed_pos_profiles:
+		return None
+
 	pf = frappe.qb.DocType("POS Profile")
 	pfu = frappe.qb.DocType("POS Profile User")
 
@@ -1560,6 +1565,7 @@ def get_pos_profile(company: str, pos_profile: str | None = None, user: str | No
 		.on(pf.name == pfu.parent)
 		.select(pf.star)
 		.where((pfu.user == user) & (pfu.default == 1))
+		.where(pf.name.isin(allowed_pos_profiles))
 	)
 
 	if company:
@@ -1574,6 +1580,7 @@ def get_pos_profile(company: str, pos_profile: str | None = None, user: str | No
 			.on(pf.name == pfu.parent)
 			.select(pf.star)
 			.where((pf.company == company) & (pf.disabled == 0))
+			.where(pf.name.isin(allowed_pos_profiles))
 		).run(as_dict=True)
 
 	return pos_profile and pos_profile[0] or None
