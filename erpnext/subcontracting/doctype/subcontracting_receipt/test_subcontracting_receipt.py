@@ -1196,6 +1196,11 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 					"valuation_method": "Valuation Rate",
 				},
 			)
+		manual_item = make_item(properties={"is_stock_item": 1}).name
+		bom.append(
+			"secondary_items",
+			{"item_code": manual_item, "stock_qty": 1, "valuation_method": "Manual", "cost": 30},
+		)
 		bom.save()
 		bom.submit()
 
@@ -1221,8 +1226,8 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		scr_secondary_items = set(
 			[item.item_code for item in scr.items if item.secondary_item_type or item.valuation_method]
 		)
-		self.assertEqual(len(scr.items), 3)  # 1 FG Item + 2 Scrap Items
-		self.assertEqual(scr_secondary_items, set(secondary_items))
+		self.assertEqual(len(scr.items), 4)  # 1 FG Item + 3 Secondary Items
+		self.assertEqual(scr_secondary_items, {*secondary_items, manual_item})
 
 		# without a document level warehouse the rows fall back to the FG row's warehouse
 		scr.set_warehouse = None
@@ -1239,6 +1244,28 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		scr.save()
 		vr_row = next(item for item in scr.items if item.item_code == secondary_item_1)
 		self.assertEqual(vr_row.rate, 40)
+
+		# the manual row starts at the BOM cost per unit and takes the user's own rate
+		manual_row = next(item for item in scr.items if item.item_code == manual_item)
+		self.assertEqual(manual_row.rate, 30)
+		manual_row.rate = 45
+		scr.save()
+		manual_row = next(item for item in scr.items if item.item_code == manual_item)
+		self.assertEqual(manual_row.rate, 45)
+		self.assertEqual(manual_row.amount, 45 * manual_row.qty)
+
+		# the finished good's rate is net of the own-cost secondary rows
+		fg_row = next(item for item in scr.items if item.bom)
+		self.assertTrue(fg_row.secondary_items_cost_per_qty > 0)
+		self.assertEqual(
+			flt(fg_row.rate),
+			flt(
+				flt(fg_row.rm_cost_per_qty)
+				+ flt(fg_row.service_cost_per_qty)
+				+ flt(fg_row.additional_cost_per_qty)
+				- flt(fg_row.secondary_items_cost_per_qty)
+			),
+		)
 
 		scr.submit()
 
