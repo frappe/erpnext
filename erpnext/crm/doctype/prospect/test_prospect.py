@@ -27,6 +27,30 @@ class TestProspect(ERPNextTestSuite):
 		address_doc.reload()
 		self.assertEqual(address_doc.has_link("Prospect", prospect_doc.name), True)
 
+	def test_add_lead_to_prospect_requires_lead_read_permission(self):
+		lead = make_lead()
+		prospect = make_prospect(company="_Test Company")
+		user = frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": f"lead-permission-{random_string(5)}@example.com",
+				"first_name": "Lead Permission Test",
+				"send_welcome_email": 0,
+			}
+		).insert()
+		frappe.share.add("Prospect", prospect.name, user.name, read=1, write=1)
+
+		self.assertTrue(frappe.has_permission("Prospect", "write", prospect.name, user=user.name))
+		self.assertFalse(frappe.has_permission("Lead", "read", lead.name, user=user.name))
+
+		self.addCleanup(frappe.set_user, "Administrator")
+		frappe.set_user(user.name)
+		with self.assertRaises(frappe.PermissionError):
+			add_lead_to_prospect(lead.name, prospect.name)
+
+		prospect.reload()
+		self.assertNotIn(lead.name, [row.lead for row in prospect.leads])
+
 	def test_make_customer_from_prospect(self):
 		from erpnext.crm.doctype.prospect.prospect import make_customer as make_customer_from_prospect
 
