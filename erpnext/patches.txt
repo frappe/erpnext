@@ -517,4 +517,4 @@ erpnext.patches.v16_0.repair_work_order_material_transfer
 erpnext.patches.v16_0.remove_frappe_crm_custom_fields
 erpnext.patches.v16_0.add_batch_split_stock_entry_type
 erpnext.patches.v16_0.add_transaction_roles_to_sms_settings
-erpnext.patches.v16_0.set_secondary_item_valuation_method
+erpnext.patches.v16_0.set_secondary_item_valuation_type

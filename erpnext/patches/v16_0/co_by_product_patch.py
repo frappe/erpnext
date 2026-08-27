@@ -42,7 +42,7 @@ def insert_into_bom():
 					"uom": item.stock_uom,
 					"conversion_factor": 1,
 					"qty": item.stock_qty,
-					"valuation_method": "Valuation Rate",
+					"valuation_type": "Valuation Rate",
 					"secondary_item_type": "Scrap",
 					"cost": item.amount,
 					"base_cost": item.base_amount,
@@ -104,23 +104,21 @@ def bulk_insert(parent_doctype, old_doctype, new_doctype, old_fields, new_fields
 def rename_fields():
 	rename_field("BOM", "scrap_material_cost", "secondary_items_cost")
 	rename_field("BOM", "base_scrap_material_cost", "base_secondary_items_cost")
-	set_valuation_method("Stock Entry Detail", "is_scrap_item")
+	set_valuation_type("Stock Entry Detail", "is_scrap_item")
 	rename_field(
 		"Manufacturing Settings",
 		"set_op_cost_and_scrap_from_sub_assemblies",
 		"set_op_cost_and_secondary_items_from_sub_assemblies",
 	)
 	rename_field("Selling Settings", "deliver_scrap_items", "deliver_secondary_items")
-	set_valuation_method("Subcontracting Receipt Item", "is_scrap_item")
+	set_valuation_type("Subcontracting Receipt Item", "is_scrap_item")
 	rename_field("Subcontracting Receipt Item", "scrap_cost_per_qty", "secondary_items_cost_per_qty")
 
 
-def set_valuation_method(doctype, legacy_field):
+def set_valuation_type(doctype, legacy_field):
 	"""The legacy scrap flag becomes the Valuation Rate method."""
 	if not frappe.db.has_column(doctype, legacy_field):
 		return
 
 	table = frappe.qb.DocType(doctype)
-	frappe.qb.update(table).set(table.valuation_method, "Valuation Rate").where(
-		table[legacy_field] == 1
-	).run()
+	frappe.qb.update(table).set(table.valuation_type, "Valuation Rate").where(table[legacy_field] == 1).run()

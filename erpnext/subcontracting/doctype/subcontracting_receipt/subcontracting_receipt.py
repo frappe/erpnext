@@ -435,7 +435,7 @@ class SubcontractingReceipt(SubcontractingController):
 		own_cost = 0.0
 		percentage_rows = []
 		for secondary_item in bom.secondary_items:
-			if secondary_item.valuation_method in ("Valuation Rate", "Manual"):
+			if secondary_item.valuation_type in ("Valuation Rate", "Manual"):
 				row = self.append_secondary_item(item, bom, secondary_item, warehouse)
 				own_cost += flt(row.qty) * flt(row.rate)
 			else:
@@ -457,13 +457,13 @@ class SubcontractingReceipt(SubcontractingController):
 			"items",
 			{
 				"secondary_item_type": secondary_item.secondary_item_type,
-				"valuation_method": secondary_item.valuation_method,
+				"valuation_type": secondary_item.valuation_type,
 				"bom_secondary_item": secondary_item.name,
 				"reference_name": item.name,
 				"item_code": secondary_item.item_code,
 				"item_name": secondary_item.item_name,
 				"qty": received_qty
-				if secondary_item.valuation_method not in ("Valuation Rate", "Manual")
+				if secondary_item.valuation_type not in ("Valuation Rate", "Manual")
 				else flt(item.qty) * (flt(secondary_item.stock_qty) / flt(bom.quantity)),
 				"received_qty": received_qty,
 				"process_loss_qty": received_qty - qty,
@@ -480,12 +480,12 @@ class SubcontractingReceipt(SubcontractingController):
 		)
 
 	def get_secondary_item_rate(self, item, secondary_item, warehouse, qty, own_cost):
-		if secondary_item.valuation_method == "Manual":
+		if secondary_item.valuation_type == "Manual":
 			if not flt(secondary_item.stock_qty):
 				return 0
 			return flt(secondary_item.cost) / flt(secondary_item.stock_qty)
 
-		if secondary_item.valuation_method == "Valuation Rate":
+		if secondary_item.valuation_type == "Valuation Rate":
 			rate = get_valuation_rate(
 				secondary_item.item_code,
 				warehouse,
@@ -514,7 +514,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 	def remove_secondary_items(self):
 		for item in list(self.items):
-			if item.secondary_item_type or item.valuation_method:
+			if item.secondary_item_type or item.valuation_type:
 				self.remove(item)
 			else:
 				item.secondary_items_cost_per_qty = 0
@@ -576,11 +576,11 @@ class SubcontractingReceipt(SubcontractingController):
 		secondary_items_cost_map = {}
 		percentage_rows = []
 		for item in self.get("items") or []:
-			if not (item.secondary_item_type or item.valuation_method):
+			if not (item.secondary_item_type or item.valuation_type):
 				continue
 
-			if item.valuation_method in ("Valuation Rate", "Manual"):
-				if item.valuation_method == "Valuation Rate":
+			if item.valuation_type in ("Valuation Rate", "Manual"):
+				if item.valuation_type == "Valuation Rate":
 					# Recomputed every time: a rate fetched against another warehouse
 					# must not stick to the row when the warehouse changes.
 					item.rate = self.get_secondary_item_valuation_rate(item)
@@ -595,7 +595,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 		total_qty = total_amount = 0
 		for item in self.get("items") or []:
-			if not item.secondary_item_type and not item.valuation_method:
+			if not item.secondary_item_type and not item.valuation_type:
 				if item.qty:
 					if item.name in rm_cost_map:
 						item.rm_supp_cost = rm_cost_map[item.name]
@@ -639,7 +639,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 	def validate_secondary_items(self):
 		for item in self.items:
-			if item.secondary_item_type or item.valuation_method:
+			if item.secondary_item_type or item.valuation_type:
 				if not item.qty:
 					frappe.throw(
 						_("Row #{0}: Secondary Item Qty cannot be zero").format(item.idx),

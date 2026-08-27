@@ -278,7 +278,7 @@ class BOMCostingService:
 		)
 
 		for d in self.doc.get("secondary_items"):
-			if d.valuation_method not in ("Valuation Rate", "Manual"):
+			if d.valuation_type not in ("Valuation Rate", "Manual"):
 				d.cost = flt(allocation_basis * (d.cost_allocation_per / 100), precision)
 				d.base_cost = flt(d.cost * self.doc.conversion_rate, precision)
 				if save:
@@ -294,10 +294,10 @@ class BOMCostingService:
 		"""Cost of the rows valued on their own: fetched for Valuation Rate, kept for Manual."""
 		total = 0.0
 		for d in self.doc.get("secondary_items"):
-			if d.valuation_method == "Valuation Rate":
+			if d.valuation_type == "Valuation Rate":
 				rate = self.get_rm_rate(self._secondary_item_rate_args(d))
 				d.cost = flt(flt(rate) * flt(d.stock_qty), precision)
-			elif d.valuation_method == "Manual":
+			elif d.valuation_type == "Manual":
 				d.cost = flt(d.cost, precision)
 			else:
 				continue

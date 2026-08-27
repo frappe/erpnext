@@ -44,7 +44,7 @@
    "stock_qty": 1.0,
    "stock_uom": "_Test UOM",
    "secondary_item_type": "Scrap",
-   "valuation_method": "Valuation Rate"
+   "valuation_type": "Valuation Rate"
   }
   ],
   "items": [

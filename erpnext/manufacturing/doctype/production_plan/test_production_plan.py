@@ -3631,7 +3631,7 @@ def make_bom(**args):
 					"stock_uom": item_doc.stock_uom,
 					"qty": args.scrap_qty or 1,
 					"cost_allocation_per": args.scrap_cost_allocation_per or 10,
-					"valuation_method": "% of FG Cost",
+					"valuation_type": "% of FG Cost",
 					"process_loss_per": args.scrap_process_loss_per or 10,
 				},
 			)

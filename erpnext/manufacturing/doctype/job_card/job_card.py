@@ -1881,7 +1881,7 @@ class JobCard(Document):
 		add_additional_cost(ste.stock_entry, wo_doc, self)
 		ManufactureStockEntry(ste.stock_entry).add_secondary_items_from_job_card()
 		for row in ste.stock_entry.items:
-			if (row.secondary_item_type or row.valuation_method) and not row.t_warehouse:
+			if (row.secondary_item_type or row.valuation_type) and not row.t_warehouse:
 				row.t_warehouse = self.target_warehouse
 
 

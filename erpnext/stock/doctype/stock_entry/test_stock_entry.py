@@ -1243,7 +1243,7 @@ class TestStockEntry(ERPNextTestSuite):
 				rm_cost += d.amount
 		fg_cost = next(filter(lambda x: x.item_code == "_Test FG Item", s.get("items"))).amount
 		secondary_item_cost = next(
-			x.amount for x in s.get("items") if x.secondary_item_type or x.valuation_method
+			x.amount for x in s.get("items") if x.secondary_item_type or x.valuation_type
 		)
 
 		self.assertEqual(fg_cost, flt(rm_cost - secondary_item_cost, 2))
@@ -1352,7 +1352,7 @@ class TestStockEntry(ERPNextTestSuite):
 				"item_code": scrap_item,
 				"secondary_item_type": "Scrap",
 				"qty": 2,
-				"valuation_method": "Valuation Rate",
+				"valuation_type": "Valuation Rate",
 			},
 		)
 		bom_doc.append(
@@ -1362,7 +1362,7 @@ class TestStockEntry(ERPNextTestSuite):
 				"secondary_item_type": "By-Product",
 				"qty": 1,
 				"cost_allocation_per": 10,
-				"valuation_method": "% of FG Cost",
+				"valuation_type": "% of FG Cost",
 			},
 		)
 		bom_doc.save()
@@ -1391,7 +1391,7 @@ class TestStockEntry(ERPNextTestSuite):
 
 		# valuation rate row is valued at its valuation rate and deducted from the
 		# basis; the percentage rows and the finished good split the remainder
-		scrap_row = next(d for d in entry.items if d.valuation_method == "Valuation Rate")
+		scrap_row = next(d for d in entry.items if d.valuation_type == "Valuation Rate")
 		self.assertEqual(scrap_row.basic_rate, 50)
 		self.assertEqual(scrap_row.basic_amount, 100)
 
@@ -1407,7 +1407,7 @@ class TestStockEntry(ERPNextTestSuite):
 		# a stale rate, e.g. fetched before the target warehouse was set, must not stick
 		scrap_row.basic_rate = 999
 		entry.save()
-		scrap_row = next(d for d in entry.items if d.valuation_method == "Valuation Rate")
+		scrap_row = next(d for d in entry.items if d.valuation_type == "Valuation Rate")
 		self.assertEqual(scrap_row.basic_rate, 50)
 
 	def test_manufacture_entry_with_same_item_secondary_types(self):
@@ -1436,7 +1436,7 @@ class TestStockEntry(ERPNextTestSuite):
 				"item_code": secondary_item,
 				"secondary_item_type": "Scrap",
 				"qty": 2,
-				"valuation_method": "Valuation Rate",
+				"valuation_type": "Valuation Rate",
 			},
 		)
 		bom_doc.append(
@@ -1446,7 +1446,7 @@ class TestStockEntry(ERPNextTestSuite):
 				"secondary_item_type": "By-Product",
 				"qty": 1,
 				"cost_allocation_per": 10,
-				"valuation_method": "% of FG Cost",
+				"valuation_type": "% of FG Cost",
 			},
 		)
 		bom_doc.save()
@@ -1474,10 +1474,10 @@ class TestStockEntry(ERPNextTestSuite):
 		secondary_rows = [d for d in entry.items if d.item_code == secondary_item]
 		self.assertEqual(len(secondary_rows), 2)
 
-		scrap_row = next(d for d in secondary_rows if d.valuation_method == "Valuation Rate")
+		scrap_row = next(d for d in secondary_rows if d.valuation_type == "Valuation Rate")
 		self.assertEqual(scrap_row.basic_amount, 100)
 
-		by_product_row = next(d for d in secondary_rows if d.valuation_method != "Valuation Rate")
+		by_product_row = next(d for d in secondary_rows if d.valuation_type != "Valuation Rate")
 		self.assertEqual(by_product_row.secondary_item_type, "By-Product")
 		self.assertEqual(by_product_row.basic_amount, 90)
 
@@ -1510,7 +1510,7 @@ class TestStockEntry(ERPNextTestSuite):
 				"item_code": by_product,
 				"secondary_item_type": "By-Product",
 				"qty": 2,
-				"valuation_method": "Manual",
+				"valuation_type": "Manual",
 				"cost": 120,
 			},
 		)
@@ -1536,7 +1536,7 @@ class TestStockEntry(ERPNextTestSuite):
 		entry.insert()
 
 		# the manual row starts at the BOM cost per unit and is deducted from the FG
-		manual_row = next(d for d in entry.items if d.valuation_method == "Manual")
+		manual_row = next(d for d in entry.items if d.valuation_type == "Manual")
 		self.assertEqual(manual_row.set_basic_rate_manually, 1)
 		self.assertEqual(manual_row.basic_rate, 60)
 		self.assertEqual(manual_row.basic_amount, 120)
@@ -1550,7 +1550,7 @@ class TestStockEntry(ERPNextTestSuite):
 		self.assertEqual(fg_row.basic_amount, 800)
 
 		# a manual cost above the consumed cost would turn the finished good negative
-		manual_row = next(d for d in entry.items if d.valuation_method == "Manual")
+		manual_row = next(d for d in entry.items if d.valuation_type == "Manual")
 		manual_row.basic_rate = 600
 		self.assertRaises(frappe.ValidationError, entry.save)
 
@@ -1573,7 +1573,7 @@ class TestStockEntry(ERPNextTestSuite):
 				"item_code": scrap_item,
 				"secondary_item_type": "Scrap",
 				"qty": 2,
-				"valuation_method": "Valuation Rate",
+				"valuation_type": "Valuation Rate",
 			},
 		)
 		bom_doc.save()
@@ -1592,7 +1592,7 @@ class TestStockEntry(ERPNextTestSuite):
 		entry.insert()
 
 		# the repacked good absorbs the consumed cost net of the own-cost rows
-		scrap_row = next(d for d in entry.items if d.valuation_method == "Valuation Rate")
+		scrap_row = next(d for d in entry.items if d.valuation_type == "Valuation Rate")
 		self.assertEqual(scrap_row.basic_amount, 100)
 		fg_row = next(d for d in entry.items if d.is_finished_item)
 		self.assertEqual(fg_row.basic_amount, 900)
@@ -1651,7 +1651,7 @@ class TestStockEntry(ERPNextTestSuite):
 					basic_rate=row.basic_rate or 100,
 				)
 
-			if row.secondary_item_type or row.valuation_method:
+			if row.secondary_item_type or row.valuation_type:
 				row.item_code = secondary_item
 				row.uom = frappe.db.get_value("Item", secondary_item, "stock_uom")
 				row.stock_uom = frappe.db.get_value("Item", secondary_item, "stock_uom")
@@ -1660,11 +1660,11 @@ class TestStockEntry(ERPNextTestSuite):
 		stock_entry.save()
 
 		self.assertTrue(
-			[row.item_code for row in stock_entry.items if row.secondary_item_type or row.valuation_method]
+			[row.item_code for row in stock_entry.items if row.secondary_item_type or row.valuation_type]
 		)
 
 		for row in stock_entry.items:
-			if not row.secondary_item_type and not row.valuation_method:
+			if not row.secondary_item_type and not row.valuation_type:
 				qc = frappe.get_doc(
 					{
 						"doctype": "Quality Inspection",
@@ -1684,7 +1684,7 @@ class TestStockEntry(ERPNextTestSuite):
 		stock_entry.reload()
 		stock_entry.submit()
 		for row in stock_entry.items:
-			if row.secondary_item_type or row.valuation_method:
+			if row.secondary_item_type or row.valuation_type:
 				self.assertFalse(row.quality_inspection)
 			else:
 				self.assertTrue(row.quality_inspection)
@@ -3416,7 +3416,7 @@ class TestStockEntry(ERPNextTestSuite):
 				"qty": 5,
 				"cost_allocation_per": 25,
 				"process_loss_per": 0,
-				"valuation_method": "% of FG Cost",
+				"valuation_type": "% of FG Cost",
 			},
 		)
 		bom.insert()
@@ -3478,7 +3478,7 @@ class TestStockEntry(ERPNextTestSuite):
 				"qty": 5,
 				"cost_allocation_per": 0,
 				"process_loss_per": 0,
-				"valuation_method": "% of FG Cost",
+				"valuation_type": "% of FG Cost",
 			},
 		)
 		bom.insert()
@@ -3535,7 +3535,7 @@ class TestStockEntry(ERPNextTestSuite):
 				"qty": 5,
 				"cost_allocation_per": 25,
 				"process_loss_per": 0,
-				"valuation_method": "% of FG Cost",
+				"valuation_type": "% of FG Cost",
 			},
 		)
 		bom.insert()

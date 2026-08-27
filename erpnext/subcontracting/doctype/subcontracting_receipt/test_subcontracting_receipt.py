@@ -1193,13 +1193,13 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 				{
 					"item_code": item,
 					"stock_qty": 1 * (idx + 1),
-					"valuation_method": "Valuation Rate",
+					"valuation_type": "Valuation Rate",
 				},
 			)
 		manual_item = make_item(properties={"is_stock_item": 1}).name
 		bom.append(
 			"secondary_items",
-			{"item_code": manual_item, "stock_qty": 1, "valuation_method": "Manual", "cost": 30},
+			{"item_code": manual_item, "stock_qty": 1, "valuation_type": "Manual", "cost": 30},
 		)
 		percentage_item = make_item(properties={"is_stock_item": 1}).name
 		bom.append(
@@ -1208,7 +1208,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 				"item_code": percentage_item,
 				"secondary_item_type": "Co-Product",
 				"stock_qty": 1,
-				"valuation_method": "% of FG Cost",
+				"valuation_type": "% of FG Cost",
 				"cost_allocation_per": 10,
 			},
 		)
@@ -1235,7 +1235,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		scr.get_secondary_items()
 
 		scr_secondary_items = set(
-			[item.item_code for item in scr.items if item.secondary_item_type or item.valuation_method]
+			[item.item_code for item in scr.items if item.secondary_item_type or item.valuation_type]
 		)
 		self.assertEqual(len(scr.items), 5)  # 1 FG Item + 4 Secondary Items
 		self.assertEqual(scr_secondary_items, {*secondary_items, manual_item, percentage_item})
@@ -1245,7 +1245,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		scr.get_secondary_items()
 		fg_warehouse = next(item.warehouse for item in scr.items if item.bom)
 		for item in scr.items:
-			if item.secondary_item_type or item.valuation_method:
+			if item.secondary_item_type or item.valuation_type:
 				self.assertEqual(item.warehouse, fg_warehouse)
 
 		# the percentage row allocates from the cost net of the own-cost rows, so the
@@ -1258,7 +1258,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 			+ flt(fg_row.additional_cost_per_qty)
 		) * flt(fg_row.received_qty)
 		secondary_total = sum(
-			flt(row.amount) for row in scr.items if row.secondary_item_type or row.valuation_method
+			flt(row.amount) for row in scr.items if row.secondary_item_type or row.valuation_type
 		)
 		self.assertAlmostEqual(flt(fg_row.amount) + secondary_total, fg_gross, places=2)
 
@@ -1281,7 +1281,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		# percentage rows reprice on save when the own-cost basis changes
 		own_total = sum(
-			flt(row.amount) for row in scr.items if row.valuation_method in ("Valuation Rate", "Manual")
+			flt(row.amount) for row in scr.items if row.valuation_type in ("Valuation Rate", "Manual")
 		)
 		percentage_row = next(item for item in scr.items if item.item_code == percentage_item)
 		self.assertAlmostEqual(flt(percentage_row.amount), (fg_gross - own_total) * 0.10, places=2)

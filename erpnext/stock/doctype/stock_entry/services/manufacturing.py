@@ -40,7 +40,7 @@ class BaseManufactureStockEntry(BaseStockEntry):
 				not row.s_warehouse
 				and self.doc.from_warehouse
 				and not row.is_finished_item
-				and not row.valuation_method
+				and not row.valuation_type
 				and not row.secondary_item_type
 			):
 				row.s_warehouse = self.doc.from_warehouse
@@ -49,7 +49,7 @@ class BaseManufactureStockEntry(BaseStockEntry):
 			elif (
 				not row.t_warehouse
 				and self.doc.to_warehouse
-				and (row.is_finished_item or row.valuation_method or row.secondary_item_type)
+				and (row.is_finished_item or row.valuation_type or row.secondary_item_type)
 			):
 				row.t_warehouse = self.doc.to_warehouse
 				row.s_warehouse = None
@@ -98,10 +98,10 @@ class BaseManufactureStockEntry(BaseStockEntry):
 		secondary_items = get_secondary_items(self.doc.bom_no, self.doc.work_order)
 		for row in secondary_items:
 			item_args = self.get_item_dict(row)
-			item_args["valuation_method"] = row.get("valuation_method")
+			item_args["valuation_type"] = row.get("valuation_type")
 			item_args["secondary_item_type"] = row.secondary_item_type
 			item_args["bom_secondary_item"] = row.name
-			if row.get("valuation_method") == "Manual":
+			if row.get("valuation_type") == "Manual":
 				item_args["set_basic_rate_manually"] = 1
 				item_args["basic_rate"] = flt(row.get("manual_rate"))
 
@@ -882,8 +882,8 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			row.s_warehouse = None
 			row.t_warehouse = row.warehouse or self.doc.to_warehouse
 			bom_row = bom_rows.get(row.bom_secondary_item, frappe._dict())
-			row.valuation_method = bom_row.get("valuation_method")
-			if row.valuation_method == "Manual":
+			row.valuation_type = bom_row.get("valuation_type")
+			if row.valuation_type == "Manual":
 				row.set_basic_rate_manually = 1
 				row.basic_rate = (
 					flt(bom_row.cost) / flt(bom_row.stock_qty) if flt(bom_row.get("stock_qty")) else 0
@@ -902,7 +902,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			for row in frappe.get_all(
 				"BOM Secondary Item",
 				filters={"name": ("in", names)},
-				fields=["name", "valuation_method", "cost", "stock_qty"],
+				fields=["name", "valuation_type", "cost", "stock_qty"],
 			)
 		}
 
@@ -942,13 +942,13 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			.select(
 				sed.item_code,
 				sed.secondary_item_type,
-				sed.valuation_method,
+				sed.valuation_type,
 				sed.qty,
 				sed.bom_secondary_item,
 			)
 			.where(
 				(se.work_order == self.doc.work_order)
-				& ((sed.secondary_item_type.isnotnull()) | (Coalesce(sed.valuation_method, "") != ""))
+				& ((sed.secondary_item_type.isnotnull()) | (Coalesce(sed.valuation_type, "") != ""))
 				& (se.docstatus == 1)
 				& (se.purpose.isin(["Repack", "Manufacture"]))
 			)
@@ -1241,7 +1241,7 @@ def _add_bom_table_specific_fields(query, doctype, table_name):
 			doctype.uom,
 			doctype.process_loss_per,
 			doctype.secondary_item_type,
-			doctype.valuation_method,
+			doctype.valuation_type,
 			doctype.conversion_factor,
 			(doctype.cost / NullIf(doctype.stock_qty, 0)).as_("manual_rate"),
 		)
@@ -1301,7 +1301,7 @@ def get_secondary_item_key(row):
 
 	return (
 		row.item_code,
-		row.secondary_item_type or ("Scrap" if row.get("valuation_method") == "Valuation Rate" else ""),
+		row.secondary_item_type or ("Scrap" if row.get("valuation_type") == "Valuation Rate" else ""),
 	)
 
 

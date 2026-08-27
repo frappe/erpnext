@@ -570,7 +570,7 @@ class TestBOM(ERPNextTestSuite):
 				"secondary_item_type": "Additional Finished Good",
 				"qty": 1,
 				"cost_allocation_per": 10,
-				"valuation_method": "% of FG Cost",
+				"valuation_type": "% of FG Cost",
 			},
 		)
 
@@ -595,7 +595,7 @@ class TestBOM(ERPNextTestSuite):
 				"item_code": scrap_item,
 				"secondary_item_type": "Scrap",
 				"qty": 1,
-				"valuation_method": "Valuation Rate",
+				"valuation_type": "Valuation Rate",
 			},
 		)
 		bom_doc.append(
@@ -605,7 +605,7 @@ class TestBOM(ERPNextTestSuite):
 				"secondary_item_type": "Scrap",
 				"qty": 1,
 				"cost_allocation_per": 10,
-				"valuation_method": "% of FG Cost",
+				"valuation_type": "% of FG Cost",
 			},
 		)
 		self.assertRaises(frappe.ValidationError, bom_doc.save)
@@ -632,7 +632,7 @@ class TestBOM(ERPNextTestSuite):
 				"item_code": by_product,
 				"secondary_item_type": "By-Product",
 				"qty": 1,
-				"valuation_method": "Manual",
+				"valuation_type": "Manual",
 				"cost": 150,
 			},
 		)
@@ -668,7 +668,7 @@ class TestBOM(ERPNextTestSuite):
 				"item_code": scrap_item,
 				"secondary_item_type": "Scrap",
 				"qty": 2,
-				"valuation_method": "Valuation Rate",
+				"valuation_type": "Valuation Rate",
 			},
 		)
 		bom_doc.append(
@@ -678,7 +678,7 @@ class TestBOM(ERPNextTestSuite):
 				"secondary_item_type": "By-Product",
 				"qty": 1,
 				"cost_allocation_per": 10,
-				"valuation_method": "% of FG Cost",
+				"valuation_type": "% of FG Cost",
 			},
 		)
 		bom_doc.save()
@@ -746,7 +746,7 @@ class TestBOM(ERPNextTestSuite):
 				"item_code": scrap_item,
 				"secondary_item_type": "Scrap",
 				"qty": 1,
-				"valuation_method": "Valuation Rate",
+				"valuation_type": "Valuation Rate",
 			},
 		)
 		bom_doc.save()
@@ -774,7 +774,7 @@ class TestBOM(ERPNextTestSuite):
 				"item_code": scrap_item,
 				"secondary_item_type": "Scrap",
 				"qty": 2,
-				"valuation_method": "Valuation Rate",
+				"valuation_type": "Valuation Rate",
 			},
 		)
 		bom_doc.save()

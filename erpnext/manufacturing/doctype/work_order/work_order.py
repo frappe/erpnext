@@ -219,7 +219,7 @@ class WorkOrder(Document):
 			.where(
 				(parent.work_order == self.name)
 				& (parent.docstatus == 1)
-				& ((child.secondary_item_type != "") | (Coalesce(child.valuation_method, "") != ""))
+				& ((child.secondary_item_type != "") | (Coalesce(child.valuation_type, "") != ""))
 			)
 			.select(
 				child.item_code,

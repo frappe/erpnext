@@ -1550,7 +1550,7 @@ class TestJobCard(ERPNextTestSuite):
 					"qty": 1,
 					"process_loss_per": 10,
 					"cost_allocation_per": 5,
-					"valuation_method": "% of FG Cost",
+					"valuation_type": "% of FG Cost",
 					"secondary_item_type": "Scrap",
 				},
 			)
@@ -2986,7 +2986,7 @@ class TestJobCard(ERPNextTestSuite):
 		frappe.db.set_value(
 			"Stock Entry Detail",
 			s.items[3].name,
-			{"secondary_item_type": None, "valuation_method": "Valuation Rate"},
+			{"secondary_item_type": None, "valuation_type": "Valuation Rate"},
 		)
 
 		from erpnext.stock.doctype.stock_entry.services.manufacturing import ManufactureStockEntry
@@ -3019,7 +3019,7 @@ class TestJobCard(ERPNextTestSuite):
 					"secondary_item_type": "Scrap",
 					"qty": 1,
 					"cost_allocation_per": cost_allocation_per,
-					"valuation_method": "% of FG Cost" if cost_allocation_per else "Valuation Rate",
+					"valuation_type": "% of FG Cost" if cost_allocation_per else "Valuation Rate",
 				},
 			)
 			bom_doc.save()
@@ -3073,9 +3073,9 @@ class TestJobCard(ERPNextTestSuite):
 		rows = {d.bom_secondary_item: d for d in s.items if d.item_code == secondary_item}
 		self.assertEqual(len(rows), 2)
 		self.assertEqual(rows[bom_links[0]].qty, 2)
-		self.assertEqual(rows[bom_links[0]].valuation_method, "Valuation Rate")
+		self.assertEqual(rows[bom_links[0]].valuation_type, "Valuation Rate")
 		self.assertEqual(rows[bom_links[1]].qty, 3)
-		self.assertEqual(rows[bom_links[1]].valuation_method, "% of FG Cost")
+		self.assertEqual(rows[bom_links[1]].valuation_type, "% of FG Cost")
 
 	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings", {"overproduction_percentage_for_work_order": 100}

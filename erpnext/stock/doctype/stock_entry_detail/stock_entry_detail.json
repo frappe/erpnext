@@ -18,7 +18,7 @@
   "item_name",
   "col_break2",
   "is_finished_item",
-  "valuation_method",
+  "valuation_type",
   "secondary_item_type",
   "quality_inspection",
   "subcontracted_item",
@@ -572,7 +572,7 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:!doc.valuation_method && !doc.secondary_item_type",
+   "depends_on": "eval:!doc.valuation_type && !doc.secondary_item_type",
    "fieldname": "is_finished_item",
    "fieldtype": "Check",
    "label": "Is Finished Item",
@@ -688,10 +688,10 @@
    "read_only": 1
   },
   {
-   "depends_on": "valuation_method",
-   "fieldname": "valuation_method",
+   "depends_on": "valuation_type",
+   "fieldname": "valuation_type",
    "fieldtype": "Select",
-   "label": "Valuation Method",
+   "label": "Valuation Type",
    "options": "\nValuation Rate\n% of FG Cost\nManual",
    "read_only": 1
   }

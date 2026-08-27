@@ -243,7 +243,7 @@ class SubcontractingInwardController:
 			for item in self.get("items")
 			if not item.is_finished_item
 			and not item.secondary_item_type
-			and not item.valuation_method
+			and not item.valuation_type
 			and frappe.get_cached_value("Item", item.item_code, "is_customer_provided_item")
 		]
 
@@ -380,7 +380,7 @@ class SubcontractingInwardController:
 			if self.purpose in ["Subcontracting Delivery", "Subcontracting Return", "Manufacture"]:
 				for item in self.items:
 					if (
-						item.is_finished_item or item.secondary_item_type or item.valuation_method
+						item.is_finished_item or item.secondary_item_type or item.valuation_type
 					) and item.valuation_rate == 0:
 						item.allow_zero_valuation_rate = 1
 
@@ -480,7 +480,7 @@ class SubcontractingInwardController:
 				self.validate_delivery_on_save()
 			else:
 				for item in self.items:
-					if not item.secondary_item_type and not item.valuation_method:
+					if not item.secondary_item_type and not item.valuation_type:
 						delivered_qty, returned_qty = frappe.get_value(
 							"Subcontracting Inward Order Item",
 							item.scio_detail,
@@ -550,7 +550,7 @@ class SubcontractingInwardController:
 						bold(
 							frappe.get_cached_value(
 								"Subcontracting Inward Order Item"
-								if not item.secondary_item_type and not item.valuation_method
+								if not item.secondary_item_type and not item.valuation_type
 								else "Subcontracting Inward Order Secondary Item",
 								item.scio_detail,
 								"stock_uom",
@@ -602,7 +602,7 @@ class SubcontractingInwardController:
 				)
 
 			for item in [item for item in self.items if not item.is_finished_item]:
-				if item.secondary_item_type or item.valuation_method:
+				if item.secondary_item_type or item.valuation_type:
 					scio_secondary_item = frappe.get_value(
 						"Subcontracting Inward Order Secondary Item",
 						{
@@ -661,7 +661,7 @@ class SubcontractingInwardController:
 			for item in self.items:
 				doctype = (
 					"Subcontracting Inward Order Item"
-					if not item.secondary_item_type and not item.valuation_method
+					if not item.secondary_item_type and not item.valuation_type
 					else "Subcontracting Inward Order Secondary Item"
 				)
 				qty_map[doctype][item.scio_detail] += (
@@ -802,7 +802,7 @@ class SubcontractingInwardController:
 		items = [
 			item
 			for item in self.items
-			if not item.is_finished_item and not item.secondary_item_type and not item.valuation_method
+			if not item.is_finished_item and not item.secondary_item_type and not item.valuation_type
 		]
 		if not items:
 			return
@@ -913,7 +913,7 @@ class SubcontractingInwardController:
 	def update_inward_order_secondary_items(self):
 		if (scio := self.subcontracting_inward_order) and self.purpose == "Manufacture":
 			secondary_items_list = [
-				item for item in self.items if item.secondary_item_type or item.valuation_method
+				item for item in self.items if item.secondary_item_type or item.valuation_type
 			]
 
 			secondary_items = defaultdict(float)

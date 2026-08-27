@@ -3,7 +3,7 @@ from frappe.utils import flt
 
 
 def execute():
-	"""Set valuation_method on sites that migrated before the field existed.
+	"""Set valuation_type on sites that migrated before the field existed.
 
 	Fresh migrations get it from co_by_product_patch; the legacy columns never
 	existed there, so every step below is a no-op.
@@ -25,7 +25,7 @@ def set_valuation_rate_method(doctype, legacy_fields):
 		if not frappe.db.has_column(doctype, field):
 			continue
 
-		frappe.qb.update(table).set(table.valuation_method, "Valuation Rate").where(table[field] == 1).run()
+		frappe.qb.update(table).set(table.valuation_type, "Valuation Rate").where(table[field] == 1).run()
 
 
 def set_percentage_method():
@@ -33,14 +33,14 @@ def set_percentage_method():
 
 	Only BOM rows need this: the field is mandatory there, and the costing treats
 	the percentage method as the default for everything else."""
-	rows = frappe.get_all("BOM Secondary Item", filters={"valuation_method": ("is", "not set")}, pluck="name")
+	rows = frappe.get_all("BOM Secondary Item", filters={"valuation_type": ("is", "not set")}, pluck="name")
 	if not rows:
 		return
 
 	frappe.db.set_value(
 		"BOM Secondary Item",
 		{"name": ("in", rows)},
-		"valuation_method",
+		"valuation_type",
 		"% of FG Cost",
 		update_modified=False,
 	)
@@ -55,7 +55,7 @@ def backfill_cost_from_rate():
 	rows = (
 		frappe.qb.from_(table)
 		.select(table.name, table.parent, table.rate, table.stock_qty)
-		.where((table.valuation_method == "Valuation Rate") & (table.cost == 0) & (table.rate > 0))
+		.where((table.valuation_type == "Valuation Rate") & (table.cost == 0) & (table.rate > 0))
 	).run(as_dict=True)
 	if not rows:
 		return

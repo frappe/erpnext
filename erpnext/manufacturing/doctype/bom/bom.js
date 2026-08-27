@@ -779,7 +779,7 @@ var get_bom_material_detail = function (doc, cdt, cdn, secondary_items) {
 				erpnext.bom.calculate_rm_cost(doc);
 				erpnext.bom.calculate_total(doc);
 
-				if (secondary_items && d.valuation_method === "Valuation Rate") {
+				if (secondary_items && d.valuation_type === "Valuation Rate") {
 					erpnext.bom.fetch_secondary_item_cost(doc, cdt, cdn);
 				}
 			},
@@ -1036,14 +1036,14 @@ frappe.tour["BOM"] = [
 ];
 
 frappe.ui.form.on("BOM Secondary Item", {
-	valuation_method(frm, cdt, cdn) {
+	valuation_type(frm, cdt, cdn) {
 		const row = locals[cdt][cdn];
-		if (row.valuation_method !== "% of FG Cost") {
+		if (row.valuation_type !== "% of FG Cost") {
 			frappe.model.set_value(cdt, cdn, "cost_allocation_per", 0);
 		}
-		if (row.valuation_method === "Valuation Rate") {
+		if (row.valuation_type === "Valuation Rate") {
 			erpnext.bom.fetch_secondary_item_cost(frm.doc, cdt, cdn);
-		} else if (row.valuation_method !== "Manual") {
+		} else if (row.valuation_type !== "Manual") {
 			frappe.model.set_value(cdt, cdn, { cost: 0, base_cost: 0 });
 		}
 	},

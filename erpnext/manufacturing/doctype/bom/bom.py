@@ -440,7 +440,7 @@ class BOM(WebsiteGenerator):
 				)
 			seen_items.add(key)
 
-			if item.valuation_method != "Valuation Rate" and item.item_code == self.item:
+			if item.valuation_type != "Valuation Rate" and item.item_code == self.item:
 				frappe.throw(
 					_(
 						"Row #{0}: Finished Good Item {1} cannot be added in the Secondary Items table."
@@ -533,7 +533,7 @@ class BOM(WebsiteGenerator):
 		total_secondary_items_per = 0
 		own_cost = 0
 		for item in self.secondary_items:
-			if item.valuation_method in ("Valuation Rate", "Manual"):
+			if item.valuation_type in ("Valuation Rate", "Manual"):
 				item.cost_allocation_per = 0
 				own_cost += flt(item.cost)
 			total_secondary_items_per += item.cost_allocation_per
@@ -1143,7 +1143,7 @@ class BOM(WebsiteGenerator):
 
 	def has_scrap_items(self):
 		return any(
-			d.get("secondary_item_type") == "Scrap" or d.get("valuation_method") == "Valuation Rate"
+			d.get("secondary_item_type") == "Scrap" or d.get("valuation_type") == "Valuation Rate"
 			for d in self.get("secondary_items")
 		)
 
