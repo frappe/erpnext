@@ -381,69 +381,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 		for item in list(self.items):
 			if item.bom:
-				bom = frappe.get_doc("BOM", item.bom)
-				warehouse = self.set_warehouse or item.warehouse
-				for secondary_item in bom.secondary_items:
-					per_unit = secondary_item.stock_qty / bom.quantity
-					received_qty = flt(item.received_qty * per_unit, item.precision("received_qty"))
-					qty = flt(
-						item.received_qty * (per_unit - (secondary_item.process_loss_qty / bom.quantity)),
-						item.precision("qty"),
-					)
-					if secondary_item.valuation_method not in ("Valuation Rate", "Manual"):
-						lcv_cost_per_qty = (
-							flt(item.landed_cost_voucher_amount) / flt(item.qty) if flt(item.qty) else 0.0
-						)
-						fg_item_cost = (
-							flt(item.rm_cost_per_qty)
-							+ flt(item.additional_cost_per_qty)
-							+ flt(lcv_cost_per_qty)
-							+ flt(item.service_cost_per_qty)
-							- flt(item.secondary_items_cost_per_qty)
-						) * flt(item.received_qty)
-						rate = (fg_item_cost * (secondary_item.cost_allocation_per / 100)) / qty
-					elif secondary_item.valuation_method == "Manual":
-						rate = (
-							flt(secondary_item.cost) / flt(secondary_item.stock_qty)
-							if flt(secondary_item.stock_qty)
-							else 0
-						)
-					else:
-						rate = get_valuation_rate(
-							secondary_item.item_code,
-							warehouse,
-							self.doctype,
-							self.name,
-							currency=erpnext.get_company_currency(self.company),
-							company=self.company,
-						)
-						if not rate and secondary_item.stock_qty:
-							rate = flt(secondary_item.cost) / flt(secondary_item.stock_qty)
-
-					self.append(
-						"items",
-						{
-							"secondary_item_type": secondary_item.secondary_item_type,
-							"valuation_method": secondary_item.valuation_method,
-							"reference_name": item.name,
-							"item_code": secondary_item.item_code,
-							"item_name": secondary_item.item_name,
-							"qty": received_qty
-							if secondary_item.valuation_method not in ("Valuation Rate", "Manual")
-							else flt(item.qty) * (flt(secondary_item.stock_qty) / flt(bom.quantity)),
-							"received_qty": received_qty,
-							"process_loss_qty": received_qty - qty,
-							"stock_uom": secondary_item.stock_uom,
-							"rate": rate,
-							"rm_cost_per_qty": 0,
-							"service_cost_per_qty": 0,
-							"additional_cost_per_qty": 0,
-							"secondary_items_cost_per_qty": 0,
-							"amount": qty * rate,
-							"warehouse": warehouse,
-							"rejected_warehouse": self.rejected_warehouse,
-						},
-					)
+				self.add_secondary_items_of_fg_row(item)
 
 		if recalculate_rate:
 			self.calculate_additional_costs()
@@ -462,6 +400,85 @@ class SubcontractingReceipt(SubcontractingController):
 			)
 			or item.rate
 		)
+
+	def add_secondary_items_of_fg_row(self, item):
+		"""Own-cost rows first: the percentage rows allocate from the cost net of them."""
+		bom = frappe.get_doc("BOM", item.bom)
+		warehouse = self.set_warehouse or item.warehouse
+
+		own_cost = 0.0
+		percentage_rows = []
+		for secondary_item in bom.secondary_items:
+			if secondary_item.valuation_method in ("Valuation Rate", "Manual"):
+				row = self.append_secondary_item(item, bom, secondary_item, warehouse)
+				own_cost += flt(row.qty) * flt(row.rate)
+			else:
+				percentage_rows.append(secondary_item)
+
+		for secondary_item in percentage_rows:
+			self.append_secondary_item(item, bom, secondary_item, warehouse, own_cost)
+
+	def append_secondary_item(self, item, bom, secondary_item, warehouse, own_cost=0.0):
+		per_unit = secondary_item.stock_qty / bom.quantity
+		received_qty = flt(item.received_qty * per_unit, item.precision("received_qty"))
+		qty = flt(
+			item.received_qty * (per_unit - (secondary_item.process_loss_qty / bom.quantity)),
+			item.precision("qty"),
+		)
+		rate = self.get_secondary_item_rate(item, secondary_item, warehouse, qty, own_cost)
+
+		return self.append(
+			"items",
+			{
+				"secondary_item_type": secondary_item.secondary_item_type,
+				"valuation_method": secondary_item.valuation_method,
+				"reference_name": item.name,
+				"item_code": secondary_item.item_code,
+				"item_name": secondary_item.item_name,
+				"qty": received_qty
+				if secondary_item.valuation_method not in ("Valuation Rate", "Manual")
+				else flt(item.qty) * (flt(secondary_item.stock_qty) / flt(bom.quantity)),
+				"received_qty": received_qty,
+				"process_loss_qty": received_qty - qty,
+				"stock_uom": secondary_item.stock_uom,
+				"rate": rate,
+				"rm_cost_per_qty": 0,
+				"service_cost_per_qty": 0,
+				"additional_cost_per_qty": 0,
+				"secondary_items_cost_per_qty": 0,
+				"amount": qty * rate,
+				"warehouse": warehouse,
+				"rejected_warehouse": self.rejected_warehouse,
+			},
+		)
+
+	def get_secondary_item_rate(self, item, secondary_item, warehouse, qty, own_cost):
+		if secondary_item.valuation_method == "Manual":
+			if not flt(secondary_item.stock_qty):
+				return 0
+			return flt(secondary_item.cost) / flt(secondary_item.stock_qty)
+
+		if secondary_item.valuation_method == "Valuation Rate":
+			rate = get_valuation_rate(
+				secondary_item.item_code,
+				warehouse,
+				self.doctype,
+				self.name,
+				currency=erpnext.get_company_currency(self.company),
+				company=self.company,
+			)
+			if not rate and secondary_item.stock_qty:
+				rate = flt(secondary_item.cost) / flt(secondary_item.stock_qty)
+			return rate
+
+		lcv_cost_per_qty = flt(item.landed_cost_voucher_amount) / flt(item.qty) if flt(item.qty) else 0.0
+		fg_item_cost = (
+			flt(item.rm_cost_per_qty)
+			+ flt(item.additional_cost_per_qty)
+			+ flt(lcv_cost_per_qty)
+			+ flt(item.service_cost_per_qty)
+		) * flt(item.received_qty) - flt(own_cost)
+		return (fg_item_cost * (secondary_item.cost_allocation_per / 100)) / qty
 
 	def remove_secondary_items(self):
 		for item in list(self.items):
