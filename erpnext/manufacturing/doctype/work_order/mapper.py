@@ -296,7 +296,10 @@ def get_fg_conversion_details(work_order: str):
 		get_converted_fg_qty,
 	)
 
-	frappe.has_permission("Work Order", "read", throw=True)
+	if not work_order or not isinstance(work_order, str):
+		frappe.throw(_("Invalid Work Order"))
+
+	frappe.has_permission("Work Order", "read", doc=work_order, throw=True)
 
 	wo_details = frappe.db.get_value(
 		"Work Order", work_order, ["production_item", "produced_qty"], as_dict=True
@@ -310,7 +313,15 @@ def get_fg_conversion_details(work_order: str):
 
 @frappe.whitelist()
 def make_fg_conversion_entry(work_order: str, item_code: str, qty: float):
+	if not (work_order and isinstance(work_order, str) and item_code and isinstance(item_code, str)):
+		frappe.throw(_("Invalid Work Order or Item"))
+
+	qty = flt(qty)
+	if qty <= 0:
+		frappe.throw(_("The qty to convert must be greater than zero."))
+
 	frappe.has_permission("Stock Entry", "create", throw=True)
+	frappe.has_permission("Work Order", "read", doc=work_order, throw=True)
 
 	wo_doc = frappe.get_doc("Work Order", work_order)
 

@@ -5711,6 +5711,14 @@ class TestWorkOrder(ERPNextTestSuite):
 		invalid_item_entry = frappe.get_doc(make_fg_conversion_entry(wo_order.name, other_item, 2))
 		self.assertRaises(frappe.ValidationError, invalid_item_entry.insert)
 
+		mismatch_entry = frappe.get_doc(make_fg_conversion_entry(wo_order.name, alt_item, 2))
+		for row in mismatch_entry.items:
+			if row.is_finished_item:
+				row.qty = row.transfer_qty = 3
+		self.assertRaises(frappe.ValidationError, mismatch_entry.insert)
+
+		self.assertRaises(frappe.ValidationError, make_fg_conversion_entry, wo_order.name, alt_item, 0)
+
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"allow_alternative_finished_goods": 0})
 	def test_fg_conversion_not_allowed_when_setting_is_disabled(self):
 		from erpnext.manufacturing.doctype.work_order.mapper import make_fg_conversion_entry

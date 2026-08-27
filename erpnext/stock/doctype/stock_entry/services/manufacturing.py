@@ -1034,8 +1034,14 @@ class RepackStockEntry(BaseManufactureStockEntry):
 				).format(bold(production_item), get_link_to_form("Work Order", self.doc.work_order))
 			)
 
-		available_qty = flt(self.wo_doc.produced_qty) - get_converted_fg_qty(
-			self.doc.work_order, exclude=self.doc.name
+		self.validate_conversion_output_qty(consumed_qty, production_item)
+
+		is_submitting = self.doc.docstatus == 1
+		produced_qty = flt(
+			frappe.db.get_value("Work Order", self.doc.work_order, "produced_qty", for_update=is_submitting)
+		)
+		available_qty = produced_qty - get_converted_fg_qty(
+			self.doc.work_order, exclude=self.doc.name, for_update=is_submitting
 		)
 		if consumed_qty > available_qty:
 			frappe.throw(
@@ -1047,6 +1053,17 @@ class RepackStockEntry(BaseManufactureStockEntry):
 					available_qty,
 					get_link_to_form("Work Order", self.doc.work_order),
 				)
+			)
+
+	def validate_conversion_output_qty(self, consumed_qty, production_item):
+		precision = self.doc.precision("fg_completed_qty")
+		output_qty = sum(flt(row.transfer_qty) for row in self.doc.items if row.is_finished_item)
+
+		if flt(output_qty, precision) != flt(consumed_qty, precision):
+			frappe.throw(
+				_(
+					"The total qty {0} of the alternative finished goods must be equal to the converted qty {1} of the production item {2}."
+				).format(output_qty, consumed_qty, bold(production_item))
 			)
 
 	def validate_repack_entry(self):
@@ -1610,7 +1627,7 @@ def get_alternative_finished_goods(production_item):
 	return list(dict.fromkeys(alternatives))
 
 
-def get_converted_fg_qty(work_order, exclude=None):
+def get_converted_fg_qty(work_order, exclude=None, for_update=False):
 	production_item = frappe.db.get_value("Work Order", work_order, "production_item")
 
 	se = frappe.qb.DocType("Stock Entry")
@@ -1632,5 +1649,8 @@ def get_converted_fg_qty(work_order, exclude=None):
 
 	if exclude:
 		query = query.where(se.name != exclude)
+
+	if for_update:
+		query = query.for_update()
 
 	return flt(query.run()[0][0])
