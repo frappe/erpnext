@@ -1279,6 +1279,13 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertEqual(manual_row.rate, 45)
 		self.assertEqual(manual_row.amount, 45 * manual_row.qty)
 
+		# percentage rows reprice on save when the own-cost basis changes
+		own_total = sum(
+			flt(row.amount) for row in scr.items if row.valuation_method in ("Valuation Rate", "Manual")
+		)
+		percentage_row = next(item for item in scr.items if item.item_code == percentage_item)
+		self.assertAlmostEqual(flt(percentage_row.amount), (fg_gross - own_total) * 0.10, places=2)
+
 		# the finished good's rate is its cost allocation share of the net cost
 		fg_row = next(item for item in scr.items if item.bom)
 		self.assertTrue(fg_row.secondary_items_cost_per_qty > 0)
