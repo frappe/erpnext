@@ -981,7 +981,6 @@ class RepackStockEntry(BaseManufactureStockEntry):
 	def validate(self):
 		self.validate_raw_materials_exists()
 		self.validate_repack_entry()
-		self.validate_fg_conversion()
 
 	def validate_fg_conversion(self):
 		if not self.doc.is_fg_conversion:
@@ -1636,7 +1635,7 @@ def get_converted_fg_qty(work_order, exclude=None, for_update=False):
 		frappe.qb.from_(se)
 		.inner_join(sed)
 		.on(sed.parent == se.name)
-		.select(Sum(sed.transfer_qty))
+		.select(sed.transfer_qty)
 		.where(
 			(se.work_order == work_order)
 			& (se.is_fg_conversion == 1)
@@ -1653,4 +1652,4 @@ def get_converted_fg_qty(work_order, exclude=None, for_update=False):
 	if for_update:
 		query = query.for_update()
 
-	return flt(query.run()[0][0])
+	return sum(flt(row[0]) for row in query.run())

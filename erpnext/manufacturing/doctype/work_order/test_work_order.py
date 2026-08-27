@@ -5714,7 +5714,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		mismatch_entry = frappe.get_doc(make_fg_conversion_entry(wo_order.name, alt_item, 2))
 		for row in mismatch_entry.items:
 			if row.is_finished_item:
-				row.qty = row.transfer_qty = 3
+				row.qty = 3
 		self.assertRaises(frappe.ValidationError, mismatch_entry.insert)
 
 		self.assertRaises(frappe.ValidationError, make_fg_conversion_entry, wo_order.name, alt_item, 0)

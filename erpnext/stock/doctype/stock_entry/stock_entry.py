@@ -322,6 +322,13 @@ class StockEntry(StockController, SubcontractingInwardController):
 			else:
 				self.validate_job_card_fg_item()
 
+		# Must run after set_transfer_qty() and mark_finished_and_secondary_items() so the
+		# qty parity and conversion cap checks see recomputed transfer_qty on edited rows.
+		if self.is_fg_conversion:
+			if self.purpose != "Repack":
+				frappe.throw(_("A finished good conversion entry must have the purpose 'Repack'."))
+			self.purpose_cls(self).validate_fg_conversion()
+
 		# Disassembly rows are fully derived from the source manufacture entry / work order;
 		# verify the posted stock quantities have not been tampered with (raw-material minting).
 		# Must run after set_transfer_qty() so row.transfer_qty reflects qty * conversion_factor.
