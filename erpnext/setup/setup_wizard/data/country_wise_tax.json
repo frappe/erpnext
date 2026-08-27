@@ -5098,22 +5098,6 @@
 		}
 	},
 
-	"United States": {
-		"US ST 6%": {
-			"account_name": "ST 6%",
-			"tax_rate": 6.00,
-			"default": 1
-		},
-		"US ST 4%": {
-			"account_name": "ST 4%",
-			"tax_rate": 4.00
-		},
-		"US ST 6.25%": {
-			"account_name": "ST 6.25%",
-			"tax_rate": 6.25
-		}
-	},
-
 	"Uruguay": {
 		"Uruguay Tax": {
 			"account_name": "VAT",

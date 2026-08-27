@@ -81,7 +81,6 @@
 					},
 					"Inventory Delivered But Not Billed": {
 						"account_number": "11430",
-						"account_type": "Stock Delivered But Not Billed",
 						"account_category": "Stock Assets"
 					},
 					"account_number": "11400",
