@@ -49,6 +49,8 @@ frappe.treeview_settings["BOM"] = {
 		{ toggle_btn: true },
 		{
 			label: __("Edit"),
+			icon: "pencil",
+			inline: true,
 			condition: function (node) {
 				return node.expandable;
 			},
