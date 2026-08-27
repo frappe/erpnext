@@ -196,7 +196,6 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 		self.cap_completed_qty_to_material_coverage()
 
 	def cap_completed_qty_to_material_coverage(self):
-		"""Cap the completed quantity to the materials covered by this Stock Entry."""
 		required_qty, transferred_qty, target_qty, precision = self._get_material_coverage_data()
 		if not required_qty:
 			return
