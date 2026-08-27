@@ -547,8 +547,14 @@ def get_timesheets_list(doctype, txt, filters, limit_start, limit_page_length=20
 		customer = contact.get_link_for("Customer")
 
 	if customer:
-		sales_invoices = frappe.get_all("Sales Invoice", filters={"customer": customer}, pluck="name")
+		sales_invoices = frappe.get_all(
+			"Sales Invoice",
+			filters={"customer": customer, "docstatus": ["!=", 2]},
+			pluck="name",
+		)
 		projects = frappe.get_all("Project", filters={"customer": customer}, pluck="name")
+		if not (sales_invoices or projects):
+			return []
 
 		# Return timesheet related data to web portal.
 		table = frappe.qb.DocType("Timesheet")
@@ -578,10 +584,7 @@ def get_timesheets_list(doctype, txt, filters, limit_start, limit_page_length=20
 		if projects:
 			conditions.append(child_table.project.isin(projects))
 
-		if conditions:
-			query = query.where(frappe.qb.terms.Criterion.any(conditions))
-
-		return query.run(as_dict=True)
+		return query.where(frappe.qb.terms.Criterion.any(conditions)).run(as_dict=True)
 	else:
 		return {}
 
