@@ -791,6 +791,8 @@ def make_stock_entry(source_name, target_doc=None):
 				target.fg_completed_qty = job_card_details[0].for_quantity
 				target.from_bom = 1
 
+			target.cap_completed_qty_to_material_coverage()
+
 	doclist = get_mapped_doc(
 		"Material Request",
 		source_name,
