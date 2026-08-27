@@ -280,6 +280,7 @@ def pos_profile_query(doctype, txt, searchfield, start, page_len, filters):
 	user = frappe.session["user"]
 	company = filters.get("company") or frappe.defaults.get_user_default("company")
 
+<<<<<<< HEAD
 	args = {
 		"user": user,
 		"start": start,
@@ -314,6 +315,42 @@ def pos_profile_query(doctype, txt, searchfield, start, page_len, filters):
 				and pf.name like %(txt)s
 				and pf.disabled = 0""",
 			args,
+=======
+	allowed_pos_profiles = frappe.get_list("POS Profile", pluck="name")
+
+	if not allowed_pos_profiles:
+		return {}
+
+	pf = frappe.qb.DocType("POS Profile")
+	pfu = frappe.qb.DocType("POS Profile User")
+
+	pos_profile = (
+		frappe.qb.from_(pf)
+		.inner_join(pfu)
+		.on(pfu.parent == pf.name)
+		.select(pf.name)
+		.where((pfu.user == user) & (pf.company == company) & pf.name.like(f"%{txt}%") & (pf.disabled == 0))
+		.where(pf.name.isin(allowed_pos_profiles))
+		.limit(page_len)
+		.offset(start)
+		.run()
+	)
+
+	if not pos_profile:
+		pos_profile = (
+			frappe.qb.from_(pf)
+			.left_join(pfu)
+			.on(pf.name == pfu.parent)
+			.select(pf.name)
+			.where(
+				(pfu.user.isnull() | (pfu.user == ""))
+				& (pf.company == company)
+				& pf.name.like(f"%{txt}%")
+				& (pf.disabled == 0)
+				& (pf.name.isin(allowed_pos_profiles))
+			)
+			.run()
+>>>>>>> 9018573 (fix(accounts): set pos profile on invoices respecting user permissions (#58508))
 		)
 
 	return pos_profile
