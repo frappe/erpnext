@@ -268,6 +268,30 @@ class TestBlanketOrder(ERPNextTestSuite):
 		self.assertEqual(item.price_list_rate, price_list_rate)
 		self.assertEqual(item.rate, price_list_rate)
 
+	def test_price_list_rates_fetch_item_uoms_once(self):
+		blanket_order = new_blanket_order("Selling")
+		blanket_order.selling_price_list = "_Test Price List"
+		for item_code in ("ITEM-1", "ITEM-2"):
+			blanket_order.append("items", {"item_code": item_code, "qty": 1})
+
+		with (
+			patch.object(
+				blanket_order_pricing.frappe,
+				"get_all",
+				return_value=[["ITEM-1", "Nos"], ["ITEM-2", "Nos"]],
+			) as get_all,
+			patch.object(blanket_order_pricing, "get_price_list_rate_for", return_value=None),
+		):
+			rates = blanket_order_pricing.get_price_list_rates(blanket_order)
+
+		self.assertEqual(len(rates), 2)
+		get_all.assert_called_once_with(
+			"Item",
+			filters={"name": ("in", ["ITEM-1", "ITEM-2"])},
+			fields=["name", "stock_uom"],
+			as_list=True,
+		)
+
 	def test_price_list_conversion_uses_currency_precision(self):
 		company = "_Test Company"
 		company_currency = get_company_currency(company)
