@@ -5,13 +5,18 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, today
 
+<<<<<<< HEAD
 from erpnext.accounts.doctype.accounting_dimension.test_accounting_dimension import (
 	create_dimension,
 	disable_dimension,
 )
+=======
+from erpnext.accounts.doctype.account.test_account import create_account
+>>>>>>> e08a166 (fix(taxes): skip tax addition for invoice created from opening invoice tool)
 from erpnext.accounts.doctype.opening_invoice_creation_tool.opening_invoice_creation_tool import (
 	get_temporary_opening_account,
 )
+from erpnext.accounts.doctype.tax_rule.test_tax_rule import make_tax_rule
 from erpnext.projects.doctype.project.test_project import make_project
 
 test_dependencies = ["Customer", "Supplier", "Accounting Dimension"]
@@ -139,6 +144,55 @@ class TestOpeningInvoiceCreationTool(FrappeTestCase):
 
 		for invoice in invoices:
 			self.assertEqual(frappe.db.get_value("Sales Invoice", invoice, "department"), "Sales - _TOIC")
+
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings",
+		{"add_taxes_from_taxes_and_charges_template": 1, "add_taxes_from_item_tax_template": 0},
+	)
+	def test_opening_invoice_creation_without_taxes(self):
+		company = "_Test Opening Invoice Company"
+		template = frappe.get_doc(
+			{
+				"doctype": "Sales Taxes and Charges Template",
+				"company": company,
+				"title": "_Test Opening Invoice Tax",
+				"taxes": [
+					{
+						"charge_type": "On Net Total",
+						"account_head": create_account(
+							account_name="_Test Opening Tax Account",
+							parent_account="Duties and Taxes - _TOIC",
+							account_type="Tax",
+							company=company,
+						),
+						"description": "Test taxes",
+						"rate": 9,
+					}
+				],
+			}
+		).insert()
+
+		# makes the template the default for the party, as it would be on a live site
+		make_tax_rule(tax_type="Sales", company=company, sales_tax_template=template.name, save=1)
+
+		tool = self.make_invoices(company=company, return_doc=True)
+		invoices = tool.make_invoices()
+		self.assertEqual(len(invoices), 2)
+
+		# outstanding amount is entered inclusive of tax, so taxes must not be added on top of it
+		for invoice in invoices:
+			si = frappe.get_doc("Sales Invoice", invoice)
+			self.assertFalse(si.taxes)
+			self.assertEqual(si.grand_total, 200)
+			self.assertEqual(si.outstanding_amount, 200)
+
+		# the same invoice created outside the tool keeps the default taxes,
+		# since adding them there is the user's decision
+		si = frappe.get_doc(tool.get_invoices()[0])
+		si.flags.ignore_mandatory = True
+		si.insert()
+		self.assertTrue(si.taxes)
+		self.assertEqual(si.grand_total, 218)
 
 	def test_opening_entry_project_linking(self):
 		doc = self.make_invoices(
