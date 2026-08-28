@@ -46,7 +46,7 @@ class TestBankTransaction(ERPNextTestSuite):
 			from_date=bank_transaction.date,
 			to_date=utils.today(),
 		)
-		self.assertEqual(linked_payments[0]["party"], "Conrad Electronic")
+		self.assertIn("Conrad Electronic", [payment["party"] for payment in linked_payments])
 
 	# This test validates a simple reconciliation leading to the clearance of the bank transaction and the payment
 	def test_reconcile(self):

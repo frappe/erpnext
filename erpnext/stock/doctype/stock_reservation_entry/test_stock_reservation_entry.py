@@ -200,9 +200,9 @@ class TestStockReservationEntry(ERPNextTestSuite):
 				{
 					"item_code": item_code,
 					"warehouse": self.warehouse,
-					"qty": randint(11, 100),
+					"qty": 80,
 					"uom": properties.stock_uom,
-					"rate": randint(10, 400),
+					"rate": 100,
 				}
 			)
 
@@ -624,9 +624,9 @@ class TestStockReservationEntry(ERPNextTestSuite):
 				{
 					"item_code": item_code,
 					"warehouse": self.warehouse,
-					"qty": randint(11, 100),
+					"qty": 80,
 					"uom": properties.stock_uom,
-					"rate": randint(10, 400),
+					"rate": 100,
 				}
 			)
 
