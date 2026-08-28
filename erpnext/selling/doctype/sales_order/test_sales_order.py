@@ -3448,6 +3448,23 @@ class TestSalesOrder(ERPNextTestSuite):
 		finally:
 			frappe.db.set_value("Sales Person", "_Test Sales Person 2", "enabled", 1)
 
+	def test_sales_team_disabled_sales_person_blocks_downstream(self):
+		sales_person = "_Test Sales Person 2"
+
+		so = make_sales_order(do_not_save=True)
+		so.append("sales_team", {"sales_person": sales_person, "allocated_percentage": 100})
+		so.submit()
+
+		frappe.db.set_value("Sales Person", sales_person, "enabled", 0)
+		try:
+			with self.subTest("delivery note against the order is rejected"):
+				self.assertRaisesRegex(frappe.ValidationError, "is disabled", make_delivery_note, so.name)
+
+			with self.subTest("sales invoice against the order is rejected"):
+				self.assertRaisesRegex(frappe.ValidationError, "is disabled", make_sales_invoice, so.name)
+		finally:
+			frappe.db.set_value("Sales Person", sales_person, "enabled", 1)
+
 	def test_sales_partner_commission(self):
 		"""Sales Partner commission: total_commission = amount_eligible_for_commission * rate / 100."""
 		frappe.db.set_value("Item", "_Test Item", "grant_commission", 1)

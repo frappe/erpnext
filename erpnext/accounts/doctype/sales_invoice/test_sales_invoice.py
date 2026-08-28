@@ -2033,6 +2033,61 @@ class TestSalesInvoice(ERPNextTestSuite):
 		cr_note.items[0].qty = 0
 		self.assertRaises(frappe.ValidationError, cr_note.save)
 
+	def test_sales_team_disabled_sales_person_carried_over(self):
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_delivery_note, make_sales_return
+
+		sales_person = "_Test Sales Person 2"
+		other_sales_person = "_Test Sales Person 1"
+
+		si = create_sales_invoice(qty=1, rate=1000, do_not_save=True)
+		si.append("sales_team", {"sales_person": sales_person, "allocated_percentage": 100})
+		si.submit()
+
+		cancelled_si = create_sales_invoice(qty=1, rate=1000, do_not_save=True)
+		cancelled_si.append("sales_team", {"sales_person": sales_person, "allocated_percentage": 100})
+		cancelled_si.submit()
+		cancelled_si.reload()
+		cancelled_si.cancel()
+
+		frappe.db.set_value("Sales Person", sales_person, "enabled", 0)
+		frappe.db.set_value("Sales Person", other_sales_person, "enabled", 0)
+		try:
+			with self.subTest("return against the invoice is allowed"):
+				cr_note = make_sales_return(si.name)
+				cr_note.submit()
+				self.assertEqual([d.sales_person for d in cr_note.sales_team], [sales_person])
+
+			with self.subTest("sales person newly assigned on the return is rejected"):
+				cr_note = make_sales_return(si.name)
+				cr_note.sales_team = []
+				cr_note.append(
+					"sales_team", {"sales_person": other_sales_person, "allocated_percentage": 100}
+				)
+				self.assertRaisesRegex(frappe.ValidationError, "is disabled", cr_note.save)
+
+			with self.subTest("amending the invoice is allowed"):
+				amended = frappe.copy_doc(cancelled_si)
+				amended.amended_from = cancelled_si.name
+				amended.docstatus = 0
+				amended.insert()
+				self.assertEqual([d.sales_person for d in amended.sales_team], [sales_person])
+
+			with self.subTest("delivery note against the invoice is rejected"):
+				self.assertRaisesRegex(frappe.ValidationError, "is disabled", make_delivery_note, si.name)
+
+			with self.subTest("standalone credit note with a disabled sales person is rejected"):
+				cr_note = create_sales_invoice(qty=-1, rate=1000, is_return=1, do_not_save=True)
+				cr_note.append("sales_team", {"sales_person": sales_person, "allocated_percentage": 100})
+				self.assertRaisesRegex(frappe.ValidationError, "is disabled", cr_note.save)
+
+			with self.subTest("new invoice with the same sales person is still rejected"):
+				new_si = create_sales_invoice(qty=1, rate=1000, do_not_save=True)
+				new_si.append("sales_team", {"sales_person": sales_person, "allocated_percentage": 100})
+				self.assertRaisesRegex(frappe.ValidationError, "is disabled", new_si.save)
+		finally:
+			frappe.db.set_value("Sales Person", sales_person, "enabled", 1)
+			frappe.db.set_value("Sales Person", other_sales_person, "enabled", 1)
+
 	def test_return_invoice_with_account_mismatch(self):
 		debtors2 = create_account(
 			parent_account="Accounts Receivable - _TC",
