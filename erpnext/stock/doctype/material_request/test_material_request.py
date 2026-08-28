@@ -61,7 +61,9 @@ class TestMaterialRequest(ERPNextTestSuite):
 		# fully order the first item, leave the second pending
 		po = make_purchase_order(mr.name)
 		po.supplier = "_Test Supplier"
+		po.schedule_date = today()
 		po.items = [po.items[0]]
+		po.items[0].schedule_date = today()
 		po.insert()
 		po.submit()
 
