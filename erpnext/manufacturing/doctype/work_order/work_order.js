@@ -319,6 +319,7 @@ frappe.ui.form.on("Work Order", {
 			frm.doc.docstatus !== 1 ||
 			["Stopped", "Closed"].includes(frm.doc.status) ||
 			!frm.doc.__onload?.allow_alternative_finished_goods ||
+			!frm.doc.__onload?.has_alternative_finished_goods ||
 			!flt(frm.doc.produced_qty)
 		) {
 			return;
@@ -368,6 +369,7 @@ frappe.ui.form.on("Work Order", {
 					label: __("Actual Finished Item"),
 					options: "Item",
 					reqd: 1,
+					default: alternative_items.length === 1 ? alternative_items[0] : undefined,
 					get_query: () => {
 						return { filters: { name: ["in", alternative_items] } };
 					},
