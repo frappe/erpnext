@@ -670,7 +670,7 @@ class Company(NestedSet):
 		if frappe.db.get_single_value("Global Defaults", "demo_company") == self.name:
 			frappe.throw(
 				_("{0} is the site's Demo Company and cannot be deleted directly. Use {1} instead.").format(
-					bold(self.name), bold(_("Delete Demo Data"))
+					self.name, _("Delete Demo Data")
 				)
 			)
 
