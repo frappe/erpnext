@@ -262,7 +262,23 @@ class BatchSplitFinishedGood:
 		fg_row.batch_no = None
 
 
+def get_minted_child_batches(doc):
+	return frappe.get_all(
+		"Batch",
+		filters={
+			"reference_doctype": doc.doctype,
+			"reference_name": doc.name,
+			"parent_batch": ("is", "set"),
+		},
+		pluck="name",
+	)
+
+
 def delete_unused_child_batches(doc):
+	minted_batches = set(doc.flags.get("batch_split_child_batches") or [])
+	if not minted_batches:
+		return
+
 	own_bundles = set(
 		frappe.get_all(
 			"Serial and Batch Bundle",
@@ -272,6 +288,9 @@ def delete_unused_child_batches(doc):
 	)
 
 	for bundle_name, batch_nos in get_bundle_wise_child_batches(doc).items():
+		if not set(batch_nos).issubset(minted_batches):
+			continue
+
 		if any(is_batch_used_outside(batch_no, own_bundles) for batch_no in batch_nos):
 			continue
 
