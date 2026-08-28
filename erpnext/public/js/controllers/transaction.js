@@ -558,7 +558,13 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		frappe.flags.dialog_set = false;
 
 		var item = frappe.get_doc(cdt, cdn);
+<<<<<<< HEAD
 		var update_stock = 0, show_batch_dialog = 0;
+=======
+		let update_stock = ["Sales Invoice", "Purchase Invoice"].includes(doc.doctype) ? doc.update_stock : 0;
+		var me = this;
+
+>>>>>>> ca49de6 (fix(stock): auto-select batch no before saving transaction records (#58536))
 		item.weight_per_unit = 0;
 		item.weight_uom = '';
 		item.uom = null // make UOM blank to update the existing UOM when item changes

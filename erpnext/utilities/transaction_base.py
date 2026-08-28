@@ -292,6 +292,306 @@ class TransactionBase(StatusUpdater):
 						)
 					)
 
+<<<<<<< HEAD
+=======
+	def fetch_item_details(self, item: dict) -> dict:
+		return get_item_details(
+			frappe._dict(
+				{
+					"item_code": item.get("item_code"),
+					"barcode": item.get("barcode"),
+					"serial_no": item.get("serial_no"),
+					"batch_no": item.get("batch_no"),
+					"set_warehouse": self.get("set_warehouse"),
+					"warehouse": item.get("warehouse"),
+					"customer": self.get("customer") or self.get("party_name"),
+					"quotation_to": self.get("quotation_to"),
+					"supplier": self.get("supplier"),
+					"currency": self.get("currency"),
+					"is_internal_supplier": self.get("is_internal_supplier"),
+					"is_internal_customer": self.get("is_internal_customer"),
+					"update_stock": self.update_stock
+					if self.doctype in ["Purchase Invoice", "Sales Invoice"]
+					else False,
+					"conversion_rate": self.get("conversion_rate"),
+					"price_list": self.get("selling_price_list") or self.get("buying_price_list"),
+					"price_list_currency": self.get("price_list_currency"),
+					"plc_conversion_rate": self.get("plc_conversion_rate"),
+					"company": self.get("company"),
+					"order_type": self.get("order_type"),
+					"is_pos": cint(self.get("is_pos")),
+					"is_return": cint(self.get("is_return")),
+					"is_subcontracted": self.get("is_subcontracted"),
+					"ignore_pricing_rule": self.get("ignore_pricing_rule"),
+					"doctype": self.get("doctype"),
+					"name": self.get("name"),
+					"project": item.get("project") or self.get("project"),
+					"qty": item.get("qty") or 1,
+					"net_rate": item.get("rate"),
+					"base_net_rate": item.get("base_net_rate"),
+					"stock_qty": item.get("stock_qty"),
+					"conversion_factor": item.get("conversion_factor"),
+					"weight_per_unit": item.get("weight_per_unit"),
+					"uom": item.get("uom"),
+					"weight_uom": item.get("weight_uom"),
+					"manufacturer": item.get("manufacturer"),
+					"stock_uom": item.get("stock_uom"),
+					"pos_profile": self.get("pos_profile") if cint(self.get("is_pos")) else "",
+					"cost_center": item.get("cost_center"),
+					"tax_category": self.get("tax_category"),
+					"item_tax_template": item.get("item_tax_template"),
+					"child_doctype": item.get("doctype"),
+					"child_docname": item.get("name"),
+					"use_serial_batch_fields": item.get("use_serial_batch_fields"),
+				}
+			),
+			self,
+		)
+
+	@frappe.whitelist()
+	def process_item_selection(self, item_idx: int, reset_item_details: bool = False):
+		# Server side 'item' doc. Update this to reflect in UI
+		item_obj = self.get("items", {"idx": item_idx})[0]
+
+		if not item_obj.item_code:
+			return
+
+		if cint(reset_item_details):
+			# Do not carry item-specific values from the previously selected item.
+			for fieldname in (
+				"weight_per_unit",
+				"weight_uom",
+				"uom",
+				"conversion_factor",
+				"barcode",
+				"pricing_rules",
+			):
+				item_obj.set(fieldname, None)
+
+		# 'item_details' has latest item related values
+		item_details = self.fetch_item_details(item_obj)
+
+		self.set_fetched_values(item_obj, item_details)
+
+		if self.doctype == "Request for Quotation":
+			return
+
+		self.set_item_rate_and_discounts(item_obj, item_details)
+		self.add_taxes_from_item_template(item_obj, item_details)
+		self.add_free_item(item_obj, item_details)
+		self.handle_internal_parties(item_obj, item_details)
+		self.conversion_factor(item_obj, item_details)
+		self.calculate_taxes_and_totals()
+
+	def set_fetched_values(self, item_obj: object, item_details: dict) -> None:
+		for k, v in item_details.items():
+			if hasattr(item_obj, k):
+				setattr(item_obj, k, v)
+
+	def handle_internal_parties(self, item_obj: object, item_details: dict) -> None:
+		fetch_valuation_rate_for_internal_transaction = cint(
+			frappe.get_single_value("Accounts Settings", "fetch_valuation_rate_for_internal_transaction")
+		)
+		if (
+			self.get("is_internal_customer") or self.get("is_internal_supplier")
+		) and fetch_valuation_rate_for_internal_transaction:
+			args = frappe._dict(
+				{
+					"item_code": item_obj.item_code,
+					"warehouse": item_obj.from_warehouse
+					if self.doctype in ["Purchase Receipt", "Purchase Invoice"]
+					else item_obj.warehouse,
+					"qty": item_obj.qty * item_obj.conversion_factor,
+					"voucher_type": self.doctype,
+					"company": self.company,
+				}
+			)
+
+			if self.doctype in ["Purchase Order", "Sales Order"]:
+				args.update(
+					{
+						"posting_date": self.transaction_date,
+						"posting_time": self.transaction_time,
+					}
+				)
+			else:
+				args.update(
+					{
+						"posting_date": self.posting_date,
+						"posting_time": self.posting_time,
+						"serial_no": item_obj.serial_no,
+						"batch_no": item_obj.batch_no,
+						"allow_zero_valuation_rate": item_obj.allow_zero_valuation_rate,
+					}
+				)
+
+			rate = get_incoming_rate(args=args)
+			item_obj.rate = rate * item_obj.conversion_factor
+		else:
+			self.set_rate_based_on_price_list(item_obj, item_details)
+
+	def add_taxes_from_item_template(self, item_obj: object, item_details: dict) -> None:
+		if item_details.item_tax_rate and frappe.get_single_value(
+			"Accounts Settings", "add_taxes_from_item_tax_template"
+		):
+			item_tax_template = frappe.json.loads(item_details.item_tax_rate)
+			for tax_head, _rate in item_tax_template.items():
+				if _rate == NOT_APPLICABLE_TAX:
+					continue
+
+				found = [x for x in self.taxes if x.account_head == tax_head]
+				if not found:
+					child_doctype = self.get_table_field_doctype("taxes")
+					child = frappe.new_doc(child_doctype, parent_doc=self, parentfield="taxes")
+					child.charge_type = "On Net Total"
+					child.account_head = tax_head
+					child.rate = 0
+					self.append("taxes", child)
+
+	def set_rate_based_on_price_list(self, item_obj: object, item_details: dict) -> None:
+		if item_obj.price_list_rate and item_obj.discount_percentage:
+			item_obj.rate = flt(
+				item_obj.price_list_rate * (1 - item_obj.discount_percentage / 100.0),
+				item_obj.precision("rate"),
+			)
+
+	def copy_from_first_row(self, row, fields):
+		if self.items and row:
+			fields.extend([x.get("fieldname") for x in get_dimensions(True)[0]])
+			first_row = self.items[0]
+			[setattr(row, k, first_row.get(k)) for k in fields if hasattr(first_row, k)]
+
+	def add_free_item(self, item_obj: object, item_details: dict) -> None:
+		free_items = item_details.get("free_item_data")
+		if free_items and len(free_items):
+			existing_free_items = [x for x in self.items if x.is_free_item]
+			for free_item in free_items:
+				_matches = [
+					x
+					for x in existing_free_items
+					if x.item_code == free_item.get("item_code")
+					and x.pricing_rules == free_item.get("pricing_rules")
+				]
+				if _matches:
+					row_to_modify = _matches[0]
+				else:
+					row_to_modify = self.append("items")
+
+				for k, _v in free_item.items():
+					setattr(row_to_modify, k, free_item.get(k))
+
+				self.copy_from_first_row(row_to_modify, ["expense_account", "income_account"])
+
+	def conversion_factor(self, item_obj: object, item_details: dict) -> None:
+		if frappe.get_meta(item_obj.doctype).has_field("stock_qty"):
+			item_obj.stock_qty = flt(
+				item_obj.qty * item_obj.conversion_factor, item_obj.precision("stock_qty")
+			)
+
+			if self.doctype != "Material Request":
+				item_obj.total_weight = flt(item_obj.stock_qty * item_obj.weight_per_unit)
+				self.calculate_net_weight()
+
+			# TODO: for handling customization not to fetch price list rate
+			if frappe.flags.dont_fetch_price_list_rate:
+				return
+
+			if not frappe.flags.dont_fetch_price_list_rate and frappe.get_meta(self.doctype).has_field(
+				"price_list_currency"
+			):
+				self._apply_price_list(item_obj, True)
+			self.calculate_stock_uom_rate(item_obj)
+
+	def calculate_stock_uom_rate(self, item_obj: object) -> None:
+		if item_obj.rate:
+			item_obj.stock_uom_rate = flt(item_obj.rate) / flt(item_obj.conversion_factor)
+
+	def set_item_rate_and_discounts(self, item_obj: object, item_details: dict) -> None:
+		effective_item_rate = item_details.price_list_rate
+		item_rate = item_details.rate
+
+		# Field order precedance
+		# blanket_order_rate -> margin_type -> discount_percentage -> discount_amount
+		if item_obj.parenttype in ["Sales Order", "Quotation"] and item_obj.blanket_order_rate:
+			effective_item_rate = item_obj.blanket_order_rate
+
+		if item_obj.margin_type == "Percentage":
+			item_obj.rate_with_margin = flt(effective_item_rate) + flt(effective_item_rate) * (
+				flt(item_obj.margin_rate_or_amount) / 100
+			)
+		else:
+			item_obj.rate_with_margin = flt(effective_item_rate) + flt(item_obj.margin_rate_or_amount)
+
+		item_obj.base_rate_with_margin = flt(item_obj.rate_with_margin) * flt(self.conversion_rate)
+		item_rate = flt(item_obj.rate_with_margin, item_obj.precision("rate"))
+
+		if item_obj.discount_percentage:
+			item_obj.discount_amount = (
+				flt(item_obj.rate_with_margin) * flt(item_obj.discount_percentage) / 100
+			)
+
+		if item_obj.discount_amount:
+			item_rate = flt(
+				(item_obj.rate_with_margin) - (item_obj.discount_amount), item_obj.precision("rate")
+			)
+
+		item_obj.rate = item_rate
+
+	def calculate_net_weight(self):
+		self.total_net_weight = sum([x.get("total_weight") or 0 for x in self.items])
+		self.apply_shipping_rule()
+
+	def _apply_price_list(self, item_obj: object, reset_plc_conversion: bool) -> None:
+		if self.doctype == "Material Request":
+			return
+
+		if not reset_plc_conversion:
+			self.plc_conversion_rate = ""
+
+		if not self.items or not (item_obj.get("selling_price_list") or item_obj.get("buying_price_list")):
+			return
+
+		if self.get("in_apply_price_list"):
+			return
+
+		self.in_apply_price_list = True
+
+		from erpnext.stock.get_item_details import apply_price_list
+
+		args = {
+			# pass child_docname so the maintain-same-rate lock in apply_price_list can
+			# match each row, consistent with the desk (JS) callers
+			"items": [{**x.as_dict(), "child_docname": x.name} for x in self.items],
+			"customer": self.customer or self.party_name,
+			"quotation_to": self.quotation_to,
+			"customer_group": self.customer_group,
+			"territory": self.territory,
+			"supplier": self.supplier,
+			"supplier_group": self.supplier_group,
+			"currency": self.currency,
+			"conversion_rate": self.conversion_rate,
+			"price_list": self.selling_price_list or self.buying_price_list,
+			"price_list_currency": self.price_list_currency,
+			"plc_conversion_rate": self.plc_conversion_rate,
+			"company": self.company,
+			"transaction_date": self.transaction_date or self.posting_date,
+			"campaign": self.campaign,
+			"sales_partner": self.sales_partner,
+			"ignore_pricing_rule": self.ignore_pricing_rule,
+			"doctype": self.doctype,
+			"name": self.name,
+			"is_return": self.is_return,
+			"update_stock": self.update_stock if self.doctype in ["Sales Invoice", "Purchase Invoice"] else 0,
+			"conversion_factor": self.conversion_factor,
+			"pos_profile": self.pos_profile if self.doctype == "Sales Invoice" else "",
+			"coupon_code": self.coupon_code,
+			"is_internal_supplier": self.is_internal_supplier,
+			"is_internal_customer": self.is_internal_customer,
+		}
+		# TODO: test method call impact on document
+		apply_price_list(ctx=args, as_doc=True, doc=self)
+
+>>>>>>> ca49de6 (fix(stock): auto-select batch no before saving transaction records (#58536))
 
 def delete_events(ref_type, ref_name):
 	events = (
