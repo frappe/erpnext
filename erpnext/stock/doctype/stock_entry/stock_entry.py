@@ -170,6 +170,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		total_outgoing_value: DF.Currency
 		use_multi_level_bom: DF.Check
 		value_difference: DF.Currency
+		weight_per_piece: DF.Float
 		work_order: DF.Link | None
 	# end: auto-generated types
 

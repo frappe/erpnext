@@ -1842,7 +1842,7 @@ class TestJobCard(ERPNextTestSuite):
 			with_operations=1,
 			track_semi_finished_goods=1,
 		)
-		fg_bom.append("items", {"item_code": rm, "qty": 10, "operation_row_id": 1})
+		fg_bom.append("items", {"item_code": rm, "qty": 1, "operation_row_id": 1})
 
 		operation = {
 			"operation": "Batch Split Op A",
@@ -1866,7 +1866,7 @@ class TestJobCard(ERPNextTestSuite):
 
 		work_order = make_wo_order_test_record(
 			item=fg,
-			qty=5,
+			qty=50,
 			source_warehouse=warehouse,
 			fg_warehouse=warehouse,
 			bom_no=fg_bom.name,
@@ -1889,7 +1889,7 @@ class TestJobCard(ERPNextTestSuite):
 
 		job_card.append(
 			"time_logs",
-			{"from_time": "2024-03-01 08:00:00", "to_time": "2024-03-01 09:00:00", "completed_qty": 5},
+			{"from_time": "2024-03-01 08:00:00", "to_time": "2024-03-01 09:00:00", "completed_qty": 50},
 		)
 		job_card.save()
 		job_card.submit()
@@ -1901,6 +1901,8 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertEqual(flt(rm_row.transfer_qty), 50.0)
 
 		fg_row = next(row for row in manufacture_entry.items if row.item_code == fg)
+		self.assertEqual(flt(fg_row.transfer_qty), 50.0)
+
 		entries = frappe.get_all(
 			"Serial and Batch Entry",
 			filters={"parent": fg_row.serial_and_batch_bundle},
@@ -1909,7 +1911,7 @@ class TestJobCard(ERPNextTestSuite):
 
 		self.assertEqual(len(entries), 5)
 		for entry in entries:
-			self.assertEqual(flt(entry.qty), 1.0)
+			self.assertEqual(flt(entry.qty), 10.0)
 			self.assertTrue(entry.batch_no.startswith("BS-ROD-PC-"))
 			self.assertEqual(frappe.db.get_value("Batch", entry.batch_no, "parent_batch"), parent_batch)
 

@@ -18,7 +18,6 @@ class BatchSplitFinishedGood:
 		fg_row = self.get_finished_good_row()
 		pieces = self.get_pieces(fg_row)
 		input_batches = self.get_input_batches()
-		self.set_weight_per_piece(input_batches, pieces)
 		parent_batches = self.get_parent_batches(input_batches, pieces)
 		child_batches = self.make_child_batches(fg_row, parent_batches)
 		self.attach_bundle(fg_row, child_batches)
@@ -26,9 +25,13 @@ class BatchSplitFinishedGood:
 	def is_applicable(self):
 		self.weight_per_piece = 0.0
 		if self.doc.purpose == "Repack":
-			return self.doc.stock_entry_type and cint(
+			if not self.doc.stock_entry_type or not cint(
 				frappe.get_cached_value("Stock Entry Type", self.doc.stock_entry_type, "batch_split")
-			)
+			):
+				return False
+
+			self.weight_per_piece = flt(self.doc.weight_per_piece)
+			return True
 
 		if self.doc.purpose != "Manufacture" or not self.doc.job_card:
 			return False
@@ -39,10 +42,6 @@ class BatchSplitFinishedGood:
 
 		self.weight_per_piece = flt(details.weight_per_piece)
 		return cint(details.batch_split) and self.weight_per_piece > 0
-
-	def set_weight_per_piece(self, input_batches, pieces):
-		if not self.weight_per_piece:
-			self.weight_per_piece = sum(flt(qty) for _batch_no, qty in input_batches) / pieces
 
 	def get_finished_good_row(self):
 		fg_rows = [
@@ -77,12 +76,19 @@ class BatchSplitFinishedGood:
 		return row
 
 	def get_pieces(self, fg_row):
-		pieces = flt(fg_row.transfer_qty)
-		if pieces <= 0 or pieces != cint(pieces):
+		if self.weight_per_piece <= 0:
 			frappe.throw(
 				_(
-					"Row #{0}: The quantity {1} of the Batch Split item {2} must be a whole number of pieces."
-				).format(fg_row.idx, pieces, fg_row.item_code)
+					"Please set the Weight Per Piece to split the produced quantity into batches in the Stock Entry {0}."
+				).format(self.doc.name)
+			)
+
+		pieces = flt(fg_row.transfer_qty) / self.weight_per_piece
+		if pieces < 1 or pieces != cint(pieces):
+			frappe.throw(
+				_(
+					"Row #{0}: The quantity {1} of the Batch Split item {2} must be a multiple of the Weight Per Piece {3}."
+				).format(fg_row.idx, fg_row.transfer_qty, fg_row.item_code, self.weight_per_piece)
 			)
 
 		return cint(pieces)
@@ -204,7 +210,7 @@ class BatchSplitFinishedGood:
 				)
 			)
 
-			batches[batch_no] = 1
+			batches[batch_no] = self.weight_per_piece
 
 		return batches
 

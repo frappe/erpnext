@@ -315,7 +315,7 @@
   },
   {
    "depends_on": "eval:doc.batch_split",
-   "description": "Weight of one output piece, in the stock UOM of the consumed batch item",
+   "description": "Produced quantity is split into one batch per this many units of the finished good",
    "fieldname": "weight_per_piece",
    "fieldtype": "Float",
    "label": "Weight Per Piece",
@@ -327,7 +327,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-08-28 12:00:00.000000",
+ "modified": "2026-08-28 18:00:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Operation",

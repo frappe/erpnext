@@ -1868,8 +1868,6 @@ class JobCard(Document):
 				"wip_warehouse": self.wip_warehouse,
 				"fg_warehouse": self.target_warehouse,
 				"bom_no": self.semi_fg_bom,
-				"batch_split": self.batch_split,
-				"weight_per_piece": self.weight_per_piece,
 				"project": frappe.db.get_value("Work Order", self.work_order, "project"),
 			}
 		)

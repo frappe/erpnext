@@ -559,8 +559,9 @@ class TestStockEntry(ERPNextTestSuite):
 		repack = frappe.new_doc("Stock Entry")
 		repack.stock_entry_type = "Batch Split"
 		repack.company = "_Test Company"
+		repack.weight_per_piece = 10
 		repack.append("items", {"item_code": rm, "qty": 50, "s_warehouse": warehouse})
-		repack.append("items", {"item_code": fg, "qty": 5, "t_warehouse": warehouse, "is_finished_item": 1})
+		repack.append("items", {"item_code": fg, "qty": 50, "t_warehouse": warehouse, "is_finished_item": 1})
 		repack.insert()
 		repack.submit()
 
@@ -574,7 +575,7 @@ class TestStockEntry(ERPNextTestSuite):
 		self.assertEqual(len(entries), 5)
 		parent_wise_pieces = {}
 		for entry in entries:
-			self.assertEqual(flt(entry.qty), 1.0)
+			self.assertEqual(flt(entry.qty), 10.0)
 			parent = frappe.db.get_value("Batch", entry.batch_no, "parent_batch")
 			parent_wise_pieces[parent] = parent_wise_pieces.get(parent, 0) + 1
 
@@ -611,10 +612,11 @@ class TestStockEntry(ERPNextTestSuite):
 		repack = frappe.new_doc("Stock Entry")
 		repack.stock_entry_type = "Batch Split"
 		repack.company = "_Test Company"
+		repack.weight_per_piece = 10
 		repack.append("items", {"item_code": items["RM A"], "qty": 10, "s_warehouse": warehouse})
 		repack.append("items", {"item_code": items["RM B"], "qty": 10, "s_warehouse": warehouse})
 		repack.append(
-			"items", {"item_code": items["FG C"], "qty": 2, "t_warehouse": warehouse, "is_finished_item": 1}
+			"items", {"item_code": items["FG C"], "qty": 20, "t_warehouse": warehouse, "is_finished_item": 1}
 		)
 		repack.insert()
 

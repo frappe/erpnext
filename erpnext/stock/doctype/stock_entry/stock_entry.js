@@ -288,6 +288,7 @@ frappe.ui.form.on("Stock Entry", {
 	refresh: function (frm) {
 		frm.trigger("get_items_from_transit_entry");
 		frm.trigger("toggle_warehouse_fields");
+		frm.trigger("toggle_weight_per_piece");
 		erpnext.toggle_serial_batch_fields(frm);
 
 		if (!frm.doc.docstatus && !frm.doc.subcontracting_inward_order) {
@@ -608,12 +609,25 @@ frappe.ui.form.on("Stock Entry", {
 		frm.events.show_bom_custom_button(frm);
 		frm.trigger("add_to_transit");
 		frm.trigger("toggle_warehouse_fields");
+		frm.trigger("toggle_weight_per_piece");
 
 		frm.fields_dict.items.grid.update_docfield_property(
 			"basic_rate",
 			"read_only",
 			frm.doc.purpose == "Material Receipt" ? 0 : 1
 		);
+	},
+
+	toggle_weight_per_piece(frm) {
+		if (!frm.doc.stock_entry_type || frm.doc.purpose !== "Repack") {
+			frm.toggle_display("weight_per_piece", false);
+			return;
+		}
+
+		frappe.db.get_value("Stock Entry Type", frm.doc.stock_entry_type, "batch_split", (r) => {
+			frm.toggle_display("weight_per_piece", cint(r.batch_split));
+			frm.toggle_reqd("weight_per_piece", cint(r.batch_split));
+		});
 	},
 
 	toggle_warehouse_fields(frm) {
