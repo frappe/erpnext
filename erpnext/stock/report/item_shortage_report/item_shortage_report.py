@@ -54,7 +54,9 @@ def get_data(filters):
 	)
 
 	if warehouses := filters.get("warehouse"):
-		query = query.where(bin.warehouse.isin(get_warehouses_with_descendants(warehouses)))
+		query = query.where(
+			bin.warehouse.isin(get_warehouses_with_descendants(get_filter_values(warehouses)))
+		)
 
 	if filters.get("company"):
 		query = query.where(wh.company == filters.get("company"))
@@ -68,6 +70,16 @@ def get_warehouses_with_descendants(warehouses):
 		result.update(get_descendants_of("Warehouse", warehouse))
 
 	return list(result)
+
+
+def get_filter_values(value):
+	if isinstance(value, str) and value.startswith("["):
+		value = frappe.parse_json(value)
+
+	if isinstance(value, list | tuple):
+		return value
+
+	return [value]
 
 
 def get_chart_data(data):
