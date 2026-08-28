@@ -5,12 +5,8 @@
 from unittest.mock import MagicMock, call
 
 import frappe
-<<<<<<< HEAD
 from frappe.tests.utils import FrappeTestCase, change_settings
-from frappe.utils import add_days, add_to_date, now, nowdate, today
-=======
 from frappe.utils import add_days, add_to_date, flt, now, nowdate, today
->>>>>>> 074c84e (fix: persist redistributed additional costs during stock entry repost (#58433))
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.utils import repost_gle_for_stock_vouchers
