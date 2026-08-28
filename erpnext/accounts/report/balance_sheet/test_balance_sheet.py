@@ -13,6 +13,30 @@ COMPANY_SHORT_NAME = "_TC6"
 
 
 class TestBalanceSheet(ERPNextTestSuite):
+	def test_period_list_includes_disabled_fiscal_year(self):
+		fiscal_year = frappe.get_doc(
+			{
+				"doctype": "Fiscal Year",
+				"year": "_Test Disabled Fiscal Year 1999",
+				"year_start_date": "1999-01-01",
+				"year_end_date": "1999-12-31",
+				"disabled": 1,
+			}
+		).insert()
+
+		period_list = build_period_list(
+			frappe._dict(
+				company=COMPANY,
+				filter_based_on="Fiscal Year",
+				from_fiscal_year=fiscal_year.name,
+				to_fiscal_year=fiscal_year.name,
+				periodicity="Yearly",
+				accumulated_values=True,
+			)
+		)
+
+		self.assertEqual(period_list[0].to_date_fiscal_year, fiscal_year.name)
+
 	def test_balance_sheet(self):
 		create_account("VAT Liabilities", f"Duties and Taxes - {COMPANY_SHORT_NAME}", COMPANY)
 		create_account("Advance VAT Paid", f"Duties and Taxes - {COMPANY_SHORT_NAME}", COMPANY)
