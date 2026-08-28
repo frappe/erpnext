@@ -339,6 +339,7 @@ class BOM(WebsiteGenerator):
 		self.validate_uoms()
 		self.set_default_uom()
 		self.validate_semi_finished_goods()
+		self.validate_batch_split_operations()
 		self.validate_secondary_items()
 		self.set_fg_cost_allocation()
 		self.validate_total_cost_allocation()
@@ -394,6 +395,32 @@ class BOM(WebsiteGenerator):
 					"Only one operation can have 'Is Final Finished Good' checked when 'Track Semi Finished Goods' is enabled."
 				),
 			)
+
+	def validate_batch_split_operations(self):
+		for row in self.operations:
+			if not row.get("batch_split"):
+				continue
+
+			if not self.track_semi_finished_goods:
+				frappe.throw(
+					_(
+						"Row #{0}: Batch Split is only supported when 'Track Semi Finished Goods' is enabled."
+					).format(row.idx)
+				)
+
+			if flt(row.weight_per_piece) <= 0:
+				frappe.throw(
+					_("Row #{0}: Weight Per Piece is required for the Batch Split operation {1}.").format(
+						row.idx, bold(row.operation)
+					)
+				)
+
+			if row.finished_good and not frappe.get_cached_value("Item", row.finished_good, "has_batch_no"):
+				frappe.throw(
+					_(
+						"Row #{0}: The item {1} must have 'Has Batch No' enabled as the operation {2} is marked as Batch Split."
+					).format(row.idx, bold(row.finished_good), bold(row.operation))
+				)
 
 	def validate_secondary_items(self):
 		for item in self.secondary_items:

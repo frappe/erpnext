@@ -514,6 +514,67 @@ class TestStockEntry(ERPNextTestSuite):
 			frappe.db.exists("GL Entry", {"voucher_type": "Stock Entry", "voucher_no": repack.name})
 		)
 
+	def test_batch_split_stock_entry_type(self):
+		original_value = frappe.db.get_single_value(
+			"Stock Settings", "auto_create_serial_and_batch_bundle_for_outward"
+		)
+		frappe.db.set_single_value("Stock Settings", "auto_create_serial_and_batch_bundle_for_outward", 1)
+		self.addCleanup(
+			frappe.db.set_single_value,
+			"Stock Settings",
+			"auto_create_serial_and_batch_bundle_for_outward",
+			original_value,
+		)
+
+		if not frappe.db.exists("Stock Entry Type", "Batch Split"):
+			frappe.new_doc("Stock Entry Type", purpose="Repack", batch_split=1).insert(
+				set_name="Batch Split", ignore_permissions=True
+			)
+
+		warehouse = "_Test Warehouse - _TC"
+		rm = make_item(
+			"Batch Split Repack RM",
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "BS-RP-RM-.####",
+			},
+		).name
+		fg = make_item(
+			"Batch Split Repack FG",
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "BS-RP-FG-.####",
+			},
+		).name
+
+		receipt = make_stock_entry(item_code=rm, target=warehouse, qty=50, basic_rate=200)
+		parent_batch = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
+
+		repack = frappe.new_doc("Stock Entry")
+		repack.stock_entry_type = "Batch Split"
+		repack.company = "_Test Company"
+		repack.append("items", {"item_code": rm, "qty": 50, "s_warehouse": warehouse})
+		repack.append("items", {"item_code": fg, "qty": 5, "t_warehouse": warehouse, "is_finished_item": 1})
+		repack.insert()
+		repack.submit()
+
+		fg_row = next(row for row in repack.items if row.item_code == fg)
+		entries = frappe.get_all(
+			"Serial and Batch Entry",
+			filters={"parent": fg_row.serial_and_batch_bundle},
+			fields=["batch_no", "qty"],
+		)
+
+		self.assertEqual(len(entries), 5)
+		for entry in entries:
+			self.assertEqual(flt(entry.qty), 1.0)
+			self.assertTrue(entry.batch_no.startswith(parent_batch))
+			self.assertEqual(frappe.db.get_value("Batch", entry.batch_no, "parent_batch"), parent_batch)
+
 	def test_repack_with_additional_costs(self):
 		company = frappe.db.get_value("Warehouse", "Stores - TCP1", "company")
 

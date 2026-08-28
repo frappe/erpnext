@@ -23,6 +23,7 @@ class StockEntryType(Document):
 		from frappe.types import DF
 
 		add_to_transit: DF.Check
+		batch_split: DF.Check
 		is_standard: DF.Check
 		purpose: DF.Literal[
 			"Material Issue",
@@ -45,6 +46,9 @@ class StockEntryType(Document):
 		self.validate_standard_type()
 		if self.add_to_transit and self.purpose != "Material Transfer":
 			self.add_to_transit = 0
+
+		if self.batch_split and self.purpose != "Repack":
+			self.batch_split = 0
 
 	def validate_standard_type(self):
 		if self.is_standard and self.name not in [
@@ -132,6 +136,8 @@ class ManufactureEntry:
 				_dict.t_warehouse = ""
 				_dict.item_code = item_code
 
+				derived_qty = self.get_batch_split_qty(item_code)
+
 				if backflush_based_on != "BOM" and not self.skip_material_transfer:
 					calculated_qty = flt(_dict.transferred_qty) - flt(_dict.consumed_qty)
 					if calculated_qty < 0:
@@ -140,10 +146,14 @@ class ManufactureEntry:
 						)
 
 					_dict.qty = calculated_qty
+					if derived_qty:
+						self.validate_batch_split_consumption(item_code, derived_qty, calculated_qty)
+						_dict.qty = derived_qty
+
 					self.update_available_serial_batches(_dict, available_serial_batches)
 				else:
 					remaining_qty = max(flt(_dict.qty) - flt(_dict.consumed_qty), 0)
-					_dict.qty = min(flt(_dict.qty) * production_share, remaining_qty)
+					_dict.qty = derived_qty or min(flt(_dict.qty) * production_share, remaining_qty)
 					if not _dict.qty:
 						continue
 
@@ -151,6 +161,23 @@ class ManufactureEntry:
 						set_previous_operation_serial_batch(self.stock_entry, _dict)
 
 				self.stock_entry.append("items", _dict)
+
+	def get_batch_split_qty(self, item_code):
+		if not getattr(self, "batch_split", 0) or not flt(getattr(self, "weight_per_piece", 0)):
+			return 0
+
+		if not frappe.get_cached_value("Item", item_code, "has_batch_no"):
+			return 0
+
+		return flt(self.for_quantity) * flt(self.weight_per_piece)
+
+	def validate_batch_split_consumption(self, item_code, derived_qty, available_qty):
+		if derived_qty > available_qty:
+			frappe.throw(
+				_(
+					"As per the Batch Split operation, {0} qty of the item {1} is required to be consumed but only {2} is available."
+				).format(derived_qty, item_code, available_qty)
+			)
 
 	def get_production_share(self):
 		"""Fraction of the job card's production this entry accounts for; raw materials are

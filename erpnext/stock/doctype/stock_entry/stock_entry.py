@@ -357,6 +357,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 	def before_submit(self):
 		StockEntrySABB(self).make_serial_and_batch_bundle_for_outward()
 
+		if self.purpose_cls and hasattr(self.purpose_cls, "before_submit"):
+			self.purpose_cls(self).before_submit()
+
 	def on_submit(self):
 		if self.purpose_cls and hasattr(self.purpose_cls, "on_submit"):
 			self.purpose_cls(self).on_submit()
