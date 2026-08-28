@@ -42,11 +42,16 @@ frappe.ui.form.on("Batch", {
 			return;
 		}
 
-		frappe.db.get_value("Batch", { parent_batch: frm.doc.name }, "name", (r) => {
-			if (r && r.name) {
-				frm.trigger("show_batch_split_tree_button");
+		frappe.db.get_value(
+			"Batch",
+			{ parent_batch: frm.doc.name, reference_name: ["is", "set"] },
+			"name",
+			(r) => {
+				if (r && r.name) {
+					frm.trigger("show_batch_split_tree_button");
+				}
 			}
-		});
+		);
 	},
 	show_batch_split_tree_button: (frm) => {
 		frm.add_custom_button(__("Batch Split Tree"), () => {

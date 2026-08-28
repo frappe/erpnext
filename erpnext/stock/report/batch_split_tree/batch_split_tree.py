@@ -37,6 +37,7 @@ def get_root_batches(filters):
 		.select(batch.name)
 		.distinct()
 		.where(batch.parent_batch.isnull())
+		.where(child.reference_name.isnotnull() & (child.reference_name != ""))
 		.orderby(batch.name)
 	)
 
@@ -63,7 +64,13 @@ def get_children_map(roots):
 	]
 
 	seed = frappe.qb.from_(batch).select(*fields).where(batch.name.isin(roots))
-	recursion = frappe.qb.from_(batch).inner_join(tree).on(batch.parent_batch == tree.name).select(*fields)
+	recursion = (
+		frappe.qb.from_(batch)
+		.inner_join(tree)
+		.on(batch.parent_batch == tree.name)
+		.select(*fields)
+		.where(batch.reference_name.isnotnull() & (batch.reference_name != ""))
+	)
 
 	rows = (
 		frappe.qb.with_(seed + recursion, "batch_split_tree", recursive=True).from_(tree).select(tree.star)
