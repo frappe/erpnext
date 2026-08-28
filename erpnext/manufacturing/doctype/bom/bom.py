@@ -415,12 +415,16 @@ class BOM(WebsiteGenerator):
 					)
 				)
 
-			if row.finished_good and not frappe.get_cached_value("Item", row.finished_good, "has_batch_no"):
-				frappe.throw(
-					_(
-						"Row #{0}: The item {1} must have 'Has Batch No' enabled as the operation {2} is marked as Batch Split."
-					).format(row.idx, bold(row.finished_good), bold(row.operation))
+			if row.finished_good:
+				item_details = frappe.get_cached_value(
+					"Item", row.finished_good, ["has_batch_no", "create_new_batch"], as_dict=1
 				)
+				if not item_details.has_batch_no or not item_details.create_new_batch:
+					frappe.throw(
+						_(
+							"Row #{0}: The item {1} must have 'Has Batch No' and 'Automatically Create New Batch' enabled as the operation {2} is marked as Batch Split."
+						).format(row.idx, bold(row.finished_good), bold(row.operation))
+					)
 
 	def validate_secondary_items(self):
 		for item in self.secondary_items:

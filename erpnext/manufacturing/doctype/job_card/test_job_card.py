@@ -1910,23 +1910,15 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertEqual(len(entries), 5)
 		for entry in entries:
 			self.assertEqual(flt(entry.qty), 1.0)
-			self.assertTrue(entry.batch_no.startswith(parent_batch))
+			self.assertTrue(entry.batch_no.startswith("BS-ROD-PC-"))
 			self.assertEqual(frappe.db.get_value("Batch", entry.batch_no, "parent_batch"), parent_batch)
 
-		fg_bundle = fg_row.serial_and_batch_bundle
 		manufacture_entry.reload()
 		manufacture_entry.cancel()
 
 		for entry in entries:
-			self.assertFalse(frappe.db.exists("Batch", entry.batch_no))
+			self.assertTrue(frappe.db.exists("Batch", entry.batch_no))
 
-		self.assertFalse(frappe.db.exists("Serial and Batch Bundle", fg_bundle))
-		self.assertFalse(
-			frappe.db.exists(
-				"Stock Ledger Entry",
-				{"voucher_no": manufacture_entry.name, "serial_and_batch_bundle": fg_bundle},
-			)
-		)
 		self.assertTrue(frappe.db.exists("Batch", parent_batch))
 
 	def test_semi_fg_pending_qty_is_left_to_another_job_card(self):

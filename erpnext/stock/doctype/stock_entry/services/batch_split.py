@@ -64,10 +64,13 @@ class BatchSplitFinishedGood:
 				).format(row.idx, row.item_code)
 			)
 
-		if not frappe.get_cached_value("Item", row.item_code, "has_batch_no"):
+		item_details = frappe.get_cached_value(
+			"Item", row.item_code, ["has_batch_no", "create_new_batch"], as_dict=1
+		)
+		if not item_details.has_batch_no or not item_details.create_new_batch:
 			frappe.throw(
 				_(
-					"Row #{0}: The item {1} must have 'Has Batch No' enabled for the Batch Split operation."
+					"Row #{0}: The item {1} must have 'Has Batch No' and 'Automatically Create New Batch' enabled for the Batch Split operation."
 				).format(row.idx, row.item_code)
 			)
 
@@ -202,44 +205,21 @@ class BatchSplitFinishedGood:
 
 	def make_child_batches(self, fg_row, parent_batches):
 		batches = frappe._dict()
-		next_index = {}
 		for parent_batch in parent_batches:
-			batch_no = self.insert_child_batch(fg_row, parent_batch, next_index)
+			batch_no = make_batch(
+				frappe._dict(
+					{
+						"item": fg_row.item_code,
+						"parent_batch": parent_batch,
+						"reference_doctype": self.doc.doctype,
+						"reference_name": self.doc.name,
+					}
+				)
+			)
+
 			batches[batch_no] = 1
 
 		return batches
-
-	def insert_child_batch(self, fg_row, parent_batch, next_index):
-		index = next_index.get(parent_batch) or cint(frappe.db.count("Batch", {"parent_batch": parent_batch}))
-
-		while True:
-			index += 1
-			batch_id = f"{parent_batch}-{index}"
-			if frappe.db.exists("Batch", batch_id):
-				continue
-
-			frappe.db.savepoint("insert_child_batch")
-			try:
-				batch_no = self.make_child_batch(fg_row, parent_batch, batch_id)
-			except frappe.DuplicateEntryError:
-				frappe.db.rollback(save_point="insert_child_batch")
-				continue
-
-			next_index[parent_batch] = index
-			return batch_no
-
-	def make_child_batch(self, fg_row, parent_batch, batch_id):
-		return make_batch(
-			frappe._dict(
-				{
-					"item": fg_row.item_code,
-					"parent_batch": parent_batch,
-					"batch_id": batch_id,
-					"reference_doctype": self.doc.doctype,
-					"reference_name": self.doc.name,
-				}
-			)
-		)
 
 	def attach_bundle(self, fg_row, batches):
 		bundle = SerialBatchCreation(
@@ -260,99 +240,3 @@ class BatchSplitFinishedGood:
 		fg_row.serial_and_batch_bundle = bundle.name
 		fg_row.use_serial_batch_fields = 0
 		fg_row.batch_no = None
-
-
-def get_minted_child_batches(doc):
-	return frappe.get_all(
-		"Batch",
-		filters={
-			"reference_doctype": doc.doctype,
-			"reference_name": doc.name,
-			"parent_batch": ("is", "set"),
-		},
-		pluck="name",
-	)
-
-
-def delete_unused_child_batches(doc):
-	minted_batches = set(doc.flags.get("batch_split_child_batches") or [])
-	if not minted_batches:
-		return
-
-	own_bundles = set(
-		frappe.get_all(
-			"Serial and Batch Bundle",
-			filters={"voucher_type": doc.doctype, "voucher_no": doc.name},
-			pluck="name",
-		)
-	)
-
-	for bundle_name, batch_nos in get_bundle_wise_child_batches(doc).items():
-		if not set(batch_nos).issubset(minted_batches):
-			continue
-
-		if any(is_batch_used_outside(batch_no, own_bundles) for batch_no in batch_nos):
-			continue
-
-		delete_child_bundle(doc, bundle_name)
-		for batch_no in batch_nos:
-			frappe.delete_doc("Batch", batch_no, force=True, ignore_permissions=True)
-
-
-def delete_child_bundle(doc, bundle_name):
-	sle = frappe.qb.DocType("Stock Ledger Entry")
-	(
-		frappe.qb.update(sle)
-		.set(sle.serial_and_batch_bundle, None)
-		.where(
-			(sle.voucher_type == doc.doctype)
-			& (sle.voucher_no == doc.name)
-			& (sle.serial_and_batch_bundle == bundle_name)
-		)
-	).run()
-
-	frappe.delete_doc("Serial and Batch Bundle", bundle_name, force=True, ignore_permissions=True)
-
-
-def is_batch_used_outside(batch_no, own_bundles):
-	from frappe.model.delete_doc import get_dynamic_linked_docs, get_linked_docs
-
-	batch_doc = frappe.get_doc("Batch", batch_no)
-	for link in get_linked_docs(batch_doc) + get_dynamic_linked_docs(batch_doc):
-		if (
-			link["reference_doctype"] == "Serial and Batch Bundle"
-			and link["reference_docname"] in own_bundles
-		):
-			continue
-
-		return True
-
-	return False
-
-
-def get_bundle_wise_child_batches(doc):
-	bundle = frappe.qb.DocType("Serial and Batch Bundle")
-	entry = frappe.qb.DocType("Serial and Batch Entry")
-	batch = frappe.qb.DocType("Batch")
-
-	data = (
-		frappe.qb.from_(bundle)
-		.inner_join(entry)
-		.on(entry.parent == bundle.name)
-		.inner_join(batch)
-		.on(batch.name == entry.batch_no)
-		.select(bundle.name.as_("bundle_name"), batch.name.as_("batch_no"))
-		.distinct()
-		.where(
-			(bundle.voucher_type == doc.doctype)
-			& (bundle.voucher_no == doc.name)
-			& (bundle.type_of_transaction == "Inward")
-			& (batch.parent_batch.isnotnull())
-		)
-	).run(as_dict=True)
-
-	bundle_wise_batches = {}
-	for row in data:
-		bundle_wise_batches.setdefault(row.bundle_name, []).append(row.batch_no)
-
-	return bundle_wise_batches

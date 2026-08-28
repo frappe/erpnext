@@ -387,7 +387,6 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if self.purpose_cls and hasattr(self.purpose_cls, "on_cancel"):
 			self.purpose_cls(self).on_cancel()
 
-		self.set_batch_split_child_batches()
 		self.delink_asset_repair_sabb()
 		self.validate_closed_subcontracting_order()
 		self.update_subcontracting_order_status()
@@ -416,29 +415,12 @@ class StockEntry(StockController, SubcontractingInwardController):
 		# Recompute (now excludes this cancelled entry) so the freed reservation is restored.
 		self.update_wo_reservation_for_subcontracting()
 		self.delete_auto_created_batches()
-		self.delete_batch_split_child_batches()
 		self.delete_linked_stock_entry()
 		super().on_cancel_subcontracting_inward()
 
 	def on_update(self):
 		super().on_update()
 		self.set_serial_and_batch_bundle()
-
-	def set_batch_split_child_batches(self):
-		from erpnext.stock.doctype.stock_entry.services.batch_split import (
-			BatchSplitFinishedGood,
-			get_minted_child_batches,
-		)
-
-		self.flags.batch_split_child_batches = []
-		if BatchSplitFinishedGood(self).is_applicable():
-			self.flags.batch_split_child_batches = get_minted_child_batches(self)
-
-	def delete_batch_split_child_batches(self):
-		from erpnext.stock.doctype.stock_entry.services.batch_split import delete_unused_child_batches
-
-		if self.flags.get("batch_split_child_batches"):
-			delete_unused_child_batches(self)
 
 	def validate_job_card_fg_item(self):
 		if not self.job_card:
