@@ -1,17 +1,17 @@
 name: Patch
 
 on:
-  pull_request:
-    paths-ignore:
-      - '**.js'
-      - '**.css'
-      - '**.md'
-      - '**.html'
-      - '**.csv'
-      - 'crowdin.yml'
-      - '.coderabbit.yml'
-      - '.mergify.yml'
-  workflow_dispatch:
+  # pull_request:
+  #   paths-ignore:
+  #     - '**.js'
+  #     - '**.css'
+  #     - '**.md'
+  #     - '**.html'
+  #     - '**.csv'
+  #     - 'crowdin.yml'
+  #     - '.coderabbit.yml'
+  #     - '.mergify.yml'
+  # workflow_dispatch:
 
 permissions:
   contents: read

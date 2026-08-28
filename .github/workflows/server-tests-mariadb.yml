@@ -1,34 +1,34 @@
 name: Server (Mariadb)
 
 on:
-  repository_dispatch:
-    types: [frappe-framework-change]
-  pull_request:
-    paths-ignore:
-      - '**.js'
-      - '**.css'
-      - '**.svg'
-      - '**.md'
-      - '**.html'
-      - 'crowdin.yml'
-      - '.coderabbit.yml'
-      - '.mergify.yml'
-      - '**.po'
-  schedule:
-    # Run everday at midnight UTC / 5:30 IST
-    - cron: "0 0 * * *"
-  workflow_dispatch:
-    inputs:
-      user:
-        description: 'Frappe Framework repository user (add your username for forks)'
-        required: true
-        default: 'frappe'
-        type: string
-      branch:
-        description: 'Frappe Framework branch'
-        default: 'develop'
-        required: false
-        type: string
+  # repository_dispatch:
+  #   types: [frappe-framework-change]
+  # pull_request:
+  #   paths-ignore:
+  #     - '**.js'
+  #     - '**.css'
+  #     - '**.svg'
+  #     - '**.md'
+  #     - '**.html'
+  #     - 'crowdin.yml'
+  #     - '.coderabbit.yml'
+  #     - '.mergify.yml'
+  #     - '**.po'
+  # schedule:
+  #   # Run everday at midnight UTC / 5:30 IST
+  #   - cron: "0 0 * * *"
+  # workflow_dispatch:
+  #   inputs:
+  #     user:
+  #       description: 'Frappe Framework repository user (add your username for forks)'
+  #       required: true
+  #       default: 'frappe'
+  #       type: string
+  #     branch:
+  #       description: 'Frappe Framework branch'
+  #       default: 'develop'
+  #       required: false
+  #       type: string
 
 permissions:
   contents: read
