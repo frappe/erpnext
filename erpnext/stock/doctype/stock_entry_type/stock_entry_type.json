@@ -35,7 +35,8 @@
    "description": "On submission of the stock entry, the consumed batch is split into one child batch per finished piece",
    "fieldname": "batch_split",
    "fieldtype": "Check",
-   "label": "Batch Split"
+   "label": "Batch Split",
+   "read_only": 1
   },
   {
    "default": "0",
@@ -47,7 +48,7 @@
  ],
  "grid_page_length": 50,
  "links": [],
- "modified": "2026-08-28 12:00:00.000000",
+ "modified": "2026-08-28 14:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Type",
