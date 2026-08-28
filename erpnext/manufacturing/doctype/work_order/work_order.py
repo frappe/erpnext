@@ -187,6 +187,9 @@ class WorkOrder(Document):
 		self.set_onload("backflush_raw_materials_based_on", ms.backflush_raw_materials_based_on)
 		self.set_onload("overproduction_percentage", ms.overproduction_percentage_for_work_order)
 		self.set_onload("transfer_extra_materials_percentage", ms.transfer_extra_materials_percentage)
+		self.set_onload("allow_alternative_finished_goods", ms.allow_alternative_finished_goods)
+		if ms.allow_alternative_finished_goods and self.docstatus == 1 and flt(self.produced_qty):
+			self.set_onload("has_alternative_finished_goods", self.has_alternative_finished_goods())
 		self.set_onload("show_create_job_card_button", self.show_create_job_card_button())
 		self.set_onload(
 			"enable_stock_reservation",
@@ -196,6 +199,14 @@ class WorkOrder(Document):
 		if self.bom_no:
 			if based_on := frappe.get_cached_value("BOM", self.bom_no, "backflush_based_on"):
 				self.set_onload("backflush_raw_materials_based_on", based_on)
+
+	def has_alternative_finished_goods(self):
+		return bool(
+			frappe.db.exists("Item Alternative", {"item_code": self.production_item})
+			or frappe.db.exists(
+				"Item Alternative", {"alternative_item_code": self.production_item, "two_way": 1}
+			)
+		)
 
 	@property
 	def secondary_items(self):

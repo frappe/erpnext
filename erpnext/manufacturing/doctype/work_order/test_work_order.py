@@ -5684,6 +5684,100 @@ class TestWorkOrder(ERPNextTestSuite):
 		wo.track_semi_finished_goods = 0
 		self.assertRaises(frappe.ValidationError, wo.validate_warehouse)
 
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"allow_alternative_finished_goods": 1})
+	def test_change_finished_item_to_alternative_finished_good(self):
+		from erpnext.manufacturing.doctype.work_order.mapper import (
+			get_fg_conversion_details,
+			make_fg_conversion_entry,
+		)
+
+		wo_order, alt_item, other_item = prepare_data_for_fg_conversion_test()
+
+		details = get_fg_conversion_details(wo_order.name)
+		self.assertEqual(details["alternative_items"], [alt_item])
+		self.assertEqual(details["available_qty"], 10.0)
+
+		conversion_entry = frappe.get_doc(make_fg_conversion_entry(wo_order.name, alt_item, 4))
+		self.assertEqual(conversion_entry.purpose, "Repack")
+		self.assertEqual(conversion_entry.work_order, wo_order.name)
+		self.assertTrue(conversion_entry.is_fg_conversion)
+		conversion_entry.insert()
+		conversion_entry.submit()
+
+		fg_row = next(row for row in conversion_entry.items if row.is_finished_item)
+		self.assertEqual(fg_row.item_code, alt_item)
+		self.assertEqual(flt(fg_row.amount), 400.0)
+
+		self.assertEqual(frappe.db.get_value("Work Order", wo_order.name, "produced_qty"), 10)
+		self.assertEqual(get_fg_conversion_details(wo_order.name)["available_qty"], 6.0)
+
+		excess_entry = frappe.get_doc(make_fg_conversion_entry(wo_order.name, alt_item, 7))
+		self.assertRaises(frappe.ValidationError, excess_entry.insert)
+
+		invalid_item_entry = frappe.get_doc(make_fg_conversion_entry(wo_order.name, other_item, 2))
+		self.assertRaises(frappe.ValidationError, invalid_item_entry.insert)
+
+		mismatch_entry = frappe.get_doc(make_fg_conversion_entry(wo_order.name, alt_item, 2))
+		for row in mismatch_entry.items:
+			if row.is_finished_item:
+				row.qty = 3
+		self.assertRaises(frappe.ValidationError, mismatch_entry.insert)
+
+		self.assertRaises(frappe.ValidationError, make_fg_conversion_entry, wo_order.name, alt_item, 0)
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"allow_alternative_finished_goods": 0})
+	def test_fg_conversion_not_allowed_when_setting_is_disabled(self):
+		from erpnext.manufacturing.doctype.work_order.mapper import make_fg_conversion_entry
+
+		wo_order, alt_item, _ = prepare_data_for_fg_conversion_test()
+
+		conversion_entry = frappe.get_doc(make_fg_conversion_entry(wo_order.name, alt_item, 2))
+		self.assertRaises(frappe.ValidationError, conversion_entry.insert)
+
+
+def prepare_data_for_fg_conversion_test():
+	fg_item = make_item("_Test FG Conversion Item", {"is_stock_item": 1, "allow_alternative_item": 1}).name
+	alt_item = make_item("_Test FG Conversion Alt Item", {"is_stock_item": 1}).name
+	other_item = make_item("_Test FG Conversion Other Item", {"is_stock_item": 1}).name
+	rm_item = make_item("_Test FG Conversion RM", {"is_stock_item": 1, "valuation_rate": 100}).name
+
+	frappe.db.set_value("Item", fg_item, "allow_alternative_item", 1)
+	if not frappe.db.exists("Item Alternative", {"item_code": fg_item, "alternative_item_code": alt_item}):
+		frappe.get_doc(
+			{"doctype": "Item Alternative", "item_code": fg_item, "alternative_item_code": alt_item}
+		).insert()
+
+	bom = frappe.get_doc(
+		{
+			"doctype": "BOM",
+			"item": fg_item,
+			"currency": "INR",
+			"quantity": 1,
+			"company": "_Test Company",
+		}
+	)
+	bom.append("items", {"item_code": rm_item, "qty": 1})
+	bom.insert()
+	bom.submit()
+
+	wo_order = make_wo_order_test_record(
+		production_item=fg_item,
+		bom_no=bom.name,
+		qty=10,
+		skip_transfer=1,
+		source_warehouse="_Test Warehouse - _TC",
+	)
+
+	test_stock_entry.make_stock_entry(
+		item_code=rm_item, target="_Test Warehouse - _TC", qty=10, basic_rate=100
+	)
+
+	manufacture_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 10))
+	manufacture_entry.insert()
+	manufacture_entry.submit()
+
+	return wo_order, alt_item, other_item
+
 
 def get_reserved_entries(voucher_no, warehouse=None):
 	doctype = frappe.qb.DocType("Stock Reservation Entry")

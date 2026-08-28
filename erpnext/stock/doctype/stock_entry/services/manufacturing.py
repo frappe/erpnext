@@ -982,6 +982,89 @@ class RepackStockEntry(BaseManufactureStockEntry):
 		self.validate_raw_materials_exists()
 		self.validate_repack_entry()
 
+	def validate_fg_conversion(self):
+		if not self.doc.is_fg_conversion:
+			return
+
+		if not frappe.db.get_single_value("Manufacturing Settings", "allow_alternative_finished_goods"):
+			frappe.throw(
+				_(
+					"Enable 'Allow Alternative Finished Goods' in Manufacturing Settings to make a finished good conversion entry."
+				)
+			)
+
+		if not self.wo_doc:
+			frappe.throw(_("Work Order is mandatory for a finished good conversion entry."))
+
+		self._validate_work_order()
+		self.validate_alternative_finished_goods()
+		self.validate_conversion_qty()
+
+	def validate_alternative_finished_goods(self):
+		production_item = self.wo_doc.production_item
+		alternative_items = get_alternative_finished_goods(production_item)
+		if not alternative_items:
+			frappe.throw(
+				_(
+					"Please create Item Alternative records for the item {0} to change the finished item."
+				).format(get_link_to_form("Item", production_item))
+			)
+
+		for row in self.doc.items:
+			if row.is_finished_item and row.item_code not in alternative_items:
+				frappe.throw(
+					_("Row #{0}: Item {1} is not an alternative item of the production item {2}.").format(
+						row.idx, bold(row.item_code), bold(production_item)
+					)
+				)
+
+	def validate_conversion_qty(self):
+		production_item = self.wo_doc.production_item
+		consumed_qty = sum(
+			flt(row.transfer_qty)
+			for row in self.doc.items
+			if row.s_warehouse and row.item_code == production_item
+		)
+
+		if not consumed_qty:
+			frappe.throw(
+				_(
+					"A finished good conversion entry must consume the production item {0} of the Work Order {1}."
+				).format(bold(production_item), get_link_to_form("Work Order", self.doc.work_order))
+			)
+
+		self.validate_conversion_output_qty(consumed_qty, production_item)
+
+		is_submitting = self.doc.docstatus == 1
+		produced_qty = flt(
+			frappe.db.get_value("Work Order", self.doc.work_order, "produced_qty", for_update=is_submitting)
+		)
+		available_qty = produced_qty - get_converted_fg_qty(
+			self.doc.work_order, exclude=self.doc.name, for_update=is_submitting
+		)
+		if consumed_qty > available_qty:
+			frappe.throw(
+				_(
+					"The qty {0} of the item {1} to convert cannot be more than the available produced qty {2} against the Work Order {3}."
+				).format(
+					consumed_qty,
+					bold(production_item),
+					available_qty,
+					get_link_to_form("Work Order", self.doc.work_order),
+				)
+			)
+
+	def validate_conversion_output_qty(self, consumed_qty, production_item):
+		precision = self.doc.precision("fg_completed_qty")
+		output_qty = sum(flt(row.transfer_qty) for row in self.doc.items if row.is_finished_item)
+
+		if flt(output_qty, precision) != flt(consumed_qty, precision):
+			frappe.throw(
+				_(
+					"The total qty {0} of the alternative finished goods must be equal to the converted qty {1} of the production item {2}."
+				).format(output_qty, consumed_qty, bold(production_item))
+			)
+
 	def validate_repack_entry(self):
 		fg_items = {row.item_code: row for row in self.doc.items if row.is_finished_item}
 
@@ -1529,3 +1612,44 @@ def _cap_sample_quantity(sample_quantity, max_retain_qty, retainted_qty, batch_n
 		)
 		return qty_diff
 	return sample_quantity
+
+
+def get_alternative_finished_goods(production_item):
+	alternatives = frappe.get_all(
+		"Item Alternative", filters={"item_code": production_item}, pluck="alternative_item_code"
+	)
+	alternatives += frappe.get_all(
+		"Item Alternative",
+		filters={"alternative_item_code": production_item, "two_way": 1},
+		pluck="item_code",
+	)
+	return list(dict.fromkeys(alternatives))
+
+
+def get_converted_fg_qty(work_order, exclude=None, for_update=False):
+	production_item = frappe.db.get_value("Work Order", work_order, "production_item")
+
+	se = frappe.qb.DocType("Stock Entry")
+	sed = frappe.qb.DocType("Stock Entry Detail")
+	query = (
+		frappe.qb.from_(se)
+		.inner_join(sed)
+		.on(sed.parent == se.name)
+		.select(sed.transfer_qty)
+		.where(
+			(se.work_order == work_order)
+			& (se.is_fg_conversion == 1)
+			& (se.docstatus == 1)
+			& (sed.item_code == production_item)
+			& sed.s_warehouse.notnull()
+			& (sed.s_warehouse != "")
+		)
+	)
+
+	if exclude:
+		query = query.where(se.name != exclude)
+
+	if for_update:
+		query = query.for_update()
+
+	return sum(flt(row[0]) for row in query.run())

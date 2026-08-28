@@ -116,6 +116,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		from_warehouse: DF.Link | None
 		inspection_required: DF.Check
 		is_additional_transfer_entry: DF.Check
+		is_fg_conversion: DF.Check
 		is_opening: DF.Literal["No", "Yes"]
 		is_return: DF.Check
 		items: DF.Table[StockEntryDetail]
@@ -320,6 +321,13 @@ class StockEntry(StockController, SubcontractingInwardController):
 				self.validate_finished_goods()
 			else:
 				self.validate_job_card_fg_item()
+
+		# Must run after set_transfer_qty() and mark_finished_and_secondary_items() so the
+		# qty parity and conversion cap checks see recomputed transfer_qty on edited rows.
+		if self.is_fg_conversion:
+			if self.purpose != "Repack":
+				frappe.throw(_("A finished good conversion entry must have the purpose 'Repack'."))
+			self.purpose_cls(self).validate_fg_conversion()
 
 		# Disassembly rows are fully derived from the source manufacture entry / work order;
 		# verify the posted stock quantities have not been tampered with (raw-material minting).
@@ -975,7 +983,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		for d in self.get("items"):
 			if d.is_finished_item:
-				if not self.work_order:
+				if not self.work_order or self.is_fg_conversion:
 					# Independent MFG Entry/ Repack Entry, no WO to match against
 					finished_items.append(d.item_code)
 					continue
@@ -1547,13 +1555,18 @@ class StockEntry(StockController, SubcontractingInwardController):
 		return 0
 
 	def set_work_order_details(self):
-		if self.work_order:
-			# common validations
-			if self.pro_doc and not self.pro_doc.track_semi_finished_goods:
-				self.bom_no = self.pro_doc.bom_no
-			else:
-				# invalid work order
-				self.work_order = None
+		if not self.work_order:
+			return
+
+		if self.pro_doc and self.is_fg_conversion:
+			return
+
+		# common validations
+		if self.pro_doc and not self.pro_doc.track_semi_finished_goods:
+			self.bom_no = self.pro_doc.bom_no
+		else:
+			# invalid work order
+			self.work_order = None
 
 	def get_bom_raw_materials(self, qty):
 		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict

@@ -245,6 +245,7 @@ frappe.ui.form.on("Work Order", {
 		}
 
 		frm.trigger("add_custom_button_to_return_components");
+		frm.trigger("add_change_finished_item_button");
 		frm.trigger("allow_alternative_item");
 		frm.trigger("hide_reserve_stock_button");
 		frm.trigger("toggle_items_editable");
@@ -311,6 +312,101 @@ frappe.ui.form.on("Work Order", {
 				});
 			}
 		}
+	},
+
+	add_change_finished_item_button: function (frm) {
+		if (
+			frm.doc.docstatus !== 1 ||
+			["Stopped", "Closed"].includes(frm.doc.status) ||
+			!frm.doc.__onload?.allow_alternative_finished_goods ||
+			!frm.doc.__onload?.has_alternative_finished_goods ||
+			!flt(frm.doc.produced_qty)
+		) {
+			return;
+		}
+
+		frm.add_custom_button(__("Change Finished Item"), () => {
+			frm.trigger("change_finished_item");
+		});
+	},
+
+	change_finished_item: function (frm) {
+		frappe.call({
+			method: "erpnext.manufacturing.doctype.work_order.mapper.get_fg_conversion_details",
+			args: { work_order: frm.doc.name },
+			callback: function (r) {
+				if (!r.message.alternative_items.length) {
+					frappe.msgprint(
+						__(
+							"Please create Item Alternative records for the item {0} to change the finished item.",
+							[frappe.utils.get_form_link("Item", frm.doc.production_item, true)]
+						)
+					);
+					return;
+				}
+
+				if (!flt(r.message.available_qty)) {
+					frappe.msgprint(
+						__("The produced qty of the item {0} has already been converted in full.", [
+							frm.doc.production_item.bold(),
+						])
+					);
+					return;
+				}
+
+				frm.events.show_change_finished_item_dialog(frm, r.message);
+			},
+		});
+	},
+
+	show_change_finished_item_dialog: function (frm, { alternative_items, available_qty }) {
+		const dialog = new frappe.ui.Dialog({
+			title: __("Change Finished Item"),
+			fields: [
+				{
+					fieldtype: "Link",
+					fieldname: "item_code",
+					label: __("Actual Finished Item"),
+					options: "Item",
+					reqd: 1,
+					default: alternative_items.length === 1 ? alternative_items[0] : undefined,
+					get_query: () => {
+						return { filters: { name: ["in", alternative_items] } };
+					},
+				},
+				{
+					fieldtype: "Float",
+					fieldname: "qty",
+					label: __("Qty to Convert"),
+					reqd: 1,
+					default: available_qty,
+					description: __("Available produced qty of the item {0} is {1}.", [
+						frm.doc.production_item.bold(),
+						cstr(available_qty).bold(),
+					]),
+				},
+			],
+			primary_action_label: __("Create Stock Entry"),
+			primary_action: (values) => {
+				dialog.hide();
+				frappe.call({
+					method: "erpnext.manufacturing.doctype.work_order.mapper.make_fg_conversion_entry",
+					args: {
+						work_order: frm.doc.name,
+						item_code: values.item_code,
+						qty: values.qty,
+					},
+					callback: function (r) {
+						if (!r.exc) {
+							let doc = frappe.model.sync(r.message);
+							frappe.set_route("Form", doc[0].doctype, doc[0].name);
+						}
+					},
+				});
+			},
+		});
+
+		dialog.show();
 	},
 
 	create_stock_return_entry: function (frm) {
