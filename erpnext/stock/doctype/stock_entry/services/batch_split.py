@@ -271,9 +271,29 @@ def delete_unused_child_batches(doc):
 		)
 	)
 
-	for batch_no in get_child_batches(doc):
-		if not is_batch_used_outside(batch_no, own_bundles):
+	for bundle_name, batch_nos in get_bundle_wise_child_batches(doc).items():
+		deletable = [batch_no for batch_no in batch_nos if not is_batch_used_outside(batch_no, own_bundles)]
+
+		if len(deletable) == len(batch_nos):
+			delete_child_bundle(doc, bundle_name)
+
+		for batch_no in deletable:
 			frappe.delete_doc("Batch", batch_no, force=True, ignore_permissions=True)
+
+
+def delete_child_bundle(doc, bundle_name):
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	(
+		frappe.qb.update(sle)
+		.set(sle.serial_and_batch_bundle, None)
+		.where(
+			(sle.voucher_type == doc.doctype)
+			& (sle.voucher_no == doc.name)
+			& (sle.serial_and_batch_bundle == bundle_name)
+		)
+	).run()
+
+	frappe.delete_doc("Serial and Batch Bundle", bundle_name, force=True, ignore_permissions=True)
 
 
 def is_batch_used_outside(batch_no, own_bundles):
@@ -292,18 +312,18 @@ def is_batch_used_outside(batch_no, own_bundles):
 	return False
 
 
-def get_child_batches(doc):
+def get_bundle_wise_child_batches(doc):
 	bundle = frappe.qb.DocType("Serial and Batch Bundle")
 	entry = frappe.qb.DocType("Serial and Batch Entry")
 	batch = frappe.qb.DocType("Batch")
 
-	return (
+	data = (
 		frappe.qb.from_(bundle)
 		.inner_join(entry)
 		.on(entry.parent == bundle.name)
 		.inner_join(batch)
 		.on(batch.name == entry.batch_no)
-		.select(batch.name)
+		.select(bundle.name.as_("bundle_name"), batch.name.as_("batch_no"))
 		.distinct()
 		.where(
 			(bundle.voucher_type == doc.doctype)
@@ -311,4 +331,10 @@ def get_child_batches(doc):
 			& (bundle.type_of_transaction == "Inward")
 			& (batch.parent_batch.isnotnull())
 		)
-	).run(pluck=True)
+	).run(as_dict=True)
+
+	bundle_wise_batches = {}
+	for row in data:
+		bundle_wise_batches.setdefault(row.bundle_name, []).append(row.batch_no)
+
+	return bundle_wise_batches
