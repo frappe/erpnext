@@ -1913,6 +1913,14 @@ class TestJobCard(ERPNextTestSuite):
 			self.assertTrue(entry.batch_no.startswith(parent_batch))
 			self.assertEqual(frappe.db.get_value("Batch", entry.batch_no, "parent_batch"), parent_batch)
 
+		manufacture_entry.reload()
+		manufacture_entry.cancel()
+
+		for entry in entries:
+			self.assertFalse(frappe.db.exists("Batch", entry.batch_no))
+
+		self.assertTrue(frappe.db.exists("Batch", parent_batch))
+
 	def test_semi_fg_pending_qty_is_left_to_another_job_card(self):
 		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
 		from erpnext.stock.doctype.item.test_item import make_item

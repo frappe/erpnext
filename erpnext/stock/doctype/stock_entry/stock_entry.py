@@ -415,12 +415,19 @@ class StockEntry(StockController, SubcontractingInwardController):
 		# Recompute (now excludes this cancelled entry) so the freed reservation is restored.
 		self.update_wo_reservation_for_subcontracting()
 		self.delete_auto_created_batches()
+		self.delete_batch_split_child_batches()
 		self.delete_linked_stock_entry()
 		super().on_cancel_subcontracting_inward()
 
 	def on_update(self):
 		super().on_update()
 		self.set_serial_and_batch_bundle()
+
+	def delete_batch_split_child_batches(self):
+		from erpnext.stock.doctype.stock_entry.services.batch_split import delete_unused_child_batches
+
+		if self.purpose in ("Manufacture", "Repack"):
+			delete_unused_child_batches(self)
 
 	def validate_job_card_fg_item(self):
 		if not self.job_card:

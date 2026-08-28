@@ -551,8 +551,10 @@ class TestStockEntry(ERPNextTestSuite):
 			},
 		).name
 
-		receipt = make_stock_entry(item_code=rm, target=warehouse, qty=50, basic_rate=200)
-		parent_batch = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
+		first_receipt = make_stock_entry(item_code=rm, target=warehouse, qty=25, basic_rate=200)
+		first_parent = get_batch_from_bundle(first_receipt.items[0].serial_and_batch_bundle)
+		second_receipt = make_stock_entry(item_code=rm, target=warehouse, qty=25, basic_rate=200)
+		second_parent = get_batch_from_bundle(second_receipt.items[0].serial_and_batch_bundle)
 
 		repack = frappe.new_doc("Stock Entry")
 		repack.stock_entry_type = "Batch Split"
@@ -570,10 +572,47 @@ class TestStockEntry(ERPNextTestSuite):
 		)
 
 		self.assertEqual(len(entries), 5)
+		parent_wise_pieces = {}
 		for entry in entries:
 			self.assertEqual(flt(entry.qty), 1.0)
-			self.assertTrue(entry.batch_no.startswith(parent_batch))
-			self.assertEqual(frappe.db.get_value("Batch", entry.batch_no, "parent_batch"), parent_batch)
+			parent = frappe.db.get_value("Batch", entry.batch_no, "parent_batch")
+			self.assertTrue(entry.batch_no.startswith(parent))
+			parent_wise_pieces[parent] = parent_wise_pieces.get(parent, 0) + 1
+
+		self.assertEqual(parent_wise_pieces, {first_parent: 2, second_parent: 3})
+
+	def test_batch_split_requires_single_batch_input(self):
+		if not frappe.db.exists("Stock Entry Type", "Batch Split"):
+			frappe.new_doc("Stock Entry Type", purpose="Repack", batch_split=1).insert(
+				set_name="Batch Split", ignore_permissions=True
+			)
+
+		warehouse = "_Test Warehouse - _TC"
+		items = {}
+		for suffix in ("RM A", "RM B", "FG C"):
+			items[suffix] = make_item(
+				f"Batch Split Multi {suffix}",
+				{
+					"is_stock_item": 1,
+					"has_batch_no": 1,
+					"create_new_batch": 1,
+					"batch_number_series": f"BS-M-{suffix[-1]}-.####",
+				},
+			).name
+			if suffix != "FG C":
+				make_stock_entry(item_code=items[suffix], target=warehouse, qty=10, basic_rate=100)
+
+		repack = frappe.new_doc("Stock Entry")
+		repack.stock_entry_type = "Batch Split"
+		repack.company = "_Test Company"
+		repack.append("items", {"item_code": items["RM A"], "qty": 10, "s_warehouse": warehouse})
+		repack.append("items", {"item_code": items["RM B"], "qty": 10, "s_warehouse": warehouse})
+		repack.append(
+			"items", {"item_code": items["FG C"], "qty": 2, "t_warehouse": warehouse, "is_finished_item": 1}
+		)
+		repack.insert()
+
+		self.assertRaises(frappe.ValidationError, repack.submit)
 
 	def test_repack_with_additional_costs(self):
 		company = frappe.db.get_value("Warehouse", "Stores - TCP1", "company")

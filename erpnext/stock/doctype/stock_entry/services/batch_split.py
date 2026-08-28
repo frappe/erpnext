@@ -85,17 +85,25 @@ class BatchSplitFinishedGood:
 		return cint(pieces)
 
 	def get_input_batches(self):
+		input_rows = [row for row in self.doc.items if self.is_batch_input_row(row)]
+
+		if not input_rows:
+			frappe.throw(
+				_(
+					"The Batch Split operation requires a batch tracked raw material to be consumed in the Stock Entry {0}."
+				).format(self.doc.name)
+			)
+
+		item_codes = {row.item_code for row in input_rows}
+		if len(item_codes) > 1:
+			frappe.throw(
+				_(
+					"The Batch Split entry {0} must consume exactly one batch tracked raw material, found {1} ({2})."
+				).format(self.doc.name, len(item_codes), ", ".join(sorted(item_codes)))
+			)
+
 		batches = []
-		for row in self.doc.items:
-			if row.is_finished_item or not row.s_warehouse:
-				continue
-
-			if row.secondary_item_type or row.is_legacy_scrap_item:
-				continue
-
-			if not frappe.get_cached_value("Item", row.item_code, "has_batch_no"):
-				continue
-
+		for row in input_rows:
 			batches.extend(self.get_row_batches(row))
 
 		if not batches:
@@ -106,6 +114,15 @@ class BatchSplitFinishedGood:
 			)
 
 		return batches
+
+	def is_batch_input_row(self, row):
+		if row.is_finished_item or not row.s_warehouse:
+			return False
+
+		if row.secondary_item_type or row.is_legacy_scrap_item:
+			return False
+
+		return bool(frappe.get_cached_value("Item", row.item_code, "has_batch_no"))
 
 	def get_row_batches(self, row):
 		if row.serial_and_batch_bundle:
@@ -151,45 +168,78 @@ class BatchSplitFinishedGood:
 		return batches
 
 	def get_parent_batches(self, input_batches, pieces):
+		pool = [[batch_no, flt(qty)] for batch_no, qty in input_batches if flt(qty) > 0]
+		precision = frappe.get_precision("Serial and Batch Entry", "qty")
 		parents = []
-		pool = [[batch_no, flt(qty)] for batch_no, qty in input_batches]
 		index = 0
 
 		for _piece in range(pieces):
-			while index < len(pool) - 1 and pool[index][1] < self.weight_per_piece / 2:
-				index += 1
+			shares = {}
+			remaining = self.weight_per_piece
+			while remaining > 0 and index < len(pool):
+				taken = min(pool[index][1], remaining)
+				if taken > 0:
+					shares[pool[index][0]] = flt(shares.get(pool[index][0], 0.0) + taken, precision)
 
-			parents.append(pool[index][0])
-			pool[index][1] -= self.weight_per_piece
+				pool[index][1] = flt(pool[index][1] - taken, precision)
+				remaining = flt(remaining - taken, precision)
+				if pool[index][1] <= 0:
+					index += 1
+
+			parents.append(self.get_majority_batch(shares) or pool[-1][0])
 
 		return parents
 
+	@staticmethod
+	def get_majority_batch(shares):
+		majority_batch = None
+		majority_share = 0.0
+		for batch_no, share in shares.items():
+			if share >= majority_share:
+				majority_batch, majority_share = batch_no, share
+
+		return majority_batch
+
 	def make_child_batches(self, fg_row, parent_batches):
 		batches = frappe._dict()
+		next_index = {}
 		for parent_batch in parent_batches:
-			batch_no = make_batch(
-				frappe._dict(
-					{
-						"item": fg_row.item_code,
-						"parent_batch": parent_batch,
-						"batch_id": self.get_child_batch_id(parent_batch),
-						"reference_doctype": self.doc.doctype,
-						"reference_name": self.doc.name,
-					}
-				)
-			)
-
+			batch_no = self.insert_child_batch(fg_row, parent_batch, next_index)
 			batches[batch_no] = 1
 
 		return batches
 
-	def get_child_batch_id(self, parent_batch):
-		index = cint(frappe.db.count("Batch", {"parent_batch": parent_batch}))
+	def insert_child_batch(self, fg_row, parent_batch, next_index):
+		index = next_index.get(parent_batch) or cint(frappe.db.count("Batch", {"parent_batch": parent_batch}))
+
 		while True:
 			index += 1
 			batch_id = f"{parent_batch}-{index}"
-			if not frappe.db.exists("Batch", batch_id):
-				return batch_id
+			if frappe.db.exists("Batch", batch_id):
+				continue
+
+			frappe.db.savepoint("insert_child_batch")
+			try:
+				batch_no = self.make_child_batch(fg_row, parent_batch, batch_id)
+			except frappe.DuplicateEntryError:
+				frappe.db.rollback(save_point="insert_child_batch")
+				continue
+
+			next_index[parent_batch] = index
+			return batch_no
+
+	def make_child_batch(self, fg_row, parent_batch, batch_id):
+		return make_batch(
+			frappe._dict(
+				{
+					"item": fg_row.item_code,
+					"parent_batch": parent_batch,
+					"batch_id": batch_id,
+					"reference_doctype": self.doc.doctype,
+					"reference_name": self.doc.name,
+				}
+			)
+		)
 
 	def attach_bundle(self, fg_row, batches):
 		bundle = SerialBatchCreation(
@@ -210,3 +260,55 @@ class BatchSplitFinishedGood:
 		fg_row.serial_and_batch_bundle = bundle.name
 		fg_row.use_serial_batch_fields = 0
 		fg_row.batch_no = None
+
+
+def delete_unused_child_batches(doc):
+	own_bundles = set(
+		frappe.get_all(
+			"Serial and Batch Bundle",
+			filters={"voucher_type": doc.doctype, "voucher_no": doc.name},
+			pluck="name",
+		)
+	)
+
+	for batch_no in get_child_batches(doc):
+		if not is_batch_used_outside(batch_no, own_bundles):
+			frappe.delete_doc("Batch", batch_no, force=True, ignore_permissions=True)
+
+
+def is_batch_used_outside(batch_no, own_bundles):
+	from frappe.model.delete_doc import get_dynamic_linked_docs, get_linked_docs
+
+	batch_doc = frappe.get_doc("Batch", batch_no)
+	for link in get_linked_docs(batch_doc) + get_dynamic_linked_docs(batch_doc):
+		if (
+			link["reference_doctype"] == "Serial and Batch Bundle"
+			and link["reference_docname"] in own_bundles
+		):
+			continue
+
+		return True
+
+	return False
+
+
+def get_child_batches(doc):
+	bundle = frappe.qb.DocType("Serial and Batch Bundle")
+	entry = frappe.qb.DocType("Serial and Batch Entry")
+	batch = frappe.qb.DocType("Batch")
+
+	return (
+		frappe.qb.from_(bundle)
+		.inner_join(entry)
+		.on(entry.parent == bundle.name)
+		.inner_join(batch)
+		.on(batch.name == entry.batch_no)
+		.select(batch.name)
+		.distinct()
+		.where(
+			(bundle.voucher_type == doc.doctype)
+			& (bundle.voucher_no == doc.name)
+			& (bundle.type_of_transaction == "Inward")
+			& (batch.parent_batch.isnotnull())
+		)
+	).run(pluck=True)
