@@ -1750,6 +1750,30 @@ class update_entries_after:
 
 			frappe.db.set_value("Bin", bin_name, updated_values, update_modified=True)
 
+		self.reset_bin_without_stock_ledger_entries()
+
+	def reset_bin_without_stock_ledger_entries(self):
+		"""Reset the bin when its ledger has no entries left, a repost never covers that case."""
+		item_code, warehouse = self.args.get("item_code"), self.args.get("warehouse")
+		if not item_code or not warehouse or (item_code, warehouse) in self.prev_sle_dict:
+			return
+
+		if frappe.db.exists(
+			"Stock Ledger Entry", {"item_code": item_code, "warehouse": warehouse, "is_cancelled": 0}
+		):
+			return
+
+		bin_name = frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse})
+		if not bin_name:
+			return
+
+		frappe.db.set_value(
+			"Bin",
+			bin_name,
+			{"actual_qty": 0.0, "stock_value": 0.0, "valuation_rate": 0.0},
+			update_modified=True,
+		)
+
 
 def get_sle_against_current_voucher(kwargs):
 	kwargs["posting_datetime"] = get_combine_datetime(kwargs.posting_date, kwargs.posting_time)
