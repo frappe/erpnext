@@ -1373,7 +1373,7 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 		)
 
 		dns = []
-		for i in range(3):
+		for i in range(5):
 			dns.append(
 				create_delivery_note(
 					item_code=item,
@@ -1384,17 +1384,17 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 					posting_time=posting_time,
 				)
 			)
-		dn = dns[1]
+		dn = dns[2]
 		dn.cancel()
 
-		expected_qty_after_transaction = 60
-		qty_after_transaction = frappe.db.get_value(
+		expected_qty_after_transaction_of_dns3 = 40
+		qty_after_transaction_of_dns3 = frappe.db.get_value(
 			"Stock Ledger Entry",
-			{"voucher_no": dns[2].name, "is_cancelled": 0},
+			{"voucher_no": dns[3].name, "is_cancelled": 0},
 			"qty_after_transaction",
 		)
 
-		self.assertEqual(expected_qty_after_transaction, qty_after_transaction)
+		self.assertEqual(expected_qty_after_transaction_of_dns3, qty_after_transaction_of_dns3)
 
 	def test_get_next_stock_reco_respects_creation_order(self):
 		# A stock reco sharing the exact posting timestamp of the current entry must only count as the

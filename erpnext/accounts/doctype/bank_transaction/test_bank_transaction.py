@@ -30,14 +30,6 @@ class TestBankTransaction(ERPNextTestSuite):
 			gl_account=gl_account, bank_account_name="Checking Account " + uniq_identifier
 		)
 
-		if self._testMethodName in {
-			"test_cancel_voucher",
-			"test_clearance_date_cleared_on_amend",
-			"test_reconcile",
-		}:
-			add_reconciliation_data(bank_account, gl_account)
-			return
-
 		make_pos_profile()
 		add_transactions(bank_account=bank_account)
 		add_vouchers(gl_account=gl_account)
@@ -54,7 +46,7 @@ class TestBankTransaction(ERPNextTestSuite):
 			from_date=bank_transaction.date,
 			to_date=utils.today(),
 		)
-		self.assertIn("Conrad Electronic", [payment["party"] for payment in linked_payments])
+		self.assertEqual(linked_payments[0]["party"], "Conrad Electronic")
 
 	# This test validates a simple reconciliation leading to the clearance of the bank transaction and the payment
 	def test_reconcile(self):
@@ -352,36 +344,6 @@ def add_transactions(bank_account="_Test Bank - _TC"):
 		}
 	).insert()
 	doc.submit()
-
-
-def add_reconciliation_data(bank_account, gl_account):
-	doc = frappe.get_doc(
-		{
-			"doctype": "Bank Transaction",
-			"description": "1512567 BG/000003025 OPSKATTUZWXXX AT776000000098709849 Herr G",
-			"date": "2018-10-23",
-			"deposit": 1700,
-			"currency": "INR",
-			"bank_account": bank_account,
-		}
-	).insert()
-	doc.submit()
-
-	frappe.get_doc(
-		{
-			"doctype": "Supplier",
-			"supplier_group": "All Supplier Groups",
-			"supplier_type": "Company",
-			"supplier_name": "Mr G",
-		}
-	).insert(ignore_if_duplicate=True)
-
-	pi = make_purchase_invoice(supplier="Mr G", qty=1, rate=1700)
-	pe = get_payment_entry("Purchase Invoice", pi.name, bank_account=gl_account)
-	pe.reference_no = "Herr G Nov 18"
-	pe.reference_date = "2018-11-01"
-	pe.insert()
-	pe.submit()
 
 
 def add_vouchers(gl_account="_Test Bank - _TC"):

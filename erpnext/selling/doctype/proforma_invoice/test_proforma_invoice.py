@@ -2,13 +2,9 @@
 # License: GNU General Public License v3. See license.txt
 
 import json
-from contextlib import nullcontext
-from io import BytesIO
-from unittest.mock import patch
 
 import frappe
 from frappe.utils import flt
-from pypdf import PdfWriter
 
 from erpnext.selling.doctype.proforma_invoice.proforma_invoice import (
 	get_sales_order_items,
@@ -19,34 +15,13 @@ from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_orde
 from erpnext.tests.utils import ERPNextTestSuite
 
 
-def _make_test_pdf():
-	content = BytesIO()
-	writer = PdfWriter()
-	writer.add_blank_page(width=72, height=72)
-	writer.write(content)
-	return content.getvalue()
-
-
-TEST_PDF = _make_test_pdf()
-
-
 class TestProformaInvoice(ERPNextTestSuite):
 	def setUp(self):
 		frappe.db.set_single_value("Selling Settings", "enable_proforma_invoice", 1)
 
-	def create_proforma(self, sales_order, lines, use_real_pdf_renderer=False, **kwargs):
-		items = [line if isinstance(line, dict) else {"so_detail": line[0], "qty": line[1]} for line in lines]
-		pdf_renderer = (
-			nullcontext()
-			if use_real_pdf_renderer
-			else patch.object(
-				frappe,
-				"attach_print",
-				return_value={"fname": "proforma.pdf", "fcontent": TEST_PDF},
-			)
-		)
-		with pdf_renderer:
-			name = make_proforma_invoice(sales_order.name, json.dumps(items), **kwargs)
+	def create_proforma(self, sales_order, lines, **kwargs):
+		items = [{"so_detail": so_detail, "qty": qty} for so_detail, qty in lines]
+		name = make_proforma_invoice(sales_order.name, json.dumps(items), **kwargs)
 		return frappe.get_doc("Proforma Invoice", name)
 
 	def test_partial_proforma_is_non_blocking(self):
@@ -54,7 +29,7 @@ class TestProformaInvoice(ERPNextTestSuite):
 		sales_order = make_sales_order(qty=10)
 		so_detail = sales_order.items[0].name
 
-		proforma = self.create_proforma(sales_order, [(so_detail, 4)], use_real_pdf_renderer=True)
+		proforma = self.create_proforma(sales_order, [(so_detail, 4)])
 
 		self.assertEqual(proforma.status, "Issued")
 		self.assertEqual(proforma.docstatus, 1)
@@ -95,11 +70,12 @@ class TestProformaInvoice(ERPNextTestSuite):
 		sales_order = make_sales_order(qty=10)  # rate 100
 		so_detail = sales_order.items[0].name
 
-		proforma = self.create_proforma(
-			sales_order,
-			[{"so_detail": so_detail, "qty": 5, "amount": 250}],
+		name = make_proforma_invoice(
+			sales_order.name,
+			json.dumps([{"so_detail": so_detail, "qty": 5, "amount": 250}]),
 			based_on="Amount",
 		)
+		proforma = frappe.get_doc("Proforma Invoice", name)
 
 		self.assertEqual(proforma.based_on, "Amount")
 		item = proforma.items[0]
@@ -141,22 +117,22 @@ class TestProformaInvoice(ERPNextTestSuite):
 		sales_order = make_sales_order(qty=10)
 		so_detail = sales_order.items[0].name
 
-		amount_based = self.create_proforma(
-			sales_order,
-			[{"so_detail": so_detail, "qty": 5, "amount": 250}],
+		amount_based = make_proforma_invoice(
+			sales_order.name,
+			json.dumps([{"so_detail": so_detail, "qty": 5, "amount": 250}]),
 			based_on="Amount",
 			hide_item_qty=1,
 		)
-		self.assertEqual(amount_based.hide_item_qty, 1)
+		self.assertEqual(frappe.db.get_value("Proforma Invoice", amount_based, "hide_item_qty"), 1)
 
 		# ignored outside Amount basis
-		qty_based = self.create_proforma(
-			sales_order,
-			[(so_detail, 4)],
+		qty_based = make_proforma_invoice(
+			sales_order.name,
+			json.dumps([{"so_detail": so_detail, "qty": 4}]),
 			based_on="Quantity",
 			hide_item_qty=1,
 		)
-		self.assertEqual(qty_based.hide_item_qty, 0)
+		self.assertEqual(frappe.db.get_value("Proforma Invoice", qty_based, "hide_item_qty"), 0)
 
 	def test_feature_toggle_is_enforced(self):
 		sales_order = make_sales_order(qty=10)
