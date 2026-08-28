@@ -424,9 +424,12 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.set_serial_and_batch_bundle()
 
 	def delete_batch_split_child_batches(self):
-		from erpnext.stock.doctype.stock_entry.services.batch_split import delete_unused_child_batches
+		from erpnext.stock.doctype.stock_entry.services.batch_split import (
+			BatchSplitFinishedGood,
+			delete_unused_child_batches,
+		)
 
-		if self.purpose in ("Manufacture", "Repack"):
+		if BatchSplitFinishedGood(self).is_applicable():
 			delete_unused_child_batches(self)
 
 	def validate_job_card_fg_item(self):
