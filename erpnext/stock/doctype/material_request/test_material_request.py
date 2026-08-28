@@ -15,6 +15,7 @@ from erpnext.stock.doctype.material_request.material_request import (
 	create_pick_list,
 	make_in_transit_stock_entry,
 	make_purchase_order,
+	make_request_for_quotation,
 	make_stock_entry,
 	make_supplier_quotation,
 	raise_work_orders,
@@ -47,6 +48,76 @@ class TestMaterialRequest(FrappeTestCase):
 		self.assertEqual(po.doctype, "Purchase Order")
 		self.assertEqual(len(po.get("items")), len(mr.get("items")))
 
+<<<<<<< HEAD
+=======
+	def test_make_request_for_quotation_skips_ordered_items(self):
+		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0]).insert()
+		mr = frappe.get_doc("Material Request", mr.name)
+		mr.submit()
+
+		# fully order the first item, leave the second pending
+		po = make_purchase_order(mr.name)
+		po.supplier = "_Test Supplier"
+		po.items = [po.items[0]]
+		po.insert()
+		po.submit()
+
+		rfq = make_request_for_quotation(mr.name)
+
+		self.assertEqual(len(rfq.get("items")), 1)
+		self.assertEqual(rfq.items[0].material_request_item, mr.items[1].name)
+		self.assertEqual(rfq.items[0].qty, mr.items[1].qty)
+
+	def test_make_subcontracted_purchase_order(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.stock.doctype.item.test_item import create_item, make_item
+		from erpnext.subcontracting.doctype.subcontracting_bom.test_subcontracting_bom import (
+			create_subcontracting_bom,
+		)
+
+		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0]).insert()
+		mr.material_request_type = "Subcontracting"
+		mr.submit()
+
+		frappe.db.set_value("Item", mr.items[0].item_code, "is_sub_contracted_item", 1)
+
+		raw_materials = ["Raw Material Item 1", "Raw Material Item 2"]
+		for item in raw_materials:
+			create_item(item)
+
+		frappe.new_doc("UOM").update({"uom_name": "Test UOM"}).save()
+		service_item = make_item(
+			properties={"is_stock_item": 0}, uoms=[{"uom": "Test UOM", "conversion_factor": 3}]
+		)
+
+		mr.items[0].default_bom = make_bom(item=mr.items[0].item_code, raw_materials=raw_materials)
+		mr.reload()
+
+		create_subcontracting_bom(
+			finished_good=mr.items[0].item_code,
+			service_item=service_item.name,
+			finished_good_qty=2,
+			service_item_qty=1,
+			service_item_uom="Test UOM",
+		)
+
+		po = make_purchase_order(mr.name)
+		po.supplier = "_Test Supplier"
+		po.items[0].schedule_date = today()
+		po.items.pop(1)
+
+		# Test 1 - Test if items stock qty, qty and finished good qty are calculated correctly based on provided UOMs
+		self.assertEqual(po.items[0].stock_qty, 81)
+		self.assertEqual(po.items[0].qty, 27)
+		self.assertEqual(po.items[0].fg_item_qty, 54)
+
+		po.submit()
+		mr.reload()
+
+		# Test 2 - MR items ordered qty should be updated based on PO items qty when submitted
+		self.assertEqual(mr.items[0].ordered_qty, 54)
+
+>>>>>>> 5adcb28 (test: RFQ from Material Request skips fully ordered items)
 	def test_make_supplier_quotation(self):
 		mr = frappe.copy_doc(test_records[0]).insert()
 
