@@ -4,6 +4,13 @@
 frappe.query_reports["Incorrect Serial and Batch Bundle"] = {
 	filters: [
 		{
+			fieldname: "company",
+			label: __("Company"),
+			fieldtype: "Link",
+			options: "Company",
+			default: frappe.defaults.get_user_default("Company"),
+		},
+		{
 			fieldname: "item_code",
 			label: __("Item Code"),
 			fieldtype: "Link",
@@ -12,8 +19,12 @@ frappe.query_reports["Incorrect Serial and Batch Bundle"] = {
 		{
 			fieldname: "warehouse",
 			label: __("Warehouse"),
-			fieldtype: "Link",
+			fieldtype: "MultiSelectList",
 			options: "Warehouse",
+			get_data: function (txt) {
+				let company = frappe.query_report.get_filter_value("company");
+				return frappe.db.get_link_options("Warehouse", txt, company ? { company } : {});
+			},
 		},
 	],
 

@@ -67,7 +67,8 @@ def get_stock_ledger_entries(report_filters):
 
 	for field in ["warehouse", "item_code", "company"]:
 		if report_filters.get(field):
-			filters[field] = report_filters.get(field)
+			values = get_filter_values(report_filters.get(field))
+			filters[field] = ["in", values]
 
 	return frappe.get_all(
 		"Stock Ledger Entry",
@@ -75,6 +76,16 @@ def get_stock_ledger_entries(report_filters):
 		filters=filters,
 		order_by="posting_date asc, posting_time asc, creation asc",
 	)
+
+
+def get_filter_values(value):
+	if isinstance(value, str) and value.startswith("["):
+		value = frappe.parse_json(value)
+
+	if isinstance(value, list | tuple):
+		return value
+
+	return [value]
 
 
 def get_columns():

@@ -7,6 +7,7 @@ from frappe import _
 from frappe.query_builder.functions import IfNull, Max
 from frappe.utils import flt
 
+from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
 from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
 
 
@@ -230,19 +231,7 @@ def get_stock_ledger_entries(filters, items):
 	)
 
 	if filters.get("warehouse"):
-		warehouse_details = frappe.db.get_value(
-			"Warehouse", filters.get("warehouse"), ["lft", "rgt"], as_dict=1
-		)
-
-		if warehouse_details:
-			wh = frappe.qb.DocType("Warehouse")
-			query = query.where(
-				sle.warehouse.isin(
-					frappe.qb.from_(wh)
-					.select(wh.name)
-					.where((wh.lft >= warehouse_details.lft) & (wh.rgt <= warehouse_details.rgt))
-				)
-			)
+		query = apply_warehouse_filter(query, sle, filters)
 
 	if filters.get("company"):
 		query = query.where(sle.company == filters.get("company"))
@@ -266,19 +255,7 @@ def get_item_wise_max_posting_datetime(filters, items):
 	)
 
 	if filters.get("warehouse"):
-		warehouse_details = frappe.db.get_value(
-			"Warehouse", filters.get("warehouse"), ["lft", "rgt"], as_dict=1
-		)
-
-		if warehouse_details:
-			wh = frappe.qb.DocType("Warehouse")
-			query = query.where(
-				sle.warehouse.isin(
-					frappe.qb.from_(wh)
-					.select(wh.name)
-					.where((wh.lft >= warehouse_details.lft) & (wh.rgt <= warehouse_details.rgt))
-				)
-			)
+		query = apply_warehouse_filter(query, sle, filters)
 
 	if filters.get("company"):
 		query = query.where(sle.company == filters.get("company"))

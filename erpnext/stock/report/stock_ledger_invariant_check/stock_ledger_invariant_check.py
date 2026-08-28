@@ -14,6 +14,7 @@ SLE_FIELDS = (
 	"posting_date",
 	"posting_time",
 	"creation",
+	"warehouse",
 	"voucher_type",
 	"voucher_no",
 	"actual_qty",
@@ -39,14 +40,27 @@ def execute(filters=None):
 
 def get_data(filters):
 	sles = get_stock_ledger_entries(filters)
-	return add_invariant_check_fields(sles, filters)
+	warehouse_wise_sles = {}
+	for sle in sles:
+		warehouse_wise_sles.setdefault(sle.warehouse, []).append(sle)
+
+	data = []
+	for warehouse_sles in warehouse_wise_sles.values():
+		data.extend(add_invariant_check_fields(warehouse_sles, filters))
+
+	return data
 
 
 def get_stock_ledger_entries(filters):
+	warehouse_filter = get_filter_values(filters.warehouse)
+	filters_data = {"item_code": filters.item_code, "warehouse": ("in", warehouse_filter), "is_cancelled": 0}
+	if filters.get("company"):
+		filters_data["company"] = filters.company
+
 	return frappe.get_all(
 		"Stock Ledger Entry",
 		fields=SLE_FIELDS,
-		filters={"item_code": filters.item_code, "warehouse": filters.warehouse, "is_cancelled": 0},
+		filters=filters_data,
 		order_by="posting_datetime, creation",
 	)
 
@@ -55,7 +69,7 @@ def add_invariant_check_fields(sles, filters):
 	balance_qty = 0.0
 	balance_stock_value = 0.0
 
-	company = frappe.get_cached_value("Warehouse", filters.warehouse, "company")
+	company = filters.get("company") or frappe.get_cached_value("Warehouse", sles[0].warehouse, "company")
 	valuation_method = get_valuation_method(filters.item_code, company)
 
 	incorrect_idx = None
@@ -186,6 +200,12 @@ def get_columns():
 			"options": "voucher_type",
 		},
 		{
+			"fieldname": "warehouse",
+			"fieldtype": "Link",
+			"label": _("Warehouse"),
+			"options": "Warehouse",
+		},
+		{
 			"fieldname": "batch_no",
 			"fieldtype": "Link",
 			"label": _("Batch"),
@@ -313,6 +333,16 @@ def get_columns():
 			"label": _("I - K"),
 		},
 	]
+
+
+def get_filter_values(value):
+	if isinstance(value, str) and value.startswith("["):
+		value = frappe.parse_json(value)
+
+	if isinstance(value, list | tuple):
+		return value
+
+	return [value]
 
 
 @frappe.whitelist(methods=["POST"])

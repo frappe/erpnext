@@ -14,6 +14,13 @@ const DIFFERENCE_FIELD_NAMES = [
 frappe.query_reports["Stock Ledger Invariant Check"] = {
 	filters: [
 		{
+			fieldname: "company",
+			fieldtype: "Link",
+			label: __("Company"),
+			options: "Company",
+			default: frappe.defaults.get_user_default("Company"),
+		},
+		{
 			fieldname: "item_code",
 			fieldtype: "Link",
 			label: "Item",
@@ -27,10 +34,14 @@ frappe.query_reports["Stock Ledger Invariant Check"] = {
 		},
 		{
 			fieldname: "warehouse",
-			fieldtype: "Link",
-			label: "Warehouse",
+			fieldtype: "MultiSelectList",
+			label: __("Warehouse"),
 			mandatory: 1,
 			options: "Warehouse",
+			get_data: function (txt) {
+				let company = frappe.query_report.get_filter_value("company");
+				return frappe.db.get_link_options("Warehouse", txt, company ? { company } : {});
+			},
 		},
 		{
 			fieldname: "show_incorrect_entries",
@@ -79,7 +90,6 @@ frappe.query_reports["Stock Ledger Invariant Check"] = {
 						args: {
 							rows: selected_rows,
 							item_code: frappe.query_report.get_filter_values().item_code,
-							warehouse: frappe.query_report.get_filter_values().warehouse,
 						},
 					});
 				});
