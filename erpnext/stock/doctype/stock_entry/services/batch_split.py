@@ -177,22 +177,21 @@ class BatchSplitFinishedGood:
 		return batches
 
 	def get_parent_batches(self, input_batches, pieces):
-		pool = [[batch_no, flt(qty)] for batch_no, qty in input_batches if flt(qty) > 0]
+		pool = [(batch_no, flt(qty)) for batch_no, qty in input_batches if flt(qty) > 0]
 		if not pool:
-			pool = [[input_batches[0][0], 0.0]]
+			return [input_batches[0][0]] * pieces
 
-		precision = frappe.get_precision("Serial and Batch Entry", "qty")
+		total_qty = sum(qty for _, qty in pool)
+		shares = [pieces * qty / total_qty for _, qty in pool]
+		counts = [int(share) for share in shares]
+
+		remainders = sorted(range(len(pool)), key=lambda i: (counts[i] - shares[i], i))
+		for index in remainders[: pieces - sum(counts)]:
+			counts[index] += 1
+
 		parents = []
-		index = 0
-
-		for _piece in range(pieces):
-			while index < len(pool) - 1 and flt(pool[index][1], precision) < flt(
-				self.weight_per_piece, precision
-			):
-				index += 1
-
-			parents.append(pool[index][0])
-			pool[index][1] -= self.weight_per_piece
+		for (batch_no, _qty), count in zip(pool, counts, strict=False):
+			parents.extend([batch_no] * count)
 
 		return parents
 

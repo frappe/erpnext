@@ -579,7 +579,7 @@ class TestStockEntry(ERPNextTestSuite):
 			parent = frappe.db.get_value("Batch", entry.batch_no, "parent_batch")
 			parent_wise_pieces[parent] = parent_wise_pieces.get(parent, 0) + 1
 
-		self.assertEqual(parent_wise_pieces, {first_parent: 2, second_parent: 3})
+		self.assertEqual(parent_wise_pieces, {first_parent: 3, second_parent: 2})
 
 		repack.reload()
 		repack.cancel()
