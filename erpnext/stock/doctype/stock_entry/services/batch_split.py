@@ -178,15 +178,22 @@ class BatchSplitFinishedGood:
 
 	def get_parent_batches(self, input_batches, pieces):
 		pool = [(batch_no, flt(qty)) for batch_no, qty in input_batches if flt(qty) > 0]
-		if not pool:
-			return [input_batches[0][0]] * pieces
+		capacities = [int(flt(qty / self.weight_per_piece, 6)) for _batch_no, qty in pool]
 
-		total_qty = sum(qty for _, qty in pool)
-		shares = [pieces * qty / total_qty for _, qty in pool]
-		counts = [int(share) for share in shares]
+		if sum(capacities) < pieces:
+			frappe.throw(
+				_(
+					"The batches consumed in the Stock Entry {0} can supply only {1} whole pieces of {2} units each, but {3} pieces are required. Reduce the finished quantity or consume larger batches."
+				).format(self.doc.name, sum(capacities), self.weight_per_piece, pieces)
+			)
 
-		remainders = sorted(range(len(pool)), key=lambda i: (counts[i] - shares[i], i))
-		for index in remainders[: pieces - sum(counts)]:
+		total_qty = sum(qty for _batch_no, qty in pool)
+		shares = [pieces * qty / total_qty for _batch_no, qty in pool]
+		counts = [min(int(share), capacity) for share, capacity in zip(shares, capacities, strict=False)]
+
+		while sum(counts) < pieces:
+			eligible = [i for i in range(len(pool)) if counts[i] < capacities[i]]
+			index = min(eligible, key=lambda i: (counts[i] - shares[i], i))
 			counts[index] += 1
 
 		parents = []

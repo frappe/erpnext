@@ -551,9 +551,9 @@ class TestStockEntry(ERPNextTestSuite):
 			},
 		).name
 
-		first_receipt = make_stock_entry(item_code=rm, target=warehouse, qty=25, basic_rate=200)
+		first_receipt = make_stock_entry(item_code=rm, target=warehouse, qty=30, basic_rate=200)
 		first_parent = get_batch_from_bundle(first_receipt.items[0].serial_and_batch_bundle)
-		second_receipt = make_stock_entry(item_code=rm, target=warehouse, qty=25, basic_rate=200)
+		second_receipt = make_stock_entry(item_code=rm, target=warehouse, qty=20, basic_rate=200)
 		second_parent = get_batch_from_bundle(second_receipt.items[0].serial_and_batch_bundle)
 
 		repack = frappe.new_doc("Stock Entry")
@@ -617,6 +617,51 @@ class TestStockEntry(ERPNextTestSuite):
 		repack.append("items", {"item_code": items["RM B"], "qty": 10, "s_warehouse": warehouse})
 		repack.append(
 			"items", {"item_code": items["FG C"], "qty": 20, "t_warehouse": warehouse, "is_finished_item": 1}
+		)
+		repack.insert()
+
+		self.assertRaises(frappe.ValidationError, repack.submit)
+
+	def test_batch_split_requires_whole_piece_capacity(self):
+		original_value = frappe.db.get_single_value(
+			"Stock Settings", "auto_create_serial_and_batch_bundle_for_outward"
+		)
+		frappe.db.set_single_value("Stock Settings", "auto_create_serial_and_batch_bundle_for_outward", 1)
+		self.addCleanup(
+			frappe.db.set_single_value,
+			"Stock Settings",
+			"auto_create_serial_and_batch_bundle_for_outward",
+			original_value,
+		)
+
+		if not frappe.db.exists("Stock Entry Type", "Batch Split"):
+			frappe.new_doc("Stock Entry Type", purpose="Repack", batch_split=1).insert(
+				set_name="Batch Split", ignore_permissions=True
+			)
+
+		warehouse = "_Test Warehouse - _TC"
+		items = {}
+		for suffix in ("RM", "FG"):
+			items[suffix] = make_item(
+				f"Batch Split Capacity {suffix}",
+				{
+					"is_stock_item": 1,
+					"has_batch_no": 1,
+					"create_new_batch": 1,
+					"batch_number_series": f"BS-CAP-{suffix}-.####",
+				},
+			).name
+
+		make_stock_entry(item_code=items["RM"], target=warehouse, qty=25, basic_rate=200)
+		make_stock_entry(item_code=items["RM"], target=warehouse, qty=25, basic_rate=200)
+
+		repack = frappe.new_doc("Stock Entry")
+		repack.stock_entry_type = "Batch Split"
+		repack.company = "_Test Company"
+		repack.weight_per_piece = 10
+		repack.append("items", {"item_code": items["RM"], "qty": 50, "s_warehouse": warehouse})
+		repack.append(
+			"items", {"item_code": items["FG"], "qty": 50, "t_warehouse": warehouse, "is_finished_item": 1}
 		)
 		repack.insert()
 
