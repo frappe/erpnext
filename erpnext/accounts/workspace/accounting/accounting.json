@@ -4,25 +4,9 @@
   {
    "chart_name": "Profit and Loss",
    "label": "Profit and Loss"
-  },
-  {
-   "chart_name": "Accounts Receivable Ageing",
-   "label": "Accounts Receivable Ageing"
-  },
-  {
-   "chart_name": "Accounts Payable Ageing",
-   "label": "Accounts Payable Ageing"
-  },
-  {
-   "chart_name": "Bank Balance",
-   "label": "Bank Balance"
-  },
-  {
-   "chart_name": "Budget Variance",
-   "label": "Budget Variance"
   }
  ],
- "content": "[{\"id\":\"acc_ov_hdr1\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Accounting Overview</b></span>\",\"col\":12}},{\"id\":\"acc_ov_nc01\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Outgoing Bills\",\"col\":3}},{\"id\":\"acc_ov_nc02\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Incoming Bills\",\"col\":3}},{\"id\":\"acc_ov_nc03\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Incoming Payment\",\"col\":3}},{\"id\":\"acc_ov_nc04\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Outgoing Payment\",\"col\":3}},{\"id\":\"acc_ov_ch01\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Profit and Loss\",\"col\":12}},{\"id\":\"acc_ov_ch02\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Accounts Receivable Ageing\",\"col\":6}},{\"id\":\"acc_ov_ch03\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Accounts Payable Ageing\",\"col\":6}},{\"id\":\"acc_ov_ch04\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Bank Balance\",\"col\":6}},{\"id\":\"acc_ov_ch05\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Budget Variance\",\"col\":6}}]",
+ "content": "[{\"id\": \"a17de17773\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Profit and Loss\", \"col\": 12}}, {\"id\": \"9a0e234f25\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Outgoing Bills\", \"col\": 4}}, {\"id\": \"58b384d2dd\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Incoming Bills\", \"col\": 4}}, {\"id\": \"575d11919a\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Incoming Payment\", \"col\": 4}}]",
  "creation": "2026-07-14 12:00:00",
  "custom_blocks": [],
  "docstatus": 0,
@@ -36,27 +20,23 @@
  "label": "Accounting",
  "link_type": "DocType",
  "links": [],
- "modified": "2026-07-14 14:28:55.763394",
+ "modified": "2026-08-26 18:34:03.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "module_onboarding": "Accounting Onboarding",
  "name": "Accounting",
  "number_cards": [
   {
-   "label": "Outgoing Bills",
+   "label": "Total Outgoing Bills",
    "number_card_name": "Total Outgoing Bills"
   },
   {
-   "label": "Incoming Bills",
+   "label": "Total Incoming Bills",
    "number_card_name": "Total Incoming Bills"
   },
   {
-   "label": "Incoming Payment",
+   "label": "Total Incoming Payment",
    "number_card_name": "Total Incoming Payment"
-  },
-  {
-   "label": "Outgoing Payment",
-   "number_card_name": "Total Outgoing Payment"
   }
  ],
  "owner": "Administrator",
