@@ -200,7 +200,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 				{
 					"item_code": item_code,
 					"warehouse": self.warehouse,
-					"qty": 20,
+					"qty": 80,
 					"uom": properties.stock_uom,
 					"rate": 100,
 				}
@@ -233,7 +233,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 			se.cancel()
 
 			# Test - 3: Stock should be fully Reserved if the Available Qty to Reserve is greater than the Un-reserved Qty.
-			create_material_receipt(items_details, self.warehouse, qty=25)
+			create_material_receipt(items_details, self.warehouse, qty=110)
 			so.create_stock_reservation_entries()
 			so.load_from_db()
 
@@ -270,6 +270,9 @@ class TestStockReservationEntry(ERPNextTestSuite):
 				do_not_submit=True,
 			)
 
+			for row in so.items:
+				row.qty = 80
+
 			so.save()
 			so.submit()
 			so.create_stock_reservation_entries()
@@ -301,7 +304,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 				dn2 = make_delivery_note(so.name)
 
 				for item in dn2.items:
-					item.qty = 15
+					item.qty = 70
 
 				dn2.save()
 				dn2.submit()
@@ -613,7 +616,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 	)
 	def test_auto_reserve_serial_and_batch(self) -> None:
 		items_details = create_items()
-		create_material_receipt(items_details, self.warehouse, qty=2)
+		create_material_receipt(items_details, self.warehouse, qty=100)
 
 		item_list = []
 		for item_code, properties in items_details.items():
@@ -621,7 +624,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 				{
 					"item_code": item_code,
 					"warehouse": self.warehouse,
-					"qty": 2,
+					"qty": 80,
 					"uom": properties.stock_uom,
 					"rate": 100,
 				}

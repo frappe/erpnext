@@ -1357,7 +1357,7 @@ class TestWorkOrder(ERPNextTestSuite):
 			wo_order = make_wo_order_test_record(item=fg_item, qty=2, skip_transfer=True)
 			serial_nos = self.get_serial_nos_for_fg(wo_order.name)
 
-			stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 2))
+			stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 10))
 			stock_entry.set_work_order_details()
 			for row in stock_entry.items:
 				if row.item_code == fg_item:
@@ -1394,10 +1394,10 @@ class TestWorkOrder(ERPNextTestSuite):
 		item.save()
 
 		try:
-			wo_order = make_wo_order_test_record(item=fg_item, batch_size=1, qty=2, skip_transfer=True)
+			wo_order = make_wo_order_test_record(item=fg_item, batch_size=5, qty=10, skip_transfer=True)
 			serial_nos = self.get_serial_nos_for_fg(wo_order.name)
 
-			stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 2))
+			stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 10))
 			stock_entry.set_work_order_details()
 			for row in stock_entry.items:
 				if row.item_code == fg_item:
