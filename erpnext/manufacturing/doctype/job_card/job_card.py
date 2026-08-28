@@ -85,6 +85,7 @@ class JobCard(Document):
 		amended_from: DF.Link | None
 		backflush_from_wip_warehouse: DF.Check
 		barcode: DF.Barcode | None
+		batch_split: DF.Check
 		batch_no: DF.Link | None
 		bom_no: DF.Link | None
 		company: DF.Link
@@ -141,6 +142,7 @@ class JobCard(Document):
 		time_required: DF.Float
 		total_completed_qty: DF.Float
 		total_time_in_mins: DF.Float
+		weight_per_piece: DF.Float
 		track_semi_finished_goods: DF.Check
 		transferred_qty: DF.Float
 		wip_warehouse: DF.Link | None

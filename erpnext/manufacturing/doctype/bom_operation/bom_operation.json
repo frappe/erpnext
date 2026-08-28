@@ -22,6 +22,8 @@
   "is_final_finished_good",
   "set_cost_based_on_bom_qty",
   "quality_inspection_required",
+  "batch_split",
+  "weight_per_piece",
   "warehouse_section",
   "skip_material_transfer",
   "backflush_from_wip_warehouse",
@@ -302,13 +304,30 @@
    "fieldname": "quality_inspection_required",
    "fieldtype": "Check",
    "label": "Quality Inspection Required"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:parent.track_semi_finished_goods === 1",
+   "description": "On completion of the Job Card, split the consumed batch into one child batch per finished piece",
+   "fieldname": "batch_split",
+   "fieldtype": "Check",
+   "label": "Batch Split"
+  },
+  {
+   "depends_on": "eval:doc.batch_split",
+   "description": "Produced quantity is split into one batch per this many units of the finished good",
+   "fieldname": "weight_per_piece",
+   "fieldtype": "Float",
+   "label": "Weight Per Piece",
+   "mandatory_depends_on": "eval:doc.batch_split",
+   "non_negative": 1
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-08-08 12:00:00.000000",
+ "modified": "2026-08-28 18:00:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Operation",

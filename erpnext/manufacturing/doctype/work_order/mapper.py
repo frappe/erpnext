@@ -525,6 +525,8 @@ def _job_card_warehouse_values(work_order, row, qty):
 		"finished_good": row.get("finished_good"),
 		"semi_fg_bom": row.get("bom_no"),
 		"is_subcontracted": row.get("is_subcontracted"),
+		"batch_split": row.get("batch_split"),
+		"weight_per_piece": row.get("weight_per_piece"),
 	}
 
 

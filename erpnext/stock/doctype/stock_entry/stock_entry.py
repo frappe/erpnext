@@ -170,6 +170,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		total_outgoing_value: DF.Currency
 		use_multi_level_bom: DF.Check
 		value_difference: DF.Currency
+		weight_per_piece: DF.Float
 		work_order: DF.Link | None
 	# end: auto-generated types
 
@@ -356,6 +357,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 	def before_submit(self):
 		StockEntrySABB(self).make_serial_and_batch_bundle_for_outward()
+
+		if self.purpose_cls and hasattr(self.purpose_cls, "before_submit"):
+			self.purpose_cls(self).before_submit()
 
 	def on_submit(self):
 		if self.purpose_cls and hasattr(self.purpose_cls, "on_submit"):

@@ -283,6 +283,11 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		self.set_default_warehouse()
 		self.set_job_card_data()
 
+	def before_submit(self):
+		from .batch_split import BatchSplitFinishedGood
+
+		BatchSplitFinishedGood(self.doc).process()
+
 	def validate(self):
 		self.validate_warehouse()
 		self.validate_raw_materials_exists()
@@ -977,6 +982,11 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 class RepackStockEntry(BaseManufactureStockEntry):
 	def before_validate(self):
 		self.set_default_warehouse()
+
+	def before_submit(self):
+		from .batch_split import BatchSplitFinishedGood
+
+		BatchSplitFinishedGood(self.doc).process()
 
 	def validate(self):
 		self.validate_raw_materials_exists()

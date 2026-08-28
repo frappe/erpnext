@@ -21,6 +21,7 @@ frappe.ui.form.on("Batch", {
 				};
 				frappe.set_route("query-report", "Stock Ledger");
 			});
+			frm.trigger("add_batch_split_tree_button");
 			frm.trigger("make_dashboard");
 
 			frm.add_custom_button(__("Recalculate Batch Qty"), () => {
@@ -34,6 +35,31 @@ frappe.ui.form.on("Batch", {
 				});
 			});
 		}
+	},
+	add_batch_split_tree_button: (frm) => {
+		if (frm.doc.parent_batch) {
+			frm.trigger("show_batch_split_tree_button");
+			return;
+		}
+
+		frappe.db.get_value(
+			"Batch",
+			{ parent_batch: frm.doc.name, reference_name: ["is", "set"] },
+			"name",
+			(r) => {
+				if (r && r.name) {
+					frm.trigger("show_batch_split_tree_button");
+				}
+			}
+		);
+	},
+	show_batch_split_tree_button: (frm) => {
+		frm.add_custom_button(__("Batch Split Tree"), () => {
+			frappe.route_options = {
+				batch: frm.doc.parent_batch || frm.doc.name,
+			};
+			frappe.set_route("query-report", "Batch Split Tree");
+		});
 	},
 	item: (frm) => {
 		// frappe.db.get_value('Item', {name: frm.doc.item}, 'has_expiry_date', (r) => {

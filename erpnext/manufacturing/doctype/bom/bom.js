@@ -1116,13 +1116,6 @@ frappe.ui.form.on("BOM", {
 							doc.qty = 1.0;
 							this.grid.set_value("qty", 1.0, doc);
 						},
-						get_query() {
-							return {
-								filters: {
-									name: ["!=", row.finished_good],
-								},
-							};
-						},
 					},
 					{
 						label: __("Qty"),
