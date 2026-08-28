@@ -338,15 +338,15 @@ def apply_common_conditions(filters, query, doctype, child_doctype=None, payment
 
 	if payments:
 		if doctype == "Journal Entry" and filters.get("cost_center"):
-			query = query.where(child_doc.cost_center == filters.cost_center)
+			query = query.where(get_common_filter_condition(child_doc.cost_center, filters.cost_center))
 		elif filters.get("cost_center"):
-			query = query.where(parent_doc.cost_center == filters.cost_center)
+			query = query.where(get_common_filter_condition(parent_doc.cost_center, filters.cost_center))
 	else:
 		if filters.get("cost_center"):
-			query = query.where(child_doc.cost_center == filters.cost_center)
+			query = query.where(get_common_filter_condition(child_doc.cost_center, filters.cost_center))
 			join_required = True
 		if filters.get("warehouse"):
-			query = query.where(child_doc.warehouse == filters.warehouse)
+			query = query.where(get_common_filter_condition(child_doc.warehouse, filters.warehouse))
 			join_required = True
 		if filters.get("item_group"):
 			query = query.where(child_doc.item_group == filters.item_group)
@@ -366,6 +366,16 @@ def apply_common_conditions(filters, query, doctype, child_doctype=None, payment
 		query = filter_invoices_based_on_dimensions(filters, query, parent_doc)
 
 	return query
+
+
+def get_common_filter_condition(field, value):
+	if isinstance(value, str) and value.startswith("["):
+		value = frappe.parse_json(value)
+
+	if isinstance(value, list | tuple):
+		return field.isin(value)
+
+	return field == value
 
 
 def get_advance_taxes_and_charges(invoice_list):
