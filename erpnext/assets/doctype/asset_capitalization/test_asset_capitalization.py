@@ -440,7 +440,11 @@ def create_asset_capitalization(**args):
 	target_asset = frappe.get_doc("Asset", args.target_asset) if args.target_asset else frappe._dict()
 	target_item_code = target_asset.item_code or args.target_item_code
 	company = target_asset.company or args.company or "_Test Company"
-	warehouse = args.warehouse or create_warehouse("_Test Warehouse", company=company)
+	warehouse = args.warehouse or (
+		"_Test Warehouse - _TC"
+		if company == "_Test Company"
+		else create_warehouse("_Test Warehouse", company=company)
+	)
 	source_warehouse = args.source_warehouse or warehouse
 
 	asset_capitalization = frappe.new_doc("Asset Capitalization")

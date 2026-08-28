@@ -21,10 +21,8 @@ class TestGeneralLedger(ERPNextTestSuite):
 		from frappe.utils import today
 
 		frappe.db.set_single_value("Accounts Settings", "general_ledger_remarks_length", 50)
-		self.addCleanup(frappe.db.set_single_value, "Accounts Settings", "general_ledger_remarks_length", 0)
 
-		si = create_sales_invoice(company=self.company)
-		self.addCleanup(self._cancel_and_delete, "Sales Invoice", si.name)
+		create_sales_invoice(company=self.company)
 
 		columns, data = execute(
 			frappe._dict(
@@ -41,15 +39,6 @@ class TestGeneralLedger(ERPNextTestSuite):
 		self.assertTrue(columns)
 		self.assertTrue(data)
 		self.assertTrue(any("remarks" in row for row in data))
-
-	@staticmethod
-	def _cancel_and_delete(doctype, name):
-		if not frappe.db.exists(doctype, name):
-			return
-		doc = frappe.get_doc(doctype, name)
-		if doc.docstatus == 1:
-			doc.cancel()
-		frappe.delete_doc(doctype, name, force=1)
 
 	def clear_old_entries(self):
 		doctype_list = [

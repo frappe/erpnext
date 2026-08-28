@@ -3,6 +3,7 @@
 
 
 import copy
+from unittest.mock import patch
 
 import frappe
 from frappe.utils import add_days, add_to_date, flt, now, nowtime, today
@@ -33,21 +34,11 @@ class TestLandedCostVoucher(ERPNextTestSuite):
 		from erpnext.stock.doctype.landed_cost_voucher.landed_cost_voucher import get_vendor_invoices
 
 		pi = make_purchase_invoice(item_code="_Test Non Stock Item", qty=1, rate=100)
-		self.addCleanup(self._cancel_and_delete_pi, pi.name)
 
 		rows = get_vendor_invoices(
 			"Purchase Invoice", "", "name", 0, 20, {"company": "_Test Company", "name": pi.name}
 		)
 		self.assertTrue(any(r[0] == pi.name for r in rows))
-
-	@staticmethod
-	def _cancel_and_delete_pi(name):
-		if not frappe.db.exists("Purchase Invoice", name):
-			return
-		doc = frappe.get_doc("Purchase Invoice", name)
-		if doc.docstatus == 1:
-			doc.cancel()
-		frappe.delete_doc("Purchase Invoice", name, force=1)
 
 	def test_landed_cost_voucher(self):
 		frappe.db.set_single_value("Buying Settings", "allow_multiple_items", 1)
@@ -1333,6 +1324,7 @@ class TestLandedCostVoucher(ERPNextTestSuite):
 
 			self.assertFalse(gl_entries)
 
+	@patch.dict(frappe.flags, {"dont_execute_stock_reposts": True})
 	def test_landed_cost_voucher_does_not_change_qty_across_stock_reco(self):
 		"""LCV cost updates must not change quantity after a batch stock reconciliation."""
 		from erpnext.stock.doctype.item.test_item import make_item
@@ -1347,10 +1339,6 @@ class TestLandedCostVoucher(ERPNextTestSuite):
 		).name
 		first_batch = frappe.get_doc({"doctype": "Batch", "item": item}).insert().name
 		second_batch = frappe.get_doc({"doctype": "Batch", "item": item}).insert().name
-
-		# Inspect the immediate LCV result before a queued repost repairs it.
-		frappe.flags.dont_execute_stock_reposts = True
-		self.addCleanup(frappe.flags.pop, "dont_execute_stock_reposts", None)
 
 		receipt = make_purchase_receipt(
 			company=company,
@@ -1603,33 +1591,14 @@ class TestLandedCostVoucherAccountingDimensions(ERPNextTestSuite):
 		dimension = frappe.get_doc("Accounting Dimension", name)
 		row = next((d for d in dimension.dimension_defaults if d.company == self.company), None)
 
-		if row:
-			previous = (row.mandatory_for_pl, row.mandatory_for_bs)
-			self.addCleanup(self.restore_dimension_default, name, previous)
-		else:
+		if not row:
 			row = dimension.append(
 				"dimension_defaults",
 				{"company": self.company, "reference_document": dimension.document_type},
 			)
-			self.addCleanup(self.remove_dimension_default, name)
 
 		row.mandatory_for_pl = mandatory_for_pl
 		row.mandatory_for_bs = mandatory_for_bs
-		dimension.save()
-
-	def restore_dimension_default(self, name, previous):
-		dimension = frappe.get_doc("Accounting Dimension", name)
-		for row in dimension.dimension_defaults:
-			if row.company == self.company:
-				row.mandatory_for_pl, row.mandatory_for_bs = previous
-		dimension.save()
-
-	def remove_dimension_default(self, name):
-		dimension = frappe.get_doc("Accounting Dimension", name)
-		dimension.set(
-			"dimension_defaults",
-			[d for d in dimension.dimension_defaults if d.company != self.company],
-		)
 		dimension.save()
 
 	# tests

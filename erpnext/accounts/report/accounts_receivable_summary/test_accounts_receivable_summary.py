@@ -193,16 +193,7 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 		self.assertEqual(len(rpt_output), 0)
 
 	def test_03_summary_sales_partner_column(self):
-		partner = "_Test AR Summary Sales Partner"
-		if not frappe.db.exists("Sales Partner", partner):
-			frappe.get_doc(
-				{
-					"doctype": "Sales Partner",
-					"partner_name": partner,
-					"commission_rate": 0,
-					"territory": "All Territories",
-				}
-			).insert()
+		partner = "_Test Sales Partner India - 1"
 
 		si = create_sales_invoice(
 			item=self.item,

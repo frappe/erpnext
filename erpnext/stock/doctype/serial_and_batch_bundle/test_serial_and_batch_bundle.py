@@ -1465,9 +1465,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 
 	def _allow_negative_stock_temporarily(self):
 		for field in ("allow_negative_stock", "allow_negative_stock_for_batch"):
-			original = frappe.db.get_single_value("Stock Settings", field)
 			frappe.db.set_single_value("Stock Settings", field, 1)
-			self.addCleanup(frappe.db.set_single_value, "Stock Settings", field, original)
 
 	def _disable_negative_stock(self):
 		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 0)

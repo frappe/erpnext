@@ -7,6 +7,7 @@ from unittest.mock import MagicMock, call, patch
 import frappe
 from frappe.utils import add_days, add_to_date, now, nowdate, today
 
+from erpnext.accounts import utils as accounts_utils
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.utils import repost_gle_for_stock_vouchers
 from erpnext.controllers.stock_controller import create_item_wise_repost_entries
@@ -248,19 +249,13 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 		se.submit()
 		return se
 
+	@patch.dict(frappe.flags, {"dont_execute_stock_reposts": True})
 	def test_backdated_manufacture_repost_skips_redundant_dependent(self):
 		from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import (
 			execute_reposting_entry,
 		)
 
-		frappe.flags.dont_execute_stock_reposts = True
-		self.addCleanup(frappe.flags.pop, "dont_execute_stock_reposts", None)
-
-		original_setting = frappe.db.get_single_value("Stock Reposting Settings", "item_based_reposting")
 		frappe.db.set_single_value("Stock Reposting Settings", "item_based_reposting", 1)
-		self.addCleanup(
-			frappe.db.set_single_value, "Stock Reposting Settings", "item_based_reposting", original_setting
-		)
 
 		company = "_Test Company with perpetual inventory"
 		source_wh = "Stores - TCP1"
@@ -337,10 +332,8 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 		riv.set_status("Skipped")
 
 	@ERPNextTestSuite.change_settings("Stock Reposting Settings", {"item_based_reposting": 0})
+	@patch.dict(frappe.flags, {"dont_execute_stock_reposts": True})
 	def test_prevention_of_cancelled_transaction_riv(self):
-		frappe.flags.dont_execute_stock_reposts = True
-		self.addCleanup(frappe.flags.pop, "dont_execute_stock_reposts")
-
 		item = make_item()
 		warehouse = "_Test Warehouse - _TC"
 		old = make_stock_entry(item_code=item.name, to_warehouse=warehouse, qty=2, rate=5)
@@ -374,15 +367,13 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 
 		from erpnext.stock.doctype.repost_item_valuation import repost_item_valuation as riv
 
-		orig_max_writes = frappe.db.MAX_WRITES_PER_TRANSACTION
-		self.addCleanup(setattr, frappe.db, "MAX_WRITES_PER_TRANSACTION", orig_max_writes)
-
 		def status_after(error):
 			doc = frappe.new_doc("Repost Item Valuation")
 			doc.name = "test-recoverable-riv"
 			doc.set_status = doc.log_error = doc.db_set = MagicMock()
 			captured = {}
 			with (
+				patch.object(frappe.db, "MAX_WRITES_PER_TRANSACTION", frappe.db.MAX_WRITES_PER_TRANSACTION),
 				patch.object(frappe, "in_test", False),
 				patch.object(frappe.db, "exists", return_value=True),
 				patch.object(frappe.db, "commit"),
@@ -397,14 +388,8 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 		self.assertEqual(status_after(QueryDeadlockError("deadlock detected")), "In Progress")
 		self.assertEqual(status_after(ValueError("boom")), "Failed")
 
+	@patch.object(accounts_utils, "GL_REPOSTING_CHUNK", 1)
 	def test_gl_repost_progress(self):
-		from erpnext.accounts import utils
-
-		# lower numbers to simplify test
-		orig_chunk_size = utils.GL_REPOSTING_CHUNK
-		utils.GL_REPOSTING_CHUNK = 1
-		self.addCleanup(setattr, utils, "GL_REPOSTING_CHUNK", orig_chunk_size)
-
 		doc = frappe.new_doc("Repost Item Valuation")
 		doc.db_set = MagicMock()
 
@@ -425,14 +410,8 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 
 		self.assertNotIn(call("gl_reposting_index", 1), doc.db_set.mock_calls)
 
+	@patch.object(accounts_utils, "GL_REPOSTING_CHUNK", 2)
 	def test_gl_complete_gl_reposting(self):
-		from erpnext.accounts import utils
-
-		# lower numbers to simplify test
-		orig_chunk_size = utils.GL_REPOSTING_CHUNK
-		utils.GL_REPOSTING_CHUNK = 2
-		self.addCleanup(setattr, utils, "GL_REPOSTING_CHUNK", orig_chunk_size)
-
 		item = self.make_item().name
 
 		company = "_Test Company with perpetual inventory"
@@ -471,14 +450,8 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 			gle_filters={"account": "Stock In Hand - TCP1"},
 		)
 
+	@patch.object(accounts_utils, "GL_REPOSTING_CHUNK", 2)
 	def test_duplicate_ple_on_repost(self):
-		from erpnext.accounts import utils
-
-		# lower numbers to simplify test
-		orig_chunk_size = utils.GL_REPOSTING_CHUNK
-		utils.GL_REPOSTING_CHUNK = 2
-		self.addCleanup(setattr, utils, "GL_REPOSTING_CHUNK", orig_chunk_size)
-
 		rate = 100
 		item = self.make_item()
 		item.valuation_rate = 90

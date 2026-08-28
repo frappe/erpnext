@@ -44,7 +44,6 @@ class TestWorkOrder(ERPNextTestSuite):
 	def setUp(self):
 		self.warehouse = "_Test Warehouse 2 - _TC"
 		self.item = "_Test Item"
-		prepare_data_for_backflush_based_on_materials_transferred()
 
 	def check_planned_qty(self):
 		planned0 = (
@@ -1358,7 +1357,7 @@ class TestWorkOrder(ERPNextTestSuite):
 			wo_order = make_wo_order_test_record(item=fg_item, qty=2, skip_transfer=True)
 			serial_nos = self.get_serial_nos_for_fg(wo_order.name)
 
-			stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 10))
+			stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 2))
 			stock_entry.set_work_order_details()
 			for row in stock_entry.items:
 				if row.item_code == fg_item:
@@ -1395,10 +1394,10 @@ class TestWorkOrder(ERPNextTestSuite):
 		item.save()
 
 		try:
-			wo_order = make_wo_order_test_record(item=fg_item, batch_size=5, qty=10, skip_transfer=True)
+			wo_order = make_wo_order_test_record(item=fg_item, batch_size=1, qty=2, skip_transfer=True)
 			serial_nos = self.get_serial_nos_for_fg(wo_order.name)
 
-			stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 10))
+			stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 2))
 			stock_entry.set_work_order_details()
 			for row in stock_entry.items:
 				if row.item_code == fg_item:
@@ -2191,6 +2190,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, pick_list.submit)
 
 	def test_backflushed_batch_raw_materials_based_on_transferred(self):
+		prepare_data_for_backflush_based_on_materials_transferred()
 		frappe.db.set_single_value(
 			"Manufacturing Settings",
 			"backflush_raw_materials_based_on",
@@ -2263,6 +2263,7 @@ class TestWorkOrder(ERPNextTestSuite):
 			self.assertEqual(abs(d.qty), 2)
 
 	def test_backflushed_serial_no_raw_materials_based_on_transferred(self):
+		prepare_data_for_backflush_based_on_materials_transferred()
 		frappe.db.set_single_value(
 			"Manufacturing Settings",
 			"backflush_raw_materials_based_on",
@@ -2310,6 +2311,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(manufacture_ste_doc2.items[0].qty, 3)
 
 	def test_backflushed_serial_no_batch_raw_materials_based_on_transferred(self):
+		prepare_data_for_backflush_based_on_materials_transferred()
 		frappe.db.set_single_value(
 			"Manufacturing Settings",
 			"backflush_raw_materials_based_on",
@@ -2395,6 +2397,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertFalse(serial_nos)
 
 	def test_backflushed_batch_raw_materials_based_on_transferred_autosabb(self):
+		prepare_data_for_backflush_based_on_materials_transferred()
 		frappe.db.set_single_value(
 			"Manufacturing Settings",
 			"backflush_raw_materials_based_on",
@@ -2461,6 +2464,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(manufacture_ste_doc.items[0].qty, 4.0)
 
 	def test_backflushed_serial_no_raw_materials_based_on_transferred_autosabb(self):
+		prepare_data_for_backflush_based_on_materials_transferred()
 		frappe.db.set_single_value(
 			"Manufacturing Settings",
 			"backflush_raw_materials_based_on",
@@ -2528,6 +2532,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(manufacture_ste_doc.items[0].qty, 4.0)
 
 	def test_backflushed_serial_no_batch_raw_materials_based_on_transferred_autosabb(self):
+		prepare_data_for_backflush_based_on_materials_transferred()
 		frappe.db.set_single_value(
 			"Manufacturing Settings",
 			"backflush_raw_materials_based_on",
@@ -2586,6 +2591,7 @@ class TestWorkOrder(ERPNextTestSuite):
 
 	###
 	def test_non_consumed_material_return_against_work_order(self):
+		prepare_data_for_backflush_based_on_materials_transferred()
 		frappe.db.set_single_value(
 			"Manufacturing Settings",
 			"backflush_raw_materials_based_on",

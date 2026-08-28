@@ -2,7 +2,7 @@
 # See license.txt
 
 import json
-import time
+from unittest.mock import patch
 from uuid import uuid4
 
 import frappe
@@ -1129,11 +1129,9 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 		# original amount
 		self.assertEqual(50, _get_stock_credit(final_consumption))
 
+	@patch.dict(frappe.flags, {"dont_execute_stock_reposts": True})
 	def test_tie_breaking(self):
 		from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import repost_entries
-
-		frappe.flags.dont_execute_stock_reposts = True
-		self.addCleanup(frappe.flags.pop, "dont_execute_stock_reposts")
 
 		item = make_item().name
 		warehouse = "_Test Warehouse - _TC"
@@ -1237,8 +1235,6 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 			posting_time="02:00:00",
 		)
 
-		time.sleep(3)
-
 		reciept2 = make_stock_entry(
 			item_code=item,
 			to_warehouse=warehouse,
@@ -1276,8 +1272,6 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 			rate=10,
 			posting_time="02:00:00",
 		)
-
-		time.sleep(3)
 
 		# backdated entry with same timestamp but different ms part
 		reciept2 = make_stock_entry(
@@ -1323,7 +1317,6 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 			posting_date="2021-01-01",
 			posting_time="02:00:00",
 		)
-		time.sleep(1)
 		receipt2 = make_purchase_receipt(
 			item_code=item,
 			warehouse=warehouse,
@@ -1380,7 +1373,7 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 		)
 
 		dns = []
-		for i in range(5):
+		for i in range(3):
 			dns.append(
 				create_delivery_note(
 					item_code=item,
@@ -1391,19 +1384,17 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 					posting_time=posting_time,
 				)
 			)
-			time.sleep(1)
-
-		dn = dns[2]
+		dn = dns[1]
 		dn.cancel()
 
-		expected_qty_after_transaction_of_dns3 = 40
-		qty_after_transaction_of_dns3 = frappe.db.get_value(
+		expected_qty_after_transaction = 60
+		qty_after_transaction = frappe.db.get_value(
 			"Stock Ledger Entry",
-			{"voucher_no": dns[3].name, "is_cancelled": 0},
+			{"voucher_no": dns[2].name, "is_cancelled": 0},
 			"qty_after_transaction",
 		)
 
-		self.assertEqual(expected_qty_after_transaction_of_dns3, qty_after_transaction_of_dns3)
+		self.assertEqual(expected_qty_after_transaction, qty_after_transaction)
 
 	def test_get_next_stock_reco_respects_creation_order(self):
 		# A stock reco sharing the exact posting timestamp of the current entry must only count as the

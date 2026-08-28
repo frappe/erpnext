@@ -28,7 +28,6 @@ class TestIssue(TestSetUp):
 		creation = get_datetime("2019-03-04 12:00")
 
 		# make issue with customer specific SLA
-		create_customer("_Test Customer", "__Test SLA Customer Group", "__Test SLA Territory")
 		issue = make_issue(creation, "_Test Customer", 1)
 
 		self.assertEqual(issue.response_by, get_datetime("2019-03-04 14:00"))

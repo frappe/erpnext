@@ -1,19 +1,20 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+import copy
 import unittest
 from contextlib import contextmanager
 from typing import Any, NewType
 
 import frappe
-from frappe import _
 from frappe.core.doctype.report.report import get_report_module_dotted_path
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.tests.utils import load_test_records_for
-from frappe.utils import now_datetime, today
+from frappe.utils import compare, now_datetime, today
 
 ReportFilters = dict[str, Any]
 ReportName = NewType("ReportName", str)
+_test_data_bootstrapped = False
 
 
 def execute_script_report(
@@ -59,30 +60,20 @@ def execute_script_report(
 
 def if_lending_app_installed(function):
 	"""Decorator to check if lending app is installed"""
-
-	def wrapper(*args, **kwargs):
-		if "lending" in frappe.get_installed_apps():
-			return function(*args, **kwargs)
-		return
-
-	return wrapper
+	return unittest.skipUnless("lending" in frappe.get_installed_apps(), "lending is not installed")(function)
 
 
 def if_lending_app_not_installed(function):
 	"""Decorator to check if lending app is not installed"""
-
-	def wrapper(*args, **kwargs):
-		if "lending" not in frappe.get_installed_apps():
-			return function(*args, **kwargs)
-		return
-
-	return wrapper
+	return unittest.skipIf("lending" in frappe.get_installed_apps(), "lending is installed")(function)
 
 
-class BootStrapTestData:
+class BootstrapTestData:
 	def __init__(self):
-		self.make_presets()
-		self.make_master_data()
+		lock_name = f"{frappe.local.site}:erpnext-test-data"
+		with frappe.db.advisory_lock(lock_name, timeout=300):
+			self.make_presets()
+			self.make_master_data()
 
 	def make_presets(self):
 		from frappe.desk.page.setup_wizard.install_fixtures import update_genders, update_salutations
@@ -255,25 +246,56 @@ class BootStrapTestData:
 		stock_settings.enable_serial_and_batch_no_for_item = 1
 		stock_settings.save()
 
-	def make_records(self, key, records):
-		doctype = records[0].get("doctype")
+	def make_records(self, key, records, update_fields=()):
+		"""Create shared fixtures once and repair explicitly mutable values."""
+		if not records:
+			return
+		if not key:
+			raise ValueError("make_records expects at least one identity field")
 
-		def get_filters(record):
-			filters = {}
-			for x in key:
-				filters[x] = record.get(x)
-			return filters
+		doctypes = {record.get("doctype") for record in records}
+		if len(doctypes) != 1 or None in doctypes:
+			raise ValueError("make_records expects records for exactly one DocType")
 
-		for x in records:
-			filters = get_filters(x)
-			if not frappe.db.exists(doctype, filters):
-				frappe.get_doc(x).insert()
+		doctype = doctypes.pop()
+		for record in records:
+			filters = {fieldname: record.get(fieldname) for fieldname in key}
+			if not any(value is not None for value in filters.values()):
+				raise ValueError(f"make_records expects an identity for {doctype}")
+
+			if name := frappe.db.exists(doctype, filters):
+				self._update_fixture_values(doctype, name, record, update_fields)
+			else:
+				frappe.get_doc(record).insert(ignore_if_duplicate=True)
+
+	@staticmethod
+	def _update_fixture_values(doctype, name, record, update_fields):
+		if not update_fields:
+			return
+
+		doc = frappe.get_doc(doctype, name)
+		changed = False
+		for fieldname in update_fields:
+			if fieldname not in record:
+				continue
+
+			expected = record[fieldname]
+			field = doc.meta.get_field(fieldname)
+			fieldtype = field.fieldtype if field else None
+			if compare(doc.get(fieldname), "=", expected, fieldtype):
+				continue
+
+			doc.set(fieldname, expected)
+			changed = True
+
+		if changed:
+			doc.save(ignore_permissions=True)
 
 	def make_price_list(self):
 		records = [
 			{
 				"doctype": "Price List",
-				"price_list_name": _("Standard Buying"),
+				"price_list_name": "Standard Buying",
 				"enabled": 1,
 				"buying": 1,
 				"selling": 0,
@@ -281,7 +303,7 @@ class BootStrapTestData:
 			},
 			{
 				"doctype": "Price List",
-				"price_list_name": _("Standard Selling"),
+				"price_list_name": "Standard Selling",
 				"enabled": 1,
 				"buying": 0,
 				"selling": 1,
@@ -337,7 +359,11 @@ class BootStrapTestData:
 				"selling": 0,
 			},
 		]
-		self.make_records(["price_list_name", "enabled", "selling", "buying", "currency"], records)
+		self.make_records(
+			["price_list_name"],
+			records,
+			update_fields=("enabled", "selling", "buying", "currency", "price_not_uom_dependant"),
+		)
 
 	def make_monthly_distribution(self):
 		records = [
@@ -441,7 +467,7 @@ class BootStrapTestData:
 				"parent_department": "All Departments",
 			},
 		]
-		self.make_records(["department_name"], records)
+		self.make_records(["department_name", "company"], records)
 
 	def make_role(self):
 		records = [
@@ -590,7 +616,7 @@ class BootStrapTestData:
 				"user_id": "test2@example.com",
 			},
 		]
-		self.make_records(["first_name"], records)
+		self.make_records(["user_id"], records)
 
 	def make_sales_person(self):
 		records = [
@@ -726,8 +752,11 @@ class BootStrapTestData:
 				}
 			)
 
-		key = ["year_start_date", "year_end_date"]
-		self.make_records(key, records)
+		self.make_records(
+			["year"],
+			records,
+			update_fields=("year_start_date", "year_end_date", "is_short_year"),
+		)
 
 	def make_payment_term(self):
 		records = [
@@ -1915,7 +1944,7 @@ class BootStrapTestData:
 				"company": "_Test Company",
 			},
 		]
-		self.make_records(["item_code", "item_name"], records)
+		self.make_records(["item_code"], records, update_fields=("item_name",))
 
 	def make_product_bundle(self):
 		from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
@@ -2544,7 +2573,7 @@ class BootStrapTestData:
 			},
 			{
 				"doctype": "Item Price",
-				"price_list": _("Standard Selling"),
+				"price_list": "Standard Selling",
 				"item_code": "Loyal Item",
 				"price_list_rate": 10000,
 			},
@@ -2555,7 +2584,11 @@ class BootStrapTestData:
 				"price_list_rate": 10000,
 			},
 		]
-		self.make_records(["item_code", "price_list", "price_list_rate"], records)
+		self.make_records(
+			["item_code", "price_list", "customer", "supplier"],
+			records,
+			update_fields=("price_list_rate", "valid_from", "valid_upto", "uom", "packing_unit", "batch_no"),
+		)
 
 	def make_currency_exchange(self):
 		"""Seed current-dated USD<->INR rates so foreign-currency documents
@@ -2587,7 +2620,16 @@ class BootStrapTestData:
 				"for_selling": 1,
 			},
 		]
-		self.make_records(["from_currency", "to_currency", "date", "for_buying", "for_selling"], records)
+		identity_fields = ("from_currency", "to_currency", "for_buying", "for_selling")
+		for record in records:
+			filters = {fieldname: record.get(fieldname) for fieldname in identity_fields}
+			name = frappe.db.get_value("Currency Exchange", filters, "name", order_by="date desc")
+			if name:
+				self._update_fixture_values(
+					"Currency Exchange", name, record, update_fields=("date", "exchange_rate")
+				)
+			else:
+				frappe.get_doc(record).insert(ignore_if_duplicate=True)
 
 	def make_operation(self):
 		records = [
@@ -2713,160 +2755,87 @@ class BootStrapTestData:
 		self.make_records(["finance_book_name"], records)
 
 	def make_custom_doctype(self):
-		if not frappe.db.exists("DocType", "Shelf"):
-			frappe.get_doc(
-				{
-					"doctype": "DocType",
-					"name": "Shelf",
-					"module": "Stock",
-					"custom": 1,
-					"naming_rule": "By fieldname",
-					"autoname": "field:shelf_name",
-					"fields": [{"label": "Shelf Name", "fieldname": "shelf_name", "fieldtype": "Data"}],
-					"permissions": [
-						{
-							"role": "System Manager",
-							"permlevel": 0,
-							"read": 1,
-							"write": 1,
-							"create": 1,
-							"delete": 1,
-						}
-					],
-				}
-			).insert(ignore_permissions=True)
+		for doctype, fieldname, label in (
+			("Shelf", "shelf_name", "Shelf Name"),
+			("Rack", "rack_name", "Rack Name"),
+			("Pallet", "pallet_name", "Pallet Name"),
+			("Inv Site", "site_name", "Site Name"),
+			("Store", "store_name", "Store Name"),
+		):
+			self._make_simple_custom_doctype(doctype, fieldname, label)
 
-		if not frappe.db.exists("DocType", "Rack"):
-			frappe.get_doc(
-				{
-					"doctype": "DocType",
-					"name": "Rack",
-					"module": "Stock",
-					"custom": 1,
-					"naming_rule": "By fieldname",
-					"autoname": "field:rack_name",
-					"fields": [{"label": "Rack Name", "fieldname": "rack_name", "fieldtype": "Data"}],
-					"permissions": [
-						{
-							"role": "System Manager",
-							"permlevel": 0,
-							"read": 1,
-							"write": 1,
-							"create": 1,
-							"delete": 1,
-						}
-					],
-				}
-			).insert(ignore_permissions=True)
+		self._make_order_assignment_doctype()
 
-		if not frappe.db.exists("DocType", "Pallet"):
-			frappe.get_doc(
-				{
-					"doctype": "DocType",
-					"name": "Pallet",
-					"module": "Stock",
-					"custom": 1,
-					"naming_rule": "By fieldname",
-					"autoname": "field:pallet_name",
-					"fields": [{"label": "Pallet Name", "fieldname": "pallet_name", "fieldtype": "Data"}],
-					"permissions": [
-						{
-							"role": "System Manager",
-							"permlevel": 0,
-							"read": 1,
-							"write": 1,
-							"create": 1,
-							"delete": 1,
-						}
-					],
-				}
-			).insert(ignore_permissions=True)
+	@staticmethod
+	def _make_simple_custom_doctype(doctype, fieldname, label):
+		if frappe.db.exists("DocType", doctype):
+			return
 
-		if not frappe.db.exists("DocType", "Inv Site"):
-			frappe.get_doc(
-				{
-					"doctype": "DocType",
-					"name": "Inv Site",
-					"module": "Stock",
-					"custom": 1,
-					"naming_rule": "By fieldname",
-					"autoname": "field:site_name",
-					"fields": [{"label": "Site Name", "fieldname": "site_name", "fieldtype": "Data"}],
-					"permissions": [
-						{
-							"role": "System Manager",
-							"permlevel": 0,
-							"read": 1,
-							"write": 1,
-							"create": 1,
-							"delete": 1,
-						}
-					],
-				}
-			).insert(ignore_permissions=True)
-
-			if not frappe.db.exists("DocType", "Store"):
-				frappe.get_doc(
+		frappe.get_doc(
+			{
+				"doctype": "DocType",
+				"name": doctype,
+				"module": "Stock",
+				"custom": 1,
+				"naming_rule": "By fieldname",
+				"autoname": f"field:{fieldname}",
+				"fields": [{"label": label, "fieldname": fieldname, "fieldtype": "Data"}],
+				"permissions": [
 					{
-						"doctype": "DocType",
-						"name": "Store",
-						"module": "Stock",
-						"custom": 1,
-						"naming_rule": "By fieldname",
-						"autoname": "field:store_name",
-						"fields": [{"label": "Store Name", "fieldname": "store_name", "fieldtype": "Data"}],
-						"permissions": [
-							{
-								"role": "System Manager",
-								"permlevel": 0,
-								"read": 1,
-								"write": 1,
-								"create": 1,
-								"delete": 1,
-							}
-						],
+						"role": "System Manager",
+						"permlevel": 0,
+						"read": 1,
+						"write": 1,
+						"create": 1,
+						"delete": 1,
 					}
-				).insert(ignore_permissions=True)
+				],
+			}
+		).insert(ignore_permissions=True, ignore_if_duplicate=True)
 
-			if not frappe.db.exists("DocType", "Order Assignment"):
-				frappe.get_doc(
+	@staticmethod
+	def _make_order_assignment_doctype():
+		if frappe.db.exists("DocType", "Order Assignment"):
+			return
+
+		frappe.get_doc(
+			{
+				"doctype": "DocType",
+				"name": "Order Assignment",
+				"module": "Buying",
+				"custom": 1,
+				"autoname": "field:po",
+				"fields": [
 					{
-						"doctype": "DocType",
-						"name": "Order Assignment",
-						"module": "Buying",
-						"custom": 1,
-						"autoname": "field:po",
-						"fields": [
-							{
-								"label": "PO",
-								"fieldname": "po",
-								"fieldtype": "Link",
-								"options": "Purchase Order",
-							},
-							{
-								"label": "Supplier",
-								"fieldname": "supplier",
-								"fieldtype": "Data",
-								"fetch_from": "po.supplier",
-							},
-						],
-						"permissions": [
-							{
-								"create": 1,
-								"delete": 1,
-								"email": 1,
-								"export": 1,
-								"print": 1,
-								"read": 1,
-								"report": 1,
-								"role": "System Manager",
-								"share": 1,
-								"write": 1,
-							},
-							{"read": 1, "role": "Supplier"},
-						],
-					}
-				).insert(ignore_if_duplicate=True)
+						"label": "PO",
+						"fieldname": "po",
+						"fieldtype": "Link",
+						"options": "Purchase Order",
+					},
+					{
+						"label": "Supplier",
+						"fieldname": "supplier",
+						"fieldtype": "Data",
+						"fetch_from": "po.supplier",
+					},
+				],
+				"permissions": [
+					{
+						"create": 1,
+						"delete": 1,
+						"email": 1,
+						"export": 1,
+						"print": 1,
+						"read": 1,
+						"report": 1,
+						"role": "System Manager",
+						"share": 1,
+						"write": 1,
+					},
+					{"read": 1, "role": "Supplier"},
+				],
+			}
+		).insert(ignore_permissions=True, ignore_if_duplicate=True)
 
 	def make_address(self):
 		records = [
@@ -3046,7 +3015,21 @@ class BootStrapTestData:
 		self.make_records(["store_name"], records)
 
 
-BootStrapTestData()
+# Keep the old spelling for test helpers in downstream apps.
+BootStrapTestData = BootstrapTestData
+
+
+def bootstrap_test_data():
+	global _test_data_bootstrapped
+	if _test_data_bootstrapped:
+		return
+
+	BootstrapTestData()
+	_test_data_bootstrapped = True
+
+
+# Downstream apps create their fixtures while importing this module.
+bootstrap_test_data()
 
 
 class ERPNextTestSuite(unittest.TestCase):
@@ -3060,6 +3043,7 @@ class ERPNextTestSuite(unittest.TestCase):
 
 	@classmethod
 	def setUpClass(cls):
+		bootstrap_test_data()
 		cls.globalTestRecords = {}
 
 	def tearDown(self):
@@ -3086,24 +3070,21 @@ class ERPNextTestSuite(unittest.TestCase):
 @ERPNextTestSuite.registerAs(staticmethod)
 @contextmanager
 def change_settings(doctype, settings_dict=None, /, **settings) -> None:
-	"""Temporarily: change settings in a settings doctype."""
-	import copy
-
+	"""Temporarily change fields in a settings DocType."""
 	if settings_dict is None:
 		settings_dict = settings
 
-	settings = frappe.get_doc(doctype)
-	previous_settings = copy.deepcopy(settings_dict)
-	for key in previous_settings:
-		previous_settings[key] = getattr(settings, key)
+	settings_doc = frappe.get_doc(doctype)
+	previous_settings = {key: copy.deepcopy(settings_doc.get(key)) for key in settings_dict}
 
 	for key, value in settings_dict.items():
-		setattr(settings, key, value)
-	settings.save(ignore_permissions=True)
+		settings_doc.set(key, value)
+	settings_doc.save(ignore_permissions=True)
 
-	yield
-
-	settings = frappe.get_doc(doctype)
-	for key, value in previous_settings.items():
-		setattr(settings, key, value)
-	settings.save(ignore_permissions=True)
+	try:
+		yield
+	finally:
+		settings_doc = frappe.get_doc(doctype)
+		for key, value in previous_settings.items():
+			settings_doc.set(key, value)
+		settings_doc.save(ignore_permissions=True)
