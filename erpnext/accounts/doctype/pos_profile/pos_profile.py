@@ -280,42 +280,6 @@ def pos_profile_query(doctype, txt, searchfield, start, page_len, filters):
 	user = frappe.session["user"]
 	company = filters.get("company") or frappe.defaults.get_user_default("company")
 
-<<<<<<< HEAD
-	args = {
-		"user": user,
-		"start": start,
-		"company": company,
-		"page_len": page_len,
-		"txt": "%%%s%%" % txt,
-	}
-
-	pos_profile = frappe.db.sql(
-		"""select pf.name
-		from
-			`tabPOS Profile` pf, `tabPOS Profile User` pfu
-		where
-			pfu.parent = pf.name and pfu.user = %(user)s and pf.company = %(company)s
-			and (pf.name like %(txt)s)
-			and pf.disabled = 0 limit %(page_len)s offset %(start)s""",
-		args,
-	)
-
-	if not pos_profile:
-		del args["user"]
-
-		pos_profile = frappe.db.sql(
-			"""select pf.name
-			from
-				`tabPOS Profile` pf left join `tabPOS Profile User` pfu
-			on
-				pf.name = pfu.parent
-			where
-				ifnull(pfu.user, '') = ''
-				and pf.company = %(company)s
-				and pf.name like %(txt)s
-				and pf.disabled = 0""",
-			args,
-=======
 	allowed_pos_profiles = frappe.get_list("POS Profile", pluck="name")
 
 	if not allowed_pos_profiles:
@@ -350,7 +314,6 @@ def pos_profile_query(doctype, txt, searchfield, start, page_len, filters):
 				& (pf.name.isin(allowed_pos_profiles))
 			)
 			.run()
->>>>>>> 9018573 (fix(accounts): set pos profile on invoices respecting user permissions (#58508))
 		)
 
 	return pos_profile
