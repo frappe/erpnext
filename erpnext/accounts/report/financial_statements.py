@@ -251,8 +251,12 @@ def get_period_list(
 			period.to_date = year_end_date
 
 		if not ignore_fiscal_year:
-			period.to_date_fiscal_year = get_fiscal_year(period.to_date, company=company)[0]
-			period.from_date_fiscal_year_start_date = get_fiscal_year(period.from_date, company=company)[1]
+			period.to_date_fiscal_year = get_fiscal_year(
+				period.to_date, company=company, include_disabled=True
+			)[0]
+			period.from_date_fiscal_year_start_date = get_fiscal_year(
+				period.from_date, company=company, include_disabled=True
+			)[1]
 
 		period_list.append(period)
 

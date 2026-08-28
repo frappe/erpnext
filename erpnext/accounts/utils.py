@@ -73,6 +73,7 @@ def get_fiscal_year(
 	boolean: str | bool | None = None,
 	raise_on_missing: bool = True,
 	truncate: bool = False,
+	include_disabled: bool = False,
 ):
 	if isinstance(raise_on_missing, str):
 		raise_on_missing = loads(raise_on_missing)
@@ -84,7 +85,14 @@ def get_fiscal_year(
 		raise_on_missing = not boolean
 
 	fiscal_years = get_fiscal_years(
-		date, fiscal_year, label, verbose, company, as_dict=as_dict, raise_on_missing=raise_on_missing
+		date,
+		fiscal_year,
+		label,
+		verbose,
+		company,
+		as_dict=as_dict,
+		raise_on_missing=raise_on_missing,
+		include_disabled=include_disabled,
 	)
 
 	if fiscal_years:
@@ -105,6 +113,7 @@ def get_fiscal_years(
 	as_dict: bool = False,
 	boolean: str | None = None,
 	raise_on_missing: bool = True,
+	include_disabled: bool = False,
 ):
 	if transaction_date:
 		transaction_date = getdate(transaction_date)
@@ -112,7 +121,7 @@ def get_fiscal_years(
 	if boolean is not None:
 		raise_on_missing = not boolean
 
-	all_fiscal_years = _get_fiscal_years(company=company)
+	all_fiscal_years = _get_fiscal_years(company=company, include_disabled=include_disabled)
 
 	# No restricting selectors
 	if not transaction_date and not fiscal_year:
@@ -144,16 +153,17 @@ def get_fiscal_years(
 	return []
 
 
-def _get_fiscal_years(company=None):
-	fiscal_years = frappe.cache().hget("fiscal_years", company) or []
+def _get_fiscal_years(company=None, include_disabled=False):
+	cache_key = "fiscal_years_including_disabled" if include_disabled else "fiscal_years"
+	fiscal_years = frappe.cache().hget(cache_key, company) or []
 
 	if not fiscal_years:
 		# if year start date is 2012-04-01, year end date should be 2013-03-31 (hence subdate)
 		FY = DocType("Fiscal Year")
 
-		query = (
-			frappe.qb.from_(FY).select(FY.name, FY.year_start_date, FY.year_end_date).where(FY.disabled == 0)
-		)
+		query = frappe.qb.from_(FY).select(FY.name, FY.year_start_date, FY.year_end_date)
+		if not include_disabled:
+			query = query.where(FY.disabled == 0)
 
 		if company:
 			FYC = DocType("Fiscal Year Company")
@@ -170,7 +180,7 @@ def _get_fiscal_years(company=None):
 		query = query.orderby(FY.year_start_date, order=Order.desc)
 		fiscal_years = query.run(as_dict=True)
 
-		frappe.cache().hset("fiscal_years", company, fiscal_years)
+		frappe.cache().hset(cache_key, company, fiscal_years)
 	return fiscal_years
 
 
