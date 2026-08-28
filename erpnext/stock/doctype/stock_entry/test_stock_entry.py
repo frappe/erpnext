@@ -581,6 +581,29 @@ class TestStockEntry(ERPNextTestSuite):
 
 		self.assertEqual(parent_wise_pieces, {first_parent: 2, second_parent: 3})
 
+		fg_bundle = fg_row.serial_and_batch_bundle
+		draft_issue = frappe.new_doc("Stock Entry")
+		draft_issue.stock_entry_type = "Material Issue"
+		draft_issue.company = "_Test Company"
+		draft_issue.append(
+			"items",
+			{
+				"item_code": fg,
+				"qty": 1,
+				"s_warehouse": warehouse,
+				"batch_no": entries[0].batch_no,
+				"use_serial_batch_fields": 1,
+			},
+		)
+		draft_issue.insert()
+
+		repack.reload()
+		repack.cancel()
+
+		self.assertTrue(frappe.db.exists("Serial and Batch Bundle", fg_bundle))
+		for entry in entries:
+			self.assertTrue(frappe.db.exists("Batch", entry.batch_no))
+
 	def test_batch_split_requires_single_batch_input(self):
 		if not frappe.db.exists("Stock Entry Type", "Batch Split"):
 			frappe.new_doc("Stock Entry Type", purpose="Repack", batch_split=1).insert(

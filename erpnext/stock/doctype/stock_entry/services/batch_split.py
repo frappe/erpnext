@@ -272,12 +272,11 @@ def delete_unused_child_batches(doc):
 	)
 
 	for bundle_name, batch_nos in get_bundle_wise_child_batches(doc).items():
-		deletable = [batch_no for batch_no in batch_nos if not is_batch_used_outside(batch_no, own_bundles)]
+		if any(is_batch_used_outside(batch_no, own_bundles) for batch_no in batch_nos):
+			continue
 
-		if len(deletable) == len(batch_nos):
-			delete_child_bundle(doc, bundle_name)
-
-		for batch_no in deletable:
+		delete_child_bundle(doc, bundle_name)
+		for batch_no in batch_nos:
 			frappe.delete_doc("Batch", batch_no, force=True, ignore_permissions=True)
 
 
