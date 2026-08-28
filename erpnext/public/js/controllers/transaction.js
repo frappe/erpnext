@@ -780,7 +780,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 	process_item_selection(doc, cdt, cdn) {
 		var item = frappe.get_doc(cdt, cdn);
-		let update_stock = 0;
+		let update_stock = ["Sales Invoice", "Purchase Invoice"].includes(doc.doctype) ? doc.update_stock : 0;
 		var me = this;
 
 		item.weight_per_unit = 0;

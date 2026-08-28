@@ -343,7 +343,11 @@ class TransactionBase(StatusUpdater):
 					"item_tax_template": item.get("item_tax_template"),
 					"child_doctype": item.get("doctype"),
 					"child_docname": item.get("name"),
+<<<<<<< HEAD
 					"is_old_subcontracting_flow": self.get("is_old_subcontracting_flow"),
+=======
+					"use_serial_batch_fields": item.get("use_serial_batch_fields"),
+>>>>>>> ca49de6 (fix(stock): auto-select batch no before saving transaction records (#58536))
 				}
 			),
 			self,
