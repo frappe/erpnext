@@ -85,6 +85,33 @@ class TestRouting(ERPNextTestSuite):
 		self.assertEqual(bom_doc.operations[0].time_in_mins, 30)
 		self.assertEqual(bom_doc.operations[1].time_in_mins, 20)
 
+	def test_create_routing_isolates_operation_lists(self):
+		first = create_routing(
+			routing_name="Testing Route Isolation",
+			operations=[
+				{
+					"operation": "_Test Operation 1",
+					"workstation": "_Test Workstation 1",
+					"time_in_mins": 10,
+				}
+			],
+		)
+		second = create_routing(
+			routing_name="Testing Route Isolation",
+			operations=[
+				{
+					"operation": "_Test Operation 1",
+					"workstation": "_Test Workstation 1",
+					"time_in_mins": 20,
+				}
+			],
+		)
+
+		first.reload()
+		self.assertNotEqual(first.name, second.name)
+		self.assertEqual(first.operations[0].time_in_mins, 10)
+		self.assertEqual(second.operations[0].time_in_mins, 20)
+
 
 def setup_operations(rows):
 	from erpnext.manufacturing.doctype.operation.test_operation import make_operation
@@ -102,16 +129,8 @@ def create_routing(**args):
 	doc.update(args)
 
 	if not args.do_not_save:
-		operations = doc.get("operations")
-		doc.set("operations", [])
-		doc.insert(ignore_if_duplicate=True)
-
-		doc = frappe.get_doc("Routing", args.routing_name)
-		doc.set("operations", [])
-		for operation in operations or []:
-			doc.append("operations", operation)
-
-		doc.save()
+		doc.routing_name = f"{args.routing_name}-{frappe.generate_hash(length=10)}"
+		doc.insert()
 
 	return doc
 
@@ -135,7 +154,11 @@ def setup_bom(**args):
 
 		args.raw_materials = ["Test Extra Item N-1"]
 
-	name = frappe.db.get_value("BOM", {"item": args.item_code}, "name")
+	name = frappe.db.get_value(
+		"BOM",
+		{"item": args.item_code, "routing": args.routing, "docstatus": 1},
+		"name",
+	)
 	if not name:
 		bom_doc = make_bom(
 			item=args.item_code,
