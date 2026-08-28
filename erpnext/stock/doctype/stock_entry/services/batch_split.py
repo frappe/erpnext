@@ -172,36 +172,23 @@ class BatchSplitFinishedGood:
 
 	def get_parent_batches(self, input_batches, pieces):
 		pool = [[batch_no, flt(qty)] for batch_no, qty in input_batches if flt(qty) > 0]
+		if not pool:
+			pool = [[input_batches[0][0], 0.0]]
+
 		precision = frappe.get_precision("Serial and Batch Entry", "qty")
 		parents = []
 		index = 0
 
 		for _piece in range(pieces):
-			shares = {}
-			remaining = self.weight_per_piece
-			while remaining > 0 and index < len(pool):
-				taken = min(pool[index][1], remaining)
-				if taken > 0:
-					shares[pool[index][0]] = flt(shares.get(pool[index][0], 0.0) + taken, precision)
+			while index < len(pool) - 1 and flt(pool[index][1], precision) < flt(
+				self.weight_per_piece, precision
+			):
+				index += 1
 
-				pool[index][1] = flt(pool[index][1] - taken, precision)
-				remaining = flt(remaining - taken, precision)
-				if pool[index][1] <= 0:
-					index += 1
-
-			parents.append(self.get_majority_batch(shares) or pool[-1][0])
+			parents.append(pool[index][0])
+			pool[index][1] -= self.weight_per_piece
 
 		return parents
-
-	@staticmethod
-	def get_majority_batch(shares):
-		majority_batch = None
-		majority_share = 0.0
-		for batch_no, share in shares.items():
-			if share >= majority_share:
-				majority_batch, majority_share = batch_no, share
-
-		return majority_batch
 
 	def make_child_batches(self, fg_row, parent_batches):
 		batches = frappe._dict()
