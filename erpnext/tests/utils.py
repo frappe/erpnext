@@ -3028,6 +3028,10 @@ def bootstrap_test_data():
 	_test_data_bootstrapped = True
 
 
+# Downstream apps create their fixtures while importing this module.
+bootstrap_test_data()
+
+
 class ERPNextTestSuite(unittest.TestCase):
 	@classmethod
 	def registerAs(cls, _as):
