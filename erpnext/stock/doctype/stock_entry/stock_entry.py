@@ -1894,6 +1894,9 @@ def get_warehouse_details(args: str | dict):
 
 	ret = {}
 	if args.warehouse and args.item_code:
+		frappe.has_permission("Warehouse", doc=args.warehouse, throw=True)
+		frappe.has_permission("Item", doc=args.item_code, throw=True)
+
 		args.update(
 			{
 				"posting_date": args.posting_date,
