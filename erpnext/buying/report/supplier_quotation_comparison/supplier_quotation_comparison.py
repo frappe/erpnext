@@ -6,6 +6,7 @@ from collections import defaultdict
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import Sum
 from frappe.utils import cint, flt
 
 
@@ -87,7 +88,68 @@ def get_data(filters):
 
 	supplier_quotation_data = query.run(as_dict=True)
 
+	return add_order_status(supplier_quotation_data, filters.get("order_status"))
+
+
+def add_order_status(supplier_quotation_data, order_status=None):
+	quotation_names = {row.parent for row in supplier_quotation_data}
+	status_by_quotation = get_order_status_map(quotation_names)
+
+	for row in supplier_quotation_data:
+		row.order_status = status_by_quotation[row.parent]
+
+	if order_status:
+		return [row for row in supplier_quotation_data if row.order_status == order_status]
+
 	return supplier_quotation_data
+
+
+def get_order_status_map(quotation_names):
+	if not quotation_names:
+		return {}
+
+	items_by_quotation = defaultdict(list)
+	for item in frappe.get_all(
+		"Supplier Quotation Item",
+		filters={"parent": ["in", quotation_names]},
+		fields=["name", "parent", "stock_qty"],
+	):
+		items_by_quotation[item.parent].append(item)
+
+	ordered_qty_by_item = get_ordered_qty_by_quotation_item(quotation_names)
+	return {
+		quotation: get_order_status(items, ordered_qty_by_item)
+		for quotation, items in items_by_quotation.items()
+	}
+
+
+def get_ordered_qty_by_quotation_item(quotation_names):
+	purchase_order_item = frappe.qb.DocType("Purchase Order Item")
+	ordered_items = (
+		frappe.qb.from_(purchase_order_item)
+		.select(
+			purchase_order_item.supplier_quotation_item,
+			Sum(purchase_order_item.stock_qty).as_("ordered_qty"),
+		)
+		.where(
+			(purchase_order_item.docstatus == 1)
+			& (purchase_order_item.supplier_quotation.isin(quotation_names))
+		)
+		.groupby(purchase_order_item.supplier_quotation_item)
+	).run(as_dict=True)
+
+	return {row.supplier_quotation_item: row.ordered_qty for row in ordered_items}
+
+
+def get_order_status(quotation_items, ordered_qty_by_item):
+	if not any(item.name in ordered_qty_by_item for item in quotation_items):
+		return "Not Ordered"
+
+	for item in quotation_items:
+		if item.name not in ordered_qty_by_item or flt(item.stock_qty) > flt(ordered_qty_by_item[item.name]):
+			return "Partially Ordered"
+
+	return "Ordered"
 
 
 def prepare_data(supplier_quotation_data, filters):
@@ -109,6 +171,7 @@ def prepare_data(supplier_quotation_data, filters):
 			else data.get("item_code"),  # leave blank if group by field
 			"supplier_name": "" if group_by_field == "supplier_name" else data.get("supplier_name"),
 			"quotation": data.get("parent"),
+			"order_status": data.get("order_status"),
 			"qty": data.get("qty"),
 			"price": flt(data.get("amount"), float_precision),
 			"uom": data.get("uom"),
@@ -264,6 +327,12 @@ def get_columns(filters):
 			"fieldtype": "Link",
 			"options": "Supplier Quotation",
 			"width": 200,
+		},
+		{
+			"fieldname": "order_status",
+			"label": _("Order Status"),
+			"fieldtype": "Data",
+			"width": 130,
 		},
 		{"fieldname": "valid_till", "label": _("Valid Till"), "fieldtype": "Date", "width": 100},
 		{
