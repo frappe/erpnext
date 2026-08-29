@@ -25,8 +25,8 @@ from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.stock_ledger import get_previous_sle, update_entries_after
 from erpnext.stock.tests.test_utils import StockTestMixin
 from erpnext.stock.utils import (
+	_get_incoming_rate,
 	get_combine_datetime,
-	get_incoming_rate,
 	get_stock_value_on,
 	get_valuation_method,
 )
@@ -177,7 +177,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			"serial_and_batch_bundle": sr.items[0].serial_and_batch_bundle,
 		}
 
-		valuation_rate = get_incoming_rate(args)
+		valuation_rate = _get_incoming_rate(args)
 		self.assertEqual(valuation_rate, 200)
 
 		to_delete_records.append(sr.name)
@@ -199,7 +199,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			"serial_and_batch_bundle": sr.items[0].serial_and_batch_bundle,
 		}
 
-		valuation_rate = get_incoming_rate(args)
+		valuation_rate = _get_incoming_rate(args)
 		self.assertEqual(valuation_rate, 300)
 
 		to_delete_records.append(sr.name)
@@ -250,7 +250,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			"serial_and_batch_bundle": sr1.items[0].serial_and_batch_bundle,
 		}
 
-		valuation_rate = get_incoming_rate(args)
+		valuation_rate = _get_incoming_rate(args)
 		self.assertEqual(valuation_rate, 300)
 		to_delete_records.append(sr1.name)
 

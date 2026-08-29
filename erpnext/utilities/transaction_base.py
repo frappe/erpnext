@@ -10,7 +10,7 @@ from frappe.utils import cint, flt, get_time, now_datetime
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
 from erpnext.controllers.status_updater import StatusUpdater
 from erpnext.stock.get_item_details import NOT_APPLICABLE_TAX, get_item_details
-from erpnext.stock.utils import get_incoming_rate
+from erpnext.stock.utils import _get_incoming_rate
 
 
 class UOMMustBeIntegerError(frappe.ValidationError):
@@ -426,7 +426,7 @@ class TransactionBase(StatusUpdater):
 					}
 				)
 
-			rate = get_incoming_rate(args=args)
+			rate = _get_incoming_rate(args=args)
 			item_obj.rate = rate * item_obj.conversion_factor
 		else:
 			self.set_rate_based_on_price_list(item_obj, item_details)

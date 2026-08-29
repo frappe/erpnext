@@ -16,7 +16,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 )
 from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
 from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
-from erpnext.stock.utils import get_incoming_rate
+from erpnext.stock.utils import _get_incoming_rate
 
 
 def execute(filters=None):
@@ -967,7 +967,7 @@ class GrossProfitGenerator:
 			if row.serial_and_batch_bundle:
 				args.update({"serial_and_batch_bundle": row.serial_and_batch_bundle})
 
-			average_buying_rate = get_incoming_rate(args)
+			average_buying_rate = _get_incoming_rate(args)
 			self.average_buying_rate[key] = flt(average_buying_rate)
 
 		return self.average_buying_rate[key]

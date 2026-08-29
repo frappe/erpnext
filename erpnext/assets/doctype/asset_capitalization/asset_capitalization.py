@@ -29,7 +29,7 @@ from erpnext.stock.get_item_details import (
 	get_item_warehouse_,
 )
 from erpnext.stock.stock_ledger import get_previous_sle
-from erpnext.stock.utils import get_incoming_rate
+from erpnext.stock.utils import _get_incoming_rate
 
 force_fields = [
 	"target_item_name",
@@ -191,7 +191,7 @@ class AssetCapitalization(StockController):
 				cumulative_qty += flt(d.stock_qty)
 				args = self.get_args_for_incoming_rate(d)
 				args["qty"] = -1 * cumulative_qty
-				cumulative_rate = flt(get_incoming_rate(args, raise_error_if_no_rate=False))
+				cumulative_rate = flt(_get_incoming_rate(args, raise_error_if_no_rate=False))
 				cumulative_value = cumulative_rate * cumulative_qty
 
 				row_value = cumulative_value - prev_cumulative_value
@@ -623,11 +623,11 @@ def get_warehouse_details(ctx: ItemDetailsCtx) -> frappe._dict:
 	if ctx.warehouse and ctx.item_code:
 		frappe.has_permission("Item", doc=ctx.item_code, throw=True)
 		frappe.has_permission("Warehouse", doc=ctx.warehouse, throw=True)
-		frappe.has_permission("Stock Ledger Entry", throw=True)
+
 		out = frappe._dict(
 			{
 				"actual_qty": get_previous_sle(ctx).get("qty_after_transaction") or 0,
-				"valuation_rate": get_incoming_rate(ctx, raise_error_if_no_rate=False),
+				"valuation_rate": _get_incoming_rate(ctx, raise_error_if_no_rate=False),
 			}
 		)
 	return out
