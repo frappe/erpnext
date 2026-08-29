@@ -273,6 +273,10 @@ def get_incoming_rate(args: dict | str, raise_error_if_no_rate: bool = True, fal
 
 	args = frappe.parse_json(args)
 
+	frappe.has_permission("Stock Ledger Entry", throw=True)
+	frappe.has_permission("Warehouse", doc=args.get("warehouse"), throw=True)
+	frappe.has_permission("Item", doc=args.get("item_code"), throw=True)
+
 	if not args.get("posting_datetime") and args.get("posting_date"):
 		args["posting_datetime"] = get_combine_datetime(args.get("posting_date"), args.get("posting_time"))
 
