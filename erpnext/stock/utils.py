@@ -268,6 +268,15 @@ def _create_bin(item_code, warehouse):
 
 @frappe.whitelist()
 def get_incoming_rate(args: dict | str, raise_error_if_no_rate: bool = True, fallbacks: bool = True):
+	args = frappe.parse_json(args)
+
+	frappe.has_permission("Warehouse", doc=args.get("warehouse"), throw=True)
+	frappe.has_permission("Item", doc=args.get("item_code"), throw=True)
+
+	return _get_incoming_rate(args, raise_error_if_no_rate, fallbacks)
+
+
+def _get_incoming_rate(args, raise_error_if_no_rate=True, fallbacks=True):
 	"""Get Incoming Rate based on valuation method"""
 	from erpnext.stock.stock_ledger import get_previous_sle, get_valuation_rate
 
