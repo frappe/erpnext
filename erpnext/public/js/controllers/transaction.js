@@ -2888,8 +2888,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			method: me.get_method_for_payment(),
 			args: args,
 			callback: function (r) {
-				var doclist = frappe.model.sync(r.message);
-				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+				if (!r.exc) {
+					var doclist = frappe.model.sync(r.message);
+					frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+				}
 			},
 		});
 	}
