@@ -551,12 +551,15 @@ class WorkOrder(Document):
 			so = so_query.run(as_dict=1)
 
 			if not so:
-				so = (
+				packed_so_query = (
 					frappe.qb.from_(SalesOrder)
 					.inner_join(SalesOrderItem)
 					.on(SalesOrderItem.parent == SalesOrder.name)
 					.inner_join(PackedItem)
-					.on(PackedItem.parent == SalesOrder.name)
+					.on(
+						(PackedItem.parent == SalesOrder.name)
+						& (PackedItem.parent_detail_docname == SalesOrderItem.name)
+					)
 					.select(SalesOrder.name, SalesOrder.project, SalesOrderItem.delivery_date)
 					.where(
 						(SalesOrder.name == self.sales_order)
@@ -565,8 +568,15 @@ class WorkOrder(Document):
 						& (SalesOrder.docstatus == 1)
 						& (PackedItem.item_code == production_item)
 					)
-					.run(as_dict=1)
 				)
+
+				if self.sales_order_item:
+					packed_so_query = packed_so_query.where(
+						(PackedItem.name == self.sales_order_item)
+						| (SalesOrderItem.name == self.sales_order_item)
+					)
+
+				so = packed_so_query.run(as_dict=1)
 
 			if len(so):
 				if not self.expected_delivery_date:

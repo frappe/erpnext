@@ -1832,6 +1832,61 @@ class TestSalesOrder(ERPNextTestSuite):
 			)
 			self.assertEqual(wo_qty[0][0], so_item_name.get(item))
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_make_work_order_for_duplicate_product_bundle_rows(self):
+		from erpnext.selling.doctype.sales_order.sales_order import get_work_order_items
+
+		bundle_item = make_item("_Test Work Order Product Bundle", {"is_stock_item": 0}).name
+		make_product_bundle(bundle_item, ["_Test FG Item"])
+
+		first_delivery_date = add_days(today(), 5)
+		second_delivery_date = add_days(today(), 10)
+		so = make_sales_order(
+			item_list=[
+				{
+					"item_code": bundle_item,
+					"qty": 1,
+					"rate": 100,
+					"warehouse": "_Test Warehouse - _TC",
+					"delivery_date": first_delivery_date,
+				},
+				{
+					"item_code": bundle_item,
+					"qty": 1,
+					"rate": 100,
+					"warehouse": "_Test Warehouse - _TC",
+					"delivery_date": second_delivery_date,
+				},
+			]
+		)
+
+		items = [
+			{
+				"warehouse": item.get("warehouse"),
+				"item_code": item.get("item_code"),
+				"pending_qty": item.get("pending_qty"),
+				"sales_order_item": item.get("sales_order_item"),
+				"bom": item.get("bom"),
+				"description": item.get("description"),
+			}
+			for item in get_work_order_items(so.name)
+		]
+		work_orders = make_work_orders(json.dumps({"items": items}), so.name, so.company)
+
+		expected_delivery_dates = {
+			packed_item.name: next(
+				item.delivery_date for item in so.items if item.name == packed_item.parent_detail_docname
+			)
+			for packed_item in so.packed_items
+		}
+		self.assertEqual(len(work_orders), 2)
+		for work_order_name in work_orders:
+			work_order = frappe.get_doc("Work Order", work_order_name)
+			self.assertEqual(
+				getdate(work_order.expected_delivery_date),
+				getdate(expected_delivery_dates[work_order.sales_order_item]),
+			)
+
 	def test_advance_payment_entry_unlink_against_sales_order(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
 
