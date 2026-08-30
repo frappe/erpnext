@@ -481,6 +481,9 @@ class PurchaseReceipt(BuyingController):
 		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import (
 			get_purchase_document_details,
 		)
+		from erpnext.stock.doctype.landed_cost_voucher.landed_cost_voucher import (
+			get_custom_dimension_overrides,
+		)
 
 		provisional_accounting_for_non_stock_items = cint(
 			frappe.db.get_value("Company", self.company, "enable_provisional_accounting_for_non_stock_items")
@@ -607,32 +610,38 @@ class PurchaseReceipt(BuyingController):
 
 		def make_landed_cost_gl_entries(item):
 			# Amount added through landed-cost-voucher
-			if item.landed_cost_voucher_amount and landed_cost_entries:
-				if (item.item_code, item.name) in landed_cost_entries:
-					for account, amount in landed_cost_entries[(item.item_code, item.name)].items():
-						account_currency = get_account_currency(account)
-						credit_amount = (
-							flt(amount["base_amount"])
-							if (amount["base_amount"] or account_currency != self.company_currency)
-							else flt(amount["amount"])
-						)
+			if not (item.landed_cost_voucher_amount and landed_cost_entries):
+				return
 
-						if not account:
-							validate_account("Landed Cost Account")
+			for entry in landed_cost_entries.get((item.item_code, item.name), []):
+				if not (entry.amount or entry.base_amount):
+					continue
 
-						self.add_gl_entry(
-							gl_entries=gl_entries,
-							account=account,
-							cost_center=item.cost_center,
-							debit=0.0,
-							credit=credit_amount,
-							remarks=remarks,
-							against_account=stock_asset_account_name,
-							credit_in_account_currency=flt(amount["amount"]),
-							account_currency=account_currency,
-							project=item.project,
-							item=item,
-						)
+				account = entry.expense_account
+				if not account:
+					validate_account("Landed Cost Account")
+
+				account_currency = get_account_currency(account)
+				credit_amount = (
+					flt(entry.base_amount)
+					if (entry.base_amount or account_currency != self.company_currency)
+					else flt(entry.amount)
+				)
+
+				self.add_gl_entry(
+					gl_entries=gl_entries,
+					account=account,
+					cost_center=entry.dimensions.cost_center or item.cost_center,
+					debit=0.0,
+					credit=credit_amount,
+					remarks=remarks,
+					against_account=stock_asset_account_name,
+					credit_in_account_currency=flt(entry.amount),
+					account_currency=account_currency,
+					project=entry.dimensions.project or item.project,
+					item=item,
+					dimensions=get_custom_dimension_overrides(entry),
+				)
 
 		def make_expenses_added_to_stock_entries(item):
 			if not self.book_stock_expense_enabled():

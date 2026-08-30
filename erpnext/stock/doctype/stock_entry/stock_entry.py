@@ -2498,6 +2498,10 @@ class StockEntry(StockController, SubcontractingInwardController):
 		return process_gl_map(gl_entries, from_repost=frappe.flags.through_repost_item_valuation)
 
 	def set_gl_entries_for_landed_cost_voucher(self, gl_entries, inventory_account_map):
+		from erpnext.stock.doctype.landed_cost_voucher.landed_cost_voucher import (
+			get_custom_dimension_overrides,
+		)
+
 		landed_cost_entries = self.get_item_account_wise_lcv_entries()
 		if not landed_cost_entries:
 			return
@@ -2506,52 +2510,53 @@ class StockEntry(StockController, SubcontractingInwardController):
 			if item.s_warehouse:
 				continue
 
-			if (item.item_code, item.name) in landed_cost_entries:
-				for account, amount in landed_cost_entries[(item.item_code, item.name)].items():
-					account_currency = get_account_currency(account)
-					credit_amount = (
-						flt(amount["base_amount"])
-						if (amount["base_amount"] or account_currency != self.company_currency)
-						else flt(amount["amount"])
-					)
+			for entry in landed_cost_entries.get((item.item_code, item.name), []):
+				if not (entry.amount or entry.base_amount):
+					continue
 
-					_inv_dict = self.get_inventory_account_dict(item, inventory_account_map, "t_warehouse")
-					gl_entries.append(
-						self.get_gl_dict(
-							{
-								"account": account,
-								"against": _inv_dict["account"],
-								"cost_center": item.cost_center,
-								"debit": 0.0,
-								"credit": credit_amount,
-								"remarks": _("Accounting Entry for LCV in Stock Entry {0}").format(self.name),
-								"credit_in_account_currency": flt(amount["amount"]),
-								"account_currency": account_currency,
-								"project": item.project,
-							},
-							item=item,
-						)
-					)
+				account_currency = get_account_currency(entry.expense_account)
+				credit_amount = (
+					flt(entry.base_amount)
+					if (entry.base_amount or account_currency != self.company_currency)
+					else flt(entry.amount)
+				)
 
-					account_currency = get_account_currency(item.expense_account)
+				_inv_dict = self.get_inventory_account_dict(item, inventory_account_map, "t_warehouse")
+				gl_dict = self.get_gl_dict(
+					{
+						"account": entry.expense_account,
+						"against": _inv_dict["account"],
+						"cost_center": entry.dimensions.cost_center or item.cost_center,
+						"debit": 0.0,
+						"credit": credit_amount,
+						"remarks": _("Accounting Entry for LCV in Stock Entry {0}").format(self.name),
+						"credit_in_account_currency": flt(entry.amount),
+						"account_currency": account_currency,
+						"project": entry.dimensions.project or item.project,
+					},
+					item=item,
+				)
+				gl_dict.update(get_custom_dimension_overrides(entry))
+				gl_entries.append(gl_dict)
 
-					# credit amount in negative to knock off the debit entry
-					gl_entries.append(
-						self.get_gl_dict(
-							{
-								"account": item.expense_account,
-								"against": _inv_dict["account"],
-								"cost_center": item.cost_center,
-								"debit": 0.0,
-								"credit": credit_amount * -1,
-								"remarks": _("Accounting Entry for LCV in Stock Entry {0}").format(self.name),
-								"debit_in_account_currency": flt(amount["amount"]),
-								"account_currency": account_currency,
-								"project": item.project,
-							},
-							item=item,
-						)
+				account_currency = get_account_currency(item.expense_account)
+
+				gl_entries.append(
+					self.get_gl_dict(
+						{
+							"account": item.expense_account,
+							"against": _inv_dict["account"],
+							"cost_center": item.cost_center,
+							"debit": 0.0,
+							"credit": credit_amount * -1,
+							"remarks": _("Accounting Entry for LCV in Stock Entry {0}").format(self.name),
+							"debit_in_account_currency": flt(entry.amount),
+							"account_currency": account_currency,
+							"project": item.project,
+						},
+						item=item,
 					)
+				)
 
 	def update_work_order(self):
 		def _validate_work_order(pro_doc):
