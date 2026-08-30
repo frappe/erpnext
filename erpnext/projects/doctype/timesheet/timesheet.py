@@ -302,8 +302,52 @@ class Timesheet(Document):
 
 
 @frappe.whitelist()
+<<<<<<< HEAD
 def get_projectwise_timesheet_data(project=None, parent=None, from_time=None, to_time=None):
 	condition = ""
+=======
+def get_projectwise_timesheet_data(
+	project: str | None = None,
+	parent: str | None = None,
+	from_time: str | None = None,
+	to_time: str | None = None,
+):
+	tsd = frappe.qb.DocType("Timesheet Detail")
+	ts = frappe.qb.DocType("Timesheet")
+
+	allowed_timesheets = frappe.get_list("Timesheet", pluck="name")
+	allowed_projects = frappe.get_list("Project", pluck="name")
+
+	if not allowed_timesheets:
+		return []
+
+	query = (
+		frappe.qb.from_(tsd)
+		.inner_join(ts)
+		.on(ts.name == tsd.parent)
+		.select(
+			tsd.name.as_("name"),
+			tsd.parent.as_("time_sheet"),
+			tsd.from_time.as_("from_time"),
+			tsd.to_time.as_("to_time"),
+			tsd.billing_hours.as_("billing_hours"),
+			tsd.billing_amount.as_("billing_amount"),
+			tsd.activity_type.as_("activity_type"),
+			tsd.description.as_("description"),
+			ts.currency.as_("currency"),
+			tsd.project_name.as_("project_name"),
+		)
+		.where(
+			(tsd.parenttype == "Timesheet")
+			& (tsd.docstatus == 1)
+			& (tsd.is_billable == 1)
+			& tsd.sales_invoice.isnull()
+			& (tsd.parent.isin(allowed_timesheets))
+			& ((tsd.project.isin(allowed_projects)) | (tsd.project.isnull()))
+		)
+	)
+
+>>>>>>> d5df409 (fix(timesheet): scoping whitelisted methods output to projects and timesheets that are acccessible to users (#58267))
 	if project:
 		condition += "AND tsd.project = %(project)s "
 	if parent:
@@ -341,7 +385,16 @@ def get_projectwise_timesheet_data(project=None, parent=None, from_time=None, to
 
 
 @frappe.whitelist()
+<<<<<<< HEAD
 def get_timesheet_detail_rate(timelog, currency):
+=======
+def get_timesheet_detail_rate(timelog: str, currency: str):
+	allowed_timesheets = frappe.get_list("Timesheet", pluck="name")
+
+	if not allowed_timesheets:
+		return 0.0
+
+>>>>>>> d5df409 (fix(timesheet): scoping whitelisted methods output to projects and timesheets that are acccessible to users (#58267))
 	ts = frappe.qb.DocType("Timesheet")
 	ts_detail = frappe.qb.DocType("Timesheet Detail")
 
@@ -349,10 +402,20 @@ def get_timesheet_detail_rate(timelog, currency):
 		frappe.qb.from_(ts_detail)
 		.inner_join(ts)
 		.on(ts.name == ts_detail.parent)
-		.select(ts_detail.billing_amount.as_("billing_amount"), ts.currency.as_("currency"))
-		.where(ts_detail.name == timelog)
+		.select(
+			ts_detail.billing_amount.as_("billing_amount"),
+			ts.currency.as_("currency"),
+			ts.name.as_("timesheet"),
+		)
+		.where((ts_detail.name == timelog) & ts_detail.parent.isin(allowed_timesheets))
+		.limit(1)
 		.run(as_dict=1)
-	)[0]
+	)
+
+	if not timelog_detail:
+		return 0.0
+
+	timelog_detail = timelog_detail[0]
 
 	if timelog_detail.currency:
 		exchange_rate = get_exchange_rate(timelog_detail.currency, currency)
@@ -367,7 +430,33 @@ def get_timesheet(doctype, txt, searchfield, start, page_len, filters):
 	if not filters:
 		filters = {}
 
+<<<<<<< HEAD
 	condition = ""
+=======
+	allowed_timesheets = frappe.get_list("Timesheet", pluck="name")
+
+	if not allowed_timesheets:
+		return []
+
+	tsd = frappe.qb.DocType("Timesheet Detail")
+	ts = frappe.qb.DocType("Timesheet")
+
+	query = (
+		frappe.qb.from_(tsd)
+		.inner_join(ts)
+		.on(tsd.parent == ts.name)
+		.select(tsd.parent)
+		.distinct()
+		.where(
+			ts.status.isin(["Submitted", "Payslip"])
+			& (tsd.docstatus == 1)
+			& (ts.total_billable_amount > 0)
+			& tsd.parent.like(f"%{txt}%")
+			& tsd.parent.isin(allowed_timesheets)
+		)
+	)
+
+>>>>>>> d5df409 (fix(timesheet): scoping whitelisted methods output to projects and timesheets that are acccessible to users (#58267))
 	if filters.get("project"):
 		condition = "and tsd.project = %(project)s"
 
@@ -388,12 +477,16 @@ def get_timesheet(doctype, txt, searchfield, start, page_len, filters):
 
 
 @frappe.whitelist()
+<<<<<<< HEAD
 def get_timesheet_data(name, project):
+=======
+def get_timesheet_data(name: str, project: str | None = None):
+>>>>>>> d5df409 (fix(timesheet): scoping whitelisted methods output to projects and timesheets that are acccessible to users (#58267))
 	data = None
-	if project and project != "":
+	if project:
 		data = get_projectwise_timesheet_data(project, name)
 	else:
-		data = frappe.get_all(
+		data = frappe.get_list(
 			"Timesheet",
 			fields=[
 				{"SUB": ["total_billable_amount", "total_billed_amount"], "as": "billing_amt"},
