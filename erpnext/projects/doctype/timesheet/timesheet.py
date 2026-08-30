@@ -7,6 +7,7 @@ import json
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.query_builder.functions import Date
 from frappe.utils import add_to_date, flt, get_datetime, getdate, time_diff_in_hours, time_diff_in_seconds
 
 from erpnext.controllers.queries import get_match_cond
@@ -321,16 +322,7 @@ class Timesheet(Document):
 
 
 @frappe.whitelist()
-<<<<<<< HEAD
 def get_projectwise_timesheet_data(project=None, parent=None, from_time=None, to_time=None):
-	condition = ""
-=======
-def get_projectwise_timesheet_data(
-	project: str | None = None,
-	parent: str | None = None,
-	from_time: str | None = None,
-	to_time: str | None = None,
-):
 	tsd = frappe.qb.DocType("Timesheet Detail")
 	ts = frappe.qb.DocType("Timesheet")
 
@@ -362,58 +354,31 @@ def get_projectwise_timesheet_data(
 			& (tsd.is_billable == 1)
 			& tsd.sales_invoice.isnull()
 			& (tsd.parent.isin(allowed_timesheets))
-			& ((tsd.project.isin(allowed_projects)) | (tsd.project.isnull()))
 		)
 	)
 
->>>>>>> d5df409 (fix(timesheet): scoping whitelisted methods output to projects and timesheets that are acccessible to users (#58267))
+	if allowed_projects:
+		query = query.where((tsd.project.isin(allowed_projects)) | (tsd.project.isnull()))
+	else:
+		query = query.where(tsd.project.isnull())
+
 	if project:
-		condition += "AND tsd.project = %(project)s "
+		query = query.where(tsd.project == project)
 	if parent:
-		condition += "AND tsd.parent = %(parent)s "
+		query = query.where(tsd.parent == parent)
 	if from_time and to_time:
-		condition += "AND CAST(tsd.from_time as DATE) BETWEEN %(from_time)s AND %(to_time)s"
+		query = query.where(Date(tsd.from_time).between(from_time, to_time))
 
-	query = f"""
-		SELECT
-			tsd.name as name,
-			tsd.parent as time_sheet,
-			tsd.from_time as from_time,
-			tsd.to_time as to_time,
-			tsd.billing_hours as billing_hours,
-			tsd.billing_amount as billing_amount,
-			tsd.activity_type as activity_type,
-			tsd.description as description,
-			ts.currency as currency,
-			tsd.project_name as project_name
-		FROM `tabTimesheet Detail` tsd
-			INNER JOIN `tabTimesheet` ts
-			ON ts.name = tsd.parent
-		WHERE
-			tsd.parenttype = 'Timesheet'
-			AND tsd.docstatus = 1
-			AND tsd.is_billable = 1
-			AND tsd.sales_invoice is NULL
-			{condition}
-		ORDER BY tsd.from_time ASC
-	"""
-
-	filters = {"project": project, "parent": parent, "from_time": from_time, "to_time": to_time}
-
-	return frappe.db.sql(query, filters, as_dict=1)
+	return query.orderby(tsd.from_time).run(as_dict=1)
 
 
 @frappe.whitelist()
-<<<<<<< HEAD
 def get_timesheet_detail_rate(timelog, currency):
-=======
-def get_timesheet_detail_rate(timelog: str, currency: str):
 	allowed_timesheets = frappe.get_list("Timesheet", pluck="name")
 
 	if not allowed_timesheets:
 		return 0.0
 
->>>>>>> d5df409 (fix(timesheet): scoping whitelisted methods output to projects and timesheets that are acccessible to users (#58267))
 	ts = frappe.qb.DocType("Timesheet")
 	ts_detail = frappe.qb.DocType("Timesheet Detail")
 
@@ -449,9 +414,6 @@ def get_timesheet(doctype, txt, searchfield, start, page_len, filters):
 	if not filters:
 		filters = {}
 
-<<<<<<< HEAD
-	condition = ""
-=======
 	allowed_timesheets = frappe.get_list("Timesheet", pluck="name")
 
 	if not allowed_timesheets:
@@ -475,32 +437,14 @@ def get_timesheet(doctype, txt, searchfield, start, page_len, filters):
 		)
 	)
 
->>>>>>> d5df409 (fix(timesheet): scoping whitelisted methods output to projects and timesheets that are acccessible to users (#58267))
 	if filters.get("project"):
-		condition = "and tsd.project = %(project)s"
+		query = query.where(tsd.project == filters.get("project"))
 
-	return frappe.db.sql(
-		f"""select distinct tsd.parent from `tabTimesheet Detail` tsd,
-			`tabTimesheet` ts where
-			ts.status in ('Submitted', 'Payslip') and tsd.parent = ts.name and
-			tsd.docstatus = 1 and ts.total_billable_amount > 0
-			and tsd.parent LIKE %(txt)s {condition}
-			order by tsd.parent limit %(page_len)s offset %(start)s""",
-		{
-			"txt": "%" + txt + "%",
-			"start": start,
-			"page_len": page_len,
-			"project": filters.get("project"),
-		},
-	)
+	return query.orderby(tsd.parent).limit(page_len).offset(start).run()
 
 
 @frappe.whitelist()
-<<<<<<< HEAD
-def get_timesheet_data(name, project):
-=======
-def get_timesheet_data(name: str, project: str | None = None):
->>>>>>> d5df409 (fix(timesheet): scoping whitelisted methods output to projects and timesheets that are acccessible to users (#58267))
+def get_timesheet_data(name, project=None):
 	data = None
 	if project:
 		data = get_projectwise_timesheet_data(project, name)
