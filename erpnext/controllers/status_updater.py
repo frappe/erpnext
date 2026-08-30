@@ -40,6 +40,15 @@ status_map = {
 		["Ordered", "is_fully_ordered"],
 		["Cancelled", "eval:self.docstatus==2"],
 	],
+	"Supplier Quotation": [
+		["Draft", None],
+		["Submitted", "eval:self.docstatus==1"],
+		["Stopped", "eval:self.status=='Stopped'"],
+		["Expired", "eval:self.status=='Expired'"],
+		["Partially Ordered", "is_partially_ordered"],
+		["Ordered", "is_fully_ordered"],
+		["Cancelled", "eval:self.docstatus==2"],
+	],
 	"Sales Order": [
 		["Draft", None],
 		[

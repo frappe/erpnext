@@ -402,6 +402,12 @@ class PurchaseOrder(BuyingController):
 	def update_status(self, status):
 		StatusService(self).update_status(status)
 
+	def update_prevdoc_status(self):
+		super().update_prevdoc_status()
+
+		for supplier_quotation in {item.supplier_quotation for item in self.items if item.supplier_quotation}:
+			frappe.get_doc("Supplier Quotation", supplier_quotation).set_status(update=True)
+
 	def on_submit(self):
 		super().on_submit()
 
