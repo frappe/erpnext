@@ -86,7 +86,9 @@ class SupplierQuotation(BuyingController):
 		shipping_address: DF.Link | None
 		shipping_address_display: DF.TextEditor | None
 		shipping_rule: DF.Link | None
-		status: DF.Literal["", "Draft", "Submitted", "Stopped", "Cancelled", "Expired"]
+		status: DF.Literal[
+			"", "Draft", "Submitted", "Partially Ordered", "Ordered", "Stopped", "Cancelled", "Expired"
+		]
 		supplier: DF.Link
 		supplier_address: DF.Link | None
 		supplier_name: DF.Data | None
@@ -118,7 +120,10 @@ class SupplierQuotation(BuyingController):
 
 		from erpnext.controllers.status_updater import validate_status
 
-		validate_status(self.status, ["Draft", "Submitted", "Stopped", "Cancelled"])
+		validate_status(
+			self.status,
+			["Draft", "Submitted", "Partially Ordered", "Ordered", "Stopped", "Cancelled", "Expired"],
+		)
 
 		validate_for_items(self)
 		self.validate_with_previous_doc()
@@ -248,7 +253,7 @@ def set_expired_status():
 		"Supplier Quotation",
 		{
 			"docstatus": 1,
-			"status": ["not in", ["Cancelled", "Stopped"]],
+			"status": ["not in", ["Cancelled", "Stopped", "Partially Ordered", "Ordered"]],
 			"valid_till": ["<", nowdate()],
 		},
 		"status",
@@ -261,7 +266,11 @@ def get_purchased_items(supplier_quotation: str):
 	return frappe._dict(
 		frappe.get_all(
 			"Purchase Order Item",
-			filters={"supplier_quotation": supplier_quotation, "docstatus": 1},
+			filters={
+				"supplier_quotation": supplier_quotation,
+				"supplier_quotation_item": ["is", "set"],
+				"docstatus": 1,
+			},
 			fields=["supplier_quotation_item", {"SUM": "stock_qty"}],
 			group_by="supplier_quotation_item",
 			as_list=1,

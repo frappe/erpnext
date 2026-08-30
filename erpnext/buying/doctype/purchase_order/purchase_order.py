@@ -408,6 +408,10 @@ class PurchaseOrder(BuyingController):
 	def is_item_closable(self, item):
 		return flt(item.received_qty) < flt(item.qty) or super().is_item_closable(item)
 
+	def update_prevdoc_status(self):
+		super().update_prevdoc_status()
+		StatusService(self).update_supplier_quotation_status()
+
 	def on_submit(self):
 		super().on_submit()
 
