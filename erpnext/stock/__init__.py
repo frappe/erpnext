@@ -39,6 +39,15 @@ def get_warehouse_account_map(company=None):
 		warehouse_names = {d.name for d in warehouses}
 		walked_warehouses = set()
 
+		# the fallback is company wide and cannot change while this map is built
+		company_inventory_accounts = frappe._dict()
+		for account in frappe.get_all(
+			"Account",
+			fields=["name", "company"],
+			filters={"account_type": "Stock", "is_group": 0, **filters},
+		):
+			company_inventory_accounts.setdefault(account.company, []).append(account.name)
+
 		for d in warehouses:
 			if (
 				d.parent_warehouse in warehouse_names
@@ -55,7 +64,12 @@ def get_warehouse_account_map(company=None):
 				return get_warehouse_account_map(company)
 
 			if not d.account:
-				d.account = get_warehouse_account(d, warehouse_account, raise_error=False)
+				d.account = get_warehouse_account(
+					d,
+					warehouse_account,
+					raise_error=False,
+					inventory_accounts=company_inventory_accounts.get(d.company, []),
+				)
 
 			walked_warehouses.add(d.name)
 
@@ -73,7 +87,7 @@ def get_warehouse_account_map(company=None):
 	return frappe.flags.warehouse_account_map
 
 
-def get_warehouse_account(warehouse, warehouse_account=None, *, raise_error=True):
+def get_warehouse_account(warehouse, warehouse_account=None, *, raise_error=True, inventory_accounts=None):
 	account = warehouse.account
 	if not account and warehouse.parent_warehouse:
 		if warehouse_account:
@@ -99,7 +113,12 @@ def get_warehouse_account(warehouse, warehouse_account=None, *, raise_error=True
 		account = get_company_default_inventory_account(warehouse.company)
 
 	if not account and warehouse.company:
-		inventory_accounts = get_company_stock_accounts(warehouse.company)
+		if inventory_accounts is None:
+			inventory_accounts = frappe.get_all(
+				"Account",
+				{"account_type": "Stock", "is_group": 0, "company": warehouse.company},
+				pluck="name",
+			)
 
 		if len(inventory_accounts) == 1:
 			account = inventory_accounts[0]
@@ -115,10 +134,3 @@ def get_warehouse_account(warehouse, warehouse_account=None, *, raise_error=True
 
 def get_company_default_inventory_account(company):
 	return frappe.get_cached_value("Company", company, "default_inventory_account")
-
-
-@frappe.request_cache
-def get_company_stock_accounts(company):
-	return frappe.get_all(
-		"Account", {"account_type": "Stock", "is_group": 0, "company": company}, pluck="name"
-	)
