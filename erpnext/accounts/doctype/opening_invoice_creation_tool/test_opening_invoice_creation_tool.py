@@ -5,14 +5,11 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, today
 
-<<<<<<< HEAD
+from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.accounts.doctype.accounting_dimension.test_accounting_dimension import (
 	create_dimension,
 	disable_dimension,
 )
-=======
-from erpnext.accounts.doctype.account.test_account import create_account
->>>>>>> e08a166 (fix(taxes): skip tax addition for invoice created from opening invoice tool)
 from erpnext.accounts.doctype.opening_invoice_creation_tool.opening_invoice_creation_tool import (
 	get_temporary_opening_account,
 )
