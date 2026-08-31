@@ -32,8 +32,7 @@ class ChildItemUpdater:
 		self.child_docname = child_docname
 		self.parent = frappe.get_doc(parent_doctype, parent_doctype_name)
 		self.allow_zero_qty = get_allow_zero_qty(parent_doctype)
-		self._ordered_items: dict | None = None
-		self._purchased_items: dict | None = None
+		self._transacted_stock_qty: dict | None = None
 
 	def update(self, trans_items: str | list) -> None:
 		"""Process item additions, edits, and deletions from trans_items JSON."""
@@ -48,11 +47,22 @@ class ChildItemUpdater:
 		self._check_permissions("write")
 
 		if self.parent_doctype == "Quotation":
-			self._ordered_items = get_ordered_items(self.parent.name)
-			items_added_or_removed |= validate_and_delete_children(self.parent, data, self._ordered_items)
+			self._transacted_stock_qty = get_ordered_items(self.parent.name)
+			items_added_or_removed |= validate_and_delete_children(
+				self.parent, data, self._transacted_stock_qty
+			)
 		elif self.parent_doctype == "Supplier Quotation":
-			self._purchased_items = get_purchased_items(self.parent.name)
-			items_added_or_removed |= validate_and_delete_children(self.parent, data, self._purchased_items)
+			purchased_items = get_purchased_items(self.parent.name)
+			self._transacted_stock_qty = frappe._dict(
+				{
+					item.name: flt(purchased_items.get(item.name)) * (flt(item.get("conversion_factor")) or 1)
+					for item in self.parent.items
+					if purchased_items.get(item.name)
+				}
+			)
+			items_added_or_removed |= validate_and_delete_children(
+				self.parent, data, self._transacted_stock_qty
+			)
 		else:
 			items_added_or_removed |= validate_and_delete_children(self.parent, data)
 
@@ -71,6 +81,7 @@ class ChildItemUpdater:
 			else:
 				self._check_permissions("write")
 				child_item = frappe.get_doc(self.parent_doctype + " Item", d.get("docname"))
+				d["conversion_factor"] = self._get_new_conversion_factor(child_item, d)
 
 				change_state = get_child_item_change_state(self.parent_doctype, child_item, d)
 				rate_unchanged = change_state.rate_unchanged
@@ -251,6 +262,22 @@ class ChildItemUpdater:
 			item_row,
 		)
 
+	def _get_new_conversion_factor(self, child_item, new_data: dict) -> float:
+		current_factor = flt(child_item.get("conversion_factor")) or 1
+		uom = new_data.get("uom") or child_item.get("uom")
+
+		if uom == child_item.get("stock_uom"):
+			return 1
+
+		requested_factor = flt(new_data.get("conversion_factor"))
+		if requested_factor:
+			return requested_factor
+
+		if uom == child_item.get("uom"):
+			return current_factor
+
+		return flt(get_conversion_factor(child_item.item_code, uom).get("conversion_factor")) or 1
+
 	def _validate_quantity_and_rate(self, child_item, new_data: dict, rate_unchanged: bool | None) -> None:
 		if not flt(new_data.get("qty")) and not self.allow_zero_qty:
 			frappe.throw(
@@ -264,24 +291,24 @@ class ChildItemUpdater:
 			"Sales Order": ("delivered_qty", _("Cannot set quantity less than delivered quantity.")),
 			"Purchase Order": ("received_qty", _("Cannot set quantity less than received quantity.")),
 		}
+		old_conversion_factor = flt(child_item.get("conversion_factor")) or 1
+		new_conversion_factor = flt(new_data.get("conversion_factor")) or old_conversion_factor
+		new_stock_qty = flt(new_data.get("qty")) * new_conversion_factor
 
 		if self.parent_doctype in qty_limits:
 			qty_field, error_message = qty_limits[self.parent_doctype]
-			if flt(new_data.get("qty")) < flt(child_item.get(qty_field)):
+			old_stock_qty = flt(child_item.get(qty_field)) * old_conversion_factor
+			if new_stock_qty < old_stock_qty:
 				frappe.throw(
 					_("Row #{0}:").format(new_data.get("idx")) + error_message,
 					title=_("Invalid Qty"),
 				)
 
-		if self.parent_doctype not in ("Quotation", "Supplier Quotation"):
+		if not self._transacted_stock_qty:
 			return
 
-		items_map = self._ordered_items if self.parent_doctype == "Quotation" else self._purchased_items
-		if not items_map:
-			return
-
-		qty_to_check = items_map.get(child_item.name)
-		if not qty_to_check:
+		old_stock_qty = self._transacted_stock_qty.get(child_item.name)
+		if not old_stock_qty:
 			return
 
 		if not rate_unchanged:
@@ -291,7 +318,7 @@ class ChildItemUpdater:
 				).format(frappe.bold(new_data.get("item_code")))
 			)
 
-		if flt(new_data.get("qty")) < qty_to_check:
+		if new_stock_qty < old_stock_qty:
 			frappe.throw(_("Cannot reduce quantity than ordered or purchased quantity"))
 
 	def _validate_fg_item_for_subcontracting(self, new_data: dict, is_new: bool) -> None:
@@ -581,22 +608,18 @@ def update_child_item_rate_and_discount(
 
 
 def update_child_item_uom_and_weight(child_item, new_data) -> None:
-	conv_fac_precision = child_item.precision("conversion_factor") or 2
-
 	if new_data.get("conversion_factor"):
 		if child_item.stock_uom == child_item.uom:
 			child_item.conversion_factor = 1
 		else:
-			child_item.conversion_factor = flt(new_data.get("conversion_factor"), conv_fac_precision)
+			child_item.conversion_factor = flt(new_data.get("conversion_factor"))
 
 	if new_data.get("uom"):
 		child_item.uom = new_data.get("uom")
 		conversion_factor = flt(
 			get_conversion_factor(child_item.item_code, child_item.uom).get("conversion_factor")
 		)
-		child_item.conversion_factor = (
-			flt(new_data.get("conversion_factor"), conv_fac_precision) or conversion_factor
-		)
+		child_item.conversion_factor = flt(new_data.get("conversion_factor")) or conversion_factor
 
 	if child_item.get("weight_per_unit"):
 		child_item.total_weight = flt(
