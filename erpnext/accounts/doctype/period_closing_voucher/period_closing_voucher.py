@@ -283,6 +283,8 @@ class PeriodClosingVoucher(AccountsController):
 				"erpnext.accounts.doctype.period_closing_voucher.period_closing_voucher.mapper",
 				"erpnext.accounts.doctype.period_closing_voucher.period_closing_voucher.reducer",
 				data,
+				self.doctype,
+				self.name,
 			)
 
 	def on_cancel(self):
@@ -292,9 +294,16 @@ class PeriodClosingVoucher(AccountsController):
 			"Payment Ledger Entry",
 			"Account Closing Balance",
 			"Process Period Closing Voucher",
+			"MapReduce Job",
 		)
+
 		self.block_if_future_closing_voucher_exists()
 		self.validate_accounts_not_frozen(for_cancellation=True)
+
+		# TODO: add branching clause based on accounts settings
+		from frappe.utils.background_jobs import cancel_mapreduce_job
+
+		cancel_mapreduce_job(self.doctype, self.name)
 
 		if not frappe.get_single_value("Accounts Settings", "use_legacy_controller_for_pcv"):
 			self.cancel_process_pcv_docs()
@@ -309,6 +318,11 @@ class PeriodClosingVoucher(AccountsController):
 
 	def on_trash(self):
 		super().on_trash()
+		# TODO: add branching clause based on accounts settings
+		from frappe.utils.background_jobs import remove_mapreduce_job
+
+		remove_mapreduce_job(self.doctype, self.name)
+
 		ppcvs = frappe.db.get_all(
 			"Process Period Closing Voucher", {"parent_pcv": self.name, "docstatus": ["in", [1, 2]]}
 		)
