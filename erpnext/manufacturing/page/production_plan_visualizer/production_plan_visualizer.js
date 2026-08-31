@@ -176,10 +176,21 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 			(subs_by_signature[key] = subs_by_signature[key] || []).push(sub);
 		}
 
+		const row_by_name = {};
+		for (const fg of this.data.finished_goods) row_by_name[fg.row_name] = fg;
+		for (const sub of this.data.sub_assemblies) row_by_name[sub.row_name] = sub;
+
 		const fg_label = {};
 		for (const fg of this.data.finished_goods) fg_label[fg.row_name] = fg.item_name || fg.item_code;
 
-		this.index = { subs_by_parent, owners_of_row, bom_consumers, subs_by_signature, fg_label };
+		this.index = {
+			subs_by_parent,
+			owners_of_row,
+			bom_consumers,
+			subs_by_signature,
+			row_by_name,
+			fg_label,
+		};
 		for (const material of this.data.materials || []) {
 			material.owners = this.material_owners(material);
 		}
@@ -248,7 +259,15 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 		const rows = (this.index.subs_by_signature[key] || []).map((d) => d.row_name);
 		if (material.consumer) rows.push(material.consumer);
 		rows.push(...(this.index.bom_consumers[material.item_code] || []));
-		return this.owners_of(rows);
+		return this.owners_of(this.same_sales_order(material, rows));
+	}
+
+	same_sales_order(material, row_names) {
+		if (!material.sales_order || row_names.length < 2) return row_names;
+		const scoped = row_names.filter(
+			(row_name) => (this.index.row_by_name[row_name] || {}).sales_order === material.sales_order
+		);
+		return scoped.length ? scoped : row_names;
 	}
 
 	owners_of(row_names) {

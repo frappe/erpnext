@@ -101,6 +101,7 @@ def build_material(row, raised, stock, warehouses):
 		"ordered_qty": sum(flt(entry.ordered_qty) for entry in raised),
 		"received_qty": sum(flt(entry.received_qty) for entry in raised),
 		"schedule_date": row.schedule_date,
+		"sales_order": row.get("sales_order"),
 		"consumer": row.get("sub_assembly_item_reference"),
 		"main_item_code": row.get("main_item_code"),
 		"from_bom": row.get("from_bom"),
