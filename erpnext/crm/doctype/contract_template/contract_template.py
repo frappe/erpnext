@@ -39,6 +39,7 @@ def get_contract_template(template_name, doc):
 		doc = json.loads(doc)
 
 	contract_template = frappe.get_doc("Contract Template", template_name)
+	contract_template.check_permission()
 	contract_terms = None
 
 	if contract_template.contract_terms:
