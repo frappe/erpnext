@@ -29,6 +29,9 @@ from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.tests.utils import ERPNextTestSuite
 
 PAYMENT_URL = "https://example.com/payment"
+SEND_EMAIL_MOCK = MagicMock(return_value=None)
+GET_PAYMENT_URL_MOCK = MagicMock(return_value=PAYMENT_URL)
+GET_PAYMENT_GATEWAY_CONTROLLER_MOCK = MagicMock()
 
 payment_gateways = [
 	{"doctype": "Payment Gateway", "gateway": "_Test Gateway"},
@@ -71,6 +74,18 @@ payment_method = [
 ]
 
 
+@patch(
+	"erpnext.accounts.doctype.payment_request.payment_request.PaymentRequest.send_email",
+	new=SEND_EMAIL_MOCK,
+)
+@patch(
+	"erpnext.accounts.doctype.payment_request.payment_request.PaymentRequest.get_payment_url",
+	new=GET_PAYMENT_URL_MOCK,
+)
+@patch(
+	"erpnext.accounts.doctype.payment_request.payment_request._get_payment_gateway_controller",
+	new=GET_PAYMENT_GATEWAY_CONTROLLER_MOCK,
+)
 class TestPaymentRequest(ERPNextTestSuite):
 	def setUp(self):
 		for payment_gateway in payment_gateways:
@@ -89,24 +104,11 @@ class TestPaymentRequest(ERPNextTestSuite):
 			):
 				frappe.get_doc(method).insert(ignore_permissions=True)
 
-		send_email = patch(
-			"erpnext.accounts.doctype.payment_request.payment_request.PaymentRequest.send_email",
-			return_value=None,
-		)
-		self.send_email = send_email.start()
-		self.addCleanup(send_email.stop)
-		get_payment_url = patch(
-			# this also shadows one (1) call to _get_payment_gateway_controller
-			"erpnext.accounts.doctype.payment_request.payment_request.PaymentRequest.get_payment_url",
-			return_value=PAYMENT_URL,
-		)
-		self.get_payment_url = get_payment_url.start()
-		self.addCleanup(get_payment_url.stop)
-		_get_payment_gateway_controller = patch(
-			"erpnext.accounts.doctype.payment_request.payment_request._get_payment_gateway_controller",
-		)
-		self._get_payment_gateway_controller = _get_payment_gateway_controller.start()
-		self.addCleanup(_get_payment_gateway_controller.stop)
+		for mock in (SEND_EMAIL_MOCK, GET_PAYMENT_URL_MOCK, GET_PAYMENT_GATEWAY_CONTROLLER_MOCK):
+			mock.reset_mock()
+		self.send_email = SEND_EMAIL_MOCK
+		self.get_payment_url = GET_PAYMENT_URL_MOCK
+		self._get_payment_gateway_controller = GET_PAYMENT_GATEWAY_CONTROLLER_MOCK
 
 	def test_payment_request_linkings(self):
 		so_inr = make_sales_order(currency="INR", do_not_save=True)

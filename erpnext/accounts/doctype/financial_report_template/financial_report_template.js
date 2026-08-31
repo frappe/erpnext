@@ -163,7 +163,7 @@ function show_accounts_tree(template_rows, has_selection) {
 				fieldname: "company",
 				fieldtype: "Link",
 				options: "Company",
-				label: "Company",
+				label: __("Company"),
 				reqd: 1,
 				default: frappe.defaults.get_user_default("Company"),
 				onchange: () => {
@@ -176,7 +176,7 @@ function show_accounts_tree(template_rows, has_selection) {
 				fieldname: "view_type",
 				fieldtype: "Select",
 				options: ["Missing Accounts", "Filtered Accounts"],
-				label: "View",
+				label: __("View"),
 				default: has_selection ? "Filtered Accounts" : "Missing Accounts",
 				reqd: 1,
 				onchange: () => {
@@ -192,10 +192,10 @@ function show_accounts_tree(template_rows, has_selection) {
 			{
 				fieldname: "tip",
 				fieldtype: "HTML",
-				label: "Tip",
+				label: __("Tip"),
 				options: `
 					<div class="alert alert-success" role="alert">
-							Tip: Select report lines to view their accounts
+							${__("Tip: Select report lines to view their accounts")}
 					</div>
 				`,
 				depends_on: has_selection ? "eval: false" : "eval: true",
@@ -203,7 +203,7 @@ function show_accounts_tree(template_rows, has_selection) {
 			{
 				fieldname: "tree_area",
 				fieldtype: "HTML",
-				label: "Chart of Accounts",
+				label: __("Chart of Accounts"),
 				read_only: 1,
 				depends_on: "eval: doc.company",
 			},
@@ -288,14 +288,14 @@ function update_formula_label(frm, data_source) {
 	if (!field) return;
 
 	const labels = {
-		"Account Data": "Account Filter",
-		"Custom API": "API Method Path",
+		"Account Data": __("Account Filter"),
+		"Custom API": __("API Method Path"),
 	};
 
 	grid.update_docfield_property(
 		"calculation_formula",
 		"label",
-		labels[data_source] || "Calculation Formula"
+		labels[data_source] || __("Calculation Formula")
 	);
 }
 

@@ -568,7 +568,6 @@ class TestPlanAdapter(ERPNextTestSuite):
 			frappe.get_doc(
 				{"doctype": "Item Lead Time", "item_code": "Test PPS RM", "purchase_time": 2}
 			).insert()
-		self.addCleanup(frappe.delete_doc, "Item Lead Time", "Test PPS RM", force=True)
 
 		plan = self.make_plan()
 		start_date = get_datetime("2026-11-02 09:00:00")
@@ -636,7 +635,6 @@ class TestPlanAdapter(ERPNextTestSuite):
 				],
 			}
 		).insert()
-		self.addCleanup(frappe.delete_doc, "Item Lead Time", item_code, force=True)
 
 	@change_settings("Manufacturing Settings", {"mins_between_operations": 10, "allow_overtime": 0})
 	def test_schedule_uses_supplier_wise_lead_time(self):

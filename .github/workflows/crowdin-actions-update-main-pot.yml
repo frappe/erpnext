@@ -40,7 +40,7 @@ jobs:
           upload_translations: false
           download_translations: false
           create_pull_request: false
-          crowdin_branch_name: ${{ github.ref_name }}
+          crowdin_branch_name: "[frappe.erpnext] ${{ github.ref_name }}"
           upload_sources_args: "--cache"
         env:
           CROWDIN_PROJECT_ID: ${{ secrets.CROWDIN_PROJECT_ID }}

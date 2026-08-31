@@ -15,6 +15,7 @@ from erpnext.buying.doctype.request_for_quotation.test_request_for_quotation imp
 from erpnext.buying.doctype.supplier_quotation.mapper import make_purchase_order
 from erpnext.buying.doctype.supplier_quotation.supplier_quotation import set_expired_status
 from erpnext.controllers.accounts_controller import InvalidQtyError, update_child_qty_rate
+from erpnext.tests.assertions import assert_raises_with_savepoint
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -161,12 +162,9 @@ class TestPurchaseOrder(ERPNextTestSuite):
 			]
 		)
 
-		frappe.db.savepoint("before_cancel")
 		# check if item having purchase order can be removed
-		self.assertRaises(
-			frappe.LinkExistsError, update_child_qty_rate, "Supplier Quotation", trans_item, sq.name
-		)
-		frappe.db.rollback(save_point="before_cancel")
+		with assert_raises_with_savepoint(self, frappe.LinkExistsError):
+			update_child_qty_rate("Supplier Quotation", trans_item, sq.name)
 
 		trans_item = json.dumps(
 			[

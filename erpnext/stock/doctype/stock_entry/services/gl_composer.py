@@ -102,11 +102,7 @@ class StockEntryGLComposer(BaseStockGLComposer):
 		if not item.t_warehouse or item.s_warehouse:
 			return 0.0
 
-		if (
-			item.get("is_finished_item")
-			or item.get("secondary_item_type")
-			or item.get("is_legacy_scrap_item")
-		):
+		if item.get("is_finished_item") or item.get("secondary_item_type") or item.get("valuation_type"):
 			return 0.0
 
 		if get_valuation_method(item.item_code, self.doc.company) != "Standard Cost":

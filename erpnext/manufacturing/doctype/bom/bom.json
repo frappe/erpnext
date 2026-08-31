@@ -402,7 +402,7 @@
   {
    "fetch_from": "item.description",
    "fieldname": "description",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Item Description",
    "read_only": 1
   },
@@ -771,7 +771,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-21 23:11:39.133941",
+ "modified": "2026-08-23 15:20:11.032436",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",

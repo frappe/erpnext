@@ -37,7 +37,7 @@ class TestDeliveryTrip(ERPNextTestSuite):
 				"password": "test",
 				"smtp_server": "localhost",
 				"stmp_port": 25,
-				"email_id": "test@example.in",
+				"email_id": f"delivery-trip-{frappe.generate_hash(length=10)}@example.in",
 			}
 		)
 		outgoing.save()

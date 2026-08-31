@@ -2626,7 +2626,11 @@ def get_payment_entry(
 	reference_date: str | date | None = None,
 	created_from_payment_request: bool | None = None,
 ):
+	frappe.has_permission("Payment Entry", ptype="create", throw=True)
+
 	doc = frappe.get_doc(dt, dn)
+	doc.check_permission()
+
 	over_billing_allowance = frappe.get_single_value("Accounts Settings", "over_billing_allowance")
 	if dt in ("Sales Order", "Purchase Order") and flt(doc.per_billed, 2) >= (100.0 + over_billing_allowance):
 		frappe.throw(_("Can only make payment against unbilled {0}").format(_(dt)))

@@ -2389,9 +2389,7 @@ class TestProductionPlan(ERPNextTestSuite):
 			_quantity_in_purchase_uom,
 		)
 
-		original_precision = frappe.db.get_default("float_precision")
 		frappe.db.set_default("float_precision", "3")
-		self.addCleanup(frappe.db.set_default, "float_precision", original_precision)
 
 		self.assertEqual(_quantity_in_purchase_uom(50000, 453.592292197, 50000), 110.232)
 		self.assertEqual(_quantity_in_purchase_uom(2000, 0.453592, 2000), 4409.249)
@@ -2399,9 +2397,7 @@ class TestProductionPlan(ERPNextTestSuite):
 		self.assertEqual(_quantity_in_purchase_uom(50000, 453.592292197), 110.231)
 
 	def test_min_order_qty_grid_ceiling_in_plan_items(self):
-		original_precision = frappe.db.get_default("float_precision")
 		frappe.db.set_default("float_precision", "3")
-		self.addCleanup(frappe.db.set_default, "float_precision", original_precision)
 
 		conversion_factor = 453.592292197
 		fg_item = make_item(properties={"is_stock_item": 1}).name
@@ -2422,9 +2418,7 @@ class TestProductionPlan(ERPNextTestSuite):
 	def test_min_order_qty_grid_ceiling_from_other_locations(self):
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
-		original_precision = frappe.db.get_default("float_precision")
 		frappe.db.set_default("float_precision", "3")
-		self.addCleanup(frappe.db.set_default, "float_precision", original_precision)
 
 		conversion_factor = 453.592292197
 		fg_item = make_item(properties={"is_stock_item": 1}).name
@@ -3637,6 +3631,7 @@ def make_bom(**args):
 					"stock_uom": item_doc.stock_uom,
 					"qty": args.scrap_qty or 1,
 					"cost_allocation_per": args.scrap_cost_allocation_per or 10,
+					"valuation_type": "% of FG Cost",
 					"process_loss_per": args.scrap_process_loss_per or 10,
 				},
 			)

@@ -57,7 +57,7 @@ frappe.ui.form.on("Warehouse", {
 				);
 			}
 
-			if ("Stock Balance" in frappe.boot.user.all_reports) {
+			if ("Stock Balance" in frappe.boot.allowed_reports) {
 				frm.add_custom_button(
 					__("Stock Balance"),
 					function () {
@@ -76,7 +76,7 @@ frappe.ui.form.on("Warehouse", {
 		if (
 			!frm.doc.is_group &&
 			frm.doc.__onload?.account &&
-			"General Ledger" in frappe.boot.user.all_reports
+			"General Ledger" in frappe.boot.allowed_reports
 		) {
 			frm.add_custom_button(
 				__("General Ledger", null, "Warehouse"),

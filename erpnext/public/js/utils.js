@@ -1090,7 +1090,7 @@ erpnext.utils.map_current_doc = function (opts) {
 
 					if (already_set) {
 						frappe.msgprint(
-							__("You have already selected items from {0} {1}", [opts.source_doctype, src])
+							__("You have already selected items from {0} {1}", [__(opts.source_doctype), src])
 						);
 						return;
 					}

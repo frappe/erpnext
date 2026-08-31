@@ -27,6 +27,7 @@ jobs:
         with:
           ref: ${{ matrix.branch }}
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Download translations and open PR
         uses: crowdin/github-action@8f01d54f70f1713ee3f09d82c2bbb2daeac28689 # v2.17.1
@@ -35,7 +36,7 @@ jobs:
           upload_sources: false
           upload_translations: false
           download_translations: true
-          crowdin_branch_name: ${{ matrix.branch }}
+          crowdin_branch_name: "[frappe.erpnext] ${{ matrix.branch }}"
           skip_ref_checkout: true
           localization_branch_name: l10n_crowdin_${{ matrix.branch }}
           create_pull_request: true

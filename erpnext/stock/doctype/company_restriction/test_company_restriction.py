@@ -108,25 +108,23 @@ class TestCompanyRestriction(ERPNextTestSuite):
 			frappe.get_doc({"doctype": "User Permission", **permission}).insert(ignore_permissions=True)
 		frappe.clear_cache(user=user)
 
-		frappe.set_user(user)
-		self.addCleanup(frappe.set_user, "Administrator")
+		with self.set_user(user):
+			results = party_query(
+				"Customer",
+				customer,
+				"name",
+				0,
+				20,
+				filters={"disabled": 0, "company": "_Test Company"},
+			)
+			self.assertIn(customer, [row[0] for row in results])
 
-		results = party_query(
-			"Customer",
-			customer,
-			"name",
-			0,
-			20,
-			filters={"disabled": 0, "company": "_Test Company"},
-		)
-		self.assertIn(customer, [row[0] for row in results])
-
-		details = get_party_details(
-			party=customer,
-			party_type="Customer",
-			company="_Test Company",
-		)
-		self.assertEqual(details.customer, customer)
+			details = get_party_details(
+				party=customer,
+				party_type="Customer",
+				company="_Test Company",
+			)
+			self.assertEqual(details.customer, customer)
 
 	def test_unrestricted_item_is_not_blocked(self):
 		item = make_item()
@@ -184,14 +182,12 @@ class TestCompanyRestriction(ERPNextTestSuite):
 		permitted = frappe.get_meta("Customer").get_permitted_fieldnames(user=manager)
 		self.assertIn("restrict_to_companies", permitted)
 
-		frappe.set_user(sales_user)
-		self.addCleanup(frappe.set_user, "Administrator")
+		with self.set_user(sales_user):
+			doc = frappe.get_doc("Customer", customer)
+			doc.restrict_to_companies = 0
+			doc.set("allowed_companies", [])
+			doc.save()
 
-		doc = frappe.get_doc("Customer", customer)
-		doc.restrict_to_companies = 0
-		doc.set("allowed_companies", [])
-		doc.save()
-
-		doc.reload()
-		self.assertEqual(doc.restrict_to_companies, 1)
-		self.assertEqual([row.company for row in doc.allowed_companies], ["_Test Company"])
+			doc.reload()
+			self.assertEqual(doc.restrict_to_companies, 1)
+			self.assertEqual([row.company for row in doc.allowed_companies], ["_Test Company"])
