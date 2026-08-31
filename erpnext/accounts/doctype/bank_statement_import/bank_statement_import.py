@@ -130,6 +130,7 @@ def download_import_log(data_import_name):
 	bsi.check_permission()
 	return bsi.download_import_log()
 
+
 def parse_data_from_template(raw_data):
 	data = []
 
