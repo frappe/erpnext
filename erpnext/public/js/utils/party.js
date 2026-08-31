@@ -77,27 +77,28 @@ erpnext.utils.get_party_details = function (frm, method, args, callback) {
 		}
 	}
 
-	if (frappe.meta.get_docfield(frm.doc.doctype, "taxes")) {
-		if (
-			!erpnext.utils.validate_mandatory(
-				frm,
-				__("Posting / Transaction Date"),
-				args.posting_date,
-				args.party_type == "Customer" ? "customer" : "supplier"
-			)
-		)
-			return;
+	const field = party_field(frm, args.party_type);
+	const label = party_label(frm, args.party_type);
+
+	if (frappe.meta.get_docfield(frm.doc.doctype, "taxes") && !args.posting_date) {
+		undo_and_throw(
+			frm,
+			field,
+			__("Cannot load {0} details", [label]),
+			__("{0} is required to apply taxes. Set {0}, then select {1} again.", [date_label(frm), label])
+		);
 	}
 
-	if (
-		!erpnext.utils.validate_mandatory(
+	if (!frm.doc.company) {
+		undo_and_throw(
 			frm,
-			__("Company"),
-			frm.doc.company,
-			args.party_type == "Customer" ? "customer" : "supplier"
-		)
-	) {
-		return;
+			field,
+			__("Cannot load {0} details", [label]),
+			__(
+				"Company is required to load address, taxes, and payment terms. Set Company, then select {0} again.",
+				[label]
+			)
+		);
 	}
 
 	args.currency = frm.doc.currency;
@@ -174,30 +175,34 @@ erpnext.utils.set_taxes_from_address = function (
 ) {
 	if (frm.updating_party_details) return;
 
-	if (frappe.meta.get_docfield(frm.doc.doctype, "taxes")) {
-		if (
-			!erpnext.utils.validate_mandatory(
-				frm,
-				__("Lead / Customer / Supplier"),
-				frm.doc.customer || frm.doc.supplier || frm.doc.lead || frm.doc.party_name,
-				triggered_from_field
-			)
-		) {
-			return;
-		}
-
-		if (
-			!erpnext.utils.validate_mandatory(
-				frm,
-				__("Posting / Transaction Date"),
-				frm.doc.posting_date || frm.doc.transaction_date,
-				triggered_from_field
-			)
-		) {
-			return;
-		}
-	} else {
+	if (!frappe.meta.get_docfield(frm.doc.doctype, "taxes")) {
 		return;
+	}
+
+	const trigger_label = frappe.meta.get_translated_label(frm.doc.doctype, triggered_from_field);
+
+	if (!(frm.doc.customer || frm.doc.supplier || frm.doc.lead || frm.doc.party_name)) {
+		undo_and_throw(
+			frm,
+			triggered_from_field,
+			__("Cannot apply taxes from this address"),
+			__("{0} is required to apply taxes. Set {0}, then select {1} again.", [
+				party_label(frm),
+				trigger_label,
+			])
+		);
+	}
+
+	if (!(frm.doc.posting_date || frm.doc.transaction_date)) {
+		undo_and_throw(
+			frm,
+			triggered_from_field,
+			__("Cannot apply taxes from this address"),
+			__("{0} is required to apply taxes. Set {0}, then select {1} again.", [
+				date_label(frm),
+				trigger_label,
+			])
+		);
 	}
 
 	frappe.call({
@@ -220,34 +225,43 @@ erpnext.utils.set_taxes_from_address = function (
 };
 
 erpnext.utils.set_taxes = function (frm, triggered_from_field) {
-	if (frappe.meta.get_docfield(frm.doc.doctype, "taxes")) {
-		if (!erpnext.utils.validate_mandatory(frm, __("Company"), frm.doc.company, triggered_from_field)) {
-			return;
-		}
-
-		if (
-			!erpnext.utils.validate_mandatory(
-				frm,
-				__("Lead / Customer / Supplier"),
-				frm.doc.customer || frm.doc.supplier || frm.doc.lead || frm.doc.party_name,
-				triggered_from_field
-			)
-		) {
-			return;
-		}
-
-		if (
-			!erpnext.utils.validate_mandatory(
-				frm,
-				__("Posting / Transaction Date"),
-				frm.doc.posting_date || frm.doc.transaction_date,
-				triggered_from_field
-			)
-		) {
-			return;
-		}
-	} else {
+	if (!frappe.meta.get_docfield(frm.doc.doctype, "taxes")) {
 		return;
+	}
+
+	const trigger_label = frappe.meta.get_translated_label(frm.doc.doctype, triggered_from_field);
+
+	if (!frm.doc.company) {
+		undo_and_throw(
+			frm,
+			triggered_from_field,
+			__("Cannot apply taxes"),
+			__("Company is required to apply taxes. Set Company, then select {0} again.", [trigger_label])
+		);
+	}
+
+	if (!(frm.doc.customer || frm.doc.supplier || frm.doc.lead || frm.doc.party_name)) {
+		undo_and_throw(
+			frm,
+			triggered_from_field,
+			__("Cannot apply taxes"),
+			__("{0} is required to apply taxes. Set {0}, then select {1} again.", [
+				party_label(frm),
+				trigger_label,
+			])
+		);
+	}
+
+	if (!(frm.doc.posting_date || frm.doc.transaction_date)) {
+		undo_and_throw(
+			frm,
+			triggered_from_field,
+			__("Cannot apply taxes"),
+			__("{0} is required to apply taxes. Set {0}, then select {1} again.", [
+				date_label(frm),
+				trigger_label,
+			])
+		);
 	}
 
 	var party_type, party;
@@ -263,10 +277,6 @@ erpnext.utils.set_taxes = function (frm, triggered_from_field) {
 	} else if (frm.doc.quotation_to) {
 		party_type = frm.doc.quotation_to;
 		party = frm.doc.party_name;
-	}
-
-	if (!frm.doc.company) {
-		frappe.throw(__("Kindly select the company first"));
 	}
 
 	frappe.call({
@@ -337,16 +347,6 @@ function reset_contact_fields(frm) {
 	});
 }
 
-erpnext.utils.validate_mandatory = function (frm, label, value, trigger_on) {
-	if (!value) {
-		frm.doc[trigger_on] = "";
-		refresh_field(trigger_on);
-		frappe.throw({ message: __("Please enter {0} first", [label]), title: __("Mandatory") });
-		return false;
-	}
-	return true;
-};
-
 erpnext.utils.get_shipping_address = function (frm, callback) {
 	if (frm.doc.company) {
 		if (
@@ -378,4 +378,49 @@ erpnext.utils.get_shipping_address = function (frm, callback) {
 	} else {
 		frappe.msgprint(__("Select company first"));
 	}
+};
+
+function party_field(frm, party_type) {
+	if (frappe.meta.get_docfield(frm.doc.doctype, "party_name")) {
+		return "party_name";
+	}
+	if (party_type === "Customer") {
+		return "customer";
+	}
+	if (party_type === "Supplier") {
+		return "supplier";
+	}
+	if (party_type === "Lead") {
+		return "lead";
+	}
+	return ["customer", "supplier", "lead"].find((field) => frappe.meta.get_docfield(frm.doc.doctype, field));
+}
+
+function party_label(frm, party_type) {
+	if (frm.doc.quotation_to) {
+		return __(frm.doc.quotation_to);
+	}
+	return frappe.meta.get_translated_label(frm.doc.doctype, party_field(frm, party_type));
+}
+
+function date_label(frm) {
+	const field = frappe.meta.get_docfield(frm.doc.doctype, "posting_date")
+		? "posting_date"
+		: "transaction_date";
+	return frappe.meta.get_translated_label(frm.doc.doctype, field);
+}
+
+function undo_and_throw(frm, field, title, message) {
+	frm.doc[field] = "";
+	refresh_field(field);
+	frappe.throw({ title, message });
+}
+
+// Kept for custom client scripts that call this public helper.
+erpnext.utils.validate_mandatory = function (frm, label, value, trigger_on) {
+	if (value) {
+		return true;
+	}
+	undo_and_throw(frm, trigger_on, __("Mandatory"), __("Please enter {0} first", [label]));
+	return false;
 };
