@@ -32,9 +32,6 @@ def make_purchase_order(
 		target.stock_qty = balance_stock_qty if balance_stock_qty > 0 else 0
 		target.qty = flt(target.stock_qty) / flt(obj.conversion_factor)
 
-	def can_map_row(item):
-		return item.stock_qty > ordered_items.get(item.name, 0.0) or item.qty == 0
-
 	def select_item(d):
 		filtered_items = args.get("filtered_children", [])
 		child_filter = d.name in filtered_items if filtered_items else True
@@ -62,7 +59,7 @@ def make_purchase_order(
 				],
 				"postprocess": update_item,
 				"condition": lambda item: item.name not in mapped_items
-				and can_map_row(item)
+				and (item.stock_qty > ordered_items.get(item.name, 0.0) or item.qty == 0)
 				and select_item(item),
 			},
 			"Purchase Taxes and Charges": {
