@@ -42,6 +42,7 @@ class BOMConfigurator {
 			doctype: "BOM Configurator",
 			page: this.page,
 			expandable: true,
+			row_style: true,
 			title: __("Configure Product Assembly"),
 			breadcrumb: "Manufacturing",
 			get_tree_nodes: "erpnext.manufacturing.doctype.bom_creator.bom_creator.get_children",
@@ -98,13 +99,11 @@ class BOMConfigurator {
 				amount = frappe.format(amount, { fieldtype: "Currency", currency: frm_obj.frm.doc.currency });
 
 				$(`
-					<div class="pill small pull-right bom-qty-pill"
+					<div class="pill small bom-qty-pill"
 						style="background-color: var(--bg-white);
 							color: var(--text-on-gray);
 							font-weight:450;
-							margin-right: 40px;
 							display: inline-flex;
-							min-width: 128px;
 							border: 1px solid var(--bg-gray);
 						">
 							<div style="padding-right:5px" data-bom-qty-docname="${docname}">${qty} ${uom}</div>
