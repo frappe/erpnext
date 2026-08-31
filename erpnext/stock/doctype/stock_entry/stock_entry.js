@@ -1021,6 +1021,26 @@ frappe.ui.form.on("Stock Entry Detail", {
 		);
 	},
 
+	secondary_item_type(frm, cdt, cdn) {
+		const row = locals[cdt][cdn];
+		if (row.secondary_item_type && !row.bom_secondary_item && !row.valuation_type) {
+			frappe.model.set_value(cdt, cdn, "valuation_type", "Valuation Rate");
+		}
+	},
+
+	valuation_type(frm, cdt, cdn) {
+		const row = locals[cdt][cdn];
+		if (!row.secondary_item_type || row.bom_secondary_item) return;
+
+		if (row.valuation_type === "% of FG Cost") {
+			frappe.model.set_value(cdt, cdn, "valuation_type", "Valuation Rate");
+			frappe.msgprint(__("% of FG Cost needs a BOM secondary item. Choose Valuation Rate or Manual."));
+			return;
+		}
+
+		frappe.model.set_value(cdt, cdn, "set_basic_rate_manually", row.valuation_type === "Manual" ? 1 : 0);
+	},
+
 	conversion_factor(frm, cdt, cdn) {
 		frm.events.set_basic_rate(frm, cdt, cdn);
 	},

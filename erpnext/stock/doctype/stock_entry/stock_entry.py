@@ -321,6 +321,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		if self.purpose in ("Manufacture", "Repack"):
 			self.mark_finished_and_secondary_items()
+			self.set_bomless_secondary_valuation_types()
 			if not self.job_card:
 				self.validate_finished_goods()
 			else:
@@ -803,6 +804,26 @@ class StockEntry(StockController, SubcontractingInwardController):
 					]
 				)
 				return flt(outgoing_items_cost / total_fg_qty)
+
+	def set_bomless_secondary_valuation_types(self):
+		"""Secondary rows without a BOM link choose their own costing: valuation rate or manual.
+
+		There is no percentage to allocate without a BOM row, so % of FG Cost is rejected."""
+		for d in self.get("items"):
+			if not d.secondary_item_type or d.bom_secondary_item:
+				continue
+
+			if d.valuation_type == "% of FG Cost":
+				frappe.throw(
+					_(
+						"Row #{0}: % of FG Cost needs a BOM secondary item. Choose Valuation Rate or Manual for {1}."
+					).format(d.idx, frappe.bold(d.item_code))
+				)
+
+			if not d.valuation_type:
+				d.valuation_type = "Valuation Rate"
+
+			d.set_basic_rate_manually = cint(d.valuation_type == "Manual")
 
 	def get_costed_out_items_cost(self) -> float:
 		"""Total value of the rows that are deducted from the cost the other incoming rows split."""

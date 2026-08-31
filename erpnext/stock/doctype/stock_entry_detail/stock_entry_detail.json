@@ -688,12 +688,12 @@
    "read_only": 1
   },
   {
-   "depends_on": "valuation_type",
+   "depends_on": "eval:doc.valuation_type || doc.secondary_item_type",
    "fieldname": "valuation_type",
    "fieldtype": "Select",
    "label": "Valuation Type",
    "options": "\nValuation Rate\n% of FG Cost\nManual",
-   "read_only": 1
+   "read_only_depends_on": "eval:!doc.secondary_item_type || doc.bom_secondary_item"
   }
  ],
  "grid_page_length": 50,
