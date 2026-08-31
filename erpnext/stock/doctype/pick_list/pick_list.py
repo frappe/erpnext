@@ -1310,9 +1310,9 @@ def get_items_with_location_and_quantity(item_doc, item_location_map, docstatus)
 		# if extra quantity is available push current warehouse to available locations
 		if qty_diff > 0:
 			item_location.qty = qty_diff
-			if item_location.serial_no:
+			if item_location.serial_nos:
 				# set remaining serial numbers
-				item_location.serial_no = item_location.serial_no[-int(qty_diff) :]
+				item_location.serial_nos = item_location.serial_nos[-int(qty_diff) :]
 			available_locations = [item_location, *available_locations]
 
 	# update available locations for the item
@@ -1456,8 +1456,8 @@ def filter_locations_by_picked_materials(locations, picked_item_details) -> list
 			filterd_locations.append(row)
 			continue
 		if picked_qty > row.qty:
-			row.qty = 0
 			picked_item_details[key]["picked_qty"] -= row.qty
+			row.qty = 0
 		else:
 			row.qty -= picked_qty
 			picked_item_details[key]["picked_qty"] = 0.0
