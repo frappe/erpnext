@@ -155,16 +155,19 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 		}
 		this.resolve_nested_owners(owners_of_row);
 
+		const bom_consumers = {};
+		for (const [row_name, items] of Object.entries(this.data.row_materials || {})) {
+			for (const item of items) (bom_consumers[item] = bom_consumers[item] || []).push(row_name);
+		}
+		if (this.data.plan.combine_sub_items) {
+			this.expand_combined_owners(owners_of_row, bom_consumers);
+		}
+
 		const subs_by_parent = {};
 		for (const sub of this.data.sub_assemblies) {
 			for (const owner of owners_of_row[sub.row_name] || []) {
 				(subs_by_parent[owner] = subs_by_parent[owner] || []).push(sub);
 			}
-		}
-
-		const bom_consumers = {};
-		for (const [row_name, items] of Object.entries(this.data.row_materials || {})) {
-			for (const item of items) (bom_consumers[item] = bom_consumers[item] || []).push(row_name);
 		}
 
 		const subs_by_signature = {};
@@ -181,6 +184,25 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 			material.owners = this.material_owners(material);
 		}
 		this.compute_stats();
+	}
+
+	expand_combined_owners(owners_of_row, bom_consumers) {
+		let changed = true;
+		let passes = 0;
+		while (changed && passes++ <= this.data.sub_assemblies.length) {
+			changed = false;
+			for (const sub of this.data.sub_assemblies) {
+				const owners = new Set(owners_of_row[sub.row_name] || []);
+				const before = owners.size;
+				for (const row_name of bom_consumers[sub.item_code] || []) {
+					for (const owner of owners_of_row[row_name] || []) owners.add(owner);
+				}
+				if (owners.size !== before) {
+					owners_of_row[sub.row_name] = [...owners];
+					changed = true;
+				}
+			}
+		}
 	}
 
 	resolve_nested_owners(owners_of_row) {

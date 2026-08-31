@@ -142,6 +142,7 @@ def get_raised_material_request_items(production_plan):
 def get_row_materials(plan, schedule):
 	material_items = {d.item_code for d in schedule if d.row_type == "Raw Material"}
 	material_items.update(row.item_code for row in plan.mr_items)
+	material_items.update(row.production_item for row in plan.sub_assembly_items)
 	rows = [(d.name, d.bom_no) for d in plan.po_items + plan.sub_assembly_items if d.bom_no]
 	if not material_items or not rows:
 		return {}
@@ -177,6 +178,7 @@ def get_plan_details(plan):
 		"docstatus": plan.docstatus,
 		"company": plan.company,
 		"posting_date": plan.posting_date,
+		"combine_sub_items": plan.combine_sub_items,
 		"total_planned_qty": total_planned,
 		"total_produced_qty": total_produced,
 		"completion": flt(total_produced / total_planned * 100 if total_planned else 0, 1),
