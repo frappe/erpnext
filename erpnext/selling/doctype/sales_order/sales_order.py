@@ -22,6 +22,7 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	validate_inter_company_party,
 )
 from erpnext.accounts.party import CROSS_PARTY_FIELD_NO_MAP, get_party_account
+from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
 	validate_against_blanket_order,
@@ -1168,6 +1169,8 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 	if kwargs.for_reserved_stock:
 		sre_details = get_sre_reserved_qty_details_for_voucher("Sales Order", source_name)
 
+	mapped_qty_by_item = get_qty_already_mapped(target_doc, "so_detail")
+
 	mapper = {
 		"Sales Order": {"doctype": "Delivery Note", "validation": {"docstatus": ["=", 1]}},
 		"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "reset_value": True},
@@ -1225,15 +1228,17 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 				return False
 
 		return (
-			(abs(doc.delivered_qty) < abs(doc.qty)) or is_unit_price_row(doc)
+			(abs(doc.delivered_qty) + abs(mapped_qty_by_item.get(doc.name, 0)) < abs(doc.qty))
+			or (is_unit_price_row(doc) and doc.name not in mapped_qty_by_item)
 		) and doc.delivered_by_supplier != 1
 
+	def remaining_qty(source):
+		return flt(source.qty) - flt(source.delivered_qty) - flt(mapped_qty_by_item.get(source.name, 0))
+
 	def update_item(source, target, source_parent):
-		target.base_amount = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.base_rate)
-		target.amount = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.rate)
-		target.qty = (
-			flt(source.qty) if is_unit_price_row(source) else flt(source.qty) - flt(source.delivered_qty)
-		)
+		target.base_amount = remaining_qty(source) * flt(source.base_rate)
+		target.amount = remaining_qty(source) * flt(source.rate)
+		target.qty = flt(source.qty) if is_unit_price_row(source) else remaining_qty(source)
 
 		item = get_item_defaults(target.item_code, source_parent.company)
 		item_group = get_item_group_defaults(target.item_code, source_parent.company)
@@ -1343,6 +1348,7 @@ def make_sales_invoice(
 	has_unit_price_items = frappe.db.get_value("Sales Order", source_name, "has_unit_price_items")
 	billed_qty_by_item = None
 	pending_qty_by_item = {}
+	mapped_qty_by_item = get_qty_already_mapped(target_doc, "so_detail")
 
 	def is_unit_price_row(source):
 		return has_unit_price_items and source.qty == 0
@@ -1371,6 +1377,7 @@ def make_sales_invoice(
 			if source.qty and source.billed_amt:
 				billable_qty -= get_billed_qty_by_item().get(source.name, 0)
 
+			billable_qty -= mapped_qty_by_item.get(source.name, 0)
 			pending_qty_by_item[source.name] = max(flt(billable_qty, source.precision("qty")), 0)
 
 		return pending_qty_by_item[source.name]
@@ -1492,7 +1499,7 @@ def make_sales_invoice(
 				"condition": lambda doc: not args.get("skip_item_mapping")
 				and select_item(doc)
 				and (
-					True
+					doc.name not in mapped_qty_by_item
 					if is_unit_price_row(doc)
 					else (
 						doc.qty
