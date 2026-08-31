@@ -978,6 +978,46 @@ class TestSalesOrder(ERPNextTestSuite):
 		)
 		self.assertRaises(frappe.ValidationError, update_child_qty_rate, "Sales Order", trans_item, so.name)
 
+	def test_update_child_qty_with_conversion_factor_after_delivery(self):
+		item = make_item(uoms=[{"uom": "Box", "conversion_factor": 5}])
+		sales_order = make_sales_order(item_code=item.item_code, qty=6, uom="Box")
+		create_dn_against_so(sales_order.name, 2)
+
+		row = sales_order.items[0]
+		trans_items = json.dumps(
+			[
+				{
+					"item_code": row.item_code,
+					"rate": row.rate,
+					"qty": 4,
+					"uom": row.uom,
+					"conversion_factor": 2,
+					"docname": row.name,
+				}
+			]
+		)
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Cannot set quantity less than delivered quantity",
+			update_child_qty_rate,
+			"Sales Order",
+			trans_items,
+			sales_order.name,
+		)
+
+	def test_update_child_preserves_conversion_factor_precision(self):
+		from erpnext.accounts.services.child_item_update import update_child_item_uom_and_weight
+
+		item = make_item(properties={"stock_uom": "Kg"}, uoms=[{"uom": "Box", "conversion_factor": 2}])
+		sales_order = make_sales_order(item_code=item.item_code, qty=6, uom="Box")
+		conversion_factor = 1.123456789123
+		row = sales_order.items[0]
+
+		update_child_item_uom_and_weight(row, {"conversion_factor": conversion_factor})
+
+		self.assertEqual(row.conversion_factor, conversion_factor)
+
 	def test_update_child_with_precision(self):
 		from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 		from frappe.model.meta import get_field_precision

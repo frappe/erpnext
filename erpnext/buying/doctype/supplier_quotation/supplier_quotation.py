@@ -262,7 +262,7 @@ def get_purchased_items(supplier_quotation: str):
 		frappe.get_all(
 			"Purchase Order Item",
 			filters={"supplier_quotation": supplier_quotation, "docstatus": 1},
-			fields=["supplier_quotation_item", {"SUM": "qty"}],
+			fields=["supplier_quotation_item", {"SUM": "stock_qty"}],
 			group_by="supplier_quotation_item",
 			as_list=1,
 		)
