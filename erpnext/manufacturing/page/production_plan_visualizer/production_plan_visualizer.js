@@ -1010,10 +1010,16 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 				background: transparent;
 				border: none;
 				padding: 0;
-				margin: 0 0 var(--padding-sm);
+				margin: 0 2px var(--padding-sm);
 			}
 
-			.ppv { display: flex; flex-direction: column; gap: var(--padding-sm); overflow: hidden; }
+			.ppv {
+				display: flex;
+				flex-direction: column;
+				gap: var(--padding-sm);
+				margin: 0 2px;
+				overflow: hidden;
+			}
 			.ppv-fill { flex: 1 1 auto; display: flex; align-items: center; justify-content: center; }
 			.ppv-muted { color: var(--text-muted); }
 			.ppv-uom { color: var(--text-muted); font-size: var(--text-xs); }
