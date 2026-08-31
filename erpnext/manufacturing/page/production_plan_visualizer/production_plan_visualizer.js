@@ -599,7 +599,7 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 		}
 		const { table, body } = this.make_table([
 			{ label: __("Item") },
-			{ label: __("Planned Qty"), class: "ppv-num" },
+			{ label: __("Planned Qty"), class: "ppv-num ppv-num-uom" },
 			{ label: __("Qty In Stock"), class: "ppv-num" },
 			{ label: __("Produced Qty"), class: "ppv-num" },
 			{ label: __("Pending Qty"), class: "ppv-num" },
@@ -656,7 +656,7 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 			</tr>
 		`);
 		tr.find(".ppv-item-tag").append(this.manufacture_tag(row, kind));
-		tr.find(".ppv-col-progress").append(frappe.ui.progress({ value: completion, hint: true }));
+		tr.find(".ppv-col-progress").append(this.progress_cell(completion));
 		this.append_document_chips(tr.find(".ppv-col-docs"), row.documents);
 		return tr;
 	}
@@ -687,7 +687,7 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 		}
 		const { table, body } = this.make_table([
 			{ label: __("Material") },
-			{ label: __("Reqd Qty (BOM)"), class: "ppv-num" },
+			{ label: __("Reqd Qty (BOM)"), class: "ppv-num ppv-num-uom" },
 			{ label: __("Qty In Stock"), class: "ppv-num" },
 			{ label: __("Required Qty"), class: "ppv-num" },
 			{ label: __("Requested Qty"), class: "ppv-num" },
@@ -1210,6 +1210,13 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 		return frappe.utils.escape_html(value == null ? "" : String(value));
 	}
 
+	progress_cell(completion) {
+		const value = Math.min(Math.max(completion, 0), 100);
+		return $('<div class="ppv-progress-cell"></div>')
+			.append(frappe.ui.progress({ value }))
+			.append(`<span class="ppv-progress-pct">${Math.round(value)}%</span>`);
+	}
+
 	stock_value(row) {
 		if (!row.stock_known) {
 			return `<span class="ppv-unknown" title="${this.esc(
@@ -1350,7 +1357,13 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 			.ppv-drawer .ppv-table td:first-child { max-width: 190px; }
 			.ppv-fill { flex: 1 1 auto; display: flex; align-items: center; justify-content: center; }
 			.ppv-muted { color: var(--text-muted); }
-			.ppv-uom { color: var(--text-muted); font-size: var(--text-xs); }
+			.ppv-uom {
+				display: inline-block;
+				min-width: 30px;
+				text-align: left;
+				color: var(--text-muted);
+				font-size: var(--text-xs);
+			}
 			.ppv-unknown { color: var(--text-muted); cursor: help; }
 
 			.ppv-kpis {
@@ -1588,7 +1601,18 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 			.ppv-table tr[data-kind="fg"] .ppv-item-line a { font-weight: 600; }
 			.ppv-item-sub { font-size: var(--text-xs); color: var(--text-muted); }
 			.ppv-pending { color: var(--yellow-700); }
-			.ppv-col-progress { width: 130px; }
+			.ppv-col-progress { width: 150px; }
+			.ppv-progress-cell { display: flex; align-items: center; gap: 8px; }
+			.ppv-progress-cell .es-progress { flex: 1 1 auto; min-width: 0; }
+			.ppv-table th.ppv-num-uom { padding-right: 46px; }
+			.ppv-progress-pct {
+				flex: 0 0 auto;
+				width: 32px;
+				text-align: right;
+				font-variant-numeric: tabular-nums;
+				font-size: var(--text-xs);
+				color: var(--text-muted);
+			}
 			.ppv-col-status { width: 120px; }
 			.ppv-col-docs { width: 210px; }
 			.ppv-col-docs > * { margin-right: 4px; }
