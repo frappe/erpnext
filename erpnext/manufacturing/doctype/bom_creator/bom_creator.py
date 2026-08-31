@@ -76,37 +76,6 @@ class BOMCreator(Document):
 
 	def validate(self):
 		self.validate_items()
-<<<<<<< HEAD
-=======
-		self.validate_duplicate_item()
-
-	def validate_duplicate_item(self):
-		# If same items added multiple times under same parent, raise error
-		item_map = {}
-		for row in self.items:
-			if not row.fg_reference_id:
-				continue
-
-			key = (row.item_code, row.fg_reference_id)
-			if key in item_map:
-				frappe.throw(
-					_(
-						"Item {0} added multiple times under the same parent item {1} at rows {2} and {3}"
-					).format(bold(row.item_code), bold(row.fg_item), item_map[key], row.idx),
-					title=_("Duplicate Item Under Same Parent"),
-				)
-			else:
-				item_map[key] = row.idx
-
-	def validate_finished_good(self):
-		is_stock_item = frappe.get_cached_value("Item", self.item_code, "is_stock_item")
-		if is_stock_item and self.is_phantom:
-			frappe.throw(_("Phantom BOM cannot be created for stock item {0}.").format(self.item_code))
-		elif not is_stock_item and not self.is_phantom:
-			frappe.throw(
-				_("Non-phantom BOM cannot be created for non-stock item {0}.").format(self.item_code)
-			)
->>>>>>> 24209ae (fix(manufacturing): handle duplicate root BOM items (#58614))
 
 	def validate_items(self):
 		for row in self.items:
