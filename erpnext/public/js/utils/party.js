@@ -81,7 +81,7 @@ erpnext.utils.get_party_details = function (frm, method, args, callback) {
 		if (
 			!erpnext.utils.validate_mandatory(
 				frm,
-				"Posting / Transaction Date",
+				__("Posting / Transaction Date"),
 				args.posting_date,
 				args.party_type == "Customer" ? "customer" : "supplier"
 			)
@@ -92,7 +92,7 @@ erpnext.utils.get_party_details = function (frm, method, args, callback) {
 	if (
 		!erpnext.utils.validate_mandatory(
 			frm,
-			"Company",
+			__("Company"),
 			frm.doc.company,
 			args.party_type == "Customer" ? "customer" : "supplier"
 		)
@@ -177,7 +177,7 @@ erpnext.utils.set_taxes_from_address = function (
 		if (
 			!erpnext.utils.validate_mandatory(
 				frm,
-				"Lead / Customer / Supplier",
+				__("Lead / Customer / Supplier"),
 				frm.doc.customer || frm.doc.supplier || frm.doc.lead || frm.doc.party_name,
 				triggered_from_field
 			)
@@ -188,7 +188,7 @@ erpnext.utils.set_taxes_from_address = function (
 		if (
 			!erpnext.utils.validate_mandatory(
 				frm,
-				"Posting / Transaction Date",
+				__("Posting / Transaction Date"),
 				frm.doc.posting_date || frm.doc.transaction_date,
 				triggered_from_field
 			)
@@ -220,14 +220,14 @@ erpnext.utils.set_taxes_from_address = function (
 
 erpnext.utils.set_taxes = function (frm, triggered_from_field) {
 	if (frappe.meta.get_docfield(frm.doc.doctype, "taxes")) {
-		if (!erpnext.utils.validate_mandatory(frm, "Company", frm.doc.company, triggered_from_field)) {
+		if (!erpnext.utils.validate_mandatory(frm, __("Company"), frm.doc.company, triggered_from_field)) {
 			return;
 		}
 
 		if (
 			!erpnext.utils.validate_mandatory(
 				frm,
-				"Lead / Customer / Supplier",
+				__("Lead / Customer / Supplier"),
 				frm.doc.customer || frm.doc.supplier || frm.doc.lead || frm.doc.party_name,
 				triggered_from_field
 			)
@@ -238,7 +238,7 @@ erpnext.utils.set_taxes = function (frm, triggered_from_field) {
 		if (
 			!erpnext.utils.validate_mandatory(
 				frm,
-				"Posting / Transaction Date",
+				__("Posting / Transaction Date"),
 				frm.doc.posting_date || frm.doc.transaction_date,
 				triggered_from_field
 			)
