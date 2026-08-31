@@ -4,10 +4,9 @@
 import json
 
 import frappe
-from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import flt, getdate, nowdate
+from frappe.utils import flt
 
 from erpnext.controllers.mapper import get_qty_already_mapped
 
@@ -16,18 +15,6 @@ from erpnext.controllers.mapper import get_qty_already_mapped
 def make_purchase_order(
 	source_name: str, target_doc: str | dict | Document | None = None, args: str | dict | None = None
 ):
-	supplier_quotation = frappe.db.get_value(
-		"Supplier Quotation",
-		source_name,
-		["transaction_date", "valid_till", "has_unit_price_items"],
-		as_dict=True,
-	)
-	if supplier_quotation.valid_till and (
-		supplier_quotation.valid_till < supplier_quotation.transaction_date
-		or supplier_quotation.valid_till < getdate(nowdate())
-	):
-		frappe.throw(_("Validity period of this supplier quotation has ended."))
-
 	if args is None:
 		args = {}
 	args = frappe.parse_json(args)
@@ -46,9 +33,7 @@ def make_purchase_order(
 		target.qty = flt(target.stock_qty) / flt(obj.conversion_factor)
 
 	def can_map_row(item):
-		return item.stock_qty > ordered_items.get(item.name, 0.0) or (
-			supplier_quotation.has_unit_price_items and item.qty == 0
-		)
+		return item.stock_qty > ordered_items.get(item.name, 0.0) or item.qty == 0
 
 	def select_item(d):
 		filtered_items = args.get("filtered_children", [])
