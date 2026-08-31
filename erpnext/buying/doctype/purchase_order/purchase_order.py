@@ -21,6 +21,7 @@ from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category 
 from erpnext.accounts.party import get_party_account, get_party_account_currency
 from erpnext.buying.utils import check_on_hold_or_closed_status, validate_for_items
 from erpnext.controllers.buying_controller import BuyingController
+from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
 	validate_against_blanket_order,
 )
@@ -737,13 +738,16 @@ def make_purchase_receipt(source_name, target_doc=None, args=None):
 	def is_unit_price_row(source):
 		return has_unit_price_items and source.qty == 0
 
+	mapped_qty_by_item = get_qty_already_mapped(target_doc, "purchase_order_item")
+
 	def update_item(obj, target, source_parent):
-		target.qty = flt(obj.qty) if is_unit_price_row(obj) else flt(obj.qty) - flt(obj.received_qty)
-		target.stock_qty = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.conversion_factor)
-		target.amount = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.rate)
-		target.base_amount = (
-			(flt(obj.qty) - flt(obj.received_qty)) * flt(obj.rate) * flt(source_parent.conversion_rate)
-		)
+		received_qty = flt(obj.received_qty) + flt(mapped_qty_by_item.get(obj.name, 0))
+		pending_qty = flt(obj.qty) - received_qty
+
+		target.qty = flt(obj.qty) if is_unit_price_row(obj) else pending_qty
+		target.stock_qty = pending_qty * flt(obj.conversion_factor)
+		target.amount = pending_qty * flt(obj.rate)
+		target.base_amount = pending_qty * flt(obj.rate) * flt(source_parent.conversion_rate)
 
 	def select_item(d):
 		filtered_items = args.get("filtered_children", [])
@@ -775,7 +779,9 @@ def make_purchase_receipt(source_name, target_doc=None, args=None):
 				},
 				"postprocess": update_item,
 				"condition": lambda doc: (
-					True if is_unit_price_row(doc) else abs(doc.received_qty) < abs(doc.qty)
+					doc.name not in mapped_qty_by_item
+					if is_unit_price_row(doc)
+					else abs(doc.received_qty) + abs(mapped_qty_by_item.get(doc.name, 0)) < abs(doc.qty)
 				)
 				and doc.delivered_by_supplier != 1
 				and select_item(doc),
@@ -837,9 +843,13 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 		)
 		return query.run(pluck="qty")[0] or 0
 
+	mapped_qty_by_item = get_qty_already_mapped(target_doc, "po_detail")
+
+	def get_billed_and_mapped_qty(po_item_name):
+		return flt(get_billed_qty(po_item_name)) + flt(mapped_qty_by_item.get(po_item_name, 0))
+
 	def update_item(obj, target, source_parent):
-		billed_qty = flt(get_billed_qty(obj.name))
-		target.qty = flt(obj.qty) - billed_qty
+		target.qty = flt(obj.qty) - get_billed_and_mapped_qty(obj.name)
 
 		item = get_item_defaults(target.item_code, source_parent.company)
 		item_group = get_item_group_defaults(target.item_code, source_parent.company)
@@ -882,6 +892,7 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 				or abs(doc.billed_amt) < abs(doc.amount)
 				or doc.qty > flt(get_billed_qty(doc.name))
 			)
+			and (doc.name not in mapped_qty_by_item or doc.qty > get_billed_and_mapped_qty(doc.name))
 			and select_item(doc),
 		},
 		"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},

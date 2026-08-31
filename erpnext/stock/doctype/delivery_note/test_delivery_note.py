@@ -1091,6 +1091,25 @@ class TestDeliveryNote(FrappeTestCase):
 		self.assertEqual(dn2.per_billed, 100)
 		self.assertEqual(dn2.status, "Completed")
 
+	def test_mapping_same_dn_twice_is_idempotent(self):
+		# "Get Items From > Delivery Note" passes the in-progress invoice back as target_doc.
+		# Selecting the same DN again must not append a second row for the same dn_detail.
+		dn = create_delivery_note(qty=5)
+
+		si = make_sales_invoice(dn.name)
+		self.assertEqual(len(si.items), 1)
+		self.assertEqual(si.items[0].qty, 5)
+
+		si = make_sales_invoice(dn.name, target_doc=si)
+		self.assertEqual(len(si.items), 1)
+		self.assertEqual(si.items[0].qty, 5)
+
+		# a partly reduced draft row still tops up to the delivered qty
+		si.items[0].qty = 2
+		si = make_sales_invoice(dn.name, target_doc=si)
+		self.assertEqual(len(si.items), 2)
+		self.assertEqual([d.qty for d in si.items], [2, 3])
+
 	@change_settings("Accounts Settings", {"delete_linked_ledger_entries": True})
 	def test_sales_invoice_qty_after_return(self):
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
