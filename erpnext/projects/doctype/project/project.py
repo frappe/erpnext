@@ -590,7 +590,7 @@ def allow_to_make_project_update(project, time, frequency):
 
 
 @frappe.whitelist()
-def create_duplicate_project(prev_doc, project_name):
+def create_duplicate_project(prev_doc: str | dict, project_name: str):
 	"""Create duplicate project based on the old project"""
 	import json
 
