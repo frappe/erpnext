@@ -1367,12 +1367,13 @@ def get_children(
 	else:
 		filters.append([parent_fieldname, "=", parent])
 
+	account_fields = ["account_name", "account_number", "account_currency", "freeze_account"]
 	if is_root:
-		fields += ["root_type", "report_type", "account_currency"] if doctype == "Account" else []
+		fields += ["root_type", "report_type", *account_fields] if doctype == "Account" else []
 		filters.append(["company", "=", company])
 
 	else:
-		fields += ["root_type", "account_currency"] if doctype == "Account" else []
+		fields += ["root_type", *account_fields] if doctype == "Account" else []
 		fields += [parent_fieldname + " as parent"]
 
 	acc = frappe.get_list(doctype, fields=fields, filters=filters)
