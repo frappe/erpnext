@@ -678,7 +678,8 @@
    "fieldname": "secondary_item_type",
    "fieldtype": "Select",
    "label": "Type",
-   "options": "\nCo-Product\nBy-Product\nScrap\nAdditional Finished Good"
+   "options": "\nCo-Product\nBy-Product\nScrap\nAdditional Finished Good",
+   "read_only_depends_on": "eval:doc.bom_secondary_item"
   },
   {
    "fieldname": "bom_secondary_item",
