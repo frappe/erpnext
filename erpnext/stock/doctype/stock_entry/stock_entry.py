@@ -1053,7 +1053,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		if not finished_items:
 			frappe.throw(
-				msg=_("There must be at least 1 Finished Good in this Stock Entry").format(self.name),
+				msg=_("There must be at least 1 Finished Good in this Stock Entry"),
 				title=_("Missing Finished Good"),
 				exc=FinishedGoodError,
 			)
