@@ -616,6 +616,13 @@ frappe.ui.form.on("Stock Entry", {
 			"read_only",
 			frm.doc.purpose == "Material Receipt" ? 0 : 1
 		);
+
+		// only BOM-less rows are editable, and they cannot allocate a BOM percentage;
+		// read-only rows from a BOM still display their stored % of FG Cost
+		frm.fields_dict.items.grid.update_docfield_property("valuation_type", "options", [
+			"Valuation Rate",
+			"Manual",
+		]);
 	},
 
 	toggle_weight_per_piece(frm) {
@@ -1031,12 +1038,6 @@ frappe.ui.form.on("Stock Entry Detail", {
 	valuation_type(frm, cdt, cdn) {
 		const row = locals[cdt][cdn];
 		if (!row.secondary_item_type || row.bom_secondary_item) return;
-
-		if (row.valuation_type === "% of FG Cost") {
-			frappe.model.set_value(cdt, cdn, "valuation_type", "Valuation Rate");
-			frappe.msgprint(__("% of FG Cost needs a BOM secondary item. Choose Valuation Rate or Manual."));
-			return;
-		}
 
 		frappe.model.set_value(cdt, cdn, "set_basic_rate_manually", row.valuation_type === "Manual" ? 1 : 0);
 	},
