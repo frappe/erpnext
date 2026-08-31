@@ -177,10 +177,10 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 
 	material_owners(material) {
 		const key = `${material.main_item_code || ""}::${material.from_bom || ""}`;
-		const candidates = this.index.subs_by_signature[key] || [];
-		if (candidates.length) return this.owners_of(candidates.map((d) => d.row_name));
-		if (material.consumer) return this.owners_of([material.consumer]);
-		return this.owners_of(this.index.bom_consumers[material.item_code] || []);
+		const rows = (this.index.subs_by_signature[key] || []).map((d) => d.row_name);
+		if (material.consumer) rows.push(material.consumer);
+		rows.push(...(this.index.bom_consumers[material.item_code] || []));
+		return this.owners_of(rows);
 	}
 
 	owners_of(row_names) {
