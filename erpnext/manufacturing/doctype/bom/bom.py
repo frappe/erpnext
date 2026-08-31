@@ -1,7 +1,6 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-import functools
 import re
 from collections import deque
 
@@ -1648,7 +1647,7 @@ def _set_default_accounts_for_items(item_dict, company):
 def get_bom_items(bom: str, company: str, qty: float = 1, fetch_exploded: int = 1):
 	items = get_bom_items_as_dict(bom, company, qty, fetch_exploded, include_non_stock_items=True).values()
 	items = list(items)
-	items.sort(key=functools.cmp_to_key(lambda a, b: a.item_code > b.item_code and 1 or -1))
+	items.sort(key=lambda item: item.item_code)
 	return items
 
 
