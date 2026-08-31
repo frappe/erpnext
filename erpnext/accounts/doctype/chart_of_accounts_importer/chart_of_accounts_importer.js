@@ -175,64 +175,77 @@ var generate_tree_preview = function (frm) {
 	let parent = __("All Accounts");
 	const wrapper = $(frm.fields_dict["chart_tree"].wrapper).empty(); // empty wrapper to load new data
 
-	// same toolbar anatomy as the tree view: search on the left,
-	// expand/collapse-all on the right (three-state: fully collapsed ->
-	// Expand All, fully expanded -> Collapse All, partially expanded -> both)
-	const $toolbar = $('<div class="flex items-center gap-2 mb-2"></div>').appendTo(wrapper);
+	// search + expand/collapse-all lean on frappe.ui.Tree helpers added with
+	// row mode; when running against an older frappe that predates them, skip
+	// this toolbar so the preview still renders (just without the extras)
+	const has_row_helpers =
+		typeof frappe.ui.Tree.prototype.get_expansion_state === "function" &&
+		typeof frappe.ui.Tree.prototype.filter_nodes === "function";
+
 	let tree;
 	let deep_loaded = false;
 	let search_text = "";
+	let update_buttons = () => {};
 
-	const search_control = frappe.ui.form.make_control({
-		df: { fieldtype: "Data", fieldname: "preview_search", placeholder: __("Search") },
-		parent: $toolbar,
-		only_input: true,
-	});
-	search_control.refresh();
-	$(search_control.wrapper).addClass("m-0").css("width", "220px");
-	search_control.$input.addClass("input-xs");
-	search_control.$input.on(
-		"input",
-		frappe.utils.debounce(() => {
-			search_text = search_control.$input.val();
-			const run = () => {
-				// a newer keystroke superseded this one while the deep load ran
-				if (search_text !== search_control.$input.val()) return;
-				tree.filter_nodes(search_text);
-			};
-			if (!search_text || deep_loaded) {
-				run();
-				return;
-			}
+	if (has_row_helpers) {
+		// same toolbar anatomy as the tree view: search on the left,
+		// expand/collapse-all on the right (three-state: fully collapsed ->
+		// Expand All, fully expanded -> Collapse All, partially expanded -> both)
+		const $toolbar = $('<div class="flex items-center gap-2 mb-2"></div>').appendTo(wrapper);
+
+		const search_control = frappe.ui.form.make_control({
+			df: { fieldtype: "Data", fieldname: "preview_search", placeholder: __("Search") },
+			parent: $toolbar,
+			only_input: true,
+		});
+		search_control.refresh();
+		$(search_control.wrapper).addClass("m-0").css("width", "220px");
+		search_control.$input.addClass("input-xs");
+		search_control.$input.on(
+			"input",
+			frappe.utils.debounce(() => {
+				search_text = search_control.$input.val();
+				const run = () => {
+					// a newer keystroke superseded this one while the deep load ran
+					if (search_text !== search_control.$input.val()) return;
+					tree.filter_nodes(search_text);
+				};
+				if (!search_text || deep_loaded) {
+					run();
+					return;
+				}
+				tree.load_children(tree.root_node, true).then(() => {
+					deep_loaded = true;
+					run();
+				});
+			}, 300)
+		);
+
+		const $actions = $('<div class="ms-auto flex items-center gap-1"></div>').appendTo($toolbar);
+		update_buttons = () => {
+			const state = tree.get_expansion_state();
+			$expand_all.prop("disabled", !(state === "collapsed" || state === "partial"));
+			$collapse_all.prop("disabled", !(state === "expanded" || state === "partial"));
+		};
+		// tooltip on a wrapper: a disabled es-button has pointer-events:none,
+		// so hover falls through to the wrapper and the tooltip still shows
+		const make_action = (icon, label, onclick) => {
+			const $btn = $(
+				frappe.ui.button({ icon, disabled: true, onclick, attrs: { "aria-label": label } })
+			);
+			const $wrapper = $('<span class="inline-flex"></span>').append($btn).appendTo($actions);
+			frappe.ui.tooltip($wrapper, { text: label });
+			return $btn;
+		};
+		var $expand_all = make_action("chevrons-up-down", __("Expand All"), () => {
 			tree.load_children(tree.root_node, true).then(() => {
 				deep_loaded = true;
-				run();
 			});
-		}, 300)
-	);
-
-	const $actions = $('<div class="ms-auto flex items-center gap-1"></div>').appendTo($toolbar);
-	const update_buttons = () => {
-		const state = tree.get_expansion_state();
-		$expand_all.prop("disabled", !(state === "collapsed" || state === "partial"));
-		$collapse_all.prop("disabled", !(state === "expanded" || state === "partial"));
-	};
-	// tooltip on a wrapper: a disabled es-button has pointer-events:none,
-	// so hover falls through to the wrapper and the tooltip still shows
-	const make_action = (icon, label, onclick) => {
-		const $btn = $(frappe.ui.button({ icon, disabled: true, onclick, attrs: { "aria-label": label } }));
-		const $wrapper = $('<span class="inline-flex"></span>').append($btn).appendTo($actions);
-		frappe.ui.tooltip($wrapper, { text: label });
-		return $btn;
-	};
-	const $expand_all = make_action("chevrons-up-down", __("Expand All"), () => {
-		tree.load_children(tree.root_node, true).then(() => {
-			deep_loaded = true;
 		});
-	});
-	const $collapse_all = make_action("chevrons-down-up", __("Collapse All"), () => {
-		tree.load_children(tree.root_node, false);
-	});
+		var $collapse_all = make_action("chevrons-down-up", __("Collapse All"), () => {
+			tree.load_children(tree.root_node, false);
+		});
+	}
 
 	// generate tree structure based on the csv data
 	tree = new frappe.ui.Tree({
@@ -240,6 +253,7 @@ var generate_tree_preview = function (frm) {
 		label: parent,
 		expandable: true,
 		// read-only preview: row-mode visuals without actions or hover cards
+		// (ignored by an older frappe, which renders the legacy tree)
 		row_style: true,
 		method: "erpnext.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer.get_coa",
 		args: {
@@ -248,7 +262,7 @@ var generate_tree_preview = function (frm) {
 			doctype: "Chart of Accounts Importer",
 			file_type: frm.doc.file_type,
 		},
-		on_node_render: update_buttons,
+		on_node_render: () => update_buttons(),
 		// expanded flips right after this callback — check on the next tick
 		on_click: () => setTimeout(update_buttons, 0),
 	});
