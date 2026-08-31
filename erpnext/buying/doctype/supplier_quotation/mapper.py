@@ -8,6 +8,8 @@ from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import flt
 
+from erpnext.controllers.mapper import get_qty_already_mapped
+
 
 @frappe.whitelist()
 def make_purchase_order(
@@ -16,6 +18,8 @@ def make_purchase_order(
 	if args is None:
 		args = {}
 	args = frappe.parse_json(args)
+
+	mapped_items = get_qty_already_mapped(target_doc, "supplier_quotation_item")
 
 	def set_missing_values(source, target):
 		target.run_method("set_missing_values")
@@ -51,7 +55,8 @@ def make_purchase_order(
 					["sales_order", "sales_order"],
 				],
 				"postprocess": update_item,
-				"condition": select_item,
+				# no qty tracking between the two, so dedupe on the row reference alone
+				"condition": lambda d: d.name not in mapped_items and select_item(d),
 			},
 			"Purchase Taxes and Charges": {
 				"doctype": "Purchase Taxes and Charges",

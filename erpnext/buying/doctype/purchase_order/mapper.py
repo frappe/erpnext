@@ -10,6 +10,7 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.utils import flt, get_link_to_form
 
 from erpnext.accounts.party import get_party_account
+from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.controllers.status_updater import get_allowance_for
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults
@@ -34,12 +35,14 @@ def make_purchase_receipt(
 	def is_unit_price_row(source):
 		return has_unit_price_items and source.qty == 0
 
+	mapped_qty_by_item = get_qty_already_mapped(target_doc, "purchase_order_item")
+
 	def get_max_receivable_qty(source):
 		tolerance = flt(get_allowance_for(source.item_code, qty_or_amount="qty")[0])
 		return flt(source.qty) * (100 + tolerance) / 100
 
 	def update_item(obj, target, source_parent):
-		received_qty = flt(obj.received_qty)
+		received_qty = flt(obj.received_qty) + flt(mapped_qty_by_item.get(obj.name, 0))
 		qty = flt(obj.qty)
 		pending_qty = qty - received_qty
 
@@ -84,9 +87,10 @@ def make_purchase_receipt(
 				},
 				"postprocess": update_item,
 				"condition": lambda doc: (
-					True
+					doc.name not in mapped_qty_by_item
 					if is_unit_price_row(doc)
-					else abs(doc.received_qty) < abs(get_max_receivable_qty(doc))
+					else abs(doc.received_qty) + abs(mapped_qty_by_item.get(doc.name, 0))
+					< abs(get_max_receivable_qty(doc))
 				)
 				and doc.delivered_by_supplier != 1
 				and not doc.closed
@@ -149,9 +153,13 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 		)
 		return query.run(pluck="qty")[0] or 0
 
+	mapped_qty_by_item = get_qty_already_mapped(target_doc, "po_detail")
+
+	def get_billed_and_mapped_qty(po_item_name):
+		return flt(get_billed_qty(po_item_name)) + flt(mapped_qty_by_item.get(po_item_name, 0))
+
 	def update_item(obj, target, source_parent):
-		billed_qty = flt(get_billed_qty(obj.name))
-		target.qty = flt(obj.qty) - billed_qty
+		target.qty = flt(obj.qty) - get_billed_and_mapped_qty(obj.name)
 
 		item = get_item_defaults(target.item_code, source_parent.company)
 		item_group = get_item_group_defaults(target.item_code, source_parent.company)
@@ -194,6 +202,7 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 				or abs(doc.billed_amt) < abs(doc.amount)
 				or doc.qty > flt(get_billed_qty(doc.name))
 			)
+			and (doc.name not in mapped_qty_by_item or doc.qty > get_billed_and_mapped_qty(doc.name))
 			and not doc.closed
 			and select_item(doc),
 		},

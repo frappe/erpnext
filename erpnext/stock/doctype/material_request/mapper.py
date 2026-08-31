@@ -9,6 +9,7 @@ from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import cint, comma_and, flt, get_link_to_form, getdate, nowdate
 
+from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults
@@ -74,6 +75,7 @@ def make_purchase_order(
 	)
 
 	requested_qty = args.get("requested_qty") or {}
+	mapped_qty_by_item = get_qty_already_mapped(target_doc, "material_request_item", "stock_qty")
 
 	def postprocess(source, target_doc):
 		target_doc.is_subcontracted = is_subcontracted
@@ -90,7 +92,7 @@ def make_purchase_order(
 		filtered_items = args.get("filtered_children", [])
 		child_filter = d.name in filtered_items if filtered_items else True
 
-		qty = d.ordered_qty or d.received_qty
+		qty = (d.ordered_qty or d.received_qty) + flt(mapped_qty_by_item.get(d.name, 0))
 
 		return qty < d.stock_qty and child_filter
 
