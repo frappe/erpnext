@@ -223,6 +223,7 @@ def get_sub_assemblies(plan, work_orders, purchase_orders, stock, warehouses):
 			{
 				"row_name": item.name,
 				"production_plan_item": item.production_plan_item,
+				"parent_item_code": item.parent_item_code,
 				"item_code": item.production_item,
 				"item_name": item.item_name,
 				"qty": flt(item.qty),

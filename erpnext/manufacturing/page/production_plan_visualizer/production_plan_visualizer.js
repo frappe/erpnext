@@ -147,12 +147,18 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 
 	build_index() {
 		this.data.schedule = (this.data.schedule || []).filter((d) => d.from_time && d.to_time);
-		const subs_by_parent = this.group_rows(this.data.sub_assemblies, (d) => d.production_plan_item);
 		const owner_of_row = {};
-		for (const fg of this.data.finished_goods) {
-			owner_of_row[fg.row_name] = fg.row_name;
-			for (const sub of subs_by_parent[fg.row_name] || []) owner_of_row[sub.row_name] = fg.row_name;
+		for (const fg of this.data.finished_goods) owner_of_row[fg.row_name] = fg.row_name;
+		for (const sub of this.data.sub_assemblies) {
+			const owner = owner_of_row[sub.production_plan_item];
+			if (owner) owner_of_row[sub.row_name] = owner;
 		}
+		this.resolve_nested_owners(owner_of_row);
+
+		const subs_by_parent = this.group_rows(
+			this.data.sub_assemblies.filter((d) => owner_of_row[d.row_name]),
+			(d) => owner_of_row[d.row_name]
+		);
 
 		const bom_consumers = {};
 		for (const [row_name, items] of Object.entries(this.data.row_materials || {})) {
@@ -173,6 +179,30 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 			material.owners = this.material_owners(material);
 		}
 		this.compute_stats();
+	}
+
+	resolve_nested_owners(owner_of_row) {
+		const fg_by_item = {};
+		for (const fg of this.data.finished_goods) fg_by_item[fg.item_code] = fg.row_name;
+		const sub_by_item = {};
+		for (const sub of this.data.sub_assemblies) sub_by_item[sub.item_code] = sub;
+
+		for (const sub of this.data.sub_assemblies) {
+			if (owner_of_row[sub.row_name]) continue;
+			owner_of_row[sub.row_name] = this.walk_to_finished_good(sub, fg_by_item, sub_by_item);
+			if (!owner_of_row[sub.row_name]) delete owner_of_row[sub.row_name];
+		}
+	}
+
+	walk_to_finished_good(sub, fg_by_item, sub_by_item) {
+		const seen = new Set();
+		let node = sub;
+		while (node && !seen.has(node.row_name)) {
+			seen.add(node.row_name);
+			if (fg_by_item[node.parent_item_code]) return fg_by_item[node.parent_item_code];
+			node = sub_by_item[node.parent_item_code];
+		}
+		return null;
 	}
 
 	material_owners(material) {
