@@ -221,6 +221,7 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Rate",
+   "non_negative": 1,
    "options": "Company:company:default_currency",
    "print_width": "100px",
    "read_only_depends_on": "eval:doc.valuation_type != 'Manual'",
