@@ -73,52 +73,52 @@ class TestMapper(ERPNextTestSuite):
 			(
 				"Quotation -> Sales Order",
 				lambda: make_quotation(),
-				"erpnext.selling.doctype.quotation.mapper.make_sales_order",
+				"erpnext.selling.doctype.quotation.quotation.make_sales_order",
 			),
 			(
 				"Sales Order -> Sales Invoice",
 				lambda: make_sales_order(),
-				"erpnext.selling.doctype.sales_order.mapper.make_sales_invoice",
+				"erpnext.selling.doctype.sales_order.sales_order.make_sales_invoice",
 			),
 			(
 				"Sales Order -> Delivery Note",
 				lambda: make_sales_order(),
-				"erpnext.selling.doctype.sales_order.mapper.make_delivery_note",
+				"erpnext.selling.doctype.sales_order.sales_order.make_delivery_note",
 			),
 			(
 				"Delivery Note -> Sales Invoice",
 				lambda: create_delivery_note(),
-				"erpnext.stock.doctype.delivery_note.mapper.make_sales_invoice",
+				"erpnext.stock.doctype.delivery_note.delivery_note.make_sales_invoice",
 			),
 			(
 				"Material Request -> Purchase Order",
 				lambda: make_material_request_for_items(["_Test Item"]),
-				"erpnext.stock.doctype.material_request.mapper.make_purchase_order",
+				"erpnext.stock.doctype.material_request.material_request.make_purchase_order",
 			),
 			(
 				"Supplier Quotation -> Purchase Order",
 				make_supplier_quotation,
-				"erpnext.buying.doctype.supplier_quotation.mapper.make_purchase_order",
+				"erpnext.buying.doctype.supplier_quotation.supplier_quotation.make_purchase_order",
 			),
 			(
 				"Purchase Order -> Purchase Receipt",
 				lambda: create_purchase_order(),
-				"erpnext.buying.doctype.purchase_order.mapper.make_purchase_receipt",
+				"erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_receipt",
 			),
 			(
 				"Purchase Order -> Purchase Invoice",
 				lambda: create_purchase_order(),
-				"erpnext.buying.doctype.purchase_order.mapper.make_purchase_invoice",
+				"erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_invoice",
 			),
 			(
 				"Purchase Receipt -> Purchase Invoice",
 				lambda: make_purchase_receipt(),
-				"erpnext.stock.doctype.purchase_receipt.mapper.make_purchase_invoice",
+				"erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_invoice",
 			),
 			(
 				"Purchase Invoice -> Purchase Receipt",
 				lambda: make_purchase_invoice(),
-				"erpnext.accounts.doctype.purchase_invoice.mapper.make_purchase_receipt",
+				"erpnext.accounts.doctype.purchase_invoice.purchase_invoice.make_purchase_receipt",
 			),
 		]
 

@@ -26,6 +26,7 @@ from frappe.utils import (
 
 from erpnext.buying.utils import check_on_hold_or_closed_status, validate_for_items
 from erpnext.controllers.buying_controller import BuyingController
+from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
@@ -581,6 +582,8 @@ def make_purchase_order(source_name, target_doc=None, args=None):
 	if isinstance(args, str):
 		args = json.loads(args)
 
+	mapped_qty_by_item = get_qty_already_mapped(target_doc, "material_request_item", "stock_qty")
+
 	is_subcontracted = (
 		frappe.db.get_value("Material Request", source_name, "material_request_type") == "Subcontracting"
 	)
@@ -602,7 +605,7 @@ def make_purchase_order(source_name, target_doc=None, args=None):
 		filtered_items = args.get("filtered_children", [])
 		child_filter = d.name in filtered_items if filtered_items else True
 
-		qty = d.ordered_qty or d.received_qty
+		qty = (d.ordered_qty or d.received_qty) + flt(mapped_qty_by_item.get(d.name, 0))
 
 		return qty < d.stock_qty and child_filter
 
