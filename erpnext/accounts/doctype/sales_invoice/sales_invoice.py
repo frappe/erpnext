@@ -278,6 +278,9 @@ class SalesInvoice(SellingController):
 				"overflow_type": "billing",
 			}
 		]
+		self.closed_source_links = [
+			("Sales Invoice Item", "dn_detail", "Delivery Note Item", "Delivery Note")
+		]
 
 	def set_indicator(self):
 		"""Set indicator for portal"""

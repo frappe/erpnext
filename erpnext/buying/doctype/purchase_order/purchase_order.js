@@ -14,7 +14,9 @@ frappe.ui.form.on("Purchase Order", {
 	setup: function (frm) {
 		frm.set_indicator_formatter("item_code", function (doc) {
 			let color;
-			if (!doc.qty && frm.doc.has_unit_price_items) {
+			if (doc.closed) {
+				color = "gray";
+			} else if (!doc.qty && frm.doc.has_unit_price_items) {
 				color = "yellow";
 			} else if (doc.qty <= doc.received_qty) {
 				color = "green";
@@ -340,7 +342,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 					this.frm.page.set_inner_btn_group_as_primary(__("Status"));
 				}
 			} else if (["Closed", "Delivered"].includes(doc.status)) {
-				if (this.frm.has_perm("submit")) {
+				if (this.frm.has_perm("submit") && !doc.items.every((item) => item.closed)) {
 					this.frm.add_custom_button(
 						__("Re-open"),
 						() => this.unclose_purchase_order(),
@@ -352,7 +354,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 				if (doc.status != "On Hold") {
 					if (
 						(doc.items
-							.filter((item) => !item.delivered_by_supplier)
+							.filter((item) => !item.delivered_by_supplier && !item.closed)
 							.some((item) => item.received_qty < item.qty) ||
 							doc.__onload?.has_pending_receivable_qty) &&
 						allow_receipt
@@ -365,7 +367,11 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 							__("Create")
 						);
 						if (doc.is_subcontracted) {
-							if (!doc.items.every((item) => item.qty == item.subcontracted_qty)) {
+							if (
+								!doc.items
+									.filter((item) => !item.closed)
+									.every((item) => item.qty == item.subcontracted_qty)
+							) {
 								this.frm.add_custom_button(
 									__("Subcontracting Order"),
 									() => {
@@ -433,6 +439,8 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 		} else if (doc.docstatus === 0) {
 			this.frm.cscript.add_from_mappers();
 		}
+
+		this.set_item_close_buttons();
 	}
 
 	validate() {
@@ -695,6 +703,19 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 
 	close_purchase_order() {
 		this.frm.cscript.update_status("Close", "Closed");
+	}
+
+	set_item_close_buttons() {
+		erpnext.item_close.add_buttons(
+			this.frm,
+			erpnext.item_close.fulfilment_config({
+				qty_field: "received_qty",
+				qty_label: __("Received Qty"),
+				help: __(
+					"Closed rows stop being expected. Their pending quantity is written off and they are skipped when creating a Purchase Receipt or Purchase Invoice."
+				),
+			})
+		);
 	}
 
 	update_dropship_delivered_qty() {

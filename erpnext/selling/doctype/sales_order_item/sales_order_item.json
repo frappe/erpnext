@@ -66,6 +66,7 @@
   "base_net_rate",
   "base_net_amount",
   "billed_amt",
+  "closed",
   "valuation_rate",
   "gross_profit",
   "drop_ship_section",
@@ -629,6 +630,15 @@
    "read_only": 1
   },
   {
+   "default": "0",
+   "fieldname": "closed",
+   "fieldtype": "Check",
+   "label": "Closed",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
    "fieldname": "valuation_rate",
    "fieldtype": "Currency",
    "label": "Valuation Rate",
@@ -1067,7 +1077,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-08-27 10:55:37.000000",
+ "modified": "2026-08-27 11:55:37.000000",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order Item",

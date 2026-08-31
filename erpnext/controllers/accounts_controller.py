@@ -39,6 +39,7 @@ from erpnext.accounts.utils import (
 	get_advance_payment_doctypes as _get_advance_payment_doctypes,
 )
 from erpnext.accounts.utils import get_fiscal_year, validate_fiscal_year
+from erpnext.controllers.item_close import clear_closed_rows_on_amend
 from erpnext.controllers.print_settings import (
 	set_print_templates_for_item_table,
 	set_print_templates_for_taxes,
@@ -227,7 +228,23 @@ class AccountsController(TransactionBase):
 
 		return False
 
+	def is_item_closable(self, item):
+		"""A row can be closed while anything is still pending on it.
+
+		Billing is the axis every closable document shares; the order doctypes
+		extend this with their own fulfilment axis.
+
+		Amounts are compared as magnitudes so that return rows stay closable.
+		That is deliberate: writing off a credit note that will never be issued
+		is a real decision, and closing a whole return document is already
+		allowed. Leaving it to the sign of the amount would decide it by
+		accident.
+		"""
+		return abs(flt(item.billed_amt)) < abs(flt(item.amount))
+
 	def validate(self):
+		clear_closed_rows_on_amend(self)
+
 		if not self.get("is_return") and not self.get("is_debit_note"):
 			self.validate_qty_is_not_zero()
 
