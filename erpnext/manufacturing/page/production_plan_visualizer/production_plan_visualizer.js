@@ -155,8 +155,10 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 		}
 
 		const bom_consumers = {};
-		for (const [row_name, items] of Object.entries(this.data.row_materials || {})) {
-			for (const item of items) (bom_consumers[item] = bom_consumers[item] || []).push(row_name);
+		for (const [row_name, items] of Object.entries(this.data.row_requirements || {})) {
+			for (const item of Object.keys(items)) {
+				(bom_consumers[item] = bom_consumers[item] || []).push(row_name);
+			}
 		}
 
 		const subs_by_signature = {};
@@ -749,7 +751,7 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 			size: "sm",
 			theme: "violet",
 			variant: "outline",
-			title: __("Quantity covers {0}", [names.join(", ")]),
+			title: __("Needed by {0}. Procurement quantities are for the whole plan.", [names.join(", ")]),
 		});
 	}
 
@@ -1081,12 +1083,12 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 			blocks.filter((d) => d.row_type === "Raw Material"),
 			(d) => d.item_code
 		);
-		const row_materials = this.data.row_materials || {};
+		const row_materials = this.data.row_requirements || {};
 		const used_materials = new Set();
 		const used_rows = new Set();
 
 		const material_rows = (row_name, indent) =>
-			(row_materials[row_name] || []).flatMap((item) => {
+			Object.keys(row_materials[row_name] || {}).flatMap((item) => {
 				if (used_materials.has(item) || !material_blocks[item]) return [];
 				used_materials.add(item);
 				const rows = material_blocks[item];
@@ -1166,6 +1168,26 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 
 	esc(value) {
 		return frappe.utils.escape_html(value == null ? "" : String(value));
+	}
+
+	required_cell(material) {
+		const total = flt(material.required_qty);
+		if (this.focus === "all" || material.owners.length < 2) return this.format_float(total);
+
+		const share = this.owner_requirement(material, this.focus);
+		if (!share || share >= total) return this.format_float(total);
+		return `${this.format_float(share)}<div class="ppv-sub-note">${__("of {0} in plan", [
+			this.format_float(total),
+		])}</div>`;
+	}
+
+	owner_requirement(material, owner) {
+		const requirements = this.data.row_requirements || {};
+		const rows = [owner, ...(this.index.subs_by_parent[owner] || []).map((d) => d.row_name)];
+		return rows.reduce(
+			(total, row_name) => total + flt((requirements[row_name] || {})[material.item_code]),
+			0
+		);
 	}
 
 	stock_value(row) {
@@ -1310,6 +1332,11 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 			.ppv-muted { color: var(--text-muted); }
 			.ppv-uom { color: var(--text-muted); font-size: var(--text-xs); }
 			.ppv-unknown { color: var(--text-muted); cursor: help; }
+			.ppv-sub-note {
+				font-size: var(--text-xs);
+				font-weight: 400;
+				color: var(--text-muted);
+			}
 
 			.ppv-kpis {
 				flex: 0 0 auto;

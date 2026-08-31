@@ -1,5 +1,5 @@
 import frappe
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import flt
 
 
@@ -20,7 +20,7 @@ def get_plan_overview(production_plan: str):
 		"material_requests": get_material_requests(production_plan),
 		"materials": get_materials(plan, production_plan, stock, warehouses),
 		"schedule": schedule,
-		"row_materials": get_row_materials(plan, schedule),
+		"row_requirements": get_row_requirements(plan, schedule),
 	}
 
 
@@ -139,33 +139,62 @@ def get_raised_material_request_items(production_plan):
 	)
 
 
-def get_row_materials(plan, schedule):
+def get_row_requirements(plan, schedule):
 	material_items = {d.item_code for d in schedule if d.row_type == "Raw Material"}
 	material_items.update(row.item_code for row in plan.mr_items)
-	rows = [(d.name, d.bom_no) for d in plan.po_items + plan.sub_assembly_items if d.bom_no]
+	rows = [
+		(d.name, d.bom_no, flt(d.get("planned_qty") or d.get("qty")))
+		for d in plan.po_items + plan.sub_assembly_items
+		if d.bom_no
+	]
 	if not material_items or not rows:
 		return {}
 
 	boms = frappe.get_list(
 		"BOM",
-		filters={"name": ("in", {bom_no for _, bom_no in rows})},
+		filters={"name": ("in", {bom_no for _, bom_no, _ in rows})},
 		pluck="name",
 		limit_page_length=0,
 	)
 	if not boms:
 		return {}
 
-	bom_items = frappe.get_all(
-		"BOM Item",
-		filters={"parent": ("in", boms), "parenttype": "BOM", "item_code": ("in", material_items)},
-		fields=["parent", "item_code"],
+	per_unit = get_bom_requirements(boms, material_items)
+
+	return {
+		name: {item: qty * row_qty for item, qty in per_unit[bom_no].items()}
+		for name, bom_no, row_qty in rows
+		if per_unit.get(bom_no)
+	}
+
+
+def get_bom_requirements(boms, material_items):
+	bom_item = frappe.qb.DocType("BOM Item")
+	bom = frappe.qb.DocType("BOM")
+
+	rows = (
+		frappe.qb.from_(bom_item)
+		.inner_join(bom)
+		.on(bom.name == bom_item.parent)
+		.select(
+			bom_item.parent,
+			bom_item.item_code,
+			Sum(bom_item.stock_qty / IfNull(bom.quantity, 1)).as_("qty"),
+		)
+		.where(
+			bom_item.parent.isin(boms)
+			& (bom_item.parenttype == "BOM")
+			& bom_item.item_code.isin(material_items)
+		)
+		.groupby(bom_item.parent, bom_item.item_code)
+		.run(as_dict=True)
 	)
 
-	by_bom = {}
-	for d in bom_items:
-		by_bom.setdefault(d.parent, []).append(d.item_code)
+	per_unit = {}
+	for d in rows:
+		per_unit.setdefault(d.parent, {})[d.item_code] = flt(d.qty)
 
-	return {name: by_bom[bom_no] for name, bom_no in rows if by_bom.get(bom_no)}
+	return per_unit
 
 
 def get_plan_details(plan):
