@@ -33,6 +33,7 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 	}
 
 	make() {
+		$(this.page.wrapper).addClass("ppv-page");
 		this.body.html(`${this.styles()}<div class="ppv"></div>`);
 		this.container = this.body.find(".ppv");
 		this.make_plan_field();
@@ -1005,6 +1006,13 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 
 	styles() {
 		return `<style>
+			.ppv-page .page-form {
+				background: transparent;
+				border: none;
+				padding: 0;
+				margin: 0 0 var(--padding-sm);
+			}
+
 			.ppv { display: flex; flex-direction: column; gap: var(--padding-sm); overflow: hidden; }
 			.ppv-fill { flex: 1 1 auto; display: flex; align-items: center; justify-content: center; }
 			.ppv-muted { color: var(--text-muted); }
