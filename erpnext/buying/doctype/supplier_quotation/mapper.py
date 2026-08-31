@@ -4,9 +4,10 @@
 import json
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import flt
+from frappe.utils import flt, getdate, nowdate
 
 from erpnext.controllers.mapper import get_qty_already_mapped
 
@@ -15,9 +16,22 @@ from erpnext.controllers.mapper import get_qty_already_mapped
 def make_purchase_order(
 	source_name: str, target_doc: str | dict | Document | None = None, args: str | dict | None = None
 ):
+	supplier_quotation = frappe.db.get_value(
+		"Supplier Quotation",
+		source_name,
+		["transaction_date", "valid_till", "has_unit_price_items"],
+		as_dict=True,
+	)
+	if supplier_quotation.valid_till and (
+		supplier_quotation.valid_till < supplier_quotation.transaction_date
+		or supplier_quotation.valid_till < getdate(nowdate())
+	):
+		frappe.throw(_("Validity period of this supplier quotation has ended."))
+
 	if args is None:
 		args = {}
 	args = frappe.parse_json(args)
+	ordered_items = get_ordered_items(source_name)
 
 	mapped_items = get_qty_already_mapped(target_doc, "supplier_quotation_item")
 
@@ -27,7 +41,14 @@ def make_purchase_order(
 		target.run_method("calculate_taxes_and_totals")
 
 	def update_item(obj, target, source_parent):
-		target.stock_qty = flt(obj.qty) * flt(obj.conversion_factor)
+		balance_stock_qty = obj.stock_qty - ordered_items.get(obj.name, 0.0)
+		target.stock_qty = balance_stock_qty if balance_stock_qty > 0 else 0
+		target.qty = flt(target.stock_qty) / flt(obj.conversion_factor)
+
+	def can_map_row(item):
+		return item.stock_qty > ordered_items.get(item.name, 0.0) or (
+			supplier_quotation.has_unit_price_items and item.qty == 0
+		)
 
 	def select_item(d):
 		filtered_items = args.get("filtered_children", [])
@@ -55,8 +76,9 @@ def make_purchase_order(
 					["sales_order", "sales_order"],
 				],
 				"postprocess": update_item,
-				# no qty tracking between the two, so dedupe on the row reference alone
-				"condition": lambda d: d.name not in mapped_items and select_item(d),
+				"condition": lambda item: item.name not in mapped_items
+				and can_map_row(item)
+				and select_item(item),
 			},
 			"Purchase Taxes and Charges": {
 				"doctype": "Purchase Taxes and Charges",
@@ -112,3 +134,14 @@ def make_quotation(source_name: str, target_doc: str | dict | Document | None = 
 	)
 
 	return doclist
+
+
+def get_ordered_items(supplier_quotation: str) -> frappe._dict:
+	return frappe._dict(
+		frappe.get_all(
+			"Supplier Quotation Item",
+			{"docstatus": 1, "parent": supplier_quotation, "ordered_qty": (">", 0)},
+			["name", "ordered_qty"],
+			as_list=True,
+		)
+	)

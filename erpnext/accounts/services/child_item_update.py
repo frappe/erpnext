@@ -36,7 +36,9 @@ class ChildItemUpdater:
 
 	def update(self, trans_items: str | list) -> None:
 		"""Process item additions, edits, and deletions from trans_items JSON."""
-		from erpnext.buying.doctype.supplier_quotation.supplier_quotation import get_purchased_items
+		from erpnext.buying.doctype.supplier_quotation.mapper import (
+			get_ordered_items as get_ordered_supplier_quotation_items,
+		)
 		from erpnext.selling.doctype.quotation.mapper import get_ordered_items
 
 		data = frappe.parse_json(trans_items)
@@ -52,7 +54,7 @@ class ChildItemUpdater:
 				self.parent, data, self._transacted_stock_qty
 			)
 		elif self.parent_doctype == "Supplier Quotation":
-			self._transacted_stock_qty = get_purchased_items(self.parent.name)
+			self._transacted_stock_qty = get_ordered_supplier_quotation_items(self.parent.name)
 			items_added_or_removed |= validate_and_delete_children(
 				self.parent, data, self._transacted_stock_qty
 			)

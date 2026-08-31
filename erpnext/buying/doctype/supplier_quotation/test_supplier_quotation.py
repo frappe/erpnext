@@ -63,12 +63,12 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		valid.submit()
 
 		partially_ordered = make_supplier_quotation_from_rfq(rfq.name, for_supplier=rfq.suppliers[1].supplier)
-		partially_ordered.transaction_date = add_days(today(), -10)
-		partially_ordered.valid_till = add_days(today(), -2)
+		partially_ordered.valid_till = add_days(today(), 10)
 		partially_ordered.items[0].qty = 10
 		partially_ordered.insert()
 		partially_ordered.submit()
 		partial_order = self.make_order(partially_ordered, 4)
+		partially_ordered.db_set("valid_till", add_days(today(), -2))
 
 		# A past-validity draft must not be expired - "Expired" applies to submitted quotations only
 		draft = make_supplier_quotation_from_rfq(rfq.name, for_supplier=rfq.suppliers[0].supplier)
@@ -87,6 +87,12 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("Supplier Quotation", draft.name, "status"), "Draft")
 
 		partial_order.cancel()
+		self.assertEqual(
+			frappe.db.get_value("Supplier Quotation", partially_ordered.name, "status"),
+			"Submitted",
+		)
+
+		set_expired_status()
 		self.assertEqual(
 			frappe.db.get_value("Supplier Quotation", partially_ordered.name, "status"),
 			"Expired",
@@ -116,10 +122,12 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		partial_order = self.make_order(supplier_quotation, 4)
 		supplier_quotation.reload()
 		self.assertEqual(supplier_quotation.status, "Partially Ordered")
+		self.assertEqual(supplier_quotation.items[0].ordered_qty, 4)
 
 		self.update_order_qty(partial_order, 10)
 		supplier_quotation.reload()
 		self.assertEqual(supplier_quotation.status, "Ordered")
+		self.assertEqual(supplier_quotation.items[0].ordered_qty, 10)
 
 		self.update_order_qty(partial_order, 4)
 		supplier_quotation.reload()
@@ -136,6 +144,60 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		partial_order.cancel()
 		supplier_quotation.reload()
 		self.assertEqual(supplier_quotation.status, "Submitted")
+		self.assertEqual(supplier_quotation.items[0].ordered_qty, 0)
+
+	def test_purchase_order_maps_remaining_quotation_qty(self):
+		supplier_quotation = frappe.copy_doc(self.globalTestRecords["Supplier Quotation"][0])
+		supplier_quotation.submit()
+		self.make_order(supplier_quotation, 4)
+
+		purchase_order = make_purchase_order(supplier_quotation.name)
+		self.assertEqual(purchase_order.items[0].qty, 6)
+
+		purchase_order.items[0].schedule_date = add_days(today(), 1)
+		purchase_order.submit()
+
+		supplier_quotation.reload()
+		self.assertEqual(supplier_quotation.status, "Ordered")
+		self.assertEqual(make_purchase_order(supplier_quotation.name).items, [])
+
+	def test_purchase_order_skips_fully_ordered_quotation_rows(self):
+		supplier_quotation = frappe.copy_doc(self.globalTestRecords["Supplier Quotation"][0])
+		supplier_quotation.append("items", {"item_code": "_Test Item 2", "qty": 3, "rate": 100})
+		supplier_quotation.submit()
+
+		first_order = make_purchase_order(
+			supplier_quotation.name,
+			args={"filtered_children": [supplier_quotation.items[0].name]},
+		)
+		first_order.items[0].schedule_date = add_days(today(), 1)
+		first_order.submit()
+
+		supplier_quotation.reload()
+		self.assertEqual(supplier_quotation.status, "Partially Ordered")
+
+		second_order = make_purchase_order(supplier_quotation.name)
+		self.assertEqual(len(second_order.items), 1)
+		self.assertEqual(second_order.items[0].item_code, "_Test Item 2")
+		self.assertEqual(second_order.items[0].qty, 3)
+
+		second_order.items[0].schedule_date = add_days(today(), 1)
+		second_order.submit()
+		supplier_quotation.reload()
+		self.assertEqual(supplier_quotation.status, "Ordered")
+
+	def test_purchase_order_cannot_exceed_supplier_quotation_qty(self):
+		supplier_quotation = frappe.copy_doc(self.globalTestRecords["Supplier Quotation"][0])
+		supplier_quotation.items[0].qty = 5
+		supplier_quotation.submit()
+
+		first_order = make_purchase_order(supplier_quotation.name)
+		second_order = make_purchase_order(supplier_quotation.name)
+		for purchase_order in (first_order, second_order):
+			purchase_order.items[0].schedule_date = add_days(today(), 1)
+
+		first_order.submit()
+		self.assertRaises(frappe.ValidationError, second_order.submit)
 
 	def test_removing_purchase_order_item_updates_quotation_status(self):
 		first_quotation = frappe.copy_doc(self.globalTestRecords["Supplier Quotation"][0])
@@ -189,10 +251,12 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		self.make_order(supplier_quotation, 4)
 
 		supplier_quotation.db_set("status", "Submitted")
+		frappe.db.set_value("Supplier Quotation Item", supplier_quotation.items[0].name, "ordered_qty", 0)
 		set_order_status()
 
 		supplier_quotation.reload()
 		self.assertEqual(supplier_quotation.status, "Partially Ordered")
+		self.assertEqual(supplier_quotation.items[0].ordered_qty, 4)
 
 	def test_update_child_supplier_quotation_add_item(self):
 		sq = frappe.copy_doc(self.globalTestRecords["Supplier Quotation"][0])
