@@ -326,10 +326,10 @@ class SalesInvoice(SellingController):
 
 		if cint(self.is_pos):
 			self.validate_pos()
+			POSService(self).validate_full_payment()
 
 		if cint(self.is_created_using_pos):
 			POSService(self).validate_created_using_pos()
-			POSService(self).validate_full_payment()
 
 		self.validate_dropship_item()
 
