@@ -82,6 +82,13 @@ class ChildItemUpdater:
 				if is_child_item_unchanged(change_state):
 					continue
 
+				if child_item.get("closed"):
+					frappe.throw(
+						_(
+							"Row #{0}: Cannot change item {1} because it is closed. Reopen the row first."
+						).format(child_item.idx, child_item.item_code)
+					)
+
 			self._validate_quantity_and_rate(child_item, d, rate_unchanged)
 
 			if flt(child_item.get("qty")) != flt(d.get("qty")):
@@ -478,7 +485,11 @@ def update_bin_on_delete(row, doctype: str) -> None:
 def validate_and_delete_children(parent, data, ordered_item=None) -> bool:
 	"""Delete child rows not present in data; return True if any were removed."""
 	updated_item_names = [d.get("docname") for d in data]
-	deleted_children = [item for item in parent.items if item.name not in updated_item_names]
+	# A closed row is left out of the payload rather than deleted, so its absence
+	# must not be read as a removal.
+	deleted_children = [
+		item for item in parent.items if item.name not in updated_item_names and not item.get("closed")
+	]
 
 	for d in deleted_children:
 		validate_child_on_delete(d, parent, ordered_item)
