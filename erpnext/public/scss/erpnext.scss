@@ -656,12 +656,18 @@ body[data-route="pos"] {
 		white-space: nowrap;
 	}
 
-	// the root row is the finished-product header (not a flex li); its cost
-	// is the BOM's own field and shown in the Final Product tab, so drop the
-	// redundant root pill rather than overlap the label. !important beats the
-	// pill's inline display:inline-flex (kept for its internal two-part layout)
+	// the root row is a direct child of the wrapper (not a flex li), so its
+	// pill can't margin-auto right — pin it to the wrapper's top-right, where
+	// the always-first root row sits. width:max-content stops it stretching.
 	> .bom-qty-pill {
-		display: none !important;
+		position: absolute;
+		// inset shorthand sets left:auto explicitly (something else sets left,
+		// which would otherwise beat a lone `right`)
+		inset: 5px 8px auto auto;
+		float: none;
+		margin: 0;
+		min-width: 0;
+		width: max-content;
 	}
 
 	// keep the label readable beside the pill
