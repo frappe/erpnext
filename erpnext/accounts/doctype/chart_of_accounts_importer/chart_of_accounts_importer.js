@@ -130,7 +130,6 @@ var create_import_button = function (frm) {
 				freeze_message: __("Creating Accounts..."),
 				callback: function (r) {
 					if (!r.exc) {
-						clearInterval(frm.page["interval"]);
 						frm.page.set_indicator(__("Import Successful"), "blue");
 						create_reset_button(frm);
 					}
@@ -144,31 +143,9 @@ var create_reset_button = function (frm) {
 	frm.page
 		.set_primary_action(__("Reset"), function () {
 			frm.page.clear_primary_action();
-			delete frm.page["show_import_button"];
 			frm.reload_doc();
 		})
 		.addClass("btn btn-primary");
-};
-
-var validate_coa = function (frm) {
-	if (frm.doc.import_file) {
-		let parent = __("All Accounts");
-		return frappe.call({
-			method: "erpnext.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer.get_coa",
-			args: {
-				file_name: frm.doc.import_file,
-				parent: parent,
-				doctype: "Chart of Accounts Importer",
-				file_type: frm.doc.file_type,
-				for_validate: 1,
-			},
-			callback: function (r) {
-				if (r.message["show_import_button"]) {
-					frm.page["show_import_button"] = Boolean(r.message["show_import_button"]);
-				}
-			},
-		});
-	}
 };
 
 var generate_tree_preview = function (frm) {

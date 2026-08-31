@@ -76,7 +76,6 @@ frappe.treeview_settings["Task"] = {
 								data: dialog.get_values()["multiple_tasks"],
 								parent: node.data.value,
 							},
-							callback: function () {},
 						});
 					},
 					primary_action_label: __("Create"),
