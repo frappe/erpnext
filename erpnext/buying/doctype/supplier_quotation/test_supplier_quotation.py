@@ -118,6 +118,7 @@ class TestPurchaseOrder(ERPNextTestSuite):
 	def test_purchase_order_updates_order_status(self):
 		supplier_quotation = frappe.copy_doc(self.globalTestRecords["Supplier Quotation"][0])
 		supplier_quotation.submit()
+		self.assertEqual(supplier_quotation.status, "Submitted")
 
 		partial_order = self.make_order(supplier_quotation, 4)
 		supplier_quotation.reload()

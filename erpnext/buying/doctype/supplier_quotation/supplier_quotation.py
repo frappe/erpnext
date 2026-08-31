@@ -135,6 +135,7 @@ class SupplierQuotation(BuyingController):
 		self.validate_valid_till()
 
 	def on_submit(self):
+		self.set_status(update=True)
 		self.update_rfq_supplier_status(1)
 
 	def on_cancel(self):
