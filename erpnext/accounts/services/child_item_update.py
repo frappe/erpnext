@@ -72,6 +72,10 @@ class ChildItemUpdater:
 				self._check_permissions("write")
 				child_item = frappe.get_doc(self.parent_doctype + " Item", d.get("docname"))
 
+			if self.parent_doctype == "Quotation":
+				self._set_quotation_conversion_factor(child_item, d)
+
+			if not new_child_flag:
 				change_state = get_child_item_change_state(self.parent_doctype, child_item, d)
 				rate_unchanged = change_state.rate_unchanged
 				any_conversion_factor_changed |= not change_state.conversion_factor_unchanged
@@ -251,6 +255,12 @@ class ChildItemUpdater:
 			item_row,
 		)
 
+	def _set_quotation_conversion_factor(self, child_item, new_data: dict) -> None:
+		uom = new_data.get("uom") or child_item.uom
+		new_data["conversion_factor"] = flt(
+			get_conversion_factor(child_item.item_code, uom).get("conversion_factor")
+		)
+
 	def _validate_quantity_and_rate(self, child_item, new_data: dict, rate_unchanged: bool | None) -> None:
 		if not flt(new_data.get("qty")) and not self.allow_zero_qty:
 			frappe.throw(
@@ -291,7 +301,11 @@ class ChildItemUpdater:
 				).format(frappe.bold(new_data.get("item_code")))
 			)
 
-		if flt(new_data.get("qty")) < qty_to_check:
+		new_qty = flt(new_data.get("qty"))
+		if self.parent_doctype == "Quotation":
+			new_qty *= flt(new_data.get("conversion_factor"))
+
+		if new_qty < qty_to_check:
 			frappe.throw(_("Cannot reduce quantity than ordered or purchased quantity"))
 
 	def _validate_fg_item_for_subcontracting(self, new_data: dict, is_new: bool) -> None:
@@ -591,11 +605,8 @@ def update_child_item_uom_and_weight(child_item, new_data) -> None:
 
 	if new_data.get("uom"):
 		child_item.uom = new_data.get("uom")
-		conversion_factor = flt(
+		child_item.conversion_factor = flt(new_data.get("conversion_factor"), conv_fac_precision) or flt(
 			get_conversion_factor(child_item.item_code, child_item.uom).get("conversion_factor")
-		)
-		child_item.conversion_factor = (
-			flt(new_data.get("conversion_factor"), conv_fac_precision) or conversion_factor
 		)
 
 	if child_item.get("weight_per_unit"):
