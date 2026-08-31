@@ -41,6 +41,9 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 			"resize.ppv",
 			frappe.utils.debounce(() => this.fit_viewport(), 150)
 		);
+		$(document).on("keydown.ppv", (e) => {
+			if (e.key === "Escape") this.close_document();
+		});
 		this.render_blank_state();
 	}
 
@@ -121,7 +124,25 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 		this.container.empty();
 		this.render_kpis();
 		this.render_workspace();
+		this.render_drawer();
 		this.fit_viewport();
+	}
+
+	render_drawer() {
+		this.backdrop = $('<div class="ppv-backdrop"></div>').appendTo(this.container);
+		this.drawer = $(`
+			<aside class="ppv-drawer">
+				<div class="ppv-drawer-head">
+					<div>
+						<div class="ppv-drawer-name"></div>
+						<div class="ppv-drawer-sub"></div>
+					</div>
+					<div class="ppv-drawer-actions"></div>
+				</div>
+				<div class="ppv-drawer-body"></div>
+			</aside>
+		`).appendTo(this.container);
+		this.backdrop.on("click", () => this.close_document());
 	}
 
 	build_index() {
@@ -743,8 +764,7 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 		}
 		const icons = { "Purchase Order": "shopping-cart", "Material Request": "clipboard-list" };
 		for (const doc of documents) {
-			const route = `/app/${frappe.router.slug(doc.doctype)}/${encodeURIComponent(doc.name)}`;
-			$(`<a class="ppv-chip-link" href="${route}"></a>`)
+			$(`<a class="ppv-chip-link" href="${this.form_route(doc.doctype, doc.name)}"></a>`)
 				.append(
 					frappe.ui.badge({
 						label: doc.name,
@@ -754,8 +774,166 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 						title: __(doc.status || "Draft"),
 					})
 				)
+				.on("click", (e) => this.on_chip_click(e, doc))
 				.appendTo(target);
 		}
+	}
+
+	form_route(doctype, name) {
+		return `/app/${frappe.router.slug(doctype)}/${encodeURIComponent(name)}`;
+	}
+
+	on_chip_click(event, doc) {
+		if (event.ctrlKey || event.metaKey || event.shiftKey || event.which === 2) return;
+		event.preventDefault();
+		this.show_document(doc.doctype, doc.name);
+	}
+
+	show_document(doctype, name) {
+		this.drawer_key = `${doctype}/${name}`;
+		this.drawer.addClass("is-open");
+		this.backdrop.addClass("is-open");
+		this.drawer.find(".ppv-drawer-name").text(name);
+		this.drawer.find(".ppv-drawer-sub").text(__(doctype));
+		this.drawer.find(".ppv-drawer-actions").empty().append(this.drawer_actions(doctype, name));
+		this.drawer
+			.find(".ppv-drawer-body")
+			.html(frappe.ui.skeleton.html({ width: "100%", height: "200px" }));
+
+		frappe.db.get_doc(doctype, name).then((doc) => {
+			if (this.drawer_key === `${doctype}/${name}`) this.render_document(doc, doctype);
+		});
+	}
+
+	drawer_actions(doctype, name) {
+		const open = frappe.ui.button({
+			label: __("Open"),
+			icon_right: "external-link",
+			variant: "subtle",
+			size: "sm",
+			onclick: () => frappe.set_route("Form", doctype, name),
+		});
+		const close = frappe.ui.button({
+			icon: "x",
+			variant: "ghost",
+			size: "sm",
+			title: __("Close"),
+			onclick: () => this.close_document(),
+		});
+		return [open, close];
+	}
+
+	close_document() {
+		if (!this.drawer) return;
+		this.drawer_key = null;
+		this.drawer.removeClass("is-open");
+		this.backdrop.removeClass("is-open");
+	}
+
+	render_document(doc, doctype) {
+		const body = this.drawer.find(".ppv-drawer-body").empty();
+		this.drawer
+			.find(".ppv-drawer-sub")
+			.empty()
+			.append($(`<span>${this.esc(__(doctype))}</span>`), this.status_badge(doc.status, "sm"));
+
+		const grid = $('<div class="ppv-field-grid"></div>').appendTo(body);
+		for (const [fieldname, label, type] of this.document_fields(doctype)) {
+			grid.append(`
+				<div>
+					<div class="ppv-field-label">${this.esc(label)}</div>
+					<div class="ppv-field-value">${this.esc(this.format_value(doc[fieldname], type))}</div>
+				</div>
+			`);
+		}
+		this.render_document_items(body, doc, doctype);
+	}
+
+	render_document_items(body, doc, doctype) {
+		const { field, columns } = this.document_items(doctype);
+		const rows = doc[field] || [];
+		if (!rows.length) return;
+
+		body.append(`<div class="ppv-drawer-section">${__("Items")}</div>`);
+		const { table, body: tbody } = this.make_table(
+			columns.map(([, label, type]) => ({ label, class: type ? "ppv-num" : "" }))
+		);
+		for (const row of rows) {
+			const cells = columns
+				.map(
+					([fieldname, , type]) =>
+						`<td class="${type ? "ppv-num" : ""}">${this.esc(
+							this.format_value(row[fieldname], type)
+						)}</td>`
+				)
+				.join("");
+			tbody.append(`<tr>${cells}</tr>`);
+		}
+		body.append(table);
+	}
+
+	document_fields(doctype) {
+		const fields = {
+			"Work Order": [
+				["production_item", __("Item")],
+				["bom_no", __("BOM")],
+				["qty", __("Qty to Manufacture"), "float"],
+				["material_transferred_for_manufacturing", __("Transferred"), "float"],
+				["produced_qty", __("Produced"), "float"],
+				["planned_start_date", __("Planned Start"), "datetime"],
+				["planned_end_date", __("Planned End"), "datetime"],
+				["source_warehouse", __("Source Warehouse")],
+				["fg_warehouse", __("Target Warehouse")],
+			],
+			"Purchase Order": [
+				["supplier", __("Supplier")],
+				["transaction_date", __("Date"), "date"],
+				["schedule_date", __("Required By"), "date"],
+				["total_qty", __("Total Qty"), "float"],
+				["per_received", __("Received"), "percent"],
+				["per_billed", __("Billed"), "percent"],
+			],
+			"Material Request": [
+				["material_request_type", __("Type")],
+				["transaction_date", __("Date"), "date"],
+				["schedule_date", __("Required By"), "date"],
+				["per_ordered", __("Ordered"), "percent"],
+				["per_received", __("Received"), "percent"],
+			],
+		};
+		return fields[doctype] || [];
+	}
+
+	document_items(doctype) {
+		if (doctype === "Work Order") {
+			return {
+				field: "required_items",
+				columns: [
+					["item_code", __("Item")],
+					["required_qty", __("Required"), "float"],
+					["transferred_qty", __("Transferred"), "float"],
+					["consumed_qty", __("Consumed"), "float"],
+				],
+			};
+		}
+		const received = doctype === "Purchase Order" ? __("Received") : __("Ordered");
+		const received_field = doctype === "Purchase Order" ? "received_qty" : "ordered_qty";
+		return {
+			field: "items",
+			columns: [
+				["item_code", __("Item")],
+				["qty", __("Qty"), "float"],
+				[received_field, received, "float"],
+			],
+		};
+	}
+
+	format_value(value, type) {
+		if (value === null || value === undefined || value === "") return "—";
+		if (type === "float") return this.format_float(value);
+		if (type === "percent") return `${Math.round(flt(value))}%`;
+		if (type === "date" || type === "datetime") return frappe.datetime.str_to_user(value);
+		return String(value);
 	}
 
 	render_empty(title) {
@@ -1038,12 +1216,87 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 			}
 
 			.ppv {
+				position: relative;
 				display: flex;
 				flex-direction: column;
 				gap: var(--padding-sm);
 				margin: 0 2px;
 				overflow: hidden;
 			}
+
+			.ppv-backdrop {
+				position: absolute;
+				inset: 0;
+				z-index: 9;
+				background: rgba(0, 0, 0, 0.22);
+				opacity: 0;
+				pointer-events: none;
+				transition: opacity 0.18s ease;
+			}
+			.ppv-backdrop.is-open { opacity: 1; pointer-events: auto; }
+			.ppv-drawer {
+				position: absolute;
+				top: 0;
+				right: 0;
+				bottom: 0;
+				z-index: 10;
+				width: min(440px, 100%);
+				display: flex;
+				flex-direction: column;
+				background: var(--card-bg, var(--fg-color));
+				border-left: 1px solid var(--border-color);
+				box-shadow: var(--shadow-md);
+				transform: translateX(102%);
+				transition: transform 0.18s ease;
+			}
+			.ppv-drawer.is-open { transform: translateX(0); }
+			.ppv-drawer-head {
+				flex: 0 0 auto;
+				display: flex;
+				align-items: flex-start;
+				gap: 8px;
+				padding: 12px 14px;
+				border-bottom: 1px solid var(--border-color);
+			}
+			.ppv-drawer-name {
+				font-size: var(--text-lg);
+				font-weight: 600;
+				color: var(--heading-color);
+			}
+			.ppv-drawer-sub {
+				display: flex;
+				align-items: center;
+				gap: 6px;
+				margin-top: 2px;
+				font-size: var(--text-xs);
+				color: var(--text-muted);
+			}
+			.ppv-drawer-actions { margin-left: auto; display: flex; align-items: center; gap: 4px; }
+			.ppv-drawer-body { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 14px; }
+			.ppv-field-grid {
+				display: grid;
+				grid-template-columns: repeat(2, minmax(0, 1fr));
+				gap: 12px 16px;
+			}
+			.ppv-field-label {
+				font-size: var(--text-xs);
+				text-transform: uppercase;
+				letter-spacing: 0.05em;
+				color: var(--text-muted);
+			}
+			.ppv-field-value {
+				font-size: var(--text-sm);
+				color: var(--text-color);
+				word-break: break-word;
+			}
+			.ppv-drawer-section {
+				margin: 18px 0 6px;
+				font-size: var(--text-xs);
+				text-transform: uppercase;
+				letter-spacing: 0.05em;
+				color: var(--text-muted);
+			}
+			.ppv-drawer .ppv-table td:first-child { max-width: 190px; }
 			.ppv-fill { flex: 1 1 auto; display: flex; align-items: center; justify-content: center; }
 			.ppv-muted { color: var(--text-muted); }
 			.ppv-uom { color: var(--text-muted); font-size: var(--text-xs); }
