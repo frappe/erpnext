@@ -606,7 +606,7 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 		}
 		const { table, body } = this.make_table([
 			{ label: __("Item") },
-			{ label: __("Planned Qty"), class: "ppv-num ppv-num-uom" },
+			{ label: __("Planned Qty"), class: "ppv-num" },
 			{ label: __("Qty In Stock"), class: "ppv-num" },
 			{ label: __("Produced Qty"), class: "ppv-num" },
 			{ label: __("Pending Qty"), class: "ppv-num" },
@@ -652,9 +652,9 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 						<a href="/app/item/${encodeURIComponent(row.item_code)}">${this.esc(row.item_name || row.item_code)}</a>
 						<span class="ppv-item-tag"></span>
 					</div>
-					<div class="ppv-item-sub">${this.esc(row.item_code)}</div>
+					<div class="ppv-item-sub">${this.esc(row.item_code)}${uom ? ` &middot; ${this.esc(uom)}` : ""}</div>
 				</td>
-				<td class="ppv-num">${this.format_float(row.qty)} <span class="ppv-uom">${this.esc(uom)}</span></td>
+				<td class="ppv-num">${this.format_float(row.qty)}</td>
 				<td class="ppv-num">${kind === "sub" ? this.stock_value(row) : "—"}</td>
 				<td class="ppv-num">${this.format_float(row.produced_qty)}</td>
 				<td class="ppv-num ${row.pending_qty > 0 ? "ppv-pending" : ""}">${this.format_float(row.pending_qty)}</td>
@@ -694,7 +694,7 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 		}
 		const { table, body } = this.make_table([
 			{ label: __("Material") },
-			{ label: __("Reqd Qty (BOM)"), class: "ppv-num ppv-num-uom" },
+			{ label: __("Reqd Qty (BOM)"), class: "ppv-num" },
 			{ label: __("Qty In Stock"), class: "ppv-num" },
 			{ label: __("Required Qty"), class: "ppv-num" },
 			{ label: __("Requested Qty"), class: "ppv-num" },
@@ -741,11 +741,9 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 					</div>
 					<div class="ppv-item-sub">${this.esc(material.item_code)}${
 			material.warehouse ? ` &middot; ${this.esc(material.warehouse)}` : ""
-		}</div>
+		}${material.uom ? ` &middot; ${this.esc(material.uom)}` : ""}</div>
 				</td>
-				<td class="ppv-num">${this.format_float(material.required_qty)} <span class="ppv-uom">${this.esc(
-			material.uom || ""
-		)}</span></td>
+				<td class="ppv-num">${this.format_float(material.required_qty)}</td>
 				<td class="ppv-num">${this.stock_value(material)}</td>
 				<td class="ppv-num">${this.format_float(material.to_procure_qty)}</td>
 				<td class="ppv-num">${this.format_float(material.requested_qty)}</td>
@@ -1364,13 +1362,6 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 			.ppv-drawer .ppv-table td:first-child { max-width: 190px; }
 			.ppv-fill { flex: 1 1 auto; display: flex; align-items: center; justify-content: center; }
 			.ppv-muted { color: var(--text-muted); }
-			.ppv-uom {
-				display: inline-block;
-				min-width: 30px;
-				text-align: left;
-				color: var(--text-muted);
-				font-size: var(--text-xs);
-			}
 			.ppv-unknown { color: var(--text-muted); cursor: help; }
 
 			.ppv-kpis {
@@ -1611,7 +1602,6 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 			.ppv-col-progress { width: 150px; }
 			.ppv-progress-cell { display: flex; align-items: center; gap: 8px; }
 			.ppv-progress-cell .es-progress { flex: 1 1 auto; min-width: 0; }
-			.ppv-table th.ppv-num-uom { padding-right: 46px; }
 			.ppv-progress-pct {
 				flex: 0 0 auto;
 				width: 32px;
