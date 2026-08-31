@@ -1168,3 +1168,44 @@ class TestStockReservationEntryValidation(ERPNextTestSuite):
 		result = doc.get_serial_batch_entries()
 		self.assertEqual(result.serial_nos, ["SN1", "SN2"])
 		self.assertEqual(result.batches["B1"], 8)
+
+	def test_update_serial_batch_delivered_qty_updates_each_batch(self):
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			update_serial_batch_delivered_qty,
+		)
+
+		item = make_batch_item()
+		first_batch = frappe.get_doc(doctype="Batch", item=item.name).insert()
+		second_batch = frappe.get_doc(doctype="Batch", item=item.name).insert()
+		batches = {first_batch.name: 2, second_batch.name: 3}
+		sre = make_stock_reservation_entry(
+			item_code=item.name,
+			warehouse="_Test Warehouse - _TC",
+			reserved_qty=5,
+			ignore_validate=True,
+			do_not_submit=True,
+		)
+		sre.reservation_based_on = "Serial and Batch"
+		for batch_no, qty in batches.items():
+			sre.append("sb_entries", {"batch_no": batch_no, "qty": qty})
+		sre.save()
+
+		row = frappe._dict(serial_nos=[], batches=batches)
+		update_serial_batch_delivered_qty(row, sre.name)
+		delivered_qty_by_batch = {
+			d.batch_no: d.delivered_qty
+			for d in frappe.get_all(
+				"Serial and Batch Entry",
+				filters={"parent": sre.name},
+				fields=["batch_no", "delivered_qty"],
+			)
+		}
+		self.assertEqual(delivered_qty_by_batch, batches)
+
+		update_serial_batch_delivered_qty(row, sre.name, is_cancelled=True)
+		delivered_qty = frappe.get_all(
+			"Serial and Batch Entry",
+			filters={"parent": sre.name},
+			pluck="delivered_qty",
+		)
+		self.assertEqual(delivered_qty, [0, 0])
