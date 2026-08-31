@@ -40,6 +40,7 @@ from erpnext.assets.doctype.asset_category.asset_category import get_asset_categ
 from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.accounts_controller import merge_taxes, validate_account_head
 from erpnext.controllers.buying_controller import BuyingController
+from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.stock import get_warehouse_account_map
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 	get_item_account_wise_additional_cost,
@@ -2201,6 +2202,11 @@ def make_purchase_receipt(source_name, target_doc=None, args=None):
 	if isinstance(args, str):
 		args = json.loads(args)
 
+	mapped_qty_by_item = get_qty_already_mapped(target_doc, "purchase_invoice_item")
+
+	def received_and_mapped_qty(obj):
+		return flt(obj.received_qty) + flt(mapped_qty_by_item.get(obj.name, 0))
+
 	def post_parent_process(source_parent, target_parent):
 		remove_items_with_zero_qty(target_parent)
 		set_missing_values(source_parent, target_parent)
@@ -2215,13 +2221,13 @@ def make_purchase_receipt(source_name, target_doc=None, args=None):
 		target_parent.run_method("calculate_taxes_and_totals")
 
 	def update_item(obj, target, source_parent):
-		target.qty = flt(obj.qty) - flt(obj.received_qty)
-		target.received_qty = flt(obj.qty) - flt(obj.received_qty)
-		target.stock_qty = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.conversion_factor)
-		target.amount = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.rate)
-		target.base_amount = (
-			(flt(obj.qty) - flt(obj.received_qty)) * flt(obj.rate) * flt(source_parent.conversion_rate)
-		)
+		pending_qty = flt(obj.qty) - received_and_mapped_qty(obj)
+
+		target.qty = pending_qty
+		target.received_qty = pending_qty
+		target.stock_qty = pending_qty * flt(obj.conversion_factor)
+		target.amount = pending_qty * flt(obj.rate)
+		target.base_amount = pending_qty * flt(obj.rate) * flt(source_parent.conversion_rate)
 
 	def select_item(d):
 		filtered_items = args.get("filtered_children", [])
@@ -2251,7 +2257,8 @@ def make_purchase_receipt(source_name, target_doc=None, args=None):
 					"wip_composite_asset": "wip_composite_asset",
 				},
 				"postprocess": update_item,
-				"condition": lambda doc: abs(doc.received_qty) < abs(doc.qty) and select_item(doc),
+				"condition": lambda doc: abs(received_and_mapped_qty(doc)) < abs(doc.qty)
+				and select_item(doc),
 			},
 			"Purchase Taxes and Charges": {
 				"doctype": "Purchase Taxes and Charges",
