@@ -1030,7 +1030,16 @@ frappe.ui.form.on("Stock Entry Detail", {
 
 	secondary_item_type(frm, cdt, cdn) {
 		const row = locals[cdt][cdn];
-		if (row.secondary_item_type && !row.bom_secondary_item && !row.valuation_type) {
+		if (row.bom_secondary_item) return;
+
+		if (!row.secondary_item_type) {
+			if (row.valuation_type) {
+				frappe.model.set_value(cdt, cdn, { valuation_type: "", set_basic_rate_manually: 0 });
+			}
+			return;
+		}
+
+		if (!row.valuation_type) {
 			frappe.model.set_value(cdt, cdn, "valuation_type", "Valuation Rate");
 		}
 	},

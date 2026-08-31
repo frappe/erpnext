@@ -688,7 +688,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.valuation_type || doc.secondary_item_type",
+   "depends_on": "secondary_item_type",
    "fieldname": "valuation_type",
    "fieldtype": "Select",
    "label": "Valuation Type",

@@ -810,7 +810,13 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		There is no percentage to allocate without a BOM row, so % of FG Cost is rejected."""
 		for d in self.get("items"):
-			if not d.secondary_item_type or d.bom_secondary_item:
+			if d.bom_secondary_item:
+				continue
+
+			if not d.secondary_item_type:
+				if d.valuation_type:
+					d.valuation_type = ""
+					d.set_basic_rate_manually = 0
 				continue
 
 			if d.valuation_type == "% of FG Cost":
