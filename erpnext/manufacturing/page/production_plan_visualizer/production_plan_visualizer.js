@@ -535,7 +535,7 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 				size: "sm",
 				value: this.active_tab,
 				options: [
-					{ label: __("Items to Manufacture"), value: "manufacture" },
+					{ label: __("Work Orders"), value: "manufacture" },
 					{ label: __("Raw Materials"), value: "materials" },
 					{ label: __("Schedule"), value: "schedule" },
 				],
@@ -574,7 +574,7 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 
 	render_detail_body() {
 		this.detail_body.empty();
-		if (this.active_tab === "manufacture") this.render_manufacture_items();
+		if (this.active_tab === "manufacture") this.render_work_orders();
 		else if (this.active_tab === "materials") this.render_materials();
 		else this.render_schedule();
 		this.apply_detail_filter();
@@ -591,92 +591,107 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 		return { table, body: table.find("tbody") };
 	}
 
-	render_manufacture_items() {
-		const goods = this.focused_goods();
-		if (!goods.length) {
-			this.render_empty(__("No items to manufacture in this plan"));
+	render_work_orders() {
+		const { documents, pending } = this.focused_documents();
+		if (!documents.length && !pending.length) {
+			this.render_empty(__("No work orders created from this plan yet"));
 			return;
 		}
 		const { table, body } = this.make_table([
+			{ label: __("Document") },
 			{ label: __("Item") },
-			{ label: __("Planned Qty"), class: "ppv-num" },
-			{ label: __("Qty In Stock"), class: "ppv-num" },
+			{ label: __("Qty"), class: "ppv-num" },
 			{ label: __("Produced Qty"), class: "ppv-num" },
 			{ label: __("Pending Qty"), class: "ppv-num" },
 			{ label: __("Progress"), class: "ppv-col-progress" },
-			{ label: __("Documents"), class: "ppv-col-docs" },
+			{ label: __("Status"), class: "ppv-col-status" },
 		]);
 
-		for (const fg of goods) {
-			body.append(this.manufacture_row(fg, { kind: "fg", indent: 0 }));
-			for (const sub of this.index.subs_by_parent[fg.row_name] || []) {
-				body.append(this.manufacture_row(sub, { kind: "sub", indent: 1 + (sub.indent || 0) }));
-			}
+		for (const entry of documents) body.append(this.work_order_row(entry));
+		if (pending.length) {
+			body.append(this.group_row(__("Not created yet"), 7));
+			for (const row of pending) body.append(this.pending_row(row));
 		}
 		this.detail_body.append(table);
-		this.append_orphan_subs(body);
 	}
 
-	append_orphan_subs(body) {
-		if (this.focus !== "all") return;
-		const orphans = this.data.sub_assemblies.filter(
-			(d) => !(this.index.owners_of_row[d.row_name] || []).length
+	focused_documents() {
+		const documents = [];
+		const pending = [];
+		for (const row of this.focused_rows()) {
+			for (const doc of row.documents || []) documents.push({ doc, row });
+			if (!(row.documents || []).length) pending.push(row);
+		}
+		return { documents, pending };
+	}
+
+	focused_rows() {
+		const rows = [];
+		for (const fg of this.focused_goods()) {
+			rows.push(fg, ...(this.index.subs_by_parent[fg.row_name] || []));
+		}
+		if (this.focus !== "all") return rows;
+		return rows.concat(
+			this.data.sub_assemblies.filter((d) => !(this.index.owners_of_row[d.row_name] || []).length)
 		);
-		if (!orphans.length) return;
-		body.append(this.group_row(__("Unlinked Sub Assemblies"), 7));
-		for (const sub of orphans) body.append(this.manufacture_row(sub, { kind: "sub", indent: 1 }));
 	}
 
 	group_row(label, span) {
 		return $(`<tr class="ppv-row-group"><td colspan="${span}">${this.esc(label)}</td></tr>`);
 	}
 
-	manufacture_row(row, { kind, indent }) {
-		const completion = row.qty ? (row.produced_qty / row.qty) * 100 : 0;
-		const uom = row.stock_uom || row.uom || "";
+	work_order_row({ doc, row }) {
+		const qty = flt(doc.qty);
+		const produced = flt(doc.produced_qty);
+		const completion = qty ? (produced / qty) * 100 : 0;
+		const item_code = doc.item_code || row.item_code;
 		const tr = $(`
-			<tr data-kind="${kind}" data-search="${this.esc(
-			`${row.item_name || ""} ${row.item_code} ${(row.documents || [])
-				.map((d) => d.name)
-				.join(" ")}`.toLowerCase()
-		)}">
-				<td class="ppv-cell-item" style="--ppv-indent: ${indent}">
+			<tr data-search="${this.esc(
+				`${doc.name} ${item_code} ${row.item_name || ""} ${doc.status || ""}`.toLowerCase()
+			)}">
+				<td>
 					<div class="ppv-item-line">
-						<a href="/app/item/${encodeURIComponent(row.item_code)}">${this.esc(row.item_name || row.item_code)}</a>
-						<span class="ppv-item-tag"></span>
+						<a class="ppv-doc-link" href="${this.form_route(doc.doctype, doc.name)}">${this.esc(doc.name)}</a>
 					</div>
-					<div class="ppv-item-sub">${this.esc(row.item_code)}</div>
+					<div class="ppv-item-sub">${this.esc(__(doc.doctype))}${
+			doc.supplier ? ` &middot; ${this.esc(doc.supplier)}` : ""
+		}</div>
 				</td>
-				<td class="ppv-num">${this.format_float(row.qty)} <span class="ppv-uom">${this.esc(uom)}</span></td>
-				<td class="ppv-num">${kind === "sub" ? this.stock_value(row) : "—"}</td>
-				<td class="ppv-num">${this.format_float(row.produced_qty)}</td>
-				<td class="ppv-num ${row.pending_qty > 0 ? "ppv-pending" : ""}">${this.format_float(row.pending_qty)}</td>
+				<td>
+					<div class="ppv-item-line">${this.esc(doc.item_name || row.item_name || item_code)}</div>
+					<div class="ppv-item-sub">${this.esc(item_code)}</div>
+				</td>
+				<td class="ppv-num">${this.format_float(qty)}</td>
+				<td class="ppv-num">${this.format_float(produced)}</td>
+				<td class="ppv-num ${qty - produced > 0 ? "ppv-pending" : ""}">${this.format_float(qty - produced)}</td>
 				<td class="ppv-col-progress"></td>
-				<td class="ppv-col-docs"></td>
+				<td class="ppv-col-status"></td>
 			</tr>
 		`);
-		tr.find(".ppv-item-tag").append(this.manufacture_tag(row, kind));
+		tr.find(".ppv-doc-link").on("click", (e) => this.on_chip_click(e, doc));
 		tr.find(".ppv-col-progress").append(frappe.ui.progress({ value: completion, hint: true }));
-		this.append_document_chips(tr.find(".ppv-col-docs"), row.documents);
+		tr.find(".ppv-col-status").append(this.status_badge(doc.status, "sm"));
 		return tr;
 	}
 
-	manufacture_tag(row, kind) {
-		if (kind === "fg") {
-			if (!row.sales_order) return frappe.ui.badge({ label: __("Finished Good"), size: "sm" });
-			return frappe.ui.badge({
-				label: row.sales_order,
-				theme: "violet",
-				variant: "outline",
-				size: "sm",
-			});
-		}
-		return frappe.ui.badge({
-			label: __(row.type_of_manufacturing || "In House"),
-			size: "sm",
-			theme: row.type_of_manufacturing === "Subcontract" ? "amber" : "blue",
-			variant: "outline",
-		});
+	pending_row(row) {
+		const tr = $(`
+			<tr data-search="${this.esc(`${row.item_name || ""} ${row.item_code}`.toLowerCase())}">
+				<td><span class="ppv-no-docs">${__("Not created")}</span></td>
+				<td>
+					<div class="ppv-item-line">${this.esc(row.item_name || row.item_code)}</div>
+					<div class="ppv-item-sub">${this.esc(row.item_code)}</div>
+				</td>
+				<td class="ppv-num">${this.format_float(row.qty)}</td>
+				<td class="ppv-num">${this.format_float(0)}</td>
+				<td class="ppv-num ppv-pending">${this.format_float(row.qty)}</td>
+				<td class="ppv-col-progress"></td>
+				<td class="ppv-col-status"></td>
+			</tr>
+		`);
+		tr.find(".ppv-col-progress").append(frappe.ui.progress({ value: 0, hint: true }));
+		tr.find(".ppv-col-status").append(this.pill(__("Not Started"), "amber"));
+		return tr;
 	}
 
 	render_materials() {
@@ -1582,10 +1597,10 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 				letter-spacing: 0.05em;
 				color: var(--text-muted);
 			}
-			.ppv-cell-item { padding-left: calc(12px + var(--ppv-indent, 0) * 18px) !important; min-width: 220px; }
+			.ppv-cell-item { min-width: 220px; }
 			.ppv-item-line { display: flex; align-items: center; gap: 6px; }
 			.ppv-item-line a { color: var(--heading-color); font-weight: 500; text-decoration: none; }
-			.ppv-table tr[data-kind="fg"] .ppv-item-line a { font-weight: 600; }
+			.ppv-doc-link { cursor: pointer; }
 			.ppv-item-sub { font-size: var(--text-xs); color: var(--text-muted); }
 			.ppv-pending { color: var(--yellow-700); }
 			.ppv-col-progress { width: 130px; }
