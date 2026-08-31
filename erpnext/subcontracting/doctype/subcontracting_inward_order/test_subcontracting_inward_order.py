@@ -169,6 +169,10 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		wo.submit()
 
 		manufacture = frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture"))
+		self.assertEqual(
+			next(item.s_warehouse for item in manufacture.items if item.item_code == "Self RM"),
+			"Stores - _TC",
+		)
 		manufacture.save()
 		frappe.new_doc(
 			"Stock Entry Detail",

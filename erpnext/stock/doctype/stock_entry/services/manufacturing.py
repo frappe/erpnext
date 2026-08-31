@@ -597,6 +597,8 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		self.doc.append("items", item_args)
 
 	def _resolve_rm_warehouse(self, row):
+		if self.wo_doc and self.wo_doc.skip_transfer and not self.wo_doc.from_wip_warehouse:
+			return row.get("source_warehouse")
 		if self.doc.from_warehouse:
 			return self.doc.from_warehouse
 		if self.wo_doc and self.wo_doc.from_wip_warehouse:
