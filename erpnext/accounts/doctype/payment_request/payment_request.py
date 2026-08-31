@@ -1044,3 +1044,48 @@ def get_irequests_of_payment_request(doc: str | None = None) -> list:
 			},
 		)
 	return res
+<<<<<<< HEAD
+=======
+
+
+@frappe.whitelist()
+def get_available_payment_schedules(reference_doctype: str, reference_name: str):
+	ref_doc = frappe.get_doc(reference_doctype, reference_name)
+	ref_doc.check_permission()
+
+	if not hasattr(ref_doc, "payment_schedule") or not ref_doc.payment_schedule:
+		return []
+
+	if get_existing_payment_entry(reference_name):
+		return []
+
+	existing_refs = get_existing_payment_references(reference_name)
+	existing_ids = {r["payment_schedule"] for r in existing_refs if r.get("payment_schedule")}
+
+	return [r for r in ref_doc.payment_schedule if r.name not in existing_ids]
+
+
+def get_existing_payment_references(reference_name):
+	PR = frappe.qb.DocType("Payment Request")
+	PRF = frappe.qb.DocType("Payment Reference")
+
+	result = (
+		frappe.qb.from_(PR)
+		.join(PRF)
+		.on(PR.name == PRF.parent)
+		.select(
+			PRF.payment_term,
+			PRF.due_date,
+			PRF.amount.as_("payment_amount"),
+			PRF.payment_schedule,
+			PRF.parent,
+		)
+		.where(PR.reference_name == reference_name)
+		.where(PR.docstatus < 2)
+		.where(
+			PR.status.isin(["Draft", "Requested", "Initiated", "Partially Paid", "Payment Ordered", "Paid"])
+		)
+	).run(as_dict=True)
+
+	return result
+>>>>>>> 0e4b384 (fix(accounts): added permission checks on `get_available_payment_schedules` (#58588))
