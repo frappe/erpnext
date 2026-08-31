@@ -156,6 +156,58 @@ class TestQuotation(ERPNextTestSuite):
 		qo.reload()
 		self.assertEqual(len(qo.get("items")), 1)
 
+	def test_update_child_qty_with_uom_conversion_factor(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item(uoms=[{"uom": "Box", "conversion_factor": 5}])
+
+		qo = make_quotation(item_code=item.item_code, qty=6, uom="Box", do_not_submit=1)
+		self.assertEqual(qo.items[0].conversion_factor, 5)
+		qo.submit()
+
+		sales_order = make_sales_order(qo.name)
+		sales_order.delivery_date = nowdate()
+		sales_order.items[0].qty = 2
+		sales_order.save()
+		sales_order.submit()
+
+		qo.reload()
+		self.assertEqual(qo.status, "Partially Ordered")
+		self.assertEqual(qo.items[0].ordered_qty, 10)
+
+		trans_item = json.dumps(
+			[
+				{
+					"item_code": qo.items[0].item_code,
+					"rate": qo.items[0].rate,
+					"qty": 6,
+					"uom": "Box",
+					"conversion_factor": 100,
+					"docname": qo.items[0].name,
+				}
+			]
+		)
+		update_child_qty_rate("Quotation", trans_item, qo.name)
+
+		qo.reload()
+		self.assertEqual(qo.items[0].qty, 6)
+		self.assertEqual(qo.items[0].conversion_factor, 5)
+		self.assertEqual(qo.items[0].stock_qty, 30)
+
+		trans_item = json.dumps(
+			[
+				{
+					"item_code": qo.items[0].item_code,
+					"rate": qo.items[0].rate,
+					"qty": 1,
+					"uom": "Box",
+					"conversion_factor": 100,
+					"docname": qo.items[0].name,
+				}
+			]
+		)
+		self.assertRaises(frappe.ValidationError, update_child_qty_rate, "Quotation", trans_item, qo.name)
+
 	def test_quotation_qty(self):
 		qo = make_quotation(qty=0, do_not_save=True)
 		with self.assertRaises(InvalidQtyError):
