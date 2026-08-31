@@ -145,27 +145,32 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		purchase_order.save()
 		purchase_order.submit()
 
-		row = supplier_quotation.items[0]
-		trans_items = json.dumps(
-			[
-				{
-					"item_code": row.item_code,
-					"rate": row.rate,
-					"qty": 4,
-					"uom": row.uom,
-					"conversion_factor": 2,
-					"docname": row.name,
-				}
-			]
-		)
+		def update_qty(qty):
+			row = supplier_quotation.items[0]
+			trans_items = json.dumps(
+				[
+					{
+						"item_code": row.item_code,
+						"rate": row.rate,
+						"qty": qty,
+						"uom": row.uom,
+						"conversion_factor": 2,
+						"docname": row.name,
+					}
+				]
+			)
+			update_child_qty_rate("Supplier Quotation", trans_items, supplier_quotation.name)
+
+		update_qty(5)
+		supplier_quotation.reload()
+		self.assertEqual(supplier_quotation.items[0].conversion_factor, 2)
+		self.assertEqual(supplier_quotation.items[0].stock_qty, 10)
 
 		self.assertRaisesRegex(
 			frappe.ValidationError,
 			"Cannot reduce quantity than ordered or purchased quantity",
-			update_child_qty_rate,
-			"Supplier Quotation",
-			trans_items,
-			supplier_quotation.name,
+			update_qty,
+			4,
 		)
 
 	def test_update_supplier_quotation_child_remove_item(self):

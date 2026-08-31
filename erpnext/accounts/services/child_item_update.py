@@ -52,14 +52,7 @@ class ChildItemUpdater:
 				self.parent, data, self._transacted_stock_qty
 			)
 		elif self.parent_doctype == "Supplier Quotation":
-			purchased_items = get_purchased_items(self.parent.name)
-			self._transacted_stock_qty = frappe._dict(
-				{
-					item.name: flt(purchased_items.get(item.name)) * (flt(item.get("conversion_factor")) or 1)
-					for item in self.parent.items
-					if purchased_items.get(item.name)
-				}
-			)
+			self._transacted_stock_qty = get_purchased_items(self.parent.name)
 			items_added_or_removed |= validate_and_delete_children(
 				self.parent, data, self._transacted_stock_qty
 			)
