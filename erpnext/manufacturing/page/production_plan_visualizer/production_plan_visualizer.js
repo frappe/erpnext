@@ -608,7 +608,7 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 					<div class="ppv-item-sub">${this.esc(row.item_code)}</div>
 				</td>
 				<td class="ppv-num">${this.format_float(row.qty)} <span class="ppv-uom">${this.esc(uom)}</span></td>
-				<td class="ppv-num">${kind === "sub" ? this.format_float(row.available_qty) : "—"}</td>
+				<td class="ppv-num">${kind === "sub" ? this.stock_value(row) : "—"}</td>
 				<td class="ppv-num">${this.format_float(row.produced_qty)}</td>
 				<td class="ppv-num ${row.pending_qty > 0 ? "ppv-pending" : ""}">${this.format_float(row.pending_qty)}</td>
 				<td class="ppv-col-progress"></td>
@@ -699,7 +699,7 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 				<td class="ppv-num">${this.format_float(material.required_qty)} <span class="ppv-uom">${this.esc(
 			material.uom || ""
 		)}</span></td>
-				<td class="ppv-num">${this.format_float(material.available_qty)}</td>
+				<td class="ppv-num">${this.stock_value(material)}</td>
 				<td class="ppv-num">${this.format_float(material.to_procure_qty)}</td>
 				<td class="ppv-num">${this.format_float(material.requested_qty)}</td>
 				<td class="ppv-num">${this.format_float(material.ordered_qty)}</td>
@@ -1168,6 +1168,15 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 		return frappe.utils.escape_html(value == null ? "" : String(value));
 	}
 
+	stock_value(row) {
+		if (!row.stock_known) {
+			return `<span class="ppv-unknown" title="${this.esc(
+				__("Stock for this warehouse is not visible to you")
+			)}">—</span>`;
+		}
+		return this.format_float(row.available_qty);
+	}
+
 	format_float(value) {
 		return format_number(flt(value));
 	}
@@ -1300,6 +1309,7 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 			.ppv-fill { flex: 1 1 auto; display: flex; align-items: center; justify-content: center; }
 			.ppv-muted { color: var(--text-muted); }
 			.ppv-uom { color: var(--text-muted); font-size: var(--text-xs); }
+			.ppv-unknown { color: var(--text-muted); cursor: help; }
 
 			.ppv-kpis {
 				flex: 0 0 auto;

@@ -11,25 +11,25 @@ def get_plan_overview(production_plan: str):
 	work_orders = get_work_orders(production_plan)
 	purchase_orders = get_purchase_orders(production_plan)
 	schedule = get_schedule(production_plan)
+	stock, warehouses = get_stock_levels(plan)
 
 	return {
 		"plan": get_plan_details(plan),
 		"finished_goods": get_finished_goods(plan, work_orders),
-		"sub_assemblies": get_sub_assemblies(plan, work_orders, purchase_orders),
+		"sub_assemblies": get_sub_assemblies(plan, work_orders, purchase_orders, stock, warehouses),
 		"material_requests": get_material_requests(production_plan),
-		"materials": get_materials(plan, production_plan),
+		"materials": get_materials(plan, production_plan, stock, warehouses),
 		"schedule": schedule,
 		"row_materials": get_row_materials(plan, schedule),
 	}
 
 
-def get_materials(plan, production_plan):
+def get_materials(plan, production_plan, stock, warehouses):
 	raised = {}
 	for row in get_raised_material_request_items(production_plan):
 		raised.setdefault(row.material_request_plan_item, []).append(row)
 
-	stock = get_stock_levels(plan)
-	return [build_material(row, raised.get(row.name) or [], stock) for row in plan.mr_items]
+	return [build_material(row, raised.get(row.name) or [], stock, warehouses) for row in plan.mr_items]
 
 
 def get_permitted_names(doctype, child_doctype, production_plan):
@@ -49,29 +49,40 @@ def get_permitted_names(doctype, child_doctype, production_plan):
 
 
 def get_stock_levels(plan):
-	if not frappe.has_permission("Bin"):
-		return {}
+	pairs = [(row.item_code, row.warehouse) for row in plan.mr_items if row.warehouse]
+	pairs += [(row.production_item, row.fg_warehouse) for row in plan.sub_assembly_items if row.fg_warehouse]
+	items = {item for item, _ in pairs}
+	warehouses = {warehouse for _, warehouse in pairs}
+	if not items or not warehouses or not frappe.has_permission("Bin"):
+		return {}, set()
 
-	items = {row.item_code for row in plan.mr_items}
-	warehouses = {row.warehouse for row in plan.mr_items if row.warehouse}
-	if not items or not warehouses:
-		return {}
+	permitted = set(
+		frappe.get_list(
+			"Warehouse",
+			filters={"name": ("in", warehouses)},
+			pluck="name",
+			limit_page_length=0,
+		)
+	)
+	if not permitted:
+		return {}, permitted
 
 	bins = frappe.get_list(
 		"Bin",
-		filters={"item_code": ("in", items), "warehouse": ("in", warehouses)},
+		filters={"item_code": ("in", items), "warehouse": ("in", permitted)},
 		fields=["item_code", "warehouse", "actual_qty", "projected_qty"],
 		limit_page_length=0,
 	)
 
-	return {(d.item_code, d.warehouse): d for d in bins}
+	return {(d.item_code, d.warehouse): d for d in bins}, permitted
 
 
-def build_material(row, raised, stock):
+def build_material(row, raised, stock, warehouses):
 	documents = {
 		entry.name: {"doctype": "Material Request", "name": entry.name, "status": entry.status}
 		for entry in raised
 	}
+	stock_known = row.warehouse in warehouses
 	level = stock.get((row.item_code, row.warehouse)) or frappe._dict()
 
 	return {
@@ -83,8 +94,9 @@ def build_material(row, raised, stock):
 		"material_request_type": row.material_request_type,
 		"required_qty": flt(row.required_bom_qty) or flt(row.quantity),
 		"to_procure_qty": flt(row.quantity),
-		"available_qty": flt(level.actual_qty) if level else flt(row.actual_qty),
-		"projected_qty": flt(level.projected_qty) if level else flt(row.projected_qty),
+		"available_qty": flt(level.actual_qty) if stock_known else 0.0,
+		"projected_qty": flt(level.projected_qty) if stock_known else 0.0,
+		"stock_known": stock_known,
 		"requested_qty": flt(row.requested_qty),
 		"ordered_qty": sum(flt(entry.ordered_qty) for entry in raised),
 		"received_qty": sum(flt(entry.received_qty) for entry in raised),
@@ -196,7 +208,7 @@ def get_finished_goods(plan, work_orders):
 	return rows
 
 
-def get_sub_assemblies(plan, work_orders, purchase_orders):
+def get_sub_assemblies(plan, work_orders, purchase_orders, stock, warehouses):
 	rows = []
 	for item in plan.sub_assembly_items:
 		if item.type_of_manufacturing == "Subcontract":
@@ -205,6 +217,8 @@ def get_sub_assemblies(plan, work_orders, purchase_orders):
 			documents = [d for d in work_orders if d.production_plan_sub_assembly_item == item.name]
 
 		produced_qty = sum(flt(d.produced_qty) for d in documents)
+		stock_known = item.fg_warehouse in warehouses
+		level = stock.get((item.production_item, item.fg_warehouse)) or frappe._dict()
 		rows.append(
 			{
 				"row_name": item.name,
@@ -214,7 +228,8 @@ def get_sub_assemblies(plan, work_orders, purchase_orders):
 				"qty": flt(item.qty),
 				"produced_qty": produced_qty,
 				"pending_qty": flt(item.qty) - produced_qty,
-				"available_qty": flt(item.actual_qty),
+				"available_qty": flt(level.actual_qty) if stock_known else 0.0,
+				"stock_known": stock_known,
 				"bom_no": item.bom_no,
 				"bom_level": item.bom_level,
 				"indent": item.indent or 0,
