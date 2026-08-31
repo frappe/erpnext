@@ -1,5 +1,5 @@
 import frappe
-from frappe.query_builder.functions import Count, Sum
+from frappe.query_builder.functions import Sum
 from frappe.utils import flt
 
 
@@ -24,42 +24,42 @@ def get_plan_overview(production_plan: str):
 
 
 def get_materials(plan, production_plan):
-	raised = get_raised_material_request_items(production_plan)
+	raised = {}
+	for row in get_raised_material_request_items(production_plan):
+		raised.setdefault(row.material_request_plan_item, []).append(row)
 
-	materials = {}
-	for row in plan.mr_items:
-		material = materials.setdefault(
-			row.item_code,
-			frappe._dict(
-				{
-					"item_code": row.item_code,
-					"item_name": row.item_name,
-					"material_request_type": row.material_request_type,
-					"quantity": 0.0,
-					"requested_qty": 0.0,
-					"ordered_qty": 0.0,
-					"consumers": [],
-					"documents": [],
-				}
-			),
-		)
-		material.quantity += flt(row.quantity)
-		reference = row.get("sub_assembly_item_reference")
-		if reference and reference not in material.consumers:
-			material.consumers.append(reference)
+	return [build_material(row, raised.get(row.name) or []) for row in plan.mr_items]
 
-	for row in raised:
-		material = materials.get(row.item_code)
-		if not material:
-			continue
-		material.requested_qty += flt(row.qty)
-		material.ordered_qty += flt(row.ordered_qty)
-		material.documents.append({"doctype": "Material Request", "name": row.name, "status": row.status})
 
-	return list(materials.values())
+def build_material(row, raised):
+	documents = {}
+	for entry in raised:
+		documents[entry.name] = {"doctype": "Material Request", "name": entry.name, "status": entry.status}
+
+	return {
+		"row_name": row.name,
+		"item_code": row.item_code,
+		"item_name": row.item_name,
+		"uom": row.uom,
+		"warehouse": row.warehouse,
+		"material_request_type": row.material_request_type,
+		"required_qty": flt(row.required_bom_qty) or flt(row.quantity),
+		"to_procure_qty": flt(row.quantity),
+		"available_qty": flt(row.actual_qty),
+		"projected_qty": flt(row.projected_qty),
+		"requested_qty": flt(row.requested_qty),
+		"ordered_qty": sum(flt(entry.ordered_qty) for entry in raised),
+		"schedule_date": row.schedule_date,
+		"consumer": row.get("sub_assembly_item_reference"),
+		"main_item_code": row.get("main_item_code"),
+		"documents": list(documents.values()),
+	}
 
 
 def get_raised_material_request_items(production_plan):
+	if not frappe.has_permission("Material Request"):
+		return []
+
 	mr_item = frappe.qb.DocType("Material Request Item")
 	material_request = frappe.qb.DocType("Material Request")
 
@@ -69,6 +69,7 @@ def get_raised_material_request_items(production_plan):
 		.on(mr_item.parent == material_request.name)
 		.select(
 			mr_item.parent.as_("name"),
+			mr_item.material_request_plan_item,
 			mr_item.item_code,
 			mr_item.qty,
 			mr_item.ordered_qty,
@@ -162,10 +163,13 @@ def get_sub_assemblies(plan, work_orders, purchase_orders):
 				"qty": flt(item.qty),
 				"produced_qty": produced_qty,
 				"pending_qty": flt(item.qty) - produced_qty,
+				"available_qty": flt(item.actual_qty),
 				"bom_level": item.bom_level,
 				"indent": item.indent or 0,
 				"type_of_manufacturing": item.type_of_manufacturing,
+				"supplier": item.get("supplier"),
 				"schedule_date": item.schedule_date,
+				"uom": item.stock_uom or item.uom,
 				"documents": documents,
 			}
 		)
@@ -174,7 +178,10 @@ def get_sub_assemblies(plan, work_orders, purchase_orders):
 
 
 def get_work_orders(production_plan):
-	work_orders = frappe.get_all(
+	if not frappe.has_permission("Work Order"):
+		return []
+
+	work_orders = frappe.get_list(
 		"Work Order",
 		filters={"production_plan": production_plan, "docstatus": ("<", 2)},
 		fields=[
@@ -191,6 +198,7 @@ def get_work_orders(production_plan):
 			"production_plan_sub_assembly_item",
 		],
 		order_by="creation",
+		limit_page_length=0,
 	)
 
 	for row in work_orders:
@@ -200,6 +208,9 @@ def get_work_orders(production_plan):
 
 
 def get_purchase_orders(production_plan):
+	if not frappe.has_permission("Purchase Order"):
+		return []
+
 	po_item = frappe.qb.DocType("Purchase Order Item")
 	purchase_order = frappe.qb.DocType("Purchase Order")
 
@@ -233,6 +244,9 @@ def get_purchase_orders(production_plan):
 
 
 def get_material_requests(production_plan):
+	if not frappe.has_permission("Material Request"):
+		return []
+
 	mr_item = frappe.qb.DocType("Material Request Item")
 	material_request = frappe.qb.DocType("Material Request")
 
@@ -247,18 +261,27 @@ def get_material_requests(production_plan):
 			material_request.transaction_date,
 			material_request.per_ordered,
 			material_request.per_received,
-			Count(mr_item.name).as_("items"),
 			Sum(mr_item.qty).as_("qty"),
 		)
 		.where((mr_item.production_plan == production_plan) & (mr_item.docstatus < 2))
-		.groupby(mr_item.parent)
+		.groupby(
+			mr_item.parent,
+			material_request.status,
+			material_request.material_request_type,
+			material_request.transaction_date,
+			material_request.per_ordered,
+			material_request.per_received,
+		)
 		.orderby(material_request.transaction_date)
 		.run(as_dict=True)
 	)
 
 
 def get_schedule(production_plan):
-	return frappe.get_all(
+	if not frappe.has_permission("Production Plan Schedule"):
+		return []
+
+	return frappe.get_list(
 		"Production Plan Schedule",
 		filters={"production_plan": production_plan},
 		fields=[
@@ -276,4 +299,5 @@ def get_schedule(production_plan):
 			"duration_mins",
 		],
 		order_by="from_time",
+		limit_page_length=0,
 	)

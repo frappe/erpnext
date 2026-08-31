@@ -10,20 +10,24 @@ frappe.pages["production-plan-visualizer"].on_page_load = function (wrapper) {
 
 frappe.pages["production-plan-visualizer"].on_page_show = function () {
 	const visualizer = frappe.production_plan_visualizer;
-	if (visualizer && frappe.route_options && frappe.route_options.production_plan) {
+	if (!visualizer) return;
+	if (frappe.route_options && frappe.route_options.production_plan) {
 		const plan = frappe.route_options.production_plan;
 		frappe.route_options = null;
 		visualizer.plan_field.set_value(plan);
 	}
+	visualizer.fit_viewport();
 };
 
 erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 	constructor(page) {
 		this.page = page;
 		this.data = null;
-		this.active_tab = "plan";
+		this.focus = "all";
+		this.active_tab = "manufacture";
 		this.schedule_group = "item";
 		this.schedule_scale = "day";
+		this.today_offset = null;
 		this.body = $(this.page.body);
 		this.make();
 	}
@@ -32,6 +36,10 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 		this.body.html(`${this.styles()}<div class="ppv"></div>`);
 		this.container = this.body.find(".ppv");
 		this.make_plan_field();
+		$(window).on(
+			"resize.ppv",
+			frappe.utils.debounce(() => this.fit_viewport(), 150)
+		);
 		this.render_blank_state();
 	}
 
@@ -54,15 +62,26 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 		});
 	}
 
+	fit_viewport() {
+		if (!this.container || !this.container.is(":visible")) return;
+		const top = this.container[0].getBoundingClientRect().top;
+		const height = Math.max(window.innerHeight - top - 20, 460);
+		this.container.css("height", `${height}px`);
+	}
+
 	render_blank_state() {
 		this.container.empty().append(
-			frappe.ui.empty_state({
-				icon: "layout-dashboard",
-				title: __("Pick a Production Plan"),
-				description: __("See its progress, sub-assemblies, materials and schedule in one place."),
-				css_class: "ppv-blank",
-			})
+			$('<div class="ppv-fill"></div>').append(
+				frappe.ui.empty_state({
+					icon: "layout-dashboard",
+					title: __("Pick a Production Plan"),
+					description: __(
+						"Track readiness, shortages, work orders and the shop floor schedule on one screen."
+					),
+				})
+			)
 		);
+		this.fit_viewport();
 	}
 
 	load(plan) {
@@ -76,6 +95,8 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 			.then((r) => {
 				if (this.current_plan !== plan) return;
 				this.data = r.message;
+				this.focus = "all";
+				this.active_tab = "manufacture";
 				this.render();
 			});
 	}
@@ -83,129 +104,83 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 	render_skeleton() {
 		const line = (w, h) => frappe.ui.skeleton.html({ width: w, height: h });
 		this.container.html(`
-			<div class="ppv-hero">
-				<div class="ppv-hero-main">
-					${line("240px", "28px")}
-					<div class="mt-2">${line("180px", "14px")}</div>
-					<div class="mt-4">${line("100%", "8px")}</div>
-				</div>
-				<div class="ppv-stats">
-					${[1, 2, 3, 4].map(() => `<div class="ppv-tile">${line("100%", "48px")}</div>`).join("")}
-				</div>
+			<div class="ppv-kpis">
+				${[1, 2, 3, 4, 5].map(() => `<div class="ppv-kpi">${line("100%", "44px")}</div>`).join("")}
 			</div>
-			<div class="mt-4">${line("100%", "220px")}</div>
+			<div class="ppv-workspace">
+				<div class="ppv-pane"><div style="padding: 12px">${line("100%", "240px")}</div></div>
+				<div class="ppv-pane"><div style="padding: 12px">${line("100%", "240px")}</div></div>
+			</div>
 		`);
+		this.fit_viewport();
 	}
 
 	render() {
+		this.build_index();
 		this.container.empty();
-		this.render_hero();
-		this.render_tabs();
-		this.panel = $('<div class="ppv-panel"></div>').appendTo(this.container);
-		this.render_active_panel();
+		this.render_kpis();
+		this.render_workspace();
+		this.fit_viewport();
 	}
 
-	render_hero() {
-		const plan = this.data.plan;
-		const hero = $(`
-			<div class="ppv-hero">
-				<div class="ppv-hero-main">
-					<div class="ppv-hero-title">
-						<a class="ppv-plan-link" href="/app/production-plan/${encodeURIComponent(plan.name)}">
-							${frappe.utils.escape_html(plan.name)}</a>
-						<span class="ppv-hero-badge"></span>
-					</div>
-					<div class="ppv-hero-meta">
-						${frappe.utils.escape_html(plan.company)} &middot;
-						${frappe.datetime.str_to_user(plan.posting_date)}
-					</div>
-					<div class="ppv-hero-progress"></div>
-				</div>
-				<div class="ppv-hero-ring"></div>
-				<div class="ppv-stats"></div>
-			</div>
-		`);
+	build_index() {
+		this.data.schedule = (this.data.schedule || []).filter((d) => d.from_time && d.to_time);
+		const subs_by_parent = this.group_rows(this.data.sub_assemblies, (d) => d.production_plan_item);
+		const owner_of_row = {};
+		for (const fg of this.data.finished_goods) {
+			owner_of_row[fg.row_name] = fg.row_name;
+			for (const sub of subs_by_parent[fg.row_name] || []) owner_of_row[sub.row_name] = fg.row_name;
+		}
 
-		hero.find(".ppv-hero-badge").append(this.status_badge(plan.status, "md"));
-		hero.find(".ppv-hero-progress").append(
-			frappe.ui.progress({
-				value: plan.completion,
-				size: "md",
-				label: __("{0} of {1} produced", [
-					this.format_float(plan.total_produced_qty),
-					this.format_float(plan.total_planned_qty),
-				]),
-				hint: true,
-			})
-		);
-		hero.find(".ppv-hero-ring").html(this.completion_ring(plan.completion));
-		hero.find(".ppv-stats").html(this.stat_tiles());
-		this.container.append(hero);
+		const bom_consumers = {};
+		for (const [row_name, items] of Object.entries(this.data.row_materials || {})) {
+			for (const item of items) (bom_consumers[item] = bom_consumers[item] || []).push(row_name);
+		}
+
+		this.index = { subs_by_parent, owner_of_row, bom_consumers };
+		for (const material of this.data.materials || []) {
+			material.owners = this.material_owners(material);
+		}
+		this.compute_stats();
 	}
 
-	completion_ring(completion) {
-		const radius = 44;
-		const circumference = 2 * Math.PI * radius;
-		const offset = circumference * (1 - Math.min(completion, 100) / 100);
-		return `
-			<svg viewBox="0 0 110 110" class="ppv-ring">
-				<circle class="ppv-ring-track" cx="55" cy="55" r="${radius}"></circle>
-				<circle class="ppv-ring-fill" cx="55" cy="55" r="${radius}"
-					stroke-dasharray="${circumference}" stroke-dashoffset="${offset}"></circle>
-				<text x="55" y="52" class="ppv-ring-value">${Math.round(completion)}%</text>
-				<text x="55" y="70" class="ppv-ring-caption">${__("Complete")}</text>
-			</svg>
-		`;
+	material_owners(material) {
+		if (material.consumer) {
+			const owner = this.index.owner_of_row[material.consumer];
+			return owner ? [owner] : [];
+		}
+		const owners = new Set();
+		for (const row_name of this.index.bom_consumers[material.item_code] || []) {
+			const owner = this.index.owner_of_row[row_name];
+			if (owner) owners.add(owner);
+		}
+		return [...owners];
 	}
 
-	stat_tiles() {
+	compute_stats() {
 		const documents = this.all_documents();
-		const tiles = [
-			this.stat_tile(
-				__("Work Orders"),
-				documents.filter((d) => d.doctype === "Work Order")
-			),
-			this.stat_tile(
-				__("Purchase Orders"),
-				documents.filter((d) => d.doctype === "Purchase Order")
-			),
-			this.stat_tile(__("Material Requests"), this.data.material_requests),
-			this.schedule_tile(),
-		];
-		return tiles.join("");
+		const materials = this.data.materials || [];
+		const rows = [...this.data.finished_goods, ...this.data.sub_assemblies];
+		this.stats = {
+			work_orders: documents.filter((d) => d.doctype === "Work Order"),
+			purchase_orders: documents.filter((d) => d.doctype === "Purchase Order"),
+			material_requests: this.data.material_requests || [],
+			short_materials: materials.filter((d) => this.open_qty(d) > 0),
+			unstarted: rows.filter((d) => !(d.documents || []).length),
+			coverage: this.material_coverage(materials),
+			schedule: this.data.schedule || [],
+		};
 	}
 
-	stat_tile(label, docs) {
-		const status_dots = Object.entries(this.group_rows(docs, (d) => d.status || __("Draft")))
-			.map(
-				([status, rows]) =>
-					`<span class="ppv-dot-item" title="${frappe.utils.escape_html(status)}">
-						<span class="ppv-dot" data-theme="${this.status_theme(status)}"></span>${rows.length}
-					</span>`
-			)
-			.join("");
-		return `
-			<div class="ppv-tile">
-				<div class="ppv-tile-value">${docs.length}</div>
-				<div class="ppv-tile-label">${frappe.utils.escape_html(label)}</div>
-				<div class="ppv-tile-dots">${status_dots}</div>
-			</div>
-		`;
+	open_qty(material) {
+		return flt(flt(material.to_procure_qty) - flt(material.requested_qty), 6);
 	}
 
-	schedule_tile() {
-		const blocks = this.data.schedule || [];
-		const workstations = new Set(blocks.map((d) => d.workstation).filter(Boolean));
-		const caption = workstations.size
-			? __("{0} workstations", [workstations.size])
-			: __("Not scheduled yet");
-		return `
-			<div class="ppv-tile">
-				<div class="ppv-tile-value">${blocks.length}</div>
-				<div class="ppv-tile-label">${__("Schedule Blocks")}</div>
-				<div class="ppv-tile-dots">${frappe.utils.escape_html(caption)}</div>
-			</div>
-		`;
+	material_coverage(materials) {
+		const to_procure = materials.reduce((sum, d) => sum + flt(d.to_procure_qty), 0);
+		if (!to_procure) return 100;
+		const open = materials.reduce((sum, d) => sum + Math.max(this.open_qty(d), 0), 0);
+		return ((to_procure - open) / to_procure) * 100;
 	}
 
 	all_documents() {
@@ -214,350 +189,576 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 	}
 
 	group_rows(rows, key_fn) {
-		return rows.reduce((groups, row) => {
+		return (rows || []).reduce((groups, row) => {
 			const key = key_fn(row);
 			(groups[key] = groups[key] || []).push(row);
 			return groups;
 		}, {});
 	}
 
-	render_tabs() {
-		this.container.append(
-			$('<div class="ppv-tabs"></div>').append(
-				frappe.ui.tab_buttons({
-					label: __("Sections"),
-					type: "ghost",
-					value: this.active_tab,
-					options: [
-						{ label: __("Plan"), value: "plan" },
-						{
-							label: `${__("Schedule")} (${(this.data.schedule || []).length})`,
-							value: "schedule",
-						},
-					],
-					on_change: (value) => {
-						this.active_tab = value;
-						this.render_active_panel();
-					},
-				})
+	render_kpis() {
+		const stats = this.stats;
+		const rail = $('<div class="ppv-kpis"></div>').appendTo(this.container);
+		rail.append(this.hero_tile());
+		rail.append(
+			this.kpi_tile({
+				label: __("Material Readiness"),
+				value: `${Math.round(stats.coverage)}%`,
+				tone: stats.short_materials.length ? "red" : "green",
+				hint: stats.short_materials.length
+					? __("{0} materials still to request", [stats.short_materials.length])
+					: __("Everything requested or in stock"),
+				tab: "materials",
+			})
+		);
+		rail.append(
+			this.kpi_tile({
+				label: __("Work Orders"),
+				value: stats.work_orders.length,
+				tone: stats.unstarted.length ? "amber" : null,
+				hint: stats.unstarted.length
+					? __("{0} rows not started", [stats.unstarted.length])
+					: __("Every row has a document"),
+				dots: stats.work_orders,
+				tab: "manufacture",
+			})
+		);
+		rail.append(this.procurement_tile());
+		rail.append(this.schedule_tile());
+	}
+
+	hero_tile() {
+		const plan = this.data.plan;
+		const tile = $(`
+			<div class="ppv-kpi ppv-hero">
+				<div class="ppv-ring-wrap">${this.completion_ring(plan.completion)}</div>
+				<div class="ppv-hero-body">
+					<div class="ppv-hero-top">
+						<a class="ppv-hero-name" href="/app/production-plan/${encodeURIComponent(plan.name)}"
+							title="${this.esc(plan.name)}">${this.esc(plan.name)}</a>
+						<span class="ppv-hero-status"></span>
+					</div>
+					<div class="ppv-hero-qty">
+						<b>${this.format_float(plan.total_produced_qty)}</b>
+						<span class="ppv-muted">&nbsp;/&nbsp;${this.format_float(plan.total_planned_qty)}&nbsp;${__(
+			"produced"
+		)}</span>
+					</div>
+					<div class="ppv-hero-meta">${this.esc(plan.company)} &middot; ${frappe.datetime.str_to_user(
+			plan.posting_date
+		)}</div>
+				</div>
+			</div>
+		`);
+		tile.find(".ppv-hero-status").append(this.status_badge(plan.status, "sm"));
+		return tile;
+	}
+
+	kpi_tile({ label, value, hint, tone, dots, tab }) {
+		const tile = $(`
+			<div class="ppv-kpi" data-tone="${tone || ""}" data-clickable="${tab ? 1 : 0}">
+				<div class="ppv-kpi-label">${this.esc(label)}</div>
+				<div class="ppv-kpi-value">${this.esc(value)}</div>
+				<div class="ppv-kpi-hint">${this.esc(hint)}</div>
+			</div>
+		`);
+		if (dots && dots.length) tile.find(".ppv-kpi-hint").prepend(this.status_dots(dots));
+		if (tab) tile.on("click", () => this.set_tab(tab));
+		return tile;
+	}
+
+	status_dots(rows) {
+		return Object.entries(this.group_rows(rows, (d) => d.status || __("Draft")))
+			.map(
+				([status, group]) =>
+					`<span class="ppv-dot-item" title="${this.esc(status)}">
+						<span class="ppv-dot" data-theme="${this.status_theme(status)}"></span>${group.length}
+					</span>`
 			)
-		);
+			.join("");
 	}
 
-	render_active_panel() {
-		this.panel.empty();
-		if (this.active_tab === "plan") this.render_plan_tree();
-		else this.render_schedule();
+	procurement_tile() {
+		const orders = this.stats.purchase_orders;
+		const requests = this.stats.material_requests;
+		return this.kpi_tile({
+			label: __("Procurement"),
+			value: orders.length + requests.length,
+			hint: __("{0} requests · {1} orders", [requests.length, orders.length]),
+			dots: [...orders, ...requests],
+			tab: "materials",
+		});
 	}
 
-	render_plan_tree() {
-		if (!this.data.finished_goods.length) {
-			this.panel_empty_state(__("No items to manufacture in this plan"));
-			return;
+	schedule_tile() {
+		const blocks = this.stats.schedule;
+		if (!blocks.length) {
+			return this.kpi_tile({
+				label: __("Schedule"),
+				value: "—",
+				hint: __("Not scheduled yet"),
+			});
 		}
-		this.panel.append(this.plan_search_bar());
-		this.tree_list = $('<div class="ppv-tree"></div>').appendTo(this.panel);
-		const subs_by_parent = this.group_rows(this.data.sub_assemblies, (d) => d.production_plan_item);
-		const assignments = this.material_assignments();
-
-		for (const fg of this.data.finished_goods) {
-			const branch = $('<div class="ppv-branch"></div>');
-			for (const sub of subs_by_parent[fg.row_name] || []) {
-				const indent = sub.indent || 0;
-				branch.append(this.sub_assembly_row(sub));
-				for (const material of assignments.map[sub.row_name] || []) {
-					branch.append(this.material_row(material, indent + 1));
-				}
-			}
-			delete subs_by_parent[fg.row_name];
-			for (const material of assignments.map[fg.row_name] || []) {
-				branch.append(this.material_row(material, 0));
-			}
-			const node = this.plan_node(fg, branch);
-			node.attr("data-search", node.text().toLowerCase());
-			this.tree_list.append(node);
-		}
-
-		this.append_plan_group(__("Other Sub Assemblies"), Object.values(subs_by_parent).flat(), (d) =>
-			this.sub_assembly_row(d)
+		const workstations = new Set(blocks.map((d) => d.workstation).filter(Boolean));
+		const start = frappe.datetime.str_to_user(blocks[0].from_time.split(" ")[0]);
+		const end = frappe.datetime.str_to_user(
+			blocks.reduce((max, d) => (d.to_time > max ? d.to_time : max), blocks[0].to_time).split(" ")[0]
 		);
-		this.append_plan_group(__("Other Materials"), assignments.leftovers, (d) => this.material_row(d, 0));
-
-		this.no_results = frappe.ui.empty_state({ icon: "search", title: __("No matching items") }).hide();
-		this.panel.append(this.no_results);
-		this.apply_plan_filter();
+		return this.kpi_tile({
+			label: __("Schedule"),
+			value: blocks.length,
+			hint: `${start} → ${end} · ${__("{0} workstations", [workstations.size])}`,
+			tab: "schedule",
+		});
 	}
 
-	append_plan_group(label, rows, make_row) {
-		if (!rows.length) return;
-		const group = $('<div class="ppv-group"></div>').append(
-			`<div class="ppv-group-head">${frappe.utils.escape_html(label)}</div>`
-		);
-		for (const row of rows) {
-			const el = make_row(row);
-			el.attr("data-search", el.text().toLowerCase());
-			group.append(el);
-		}
-		this.tree_list.append(group);
+	completion_ring(completion) {
+		const radius = 26;
+		const circumference = 2 * Math.PI * radius;
+		const offset = circumference * (1 - Math.min(completion, 100) / 100);
+		return `
+			<svg viewBox="0 0 64 64" class="ppv-ring">
+				<circle class="ppv-ring-track" cx="32" cy="32" r="${radius}"></circle>
+				<circle class="ppv-ring-fill" cx="32" cy="32" r="${radius}"
+					stroke-dasharray="${circumference}" stroke-dashoffset="${offset}"></circle>
+				<text x="32" y="36" class="ppv-ring-value">${Math.round(completion)}%</text>
+			</svg>
+		`;
 	}
 
-	plan_search_bar() {
+	render_workspace() {
+		const workspace = $('<div class="ppv-workspace"></div>').appendTo(this.container);
+		this.rail = $('<div class="ppv-pane ppv-rail"></div>').appendTo(workspace);
+		this.detail = $('<div class="ppv-pane ppv-detail"></div>').appendTo(workspace);
+		this.render_rail();
+		this.render_detail();
+	}
+
+	render_rail() {
+		this.rail.empty().append(`
+			<div class="ppv-pane-head">
+				<span class="ppv-pane-title">${__("Finished Goods")}</span>
+				<span class="ppv-count">${this.data.finished_goods.length}</span>
+			</div>
+		`);
+		this.rail.append(this.rail_search());
+		this.rail_body = $('<div class="ppv-pane-body"></div>').appendTo(this.rail);
+		this.rail_body.append(this.rail_row_all());
+		for (const fg of this.data.finished_goods) this.rail_body.append(this.rail_row(fg));
+		this.apply_rail_filter();
+	}
+
+	rail_search() {
 		const bar = $(`
 			<div class="ppv-search">
 				<span class="ppv-search-icon">${frappe.utils.icon("search", "sm", "", "", "", true)}</span>
-				<input type="search" class="ppv-search-input"
-					placeholder="${__("Search item, code or document...")}" />
-				<span class="ppv-search-count"></span>
+				<input type="search" class="ppv-search-input" placeholder="${__("Filter items...")}" />
 			</div>
 		`);
-		this.search_input = bar.find("input");
-		this.search_count = bar.find(".ppv-search-count");
-		this.search_input.val(this.plan_search || "");
-		this.search_input.on("input", () => {
-			this.plan_search = this.search_input.val();
-			this.apply_plan_filter();
+		this.rail_query = "";
+		bar.find("input").on("input", (e) => {
+			this.rail_query = (e.target.value || "").trim().toLowerCase();
+			this.apply_rail_filter();
 		});
 		return bar;
 	}
 
-	apply_plan_filter() {
-		const query = (this.plan_search || "").trim().toLowerCase();
-		const matches = (el) => !query || ($(el).attr("data-search") || "").includes(query);
+	apply_rail_filter() {
 		let visible = 0;
-		let total = 0;
-
-		this.tree_list.children(".ppv-node").each((_, el) => {
-			total += 1;
-			const show = matches(el);
+		this.rail_body.find(".ppv-rail-row[data-search]").each((_, el) => {
+			const show = !this.rail_query || ($(el).attr("data-search") || "").includes(this.rail_query);
 			$(el).toggle(show);
 			if (show) visible += 1;
 		});
-
-		let group_visible = 0;
-		this.tree_list.children(".ppv-group").each((_, group) => {
-			let shown = 0;
-			$(group)
-				.children("[data-search]")
-				.each((_, el) => {
-					const show = matches(el);
-					$(el).toggle(show);
-					if (show) shown += 1;
-				});
-			$(group).toggle(shown > 0);
-			group_visible += shown;
-		});
-
-		this.search_count.text(query ? __("{0} of {1} items", [visible, total]) : "");
-		this.no_results.toggle(Boolean(query) && !visible && !group_visible);
+		this.rail_body.find(".ppv-rail-none").toggle(!visible);
+		this.highlight_focus();
 	}
 
-	plan_node(fg, branch) {
-		const node = $('<div class="ppv-node"></div>');
-		const card = this.item_card(fg, { show_dates: true });
-		node.append(card);
-		if (!branch.children().length) return node;
-
-		node.append(branch);
-		const caret = frappe.ui.button({
-			icon: "chevron-down",
-			variant: "ghost",
-			size: "sm",
-			title: __("Collapse"),
-			css_class: "ppv-caret",
-			onclick: () => {
-				branch.slideToggle(150);
-				caret.toggleClass("ppv-collapsed");
-			},
-		});
-		card.find(".ppv-card-head").prepend(caret);
-		return node;
-	}
-
-	material_assignments() {
-		const row_materials = this.data.row_materials || {};
-		const bom_consumers = {};
-		for (const [row_name, items] of Object.entries(row_materials)) {
-			for (const item of items) {
-				(bom_consumers[item] = bom_consumers[item] || []).push(row_name);
-			}
-		}
-
-		const map = {};
-		const leftovers = [];
-		for (const material of this.data.materials || []) {
-			const consumers = material.consumers.length
-				? material.consumers
-				: bom_consumers[material.item_code] || [];
-			if (consumers.length) {
-				(map[consumers[0]] = map[consumers[0]] || []).push(material);
-			} else {
-				leftovers.push(material);
-			}
-		}
-		return { map, leftovers };
-	}
-
-	material_row(material, indent) {
-		const completion = material.quantity ? (material.ordered_qty / material.quantity) * 100 : 0;
-		const el = $(`
-			<div class="ppv-sub-row ppv-material-row" style="--ppv-indent: ${indent}">
-				<div class="ppv-sub-item">
-					<div class="ppv-sub-title">
-						<a href="/app/item/${encodeURIComponent(material.item_code)}">
-							${frappe.utils.escape_html(material.item_name || material.item_code)}</a>
-						<span class="ppv-sub-type"></span>
-					</div>
-					<div class="ppv-card-sub">${frappe.utils.escape_html(material.item_code)}</div>
+	rail_row_all() {
+		const plan = this.data.plan;
+		const row = $(`
+			<div class="ppv-rail-row ppv-rail-all" data-focus="all" data-risk="all">
+				<div class="ppv-rail-top">
+					<span class="ppv-rail-name">${__("All Items")}</span>
+					<span class="ppv-rail-pct">${Math.round(plan.completion)}%</span>
 				</div>
-				<div class="ppv-qty-row ppv-qty-compact">
-					${this.qty_cell(__("Planned"), material.quantity)}
-					${this.qty_cell(__("Requested"), material.requested_qty)}
-					${this.qty_cell(__("Ordered"), material.ordered_qty)}
-				</div>
-				<div class="ppv-sub-progress"></div>
-				<div class="ppv-chips"></div>
+				<div class="ppv-rail-sub">${__("{0} finished goods · {1} sub assemblies", [
+					this.data.finished_goods.length,
+					this.data.sub_assemblies.length,
+				])}</div>
 			</div>
 		`);
-		el.find(".ppv-sub-type").append(
+		row.on("click", () => this.set_focus("all"));
+		return row;
+	}
+
+	rail_row(fg) {
+		const completion = fg.qty ? (fg.produced_qty / fg.qty) * 100 : 0;
+		const risk = this.risk_of(fg);
+		const row = $(`
+			<div class="ppv-rail-row" data-focus="${this.esc(fg.row_name)}" data-risk="${risk.level}"
+				data-search="${this.esc(`${fg.item_name || ""} ${fg.item_code}`.toLowerCase())}">
+				<div class="ppv-rail-top">
+					<span class="ppv-rail-name" title="${this.esc(fg.item_name || fg.item_code)}">${this.esc(
+			fg.item_name || fg.item_code
+		)}</span>
+					<span class="ppv-rail-pct">${Math.round(completion)}%</span>
+				</div>
+				<div class="ppv-rail-sub">${this.esc(fg.item_code)} &middot; ${this.format_float(fg.qty)} ${this.esc(
+			fg.stock_uom || ""
+		)}</div>
+				<div class="ppv-rail-bar"><span style="width: ${Math.min(completion, 100)}%"></span></div>
+				<div class="ppv-rail-flag">${this.esc(risk.label)}</div>
+			</div>
+		`);
+		row.on("click", () => this.set_focus(fg.row_name));
+		return row;
+	}
+
+	risk_of(fg) {
+		const short = (this.data.materials || []).filter(
+			(d) => this.open_qty(d) > 0 && d.owners.includes(fg.row_name)
+		);
+		if (short.length) {
+			return { level: "short", label: __("{0} materials short", [short.length]) };
+		}
+		if (fg.qty && fg.produced_qty >= fg.qty) return { level: "done", label: __("Completed") };
+		const rows = [fg, ...(this.index.subs_by_parent[fg.row_name] || [])];
+		if (rows.every((d) => !(d.documents || []).length)) {
+			return { level: "idle", label: __("Not started") };
+		}
+		return { level: "running", label: __("In progress") };
+	}
+
+	set_focus(row_name) {
+		this.focus = row_name;
+		this.highlight_focus();
+		this.render_detail_body();
+	}
+
+	highlight_focus() {
+		this.rail_body.find(".ppv-rail-row").each((_, el) => {
+			$(el).toggleClass("is-active", $(el).attr("data-focus") === this.focus);
+		});
+	}
+
+	set_tab(tab) {
+		if (this.active_tab === tab) return;
+		this.active_tab = tab;
+		this.render_detail();
+	}
+
+	focused_goods() {
+		if (this.focus === "all") return this.data.finished_goods;
+		return this.data.finished_goods.filter((d) => d.row_name === this.focus);
+	}
+
+	render_detail() {
+		this.detail.empty();
+		const head = $('<div class="ppv-pane-head"></div>').appendTo(this.detail);
+		head.append(
+			frappe.ui.tab_buttons({
+				type: "subtle",
+				size: "sm",
+				value: this.active_tab,
+				options: [
+					{ label: __("Items to Manufacture"), value: "manufacture" },
+					{ label: __("Raw Materials"), value: "materials" },
+					{ label: __("Schedule"), value: "schedule" },
+				],
+				on_change: (value) => {
+					this.active_tab = value;
+					this.render_detail_body();
+				},
+			})
+		);
+		head.append(this.detail_search());
+		this.detail_body = $('<div class="ppv-pane-body"></div>').appendTo(this.detail);
+		this.render_detail_body();
+	}
+
+	detail_search() {
+		const bar = $(`
+			<div class="ppv-search ppv-search-inline">
+				<span class="ppv-search-icon">${frappe.utils.icon("search", "sm", "", "", "", true)}</span>
+				<input type="search" class="ppv-search-input" placeholder="${__("Search item or document...")}" />
+			</div>
+		`);
+		bar.find("input").on("input", (e) => {
+			this.detail_query = (e.target.value || "").trim().toLowerCase();
+			this.apply_detail_filter();
+		});
+		this.detail_query = "";
+		return bar;
+	}
+
+	apply_detail_filter() {
+		const query = this.detail_query;
+		this.detail_body.find("tr[data-search]").each((_, el) => {
+			$(el).toggle(!query || ($(el).attr("data-search") || "").includes(query));
+		});
+	}
+
+	render_detail_body() {
+		this.detail_body.empty();
+		if (this.active_tab === "manufacture") this.render_manufacture_items();
+		else if (this.active_tab === "materials") this.render_materials();
+		else this.render_schedule();
+		this.apply_detail_filter();
+	}
+
+	make_table(columns) {
+		const head = columns
+			.map(
+				(col) =>
+					`<th class="${col.class || ""}" style="${col.style || ""}">${this.esc(col.label)}</th>`
+			)
+			.join("");
+		const table = $(`<table class="ppv-table"><thead><tr>${head}</tr></thead><tbody></tbody></table>`);
+		return { table, body: table.find("tbody") };
+	}
+
+	render_manufacture_items() {
+		const goods = this.focused_goods();
+		if (!goods.length) {
+			this.render_empty(__("No items to manufacture in this plan"));
+			return;
+		}
+		const { table, body } = this.make_table([
+			{ label: __("Item") },
+			{ label: __("Planned"), class: "ppv-num" },
+			{ label: __("In Stock"), class: "ppv-num" },
+			{ label: __("Done"), class: "ppv-num" },
+			{ label: __("Pending"), class: "ppv-num" },
+			{ label: __("Progress"), class: "ppv-col-progress" },
+			{ label: __("Documents"), class: "ppv-col-docs" },
+		]);
+
+		for (const fg of goods) {
+			body.append(this.manufacture_row(fg, { kind: "fg", indent: 0 }));
+			for (const sub of this.index.subs_by_parent[fg.row_name] || []) {
+				body.append(this.manufacture_row(sub, { kind: "sub", indent: 1 + (sub.indent || 0) }));
+			}
+		}
+		this.detail_body.append(table);
+		this.append_orphan_subs(body);
+	}
+
+	append_orphan_subs(body) {
+		if (this.focus !== "all") return;
+		const orphans = this.data.sub_assemblies.filter((d) => !this.index.owner_of_row[d.row_name]);
+		if (!orphans.length) return;
+		body.append(this.group_row(__("Unlinked Sub Assemblies"), 7));
+		for (const sub of orphans) body.append(this.manufacture_row(sub, { kind: "sub", indent: 1 }));
+	}
+
+	group_row(label, span) {
+		return $(`<tr class="ppv-row-group"><td colspan="${span}">${this.esc(label)}</td></tr>`);
+	}
+
+	manufacture_row(row, { kind, indent }) {
+		const completion = row.qty ? (row.produced_qty / row.qty) * 100 : 0;
+		const uom = row.stock_uom || row.uom || "";
+		const tr = $(`
+			<tr data-kind="${kind}" data-search="${this.esc(
+			`${row.item_name || ""} ${row.item_code} ${(row.documents || [])
+				.map((d) => d.name)
+				.join(" ")}`.toLowerCase()
+		)}">
+				<td class="ppv-cell-item" style="--ppv-indent: ${indent}">
+					<div class="ppv-item-line">
+						<a href="/app/item/${encodeURIComponent(row.item_code)}">${this.esc(row.item_name || row.item_code)}</a>
+						<span class="ppv-item-tag"></span>
+					</div>
+					<div class="ppv-item-sub">${this.esc(row.item_code)}</div>
+				</td>
+				<td class="ppv-num">${this.format_float(row.qty)} <span class="ppv-uom">${this.esc(uom)}</span></td>
+				<td class="ppv-num">${kind === "sub" ? this.format_float(row.available_qty) : "—"}</td>
+				<td class="ppv-num">${this.format_float(row.produced_qty)}</td>
+				<td class="ppv-num ${row.pending_qty > 0 ? "ppv-pending" : ""}">${this.format_float(row.pending_qty)}</td>
+				<td class="ppv-col-progress"></td>
+				<td class="ppv-col-docs"></td>
+			</tr>
+		`);
+		tr.find(".ppv-item-tag").append(this.manufacture_tag(row, kind));
+		tr.find(".ppv-col-progress").append(frappe.ui.progress({ value: completion, hint: true }));
+		this.append_document_chips(tr.find(".ppv-col-docs"), row.documents);
+		return tr;
+	}
+
+	manufacture_tag(row, kind) {
+		if (kind === "fg") {
+			if (!row.sales_order) return frappe.ui.badge({ label: __("Finished Good"), size: "sm" });
+			return frappe.ui.badge({
+				label: row.sales_order,
+				theme: "violet",
+				variant: "outline",
+				size: "sm",
+			});
+		}
+		return frappe.ui.badge({
+			label: __(row.type_of_manufacturing || "In House"),
+			size: "sm",
+			theme: row.type_of_manufacturing === "Subcontract" ? "amber" : "blue",
+			variant: "outline",
+		});
+	}
+
+	render_materials() {
+		const { owned, shared } = this.focused_materials();
+		if (!owned.length && !shared.length) {
+			this.render_empty(__("No raw materials planned for this plan yet"));
+			return;
+		}
+		const { table, body } = this.make_table([
+			{ label: __("Material") },
+			{ label: __("Required"), class: "ppv-num" },
+			{ label: __("In Stock"), class: "ppv-num" },
+			{ label: __("To Procure"), class: "ppv-num" },
+			{ label: __("Requested"), class: "ppv-num" },
+			{ label: __("Ordered"), class: "ppv-num" },
+			{ label: __("Status"), class: "ppv-col-status" },
+			{ label: __("Requests"), class: "ppv-col-docs" },
+		]);
+
+		for (const material of owned) body.append(this.material_row(material));
+		if (shared.length) {
+			body.append(this.group_row(__("Shared across finished goods"), 8));
+			for (const material of shared) body.append(this.material_row(material));
+		}
+		this.detail_body.append(table);
+	}
+
+	focused_materials() {
+		const materials = [...(this.data.materials || [])].sort(
+			(a, b) => this.open_qty(b) - this.open_qty(a)
+		);
+		const is_shared = (d) => d.owners.length !== 1;
+		if (this.focus === "all") {
+			return { owned: materials.filter((d) => !is_shared(d)), shared: materials.filter(is_shared) };
+		}
+		return {
+			owned: materials.filter((d) => !is_shared(d) && d.owners[0] === this.focus),
+			shared: materials.filter((d) => is_shared(d) && d.owners.includes(this.focus)),
+		};
+	}
+
+	material_row(material) {
+		const open = this.open_qty(material);
+		const tr = $(`
+			<tr data-open="${open > 0 ? 1 : 0}" data-search="${this.esc(
+			`${material.item_name || ""} ${material.item_code} ${(material.documents || [])
+				.map((d) => d.name)
+				.join(" ")}`.toLowerCase()
+		)}">
+				<td class="ppv-cell-item">
+					<div class="ppv-item-line">
+						<a href="/app/item/${encodeURIComponent(material.item_code)}">${this.esc(
+			material.item_name || material.item_code
+		)}</a>
+						<span class="ppv-item-tag"></span>
+					</div>
+					<div class="ppv-item-sub">${this.esc(material.item_code)}${
+			material.warehouse ? ` &middot; ${this.esc(material.warehouse)}` : ""
+		}</div>
+				</td>
+				<td class="ppv-num">${this.format_float(material.required_qty)} <span class="ppv-uom">${this.esc(
+			material.uom || ""
+		)}</span></td>
+				<td class="ppv-num">${this.format_float(material.available_qty)}</td>
+				<td class="ppv-num">${this.format_float(material.to_procure_qty)}</td>
+				<td class="ppv-num">${this.format_float(material.requested_qty)}</td>
+				<td class="ppv-num">${this.format_float(material.ordered_qty)}</td>
+				<td class="ppv-col-status"></td>
+				<td class="ppv-col-docs"></td>
+			</tr>
+		`);
+		tr.find(".ppv-item-tag").append(
 			frappe.ui.badge({
 				label: __(material.material_request_type || "Material"),
 				size: "sm",
 				variant: "ghost",
 			})
 		);
-		el.find(".ppv-sub-progress").append(frappe.ui.progress({ value: completion, hint: true }));
-		this.append_document_chips(el.find(".ppv-chips"), material.documents);
-		return el;
+		tr.find(".ppv-col-status").append(this.material_status(material, open));
+		this.append_document_chips(tr.find(".ppv-col-docs"), material.documents);
+		return tr;
 	}
 
-	item_card(row, { show_dates } = {}) {
-		const completion = row.qty ? (row.produced_qty / row.qty) * 100 : 0;
-		const card = $(`
-			<div class="ppv-card">
-				<div class="ppv-card-head">
-					<div>
-						<div class="ppv-card-title">
-							<a href="/app/item/${encodeURIComponent(row.item_code)}">
-								${frappe.utils.escape_html(row.item_name || row.item_code)}</a>
-						</div>
-						<div class="ppv-card-sub">${frappe.utils.escape_html(row.item_code)}</div>
-					</div>
-					<div class="ppv-card-badges"></div>
-				</div>
-				<div class="ppv-qty-row">
-					${this.qty_cell(__("Planned"), row.qty)}
-					${this.qty_cell(__("Produced"), row.produced_qty)}
-					${this.qty_cell(__("Pending"), row.pending_qty)}
-				</div>
-				<div class="ppv-card-progress"></div>
-				<div class="ppv-chips"></div>
-			</div>
-		`);
-
-		const badges = card.find(".ppv-card-badges");
-		if (row.sales_order) {
-			badges.append(frappe.ui.badge({ label: row.sales_order, theme: "violet", variant: "outline" }));
-		}
-		if (show_dates && row.planned_start_date) {
-			badges.append(
-				frappe.ui.badge({
-					label: frappe.datetime.str_to_user(row.planned_start_date.split(" ")[0]),
-					icon: "calendar",
-					variant: "ghost",
-				})
-			);
-		}
-		card.find(".ppv-card-progress").append(
-			frappe.ui.progress({ value: completion, size: "md", hint: true })
-		);
-		this.append_document_chips(card.find(".ppv-chips"), row.documents);
-		return card;
-	}
-
-	sub_assembly_row(row) {
-		const completion = row.qty ? (row.produced_qty / row.qty) * 100 : 0;
-		const el = $(`
-			<div class="ppv-sub-row" style="--ppv-indent: ${row.indent}">
-				<div class="ppv-sub-item">
-					<div class="ppv-sub-title">
-						<a href="/app/item/${encodeURIComponent(row.item_code)}">
-							${frappe.utils.escape_html(row.item_name || row.item_code)}</a>
-						<span class="ppv-sub-type"></span>
-					</div>
-					<div class="ppv-card-sub">${frappe.utils.escape_html(row.item_code)}</div>
-				</div>
-				<div class="ppv-qty-row ppv-qty-compact">
-					${this.qty_cell(__("Planned"), row.qty)}
-					${this.qty_cell(__("Done"), row.produced_qty)}
-					${this.qty_cell(__("Pending"), row.pending_qty)}
-				</div>
-				<div class="ppv-sub-progress"></div>
-				<div class="ppv-chips"></div>
-			</div>
-		`);
-		el.find(".ppv-sub-type").append(
-			frappe.ui.badge({
-				label: __(row.type_of_manufacturing || "In House"),
+	material_status(material, open) {
+		if (open > 0) {
+			return frappe.ui.badge({
+				label: __("Request {0}", [this.format_float(open)]),
+				theme: "red",
 				size: "sm",
-				theme: row.type_of_manufacturing === "Subcontract" ? "amber" : "blue",
-				variant: "outline",
-			})
-		);
-		el.find(".ppv-sub-progress").append(frappe.ui.progress({ value: completion, hint: true }));
-		this.append_document_chips(el.find(".ppv-chips"), row.documents);
-		return el;
+			});
+		}
+		if (!flt(material.to_procure_qty)) {
+			return frappe.ui.badge({ label: __("In Stock"), theme: "green", size: "sm" });
+		}
+		if (flt(material.ordered_qty) >= flt(material.to_procure_qty)) {
+			return frappe.ui.badge({ label: __("Ordered"), theme: "green", size: "sm" });
+		}
+		return frappe.ui.badge({ label: __("Requested"), theme: "blue", size: "sm" });
 	}
 
 	append_document_chips(target, documents) {
 		if (!documents || !documents.length) {
-			target.append(`<span class="ppv-no-docs">${__("No documents yet")}</span>`);
+			target.append(`<span class="ppv-no-docs">${__("None")}</span>`);
 			return;
 		}
+		const icons = { "Purchase Order": "shopping-cart", "Material Request": "clipboard-list" };
 		for (const doc of documents) {
 			const route = `/app/${frappe.router.slug(doc.doctype)}/${encodeURIComponent(doc.name)}`;
-			const label = doc.status ? `${doc.name} · ${__(doc.status)}` : doc.name;
-			const icons = {
-				"Purchase Order": "shopping-cart",
-				"Material Request": "clipboard-list",
-			};
 			$(`<a class="ppv-chip-link" href="${route}"></a>`)
 				.append(
 					frappe.ui.badge({
-						label: label,
+						label: doc.name,
+						size: "sm",
 						theme: this.status_theme(doc.status),
 						icon: icons[doc.doctype] || "factory",
+						title: __(doc.status || "Draft"),
 					})
 				)
 				.appendTo(target);
 		}
 	}
 
+	render_empty(title) {
+		this.detail_body.append(
+			$('<div class="ppv-fill"></div>').append(frappe.ui.empty_state({ icon: "inbox", title }))
+		);
+	}
+
 	render_schedule() {
-		const blocks = this.data.schedule || [];
+		const blocks = this.focused_schedule();
 		if (!blocks.length) {
-			this.panel_empty_state(
-				__("No schedule yet — use Schedule Items on the Production Plan to build one")
-			);
+			this.render_empty(__("No schedule yet — use Schedule Items on the Production Plan to build one"));
 			return;
 		}
-		this.panel.append(this.schedule_toolbar());
-		this.panel.append(this.schedule_timeline(blocks));
+		this.detail_body.append(this.schedule_toolbar());
+		this.detail_body.append(this.schedule_timeline(blocks));
+	}
+
+	focused_schedule() {
+		const blocks = this.data.schedule || [];
+		if (this.focus === "all") return blocks;
+		const rows = new Set([this.focus]);
+		for (const sub of this.index.subs_by_parent[this.focus] || []) rows.add(sub.row_name);
+		const items = new Set(
+			(this.data.materials || []).filter((d) => d.owners.includes(this.focus)).map((d) => d.item_code)
+		);
+		return blocks.filter((d) =>
+			d.row_type === "Raw Material" ? items.has(d.item_code) : rows.has(d.plan_row)
+		);
 	}
 
 	schedule_toolbar() {
-		const toggle = (label, value, options, on_change) =>
-			frappe.ui.tab_buttons({
-				label,
-				type: "subtle",
-				size: "sm",
-				value,
-				options,
-				on_change,
-			});
+		const toggle = (value, options, on_change) =>
+			frappe.ui.tab_buttons({ type: "ghost", size: "sm", value, options, on_change });
 		return $('<div class="ppv-schedule-toolbar"></div>')
 			.append(
 				toggle(
-					__("Group by"),
 					this.schedule_group,
 					[
 						{ label: __("By Item"), value: "item" },
@@ -565,13 +766,12 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 					],
 					(value) => {
 						this.schedule_group = value;
-						this.render_active_panel();
+						this.render_detail_body();
 					}
 				)
 			)
 			.append(
 				toggle(
-					__("Scale"),
 					this.schedule_scale,
 					[
 						{ label: __("Day"), value: "day" },
@@ -579,10 +779,14 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 					],
 					(value) => {
 						this.schedule_scale = value;
-						this.render_active_panel();
+						this.render_detail_body();
 					}
 				)
-			);
+			).append(`<span class="ppv-legend">
+				<span class="ppv-legend-item"><i data-row-type="Finished Good"></i>${__("Finished Good")}</span>
+				<span class="ppv-legend-item"><i data-row-type="Sub Assembly"></i>${__("Sub Assembly")}</span>
+				<span class="ppv-legend-item"><i data-row-type="Raw Material"></i>${__("Raw Material")}</span>
+			</span>`);
 	}
 
 	schedule_timeline(blocks) {
@@ -590,6 +794,8 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 		const raw_end = Math.max(...blocks.map((d) => frappe.datetime.str_to_obj(d.to_time).getTime()));
 		const axis = this.timeline_ticks(raw_start, raw_end);
 		const span = Math.max(axis.end - axis.start, 1);
+		const now = new Date().getTime();
+		this.today_offset = now > axis.start && now < axis.end ? ((now - axis.start) / span) * 100 : null;
 
 		const timeline = $(
 			`<div class="ppv-timeline" style="--ppv-ticks: ${axis.ticks.length}; --ppv-tick-w: ${axis.tick_width}"></div>`
@@ -598,7 +804,7 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 			<div class="ppv-timeline-header">
 				<div class="ppv-timeline-label">${__("Timeline")}</div>
 				<div class="ppv-axis">${axis.ticks
-					.map((tick) => `<div class="ppv-axis-tick">${frappe.utils.escape_html(tick)}</div>`)
+					.map((tick) => `<div class="ppv-axis-tick">${this.esc(tick)}</div>`)
 					.join("")}</div>
 			</div>
 		`);
@@ -610,28 +816,8 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 
 	timeline_ticks(start, end) {
 		const hour_ms = 3600000;
-		if (this.schedule_scale === "hour") {
-			const span_hours = Math.max((end - start) / hour_ms, 1);
-			const step = span_hours <= 24 ? 1 : span_hours <= 72 ? 3 : span_hours <= 240 ? 6 : 12;
-			const first = new Date(start);
-			first.setMinutes(0, 0, 0);
-			first.setHours(Math.floor(first.getHours() / step) * step);
-			const ticks = [];
-			for (let time = first.getTime(); time < end; time += step * hour_ms) {
-				const date = new Date(time);
-				ticks.push(
-					date.getHours() === 0
-						? frappe.datetime.obj_to_user(date).slice(0, 5)
-						: `${String(date.getHours()).padStart(2, "0")}:00`
-				);
-			}
-			return {
-				ticks,
-				start: first.getTime(),
-				end: first.getTime() + ticks.length * step * hour_ms,
-				tick_width: "72px",
-			};
-		}
+		if (this.schedule_scale === "hour") return this.hour_ticks(start, end, hour_ms);
+
 		const first = new Date(start);
 		first.setHours(0, 0, 0, 0);
 		const ticks = [];
@@ -642,18 +828,37 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 			ticks,
 			start: first.getTime(),
 			end: first.getTime() + ticks.length * 24 * hour_ms,
-			tick_width: "96px",
+			tick_width: "84px",
+		};
+	}
+
+	hour_ticks(start, end, hour_ms) {
+		const span_hours = Math.max((end - start) / hour_ms, 1);
+		const step = span_hours <= 24 ? 1 : span_hours <= 72 ? 3 : span_hours <= 240 ? 6 : 12;
+		const first = new Date(start);
+		first.setMinutes(0, 0, 0);
+		first.setHours(Math.floor(first.getHours() / step) * step);
+		const ticks = [];
+		for (let time = first.getTime(); time < end; time += step * hour_ms) {
+			const date = new Date(time);
+			ticks.push(
+				date.getHours() === 0
+					? frappe.datetime.obj_to_user(date).slice(0, 5)
+					: `${String(date.getHours()).padStart(2, "0")}:00`
+			);
+		}
+		return {
+			ticks,
+			start: first.getTime(),
+			end: first.getTime() + ticks.length * step * hour_ms,
+			tick_width: "64px",
 		};
 	}
 
 	schedule_rows(blocks) {
 		if (this.schedule_group === "workstation") {
 			const groups = this.group_rows(blocks, (d) => d.workstation || d.supplier || __("Unassigned"));
-			return Object.entries(groups).map(([label, rows]) => ({
-				label,
-				indent: 0,
-				blocks: rows,
-			}));
+			return Object.entries(groups).map(([label, rows]) => ({ label, indent: 0, blocks: rows }));
 		}
 		return this.schedule_tree(blocks);
 	}
@@ -665,7 +870,6 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 			(d) => d.item_code
 		);
 		const row_materials = this.data.row_materials || {};
-		const subs_by_parent = this.group_rows(this.data.sub_assemblies, (d) => d.production_plan_item);
 		const used_materials = new Set();
 		const used_rows = new Set();
 
@@ -678,10 +882,10 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 			});
 
 		const out = [];
-		for (const fg of this.data.finished_goods) {
+		for (const fg of this.focused_goods()) {
 			used_rows.add(fg.row_name);
 			const branch = [];
-			for (const sub of subs_by_parent[fg.row_name] || []) {
+			for (const sub of this.index.subs_by_parent[fg.row_name] || []) {
 				used_rows.add(sub.row_name);
 				const indent = 1 + (sub.indent || 0);
 				const sub_blocks = by_row[sub.row_name] || [];
@@ -700,60 +904,56 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 			}
 		}
 
+		return out.concat(this.leftover_rows(blocks, used_rows, used_materials));
+	}
+
+	leftover_rows(blocks, used_rows, used_materials) {
 		const leftover = blocks.filter((d) =>
 			d.row_type === "Raw Material" ? !used_materials.has(d.item_code) : !used_rows.has(d.plan_row)
 		);
-		for (const [label, rows] of Object.entries(
-			this.group_rows(leftover, (d) => d.item_name || d.item_code || d.subject)
-		)) {
-			out.push({ label, indent: 0, blocks: rows });
-		}
-		return out;
+		const groups = this.group_rows(leftover, (d) => d.item_name || d.item_code || d.subject);
+		return Object.entries(groups).map(([label, rows]) => ({ label, indent: 0, blocks: rows }));
 	}
 
 	timeline_row(descriptor, start, span) {
 		const { label, indent, blocks } = descriptor;
 		const row = $(`
 			<div class="ppv-timeline-row" data-depth="${indent > 0 ? "child" : "root"}">
-				<div class="ppv-timeline-label" style="--ppv-row-indent: ${indent}"
-					title="${frappe.utils.escape_html(label)}">
-					${indent > 0 ? '<span class="ppv-tree-branch">└</span>' : ""}
-					${frappe.utils.escape_html(label)}</div>
+				<div class="ppv-timeline-label" style="--ppv-row-indent: ${indent}" title="${this.esc(label)}">
+					${this.esc(label)}</div>
 				<div class="ppv-track"></div>
 			</div>
 		`);
 		const track = row.find(".ppv-track");
-		for (const block of blocks) {
-			const from = frappe.datetime.str_to_obj(block.from_time).getTime();
-			const to = frappe.datetime.str_to_obj(block.to_time).getTime();
-			const left = ((from - start) / span) * 100;
-			const width = Math.max(((to - from) / span) * 100, 0.6);
-			const title = [
-				block.subject,
-				`${frappe.datetime.str_to_user(block.from_time)} → ${frappe.datetime.str_to_user(
-					block.to_time
-				)}`,
-				block.workstation || block.supplier || "",
-			]
-				.filter(Boolean)
-				.join("\n");
-			$(`<a class="ppv-block" data-row-type="${frappe.utils.escape_html(block.row_type || "")}"
-				style="left: ${left}%; width: ${width}%"
-				href="/app/production-plan-schedule/${encodeURIComponent(block.name)}"
-				title="${frappe.utils.escape_html(title)}">
-				<span>${frappe.utils.escape_html(block.operation || block.item_name || block.subject || "")}</span>
-			</a>`).appendTo(track);
+		if (this.today_offset !== null) {
+			track.append(`<span class="ppv-today" style="left: ${this.today_offset}%"></span>`);
 		}
+		for (const block of blocks) track.append(this.timeline_block(block, start, span));
 		return row;
 	}
 
-	qty_cell(label, value, { integer } = {}) {
-		return `
-			<div class="ppv-qty-cell">
-				<div class="ppv-qty-label">${frappe.utils.escape_html(label)}</div>
-				<div class="ppv-qty-value">${integer ? cint(value) : this.format_float(value)}</div>
-			</div>
-		`;
+	timeline_block(block, start, span) {
+		const from = frappe.datetime.str_to_obj(block.from_time).getTime();
+		const to = frappe.datetime.str_to_obj(block.to_time).getTime();
+		const left = ((from - start) / span) * 100;
+		const width = Math.max(((to - from) / span) * 100, 0.6);
+		const title = [
+			block.subject,
+			`${frappe.datetime.str_to_user(block.from_time)} → ${frappe.datetime.str_to_user(block.to_time)}`,
+			block.workstation || block.supplier || "",
+		]
+			.filter(Boolean)
+			.join("\n");
+		return `<a class="ppv-block" data-row-type="${this.esc(block.row_type || "")}"
+			style="left: ${left}%; width: ${width}%"
+			href="/app/production-plan-schedule/${encodeURIComponent(block.name)}"
+			title="${this.esc(title)}"><span>${this.esc(
+			block.operation || block.item_name || block.subject || ""
+		)}</span></a>`;
+	}
+
+	esc(value) {
+		return frappe.utils.escape_html(value == null ? "" : String(value));
 	}
 
 	format_float(value) {
@@ -793,84 +993,55 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 		return themes[status] || "gray";
 	}
 
-	panel_empty_state(title) {
-		this.panel.append(
-			frappe.ui.empty_state({
-				icon: "inbox",
-				title: title,
-				css_class: "ppv-panel-empty",
-			})
-		);
-	}
-
 	styles() {
 		return `<style>
-			.ppv { max-width: 1100px; margin: 0 auto; padding-bottom: var(--padding-2xl); }
-			.ppv-blank, .ppv-panel-empty { min-height: 320px; }
+			.ppv { display: flex; flex-direction: column; gap: var(--padding-sm); overflow: hidden; }
+			.ppv-fill { flex: 1 1 auto; display: flex; align-items: center; justify-content: center; }
+			.ppv-muted { color: var(--text-muted); }
+			.ppv-uom { color: var(--text-muted); font-size: var(--text-xs); }
 
-			.ppv-hero {
+			.ppv-kpis {
+				flex: 0 0 auto;
 				display: grid;
-				grid-template-columns: 1fr auto;
-				gap: var(--padding-lg) var(--padding-2xl);
+				grid-template-columns: 1.7fr repeat(4, minmax(0, 1fr));
+				gap: var(--padding-sm);
+			}
+			.ppv-kpi {
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				gap: 2px;
+				min-height: 76px;
+				padding: 10px 14px;
 				background: var(--card-bg, var(--fg-color));
 				border: 1px solid var(--border-color);
-				border-radius: var(--border-radius-lg);
-				padding: var(--padding-xl);
-				margin-top: var(--padding-md);
+				border-radius: var(--radius-md);
 			}
-			.ppv-hero-title { display: flex; align-items: center; gap: 10px; }
-			.ppv-plan-link {
-				font-size: var(--text-xl);
-				font-weight: 600;
-				color: var(--heading-color);
-				text-decoration: none;
-			}
-			.ppv-hero-meta { color: var(--text-muted); margin-top: 2px; font-size: var(--text-sm); }
-			.ppv-hero-progress { margin-top: var(--padding-lg); max-width: 460px; }
-
-			.ppv-ring { width: 110px; height: 110px; }
-			.ppv-ring-track { fill: none; stroke: var(--bg-color); stroke-width: 10; }
-			.ppv-ring-fill {
-				fill: none;
-				stroke: var(--primary);
-				stroke-width: 10;
-				stroke-linecap: round;
-				transform: rotate(-90deg);
-				transform-origin: 55px 55px;
-				transition: stroke-dashoffset 0.6s ease;
-			}
-			.ppv-ring-value {
-				text-anchor: middle;
-				font-size: 22px;
-				font-weight: 700;
-				fill: var(--heading-color);
-			}
-			.ppv-ring-caption { text-anchor: middle; font-size: 10px; fill: var(--text-muted); }
-
-			.ppv-stats {
-				grid-column: 1 / -1;
-				display: grid;
-				grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-				gap: var(--padding-md);
-				border-top: 1px solid var(--border-color);
-				padding-top: var(--padding-lg);
-			}
-			.ppv-tile-value {
-				font-size: var(--text-2xl);
-				font-weight: 700;
-				color: var(--heading-color);
-				font-variant-numeric: tabular-nums;
-			}
-			.ppv-tile-label {
+			.ppv-kpi[data-clickable="1"] { cursor: pointer; }
+			.ppv-kpi[data-clickable="1"]:hover { border-color: var(--gray-400); }
+			.ppv-kpi-label {
 				font-size: var(--text-xs);
 				text-transform: uppercase;
 				letter-spacing: 0.05em;
 				color: var(--text-muted);
-				margin-top: 2px;
 			}
-			.ppv-tile-dots {
-				display: flex; gap: 10px; margin-top: 6px;
-				font-size: var(--text-xs); color: var(--text-muted);
+			.ppv-kpi-value {
+				font-size: 22px;
+				line-height: 1.2;
+				font-weight: 700;
+				color: var(--heading-color);
+				font-variant-numeric: tabular-nums;
+			}
+			.ppv-kpi[data-tone="red"] .ppv-kpi-value { color: var(--red-600); }
+			.ppv-kpi[data-tone="green"] .ppv-kpi-value { color: var(--green-600); }
+			.ppv-kpi[data-tone="amber"] .ppv-kpi-value { color: var(--yellow-700); }
+			.ppv-kpi-hint {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				flex-wrap: wrap;
+				font-size: var(--text-xs);
+				color: var(--text-muted);
 			}
 			.ppv-dot-item { display: inline-flex; align-items: center; gap: 4px; }
 			.ppv-dot { width: 7px; height: 7px; border-radius: 999px; background: var(--gray-400); }
@@ -879,136 +1050,235 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 			.ppv-dot[data-theme="amber"] { background: var(--yellow-500); }
 			.ppv-dot[data-theme="red"] { background: var(--red-500); }
 
-			.ppv-tabs { margin: var(--padding-lg) 0 var(--padding-md); }
+			.ppv-hero { flex-direction: row; align-items: center; gap: 14px; }
+			.ppv-ring { width: 62px; height: 62px; }
+			.ppv-ring-track { fill: none; stroke: var(--bg-color); stroke-width: 7; }
+			.ppv-ring-fill {
+				fill: none;
+				stroke: var(--primary);
+				stroke-width: 7;
+				stroke-linecap: round;
+				transform: rotate(-90deg);
+				transform-origin: 32px 32px;
+				transition: stroke-dashoffset 0.6s ease;
+			}
+			.ppv-ring-value {
+				text-anchor: middle;
+				font-size: 15px;
+				font-weight: 700;
+				fill: var(--heading-color);
+			}
+			.ppv-hero-body { min-width: 0; }
+			.ppv-hero-top { display: flex; align-items: center; gap: 8px; }
+			.ppv-hero-name {
+				font-size: var(--text-lg);
+				font-weight: 600;
+				color: var(--heading-color);
+				text-decoration: none;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+			.ppv-hero-qty { font-size: var(--text-sm); color: var(--text-color); margin-top: 2px; }
+			.ppv-hero-meta { font-size: var(--text-xs); color: var(--text-muted); }
+
+			.ppv-workspace {
+				flex: 1 1 auto;
+				min-height: 0;
+				display: grid;
+				grid-template-columns: 284px minmax(0, 1fr);
+				gap: var(--padding-sm);
+			}
+			.ppv-pane {
+				display: flex;
+				flex-direction: column;
+				min-height: 0;
+				background: var(--card-bg, var(--fg-color));
+				border: 1px solid var(--border-color);
+				border-radius: var(--radius-md);
+				overflow: hidden;
+			}
+			.ppv-pane-head {
+				flex: 0 0 auto;
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				min-height: 44px;
+				padding: 6px 12px;
+				border-bottom: 1px solid var(--border-color);
+			}
+			.ppv-pane-title { font-weight: 600; font-size: var(--text-sm); color: var(--heading-color); }
+			.ppv-count {
+				font-size: var(--text-xs);
+				color: var(--text-muted);
+				background: var(--bg-color);
+				border-radius: 999px;
+				padding: 1px 7px;
+			}
+			.ppv-pane-body { flex: 1 1 auto; min-height: 0; overflow: auto; }
 
 			.ppv-search {
 				display: flex;
 				align-items: center;
-				gap: 8px;
-				max-width: 380px;
-				margin-bottom: var(--padding-md);
+				gap: 6px;
+				margin: 8px 12px;
 				background: var(--fg-color);
 				border: 1px solid var(--border-color);
-				border-radius: var(--border-radius);
-				padding: 6px 10px;
+				border-radius: var(--radius-sm);
+				padding: 4px 8px;
 			}
+			.ppv-search-inline { margin: 0 0 0 auto; min-width: 200px; max-width: 260px; }
 			.ppv-search:focus-within { border-color: var(--primary); }
 			.ppv-search-icon { display: flex; color: var(--text-muted); }
 			.ppv-search-input {
 				flex: 1;
+				min-width: 0;
 				border: none;
 				outline: none;
-				background: transparent;
-				font-size: var(--text-md);
+				background: var(--fg-color);
+				font-size: var(--text-sm);
 				color: var(--text-color);
 			}
-			.ppv-search-count {
-				color: var(--text-muted);
-				font-size: var(--text-xs);
-				white-space: nowrap;
-			}
 
-			.ppv-node { margin-bottom: var(--padding-md); }
-			.ppv-node > .ppv-card { margin-bottom: 0; }
-			.ppv-branch {
-				margin: var(--padding-sm) 0 0 var(--padding-xl);
-				padding-left: var(--padding-lg);
-				border-left: 2px solid var(--border-color);
+			.ppv-rail-row {
+				position: relative;
+				padding: 9px 12px 9px 15px;
+				border-bottom: 1px solid var(--border-color);
+				cursor: pointer;
 			}
-			.ppv-caret { margin-right: 4px; align-self: flex-start; }
-			.ppv-caret svg { transition: transform 0.15s ease; }
-			.ppv-caret.ppv-collapsed svg { transform: rotate(-90deg); }
-			.ppv-material-row { border-style: dashed; }
-			.ppv-material-row .ppv-sub-title a { font-weight: 500; }
-
-			.ppv-card {
-				background: var(--card-bg, var(--fg-color));
-				border: 1px solid var(--border-color);
-				border-radius: var(--border-radius-lg);
-				padding: var(--padding-lg);
-				margin-bottom: var(--padding-md);
-				transition: box-shadow 0.15s ease;
+			.ppv-rail-row::before {
+				content: "";
+				position: absolute;
+				left: 0; top: 0; bottom: 0;
+				width: 3px;
+				background: transparent;
 			}
-			.ppv-card:hover { box-shadow: var(--shadow-sm); }
-			.ppv-card-head { display: flex; gap: var(--padding-md); }
-			.ppv-card-head .ppv-card-badges { margin-left: auto; }
-			.ppv-card-title a { color: var(--heading-color); font-weight: 600; text-decoration: none; }
-			.ppv-card-sub { color: var(--text-muted); font-size: var(--text-sm); margin-top: 1px; }
-			.ppv-card-badges { display: flex; gap: 6px; align-items: flex-start; flex-wrap: wrap; }
-			.ppv-card-progress { margin-top: var(--padding-sm); max-width: 460px; }
-
-			.ppv-qty-row {
-				display: flex;
-				gap: var(--padding-2xl);
-				margin-top: var(--padding-md);
-				justify-content: flex-end;
-			}
-			.ppv-qty-cell { text-align: right; min-width: 90px; }
-			.ppv-qty-label {
-				font-size: var(--text-xs);
-				text-transform: uppercase;
-				letter-spacing: 0.05em;
-				color: var(--text-muted);
-				text-align: right;
-			}
-			.ppv-qty-value {
-				font-size: var(--text-lg);
+			.ppv-rail-row[data-risk="short"]::before { background: var(--red-500); }
+			.ppv-rail-row[data-risk="idle"]::before { background: var(--yellow-500); }
+			.ppv-rail-row[data-risk="running"]::before { background: var(--blue-500); }
+			.ppv-rail-row[data-risk="done"]::before { background: var(--green-500); }
+			.ppv-rail-row:hover { background: var(--bg-color); }
+			.ppv-rail-row.is-active { background: var(--bg-color); }
+			.ppv-rail-row.is-active .ppv-rail-name { color: var(--primary); }
+			.ppv-rail-top { display: flex; align-items: baseline; gap: 8px; }
+			.ppv-rail-name {
+				flex: 1;
+				min-width: 0;
 				font-weight: 600;
+				font-size: var(--text-sm);
 				color: var(--heading-color);
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+			.ppv-rail-pct {
+				font-size: var(--text-xs);
+				color: var(--text-muted);
 				font-variant-numeric: tabular-nums;
+			}
+			.ppv-rail-sub {
+				font-size: var(--text-xs);
+				color: var(--text-muted);
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+			.ppv-rail-bar {
+				height: 3px;
+				border-radius: 999px;
+				background: var(--bg-color);
+				margin-top: 6px;
+				overflow: hidden;
+			}
+			.ppv-rail-bar span { display: block; height: 100%; background: var(--primary); }
+			.ppv-rail-flag { font-size: var(--text-xs); color: var(--text-muted); margin-top: 4px; }
+			.ppv-rail-row[data-risk="short"] .ppv-rail-flag { color: var(--red-600); }
+
+			.ppv-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: var(--text-sm); }
+			.ppv-table thead th {
+				position: sticky;
+				top: 0;
+				z-index: 2;
+				background: var(--card-bg, var(--fg-color));
+				border-bottom: 1px solid var(--border-color);
+				padding: 8px 12px;
+				font-size: var(--text-xs);
+				font-weight: 500;
+				text-transform: uppercase;
+				letter-spacing: 0.05em;
+				color: var(--text-muted);
+				white-space: nowrap;
+				text-align: left;
+			}
+			.ppv-table td {
+				padding: 7px 12px;
+				border-bottom: 1px solid var(--border-color);
+				vertical-align: middle;
+			}
+			.ppv-table th.ppv-num, .ppv-table td.ppv-num {
 				text-align: right;
+				white-space: nowrap;
+				font-variant-numeric: tabular-nums;
 			}
-			.ppv-qty-compact .ppv-qty-value { font-size: var(--text-base); }
-			.ppv-qty-compact { gap: var(--padding-lg); margin-top: 0; }
-
-			.ppv-chips {
-				display: flex; flex-wrap: wrap; gap: 6px;
-				margin-top: var(--padding-md);
-			}
-			.ppv-chip-link { text-decoration: none; }
-			.ppv-no-docs { color: var(--text-muted); font-size: var(--text-sm); }
-
-			.ppv-group-head {
+			.ppv-table tbody tr:hover { background: var(--bg-color); }
+			.ppv-table tbody tr[data-open="1"] td:first-child { box-shadow: inset 3px 0 0 var(--red-500); }
+			.ppv-row-group td {
+				background: var(--bg-color);
 				font-size: var(--text-xs);
 				text-transform: uppercase;
 				letter-spacing: 0.05em;
 				color: var(--text-muted);
-				margin: var(--padding-lg) 0 var(--padding-sm);
 			}
-			.ppv-sub-row {
-				display: grid;
-				grid-template-columns: minmax(220px, 1.2fr) auto minmax(140px, 0.8fr);
-				gap: var(--padding-sm) var(--padding-xl);
-				align-items: center;
-				background: var(--card-bg, var(--fg-color));
-				border: 1px solid var(--border-color);
-				border-radius: var(--border-radius-lg);
-				padding: var(--padding-md) var(--padding-lg);
-				margin-bottom: var(--padding-sm);
-				margin-left: calc(var(--ppv-indent, 0) * 24px);
-			}
-			.ppv-sub-title { display: flex; align-items: center; gap: 8px; }
-			.ppv-sub-title a { color: var(--heading-color); font-weight: 600; text-decoration: none; }
-			.ppv-sub-row .ppv-chips { grid-column: 1 / -1; margin-top: 0; }
+			.ppv-cell-item { padding-left: calc(12px + var(--ppv-indent, 0) * 18px) !important; min-width: 220px; }
+			.ppv-item-line { display: flex; align-items: center; gap: 6px; }
+			.ppv-item-line a { color: var(--heading-color); font-weight: 500; text-decoration: none; }
+			.ppv-table tr[data-kind="fg"] .ppv-item-line a { font-weight: 600; }
+			.ppv-item-sub { font-size: var(--text-xs); color: var(--text-muted); }
+			.ppv-pending { color: var(--yellow-700); }
+			.ppv-col-progress { width: 130px; }
+			.ppv-col-status { width: 120px; }
+			.ppv-col-docs { width: 210px; }
+			.ppv-col-docs > * { margin-right: 4px; }
+			.ppv-chip-link { text-decoration: none; }
+			.ppv-no-docs { color: var(--text-muted); font-size: var(--text-xs); }
 
 			.ppv-schedule-toolbar {
 				display: flex;
+				align-items: center;
 				gap: var(--padding-md);
 				flex-wrap: wrap;
-				margin-bottom: var(--padding-md);
+				padding: 8px 12px;
+				border-bottom: 1px solid var(--border-color);
 			}
-			.ppv-timeline-scroll { overflow-x: auto; border: 1px solid var(--border-color);
-				border-radius: var(--border-radius-lg); background: var(--card-bg, var(--fg-color)); }
-			.ppv-timeline { min-width: calc(220px + var(--ppv-ticks) * var(--ppv-tick-w, 96px)); }
+			.ppv-legend { display: flex; gap: 12px; margin-left: auto; font-size: var(--text-xs); color: var(--text-muted); }
+			.ppv-legend-item { display: inline-flex; align-items: center; gap: 5px; }
+			.ppv-legend-item i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+			.ppv-legend-item i[data-row-type="Finished Good"] { background: var(--purple-300); }
+			.ppv-legend-item i[data-row-type="Sub Assembly"] { background: var(--blue-300); }
+			.ppv-legend-item i[data-row-type="Raw Material"] { background: var(--yellow-300); }
+
+			.ppv-timeline-scroll { overflow: auto; }
+			.ppv-timeline { min-width: calc(200px + var(--ppv-ticks) * var(--ppv-tick-w, 84px)); }
 			.ppv-timeline-header, .ppv-timeline-row {
 				display: grid;
-				grid-template-columns: 220px 1fr;
+				grid-template-columns: 200px 1fr;
 				border-bottom: 1px solid var(--border-color);
+			}
+			.ppv-timeline-header {
+				position: sticky;
+				top: 0;
+				z-index: 3;
+				background: var(--card-bg, var(--fg-color));
 			}
 			.ppv-timeline-row:last-child { border-bottom: none; }
 			.ppv-timeline-label {
-				padding: var(--padding-md) var(--padding-lg);
-				padding-left: calc(var(--padding-lg) + var(--ppv-row-indent, 0) * 18px);
+				position: sticky;
+				left: 0;
+				z-index: 2;
+				background: var(--card-bg, var(--fg-color));
+				padding: 8px 10px;
+				padding-left: calc(10px + var(--ppv-row-indent, 0) * 16px);
+				font-size: var(--text-sm);
 				font-weight: 600;
 				color: var(--heading-color);
 				border-right: 1px solid var(--border-color);
@@ -1020,10 +1290,9 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 				font-weight: 400;
 				color: var(--text-color);
 			}
-			.ppv-tree-branch { color: var(--text-muted); margin-right: 4px; }
 			.ppv-axis { display: grid; grid-template-columns: repeat(var(--ppv-ticks), 1fr); }
 			.ppv-axis-tick {
-				padding: var(--padding-md) 8px;
+				padding: 8px 6px;
 				font-size: var(--text-xs);
 				color: var(--text-muted);
 				border-right: 1px dashed var(--border-color);
@@ -1031,7 +1300,7 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 			}
 			.ppv-track {
 				position: relative;
-				min-height: 44px;
+				min-height: 38px;
 				background-image: repeating-linear-gradient(
 					to right,
 					transparent,
@@ -1040,21 +1309,30 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 					var(--border-color) calc(100% / var(--ppv-ticks))
 				);
 			}
+			.ppv-today {
+				position: absolute;
+				top: 0;
+				bottom: 0;
+				width: 2px;
+				background: var(--red-400);
+				z-index: 1;
+			}
 			.ppv-block {
 				position: absolute;
-				top: 8px;
-				height: 28px;
-				border-radius: var(--border-radius);
+				top: 6px;
+				height: 26px;
+				border-radius: var(--radius-sm);
 				background: var(--blue-100);
 				border: 1px solid var(--blue-300);
 				color: var(--blue-700);
 				font-size: var(--text-xs);
-				line-height: 26px;
+				line-height: 24px;
 				padding: 0 8px;
 				overflow: hidden;
 				white-space: nowrap;
 				text-overflow: ellipsis;
 				text-decoration: none;
+				z-index: 2;
 			}
 			.ppv-block:hover { filter: brightness(0.97); text-decoration: none; }
 			.ppv-block[data-row-type="Finished Good"] {
@@ -1064,11 +1342,16 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 				background: var(--yellow-100); border-color: var(--yellow-300); color: var(--yellow-700);
 			}
 
-			@media (max-width: 768px) {
-				.ppv-hero { grid-template-columns: 1fr; }
-				.ppv-hero-ring { display: none; }
-				.ppv-qty-row { gap: var(--padding-lg); }
-				.ppv-sub-row { grid-template-columns: 1fr; }
+			@media (max-width: 1200px) {
+				.ppv-kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+				.ppv-hero { grid-column: span 3; }
+			}
+			@media (max-width: 900px) {
+				.ppv { height: auto !important; overflow: visible; }
+				.ppv-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+				.ppv-hero { grid-column: span 2; }
+				.ppv-workspace { grid-template-columns: 1fr; }
+				.ppv-pane-body { max-height: 60vh; }
 			}
 		</style>`;
 	}
