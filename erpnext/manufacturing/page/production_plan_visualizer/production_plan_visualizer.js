@@ -33,7 +33,7 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 	}
 
 	make() {
-		$(this.page.wrapper).addClass("ppv-page");
+		$(this.page.wrapper).addClass("ppv-page").find(".page-head").css("border-bottom", "none");
 		this.body.html(`${this.styles()}<div class="ppv"></div>`);
 		this.container = this.body.find(".ppv");
 		this.make_plan_field();
