@@ -1437,12 +1437,14 @@ class update_entries_after:
 		stock_entry = frappe.get_lazy_doc("Stock Entry", voucher_no, for_update=True)
 		stock_entry.calculate_rate_and_amount(reset_outgoing_rate=False, raise_error_if_no_rate=False)
 		stock_entry.db_update()
+		update_additional_cost_rows = bool(stock_entry.get("additional_costs"))
 		for d in stock_entry.items:
-			# Update only the row that matches the voucher_detail_no or the row containing the FG/Scrap Item.
+			# Additional costs are redistributed across all incoming rows.
 			if (
 				d.name == voucher_detail_no
 				or (not d.s_warehouse and d.t_warehouse)
 				or stock_entry.purpose in ["Manufacture", "Repack"]
+				or (update_additional_cost_rows and d.t_warehouse)
 			):
 				d.db_update()
 
@@ -1929,9 +1931,6 @@ def get_stock_ledger_entries(
 
 		else:
 			conditions += " and warehouse = %(warehouse)s"
-
-	elif previous_sle.get("warehouse_condition"):
-		conditions += " and " + previous_sle.get("warehouse_condition")
 
 	if check_serial_no and previous_sle.get("serial_no"):
 		# conditions += " and serial_no like {}".format(frappe.db.escape('%{0}%'.format(previous_sle.get("serial_no"))))

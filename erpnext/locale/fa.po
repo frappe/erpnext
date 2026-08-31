@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-08-09 09:47+0000\n"
-"PO-Revision-Date: 2026-08-11 11:06\n"
+"PO-Revision-Date: 2026-08-26 11:43\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -2890,7 +2890,7 @@ msgstr "اضافه شده در"
 
 #: erpnext/buying/doctype/supplier/supplier.py:139
 msgid "Added Supplier Role to User {0}."
-msgstr "نقش تامین کننده به کاربر {0} اضافه شد."
+msgstr "نقش تأمین‌کننده به کاربر {0} اضافه شد."
 
 #: erpnext/controllers/website_list_for_contact.py:310
 msgid "Added {1} Role to User {0}."
@@ -3616,7 +3616,7 @@ msgstr "در مقابل ثبت موجودی"
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:349
 msgid "Against Supplier Invoice {0}"
-msgstr "در مقابل فاکتور تامین کننده {0}"
+msgstr "در مقابل فاکتور تأمین‌کننده {0}"
 
 #. Label of the against_voucher (Dynamic Link) field in DocType 'GL Entry'
 #: erpnext/accounts/doctype/gl_entry/gl_entry.json
@@ -3885,7 +3885,7 @@ msgstr ""
 #. Option for the 'Send To' (Select) field in DocType 'SMS Center'
 #: erpnext/selling/doctype/sms_center/sms_center.json
 msgid "All Supplier Contact"
-msgstr "همه مخاطبین تامین کننده"
+msgstr "همه مخاطبین تأمین‌کننده"
 
 #: erpnext/patches/v11_0/rename_supplier_type_to_supplier_group.py:29
 #: erpnext/patches/v11_0/rename_supplier_type_to_supplier_group.py:32
@@ -3900,7 +3900,7 @@ msgstr "همه مخاطبین تامین کننده"
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:239
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:245
 msgid "All Supplier Groups"
-msgstr "همه گروه‌های تامین کننده"
+msgstr "همه گروه‌های تأمین‌کننده"
 
 #: erpnext/patches/v13_0/remove_bad_selling_defaults.py:12
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:148
@@ -4231,7 +4231,7 @@ msgstr "اجازه ثبت سفارش خرید با مقدار صفر"
 #. Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Allow Quotation with zero quantity"
-msgstr ""
+msgstr "امکان ثبت پیش‌فاکتور با تعداد صفر"
 
 #. Label of the allow_rename_attribute_value (Check) field in DocType 'Item
 #. Variant Settings'
@@ -4265,7 +4265,7 @@ msgstr "اجازه فروش"
 #. in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Allow Sales Order creation for expired Quotation"
-msgstr ""
+msgstr "اجازه ایجاد سفارش فروش برای پیش‌فاکتور منقضی شده"
 
 #. Label of the allow_zero_qty_in_sales_order (Check) field in DocType 'Selling
 #. Settings'
@@ -4527,7 +4527,7 @@ msgstr ""
 
 #: erpnext/accounts/doctype/party_link/party_link.py:27
 msgid "Allowed primary roles are 'Customer' and 'Supplier'. Please select one of these roles only."
-msgstr "نقش‌های اصلی مجاز عبارتند از «مشتری» و «تامین‌کننده». لطفا فقط یکی از این نقش‌ها را انتخاب کنید."
+msgstr "نقش‌های اصلی مجاز عبارتند از «مشتری» و «تأمین‌کننده». لطفا فقط یکی از این نقش‌ها را انتخاب کنید."
 
 #. Label of the companies (Table) field in DocType 'Supplier'
 #. Label of the companies (Table) field in DocType 'Customer'
@@ -4558,7 +4558,7 @@ msgstr "اجازه می‌دهد کاربران درخواست پیش‌فاکت
 #. field in DocType 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "Allows users to submit Supplier Quotations with zero quantity. Useful when rates are fixed but the quantities are not. Eg. Rate Contracts."
-msgstr "اجازه می‌دهد کاربران پیش‌فاکتور تامین کننده با مقدار صفر ثبت کنند. این ویژگی زمانی مفید است که نرخ‌ها ثابت هستند اما مقادیر هنوز مشخص نشده‌اند. مثلاً در قراردادهای نرخ‌گذاری."
+msgstr "اجازه می‌دهد کاربران پیش‌فاکتور تأمین‌کننده با مقدار صفر ثبت کنند. این ویژگی زمانی مفید است که نرخ‌ها ثابت هستند اما مقادیر هنوز مشخص نشده‌اند. مثلاً در قراردادهای نرخ‌گذاری."
 
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.py:1190
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.py:1211
@@ -6892,7 +6892,7 @@ msgstr "میانگین زمان پاسخگویی"
 #. Description of the 'Lead Time in days' (Int) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Average time taken by the supplier to deliver"
-msgstr "میانگین زمان صرف شده توسط تامین کننده برای تحویل"
+msgstr "میانگین زمان صرف شده توسط تأمین‌کننده برای تحویل"
 
 #: erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py:63
 msgid "Avg Daily Outgoing"
@@ -8697,7 +8697,7 @@ msgstr "مسدود کردن فاکتور"
 #. 'Supplier'
 #: erpnext/buying/doctype/supplier/supplier.json
 msgid "Block Supplier"
-msgstr "مسدود کردن تامین کننده"
+msgstr "مسدود کردن تأمین‌کننده"
 
 #. Description of the 'Restrict Customer Over Billing' (Check) field in DocType
 #. 'Accounts Settings'
@@ -9226,7 +9226,7 @@ msgstr "اگر Applicable For به عنوان {0} انتخاب شده باشد،
 
 #: erpnext/buying/doctype/buying_settings/buying_settings.js:62
 msgid "By default, the Supplier Name is set as per the Supplier Name entered. If you want Suppliers to be named by a <a href='https://docs.erpnext.com/docs/user/manual/en/setting-up/settings/naming-series' target='_blank'>Naming Series</a> choose the 'Naming Series' option."
-msgstr "به‌طور پیش‌فرض، نام تامین‌کننده مطابق با نام تامین‌کننده وارد شده تنظیم می‌شود. اگر می‌خواهید تامین‌کنندگان با <a href='https://docs.erpnext.com/docs/user/manual/en/setting-up/settings/name-series' target='_blank'>سری نام‌گذاری نام‌گذاری شوند. </a> گزینه \"Naming Series\" را انتخاب کنید."
+msgstr "به‌طور پیش‌فرض، نام تأمین‌کننده مطابق با نام تأمین‌کننده وارد شده تنظیم می‌شود. اگر می‌خواهید تامین‌کنندگان با <a href='https://docs.erpnext.com/docs/user/manual/en/setting-up/settings/name-series' target='_blank'>سری نام‌گذاری نام‌گذاری شوند. </a> گزینه \"Naming Series\" را انتخاب کنید."
 
 #. Option for the 'Type' (Select) field in DocType 'BOM Secondary Item'
 #. Option for the 'Type' (Select) field in DocType 'Job Card Secondary Item'
@@ -9821,11 +9821,11 @@ msgstr ""
 
 #: erpnext/setup/doctype/company/company.py:564
 msgid "Cannot disable perpetual inventory, as there are existing Stock Ledger Entries for the company {0}. Please cancel the stock transactions first and try again."
-msgstr ""
+msgstr "نمی‌توان موجودی دائمی را غیرفعال کرد، زیرا ثبت‌های دفتر کل سهام برای شرکت {0} وجود دارد. لطفاً ابتدا تراکنش‌های موجودی را لغو کنید و دوباره امتحان کنید."
 
 #: erpnext/stock/doctype/stock_settings/stock_settings.py:134
 msgid "Cannot disable {0} as it may lead to incorrect stock valuation."
-msgstr ""
+msgstr "نمی‌توان {0} را غیرفعال کرد زیرا ممکن است منجر به ارزیابی نادرست موجودی شود."
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:858
 msgid "Cannot disassemble more than produced quantity."
@@ -10200,7 +10200,7 @@ msgstr "دسته‌بندی بر اساس طرف"
 #: erpnext/buying/report/supplier_quotation_comparison/supplier_quotation_comparison.js:83
 #: erpnext/buying/report/supplier_quotation_comparison/supplier_quotation_comparison.js:86
 msgid "Categorize by Supplier"
-msgstr "دسته‌بندی بر اساس تامین‌کننده"
+msgstr "دسته‌بندی بر اساس تأمین‌کننده"
 
 #. Option for the 'Categorize By' (Select) field in DocType 'Process Statement
 #. Of Accounts'
@@ -11835,7 +11835,7 @@ msgstr "شرکتی که مشتری داخلی نماینده آن است."
 #. Invoice'
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 msgid "Company which internal supplier represents"
-msgstr "شرکتی که تامین کننده داخلی آن را نمایندگی می‌کند"
+msgstr "شرکتی که تأمین‌کننده داخلی آن را نمایندگی می‌کند"
 
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.py:74
 msgid "Company {0} added multiple times"
@@ -12005,7 +12005,7 @@ msgstr ""
 #. Label of the items (Table) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "Components"
-msgstr ""
+msgstr "اجزاء"
 
 #. Option for the 'Asset Type' (Select) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
@@ -12753,7 +12753,7 @@ msgstr "در کلیپ بورد کپی شد"
 #. and Conditions'
 #: erpnext/setup/doctype/terms_and_conditions/terms_and_conditions.json
 msgid "Copy Attachments to Transaction"
-msgstr ""
+msgstr "کپی کردن پیوست‌ها به تراکنش"
 
 #. Label of the copy_fields_to_variant (Section Break) field in DocType 'Item
 #. Variant Settings'
@@ -13040,7 +13040,7 @@ msgstr "مرکز هزینه و بودجه"
 
 #: erpnext/public/js/utils/sales_common.js:538
 msgid "Cost Center for Item rows has been updated to {0}"
-msgstr "مرکز هزینه برای ردیف های آیتم به {0} به روز شده است"
+msgstr "مرکز هزینه برای ردیف‌های آیتم به {0} به روز شده است"
 
 #: erpnext/accounts/doctype/cost_center/cost_center.py:75
 msgid "Cost Center is a part of Cost Center Allocation, hence cannot be converted to a group"
@@ -13569,7 +13569,7 @@ msgstr "ایجاد رسید خرید"
 
 #: erpnext/utilities/activation.py:88
 msgid "Create Quotation"
-msgstr "پیش‌فاکتور ایجاد کنید"
+msgstr "ایجاد پیش‌فاکتور"
 
 #. Label of an action in the Onboarding Step 'Create Raw Materials'
 #: erpnext/manufacturing/onboarding_step/create_raw_materials/create_raw_materials.json
@@ -13658,7 +13658,7 @@ msgstr "ایجاد تأمین‌کننده"
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.js:181
 msgid "Create Supplier Quotation"
-msgstr "ایجاد پیش‌فاکتور تامین کننده"
+msgstr "ایجاد پیش‌فاکتور تأمین‌کننده"
 
 #. Label of an action in the Onboarding Step 'Create Tasks'
 #: erpnext/projects/onboarding_step/create_tasks/create_tasks.json
@@ -15721,7 +15721,7 @@ msgstr ""
 #. 'Payment Entry'
 #: erpnext/accounts/doctype/payment_entry/payment_entry.json
 msgid "Deductions or Loss"
-msgstr "کسر یا ضرر"
+msgstr "کسر یا زیان"
 
 #. Label of the default_account (Link) field in DocType 'Mode of Payment
 #. Account'
@@ -16106,7 +16106,7 @@ msgstr "تامین کننده پیش‌فرض"
 #. Label of the supplier_group (Link) field in DocType 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "Default Supplier Group"
-msgstr "گروه تامین کننده پیش‌فرض"
+msgstr "گروه تأمین‌کننده پیش‌فرض"
 
 #. Label of the default_target_warehouse (Link) field in DocType 'BOM'
 #. Label of the to_warehouse (Link) field in DocType 'Stock Entry'
@@ -16450,7 +16450,7 @@ msgstr "تحویل در محل تخلیه شده"
 #: erpnext/accounts/doctype/pos_invoice_item/pos_invoice_item.json
 #: erpnext/accounts/doctype/sales_invoice_item/sales_invoice_item.json
 msgid "Delivered By Supplier"
-msgstr "تحویل توسط تامین کننده"
+msgstr "تحویل توسط تأمین‌کننده"
 
 #. Title of an incoterm
 #: erpnext/setup/doctype/incoterm/incoterms.csv:12
@@ -16512,7 +16512,7 @@ msgstr ""
 #. Label of the delivered_by_supplier (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Delivered by Supplier (Drop Ship)"
-msgstr "تحویل توسط تامین کننده (ارسال مستقیم)"
+msgstr "تحویل توسط تأمین‌کننده (ارسال مستقیم)"
 
 #: erpnext/templates/pages/material_request_info.html:66
 msgid "Delivered: {0}"
@@ -17258,7 +17258,7 @@ msgstr "غیرفعال کردن آستانه تجمعی"
 #. Label of the disable_in_words (Check) field in DocType 'Global Defaults'
 #: erpnext/setup/doctype/global_defaults/global_defaults.json
 msgid "Disable In Words"
-msgstr "غیر فعال کردن به حروف"
+msgstr "غیرفعال کردن به حروف"
 
 #: erpnext/accounts/report/general_ledger/general_ledger.js:182
 msgid "Disable Opening Balance Calculation"
@@ -17883,7 +17883,7 @@ msgstr "تماس نگیرید"
 #: erpnext/manufacturing/doctype/bom_creator_item/bom_creator_item.json
 #: erpnext/manufacturing/doctype/bom_item/bom_item.json
 msgid "Do Not Explode"
-msgstr "گسترده نکنید"
+msgstr "گسترده نشود"
 
 #: erpnext/stock/doctype/stock_settings/stock_settings.py:135
 msgid "Do Not Use Batchwise Valuation"
@@ -18069,7 +18069,7 @@ msgstr "دانلود قالب CSV"
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.js:145
 msgid "Download PDF for Supplier"
-msgstr "دانلود PDF برای تامین کننده"
+msgstr "دانلود PDF برای تأمین‌کننده"
 
 #. Label of the download_materials_required (Button) field in DocType
 #. 'Production Plan'
@@ -18316,7 +18316,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/stock_closing_entry/stock_closing_entry.py:123
 msgid "Duplicate Stock Closing Entry"
-msgstr ""
+msgstr "ثبت اختتامیه موجودی تکراری"
 
 #: erpnext/accounts/doctype/pos_profile/pos_profile.py:169
 msgid "Duplicate customer group found in the customer group table"
@@ -18664,7 +18664,7 @@ msgstr "رسید ایمیل"
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.py:383
 msgid "Email Sent to Supplier {0}"
-msgstr "ایمیل به تامین کننده ارسال شد {0}"
+msgstr "ایمیل به تأمین‌کننده ارسال شد {0}"
 
 #. Label of the email_verified (Check) field in DocType 'Appointment'
 #: erpnext/crm/doctype/appointment/appointment.json
@@ -19536,7 +19536,7 @@ msgstr ""
 
 #: banking/src/components/features/BankReconciliation/BankEntryModalContent.tsx:326
 msgid "Error uploading attachments"
-msgstr ""
+msgstr "خطا در بارگذاری پیوست‌ها"
 
 #: erpnext/assets/doctype/asset/depreciation.py:323
 msgid "Error while posting depreciation entries"
@@ -19666,7 +19666,7 @@ msgstr "حساب سود / زیان تبدیل"
 #. Option for the 'Entry Type' (Select) field in DocType 'Journal Entry'
 #: erpnext/accounts/doctype/journal_entry/journal_entry.json
 msgid "Exchange Gain Or Loss"
-msgstr "سود یا ضرر تبدیل"
+msgstr "سود یا زیان تبدیل"
 
 #. Label of the exchange_gain_loss (Currency) field in DocType 'Payment Entry
 #. Reference'
@@ -21241,7 +21241,7 @@ msgstr "برای فروش"
 
 #: erpnext/accounts/doctype/payment_order/payment_order.js:108
 msgid "For Supplier"
-msgstr "برای تامین کننده"
+msgstr "برای تأمین‌کننده"
 
 #. Label of the warehouse (Link) field in DocType 'Material Request Plan Item'
 #. Label of the for_warehouse (Link) field in DocType 'Production Plan'
@@ -21294,7 +21294,7 @@ msgstr "برای مقدار هزینه = 1 امتیاز وفاداری"
 #. Quotation'
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.json
 msgid "For individual supplier"
-msgstr "برای تامین کننده فردی"
+msgstr "برای تأمین‌کننده فردی"
 
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py:374
 msgid "For item <b>{0}</b>, only <b>{1}</b> asset have been created or linked to <b>{2}</b>. Please create or link <b>{3}</b> more asset with the respective document."
@@ -21302,7 +21302,7 @@ msgstr ""
 
 #: erpnext/controllers/status_updater.py:302
 msgid "For item {0}, rate must be a positive number. To Allow negative rates, enable {1} in {2}"
-msgstr "برای مورد {0}، نرخ باید یک عدد مثبت باشد. برای مجاز کردن نرخ‌های منفی، {1} را در {2} فعال کنید"
+msgstr "برای آیتم {0}، نرخ باید یک عدد مثبت باشد. برای مجاز کردن نرخ‌های منفی، {1} را در {2} فعال کنید"
 
 #. Description of the 'Do not fetch incoming rate from Serial No' (Check) field
 #. in DocType 'Stock Reposting Settings'
@@ -22038,7 +22038,7 @@ msgstr "GTIN-14"
 #. Revaluation Account'
 #: erpnext/accounts/doctype/exchange_rate_revaluation_account/exchange_rate_revaluation_account.json
 msgid "Gain/Loss"
-msgstr "سود / ضرر"
+msgstr "سود / زیان"
 
 #. Label of the disposal_account (Link) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
@@ -22345,7 +22345,7 @@ msgstr "دریافت آیتم‌ها از BOM"
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.js:419
 msgid "Get Items from Material Requests against this Supplier"
-msgstr "دریافت آیتم‌ها از درخواست های مواد در برابر این تامین کننده"
+msgstr "دریافت آیتم‌ها از درخواست های مواد در برابر این تأمین‌کننده"
 
 #: erpnext/public/js/controllers/buying.js:606
 msgid "Get Items from Product Bundle"
@@ -22435,7 +22435,7 @@ msgstr "دریافت آیتم‌های زیر مونتاژ"
 
 #: erpnext/buying/doctype/supplier/supplier.js:151
 msgid "Get Supplier Group Details"
-msgstr "دریافت جزئیات گروه تامین کننده"
+msgstr "دریافت جزئیات گروه تأمین‌کننده"
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.js:461
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.js:481
@@ -22817,7 +22817,7 @@ msgstr "گروه بر اساس مشتری"
 
 #: erpnext/accounts/report/accounts_payable/accounts_payable.js:129
 msgid "Group By Supplier"
-msgstr "گروه بر اساس تامین کننده"
+msgstr "گروه بر اساس تأمین‌کننده"
 
 #. Label of the group_name (Data) field in DocType 'Tax Withholding Group'
 #: erpnext/accounts/doctype/tax_withholding_group/tax_withholding_group.json
@@ -23375,7 +23375,7 @@ msgstr "این BOM چند واحد از کالای تمام شده تولید م
 #. Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "How often should project be updated of Total Purchase Cost ?"
-msgstr ""
+msgstr "هزینه کل خرید پروژه هر چند وقت یکبار باید به‌روزرسانی شود؟"
 
 #. Label of the sales_update_frequency (Select) field in DocType 'Selling
 #. Settings'
@@ -23926,11 +23926,11 @@ msgstr "اگر این آیتم دارای گونه باشد، نمی‌توان 
 
 #: erpnext/buying/doctype/buying_settings/buying_settings.js:76
 msgid "If this option is configured 'Yes', ERPNext will prevent you from creating a Purchase Invoice or Receipt without creating a Purchase Order first. This configuration can be overridden for a particular supplier by enabling the 'Allow Purchase Invoice Creation Without Purchase Order' checkbox in the Supplier master."
-msgstr "اگر این گزینه 'بله' پیکربندی شده باشد، ERPNext شما را از ایجاد فاکتور خرید یا رسید بدون ایجاد یک سفارش خرید جلوگیری می‌کند. این پیکربندی را می‌توان با فعال کردن کادر انتخاب «اجازه ایجاد فاکتور خرید بدون سفارش خرید» در بخش اصلی تامین‌کننده، برای یک تامین‌کننده خاص لغو کرد."
+msgstr "اگر این گزینه 'بله' پیکربندی شده باشد، ERPNext شما را از ایجاد فاکتور خرید یا رسید بدون ایجاد یک سفارش خرید جلوگیری می‌کند. این پیکربندی را می‌توان با فعال کردن کادر انتخاب «اجازه ایجاد فاکتور خرید بدون سفارش خرید» در بخش اصلی تأمین‌کننده، برای یک تأمین‌کننده خاص لغو کرد."
 
 #: erpnext/buying/doctype/buying_settings/buying_settings.js:83
 msgid "If this option is configured 'Yes', ERPNext will prevent you from creating a Purchase Invoice without creating a Purchase Receipt first. This configuration can be overridden for a particular supplier by enabling the 'Allow Purchase Invoice Creation Without Purchase Receipt' checkbox in the Supplier master."
-msgstr "اگر این گزینه 'بله' پیکربندی شده باشد، ERPNext از ایجاد فاکتور خرید بدون ایجاد یک رسید خرید جلوگیری می‌کند. این پیکربندی را می‌توان برای یک تامین‌کننده خاص با فعال کردن کادر انتخاب «اجازه ایجاد فاکتور خرید بدون رسید خرید» در قسمت اصلی تامین‌کننده لغو کرد."
+msgstr "اگر این گزینه 'بله' پیکربندی شده باشد، ERPNext از ایجاد فاکتور خرید بدون ایجاد یک رسید خرید جلوگیری می‌کند. این پیکربندی را می‌توان برای یک تأمین‌کننده خاص با فعال کردن کادر انتخاب «اجازه ایجاد فاکتور خرید بدون رسید خرید» در قسمت اصلی تأمین‌کننده لغو کرد."
 
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.js:10
 msgid "If ticked, multiple materials can be used for a single Work Order. This is useful if one or more time consuming products are being manufactured."
@@ -24202,7 +24202,7 @@ msgstr "خلاصه درون‌بُرد"
 #: erpnext/buying/workspace/buying/buying.json
 #: erpnext/regional/doctype/import_supplier_invoice/import_supplier_invoice.json
 msgid "Import Supplier Invoice"
-msgstr "درون‌بُرد فاکتور تامین کننده"
+msgstr "درون‌بُرد فاکتور تأمین‌کننده"
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:228
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.js:84
@@ -24436,7 +24436,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/item/item.js:1310
 msgid "In this section, you can define Company-wide transaction-related defaults for this Item. Eg. Default Warehouse, Default Price List, Supplier, etc."
-msgstr "در این بخش می‌توانید پیش‌فرض‌های مربوط به تراکنش‌های کل شرکت را برای این آیتم تعریف کنید. به عنوان مثال. انبار پیش‌فرض، لیست قیمت پیش‌فرض، تامین کننده و غیره"
+msgstr "در این بخش می‌توانید پیش‌فرض‌های مربوط به تراکنش‌های کل شرکت را برای این آیتم تعریف کنید. به عنوان مثال. انبار پیش‌فرض، لیست قیمت پیش‌فرض، تأمین‌کننده و غیره"
 
 #. Label of a Link in the CRM Workspace
 #. Name of a report
@@ -24447,17 +24447,17 @@ msgstr "در این بخش می‌توانید پیش‌فرض‌های مربو
 #: erpnext/selling/workspace/selling/selling.json
 #: erpnext/workspace_sidebar/selling.json
 msgid "Inactive Customers"
-msgstr "مشتریان غیر فعال"
+msgstr "مشتریان غیرفعال"
 
 #. Name of a report
 #: erpnext/accounts/report/inactive_sales_items/inactive_sales_items.json
 msgid "Inactive Sales Items"
-msgstr "آیتم‌های غیر فعال فروش"
+msgstr "آیتم‌های غیرفعال فروش"
 
 #. Label of the off_status_image (Attach Image) field in DocType 'Workstation'
 #: erpnext/manufacturing/doctype/workstation/workstation.json
 msgid "Inactive Status"
-msgstr "وضعیت غیر فعال"
+msgstr "وضعیت غیرفعال"
 
 #. Label of the incentives (Currency) field in DocType 'Sales Team'
 #: erpnext/selling/doctype/sales_team/sales_team.json
@@ -25300,7 +25300,7 @@ msgstr "جزئیات تأمین‌کننده داخلی"
 
 #: erpnext/buying/doctype/supplier/supplier.py:185
 msgid "Internal Supplier for company {0} already exists"
-msgstr "تامین کننده داخلی برای شرکت {0} از قبل وجود دارد"
+msgstr "تأمین‌کننده داخلی برای شرکت {0} از قبل وجود دارد"
 
 #. Option for the 'Payment Type' (Select) field in DocType 'Payment Entry'
 #. Option for the 'Status' (Select) field in DocType 'Purchase Invoice'
@@ -25950,7 +25950,7 @@ msgstr "ورودی"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/subcontracting.json
 msgid "Inward Order"
-msgstr ""
+msgstr "سفارش درونی"
 
 #. Label of the is_account_payable (Check) field in DocType 'Cheque Print
 #. Template'
@@ -26211,7 +26211,7 @@ msgstr "مشتری داخلی است"
 #: erpnext/buying/doctype/supplier/supplier.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Is Internal Supplier"
-msgstr "تامین کننده داخلی است"
+msgstr "تأمین‌کننده داخلی است"
 
 #. Label of the is_legacy (Check) field in DocType 'BOM Secondary Item'
 #: erpnext/manufacturing/doctype/bom_secondary_item/bom_secondary_item.json
@@ -26311,17 +26311,17 @@ msgstr "BOM فانتوم است"
 #: erpnext/manufacturing/doctype/bom_item/bom_item.json
 #: erpnext/manufacturing/report/bom_explorer/bom_explorer.py:68
 msgid "Is Phantom Item"
-msgstr "آیتم فانتوم است"
+msgstr "آیا آیتم فانتوم است"
 
 #. Label of the po_required (Select) field in DocType 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "Is Purchase Order required for Purchase Invoice & Receipt creation?"
-msgstr ""
+msgstr "آیا برای ایجاد فاکتور خرید و رسید، سفارش خرید الزامی است؟"
 
 #. Label of the pr_required (Select) field in DocType 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "Is Purchase Receipt required for Purchase Invoice creation?"
-msgstr ""
+msgstr "آیا برای ایجاد فاکتور خرید، ارائه رسید خرید الزامی است؟"
 
 #. Label of the is_debit_note (Check) field in DocType 'Sales Invoice'
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
@@ -27566,7 +27566,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/item_price/item_price.py:140
 msgid "Item Price appears multiple times based on Price List, Supplier/Customer, Currency, Item, Batch, UOM, Qty, and Dates."
-msgstr "قیمت آیتم چندین بار بر اساس لیست قیمت، تامین کننده/مشتری، ارز، آیتم، دسته، UOM، مقدار و تاریخ‌ها ظاهر می‌شود."
+msgstr "قیمت آیتم چندین بار بر اساس لیست قیمت، تأمین‌کننده/مشتری، ارز، آیتم، دسته، UOM، مقدار و تاریخ‌ها ظاهر می‌شود."
 
 #: erpnext/stock/doctype/item/item.py:185
 msgid "Item Price created at rate {0}"
@@ -27640,7 +27640,7 @@ msgstr "گزارش کمبود آیتم"
 #: erpnext/stock/doctype/item/item.json
 #: erpnext/stock/doctype/item_supplier/item_supplier.json
 msgid "Item Supplier"
-msgstr "تامین کننده آیتم"
+msgstr "تأمین‌کننده آیتم"
 
 #. Label of the sec_break_taxes (Section Break) field in DocType 'Item Group'
 #. Name of a DocType
@@ -28041,7 +28041,7 @@ msgstr "مورد {0} باید یک کالای غیر موجودی باشد"
 
 #: erpnext/stock/get_item_details.py:348
 msgid "Item {0} must be a Sub-contracted Item"
-msgstr "مورد {0} باید یک آیتم قرارداد فرعی باشد"
+msgstr "آیتم {0} باید یک آیتم قرارداد فرعی باشد"
 
 #: erpnext/assets/doctype/asset/asset.py:353
 msgid "Item {0} must be a non-stock item"
@@ -29003,7 +29003,7 @@ msgstr ""
 #. Description of the 'Release Date' (Date) field in DocType 'Supplier'
 #: erpnext/buying/doctype/supplier/supplier.json
 msgid "Leave blank if the Supplier is blocked indefinitely"
-msgstr "اگر تامین کننده برای مدت نامحدود مسدود شده است، خالی بگذارید"
+msgstr "اگر تأمین‌کننده برای مدت نامحدود مسدود شده است، خالی بگذارید"
 
 #: banking/src/pages/BankStatementImporter.tsx:138
 msgid "Leave blank to use the password already saved for this bank account (if any). It is stored encrypted and reused for future statements."
@@ -29215,7 +29215,7 @@ msgstr "پیوند با مشتری"
 
 #: erpnext/selling/doctype/customer/customer.js:203
 msgid "Link with Supplier"
-msgstr "پیوند با تامین کننده"
+msgstr "پیوند با تأمین‌کننده"
 
 #. Label of the linked_docs_section (Section Break) field in DocType
 #. 'Appointment'
@@ -30732,7 +30732,7 @@ msgstr "درخواست مواد مورد نیاز است"
 #: erpnext/buying/workspace/buying/buying.json
 #: erpnext/stock/report/material_requests_for_which_supplier_quotations_are_not_created/material_requests_for_which_supplier_quotations_are_not_created.json
 msgid "Material Requests for which Supplier Quotations are not created"
-msgstr "درخواست‌های موادی که برای آنها پیش‌فاکتورهای تامین‌کننده ایجاد نشده است"
+msgstr "درخواست‌های موادی که برای آنها پیش‌فاکتورهای تأمین‌کننده ایجاد نشده است"
 
 #. Label of a Link in the Manufacturing Workspace
 #: erpnext/manufacturing/workspace/manufacturing/manufacturing.json
@@ -30815,7 +30815,7 @@ msgstr ""
 #: erpnext/buying/doctype/purchase_order/purchase_order.js:394
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.js:644
 msgid "Material to Supplier"
-msgstr "مواد به تامین کننده"
+msgstr "مواد به تأمین‌کننده"
 
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/subcontracting.json
@@ -31058,7 +31058,7 @@ msgstr "ادغام {0} از {1}"
 #. Label of the mfs_html (Code) field in DocType 'Request for Quotation'
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.json
 msgid "Message for Supplier"
-msgstr "پیام برای تامین کننده"
+msgstr "پیام برای تأمین‌کننده"
 
 #. Label of the message_to_show (Data) field in DocType 'Cheque Print Template'
 #: erpnext/accounts/doctype/cheque_print_template/cheque_print_template.json
@@ -32542,7 +32542,7 @@ msgstr "بدون خلاصه"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2573
 msgid "No Supplier found for Inter Company Transactions which represents company {0}"
-msgstr "هیچ تامین کننده ای برای Inter Company Transactions یافت نشد که نماینده شرکت {0}"
+msgstr "هیچ تأمین‌کننده ای برای Inter Company Transactions یافت نشد که نماینده شرکت {0}"
 
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.py:982
 msgid "No Tables Detected"
@@ -33113,7 +33113,7 @@ msgstr ""
 #. Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
 msgid "Note: Email will not be sent to disabled users"
-msgstr "توجه: برای کاربران غیر فعال ایمیل ارسال نخواهد شد"
+msgstr "توجه: برای کاربران غیرفعال ایمیل ارسال نخواهد شد"
 
 #: erpnext/manufacturing/doctype/bom/bom.py:793
 msgid "Note: If you want to use the finished good {0} as a raw material, then enable the 'Do Not Explode' checkbox in the Items table against the same raw material."
@@ -33221,7 +33221,7 @@ msgstr "خطای ارسال مجدد به نقش را اطلاع دهید"
 #: erpnext/buying/doctype/supplier_scorecard_scoring_standing/supplier_scorecard_scoring_standing.json
 #: erpnext/buying/doctype/supplier_scorecard_standing/supplier_scorecard_standing.json
 msgid "Notify Supplier"
-msgstr "به تامین کننده اطلاع دهید"
+msgstr "به تأمین‌کننده اطلاع دهید"
 
 #. Label of the email_reminders (Check) field in DocType 'Appointment Booking
 #. Settings'
@@ -35585,7 +35585,7 @@ msgstr "فروشنده والد"
 #. Label of the parent_supplier_group (Link) field in DocType 'Supplier Group'
 #: erpnext/setup/doctype/supplier_group/supplier_group.json
 msgid "Parent Supplier Group"
-msgstr "گروه تامین کننده والد"
+msgstr "گروه تأمین‌کننده والد"
 
 #. Label of the parent_task (Link) field in DocType 'Task'
 #: erpnext/projects/doctype/task/task.json
@@ -36319,7 +36319,7 @@ msgstr "کانال پرداخت"
 #. Label of the deductions (Table) field in DocType 'Payment Entry'
 #: erpnext/accounts/doctype/payment_entry/payment_entry.json
 msgid "Payment Deductions or Loss"
-msgstr "کسر پرداخت یا ضرر"
+msgstr "کسر یا زیان پرداخت"
 
 #: banking/src/components/features/ActionLog/ActionLogDialogBody.tsx:408
 msgid "Payment Details"
@@ -37771,7 +37771,7 @@ msgstr "لطفا یک مشتری انتخاب کنید"
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:222
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:146
 msgid "Please Select a Supplier"
-msgstr "لطفا یک تامین کننده انتخاب کنید"
+msgstr "لطفا یک تأمین‌کننده انتخاب کنید"
 
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:179
 msgid "Please Set Priority"
@@ -37779,7 +37779,7 @@ msgstr "لطفا اولویت را تعیین کنید"
 
 #: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py:182
 msgid "Please Set Supplier Group in Buying Settings."
-msgstr "لطفاً گروه تامین کننده را در تنظیمات خرید تنظیم کنید."
+msgstr "لطفاً گروه تأمین‌کننده را در تنظیمات خرید تنظیم کنید."
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.js:1919
 msgid "Please Specify Account"
@@ -37787,7 +37787,7 @@ msgstr "لطفا حساب را مشخص کنید"
 
 #: erpnext/buying/doctype/supplier/supplier.py:133
 msgid "Please add 'Supplier' role to user {0}."
-msgstr "لطفا نقش \"تامین کننده\" را به کاربر {0} اضافه کنید."
+msgstr "لطفا نقش \"تأمین‌کننده\" را به کاربر {0} اضافه کنید."
 
 #: erpnext/selling/page/point_of_sale/pos_controller.js:92
 msgid "Please add Mode of payments and opening balance details."
@@ -38448,7 +38448,7 @@ msgstr "لطفاً سفارش خرید پیمانکاری فرعی را انتخ
 
 #: erpnext/buying/doctype/supplier_quotation/supplier_quotation.js:91
 msgid "Please select a Supplier"
-msgstr "لطفا یک تامین کننده انتخاب کنید"
+msgstr "لطفا یک تأمین‌کننده انتخاب کنید"
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:666
 msgid "Please select a Warehouse"
@@ -38509,7 +38509,7 @@ msgstr "لطفاً یک ردیف برای ایجاد یک ورودی ارسال 
 
 #: erpnext/accounts/report/purchase_register/purchase_register.py:36
 msgid "Please select a supplier for fetching payments."
-msgstr "لطفاً یک تامین کننده برای واکشی پرداخت‌ها انتخاب کنید."
+msgstr "لطفاً یک تأمین‌کننده برای واکشی پرداخت‌ها انتخاب کنید."
 
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.py:142
 msgid "Please select a valid Purchase Order that has Service Items."
@@ -39019,7 +39019,7 @@ msgstr "کاربران پورتال"
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.js:407
 msgid "Possible Supplier"
-msgstr "تامین کننده احتمالی"
+msgstr "تأمین‌کننده احتمالی"
 
 #. Label of the post_description_key (Data) field in DocType 'Support Search
 #. Source'
@@ -39432,7 +39432,7 @@ msgstr ""
 #. 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "Prevents the system from automatically using the rate from the last purchase transaction when creating new purchase orders or transactions."
-msgstr ""
+msgstr "از استفاده خودکار سیستم از نرخ آخرین تراکنش خرید هنگام ایجاد سفارش‌های خرید یا تراکنش‌های جدید جلوگیری می‌کند."
 
 #. Label of the preview (Button) field in DocType 'Request for Quotation'
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.js:267
@@ -42977,7 +42977,7 @@ msgstr "نرخی که ارز مشتری به ارز پایه شرکت تبدیل
 #. Receipt'
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Rate at which supplier's currency is converted to company's base currency"
-msgstr "نرخی که ارز تامین کننده به ارز پایه شرکت تبدیل می‌شود"
+msgstr "نرخی که ارز تأمین‌کننده به ارز پایه شرکت تبدیل می‌شود"
 
 #. Description of the 'Tax Rate' (Float) field in DocType 'Account'
 #: erpnext/accounts/doctype/account/account.json
@@ -44726,7 +44726,7 @@ msgstr "درخواست برای آیتم پیش‌فاکتور"
 #. Name of a DocType
 #: erpnext/buying/doctype/request_for_quotation_supplier/request_for_quotation_supplier.json
 msgid "Request for Quotation Supplier"
-msgstr "درخواست تامین کننده قیمت"
+msgstr "درخواست پیشنهاد قیمت از تأمین‌کننده"
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:1098
 msgid "Request for Raw Materials"
@@ -46401,7 +46401,7 @@ msgstr ""
 
 #: erpnext/selling/doctype/sales_order/sales_order.py:673
 msgid "Row #{0}: Not allowed to change Supplier as Purchase Order already exists"
-msgstr "ردیف #{0}: به دلیل وجود سفارش خرید، مجاز به تغییر تامین کننده نیست"
+msgstr "ردیف #{0}: به دلیل وجود سفارش خرید، مجاز به تغییر تأمین‌کننده نیست"
 
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1718
 msgid "Row #{0}: Only {1} available to reserve for the Item {2}"
@@ -46582,7 +46582,7 @@ msgstr "ردیف #{0}: تاریخ شروع و پایان سرویس برای ح�
 
 #: erpnext/selling/doctype/sales_order/sales_order.py:495
 msgid "Row #{0}: Set Supplier for item {1}"
-msgstr "ردیف #{0}: تنظیم تامین کننده برای مورد {1}"
+msgstr "ردیف #{0}: تنظیم تأمین‌کننده برای مورد {1}"
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.py:1062
 msgid "Row #{0}: Since 'Track Semi Finished Goods' is enabled, the BOM {1} cannot be used for Sub Assembly Items"
@@ -46731,7 +46731,7 @@ msgstr "ردیف #{1}: انبار برای کالای موجودی {0} اجبا�
 
 #: erpnext/controllers/buying_controller.py:315
 msgid "Row #{idx}: Cannot select Supplier Warehouse while suppling raw materials to subcontractor."
-msgstr "ردیف #{idx}: هنگام تامین مواد اولیه به پیمانکار فرعی، نمی‌توان انبار تامین کننده را انتخاب کرد."
+msgstr "ردیف #{idx}: هنگام تامین مواد اولیه به پیمانکار فرعی، نمی‌توان انبار تأمین‌کننده را انتخاب کرد."
 
 #: erpnext/controllers/buying_controller.py:671
 msgid "Row #{idx}: Item rate has been updated as per valuation rate since its an internal stock transfer."
@@ -46860,7 +46860,7 @@ msgstr "ردیف {0}: پیش‌پرداخت در برابر مشتری باید 
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:685
 msgid "Row {0}: Advance against Supplier must be debit"
-msgstr "ردیف {0}: پیش‌پرداخت در مقابل تامین کننده باید بدهکار باشد"
+msgstr "ردیف {0}: پیش‌پرداخت در مقابل تأمین‌کننده باید بدهکار باشد"
 
 #: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py:768
 msgid "Row {0}: Allocated amount {1} must be less than or equal to invoice outstanding amount {2}"
@@ -46957,7 +46957,7 @@ msgstr "ردیف {0}: سرفصل هزینه به {1} تغییر کرد زیرا 
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.py:156
 msgid "Row {0}: For Supplier {1}, Email Address is Required to send an email"
-msgstr "ردیف {0}: برای تامین کننده {1}، آدرس ایمیل برای ارسال ایمیل ضروری است"
+msgstr "ردیف {0}: برای تأمین‌کننده {1}، آدرس ایمیل برای ارسال ایمیل ضروری است"
 
 #: erpnext/projects/doctype/timesheet/timesheet.py:161
 msgid "Row {0}: From Time and To Time is mandatory."
@@ -47054,7 +47054,7 @@ msgstr "ردیف {0}: لطفاً یک BOM فعال برای مورد {1} انت�
 
 #: erpnext/controllers/subcontracting_controller.py:224
 msgid "Row {0}: Please select an valid BOM for Item {1}."
-msgstr "ردیف {0}: لطفاً یک BOM معتبر برای مورد {1} انتخاب کردن کنید."
+msgstr "ردیف {0}: لطفاً یک BOM معتبر برای آیتم {1} انتخاب کردن کنید."
 
 #: erpnext/regional/italy/utils.py:290
 msgid "Row {0}: Please set at Tax Exemption Reason in Sales Taxes and Charges"
@@ -47126,7 +47126,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:793
 msgid "Row {0}: The item {1}, quantity must be positive number"
-msgstr "ردیف {0}: مورد {1}، مقدار باید عدد مثبت باشد"
+msgstr "ردیف {0}: آیتم {1}، مقدار باید عدد مثبت باشد"
 
 #: erpnext/controllers/accounts_controller.py:3247
 msgid "Row {0}: The {3} Account {1} does not belong to the company {2}"
@@ -47207,7 +47207,7 @@ msgstr "ردیف ({0}): {1} قبلاً در {2} تخفیف داده شده اس�
 
 #: erpnext/manufacturing/page/bom_comparison_tool/bom_comparison_tool.js:206
 msgid "Rows Added in {0}"
-msgstr "ردیف های اضافه شده در {0}"
+msgstr "ردیف‌های اضافه شده در {0}"
 
 #: erpnext/manufacturing/page/bom_comparison_tool/bom_comparison_tool.js:207
 msgid "Rows Removed in {0}"
@@ -47217,7 +47217,7 @@ msgstr "ردیف‌ها در {0} حذف شدند"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Rows with Same Account heads will be merged on Ledger"
-msgstr "ردیف هایی با سرهای حساب یکسان در دفتر ادغام می‌شوند"
+msgstr "ردیف‌هایی با سرهای حساب یکسان در دفتر ادغام می‌شوند"
 
 #: erpnext/controllers/accounts_controller.py:2781
 msgid "Rows with duplicate due dates in other rows were found: {0}"
@@ -48282,7 +48282,7 @@ msgstr "یک آیتم را نمی‌توان چندین بار وارد کرد."
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.py:125
 msgid "Same supplier has been entered multiple times"
-msgstr "همان تامین کننده چندین بار وارد شده است"
+msgstr "همان تأمین‌کننده چندین بار وارد شده است"
 
 #. Label of the sample_quantity (Int) field in DocType 'Purchase Receipt Item'
 #. Label of the sample_quantity (Int) field in DocType 'Stock Entry Detail'
@@ -48786,7 +48786,7 @@ msgstr "تاریخ عضویت را انتخاب کنید. در اولین محا
 #: erpnext/buying/report/supplier_quotation_comparison/supplier_quotation_comparison.js:116
 #: erpnext/buying/report/supplier_quotation_comparison/supplier_quotation_comparison.js:147
 msgid "Select Default Supplier"
-msgstr "تامین کننده پیش‌فرض را انتخاب کنید"
+msgstr "تأمین‌کننده پیش‌فرض را انتخاب کنید"
 
 #: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.js:276
 msgid "Select Difference Account"
@@ -48862,7 +48862,7 @@ msgstr ""
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.js:411
 msgid "Select Possible Supplier"
-msgstr "تامین کننده احتمالی را انتخاب کنید"
+msgstr "تأمین‌کننده احتمالی را انتخاب کنید"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:1120
 #: erpnext/stock/doctype/pick_list/pick_list.js:224
@@ -48892,7 +48892,7 @@ msgstr "انتخاب آدرس حمل و نقل"
 #. Label of the supplier_address (Link) field in DocType 'Purchase Invoice'
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 msgid "Select Supplier Address"
-msgstr "انتخاب آدرس تامین کننده"
+msgstr "انتخاب آدرس تأمین‌کننده"
 
 #: erpnext/stock/doctype/material_request/material_request.js:448
 msgid "Select Supplier for Items"
@@ -48945,7 +48945,7 @@ msgstr "یک روش پرداخت انتخاب کنید."
 
 #: erpnext/selling/doctype/customer/customer.js:251
 msgid "Select a Supplier"
-msgstr "یک تامین کننده انتخاب کنید"
+msgstr "یک تأمین‌کننده انتخاب کنید"
 
 #: erpnext/stock/doctype/material_request/material_request.js:552
 #: erpnext/stock/doctype/material_request/material_request.py:699
@@ -49058,7 +49058,7 @@ msgstr "انبار را انتخاب کنید"
 
 #: erpnext/accounts/doctype/bank_guarantee/bank_guarantee.py:47
 msgid "Select the customer or supplier."
-msgstr "مشتری یا تامین کننده را انتخاب کنید."
+msgstr "مشتری یا تأمین‌کننده را انتخاب کنید."
 
 #: erpnext/assets/doctype/asset/asset.js:947
 msgid "Select the date"
@@ -50021,7 +50021,7 @@ msgstr "تنظیم نرخ پایه به صورت دستی"
 
 #: erpnext/buying/report/supplier_quotation_comparison/supplier_quotation_comparison.js:180
 msgid "Set Default Supplier"
-msgstr "تامین کننده پیش‌فرض را تنظیم کنید"
+msgstr "تأمین‌کننده پیش‌فرض را تنظیم کنید"
 
 #. Label of the set_delivery_warehouse (Link) field in DocType 'Subcontracting
 #. Inward Order'
@@ -50139,7 +50139,7 @@ msgstr "تنظیم انبار منبع"
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:1645
 msgid "Set Supplier"
-msgstr "تنظیم تامین کننده"
+msgstr "تنظیم تأمین‌کننده"
 
 #: erpnext/stock/doctype/material_request/material_request.js:455
 msgid "Set Supplier for All Items"
@@ -51364,7 +51364,7 @@ msgstr ""
 #: erpnext/manufacturing/doctype/bom_explosion_item/bom_explosion_item.json
 #: erpnext/manufacturing/doctype/bom_item/bom_item.json
 msgid "Sourced by Supplier"
-msgstr "به دست آمده توسط تامین کننده"
+msgstr "منبع توسط تأمین‌کننده"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/south_africa_vat_account/south_africa_vat_account.json
@@ -51415,7 +51415,7 @@ msgstr "دسته تقسیم"
 #. in DocType 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Split Early Payment Discount Loss into Income and Tax Loss"
-msgstr "زیان تخفیف پرداخت زودهنگام را به درآمد و ضرر مالیات تقسیم کنید"
+msgstr "تقسیم زیان تخفیف پرداخت زودهنگام به زیان درآمد و مالیات"
 
 #. Label of the split_from (Link) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
@@ -52025,7 +52025,7 @@ msgstr "واریانس دفتر موجودی"
 #. 'Repost Item Valuation'
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgid "Stock Ledgers won’t be reposted."
-msgstr ""
+msgstr "دفاتر کل موجودی دوباره ارسال نخواهند شد."
 
 #. Label of the stock_levels_section (Section Break) field in DocType 'Item'
 #: erpnext/stock/doctype/batch/batch.js:81 erpnext/stock/doctype/item/item.json
@@ -53226,7 +53226,7 @@ msgstr "با موفقیت تطبیق کرد"
 
 #: erpnext/buying/report/supplier_quotation_comparison/supplier_quotation_comparison.js:194
 msgid "Successfully Set Supplier"
-msgstr "تامین کننده با موفقیت تنظیم شد"
+msgstr "تأمین‌کننده با موفقیت تنظیم شد"
 
 #: erpnext/stock/doctype/item/item.py:391
 msgid "Successfully changed Stock UOM, please redefine conversion factors for new UOM."
@@ -53254,7 +53254,7 @@ msgstr "با موفقیت به مشتری پیوند داده شد"
 
 #: erpnext/selling/doctype/customer/customer.js:273
 msgid "Successfully linked to Supplier"
-msgstr "با موفقیت به تامین کننده پیوند داده شد"
+msgstr "با موفقیت به تأمین‌کننده پیوند داده شد"
 
 #: erpnext/accounts/doctype/ledger_merge/ledger_merge.js:99
 msgid "Successfully merged {0} out of {1}."
@@ -53438,7 +53438,7 @@ msgstr "مقدار تامین شده"
 #: erpnext/workspace_sidebar/invoicing.json
 #: erpnext/workspace_sidebar/subscription.json
 msgid "Supplier"
-msgstr "تامین کننده"
+msgstr "تأمین‌کننده"
 
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.js:98
 msgid "Supplier > Supplier Type"
@@ -53462,12 +53462,12 @@ msgstr "تأمین‌کننده > نوع تأمین‌کننده"
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 #: erpnext/stock/doctype/stock_entry/stock_entry.json
 msgid "Supplier Address"
-msgstr "آدرس تامین کننده"
+msgstr "آدرس تأمین‌کننده"
 
 #. Label of the address_display (Text Editor) field in DocType 'Purchase Order'
 #: erpnext/buying/doctype/purchase_order/purchase_order.json
 msgid "Supplier Address Details"
-msgstr "جزئیات آدرس تامین کننده"
+msgstr "جزئیات آدرس تأمین‌کننده"
 
 #. Label of a Link in the Buying Workspace
 #. Label of a Workspace Sidebar Item
@@ -53479,7 +53479,7 @@ msgstr ""
 #. Label of the contact_person (Link) field in DocType 'Purchase Order'
 #: erpnext/buying/doctype/purchase_order/purchase_order.json
 msgid "Supplier Contact"
-msgstr "مخاطب تامین کننده"
+msgstr "مخاطب تأمین‌کننده"
 
 #. Label of the supplier_defaults_section (Section Break) field in DocType
 #. 'Buying Settings'
@@ -53491,7 +53491,7 @@ msgstr "پیش‌فرض‌های تأمین‌کننده"
 #. Receipt'
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Supplier Delivery Note"
-msgstr "یادداشت تحویل تامین کننده"
+msgstr "یادداشت تحویل تأمین‌کننده"
 
 #. Label of the supplier_details (Text) field in DocType 'Supplier'
 #. Label of the supplier_details (Section Break) field in DocType 'Item'
@@ -53500,7 +53500,7 @@ msgstr "یادداشت تحویل تامین کننده"
 #: erpnext/stock/doctype/item/item.json
 #: erpnext/stock/doctype/stock_entry/stock_entry.json
 msgid "Supplier Details"
-msgstr "جزئیات تامین کننده"
+msgstr "جزئیات تأمین‌کننده"
 
 #. Option for the 'Applicable For' (Select) field in DocType 'Pricing Rule'
 #. Label of the supplier_group (Link) field in DocType 'Pricing Rule'
@@ -53546,28 +53546,28 @@ msgstr "جزئیات تامین کننده"
 #: erpnext/setup/doctype/supplier_group/supplier_group.json
 #: erpnext/workspace_sidebar/buying.json
 msgid "Supplier Group"
-msgstr "گروه تامین کننده"
+msgstr "گروه تأمین‌کننده"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/supplier_group_item/supplier_group_item.json
 msgid "Supplier Group Item"
-msgstr "آیتم گروه تامین کننده"
+msgstr "آیتم گروه تأمین‌کننده"
 
 #. Label of the supplier_group_name (Data) field in DocType 'Supplier Group'
 #: erpnext/setup/doctype/supplier_group/supplier_group.json
 msgid "Supplier Group Name"
-msgstr "نام گروه تامین کننده"
+msgstr "نام گروه تأمین‌کننده"
 
 #. Label of the supplier_info_tab (Tab Break) field in DocType 'Stock Entry'
 #: erpnext/stock/doctype/stock_entry/stock_entry.json
 msgid "Supplier Info"
-msgstr "اطلاعات تامین کننده"
+msgstr "اطلاعات تأمین‌کننده"
 
 #. Label of the supplier_invoice_details (Section Break) field in DocType
 #. 'Purchase Invoice'
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 msgid "Supplier Invoice"
-msgstr "فاکتور تامین کننده"
+msgstr "فاکتور تأمین‌کننده"
 
 #. Label of the supplier_invoice_date (Date) field in DocType 'Opening Invoice
 #. Creation Tool Item'
@@ -53576,7 +53576,7 @@ msgstr "فاکتور تامین کننده"
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 #: erpnext/accounts/report/tax_withholding_details/tax_withholding_details.py:230
 msgid "Supplier Invoice Date"
-msgstr "تاریخ فاکتور تامین کننده"
+msgstr "تاریخ فاکتور تأمین‌کننده"
 
 #. Label of the bill_no (Data) field in DocType 'Payment Entry Reference'
 #. Label of the bill_no (Data) field in DocType 'Purchase Invoice'
@@ -53587,16 +53587,16 @@ msgstr "تاریخ فاکتور تامین کننده"
 #: erpnext/accounts/report/general_ledger/general_ledger.py:813
 #: erpnext/accounts/report/tax_withholding_details/tax_withholding_details.py:224
 msgid "Supplier Invoice No"
-msgstr "شماره فاکتور تامین کننده"
+msgstr "شماره فاکتور تأمین‌کننده"
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:1851
 msgid "Supplier Invoice No exists in Purchase Invoice {0}"
-msgstr "فاکتور تامین کننده در فاکتور خرید وجود ندارد {0}"
+msgstr "فاکتور تأمین‌کننده در فاکتور خرید وجود ندارد {0}"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/supplier_item/supplier_item.json
 msgid "Supplier Item"
-msgstr "آیتم تامین کننده"
+msgstr "آیتم تأمین‌کننده"
 
 #. Label of the lead_time_days (Int) field in DocType 'Supplier Quotation Item'
 #: erpnext/buying/doctype/supplier_quotation_item/supplier_quotation_item.json
@@ -53613,7 +53613,7 @@ msgstr ""
 #: erpnext/accounts/report/supplier_ledger_summary/supplier_ledger_summary.json
 #: erpnext/accounts/workspace/financial_reports/financial_reports.json
 msgid "Supplier Ledger Summary"
-msgstr "خلاصه دفتر تامین کننده"
+msgstr "خلاصه دفتر تأمین‌کننده"
 
 #. Label of the supplier_name (Data) field in DocType 'Purchase Invoice'
 #. Option for the 'Supplier Naming By' (Select) field in DocType 'Buying
@@ -53644,12 +53644,12 @@ msgstr "خلاصه دفتر تامین کننده"
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 #: erpnext/stock/doctype/stock_entry/stock_entry.json
 msgid "Supplier Name"
-msgstr "نام تامین کننده"
+msgstr "نام تأمین‌کننده"
 
 #. Label of the supp_master_name (Select) field in DocType 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "Supplier Naming By"
-msgstr "نام‌گذاری تامین کننده توسط"
+msgstr "نام‌گذاری تأمین‌کننده توسط"
 
 #. Label of the supplier_number (Data) field in DocType 'Supplier Number At
 #. Customer'
@@ -53672,7 +53672,7 @@ msgstr "شماره‌های تأمین‌کننده"
 #: erpnext/buying/doctype/request_for_quotation_item/request_for_quotation_item.json
 #: erpnext/templates/includes/rfq/rfq_macros.html:20
 msgid "Supplier Part No"
-msgstr "شماره قطعه تامین کننده"
+msgstr "شماره قطعه تأمین‌کننده"
 
 #. Label of the supplier_part_no (Data) field in DocType 'Purchase Order Item'
 #. Label of the supplier_part_no (Data) field in DocType 'Supplier Quotation
@@ -53685,12 +53685,12 @@ msgstr "شماره قطعه تامین کننده"
 #: erpnext/stock/doctype/item_supplier/item_supplier.json
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgid "Supplier Part Number"
-msgstr "شماره قطعه تامین کننده"
+msgstr "شماره قطعه تأمین‌کننده"
 
 #. Label of the portal_users (Table) field in DocType 'Supplier'
 #: erpnext/buying/doctype/supplier/supplier.json
 msgid "Supplier Portal Users"
-msgstr "کاربران پورتال تامین کننده"
+msgstr "کاربران پورتال تأمین‌کننده"
 
 #. Label of the ref_sq (Link) field in DocType 'Purchase Order'
 #. Label of the supplier_quotation (Link) field in DocType 'Purchase Order
@@ -53713,7 +53713,7 @@ msgstr "کاربران پورتال تامین کننده"
 #: erpnext/stock/doctype/material_request/material_request.js:211
 #: erpnext/workspace_sidebar/buying.json
 msgid "Supplier Quotation"
-msgstr "پیش‌فاکتور تامین کننده"
+msgstr "پیش‌فاکتور تأمین‌کننده"
 
 #. Name of a report
 #. Label of a Link in the Buying Workspace
@@ -53731,15 +53731,15 @@ msgstr "مقایسه قیمت عرضه کننده"
 #: erpnext/buying/doctype/purchase_order_item/purchase_order_item.json
 #: erpnext/buying/doctype/supplier_quotation_item/supplier_quotation_item.json
 msgid "Supplier Quotation Item"
-msgstr "آیتم پیش‌فاکتور تامین کننده"
+msgstr "آیتم پیش‌فاکتور تأمین‌کننده"
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.py:512
 msgid "Supplier Quotation {0} Created"
-msgstr "پیش‌فاکتور تامین کننده {0} ایجاد شد"
+msgstr "پیش‌فاکتور تأمین‌کننده {0} ایجاد شد"
 
 #: erpnext/setup/setup_wizard/data/marketing_source.txt:6
 msgid "Supplier Reference"
-msgstr "مرجع تامین کننده"
+msgstr "مرجع تأمین‌کننده"
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:1727
 msgid "Supplier Required"
@@ -53748,7 +53748,7 @@ msgstr ""
 #. Label of the supplier_score (Data) field in DocType 'Supplier Scorecard'
 #: erpnext/buying/doctype/supplier_scorecard/supplier_scorecard.json
 msgid "Supplier Score"
-msgstr "امتیاز تامین کننده"
+msgstr "امتیاز تأمین‌کننده"
 
 #. Name of a DocType
 #. Label of a Card Break in the Buying Workspace
@@ -53758,7 +53758,7 @@ msgstr "امتیاز تامین کننده"
 #: erpnext/buying/workspace/buying/buying.json
 #: erpnext/workspace_sidebar/buying.json
 msgid "Supplier Scorecard"
-msgstr "کارت امتیازی تامین کننده"
+msgstr "کارت امتیازی تأمین‌کننده"
 
 #. Name of a DocType
 #. Label of a Link in the Buying Workspace
@@ -53767,32 +53767,32 @@ msgstr "کارت امتیازی تامین کننده"
 #: erpnext/buying/workspace/buying/buying.json
 #: erpnext/workspace_sidebar/buying.json
 msgid "Supplier Scorecard Criteria"
-msgstr "معیارهای کارت امتیازی تامین کننده"
+msgstr "معیارهای کارت امتیازی تأمین‌کننده"
 
 #. Name of a DocType
 #: erpnext/buying/doctype/supplier_scorecard_period/supplier_scorecard_period.json
 msgid "Supplier Scorecard Period"
-msgstr "دوره کارت امتیازی تامین کننده"
+msgstr "دوره کارت امتیازی تأمین‌کننده"
 
 #. Name of a DocType
 #: erpnext/buying/doctype/supplier_scorecard_scoring_criteria/supplier_scorecard_scoring_criteria.json
 msgid "Supplier Scorecard Scoring Criteria"
-msgstr "معیارهای امتیازدهی کارت امتیازی تامین کننده"
+msgstr "معیارهای امتیازدهی کارت امتیازی تأمین‌کننده"
 
 #. Name of a DocType
 #: erpnext/buying/doctype/supplier_scorecard_scoring_standing/supplier_scorecard_scoring_standing.json
 msgid "Supplier Scorecard Scoring Standing"
-msgstr "رتبه‌بندی کارت امتیازی تامین کننده"
+msgstr "رتبه‌بندی کارت امتیازی تأمین‌کننده"
 
 #. Name of a DocType
 #: erpnext/buying/doctype/supplier_scorecard_scoring_variable/supplier_scorecard_scoring_variable.json
 msgid "Supplier Scorecard Scoring Variable"
-msgstr "متغیر امتیازدهی کارت امتیازی تامین کننده"
+msgstr "متغیر امتیازدهی کارت امتیازی تأمین‌کننده"
 
 #. Label of the scorecard (Link) field in DocType 'Supplier Scorecard Period'
 #: erpnext/buying/doctype/supplier_scorecard_period/supplier_scorecard_period.json
 msgid "Supplier Scorecard Setup"
-msgstr "راه‌اندازی کارت امتیازی تامین کننده"
+msgstr "راه‌اندازی کارت امتیازی تأمین‌کننده"
 
 #. Name of a DocType
 #. Label of a Link in the Buying Workspace
@@ -53801,7 +53801,7 @@ msgstr "راه‌اندازی کارت امتیازی تامین کننده"
 #: erpnext/buying/workspace/buying/buying.json
 #: erpnext/workspace_sidebar/buying.json
 msgid "Supplier Scorecard Standing"
-msgstr "رتبه کارت امتیازی تامین کننده"
+msgstr "رتبه کارت امتیازی تأمین‌کننده"
 
 #. Name of a DocType
 #. Label of a Link in the Buying Workspace
@@ -53810,12 +53810,12 @@ msgstr "رتبه کارت امتیازی تامین کننده"
 #: erpnext/buying/workspace/buying/buying.json
 #: erpnext/workspace_sidebar/buying.json
 msgid "Supplier Scorecard Variable"
-msgstr "متغیر کارت امتیازی تامین کننده"
+msgstr "متغیر کارت امتیازی تأمین‌کننده"
 
 #. Label of the supplier_type (Select) field in DocType 'Supplier'
 #: erpnext/buying/doctype/supplier/supplier.json
 msgid "Supplier Type"
-msgstr "نوع تامین کننده"
+msgstr "نوع تأمین‌کننده"
 
 #. Label of the supplier_warehouse (Link) field in DocType 'Purchase Invoice'
 #. Label of the supplier_warehouse (Link) field in DocType 'Purchase Order'
@@ -53825,7 +53825,7 @@ msgstr "نوع تامین کننده"
 #: erpnext/manufacturing/doctype/job_card/job_card.js:91
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Supplier Warehouse"
-msgstr "انبار تامین کننده"
+msgstr "انبار تأمین‌کننده"
 
 #. Label of the delivered_by_supplier (Check) field in DocType 'Sales Order
 #. Item'
@@ -53833,7 +53833,7 @@ msgstr "انبار تامین کننده"
 #: erpnext/selling/doctype/sales_order_item/sales_order_item.json
 #: erpnext/stock/doctype/packed_item/packed_item.json
 msgid "Supplier delivers to Customer"
-msgstr "تامین کننده به مشتری تحویل می‌دهد"
+msgstr "تأمین‌کننده به مشتری تحویل می‌دهد"
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:1726
 msgid "Supplier is required for all selected Items"
@@ -53842,11 +53842,11 @@ msgstr ""
 #. Description of a DocType
 #: erpnext/buying/doctype/supplier/supplier.json
 msgid "Supplier of Goods or Services."
-msgstr "تامین کننده کالا یا خدمات."
+msgstr "تأمین‌کننده کالا یا خدمات."
 
 #: erpnext/buying/doctype/supplier_quotation/supplier_quotation.py:187
 msgid "Supplier {0} not found in {1}"
-msgstr "تامین کننده {0} در {1} یافت نشد"
+msgstr "تأمین‌کننده {0} در {1} یافت نشد"
 
 #. Description of the 'Tax ID' (Data) field in DocType 'Supplier'
 #: erpnext/buying/doctype/supplier/supplier.json
@@ -53855,7 +53855,7 @@ msgstr ""
 
 #: erpnext/stock/report/item_wise_consumption/item_wise_consumption.py:67
 msgid "Supplier(s)"
-msgstr "تامین کننده(های)"
+msgstr "تأمین‌کننده(های)"
 
 #. Label of the suppliers (Table) field in DocType 'Request for Quotation'
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.json
@@ -55345,7 +55345,7 @@ msgstr "تفاوت بین زمان و تا زمان باید مضربی از ا�
 
 #: banking/src/components/common/FileUploadBanner.tsx:11
 msgid "The document has been created and reconciled. Uploading attachments..."
-msgstr ""
+msgstr "سند ایجاد و تطبیق داده شده است. در حال بارگذاری پیوست‌ها..."
 
 #: erpnext/accounts/doctype/share_transfer/share_transfer.py:177
 #: erpnext/accounts/doctype/share_transfer/share_transfer.py:185
@@ -55535,7 +55535,7 @@ msgstr "حساب درگاه پرداخت در طرح {0} با حساب درگا�
 #. 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "The percentage by which you are allowed to order more on a Purchase Order than the quantity requested on the originating Material Request. For example, if the Material Request has 100 units and the allowance is 10%, you can order up to 110 units"
-msgstr ""
+msgstr "درصدی که شما مجاز به سفارش بیشتر از مقدار درخواست شده در درخواست اولیه مواد در یک سفارش خرید هستید. به عنوان مثال، اگر درخواست مواد ۱۰۰ واحد داشته باشد و میزان مجاز ۱۰٪ باشد، می‌توانید تا ۱۱۰ واحد سفارش دهید"
 
 #. Description of the 'Over Billing Allowance (%)' (Currency) field in DocType
 #. 'Accounts Settings'
@@ -55788,7 +55788,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/item/item.js:1296
 msgid "There are two options to maintain valuation of stock. FIFO (first in - first out) and Moving Average. To understand this topic in detail please visit <a href='https://docs.frappe.io/erpnext/user/manual/en/calculation-of-valuation-rate-in-fifo-and-moving-average' target='_blank'>Item Valuation, FIFO and Moving Average.</a>"
-msgstr ""
+msgstr "دو گزینه برای نگهداری ارزش‌گذاری موجودی وجود دارد. FIFO (اولین ورودی - اولین خروجی) و میانگین متحرک. برای درک دقیق این موضوع، لطفاً به <a href='https://docs.frappe.io/erpnext/user/manual/en/calculation-of-valuation-rate-in-fifo-and-moving-average' target='_blank'>ارزش‌گذاری کالا، FIFO و میانگین متحرک مراجعه کنید.</a>"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:982
 msgid "There are {0} unreconciled transactions before {1}."
@@ -55812,7 +55812,7 @@ msgstr "فقط یک شرط قانون حمل و نقل با مقدار 0 یا خ
 
 #: erpnext/regional/doctype/lower_deduction_certificate/lower_deduction_certificate.py:65
 msgid "There is already a valid Lower Deduction Certificate {0} for Supplier {1} against category {2} for this time period."
-msgstr "در حال حاضر یک گواهی کسر کمتر معتبر {0} برای تامین کننده {1} در برابر دسته {2} برای این دوره زمانی وجود دارد."
+msgstr "در حال حاضر یک گواهی کسر کمتر معتبر {0} برای تأمین‌کننده {1} در برابر دسته {2} برای این دوره زمانی وجود دارد."
 
 #: erpnext/subcontracting/doctype/subcontracting_bom/subcontracting_bom.py:77
 msgid "There is already an active Subcontracting BOM {0} for the Finished Good {1}."
@@ -56015,7 +56015,7 @@ msgstr "این یک فروشنده اصلی است و قابل ویرایش نی
 
 #: erpnext/setup/doctype/supplier_group/supplier_group.js:43
 msgid "This is a root supplier group and cannot be edited."
-msgstr "این یک گروه تامین کننده ریشه است و قابل ویرایش نیست."
+msgstr "این یک گروه تأمین‌کننده ریشه است و قابل ویرایش نیست."
 
 #: erpnext/setup/doctype/territory/territory.js:22
 msgid "This is a root territory and cannot be edited."
@@ -56706,7 +56706,7 @@ msgstr "برای مجاز کردن اضافه صورتحساب، «اضافه ص
 
 #: erpnext/controllers/status_updater.py:489
 msgid "To allow over ordering, update \"Over Order Allowance\" in Buying Settings."
-msgstr ""
+msgstr "برای مجاز کردن سفارش بیش از حد، «مجوز سفارش بیش از حد» را در تنظیمات خرید به‌روزرسانی کنید."
 
 #: erpnext/controllers/status_updater.py:491
 msgid "To allow over receipt / delivery, update \"Over Receipt/Delivery Allowance\" in Stock Settings or the Item."
@@ -57213,7 +57213,7 @@ msgstr "کل پیش بینی (داده‌های گذشته)"
 #. Revaluation'
 #: erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.json
 msgid "Total Gain/Loss"
-msgstr "سود / ضرر کل"
+msgstr "سود / زیان کل"
 
 #. Label of the total_hold_time (Duration) field in DocType 'Issue'
 #: erpnext/support/doctype/issue/issue.json
@@ -60665,7 +60665,7 @@ msgstr "جزئیات انبار"
 
 #: erpnext/stock/report/warehouse_wise_stock_balance/warehouse_wise_stock_balance.py:113
 msgid "Warehouse Disabled?"
-msgstr "انبار غیر فعال است؟"
+msgstr "انبار غیرفعال است؟"
 
 #. Label of the warehouse_name (Data) field in DocType 'Warehouse'
 #: erpnext/stock/doctype/warehouse/warehouse.json
@@ -62666,11 +62666,11 @@ msgstr "ارز {0} باید با واحد پول پیش‌فرض شرکت یکس
 
 #: erpnext/buying/doctype/purchase_order/purchase_order.py:298
 msgid "{0} currently has a {1} Supplier Scorecard standing, and Purchase Orders to this supplier should be issued with caution."
-msgstr "{0} در حال حاضر دارای {1} کارت امتیازی تامین‌کننده است و سفارش‌های خرید به این تامین‌کننده باید با احتیاط صادر شوند."
+msgstr "{0} در حال حاضر دارای {1} کارت امتیازی تأمین‌کننده است و سفارش‌های خرید به این تأمین‌کننده باید با احتیاط صادر شوند."
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.py:141
 msgid "{0} currently has a {1} Supplier Scorecard standing, and RFQs to this supplier should be issued with caution."
-msgstr "{0} در حال حاضر دارای {1} کارت امتیازی تامین کننده است، و RFQ برای این تامین کننده باید با احتیاط صادر شود."
+msgstr "{0} در حال حاضر دارای {1} کارت امتیازی تأمین‌کننده است، و RFQ برای این تأمین‌کننده باید با احتیاط صادر شود."
 
 #: erpnext/accounts/doctype/pos_profile/pos_profile.py:156
 msgid "{0} does not belong to Company {1}"
@@ -62742,7 +62742,7 @@ msgstr "{0} یک بعد حسابداری اجباری است. <br>لطفاً ی�
 #: erpnext/accounts/doctype/pos_closing_entry/pos_closing_entry.py:153
 #: erpnext/accounts/doctype/pos_invoice_merge_log/pos_invoice_merge_log.py:60
 msgid "{0} is added multiple times on rows: {1}"
-msgstr "{0} چندین بار در ردیف ها اضافه می‌شود: {1}"
+msgstr "{0} چندین بار در ردیف‌ها اضافه می‌شود: {1}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:639
 msgid "{0} is already running for {1}"
@@ -62827,7 +62827,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/material_request/material_request.py:835
 msgid "{0} is not the default supplier for any items."
-msgstr "{0} تامین کننده پیش‌فرض هیچ موردی نیست."
+msgstr "{0} تأمین‌کننده پیش‌فرض هیچ موردی نیست."
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:2973
 msgid "{0} is on hold till {1}"
@@ -63138,7 +63138,7 @@ msgstr "{0} {1}: مبلغ بدهکاری یا بستانکاری برای {2} م
 
 #: erpnext/accounts/doctype/gl_entry/gl_entry.py:150
 msgid "{0} {1}: Supplier is required against Payable account {2}"
-msgstr "{0} {1}: تامین‌کننده در برابر حساب پرداختنی {2} الزامی است"
+msgstr "{0} {1}: تأمین‌کننده در برابر حساب پرداختنی {2} الزامی است"
 
 #: erpnext/projects/doctype/project/project_list.js:6
 msgid "{0}%"

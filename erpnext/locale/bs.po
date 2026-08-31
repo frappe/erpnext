@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-08-09 09:47+0000\n"
-"PO-Revision-Date: 2026-08-10 11:05\n"
+"PO-Revision-Date: 2026-08-26 11:43\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Bosnian\n"
 "MIME-Version: 1.0\n"
@@ -353,7 +353,7 @@ msgstr "'Trajanje Važenja Verifikacijskog Linka' mora biti između 15 i 60 minu
 
 #: erpnext/accounts/doctype/bank_account/bank_account.py:79
 msgid "'{0}' account is already used by {1}. Use another account."
-msgstr "Račun '{0}' već koristi {1}. Koristite drugi račun."
+msgstr "Račun '{0}' već koristi {1}. Koristi drugi račun."
 
 #: erpnext/accounts/doctype/pos_settings/pos_settings.py:44
 msgid "'{0}' has been already added."
@@ -9803,7 +9803,7 @@ msgstr "Nije moguće promijeniti atribute nakon transakcije zaliha. Napravi novi
 
 #: erpnext/stock/doctype/item/item.py:1129
 msgid "Cannot change Item {0} from serialized to non-serialized because a Serial and Batch Bundle exists for it. Please delete or cancel the Serial and Batch Bundle first."
-msgstr "Nije moguće promijenuti artikal {0} iz serijaliziranog u neserijalizirani jer za njega postoji Serijski i Šaržni paket. Prvo izbrišite ili otkažite Serijski i Šaržni paket."
+msgstr "Nije moguće promijenuti artikal {0} iz serijaliziranog u neserijalizirani jer za njega postoji Serijski i Šaržni paket. Prvo obriši ili otkažite Serijski i Šaržni paket."
 
 #: erpnext/accounts/doctype/accounting_dimension/accounting_dimension.py:74
 msgid "Cannot change Reference Document Type."
@@ -16413,29 +16413,29 @@ msgstr "Sažetak Odgođenih Zadataka"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Delete Accounting and Stock Ledger entries on deletion of transaction"
-msgstr "Izbriši unose Knjigovodstva i Registra Zaliha pri brisanju Transakcije"
+msgstr "Obriši unose Knjigovodstva i Registra Zaliha pri brisanju Transakcije"
 
 #. Label of the delete_bin_data_status (Select) field in DocType 'Transaction
 #. Deletion Record'
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.json
 msgid "Delete Bins"
-msgstr "Izbriši Spremnike"
+msgstr "Obriši Spremnike"
 
 #. Label of the delete_cancelled_entries (Check) field in DocType 'Repost
 #. Accounting Ledger'
 #: erpnext/accounts/doctype/repost_accounting_ledger/repost_accounting_ledger.json
 msgid "Delete Cancelled Ledger Entries"
-msgstr "Izbrišite poništene unose iz Registra"
+msgstr "Obriši poništene unose iz Registra"
 
 #. Label of a standard navbar item
 #. Type: Action
 #: erpnext/hooks.py erpnext/public/js/utils/demo.js:5
 msgid "Delete Demo Data"
-msgstr "Izbriši Demo Podatke"
+msgstr "Obriši Demo Podatke"
 
 #: erpnext/stock/doctype/inventory_dimension/inventory_dimension.js:65
 msgid "Delete Dimension"
-msgstr "Izbriši Dimenziju"
+msgstr "Obriši Dimenziju"
 
 #. Label of the delete_leads_and_addresses_status (Select) field in DocType
 #. 'Transaction Deletion Record'
@@ -16447,14 +16447,14 @@ msgstr "Izriši Potencijalne Klijente i Adrese"
 #. in DocType 'Appointment Booking Settings'
 #: erpnext/crm/doctype/appointment_booking_settings/appointment_booking_settings.json
 msgid "Delete Permanently"
-msgstr "Trajno Izbriši"
+msgstr "Trajno Obriši"
 
 #. Label of the delete_transactions_status (Select) field in DocType
 #. 'Transaction Deletion Record'
 #: erpnext/setup/doctype/company/company.js:179
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.json
 msgid "Delete Transactions"
-msgstr "Izbriši Transakcije"
+msgstr "Obriši Transakcije"
 
 #: erpnext/setup/doctype/company/company.js:249
 msgid "Delete all the Transactions for {0}"
@@ -18347,7 +18347,7 @@ msgstr "Kopiraj Grupa Klijenta"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:190
 msgid "Duplicate DocType"
-msgstr "Dupliciraj DocType"
+msgstr "Dupliraj DocType"
 
 #: erpnext/setup/doctype/authorization_rule/authorization_rule.py:71
 msgid "Duplicate Entry. Please check Authorization Rule {0}"
@@ -18363,7 +18363,7 @@ msgstr "Kopiraj Grupu Artikla"
 
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:102
 msgid "Duplicate Item Under Same Parent"
-msgstr "Dupliciraj Artikal pod Istim Nadređenim"
+msgstr "Dupliraj Artikal pod Istim Nadređenim"
 
 #: erpnext/manufacturing/doctype/workstation/workstation.py:80
 #: erpnext/manufacturing/doctype/workstation_type/workstation_type.py:37
@@ -18372,7 +18372,7 @@ msgstr "Duplikat operativne komponente {0} je pronađen u operativnim komponenta
 
 #: erpnext/accounts/doctype/pos_settings/pos_settings.py:44
 msgid "Duplicate POS Fields"
-msgstr "Dupliciraj Kasa Polja"
+msgstr "Dupliraj Kasa Polja"
 
 #: erpnext/accounts/doctype/pos_closing_entry/pos_closing_entry.py:104
 #: erpnext/accounts/doctype/pos_invoice_merge_log/pos_invoice_merge_log.py:64
@@ -18409,7 +18409,7 @@ msgstr "Dupli unos naspram koda artikla {0} i proizvođača {1}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:189
 msgid "Duplicate entry: {0}{1}"
-msgstr "Dupliciraj unos: {0}{1}"
+msgstr "Dupliraj unos: {0}{1}"
 
 #: erpnext/accounts/doctype/pos_profile/pos_profile.py:164
 msgid "Duplicate item group found in the item group table"
@@ -20376,7 +20376,7 @@ msgstr "Brisanje pravila nije uspjelo."
 
 #: erpnext/setup/demo.py:77
 msgid "Failed to erase demo data, please delete the demo company manually."
-msgstr "Brisanje demo podataka nije uspjelo, izbrišite demo poduzeće ručno."
+msgstr "Brisanje demo podataka nije uspjelo, obriši demo poduzeće ručno."
 
 #: erpnext/setup/setup_wizard/setup_wizard.py:17
 #: erpnext/setup/setup_wizard/setup_wizard.py:18
@@ -21932,7 +21932,7 @@ msgstr "Zatvoreno"
 #. Description of the 'Is Frozen' (Check) field in DocType 'Supplier'
 #: erpnext/buying/doctype/supplier/supplier.json
 msgid "Frozen suppliers block ledger entries until unfrozen. Use this to temporarily lock accounting activity without disabling the supplier."
-msgstr "Zatvoreni dobavljači blokiraju unose u registar dok se ne otvore. Koristite ovo za privremeno zaključavanje knjigovodstvenih aktivnosti bez onemogućavanja dobavljača."
+msgstr "Zatvoreni dobavljači blokiraju unose u registar dok se ne otvore. Koristi ovo za privremeno zaključavanje knjigovodstvenih aktivnosti bez onemogućavanja dobavljača."
 
 #. Label of the fuel_type (Select) field in DocType 'Vehicle'
 #: erpnext/setup/doctype/vehicle/vehicle.json
@@ -38051,7 +38051,7 @@ msgstr "Izradi Nabavni Račun ili Nabavnu Fakturu za artikal {0}"
 
 #: erpnext/stock/doctype/item/item.py:706
 msgid "Please delete Product Bundle {0}, before merging {1} into {2}"
-msgstr "Izbriši Artikal Paket {0}, prije spajanja {1} u {2}"
+msgstr "Obriši Artikal Paket {0}, prije spajanja {1} u {2}"
 
 #: erpnext/assets/doctype/asset/depreciation.py:562
 msgid "Please disable workflow temporarily for Journal Entry {0}"
@@ -41743,7 +41743,7 @@ msgstr "Pravilo Odlaganja već postoji za Artikal {0} u Skladištu {1}."
 #. DocType 'Inventory Dimension'
 #: erpnext/stock/doctype/inventory_dimension/inventory_dimension.json
 msgid "Python expression evaluated on the server. Use doc.fieldname for the row and parent.fieldname for the parent document. When it evaluates to true the dimension becomes mandatory. Example: doc.t_warehouse and doc.qty > 0"
-msgstr "Python izraz se računa na serveru. Koristite doc.fieldname za red i parent.fieldname za nadređeni dokument. Kada se računa kao istinito, dimenzija postaje obavezna. Primjer: doc.t_warehouse i doc.qty > 0"
+msgstr "Python izraz se računa na serveru. Koristi doc.fieldname za red i parent.fieldname za nadređeni dokument. Kada se računa kao istinito, dimenzija postaje obavezna. Primjer: doc.t_warehouse i doc.qty > 0"
 
 #: banking/src/components/features/BankReconciliation/BankRecDateFilter.tsx:41
 msgid "Q1"
@@ -45902,7 +45902,7 @@ msgstr "Uloga obavještavanja o neuspjehu amortizacije"
 #. 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Roles Allowed to Set and Edit Frozen Account Entries"
-msgstr "Uloge kojima je dozvoljeno postavljanje i uređivanje unosa zatvorenih računa"
+msgstr "Uloge kojima je dozvoljeno postavljanje i uređivanje unosa zamrznutih računa"
 
 #. Label of the root (Link) field in DocType 'Bisect Nodes'
 #: erpnext/accounts/doctype/bisect_nodes/bisect_nodes.json
@@ -46970,7 +46970,7 @@ msgstr "Red {0}: Dodijeljeni iznos {1} mora biti manji ili jednak preostalom izn
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1663
 msgid "Row {0}: As {1} is enabled, raw materials cannot be added to {2} entry. Use {3} entry to consume raw materials."
-msgstr "Red {0}: Kako je {1} omogućen, sirovine se ne mogu dodati u {2} unos. Koristite {3} unos za potrošnju sirovina."
+msgstr "Red {0}: Kako je {1} omogućen, sirovine se ne mogu dodati u {2} unos. Koristi {3} unos za potrošnju sirovina."
 
 #: erpnext/stock/doctype/material_request/material_request.py:1052
 msgid "Row {0}: Bill of Materials not found for the Item {1}"
@@ -52263,7 +52263,7 @@ msgstr "Zaliha Primljena, ali nije Fakturisana"
 #: erpnext/stock/workspace/stock/stock.json
 #: erpnext/workspace_sidebar/stock.json
 msgid "Stock Reconciliation"
-msgstr "Popis Zaliha"
+msgstr "Lista Zaliha"
 
 #. Name of a DocType
 #: erpnext/stock/doctype/stock_reconciliation_item/stock_reconciliation_item.json
@@ -59396,7 +59396,7 @@ msgstr "Hitno"
 
 #: erpnext/accounts/doctype/repost_payment_ledger/repost_payment_ledger.js:36
 msgid "Use 'Repost in background' button to trigger background job. Job can only be triggered when document is in Queued or Failed status."
-msgstr "Koristite dugme 'Ponovo knjiži u pozadini' da pokrenete posao u pozadini. Zadatak se može pokrenuti samo kada je dokument u stanju čekanja ili neuspješan."
+msgstr "Koristi dugme 'Ponovo knjiži u pozadini' da pokrenete posao u pozadini. Zadatak se može pokrenuti samo kada je dokument u stanju čekanja ili neuspješan."
 
 #. Description of the 'Advanced Filtering' (Check) field in DocType 'Financial
 #. Report Row'
@@ -59472,7 +59472,7 @@ msgstr "Koristi Višeslojnu Sastavnicu"
 #. DocType 'Global Defaults'
 #: erpnext/setup/doctype/global_defaults/global_defaults.json
 msgid "Use Posting Datetime for Naming Documents"
-msgstr "Koristite datum i vrijeme registracije za Imenovanje Dokumenata"
+msgstr "Koristi datum i vrijeme registracije za Imenovanje Dokumenata"
 
 #. Label of the use_serial_batch_fields (Check) field in DocType 'Stock
 #. Settings'
@@ -59533,7 +59533,7 @@ msgstr "Koristi Devizni Kurs Datuma Transakcije"
 
 #: erpnext/projects/doctype/project/project.py:600
 msgid "Use a name that is different from previous project name"
-msgstr "Koristite naziv koji se razlikuje od naziva prethodnog projekta"
+msgstr "Koristi naziv koji se razlikuje od naziva prethodnog projekta"
 
 #. Label of the use_for_shopping_cart (Check) field in DocType 'Tax Rule'
 #: erpnext/accounts/doctype/tax_rule/tax_rule.json
@@ -59550,13 +59550,13 @@ msgstr "Koristi stari Kontroler Proračuna"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Use legacy controller for Period Closing Voucher"
-msgstr "Koristite stari kontroler za Verifikat Zatvaranje Perioda"
+msgstr "Koristi stari kontroler za Verifikat Zatvaranje Perioda"
 
 #. Label of the fallback_to_default_price_list (Check) field in DocType
 #. 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Use prices from Default Price List as fallback"
-msgstr "Koristite cjene iz Standard Cjenovnika kao Rezervnu Opciju"
+msgstr "Koristi cjene iz Standard Cjenovnika kao Rezervnu Opciju"
 
 #. Description of the 'Sales Order Date' (Date) field in DocType 'Sales Order
 #. Item'
@@ -62485,7 +62485,7 @@ msgstr "po satu"
 
 #: erpnext/stock/stock_ledger.py:2092
 msgid "performing either one below:"
-msgstr "izvodi bilo koje dolje:"
+msgstr "izvodi bilo koje niže:"
 
 #. Description of the 'Product Bundle Item' (Data) field in DocType 'Pick List
 #. Item'
@@ -63005,7 +63005,7 @@ msgstr "{0} transakcija će biti uvezeno u sistem. Molimo Vas da pregledate deta
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:732
 msgid "{0} units are reserved for Item {1} in Warehouse {2}, please un-reserve the same to {3} the Stock Reconciliation."
-msgstr "{0} jedinica je rezervisano za artikal {1} u Skladištu {2}, poništi rezervaciju iste za {3} Popis Zaliha."
+msgstr "{0} jedinica je rezervisano za artikal {1} u Skladištu {2}, poništi rezervaciju iste za {3} Listu Zaliha."
 
 #: erpnext/stock/doctype/pick_list/pick_list.py:1120
 msgid "{0} units of Item {1} is not available in any of the warehouses."
@@ -63297,7 +63297,7 @@ msgstr "{0}: ukloni nevažeću vrijednost(i) {1}"
 
 #: erpnext/stock/doctype/item/item.js:897
 msgid "{0}: select the typed value {1} from the list or clear it"
-msgstr "{0}: odaberi unesenu vrijednost {1} s liste ili je obrišite"
+msgstr "{0}: odaberi unesenu vrijednost {1} s liste ili je obriši"
 
 #: erpnext/controllers/accounts_controller.py:567
 msgid "{0}: {1} does not belong to the Company: {2}"
