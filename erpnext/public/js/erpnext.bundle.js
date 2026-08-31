@@ -1,4 +1,3 @@
-import "./conf";
 import "./utils";
 import "./stock_reservation";
 import "./queries";
@@ -26,6 +25,7 @@ import "./call_popup/call_popup";
 import "./utils/dimension_tree_filter";
 import "./utils/ledger_preview.js";
 import "./utils/unreconcile.js";
+import "./utils/item_close";
 import "./utils/barcode_scanner";
 import "./telephony";
 import "./templates/call_link.html";

@@ -53,7 +53,6 @@ class TestAccountsController(ERPNextTestSuite):
 		self.item = "_Test Item"
 		self.customer = "_Test Customer USD"
 		self.supplier = "_Test Supplier USD"
-		self.create_account()
 		frappe.flags.is_reverse_depr_entry = False
 
 	def create_account(self):
@@ -99,6 +98,7 @@ class TestAccountsController(ERPNextTestSuite):
 			setattr(self, x.attribute_name, acc.name)
 
 	def setup_advance_accounts_in_party_master(self):
+		self.create_account()
 		company = frappe.get_doc("Company", self.company)
 		company.book_advance_payments_in_separate_party_account = 1
 		company.save()

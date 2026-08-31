@@ -29,6 +29,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 )
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.get_item_details import get_conversion_factor
+from erpnext.tests.assertions import assert_raises_with_savepoint
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -1215,9 +1216,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			company="_Test Company with perpetual inventory",
 		)
 
-		if not frappe.db.exists("Location", "Test Location"):
-			frappe.get_doc({"doctype": "Location", "location_name": "Test Location"}).insert()
-
 		pr = make_purchase_receipt(
 			cost_center=cost_center,
 			company="_Test Company with perpetual inventory",
@@ -1240,9 +1238,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		pr.cancel()
 
 	def test_purchase_receipt_cost_center_with_balance_sheet_account(self):
-		if not frappe.db.exists("Location", "Test Location"):
-			frappe.get_doc({"doctype": "Location", "location_name": "Test Location"}).insert()
-
 		pr = make_purchase_receipt(
 			company="_Test Company with perpetual inventory",
 			warehouse="Stores - TCP1",
@@ -5684,8 +5679,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		item_code = create_item("Test Item for PR against Rejected Qty").name
 		warehouse = "_Test Warehouse - _TC"
 
-		company = frappe.db.get_value("Warehouse", warehouse, "company")
-		rejected_wh = create_warehouse("_Test Rejected Warehouse", company=company)
+		rejected_wh = "_Test Rejected Warehouse - _TC"
 
 		pr = make_purchase_receipt(
 			item_code=item_code,
@@ -6537,11 +6531,9 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		sle_before = frappe.db.count("Stock Ledger Entry", {"voucher_no": pr.name})
 		gle_before = frappe.db.count("GL Entry", {"voucher_no": pr.name})
 
-		frappe.db.savepoint("before_blocked_cancel")
-		with self.assertRaises(frappe.LinkExistsError) as cm:
+		with assert_raises_with_savepoint(self, frappe.LinkExistsError) as cm:
 			pr.cancel()
 		self.assertIn(pi.name, str(cm.exception))
-		frappe.db.rollback(save_point="before_blocked_cancel")  # mimic the request-level rollback
 
 		pr.reload()
 		self.assertEqual(pr.docstatus, 1)
@@ -6573,22 +6565,7 @@ def create_asset_category_for_pr_test():
 
 
 def prepare_data_for_internal_transfer():
-	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
-	from erpnext.selling.doctype.customer.test_customer import create_internal_customer
-
 	company = "_Test Company with perpetual inventory"
-
-	create_internal_customer(
-		"_Test Internal Customer 2",
-		company,
-		company,
-	)
-
-	create_internal_supplier(
-		"_Test Internal Supplier 2",
-		company,
-		company,
-	)
 
 	if not frappe.db.get_value("Company", company, "unrealized_profit_loss_account"):
 		account = "Unrealized Profit and Loss - TCP1"
@@ -6720,9 +6697,6 @@ def get_items(**args):
 
 
 def make_purchase_receipt(**args):
-	if not frappe.db.exists("Location", "Test Location"):
-		frappe.get_doc({"doctype": "Location", "location_name": "Test Location"}).insert()
-
 	frappe.db.set_single_value("Buying Settings", "allow_multiple_items", 1)
 	pr = frappe.new_doc("Purchase Receipt")
 	args = frappe._dict(args)

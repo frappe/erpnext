@@ -343,6 +343,7 @@ class TransactionBase(StatusUpdater):
 					"item_tax_template": item.get("item_tax_template"),
 					"child_doctype": item.get("doctype"),
 					"child_docname": item.get("name"),
+					"use_serial_batch_fields": item.get("use_serial_batch_fields"),
 				}
 			),
 			self,

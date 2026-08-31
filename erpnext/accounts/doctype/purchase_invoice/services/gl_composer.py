@@ -130,6 +130,9 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import (
 			get_purchase_document_details,
 		)
+		from erpnext.stock.doctype.landed_cost_voucher.landed_cost_voucher import (
+			get_custom_dimension_overrides,
+		)
 
 		doc = self.doc
 		tax_service = TaxService(doc)
@@ -270,25 +273,25 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 
 					# Amount added through landed-cost-voucher
 					if landed_cost_entries:
-						if (item.item_code, item.name) in landed_cost_entries:
-							for account, base_amount in landed_cost_entries[
-								(item.item_code, item.name)
-							].items():
-								gl_entries.append(
-									self.get_gl_dict(
-										{
-											"account": account,
-											"against": item.expense_account,
-											"cost_center": item.cost_center,
-											"remarks": doc.get("remarks") or _("Accounting Entry for Stock"),
-											"credit": flt(base_amount["base_amount"]),
-											"credit_in_account_currency": flt(base_amount["amount"]),
-											"credit_in_transaction_currency": item.net_amount,
-											"project": item.project or doc.project,
-										},
-										item=item,
-									)
-								)
+						for entry in landed_cost_entries.get((item.item_code, item.name), []):
+							if not (entry.amount or entry.base_amount):
+								continue
+
+							gl_dict = self.get_gl_dict(
+								{
+									"account": entry.expense_account,
+									"against": item.expense_account,
+									"cost_center": entry.dimensions.cost_center or item.cost_center,
+									"remarks": doc.get("remarks") or _("Accounting Entry for Stock"),
+									"credit": flt(entry.base_amount),
+									"credit_in_account_currency": flt(entry.amount),
+									"credit_in_transaction_currency": item.net_amount,
+									"project": entry.dimensions.project or item.project or doc.project,
+								},
+								item=item,
+							)
+							gl_dict.update(get_custom_dimension_overrides(entry))
+							gl_entries.append(gl_dict)
 
 					# sub-contracting warehouse
 					if flt(item.rm_supp_cost):

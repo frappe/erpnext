@@ -337,8 +337,12 @@ class StockController(AccountsController):
 		items = frappe.get_all(
 			"Delivery Note Item",
 			filters={"parent": self.name, "parenttype": "Delivery Note"},
-			fields=["name", "qty", "returned_qty", "rate", "amount", "billed_amt"],
+			fields=["name", "qty", "returned_qty", "rate", "amount", "billed_amt", "closed"],
 		)
+		# A written off row leaves the basis. Once every row is written off there is
+		# nothing left to measure against, so fall back to the whole table.
+		items = [item for item in items if not item.closed] or items
+
 		total_amount = sum(flt(item.amount) for item in items)
 		total_returned = sum(flt(item.returned_qty) * flt(item.rate) for item in items)
 		# Preserve the original amount basis once the entire Delivery Note is returned.
@@ -434,6 +438,7 @@ class StockController(AccountsController):
 		voucher_detail_no=None,
 		item=None,
 		posting_date=None,
+		dimensions=None,
 	):
 		from erpnext.accounts.services.base_gl_composer import add_gl_entry
 
@@ -453,6 +458,7 @@ class StockController(AccountsController):
 			voucher_detail_no,
 			item,
 			posting_date,
+			dimensions,
 		)
 
 	def update_stock_reservation_entries(self):

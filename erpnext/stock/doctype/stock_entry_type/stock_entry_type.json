@@ -8,6 +8,7 @@
  "field_order": [
   "purpose",
   "add_to_transit",
+  "batch_split",
   "is_standard"
  ],
  "fields": [
@@ -30,6 +31,15 @@
   },
   {
    "default": "0",
+   "depends_on": "eval: doc.purpose == 'Repack'",
+   "description": "On submission of the stock entry, the consumed batch is split into one child batch per finished piece",
+   "fieldname": "batch_split",
+   "fieldtype": "Check",
+   "label": "Batch Split",
+   "read_only": 1
+  },
+  {
+   "default": "0",
    "fieldname": "is_standard",
    "fieldtype": "Check",
    "label": "Is Standard",
@@ -38,7 +48,7 @@
  ],
  "grid_page_length": 50,
  "links": [],
- "modified": "2025-09-04 13:03:31.283348",
+ "modified": "2026-08-28 14:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Type",

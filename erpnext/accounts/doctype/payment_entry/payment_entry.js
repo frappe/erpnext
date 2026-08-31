@@ -1279,8 +1279,14 @@ frappe.ui.form.on("Payment Entry", {
 		await frappe.after_ajax();
 		const base_paid_amount = frm.doc.base_paid_amount || 0;
 		const base_received_amount = frm.doc.base_received_amount || 0;
+		let other_deductions = 0;
+		if (frm.doc.payment_type === "Internal Transfer") {
+			other_deductions = (frm.doc.deductions || [])
+				.filter((row) => !row.is_exchange_gain_loss)
+				.reduce((sum, row) => sum + flt(row.amount), 0);
+		}
 		const exchange_gain_loss = flt(
-			base_paid_amount - base_received_amount,
+			base_paid_amount - base_received_amount - other_deductions,
 			get_deduction_amount_precision()
 		);
 
@@ -1857,11 +1863,19 @@ frappe.ui.form.on("Payment Entry Deduction", {
 	},
 
 	amount: function (frm) {
-		frm.events.set_unallocated_amount(frm);
+		if (frm.doc.payment_type === "Internal Transfer") {
+			frm.events.set_exchange_gain_loss_deduction(frm);
+		} else {
+			frm.events.set_unallocated_amount(frm);
+		}
 	},
 
 	deductions_remove: function (frm) {
-		frm.events.set_unallocated_amount(frm);
+		if (frm.doc.payment_type === "Internal Transfer") {
+			frm.events.set_exchange_gain_loss_deduction(frm);
+		} else {
+			frm.events.set_unallocated_amount(frm);
+		}
 	},
 });
 

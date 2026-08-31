@@ -172,6 +172,7 @@ class DeliveryNote(SellingController):
 				"percent_join_field": "against_sales_order",
 				"status_field": "delivery_status",
 				"keyword": "Delivered",
+				"exclude_field": "skip_delivery",
 				"second_source_dt": "Sales Invoice Item",
 				"second_source_field": "qty",
 				"second_join_field": "so_detail",
@@ -624,6 +625,9 @@ class DeliveryNote(SellingController):
 
 	def update_status(self, status):
 		BillingStatusService(self).update_status(status)
+
+	def on_item_close_status_change(self):
+		self.update_billing_percentage()
 
 	def update_billing_status(self, update_modified=True):
 		BillingStatusService(self).update_billing_status(update_modified)

@@ -278,6 +278,9 @@ class SalesInvoice(SellingController):
 				"overflow_type": "billing",
 			}
 		]
+		self.closed_source_links = [
+			("Sales Invoice Item", "dn_detail", "Delivery Note Item", "Delivery Note")
+		]
 
 	def set_indicator(self):
 		"""Set indicator for portal"""
@@ -614,6 +617,7 @@ class SalesInvoice(SellingController):
 					"percent_join_field": "sales_order",
 					"status_field": "delivery_status",
 					"keyword": "Delivered",
+					"exclude_field": "skip_delivery",
 					"second_source_dt": "Delivery Note Item",
 					"second_source_field": "qty",
 					"second_join_field": "so_detail",

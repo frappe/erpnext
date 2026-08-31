@@ -789,7 +789,6 @@ class TestPaymentEntry(ERPNextTestSuite):
 			company="_Test Company",
 		)
 		frappe.db.set_value("Company", "_Test Company", "bank_charges_account", bank_charges_account)
-		self.addCleanup(frappe.db.set_value, "Company", "_Test Company", "bank_charges_account", "")
 
 		pe = frappe.new_doc("Payment Entry")
 		pe.payment_type = "Internal Transfer"
@@ -834,7 +833,6 @@ class TestPaymentEntry(ERPNextTestSuite):
 			company="_Test Company",
 		)
 		frappe.db.set_value("Company", "_Test Company", "bank_charges_account", bank_charges_account)
-		self.addCleanup(frappe.db.set_value, "Company", "_Test Company", "bank_charges_account", "")
 
 		pe = frappe.new_doc("Payment Entry")
 		pe.payment_type = "Internal Transfer"
@@ -865,6 +863,64 @@ class TestPaymentEntry(ERPNextTestSuite):
 				["_Test Bank USD - _TC", 0, 5000, None],
 				["_Test Bank - _TC", 4500, 0, None],
 				[exchange_gain_loss_account, 500.0, 0, None],
+			]
+		)
+
+		self.validate_gl_entries(pe.name, expected_gle)
+
+	def test_cross_currency_transfer_splits_bank_charge_and_exchange_gain_loss(self):
+		exchange_gain_loss_account = frappe.db.get_value(
+			"Company", "_Test Company", "exchange_gain_loss_account"
+		)
+		bank_charges_account = create_account(
+			parent_account="Indirect Expenses - _TC",
+			account_name="_Test Bank Charges",
+			company="_Test Company",
+		)
+
+		pe = frappe.new_doc("Payment Entry")
+		pe.payment_type = "Internal Transfer"
+		pe.company = "_Test Company"
+		pe.paid_from = "_Test Bank USD - _TC"
+		pe.paid_to = "_Test Bank - _TC"
+		pe.paid_amount = 100
+		pe.source_exchange_rate = 50
+		pe.received_amount = 4500
+		pe.reference_no = "6"
+		pe.reference_date = nowdate()
+		pe.append(
+			"deductions",
+			{
+				"account": bank_charges_account,
+				"cost_center": "_Test Cost Center - _TC",
+				"amount": 100,
+			},
+		)
+
+		pe.setup_party_account_field()
+		pe.set_missing_values()
+		pe.set_exchange_rate()
+		pe.set_amounts()
+
+		deductions = {d.account: d for d in pe.deductions}
+		self.assertEqual(deductions[bank_charges_account].amount, 100)
+		self.assertEqual(deductions[exchange_gain_loss_account].amount, 400)
+		self.assertTrue(deductions[exchange_gain_loss_account].is_exchange_gain_loss)
+		self.assertEqual(pe.difference_amount, 0)
+
+		for d in pe.deductions:
+			d.cost_center = "_Test Cost Center - _TC"
+
+		pe.insert()
+		pe.submit()
+
+		expected_gle = dict(
+			(d[0], d)
+			for d in [
+				["_Test Bank USD - _TC", 0, 5000, None],
+				["_Test Bank - _TC", 4500, 0, None],
+				[exchange_gain_loss_account, 400.0, 0, None],
+				[bank_charges_account, 100.0, 0, None],
 			]
 		)
 
@@ -1051,8 +1107,6 @@ class TestPaymentEntry(ERPNextTestSuite):
 		)
 		frappe.db.set_value("Company", "_Test Company", "exchange_gain_account", gain_account)
 		frappe.db.set_value("Company", "_Test Company", "exchange_loss_account", loss_account)
-		self.addCleanup(frappe.db.set_value, "Company", "_Test Company", "exchange_gain_account", "")
-		self.addCleanup(frappe.db.set_value, "Company", "_Test Company", "exchange_loss_account", "")
 
 		si_gain = create_sales_invoice(
 			customer="_Test Customer USD",
