@@ -841,6 +841,7 @@ def get_sre_details_for_voucher(voucher_type: str, voucher_no: str) -> list[dict
 		frappe.qb.from_(sre)
 		.select(
 			sre.name,
+			sre.company,
 			sre.item_code,
 			sre.warehouse,
 			sre.voucher_type,
@@ -895,7 +896,7 @@ def get_ssb_bundle_for_voucher(sre: dict) -> object:
 		bundle.posting_date = nowdate()
 		bundle.posting_time = nowtime()
 
-		for field in ("item_code", "warehouse", "has_serial_no", "has_batch_no"):
+		for field in ("company", "item_code", "warehouse", "has_serial_no", "has_batch_no"):
 			setattr(bundle, field, sre[field])
 
 		for sb_entry in sb_entries:
