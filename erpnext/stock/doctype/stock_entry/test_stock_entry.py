@@ -1601,6 +1601,68 @@ class TestStockEntry(ERPNextTestSuite):
 		incoming = sum(d.basic_amount for d in entry.items if not d.s_warehouse)
 		self.assertEqual(incoming, outgoing)
 
+	def test_bomless_manufacture_entry_secondary_valuation_types(self):
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		scrap_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 50}).name
+		manual_item = make_item(properties={"is_stock_item": 1}).name
+
+		make_stock_entry(item_code=rm_item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+
+		def row(item_code, qty, **kwargs):
+			stock_uom = frappe.db.get_value("Item", item_code, "stock_uom")
+			return {
+				"item_code": item_code,
+				"qty": qty,
+				"transfer_qty": qty,
+				"uom": stock_uom,
+				"stock_uom": stock_uom,
+				"conversion_factor": 1,
+				**kwargs,
+			}
+
+		entry = frappe.new_doc("Stock Entry")
+		entry.company = "_Test Company"
+		entry.purpose = "Manufacture"
+		entry.set_stock_entry_type()
+		entry.fg_completed_qty = 1
+		entry.append("items", row(rm_item, 10, s_warehouse="_Test Warehouse - _TC"))
+		entry.append("items", row(fg_item, 1, t_warehouse="_Test Warehouse 1 - _TC", is_finished_item=1))
+		entry.append(
+			"items",
+			row(scrap_item, 2, t_warehouse="_Test Warehouse 1 - _TC", secondary_item_type="Scrap"),
+		)
+		entry.append(
+			"items",
+			row(
+				manual_item,
+				1,
+				t_warehouse="_Test Warehouse 1 - _TC",
+				secondary_item_type="By-Product",
+				valuation_type="Manual",
+				basic_rate=70,
+			),
+		)
+		entry.insert()
+
+		# without a BOM link, the valuation type defaults to Valuation Rate
+		scrap_row = next(d for d in entry.items if d.item_code == scrap_item)
+		self.assertEqual(scrap_row.valuation_type, "Valuation Rate")
+		self.assertEqual(scrap_row.basic_rate, 50)
+
+		# a manual row keeps the user's rate
+		manual_row = next(d for d in entry.items if d.item_code == manual_item)
+		self.assertTrue(manual_row.set_basic_rate_manually)
+		self.assertEqual(manual_row.basic_amount, 70)
+
+		# both are deducted from the finished good
+		fg_row = next(d for d in entry.items if d.is_finished_item)
+		self.assertEqual(fg_row.basic_amount, 830)
+
+		# there is no percentage to allocate without a BOM row
+		manual_row.valuation_type = "% of FG Cost"
+		self.assertRaises(frappe.ValidationError, entry.save)
+
 	def test_valuation_rate_lookup_without_voucher_no(self):
 		from erpnext.stock.stock_ledger import get_valuation_rate
 
