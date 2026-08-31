@@ -5915,7 +5915,12 @@ def prepare_boms_for_sub_assembly_test():
 
 		bom.append(
 			"secondary_items",
-			{"item_code": "Test Final Scrap Item 1", "qty": 1, "valuation_type": "Valuation Rate"},
+			{
+				"item_code": "Test Final Scrap Item 1",
+				"secondary_item_type": "Scrap",
+				"qty": 1,
+				"valuation_type": "Valuation Rate",
+			},
 		)
 
 		bom.submit()
@@ -5931,7 +5936,12 @@ def prepare_boms_for_sub_assembly_test():
 
 		bom.append(
 			"secondary_items",
-			{"item_code": "Test Final Scrap Item 2", "qty": 1, "valuation_type": "Valuation Rate"},
+			{
+				"item_code": "Test Final Scrap Item 2",
+				"secondary_item_type": "Scrap",
+				"qty": 1,
+				"valuation_type": "Valuation Rate",
+			},
 		)
 
 		bom.submit()

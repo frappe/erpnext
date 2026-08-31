@@ -36,8 +36,8 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Type",
-   "mandatory_depends_on": "eval:doc.valuation_type == '% of FG Cost'",
-   "options": "\nCo-Product\nBy-Product\nScrap\nAdditional Finished Good"
+   "options": "\nCo-Product\nBy-Product\nScrap\nAdditional Finished Good",
+   "reqd": 1
   },
   {
    "fieldname": "item_code",

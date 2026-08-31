@@ -1192,6 +1192,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 				"secondary_items",
 				{
 					"item_code": item,
+					"secondary_item_type": "Scrap",
 					"stock_qty": 1 * (idx + 1),
 					"valuation_type": "Valuation Rate",
 				},
@@ -1199,7 +1200,13 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		manual_item = make_item(properties={"is_stock_item": 1}).name
 		bom.append(
 			"secondary_items",
-			{"item_code": manual_item, "stock_qty": 1, "valuation_type": "Manual", "cost": 30},
+			{
+				"item_code": manual_item,
+				"secondary_item_type": "By-Product",
+				"stock_qty": 1,
+				"valuation_type": "Manual",
+				"cost": 30,
+			},
 		)
 		percentage_item = make_item(properties={"is_stock_item": 1}).name
 		bom.append(

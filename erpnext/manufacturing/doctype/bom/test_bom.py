@@ -1510,6 +1510,7 @@ def create_bom_with_process_loss_item(
 			"secondary_items",
 			{
 				"item_code": fg_item.item_code,
+				"secondary_item_type": "Scrap",
 				"qty": scrap_qty,
 				"stock_qty": scrap_qty,
 				"uom": fg_item.stock_uom,
