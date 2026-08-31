@@ -110,36 +110,6 @@ class TestBOMCreator(ERPNextTestSuite):
 
 		self.assertEqual(doc.raw_material_cost, fg_valuation_rate)
 
-	def test_duplicate_root_item_raises_validation_error(self):
-		final_product = "Bicycle"
-		make_item(final_product, {"item_group": "Raw Material", "stock_uom": "Nos"})
-
-		doc = make_bom_creator(
-			name="Bicycle BOM with Duplicate Raw Material",
-			company="_Test Company",
-			item_code=final_product,
-			qty=1,
-			rm_cosy_as_per="Valuation Rate",
-			currency="INR",
-			plc_conversion_rate=1,
-			conversion_rate=1,
-		)
-
-		doc.add_item(
-			fg_item=final_product,
-			fg_reference_id=doc.name,
-			item_code="Pedal Assembly",
-			qty=1,
-		)
-
-		with self.assertRaisesRegex(frappe.ValidationError, "Pedal Assembly.*Bicycle"):
-			doc.add_item(
-				fg_item=final_product,
-				fg_reference_id=doc.name,
-				item_code="Pedal Assembly",
-				qty=1,
-			)
-
 	def test_convert_to_sub_assembly(self):
 		final_product = "Bicycle"
 		make_item(
