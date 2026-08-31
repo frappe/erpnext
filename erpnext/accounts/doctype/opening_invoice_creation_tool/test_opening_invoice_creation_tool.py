@@ -2,7 +2,7 @@
 # See license.txt
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, today
 
 from erpnext.accounts.doctype.account.test_account import create_account
@@ -142,7 +142,7 @@ class TestOpeningInvoiceCreationTool(FrappeTestCase):
 		for invoice in invoices:
 			self.assertEqual(frappe.db.get_value("Sales Invoice", invoice, "department"), "Sales - _TOIC")
 
-	@ERPNextTestSuite.change_settings(
+	@change_settings(
 		"Accounts Settings",
 		{"add_taxes_from_taxes_and_charges_template": 1, "add_taxes_from_item_tax_template": 0},
 	)
