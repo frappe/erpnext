@@ -5,6 +5,7 @@ import frappe
 
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.utils import _create_bin
+from erpnext.tests.assertions import assert_raises_with_savepoint
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -19,10 +20,8 @@ class TestBin(ERPNextTestSuite):
 		bin1.insert()
 
 		bin2 = frappe.get_doc(doctype="Bin", item_code=item_code, warehouse=warehouse)
-		frappe.db.savepoint("dup_bin")
-		with self.assertRaises(frappe.UniqueValidationError):
+		with assert_raises_with_savepoint(self, frappe.UniqueValidationError):
 			bin2.insert()
-		frappe.db.rollback(save_point="dup_bin")  # preserve transaction in postgres
 
 		# util method should handle it
 		bin = _create_bin(item_code, warehouse)

@@ -290,6 +290,77 @@ def _set_stock_entry_warehouses(stock_entry, work_order, purpose, target_warehou
 
 
 @frappe.whitelist()
+def get_fg_conversion_details(work_order: str):
+	from erpnext.stock.doctype.stock_entry.services.manufacturing import (
+		get_alternative_finished_goods,
+		get_converted_fg_qty,
+	)
+
+	if not work_order or not isinstance(work_order, str):
+		frappe.throw(_("Invalid Work Order"))
+
+	frappe.has_permission("Work Order", "read", doc=work_order, throw=True)
+
+	wo_details = frappe.db.get_value(
+		"Work Order", work_order, ["production_item", "produced_qty"], as_dict=True
+	)
+
+	return {
+		"alternative_items": get_alternative_finished_goods(wo_details.production_item),
+		"available_qty": flt(wo_details.produced_qty) - get_converted_fg_qty(work_order),
+	}
+
+
+@frappe.whitelist()
+def make_fg_conversion_entry(work_order: str, item_code: str, qty: float):
+	if not (work_order and isinstance(work_order, str) and item_code and isinstance(item_code, str)):
+		frappe.throw(_("Invalid Work Order or Item"))
+
+	qty = flt(qty)
+	if qty <= 0:
+		frappe.throw(_("The qty to convert must be greater than zero."))
+
+	frappe.has_permission("Stock Entry", "create", throw=True)
+	frappe.has_permission("Work Order", "read", doc=work_order, throw=True)
+
+	wo_doc = frappe.get_doc("Work Order", work_order)
+
+	stock_entry = frappe.new_doc("Stock Entry")
+	stock_entry.purpose = "Repack"
+	stock_entry.is_fg_conversion = 1
+	stock_entry.work_order = wo_doc.name
+	stock_entry.company = wo_doc.company
+	stock_entry.set_stock_entry_type()
+
+	stock_entry.append("items", _get_fg_conversion_row(wo_doc.production_item, qty, wo_doc.fg_warehouse))
+
+	target_row = _get_fg_conversion_row(item_code, qty, wo_doc.fg_warehouse, is_target=True)
+	stock_entry.append("items", target_row)
+
+	return stock_entry.as_dict()
+
+
+def _get_fg_conversion_row(item_code, qty, warehouse, is_target=False):
+	stock_uom = frappe.get_cached_value("Item", item_code, "stock_uom")
+	row = {
+		"item_code": item_code,
+		"qty": flt(qty),
+		"transfer_qty": flt(qty),
+		"uom": stock_uom,
+		"stock_uom": stock_uom,
+		"conversion_factor": 1,
+		"use_serial_batch_fields": 1,
+	}
+
+	if is_target:
+		row.update({"t_warehouse": warehouse, "is_finished_item": 1})
+	else:
+		row["s_warehouse"] = warehouse
+
+	return row
+
+
+@frappe.whitelist()
 def make_job_card(work_order: str, operations: str | list, parent_bom: str | None = None):
 	frappe.has_permission("Job Card", "create", throw=True)
 
@@ -454,6 +525,8 @@ def _job_card_warehouse_values(work_order, row, qty):
 		"finished_good": row.get("finished_good"),
 		"semi_fg_bom": row.get("bom_no"),
 		"is_subcontracted": row.get("is_subcontracted"),
+		"batch_split": row.get("batch_split"),
+		"weight_per_piece": row.get("weight_per_piece"),
 	}
 
 

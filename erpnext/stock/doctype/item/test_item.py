@@ -26,6 +26,7 @@ from erpnext.stock.doctype.item.item import (
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.get_item_details import get_item_details
+from erpnext.tests.assertions import assert_raises_with_savepoint
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -488,17 +489,6 @@ class TestItem(ERPNextTestSuite):
 				row.attribute_value = "Larger"
 				break
 
-		def restore_test_size_large():
-			doc = frappe.get_doc("Item Attribute", "Test Size")
-			for row in doc.item_attribute_values:
-				if row.attribute_value == "Larger":
-					row.attribute_value = "Large"
-					break
-			frappe.flags.attribute_values = None
-			doc.save()
-
-		self.addCleanup(restore_test_size_large)
-
 		frappe.flags.attribute_values = None
 		attribute.save()
 
@@ -522,16 +512,6 @@ class TestItem(ERPNextTestSuite):
 		small_variant.save()
 
 		attribute = frappe.get_doc("Item Attribute", "Test Size")
-		original_values = {row.name: row.attribute_value for row in attribute.item_attribute_values}
-
-		def restore_test_size_values():
-			doc = frappe.get_doc("Item Attribute", "Test Size")
-			for row in doc.item_attribute_values:
-				row.attribute_value = original_values[row.name]
-			frappe.flags.attribute_values = None
-			doc.save()
-
-		self.addCleanup(restore_test_size_values)
 
 		for row in attribute.item_attribute_values:
 			if row.attribute_value == "Large":
@@ -572,18 +552,6 @@ class TestItem(ERPNextTestSuite):
 				row.abbr = "LRG"
 				break
 
-		def restore_test_size_abbr():
-			doc = frappe.get_doc("Item Attribute", "Test Size")
-			for row in doc.item_attribute_values:
-				if row.attribute_value == "Large":
-					row.abbr = "L"
-					break
-			frappe.flags.attribute_values = None
-			doc.save()
-
-		self.addCleanup(restore_test_size_abbr)
-		self.addCleanup(lambda: frappe.delete_doc_if_exists("Item", "_Test Variant Item-LRG", force=1))
-
 		frappe.flags.attribute_values = None
 		attribute.save()
 
@@ -615,7 +583,6 @@ class TestItem(ERPNextTestSuite):
 			}
 		)
 		template.insert()
-		self.addCleanup(lambda: frappe.delete_doc_if_exists("Item", "_Test Variant Item Diff", force=1))
 
 		variant = create_variant("_Test Variant Item Diff", {"Test Size": "Large"})
 		variant.save()
@@ -631,18 +598,6 @@ class TestItem(ERPNextTestSuite):
 			if row.attribute_value == "Large":
 				row.abbr = "LRG"
 				break
-
-		def restore_test_size_abbr():
-			doc = frappe.get_doc("Item Attribute", "Test Size")
-			for row in doc.item_attribute_values:
-				if row.attribute_value == "Large":
-					row.abbr = "L"
-					break
-			frappe.flags.attribute_values = None
-			doc.save()
-
-		self.addCleanup(restore_test_size_abbr)
-		self.addCleanup(lambda: frappe.delete_doc_if_exists("Item", "_Test Variant Item Diff-LRG", force=1))
 
 		frappe.flags.attribute_values = None
 		attribute.save()
@@ -934,9 +889,8 @@ class TestItem(ERPNextTestSuite):
 		item_doc = frappe.get_doc("Item", item_code)
 		new_barcode = item_doc.append("barcodes")
 		new_barcode.update(barcode_properties_list[0])
-		frappe.db.savepoint("dup_barcode")
-		self.assertRaises(frappe.UniqueValidationError, item_doc.save)
-		frappe.db.rollback(save_point="dup_barcode")  # preserve transaction in postgres
+		with assert_raises_with_savepoint(self, frappe.UniqueValidationError):
+			item_doc.save()
 
 		# Add invalid barcode - should cause InvalidBarcode
 		item_doc = frappe.get_doc("Item", item_code)

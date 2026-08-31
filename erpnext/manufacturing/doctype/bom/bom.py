@@ -1,7 +1,6 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-import functools
 import re
 from collections import deque
 
@@ -156,7 +155,7 @@ class BOM(WebsiteGenerator):
 		currency: DF.Link
 		default_source_warehouse: DF.Link | None
 		default_target_warehouse: DF.Link | None
-		description: DF.SmallText | None
+		description: DF.TextEditor | None
 		exploded_items: DF.Table[BOMExplosionItem]
 		fg_based_operating_cost: DF.Check
 		has_variants: DF.Check
@@ -339,8 +338,9 @@ class BOM(WebsiteGenerator):
 		self.validate_uoms()
 		self.set_default_uom()
 		self.validate_semi_finished_goods()
+		self.validate_batch_split_operations()
 		self.validate_secondary_items()
-		self.set_fg_cost_allocation()
+		self.validate_secondary_items_cost()
 		self.validate_total_cost_allocation()
 
 	def set_operation_finished_goods(self):
@@ -395,9 +395,51 @@ class BOM(WebsiteGenerator):
 				),
 			)
 
+	def validate_batch_split_operations(self):
+		for row in self.operations:
+			if not row.get("batch_split"):
+				continue
+
+			if not self.track_semi_finished_goods:
+				frappe.throw(
+					_(
+						"Row #{0}: Batch Split is only supported when 'Track Semi Finished Goods' is enabled."
+					).format(row.idx)
+				)
+
+			if flt(row.weight_per_piece) <= 0:
+				frappe.throw(
+					_("Row #{0}: Weight Per Piece is required for the Batch Split operation {1}.").format(
+						row.idx, bold(row.operation)
+					)
+				)
+
+			if row.finished_good:
+				item_details = frappe.get_cached_value(
+					"Item", row.finished_good, ["has_batch_no", "create_new_batch"], as_dict=1
+				)
+				if not item_details.has_batch_no or not item_details.create_new_batch:
+					frappe.throw(
+						_(
+							"Row #{0}: The item {1} must have 'Has Batch No' and 'Automatically Create New Batch' enabled as the operation {2} is marked as Batch Split."
+						).format(row.idx, bold(row.finished_good), bold(row.operation))
+					)
+
 	def validate_secondary_items(self):
+		seen_items = set()
 		for item in self.secondary_items:
-			if not item.is_legacy and item.item_code == self.item:
+			# every consumer merges secondary rows by item and type, so duplicates cannot
+			# keep their own quantities, percentages or valuation mode
+			key = (item.item_code, item.secondary_item_type or "")
+			if key in seen_items:
+				frappe.throw(
+					_(
+						"Row #{0}: Item {1} is already added with the same Type in the Secondary Items table."
+					).format(item.idx, get_link_to_form("Item", item.item_code))
+				)
+			seen_items.add(key)
+
+			if item.valuation_type != "Valuation Rate" and item.item_code == self.item:
 				frappe.throw(
 					_(
 						"Row #{0}: Finished Good Item {1} cannot be added in the Secondary Items table."
@@ -488,13 +530,25 @@ class BOM(WebsiteGenerator):
 
 	def set_fg_cost_allocation(self):
 		total_secondary_items_per = 0
+		own_cost = 0
 		for item in self.secondary_items:
+			if item.valuation_type in ("Valuation Rate", "Manual"):
+				item.cost_allocation_per = 0
+				own_cost += flt(item.cost)
 			total_secondary_items_per += item.cost_allocation_per
 
 		if self.cost_allocation_per == 100 and total_secondary_items_per:
 			self.cost_allocation_per -= total_secondary_items_per
 
-		self.cost_allocation = self.raw_material_cost * (self.cost_allocation_per / 100)
+		self.cost_allocation = (self.raw_material_cost - own_cost) * (self.cost_allocation_per / 100)
+
+	def validate_secondary_items_cost(self):
+		if flt(self.secondary_items_cost) > flt(self.raw_material_cost):
+			frappe.throw(
+				_("The cost of the secondary items cannot exceed the raw material cost of {0}.").format(
+					frappe.bold(flt(self.raw_material_cost))
+				)
+			)
 
 	def validate_total_cost_allocation(self):
 		total_cost_allocation_per = self.cost_allocation_per
@@ -569,6 +623,7 @@ class BOM(WebsiteGenerator):
 					"conversion_factor": item.conversion_factor,
 					"sourced_by_supplier": item.sourced_by_supplier,
 					"do_not_explode": item.do_not_explode,
+					"source_warehouse": item.source_warehouse or self.default_source_warehouse,
 					"fetch_rate": True,
 				}
 			)
@@ -1087,7 +1142,8 @@ class BOM(WebsiteGenerator):
 
 	def has_scrap_items(self):
 		return any(
-			d.get("secondary_item_type") == "Scrap" or d.get("is_legacy") for d in self.get("secondary_items")
+			d.get("secondary_item_type") == "Scrap" or d.get("valuation_type") == "Valuation Rate"
+			for d in self.get("secondary_items")
 		)
 
 	def validate_bom_currency(self, item):
@@ -1209,7 +1265,9 @@ def _get_price_list_item_rate(args, bom_doc):
 
 def get_valuation_rate(data):
 	"""
-	1) Get average valuation rate from all warehouses
+	1) Get average valuation rate from the scoping warehouse if one is passed
+	   (source warehouse for raw materials, default target warehouse for secondary
+	   items), else from all warehouses
 	2) If no value, get last valuation rate from SLE
 	3) If no value, get valuation rate from Item
 	"""
@@ -1248,8 +1306,12 @@ def _get_avg_valuation_rate_from_bins(item_code, company, data):
 		.where((bin_table.item_code == item_code) & (wh_table.company == company))
 	)
 
+	warehouse = data.get("source_warehouse")
 	if data.get("set_rate_based_on_warehouse") and data.get("warehouse"):
-		item_valuation = item_valuation.where(bin_table.warehouse == data.get("warehouse"))
+		warehouse = data.get("warehouse")
+
+	if warehouse:
+		item_valuation = item_valuation.where(bin_table.warehouse == warehouse)
 
 	return item_valuation.run(as_dict=True)[0].get("valuation_rate")
 
@@ -1467,18 +1529,18 @@ def _add_exploded_item_columns(query, t, bom, amount_col, stock_item_condition):
 
 
 def _add_secondary_item_columns(query, t, stock_item_condition):
-	# non-grouped columns are constant per grouped item_code -> Max() keeps the GROUP BY valid on
-	# postgres while returning the same value MySQL picked arbitrarily.
+	# grouped by (item_code, secondary_item_type), which the BOM keeps unique, so every Max()
+	# below returns the single grouped row's own value while keeping the GROUP BY valid on
+	# postgres.
 	query = query.select(
 		Max(t.item_doc.description).as_("description"),
 		Max(t.bom_item.cost_allocation_per).as_("cost_allocation_per"),
 		Max(t.bom_item.process_loss_per).as_("process_loss_per"),
-		Max(t.bom_item.secondary_item_type).as_("secondary_item_type"),
+		t.bom_item.secondary_item_type,
 		Max(t.bom_item.name).as_("name"),
-		Max(t.bom_item.is_legacy).as_("is_legacy"),
 	).where(stock_item_condition)
 
-	return query, [t.bom_item.item_code]
+	return query, [t.bom_item.item_code, t.bom_item.secondary_item_type]
 
 
 def _add_normal_item_columns(query, t, amount_col, stock_item_condition, track_semi_finished_goods):
@@ -1518,6 +1580,9 @@ def _add_normal_item_columns(query, t, amount_col, stock_item_condition, track_s
 
 def _add_bom_item_to_dict(item_dict, item, company, opts):
 	key = item.item_code
+	if opts.fetch_secondary_items:
+		key = (item.item_code, item.secondary_item_type or "")
+
 	if item.operation_row_id:
 		key = (item.item_code, item.operation_row_id)
 
@@ -1582,7 +1647,7 @@ def _set_default_accounts_for_items(item_dict, company):
 def get_bom_items(bom: str, company: str, qty: float = 1, fetch_exploded: int = 1):
 	items = get_bom_items_as_dict(bom, company, qty, fetch_exploded, include_non_stock_items=True).values()
 	items = list(items)
-	items.sort(key=functools.cmp_to_key(lambda a, b: a.item_code > b.item_code and 1 or -1))
+	items.sort(key=lambda item: item.item_code)
 	return items
 
 

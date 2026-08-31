@@ -196,7 +196,7 @@ def update_billing_percentage(
 		billed_qty_amt = get_billed_qty_amount_against_purchase_receipt(pr_doc)
 		billed_qty_amt_based_on_po = get_billed_qty_amount_against_purchase_order(pr_doc)
 
-	for item in pr_doc.items:
+	for item in [item for item in pr_doc.items if not item.closed] or pr_doc.items:
 		returned_qty = flt(item_wise_returned_qty.get(item.name))
 		returned_amount = flt(returned_qty) * flt(item.rate)
 		pending_amount = flt(item.amount) - returned_amount

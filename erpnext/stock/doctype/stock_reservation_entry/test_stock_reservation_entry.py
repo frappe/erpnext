@@ -24,8 +24,16 @@ from erpnext.tests.utils import ERPNextTestSuite
 class TestStockReservationEntry(ERPNextTestSuite):
 	def setUp(self) -> None:
 		self.warehouse = "_Test Warehouse - _TC"
-		self.sr_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100})
-		create_material_receipt(items={self.sr_item.name: self.sr_item}, warehouse=self.warehouse, qty=100)
+		self._sr_item = None
+
+	@property
+	def sr_item(self):
+		if self._sr_item is None:
+			self._sr_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100})
+			create_material_receipt(
+				items={self._sr_item.name: self._sr_item}, warehouse=self.warehouse, qty=100
+			)
+		return self._sr_item
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_validate_stock_reservation_settings(self) -> None:
@@ -192,9 +200,9 @@ class TestStockReservationEntry(ERPNextTestSuite):
 				{
 					"item_code": item_code,
 					"warehouse": self.warehouse,
-					"qty": randint(11, 100),
+					"qty": 80,
 					"uom": properties.stock_uom,
-					"rate": randint(10, 400),
+					"rate": 100,
 				}
 			)
 
@@ -616,9 +624,9 @@ class TestStockReservationEntry(ERPNextTestSuite):
 				{
 					"item_code": item_code,
 					"warehouse": self.warehouse,
-					"qty": randint(11, 100),
+					"qty": 80,
 					"uom": properties.stock_uom,
-					"rate": randint(10, 400),
+					"rate": 100,
 				}
 			)
 

@@ -2109,13 +2109,17 @@ def create_asset_category(enable_cwip=1):
 
 
 def create_fixed_asset_item(item_code=None, auto_create_assets=1, is_grouped_asset=0, asset_category=None):
+	item_code = item_code or "Macbook Pro"
+	if frappe.db.exists("Item", item_code):
+		return frappe.get_doc("Item", item_code)
+
 	meta = frappe.get_meta("Asset")
 	naming_series = meta.get_field("naming_series").options.splitlines()[0] or "ACC-ASS-.YYYY.-"
 	try:
 		item = frappe.get_doc(
 			{
 				"doctype": "Item",
-				"item_code": item_code or "Macbook Pro",
+				"item_code": item_code,
 				"item_name": "Macbook Pro",
 				"description": "Macbook Pro Retina Display",
 				"asset_category": asset_category or "Computers",

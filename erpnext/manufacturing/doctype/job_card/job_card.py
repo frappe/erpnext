@@ -85,6 +85,7 @@ class JobCard(Document):
 		amended_from: DF.Link | None
 		backflush_from_wip_warehouse: DF.Check
 		barcode: DF.Barcode | None
+		batch_split: DF.Check
 		batch_no: DF.Link | None
 		bom_no: DF.Link | None
 		company: DF.Link
@@ -141,6 +142,7 @@ class JobCard(Document):
 		time_required: DF.Float
 		total_completed_qty: DF.Float
 		total_time_in_mins: DF.Float
+		weight_per_piece: DF.Float
 		track_semi_finished_goods: DF.Check
 		transferred_qty: DF.Float
 		wip_warehouse: DF.Link | None
@@ -305,8 +307,9 @@ class JobCard(Document):
 			fetch_exploded=0,
 			fetch_secondary_items=1,
 		)
-		for item_code, values in items_dict.items():
-			self.append_secondary_item(item_code, frappe._dict(values))
+		for values in items_dict.values():
+			values = frappe._dict(values)
+			self.append_secondary_item(values.item_code, values)
 
 	def append_secondary_item(self, item_code, values):
 		secondary_item = {
@@ -318,11 +321,10 @@ class JobCard(Document):
 			"bom_secondary_item": values.name,
 		}
 
-		if not values.is_legacy:
-			secondary_item["stock_qty"] -= flt(
-				secondary_item["stock_qty"] * (values.process_loss_per / 100),
-				self.precision("for_quantity"),
-			)
+		secondary_item["stock_qty"] -= flt(
+			secondary_item["stock_qty"] * (flt(values.process_loss_per) / 100),
+			self.precision("for_quantity"),
+		)
 
 		self.append("secondary_items", secondary_item)
 
@@ -1879,7 +1881,7 @@ class JobCard(Document):
 		add_additional_cost(ste.stock_entry, wo_doc, self)
 		ManufactureStockEntry(ste.stock_entry).add_secondary_items_from_job_card()
 		for row in ste.stock_entry.items:
-			if (row.secondary_item_type or row.is_legacy_scrap_item) and not row.t_warehouse:
+			if (row.secondary_item_type or row.valuation_type) and not row.t_warehouse:
 				row.t_warehouse = self.target_warehouse
 
 

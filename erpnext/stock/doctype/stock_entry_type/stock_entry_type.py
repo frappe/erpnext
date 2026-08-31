@@ -23,6 +23,7 @@ class StockEntryType(Document):
 		from frappe.types import DF
 
 		add_to_transit: DF.Check
+		batch_split: DF.Check
 		is_standard: DF.Check
 		purpose: DF.Literal[
 			"Material Issue",
@@ -45,6 +46,9 @@ class StockEntryType(Document):
 		self.validate_standard_type()
 		if self.add_to_transit and self.purpose != "Material Transfer":
 			self.add_to_transit = 0
+
+		if self.batch_split and self.purpose != "Repack":
+			self.batch_split = 0
 
 	def validate_standard_type(self):
 		if self.is_standard and self.name not in [

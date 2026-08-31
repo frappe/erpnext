@@ -585,6 +585,22 @@ class SalesOrder(SellingController):
 	def update_status(self, status):
 		StatusService(self).update_status(status)
 
+	def on_item_close_status_change(self):
+		StatusService(self).recalculate_after_item_close()
+
+	def is_item_closable(self, item):
+		return flt(item.delivered_qty) < flt(item.qty) or super().is_item_closable(item)
+
+	def validate_item_close(self, items):
+		"""Reserved stock has to be released deliberately before a row is closed."""
+		for item in items:
+			if has_reserved_stock(self.doctype, self.name, item.name):
+				frappe.throw(
+					_("Row #{0}: {1} has reserved stock. Unreserve it before closing the row.").format(
+						item.idx, frappe.bold(item.item_code)
+					)
+				)
+
 	def update_reserved_qty(self, so_item_rows=None):
 		SalesOrderStockReservation(self).update_reserved_qty(so_item_rows)
 

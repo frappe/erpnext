@@ -789,7 +789,6 @@ class TestPaymentEntry(ERPNextTestSuite):
 			company="_Test Company",
 		)
 		frappe.db.set_value("Company", "_Test Company", "bank_charges_account", bank_charges_account)
-		self.addCleanup(frappe.db.set_value, "Company", "_Test Company", "bank_charges_account", "")
 
 		pe = frappe.new_doc("Payment Entry")
 		pe.payment_type = "Internal Transfer"
@@ -834,7 +833,6 @@ class TestPaymentEntry(ERPNextTestSuite):
 			company="_Test Company",
 		)
 		frappe.db.set_value("Company", "_Test Company", "bank_charges_account", bank_charges_account)
-		self.addCleanup(frappe.db.set_value, "Company", "_Test Company", "bank_charges_account", "")
 
 		pe = frappe.new_doc("Payment Entry")
 		pe.payment_type = "Internal Transfer"
@@ -1109,8 +1107,6 @@ class TestPaymentEntry(ERPNextTestSuite):
 		)
 		frappe.db.set_value("Company", "_Test Company", "exchange_gain_account", gain_account)
 		frappe.db.set_value("Company", "_Test Company", "exchange_loss_account", loss_account)
-		self.addCleanup(frappe.db.set_value, "Company", "_Test Company", "exchange_gain_account", "")
-		self.addCleanup(frappe.db.set_value, "Company", "_Test Company", "exchange_loss_account", "")
 
 		si_gain = create_sales_invoice(
 			customer="_Test Customer USD",

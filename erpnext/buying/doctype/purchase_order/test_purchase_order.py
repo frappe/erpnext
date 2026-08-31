@@ -333,6 +333,38 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		self.assertEqual(po.get("items")[0].amount, 1400)
 		self.assertEqual(get_ordered_qty(), existing_ordered_qty + 3)
 
+	def test_update_child_qty_with_conversion_factor_after_receipt(self):
+		item = make_item(uoms=[{"uom": "Box", "conversion_factor": 5}])
+		purchase_order = create_purchase_order(item_code=item.item_code, qty=6, do_not_save=True)
+		purchase_order.items[0].uom = "Box"
+		purchase_order.items[0].conversion_factor = 5
+		purchase_order.save()
+		purchase_order.submit()
+		create_pr_against_po(purchase_order.name, 2)
+
+		row = purchase_order.items[0]
+		trans_items = json.dumps(
+			[
+				{
+					"item_code": row.item_code,
+					"rate": row.rate,
+					"qty": 4,
+					"uom": row.uom,
+					"conversion_factor": 2,
+					"docname": row.name,
+				}
+			]
+		)
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Cannot set quantity less than received quantity",
+			update_child_qty_rate,
+			"Purchase Order",
+			trans_items,
+			purchase_order.name,
+		)
+
 	def test_update_child_adding_new_item(self):
 		po = create_purchase_order(do_not_save=1)
 		po.items[0].qty = 4
@@ -378,9 +410,7 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		po.submit()
 		first_item_of_po = po.get("items")[0]
 
-		company_default = frappe.db.get_value("Company", po.company, "default_warehouse")
 		frappe.db.set_value("Company", po.company, "default_warehouse", None)
-		self.addCleanup(frappe.db.set_value, "Company", po.company, "default_warehouse", company_default)
 
 		def get_trans_items(item_code):
 			return json.dumps(
@@ -794,14 +824,9 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, below_minimum.insert)
 
 	def test_marginal_min_order_qty_overage_toast(self):
-		original_precision = frappe.db.get_default("float_precision")
 		frappe.db.set_default("float_precision", "3")
-		self.addCleanup(frappe.db.set_default, "float_precision", original_precision)
 
-		if not frappe.db.exists("UOM", "Gram"):
-			frappe.get_doc({"doctype": "UOM", "uom_name": "Gram"}).insert()
-
-		item_doc = make_item(properties={"min_order_qty": 50000, "stock_uom": "Gram"})
+		item_doc = make_item(properties={"min_order_qty": 50000, "stock_uom": "_Test UOM 1"})
 		item_doc.append("uoms", {"uom": "Pound", "conversion_factor": 453.592292197})
 		item_doc.save()
 		item = item_doc.name
@@ -1799,24 +1824,10 @@ def create_po_for_sc_testing():
 
 
 def prepare_data_for_internal_transfer():
-	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
-	from erpnext.selling.doctype.customer.test_customer import create_internal_customer
 	from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 	from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 	company = "_Test Company with perpetual inventory"
-
-	create_internal_customer(
-		"_Test Internal Customer 2",
-		company,
-		company,
-	)
-
-	create_internal_supplier(
-		"_Test Internal Supplier 2",
-		company,
-		company,
-	)
 
 	warehouse = create_warehouse("_Test Internal Warehouse New 1", company=company)
 

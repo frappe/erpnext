@@ -443,6 +443,8 @@ class TestInventoryDimension(ERPNextTestSuite):
 			document_type="Inv Site",
 			validate_negative_stock=1,
 		)
+		inv_dimension.db_set("validate_negative_stock", 1)
+		frappe.clear_cache(doctype="Inventory Dimension")
 
 		warehouse = create_warehouse("Negative Stock Warehouse")
 
@@ -758,24 +760,13 @@ def create_inventory_dimension(**args):
 
 
 def prepare_data_for_internal_transfer():
-	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
-	from erpnext.selling.doctype.customer.test_customer import create_internal_customer
 	from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 	from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 	company = "_Test Company with perpetual inventory"
 
-	customer = create_internal_customer(
-		"_Test Internal Customer 2",
-		company,
-		company,
-	)
-
-	supplier = create_internal_supplier(
-		"_Test Internal Supplier 2",
-		company,
-		company,
-	)
+	customer = "_Test Internal Customer 2"
+	supplier = "_Test Internal Supplier 2"
 
 	for store in ["Inter Transfer Store 1", "Inter Transfer Store 2", "Inter Transfer Store 3"]:
 		if not frappe.db.exists("Store", store):

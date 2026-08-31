@@ -151,6 +151,15 @@ frappe.ui.form.on("Production Plan", {
 				__("View")
 			);
 
+			frm.add_custom_button(
+				__("Plan Visualizer"),
+				() => {
+					frappe.route_options = { production_plan: frm.doc.name };
+					frappe.set_route("production-plan-visualizer");
+				},
+				__("View")
+			);
+
 			if (!["Completed", "Closed"].includes(frm.doc.status)) {
 				frm.add_custom_button(__("Schedule Items"), () => {
 					frm.events.show_schedule_dialog(frm);

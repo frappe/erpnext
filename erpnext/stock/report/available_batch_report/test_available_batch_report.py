@@ -8,15 +8,6 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestAvailableBatchReport(ERPNextTestSuite):
-	@staticmethod
-	def _cancel_and_delete_stock_entry(name):
-		if not frappe.db.exists("Stock Entry", name):
-			return
-		doc = frappe.get_doc("Stock Entry", name)
-		if doc.docstatus == 1:
-			doc.cancel()
-		frappe.delete_doc("Stock Entry", name, force=1)
-
 	def test_report_runs_and_lists_batch_qty(self):
 		# The report selects Batch columns (expiry_date, and item_name when show_item_name is set)
 		# while grouping by SLE columns; the Batch PK must be in the GROUP BY for the report to run
@@ -35,9 +26,6 @@ class TestAvailableBatchReport(ERPNextTestSuite):
 		se = make_stock_entry(
 			item_code=item, target="_Test Warehouse - _TC", qty=7, basic_rate=10, purpose="Material Receipt"
 		)
-		# make_item is idempotent (returns the existing item), but each receipt stacks a new batch,
-		# so cancel+delete the stock entry to keep repeated runs clean.
-		self.addCleanup(self._cancel_and_delete_stock_entry, se.name)
 		batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
 
 		filters = frappe._dict(to_date=today(), item_code=item, show_item_name=1)

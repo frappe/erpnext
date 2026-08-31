@@ -910,14 +910,8 @@ class TestDeliveryNote(ERPNextTestSuite):
 			self.assertEqual(sn.warehouse, warehouse)
 
 	def test_delivery_of_bundled_items_to_target_warehouse(self):
-		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
-
 		company = frappe.db.get_value("Warehouse", "Stores - TCP1", "company")
-		customer_name = create_internal_customer(
-			customer_name="_Test Internal Customer 2",
-			represents_company="_Test Company with perpetual inventory",
-			allowed_to_interact_with="_Test Company with perpetual inventory",
-		)
+		customer_name = "_Test Internal Customer 2"
 
 		set_valuation_method("_Test Item", "FIFO")
 		set_valuation_method("_Test Item Home Desktop 100", "FIFO")

@@ -578,17 +578,7 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 			make_purchase_invoice as create_purchase_invoice,
 		)
 
-		original_value = frappe.db.get_single_value(
-			"Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate"
-		)
-
 		frappe.db.set_single_value("Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate", 0)
-		self.addCleanup(
-			frappe.db.set_single_value,
-			"Buying Settings",
-			"set_landed_cost_based_on_purchase_invoice_rate",
-			original_value,
-		)
 
 		pr = make_purchase_receipt(
 			company="_Test Company with perpetual inventory",
@@ -616,16 +606,7 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 			make_purchase_invoice as create_purchase_invoice,
 		)
 
-		original_value = frappe.db.get_single_value(
-			"Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate"
-		)
 		frappe.db.set_single_value("Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate", 0)
-		self.addCleanup(
-			frappe.db.set_single_value,
-			"Buying Settings",
-			"set_landed_cost_based_on_purchase_invoice_rate",
-			original_value,
-		)
 
 		pr = frappe.new_doc("Purchase Receipt")
 		pr.currency = "USD"
@@ -3545,7 +3526,6 @@ def make_purchase_invoice_against_cost_center(**args):
 
 def setup_provisional_accounting(**args):
 	args = frappe._dict(args)
-	create_item("_Test Non Stock Item", is_stock_item=0)
 	company = args.company or "_Test Company"
 	provisional_account = create_account(
 		account_name=args.account_name or "Provision Account",

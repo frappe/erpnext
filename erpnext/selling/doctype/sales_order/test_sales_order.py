@@ -82,8 +82,10 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("Item Price", all_item_prices[0].name, "price_list_rate"), 1000)
 
 	def test_sales_order_with_product_bundle_for_partial_material_request(self):
-		product_bundle = make_product_bundle(
-			"_Test Product Bundle Item", ["_Test Item", "_Test Item Home Desktop 100"]
+		from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
+
+		product_bundle = frappe.get_doc(
+			"Product Bundle", get_active_product_bundle("_Test Product Bundle Item")
 		)
 		so = make_sales_order(item_code=product_bundle.new_item_code, qty=2)
 		mr = make_material_request(so.name)
@@ -274,10 +276,10 @@ class TestSalesOrder(ERPNextTestSuite):
 		so.append("items", {"item_code": "_Test Item 2", "qty": 1, "rate": -10})
 		so.save()
 
-		with self.assertRaises(frappe.ValidationError) as error:
+		with self.assertRaises(frappe.ValidationError):
 			so.submit()
 
-		self.assertIn("selling-settings", str(error.exception))
+		self.assertIn("selling-settings", frappe.local.message_log[-1]["message"])
 
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_negative_rates_for_items": 1})
 	def test_sales_order_negative_rate_setting_does_not_allow_negative_quantity(self):
@@ -872,9 +874,7 @@ class TestSalesOrder(ERPNextTestSuite):
 		existing_item = so.get("items")[0]
 
 		# a company gets a default warehouse when its warehouses are created
-		company_default = frappe.db.get_value("Company", so.company, "default_warehouse")
 		frappe.db.set_value("Company", so.company, "default_warehouse", None)
-		self.addCleanup(frappe.db.set_value, "Company", so.company, "default_warehouse", company_default)
 
 		def get_trans_items(warehouse=None):
 			new_row = {"item_code": item_code, "rate": 200, "qty": 7}
@@ -977,6 +977,46 @@ class TestSalesOrder(ERPNextTestSuite):
 			[{"item_code": "_Test Item", "rate": 200, "qty": 2, "docname": so.items[0].name}]
 		)
 		self.assertRaises(frappe.ValidationError, update_child_qty_rate, "Sales Order", trans_item, so.name)
+
+	def test_update_child_qty_with_conversion_factor_after_delivery(self):
+		item = make_item(uoms=[{"uom": "Box", "conversion_factor": 5}])
+		sales_order = make_sales_order(item_code=item.item_code, qty=6, uom="Box")
+		create_dn_against_so(sales_order.name, 2)
+
+		row = sales_order.items[0]
+		trans_items = json.dumps(
+			[
+				{
+					"item_code": row.item_code,
+					"rate": row.rate,
+					"qty": 4,
+					"uom": row.uom,
+					"conversion_factor": 2,
+					"docname": row.name,
+				}
+			]
+		)
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Cannot set quantity less than delivered quantity",
+			update_child_qty_rate,
+			"Sales Order",
+			trans_items,
+			sales_order.name,
+		)
+
+	def test_update_child_preserves_conversion_factor_precision(self):
+		from erpnext.accounts.services.child_item_update import update_child_item_uom_and_weight
+
+		item = make_item(properties={"stock_uom": "Kg"}, uoms=[{"uom": "Box", "conversion_factor": 2}])
+		sales_order = make_sales_order(item_code=item.item_code, qty=6, uom="Box")
+		conversion_factor = 1.123456789123
+		row = sales_order.items[0]
+
+		update_child_item_uom_and_weight(row, {"conversion_factor": conversion_factor})
+
+		self.assertEqual(row.conversion_factor, conversion_factor)
 
 	def test_update_child_with_precision(self):
 		from frappe.custom.doctype.property_setter.property_setter import make_property_setter
@@ -1940,6 +1980,61 @@ class TestSalesOrder(ERPNextTestSuite):
 				.where((wo.sales_order == so.name) & (wo.sales_order_item == item))
 			).run()
 			self.assertEqual(wo_qty[0][0], so_item_name.get(item))
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_make_work_order_for_duplicate_product_bundle_rows(self):
+		from erpnext.selling.doctype.sales_order.sales_order import get_work_order_items
+
+		bundle_item = make_item("_Test Work Order Product Bundle", {"is_stock_item": 0}).name
+		make_product_bundle(bundle_item, ["_Test FG Item"])
+
+		first_delivery_date = add_days(today(), 5)
+		second_delivery_date = add_days(today(), 10)
+		so = make_sales_order(
+			item_list=[
+				{
+					"item_code": bundle_item,
+					"qty": 1,
+					"rate": 100,
+					"warehouse": "_Test Warehouse - _TC",
+					"delivery_date": first_delivery_date,
+				},
+				{
+					"item_code": bundle_item,
+					"qty": 1,
+					"rate": 100,
+					"warehouse": "_Test Warehouse - _TC",
+					"delivery_date": second_delivery_date,
+				},
+			]
+		)
+
+		items = [
+			{
+				"warehouse": item.get("warehouse"),
+				"item_code": item.get("item_code"),
+				"pending_qty": item.get("pending_qty"),
+				"sales_order_item": item.get("sales_order_item"),
+				"bom": item.get("bom"),
+				"description": item.get("description"),
+			}
+			for item in get_work_order_items(so.name)
+		]
+		work_orders = make_work_orders(json.dumps({"items": items}), so.name, so.company)
+
+		expected_delivery_dates = {
+			packed_item.name: next(
+				item.delivery_date for item in so.items if item.name == packed_item.parent_detail_docname
+			)
+			for packed_item in so.packed_items
+		}
+		self.assertEqual(len(work_orders), 2)
+		for work_order_name in work_orders:
+			work_order = frappe.get_doc("Work Order", work_order_name)
+			self.assertEqual(
+				getdate(work_order.expected_delivery_date),
+				getdate(expected_delivery_dates[work_order.sales_order_item]),
+			)
 
 	def test_advance_payment_entry_unlink_against_sales_order(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry

@@ -318,9 +318,8 @@ class TestJournalEntry(ERPNextTestSuite):
 		)
 
 		# the guard must not disclose the reversal to a user who cannot read the entry
-		frappe.set_user("Guest")
-		self.addCleanup(frappe.set_user, "Administrator")
-		self.assertRaises(frappe.PermissionError, make_reverse_journal_entry, rjv.name)
+		with self.set_user("Guest"):
+			self.assertRaises(frappe.PermissionError, make_reverse_journal_entry, rjv.name)
 
 	def test_disallow_change_in_account_currency_for_a_party(self):
 		# create jv in USD

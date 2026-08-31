@@ -24,6 +24,8 @@
   "is_subcontracted",
   "skip_material_transfer",
   "backflush_from_wip_warehouse",
+  "batch_split",
+  "weight_per_piece",
   "column_break_vjih",
   "source_warehouse",
   "wip_warehouse",
@@ -301,6 +303,20 @@
   },
   {
    "default": "0",
+   "fieldname": "batch_split",
+   "fieldtype": "Check",
+   "label": "Batch Split",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.batch_split",
+   "fieldname": "weight_per_piece",
+   "fieldtype": "Float",
+   "label": "Weight Per Piece",
+   "read_only": 1
+  },
+  {
+   "default": "0",
    "fieldname": "quality_inspection_required",
    "fieldtype": "Check",
    "label": "Quality Inspection Required"
@@ -317,7 +333,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-05-25 17:15:12.038470",
+ "modified": "2026-08-28 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order Operation",

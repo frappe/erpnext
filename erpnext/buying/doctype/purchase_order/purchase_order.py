@@ -402,6 +402,12 @@ class PurchaseOrder(BuyingController):
 	def update_status(self, status):
 		StatusService(self).update_status(status)
 
+	def on_item_close_status_change(self):
+		StatusService(self).recalculate_after_item_close()
+
+	def is_item_closable(self, item):
+		return flt(item.received_qty) < flt(item.qty) or super().is_item_closable(item)
+
 	def on_submit(self):
 		super().on_submit()
 
@@ -531,7 +537,7 @@ class PurchaseOrder(BuyingController):
 		considering the configured over_delivery_receipt_allowance.
 		"""
 		for item in self.get("items", []):
-			if item.delivered_by_supplier:
+			if item.delivered_by_supplier or item.closed:
 				continue
 			tolerance = flt(get_allowance_for(item.item_code, qty_or_amount="qty")[0])
 			max_receivable_qty = flt(item.qty) * (100 + tolerance) / 100
