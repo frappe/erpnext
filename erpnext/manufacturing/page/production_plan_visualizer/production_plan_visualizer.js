@@ -147,18 +147,20 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 
 	build_index() {
 		this.data.schedule = (this.data.schedule || []).filter((d) => d.from_time && d.to_time);
-		const owner_of_row = {};
-		for (const fg of this.data.finished_goods) owner_of_row[fg.row_name] = fg.row_name;
+		const owners_of_row = {};
+		for (const fg of this.data.finished_goods) owners_of_row[fg.row_name] = [fg.row_name];
 		for (const sub of this.data.sub_assemblies) {
-			const owner = owner_of_row[sub.production_plan_item];
-			if (owner) owner_of_row[sub.row_name] = owner;
+			const owners = owners_of_row[sub.production_plan_item];
+			if (owners) owners_of_row[sub.row_name] = [...owners];
 		}
-		this.resolve_nested_owners(owner_of_row);
+		this.resolve_nested_owners(owners_of_row);
 
-		const subs_by_parent = this.group_rows(
-			this.data.sub_assemblies.filter((d) => owner_of_row[d.row_name]),
-			(d) => owner_of_row[d.row_name]
-		);
+		const subs_by_parent = {};
+		for (const sub of this.data.sub_assemblies) {
+			for (const owner of owners_of_row[sub.row_name] || []) {
+				(subs_by_parent[owner] = subs_by_parent[owner] || []).push(sub);
+			}
+		}
 
 		const bom_consumers = {};
 		for (const [row_name, items] of Object.entries(this.data.row_materials || {})) {
@@ -174,35 +176,42 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 		const fg_label = {};
 		for (const fg of this.data.finished_goods) fg_label[fg.row_name] = fg.item_name || fg.item_code;
 
-		this.index = { subs_by_parent, owner_of_row, bom_consumers, subs_by_signature, fg_label };
+		this.index = { subs_by_parent, owners_of_row, bom_consumers, subs_by_signature, fg_label };
 		for (const material of this.data.materials || []) {
 			material.owners = this.material_owners(material);
 		}
 		this.compute_stats();
 	}
 
-	resolve_nested_owners(owner_of_row) {
+	resolve_nested_owners(owners_of_row) {
 		const fg_by_item = {};
-		for (const fg of this.data.finished_goods) fg_by_item[fg.item_code] = fg.row_name;
-		const sub_by_item = {};
-		for (const sub of this.data.sub_assemblies) sub_by_item[sub.item_code] = sub;
+		for (const fg of this.data.finished_goods) {
+			(fg_by_item[fg.item_code] = fg_by_item[fg.item_code] || []).push(fg.row_name);
+		}
+		const subs_by_item = {};
+		for (const sub of this.data.sub_assemblies) {
+			(subs_by_item[sub.item_code] = subs_by_item[sub.item_code] || []).push(sub);
+		}
 
 		for (const sub of this.data.sub_assemblies) {
-			if (owner_of_row[sub.row_name]) continue;
-			owner_of_row[sub.row_name] = this.walk_to_finished_good(sub, fg_by_item, sub_by_item);
-			if (!owner_of_row[sub.row_name]) delete owner_of_row[sub.row_name];
+			if (owners_of_row[sub.row_name]) continue;
+			const owners = this.walk_to_finished_goods(sub, fg_by_item, subs_by_item);
+			if (owners.length) owners_of_row[sub.row_name] = owners;
 		}
 	}
 
-	walk_to_finished_good(sub, fg_by_item, sub_by_item) {
+	walk_to_finished_goods(sub, fg_by_item, subs_by_item) {
 		const seen = new Set();
-		let node = sub;
-		while (node && !seen.has(node.row_name)) {
+		const queue = [sub];
+		const owners = new Set();
+		while (queue.length) {
+			const node = queue.shift();
+			if (!node || seen.has(node.row_name)) continue;
 			seen.add(node.row_name);
-			if (fg_by_item[node.parent_item_code]) return fg_by_item[node.parent_item_code];
-			node = sub_by_item[node.parent_item_code];
+			for (const row_name of fg_by_item[node.parent_item_code] || []) owners.add(row_name);
+			queue.push(...(subs_by_item[node.parent_item_code] || []));
 		}
-		return null;
+		return [...owners];
 	}
 
 	material_owners(material) {
@@ -216,8 +225,7 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 	owners_of(row_names) {
 		const owners = new Set();
 		for (const row_name of row_names) {
-			const owner = this.index.owner_of_row[row_name];
-			if (owner) owners.add(owner);
+			for (const owner of this.index.owners_of_row[row_name] || []) owners.add(owner);
 		}
 		return [...owners];
 	}
@@ -611,7 +619,9 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 
 	append_orphan_subs(body) {
 		if (this.focus !== "all") return;
-		const orphans = this.data.sub_assemblies.filter((d) => !this.index.owner_of_row[d.row_name]);
+		const orphans = this.data.sub_assemblies.filter(
+			(d) => !(this.index.owners_of_row[d.row_name] || []).length
+		);
 		if (!orphans.length) return;
 		body.append(this.group_row(__("Unlinked Sub Assemblies"), 7));
 		for (const sub of orphans) body.append(this.manufacture_row(sub, { kind: "sub", indent: 1 }));
