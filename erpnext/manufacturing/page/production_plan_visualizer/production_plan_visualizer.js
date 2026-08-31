@@ -186,7 +186,7 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 	resolve_nested_owners(owners_of_row) {
 		const fg_by_item = {};
 		for (const fg of this.data.finished_goods) {
-			(fg_by_item[fg.item_code] = fg_by_item[fg.item_code] || []).push(fg.row_name);
+			(fg_by_item[fg.item_code] = fg_by_item[fg.item_code] || []).push(fg);
 		}
 		const subs_by_item = {};
 		for (const sub of this.data.sub_assemblies) {
@@ -208,10 +208,17 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 			const node = queue.shift();
 			if (!node || seen.has(node.row_name)) continue;
 			seen.add(node.row_name);
-			for (const row_name of fg_by_item[node.parent_item_code] || []) owners.add(row_name);
-			queue.push(...(subs_by_item[node.parent_item_code] || []));
+			const parent = node.parent_item_code;
+			for (const fg of this.same_demand(sub, fg_by_item[parent] || [])) owners.add(fg.row_name);
+			queue.push(...this.same_demand(sub, subs_by_item[parent] || []));
 		}
 		return [...owners];
+	}
+
+	same_demand(sub, candidates) {
+		if (!sub.sales_order || candidates.length < 2) return candidates;
+		const scoped = candidates.filter((d) => d.sales_order === sub.sales_order);
+		return scoped.length ? scoped : candidates;
 	}
 
 	material_owners(material) {
