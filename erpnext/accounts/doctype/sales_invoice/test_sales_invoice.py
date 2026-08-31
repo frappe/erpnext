@@ -21,6 +21,7 @@ from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
 )
 from erpnext.accounts.doctype.sales_invoice.mapper import make_inter_company_transaction
 from erpnext.accounts.doctype.sales_invoice.services.pos import (
+	PartialPaymentValidationError,
 	POSService,
 	get_all_mode_of_payments,
 	get_mode_of_payment_info,
@@ -5213,6 +5214,22 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 			pos.append("payments", {"mode_of_payment": "Cash", "amount": 1000})
 			self.assertRaises(frappe.ValidationError, pos.insert)
+
+	def test_pos_sales_invoice_partial_payment_not_allowed_without_pos_screen(self):
+		frappe.db.delete("POS Opening Entry")
+
+		pos_profile = make_pos_profile()
+		pos_profile.payments = []
+		pos_profile.append("payments", {"default": 1, "mode_of_payment": "Cash"})
+		pos_profile.save()
+
+		pos = create_sales_invoice(qty=1, rate=100, do_not_save=True)
+		pos.is_pos = 1
+		pos.pos_profile = pos_profile.name
+		pos.append("payments", {"mode_of_payment": "Cash", "amount": 99})
+		pos.insert()
+
+		self.assertRaises(PartialPaymentValidationError, pos.submit)
 
 	def test_stand_alone_credit_note_valuation(self):
 		item_code = "_Test Item for Credit Note Valuation"
