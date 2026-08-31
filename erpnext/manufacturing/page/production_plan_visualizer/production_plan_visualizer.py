@@ -32,16 +32,36 @@ def get_materials(plan, production_plan):
 	return [build_material(row, raised.get(row.name) or [], stock) for row in plan.mr_items]
 
 
+def get_permitted_names(doctype, child_doctype, production_plan):
+	if not frappe.has_permission(doctype):
+		return []
+
+	return frappe.get_list(
+		doctype,
+		filters=[
+			[child_doctype, "production_plan", "=", production_plan],
+			[child_doctype, "docstatus", "<", 2],
+		],
+		pluck="name",
+		distinct=True,
+		limit_page_length=0,
+	)
+
+
 def get_stock_levels(plan):
+	if not frappe.has_permission("Bin"):
+		return {}
+
 	items = {row.item_code for row in plan.mr_items}
 	warehouses = {row.warehouse for row in plan.mr_items if row.warehouse}
 	if not items or not warehouses:
 		return {}
 
-	bins = frappe.get_all(
+	bins = frappe.get_list(
 		"Bin",
 		filters={"item_code": ("in", items), "warehouse": ("in", warehouses)},
 		fields=["item_code", "warehouse", "actual_qty", "projected_qty"],
+		limit_page_length=0,
 	)
 
 	return {(d.item_code, d.warehouse): d for d in bins}
@@ -71,12 +91,14 @@ def build_material(row, raised, stock):
 		"schedule_date": row.schedule_date,
 		"consumer": row.get("sub_assembly_item_reference"),
 		"main_item_code": row.get("main_item_code"),
+		"from_bom": row.get("from_bom"),
 		"documents": list(documents.values()),
 	}
 
 
 def get_raised_material_request_items(production_plan):
-	if not frappe.has_permission("Material Request"):
+	names = get_permitted_names("Material Request", "Material Request Item", production_plan)
+	if not names:
 		return []
 
 	mr_item = frappe.qb.DocType("Material Request Item")
@@ -95,7 +117,11 @@ def get_raised_material_request_items(production_plan):
 			mr_item.received_qty,
 			material_request.status,
 		)
-		.where((mr_item.production_plan == production_plan) & (mr_item.docstatus < 2))
+		.where(
+			(mr_item.production_plan == production_plan)
+			& (mr_item.docstatus < 2)
+			& mr_item.parent.isin(names)
+		)
 		.orderby(material_request.transaction_date)
 		.run(as_dict=True)
 	)
@@ -108,13 +134,18 @@ def get_row_materials(plan, schedule):
 	if not material_items or not rows:
 		return {}
 
+	boms = frappe.get_list(
+		"BOM",
+		filters={"name": ("in", {bom_no for _, bom_no in rows})},
+		pluck="name",
+		limit_page_length=0,
+	)
+	if not boms:
+		return {}
+
 	bom_items = frappe.get_all(
 		"BOM Item",
-		filters={
-			"parent": ("in", {bom_no for _, bom_no in rows}),
-			"parenttype": "BOM",
-			"item_code": ("in", material_items),
-		},
+		filters={"parent": ("in", boms), "parenttype": "BOM", "item_code": ("in", material_items)},
 		fields=["parent", "item_code"],
 	)
 
@@ -184,6 +215,7 @@ def get_sub_assemblies(plan, work_orders, purchase_orders):
 				"produced_qty": produced_qty,
 				"pending_qty": flt(item.qty) - produced_qty,
 				"available_qty": flt(item.actual_qty),
+				"bom_no": item.bom_no,
 				"bom_level": item.bom_level,
 				"indent": item.indent or 0,
 				"type_of_manufacturing": item.type_of_manufacturing,
@@ -228,7 +260,8 @@ def get_work_orders(production_plan):
 
 
 def get_purchase_orders(production_plan):
-	if not frappe.has_permission("Purchase Order"):
+	names = get_permitted_names("Purchase Order", "Purchase Order Item", production_plan)
+	if not names:
 		return []
 
 	po_item = frappe.qb.DocType("Purchase Order Item")
@@ -249,7 +282,11 @@ def get_purchase_orders(production_plan):
 			purchase_order.docstatus,
 			purchase_order.supplier,
 		)
-		.where((po_item.production_plan == production_plan) & (po_item.docstatus < 2))
+		.where(
+			(po_item.production_plan == production_plan)
+			& (po_item.docstatus < 2)
+			& po_item.parent.isin(names)
+		)
 		.run(as_dict=True)
 	)
 
@@ -264,7 +301,8 @@ def get_purchase_orders(production_plan):
 
 
 def get_material_requests(production_plan):
-	if not frappe.has_permission("Material Request"):
+	names = get_permitted_names("Material Request", "Material Request Item", production_plan)
+	if not names:
 		return []
 
 	mr_item = frappe.qb.DocType("Material Request Item")
@@ -283,7 +321,11 @@ def get_material_requests(production_plan):
 			material_request.per_received,
 			Sum(mr_item.qty).as_("qty"),
 		)
-		.where((mr_item.production_plan == production_plan) & (mr_item.docstatus < 2))
+		.where(
+			(mr_item.production_plan == production_plan)
+			& (mr_item.docstatus < 2)
+			& mr_item.parent.isin(names)
+		)
 		.groupby(
 			mr_item.parent,
 			material_request.status,

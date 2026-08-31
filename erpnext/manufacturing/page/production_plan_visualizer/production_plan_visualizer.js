@@ -138,7 +138,13 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 			for (const item of items) (bom_consumers[item] = bom_consumers[item] || []).push(row_name);
 		}
 
-		this.index = { subs_by_parent, owner_of_row, bom_consumers };
+		const subs_by_signature = {};
+		for (const sub of this.data.sub_assemblies) {
+			const key = `${sub.item_code}::${sub.bom_no || ""}`;
+			(subs_by_signature[key] = subs_by_signature[key] || []).push(sub);
+		}
+
+		this.index = { subs_by_parent, owner_of_row, bom_consumers, subs_by_signature };
 		for (const material of this.data.materials || []) {
 			material.owners = this.material_owners(material);
 		}
@@ -146,12 +152,16 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 	}
 
 	material_owners(material) {
-		if (material.consumer) {
-			const owner = this.index.owner_of_row[material.consumer];
-			return owner ? [owner] : [];
-		}
+		const key = `${material.main_item_code || ""}::${material.from_bom || ""}`;
+		const candidates = this.index.subs_by_signature[key] || [];
+		if (candidates.length) return this.owners_of(candidates.map((d) => d.row_name));
+		if (material.consumer) return this.owners_of([material.consumer]);
+		return this.owners_of(this.index.bom_consumers[material.item_code] || []);
+	}
+
+	owners_of(row_names) {
 		const owners = new Set();
-		for (const row_name of this.index.bom_consumers[material.item_code] || []) {
+		for (const row_name of row_names) {
 			const owner = this.index.owner_of_row[row_name];
 			if (owner) owners.add(owner);
 		}
