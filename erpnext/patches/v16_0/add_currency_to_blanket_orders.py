@@ -2,9 +2,6 @@ import frappe
 
 
 def execute():
-	frappe.reload_doctype("Blanket Order")
-	frappe.reload_doctype("Blanket Order Item")
-
 	company_currencies = dict(frappe.get_all("Company", fields=["name", "default_currency"], as_list=True))
 	blanket_order_updates = {
 		order.name: {
