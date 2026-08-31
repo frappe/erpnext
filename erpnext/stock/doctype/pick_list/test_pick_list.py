@@ -29,6 +29,61 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestPickList(ERPNextTestSuite):
+	def test_filter_locations_consumes_picked_qty_across_rows(self):
+		from erpnext.stock.doctype.pick_list.pick_list import filter_locations_by_picked_materials
+
+		key = ("Test Warehouse", "Test Batch")
+		locations = [
+			_dict(warehouse=key[0], batch_no=key[1], qty=5),
+			_dict(warehouse=key[0], batch_no=key[1], qty=5),
+		]
+		picked_item_details = {key: {"picked_qty": 7}}
+
+		filtered_locations = filter_locations_by_picked_materials(locations, picked_item_details)
+
+		self.assertEqual(len(filtered_locations), 1)
+		self.assertEqual(filtered_locations[0].qty, 3)
+		self.assertEqual(picked_item_details[key]["picked_qty"], 0)
+
+	def test_filter_locations_preserves_serial_order(self):
+		from erpnext.stock.doctype.pick_list.pick_list import filter_locations_by_picked_materials
+
+		warehouse = "Test Warehouse"
+		locations = [
+			_dict(
+				warehouse=warehouse,
+				batch_no=None,
+				qty=4,
+				serial_nos=["SN-1", "SN-2", "SN-3", "SN-4"],
+			)
+		]
+		picked_item_details = {warehouse: {"picked_qty": 2, "serial_no": ["SN-2", "SN-4"]}}
+
+		filtered_locations = filter_locations_by_picked_materials(locations, picked_item_details)
+
+		self.assertEqual(filtered_locations[0].serial_nos, ["SN-1", "SN-3"])
+
+	def test_get_items_with_location_trims_allocated_serial_nos(self):
+		from erpnext.stock.doctype.pick_list.pick_list import get_items_with_location_and_quantity
+
+		item = _dict(item_code="Test Serial Item", qty=2, stock_qty=2, conversion_factor=1, uom="Nos")
+		item_location_map = {
+			item.item_code: [
+				_dict(
+					warehouse="Test Warehouse",
+					batch_no=None,
+					qty=4,
+					serial_nos=["SN-1", "SN-2", "SN-3", "SN-4"],
+				)
+			]
+		}
+
+		first_locations = get_items_with_location_and_quantity(item, item_location_map, docstatus=0)
+		second_locations = get_items_with_location_and_quantity(item, item_location_map, docstatus=0)
+
+		self.assertEqual(first_locations[0].serial_no, "SN-1\nSN-2")
+		self.assertEqual(second_locations[0].serial_no, "SN-3\nSN-4")
+
 	def test_pick_list_allocation_takes_advisory_gate(self):
 		if frappe.db.db_type != "postgres":
 			return
