@@ -415,3 +415,12 @@ function undo_and_throw(frm, field, title, message) {
 	refresh_field(field);
 	frappe.throw({ title, message });
 }
+
+// Kept for custom client scripts that call this public helper.
+erpnext.utils.validate_mandatory = function (frm, label, value, trigger_on) {
+	if (value) {
+		return true;
+	}
+	undo_and_throw(frm, trigger_on, __("Mandatory"), __("Please enter {0} first", [label]));
+	return false;
+};
