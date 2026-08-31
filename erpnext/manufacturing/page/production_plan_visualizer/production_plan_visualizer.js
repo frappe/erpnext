@@ -617,13 +617,14 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 			{ label: __("To Procure"), class: "ppv-num" },
 			{ label: __("Requested"), class: "ppv-num" },
 			{ label: __("Ordered"), class: "ppv-num" },
+			{ label: __("Received"), class: "ppv-num" },
 			{ label: __("Status"), class: "ppv-col-status" },
 			{ label: __("Requests"), class: "ppv-col-docs" },
 		]);
 
 		for (const material of owned) body.append(this.material_row(material));
 		if (shared.length) {
-			body.append(this.group_row(__("Shared across finished goods"), 8));
+			body.append(this.group_row(__("Shared across finished goods"), 9));
 			for (const material of shared) body.append(this.material_row(material));
 		}
 		this.detail_body.append(table);
@@ -669,6 +670,7 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 				<td class="ppv-num">${this.format_float(material.to_procure_qty)}</td>
 				<td class="ppv-num">${this.format_float(material.requested_qty)}</td>
 				<td class="ppv-num">${this.format_float(material.ordered_qty)}</td>
+				<td class="ppv-num">${this.format_float(material.received_qty)}</td>
 				<td class="ppv-col-status"></td>
 				<td class="ppv-col-docs"></td>
 			</tr>
@@ -686,20 +688,27 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 	}
 
 	material_status(material, open) {
+		const documents = material.documents || [];
 		if (open > 0) {
-			return frappe.ui.badge({
-				label: __("Request {0}", [this.format_float(open)]),
-				theme: "red",
-				size: "sm",
-			});
+			return this.pill(__("Request {0}", [this.format_float(open)]), "red");
 		}
-		if (!flt(material.to_procure_qty)) {
-			return frappe.ui.badge({ label: __("In Stock"), theme: "green", size: "sm" });
+		if (!flt(material.to_procure_qty) && !documents.length) {
+			return this.pill(__("In Stock"), "green");
+		}
+
+		const statuses = [...new Set(documents.map((d) => d.status).filter(Boolean))];
+		if (statuses.length === 1) return this.pill(__(statuses[0]), this.status_theme(statuses[0]));
+		if (flt(material.received_qty) >= flt(material.to_procure_qty)) {
+			return this.pill(__("Received"), "green");
 		}
 		if (flt(material.ordered_qty) >= flt(material.to_procure_qty)) {
-			return frappe.ui.badge({ label: __("Ordered"), theme: "green", size: "sm" });
+			return this.pill(__("Ordered"), "blue");
 		}
-		return frappe.ui.badge({ label: __("Requested"), theme: "blue", size: "sm" });
+		return this.pill(__("Requested"), "amber");
+	}
+
+	pill(label, theme) {
+		return frappe.ui.badge({ label, theme, size: "sm" });
 	}
 
 	append_document_chips(target, documents) {
@@ -974,6 +983,7 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 			Transferred: "green",
 			Received: "green",
 			Ordered: "green",
+			Issued: "blue",
 			"In Process": "blue",
 			Submitted: "blue",
 			"In Progress": "blue",

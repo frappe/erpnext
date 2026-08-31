@@ -28,13 +28,31 @@ def get_materials(plan, production_plan):
 	for row in get_raised_material_request_items(production_plan):
 		raised.setdefault(row.material_request_plan_item, []).append(row)
 
-	return [build_material(row, raised.get(row.name) or []) for row in plan.mr_items]
+	stock = get_stock_levels(plan)
+	return [build_material(row, raised.get(row.name) or [], stock) for row in plan.mr_items]
 
 
-def build_material(row, raised):
-	documents = {}
-	for entry in raised:
-		documents[entry.name] = {"doctype": "Material Request", "name": entry.name, "status": entry.status}
+def get_stock_levels(plan):
+	items = {row.item_code for row in plan.mr_items}
+	warehouses = {row.warehouse for row in plan.mr_items if row.warehouse}
+	if not items or not warehouses:
+		return {}
+
+	bins = frappe.get_all(
+		"Bin",
+		filters={"item_code": ("in", items), "warehouse": ("in", warehouses)},
+		fields=["item_code", "warehouse", "actual_qty", "projected_qty"],
+	)
+
+	return {(d.item_code, d.warehouse): d for d in bins}
+
+
+def build_material(row, raised, stock):
+	documents = {
+		entry.name: {"doctype": "Material Request", "name": entry.name, "status": entry.status}
+		for entry in raised
+	}
+	level = stock.get((row.item_code, row.warehouse)) or frappe._dict()
 
 	return {
 		"row_name": row.name,
@@ -45,10 +63,11 @@ def build_material(row, raised):
 		"material_request_type": row.material_request_type,
 		"required_qty": flt(row.required_bom_qty) or flt(row.quantity),
 		"to_procure_qty": flt(row.quantity),
-		"available_qty": flt(row.actual_qty),
-		"projected_qty": flt(row.projected_qty),
+		"available_qty": flt(level.actual_qty) if level else flt(row.actual_qty),
+		"projected_qty": flt(level.projected_qty) if level else flt(row.projected_qty),
 		"requested_qty": flt(row.requested_qty),
 		"ordered_qty": sum(flt(entry.ordered_qty) for entry in raised),
+		"received_qty": sum(flt(entry.received_qty) for entry in raised),
 		"schedule_date": row.schedule_date,
 		"consumer": row.get("sub_assembly_item_reference"),
 		"main_item_code": row.get("main_item_code"),
@@ -73,6 +92,7 @@ def get_raised_material_request_items(production_plan):
 			mr_item.item_code,
 			mr_item.qty,
 			mr_item.ordered_qty,
+			mr_item.received_qty,
 			material_request.status,
 		)
 		.where((mr_item.production_plan == production_plan) & (mr_item.docstatus < 2))
