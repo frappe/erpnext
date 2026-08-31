@@ -289,6 +289,13 @@ frappe.ui.form.on("Stock Entry", {
 		frm.trigger("get_items_from_transit_entry");
 		frm.trigger("toggle_warehouse_fields");
 		frm.trigger("toggle_weight_per_piece");
+
+		// only BOM-less rows are editable, and they cannot allocate a BOM percentage;
+		// read-only rows from a BOM still display their stored % of FG Cost
+		frm.fields_dict.items.grid.update_docfield_property("valuation_type", "options", [
+			"Valuation Rate",
+			"Manual",
+		]);
 		erpnext.toggle_serial_batch_fields(frm);
 
 		if (!frm.doc.docstatus && !frm.doc.subcontracting_inward_order) {
@@ -616,13 +623,6 @@ frappe.ui.form.on("Stock Entry", {
 			"read_only",
 			frm.doc.purpose == "Material Receipt" ? 0 : 1
 		);
-
-		// only BOM-less rows are editable, and they cannot allocate a BOM percentage;
-		// read-only rows from a BOM still display their stored % of FG Cost
-		frm.fields_dict.items.grid.update_docfield_property("valuation_type", "options", [
-			"Valuation Rate",
-			"Manual",
-		]);
 	},
 
 	toggle_weight_per_piece(frm) {
