@@ -144,7 +144,10 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 			(subs_by_signature[key] = subs_by_signature[key] || []).push(sub);
 		}
 
-		this.index = { subs_by_parent, owner_of_row, bom_consumers, subs_by_signature };
+		const fg_label = {};
+		for (const fg of this.data.finished_goods) fg_label[fg.row_name] = fg.item_name || fg.item_code;
+
+		this.index = { subs_by_parent, owner_of_row, bom_consumers, subs_by_signature, fg_label };
 		for (const material of this.data.materials || []) {
 			material.owners = this.material_owners(material);
 		}
@@ -616,8 +619,8 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 	}
 
 	render_materials() {
-		const { owned, shared } = this.focused_materials();
-		if (!owned.length && !shared.length) {
+		const { owned, unassigned } = this.focused_materials();
+		if (!owned.length && !unassigned.length) {
 			this.render_empty(__("No raw materials planned for this plan yet"));
 			return;
 		}
@@ -634,9 +637,9 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 		]);
 
 		for (const material of owned) body.append(this.material_row(material));
-		if (shared.length) {
-			body.append(this.group_row(__("Shared across finished goods"), 9));
-			for (const material of shared) body.append(this.material_row(material));
+		if (unassigned.length) {
+			body.append(this.group_row(__("Not linked to a finished good"), 9));
+			for (const material of unassigned) body.append(this.material_row(material));
 		}
 		this.detail_body.append(table);
 	}
@@ -645,14 +648,12 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 		const materials = [...(this.data.materials || [])].sort(
 			(a, b) => this.open_qty(b) - this.open_qty(a)
 		);
-		const is_shared = (d) => d.owners.length !== 1;
-		if (this.focus === "all") {
-			return { owned: materials.filter((d) => !is_shared(d)), shared: materials.filter(is_shared) };
-		}
-		return {
-			owned: materials.filter((d) => !is_shared(d) && d.owners[0] === this.focus),
-			shared: materials.filter((d) => is_shared(d) && d.owners.includes(this.focus)),
-		};
+		const owned =
+			this.focus === "all"
+				? materials.filter((d) => d.owners.length)
+				: materials.filter((d) => d.owners.includes(this.focus));
+
+		return { owned, unassigned: materials.filter((d) => !d.owners.length) };
 	}
 
 	material_row(material) {
@@ -686,13 +687,15 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 				<td class="ppv-col-docs"></td>
 			</tr>
 		`);
-		tr.find(".ppv-item-tag").append(
+		const tag = tr.find(".ppv-item-tag");
+		tag.append(
 			frappe.ui.badge({
 				label: __(material.material_request_type || "Material"),
 				size: "sm",
 				variant: "ghost",
 			})
 		);
+		if (material.owners.length > 1) tag.append(this.shared_badge(material));
 		tr.find(".ppv-col-status").append(this.material_status(material, open));
 		this.append_document_chips(tr.find(".ppv-col-docs"), material.documents);
 		return tr;
@@ -716,6 +719,17 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 			return this.pill(__("Ordered"), "blue");
 		}
 		return this.pill(__("Requested"), "amber");
+	}
+
+	shared_badge(material) {
+		const names = material.owners.map((row_name) => this.index.fg_label[row_name]).filter(Boolean);
+		return frappe.ui.badge({
+			label: __("Shared"),
+			size: "sm",
+			theme: "violet",
+			variant: "outline",
+			title: __("Quantity covers {0}", [names.join(", ")]),
+		});
 	}
 
 	pill(label, theme) {
