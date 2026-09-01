@@ -505,3 +505,4 @@ erpnext.patches.v16_0.remove_frappe_crm_custom_fields
 erpnext.patches.v16_0.rename_secondary_item_type_field
 erpnext.patches.v16_0.append_fieldname_to_pos_search_fields
 erpnext.patches.v16_0.set_secondary_item_valuation_type
+erpnext.patches.v16_0.add_transaction_roles_to_sms_settings
