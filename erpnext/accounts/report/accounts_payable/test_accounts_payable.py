@@ -1,6 +1,9 @@
 import frappe
 from frappe.utils import add_days, today
 
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	BLANK_ACCOUNTING_DIMENSION,
+)
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.report.accounts_payable.accounts_payable import execute
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
@@ -13,6 +16,33 @@ class TestAccountsPayable(ERPNextTestSuite, AccountsTestMixin):
 		self.item = "_Test Item"
 		self.supplier = "_Test Supplier 2"
 		self.creditors_usd = "_Test Payable USD - _TC"
+
+	def test_blank_supplier_group_filter(self):
+		invoice = self.create_purchase_invoice()
+		group = frappe.db.get_value("Supplier", self.supplier, "supplier_group")
+		parent_group = frappe.db.get_value("Supplier Group", group, "parent_supplier_group")
+		filters = frappe._dict(
+			company=self.company,
+			party=[self.supplier],
+			report_date=today(),
+			range="30, 60, 90, 120",
+		)
+		for party_group in (None, "", group):
+			frappe.db.set_value("Supplier", self.supplier, "supplier_group", party_group)
+			for groups, expected in (
+				([BLANK_ACCOUNTING_DIMENSION], int(not party_group)),
+				([parent_group], int(bool(party_group))),
+				([BLANK_ACCOUNTING_DIMENSION, parent_group], 1),
+			):
+				with self.subTest(party_group=party_group, groups=groups):
+					filters.supplier_group = groups
+					rows = execute(filters)[1]
+					self.assertEqual(len(rows), expected)
+					if rows:
+						self.assertEqual(rows[0].outstanding, invoice.grand_total)
+
+		filters.supplier_group = [BLANK_ACCOUNTING_DIMENSION, "_Test Missing Supplier Group"]
+		self.assertRaises(frappe.ValidationError, execute, filters)
 
 	def test_accounts_payable_for_foreign_currency_supplier(self):
 		pi = self.create_purchase_invoice(do_not_submit=True)

@@ -1,6 +1,7 @@
 import frappe
 from frappe.utils import add_days, flt, getdate, today
 
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import BLANK_ACCOUNTING_DIMENSION
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
@@ -12,6 +13,27 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestItemWiseSalesRegister(ERPNextTestSuite, AccountsTestMixin):
+	def test_blank_and_multiple_brand_filters(self):
+		invoice = self.create_sales_invoice()
+		filters = frappe._dict(
+			company=invoice.company, from_date=invoice.posting_date, to_date=invoice.posting_date
+		)
+		for brand in (None, "", "_Test Brand", "_Test Other Brand"):
+			frappe.db.set_value(invoice.items[0].doctype, invoice.items[0].name, "brand", brand)
+			for selected, matching_brands in (
+				([], (None, "", "_Test Brand", "_Test Other Brand")),
+				([BLANK_ACCOUNTING_DIMENSION], (None, "")),
+				(["_Test Brand"], ("_Test Brand",)),
+				(["_Test Brand", "_Test Other Brand"], ("_Test Brand", "_Test Other Brand")),
+				([BLANK_ACCOUNTING_DIMENSION, "_Test Brand"], (None, "", "_Test Brand")),
+				("_Test Brand", ("_Test Brand",)),
+				(frappe.as_json([BLANK_ACCOUNTING_DIMENSION, "_Test Brand"]), (None, "", "_Test Brand")),
+			):
+				with self.subTest(brand=brand, selected=selected):
+					filters.brand = selected
+					vouchers = {row.get("voucher_no") for row in execute(filters)[1]}
+					self.assertEqual(invoice.name in vouchers, brand in matching_brands)
+
 	def setUp(self):
 		self.company = "_Test Company"
 		self.customer = "_Test Customer"
