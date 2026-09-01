@@ -2894,7 +2894,6 @@ def get_payment_entry(
 	party_type=None,
 	payment_type=None,
 	reference_date=None,
-	ignore_permissions=False,
 	created_from_payment_request=False,
 ):
 	frappe.has_permission("Payment Entry", ptype="create", throw=True)
