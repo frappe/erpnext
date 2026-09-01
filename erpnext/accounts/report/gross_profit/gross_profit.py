@@ -180,13 +180,13 @@ def get_data_when_grouped_by_invoice(columns, gross_profit_data, filters, group_
 	columns[0]["fieldname"] = "sales_invoice"
 	columns[0]["options"] = "Item"
 	columns[0]["width"] = 300
-	# removing Item Code and Item Name columns
+	# removing the duplicate Item Code column
 	supplier_master_name = frappe.db.get_single_value("Buying Settings", "supp_master_name")
 	customer_master_name = frappe.db.get_single_value("Selling Settings", "cust_master_name")
 	if supplier_master_name == "Supplier Name" and customer_master_name == "Customer Name":
-		del columns[4:6]
+		del columns[4]
 	else:
-		del columns[5:7]
+		del columns[5]
 
 	total_base_amount = 0
 	total_buying_amount = 0
