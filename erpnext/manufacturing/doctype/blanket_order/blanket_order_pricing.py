@@ -8,7 +8,7 @@ from frappe.utils import cint, flt
 
 from erpnext import get_company_currency
 from erpnext.accounts.party import get_default_price_list as get_party_default_price_list
-from erpnext.accounts.services.taxes import validate_conversion_rate
+from erpnext.controllers.accounts_controller import validate_conversion_rate
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.get_item_details import get_price_list_rate_for
 

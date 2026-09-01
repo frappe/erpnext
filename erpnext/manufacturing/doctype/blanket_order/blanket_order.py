@@ -10,7 +10,7 @@ from frappe.query_builder.functions import Sum
 from frappe.utils import flt, getdate
 
 from erpnext import get_company_currency
-from erpnext.accounts.services.taxes import validate_conversion_rate
+from erpnext.controllers.accounts_controller import validate_conversion_rate
 from erpnext.manufacturing.doctype.blanket_order import blanket_order_pricing
 from erpnext.stock.doctype.item.item import get_item_defaults
 

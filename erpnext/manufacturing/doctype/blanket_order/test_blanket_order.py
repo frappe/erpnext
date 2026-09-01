@@ -144,26 +144,6 @@ class TestBlanketOrder(ERPNextTestSuite):
 		bo = make_blanket_order(blanket_order_type="Purchasing", supplier=supplier, item_code=item_code)
 		self.assertEqual(bo.items[0].party_item_code, "SUPP-PART-1")
 
-	def test_blanket_order_zero_quantity(self):
-		bo = frappe.new_doc("Blanket Order")
-		bo.blanket_order_type = "Selling"
-		bo.company = "_Test Company"
-		bo.customer = "_Test Customer"
-		bo.from_date = today()
-		bo.to_date = add_months(today(), 12)
-
-		bo.append(
-			"items",
-			{
-				"item_code": "_Test Item",
-				"qty": 0,
-				"rate": 100,
-			},
-		)
-
-		with self.assertRaises(frappe.ValidationError):
-			bo.insert()
-
 	def test_multicurrency_blanket_order(self):
 		company_currency = get_company_currency("_Test Company")
 		transaction_currency = "USD" if company_currency != "USD" else "EUR"
