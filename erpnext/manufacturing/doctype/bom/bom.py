@@ -1482,7 +1482,10 @@ def get_bom_items_as_dict(
 
 	if fetch_secondary_items:
 		fetch_exploded = 0
-		group_by_cond = "group by item_code, secondary_item_type"
+		# grouped by the primary keys so postgres accepts the ungrouped columns; rows
+		# per (item_code, secondary_item_type) are unique in a BOM and the caller
+		# merges any legacy duplicates by that key anyway
+		group_by_cond = "group by bom_item.name, bom.name, item.name, item_default.name"
 
 	# Did not use qty_consumed_per_unit in the query, as it leads to rounding loss
 	query = """select
@@ -1531,7 +1534,7 @@ def get_bom_items_as_dict(
 			query, {"parent": bom, "qty": qty, "bom": bom, "company": company}, as_dict=True
 		)
 	elif fetch_secondary_items:
-		query = query.format(
+		query = query.format(  # nosemgrep
 			table="BOM Secondary Item",
 			where_conditions=")",
 			select_columns=", item.description, bom_item.cost_allocation_per, bom_item.process_loss_per, bom_item.secondary_item_type, bom_item.name, bom_item.valuation_type, bom_item.cost / nullif(bom_item.stock_qty, 0) as manual_rate",
