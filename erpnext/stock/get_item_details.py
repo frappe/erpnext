@@ -325,27 +325,24 @@ def update_stock(ctx, out, doc=None):
 		if ctx.get("ignore_serial_nos"):
 			kwargs["ignore_serial_nos"] = ctx.get("ignore_serial_nos")
 
-		qty = out.stock_qty
-		batches = []
+		qty = flt(out.stock_qty)
 		if out.has_batch_no and not ctx.get("batch_no"):
-			batches = get_available_batches(kwargs)
+			batch_args = kwargs.copy()
+			batch_args.qty = 0
+			batches = get_available_batches(batch_args)
 			if doc:
 				filter_batches(batches, doc)
 
-			for batch_no, batch_qty in batches.items():
+			batch_no, batch_qty = next(iter(batches.items()), (None, 0))
+
+			if batch_no and flt(batch_qty) >= qty:
+				out.update({"batch_no": batch_no, "actual_batch_qty": qty})
+
 				rate = get_batch_based_item_price(
 					{"price_list": doc.get("selling_price_list"), "uom": out.uom, "batch_no": batch_no},
 					out.item_code,
 				)
-				if batch_qty >= qty:
-					out.update({"batch_no": batch_no, "actual_batch_qty": qty})
-					if rate:
-						out.update({"rate": rate, "price_list_rate": rate})
-					break
-				else:
-					qty -= batch_qty
 
-				out.update({"batch_no": batch_no, "actual_batch_qty": batch_qty})
 				if rate:
 					out.update({"rate": rate, "price_list_rate": rate})
 
