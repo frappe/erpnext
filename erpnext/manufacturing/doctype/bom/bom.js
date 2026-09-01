@@ -685,7 +685,9 @@ erpnext.bom.BomController = class BomController extends erpnext.TransactionContr
 		get_bom_material_detail(doc, cdt, cdn, secondary_items);
 	}
 
-	buying_price_list(doc) {
+	buying_price_list() {
+		const doc = this.frm.doc;
+
 		if (doc.rm_cost_as_per !== "Price List" && doc.buying_price_list) {
 			this.frm.set_value("buying_price_list", "");
 			return;
@@ -696,8 +698,8 @@ erpnext.bom.BomController = class BomController extends erpnext.TransactionContr
 		}
 	}
 
-	plc_conversion_rate(doc) {
-		if (!this.in_apply_price_list && doc.rm_cost_as_per === "Price List") {
+	plc_conversion_rate() {
+		if (!this.in_apply_price_list && this.frm.doc.rm_cost_as_per === "Price List") {
 			this.apply_price_list(null, true);
 		}
 	}
