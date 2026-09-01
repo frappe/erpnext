@@ -535,7 +535,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 					},
 					get_query_filters: {
 						docstatus: 1,
-						status: ["not in", ["Stopped", "Expired"]],
+						status: ["not in", ["Stopped", "Ordered", "Expired"]],
 					},
 					allow_child_item_selection: true,
 					child_fieldname: "items",

@@ -178,7 +178,15 @@ class PurchaseOrder(BuyingController):
 				"global_allowance_field": "over_order_allowance",
 				"global_allowance_doctype": "Buying Settings",
 				"item_allowance_field": "over_order_allowance",
-			}
+			},
+			{
+				"source_dt": "Purchase Order Item",
+				"target_dt": "Supplier Quotation Item",
+				"join_field": "supplier_quotation_item",
+				"target_field": "ordered_qty",
+				"target_ref_field": "stock_qty",
+				"source_field": "stock_qty",
+			},
 		]
 
 	def onload(self):
@@ -250,6 +258,7 @@ class PurchaseOrder(BuyingController):
 						["conversion_factor", "="],
 					],
 					"is_child_table": True,
+					"allow_duplicate_prev_row_id": True,
 				},
 				"Material Request": {
 					"ref_dn_field": "material_request",
@@ -407,6 +416,19 @@ class PurchaseOrder(BuyingController):
 
 	def is_item_closable(self, item):
 		return flt(item.received_qty) < flt(item.qty) or super().is_item_closable(item)
+
+	def update_prevdoc_status(self):
+		super().update_prevdoc_status()
+
+		for supplier_quotation in {item.supplier_quotation for item in self.items}:
+			if not supplier_quotation:
+				continue
+
+			doc = frappe.get_doc("Supplier Quotation", supplier_quotation)
+			if doc.docstatus.is_cancelled():
+				frappe.throw(_("Supplier Quotation {0} is cancelled").format(supplier_quotation))
+
+			doc.set_status(update=True)
 
 	def on_submit(self):
 		super().on_submit()

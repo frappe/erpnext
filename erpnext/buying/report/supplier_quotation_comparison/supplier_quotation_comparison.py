@@ -52,6 +52,7 @@ def get_data(filters):
 			sq_item.request_for_quotation,
 			sq_item.lead_time_days,
 			sq.supplier.as_("supplier_name"),
+			sq.status.as_("supplier_quotation_status"),
 			sq.valid_till,
 		)
 		.where(
@@ -82,6 +83,11 @@ def get_data(filters):
 	if filters.get("supplier"):
 		query = query.where(sq.supplier.isin(filters.get("supplier")))
 
+	if filters.get("order_status") == "Not Ordered":
+		query = query.where(sq.status.notin(["Partially Ordered", "Ordered"]))
+	elif filters.get("order_status"):
+		query = query.where(sq.status == filters.get("order_status"))
+
 	if not filters.get("include_expired"):
 		query = query.where(sq.status != "Expired")
 
@@ -109,6 +115,7 @@ def prepare_data(supplier_quotation_data, filters):
 			else data.get("item_code"),  # leave blank if group by field
 			"supplier_name": "" if group_by_field == "supplier_name" else data.get("supplier_name"),
 			"quotation": data.get("parent"),
+			"order_status": get_order_status(data.get("supplier_quotation_status")),
 			"qty": data.get("qty"),
 			"price": flt(data.get("amount"), float_precision),
 			"uom": data.get("uom"),
@@ -162,6 +169,10 @@ def prepare_data(supplier_quotation_data, filters):
 		chart_data = prepare_chart_data(suppliers, qty_list, supplier_qty_price_map)
 
 	return out, chart_data
+
+
+def get_order_status(status):
+	return status if status in ("Partially Ordered", "Ordered") else "Not Ordered"
 
 
 def prepare_chart_data(suppliers, qty_list, supplier_qty_price_map):
@@ -264,6 +275,12 @@ def get_columns(filters):
 			"fieldtype": "Link",
 			"options": "Supplier Quotation",
 			"width": 200,
+		},
+		{
+			"fieldname": "order_status",
+			"label": _("Order Status"),
+			"fieldtype": "Data",
+			"width": 130,
 		},
 		{"fieldname": "valid_till", "label": _("Valid Till"), "fieldtype": "Date", "width": 100},
 		{
