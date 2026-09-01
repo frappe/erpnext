@@ -11,7 +11,7 @@ from pypika.terms import Bracket, LiteralValue
 import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
-	get_dimension_with_children,
+	get_dimension_filter_condition,
 )
 from erpnext.accounts.doctype.financial_report_template.financial_report_engine import (
 	FinancialReportEngine,
@@ -21,7 +21,6 @@ from erpnext.accounts.report.financial_statements import (
 	build_period_list,
 	get_appropriate_currency,
 	get_columns,
-	get_cost_centers_with_children,
 	get_data,
 	get_filtered_list_for_consolidated_report,
 	get_period_keys_for_total,
@@ -305,15 +304,13 @@ def apply_gl_filters(query, gl, company, filters):
 
 	# cost center (with children)
 	if filters.get("cost_center"):
-		cost_centers = get_cost_centers_with_children(filters.cost_center)
-		query = query.where(gl.cost_center.isin(cost_centers))
+		query = query.where(
+			get_dimension_filter_condition(gl.cost_center, filters.cost_center, "Cost Center")
+		)
 
 	# project
 	if filters.get("project"):
-		projects = filters.project
-		if not isinstance(projects, list):
-			projects = frappe.parse_json(projects)
-		query = query.where(gl.project.isin(projects))
+		query = query.where(get_dimension_filter_condition(gl.project, filters.project, "Project"))
 
 	# per-period group-by-dimension filter (always a single exact value)
 	if filters.get("dimension_field") and filters.get("dimension_value"):
@@ -322,10 +319,11 @@ def apply_gl_filters(query, gl, company, filters):
 	# accounting dimension filters selected in the filter bar
 	for dimension in get_accounting_dimensions(as_list=False):
 		if filters.get(dimension.fieldname):
-			values = filters[dimension.fieldname]
-			if frappe.get_cached_value("DocType", dimension.document_type, "is_tree"):
-				values = get_dimension_with_children(dimension.document_type, values)
-			query = query.where(gl[dimension.fieldname].isin(values))
+			query = query.where(
+				get_dimension_filter_condition(
+					gl[dimension.fieldname], filters[dimension.fieldname], dimension.document_type
+				)
+			)
 
 	# apply permission filters
 	from frappe.desk.reportview import build_match_conditions

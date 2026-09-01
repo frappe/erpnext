@@ -11,13 +11,12 @@ from frappe.utils.nestedset import get_descendants_of
 from pypika.terms import Bracket, LiteralValue
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	BLANK_ACCOUNTING_DIMENSION,
 	get_accounting_dimensions,
-	get_dimension_with_children,
+	get_dimension_filter_condition,
 )
 
-TREE_DOCTYPES = frozenset(
-	["Customer Group", "Territory", "Supplier Group", "Sales Partner", "Sales Person", "Cost Center"]
-)
+TREE_DOCTYPES = frozenset(["Customer Group", "Territory", "Supplier Group", "Sales Person", "Cost Center"])
 
 
 class PartyLedgerSummaryReport:
@@ -101,16 +100,20 @@ class PartyLedgerSummaryReport:
 			conditions.append(doctype.name == self.filters.party)
 
 		if self.filters.territory:
-			conditions.append(doctype.territory.isin(self.filters.territory))
+			conditions.append(get_dimension_filter_condition(doctype.territory, self.filters.territory))
 
 		if self.filters.get(group_field):
-			conditions.append(doctype[group_field].isin(self.filters.get(group_field)))
+			conditions.append(
+				get_dimension_filter_condition(doctype[group_field], self.filters.get(group_field))
+			)
 
 		if self.filters.payment_terms_template:
 			conditions.append(doctype.payment_terms == self.filters.payment_terms_template)
 
 		if self.filters.sales_partner:
-			conditions.append(doctype.default_sales_partner.isin(self.filters.sales_partner))
+			conditions.append(
+				get_dimension_filter_condition(doctype.default_sales_partner, self.filters.sales_partner)
+			)
 
 		if self.filters.sales_person:
 			sales_team = qb.DocType("Sales Team")
@@ -385,27 +388,23 @@ class PartyLedgerSummaryReport:
 			query = query.where(IfNull(gle.finance_book, "") == self.filters.finance_book)
 
 		if self.filters.cost_center:
-			query = query.where((gle.cost_center).isin(self.filters.cost_center))
+			query = query.where(get_dimension_filter_condition(gle.cost_center, self.filters.cost_center))
 
 		if self.filters.project:
-			query = query.where((gle.project).isin(self.filters.project))
+			query = query.where(get_dimension_filter_condition(gle.project, self.filters.project, "Project"))
 
 		accounting_dimensions = get_accounting_dimensions(as_list=False)
 
 		if accounting_dimensions:
 			for dimension in accounting_dimensions:
 				if self.filters.get(dimension.fieldname):
-					if frappe.get_cached_value("DocType", dimension.document_type, "is_tree"):
-						self.filters[dimension.fieldname] = get_dimension_with_children(
-							dimension.document_type, self.filters.get(dimension.fieldname)
+					query = query.where(
+						get_dimension_filter_condition(
+							gle[dimension.fieldname],
+							self.filters[dimension.fieldname],
+							dimension.document_type,
 						)
-						query = query.where(
-							(gle[dimension.fieldname]).isin(self.filters.get(dimension.fieldname))
-						)
-					else:
-						query = query.where(
-							(gle[dimension.fieldname]).isin(self.filters.get(dimension.fieldname))
-						)
+					)
 
 		return query
 
@@ -510,7 +509,8 @@ def get_children(doctype, value):
 	all_children = []
 
 	for d in value:
-		all_children += get_descendants_of(doctype, d)
+		if d != BLANK_ACCOUNTING_DIMENSION:
+			all_children += get_descendants_of(doctype, d)
 		all_children.append(d)
 
 	return list(set(all_children))

@@ -12,10 +12,11 @@ from frappe.query_builder.functions import Date, Substring, Sum
 from frappe.utils import cint, cstr, flt, getdate, nowdate
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	BLANK_ACCOUNTING_DIMENSION,
 	get_accounting_dimensions,
-	get_dimension_with_children,
+	get_dimension_filter_condition,
+	get_dimension_filter_values,
 )
-from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
 from erpnext.accounts.utils import (
 	build_qb_match_conditions,
 	get_advance_payment_doctypes,
@@ -964,16 +965,14 @@ class ReceivablePayableReport:
 		if not self.filters.get("sales_partner"):
 			return
 
+		sales_invoice = qb.DocType("Sales Invoice")
 		self.sales_partner_invoices = set(
-			frappe.get_all(
-				"Sales Invoice",
-				filters={
-					"sales_partner": self.filters.get("sales_partner"),
-					"docstatus": 1,
-					"company": self.filters.company,
-				},
-				pluck="name",
-			)
+			qb.from_(sales_invoice)
+			.select(sales_invoice.name)
+			.where(sales_invoice.docstatus == 1)
+			.where(sales_invoice.company == self.filters.company)
+			.where(get_dimension_filter_condition(sales_invoice.sales_partner, self.filters.sales_partner))
+			.run(pluck=True)
 		)
 
 	def prepare_conditions(self):
@@ -994,7 +993,9 @@ class ReceivablePayableReport:
 			self.get_cost_center_conditions()
 
 		if self.filters.project:
-			self.qb_selection_filter.append(self.ple.project.isin(self.filters.project))
+			self.qb_selection_filter.append(
+				get_dimension_filter_condition(self.ple.project, self.filters.project, "Project")
+			)
 
 		self.add_user_permission_filters()
 
@@ -1019,8 +1020,9 @@ class ReceivablePayableReport:
 			)
 
 	def get_cost_center_conditions(self):
-		cost_center_list = get_cost_centers_with_children(self.filters.cost_center)
-		self.qb_selection_filter.append(self.ple.cost_center.isin(cost_center_list))
+		self.qb_selection_filter.append(
+			get_dimension_filter_condition(self.ple.cost_center, self.filters.cost_center, "Cost Center")
+		)
 
 	def add_common_filters(self):
 		if self.filters.company:
@@ -1058,16 +1060,22 @@ class ReceivablePayableReport:
 			customers = (
 				qb.from_(self.customer)
 				.select(self.customer.name)
-				.where(self.customer["customer_group"].isin(groups))
+				.where(get_dimension_filter_condition(self.customer.customer_group, groups))
 			)
 			self.qb_selection_filter.append(self.ple.party.isin(customers))
 
 		if self.filters.get("territory"):
-			territories = get_nested_set_children("Territory", self.filters.territory)
+			territories, include_blank = get_dimension_filter_values(self.filters.territory)
+			if territories or not include_blank:
+				territories = get_nested_set_children(
+					"Territory", territories if include_blank else self.filters.territory
+				)
+			if include_blank:
+				territories.append(BLANK_ACCOUNTING_DIMENSION)
 			customers = (
 				qb.from_(self.customer)
 				.select(self.customer.name)
-				.where(self.customer["territory"].isin(territories))
+				.where(get_dimension_filter_condition(self.customer.territory, territories))
 			)
 			self.qb_selection_filter.append(self.ple.party.isin(customers))
 
@@ -1093,7 +1101,9 @@ class ReceivablePayableReport:
 			groups = get_party_group_with_children("Supplier", self.filters.supplier_group)
 			self.qb_selection_filter.append(
 				self.ple.party.isin(
-					qb.from_(supplier).select(supplier.name).where(supplier.supplier_group.isin(groups))
+					qb.from_(supplier)
+					.select(supplier.name)
+					.where(get_dimension_filter_condition(supplier.supplier_group, groups))
 				)
 			)
 
@@ -1131,14 +1141,17 @@ class ReceivablePayableReport:
 
 		if self.filters.get(party_group_type):
 			party_groups = get_party_group_with_children(party, self.filters.get(party_group_type))
-			ptt = ptt.where((voucher_type[party_group_type]).isin(party_groups))
+			ptt = ptt.where(get_dimension_filter_condition(voucher_type[party_group_type], party_groups))
 
 		if self.filters.party:
 			ptt = ptt.where((voucher_type[party.lower()]).isin(self.filters.party))
 
 		if self.filters.cost_center:
-			cost_centers = get_cost_centers_with_children(self.filters.cost_center)
-			ptt = ptt.where(voucher_type.cost_center.isin(cost_centers))
+			ptt = ptt.where(
+				get_dimension_filter_condition(
+					voucher_type.cost_center, self.filters.cost_center, "Cost Center"
+				)
+			)
 
 		if self.filters.party_account:
 			ptt = ptt.where(voucher_type[acc_type] == self.filters.party_account)
@@ -1151,17 +1164,13 @@ class ReceivablePayableReport:
 		if accounting_dimensions:
 			for dimension in accounting_dimensions:
 				if self.filters.get(dimension.fieldname):
-					if frappe.get_cached_value("DocType", dimension.document_type, "is_tree"):
-						self.filters[dimension.fieldname] = get_dimension_with_children(
-							dimension.document_type, self.filters.get(dimension.fieldname)
+					self.qb_selection_filter.append(
+						get_dimension_filter_condition(
+							self.ple[dimension.fieldname],
+							self.filters[dimension.fieldname],
+							dimension.document_type,
 						)
-						self.qb_selection_filter.append(
-							self.ple[dimension.fieldname].isin(self.filters[dimension.fieldname])
-						)
-					else:
-						self.qb_selection_filter.append(
-							self.ple[dimension.fieldname].isin(self.filters[dimension.fieldname])
-						)
+					)
 
 	def is_return(self, ple):
 		return (self.invoice_details.get(ple.voucher_no) or {}).get("is_return")
@@ -1394,7 +1403,12 @@ def get_party_group_with_children(party, party_groups):
 	if party not in ("Customer", "Supplier"):
 		return []
 
-	return get_nested_set_children(f"{party} Group", party_groups)
+	groups, include_blank = get_dimension_filter_values(party_groups)
+	if groups or not include_blank:
+		groups = get_nested_set_children(f"{party} Group", groups if include_blank else party_groups)
+	if include_blank:
+		groups.append(BLANK_ACCOUNTING_DIMENSION)
+	return groups
 
 
 def get_nested_set_children(doctype, values):
