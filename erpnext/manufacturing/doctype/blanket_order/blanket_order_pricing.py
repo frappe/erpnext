@@ -10,7 +10,7 @@ from erpnext import get_company_currency
 from erpnext.accounts.party import get_default_price_list as get_party_default_price_list
 from erpnext.controllers.accounts_controller import validate_conversion_rate
 from erpnext.setup.utils import get_exchange_rate
-from erpnext.stock.get_item_details import get_price_list_rate_for
+from erpnext.stock.get_item_details import get_item_prices_for_stock_uom
 
 _ORDER_TYPE_CONFIG = {
 	"Selling": {
@@ -119,15 +119,6 @@ def get_price_list_rates(doc, item_name=None):
 	if not price_list:
 		return [{"name": item.name, "price_list_rate": 0, "base_price_list_rate": 0} for item in items]
 
-	stock_uoms = dict(
-		frappe.get_all(
-			"Item",
-			filters={"name": ("in", [item.item_code for item in items])},
-			fields=["name", "stock_uom"],
-			as_list=True,
-		)
-	)
-
 	ctx = frappe._dict(
 		{
 			"price_list": price_list,
@@ -136,18 +127,17 @@ def get_price_list_rates(doc, item_name=None):
 			"transaction_date": doc.from_date,
 		}
 	)
+	item_prices = get_item_prices_for_stock_uom(ctx, list(dict.fromkeys(item.item_code for item in items)))
 	rates = []
 	for item in items:
-		stock_uom = stock_uoms.get(item.item_code)
-		ctx.update(
-			{
-				"qty": flt(item.qty) or 1,
-				"uom": stock_uom,
-				"stock_uom": stock_uom,
-				"conversion_factor": 1,
-			}
+		item_price = item_prices.get(item.item_code)
+		qty = flt(item.qty) or 1
+		packing_unit = flt(item_price.packing_unit) if item_price else 0
+		price_list_rate = (
+			item_price.price_list_rate
+			if item_price and (not packing_unit or qty % packing_unit == 0)
+			else None
 		)
-		price_list_rate = get_price_list_rate_for(ctx, item.item_code)
 		rate_details = {"name": item.name, "price_list_rate": 0, "base_price_list_rate": 0}
 		if price_list_rate is not None:
 			rate = flt(price_list_rate) * flt(doc.plc_conversion_rate) / flt(doc.conversion_rate)
