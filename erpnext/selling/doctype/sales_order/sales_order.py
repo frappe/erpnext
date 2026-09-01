@@ -1797,8 +1797,10 @@ def is_product_bundle(item_code):
 
 
 @frappe.whitelist()
-def make_work_orders(items, sales_order, company, project=None):
+def make_work_orders(items: str, sales_order: str, company: str, project: str | None = None):
 	"""Make Work Orders against the given Sales Order for the given `items`"""
+	frappe.has_permission("Sales Order", "read", sales_order, throw=True)
+
 	items = json.loads(items).get("items")
 	out = []
 
