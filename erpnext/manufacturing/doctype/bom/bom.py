@@ -1203,8 +1203,12 @@ class BOM(WebsiteGenerator):
 	def add_to_cur_exploded_items(self, args):
 		return BOMExplodedItemsService(self).add_to_cur_exploded_items(args)
 
-	def get_child_exploded_items(self, bom_no, stock_qty, operation=None):
-		return BOMExplodedItemsService(self).get_child_exploded_items(bom_no, stock_qty, operation)
+	def get_child_exploded_items(
+		self, bom_no, stock_qty, operation=None, operation_row_id=None, operation_bom=None
+	):
+		return BOMExplodedItemsService(self).get_child_exploded_items(
+			bom_no, stock_qty, operation, operation_row_id, operation_bom
+		)
 
 	def add_exploded_items(self, save=True):
 		return BOMExplodedItemsService(self).add_exploded_items(save)
@@ -1518,6 +1522,8 @@ def _add_exploded_item_columns(query, t, bom, amount_col, stock_item_condition):
 		Max(t.bom_item.source_warehouse).as_("source_warehouse"),
 		Count(t.bom_item.name).distinct().as_("line_count"),
 		Max(t.bom_item.operation).as_("operation"),
+		Max(t.bom_item.operation_row_id).as_("operation_row_id"),
+		Max(t.bom_item.operation_bom).as_("operation_bom"),
 		Max(t.bom_item.include_item_in_manufacturing).as_("include_item_in_manufacturing"),
 		Max(t.bom_item.rate).as_("rate"),
 		Max(t.bom_item.sourced_by_supplier).as_("sourced_by_supplier"),
@@ -1525,7 +1531,13 @@ def _add_exploded_item_columns(query, t, bom, amount_col, stock_item_condition):
 		idx_subquery.as_("idx"),
 	).where(stock_item_condition)
 
-	return query, [t.bom_item.item_code, t.item_doc.stock_uom, t.bom_item.operation]
+	return query, [
+		t.bom_item.item_code,
+		t.bom_item.operation_bom,
+		t.bom_item.operation_row_id,
+		t.item_doc.stock_uom,
+		t.bom_item.operation,
+	]
 
 
 def _add_secondary_item_columns(query, t, stock_item_condition):
@@ -1572,7 +1584,12 @@ def _add_normal_item_columns(query, t, amount_col, stock_item_condition, track_s
 	if track_semi_finished_goods:
 		group_by = [t.bom_item.item_code, t.bom_item.operation_row_id, t.item_doc.stock_uom]
 	else:
-		group_by = [t.bom_item.item_code, t.item_doc.stock_uom, t.bom_item.operation]
+		group_by = [
+			t.bom_item.item_code,
+			t.bom_item.operation_row_id,
+			t.item_doc.stock_uom,
+			t.bom_item.operation,
+		]
 	group_by += [t.bom_item.bom_no, t.bom_item.is_phantom_item]
 
 	return query, group_by
@@ -1580,13 +1597,14 @@ def _add_normal_item_columns(query, t, amount_col, stock_item_condition, track_s
 
 def _add_bom_item_to_dict(item_dict, item, company, opts):
 	key = item.item_code
+	# Secondary items are grouped by type; manufacturing items are grouped by operation identity.
 	if opts.fetch_secondary_items:
 		key = (item.item_code, item.secondary_item_type or "")
-
-	if item.operation_row_id:
+	elif item.operation_bom and item.operation_row_id:
+		key = (item.item_code, item.operation_bom, item.operation_row_id)
+	elif item.operation_row_id:
 		key = (item.item_code, item.operation_row_id)
-
-	if item.operation:
+	elif item.operation:
 		key = (item.item_code, item.operation)
 
 	if item.get("is_phantom_item"):

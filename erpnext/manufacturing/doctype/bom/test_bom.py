@@ -39,6 +39,74 @@ class TestBOM(ERPNextTestSuite):
 		self.assertEqual(len(items_dict.values()), 2)
 
 	@timeout
+	def test_get_items_keeps_repeated_operation_rows_separate(self):
+		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
+		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+
+		operation = make_operation(
+			{"operation": "_Test Repeated Operation", "workstation": "_Test Workstation 1"}
+		)
+		finished_good = make_item(properties={"is_stock_item": 1}).name
+		raw_material = make_item(properties={"is_stock_item": 1}).name
+		bom = frappe.new_doc(
+			"BOM",
+			company="_Test Company",
+			item=finished_good,
+			quantity=1,
+			with_operations=1,
+		)
+		for _ in range(2):
+			bom.append(
+				"operations",
+				{
+					"operation": operation.name,
+					"workstation": "_Test Workstation 1",
+					"time_in_mins": 30,
+				},
+			)
+
+		bom.append("items", {"item_code": raw_material, "qty": 1, "operation_row_id": 1})
+		bom.append("items", {"item_code": raw_material, "qty": 2, "operation_row_id": 2})
+		bom.insert()
+		bom.submit()
+
+		for fetch_exploded in (0, 1):
+			items = get_bom_items_as_dict(bom.name, bom.company, qty=1, fetch_exploded=fetch_exploded)
+			operation_keys = (
+				[(raw_material, bom.name, row_id) for row_id in (1, 2)]
+				if fetch_exploded
+				else [(raw_material, row_id) for row_id in (1, 2)]
+			)
+
+			self.assertEqual(items[operation_keys[0]].qty, 1)
+			self.assertEqual(items[operation_keys[1]].qty, 2)
+
+		frappe.db.set_value(
+			"BOM Explosion Item",
+			{"parent": bom.name},
+			{"operation_bom": None, "operation_row_id": 0},
+			update_modified=False,
+		)
+
+		from erpnext.patches.v16_0.rebuild_bom_explosion_operation_identity import execute
+
+		execute()
+		execute()
+		operation_identity = frappe.get_all(
+			"BOM Explosion Item",
+			filters={"parent": bom.name},
+			fields=["operation_bom", "operation_row_id"],
+			order_by="operation_row_id",
+		)
+		self.assertEqual(
+			[(row.operation_bom, row.operation_row_id) for row in operation_identity],
+			[(bom.name, 1), (bom.name, 2)],
+		)
+
+		bom.cancel()
+		bom.delete()
+
+	@timeout
 	def test_get_items_exploded(self):
 		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
 

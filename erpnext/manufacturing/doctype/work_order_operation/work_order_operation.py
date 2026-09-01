@@ -22,6 +22,7 @@ class WorkOrderOperation(Document):
 		batch_size: DF.Float
 		batch_split: DF.Check
 		bom: DF.Link | None
+		bom_operation_row_id: DF.Int
 		bom_no: DF.Link | None
 		completed_qty: DF.Float
 		description: DF.TextEditor | None

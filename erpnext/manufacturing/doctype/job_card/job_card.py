@@ -61,6 +61,12 @@ class JobCardOverTransferError(frappe.ValidationError):
 	pass
 
 
+def is_same_operation(first, second):
+	if first.operation_row_id and second.operation_row_id:
+		return cint(first.operation_row_id) == cint(second.operation_row_id)
+	return first.operation == second.operation
+
+
 class JobCard(Document):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
@@ -820,7 +826,7 @@ class JobCard(Document):
 				)
 			)
 
-		if not (self.get("operation") == d.operation or self.operation_row_id == d.operation_row_id):
+		if not is_same_operation(self, d):
 			return
 
 		self.append(

@@ -44,6 +44,7 @@ _BOM_OPERATION_FIELDS = [
 	"base_hour_rate as hour_rate",
 	"time_in_mins",
 	"parent as bom",
+	"idx as bom_operation_row_id",
 	"bom_no",
 	"batch_size",
 	"sequence_id",
@@ -232,10 +233,16 @@ class OperationsService:
 		groups = []
 		if self.doc.use_multi_level_bom:
 			bom_tree = frappe.get_doc("BOM", self.doc.bom_no).get_tree_representation()
+			exploded_qty_by_bom = {}
 			for node in reversed(bom_tree.level_order_traversal()):
 				if node.is_bom:
-					qty = node.exploded_qty / node.bom_qty
-					groups.append((self._bom_operations(node.name), qty, True))
+					exploded_qty_by_bom[node.name] = (
+						exploded_qty_by_bom.get(node.name, 0.0) + node.exploded_qty
+					)
+
+			for bom_no, exploded_qty in exploded_qty_by_bom.items():
+				bom_qty = frappe.get_cached_value("BOM", bom_no, "quantity")
+				groups.append((self._bom_operations(bom_no), exploded_qty / bom_qty, True))
 
 		bom_qty = frappe.get_cached_value("BOM", self.doc.bom_no, "quantity")
 		groups.append((self._bom_operations(self.doc.bom_no), bom_qty, False))
