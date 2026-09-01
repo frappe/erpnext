@@ -674,12 +674,14 @@ class JournalEntry(AccountsController):
 			if d.debit and d.credit:
 				frappe.throw(_("You cannot credit and debit same account at the same time"))
 
-			self.total_debit = flt(self.total_debit) + flt(d.debit, d.precision("debit"))
-			self.total_credit = flt(self.total_credit) + flt(d.credit, d.precision("credit"))
+			self.total_debit = flt(
+				self.total_debit + flt(d.debit, d.precision("debit")), self.precision("total_debit")
+			)
+			self.total_credit = flt(
+				self.total_credit + flt(d.credit, d.precision("credit")), self.precision("total_credit")
+			)
 
-		self.difference = flt(self.total_debit, self.precision("total_debit")) - flt(
-			self.total_credit, self.precision("total_credit")
-		)
+		self.difference = flt(self.total_debit - self.total_credit, self.precision("difference"))
 
 	def validate_multi_currency(self):
 		alternate_currency = []
