@@ -2,6 +2,9 @@ import frappe
 from frappe import qb
 from frappe.utils import add_days, flt, getdate, today
 
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	BLANK_ACCOUNTING_DIMENSION,
+)
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.accounts_receivable.accounts_receivable import execute
@@ -80,6 +83,33 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 		)
 
 		return credit_note
+
+	def test_blank_customer_group_filter(self):
+		invoice = self.create_sales_invoice()
+		group = frappe.db.get_value("Customer", self.customer, "customer_group")
+		parent_group = frappe.db.get_value("Customer Group", group, "parent_customer_group")
+		filters = frappe._dict(
+			company=self.company,
+			party=[self.customer],
+			report_date=today(),
+			range="30, 60, 90, 120",
+		)
+		for party_group in (None, "", group):
+			frappe.db.set_value("Customer", self.customer, "customer_group", party_group)
+			for groups, expected in (
+				([BLANK_ACCOUNTING_DIMENSION], int(not party_group)),
+				([parent_group], int(bool(party_group))),
+				([BLANK_ACCOUNTING_DIMENSION, parent_group], 1),
+			):
+				with self.subTest(party_group=party_group, groups=groups):
+					filters.customer_group = groups
+					rows = execute(filters)[1]
+					self.assertEqual(len(rows), expected)
+					if rows:
+						self.assertEqual(rows[0].outstanding, invoice.grand_total)
+
+		filters.customer_group = [BLANK_ACCOUNTING_DIMENSION, "_Test Missing Customer Group"]
+		self.assertRaises(frappe.ValidationError, execute, filters)
 
 	def test_pos_receivable(self):
 		filters = {
@@ -1000,6 +1030,34 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 			# Assert that the customer group of each row is in the list of customer groups
 			self.assertIn(row.customer_group, cus_groups_list)
 
+	def test_blank_territory_filter(self):
+		self.create_sales_invoice()
+		territory = frappe.db.get_value("Customer", self.customer, "territory")
+		parent_territory = frappe.db.get_value("Territory", territory, "parent_territory")
+		filters = frappe._dict(
+			company=self.company,
+			party=[self.customer],
+			report_date=today(),
+			range="30, 60, 90, 120",
+		)
+
+		for customer_territory in (None, "", territory):
+			frappe.db.set_value("Customer", self.customer, "territory", customer_territory)
+			for territories, expected in (
+				([BLANK_ACCOUNTING_DIMENSION], int(not customer_territory)),
+				([parent_territory], int(bool(customer_territory))),
+				([BLANK_ACCOUNTING_DIMENSION, parent_territory], 1),
+			):
+				with self.subTest(customer_territory=customer_territory, territories=territories):
+					filters.territory = territories
+					rows = execute(filters)[1]
+					self.assertEqual(len(rows), expected)
+					if rows:
+						self.assertEqual(rows[0].outstanding, 100)
+
+		filters.territory = [BLANK_ACCOUNTING_DIMENSION, "_Test Territory Mars"]
+		self.assertRaises(frappe.ValidationError, execute, filters)
+
 	def test_territory_filter(self):
 		self.create_sales_invoice()
 		territory = frappe.db.get_value("Customer", self.customer, "territory")
@@ -1642,6 +1700,19 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 		self.assertEqual(len(report[1]), 2)
 		self.assertEqual([si.name, payment_term1.payment_term_name], [row.voucher_no, row.payment_term])
 
+		group = frappe.db.get_value("Customer", self.customer, "customer_group")
+		for group_value in (None, "", group):
+			frappe.db.set_value("Customer", self.customer, "customer_group", group_value)
+			frappe.db.set_value("Sales Invoice", si.name, "customer_group", group_value)
+			for groups, expected in (
+				([BLANK_ACCOUNTING_DIMENSION], 2 if not group_value else 0),
+				([BLANK_ACCOUNTING_DIMENSION, group], 2),
+			):
+				with self.subTest(group_value=group_value, groups=groups):
+					filters["customer_group"] = groups
+					rows = execute(filters)[1]
+					self.assertEqual(len(rows), expected)
+
 	def test_project_filter(self):
 		project = frappe.get_doc(
 			{"doctype": "Project", "project_name": "_Test AR Project", "company": self.company}
@@ -1780,3 +1851,17 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 		rows_b = rows_for(partner_b)
 		self.assertIn(partner_b_si.name, rows_b)
 		self.assertNotIn(partner_a_si.name, rows_b)
+
+		for blank_value in (None, ""):
+			frappe.db.set_value("Sales Invoice", no_partner_si.name, "sales_partner", blank_value)
+			for partners, expected in (
+				([BLANK_ACCOUNTING_DIMENSION], {no_partner_si.name}),
+				([partner_a, partner_b], {partner_a_si.name, partner_b_si.name}),
+				([BLANK_ACCOUNTING_DIMENSION, partner_a], {no_partner_si.name, partner_a_si.name}),
+			):
+				with self.subTest(blank_value=blank_value, partners=partners):
+					rows = rows_for(partners)
+					self.assertEqual(set(rows), expected)
+					if partner_a_si.name in rows:
+						self.assertEqual(rows[partner_a_si.name].credit_note, 100)
+						self.assertEqual(rows[partner_a_si.name].outstanding, 100)
