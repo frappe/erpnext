@@ -924,7 +924,6 @@ def get_returned_qty_map(delivery_note):
 
 
 @frappe.whitelist()
-<<<<<<< HEAD
 def make_sales_invoice(
 	source_name: str, target_doc: Document | str | None = None, args: dict | str | None = None
 ):
@@ -1267,12 +1266,8 @@ def make_sales_return(source_name, target_doc=None):
 
 @frappe.whitelist()
 def update_delivery_note_status(docname, status):
-	dn = frappe.get_doc("Delivery Note", docname)
-=======
-def update_delivery_note_status(docname: str, status: str):
 	dn = frappe.get_lazy_doc("Delivery Note", docname)
 	dn.check_permission("submit")
->>>>>>> a20fc4f (fix: add missing perm checks on various whitelisted methods (#58652))
 	dn.update_status(status)
 
 
