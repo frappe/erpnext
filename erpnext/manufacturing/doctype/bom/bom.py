@@ -1482,10 +1482,7 @@ def get_bom_items_as_dict(
 
 	if fetch_secondary_items:
 		fetch_exploded = 0
-		# grouped by the primary keys so postgres accepts the ungrouped columns; rows
-		# per (item_code, secondary_item_type) are unique in a BOM and the caller
-		# merges any legacy duplicates by that key anyway
-		group_by_cond = "group by bom_item.name, bom.name, item.name, item_default.name"
+		group_by_cond = "group by item_code, secondary_item_type"
 
 	# Did not use qty_consumed_per_unit in the query, as it leads to rounding loss
 	query = """select
