@@ -142,6 +142,8 @@ def start_pcv_processing(docname: str):
 
 @frappe.whitelist()
 def pause_pcv_processing(docname: str):
+	frappe.has_permission("Process Period Closing Voucher", ptype="write", doc=docname, throw=True)
+
 	ppcv = qb.DocType("Process Period Closing Voucher")
 	qb.update(ppcv).set(ppcv.status, "Paused").where(ppcv.name.eq(docname)).run()
 
@@ -157,6 +159,8 @@ def pause_pcv_processing(docname: str):
 
 @frappe.whitelist()
 def cancel_pcv_processing(docname: str):
+	frappe.has_permission("Process Period Closing Voucher", ptype="cancel", doc=docname, throw=True)
+
 	ppcv = qb.DocType("Process Period Closing Voucher")
 	qb.update(ppcv).set(ppcv.status, "Cancelled").where(ppcv.name.eq(docname)).run()
 
@@ -171,6 +175,8 @@ def cancel_pcv_processing(docname: str):
 
 @frappe.whitelist()
 def resume_pcv_processing(docname: str):
+	frappe.has_permission("Process Period Closing Voucher", ptype="write", doc=docname, throw=True)
+
 	ppcv = qb.DocType("Process Period Closing Voucher")
 	qb.update(ppcv).set(ppcv.status, "Running").where(ppcv.name.eq(docname)).run()
 
