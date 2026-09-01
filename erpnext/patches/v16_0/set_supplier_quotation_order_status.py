@@ -3,10 +3,7 @@ from frappe.query_builder.functions import Sum
 
 
 def execute():
-	supplier_quotation_item = frappe.qb.DocType("Supplier Quotation Item")
 	purchase_order_item = frappe.qb.DocType("Purchase Order Item")
-
-	frappe.qb.update(supplier_quotation_item).set(supplier_quotation_item.ordered_qty, 0).run()
 
 	ordered_items = (
 		frappe.qb.from_(purchase_order_item)
