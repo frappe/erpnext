@@ -2029,9 +2029,11 @@ def get_valuation_rate(
 				& (table.warehouse == warehouse)
 				& (table.batch_no == batch_no)
 				& (table.is_cancelled == 0)
-				& ((table.voucher_no != voucher_no) | (table.voucher_type != voucher_type))
 			)
 		)
+		if voucher_no:
+			# Comparing against a None voucher_no yields NULL, which filters out every row
+			query = query.where((table.voucher_no != voucher_no) | (table.voucher_type != voucher_type))
 
 		last_valuation_rate = query.run()
 		if last_valuation_rate and last_valuation_rate[0][0] is not None:
@@ -2056,17 +2058,24 @@ def get_valuation_rate(
 		return batch_obj.get_incoming_rate()
 
 	# Get valuation rate from last sle for the same item and warehouse
+	exclude_voucher_condition = ""
+	values = [item_code, warehouse]
+	if voucher_no:
+		# Comparing against a None voucher_no yields NULL, which filters out every row
+		exclude_voucher_condition = "AND NOT (voucher_no = %s AND voucher_type = %s)"
+		values.extend([voucher_no, voucher_type])
+
 	if last_valuation_rate := frappe.db.sql(  # nosemgrep
-		"""select valuation_rate
+		f"""select valuation_rate
 		from `tabStock Ledger Entry`
 		where
 			item_code = %s
 			AND warehouse = %s
 			AND valuation_rate >= 0
 			AND is_cancelled = 0
-			AND NOT (voucher_no = %s AND voucher_type = %s)
+			{exclude_voucher_condition}
 		order by posting_datetime desc, creation desc limit 1""",
-		(item_code, warehouse, voucher_no, voucher_type),
+		values,
 	):
 		return flt(last_valuation_rate[0][0])
 
