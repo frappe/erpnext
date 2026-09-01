@@ -753,6 +753,7 @@ var get_bom_material_detail = function (doc, cdt, cdn, secondary_items) {
 				conversion_factor: d.conversion_factor,
 				sourced_by_supplier: d.sourced_by_supplier,
 				do_not_explode: d.do_not_explode,
+				source_warehouse: d.source_warehouse || doc.default_source_warehouse,
 				fetch_rate: !secondary_items,
 			},
 			callback: function (r) {
@@ -763,6 +764,10 @@ var get_bom_material_detail = function (doc, cdt, cdn, secondary_items) {
 				doc = locals[doc.doctype][doc.name];
 				erpnext.bom.calculate_rm_cost(doc);
 				erpnext.bom.calculate_total(doc);
+
+				if (secondary_items && d.valuation_type === "Valuation Rate") {
+					erpnext.bom.fetch_secondary_item_cost(doc, cdt, cdn);
+				}
 			},
 			freeze: true,
 		});
@@ -776,11 +781,10 @@ cur_frm.cscript.qty = function (doc) {
 
 cur_frm.cscript.rate = function (doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
-	const is_secondary_item = cdt == "BOM Secondary Item";
 
 	if (d.bom_no) {
 		frappe.msgprint(__("You cannot change the rate if BOM is mentioned against any Item."));
-		get_bom_material_detail(doc, cdt, cdn, is_secondary_item);
+		get_bom_material_detail(doc, cdt, cdn, false);
 	} else {
 		erpnext.bom.calculate_rm_cost(doc);
 		erpnext.bom.calculate_total(doc);
@@ -943,6 +947,9 @@ frappe.ui.form.on("BOM Item", {
 	do_not_explode: function (frm, cdt, cdn) {
 		get_bom_material_detail(frm.doc, cdt, cdn, false);
 	},
+	source_warehouse: function (frm, cdt, cdn) {
+		get_bom_material_detail(frm.doc, cdt, cdn, false);
+	},
 });
 
 frappe.ui.form.on("BOM Item", "qty", function (frm, cdt, cdn) {
@@ -1015,10 +1022,47 @@ frappe.tour["BOM"] = [
 ];
 
 frappe.ui.form.on("BOM Secondary Item", {
-	item_code(frm, cdt, cdn) {
-		const { item_code } = locals[cdt][cdn];
+	valuation_type(frm, cdt, cdn) {
+		const row = locals[cdt][cdn];
+		if (row.valuation_type !== "% of FG Cost") {
+			frappe.model.set_value(cdt, cdn, "cost_allocation_per", 0);
+		}
+		if (row.valuation_type === "Valuation Rate") {
+			erpnext.bom.fetch_secondary_item_cost(frm.doc, cdt, cdn);
+		} else if (row.valuation_type !== "Manual") {
+			frappe.model.set_value(cdt, cdn, { cost: 0, base_cost: 0 });
+		}
 	},
 });
+
+erpnext.bom.fetch_secondary_item_cost = function (doc, cdt, cdn) {
+	const row = locals[cdt][cdn];
+	if (!row.item_code) return;
+
+	frappe.call({
+		doc: doc,
+		method: "get_bom_material_detail",
+		args: {
+			company: doc.company,
+			item_code: row.item_code,
+			uom: row.uom,
+			stock_uom: row.stock_uom,
+			conversion_factor: row.conversion_factor,
+			warehouse: doc.default_target_warehouse,
+			set_rate_based_on_warehouse: 1,
+			force_valuation_rate: 1,
+			fetch_rate: 1,
+			bom_no: "",
+		},
+		callback(r) {
+			const cost = flt(r.message.rate) * flt(row.stock_qty);
+			frappe.model.set_value(cdt, cdn, {
+				cost: cost,
+				base_cost: cost * flt(doc.conversion_rate || 1),
+			});
+		},
+	});
+};
 
 function trigger_process_loss_qty_prompt(frm, cdt, cdn, item_code) {
 	frappe.prompt(

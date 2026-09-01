@@ -502,3 +502,4 @@ erpnext.patches.v16_0.recalculate_purchase_receipt_billing_status
 erpnext.patches.v16_0.repair_work_order_material_transfer
 erpnext.patches.v16_0.remove_frappe_crm_custom_fields
 erpnext.patches.v16_0.rename_secondary_item_type_field
+erpnext.patches.v16_0.set_secondary_item_valuation_type
