@@ -82,6 +82,16 @@ class TestRequestforQuotation(ERPNextTestSuite):
 		)
 		self.assertRaises(frappe.ValidationError, rfq.insert)
 
+	def test_item_change_on_material_request_row_is_blocked(self):
+		other_item = make_item("_Test RFQ Item Swap").name
+		mr = make_material_request(qty=5)
+		rfq = make_request_for_quotation(do_not_save=True)
+		rfq.items[0].material_request = mr.name
+		rfq.items[0].material_request_item = mr.items[0].name
+		# swapping the fetched item would leave a stale link to the MR row
+		rfq.items[0].item_code = other_item
+		self.assertRaises(frappe.ValidationError, rfq.insert)
+
 	def test_rfq_blocked_for_supplier_with_prevent_rfqs(self):
 		frappe.db.set_value("Supplier", "_Test Supplier", "prevent_rfqs", 1)
 		rfq = make_request_for_quotation(
