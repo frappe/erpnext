@@ -17,6 +17,7 @@ from pypika.terms import Bracket, ExistsCriterion, LiteralValue
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 	get_dimension_fieldname,
+	get_dimension_filter_condition,
 	get_dimension_with_children,
 	get_doctypes_with_dimensions,
 )
@@ -809,14 +810,12 @@ def apply_additional_conditions(doctype, query, from_date, ignore_closing_entrie
 
 	if filters:
 		if filters.get("project"):
-			if not isinstance(filters.get("project"), list):
-				filters.project = frappe.parse_json(filters.get("project"))
-
-			query = query.where(gl_entry.project.isin(filters.project))
+			query = query.where(get_dimension_filter_condition(gl_entry.project, filters.project, "Project"))
 
 		if filters.get("cost_center"):
-			filters.cost_center = get_cost_centers_with_children(filters.cost_center)
-			query = query.where(gl_entry.cost_center.isin(filters.cost_center))
+			query = query.where(
+				get_dimension_filter_condition(gl_entry.cost_center, filters.cost_center, "Cost Center")
+			)
 
 		if filters.get("include_default_book_entries"):
 			company_fb = frappe.get_cached_value("Company", filters.company, "default_finance_book")
@@ -839,12 +838,13 @@ def apply_additional_conditions(doctype, query, from_date, ignore_closing_entrie
 	if accounting_dimensions:
 		for dimension in accounting_dimensions:
 			if filters.get(dimension.fieldname):
-				if frappe.get_cached_value("DocType", dimension.document_type, "is_tree"):
-					filters[dimension.fieldname] = get_dimension_with_children(
-						dimension.document_type, filters.get(dimension.fieldname)
+				query = query.where(
+					get_dimension_filter_condition(
+						gl_entry[dimension.fieldname],
+						filters[dimension.fieldname],
+						dimension.document_type,
 					)
-
-				query = query.where(gl_entry[dimension.fieldname].isin(filters[dimension.fieldname]))
+				)
 
 	return query
 

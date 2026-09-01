@@ -12,9 +12,8 @@ from pypika.terms import ExistsCriterion
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
-	get_dimension_with_children,
+	get_dimension_filter_condition,
 )
-from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
 from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
 from erpnext.stock.utils import get_incoming_rate
 
@@ -1146,21 +1145,26 @@ class GrossProfitGenerator:
 			query = query.where(SalesInvoiceItem.item_code == self.filters.item_code)
 
 		if self.filters.cost_center:
-			self.filters.cost_center = frappe.parse_json(self.filters.get("cost_center"))
-			self.filters.cost_center = get_cost_centers_with_children(self.filters.cost_center)
-			query = query.where(SalesInvoiceItem.cost_center.isin(self.filters.cost_center))
+			query = query.where(
+				get_dimension_filter_condition(
+					SalesInvoiceItem.cost_center, self.filters.cost_center, "Cost Center"
+				)
+			)
 
 		if self.filters.project:
-			self.filters.project = frappe.parse_json(self.filters.get("project"))
-			query = query.where(SalesInvoiceItem.project.isin(self.filters.project))
+			query = query.where(
+				get_dimension_filter_condition(SalesInvoiceItem.project, self.filters.project, "Project")
+			)
 
 		for dim in get_accounting_dimensions(as_list=False) or []:
 			if self.filters.get(dim.fieldname):
-				if frappe.get_cached_value("DocType", dim.document_type, "is_tree"):
-					self.filters[dim.fieldname] = get_dimension_with_children(
-						dim.document_type, self.filters.get(dim.fieldname)
+				query = query.where(
+					get_dimension_filter_condition(
+						SalesInvoiceItem[dim.fieldname],
+						self.filters[dim.fieldname],
+						dim.document_type,
 					)
-				query = query.where(SalesInvoiceItem[dim.fieldname].isin(self.filters[dim.fieldname]))
+				)
 
 		if self.filters.warehouse:
 			lft, rgt = frappe.db.get_value("Warehouse", self.filters.warehouse, ["lft", "rgt"])
