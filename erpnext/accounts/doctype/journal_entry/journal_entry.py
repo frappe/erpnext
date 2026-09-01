@@ -1526,6 +1526,7 @@ def get_payment_entry_against_order(
 	dt, dn, amount=None, debit_in_account_currency=None, journal_entry=False, bank_account=None
 ):
 	ref_doc = frappe.get_doc(dt, dn)
+	ref_doc.check_permission()
 
 	if flt(ref_doc.per_billed, 2) > 0:
 		frappe.throw(_("Can only make payment against unbilled {0}").format(dt))
@@ -1571,6 +1572,8 @@ def get_payment_entry_against_invoice(
 	dt, dn, amount=None, debit_in_account_currency=None, journal_entry=False, bank_account=None
 ):
 	ref_doc = frappe.get_doc(dt, dn)
+	ref_doc.check_permission()
+
 	if dt == "Sales Invoice":
 		party_type = "Customer"
 		party_account = get_party_account_based_on_invoice_discounting(dn) or ref_doc.debit_to
@@ -1606,6 +1609,8 @@ def get_payment_entry_against_invoice(
 
 
 def get_payment_entry(ref_doc, args):
+	frappe.has_permission("Journal Entry", ptype="create", throw=True)
+
 	cost_center = ref_doc.get("cost_center") or frappe.get_cached_value(
 		"Company", ref_doc.company, "cost_center"
 	)
