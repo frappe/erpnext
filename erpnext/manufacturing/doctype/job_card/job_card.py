@@ -293,10 +293,10 @@ class JobCard(Document):
 			fetch_exploded=0,
 			fetch_secondary_items=1,
 		)
-		for item_code, values in items_dict.items():
+		for values in items_dict.values():
 			values = frappe._dict(values)
 			secondary_item = {
-				"item_code": item_code,
+				"item_code": values.item_code,
 				"stock_qty": values.qty,
 				"item_name": values.item_name,
 				"stock_uom": values.stock_uom,
@@ -304,11 +304,10 @@ class JobCard(Document):
 				"bom_secondary_item": values.name,
 			}
 
-			if not values.is_legacy:
-				secondary_item["stock_qty"] -= flt(
-					secondary_item["stock_qty"] * (values.process_loss_per / 100),
-					self.precision("for_quantity"),
-				)
+			secondary_item["stock_qty"] -= flt(
+				secondary_item["stock_qty"] * (flt(values.process_loss_per) / 100),
+				self.precision("for_quantity"),
+			)
 
 			self.append("secondary_items", secondary_item)
 
@@ -1758,7 +1757,7 @@ class JobCard(Document):
 		ste.stock_entry.pro_doc = frappe.get_doc("Work Order", self.work_order)
 		ste.stock_entry.set_secondary_items_from_job_card()
 		for row in ste.stock_entry.items:
-			if (row.secondary_item_type or row.is_legacy_scrap_item) and not row.t_warehouse:
+			if (row.secondary_item_type or row.valuation_type) and not row.t_warehouse:
 				row.t_warehouse = self.target_warehouse
 
 		if auto_submit:
