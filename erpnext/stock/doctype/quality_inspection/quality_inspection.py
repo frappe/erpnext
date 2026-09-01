@@ -3,6 +3,7 @@
 
 
 from math import isfinite
+from typing import Any
 
 import frappe
 from frappe import _
@@ -416,7 +417,7 @@ class QualityInspection(Document):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def item_query(doctype, txt, searchfield, start, page_len, filters):
+def item_query(doctype: Any, txt: str | None, searchfield: Any, start: int, page_len: int, filters: dict):
 	reference_doctype = filters.get("reference_doctype")
 
 	if not reference_doctype:
