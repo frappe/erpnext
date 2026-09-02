@@ -1,5 +1,4 @@
 import frappe
-from frappe.utils import add_days
 
 from erpnext.stock.get_item_details import get_item_details
 from erpnext.tests.utils import ERPNextTestSuite
@@ -459,136 +458,56 @@ class TestGetItemDetail(ERPNextTestSuite):
 			frappe.db.set_single_value("Buying Settings", "maintain_same_rate", original)
 			frappe.clear_cache(doctype="Buying Settings")
 
-	def _setup_batch_item_with_stock(self, batches):
+	def test_batch_no_set_only_when_first_batch_covers_qty(self):
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+			get_batch_from_bundle,
+		)
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
-		item = make_item(
-			properties={
-				"is_stock_item": 1,
-				"has_batch_no": 1,
-				"create_new_batch": 1,
-				"batch_number_series": "FEFO-TAP-.#####",
-			},
-		)
-
-		for qty, expiry_date in batches:
+		item_code = make_item(
+			properties={"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "FBQ-.#####"}
+		).name
+		batches = []
+		for qty in (2, 3, 14):
 			se = make_stock_entry(
-				item_code=item.name,
-				target="_Test Warehouse - _TC",
-				qty=qty,
-				rate=100,
-				purpose="Material Receipt",
+				item_code=item_code, target="_Test Warehouse - _TC", qty=qty, basic_rate=100
 			)
-			batch_no = se.items[0].batch_no or frappe.db.get_value(
-				"Serial and Batch Entry", {"parent": se.items[0].serial_and_batch_bundle}, "batch_no"
-			)
-			frappe.db.set_value("Batch", batch_no, "expiry_date", expiry_date)
+			batches.append(get_batch_from_bundle(se.items[0].serial_and_batch_bundle))
 
-		return item.name
-
-	def _get_delivery_note_context(self, item_code, qty):
-		ctx = frappe._dict(
-			{
-				"item_code": item_code,
-				"doctype": "Delivery Note",
-				"warehouse": "_Test Warehouse - _TC",
-				"company": "_Test Company",
-				"qty": qty,
-				"stock_qty": qty,
-				"conversion_factor": 1,
-				"use_serial_batch_fields": 1,
-				"update_stock": 1,
-				"currency": "INR",
-				"conversion_rate": 1.0,
-				"price_list": "_Test Price List",
-				"price_list_currency": "INR",
-				"plc_conversion_rate": 1.0,
-				"transaction_date": None,
-				"name": None,
-				"ignore_pricing_rule": 1,
-			}
-		)
-		return ctx
-
-	def test_expiry_based_pick_spans_multiple_batches(self):
-		original_based_on = frappe.db.get_single_value("Stock Settings", "pick_serial_and_batch_based_on")
-		original_auto_create = frappe.db.get_single_value(
-			"Stock Settings", "auto_create_serial_and_batch_bundle_for_outward"
-		)
-		frappe.db.set_single_value("Stock Settings", "pick_serial_and_batch_based_on", "Expiry")
-		frappe.db.set_single_value("Stock Settings", "auto_create_serial_and_batch_bundle_for_outward", 1)
-
-		try:
-			item_code = self._setup_batch_item_with_stock(
-				[(2, add_days(None, 3)), (3, add_days(None, 9)), (14, add_days(None, 30))]
-			)
-
-			single_batch_details = get_item_details(
-				self._get_delivery_note_context(item_code, 2),
-				doc={"doctype": "Delivery Note", "selling_price_list": "_Test Price List", "items": []},
-			)
-			self.assertIsNotNone(single_batch_details.get("batch_no"))
-
-			next_batch_details = get_item_details(
-				self._get_delivery_note_context(item_code, 3),
-				doc={
-					"doctype": "Delivery Note",
-					"selling_price_list": "_Test Price List",
-					"items": [{"batch_no": single_batch_details.batch_no, "qty": 2}],
-				},
-			)
-			self.assertIsNotNone(next_batch_details.get("batch_no"))
-			self.assertNotEqual(
-				next_batch_details.batch_no,
-				single_batch_details.batch_no,
-			)
-
-			multiple_batch_details = get_item_details(
-				self._get_delivery_note_context(item_code, 5),
-				doc={"doctype": "Delivery Note", "selling_price_list": "_Test Price List", "items": []},
-			)
-			self.assertIsNone(multiple_batch_details.get("batch_no"))
-
-			insufficient_details = get_item_details(
-				self._get_delivery_note_context(item_code, 20),
-				doc={"doctype": "Delivery Note", "selling_price_list": "_Test Price List", "items": []},
-			)
-			self.assertIsNone(insufficient_details.get("batch_no"))
-
-			dn = frappe.get_doc(
+		def get_picked_batch_no(qty, items=None):
+			ctx = frappe._dict(
 				{
 					"doctype": "Delivery Note",
-					"customer": "_Test Customer",
+					"item_code": item_code,
 					"company": "_Test Company",
-					"selling_price_list": "_Test Price List",
+					"warehouse": "_Test Warehouse - _TC",
+					"qty": qty,
+					"use_serial_batch_fields": 1,
+					"price_list": "_Test Price List",
 					"currency": "INR",
-					"items": [
-						{
-							"item_code": item_code,
-							"qty": 5,
-							"rate": 100,
-							"warehouse": "_Test Warehouse - _TC",
-							"use_serial_batch_fields": 1,
-						}
-					],
+					"conversion_rate": 1.0,
+					"price_list_currency": "INR",
+					"plc_conversion_rate": 1.0,
+					"ignore_pricing_rule": 1,
 				}
 			)
-			dn.insert()
-			dn.submit()
-			dn.reload()
+			doc = {"doctype": "Delivery Note", "selling_price_list": "_Test Price List", "items": items or []}
+			return get_item_details(ctx, doc=doc).get("batch_no")
 
+		with self.change_settings(
+			"Stock Settings",
+			{"pick_serial_and_batch_based_on": "FIFO", "auto_create_serial_and_batch_bundle_for_outward": 1},
+		):
+			self.assertEqual(get_picked_batch_no(2), batches[0])
+			self.assertEqual(get_picked_batch_no(3, items=[{"batch_no": batches[0], "qty": 2}]), batches[1])
+			self.assertIsNone(get_picked_batch_no(5))
+			self.assertIsNone(get_picked_batch_no(20))
+
+			dn = create_delivery_note(item_code=item_code, qty=5, use_serial_batch_fields=1)
+			dn.reload()
 			entries = frappe.get_all(
-				"Serial and Batch Entry",
-				filters={"parent": dn.items[0].serial_and_batch_bundle},
-				fields=["batch_no", "qty"],
-				order_by="idx",
+				"Serial and Batch Entry", {"parent": dn.items[0].serial_and_batch_bundle}, ["batch_no", "qty"]
 			)
-			self.assertEqual(len(entries), 2)
-			self.assertEqual(abs(entries[0].qty), 2)
-			self.assertEqual(abs(entries[1].qty), 3)
-		finally:
-			frappe.db.set_single_value("Stock Settings", "pick_serial_and_batch_based_on", original_based_on)
-			frappe.db.set_single_value(
-				"Stock Settings", "auto_create_serial_and_batch_bundle_for_outward", original_auto_create
-			)
+			self.assertEqual({d.batch_no: d.qty for d in entries}, {batches[0]: -2, batches[1]: -3})
