@@ -311,11 +311,16 @@ def get_dimension_with_children(doctype, dimensions):
 def get_dimension_filter_values(values, dimension_doctype=None):
 	if isinstance(values, str):
 		try:
-			values = json.loads(values)
+			parsed_values = json.loads(values)
 		except json.JSONDecodeError:
-			values = [values]
+			pass
+		else:
+			if isinstance(parsed_values, list):
+				values = parsed_values
 
-	if not isinstance(values, list | tuple):
+	if values is None:
+		values = []
+	elif not isinstance(values, list | tuple):
 		values = [values]
 
 	include_blank = BLANK_ACCOUNTING_DIMENSION in values
