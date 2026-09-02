@@ -14,9 +14,9 @@ from pypika.terms import Bracket, ExistsCriterion, LiteralValue
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 	get_dimension_filter_condition,
+	get_dimension_filter_values,
 )
 from erpnext.accounts.report.utils import validate_date_range
-from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
 from erpnext.stock.utils import _get_incoming_rate
 
 
@@ -1214,19 +1214,26 @@ class GrossProfitGenerator:
 			query = query.where(SalesInvoice.posting_date <= self.filters.to_date)
 
 		if self.filters.item_group:
-			query = query.where(get_item_group_condition(self.filters.item_group, Item))
+			query = query.where(
+				get_dimension_filter_condition(Item.item_group, self.filters.item_group, "Item Group")
+			)
 
 		if self.filters.sales_person:
-			query = query.where(
-				ExistsCriterion(
-					frappe.qb.from_(SalesTeam)
-					.select(1)
-					.where(
-						(SalesTeam.parent == SalesInvoice.name)
-						& (SalesTeam.sales_person == self.filters.sales_person)
+			sales_team = (
+				frappe.qb.from_(SalesTeam)
+				.select(1)
+				.where((SalesTeam.parent == SalesInvoice.name) & (SalesTeam.parenttype == "Sales Invoice"))
+			)
+			condition = ExistsCriterion(
+				sales_team.where(
+					get_dimension_filter_condition(
+						SalesTeam.sales_person, self.filters.sales_person, "Sales Person"
 					)
 				)
 			)
+			if get_dimension_filter_values(self.filters.sales_person)[1]:
+				condition |= ~ExistsCriterion(sales_team)
+			query = query.where(condition)
 
 		if self.filters.sales_invoice:
 			query = query.where(SalesInvoice.name == self.filters.sales_invoice)
@@ -1257,11 +1264,9 @@ class GrossProfitGenerator:
 				)
 
 		if self.filters.warehouse:
-			lft, rgt = frappe.db.get_value("Warehouse", self.filters.warehouse, ["lft", "rgt"])
-			WH = frappe.qb.DocType("Warehouse")
 			query = query.where(
-				SalesInvoiceItem.warehouse.isin(
-					frappe.qb.from_(WH).select(WH.name).where((WH.lft >= lft) & (WH.rgt <= rgt))
+				get_dimension_filter_condition(
+					SalesInvoiceItem.warehouse, self.filters.warehouse, "Warehouse"
 				)
 			)
 
