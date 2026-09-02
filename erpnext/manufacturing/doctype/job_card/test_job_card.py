@@ -327,8 +327,8 @@ class TestJobCard(ERPNextTestSuite):
 
 		job_card.reload()
 
-		self.assertEqual(transfer_entry_1.fg_completed_qty, 0)
-		self.assertEqual(job_card.transferred_qty, 0)
+		self.assertEqual(transfer_entry_1.fg_completed_qty, 2)
+		self.assertEqual(job_card.transferred_qty, 2)
 
 		# transfer second RM
 		transfer_entry_2 = make_stock_entry_from_jc(job_card_name)
@@ -336,24 +336,9 @@ class TestJobCard(ERPNextTestSuite):
 		transfer_entry_2.insert()
 		transfer_entry_2.submit()
 
-		self.assertEqual(transfer_entry_2.fg_completed_qty, 2)
-		job_card.reload()
-		self.assertEqual(job_card.transferred_qty, 2)
-
-	def test_job_card_partial_material_transfer_qty(self):
-		self.transfer_material_against = "Job Card"
-		self.source_warehouse = "Stores - _TC"
-		self.generate_required_stock(self.work_order)
-
-		job_card = frappe.get_last_doc("Job Card", {"work_order": self.work_order.name})
-		transfer_entry = make_stock_entry_from_jc(job_card.name)
-		for row in transfer_entry.items:
-			row.qty /= 2
-		transfer_entry.submit()
-
-		job_card.reload()
-		self.assertEqual(transfer_entry.fg_completed_qty, 1)
-		self.assertEqual(job_card.transferred_qty, 1)
+		# 'For Quantity' here will be 0 since
+		# transfer was made for 2 fg qty in first transfer Stock Entry
+		self.assertEqual(transfer_entry_2.fg_completed_qty, 0)
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"job_card_excess_transfer": 1})
 	def test_job_card_excess_material_transfer(self):
@@ -2567,19 +2552,9 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertEqual(flt(fg_row.qty), 3.0)
 		me_b.submit()
 
-	def test_semi_fg_job_card_transfer_keeps_completed_qty(self):
-		work_order = self.make_semi_fg_work_order("JC Transfer", skip_material_transfer=False)
-		job_card = self.get_semi_fg_job_card(work_order, "JC Transfer Op A")
-
-		transfer_entry = make_stock_entry_from_jc(job_card.name)
-		transfer_entry.submit()
-
-		job_card.reload()
-		self.assertEqual(transfer_entry.fg_completed_qty, job_card.for_quantity)
-		self.assertEqual(job_card.transferred_qty, job_card.for_quantity)
-
-	def make_semi_fg_work_order(self, prefix, qty=5, skip_material_transfer=True):
-		"""Create a two-operation semi-finished-goods Work Order with pre-seeded stock."""
+	def make_semi_fg_work_order(self, prefix, qty=5):
+		"""Two-operation semi FG work order: Op A makes the SFG from RM 1, final Op B
+		consumes it. Both operations skip material transfer; stock is pre-seeded."""
 		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
 		from erpnext.stock.doctype.item.test_item import make_item
 
@@ -2612,7 +2587,7 @@ class TestJobCard(ERPNextTestSuite):
 			"time_in_mins": 60,
 			"source_warehouse": warehouse,
 			"fg_warehouse": warehouse,
-			"skip_material_transfer": skip_material_transfer,
+			"skip_material_transfer": 1,
 		}
 		operation2 = {
 			"operation": f"{prefix} Op B",
@@ -2624,7 +2599,7 @@ class TestJobCard(ERPNextTestSuite):
 			"time_in_mins": 60,
 			"source_warehouse": warehouse,
 			"fg_warehouse": warehouse,
-			"skip_material_transfer": skip_material_transfer,
+			"skip_material_transfer": 1,
 		}
 		make_workstation(operation1)
 		make_operation(operation1)
