@@ -9,6 +9,10 @@ from frappe.utils import add_days, cint, flt, nowtime, today
 
 import erpnext
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
+from erpnext.controllers.ledger_preview import (
+	get_accounting_ledger_preview,
+	get_stock_ledger_preview,
+)
 from erpnext.controllers.sales_and_purchase_return import make_return_doc
 from erpnext.controllers.tests.test_subcontracting_controller import (
 	get_rm_items,
@@ -373,6 +377,38 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		scr.cancel()
 		self.assertTrue(get_gl_entries("Subcontracting Receipt", scr.name))
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
+
+	def test_ledger_preview(self):
+		sco = get_subcontracting_order(
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
+		)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.save()
+
+		gl_columns, gl_data = get_accounting_ledger_preview(
+			scr, frappe._dict(company=scr.company, include_dimensions=1)
+		)
+		scr.reload()
+		sl_columns, sl_data = get_stock_ledger_preview(scr, frappe._dict(company=scr.company))
+
+		self.assertTrue(gl_columns)
+		self.assertTrue(gl_data)
+		self.assertTrue(sl_columns)
+		self.assertTrue(sl_data)
+		self.assertFalse(frappe.db.exists("GL Entry", {"voucher_type": scr.doctype, "voucher_no": scr.name}))
+		self.assertFalse(
+			frappe.db.exists("Stock Ledger Entry", {"voucher_type": scr.doctype, "voucher_no": scr.name})
+		)
 
 	def test_subcontracting_receipt_gl_entry_with_different_rm_expense_accounts(self):
 		service_items = [
@@ -1732,6 +1768,10 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		scr.items[0].batch_no = batch_no
 
 		scr.save()
+		get_accounting_ledger_preview(scr, frappe._dict(company=scr.company, include_dimensions=1))
+		scr.reload()
+		self.assertFalse(scr.items[0].serial_and_batch_bundle)
+
 		scr.submit()
 		scr.reload()
 		self.assertTrue(scr.items[0].serial_and_batch_bundle)
