@@ -11,6 +11,7 @@ from frappe.query_builder.functions import Sum
 from frappe.utils import flt, getdate
 from pypika.terms import Bracket, LiteralValue, Order
 
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimension_filter_condition
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.report.utils import (
 	apply_common_conditions,
@@ -22,7 +23,6 @@ from erpnext.accounts.report.utils import (
 	get_query_columns,
 	get_taxes_query,
 	get_values_for_columns,
-	get_with_descendants,
 )
 
 
@@ -481,7 +481,7 @@ def get_invoices(filters, additional_query_columns):
 			query = query.select(col)
 
 	if filters.get("supplier"):
-		query = query.where(pi.supplier == filters.supplier)
+		query = query.where(get_dimension_filter_condition(pi.supplier, filters.supplier))
 	if filters.get("supplier_group"):
 		# read the group from the supplier master, to match the Supplier Group column
 		supplier = frappe.qb.DocType("Supplier")
@@ -490,8 +490,8 @@ def get_invoices(filters, additional_query_columns):
 				frappe.qb.from_(supplier)
 				.select(supplier.name)
 				.where(
-					supplier.supplier_group.isin(
-						get_with_descendants("Supplier Group", filters.supplier_group)
+					get_dimension_filter_condition(
+						supplier.supplier_group, filters.supplier_group, "Supplier Group"
 					)
 				)
 			)
@@ -524,7 +524,9 @@ def get_conditions(filters, query, doctype):
 	parent_doc = frappe.qb.DocType(doctype)
 
 	if filters.get("mode_of_payment"):
-		query = query.where(parent_doc.mode_of_payment == filters.mode_of_payment)
+		query = query.where(
+			get_dimension_filter_condition(parent_doc.mode_of_payment, filters.mode_of_payment)
+		)
 
 	return query
 
