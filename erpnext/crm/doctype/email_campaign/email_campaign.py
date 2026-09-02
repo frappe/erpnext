@@ -29,11 +29,18 @@ class EmailCampaign(Document):
 
 	def validate(self):
 		self.set_date()
-		# checking if email is set for lead. Not checking for contact as email is a mandatory field for contact.
-		if self.email_campaign_for == "Lead":
-			self.validate_lead()
+		self.validate_recipient_email()
 		self.validate_email_campaign_already_exists()
 		self.update_status()
+
+	def validate_recipient_email(self):
+		if not self.recipient:
+			return
+
+		if self.email_campaign_for == "Lead":
+			self.validate_lead()
+		elif self.email_campaign_for == "Contact":
+			self.validate_contact()
 
 	def set_date(self):
 		if getdate(self.start_date) < getdate(today()):
@@ -55,6 +62,12 @@ class EmailCampaign(Document):
 		if not lead_email_id:
 			lead_name = frappe.db.get_value("Lead", self.recipient, "lead_name")
 			frappe.throw(_("Please set an email id for the Lead {0}").format(lead_name))
+
+	def validate_contact(self):
+		contact_email_id = frappe.db.get_value("Contact", self.recipient, "email_id")
+		if not contact_email_id:
+			full_name = frappe.db.get_value("Contact", self.recipient, "full_name")
+			frappe.throw(_("Please set a primary email id for the Contact {0}").format(full_name))
 
 	def validate_email_campaign_already_exists(self):
 		email_campaign_exists = frappe.db.exists(
