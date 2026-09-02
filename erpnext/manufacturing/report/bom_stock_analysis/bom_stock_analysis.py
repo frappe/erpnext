@@ -8,9 +8,13 @@ from frappe.utils import flt
 from frappe.utils.data import comma_and
 from pypika.terms import ExistsCriterion
 
+from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter, get_child_warehouses
+
 
 def execute(filters=None):
 	filters = filters or {}
+	validate_bom_company(filters)
+
 	if filters.get("qty_to_make"):
 		columns = get_columns_with_qty_to_make()
 		data = get_data_with_qty_to_make(filters)
@@ -30,6 +34,19 @@ def fmt_rate(value):
 	"""Format a currency rate for display as a string."""
 	currency = frappe.defaults.get_global_default("currency")
 	return frappe.utils.fmt_money(value, precision=2, currency=currency)
+
+
+def validate_bom_company(filters):
+	if not filters.get("bom") or not filters.get("company"):
+		return
+
+	bom_company = frappe.db.get_value("BOM", filters.get("bom"), "company")
+	if bom_company and bom_company != filters.get("company"):
+		frappe.throw(
+			_("BOM {0} does not belong to company {1}").format(
+				frappe.bold(filters.get("bom")), frappe.bold(filters.get("company"))
+			)
+		)
 
 
 def get_data_with_qty_to_make(filters):
@@ -201,24 +218,16 @@ def get_stock_qty_by_item(filters):
 	)
 
 	if filters.get("warehouse"):
-		warehouse_details = frappe.db.get_value(
-			"Warehouse", filters.get("warehouse"), ["lft", "rgt"], as_dict=1
-		)
-		if warehouse_details:
-			wh = frappe.qb.DocType("Warehouse")
-			query = query.where(
-				ExistsCriterion(
-					frappe.qb.from_(wh)
-					.select(wh.name)
-					.where(
-						(wh.lft >= warehouse_details.lft)
-						& (wh.rgt <= warehouse_details.rgt)
-						& (bin.warehouse == wh.name)
-					)
-				)
+		query = apply_warehouse_filter(query, bin, filters)
+	elif filters.get("company"):
+		wh = frappe.qb.DocType("Warehouse")
+		query = query.where(
+			ExistsCriterion(
+				frappe.qb.from_(wh)
+				.select(wh.name)
+				.where((wh.company == filters.get("company")) & (bin.warehouse == wh.name))
 			)
-		else:
-			query = query.where(bin.warehouse == filters.get("warehouse"))
+		)
 
 	return query
 
@@ -307,6 +316,23 @@ def explode_phantom_boms(data, filters):
 	return data
 
 
+def get_warehouses_with_children(warehouses):
+	if not warehouses:
+		return []
+
+	if isinstance(warehouses, str) and warehouses.startswith("["):
+		warehouses = frappe.parse_json(warehouses)
+
+	if not isinstance(warehouses, list | tuple):
+		warehouses = [warehouses]
+
+	all_warehouses = []
+	for warehouse in warehouses:
+		all_warehouses.extend(get_child_warehouses(warehouse))
+
+	return list(set(all_warehouses))
+
+
 def get_manufacturer_records():
 	details = frappe.get_all(
 		"Item Manufacturer", fields=["manufacturer", "manufacturer_part_no", "item_code"]
@@ -323,30 +349,17 @@ def get_producible_fg_items(filters):
 	BOM_ITEM = frappe.qb.DocType("BOM Item")
 	BOM = frappe.qb.DocType("BOM")
 	BIN = frappe.qb.DocType("Bin")
-	WH = frappe.qb.DocType("Warehouse")
 
-	warehouse = filters.get("warehouse")
-	if not warehouse:
+	warehouses = get_warehouses_with_children(filters.get("warehouse"))
+	if not warehouses:
 		frappe.throw(_("Warehouse is required to get producible FG Items"))
 
-	warehouse_details = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"], as_dict=1)
-
-	if warehouse_details:
-		bin_subquery = (
-			frappe.qb.from_(BIN)
-			.join(WH)
-			.on(BIN.warehouse == WH.name)
-			.select(BIN.item_code, Sum(BIN.actual_qty).as_("actual_qty"))
-			.where((WH.lft >= warehouse_details.lft) & (WH.rgt <= warehouse_details.rgt))
-			.groupby(BIN.item_code)
-		)
-	else:
-		bin_subquery = (
-			frappe.qb.from_(BIN)
-			.select(BIN.item_code, Sum(BIN.actual_qty).as_("actual_qty"))
-			.where(BIN.warehouse == warehouse)
-			.groupby(BIN.item_code)
-		)
+	bin_subquery = (
+		frappe.qb.from_(BIN)
+		.select(BIN.item_code, Sum(BIN.actual_qty).as_("actual_qty"))
+		.where(BIN.warehouse.isin(warehouses))
+		.groupby(BIN.item_code)
+	)
 
 	query = (
 		frappe.qb.from_(BOM_ITEM)

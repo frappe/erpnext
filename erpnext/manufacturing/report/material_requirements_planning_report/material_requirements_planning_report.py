@@ -20,7 +20,8 @@ from frappe.utils import (
 	parse_json,
 	today,
 )
-from frappe.utils.nestedset import get_descendants_of
+
+from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
 
 
 def execute(filters: dict | None = None):
@@ -33,9 +34,51 @@ def execute(filters: dict | None = None):
 
 class MaterialRequirementsPlanningReport:
 	def __init__(self, filters):
-		self.filters = filters
+		self.filters = frappe._dict(filters or {})
+		self._warehouses = None
+		self._warehouses_with_groups = None
+
+	def get_warehouses(self, include_group_warehouses=False):
+		cache_attr = "_warehouses_with_groups" if include_group_warehouses else "_warehouses"
+		if getattr(self, cache_attr) is not None:
+			return getattr(self, cache_attr)
+
+		warehouses = self.filters.get("warehouse")
+		if not warehouses:
+			setattr(self, cache_attr, [])
+			return []
+
+		if isinstance(warehouses, str) and warehouses.startswith("["):
+			warehouses = parse_json(warehouses)
+
+		if not isinstance(warehouses, list | tuple):
+			warehouses = [warehouses]
+
+		warehouse_group_map = {
+			row.name: row.is_group
+			for row in frappe.get_all(
+				"Warehouse",
+				filters={"name": ["in", warehouses]},
+				fields=["name", "is_group"],
+			)
+		}
+
+		all_warehouses = []
+		for warehouse in warehouses:
+			child_warehouses = get_child_warehouses(warehouse)
+			if include_group_warehouses or not warehouse_group_map.get(warehouse):
+				all_warehouses.extend(child_warehouses)
+			else:
+				all_warehouses.extend(w for w in child_warehouses if w != warehouse)
+
+		warehouses = list(set(all_warehouses))
+		setattr(self, cache_attr, warehouses)
+		return warehouses
 
 	def generate_mrp(self):
+		if not self.get_warehouses():
+			frappe.throw(_("Warehouse is required"))
+
 		self.fg_items = []
 		self.rm_items = []
 		self.dates = self.get_dates()
@@ -84,11 +127,7 @@ class MaterialRequirementsPlanningReport:
 			query = query.where(so_item.item_code.isin(items))
 
 		if self.filters.get("warehouse"):
-			warehouses = [self.filters.get("warehouse")]
-			if frappe.db.get_value("Warehouse", self.filters.get("warehouse"), "is_group"):
-				warehouses = get_descendants_of("Warehouse", self.filters.get("warehouse"))
-
-			query = query.where(so_item.warehouse.isin(warehouses))
+			query = query.where(so_item.warehouse.isin(self.get_warehouses()))
 
 		if skip_orders := self.get_orders_to_skip():
 			query = query.where(so.name.notin(skip_orders))
@@ -148,11 +187,7 @@ class MaterialRequirementsPlanningReport:
 		)
 
 		if self.filters.get("warehouse"):
-			warehouses = [self.filters.get("warehouse")]
-			if frappe.db.get_value("Warehouse", self.filters.get("warehouse"), "is_group"):
-				warehouses = get_descendants_of("Warehouse", self.filters.get("warehouse"))
-
-			query = query.where(doctype.warehouse.isin(warehouses))
+			query = query.where(doctype.warehouse.isin(self.get_warehouses()))
 
 		bin_data = query.run(as_dict=True)
 
@@ -593,11 +628,7 @@ class MaterialRequirementsPlanningReport:
 			query = query.where(doctype.production_item.isin(items))
 
 		if self.filters.get("warehouse"):
-			warehouses = [self.filters.get("warehouse")]
-			if frappe.db.get_value("Warehouse", self.filters.get("warehouse"), "is_group"):
-				warehouses = get_descendants_of("Warehouse", self.filters.get("warehouse"))
-
-			query = query.where(doctype.fg_warehouse.isin(warehouses))
+			query = query.where(doctype.fg_warehouse.isin(self.get_warehouses()))
 
 		data = query.run(as_dict=True)
 
@@ -636,11 +667,7 @@ class MaterialRequirementsPlanningReport:
 			query = query.where(doctype.item_code.isin(items))
 
 		if self.filters.get("warehouse"):
-			warehouses = [self.filters.get("warehouse")]
-			if frappe.db.get_value("Warehouse", self.filters.get("warehouse"), "is_group"):
-				warehouses = get_descendants_of("Warehouse", self.filters.get("warehouse"))
-
-			query = query.where(doctype.warehouse.isin(warehouses))
+			query = query.where(doctype.warehouse.isin(self.get_warehouses()))
 
 		data = query.run(as_dict=True)
 
@@ -689,11 +716,7 @@ class MaterialRequirementsPlanningReport:
 			query = query.where(doctype.item_code.isin(self.rm_items))
 
 		if self.filters.get("warehouse"):
-			warehouses = [self.filters.get("warehouse")]
-			if frappe.db.get_value("Warehouse", self.filters.get("warehouse"), "is_group"):
-				warehouses = get_descendants_of("Warehouse", self.filters.get("warehouse"))
-
-			query = query.where(doctype.warehouse.isin(warehouses))
+			query = query.where(doctype.warehouse.isin(self.get_warehouses()))
 
 		data = query.run(as_dict=True)
 
@@ -742,11 +765,7 @@ class MaterialRequirementsPlanningReport:
 			query = query.where(doctype.item_code.isin(self.rm_items))
 
 		if self.filters.get("warehouse"):
-			warehouses = [self.filters.get("warehouse")]
-			if frappe.db.get_value("Warehouse", self.filters.get("warehouse"), "is_group"):
-				warehouses = get_descendants_of("Warehouse", self.filters.get("warehouse"))
-
-			query = query.where(doctype.warehouse.isin(warehouses))
+			query = query.where(doctype.warehouse.isin(self.get_warehouses()))
 
 		return query.run(as_dict=True)
 
@@ -773,11 +792,7 @@ class MaterialRequirementsPlanningReport:
 			query = query.where(doctype.item_code.isin(items))
 
 		if self.filters.get("warehouse"):
-			warehouses = [self.filters.get("warehouse")]
-			if frappe.db.get_value("Warehouse", self.filters.get("warehouse"), "is_group"):
-				warehouses = get_descendants_of("Warehouse", self.filters.get("warehouse"))
-
-			query = query.where(doctype.warehouse.isin(warehouses))
+			query = query.where(doctype.warehouse.isin(self.get_warehouses()))
 
 		return query.run(as_dict=True)
 
@@ -1175,12 +1190,7 @@ class MaterialRequirementsPlanningReport:
 			query = query.where(doctype.delivery_date <= self.filters.to_date)
 
 		if self.filters.warehouse:
-			warehouses = [self.filters.get("warehouse")]
-			if frappe.db.get_value("Warehouse", self.filters.get("warehouse"), "is_group"):
-				warehouses = get_descendants_of("Warehouse", self.filters.get("warehouse"))
-				warehouses.append(self.filters.get("warehouse"))
-
-			query = query.where(forecast_doc.parent_warehouse.isin(warehouses))
+			query = query.where(forecast_doc.parent_warehouse.isin(self.get_warehouses(True)))
 
 		if self.filters.item_code:
 			query = query.where(doctype.item_code == self.filters.item_code)

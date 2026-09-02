@@ -8,6 +8,8 @@ from frappe import _
 from frappe.utils import flt
 from frappe.utils.nestedset import get_descendants_of
 
+from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
+
 SLE_FIELDS = (
 	"name",
 	"item_code",
@@ -43,8 +45,10 @@ def get_stock_ledger_entries(filters):
 	sle_filters = {"is_cancelled": 0}
 
 	if filters.warehouse:
-		children = get_descendants_of("Warehouse", filters.warehouse)
-		sle_filters["warehouse"] = ("in", [*children, filters.warehouse])
+		sle_filters["warehouse"] = ("in", get_warehouses_with_children(filters.warehouse))
+
+	if filters.get("company"):
+		sle_filters["company"] = filters.company
 
 	if filters.item_code:
 		sle_filters["item_code"] = filters.item_code
@@ -68,6 +72,20 @@ def get_stock_ledger_entries(filters):
 		filters=sle_filters,
 		order_by="posting_datetime, creation",
 	)
+
+
+def get_warehouses_with_children(warehouses):
+	if isinstance(warehouses, str) and warehouses.startswith("["):
+		warehouses = frappe.parse_json(warehouses)
+
+	if not isinstance(warehouses, list | tuple):
+		warehouses = [warehouses]
+
+	all_warehouses = []
+	for warehouse in warehouses:
+		all_warehouses.extend(get_child_warehouses(warehouse))
+
+	return list(set(all_warehouses))
 
 
 def find_first_bad_queue(sles):
