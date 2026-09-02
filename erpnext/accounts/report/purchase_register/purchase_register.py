@@ -11,6 +11,7 @@ from frappe.query_builder.functions import Sum
 from frappe.utils import flt, getdate
 from pypika.terms import Bracket, LiteralValue, Order
 
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimension_filter_condition
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.report.utils import (
 	apply_common_conditions,
@@ -22,7 +23,6 @@ from erpnext.accounts.report.utils import (
 	get_query_columns,
 	get_taxes_query,
 	get_values_for_columns,
-	get_with_descendants,
 )
 
 
@@ -490,8 +490,8 @@ def get_invoices(filters, additional_query_columns):
 				frappe.qb.from_(supplier)
 				.select(supplier.name)
 				.where(
-					supplier.supplier_group.isin(
-						get_with_descendants("Supplier Group", filters.supplier_group)
+					get_dimension_filter_condition(
+						supplier.supplier_group, filters.supplier_group, "Supplier Group"
 					)
 				)
 			)

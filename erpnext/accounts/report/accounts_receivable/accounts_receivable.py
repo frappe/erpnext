@@ -934,6 +934,9 @@ class ReceivablePayableReport:
 		scope = []
 		for parenttype in parenttypes:
 			criterion = steam.parenttype == parenttype
+			if parenttype == "Customer" and self.filters.get("sales_person"):
+				# Only an explicitly selected sales person may match all of a customer's invoices.
+				criterion &= steam.sales_person.isnotnull() & (steam.sales_person != "")
 			if (allowed := permitted[parenttype]) is not None:
 				criterion &= steam.sales_person.isin(allowed or [""])
 			scope.append(criterion)
@@ -941,12 +944,8 @@ class ReceivablePayableReport:
 		conditions = [Criterion.any(scope)]
 
 		if self.filters.get("sales_person"):
-			lft, rgt = frappe.db.get_value("Sales Person", self.filters.get("sales_person"), ["lft", "rgt"])
-			sp = frappe.qb.DocType("Sales Person")
 			conditions.append(
-				steam.sales_person.isin(
-					frappe.qb.from_(sp).select(sp.name).where((sp.lft >= lft) & (sp.rgt <= rgt))
-				)
+				get_dimension_filter_condition(steam.sales_person, self.filters.sales_person, "Sales Person")
 			)
 
 		records = (
@@ -960,6 +959,21 @@ class ReceivablePayableReport:
 		self.sales_person_records = frappe._dict()
 		for d in records:
 			self.sales_person_records.setdefault(d.parenttype, set()).add(d.parent)
+
+		if get_dimension_filter_values(self.filters.sales_person)[1] and permitted["Sales Invoice"] is None:
+			sales_invoice = frappe.qb.DocType("Sales Invoice")
+			invoices_without_sales_team = (
+				frappe.qb.from_(sales_invoice)
+				.select(sales_invoice.name)
+				.where(sales_invoice.company == self.filters.company)
+				.where(
+					sales_invoice.name.notin(
+						frappe.qb.from_(steam).select(steam.parent).where(steam.parenttype == "Sales Invoice")
+					)
+				)
+				.run(pluck=True)
+			)
+			self.sales_person_records.setdefault("Sales Invoice", set()).update(invoices_without_sales_team)
 
 	def get_invoices_based_on_sales_partner(self):
 		if not self.filters.get("sales_partner"):
