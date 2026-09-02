@@ -21,12 +21,8 @@ if TYPE_CHECKING:
 
 
 def default_company() -> str | None:
-	"""The company this site works in, or None on a site still in the setup wizard.
-
-	The same key the renderer reads out of `boot.sysdefaults`, which is this function's
-	output for the whole site -- so the item cannot be filtered against one company and
-	then drawn pointing at another.
-	"""
+	"""The same key the renderer reads out of `boot.sysdefaults`, so the item cannot be
+	filtered against one company and then drawn pointing at another."""
 	return frappe.defaults.get_defaults().get("company")
 
 
