@@ -9,8 +9,10 @@ import frappe
 import frappe.utils
 from frappe import _, qb
 from frappe.model.document import Document
-from frappe.query_builder.functions import Sum
+from frappe.query_builder import Case, Criterion
+from frappe.query_builder.functions import Abs, IfNull, Sum
 from frappe.utils import cint, flt, get_link_to_form, getdate
+from pypika import Order
 
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	unlink_inter_company_doc,
@@ -29,8 +31,22 @@ from erpnext.selling.doctype.sales_order.services.subcontracting import Subcontr
 from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import has_reserved_stock
 from erpnext.stock.get_item_details import get_default_bom
+from erpnext.utilities.query import get_filter_conditions_qb, get_match_conditions_qb
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
+
+# fieldtypes frappe's link search runs a LIKE against, see frappe.desk.search.search_widget
+TEXT_SEARCH_FIELDTYPES = {
+	"Autocomplete",
+	"Data",
+	"Link",
+	"Long Text",
+	"Read Only",
+	"Select",
+	"Small Text",
+	"Text",
+	"Text Editor",
+}
 
 
 class WarehouseRequired(frappe.ValidationError):
@@ -212,6 +228,9 @@ class SalesOrder(SellingController):
 
 		if has_reserved_stock(self.doctype, self.name):
 			self.set_onload("has_reserved_stock", True)
+
+		if self.docstatus == 1:
+			self.set_onload("has_billable_items", has_billable_items(self.name))
 
 	def can_update_items(self) -> bool:
 		return SubcontractingService(self).can_update_items()
@@ -930,3 +949,123 @@ def get_work_order_items(sales_order: str, for_raw_material_request: int = 0):
 @frappe.whitelist()
 def get_stock_reservation_status():
 	return frappe.get_single_value("Stock Settings", "enable_stock_reservation")
+
+
+def get_pending_qty_expr(so_item):
+	"""`get_pending_qty` from the mapper, as a query-builder expression."""
+	invoice_item = qb.DocType("Sales Invoice Item")
+	billed_qty = (
+		qb.from_(invoice_item)
+		.select(IfNull(Sum(invoice_item.qty), 0))
+		.where((invoice_item.docstatus == 1) & (invoice_item.so_detail == so_item.name))
+	)
+
+	# get_qty_net_of_returns: min(qty, max(qty - returned_qty, delivered_qty))
+	after_returns = (
+		Case()
+		.when(so_item.qty - so_item.returned_qty > so_item.delivered_qty, so_item.qty - so_item.returned_qty)
+		.else_(so_item.delivered_qty)
+	)
+	net_qty = Case().when(so_item.qty < after_returns, so_item.qty).else_(after_returns)
+
+	# like the mapper, only net off the invoiced qty once the row has been billed
+	return net_qty - Case().when((so_item.qty != 0) & (so_item.billed_amt != 0), billed_qty).else_(0)
+
+
+def get_billable_item_criterion(so, so_item, item):
+	"""Criterion for a Sales Order Item that can still be invoiced.
+
+	Mirrors the mapper's condition. Billing is tracked on amount, so a row stays billable while
+	its billed amount is within the item's over billing allowance, falling back to the global one,
+	and while there is qty left for the mapper to carry over.
+	"""
+	global_allowance = flt(frappe.get_cached_value("Accounts Settings", None, "over_billing_allowance"))
+	allowance = (
+		Case().when(item.over_billing_allowance > 0, item.over_billing_allowance).else_(global_allowance)
+	)
+
+	within_allowance = (so_item.base_amount == 0) | (
+		Abs(so_item.billed_amt) < Abs(so_item.amount) * (1 + allowance / 100)
+	)
+	# 0 qty rows of a unit price order are mapped as they are, so they never run out of qty
+	is_unit_price_row = (so.has_unit_price_items == 1) & (so_item.qty == 0)
+
+	return (so_item.closed == 0) & (
+		is_unit_price_row | ((so_item.qty != 0) & within_allowance & (get_pending_qty_expr(so_item) > 0))
+	)
+
+
+def has_billable_items(sales_order: str) -> bool:
+	so = qb.DocType("Sales Order")
+	so_item = qb.DocType("Sales Order Item")
+	item = qb.DocType("Item")
+
+	return bool(
+		qb.from_(so_item)
+		.inner_join(so)
+		.on(so.name == so_item.parent)
+		.left_join(item)
+		.on(item.name == so_item.item_code)
+		.select(so_item.name)
+		.where((so_item.parent == sales_order) & get_billable_item_criterion(so, so_item, item))
+		.limit(1)
+		.run()
+	)
+
+
+@frappe.whitelist()
+def get_billable_sales_orders(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict
+):
+	"""Sales Orders with at least one item that can still be invoiced.
+
+	A plain `per_billed` filter cannot see item level over billing allowances, so it hides orders
+	the mapper would still map rows from.
+	"""
+	frappe.has_permission("Sales Order", throw=True)
+
+	so = qb.DocType("Sales Order")
+	so_item = qb.DocType("Sales Order Item")
+	item = qb.DocType("Item")
+
+	query = (
+		qb.from_(so)
+		.inner_join(so_item)
+		.on(so_item.parent == so.name)
+		.left_join(item)
+		.on(item.name == so_item.item_code)
+		.select(so.name, so.customer, so.transaction_date)
+		.where(get_billable_item_criterion(so, so_item, item))
+		# customer and transaction_date are plain selects under GROUP BY, so Postgres needs them
+		# grouped as well; they are functionally dependent on the order, so this is a no-op.
+		.groupby(so.name, so.customer, so.transaction_date)
+		.orderby(so.transaction_date, order=Order.desc)
+		.limit(cint(page_len))
+		.offset(cint(start))
+	)
+
+	for condition in get_match_conditions_qb("Sales Order", table=so) + get_filter_conditions_qb(
+		"Sales Order", filters
+	):
+		query = query.where(condition)
+
+	if txt:
+		meta = frappe.get_meta("Sales Order")
+
+		def is_searchable(fieldname):
+			# like frappe's own link search, only text like fields can take a LIKE. postgres
+			# refuses one on a Date column, and `transaction_date` is a search field here.
+			if fieldname == "name":
+				return True
+
+			df = meta.get_field(fieldname)
+			return df and df.fieldtype in TEXT_SEARCH_FIELDTYPES
+
+		txt = f"%{txt}%"
+		query = query.where(
+			Criterion.any(
+				so[fieldname].like(txt) for fieldname in meta.get_search_fields() if is_searchable(fieldname)
+			)
+		)
+
+	return query.run(as_dict=True)

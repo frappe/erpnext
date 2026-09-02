@@ -1120,7 +1120,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 
 					// sales invoice
 					if (
-						(flt(doc.per_billed) < 100 && frappe.model.can_create("Sales Invoice")) ||
+						(doc.__onload?.has_billable_items && frappe.model.can_create("Sales Invoice")) ||
 						doc.is_subcontracted
 					) {
 						this.frm.add_custom_button(

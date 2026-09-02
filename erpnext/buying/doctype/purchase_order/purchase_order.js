@@ -383,7 +383,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 						}
 					}
 					// Please do not add precision in the below flt function
-					if (flt(doc.per_billed) < 100)
+					if (flt(doc.per_billed) < 100 + flt(frappe.boot.sysdefaults.over_billing_allowance))
 						this.frm.add_custom_button(
 							__("Purchase Invoice"),
 							() => {
