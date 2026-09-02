@@ -125,6 +125,8 @@ class ManufactureEntry:
 			if backflush_based_on != "BOM":
 				available_serial_batches = self.get_transferred_serial_batches()
 
+			production_share = self.get_production_share()
+			items_to_remove = []
 			for item_code, _dict in item_dict.items():
 				_dict.from_warehouse = self.source_wh.get(item_code) or self.wip_warehouse
 				_dict.to_warehouse = ""
@@ -138,10 +140,32 @@ class ManufactureEntry:
 
 					_dict.qty = calculated_qty
 					self.update_available_serial_batches(_dict, available_serial_batches)
-				elif self.skip_material_transfer:
-					set_previous_operation_serial_batch(self.stock_entry, _dict)
+				else:
+					remaining_qty = max(flt(_dict.qty) - flt(_dict.consumed_qty), 0)
+					_dict.qty = min(flt(_dict.qty) * production_share, remaining_qty)
+					if not _dict.qty:
+						items_to_remove.append(item_code)
+						continue
+
+					if self.skip_material_transfer:
+						set_previous_operation_serial_batch(self.stock_entry, _dict)
+
+			for item_code in items_to_remove:
+				item_dict.pop(item_code)
 
 			self.stock_entry.add_to_stock_entry_detail(item_dict)
+
+	def get_production_share(self):
+		"""Fraction of the job card's production this entry accounts for; raw materials are
+		generated proportionally so several partial entries never consume more than required."""
+		for_quantity, pending_qty = frappe.db.get_value(
+			"Job Card", self.job_card, ["for_quantity", "pending_qty"]
+		)
+		qty_to_produce = flt(for_quantity) - flt(pending_qty)
+		if not qty_to_produce:
+			return 1
+
+		return min(flt(self.for_quantity) / qty_to_produce, 1)
 
 	def parse_available_serial_batches(self, item_dict, available_serial_batches):
 		key = (item_dict.item_code, item_dict.from_warehouse)

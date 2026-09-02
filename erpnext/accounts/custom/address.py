@@ -71,4 +71,6 @@ def get_shipping_address(company, address=None):
 	if address:
 		address_as_dict = address[0]
 		name, address_template = get_address_templates(address_as_dict)
-		return address_as_dict.get("name"), frappe.render_template(address_template, address_as_dict)
+		return address_as_dict.get("name"), frappe.render_template(
+			address_template, address_as_dict, restrict_globals=True
+		)

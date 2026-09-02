@@ -363,7 +363,7 @@
   },
   {
    "default": "0",
-   "description": "Frozen suppliers block ledger entries until unfrozen. Use this to temporarily lock accounting activity without disabling the supplier.",
+   "description": "Frozen suppliers block new transactions and ledger entries until unfrozen. Only users with the role set in Company's \"Roles Allowed to Set and Edit Frozen Account Entries\" can transact.",
    "fieldname": "is_frozen",
    "fieldtype": "Check",
    "label": "Is Frozen"
@@ -562,7 +562,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2026-06-27 16:12:33.190257",
+ "modified": "2026-08-14 16:10:58.600553",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",

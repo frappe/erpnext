@@ -2,11 +2,15 @@
 # License: GNU General Public License v3. See license.txt
 
 
+from math import isfinite
+from typing import Any
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import cint, cstr, flt, get_link_to_form, get_number_format_info
+from frappe.utils import cint, cstr, flt, get_link_to_form
+from frappe.utils.number_format import NUMBER_FORMAT_MAP, NumberFormat
 
 from erpnext.controllers.stock_controller import (
 	QI_INCOMING_PURPOSES,
@@ -82,6 +86,7 @@ class QualityInspection(Document):
 						reading.status = "Accepted"
 
 		if self.readings:
+			self.validate_reading_number_format()
 			self.inspect_and_set_status()
 
 		self.validate_inspection_required()
@@ -261,6 +266,9 @@ class QualityInspection(Document):
 					self.modified,
 				)
 
+		if self.reference_type and self.reference_name:
+			frappe.get_lazy_doc(self.reference_type, self.reference_name).notify_update()
+
 	def inspect_and_set_status(self):
 		for reading in self.readings:
 			if not reading.manual_inspection:  # dont auto set status if manual
@@ -279,6 +287,47 @@ class QualityInspection(Document):
 						_("Status set to rejected as there are one or more rejected readings."), alert=True
 					)
 					break
+
+	def validate_reading_number_format(self):
+		"""Reject newly entered readings that are not numbers in the user's format.
+
+		They would otherwise be misread rather than refused, silently rejecting an
+		inspection whose readings are in fact within the acceptance range. Readings
+		already stored are left alone, so a document entered by a user in one locale
+		stays saveable and submittable by a user in another."""
+		number_format = get_reading_number_format()
+		decimal_str, comma_str = get_reading_separators(number_format)
+		before_save = self.get_doc_before_save()
+
+		for reading in self.readings:
+			if not cint(reading.numeric) or cint(reading.manual_inspection):
+				continue
+
+			stored = before_save and before_save.get("readings", {"name": reading.name})
+			stored = stored[0] if stored else None
+
+			for i in range(1, 11):
+				field = "reading_" + str(i)
+				value = reading.get(field)
+				if value is None or not value.strip():
+					continue
+
+				if stored and stored.get(field) == value:
+					continue
+
+				if parse_reading(value, decimal_str, comma_str) is None:
+					frappe.throw(
+						_(
+							"Row #{0}: Reading {1} {2} is not a valid number in the {3} number format. Use {4} as the decimal separator."
+						).format(
+							reading.idx,
+							i,
+							frappe.bold(value),
+							frappe.bold(number_format.string),
+							frappe.bold(decimal_str),
+						),
+						title=_("Invalid Reading"),
+					)
 
 	def set_status_based_on_acceptance_values(self, reading):
 		if not cint(reading.numeric):
@@ -368,7 +417,7 @@ class QualityInspection(Document):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def item_query(doctype, txt, searchfield, start, page_len, filters):
+def item_query(doctype: Any, txt: str | None, searchfield: Any, start: int, page_len: int, filters: dict):
 	reference_doctype = filters.get("reference_doctype")
 
 	if not reference_doctype:
@@ -396,9 +445,9 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 			my_filters.extend(
 				[
 					"and",
-					["items.type", "is", "not set"],
+					["items.secondary_item_type", "is", "not set"],
 					"and",
-					["items.is_legacy_scrap_item", "=", 0],
+					["items.valuation_type", "is", "not set"],
 				]
 			)
 			if purpose == "Manufacture":
@@ -507,17 +556,61 @@ def make_quality_inspection(source_name, target_doc=None):
 	return doc
 
 
+def get_reading_number_format() -> NumberFormat:
+	"""Number format the user enters readings in.
+
+	User defaults fall back to the global default, so this is the same format the
+	user's desk formats numbers with."""
+	number_format = frappe.defaults.get_user_default("number_format")
+	if number_format not in NUMBER_FORMAT_MAP:
+		number_format = "#,###.##"
+
+	return NumberFormat.from_string(number_format)
+
+
+def get_reading_separators(number_format: NumberFormat) -> tuple[str, str]:
+	"""Decimal and thousands separator a reading may be written with.
+
+	A format with no decimal separator still has to accept decimal readings, so it
+	falls back to a dot and gives up any grouping that would collide with it."""
+	decimal_str = number_format.decimal_separator or "."
+	comma_str = number_format.thousands_separator
+
+	return decimal_str, "" if comma_str == decimal_str else comma_str
+
+
+def parse_reading(value: str, decimal_str: str, comma_str: str) -> float | None:
+	"""Reading as a float, or None when it is not a number in that format."""
+	value = value.strip()
+	integer_part = value.partition(decimal_str)[0]
+
+	if comma_str and comma_str in integer_part:
+		groups = integer_part.split(comma_str)
+		lead = groups[0][1:] if groups[0][:1] in ("+", "-") else groups[0]
+		if not 1 <= len(lead) <= 3 or len(groups[-1]) != 3:
+			return None
+
+		if any(len(group) not in (2, 3) for group in groups[1:-1]):
+			return None
+
+		value = value.replace(comma_str, "")
+
+	if decimal_str != ".":
+		value = value.replace(decimal_str, ".")
+
+	try:
+		number = float(value)
+	except ValueError:
+		return None
+
+	return number if isfinite(number) else None
+
+
 def parse_float(num: str) -> float:
 	"""Since reading_# fields are `Data` field they might contain number which
 	is representation in user's prefered number format instead of machine
 	readable format. This function converts them to machine readable format."""
 
-	number_format = frappe.db.get_default("number_format") or "#,###.##"
-	decimal_str, comma_str, _number_format_precision = get_number_format_info(number_format)
+	decimal_str, comma_str = get_reading_separators(get_reading_number_format())
 
-	if decimal_str == "," and comma_str == ".":
-		num = num.replace(",", "#$")
-		num = num.replace(".", ",")
-		num = num.replace("#$", ".")
-
-	return flt(num)
+	return flt(parse_reading(num, decimal_str, comma_str))

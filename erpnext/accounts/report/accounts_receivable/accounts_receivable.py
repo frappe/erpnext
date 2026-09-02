@@ -7,6 +7,7 @@ from collections import OrderedDict
 import frappe
 from frappe import _, qb, query_builder, scrub
 from frappe.database.schema import get_definition
+from frappe.permissions import get_allowed_docs_for_doctype
 from frappe.query_builder import Criterion
 from frappe.query_builder.functions import Date, Substring, Sum
 from frappe.utils import cint, cstr, flt, getdate, nowdate
@@ -52,6 +53,7 @@ class ReceivablePayableReport:
 		self.filters = frappe._dict(filters or {})
 		self.qb_selection_filter = []
 		self.ple = qb.DocType("Payment Ledger Entry")
+		self.sales_person_records = None
 		self.filters.report_date = getdate(self.filters.report_date or nowdate())
 		self.age_as_on = (
 			getdate(nowdate())
@@ -92,6 +94,7 @@ class ReceivablePayableReport:
 		self.party_type = get_party_types_from_account_type(self.account_type)
 		self.party_details = {}
 		self.invoices = set()
+		self.sales_person_records = None
 		self.skip_total_row = 0
 		self.advance_payment_doctypes = get_advance_payment_doctypes()
 
@@ -108,6 +111,7 @@ class ReceivablePayableReport:
 
 	def get_data(self):
 		self.get_sales_invoices_or_customers_based_on_sales_person()
+		self.get_invoices_based_on_sales_partner()
 
 		# Get invoice details like bill_no, due_date etc for all invoices
 		self.get_invoice_details()
@@ -205,7 +209,7 @@ class ReceivablePayableReport:
 
 	def get_invoices(self, ple):
 		if ple.voucher_type in ("Sales Invoice", "Purchase Invoice"):
-			if self.filters.get("sales_person"):
+			if self.sales_person_records is not None:
 				if ple.voucher_no in self.sales_person_records.get(
 					"Sales Invoice", []
 				) or ple.party in self.sales_person_records.get("Customer", []):
@@ -236,11 +240,17 @@ class ReceivablePayableReport:
 		]
 
 	def get_voucher_balance(self, ple):
-		if self.filters.get("sales_person"):
+		if self.sales_person_records is not None:
 			if not (
 				ple.party in self.sales_person_records.get("Customer", [])
 				or ple.against_voucher_no in self.sales_person_records.get("Sales Invoice", [])
 			):
+				return
+
+		if self.filters.get("sales_partner"):
+			# a return is folded onto the invoice it settles, so match that invoice's
+			# partner (like the sales_person filter above), not the return's own
+			if ple.against_voucher_no not in self.sales_partner_invoices:
 				return
 
 		if self.filters.get("ignore_accounts"):
@@ -471,7 +481,7 @@ class ReceivablePayableReport:
 					"company": self.filters.company,
 					"docstatus": 1,
 				},
-				fields=["name", "due_date", "po_no"],
+				fields=["name", "due_date", "po_no", "sales_partner"],
 			)
 			for d in si_list:
 				self.invoice_details.setdefault(d.name, d)
@@ -889,25 +899,70 @@ class ReceivablePayableReport:
 
 		self.ple_query = query
 
+	def get_permitted_sales_persons(self, parenttype):
+		if self.account_type != "Receivable":
+			return None
+
+		permissions = frappe.permissions.get_user_permissions(frappe.session.user).get("Sales Person", [])
+		if not permissions:
+			return None
+
+		return get_allowed_docs_for_doctype(permissions, parenttype)
+
 	def get_sales_invoices_or_customers_based_on_sales_person(self):
+		parenttypes = ["Customer", "Sales Invoice"]
+		permitted = {p: self.get_permitted_sales_persons(p) for p in parenttypes}
+
+		if not (self.filters.get("sales_person") or any(p is not None for p in permitted.values())):
+			return
+
+		steam = frappe.qb.DocType("Sales Team")
+
+		scope = []
+		for parenttype in parenttypes:
+			criterion = steam.parenttype == parenttype
+			if (allowed := permitted[parenttype]) is not None:
+				criterion &= steam.sales_person.isin(allowed or [""])
+			scope.append(criterion)
+
+		conditions = [Criterion.any(scope)]
+
 		if self.filters.get("sales_person"):
 			lft, rgt = frappe.db.get_value("Sales Person", self.filters.get("sales_person"), ["lft", "rgt"])
-
-			# nosemgrep
-			records = frappe.db.sql(
-				"""
-				select distinct parent, parenttype
-				from `tabSales Team` steam
-				where parenttype in ('Customer', 'Sales Invoice')
-					and exists(select name from `tabSales Person` where lft >= %s and rgt <= %s and name = steam.sales_person)
-			""",
-				(lft, rgt),
-				as_dict=1,
+			sp = frappe.qb.DocType("Sales Person")
+			conditions.append(
+				steam.sales_person.isin(
+					frappe.qb.from_(sp).select(sp.name).where((sp.lft >= lft) & (sp.rgt <= rgt))
+				)
 			)
 
-			self.sales_person_records = frappe._dict()
-			for d in records:
-				self.sales_person_records.setdefault(d.parenttype, set()).add(d.parent)
+		records = (
+			frappe.qb.from_(steam)
+			.select(steam.parent, steam.parenttype)
+			.distinct()
+			.where(Criterion.all(conditions))
+			.run(as_dict=1)
+		)
+
+		self.sales_person_records = frappe._dict()
+		for d in records:
+			self.sales_person_records.setdefault(d.parenttype, set()).add(d.parent)
+
+	def get_invoices_based_on_sales_partner(self):
+		if not self.filters.get("sales_partner"):
+			return
+
+		self.sales_partner_invoices = set(
+			frappe.get_all(
+				"Sales Invoice",
+				filters={
+					"sales_partner": self.filters.get("sales_partner"),
+					"docstatus": 1,
+					"company": self.filters.company,
+				},
+				pluck="name",
+			)
+		)
 
 	def prepare_conditions(self):
 		self.qb_selection_filter = []
@@ -996,7 +1051,13 @@ class ReceivablePayableReport:
 			self.qb_selection_filter.append(self.ple.party.isin(customers))
 
 		if self.filters.get("territory"):
-			self.get_hierarchical_filters("Territory", "territory")
+			territories = get_nested_set_children("Territory", self.filters.territory)
+			customers = (
+				qb.from_(self.customer)
+				.select(self.customer.name)
+				.where(self.customer["territory"].isin(territories))
+			)
+			self.qb_selection_filter.append(self.ple.party.isin(customers))
 
 		if self.filters.get("payment_terms_template"):
 			customer_ptt = self.ple.party.isin(
@@ -1011,26 +1072,16 @@ class ReceivablePayableReport:
 
 			self.qb_selection_filter.append(Criterion.any([customer_ptt, sales_ptt]))
 
-		if self.filters.get("sales_partner"):
-			self.qb_selection_filter.append(
-				self.ple.party.isin(
-					qb.from_(self.customer)
-					.select(self.customer.name)
-					.where(self.customer.default_sales_partner == self.filters.get("sales_partner"))
-				)
-			)
-
 	def exclude_employee_transaction(self):
 		self.qb_selection_filter.append(self.ple.party_type != "Employee")
 
 	def add_supplier_filters(self):
 		supplier = qb.DocType("Supplier")
 		if self.filters.get("supplier_group"):
+			groups = get_party_group_with_children("Supplier", self.filters.supplier_group)
 			self.qb_selection_filter.append(
 				self.ple.party.isin(
-					qb.from_(supplier)
-					.select(supplier.name)
-					.where(supplier.supplier_group == self.filters.get("supplier_group"))
+					qb.from_(supplier).select(supplier.name).where(supplier.supplier_group.isin(groups))
 				)
 			)
 
@@ -1082,16 +1133,6 @@ class ReceivablePayableReport:
 
 		return ptt
 
-	def get_hierarchical_filters(self, doctype, key):
-		lft, rgt = frappe.db.get_value(doctype, self.filters.get(key), ["lft", "rgt"])
-
-		doc = qb.DocType(doctype)
-		ple = self.ple
-		customer = self.customer
-		groups = qb.from_(doc).select(doc.name).where((doc.lft >= lft) & (doc.rgt <= rgt))
-		customers = qb.from_(customer).select(customer.name).where(customer[key].isin(groups))
-		self.qb_selection_filter.append(ple.party.isin(customers))
-
 	def add_accounting_dimensions_filters(self):
 		accounting_dimensions = get_accounting_dimensions(as_list=False)
 
@@ -1118,9 +1159,6 @@ class ReceivablePayableReport:
 		if party not in self.party_details:
 			if self.account_type == "Receivable":
 				fields = ["customer_name", "territory", "customer_group", "customer_primary_contact"]
-
-				if self.filters.get("sales_partner"):
-					fields.append("default_sales_partner")
 
 				self.party_details[party] = frappe.db.get_value(
 					"Customer",
@@ -1251,7 +1289,7 @@ class ReceivablePayableReport:
 				self.add_column(label=_("Sales Person"), fieldname="sales_person", fieldtype="Data")
 
 			if self.filters.sales_partner:
-				self.add_column(label=_("Sales Partner"), fieldname="default_sales_partner", fieldtype="Data")
+				self.add_column(label=_("Sales Partner"), fieldname="sales_partner", fieldtype="Data")
 
 		if self.filters.account_type == "Payable":
 			self.add_column(
@@ -1338,19 +1376,23 @@ def get_party_group_with_children(party, party_groups):
 	if party not in ("Customer", "Supplier"):
 		return []
 
-	group_dtype = f"{party} Group"
-	if not isinstance(party_groups, list):
-		party_groups = [d.strip() for d in party_groups.strip().split(",") if d]
+	return get_nested_set_children(f"{party} Group", party_groups)
 
-	all_party_groups = []
-	for d in party_groups:
-		if frappe.db.exists(group_dtype, d):
-			lft, rgt = frappe.db.get_value(group_dtype, d, ["lft", "rgt"])
-			children = frappe.get_all(
-				group_dtype, filters={"lft": [">=", lft], "rgt": ["<=", rgt]}, pluck="name"
-			)
-			all_party_groups += children
+
+def get_nested_set_children(doctype, values):
+	if not isinstance(values, list):
+		values = [d.strip() for d in values.split(",") if d.strip()]
+
+	if not values:
+		frappe.throw(_("Please select a valid {0}").format(_(doctype)))
+
+	all_values = []
+	for d in values:
+		if frappe.db.exists(doctype, d):
+			lft, rgt = frappe.db.get_value(doctype, d, ["lft", "rgt"])
+			children = frappe.get_all(doctype, filters={"lft": [">=", lft], "rgt": ["<=", rgt]}, pluck="name")
+			all_values += children
 		else:
-			frappe.throw(_("{0}: {1} does not exist").format(group_dtype, d))
+			frappe.throw(_("{0}: {1} does not exist").format(doctype, d))
 
-	return list(set(all_party_groups))
+	return list(set(all_values))

@@ -17,6 +17,7 @@ class SubcontractingReceiptItem(Document):
 		additional_cost_per_qty: DF.Currency
 		amount: DF.Currency
 		batch_no: DF.Link | None
+		bom_secondary_item: DF.Data | None
 		bom: DF.Link | None
 		brand: DF.Link | None
 		conversion_factor: DF.Float
@@ -25,7 +26,6 @@ class SubcontractingReceiptItem(Document):
 		expense_account: DF.Link | None
 		image: DF.Attach | None
 		include_exploded_items: DF.Check
-		is_legacy_scrap_item: DF.Check
 		item_code: DF.Link
 		item_name: DF.Data | None
 		job_card: DF.Link | None
@@ -62,8 +62,9 @@ class SubcontractingReceiptItem(Document):
 		subcontracting_order: DF.Link | None
 		subcontracting_order_item: DF.Data | None
 		subcontracting_receipt_item: DF.Data | None
-		type: DF.Literal["", "Co-Product", "By-Product", "Scrap", "Additional Finished Good"]
+		secondary_item_type: DF.Literal["", "Co-Product", "By-Product", "Scrap", "Additional Finished Good"]
 		use_serial_batch_fields: DF.Check
+		valuation_type: DF.Literal["", "Valuation Rate", "% of FG Cost", "Manual"]
 		warehouse: DF.Link | None
 	# end: auto-generated types
 

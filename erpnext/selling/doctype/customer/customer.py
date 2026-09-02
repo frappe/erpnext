@@ -16,7 +16,7 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.model.naming import set_name_by_naming_series, set_name_from_naming_options
 from frappe.model.utils.rename_doc import update_linked_doctypes
 from frappe.query_builder import Field, functions
-from frappe.utils import cint, cstr, flt, fmt_money, get_formatted_email, getdate, today
+from frappe.utils import cint, cstr, flt, fmt_money, get_formatted_email, get_link_to_form, getdate, today
 from frappe.utils.user import get_users_with_role
 
 from erpnext.accounts.party import (
@@ -194,7 +194,8 @@ class Customer(TransactionBase):
 				self.loyalty_program_tier = customer.loyalty_program_tier
 
 		if self.sales_team:
-			if sum(member.allocated_percentage or 0 for member in self.sales_team) != 100:
+			total = sum(flt(member.allocated_percentage) for member in self.sales_team)
+			if flt(total, self.precision("allocated_percentage", "sales_team")) != 100:
 				frappe.throw(_("Total contribution percentage should be equal to 100"))
 
 	@frappe.whitelist()
@@ -260,10 +261,15 @@ class Customer(TransactionBase):
 		)
 
 		if internal_customer:
+			internal_customer_link = get_link_to_form("Customer", internal_customer)
 			frappe.throw(
-				_("Internal Customer for company {0} already exists").format(
-					frappe.bold(self.represents_company)
-				)
+				_(
+					"Internal Customer {0} already exists for {1}. Disable it to make this Customer internal."
+				).format(
+					internal_customer_link,
+					frappe.bold(self.represents_company),
+				),
+				title=_("Internal Customer Already Exists"),
 			)
 
 	def on_update(self):
@@ -730,8 +736,8 @@ def get_overdue_billing_threshold(customer: str, company: str) -> float:
 def get_customer_overdue_amount(customer: str, company: str) -> float:
 	"""Amount the customer owes past its due date, in company currency.
 
-	Follows the same rule as the Overdue invoice status, so a customer is only
-	blocked for what the invoice list already shows as overdue.
+	Reads the Payment Ledger, the same source as `outstanding_amount`, so this agrees
+	with the Overdue status the invoice list already shows.
 	"""
 	invoices = get_outstanding_invoices_for_customer(customer, company)
 	if not invoices:
@@ -744,27 +750,28 @@ def get_customer_overdue_amount(customer: str, company: str) -> float:
 def get_outstanding_invoices_for_customer(customer: str, company: str) -> list[frappe._dict]:
 	from frappe.query_builder.functions import Sum
 
-	gl_entry = frappe.qb.DocType("GL Entry")
+	ple = frappe.qb.DocType("Payment Ledger Entry")
 	sales_invoice = frappe.qb.DocType("Sales Invoice")
 
-	# debit - credit is always booked in company currency, so this is comparable to the overdue limit
-	outstanding = Sum(gl_entry.debit) - Sum(gl_entry.credit)
+	# the Payment Ledger, not the GL, carries allocations made after submit (reconciled advances).
+	# `amount` is booked in company currency, so this is comparable to the overdue limit.
+	outstanding = Sum(ple.amount)
 
 	return (
-		frappe.qb.from_(gl_entry)
+		frappe.qb.from_(ple)
 		.inner_join(sales_invoice)
-		.on(sales_invoice.name == gl_entry.against_voucher)
+		.on(sales_invoice.name == ple.against_voucher_no)
 		.select(
 			sales_invoice.name,
 			sales_invoice.due_date,
 			sales_invoice.base_grand_total,
 			outstanding.as_("outstanding"),
 		)
-		.where(gl_entry.party_type == "Customer")
-		.where(gl_entry.party == customer)
-		.where(gl_entry.company == company)
-		.where(gl_entry.is_cancelled == 0)
-		.where(gl_entry.against_voucher_type == "Sales Invoice")
+		.where(ple.party_type == "Customer")
+		.where(ple.party == customer)
+		.where(ple.company == company)
+		.where(ple.delinked == 0)
+		.where(ple.against_voucher_type == "Sales Invoice")
 		.groupby(sales_invoice.name, sales_invoice.due_date, sales_invoice.base_grand_total)
 		.having(outstanding > 0)
 	).run(as_dict=True)

@@ -13,6 +13,7 @@ from frappe.model.document import Document
 from frappe.share import add_docshare
 from frappe.utils import add_to_date, cint, date_diff, get_datetime, get_url, getdate, now, now_datetime
 from frappe.utils.data import sha256_hash
+from frappe.utils.html_utils import escape_html
 
 from erpnext.setup.doctype.holiday_list.holiday_list import is_holiday
 
@@ -269,7 +270,11 @@ class Appointment(Document):
 		if self.customer_details:
 			lead.append(
 				"notes",
-				{"note": self.customer_details, "added_by": frappe.session.user, "added_on": now()},
+				{
+					"note": escape_html(self.customer_details),
+					"added_by": frappe.session.user,
+					"added_on": now(),
+				},
 			)
 
 		self.party = lead.insert(ignore_permissions=True).name

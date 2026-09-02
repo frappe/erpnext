@@ -213,6 +213,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "FG / Semi FG Item",
+   "mandatory_depends_on": "eval:parent.track_semi_finished_goods === 1",
    "options": "Item"
   },
   {
@@ -307,7 +308,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-05-25 17:15:42.044630",
+ "modified": "2026-08-08 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Operation",

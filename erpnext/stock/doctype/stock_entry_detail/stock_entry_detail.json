@@ -18,8 +18,8 @@
   "item_name",
   "col_break2",
   "is_finished_item",
-  "is_legacy_scrap_item",
-  "type",
+  "valuation_type",
+  "secondary_item_type",
   "quality_inspection",
   "subcontracted_item",
   "against_fg",
@@ -255,6 +255,7 @@
    "label": "Conversion Factor",
    "oldfieldname": "conversion_factor",
    "oldfieldtype": "Currency",
+   "precision": "9",
    "print_hide": 1,
    "reqd": 1
   },
@@ -569,7 +570,7 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:!doc.is_legacy_scrap_item && !doc.type",
+   "depends_on": "eval:!doc.valuation_type && !doc.secondary_item_type",
    "fieldname": "is_finished_item",
    "fieldtype": "Check",
    "label": "Is Finished Item",
@@ -662,11 +663,12 @@
    "set_only_once": 1
   },
   {
-   "depends_on": "eval:parent.purpose == \"Manufacture\" && doc.t_warehouse && !doc.is_finished_item && !doc.is_legacy_scrap_item",
-   "fieldname": "type",
+   "depends_on": "eval:parent.purpose == \"Manufacture\" && doc.t_warehouse && !doc.is_finished_item",
+   "fieldname": "secondary_item_type",
    "fieldtype": "Select",
    "label": "Type",
-   "options": "\nCo-Product\nBy-Product\nScrap\nAdditional Finished Good"
+   "options": "\nCo-Product\nBy-Product\nScrap\nAdditional Finished Good",
+   "read_only_depends_on": "eval:doc.bom_secondary_item"
   },
   {
    "fieldname": "bom_secondary_item",
@@ -676,12 +678,12 @@
    "read_only": 1
   },
   {
-   "default": "0",
-   "depends_on": "is_legacy_scrap_item",
-   "fieldname": "is_legacy_scrap_item",
-   "fieldtype": "Check",
-   "label": "Is Legacy Scrap Item",
-   "read_only": 1
+   "depends_on": "secondary_item_type",
+   "fieldname": "valuation_type",
+   "fieldtype": "Select",
+   "label": "Valuation Type",
+   "options": "\nValuation Rate\n% of FG Cost\nManual",
+   "read_only_depends_on": "eval:!doc.secondary_item_type || doc.bom_secondary_item"
   }
  ],
  "grid_page_length": 50,
@@ -689,7 +691,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-07-06 18:17:18.000000",
+ "modified": "2026-08-07 17:31:31.732720",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Detail",

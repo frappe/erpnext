@@ -1,8 +1,12 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors and Contributors
 # See license.txt
 
+from contextlib import contextmanager
+from unittest.mock import patch
+
 import frappe
 from frappe.utils import nowdate
+from frappe.utils.number_format import NumberFormat
 
 from erpnext.controllers.stock_controller import (
 	QualityInspectionNotSubmittedError,
@@ -12,8 +16,27 @@ from erpnext.controllers.stock_controller import (
 )
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.item.test_item import create_item
+from erpnext.stock.doctype.quality_inspection.quality_inspection import (
+	get_reading_separators,
+	parse_reading,
+)
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.tests.utils import ERPNextTestSuite
+
+
+@contextmanager
+def user_number_format(number_format):
+	"""Temporarily set the session user's own number format."""
+	user = frappe.session.user
+	previous = frappe.db.get_value("DefaultValue", {"parent": user, "defkey": "number_format"}, "defvalue")
+	frappe.defaults.set_user_default("number_format", number_format)
+	try:
+		yield
+	finally:
+		if previous:
+			frappe.defaults.set_user_default("number_format", previous)
+		else:
+			frappe.defaults.clear_user_default("number_format")
 
 
 class TestQualityInspection(ERPNextTestSuite):
@@ -55,6 +78,27 @@ class TestQualityInspection(ERPNextTestSuite):
 
 		qa.delete()
 		dn.delete()
+
+	def test_doc_update_published_for_reference_on_submit(self):
+		"""Submitting a QI publishes doc_update so open reference forms resync their timestamp."""
+		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
+		qa = create_quality_inspection(
+			reference_type="Delivery Note", reference_name=dn.name, do_not_submit=True
+		)
+
+		with patch.object(frappe, "publish_realtime") as publish_realtime:
+			qa.submit()
+
+		reference_updates = [
+			call
+			for call in publish_realtime.call_args_list
+			if call.args and call.args[0] == "doc_update" and call.kwargs.get("docname") == dn.name
+		]
+		self.assertEqual(len(reference_updates), 1)
+
+		message = reference_updates[0].args[1]
+		self.assertEqual(message["doctype"], "Delivery Note")
+		self.assertEqual(message["modified"], frappe.db.get_value("Delivery Note", dn.name, "modified"))
 
 	def test_value_based_qi_readings(self):
 		# Test QI based on acceptance values (Non formula)
@@ -108,7 +152,6 @@ class TestQualityInspection(ERPNextTestSuite):
 				"acceptance_formula": "mean < 0.9",
 				"reading_1": "0.5",
 				"reading_2": "0.7",
-				"reading_3": "random text",  # check if random string input causes issues
 			},
 			{
 				"specification": "Calcium Content",  # non-numeric reading
@@ -251,6 +294,208 @@ class TestQualityInspection(ERPNextTestSuite):
 
 		qa.delete()
 		dn.delete()
+
+	def test_non_numeric_reading(self):
+		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
+		create_quality_inspection_parameter("Density")
+
+		readings = [
+			{"specification": "Density", "min_value": 1.15, "max_value": 1.20, "reading_1": "random text"}
+		]
+		qa = create_quality_inspection(
+			reference_type="Delivery Note", reference_name=dn.name, readings=readings, do_not_save=True
+		)
+
+		self.assertRaises(frappe.ValidationError, qa.save)
+
+		dn.delete()
+
+	def test_non_numeric_reading_in_formula_based_criteria(self):
+		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
+		create_quality_inspection_parameter("Density")
+
+		readings = [
+			{
+				"specification": "Density",
+				"formula_based_criteria": 1,
+				"acceptance_formula": "mean < 0.9",
+				"reading_1": "0.5",
+				"reading_2": "0.7",
+				"reading_3": "random text",
+			}
+		]
+		qa = create_quality_inspection(
+			reference_type="Delivery Note", reference_name=dn.name, readings=readings, do_not_save=True
+		)
+
+		self.assertRaises(frappe.ValidationError, qa.save)
+
+		dn.delete()
+
+	def test_manual_inspection_reading_is_not_number_checked(self):
+		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
+		create_quality_inspection_parameter("Density")
+
+		readings = [
+			{
+				"specification": "Density",
+				"manual_inspection": 1,
+				"status": "Accepted",
+				"min_value": 1.15,
+				"max_value": 1.20,
+				"reading_1": "1.15 g/cm3",
+			}
+		]
+		qa = create_quality_inspection(
+			reference_type="Delivery Note", reference_name=dn.name, readings=readings, do_not_save=True
+		)
+		qa.save()
+
+		self.assertEqual(qa.readings[0].status, "Accepted")
+
+		qa.delete()
+		dn.delete()
+
+	def test_reading_in_comma_decimal_number_format(self):
+		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
+		create_quality_inspection_parameter("Density")
+
+		readings = [{"specification": "Density", "min_value": 1.15, "max_value": 1.20, "reading_1": "1,15"}]
+		with user_number_format("#.###,##"):
+			qa = create_quality_inspection(
+				reference_type="Delivery Note", reference_name=dn.name, readings=readings, do_not_save=True
+			)
+			qa.save()
+
+			self.assertEqual(qa.readings[0].status, "Accepted")
+			self.assertEqual(qa.status, "Accepted")
+
+		qa.delete()
+		dn.delete()
+
+	def test_reading_in_space_grouped_number_format(self):
+		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
+		create_quality_inspection_parameter("Density")
+
+		readings = [{"specification": "Density", "min_value": 1.15, "max_value": 1.20, "reading_1": "1,15"}]
+		with user_number_format("# ###,##"):
+			qa = create_quality_inspection(
+				reference_type="Delivery Note", reference_name=dn.name, readings=readings, do_not_save=True
+			)
+			qa.save()
+
+			self.assertEqual(qa.readings[0].status, "Accepted")
+			self.assertEqual(qa.status, "Accepted")
+
+		qa.delete()
+		dn.delete()
+
+	def test_reading_in_wrong_decimal_number_format(self):
+		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
+		create_quality_inspection_parameter("Density")
+
+		readings = [{"specification": "Density", "min_value": 1.15, "max_value": 1.20, "reading_1": "1.15"}]
+		with user_number_format("#.###,##"):
+			qa = create_quality_inspection(
+				reference_type="Delivery Note", reference_name=dn.name, readings=readings, do_not_save=True
+			)
+
+			self.assertRaises(frappe.ValidationError, qa.save)
+
+		dn.delete()
+
+	def test_reading_with_comma_in_dot_decimal_number_format(self):
+		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
+		create_quality_inspection_parameter("Density")
+
+		readings = [{"specification": "Density", "min_value": 1.15, "max_value": 1.20, "reading_1": "1,15"}]
+		with user_number_format("#,###.##"):
+			qa = create_quality_inspection(
+				reference_type="Delivery Note", reference_name=dn.name, readings=readings, do_not_save=True
+			)
+
+			self.assertRaises(frappe.ValidationError, qa.save)
+
+		dn.delete()
+
+	@ERPNextTestSuite.change_settings("System Settings", {"number_format": "#,###.##"})
+	def test_reading_number_format_prefers_the_user_over_the_system(self):
+		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
+		create_quality_inspection_parameter("Density")
+
+		readings = [{"specification": "Density", "min_value": 1.15, "max_value": 1.20, "reading_1": "1,15"}]
+		with user_number_format("#.###,##"):
+			qa = create_quality_inspection(
+				reference_type="Delivery Note", reference_name=dn.name, readings=readings, do_not_save=True
+			)
+			qa.save()
+
+			self.assertEqual(qa.readings[0].status, "Accepted")
+
+		qa.delete()
+		dn.delete()
+
+	def test_stored_reading_stays_submittable_in_another_number_format(self):
+		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
+		create_quality_inspection_parameter("Density")
+
+		readings = [{"specification": "Density", "min_value": 1.15, "max_value": 1.20, "reading_1": "1,15"}]
+		with user_number_format("#.###,##"):
+			qa = create_quality_inspection(
+				reference_type="Delivery Note", reference_name=dn.name, readings=readings, do_not_save=True
+			)
+			qa.save()
+
+		with user_number_format("#,###.##"):
+			qa.reload()
+			qa.submit()
+
+		self.assertEqual(qa.docstatus, 1)
+
+		qa.cancel()
+		qa.delete()
+		dn.delete()
+
+	def test_parse_reading_in_every_number_format(self):
+		accepted = [
+			("#,###.##", "1.15", 1.15),
+			("#,###.##", "1,234.56", 1234.56),
+			("#,##,###.##", "12,34,567.89", 1234567.89),
+			("#,###.###", "1,234.567", 1234.567),
+			("#.###,##", "1,15", 1.15),
+			("#.###,##", "1.234,56", 1234.56),
+			("# ###,##", "1,15", 1.15),
+			("# ###,##", "1.15", 1.15),
+			("# ###,##", "1 234,56", 1234.56),
+			("# ###.##", "1 234.56", 1234.56),
+			("#'###.##", "1'234.56", 1234.56),
+			("#, ###.##", "1, 234.56", 1234.56),
+			("#.########", "1.15", 1.15),
+			("#,###", "1.5", 1.5),
+			("#,###", "1,500", 1500.0),
+			("#.###", "1.5", 1.5),
+			("#.###", "1.500", 1.5),
+			("#,###.##", "-1,234.56", -1234.56),
+		]
+		refused = [
+			("#,###.##", "1,15"),
+			("#.###,##", "1.15"),
+			("#,###.##", "--1.15"),
+			("#,###.##", "1²"),
+			("#,###.##", "nan"),
+			("#,###.##", "random text"),
+			("#,###", "1,50"),
+		]
+
+		for number_format, value, expected in accepted:
+			decimal_str, comma_str = get_reading_separators(NumberFormat.from_string(number_format))
+			with self.subTest(number_format=number_format, value=value):
+				self.assertEqual(parse_reading(value, decimal_str, comma_str), expected)
+
+		for number_format, value in refused:
+			decimal_str, comma_str = get_reading_separators(NumberFormat.from_string(number_format))
+			with self.subTest(number_format=number_format, value=value):
+				self.assertIsNone(parse_reading(value, decimal_str, comma_str))
 
 	def test_delete_quality_inspection_linked_with_stock_entry(self):
 		item_code = create_item("_Test Cicuular Dependecy Item with QA").name

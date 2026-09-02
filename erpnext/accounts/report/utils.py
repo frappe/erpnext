@@ -1,4 +1,5 @@
 import frappe
+from frappe import _
 from frappe.query_builder.custom import ConstantColumn
 from frappe.query_builder.functions import Sum
 from frappe.utils import flt, formatdate, get_datetime_str, get_table_name
@@ -14,6 +15,19 @@ from erpnext.accounts.party import get_party_account
 from erpnext.setup.utils import get_exchange_rate
 
 __exchange_rates = {}
+
+
+def validate_mandatory_date_range(filters, from_field="from_date", to_field="to_date"):
+	from_date = filters.get(from_field)
+	to_date = filters.get(to_field)
+
+	if not from_date or not to_date:
+		frappe.throw(
+			_("{0} and {1} are mandatory").format(frappe.bold(_("From Date")), frappe.bold(_("To Date")))
+		)
+
+	if from_date > to_date:
+		frappe.throw(_("From Date must be before To Date"))
 
 
 def get_currency(filters):

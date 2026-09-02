@@ -22,8 +22,10 @@ def copy_doctypes():
 
 
 def insert_into_bom():
-	fields = ["item_code", "item_name", "stock_uom", "stock_qty", "rate"]
-	data = frappe.get_all("BOM Scrap Item", {"docstatus": ("<", 2)}, ["parent", *fields])
+	fields = ["item_code", "item_name", "stock_uom", "stock_qty"]
+	data = frappe.get_all(
+		"BOM Scrap Item", {"docstatus": ("<", 2)}, ["parent", *fields, "amount", "base_amount"]
+	)
 	grouped_data = defaultdict(list)
 	for item in data:
 		grouped_data[item.parent].append(item)
@@ -40,8 +42,10 @@ def insert_into_bom():
 					"uom": item.stock_uom,
 					"conversion_factor": 1,
 					"qty": item.stock_qty,
-					"is_legacy": 1,
-					"type": "Scrap",
+					"valuation_type": "Valuation Rate",
+					"secondary_item_type": "Scrap",
+					"cost": item.amount,
+					"base_cost": item.base_amount,
 				}
 			)
 			secondary_item.insert()
@@ -49,7 +53,14 @@ def insert_into_bom():
 
 def insert_into_job_card():
 	fields = ["item_code", "item_name", "description", "stock_qty", "stock_uom"]
-	bulk_insert("Job Card", "Job Card Scrap Item", "Job Card Secondary Item", fields, ["type"], ["Scrap"])
+	bulk_insert(
+		"Job Card",
+		"Job Card Scrap Item",
+		"Job Card Secondary Item",
+		fields,
+		["secondary_item_type"],
+		["Scrap"],
+	)
 
 
 def insert_into_subcontracting_inward():
@@ -67,7 +78,7 @@ def insert_into_subcontracting_inward():
 		"Subcontracting Inward Order Scrap Item",
 		"Subcontracting Inward Order Secondary Item",
 		fields,
-		["type"],
+		["secondary_item_type"],
 		["Scrap"],
 	)
 
@@ -93,12 +104,21 @@ def bulk_insert(parent_doctype, old_doctype, new_doctype, old_fields, new_fields
 def rename_fields():
 	rename_field("BOM", "scrap_material_cost", "secondary_items_cost")
 	rename_field("BOM", "base_scrap_material_cost", "base_secondary_items_cost")
-	rename_field("Stock Entry Detail", "is_scrap_item", "is_legacy_scrap_item")
+	set_valuation_type("Stock Entry Detail", "is_scrap_item")
 	rename_field(
 		"Manufacturing Settings",
 		"set_op_cost_and_scrap_from_sub_assemblies",
 		"set_op_cost_and_secondary_items_from_sub_assemblies",
 	)
 	rename_field("Selling Settings", "deliver_scrap_items", "deliver_secondary_items")
-	rename_field("Subcontracting Receipt Item", "is_scrap_item", "is_legacy_scrap_item")
+	set_valuation_type("Subcontracting Receipt Item", "is_scrap_item")
 	rename_field("Subcontracting Receipt Item", "scrap_cost_per_qty", "secondary_items_cost_per_qty")
+
+
+def set_valuation_type(doctype, legacy_field):
+	"""The legacy scrap flag becomes the Valuation Rate method."""
+	if not frappe.db.has_column(doctype, legacy_field):
+		return
+
+	table = frappe.qb.DocType(doctype)
+	frappe.qb.update(table).set(table.valuation_type, "Valuation Rate").where(table[legacy_field] == 1).run()

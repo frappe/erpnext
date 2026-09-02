@@ -10,7 +10,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder import Case
-from frappe.query_builder.functions import IfNull, Sum
+from frappe.query_builder.functions import Coalesce, IfNull, Sum
 from frappe.utils import (
 	cint,
 	date_diff,
@@ -34,6 +34,10 @@ from erpnext.manufacturing.doctype.bom.bom import (
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import (
 	get_mins_between_operations,
 )
+from erpnext.manufacturing.doctype.work_order.services.material_coverage import (
+	get_minimum_material_coverage_fraction,
+)
+from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.batch.batch import make_batch
 from erpnext.stock.doctype.item.item import get_item_defaults, validate_end_of_life
 from erpnext.stock.doctype.serial_no.serial_no import get_available_serial_nos, get_serial_nos
@@ -183,11 +187,11 @@ class WorkOrder(Document):
 			.where(
 				(parent.work_order == self.name)
 				& (parent.docstatus == 1)
-				& ((child.type != "") | (child.is_legacy_scrap_item == 1))
+				& ((child.secondary_item_type != "") | (Coalesce(child.valuation_type, "") != ""))
 			)
 			.select(
 				child.item_code,
-				Case().when(child.is_legacy_scrap_item == 1, "Scrap (Legacy)").else_(child.type).as_("type"),
+				Coalesce(child.secondary_item_type, "Scrap (Legacy)").as_("secondary_item_type"),
 				child.qty,
 				child.uom,
 				child.amount,
@@ -203,7 +207,7 @@ class WorkOrder(Document):
 				filters={"name": self.bom_no},
 				fields=[
 					"secondary_items.item_code",
-					"secondary_items.type",
+					"secondary_items.secondary_item_type",
 					"secondary_items.qty",
 					"secondary_items.uom",
 					"secondary_items.cost as amount",
@@ -520,7 +524,7 @@ class WorkOrder(Document):
 			PackedItem = frappe.qb.DocType("Packed Item")
 			ProductBundleItem = frappe.qb.DocType("Product Bundle Item")
 
-			so = (
+			so_query = (
 				frappe.qb.from_(SalesOrder)
 				.inner_join(SalesOrderItem)
 				.on(SalesOrderItem.parent == SalesOrder.name)
@@ -536,16 +540,23 @@ class WorkOrder(Document):
 						| (ProductBundleItem.item_code == production_item)
 					)
 				)
-				.run(as_dict=1)
 			)
 
+			if self.sales_order_item:
+				so_query = so_query.where(SalesOrderItem.name == self.sales_order_item)
+
+			so = so_query.run(as_dict=1)
+
 			if not so:
-				so = (
+				packed_so_query = (
 					frappe.qb.from_(SalesOrder)
 					.inner_join(SalesOrderItem)
 					.on(SalesOrderItem.parent == SalesOrder.name)
 					.inner_join(PackedItem)
-					.on(PackedItem.parent == SalesOrder.name)
+					.on(
+						(PackedItem.parent == SalesOrder.name)
+						& (PackedItem.parent_detail_docname == SalesOrderItem.name)
+					)
 					.select(SalesOrder.name, SalesOrder.project, SalesOrderItem.delivery_date)
 					.where(
 						(SalesOrder.name == self.sales_order)
@@ -554,8 +565,15 @@ class WorkOrder(Document):
 						& (SalesOrder.docstatus == 1)
 						& (PackedItem.item_code == production_item)
 					)
-					.run(as_dict=1)
 				)
+
+				if self.sales_order_item:
+					packed_so_query = packed_so_query.where(
+						(PackedItem.name == self.sales_order_item)
+						| (SalesOrderItem.name == self.sales_order_item)
+					)
+
+				so = packed_so_query.run(as_dict=1)
 
 			if len(so):
 				if not self.expected_delivery_date:
@@ -573,7 +591,18 @@ class WorkOrder(Document):
 		if not self.wip_warehouse and not self.skip_transfer:
 			self.wip_warehouse = frappe.get_cached_value("Company", self.company, "default_wip_warehouse")
 		if not self.fg_warehouse:
-			self.fg_warehouse = frappe.get_cached_value("Company", self.company, "default_fg_warehouse")
+			self.fg_warehouse = (
+				frappe.get_cached_value("Company", self.company, "default_fg_warehouse")
+				or self.get_production_item_warehouse()
+			)
+
+	def get_production_item_warehouse(self):
+		if not self.production_item:
+			return None
+
+		return get_item_defaults(self.production_item, self.company).get(
+			"default_warehouse"
+		) or get_item_group_defaults(self.production_item, self.company).get("default_warehouse")
 
 	def check_wip_warehouse_skip(self):
 		if self.skip_transfer and not self.from_wip_warehouse:
@@ -681,11 +710,7 @@ class WorkOrder(Document):
 		elif self.docstatus == 1:
 			if status not in ["Closed", "Stopped"]:
 				status = "Not Started"
-				if (
-					flt(self.material_transferred_for_manufacturing) > 0
-					or self.skip_transfer
-					or self._has_transferred_material()
-				):
+				if flt(self.material_transferred_for_manufacturing) > 0 or self._has_transferred_material():
 					status = "In Process"
 
 				precision = frappe.get_precision("Work Order", "produced_qty")
@@ -720,29 +745,9 @@ class WorkOrder(Document):
 		return status
 
 	def _has_transferred_material(self):
-		"""True if any raw material transferred against this work order via a pick list or a
-		material request is still, net of returns, in WIP (these leave
-		material_transferred_for_manufacturing at 0 via the min-fraction rule)."""
+		"""True if any raw material transferred against this work order is still in WIP."""
 		ste = frappe.qb.DocType("Stock Entry")
 		ste_child = frappe.qb.DocType("Stock Entry Detail")
-		mr_ste = frappe.qb.DocType("Stock Entry")
-		mr_child = frappe.qb.DocType("Stock Entry Detail")
-		# Stock Entry only carries `material_request` at the child-row level, so a Stock
-		# Entry is "MR-sourced" if *any* of its rows link back to a Material Request against
-		# this work order; the join to mr_ste keeps this scoped to this work order's entries
-		# instead of scanning every Material-Request-linked row in the system.
-		mr_sourced_stock_entries = (
-			frappe.qb.from_(mr_child)
-			.inner_join(mr_ste)
-			.on(mr_ste.name == mr_child.parent)
-			.select(mr_child.parent)
-			.where(
-				(mr_child.material_request.isnotnull())
-				& (mr_ste.work_order == self.name)
-				& (mr_ste.docstatus == 1)
-				& (mr_ste.purpose == "Material Transfer for Manufacture")
-			)
-		)
 		common_filters = (
 			(ste.work_order == self.name)
 			& (ste.docstatus == 1)
@@ -753,11 +758,7 @@ class WorkOrder(Document):
 			.inner_join(ste_child)
 			.on(ste_child.parent == ste.name)
 			.select(Sum(ste_child.transfer_qty))
-			.where(
-				common_filters
-				& (ste.is_return == 0)
-				& (ste.pick_list.isnotnull() | ste.name.isin(mr_sourced_stock_entries))
-			)
+			.where(common_filters & (ste.is_return == 0))
 		).run()[0][0]
 		# Returns don't carry their own pick_list/material_request reference, so net every
 		# return against this work order to correctly clear WIP after a full return.
@@ -883,6 +884,12 @@ class WorkOrder(Document):
 		return flt(query.run()[0][0])
 
 	def set_process_loss_qty(self):
+		self.db_set("process_loss_qty", self._process_loss_qty())
+
+	def _process_loss_qty(self):
+		if self.track_semi_finished_goods:
+			return flt(sum(flt(row.process_loss_qty) for row in self.operations))
+
 		table = frappe.qb.DocType("Stock Entry")
 		process_loss_qty = (
 			frappe.qb.from_(table)
@@ -892,7 +899,7 @@ class WorkOrder(Document):
 			)
 		).run()[0][0]
 
-		self.db_set("process_loss_qty", flt(process_loss_qty))
+		return flt(process_loss_qty)
 
 	def update_production_plan_status(self):
 		production_plan = frappe.get_doc("Production Plan", self.production_plan)
@@ -916,12 +923,9 @@ class WorkOrder(Document):
 		production_plan.run_method("update_produced_pending_qty", produced_qty, self.production_plan_item)
 
 	def validate_warehouse(self):
-		if self.track_semi_finished_goods:
-			return
-
 		if not self.wip_warehouse and not self.skip_transfer:
 			frappe.throw(_("Work-in-Progress Warehouse is required before Submit"))
-		if not self.fg_warehouse:
+		if not self.fg_warehouse and not self.track_semi_finished_goods:
 			frappe.throw(_("Target Warehouse is required before Submit"))
 
 	def before_submit(self):
@@ -1734,7 +1738,12 @@ class WorkOrder(Document):
 							"allow_alternative_item": item.allow_alternative_item,
 							"required_qty": item.qty,
 							"source_warehouse": (
-								self.source_warehouse or item.source_warehouse or item.default_warehouse
+								self.source_warehouse
+								or item.source_warehouse
+								or item.default_warehouse
+								or get_item_group_defaults(item.item_code, self.company).get(
+									"default_warehouse"
+								)
 							)
 							if not reset_source_warehouse
 							else self.source_warehouse,
@@ -1800,29 +1809,27 @@ class WorkOrder(Document):
 				& (ste.purpose == "Material Transfer for Manufacture")
 				& (ste.is_return == is_return)
 			)
-			.groupby(ste_child.item_code)
+			.groupby(ste_child.item_code, ste_child.original_item)
 		)
 
 		data = query.run(as_dict=1) or []
-		return frappe._dict({d.original_item or d.item_code: d.qty for d in data})
+		# An item's own transfer and its substitutes both key to the original item, so sum them.
+		transferred_items = frappe._dict()
+		for d in data:
+			key = d.original_item or d.item_code
+			transferred_items[key] = flt(transferred_items.get(key)) + flt(d.qty)
+		return transferred_items
 
 	def recompute_material_transferred_for_manufacturing(self, transferred_items):
-		"""Set material_transferred_for_manufacturing based on actual item-level transfers, not fg_completed_qty."""
+		"""Set transferred quantity from the raw materials that have actually moved."""
 		# Job Card transfers use the minimum completed quantity across operations.
 		if self.operations and self.transfer_material_against == "Job Card":
 			return
 
-		# When fg_completed_qty > 0 (direct stock entries, excess transfer), preserve the
-		# SUM(fg_completed_qty) approach so excess-transfer tracking works correctly.
-		sum_fg_completed_qty = self.get_transferred_or_manufactured_qty(
+		claimed_qty = self.get_transferred_or_manufactured_qty(
 			"Material Transfer for Manufacture", "material_transferred_for_manufacturing"
 		)
-		if sum_fg_completed_qty:
-			self.db_set("material_transferred_for_manufacturing", sum_fg_completed_qty)
-			return
 
-		# Pick list flow sets fg_completed_qty=0; use min-fraction of actual item transfers
-		# so partial availability does not prematurely mark the work order as fully transferred.
 		required_by_item = {}
 		for row in self.required_items:
 			if not row.include_item_in_manufacturing or flt(row.required_qty) <= 0:
@@ -1832,12 +1839,13 @@ class WorkOrder(Document):
 		if not required_by_item:
 			return
 
-		min_fraction = min(
-			flt(transferred_items.get(item_code) or 0) / required_qty
-			for item_code, required_qty in required_by_item.items()
+		min_fraction = get_minimum_material_coverage_fraction(
+			required_by_item,
+			transferred_items,
+			self.precision("required_qty", "required_items"),
 		)
-		min_fraction = min(min_fraction, 1.0)
-		material_transferred = min_fraction * flt(self.qty)
+		covered_qty = min_fraction * flt(self.qty)
+		material_transferred = min(covered_qty, max(flt(self.qty), claimed_qty))
 		self.db_set("material_transferred_for_manufacturing", material_transferred)
 
 	def update_qty_in_stock_reservation(self, row, transferred_qty, row_wise_serial_batch):
@@ -2824,6 +2832,7 @@ def get_operation_details(name, work_order, parent_bom):
 	for row in work_order.operations:
 		if row.name == name:
 			return {
+				"idx": row.idx,
 				"workstation": row.workstation,
 				"workstation_type": row.workstation_type,
 				"source_warehouse": row.source_warehouse,

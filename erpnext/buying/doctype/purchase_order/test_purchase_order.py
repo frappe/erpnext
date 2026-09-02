@@ -54,6 +54,28 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		po.save()
 		self.assertEqual(po.items[1].qty, 1)
 
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_negative_rates_for_items": 0})
+	def test_purchase_order_negative_grand_total_blocked_without_setting(self):
+		po = create_purchase_order(qty=1, rate=100, do_not_save=True)
+		po.append("items", {"item_code": "_Test Item 2", "qty": 1, "rate": -150, "schedule_date": nowdate()})
+		self.assertRaises(frappe.ValidationError, po.save)
+
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_negative_rates_for_items": 1})
+	def test_purchase_order_negative_grand_total_allowed_with_setting(self):
+		"""Use a negative rate to represent a credit while order quantities remain positive."""
+		po = create_purchase_order(qty=1, rate=100, do_not_save=True)
+		po.append("items", {"item_code": "_Test Item 2", "qty": 1, "rate": -150, "schedule_date": nowdate()})
+		po.save()
+		po.submit()
+		self.assertEqual(po.docstatus, 1)
+		self.assertTrue(po.base_grand_total < 0)
+
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_negative_rates_for_items": 1})
+	def test_purchase_order_negative_rate_setting_does_not_allow_negative_quantity(self):
+		po = create_purchase_order(qty=1, rate=100, do_not_save=True)
+		po.append("items", {"item_code": "_Test Item 2", "qty": -1, "rate": 100})
+		self.assertRaises(frappe.ValidationError, po.save)
+
 	def test_purchase_order_zero_qty(self):
 		po = create_purchase_order(qty=0, do_not_save=True)
 
@@ -162,6 +184,21 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		po2.items[0].qty = 110
 		self.assertRaises(OverAllowanceError, po2.submit)
 
+		# Stock over-delivery role must not bypass over-ordering against Material Request.
+		with self.change_settings(
+			"Stock Settings", {"role_allowed_to_over_deliver_receive": "Stock Manager"}
+		):
+			test_user = frappe.get_doc("User", "test@example.com")
+			test_user.add_roles("Stock Manager")
+
+			mr3 = make_material_request(qty=100)
+			po3 = make_purchase_order(mr3.name)
+			po3.supplier = "_Test Supplier"
+			po3.items[0].qty = 110
+			with self.set_user("test@example.com"):
+				po3.flags.ignore_permissions = True
+				self.assertRaises(OverAllowanceError, po3.submit)
+
 		# cleanup
 		frappe.db.set_single_value("Buying Settings", "over_order_allowance", 0)
 		frappe.db.set_single_value("Stock Settings", "over_delivery_receipt_allowance", 0)
@@ -251,6 +288,7 @@ class TestPurchaseOrder(ERPNextTestSuite):
 
 		po.load_from_db()
 		existing_ordered_qty = get_ordered_qty()
+		existing_ordered_qty_in_new_warehouse = get_ordered_qty(warehouse="_Test Warehouse 2 - _TC")
 		first_item_of_po = po.get("items")[0]
 
 		trans_item = json.dumps(
@@ -261,16 +299,64 @@ class TestPurchaseOrder(ERPNextTestSuite):
 					"qty": first_item_of_po.qty,
 					"docname": first_item_of_po.name,
 				},
-				{"item_code": "_Test Item", "rate": 200, "qty": 7},
+				{"item_code": "_Test Item", "rate": 200, "qty": 7, "warehouse": "_Test Warehouse 2 - _TC"},
 			]
 		)
 		update_child_qty_rate("Purchase Order", trans_item, po.name)
 
 		po.reload()
 		self.assertEqual(len(po.get("items")), 2)
+		self.assertEqual(po.get("items")[-1].warehouse, "_Test Warehouse 2 - _TC")
 		self.assertEqual(po.status, "To Receive and Bill")
-		# ordered qty should increase on row addition
-		self.assertEqual(get_ordered_qty(), existing_ordered_qty + 7)
+		# ordered qty should increase on row addition, in the warehouse passed for the new row
+		self.assertEqual(get_ordered_qty(), existing_ordered_qty)
+		self.assertEqual(
+			get_ordered_qty(warehouse="_Test Warehouse 2 - _TC"),
+			existing_ordered_qty_in_new_warehouse + 7,
+		)
+
+	def test_update_child_adding_new_item_without_any_default_warehouse(self):
+		stock_item = make_item("_Test PO Item Without Default Warehouse", {"is_stock_item": 1}).name
+		service_item = make_item("_Test PO Item Non Stock", {"is_stock_item": 0}).name
+
+		po = create_purchase_order(do_not_save=1)
+		po.save()
+		po.submit()
+		first_item_of_po = po.get("items")[0]
+
+		stock_settings_default = frappe.db.get_single_value("Stock Settings", "default_warehouse")
+		frappe.db.set_single_value("Stock Settings", "default_warehouse", None)
+		self.addCleanup(
+			frappe.db.set_single_value, "Stock Settings", "default_warehouse", stock_settings_default
+		)
+
+		def get_trans_items(item_code):
+			return json.dumps(
+				[
+					{
+						"item_code": first_item_of_po.item_code,
+						"rate": first_item_of_po.rate,
+						"qty": first_item_of_po.qty,
+						"docname": first_item_of_po.name,
+					},
+					{"item_code": item_code, "rate": 200, "qty": 7},
+				]
+			)
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Cannot find a default warehouse",
+			update_child_qty_rate,
+			"Purchase Order",
+			get_trans_items(stock_item),
+			po.name,
+		)
+
+		update_child_qty_rate("Purchase Order", get_trans_items(service_item), po.name)
+
+		po.reload()
+		self.assertEqual(po.get("items")[-1].item_code, service_item)
+		self.assertFalse(po.get("items")[-1].warehouse)
 
 	def test_update_child_removing_item(self):
 		po = create_purchase_order(do_not_save=1)
@@ -455,11 +541,13 @@ class TestPurchaseOrder(ERPNextTestSuite):
 					"item_code": item,
 					"rate": 100,
 					"qty": 1,
+					"warehouse": po.items[0].warehouse,
 				},  # added item whose tax account head already exists in PO
 				{
 					"item_code": new_item_with_tax.name,
 					"rate": 100,
 					"qty": 1,
+					"warehouse": po.items[0].warehouse,
 				},  # added item whose tax account head  is missing in PO
 			]
 		)
@@ -996,6 +1084,8 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		# self.assertEqual(po.payment_terms_template, pi.payment_terms_template)
 		compare_payment_schedules(self, po, pi)
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"maintain_same_sales_rate": 1})
+	@ERPNextTestSuite.change_settings("Buying Settings", {"maintain_same_rate": 1})
 	def test_internal_transfer_flow(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 		from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
@@ -1006,9 +1096,6 @@ class TestPurchaseOrder(ERPNextTestSuite):
 			make_sales_invoice,
 		)
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
-
-		frappe.db.set_single_value("Selling Settings", "maintain_same_sales_rate", 1)
-		frappe.db.set_single_value("Buying Settings", "maintain_same_rate", 1)
 
 		prepare_data_for_internal_transfer()
 		supplier = "_Test Internal Supplier 2"
@@ -1448,6 +1535,7 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		self.assertEqual(pi_2.status, "Paid")
 		self.assertEqual(po.status, "Completed")
 
+	@ERPNextTestSuite.change_settings("Buying Settings", {"maintain_same_rate": 0})
 	def test_purchase_order_over_billing_missing_item(self):
 		item1 = make_item(
 			"_Test Item for Overbilling",

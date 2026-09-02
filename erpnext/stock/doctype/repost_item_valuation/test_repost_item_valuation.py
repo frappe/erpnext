@@ -5,7 +5,7 @@
 from unittest.mock import MagicMock, call, patch
 
 import frappe
-from frappe.utils import add_days, add_to_date, now, nowdate, today
+from frappe.utils import add_days, add_to_date, flt, now, nowdate, today
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.utils import repost_gle_for_stock_vouchers
@@ -479,6 +479,105 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 
 		# incoming rate after reposting should be 150
 		self.assertSLEs(se, [{"incoming_rate": 150}])
+
+	def test_recalculate_stock_entry_additional_cost_updates_all_incoming_rows(self):
+		from erpnext.stock.stock_ledger import update_entries_after
+
+		company = frappe.db.get_value("Warehouse", "Stores - TCP1", "company")
+		warehouse = "Stores - TCP1"
+		items = [
+			self.make_item(f"_Test Repost Addl Cost {x}", {"is_stock_item": 1}).name for x in ("A", "B", "C")
+		]
+
+		for item_code in items:
+			make_stock_entry(item_code=item_code, target=warehouse, company=company, qty=100, rate=10)
+
+		transfer = make_stock_entry(company=company, purpose="Material Transfer", do_not_save=True)
+		transfer.from_warehouse = warehouse
+		transfer.to_warehouse = warehouse
+		transfer.items = []
+		for item_code in items:
+			transfer.append(
+				"items",
+				{
+					"item_code": item_code,
+					"qty": 100,
+					"s_warehouse": warehouse,
+					"t_warehouse": warehouse,
+					"uom": "Nos",
+					"conversion_factor": 1,
+				},
+			)
+		transfer.append(
+			"additional_costs",
+			{
+				"expense_account": "Expenses Included In Valuation - TCP1",
+				"description": "freight",
+				"amount": 100,
+			},
+		)
+		transfer.insert()
+		transfer.submit()
+
+		first_row = transfer.items[0]
+		frappe.db.set_value("Stock Entry Detail", first_row.name, "basic_rate", first_row.basic_rate + 1)
+		update_entries_after.recalculate_amounts_in_stock_entry(MagicMock(), transfer.name, first_row.name)
+
+		transfer.load_from_db()
+		detail_additional_cost = sum(row.additional_cost for row in transfer.items)
+		net_added_to_stock = sum(row.amount - row.basic_amount for row in transfer.items)
+
+		self.assertEqual(flt(detail_additional_cost, 2), flt(transfer.total_additional_costs, 2))
+		self.assertEqual(flt(net_added_to_stock, 2), flt(transfer.total_additional_costs, 2))
+
+	def test_repost_multi_line_moving_average_return(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		item = self.make_item(properties={"valuation_method": "Moving Average"}).name
+		warehouse = "_Test Warehouse - _TC"
+
+		make_purchase_receipt(item_code=item, qty=100, rate=100, warehouse=warehouse)
+
+		pr = make_purchase_receipt(item_code=item, qty=400, rate=200, warehouse=warehouse, do_not_submit=1)
+		for qty in (100, 300, 100):
+			pr.append(
+				"items",
+				{
+					"item_code": item,
+					"warehouse": warehouse,
+					"qty": qty,
+					"received_qty": qty,
+					"rate": 200,
+					"uom": pr.items[0].uom,
+					"conversion_factor": 1.0,
+				},
+			)
+		pr.save()
+		pr.submit()
+
+		return_pr = make_return_doc(pr.doctype, pr.name)
+		return_pr.save()
+		return_pr.submit()
+
+		expected_sles = [
+			{"outgoing_rate": 190.0, "valuation_rate": 190.0, "qty_after_transaction": 600.0},
+			{"outgoing_rate": 190.0, "valuation_rate": 190.0, "qty_after_transaction": 500.0},
+			{"outgoing_rate": 190.0, "valuation_rate": 190.0, "qty_after_transaction": 200.0},
+			{"outgoing_rate": 190.0, "valuation_rate": 190.0, "qty_after_transaction": 100.0},
+		]
+
+		for _ in range(2):
+			riv = frappe.get_doc(
+				doctype="Repost Item Valuation",
+				based_on="Transaction",
+				voucher_type=pr.doctype,
+				voucher_no=pr.name,
+				posting_date=pr.posting_date,
+				posting_time=pr.posting_time,
+			)
+			riv.submit()
+
+			self.assertSLEs(return_pr, expected_sles)
 
 	def test_remove_attached_file(self):
 		item_code = make_item("_Test Remove Attached File Item", properties={"is_stock_item": 1})

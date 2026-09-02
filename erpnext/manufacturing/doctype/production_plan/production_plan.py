@@ -32,6 +32,7 @@ from erpnext.manufacturing.doctype.bom.bom import get_children as get_bom_childr
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
+from erpnext.stock.doctype.item.item import get_uom_conv_factor
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import StockReservation
 from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.stock.utils import get_or_make_bin
@@ -930,8 +931,6 @@ class ProductionPlan(Document):
 
 		wo = frappe.new_doc("Work Order")
 		wo.update(item)
-		if not wo.source_warehouse:
-			wo.source_warehouse = item.get("fg_warehouse")
 
 		wo.reserve_stock = self.reserve_stock
 		wo.planned_start_date = item.get("planned_start_date") or item.get("schedule_date")
@@ -940,7 +939,7 @@ class ProductionPlan(Document):
 			wo.fg_warehouse = item.get("warehouse")
 
 		wo.set_work_order_operations()
-		wo.set_required_items(reset_source_warehouse=True)
+		wo.set_required_items()
 
 		try:
 			wo.flags.ignore_mandatory = True
@@ -1335,9 +1334,16 @@ def get_exploded_items(item_details, company, bom_no, include_non_stock_items, p
 
 
 def get_uom_conversion_factor(item_code, uom):
-	return frappe.db.get_value(
+	item = frappe.get_cached_value("Item", item_code, ["variant_of", "stock_uom"], as_dict=True)
+	conversion_factor = frappe.db.get_value(
 		"UOM Conversion Detail", {"parent": item_code, "uom": uom}, "conversion_factor"
 	)
+	if not conversion_factor and item.variant_of:
+		conversion_factor = frappe.db.get_value(
+			"UOM Conversion Detail", {"parent": item.variant_of, "uom": uom}, "conversion_factor"
+		)
+
+	return conversion_factor or get_uom_conv_factor(uom, item.stock_uom)
 
 
 def get_subitems(
@@ -1472,8 +1478,6 @@ def get_material_request_items(
 				)
 			)
 
-			required_qty = required_qty / row["conversion_factor"]
-
 	if frappe.db.get_value("UOM", row["purchase_uom"], "must_be_whole_number"):
 		required_qty = ceil(required_qty)
 
@@ -1492,10 +1496,11 @@ def get_material_request_items(
 			get_conversion_factor(row.item_code, item_details.purchase_uom).get("conversion_factor") or 1.0
 		)
 
+	precision = frappe.get_precision("Material Request Plan Item", "quantity")
 	return {
 		"item_code": row.item_code,
 		"item_name": row.item_name,
-		"quantity": required_qty / conversion_factor,
+		"quantity": flt(required_qty / conversion_factor, precision),
 		"conversion_factor": conversion_factor,
 		"required_bom_qty": row.get("qty"),
 		"stock_uom": row.get("stock_uom"),
@@ -1904,7 +1909,7 @@ def get_materials_from_other_locations(
 		if frappe.db.get_value("UOM", purchase_uom, "must_be_whole_number"):
 			required_qty = ceil(required_qty)
 
-		item["quantity"] = required_qty / item.get("conversion_factor")
+		item["quantity"] = flt(required_qty / item.get("conversion_factor"), precision)
 
 		new_mr_items.append(item)
 

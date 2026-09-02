@@ -422,6 +422,37 @@ class TestCustomer(ERPNextTestSuite):
 		pe.submit()
 		self.assertEqual(get_customer_overdue_amount("_Test Customer", "_Test Company"), baseline)
 
+	def test_get_customer_overdue_amount_ignores_advance_reconciled_after_submit(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		baseline = get_customer_overdue_amount("_Test Customer", "_Test Company")
+
+		# advance received before the invoice exists, so it carries no reference row
+		pe = create_payment_entry(
+			company="_Test Company",
+			party_type="Customer",
+			party="_Test Customer",
+			payment_type="Receive",
+			paid_from="Debtors - _TC",
+			paid_to="Cash - _TC",
+			paid_amount=800,
+		)
+		pe.posting_date = add_days(nowdate(), -60)
+		pe.submit()
+
+		si = create_sales_invoice(qty=1, rate=800, posting_date=add_days(nowdate(), -30))
+		self.assertEqual(get_customer_overdue_amount("_Test Customer", "_Test Company"), baseline + 800)
+
+		reconcile_payment_against_invoice(pe, si)
+
+		# reconciliation settles the invoice without re-tagging the payment's GL entries, so an
+		# overdue amount read off the GL would still count the full 800 here
+		si.reload()
+		self.assertEqual(si.outstanding_amount, 0)
+		self.assertEqual(si.status, "Paid")
+		self.assertEqual(get_customer_overdue_amount("_Test Customer", "_Test Company"), baseline)
+
 	def test_overdue_billing_threshold_on_submit(self):
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
@@ -589,6 +620,27 @@ def set_credit_limit(customer, company, credit_limit):
 	if not existing_row:
 		customer.append("credit_limits", {"company": company, "credit_limit": credit_limit})
 		customer.credit_limits[-1].db_insert()
+
+
+def reconcile_payment_against_invoice(payment_entry, sales_invoice):
+	"""Allocate an unlinked payment against an invoice through the reconciliation tool."""
+	pr = frappe.get_doc(
+		doctype="Payment Reconciliation",
+		company=sales_invoice.company,
+		party_type="Customer",
+		party=sales_invoice.customer,
+		receivable_payable_account=sales_invoice.debit_to,
+	)
+	pr.get_unreconciled_entries()
+	pr.allocate_entries(
+		frappe._dict(
+			{
+				"invoices": [d.as_dict() for d in pr.invoices if d.invoice_number == sales_invoice.name],
+				"payments": [d.as_dict() for d in pr.payments if d.reference_name == payment_entry.name],
+			}
+		)
+	)
+	pr.reconcile()
 
 
 def set_overdue_billing_threshold(customer, company, threshold):

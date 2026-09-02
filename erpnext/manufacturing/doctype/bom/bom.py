@@ -282,6 +282,7 @@ class BOM(WebsiteGenerator):
 		self.clear_inspection()
 		self.validate_main_item()
 		self.validate_currency()
+		self.set_operation_finished_goods()
 		self.set_materials_based_on_operation_bom()
 		self.set_conversion_rate()
 		self.set_plc_conversion_rate()
@@ -301,11 +302,24 @@ class BOM(WebsiteGenerator):
 		self.set_default_uom()
 		self.validate_semi_finished_goods()
 		self.validate_secondary_items()
-		self.set_fg_cost_allocation()
+		self.validate_secondary_items_cost()
 		self.validate_total_cost_allocation()
 
 		if self.docstatus == 1:
 			self.validate_raw_materials_of_operation()
+
+	def set_operation_finished_goods(self):
+		"""Fill each operation's FG item where it is unambiguous: the final operation produces
+		this BOM's item, an operation with a BOM produces that BOM's item. Runs before
+		set_materials_based_on_operation_bom so derived rows get their materials expanded."""
+		if not self.track_semi_finished_goods:
+			return
+
+		for row in self.operations:
+			if row.is_final_finished_good and not row.finished_good:
+				row.finished_good = self.item
+			elif row.bom_no and not row.finished_good:
+				row.finished_good = frappe.get_cached_value("BOM", row.bom_no, "item")
 
 	def validate_semi_finished_goods(self):
 		if not self.track_semi_finished_goods or not self.operations:
@@ -313,8 +327,22 @@ class BOM(WebsiteGenerator):
 
 		fg_items = []
 		for row in self.operations:
+			if not row.finished_good:
+				frappe.throw(
+					_(
+						"Row #{0}: FG / Semi FG Item is required for the operation {1} as 'Track Semi Finished Goods' is enabled."
+					).format(row.idx, bold(row.operation)),
+				)
+
 			if not row.is_final_finished_good:
 				continue
+
+			if row.finished_good != self.item:
+				frappe.throw(
+					_(
+						"Row #{0}: The operation {1} has 'Is Final Finished Good' checked, so its FG / Semi FG Item must be {2}."
+					).format(row.idx, bold(row.operation), bold(self.item)),
+				)
 
 			fg_items.append(row.finished_good)
 
@@ -333,8 +361,20 @@ class BOM(WebsiteGenerator):
 			)
 
 	def validate_secondary_items(self):
+		seen_items = set()
 		for item in self.secondary_items:
-			if not item.is_legacy and item.item_code == self.item:
+			# every consumer merges secondary rows by item and type, so duplicates cannot
+			# keep their own quantities, percentages or valuation mode
+			key = (item.item_code, item.secondary_item_type or "")
+			if key in seen_items:
+				frappe.throw(
+					_(
+						"Row #{0}: Item {1} is already added with the same Type in the Secondary Items table."
+					).format(item.idx, get_link_to_form("Item", item.item_code))
+				)
+			seen_items.add(key)
+
+			if item.valuation_type != "Valuation Rate" and item.item_code == self.item:
 				frappe.throw(
 					_(
 						"Row #{0}: Finished Good Item {1} cannot be added in the Secondary Items table."
@@ -344,7 +384,7 @@ class BOM(WebsiteGenerator):
 			if item.process_loss_per >= 100:
 				frappe.throw(
 					_("Row #{0}: Process Loss Percentage should be less than 100% for {1} Item {2}").format(
-						item.idx, item.type, get_link_to_form("Item", item.item_code)
+						item.idx, item.secondary_item_type, get_link_to_form("Item", item.item_code)
 					)
 				)
 
@@ -425,13 +465,25 @@ class BOM(WebsiteGenerator):
 
 	def set_fg_cost_allocation(self):
 		total_secondary_items_per = 0
+		own_cost = 0
 		for item in self.secondary_items:
+			if item.valuation_type in ("Valuation Rate", "Manual"):
+				item.cost_allocation_per = 0
+				own_cost += flt(item.cost)
 			total_secondary_items_per += item.cost_allocation_per
 
 		if self.cost_allocation_per == 100 and total_secondary_items_per:
 			self.cost_allocation_per -= total_secondary_items_per
 
-		self.cost_allocation = self.raw_material_cost * (self.cost_allocation_per / 100)
+		self.cost_allocation = (self.raw_material_cost - own_cost) * (self.cost_allocation_per / 100)
+
+	def validate_secondary_items_cost(self):
+		if flt(self.secondary_items_cost) > flt(self.raw_material_cost):
+			frappe.throw(
+				_("The cost of the secondary items cannot exceed the raw material cost of {0}.").format(
+					frappe.bold(flt(self.raw_material_cost))
+				)
+			)
 
 	def validate_total_cost_allocation(self):
 		total_cost_allocation_per = self.cost_allocation_per
@@ -502,6 +554,7 @@ class BOM(WebsiteGenerator):
 					"conversion_factor": item.conversion_factor,
 					"sourced_by_supplier": item.sourced_by_supplier,
 					"do_not_explode": item.do_not_explode,
+					"source_warehouse": item.source_warehouse or self.default_source_warehouse,
 					"fetch_rate": True,
 				}
 			)
@@ -587,7 +640,12 @@ class BOM(WebsiteGenerator):
 		if not self.rm_cost_as_per:
 			self.rm_cost_as_per = "Valuation Rate"
 
-		if arg:
+		if arg and arg.get("force_valuation_rate"):
+			# Valuation Rate secondary items ignore the BOM's rm_cost_as_per method:
+			# bin-average valuation like the raw materials, scoped to the default
+			# target warehouse when set.
+			rate = get_valuation_rate(arg)
+		elif arg:
 			# Customer Provided parts and Supplier sourced parts will have zero rate
 			if not frappe.db.get_value("Item", arg["item_code"], "is_customer_provided_item") and not arg.get(
 				"sourced_by_supplier"
@@ -826,7 +884,7 @@ class BOM(WebsiteGenerator):
 				self.add_materials_from_bom(row.finished_good, row.bom_no, row.idx, qty=row.finished_good_qty)
 
 	@frappe.whitelist()
-	def add_raw_materials(self, operation_row_id, items):
+	def add_raw_materials(self, operation_row_id: str | int, items: str | list[dict]) -> None:
 		if isinstance(items, str):
 			items = parse_json(items)
 
@@ -836,17 +894,10 @@ class BOM(WebsiteGenerator):
 			row.update(get_item_details(row.get("item_code")))
 			row.operation_row_id = operation_row_id
 
-			item_row = None
-			if row.name:
-				item_row = self.get_item_data(row.name)
+			item_row = self.get_item_data(row.item_code, operation_row_id)
 
 			if item_row:
-				item_row.update(
-					{
-						"item_code": row.get("item_code"),
-						"qty": row.get("qty"),
-					}
-				)
+				item_row.qty = row.get("qty")
 			else:
 				row.idx = None
 				row.name = None
@@ -867,9 +918,9 @@ class BOM(WebsiteGenerator):
 
 		return False
 
-	def get_item_data(self, name):
+	def get_item_data(self, item_code, operation_row_id):
 		for row in self.items:
-			if row.item_code == name:
+			if row.item_code == item_code and cint(row.operation_row_id) == cint(operation_row_id):
 				return row
 
 	@frappe.whitelist()
@@ -929,6 +980,7 @@ class BOM(WebsiteGenerator):
 		self.calculate_op_cost(update_hour_rate)
 		self.calculate_rm_cost(save=save_updates)
 		self.calculate_secondary_items_costs(save=save_updates)
+		self.set_fg_cost_allocation()
 		if save_updates:
 			# not via doc event, table is not regenerated and needs updation
 			self.calculate_exploded_cost()
@@ -1003,7 +1055,7 @@ class BOM(WebsiteGenerator):
 
 		for d in self.get("items"):
 			old_rate = d.rate
-			if not self.bom_creator and (d.is_stock_item or d.is_phantom_item):
+			if d.is_stock_item or d.is_phantom_item:
 				d.rate = self.get_rm_rate(
 					{
 						"company": self.company,
@@ -1015,6 +1067,7 @@ class BOM(WebsiteGenerator):
 						"conversion_factor": d.conversion_factor,
 						"sourced_by_supplier": d.sourced_by_supplier,
 						"is_phantom_item": d.is_phantom_item,
+						"source_warehouse": d.source_warehouse or self.default_source_warehouse,
 					},
 					notify=False,
 				)
@@ -1037,23 +1090,53 @@ class BOM(WebsiteGenerator):
 		self.base_raw_material_cost = base_total_rm_cost
 
 	def calculate_secondary_items_costs(self, save=False):
-		"""Fetch RM rate as per today's valuation rate and calculate totals"""
+		"""Valuation Rate and Manual rows carry their own cost, deducted from the raw
+		material cost; the % of FG Cost rows split the remainder by their percentage."""
 		total_sm_cost = 0
 		base_total_sm_cost = 0
 		precision = self.precision("raw_material_cost")
+		allocation_basis = flt(self.raw_material_cost) - self._set_own_cost_secondary_items(precision, save)
 
 		for d in self.get("secondary_items"):
-			if not d.is_legacy:
-				d.cost = flt(self.raw_material_cost * (d.cost_allocation_per / 100), precision)
+			if d.valuation_type not in ("Valuation Rate", "Manual"):
+				d.cost = flt(allocation_basis * (d.cost_allocation_per / 100), precision)
 				d.base_cost = flt(d.cost * self.conversion_rate, precision)
-
-				total_sm_cost += d.cost
-				base_total_sm_cost += d.base_cost
 				if save:
 					d.db_update()
 
+			total_sm_cost += d.cost
+			base_total_sm_cost += d.base_cost
+
 		self.secondary_items_cost = total_sm_cost
 		self.base_secondary_items_cost = base_total_sm_cost
+
+	def _set_own_cost_secondary_items(self, precision, save) -> float:
+		"""Cost of the rows valued on their own: fetched for Valuation Rate, kept for Manual."""
+		total = 0.0
+		for d in self.get("secondary_items"):
+			if d.valuation_type == "Valuation Rate":
+				rate = self.get_rm_rate(self._secondary_item_rate_args(d))
+				d.cost = flt(flt(rate) * flt(d.stock_qty), precision)
+			elif d.valuation_type == "Manual":
+				d.cost = flt(d.cost, precision)
+			else:
+				continue
+
+			d.base_cost = flt(d.cost * self.conversion_rate, precision)
+			total += d.cost
+			if save:
+				d.db_update()
+
+		return total
+
+	def _secondary_item_rate_args(self, d):
+		return {
+			"item_code": d.item_code,
+			"company": self.company,
+			"warehouse": self.default_target_warehouse,
+			"set_rate_based_on_warehouse": 1,
+			"force_valuation_rate": 1,
+		}
 
 	def calculate_exploded_cost(self):
 		"Set exploded row cost from it's parent BOM."
@@ -1276,7 +1359,10 @@ class BOM(WebsiteGenerator):
 			frappe.throw(msg, title=_("Invalid Process Loss Configuration"))
 
 	def has_scrap_items(self):
-		return any(d.get("type") == "Scrap" or d.get("is_legacy") for d in self.get("secondary_items"))
+		return any(
+			d.get("secondary_item_type") == "Scrap" or d.get("valuation_type") == "Valuation Rate"
+			for d in self.get("secondary_items")
+		)
 
 
 def get_bom_item_rate(args, bom_doc):
@@ -1342,8 +1428,12 @@ def get_valuation_rate(data):
 		.where((bin_table.item_code == item_code) & (wh_table.company == company))
 	)
 
+	warehouse = data.get("source_warehouse")
 	if data.get("set_rate_based_on_warehouse") and data.get("warehouse"):
-		item_valuation = item_valuation.where(bin_table.warehouse == data.get("warehouse"))
+		warehouse = data.get("warehouse")
+
+	if warehouse:
+		item_valuation = item_valuation.where(bin_table.warehouse == warehouse)
 
 	item_valuation = item_valuation.run(as_dict=True)[0]
 
@@ -1392,7 +1482,7 @@ def get_bom_items_as_dict(
 
 	if fetch_secondary_items:
 		fetch_exploded = 0
-		group_by_cond = "group by item_code"
+		group_by_cond = "group by item_code, secondary_item_type"
 
 	# Did not use qty_consumed_per_unit in the query, as it leads to rounding loss
 	query = """select
@@ -1441,10 +1531,10 @@ def get_bom_items_as_dict(
 			query, {"parent": bom, "qty": qty, "bom": bom, "company": company}, as_dict=True
 		)
 	elif fetch_secondary_items:
-		query = query.format(
+		query = query.format(  # nosemgrep
 			table="BOM Secondary Item",
 			where_conditions=")",
-			select_columns=", item.description, bom_item.cost_allocation_per, bom_item.process_loss_per, bom_item.type, bom_item.name, bom_item.is_legacy",
+			select_columns=", item.description, bom_item.cost_allocation_per, bom_item.process_loss_per, bom_item.secondary_item_type, bom_item.name, bom_item.valuation_type, bom_item.cost / nullif(bom_item.stock_qty, 0) as manual_rate",
 			is_stock_item=is_stock_item,
 			qty_field="stock_qty",
 			group_by_cond=group_by_cond,
@@ -1467,6 +1557,9 @@ def get_bom_items_as_dict(
 
 	for item in items:
 		key = item.item_code
+		if fetch_secondary_items:
+			key = (item.item_code, item.secondary_item_type or "")
+
 		if item.operation_row_id:
 			key = (item.item_code, item.operation_row_id)
 
@@ -1888,10 +1981,10 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 		[IfNull(Field("end_of_life"), "3099-12-31"), ">", today()],
 	]
 
-	or_cond_filters = {}
+	or_cond_filters = []
 	if txt:
 		for s_field in searchfields:
-			or_cond_filters[s_field] = ("like", f"%{txt}%")
+			or_cond_filters.append([s_field, "like", f"%{txt}%"])
 
 		barcodes = frappe.get_all(
 			"Item Barcode",
@@ -1902,7 +1995,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 
 		barcodes = [d.item_code for d in barcodes]
 		if barcodes:
-			or_cond_filters["name"] = ("in", barcodes)
+			or_cond_filters.append(["name", "in", barcodes])
 
 	if filters and filters.get("item_code"):
 		has_variants = frappe.get_cached_value("Item", filters.get("item_code"), "has_variants")

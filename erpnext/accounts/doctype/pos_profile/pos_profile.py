@@ -234,15 +234,18 @@ def get_item_groups(pos_profile):
 		for data in pos_profile.get("item_groups"):
 			item_groups.extend(
 				[
-					"%s" % frappe.db.escape(d.name)
+					d.name
 					for d in get_child_nodes("Item Group", data.item_group)
 					if not permitted_item_groups or d.name in permitted_item_groups
 				]
 			)
 
 	if not item_groups and permitted_item_groups:
-		item_groups = ["%s" % frappe.db.escape(d) for d in permitted_item_groups]
+		item_groups = list(permitted_item_groups)
 
+	# Return raw Item Group names; the callers parameterize them via the query builder
+	# (item_group.isin(...)) / frappe.get_all, which escapes them once. Pre-escaping here would
+	# double-escape (item_group IN ('''X''')) and match nothing.
 	return list(set(item_groups))
 
 
@@ -277,40 +280,40 @@ def pos_profile_query(doctype, txt, searchfield, start, page_len, filters):
 	user = frappe.session["user"]
 	company = filters.get("company") or frappe.defaults.get_user_default("company")
 
-	args = {
-		"user": user,
-		"start": start,
-		"company": company,
-		"page_len": page_len,
-		"txt": "%%%s%%" % txt,
-	}
+	allowed_pos_profiles = frappe.get_list("POS Profile", pluck="name")
 
-	pos_profile = frappe.db.sql(
-		"""select pf.name
-		from
-			`tabPOS Profile` pf, `tabPOS Profile User` pfu
-		where
-			pfu.parent = pf.name and pfu.user = %(user)s and pf.company = %(company)s
-			and (pf.name like %(txt)s)
-			and pf.disabled = 0 limit %(page_len)s offset %(start)s""",
-		args,
+	if not allowed_pos_profiles:
+		return {}
+
+	pf = frappe.qb.DocType("POS Profile")
+	pfu = frappe.qb.DocType("POS Profile User")
+
+	pos_profile = (
+		frappe.qb.from_(pf)
+		.inner_join(pfu)
+		.on(pfu.parent == pf.name)
+		.select(pf.name)
+		.where((pfu.user == user) & (pf.company == company) & pf.name.like(f"%{txt}%") & (pf.disabled == 0))
+		.where(pf.name.isin(allowed_pos_profiles))
+		.limit(page_len)
+		.offset(start)
+		.run()
 	)
 
 	if not pos_profile:
-		del args["user"]
-
-		pos_profile = frappe.db.sql(
-			"""select pf.name
-			from
-				`tabPOS Profile` pf left join `tabPOS Profile User` pfu
-			on
-				pf.name = pfu.parent
-			where
-				ifnull(pfu.user, '') = ''
-				and pf.company = %(company)s
-				and pf.name like %(txt)s
-				and pf.disabled = 0""",
-			args,
+		pos_profile = (
+			frappe.qb.from_(pf)
+			.left_join(pfu)
+			.on(pf.name == pfu.parent)
+			.select(pf.name)
+			.where(
+				(pfu.user.isnull() | (pfu.user == ""))
+				& (pf.company == company)
+				& pf.name.like(f"%{txt}%")
+				& (pf.disabled == 0)
+				& (pf.name.isin(allowed_pos_profiles))
+			)
+			.run()
 		)
 
 	return pos_profile

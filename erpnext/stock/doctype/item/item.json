@@ -721,7 +721,7 @@
   },
   {
    "default": "0",
-   "description": "Expense for this item will be recognized over a period of months. Eg: prepaid insurance or annual software license",
+   "description": "Income from this item will be recognized over a period of months instead of all at once. Eg: annual subscription paid upfront.",
    "fieldname": "enable_deferred_revenue",
    "fieldtype": "Check",
    "label": "Enable Deferred Revenue"
@@ -734,7 +734,7 @@
   },
   {
    "default": "0",
-   "description": "Income from this item will be recognized over a period of months instead of all at once. Eg: annual subscription paid upfront.",
+   "description": "Expense for this item will be recognized over a period of months. Eg: prepaid insurance or annual software license",
    "fieldname": "enable_deferred_expense",
    "fieldtype": "Check",
    "label": "Enable Deferred Expense"
@@ -1093,7 +1093,7 @@
  "image_field": "image",
  "links": [],
  "make_attachments_public": 1,
- "modified": "2026-07-05 23:24:45.734144",
+ "modified": "2026-07-28 18:58:43.328497",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

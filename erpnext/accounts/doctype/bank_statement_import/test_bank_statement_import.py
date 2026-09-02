@@ -1,7 +1,10 @@
 # Copyright (c) 2020, Frappe Technologies and Contributors
 # See license.txt
 
+import mt940
+
 from erpnext.accounts.doctype.bank_statement_import.bank_statement_import import (
+	get_transaction_reference,
 	is_mt940_format,
 	preprocess_mt940_content,
 )
@@ -187,6 +190,135 @@ class TestBankStatementImport(ERPNextTestSuite):
 		# Verify that other content remains unchanged
 		self.assertIn(":20:STMTREF167619", result)  # Reference should remain unchanged
 		self.assertIn("UPI/TEST USER/123456789/PaidViaTestApp", result)
+
+	def test_get_transaction_reference_uses_customer_reference(self):
+		"""Per-transaction reference must come from :61: customer_reference, not :20:."""
+		self.assertEqual(
+			get_transaction_reference(
+				{"customer_reference": "UPI-100000000001", "transaction_reference": "STMTREF12345"}
+			),
+			"UPI-100000000001",
+		)
+
+	def test_get_transaction_reference_rejoins_overflow(self):
+		"""When a bank emits a single-line :61: with >16-char reference, the regex
+		splits the tail into extra_details. We must rejoin them."""
+		self.assertEqual(
+			get_transaction_reference(
+				{
+					"customer_reference": "NEFTINW-12345678",
+					"extra_details": "90",
+					"transaction_reference": "STMTREF12345",
+				}
+			),
+			"NEFTINW-1234567890",
+		)
+
+	def test_get_transaction_reference_falls_back_to_bank_reference_on_nonref(self):
+		"""NONREF is the MT940 'no customer reference' sentinel; prefer bank_reference."""
+		self.assertEqual(
+			get_transaction_reference(
+				{
+					"customer_reference": "NONREF",
+					"bank_reference": "1234567890123456",
+					"transaction_reference": "STMTREF12345",
+				}
+			),
+			"1234567890123456",
+		)
+
+	def test_get_transaction_reference_falls_back_to_bank_reference_on_nonref_with_extra_details(self):
+		"""NONREF sentinel must trigger the bank_reference fallback even when
+		extra_details is populated. Without the 16-char gate, the old naive concat
+		would produce a junk reference like 'NONREFsome info' and bypass the check."""
+		self.assertEqual(
+			get_transaction_reference(
+				{
+					"customer_reference": "NONREF",
+					"extra_details": "some info",
+					"bank_reference": "1234567890123456",
+					"transaction_reference": "STMTREF12345",
+				}
+			),
+			"1234567890123456",
+		)
+
+	def test_get_transaction_reference_does_not_append_extra_details_below_16_chars(self):
+		"""When customer_reference is below the 16-char cap, extra_details is a
+		genuine supplementary-info field from :61: — not overflow — and must not
+		be appended to the reference."""
+		self.assertEqual(
+			get_transaction_reference(
+				{
+					"customer_reference": "TBMS-123456789",
+					"extra_details": "note field",
+					"transaction_reference": "STMTREF12345",
+				}
+			),
+			"TBMS-123456789",
+		)
+
+	def test_get_transaction_reference_keeps_noref_literal(self):
+		"""Bare 'NOREF' (without bank_reference) stays as-is; still better than the
+		statement-level reference which is identical across all transactions."""
+		self.assertEqual(
+			get_transaction_reference(
+				{
+					"customer_reference": "NOREF",
+					"bank_reference": None,
+					"transaction_reference": "STMTREF12345",
+				}
+			),
+			"NOREF",
+		)
+
+	def test_mt940_parse_per_transaction_reference_mapping(self):
+		"""End-to-end: every transaction in a statement must get its own distinct
+		reference from :61: customer_reference, never the statement-level :20: reference."""
+		mt940_content = """{1:F0112345678901X0000000000}{2:I94012345678901XN}{4:
+:20:STMTREF12345
+:25:1234567890
+:28C:12345/1
+:60F:C250716INR88123,38
+:61:2509280928D5000,00NMSCUPI-100000000001
+:86:UPI/TEST PAYEE ONE/111111111111/TestApp
+:61:2509190919D2606,00NMSCUPI-100000000002
+:86:UPI/TEST PAYEE TWO/222222222222/TestApp
+:61:2509190919D900,00NMSCUPI-100000000003
+:86:UPI/TEST PAYEE THREE/333333333333/TestApp
+:61:2508140814D5000,00NMSCUPI-100000000004
+:86:UPI/TEST PAYEE FOUR/444444444444/TestApp
+:61:2508060806D2000,00NMSCUPI-100000000005
+:86:UPI/TEST PAYEE FIVE/555555555555/TestApp
+:61:2508030803D1066,00NMSC123456789012
+:86:PCD/1234/TEST MERCHANT/01234567890123/12:00
+:61:2507310731D305,62NMSCTBMS-123456789
+:86:Chrg: Debit Card Annual Fee 1234 for 2025
+:61:2507240724C1,00NMSCNEFTINW-1234567890
+:86:NEFT TEST123456789 TEST SERVICES
+:61:2507170717C100000,00NMSCNOREF
+:86:BY CLG INST 123456/01-01-25/TESTBANK/TESTCITY
+:62F:C250930INR100000,00
+-}"""
+		transactions = list(mt940.parse(preprocess_mt940_content(mt940_content)))
+		references = [get_transaction_reference(t.data) for t in transactions]
+
+		self.assertEqual(
+			references,
+			[
+				"UPI-100000000001",
+				"UPI-100000000002",
+				"UPI-100000000003",
+				"UPI-100000000004",
+				"UPI-100000000005",
+				"123456789012",
+				"TBMS-123456789",
+				"NEFTINW-1234567890",
+				"NOREF",
+			],
+		)
+		# No transaction should carry the statement-level reference from :20:
+		self.assertNotIn("STMTREF12345", references)
 
 	def test_preprocess_mt940_content_whitespace_variants(self):
 		"""Test handling of whitespace and different line endings"""

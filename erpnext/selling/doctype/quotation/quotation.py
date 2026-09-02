@@ -9,6 +9,7 @@ from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import cint, flt, getdate, nowdate
 
+from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.controllers.selling_controller import SellingController
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
@@ -151,6 +152,9 @@ class Quotation(SellingController):
 
 		make_packing_list(self)
 
+	def after_insert(self):
+		self.carry_forward_communication()
+
 	def before_submit(self):
 		self.set_has_alternative_item()
 
@@ -258,7 +262,11 @@ class Quotation(SellingController):
 		opp.set_status(status=status, update=True)
 
 	@frappe.whitelist()
-	def declare_enquiry_lost(self, lost_reasons_list, competitors, detailed_reason=None):
+	def declare_enquiry_lost(
+		self, lost_reasons_list: list, competitors: list, detailed_reason: str | None = None
+	):
+		self.check_permission("write")
+
 		if not (self.is_fully_ordered() or self.is_partially_ordered()):
 			get_lost_reasons = frappe.get_list("Quotation Lost Reason", fields=["name"])
 			lost_reasons_lst = [reason.get("name") for reason in get_lost_reasons]
@@ -296,7 +304,6 @@ class Quotation(SellingController):
 		# update enquiry status
 		self.update_opportunity("Quotation")
 		self.update_lead()
-		self.carry_forward_communication()
 
 	def on_cancel(self):
 		if self.lost_reasons:
@@ -390,6 +397,9 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False, ar
 
 	customer = _make_customer(source_name, ignore_permissions)
 	ordered_items = get_ordered_items(source_name)
+	mapped_items = get_qty_already_mapped(target_doc, "quotation_item", "stock_qty")
+	for name, stock_qty in mapped_items.items():
+		ordered_items[name] = flt(ordered_items.get(name)) + stock_qty
 
 	selected_rows = [x.get("name") for x in frappe.flags.get("args", {}).get("selected_items", [])]
 
@@ -443,7 +453,10 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False, ar
 		2. If selections: Is Alternative Item/Has Alternative Item: Map if selected and adequate qty
 		3. If no selections: Simple row: Map if adequate qty
 		"""
-		if not ((item.stock_qty > ordered_items.get(item.name, 0.0)) or is_unit_price_row(item)):
+		if not (
+			(item.stock_qty > ordered_items.get(item.name, 0.0))
+			or (is_unit_price_row(item) and item.name not in mapped_items)
+		):
 			return False
 
 		if not selected_rows:

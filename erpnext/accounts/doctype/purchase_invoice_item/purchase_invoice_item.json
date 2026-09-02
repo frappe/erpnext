@@ -237,6 +237,7 @@
    "fieldname": "conversion_factor",
    "fieldtype": "Float",
    "label": "UOM Conversion Factor",
+   "precision": "9",
    "print_hide": 1,
    "read_only": 1,
    "reqd": 1
@@ -1017,7 +1018,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-05-06 08:08:40.782395",
+ "modified": "2026-08-07 17:31:31.732720",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",

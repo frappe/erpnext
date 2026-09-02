@@ -32,7 +32,7 @@ from erpnext.exceptions import (
 )
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
-from erpnext.stock import get_warehouse_account_map
+from erpnext.stock import get_warehouse_account, get_warehouse_account_map
 from erpnext.stock.doctype.batch.batch import get_batch_qty
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import (
 	get_evaluated_inventory_dimension,
@@ -70,9 +70,23 @@ QI_OUTGOING_PURPOSES = (
 )
 
 
+SECONDARY_ITEM_PURPOSES = ("Manufacture", "Repack", "Disassemble")
+
+
+def is_inspection_exempt_secondary_row(doc, row) -> bool:
+	"""Whether the row is a secondary item on a document that produces secondary items."""
+	if not (row.get("secondary_item_type") or row.get("valuation_type")):
+		return False
+
+	if doc.doctype == "Stock Entry":
+		return doc.purpose in SECONDARY_ITEM_PURPOSES
+
+	return True
+
+
 def stock_entry_row_requires_inspection(purpose, row):
 	"""Check if this Stock Entry row need a Quality Inspection."""
-	if row.get("type") or row.get("is_legacy_scrap_item"):
+	if purpose in SECONDARY_ITEM_PURPOSES and (row.get("secondary_item_type") or row.get("valuation_type")):
 		return False
 	if purpose == "Manufacture":
 		return bool(row.is_finished_item)
@@ -254,7 +268,9 @@ class StockController(AccountsController):
 	def use_item_inventory_account(self):
 		return frappe.get_cached_value("Company", self.company, "enable_item_wise_inventory_account")
 
-	def get_inventory_account_dict(self, row, inventory_account_map, warehouse_field=None):
+	def get_inventory_account_dict(
+		self, row, inventory_account_map, warehouse_field=None, *, raise_error=True
+	):
 		account_dict = frappe._dict()
 
 		if isinstance(row, dict):
@@ -283,8 +299,15 @@ class StockController(AccountsController):
 		if not warehouse:
 			warehouse = self.get(warehouse_field)
 
-		if warehouse and warehouse in inventory_account_map:
-			account_dict = inventory_account_map[warehouse]
+		if warehouse:
+			account_dict = inventory_account_map.get(warehouse)
+			if not account_dict and raise_error:
+				account = get_warehouse_account(frappe.get_cached_doc("Warehouse", warehouse))
+				account_dict = frappe._dict(
+					account=account,
+					account_currency=frappe.get_cached_value("Account", account, "account_currency"),
+				)
+				inventory_account_map[warehouse] = account_dict
 
 		return account_dict
 
@@ -897,6 +920,12 @@ class StockController(AccountsController):
 			self.append_expenses_added_to_stock_pair(gl_list, item_code, amount, item_row)
 
 	def append_expenses_added_to_stock_pair(self, gl_list, item_code, amount, item_row):
+		# A service item holds no stock value, so there is nothing to book against it - and it must
+		# not make the expense accounts mandatory either. A zero pair would be rejected by GL Entry
+		# anyway, which needs a debit or a credit on every row.
+		if not amount or not frappe.get_cached_value("Item", item_code, "is_stock_item"):
+			return
+
 		fields = ("expenses_added_to_stock_account", "expenses_added_to_stock_contra_account")
 		details = get_expenses_added_to_stock_accounts(item_code, self.company)
 
@@ -1598,7 +1627,7 @@ class StockController(AccountsController):
 			elif self.doctype == "Stock Entry":
 				qi_required = stock_entry_row_requires_inspection(self.purpose, row)
 
-			if row.get("type") or row.get("is_legacy_scrap_item"):
+			if is_inspection_exempt_secondary_row(self, row):
 				continue
 
 			if qi_required:  # validate row only if inspection is required on item level
@@ -2395,6 +2424,11 @@ def is_reposting_pending():
 	return frappe.db.exists(
 		"Repost Item Valuation", {"docstatus": 1, "status": ["in", ["Queued", "In Progress"]]}
 	)
+
+
+def invalidate_future_sle_cache(voucher_type, voucher_no):
+	if hasattr(frappe.local, "future_sle"):
+		frappe.local.future_sle.pop((voucher_type, voucher_no), None)
 
 
 def future_sle_exists(args, sl_entries=None):
