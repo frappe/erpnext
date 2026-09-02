@@ -1,0 +1,55 @@
+{
+ "app": "erpnext",
+ "creation": "2026-09-02 22:15:00.000000",
+ "docstatus": 0,
+ "doctype": "Sidebar",
+ "idx": 0,
+ "items": [],
+ "link_doctype": "Module Def",
+ "link_to": "Regional",
+ "modified": "2026-09-02 22:15:00.000000",
+ "modified_by": "Administrator",
+ "name": "module_def_regional",
+ "navigation_items": [
+  {
+   "added": 0,
+   "collapsible": 0,
+   "hidden": 0,
+   "item_type": "DocType",
+   "keep_closed": 0,
+   "key": "lower-deduction-certificate",
+   "label": "Lower Deduction Certificate",
+   "link_doctype": "DocType",
+   "link_to": "Lower Deduction Certificate",
+   "switches_app": 0
+  },
+  {
+   "added": 0,
+   "collapsible": 0,
+   "hidden": 0,
+   "item_type": "DocType",
+   "keep_closed": 0,
+   "key": "uae-vat-settings",
+   "label": "UAE VAT Settings",
+   "link_doctype": "DocType",
+   "link_to": "UAE VAT Settings",
+   "switches_app": 0
+  },
+  {
+   "added": 0,
+   "collapsible": 0,
+   "hidden": 0,
+   "item_type": "DocType",
+   "keep_closed": 0,
+   "key": "south-africa-vat-settings",
+   "label": "South Africa VAT Settings",
+   "link_doctype": "DocType",
+   "link_to": "South Africa VAT Settings",
+   "switches_app": 0
+  }
+ ],
+ "owner": "Administrator",
+ "standard": 1,
+ "title": "Regional",
+ "user": ""
+}

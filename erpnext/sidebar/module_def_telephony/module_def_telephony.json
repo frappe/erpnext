@@ -1,0 +1,67 @@
+{
+ "app": "erpnext",
+ "creation": "2026-09-02 22:15:00.000000",
+ "docstatus": 0,
+ "doctype": "Sidebar",
+ "idx": 0,
+ "items": [],
+ "link_doctype": "Module Def",
+ "link_to": "Telephony",
+ "modified": "2026-09-02 22:15:00.000000",
+ "modified_by": "Administrator",
+ "name": "module_def_telephony",
+ "navigation_items": [
+  {
+   "added": 0,
+   "collapsible": 0,
+   "hidden": 0,
+   "item_type": "DocType",
+   "keep_closed": 0,
+   "key": "incoming-call-settings",
+   "label": "Incoming Call Settings",
+   "link_doctype": "DocType",
+   "link_to": "Incoming Call Settings",
+   "switches_app": 0
+  },
+  {
+   "added": 0,
+   "collapsible": 0,
+   "hidden": 0,
+   "item_type": "DocType",
+   "keep_closed": 0,
+   "key": "voice-call-settings",
+   "label": "Voice Call Settings",
+   "link_doctype": "DocType",
+   "link_to": "Voice Call Settings",
+   "switches_app": 0
+  },
+  {
+   "added": 0,
+   "collapsible": 0,
+   "hidden": 0,
+   "item_type": "DocType",
+   "keep_closed": 0,
+   "key": "call-log",
+   "label": "Call Log",
+   "link_doctype": "DocType",
+   "link_to": "Call Log",
+   "switches_app": 0
+  },
+  {
+   "added": 0,
+   "collapsible": 0,
+   "hidden": 0,
+   "item_type": "DocType",
+   "keep_closed": 0,
+   "key": "telephony-call-type",
+   "label": "Telephony Call Type",
+   "link_doctype": "DocType",
+   "link_to": "Telephony Call Type",
+   "switches_app": 0
+  }
+ ],
+ "owner": "Administrator",
+ "standard": 1,
+ "title": "Telephony",
+ "user": ""
+}

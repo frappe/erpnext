@@ -10,6 +10,16 @@ source_link = "https://github.com/frappe/erpnext"
 app_logo_url = "/assets/erpnext/images/erpnext-logo.svg"
 app_home = "/desk/home"
 
+# ERPNext addresses its doctypes through their module: /apps/erpnext/accounts/
+# sales-invoice/SI-001 (frappe/frappe#42211). The shape is fixed per app rather than per
+# doctype, foreign doctypes included, because a shape that varied inside one app would be
+# unparseable.
+#
+# desk v2 only. On `develop` this is dead config, and it is what the module rail below
+# needs to have anywhere to land: a `Module` item resolves to a module page, and a
+# non-modular prefix has no module route at all.
+app_modular = True
+
 add_to_apps_screen = [
 	{
 		"name": app_name,

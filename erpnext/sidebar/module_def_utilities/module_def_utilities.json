@@ -1,0 +1,55 @@
+{
+ "app": "erpnext",
+ "creation": "2026-09-02 22:15:00.000000",
+ "docstatus": 0,
+ "doctype": "Sidebar",
+ "idx": 0,
+ "items": [],
+ "link_doctype": "Module Def",
+ "link_to": "Utilities",
+ "modified": "2026-09-02 22:15:00.000000",
+ "modified_by": "Administrator",
+ "name": "module_def_utilities",
+ "navigation_items": [
+  {
+   "added": 0,
+   "collapsible": 0,
+   "hidden": 0,
+   "item_type": "DocType",
+   "keep_closed": 0,
+   "key": "rename-tool",
+   "label": "Rename Tool",
+   "link_doctype": "DocType",
+   "link_to": "Rename Tool",
+   "switches_app": 0
+  },
+  {
+   "added": 0,
+   "collapsible": 0,
+   "hidden": 0,
+   "item_type": "DocType",
+   "keep_closed": 0,
+   "key": "video",
+   "label": "Video",
+   "link_doctype": "DocType",
+   "link_to": "Video",
+   "switches_app": 0
+  },
+  {
+   "added": 0,
+   "collapsible": 0,
+   "hidden": 0,
+   "item_type": "DocType",
+   "keep_closed": 0,
+   "key": "video-settings",
+   "label": "Video Settings",
+   "link_doctype": "DocType",
+   "link_to": "Video Settings",
+   "switches_app": 0
+  }
+ ],
+ "owner": "Administrator",
+ "standard": 1,
+ "title": "Utilities",
+ "user": ""
+}
