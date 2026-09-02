@@ -151,6 +151,8 @@ class StockClosingEntry(Document):
 
 	@frappe.whitelist(methods=["POST"])
 	def enqueue_job(self):
+		self.check_permission("write")
+
 		self.db_set("status", "In Progress")
 		enqueue(prepare_closing_stock_balance, name=self.name, queue="long", timeout=1500)
 		frappe.msgprint(
@@ -161,6 +163,8 @@ class StockClosingEntry(Document):
 
 	@frappe.whitelist(methods=["POST"])
 	def regenerate_closing_balance(self):
+		self.check_permission("write")
+
 		self.validate_closed_period_lock()
 		self.remove_stock_closing()
 		self.enqueue_job()
