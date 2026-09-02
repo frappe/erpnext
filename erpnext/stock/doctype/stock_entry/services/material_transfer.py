@@ -193,9 +193,6 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 		if not self._is_overproduction_allowed(flt(self.wo_doc.qty)):
 			return
 
-		self.cap_completed_qty_to_material_coverage()
-
-	def cap_completed_qty_to_material_coverage(self):
 		required_qty, transferred_qty, target_qty, precision = self._get_material_coverage_data()
 		if not required_qty:
 			return
@@ -209,7 +206,7 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 				material_reference = row.original_item or row.item_code
 				transferred = flt(row.qty) * flt(row.conversion_factor or 1)
 
-			if material_reference in required_qty and (self.doc.job_card or row.s_warehouse):
+			if row.s_warehouse and material_reference in required_qty:
 				transferred_qty[material_reference] += transferred
 
 		covered_after = self._get_covered_qty(required_qty, transferred_qty, target_qty, precision)
