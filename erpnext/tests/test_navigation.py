@@ -3,16 +3,19 @@
 
 """ERPNext's shipped desk v2 navigation: one Rail record and eighteen module Sidebars.
 
-These are fixture tests. ERPNext ships no navigation code at all -- the rows arrive as JSON at
-`bench migrate` and the framework resolves them -- so what there is to get wrong is the content
-of those rows: a rail item naming a sidebar nobody ships, a row pointing at a doctype this site
-does not have, or two rows claiming one key. Each of those resolves to a quietly shorter list
-rather than to an error, which is why they are asserted here.
+These are fixture tests. The rows arrive as JSON at `bench migrate` and the framework resolves
+them, so what there is to get wrong is the content of those rows: a rail item naming a sidebar
+nobody ships, a row pointing at a doctype this site does not have, or two rows claiming one key.
+Each of those resolves to a quietly shorter list rather than to an error, which is why they are
+asserted here.
 
 This is the module-primary half of charter point 2 (frappe/frappe#42226): the same table, the
 same resolver and the same item kinds that give CRM a doctype-primary rail, giving ERPNext one
 made of modules. The rail is a `Sidebar` item per module that has an authored sidebar and a
 `Module` item per module that does not.
+
+The one piece of ERPNext navigation code lives elsewhere: `test_navigation_kind.py` covers the
+`Default Company` item kind, which is the app contributing a kind rather than authoring rows.
 
 Every test runs as somebody other than Administrator. The permission filter short-circuits for
 an administrator (`frappe/shell/navigation_filter.py`), so an Administrator suite would pass

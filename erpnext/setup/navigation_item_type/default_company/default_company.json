@@ -1,0 +1,15 @@
+{
+ "creation": "2026-09-03 10:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Navigation Item Type",
+ "idx": 0,
+ "label": "Default Company",
+ "modified": "2026-09-03 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Setup",
+ "name": "Default Company",
+ "owner": "Administrator",
+ "permission_rule": "Custom",
+ "target_doctype": "Company",
+ "type_name": "Default Company"
+}
