@@ -278,7 +278,9 @@ def get_account_type_based_gl_data(company, filters=None):
 
 	# per-period group-by-dimension filter (always a single exact value)
 	if filters.get("dimension_field") and filters.get("dimension_value"):
-		query = query.where(gl[filters.dimension_field] == filters.dimension_value)
+		query = query.where(
+			get_dimension_filter_condition(gl[filters.dimension_field], [filters.dimension_value])
+		)
 
 	# accounting dimension filters selected in the filter bar
 	for dimension in get_accounting_dimensions(as_list=False):
