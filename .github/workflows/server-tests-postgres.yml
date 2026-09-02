@@ -103,6 +103,8 @@ jobs:
           DB: postgres
           TYPE: server
           FRAPPE_BRANCH: develop
+          # Anonymous git to github.com gets throttled to a 401; authenticate the clones.
+          CI_GITHUB_TOKEN: ${{ github.token }}
           BENCH_CACHE_DIR: /home/runner/bench-cache
 
       - name: Warm up test data
