@@ -10,6 +10,7 @@ import json
 import frappe
 import frappe.defaults
 from frappe import _, msgprint
+from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder import Order
 from frappe.query_builder.functions import Sum
@@ -766,7 +767,16 @@ def make_purchase_orders_by_supplier(source_name: str, item_suppliers: str | lis
 
 
 @frappe.whitelist()
-def make_request_for_quotation(source_name, target_doc=None):
+def make_request_for_quotation(source_name: str, target_doc: str | dict | Document | None = None):
+	def update_item(obj, target, source_parent):
+		qty = obj.ordered_qty or obj.received_qty
+		target.qty = flt(flt(obj.stock_qty) - flt(qty)) / target.conversion_factor
+		target.stock_qty = target.qty * target.conversion_factor
+
+	def select_item(d):
+		qty = d.ordered_qty or d.received_qty
+		return qty < d.stock_qty
+
 	doclist = get_mapped_doc(
 		"Material Request",
 		source_name,
@@ -782,6 +792,8 @@ def make_request_for_quotation(source_name, target_doc=None):
 					["parent", "material_request"],
 					["project", "project_name"],
 				],
+				"postprocess": update_item,
+				"condition": select_item,
 			},
 		},
 		target_doc,
