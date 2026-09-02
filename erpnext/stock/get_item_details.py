@@ -336,7 +336,9 @@ def update_stock(ctx, out, doc=None):
 					out.update({"rate": rate, "price_list_rate": rate})
 
 		if out.has_serial_no and out.has_batch_no and has_incorrect_serial_nos(ctx, out):
-			kwargs["batches"] = [ctx.get("batch_no")] if ctx.get("batch_no") else [out.get("batch_no")]
+			batch_no = ctx.get("batch_no") or out.get("batch_no")
+			if batch_no:
+				kwargs["batches"] = [batch_no]
 			serial_nos = get_serial_nos_for_outward(kwargs)
 			serial_nos = get_filtered_serial_nos(serial_nos, doc)
 
