@@ -790,6 +790,9 @@ def get_daily_depr_amount(asset, row, schedule_idx, amount):
 
 		return amount / total_days
 	else:
+		if asset.opening_accumulated_depreciation:
+			amount = flt(row.value_after_depreciation) - flt(row.expected_value_after_useful_life)
+
 		total_years = (
 			flt(
 				(row.total_number_of_depreciations - row.total_number_of_booked_depreciations)
