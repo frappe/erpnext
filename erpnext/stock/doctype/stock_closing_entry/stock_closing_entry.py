@@ -187,7 +187,7 @@ class StockClosingEntry(Document):
 			new_doc.posting_datetime = get_combine_datetime(self.to_date, new_doc.posting_time)
 			new_doc.stock_closing_entry = self.name
 			new_doc.company = self.company
-			new_doc.save()
+			new_doc.save(ignore_permissions=True)
 
 	def get_prepared_data(self):
 		if attachments := get_attachments(self.doctype, self.name):
