@@ -64,10 +64,11 @@ class EmailCampaign(Document):
 			frappe.throw(_("Please set an email id for the Lead {0}").format(lead_name))
 
 	def validate_contact(self):
-		contact_email_id = frappe.db.get_value("Contact", self.recipient, "email_id")
-		if not contact_email_id:
-			full_name = frappe.db.get_value("Contact", self.recipient, "full_name")
-			frappe.throw(_("Please set a primary email id for the Contact {0}").format(full_name))
+		contact = frappe.db.get_value("Contact", self.recipient, ["email_id", "full_name"], as_dict=True)
+		if contact and not contact.email_id:
+			frappe.throw(
+				_("Please set a primary email ID for the Contact {0}").format(frappe.bold(contact.full_name))
+			)
 
 	def validate_email_campaign_already_exists(self):
 		email_campaign_exists = frappe.db.exists(

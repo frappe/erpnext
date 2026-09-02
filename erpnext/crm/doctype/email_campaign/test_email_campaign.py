@@ -66,7 +66,7 @@ class TestEmailCampaign(ERPNextTestSuite):
 		doc = self.make_email_campaign(campaign.name)
 		doc.email_campaign_for = "Contact"
 		doc.recipient = contact.name
-		self.assertRaisesRegex(frappe.ValidationError, "primary email id", doc.insert)
+		self.assertRaisesRegex(frappe.ValidationError, "primary email ID", doc.insert)
 
 	def test_contact_with_an_email_is_accepted(self):
 		contact = frappe.get_doc(
