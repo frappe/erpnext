@@ -1,0 +1,67 @@
+{
+ "app": "erpnext",
+ "creation": "2026-09-02 22:15:00.000000",
+ "docstatus": 0,
+ "doctype": "Sidebar",
+ "idx": 0,
+ "items": [],
+ "link_doctype": "Module Def",
+ "link_to": "Subcontracting",
+ "modified": "2026-09-02 22:15:00.000000",
+ "modified_by": "Administrator",
+ "name": "module_def_subcontracting",
+ "navigation_items": [
+  {
+   "added": 0,
+   "collapsible": 0,
+   "hidden": 0,
+   "item_type": "DocType",
+   "keep_closed": 0,
+   "key": "subcontracting-order",
+   "label": "Subcontracting Order",
+   "link_doctype": "DocType",
+   "link_to": "Subcontracting Order",
+   "switches_app": 0
+  },
+  {
+   "added": 0,
+   "collapsible": 0,
+   "hidden": 0,
+   "item_type": "DocType",
+   "keep_closed": 0,
+   "key": "subcontracting-receipt",
+   "label": "Subcontracting Receipt",
+   "link_doctype": "DocType",
+   "link_to": "Subcontracting Receipt",
+   "switches_app": 0
+  },
+  {
+   "added": 0,
+   "collapsible": 0,
+   "hidden": 0,
+   "item_type": "DocType",
+   "keep_closed": 0,
+   "key": "subcontracting-bom",
+   "label": "Subcontracting BOM",
+   "link_doctype": "DocType",
+   "link_to": "Subcontracting BOM",
+   "switches_app": 0
+  },
+  {
+   "added": 0,
+   "collapsible": 0,
+   "hidden": 0,
+   "item_type": "DocType",
+   "keep_closed": 0,
+   "key": "subcontracting-inward-order",
+   "label": "Subcontracting Inward Order",
+   "link_doctype": "DocType",
+   "link_to": "Subcontracting Inward Order",
+   "switches_app": 0
+  }
+ ],
+ "owner": "Administrator",
+ "standard": 1,
+ "title": "Subcontracting",
+ "user": ""
+}
