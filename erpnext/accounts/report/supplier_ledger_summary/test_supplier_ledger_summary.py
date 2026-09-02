@@ -11,6 +11,39 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestSupplierLedgerSummary(ERPNextTestSuite, AccountsTestMixin):
+	def test_blank_and_multiple_payment_terms_filters(self):
+		invoice = self.create_purchase_invoice()
+		filters = frappe._dict(
+			company=invoice.company,
+			party=self.supplier,
+			from_date=invoice.posting_date,
+			to_date=invoice.posting_date,
+		)
+		for party_terms in (None, "", "_Test Payment Term Template", "_Test Other Payment Terms"):
+			frappe.db.set_value("Supplier", self.supplier, "payment_terms", party_terms)
+			for selected, matching_terms in (
+				([], (None, "", "_Test Payment Term Template", "_Test Other Payment Terms")),
+				([BLANK_ACCOUNTING_DIMENSION], (None, "")),
+				(["_Test Payment Term Template"], ("_Test Payment Term Template",)),
+				(
+					["_Test Payment Term Template", "_Test Other Payment Terms"],
+					("_Test Payment Term Template", "_Test Other Payment Terms"),
+				),
+				(
+					[BLANK_ACCOUNTING_DIMENSION, "_Test Payment Term Template"],
+					(None, "", "_Test Payment Term Template"),
+				),
+				("_Test Payment Term Template", ("_Test Payment Term Template",)),
+				(
+					frappe.as_json([BLANK_ACCOUNTING_DIMENSION, "_Test Payment Term Template"]),
+					(None, "", "_Test Payment Term Template"),
+				),
+			):
+				with self.subTest(party_terms=party_terms, selected=selected):
+					filters.payment_terms_template = selected
+					rows = execute(filters)[1]
+					self.assertEqual(bool(rows), party_terms in matching_terms)
+
 	def setUp(self):
 		self.company = "_Test Company"
 		self.supplier = "_Test Supplier"
