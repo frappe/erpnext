@@ -4,7 +4,6 @@ import frappe
 from frappe import _, bold
 from frappe.query_builder import Case
 from frappe.utils import flt, get_link_to_form
-from pypika.terms import ValueWrapper
 
 from erpnext.stock.serial_batch_bundle import get_serial_batch_list_from_item
 
@@ -509,21 +508,13 @@ class SubcontractingInwardController:
 				)
 
 			table = frappe.qb.DocType("Subcontracting Inward Order Item")
+			allowed_qty = table.produced_qty
+			if not allow_delivery_of_overproduced_qty:
+				allowed_qty = Case().when(table.produced_qty < table.qty, table.produced_qty).else_(table.qty)
+
 			query = (
 				frappe.qb.from_(table)
-				.select(
-					(
-						Case()
-						.when(
-							# bool() so the literal renders as true/false; postgres rejects `OR <integer>`
-							(table.produced_qty < table.qty)
-							| ValueWrapper(bool(allow_delivery_of_overproduced_qty)),
-							table.produced_qty,
-						)
-						.else_(table.qty)
-						- table.delivered_qty
-					).as_("max_allowed_qty")
-				)
+				.select((allowed_qty - table.delivered_qty).as_("max_allowed_qty"))
 				.where((table.name == item.scio_detail) & (table.docstatus == 1))
 			)
 			max_allowed_qty = query.run(pluck="max_allowed_qty")
