@@ -308,6 +308,7 @@ class StatusService:
 
 	def update_production_plan_status(self):
 		production_plan = frappe.get_doc("Production Plan", self.doc.production_plan)
+		production_plan.flags.ignore_permissions = True
 		produced_qty = 0
 		if self.doc.production_plan_item:
 			total_qty = frappe.get_all(
