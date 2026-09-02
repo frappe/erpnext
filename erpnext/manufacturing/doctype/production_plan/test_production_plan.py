@@ -3167,6 +3167,43 @@ class TestProductionPlan(ERPNextTestSuite):
 			"The phantom BOM was not re-exploded for the second po_item.",
 		)
 
+	def test_set_status_requires_write_permission(self):
+		pln = create_production_plan(item_code="Test Production Item 1")
+
+		with self.set_user(create_user_without_production_plan_access()):
+			doc = frappe.get_doc("Production Plan", pln.name)
+			self.assertRaises(frappe.PermissionError, doc.set_status)
+
+	def test_work_order_status_rollup_without_production_plan_permission(self):
+		pln = create_production_plan(item_code="Test Production Item 1")
+		pln.make_work_order()
+
+		wo_name = frappe.db.get_value("Work Order", {"production_plan": pln.name}, "name")
+		frappe.db.set_value("Production Plan Item", pln.po_items[0].name, "ordered_qty", 99)
+
+		with self.set_user(create_user_without_production_plan_access()):
+			frappe.get_doc("Work Order", wo_name).update_ordered_qty()
+
+		pln.reload()
+		self.assertEqual(pln.po_items[0].ordered_qty, 0.0)
+		self.assertEqual(pln.status, "Submitted")
+
+	def test_material_request_status_rollup_without_production_plan_permission(self):
+		pln = create_production_plan(item_code="Test Production Item 1")
+		pln.make_material_request()
+
+		mr_name = frappe.db.get_value("Material Request Item", {"production_plan": pln.name}, "parent")
+		plan_item = frappe.get_doc("Material Request", mr_name).items[0].material_request_plan_item
+		frappe.db.set_value("Material Request Plan Item", plan_item, "requested_qty", 0)
+
+		with self.set_user(create_user_without_production_plan_access()):
+			frappe.get_doc("Material Request", mr_name).update_requested_qty_in_production_plan()
+
+		pln.reload()
+		requested_qty = frappe.db.get_value("Material Request Plan Item", plan_item, "requested_qty")
+		self.assertGreater(requested_qty, 0)
+		self.assertEqual(pln.status, "Material Requested")
+
 
 def create_production_plan(**args):
 	"""
@@ -3299,3 +3336,19 @@ def make_bom(**args):
 		frappe.set_value("Item", args.item, "default_bom", bom.name)
 
 	return bom
+
+
+def create_user_without_production_plan_access():
+	user = "test_production_plan_no_access@example.com"
+	if not frappe.db.exists("User", user):
+		frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": user,
+				"first_name": "Production Plan No Access",
+				"send_welcome_email": 0,
+				"roles": [{"doctype": "Has Role", "role": "Stock User"}],
+			}
+		).insert(ignore_permissions=True)
+
+	return user
