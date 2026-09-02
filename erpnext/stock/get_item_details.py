@@ -381,7 +381,7 @@ def get_batch_no_covering_qty(kwargs, doc, qty):
 def filter_batches(batches, doc):
 	for row in doc.get("items"):
 		if row.get("batch_no") in batches:
-			batches[row.get("batch_no")] -= row.get("qty")
+			batches[row.get("batch_no")] -= flt(row.get("stock_qty"))
 			if batches[row.get("batch_no")] <= 0:
 				del batches[row.get("batch_no")]
 
