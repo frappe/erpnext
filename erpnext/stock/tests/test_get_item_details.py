@@ -457,3 +457,93 @@ class TestGetItemDetail(ERPNextTestSuite):
 			frappe.set_user("Administrator")
 			frappe.db.set_single_value("Buying Settings", "maintain_same_rate", original)
 			frappe.clear_cache(doctype="Buying Settings")
+
+	def make_batched_item_with_stock(self, quantities, uoms=None, **properties):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+			get_batch_from_bundle,
+		)
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		properties.update({"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "FBQ-.#####"})
+		item_code = make_item(properties=properties, uoms=uoms).name
+		batches = []
+		for qty in quantities:
+			se = make_stock_entry(
+				item_code=item_code, target="_Test Warehouse - _TC", qty=qty, basic_rate=100
+			)
+			batches.append(get_batch_from_bundle(se.items[0].serial_and_batch_bundle))
+
+		return item_code, batches
+
+	def get_item_details_for_row(self, item_code, qty, items=None):
+		ctx = frappe._dict(
+			{
+				"doctype": "Delivery Note",
+				"item_code": item_code,
+				"company": "_Test Company",
+				"warehouse": "_Test Warehouse - _TC",
+				"qty": qty,
+				"use_serial_batch_fields": 1,
+				"price_list": "_Test Price List",
+				"currency": "INR",
+				"conversion_rate": 1.0,
+				"price_list_currency": "INR",
+				"plc_conversion_rate": 1.0,
+				"ignore_pricing_rule": 1,
+			}
+		)
+		doc = {"doctype": "Delivery Note", "selling_price_list": "_Test Price List", "items": items or []}
+		return get_item_details(ctx, doc=doc)
+
+	def get_picked_batch_no(self, item_code, qty, items=None):
+		return self.get_item_details_for_row(item_code, qty, items).get("batch_no")
+
+	def test_batch_no_set_only_when_first_batch_covers_qty(self):
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		item_code, batches = self.make_batched_item_with_stock([2, 3, 14])
+		first_batch_row = [{"batch_no": batches[0], "qty": 2, "stock_qty": 2}]
+
+		with self.change_settings(
+			"Stock Settings",
+			{"pick_serial_and_batch_based_on": "FIFO", "auto_create_serial_and_batch_bundle_for_outward": 1},
+		):
+			self.assertEqual(self.get_picked_batch_no(item_code, 2), batches[0])
+			self.assertEqual(self.get_picked_batch_no(item_code, 3, items=first_batch_row), batches[1])
+			self.assertIsNone(self.get_picked_batch_no(item_code, 5))
+			self.assertIsNone(self.get_picked_batch_no(item_code, 20))
+
+			dn = create_delivery_note(item_code=item_code, qty=5, use_serial_batch_fields=1)
+			dn.reload()
+			entries = frappe.get_all(
+				"Serial and Batch Entry", {"parent": dn.items[0].serial_and_batch_bundle}, ["batch_no", "qty"]
+			)
+			self.assertEqual({d.batch_no: d.qty for d in entries}, {batches[0]: -2, batches[1]: -3})
+
+	def test_serial_nos_picked_across_batches_when_no_batch_covers_qty(self):
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+			get_serial_nos_from_bundle,
+		)
+
+		item_code, batches = self.make_batched_item_with_stock(
+			[2, 3], has_serial_no=1, serial_no_series="FBQ-SN-.#####"
+		)
+
+		with self.change_settings(
+			"Stock Settings",
+			{"pick_serial_and_batch_based_on": "FIFO", "auto_create_serial_and_batch_bundle_for_outward": 1},
+		):
+			details = self.get_item_details_for_row(item_code, 5)
+			self.assertIsNone(details.get("batch_no"))
+			serial_nos = details.serial_no.split("\n")
+			self.assertEqual(len(serial_nos), 5)
+
+			dn = create_delivery_note(
+				item_code=item_code, qty=5, use_serial_batch_fields=1, serial_no=details.serial_no
+			)
+			dn.reload()
+			self.assertEqual(
+				get_serial_nos_from_bundle(dn.items[0].serial_and_batch_bundle), sorted(serial_nos)
+			)
