@@ -887,6 +887,9 @@ class ProductionPlan(Document):
 		material_request_map = {}
 
 		for item in self.mr_items:
+			if not item.quantity:
+				continue
+
 			item_doc = frappe.get_cached_doc("Item", item.item_code)
 
 			material_request_type = item.material_request_type or item_doc.default_material_request_type
