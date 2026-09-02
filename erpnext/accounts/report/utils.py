@@ -425,12 +425,12 @@ def apply_common_conditions(filters, query, doctype, child_doctype=None, payment
 			join_required = True
 		if filters.get("warehouse"):
 			query = query.where(
-				child_doc.warehouse.isin(get_with_descendants("Warehouse", filters.warehouse))
+				get_dimension_filter_condition(child_doc.warehouse, filters.warehouse, "Warehouse")
 			)
 			join_required = True
 		if filters.get("item_group"):
 			query = query.where(
-				child_doc.item_group.isin(get_with_descendants("Item Group", filters.item_group))
+				get_dimension_filter_condition(child_doc.item_group, filters.item_group, "Item Group")
 			)
 			join_required = True
 
