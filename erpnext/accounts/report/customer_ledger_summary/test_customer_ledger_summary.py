@@ -163,6 +163,49 @@ class TestCustomerLedgerSummary(ERPNextTestSuite, AccountsTestMixin):
 					if rows:
 						self.assertEqual(rows[0].invoiced_amount, 1000)
 
+	def test_blank_sales_person_filter(self):
+		invoice = self.create_sales_invoice()
+		filters = frappe._dict(company=self.company, party=self.customer, from_date=today(), to_date=today())
+		person = "_Test Sales Person"
+		parent_person = frappe.db.get_value("Sales Person", person, "parent_sales_person")
+		for customer_person, invoice_person in (
+			(None, None),
+			("", ""),
+			(person, None),
+			(None, person),
+			(person, person),
+		):
+			for parenttype, parent, value in (
+				("Customer", self.customer, customer_person),
+				("Sales Invoice", invoice.name, invoice_person),
+			):
+				frappe.db.delete("Sales Team", {"parenttype": parenttype, "parent": parent})
+				if value is not None:
+					frappe.get_doc(
+						{
+							"doctype": "Sales Team",
+							"parenttype": parenttype,
+							"parent": parent,
+							"parentfield": "sales_team",
+							"sales_person": value,
+							"allocated_percentage": 100,
+						}
+					).db_insert()
+			for selected, expected in (
+				([BLANK_ACCOUNTING_DIMENSION], not customer_person or not invoice_person),
+				([parent_person], bool(customer_person or invoice_person)),
+				([BLANK_ACCOUNTING_DIMENSION, parent_person], True),
+			):
+				with self.subTest(
+					customer_person=customer_person, invoice_person=invoice_person, selected=selected
+				):
+					filters.sales_person = selected
+					rows = execute(filters)[1]
+					self.assertEqual({row.party for row in rows}, {self.customer} if expected else set())
+					self.assertEqual(
+						sum(row.invoiced_amount for row in rows), invoice.grand_total if expected else 0
+					)
+
 	def test_ledger_summary_basic_output(self):
 		filters = {"company": self.company, "from_date": today(), "to_date": today()}
 

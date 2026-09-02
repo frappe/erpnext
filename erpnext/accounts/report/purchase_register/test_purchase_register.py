@@ -4,12 +4,55 @@
 import frappe
 from frappe.utils import add_months, flt, today
 
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import BLANK_ACCOUNTING_DIMENSION
 from erpnext.accounts.report.purchase_register.purchase_register import execute
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestPurchaseRegister(ERPNextTestSuite):
+	def test_blank_and_multiple_tree_filters(self):
+		invoice = make_purchase_invoice()
+		for fieldname, doctype in (("warehouse", "Warehouse"), ("item_group", "Item Group")):
+			value = "_Test Warehouse - _TC6" if fieldname == "warehouse" else invoice.items[0].item_group
+			parent = frappe.db.get_value(doctype, value, "parent_" + fieldname)
+			for stored_value in (None, "", value):
+				frappe.db.set_value(invoice.items[0].doctype, invoice.items[0].name, fieldname, stored_value)
+				for selected, expected in (
+					([BLANK_ACCOUNTING_DIMENSION], not stored_value),
+					([value], bool(stored_value)),
+					([parent], bool(stored_value)),
+					([parent, value], bool(stored_value)),
+					([BLANK_ACCOUNTING_DIMENSION, parent], True),
+					(value, bool(stored_value)),
+				):
+					with self.subTest(fieldname=fieldname, stored_value=stored_value, selected=selected):
+						filters = frappe._dict(
+							company=invoice.company,
+							from_date=invoice.posting_date,
+							to_date=invoice.posting_date,
+						)
+						filters[fieldname] = selected
+						vouchers = {row.get("voucher_no") for row in execute(filters)[1]}
+						self.assertEqual(invoice.name in vouchers, expected)
+			frappe.db.set_value(invoice.items[0].doctype, invoice.items[0].name, fieldname, value)
+
+	def test_blank_supplier_group_filter(self):
+		invoice = make_purchase_invoice()
+		group = frappe.db.get_value("Supplier", invoice.supplier, "supplier_group")
+		filters = frappe._dict(company=invoice.company, from_date=today(), to_date=today())
+		for value in (None, "", group):
+			frappe.db.set_value("Supplier", invoice.supplier, "supplier_group", value)
+			for selected, expected in (
+				([BLANK_ACCOUNTING_DIMENSION], not value),
+				(["All Supplier Groups"], bool(value)),
+				([BLANK_ACCOUNTING_DIMENSION, "All Supplier Groups"], True),
+			):
+				with self.subTest(value=value, selected=selected):
+					filters.supplier_group = selected
+					vouchers = {row.get("voucher_no") for row in execute(filters)[1]}
+					self.assertEqual(invoice.name in vouchers, expected)
+
 	def test_purchase_register(self):
 		filters = frappe._dict(company="_Test Company 6", from_date=add_months(today(), -1), to_date=today())
 
