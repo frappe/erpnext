@@ -227,7 +227,10 @@ class CRMNote(Document):
 		notify_mentions(self.doctype, self.name, note)
 
 	@frappe.whitelist()
-	def edit_note(self, note, row_id):
+	def edit_note(self, note: str, row_id: str):
+		# db_update() skips the write check that save() does in add_note/delete_note
+		self.check_permission("write")
+
 		for d in self.notes:
 			if cstr(d.name) == row_id:
 				d.note = note

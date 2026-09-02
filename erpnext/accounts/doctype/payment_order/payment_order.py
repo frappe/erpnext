@@ -83,6 +83,7 @@ def get_supplier_query(doctype, txt, searchfield, start, page_len, filters):
 @frappe.whitelist()
 def make_payment_records(name, supplier, mode_of_payment=None):
 	doc = frappe.get_doc("Payment Order", name)
+	doc.check_permission()
 	make_journal_entry(doc, supplier, mode_of_payment)
 
 
