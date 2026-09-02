@@ -745,29 +745,9 @@ class WorkOrder(Document):
 		return status
 
 	def _has_transferred_material(self):
-		"""True if any raw material transferred against this work order via a pick list or a
-		material request is still, net of returns, in WIP (these leave
-		material_transferred_for_manufacturing at 0 via the min-fraction rule)."""
+		"""True if any raw material transferred against this work order remains in WIP."""
 		ste = frappe.qb.DocType("Stock Entry")
 		ste_child = frappe.qb.DocType("Stock Entry Detail")
-		mr_ste = frappe.qb.DocType("Stock Entry")
-		mr_child = frappe.qb.DocType("Stock Entry Detail")
-		# Stock Entry only carries `material_request` at the child-row level, so a Stock
-		# Entry is "MR-sourced" if *any* of its rows link back to a Material Request against
-		# this work order; the join to mr_ste keeps this scoped to this work order's entries
-		# instead of scanning every Material-Request-linked row in the system.
-		mr_sourced_stock_entries = (
-			frappe.qb.from_(mr_child)
-			.inner_join(mr_ste)
-			.on(mr_ste.name == mr_child.parent)
-			.select(mr_child.parent)
-			.where(
-				(mr_child.material_request.isnotnull())
-				& (mr_ste.work_order == self.name)
-				& (mr_ste.docstatus == 1)
-				& (mr_ste.purpose == "Material Transfer for Manufacture")
-			)
-		)
 		common_filters = (
 			(ste.work_order == self.name)
 			& (ste.docstatus == 1)
@@ -778,14 +758,9 @@ class WorkOrder(Document):
 			.inner_join(ste_child)
 			.on(ste_child.parent == ste.name)
 			.select(Sum(ste_child.transfer_qty))
-			.where(
-				common_filters
-				& (ste.is_return == 0)
-				& (ste.pick_list.isnotnull() | ste.name.isin(mr_sourced_stock_entries))
-			)
+			.where(common_filters & (ste.is_return == 0))
 		).run()[0][0]
-		# Returns don't carry their own pick_list/material_request reference, so net every
-		# return against this work order to correctly clear WIP after a full return.
+		# Net every return against this work order to clear WIP after a full return.
 		returned_qty = (
 			frappe.qb.from_(ste)
 			.inner_join(ste_child)
