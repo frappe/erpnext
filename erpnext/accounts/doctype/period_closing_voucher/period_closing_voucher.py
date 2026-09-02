@@ -7,6 +7,7 @@ from datetime import timedelta
 
 import frappe
 from frappe import _, qb
+from frappe.query_builder.custom import ConstantColumn
 from frappe.query_builder.functions import Max, Min, Sum
 from frappe.utils import (
 	add_days,
@@ -282,6 +283,7 @@ class PeriodClosingVoucher(AccountsController):
 			mapreduce(
 				"erpnext.accounts.doctype.period_closing_voucher.period_closing_voucher.mapper",
 				"erpnext.accounts.doctype.period_closing_voucher.period_closing_voucher.reducer",
+				"erpnext.accounts.doctype.period_closing_voucher.period_closing_voucher.summarize_and_post_ledger",
 				data,
 				self.doctype,
 				self.name,
@@ -300,12 +302,10 @@ class PeriodClosingVoucher(AccountsController):
 		self.block_if_future_closing_voucher_exists()
 		self.validate_accounts_not_frozen(for_cancellation=True)
 
-		# TODO: add branching clause based on accounts settings
-		from frappe.utils.background_jobs import cancel_mapreduce_job
-
-		cancel_mapreduce_job(self.doctype, self.name)
-
 		if not frappe.get_single_value("Accounts Settings", "use_legacy_controller_for_pcv"):
+			from frappe.utils.background_jobs import cancel_mapreduce_job
+
+			cancel_mapreduce_job(self.doctype, self.name)
 			self.cancel_process_pcv_docs()
 
 		self.db_set("gle_processing_status", "In Progress")
@@ -318,10 +318,10 @@ class PeriodClosingVoucher(AccountsController):
 
 	def on_trash(self):
 		super().on_trash()
-		# TODO: add branching clause based on accounts settings
-		from frappe.utils.background_jobs import remove_mapreduce_job
+		if not frappe.get_single_value("Accounts Settings", "use_legacy_controller_for_pcv"):
+			from frappe.utils.background_jobs import remove_mapreduce_job
 
-		remove_mapreduce_job(self.doctype, self.name)
+			remove_mapreduce_job(self.doctype, self.name)
 
 		ppcvs = frappe.db.get_all(
 			"Process Period Closing Voucher", {"parent_pcv": self.name, "docstatus": ["in", [1, 2]]}
@@ -804,7 +804,6 @@ def mapper(val):
 		"Account", filters={"company": company, "report_type": report_type}, pluck="name"
 	)
 
-	# summarize
 	gle = qb.DocType("GL Entry")
 	query = qb.from_(gle).select(gle.account)
 	for dim in dimensions:
@@ -816,6 +815,8 @@ def mapper(val):
 		Sum(gle.credit_in_account_currency).as_("credit_in_account_currency"),
 		# account_currency is constant per grouped account -> Max() keeps the GROUP BY postgres-valid
 		Max(gle.account_currency).as_("account_currency"),
+		ConstantColumn(balance_type).as_("balance_type"),
+		ConstantColumn(report_type).as_("report_type"),
 	).where(
 		(gle.company.eq(company))
 		& (gle.is_cancelled.eq(0))
@@ -841,12 +842,10 @@ def reducer(final, partial_res):
 	if final is None:
 		final = []
 
-	gl_entries = []
 	if partial_res:
-		for x in partial_res:
-			gl_entries.append(frappe._dict(x))
+		final.extend([frappe._dict(x) for x in partial_res])
 
-	return final + gl_entries
+	return final
 
 
 def get_dimensions():
@@ -857,3 +856,57 @@ def get_dimensions():
 	default_dimensions = ["cost_center", "finance_book", "project"]
 	dimensions = default_dimensions + get_accounting_dimensions()
 	return dimensions
+
+
+def summarize_and_post_ledger(result, ref_dt, ref_dn):
+	pcv = frappe.get_doc(ref_dt, ref_dn)
+
+	from erpnext.accounts.doctype.process_period_closing_voucher.process_period_closing_voucher import (
+		build_dimension_wise_balance_dict,
+		get_bs_closing_entries,
+		get_closing_account_closing_entry,
+		get_gle_for_closing_account,
+		get_gle_for_pl_account,
+		get_p_l_closing_entries,
+	)
+
+	result = [frappe._dict(x) for x in result]
+
+	# generate and post closing entries for P&L accounts
+	pl_entries = [x for x in result if x.report_type == "Profit and Loss"]
+	pl_dimension_wise_acc_balance = build_dimension_wise_balance_dict(pl_entries)
+
+	# build gl map
+	pl_accounts_reverse_gle = []
+	closing_account_gle = []
+
+	for dimensions, account_balances in pl_dimension_wise_acc_balance.items():
+		for acc, balances in account_balances.items():
+			balance_in_company_currency = flt(balances.debit) - flt(balances.credit)
+			if balance_in_company_currency:
+				pl_accounts_reverse_gle.append(get_gle_for_pl_account(pcv, acc, balances, dimensions))
+
+		closing_account_gle.append(get_gle_for_closing_account(pcv, account_balances["balances"], dimensions))
+
+	gl_entries = pl_accounts_reverse_gle + closing_account_gle
+	if gl_entries:
+		from erpnext.accounts.general_ledger import make_gl_entries
+
+		make_gl_entries(gl_entries, merge_entries=False)
+
+	# generate and post account closing balance for balance sheet accounts
+	bs_entries = [x for x in result if x.report_type == "Balance Sheet"]
+	bs_dimension_wise_acc_balance = build_dimension_wise_balance_dict(bs_entries)
+	pl_closing_entries = get_p_l_closing_entries(pl_accounts_reverse_gle, pcv)
+	bs_closing_entries = get_bs_closing_entries(bs_dimension_wise_acc_balance, pcv)
+	closing_entries_for_closing_account = get_closing_account_closing_entry(closing_account_gle, pcv)
+	closing_entries = pl_closing_entries + bs_closing_entries + closing_entries_for_closing_account
+
+	make_closing_entries(closing_entries, pcv.name, pcv.company, pcv.period_end_date)
+
+	# keep transaction on PPCV and PPCVD short
+	# prevents concurrency errors - REPEATABLE READ
+	if not frappe.in_test:
+		frappe.db.commit()  # nosemgrep
+
+	frappe.db.set_value("Period Closing Voucher", pcv.name, "gle_processing_status", "Completed")
