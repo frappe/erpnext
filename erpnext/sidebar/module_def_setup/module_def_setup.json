@@ -1,13 +1,13 @@
 {
  "app": "erpnext",
- "creation": "2026-09-02 22:15:00.000000",
+ "creation": "2026-09-02 22:15:00",
  "docstatus": 0,
  "doctype": "Sidebar",
  "idx": 0,
  "items": [],
  "link_doctype": "Module Def",
  "link_to": "Setup",
- "modified": "2026-09-02 22:15:00.000000",
+ "modified": "2026-09-02 20:36:43.873382",
  "modified_by": "Administrator",
  "name": "module_def_setup",
  "navigation_items": [
@@ -241,6 +241,17 @@
    "key": "section-organization",
    "label": "Organization",
    "link_doctype": "",
+   "switches_app": 0
+  },
+  {
+   "added": 0,
+   "collapsible": 0,
+   "hidden": 0,
+   "item_type": "Default Company",
+   "keep_closed": 0,
+   "key": "default-company",
+   "link_doctype": "Company",
+   "parent_key": "section-organization",
    "switches_app": 0
   },
   {

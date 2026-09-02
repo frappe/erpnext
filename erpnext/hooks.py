@@ -20,6 +20,18 @@ app_home = "/desk/home"
 # non-modular prefix has no module route at all.
 app_modular = True
 
+# The server half of ERPNext's own navigation item kind, keyed by type name. The other two
+# halves are files: the `Navigation Item Type` record, which arrives at migrate, and the
+# renderer beside it, which arrives at build. Server code is optional for a kind, and this
+# one needs it because the type declares the `Custom` permission rule -- the framework
+# appends `.can_see` to this path and hands it every item of the kind at once
+# (frappe/frappe#42424).
+#
+# desk v2 only, and harmless on `develop`, where nothing reads the hook.
+navigation_item_resolvers = {
+	"Default Company": "erpnext.setup.navigation_item_type.default_company.default_company"
+}
+
 add_to_apps_screen = [
 	{
 		"name": app_name,
