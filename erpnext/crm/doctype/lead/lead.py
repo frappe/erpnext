@@ -238,6 +238,8 @@ class Lead(SellingController, CRMNote):
 
 	@frappe.whitelist()
 	def create_prospect_and_contact(self, data):
+		self.check_permission("write")
+
 		data = frappe._dict(data)
 		if data.create_contact:
 			self.create_contact()
