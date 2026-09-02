@@ -31,6 +31,7 @@ from erpnext.accounts.doctype.financial_report_template.financial_report_validat
 	AccountFilterValidator,
 	CalculationFormulaValidator,
 	DependencyValidator,
+	get_valid_api_method,
 )
 from erpnext.accounts.report.financial_statements import (
 	get_columns,
@@ -1164,10 +1165,12 @@ class RowProcessor:
 
 	def _process_api_row(self, row) -> RowData:
 		api_path = row.calculation_formula
-		# TODO
+
+		method = get_valid_api_method(api_path)
 
 		try:
-			values = frappe.call(api_path, filters=self.context.filters, periods=self.period_list, row=row)
+			# nosemgrep: frappe-semgrep-rules.rules.security.frappe-codeinjection-eval
+			values = frappe.call(method, filters=self.context.filters, periods=self.period_list, row=row)
 
 			if row.reverse_sign:
 				values = [-1 * v for v in values]
