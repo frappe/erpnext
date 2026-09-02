@@ -547,3 +547,16 @@ class TestGetItemDetail(ERPNextTestSuite):
 			self.assertEqual(
 				get_serial_nos_from_bundle(dn.items[0].serial_and_batch_bundle), sorted(serial_nos)
 			)
+
+	def test_same_document_rows_reduce_batch_by_stock_qty(self):
+		item_code, batches = self.make_batched_item_with_stock(
+			[10], uoms=[{"uom": "Box", "conversion_factor": 5}]
+		)
+		box_row = [{"batch_no": batches[0], "uom": "Box", "qty": 1, "stock_qty": 5}]
+
+		with self.change_settings(
+			"Stock Settings",
+			{"pick_serial_and_batch_based_on": "FIFO", "auto_create_serial_and_batch_bundle_for_outward": 1},
+		):
+			self.assertEqual(self.get_picked_batch_no(item_code, 5, items=box_row), batches[0])
+			self.assertIsNone(self.get_picked_batch_no(item_code, 6, items=box_row))
