@@ -340,6 +340,43 @@ class TestJobCard(ERPNextTestSuite):
 		# transfer was made for 2 fg qty in first transfer Stock Entry
 		self.assertEqual(transfer_entry_2.fg_completed_qty, 0)
 
+	def test_material_request_stock_entry_uses_mapped_job_card_items(self):
+		from erpnext.stock.doctype.material_request.mapper import make_stock_entry
+
+		self.transfer_material_against = "Job Card"
+		self.source_warehouse = "Stores - _TC"
+		job_card = frappe.get_last_doc("Job Card", {"work_order": self.work_order.name})
+		mr = make_material_request(job_card.name)
+		mr.schedule_date = today()
+		for row in mr.items:
+			row.qty = flt(row.qty) / 2
+			row.stock_qty = flt(row.stock_qty) / 2
+		mr.submit()
+
+		stock_entry = make_stock_entry(mr.name)
+		self.assertEqual(stock_entry.fg_completed_qty, job_card.for_quantity / 2)
+
+		selected_row = mr.items[0]
+		try:
+			frappe.flags.selected_children = {"items": [selected_row.name]}
+			selected_stock_entry = make_stock_entry(mr.name)
+		finally:
+			frappe.flags.selected_children = None
+
+		self.assertEqual(
+			[row.job_card_item for row in selected_stock_entry.items], [selected_row.job_card_item]
+		)
+		self.assertEqual(selected_stock_entry.fg_completed_qty, 0)
+
+		for row in mr.items:
+			transferred_qty = flt(row.stock_qty) / 2
+			frappe.db.set_value("Job Card Item", row.job_card_item, "transferred_qty", transferred_qty)
+			frappe.db.set_value(row.doctype, row.name, "ordered_qty", transferred_qty)
+		mr.reload()
+
+		repeated_stock_entry = make_stock_entry(mr.name)
+		self.assertEqual(repeated_stock_entry.fg_completed_qty, job_card.for_quantity / 4)
+
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"job_card_excess_transfer": 1})
 	def test_job_card_excess_material_transfer(self):
 		"Test transferring more than required RM against Job Card."
@@ -1002,6 +1039,7 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertEqual(ste.job_card, job_card_name)
 		self.assertEqual(ste.from_bom, 1.0)
 		self.assertEqual(ste.bom_no, work_order.bom_no)
+		self.assertEqual(ste.fg_completed_qty, frappe.get_value("Job Card", job_card_name, "for_quantity"))
 
 	def test_job_card_material_transfer_via_pick_list(self):
 		from erpnext.stock.doctype.material_request.mapper import create_pick_list
