@@ -111,7 +111,9 @@ class PartyLedgerSummaryReport:
 			)
 
 		if self.filters.payment_terms_template:
-			conditions.append(doctype.payment_terms == self.filters.payment_terms_template)
+			conditions.append(
+				get_dimension_filter_condition(doctype.payment_terms, self.filters.payment_terms_template)
+			)
 
 		if self.filters.sales_partner:
 			conditions.append(
@@ -123,17 +125,17 @@ class PartyLedgerSummaryReport:
 			sales_invoice = qb.DocType("Sales Invoice")
 
 			customers = (
-				qb.from_(sales_team)
-				.select(sales_team.parent)
-				.where(sales_team.sales_person.isin(self.filters.sales_person))
-				.where(sales_team.parenttype == "Customer")
+				qb.from_(doctype)
+				.left_join(sales_team)
+				.on((sales_team.parent == doctype.name) & (sales_team.parenttype == "Customer"))
+				.select(doctype.name)
+				.where(get_dimension_filter_condition(sales_team.sales_person, self.filters.sales_person))
 			) + (
-				qb.from_(sales_team)
-				.join(sales_invoice)
-				.on(sales_team.parent == sales_invoice.name)
+				qb.from_(sales_invoice)
+				.left_join(sales_team)
+				.on((sales_team.parent == sales_invoice.name) & (sales_team.parenttype == "Sales Invoice"))
 				.select(sales_invoice.customer)
-				.where(sales_team.sales_person.isin(self.filters.sales_person))
-				.where(sales_team.parenttype == "Sales Invoice")
+				.where(get_dimension_filter_condition(sales_team.sales_person, self.filters.sales_person))
 			)
 
 			conditions.append(doctype.name.isin(customers))
