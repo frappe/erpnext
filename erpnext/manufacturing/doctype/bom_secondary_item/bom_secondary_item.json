@@ -6,13 +6,10 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "secondary_item_type",
-  "rate",
-  "column_break_gres",
-  "is_legacy",
   "section_break_sbnk",
   "item_code",
   "item_name",
+  "secondary_item_type",
   "uom",
   "column_break_atlf",
   "qty",
@@ -25,6 +22,7 @@
   "column_break_wsra",
   "image_nygv",
   "section_break_ielf",
+  "valuation_type",
   "cost_allocation_per",
   "process_loss_per",
   "column_break_gtbl",
@@ -34,13 +32,12 @@
  ],
  "fields": [
   {
-   "depends_on": "eval:!doc.is_legacy",
    "fieldname": "secondary_item_type",
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Type",
-   "mandatory_depends_on": "eval:!doc.is_legacy",
-   "options": "\nCo-Product\nBy-Product\nScrap\nAdditional Finished Good"
+   "options": "\nCo-Product\nBy-Product\nScrap\nAdditional Finished Good",
+   "reqd": 1
   },
   {
    "fieldname": "item_code",
@@ -63,10 +60,9 @@
    "fieldname": "cost",
    "fieldtype": "Currency",
    "label": "Cost",
-   "no_copy": 1,
    "non_negative": 1,
    "options": "currency",
-   "read_only": 1,
+   "read_only_depends_on": "eval:doc.valuation_type != 'Manual'",
    "reqd": 1
   },
   {
@@ -103,7 +99,6 @@
    "reqd": 1
   },
   {
-   "depends_on": "eval:!doc.is_legacy",
    "fieldname": "section_break_ielf",
    "fieldtype": "Section Break"
   },
@@ -143,6 +138,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:doc.valuation_type == '% of FG Cost'",
    "fieldname": "cost_allocation_per",
    "fieldtype": "Percent",
    "label": "Cost Allocation %",
@@ -175,33 +171,20 @@
    "fieldtype": "Currency",
    "hidden": 1,
    "label": "Base Cost (Company Currency)",
-   "no_copy": 1,
    "non_negative": 1,
    "options": "Company:company:default_currency",
    "read_only": 1,
    "reqd": 1
   },
   {
-   "fieldname": "column_break_gres",
-   "fieldtype": "Column Break"
-  },
-  {
-   "default": "0",
-   "depends_on": "is_legacy",
-   "fieldname": "is_legacy",
-   "fieldtype": "Check",
-   "label": "Is Legacy",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
-   "depends_on": "eval:doc.is_legacy",
-   "fieldname": "rate",
-   "fieldtype": "Currency",
-   "label": "Rate",
-   "no_copy": 1,
-   "non_negative": 1,
-   "read_only": 1
+   "default": "Valuation Rate",
+   "description": "Valuation Rate and Manual value this item on its own and deduct that cost from the raw material cost, like the pre-v16 scrap items. % of FG Cost allocates a percentage of the remaining raw material cost.",
+   "fieldname": "valuation_type",
+   "fieldtype": "Select",
+   "label": "Valuation Type",
+   "options": "Valuation Rate\n% of FG Cost\nManual",
+   "reqd": 1,
+   "show_description_on_click": 1
   },
   {
    "default": "0",

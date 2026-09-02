@@ -1115,7 +1115,7 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 10))
 		for row in stock_entry.items:
-			if row.secondary_item_type or row.is_legacy_scrap_item:
+			if row.secondary_item_type or row.valuation_type:
 				self.assertEqual(row.qty, 1)
 
 		# Partial Job Card 1 with qty 10
@@ -1127,7 +1127,7 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 10))
 		for row in stock_entry.items:
-			if row.secondary_item_type or row.is_legacy_scrap_item:
+			if row.secondary_item_type or row.valuation_type:
 				self.assertEqual(row.qty, 2)
 
 		# Partial Job Card 2 with qty 10
@@ -2501,7 +2501,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertTrue(se_doc.additional_costs)
 		secondary_items = []
 		for item in se_doc.items:
-			if item.secondary_item_type or item.is_legacy_scrap_item:
+			if item.secondary_item_type or item.valuation_type:
 				secondary_items.append(item.item_code)
 
 		self.assertEqual(
@@ -3491,6 +3491,42 @@ class TestWorkOrder(ERPNextTestSuite):
 		manufacture_entry.submit()
 
 		frappe.db.set_single_value("Manufacturing Settings", "validate_components_quantities_per_bom", 0)
+
+	def test_transferred_qty_sums_item_and_its_alternate(self):
+		# Base item + its alternate transfers must sum onto the required row, not overwrite.
+		fg_item = "Test FG Item For Alternate Transferred Qty"
+		source_warehouse = "Stores - _TC"
+		raw_material = "Test RM For Alternate Transferred Qty"
+		alternate_item = "Alternate Test RM For Alternate Transferred Qty"
+
+		make_item(fg_item, {"is_stock_item": 1})
+		for item in [raw_material, alternate_item]:
+			make_item(item, {"is_stock_item": 1, "allow_alternative_item": 1})
+			test_stock_entry.make_stock_entry(item_code=item, target=source_warehouse, qty=10, basic_rate=100)
+
+		frappe.get_doc(
+			{
+				"doctype": "Item Alternative",
+				"item_code": raw_material,
+				"alternative_item_code": alternate_item,
+				"two_way": 1,
+			}
+		).insert()
+
+		make_bom(item=fg_item, source_warehouse=source_warehouse, raw_materials=[raw_material])
+		wo = make_wo_order_test_record(item=fg_item, qty=10, source_warehouse=source_warehouse)
+
+		# 6 as the base item
+		frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 6)).submit()
+		# 4 as the alternate item, linked back to the base
+		alt_transfer = frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 4))
+		alt_transfer.items[0].item_code = alternate_item
+		alt_transfer.items[0].original_item = raw_material
+		alt_transfer.submit()
+
+		wo.reload()
+		self.assertEqual(wo.required_items[0].transferred_qty, 10)
+		self.assertEqual(wo.material_transferred_for_manufacturing, 10)
 
 	def test_components_qty_for_bom_based_manufacture_entry(self):
 		frappe.db.set_single_value("Manufacturing Settings", "backflush_raw_materials_based_on", "BOM")
@@ -4887,6 +4923,7 @@ class TestWorkOrder(ERPNextTestSuite):
 				"item_name": scrap_item,
 				"qty": 3,
 				"cost_allocation_per": 25,
+				"valuation_type": "% of FG Cost",
 				"process_loss_per": 0,
 			},
 		)
@@ -4935,6 +4972,7 @@ class TestWorkOrder(ERPNextTestSuite):
 				"item_name": scrap_item,
 				"qty": 3,
 				"cost_allocation_per": 25,
+				"valuation_type": "% of FG Cost",
 				"process_loss_per": 0,
 			},
 		)
@@ -5124,7 +5162,15 @@ def prepare_boms_for_sub_assembly_test():
 			do_not_submit=True,
 		)
 
-		bom.append("secondary_items", {"item_code": "Test Final Scrap Item 1", "qty": 1, "is_legacy": 1})
+		bom.append(
+			"secondary_items",
+			{
+				"item_code": "Test Final Scrap Item 1",
+				"secondary_item_type": "Scrap",
+				"qty": 1,
+				"valuation_type": "Valuation Rate",
+			},
+		)
 
 		bom.submit()
 
@@ -5137,7 +5183,15 @@ def prepare_boms_for_sub_assembly_test():
 			do_not_submit=True,
 		)
 
-		bom.append("secondary_items", {"item_code": "Test Final Scrap Item 2", "qty": 1, "is_legacy": 1})
+		bom.append(
+			"secondary_items",
+			{
+				"item_code": "Test Final Scrap Item 2",
+				"secondary_item_type": "Scrap",
+				"qty": 1,
+				"valuation_type": "Valuation Rate",
+			},
+		)
 
 		bom.submit()
 

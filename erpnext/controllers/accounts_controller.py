@@ -1305,6 +1305,11 @@ class AccountsController(TransactionBase):
 		if self.get("taxes") or self.get("is_pos"):
 			return
 
+		# set by the Opening Invoice Creation Tool, where the outstanding amount
+		# entered against a party is already inclusive of tax
+		if self.flags.dont_auto_add_taxes:
+			return
+
 		if frappe.get_single_value(
 			"Accounts Settings", "add_taxes_from_taxes_and_charges_template"
 		) and hasattr(self, "taxes_and_charges"):
@@ -1421,9 +1426,12 @@ class AccountsController(TransactionBase):
 		dimension_dict = frappe._dict()
 
 		for dimension in accounting_dimensions:
-			dimension_dict[dimension] = self.get(dimension)
+			value = self.get(dimension)
 			if item and item.get(dimension):
-				dimension_dict[dimension] = item.get(dimension)
+				value = item.get(dimension)
+			if isinstance(value, list | dict):
+				continue
+			dimension_dict[dimension] = value
 
 		gl_dict.update(dimension_dict)
 		gl_dict.update(args)

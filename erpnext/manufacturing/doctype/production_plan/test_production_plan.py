@@ -128,6 +128,57 @@ class TestProductionPlan(ERPNextTestSuite):
 		plan.reload()
 		plan.cancel()
 
+	def test_subassembly_work_order_uses_raw_material_default_warehouses(self):
+		raw_material_warehouses = {
+			make_item(
+				properties={
+					"is_stock_item": 1,
+					"item_defaults": [
+						{"company": "_Test Company", "default_warehouse": "_Test Warehouse - _TC"}
+					],
+				}
+			).name: "_Test Warehouse - _TC",
+			make_item(
+				properties={
+					"is_stock_item": 1,
+					"item_defaults": [
+						{"company": "_Test Company", "default_warehouse": "_Test Warehouse 1 - _TC"}
+					],
+				}
+			).name: "_Test Warehouse 1 - _TC",
+		}
+		subassembly_item = make_item(properties={"is_stock_item": 1}).name
+		finished_item = make_item(properties={"is_stock_item": 1}).name
+
+		make_bom(item=subassembly_item, raw_materials=raw_material_warehouses)
+		make_bom(item=finished_item, raw_materials=[subassembly_item])
+
+		plan = create_production_plan(
+			item_code=finished_item,
+			warehouse="Finished Goods - _TC",
+			sub_assembly_warehouse="Finished Goods - _TC",
+			skip_available_sub_assembly_item=1,
+			skip_getting_mr_items=1,
+			do_not_submit=1,
+		)
+		plan.get_sub_assembly_items()
+		plan.save()
+		plan.submit()
+		plan.make_work_order()
+
+		work_order_name = frappe.db.get_value(
+			"Work Order",
+			{"production_plan": plan.name, "production_item": subassembly_item},
+		)
+		work_order = frappe.get_doc("Work Order", work_order_name)
+
+		self.assertFalse(work_order.source_warehouse)
+		self.assertEqual(work_order.fg_warehouse, plan.sub_assembly_warehouse)
+		self.assertEqual(
+			{row.item_code: row.source_warehouse for row in work_order.required_items},
+			raw_material_warehouses,
+		)
+
 	def test_production_plan_for_existing_ordered_qty(self):
 		"""
 		- Enable 'ignore_existing_ordered_qty'.
@@ -3233,6 +3284,7 @@ def make_bom(**args):
 					"stock_uom": item_doc.stock_uom,
 					"qty": args.scrap_qty or 1,
 					"cost_allocation_per": args.scrap_cost_allocation_per or 10,
+					"valuation_type": "% of FG Cost",
 					"process_loss_per": args.scrap_process_loss_per or 10,
 				},
 			)

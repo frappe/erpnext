@@ -10,7 +10,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder import Case
-from frappe.query_builder.functions import IfNull, Sum
+from frappe.query_builder.functions import Coalesce, IfNull, Sum
 from frappe.utils import (
 	cint,
 	date_diff,
@@ -187,14 +187,11 @@ class WorkOrder(Document):
 			.where(
 				(parent.work_order == self.name)
 				& (parent.docstatus == 1)
-				& ((child.secondary_item_type != "") | (child.is_legacy_scrap_item == 1))
+				& ((child.secondary_item_type != "") | (Coalesce(child.valuation_type, "") != ""))
 			)
 			.select(
 				child.item_code,
-				Case()
-				.when(child.is_legacy_scrap_item == 1, "Scrap (Legacy)")
-				.else_(child.secondary_item_type)
-				.as_("secondary_item_type"),
+				Coalesce(child.secondary_item_type, "Scrap (Legacy)").as_("secondary_item_type"),
 				child.qty,
 				child.uom,
 				child.amount,
@@ -527,7 +524,7 @@ class WorkOrder(Document):
 			PackedItem = frappe.qb.DocType("Packed Item")
 			ProductBundleItem = frappe.qb.DocType("Product Bundle Item")
 
-			so = (
+			so_query = (
 				frappe.qb.from_(SalesOrder)
 				.inner_join(SalesOrderItem)
 				.on(SalesOrderItem.parent == SalesOrder.name)
@@ -543,16 +540,23 @@ class WorkOrder(Document):
 						| (ProductBundleItem.item_code == production_item)
 					)
 				)
-				.run(as_dict=1)
 			)
 
+			if self.sales_order_item:
+				so_query = so_query.where(SalesOrderItem.name == self.sales_order_item)
+
+			so = so_query.run(as_dict=1)
+
 			if not so:
-				so = (
+				packed_so_query = (
 					frappe.qb.from_(SalesOrder)
 					.inner_join(SalesOrderItem)
 					.on(SalesOrderItem.parent == SalesOrder.name)
 					.inner_join(PackedItem)
-					.on(PackedItem.parent == SalesOrder.name)
+					.on(
+						(PackedItem.parent == SalesOrder.name)
+						& (PackedItem.parent_detail_docname == SalesOrderItem.name)
+					)
 					.select(SalesOrder.name, SalesOrder.project, SalesOrderItem.delivery_date)
 					.where(
 						(SalesOrder.name == self.sales_order)
@@ -561,8 +565,15 @@ class WorkOrder(Document):
 						& (SalesOrder.docstatus == 1)
 						& (PackedItem.item_code == production_item)
 					)
-					.run(as_dict=1)
 				)
+
+				if self.sales_order_item:
+					packed_so_query = packed_so_query.where(
+						(PackedItem.name == self.sales_order_item)
+						| (SalesOrderItem.name == self.sales_order_item)
+					)
+
+				so = packed_so_query.run(as_dict=1)
 
 			if len(so):
 				if not self.expected_delivery_date:
@@ -1796,11 +1807,16 @@ class WorkOrder(Document):
 				& (ste.purpose == "Material Transfer for Manufacture")
 				& (ste.is_return == is_return)
 			)
-			.groupby(ste_child.item_code)
+			.groupby(ste_child.item_code, ste_child.original_item)
 		)
 
 		data = query.run(as_dict=1) or []
-		return frappe._dict({d.original_item or d.item_code: d.qty for d in data})
+		# An item's own transfer and its substitutes both key to the original item, so sum them.
+		transferred_items = frappe._dict()
+		for d in data:
+			key = d.original_item or d.item_code
+			transferred_items[key] = flt(transferred_items.get(key)) + flt(d.qty)
+		return transferred_items
 
 	def recompute_material_transferred_for_manufacturing(self, transferred_items):
 		"""Set transferred quantity from the raw materials that have actually moved."""

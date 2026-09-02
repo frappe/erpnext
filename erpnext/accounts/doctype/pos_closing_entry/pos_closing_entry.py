@@ -261,12 +261,15 @@ def get_cashiers(doctype, txt, searchfield, start, page_len, filters):
 @frappe.whitelist()
 def get_invoices(start, end, pos_profile, user):
 	invoice_doctype = frappe.db.get_single_value("POS Settings", "invoice_type")
+	frappe.has_permission("POS Profile", doc=pos_profile, throw=True)
 
+	frappe.has_permission("Sales Invoice", throw=True)
 	sales_inv_query = build_invoice_query("Sales Invoice", user, pos_profile, start, end)
 
 	query = sales_inv_query
 
 	if invoice_doctype == "POS Invoice":
+		frappe.has_permission("POS Invoice", throw=True)
 		pos_inv_query = build_invoice_query("POS Invoice", user, pos_profile, start, end)
 		query = query + pos_inv_query
 
