@@ -520,3 +520,30 @@ class TestGetItemDetail(ERPNextTestSuite):
 				"Serial and Batch Entry", {"parent": dn.items[0].serial_and_batch_bundle}, ["batch_no", "qty"]
 			)
 			self.assertEqual({d.batch_no: d.qty for d in entries}, {batches[0]: -2, batches[1]: -3})
+
+	def test_serial_nos_picked_across_batches_when_no_batch_covers_qty(self):
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+			get_serial_nos_from_bundle,
+		)
+
+		item_code, batches = self.make_batched_item_with_stock(
+			[2, 3], has_serial_no=1, serial_no_series="FBQ-SN-.#####"
+		)
+
+		with self.change_settings(
+			"Stock Settings",
+			{"pick_serial_and_batch_based_on": "FIFO", "auto_create_serial_and_batch_bundle_for_outward": 1},
+		):
+			details = self.get_item_details_for_row(item_code, 5)
+			self.assertIsNone(details.get("batch_no"))
+			serial_nos = details.serial_no.split("\n")
+			self.assertEqual(len(serial_nos), 5)
+
+			dn = create_delivery_note(
+				item_code=item_code, qty=5, use_serial_batch_fields=1, serial_no=details.serial_no
+			)
+			dn.reload()
+			self.assertEqual(
+				get_serial_nos_from_bundle(dn.items[0].serial_and_batch_bundle), sorted(serial_nos)
+			)
