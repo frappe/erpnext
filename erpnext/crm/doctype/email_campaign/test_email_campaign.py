@@ -1,15 +1,13 @@
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-# import frappe
-import unittest
+
+import frappe
+from frappe.utils import add_days, getdate, today
 
 from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestEmailCampaign(ERPNextTestSuite):
-<<<<<<< HEAD
-	pass
-=======
 	"""Email Campaign derives its window from the linked Campaign schedule and
 	guards the start date and the recipient's email."""
 
@@ -84,4 +82,3 @@ class TestEmailCampaign(ERPNextTestSuite):
 		doc.recipient = contact.name
 		doc.insert()
 		self.assertEqual(doc.status, "In Progress")
->>>>>>> 56a391c (fix(crm): validate contact email before saving an email campaign (#58667))
