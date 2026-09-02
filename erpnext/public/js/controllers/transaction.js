@@ -24,7 +24,7 @@ erpnext.stock.is_incoming_qi_purpose = (purpose) =>
 erpnext.stock.row_requires_quality_inspection = (purpose, row) => {
 	if (
 		erpnext.stock.secondary_item_purposes.includes(purpose) &&
-		(row.secondary_item_type || row.is_legacy_scrap_item)
+		(row.secondary_item_type || row.valuation_type)
 	)
 		return false;
 	if (purpose === "Manufacture") return !!row.is_finished_item;
@@ -334,6 +334,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 					query: "erpnext.controllers.queries.get_blanket_orders",
 					filters: {
 						company: doc.company,
+						currency: doc.currency,
 						blanket_order_type: doc.doctype === "Sales Order" ? "Selling" : "Purchasing",
 						item: item.item_code,
 					},
@@ -3267,10 +3268,12 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				method: "erpnext.stock.get_item_details.get_blanket_order_details",
 				args: {
 					ctx: {
+						doctype: doc.doctype,
 						item_code: item.item_code,
 						customer: doc.customer,
 						supplier: doc.supplier,
 						company: doc.company,
+						currency: doc.currency,
 						transaction_date: doc.transaction_date,
 						blanket_order: item.blanket_order,
 					},

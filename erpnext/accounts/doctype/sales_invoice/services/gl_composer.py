@@ -476,7 +476,7 @@ class SalesInvoiceGLComposer(BaseGLComposer):
 
 			for payment_mode in doc.payments:
 				if skip_change_gl_entries and payment_mode.account == doc.account_for_change_amount:
-					payment_mode.base_amount -= flt(doc.change_amount)
+					payment_mode.base_amount -= flt(doc.base_change_amount)
 
 				if payment_mode.base_amount:
 					# POS, make payment entries

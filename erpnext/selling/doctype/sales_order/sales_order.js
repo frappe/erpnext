@@ -25,7 +25,9 @@ frappe.ui.form.on("Sales Order", {
 		// formatter for material request item
 		frm.set_indicator_formatter("item_code", function (doc) {
 			let color;
-			if (!doc.qty && frm.doc.has_unit_price_items) {
+			if (doc.closed) {
+				color = "gray";
+			} else if (!doc.qty && frm.doc.has_unit_price_items) {
 				color = "yellow";
 			} else if (doc.stock_qty - doc.delivered_qty <= doc.actual_qty) {
 				color = "green";
@@ -1008,13 +1010,15 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					}
 				} else if (doc.status === "Closed") {
 					// un-close
-					this.frm.add_custom_button(
-						__("Re-open"),
-						function () {
-							me.frm.cscript.update_status("Re-open", "Draft");
-						},
-						__("Status")
-					);
+					if (!doc.items.every((item) => item.closed)) {
+						this.frm.add_custom_button(
+							__("Re-open"),
+							function () {
+								me.frm.cscript.update_status("Re-open", "Draft");
+							},
+							__("Status")
+						);
+					}
 				}
 			}
 			if (doc.status !== "Closed") {
@@ -1023,6 +1027,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 						(item) =>
 							!item.skip_delivery &&
 							item.delivered_by_supplier === 0 &&
+							!item.closed &&
 							item.qty > flt(item.delivered_qty)
 					);
 					allow_delivery =
@@ -1047,7 +1052,11 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					}
 
 					if (doc.is_subcontracted) {
-						if (!doc.items.every((item) => item.qty == item.subcontracted_qty)) {
+						if (
+							!doc.items
+								.filter((item) => !item.closed)
+								.every((item) => item.qty == item.subcontracted_qty)
+						) {
 							this.frm.add_custom_button(
 								__("Subcontracting Inward Order"),
 								() => {
@@ -1259,6 +1268,8 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 		}
 
 		this.order_type(doc);
+
+		this.set_item_close_buttons();
 	}
 
 	items_add(doc, cdt, cdn) {
@@ -1871,6 +1882,19 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 	}
 	close_sales_order() {
 		this.frm.cscript.update_status("Close", "Closed");
+	}
+
+	set_item_close_buttons() {
+		erpnext.item_close.add_buttons(
+			this.frm,
+			erpnext.item_close.fulfilment_config({
+				qty_field: "delivered_qty",
+				qty_label: __("Delivered Qty"),
+				help: __(
+					"Closed rows stop being expected. Their pending quantity is written off, stock is no longer reserved for them, and they are skipped when creating a Delivery Note or Sales Invoice."
+				),
+			})
+		);
 	}
 	update_status(label, status) {
 		var doc = this.frm.doc;

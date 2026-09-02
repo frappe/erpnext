@@ -2,7 +2,9 @@
 # See license.txt
 
 import frappe
+from frappe.utils import add_days, today
 
+from erpnext.buying.doctype.supplier_quotation.mapper import make_purchase_order
 from erpnext.buying.report.supplier_quotation_comparison.supplier_quotation_comparison import execute
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -37,6 +39,15 @@ class TestSupplierQuotationComparison(ERPNextTestSuite):
 		filters = frappe._dict({"company": COMPANY, "from_date": "2026-01-01", "to_date": "2026-12-31"})
 		filters.update(extra)
 		return execute(filters)[1]
+
+	def make_order(self, supplier_quotation, qty):
+		purchase_order = make_purchase_order(supplier_quotation.name)
+		purchase_order.naming_series = "_T-Purchase Order-"
+		purchase_order.items[0].qty = qty
+		purchase_order.items[0].schedule_date = add_days(today(), 1)
+		purchase_order.insert()
+		purchase_order.submit()
+		return purchase_order
 
 	def test_no_filters_returns_empty(self):
 		self.assertEqual(execute(None)[1], [])
@@ -83,3 +94,34 @@ class TestSupplierQuotationComparison(ERPNextTestSuite):
 		both = names(status="")
 		self.assertIn(draft.name, both)
 		self.assertIn(submitted.name, both)
+
+	def test_order_status_and_filter(self):
+		supplier_quotation = self.make_quotation("_Test Supplier", qty=10, rate=100)
+
+		def get_order_status():
+			return next(
+				row["order_status"]
+				for row in self.run_report(item_code=ITEM)
+				if row["quotation"] == supplier_quotation.name
+			)
+
+		def quotations_with_status(order_status):
+			return {row["quotation"] for row in self.run_report(item_code=ITEM, order_status=order_status)}
+
+		self.assertEqual(get_order_status(), "Not Ordered")
+		self.assertIn(supplier_quotation.name, quotations_with_status("Not Ordered"))
+
+		partial_order = self.make_order(supplier_quotation, qty=4)
+		self.assertEqual(get_order_status(), "Partially Ordered")
+		self.assertIn(supplier_quotation.name, quotations_with_status("Partially Ordered"))
+		self.assertNotIn(supplier_quotation.name, quotations_with_status("Ordered"))
+
+		complete_order = self.make_order(supplier_quotation, qty=6)
+		self.assertEqual(get_order_status(), "Ordered")
+		self.assertIn(supplier_quotation.name, quotations_with_status("Ordered"))
+
+		complete_order.cancel()
+		self.assertEqual(get_order_status(), "Partially Ordered")
+
+		partial_order.cancel()
+		self.assertEqual(get_order_status(), "Not Ordered")

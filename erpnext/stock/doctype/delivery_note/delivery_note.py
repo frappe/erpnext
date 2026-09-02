@@ -626,6 +626,9 @@ class DeliveryNote(SellingController):
 	def update_status(self, status):
 		BillingStatusService(self).update_status(status)
 
+	def on_item_close_status_change(self):
+		self.update_billing_percentage()
+
 	def update_billing_status(self, update_modified=True):
 		BillingStatusService(self).update_billing_status(update_modified)
 
@@ -652,4 +655,5 @@ def get_list_context(context=None):
 @frappe.whitelist()
 def update_delivery_note_status(docname: str, status: str):
 	dn = frappe.get_lazy_doc("Delivery Note", docname)
+	dn.check_permission("submit")
 	dn.update_status(status)

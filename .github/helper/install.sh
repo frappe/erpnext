@@ -188,7 +188,7 @@ restore_warm_bench() {
         # Phase 1 already fetched ~/frappe to the exact live develop SHA. Fetch that commit
         # straight from it (bench init names the remote 'upstream', not 'origin', and points
         # it at this local clone — so a plain `git fetch origin` does not work).
-        git fetch --no-tags "$HOME/frappe" HEAD || exit 1
+        git fetch --no-tags --update-shallow "$HOME/frappe" HEAD || exit 1
         git checkout --force FETCH_HEAD || exit 1
     ); then
         echo "Fast-forward to ${frappe_sha} failed; falling back to full init"

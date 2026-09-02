@@ -626,3 +626,60 @@ body[data-route="pos"] {
 	transform: translateY(-50%);
 	z-index: 1;
 }
+
+// BOM Creator's tree. The qty/amount pill's positioning lives here (not in
+// inline styles) so it can differ by tree mode:
+//
+//  * Legacy — old frappe (or any tree without new frappe's `.tree-rows`
+//    class): restore the original float layout, so BOM looks unchanged when
+//    running against a frappe that predates row mode.
+//  * Row mode — new frappe adds `.tree-rows`: lay the pill out as the row's
+//    value column (like .balance-area) and let labels stay readable.
+//
+// Both directions stay compatible: nothing here changes base markup, and the
+// legacy rule only applies where `.tree-rows` is absent.
+.tree:not(.tree-rows) .bom-qty-pill {
+	float: right;
+	margin-right: 40px;
+	min-width: 128px;
+}
+
+.tree.tree-rows {
+	position: relative;
+
+	// child-row pill = value column, pinned to the row's right edge
+	li.tree-node > .bom-qty-pill {
+		float: none;
+		flex: none;
+		align-self: center;
+		margin: 0 8px 0 auto;
+		white-space: nowrap;
+	}
+
+	// the root row is a direct child of the wrapper (not a flex li), so its
+	// pill can't margin-auto right — pin it to the wrapper's top-right, where
+	// the always-first root row sits. width:max-content stops it stretching.
+	> .bom-qty-pill {
+		position: absolute;
+		// inset shorthand sets left:auto explicitly (something else sets left,
+		// which would otherwise beat a lone `right`)
+		inset: 5px 8px auto auto;
+		float: none;
+		margin: 0;
+		min-width: 0;
+		width: max-content;
+	}
+
+	// keep the label readable beside the pill
+	.tree-link .tree-label {
+		min-width: 6ch;
+	}
+
+	// the click-toolbar (Edit / + Raw Material / …) wraps to its own line
+	// under the row instead of fighting the value column
+	.tree-node-toolbar {
+		flex: 1 1 100%;
+		order: 3;
+		margin: 2px 0 4px 24px;
+	}
+}
