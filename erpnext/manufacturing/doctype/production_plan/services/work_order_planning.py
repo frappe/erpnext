@@ -232,8 +232,6 @@ class WorkOrderCreationService:
 	def _new_work_order(self, item):
 		wo = frappe.new_doc("Work Order")
 		wo.update(item)
-		if not wo.source_warehouse:
-			wo.source_warehouse = item.get("fg_warehouse")
 
 		wo.reserve_stock = self.doc.reserve_stock
 		wo.planned_start_date = item.get("planned_start_date") or item.get("schedule_date")
@@ -241,7 +239,7 @@ class WorkOrderCreationService:
 			wo.fg_warehouse = item.get("warehouse")
 
 		wo.set_work_order_operations()
-		wo.set_required_items(reset_source_warehouse=True)
+		wo.set_required_items()
 		return wo
 
 
