@@ -109,6 +109,91 @@ jobs:
         env:
           DB: postgres
           TYPE: server
+<<<<<<< HEAD
+=======
+          FRAPPE_BRANCH: develop
+          # Anonymous git to github.com gets throttled to a 401; authenticate the clones.
+          CI_GITHUB_TOKEN: ${{ github.token }}
+          BENCH_CACHE_DIR: /home/runner/bench-cache
+
+      - name: Warm up test data
+        run: |
+          cd ~/frappe-bench/
+          bench --site test_site run-tests --lightmode --module erpnext.tests.bootstrap_test_data
+
+      - name: Stop DB and stage datadir
+        run: |
+          PG_BIN=$(ls -d /usr/lib/postgresql/*/bin | sort -V | tail -1)
+          # Clean shutdown so the baked datadir is consistent. Do NOT swallow a failed stop with
+          # `|| true`: moving and tarring a still-running cluster ships a torn datadir the shards
+          # cannot crash-recover (full_page_writes is off). Fail the job instead — mirrors the
+          # MariaDB sister's "don't bake a dirty datadir" guard.
+          "$PG_BIN/pg_ctl" -D /home/runner/pgdata -m fast -w stop
+          mv /home/runner/pgdata /home/runner/frappe-bench/pgdata
+
+      - name: Package bench for test shards
+        run: |
+          cp "${GITHUB_WORKSPACE}/.github/helper/hydrate.sh" /home/runner/frappe-bench/hydrate.sh
+          cp "${GITHUB_WORKSPACE}/.github/helper/start-db.sh" /home/runner/frappe-bench/start-db.sh
+          tar czpf "${GITHUB_WORKSPACE}/bench.tar.gz" -C /home/runner \
+            --exclude='.git' --exclude='node_modules' frappe-bench
+          ls -lh "${GITHUB_WORKSPACE}/bench.tar.gz"
+
+      - name: Upload bench artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bench-pg
+          path: bench.tar.gz
+          retention-days: 1
+          compression-level: 0
+
+  test:
+    name: Python Unit Tests
+    needs: setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        container: [1, 2, 3, 4]
+    steps:
+      - name: Download bench artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: bench-pg
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Add to Hosts
+        run: echo "127.0.0.1 test_site" | sudo tee -a /etc/hosts
+
+      # The bench CLI (frappe-bench) and redis are global/system tools — not in the bench tarball.
+      # The setup runner got them via install.sh; the MariaDB shards get them from the arc5 image.
+      # GitHub-hosted PG shards install them here (cheap vs the build+reinstall that setup did once).
+      - name: Install shard runtime (bench CLI + redis + wkhtmltopdf)
+        run: |
+          pip install frappe-bench
+          command -v redis-server >/dev/null || { sudo apt-get update -qq && sudo apt-get install -y -qq redis-server; }
+          # wkhtmltopdf (patched-qt build) for print-format / PDF tests — same .deb install.sh uses.
+          if ! command -v wkhtmltopdf >/dev/null; then
+            wget -qO /tmp/wkhtmltox.deb https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.jammy_amd64.deb
+            sudo apt-get install -y -qq /tmp/wkhtmltox.deb
+          fi
+
+      - name: Untar bench
+        run: |
+          tar xzpf "${GITHUB_WORKSPACE}/bench.tar.gz" -C /home/runner
+          ls -ld /home/runner/frappe-bench
+
+      - name: Hydrate (start Postgres on the baked datadir)
+        run: bash /home/runner/frappe-bench/hydrate.sh
+        env:
+          DB: postgres
+          DB_HOST: 127.0.0.1
+>>>>>>> 717af27 (ci: authenticate github clones in install.sh (#58718))
 
       - name: Run Tests
         run: cd ~/frappe-bench/ && bench --site test_site run-parallel-tests --app erpnext --use-orchestrator
