@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_bulk_edit": 1,
  "autoname": "TDL.####",
  "creation": "2021-04-06 20:17:18.404716",
  "doctype": "DocType",
@@ -141,19 +142,22 @@
    "read_only": 1
   }
  ],
+ "in_create": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2024-03-21 10:29:19.456413",
+=======
+ "modified": "2026-09-02 20:32:19.679290",
+>>>>>>> e3a976f (fix(setup): strict permissions for transaction deletion record (#58687))
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Transaction Deletion Record",
- "naming_rule": "Expression (old style)",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {
-   "create": 1,
-   "delete": 1,
    "email": 1,
    "export": 1,
    "print": 1,
@@ -161,7 +165,6 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
-   "submit": 1,
    "write": 1
   }
  ],
