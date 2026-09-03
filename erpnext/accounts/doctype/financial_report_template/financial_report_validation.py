@@ -192,7 +192,7 @@ class TemplateStructureValidator(Validator):
 						ValidationIssue(
 							message=_("{0} is required when {1} is {2}").format(
 								get_formula_field_label(row.data_source),
-								frappe.get_meta(row.doctype).get_translated_label("data_source"),
+								row.meta.get_translated_label("data_source"),
 								_(row.data_source),
 							),
 							row_idx=row.idx,
@@ -221,6 +221,7 @@ class DependencyValidator(Validator):
 
 		for row in self.template.rows:
 			if row.reference_code and row.data_source == "Calculated Amount" and row.calculation_formula:
+				# skip self-reference, `CalculationFormulaValidator` already reports it
 				deps = [
 					code
 					for code in extract_reference_codes_from_formula(
@@ -289,7 +290,9 @@ class DependencyValidator(Validator):
 				row_idx = self._get_row_idx(ref_code)
 				result.add_error(
 					ValidationIssue(
-						message=_("Line references undefined in Formula: {0}").format(", ".join(undefined)),
+						message=_("Line references undefined in {0}: {1}").format(
+							get_formula_field_label("Calculated Amount"), ", ".join(undefined)
+						),
 						row_idx=row_idx,
 					)
 				)
