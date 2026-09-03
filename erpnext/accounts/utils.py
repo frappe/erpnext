@@ -1359,22 +1359,28 @@ def get_children(
 	parent_fieldname = "parent_" + doctype.lower().replace(" ", "_")
 	fields = ["name as value", "is_group as expandable"]
 	filters = [["docstatus", "<", 2]]
-	if frappe.db.has_column(doctype, "disabled") and not include_disabled:
-		filters.append(["disabled", "=", False])
+	if frappe.db.has_column(doctype, "disabled"):
+		if include_disabled:
+			# the tree marks disabled rows, so it needs the flag
+			fields.append("disabled")
+		else:
+			filters.append(["disabled", "=", False])
+
+	# extra columns the tree views render as badges / clean labels
+	node_fields = {
+		"Account": ["root_type", "account_name", "account_number", "account_currency", "freeze_account"],
+		"Cost Center": ["cost_center_name", "cost_center_number"],
+	}
+	fields += node_fields.get(doctype, [])
 
 	if is_root:
 		filters.append(IfNull(Field(parent_fieldname), "") == "")
+		filters.append(["company", "=", company])
+		if doctype == "Account":
+			fields.append("report_type")
 	else:
 		filters.append([parent_fieldname, "=", parent])
-
-	account_fields = ["account_name", "account_number", "account_currency", "freeze_account"]
-	if is_root:
-		fields += ["root_type", "report_type", *account_fields] if doctype == "Account" else []
-		filters.append(["company", "=", company])
-
-	else:
-		fields += ["root_type", *account_fields] if doctype == "Account" else []
-		fields += [parent_fieldname + " as parent"]
+		fields.append(parent_fieldname + " as parent")
 
 	acc = frappe.get_list(doctype, fields=fields, filters=filters)
 
