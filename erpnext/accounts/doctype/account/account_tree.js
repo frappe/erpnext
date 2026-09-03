@@ -62,7 +62,7 @@ frappe.treeview_settings["Account"] = {
 
 		const flags = [];
 		if (node.data.account_number) {
-			flags.push(frappe.ui.badge({ label: node.data.account_number, theme: "light" }));
+			flags.push(frappe.ui.badge({ label: node.data.account_number }));
 		}
 
 		const company = frappe.treeview_settings["Account"].treeview?.page?.fields_dict?.company?.get_value();
