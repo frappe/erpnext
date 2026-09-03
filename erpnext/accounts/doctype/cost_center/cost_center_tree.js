@@ -12,6 +12,19 @@ frappe.treeview_settings["Cost Center"] = {
 	],
 	root_label: "Cost Centers",
 	get_tree_nodes: "erpnext.accounts.utils.get_children",
+	get_label: function (node) {
+		// clean display name — the number renders as a badge (see onrender)
+		return frappe.utils.escape_html(node.data.cost_center_name || node.title || node.label);
+	},
+	onrender: function (node) {
+		if (node.is_root || !node.data) return;
+
+		const flags = [];
+		if (node.data.cost_center_number) {
+			flags.push(frappe.ui.badge({ label: node.data.cost_center_number }));
+		}
+		erpnext.utils.render_tree_node_flags(node, flags);
+	},
 	add_tree_node: "erpnext.accounts.utils.add_cc",
 	menu_items: [
 		{

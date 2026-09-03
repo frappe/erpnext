@@ -62,7 +62,7 @@ frappe.treeview_settings["Account"] = {
 
 		const flags = [];
 		if (node.data.account_number) {
-			flags.push(frappe.ui.badge({ label: node.data.account_number, size: "sm" }));
+			flags.push(frappe.ui.badge({ label: node.data.account_number }));
 		}
 
 		const company = frappe.treeview_settings["Account"].treeview?.page?.fields_dict?.company?.get_value();
@@ -72,26 +72,21 @@ frappe.treeview_settings["Account"] = {
 			company_currency &&
 			node.data.account_currency !== company_currency
 		) {
-			flags.push(frappe.ui.badge({ label: node.data.account_currency, theme: "blue", size: "sm" }));
+			flags.push(frappe.ui.badge({ label: node.data.account_currency, theme: "blue" }));
 		}
 
 		if (node.data.freeze_account === "Yes") {
 			flags.push(
-				$(
-					`<span class="inline-flex text-ink-gray-4" title="${__("Frozen — entries restricted")}">
-						${frappe.utils.icon("lock", "sm")}
-					</span>`
-				)[0]
+				frappe.ui.badge({
+					label: __("Frozen"),
+					icon: "lock",
+					title: __("Frozen - entries restricted"),
+					theme: "orange",
+				})
 			);
 		}
 
-		if (flags.length) {
-			const $flags = $(
-				'<span class="tree-node-flags inline-flex items-center gap-1.5 ms-2 shrink-0"></span>'
-			);
-			flags.forEach((flag) => $flags.append(flag));
-			$flags.insertAfter(node.$tree_link.find("a.tree-label"));
-		}
+		erpnext.utils.render_tree_node_flags(node, flags);
 	},
 	on_node_render: function (node, deep) {
 		const render_balances = () => {
