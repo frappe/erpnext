@@ -107,6 +107,19 @@ class TestProductionPlan(FrappeTestCase):
 		pln = frappe.get_doc("Production Plan", pln.name)
 		pln.cancel()
 
+	def test_production_plan_mr_creation_skips_zero_qty(self):
+		pln = create_production_plan(item_code="Test Production Item 1", do_not_submit=1)
+		pln.mr_items[0].quantity = 0
+		pln.save().submit()
+
+		pln.make_material_request()
+
+		quantities = frappe.get_all(
+			"Material Request Item", filters={"production_plan": pln.name}, pluck="qty"
+		)
+		self.assertEqual(len(quantities), len(pln.mr_items) - 1)
+		self.assertNotIn(0, quantities)
+
 	def test_production_plan_start_date(self):
 		"Test if Work Order has same Planned Start Date as Prod Plan."
 		planned_date = add_to_date(date=None, days=3)
