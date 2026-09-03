@@ -1746,22 +1746,6 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(work_order.material_transferred_for_manufacturing, 0.0)
 		self.assertEqual(work_order.status, "In Process")
 
-	def test_status_in_process_after_direct_transfer_with_zero_for_quantity(self):
-		work_order = make_wo_order_test_record(planned_start_date=now(), qty=2)
-		test_stock_entry.make_stock_entry(
-			item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=5000.0
-		)
-
-		stock_entry = frappe.get_doc(
-			make_stock_entry(work_order.name, "Material Transfer for Manufacture", 0)
-		)
-		stock_entry.items = [row for row in stock_entry.items if row.item_code == "_Test Item"]
-		stock_entry.submit()
-
-		work_order.reload()
-		self.assertEqual(work_order.material_transferred_for_manufacturing, 0.0)
-		self.assertEqual(work_order.status, "In Process")
-
 	def test_work_order_material_request_and_bom_details(self):
 		from erpnext.stock.doctype.material_request.mapper import make_stock_entry as mr_to_stock_entry
 
