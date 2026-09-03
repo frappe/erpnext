@@ -15,9 +15,6 @@ from pypika import functions as fn
 
 from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
 from erpnext.manufacturing.doctype.work_order.mapper import check_if_scrap_warehouse_mandatory
-from erpnext.manufacturing.doctype.work_order.services.material_coverage import (
-	get_minimum_material_coverage_fraction,
-)
 from erpnext.manufacturing.doctype.work_order.services.reservation import (
 	WorkOrderStockReservation,
 	get_consumed_qty,
@@ -205,10 +202,9 @@ class RequiredItemsService:
 		if not required_by_item:
 			return
 
-		min_fraction = get_minimum_material_coverage_fraction(
-			required_by_item,
-			transferred_items,
-			self.doc.precision("required_qty", "required_items"),
+		min_fraction = min(
+			flt(transferred_items.get(item_code) or 0) / required_qty
+			for item_code, required_qty in required_by_item.items()
 		)
 		min_fraction = min(min_fraction, 1.0)
 		material_transferred = min_fraction * flt(self.doc.qty)
