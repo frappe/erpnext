@@ -1,6 +1,6 @@
 {
  "app": "erpnext",
- "creation": "2026-08-16 00:00:00.000000",
+ "creation": "2026-08-16 00:00:00",
  "docstatus": 0,
  "doctype": "Sidebar",
  "header_icon": "sliders-horizontal",
@@ -419,9 +419,9 @@
    "child": 0,
    "collapsible": 1,
    "hidden": 0,
-   "indent": 0,
+   "indent": 1,
    "is_default_module": 0,
-   "keep_closed": 1,
+   "keep_closed": 0,
    "label": "Home",
    "link_type": "DocType",
    "open_in_new_tab": 1,
@@ -504,12 +504,11 @@
    "type": "Link"
   }
  ],
- "modified": "2026-08-16 00:00:00.000000",
+ "modified": "2026-09-01 17:52:52.506437",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Setup",
  "owner": "Administrator",
- "sequence_id": 0.0,
  "standard": 1,
  "title": "Setup"
 }
