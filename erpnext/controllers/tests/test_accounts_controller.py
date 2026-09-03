@@ -2251,6 +2251,63 @@ class TestAccountsController(ERPNextTestSuite):
 		self.assertEqual(pr2.discount_amount, 0)
 		self.assertEqual(pr2.grand_total, 500)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"auto_insert_price_list_rate_if_missing": 0})
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"maintain_same_rate": 1, "maintain_same_rate_action": "Stop"}
+	)
+	def test_source_discounts_are_preserved_when_combining_purchase_documents(self):
+		from frappe.model.mapper import map_docs
+
+		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
+
+		item_a = "_Test Item"
+		item_b = "_Test Item 2"
+
+		po1 = create_purchase_order(item_code=item_a, qty=1, rate=100, do_not_save=True)
+		po1.apply_discount_on = "Grand Total"
+		po1.additional_discount_percentage = 35
+		po1.save().submit()
+
+		po2 = create_purchase_order(item_code=item_b, qty=1, rate=100)
+		po3 = create_purchase_order(item_code=item_b, qty=1, rate=100)
+
+		pr1 = make_purchase_receipt(po1.name).save().submit()
+		pr2 = make_purchase_receipt(po2.name).save().submit()
+		pr3 = make_purchase_receipt(po3.name).save().submit()
+
+		mapping_scenarios = (
+			(
+				"erpnext.buying.doctype.purchase_order.mapper.make_purchase_invoice",
+				(po1.name, po2.name, po3.name),
+			),
+			(
+				"erpnext.stock.doctype.purchase_receipt.mapper.make_purchase_invoice",
+				(pr1.name, pr2.name, pr3.name),
+			),
+		)
+		for mapper, source_names in mapping_scenarios:
+			for document_names in (source_names, tuple(reversed(source_names))):
+				with self.subTest(mapper=mapper, document_names=document_names):
+					invoice = map_docs(mapper, document_names, frappe.new_doc("Purchase Invoice").as_dict())
+					invoice.save()
+					items = {item.purchase_order: item for item in invoice.items}
+
+					self.assertEqual(invoice.additional_discount_percentage, 0)
+					self.assertEqual(invoice.discount_amount, 0)
+					self.assertEqual(invoice.grand_total, 265)
+					self.assertEqual(items[po1.name].price_list_rate, 100)
+					self.assertEqual(items[po1.name].rate, 65)
+					self.assertEqual(items[po1.name].discount_amount, 35)
+					self.assertEqual(items[po1.name].net_amount, 65)
+					for purchase_order in (po2.name, po3.name):
+						self.assertEqual(items[purchase_order].rate, 100)
+						self.assertEqual(items[purchase_order].discount_amount, 0)
+						self.assertEqual(items[purchase_order].net_amount, 100)
+
+					items[po1.name].rate = 64
+					with self.assertRaisesRegex(frappe.ValidationError, "Rate must be same"):
+						invoice.save()
+
 	def test_discount_amount_partial_application_in_mapped_transactions(self):
 		"""
 		Test that discount amount is partially applied when some discount
