@@ -31,9 +31,6 @@ from erpnext.manufacturing.doctype.bom.bom import (
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import (
 	get_mins_between_operations,
 )
-from erpnext.manufacturing.doctype.work_order.services.material_coverage import (
-	get_minimum_material_coverage_fraction,
-)
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.batch.batch import make_batch
 from erpnext.stock.doctype.item.item import get_item_defaults, validate_end_of_life
@@ -1329,8 +1326,10 @@ class WorkOrder(Document):
 		if not required_by_item:
 			return
 
-		precision = self.precision("required_qty", "required_items")
-		min_fraction = get_minimum_material_coverage_fraction(required_by_item, transferred_items, precision)
+		min_fraction = min(
+			flt(transferred_items.get(item_code) or 0) / required_qty
+			for item_code, required_qty in required_by_item.items()
+		)
 		min_fraction = min(min_fraction, 1.0)
 		material_transferred = min_fraction * flt(self.qty)
 		self.db_set("material_transferred_for_manufacturing", material_transferred)
