@@ -1,17 +1,21 @@
 # Copyright (c) 2024, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-# import frappe
+from unittest.mock import patch
 
 import frappe
 from frappe.core.doctype.user_permission.test_user_permission import create_user
-from erpnext.stock.doctype.item.test_item import make_item
 from frappe.utils import today
+
+from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.tests.utils import ERPNextTestSuite
 
 # On ERPNextTestSuite, the doctype test records and all
 # link-field test record depdendencies are recursively loaded
 # Use these module variables to add/remove to/from that list
+
+COMPANY = "_Test Company"
+WAREHOUSE = "_Test Warehouse - _TC"
 
 
 class TestStockClosingEntry(ERPNextTestSuite):
@@ -19,6 +23,7 @@ class TestStockClosingEntry(ERPNextTestSuite):
 	Integration tests for StockClosingEntry.
 	Use this class for testing interactions between multiple components.
 	"""
+
 	def make_stock_closing_entry(self, from_date, to_date):
 		entry = frappe.get_doc(
 			doctype="Stock Closing Entry",
