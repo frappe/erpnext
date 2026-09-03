@@ -19,9 +19,6 @@ from frappe.utils import cint, cstr, flt, get_link_to_form, getdate, new_line_se
 from erpnext.buying.utils import check_on_hold_or_closed_status, validate_for_items
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.controllers.mapper import get_qty_already_mapped
-from erpnext.manufacturing.doctype.work_order.services.material_coverage import (
-	get_minimum_material_coverage_fraction,
-)
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.get_item_details import get_price_list_rate_for
@@ -800,10 +797,14 @@ def make_stock_entry(source_name, target_doc=None):
 		target.set_job_card_data()
 
 		if source.job_card:
-			job_card = frappe.get_doc("Job Card", source.job_card)
-			target.bom_no = job_card.bom_no
-			target.from_bom = 1
-			_set_job_card_completed_qty(job_card, target)
+			job_card_details = frappe.get_all(
+				"Job Card", filters={"name": source.job_card}, fields=["bom_no", "for_quantity"]
+			)
+
+			if job_card_details and job_card_details[0]:
+				target.bom_no = job_card_details[0].bom_no
+				target.fg_completed_qty = job_card_details[0].for_quantity
+				target.from_bom = 1
 
 	doclist = get_mapped_doc(
 		"Material Request",
@@ -840,41 +841,6 @@ def make_stock_entry(source_name, target_doc=None):
 	)
 
 	return doclist
-
-
-def _set_job_card_completed_qty(job_card: Document, stock_entry: Document) -> None:
-	required_qty = {}
-	transferred_qty = {}
-	for row in job_card.items:
-		if flt(row.required_qty) <= 0:
-			continue
-		required_qty[row.name] = flt(row.required_qty)
-		transferred_qty[row.name] = flt(row.transferred_qty)
-
-	if not required_qty:
-		stock_entry.fg_completed_qty = 0
-		return
-
-	covered_before = _get_covered_job_card_qty(job_card, required_qty, transferred_qty)
-	for row in stock_entry.items:
-		if row.job_card_item in transferred_qty:
-			transferred_qty[row.job_card_item] += flt(row.qty)
-
-	covered_after = _get_covered_job_card_qty(job_card, required_qty, transferred_qty)
-	covered_by_entry = flt(max(covered_after - covered_before, 0), stock_entry.precision("fg_completed_qty"))
-	pending_qty = max(flt(job_card.for_quantity) - flt(job_card.transferred_qty), 0)
-	stock_entry.fg_completed_qty = min(covered_by_entry, pending_qty)
-
-
-def _get_covered_job_card_qty(
-	job_card: Document, required_qty: dict[str, float], transferred_qty: dict[str, float]
-) -> float:
-	coverage = get_minimum_material_coverage_fraction(
-		required_qty,
-		transferred_qty,
-		job_card.precision("required_qty", "items"),
-	)
-	return min(coverage, 1.0) * flt(job_card.for_quantity)
 
 
 @frappe.whitelist()
