@@ -1423,6 +1423,63 @@ class AccountsController(TransactionBase):
 	def after_mapping(self, source_doc):
 		self.set_discount_amount_after_mapping(source_doc)
 
+	def preserve_mapped_source_discounts(self, source_doctype, source_fieldname, source_item_fieldname):
+		if not self.has_mixed_source_discounts(source_doctype, source_fieldname):
+			return
+
+		mapped_items = [item for item in self.get("items") if item.get(source_fieldname)]
+		source_item_names = {item.get(source_item_fieldname) for item in mapped_items}
+		if None in source_item_names:
+			return
+
+		source_item_doctype = f"{source_doctype} Item"
+		source_rates = self.get_reference_details(source_item_names, source_item_doctype)
+		source_net_rates = self.get_reference_details(source_item_names, source_item_doctype, "net_rate")
+		if len(source_rates) != len(source_item_names) or len(source_net_rates) != len(source_item_names):
+			return
+
+		for item in mapped_items:
+			source_item_name = item.get(source_item_fieldname)
+			reference_rate = flt(source_rates[source_item_name])
+			item.price_list_rate = reference_rate
+			item.rate = flt(source_net_rates[source_item_name])
+			item.discount_percentage = 0
+			item.discount_amount = flt(
+				max(reference_rate - flt(item.rate), 0), item.precision("discount_amount")
+			)
+			item.distributed_discount_amount = 0
+			item.margin_type = None
+			item.margin_rate_or_amount = 0
+			item.pricing_rules = None
+
+		self.additional_discount_percentage = 0
+		self.discount_amount = 0
+		self.base_discount_amount = 0
+
+	def has_mixed_source_discounts(self, source_doctype, source_fieldname):
+		source_names = {
+			item.get(source_fieldname) for item in self.get("items") if item.get(source_fieldname)
+		}
+		if len(source_names) < 2:
+			return False
+
+		source_discounts = frappe.get_all(
+			source_doctype,
+			filters={"name": ("in", source_names)},
+			fields=["apply_discount_on", "additional_discount_percentage", "discount_amount"],
+		)
+		return self._has_mixed_source_discounts(source_discounts)
+
+	def _has_mixed_source_discounts(self, source_discounts):
+		if not any(flt(discount.discount_amount) for discount in source_discounts):
+			return False
+
+		percentage_discounts = {
+			(discount.apply_discount_on, flt(discount.additional_discount_percentage))
+			for discount in source_discounts
+		}
+		return len(percentage_discounts) != 1 or not next(iter(percentage_discounts))[1]
+
 	def set_discount_amount_after_mapping(self, source_doc):
 		"""
 		Ensures that Additional Discount Amount is not copied repeatedly
