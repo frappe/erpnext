@@ -426,6 +426,26 @@ $.extend(erpnext.utils, {
 		}
 		return rows;
 	},
+	/**
+	 * Row flags for the Account / Cost Center trees: the caller's badges plus
+	 * a shared "Disabled" marker for records shown through the tree's
+	 * "include disabled" toggle.
+	 * @param {Object} node tree node (from treeview_settings.onrender)
+	 * @param {Array<string|HTMLElement>} flags badge markup / elements
+	 */
+	render_tree_node_flags: function (node, flags = []) {
+		if (cint(node.data?.disabled)) {
+			flags.push(frappe.ui.badge({ label: __("Disabled"), variant: "outline" }));
+			node.$tree_link.find("a.tree-label").addClass("text-ink-gray-5");
+		}
+		if (!flags.length) return;
+		const $flags = $(
+			'<span class="tree-node-flags inline-flex items-center gap-1.5 ms-2 shrink-0"></span>'
+		);
+		flags.forEach((flag) => $flags.append(flag));
+		$flags.insertAfter(node.$tree_link.find("a.tree-label"));
+	},
+
 	get_tree_options: function (option) {
 		// get valid options for tree based on user permission & locals dict
 		let unscrub_option = frappe.model.unscrub(option);
