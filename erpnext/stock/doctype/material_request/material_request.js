@@ -102,7 +102,7 @@ frappe.ui.form.on("Material Request", {
 		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
 		if (!frm.doc.buying_price_list) {
 			const buying_price_list = frappe.defaults.get_default("buying_price_list");
-			if (frappe.has_permission("Price List", "read", buying_price_list)) {
+			if (frappe.perm.has_perm("Price List", 0, "read", buying_price_list)) {
 				frm.set_value("buying_price_list", buying_price_list);
 			}
 		}
