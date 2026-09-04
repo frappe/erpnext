@@ -5610,6 +5610,121 @@ class TestWorkOrder(ERPNextTestSuite):
 		conversion_entry = frappe.get_doc(make_fg_conversion_entry(wo_order.name, alt_item, 2))
 		self.assertRaises(frappe.ValidationError, conversion_entry.insert)
 
+	def test_undo_work_order_material_transfer_repair(self):
+		from erpnext.patches.v16_0.undo_work_order_material_transfer_repair import (
+			_get_legacy_material_transferred,
+			get_undo_updates,
+		)
+
+		precision = frappe.get_precision("Work Order Item", "required_qty")
+		hidden_difference = 4 / (10 ** (precision + 1))
+		test_stock_entry.make_stock_entry(
+			item_code="_Test Item", target="_Test Warehouse - _TC", qty=100, basic_rate=5000.0
+		)
+		test_stock_entry.make_stock_entry(
+			item_code="_Test Item Home Desktop 100",
+			target="_Test Warehouse - _TC",
+			qty=100,
+			basic_rate=1000.0,
+		)
+
+		def simulate_repair(work_order):
+			for index, row in enumerate(work_order.required_items):
+				required_qty = flt(row.required_qty) + (hidden_difference if index == 0 else 0)
+				row.db_set("required_qty", required_qty, update_modified=False)
+
+			work_order.reload()
+			required_qty = {row.item_code: row.required_qty for row in work_order.required_items}
+			transfer_entry = frappe.get_doc(
+				make_stock_entry(work_order.name, "Material Transfer for Manufacture", 0)
+			)
+			for item in transfer_entry.items:
+				item.qty = flt(required_qty[item.item_code], precision)
+				item.transfer_qty = item.qty
+			transfer_entry.submit()
+
+			work_order.reload()
+			work_order.db_set("material_transferred_for_manufacturing", work_order.qty, update_modified=False)
+			return transfer_entry
+
+		affected_work_order = make_wo_order_test_record(planned_start_date=now(), qty=2)
+		simulate_repair(affected_work_order)
+		changed_work_order = make_wo_order_test_record(planned_start_date=now(), qty=2)
+		changed_transfer = simulate_repair(changed_work_order)
+		mismatched_work_order = make_wo_order_test_record(planned_start_date=now(), qty=2)
+		simulate_repair(mismatched_work_order)
+		mismatched_row = mismatched_work_order.required_items[0]
+		mismatched_row.db_set("transferred_qty", mismatched_row.transferred_qty + 1, update_modified=False)
+
+		patch_run_at = add_to_date(now(), minutes=1)
+		frappe.db.set_value(
+			"Stock Entry",
+			changed_transfer.name,
+			"modified",
+			add_to_date(patch_run_at, seconds=1),
+			update_modified=False,
+		)
+
+		updates = get_undo_updates(patch_run_at)
+		self.assertIn(affected_work_order.name, updates)
+		self.assertNotIn(changed_work_order.name, updates)
+		self.assertNotIn(mismatched_work_order.name, updates)
+
+		expected_qty = (
+			min(row.transferred_qty / row.required_qty for row in affected_work_order.required_items)
+			* affected_work_order.qty
+		)
+		self.assertAlmostEqual(
+			updates[affected_work_order.name]["material_transferred_for_manufacturing"], expected_qty
+		)
+		self.assertEqual(
+			_get_legacy_material_transferred(
+				{"qty": 2, "required_qty": {"RM": 2}, "transferred_qty": {"RM": 2}},
+				1.25,
+				{"RM": 2},
+			),
+			1.25,
+		)
+
+		frappe.db.bulk_update(
+			"Work Order",
+			{affected_work_order.name: updates[affected_work_order.name]},
+			update_modified=False,
+		)
+		affected_work_order.reload()
+		self.assertAlmostEqual(affected_work_order.material_transferred_for_manufacturing, expected_qty)
+		self.assertNotIn(affected_work_order.name, get_undo_updates(patch_run_at))
+
+	def test_undo_work_order_material_transfer_patch_log_guard(self):
+		from unittest import mock
+
+		from frappe.utils import get_datetime
+
+		from erpnext.patches.v16_0 import undo_work_order_material_transfer_repair as undo_patch
+
+		missing_patch = f"{undo_patch.ORIGINAL_PATCH}.missing.{frappe.generate_hash()}"
+		with (
+			mock.patch.object(undo_patch, "ORIGINAL_PATCH", missing_patch),
+			mock.patch.object(frappe.db, "bulk_update") as bulk_update,
+		):
+			undo_patch.execute()
+		bulk_update.assert_not_called()
+
+		patch_name = f"{undo_patch.ORIGINAL_PATCH}.test.{frappe.generate_hash()}"
+		patch_log = frappe.get_doc({"doctype": "Patch Log", "patch": patch_name}).insert(
+			ignore_permissions=True
+		)
+		updates = {"WO-TEST": {"material_transferred_for_manufacturing": 1}}
+		with (
+			mock.patch.object(undo_patch, "ORIGINAL_PATCH", patch_name),
+			mock.patch.object(undo_patch, "get_undo_updates", return_value=updates) as get_undo_updates,
+			mock.patch.object(frappe.db, "bulk_update") as bulk_update,
+		):
+			undo_patch.execute()
+
+		get_undo_updates.assert_called_once_with(get_datetime(patch_log.creation))
+		bulk_update.assert_called_once_with("Work Order", updates, update_modified=False)
+
 
 def prepare_data_for_fg_conversion_test():
 	fg_item = make_item("_Test FG Conversion Item", {"is_stock_item": 1, "allow_alternative_item": 1}).name
