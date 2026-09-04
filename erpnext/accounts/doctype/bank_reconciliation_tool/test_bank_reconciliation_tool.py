@@ -98,8 +98,6 @@ class TestBankReconciliationTool(ERPNextTestSuite, AccountsTestMixin):
 		# assert API output post reconciliation
 		transactions = get_bank_transactions(self.bank_account, from_date, to_date)
 		self.assertEqual(len(transactions), 0)
-<<<<<<< HEAD
-=======
 
 	def make_bank_transaction(self, date, deposit=100, withdrawal=0):
 		return (
@@ -200,4 +198,3 @@ class TestBankReconciliationTool(ERPNextTestSuite, AccountsTestMixin):
 		self.assertIn("1 Transaction Partially Reconciled", singular)
 		plural, _ = get_auto_reconcile_message(["p1", "p2"], [])
 		self.assertIn("2 Transactions Partially Reconciled", plural)
->>>>>>> 154c6fb (fix(bank reconciliation): match Payment Entries on the bank-side amount (#57740))
