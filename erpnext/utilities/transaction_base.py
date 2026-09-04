@@ -177,9 +177,7 @@ class TransactionBase(StatusUpdater):
 					precision = d.precision("rate")
 					rate_matches = abs(flt(flt(d.rate) - flt(reference.rate), precision)) < 0.01
 					mapped_discount_matches = (
-						not flt(self.get("discount_amount"))
-						and not flt(self.get("additional_discount_percentage"))
-						and abs(flt(flt(d.price_list_rate) - flt(reference.rate), precision)) < 0.01
+						abs(flt(flt(d.price_list_rate) - flt(reference.rate), precision)) < 0.01
 						and abs(flt(flt(d.rate) - flt(reference.net_rate), precision)) < 0.01
 					)
 
