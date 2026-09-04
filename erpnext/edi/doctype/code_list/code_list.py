@@ -169,5 +169,8 @@ def get_default_code(code_list: str) -> str | None:
 
 	`code_list` may be a Code List name or a canonical URI (latest version wins).
 	"""
-	code_id = frappe.db.get_value("Code List", resolve_code_list(code_list), "default_common_code")
+	if not (code_list := resolve_code_list(code_list)):
+		return None
+
+	code_id = frappe.db.get_value("Code List", code_list, "default_common_code")
 	return frappe.db.get_value("Common Code", code_id, "common_code") if code_id else None
