@@ -2251,6 +2251,34 @@ class TestAccountsController(ERPNextTestSuite):
 		self.assertEqual(pr2.discount_amount, 0)
 		self.assertEqual(pr2.grand_total, 500)
 
+	def test_fixed_discount_is_not_repeated_when_combining_purchase_documents(self):
+		from frappe.model.mapper import map_docs
+
+		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
+
+		discounted_order = create_purchase_order(qty=10, rate=100, do_not_submit=True)
+		discounted_order.apply_discount_on = "Net Total"
+		discounted_order.discount_amount = 100
+		discounted_order.save().submit()
+
+		first_receipt = make_purchase_receipt(discounted_order.name)
+		first_receipt.items[0].qty = 5
+		first_receipt.save().submit()
+
+		regular_order = create_purchase_order(item_code="_Test Item 2", qty=5, rate=100)
+
+		mapper = "erpnext.buying.doctype.purchase_order.mapper.make_purchase_receipt"
+		for document_names in (
+			(discounted_order.name, regular_order.name),
+			(regular_order.name, discounted_order.name),
+		):
+			with self.subTest(document_names=document_names):
+				receipt = map_docs(mapper, document_names, frappe.new_doc("Purchase Receipt").as_dict())
+				receipt.save()
+
+				self.assertEqual(receipt.discount_amount, 0)
+				self.assertEqual(receipt.grand_total, 1000)
+
 	@ERPNextTestSuite.change_settings("Stock Settings", {"auto_insert_price_list_rate_if_missing": 0})
 	@ERPNextTestSuite.change_settings(
 		"Buying Settings", {"maintain_same_rate": 1, "maintain_same_rate_action": "Stop"}
