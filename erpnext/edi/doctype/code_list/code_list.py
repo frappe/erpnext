@@ -88,19 +88,24 @@ def _version_key(version: str | None) -> list:
 
 
 @frappe.request_cache
-def resolve_code_list(canonical_uri: str) -> str | None:
-	"""Return the latest-version Code List for a canonical URI.
+def resolve_code_list(code_list: str) -> str | None:
+	"""Return the Code List for a document name or a canonical URI.
 
 	Code Lists are named after their CanonicalVersionUri, so one canonical URI can
-	map to several documents. Falls back to treating the argument as a document name.
+	map to several documents, one per version. An exact document name takes
+	precedence, which lets a caller request a specific version; a canonical URI
+	resolves to the latest version available.
 	"""
+	if frappe.db.exists("Code List", code_list):
+		return code_list
+
 	candidates = frappe.get_all(
 		"Code List",
-		filters={"canonical_uri": canonical_uri},
+		filters={"canonical_uri": code_list},
 		fields=["name", "version"],
 	)
 	if not candidates:
-		return canonical_uri if frappe.db.exists("Code List", canonical_uri) else None
+		return None
 
 	# ponytail: assumes one publisher sticks to one version format. An integer and an
 	# ISO date under the same canonical URI compare numerically (3 < 2020), so the date
