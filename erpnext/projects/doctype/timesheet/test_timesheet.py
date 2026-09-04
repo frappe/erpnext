@@ -1,11 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 import datetime
-<<<<<<< HEAD
-import unittest
-=======
 from unittest.mock import patch
->>>>>>> f368a5b (fix(timesheet): handle empty allowed projects (#58745))
 
 import frappe
 from frappe.utils import add_to_date, now_datetime, nowdate
