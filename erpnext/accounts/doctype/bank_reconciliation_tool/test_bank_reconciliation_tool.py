@@ -10,6 +10,7 @@ from erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool 
 	auto_reconcile_vouchers,
 	get_auto_reconcile_message,
 	get_bank_transactions,
+	get_linked_payments,
 )
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
@@ -118,6 +119,10 @@ class TestBankReconciliationTool(ERPNextTestSuite, AccountsTestMixin):
 		self.make_bank_transaction(date=today())
 		names = [t.name for t in get_bank_transactions(self.bank_account, to_date=add_days(today(), -1))]
 		self.assertEqual(names, [])
+
+	def test_get_linked_payments_without_document_types(self):
+		bank_transaction = self.make_bank_transaction(date=today())
+		self.assertEqual(get_linked_payments(bank_transaction.name), [])
 
 	def test_auto_reconcile_message_for_no_matches(self):
 		message, indicator = get_auto_reconcile_message([], [])
