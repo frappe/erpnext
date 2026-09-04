@@ -1463,6 +1463,13 @@ class AccountsController(TransactionBase):
 
 		discount_percentage = flt(self.get("additional_discount_percentage"))
 		source_discount_percentage = flt(source_doc.get("additional_discount_percentage"))
+
+		# Fixed discounts must stay on the document so partial mappings can track the amount already used.
+		if (flt(self.get("discount_amount")) and not discount_percentage) or (
+			flt(source_doc.get("discount_amount")) and not source_discount_percentage
+		):
+			return False
+
 		return not (
 			discount_percentage
 			and discount_percentage == source_discount_percentage
