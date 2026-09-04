@@ -1,11 +1,8 @@
 # Copyright (c) 2024, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-<<<<<<< HEAD
-# import frappe
-from frappe.tests.utils import FrappeTestCase
-=======
 import frappe
+from frappe.tests.utils import FrappeTestCase
 
 from erpnext.edi.doctype.code_list.code_list import (
 	_version_key,
@@ -14,8 +11,6 @@ from erpnext.edi.doctype.code_list.code_list import (
 	get_docnames_for,
 	resolve_code_list,
 )
-from erpnext.tests.utils import ERPNextTestSuite
->>>>>>> 5beed5f (fix: resolve code lists by URI and version (#58770))
 
 CANONICAL_URI = "urn:test:erpnext:codeliste:resolve"
 OLD_VERSION = f"{CANONICAL_URI}:3"
@@ -23,13 +18,9 @@ NEW_VERSION = f"{CANONICAL_URI}:10"
 UNKNOWN_URI = "urn:test:erpnext:codeliste:missing"
 
 
-<<<<<<< HEAD
 class TestCodeList(FrappeTestCase):
-	pass
-=======
-class TestCodeList(ERPNextTestSuite):
 	def setUp(self):
-		"""Create two versions of one code list. Test records are rolled back per test."""
+		"""Create two versions of one code list. FrappeTestCase rolls back once per class, so the inserts are guarded."""
 		for name, version in ((OLD_VERSION, "3"), (NEW_VERSION, "10")):
 			if not frappe.db.exists("Code List", name):
 				frappe.get_doc(
@@ -90,4 +81,3 @@ class TestCodeList(ERPNextTestSuite):
 
 	def test_default_code_follows_latest_version(self):
 		self.assertEqual(get_default_code(CANONICAL_URI), "XYZ")
->>>>>>> 5beed5f (fix: resolve code lists by URI and version (#58770))
