@@ -2255,6 +2255,80 @@ class TestAccountsController(ERPNextTestSuite):
 	@ERPNextTestSuite.change_settings(
 		"Buying Settings", {"maintain_same_rate": 1, "maintain_same_rate_action": "Stop"}
 	)
+	def test_fixed_discount_remainder_is_preserved_when_combining_purchase_documents(self):
+		from frappe.model.mapper import map_docs
+
+		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
+
+		discounted_order = create_purchase_order(qty=10, rate=100, do_not_submit=True)
+		discounted_order.apply_discount_on = "Net Total"
+		discounted_order.discount_amount = 100
+		discounted_order.save().submit()
+
+		first_receipt = make_purchase_receipt(discounted_order.name)
+		first_receipt.items[0].qty = 5
+		first_receipt.discount_amount = 50
+		first_receipt.save().submit()
+
+		regular_order = create_purchase_order(item_code="_Test Item 2", qty=5, rate=100)
+		mapper = "erpnext.buying.doctype.purchase_order.mapper.make_purchase_receipt"
+		for document_names in (
+			(discounted_order.name, regular_order.name),
+			(regular_order.name, discounted_order.name),
+		):
+			with self.subTest(document_names=document_names):
+				receipt = map_docs(mapper, document_names, frappe.new_doc("Purchase Receipt").as_dict())
+				receipt.save()
+				items = {item.purchase_order: item for item in receipt.items}
+
+				self.assertEqual(receipt.grand_total, 950)
+
+				items[discounted_order.name].rate -= 1
+				with self.assertRaisesRegex(frappe.ValidationError, "Rate must be same"):
+					receipt.save()
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"auto_insert_price_list_rate_if_missing": 0})
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"maintain_same_rate": 1, "maintain_same_rate_action": "Stop"}
+	)
+	def test_fixed_discount_remainders_are_preserved_for_multiple_sources(self):
+		from frappe.model.mapper import map_docs
+
+		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
+
+		purchase_orders = []
+		for item_code, discount_amount, consumed_discount in (
+			("_Test Item", 100, 50),
+			("_Test Item 2", 200, 100),
+		):
+			purchase_order = create_purchase_order(item_code=item_code, qty=10, rate=100, do_not_save=True)
+			purchase_order.apply_discount_on = "Net Total"
+			purchase_order.discount_amount = discount_amount
+			purchase_order.save().submit()
+
+			first_receipt = make_purchase_receipt(purchase_order.name)
+			first_receipt.items[0].qty = 5
+			first_receipt.discount_amount = consumed_discount
+			first_receipt.save().submit()
+			purchase_orders.append(purchase_order.name)
+
+		mapper = "erpnext.buying.doctype.purchase_order.mapper.make_purchase_receipt"
+		for document_names in (tuple(purchase_orders), tuple(reversed(purchase_orders))):
+			with self.subTest(document_names=document_names):
+				receipt = map_docs(mapper, document_names, frappe.new_doc("Purchase Receipt").as_dict())
+				receipt.save()
+				items = {item.purchase_order: item for item in receipt.items}
+
+				self.assertEqual(receipt.grand_total, 850)
+
+				items[document_names[0]].rate -= 1
+				with self.assertRaisesRegex(frappe.ValidationError, "Rate must be same"):
+					receipt.save()
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"auto_insert_price_list_rate_if_missing": 0})
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"maintain_same_rate": 1, "maintain_same_rate_action": "Stop"}
+	)
 	def test_source_discounts_are_preserved_when_combining_purchase_documents(self):
 		from frappe.model.mapper import map_docs
 
