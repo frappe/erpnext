@@ -1433,8 +1433,10 @@ class AccountsController(TransactionBase):
 		if not self._has_mixed_additional_discount(source_doc):
 			return
 
-		# The mapper copies this in-memory source after the hook, so normalize both sides here.
-		for doc in (self, source_doc):
+		# A fixed source discount must first pass through after_mapping to calculate its remainder.
+		source_has_fixed_discount = self._has_fixed_additional_discount(source_doc)
+		documents = (self,) if source_has_fixed_discount else (self, source_doc)
+		for doc in documents:
 			for item in doc.get("items"):
 				self._set_additional_discount_as_item_discount(item)
 
@@ -1443,7 +1445,8 @@ class AccountsController(TransactionBase):
 			doc.additional_discount_percentage = 0
 			doc.discount_amount = 0
 
-		self.flags.mapped_additional_discount = True
+		if not source_has_fixed_discount:
+			self.flags.mapped_additional_discount = True
 
 	def after_mapping(self, source_doc):
 		if self.flags.pop("mapped_additional_discount", False):
@@ -1463,18 +1466,14 @@ class AccountsController(TransactionBase):
 
 		discount_percentage = flt(self.get("additional_discount_percentage"))
 		source_discount_percentage = flt(source_doc.get("additional_discount_percentage"))
-
-		# Fixed discounts must stay on the document so partial mappings can track the amount already used.
-		if (flt(self.get("discount_amount")) and not discount_percentage) or (
-			flt(source_doc.get("discount_amount")) and not source_discount_percentage
-		):
-			return False
-
 		return not (
 			discount_percentage
 			and discount_percentage == source_discount_percentage
 			and self.get("apply_discount_on") == source_doc.get("apply_discount_on")
 		)
+
+	def _has_fixed_additional_discount(self, doc):
+		return flt(doc.get("discount_amount")) and not flt(doc.get("additional_discount_percentage"))
 
 	def _set_additional_discount_as_item_discount(self, item):
 		if not flt(item.get("distributed_discount_amount")):

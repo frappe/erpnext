@@ -2251,7 +2251,7 @@ class TestAccountsController(ERPNextTestSuite):
 		self.assertEqual(pr2.discount_amount, 0)
 		self.assertEqual(pr2.grand_total, 500)
 
-	def test_fixed_discount_is_not_repeated_when_combining_purchase_documents(self):
+	def test_fixed_discount_remainder_is_preserved_when_combining_purchase_documents(self):
 		from frappe.model.mapper import map_docs
 
 		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
@@ -2263,6 +2263,7 @@ class TestAccountsController(ERPNextTestSuite):
 
 		first_receipt = make_purchase_receipt(discounted_order.name)
 		first_receipt.items[0].qty = 5
+		first_receipt.discount_amount = 50
 		first_receipt.save().submit()
 
 		regular_order = create_purchase_order(item_code="_Test Item 2", qty=5, rate=100)
@@ -2276,8 +2277,7 @@ class TestAccountsController(ERPNextTestSuite):
 				receipt = map_docs(mapper, document_names, frappe.new_doc("Purchase Receipt").as_dict())
 				receipt.save()
 
-				self.assertEqual(receipt.discount_amount, 0)
-				self.assertEqual(receipt.grand_total, 1000)
+				self.assertEqual(receipt.grand_total, 950)
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"auto_insert_price_list_rate_if_missing": 0})
 	@ERPNextTestSuite.change_settings(
