@@ -1,7 +1,11 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 import datetime
+<<<<<<< HEAD
 import unittest
+=======
+from unittest.mock import patch
+>>>>>>> f368a5b (fix(timesheet): handle empty allowed projects (#58745))
 
 import frappe
 from frappe.utils import add_to_date, now_datetime, nowdate
@@ -9,12 +13,20 @@ from frappe.utils import add_to_date, now_datetime, nowdate
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_sales_return
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.projects.doctype.task.test_task import create_task
-from erpnext.projects.doctype.timesheet.timesheet import OverlapError, make_sales_invoice
+from erpnext.projects.doctype.timesheet.timesheet import (
+	OverlapError,
+	get_projectwise_timesheet_data,
+	make_sales_invoice,
+)
 from erpnext.setup.doctype.employee.test_employee import make_employee
 from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestTimesheet(ERPNextTestSuite):
+	def test_get_projectwise_timesheet_data_without_allowed_projects(self):
+		with patch("frappe.get_list", side_effect=[["TS-0001"], []]):
+			self.assertEqual(get_projectwise_timesheet_data(), [])
+
 	def test_timesheet_post_update(self):
 		frappe.get_doc(
 			{
