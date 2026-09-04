@@ -1,11 +1,17 @@
 // Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
+function update_total_holidays(frm) {
+	frm.doc.total_holidays = (frm.doc.holidays || []).reduce(
+		(total, holiday) => total + (holiday.is_half_day ? 0.5 : 1),
+		0
+	);
+	frm.refresh_field("total_holidays");
+}
+
 frappe.ui.form.on("Holiday List", {
 	refresh: function (frm) {
-		if (frm.doc.holidays) {
-			frm.set_value("total_holidays", frm.doc.holidays.length);
-		}
+		update_total_holidays(frm);
 
 		frm.call("get_supported_countries").then((r) => {
 			frm.subdivisions_by_country = r.message.subdivisions_by_country;
@@ -40,6 +46,18 @@ frappe.ui.form.on("Holiday List", {
 			frm.fields_dict.subdivision.set_data([]);
 			frm.set_df_property("subdivision", "hidden", 1);
 		}
+	},
+});
+
+frappe.ui.form.on("Holiday", {
+	holidays_add: function (frm) {
+		update_total_holidays(frm);
+	},
+	holidays_remove: function (frm) {
+		update_total_holidays(frm);
+	},
+	is_half_day: function (frm) {
+		update_total_holidays(frm);
 	},
 });
 

@@ -34,7 +34,7 @@ class HolidayList(Document):
 		is_half_day: DF.Check
 		subdivision: DF.Autocomplete | None
 		to_date: DF.Date
-		total_holidays: DF.Int
+		total_holidays: DF.Float
 		weekly_off: DF.Literal[
 			"", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
 		]
@@ -42,7 +42,7 @@ class HolidayList(Document):
 
 	def validate(self):
 		self.validate_days()
-		self.total_holidays = len(self.holidays)
+		self.total_holidays = sum(0.5 if holiday.is_half_day else 1 for holiday in self.holidays)
 		self.validate_duplicate_date()
 		self.sort_holidays()
 
