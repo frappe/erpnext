@@ -4,59 +4,11 @@ set -e
 
 cd ~ || exit
 
-# Authenticate git against github.com with the job token: anonymous git-over-HTTPS from the
-# runners gets throttled to a 401, which kills whichever clone is in flight — the frappe fetch
-# below, or payments under `bench get-app`. See the PR description.
-#
-# A credential helper rather than a url.insteadOf rewrite, because `git clone` PERSISTS a
-# rewritten URL into the new repo's .git/config: an insteadOf would leave the token sitting in
-# apps/payments/.git/config on the runner. A helper is consulted only when github.com actually
-# challenges, and leaves the stored remote URL untouched. Passing it through GIT_CONFIG_* keeps
-# the token out of ~/.gitconfig too, and child processes inherit it (bench shells out to git).
-ci_github_token=${CI_GITHUB_TOKEN:-${GITHUB_TOKEN:-}}
-if [ -n "$ci_github_token" ]; then
-    export CI_GITHUB_TOKEN="$ci_github_token"
-    export GIT_CONFIG_COUNT=3
-    # Reset first: git runs EVERY configured helper and calls `store` on them after a successful
-    # auth, so a `credential.helper=store` inherited from the image's gitconfig would write the
-    # token to ~/.git-credentials. An empty value clears the list before ours is added.
-    export GIT_CONFIG_KEY_0="credential.helper"
-    export GIT_CONFIG_VALUE_0=""
-    export GIT_CONFIG_KEY_1="credential.https://github.com.username"
-    export GIT_CONFIG_VALUE_1="x-access-token"
-    export GIT_CONFIG_KEY_2="credential.https://github.com.helper"
-    # Single-quoted: $CI_GITHUB_TOKEN is expanded by the shell git runs the helper in, so the
-    # token is read from the environment at call time and never stored anywhere. Answering only
-    # `get` makes the helper inert for git's `store`/`erase` calls.
-    export GIT_CONFIG_VALUE_2='!f() { test "$1" = get && echo "password=$CI_GITHUB_TOKEN"; }; f'
-fi
+helper_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+source "${helper_dir}/git-auth.sh"
 
-# Whatever happens, never sit on a credential prompt: fail fast and legibly instead.
-export GIT_TERMINAL_PROMPT=0
-
-githubbranch=${GITHUB_BASE_REF:-${GITHUB_REF##*/}}
 frappeuser=${FRAPPE_USER:-"frappe"}
-frappecommitish=${FRAPPE_BRANCH:-}
-
-# A stacked pull request targets another erpnext branch, which has no counterpart in frappe.
-# Fall back to develop so the bench is still installed. An explicit FRAPPE_BRANCH is trusted as
-# given, since it can be a commit sha rather than a branch.
-if [ -z "$frappecommitish" ]; then
-    frappecommitish=$githubbranch
-
-    # git ls-remote --exit-code reports 2 for a branch that is not there and 128 for a remote it
-    # could not reach. Only the first one is proof of absence; keep the branch on anything else so
-    # a flaky probe cannot install an unrelated frappe.
-    probe=0
-    git ls-remote --exit-code --heads "https://github.com/${frappeuser}/frappe" "$frappecommitish" >/dev/null 2>&1 || probe=$?
-
-    if [ "$probe" -eq 2 ]; then
-        echo "frappe has no branch ${frappecommitish}, falling back to develop"
-        frappecommitish=develop
-    elif [ "$probe" -ne 0 ]; then
-        echo "could not reach frappe to check for branch ${frappecommitish} (git ls-remote exited ${probe}), keeping it"
-    fi
-fi
+frappe_source=${FRAPPE_PATH:-$HOME/frappe}
 db_host=${DB_HOST:-"127.0.0.1"}
 db_user_host=${DB_USER_HOST:-"localhost"}
 wkhtmltox_deb=${WKHTMLTOX_DEB:-"/tmp/wkhtmltox.deb"}
@@ -135,12 +87,17 @@ if [ -n "${GITHUB_WORKSPACE:-}" ]; then
     git config --global --add safe.directory "$GITHUB_WORKSPACE" || true
     git config --global --add safe.directory "$GITHUB_WORKSPACE/.git" || true
 fi
+if [ -n "${FRAPPE_PATH:-}" ]; then
+    git config --global --add safe.directory "$FRAPPE_PATH" || true
+    git config --global --add safe.directory "$FRAPPE_PATH/.git" || true
+fi
 
 rm -rf ~/frappe ~/frappe-bench
 
 # ---------------------------------------------------------------------------
 # Phase 1 — parallelise the three slow, independent setup steps:
-#   a) system packages   b) frappe-bench pip install   c) frappe git fetch
+#   a) system packages   b) frappe-bench pip install   c) frappe git fetch (unless FRAPPE_PATH
+#      already points at a checkout)
 # ---------------------------------------------------------------------------
 
 if [ "${SKIP_SYSTEM_SETUP:-0}" != "1" ]; then
@@ -158,23 +115,28 @@ else
     pip_pid=
 fi
 
-mkdir frappe
-(
-  cd frappe
-  git init
-  git remote add origin "https://github.com/${frappeuser}/frappe"
-  git fetch origin "${frappecommitish}" --depth 1
-) &
-clone_pid=$!
+fetch_frappe() {
+    local frappecommitish
+    frappecommitish=$(bash "${helper_dir}/frappe-ref.sh")
+    mkdir frappe
+    cd frappe
+    git init
+    git remote add origin "https://github.com/${frappeuser}/frappe"
+    git fetch origin "${frappecommitish}" --depth 1
+    git checkout FETCH_HEAD
+}
+
+if [ -z "${FRAPPE_PATH:-}" ]; then
+    fetch_frappe &
+    clone_pid=$!
+else
+    clone_pid=
+fi
 
 if [ -n "$apt_pid" ]; then wait $apt_pid; fi
 if [ -n "$pip_pid" ]; then wait $pip_pid; fi
-wait $clone_pid
-
-pushd frappe
-git checkout FETCH_HEAD
-popd
-frappe_sha=$(git -C frappe rev-parse HEAD)
+if [ -n "$clone_pid" ]; then wait $clone_pid; fi
+frappe_sha=$(git -C "$frappe_source" rev-parse HEAD)
 
 get_bench_cache_archive() {
     if [ -z "$bench_cache_dir" ]; then
@@ -215,10 +177,10 @@ restore_warm_bench() {
     # no reinstall. Any failure returns non-zero so the caller falls back to a full bench init.
     if ! (
         cd ~/frappe-bench/apps/frappe || exit 1
-        # Phase 1 already fetched ~/frappe to the exact live develop SHA. Fetch that commit
-        # straight from it (bench init names the remote 'upstream', not 'origin', and points
-        # it at this local clone — so a plain `git fetch origin` does not work).
-        git fetch --no-tags --update-shallow "$HOME/frappe" HEAD || exit 1
+        # Phase 1 already has the frappe checkout at the exact live develop SHA. Fetch that
+        # commit straight from it (bench init names the remote 'upstream', not 'origin', and
+        # points it at this local clone — so a plain `git fetch origin` does not work).
+        git fetch --no-tags --update-shallow "$frappe_source" HEAD || exit 1
         git checkout --force FETCH_HEAD || exit 1
     ); then
         echo "Fast-forward to ${frappe_sha} failed; falling back to full init"
@@ -284,7 +246,7 @@ else
 fi
 
 if ! restore_warm_bench; then
-    bench init --skip-assets --frappe-path ~/frappe --python "$(which python)" frappe-bench
+    bench init --skip-assets --frappe-path "$frappe_source" --python "$(which python)" frappe-bench
 
     cd ~/frappe-bench || exit
 
