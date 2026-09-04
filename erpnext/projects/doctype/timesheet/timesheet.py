@@ -339,9 +339,13 @@ def get_projectwise_timesheet_data(
 			& (tsd.is_billable == 1)
 			& tsd.sales_invoice.isnull()
 			& (tsd.parent.isin(allowed_timesheets))
-			& ((tsd.project.isin(allowed_projects)) | (tsd.project.isnull()))
 		)
 	)
+
+	if allowed_projects:
+		query = query.where((tsd.project.isin(allowed_projects)) | (tsd.project.isnull()))
+	else:
+		query = query.where(tsd.project.isnull())
 
 	if project:
 		query = query.where(tsd.project == project)
