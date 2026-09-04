@@ -10,6 +10,7 @@ from erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool 
 	auto_reconcile_vouchers,
 	get_bank_transactions,
 	get_linked_payments,
+	get_auto_reconcile_message
 )
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
