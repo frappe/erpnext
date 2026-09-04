@@ -45,6 +45,24 @@ class TestHolidayList(ERPNextTestSuite):
 		self.assertIn(date(2023, 2, 26), holidays)
 		self.assertNotIn(date(2023, 3, 5), holidays)
 
+	def test_total_holidays_includes_half_days(self):
+		holiday_list = make_holiday_list(
+			"test_half_day_holiday_list",
+			from_date="2023-01-01",
+			to_date="2023-01-03",
+			holiday_dates=[
+				{"holiday_date": "2023-01-01", "description": "Full-day holiday"},
+				{
+					"holiday_date": "2023-01-02",
+					"description": "Half-day holiday",
+					"is_half_day": 1,
+				},
+			],
+		)
+
+		self.assertEqual(holiday_list.total_holidays, 1.5)
+		self.assertEqual(frappe.db.get_value("Holiday List", holiday_list.name, "total_holidays"), 1.5)
+
 	def test_local_holidays(self):
 		holiday_list = frappe.new_doc("Holiday List")
 		holiday_list.from_date = "2022-01-01"
