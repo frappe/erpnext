@@ -18,6 +18,7 @@
   "total_amount",
   "outstanding_amount",
   "allocated_amount",
+  "allocated_gross_amount",
   "exchange_rate",
   "exchange_gain_loss",
   "account",
@@ -90,6 +91,12 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Allocated"
+  },
+  {
+   "fieldname": "allocated_gross_amount",
+   "fieldtype": "Currency",
+   "label": "Allocated Gross",
+   "read_only": 1
   },
   {
    "depends_on": "eval:(doc.reference_doctype=='Purchase Invoice')",
@@ -176,7 +183,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-01-05 14:18:03.286224",
+ "modified": "2026-08-12 10:15:22.410338",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry Reference",

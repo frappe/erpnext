@@ -61,6 +61,10 @@ class InvalidPaymentEntry(ValidationError):
 	pass
 
 
+# Orders hold the advance tax until an invoice consumes it and reverses it against the party.
+ADVANCE_GROSS_REFERENCE_TYPES = ("Sales Order", "Purchase Order", "Sales Invoice", "Purchase Invoice")
+
+
 class PaymentEntry(AccountsController):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
@@ -148,6 +152,7 @@ class PaymentEntry(AccountsController):
 		total_allocated_amount: DF.Currency
 		total_taxes_and_charges: DF.Currency
 		unallocated_amount: DF.Currency
+		unallocated_gross_amount: DF.Currency
 	# end: auto-generated types
 
 	def __init__(self, *args, **kwargs):
@@ -185,6 +190,7 @@ class PaymentEntry(AccountsController):
 		self.apply_taxes()
 		self.set_amounts_after_tax()
 		self.clear_unallocated_reference_document_rows()
+		self.set_allocated_gross_amount()
 		self.validate_transaction_reference()
 		self.set_title()
 		self.set_remarks()
@@ -228,6 +234,10 @@ class PaymentEntry(AccountsController):
 			self.validate_for_repost()
 			self.repost_accounting_entries()
 
+	def has_only_order_references(self):
+		"""Orders keep a payment an advance; any other reference type makes it a normal payment."""
+		return not ({d.reference_doctype for d in self.references} - {"Sales Order", "Purchase Order"})
+
 	def set_liability_account(self):
 		# Auto setting liability account should only be done during 'draft' status
 		if self.docstatus > 0 or self.payment_type == "Internal Transfer":
@@ -256,15 +266,11 @@ class PaymentEntry(AccountsController):
 			self.is_opening = "No"
 			return
 
-		if self.references:
-			allowed_types = frozenset(["Sales Order", "Purchase Order"])
-			reference_types = set([x.reference_doctype for x in self.references])
-
-			# If there are referencers other than `allowed_types`, treat this as a normal payment entry
-			if reference_types - allowed_types:
-				self.book_advance_payments_in_separate_party_account = False
-				self.is_opening = "No"
-				return
+		# References other than orders make this a normal payment entry
+		if self.references and not self.has_only_order_references():
+			self.book_advance_payments_in_separate_party_account = False
+			self.is_opening = "No"
+			return
 
 		accounts = get_party_account(self.party_type, self.party, self.company, include_advance=True)
 
@@ -731,6 +737,117 @@ class PaymentEntry(AccountsController):
 						_("{0} {1} must be submitted").format(_(d.reference_doctype), d.reference_name)
 					)
 
+	def get_party_paid_amount(self):
+		"""Gross amount in party account currency."""
+		return flt(self.paid_amount if self.payment_type == "Receive" else self.received_amount)
+
+	def get_party_exchange_rate(self):
+		"""Rate from party account currency to company currency. The party side is `paid_from` on Receive."""
+		rate = self.source_exchange_rate if self.payment_type == "Receive" else self.target_exchange_rate
+		return flt(rate) or 1
+
+	def get_advance_tax_rows(self):
+		"""Included taxes collected on top of the advance. Deductions and withholding post against the party."""
+		return [
+			tax
+			for tax in self.get("taxes") or []
+			if cint(tax.included_in_paid_amount)
+			and tax.add_deduct_tax == "Add"
+			and not cint(tax.is_tax_withholding_account)
+		]
+
+	def get_advance_tax_total(self, in_account_currency: bool = False):
+		"""Total advance tax, in company currency unless `in_account_currency`."""
+		total = sum(flt(tax.base_tax_amount) for tax in self.get_advance_tax_rows())
+		if in_account_currency:
+			total = flt(total / self.get_party_exchange_rate(), self.precision("paid_amount"))
+		return total
+
+	def get_gross_net_ratio(self):
+		"""Gross per unit of net. References owe gross, while an advance holds only the net."""
+		net = self.get_party_paid_amount() - self.get_included_taxes(in_account_currency=True)
+		return (net + self.get_advance_tax_total(in_account_currency=True)) / net if net else 1
+
+	def compute_advance_tax_breakdown(self):
+		"""Advance tax per reference row in company currency, as `{ref_row: {account_head: amount}}`.
+
+		Each row's share depends only on its own allocation, so tax on the unallocated
+		portion stays in the tax account.
+		"""
+		references = self.get("references") or []
+		if not references:
+			return {}
+
+		precision = self.precision("allocated_amount", references[0])
+
+		tax_by_account = {}
+		for tax in self.get_advance_tax_rows():
+			amount = flt(tax.base_tax_amount)
+			tax_by_account[tax.account_head] = tax_by_account.get(tax.account_head, 0.0) + amount
+
+		breakdown = {ref.name: {} for ref in references}
+		total_net_paid = self.get_party_paid_amount() - self.get_included_taxes(in_account_currency=True)
+		if not tax_by_account or not total_net_paid:
+			return breakdown
+
+		total_allocated = sum(flt(r.allocated_amount) for r in references)
+		fully_allocated = flt(total_allocated, precision) == flt(total_net_paid, precision)
+
+		for account_head, total_amount in tax_by_account.items():
+			running = 0.0
+			for i, ref in enumerate(references):
+				is_last = i == len(references) - 1
+				# Only absorb the rounding remainder when nothing is left unallocated.
+				if is_last and fully_allocated:
+					share = total_amount - running
+				else:
+					share = flt(total_amount * flt(ref.allocated_amount) / total_net_paid, precision)
+					running += share
+				breakdown[ref.name][account_head] = flt(
+					breakdown[ref.name].get(account_head, 0.0) + share, precision
+				)
+
+		return breakdown
+
+	def set_allocated_gross_amount(self):
+		"""Set `allocated_gross_amount` per reference row and `unallocated_gross_amount` on the entry."""
+		# `set_amounts` ran before `apply_taxes`, so percentage-based taxes were still 0 there.
+		grosses_up = bool(self.book_advance_payments_in_separate_party_account)
+
+		# Only the entry's own save carries what the user typed; reconciliation and unlink reach
+		# here on a stored entry, where the row's outstanding no longer reflects this allocation.
+		caps = self.docstatus.is_draft() or self.is_new()
+
+		references = self.get("references") or []
+		if references:
+			ref_precision = self.precision("allocated_amount", references[0])
+			rate = self.get_party_exchange_rate()
+			# Round like the reversal legs do, or the stored gross drifts a cent from the posted GL.
+			breakdown = self.compute_advance_tax_breakdown() if grosses_up else {}
+			for ref in references:
+				# Journal and payment references never reverse the tax, so they settle by the net.
+				tax_sum = (
+					sum(flt(amount / rate, ref_precision) for amount in breakdown.get(ref.name, {}).values())
+					if ref.reference_doctype in ADVANCE_GROSS_REFERENCE_TYPES
+					else 0
+				)
+				gross = flt(flt(ref.allocated_amount) + tax_sum, ref_precision)
+				outstanding = flt(ref.outstanding_amount, ref_precision)
+				# The party leg settles the reference by the gross, so that is what has to fit.
+				if caps and tax_sum and outstanding > 0 and gross > outstanding:
+					ref.allocated_amount = flt(ref.allocated_amount * outstanding / gross, ref_precision)
+					gross = outstanding
+				ref.allocated_gross_amount = gross
+
+		# Exchange gain/loss follows the gross, which `set_amounts` ran too early to see.
+		self.set_amounts()
+
+		# Grossed up by advance tax only, like the reference rows above.
+		self.unallocated_gross_amount = flt(
+			flt(self.unallocated_amount) * (self.get_gross_net_ratio() if grosses_up else 1),
+			self.precision("paid_amount"),
+		)
+
 	def get_valid_reference_doctypes(self):
 		if self.party_type == "Customer":
 			return ("Sales Order", "Sales Invoice", "Journal Entry", "Dunning", "Payment Entry")
@@ -1053,10 +1170,11 @@ class PaymentEntry(AccountsController):
 			if d.exchange_rate is None:
 				d.exchange_rate = 1
 
-			allocated_amount_in_ref_exchange_rate = flt(
-				flt(d.allocated_amount) * flt(d.exchange_rate), self.precision("base_paid_amount")
-			)
-			d.exchange_gain_loss = base_allocated_amount - allocated_amount_in_ref_exchange_rate
+			# The party leg clears the reference by the gross, so the rate difference is on the gross.
+			settled_amount = flt(d.allocated_gross_amount) or flt(d.allocated_amount)
+			d.exchange_gain_loss = flt(
+				settled_amount * flt(exchange_rate), self.precision("base_paid_amount")
+			) - flt(settled_amount * flt(d.exchange_rate), self.precision("base_paid_amount"))
 		return base_allocated_amount
 
 	def set_total_allocated_amount(self):
@@ -1202,17 +1320,17 @@ class PaymentEntry(AccountsController):
 			self.difference_amount - total_deductions, self.precision("difference_amount")
 		)
 
-	def get_included_taxes(self):
+	def get_included_taxes(self, in_account_currency: bool = False):
+		"""Signed sum of included-in-paid-amount taxes, in company currency unless `in_account_currency`."""
+		rate = self.get_party_exchange_rate()
 		included_taxes = 0
 		for tax in self.get("taxes"):
 			if not tax.included_in_paid_amount:
 				continue
-
-			if tax.add_deduct_tax == "Add":
-				included_taxes += flt(tax.base_tax_amount)
-			else:
-				included_taxes -= flt(tax.base_tax_amount)
-
+			amount = flt(tax.base_tax_amount)
+			if in_account_currency:
+				amount = flt(amount / rate, self.precision("paid_amount"))
+			included_taxes += amount if tax.add_deduct_tax == "Add" else -amount
 		return included_taxes
 
 	# Paid amount is auto allocated in the reference document by default.
@@ -1440,6 +1558,88 @@ class PaymentEntry(AccountsController):
 		)
 		gl_entries.append(gle)
 
+		if invoice.reference_doctype in ("Sales Invoice", "Purchase Invoice"):
+			self._add_advance_tax_reversal_for_reference(gl_entries, invoice, account, posting_date)
+
+	def _add_advance_tax_reversal_for_reference(self, gl_entries, invoice, party_account, posting_date):
+		"""Reverse this reference's share of the advance tax against the party account.
+
+		A pair of legs is emitted per tax account even when the share is 0: by cancel time
+		`remove_ref_doc_link_from_pe` has zeroed `allocated_amount`, so these legs rebuild as 0
+		and `make_reverse_gl_entries` still needs them to match on `voucher_detail_no`.
+		`merge_similar_entries` drops the empty legs on submit.
+		"""
+		tax_accounts = list(dict.fromkeys(tax.account_head for tax in self.get_advance_tax_rows()))
+		if not tax_accounts:
+			return
+
+		invoice_breakdown = self.compute_advance_tax_breakdown().get(invoice.name, {})
+
+		# Advance taxes are validated to be on company currency accounts, so convert back.
+		party_to_company_rate = self.get_party_exchange_rate()
+
+		for account_head in tax_accounts:
+			tax_amount = flt(invoice_breakdown.get(account_head, 0.0))
+
+			tax_in_party_currency = flt(
+				tax_amount / party_to_company_rate, self.precision("allocated_amount", invoice)
+			)
+			tax_in_transaction_currency = (
+				tax_in_party_currency
+				if self.party_account_currency == self.transaction_currency
+				else flt(tax_amount / self.transaction_exchange_rate)
+			)
+
+			party_dr_or_cr = "credit" if self.payment_type == "Receive" else "debit"
+			tax_dr_or_cr = "debit" if party_dr_or_cr == "credit" else "credit"
+
+			party_gle = self.get_gl_dict(
+				{
+					"party_type": self.party_type,
+					"party": self.party,
+					"account": party_account,
+					"account_currency": self.party_account_currency,
+					"cost_center": self.cost_center,
+					"voucher_type": "Payment Entry",
+					"voucher_no": self.name,
+					"voucher_detail_no": invoice.name,
+					party_dr_or_cr: tax_amount,
+					party_dr_or_cr + "_in_account_currency": tax_in_party_currency,
+					party_dr_or_cr + "_in_transaction_currency": tax_in_transaction_currency,
+					"against_voucher_type": invoice.reference_doctype,
+					"against_voucher": invoice.reference_name,
+					"advance_voucher_type": invoice.advance_voucher_type,
+					"advance_voucher_no": invoice.advance_voucher_no,
+					"posting_date": posting_date,
+				},
+				item=self,
+			)
+			gl_entries.append(party_gle)
+
+			tax_gle = self.get_gl_dict(
+				{
+					"account": account_head,
+					"account_currency": self.company_currency,
+					"cost_center": self.cost_center,
+					"voucher_type": "Payment Entry",
+					"voucher_no": self.name,
+					"voucher_detail_no": invoice.name,
+					tax_dr_or_cr: tax_amount,
+					tax_dr_or_cr + "_in_account_currency": tax_amount,
+					tax_dr_or_cr + "_in_transaction_currency": flt(
+						tax_amount / self.transaction_exchange_rate
+					),
+					"against_voucher_type": "Payment Entry",
+					"against_voucher": self.name,
+					"advance_voucher_type": invoice.advance_voucher_type,
+					"advance_voucher_no": invoice.advance_voucher_no,
+					"posting_date": posting_date,
+					"post_net_value": True,
+				},
+				item=self,
+			)
+			gl_entries.append(tax_gle)
+
 	def get_party_account_for_taxes(self):
 		if self.payment_type == "Receive":
 			return self.paid_to
@@ -1660,9 +1860,24 @@ class PaymentEntry(AccountsController):
 		total_positive_outstanding_including_order = 0
 		total_negative_outstanding = 0
 		paid_amount -= sum(flt(d.amount, precision) for d in self.deductions)
+		# Included taxes are not allocatable; `apply_taxes` first, as `tax_amount` may be stale.
+		gross_ratio = 1
+		if any(cint(tax.included_in_paid_amount) for tax in self.get("taxes")):
+			self.apply_taxes()
+			paid_amount = flt(paid_amount - self.get_included_taxes(in_account_currency=True), precision)
+			# Only an advance clears a reference by the gross the party paid, so compare net with net.
+			# Read the company setting, as `set_liability_account` only runs on save.
+			if self.has_only_order_references() and frappe.get_cached_value(
+				"Company", self.company, "book_advance_payments_in_separate_party_account"
+			):
+				gross_ratio = self.get_gross_net_ratio()
+
+		def _allocatable(outstanding_amount):
+			"""Outstanding amounts are gross; `allocated_amount` is stored net of advance tax."""
+			return flt(flt(outstanding_amount) / gross_ratio, precision)
 
 		for ref in self.references:
-			reference_outstanding_amount = flt(ref.outstanding_amount)
+			reference_outstanding_amount = _allocatable(ref.outstanding_amount)
 			abs_outstanding_amount = abs(reference_outstanding_amount)
 
 			if reference_outstanding_amount > 0:
@@ -1731,7 +1946,7 @@ class PaymentEntry(AccountsController):
 			for ref in self.references:
 				allocated_positive_outstanding, allocated_negative_outstanding = _allocation_to_unset_pr_row(
 					ref,
-					ref.outstanding_amount,
+					_allocatable(ref.outstanding_amount),
 					allocated_positive_outstanding,
 					allocated_negative_outstanding,
 				)
@@ -1743,6 +1958,13 @@ class PaymentEntry(AccountsController):
 				get_payment_request_outstanding_set_in_references(self.references) or {}
 			)
 			references_outstanding_amounts = get_references_outstanding_amount(self.references) or {}
+			if gross_ratio != 1:
+				payment_request_outstanding_amounts = {
+					k: _allocatable(v) for k, v in payment_request_outstanding_amounts.items()
+				}
+				references_outstanding_amounts = {
+					k: _allocatable(v) for k, v in references_outstanding_amounts.items()
+				}
 			remaining_references_allocated_amounts = references_outstanding_amounts.copy()
 
 			# Re allocate amount to those references which have PR set (Higher priority)

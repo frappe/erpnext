@@ -15,7 +15,9 @@ class PurchaseInvoiceAdvance(Document):
 		from frappe.types import DF
 
 		advance_amount: DF.Currency
+		advance_gross_amount: DF.Currency
 		allocated_amount: DF.Currency
+		allocated_gross_amount: DF.Currency
 		difference_posting_date: DF.Date | None
 		exchange_gain_loss: DF.Currency
 		parent: DF.Data

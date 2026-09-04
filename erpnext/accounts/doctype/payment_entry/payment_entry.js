@@ -382,7 +382,7 @@ frappe.ui.form.on("Payment Entry", {
 		frm.set_df_property("total_taxes_and_charges", "options", currency_field);
 
 		frm.set_currency_labels(
-			["total_amount", "outstanding_amount", "allocated_amount"],
+			["total_amount", "outstanding_amount", "allocated_amount", "allocated_gross_amount"],
 			party_account_currency,
 			"references"
 		);
@@ -405,9 +405,11 @@ frappe.ui.form.on("Payment Entry", {
 			frm.doc.payment_type === "Receive" ? "paid_from_account_currency" : "paid_to_account_currency";
 
 		var reference_grid = frm.fields_dict["references"].grid;
-		["total_amount", "outstanding_amount", "allocated_amount"].forEach((fieldname) => {
-			reference_grid.update_docfield_property(fieldname, "options", party_currency);
-		});
+		["total_amount", "outstanding_amount", "allocated_amount", "allocated_gross_amount"].forEach(
+			(fieldname) => {
+				reference_grid.update_docfield_property(fieldname, "options", party_currency);
+			}
+		);
 
 		reference_grid.refresh();
 	},
@@ -1114,6 +1116,82 @@ frappe.ui.form.on("Payment Entry", {
 			allocate_payment_amount: frappe.flags.allocate_payment_amount ?? false,
 		});
 
+		frm.events.refresh_allocated_gross_amounts(frm);
+		frm.events.set_total_allocated_amount(frm);
+	},
+
+	get_gross_net_ratio: function (frm) {
+		// Mirrors `set_liability_account`: any reference other than an order makes this a
+		// normal payment, and then nothing reverses the tax back onto the party later.
+		if (
+			!cint(frm.doc.book_advance_payments_in_separate_party_account) ||
+			!(frm.doc.references || []).every((row) =>
+				frm.events.get_order_doctypes(frm).includes(row.reference_doctype)
+			)
+		) {
+			return 1;
+		}
+
+		// Only advance tax grosses the net up; a `Deduct` row already sits inside the net.
+		const is_pay = frm.doc.payment_type === "Pay";
+		const exchange_rate =
+			(is_pay ? flt(frm.doc.target_exchange_rate) : flt(frm.doc.source_exchange_rate)) || 1;
+		let included_taxes = 0;
+		let advance_taxes = 0;
+		for (const tax of frm.doc.taxes || []) {
+			if (!cint(tax.included_in_paid_amount)) continue;
+			const amount = flt(tax.base_tax_amount) / exchange_rate;
+			if (tax.add_deduct_tax === "Deduct") {
+				included_taxes -= amount;
+			} else {
+				included_taxes += amount;
+				if (!cint(tax.is_tax_withholding_account)) advance_taxes += amount;
+			}
+		}
+		const net = flt(is_pay ? frm.doc.received_amount : frm.doc.paid_amount) - included_taxes;
+		return net ? (net + advance_taxes) / net : 1;
+	},
+
+	refresh_allocated_gross_amounts: function (frm) {
+		// Form-side preview only; `set_allocated_gross_amount` recomputes the exact breakdown on save.
+		const ratio = frm.events.get_gross_net_ratio(frm);
+		const precision = frappe.meta.get_field_precision(
+			frappe.meta.get_docfield("Payment Entry Reference", "allocated_gross_amount"),
+			frm.doc
+		);
+		let changed = false;
+		for (const row of frm.doc.references || []) {
+			const new_gross = flt(flt(row.allocated_amount) * ratio, precision);
+			if (flt(new_gross, precision) !== flt(row.allocated_gross_amount, precision)) {
+				row.allocated_gross_amount = new_gross;
+				changed = true;
+			}
+		}
+		if (changed) frm.refresh_field("references");
+	},
+
+	taxes_changed: function (frm) {
+		// A tax edit only moves the split between net and tax, so each reference still owes the
+		// same gross. Re-deriving the net from it keeps hand-made allocations and the total intact.
+		// Read the stored gross: deriving it here would price the edited row, which already carries
+		// the new `included_in_paid_amount`, against amounts `apply_taxes` has not refreshed yet.
+		const gross_amounts = (frm.doc.references || []).map(
+			(row) => flt(row.allocated_gross_amount) || flt(row.allocated_amount)
+		);
+
+		frm.events.apply_taxes(frm);
+
+		const ratio = frm.events.get_gross_net_ratio(frm);
+		const precision = frappe.meta.get_field_precision(
+			frappe.meta.get_docfield("Payment Entry Reference", "allocated_amount"),
+			frm.doc
+		);
+		(frm.doc.references || []).forEach((row, i) => {
+			row.allocated_amount = flt(gross_amounts[i] / ratio, precision);
+		});
+		frm.refresh_field("references");
+
+		frm.events.refresh_allocated_gross_amounts(frm);
 		frm.events.set_total_allocated_amount(frm);
 	},
 
@@ -1813,7 +1891,17 @@ frappe.ui.form.on("Payment Entry Reference", {
 		}
 	},
 
-	allocated_amount: function (frm) {
+	allocated_amount: function (frm, cdt, cdn) {
+		const row = locals[cdt][cdn];
+		const ratio = frm.events.get_gross_net_ratio(frm);
+		const precision = frappe.meta.get_field_precision(
+			frappe.meta.get_docfield("Payment Entry Reference", "allocated_gross_amount"),
+			frm.doc
+		);
+		const new_gross = flt(flt(row.allocated_amount) * ratio, precision);
+		if (flt(new_gross, precision) !== flt(row.allocated_gross_amount, precision)) {
+			frappe.model.set_value(cdt, cdn, "allocated_gross_amount", new_gross);
+		}
 		frm.events.set_total_allocated_amount(frm);
 	},
 
@@ -1823,35 +1911,12 @@ frappe.ui.form.on("Payment Entry Reference", {
 });
 
 frappe.ui.form.on("Advance Taxes and Charges", {
-	rate: function (frm) {
-		frm.events.apply_taxes(frm);
-		frm.events.set_unallocated_amount(frm);
-	},
-
-	tax_amount: function (frm) {
-		frm.events.apply_taxes(frm);
-		frm.events.set_unallocated_amount(frm);
-	},
-
-	row_id: function (frm) {
-		frm.events.apply_taxes(frm);
-		frm.events.set_unallocated_amount(frm);
-	},
-
-	taxes_remove: function (frm) {
-		frm.events.apply_taxes(frm);
-		frm.events.set_unallocated_amount(frm);
-	},
-
-	included_in_paid_amount: function (frm) {
-		frm.events.apply_taxes(frm);
-		frm.events.set_unallocated_amount(frm);
-	},
-
-	charge_type: function (frm) {
-		frm.events.apply_taxes(frm);
-		frm.events.set_unallocated_amount(frm);
-	},
+	rate: (frm) => frm.events.taxes_changed(frm),
+	tax_amount: (frm) => frm.events.taxes_changed(frm),
+	row_id: (frm) => frm.events.taxes_changed(frm),
+	taxes_remove: (frm) => frm.events.taxes_changed(frm),
+	included_in_paid_amount: (frm) => frm.events.taxes_changed(frm),
+	charge_type: (frm) => frm.events.taxes_changed(frm),
 });
 
 frappe.ui.form.on("Payment Entry Deduction", {
