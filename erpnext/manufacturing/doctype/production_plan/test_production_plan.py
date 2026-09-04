@@ -2222,8 +2222,11 @@ class TestProductionPlan(FrappeTestCase):
 		pln = create_production_plan(item_code="Test Production Item 1")
 		pln.make_material_request()
 
-		mr_name = frappe.db.get_value("Material Request Item", {"production_plan": pln.name}, "parent")
-		plan_item = frappe.get_doc("Material Request", mr_name).items[0].material_request_plan_item
+		plan_item = pln.mr_items[0].name
+		mr_name = frappe.db.get_value(
+			"Material Request Item", {"material_request_plan_item": plan_item}, "parent"
+		)
+		frappe.get_doc("Material Request", mr_name).submit()
 		frappe.db.set_value("Material Request Plan Item", plan_item, "requested_qty", 0)
 
 		with self.set_user(create_user_without_production_plan_access()):
