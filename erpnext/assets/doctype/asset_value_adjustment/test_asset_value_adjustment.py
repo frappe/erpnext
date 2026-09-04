@@ -329,6 +329,61 @@ class TestAssetValueAdjustment(unittest.TestCase):
 		self.assertEqual(asset_doc.finance_books[0].value_after_depreciation, 40000.0)
 		self.assertEqual(asset_doc.finance_books[0].expected_value_after_useful_life, 2000.0)
 
+	def test_asset_value_adjustment_does_not_affect_other_finance_books(self):
+		pr = make_purchase_receipt(item_code="Macbook Pro", qty=1, rate=120000.0, location="Test Location")
+
+		asset_name = frappe.db.get_value("Asset", {"purchase_receipt": pr.name}, "name")
+		asset_doc = frappe.get_doc("Asset", asset_name)
+		asset_doc.calculate_depreciation = 1
+		asset_doc.available_for_use_date = "2023-01-15"
+		asset_doc.purchase_date = "2023-01-15"
+
+		finance_book_row = {
+			"expected_value_after_useful_life": 200,
+			"depreciation_method": "Straight Line",
+			"total_number_of_depreciations": 12,
+			"frequency_of_depreciation": 1,
+			"depreciation_start_date": "2023-01-31",
+		}
+		asset_doc.append("finance_books", {**finance_book_row, "finance_book": "Test Finance Book 1"})
+		asset_doc.append("finance_books", {**finance_book_row, "finance_book": "Test Finance Book 2"})
+		asset_doc.submit()
+
+		other_book_schedule_before = [
+			d.depreciation_amount
+			for d in get_asset_depr_schedule_doc(asset_doc.name, "Active", "Test Finance Book 2").get(
+				"depreciation_schedule"
+			)
+		]
+
+		current_value = get_asset_value_after_depreciation(asset_doc.name, "Test Finance Book 1")
+
+		# adjust only "Test Finance Book 1"
+		adj_doc = make_asset_value_adjustment(
+			asset=asset_doc.name,
+			finance_book="Test Finance Book 1",
+			current_asset_value=current_value,
+			new_asset_value=50000.0,
+			date="2023-08-21",
+		)
+		adj_doc.submit()
+
+		asset_doc.load_from_db()
+		book_1 = next(d for d in asset_doc.finance_books if d.finance_book == "Test Finance Book 1")
+		book_2 = next(d for d in asset_doc.finance_books if d.finance_book == "Test Finance Book 2")
+
+		self.assertEqual(book_1.value_after_depreciation, 50000.0)
+		# "Test Finance Book 2" was never referenced by the adjustment and must be untouched
+		self.assertEqual(book_2.value_after_depreciation, current_value)
+
+		other_book_schedule_after = [
+			d.depreciation_amount
+			for d in get_asset_depr_schedule_doc(asset_doc.name, "Active", "Test Finance Book 2").get(
+				"depreciation_schedule"
+			)
+		]
+		self.assertEqual(other_book_schedule_after, other_book_schedule_before)
+
 
 def make_asset_value_adjustment(**args):
 	args = frappe._dict(args)
@@ -338,6 +393,7 @@ def make_asset_value_adjustment(**args):
 			"doctype": "Asset Value Adjustment",
 			"company": args.company or "_Test Company",
 			"asset": args.asset,
+			"finance_book": args.finance_book,
 			"date": args.date or nowdate(),
 			"new_asset_value": args.new_asset_value,
 			"current_asset_value": args.current_asset_value,
