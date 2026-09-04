@@ -916,7 +916,7 @@ def search_for_transfer_transaction(transaction_id: str | int):
 
 	days = frappe.db.get_single_value("Accounts Settings", "transfer_match_days")
 
-	if not days:
+	if days is None:
 		days = 3
 
 	min_date = frappe.utils.add_days(date, -days)
