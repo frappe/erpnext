@@ -159,24 +159,40 @@ class TransactionBase(StatusUpdater):
 
 		stop_actions = []
 		for ref_dt, ref_dn_field, ref_link_field in ref_details:
-			reference_names = [d.get(ref_link_field) for d in self.get("items") if d.get(ref_link_field)]
-			reference_details = self.get_reference_details(reference_names, ref_dt + " Item")
+			reference_names = {d.get(ref_link_field) for d in self.get("items") if d.get(ref_link_field)}
+			reference_details = {
+				d.name: d
+				for d in frappe.get_all(
+					ref_dt + " Item",
+					filters={"name": ("in", reference_names)},
+					fields=["name", "rate", "net_rate"],
+				)
+			}
 			for d in self.get("items"):
 				if d.get(ref_link_field):
-					ref_rate = reference_details.get(d.get(ref_link_field))
+					reference = reference_details.get(d.get(ref_link_field))
+					if not reference:
+						continue
 
-					if abs(flt(d.rate - ref_rate, d.precision("rate"))) >= 0.01:
+					precision = d.precision("rate")
+					rate_matches = abs(flt(flt(d.rate) - flt(reference.rate), precision)) < 0.01
+					mapped_discount_matches = (
+						abs(flt(flt(d.price_list_rate) - flt(reference.rate), precision)) < 0.01
+						and abs(flt(flt(d.rate) - flt(reference.net_rate), precision)) < 0.01
+					)
+
+					if not rate_matches and not mapped_discount_matches:
 						if action == "Stop":
 							if role_allowed_to_override not in frappe.get_roles():
 								stop_actions.append(
 									_("Row #{0}: Rate must be same as {1}: {2} ({3} / {4})").format(
-										d.idx, ref_dt, d.get(ref_dn_field), d.rate, ref_rate
+										d.idx, ref_dt, d.get(ref_dn_field), d.rate, reference.rate
 									)
 								)
 						else:
 							frappe.msgprint(
 								_("Row #{0}: Rate must be same as {1}: {2} ({3} / {4})").format(
-									d.idx, ref_dt, d.get(ref_dn_field), d.rate, ref_rate
+									d.idx, ref_dt, d.get(ref_dn_field), d.rate, reference.rate
 								),
 								title=_("Warning"),
 								indicator="orange",

@@ -74,6 +74,15 @@ force_item_fields = (
 	"valuation_rate",
 )
 
+additional_discount_item_fields = (
+	"discount_percentage",
+	"discount_amount",
+	"distributed_discount_amount",
+	"margin_type",
+	"margin_rate_or_amount",
+	"pricing_rules",
+)
+
 
 class AccountsController(TransactionBase):
 	def get_print_settings(self):
@@ -1420,8 +1429,60 @@ class AccountsController(TransactionBase):
 
 		set_transaction_currency_and_rate_in_gl_map(self, gl_entries)
 
+	def before_mapping(self, source_doc, _table_maps):
+		if not self._has_mixed_additional_discount(source_doc):
+			return
+
+		# A fixed source discount must first pass through after_mapping to calculate its remainder.
+		source_has_fixed_discount = self._has_fixed_additional_discount(source_doc)
+		documents = (self,) if source_has_fixed_discount else (self, source_doc)
+		for doc in documents:
+			for item in doc.get("items"):
+				self._set_additional_discount_as_item_discount(item)
+
+			doc.apply_discount_on = ""
+			doc.base_discount_amount = 0
+			doc.additional_discount_percentage = 0
+			doc.discount_amount = 0
+
+		if not source_has_fixed_discount:
+			self.flags.mapped_additional_discount = True
+
 	def after_mapping(self, source_doc):
+		if self.flags.pop("mapped_additional_discount", False):
+			return
+
 		self.set_discount_amount_after_mapping(source_doc)
+
+	def _has_mixed_additional_discount(self, source_doc):
+		if not self.get("items") or not any(
+			self.doctype in transaction_types and source_doc.doctype in transaction_types
+			for transaction_types in (PURCHASE_TRANSACTION_TYPES, SALES_TRANSACTION_TYPES)
+		):
+			return False
+
+		if not flt(self.get("discount_amount")) and not flt(source_doc.get("discount_amount")):
+			return False
+
+		discount_percentage = flt(self.get("additional_discount_percentage"))
+		source_discount_percentage = flt(source_doc.get("additional_discount_percentage"))
+		return not (
+			discount_percentage
+			and discount_percentage == source_discount_percentage
+			and self.get("apply_discount_on") == source_doc.get("apply_discount_on")
+		)
+
+	def _has_fixed_additional_discount(self, doc):
+		return flt(doc.get("discount_amount")) and not flt(doc.get("additional_discount_percentage"))
+
+	def _set_additional_discount_as_item_discount(self, item):
+		if not flt(item.get("distributed_discount_amount")):
+			return
+
+		item.price_list_rate = item.rate
+		item.rate = item.net_rate
+		for fieldname in additional_discount_item_fields:
+			item.set(fieldname, None if fieldname in ("margin_type", "pricing_rules") else 0)
 
 	def set_discount_amount_after_mapping(self, source_doc):
 		"""
