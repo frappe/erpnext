@@ -1934,17 +1934,160 @@ class GrowthViewTransformer:
 # ============================================================================
 
 
+def _base_fieldname(fieldname: str) -> str:
+	"""Strip the `seg_<n>_` prefix segmented templates add to every column."""
+	if not fieldname.startswith(SEGMENT_PREFIX):
+		return fieldname
+
+	parts = fieldname.split("_", 2)
+	return parts[2] if len(parts) == 3 else fieldname
+
+
+def get_special_view_cells(metadata: XLSXMetadata) -> dict[tuple[int, int], float]:
+	"""
+	Map `(row, column) -> value` for cells shown as percentages, not amounts.
+
+	Mirrors `_is_special_view` in financial_statements.js. Every other styling pass
+	skips these cells.
+	"""
+	selected_view = metadata.filters.get("selected_view")
+
+	if selected_view not in ("Growth", "Margin"):
+		return {}
+
+	is_growth = selected_view == "Growth"
+	has_template = bool(metadata.filters.get("report_template"))
+
+	currency_columns = {
+		col_idx: col for col_idx, col in metadata.column_map.items() if col.get("fieldtype") == "Currency"
+	}
+
+	if not currency_columns:
+		return {}
+
+	last_row_index = metadata.get_last_row_index()
+	special_cells = {}
+
+	for row_idx, row in metadata.row_map.items():
+		if not row or row.get("is_blank_line"):
+			continue
+
+		if metadata.has_total_row and row_idx == last_row_index:
+			continue
+
+		# only the template engine stamps `_segment_info`; it names the period columns
+		period_keys = (row.get("_segment_info") or {}).get("period_keys") or []
+
+		for col_idx, col in currency_columns.items():
+			fieldname = col.get("fieldname") or ""
+			base = _base_fieldname(fieldname)
+
+			# the row `Total` aggregates amounts, so it stays a raw figure
+			if base == "total":
+				continue
+
+			if has_template:
+				# templates only percentage-format period columns
+				if base not in period_keys:
+					continue
+
+				# each segment restarts its periods; the first has no prior period
+				if is_growth and period_keys[0] == base:
+					continue
+			elif is_growth and (col_idx <= 1 or col.get("is_first_in_dimension")):
+				# Growth has no earlier period to compare the first one against
+				continue
+
+			cell_value = row.get(fieldname)
+
+			if cell_value in (None, ""):
+				continue
+
+			special_cells[(row_idx, col_idx)] = flt(cell_value)
+
+	return special_cells
+
+
+def apply_standard_report_styling(
+	metadata: XLSXMetadata, builder: XLSXStyleBuilder, special_cells: dict[tuple[int, int], float]
+) -> dict:
+	"""
+	Bold group / top-level rows and redden their negative amounts, for reports
+	rendered without a Report Template.
+	"""
+	bold_style_id = builder.bold_style_id
+	warning_style_id = builder.register_style({"font_color": "#dc3545"})
+	style_cell = builder.style_cell
+
+	for row_idx, row in metadata.row_map.items():
+		if not row or row.get("is_blank_line"):
+			continue
+
+		if not row.get("is_group") and (row.get("parent_account") or row.get("parent_section")):
+			continue
+
+		warn_if_negative = row.get("warn_if_negative")
+
+		for col_idx, col in metadata.column_map.items():
+			if (row_idx, col_idx) in special_cells:
+				continue
+
+			style_cell(row_idx, col_idx, bold_style_id)
+
+			if warn_if_negative and flt(row.get(col.get("fieldname"))) < 0:
+				style_cell(row_idx, col_idx, warning_style_id)
+
+	return builder.result
+
+
+def apply_special_view_styling(
+	metadata: XLSXMetadata, builder: XLSXStyleBuilder, special_cells: dict[tuple[int, int], float]
+) -> dict:
+	"""
+	Percent number format and a red/green font colour for Growth / Margin cells,
+	shared by templated and standard reports.
+	"""
+	if not special_cells:
+		return builder.result
+
+	percent_format = builder.register_style(
+		{
+			"num_format": '+0.00"%";-0.00"%";0"%"'
+			if metadata.filters.get("selected_view") == "Growth"
+			else builder.get_number_format("Percent")
+		}
+	)
+	danger = builder.register_style({"font_color": "#dc3545"})
+	success = builder.register_style({"font_color": "#28a745"})
+
+	style_cell = builder.style_cell
+
+	for (row_idx, col_idx), cell_value in special_cells.items():
+		style_cell(row_idx, col_idx, percent_format)
+		style_cell(row_idx, col_idx, danger if cell_value < 0 else success)
+
+	return builder.result
+
+
+# NOTE: keep in sync with `erpnext.financial_statements.formatter` in financial_statements.js —
+# any style added, removed or changed here must be mirrored there, and vice versa.
 def get_xlsx_styles(metadata: XLSXMetadata) -> dict | None:
 	"""
-	Generate XLSX styles for financial report templates.
+	Generate XLSX styles for financial statement reports.
 
-	NOTE: Currently only custom report generated with "Report Template" filter will have styles applied.
+	Templated reports are styled from the formatting flags `FinancialReportEngine`
+	sets on each row; reports without a template get the framework defaults. Growth
+	/ Margin styling is shared by both.
 	"""
-	# skip styling
-	if not metadata.filters.get("report_template"):
-		return
-
 	builder = XLSXStyleBuilder(metadata, default_styling=False)
+	special_cells = get_special_view_cells(metadata)
+
+	# without a template the framework defaults handle number / currency formats
+	if not metadata.filters.get("report_template"):
+		builder.apply_default_styles()
+		apply_standard_report_styling(metadata, builder, special_cells)
+		return apply_special_view_styling(metadata, builder, special_cells)
+
 	builder.apply_default_styles(currency_formatting=False)
 
 	# currency is fixed for all columns (only if report template filter is applied)
@@ -1997,6 +2140,10 @@ def get_xlsx_styles(metadata: XLSXMetadata) -> dict | None:
 		segment_values = row.get("segment_values", {}) or {}
 
 		for col_idx, col in metadata.column_map.items():
+			# percentage cells are styled exclusively by `apply_special_view_styling`
+			if (row_idx, col_idx) in special_cells:
+				continue
+
 			fieldname = col.get("fieldname")
 			is_account = fieldname == "account"
 
@@ -2047,4 +2194,4 @@ def get_xlsx_styles(metadata: XLSXMetadata) -> dict | None:
 			elif color := formatting.get("color"):
 				style_cell(row_idx, col_idx, get_color_style(color))
 
-	return builder.result
+	return apply_special_view_styling(metadata, builder, special_cells)
