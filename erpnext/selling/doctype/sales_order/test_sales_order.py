@@ -33,6 +33,8 @@ from erpnext.selling.doctype.sales_order.mapper import (
 )
 from erpnext.selling.doctype.sales_order.sales_order import (
 	WarehouseRequired,
+	get_billable_sales_orders,
+	has_billable_items,
 )
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -381,6 +383,82 @@ class TestSalesOrder(ERPNextTestSuite):
 
 		si1 = make_sales_invoice(so.name)
 		self.assertEqual(len(si1.get("items")), 0)
+
+	def test_make_sales_invoice_for_pending_qty_within_over_billing_allowance(self):
+		item = make_item("_Test Over Billed Pending Qty Item", {"is_stock_item": 1}).name
+		so = make_sales_order(item_code=item, qty=390, rate=100)
+
+		# invoiced above the ordered rate, so 240 of 390 qty already bills 100% of the amount
+		for _ in range(2):
+			si = make_sales_invoice(so.name)
+			si.get("items")[0].qty = 120
+			si.get("items")[0].rate = 162.50
+			si.insert()
+			si.submit()
+
+		so.load_from_db()
+		self.assertEqual(flt(so.per_billed), 100.0)
+		self.assertEqual(so.get("items")[0].billed_amt, so.get("items")[0].amount)
+
+		with change_settings("Accounts Settings", {"over_billing_allowance": 0}):
+			self.assertEqual(len(make_sales_invoice(so.name).get("items")), 0)
+
+		with change_settings("Accounts Settings", {"over_billing_allowance": 100}):
+			si = make_sales_invoice(so.name)
+			self.assertEqual(len(si.get("items")), 1)
+			self.assertEqual(si.get("items")[0].qty, 150)
+
+	def test_billable_sales_orders_query_honours_item_allowance(self):
+		item = make_item("_Test Over Billed Query Item", {"is_stock_item": 1}).name
+		so = make_sales_order(item_code=item, qty=390, rate=100)
+
+		for _ in range(2):
+			si = make_sales_invoice(so.name)
+			si.get("items")[0].qty = 120
+			si.get("items")[0].rate = 162.50
+			si.insert()
+			si.submit()
+
+		so.load_from_db()
+		self.assertEqual(flt(so.per_billed), 100.0)
+
+		filters = {"docstatus": 1, "company": so.company, "customer": so.customer}
+
+		def is_offered():
+			rows = get_billable_sales_orders("Sales Order", "", "name", 0, 50, dict(filters))
+			return so.name in [d.name for d in rows]
+
+		with change_settings("Accounts Settings", {"over_billing_allowance": 0}):
+			self.assertFalse(is_offered())
+			self.assertFalse(has_billable_items(so.name))
+
+			# an item level allowance is honoured even when the global one is zero
+			frappe.db.set_value("Item", item, "over_billing_allowance", 100)
+			self.assertTrue(is_offered())
+			self.assertTrue(has_billable_items(so.name))
+
+			# searching must skip the Date search field, postgres refuses a LIKE on one
+			rows = get_billable_sales_orders("Sales Order", so.customer, "name", 0, 50, dict(filters))
+			self.assertIn(so.name, [d.name for d in rows])
+
+	def test_billable_sales_orders_query_skips_orders_without_pending_qty(self):
+		item = make_item("_Test Under Billed Query Item", {"is_stock_item": 1}).name
+		so = make_sales_order(item_code=item, qty=10, rate=100)
+
+		# billing the whole qty at a lower rate leaves pending amount but no pending qty
+		si = make_sales_invoice(so.name)
+		si.get("items")[0].rate = 50
+		si.insert()
+		si.submit()
+
+		so.load_from_db()
+		self.assertLess(flt(so.get("items")[0].billed_amt), flt(so.get("items")[0].amount))
+		self.assertEqual(len(make_sales_invoice(so.name).get("items")), 0)
+
+		filters = {"docstatus": 1, "company": so.company, "customer": so.customer}
+		rows = get_billable_sales_orders("Sales Order", "", "name", 0, 50, filters)
+		self.assertNotIn(so.name, [d.name for d in rows])
+		self.assertFalse(has_billable_items(so.name))
 
 	def test_make_sales_invoice_after_return_and_redelivery(self):
 		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return

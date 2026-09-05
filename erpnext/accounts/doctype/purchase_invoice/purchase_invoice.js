@@ -166,7 +166,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 						get_query_filters: {
 							docstatus: 1,
 							status: ["not in", ["Closed", "On Hold"]],
-							per_billed: ["<", 99.99],
+							per_billed: ["<", 99.99 + flt(frappe.boot.sysdefaults.over_billing_allowance)],
 							company: me.frm.doc.company,
 						},
 						allow_child_item_selection: true,

@@ -455,10 +455,24 @@ def make_sales_invoice(
 	has_unit_price_items = frappe.db.get_value("Sales Order", source_name, "has_unit_price_items")
 	billed_qty_by_item = None
 	pending_qty_by_item = {}
+	amount_allowance_by_item = {}
 	mapped_qty_by_item = get_qty_already_mapped(target_doc, "so_detail")
 
 	def is_unit_price_row(source):
 		return has_unit_price_items and source.qty == 0
+
+	def is_amount_billable(source):
+		"""Billing is tracked on amount, so a row invoiced at a higher rate than ordered can hit
+		100% billed while qty is still pending. Allow it upto the item's over billing allowance."""
+		from erpnext.controllers.status_updater import get_allowance_for
+
+		if source.item_code not in amount_allowance_by_item:
+			amount_allowance_by_item[source.item_code] = flt(
+				get_allowance_for(source.item_code, qty_or_amount="amount")[0]
+			)
+
+		allowance = amount_allowance_by_item[source.item_code]
+		return abs(flt(source.billed_amt)) < abs(flt(source.amount)) * (1 + allowance / 100.0)
 
 	def get_billed_qty_by_item():
 		nonlocal billed_qty_by_item
@@ -621,7 +635,7 @@ def make_sales_invoice(
 					if is_unit_price_row(doc)
 					else (
 						doc.qty
-						and (doc.base_amount == 0 or abs(doc.billed_amt) < abs(doc.amount))
+						and (doc.base_amount == 0 or is_amount_billable(doc))
 						and get_pending_qty(doc) > 0
 					)
 				),
