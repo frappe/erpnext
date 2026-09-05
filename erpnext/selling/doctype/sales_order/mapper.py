@@ -280,6 +280,12 @@ def make_delivery_note(
 
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
+		target.run_method(
+			"preserve_mapped_source_discounts",
+			source.doctype,
+			"against_sales_order",
+			"so_detail",
+		)
 		target.run_method("calculate_taxes_and_totals")
 		target.run_method("set_use_serial_batch_fields")
 
@@ -507,6 +513,12 @@ def make_sales_invoice(
 		target.flags.ignore_permissions = True
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
+		target.run_method(
+			"preserve_mapped_source_discounts",
+			source.doctype,
+			"sales_order",
+			"so_detail",
+		)
 		target.run_method("calculate_taxes_and_totals")
 		target.run_method("set_use_serial_batch_fields")
 

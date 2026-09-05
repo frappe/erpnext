@@ -160,12 +160,31 @@ class TransactionBase(StatusUpdater):
 		stop_actions = []
 		for ref_dt, ref_dn_field, ref_link_field in ref_details:
 			reference_names = [d.get(ref_link_field) for d in self.get("items") if d.get(ref_link_field)]
+			uses_mapped_source_discounts = (
+				not flt(self.get("discount_amount"))
+				and not flt(self.get("additional_discount_percentage"))
+				and hasattr(self, "has_mixed_source_discounts")
+				and self.has_mixed_source_discounts(ref_dt, ref_dn_field)
+			)
 			reference_details = self.get_reference_details(reference_names, ref_dt + " Item")
+			reference_net_rates = (
+				self.get_reference_details(reference_names, ref_dt + " Item", "net_rate")
+				if uses_mapped_source_discounts
+				else {}
+			)
 			for d in self.get("items"):
 				if d.get(ref_link_field):
 					ref_rate = reference_details.get(d.get(ref_link_field))
+					ref_net_rate = reference_net_rates.get(d.get(ref_link_field))
+					mapped_discount_matches = ref_net_rate is not None and (
+						abs(flt(d.price_list_rate - ref_rate, d.precision("rate"))) < 0.01
+						and abs(flt(d.rate - ref_net_rate, d.precision("rate"))) < 0.01
+					)
 
-					if abs(flt(d.rate - ref_rate, d.precision("rate"))) >= 0.01:
+					if (
+						abs(flt(d.rate - ref_rate, d.precision("rate"))) >= 0.01
+						and not mapped_discount_matches
+					):
 						if action == "Stop":
 							if role_allowed_to_override not in frappe.get_roles():
 								stop_actions.append(
@@ -184,12 +203,12 @@ class TransactionBase(StatusUpdater):
 		if stop_actions:
 			frappe.throw(stop_actions, as_list=True)
 
-	def get_reference_details(self, reference_names, reference_doctype):
+	def get_reference_details(self, reference_names, reference_doctype, rate_fieldname="rate"):
 		return frappe._dict(
 			frappe.get_all(
 				reference_doctype,
 				filters={"name": ("in", reference_names)},
-				fields=["name", "rate"],
+				fields=["name", rate_fieldname],
 				as_list=1,
 			)
 		)

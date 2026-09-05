@@ -83,6 +83,12 @@ def make_purchase_invoice(
 		if args and args.get("merge_taxes"):
 			merge_taxes(source, doc)
 
+		doc.run_method(
+			"preserve_mapped_source_discounts",
+			source.doctype,
+			"purchase_receipt",
+			"pr_detail",
+		)
 		doc.run_method("calculate_taxes_and_totals")
 		from erpnext.accounts.services.payment_schedule import PaymentScheduleService
 

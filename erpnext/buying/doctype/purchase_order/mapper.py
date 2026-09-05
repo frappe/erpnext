@@ -18,6 +18,13 @@ from erpnext.stock.doctype.item.item import get_item_defaults
 
 def set_missing_values(source, target):
 	target.run_method("set_missing_values")
+	source_item_fieldname = "po_detail" if target.doctype == "Purchase Invoice" else "purchase_order_item"
+	target.run_method(
+		"preserve_mapped_source_discounts",
+		source.doctype,
+		"purchase_order",
+		source_item_fieldname,
+	)
 	target.run_method("calculate_taxes_and_totals")
 	target.run_method("set_use_serial_batch_fields")
 
