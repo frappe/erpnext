@@ -48,6 +48,7 @@ SALES_TRANSACTION_TYPES = {
 	"POS Invoice",
 }
 TRANSACTION_TYPES = PURCHASE_TRANSACTION_TYPES | SALES_TRANSACTION_TYPES
+INVOICE_DOCTYPES = {"POS Invoice", "Sales Invoice", "Purchase Invoice"}
 
 # Party-derived fields that must NOT be auto-copied by `get_mapped_doc` when the
 # source and target documents belong to different parties (e.g. Sales Order →
@@ -142,7 +143,11 @@ def _get_party_details(
 		frappe.has_permission(party_type, ptype, party, throw=True)
 		validate_party_company(party_type, party.name, company)
 
-	currency = party.get("default_currency") or currency or get_company_currency(company)
+	if doctype in TRANSACTION_TYPES:
+		# `currency` here is always the previous party's, not worth keeping over the new one
+		currency = party.get("default_currency") or get_company_currency(company)
+	else:
+		currency = party.get("default_currency") or currency or get_company_currency(company)
 
 	party_address, shipping_address = set_address_details(
 		party_details,
@@ -429,7 +434,7 @@ def set_price_list(party_details, party, party_type, given_price_list, pos=None)
 
 
 def set_account_and_due_date(party, account, party_type, company, posting_date, bill_date, doctype):
-	if doctype not in ["POS Invoice", "Sales Invoice", "Purchase Invoice"]:
+	if doctype not in INVOICE_DOCTYPES:
 		# not an invoice
 		return {party_type.lower(): party}
 
