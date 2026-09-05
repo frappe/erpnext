@@ -558,6 +558,7 @@ class WorkOrder(Document):
 
 	def update_production_plan_status(self):
 		production_plan = frappe.get_doc("Production Plan", self.production_plan)
+		production_plan.flags.ignore_permissions = True
 		produced_qty = 0
 		if self.production_plan_item:
 			total_qty = frappe.get_all(
@@ -900,6 +901,7 @@ class WorkOrder(Document):
 				)
 
 			doc = frappe.get_doc("Production Plan", self.production_plan)
+			doc.flags.ignore_permissions = True
 			doc.set_status()
 			doc.db_set("status", doc.status)
 
