@@ -9,8 +9,10 @@ import frappe
 import frappe.utils
 from frappe import _, qb
 from frappe.model.document import Document
-from frappe.query_builder.functions import Sum
+from frappe.query_builder import Case
+from frappe.query_builder.functions import Abs, Sum
 from frappe.utils import cint, flt, get_link_to_form, getdate
+from pypika import Order
 
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	unlink_inter_company_doc,
@@ -31,6 +33,18 @@ from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry impor
 from erpnext.stock.get_item_details import get_default_bom
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
+
+LINK_SEARCH_FIELDTYPES = {
+	"Autocomplete",
+	"Data",
+	"Link",
+	"Long Text",
+	"Read Only",
+	"Select",
+	"Small Text",
+	"Text",
+	"Text Editor",
+}
 
 
 class WarehouseRequired(frappe.ValidationError):
@@ -212,6 +226,12 @@ class SalesOrder(SellingController):
 
 		if has_reserved_stock(self.doctype, self.name):
 			self.set_onload("has_reserved_stock", True)
+
+		if self.docstatus == 1 and self.status not in {"Closed", "On Hold"}:
+			self.set_onload(
+				"has_potentially_billable_items",
+				has_potentially_billable_items(self.name),
+			)
 
 	def can_update_items(self) -> bool:
 		return SubcontractingService(self).can_update_items()
@@ -930,3 +950,87 @@ def get_work_order_items(sales_order: str, for_raw_material_request: int = 0):
 @frappe.whitelist()
 def get_stock_reservation_status():
 	return frappe.get_single_value("Stock Settings", "enable_stock_reservation")
+
+
+def get_potentially_billable_item_criterion(sales_order, sales_order_item, item):
+	"""Return the amount check for UI candidates. The mapper checks pending quantity."""
+	global_allowance = flt(frappe.get_cached_value("Accounts Settings", None, "over_billing_allowance"))
+	allowance = (
+		Case().when(item.over_billing_allowance != 0, item.over_billing_allowance).else_(global_allowance)
+	)
+
+	has_amount_headroom = (sales_order_item.base_amount == 0) | (
+		Abs(sales_order_item.billed_amt) < Abs(sales_order_item.amount) * (1 + allowance / 100)
+	)
+	is_unit_price_row = (sales_order.has_unit_price_items == 1) & (sales_order_item.qty == 0)
+
+	return (sales_order_item.closed == 0) & (
+		is_unit_price_row | ((sales_order_item.qty != 0) & has_amount_headroom)
+	)
+
+
+def has_potentially_billable_items(sales_order: str) -> bool:
+	"""Return whether a Sales Order has an item with billing amount headroom."""
+	so = qb.DocType("Sales Order")
+	so_item = qb.DocType("Sales Order Item")
+	item = qb.DocType("Item")
+
+	return bool(
+		qb.from_(so_item)
+		.inner_join(so)
+		.on(so.name == so_item.parent)
+		.left_join(item)
+		.on(item.name == so_item.item_code)
+		.select(so_item.name)
+		.where((so_item.parent == sales_order) & get_potentially_billable_item_criterion(so, so_item, item))
+		.limit(1)
+		.run()
+	)
+
+
+@frappe.whitelist(methods=["GET"])
+@frappe.validate_and_sanitize_search_inputs
+def get_potentially_billable_sales_orders(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict
+):
+	"""Return Sales Orders that have an item with billing amount headroom."""
+	so = qb.DocType("Sales Order")
+	so_item = qb.DocType("Sales Order Item")
+	item = qb.DocType("Item")
+	meta = frappe.get_meta("Sales Order")
+
+	search_fields = list(dict.fromkeys(["name", meta.title_field, *meta.get_search_fields()]))
+	or_filters = (
+		{
+			fieldname: ("like", f"%{txt}%")
+			for fieldname in search_fields
+			if fieldname
+			and (
+				fieldname == "name"
+				or ((field := meta.get_field(fieldname)) and field.fieldtype in LINK_SEARCH_FIELDTYPES)
+			)
+		}
+		if txt
+		else None
+	)
+
+	query = frappe.qb.get_query(
+		so,
+		fields=[so.name, so.customer, so.transaction_date],
+		filters=filters,
+		or_filters=or_filters,
+		ignore_permissions=False,
+	)
+
+	return (
+		query.inner_join(so_item)
+		.on(so_item.parent == so.name)
+		.left_join(item)
+		.on(item.name == so_item.item_code)
+		.where(get_potentially_billable_item_criterion(so, so_item, item))
+		.distinct()
+		.orderby(so.transaction_date, order=Order.desc)
+		.limit(cint(page_len))
+		.offset(cint(start))
+		.run(as_dict=True)
+	)
