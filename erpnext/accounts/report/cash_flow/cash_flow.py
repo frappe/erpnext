@@ -114,6 +114,7 @@ def execute(filters=None):
 				filters={
 					"account_type": row["account_type"],
 					"is_group": 0,
+					"company": filters.company,
 				},
 				pluck="name",
 			)
