@@ -770,3 +770,13 @@ repost_allowed_doctypes = [
 	"Payment Entry",
 	"Purchase Receipt",
 ]
+
+
+# Data Import
+# -----------
+# Custom Import Providers plug provider-owned field schema, validation and import logic into
+# the standard Data Import. See frappe.core.doctype.data_import.import_provider.
+data_import_providers = {
+	"Customer": "erpnext.selling.doctype.customer.customer_import_provider.CustomerImportProvider",
+	"Supplier": "erpnext.buying.doctype.supplier.supplier_import_provider.SupplierImportProvider",
+}
