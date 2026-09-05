@@ -22,7 +22,7 @@ from pypika.terms import Bracket, LiteralValue
 from erpnext import get_company_currency
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
-	get_dimension_with_children,
+	get_dimension_filter_condition,
 )
 from erpnext.accounts.doctype.financial_report_row.financial_report_row import FinancialReportRow
 from erpnext.accounts.doctype.financial_report_template.financial_report_template import (
@@ -36,7 +36,6 @@ from erpnext.accounts.doctype.financial_report_template.financial_report_validat
 )
 from erpnext.accounts.report.financial_statements import (
 	get_columns,
-	get_cost_centers_with_children,
 	get_period_list,
 )
 from erpnext.accounts.utils import get_children, get_currency_precision
@@ -744,14 +743,14 @@ class FinancialQueryBuilder:
 		query = query.where(~is_pcv | table.account.isin(closing_heads))
 
 		if self.filters.get("project"):
-			projects = self.filters.get("project")
-			if isinstance(projects, str):
-				projects = [projects]
-			query = query.where(table.project.isin(projects))
+			query = query.where(
+				get_dimension_filter_condition(table.project, self.filters.project, "Project")
+			)
 
 		if self.filters.get("cost_center"):
-			self.filters.cost_center = get_cost_centers_with_children(self.filters.cost_center)
-			query = query.where(table.cost_center.isin(self.filters.cost_center))
+			query = query.where(
+				get_dimension_filter_condition(table.cost_center, self.filters.cost_center, "Cost Center")
+			)
 
 		finance_book = self.filters.get("finance_book")
 		if self.filters.get("include_default_book_entries"):
@@ -774,12 +773,13 @@ class FinancialQueryBuilder:
 		dimensions = get_accounting_dimensions(as_list=False)
 		for dimension in dimensions:
 			if self.filters.get(dimension.fieldname):
-				if frappe.get_cached_value("DocType", dimension.document_type, "is_tree"):
-					self.filters[dimension.fieldname] = get_dimension_with_children(
-						dimension.document_type, self.filters.get(dimension.fieldname)
+				query = query.where(
+					get_dimension_filter_condition(
+						table[dimension.fieldname],
+						self.filters[dimension.fieldname],
+						dimension.document_type,
 					)
-
-				query = query.where(table[dimension.fieldname].isin(self.filters.get(dimension.fieldname)))
+				)
 
 		return query
 

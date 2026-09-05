@@ -10,9 +10,9 @@ from frappe.utils import cstr, getdate
 from erpnext import get_company_currency, get_default_company
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
-	get_dimension_with_children,
+	get_dimension_filter_sql_condition,
+	get_dimension_filter_values,
 )
-from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
 from erpnext.accounts.report.utils import convert_to_presentation_currency, get_currency
 from erpnext.accounts.utils import get_account_currency
 
@@ -233,8 +233,7 @@ def get_conditions(filters):
 			conditions.append("account in %(account)s")
 
 	if filters.get("cost_center"):
-		filters.cost_center = get_cost_centers_with_children(filters.cost_center)
-		conditions.append("cost_center in %(cost_center)s")
+		append_named_dimension_condition(conditions, filters, "cost_center", "Cost Center")
 
 	if filters.get("voucher_no"):
 		conditions.append("voucher_no=%(voucher_no)s")
@@ -308,7 +307,7 @@ def get_conditions(filters):
 		conditions.append("posting_date <=%(to_date)s")
 
 	if filters.get("project"):
-		conditions.append("project in %(project)s")
+		append_named_dimension_condition(conditions, filters, "project", "Project")
 
 	if filters.get("include_default_book_entries"):
 		if filters.get("finance_book"):
@@ -343,15 +342,27 @@ def get_conditions(filters):
 			# Ignore 'Finance Book' set up as dimension in below logic, as it is already handled in above section
 			if not dimension.disabled and dimension.document_type != "Finance Book":
 				if filters.get(dimension.fieldname):
-					if frappe.get_cached_value("DocType", dimension.document_type, "is_tree"):
-						filters[dimension.fieldname] = get_dimension_with_children(
-							dimension.document_type, filters.get(dimension.fieldname)
-						)
-						conditions.append(f"{dimension.fieldname} in %({dimension.fieldname})s")
-					else:
-						conditions.append(f"{dimension.fieldname} in %({dimension.fieldname})s")
+					append_named_dimension_condition(
+						conditions, filters, dimension.fieldname, dimension.document_type
+					)
 
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
+
+
+def append_named_dimension_condition(conditions, filters, fieldname, dimension_doctype):
+	values, include_blank = get_dimension_filter_values(filters[fieldname], dimension_doctype)
+	parts = []
+
+	if values:
+		parameter = f"_selected_{fieldname}"
+		filters[parameter] = values
+		parts.append(f"{fieldname} in %({parameter})s")
+
+	if include_blank:
+		parts.append(f"({fieldname} is null or {fieldname} = '')")
+
+	if parts:
+		conditions.append(f"({' or '.join(parts)})")
 
 
 def get_party_name_map():
@@ -977,9 +988,9 @@ def _build_gl_conditions_duckdb(filters):
 			params.extend(filters.account)
 
 	if filters.get("cost_center"):
-		filters.cost_center = get_cost_centers_with_children(filters.cost_center)
-		conditions.append(f"cost_center IN ({', '.join(['?'] * len(filters.cost_center))})")
-		params.extend(filters.cost_center)
+		append_positional_dimension_condition(
+			conditions, params, "cost_center", filters.cost_center, "Cost Center"
+		)
 
 	if filters.get("voucher_no"):
 		conditions.append("voucher_no = ?")
@@ -1058,8 +1069,7 @@ def _build_gl_conditions_duckdb(filters):
 	params.append(filters.to_date)
 
 	if filters.get("project"):
-		conditions.append(f"project IN ({', '.join(['?'] * len(filters.project))})")
-		params.extend(filters.project)
+		append_positional_dimension_condition(conditions, params, "project", filters.project, "Project")
 
 	company_fb = filters.get("company_fb") or frappe.get_cached_value(
 		"Company", filters.company, "default_finance_book"
@@ -1090,16 +1100,19 @@ def _build_gl_conditions_duckdb(filters):
 		for dimension in accounting_dimensions_list:
 			if not dimension.disabled and dimension.document_type != "Finance Book":
 				if filters.get(dimension.fieldname):
-					if frappe.get_cached_value("DocType", dimension.document_type, "is_tree"):
-						filters[dimension.fieldname] = get_dimension_with_children(
-							dimension.document_type, filters.get(dimension.fieldname)
-						)
-					vals = (
-						filters[dimension.fieldname]
-						if isinstance(filters[dimension.fieldname], list)
-						else [filters[dimension.fieldname]]
+					append_positional_dimension_condition(
+						conditions,
+						params,
+						dimension.fieldname,
+						filters[dimension.fieldname],
+						dimension.document_type,
 					)
-					conditions.append(f"{dimension.fieldname} IN ({', '.join(['?'] * len(vals))})")
-					params.extend(vals)
 
 	return conditions, params
+
+
+def append_positional_dimension_condition(conditions, params, fieldname, selected_values, dimension_doctype):
+	condition, values = get_dimension_filter_sql_condition(fieldname, selected_values, dimension_doctype)
+	if condition:
+		conditions.append(condition)
+		params.extend(values)

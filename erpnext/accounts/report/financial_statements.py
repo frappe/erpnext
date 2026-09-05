@@ -15,9 +15,11 @@ from frappe.utils import add_days, add_months, cint, cstr, flt, formatdate, get_
 from pypika.terms import Bracket, ExistsCriterion, LiteralValue
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	BLANK_ACCOUNTING_DIMENSION,
 	get_accounting_dimensions,
 	get_dimension_fieldname,
-	get_dimension_with_children,
+	get_dimension_filter_condition,
+	get_dimension_filter_values,
 	get_doctypes_with_dimensions,
 )
 from erpnext.accounts.report.utils import convert_to_presentation_currency, get_currency
@@ -48,13 +50,14 @@ def get_dimension_values(filters: frappe._dict) -> tuple[str | None, list]:
 	if meta.has_field("company"):
 		query = query.where(dim.company == filters.company)
 
+	include_blank = False
+	selected_values = []
+
 	# Self-filter: narrow to values the user picked for this same dimension.
 	if selected := filters.get(fieldname):
-		if isinstance(selected, str):
-			selected = frappe.parse_json(selected)
-		if is_tree:
-			selected = get_dimension_with_children(dim_doctype, selected)
-		query = query.where(dim.name.isin(selected))
+		selected_values, include_blank = get_dimension_filter_values(selected, dim_doctype)
+		if selected_values:
+			query = query.where(dim.name.isin(selected_values))
 
 	from frappe.desk.reportview import build_match_conditions
 
@@ -64,7 +67,11 @@ def get_dimension_values(filters: frappe._dict) -> tuple[str | None, list]:
 	# order by name
 	query = query.orderby(dim.name)
 
-	return fieldname, query.run(pluck=True)
+	dimensions = [] if include_blank and not selected_values else query.run(pluck=True)
+	if include_blank:
+		dimensions.append(BLANK_ACCOUNTING_DIMENSION)
+
+	return fieldname, dimensions
 
 
 def get_dimension_period_list(filters: frappe._dict) -> list[dict]:
@@ -112,6 +119,7 @@ def get_dimension_period_list(filters: frappe._dict) -> list[dict]:
 
 	for dimension in dimensions:
 		dim_key_base = frappe.scrub(dimension)
+		dimension_label = _("Blank") if dimension == BLANK_ACCOUNTING_DIMENSION else dimension
 		for period in period_buckets:
 			key = f"{dim_key_base}_{period.key}"
 
@@ -123,7 +131,7 @@ def get_dimension_period_list(filters: frappe._dict) -> list[dict]:
 			cell.update(
 				{
 					"key": key,
-					"label": f"{dimension} - {period.label}",
+					"label": f"{dimension_label} - {period.label}",
 					"dimension_field": fieldname,
 					"dimension_value": dimension,
 					"period": period.key,
@@ -163,6 +171,13 @@ def is_dimension_grouped(period_list: list[dict]) -> bool:
 		return False
 
 	return bool(period_list[0].get("dimension_field"))
+
+
+def _matches_dimension_value(entry_value, dimension_value):
+	if dimension_value == BLANK_ACCOUNTING_DIMENSION:
+		return entry_value in (None, "")
+
+	return entry_value == dimension_value
 
 
 def get_period_keys_for_total(
@@ -422,7 +437,9 @@ def calculate_values(
 					raise_exception=1,
 				)
 			for period in period_list:
-				if grouped_by_dimension and entry.get(period.dimension_field) != period.dimension_value:
+				if grouped_by_dimension and not _matches_dimension_value(
+					entry.get(period.dimension_field), period.dimension_value
+				):
 					continue
 
 				if entry.posting_date <= period.to_date:
@@ -809,14 +826,12 @@ def apply_additional_conditions(doctype, query, from_date, ignore_closing_entrie
 
 	if filters:
 		if filters.get("project"):
-			if not isinstance(filters.get("project"), list):
-				filters.project = frappe.parse_json(filters.get("project"))
-
-			query = query.where(gl_entry.project.isin(filters.project))
+			query = query.where(get_dimension_filter_condition(gl_entry.project, filters.project, "Project"))
 
 		if filters.get("cost_center"):
-			filters.cost_center = get_cost_centers_with_children(filters.cost_center)
-			query = query.where(gl_entry.cost_center.isin(filters.cost_center))
+			query = query.where(
+				get_dimension_filter_condition(gl_entry.cost_center, filters.cost_center, "Cost Center")
+			)
 
 		if filters.get("include_default_book_entries"):
 			company_fb = frappe.get_cached_value("Company", filters.company, "default_finance_book")
@@ -839,12 +854,13 @@ def apply_additional_conditions(doctype, query, from_date, ignore_closing_entrie
 	if accounting_dimensions:
 		for dimension in accounting_dimensions:
 			if filters.get(dimension.fieldname):
-				if frappe.get_cached_value("DocType", dimension.document_type, "is_tree"):
-					filters[dimension.fieldname] = get_dimension_with_children(
-						dimension.document_type, filters.get(dimension.fieldname)
+				query = query.where(
+					get_dimension_filter_condition(
+						gl_entry[dimension.fieldname],
+						filters[dimension.fieldname],
+						dimension.document_type,
 					)
-
-				query = query.where(gl_entry[dimension.fieldname].isin(filters[dimension.fieldname]))
+				)
 
 	return query
 

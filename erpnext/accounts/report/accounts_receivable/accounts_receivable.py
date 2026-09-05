@@ -13,9 +13,8 @@ from frappe.utils import cint, cstr, flt, getdate, nowdate
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
-	get_dimension_with_children,
+	get_dimension_filter_condition,
 )
-from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
 from erpnext.accounts.utils import (
 	build_qb_match_conditions,
 	get_advance_payment_doctypes,
@@ -980,7 +979,9 @@ class ReceivablePayableReport:
 			self.get_cost_center_conditions()
 
 		if self.filters.project:
-			self.qb_selection_filter.append(self.ple.project.isin(self.filters.project))
+			self.qb_selection_filter.append(
+				get_dimension_filter_condition(self.ple.project, self.filters.project, "Project")
+			)
 
 		self.add_user_permission_filters()
 
@@ -1005,8 +1006,9 @@ class ReceivablePayableReport:
 			)
 
 	def get_cost_center_conditions(self):
-		cost_center_list = get_cost_centers_with_children(self.filters.cost_center)
-		self.qb_selection_filter.append(self.ple.cost_center.isin(cost_center_list))
+		self.qb_selection_filter.append(
+			get_dimension_filter_condition(self.ple.cost_center, self.filters.cost_center, "Cost Center")
+		)
 
 	def add_common_filters(self):
 		if self.filters.company:
@@ -1123,8 +1125,11 @@ class ReceivablePayableReport:
 			ptt = ptt.where((voucher_type[party.lower()]).isin(self.filters.party))
 
 		if self.filters.cost_center:
-			cost_centers = get_cost_centers_with_children(self.filters.cost_center)
-			ptt = ptt.where(voucher_type.cost_center.isin(cost_centers))
+			ptt = ptt.where(
+				get_dimension_filter_condition(
+					voucher_type.cost_center, self.filters.cost_center, "Cost Center"
+				)
+			)
 
 		if self.filters.party_account:
 			ptt = ptt.where(voucher_type[acc_type] == self.filters.party_account)
@@ -1137,17 +1142,13 @@ class ReceivablePayableReport:
 		if accounting_dimensions:
 			for dimension in accounting_dimensions:
 				if self.filters.get(dimension.fieldname):
-					if frappe.get_cached_value("DocType", dimension.document_type, "is_tree"):
-						self.filters[dimension.fieldname] = get_dimension_with_children(
-							dimension.document_type, self.filters.get(dimension.fieldname)
+					self.qb_selection_filter.append(
+						get_dimension_filter_condition(
+							self.ple[dimension.fieldname],
+							self.filters[dimension.fieldname],
+							dimension.document_type,
 						)
-						self.qb_selection_filter.append(
-							self.ple[dimension.fieldname].isin(self.filters[dimension.fieldname])
-						)
-					else:
-						self.qb_selection_filter.append(
-							self.ple[dimension.fieldname].isin(self.filters[dimension.fieldname])
-						)
+					)
 
 	def is_invoice(self, ple):
 		if ple.voucher_type in ("Sales Invoice", "Purchase Invoice"):

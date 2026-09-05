@@ -5,6 +5,9 @@ import frappe
 from frappe.desk.query_report import export_query
 from frappe.utils import add_days, getdate, today
 
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	BLANK_ACCOUNTING_DIMENSION,
+)
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.financial_statements import (
 	build_period_list,
@@ -132,6 +135,35 @@ class TestProfitAndLossStatement(ERPNextTestSuite, AccountsTestMixin):
 		data = execute(filters)[1]
 		income_row = next(r for r in data if r.get("account") == income_account)
 		self.assertEqual(income_row["total"], 300.0)
+
+	def test_group_by_dimension_with_blank_filter(self):
+		sales_invoice = self.create_sales_invoice(rate=125)
+		frappe.db.set_value(
+			"GL Entry",
+			{"voucher_no": sales_invoice.name},
+			"cost_center",
+			None,
+		)
+
+		filters = self.get_report_filters()
+		filters.group_by_dimension = "Cost Center"
+		filters.cost_center = [BLANK_ACCOUNTING_DIMENSION]
+		period_list = build_period_list(filters)
+
+		self.assertEqual(
+			{period.dimension_value for period in period_list},
+			{BLANK_ACCOUNTING_DIMENSION},
+		)
+
+		posting_date = getdate()
+		blank_period_key = next(
+			period.key for period in period_list if period.from_date <= posting_date <= period.to_date
+		)
+		income_account = frappe.db.get_value("Company", self.company, "default_income_account")
+		income_row = next(row for row in execute(filters)[1] if row.get("account") == income_account)
+
+		self.assertEqual(income_row[blank_period_key], 125)
+		self.assertEqual(income_row["total"], 125)
 
 	def test_profit_and_loss_output_and_summary(self):
 		self.create_sales_invoice(qty=1, rate=150)
