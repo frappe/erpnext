@@ -57,14 +57,14 @@ class MaterialRequestService:
 		"""Create Material Requests grouped by Sales Order and Material Request Type"""
 		self.validate_mr_subcontracted()
 
-		if all(item.requested_qty == item.quantity for item in self.doc.mr_items):
+		if all(item.requested_qty >= item.quantity for item in self.doc.mr_items):
 			msgprint(_("All items are already requested"))
 			return
 
 		material_request_map = {}
 		material_request_list = []
 		for item in self.doc.mr_items:
-			if item.quantity == item.requested_qty:
+			if item.quantity <= item.requested_qty:
 				continue
 			self._add_item_to_material_request(item, material_request_map, material_request_list)
 

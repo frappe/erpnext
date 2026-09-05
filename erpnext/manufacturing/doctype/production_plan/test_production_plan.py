@@ -228,6 +228,7 @@ class TestProductionPlan(ERPNextTestSuite):
 				"posting_date": nowdate(),
 				"get_items_from": "Sales Order",
 				"ignore_existing_ordered_qty": 1,
+				"for_warehouse": "_Test Warehouse - _TC",
 			}
 		)
 		pln.append(
@@ -263,6 +264,15 @@ class TestProductionPlan(ERPNextTestSuite):
 			[0, 1],
 			"Cascading failed: first item should consume stock (qty=0), second should need procurement (qty=1)",
 		)
+
+		pln.extend("mr_items", mr_items)
+		pln.submit()
+		pln.make_material_request()
+		material_request_name = frappe.db.get_value(
+			"Material Request Item", {"production_plan": pln.name}, "parent"
+		)
+		material_request = frappe.get_doc("Material Request", material_request_name)
+		self.assertEqual([item.qty for item in material_request.items], [1])
 
 		sr.cancel()
 
