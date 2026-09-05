@@ -984,55 +984,63 @@ class SubcontractingReceipt(SubcontractingController):
 			)
 
 	def make_item_gl_entries_for_lcv(self, gl_entries, inventory_account_map):
+		from erpnext.stock.doctype.landed_cost_voucher.landed_cost_voucher import (
+			get_custom_dimension_overrides,
+		)
+
 		landed_cost_entries = self.get_item_account_wise_lcv_entries()
 
 		if not landed_cost_entries:
 			return
 
 		for item in self.items:
-			if item.landed_cost_voucher_amount and landed_cost_entries:
+			item_entries = landed_cost_entries.get((item.item_code, item.name), [])
+
+			if item.landed_cost_voucher_amount and item_entries:
 				remarks = _("Accounting Entry for Landed Cost Voucher for SCR {0}").format(self.name)
-				if (item.item_code, item.name) in landed_cost_entries:
-					_inv_dict = self.get_inventory_account_dict(item, inventory_account_map)
+				_inv_dict = self.get_inventory_account_dict(item, inventory_account_map)
 
-					for account, amount in landed_cost_entries[(item.item_code, item.name)].items():
-						account_currency = get_account_currency(account)
-						credit_amount = (
-							flt(amount["base_amount"])
-							if (amount["base_amount"] or account_currency != self.company_currency)
-							else flt(amount["amount"])
-						)
+				for entry in item_entries:
+					if not (entry.amount or entry.base_amount):
+						continue
 
-						self.add_gl_entry(
-							gl_entries=gl_entries,
-							account=account,
-							cost_center=item.cost_center,
-							debit=0.0,
-							credit=credit_amount,
-							remarks=remarks,
-							against_account=_inv_dict["account"],
-							credit_in_account_currency=flt(amount["amount"]),
-							account_currency=account_currency,
-							project=item.project,
-							item=item,
-						)
+					account_currency = get_account_currency(entry.expense_account)
+					credit_amount = (
+						flt(entry.base_amount)
+						if (entry.base_amount or account_currency != self.company_currency)
+						else flt(entry.amount)
+					)
 
-						account_currency = get_account_currency(item.expense_account)
+					self.add_gl_entry(
+						gl_entries=gl_entries,
+						account=entry.expense_account,
+						cost_center=entry.dimensions.cost_center or item.cost_center,
+						debit=0.0,
+						credit=credit_amount,
+						remarks=remarks,
+						against_account=_inv_dict["account"],
+						credit_in_account_currency=flt(entry.amount),
+						account_currency=account_currency,
+						project=entry.dimensions.project or item.project,
+						item=item,
+						dimensions=get_custom_dimension_overrides(entry),
+					)
 
-						# credit amount in negative to knock off the debit entry
-						self.add_gl_entry(
-							gl_entries=gl_entries,
-							account=item.expense_account,
-							cost_center=item.cost_center,
-							debit=0.0,
-							credit=credit_amount * -1,
-							remarks=remarks,
-							against_account=_inv_dict["account"],
-							debit_in_account_currency=flt(amount["amount"]),
-							account_currency=account_currency,
-							project=item.project,
-							item=item,
-						)
+					account_currency = get_account_currency(item.expense_account)
+
+					self.add_gl_entry(
+						gl_entries=gl_entries,
+						account=item.expense_account,
+						cost_center=item.cost_center,
+						debit=0.0,
+						credit=credit_amount * -1,
+						remarks=remarks,
+						against_account=_inv_dict["account"],
+						debit_in_account_currency=flt(entry.amount),
+						account_currency=account_currency,
+						project=item.project,
+						item=item,
+					)
 
 	def auto_create_purchase_receipt(self):
 		if frappe.db.get_single_value("Buying Settings", "auto_create_purchase_receipt"):

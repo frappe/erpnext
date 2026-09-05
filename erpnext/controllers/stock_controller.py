@@ -1246,7 +1246,13 @@ class StockController(AccountsController):
 		if not landed_cost_vouchers:
 			return
 
+		from erpnext.stock.doctype.landed_cost_voucher.landed_cost_voucher import (
+			get_lcv_dimension_fields,
+			get_row_dimensions,
+		)
+
 		item_account_wise_cost = {}
+		dimension_fields = get_lcv_dimension_fields()
 
 		row_fieldname = "purchase_receipt_item"
 		if self.doctype == "Stock Entry":
@@ -1268,28 +1274,36 @@ class StockController(AccountsController):
 
 			for item in landed_cost_voucher_doc.items:
 				if item.receipt_document == self.name:
+					charges = item_account_wise_cost.setdefault((item.item_code, item.get(row_fieldname)), {})
+
 					for account in landed_cost_voucher_doc.taxes:
 						exchange_rate = account.exchange_rate or 1
-						item_account_wise_cost.setdefault((item.item_code, item.get(row_fieldname)), {})
-						item_account_wise_cost[(item.item_code, item.get(row_fieldname))].setdefault(
-							account.expense_account, {"amount": 0.0, "base_amount": 0.0}
+						dimensions = get_row_dimensions(account, item, dimension_fields)
+						group_key = (
+							account.expense_account,
+							tuple(dimensions.get(field) for field in dimension_fields),
 						)
 
-						item_row = item_account_wise_cost[(item.item_code, item.get(row_fieldname))][
-							account.expense_account
-						]
+						item_row = charges.get(group_key)
+						if item_row is None:
+							item_row = charges[group_key] = frappe._dict(
+								expense_account=account.expense_account,
+								amount=0.0,
+								base_amount=0.0,
+								dimensions=dimensions,
+							)
 
 						if total_item_cost > 0:
-							item_row["amount"] += account.amount * item.get(based_on_field) / total_item_cost
+							item_row.amount += account.amount * item.get(based_on_field) / total_item_cost
 
-							item_row["base_amount"] += (
+							item_row.base_amount += (
 								account.base_amount * item.get(based_on_field) / total_item_cost
 							)
 						else:
-							item_row["amount"] += item.applicable_charges / exchange_rate
-							item_row["base_amount"] += item.applicable_charges
+							item_row.amount += item.applicable_charges / exchange_rate
+							item_row.base_amount += item.applicable_charges
 
-		return item_account_wise_cost
+		return {key: list(charges.values()) for key, charges in item_account_wise_cost.items()}
 
 	def validate_inventory_dimension_mandatory(self):
 		# Mandatory inventory dimensions are enforced here (instead of via field-level `reqd`)
@@ -1976,6 +1990,7 @@ class StockController(AccountsController):
 		voucher_detail_no=None,
 		item=None,
 		posting_date=None,
+		dimensions=None,
 	):
 		gl_entry = {
 			"account": account,
@@ -2000,6 +2015,9 @@ class StockController(AccountsController):
 
 		if posting_date:
 			gl_entry.update({"posting_date": posting_date})
+
+		if dimensions:
+			gl_entry.update(dimensions)
 
 		gl_entries.append(self.get_gl_dict(gl_entry, item=item))
 
