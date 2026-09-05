@@ -63,5 +63,14 @@ erpnext.purchase_trends_filters = {
 			options: ["", { value: "Item", label: __("Item") }, { value: "Supplier", label: __("Supplier") }],
 			default: "",
 		},
+		{
+			fieldname: "item_code",
+			label: __("Item"),
+			fieldtype: "MultiSelectList",
+			options: "Item",
+			get_data: function (txt) {
+				return frappe.db.get_link_options("Item", txt);
+			},
+		},
 	],
 };
