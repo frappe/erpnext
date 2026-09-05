@@ -240,7 +240,6 @@ erpnext.PointOfSale.ItemSelector = class {
 				only_select: true,
 				onchange: function () {
 					me.item_group = this.value;
-					!me.item_group && (me.item_group = me.parent_item_group);
 					me.filter_items();
 					me.set_item_selector_filter_label(this.value);
 				},
