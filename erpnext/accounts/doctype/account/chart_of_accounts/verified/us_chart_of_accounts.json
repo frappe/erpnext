@@ -1,0 +1,558 @@
+{
+	"country_code": "us",
+	"name": "United States - Chart of Accounts",
+	"tree": {
+		"Assets": {
+			"Current Assets": {
+				"Cash and Cash Equivalents": {
+					"Cash on Hand": {
+						"account_number": "11110",
+						"account_type": "Cash",
+						"account_category": "Cash and Cash Equivalents"
+					},
+					"Petty Cash": {
+						"account_number": "11120",
+						"account_type": "Cash",
+						"account_category": "Cash and Cash Equivalents"
+					},
+					"Bank Accounts": {
+						"Operating Account": {
+							"account_number": "11131",
+							"account_type": "Bank",
+							"account_category": "Cash and Cash Equivalents"
+						},
+						"Payroll Account": {
+							"account_number": "11132",
+							"account_type": "Bank",
+							"account_category": "Cash and Cash Equivalents"
+						},
+						"account_number": "11130",
+						"account_type": "Bank",
+						"account_category": "Cash and Cash Equivalents"
+					},
+					"Undeposited Funds": {
+						"account_number": "11140",
+						"account_type": "Cash",
+						"account_category": "Cash and Cash Equivalents"
+					},
+					"account_number": "11100",
+					"account_category": "Cash and Cash Equivalents"
+				},
+				"Accounts Receivable": {
+					"Accounts Receivable": {
+						"account_number": "11210",
+						"account_type": "Receivable",
+						"account_category": "Trade Receivables"
+					},
+					"Allowance for Doubtful Accounts": {
+						"account_number": "11220",
+						"account_category": "Trade Receivables"
+					},
+					"account_number": "11200",
+					"account_category": "Trade Receivables"
+				},
+				"Other Receivables": {
+					"Employee Advances": {
+						"account_number": "11310",
+						"account_type": "Payable",
+						"account_category": "Other Receivables"
+					},
+					"Notes Receivable": {
+						"account_number": "11320",
+						"account_category": "Other Receivables"
+					},
+					"Interest Receivable": {
+						"account_number": "11330",
+						"account_category": "Other Receivables"
+					},
+					"account_number": "11300",
+					"account_category": "Other Receivables"
+				},
+				"Inventory": {
+					"Inventory on Hand": {
+						"account_number": "11410",
+						"account_type": "Stock",
+						"account_category": "Stock Assets"
+					},
+					"Inventory Received But Not Billed": {
+						"account_number": "11420",
+						"account_type": "Stock Received But Not Billed",
+						"account_category": "Stock Assets"
+					},
+					"account_number": "11400",
+					"account_category": "Stock Assets"
+				},
+				"Prepaid Expenses and Other Current Assets": {
+					"Prepaid Expenses": {
+						"account_number": "11510",
+						"account_category": "Other Current Assets"
+					},
+					"Prepaid Insurance": {
+						"account_number": "11520",
+						"account_category": "Other Current Assets"
+					},
+					"Short-term Deposits": {
+						"account_number": "11530",
+						"account_category": "Other Current Assets"
+					},
+					"account_number": "11500",
+					"account_category": "Other Current Assets"
+				},
+				"Short-term Investments": {
+					"account_number": "11600",
+					"account_category": "Short-term Investments"
+				},
+				"account_number": "11000"
+			},
+			"Fixed Assets": {
+				"Land": {
+					"account_number": "12010",
+					"account_type": "Fixed Asset",
+					"account_category": "Tangible Assets"
+				},
+				"Buildings": {
+					"account_number": "12020",
+					"account_type": "Fixed Asset",
+					"account_category": "Tangible Assets"
+				},
+				"Leasehold Improvements": {
+					"account_number": "12030",
+					"account_type": "Fixed Asset",
+					"account_category": "Tangible Assets"
+				},
+				"Machinery and Equipment": {
+					"account_number": "12040",
+					"account_type": "Fixed Asset",
+					"account_category": "Tangible Assets"
+				},
+				"Furniture and Fixtures": {
+					"account_number": "12050",
+					"account_type": "Fixed Asset",
+					"account_category": "Tangible Assets"
+				},
+				"Vehicles": {
+					"account_number": "12060",
+					"account_type": "Fixed Asset",
+					"account_category": "Tangible Assets"
+				},
+				"Computer and Office Equipment": {
+					"account_number": "12070",
+					"account_type": "Fixed Asset",
+					"account_category": "Tangible Assets"
+				},
+				"Capital Work in Progress": {
+					"account_number": "12080",
+					"account_type": "Capital Work in Progress",
+					"account_category": "Tangible Assets"
+				},
+				"Asset Received But Not Billed": {
+					"account_number": "12090",
+					"account_type": "Asset Received But Not Billed",
+					"account_category": "Tangible Assets"
+				},
+				"Accumulated Depreciation": {
+					"account_number": "12099",
+					"account_type": "Accumulated Depreciation",
+					"account_category": "Tangible Assets"
+				},
+				"account_number": "12000",
+				"account_category": "Tangible Assets"
+			},
+			"Intangible Assets": {
+				"Goodwill": {
+					"account_number": "13010",
+					"account_category": "Intangible Assets"
+				},
+				"Software and Licenses": {
+					"account_number": "13020",
+					"account_category": "Intangible Assets"
+				},
+				"Patents and Trademarks": {
+					"account_number": "13030",
+					"account_category": "Intangible Assets"
+				},
+				"Accumulated Amortization": {
+					"account_number": "13090",
+					"account_category": "Intangible Assets"
+				},
+				"account_number": "13000",
+				"account_category": "Intangible Assets"
+			},
+			"Other Non-current Assets": {
+				"Right-of-Use Asset - Operating Lease": {
+					"account_number": "14010",
+					"account_category": "Other Non-current Assets"
+				},
+				"Long-term Deposits": {
+					"account_number": "14020",
+					"account_category": "Other Non-current Assets"
+				},
+				"Long-term Investments": {
+					"account_number": "14030",
+					"account_category": "Long-term Investments"
+				},
+				"Deferred Tax Asset": {
+					"account_number": "14040",
+					"account_category": "Other Non-current Assets"
+				},
+				"account_number": "14000",
+				"account_category": "Other Non-current Assets"
+			},
+			"Temporary Accounts": {
+				"Temporary Opening": {
+					"account_number": "19010",
+					"account_type": "Temporary",
+					"account_category": "Other Non-current Assets"
+				},
+				"account_number": "19000",
+				"account_category": "Other Non-current Assets"
+			},
+			"root_type": "Asset",
+			"account_number": "10000"
+		},
+		"Liabilities": {
+			"Current Liabilities": {
+				"Accounts Payable": {
+					"Accounts Payable": {
+						"account_number": "21110",
+						"account_type": "Payable",
+						"account_category": "Trade Payables"
+					},
+					"account_number": "21100",
+					"account_category": "Trade Payables"
+				},
+				"Accrued Liabilities": {
+					"Accrued Expenses": {
+						"account_number": "21210",
+						"account_category": "Other Current Liabilities"
+					},
+					"Accrued Payroll": {
+						"account_number": "21220",
+						"account_category": "Other Current Liabilities"
+					},
+					"Accrued Interest": {
+						"account_number": "21230",
+						"account_category": "Other Current Liabilities"
+					},
+					"account_number": "21200",
+					"account_category": "Other Current Liabilities"
+				},
+				"Payroll Liabilities": {
+					"Federal Income Tax Withholding Payable": {
+						"account_number": "21310",
+						"account_category": "Other Payables"
+					},
+					"FICA Payable (Social Security & Medicare)": {
+						"account_number": "21320",
+						"account_category": "Other Payables"
+					},
+					"Federal Unemployment Tax Payable (FUTA)": {
+						"account_number": "21330",
+						"account_category": "Other Payables"
+					},
+					"State Income Tax Withholding Payable": {
+						"account_number": "21340",
+						"account_category": "Other Payables"
+					},
+					"State Unemployment Tax Payable (SUTA)": {
+						"account_number": "21350",
+						"account_category": "Other Payables"
+					},
+					"Employee Benefits Payable": {
+						"account_number": "21360",
+						"account_category": "Other Payables"
+					},
+					"Garnishments and Other Payroll Deductions Payable": {
+						"account_number": "21370",
+						"account_category": "Other Payables"
+					},
+					"account_number": "21300",
+					"account_category": "Other Payables"
+				},
+				"Sales Tax Payable": {
+					"account_number": "21400",
+					"account_type": "Tax",
+					"account_category": "Other Current Liabilities"
+				},
+				"Income Tax Payable": {
+					"Federal Income Tax Payable": {
+						"account_number": "21510",
+						"account_category": "Current Tax Liabilities"
+					},
+					"State Income Tax Payable": {
+						"account_number": "21520",
+						"account_category": "Current Tax Liabilities"
+					},
+					"account_number": "21500",
+					"account_category": "Current Tax Liabilities"
+				},
+				"Unearned Revenue and Customer Deposits": {
+					"account_number": "21600",
+					"account_category": "Other Current Liabilities"
+				},
+				"Current Portion of Long-term Debt": {
+					"account_number": "21700",
+					"account_category": "Short-term Borrowings"
+				},
+				"Lease Liability - Current": {
+					"account_number": "21800",
+					"account_category": "Other Current Liabilities"
+				},
+				"Credit Card Payable": {
+					"account_number": "21900",
+					"account_type": "Payable",
+					"account_category": "Other Payables"
+				},
+				"Other Current Liabilities": {
+					"account_number": "21990",
+					"account_category": "Other Current Liabilities"
+				},
+				"account_number": "21000"
+			},
+			"Long-term Liabilities": {
+				"Notes Payable - Long-term": {
+					"account_number": "22010",
+					"account_category": "Long-term Borrowings"
+				},
+				"Loans Payable - Long-term": {
+					"account_number": "22020",
+					"account_category": "Long-term Borrowings"
+				},
+				"Lease Liability - Non-current": {
+					"account_number": "22030",
+					"account_category": "Other Non-current Liabilities"
+				},
+				"Deferred Tax Liability": {
+					"account_number": "22040",
+					"account_category": "Other Non-current Liabilities"
+				},
+				"Other Long-term Liabilities": {
+					"account_number": "22090",
+					"account_category": "Other Non-current Liabilities"
+				},
+				"account_number": "22000"
+			},
+			"root_type": "Liability",
+			"account_number": "20000"
+		},
+		"Equity": {
+			"Common Stock": {
+				"account_number": "31000",
+				"account_type": "Equity",
+				"account_category": "Share Capital"
+			},
+			"Additional Paid-in Capital": {
+				"account_number": "31100",
+				"account_type": "Equity",
+				"account_category": "Share Capital"
+			},
+			"Retained Earnings": {
+				"account_number": "32000",
+				"account_type": "Equity",
+				"account_category": "Reserves and Surplus"
+			},
+			"Dividends and Distributions Paid": {
+				"account_number": "32100",
+				"account_type": "Equity",
+				"account_category": "Reserves and Surplus"
+			},
+			"Treasury Stock": {
+				"account_number": "33000",
+				"account_type": "Equity",
+				"account_category": "Reserves and Surplus"
+			},
+			"Accumulated Other Comprehensive Income": {
+				"account_number": "34000",
+				"account_type": "Equity",
+				"account_category": "Reserves and Surplus"
+			},
+			"root_type": "Equity",
+			"account_number": "30000"
+		},
+		"Income": {
+			"Product Sales": {
+				"account_number": "41000",
+				"account_type": "Income Account",
+				"account_category": "Revenue from Operations"
+			},
+			"Service Revenue": {
+				"account_number": "41100",
+				"account_category": "Revenue from Operations"
+			},
+			"Shipping and Freight Income": {
+				"account_number": "41200",
+				"account_category": "Revenue from Operations"
+			},
+			"Sales Returns and Allowances": {
+				"account_number": "41800",
+				"account_category": "Revenue from Operations"
+			},
+			"Sales Discounts": {
+				"account_number": "41900",
+				"account_category": "Revenue from Operations"
+			},
+			"root_type": "Income",
+			"account_number": "40000"
+		},
+		"Cost of Goods Sold": {
+			"Cost of Goods Sold": {
+				"account_number": "51000",
+				"account_type": "Cost of Goods Sold",
+				"account_category": "Cost of Goods Sold"
+			},
+			"Direct Labor": {
+				"account_number": "51100",
+				"account_category": "Other Direct Costs"
+			},
+			"Freight-In": {
+				"account_number": "51200",
+				"account_category": "Other Direct Costs"
+			},
+			"Subcontractor Costs": {
+				"account_number": "51300",
+				"account_category": "Other Direct Costs"
+			},
+			"Inventory Shrinkage and Adjustments": {
+				"account_number": "51900",
+				"account_type": "Stock Adjustment",
+				"account_category": "Other Direct Costs"
+			},
+			"root_type": "Expense",
+			"account_number": "50000"
+		},
+		"Expenses": {
+			"Salaries and Wages": {
+				"account_number": "61000",
+				"account_category": "Operating Expenses"
+			},
+			"Payroll Taxes and Employee Benefits": {
+				"account_number": "61100",
+				"account_category": "Operating Expenses"
+			},
+			"Rent and Occupancy": {
+				"account_number": "62000",
+				"account_category": "Operating Expenses"
+			},
+			"Utilities": {
+				"account_number": "62100",
+				"account_category": "Operating Expenses"
+			},
+			"Office Supplies and Expenses": {
+				"account_number": "62200",
+				"account_category": "Operating Expenses"
+			},
+			"Professional Fees (Legal, Accounting, Consulting)": {
+				"account_number": "63000",
+				"account_category": "Operating Expenses"
+			},
+			"Marketing and Advertising": {
+				"account_number": "63100",
+				"account_category": "Operating Expenses"
+			},
+			"Travel and Entertainment": {
+				"account_number": "63200",
+				"account_category": "Operating Expenses"
+			},
+			"Insurance": {
+				"account_number": "64000",
+				"account_category": "Operating Expenses"
+			},
+			"Repairs and Maintenance": {
+				"account_number": "64100",
+				"account_category": "Operating Expenses"
+			},
+			"Software and Subscriptions": {
+				"account_number": "64200",
+				"account_category": "Operating Expenses"
+			},
+			"Depreciation and Amortization Expense": {
+				"account_number": "65000",
+				"account_type": "Depreciation",
+				"account_category": "Operating Expenses"
+			},
+			"Bad Debt Expense": {
+				"account_number": "65100",
+				"account_category": "Operating Expenses"
+			},
+			"Sales Tax Compliance and Filing Fees": {
+				"account_number": "65200",
+				"account_category": "Operating Expenses"
+			},
+			"Licenses, Permits, and Dues": {
+				"account_number": "65300",
+				"account_category": "Operating Expenses"
+			},
+			"Miscellaneous Expense": {
+				"account_number": "69000",
+				"account_category": "Operating Expenses"
+			},
+			"Write Off": {
+				"account_number": "69100",
+				"account_category": "Operating Expenses"
+			},
+			"Round Off": {
+				"account_number": "69900",
+				"account_type": "Round Off",
+				"account_category": "Operating Expenses"
+			},
+			"root_type": "Expense",
+			"account_number": "60000"
+		},
+		"Other Income": {
+			"Interest Income": {
+				"account_number": "71000",
+				"account_category": "Investment Income"
+			},
+			"Dividend and Investment Income": {
+				"account_number": "71100",
+				"account_category": "Investment Income"
+			},
+			"Gain/Loss on Asset Disposal": {
+				"account_number": "71200",
+				"account_category": "Other Operating Income"
+			},
+			"Miscellaneous Other Income": {
+				"account_number": "71900",
+				"account_category": "Other Operating Income"
+			},
+			"root_type": "Income",
+			"account_number": "70000"
+		},
+		"Other Expenses": {
+			"Interest Expense": {
+				"account_number": "76000",
+				"account_category": "Finance Costs"
+			},
+			"Bank and Merchant Fees": {
+				"account_number": "76100",
+				"account_category": "Finance Costs"
+			},
+			"Exchange Gain/Loss": {
+				"account_number": "76200",
+				"account_category": "Finance Costs"
+			},
+			"Unrealized Gain/Loss on Investments": {
+				"account_number": "76900",
+				"account_category": "Finance Costs"
+			},
+			"root_type": "Expense",
+			"account_number": "75000"
+		},
+		"Income Tax Expense": {
+			"Federal Income Tax Expense": {
+				"account_number": "81000",
+				"account_category": "Tax Expense"
+			},
+			"State Income Tax Expense": {
+				"account_number": "81100",
+				"account_category": "Tax Expense"
+			},
+			"Deferred Income Tax Expense": {
+				"account_number": "81900",
+				"account_category": "Tax Expense"
+			},
+			"root_type": "Expense",
+			"account_number": "80000"
+		}
+	}
+}
