@@ -3735,6 +3735,31 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 		self.assertEqual(frappe.db.get_value("Packing Slip", ps.name, "docstatus"), 2)
 
+	def test_sales_team_disabled_sales_person_carried_over(self):
+		sales_person = "_Test Sales Person 2"
+		other_sales_person = "_Test Sales Person 1"
+
+		dn = create_delivery_note(do_not_submit=True)
+		dn.append("sales_team", {"sales_person": sales_person, "allocated_percentage": 100})
+		dn.submit()
+
+		frappe.db.set_value("Sales Person", sales_person, "enabled", 0)
+		frappe.db.set_value("Sales Person", other_sales_person, "enabled", 0)
+		try:
+			with self.subTest("invoice against the delivery note is allowed"):
+				si = make_sales_invoice(dn.name)
+				si.save()
+				self.assertEqual([d.sales_person for d in si.sales_team], [sales_person])
+
+			with self.subTest("sales person newly assigned on the invoice is rejected"):
+				si = make_sales_invoice(dn.name)
+				si.sales_team = []
+				si.append("sales_team", {"sales_person": other_sales_person, "allocated_percentage": 100})
+				self.assertRaisesRegex(frappe.ValidationError, "is disabled", si.save)
+		finally:
+			frappe.db.set_value("Sales Person", sales_person, "enabled", 1)
+			frappe.db.set_value("Sales Person", other_sales_person, "enabled", 1)
+
 
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")
