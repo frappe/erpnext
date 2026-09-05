@@ -20,7 +20,8 @@ erpnext.accounts.ledger_preview = {
 								"Accounting Ledger Preview",
 								"accounting_ledger_preview_html",
 								response.message.gl_columns,
-								response.message.gl_data
+								response.message.gl_data,
+								erpnext.get_currency(frm.doc.company)
 							);
 						},
 					});
@@ -49,7 +50,8 @@ erpnext.accounts.ledger_preview = {
 								"Stock Ledger Preview",
 								"stock_ledger_preview_html",
 								response.message.sl_columns,
-								response.message.sl_data
+								response.message.sl_data,
+								erpnext.get_currency(frm.doc.company)
 							);
 						},
 					});
@@ -59,7 +61,7 @@ erpnext.accounts.ledger_preview = {
 		}
 	},
 
-	make_dialog(label, fieldname, columns, data) {
+	make_dialog(label, fieldname, columns, data, currency) {
 		if (data.length === 0 && fieldname === "accounting_ledger_preview_html") {
 			frappe.msgprint("<strong>" + __("No Impact on Accounting Ledger") + "</strong>");
 		} else {
@@ -76,18 +78,18 @@ erpnext.accounts.ledger_preview = {
 			});
 
 			setTimeout(function () {
-				me.get_datatable(columns, data, dialog.get_field(fieldname).wrapper);
+				me.get_datatable(columns, data, dialog.get_field(fieldname).wrapper, currency);
 			}, 200);
 
 			dialog.show();
 		}
 	},
 
-	get_datatable(columns, data, wrapper) {
+	get_datatable(columns, data, wrapper, currency) {
 		columns.forEach((col) => {
 			if (col.fieldtype === "Currency") {
 				col.format = (value) => {
-					return format_currency(value);
+					return format_currency(value, currency);
 				};
 			}
 		});
