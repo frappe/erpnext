@@ -176,6 +176,7 @@ class PaymentEntry(AccountsController):
 		self.set_liability_account()
 		self.set_missing_ref_details(force=True)
 		self.validate_payment_type()
+		self.validate_internal_transfer_accounts()
 		self.validate_party_details()
 		self.set_exchange_rate()
 		self.validate_mandatory()
@@ -626,6 +627,10 @@ class PaymentEntry(AccountsController):
 	def validate_payment_type(self):
 		if self.payment_type not in ("Receive", "Pay", "Internal Transfer"):
 			frappe.throw(_("Payment Type must be one of Receive, Pay, or Internal Transfer"))
+
+	def validate_internal_transfer_accounts(self):
+		if self.payment_type == "Internal Transfer" and self.paid_from and self.paid_from == self.paid_to:
+			frappe.throw(_("Paid From and Paid To accounts must be different for an Internal Transfer."))
 
 	def validate_party_details(self):
 		if self.party and not frappe.db.exists(self.party_type, self.party):

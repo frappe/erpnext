@@ -782,6 +782,23 @@ class TestPaymentEntry(ERPNextTestSuite):
 
 		self.validate_gl_entries(pe.name, expected_gle)
 
+	def test_internal_transfer_rejects_same_account(self):
+		pe = frappe.new_doc("Payment Entry")
+		pe.payment_type = "Internal Transfer"
+		pe.company = "_Test Company"
+		pe.paid_from = "_Test Bank - _TC"
+		pe.paid_to = "_Test Bank - _TC"
+		pe.paid_amount = 100
+		pe.received_amount = 100
+		pe.reference_no = "same-account-transfer"
+		pe.reference_date = nowdate()
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Paid From and Paid To accounts must be different",
+			pe.insert,
+		)
+
 	def test_bank_charges_deduction(self):
 		bank_charges_account = create_account(
 			parent_account="Indirect Expenses - _TC",
