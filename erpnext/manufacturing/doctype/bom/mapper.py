@@ -85,6 +85,9 @@ def get_bom_diff(bom1: str, bom2: str):
 	doc1 = frappe.get_doc("BOM", bom1)
 	doc2 = frappe.get_doc("BOM", bom2)
 
+	doc1.check_permission()
+	doc2.check_permission()
+
 	out = get_diff(doc1, doc2)
 	out.row_changed, out.added, out.removed = [], [], []
 	for df in doc1.meta.fields:
