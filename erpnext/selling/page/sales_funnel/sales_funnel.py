@@ -147,7 +147,7 @@ def get_opp_by(by_field, from_date, to_date, company):
 def get_pipeline_data(from_date: str, to_date: str, company: str):
 	validate_filters(from_date, to_date, company)
 
-	opportunities = frappe.get_all(
+	opportunities = frappe.get_list(
 		"Opportunity",
 		filters=[
 			["status", "in", ["Open", "Quotation", "Replied"]],
