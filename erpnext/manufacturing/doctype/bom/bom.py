@@ -1645,6 +1645,8 @@ def _set_default_accounts_for_items(item_dict, company):
 
 @frappe.whitelist()
 def get_bom_items(bom: str, company: str, qty: float = 1, fetch_exploded: int = 1):
+	frappe.has_permission("BOM", "read", doc=bom, throw=True)
+
 	items = get_bom_items_as_dict(bom, company, qty, fetch_exploded, include_non_stock_items=True).values()
 	items = list(items)
 	items.sort(key=lambda item: item.item_code)
