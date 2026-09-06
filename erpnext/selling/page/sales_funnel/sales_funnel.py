@@ -21,6 +21,8 @@ def validate_filters(from_date, to_date, company):
 
 @frappe.whitelist()
 def get_funnel_data(from_date: str, to_date: str, company: str):
+	frappe.has_permission("Company", doc=company, throw=True)
+
 	validate_filters(from_date, to_date, company)
 
 	lead = frappe.qb.DocType("Lead")
