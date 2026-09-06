@@ -76,23 +76,24 @@ def get_funnel_data(from_date: str, to_date: str, company: str):
 
 @frappe.whitelist()
 def get_opp_by_utm_source(from_date: str, to_date: str, company: str):
-	return get_opp_by("utm_source", from_date, to_date, company)
+	return get_opp_by("utm_source", from_date, to_date, company, ignore_permissions=False)
 
 
 @frappe.whitelist()
 def get_opp_by_utm_campaign(from_date: str, to_date: str, company: str):
-	return get_opp_by("utm_campaign", from_date, to_date, company)
+	return get_opp_by("utm_campaign", from_date, to_date, company, ignore_permissions=False)
 
 
 @frappe.whitelist()
 def get_opp_by_utm_medium(from_date: str, to_date: str, company: str):
-	return get_opp_by("utm_medium", from_date, to_date, company)
+	return get_opp_by("utm_medium", from_date, to_date, company, ignore_permissions=False)
 
 
-def get_opp_by(by_field, from_date, to_date, company):
+def get_opp_by(by_field, from_date, to_date, company, ignore_permissions=False):
 	validate_filters(from_date, to_date, company)
 
-	opportunities = frappe.get_all(
+	get_opportunities = frappe.get_all if ignore_permissions else frappe.get_list
+	opportunities = get_opportunities(
 		"Opportunity",
 		filters=[
 			["status", "in", ["Open", "Quotation", "Replied"]],
