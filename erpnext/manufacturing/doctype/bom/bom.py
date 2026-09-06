@@ -1343,7 +1343,11 @@ def get_bom_items_as_dict(
 	fetch_secondary_items=0,
 	include_non_stock_items=False,
 	fetch_qty_in_stock_uom=True,
+	ignore_permissions=True,
 ):
+	if not ignore_permissions:
+		frappe.has_permission("BOM", "read", doc=bom, throw=True)
+
 	item_dict = {}
 	opts = frappe._dict(
 		qty=qty,
@@ -1351,6 +1355,7 @@ def get_bom_items_as_dict(
 		fetch_secondary_items=fetch_secondary_items,
 		include_non_stock_items=include_non_stock_items,
 		fetch_qty_in_stock_uom=fetch_qty_in_stock_uom,
+		ignore_permissions=ignore_permissions,
 	)
 
 	items = _query_bom_items(bom, company, opts)
@@ -1606,6 +1611,7 @@ def _merge_phantom_bom_items(item_dict, item, company, opts):
 		fetch_secondary_items=opts.fetch_secondary_items,
 		include_non_stock_items=opts.include_non_stock_items,
 		fetch_qty_in_stock_uom=opts.fetch_qty_in_stock_uom,
+		ignore_permissions=opts.ignore_permissions,
 	)
 
 	for k, v in data.items():
@@ -1647,7 +1653,9 @@ def _set_default_accounts_for_items(item_dict, company):
 def get_bom_items(bom: str, company: str, qty: float = 1, fetch_exploded: int = 1):
 	frappe.has_permission("BOM", "read", doc=bom, throw=True)
 
-	items = get_bom_items_as_dict(bom, company, qty, fetch_exploded, include_non_stock_items=True).values()
+	items = get_bom_items_as_dict(
+		bom, company, qty, fetch_exploded, include_non_stock_items=True, ignore_permissions=False
+	).values()
 	items = list(items)
 	items.sort(key=lambda item: item.item_code)
 	return items
