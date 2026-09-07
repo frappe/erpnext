@@ -3,12 +3,11 @@
 
 
 import copy
-from datetime import timedelta
 
 import frappe
 from frappe import _, qb
 from frappe.query_builder.custom import ConstantColumn
-from frappe.query_builder.functions import Max, Min, Sum
+from frappe.query_builder.functions import Count, Max, Min, Sum
 from frappe.utils import (
 	add_days,
 	ceil,
@@ -664,17 +663,41 @@ class PeriodClosingVoucher(AccountsController):
 
 	def generate_tasks_for_normal_balance(self):
 		# estimation can be wrong by a factor of 2
-		estimated_count = (
-			cint(
-				frappe.db.sql(
-					f"explain select count(*) from `tabGL Entry` where is_cancelled = 0 and posting_date between {self.period_start_date} and {self.period_end_date};",
-					as_dict=True,
-				)[0].rows
+		gl = qb.DocType("GL Entry")
+		raw_query = (
+			qb.from_(gl)
+			.select(Count(gl.star))
+			.where(
+				gl.is_cancelled.eq(0) & gl.posting_date.between(self.period_start_date, self.period_end_date)
 			)
-			* 2
+			.get_sql()
 		)
+
+		# estimation can be wrong by a factor of 2
+		correction_factor = 2
+		if frappe.db.db_type == "postgres":
+			analyzer = frappe.json.loads(
+				(
+					frappe.db.sql(
+						f"explain (format json) {raw_query}",
+					)
+				)[0][0]
+			)
+
+			estimated_count = analyzer[0].get("Plan").get("Plans")[0].get("Plan Rows") * correction_factor
+		else:
+			estimated_count = (
+				cint(
+					frappe.db.sql(
+						f"explain {raw_query}",
+						as_dict=True,
+					)[0].rows
+				)
+				* correction_factor
+			)
+
 		job_count = (
-			1 if estimated_count / 2000000 else ceil(estimated_count / 2000000)
+			1 if estimated_count / 2000000 < 1 else ceil(estimated_count / 2000000)
 		)  # conservative chunk size
 		days = (getdate(self.period_end_date) - getdate(self.period_start_date)).days
 		step_size = 1 if days / job_count < 1 else ceil(days / job_count)
@@ -691,18 +714,38 @@ class PeriodClosingVoucher(AccountsController):
 			min = qb.from_(gl).select(Min(gl.posting_date)).run()[0][0]
 			max = qb.from_(gl).select(Max(gl.posting_date)).run()[0][0]
 
-			# estimation can be wrong by a factor of 2
-			estimated_count = (
-				cint(
-					frappe.db.sql(
-						f"explain select count(*) from `tabGL Entry` where is_cancelled = 0 and is_opening = 0 and posting_date between {min} and {max};",
-						as_dict=True,
-					)[0].rows
-				)
-				* 2
+			raw_query = (
+				qb.from_(gl)
+				.select(Count(gl.star))
+				.where(gl.is_cancelled.eq(0) & gl.is_opening.eq("Yes") & gl.posting_date.between(min, max))
+				.get_sql()
 			)
+
+			# estimation can be wrong by a factor of 2
+			correction_factor = 2
+			if frappe.db.db_type == "postgres":
+				analyzer = frappe.json.loads(
+					(
+						frappe.db.sql(
+							f"explain (format json) {raw_query}",
+						)
+					)[0][0]
+				)
+
+				estimated_count = analyzer[0].get("Plan").get("Plans")[0].get("Plan Rows") * correction_factor
+			else:
+				estimated_count = (
+					cint(
+						frappe.db.sql(
+							f"explain {raw_query};",
+							as_dict=True,
+						)[0].rows
+					)
+					* correction_factor
+				)
+
 			job_count = (
-				1 if estimated_count / 2000000 else ceil(estimated_count / 2000000)
+				1 if estimated_count / 2000000 < 1 else ceil(estimated_count / 2000000)
 			)  # conservative chunk size
 			days = (getdate(self.period_end_date) - getdate(self.period_start_date)).days
 			step_size = 1 if days / job_count < 1 else ceil(days / job_count)
@@ -903,10 +946,5 @@ def summarize_and_post_ledger(result, ref_dt, ref_dn):
 	closing_entries = pl_closing_entries + bs_closing_entries + closing_entries_for_closing_account
 
 	make_closing_entries(closing_entries, pcv.name, pcv.company, pcv.period_end_date)
-
-	# keep transaction on PPCV and PPCVD short
-	# prevents concurrency errors - REPEATABLE READ
-	if not frappe.in_test:
-		frappe.db.commit()  # nosemgrep
 
 	frappe.db.set_value("Period Closing Voucher", pcv.name, "gle_processing_status", "Completed")
