@@ -2,10 +2,11 @@
 // For license information, please see license.txt
 
 function update_total_holidays(frm) {
-	frm.doc.total_holidays = (frm.doc.holidays || []).reduce(
-		(total, holiday) => total + (holiday.is_half_day ? 0.5 : 1),
-		0
-	);
+	let total_holidays = 0;
+	for (const holiday of frm.doc.holidays || []) {
+		total_holidays += holiday.is_half_day ? 0.5 : 1;
+	}
+	frm.doc.total_holidays = total_holidays;
 	frm.refresh_field("total_holidays");
 }
 
