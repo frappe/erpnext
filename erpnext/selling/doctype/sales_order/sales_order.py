@@ -1200,9 +1200,7 @@ def make_sales_invoice(
 	def get_pending_qty(source):
 		if source.name not in pending_qty_by_item:
 			billable_qty = get_qty_net_of_returns(source)
-			if source.qty and source.billed_amt:
-				billable_qty -= get_billed_qty_by_item().get(source.name, 0)
-
+			billable_qty -= get_billed_qty_by_item().get(source.name, 0)
 			billable_qty -= mapped_qty_by_item.get(source.name, 0)
 			pending_qty_by_item[source.name] = max(flt(billable_qty, source.precision("qty")), 0)
 
