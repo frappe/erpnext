@@ -2262,6 +2262,125 @@ class TestProductionPlan(ERPNextTestSuite):
 		self.assertEqual(items_by_type["Material Transfer"].get("quantity"), 7.0)
 		self.assertEqual(items_by_type["Purchase"].get("quantity"), 1000.0)
 
+	def test_min_order_qty_conversion_takes_grid_ceiling(self):
+		from erpnext.manufacturing.doctype.production_plan.production_plan import (
+			_quantity_in_purchase_uom,
+		)
+
+		original_precision = frappe.db.get_default("float_precision")
+		frappe.db.set_default("float_precision", "3")
+		self.addCleanup(frappe.db.set_default, "float_precision", original_precision)
+
+		self.assertEqual(_quantity_in_purchase_uom(50000, 453.592292197, 50000), 110.232)
+		self.assertEqual(_quantity_in_purchase_uom(2000, 0.453592, 2000), 4409.249)
+		self.assertEqual(_quantity_in_purchase_uom(10, 0.5, 10), 20.0)
+		self.assertEqual(_quantity_in_purchase_uom(50000, 453.592292197), 110.231)
+
+	def test_min_order_qty_grid_ceiling_in_plan_items(self):
+		original_precision = frappe.db.get_default("float_precision")
+		frappe.db.set_default("float_precision", "3")
+		self.addCleanup(frappe.db.set_default, "float_precision", original_precision)
+
+		conversion_factor = 453.592292197
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(
+			properties={"is_stock_item": 1, "min_order_qty": 50000, "purchase_uom": "_Test UOM 1"},
+			uoms=[{"uom": "_Test UOM 1", "conversion_factor": conversion_factor}],
+		).name
+
+		make_bom(item=fg_item, raw_materials=[rm_item], source_warehouse="_Test Warehouse - _TC")
+
+		pln = create_production_plan(item_code=fg_item, planned_qty=1, do_not_submit=1)
+		pln.consider_minimum_order_qty = 1
+		mr_items = get_items_for_material_requests(pln.as_dict())
+
+		self.assertEqual(mr_items[0].get("quantity"), 110.232)
+		self.assertGreaterEqual(mr_items[0].get("quantity") * conversion_factor, 50000)
+
+	def test_min_order_qty_grid_ceiling_from_other_locations(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		original_precision = frappe.db.get_default("float_precision")
+		frappe.db.set_default("float_precision", "3")
+		self.addCleanup(frappe.db.set_default, "float_precision", original_precision)
+
+		conversion_factor = 453.592292197
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(
+			properties={"is_stock_item": 1, "min_order_qty": 50000, "purchase_uom": "_Test UOM 1"},
+			uoms=[{"uom": "_Test UOM 1", "conversion_factor": conversion_factor}],
+		).name
+
+		rm_warehouse = create_warehouse("MOQ Ceiling RM Warehouse", company="_Test Company")
+		source_warehouse = create_warehouse("MOQ Ceiling Source Warehouse", company="_Test Company")
+		make_stock_entry(item_code=rm_item, qty=4, rate=100, target=source_warehouse)
+
+		make_bom(item=fg_item, raw_materials=[rm_item], source_warehouse="_Test Warehouse - _TC")
+
+		pln = create_production_plan(item_code=fg_item, planned_qty=10, do_not_submit=1)
+		pln.for_warehouse = rm_warehouse
+		pln.consider_minimum_order_qty = 1
+		pln.ignore_existing_ordered_qty = 1
+		mr_items = get_items_for_material_requests(
+			pln.as_dict(), warehouses=[{"warehouse": source_warehouse}]
+		)
+
+		rows_by_type = {d.get("material_request_type"): d for d in mr_items}
+		self.assertEqual(rows_by_type["Material Transfer"].get("quantity"), 4)
+		self.assertEqual(rows_by_type["Purchase"].get("quantity"), 110.232)
+
+	def test_min_order_qty_round_trip_to_purchase_order(self):
+		from erpnext.stock.doctype.material_request.material_request import (
+			get_item_default_suppliers,
+			make_purchase_orders_by_supplier,
+		)
+
+		original_precision = frappe.db.get_default("float_precision")
+		frappe.db.set_default("float_precision", "3")
+		self.addCleanup(frappe.db.set_default, "float_precision", original_precision)
+
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "_Test UOM 1",
+				"purchase_uom": "Pound",
+				"min_order_qty": 50000,
+			},
+			uoms=[{"uom": "Pound", "conversion_factor": 453.592292197}],
+		).name
+		make_bom(item=fg_item, raw_materials=[rm_item], source_warehouse="_Test Warehouse - _TC")
+
+		pln = create_production_plan(
+			item_code=fg_item, planned_qty=1, skip_getting_mr_items=1, do_not_submit=1
+		)
+		pln.consider_minimum_order_qty = 1
+		pln.set("mr_items", get_items_for_material_requests(pln.as_dict()))
+		pln.submit_material_request = 1
+		pln.save()
+		pln.submit()
+		pln.make_material_request()
+
+		mr_name = frappe.db.get_value(
+			"Material Request Item", {"production_plan": pln.name, "item_code": rm_item}, "parent"
+		)
+		self.assertTrue(mr_name)
+		pending_items = get_item_default_suppliers(mr_name)
+		self.assertEqual(len(pending_items), 1)
+		self.assertEqual(flt(pending_items[0]["pending_qty"], 3), 110.232)
+
+		purchase_orders = make_purchase_orders_by_supplier(
+			mr_name,
+			[
+				row | {"qty": flt(row["pending_qty"], 3), "supplier": "_Test Supplier"}
+				for row in pending_items
+			],
+		)
+		self.assertEqual(len(purchase_orders), 1)
+		po = frappe.get_doc("Purchase Order", purchase_orders[0])
+		self.assertEqual(po.items[0].qty, 110.232)
+		self.assertGreaterEqual(po.items[0].stock_qty, 50000)
+
 	def test_fg_item_quantity(self):
 		fg_item = make_item(properties={"is_stock_item": 1}).name
 		rm_item = make_item(properties={"is_stock_item": 1}).name
