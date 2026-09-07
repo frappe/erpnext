@@ -1402,9 +1402,11 @@ class TestProductionPlan(FrappeTestCase):
 
 		self.assertEqual(after_qty, before_qty)
 
-		completed_plans = get_non_completed_production_plans()
+		# Plan submission cached this list before the Work Orders updated ordered quantities.
+		frappe.clear_cache()
+		non_completed_plans = get_non_completed_production_plans()
 		for plan in plans:
-			self.assertFalse(plan in completed_plans)
+			self.assertNotIn(plan, non_completed_plans)
 
 	def test_resered_qty_for_production_plan_for_material_requests_with_multi_UOM(self):
 		from erpnext.stock.utils import get_or_make_bin
