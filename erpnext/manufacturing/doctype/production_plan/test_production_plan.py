@@ -2248,6 +2248,117 @@ class TestProductionPlan(ERPNextTestSuite):
 				self.assertEqual(row.warehouse, mrp_warhouse)
 				self.assertEqual(row.quantity, 12.0)
 
+	def test_transfer_batches_share_stock_across_requirements(self):
+		rm_item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"safety_stock": 100,
+				"min_order_qty": 1234,
+			}
+		).name
+		source_warehouse = "_Test Warehouse 1 - _TC"
+		for qty in (1, 1, 5, 3, 3, 4, 100):
+			make_stock_entry(item_code=rm_item, qty=qty, rate=100, target=source_warehouse)
+		pln = self._plan_with_shared_raw_material(rm_item, qty_per_order=250)
+		pln.po_items[1].planned_qty = 1000
+		pln.for_warehouse = "_Test Warehouse - _TC"
+		warehouses = [{"warehouse": source_warehouse}]
+
+		for safety_stock in (0, 1):
+			for minimum_order_qty in (0, 1):
+				with self.subTest(safety_stock=safety_stock, minimum_order_qty=minimum_order_qty):
+					pln.include_safety_stock = safety_stock
+					pln.consider_minimum_order_qty = minimum_order_qty
+					items = get_items_for_material_requests(pln.as_dict(), warehouses=warehouses)
+					self.assertEqual(
+						[row["material_request_type"] for row in items],
+						["Material Transfer", "Purchase", "Purchase"],
+					)
+					purchase_qty = [1234, 0] if minimum_order_qty else [133 + safety_stock * 100, 1000]
+					self.assertEqual([row["quantity"] for row in items], [117, *purchase_qty])
+					self.assertEqual(items[0]["from_warehouse"], source_warehouse)
+					self.assertEqual([row["warehouse"] for row in items], [pln.for_warehouse] * 3)
+					self.assertEqual([row["required_bom_qty"] for row in items], [250, 250, 1000])
+					self.assertEqual(
+						[row["sales_order"] for row in items],
+						[pln.po_items[0].sales_order] * 2 + [pln.po_items[1].sales_order],
+					)
+					self.assertEqual(
+						items, get_items_for_material_requests(pln.as_dict(), warehouses=warehouses)
+					)
+
+	def test_transfer_batches_keep_source_warehouses_and_requirements_separate(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1, "create_new_batch": 1}).name
+		source_warehouses = ["_Test Warehouse 1 - _TC", "_Test Warehouse 2 - _TC"]
+		for warehouse, quantities in zip(source_warehouses, ((10, 20), (50, 60)), strict=True):
+			for qty in quantities:
+				make_stock_entry(item_code=rm_item, qty=qty, rate=100, target=warehouse)
+		pln = self._plan_with_shared_raw_material(rm_item, qty_per_order=50)
+		pln.po_items[1].planned_qty = 100
+		pln.for_warehouse = "_Test Warehouse - _TC"
+
+		items = get_items_for_material_requests(
+			pln.as_dict(), warehouses=[{"warehouse": warehouse} for warehouse in source_warehouses]
+		)
+		transfers = [row for row in items if row["material_request_type"] == "Material Transfer"]
+		self.assertEqual(len(transfers), 3)
+		self.assertEqual(
+			{(row["sales_order"], row["from_warehouse"]): row["quantity"] for row in transfers},
+			{
+				(pln.po_items[0].sales_order, source_warehouses[0]): 30,
+				(pln.po_items[0].sales_order, source_warehouses[1]): 20,
+				(pln.po_items[1].sales_order, source_warehouses[1]): 90,
+			},
+		)
+		purchases = [row for row in items if row["material_request_type"] == "Purchase"]
+		self.assertEqual(len(purchases), 1)
+		self.assertEqual(purchases[0]["quantity"], 10)
+		self.assertEqual(purchases[0]["sales_order"], pln.po_items[1].sales_order)
+
+	def test_transfer_shared_stock_uses_stock_uom(self):
+		rm_item = make_item(
+			properties={"is_stock_item": 1, "stock_uom": "Nos", "purchase_uom": "_Test UOM 1"},
+			uoms=[{"uom": "_Test UOM 1", "conversion_factor": 10}],
+		).name
+		source_warehouse = "_Test Warehouse 1 - _TC"
+		make_stock_entry(item_code=rm_item, qty=60, rate=100, target=source_warehouse)
+		pln = self._plan_with_shared_raw_material(rm_item, qty_per_order=50)
+		pln.for_warehouse = "_Test Warehouse - _TC"
+
+		items = get_items_for_material_requests(pln.as_dict(), warehouses=[{"warehouse": source_warehouse}])
+		self.assertEqual(
+			[row["material_request_type"] for row in items],
+			["Material Transfer", "Material Transfer", "Purchase"],
+		)
+		self.assertEqual([row["quantity"] for row in items], [50, 10, 4])
+		self.assertEqual([row["uom"] for row in items], ["Nos", "Nos", "_Test UOM 1"])
+		self.assertEqual([row["conversion_factor"] for row in items], [1, 1, 10])
+		self.assertEqual(
+			[row["sales_order"] for row in items],
+			[pln.po_items[0].sales_order] + [pln.po_items[1].sales_order] * 2,
+		)
+
+	def test_transfer_shared_stock_rounds_away_float_residue(self):
+		from erpnext.manufacturing.doctype.production_plan.services.material_request import (
+			_transfer_from_locations,
+		)
+
+		locations = [
+			frappe._dict(qty=0.7, warehouse="_Test Warehouse 1 - _TC"),
+			frappe._dict(qty=1, warehouse="_Test Warehouse 2 - _TC"),
+		]
+		transfers = []
+		for quantity in (0.1, 0.2, 0.4):
+			item = {"item_code": "Raw Material Item 1", "quantity": quantity, "conversion_factor": 1}
+			self.assertEqual(_transfer_from_locations(item, locations, transfers, quantity), 0)
+
+		self.assertEqual(
+			[(row["from_warehouse"], row["quantity"]) for row in transfers],
+			[("_Test Warehouse 1 - _TC", quantity) for quantity in (0.1, 0.2, 0.4)],
+		)
+
 	def test_purchase_uom_falls_back_to_uom_conversion_factor(self):
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
 
