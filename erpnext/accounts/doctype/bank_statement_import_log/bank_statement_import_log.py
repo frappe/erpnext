@@ -542,6 +542,8 @@ class BankStatementImportLog(Document):
 				"bank-rec-statement-import-progress",
 				{
 					"progress": round(progress / total_transactions * 100),
+					"current": progress,
+					"total": total_transactions,
 				},
 				doctype="Bank Statement Import Log",
 				docname=self.name,
@@ -551,6 +553,7 @@ class BankStatementImportLog(Document):
 			"bank-rec-statement-import-progress",
 			{
 				"progress": 100,
+				"current": total_transactions,
 				"total": total_transactions,
 			},
 			doctype="Bank Statement Import Log",
