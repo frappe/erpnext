@@ -74,15 +74,6 @@ force_item_fields = (
 	"valuation_rate",
 )
 
-additional_discount_item_fields = (
-	"discount_percentage",
-	"discount_amount",
-	"distributed_discount_amount",
-	"margin_type",
-	"margin_rate_or_amount",
-	"pricing_rules",
-)
-
 
 class AccountsController(TransactionBase):
 	def get_print_settings(self):
@@ -1429,30 +1420,30 @@ class AccountsController(TransactionBase):
 
 		set_transaction_currency_and_rate_in_gl_map(self, gl_entries)
 
-	def before_mapping(self, source_doc, _table_maps):
+	def before_mapping(self, source_doc, table_maps):
+		source_items_field = source_doc.meta.get_field("items")
+		item_map = table_maps.get(source_items_field.options, {}) if source_items_field else {}
+		field_map = item_map.get("field_map", {})
+		self.flags.mapped_discount_reference_field = dict(field_map).get("name")
 		if not self._has_mixed_additional_discount(source_doc):
 			return
 
-		# A fixed source discount must first pass through after_mapping to calculate its remainder.
-		source_has_fixed_discount = self._has_fixed_additional_discount(source_doc)
-		documents = (self,) if source_has_fixed_discount else (self, source_doc)
-		for doc in documents:
-			for item in doc.get("items"):
-				self._set_additional_discount_as_item_discount(item)
-
-			doc.apply_discount_on = ""
-			doc.base_discount_amount = 0
-			doc.additional_discount_percentage = 0
-			doc.discount_amount = 0
-
-		if not source_has_fixed_discount:
-			self.flags.mapped_additional_discount = True
+		# Recalculate quantities and discounts supplied by the form before carrying them forward.
+		self.calculate_taxes_and_totals()
+		self.move_additional_discount_to_items()
+		# Calculate the incoming discount using only that source's mapped quantities.
+		self.flags.discount_mapping_previous_items = self.items
+		self.items = []
 
 	def after_mapping(self, source_doc):
-		if self.flags.pop("mapped_additional_discount", False):
-			return
+		item_reference_field = self.flags.pop("mapped_discount_reference_field", None)
+		self.set_discount_amount_after_mapping(source_doc, item_reference_field=item_reference_field)
 
-		self.set_discount_amount_after_mapping(source_doc)
+		previous_items = self.flags.pop("discount_mapping_previous_items", None)
+		if previous_items is not None:
+			self.move_additional_discount_to_items()
+			self.set("items", previous_items + self.items)
+			self.calculate_taxes_and_totals()
 
 	def _has_mixed_additional_discount(self, source_doc):
 		if not self.get("items") or not any(
@@ -1472,19 +1463,25 @@ class AccountsController(TransactionBase):
 			and self.get("apply_discount_on") == source_doc.get("apply_discount_on")
 		)
 
-	def _has_fixed_additional_discount(self, doc):
-		return flt(doc.get("discount_amount")) and not flt(doc.get("additional_discount_percentage"))
-
-	def _set_additional_discount_as_item_discount(self, item):
-		if not flt(item.get("distributed_discount_amount")):
+	def move_additional_discount_to_items(self):
+		if not self.discount_amount:
 			return
 
-		item.price_list_rate = item.rate
-		item.rate = item.net_rate
-		for fieldname in additional_discount_item_fields:
-			item.set(fieldname, None if fieldname in ("margin_type", "pricing_rules") else 0)
+		for item in self.items:
+			if item.qty:
+				item.mapped_additional_discount_amount = flt(
+					flt(item.get("mapped_additional_discount_amount"))
+					+ flt(item.distributed_discount_amount) / item.qty,
+					item.precision("mapped_additional_discount_amount"),
+				)
+			item.distributed_discount_amount = 0
 
-	def set_discount_amount_after_mapping(self, source_doc):
+		self.apply_discount_on = ""
+		self.base_discount_amount = 0
+		self.additional_discount_percentage = 0
+		self.discount_amount = 0
+
+	def set_discount_amount_after_mapping(self, source_doc, *, item_reference_field=None):
 		"""
 		Ensures that Additional Discount Amount is not copied repeatedly
 		for multiple mappings of a single source transaction.
@@ -1563,7 +1560,9 @@ class AccountsController(TransactionBase):
 		if not result:
 			return
 
-		discount_already_applied = result[0][0]
+		discount_already_applied = flt(result[0][0])
+		if item_reference_field:
+			discount_already_applied += self.get_mapped_discount_applied(source_doc, item_reference_field)
 		if not discount_already_applied:
 			return
 
@@ -1578,6 +1577,30 @@ class AccountsController(TransactionBase):
 		self.discount_amount = flt(discount_amount, self.precision("discount_amount"))
 
 		self.calculate_taxes_and_totals()
+
+	def get_mapped_discount_applied(self, source_doc, item_reference_field):
+		from frappe.query_builder.functions import Coalesce
+
+		distributed_discount = sum(flt(item.distributed_discount_amount) for item in source_doc.items)
+		if not distributed_discount:
+			return 0
+
+		item_table = frappe.qb.DocType(self.meta.get_field("items").options)
+		source_item_table = frappe.qb.DocType(source_doc.meta.get_field("items").options).as_("source_item")
+		mapped_discount = (
+			Coalesce(item_table.mapped_additional_discount_amount, 0)
+			- Coalesce(source_item_table.mapped_additional_discount_amount, 0)
+		) * item_table.qty
+		consumed = (
+			frappe.qb.from_(item_table)
+			.join(source_item_table)
+			.on(item_table[item_reference_field] == source_item_table.name)
+			.where((item_table.docstatus == 1) & (source_item_table.parent == source_doc.name))
+			.select(Sum(mapped_discount))
+		).run()[0][0]
+
+		# Grand Total discounts include tax; stored item allocations are tax-exclusive.
+		return flt(consumed) * source_doc.discount_amount / distributed_discount
 
 
 from erpnext.accounts.services.advances import (
