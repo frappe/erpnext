@@ -1403,7 +1403,7 @@ class TestProductionPlan(FrappeTestCase):
 		self.assertEqual(after_qty, before_qty)
 
 		# Plan submission cached this list before the Work Orders updated ordered quantities.
-		frappe.clear_cache()
+		frappe.local.request_cache.clear()
 		non_completed_plans = get_non_completed_production_plans()
 		for plan in plans:
 			self.assertNotIn(plan, non_completed_plans)
