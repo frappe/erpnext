@@ -68,6 +68,46 @@ class TestMappedDiscounts(ERPNextTestSuite):
 					first.cancel()
 					self.assertEqual(make_purchase_receipt(discounted.name).discount_amount, 100)
 
+	def test_fixed_discount_remainder_after_multiple_partial_receipts(self):
+		for apply_discount_on in ("Net Total", "Grand Total"):
+			for inclusive in (False, True):
+				for discounted_first in (False, True):
+					with self.subTest(
+						basis=apply_discount_on, inclusive=inclusive, discounted_first=discounted_first
+					):
+						rate = 110 if inclusive else 100
+						discounted = self.make_order(
+							qty=10,
+							rate=rate,
+							fixed=100,
+							inclusive=inclusive,
+							apply_discount_on=apply_discount_on,
+						)
+						first = make_purchase_receipt(discounted.name)
+						first.items[0].qty = 2
+						first.discount_amount = 20
+						first.save().submit()
+						regular = self.make_order(item="_Test Item 2", qty=5, rate=rate, inclusive=inclusive)
+						sources = (discounted, regular) if discounted_first else (regular, discounted)
+						second = self.combine(*sources)
+						item = second.getone("items", {"purchase_order": discounted.name})
+						self.assertEqual(item.qty, 8)
+						expected_per_unit = (
+							100 / 11 if inclusive and apply_discount_on == "Grand Total" else 10
+						)
+						self.assertAlmostEqual(
+							item.mapped_additional_discount_amount, expected_per_unit, places=3
+						)
+						item.qty = 3
+						second.save().submit()
+						third = make_purchase_receipt(discounted.name).save().submit()
+						self.assertEqual(third.items[0].qty, 5)
+						self.assertEqual(third.discount_amount, 50)
+						self.assertEqual(
+							first.grand_total + second.grand_total + third.grand_total,
+							discounted.grand_total + regular.grand_total,
+						)
+
 	def test_three_fixed_sources_keep_their_own_discounts(self):
 		third_item = make_item("_Test Third Mapped Discount Item").name
 		orders = [
