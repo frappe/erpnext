@@ -31,6 +31,9 @@ from erpnext.manufacturing.doctype.bom.bom import (
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import (
 	get_mins_between_operations,
 )
+from erpnext.manufacturing.doctype.production_plan.work_order_quantities import (
+	ProductionPlanWorkOrderQuantities,
+)
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.batch.batch import make_batch
 from erpnext.stock.doctype.item.item import get_item_defaults, validate_end_of_life
@@ -481,6 +484,8 @@ class WorkOrder(Document):
 		"""Update **Manufactured Qty** and **Material Transferred for Qty** in Work Order
 		based on Stock Entry"""
 
+		# Lock the plan row before any Work Order quantity update takes a row lock.
+		self.set_process_loss_qty()
 		allowance_percentage = flt(
 			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order")
 		)
@@ -508,7 +513,6 @@ class WorkOrder(Document):
 				)
 
 			self.db_set(fieldname, qty)
-			self.set_process_loss_qty()
 
 			from erpnext.selling.doctype.sales_order.sales_order import update_produced_qty_in_so_item
 
@@ -545,6 +549,22 @@ class WorkOrder(Document):
 		return flt(query.run()[0][0])
 
 	def set_process_loss_qty(self):
+		quantities = None
+		if self.docstatus == 1 and self.production_plan:
+			quantities = ProductionPlanWorkOrderQuantities(self.production_plan)
+			quantities.lock_plan_row(self)
+
+		process_loss_qty = self._process_loss_qty()
+		if quantities:
+			previous_loss_qty = frappe.db.get_value(
+				"Work Order", self.name, "process_loss_qty", for_update=True
+			)
+			if process_loss_qty < flt(previous_loss_qty):
+				# Replacement Work Orders may have consumed the recorded loss.
+				quantities.validate_work_order(self, process_loss_qty=process_loss_qty)
+		self.db_set("process_loss_qty", process_loss_qty)
+
+	def _process_loss_qty(self):
 		table = frappe.qb.DocType("Stock Entry")
 		process_loss_qty = (
 			frappe.qb.from_(table)
@@ -554,7 +574,7 @@ class WorkOrder(Document):
 			)
 		).run()[0][0]
 
-		self.db_set("process_loss_qty", flt(process_loss_qty))
+		return flt(process_loss_qty)
 
 	def update_production_plan_status(self):
 		production_plan = frappe.get_doc("Production Plan", self.production_plan)
@@ -578,6 +598,8 @@ class WorkOrder(Document):
 		production_plan.run_method("update_produced_pending_qty", produced_qty, self.production_plan_item)
 
 	def before_submit(self):
+		if self.production_plan:
+			ProductionPlanWorkOrderQuantities(self.production_plan).validate_work_order(self)
 		self.create_serial_no_batch_no()
 
 	def on_submit(self):
@@ -1131,36 +1153,6 @@ class WorkOrder(Document):
 					frappe.bold(self.stock_uom),
 				),
 			)
-
-		if self.production_plan and self.production_plan_item and not self.production_plan_sub_assembly_item:
-			qty_dict = frappe.db.get_value(
-				"Production Plan Item", self.production_plan_item, ["planned_qty", "ordered_qty"], as_dict=1
-			)
-
-			if not qty_dict:
-				return
-
-			allowance_qty = (
-				flt(
-					frappe.db.get_single_value(
-						"Manufacturing Settings", "overproduction_percentage_for_work_order"
-					)
-				)
-				/ 100
-				* qty_dict.get("planned_qty", 0)
-			)
-
-			max_qty = qty_dict.get("planned_qty", 0) + allowance_qty - qty_dict.get("ordered_qty", 0)
-
-			if not max_qty > 0:
-				frappe.throw(
-					_("Cannot produce more item for {0}").format(self.production_item), OverProductionError
-				)
-			elif self.qty > max_qty:
-				frappe.throw(
-					_("Cannot produce more than {0} items for {1}").format(max_qty, self.production_item),
-					OverProductionError,
-				)
 
 	def validate_transfer_against(self):
 		if not self.docstatus == 1:

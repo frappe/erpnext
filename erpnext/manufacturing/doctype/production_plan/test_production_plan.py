@@ -499,7 +499,7 @@ class TestProductionPlan(FrappeTestCase):
 			so_wo_qty = frappe.db.get_value(
 				"Sales Order Item", plan_reference.sales_order_item, "work_order_qty"
 			)
-			self.assertEqual(so_wo_qty, plan_reference.qty)
+			self.assertEqual(so_wo_qty, flt(plan_reference.qty))
 
 		wo_doc.cancel()
 		for so_item in so_items:
@@ -963,12 +963,12 @@ class TestProductionPlan(FrappeTestCase):
 	def test_multiple_work_order_for_production_plan_item(self):
 		"Test producing Prod Plan (making WO) in parts."
 
-		def create_work_order(item, pln, qty):
+		def create_work_order(pln, qty):
 			# Get Production Items
 			items_data = pln.get_production_items()
 
 			# Update qty
-			items_data[(pln.po_items[0].name, item, None, pln.po_items[0].planned_start_date)]["qty"] = qty
+			items_data[pln.po_items[0].name]["qty"] = qty
 
 			# Create and Submit Work Order for each item in items_data
 			for _key, item in items_data.items():
@@ -996,17 +996,17 @@ class TestProductionPlan(FrappeTestCase):
 		wo_list = []
 
 		# Create and Submit 1st Work Order for 3 qty
-		create_work_order(item, pln, 3)
+		create_work_order(pln, 3)
 		pln.reload()
 		self.assertEqual(pln.po_items[0].ordered_qty, 3)
 
 		# Create and Submit 2nd Work Order for 2 qty
-		create_work_order(item, pln, 2)
+		create_work_order(pln, 2)
 		pln.reload()
 		self.assertEqual(pln.po_items[0].ordered_qty, 5)
 
 		# Overproduction
-		self.assertRaises(OverProductionError, create_work_order, item=item, pln=pln, qty=2)
+		self.assertRaises(OverProductionError, create_work_order, pln=pln, qty=2)
 
 		# Cancel 1st Work Order
 		wo1 = frappe.get_doc("Work Order", wo_list[0])
@@ -1187,8 +1187,11 @@ class TestProductionPlan(FrappeTestCase):
 		make_bom(item=fg_item, raw_materials=[sub_assembly_item], rm_qty=4)
 
 		# Step - 1: Create Production Plan
-		pln = create_production_plan(item_code=fg_item, planned_qty=5, skip_getting_mr_items=1)
+		pln = create_production_plan(
+			item_code=fg_item, planned_qty=5, skip_getting_mr_items=1, do_not_submit=1
+		)
 		pln.get_sub_assembly_items()
+		pln.submit()
 
 		# Step - 2: Create Work Orders
 		pln.make_work_order()
