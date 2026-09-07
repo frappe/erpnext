@@ -12,7 +12,6 @@ import _ from "@/lib/translate"
 import { lazy, Suspense, useLayoutEffect, useRef, useState } from "react"
 import { AlertTriangleIcon, CheckCircleIcon, HomeIcon, LandmarkIcon, ListIcon, Loader2Icon, ScrollTextIcon, ShuffleIcon } from "lucide-react"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
-import { Badge } from "@/components/ui/badge"
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
 import { Button } from "@/components/ui/button"
 import { useAtomValue } from "jotai"
@@ -54,7 +53,7 @@ const BankReconciliation = () => {
                                     <BreadcrumbItem>
                                         <BreadcrumbPage>
                                             <div className="flex gap-1 items-center">
-                                                {_("Banking")} <Badge theme="violet" variant="subtle">{_("Beta")}</Badge>
+                                                {_("Banking")}
                                             </div>
 
                                         </BreadcrumbPage>
