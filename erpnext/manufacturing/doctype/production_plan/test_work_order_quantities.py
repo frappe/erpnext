@@ -3,6 +3,7 @@
 
 import frappe
 
+from erpnext.manufacturing.doctype.operation.test_operation import make_operation
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import (
 	create_production_plan,
 	make_bom,
@@ -13,6 +14,7 @@ from erpnext.manufacturing.doctype.work_order.work_order import (
 	close_work_order,
 	stop_unstop,
 )
+from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
@@ -71,13 +73,76 @@ class TestProductionPlanWorkOrderQuantities(ERPNextTestSuite):
 				row = self.plan_row(plan, field)
 				self.assertEqual(row.ordered_qty, 110)
 
-				manufacture.cancel()
+				self.assert_loss_reversal_blocked(manufacture)
+				first.reload()
+				self.assertEqual(first.process_loss_qty, 10)
+				self.assertEqual(first.produced_qty, 90)
 				self.assert_pending_qty(plan, field, 0)
-				extra = self.copy_work_order(replacement)
-				self.assert_overproduction(extra, 1)
 				replacement.cancel()
+				manufacture.cancel()
+				self.assertEqual(first.reload().process_loss_qty, 0)
 				first.reload().cancel()
 				self.assert_pending_qty(plan, field, 100)
+
+	def test_loss_reversal_with_draft_replacement(self):
+		plan = self.make_plan()
+		for field in REFERENCE_FIELDS:
+			with self.subTest(field=field):
+				first = self.create_work_order(plan, field)
+				first.submit()
+				manufacture = self.manufacture_with_loss(first)
+				replacement = self.create_work_order(plan, field)
+				manufacture.cancel()
+				self.assertEqual(first.reload().process_loss_qty, 0)
+				self.assert_pending_qty(plan, field, 0)
+				self.assert_overproduction(replacement, 10)
+
+	def test_partial_loss_reversal_with_overproduction_allowance(self):
+		frappe.db.set_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order", 5)
+		plan = self.make_plan()
+		for field in REFERENCE_FIELDS:
+			with self.subTest(field=field):
+				first = self.create_work_order(plan, field)
+				first.submit()
+				manufactures = [self.manufacture_with_loss(first, qty=50) for _ in range(2)]
+				self.assertEqual(first.reload().process_loss_qty, 10)
+				replacement = self.create_work_order(plan, field)
+				replacement.submit()
+
+				# Retaining five units of loss keeps the net quantity at the allowed 105.
+				manufactures[1].cancel()
+				self.assertEqual(first.reload().process_loss_qty, 5)
+				self.assert_loss_reversal_blocked(manufactures[0])
+				self.assertEqual(first.reload().process_loss_qty, 5)
+				replacement.cancel()
+				manufactures[0].cancel()
+				self.assertEqual(first.reload().process_loss_qty, 0)
+
+	def test_job_card_loss_reversal_with_replacement(self):
+		self.make_bom_with_operation(self.finished_good, self.raw_material)
+		plan = self.make_plan()
+		first = self.create_work_order(plan, "production_plan_item")
+		first.submit()
+		job_card = frappe.get_last_doc("Job Card", {"work_order": first.name})
+		job_card.append("time_logs", {"from_time": "2024-05-01 08:00:00"})
+		job_card.save()
+		job_card.complete_job_card(
+			qty=90,
+			for_quantity=100,
+			pending_qty=0,
+			process_loss_qty=10,
+			end_time="2024-05-01 09:00:00",
+		)
+		job_card.reload().submit()
+		self.assertEqual(first.reload().process_loss_qty, 10)
+		replacement = self.create_work_order(plan, "production_plan_item")
+		replacement.submit()
+		self.assert_loss_reversal_blocked(job_card)
+		self.assertEqual(first.reload().process_loss_qty, 10)
+		self.assertEqual(first.operations[0].process_loss_qty, 10)
+		replacement.cancel()
+		job_card.cancel()
+		self.assertEqual(first.reload().process_loss_qty, 0)
 
 	def test_expected_loss_does_not_allow_extra_quantity(self):
 		plan = self.make_plan()
@@ -220,6 +285,27 @@ class TestProductionPlanWorkOrderQuantities(ERPNextTestSuite):
 			plan.submit()
 		return plan
 
+	def make_bom_with_operation(self, item, material):
+		bom = make_bom(item=item, raw_materials=[material], with_operations=1, do_not_save=True)
+		bom.track_semi_finished_goods = 1
+		bom.items[0].operation_row_id = 1
+		operation = {
+			"operation": f"_Test Loss Reversal {item}",
+			"workstation": "_Test Workstation A",
+			"finished_good": item,
+			"finished_good_qty": 1,
+			"is_final_finished_good": 1,
+			"sequence_id": 1,
+			"time_in_mins": 60,
+			"source_warehouse": self.warehouse,
+			"fg_warehouse": self.warehouse,
+			"skip_material_transfer": 1,
+		}
+		make_workstation(operation)
+		make_operation(operation)
+		bom.append("operations", operation)
+		bom.insert().submit()
+
 	def create_work_order(self, plan, field):
 		plan.make_work_order()
 		name = frappe.db.get_value(
@@ -243,14 +329,24 @@ class TestProductionPlanWorkOrderQuantities(ERPNextTestSuite):
 		copy.insert()
 		return copy
 
-	def manufacture_with_loss(self, work_order):
+	def manufacture_with_loss(self, work_order, qty=None):
 		for item in work_order.required_items:
 			make_stock_entry(
 				item_code=item.item_code, target=self.warehouse, qty=item.required_qty, basic_rate=10
 			)
-		entry = frappe.get_doc(make_se_from_wo(work_order.name, "Manufacture", work_order.qty))
+		entry = frappe.get_doc(make_se_from_wo(work_order.name, "Manufacture", qty or work_order.qty))
 		entry.submit()
 		return entry
+
+	def assert_loss_reversal_blocked(self, document):
+		frappe.db.savepoint("loss_reversal")
+		try:
+			with self.assertRaises(OverProductionError):
+				document.cancel()
+		finally:
+			# Match the request rollback after an on_cancel validation fails.
+			frappe.db.rollback(save_point="loss_reversal")
+		self.assertEqual(document.reload().docstatus, 1)
 
 	def assert_overproduction(self, work_order, qty):
 		work_order.qty = qty

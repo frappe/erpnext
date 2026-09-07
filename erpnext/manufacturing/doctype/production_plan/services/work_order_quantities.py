@@ -14,7 +14,7 @@ class ProductionPlanWorkOrderQuantities:
 	def __init__(self, production_plan):
 		self.production_plan = production_plan
 
-	def validate_work_order(self, work_order):
+	def validate_work_order(self, work_order, *, process_loss_qty=0):
 		from erpnext.manufacturing.doctype.work_order.work_order import OverProductionError
 
 		if work_order.production_plan_item and work_order.production_plan_sub_assembly_item:
@@ -28,7 +28,7 @@ class ProductionPlanWorkOrderQuantities:
 			row_doctype, qty_field = "Production Plan Item", "planned_qty"
 
 		reference_name = work_order.get(reference_field)
-		# Serialize submissions before reading quantities. The submit rollup updates this row.
+		# Serialize submissions and loss reversals. The submit rollup updates this row.
 		row = (
 			frappe.db.get_value(
 				row_doctype,
@@ -57,7 +57,9 @@ class ProductionPlanWorkOrderQuantities:
 			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order")
 		)
 		precision = work_order.precision("qty")
-		maximum_qty = flt(flt(row[qty_field]) * (1 + allowance / 100) - committed, precision)
+		maximum_qty = flt(
+			flt(row[qty_field]) * (1 + allowance / 100) - committed + flt(process_loss_qty), precision
+		)
 		if flt(work_order.qty, precision) > maximum_qty:
 			frappe.throw(
 				_(

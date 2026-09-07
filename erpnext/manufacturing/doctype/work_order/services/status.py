@@ -13,6 +13,9 @@ from frappe import _
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import cint, flt, get_link_to_form
 
+from erpnext.manufacturing.doctype.production_plan.services.work_order_quantities import (
+	ProductionPlanWorkOrderQuantities,
+)
 from erpnext.stock.stock_balance import get_planned_qty, update_bin_qty
 
 _QTY_PURPOSES = (
@@ -298,7 +301,17 @@ class StatusService:
 		)
 
 	def set_process_loss_qty(self):
-		self.doc.db_set("process_loss_qty", self._process_loss_qty())
+		process_loss_qty = self._process_loss_qty()
+		if self.doc.docstatus == 1 and self.doc.production_plan:
+			previous_loss_qty = frappe.db.get_value(
+				"Work Order", self.doc.name, "process_loss_qty", for_update=True
+			)
+			if process_loss_qty < flt(previous_loss_qty):
+				# Replacement Work Orders may have consumed the recorded loss.
+				ProductionPlanWorkOrderQuantities(self.doc.production_plan).validate_work_order(
+					self.doc, process_loss_qty=process_loss_qty
+				)
+		self.doc.db_set("process_loss_qty", process_loss_qty)
 
 	def _process_loss_qty(self):
 		if self.doc.track_semi_finished_goods:
