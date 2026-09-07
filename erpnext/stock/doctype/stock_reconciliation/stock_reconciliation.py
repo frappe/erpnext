@@ -651,7 +651,7 @@ class StockReconciliation(StockController):
 
 			rate_precision = item.precision("valuation_rate")
 			rate = flt(item_dict.get("rate"), rate_precision)
-			valuation_rate = flt(item.valuation_rate, rate_precision) if item.valuation_rate else None
+			valuation_rate = flt(item.valuation_rate, rate_precision)
 			if (
 				(item.qty is None or item.qty == item_dict.get("qty"))
 				and (valuation_rate is None or valuation_rate == rate)
