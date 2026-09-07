@@ -255,6 +255,35 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		with change_settings("Accounts Settings", {"over_billing_allowance": 100}):
 			self.assertTrue(has_potentially_billable_items(so.name))
 			self.assertTrue(is_offered())
+			from erpnext.controllers.status_updater import get_allowance_for
+
+			so.load_from_db()
+			print(
+				"DIAG58822 so_items",
+				[
+					(d.name, d.qty, d.billed_amt, d.amount, d.base_amount, d.delivered_qty, d.returned_qty)
+					for d in so.items
+				],
+			)
+			print(
+				"DIAG58822 si_items",
+				frappe.get_all(
+					"Sales Invoice Item",
+					filters={"so_detail": so.items[0].name},
+					fields=["parent", "qty", "amount", "docstatus", "so_detail"],
+				),
+			)
+			print(
+				"DIAG58822 allowance",
+				get_allowance_for(item, qty_or_amount="amount"),
+				frappe.get_cached_value("Accounts Settings", None, "over_billing_allowance"),
+				frappe.db.get_single_value("Accounts Settings", "over_billing_allowance"),
+				frappe.db.get_value("Sales Order", so.name, "has_unit_price_items"),
+			)
+			print(
+				"DIAG58822 mapped",
+				[(d.item_code, d.qty, d.amount) for d in make_sales_invoice(so.name).items],
+			)
 			self.assertEqual(make_sales_invoice(so.name).get("items")[0].qty, 150)
 
 		with change_settings("Accounts Settings", {"over_billing_allowance": 0}):
