@@ -11,12 +11,14 @@ from erpnext.accounts.doctype.bank_statement_import_log.bank_statement_import_lo
 	detect_column_mapping,
 	detect_header_row,
 	extract_pdf_tables,
+	get_amount_cr_dr_marker,
 	get_float_amount,
 	get_statement_details,
 	guess_column_mapping_by_content,
 	reextract_pdf_table,
 	set_header_index,
 	set_pdf_table_header,
+	should_include_table,
 	update_column_mapping,
 	update_pdf_tables,
 )
@@ -125,6 +127,184 @@ class TestBankStatementImportLog(ERPNextTestSuite, AccountsTestMixin):
 		self.assertIsNone(get_float_amount("****"))
 
 	# ------------------------------------------------------------------ #
+	# Amount format detection
+	# ------------------------------------------------------------------ #
+
+	def test_amount_cr_dr_marker(self):
+		"""The marker is read at either end of the cell, but only next to the amount."""
+		for amount in ("2,378.00Cr", "50.90 CR", "INR 50.90 Cr.", "1000cr", "5cr", "(100) Cr"):
+			self.assertEqual(get_amount_cr_dr_marker(amount), "cr", amount)
+
+		for amount in ("2,378.00Dr", "50.90 DR", "1000dr", "-100 Dr"):
+			self.assertEqual(get_amount_cr_dr_marker(amount), "dr", amount)
+
+		# Some banks put the marker in front of the digits instead.
+		for amount in ("Cr 100", "Cr100", "CR INR 100", "cr 0.00"):
+			self.assertEqual(get_amount_cr_dr_marker(amount), "cr", amount)
+
+		for amount in ("Dr 100", "Dr100", "Dr. 1,234.50"):
+			self.assertEqual(get_amount_cr_dr_marker(amount), "dr", amount)
+
+		for amount in ("100.00", "-2,000.00", "INR 25,236.00", "", None, 100.0):
+			self.assertIsNone(get_amount_cr_dr_marker(amount), amount)
+
+		# Text that merely starts or ends with the letters must not be read as a marker, or
+		# a description that bled into the amount column would reclassify the statement.
+		for amount in (
+			"CREDIT CARD PAYMENT 500",
+			"DRAFT 100",
+			"Dr Smith Clinic 500",
+			"DR AMBEDKAR ROAD BRANCH 500",
+			"500 CRC",
+			"Cheque Dr",
+			"Cr",
+		):
+			self.assertIsNone(get_amount_cr_dr_marker(amount), amount)
+
+	def test_sparsely_marked_cr_dr_amount_column(self):
+		"""One marker is enough to prove a CR/DR amount column - it is not a majority vote.
+
+		A real HDFC credit-card page carries 18 rows and a single "50.90Cr": the unmarked
+		rows are ordinary purchases, and only the exceptions are marked. A frequency vote
+		therefore picked "positive/negative" 17-1 and imported that lone credit as a debit.
+		"""
+		doc = self._create_bank_statement_import_log(
+			[
+				["Date", "Transaction Description", "Amount (in Rs.)"],
+				["21/07/2026", "ITC MAURYA NEW DELHI", "2,495.00"],
+				["22/07/2026", "ZOMATO LIMITED Gurugram", "1,288.68"],
+				["23/07/2026", "SWIGGY Bangalore", "532.00"],
+				["26/07/2026", "SWIGGY Bangalore", "1,043.00"],
+				["27/07/2026", "PETRO SURCHARGE WAIVER", "50.90Cr"],
+			]
+		)
+
+		self.assertEqual(doc.detected_amount_format, 'Amount column has "CR"/"DR" values')
+		# Only "Cr" appears, so it is the marked exception and unmarked rows are debits.
+		self.assertEqual(doc.total_credits, 50.90)
+		self.assertEqual(doc.total_credit_transactions, 1)
+		self.assertEqual(doc.total_debits, 5358.68)
+		self.assertEqual(doc.total_debit_transactions, 4)
+
+	def test_dr_only_statement_treats_unmarked_rows_as_deposits(self):
+		"""The mirror image of a Cr-only statement: only withdrawals are marked.
+
+		The unmarked default cannot be hardcoded to the debit, because which side gets
+		marked varies by bank. It is derived from the markers the statement actually uses -
+		here only "Dr" appears, so "Dr" is the exception and everything unmarked is a
+		deposit.
+		"""
+		doc = self._create_bank_statement_import_log(
+			[
+				["Date", "Narration", "Amount"],
+				["01/04/2026", "ATM WITHDRAWAL", "2,000.00Dr"],
+				["03/04/2026", "SALARY", "20,000.00"],
+				["05/04/2026", "INTEREST", "150.00"],
+			]
+		)
+
+		self.assertEqual(doc.detected_amount_format, 'Amount column has "CR"/"DR" values')
+		self.assertEqual(doc.total_debits, 2000.0)
+		self.assertEqual(doc.total_debit_transactions, 1)
+		self.assertEqual(doc.total_credits, 20150.0)
+		self.assertEqual(doc.total_credit_transactions, 2)
+
+	def test_leading_cr_dr_markers(self):
+		"""Some banks print the marker in front of the amount."""
+		doc = self._create_bank_statement_import_log(
+			[
+				["Date", "Narration", "Amount"],
+				["01/04/2026", "ATM WITHDRAWAL", "Dr 2,000.00"],
+				["03/04/2026", "SALARY", "Cr 20,000.00"],
+			]
+		)
+
+		self.assertEqual(doc.detected_amount_format, 'Amount column has "CR"/"DR" values')
+		self.assertEqual(doc.total_debits, 2000.0)
+		self.assertEqual(doc.total_credits, 20000.0)
+
+	def test_partially_marked_cr_dr_amount_column(self):
+		"""A CR/DR amount column stays CR/DR even when some rows carry no marker.
+
+		Every unmarked row used to also vote for "positive/negative", so an ordinary
+		statement with a few unmarked rows was detected as positive/negative and a
+		"2000.00Dr" was then imported as a deposit.
+		"""
+		doc = self._create_bank_statement_import_log(
+			[
+				["Date", "Narration", "Amount", "Balance"],
+				["01/04/2026", "OPENING FEE", "100.00", "9,900.00"],
+				["03/04/2026", "SALARY", "20000.00Cr", "29,900.00"],
+				["05/04/2026", "ATM WDL", "2000.00Dr", "27,900.00"],
+			]
+		)
+
+		self.assertEqual(doc.detected_amount_format, 'Amount column has "CR"/"DR" values')
+		# Both markers appear, so an unmarked row is undetermined and stays a debit.
+		self.assertEqual(doc.total_debits, 2100.0)
+		self.assertEqual(doc.total_debit_transactions, 2)
+		self.assertEqual(doc.total_credits, 20000.0)
+		self.assertEqual(doc.total_credit_transactions, 1)
+
+	def test_deposit_withdrawal_type_column(self):
+		"""The word Withdrawal contains "dr", so a loose CR/DR check claims this column first.
+
+		It then reads "Deposit" (which has no "cr" in it) as a withdrawal, flipping the
+		direction of every credit in the statement.
+		"""
+		doc = self._create_bank_statement_import_log(
+			[
+				["Date", "Narration", "Transaction Type", "Amount"],
+				["01/04/2026", "ATM WDL", "Withdrawal", "2,000.00"],
+				["03/04/2026", "SALARY", "Deposit", "20,000.00"],
+				["05/04/2026", "ATM WDL", "Withdrawal", "500.00"],
+			]
+		)
+
+		self.assertEqual(
+			doc.detected_amount_format, 'Transaction type column has "Deposit"/"Withdrawal" values'
+		)
+		self.assertEqual(doc.total_debits, 2500.0)
+		self.assertEqual(doc.total_debit_transactions, 2)
+		self.assertEqual(doc.total_credits, 20000.0)
+		self.assertEqual(doc.total_credit_transactions, 1)
+
+	def test_unrecognised_type_column_falls_back_to_signed_amount(self):
+		"""An unrecognised transaction type must not stop the amount being read.
+
+		No tally was incremented for these rows, so max() returned the first key -
+		"Separate columns for withdrawal and deposit" - and, with no such columns in the
+		file, every amount came through as None.
+		"""
+		doc = self._create_bank_statement_import_log(
+			[
+				["Date", "Narration", "Transaction Type", "Amount"],
+				["01/04/2026", "ATM WDL", "NEFT", "-2,000.00"],
+				["03/04/2026", "SALARY", "IMPS", "20,000.00"],
+			]
+		)
+
+		self.assertEqual(doc.detected_amount_format, "Amount column has positive/negative values")
+		self.assertEqual(doc.total_debits, 2000.0)
+		self.assertEqual(doc.total_credits, 20000.0)
+
+	def test_blank_transaction_type_cell(self):
+		"""A blank type cell used to raise - `None.lower()` - instead of parsing the row."""
+		doc = self._create_bank_statement_import_log(
+			[
+				["Date", "Narration", "Transaction Type", "Amount"],
+				["01/04/2026", "ATM WDL", "Dr", "2,000.00"],
+				["03/04/2026", "SALARY", "Cr", "20,000.00"],
+				["05/04/2026", "UNKNOWN", None, "500.00"],
+			]
+		)
+
+		self.assertEqual(doc.detected_amount_format, 'Transaction type column has "CR"/"DR" values')
+		# The unmarked row has no direction of its own, so it counts as a withdrawal.
+		self.assertEqual(doc.total_debits, 2500.0)
+		self.assertEqual(doc.total_credits, 20000.0)
+
+	# ------------------------------------------------------------------ #
 	# PDF statement import
 	# ------------------------------------------------------------------ #
 
@@ -159,7 +339,8 @@ class TestBankStatementImportLog(ERPNextTestSuite, AccountsTestMixin):
 		else:
 			table["header_index"] = None
 			table["column_mapping"] = guess_column_mapping_by_content(table["rows"])
-		table["included"] = True
+		final_transactions, _df, _af = build_table_transactions(table)
+		table["included"] = should_include_table(table, final_transactions)
 		return table
 
 	def test_pdf_multi_page_kept_separate_and_unioned(self):
@@ -196,6 +377,74 @@ class TestBankStatementImportLog(ERPNextTestSuite, AccountsTestMixin):
 		ad_table = self._auto_map({"rows": [["Open a new account!", "Call 1800-XYZ"]]})
 		final, _df, _af = build_table_transactions(ad_table)
 		self.assertEqual(final, [])
+
+	def test_pdf_summary_box_not_auto_included(self):
+		"""A summary box that happens to parse as one transaction must not start included.
+
+		The "Payment Due Date / Total Dues / Minimum Amount Due" block on an HDFC
+		credit-card statement has a date column and a figures column, so it yields a single
+		transaction - the due date and the minimum amount - and used to import as a phantom
+		row. What it does not have, and a real transaction table always does, is a narration.
+		"""
+		summary_box = {
+			"header_index": 1,
+			"rows": [
+				["Statement Date:17/08/2025", "Card No: 4341 55XX XXXX 2754", ""],
+				["Payment Due Date", "Total Dues", "Minimum Amount Due"],
+				["06/09/2025", "73,200.00", "3,660.00"],
+				["Credit Limit", "Available Credit Limit", "Available Cash Limit"],
+				["", "32,800", ""],
+			],
+			"column_mapping": [
+				{"index": 0, "header_text": "Payment Due Date", "variable": "a", "maps_to": "Date"},
+				{"index": 1, "header_text": "Total Dues", "variable": "b", "maps_to": "Do not import"},
+				{"index": 2, "header_text": "Minimum Amount Due", "variable": "c", "maps_to": "Amount"},
+			],
+		}
+
+		final, _df, _af = build_table_transactions(summary_box)
+		# It really does parse as a transaction - that is why the previous check missed it.
+		self.assertEqual(len(final), 1)
+		self.assertFalse(should_include_table(summary_box, final))
+
+		# The transaction table beside it, which does carry a narration, still starts included.
+		transactions = self._auto_map(
+			{
+				"rows": [
+					["Date", "Transaction Description", "Amount (in Rs.)"],
+					["21/07/2025", "ITC MAURYA NEW DELHI", "2,495.00"],
+					["27/07/2025", "PETRO SURCHARGE WAIVER", "50.90Cr"],
+				]
+			}
+		)
+		self.assertTrue(transactions["included"])
+
+	def test_pdf_table_without_description_still_importable(self):
+		"""No narration column means "starts unticked", NOT "cannot be imported".
+
+		`description` is not mandatory on Bank Transaction, so a bank that omits narration
+		must still import once the user ticks the table.
+		"""
+		table = {
+			"header_index": 0,
+			"rows": [
+				["Date", "Amount", "Balance"],
+				["01/04/2025", "500.00", "9,500.00"],
+				["03/04/2025", "20000.00", "29,500.00"],
+			],
+			"column_mapping": [
+				{"index": 0, "header_text": "Date", "variable": "a", "maps_to": "Date"},
+				{"index": 1, "header_text": "Amount", "variable": "b", "maps_to": "Amount"},
+				{"index": 2, "header_text": "Balance", "variable": "c", "maps_to": "Balance"},
+			],
+		}
+
+		final, _df, _af = build_table_transactions(table)
+		self.assertFalse(should_include_table(table, final))
+
+		# The transactions themselves are intact and importable.
+		self.assertEqual(len(final), 2)
+		self.assertEqual([t["date"] for t in final], ["2025-04-01", "2025-04-03"])
 
 	def test_headerless_content_mapping(self):
 		"""Without a header row, columns are guessed from their contents."""
