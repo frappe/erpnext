@@ -375,8 +375,7 @@ class BankStatementImportLog(Document):
 				table["column_mapping"] = guess_column_mapping_by_content(table["rows"])
 
 			final_transactions, table["date_format"], table["amount_format"] = build_table_transactions(table)
-			# Tables with no detectable transactions (ads, summaries, headers) start excluded.
-			table["included"] = bool(final_transactions)
+			table["included"] = should_include_table(table, final_transactions)
 
 		self.pdf_tables = json.dumps(tables)
 		return tables
@@ -542,6 +541,8 @@ class BankStatementImportLog(Document):
 				"bank-rec-statement-import-progress",
 				{
 					"progress": round(progress / total_transactions * 100),
+					"current": progress,
+					"total": total_transactions,
 				},
 				doctype="Bank Statement Import Log",
 				docname=self.name,
@@ -551,6 +552,7 @@ class BankStatementImportLog(Document):
 			"bank-rec-statement-import-progress",
 			{
 				"progress": 100,
+				"current": total_transactions,
 				"total": total_transactions,
 			},
 			doctype="Bank Statement Import Log",
@@ -821,6 +823,15 @@ def compute_final_transactions(transaction_rows: list, date_format: str, amount_
 	"""Pure version of the final-transaction builder (date normalized, amount split)."""
 	final_transactions = []
 
+	# Which marker does this statement actually write? A statement that only ever says "Cr"
+	# is marking the credits as its exceptions, so an unmarked row is a withdrawal; one that
+	# only ever says "Dr" means the opposite. With both markers present an unmarked row is
+	# genuinely undetermined, so it stays a withdrawal.
+	unmarked_is_deposit = False
+	if amount_format == 'Amount column has "CR"/"DR" values':
+		markers = {get_amount_cr_dr_marker(row.get("amount")) for row in transaction_rows}
+		unmarked_is_deposit = markers - {None} == {"dr"}
+
 	def parse_amount(transaction_row: dict):
 		if amount_format == "Separate columns for withdrawal and deposit":
 			return get_float_amount(transaction_row.get("withdrawal")), get_float_amount(
@@ -829,44 +840,43 @@ def compute_final_transactions(transaction_rows: list, date_format: str, amount_
 
 		if amount_format == 'Amount column has "CR"/"DR" values':
 			amount = transaction_row.get("amount")
+			marker = get_amount_cr_dr_marker(amount)
+			# The marker carries the direction, so the amount's own sign is ignored.
+			signed_amount = get_float_amount(amount) or 0
 
-			# If the amount column has CR/DR in it - we should remove any signs (negative or positive) from the amount
-			float_amount = abs(get_float_amount(amount) or 0)
-			if "cr" in amount.lower():
-				return 0, float_amount
-			else:
-				return float_amount, 0
+			if marker:
+				return (0, abs(signed_amount)) if marker == "cr" else (abs(signed_amount), 0)
 
+			# An unmarked row takes the opposite direction to the marker this statement
+			# uses. A negative amount reverses that again (a refund).
+			is_deposit = unmarked_is_deposit
+			if signed_amount < 0:
+				is_deposit = not is_deposit
+
+			return (0, abs(signed_amount)) if is_deposit else (abs(signed_amount), 0)
+
+		# `or 0` below: get_float_amount returns None for an unparseable cell, and a blank
+		# transaction-type cell comes through as None. Both used to raise.
 		if amount_format == "Amount column has positive/negative values":
-			amount = get_float_amount(transaction_row.get("amount", "0"))
+			amount = get_float_amount(transaction_row.get("amount", "0")) or 0
 			if amount > 0:
 				return 0, abs(amount)
 			else:
 				return abs(amount), 0
 
+		transaction_type = str(transaction_row.get("debit_credit") or "").strip().lower()
+		amount = abs(get_float_amount(transaction_row.get("amount", "0")) or 0)
+
 		if amount_format == 'Transaction type column has "CR"/"DR" values':
-			transaction_type = transaction_row.get("debit_credit")
-			amount = get_float_amount(transaction_row.get("amount", "0"))
-			if "cr" in transaction_type.lower():
-				return 0, abs(amount)
-			else:
-				return abs(amount), 0
+			# "credit" contains "cr". "debit" does not contain "dr", so it correctly falls
+			# through to the withdrawal side.
+			return (0, amount) if "cr" in transaction_type else (amount, 0)
 
 		if amount_format == 'Transaction type column has "C"/"D" values':
-			transaction_type = transaction_row.get("debit_credit")
-			amount = get_float_amount(transaction_row.get("amount", "0"))
-			if transaction_type.lower().strip() == "c":
-				return 0, abs(amount)
-			else:
-				return abs(amount), 0
+			return (0, amount) if transaction_type == "c" else (amount, 0)
 
 		if amount_format == 'Transaction type column has "Deposit"/"Withdrawal" values':
-			transaction_type = transaction_row.get("debit_credit")
-			amount = get_float_amount(transaction_row.get("amount", "0"))
-			if "deposit" in transaction_type.lower():
-				return 0, abs(amount)
-			else:
-				return abs(amount), 0
+			return (0, amount) if "deposit" in transaction_type else (amount, 0)
 
 		return 0, 0
 
@@ -908,6 +918,26 @@ def build_table_transactions(table: dict):
 	date_format, amount_format = get_file_properties(transaction_rows)
 	final_transactions = compute_final_transactions(transaction_rows, date_format, amount_format)
 	return final_transactions, date_format, amount_format
+
+
+def should_include_table(table: dict, final_transactions: list) -> bool:
+	"""
+	Whether a freshly extracted PDF table should START as included - only the default state
+	of the checkbox, which the user can change afterwards.
+
+	It must have yielded transactions, and it must have a Description column mapped. A
+	transaction table always carries a narration; the summary boxes printed around it -
+	payment due, credit limit, reward points - are dates and figures only. Otherwise the
+	HDFC credit-card "Payment Due Date / Total Dues / Minimum Amount Due" box parses as one
+	transaction and imports a phantom row.
+
+	A description is NOT needed to import (it is not mandatory on Bank Transaction), so a
+	bank that omits narration still works - its table just starts unticked.
+	"""
+	if not final_transactions:
+		return False
+
+	return any(column.get("maps_to") == "Description" for column in table.get("column_mapping", []))
 
 
 def _clean_cell(cell) -> str:
@@ -1055,6 +1085,43 @@ def get_float_amount(amount):
 	return amount
 
 
+# A "CR"/"DR" marker on the amount itself, at either end: "2,378.00Cr", "Cr 100",
+# "INR 50.90 Cr.", "DR 1,234.50".
+# `(?![a-zA-Z])` rather than `\b` on the leading form: there is no word boundary between
+# the "r" of "Cr100" and the digit, but there IS one inside "CREDIT" and "DRAFT".
+AMOUNT_CR_DR_PATTERN = re.compile(r"^\s*(cr|dr)(?![a-zA-Z])\.?|(?:^|[\s\d.)])(cr|dr)\b\.?\s*$", re.IGNORECASE)
+
+
+def get_amount_cr_dr_marker(amount) -> str | None:
+	"""
+	Return "cr" or "dr" if the amount cell carries a direction marker of its own, else None.
+
+	What is left after removing the marker has to look like an amount - it must hold a digit
+	and at most a short currency token - so that text which merely starts or ends with the
+	letters is not read as a marker. That guard is what separates "Cr 100" from a
+	description that bled into the amount column, like "Dr Smith Clinic 500".
+	"""
+	if not isinstance(amount, str):
+		return None
+
+	match = AMOUNT_CR_DR_PATTERN.search(amount)
+	if not match:
+		return None
+
+	# Only the marker itself is removed - the surrounding character the pattern needed to
+	# anchor on (a digit, say) stays part of the remainder.
+	group = 1 if match.group(1) else 2
+	start, end = match.span(group)
+	remainder = amount[:start] + amount[end:]
+
+	if not any(char.isdigit() for char in remainder):
+		return None
+	if sum(char.isalpha() for char in remainder) > 3:
+		return None
+
+	return match.group(group).lower()
+
+
 def get_file_properties(transactions: list):
 	"""
 	From the transaction rows, try to figure out the following:
@@ -1075,6 +1142,8 @@ def get_file_properties(transactions: list):
 		'Transaction type column has "C"/"D" values': 0,
 	}
 
+	amount_column_has_cr_dr = False
+
 	for transaction in transactions:
 		date_format = transaction.get("date_format")
 
@@ -1092,32 +1161,39 @@ def get_file_properties(transactions: list):
 		if not amount:
 			continue
 
-		if isinstance(amount, str) and ("cr" in amount.lower() or "dr" in amount.lower()):
+		debit_credit = str(transaction.get("debit_credit") or "").strip().lower()
+
+		# One vote per row, most specific signal first. Order matters: "withdrawal" contains
+		# "dr", so it must be matched before the loose cr/dr check or a Deposit/Withdrawal
+		# column reads as CR/DR. "debit" needs listing because, unlike "credit", it does not
+		# contain "dr". The final else means every row votes, even an unrecognised type.
+		if get_amount_cr_dr_marker(amount):
+			amount_column_has_cr_dr = True
 			amount_format_frequency['Amount column has "CR"/"DR" values'] += 1
-
-		# Check if there's a debit_credit column containing "cr"/"dr"
-		if transaction.get("debit_credit", None):
-			if (
-				"cr" in transaction.get("debit_credit", "").lower()
-				or "dr" in transaction.get("debit_credit", "").lower()
-			):
-				amount_format_frequency['Transaction type column has "CR"/"DR" values'] += 1
-			elif (
-				"deposit" in transaction.get("debit_credit", "").lower()
-				or "withdrawal" in transaction.get("debit_credit", "").lower()
-			):
-				amount_format_frequency['Transaction type column has "Deposit"/"Withdrawal" values'] += 1
-			elif (transaction.get("debit_credit", "").lower().strip() == "c") or (
-				transaction.get("debit_credit", "").lower().strip() == "d"
-			):
-				amount_format_frequency['Transaction type column has "C"/"D" values'] += 1
-
-		# Else assume that the amount is expressed as positive/negative value
+		elif "deposit" in debit_credit or "withdrawal" in debit_credit:
+			amount_format_frequency['Transaction type column has "Deposit"/"Withdrawal" values'] += 1
+		elif debit_credit in ("c", "d"):
+			amount_format_frequency['Transaction type column has "C"/"D" values'] += 1
+		elif any(token in debit_credit for token in ("cr", "dr", "debit")):
+			amount_format_frequency['Transaction type column has "CR"/"DR" values'] += 1
 		else:
+			# Nothing said which direction this is, so assume the amount carries the sign.
 			amount_format_frequency["Amount column has positive/negative values"] += 1
 
 	most_common_date_format = max(date_format_frequency, key=date_format_frequency.get)
 	most_common_amount_format = max(amount_format_frequency, key=amount_format_frequency.get)
+
+	# With no votes at all (no rows, or every amount blank) max() would return whichever key
+	# happens to be first in the dict. Say what we mean instead.
+	if not amount_format_frequency[most_common_amount_format]:
+		most_common_amount_format = "Amount column has positive/negative values"
+
+	# A CR/DR amount column is proved by a single marker, not by a majority: both formats
+	# describe the same column, and an unmarked row is only the default direction, not
+	# evidence against the notation. Statements mark just the exceptions - one HDFC
+	# credit-card page has 18 rows and a single "50.90Cr".
+	if amount_column_has_cr_dr and most_common_amount_format == "Amount column has positive/negative values":
+		most_common_amount_format = 'Amount column has "CR"/"DR" values'
 
 	return most_common_date_format, most_common_amount_format
 

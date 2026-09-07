@@ -74,7 +74,10 @@ const BankPicker = ({ className }: { className?: string }) => {
     }
     return (
         <div
-            className={cn("flex gap-3 items-stretch w-full overflow-x-auto pe-4",
+            // No trailing padding: it would sit inside the fade region, so the mask would
+            // spend itself on empty space and the last card would stop short of the balance
+            // panel instead of fading towards it. The column gap provides the separation.
+            className={cn("flex gap-3 items-stretch w-full overflow-x-auto scroll-fade-x",
                 banks?.length > 4 ? 'pb-2' : '', className,
             )}
             style={{
@@ -108,12 +111,12 @@ const BankPickerItem = ({ bank }: { bank: SelectedBank }) => {
         role="button"
         title={`Select ${bank.account_name}`}
         onClick={onSelect}
-        className={cn('rounded-md border border-outline-gray-1 max-w-60 min-w-60 p-2 overflow-hidden cursor-pointer',
+        // `shrink-0`: this is a horizontally scrolling row, so cards keep their own width
+        // instead of being compressed to fit the container.
+        className={cn('w-60 shrink-0 rounded-md border border-outline-gray-1 p-2 overflow-hidden cursor-pointer transition-colors',
             isSelected ? 'border-outline-gray-5 bg-surface-gray-1' : 'hover:bg-surface-gray-1'
         )}
     >
-
-
         <BankLogo bank={bank} className="mb-2" />
 
         <div className="flex flex-col gap-1">
