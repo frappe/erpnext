@@ -1443,6 +1443,8 @@ class AccountsController(TransactionBase):
 		if previous_items is not None:
 			self.move_additional_discount_to_items()
 			self.set("items", previous_items + self.items)
+			for idx, item in enumerate(self.items, 1):
+				item.idx = idx
 			self.calculate_taxes_and_totals()
 
 	def _has_mixed_additional_discount(self, source_doc):

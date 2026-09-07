@@ -76,6 +76,11 @@ class TestMappedDiscounts(ERPNextTestSuite):
 		]
 		for sources in (orders, list(reversed(orders))):
 			receipt = self.combine(*sources).save()
+			self.assertEqual([item.idx for item in receipt.items], [1, 2, 3])
+			receipt.reload()
+			self.assertEqual(
+				[item.purchase_order for item in receipt.items], [source.name for source in sources]
+			)
 			self.assertEqual(receipt.grand_total, 2400)
 			items = {item.purchase_order: item for item in receipt.items}
 			for source in sources:
@@ -145,6 +150,7 @@ class TestMappedDiscounts(ERPNextTestSuite):
 				[regular.name, discounted.name],
 				frappe.new_doc("Sales Invoice").as_dict(),
 			)
+			self.assertEqual([item.idx for item in invoice.items], [1, 2])
 			invoice.items[1].qty = 5
 			invoice.save().submit()
 			self.assertEqual(invoice.grand_total, 950)
