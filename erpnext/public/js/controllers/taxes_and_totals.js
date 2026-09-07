@@ -110,11 +110,28 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		this.calculate_item_values();
 		this.initialize_taxes();
 		this.determine_exclusive_rate();
+		this.apply_mapped_additional_discount();
 		this.calculate_net_total();
 		this.calculate_taxes();
 		this.adjust_grand_total_for_inclusive_tax();
 		this.calculate_totals();
 		this._cleanup();
+	}
+
+	apply_mapped_additional_discount() {
+		if (this.discount_amount_applied || this.frm.doc.is_consolidated) return;
+
+		for (const item of this.frm._items || []) {
+			if (!item.mapped_additional_discount_amount || !item.qty) continue;
+
+			item.net_amount = flt(
+				item.net_amount - item.mapped_additional_discount_amount * item.qty,
+				precision("net_amount", item)
+			);
+			item.net_rate = flt(item.net_amount / item.qty, precision("net_rate", item));
+			item._unrounded_net_amount = null;
+			this.set_in_company_currency(item, ["net_rate", "net_amount"]);
+		}
 	}
 
 	validate_conversion_rate() {
@@ -163,6 +180,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			const fields_to_round = this.get_item_fields_to_round();
 			for (const item of this.frm.doc.items || []) {
 				frappe.model.round_floats_in(item, fields_to_round);
+				item._mapped_discount_inclusive_amount = 0;
 				item.net_rate = item.rate;
 				item.qty = item.qty === undefined ? (me.frm.doc.is_return ? -1 : 1) : item.qty;
 
@@ -305,6 +323,9 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 				total_tax_slope += tax.tax_fraction_for_current_item;
 				total_tax_intercept += tax_intercept_per_qty * flt(item.qty);
 			});
+
+			item._mapped_discount_inclusive_amount =
+				flt(item.mapped_additional_discount_amount) * flt(item.qty) * (1 + total_tax_slope);
 
 			if (!me.discount_amount_applied && item.qty && (total_tax_intercept || total_tax_slope)) {
 				var amount = flt(item.amount) - total_tax_intercept;
@@ -689,6 +710,10 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 					me.frm.doc.total +
 					non_inclusive_tax_amount -
 					flt(last_tax.total, precision("grand_total"));
+				diff -= (me.frm._items || []).reduce(
+					(total, item) => total + flt(item._mapped_discount_inclusive_amount),
+					0
+				);
 
 				if (me.discount_amount_applied && me.frm.doc.discount_amount) {
 					diff -= flt(me.frm.doc.discount_amount);

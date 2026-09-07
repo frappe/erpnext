@@ -2358,10 +2358,10 @@ class TestAccountsController(ERPNextTestSuite):
 				self.assertEqual(document.additional_discount_percentage, 0)
 				self.assertEqual(document.discount_amount, 0)
 				for purchase_order, expected_rate in expected_rates.items():
-					if expected_rate < 100:
-						self.assertEqual(items[purchase_order].price_list_rate, 100)
-					self.assertEqual(items[purchase_order].rate, expected_rate)
-					self.assertEqual(items[purchase_order].discount_amount, 100 - expected_rate)
+					self.assertEqual(items[purchase_order].rate, 100)
+					self.assertEqual(
+						items[purchase_order].mapped_additional_discount_amount, 100 - expected_rate
+					)
 					self.assertEqual(items[purchase_order].net_amount, expected_rate)
 				self.assertEqual(document.grand_total, 270)
 
@@ -2475,7 +2475,8 @@ class TestAccountsController(ERPNextTestSuite):
 				self.assertEqual(first_receipt.discount_amount, 50)
 				self.assertEqual(receipt.discount_amount, 0)
 				self.assertEqual(receipt.grand_total, 950)
-				self.assertEqual(items[discounted_order.name].rate, 90)
+				self.assertEqual(items[discounted_order.name].rate, 100)
+				self.assertEqual(items[discounted_order.name].mapped_additional_discount_amount, 10)
 				self.assertEqual(items[regular_order.name].rate, 100)
 
 				items[discounted_order.name].rate = 89
@@ -2518,10 +2519,10 @@ class TestAccountsController(ERPNextTestSuite):
 				self.assertEqual(document.additional_discount_percentage, 0)
 				self.assertEqual(document.discount_amount, 0)
 				for sales_order, expected_rate in expected_rates.items():
-					if expected_rate < 100:
-						self.assertEqual(items[sales_order].price_list_rate, 100)
-					self.assertEqual(items[sales_order].rate, expected_rate)
-					self.assertEqual(items[sales_order].discount_amount, 100 - expected_rate)
+					self.assertEqual(items[sales_order].rate, 100)
+					self.assertEqual(
+						items[sales_order].mapped_additional_discount_amount, 100 - expected_rate
+					)
 					self.assertEqual(items[sales_order].net_amount, expected_rate)
 				self.assertEqual(document.grand_total, 270)
 
