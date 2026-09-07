@@ -597,7 +597,7 @@ def _deduct_consumed_material_qty(item_data, row):
 		item_data.batch_details[row.batch_no] -= row.qty
 	elif row.batch_nos:
 		for batch_no, qty in row.batch_nos.items():
-			item_data.batch_details[batch_no] += qty
+			item_data.batch_details[batch_no] -= qty
 	_remove_serial_nos_from_available(item_data, row)
 
 
