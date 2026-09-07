@@ -1619,6 +1619,21 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			-500,
 		)
 
+	def test_no_change_row_removed_when_valuation_rate_is_blank(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		item_code = self.make_item("Test Item Stock Reco Blank Valuation Rate").name
+		warehouse = "_Test Warehouse - _TC"
+
+		make_stock_entry(item_code=item_code, target=warehouse, qty=5, basic_rate=100)
+
+		sr = create_stock_reconciliation(
+			item_code=item_code, warehouse=warehouse, qty=5, rate=None, do_not_save=1
+		)
+
+		# a blank rate means "keep the current rate", so nothing changed on this row
+		self.assertRaises(EmptyStockReconciliationItemsError, sr.save)
+
 	def test_set_existing_stock_valuation_to_zero(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 

@@ -651,7 +651,10 @@ class StockReconciliation(StockController):
 
 			rate_precision = item.precision("valuation_rate")
 			rate = flt(item_dict.get("rate"), rate_precision)
-			valuation_rate = flt(item.valuation_rate, rate_precision)
+			# an unset rate means "keep the current one", an explicit zero is a real revaluation
+			valuation_rate = (
+				flt(item.valuation_rate, rate_precision) if item.valuation_rate not in ("", None) else None
+			)
 			if (
 				(item.qty is None or item.qty == item_dict.get("qty"))
 				and (valuation_rate is None or valuation_rate == rate)
