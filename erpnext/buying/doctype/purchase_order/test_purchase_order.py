@@ -748,6 +748,48 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		self.assertTrue(insert_po(110.232))
 		self.assertFalse(insert_po(150))
 
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 1})
+	def test_marginal_min_order_qty_toast_with_duplicate_rows(self):
+		original_precision = frappe.db.get_default("float_precision")
+		frappe.db.set_default("float_precision", "3")
+		self.addCleanup(frappe.db.set_default, "float_precision", original_precision)
+
+		item = make_item(
+			properties={"min_order_qty": 1000.5, "stock_uom": "_Test UOM 1"},
+			uoms=[{"uom": "Pound", "conversion_factor": 1000}],
+		)
+		conversion_factors = {"_Test UOM 1": 1, "Pound": 1000}
+		cases = [
+			([("Pound", 1), ("_Test UOM 1", 0.6)], False),
+			([("_Test UOM 1", 0.6), ("Pound", 1)], False),
+			([("Pound", 0.5), ("_Test UOM 1", 0.6), ("Pound", 0.5)], False),
+			([("Pound", 0.5), ("Pound", 0.501)], True),
+		]
+		for rows, expect_toast in cases:
+			with self.subTest(rows=rows):
+				po = create_purchase_order(
+					do_not_save=1,
+					rm_items=[
+						{
+							"item_code": item.name,
+							"uom": uom,
+							"conversion_factor": conversion_factors[uom],
+							"qty": qty,
+							"rate": 1,
+							"warehouse": "_Test Warehouse - _TC",
+							"schedule_date": add_days(nowdate(), 1),
+						}
+						for uom, qty in rows
+					],
+				)
+				frappe.clear_messages()
+				po.insert()
+				has_toast = any(
+					"due to purchase UOM rounding" in message.get("message", "")
+					for message in frappe.get_message_log()
+				)
+				self.assertEqual(has_toast, expect_toast)
+
 	def test_uom_integer_validation(self):
 		from erpnext.utilities.transaction_base import UOMMustBeIntegerError
 

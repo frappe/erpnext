@@ -339,17 +339,22 @@ class PurchaseOrder(BuyingController):
 			return
 
 		precision = self.items[0].precision("stock_qty")
-		itemwise_step = frappe._dict()
+		itemwise_steps = {}
 		itemwise_stock_uom = frappe._dict()
 		for d in self.get("items"):
 			step = 10 ** -d.precision("qty") * flt(d.conversion_factor)
-			itemwise_step[d.item_code] = max(itemwise_step.get(d.item_code, 0), step)
+			itemwise_steps.setdefault(d.item_code, set()).add(step)
 			itemwise_stock_uom[d.item_code] = d.stock_uom
 
 		for item_code, qty in itemwise_qty.items():
+			steps = itemwise_steps[item_code]
+			if len(steps) != 1:
+				continue
+
+			step = next(iter(steps))
 			min_order_qty = flt(itemwise_min_order_qty.get(item_code))
 			overage = flt(qty) - min_order_qty
-			if min_order_qty and flt(overage, precision) > 0 and overage < itemwise_step[item_code]:
+			if min_order_qty and flt(overage, precision) > 0 and overage < step:
 				frappe.toast(
 					_(
 						"Item {0}: Ordered qty {1} {2} exceeds the minimum order qty {3} {2} by {4} {2} due to purchase UOM rounding."
