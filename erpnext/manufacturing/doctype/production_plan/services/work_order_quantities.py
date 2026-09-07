@@ -17,6 +17,37 @@ class ProductionPlanWorkOrderQuantities:
 	def validate_work_order(self, work_order, *, process_loss_qty=0):
 		from erpnext.manufacturing.doctype.work_order.work_order import OverProductionError
 
+		row = self.lock_plan_row(work_order)
+
+		committed = self.get_committed_quantities(
+			exclude_work_order=work_order.name,
+			reference_field=row.reference_field,
+			reference_name=row.name,
+			for_update=True,
+		)[row.reference_field].get(row.name, 0)
+		allowance = flt(
+			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order")
+		)
+		precision = work_order.precision("qty")
+		maximum_qty = flt(
+			flt(row.planned_qty) * (1 + allowance / 100) - committed + flt(process_loss_qty), precision
+		)
+		if flt(work_order.qty, precision) > maximum_qty:
+			frappe.throw(
+				_(
+					"Row {0} in {1} {2}: Work Order quantity {3} exceeds the remaining allowed quantity {4}."
+				).format(
+					row.idx,
+					_(row.doctype),
+					get_link_to_form("Production Plan", self.production_plan),
+					flt(work_order.qty, precision),
+					max(0, maximum_qty),
+				),
+				OverProductionError,
+				title=_("Production Plan Quantity Exceeded"),
+			)
+
+	def lock_plan_row(self, work_order):
 		if work_order.production_plan_item and work_order.production_plan_sub_assembly_item:
 			frappe.throw(_("Work Order must reference only one Production Plan row."))
 
@@ -33,7 +64,7 @@ class ProductionPlanWorkOrderQuantities:
 			frappe.db.get_value(
 				row_doctype,
 				{"name": reference_name, "parent": self.production_plan},
-				["idx", qty_field],
+				["name", "idx", f"{qty_field} as planned_qty"],
 				as_dict=True,
 				for_update=True,
 			)
@@ -47,33 +78,9 @@ class ProductionPlanWorkOrderQuantities:
 				)
 			)
 
-		committed = self.get_committed_quantities(
-			exclude_work_order=work_order.name,
-			reference_field=reference_field,
-			reference_name=reference_name,
-			for_update=True,
-		)[reference_field].get(reference_name, 0)
-		allowance = flt(
-			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order")
-		)
-		precision = work_order.precision("qty")
-		maximum_qty = flt(
-			flt(row[qty_field]) * (1 + allowance / 100) - committed + flt(process_loss_qty), precision
-		)
-		if flt(work_order.qty, precision) > maximum_qty:
-			frappe.throw(
-				_(
-					"Row {0} in {1} {2}: Work Order quantity {3} exceeds the remaining allowed quantity {4}."
-				).format(
-					row.idx,
-					_(row_doctype),
-					get_link_to_form("Production Plan", self.production_plan),
-					flt(work_order.qty, precision),
-					max(0, maximum_qty),
-				),
-				OverProductionError,
-				title=_("Production Plan Quantity Exceeded"),
-			)
+		row.reference_field = reference_field
+		row.doctype = row_doctype
+		return row
 
 	def get_pending_quantities(self, plan):
 		committed = self.get_committed_quantities()

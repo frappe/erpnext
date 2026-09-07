@@ -1,6 +1,9 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from contextlib import contextmanager
+from unittest.mock import patch
+
 import frappe
 
 from erpnext.manufacturing.doctype.operation.test_operation import make_operation
@@ -135,8 +138,13 @@ class TestProductionPlanWorkOrderQuantities(ERPNextTestSuite):
 		)
 		job_card.reload().submit()
 		self.assertEqual(first.reload().process_loss_qty, 10)
+		make_stock_entry(item_code=self.raw_material, target=self.warehouse, qty=100, basic_rate=10)
+		manufacture = frappe.get_doc(job_card.make_stock_entry_for_semi_fg_item()).submit()
 		replacement = self.create_work_order(plan, "production_plan_item")
 		replacement.submit()
+		with self.assert_plan_locked_before_work_order_update(first):
+			manufacture.cancel()
+		job_card.reload()
 		self.assert_loss_reversal_blocked(job_card)
 		self.assertEqual(first.reload().process_loss_qty, 10)
 		self.assertEqual(first.operations[0].process_loss_qty, 10)
@@ -339,14 +347,53 @@ class TestProductionPlanWorkOrderQuantities(ERPNextTestSuite):
 		return entry
 
 	def assert_loss_reversal_blocked(self, document):
+		work_order = frappe.get_doc("Work Order", document.work_order)
 		frappe.db.savepoint("loss_reversal")
 		try:
-			with self.assertRaises(OverProductionError):
+			with (
+				self.assert_plan_locked_before_work_order_update(work_order),
+				self.assertRaises(OverProductionError),
+			):
 				document.cancel()
 		finally:
 			# Match the request rollback after an on_cancel validation fails.
 			frappe.db.rollback(save_point="loss_reversal")
 		self.assertEqual(document.reload().docstatus, 1)
+
+	@contextmanager
+	def assert_plan_locked_before_work_order_update(self, work_order):
+		get_value, set_value = frappe.db.get_value, frappe.db.set_value
+		plan_row_locked = False
+		row_doctype = (
+			"Production Plan Sub Assembly Item"
+			if work_order.production_plan_sub_assembly_item
+			else "Production Plan Item"
+		)
+		row_name = work_order.production_plan_sub_assembly_item or work_order.production_plan_item
+
+		def get_value_with_lock_check(doctype, filters=None, *args, **kwargs):
+			nonlocal plan_row_locked
+			if doctype == "Work Order" and filters == work_order.name and kwargs.get("for_update"):
+				self.assertTrue(plan_row_locked, "Work Order locked before its Production Plan row")
+			result = get_value(doctype, filters, *args, **kwargs)
+			if (
+				doctype == row_doctype
+				and filters == {"name": row_name, "parent": work_order.production_plan}
+				and kwargs.get("for_update")
+			):
+				plan_row_locked = True
+			return result
+
+		def set_value_with_lock_check(doctype, name, *args, **kwargs):
+			if doctype == "Work Order" and name == work_order.name:
+				self.assertTrue(plan_row_locked, "Work Order updated before locking its Production Plan row")
+			return set_value(doctype, name, *args, **kwargs)
+
+		with (
+			patch.object(frappe.db, "get_value", get_value_with_lock_check),
+			patch.object(frappe.db, "set_value", set_value_with_lock_check),
+		):
+			yield
 
 	def assert_overproduction(self, work_order, qty):
 		work_order.qty = qty
