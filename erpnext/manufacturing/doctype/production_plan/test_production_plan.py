@@ -869,11 +869,58 @@ class TestProductionPlan(ERPNextTestSuite):
 		self.assertTrue(len(plan.sub_assembly_items), 1)  # check if sub-assembly items merged
 		self.assertEqual(plan.sub_assembly_items[0].qty, 2.0)
 		self.assertEqual(plan.sub_assembly_items[0].stock_qty, 2.0)
+		self.assertEqual(plan.sub_assembly_items[0].required_qty, 2.0)
 
 		# change warehouse in one row, sub-assemblies should not merge
 		plan.po_items[0].warehouse = "Finished Goods - _TC"
 		plan.get_sub_assembly_items()
 		self.assertTrue(len(plan.sub_assembly_items), 2)
+
+	def test_consolidated_subassembly_required_qty_with_projected_stock(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		subassembly = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
+		make_bom(item=subassembly, raw_materials=[rm_item])
+		warehouse = create_warehouse("Consolidated Sub Assembly Warehouse", company="_Test Company")
+		make_stock_entry(item_code=subassembly, qty=750, rate=100, target=warehouse)
+		finished_item = make_item(properties={"is_stock_item": 1}).name
+		make_bom(item=finished_item, raw_materials=[subassembly])
+		plan = create_production_plan(
+			item_code=finished_item, planned_qty=1000, do_not_save=1, skip_getting_mr_items=1
+		)
+		plan.append(
+			"po_items",
+			{
+				"item_code": finished_item,
+				"bom_no": plan.po_items[0].bom_no,
+				"planned_qty": 1000,
+				"use_multi_level_bom": 1,
+				"planned_start_date": now_datetime(),
+			},
+		)
+		plan.sub_assembly_warehouse = warehouse
+
+		for consider_projected_qty in (0, 1):
+			with self.subTest(consider_projected_qty=consider_projected_qty):
+				plan.skip_available_sub_assembly_item = consider_projected_qty
+				plan.combine_sub_items = 0
+				plan.get_sub_assembly_items()
+				self.assertEqual([row.required_qty for row in plan.sub_assembly_items], [1000, 1000])
+				self.assertEqual(
+					[row.qty for row in plan.sub_assembly_items],
+					[250, 1000] if consider_projected_qty else [1000, 1000],
+				)
+
+				plan.combine_sub_items = 1
+				plan.get_sub_assembly_items()
+				self.assertEqual(len(plan.sub_assembly_items), 1)
+				row = plan.sub_assembly_items[0]
+				self.assertEqual(row.required_qty, 2000)
+				self.assertEqual(row.projected_qty, 750)
+				self.assertEqual(row.actual_qty, 750)
+				self.assertEqual(row.qty, 1250 if consider_projected_qty else 2000)
+				self.assertEqual(row.stock_qty, row.qty)
 
 	def test_pp_to_mr_customer_provided(self):
 		"Test Material Request from Production Plan for Customer Provided Item."

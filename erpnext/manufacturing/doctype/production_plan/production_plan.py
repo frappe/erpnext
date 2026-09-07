@@ -1174,6 +1174,7 @@ class ProductionPlan(Document):
 			if existing_row:
 				# if row with same (item, wh, bom no, man.g type) key, merge
 				existing_row.qty += flt(row.qty)
+				existing_row.required_qty += flt(row.required_qty)
 				existing_row.stock_qty += flt(row.stock_qty)
 				existing_row.bom_level = max(existing_row.bom_level, row.bom_level)
 				continue
