@@ -170,9 +170,8 @@ const StatementClosingBalanceRow = () => {
 
     const isDateSame = data?.message?.date === dates.toDate
 
-    // No balance recorded yet - showing a formatted 0 would read as a real figure, so offer
-    // the action instead. Matches how the atom above only takes a truthy balance.
-    const hasBalance = Boolean(data?.message?.balance)
+    // The server uses the returned date to distinguish an unset balance from a saved zero.
+    const hasBalance = Boolean(data?.message?.date)
 
     const [isOpen, setIsOpen] = useState(false)
 
