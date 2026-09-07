@@ -2212,9 +2212,7 @@ def get_potentially_billable_item_criterion(sales_order, sales_order_item, item)
 	)
 	is_unit_price_row = (sales_order.has_unit_price_items == 1) & (sales_order_item.qty == 0)
 
-	return (sales_order_item.closed == 0) & (
-		is_unit_price_row | ((sales_order_item.qty != 0) & has_amount_headroom)
-	)
+	return is_unit_price_row | ((sales_order_item.qty != 0) & has_amount_headroom)
 
 
 def has_potentially_billable_items(sales_order: str) -> bool:
