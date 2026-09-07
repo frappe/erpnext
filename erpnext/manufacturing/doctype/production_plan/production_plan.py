@@ -5,6 +5,7 @@
 import copy
 import json
 from collections import defaultdict
+from decimal import ROUND_CEILING, Decimal
 
 import frappe
 from frappe import _, msgprint
@@ -1353,9 +1354,6 @@ def get_material_request_items(
 		else:
 			required_qty = flt(row.get("qty"))
 
-	if doc.get("consider_minimum_order_qty") and required_qty > 0 and required_qty < row["min_order_qty"]:
-		required_qty = row["min_order_qty"]
-
 	item_group_defaults = get_item_group_defaults(row.item_code, company)
 
 	if not row["purchase_uom"]:
@@ -1389,11 +1387,12 @@ def get_material_request_items(
 			get_conversion_factor(row.item_code, item_details.purchase_uom).get("conversion_factor") or 1.0
 		)
 
+	min_order_qty = flt(row.get("min_order_qty")) if doc.get("consider_minimum_order_qty") else 0
 	if flt(row.get("qty")) > 0:
 		return {
 			"item_code": row.item_code,
 			"item_name": row.item_name,
-			"quantity": required_qty / conversion_factor,
+			"quantity": _quantity_in_purchase_uom(required_qty, conversion_factor, min_order_qty),
 			"conversion_factor": conversion_factor,
 			"required_bom_qty": row.get("qty"),
 			"stock_uom": row.get("stock_uom"),
@@ -1413,6 +1412,91 @@ def get_material_request_items(
 			"uom": row.get("purchase_uom") or row.get("stock_uom"),
 			"main_item_code": row.get("main_bom_item"),
 		}
+
+
+def _apply_minimum_order_qty(mr_items):
+	for rows in _purchase_rows_by_item(mr_items).values():
+		surplus_qty = 0.0
+		for order_rows in _rows_by_sales_order(rows):
+			surplus_qty = _apply_minimum_order_qty_to_order(order_rows, surplus_qty)
+
+
+def _purchase_rows_by_item(mr_items):
+	rows_by_item = defaultdict(list)
+	for row in mr_items:
+		if row.get("material_request_type") not in ("Purchase", "Subcontracting"):
+			continue
+		if flt(row.get("quantity")) <= 0:
+			continue
+		key = (
+			row.get("item_code"),
+			row.get("warehouse"),
+			row.get("material_request_type"),
+			row.get("supplier"),
+		)
+		rows_by_item[key].append(row)
+	return rows_by_item
+
+
+def _rows_by_sales_order(rows):
+	rows_by_order = defaultdict(list)
+	for row in rows:
+		rows_by_order[row.get("sales_order")].append(row)
+	return rows_by_order.values()
+
+
+def _apply_minimum_order_qty_to_order(rows, surplus_qty):
+	"""Cover the order from an earlier order's surplus, then raise the rest to the minimum.
+
+	Material Requests and Purchase Orders are raised per Sales Order and a Purchase
+	Order rejects an item below its minimum, so each order either buys at least the
+	minimum or is covered by what an earlier order over-purchased."""
+	demand_qty = sum(_stock_quantity(row) for row in rows)
+	_cover_from_surplus(rows, surplus_qty)
+
+	min_order_qty = max(flt(row.get("min_order_qty")) for row in rows)
+	total_qty = sum(_stock_quantity(row) for row in rows)
+	if 0 < total_qty < min_order_qty:
+		row = next(row for row in rows if _stock_quantity(row) > 0)
+		_set_stock_quantity(row, _stock_quantity(row) + min_order_qty - total_qty)
+
+	purchased_qty = sum(_stock_quantity(row) for row in rows)
+	return surplus_qty + purchased_qty - demand_qty
+
+
+def _cover_from_surplus(rows, surplus_qty):
+	for row in rows:
+		covered_qty = min(surplus_qty, _stock_quantity(row))
+		if covered_qty <= 0:
+			break
+		_set_stock_quantity(row, _stock_quantity(row) - covered_qty)
+		surplus_qty -= covered_qty
+
+
+def _stock_quantity(row):
+	return flt(row.get("quantity")) * (flt(row.get("conversion_factor")) or 1)
+
+
+def _set_stock_quantity(row, stock_qty):
+	conversion_factor = flt(row.get("conversion_factor")) or 1
+	quantity = _quantity_in_purchase_uom(stock_qty, conversion_factor, stock_qty)
+	if frappe.get_cached_value("UOM", row.get("uom"), "must_be_whole_number"):
+		quantity = ceil(quantity)
+	row["quantity"] = quantity
+
+
+def _quantity_in_purchase_uom(required_qty, conversion_factor, min_order_qty=0):
+	"""Convert to purchase UOM; a binding minimum order qty takes the smallest
+	representable quantity whose stock equivalent still meets it. The minimum is
+	capped at the requirement so a small shortage never rounds down to zero."""
+	min_order_qty = min(min_order_qty, required_qty)
+	precision = frappe.get_precision("Material Request Plan Item", "quantity")
+	quantity = flt(required_qty / conversion_factor, precision)
+	if min_order_qty and quantity * conversion_factor < min_order_qty <= required_qty:
+		grid = Decimal(10) ** -precision
+		exact = Decimal(str(min_order_qty)) / Decimal(str(conversion_factor))
+		quantity = flt(exact.quantize(grid, rounding=ROUND_CEILING))
+	return quantity
 
 
 def get_sales_orders(self):
@@ -1543,9 +1627,10 @@ def get_warehouse_list(warehouses):
 
 
 @frappe.whitelist()
-def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_data=None):
-	if isinstance(doc, str):
-		doc = frappe._dict(json.loads(doc))
+def get_items_for_material_requests(
+	doc: str | dict, warehouses: str | list[dict] | None = None, get_parent_warehouse_data: bool | None = None
+):
+	doc = frappe._dict(json.loads(doc) if isinstance(doc, str) else doc)
 
 	if warehouses:
 		warehouses = list(set(get_warehouse_list(warehouses)))
@@ -1731,6 +1816,9 @@ def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_d
 
 		mr_items = new_mr_items
 
+	if doc.get("consider_minimum_order_qty"):
+		_apply_minimum_order_qty(mr_items)
+
 	if not mr_items:
 		to_enable = frappe.bold(_("Ignore Existing Projected Quantity"))
 		warehouse = frappe.bold(doc.get("for_warehouse"))
@@ -1794,13 +1882,13 @@ def get_materials_from_other_locations(
 
 	precision = frappe.get_precision("Material Request Plan Item", "quantity")
 	if flt(required_qty, precision) > 0:
-		if consider_minimum_order_qty:
-			required_qty = max(required_qty, flt(item.get("min_order_qty")))
-
 		if frappe.db.get_value("UOM", purchase_uom, "must_be_whole_number"):
 			required_qty = ceil(required_qty)
 
-		item["quantity"] = required_qty / item.get("conversion_factor")
+		min_order_qty = flt(item.get("min_order_qty")) if consider_minimum_order_qty else 0
+		item["quantity"] = _quantity_in_purchase_uom(
+			required_qty, item.get("conversion_factor"), min_order_qty
+		)
 
 		new_mr_items.append(item)
 
