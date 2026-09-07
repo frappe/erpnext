@@ -1127,12 +1127,12 @@ class TestProductionPlan(ERPNextTestSuite):
 	def test_multiple_work_order_for_production_plan_item(self):
 		"Test producing Prod Plan (making WO) in parts."
 
-		def create_work_order(item, pln, qty):
+		def create_work_order(pln, qty):
 			# Get Production Items
 			items_data = pln.get_production_items()
 
 			# Update qty
-			items_data[(pln.po_items[0].name, item, None, pln.po_items[0].planned_start_date)]["qty"] = qty
+			items_data[pln.po_items[0].name]["qty"] = qty
 
 			# Create and Submit Work Order for each item in items_data
 			for _key, item in items_data.items():
@@ -1160,17 +1160,17 @@ class TestProductionPlan(ERPNextTestSuite):
 		wo_list = []
 
 		# Create and Submit 1st Work Order for 3 qty
-		create_work_order(item, pln, 3)
+		create_work_order(pln, 3)
 		pln.reload()
 		self.assertEqual(pln.po_items[0].ordered_qty, 3)
 
 		# Create and Submit 2nd Work Order for 2 qty
-		create_work_order(item, pln, 2)
+		create_work_order(pln, 2)
 		pln.reload()
 		self.assertEqual(pln.po_items[0].ordered_qty, 5)
 
 		# Overproduction
-		self.assertRaises(OverProductionError, create_work_order, item=item, pln=pln, qty=2)
+		self.assertRaises(OverProductionError, create_work_order, pln=pln, qty=2)
 
 		# Cancel 1st Work Order
 		wo1 = frappe.get_doc("Work Order", wo_list[0])

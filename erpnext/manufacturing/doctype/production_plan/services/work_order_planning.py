@@ -47,7 +47,8 @@ class WorkOrderCreationService:
 		for d in self.doc.po_items:
 			item_details = self._production_item_details(d, bom_warehouse_map)
 			item_details["qty"] = self.pending_quantities["production_plan_item"][d.name]
-			item_dict[self._production_item_key(d)] = item_details
+			# A Work Order can reference only one Production Plan row.
+			item_dict[d.name] = item_details
 		return item_dict
 
 	@cached_property
@@ -90,10 +91,6 @@ class WorkOrderCreationService:
 		if not details["project"] and d.sales_order:
 			details["project"] = frappe.get_cached_value("Sales Order", d.sales_order, "project")
 		return details
-
-	def _production_item_key(self, d):
-		# A Work Order can reference only one Production Plan row.
-		return (d.name, d.item_code, d.warehouse, d.planned_start_date)
 
 	def make_work_order(self):
 		from erpnext.manufacturing.doctype.work_order.work_order import get_default_warehouse
