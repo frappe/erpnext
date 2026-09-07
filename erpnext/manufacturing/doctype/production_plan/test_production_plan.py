@@ -3697,3 +3697,273 @@ def make_bom(**args):
 		frappe.set_value("Item", args.item, "default_bom", bom.name)
 
 	return bom
+
+
+class TestProductionPlanAlternativeItem(ERPNextTestSuite):
+	"""Substituting a declared Item Alternative on the two generated planning tables."""
+
+	@classmethod
+	def setUpClass(cls):
+		super().setUpClass()
+		cls.warehouse = "_Test Warehouse - _TC"
+
+		for item_code in ("_Test PP Alt RM", "_Test PP Alt RM Substitute"):
+			create_item(item_code, valuation_rate=100, warehouse=cls.warehouse)
+			frappe.db.set_value("Item", item_code, "allow_alternative_item", 1)
+
+		create_item("_Test PP Alt FG", valuation_rate=500, warehouse=cls.warehouse)
+		make_alternative_record("_Test PP Alt RM", "_Test PP Alt RM Substitute")
+
+		if not frappe.db.get_value("BOM", {"item": "_Test PP Alt FG", "docstatus": 1}):
+			make_bom(item="_Test PP Alt FG", raw_materials=["_Test PP Alt RM"], rm_qty=2)
+
+		# a sub-assembly with an alternative whose BOM consumes the same raw material,
+		# so the plan's exploded raw materials stay valid across the swap
+		for item_code in ("_Test PP Alt SA", "_Test PP Alt SA Substitute"):
+			create_item(item_code, valuation_rate=200, warehouse=cls.warehouse, is_stock_item=1)
+			frappe.db.set_value("Item", item_code, "allow_alternative_item", 1)
+			if not frappe.db.get_value("BOM", {"item": item_code, "docstatus": 1}):
+				make_bom(item=item_code, raw_materials=["_Test PP Alt RM"], rm_qty=1)
+
+		create_item("_Test PP Alt SA FG", valuation_rate=900, warehouse=cls.warehouse)
+		make_alternative_record("_Test PP Alt SA", "_Test PP Alt SA Substitute")
+
+		if not frappe.db.get_value("BOM", {"item": "_Test PP Alt SA FG", "docstatus": 1}):
+			make_bom(item="_Test PP Alt SA FG", raw_materials=["_Test PP Alt SA"], rm_qty=1)
+
+		for item_code in (
+			"_Test PP Alt RM",
+			"_Test PP Alt RM Substitute",
+			"_Test PP Alt SA",
+			"_Test PP Alt SA Substitute",
+		):
+			make_stock_entry(item_code=item_code, target=cls.warehouse, qty=50, basic_rate=100)
+
+	def setUp(self):
+		super().setUp()
+		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 1)
+
+	def tearDown(self):
+		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 0)
+
+	def make_plan(self, **kwargs):
+		kwargs.setdefault("ignore_existing_ordered_qty", 1)
+		return create_production_plan(
+			item_code="_Test PP Alt FG",
+			planned_qty=5,
+			warehouse=self.warehouse,
+			for_warehouse=self.warehouse,
+			**kwargs,
+		)
+
+	def get_reserved(self, plan_name, item_code):
+		return frappe.get_all(
+			"Stock Reservation Entry",
+			filters={
+				"voucher_type": "Production Plan",
+				"voucher_no": plan_name,
+				"item_code": item_code,
+				"docstatus": 1,
+			},
+			pluck="reserved_qty",
+		)
+
+	def bin_reserved_for_plan(self, item_code):
+		return flt(
+			frappe.db.get_value(
+				"Bin",
+				{"item_code": item_code, "warehouse": self.warehouse},
+				"reserved_qty_for_production_plan",
+			)
+		)
+
+	def test_raw_material_substitution_moves_reservation(self):
+		plan = self.make_plan(reserve_stock=1)
+
+		row = plan.mr_items[0]
+		self.assertEqual(row.item_code, "_Test PP Alt RM")
+		self.assertEqual(self.get_reserved(plan.name, "_Test PP Alt RM"), [10.0])
+
+		# other plans on the site reserve these items too, so compare the movement, not the total
+		reserved_before = {
+			item: self.bin_reserved_for_plan(item)
+			for item in ("_Test PP Alt RM", "_Test PP Alt RM Substitute")
+		}
+
+		plan.substitute_alternative_items(
+			"mr_items",
+			[{"docname": row.name, "alternate_item": "_Test PP Alt RM Substitute"}],
+		)
+
+		plan.reload()
+		self.assertEqual(plan.mr_items[0].item_code, "_Test PP Alt RM Substitute")
+		self.assertEqual(plan.mr_items[0].original_item, "_Test PP Alt RM")
+		self.assertEqual(plan.mr_items[0].required_bom_qty, 10.0)
+
+		# the original item's reservation is released, the alternative is reserved instead
+		self.assertEqual(self.get_reserved(plan.name, "_Test PP Alt RM"), [])
+		self.assertEqual(self.get_reserved(plan.name, "_Test PP Alt RM Substitute"), [10.0])
+
+		# ... and both bins agree with the new picture
+		self.assertEqual(
+			self.bin_reserved_for_plan("_Test PP Alt RM"), reserved_before["_Test PP Alt RM"] - 10.0
+		)
+		self.assertEqual(
+			self.bin_reserved_for_plan("_Test PP Alt RM Substitute"),
+			reserved_before["_Test PP Alt RM Substitute"] + 10.0,
+		)
+
+	def test_work_order_created_after_substitution_uses_alternative(self):
+		plan = self.make_plan(reserve_stock=0)
+
+		plan.substitute_alternative_items(
+			"mr_items",
+			[{"docname": plan.mr_items[0].name, "alternate_item": "_Test PP Alt RM Substitute"}],
+		)
+
+		plan.reload()
+		plan.make_work_order()
+
+		wo_name = frappe.get_all("Work Order", filters={"production_plan": plan.name}, pluck="name")[0]
+		wo = frappe.get_doc("Work Order", wo_name)
+		required = {row.item_code: row for row in wo.required_items}
+
+		self.assertIn("_Test PP Alt RM Substitute", required)
+		self.assertNotIn("_Test PP Alt RM", required)
+		self.assertEqual(required["_Test PP Alt RM Substitute"].original_item, "_Test PP Alt RM")
+		self.assertEqual(required["_Test PP Alt RM Substitute"].required_qty, 10.0)
+
+	def test_existing_draft_work_order_follows_the_substitution(self):
+		plan = self.make_plan(reserve_stock=0)
+		plan.make_work_order()
+
+		wo_name = frappe.get_all("Work Order", filters={"production_plan": plan.name}, pluck="name")[0]
+		self.assertEqual(frappe.get_doc("Work Order", wo_name).required_items[0].item_code, "_Test PP Alt RM")
+
+		plan.substitute_alternative_items(
+			"mr_items",
+			[{"docname": plan.mr_items[0].name, "alternate_item": "_Test PP Alt RM Substitute"}],
+		)
+
+		wo = frappe.get_doc("Work Order", wo_name)
+		self.assertEqual(wo.required_items[0].item_code, "_Test PP Alt RM Substitute")
+		self.assertEqual(wo.required_items[0].original_item, "_Test PP Alt RM")
+
+	def make_sub_assembly_plan(self):
+		plan = create_production_plan(
+			item_code="_Test PP Alt SA FG",
+			planned_qty=4,
+			warehouse=self.warehouse,
+			for_warehouse=self.warehouse,
+			sub_assembly_warehouse=self.warehouse,
+			skip_getting_mr_items=1,
+			reserve_stock=1,
+			do_not_submit=1,
+		)
+		plan.get_sub_assembly_items()
+		for row in get_items_for_material_requests(plan.as_dict()):
+			plan.append("mr_items", row)
+
+		plan.save()
+		plan.submit()
+		return plan
+
+	def test_sub_assembly_substitution_moves_reservation_and_bom(self):
+		plan = self.make_sub_assembly_plan()
+
+		row = plan.sub_assembly_items[0]
+		self.assertEqual(row.production_item, "_Test PP Alt SA")
+		self.assertEqual(self.get_reserved(plan.name, "_Test PP Alt SA"), [4.0])
+
+		plan.substitute_alternative_items(
+			"sub_assembly_items",
+			[{"docname": row.name, "alternate_item": "_Test PP Alt SA Substitute"}],
+		)
+
+		plan.reload()
+		substituted = plan.sub_assembly_items[0]
+		self.assertEqual(substituted.production_item, "_Test PP Alt SA Substitute")
+		self.assertEqual(substituted.original_item, "_Test PP Alt SA")
+		self.assertEqual(substituted.required_qty, 4.0)
+		self.assertEqual(
+			substituted.bom_no,
+			frappe.db.get_value(
+				"BOM", {"item": "_Test PP Alt SA Substitute", "is_default": 1, "docstatus": 1}, "name"
+			),
+		)
+
+		# the raw materials exploded through the old sub-assembly now point at the new one,
+		# so add_reference_to_raw_materials keeps matching them
+		self.assertEqual(plan.mr_items[0].main_item_code, "_Test PP Alt SA Substitute")
+		self.assertEqual(plan.mr_items[0].from_bom, substituted.bom_no)
+
+		self.assertEqual(self.get_reserved(plan.name, "_Test PP Alt SA"), [])
+		self.assertEqual(self.get_reserved(plan.name, "_Test PP Alt SA Substitute"), [4.0])
+
+	def test_sub_assembly_substitution_reaches_both_work_orders(self):
+		plan = self.make_sub_assembly_plan()
+
+		plan.substitute_alternative_items(
+			"sub_assembly_items",
+			[{"docname": plan.sub_assembly_items[0].name, "alternate_item": "_Test PP Alt SA Substitute"}],
+		)
+
+		plan.reload()
+		plan.make_work_order()
+
+		work_orders = [
+			frappe.get_doc("Work Order", name)
+			for name in frappe.get_all("Work Order", filters={"production_plan": plan.name}, pluck="name")
+		]
+		by_item = {wo.production_item: wo for wo in work_orders}
+
+		# the sub-assembly is now made as the alternative ...
+		self.assertIn("_Test PP Alt SA Substitute", by_item)
+		self.assertNotIn("_Test PP Alt SA", by_item)
+
+		# ... and the parent work order consumes the alternative, not what its BOM still lists
+		parent = by_item["_Test PP Alt SA FG"]
+		required = {item.item_code: item for item in parent.required_items}
+		self.assertIn("_Test PP Alt SA Substitute", required)
+		self.assertNotIn("_Test PP Alt SA", required)
+		self.assertEqual(required["_Test PP Alt SA Substitute"].original_item, "_Test PP Alt SA")
+
+	def test_substitution_rejects_an_item_without_a_declared_alternative(self):
+		plan = self.make_plan(reserve_stock=0)
+
+		self.assertRaises(
+			frappe.ValidationError,
+			plan.substitute_alternative_items,
+			"mr_items",
+			[{"docname": plan.mr_items[0].name, "alternate_item": "_Test PP Alt FG"}],
+		)
+
+	def test_substitution_blocked_once_a_material_request_is_raised(self):
+		plan = self.make_plan(reserve_stock=0, ignore_existing_ordered_qty=0)
+		plan.submit_material_request = 1
+		plan.make_material_request()
+		plan.reload()
+
+		self.assertTrue(plan.mr_items[0].requested_qty)
+		self.assertRaises(
+			frappe.ValidationError,
+			plan.substitute_alternative_items,
+			"mr_items",
+			[{"docname": plan.mr_items[0].name, "alternate_item": "_Test PP Alt RM Substitute"}],
+		)
+
+
+def make_alternative_record(item_code, alternative_item_code):
+	if frappe.db.exists(
+		"Item Alternative", {"item_code": item_code, "alternative_item_code": alternative_item_code}
+	):
+		return
+
+	frappe.get_doc(
+		{
+			"doctype": "Item Alternative",
+			"item_code": item_code,
+			"alternative_item_code": alternative_item_code,
+			"two_way": 1,
+		}
+	).insert()

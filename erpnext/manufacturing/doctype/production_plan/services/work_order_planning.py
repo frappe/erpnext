@@ -240,7 +240,41 @@ class WorkOrderCreationService:
 
 		wo.set_work_order_operations()
 		wo.set_required_items()
+		self.apply_item_substitutions(wo)
 		return wo
+
+	def apply_item_substitutions(self, wo):
+		"""Re-apply the plan's alternative-item choices to the freshly exploded BOM items.
+
+		``set_required_items`` reads the BOM, which still lists the original items, so a work
+		order created after a substitution would otherwise demand the item the plan replaced.
+		"""
+		substitutions = self.get_item_substitutions()
+		if not substitutions:
+			return
+
+		for row in wo.required_items:
+			if new_item := substitutions.get(row.item_code):
+				details = frappe.get_cached_value(
+					"Item", new_item, ["item_name", "description", "stock_uom"], as_dict=True
+				)
+				row.original_item = row.item_code
+				row.item_code = new_item
+				row.item_name = details.item_name
+				row.description = details.description
+				row.stock_uom = details.stock_uom
+				row.allow_alternative_item = 1
+				wo.allow_alternative_item = 1
+
+	def get_item_substitutions(self):
+		"""``{original item: substituted item}`` across both planning tables."""
+		substitutions = {}
+		for table in ("sub_assembly_items", "mr_items"):
+			for row in self.doc.get(table):
+				item_field = "production_item" if table == "sub_assembly_items" else "item_code"
+				if row.get("original_item") and row.get("original_item") != row.get(item_field):
+					substitutions[row.get("original_item")] = row.get(item_field)
+		return substitutions
 
 
 def _consolidate_subcontracted_po(subcontracted_po):

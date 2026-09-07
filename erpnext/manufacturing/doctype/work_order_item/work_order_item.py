@@ -28,6 +28,7 @@ class WorkOrderItem(Document):
 		item_name: DF.Data | None
 		operation: DF.Link | None
 		operation_row_id: DF.Int
+		original_item: DF.Link | None
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data

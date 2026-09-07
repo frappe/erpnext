@@ -819,15 +819,18 @@ frappe.ui.form.on("Work Order Item", {
 				},
 				callback: function (r) {
 					if (r.message) {
+						const default_source_warehouse =
+							r.message.is_customer_provided_item && frm.doc.subcontracting_inward_order_item
+								? frm.doc.source_warehouse
+								: r.message.default_warehouse;
+
 						frappe.model.set_value(cdt, cdn, {
 							required_qty: row.required_qty || 1,
 							item_name: r.message.item_name,
 							description: r.message.description,
-							source_warehouse:
-								r.message.is_customer_provided_item &&
-								frm.doc.subcontracting_inward_order_item
-									? frm.doc.source_warehouse
-									: r.message.default_warehouse,
+							// keep a warehouse already chosen for the row (e.g. by the Alternate
+							// Item dialog); fall back to the item default only when it is empty
+							source_warehouse: row.source_warehouse || default_source_warehouse,
 							allow_alternative_item: r.message.allow_alternative_item,
 							include_item_in_manufacturing: r.message.include_item_in_manufacturing,
 						});

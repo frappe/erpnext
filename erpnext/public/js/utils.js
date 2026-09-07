@@ -706,17 +706,19 @@ erpnext.utils.select_alternate_items = function (opts) {
 				}
 			});
 
+			const qty_field =
+				opts.qty_field || (opts.child_doctype === "Work Order Item" ? "required_qty" : "qty");
+
 			alternative_items.forEach((d) => {
 				let row = frappe.get_doc(opts.child_doctype, d.docname);
-				let qty = null;
-				if (row.doctype === "Work Order Item") {
-					qty = row.required_qty;
-				} else {
-					qty = row.qty;
-				}
+				let qty = row[qty_field];
+
 				row[item_field] = d.alternate_item;
-				frappe.model.set_value(row.doctype, row.name, "qty", qty);
+				frappe.model.set_value(row.doctype, row.name, qty_field, qty);
 				frappe.model.set_value(row.doctype, row.name, opts.original_item_field, d.item_code);
+				if (d.warehouse) {
+					frappe.model.set_value(row.doctype, row.name, warehouse_field, d.warehouse);
+				}
 				frm.trigger(item_field, row.doctype, row.name);
 			});
 

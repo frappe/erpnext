@@ -314,6 +314,7 @@ class WorkOrder(Document):
 		self.reset_use_multi_level_bom()
 		WorkOrderStockReservation(self).set_reserve_stock()
 		WorkOrderStockReservation(self).validate_fg_warehouse_for_reservation()
+		WorkOrderStockReservation(self).validate_substituted_items()
 		self.validate_dates()
 
 		if self.source_warehouse:
