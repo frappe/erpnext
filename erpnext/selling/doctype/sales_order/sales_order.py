@@ -13,7 +13,7 @@ from frappe.desk.notifications import clear_doctype_notifications
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
-from frappe.query_builder import Case
+from frappe.query_builder import Case, Criterion
 from frappe.query_builder.functions import Abs, Sum
 from frappe.utils import add_days, cint, cstr, flt, get_link_to_form, getdate, nowdate, strip_html
 from pypika import Order
@@ -24,6 +24,7 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	validate_inter_company_party,
 )
 from erpnext.accounts.party import CROSS_PARTY_FIELD_NO_MAP, get_party_account
+from erpnext.accounts.utils import build_qb_match_conditions
 from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
@@ -1984,9 +1985,7 @@ def get_potentially_billable_item_criterion(sales_order, sales_order_item, item)
 	)
 	is_unit_price_row = (sales_order.has_unit_price_items == 1) & (sales_order_item.qty == 0)
 
-	return (sales_order_item.closed == 0) & (
-		is_unit_price_row | ((sales_order_item.qty != 0) & has_amount_headroom)
-	)
+	return is_unit_price_row | ((sales_order_item.qty != 0) & has_amount_headroom)
 
 
 def has_potentially_billable_items(sales_order: str) -> bool:
@@ -2008,39 +2007,40 @@ def has_potentially_billable_items(sales_order: str) -> bool:
 	)
 
 
+def get_text_search_criterion(sales_order, txt: str):
+	"""Match the search text the way the Sales Order link search does."""
+	meta = frappe.get_meta("Sales Order")
+	conditions = []
+
+	for fieldname in dict.fromkeys(["name", meta.title_field, *meta.get_search_fields()]):
+		if not fieldname:
+			continue
+
+		field = meta.get_field(fieldname)
+		if fieldname == "name" or (field and field.fieldtype in LINK_SEARCH_FIELDTYPES):
+			conditions.append(sales_order[fieldname].like(f"%{txt}%"))
+
+	return Criterion.any(conditions)
+
+
 @frappe.whitelist(methods=["GET"])
 @frappe.validate_and_sanitize_search_inputs
 def get_potentially_billable_sales_orders(
 	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict
 ):
 	"""Return Sales Orders that have an item with billing amount headroom."""
+	permission_type = "select" if frappe.only_has_select_perm("Sales Order") else "read"
+	frappe.has_permission("Sales Order", permission_type, throw=True)
+
 	so = qb.DocType("Sales Order")
 	so_item = qb.DocType("Sales Order Item")
 	item = qb.DocType("Item")
-	meta = frappe.get_meta("Sales Order")
-
-	search_fields = list(dict.fromkeys(["name", meta.title_field, *meta.get_search_fields()]))
-	or_filters = (
-		{
-			fieldname: ("like", f"%{txt}%")
-			for fieldname in search_fields
-			if fieldname
-			and (
-				fieldname == "name"
-				or ((field := meta.get_field(fieldname)) and field.fieldtype in LINK_SEARCH_FIELDTYPES)
-			)
-		}
-		if txt
-		else None
-	)
 
 	query = frappe.qb.get_query(
-		so,
-		fields=[so.name, so.customer, so.transaction_date],
-		filters=filters,
-		or_filters=or_filters,
-		ignore_permissions=False,
+		"Sales Order", fields=["name", "customer", "transaction_date"], filters=filters
 	)
+	if txt:
+		query = query.where(get_text_search_criterion(so, txt))
 
 	return (
 		query.inner_join(so_item)
@@ -2048,6 +2048,7 @@ def get_potentially_billable_sales_orders(
 		.left_join(item)
 		.on(item.name == so_item.item_code)
 		.where(get_potentially_billable_item_criterion(so, so_item, item))
+		.where(Criterion.all(build_qb_match_conditions("Sales Order")))
 		.distinct()
 		.orderby(so.transaction_date, order=Order.desc)
 		.limit(cint(page_len))
