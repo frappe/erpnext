@@ -31,6 +31,9 @@ from pypika.terms import ExistsCriterion
 
 from erpnext.manufacturing.doctype.bom.bom import get_children as get_bom_children
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
+from erpnext.manufacturing.doctype.production_plan.work_order_quantities import (
+	ProductionPlanWorkOrderQuantities,
+)
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_uom_conv_factor
@@ -121,6 +124,12 @@ class ProductionPlan(Document):
 			"enable_stock_reservation",
 			frappe.db.get_single_value("Stock Settings", "enable_stock_reservation"),
 		)
+
+		if self.docstatus == 1:
+			self.set_onload(
+				"pending_work_order_qty",
+				ProductionPlanWorkOrderQuantities(self.name).get_pending_quantities(self),
+			)
 
 	def on_discard(self):
 		self.db_set("status", "Cancelled")
@@ -728,6 +737,7 @@ class ProductionPlan(Document):
 
 	def get_production_items(self):
 		item_dict = {}
+		pending = ProductionPlanWorkOrderQuantities(self.name).get_pending_quantities(self)
 
 		for d in self.po_items:
 			item_details = {
@@ -750,29 +760,12 @@ class ProductionPlan(Document):
 				"project": self.project,
 			}
 
-			key = (d.item_code, d.sales_order, d.sales_order_item, d.warehouse, d.planned_start_date)
-			if self.combine_items:
-				key = (d.item_code, d.sales_order, d.warehouse, d.planned_start_date)
-
-			if not d.sales_order:
-				key = (d.name, d.item_code, d.warehouse, d.planned_start_date)
-
 			if not item_details["project"] and d.sales_order:
 				item_details["project"] = frappe.get_cached_value("Sales Order", d.sales_order, "project")
 
-			if self.get_items_from == "Material Request":
-				item_details.update({"qty": d.planned_qty})
-				item_dict[
-					(d.item_code, d.material_request_item, d.warehouse, d.planned_start_date)
-				] = item_details
-			else:
-				item_details.update(
-					{
-						"qty": flt(item_dict.get(key, {}).get("qty"))
-						+ (flt(d.planned_qty) - flt(d.ordered_qty))
-					}
-				)
-				item_dict[key] = item_details
+			item_details["qty"] = pending["production_plan_item"][d.name]
+			# A Work Order can reference only one Production Plan row.
+			item_dict[d.name] = item_details
 
 		return item_dict
 
@@ -780,6 +773,7 @@ class ProductionPlan(Document):
 	def make_work_order(self):
 		from erpnext.manufacturing.doctype.work_order.work_order import get_default_warehouse
 
+		self.reload()
 		wo_list, po_list = [], []
 		subcontracted_po = {}
 		default_warehouses = get_default_warehouse(self.company)
@@ -809,6 +803,7 @@ class ProductionPlan(Document):
 				wo_list.append(work_order)
 
 	def make_work_order_for_subassembly_items(self, wo_list, subcontracted_po, default_warehouses):
+		pending = ProductionPlanWorkOrderQuantities(self.name).get_pending_quantities(self)
 		for row in self.sub_assembly_items:
 			if row.type_of_manufacturing == "Subcontract":
 				subcontracted_po.setdefault(row.supplier, []).append(row)
@@ -825,10 +820,9 @@ class ProductionPlan(Document):
 				"company": self.get("company"),
 			}
 
-			if flt(row.qty) <= flt(row.ordered_qty):
-				continue
-
-			self.prepare_data_for_sub_assembly_items(row, work_order_data)
+			self.prepare_data_for_sub_assembly_items(
+				row, work_order_data, pending["production_plan_sub_assembly_item"][row.name]
+			)
 
 			if work_order_data.get("qty") <= 0:
 				continue
@@ -837,7 +831,7 @@ class ProductionPlan(Document):
 			if work_order:
 				wo_list.append(work_order)
 
-	def prepare_data_for_sub_assembly_items(self, row, wo_data):
+	def prepare_data_for_sub_assembly_items(self, row, wo_data, pending_qty=None):
 		for field in [
 			"production_item",
 			"item_name",
@@ -853,7 +847,11 @@ class ProductionPlan(Document):
 			if row.get(field):
 				wo_data[field] = row.get(field)
 
-		wo_data["qty"] = flt(row.get("qty")) - flt(row.get("ordered_qty"))
+		if pending_qty is None:
+			pending_qty = ProductionPlanWorkOrderQuantities(self.name).get_pending_quantities(self)[
+				"production_plan_sub_assembly_item"
+			][row.name]
+		wo_data["qty"] = pending_qty
 
 		wo_data.update(
 			{

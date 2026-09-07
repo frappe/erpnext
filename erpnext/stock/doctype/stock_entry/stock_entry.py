@@ -33,6 +33,9 @@ from erpnext.manufacturing.doctype.bom.bom import (
 	get_secondary_items_from_sub_assemblies,
 	validate_bom_no,
 )
+from erpnext.manufacturing.doctype.production_plan.work_order_quantities import (
+	ProductionPlanWorkOrderQuantities,
+)
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.batch.batch import get_batch_qty
@@ -2517,6 +2520,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if self.work_order:
 			pro_doc = frappe.get_doc("Work Order", self.work_order)
 			_validate_work_order(pro_doc)
+			if pro_doc.production_plan:
+				ProductionPlanWorkOrderQuantities(pro_doc.production_plan).lock_plan_row(pro_doc)
 
 			if self.fg_completed_qty:
 				if self.docstatus == 1:
