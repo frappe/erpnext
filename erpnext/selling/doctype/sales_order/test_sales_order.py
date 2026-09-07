@@ -271,6 +271,19 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 			self.assertEqual(len(si.get("items")), 1)
 			self.assertEqual(si.get("items")[0].qty, 150)
 
+	def test_make_sales_invoice_skips_fully_invoiced_free_item(self):
+		free_item = make_item("_Test Free Item", {"is_stock_item": 1}).name
+		so = make_sales_order(qty=10, rate=100, do_not_submit=True)
+		so.append("items", {"item_code": free_item, "qty": 5, "rate": 0, "warehouse": so.items[0].warehouse})
+		so.submit()
+
+		si = make_sales_invoice(so.name)
+		self.assertEqual([row.qty for row in si.items], [10, 5])
+		si.insert()
+		si.submit()
+
+		self.assertEqual(len(make_sales_invoice(so.name).items), 0)
+
 	def test_make_sales_invoice_after_return_and_redelivery(self):
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
 
