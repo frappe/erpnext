@@ -1734,7 +1734,7 @@ class TestPickList(FrappeTestCase):
 		stock_entry.cancel()
 
 	def test_packed_item_in_pick_list(self):
-		warehouse_1 = "RJ Warehouse - _TC"
+		warehouse_1 = "_Test Warehouse - _TC"
 		warehouse_2 = "_Test Warehouse 2 - _TC"
 		item_1 = make_item(properties={"is_stock_item": 0}).name
 		item_2 = make_item().name
@@ -1765,7 +1765,7 @@ class TestPickList(FrappeTestCase):
 
 	def test_packed_item_multiple_times_in_so(self):
 		frappe.db.delete("Item Price")
-		warehouse_1 = "RJ Warehouse - _TC"
+		warehouse_1 = "_Test Warehouse - _TC"
 		warehouse_2 = "_Test Warehouse 2 - _TC"
 		warehouse = "_Test Warehouse - _TC"
 		item_1 = make_item(properties={"is_stock_item": 0}).name
