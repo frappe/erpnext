@@ -3900,6 +3900,55 @@ class TestProductionPlanAlternativeItem(ERPNextTestSuite):
 		self.assertEqual(self.get_reserved(plan.name, "_Test PP Alt SA"), [])
 		self.assertEqual(self.get_reserved(plan.name, "_Test PP Alt SA Substitute"), [4.0])
 
+	def test_substitution_keeps_the_reservation_of_an_untouched_row(self):
+		"""Rows of a plan can carry the same item in the same warehouse.
+
+		Sub-assembly rows are not combined by default, so two planned rows for the same
+		finished good give two rows for the same sub-assembly, reserved separately. Only the
+		substituted row's reservation may be released -- the other row still needs its stock.
+		"""
+		plan = create_production_plan(
+			item_code="_Test PP Alt SA FG",
+			planned_qty=4,
+			warehouse=self.warehouse,
+			for_warehouse=self.warehouse,
+			sub_assembly_warehouse=self.warehouse,
+			skip_getting_mr_items=1,
+			reserve_stock=1,
+			do_not_submit=1,
+		)
+		plan.append(
+			"po_items",
+			{
+				"use_multi_level_bom": 1,
+				"item_code": "_Test PP Alt SA FG",
+				"bom_no": frappe.db.get_value("Item", "_Test PP Alt SA FG", "default_bom"),
+				"planned_qty": 4,
+				"planned_start_date": now_datetime(),
+				"stock_uom": "Nos",
+				"warehouse": self.warehouse,
+			},
+		)
+		plan.get_sub_assembly_items()
+		for row in get_items_for_material_requests(plan.as_dict()):
+			plan.append("mr_items", row)
+
+		plan.save()
+		plan.submit()
+
+		rows = [row for row in plan.sub_assembly_items if row.production_item == "_Test PP Alt SA"]
+		self.assertEqual(len(rows), 2)
+		self.assertEqual(self.get_reserved(plan.name, "_Test PP Alt SA"), [4.0, 4.0])
+
+		plan.substitute_alternative_items(
+			"sub_assembly_items",
+			[{"docname": rows[0].name, "alternate_item": "_Test PP Alt SA Substitute"}],
+		)
+
+		plan.reload()
+		self.assertEqual(self.get_reserved(plan.name, "_Test PP Alt SA"), [4.0])
+		self.assertEqual(self.get_reserved(plan.name, "_Test PP Alt SA Substitute"), [4.0])
+
 	def test_sub_assembly_substitution_reaches_both_work_orders(self):
 		plan = self.make_sub_assembly_plan()
 

@@ -127,7 +127,7 @@ class AlternativeItemService:
 
 	def substitute(self, table_name: str, substitutions: str | list) -> None:
 		config = _config(table_name)
-		substitutions = parse_json(substitutions) if isinstance(substitutions, str) else substitutions
+		substitutions = _normalize_substitutions(substitutions)
 		self._validate_plan_state()
 
 		changes = self._collect_changes(table_name, config, substitutions)
@@ -138,7 +138,7 @@ class AlternativeItemService:
 		bins_to_update = {(c.old_item, c.warehouse) for c in changes}
 
 		if self.doc.docstatus == 1:
-			self._release_reservations(changes, table_name)
+			self._release_reservations(changes)
 
 		for change in changes:
 			self._apply(change, table_name)
@@ -458,38 +458,38 @@ class AlternativeItemService:
 
 	# ----------------------------------------------------------- reservation
 
-	def _release_reservations(self, changes, table_name):
-		"""Cancel the plan's Stock Reservation Entries held for the original items.
+	def _release_reservations(self, changes):
+		"""Cancel the plan's Stock Reservation Entries held for the substituted rows.
+
+		Matched on the full reservation identity -- detail row, item and warehouse. Several
+		rows of a plan can carry the same item in the same warehouse (sub-assembly rows differ
+		by BOM, and raw materials are accumulated per sales order), and only the rows in
+		``changes`` are re-reserved afterwards, so matching on item and warehouse alone would
+		cancel reservations for rows nobody substituted and leave that demand unreserved.
 
 		Cancelling each entry updates the Bin and the row's ``stock_reserved_qty`` through the
 		Stock Reservation Entry's own lifecycle, so no manual bookkeeping is needed here.
 		"""
-		names = []
-		for change in changes:
-			names.extend(self._reservation_names(change.old_item, change.warehouse, table_name))
+		wanted = {(_sre_detail_no(change.row), change.old_item, change.warehouse) for change in changes}
 
-		if names:
-			StockReservation(self.doc).cancel_stock_reservation_entries(names)
-
-	def _reservation_names(self, item_code, warehouse, table_name):
 		entries = frappe.get_all(
 			"Stock Reservation Entry",
 			filters={
 				"voucher_type": "Production Plan",
 				"voucher_no": self.doc.name,
-				"item_code": item_code,
-				"warehouse": warehouse,
+				"voucher_detail_no": ("in", sorted({detail_no for detail_no, _, _ in wanted})),
 				"docstatus": 1,
 			},
-			fields=["name", "voucher_detail_no"],
+			fields=["name", "voucher_detail_no", "item_code", "warehouse"],
 		)
-		# The two plan tables can reserve the same item in the same warehouse. Entries are told
-		# apart by whether their voucher_detail_no is a raw-material row of this plan.
-		mr_row_names = {row.name for row in self.doc.mr_items}
-		wants_mr_rows = table_name == "mr_items"
-		return [
-			entry.name for entry in entries if ((entry.voucher_detail_no in mr_row_names) is wants_mr_rows)
+		names = [
+			entry.name
+			for entry in entries
+			if (entry.voucher_detail_no, entry.item_code, entry.warehouse) in wanted
 		]
+
+		if names:
+			StockReservation(self.doc).cancel_stock_reservation_entries(names)
 
 	def _reserve(self, changes, table_name):
 		if not self.doc.reserve_stock:
@@ -577,6 +577,42 @@ def _config(table_name):
 	if not config:
 		frappe.throw(_("Alternative items are not supported for the table {0}.").format(table_name))
 	return config
+
+
+def _normalize_substitutions(substitutions):
+	"""Coerce the request payload into a list of row mappings.
+
+	The method is whitelisted, so the payload arrives from the client. Frappe checks the
+	annotated argument types, but not the shape of what a JSON string decodes to; without
+	this a stray scalar or a list of strings would fail deep inside _collect_changes with an
+	internal error instead of a message the caller can act on.
+	"""
+	if isinstance(substitutions, str):
+		substitutions = parse_json(substitutions)
+
+	if isinstance(substitutions, dict):
+		substitutions = [substitutions]
+
+	if not isinstance(substitutions, list | tuple) or any(
+		not isinstance(entry, dict) for entry in substitutions
+	):
+		frappe.throw(
+			_("Expected a list of rows to substitute."),
+			title=_("Invalid Request"),
+		)
+
+	return list(substitutions)
+
+
+def _sre_detail_no(row):
+	"""The ``voucher_detail_no`` the plan's Stock Reservation Entries carry for ``row``.
+
+	Mirrors StockReservation, which stores ``production_plan_item`` when the child table has
+	that field and the row's own name otherwise. So it is the po_items row for a sub-assembly
+	row -- shared by every sub-assembly row exploded from the same planned item -- and the row
+	itself for a raw material.
+	"""
+	return row.get("production_plan_item") or row.name
 
 
 def _item_details(item_code):

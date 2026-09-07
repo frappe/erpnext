@@ -1222,8 +1222,17 @@ erpnext.production_plan.blocked_rows_html = function (rows) {
 	const blocked = rows.filter((row) => row.blocked_by);
 	if (!blocked.length) return "";
 
+	// item_code and blocked_by carry document names, which are user-controlled; they are
+	// interpolated into the dialog's HTML, so escape them before building the markup.
 	const items = blocked
-		.map((row) => `<li>${__("Row #{0} {1}: {2}", [row.idx, row.item_code, row.blocked_by])}</li>`)
+		.map(
+			(row) =>
+				`<li>${__("Row #{0} {1}: {2}", [
+					row.idx,
+					frappe.utils.escape_html(row.item_code),
+					frappe.utils.escape_html(row.blocked_by),
+				])}</li>`
+		)
 		.join("");
 
 	return `<p>${__("These rows can no longer be substituted:")}</p><ul>${items}</ul>`;
