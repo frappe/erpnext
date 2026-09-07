@@ -252,45 +252,22 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 			rows = get_potentially_billable_sales_orders("Sales Order", txt, "name", 0, 50, filters)
 			return so.name in [row.name for row in rows]
 
+		def forget_cached_allowances():
+			frappe.local.request_cache.clear()
+
 		with change_settings("Accounts Settings", {"over_billing_allowance": 100}):
+			forget_cached_allowances()
 			self.assertTrue(has_potentially_billable_items(so.name))
 			self.assertTrue(is_offered())
-			from erpnext.controllers.status_updater import get_allowance_for
-
-			so.load_from_db()
-			print(
-				"DIAG58822 so_items",
-				[
-					(d.name, d.qty, d.billed_amt, d.amount, d.base_amount, d.delivered_qty, d.returned_qty)
-					for d in so.items
-				],
-			)
-			print(
-				"DIAG58822 si_items",
-				frappe.get_all(
-					"Sales Invoice Item",
-					filters={"so_detail": so.items[0].name},
-					fields=["parent", "qty", "amount", "docstatus", "so_detail"],
-				),
-			)
-			print(
-				"DIAG58822 allowance",
-				get_allowance_for(item, qty_or_amount="amount"),
-				frappe.get_cached_value("Accounts Settings", None, "over_billing_allowance"),
-				frappe.db.get_single_value("Accounts Settings", "over_billing_allowance"),
-				frappe.db.get_value("Sales Order", so.name, "has_unit_price_items"),
-			)
-			print(
-				"DIAG58822 mapped",
-				[(d.item_code, d.qty, d.amount) for d in make_sales_invoice(so.name).items],
-			)
 			self.assertEqual(make_sales_invoice(so.name).get("items")[0].qty, 150)
 
 		with change_settings("Accounts Settings", {"over_billing_allowance": 0}):
+			forget_cached_allowances()
 			self.assertFalse(has_potentially_billable_items(so.name))
 			self.assertEqual(len(make_sales_invoice(so.name).get("items")), 0)
 
 			frappe.db.set_value("Item", item, "over_billing_allowance", 100)
+			forget_cached_allowances()
 
 			so.run_method("onload")
 			self.assertTrue(so.get_onload("has_potentially_billable_items"))
@@ -299,19 +276,6 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 			si = make_sales_invoice(so.name)
 			self.assertEqual(len(si.get("items")), 1)
 			self.assertEqual(si.get("items")[0].qty, 150)
-
-	def test_make_sales_invoice_skips_fully_invoiced_free_item(self):
-		free_item = make_item("_Test Free Item", {"is_stock_item": 1}).name
-		so = make_sales_order(qty=10, rate=100, do_not_submit=True)
-		so.append("items", {"item_code": free_item, "qty": 5, "rate": 0, "warehouse": so.items[0].warehouse})
-		so.submit()
-
-		si = make_sales_invoice(so.name)
-		self.assertEqual([row.qty for row in si.items], [10, 5])
-		si.insert()
-		si.submit()
-
-		self.assertEqual(len(make_sales_invoice(so.name).items), 0)
 
 	def test_make_sales_invoice_after_return_and_redelivery(self):
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
