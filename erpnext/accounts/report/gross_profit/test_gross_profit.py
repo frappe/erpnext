@@ -11,6 +11,8 @@ from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delive
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
+test_dependencies = ["Purchase Invoice", "Sales Invoice"]
+
 
 class TestGrossProfit(FrappeTestCase):
 	def setUp(self):
@@ -1030,6 +1032,7 @@ class TestGrossProfit(FrappeTestCase):
 	def test_legacy_return_prefers_item_without_linked_return(self):
 		sales_invoice = self.create_sales_invoice(qty=2, rate=100, do_not_submit=True)
 		second_item = frappe.copy_doc(sales_invoice.items[0], ignore_no_copy=False)
+		second_item.idx = None
 		second_item.rate = 200
 		sales_invoice.append("items", second_item)
 		sales_invoice.submit()
@@ -1205,6 +1208,7 @@ class TestGrossProfit(FrappeTestCase):
 		)
 		sales_invoice = self.create_sales_invoice(qty=1, rate=100, do_not_submit=True)
 		second_item = frappe.copy_doc(sales_invoice.items[0], ignore_no_copy=False)
+		second_item.idx = None
 		second_item.item_code = unreturned_item.name
 		second_item.item_name = unreturned_item.name
 		second_item.qty = 30000
@@ -1240,6 +1244,7 @@ class TestGrossProfit(FrappeTestCase):
 		item = make_item("_Test Drop Ship Item", properties={"is_stock_item": 1, "delivered_by_supplier": 1})
 		so = make_sales_order(item=item.name, qty=qty, rate=selling_rate, do_not_submit=True)
 		so.items[0].delivered_by_supplier = 1
+		so.items[0].supplier = "_Test Supplier"
 		so.submit()
 		purchase_order = make_purchase_order(so.name, selected_items=[so.items[0]])
 		purchase_order.items[0].rate = buying_rate
