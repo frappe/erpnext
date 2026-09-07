@@ -1351,8 +1351,11 @@ class TestProductionPlan(ERPNextTestSuite):
 		make_bom(item=fg_item, raw_materials=[sub_assembly_item], rm_qty=4)
 
 		# Step - 1: Create Production Plan
-		pln = create_production_plan(item_code=fg_item, planned_qty=5, skip_getting_mr_items=1)
+		pln = create_production_plan(
+			item_code=fg_item, planned_qty=5, skip_getting_mr_items=1, do_not_submit=1
+		)
 		pln.get_sub_assembly_items()
+		pln.submit()
 
 		# Step - 2: Create Work Orders
 		pln.make_work_order()
