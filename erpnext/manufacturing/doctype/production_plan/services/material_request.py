@@ -568,12 +568,10 @@ def _required_qty_for_mr(
 ):
 	safety_stock = flt(row["safety_stock"]) if include_safety_stock else 0
 	qty = flt(row.get("qty"))
-
-	if not ignore_existing_ordered_qty or bin_dict.get("projected_qty", 0) < 0:
-		return _adjust_required_qty_for_uom(row, qty + safety_stock)
+	projected_qty = max(0, flt(bin_dict.get("projected_qty"))) if ignore_existing_ordered_qty else 0
 
 	key = (row.get("item_code"), warehouse)
-	available_qty = flt(bin_dict.get("projected_qty", 0)) - consumed_qty[key]
+	available_qty = projected_qty - consumed_qty[key]
 	required_qty = max(0, qty - (available_qty - safety_stock))
 	required_qty = _adjust_required_qty_for_uom(row, required_qty)
 	consumed_qty[key] += qty - required_qty
