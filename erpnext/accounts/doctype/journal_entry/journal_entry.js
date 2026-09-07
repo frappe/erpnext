@@ -623,7 +623,7 @@ $.extend(erpnext.journal_entry, {
 		} else {
 			erpnext.journal_entry.set_debit_credit_in_company_currency(frm, cdt, cdn);
 		}
-		refresh_field("exchange_rate", cdn, "accounts");
+		frm.get_field("accounts").grid.refresh_row(cdn);
 	},
 
 	quick_entry: function (frm) {
