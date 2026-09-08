@@ -889,7 +889,8 @@ class ProductionPlan(Document):
 		material_request_map = {}
 
 		for item in self.mr_items:
-			if not item.quantity:
+			qty_to_request = flt(item.quantity, item.precision("quantity"))
+			if qty_to_request <= 0:
 				continue
 
 			item_doc = frappe.get_cached_doc("Item", item.item_code)
@@ -925,7 +926,7 @@ class ProductionPlan(Document):
 					"from_warehouse": item.from_warehouse
 					if material_request_type == "Material Transfer"
 					else None,
-					"qty": item.quantity,
+					"qty": qty_to_request,
 					"schedule_date": schedule_date,
 					"warehouse": item.warehouse,
 					"sales_order": item.sales_order,
