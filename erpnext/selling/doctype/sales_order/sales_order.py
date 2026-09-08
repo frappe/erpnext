@@ -13,8 +13,10 @@ from frappe.desk.notifications import clear_doctype_notifications
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
-from frappe.query_builder.functions import Sum
+from frappe.query_builder import Case
+from frappe.query_builder.functions import Abs, Sum
 from frappe.utils import add_days, cint, cstr, flt, get_link_to_form, getdate, nowdate, parse_json, strip_html
+from pypika import Order
 
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	unlink_inter_company_doc,
@@ -47,6 +49,18 @@ from erpnext.stock.get_item_details import (
 from erpnext.stock.stock_balance import get_reserved_qty, update_bin_qty
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
+
+LINK_SEARCH_FIELDTYPES = {
+	"Autocomplete",
+	"Data",
+	"Link",
+	"Long Text",
+	"Read Only",
+	"Select",
+	"Small Text",
+	"Text",
+	"Text Editor",
+}
 
 
 class WarehouseRequired(frappe.ValidationError):
@@ -224,6 +238,12 @@ class SalesOrder(SellingController):
 
 		if has_reserved_stock(self.doctype, self.name):
 			self.set_onload("has_reserved_stock", True)
+
+		if self.docstatus == 1 and self.status not in {"Closed", "On Hold"}:
+			self.set_onload(
+				"has_potentially_billable_items",
+				has_potentially_billable_items(self.name),
+			)
 
 	def can_update_items(self) -> bool:
 		result = True
@@ -1348,10 +1368,22 @@ def make_sales_invoice(
 	has_unit_price_items = frappe.db.get_value("Sales Order", source_name, "has_unit_price_items")
 	billed_qty_by_item = None
 	pending_qty_by_item = {}
+	amount_allowance_by_item = {}
 	mapped_qty_by_item = get_qty_already_mapped(target_doc, "so_detail")
 
 	def is_unit_price_row(source):
 		return has_unit_price_items and source.qty == 0
+
+	def is_amount_billable(source):
+		from erpnext.controllers.status_updater import get_allowance_for
+
+		if source.item_code not in amount_allowance_by_item:
+			amount_allowance_by_item[source.item_code] = flt(
+				get_allowance_for(source.item_code, qty_or_amount="amount")[0]
+			)
+
+		allowance = amount_allowance_by_item[source.item_code]
+		return abs(flt(source.billed_amt)) < abs(flt(source.amount)) * (1 + allowance / 100)
 
 	def get_billed_qty_by_item():
 		nonlocal billed_qty_by_item
@@ -1374,9 +1406,7 @@ def make_sales_invoice(
 	def get_pending_qty(source):
 		if source.name not in pending_qty_by_item:
 			billable_qty = get_qty_net_of_returns(source)
-			if source.qty and source.billed_amt:
-				billable_qty -= get_billed_qty_by_item().get(source.name, 0)
-
+			billable_qty -= get_billed_qty_by_item().get(source.name, 0)
 			billable_qty -= mapped_qty_by_item.get(source.name, 0)
 			pending_qty_by_item[source.name] = max(flt(billable_qty, source.precision("qty")), 0)
 
@@ -1503,7 +1533,7 @@ def make_sales_invoice(
 					if is_unit_price_row(doc)
 					else (
 						doc.qty
-						and (doc.base_amount == 0 or abs(doc.billed_amt) < abs(doc.amount))
+						and (doc.base_amount == 0 or is_amount_billable(doc))
 						and get_pending_qty(doc) > 0
 					)
 				),
@@ -2168,3 +2198,85 @@ def get_mapped_subcontracting_inward_order(source_name, target_doc=None):
 	)
 
 	return target_doc
+
+
+def get_potentially_billable_item_criterion(sales_order, sales_order_item, item):
+	"""Return the amount check for UI candidates. The mapper checks pending quantity."""
+	global_allowance = flt(frappe.get_cached_value("Accounts Settings", None, "over_billing_allowance"))
+	allowance = (
+		Case().when(item.over_billing_allowance != 0, item.over_billing_allowance).else_(global_allowance)
+	)
+
+	has_amount_headroom = (sales_order_item.base_amount == 0) | (
+		Abs(sales_order_item.billed_amt) < Abs(sales_order_item.amount) * (1 + allowance / 100)
+	)
+	is_unit_price_row = (sales_order.has_unit_price_items == 1) & (sales_order_item.qty == 0)
+
+	return is_unit_price_row | ((sales_order_item.qty != 0) & has_amount_headroom)
+
+
+def has_potentially_billable_items(sales_order: str) -> bool:
+	"""Return whether a Sales Order has an item with billing amount headroom."""
+	so = qb.DocType("Sales Order")
+	so_item = qb.DocType("Sales Order Item")
+	item = qb.DocType("Item")
+
+	return bool(
+		qb.from_(so_item)
+		.inner_join(so)
+		.on(so.name == so_item.parent)
+		.left_join(item)
+		.on(item.name == so_item.item_code)
+		.select(so_item.name)
+		.where((so_item.parent == sales_order) & get_potentially_billable_item_criterion(so, so_item, item))
+		.limit(1)
+		.run()
+	)
+
+
+@frappe.whitelist(methods=["GET"])
+@frappe.validate_and_sanitize_search_inputs
+def get_potentially_billable_sales_orders(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict
+):
+	"""Return Sales Orders that have an item with billing amount headroom."""
+	so = qb.DocType("Sales Order")
+	so_item = qb.DocType("Sales Order Item")
+	item = qb.DocType("Item")
+	meta = frappe.get_meta("Sales Order")
+
+	search_fields = list(dict.fromkeys(["name", meta.title_field, *meta.get_search_fields()]))
+	or_filters = (
+		{
+			fieldname: ("like", f"%{txt}%")
+			for fieldname in search_fields
+			if fieldname
+			and (
+				fieldname == "name"
+				or ((field := meta.get_field(fieldname)) and field.fieldtype in LINK_SEARCH_FIELDTYPES)
+			)
+		}
+		if txt
+		else None
+	)
+
+	query = frappe.qb.get_query(
+		so,
+		fields=[so.name, so.customer, so.transaction_date],
+		filters=filters,
+		or_filters=or_filters,
+		ignore_permissions=False,
+	)
+
+	return (
+		query.inner_join(so_item)
+		.on(so_item.parent == so.name)
+		.left_join(item)
+		.on(item.name == so_item.item_code)
+		.where(get_potentially_billable_item_criterion(so, so_item, item))
+		.distinct()
+		.orderby(so.transaction_date, order=Order.desc)
+		.limit(cint(page_len))
+		.offset(cint(start))
+		.run(as_dict=True)
+	)

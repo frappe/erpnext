@@ -33,8 +33,8 @@ from erpnext.manufacturing.doctype.bom.bom import (
 	get_secondary_items_from_sub_assemblies,
 	validate_bom_no,
 )
-from erpnext.manufacturing.doctype.work_order.services.material_coverage import (
-	get_minimum_material_coverage_fraction,
+from erpnext.manufacturing.doctype.production_plan.work_order_quantities import (
+	ProductionPlanWorkOrderQuantities,
 )
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
@@ -334,7 +334,6 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.calculate_rate_and_amount()
 		self.validate_putaway_capacity()
 		self.validate_component_and_quantities()
-		self._cap_completed_qty_to_material_coverage()
 		self.validate_finished_good_serial_batch_for_work_order()
 		# Stock Entry overrides validate() without calling super(), so the shared mandatory
 		# inventory dimension check must be invoked explicitly here.
@@ -1316,128 +1315,6 @@ class StockEntry(StockController, SubcontractingInwardController):
 					),
 					title=_("Missing Item"),
 				)
-
-	def _cap_completed_qty_to_material_coverage(self):
-		if not self._should_cap_completed_qty():
-			return
-		# Keep an excessive claim intact so the Work Order allowance check can reject it.
-		max_qty = flt(self.pro_doc.qty)
-		overproduction_percentage = flt(
-			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order")
-		)
-		extra_materials_percentage = flt(
-			frappe.db.get_single_value("Manufacturing Settings", "transfer_extra_materials_percentage")
-		)
-		to_transfer_qty = flt(self.pro_doc.material_transferred_for_manufacturing) + flt(
-			self.fg_completed_qty
-		)
-		limit_percentage = extra_materials_percentage or overproduction_percentage
-		transfer_limit_qty = max_qty + (max_qty * limit_percentage / 100)
-		if transfer_limit_qty < to_transfer_qty:
-			return
-
-		self.cap_completed_qty_to_material_coverage()
-
-	def cap_completed_qty_to_material_coverage(self):
-		required_qty, transferred_qty, target_qty, precision = self._get_material_coverage_data()
-		if not required_qty:
-			return
-
-		covered_before = self._get_covered_qty(required_qty, transferred_qty, target_qty, precision)
-		for row in self.items:
-			if self.job_card:
-				material_reference = row.job_card_item
-				transferred = flt(row.qty)
-			else:
-				material_reference = row.original_item or row.item_code
-				transferred = flt(row.qty) * flt(row.conversion_factor or 1)
-
-			if material_reference in required_qty and (self.job_card or row.s_warehouse):
-				transferred_qty[material_reference] += transferred
-
-		covered_after = self._get_covered_qty(required_qty, transferred_qty, target_qty, precision)
-		covered_by_entry = flt(max(covered_after - covered_before, 0), self.precision("fg_completed_qty"))
-		self.fg_completed_qty = min(flt(self.fg_completed_qty), covered_by_entry)
-
-	def _should_cap_completed_qty(self):
-		if self.get("_action") != "submit":
-			return False
-		if self.purpose != "Material Transfer for Manufacture":
-			return False
-		if not self.pro_doc or not self.fg_completed_qty:
-			return False
-		if self.is_return or self.get("is_additional_transfer_entry"):
-			return False
-		return not (self.pro_doc.operations and self.pro_doc.transfer_material_against == "Job Card")
-
-	def _get_material_coverage_data(self):
-		if self.job_card:
-			return self._get_job_card_material_qty()
-		return self._get_work_order_material_qty()
-
-	def _get_job_card_material_qty(self):
-		job_card = frappe.get_doc("Job Card", self.job_card)
-		required_qty = {}
-		transferred_qty = {}
-		for row in job_card.items:
-			if flt(row.required_qty) <= 0:
-				continue
-			required_qty[row.name] = flt(row.required_qty)
-			transferred_qty[row.name] = flt(row.transferred_qty)
-
-		return (
-			required_qty,
-			transferred_qty,
-			self._get_job_card_target_qty(job_card),
-			job_card.precision("required_qty", "items"),
-		)
-
-	def _get_job_card_target_qty(self, job_card):
-		required_by_item = {}
-		for row in job_card.items:
-			required_by_item[row.item_code] = required_by_item.get(row.item_code, 0.0) + flt(row.required_qty)
-
-		work_order_required_by_item = {}
-		work_order = frappe.get_doc("Work Order", job_card.work_order)
-		for row in work_order.required_items:
-			if not (job_card.operation == row.operation or job_card.operation_row_id == row.operation_row_id):
-				continue
-			work_order_required_by_item[row.item_code] = work_order_required_by_item.get(
-				row.item_code, 0.0
-			) + flt(row.required_qty)
-
-		target_qty = [
-			item_required * flt(work_order.qty) / work_order_required_by_item[item_code]
-			for item_code, item_required in required_by_item.items()
-			if work_order_required_by_item.get(item_code)
-		]
-		return min(target_qty) if target_qty else job_card.for_quantity
-
-	def _get_work_order_material_qty(self):
-		required_qty = {}
-		transferred_qty = {}
-		for row in self.pro_doc.required_items:
-			if not row.include_item_in_manufacturing or flt(row.required_qty) <= 0:
-				continue
-			required_qty[row.item_code] = required_qty.get(row.item_code, 0.0) + flt(row.required_qty)
-			# Duplicate required-item rows each hold the aggregate transferred quantity.
-			transferred_qty[row.item_code] = max(
-				transferred_qty.get(row.item_code, 0.0), flt(row.transferred_qty)
-			)
-		return (
-			required_qty,
-			transferred_qty,
-			self.pro_doc.qty,
-			self.pro_doc.precision("required_qty", "required_items"),
-		)
-
-	def _get_covered_qty(self, required_qty, transferred_qty, target_qty, precision):
-		min_fraction = get_minimum_material_coverage_fraction(
-			required_qty,
-			transferred_qty,
-			precision,
-		)
-		return min_fraction * flt(target_qty)
 
 	def _validate_no_excess_transfer(self):
 		if self.is_return:
@@ -2563,6 +2440,10 @@ class StockEntry(StockController, SubcontractingInwardController):
 		return process_gl_map(gl_entries, from_repost=frappe.flags.through_repost_item_valuation)
 
 	def set_gl_entries_for_landed_cost_voucher(self, gl_entries, inventory_account_map):
+		from erpnext.stock.doctype.landed_cost_voucher.landed_cost_voucher import (
+			get_custom_dimension_overrides,
+		)
+
 		landed_cost_entries = self.get_item_account_wise_lcv_entries()
 		if not landed_cost_entries:
 			return
@@ -2571,52 +2452,53 @@ class StockEntry(StockController, SubcontractingInwardController):
 			if item.s_warehouse:
 				continue
 
-			if (item.item_code, item.name) in landed_cost_entries:
-				for account, amount in landed_cost_entries[(item.item_code, item.name)].items():
-					account_currency = get_account_currency(account)
-					credit_amount = (
-						flt(amount["base_amount"])
-						if (amount["base_amount"] or account_currency != self.company_currency)
-						else flt(amount["amount"])
-					)
+			for entry in landed_cost_entries.get((item.item_code, item.name), []):
+				if not (entry.amount or entry.base_amount):
+					continue
 
-					_inv_dict = self.get_inventory_account_dict(item, inventory_account_map, "t_warehouse")
-					gl_entries.append(
-						self.get_gl_dict(
-							{
-								"account": account,
-								"against": _inv_dict["account"],
-								"cost_center": item.cost_center,
-								"debit": 0.0,
-								"credit": credit_amount,
-								"remarks": _("Accounting Entry for LCV in Stock Entry {0}").format(self.name),
-								"credit_in_account_currency": flt(amount["amount"]),
-								"account_currency": account_currency,
-								"project": item.project,
-							},
-							item=item,
-						)
-					)
+				account_currency = get_account_currency(entry.expense_account)
+				credit_amount = (
+					flt(entry.base_amount)
+					if (entry.base_amount or account_currency != self.company_currency)
+					else flt(entry.amount)
+				)
 
-					account_currency = get_account_currency(item.expense_account)
+				_inv_dict = self.get_inventory_account_dict(item, inventory_account_map, "t_warehouse")
+				gl_dict = self.get_gl_dict(
+					{
+						"account": entry.expense_account,
+						"against": _inv_dict["account"],
+						"cost_center": entry.dimensions.cost_center or item.cost_center,
+						"debit": 0.0,
+						"credit": credit_amount,
+						"remarks": _("Accounting Entry for LCV in Stock Entry {0}").format(self.name),
+						"credit_in_account_currency": flt(entry.amount),
+						"account_currency": account_currency,
+						"project": entry.dimensions.project or item.project,
+					},
+					item=item,
+				)
+				gl_dict.update(get_custom_dimension_overrides(entry))
+				gl_entries.append(gl_dict)
 
-					# credit amount in negative to knock off the debit entry
-					gl_entries.append(
-						self.get_gl_dict(
-							{
-								"account": item.expense_account,
-								"against": _inv_dict["account"],
-								"cost_center": item.cost_center,
-								"debit": 0.0,
-								"credit": credit_amount * -1,
-								"remarks": _("Accounting Entry for LCV in Stock Entry {0}").format(self.name),
-								"debit_in_account_currency": flt(amount["amount"]),
-								"account_currency": account_currency,
-								"project": item.project,
-							},
-							item=item,
-						)
+				account_currency = get_account_currency(item.expense_account)
+
+				gl_entries.append(
+					self.get_gl_dict(
+						{
+							"account": item.expense_account,
+							"against": _inv_dict["account"],
+							"cost_center": item.cost_center,
+							"debit": 0.0,
+							"credit": credit_amount * -1,
+							"remarks": _("Accounting Entry for LCV in Stock Entry {0}").format(self.name),
+							"debit_in_account_currency": flt(entry.amount),
+							"account_currency": account_currency,
+							"project": item.project,
+						},
+						item=item,
 					)
+				)
 
 	def update_work_order(self):
 		def _validate_work_order(pro_doc):
@@ -2643,6 +2525,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if self.work_order:
 			pro_doc = frappe.get_doc("Work Order", self.work_order)
 			_validate_work_order(pro_doc)
+			if pro_doc.production_plan:
+				ProductionPlanWorkOrderQuantities(pro_doc.production_plan).lock_plan_row(pro_doc)
 
 			if self.fg_completed_qty:
 				if self.docstatus == 1:

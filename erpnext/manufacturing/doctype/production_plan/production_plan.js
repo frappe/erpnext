@@ -230,6 +230,14 @@ frappe.ui.form.on("Production Plan", {
 
 		let has_items =
 			items.filter((item) => {
+				const reference_field =
+					item.doctype === "Production Plan Item"
+						? "production_plan_item"
+						: "production_plan_sub_assembly_item";
+				const pending_qty = frm.doc.__onload?.pending_work_order_qty?.[reference_field]?.[item.name];
+				if (pending_qty !== undefined) {
+					return pending_qty > 0;
+				}
 				if (item.planned_qty) {
 					return item.planned_qty > item.ordered_qty;
 				} else {

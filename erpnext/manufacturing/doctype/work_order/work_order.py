@@ -34,8 +34,8 @@ from erpnext.manufacturing.doctype.bom.bom import (
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import (
 	get_mins_between_operations,
 )
-from erpnext.manufacturing.doctype.work_order.services.material_coverage import (
-	get_minimum_material_coverage_fraction,
+from erpnext.manufacturing.doctype.production_plan.work_order_quantities import (
+	ProductionPlanWorkOrderQuantities,
 )
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.batch.batch import make_batch
@@ -745,9 +745,29 @@ class WorkOrder(Document):
 		return status
 
 	def _has_transferred_material(self):
-		"""True if any raw material transferred against this work order is still in WIP."""
+		"""True if any raw material transferred against this work order via a pick list or a
+		material request is still, net of returns, in WIP (these leave
+		material_transferred_for_manufacturing at 0 via the min-fraction rule)."""
 		ste = frappe.qb.DocType("Stock Entry")
 		ste_child = frappe.qb.DocType("Stock Entry Detail")
+		mr_ste = frappe.qb.DocType("Stock Entry")
+		mr_child = frappe.qb.DocType("Stock Entry Detail")
+		# Stock Entry only carries `material_request` at the child-row level, so a Stock
+		# Entry is "MR-sourced" if *any* of its rows link back to a Material Request against
+		# this work order; the join to mr_ste keeps this scoped to this work order's entries
+		# instead of scanning every Material-Request-linked row in the system.
+		mr_sourced_stock_entries = (
+			frappe.qb.from_(mr_child)
+			.inner_join(mr_ste)
+			.on(mr_ste.name == mr_child.parent)
+			.select(mr_child.parent)
+			.where(
+				(mr_child.material_request.isnotnull())
+				& (mr_ste.work_order == self.name)
+				& (mr_ste.docstatus == 1)
+				& (mr_ste.purpose == "Material Transfer for Manufacture")
+			)
+		)
 		common_filters = (
 			(ste.work_order == self.name)
 			& (ste.docstatus == 1)
@@ -758,7 +778,11 @@ class WorkOrder(Document):
 			.inner_join(ste_child)
 			.on(ste_child.parent == ste.name)
 			.select(Sum(ste_child.transfer_qty))
-			.where(common_filters & (ste.is_return == 0))
+			.where(
+				common_filters
+				& (ste.is_return == 0)
+				& (ste.pick_list.isnotnull() | ste.name.isin(mr_sourced_stock_entries))
+			)
 		).run()[0][0]
 		# Returns don't carry their own pick_list/material_request reference, so net every
 		# return against this work order to correctly clear WIP after a full return.
@@ -778,6 +802,8 @@ class WorkOrder(Document):
 		if self.track_semi_finished_goods:
 			return
 
+		# Lock the plan row before any Work Order quantity update takes a row lock.
+		self.set_process_loss_qty()
 		allowance_percentage = flt(
 			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order")
 		)
@@ -804,16 +830,26 @@ class WorkOrder(Document):
 				)
 
 			completed_qty = self.qty + (allowance_percentage / 100 * self.qty)
-			if qty > completed_qty:
+			qty_to_validate = qty + flt(self.process_loss_qty) if purpose == "Manufacture" else qty
+			precision = self.precision(fieldname)
+			if flt(qty_to_validate, precision) > flt(completed_qty, precision):
 				frappe.throw(
 					_("{0} ({1}) cannot be greater than planned quantity ({2}) in Work Order {3}").format(
-						_(self.meta.get_label(fieldname)), qty, completed_qty, self.name
+						_("Manufactured Qty (including Process Loss)")
+						if purpose == "Manufacture"
+						else _(self.meta.get_label(fieldname)),
+						flt(qty_to_validate, precision),
+						completed_qty,
+						self.name,
 					),
 					StockOverProductionError,
 				)
 
 			self.db_set(fieldname, qty)
-			self.set_process_loss_qty()
+			if purpose == "Manufacture" and self.production_plan:
+				ProductionPlanWorkOrderQuantities(self.production_plan).validate_work_order(
+					self, process_loss_qty=self.process_loss_qty
+				)
 
 			from erpnext.selling.doctype.sales_order.sales_order import update_produced_qty_in_so_item
 
@@ -884,7 +920,20 @@ class WorkOrder(Document):
 		return flt(query.run()[0][0])
 
 	def set_process_loss_qty(self):
-		self.db_set("process_loss_qty", self._process_loss_qty())
+		quantities = None
+		if self.docstatus == 1 and self.production_plan:
+			quantities = ProductionPlanWorkOrderQuantities(self.production_plan)
+			quantities.lock_plan_row(self)
+
+		process_loss_qty = self._process_loss_qty()
+		if quantities:
+			previous_loss_qty = frappe.db.get_value(
+				"Work Order", self.name, "process_loss_qty", for_update=True
+			)
+			if process_loss_qty < flt(previous_loss_qty):
+				# Replacement Work Orders may have consumed the recorded loss.
+				quantities.validate_work_order(self, process_loss_qty=process_loss_qty)
+		self.db_set("process_loss_qty", process_loss_qty)
 
 	def _process_loss_qty(self):
 		if self.track_semi_finished_goods:
@@ -903,6 +952,7 @@ class WorkOrder(Document):
 
 	def update_production_plan_status(self):
 		production_plan = frappe.get_doc("Production Plan", self.production_plan)
+		production_plan.flags.ignore_permissions = True
 		produced_qty = 0
 		if self.production_plan_item:
 			total_qty = frappe.get_all(
@@ -928,6 +978,8 @@ class WorkOrder(Document):
 			frappe.throw(_("Target Warehouse is required before Submit"))
 
 	def before_submit(self):
+		if self.production_plan:
+			ProductionPlanWorkOrderQuantities(self.production_plan).validate_work_order(self)
 		self.create_serial_no_batch_no()
 
 	def on_submit(self):
@@ -1330,6 +1382,7 @@ class WorkOrder(Document):
 				)
 
 			doc = frappe.get_doc("Production Plan", self.production_plan)
+			doc.flags.ignore_permissions = True
 			doc.set_status()
 			doc.db_set("status", doc.status)
 
@@ -1599,36 +1652,6 @@ class WorkOrder(Document):
 				),
 			)
 
-		if self.production_plan and self.production_plan_item and not self.production_plan_sub_assembly_item:
-			qty_dict = frappe.db.get_value(
-				"Production Plan Item", self.production_plan_item, ["planned_qty", "ordered_qty"], as_dict=1
-			)
-
-			if not qty_dict:
-				return
-
-			allowance_qty = (
-				flt(
-					frappe.db.get_single_value(
-						"Manufacturing Settings", "overproduction_percentage_for_work_order"
-					)
-				)
-				/ 100
-				* qty_dict.get("planned_qty", 0)
-			)
-
-			max_qty = qty_dict.get("planned_qty", 0) + allowance_qty - qty_dict.get("ordered_qty", 0)
-
-			if max_qty <= 0:
-				frappe.throw(
-					_("Cannot produce more item for {0}").format(self.production_item), OverProductionError
-				)
-			elif self.qty > max_qty:
-				frappe.throw(
-					_("Cannot produce more than {0} items for {1}").format(max_qty, self.production_item),
-					OverProductionError,
-				)
-
 		if self.subcontracting_inward_order and self.qty > self.max_producible_qty:
 			frappe.msgprint(
 				_(
@@ -1819,15 +1842,22 @@ class WorkOrder(Document):
 		return transferred_items
 
 	def recompute_material_transferred_for_manufacturing(self, transferred_items):
-		"""Set transferred quantity from the raw materials that have actually moved."""
+		"""Set material_transferred_for_manufacturing based on actual item-level transfers, not fg_completed_qty."""
 		# Job Card transfers use the minimum completed quantity across operations.
 		if self.operations and self.transfer_material_against == "Job Card":
 			return
 
-		claimed_qty = self.get_transferred_or_manufactured_qty(
+		# When fg_completed_qty > 0 (direct stock entries, excess transfer), preserve the
+		# SUM(fg_completed_qty) approach so excess-transfer tracking works correctly.
+		sum_fg_completed_qty = self.get_transferred_or_manufactured_qty(
 			"Material Transfer for Manufacture", "material_transferred_for_manufacturing"
 		)
+		if sum_fg_completed_qty:
+			self.db_set("material_transferred_for_manufacturing", sum_fg_completed_qty)
+			return
 
+		# Pick list flow sets fg_completed_qty=0; use min-fraction of actual item transfers
+		# so partial availability does not prematurely mark the work order as fully transferred.
 		required_by_item = {}
 		for row in self.required_items:
 			if not row.include_item_in_manufacturing or flt(row.required_qty) <= 0:
@@ -1837,13 +1867,12 @@ class WorkOrder(Document):
 		if not required_by_item:
 			return
 
-		min_fraction = get_minimum_material_coverage_fraction(
-			required_by_item,
-			transferred_items,
-			self.precision("required_qty", "required_items"),
+		min_fraction = min(
+			flt(transferred_items.get(item_code) or 0) / required_qty
+			for item_code, required_qty in required_by_item.items()
 		)
-		covered_qty = min_fraction * flt(self.qty)
-		material_transferred = min(covered_qty, max(flt(self.qty), claimed_qty))
+		min_fraction = min(min_fraction, 1.0)
+		material_transferred = min_fraction * flt(self.qty)
 		self.db_set("material_transferred_for_manufacturing", material_transferred)
 
 	def update_qty_in_stock_reservation(self, row, transferred_qty, row_wise_serial_batch):

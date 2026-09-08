@@ -193,8 +193,10 @@ class TemplateStructureValidator(Validator):
 				if not row.calculation_formula:
 					result.add_error(
 						ValidationIssue(
-							message=_("{0} is required for {1}").format(
-								get_formula_field_label(row.data_source), row.data_source
+							message=_("{0} is required when {1} is {2}").format(
+								get_formula_field_label(row.data_source),
+								row.meta.get_translated_label("data_source"),
+								_(row.data_source),
 							),
 							row_idx=row.idx,
 						)
@@ -222,7 +224,14 @@ class DependencyValidator(Validator):
 
 		for row in self.template.rows:
 			if row.reference_code and row.data_source == "Calculated Amount" and row.calculation_formula:
-				deps = extract_reference_codes_from_formula(row.calculation_formula, list(available_codes))
+				# skip self-reference, `CalculationFormulaValidator` already reports it
+				deps = [
+					code
+					for code in extract_reference_codes_from_formula(
+						row.calculation_formula, list(available_codes)
+					)
+					if code != row.reference_code
+				]
 				if deps:
 					graph[row.reference_code] = deps
 
@@ -284,7 +293,9 @@ class DependencyValidator(Validator):
 				row_idx = self._get_row_idx(ref_code)
 				result.add_error(
 					ValidationIssue(
-						message=_("Line References undefined in Formula: {0}").format(", ".join(undefined)),
+						message=_("Line references undefined in {0}: {1}").format(
+							get_formula_field_label("Calculated Amount"), ", ".join(undefined)
+						),
 						row_idx=row_idx,
 					)
 				)
@@ -311,17 +322,6 @@ class CalculationFormulaValidator(Validator):
 		if row.data_source != "Calculated Amount":
 			return result
 
-		if not row.calculation_formula:
-			result.add_error(
-				ValidationIssue(
-					message=_("{0} is required for Calculated Amount").format(
-						get_formula_field_label(row.data_source)
-					),
-					row_idx=row.idx,
-				)
-			)
-			return result
-
 		formula = self._preprocess_formula(row.calculation_formula)
 		row.calculation_formula = formula
 
@@ -342,16 +342,6 @@ class CalculationFormulaValidator(Validator):
 			result.add_error(
 				ValidationIssue(
 					message=_("Formula references itself ('{0}')").format(row.reference_code),
-					row_idx=row.idx,
-				)
-			)
-
-		# Check undefined references
-		undefined = set(refs) - set(available_codes)
-		if undefined:
-			result.add_error(
-				ValidationIssue(
-					message=_("Formula references undefined codes: {0}").format(", ".join(undefined)),
 					row_idx=row.idx,
 				)
 			)
@@ -413,21 +403,19 @@ class AccountFilterValidator(Validator):
 		self.account_fields = account_fields or set(self.account_meta._valid_columns)
 
 	def validate(self, row) -> ValidationResult:
-		result = ValidationResult()
-
+		# dispatch-path guard: only account-data rows are validated here
 		if row.data_source != "Account Data":
-			return result
+			return ValidationResult()
 
-		if not row.calculation_formula:
-			result.add_error(
-				ValidationIssue(
-					message=_("{0} is required for Account Data").format(
-						get_formula_field_label(row.data_source)
-					),
-					row_idx=row.idx,
-				)
-			)
-			return result
+		return self.validate_filter(row)
+
+	def validate_filter(self, row) -> ValidationResult:
+		"""Validate calculation_formula as an Account filter, regardless of data_source.
+
+		The caller has already decided this row is an account filter, so unlike
+		`validate()` this does not opt out based on `data_source`.
+		"""
+		result = ValidationResult()
 
 		try:
 			filter_config = json.loads(row.calculation_formula)
@@ -440,7 +428,9 @@ class AccountFilterValidator(Validator):
 			if error:
 				result.add_error(
 					ValidationIssue(
-						message=_("{0}: {1}").format(get_formula_field_label(row.data_source), error),
+						message=_("[{0}] {1}", context="Financial Report Template").format(
+							get_formula_field_label("Account Data"), error
+						),
 						row_idx=row.idx,
 					)
 				)
@@ -448,8 +438,9 @@ class AccountFilterValidator(Validator):
 		except json.JSONDecodeError as e:
 			result.add_error(
 				ValidationIssue(
-					message=_("{0}: Invalid JSON format: {1}").format(
-						get_formula_field_label(row.data_source), str(e)
+					message=_("[{0}] {1}", context="Financial Report Template").format(
+						get_formula_field_label("Account Data"),
+						_("Invalid JSON format: {0}").format(str(e)),
 					),
 					row_idx=row.idx,
 				)
@@ -473,10 +464,9 @@ class AccountFilterValidator(Validator):
 			if not isinstance(field, str) or not isinstance(operator, str):
 				return _("Field and operator must be strings")
 
-			display = (field if advanced_filtering else self.account_meta.get_label(field)) or field
-
 			if field not in account_fields:
-				return _("Field '{0}' is not a valid Account field").format(display)
+				# escape: `field` is caller-supplied and this message renders as HTML
+				return _("Field '{0}' is not a valid Account field").format(frappe.utils.escape_html(field))
 
 			if operator.casefold() not in OPERATOR_MAP:
 				return _("Invalid operator '{0}'").format(operator)
@@ -555,8 +545,9 @@ class FormulaValidator(Validator):
 				frappe.clear_last_message()
 
 			if isinstance(e, frappe.PermissionError):
-				message = _("{0}: Method '{1}' must be whitelisted and permit GET requests").format(
-					get_formula_field_label(row.data_source), api_path
+				message = _("[{0}] {1}", context="Financial Report Template").format(
+					get_formula_field_label(row.data_source),
+					_("Method '{0}' must be whitelisted and permit GET requests").format(api_path),
 				)
 			else:
 				message = _("Could not validate {0}: {1}").format(

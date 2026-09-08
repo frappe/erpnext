@@ -230,6 +230,7 @@ class PurchaseOrder(BuyingController):
 			self.doctype, self.supplier, self.company, self.inter_company_order_reference
 		)
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
+		self.set_missing_terms()
 
 	def set_has_unit_price_items(self):
 		"""
@@ -329,6 +330,43 @@ class PurchaseOrder(BuyingController):
 					_(
 						"Item {0}: Ordered qty {1} cannot be less than minimum order qty {2} (defined in Item)."
 					).format(item_code, qty, itemwise_min_order_qty.get(item_code))
+				)
+
+		self.warn_marginal_min_order_qty(itemwise_qty, itemwise_min_order_qty)
+
+	def warn_marginal_min_order_qty(self, itemwise_qty, itemwise_min_order_qty):
+		"""Toast when an item's ordered qty exceeds its minimum only by purchase UOM rounding."""
+		if not self.is_new():
+			return
+
+		precision = self.items[0].precision("stock_qty")
+		itemwise_steps = {}
+		itemwise_stock_uom = frappe._dict()
+		for d in self.get("items"):
+			step = 10 ** -d.precision("qty") * flt(d.conversion_factor)
+			itemwise_steps.setdefault(d.item_code, set()).add(step)
+			itemwise_stock_uom[d.item_code] = d.stock_uom
+
+		for item_code, qty in itemwise_qty.items():
+			steps = itemwise_steps[item_code]
+			if len(steps) != 1:
+				continue
+
+			step = next(iter(steps))
+			min_order_qty = flt(itemwise_min_order_qty.get(item_code))
+			overage = flt(qty) - min_order_qty
+			if min_order_qty and flt(overage, precision) > 0 and overage < step:
+				frappe.toast(
+					_(
+						"Item {0}: Ordered qty {1} {2} exceeds the minimum order qty {3} {2} by {4} {2} due to purchase UOM rounding."
+					).format(
+						item_code,
+						flt(qty, precision),
+						itemwise_stock_uom[item_code],
+						min_order_qty,
+						flt(overage, precision),
+					),
+					indicator="orange",
 				)
 
 	def validate_bom_for_subcontracting_items(self):
