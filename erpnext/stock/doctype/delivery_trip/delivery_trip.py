@@ -54,6 +54,12 @@ class DeliveryTrip(Document):
 		self.update_status()
 		self.update_delivery_notes(delete=True)
 
+	def after_mapping(self, source_doc):
+		# Remove placeholder rows without discarding partially filled stops.
+		for stop in self.delivery_stops[:]:
+			if not any(stop.get(df.fieldname) for df in stop.meta.fields):
+				self.remove(stop)
+
 	def validate(self):
 		if self._action == "submit" and not self.driver:
 			frappe.throw(_("A driver must be set to submit."))
