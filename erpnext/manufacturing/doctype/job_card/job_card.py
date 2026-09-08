@@ -1013,6 +1013,10 @@ class JobCard(Document):
 		frappe.db.set_value("Work Order Operation", self.operation_id, "completed_qty", completed_qty)
 		if self.finished_good and work_order.production_item == self.finished_good:
 			work_order.db_set("produced_qty", sum(flt(row.manufactured_qty) for row in job_cards))
+			if work_order.production_plan:
+				ProductionPlanWorkOrderQuantities(work_order.production_plan).validate_work_order(
+					work_order, process_loss_qty=work_order.process_loss_qty
+				)
 			work_order.db_set("status", work_order.get_status())
 
 	def update_corrective_in_work_order(self, wo):

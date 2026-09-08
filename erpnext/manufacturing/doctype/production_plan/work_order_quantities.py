@@ -29,18 +29,17 @@ class ProductionPlanWorkOrderQuantities:
 			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order")
 		)
 		precision = work_order.precision("qty")
-		maximum_qty = flt(
-			flt(row.planned_qty) * (1 + allowance / 100) - committed + flt(process_loss_qty), precision
-		)
-		if flt(work_order.qty, precision) > maximum_qty:
+		maximum_qty = flt(flt(row.planned_qty) * (1 + allowance / 100) - committed, precision)
+		committed_qty = flt(self._get_committed_qty(work_order, process_loss_qty), precision)
+		if committed_qty > maximum_qty:
 			frappe.throw(
 				_(
-					"Row {0} in {1} {2}: Work Order quantity {3} exceeds the remaining allowed quantity {4}."
+					"Row {0} in {1} {2}: Work Order quantity after process loss {3} exceeds the remaining allowed quantity {4}."
 				).format(
 					row.idx,
 					_(row.doctype),
 					get_link_to_form("Production Plan", self.production_plan),
-					flt(work_order.qty, precision),
+					committed_qty,
 					max(0, maximum_qty),
 				),
 				OverProductionError,
@@ -109,6 +108,7 @@ class ProductionPlanWorkOrderQuantities:
 				table.production_plan_item,
 				table.production_plan_sub_assembly_item,
 				table.qty,
+				table.produced_qty,
 				table.process_loss_qty,
 			)
 			.where((table.production_plan == self.production_plan) & (table.docstatus == 1))
@@ -133,5 +133,11 @@ class ProductionPlanWorkOrderQuantities:
 				else "production_plan_item"
 			)
 			if work_order.get(field):
-				quantities[field][work_order[field]] += flt(work_order.qty) - flt(work_order.process_loss_qty)
+				quantities[field][work_order[field]] += self._get_committed_qty(
+					work_order, work_order.process_loss_qty
+				)
 		return quantities
+
+	def _get_committed_qty(self, work_order, process_loss_qty):
+		# Excess loss in existing records must not erase finished goods already produced.
+		return max(0, flt(work_order.produced_qty), flt(work_order.qty) - flt(process_loss_qty))
