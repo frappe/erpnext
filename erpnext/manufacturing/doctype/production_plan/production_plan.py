@@ -966,12 +966,9 @@ class ProductionPlan(Document):
 		material_request_list = []
 		material_request_map = {}
 
-		if all([item.requested_qty == item.quantity for item in self.mr_items]):
-			msgprint(_("All items are already requested"))
-			return
-
 		for item in self.mr_items:
-			if item.quantity == item.requested_qty:
+			qty_to_request = flt(flt(item.quantity) - flt(item.requested_qty), item.precision("quantity"))
+			if qty_to_request <= 0:
 				continue
 
 			item_doc = frappe.get_cached_doc("Item", item.item_code)
@@ -1006,7 +1003,7 @@ class ProductionPlan(Document):
 					"from_warehouse": item.from_warehouse
 					if material_request_type == "Material Transfer"
 					else None,
-					"qty": item.quantity - item.requested_qty,
+					"qty": qty_to_request,
 					"uom": item.uom,
 					"schedule_date": schedule_date,
 					"warehouse": item.warehouse,
@@ -1018,6 +1015,10 @@ class ProductionPlan(Document):
 					else None,
 				},
 			)
+
+		if not material_request_list:
+			msgprint(_("All items are already requested"))
+			return
 
 		for material_request in material_request_list:
 			# submit
