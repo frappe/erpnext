@@ -73,24 +73,51 @@ frappe.ui.form.on("Inventory Dimension", {
 		frm.trigger("set_parent_fields");
 	},
 
+	istable(frm) {
+		frm.trigger("set_parent_fields");
+	},
+
+	reference_document(frm) {
+		frm.trigger("set_parent_fields");
+	},
+
+	apply_to_all_doctypes(frm) {
+		frm.trigger("set_parent_fields");
+	},
+
 	set_parent_fields(frm) {
+		const { reference_document, document_type } = frm.doc;
+		if (!reference_document || (!frm.doc.apply_to_all_doctypes && (!document_type || !frm.doc.istable))) {
+			frm.set_df_property("fetch_from_parent", "options", []);
+			frm.set_df_property("fetch_from_parent", "hidden", 1);
+			return frm.set_value("fetch_from_parent", "");
+		}
+
 		if (frm.doc.apply_to_all_doctypes) {
-			let options = ["\n", frm.doc.reference_document];
+			let options = ["\n", reference_document];
 
 			frm.set_df_property("fetch_from_parent", "options", options);
-		} else if (frm.doc.document_type && frm.doc.istable) {
+			frm.set_df_property("fetch_from_parent", "hidden", 0);
+		} else if (document_type && frm.doc.istable) {
 			frappe.call({
 				method: "erpnext.stock.doctype.inventory_dimension.inventory_dimension.get_parent_fields",
 				args: {
-					child_doctype: frm.doc.document_type,
-					dimension_name: frm.doc.reference_document,
+					child_doctype: document_type,
+					dimension_name: reference_document,
 				},
 				callback: (r) => {
-					if (r.message && r.message.length) {
-						frm.set_df_property("fetch_from_parent", "options", ["\n"].concat(r.message));
-					} else {
-						frm.set_df_property("fetch_from_parent", "hidden", 1);
+					if (
+						frm.doc.reference_document !== reference_document ||
+						frm.doc.document_type !== document_type ||
+						frm.doc.apply_to_all_doctypes ||
+						!frm.doc.istable
+					) {
+						return;
 					}
+
+					const fields = r.message || [];
+					frm.set_df_property("fetch_from_parent", "options", ["\n"].concat(fields));
+					frm.set_df_property("fetch_from_parent", "hidden", !fields.length);
 				},
 			});
 		}
