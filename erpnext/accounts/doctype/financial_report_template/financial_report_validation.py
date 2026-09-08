@@ -464,11 +464,6 @@ class AccountFilterValidator(Validator):
 			if not isinstance(field, str) or not isinstance(operator, str):
 				return _("Field and operator must be strings")
 
-<<<<<<< HEAD
-			display = (field if advanced_filtering else self.account_meta.get_label(field)) or field
-
-=======
->>>>>>> ed368a3 (fix(accounts): enforce account field allow-list on financial report filters (#58790))
 			if field not in account_fields:
 				# escape: `field` is caller-supplied and this message renders as HTML
 				return _("Field '{0}' is not a valid Account field").format(frappe.utils.escape_html(field))
