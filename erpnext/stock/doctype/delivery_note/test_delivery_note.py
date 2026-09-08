@@ -1049,6 +1049,56 @@ class TestDeliveryNote(FrappeTestCase):
 		self.assertEqual(dn.per_billed, 100)
 		self.assertEqual(dn.status, "Completed")
 
+	def test_dn_is_completed_when_unbilled_item_is_returned(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+
+		make_stock_entry(target="_Test Warehouse - _TC", qty=1, basic_rate=100)
+		make_stock_entry(item_code="_Test Item 2", target="_Test Warehouse - _TC", qty=1, basic_rate=100)
+
+		dn = create_delivery_note(do_not_submit=True)
+		dn.append(
+			"items",
+			{
+				"item_code": "_Test Item 2",
+				"warehouse": "_Test Warehouse - _TC",
+				"qty": 1,
+				"rate": 100,
+				"conversion_factor": 1,
+				"allow_zero_valuation_rate": 1,
+				"expense_account": "Cost of Goods Sold - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+			},
+		)
+		dn.submit()
+
+		si = make_sales_invoice(dn.name)
+		si.set("items", [item for item in si.items if item.item_code == "_Test Item"])
+		si.insert()
+		si.submit()
+
+		dn.reload()
+		self.assertEqual(dn.per_billed, 50)
+		self.assertEqual(dn.status, "Partially Billed")
+
+		return_dn = make_sales_return(dn.name)
+		return_dn.set("items", [item for item in return_dn.items if item.item_code == "_Test Item 2"])
+		return_dn.insert()
+		# Mimic the submit request, which reconstructs the document from client data.
+		return_dn = frappe.get_doc(return_dn.as_dict())
+		return_dn.submit()
+
+		dn.reload()
+		self.assertEqual(dn.items[1].returned_qty, 1)
+		self.assertEqual(dn.per_billed, 100)
+		self.assertEqual(dn.status, "Completed")
+
+		return_dn.cancel()
+
+		dn.reload()
+		self.assertEqual(dn.items[1].returned_qty, 0)
+		self.assertEqual(dn.per_billed, 50)
+		self.assertEqual(dn.status, "Partially Billed")
+
 	def test_dn_billing_status_case2(self):
 		# SO -> SI and SO -> DN1, DN2
 		from erpnext.selling.doctype.sales_order.sales_order import (
