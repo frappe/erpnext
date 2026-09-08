@@ -9,12 +9,17 @@ frappe.ui.form.on("Stock Reconciliation", {
 		frm.ignore_doctypes_on_cancel_all = ["Serial and Batch Bundle", "Item Standard Cost"];
 		frm.barcode_scanner = new erpnext.utils.BarcodeScanner({
 			frm: frm,
-			uom_field: "stock_uom",
+			uom_field: "uom",
+			qty_field: "counted_qty",
 		});
 	},
 
 	onload: function (frm) {
 		frm.add_fetch("item_code", "item_name", "item_name");
+		frm.set_query("uom", "items", (doc, cdt, cdn) => ({
+			query: "erpnext.stock.doctype.stock_reconciliation.stock_reconciliation.get_reconciliation_uom_query",
+			filters: { item_code: locals[cdt][cdn].item_code },
+		}));
 
 		// end of life
 		frm.set_query("item_code", "items", function (doc, cdt, cdn) {
@@ -82,6 +87,15 @@ frappe.ui.form.on("Stock Reconciliation", {
 	},
 
 	set_fields_onload_for_line_item(frm) {
+		if (frm.doc.docstatus === 0) {
+			(frm.doc.items || []).forEach((item) => {
+				if (!item.uom) {
+					item.uom = item.stock_uom;
+					item.conversion_factor = 1;
+					item.counted_qty = item.qty;
+				}
+			});
+		}
 		if (frm.is_new() && frm.doc?.items && cint(frappe.user_defaults?.use_serial_batch_fields) === 1) {
 			frm.doc.items.forEach((item) => {
 				if (!item.serial_and_batch_bundle) {
@@ -161,6 +175,9 @@ frappe.ui.form.on("Stock Reconciliation", {
 							$.extend(item, row);
 
 							item.qty = item.qty || 0;
+							item.uom = item.stock_uom;
+							item.conversion_factor = 1;
+							item.counted_qty = item.qty;
 							item.valuation_rate = item.valuation_rate || 0;
 							item.use_serial_batch_fields = cint(
 								frappe.user_defaults?.use_serial_batch_fields
@@ -193,7 +210,7 @@ frappe.ui.form.on("Stock Reconciliation", {
 		var d = frappe.model.get_doc(cdt, cdn);
 
 		if (d.item_code && d.warehouse) {
-			frappe.call({
+			return frappe.call({
 				method: "erpnext.stock.doctype.stock_reconciliation.stock_reconciliation.get_stock_balance_for",
 				args: {
 					item_code: d.item_code,
@@ -206,7 +223,7 @@ frappe.ui.form.on("Stock Reconciliation", {
 				},
 				callback: function (r) {
 					const row = frappe.model.get_doc(cdt, cdn);
-					if (!frm.doc.scan_mode) {
+					if (!frm.doc.scan_mode && !frappe.flags.trigger_from_barcode_scanner) {
 						frappe.model.set_value(cdt, cdn, "qty", r.message.qty);
 					}
 					frappe.model.set_value(cdt, cdn, "valuation_rate", r.message.rate);
@@ -232,11 +249,11 @@ frappe.ui.form.on("Stock Reconciliation", {
 
 	set_amount_quantity: function (doc, cdt, cdn) {
 		var d = frappe.model.get_doc(cdt, cdn);
-		if (d.qty && d.valuation_rate) {
-			frappe.model.set_value(cdt, cdn, "amount", flt(d.qty) * flt(d.valuation_rate));
-			frappe.model.set_value(cdt, cdn, "quantity_difference", flt(d.qty) - flt(d.current_qty));
-			frappe.model.set_value(cdt, cdn, "amount_difference", flt(d.amount) - flt(d.current_amount));
-		}
+		return frappe.model.set_value(cdt, cdn, {
+			amount: flt(d.qty) * flt(d.valuation_rate),
+			quantity_difference: flt(d.qty) - flt(d.current_qty),
+			amount_difference: flt(d.qty) * flt(d.valuation_rate) - flt(d.current_amount),
+		});
 	},
 	toggle_display_account_head: function (frm) {
 		frm.toggle_display(
@@ -275,13 +292,44 @@ frappe.ui.form.on("Stock Reconciliation Item", {
 		frm.events.set_valuation_rate_and_qty(frm, cdt, cdn);
 	},
 
-	item_code: function (frm, cdt, cdn) {
+	item_code: async function (frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
+		if (!child.item_code) return;
+		const item_code = child.item_code;
+		const { message } = await frappe.call({
+			method: "erpnext.stock.doctype.stock_reconciliation.stock_reconciliation.get_reconciliation_uom_details",
+			args: { item_code },
+		});
+		if (child.item_code !== item_code) return;
+		await frappe.model.set_value(cdt, cdn, message);
 		if (child.batch_no && !frm.doc.scan_mode) {
 			frappe.model.set_value(cdt, cdn, "batch_no", "");
 		}
 
-		frm.events.set_valuation_rate_and_qty(frm, cdt, cdn);
+		return frm.events.set_valuation_rate_and_qty(frm, cdt, cdn);
+	},
+
+	uom: async function (frm, cdt, cdn) {
+		const row = locals[cdt][cdn];
+		if (!row.item_code) return;
+		const { item_code, uom } = row;
+		const { message } = await frappe.call({
+			method: "erpnext.stock.doctype.stock_reconciliation.stock_reconciliation.get_reconciliation_uom_details",
+			args: { item_code, uom },
+		});
+		if (row.item_code !== item_code || row.uom !== uom) return;
+		await frappe.model.set_value(cdt, cdn, message);
+		return frm.script_manager.trigger("counted_qty", cdt, cdn);
+	},
+
+	counted_qty: function (frm, cdt, cdn) {
+		const row = locals[cdt][cdn];
+		return frappe.model.set_value(
+			cdt,
+			cdn,
+			"qty",
+			flt(flt(row.counted_qty) * (flt(row.conversion_factor) || 1), precision("qty", row))
+		);
 	},
 
 	batch_no(frm, cdt, cdn) {
@@ -296,10 +344,20 @@ frappe.ui.form.on("Stock Reconciliation Item", {
 		}
 	},
 
-	qty: function (frm, cdt, cdn) {
-		frm.events.set_amount_quantity(frm, cdt, cdn);
-
+	qty: async function (frm, cdt, cdn) {
 		let row = locals[cdt][cdn];
+		const conversion_factor = flt(row.conversion_factor) || 1;
+		const qty_precision = precision("qty", row);
+		// Stock balances, serial numbers and the bundle selector supply Stock UOM quantities.
+		// Keep the entered count if it already converts to this rounded quantity.
+		if (
+			row.counted_qty == null ||
+			row.counted_qty === "" ||
+			flt(flt(row.counted_qty) * conversion_factor, qty_precision) !== flt(row.qty, qty_precision)
+		) {
+			await frappe.model.set_value(cdt, cdn, "counted_qty", flt(row.qty) / conversion_factor);
+		}
+		frm.events.set_amount_quantity(frm, cdt, cdn);
 		if (row.use_serial_batch_fields && !row.qty && row.serial_no) {
 			frappe.model.set_value(cdt, cdn, "serial_no", "");
 		}
