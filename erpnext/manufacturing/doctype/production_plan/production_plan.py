@@ -1562,8 +1562,9 @@ def _purchase_rows_by_item(mr_items):
 def _rows_by_sales_order(rows):
 	rows_by_order = defaultdict(list)
 	for row in rows:
-		rows_by_order[row.get("sales_order")].append(row)
-	return rows_by_order.values()
+		rows_by_order[row.get("sales_order") or ""].append(row)
+	# Keep surplus allocation stable when upstream queries return orders in a different order.
+	return [rows_by_order[sales_order] for sales_order in sorted(rows_by_order)]
 
 
 def _apply_minimum_order_qty_to_order(rows, surplus_qty):

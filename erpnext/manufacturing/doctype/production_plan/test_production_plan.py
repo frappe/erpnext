@@ -118,6 +118,47 @@ class TestProductionPlan(ERPNextTestSuite):
 							[row["sales_order"] for row in items], [row.sales_order for row in pln.po_items]
 						)
 
+	def test_minimum_order_qty_allocation_uses_sales_order_name(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "min_order_qty": 1234}).name
+		pln = self._plan_with_shared_raw_material(rm_item, qty_per_order=250)
+		pln.po_items[1].planned_qty = 500
+		pln.consider_minimum_order_qty = 1
+		sales_orders = sorted(row.sales_order for row in pln.po_items)
+
+		for reverse in (False, True):
+			with self.subTest(reverse=reverse):
+				pln.set("po_items", sorted(pln.po_items, key=lambda row: row.sales_order, reverse=reverse))
+				items = get_items_for_material_requests(pln.as_dict())
+				self.assertEqual(
+					{row["sales_order"]: row["quantity"] for row in items},
+					{sales_orders[0]: 1234, sales_orders[1]: 0},
+				)
+				self.assertEqual(
+					[row["sales_order"] for row in items], [row.sales_order for row in pln.po_items]
+				)
+				self.assertEqual(
+					[row["required_bom_qty"] for row in items], [row.planned_qty for row in pln.po_items]
+				)
+
+	def test_minimum_order_qty_groups_rows_without_sales_order(self):
+		from erpnext.manufacturing.doctype.production_plan.production_plan import _apply_minimum_order_qty
+
+		rows = [
+			{
+				"item_code": "Raw Material Item 1",
+				"warehouse": "_Test Warehouse - _TC",
+				"material_request_type": "Purchase",
+				"uom": "Nos",
+				"min_order_qty": 1234,
+				"quantity": 250,
+				"sales_order": sales_order,
+			}
+			for sales_order in ("SO-2", None, "SO-1", "")
+		]
+		_apply_minimum_order_qty(rows)
+		self.assertEqual([row["quantity"] for row in rows], [0, 984, 0, 250])
+		self.assertEqual([row["sales_order"] for row in rows], ["SO-2", None, "SO-1", ""])
+
 	def test_minimum_order_qty_does_not_purchase_when_stock_covers_demand(self):
 		rm_item = make_item(properties={"is_stock_item": 1, "min_order_qty": 1234}).name
 		make_stock_entry(item_code=rm_item, qty=1000, rate=100, target="_Test Warehouse - _TC")
