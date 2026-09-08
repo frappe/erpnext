@@ -341,6 +341,23 @@ class TestProductionPlan(ERPNextTestSuite):
 		pln = frappe.get_doc("Production Plan", pln.name)
 		pln.cancel()
 
+	def test_production_plan_material_request_skips_zero_qty_items(self):
+		pln = create_production_plan(item_code="Test Production Item 1")
+		zero_qty_item, requested_item = pln.mr_items
+		zero_qty_item.quantity = "0"
+
+		pln.make_material_request()
+
+		material_request_items = frappe.get_all(
+			"Material Request Item",
+			filters={"production_plan": pln.name},
+			fields=["item_code", "qty"],
+		)
+		self.assertEqual(
+			material_request_items,
+			[{"item_code": requested_item.item_code, "qty": requested_item.quantity}],
+		)
+
 	def _plan_for_safety_stock(self, rm_item, qty_per_order, bom_quantity=1):
 		fg_item = make_item(properties={"is_stock_item": 1}).name
 		make_bom(
