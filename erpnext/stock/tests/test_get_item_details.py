@@ -473,10 +473,16 @@ class TestGetItemDetail(ERPNextTestSuite):
 
 		# one PO with both items at different rates
 		po = create_purchase_order(item_code=item_a, qty=5, rate=28, do_not_save=True)
-		po.append("items", {
-			"item_code": item_b, "qty": 5, "rate": 275,
-			"warehouse": "_Test Warehouse - _TC", "schedule_date": frappe.utils.nowdate(),
-		})
+		po.append(
+			"items",
+			{
+				"item_code": item_b,
+				"qty": 5,
+				"rate": 275,
+				"warehouse": "_Test Warehouse - _TC",
+				"schedule_date": frappe.utils.nowdate(),
+			},
+		)
 		po.set_missing_values()
 		po.insert()
 		po.submit()
