@@ -5,6 +5,7 @@ import frappe
 import frappe.permissions
 
 from erpnext.buying.utils import get_linked_material_requests
+from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.material_request.test_material_request import make_material_request
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -40,6 +41,31 @@ class TestGetLinkedMaterialRequests(ERPNextTestSuite):
 			rows = get_linked_material_requests(["_Test Item"])
 
 		self.assertIn(self.material_request.name, {row.mr_name for row in rows})
+
+	def test_populated_result_is_a_flat_list_of_rows(self):
+		"""Both callers iterate the response directly, so it has to stay a flat list of rows
+		rather than a list of lists."""
+		create_user_with_roles("test_buying_purchase_user@example.com", "Purchase User")
+
+		with self.set_user("test_buying_purchase_user@example.com"):
+			rows = get_linked_material_requests(["_Test Item"])
+
+		self.assertIsInstance(rows, list)
+		self.assertTrue(rows)
+		for row in rows:
+			self.assertNotIsInstance(row, list | tuple)
+			self.assertIsInstance(row, dict)
+			for fieldname in ("mr_name", "mr_item", "item_code", "qty"):
+				self.assertIn(fieldname, row)
+
+	def test_empty_result_is_a_flat_empty_list(self):
+		item_without_request = make_item("_Test Item Without Material Request").name
+		create_user_with_roles("test_buying_purchase_user@example.com", "Purchase User")
+
+		with self.set_user("test_buying_purchase_user@example.com"):
+			rows = get_linked_material_requests([item_without_request])
+
+		self.assertEqual(rows, [])
 
 	def test_manufacturing_manager_can_fetch_linked_material_requests(self):
 		"""Manufacturing Manager holds write on Supplier Quotation and Request for Quotation,
