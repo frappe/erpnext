@@ -910,7 +910,7 @@ class TestStockEntry(ERPNextTestSuite):
 				doc.serial_no = serial_no
 				doc.item_code = "_Test Serialized Item"
 				doc.company = "_Test Company"
-				doc.insert(ignore_permissions=True)
+				doc.insert(ignore_permissions=True, set_name=serial_no)
 
 		se = frappe.copy_doc(self.globalTestRecords["Stock Entry"][0])
 		se.get("items")[0].item_code = "_Test Serialized Item"
@@ -2831,6 +2831,9 @@ class TestStockEntry(ERPNextTestSuite):
 			"Test Use Serial and Batch Item SN Item - SN 001",
 			"Test Use Serial and Batch Item SN Item - SN 002",
 		]
+		from erpnext.stock.serial_batch_identity import SerialBatchIdentity
+
+		serial_nos = SerialBatchIdentity("Serial No").resolve(item.name, serial_nos, create=True)
 
 		se = make_stock_entry(
 			item_code=item.name,

@@ -11,10 +11,12 @@ from erpnext.accounts.report.utils import validate_mandatory_date_range
 from erpnext.deprecation_dumpster import deprecated
 from erpnext.stock.doctype.stock_closing_entry.stock_closing_entry import StockClosing
 from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
+from erpnext.stock.serial_batch_display import with_serial_batch_numbers
 
 SLE_COUNT_LIMIT = 100_000
 
 
+@with_serial_batch_numbers
 def execute(filters=None):
 	if not filters:
 		filters = {}

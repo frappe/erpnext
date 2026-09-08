@@ -482,7 +482,7 @@ class TestBatch(ERPNextTestSuite):
 
 		if not frappe.db.exists("Batch", batch_name):
 			batch = frappe.get_doc(doctype="Batch", item=item_name, batch_id=batch_name).insert(
-				ignore_permissions=True
+				ignore_permissions=True, set_name=batch_name
 			)
 			batch.save()
 
@@ -531,14 +531,15 @@ class TestBatch(ERPNextTestSuite):
 			frappe.set_value("Stock Settings", "Stock Settings", "use_naming_series", 1)
 
 		batch = self.make_new_batch("_Test Stock Item For Batch Test1")
-		batch_name = batch.name
+		batch_name = batch.batch_id
 
+		self.assertNotEqual(batch.name, batch.batch_id)
 		self.assertTrue(batch_name.startswith("BATCH-"))
 
 		batch.delete()
 		batch = self.make_new_batch("_Test Stock Item For Batch Test2")
 
-		self.assertEqual(batch_name, batch.name)
+		self.assertEqual(batch_name, batch.batch_id)
 
 		# reset Stock Settings
 		if not use_naming_series:
@@ -714,7 +715,12 @@ class TestBatch(ERPNextTestSuite):
 			get_batch_from_bundle(pr_2.items[0].serial_and_batch_bundle),
 		)
 
-		self.assertEqual("BATCHEXISTING002", get_batch_from_bundle(pr_2.items[0].serial_and_batch_bundle))
+		self.assertEqual(
+			"BATCHEXISTING002",
+			frappe.db.get_value(
+				"Batch", get_batch_from_bundle(pr_2.items[0].serial_and_batch_bundle), "batch_id"
+			),
+		)
 
 
 def create_batch(item_code, rate, create_item_price_for_batch):
@@ -771,6 +777,7 @@ def make_new_batch(**args):
 		if args.expiry_date:
 			batch.expiry_date = args.expiry_date
 
-		batch.insert()
+		# Explicit names model batches already referenced by historical transactions.
+		batch.insert(set_name=args.batch_id)
 
 	return batch

@@ -596,13 +596,15 @@ def get_batch_no(doctype: str, txt: str, searchfield: str, start: int, page_len:
 	if filters.get("is_inward"):
 		filtered_batches.extend(get_empty_batches(filters, start, page_len, filtered_batches, txt))
 
-	return filtered_batches
+	from erpnext.stock.serial_batch_identity import SerialBatchIdentity
+
+	labels = SerialBatchIdentity("Batch").labels([row[0] for row in filtered_batches])
+	return [(row[0], labels.get(row[0], row[0]), *row[1:]) for row in filtered_batches]
 
 
 def get_empty_batches(filters, start, page_len, filtered_batches=None, txt=None):
 	query_filter = {"item": filters.get("item_code"), "disabled": 0}
-	if txt:
-		query_filter["name"] = ("like", f"%{txt}%")
+	or_filters = {"batch_id": ("like", f"%{txt}%"), "name": txt} if txt else None
 
 	exclude_batches = [batch[0] for batch in filtered_batches] if filtered_batches else []
 	if exclude_batches:
@@ -612,6 +614,7 @@ def get_empty_batches(filters, start, page_len, filtered_batches=None, txt=None)
 		"Batch",
 		fields=["name", "batch_qty"],
 		filters=query_filter,
+		or_filters=or_filters,
 		limit_start=start,
 		limit_page_length=page_len,
 		as_list=1,
@@ -687,7 +690,7 @@ def get_batches_from_stock_ledger_entries(searchfields, txt, filters, start=0, p
 		query = query.select(batch_table[field])
 
 	if txt:
-		txt_condition = batch_table.name.like(f"%{txt}%")
+		txt_condition = batch_table.batch_id.like(f"%{txt}%")
 		for field in [*searchfields, "name"]:
 			txt_condition |= batch_table[field].like(f"%{txt}%")
 
@@ -753,7 +756,7 @@ def get_batches_from_serial_and_batch_bundle(searchfields, txt, filters, start=0
 		bundle_query = bundle_query.select(batch_table[field])
 
 	if txt:
-		txt_condition = batch_table.name.like(f"%{txt}%")
+		txt_condition = batch_table.batch_id.like(f"%{txt}%")
 		for field in [*searchfields, "name"]:
 			txt_condition |= batch_table[field].like(f"%{txt}%")
 
@@ -1018,11 +1021,11 @@ def get_batch_numbers(doctype: str, txt: str, searchfield: str, start: int, page
 	batch = frappe.qb.DocType("Batch")
 	query = (
 		frappe.qb.from_(batch)
-		.select(batch.batch_id)
+		.select(batch.name, batch.batch_id, batch.item)
 		.where(
 			(batch.disabled == 0)
 			& (batch.expiry_date.isnull() | (batch.expiry_date >= today()))
-			& batch.name.like(f"%{txt}%")
+			& batch.batch_id.like(f"%{txt}%")
 		)
 	)
 

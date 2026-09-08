@@ -594,14 +594,15 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 					batch_no: scan_batch_no,
 				},
 				callback: (r) => {
-					this.update_serial_batch_no();
+					this.update_serial_batch_no(r.message);
 				},
 			});
 		}
 	}
 
-	update_serial_batch_no() {
-		const { scan_serial_no, scan_batch_no } = this.dialog.get_values();
+	update_serial_batch_no(result) {
+		const scan_serial_no = result.serial_nos?.[0];
+		const scan_batch_no = result.batch_nos?.[0];
 
 		if (scan_serial_no) {
 			let existing_row = this.dialog.fields_dict.entries.df.data.filter((d) => {

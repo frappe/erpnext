@@ -6,7 +6,10 @@ import frappe
 from frappe import _
 from frappe.query_builder.functions import Date
 
+from erpnext.stock.serial_batch_display import with_serial_batch_numbers
 
+
+@with_serial_batch_numbers
 def execute(filters=None):
 	validate_filters(filters)
 

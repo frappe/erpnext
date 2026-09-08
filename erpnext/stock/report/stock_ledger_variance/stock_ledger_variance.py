@@ -10,8 +10,10 @@ from frappe.utils import cint, flt
 from erpnext.stock.report.stock_ledger_invariant_check.stock_ledger_invariant_check import (
 	get_data as stock_ledger_invariant_check,
 )
+from erpnext.stock.serial_batch_display import with_serial_batch_numbers
 
 
+@with_serial_batch_numbers
 def execute(filters=None):
 	columns, data = [], []
 

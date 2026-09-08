@@ -7,8 +7,10 @@ import frappe
 from frappe import _
 
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.serial_batch_display import with_serial_batch_numbers
 
 
+@with_serial_batch_numbers
 def execute(filters=None):
 	columns, data = [], []
 	columns = get_columns()

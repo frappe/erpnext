@@ -5,7 +5,10 @@ import frappe
 from frappe import _
 from frappe.query_builder import Case
 
+from erpnext.stock.serial_batch_display import with_serial_batch_numbers
 
+
+@with_serial_batch_numbers
 def execute(filters: dict | None = None):
 	report = ReportData(filters)
 	report.validate_filters()

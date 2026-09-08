@@ -435,32 +435,14 @@ erpnext.PointOfSale.ItemSelector = class {
 	filter_items({ search_term = "" } = {}) {
 		this.start_item_loading_animation();
 
-		const selling_price_list = this.events.get_frm().doc.selling_price_list;
-
-		if (search_term) {
-			search_term = search_term.toLowerCase();
-
-			// memoize
-			this.search_index = this.search_index || {};
-			this.search_index[selling_price_list] = this.search_index[selling_price_list] || {};
-			if (this.search_index[selling_price_list][search_term]) {
-				const items = this.search_index[selling_price_list][search_term];
-				this.items = items;
-				this.render_item_list(items);
-				this.auto_add_item &&
-					this.search_field.$input[0].value &&
-					this.items.length == 1 &&
-					this.add_filtered_item_to_cart();
-				return;
-			}
-		}
-
 		this.get_items({ search_term })
 			.then(({ message }) => {
-				// eslint-disable-next-line no-unused-vars
-				const { items, serial_no, batch_no, barcode } = message;
-				if (search_term && !barcode) {
-					this.search_index[selling_price_list][search_term] = items;
+				const { items, requires_selection } = message;
+				if (requires_selection) {
+					frappe.show_alert({
+						message: __("Select the item that matches the scanned number."),
+						indicator: "blue",
+					});
 				}
 				this.items = items;
 				this.render_item_list(items);

@@ -34,6 +34,7 @@ from erpnext.stock.serial_batch_bundle import (
 	get_batches_from_bundle,
 )
 from erpnext.stock.serial_batch_bundle import get_serial_nos as get_serial_nos_from_bundle
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity, resolve_number_entries
 from erpnext.stock.valuation import FIFOValuation
 
 
@@ -1986,19 +1987,19 @@ def parse_csv_file_to_get_serial_batch(reader):
 			continue
 
 		if has_serial_no or (has_serial_no and has_batch_no):
-			_dict = {"serial_no": row[0].strip(), "qty": 1}
+			_dict = {"serial_number": row[0].strip(), "qty": 1}
 
 			if has_batch_no:
 				_dict.update(
 					{
-						"batch_no": row[1].strip(),
+						"batch_number": row[1].strip(),
 						"qty": row[2],
 					}
 				)
 
 				batch_nos.append(
 					{
-						"batch_no": row[1].strip(),
+						"batch_number": row[1].strip(),
 						"qty": row[2],
 					}
 				)
@@ -2007,7 +2008,7 @@ def parse_csv_file_to_get_serial_batch(reader):
 		elif has_batch_no:
 			batch_nos.append(
 				{
-					"batch_no": row[0].strip(),
+					"batch_number": row[0].strip(),
 					"qty": row[1],
 				}
 			)
@@ -2023,7 +2024,7 @@ def get_serial_batch_from_data(item_code, kwargs):
 		for serial_no in data:
 			if not serial_no:
 				continue
-			serial_nos.append({"serial_no": serial_no, "qty": 1})
+			serial_nos.append({"serial_number": serial_no, "qty": 1})
 
 		make_serial_nos(item_code, serial_nos)
 
@@ -2047,106 +2048,12 @@ def create_serial_nos(item_code: str, serial_nos: list | str):
 
 
 def make_serial_nos(item_code, serial_nos):
-	item = frappe.get_cached_value(
-		"Item", item_code, ["description", "item_code", "item_name", "warranty_period"], as_dict=1
-	)
-
-	serial_nos = [d.get("serial_no").strip() for d in serial_nos if d.get("serial_no")]
-	existing_serial_nos = frappe.get_all("Serial No", filters={"name": ("in", serial_nos)})
-
-	existing_serial_nos = [d.get("name") for d in existing_serial_nos if d.get("name")]
-	serial_nos = list(set(serial_nos) - set(existing_serial_nos))
-
-	if not serial_nos:
-		return
-
-	serial_nos_details = []
-	user = frappe.session.user
-	for serial_no in serial_nos:
-		serial_nos_details.append(
-			(
-				serial_no,
-				serial_no,
-				now(),
-				now(),
-				user,
-				user,
-				item.item_code,
-				item.item_name,
-				item.description,
-				item.warranty_period or 0,
-				"Inactive",
-			)
-		)
-
-	fields = [
-		"name",
-		"serial_no",
-		"creation",
-		"modified",
-		"owner",
-		"modified_by",
-		"item_code",
-		"item_name",
-		"description",
-		"warranty_period",
-		"status",
-	]
-
-	frappe.db.bulk_insert("Serial No", fields=fields, values=set(serial_nos_details))
-
-	frappe.msgprint(_("Serial Nos are created successfully"), alert=True)
+	"""Resolve explicit physical numbers and populate the entry links."""
+	resolve_number_entries(item_code, serial_nos, create=True)
 
 
 def make_batch_nos(item_code, batch_nos):
-	item = frappe.get_cached_value("Item", item_code, ["description", "item_code"], as_dict=1)
-	batch_nos = [d.get("batch_no") for d in batch_nos if d.get("batch_no")]
-
-	existing_batches = frappe.get_all("Batch", filters={"name": ("in", batch_nos)})
-
-	existing_batches = [d.get("name") for d in existing_batches if d.get("name")]
-
-	batch_nos = list(set(batch_nos) - set(existing_batches))
-	if not batch_nos:
-		return
-
-	batch_nos_details = []
-	user = frappe.session.user
-	for batch_no in batch_nos:
-		if frappe.db.exists("Batch", batch_no):
-			continue
-
-		batch_nos_details.append(
-			(
-				batch_no,
-				batch_no,
-				now(),
-				now(),
-				user,
-				user,
-				item.item_code,
-				item.item_name,
-				item.description,
-				1,
-			)
-		)
-
-	fields = [
-		"name",
-		"batch_id",
-		"creation",
-		"modified",
-		"owner",
-		"modified_by",
-		"item",
-		"item_name",
-		"description",
-		"use_batchwise_valuation",
-	]
-
-	frappe.db.bulk_insert("Batch", fields=fields, values=set(batch_nos_details))
-
-	frappe.msgprint(_("Batch Nos are created successfully"), alert=True)
+	resolve_number_entries(item_code, batch_nos, create=True)
 
 
 @frappe.whitelist()
@@ -2472,11 +2379,15 @@ def get_serial_and_batch_ledger(**kwargs):
 
 @frappe.whitelist()
 def get_auto_data(**kwargs):
+	from erpnext.stock.serial_batch_identity import add_number_labels
+
 	kwargs = frappe._dict(kwargs)
+	data = []
 	if cint(kwargs.has_serial_no):
-		return get_serial_nos_from_sre(kwargs) if kwargs.scio_detail else get_available_serial_nos(kwargs)
+		data = get_serial_nos_from_sre(kwargs) if kwargs.scio_detail else get_available_serial_nos(kwargs)
 	elif cint(kwargs.has_batch_no):
-		return get_batch_nos_from_sre(kwargs) if kwargs.scio_detail else get_auto_batch_nos(kwargs)
+		data = get_batch_nos_from_sre(kwargs) if kwargs.scio_detail else get_auto_batch_nos(kwargs)
+	return add_number_labels(data or [])
 
 
 def get_available_batches_qty(available_batches):
@@ -3693,35 +3604,26 @@ def get_batch_no_from_serial_no(serial_no: str):
 	return frappe.get_cached_value("Serial No", serial_no, "batch_no")
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def is_serial_batch_no_exists(
 	item_code: str, type_of_transaction: str, serial_no: str | None = None, batch_no: str | None = None
 ):
-	if serial_no and not frappe.db.exists("Serial No", serial_no):
-		if type_of_transaction != "Inward":
-			frappe.throw(_("Serial No {0} does not exist").format(serial_no))
+	from erpnext.stock.serial_batch_identity import resolve_serial_batch_numbers
 
-		make_serial_no(serial_no, item_code)
-
-	if batch_no and not frappe.db.exists("Batch", batch_no):
-		if type_of_transaction != "Inward":
-			frappe.throw(_("Batch No {0} does not exist").format(batch_no))
-
-		make_batch_no(batch_no, item_code)
+	return resolve_serial_batch_numbers(
+		item_code,
+		serial_numbers=[serial_no] if serial_no else [],
+		batch_numbers=[batch_no] if batch_no else [],
+		create=type_of_transaction == "Inward",
+	)
 
 
 def make_serial_no(serial_no, item_code):
-	serial_no_doc = frappe.new_doc("Serial No")
-	serial_no_doc.serial_no = serial_no
-	serial_no_doc.item_code = item_code
-	serial_no_doc.save(ignore_permissions=True)
+	return SerialBatchIdentity("Serial No").resolve(item_code, [serial_no], create=True)[0]
 
 
 def make_batch_no(batch_no, item_code):
-	batch_doc = frappe.new_doc("Batch")
-	batch_doc.batch_id = batch_no
-	batch_doc.item = item_code
-	batch_doc.save(ignore_permissions=True)
+	return SerialBatchIdentity("Batch").resolve(item_code, [batch_no], create=True)[0]
 
 
 @frappe.whitelist()

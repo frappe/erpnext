@@ -3,7 +3,10 @@ from collections import defaultdict
 import frappe
 from frappe import _
 
+from erpnext.stock.serial_batch_display import with_serial_batch_numbers
 
+
+@with_serial_batch_numbers
 def execute(filters=None):
 	filters = frappe._dict(filters or {})
 	return get_columns(), get_data(filters)

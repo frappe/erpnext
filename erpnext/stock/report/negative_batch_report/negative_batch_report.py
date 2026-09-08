@@ -6,8 +6,10 @@ from frappe import _
 from frappe.utils import add_to_date, flt, today
 
 from erpnext.stock.report.stock_ledger.stock_ledger import execute as stock_ledger_execute
+from erpnext.stock.serial_batch_display import with_serial_batch_numbers
 
 
+@with_serial_batch_numbers
 def execute(filters: dict | None = None):
 	"""Return columns and data for the report.
 

@@ -6,6 +6,8 @@ import "./utils/party";
 import "./utils/draft_link_guard";
 import "./controllers/stock_controller";
 import "./utils/serial_no_batch_selector";
+import "./utils/serial_batch_input";
+import "./utils/serial_batch_display";
 import "./utils/serial_batch_inline_editor";
 import "./payment/payments";
 import "./templates/visual_plant_floor_template.html";

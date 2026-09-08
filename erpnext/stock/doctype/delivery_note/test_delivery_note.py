@@ -240,7 +240,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 						"company": "_Test Company",
 					}
 				)
-				sn_doc.insert()
+				sn_doc.insert(set_name=sn)
 
 		warehouse = "_Test Warehouse - _TC"
 		company = frappe.db.get_value("Warehouse", warehouse, "company")
@@ -2059,7 +2059,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 						"company": "_Test Company",
 					}
 				)
-				sn_doc.insert()
+				sn_doc.insert(set_name=sn)
 
 		warehouse = "_Test Warehouse - _TC"
 		company = frappe.db.get_value("Warehouse", warehouse, "company")

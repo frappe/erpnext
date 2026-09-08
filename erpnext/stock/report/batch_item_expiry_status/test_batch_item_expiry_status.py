@@ -46,12 +46,13 @@ class TestBatchItemExpiryStatus(ERPNextTestSuite):
 
 		data = self.run_report(item=item)
 
-		# Columns: [item, item_name, batch, stock_uom, quantity, expires_on, expiry_in_days]
-		row = next((r for r in data if r[2] == batch_no), None)
+		# Physical batch numbers are displayed; the final hidden column retains the ID.
+		row = next((r for r in data if r[-1] == batch_no), None)
 		self.assertIsNotNone(row, f"Batch {batch_no} not found in report for item {item}")
 
 		self.assertEqual(row[0], item)
-		self.assertEqual(row[2], batch_no)
+		self.assertEqual(row[2], frappe.db.get_value("Batch", batch_no, "batch_id"))
+		self.assertEqual(row[-1], batch_no)
 		self.assertEqual(row[4], 10)
 		# expiry = batch manufacturing_date + 30 day shelf life; matches the Batch record
 		batch_expiry = frappe.db.get_value("Batch", batch_no, "expiry_date")

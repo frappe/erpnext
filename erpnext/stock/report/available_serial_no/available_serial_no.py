@@ -11,9 +11,11 @@ from erpnext.stock.report.stock_ledger.stock_ledger import (
 	get_opening_balance,
 	get_stock_ledger_entries,
 )
+from erpnext.stock.serial_batch_display import with_serial_batch_numbers
 from erpnext.stock.utils import is_reposting_item_valuation_in_progress
 
 
+@with_serial_batch_numbers
 def execute(filters=None):
 	is_reposting_item_valuation_in_progress()
 	columns = get_columns(filters)

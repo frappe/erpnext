@@ -7,8 +7,10 @@ import frappe
 from frappe import _
 
 from erpnext.stock.doctype.batch.batch import get_batch_qty
+from erpnext.stock.serial_batch_display import with_serial_batch_numbers
 
 
+@with_serial_batch_numbers
 def execute(filters=None):
 	if not filters:
 		filters = {}

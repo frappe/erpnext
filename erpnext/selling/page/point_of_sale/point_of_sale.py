@@ -16,15 +16,21 @@ from erpnext.stock.utils import scan_barcode
 
 
 def search_by_term(search_term, warehouse, price_list):
-	result = search_for_serial_or_batch_or_barcode_number(search_term) or {}
+	result = scan_barcode(search_term, allow_multiple=True)
+	if not result or result.get("warehouse"):
+		return
+	matches = result.get("candidates", [result])
+	return {
+		"items": [get_scanned_item(match, warehouse, price_list) for match in matches],
+		"requires_selection": len(matches) > 1,
+	}
 
-	item_code = result.get("item_code", search_term)
+
+def get_scanned_item(result, warehouse, price_list):
+	item_code = result["item_code"]
 	serial_no = result.get("serial_no", "")
 	batch_no = result.get("batch_no", "")
 	barcode = result.get("barcode", "")
-
-	if not result:
-		return
 
 	item_doc = frappe.get_doc("Item", item_code)
 
@@ -109,7 +115,7 @@ def search_by_term(search_term, warehouse, price_list):
 			}
 		)
 
-	return {"items": [item]}
+	return item
 
 
 def filter_result_items(result, pos_profile):
@@ -271,8 +277,10 @@ def get_items(
 
 
 @frappe.whitelist()
-def search_for_serial_or_batch_or_barcode_number(search_value: str) -> dict[str, str | None]:
-	return scan_barcode(search_value)
+def search_for_serial_or_batch_or_barcode_number(
+	search_value: str, item_code: str | None = None, allow_multiple: bool = False
+) -> dict:
+	return scan_barcode(search_value, {"item_code": item_code}, allow_multiple=allow_multiple)
 
 
 def get_conditions(search_term, item=None):

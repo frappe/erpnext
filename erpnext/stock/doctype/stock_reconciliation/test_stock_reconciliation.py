@@ -615,7 +615,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 					"serial_no": "SR-CREATED-SR-NO",
 					"company": "_Test Company",
 				}
-			).insert()
+			).insert(set_name="SR-CREATED-SR-NO")
 
 		sr = create_stock_reconciliation(
 			item_code=item.name,
@@ -1351,7 +1351,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 					"item": batch_item_code,
 					"use_batchwise_valuation": 0,
 				}
-			).insert(ignore_permissions=True)
+			).insert(set_name=batch_id, ignore_permissions=True)
 
 			self.assertTrue(batch_doc.use_batchwise_valuation)
 

@@ -830,57 +830,29 @@ class WorkOrder(Document):
 
 		serial_nos = []
 		if item_details.serial_no_series:
-			serial_nos = get_available_serial_nos(item_details.serial_no_series, self.qty)
+			serial_nos = get_available_serial_nos(
+				item_details.serial_no_series, self.qty, self.production_item
+			)
 
 		if not serial_nos:
 			return
 
-		fields = [
-			"name",
-			"serial_no",
-			"creation",
-			"modified",
-			"owner",
-			"modified_by",
-			"company",
-			"item_code",
-			"item_name",
-			"description",
-			"status",
-			"work_order",
-			"batch_no",
-		]
+		from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
-		serial_nos_details = []
-		index = 0
-		for serial_no in serial_nos:
-			index += 1
-			batch_no = None
-			if batches and self.batch_size:
-				batch_no = batches[0]
+		groups = {}
+		for index, number in enumerate(serial_nos, 1):
+			batch_no = batches[0] if batches and self.batch_size else None
+			groups.setdefault(batch_no, []).append(number)
+			if batch_no and index % self.batch_size == 0:
+				batches.pop(0)
 
-				if index % self.batch_size == 0:
-					batches.remove(batch_no)
-
-			serial_nos_details.append(
-				(
-					serial_no,
-					serial_no,
-					now(),
-					now(),
-					frappe.session.user,
-					frappe.session.user,
-					self.company,
-					self.production_item,
-					item_details.item_name,
-					item_details.description,
-					"Inactive",
-					self.name,
-					batch_no,
-				)
+		for batch_no, numbers in groups.items():
+			SerialBatchIdentity("Serial No").resolve(
+				self.production_item,
+				numbers,
+				create=True,
+				defaults={"company": self.company, "work_order": self.name, "batch_no": batch_no},
 			)
-
-		frappe.db.bulk_insert("Serial No", fields=fields, values=set(serial_nos_details))
 
 	def validate_cancel(self):
 		if self.status == "Stopped":

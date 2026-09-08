@@ -1093,7 +1093,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 					"serial_no": serial_no[0],
 					"company": "_Test Company",
 				}
-			).insert()
+			).insert(set_name=serial_no[0])
 
 		pr_doc = make_purchase_receipt(item_code=item_code, qty=1, serial_no=serial_no)
 		pr_doc.load_from_db()
@@ -3144,6 +3144,10 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			"SNU-TSFISI-000014",
 			"SNU-TSFISI-000015",
 		]
+		from erpnext.stock.serial_batch_identity import SerialBatchIdentity
+
+		serial_nos = SerialBatchIdentity("Serial No").resolve(item_code, serial_nos, create=True)
+		removed_serial = serial_nos[-1]
 
 		pr = make_purchase_receipt(
 			item_code=item_code,
@@ -3162,7 +3166,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		for row in sbb_doc.entries:
 			self.assertIn(row.serial_no, serial_nos)
 
-		serial_nos.remove("SNU-TSFISI-000015")
+		serial_nos.remove(removed_serial)
 
 		sr = create_stock_reconciliation(
 			item_code=item_code,
@@ -3191,7 +3195,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertTrue(sr.items[0].current_serial_and_batch_bundle)
 		self.assertTrue(sr.items[0].serial_and_batch_bundle)
 
-		serial_no_status = frappe.db.get_value("Serial No", "SNU-TSFISI-000015", "status")
+		serial_no_status = frappe.db.get_value("Serial No", removed_serial, "status")
 
 		self.assertNotEqual(serial_no_status, "Active")
 
@@ -3443,7 +3447,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 					"batch_id": batch_no,
 					"item": batch_item,
 				}
-			).insert()
+			).insert(set_name=batch_no)
 
 		for serial_no in serial_nos:
 			if not frappe.db.exists("Serial No", serial_no):
@@ -3454,7 +3458,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 						"serial_no": serial_no,
 						"company": "_Test Company",
 					}
-				).insert()
+				).insert(set_name=serial_no)
 
 		pr = make_purchase_receipt(
 			item_code=batch_item,
@@ -4762,7 +4766,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 					"batch_id": batch_no,
 					"item": batch_item,
 				}
-			).insert()
+			).insert(set_name=batch_no)
 
 		for serial_no in serial_nos:
 			if not frappe.db.exists("Serial No", serial_no):
@@ -4773,7 +4777,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 						"serial_no": serial_no,
 						"company": "_Test Company",
 					}
-				).insert()
+				).insert(set_name=serial_no)
 
 		pr = make_purchase_receipt(
 			item_code=batch_item,
@@ -5738,7 +5742,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 				"batch_id": "BN-TESTDNUBVWF-00001",
 				"item": item_code,
 			}
-		).insert()
+		).insert(set_name="BN-TESTDNUBVWF-00001")
 
 		doc.db_set("use_batchwise_valuation", 0)
 		doc.reload()
@@ -5751,7 +5755,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 				"batch_id": "BN-TESTDNUBVWF-00002",
 				"item": item_code,
 			}
-		).insert()
+		).insert(set_name="BN-TESTDNUBVWF-00002")
 
 		self.assertEqual(doc.use_batchwise_valuation, 1)
 
@@ -5881,7 +5885,11 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		).name
 
 		batch_no = "BN-TPRBWV-00001"
-		batch = frappe.new_doc("Batch").update({"batch_id": batch_no, "item": item_code}).insert()
+		batch = (
+			frappe.new_doc("Batch")
+			.update({"batch_id": batch_no, "item": item_code})
+			.insert(set_name=batch_no)
+		)
 		self.assertEqual(batch.use_batchwise_valuation, 1)
 
 		warehouse = "_Test Warehouse - _TC"

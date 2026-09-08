@@ -199,6 +199,7 @@ erpnext.PointOfSale.ItemDetails = class {
 				parent: this.$form_container.find(`.${fieldname}-control`),
 				render_input: true,
 			});
+			this[`${fieldname}_control`].serial_batch_context = { frm: this.events.get_frm(), row: item };
 			this[`${fieldname}_control`].set_value(item[fieldname]);
 		});
 

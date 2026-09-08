@@ -4,6 +4,8 @@
 import json
 
 import frappe
+
+# Explicit names below model historical records referenced by legacy ledgers.
 from frappe.utils import add_days, add_to_date, flt, nowtime, today
 
 from erpnext.stock.doctype.item.test_item import make_item
@@ -46,7 +48,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 						"item_code": serial_item_code,
 						"company": "_Test Company",
 					}
-				).insert(ignore_permissions=True)
+				).insert(ignore_permissions=True, set_name=sn)
 
 		bundle_doc = make_serial_batch_bundle(
 			{
@@ -252,7 +254,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 					"item": batch_item_code,
 					"use_batchwise_valuation": 0,
 				}
-			).insert(ignore_permissions=True)
+			).insert(ignore_permissions=True, set_name=batch_id)
 
 			self.assertTrue(batch_doc.use_batchwise_valuation)
 			batch_doc.db_set(
@@ -422,7 +424,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 						"item": batch_item_code,
 						"use_batchwise_valuation": 0,
 					}
-				).insert(ignore_permissions=True)
+				).insert(ignore_permissions=True, set_name=batch_id)
 
 				self.assertTrue(batch_doc.use_batchwise_valuation)
 				batch_doc.db_set(
@@ -550,7 +552,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 					"item_code": serial_no_item_code,
 					"company": "_Test Company",
 				}
-			).insert(ignore_permissions=True)
+			).insert(ignore_permissions=True, set_name=serial_no_id)
 
 			sn_doc.db_set(
 				{
@@ -685,7 +687,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 					"item_code": serial_and_batch_code,
 					"company": "_Test Company",
 				}
-			).insert(ignore_permissions=True)
+			).insert(ignore_permissions=True, set_name=serial_no)
 
 		bundle_doc = make_serial_batch_bundle(
 			{
@@ -741,7 +743,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 						"item_code": item,
 						"company": "_Test Company",
 					}
-				).insert(ignore_permissions=True)
+				).insert(ignore_permissions=True, set_name=serial_no)
 
 		item_row = pr.items[0]
 		item_row.type_of_transaction = "Inward"
@@ -840,35 +842,37 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 		item_code = make_item(properties={"has_batch_no": 1}).name
 
 		batch_id = "TEST-BATTCCH-VAL-00001"
-		batch_nos = [{"batch_no": batch_id, "qty": 1}]
+		batch_nos = [{"batch_number": batch_id, "qty": 1}]
 
 		make_batch_nos(item_code, batch_nos)
-		self.assertTrue(frappe.db.exists("Batch", batch_id))
-		use_batchwise_valuation = frappe.db.get_value("Batch", batch_id, "use_batchwise_valuation")
+		self.assertTrue(frappe.db.exists("Batch", {"item": item_code, "batch_id": batch_id}))
+		use_batchwise_valuation = frappe.db.get_value(
+			"Batch", {"item": item_code, "batch_id": batch_id}, "use_batchwise_valuation"
+		)
 		self.assertEqual(use_batchwise_valuation, 1)
 
 		batch_id = "TEST-BATTCCH-VAL-00001"
-		batch_nos = [{"batch_no": batch_id, "qty": 1}]
+		batch_nos = [{"batch_number": batch_id, "qty": 1}]
 
 		# Shouldn't throw duplicate entry error
 		make_batch_nos(item_code, batch_nos)
-		self.assertTrue(frappe.db.exists("Batch", batch_id))
+		self.assertTrue(frappe.db.exists("Batch", {"item": item_code, "batch_id": batch_id}))
 
 	def test_serial_no_duplicate_entry(self):
 		item_code = make_item(properties={"has_serial_no": 1}).name
 
 		serial_no_id = "TEST-SNID-VAL-00001"
-		serial_nos = [{"serial_no": serial_no_id, "qty": 1}]
+		serial_nos = [{"serial_number": serial_no_id, "qty": 1}]
 
 		make_serial_nos(item_code, serial_nos)
-		self.assertTrue(frappe.db.exists("Serial No", serial_no_id))
+		self.assertTrue(frappe.db.exists("Serial No", {"item_code": item_code, "serial_no": serial_no_id}))
 
 		serial_no_id = "TEST-SNID-VAL-00001"
-		serial_nos = [{"batch_no": serial_no_id, "qty": 1}]
+		serial_nos = [{"serial_number": serial_no_id, "qty": 1}]
 
 		# Shouldn't throw duplicate entry error
 		make_serial_nos(item_code, serial_nos)
-		self.assertTrue(frappe.db.exists("Serial No", serial_no_id))
+		self.assertTrue(frappe.db.exists("Serial No", {"item_code": item_code, "serial_no": serial_no_id}))
 
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings", {"auto_create_serial_and_batch_bundle_for_outward": 1}
@@ -879,10 +883,10 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 		item_code = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
 
 		serial_no = f"{item_code}-001"
-		serial_nos = [{"serial_no": serial_no, "qty": 1}]
+		serial_nos = [{"serial_number": serial_no, "qty": 1}]
 		make_serial_nos(item_code, serial_nos)
 
-		pr1 = make_purchase_receipt(item=item_code, qty=1, rate=500, serial_no=[serial_no])
+		pr1 = make_purchase_receipt(item=item_code, qty=1, rate=500, serial_no=[serial_nos[0]["serial_no"]])
 		pr2 = make_purchase_receipt(item=item_code, qty=1, rate=500, do_not_save=True)
 
 		pr1.reload()
@@ -906,7 +910,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 						"item_code": sn_item,
 						"company": "_Test Company",
 					}
-				).insert(ignore_permissions=True)
+				).insert(ignore_permissions=True, set_name=serial_no)
 				serial_nos.append(serial_no)
 
 		frappe.flags.ignore_serial_batch_bundle_validation = True
@@ -1069,7 +1073,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 					"item": item_code,
 					"company": "_Test Company",
 				}
-			).insert(ignore_permissions=True)
+			).insert(ignore_permissions=True, set_name="ACSBBO-TACSB-00001")
 
 		make_stock_entry(
 			item_code=item_code,
@@ -1130,7 +1134,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 					"item": item_code,
 					"company": "_Test Company",
 				}
-			).insert(ignore_permissions=True)
+			).insert(ignore_permissions=True, set_name="TST-ACSBBO-TACSB-00001")
 
 		bundle_doc = make_serial_batch_bundle(
 			{
@@ -1233,7 +1237,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 					"item": batch_item_code,
 					"use_batchwise_valuation": 0,
 				}
-			).insert(ignore_permissions=True)
+			).insert(ignore_permissions=True, set_name=batch_id)
 
 			batch_doc.db_set(
 				{
@@ -1322,7 +1326,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 					"item": batch_item_code,
 					"use_batchwise_valuation": 0,
 				}
-			).insert(ignore_permissions=True)
+			).insert(ignore_permissions=True, set_name=batch_id)
 
 			batch_doc.db_set(
 				{
@@ -1391,7 +1395,9 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 
 		make_item(item_code, props)
 		if batch_no and not frappe.db.exists("Batch", batch_no):
-			frappe.get_doc({"doctype": "Batch", "batch_id": batch_no, "item": item_code}).insert()
+			frappe.get_doc({"doctype": "Batch", "batch_id": batch_no, "item": item_code}).insert(
+				set_name=batch_no
+			)
 
 		pr = make_purchase_receipt(
 			item_code=item_code, qty=10, rate=100, batch_no=batch_no, use_serial_batch_fields=True
@@ -1475,7 +1481,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 			if not frappe.db.exists("Batch", batch_no):
 				frappe.get_doc(
 					{"doctype": "Batch", "batch_id": batch_no, "item": item_code, "company": "_Test Company"}
-				).insert(ignore_permissions=True)
+				).insert(ignore_permissions=True, set_name=batch_no)
 
 	def _allow_negative_stock_temporarily(self):
 		for field in ("allow_negative_stock", "allow_negative_stock_for_batch"):

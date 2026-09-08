@@ -8,6 +8,8 @@ from frappe import _
 from frappe.utils import flt
 from frappe.utils.nestedset import get_descendants_of
 
+from erpnext.stock.serial_batch_display import with_serial_batch_numbers
+
 SLE_FIELDS = (
 	"name",
 	"item_code",
@@ -26,6 +28,7 @@ SLE_FIELDS = (
 )
 
 
+@with_serial_batch_numbers
 def execute(filters=None):
 	columns = get_columns()
 	data = get_data(filters)

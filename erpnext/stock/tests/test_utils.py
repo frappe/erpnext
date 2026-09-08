@@ -78,7 +78,7 @@ class TestStockUtilities(ERPNextTestSuite, StockTestMixin):
 		batch_item = self.make_item(properties={"has_batch_no": 1, "create_new_batch": 1})
 		batch = frappe.get_doc(doctype="Batch", item=batch_item.name).insert()
 
-		batch_scan = scan_barcode(batch.name)
+		batch_scan = scan_barcode(batch.batch_id)
 		self.assertEqual(batch_scan["item_code"], batch_item.name)
 		self.assertEqual(batch_scan["batch_no"], batch.name)
 		self.assertEqual(batch_scan["has_batch_no"], 1)
@@ -92,7 +92,7 @@ class TestStockUtilities(ERPNextTestSuite, StockTestMixin):
 			company="_Test Company",
 		).insert()
 
-		serial_scan = scan_barcode(serial.name)
+		serial_scan = scan_barcode(serial.serial_no)
 		self.assertEqual(serial_scan["item_code"], serial_item.name)
 		self.assertEqual(serial_scan["serial_no"], serial.name)
 		self.assertEqual(serial_scan["has_batch_no"], 0)
@@ -182,7 +182,7 @@ class TestStockUtilities(ERPNextTestSuite, StockTestMixin):
 		serial_nos = []
 		for rate in (10, 30):
 			sn = "_TAVG" + random_string(8)
-			frappe.get_doc(
+			serial = frappe.get_doc(
 				{
 					"doctype": "Serial No",
 					"serial_no": sn,
@@ -191,6 +191,6 @@ class TestStockUtilities(ERPNextTestSuite, StockTestMixin):
 					"purchase_rate": rate,
 				}
 			).insert()
-			serial_nos.append(sn)
+			serial_nos.append(serial.name)
 
 		self.assertEqual(flt(get_avg_purchase_rate("\n".join(serial_nos))), 20.0)

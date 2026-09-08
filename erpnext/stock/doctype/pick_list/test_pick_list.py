@@ -275,7 +275,7 @@ class TestPickList(ERPNextTestSuite):
 						"item_code": "_Test Serialized Item",
 						"serial_no": serial_no,
 					}
-				).insert()
+				).insert(set_name=serial_no)
 
 		stock_reconciliation = frappe.get_doc(
 			{
@@ -1152,7 +1152,7 @@ class TestPickList(ERPNextTestSuite):
 						"batch_id": batch_id,
 						"item": item,
 					}
-				).insert()
+				).insert(set_name=batch_id)
 
 		make_stock_entry(
 			item=item,

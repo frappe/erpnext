@@ -65,7 +65,7 @@ frappe.query_reports["Serial No and Batch Traceability"] = {
 	},
 };
 
-function getTraceabilityLink({ type, value, original_value, item_code, data, filter_values }) {
+function getTraceabilityLink({ type, value, original_value, number, item_code, data, filter_values }) {
 	if (!value) return value;
 
 	const link_doctype = type === "batch_no" ? "Batch" : "Serial No";
@@ -87,7 +87,7 @@ function getTraceabilityLink({ type, value, original_value, item_code, data, fil
 	return `<a class="${css_class}" href="${frappe.utils.get_form_link(
 		link_doctype,
 		original_value
-	)}">${frappe.utils.escape_html(original_value)}</a>`;
+	)}">${frappe.utils.escape_html(number)}</a>`;
 }
 
 function custom_formatter(value, row, column, data, default_formatter) {
@@ -100,11 +100,12 @@ function custom_formatter(value, row, column, data, default_formatter) {
 
 	value = default_formatter(value, row, column, data);
 
-	if (["batch_no", "serial_no"].includes(column.fieldname) && value) {
+	if (["batch_no_number", "serial_no_number"].includes(column.fieldname) && value) {
 		value = getTraceabilityLink({
-			type: column.fieldname,
+			type: column.reference_field,
 			value,
-			original_value,
+			original_value: data[column.reference_field],
+			number: original_value,
 			item_code,
 			data,
 			filter_values,

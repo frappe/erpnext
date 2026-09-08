@@ -6,6 +6,8 @@
 
 
 import frappe
+
+# Explicit names below model historical records referenced by legacy ledgers.
 from frappe import _dict
 from frappe.utils import add_days, nowdate, random_string
 
@@ -202,7 +204,7 @@ class TestSerialNo(ERPNextTestSuite):
 						"serial_no": serial_no,
 						"company": "_Test Company",
 					}
-				).insert()
+				).insert(set_name=serial_no)
 
 		make_stock_entry(
 			item_code=item_code, to_warehouse=warehouse, qty=1, rate=42, serial_no=[serial_nos[0]]
@@ -350,7 +352,7 @@ class TestSerialNo(ERPNextTestSuite):
 				"company": "_Test Company",
 				"warranty_expiry_date": past_date,
 			}
-		).insert()
+		).insert(set_name="_TCWARREXP" + random_string(6))
 		frappe.db.set_value("Serial No", expired_sr.name, "maintenance_status", "Under Warranty")
 		self.assertEqual(
 			frappe.db.get_value("Serial No", expired_sr.name, "maintenance_status"), "Under Warranty"
@@ -365,7 +367,7 @@ class TestSerialNo(ERPNextTestSuite):
 				"company": "_Test Company",
 				"warranty_expiry_date": future_date,
 			}
-		).insert()
+		).insert(set_name="_TCWARRACT" + random_string(6))
 		self.assertEqual(
 			frappe.db.get_value("Serial No", active_sr.name, "maintenance_status"), "Under Warranty"
 		)
@@ -402,7 +404,7 @@ class TestSerialNo(ERPNextTestSuite):
 				"amc_expiry_date": past_date,
 				"warranty_expiry_date": future_date,
 			}
-		).insert()
+		).insert(set_name="_TCAMCEXCL" + random_string(6))
 		frappe.db.set_value("Serial No", excluded_sr.name, "maintenance_status", "Out of AMC")
 
 		# Negative control: same lapsed amc date, but a status NOT in the excluded list, so it
@@ -416,7 +418,7 @@ class TestSerialNo(ERPNextTestSuite):
 				"company": "_Test Company",
 				"amc_expiry_date": past_date,
 			}
-		).insert()
+		).insert(set_name="_TCAMCCAND" + random_string(6))
 		frappe.db.set_value("Serial No", candidate_sr.name, "maintenance_status", "Under AMC")
 
 		update_maintenance_status()
@@ -446,7 +448,7 @@ class TestSerialNo(ERPNextTestSuite):
 				"company": "_Test Company",
 				"amc_expiry_date": past_date,
 			}
-		).insert()
+		).insert(set_name="_TCAMCNULL" + random_string(6))
 		# Force a NULL maintenance_status while a lapsed amc date keeps the row in or_filters.
 		frappe.db.set_value("Serial No", null_sr.name, "maintenance_status", None)
 		self.assertIsNone(frappe.db.get_value("Serial No", null_sr.name, "maintenance_status"))

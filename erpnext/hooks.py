@@ -384,6 +384,7 @@ pre_submit_validation_doctypes = [
 
 doc_events = {
 	"*": {
+		"before_print": "erpnext.stock.serial_batch_display.before_print",
 		"validate": [
 			"erpnext.support.doctype.service_level_agreement.service_level_agreement.apply",
 			"erpnext.setup.doctype.transaction_deletion_record.transaction_deletion_record.check_for_running_deletion_job",

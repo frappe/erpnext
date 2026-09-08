@@ -7,7 +7,10 @@ from frappe import _
 from frappe.query_builder.functions import Sum
 from frappe.utils import flt, get_datetime, today
 
+from erpnext.stock.serial_batch_display import with_serial_batch_numbers
 
+
+@with_serial_batch_numbers
 def execute(filters=None):
 	columns, data = [], []
 	data = get_data(filters)

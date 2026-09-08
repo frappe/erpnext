@@ -1268,9 +1268,18 @@ class TestItem(ERPNextTestSuite):
 		).name
 
 		serial_no = f"{item}-SN-01"
-		frappe.get_doc(
-			{"doctype": "Serial No", "serial_no": serial_no, "item_code": item, "company": "_Test Company"}
-		).insert()
+		serial_no = (
+			frappe.get_doc(
+				{
+					"doctype": "Serial No",
+					"serial_no": serial_no,
+					"item_code": item,
+					"company": "_Test Company",
+				}
+			)
+			.insert()
+			.name
+		)
 
 		# A draft (unsubmitted) Serial and Batch Bundle for the item must block the change.
 		bundle = make_serial_batch_bundle(

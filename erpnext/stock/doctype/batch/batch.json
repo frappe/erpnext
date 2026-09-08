@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_import": 1,
- "autoname": "field:batch_id",
+ "autoname": "hash",
  "creation": "2013-03-05 14:50:38",
  "doctype": "DocType",
  "document_type": "Setup",
@@ -44,16 +44,15 @@
    "report_hide": 1
   },
   {
-   "depends_on": "eval:doc.__islocal",
    "fieldname": "batch_id",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Batch ID",
+   "label": "Batch No",
    "no_copy": 1,
    "oldfieldname": "batch_id",
    "oldfieldtype": "Data",
    "reqd": 1,
-   "unique": 1
+   "search_index": 1
   },
   {
    "fieldname": "item",
@@ -219,7 +218,7 @@
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Batch",
- "naming_rule": "By fieldname",
+ "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [
   {
@@ -294,5 +293,7 @@
  "sort_order": "DESC",
  "states": [],
  "title_field": "batch_id",
- "track_changes": 1
+ "track_changes": 1,
+ "show_title_field_in_link": 1,
+ "search_fields": "batch_id,item"
 }

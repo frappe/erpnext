@@ -605,6 +605,10 @@ def get_serial_nos_from_bundle(serial_and_batch_bundle, serial_nos=None):
 
 
 def get_serial_or_batch_nos(bundle):
+	from frappe.utils import escape_html
+
+	from erpnext.stock.serial_batch_identity import add_number_labels
+
 	# For print format
 
 	bundle_data = frappe.get_cached_value(
@@ -620,16 +624,18 @@ def get_serial_or_batch_nos(bundle):
 
 	data = frappe.get_all("Serial and Batch Entry", fields=fields, filters={"parent": bundle})
 
+	add_number_labels(data)
+
 	if bundle_data.has_serial_no and not bundle_data.has_batch_no:
-		return ", ".join([d.serial_no for d in data])
+		return ", ".join([escape_html(d.serial_number) for d in data])
 
 	elif bundle_data.has_batch_no:
 		html = "<table class= 'table table-borderless' style='margin-top: 0px;margin-bottom: 0px;'>"
 		for d in data:
 			if d.serial_no:
-				html += f"<tr><td>{d.batch_no}</td><td>{d.serial_no}</td><td>{abs(d.qty)}</td></tr>"
+				html += f"<tr><td>{escape_html(d.batch_number or '')}</td><td>{escape_html(d.serial_number or '')}</td><td>{abs(d.qty)}</td></tr>"
 			else:
-				html += f"<tr><td>{d.batch_no}</td><td>{abs(d.qty)}</td></tr>"
+				html += f"<tr><td>{escape_html(d.batch_number or '')}</td><td>{abs(d.qty)}</td></tr>"
 
 		html += "</table>"
 
@@ -1384,57 +1390,32 @@ class SerialBatchCreation:
 			self.batches = frappe._dict({self.batch_no: abs(self.actual_qty)})
 
 	def make_serial_no_if_not_exists(self):
-		non_exists_serial_nos = []
-		for row in self.serial_nos:
-			if not frappe.db.exists("Serial No", row):
-				non_exists_serial_nos.append(row)
-
-		if non_exists_serial_nos:
-			self.make_serial_nos(non_exists_serial_nos)
+		# Transaction fields contain IDs. Physical input is resolved by the input API.
+		existing = set(
+			frappe.get_all(
+				"Serial No",
+				filters={"name": ("in", self.serial_nos), "item_code": self.item_code},
+				pluck="name",
+			)
+		)
+		for name in self.serial_nos:
+			if name not in existing:
+				frappe.throw(_("Serial No {0} does not exist for Item {1}").format(name, self.item_code))
 
 	def make_serial_nos(self, serial_nos):
-		serial_nos_details = []
-		batch_no = None
-		if self.batches:
-			batch_no = next(iter(self.batches.keys()))
+		from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
-		for serial_no in serial_nos:
-			serial_nos_details.append(
-				(
-					serial_no,
-					serial_no,
-					now(),
-					now(),
-					frappe.session.user,
-					frappe.session.user,
-					self.warehouse,
-					self.company,
-					self.item_code,
-					self.item_name,
-					self.description,
-					"Active",
-					batch_no,
-				)
-			)
-
-		if serial_nos_details:
-			fields = [
-				"name",
-				"serial_no",
-				"creation",
-				"modified",
-				"owner",
-				"modified_by",
-				"warehouse",
-				"company",
-				"item_code",
-				"item_name",
-				"description",
-				"status",
-				"batch_no",
-			]
-
-			frappe.db.bulk_insert("Serial No", fields=fields, values=set(serial_nos_details))
+		return SerialBatchIdentity("Serial No").resolve(
+			self.item_code,
+			serial_nos,
+			create=True,
+			defaults={
+				"warehouse": self.warehouse,
+				"company": self.company,
+				"status": "Active",
+				"batch_no": next(iter(self.batches), None) if self.get("batches") else None,
+			},
+		)
 
 	def set_serial_batch_entries(self, doc):
 		incoming_rate = self.get("incoming_rate")
@@ -1535,95 +1516,37 @@ class SerialBatchCreation:
 		)
 
 	def get_auto_created_serial_nos(self):
-		sr_nos = []
-		serial_nos_details = []
+		from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 		if not self.serial_no_series:
-			msg = f"Please set Serial No Series in the item {self.item_code} or create Serial and Batch Bundle manually."
-			frappe.throw(_(msg))
+			frappe.throw(_("Please set Serial No Series in Item {0}").format(self.item_code))
 
-		voucher_no = ""
-		if self.get("voucher_no"):
-			voucher_no = self.get("voucher_no")
-
-		voucher_type = ""
-		if self.get("voucher_type"):
-			voucher_type = self.get("voucher_type")
-
-		obj = NamingSeries(self.serial_no_series)
-		current_value = obj.get_current_value()
+		series = NamingSeries(self.serial_no_series)
+		current_value = series.get_current_value()
 
 		def get_series(partial_series, digits):
 			return f"{current_value:0{digits}d}"
 
-		posting_date = frappe.db.get_value(
-			voucher_type,
-			voucher_no,
-			"posting_date",
-		)
-
-		for _i in range(abs(cint(self.actual_qty))):
+		numbers = []
+		for _index in range(abs(cint(self.actual_qty))):
 			current_value += 1
-			serial_no = parse_naming_series(self.serial_no_series, number_generator=get_series)
+			numbers.append(parse_naming_series(self.serial_no_series, number_generator=get_series))
 
-			sr_nos.append(serial_no)
-			serial_nos_details.append(
-				(
-					serial_no,
-					serial_no,
-					now(),
-					now(),
-					frappe.session.user,
-					frappe.session.user,
-					self.warehouse,
-					self.company,
-					self.item_code,
-					self.item_name,
-					self.description,
-					"Active",
-					voucher_type,
-					voucher_no,
-					posting_date,
-					self.batch_no,
-				)
-			)
-
-		if serial_nos_details:
-			fields = [
-				"name",
-				"serial_no",
-				"creation",
-				"modified",
-				"owner",
-				"modified_by",
-				"warehouse",
-				"company",
-				"item_code",
-				"item_name",
-				"description",
-				"status",
-				"reference_doctype",
-				"reference_name",
-				"posting_date",
-				"batch_no",
-			]
-
-			try:
-				frappe.db.bulk_insert("Serial No", fields=fields, values=set(serial_nos_details))
-			except Exception as e:
-				if e and len(e.args) > 1 and "Duplicate" in e.args[1]:
-					frappe.throw(
-						_(
-							"A naming series conflict occurred while creating serial numbers. Please change the naming series for the item {0}."
-						).format(bold(self.item_code)),
-						title=_("Duplicate Serial Number Error"),
-					)
-				else:
-					raise e
-
-		obj.update_counter(current_value)
-
-		return sr_nos
+		ids = SerialBatchIdentity("Serial No").create_many(
+			self.item_code,
+			numbers,
+			defaults={
+				"warehouse": self.warehouse,
+				"company": self.company,
+				"status": "Active",
+				"reference_doctype": self.get("voucher_type"),
+				"reference_name": self.get("voucher_no"),
+				"posting_date": self.get("posting_date") or getdate(self.posting_datetime),
+				"batch_no": self.get("batch_no"),
+			},
+		)
+		series.update_counter(current_value)
+		return [ids[number] for number in numbers]
 
 
 def get_serial_or_batch_items(items):

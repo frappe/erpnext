@@ -11,6 +11,7 @@ from frappe.query_builder.functions import Coalesce
 from frappe.utils import cint, cstr, getdate, nowdate, safe_json_loads
 
 from erpnext.controllers.stock_controller import StockController
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 
 class SerialNoCannotCreateDirectError(ValidationError):
@@ -65,6 +66,7 @@ class SerialNo(StockController):
 		self.via_stock_ledger = False
 
 	def validate(self):
+		SerialBatchIdentity("Serial No").validate(self)
 		if self.get("__islocal") and self.warehouse and not self.via_stock_ledger:
 			frappe.throw(
 				_(
@@ -110,7 +112,7 @@ class SerialNo(StockController):
 		# Find the exact match
 		sle_exists = False
 		for d in sl_entries:
-			if self.name.upper() in get_serial_nos(d.serial_no):
+			if self.name in get_serial_nos(d.serial_no):
 				sle_exists = True
 				break
 
@@ -120,23 +122,27 @@ class SerialNo(StockController):
 			)
 
 
-def get_available_serial_nos(serial_no_series, qty) -> list[str]:
+def get_available_serial_nos(serial_no_series, qty, item_code=None) -> list[str]:
 	serial_nos = []
 	for _i in range(cint(qty)):
-		serial_nos.append(get_new_serial_number(serial_no_series))
+		serial_nos.append(get_new_serial_number(serial_no_series, item_code))
 
 	return serial_nos
 
 
-def get_new_serial_number(series):
+def get_new_serial_number(series, item_code=None):
 	sr_no = make_autoname(series, "Serial No")
-	if frappe.db.exists("Serial No", sr_no):
-		sr_no = get_new_serial_number(series)
+	if frappe.db.exists("Serial No", {"serial_no": sr_no, **({"item_code": item_code} if item_code else {})}):
+		sr_no = get_new_serial_number(series, item_code)
 	return sr_no
 
 
 def get_items_html(serial_nos, item_code):
-	body = ", ".join(serial_nos)
+	from frappe.utils import escape_html
+
+	labels = SerialBatchIdentity("Serial No").labels(serial_nos)
+	body = ", ".join(escape_html(labels.get(name, name)) for name in serial_nos)
+	item_code = escape_html(item_code)
 	return f"""<details><summary>
 		<b>{item_code}:</b> {len(serial_nos)} Serial Numbers <span class="caret"></span>
 	</summary>
@@ -306,4 +312,5 @@ def get_serial_nos_for_outward(kwargs):
 
 
 def on_doctype_update():
+	SerialBatchIdentity("Serial No").sync_constraint()
 	frappe.db.add_index("Serial No", ["item_code", "warehouse"])

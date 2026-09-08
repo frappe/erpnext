@@ -7,6 +7,7 @@ import frappe
 from frappe import _
 from frappe.utils import cint, flt, get_link_to_form, parse_json
 
+from erpnext.stock.serial_batch_display import with_serial_batch_numbers
 from erpnext.stock.utils import get_valuation_method
 
 SLE_FIELDS = (
@@ -31,6 +32,7 @@ SLE_FIELDS = (
 )
 
 
+@with_serial_batch_numbers
 def execute(filters=None):
 	columns = get_columns()
 	data = get_data(filters)

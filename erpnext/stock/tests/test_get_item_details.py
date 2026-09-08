@@ -521,6 +521,32 @@ class TestGetItemDetail(ERPNextTestSuite):
 			)
 			self.assertEqual({d.batch_no: d.qty for d in entries}, {batches[0]: -2, batches[1]: -3})
 
+	def test_scanned_serial_and_batch_preserved_during_item_selection(self):
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		item_code, batches = self.make_batched_item_with_stock(
+			[1, 1], has_serial_no=1, serial_no_series="SCAN-SN-.#####"
+		)
+		serial_no = frappe.db.get_value("Serial No", {"item_code": item_code, "batch_no": batches[1]})
+
+		with self.change_settings(
+			"Stock Settings",
+			{"pick_serial_and_batch_based_on": "FIFO", "auto_create_serial_and_batch_bundle_for_outward": 1},
+		):
+			self.assertEqual(self.get_picked_batch_no(item_code, 1), batches[0])
+			dn = create_delivery_note(
+				item_code=item_code,
+				qty=1,
+				use_serial_batch_fields=1,
+				serial_no=serial_no,
+				batch_no=batches[1],
+				do_not_save=True,
+			)
+			dn.process_item_selection(item_idx=dn.items[0].idx, reset_item_details=True)
+			self.assertEqual(dn.items[0].serial_no, serial_no)
+			self.assertEqual(dn.items[0].batch_no, batches[1])
+			self.assertEqual(dn.items[0].qty, 1)
+
 	def test_serial_nos_picked_across_batches_when_no_batch_covers_qty(self):
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 		from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (

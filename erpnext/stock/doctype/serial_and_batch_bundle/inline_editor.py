@@ -9,9 +9,8 @@ from frappe.utils import cint, flt, parse_json
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 	create_serial_batch_no_ledgers,
 	get_type_of_transaction,
-	make_batch_nos,
-	make_serial_nos,
 )
+from erpnext.stock.serial_batch_identity import add_number_labels, resolve_number_entries
 
 SUPPORTED_VOUCHER_TYPES = frozenset(
 	[
@@ -36,8 +35,14 @@ def get_bundle_entries(bundle: str, start: int = 0, page_length: int = 50, searc
 	page_length = min(cint(page_length) or 50, 500)
 
 	table = frappe.qb.DocType("Serial and Batch Entry")
+	serial = frappe.qb.DocType("Serial No")
+	batch = frappe.qb.DocType("Batch")
 	query = (
 		frappe.qb.from_(table)
+		.left_join(serial)
+		.on(serial.name == table.serial_no)
+		.left_join(batch)
+		.on(batch.name == table.batch_no)
 		.select(table.name, table.serial_no, table.batch_no, table.qty)
 		.where(table.parent == bundle)
 		.orderby(table.idx)
@@ -47,9 +52,9 @@ def get_bundle_entries(bundle: str, start: int = 0, page_length: int = 50, searc
 
 	if search:
 		search_term = f"%{search}%"
-		query = query.where((table.serial_no.like(search_term)) | (table.batch_no.like(search_term)))
+		query = query.where(serial.serial_no.like(search_term) | batch.batch_id.like(search_term))
 
-	entries = query.run(as_dict=True)
+	entries = add_number_labels(query.run(as_dict=True))
 	summary = get_bundle_summary(bundle)
 	summary["entries"] = entries
 
@@ -82,13 +87,13 @@ def download_bundle_entries_csv(bundle: str):
 	item = frappe.get_cached_value("Item", doc.item_code, ["has_serial_no", "has_batch_no"], as_dict=True)
 
 	rows = [get_csv_columns(item)]
-	for entry in doc.entries:
+	for entry in add_number_labels(doc.entries):
 		if item.has_serial_no and item.has_batch_no:
-			rows.append([entry.serial_no, entry.batch_no, abs(entry.qty)])
+			rows.append([entry.serial_number, entry.batch_number, abs(entry.qty)])
 		elif item.has_batch_no:
-			rows.append([entry.batch_no, abs(entry.qty)])
+			rows.append([entry.batch_number, abs(entry.qty)])
 		else:
-			rows.append([entry.serial_no])
+			rows.append([entry.serial_number])
 
 	build_csv_response(rows, f"{bundle}-entries")
 
@@ -132,9 +137,9 @@ def upsert_bundle_entries(
 			frappe.throw(_("Please add at least one Serial No or Batch to save"))
 
 		frappe.has_permission(doc.get("doctype"), "write", throw=True)
-		if get_type_of_transaction(doc, child_row) == "Inward":
-			make_serial_nos(child_row.item_code, entries)
-			make_batch_nos(child_row.item_code, entries)
+		resolve_number_entries(
+			child_row.item_code, entries, create=get_type_of_transaction(doc, child_row) == "Inward"
+		)
 
 		bundle = create_serial_batch_no_ledgers(entries, child_row, doc)
 
@@ -175,6 +180,10 @@ def apply_incremental_changes(bundle_name, child_row, entries, deleted, replace=
 			)
 		)
 
+	if child_row.item_code != bundle.item_code:
+		frappe.throw(_("The bundle belongs to a different item"))
+
+	resolve_number_entries(bundle.item_code, entries, create=bundle.type_of_transaction == "Inward")
 	sign = 1 if bundle.type_of_transaction == "Inward" else -1
 
 	if replace:
@@ -197,11 +206,6 @@ def apply_incremental_changes(bundle_name, child_row, entries, deleted, replace=
 				entry.batch_no = row.get("batch_no")
 			if row.get("serial_no"):
 				entry.serial_no = row.get("serial_no")
-
-	if entries and bundle.type_of_transaction == "Inward":
-		incoming = [frappe._dict(row) for row in entries]
-		make_serial_nos(child_row.item_code, incoming)
-		make_batch_nos(child_row.item_code, incoming)
 
 	for row in new_rows:
 		bundle.append(
