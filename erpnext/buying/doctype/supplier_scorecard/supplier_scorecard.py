@@ -205,7 +205,7 @@ def refresh_scorecards():
 
 
 @frappe.whitelist()
-def make_all_scorecards(docname):
+def make_all_scorecards(docname: str):
 	sc = frappe.get_doc("Supplier Scorecard", docname)
 	supplier = frappe.get_doc("Supplier", sc.supplier)
 	supplier.check_permission("write")
