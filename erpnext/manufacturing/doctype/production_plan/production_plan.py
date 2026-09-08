@@ -1665,9 +1665,10 @@ def get_warehouse_list(warehouses):
 
 
 @frappe.whitelist()
-def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_data=None):
-	if isinstance(doc, str):
-		doc = frappe._dict(json.loads(doc))
+def get_items_for_material_requests(
+	doc: str | dict, warehouses: str | list[dict] | None = None, get_parent_warehouse_data: bool | None = None
+):
+	doc = frappe._dict(json.loads(doc) if isinstance(doc, str) else doc)
 
 	if warehouses:
 		warehouses = list(set(get_warehouse_list(warehouses)))
@@ -1843,6 +1844,7 @@ def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_d
 
 	if (ignore_existing_ordered_qty or get_parent_warehouse_data) and warehouses:
 		new_mr_items = []
+		locations_by_item = _get_transfer_locations(mr_items, warehouses, company)
 		for item in mr_items:
 			get_materials_from_other_locations(
 				item,
@@ -1850,6 +1852,7 @@ def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_d
 				new_mr_items,
 				company,
 				consider_minimum_order_qty=doc.get("consider_minimum_order_qty"),
+				locations=locations_by_item[item.get("item_code")],
 			)
 
 		mr_items = new_mr_items
@@ -1873,45 +1876,19 @@ def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_d
 
 
 def get_materials_from_other_locations(
-	item, warehouses, new_mr_items, company, consider_minimum_order_qty=False
+	item, warehouses, new_mr_items, company, consider_minimum_order_qty=False, locations=None
 ):
-	from erpnext.stock.doctype.pick_list.pick_list import get_available_item_locations
-
 	purchase_uom = frappe.db.get_value("Item", item.get("item_code"), "purchase_uom")
 
-	locations = get_available_item_locations(
-		item.get("item_code"),
-		warehouses,
-		item.get("quantity") * item.get("conversion_factor"),
-		company,
-		ignore_validation=True,
-	)
+	if locations is None:
+		locations = _get_transfer_locations([item], warehouses, company)[item.get("item_code")]
 
 	required_qty = item.get("quantity")
 	if item.get("conversion_factor") and item.get("purchase_uom") != item.get("stock_uom"):
 		# Convert qty to stock UOM
 		required_qty = required_qty * item.get("conversion_factor")
 
-	# get available material by transferring to production warehouse
-	for d in locations:
-		if required_qty <= 0:
-			return
-
-		new_dict = copy.deepcopy(item)
-		quantity = required_qty if d.get("qty") > required_qty else d.get("qty")
-
-		new_dict.update(
-			{
-				"quantity": quantity,
-				"material_request_type": "Material Transfer",
-				"uom": new_dict.get("stock_uom"),  # internal transfer should be in stock UOM
-				"from_warehouse": d.get("warehouse"),
-				"conversion_factor": 1.0,
-			}
-		)
-
-		required_qty -= quantity
-		new_mr_items.append(new_dict)
+	required_qty = _transfer_from_locations(item, locations, new_mr_items, required_qty)
 
 	# raise purchase request for remaining qty
 
@@ -1929,6 +1906,59 @@ def get_materials_from_other_locations(
 		)
 
 		new_mr_items.append(item)
+
+
+def _get_transfer_locations(mr_items, warehouses, company):
+	from erpnext.stock.doctype.pick_list.pick_list import get_available_item_locations
+
+	required_qty_by_item = defaultdict(float)
+	for item in mr_items:
+		required_qty_by_item[item.get("item_code")] += max(
+			0, flt(item.get("quantity")) * flt(item.get("conversion_factor"))
+		)
+
+	return {
+		item_code: get_available_item_locations(
+			item_code, warehouses, required_qty, company, ignore_validation=True
+		)
+		if required_qty > 0
+		else []
+		for item_code, required_qty in required_qty_by_item.items()
+	}
+
+
+def _transfer_from_locations(item, locations, new_mr_items, required_qty):
+	precision = frappe.get_precision("Material Request Plan Item", "quantity")
+	transfers_by_warehouse = {}
+	for d in locations:
+		if flt(required_qty, precision) <= 0:
+			return required_qty
+
+		quantity = flt(min(required_qty, d.get("qty")), precision)
+		if quantity <= 0:
+			continue
+		d["qty"] -= quantity
+		required_qty -= quantity
+
+		warehouse = d.get("warehouse")
+		if warehouse in transfers_by_warehouse:
+			transfer = transfers_by_warehouse[warehouse]
+			transfer["quantity"] = flt(transfer["quantity"] + quantity, precision)
+			continue
+
+		new_dict = copy.deepcopy(item)
+		new_dict.update(
+			{
+				"quantity": quantity,
+				"material_request_type": "Material Transfer",
+				"uom": new_dict.get("stock_uom"),  # internal transfer should be in stock UOM
+				"from_warehouse": warehouse,
+				"conversion_factor": 1.0,
+			}
+		)
+		transfers_by_warehouse[warehouse] = new_dict
+		new_mr_items.append(new_dict)
+	return required_qty
 
 
 @frappe.whitelist()
