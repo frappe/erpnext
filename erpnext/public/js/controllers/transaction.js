@@ -2524,6 +2524,23 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			.call({
 				method: "erpnext.stock.get_item_details.apply_price_list",
 				args: { ctx: args, doc: me.frm.doc },
+				error: (r) => {
+					if (
+						r?.exc_type !== "InvalidPriceList" ||
+						!me.frm.is_new() ||
+						me.frm.doc.doctype !== args.doctype ||
+						me.frm.doc.name !== args.name
+					) {
+						return;
+					}
+
+					const price_list_field = ["selling_price_list", "buying_price_list"].find(
+						(field) => me.frm.fields_dict[field]
+					);
+					if (price_list_field && me.frm.doc[price_list_field] === args.price_list) {
+						me.frm.set_value(price_list_field, "");
+					}
+				},
 				callback: function (r) {
 					if (!r.exc) {
 						frappe.run_serially([

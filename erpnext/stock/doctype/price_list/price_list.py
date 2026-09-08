@@ -8,6 +8,10 @@ from frappe.model.document import Document
 from frappe.utils import cint, now
 
 
+class InvalidPriceList(frappe.ValidationError):
+	pass
+
+
 class PriceList(Document):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
@@ -85,7 +89,7 @@ def get_price_list_details(price_list):
 		)
 
 		if not price_list_details or not price_list_details.get("enabled"):
-			throw(_("Price List {0} is disabled or does not exist").format(price_list))
+			throw(_("Price List {0} is disabled or does not exist").format(price_list), InvalidPriceList)
 
 		frappe.cache().hset("price_list_details", price_list, price_list_details)
 
