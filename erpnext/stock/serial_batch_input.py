@@ -2,7 +2,7 @@ import frappe
 from frappe import _
 
 from erpnext.stock.serial_batch_fields import NUMBER_INPUT_DOCTYPES
-from erpnext.stock.serial_batch_identity import SerialBatchIdentity, resolve_serial_batch_numbers
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 
 def resolve_transaction_numbers(doc, method=None):
@@ -48,22 +48,13 @@ class TransactionNumberInput:
 		if not self.item_code:
 			frappe.throw(_("Item is required"))
 		frappe.has_permission("Item", "read", doc=self.item_code, throw=True)
-		existing = {
-			record[identity.number_field]
-			for record in identity.get_query(numbers, self.item_code).run(as_dict=True)
-		}
-		missing = any(
-			number not in existing and not identity.exists(number, self.item_code) for number in numbers
+		names = identity.resolve(
+			self.item_code,
+			numbers,
+			create=self.can_create(field),
+			defaults={"company": self.doc.get("company")},
+			check_permissions=True,
 		)
-		if missing and self.can_create(field):
-			frappe.has_permission(doctype, "create", throw=True)
-			identity.resolve(
-				self.item_code, numbers, create=True, defaults={"company": self.doc.get("company")}
-			)
-		key = "batch_numbers" if field == "batch_no" else "serial_numbers"
-		names = resolve_serial_batch_numbers(self.item_code, **{key: numbers})[
-			"batch_nos" if field == "batch_no" else "serial_nos"
-		]
 		if doctype == "Serial No" and len(set(names)) != len(names):
 			frappe.throw(_("A serial number cannot appear twice in the same row"))
 		return names

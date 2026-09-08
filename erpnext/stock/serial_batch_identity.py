@@ -6,6 +6,8 @@ from frappe.model.naming import make_autoname
 from frappe.query_builder.functions import Coalesce, Count, Lower, NullIf
 from frappe.utils import cstr, now
 
+from erpnext.stock.serial_batch_number_lookup import SerialBatchNumberLookup
+
 
 class SerialBatchIdentity:
 	def __init__(self, doctype):
@@ -15,7 +17,7 @@ class SerialBatchIdentity:
 			"Batch": ("item", "batch_id"),
 		}[doctype]
 
-	def resolve(self, item_code, numbers, *, create=False, defaults=None):
+	def resolve(self, item_code, numbers, *, create=False, defaults=None, check_permissions=False):
 		"""Return IDs in input order. A physical number is never looked up as a document ID."""
 		if not isinstance(numbers, list | tuple) or any(not isinstance(number, str) for number in numbers):
 			frappe.throw(_("Physical numbers must be a list of strings"))
@@ -25,23 +27,29 @@ class SerialBatchIdentity:
 		if not isinstance(item_code, str) or not item_code or any(not number for number in numbers):
 			frappe.throw(_("Item and physical number are required"))
 
-		records = self.get_query(numbers, item_code).run(as_dict=True)
-		ids = {row[self.number_field]: row.name for row in records}
-		missing = []
-		for number in dict.fromkeys(numbers):
-			if number in ids:
-				continue
-			# Use the database comparison rules, including its collation, for exact lookups.
-			name = self.exists(number, item_code) if records else None
-			if not name and create:
-				missing.append(number)
-				continue
-			if not name:
-				frappe.throw(_("{0} {1} does not exist for Item {2}").format(self.doctype, number, item_code))
-			ids[number] = name
+		if check_permissions:
+			permission = "select" if frappe.only_has_select_perm(self.doctype) else "read"
+			frappe.has_permission(self.doctype, permission, throw=True)
+		lookup = SerialBatchNumberLookup(self, item_code, numbers)
+		missing = lookup.missing
 		if missing:
-			ids.update(self.resolve_missing(item_code, missing, defaults))
-		return [ids[number] for number in numbers]
+			if not create:
+				frappe.throw(
+					_("{0} {1} does not exist for Item {2}").format(self.doctype, missing[0], item_code)
+				)
+			if check_permissions:
+				frappe.has_permission(self.doctype, "create", throw=True)
+			lookup.assign(self.resolve_missing(item_code, missing, defaults))
+		names = [lookup.ids[number] for number in numbers]
+		if check_permissions:
+			allowed = frappe.get_list(
+				self.doctype, filters={"name": ("in", names)}, pluck="name", limit_page_length=0
+			)
+			if set(names) - set(allowed):
+				frappe.throw(
+					_("Not permitted to select these serial or batch records"), frappe.PermissionError
+				)
+		return names
 
 	def resolve_missing(self, item_code, numbers, defaults):
 		savepoint = "serial_batch_resolve_" + frappe.generate_hash(length=10)
@@ -51,17 +59,16 @@ class SerialBatchIdentity:
 		except Exception as error:
 			frappe.db.rollback(save_point=savepoint)
 			frappe.db.release_savepoint(savepoint)
-			if not isinstance(error, frappe.DuplicateEntryError):
+			if not isinstance(error, frappe.DuplicateEntryError | frappe.UniqueValidationError):
 				raise
 		else:
 			frappe.db.release_savepoint(savepoint)
 			return ids
 
-		# Retry aliases using the database's comparison rules, including MariaDB collation.
-		return {
-			number: self.exists(number, item_code) or self.create_many(item_code, [number], defaults)[number]
-			for number in numbers
-		}
+		lookup = SerialBatchNumberLookup(self, item_code, numbers)
+		if lookup.missing:
+			lookup.assign(self.create_many(item_code, lookup.missing, defaults))
+		return lookup.ids
 
 	def get_query(self, numbers, item_code=None, *, fields=None, filters=None, ignore_permissions=True):
 		table = frappe.qb.DocType(self.doctype)
@@ -86,10 +93,8 @@ class SerialBatchIdentity:
 
 	def create_many(self, item_code, numbers, defaults=None):
 		if self.doctype == "Batch":
-			return {
-				number: self.exists(number, item_code) or self.create_batch(item_code, number, defaults)
-				for number in numbers
-			}
+			# New batches still need their expiry and valuation hooks.
+			return {number: self.create_batch(item_code, number, defaults) for number in numbers}
 
 		# Inactive serials can be prepared before their first receipt assigns a company.
 		item = frappe.get_cached_value(
@@ -129,6 +134,7 @@ class SerialBatchIdentity:
 		doc.update(defaults or {})
 		doc.item = item_code
 		doc.batch_id = number
+		doc.flags.serial_batch_number_checked = True
 		doc.insert(ignore_permissions=True)
 		return doc.name
 
@@ -147,7 +153,11 @@ class SerialBatchIdentity:
 	def validate(self, doc):
 		number = cstr(doc.get(self.number_field)).strip()
 		doc.set(self.number_field, number)
-		if number and self.exists(number, doc.get(self.item_field), exclude=doc.name):
+		if (
+			number
+			and not (doc.is_new() and doc.flags.serial_batch_number_checked)
+			and self.exists(number, doc.get(self.item_field), exclude=doc.name)
+		):
 			frappe.throw(
 				_("{0} {1} already exists for Item {2}").format(
 					self.doctype, number, doc.get(self.item_field)
@@ -241,18 +251,9 @@ def resolve_serial_batch_numbers(
 		("Batch", batch_numbers, "batch_nos"),
 	):
 		values = frappe.parse_json(values) or []
-		if values:
-			permission = "create" if create else "select" if frappe.only_has_select_perm(doctype) else "read"
-			frappe.has_permission(doctype, permission, throw=True)
-		result[key] = SerialBatchIdentity(doctype).resolve(item_code, values, create=create)
-		if values and not create:
-			allowed = frappe.get_list(
-				doctype, filters={"name": ("in", result[key])}, pluck="name", limit_page_length=0
-			)
-			if set(result[key]) - set(allowed):
-				frappe.throw(
-					_("Not permitted to select these serial or batch records"), frappe.PermissionError
-				)
+		result[key] = SerialBatchIdentity(doctype).resolve(
+			item_code, values, create=create, check_permissions=True
+		)
 	return result
 
 
@@ -314,8 +315,6 @@ def resolve_number_entries(item_code, entries, *, create=False):
 		("serial_no", "Serial No", "serial_number"),
 	):
 		rows = [row for row in entries if row.get(number_field) and not row.get(field)]
-		identity = SerialBatchIdentity(doctype)
-		missing = create and any(not identity.exists(row[number_field], item_code) for row in rows)
 		ids = (
 			resolve_serial_batch_numbers(
 				item_code,
@@ -324,7 +323,7 @@ def resolve_number_entries(item_code, entries, *, create=False):
 						row[number_field] for row in rows
 					]
 				},
-				create=missing,
+				create=create,
 			)["serial_nos" if doctype == "Serial No" else "batch_nos"]
 			if rows
 			else []
