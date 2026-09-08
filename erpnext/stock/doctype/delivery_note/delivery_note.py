@@ -642,6 +642,9 @@ class DeliveryNote(SellingController):
 
 	def update_billing_status(self, update_modified=True):
 		updated_delivery_notes = [self.name]
+		if self.is_return and self.return_against:
+			updated_delivery_notes.append(self.return_against)
+
 		for d in self.get("items"):
 			if d.si_detail and not d.so_detail:
 				d.db_set("billed_amt", d.amount, update_modified=update_modified)
@@ -650,7 +653,8 @@ class DeliveryNote(SellingController):
 
 		for dn in set(updated_delivery_notes):
 			dn_doc = self if (dn == self.name) else frappe.get_lazy_doc("Delivery Note", dn)
-			dn_doc.update_billing_percentage(update_modified=update_modified)
+			update_dn_modified = update_modified and dn != self.return_against
+			dn_doc.update_billing_percentage(update_modified=update_dn_modified)
 
 		self.load_from_db()
 
