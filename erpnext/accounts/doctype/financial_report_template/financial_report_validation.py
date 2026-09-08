@@ -403,10 +403,19 @@ class AccountFilterValidator(Validator):
 		self.account_fields = account_fields or set(self.account_meta._valid_columns)
 
 	def validate(self, row) -> ValidationResult:
-		result = ValidationResult()
-
+		# dispatch-path guard: only account-data rows are validated here
 		if row.data_source != "Account Data":
-			return result
+			return ValidationResult()
+
+		return self.validate_filter(row)
+
+	def validate_filter(self, row) -> ValidationResult:
+		"""Validate calculation_formula as an Account filter, regardless of data_source.
+
+		The caller has already decided this row is an account filter, so unlike
+		`validate()` this does not opt out based on `data_source`.
+		"""
+		result = ValidationResult()
 
 		try:
 			filter_config = json.loads(row.calculation_formula)
@@ -420,7 +429,7 @@ class AccountFilterValidator(Validator):
 				result.add_error(
 					ValidationIssue(
 						message=_("[{0}] {1}", context="Financial Report Template").format(
-							get_formula_field_label(row.data_source), error
+							get_formula_field_label("Account Data"), error
 						),
 						row_idx=row.idx,
 					)
@@ -430,7 +439,7 @@ class AccountFilterValidator(Validator):
 			result.add_error(
 				ValidationIssue(
 					message=_("[{0}] {1}", context="Financial Report Template").format(
-						get_formula_field_label(row.data_source),
+						get_formula_field_label("Account Data"),
 						_("Invalid JSON format: {0}").format(str(e)),
 					),
 					row_idx=row.idx,
@@ -455,10 +464,9 @@ class AccountFilterValidator(Validator):
 			if not isinstance(field, str) or not isinstance(operator, str):
 				return _("Field and operator must be strings")
 
-			display = (field if advanced_filtering else self.account_meta.get_label(field)) or field
-
 			if field not in account_fields:
-				return _("Field '{0}' is not a valid Account field").format(display)
+				# escape: `field` is caller-supplied and this message renders as HTML
+				return _("Field '{0}' is not a valid Account field").format(frappe.utils.escape_html(field))
 
 			if operator.casefold() not in OPERATOR_MAP:
 				return _("Invalid operator '{0}'").format(operator)
