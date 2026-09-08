@@ -12,12 +12,34 @@ from erpnext.stock.report.stock_ageing.stock_ageing import (
 	format_report_data,
 	get_average_age,
 )
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestStockAgeing(ERPNextTestSuite):
 	def setUp(self) -> None:
 		self.filters = frappe._dict(company="_Test Company", to_date="2021-12-10", ranges=["30", "60", "90"])
+
+	def test_serial_ids_keep_their_case_in_fifo_slots(self):
+		rows = [
+			frappe._dict(
+				name="Serialized Item",
+				actual_qty=qty,
+				qty_after_transaction=balance,
+				stock_value_difference=qty * 10,
+				warehouse="WH 1",
+				posting_date=date,
+				voucher_type="Stock Entry",
+				voucher_no=str(index),
+				has_serial_no=True,
+				serial_no=serials,
+			)
+			for index, (qty, balance, date, serials) in enumerate(
+				[(2, 2, "2021-12-01", "id-aB\nid-Cd"), (-1, 1, "2021-12-02", "id-aB")]
+			)
+		]
+		slots = FIFOSlots(self.filters, rows).generate()
+		self.assertEqual(slots["Serialized Item"]["fifo_queue"], [["id-Cd", "2021-12-01", 10.0]])
 
 	def test_normal_inward_outward_queue(self):
 		"Reference: Case 1 in stock_ageing_fifo_logic.md (same wh)"
@@ -530,12 +552,7 @@ class TestStockAgeing(ERPNextTestSuite):
 			{"is_stock_item": 1, "has_batch_no": 1, "valuation_method": "FIFO"},
 		).name
 
-		batch_no = "SA-RECO-REVALUE-BATCH"
-		if not frappe.db.exists("Batch", batch_no):
-			frappe.get_doc({"doctype": "Batch", "batch_id": batch_no, "item": item_code}).insert(
-				ignore_permissions=True
-			)
-		frappe.db.set_value("Batch", batch_no, "use_batchwise_valuation", 1)
+		batch_no = make_batch(item_code, "SA-RECO-REVALUE-BATCH")
 
 		def make_sle(posting_date, voucher_type, voucher_no, actual_qty, qty_after, stock_value_difference):
 			return frappe._dict(
@@ -583,12 +600,7 @@ class TestStockAgeing(ERPNextTestSuite):
 			{"is_stock_item": 1, "has_batch_no": 1, "valuation_method": "FIFO"},
 		).name
 
-		batch_no = "SA-PARTIAL-RECO-BATCH"
-		if not frappe.db.exists("Batch", batch_no):
-			frappe.get_doc({"doctype": "Batch", "batch_id": batch_no, "item": item_code}).insert(
-				ignore_permissions=True
-			)
-		frappe.db.set_value("Batch", batch_no, "use_batchwise_valuation", 1)
+		batch_no = make_batch(item_code, "SA-PARTIAL-RECO-BATCH")
 
 		def make_sle(posting_date, voucher_type, voucher_no, actual_qty, qty_after, stock_value_difference):
 			return frappe._dict(
@@ -636,12 +648,7 @@ class TestStockAgeing(ERPNextTestSuite):
 			{"is_stock_item": 1, "has_batch_no": 1, "valuation_method": "FIFO"},
 		).name
 
-		batch_no = "SA-POOL-SPLIT-BATCH"
-		if not frappe.db.exists("Batch", batch_no):
-			frappe.get_doc({"doctype": "Batch", "batch_id": batch_no, "item": item_code}).insert(
-				ignore_permissions=True
-			)
-		frappe.db.set_value("Batch", batch_no, "use_batchwise_valuation", 1)
+		batch_no = make_batch(item_code, "SA-POOL-SPLIT-BATCH")
 
 		def make_sle(posting_date, voucher_no, actual_qty, qty_after, stock_value_difference):
 			return frappe._dict(
@@ -687,12 +694,7 @@ class TestStockAgeing(ERPNextTestSuite):
 			{"is_stock_item": 1, "has_batch_no": 1, "valuation_method": "FIFO"},
 		).name
 
-		batch_no = "SA-POOL-RESIDUAL-BATCH"
-		if not frappe.db.exists("Batch", batch_no):
-			frappe.get_doc({"doctype": "Batch", "batch_id": batch_no, "item": item_code}).insert(
-				ignore_permissions=True
-			)
-		frappe.db.set_value("Batch", batch_no, "use_batchwise_valuation", 1)
+		batch_no = make_batch(item_code, "SA-POOL-RESIDUAL-BATCH")
 
 		def make_sle(posting_date, voucher_no, actual_qty, qty_after, stock_value_difference):
 			return frappe._dict(
@@ -734,12 +736,7 @@ class TestStockAgeing(ERPNextTestSuite):
 			{"is_stock_item": 1, "has_batch_no": 1, "valuation_method": "FIFO"},
 		).name
 
-		batch_no = "SA-POOL-REBALANCE-BATCH"
-		if not frappe.db.exists("Batch", batch_no):
-			frappe.get_doc({"doctype": "Batch", "batch_id": batch_no, "item": item_code}).insert(
-				ignore_permissions=True
-			)
-		frappe.db.set_value("Batch", batch_no, "use_batchwise_valuation", 1)
+		batch_no = make_batch(item_code, "SA-POOL-REBALANCE-BATCH")
 
 		def make_sle(posting_date, voucher_no, actual_qty, qty_after, stock_value_difference):
 			return frappe._dict(
@@ -1533,38 +1530,14 @@ class TestStockAgeing(ERPNextTestSuite):
 			},
 		).name
 
-		def make_batch(batch_id, use_batchwise_valuation):
-			if not frappe.db.exists("Batch", batch_id):
-				frappe.get_doc(
-					{
-						"doctype": "Batch",
-						"batch_id": batch_id,
-						"item": item_code,
-					}
-				).insert(ignore_permissions=True)
-
-			frappe.db.set_value("Batch", batch_id, "use_batchwise_valuation", use_batchwise_valuation)
-
-		batchwise_above_90 = "SA-BATCHWISE-ABOVE-90"
-		non_batchwise_above_90 = "SA-NON-BATCHWISE-ABOVE-90"
-		batchwise_61_90 = "SA-BATCHWISE-61-90"
-		non_batchwise_61_90 = "SA-NON-BATCHWISE-61-90"
-		batchwise_31_60 = "SA-BATCHWISE-31-60"
-		non_batchwise_31_60 = "SA-NON-BATCHWISE-31-60"
-		batchwise_0_30 = "SA-BATCHWISE-0-30"
-		non_batchwise_0_30 = "SA-NON-BATCHWISE-0-30"
-
-		for batch_id, use_batchwise_valuation in {
-			batchwise_above_90: 1,
-			non_batchwise_above_90: 0,
-			batchwise_61_90: 1,
-			non_batchwise_61_90: 0,
-			batchwise_31_60: 1,
-			non_batchwise_31_60: 0,
-			batchwise_0_30: 1,
-			non_batchwise_0_30: 0,
-		}.items():
-			make_batch(batch_id, use_batchwise_valuation)
+		batchwise_above_90 = make_batch(item_code, "SA-BATCHWISE-ABOVE-90", 1)
+		non_batchwise_above_90 = make_batch(item_code, "SA-NON-BATCHWISE-ABOVE-90", 0)
+		batchwise_61_90 = make_batch(item_code, "SA-BATCHWISE-61-90", 1)
+		non_batchwise_61_90 = make_batch(item_code, "SA-NON-BATCHWISE-61-90", 0)
+		batchwise_31_60 = make_batch(item_code, "SA-BATCHWISE-31-60", 1)
+		non_batchwise_31_60 = make_batch(item_code, "SA-NON-BATCHWISE-31-60", 0)
+		batchwise_0_30 = make_batch(item_code, "SA-BATCHWISE-0-30", 1)
+		non_batchwise_0_30 = make_batch(item_code, "SA-NON-BATCHWISE-0-30", 0)
 
 		qty_after_transaction = 0
 
@@ -1641,22 +1614,8 @@ class TestStockAgeing(ERPNextTestSuite):
 			},
 		).name
 
-		def make_batch(batch_id):
-			if not frappe.db.exists("Batch", batch_id):
-				frappe.get_doc(
-					{
-						"doctype": "Batch",
-						"batch_id": batch_id,
-						"item": item_code,
-					}
-				).insert(ignore_permissions=True)
-
-			frappe.db.set_value("Batch", batch_id, "use_batchwise_valuation", 1)
-
-		source_batch = "SA-BATCHWISE-TRANSFER-SOURCE"
-		target_batch = "SA-BATCHWISE-TRANSFER-TARGET"
-		make_batch(source_batch)
-		make_batch(target_batch)
+		source_batch = make_batch(item_code, "SA-BATCHWISE-TRANSFER-SOURCE")
+		target_batch = make_batch(item_code, "SA-BATCHWISE-TRANSFER-TARGET")
 
 		sle = [
 			frappe._dict(
@@ -1735,17 +1694,7 @@ class TestStockAgeing(ERPNextTestSuite):
 			},
 		).name
 
-		batch_no = "SA-BATCHWISE-NEGATIVE-STOCK"
-		if not frappe.db.exists("Batch", batch_no):
-			frappe.get_doc(
-				{
-					"doctype": "Batch",
-					"batch_id": batch_no,
-					"item": item_code,
-				}
-			).insert(ignore_permissions=True)
-
-		frappe.db.set_value("Batch", batch_no, "use_batchwise_valuation", 1)
+		batch_no = make_batch(item_code, "SA-BATCHWISE-NEGATIVE-STOCK")
 
 		sle = [
 			frappe._dict(
@@ -1814,19 +1763,8 @@ class TestStockAgeing(ERPNextTestSuite):
 			},
 		).name
 
-		buffer_batch = "SA-BATCHWISE-NEGATIVE-BUFFER"
-		negative_batch = "SA-BATCHWISE-NEGATIVE-NON-HEAD"
-		for batch_no in [buffer_batch, negative_batch]:
-			if not frappe.db.exists("Batch", batch_no):
-				frappe.get_doc(
-					{
-						"doctype": "Batch",
-						"batch_id": batch_no,
-						"item": item_code,
-					}
-				).insert(ignore_permissions=True)
-
-			frappe.db.set_value("Batch", batch_no, "use_batchwise_valuation", 1)
+		buffer_batch = make_batch(item_code, "SA-BATCHWISE-NEGATIVE-BUFFER")
+		negative_batch = make_batch(item_code, "SA-BATCHWISE-NEGATIVE-NON-HEAD")
 
 		sle = [
 			frappe._dict(
@@ -1905,17 +1843,7 @@ class TestStockAgeing(ERPNextTestSuite):
 			},
 		).name
 
-		batch_no = "SA-BATCHWISE-NEGATIVE-LATER-VOUCHER"
-		if not frappe.db.exists("Batch", batch_no):
-			frappe.get_doc(
-				{
-					"doctype": "Batch",
-					"batch_id": batch_no,
-					"item": item_code,
-				}
-			).insert(ignore_permissions=True)
-
-		frappe.db.set_value("Batch", batch_no, "use_batchwise_valuation", 1)
+		batch_no = make_batch(item_code, "SA-BATCHWISE-NEGATIVE-LATER-VOUCHER")
 
 		sle = [
 			frappe._dict(
@@ -2056,7 +1984,7 @@ class TestStockAgeing(ERPNextTestSuite):
 		self.assertEqual(item_result["qty_after_transaction"], item_result["total_qty"])
 		self.assertEqual(item_result["total_qty"], 5.0)
 		self.assertEqual(
-			item_result["fifo_queue"], [[batch_no.upper(), 1, 5.0, getdate(add_days(base_date, -2)), 50.0]]
+			item_result["fifo_queue"], [[batch_no, 1, 5.0, getdate(add_days(base_date, -2)), 50.0]]
 		)
 
 	def test_legacy_batch_no_sle_with_streaming_cursor(self):
@@ -2143,3 +2071,9 @@ def generate_item_and_item_wh_wise_slots(filters, sle):
 	filters.show_warehouse_wise_stock = False
 
 	return item_wise_slots, item_wh_wise_slots
+
+
+def make_batch(item_code, batch_id, use_batchwise_valuation=1):
+	batch_no = SerialBatchIdentity("Batch").resolve(item_code, [batch_id], create=True)[0]
+	frappe.db.set_value("Batch", batch_no, "use_batchwise_valuation", use_batchwise_valuation)
+	return batch_no

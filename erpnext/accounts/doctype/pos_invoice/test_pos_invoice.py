@@ -818,7 +818,7 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		)
 		from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 
-		create_batch_item_with_batch("_BATCH ITEM", "TestBatch 01")
+		batch_no = create_batch_item_with_batch("_BATCH ITEM", "TestBatch 01")
 		item = frappe.get_doc("Item", "_BATCH ITEM")
 
 		se = make_stock_entry(
@@ -826,12 +826,10 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 			item_code="_BATCH ITEM",
 			qty=2,
 			basic_rate=100,
-			batch_no="TestBatch 01",
+			batch_no=batch_no,
 		)
 
-		pos_inv1 = create_pos_invoice(
-			item=item.name, rate=300, qty=1, do_not_submit=1, batch_no="TestBatch 01"
-		)
+		pos_inv1 = create_pos_invoice(item=item.name, rate=300, qty=1, do_not_submit=1, batch_no=batch_no)
 		pos_inv1.append(
 			"payments",
 			{"mode_of_payment": "Cash", "amount": 300},
@@ -849,7 +847,7 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 				"voucher_no": pos_inv2.name,
 				"qty": 2,
 				"avg_rate": 300,
-				"batches": frappe._dict({"TestBatch 01": 2}),
+				"batches": frappe._dict({batch_no: 2}),
 				"type_of_transaction": "Outward",
 				"company": pos_inv2.company,
 			}
@@ -925,6 +923,7 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 
 		self.assertRaises(frappe.ValidationError, pos_inv.submit)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_bundle_stock_availability_validation(self):
 		from erpnext.accounts.doctype.pos_invoice.pos_invoice import ProductBundleStockValidationError
 		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle

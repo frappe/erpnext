@@ -36,6 +36,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 	make_serial_batch_bundle,
 )
 from erpnext.stock.doctype.stock_entry.test_stock_entry import get_qty_after_transaction
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.tests.test_utils import StockTestMixin
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -2643,25 +2644,8 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		batch_no = "BATCH-PI-BNU-TPRBI-0001"
 		serial_nos = ["SNU-PI-TPRSI-0001", "SNU-PI-TPRSI-0002", "SNU-PI-TPRSI-0003"]
 
-		if not frappe.db.exists("Batch", batch_no):
-			frappe.get_doc(
-				{
-					"doctype": "Batch",
-					"batch_id": batch_no,
-					"item": batch_item,
-				}
-			).insert()
-
-		for serial_no in serial_nos:
-			if not frappe.db.exists("Serial No", serial_no):
-				frappe.get_doc(
-					{
-						"doctype": "Serial No",
-						"item_code": serial_item,
-						"serial_no": serial_no,
-						"company": "_Test Company",
-					}
-				).insert()
+		batch_no = SerialBatchIdentity("Batch").resolve(batch_item, [batch_no], create=True)[0]
+		serial_nos = SerialBatchIdentity("Serial No").resolve(serial_item, serial_nos, create=True)
 
 		pi = make_purchase_invoice(
 			item_code=batch_item,

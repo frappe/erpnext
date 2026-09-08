@@ -3453,8 +3453,8 @@ class TestSalesOrder(ERPNextTestSuite):
 		serial_nos_in_bundle = get_serial_nos(dn.packed_items[1].serial_and_batch_bundle)
 		batches_in_bundle = list(get_batches_from_bundle(dn.packed_items[1].serial_and_batch_bundle).keys())
 
-		self.assertEqual(sre_serial_nos, serial_nos_in_bundle)
-		self.assertEqual(sre_batch_nos, batches_in_bundle)
+		self.assertCountEqual(sre_serial_nos, serial_nos_in_bundle)
+		self.assertCountEqual(sre_batch_nos, batches_in_bundle)
 
 		dn.items[0].qty = 5
 		dn.save()
@@ -3495,8 +3495,8 @@ class TestSalesOrder(ERPNextTestSuite):
 		serial_nos_in_bundle = get_serial_nos(si.packed_items[1].serial_and_batch_bundle)
 		batches_in_bundle = list(get_batches_from_bundle(si.packed_items[1].serial_and_batch_bundle).keys())
 
-		self.assertEqual(sre_serial_nos, serial_nos_in_bundle)
-		self.assertEqual(sre_batch_nos, batches_in_bundle)
+		self.assertCountEqual(sre_serial_nos, serial_nos_in_bundle)
+		self.assertCountEqual(sre_batch_nos, batches_in_bundle)
 
 		si.items[0].qty = 5
 		si.save()

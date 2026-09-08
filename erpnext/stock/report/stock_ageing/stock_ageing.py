@@ -487,7 +487,7 @@ class FIFOSlots:
 						or []
 					)
 
-		return self.uppercase_serial_nos(serial_nos), batch_nos
+		return serial_nos, batch_nos
 
 	def _get_row_batch_nos(self, row: dict) -> list:
 		if not row.batch_no:
@@ -495,7 +495,7 @@ class FIFOSlots:
 
 		return [
 			[
-				row.batch_no.upper(),
+				row.batch_no,
 				self._get_batchwise_valuation(row.batch_no),
 				abs(row.actual_qty),
 				abs(row.stock_value_difference),
@@ -511,10 +511,6 @@ class FIFOSlots:
 			fifo_queue.clear()
 		elif len(fifo_queue) > qty_after:
 			fifo_queue[:] = fifo_queue[:qty_after]
-
-	def uppercase_serial_nos(self, serial_nos):
-		"Convert serial nos to uppercase for uniformity."
-		return [sn.upper() for sn in serial_nos]
 
 	def _get_batchwise_valuation(self, batch_no: str):
 		if batch_no not in self.batchwise_valuation_by_batch:
@@ -1152,7 +1148,7 @@ class FIFOSlots:
 		bundle_wise_batch_nos = frappe._dict({})
 		for bundle_name, batch_no, use_batchwise_valuation, qty, stock_value_difference in query.run():
 			bundle_wise_batch_nos.setdefault(bundle_name, []).append(
-				[batch_no.upper(), use_batchwise_valuation, qty, stock_value_difference]
+				[batch_no, use_batchwise_valuation, qty, stock_value_difference]
 			)
 
 		return bundle_wise_batch_nos

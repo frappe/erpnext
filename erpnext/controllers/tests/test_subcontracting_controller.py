@@ -995,9 +995,9 @@ class TestSubcontractingController(ERPNextTestSuite):
 				if value.get(field):
 					data = value.get(field)
 					if field == "serial_no":
-						data = sorted(data)
-
-					self.assertEqual(data, transferred_detais.get(field))
+						self.assertCountEqual(data, transferred_detais.get(field))
+					else:
+						self.assertEqual(data, transferred_detais.get(field))
 
 		scr2 = make_subcontracting_receipt(sco.name)
 		scr2.save()
@@ -1010,9 +1010,9 @@ class TestSubcontractingController(ERPNextTestSuite):
 				if value.get(field):
 					data = value.get(field)
 					if field == "serial_no":
-						data = sorted(data)
-
-					self.assertEqual(data, transferred_detais.get(field))
+						self.assertCountEqual(data, transferred_detais.get(field))
+					else:
+						self.assertEqual(data, transferred_detais.get(field))
 
 	def test_subcontracting_with_same_components_different_fg_with_serial_batch_fields(self):
 		"""
@@ -1338,7 +1338,7 @@ def make_stock_transfer_entry(**args):
 		batches = defaultdict(float)
 		if item_details and item_details.serial_no:
 			serial_nos = item_details.serial_no[0 : cint(row.qty)]
-			item_details.serial_no = list(set(item_details.serial_no) - set(serial_nos))
+			item_details.serial_no = item_details.serial_no[cint(row.qty) :]
 
 		if item_details and item_details.batch_no:
 			for batch_no, batch_qty in item_details.batch_no.items():

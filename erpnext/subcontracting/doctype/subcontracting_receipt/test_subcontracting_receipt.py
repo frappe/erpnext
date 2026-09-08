@@ -37,6 +37,7 @@ from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 	create_stock_reconciliation,
 )
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
 	make_subcontracting_receipt,
 )
@@ -1753,14 +1754,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		)
 
 		batch_no = "BATCH-BNGS-0001"
-		if not frappe.db.exists("Batch", batch_no):
-			frappe.get_doc(
-				{
-					"doctype": "Batch",
-					"batch_id": batch_no,
-					"item": fg_item,
-				}
-			).insert()
+		batch_no = SerialBatchIdentity("Batch").resolve(fg_item, [batch_no], create=True)[0]
 
 		scr = make_subcontracting_receipt(sco.name)
 		self.assertFalse(scr.items[0].serial_and_batch_bundle)
@@ -1830,14 +1824,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		)
 
 		batch_no = "BATCH-REJ-BNGS-0001"
-		if not frappe.db.exists("Batch", batch_no):
-			frappe.get_doc(
-				{
-					"doctype": "Batch",
-					"batch_id": batch_no,
-					"item": fg_item,
-				}
-			).insert()
+		batch_no = SerialBatchIdentity("Batch").resolve(fg_item, [batch_no], create=True)[0]
 
 		rej_warehouse = create_warehouse("_Test Subcontract Warehouse For Rejected Qty")
 

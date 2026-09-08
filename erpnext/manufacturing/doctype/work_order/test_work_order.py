@@ -36,6 +36,7 @@ from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.stock_entry import test_stock_entry
 from erpnext.stock.doctype.stock_entry.stock_entry import OperationsNotCompleteError
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.utils import get_bin
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -1971,6 +1972,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertAlmostEqual(rows["Stores - _TC"], flt(first.required_qty) * 4 / 10, places=6)
 		self.assertAlmostEqual(rows["_Test Warehouse 1 - _TC"], 5 * 4 / 10, places=6)
 
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 0})
 	def test_allocation_collapses_groups_when_multiple_items_disallowed(self):
 		work_order = make_wo_order_test_record(
 			planned_start_date=now(), qty=10, source_warehouse="Stores - _TC"
@@ -2163,6 +2165,8 @@ class TestWorkOrder(ERPNextTestSuite):
 		)
 
 		transferred_ste_doc.items[0].serial_no = "\n".join(serial_nos_list)
+		transferred_ste_doc.items[0].serial_and_batch_bundle = None
+		transferred_ste_doc.items[0].use_serial_batch_fields = 1
 		transferred_ste_doc.submit()
 
 		# First Manufacture stock entry
@@ -3770,8 +3774,12 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		# Pre-generate two sets of FG serial numbers
 		series = frappe.db.get_value("Item", fg_item, "serial_no_series")
-		fg_serials_1 = [make_autoname(series) for _ in range(3)]
-		fg_serials_2 = [make_autoname(series) for _ in range(3)]
+		fg_serials_1 = SerialBatchIdentity("Serial No").resolve(
+			fg_item, [make_autoname(series) for _ in range(3)], create=True
+		)
+		fg_serials_2 = SerialBatchIdentity("Serial No").resolve(
+			fg_item, [make_autoname(series) for _ in range(3)], create=True
+		)
 
 		# Manufacture entry 1 — consumes rm_serials_1, produces fg_serials_1
 		se_manufacture_1 = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 3))

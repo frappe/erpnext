@@ -21,6 +21,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 	get_serial_nos_from_bundle,
 )
 from erpnext.stock.serial_batch_bundle import SerialNoValuation
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -433,15 +434,7 @@ class TestLandedCostVoucher(ERPNextTestSuite):
 		item_code = "_Test Serialized Item"
 		warehouse = "Stores - TCP1"
 
-		if not frappe.db.exists("Serial No", serial_no):
-			frappe.get_doc(
-				{
-					"doctype": "Serial No",
-					"item_code": item_code,
-					"serial_no": serial_no,
-					"company": "_Test Company",
-				}
-			).insert()
+		serial_no = SerialBatchIdentity("Serial No").resolve(item_code, [serial_no], create=True)[0]
 
 		pr = make_purchase_receipt(
 			company="_Test Company with perpetual inventory",
@@ -751,27 +744,12 @@ class TestLandedCostVoucher(ERPNextTestSuite):
 			"SN-TLCVSNO-0005",
 		]
 
-		for sn in serial_nos:
-			if not frappe.db.exists("Serial No", sn):
-				sn_doc = frappe.get_doc(
-					{
-						"doctype": "Serial No",
-						"item_code": sn_item,
-						"serial_no": sn,
-						"company": "_Test Company",
-					}
-				)
-				sn_doc.insert()
+		serial_nos = SerialBatchIdentity("Serial No").resolve(
+			sn_item, serial_nos, create=True, defaults={"company": "_Test Company"}
+		)
 
-		if not frappe.db.exists("Batch", "BATCH-TLCVSNO-0001"):
-			batch_doc = frappe.get_doc(
-				{
-					"doctype": "Batch",
-					"item": batch_item,
-					"batch_id": "BATCH-TLCVSNO-0001",
-				}
-			)
-			batch_doc.insert()
+		batch_no = SerialBatchIdentity("Batch").resolve(batch_item, ["BATCH-TLCVSNO-0001"], create=True)[0]
+		batch_doc = frappe.get_doc("Batch", batch_no)
 
 		warehouse = "_Test Warehouse - _TC"
 		company = frappe.db.get_value("Warehouse", warehouse, "company")
@@ -813,7 +791,7 @@ class TestLandedCostVoucher(ERPNextTestSuite):
 			if row.item_code == sn_item:
 				row.db_set("serial_no", ", ".join(serial_nos))
 			else:
-				row.db_set("batch_no", "BATCH-TLCVSNO-0001")
+				row.db_set("batch_no", batch_no)
 
 		for sn in serial_nos:
 			sn_doc = frappe.get_doc("Serial No", sn)
@@ -902,27 +880,12 @@ class TestLandedCostVoucher(ERPNextTestSuite):
 			"SN-TDVLCVSNO-0005",
 		]
 
-		for sn in serial_nos:
-			if not frappe.db.exists("Serial No", sn):
-				sn_doc = frappe.get_doc(
-					{
-						"doctype": "Serial No",
-						"item_code": sn_item,
-						"serial_no": sn,
-						"company": "_Test Company",
-					}
-				)
-				sn_doc.insert()
+		serial_nos = SerialBatchIdentity("Serial No").resolve(
+			sn_item, serial_nos, create=True, defaults={"company": "_Test Company"}
+		)
 
-		if not frappe.db.exists("Batch", "BATCH-TDVLCVSNO-0001"):
-			batch_doc = frappe.get_doc(
-				{
-					"doctype": "Batch",
-					"item": batch_item,
-					"batch_id": "BATCH-TDVLCVSNO-0001",
-				}
-			)
-			batch_doc.insert()
+		batch_no = SerialBatchIdentity("Batch").resolve(batch_item, ["BATCH-TDVLCVSNO-0001"], create=True)[0]
+		batch_doc = frappe.get_doc("Batch", batch_no)
 
 		warehouse = "_Test Warehouse - _TC"
 		company = frappe.db.get_value("Warehouse", warehouse, "company")
@@ -974,7 +937,7 @@ class TestLandedCostVoucher(ERPNextTestSuite):
 			if row.item_code == sn_item:
 				row.db_set("serial_no", ", ".join(serial_nos))
 			else:
-				row.db_set("batch_no", "BATCH-TDVLCVSNO-0001")
+				row.db_set("batch_no", batch_no)
 
 		stock_ledger_entries = frappe.get_all("Stock Ledger Entry", filters={"voucher_no": pr.name})
 		for sle in stock_ledger_entries:
@@ -982,7 +945,7 @@ class TestLandedCostVoucher(ERPNextTestSuite):
 			if doc.item_code == sn_item:
 				doc.db_set("serial_no", ", ".join(serial_nos))
 			else:
-				doc.db_set("batch_no", "BATCH-TDVLCVSNO-0001")
+				doc.db_set("batch_no", batch_no)
 
 		dn = create_delivery_note(
 			company=company,
@@ -1017,14 +980,14 @@ class TestLandedCostVoucher(ERPNextTestSuite):
 			if doc.item_code == sn_item:
 				doc.db_set("serial_no", ", ".join(serial_nos))
 			else:
-				doc.db_set("batch_no", "BATCH-TDVLCVSNO-0001")
+				doc.db_set("batch_no", batch_no)
 
 		available_batches = get_auto_batch_nos(
 			frappe._dict(
 				{
 					"item_code": batch_item,
 					"warehouse": warehouse,
-					"batch_no": ["BATCH-TDVLCVSNO-0001"],
+					"batch_no": [batch_no],
 					"consider_negative_batches": True,
 				}
 			)
@@ -1092,17 +1055,9 @@ class TestLandedCostVoucher(ERPNextTestSuite):
 			"SN-ALCVTDVLCVSNO-0005",
 		]
 
-		for sn in serial_nos:
-			if not frappe.db.exists("Serial No", sn):
-				sn_doc = frappe.get_doc(
-					{
-						"doctype": "Serial No",
-						"item_code": sn_item,
-						"serial_no": sn,
-						"company": "_Test Company",
-					}
-				)
-				sn_doc.insert()
+		serial_nos = SerialBatchIdentity("Serial No").resolve(
+			sn_item, serial_nos, create=True, defaults={"company": "_Test Company"}
+		)
 
 		warehouse = "_Test Warehouse - _TC"
 		company = frappe.db.get_value("Warehouse", warehouse, "company")

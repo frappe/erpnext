@@ -21,6 +21,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.serial_batch_bundle import SerialBatchCreation, get_serial_nos_from_bundle
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.utils import get_incoming_rate
 
 
@@ -433,9 +434,10 @@ class SubcontractingController(StockController):
 			consumed_bundles = voucher_bundle_data.get(bundle_key, frappe._dict())
 
 			if consumed_bundles.serial_nos:
-				self.available_materials[key]["serial_no"] = list(
-					set(self.available_materials[key]["serial_no"]) - set(consumed_bundles.serial_nos)
-				)
+				consumed_serials = set(consumed_bundles.serial_nos)
+				self.available_materials[key]["serial_no"] = [
+					sn for sn in self.available_materials[key]["serial_no"] if sn not in consumed_serials
+				]
 
 			if consumed_bundles.batch_nos:
 				for batch_no, qty in consumed_bundles.batch_nos.items():
@@ -449,9 +451,10 @@ class SubcontractingController(StockController):
 				from erpnext.deprecation_dumpster import deprecation_warning
 
 				deprecation_warning("unknown", "v16", "No instructions.")
-				self.available_materials[key]["serial_no"] = list(
-					set(self.available_materials[key]["serial_no"]) - set(get_serial_nos(row.serial_no))
-				)
+				consumed_serials = set(get_serial_nos(row.serial_no))
+				self.available_materials[key]["serial_no"] = [
+					sn for sn in self.available_materials[key]["serial_no"] if sn not in consumed_serials
+				]
 
 			# Will be deprecated in v16
 			if row.batch_no and not consumed_bundles.batch_nos:
@@ -530,6 +533,12 @@ class SubcontractingController(StockController):
 							bundle_data.batch_nos[batch_no] -= qty
 
 			self.__set_alternative_item_details(row)
+
+		serial_numbers = SerialBatchIdentity("Serial No").labels(
+			[sn for details in self.available_materials.values() for sn in details.serial_no]
+		)
+		for details in self.available_materials.values():
+			details.serial_no.sort(key=lambda sn: serial_numbers.get(sn) or sn)
 
 		self.__transferred_items = copy.deepcopy(self.available_materials)
 		self.__update_consumed_materials("Subcontracting Receipt")
@@ -682,7 +691,7 @@ class SubcontractingController(StockController):
 		return available_batches
 
 	def __get_serial_nos_for_bundle(self, qty, key):
-		available_sns = sorted(self.available_materials[key]["serial_no"])[0 : cint(qty)]
+		available_sns = self.available_materials[key]["serial_no"][0 : cint(qty)]
 		serial_nos = []
 
 		for serial_no in available_sns:

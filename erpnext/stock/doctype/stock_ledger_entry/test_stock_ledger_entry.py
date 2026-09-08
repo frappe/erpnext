@@ -24,6 +24,7 @@ from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import BackDate
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 	create_stock_reconciliation,
 )
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.stock_ledger import get_previous_sle
 from erpnext.stock.tests.test_utils import StockTestMixin
 from erpnext.tests.utils import ERPNextTestSuite
@@ -59,11 +60,9 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 		item = "_Test Serialized Item"
 		serial = "_Test SN Tie 9"
 		company_a, company_b = "_Test Company", "_Test Company 1"
-		if frappe.db.exists("Serial No", serial):
-			frappe.delete_doc("Serial No", serial, force=1)
-		frappe.get_doc(
-			{"doctype": "Serial No", "serial_no": serial, "item_code": item, "company": company_b}
-		).insert(ignore_permissions=True)
+		serial = SerialBatchIdentity("Serial No").resolve(
+			item, [serial], create=True, defaults={"company": company_b}
+		)[0]
 
 		def mk_sle(name, rate):
 			if frappe.db.exists("Stock Ledger Entry", name):
@@ -1691,7 +1690,8 @@ def setup_item_valuation_test(
 	batches = [f"IV - Test Batch {i} {valuation_method} {suffix}" for i in batches_list]
 
 	for i, batch_id in enumerate(batches):
-		if not frappe.db.exists("Batch", batch_id):
+		batches[i] = frappe.db.get_value("Batch", {"item": item.item_code, "batch_id": batch_id})
+		if not batches[i]:
 			ubw = use_batchwise_valuation
 			if isinstance(use_batchwise_valuation, list | tuple):
 				ubw = use_batchwise_valuation[i]
@@ -1702,6 +1702,7 @@ def setup_item_valuation_test(
 			).insert()
 			batch.use_batchwise_valuation = ubw
 			batch.db_update()
+			batches[i] = batch.name
 
 	return item.item_code, warehouses, batches
 

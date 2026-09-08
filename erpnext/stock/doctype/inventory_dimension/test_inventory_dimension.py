@@ -20,6 +20,7 @@ from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import (
 	SerialNoInventoryDimensionError,
 )
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -503,6 +504,7 @@ class TestInventoryDimension(ERPNextTestSuite):
 			{"has_serial_no": 1, "is_stock_item": 1},
 		)
 		serial_no = "Test Serialized Inventory Dimension Serial No"
+		serial_no = SerialBatchIdentity("Serial No").resolve(item.name, [serial_no], create=True)[0]
 		warehouse = create_warehouse("Serialized Inventory Dimension Warehouse")
 
 		create_inventory_dimension(
@@ -563,6 +565,7 @@ class TestInventoryDimension(ERPNextTestSuite):
 			{"has_serial_no": 1, "is_stock_item": 1},
 		)
 		serial_no = "Test Serialized Empty Inventory Dimension Serial No"
+		serial_no = SerialBatchIdentity("Serial No").resolve(item.name, [serial_no], create=True)[0]
 		warehouse = create_warehouse("Serialized Empty Inventory Dimension Warehouse")
 
 		create_inventory_dimension(
@@ -599,6 +602,7 @@ class TestInventoryDimension(ERPNextTestSuite):
 			{"has_serial_no": 1, "is_stock_item": 1},
 		)
 		serial_no = "Test Serialized Required Inventory Dimension Serial No"
+		serial_no = SerialBatchIdentity("Serial No").resolve(item.name, [serial_no], create=True)[0]
 		warehouse = create_warehouse("Serialized Required Inventory Dimension Warehouse")
 
 		create_inventory_dimension(
@@ -644,6 +648,7 @@ class TestInventoryDimension(ERPNextTestSuite):
 			{"has_serial_no": 1, "is_stock_item": 1},
 		)
 		serial_no = "Test Serialized Legacy Inventory Dimension Serial No"
+		serial_no = SerialBatchIdentity("Serial No").resolve(item.name, [serial_no], create=True)[0]
 		warehouse = create_warehouse("Serialized Legacy Inventory Dimension Warehouse")
 
 		create_inventory_dimension(

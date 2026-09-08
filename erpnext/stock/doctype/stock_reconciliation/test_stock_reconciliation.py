@@ -549,7 +549,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 
 	def test_valid_batch(self):
 		create_batch_item_with_batch("Testing Batch Item 1", "001")
-		create_batch_item_with_batch("Testing Batch Item 2", "002")
+		batch_no = create_batch_item_with_batch("Testing Batch Item 2", "002")
 
 		doc = frappe.get_doc(
 			{
@@ -559,7 +559,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 				"voucher_type": "Stock Reconciliation",
 				"entries": [
 					{
-						"batch_no": "002",
+						"batch_no": batch_no,
 						"qty": 1,
 						"incoming_rate": 100,
 					}
@@ -567,7 +567,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			}
 		)
 
-		self.assertRaises(frappe.ValidationError, doc.save)
+		self.assertRaisesRegex(frappe.ValidationError, "does not belong to Item", doc.save)
 
 	def test_serial_no_cancellation(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
@@ -2219,17 +2219,15 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 
 
 def create_batch_item_with_batch(item_name, batch_id):
+	from erpnext.stock.serial_batch_identity import SerialBatchIdentity
+
 	batch_item_doc = create_item(item_name, is_stock_item=1)
 	if not batch_item_doc.has_batch_no:
 		batch_item_doc.has_batch_no = 1
 		batch_item_doc.create_new_batch = 1
 		batch_item_doc.save(ignore_permissions=True)
 
-	if not frappe.db.exists("Batch", batch_id):
-		b = frappe.new_doc("Batch")
-		b.item = item_name
-		b.batch_id = batch_id
-		b.save()
+	return SerialBatchIdentity("Batch").resolve(item_name, [batch_id], create=True)[0]
 
 
 def insert_existing_sle(warehouse, item_code="_Test Item"):
