@@ -1450,41 +1450,17 @@ def get_material_request_items(
 	bin_dict,
 	consumed_qty,
 ):
-	required_qty = 0
-	item_code = row.get("item_code")
-
-	if not ignore_existing_ordered_qty or bin_dict.get("projected_qty", 0) < 0:
-		required_qty = flt(row.get("qty"))
-	else:
-		key = (item_code, warehouse)
-		available_qty = flt(bin_dict.get("projected_qty", 0)) - consumed_qty[key]
-		if available_qty > 0:
-			required_qty = max(0, flt(row.get("qty")) - available_qty)
-			consumed_qty[key] += min(flt(row.get("qty")), available_qty)
-		else:
-			required_qty = flt(row.get("qty"))
+	required_qty = _required_qty_for_mr(
+		row, ignore_existing_ordered_qty, warehouse, bin_dict, consumed_qty, include_safety_stock
+	)
 
 	if doc.get("consider_minimum_order_qty") and required_qty > 0 and required_qty < row["min_order_qty"]:
 		required_qty = row["min_order_qty"]
 
 	item_group_defaults = get_item_group_defaults(row.item_code, company)
 
-	if not row["purchase_uom"]:
-		row["purchase_uom"] = row["stock_uom"]
-
-	if row["purchase_uom"] != row["stock_uom"]:
-		if not (row["conversion_factor"] or frappe.flags.show_qty_in_stock_uom):
-			frappe.throw(
-				_("UOM Conversion factor ({0} -> {1}) not found for item: {2}").format(
-					row["purchase_uom"], row["stock_uom"], row.item_code
-				)
-			)
-
 	if frappe.db.get_value("UOM", row["purchase_uom"], "must_be_whole_number"):
 		required_qty = ceil(required_qty)
-
-	if include_safety_stock:
-		required_qty += flt(row["safety_stock"])
 
 	item_details = frappe.get_cached_value("Item", row.item_code, ["purchase_uom", "stock_uom"], as_dict=1)
 
@@ -1604,6 +1580,37 @@ def get_sales_orders(self):
 	open_so = open_so_query.run(as_dict=True)
 
 	return open_so
+
+
+def _required_qty_for_mr(
+	row, ignore_existing_ordered_qty, warehouse, bin_dict, consumed_qty, include_safety_stock
+):
+	safety_stock = flt(row["safety_stock"]) if include_safety_stock else 0
+	qty = flt(row.get("qty"))
+	projected_qty = max(0, flt(bin_dict.get("projected_qty"))) if ignore_existing_ordered_qty else 0
+
+	key = (row.get("item_code"), warehouse)
+	available_qty = projected_qty - consumed_qty[key]
+	required_qty = max(0, qty - (available_qty - safety_stock))
+	consumed_qty[key] += qty - required_qty
+	return _adjust_required_qty_for_uom(row, required_qty)
+
+
+def _adjust_required_qty_for_uom(row, required_qty):
+	if not row["purchase_uom"]:
+		row["purchase_uom"] = row["stock_uom"]
+
+	if row["purchase_uom"] != row["stock_uom"]:
+		if not (row["conversion_factor"] or frappe.flags.show_qty_in_stock_uom):
+			frappe.throw(
+				_("UOM Conversion factor ({0} -> {1}) not found for item: {2}").format(
+					row["purchase_uom"], row["stock_uom"], row.item_code
+				)
+			)
+
+	if frappe.db.get_value("UOM", row["purchase_uom"], "must_be_whole_number"):
+		required_qty = ceil(required_qty)
+	return required_qty
 
 
 @frappe.whitelist()
