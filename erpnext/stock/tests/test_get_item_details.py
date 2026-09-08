@@ -488,6 +488,39 @@ class TestGetItemDetail(ERPNextTestSuite):
 			frappe.db.set_single_value("Buying Settings", "maintain_same_rate", original)
 			frappe.clear_cache(doctype="Buying Settings")
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"maintain_same_sales_rate": 1})
+	def test_delivery_note_to_sales_invoice_keeps_item_rates(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_invoice
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		first_item, first_batches = self.make_batched_item_with_stock([1])
+		second_item, second_batches = self.make_batched_item_with_stock([1])
+		dn = create_delivery_note(
+			item_code=first_item,
+			qty=1,
+			rate=100,
+			batch_no=first_batches[0],
+			use_serial_batch_fields=1,
+			do_not_save=True,
+		)
+		dn.append(
+			"items",
+			{
+				"item_code": second_item,
+				"warehouse": "_Test Warehouse - _TC",
+				"qty": 1,
+				"rate": 200,
+				"conversion_factor": 1,
+				"batch_no": second_batches[0],
+				"use_serial_batch_fields": 1,
+			},
+		)
+		dn.insert()
+		dn.submit()
+
+		si = make_sales_invoice(dn.name)
+		self.assertEqual([item.rate for item in si.items], [100, 200])
+
 	def make_batched_item_with_stock(self, quantities, uoms=None, **properties):
 		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
