@@ -1153,7 +1153,7 @@ class update_entries_after:
 
 		# rounding as per precision
 		self.wh_data.stock_value = flt(self.wh_data.stock_value, self.currency_precision)
-		if not self.wh_data.qty_after_transaction:
+		if not flt(self.wh_data.qty_after_transaction, self.flt_precision):
 			self.wh_data.stock_value = 0.0
 
 		if sle.actual_qty < 0:
