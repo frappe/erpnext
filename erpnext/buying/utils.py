@@ -130,6 +130,21 @@ def get_linked_material_requests(items: str | list):
 	"""
 
 	items = frappe.parse_json(items)
+
+	permitted_material_requests = frappe.get_list(
+		"Material Request",
+		filters={
+			"material_request_type": "Purchase",
+			"docstatus": 1,
+			"status": ("!=", "Stopped"),
+			"per_ordered": ("<", 99.99),
+		},
+		pluck="name",
+	)
+
+	if not permitted_material_requests:
+		return []
+
 	mr_list = []
 
 	mr = frappe.qb.DocType("Material Request")
@@ -146,6 +161,7 @@ def get_linked_material_requests(items: str | list):
 				mr_item.item_code,
 				mr_item.name.as_("mr_item"),
 			)
+			.where(mr.name.isin(permitted_material_requests))
 			.where(mr_item.item_code == item)
 			.where(mr.material_request_type == "Purchase")
 			.where(mr.per_ordered < 99.99)
