@@ -225,10 +225,11 @@ def get_rate_locked_source_row(ctx: ItemDetailsCtx, doc) -> frappe._dict | None:
 		doc = json.loads(doc)
 
 	source_fields = maintain_same_rate_source_fields.get(ctx.parenttype or ctx.doctype)
-	if not source_fields or not doc or ctx.get("is_return") or not maintain_same_rate_enabled(ctx):
+	if not source_fields or ctx.get("is_return") or not maintain_same_rate_enabled(ctx):
 		return None
 
-	row = next((d for d in doc.get("items") or [] if d.get("name") == ctx.child_docname), None)
+	# use ctx's own source links when present; else match by name, never on an empty name (collapses every unsaved row onto the first)
+	row = ctx if any(ctx.get(field) for field in source_fields) else find_row_by_name(doc, ctx.child_docname)
 	if not row:
 		return None
 
@@ -243,6 +244,12 @@ def get_rate_locked_source_row(ctx: ItemDetailsCtx, doc) -> frappe._dict | None:
 				return source
 			return None
 	return None
+
+
+def find_row_by_name(doc, child_docname) -> frappe._dict | None:
+	if not doc or not child_docname:
+		return None
+	return next((d for d in doc.get("items") or [] if d.get("name") == child_docname), None)
 
 
 def maintain_same_rate_enabled(ctx: ItemDetailsCtx) -> bool:
