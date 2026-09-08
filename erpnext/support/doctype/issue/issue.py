@@ -117,11 +117,60 @@ class Issue(Document):
 		communication.flags.ignore_mandatory = True
 		communication.save()
 
+	def get_timeline_communications(self, after=None) -> tuple[set[str], set[str]]:
+		"""Return the Communications on this Issue's timeline, by how they are attached to it.
+
+		The desk timeline (`frappe.desk.form.load.get_communication_data`) draws from two
+		sources: Communications that reference this Issue, and Communications joined to it
+		through a Timeline Link. The Split action is offered on every one of them, so both
+		are returned. Both sets are scoped to this Issue and cannot reach another one.
+
+		`after` is matched against `communication_date`, which is what the timeline is
+		ordered by, so "everything from here on" means the same thing here as it does on
+		screen. It is not `creation`: a pulled email is created when it is fetched, long
+		after it was sent.
+		"""
+		date_filter = {"communication_date": (">=", after)} if after else {}
+
+		referenced = frappe.get_all(
+			"Communication",
+			filters={"reference_doctype": "Issue", "reference_name": self.name, **date_filter},
+			pluck="name",
+		)
+
+		link_parents = frappe.get_all(
+			"Communication Link",
+			filters={"link_doctype": "Issue", "link_name": self.name},
+			pluck="parent",
+		)
+		linked = (
+			frappe.get_all(
+				"Communication",
+				filters={"name": ("in", link_parents), **date_filter},
+				pluck="name",
+			)
+			if link_parents
+			else []
+		)
+
+		return set(referenced), set(linked)
+
 	@frappe.whitelist(methods=["POST"])
 	def split_issue(self, subject: str, communication_id: str):
 		from copy import deepcopy
 
 		self.check_permission("write")
+
+		referenced, linked = self.get_timeline_communications()
+		if communication_id not in referenced | linked:
+			frappe.throw(
+				_("Communication {0} is not on the timeline of Issue {1}").format(
+					communication_id, self.name
+				),
+				frappe.PermissionError,
+			)
+
+		comm_to_split_from = frappe.get_doc("Communication", communication_id)
 
 		replicated_issue = deepcopy(self)
 		replicated_issue.subject = subject
@@ -141,21 +190,22 @@ class Issue(Document):
 
 		frappe.get_doc(replicated_issue).insert()
 
-		# Replicate linked Communications
-		# TODO: get all communications in timeline before this, and modify them to append them to new doc
-		comm_to_split_from = frappe.get_doc("Communication", communication_id)
-		communications = frappe.get_all(
-			"Communication",
-			filters={
-				"reference_doctype": "Issue",
-				"reference_name": comm_to_split_from.reference_name,
-				"creation": (">=", comm_to_split_from.creation),
-			},
-		)
+		# Move the whole timeline from the split point onwards, both the Communications that
+		# reference this Issue and the ones only joined to it through a Timeline Link.
+		referenced, linked = self.get_timeline_communications(after=comm_to_split_from.communication_date)
 
-		for communication in communications:
-			doc = frappe.get_doc("Communication", communication.name)
-			doc.reference_name = replicated_issue.name
+		for name in sorted(referenced | linked):
+			doc = frappe.get_doc("Communication", name)
+
+			if name in referenced:
+				doc.reference_name = replicated_issue.name
+
+			# A Timeline Link is this Issue's own handle on the Communication, so it moves with
+			# the split. Its reference belongs to some other document and is left alone.
+			for link in doc.timeline_links:
+				if link.link_doctype == "Issue" and link.link_name == self.name:
+					link.link_name = replicated_issue.name
+
 			doc.save(ignore_permissions=True)
 
 		frappe.get_doc(
