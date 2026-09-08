@@ -110,9 +110,14 @@ class TestProductionPlan(ERPNextTestSuite):
 		pln = frappe.get_doc("Production Plan", pln.name)
 		pln.cancel()
 
-	def _plan_for_safety_stock(self, rm_item, qty_per_order):
+	def _plan_for_safety_stock(self, rm_item, qty_per_order, bom_quantity=1):
 		fg_item = make_item(properties={"is_stock_item": 1}).name
-		make_bom(item=fg_item, raw_materials=[rm_item], source_warehouse="_Test Warehouse - _TC")
+		make_bom(
+			item=fg_item,
+			raw_materials=[rm_item],
+			source_warehouse="_Test Warehouse - _TC",
+			quantity=bom_quantity,
+		)
 
 		pln = create_production_plan(
 			item_code=fg_item,
@@ -226,6 +231,34 @@ class TestProductionPlan(ERPNextTestSuite):
 		items = get_items_for_material_requests(pln.as_dict(), warehouses=[{"warehouse": source_warehouse}])
 		self.assertEqual([row["material_request_type"] for row in items], ["Material Transfer"] * 2)
 		self.assertEqual([row["quantity"] for row in items], [350, 1000])
+
+	def test_safety_stock_does_not_share_purchase_rounding_between_rows(self):
+		from erpnext.stock.utils import get_or_make_bin
+
+		rm_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos", "safety_stock": 1}).name
+		pln = self._plan_for_safety_stock(rm_item, qty_per_order=1, bom_quantity=2)
+		bin_name = get_or_make_bin(rm_item, "_Test Warehouse - _TC")
+
+		for projected_qty in (0, 0.25, 0.75):
+			frappe.db.set_value("Bin", bin_name, "projected_qty", projected_qty)
+			for include_safety_stock in (0, 1):
+				for consider_projected_qty in (0, 1):
+					with self.subTest(
+						projected_qty=projected_qty,
+						include_safety_stock=include_safety_stock,
+						consider_projected_qty=consider_projected_qty,
+					):
+						pln.include_safety_stock = include_safety_stock
+						pln.ignore_existing_ordered_qty = consider_projected_qty
+						items = get_items_for_material_requests(pln.as_dict())
+						expected_qty = [2, 1] if include_safety_stock else [1, 1]
+						if consider_projected_qty and projected_qty == 0.75:
+							expected_qty = [1, 1] if include_safety_stock else [0, 1]
+						self.assertEqual([row["quantity"] for row in items], expected_qty)
+						self.assertEqual([row["required_bom_qty"] for row in items], [0.5, 0.5])
+						self.assertEqual(
+							[row["sales_order"] for row in items], [row.sales_order for row in pln.po_items]
+						)
 
 	def test_safety_stock_with_fractional_minimum_uses_whole_purchase_uom(self):
 		rm_item = make_item(

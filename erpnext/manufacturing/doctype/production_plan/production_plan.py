@@ -1591,9 +1591,8 @@ def _required_qty_for_mr(
 	key = (row.get("item_code"), warehouse)
 	available_qty = projected_qty - consumed_qty[key]
 	required_qty = max(0, qty - (available_qty - safety_stock))
-	required_qty = _adjust_required_qty_for_uom(row, required_qty)
 	consumed_qty[key] += qty - required_qty
-	return required_qty
+	return _adjust_required_qty_for_uom(row, required_qty)
 
 
 def _adjust_required_qty_for_uom(row, required_qty):
