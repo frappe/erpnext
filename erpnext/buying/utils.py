@@ -133,13 +133,15 @@ def get_linked_material_requests(items: str | list):
 
 	permitted_material_requests = frappe.get_list(
 		"Material Request",
-		filters={
-			"material_request_type": "Purchase",
-			"docstatus": 1,
-			"status": ("!=", "Stopped"),
-			"per_ordered": ("<", 99.99),
-		},
+		filters=[
+			["material_request_type", "=", "Purchase"],
+			["docstatus", "=", 1],
+			["status", "!=", "Stopped"],
+			["per_ordered", "<", 99.99],
+			["Material Request Item", "item_code", "in", items],
+		],
 		pluck="name",
+		distinct=True,
 	)
 
 	if not permitted_material_requests:
