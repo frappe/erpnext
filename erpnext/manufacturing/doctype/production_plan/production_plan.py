@@ -47,6 +47,9 @@ from erpnext.manufacturing.doctype.production_plan.services.sub_assembly import 
 from erpnext.manufacturing.doctype.production_plan.services.work_order_planning import (
 	WorkOrderCreationService,
 )
+from erpnext.manufacturing.doctype.production_plan.services.work_order_quantities import (
+	ProductionPlanWorkOrderQuantities,
+)
 from erpnext.stock.utils import get_or_make_bin
 from erpnext.utilities.transaction_base import validate_uom_is_integer
 
@@ -133,6 +136,11 @@ class ProductionPlan(Document):
 			"enable_stock_reservation",
 			frappe.db.get_single_value("Stock Settings", "enable_stock_reservation"),
 		)
+		if self.docstatus == 1:
+			self.set_onload(
+				"pending_work_order_qty",
+				ProductionPlanWorkOrderQuantities(self.name).get_pending_quantities(self),
+			)
 
 	def on_discard(self):
 		self.db_set("status", "Cancelled")

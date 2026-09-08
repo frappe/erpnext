@@ -455,10 +455,22 @@ def make_sales_invoice(
 	has_unit_price_items = frappe.db.get_value("Sales Order", source_name, "has_unit_price_items")
 	billed_qty_by_item = None
 	pending_qty_by_item = {}
+	amount_allowance_by_item = {}
 	mapped_qty_by_item = get_qty_already_mapped(target_doc, "so_detail")
 
 	def is_unit_price_row(source):
 		return has_unit_price_items and source.qty == 0
+
+	def is_amount_billable(source):
+		from erpnext.controllers.status_updater import get_allowance_for
+
+		if source.item_code not in amount_allowance_by_item:
+			amount_allowance_by_item[source.item_code] = flt(
+				get_allowance_for(source.item_code, qty_or_amount="amount")[0]
+			)
+
+		allowance = amount_allowance_by_item[source.item_code]
+		return abs(flt(source.billed_amt)) < abs(flt(source.amount)) * (1 + allowance / 100)
 
 	def get_billed_qty_by_item():
 		nonlocal billed_qty_by_item
@@ -481,9 +493,7 @@ def make_sales_invoice(
 	def get_pending_qty(source):
 		if source.name not in pending_qty_by_item:
 			billable_qty = get_qty_net_of_returns(source)
-			if source.qty and source.billed_amt:
-				billable_qty -= get_billed_qty_by_item().get(source.name, 0)
-
+			billable_qty -= get_billed_qty_by_item().get(source.name, 0)
 			billable_qty -= mapped_qty_by_item.get(source.name, 0)
 			pending_qty_by_item[source.name] = max(flt(billable_qty, source.precision("qty")), 0)
 
@@ -621,7 +631,7 @@ def make_sales_invoice(
 					if is_unit_price_row(doc)
 					else (
 						doc.qty
-						and (doc.base_amount == 0 or abs(doc.billed_amt) < abs(doc.amount))
+						and (doc.base_amount == 0 or is_amount_billable(doc))
 						and get_pending_qty(doc) > 0
 					)
 				),

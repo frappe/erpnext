@@ -162,6 +162,8 @@ def get_items_for_material_requests(
 		doc, mr_items, warehouses, ignore_ordered_qty, get_parent_warehouse_data
 	)
 	_set_default_suppliers(mr_items, doc.get("company"))
+	if doc.get("consider_minimum_order_qty"):
+		_apply_minimum_order_qty(mr_items)
 
 	if not mr_items:
 		_warn_no_mr_items(doc)
@@ -454,6 +456,7 @@ def _apply_other_locations(doc, mr_items, warehouses, ignore_ordered_qty, get_pa
 		return mr_items
 
 	new_mr_items = []
+	locations_by_item = _get_transfer_locations(mr_items, warehouses, doc.get("company"))
 	for item in mr_items:
 		get_materials_from_other_locations(
 			item,
@@ -461,8 +464,28 @@ def _apply_other_locations(doc, mr_items, warehouses, ignore_ordered_qty, get_pa
 			new_mr_items,
 			doc.get("company"),
 			consider_minimum_order_qty=doc.get("consider_minimum_order_qty"),
+			locations=locations_by_item[item.get("item_code")],
 		)
 	return new_mr_items
+
+
+def _get_transfer_locations(mr_items, warehouses, company):
+	from erpnext.stock.doctype.pick_list.pick_list import get_available_item_locations
+
+	required_qty_by_item = defaultdict(float)
+	for item in mr_items:
+		required_qty_by_item[item.get("item_code")] += max(
+			0, flt(item.get("quantity")) * flt(item.get("conversion_factor"))
+		)
+
+	return {
+		item_code: get_available_item_locations(
+			item_code, warehouses, required_qty, company, ignore_validation=True
+		)
+		if required_qty > 0
+		else []
+		for item_code, required_qty in required_qty_by_item.items()
+	}
 
 
 def _set_default_suppliers(mr_items, company):
@@ -544,7 +567,7 @@ def get_material_request_items(
 	consumed_qty,
 ):
 	required_qty = _required_qty_for_mr(
-		doc, row, ignore_existing_ordered_qty, warehouse, bin_dict, consumed_qty, include_safety_stock
+		row, ignore_existing_ordered_qty, warehouse, bin_dict, consumed_qty, include_safety_stock
 	)
 	item_group_defaults = get_item_group_defaults(row.item_code, company)
 	conversion_factor = _mr_purchase_conversion_factor(row)
@@ -562,27 +585,89 @@ def get_material_request_items(
 
 
 def _required_qty_for_mr(
-	doc, row, ignore_existing_ordered_qty, warehouse, bin_dict, consumed_qty, include_safety_stock
+	row, ignore_existing_ordered_qty, warehouse, bin_dict, consumed_qty, include_safety_stock
 ):
 	safety_stock = flt(row["safety_stock"]) if include_safety_stock else 0
 	qty = flt(row.get("qty"))
-
-	if not ignore_existing_ordered_qty or bin_dict.get("projected_qty", 0) < 0:
-		required_qty = _apply_minimum_order_qty(doc, row, qty + safety_stock)
-		return _adjust_required_qty_for_uom(row, required_qty)
+	projected_qty = max(0, flt(bin_dict.get("projected_qty"))) if ignore_existing_ordered_qty else 0
 
 	key = (row.get("item_code"), warehouse)
-	available_qty = flt(bin_dict.get("projected_qty", 0)) - consumed_qty[key]
-	required_qty = _apply_minimum_order_qty(doc, row, max(0, qty - (available_qty - safety_stock)))
+	available_qty = projected_qty - consumed_qty[key]
+	required_qty = max(0, qty - (available_qty - safety_stock))
 	required_qty = _adjust_required_qty_for_uom(row, required_qty)
 	consumed_qty[key] += qty - required_qty
 	return required_qty
 
 
-def _apply_minimum_order_qty(doc, row, required_qty):
-	if doc.get("consider_minimum_order_qty") and 0 < required_qty < row["min_order_qty"]:
-		return row["min_order_qty"]
-	return required_qty
+def _apply_minimum_order_qty(mr_items):
+	for rows in _purchase_rows_by_item(mr_items).values():
+		surplus_qty = 0.0
+		for order_rows in _rows_by_sales_order(rows):
+			surplus_qty = _apply_minimum_order_qty_to_order(order_rows, surplus_qty)
+
+
+def _purchase_rows_by_item(mr_items):
+	rows_by_item = defaultdict(list)
+	for row in mr_items:
+		if row.get("material_request_type") not in ("Purchase", "Subcontracting"):
+			continue
+		if flt(row.get("quantity")) <= 0:
+			continue
+		key = (
+			row.get("item_code"),
+			row.get("warehouse"),
+			row.get("material_request_type"),
+			row.get("supplier"),
+		)
+		rows_by_item[key].append(row)
+	return rows_by_item
+
+
+def _rows_by_sales_order(rows):
+	rows_by_order = defaultdict(list)
+	for row in rows:
+		rows_by_order[row.get("sales_order")].append(row)
+	return rows_by_order.values()
+
+
+def _apply_minimum_order_qty_to_order(rows, surplus_qty):
+	"""Cover the order from an earlier order's surplus, then raise the rest to the minimum.
+
+	Material Requests and Purchase Orders are raised per Sales Order and a Purchase
+	Order rejects an item below its minimum, so each order either buys at least the
+	minimum or is covered by what an earlier order over-purchased."""
+	demand_qty = sum(_stock_quantity(row) for row in rows)
+	_cover_from_surplus(rows, surplus_qty)
+
+	min_order_qty = max(flt(row.get("min_order_qty")) for row in rows)
+	total_qty = sum(_stock_quantity(row) for row in rows)
+	if 0 < total_qty < min_order_qty:
+		row = next(row for row in rows if _stock_quantity(row) > 0)
+		_set_stock_quantity(row, _stock_quantity(row) + min_order_qty - total_qty)
+
+	purchased_qty = sum(_stock_quantity(row) for row in rows)
+	return surplus_qty + purchased_qty - demand_qty
+
+
+def _cover_from_surplus(rows, surplus_qty):
+	for row in rows:
+		covered_qty = min(surplus_qty, _stock_quantity(row))
+		if covered_qty <= 0:
+			break
+		_set_stock_quantity(row, _stock_quantity(row) - covered_qty)
+		surplus_qty -= covered_qty
+
+
+def _stock_quantity(row):
+	return flt(row.get("quantity")) * (flt(row.get("conversion_factor")) or 1)
+
+
+def _set_stock_quantity(row, stock_qty):
+	conversion_factor = flt(row.get("conversion_factor")) or 1
+	quantity = _quantity_in_purchase_uom(stock_qty, conversion_factor, stock_qty)
+	if frappe.get_cached_value("UOM", row.get("uom"), "must_be_whole_number"):
+		quantity = ceil(quantity)
+	row["quantity"] = quantity
 
 
 def _adjust_required_qty_for_uom(row, required_qty):
@@ -604,7 +689,9 @@ def _adjust_required_qty_for_uom(row, required_qty):
 
 def _quantity_in_purchase_uom(required_qty, conversion_factor, min_order_qty=0):
 	"""Convert to purchase UOM; a binding minimum order qty takes the smallest
-	representable quantity whose stock equivalent still meets it."""
+	representable quantity whose stock equivalent still meets it. The minimum is
+	capped at the requirement so a small shortage never rounds down to zero."""
+	min_order_qty = min(min_order_qty, required_qty)
 	precision = frappe.get_precision("Material Request Plan Item", "quantity")
 	quantity = flt(required_qty / conversion_factor, precision)
 	if min_order_qty and quantity * conversion_factor < min_order_qty <= required_qty:
@@ -665,17 +752,10 @@ def _material_request_item_row(
 
 
 def get_materials_from_other_locations(
-	item, warehouses, new_mr_items, company, consider_minimum_order_qty=False
+	item, warehouses, new_mr_items, company, consider_minimum_order_qty=False, locations=None
 ):
-	from erpnext.stock.doctype.pick_list.pick_list import get_available_item_locations
-
-	locations = get_available_item_locations(
-		item.get("item_code"),
-		warehouses,
-		item.get("quantity") * item.get("conversion_factor"),
-		company,
-		ignore_validation=True,
-	)
+	if locations is None:
+		locations = _get_transfer_locations([item], warehouses, company)[item.get("item_code")]
 
 	required_qty = item.get("quantity")
 	if item.get("conversion_factor") and item.get("purchase_uom") != item.get("stock_uom"):
@@ -687,23 +767,35 @@ def get_materials_from_other_locations(
 
 
 def _transfer_from_locations(item, locations, new_mr_items, required_qty):
-	# get available material by transferring to production warehouse
+	precision = frappe.get_precision("Material Request Plan Item", "quantity")
+	transfers_by_warehouse = {}
 	for d in locations:
-		if required_qty <= 0:
+		if flt(required_qty, precision) <= 0:
 			return required_qty
 
+		quantity = flt(min(required_qty, d.get("qty")), precision)
+		if quantity <= 0:
+			continue
+		d["qty"] -= quantity
+		required_qty -= quantity
+
+		warehouse = d.get("warehouse")
+		if warehouse in transfers_by_warehouse:
+			transfer = transfers_by_warehouse[warehouse]
+			transfer["quantity"] = flt(transfer["quantity"] + quantity, precision)
+			continue
+
 		new_dict = copy.deepcopy(item)
-		quantity = required_qty if d.get("qty") > required_qty else d.get("qty")
 		new_dict.update(
 			{
 				"quantity": quantity,
 				"material_request_type": "Material Transfer",
 				"uom": new_dict.get("stock_uom"),  # internal transfer should be in stock UOM
-				"from_warehouse": d.get("warehouse"),
+				"from_warehouse": warehouse,
 				"conversion_factor": 1.0,
 			}
 		)
-		required_qty -= quantity
+		transfers_by_warehouse[warehouse] = new_dict
 		new_mr_items.append(new_dict)
 	return required_qty
 
@@ -713,9 +805,6 @@ def _add_remaining_purchase_request(item, new_mr_items, required_qty, consider_m
 	precision = frappe.get_precision("Material Request Plan Item", "quantity")
 	if flt(required_qty, precision) <= 0:
 		return
-
-	if consider_minimum_order_qty:
-		required_qty = max(required_qty, flt(item.get("min_order_qty")))
 
 	purchase_uom = frappe.db.get_value("Item", item.get("item_code"), "purchase_uom")
 	if frappe.db.get_value("UOM", purchase_uom, "must_be_whole_number"):
