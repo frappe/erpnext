@@ -421,8 +421,8 @@ cur_frm.cscript.update_totals = function (doc) {
 		tc += flt(accounts[i].credit, precision("credit", accounts[i]));
 	}
 	doc = locals[doc.doctype][doc.name];
-	doc.total_debit = td;
-	doc.total_credit = tc;
+	doc.total_debit = flt(td, precision("total_debit"));
+	doc.total_credit = flt(tc, precision("total_credit"));
 	doc.difference = flt(td - tc, precision("difference"));
 	refresh_many(["total_debit", "total_credit", "difference"]);
 };
@@ -524,17 +524,6 @@ $.extend(erpnext.journal_entry, {
 	set_debit_credit_in_company_currency: function (frm, cdt, cdn) {
 		var row = locals[cdt][cdn];
 
-<<<<<<< HEAD
-=======
-		frm.doc.total_debit = flt(total_debit, precision("total_debit"));
-		frm.doc.total_credit = flt(total_credit, precision("total_credit"));
-		frm.doc.difference = flt(total_debit - total_credit, precision("difference"));
-		["total_debit", "total_credit", "difference"].forEach((field) => frm.refresh_field(field));
-	},
-
-	set_debit_credit_in_company_currency(frm, cdt, cdn) {
-		const row = frappe.get_doc(cdt, cdn);
->>>>>>> e825bb2 (fix(accounts): round journal entry totals to field precision (#58629))
 		frappe.model.set_value(
 			cdt,
 			cdn,
