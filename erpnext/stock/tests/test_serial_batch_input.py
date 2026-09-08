@@ -1,5 +1,6 @@
 import csv
-from tempfile import NamedTemporaryFile
+from pathlib import Path
+from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
 import frappe
@@ -140,35 +141,36 @@ class TestSerialBatchInput(ERPNextTestSuite):
 		from frappe.core.doctype.data_import.importer import ImportFile
 
 		receipt = self.make_receipt()
-		with NamedTemporaryFile(mode="w+", suffix=".csv") as file:
-			writer = csv.writer(file)
-			writer.writerow(
-				[
-					"supplier",
-					"company",
-					"items.item_code",
-					"items.qty",
-					"items.rate",
-					"items.warehouse",
-					"items.serial_number",
-					"items.batch_number",
-				]
-			)
-			writer.writerow(
-				[
-					receipt.supplier,
-					receipt.company,
-					receipt.items[0].item_code,
-					1,
-					100,
-					receipt.items[0].warehouse,
-					"Imported-Serial",
-					"Imported-Batch",
-				]
-			)
-			file.flush()
+		with TemporaryDirectory() as directory:
+			path = Path(directory) / "physical_numbers.csv"
+			with path.open("w", newline="") as file:
+				writer = csv.writer(file)
+				writer.writerow(
+					[
+						"supplier",
+						"company",
+						"items.item_code",
+						"items.qty",
+						"items.rate",
+						"items.warehouse",
+						"items.serial_number",
+						"items.batch_number",
+					]
+				)
+				writer.writerow(
+					[
+						receipt.supplier,
+						receipt.company,
+						receipt.items[0].item_code,
+						1,
+						100,
+						receipt.items[0].warehouse,
+						"Imported-Serial",
+						"Imported-Batch",
+					]
+				)
 			payloads = ImportFile(
-				"Purchase Receipt", file.name, import_type="Insert New Records", console=True
+				"Purchase Receipt", str(path), import_type="Insert New Records", console=True
 			).get_payloads_for_import()
 		self.assertEqual(len(payloads), 1)
 		imported = frappe.new_doc("Purchase Receipt").update(payloads[0].doc).insert()
