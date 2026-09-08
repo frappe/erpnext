@@ -132,7 +132,7 @@ def get_available_serial_nos(serial_no_series, qty, item_code=None) -> list[str]
 
 def get_new_serial_number(series, item_code=None):
 	sr_no = make_autoname(series, "Serial No")
-	if frappe.db.exists("Serial No", {"serial_no": sr_no, **({"item_code": item_code} if item_code else {})}):
+	if SerialBatchIdentity("Serial No").exists(sr_no, item_code):
 		sr_no = get_new_serial_number(series, item_code)
 	return sr_no
 

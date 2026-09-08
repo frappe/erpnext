@@ -3,6 +3,7 @@
 import frappe
 from frappe import _
 from frappe.model.naming import make_autoname
+from frappe.query_builder.functions import Lower
 from frappe.utils import cstr, now
 
 
@@ -24,19 +25,14 @@ class SerialBatchIdentity:
 		if not isinstance(item_code, str) or not item_code or any(not number for number in numbers):
 			frappe.throw(_("Item and physical number are required"))
 
-		filters = {self.item_field: item_code, self.number_field: ("in", numbers)}
-		records = frappe.get_all(self.doctype, filters=filters, fields=["name", self.number_field])
+		records = self.get_query(numbers, item_code).run(as_dict=True)
 		ids = {row[self.number_field]: row.name for row in records}
 		missing = []
 		for number in dict.fromkeys(numbers):
 			if number in ids:
 				continue
 			# Use the database comparison rules, including its collation, for exact lookups.
-			name = (
-				frappe.db.get_value(self.doctype, {self.item_field: item_code, self.number_field: number})
-				if records
-				else None
-			)
+			name = self.exists(number, item_code) if records else None
 			if not name and create:
 				missing.append(number)
 				continue
@@ -46,6 +42,27 @@ class SerialBatchIdentity:
 		if missing:
 			ids.update(self.create_many(item_code, missing, defaults))
 		return [ids[number] for number in numbers]
+
+	def get_query(self, numbers, item_code=None, *, fields=None, filters=None, ignore_permissions=True):
+		table = frappe.qb.DocType(self.doctype)
+		filters = {**(filters or {}), **({self.item_field: item_code} if item_code else {})}
+		return frappe.qb.get_query(
+			self.doctype,
+			fields=fields or ["name", self.number_field],
+			filters=filters,
+			ignore_permissions=ignore_permissions,
+		).where(
+			self.number_key(table[self.number_field]).isin([self.number_key(number) for number in numbers])
+		)
+
+	def number_key(self, value):
+		# Preserve MariaDB's collation. PostgreSQL needs an explicit case-insensitive comparison.
+		return Lower(value) if frappe.db.db_type == "postgres" else value
+
+	def exists(self, number, item_code=None, *, exclude=None):
+		filters = {"name": ("!=", exclude)} if exclude else None
+		rows = self.get_query([number], item_code, fields=["name"], filters=filters).limit(1).run()
+		return rows[0][0] if rows else None
 
 	def create_many(self, item_code, numbers, defaults=None):
 		if self.doctype == "Batch":
@@ -110,10 +127,7 @@ class SerialBatchIdentity:
 	def validate(self, doc):
 		number = cstr(doc.get(self.number_field)).strip()
 		doc.set(self.number_field, number)
-		filters = {self.item_field: doc.get(self.item_field), self.number_field: number}
-		if doc.name:
-			filters["name"] = ("!=", doc.name)
-		if number and frappe.db.exists(self.doctype, filters):
+		if number and self.exists(number, doc.get(self.item_field), exclude=doc.name):
 			frappe.throw(
 				_("{0} {1} already exists for Item {2}").format(
 					self.doctype, number, doc.get(self.item_field)
@@ -129,7 +143,19 @@ class SerialBatchIdentity:
 
 	def sync_constraint(self):
 		self.backfill_numbers()
-		frappe.db.add_unique(self.doctype, [self.item_field, self.number_field])
+		if frappe.db.db_type == "postgres":
+			# The leading number expression also indexes scans without an item filter.
+			# add_unique only accepts column names, so expression indexes need explicit DDL.
+			frappe.db.sql_ddl(
+				{
+					"Serial No": 'CREATE UNIQUE INDEX IF NOT EXISTS "serial_no_number_item_ci" '
+					'ON "tabSerial No" (lower("serial_no"), "item_code")',
+					"Batch": 'CREATE UNIQUE INDEX IF NOT EXISTS "batch_number_item_ci" '
+					'ON "tabBatch" (lower("batch_id"), "item")',
+				}[self.doctype]
+			)
+		else:
+			frappe.db.add_unique(self.doctype, [self.item_field, self.number_field])
 
 
 @frappe.whitelist(methods=["POST"])
@@ -191,8 +217,8 @@ def resolve_transaction_serial_numbers(parent: dict | str, row: dict | str, numb
 		parent.doctype, "write", doc=parent.name if not parent.__islocal else None, throw=True
 	)
 	frappe.has_permission("Item", "read", doc=row.item_code or row.rm_item_code, throw=True)
-	frappe.has_permission("Serial No", "read", throw=True)
 	create = parent.doctype in SUPPORTED_VOUCHER_TYPES and get_type_of_transaction(parent, row) == "Inward"
+	frappe.has_permission("Serial No", "create" if create else "read", throw=True)
 	return SerialBatchIdentity("Serial No").resolve(
 		row.item_code or row.rm_item_code,
 		frappe.parse_json(numbers),
@@ -236,7 +262,10 @@ def validate_item_merge(old, new):
 		conflict = (
 			frappe.qb.from_(source)
 			.join(target)
-			.on(source[identity.number_field] == target[identity.number_field])
+			.on(
+				identity.number_key(source[identity.number_field])
+				== identity.number_key(target[identity.number_field])
+			)
 			.select(source[identity.number_field])
 			.where((source[identity.item_field] == old) & (target[identity.item_field] == new))
 			.limit(1)

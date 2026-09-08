@@ -598,6 +598,8 @@ def check_pending_reposting(posting_date: str, company: str | None = None, throw
 
 @frappe.whitelist(methods=["GET", "POST"])
 def scan_barcode(search_value: str, ctx: dict | str | None = None, allow_multiple: bool = False) -> dict:
+	from erpnext.stock.serial_batch_identity import SerialBatchIdentity
+
 	ctx = frappe._dict(frappe.parse_json(ctx) or {})
 	if ctx.item_code and not isinstance(ctx.item_code, str):
 		frappe.throw(_("Item Code must be a string"))
@@ -612,23 +614,26 @@ def scan_barcode(search_value: str, ctx: dict | str | None = None, allow_multipl
 	if barcode:
 		candidates.append(barcode)
 
-	for doctype, number_field, item_field, fields in (
+	for doctype, fields in (
 		(
 			"Serial No",
-			"serial_no",
-			"item_code",
 			["name as serial_no", "serial_no as serial_number", "item_code", "batch_no"],
 		),
-		("Batch", "batch_id", "item", ["name as batch_no", "batch_id as batch_number", "item as item_code"]),
+		("Batch", ["name as batch_no", "batch_id as batch_number", "item as item_code"]),
 	):
 		if not frappe.has_permission(doctype, "read"):
 			continue
-		filters = {number_field: search_value}
-		if ctx.item_code:
-			filters[item_field] = ctx.item_code
-		if doctype == "Batch":
-			filters["disabled"] = 0
-		candidates.extend(frappe.get_list(doctype, filters=filters, fields=fields, limit_page_length=0))
+		candidates.extend(
+			SerialBatchIdentity(doctype)
+			.get_query(
+				[search_value],
+				ctx.item_code,
+				fields=fields,
+				filters={"disabled": 0} if doctype == "Batch" else None,
+				ignore_permissions=False,
+			)
+			.run(as_dict=True)
+		)
 
 	for candidate in candidates:
 		_update_item_info(candidate, ctx)
