@@ -6,6 +6,7 @@ Physical-number matching and uniqueness ignore letter case on both databases. St
 
 Existing document IDs remain unchanged. Migration fills missing physical numbers from those IDs and replaces the global unique indexes.
 Historical transactions, bundles, and stock valuations retain their references. Item merges fail when they would introduce duplicate numbers.
+Before changing either DocType, migration checks for existing numbers that conflict under the new comparison rules. If it finds conflicts, it lists the item and document IDs for correction before retrying the upgrade. It does not merge stock records or change physical labels automatically.
 
 When a scanned number matches several items, select the item from the filtered Item field.
 

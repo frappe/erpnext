@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import frappe
 
 from erpnext.stock.doctype.item.test_item import make_item
@@ -76,3 +78,53 @@ class TestSerialBatchIdentityMatching(ERPNextTestSuite):
 				item.save()
 				number = frappe.get_doc({"doctype": "Batch", "item": item.name}).insert().batch_id
 			self.assertEqual(number, prefix + "00002")
+
+	def test_create_case_variants_in_one_request(self):
+		for doctype in ("Serial No", "Batch"):
+			identity, item, existing = self.make_number(doctype, "Existing-Lot")
+			numbers = ["New-Lot", "NEW-LOT", "Second-Lot", "new-lot", "existing-lot"]
+			names = identity.resolve(item.name, numbers, create=True)
+			self.assertEqual(names[0], names[1])
+			self.assertEqual(names[0], names[3])
+			self.assertNotEqual(names[0], names[2])
+			self.assertEqual(names[4], existing)
+			self.assertEqual(identity.resolve(item.name, numbers), names)
+			self.assertEqual(identity.labels(names)[names[0]], "New-Lot")
+			self.assertEqual(frappe.db.count(doctype, {identity.item_field: item.name}), 3)
+
+	def test_create_aliases_uses_mariadb_collation(self):
+		if frappe.db.db_type != "mariadb":
+			self.skipTest("MariaDB's accent-insensitive collation")
+		for doctype in ("Serial No", "Batch"):
+			identity, item, _ = self.make_number(doctype, "Existing-Lot")
+			names = identity.resolve(item.name, ["Café-Lot", "Cafe-Lot"], create=True)
+			self.assertEqual(names[0], names[1])
+			self.assertEqual(identity.labels(names)[names[0]], "Café-Lot")
+
+	def test_migration_reports_case_conflicts_before_changing_records(self):
+		if frappe.db.db_type != "postgres":
+			self.skipTest("Legacy case-only duplicates are possible on PostgreSQL")
+		from erpnext.patches.separate_serial_batch_identity import execute
+
+		for doctype, index in (("Serial No", "serial_no_number_item_ci"), ("Batch", "batch_number_item_ci")):
+			identity, item, name = self.make_number(doctype, "Legacy-Lot")
+			frappe.db.savepoint("legacy_case_conflict")
+			try:
+				# PostgreSQL DDL is transactional, so rollback restores the unique index.
+				frappe.db.sql(f'DROP INDEX "{index}"')
+				duplicate = frappe.get_doc(doctype, name)
+				duplicate.name = frappe.generate_hash()
+				duplicate.set(identity.number_field, "LEGACY-LOT")
+				duplicate.db_insert()
+				with patch("frappe.reload_doc") as reload_doc:
+					with self.assertRaises(frappe.ValidationError) as error:
+						execute()
+					reload_doc.assert_not_called()
+				for value in (item.name, name, duplicate.name):
+					self.assertIn(value, str(error.exception))
+				self.assertEqual(
+					identity.labels([name, duplicate.name]),
+					{name: "Legacy-Lot", duplicate.name: "LEGACY-LOT"},
+				)
+			finally:
+				frappe.db.rollback(save_point="legacy_case_conflict")

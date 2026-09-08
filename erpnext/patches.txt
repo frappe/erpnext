@@ -262,6 +262,7 @@ erpnext.patches.v15_0.rename_subcontracting_fields
 erpnext.patches.v15_0.unset_incorrect_additional_discount_percentage
 erpnext.patches.v16_0.convert_commission_rate_to_percent
 erpnext.patches.v16_0.convert_hide_currency_symbol_to_check
+erpnext.patches.separate_serial_batch_identity
 
 [post_model_sync]
 erpnext.patches.v15_0.rename_gross_purchase_amount_to_net_purchase_amount
@@ -520,5 +521,3 @@ erpnext.patches.v16_0.add_transaction_roles_to_sms_settings
 erpnext.patches.v16_0.set_secondary_item_valuation_type
 erpnext.patches.v16_0.append_fieldname_to_pos_search_fields
 erpnext.patches.v16_0.set_supplier_quotation_order_status
-
-erpnext.patches.separate_serial_batch_identity

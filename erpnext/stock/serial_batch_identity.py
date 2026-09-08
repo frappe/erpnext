@@ -3,7 +3,7 @@
 import frappe
 from frappe import _
 from frappe.model.naming import make_autoname
-from frappe.query_builder.functions import Lower
+from frappe.query_builder.functions import Coalesce, Count, Lower, NullIf
 from frappe.utils import cstr, now
 
 
@@ -40,8 +40,28 @@ class SerialBatchIdentity:
 				frappe.throw(_("{0} {1} does not exist for Item {2}").format(self.doctype, number, item_code))
 			ids[number] = name
 		if missing:
-			ids.update(self.create_many(item_code, missing, defaults))
+			ids.update(self.resolve_missing(item_code, missing, defaults))
 		return [ids[number] for number in numbers]
+
+	def resolve_missing(self, item_code, numbers, defaults):
+		savepoint = "serial_batch_resolve_" + frappe.generate_hash(length=10)
+		frappe.db.savepoint(savepoint)
+		try:
+			ids = self.create_many(item_code, numbers, defaults)
+		except Exception as error:
+			frappe.db.rollback(save_point=savepoint)
+			frappe.db.release_savepoint(savepoint)
+			if not isinstance(error, frappe.DuplicateEntryError):
+				raise
+		else:
+			frappe.db.release_savepoint(savepoint)
+			return ids
+
+		# Retry aliases using the database's comparison rules, including MariaDB collation.
+		return {
+			number: self.exists(number, item_code) or self.create_many(item_code, [number], defaults)[number]
+			for number in numbers
+		}
 
 	def get_query(self, numbers, item_code=None, *, fields=None, filters=None, ignore_permissions=True):
 		table = frappe.qb.DocType(self.doctype)
@@ -66,7 +86,10 @@ class SerialBatchIdentity:
 
 	def create_many(self, item_code, numbers, defaults=None):
 		if self.doctype == "Batch":
-			return {number: self.create_batch(item_code, number, defaults) for number in numbers}
+			return {
+				number: self.exists(number, item_code) or self.create_batch(item_code, number, defaults)
+				for number in numbers
+			}
 
 		# Inactive serials can be prepared before their first receipt assigns a company.
 		item = frappe.get_cached_value(
@@ -95,12 +118,9 @@ class SerialBatchIdentity:
 			)
 		except Exception as error:
 			if frappe.db.is_unique_key_violation(error) or frappe.db.is_primary_key_violation(error):
-				frappe.throw(
-					_("A serial number already exists for Item {0}. Refresh and try again.").format(
-						item_code
-					),
-					frappe.DuplicateEntryError,
-				)
+				raise frappe.DuplicateEntryError(
+					_("A serial number already exists for Item {0}. Refresh and try again.").format(item_code)
+				) from error
 			raise
 		return ids
 
@@ -142,6 +162,7 @@ class SerialBatchIdentity:
 		).run()
 
 	def sync_constraint(self):
+		self.validate_existing_numbers()
 		self.backfill_numbers()
 		if frappe.db.db_type == "postgres":
 			# The leading number expression also indexes scans without an item filter.
@@ -156,6 +177,42 @@ class SerialBatchIdentity:
 			)
 		else:
 			frappe.db.add_unique(self.doctype, [self.item_field, self.number_field])
+
+	def validate_existing_numbers(self):
+		table = frappe.qb.DocType(self.doctype)
+		# Use the future backfilled value without changing legacy records during the preflight.
+		number = (
+			Coalesce(NullIf(table[self.number_field], ""), table.name)
+			if frappe.db.has_column(self.doctype, self.number_field)
+			else table.name
+		)
+		key = self.number_key(number)
+		duplicates = (
+			frappe.qb.from_(table)
+			.select(table[self.item_field], key)
+			.groupby(table[self.item_field], key)
+			.having(Count(table.name) > 1)
+		).run()
+		if not duplicates:
+			return
+
+		conflicts = []
+		for item, value in duplicates:
+			names = (
+				frappe.qb.from_(table)
+				.select(table.name)
+				.where((table[self.item_field] == item) & (key == value))
+				.orderby(table.name)
+			).run(pluck=True)
+			conflicts.append(_("Item {0}, number {1}: {2}").format(item, value, ", ".join(names)))
+		frappe.throw(
+			_(
+				"Resolve duplicate {0} physical numbers before upgrading. Document IDs and stock references have not been changed."
+			).format(self.doctype)
+			+ "\n"
+			+ "\n".join(conflicts),
+			title=_("Duplicate Serial or Batch Numbers"),
+		)
 
 
 @frappe.whitelist(methods=["POST"])

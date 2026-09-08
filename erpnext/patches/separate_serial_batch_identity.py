@@ -4,6 +4,9 @@ from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 
 def execute():
+	for doctype in ("Serial No", "Batch"):
+		SerialBatchIdentity(doctype).validate_existing_numbers()
+
 	# Reload also drops the former single-field unique indexes on both database engines.
 	for doctype in ("Serial No", "Batch"):
 		frappe.reload_doc("stock", "doctype", frappe.scrub(doctype), force=True)
