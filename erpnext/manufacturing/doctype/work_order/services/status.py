@@ -216,11 +216,15 @@ class StatusService:
 
 		qty = self.get_transferred_or_manufactured_qty(purpose, fieldname)
 		completed_qty = self.doc.qty + (self._qty_allowance(purpose) / 100 * self.doc.qty)
-		if qty > completed_qty:
+		qty_to_validate = qty + flt(self.doc.process_loss_qty) if purpose == "Manufacture" else qty
+		precision = self.doc.precision(fieldname)
+		if flt(qty_to_validate, precision) > flt(completed_qty, precision):
 			frappe.throw(
 				_("{0} ({1}) cannot be greater than planned quantity ({2}) in Work Order {3}").format(
-					self.doc.meta.get_translated_label(fieldname),
-					qty,
+					_("Manufactured Qty (including Process Loss)")
+					if purpose == "Manufacture"
+					else self.doc.meta.get_translated_label(fieldname),
+					flt(qty_to_validate, precision),
 					completed_qty,
 					self.doc.name,
 				),
@@ -228,6 +232,10 @@ class StatusService:
 			)
 
 		self.doc.db_set(fieldname, qty)
+		if purpose == "Manufacture" and self.doc.production_plan:
+			ProductionPlanWorkOrderQuantities(self.doc.production_plan).validate_work_order(
+				self.doc, process_loss_qty=self.doc.process_loss_qty
+			)
 		self._update_produced_qty_in_so()
 
 	def _skip_transfer_purpose(self, purpose):
