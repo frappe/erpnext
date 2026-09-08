@@ -456,3 +456,84 @@ class TestGetItemDetail(ERPNextTestSuite):
 			frappe.set_user("Administrator")
 			frappe.db.set_single_value("Buying Settings", "maintain_same_rate", original)
 			frappe.clear_cache(doctype="Buying Settings")
+
+	def test_rate_lock_matches_unsaved_mapped_row(self):
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+		from erpnext.stock.get_item_details import get_rate_locked_source_row
+
+		original = frappe.db.get_single_value("Buying Settings", "maintain_same_rate")
+		frappe.db.set_single_value("Buying Settings", "maintain_same_rate", 1)
+		frappe.clear_cache(doctype="Buying Settings")
+
+		try:
+			first_po = create_purchase_order(rate=100)
+			second_po = create_purchase_order(rate=200)
+			pr_doc = {
+				"doctype": "Purchase Receipt",
+				"items": [
+					{"name": None, "purchase_order_item": first_po.items[0].name},
+					{"name": None, "purchase_order_item": second_po.items[0].name},
+				],
+			}
+			ctx = frappe._dict(
+				doctype="Purchase Receipt",
+				child_docname=None,
+				purchase_order_item=second_po.items[0].name,
+			)
+
+			source_row = get_rate_locked_source_row(ctx, pr_doc)
+			self.assertEqual(source_row.rate, 200)
+		finally:
+			frappe.db.set_single_value("Buying Settings", "maintain_same_rate", original)
+			frappe.clear_cache(doctype="Buying Settings")
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"maintain_same_sales_rate": 1})
+	def test_delivery_note_to_sales_invoice_keeps_item_rates(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		first_item, first_batches = self.make_batched_item_with_stock([1])
+		second_item, second_batches = self.make_batched_item_with_stock([1])
+		dn = create_delivery_note(
+			item_code=first_item,
+			qty=1,
+			rate=100,
+			batch_no=first_batches[0],
+			use_serial_batch_fields=1,
+			do_not_save=True,
+		)
+		dn.append(
+			"items",
+			{
+				"item_code": second_item,
+				"warehouse": "_Test Warehouse - _TC",
+				"qty": 1,
+				"rate": 200,
+				"conversion_factor": 1,
+				"batch_no": second_batches[0],
+				"use_serial_batch_fields": 1,
+			},
+		)
+		dn.insert()
+		dn.submit()
+
+		si = make_sales_invoice(dn.name)
+		self.assertEqual([item.rate for item in si.items], [100, 200])
+
+	def make_batched_item_with_stock(self, quantities, uoms=None, **properties):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+			get_batch_from_bundle,
+		)
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		properties.update({"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "FBQ-.#####"})
+		item_code = make_item(properties=properties, uoms=uoms).name
+		batches = []
+		for qty in quantities:
+			se = make_stock_entry(
+				item_code=item_code, target="_Test Warehouse - _TC", qty=qty, basic_rate=100
+			)
+			batches.append(get_batch_from_bundle(se.items[0].serial_and_batch_bundle))
+
+		return item_code, batches
