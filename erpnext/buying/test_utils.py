@@ -1,6 +1,8 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+import json
+
 import frappe
 import frappe.permissions
 
@@ -66,6 +68,31 @@ class TestGetLinkedMaterialRequests(ERPNextTestSuite):
 			rows = get_linked_material_requests([item_without_request])
 
 		self.assertEqual(rows, [])
+
+	def test_a_single_item_code_is_treated_as_one_code(self):
+		"""A lone code must be read as one item code, not iterated character by character."""
+		create_user_with_roles("test_buying_purchase_user@example.com", "Purchase User")
+
+		with self.set_user("test_buying_purchase_user@example.com"):
+			rows = get_linked_material_requests(json.dumps("_Test Item"))
+
+		self.assertIn(self.material_request.name, {row.mr_name for row in rows})
+
+	def test_items_that_are_not_item_codes_are_rejected(self):
+		"""Anything that is not a `str` or a `list` is already refused by the type annotation,
+		so these are the malformed inputs that reach the method."""
+		create_user_with_roles("test_buying_purchase_user@example.com", "Purchase User")
+		bad_inputs = (
+			"not json at all",
+			[{"item_code": "_Test Item"}],
+			[["_Test Item"]],
+			[None],
+		)
+
+		with self.set_user("test_buying_purchase_user@example.com"):
+			for bad_items in bad_inputs:
+				with self.subTest(items=bad_items):
+					self.assertRaises(frappe.ValidationError, get_linked_material_requests, bad_items)
 
 	def test_manufacturing_manager_can_fetch_linked_material_requests(self):
 		"""Manufacturing Manager holds write on Supplier Quotation and Request for Quotation,
