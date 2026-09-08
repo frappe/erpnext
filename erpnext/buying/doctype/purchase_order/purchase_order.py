@@ -226,6 +226,7 @@ class PurchaseOrder(BuyingController):
 			self.doctype, self.supplier, self.company, self.inter_company_order_reference
 		)
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
+		self.set_missing_terms()
 
 	def set_has_unit_price_items(self):
 		"""
