@@ -472,8 +472,8 @@ cur_frm.cscript.update_totals = function (doc) {
 		tc += flt(accounts[i].credit, precision("credit", accounts[i]));
 	}
 	doc = locals[doc.doctype][doc.name];
-	doc.total_debit = td;
-	doc.total_credit = tc;
+	doc.total_debit = flt(td, precision("total_debit"));
+	doc.total_credit = flt(tc, precision("total_credit"));
 	doc.difference = flt(td - tc, precision("difference"));
 	refresh_many(["total_debit", "total_credit", "difference"]);
 };
