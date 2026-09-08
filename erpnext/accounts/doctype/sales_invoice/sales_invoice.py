@@ -1877,7 +1877,7 @@ class SalesInvoice(SellingController):
 
 			for payment_mode in self.payments:
 				if skip_change_gl_entries and payment_mode.account == self.account_for_change_amount:
-					payment_mode.base_amount -= flt(self.change_amount)
+					payment_mode.base_amount -= flt(self.base_change_amount)
 
 				against_voucher = self.name
 				if self.is_return and self.return_against and not self.update_outstanding_for_self:
