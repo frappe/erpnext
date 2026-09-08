@@ -31,9 +31,6 @@ from erpnext.manufacturing.doctype.bom.bom import (
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import (
 	get_mins_between_operations,
 )
-from erpnext.manufacturing.doctype.work_order.services.material_coverage import (
-	get_minimum_material_coverage_fraction,
-)
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.batch.batch import make_batch
 from erpnext.stock.doctype.item.item import get_item_defaults, validate_end_of_life
@@ -461,7 +458,8 @@ class WorkOrder(Document):
 		return status
 
 	def has_transferred_material(self):
-		"""True if any raw material was transferred against this work order."""
+		"""True if any raw material was transferred against this work order via a pick list
+		(these leave material_transferred_for_manufacturing at 0 via the min-fraction rule)."""
 		ste = frappe.qb.DocType("Stock Entry")
 		ste_child = frappe.qb.DocType("Stock Entry Detail")
 		qty = (
@@ -474,6 +472,7 @@ class WorkOrder(Document):
 				& (ste.docstatus == 1)
 				& (ste.purpose == "Material Transfer for Manufacture")
 				& (ste.is_return == 0)
+				& (ste.pick_list.isnotnull())
 			)
 		).run()[0][0]
 		return flt(qty) > 0
@@ -559,6 +558,7 @@ class WorkOrder(Document):
 
 	def update_production_plan_status(self):
 		production_plan = frappe.get_doc("Production Plan", self.production_plan)
+		production_plan.flags.ignore_permissions = True
 		produced_qty = 0
 		if self.production_plan_item:
 			total_qty = frappe.get_all(
@@ -901,6 +901,7 @@ class WorkOrder(Document):
 				)
 
 			doc = frappe.get_doc("Production Plan", self.production_plan)
+			doc.flags.ignore_permissions = True
 			doc.set_status()
 			doc.db_set("status", doc.status)
 
@@ -1304,13 +1305,20 @@ class WorkOrder(Document):
 		self.recompute_material_transferred_for_manufacturing(transferred_items)
 
 	def recompute_material_transferred_for_manufacturing(self, transferred_items):
-		"""Set transferred quantity from the raw materials that have actually moved."""
+		"""Set material_transferred_for_manufacturing based on actual item-level transfers, not fg_completed_qty."""
 		# Job Card transfers use the minimum completed quantity across operations.
 		if self.operations and self.transfer_material_against == "Job Card":
 			return
 
-		claimed_qty = self.get_transferred_or_manufactured_qty("Material Transfer for Manufacture")
+		# When fg_completed_qty > 0 (direct stock entries, excess transfer), preserve the
+		# SUM(fg_completed_qty) approach so excess-transfer tracking works correctly.
+		sum_fg_completed_qty = self.get_transferred_or_manufactured_qty("Material Transfer for Manufacture")
+		if sum_fg_completed_qty:
+			self.db_set("material_transferred_for_manufacturing", sum_fg_completed_qty)
+			return
 
+		# Pick list flow sets fg_completed_qty=0; use min-fraction of actual item transfers
+		# so partial availability does not prematurely mark the work order as fully transferred.
 		required_by_item = {}
 		for row in self.required_items:
 			if not row.include_item_in_manufacturing or flt(row.required_qty) <= 0:
@@ -1320,13 +1328,12 @@ class WorkOrder(Document):
 		if not required_by_item:
 			return
 
-		min_fraction = get_minimum_material_coverage_fraction(
-			required_by_item,
-			transferred_items,
-			self.precision("required_qty", "required_items"),
+		min_fraction = min(
+			flt(transferred_items.get(item_code) or 0) / required_qty
+			for item_code, required_qty in required_by_item.items()
 		)
-		covered_qty = min_fraction * flt(self.qty)
-		material_transferred = min(covered_qty, max(flt(self.qty), claimed_qty))
+		min_fraction = min(min_fraction, 1.0)
+		material_transferred = min_fraction * flt(self.qty)
 		self.db_set("material_transferred_for_manufacturing", material_transferred)
 
 	def update_returned_qty(self):

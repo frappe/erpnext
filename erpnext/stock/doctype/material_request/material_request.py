@@ -428,6 +428,7 @@ class MaterialRequest(BuyingController):
 
 		for production_plan in production_plans:
 			doc = frappe.get_doc("Production Plan", production_plan)
+			doc.flags.ignore_permissions = True
 			doc.set_status()
 			doc.db_set("status", doc.status)
 
@@ -805,8 +806,6 @@ def make_stock_entry(source_name, target_doc=None):
 				target.bom_no = job_card_details[0].bom_no
 				target.fg_completed_qty = job_card_details[0].for_quantity
 				target.from_bom = 1
-
-			target.cap_completed_qty_to_material_coverage()
 
 	doclist = get_mapped_doc(
 		"Material Request",

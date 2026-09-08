@@ -265,6 +265,8 @@ class RepostItemValuation(Document):
 
 	@frappe.whitelist()
 	def restart_reposting(self):
+		self.check_permission("write")
+
 		self.set_status("Queued", write=False)
 		self.current_index = 0
 		self.distinct_item_and_warehouse = None
