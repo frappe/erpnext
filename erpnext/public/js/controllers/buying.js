@@ -541,7 +541,7 @@ erpnext.buying.link_to_mrs = function (frm) {
 			var item_length = frm.doc.items.length;
 			for (let item of frm.doc.items) {
 				var qty = item.qty;
-				(r.message[0] || []).forEach(function (d) {
+				(r.message || []).forEach(function (d) {
 					if (
 						d.qty > 0 &&
 						qty > 0 &&

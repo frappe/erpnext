@@ -377,7 +377,7 @@
  "idx": 70,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-21 23:11:44.554719",
+ "modified": "2026-09-08 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request",
@@ -441,6 +441,11 @@
    "share": 1,
    "submit": 1,
    "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Manufacturing Manager"
   },
   {
    "role": "Delivery Manager",
