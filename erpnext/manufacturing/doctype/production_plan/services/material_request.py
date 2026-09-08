@@ -57,20 +57,25 @@ class MaterialRequestService:
 		"""Create Material Requests grouped by Sales Order and Material Request Type"""
 		self.validate_mr_subcontracted()
 
-		if all(item.requested_qty == item.quantity for item in self.doc.mr_items):
-			msgprint(_("All items are already requested"))
-			return
-
 		material_request_map = {}
 		material_request_list = []
 		for item in self.doc.mr_items:
-			if item.quantity == item.requested_qty:
+			qty_to_request = flt(flt(item.quantity) - flt(item.requested_qty), item.precision("quantity"))
+			if qty_to_request <= 0:
 				continue
-			self._add_item_to_material_request(item, material_request_map, material_request_list)
+			self._add_item_to_material_request(
+				item, qty_to_request, material_request_map, material_request_list
+			)
+
+		if not material_request_list:
+			msgprint(_("All items are already requested"))
+			return
 
 		self._submit_material_requests(material_request_list)
 
-	def _add_item_to_material_request(self, item, material_request_map, material_request_list):
+	def _add_item_to_material_request(
+		self, item, qty_to_request, material_request_map, material_request_list
+	):
 		item_doc = frappe.get_cached_doc("Item", item.item_code)
 		material_request_type = item.material_request_type or item_doc.default_material_request_type
 
@@ -81,7 +86,7 @@ class MaterialRequestService:
 			material_request_list.append(material_request_map[key])
 
 		schedule_date = item.schedule_date or add_days(nowdate(), cint(item_doc.lead_time_days))
-		row = self._material_request_item(item, material_request_type, schedule_date)
+		row = self._material_request_item(item, material_request_type, schedule_date, qty_to_request)
 		material_request_map[key].append("items", row)
 
 	def _new_material_request(self, material_request_type):
@@ -96,7 +101,7 @@ class MaterialRequestService:
 		)
 		return mr
 
-	def _material_request_item(self, item, material_request_type, schedule_date):
+	def _material_request_item(self, item, material_request_type, schedule_date, qty_to_request):
 		from_warehouse = item.from_warehouse if material_request_type == "Material Transfer" else None
 		# a group warehouse cannot receive stock; it must never reach a Material Request line
 		if item.warehouse and frappe.get_cached_value("Warehouse", item.warehouse, "is_group"):
@@ -111,7 +116,7 @@ class MaterialRequestService:
 		return {
 			"item_code": item.item_code,
 			"from_warehouse": from_warehouse,
-			"qty": item.quantity - item.requested_qty,
+			"qty": qty_to_request,
 			"uom": item.uom,
 			"schedule_date": schedule_date,
 			"warehouse": item.warehouse,
