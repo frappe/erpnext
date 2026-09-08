@@ -54,26 +54,19 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 
 		qty = Math.abs(qty);
 		if (qty > 0) {
-			this.dialog.set_value("qty", qty).then(() => {
+			this.dialog.set_value("qty", qty).then(async () => {
 				if (this.item.serial_no && !this.item.serial_and_batch_bundle) {
-					let serial_nos = this.item.serial_no.split("\n");
-					if (serial_nos.length > 1) {
-						serial_nos.forEach((serial_no) => {
-							this.dialog.fields_dict.entries.df.data.push({
-								serial_no: serial_no,
-								batch_no: this.item.batch_no,
-							});
-						});
-					} else {
-						this.dialog.set_value("scan_serial_no", this.item.serial_no);
-					}
+					await this.set_data(
+						this.item.serial_no
+							.split("\n")
+							.filter(Boolean)
+							.map((serial_no) => ({ serial_no, batch_no: this.item.batch_no, qty: 1 }))
+					);
 					frappe.model.set_value(this.item.doctype, this.item.name, "serial_no", "");
 				} else if (this.item.batch_no && !this.item.serial_and_batch_bundle) {
-					this.dialog.set_value("scan_batch_no", this.item.batch_no);
+					await this.set_data([{ batch_no: this.item.batch_no, qty }]);
 					frappe.model.set_value(this.item.doctype, this.item.name, "batch_no", "");
 				}
-
-				this.dialog.fields_dict.entries.grid.refresh();
 			});
 		}
 	}
@@ -336,10 +329,10 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 				item_code: this.item.item_code,
 				serial_nos: upload_serial_nos,
 			},
-			callback: (r) => {
+			callback: async (r) => {
 				if (r.message) {
 					this.dialog.fields_dict.entries.df.data = [];
-					this.set_data(r.message);
+					await this.set_data(r.message);
 					this.update_bundle_entries();
 				}
 			},
@@ -522,6 +515,18 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 			hidden: 1,
 		});
 
+		if (this.item.type_of_transaction === "Inward") {
+			for (const field of fields) {
+				if (!["serial_no", "batch_no"].includes(field.fieldname)) continue;
+				const reference = field.fieldname;
+				field.fieldtype = "Data";
+				field.fieldname = reference.replace("_no", "_number");
+				field.change = function () {
+					this.doc[reference] = null;
+				};
+			}
+		}
+
 		return fields;
 	}
 
@@ -571,8 +576,8 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 				},
 				callback: (r) => {
 					if (r.message) {
-						this.dialog.fields_dict.entries.df.data = r.message;
-						this.dialog.fields_dict.entries.grid.refresh();
+						this.dialog.fields_dict.entries.df.data = [];
+						this.set_data(r.message);
 					}
 				},
 			});
@@ -584,12 +589,32 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 
 		this.dialog.set_value("enter_manually", 0);
 
+		if (this.item.type_of_transaction === "Inward") {
+			const entries = this.dialog.fields_dict.entries.df.data;
+			if (
+				scan_serial_no &&
+				entries.some((row) => row.serial_number?.toUpperCase() === scan_serial_no.toUpperCase())
+			) {
+				frappe.throw(__("Serial No {0} already exists", [scan_serial_no]));
+			}
+			if (scan_serial_no || scan_batch_no) {
+				const batch =
+					!scan_serial_no &&
+					entries.find((row) => row.batch_number?.toUpperCase() === scan_batch_no.toUpperCase());
+				if (batch) batch.qty = flt(batch.qty) + 1;
+				else entries.push({ serial_number: scan_serial_no, batch_number: scan_batch_no, qty: 1 });
+				this.dialog.set_value("scan_serial_no", "");
+				this.dialog.set_value("scan_batch_no", "");
+				this.dialog.fields_dict.entries.grid.refresh();
+			}
+			return;
+		}
+
 		if (scan_serial_no || scan_batch_no) {
 			frappe.call({
-				method: "erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.is_serial_batch_no_exists",
+				method: "erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.resolve_scanned_serial_batch_numbers",
 				args: {
 					item_code: this.item.item_code,
-					type_of_transaction: this.item.type_of_transaction,
 					serial_no: scan_serial_no,
 					batch_no: scan_batch_no,
 				},
@@ -773,7 +798,22 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 		}
 	}
 
-	set_data(data) {
+	async set_data(data) {
+		if (this.item.type_of_transaction === "Inward") {
+			for (const [field, doctype] of [
+				["serial_no", "Serial No"],
+				["batch_no", "Batch"],
+			]) {
+				const names = data.map((row) => row[field]).filter(Boolean);
+				const labels = names.length
+					? await frappe.xcall("erpnext.stock.serial_batch_identity.get_serial_batch_labels", {
+							doctype,
+							names,
+					  })
+					: {};
+				for (const row of data) row[field.replace("_no", "_number")] ||= labels[row[field]];
+			}
+		}
 		data.forEach((d) => {
 			d.qty = Math.abs(d.qty);
 			d.name = d.child_row || d.name;

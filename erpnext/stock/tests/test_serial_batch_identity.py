@@ -223,7 +223,8 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 		print_doc.items[0].serial_no = name
 		before_print(print_doc)
 		before_print(print_doc)
-		self.assertEqual(print_doc.items[0].serial_no, "PRINT-123")
+		self.assertEqual(print_doc.items[0].serial_no, name)
+		self.assertIn("PRINT-123", print_doc.items[0].get_formatted("serial_no"))
 		entry = frappe.get_doc("Serial and Batch Bundle", pr.items[0].serial_and_batch_bundle).entries[0]
 		self.assertEqual(entry.serial_no, name)
 		print_format = frappe.get_doc(
@@ -233,10 +234,11 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 				"doc_type": "Purchase Receipt",
 				"print_format_type": "Jinja",
 				"custom_format": 1,
-				"html": "{{ get_serial_or_batch_nos(doc.items[0].serial_and_batch_bundle) }}",
+				"html": "{{ doc.items[0].get_formatted('serial_no') }}",
 			}
 		).insert()
-		printed = frappe.get_print("Purchase Receipt", pr.name, print_format=print_format.name)
+		printed = frappe.get_print("Purchase Receipt", pr.name, print_format=print_format.name, doc=print_doc)
+		self.assertEqual(print_doc.items[0].serial_no, name)
 		self.assertIn("PRINT-123", printed)
 		self.assertNotIn(name, printed)
 		pr.cancel()

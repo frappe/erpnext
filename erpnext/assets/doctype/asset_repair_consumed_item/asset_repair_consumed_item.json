@@ -11,6 +11,7 @@
   "consumed_quantity",
   "total_value",
   "serial_no",
+  "serial_number",
   "column_break_xzfr",
   "pick_serial_and_batch",
   "serial_and_batch_bundle",
@@ -83,6 +84,15 @@
   {
    "fieldname": "serial_batch_entries_html",
    "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "serial_number",
+   "fieldtype": "Small Text",
+   "label": "Serial No (Physical Input)",
+   "hidden": 1,
+   "no_copy": 1,
+   "print_hide": 1,
+   "description": "Enter physical numbers. These are resolved for the selected Item when saving; reference fields store internal IDs."
   }
  ],
  "index_web_pages_for_search": 1,

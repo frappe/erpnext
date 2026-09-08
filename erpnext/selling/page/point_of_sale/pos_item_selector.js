@@ -74,11 +74,34 @@ erpnext.PointOfSale.ItemSelector = class {
 		const price_list = (doc && doc.selling_price_list) || this.price_list;
 		let { item_group, pos_profile } = this;
 
-		return frappe.call({
-			method: "erpnext.selling.page.point_of_sale.point_of_sale.get_items",
-			freeze: true,
-			args: { start, page_length, price_list, item_group, search_term, pos_profile },
-		});
+		const cache_key = JSON.stringify([
+			pos_profile,
+			price_list,
+			item_group,
+			start,
+			page_length,
+			search_term,
+		]);
+		this.items_cache ||= new Map();
+		const scanned = this.barcode_search_pending;
+		this.barcode_search_pending = false;
+		if (!scanned && this.items_cache.has(cache_key)) {
+			return $.Deferred()
+				.resolve({ message: this.items_cache.get(cache_key) })
+				.promise();
+		}
+		return frappe
+			.call({
+				method: "erpnext.selling.page.point_of_sale.point_of_sale.get_items",
+				freeze: true,
+				args: { start, page_length, price_list, item_group, search_term, pos_profile },
+			})
+			.then((response) => {
+				if (!scanned && !response.message?.is_scan && response.message?.items?.length) {
+					this.items_cache.set(cache_key, response.message);
+				}
+				return response;
+			});
 	}
 
 	render_item_list(items) {
@@ -347,6 +370,7 @@ erpnext.PointOfSale.ItemSelector = class {
 					this.search_field.set_focus();
 					this.set_search_value(sScancode);
 					this.barcode_scanned = true;
+					this.barcode_search_pending = true;
 				}
 			},
 		});

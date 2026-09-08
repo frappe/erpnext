@@ -295,5 +295,5 @@
  "title_field": "batch_id",
  "track_changes": 1,
  "show_title_field_in_link": 1,
- "search_fields": "batch_id,item"
+ "search_fields": "item"
 }

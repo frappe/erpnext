@@ -274,10 +274,19 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 		// Item selection must receive the scanned references before it can auto-pick stock.
 		const values = { item_code, use_serial_batch_fields: 1 };
 		if (serial_no && frappe.meta.has_field(row.doctype, this.serial_no_field)) {
-			values[this.serial_no_field] = serial_no;
+			if (row.serial_number != null && this.serial_no_field === "serial_no") {
+				const numbers = serial_no
+					.split("\n")
+					.map((id) => frappe.utils.get_link_title("Serial No", id) || id)
+					.join("\n");
+				values.serial_number = this.merge_serial_nos(row.serial_number, numbers);
+			} else {
+				values[this.serial_no_field] = serial_no;
+			}
 		}
 		if (batch_no && frappe.meta.has_field(row.doctype, this.batch_no_field)) {
 			values[this.batch_no_field] = batch_no;
+			if (frappe.meta.has_field(row.doctype, "batch_number")) values.batch_number = null;
 		}
 		return values;
 	}
@@ -488,6 +497,16 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 
 	async set_serial_no(row, serial_no) {
 		if (serial_no && frappe.meta.has_field(row.doctype, this.serial_no_field)) {
+			if (row.serial_number != null && this.serial_no_field === "serial_no") {
+				const number = frappe.utils.get_link_title("Serial No", serial_no) || serial_no;
+				await frappe.model.set_value(
+					row.doctype,
+					row.name,
+					"serial_number",
+					this.merge_serial_nos(row.serial_number, number)
+				);
+				return;
+			}
 			const new_serial_nos = this.merge_serial_nos(row[this.serial_no_field], serial_no);
 			await frappe.model.set_value(row.doctype, row.name, this.serial_no_field, new_serial_nos);
 		}
@@ -542,7 +561,12 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 	}
 
 	is_duplicate_serial_no(row, serial_no) {
-		const is_duplicate = serial_no && row[this.serial_no_field]?.split("\n").includes(serial_no);
+		const physical_number = frappe.utils.get_link_title("Serial No", serial_no) || serial_no;
+		const pending_duplicate = row.serial_number
+			?.split("\n")
+			.some((number) => number.toUpperCase() === physical_number?.toUpperCase());
+		const is_duplicate =
+			serial_no && (pending_duplicate || row[this.serial_no_field]?.split("\n").includes(serial_no));
 
 		if (is_duplicate) {
 			const number = frappe.utils.get_link_title("Serial No", serial_no) || serial_no;

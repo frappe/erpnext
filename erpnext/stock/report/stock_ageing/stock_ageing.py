@@ -487,7 +487,7 @@ class FIFOSlots:
 						or []
 					)
 
-		return serial_nos, batch_nos
+		return [name.upper() for name in serial_nos], batch_nos
 
 	def _get_row_batch_nos(self, row: dict) -> list:
 		if not row.batch_no:
@@ -495,7 +495,7 @@ class FIFOSlots:
 
 		return [
 			[
-				row.batch_no,
+				row.batch_no.upper(),
 				self._get_batchwise_valuation(row.batch_no),
 				abs(row.actual_qty),
 				abs(row.stock_value_difference),
@@ -1148,7 +1148,7 @@ class FIFOSlots:
 		bundle_wise_batch_nos = frappe._dict({})
 		for bundle_name, batch_no, use_batchwise_valuation, qty, stock_value_difference in query.run():
 			bundle_wise_batch_nos.setdefault(bundle_name, []).append(
-				[batch_no, use_batchwise_valuation, qty, stock_value_difference]
+				[batch_no.upper(), use_batchwise_valuation, qty, stock_value_difference]
 			)
 
 		return bundle_wise_batch_nos

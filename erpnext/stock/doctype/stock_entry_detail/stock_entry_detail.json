@@ -58,8 +58,10 @@
   "serial_batch_entries_html",
   "section_break_rdtg",
   "serial_no",
+  "serial_number",
   "column_break_prps",
   "batch_no",
+  "batch_number",
   "accounting",
   "expense_account",
   "accounting_dimensions_section",
@@ -695,6 +697,24 @@
    "label": "Valuation Type",
    "options": "\nValuation Rate\n% of FG Cost\nManual",
    "read_only_depends_on": "eval:!doc.secondary_item_type || doc.bom_secondary_item"
+  },
+  {
+   "fieldname": "serial_number",
+   "fieldtype": "Small Text",
+   "label": "Serial No (Physical Input)",
+   "hidden": 1,
+   "no_copy": 1,
+   "print_hide": 1,
+   "description": "Enter physical numbers. These are resolved for the selected Item when saving; reference fields store internal IDs."
+  },
+  {
+   "fieldname": "batch_number",
+   "fieldtype": "Data",
+   "label": "Batch No (Physical Input)",
+   "hidden": 1,
+   "no_copy": 1,
+   "print_hide": 1,
+   "description": "Enter physical numbers. These are resolved for the selected Item when saving; reference fields store internal IDs."
   }
  ],
  "grid_page_length": 50,

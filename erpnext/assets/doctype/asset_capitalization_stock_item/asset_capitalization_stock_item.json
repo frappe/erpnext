@@ -25,8 +25,10 @@
   "serial_batch_entries_html",
   "section_break_bfqc",
   "serial_no",
+  "serial_number",
   "column_break_mbuv",
   "batch_no",
+  "batch_number",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break"
@@ -190,6 +192,24 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Purchase Receipt Item"
+  },
+  {
+   "fieldname": "serial_number",
+   "fieldtype": "Small Text",
+   "label": "Serial No (Physical Input)",
+   "hidden": 1,
+   "no_copy": 1,
+   "print_hide": 1,
+   "description": "Enter physical numbers. These are resolved for the selected Item when saving; reference fields store internal IDs."
+  },
+  {
+   "fieldname": "batch_number",
+   "fieldtype": "Data",
+   "label": "Batch No (Physical Input)",
+   "hidden": 1,
+   "no_copy": 1,
+   "print_hide": 1,
+   "description": "Enter physical numbers. These are resolved for the selected Item when saving; reference fields store internal IDs."
   }
  ],
  "grid_page_length": 50,

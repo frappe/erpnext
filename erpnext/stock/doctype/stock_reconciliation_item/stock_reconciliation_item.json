@@ -29,14 +29,17 @@
   "serial_batch_entries_html",
   "section_break_lypk",
   "serial_no",
+  "serial_number",
   "column_break_eefq",
   "batch_no",
+  "batch_number",
   "section_break_3",
   "current_qty",
   "current_amount",
   "column_break_9",
   "current_valuation_rate",
   "current_serial_no",
+  "current_serial_number",
   "section_break_14",
   "quantity_difference",
   "column_break_16",
@@ -272,6 +275,33 @@
    "fieldname": "reconcile_all_serial_batch",
    "fieldtype": "Check",
    "label": "Reconcile All Serial Nos / Batches"
+  },
+  {
+   "fieldname": "serial_number",
+   "fieldtype": "Small Text",
+   "label": "Serial No (Physical Input)",
+   "hidden": 1,
+   "no_copy": 1,
+   "print_hide": 1,
+   "description": "Enter physical numbers. These are resolved for the selected Item when saving; reference fields store internal IDs."
+  },
+  {
+   "fieldname": "current_serial_number",
+   "fieldtype": "Small Text",
+   "label": "Current Serial No (Physical Input)",
+   "hidden": 1,
+   "no_copy": 1,
+   "print_hide": 1,
+   "description": "Enter physical numbers. These are resolved for the selected Item when saving; reference fields store internal IDs."
+  },
+  {
+   "fieldname": "batch_number",
+   "fieldtype": "Data",
+   "label": "Batch No (Physical Input)",
+   "hidden": 1,
+   "no_copy": 1,
+   "print_hide": 1,
+   "description": "Enter physical numbers. These are resolved for the selected Item when saving; reference fields store internal IDs."
   }
  ],
  "grid_page_length": 50,

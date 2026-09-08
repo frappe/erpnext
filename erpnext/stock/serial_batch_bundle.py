@@ -1390,7 +1390,7 @@ class SerialBatchCreation:
 			self.batches = frappe._dict({self.batch_no: abs(self.actual_qty)})
 
 	def make_serial_no_if_not_exists(self):
-		# Transaction fields contain IDs. Physical input is resolved by the input API.
+		# Transaction fields contain IDs. Physical input is resolved during save.
 		existing = set(
 			frappe.get_all(
 				"Serial No",
@@ -1401,21 +1401,6 @@ class SerialBatchCreation:
 		for name in self.serial_nos:
 			if name not in existing:
 				frappe.throw(_("Serial No {0} does not exist for Item {1}").format(name, self.item_code))
-
-	def make_serial_nos(self, serial_nos):
-		from erpnext.stock.serial_batch_identity import SerialBatchIdentity
-
-		return SerialBatchIdentity("Serial No").resolve(
-			self.item_code,
-			serial_nos,
-			create=True,
-			defaults={
-				"warehouse": self.warehouse,
-				"company": self.company,
-				"status": "Active",
-				"batch_no": next(iter(self.batches), None) if self.get("batches") else None,
-			},
-		)
 
 	def set_serial_batch_entries(self, doc):
 		incoming_rate = self.get("incoming_rate")
@@ -1532,19 +1517,28 @@ class SerialBatchCreation:
 			current_value += 1
 			numbers.append(parse_naming_series(self.serial_no_series, number_generator=get_series))
 
-		ids = SerialBatchIdentity("Serial No").create_many(
-			self.item_code,
-			numbers,
-			defaults={
-				"warehouse": self.warehouse,
-				"company": self.company,
-				"status": "Active",
-				"reference_doctype": self.get("voucher_type"),
-				"reference_name": self.get("voucher_no"),
-				"posting_date": self.get("posting_date") or getdate(self.posting_datetime),
-				"batch_no": self.get("batch_no"),
-			},
-		)
+		try:
+			ids = SerialBatchIdentity("Serial No").create_many(
+				self.item_code,
+				numbers,
+				defaults={
+					"warehouse": self.warehouse,
+					"company": self.company,
+					"status": "Active",
+					"reference_doctype": self.get("voucher_type"),
+					"reference_name": self.get("voucher_no"),
+					"posting_date": self.get("posting_date") or getdate(self.posting_datetime),
+					"batch_no": self.get("batch_no"),
+				},
+			)
+		except frappe.DuplicateEntryError:
+			frappe.throw(
+				_(
+					"A generated serial number already exists. Change the Serial No Series for Item {0} or correct its current counter."
+				).format(self.item_code),
+				frappe.DuplicateEntryError,
+			)
+
 		series.update_counter(current_value)
 		return [ids[number] for number in numbers]
 

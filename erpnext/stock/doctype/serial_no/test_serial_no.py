@@ -6,8 +6,6 @@
 
 
 import frappe
-
-# Explicit names below model historical records referenced by legacy ledgers.
 from frappe import _dict
 from frappe.utils import add_days, nowdate, random_string
 

@@ -18,6 +18,7 @@
   "completion_status",
   "section_break_10",
   "serial_no",
+  "serial_number",
   "item_reference"
  ],
  "fields": [
@@ -121,6 +122,15 @@
    "label": "Item Reference",
    "options": "Maintenance Schedule Item",
    "read_only": 1
+  },
+  {
+   "fieldname": "serial_number",
+   "fieldtype": "Small Text",
+   "label": "Serial No (Physical Input)",
+   "hidden": 1,
+   "no_copy": 1,
+   "print_hide": 1,
+   "description": "Enter physical numbers. These are resolved for the selected Item when saving; reference fields store internal IDs."
   }
  ],
  "idx": 1,

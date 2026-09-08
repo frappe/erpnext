@@ -64,9 +64,12 @@
   "rejected_serial_batch_entries_html",
   "section_break_jshh",
   "serial_no",
+  "serial_number",
   "rejected_serial_no",
+  "rejected_serial_number",
   "column_break_henr",
   "batch_no",
+  "batch_number",
   "manufacture_details",
   "manufacturer",
   "column_break_16",
@@ -661,6 +664,33 @@
    "fieldtype": "Float",
    "label": "Process Loss Qty",
    "non_negative": 1
+  },
+  {
+   "fieldname": "serial_number",
+   "fieldtype": "Small Text",
+   "label": "Serial No (Physical Input)",
+   "hidden": 1,
+   "no_copy": 1,
+   "print_hide": 1,
+   "description": "Enter physical numbers. These are resolved for the selected Item when saving; reference fields store internal IDs."
+  },
+  {
+   "fieldname": "rejected_serial_number",
+   "fieldtype": "Small Text",
+   "label": "Rejected Serial No (Physical Input)",
+   "hidden": 1,
+   "no_copy": 1,
+   "print_hide": 1,
+   "description": "Enter physical numbers. These are resolved for the selected Item when saving; reference fields store internal IDs."
+  },
+  {
+   "fieldname": "batch_number",
+   "fieldtype": "Data",
+   "label": "Batch No (Physical Input)",
+   "hidden": 1,
+   "no_copy": 1,
+   "print_hide": 1,
+   "description": "Enter physical numbers. These are resolved for the selected Item when saving; reference fields store internal IDs."
   }
  ],
  "grid_page_length": 50,

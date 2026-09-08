@@ -1,7 +1,7 @@
 import frappe
 
 from erpnext.stock.doctype.item.test_item import make_item
-from erpnext.stock.serial_batch_identity import resolve_transaction_serial_numbers
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity, resolve_transaction_serial_numbers
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -17,7 +17,7 @@ class TestSerialBatchIdentityAccess(ERPNextTestSuite):
 			}
 		).insert()
 
-	def test_inward_resolution_requires_serial_create_permission(self):
+	def test_read_only_resolution_never_creates_missing_serials(self):
 		item = make_item(properties={"has_serial_no": 1})
 		user = self.make_stock_user()
 		parent = {"doctype": "Purchase Receipt", "__islocal": 1, "company": "_Test Company"}
@@ -26,7 +26,7 @@ class TestSerialBatchIdentityAccess(ERPNextTestSuite):
 			self.assertTrue(frappe.has_permission("Purchase Receipt", "write"))
 			self.assertTrue(frappe.has_permission("Serial No", "read"))
 			self.assertFalse(frappe.has_permission("Serial No", "create"))
-			with self.assertRaises(frappe.PermissionError):
+			with self.assertRaises(frappe.ValidationError):
 				resolve_transaction_serial_numbers(parent, row, ["UNAUTHORIZED-SERIAL"])
 		self.assertFalse(frappe.db.exists("Serial No", {"item_code": item.name}))
 
@@ -34,7 +34,7 @@ class TestSerialBatchIdentityAccess(ERPNextTestSuite):
 		item = make_item(properties={"has_serial_no": 1})
 		parent = {"doctype": "Purchase Receipt", "__islocal": 1, "company": "_Test Company"}
 		row = {"item_code": item.name, "qty": 1}
-		names = resolve_transaction_serial_numbers(parent, row, ["EXISTING-SERIAL"])
+		names = SerialBatchIdentity("Serial No").resolve(item.name, ["EXISTING-SERIAL"], create=True)
 		parent["is_return"] = 1
 		row["qty"] = -1
 		user = self.make_stock_user()
@@ -42,13 +42,53 @@ class TestSerialBatchIdentityAccess(ERPNextTestSuite):
 			self.assertFalse(frappe.has_permission("Serial No", "create"))
 			self.assertEqual(resolve_transaction_serial_numbers(parent, row, ["EXISTING-SERIAL"]), names)
 
-	def test_authorized_inward_resolution_creates_serials(self):
+	def test_even_authorized_resolution_does_not_create_serials(self):
 		item = make_item(properties={"has_serial_no": 1})
-		parent = {"doctype": "Purchase Receipt", "__islocal": 1, "company": "_Test Company"}
-		row = {"item_code": item.name, "qty": 1}
-		names = resolve_transaction_serial_numbers(parent, row, ["AUTHORIZED-SERIAL"])
-		serial = frappe.get_doc("Serial No", names[0])
-		self.assertEqual(serial.item_code, item.name)
-		self.assertEqual(serial.serial_no, "AUTHORIZED-SERIAL")
-		self.assertEqual(serial.company, parent["company"])
-		self.assertEqual(resolve_transaction_serial_numbers(parent, row, ["AUTHORIZED-SERIAL"]), names)
+		with self.assertRaises(frappe.ValidationError):
+			resolve_transaction_serial_numbers(
+				{"doctype": "Purchase Receipt", "__islocal": 1, "company": "_Test Company"},
+				{"item_code": item.name},
+				["MISSING-SERIAL"],
+			)
+		self.assertFalse(frappe.db.exists("Serial No", {"item_code": item.name}))
+
+	def test_missing_transaction_doctype_is_a_validation_error(self):
+		for parent in ({}, {"doctype": ""}, {"doctype": "No Such Transaction"}, "[]"):
+			with self.assertRaises(frappe.ValidationError):
+				resolve_transaction_serial_numbers(parent, {"item_code": "Item"}, ["SERIAL"])
+
+	def test_draft_save_requires_permission_to_create_missing_serials(self):
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		item = make_item(properties={"has_serial_no": 1})
+		user = self.make_stock_user()
+		receipt = make_purchase_receipt(item_code=item.name, qty=1, do_not_save=True)
+		receipt.items[0].serial_number = "UNAUTHORIZED-ON-SAVE"
+		with self.set_user(user.name):
+			with self.assertRaises(frappe.PermissionError):
+				receipt.insert()
+		self.assertFalse(frappe.db.exists("Serial No", {"item_code": item.name}))
+
+	def test_bundle_number_input_checks_creation_permissions(self):
+		from erpnext.stock.serial_batch_identity import resolve_number_entries
+
+		item = make_item(properties={"has_serial_no": 1})
+		serial = SerialBatchIdentity("Serial No").resolve(item.name, ["Existing"], create=True)[0]
+		user = self.make_stock_user()
+		with self.set_user(user.name):
+			entries = [{"serial_number": "Existing"}]
+			resolve_number_entries(item.name, entries, create=True)
+			self.assertEqual(entries[0]["serial_no"], serial)
+			with self.assertRaises(frappe.PermissionError):
+				resolve_number_entries(item.name, [{"serial_number": "Unauthorized"}], create=True)
+		self.assertFalse(SerialBatchIdentity("Serial No").exists("Unauthorized", item.name))
+
+	def test_bundle_scanning_does_not_create_records(self):
+		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+			resolve_scanned_serial_batch_numbers,
+		)
+
+		item = make_item(properties={"has_serial_no": 1})
+		with self.assertRaises(frappe.ValidationError):
+			resolve_scanned_serial_batch_numbers(item.name, serial_no="Missing")
+		self.assertFalse(frappe.db.exists("Serial No", {"item_code": item.name}))

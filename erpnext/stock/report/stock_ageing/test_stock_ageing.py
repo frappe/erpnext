@@ -20,7 +20,7 @@ class TestStockAgeing(ERPNextTestSuite):
 	def setUp(self) -> None:
 		self.filters = frappe._dict(company="_Test Company", to_date="2021-12-10", ranges=["30", "60", "90"])
 
-	def test_serial_ids_keep_their_case_in_fifo_slots(self):
+	def test_legacy_serial_references_match_regardless_of_case(self):
 		rows = [
 			frappe._dict(
 				name="Serialized Item",
@@ -35,11 +35,11 @@ class TestStockAgeing(ERPNextTestSuite):
 				serial_no=serials,
 			)
 			for index, (qty, balance, date, serials) in enumerate(
-				[(2, 2, "2021-12-01", "id-aB\nid-Cd"), (-1, 1, "2021-12-02", "id-aB")]
+				[(2, 2, "2021-12-01", "id-aB\nid-Cd"), (-1, 1, "2021-12-02", "ID-Ab")]
 			)
 		]
 		slots = FIFOSlots(self.filters, rows).generate()
-		self.assertEqual(slots["Serialized Item"]["fifo_queue"], [["id-Cd", "2021-12-01", 10.0]])
+		self.assertEqual(slots["Serialized Item"]["fifo_queue"], [["ID-CD", "2021-12-01", 10.0]])
 
 	def test_normal_inward_outward_queue(self):
 		"Reference: Case 1 in stock_ageing_fifo_logic.md (same wh)"
@@ -583,8 +583,8 @@ class TestStockAgeing(ERPNextTestSuite):
 		self.assertEqual(
 			queue,
 			[
-				[batch_no, 1, 10.0, "2021-12-01", 20.0],
-				[batch_no, 1, 2.0, "2021-12-02", 4.0],
+				[batch_no.upper(), 1, 10.0, "2021-12-01", 20.0],
+				[batch_no.upper(), 1, 2.0, "2021-12-02", 4.0],
 			],
 		)
 
@@ -630,8 +630,8 @@ class TestStockAgeing(ERPNextTestSuite):
 		self.assertEqual(
 			[slot[:4] for slot in queue],
 			[
-				[batch_no, 1, 10.0, "2021-12-01"],
-				[batch_no, 1, 2.0, "2021-12-01"],
+				[batch_no.upper(), 1, 10.0, "2021-12-01"],
+				[batch_no.upper(), 1, 2.0, "2021-12-01"],
 			],
 		)
 		self.assertAlmostEqual(queue[0][4], 1166.67, places=2)
@@ -678,8 +678,8 @@ class TestStockAgeing(ERPNextTestSuite):
 		self.assertEqual(
 			queue,
 			[
-				[batch_no, 1, 10.0, "2021-12-01", 50.0],
-				[batch_no, 1, 10.0, "2021-12-01", 50.0],
+				[batch_no.upper(), 1, 10.0, "2021-12-01", 50.0],
+				[batch_no.upper(), 1, 10.0, "2021-12-01", 50.0],
 			],
 		)
 
@@ -767,8 +767,8 @@ class TestStockAgeing(ERPNextTestSuite):
 		self.assertEqual(
 			queue,
 			[
-				[batch_no, 1, 6.0, "2021-12-01", 30.0],
-				[batch_no, 1, 10.0, "2021-12-01", 50.0],
+				[batch_no.upper(), 1, 6.0, "2021-12-01", 30.0],
+				[batch_no.upper(), 1, 10.0, "2021-12-01", 50.0],
 			],
 		)
 
@@ -1588,13 +1588,13 @@ class TestStockAgeing(ERPNextTestSuite):
 		self.assertEqual(
 			item_result["fifo_queue"],
 			[
-				[batchwise_above_90, 1, 40.0, "2021-08-01", 400.0],
-				[batchwise_61_90, 1, 35.0, "2021-09-20", 350.0],
-				[non_batchwise_61_90, 0, 40.0, "2021-09-25", 400.0],
-				[batchwise_31_60, 1, 22.0, "2021-10-20", 220.0],
-				[non_batchwise_31_60, 0, 40, "2021-10-25", 400],
-				[batchwise_0_30, 1, 14.0, "2021-11-20", 140.0],
-				[non_batchwise_0_30, 0, 30, "2021-11-25", 300],
+				[batchwise_above_90.upper(), 1, 40.0, "2021-08-01", 400.0],
+				[batchwise_61_90.upper(), 1, 35.0, "2021-09-20", 350.0],
+				[non_batchwise_61_90.upper(), 0, 40.0, "2021-09-25", 400.0],
+				[batchwise_31_60.upper(), 1, 22.0, "2021-10-20", 220.0],
+				[non_batchwise_31_60.upper(), 0, 40, "2021-10-25", 400],
+				[batchwise_0_30.upper(), 1, 14.0, "2021-11-20", 140.0],
+				[non_batchwise_0_30.upper(), 0, 30, "2021-11-25", 300],
 			],
 		)
 
@@ -1673,8 +1673,8 @@ class TestStockAgeing(ERPNextTestSuite):
 		self.assertEqual(
 			item_result["fifo_queue"],
 			[
-				[source_batch, 1, 5.0, "2021-09-01", 50.0],
-				[target_batch, 1, 10.0, "2021-09-01", 100.0],
+				[source_batch.upper(), 1, 5.0, "2021-09-01", 50.0],
+				[target_batch.upper(), 1, 10.0, "2021-09-01", 100.0],
 			],
 		)
 		self.assertEqual(
@@ -1718,7 +1718,7 @@ class TestStockAgeing(ERPNextTestSuite):
 		slots = fifo_slots.generate()
 		item_result = slots[item_code]
 
-		self.assertEqual(item_result["fifo_queue"], [[batch_no, 1, -10, "2021-12-01", -100]])
+		self.assertEqual(item_result["fifo_queue"], [[batch_no.upper(), 1, -10, "2021-12-01", -100]])
 		self.assertEqual(
 			fifo_slots.transferred_item_details[("001", item_code, "WH 1")], [[10, "2021-12-01", 100]]
 		)
@@ -1745,7 +1745,7 @@ class TestStockAgeing(ERPNextTestSuite):
 		slots = fifo_slots.generate()
 		item_result = slots[item_code]
 
-		self.assertEqual(item_result["fifo_queue"], [[batch_no, 1, -4.0, "2021-12-01", -40.0]])
+		self.assertEqual(item_result["fifo_queue"], [[batch_no.upper(), 1, -4.0, "2021-12-01", -40.0]])
 		self.assertEqual(
 			fifo_slots.transferred_item_details[("001", item_code, "WH 1")],
 			[[4.0, "2021-12-01", 40.0]],
@@ -1822,8 +1822,8 @@ class TestStockAgeing(ERPNextTestSuite):
 		self.assertEqual(
 			item_result["fifo_queue"],
 			[
-				[buffer_batch, 1, 5, "2021-11-30", 50],
-				[negative_batch, 1, -4.0, "2021-12-01", -40.0],
+				[buffer_batch.upper(), 1, 5, "2021-11-30", 50],
+				[negative_batch.upper(), 1, -4.0, "2021-12-01", -40.0],
 			],
 		)
 		self.assertEqual(
@@ -1883,7 +1883,7 @@ class TestStockAgeing(ERPNextTestSuite):
 
 		self.assertEqual(item_result["qty_after_transaction"], item_result["total_qty"])
 		self.assertEqual(item_result["total_qty"], -4.0)
-		self.assertEqual(item_result["fifo_queue"], [[batch_no, 1, -4.0, "2021-11-10", -40.0]])
+		self.assertEqual(item_result["fifo_queue"], [[batch_no.upper(), 1, -4.0, "2021-11-10", -40.0]])
 
 	def test_untagged_receipt_with_negative_batch_head(self):
 		"""An incoming SLE without batch details must not treat a negative
@@ -1984,7 +1984,7 @@ class TestStockAgeing(ERPNextTestSuite):
 		self.assertEqual(item_result["qty_after_transaction"], item_result["total_qty"])
 		self.assertEqual(item_result["total_qty"], 5.0)
 		self.assertEqual(
-			item_result["fifo_queue"], [[batch_no, 1, 5.0, getdate(add_days(base_date, -2)), 50.0]]
+			item_result["fifo_queue"], [[batch_no.upper(), 1, 5.0, getdate(add_days(base_date, -2)), 50.0]]
 		)
 
 	def test_legacy_batch_no_sle_with_streaming_cursor(self):

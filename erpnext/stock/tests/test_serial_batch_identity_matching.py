@@ -104,7 +104,7 @@ class TestSerialBatchIdentityMatching(ERPNextTestSuite):
 	def test_migration_reports_case_conflicts_before_changing_records(self):
 		if frappe.db.db_type != "postgres":
 			self.skipTest("Legacy case-only duplicates are possible on PostgreSQL")
-		from erpnext.patches.separate_serial_batch_identity import execute
+		from erpnext.patches.v17_0.separate_serial_batch_identity import execute
 
 		for doctype, index in (("Serial No", "serial_no_number_item_ci"), ("Batch", "batch_number_item_ci")):
 			identity, item, name = self.make_number(doctype, "Legacy-Lot")

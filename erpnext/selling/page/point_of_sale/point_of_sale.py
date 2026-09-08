@@ -23,6 +23,7 @@ def search_by_term(search_term, warehouse, price_list):
 	return {
 		"items": [get_scanned_item(match, warehouse, price_list) for match in matches],
 		"requires_selection": len(matches) > 1,
+		"is_scan": True,
 	}
 
 

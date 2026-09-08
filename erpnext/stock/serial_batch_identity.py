@@ -161,8 +161,19 @@ class SerialBatchIdentity:
 			table[self.number_field].isnull() | (table[self.number_field] == "")
 		).run()
 
+	def has_constraint(self):
+		index = (
+			("serial_no_number_item_ci" if self.doctype == "Serial No" else "batch_number_item_ci")
+			if frappe.db.db_type == "postgres"
+			else f"unique_{self.item_field}_{self.number_field}"
+		)
+		return bool(frappe.db.has_index(f"tab{self.doctype}", index))
+
 	def sync_constraint(self):
-		self.validate_existing_numbers()
+		if self.has_constraint():
+			return
+		if self.doctype not in (frappe.flags.serial_batch_preflight or ()):
+			self.validate_existing_numbers()
 		self.backfill_numbers()
 		if frappe.db.db_type == "postgres":
 			# The leading number expression also indexes scans without an item filter.
@@ -266,22 +277,22 @@ def get_serial_batch_labels(doctype: str, names: list | str):
 
 @frappe.whitelist(methods=["POST"])
 def resolve_transaction_serial_numbers(parent: dict | str, row: dict | str, numbers: list | str):
-	from erpnext.stock.doctype.serial_and_batch_bundle.inline_editor import SUPPORTED_VOUCHER_TYPES
-	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_type_of_transaction
-
-	parent, row = frappe._dict(frappe.parse_json(parent)), frappe._dict(frappe.parse_json(row))
+	parent, row = frappe.parse_json(parent), frappe.parse_json(row)
+	if not isinstance(parent, dict) or not isinstance(parent.get("doctype"), str):
+		frappe.throw(_("Transaction DocType is required"))
+	if not frappe.db.exists("DocType", parent["doctype"]):
+		frappe.throw(_("Invalid transaction DocType"))
+	if not isinstance(row, dict) or not (row.get("item_code") or row.get("rm_item_code")):
+		frappe.throw(_("Item is required"))
 	frappe.has_permission(
-		parent.doctype, "write", doc=parent.name if not parent.__islocal else None, throw=True
+		parent["doctype"],
+		"write",
+		doc=parent.get("name") if not parent.get("__islocal") else None,
+		throw=True,
 	)
-	frappe.has_permission("Item", "read", doc=row.item_code or row.rm_item_code, throw=True)
-	create = parent.doctype in SUPPORTED_VOUCHER_TYPES and get_type_of_transaction(parent, row) == "Inward"
-	frappe.has_permission("Serial No", "create" if create else "read", throw=True)
-	return SerialBatchIdentity("Serial No").resolve(
-		row.item_code or row.rm_item_code,
-		frappe.parse_json(numbers),
-		create=create,
-		defaults={"company": parent.company},
-	)
+	return resolve_serial_batch_numbers(
+		row.get("item_code") or row.get("rm_item_code"), serial_numbers=numbers
+	)["serial_nos"]
 
 
 def add_number_labels(entries):
@@ -303,11 +314,39 @@ def resolve_number_entries(item_code, entries, *, create=False):
 		("serial_no", "Serial No", "serial_number"),
 	):
 		rows = [row for row in entries if row.get(number_field) and not row.get(field)]
-		ids = SerialBatchIdentity(doctype).resolve(
-			item_code, [row[number_field] for row in rows], create=create
+		identity = SerialBatchIdentity(doctype)
+		missing = create and any(not identity.exists(row[number_field], item_code) for row in rows)
+		ids = (
+			resolve_serial_batch_numbers(
+				item_code,
+				**{
+					"serial_numbers" if doctype == "Serial No" else "batch_numbers": [
+						row[number_field] for row in rows
+					]
+				},
+				create=missing,
+			)["serial_nos" if doctype == "Serial No" else "batch_nos"]
+			if rows
+			else []
 		)
 		for row, name in zip(rows, ids, strict=True):
 			row[field] = name
+	serials = [row["serial_no"] for row in entries if row.get("serial_no") and not row.get("batch_no")]
+	batches = (
+		dict(
+			frappe.get_all(
+				"Serial No",
+				filters={"name": ("in", serials), "item_code": item_code},
+				fields=["name", "batch_no"],
+				as_list=True,
+			)
+		)
+		if serials
+		else {}
+	)
+	for row in entries:
+		if not row.get("batch_no") and row.get("serial_no") in batches and batches[row["serial_no"]]:
+			row["batch_no"] = batches[row["serial_no"]]
 	return entries
 
 

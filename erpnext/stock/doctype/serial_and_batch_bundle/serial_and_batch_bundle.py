@@ -2173,6 +2173,10 @@ def add_serial_batch_ledgers(
 	if parent_doc and isinstance(parent_doc, str):
 		parent_doc = parse_json(parent_doc)
 
+	resolve_number_entries(
+		child_row.item_code, entries, create=get_type_of_transaction(parent_doc, child_row) == "Inward"
+	)
+
 	bundle = child_row.serial_and_batch_bundle
 	if child_row.get("is_rejected"):
 		bundle = child_row.rejected_serial_and_batch_bundle
@@ -3605,8 +3609,8 @@ def get_batch_no_from_serial_no(serial_no: str):
 
 
 @frappe.whitelist(methods=["POST"])
-def is_serial_batch_no_exists(
-	item_code: str, type_of_transaction: str, serial_no: str | None = None, batch_no: str | None = None
+def resolve_scanned_serial_batch_numbers(
+	item_code: str, serial_no: str | None = None, batch_no: str | None = None
 ):
 	from erpnext.stock.serial_batch_identity import resolve_serial_batch_numbers
 
@@ -3614,7 +3618,6 @@ def is_serial_batch_no_exists(
 		item_code,
 		serial_numbers=[serial_no] if serial_no else [],
 		batch_numbers=[batch_no] if batch_no else [],
-		create=type_of_transaction == "Inward",
 	)
 
 

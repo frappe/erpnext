@@ -9,6 +9,7 @@
   "item_code",
   "serial_and_batch_bundle",
   "serial_no",
+  "serial_number",
   "qty",
   "description",
   "prevdoc_detail_docname",
@@ -107,6 +108,15 @@
    "no_copy": 1,
    "options": "Serial and Batch Bundle",
    "print_hide": 1
+  },
+  {
+   "fieldname": "serial_number",
+   "fieldtype": "Small Text",
+   "label": "Serial No (Physical Input)",
+   "hidden": 1,
+   "no_copy": 1,
+   "print_hide": 1,
+   "description": "Enter physical numbers. These are resolved for the selected Item when saving; reference fields store internal IDs."
   }
  ],
  "idx": 1,
