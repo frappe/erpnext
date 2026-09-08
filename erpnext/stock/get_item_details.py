@@ -228,7 +228,11 @@ def get_rate_locked_source_row(ctx: ItemDetailsCtx, doc) -> frappe._dict | None:
 	if not source_fields or not doc or ctx.get("is_return") or not maintain_same_rate_enabled(ctx):
 		return None
 
-	row = next((d for d in doc.get("items") or [] if d.get("name") == ctx.child_docname), None)
+	row = (
+		next((d for d in doc.get("items") or [] if d.get("name") == ctx.child_docname), None)
+		if ctx.child_docname
+		else ctx
+	)
 	if not row:
 		return None
 

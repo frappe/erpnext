@@ -458,6 +458,36 @@ class TestGetItemDetail(ERPNextTestSuite):
 			frappe.db.set_single_value("Buying Settings", "maintain_same_rate", original)
 			frappe.clear_cache(doctype="Buying Settings")
 
+	def test_rate_lock_matches_unsaved_mapped_row(self):
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+		from erpnext.stock.get_item_details import get_rate_locked_source_row
+
+		original = frappe.db.get_single_value("Buying Settings", "maintain_same_rate")
+		frappe.db.set_single_value("Buying Settings", "maintain_same_rate", 1)
+		frappe.clear_cache(doctype="Buying Settings")
+
+		try:
+			first_po = create_purchase_order(rate=100)
+			second_po = create_purchase_order(rate=200)
+			pr_doc = {
+				"doctype": "Purchase Receipt",
+				"items": [
+					{"name": None, "purchase_order_item": first_po.items[0].name},
+					{"name": None, "purchase_order_item": second_po.items[0].name},
+				],
+			}
+			ctx = frappe._dict(
+				doctype="Purchase Receipt",
+				child_docname=None,
+				purchase_order_item=second_po.items[0].name,
+			)
+
+			source_row = get_rate_locked_source_row(ctx, pr_doc)
+			self.assertEqual(source_row.rate, 200)
+		finally:
+			frappe.db.set_single_value("Buying Settings", "maintain_same_rate", original)
+			frappe.clear_cache(doctype="Buying Settings")
+
 	def make_batched_item_with_stock(self, quantities, uoms=None, **properties):
 		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
