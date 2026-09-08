@@ -40,6 +40,25 @@ class TestStockAgeing(ERPNextTestSuite):
 		]
 		slots = FIFOSlots(self.filters, rows).generate()
 		self.assertEqual(slots["Serialized Item"]["fifo_queue"], [["ID-CD", "2021-12-01", 10.0]])
+		self.assertEqual([row.serial_no for row in rows], ["id-aB\nid-Cd", "ID-Ab"])
+
+	def test_fifo_normalization_preserves_ids_for_database_lookups(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item(properties={"has_batch_no": 1})
+		batch = frappe.get_doc(
+			{
+				"doctype": "Batch",
+				"item": item.name,
+				"batch_id": "Physical-Batch",
+				"use_batchwise_valuation": 1,
+			}
+		).insert(set_name="Mixed-Case-" + frappe.generate_hash(length=10))
+		row = frappe._dict(batch_no=batch.name, actual_qty=1, stock_value_difference=10)
+		batches = FIFOSlots(self.filters, [])._get_row_batch_nos(row)
+		self.assertEqual(batches, [[batch.name.upper(), 1, 1, 10]])
+		self.assertEqual(row.batch_no, batch.name)
+		self.assertEqual(frappe.get_doc("Batch", row.batch_no).batch_id, "Physical-Batch")
 
 	def test_normal_inward_outward_queue(self):
 		"Reference: Case 1 in stock_ageing_fifo_logic.md (same wh)"

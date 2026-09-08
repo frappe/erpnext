@@ -487,6 +487,7 @@ class FIFOSlots:
 						or []
 					)
 
+		# FIFO slots use normalized comparison keys, not document links.
 		return [name.upper() for name in serial_nos], batch_nos
 
 	def _get_row_batch_nos(self, row: dict) -> list:
