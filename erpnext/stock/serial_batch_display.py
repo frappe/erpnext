@@ -1,11 +1,10 @@
 """Display physical numbers while retaining document IDs for stock references."""
 
-from copy import copy
+from copy import deepcopy
 from functools import wraps
 
 import frappe
 from frappe import _
-from frappe.model.base_document import BaseDocument
 from frappe.utils import escape_html
 
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
@@ -61,7 +60,15 @@ def report_number_columns(columns, rows):
 	return columns, rows
 
 
-def before_print(doc, method=None, print_settings=None, **kwargs):
+def pdf_body_html(template, args, **kwargs):
+	from frappe.utils.pdf import pdf_body_html as render_body
+
+	print_doc = deepcopy(args["doc"])
+	set_serial_number_labels(print_doc)
+	return render_body(template, {**args, "doc": print_doc}, **kwargs)
+
+
+def set_serial_number_labels(doc):
 	rows = [doc, *doc.get_all_children()]
 	fields = ("serial_no", "rejected_serial_no", "current_serial_no")
 	serial_rows = [
@@ -76,28 +83,5 @@ def before_print(doc, method=None, print_settings=None, **kwargs):
 			if meta and meta.fieldtype in ("Small Text", "Text", "Long Text") and row.get(field):
 				values.append((row, field, row.get(field).split("\n")))
 	labels = SerialBatchIdentity("Serial No").labels([name for _, _, names in values for name in names])
-	for row, _field, _names in values:
-		row.__dict__["__serial_number_labels"] = labels
-
-
-class SerialNumberDisplay:
-	def as_dict(self, *args, **kwargs):
-		doc = super().as_dict(*args, **kwargs)
-		if self.get("__serial_batch_input") and not kwargs.get("no_private_properties"):
-			doc["__serial_batch_input"] = self.get("__serial_batch_input").copy()
-		return doc
-
-	def get_formatted(self, fieldname, *args, **kwargs):
-		field = self.meta.get_field(fieldname)
-		if (
-			fieldname not in ("serial_no", "rejected_serial_no", "current_serial_no")
-			or not field
-			or field.fieldtype not in ("Small Text", "Text", "Long Text")
-			or not self.get(fieldname)
-		):
-			return super().get_formatted(fieldname, *args, **kwargs)
-		names = self.get(fieldname).split("\n")
-		labels = self.get("__serial_number_labels") or SerialBatchIdentity("Serial No").labels(names)
-		print_row = copy(self)
-		print_row.set(fieldname, "\n".join(escape_html(labels.get(name, name)) for name in names))
-		return BaseDocument.get_formatted(print_row, fieldname, *args, **kwargs)
+	for row, field, names in values:
+		row.set(field, "\n".join(escape_html(labels.get(name, name)) for name in names))

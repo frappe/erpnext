@@ -1,7 +1,6 @@
 import frappe
 from frappe import _
 
-from erpnext.stock.serial_batch_fields import NUMBER_INPUT_DOCTYPES
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 NUMBER_FIELDS = ("batch_no", "serial_no", "rejected_serial_no", "current_serial_no")
@@ -11,7 +10,7 @@ def resolve_transaction_numbers(doc, method=None):
 	if doc.docstatus == 2:
 		return
 	for row in [doc, *doc.get_all_children()]:
-		if row.doctype in NUMBER_INPUT_DOCTYPES:
+		if row.meta.has_field("serial_and_batch_bundle"):
 			TransactionNumberInput(doc, row).resolve()
 
 

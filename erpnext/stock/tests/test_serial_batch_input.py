@@ -142,12 +142,53 @@ class TestSerialBatchInput(ERPNextTestSuite):
 			receipt.insert()
 
 	def test_no_extra_transaction_number_fields(self):
-		from erpnext.stock.serial_batch_fields import NUMBER_INPUT_DOCTYPES
-
-		for doctype in NUMBER_INPUT_DOCTYPES:
+		for doctype in frappe.get_all(
+			"DocField", filters={"fieldname": "serial_and_batch_bundle"}, pluck="parent", distinct=True
+		):
 			meta = frappe.get_meta(doctype)
 			for field in ("serial_number", "batch_number", "rejected_serial_number", "current_serial_number"):
 				self.assertFalse(meta.has_field(field), (doctype, field))
+
+	def test_input_requires_a_bundle_field(self):
+		from erpnext.stock.serial_batch_input import resolve_transaction_numbers
+
+		receipt = self.make_receipt()
+		row = receipt.items[0]
+		row.serial_no = "Pending-Serial"
+		row.set("__serial_batch_input", ["serial_no"])
+		with patch.object(row.meta, "has_field", return_value=False):
+			resolve_transaction_numbers(receipt)
+		self.assertEqual(row.serial_no, "Pending-Serial")
+		self.assertNotIn("__serial_batch_input", receipt.as_dict(no_private_properties=True)["items"][0])
+		self.assertFalse(frappe.db.exists("Serial No", {"item_code": row.item_code}))
+
+	def test_number_inputs_follow_child_field_metadata(self):
+		from erpnext.stock.serial_batch_import import has_number_inputs
+		from erpnext.stock.serial_batch_input import resolve_transaction_numbers
+
+		doctype = "Installation Note Item"
+		meta = frappe.get_meta(doctype)
+		with patch.dict(
+			meta._fields,
+			{field: df for field, df in meta._fields.items() if field != "serial_and_batch_bundle"},
+			clear=True,
+		):
+			self.assertFalse(has_number_inputs("Installation Note"))
+			meta._fields["serial_and_batch_bundle"] = frappe._dict(
+				fieldname="serial_and_batch_bundle", fieldtype="Data"
+			)
+			self.assertTrue(has_number_inputs("Installation Note"))
+			receipt = self.make_receipt(has_batch_no=0)
+			item = receipt.items[0].item_code
+			serial = SerialBatchIdentity("Serial No").resolve(item, ["Custom-Serial"], create=True)[0]
+			doc = frappe.get_doc(doctype="Installation Note", items=[{"item_code": item}])
+			row = doc.items[0]
+			row.serial_no = "Custom-Serial"
+			row.set("__serial_batch_input", ["serial_no"])
+			payload = frappe.parse_json(doc.as_json())
+			self.assertEqual(payload["items"][0]["__serial_batch_input"], ["serial_no"])
+			resolve_transaction_numbers(doc)
+			self.assertEqual(row.serial_no, serial)
 
 	def test_bundle_save_resolves_physical_entries(self):
 		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (

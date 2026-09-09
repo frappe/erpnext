@@ -7,7 +7,6 @@ from frappe.utils.background_jobs import is_job_enqueued
 from frappe.utils.scheduler import is_scheduler_inactive
 from rq.timeouts import JobTimeoutException
 
-from erpnext.stock.serial_batch_fields import NUMBER_INPUT_DOCTYPES
 from erpnext.stock.serial_batch_input import NUMBER_FIELDS
 
 
@@ -64,7 +63,11 @@ class SerialBatchImporter(Importer):
 			return
 		for column in self.import_file.header.columns:
 			df = column.df
-			if column.skip_import or not df or df.parent not in NUMBER_INPUT_DOCTYPES:
+			if (
+				column.skip_import
+				or not df
+				or not frappe.get_meta(df.parent).has_field("serial_and_batch_bundle")
+			):
 				continue
 			if df.fieldname == "batch_no":
 				# Import cells contain physical numbers; validate their links after item resolution.
@@ -81,7 +84,7 @@ class SerialBatchImporter(Importer):
 class SerialBatchImportRow(Row):
 	def _parse_doc(self, doctype, columns, values, parent_doc=None, table_df=None):
 		doc = super()._parse_doc(doctype, columns, values, parent_doc, table_df)
-		if doctype in NUMBER_INPUT_DOCTYPES:
+		if frappe.get_meta(doctype).has_field("serial_and_batch_bundle"):
 			fields = [
 				column.df.fieldname
 				for column, value in zip(columns, values, strict=True)
@@ -93,4 +96,7 @@ class SerialBatchImportRow(Row):
 
 
 def has_number_inputs(doctype):
-	return any(df.options in NUMBER_INPUT_DOCTYPES for df in frappe.get_meta(doctype).get_table_fields())
+	return any(
+		frappe.get_meta(df.options).has_field("serial_and_batch_bundle")
+		for df in frappe.get_meta(doctype).get_table_fields()
+	)

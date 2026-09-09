@@ -34,7 +34,10 @@ const with_serial_numbers = (BaseControl) =>
 				return super.parse_validate_and_set_in_model(value, event);
 			}
 			const context = this.number_context();
-			if (context.row.parenttype && context.row.doctype !== "Stock Ledger Entry") {
+			if (
+				context.row.parenttype &&
+				frappe.meta.has_field(context.row.doctype, "serial_and_batch_bundle")
+			) {
 				const numbers = split_physical_numbers(value);
 				await set_pending_number(context, this.df.fieldname, numbers.join("\n"));
 				return;
@@ -144,9 +147,7 @@ frappe.ui.form.ControlLink = class extends frappe.ui.form.ControlLink {
 			doctype === "Batch" &&
 			this.df.fieldname === "batch_no" &&
 			row.parenttype &&
-			["Small Text", "Text", "Long Text"].includes(
-				frappe.meta.get_docfield(row.doctype, "serial_no")?.fieldtype
-			)
+			frappe.meta.has_field(row.doctype, "serial_and_batch_bundle")
 		) {
 			await set_pending_number({ frm, row }, "batch_no", (label ?? this.get_label_value()).trim());
 			return;

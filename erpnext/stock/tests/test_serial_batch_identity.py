@@ -224,17 +224,11 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 			pr.cancel()
 
 	def test_print_formats_physical_serials_without_changing_stored_ids(self):
-		from erpnext.stock.serial_batch_display import before_print
-
 		item = self.make_item(True)
 		name = self.create_number(item, "PRINT-123", True)
 		pr = make_purchase_receipt(item_code=item.name, qty=1, rate=100, serial_no=[name])
 		print_doc = frappe.get_doc("Purchase Receipt", pr.name)
 		print_doc.items[0].serial_no = name
-		before_print(print_doc)
-		before_print(print_doc)
-		self.assertEqual(print_doc.items[0].serial_no, name)
-		self.assertIn("PRINT-123", print_doc.items[0].get_formatted("serial_no"))
 		entry = frappe.get_doc("Serial and Batch Bundle", pr.items[0].serial_and_batch_bundle).entries[0]
 		self.assertEqual(entry.serial_no, name)
 		print_format = frappe.get_doc(
@@ -247,10 +241,14 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 				"html": "{{ doc.items[0].get_formatted('serial_no') }}",
 			}
 		).insert()
-		printed = frappe.get_print("Purchase Receipt", pr.name, print_format=print_format.name, doc=print_doc)
-		self.assertEqual(print_doc.items[0].serial_no, name)
-		self.assertIn("PRINT-123", printed)
-		self.assertNotIn(name, printed)
+		for _ in range(2):
+			printed = frappe.get_print(
+				"Purchase Receipt", pr.name, print_format=print_format.name, doc=print_doc
+			)
+			self.assertEqual(print_doc.items[0].serial_no, name)
+			self.assertEqual(print_doc.as_dict()["items"][0]["serial_no"], name)
+			self.assertIn("PRINT-123", printed)
+			self.assertNotIn(name, printed)
 		pr.cancel()
 
 	def test_number_search_returns_ids_and_physical_titles(self):

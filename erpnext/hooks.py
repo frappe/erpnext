@@ -1,5 +1,3 @@
-from erpnext.stock.serial_batch_fields import SERIAL_TEXT_DOCTYPES
-
 app_name = "erpnext"
 app_title = "ERPNext"
 app_publisher = "Frappe Technologies Pvt. Ltd."
@@ -385,14 +383,12 @@ pre_submit_validation_doctypes = [
 ]
 
 
-extend_doctype_class.update(
-	{doctype: "erpnext.stock.serial_batch_display.SerialNumberDisplay" for doctype in SERIAL_TEXT_DOCTYPES}
-)
+pdf_body_html = "erpnext.stock.serial_batch_display.pdf_body_html"
+
 extend_doctype_class["Data Import"] = "erpnext.stock.serial_batch_import.SerialBatchDataImport"
 
 doc_events = {
 	"*": {
-		"before_print": "erpnext.stock.serial_batch_display.before_print",
 		"validate": [
 			"erpnext.support.doctype.service_level_agreement.service_level_agreement.apply",
 			"erpnext.setup.doctype.transaction_deletion_record.transaction_deletion_record.check_for_running_deletion_job",

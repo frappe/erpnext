@@ -18,6 +18,32 @@ class UOMMustBeIntegerError(frappe.ValidationError):
 
 
 class TransactionBase(StatusUpdater):
+	def as_dict(
+		self,
+		no_nulls=False,
+		no_default_fields=False,
+		convert_dates_to_str=False,
+		no_child_table_fields=False,
+		no_private_properties=False,
+		**kwargs,
+	):
+		doc = super().as_dict(
+			no_nulls=no_nulls,
+			no_default_fields=no_default_fields,
+			convert_dates_to_str=convert_dates_to_str,
+			no_child_table_fields=no_child_table_fields,
+			no_private_properties=no_private_properties,
+			**kwargs,
+		)
+		if not no_private_properties:
+			for df in self.meta.get_table_fields():
+				for row, values in zip(
+					self.get(df.fieldname) or [], doc.get(df.fieldname) or [], strict=True
+				):
+					if row.meta.has_field("serial_and_batch_bundle") and row.get("__serial_batch_input"):
+						values["__serial_batch_input"] = row.get("__serial_batch_input").copy()
+		return doc
+
 	def _validate_links(self):
 		from erpnext.stock.serial_batch_input import resolve_transaction_numbers
 
