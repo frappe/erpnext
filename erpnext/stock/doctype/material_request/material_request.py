@@ -32,6 +32,7 @@ from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults
+from erpnext.stock.doctype.price_list.price_list import is_price_list_enabled
 from erpnext.stock.get_item_details import get_default_supplier, get_price_list_rate_for
 from erpnext.stock.stock_balance import get_indented_qty, update_bin_qty
 from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import (
@@ -219,14 +220,20 @@ class MaterialRequest(BuyingController):
 		self.reset_default_field_value("set_from_warehouse", "items", "from_warehouse")
 
 		self.validate_pp_qty()
+		self.set_buying_price_list()
 
-		if self.buying_price_list and not frappe.get_value("Price List", self.buying_price_list, "buying"):
+	def set_buying_price_list(self):
+		if not is_valid_buying_price_list(self.buying_price_list):
 			self.buying_price_list = None
 
-		if not self.buying_price_list:
-			buying_price_list = frappe.defaults.get_defaults().buying_price_list
-			if frappe.has_permission("Price List", "read", buying_price_list):
-				self.buying_price_list = buying_price_list
+		if self.buying_price_list:
+			return
+
+		default_price_list = frappe.defaults.get_defaults().buying_price_list
+		if is_valid_buying_price_list(default_price_list) and frappe.has_permission(
+			"Price List", "read", default_price_list
+		):
+			self.buying_price_list = default_price_list
 
 	def on_update(self):
 		if not self.is_new() and self.buying_price_list and self.has_value_changed("buying_price_list"):
@@ -486,6 +493,10 @@ class MaterialRequest(BuyingController):
 			doc.flags.ignore_permissions = True
 			doc.set_status()
 			doc.db_set("status", doc.status)
+
+
+def is_valid_buying_price_list(price_list: str | None) -> bool:
+	return is_price_list_enabled(price_list) and bool(frappe.get_value("Price List", price_list, "buying"))
 
 
 def update_completed_and_requested_qty(stock_entry, method):
