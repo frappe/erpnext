@@ -464,6 +464,7 @@ class BOM(WebsiteGenerator):
 		doc.set_status(save=True)
 
 	def set_fg_cost_allocation(self):
+		self.cost_allocation_per = flt(self.cost_allocation_per)
 		total_secondary_items_per = 0
 		own_cost = 0
 		for item in self.secondary_items:
