@@ -9,13 +9,13 @@ import json
 import frappe
 import frappe.defaults
 from frappe import _
-from frappe.model.document import Document
 from frappe.utils import flt
 
 from erpnext.stock.get_item_details import get_item_details, get_price_list_rate
+from erpnext.stock.serial_batch_display import SerialBatchReference
 
 
-class PackedItem(Document):
+class PackedItem(SerialBatchReference):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
 

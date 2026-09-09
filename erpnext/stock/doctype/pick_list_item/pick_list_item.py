@@ -3,10 +3,10 @@
 
 
 # import frappe
-from frappe.model.document import Document
+from erpnext.stock.serial_batch_display import SerialBatchReference
 
 
-class PickListItem(Document):
+class PickListItem(SerialBatchReference):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
 

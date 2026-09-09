@@ -1,10 +1,11 @@
 """Display physical numbers while retaining document IDs for stock references."""
 
-from copy import deepcopy
+from copy import copy
 from functools import wraps
 
 import frappe
 from frappe import _
+from frappe.model.document import Document
 from frappe.utils import escape_html
 
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
@@ -60,28 +61,46 @@ def report_number_columns(columns, rows):
 	return columns, rows
 
 
-def pdf_body_html(template, args, **kwargs):
-	from frappe.utils.pdf import pdf_body_html as render_body
+class SerialBatchReference(Document):
+	def get_formatted(
+		self, fieldname, doc=None, currency=None, absolute_value=False, translated=False, format=None
+	):
+		if fieldname not in serial_number_fields(self) or not self.get(fieldname):
+			return super().get_formatted(fieldname, doc, currency, absolute_value, translated, format)
 
-	print_doc = deepcopy(args["doc"])
-	set_serial_number_labels(print_doc)
-	return render_body(template, {**args, "doc": print_doc}, **kwargs)
+		names = self.get(fieldname).split("\n")
+		labels = {}
+		if fieldname not in (self.get("__serial_batch_input") or []):
+			labels = self.get("__serial_number_labels") or {}
+			if any(name not in labels for name in names):
+				set_serial_number_labels(self.parent_doc or self)
+				labels = self.get("__serial_number_labels") or {}
+
+		print_row = copy(self)
+		print_row.set(fieldname, "\n".join(escape_html(labels.get(name, name)) for name in names))
+		return super(SerialBatchReference, print_row).get_formatted(
+			fieldname, doc, currency, absolute_value, translated, format
+		)
 
 
-def set_serial_number_labels(doc):
-	rows = [doc, *doc.get_all_children()]
-	fields = ("serial_no", "rejected_serial_no", "current_serial_no")
-	serial_rows = [
-		row
+def set_serial_number_labels(doc, method=None, print_settings=None):
+	rows = [row for row in [doc, *doc.get_all_children()] if isinstance(row, SerialBatchReference)]
+	names = {
+		name
 		for row in rows
-		if row.doctype != "Serial No" and (row.get("item_code") or row.get("rm_item_code"))
+		for field in serial_number_fields(row)
+		if row.get(field) and field not in (row.get("__serial_batch_input") or [])
+		for name in row.get(field).split("\n")
+	}
+	labels = SerialBatchIdentity("Serial No").labels(names)
+	labels = {name: labels.get(name) or name for name in names}
+	for row in rows:
+		row.__dict__["__serial_number_labels"] = labels
+
+
+def serial_number_fields(row):
+	return [
+		field
+		for field in ("serial_no", "rejected_serial_no", "current_serial_no")
+		if (meta := row.meta.get_field(field)) and meta.fieldtype in ("Small Text", "Text", "Long Text")
 	]
-	values = []
-	for row in serial_rows:
-		for field in fields:
-			meta = row.meta.get_field(field)
-			if meta and meta.fieldtype in ("Small Text", "Text", "Long Text") and row.get(field):
-				values.append((row, field, row.get(field).split("\n")))
-	labels = SerialBatchIdentity("Serial No").labels([name for _, _, names in values for name in names])
-	for row, field, names in values:
-		row.set(field, "\n".join(escape_html(labels.get(name, name)) for name in names))

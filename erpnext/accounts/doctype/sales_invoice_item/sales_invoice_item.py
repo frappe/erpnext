@@ -4,12 +4,12 @@
 
 import frappe
 from frappe import _
-from frappe.model.document import Document
 
 from erpnext.assets.doctype.asset.depreciation import get_disposal_account_and_cost_center
+from erpnext.stock.serial_batch_display import SerialBatchReference
 
 
-class SalesInvoiceItem(Document):
+class SalesInvoiceItem(SerialBatchReference):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
 

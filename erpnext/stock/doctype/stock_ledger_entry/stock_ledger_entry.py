@@ -8,7 +8,6 @@ from datetime import date
 import frappe
 from frappe import _
 from frappe.core.doctype.role.role import get_users
-from frappe.model.document import Document
 from frappe.query_builder.functions import Concat_ws, Max, Sum
 from frappe.utils import add_days, cint, flt, formatdate, get_datetime, getdate
 
@@ -17,6 +16,7 @@ from erpnext.controllers.item_variant import ItemTemplateCannotHaveStock
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos as get_parsed_serial_nos
 from erpnext.stock.serial_batch_bundle import SerialBatchBundle, get_serial_nos
+from erpnext.stock.serial_batch_display import SerialBatchReference
 
 
 class StockFreezeError(frappe.ValidationError):
@@ -38,7 +38,7 @@ class SerialNoInventoryDimensionError(frappe.ValidationError):
 exclude_from_linked_with = True
 
 
-class StockLedgerEntry(Document):
+class StockLedgerEntry(SerialBatchReference):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
 

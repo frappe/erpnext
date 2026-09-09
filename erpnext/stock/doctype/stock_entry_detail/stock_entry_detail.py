@@ -3,7 +3,6 @@
 
 import frappe
 from frappe import _, bold
-from frappe.model.document import Document
 from frappe.utils import (
 	flt,
 	get_link_to_form,
@@ -13,10 +12,11 @@ from frappe.utils import (
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 	OpeningEntryAccountError,
 )
+from erpnext.stock.serial_batch_display import SerialBatchReference
 from erpnext.stock.stock_ledger import get_previous_sle
 
 
-class StockEntryDetail(Document):
+class StockEntryDetail(SerialBatchReference):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
 

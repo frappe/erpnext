@@ -2,10 +2,10 @@
 # License: GNU General Public License v3. See license.txt
 
 
-from frappe.model.document import Document
+from erpnext.stock.serial_batch_display import SerialBatchReference
 
 
-class PurchaseInvoiceItem(Document):
+class PurchaseInvoiceItem(SerialBatchReference):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
 

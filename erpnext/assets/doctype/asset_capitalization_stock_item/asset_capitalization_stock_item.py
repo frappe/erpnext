@@ -2,10 +2,10 @@
 # For license information, please see license.txt
 
 # import frappe
-from frappe.model.document import Document
+from erpnext.stock.serial_batch_display import SerialBatchReference
 
 
-class AssetCapitalizationStockItem(Document):
+class AssetCapitalizationStockItem(SerialBatchReference):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
 

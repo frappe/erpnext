@@ -383,12 +383,11 @@ pre_submit_validation_doctypes = [
 ]
 
 
-pdf_body_html = "erpnext.stock.serial_batch_display.pdf_body_html"
-
 extend_doctype_class["Data Import"] = "erpnext.stock.serial_batch_import.SerialBatchDataImport"
 
 doc_events = {
 	"*": {
+		"before_print": "erpnext.stock.serial_batch_display.set_serial_number_labels",
 		"validate": [
 			"erpnext.support.doctype.service_level_agreement.service_level_agreement.apply",
 			"erpnext.setup.doctype.transaction_deletion_record.transaction_deletion_record.check_for_running_deletion_job",
