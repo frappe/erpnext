@@ -1,11 +1,7 @@
 from copy import copy
 
 import frappe
-from frappe import _
 from frappe.core.doctype.data_import.importer import Importer, Row
-from frappe.utils.background_jobs import is_job_enqueued
-from frappe.utils.scheduler import is_scheduler_inactive
-from rq.timeouts import JobTimeoutException
 
 from erpnext.stock.serial_batch_input import NUMBER_FIELDS
 
@@ -15,45 +11,6 @@ class SerialBatchDataImport:
 		if not has_number_inputs(self.reference_doctype):
 			return super().get_importer()
 		return SerialBatchImporter(self.reference_doctype, data_import=self, use_sniffer=self.use_csv_sniffer)
-
-	def start_import(self):
-		if not has_number_inputs(self.reference_doctype):
-			return super().start_import()
-		run_now = frappe.in_test or frappe.conf.developer_mode
-		if is_scheduler_inactive() and not run_now:
-			frappe.throw(_("Scheduler is inactive. Cannot import data."), title=_("Scheduler Inactive"))
-		job_id = f"data_import||{self.name}"
-		if not is_job_enqueued(job_id):
-			frappe.enqueue(
-				start_import,
-				queue="default",
-				timeout=10000,
-				event="data_import",
-				job_id=job_id,
-				data_import=self.name,
-				now=run_now,
-				enqueue_after_commit=True,
-			)
-			return True
-
-
-def start_import(data_import):
-	data_import = frappe.get_doc("Data Import", data_import)
-	data_import.set_delimiters_flag()
-	try:
-		data_import.get_importer().import_data()
-	except JobTimeoutException:
-		frappe.db.rollback()
-		data_import.db_set("status", "Timed Out")
-	except Exception:
-		frappe.db.rollback()
-		data_import.db_set("status", "Error")
-		data_import.log_error("Data import failed")
-	finally:
-		frappe.flags.in_import = False
-	frappe.publish_realtime(
-		"data_import_refresh", {"data_import": data_import.name}, user=frappe.session.user
-	)
 
 
 class SerialBatchImporter(Importer):
