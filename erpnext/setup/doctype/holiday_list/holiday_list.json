@@ -58,9 +58,10 @@
   },
   {
    "fieldname": "total_holidays",
-   "fieldtype": "Int",
+   "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Total Holidays",
+   "precision": "1",
    "read_only": 1
   },
   {
