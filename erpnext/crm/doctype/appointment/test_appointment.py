@@ -53,7 +53,7 @@ def set_booking_setting(field, value):
 
 
 def slot_on(days_from_now, hour, minute=0):
-	day = datetime.date.today() + datetime.timedelta(days=days_from_now)
+	day = getdate() + datetime.timedelta(days=days_from_now)
 	return datetime.datetime.combine(day, datetime.time(hour, minute))
 
 
@@ -136,7 +136,7 @@ class TestAppointment(FrappeTestCase):
 
 		with self.set_user("Guest"), patch.object(Appointment, "send_confirmation_email") as mock_send:
 			appointment = create_appointment(
-				date=str(datetime.date.today() + datetime.timedelta(days=days_from_now)),
+				date=str(getdate() + datetime.timedelta(days=days_from_now)),
 				time=time,
 				tz=get_system_timezone(),
 				contact={"name": "Portal Visitor", "email": email, "number": "123", "skype": "", "notes": ""},
@@ -280,7 +280,7 @@ class TestAppointment(FrappeTestCase):
 
 		with self.set_user("Guest"), self.assertRaises(frappe.Redirect):
 			create_appointment(
-				date=str(datetime.date.today() + datetime.timedelta(days=3)),
+				date=str(getdate() + datetime.timedelta(days=3)),
 				time="10:00:00",
 				tz="UTC",
 				contact={
@@ -295,7 +295,7 @@ class TestAppointment(FrappeTestCase):
 	def test_booked_slot_unavailable_on_portal(self):
 		self._configure_booking_settings()
 		tz = get_system_timezone()
-		day = datetime.date.today() + datetime.timedelta(days=2)
+		day = getdate() + datetime.timedelta(days=2)
 
 		def get_availability():
 			with self.set_user("Guest"):
