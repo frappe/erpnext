@@ -29,15 +29,11 @@ from erpnext.buying.utils import check_on_hold_or_closed_status, validate_for_it
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
-<<<<<<< HEAD
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults
-from erpnext.stock.get_item_details import get_default_supplier, get_price_list_rate_for
-=======
 from erpnext.stock.doctype.price_list.price_list import is_price_list_enabled
-from erpnext.stock.get_item_details import get_price_list_rate_for
->>>>>>> fd49210 (fix(stock): ignore disabled price lists on transactions (#58926))
+from erpnext.stock.get_item_details import get_default_supplier, get_price_list_rate_for
 from erpnext.stock.stock_balance import get_indented_qty, update_bin_qty
 from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import (
 	get_subcontracting_boms_for_finished_goods,
