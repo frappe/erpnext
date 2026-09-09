@@ -26,6 +26,7 @@ import erpnext
 from erpnext import get_company_currency
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.exceptions import InvalidAccountCurrency, PartyDisabled, PartyFrozen
+from erpnext.stock.doctype.price_list.price_list import is_price_list_enabled
 from erpnext.utilities.regional import temporary_flag
 
 try:
@@ -419,6 +420,9 @@ def set_price_list(party_details, party, party_type, given_price_list, pos=None)
 			price_list = pos_price_list or given_price_list
 	else:
 		price_list = get_default_price_list(party) or given_price_list
+
+	if price_list and not is_price_list_enabled(price_list):
+		price_list = None
 
 	if price_list:
 		party_details.price_list_currency = frappe.db.get_value(

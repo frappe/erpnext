@@ -7,6 +7,7 @@ from frappe.defaults import get_user_default
 from frappe.utils import cint
 
 import erpnext.accounts.utils
+from erpnext.stock.doctype.price_list.price_list import is_price_list_enabled
 
 
 def boot_session(bootinfo):
@@ -27,6 +28,8 @@ def boot_session(bootinfo):
 		bootinfo.sysdefaults.disable_include_dimensions = cint(
 			frappe.get_single_value("Accounts Settings", "disable_include_dimensions")
 		)
+
+		remove_disabled_price_list_defaults(bootinfo)
 
 		bootinfo.sysdefaults.quotation_valid_till = cint(
 			frappe.db.get_single_value("CRM Settings", "default_valid_till")
@@ -79,6 +82,18 @@ def boot_session(bootinfo):
 			"Accounts Settings", "default_ageing_range"
 		)
 		bootinfo.sysdefaults.repost_allowed_doctypes = frappe.get_hooks("repost_allowed_doctypes")
+
+
+def remove_disabled_price_list_defaults(bootinfo):
+	user_defaults = bootinfo.user.get("defaults") or {}
+
+	for key in ("selling_price_list", "buying_price_list"):
+		price_list = bootinfo.sysdefaults.get(key) or user_defaults.get(key)
+		if not isinstance(price_list, str) or is_price_list_enabled(price_list):
+			continue
+
+		bootinfo.sysdefaults.pop(key, None)
+		user_defaults.pop(key, None)
 
 
 def update_page_info(bootinfo):
