@@ -1,0 +1,245 @@
+# Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and Contributors
+# License: GNU General Public License v3. See license.txt
+
+import frappe
+from frappe.query_builder.functions import Abs, Count, Floor, IfNull, Max, Min, Sum
+from pypika import Case, CustomFunction, Tuple
+from pypika.analytics import CURRENT_ROW, Preceding
+from pypika.analytics import Sum as WindowSum
+
+ArgMin = CustomFunction("arg_min_null", ["value", "order"])
+ArgMax = CustomFunction("arg_max_null", ["value", "order"])
+Row = CustomFunction("row", ["posting_datetime", "creation"])
+Least = CustomFunction("least", ["left", "right"])
+
+
+class SnapshotFIFO:
+	"""Resolve surviving receipt layers in DuckDB when FIFO arithmetic is exact."""
+
+	def __init__(self, fifo):
+		self.fifo = fifo
+		self.snapshot = fifo.snapshot
+		ledger = frappe.qb.DocType("Stock Ledger Entry")
+		self.entries = fifo._get_stock_ledger_query(ordered=False).select(
+			ledger.posting_datetime, ledger.creation
+		)
+
+	def generate(self, serial_bundles=None, batch_bundles=None):
+		summaries = self.snapshot.run(self.get_summary_query(), as_dict=True)
+		if len({row.first_order for row in summaries}) != len(summaries):
+			return None
+		eligible = [row for row in summaries if self.can_aggregate(row)]
+		if summaries and not eligible:
+			return None
+
+		details = {}
+		for row in eligible:
+			key = (row.name, row.warehouse)
+			details[key] = {
+				"details": frappe._dict({field: row[field] for field in DETAIL_FIELDS}),
+				"fifo_queue": [],
+				"total_qty": row.total_qty,
+				"qty_after_transaction": row.final_qty,
+				"has_serial_no": row.has_serial_no,
+				"has_batch_no": row.has_batch_no,
+			}
+
+		self.fast_keys = list(details)
+		if len(eligible) != len(summaries):
+			entries = frappe.qb.Table("fifo_scope")
+			self.entries = (
+				frappe.qb.from_(self.entries.as_("fifo_scope"))
+				.select(entries.star)
+				.where(Tuple(entries.name, entries.warehouse).isin(self.fast_keys))
+			)
+		if details:
+			for row in self.snapshot.run(self.get_layers_query(), as_iterator=True):
+				item, warehouse, qty, posting_date, value = row
+				details[(item, warehouse)]["fifo_queue"].append([qty, posting_date, value])
+		if len(eligible) != len(summaries):
+			self.fifo.item_details = details
+			serial_bundles = serial_bundles or {}
+			batch_bundles = batch_bundles or {}
+			ledger = frappe.qb.DocType("Stock Ledger Entry")
+			query = self.fifo._get_stock_ledger_query().where(
+				~Tuple(ledger.item_code, ledger.warehouse).isin(self.fast_keys) | ledger.warehouse.isnull()
+			)
+			for row in self.snapshot.run(query, as_dict=True, as_iterator=True):
+				self.fifo._process_stock_ledger_entry(row, serial_bundles, batch_bundles)
+		return {(row.name, row.warehouse): details[(row.name, row.warehouse)] for row in summaries}
+
+	def can_aggregate(self, row):
+		return (
+			not row.unsupported
+			and row.min_balance >= 0
+			and row.row_count == row.voucher_count == row.order_count
+			and row.qty_bound < 2**52
+			and row.value_bound < 2**52
+			and self.fifo._get_item_valuation_method(row.name) in ("FIFO", "Moving Average")
+		)
+
+	def get_summary_query(self):
+		entries = frappe.qb.Table("fifo_entries")
+		progress = frappe.qb.Table("fifo_progress")
+		order = Row(progress.posting_datetime, progress.creation)
+		progress_query = frappe.qb.from_(entries).select(
+			entries.star, self.running_sum(entries.actual_qty, entries).as_("running_qty")
+		)
+		unsupported = (
+			(progress.voucher_type == "Stock Reconciliation")
+			| (IfNull(progress.has_serial_no, 0) != 0)
+			| (IfNull(progress.has_batch_no, 0) != 0)
+		)
+		for field in ("serial_no", "batch_no", "serial_and_batch_bundle"):
+			unsupported |= IfNull(progress[field], "") != ""
+		unsupported |= progress.warehouse.isnull() | progress.creation.isnull()
+		# Restrict reassociation to exactly representable binary fractions with bounded sums.
+		for field in (progress.actual_qty, progress.stock_value_difference):
+			unsupported |= field.isnull() | (field * 1024 != Floor(field * 1024))
+
+		return (
+			frappe.qb.with_(self.entries, "fifo_entries")
+			.with_(progress_query, "fifo_progress")
+			.from_(progress)
+			.select(
+				progress.name,
+				progress.warehouse,
+				*[
+					ArgMin(progress[field], order).as_(field)
+					for field in DETAIL_FIELDS
+					if field not in ("name", "warehouse", "valuation_rate")
+				],
+				ArgMax(progress.valuation_rate, order).as_("valuation_rate"),
+				ArgMax(progress.qty_after_transaction, order).as_("final_qty"),
+				Min(order).as_("first_order"),
+				Count("*").as_("row_count"),
+				Count(progress.voucher_no).distinct().as_("voucher_count"),
+				Count(order).distinct().as_("order_count"),
+				Max(Case().when(unsupported, 1).else_(0)).as_("unsupported"),
+				Min(progress.running_qty).as_("min_balance"),
+				Sum(progress.actual_qty).as_("total_qty"),
+				Sum(Abs(progress.actual_qty) * 1024).as_("qty_bound"),
+				Sum(Abs(progress.stock_value_difference) * 1024).as_("value_bound"),
+			)
+			.groupby(progress.name, progress.warehouse)
+			.orderby("first_order")
+		)
+
+	def get_layers_query(self):
+		entries = frappe.qb.Table("fifo_entries")
+		progress = frappe.qb.Table("fifo_progress")
+		receipts = frappe.qb.Table("fifo_receipts")
+		issues = frappe.qb.Table("fifo_issues")
+		totals = frappe.qb.Table("fifo_totals")
+		resets = frappe.qb.Table("fifo_resets")
+		progress_query = frappe.qb.from_(entries).select(
+			entries.name,
+			entries.warehouse,
+			entries.actual_qty,
+			entries.stock_value_difference,
+			entries.posting_date,
+			entries.posting_datetime,
+			entries.creation,
+			*self.get_cumulative_columns(entries),
+		)
+		totals_query = (
+			frappe.qb.from_(progress)
+			.select(
+				progress.name,
+				progress.warehouse,
+				Max(progress.out_qty).as_("out_qty"),
+				Max(progress.out_value).as_("out_value"),
+			)
+			.groupby(progress.name, progress.warehouse)
+		)
+		# Exact layer exhaustion discards the issue's residual value in the existing FIFO replay.
+		resets_query = (
+			frappe.qb.from_(issues)
+			.join(receipts)
+			.on(self.same_stock(issues, receipts) & (issues.out_qty == receipts.in_qty))
+			.select(
+				issues.name,
+				issues.warehouse,
+				ArgMax(issues.out_value - receipts.in_value, issues.out_qty).as_("correction"),
+			)
+			.groupby(issues.name, issues.warehouse)
+		)
+		return (
+			frappe.qb.with_(self.entries, "fifo_entries")
+			.with_(progress_query, "fifo_progress")
+			.with_(
+				frappe.qb.from_(progress).select(progress.star).where(progress.actual_qty > 0),
+				"fifo_receipts",
+			)
+			.with_(
+				frappe.qb.from_(progress).select(progress.star).where(progress.actual_qty < 0), "fifo_issues"
+			)
+			.with_(totals_query, "fifo_totals")
+			.with_(resets_query, "fifo_resets")
+			.from_(receipts)
+			.join(totals)
+			.on(self.same_stock(receipts, totals))
+			.left_join(resets)
+			.on(self.same_stock(receipts, resets))
+			.select(
+				receipts.name,
+				receipts.warehouse,
+				Least(receipts.actual_qty, receipts.in_qty - totals.out_qty).as_("qty"),
+				receipts.posting_date,
+				Case()
+				.when(
+					receipts.in_qty - receipts.actual_qty < totals.out_qty,
+					receipts.in_value - totals.out_value + IfNull(resets.correction, 0),
+				)
+				.else_(receipts.stock_value_difference)
+				.as_("value"),
+			)
+			.where(receipts.in_qty > totals.out_qty)
+			.orderby(receipts.name, receipts.warehouse, receipts.posting_datetime, receipts.creation)
+		)
+
+	def get_cumulative_columns(self, entries):
+		for field, condition, value in (
+			("in_qty", entries.actual_qty > 0, entries.actual_qty),
+			("in_value", entries.actual_qty > 0, entries.stock_value_difference),
+			("out_qty", entries.actual_qty < 0, -entries.actual_qty),
+			("out_value", entries.actual_qty < 0, Abs(entries.stock_value_difference)),
+		):
+			yield self.running_sum(Case().when(condition, value).else_(0), entries).as_(field)
+
+	@staticmethod
+	def running_sum(value, table):
+		return (
+			WindowSum(value)
+			.over(table.name, table.warehouse)
+			.orderby(table.posting_datetime, table.creation)
+			.rows(Preceding(), CURRENT_ROW)
+		)
+
+	@staticmethod
+	def same_stock(left, right):
+		return (left.name == right.name) & (left.warehouse == right.warehouse)
+
+
+DETAIL_FIELDS = (
+	"name",
+	"item_name",
+	"item_group",
+	"brand",
+	"description",
+	"stock_uom",
+	"has_batch_no",
+	"has_serial_no",
+	"actual_qty",
+	"stock_value_difference",
+	"valuation_rate",
+	"posting_date",
+	"voucher_type",
+	"voucher_no",
+	"voucher_detail_no",
+	"serial_no",
+	"batch_no",
+	"qty_after_transaction",
+	"serial_and_batch_bundle",
+	"warehouse",
+)

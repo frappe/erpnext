@@ -3,6 +3,7 @@
 
 
 import json
+from contextlib import nullcontext
 from operator import itemgetter
 from typing import Any, TypedDict
 
@@ -21,6 +22,7 @@ from erpnext.stock.report.stock_ageing.stock_ageing import (
 	get_average_age,
 	normalize_fifo_queue,
 )
+from erpnext.stock.report.stock_report_snapshot import StockReportSnapshot, run_stock_query
 from erpnext.stock.utils import add_additional_uom_columns
 
 
@@ -45,9 +47,15 @@ def execute(filters: StockBalanceFilter | None = None):
 	return StockBalanceReport(filters).run()
 
 
+def execute_snapshot_report(filters):
+	with StockReportSnapshot("Stock Balance", filters) as snapshot:
+		return StockBalanceReport(filters, snapshot).run()
+
+
 class StockBalanceReport:
-	def __init__(self, filters: StockBalanceFilter | None) -> None:
+	def __init__(self, filters: StockBalanceFilter | None, snapshot=None) -> None:
 		self.filters = filters
+		self.snapshot = snapshot
 		self.from_date = getdate(filters.get("from_date"))
 		self.to_date = getdate(filters.get("to_date"))
 
@@ -65,6 +73,8 @@ class StockBalanceReport:
 
 	def run(self):
 		self.float_precision = cint(frappe.db.get_default("float_precision")) or 3
+		self.rounding_method = frappe.get_system_settings("rounding_method") or "Banker's Rounding (legacy)"
+		self.rounding_unit = 10**-self.float_precision
 
 		self.item_warehouse_map = frappe._dict({})
 		self.inventory_dimensions = self.get_inventory_dimension_fields()
@@ -194,16 +204,21 @@ class StockBalanceReport:
 	def prepare_item_warehouse_map_for_current_period(self):
 		self.opening_vouchers = self.get_opening_vouchers()
 
-		if self.filters.get("show_stock_ageing_data"):
-			self.sle_entries = self.sle_query.run(as_dict=True)
+		if self.snapshot:
+			from erpnext.stock.report.stock_balance.stock_balance_snapshot import prepare_aggregated_balances
+
+			if prepare_aggregated_balances(self):
+				self.item_warehouse_map = filter_items_with_no_transactions(
+					self.item_warehouse_map, self.float_precision, self.inventory_dimensions
+				)
+				return
 
 		self.prepare_stock_reco_voucher_wise_count()
 
 		# HACK: This is required to avoid causing db query in flt
 		_system_settings = frappe.get_cached_doc("System Settings")
-		with frappe.db.unbuffered_cursor():
-			if not self.filters.get("show_stock_ageing_data"):
-				self.sle_entries = self.sle_query.run(as_dict=True, as_iterator=True)
+		with nullcontext() if self.snapshot else frappe.db.unbuffered_cursor():
+			self.sle_entries = run_stock_query(self.sle_query, self.snapshot, as_dict=True, as_iterator=True)
 
 			for entry in self.sle_entries:
 				group_by_key = self.get_group_by_key(entry)
@@ -266,7 +281,7 @@ class StockBalanceReport:
 			if childrens:
 				query = query.where(doctype.warehouse.isin(childrens))
 
-		data = query.run(as_dict=True)
+		data = run_stock_query(query, self.snapshot, as_dict=True)
 		if not data:
 			return
 
@@ -284,7 +299,7 @@ class StockBalanceReport:
 	def prepare_new_data(self):
 		if self.filters.get("show_stock_ageing_data"):
 			self.filters["show_warehouse_wise_stock"] = True
-			item_wise_fifo_queue = FIFOSlots(self.filters).generate()
+			item_wise_fifo_queue = FIFOSlots(self.filters, snapshot=self.snapshot).generate()
 
 		del self.sle_entries
 
@@ -368,12 +383,12 @@ class StockBalanceReport:
 			qty_dict.opening_val += value_diff
 
 		elif entry.posting_date >= self.from_date and entry.posting_date <= self.to_date:
-			if flt(qty_diff, self.float_precision) >= 0:
+			if self.is_incoming(qty_diff):
 				qty_dict.in_qty += qty_diff
 			else:
 				qty_dict.out_qty += abs(qty_diff)
 
-			if flt(value_diff, self.float_precision) >= 0:
+			if self.is_incoming(value_diff):
 				qty_dict.in_val += value_diff
 			else:
 				qty_dict.out_val += abs(value_diff)
@@ -381,6 +396,14 @@ class StockBalanceReport:
 		qty_dict.val_rate = entry.valuation_rate
 		qty_dict.bal_qty += qty_diff
 		qty_dict.bal_val += value_diff
+
+	def is_incoming(self, value):
+		# Only a negative amount smaller than one rounding unit can round to zero.
+		if value >= 0:
+			return True
+		if value <= -self.rounding_unit:
+			return False
+		return flt(value, self.float_precision, self.rounding_method) >= 0
 
 	def initialize_data(self, group_by_key, entry):
 		self.item_warehouse_map[group_by_key] = frappe._dict(

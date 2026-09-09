@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 
-from collections.abc import Iterator
+from contextlib import nullcontext
 from operator import itemgetter
 
 import frappe
@@ -12,6 +12,7 @@ from frappe.utils import cint, date_diff, flt, get_datetime
 
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
+from erpnext.stock.report.stock_report_snapshot import StockReportSnapshot, run_stock_query
 from erpnext.stock.valuation import round_off_if_near_zero
 
 Filters = frappe._dict
@@ -33,11 +34,20 @@ MAX_CHART_ITEMS = 10
 
 
 def execute(filters: Filters = None) -> tuple:
+	return _execute(filters)
+
+
+def execute_snapshot_report(filters):
+	with StockReportSnapshot("Stock Ageing", filters) as snapshot:
+		return _execute(filters, snapshot)
+
+
+def _execute(filters, snapshot=None):
 	to_date = filters["to_date"]
 	filters.ranges = get_age_ranges(filters.range)
 	columns = get_columns(filters)
 
-	item_details = FIFOSlots(filters).generate()
+	item_details = FIFOSlots(filters, snapshot=snapshot).generate()
 	data = format_report_data(filters, item_details, to_date)
 
 	chart_data = get_chart_data(data, filters)
@@ -283,7 +293,7 @@ def is_qty_slot(slot: list) -> bool:
 class FIFOSlots:
 	"Returns FIFO computed slots of inwarded stock as per date."
 
-	def __init__(self, filters: dict | None = None, sle: list | None = None):
+	def __init__(self, filters: dict | None = None, sle: list | None = None, snapshot=None):
 		self.item_details = {}
 		self.transferred_item_details = {}
 		self.serial_no_details = {}
@@ -292,6 +302,7 @@ class FIFOSlots:
 		self.valuation_method_by_item = {}
 		self.filters = filters
 		self.sle = sle
+		self.snapshot = snapshot
 
 	def generate(self) -> dict:
 		"""
@@ -311,29 +322,24 @@ class FIFOSlots:
 		self.float_precision = get_float_precision()
 
 		if stock_ledger_entries is None:
-			# streaming path: nested queries invalidate the streaming cursor below,
-			# so batchwise valuation flags and item valuation methods must be resolved beforehand
+			# Resolve supporting records and warehouse filters before opening the streaming cursor.
 			self._prefetch_batchwise_valuations()
 			self._prefetch_valuation_methods()
+			query = self._get_stock_ledger_query()
 
-			if frappe.db.db_type == "postgres":
-				# postgres server-side cursors can't run nested queries mid-iteration; _get_stock_ledger_entries
-				# returns a buffered result there, so process it directly (no unbuffered cursor).
-				for row in self._get_stock_ledger_entries():
-					self._process_stock_ledger_entry(row, bundle_wise_serial_nos, bundle_wise_batch_nos)
+			snapshot_details = None
+			if self.snapshot:
+				from erpnext.stock.report.stock_ageing.stock_ageing_snapshot import SnapshotFIFO
+
+				snapshot_details = SnapshotFIFO(self).generate(bundle_wise_serial_nos, bundle_wise_batch_nos)
+			if snapshot_details is not None:
+				self.item_details = snapshot_details
 			else:
-				with frappe.db.unbuffered_cursor():
-					stock_ledger_entries = self._get_stock_ledger_entries()
-
-					for row in stock_ledger_entries:
+				with nullcontext() if self.snapshot else frappe.db.unbuffered_cursor():
+					for row in run_stock_query(query, self.snapshot, as_dict=True, as_iterator=True):
 						self._process_stock_ledger_entry(row, bundle_wise_serial_nos, bundle_wise_batch_nos)
-
-					# Note that stock_ledger_entries is an iterator, you can not reuse it like a list
-					del stock_ledger_entries
 		else:
-			# entries passed in directly as a list: no streaming cursor is opened, so the batchwise
-			# valuation flags can be resolved lazily — a nested get_value here is safe on postgres too
-			# (running it inside an unbuffered/named cursor would raise on postgres).
+			# Supplied entries can resolve supporting records lazily without a streaming cursor.
 			for row in stock_ledger_entries:
 				self._process_stock_ledger_entry(row, bundle_wise_serial_nos, bundle_wise_batch_nos)
 
@@ -472,12 +478,12 @@ class FIFOSlots:
 
 		if row.serial_and_batch_bundle:
 			if row.has_serial_no:
-				if bundle_wise_serial_nos:
+				if self.sle is None or bundle_wise_serial_nos:
 					serial_nos = bundle_wise_serial_nos.get(row.serial_and_batch_bundle) or []
 				else:
 					serial_nos = sorted(get_serial_nos_from_bundle(row.serial_and_batch_bundle)) or []
 			elif row.has_batch_no:
-				if bundle_wise_batch_nos:
+				if self.sle is None or bundle_wise_batch_nos:
 					batch_nos = bundle_wise_batch_nos.get(row.serial_and_batch_bundle) or []
 				else:
 					batch_nos = (
@@ -547,13 +553,13 @@ class FIFOSlots:
 
 		query = self._apply_filter(query, sle, "item_code")
 
-		for batch_no, use_batchwise_valuation in query.run():
+		for batch_no, use_batchwise_valuation in run_stock_query(query, self.snapshot):
 			self.batchwise_valuation_by_batch[batch_no] = use_batchwise_valuation
 
 	def _get_item_valuation_method(self, item_code: str) -> str:
-		from erpnext.stock.utils import get_valuation_method
-
 		if item_code not in self.valuation_method_by_item:
+			from erpnext.stock.utils import get_valuation_method
+
 			# only reachable when stock ledger entries are passed in directly;
 			# the streaming path prefetches all methods before iteration
 			self.valuation_method_by_item[item_code] = get_valuation_method(
@@ -566,23 +572,19 @@ class FIFOSlots:
 		from erpnext.stock.utils import get_valuation_method
 
 		company = self.filters.get("company")
-		sle = frappe.qb.DocType("Stock Ledger Entry")
 		item = frappe.qb.DocType("Item")
-		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59")
-
-		query = (
-			frappe.qb.from_(sle)
-			.inner_join(item)
-			.on(sle.item_code == item.name)
-			.select(item.name, item.valuation_method)
-			.distinct()
-			.where((sle.company == company) & (sle.posting_datetime <= to_date) & (sle.is_cancelled != 1))
-		)
-		query = self._apply_filter(query, sle, "item_code")
+		query = frappe.qb.from_(item).select(item.name, item.valuation_method)
+		query = self._apply_filter(query, item, "item_code")
+		if self.filters.get("item_code"):
+			methods = query.run()
+		else:
+			entries = self._get_stock_ledger_query(ordered=False).as_("valuation_entries")
+			query = query.where(item.name.isin(frappe.qb.from_(entries).select(entries.name)))
+			methods = run_stock_query(query, self.snapshot)
 
 		# items with no item-level method share the company/settings default; resolve it once
 		default_method = None
-		for item_code, valuation_method in query.run():
+		for item_code, valuation_method in methods:
 			if not valuation_method:
 				if default_method is None:
 					default_method = get_valuation_method(item_code, company)
@@ -593,11 +595,11 @@ class FIFOSlots:
 		"Initialise keys and FIFO Queue."
 
 		key = (row.name, row.warehouse)
-		self.item_details.setdefault(key, {"details": row, "fifo_queue": []})
+		if key not in self.item_details:
+			self.item_details[key] = {"details": row, "fifo_queue": []}
 		fifo_queue = self.item_details[key]["fifo_queue"]
 
 		transferred_item_key = (row.voucher_no, row.name, row.warehouse)
-		self.transferred_item_details.setdefault(transferred_item_key, [])
 
 		return key, fifo_queue, transferred_item_key
 
@@ -714,6 +716,7 @@ class FIFOSlots:
 		from_end: bool = False,
 	):
 		"Update FIFO Queue on outward stock."
+		self.transferred_item_details.setdefault(transfer_key, [])
 		if serial_nos:
 			self._consume_serial_fifo_slots(fifo_queue, serial_nos)
 		elif batch_nos:
@@ -1029,7 +1032,7 @@ class FIFOSlots:
 
 		return item_aggregated_data
 
-	def _get_stock_ledger_entries(self) -> Iterator[dict]:
+	def _get_stock_ledger_query(self, ordered=True):
 		sle = frappe.qb.DocType("Stock Ledger Entry")
 		item = self._get_item_query()  # used as derived table in sle query
 		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59")
@@ -1079,11 +1082,7 @@ class FIFOSlots:
 			if warehouses:
 				sle_query = sle_query.where(sle.warehouse.isin(warehouses))
 
-		sle_query = sle_query.orderby(sle.posting_datetime, sle.creation)
-
-		# postgres server-side (named) cursors can't run nested queries mid-iteration, which
-		# _process_stock_ledger_entry needs; fall back to a buffered fetch there. MariaDB streams.
-		return sle_query.run(as_dict=True, as_iterator=frappe.db.db_type != "postgres")
+		return sle_query.orderby(sle.posting_datetime, sle.creation) if ordered else sle_query
 
 	def _get_bundle_wise_serial_nos(self) -> dict:
 		bundle = frappe.qb.DocType("Serial and Batch Bundle")
@@ -1211,7 +1210,7 @@ class FIFOSlots:
 			.groupby(doctype.voucher_detail_no)
 		)
 
-		data = query.run(as_dict=True)
+		data = run_stock_query(query, self.snapshot, as_dict=True)
 		if not data:
 			return
 
