@@ -1,6 +1,8 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+import hashlib
+import json
 from copy import deepcopy
 from datetime import datetime, timedelta
 from decimal import Decimal
@@ -22,6 +24,18 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestStockAgeingSnapshot(ERPNextTestSuite):
+	def test_generated_histories_stay_pinned(self):
+		"""The seeded histories are fixtures. A different sequence must fail here, not silently
+		change what the FIFO tests cover."""
+		digest = hashlib.sha256()
+		for seed in range(20):
+			for row in self.make_rows(seed):
+				digest.update(json.dumps(row, default=str, sort_keys=True).encode())
+
+		self.assertEqual(
+			digest.hexdigest(), "c0d6222b7c07fb59a5f43f7186e2236ae574f83646453a11f1bd6321992abf33"
+		)
+
 	def test_randomized_fifo_layers_match_replay(self):
 		for seed in range(20):
 			with self.subTest(seed=seed):
