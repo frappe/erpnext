@@ -11,6 +11,8 @@ from pypika.terms import Bracket, ExistsCriterion
 
 RESTRICTABLE_MASTER_DOCTYPES = ("Item", "Customer", "Supplier")
 
+RESTRICTION_INHERITED_FROM = {"Item Price": ("Item", "item_code")}
+
 COMPANY_RESTRICTION_EXEMPT_DOCTYPES = frozenset(
 	{
 		"Asset",
@@ -71,6 +73,25 @@ def get_permission_query_conditions(user, doctype=None):
 	return get_restriction_criterion(doctype, allowed_companies)
 
 
+def get_inherited_permission_query_conditions(user, doctype=None):
+	if not (inherited := RESTRICTION_INHERITED_FROM.get(doctype)):
+		return None
+
+	master_doctype, fieldname = inherited
+	allowed_companies = get_allowed_companies(user, master_doctype)
+	if not allowed_companies:
+		return None
+
+	child = frappe.qb.DocType(doctype)
+	master = frappe.qb.DocType(master_doctype)
+	allowed_masters = (
+		frappe.qb.from_(master)
+		.select(master.name)
+		.where(get_restriction_criterion(master_doctype, allowed_companies))
+	)
+	return child[fieldname].isin(allowed_masters)
+
+
 def get_restriction_criterion(doctype, companies):
 	parent = frappe.qb.DocType(doctype)
 	restriction = frappe.qb.DocType("Company Restriction")
@@ -96,6 +117,17 @@ def has_permission(doc, ptype=None, user=None):
 		return True
 
 	return any(row.company in allowed_companies for row in doc.get("allowed_companies") or [])
+
+
+def has_inherited_permission(doc, ptype=None, user=None):
+	if not (inherited := RESTRICTION_INHERITED_FROM.get(doc.doctype)):
+		return True
+
+	master_doctype, fieldname = inherited
+	if not (master_name := doc.get(fieldname)):
+		return True
+
+	return has_permission(frappe.get_cached_doc(master_doctype, master_name), ptype, user)
 
 
 def validate_allowed_companies(doc, method=None):
