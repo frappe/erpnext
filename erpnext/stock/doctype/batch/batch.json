@@ -52,7 +52,8 @@
    "oldfieldname": "batch_id",
    "oldfieldtype": "Data",
    "reqd": 1,
-   "search_index": 1
+   "search_index": 1,
+   "set_only_once": 1
   },
   {
    "fieldname": "item",
@@ -214,7 +215,7 @@
  "image_field": "image",
  "links": [],
  "max_attachments": 5,
- "modified": "2026-08-21 23:11:39.905227",
+ "modified": "2026-09-09 10:32:25.613814",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Batch",
@@ -289,11 +290,11 @@
  ],
  "quick_entry": 1,
  "row_format": "Dynamic",
+ "search_fields": "item",
+ "show_title_field_in_link": 1,
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "title_field": "batch_id",
- "track_changes": 1,
- "show_title_field_in_link": 1,
- "search_fields": "item"
+ "track_changes": 1
 }
