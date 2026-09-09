@@ -735,10 +735,14 @@ frappe.ui.form.on("Asset", {
 	},
 
 	net_purchase_amount: function (frm) {
-		if (frm.doc.finance_books) {
+		if (frm.doc.finance_books && frm.doc.finance_books.length) {
 			frm.doc.finance_books.forEach((d) => {
 				frm.events.set_depreciation_rate(frm, d);
 			});
+		} else if (frm.doc.item_code && frm.doc.calculate_depreciation && frm.doc.net_purchase_amount) {
+			// "Calculate Depreciation" (or the Item) was set before an amount existed, so the
+			// finance books table was left empty -- build it now that there's an amount to base it on.
+			frm.trigger("set_finance_book");
 		}
 	},
 
