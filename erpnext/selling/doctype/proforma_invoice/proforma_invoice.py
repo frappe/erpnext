@@ -212,6 +212,7 @@ def _proforma_line(so_item, based_on: str, row: dict) -> dict | None:
 @frappe.whitelist()
 def send_proforma_email(proforma_name: str, recipients: str) -> None:
 	proforma = frappe.get_doc("Proforma Invoice", proforma_name)
+	proforma.check_permission("email")
 	if proforma.docstatus != 1:
 		frappe.throw(_("Only an issued Proforma Invoice can be emailed."))
 	if not proforma.proforma_pdf:
