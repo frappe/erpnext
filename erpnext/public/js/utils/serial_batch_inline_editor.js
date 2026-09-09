@@ -707,28 +707,37 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 		dialog.show();
 	}
 
+	get_entry_number(entry, field) {
+		let update = this.pending.updates[entry.name] || {};
+		let name = update[field] || entry[field];
+		let is_serial = field === "serial_no";
+		return (
+			(!update[field] && entry[is_serial ? "serial_number" : "batch_number"]) ||
+			frappe.utils.get_link_title(is_serial ? "Serial No" : "Batch", name) ||
+			name ||
+			""
+		);
+	}
+
 	get_active_server_row(field, value) {
 		let p = this.pending;
 		if (p.delete_all) return null;
 
 		return this.last_entries.find(
-			(d) =>
-				(d[field === "batch_no" ? "batch_number" : "serial_number"] || d[field]) === value &&
-				!p.deleted.some((x) => x.name === d.name)
+			(d) => this.get_entry_number(d, field) === value && !p.deleted.some((x) => x.name === d.name)
 		);
 	}
 
 	get_known_identifiers() {
 		let p = this.pending;
-		let known = new Set(
-			p.new_entries.map((d) => d.serial_number || d.serial_no || d.batch_number || d.batch_no)
-		);
+		let field = cint(this.item.has_serial_no) ? "serial_no" : "batch_no";
+		let known = new Set(p.new_entries.map((d) => this.get_entry_number(d, field)));
 
 		if (!p.delete_all) {
 			let deleted = new Set(p.deleted.map((d) => d.name));
 			for (const d of this.last_entries) {
 				if (!deleted.has(d.name)) {
-					known.add(d.serial_number || d.serial_no || d.batch_number || d.batch_no);
+					known.add(this.get_entry_number(d, field));
 				}
 			}
 		}
@@ -750,7 +759,7 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 
 			p.new_entries.push({ serial_number: value, qty: 1 });
 		} else {
-			let existing = p.new_entries.find((d) => (d.batch_number || d.batch_no) === value);
+			let existing = p.new_entries.find((d) => this.get_entry_number(d, "batch_no") === value);
 			let server_row = this.get_active_server_row("batch_no", value);
 			if (existing) {
 				existing.qty = flt(existing.qty) + 1;
@@ -956,16 +965,8 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 			.map((d, i) => {
 				let update = p.updates[d.name] || {};
 				let qty = update.qty != null ? flt(update.qty) : Math.abs(flt(d.qty));
-				let batch_no = this.esc(
-					update.batch_no
-						? frappe.utils.get_link_title("Batch", update.batch_no) || update.batch_no
-						: d.batch_number || d.batch_no || ""
-				);
-				let serial_no = this.esc(
-					update.serial_no
-						? frappe.utils.get_link_title("Serial No", update.serial_no) || update.serial_no
-						: d.serial_number || d.serial_no || ""
-				);
+				let batch_no = this.esc(this.get_entry_number(d, "batch_no"));
+				let serial_no = this.esc(this.get_entry_number(d, "serial_no"));
 				let name = this.esc(d.name);
 
 				return `<tr data-name="${name}">
@@ -1013,10 +1014,7 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 						? `<td class="sbie-serial-cell" data-pending-index="${index}" title="${__(
 								"Click to change Serial No"
 						  )}" style="cursor: pointer;">${this.esc(
-								d.serial_number ||
-									frappe.utils.get_link_title("Serial No", d.serial_no) ||
-									d.serial_no ||
-									""
+								this.get_entry_number(d, "serial_no")
 						  )}</td>`
 						: ""
 				}
@@ -1024,12 +1022,7 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 					show_batch
 						? `<td class="sbie-batch-cell" data-pending-index="${index}" title="${__(
 								"Click to change Batch No"
-						  )}" style="cursor: pointer;">${this.esc(
-								d.batch_number ||
-									frappe.utils.get_link_title("Batch", d.batch_no) ||
-									d.batch_no ||
-									""
-						  )}</td>`
+						  )}" style="cursor: pointer;">${this.esc(this.get_entry_number(d, "batch_no"))}</td>`
 						: ""
 				}
 				<td class="${
