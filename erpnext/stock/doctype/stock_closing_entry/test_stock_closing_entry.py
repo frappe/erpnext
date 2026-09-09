@@ -5,9 +5,11 @@ from unittest.mock import patch
 
 import frappe
 from frappe.core.doctype.user_permission.test_user_permission import create_user
-from frappe.utils import today
+from frappe.utils import add_days, today
 
 from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.doctype.stock_closing_entry.stock_closing_entry import StockClosing
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.tests.utils import ERPNextTestSuite
 
 # On ERPNextTestSuite, the doctype test records and all
@@ -23,6 +25,27 @@ class TestStockClosingEntry(ERPNextTestSuite):
 	Integration tests for StockClosingEntry.
 	Use this class for testing interactions between multiple components.
 	"""
+
+	def test_closing_entry_reads_previous_closing_balance(self):
+		item = make_item(properties={"is_stock_item": 1}).name
+		first_date = add_days(today(), -10)
+		self.make_stock_closing_entry(first_date, first_date)
+
+		second_from_date = add_days(first_date, 1)
+		make_stock_entry(
+			item_code=item,
+			to_warehouse=WAREHOUSE,
+			qty=10,
+			rate=100,
+			posting_date=second_from_date,
+			company=COMPANY,
+		)
+
+		closing = StockClosing(COMPANY, second_from_date, add_days(second_from_date, 1))
+		entries = closing.get_sle_entries()
+
+		self.assertEqual(closing.last_closing_balance.name, self.last_closing_entry)
+		self.assertIn(item, {row.item_code for row in entries})
 
 	def make_stock_closing_entry(self, from_date, to_date):
 		entry = frappe.get_doc(
