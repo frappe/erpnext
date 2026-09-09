@@ -24,14 +24,14 @@ erpnext.utils.get_party_details = function (frm, method, args, callback) {
 			args = {
 				party: frm.doc.customer || frm.doc.party_name,
 				party_type: party_type,
-				price_list: frm.doc.selling_price_list,
+				price_list: frappe.defaults.get_default("selling_price_list"),
 			};
 		} else if (frm.doc.supplier) {
 			args = {
 				party: frm.doc.supplier,
 				party_type: "Supplier",
 				bill_date: frm.doc.bill_date,
-				price_list: frm.doc.buying_price_list,
+				price_list: frappe.defaults.get_default("buying_price_list"),
 			};
 		}
 
