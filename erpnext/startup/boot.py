@@ -85,7 +85,7 @@ def boot_session(bootinfo):
 
 
 def remove_disabled_price_list_defaults(bootinfo):
-	user_defaults = bootinfo.user.get("defaults") or {}
+	user_defaults = (bootinfo.user or {}).get("defaults") or {}
 
 	for key in ("selling_price_list", "buying_price_list"):
 		price_list = bootinfo.sysdefaults.get(key) or user_defaults.get(key)
