@@ -12,6 +12,7 @@ from erpnext.stock.deprecated_serial_batch import (
 	DeprecatedBatchNoValuation,
 	DeprecatedSerialNoValuation,
 )
+from erpnext.stock.serial_batch_display import format_serial_batch_numbers
 from erpnext.stock.valuation import round_off_if_near_zero
 
 CONSUMED_SERIAL_NO_STOCK_ENTRY_PURPOSES = (
@@ -1400,7 +1401,11 @@ class SerialBatchCreation:
 		)
 		for name in self.serial_nos:
 			if name not in existing:
-				frappe.throw(_("Serial No {0} does not exist for Item {1}").format(name, self.item_code))
+				frappe.throw(
+					_("Serial No {0} does not exist for Item {1}").format(
+						format_serial_batch_numbers("Serial No", [name]), self.item_code
+					)
+				)
 
 	def set_serial_batch_entries(self, doc):
 		incoming_rate = self.get("incoming_rate")
@@ -1598,7 +1603,10 @@ def throw_negative_batch_validation(batch_no, qty):
 	frappe.throw(
 		_(
 			"The Batch {0} has negative batch quantity {1}. To fix this, go to the batch and click on Recalculate Batch Qty. If the issue still persists, create an inward entry."
-		).format(bold(get_link_to_form("Batch", batch_no)), bold(qty)),
+		).format(
+			bold(get_link_to_form("Batch", batch_no, format_serial_batch_numbers("Batch", [batch_no]))),
+			bold(qty),
+		),
 		title=_("Negative Stock Error"),
 	)
 

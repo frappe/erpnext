@@ -11,6 +11,11 @@ from frappe.utils import escape_html
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 
+def format_serial_batch_numbers(doctype: str, names: list[str]) -> str:
+	labels = SerialBatchIdentity(doctype).labels(names)
+	return ", ".join(escape_html(labels.get(name) or name) for name in names)
+
+
 def with_serial_batch_numbers(execute):
 	@wraps(execute)
 	def wrapped(*args, **kwargs):
