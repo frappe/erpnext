@@ -1314,10 +1314,14 @@ def update_billing_percentage(pr_doc, update_modified=True, adjust_incoming_rate
 		returned_qty = flt(item_wise_returned_qty.get(item.name))
 		returned_amount = flt(returned_qty) * flt(item.rate)
 		pending_amount = flt(item.amount) - returned_amount
-		if buying_settings.bill_for_rejected_quantity_in_purchase_invoice:
-			pending_amount = flt(item.amount)
 
-		total_billable_amount = abs(flt(item.amount))
+		# When rejected qty is billable, its value is part of the billable base too
+		rejected_amount = 0.0
+		if buying_settings.bill_for_rejected_quantity_in_purchase_invoice:
+			rejected_amount = flt(item.rejected_qty * item.rate, item.precision("amount"))
+			pending_amount = flt(item.amount) + rejected_amount
+
+		total_billable_amount = abs(flt(item.amount) + rejected_amount)
 		if pending_amount > 0:
 			total_billable_amount = pending_amount if item.billed_amt <= pending_amount else item.billed_amt
 
@@ -1327,9 +1331,7 @@ def update_billing_percentage(pr_doc, update_modified=True, adjust_incoming_rate
 		if pr_doc.get("is_return") and not total_amount and total_billed_amount:
 			total_amount = total_billed_amount
 
-		amount = item.amount
-		if frappe.db.get_single_value("Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice"):
-			amount += flt(item.rejected_qty * item.rate, item.precision("amount"))
+		amount = flt(item.amount) + rejected_amount
 
 		if adjust_incoming_rate:
 			adjusted_amt = 0.0
