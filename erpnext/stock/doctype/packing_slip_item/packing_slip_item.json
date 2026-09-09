@@ -41,6 +41,7 @@
   },
   {
    "fetch_from": "item_code.item_name",
+   "fetch_if_empty": 1,
    "fieldname": "item_name",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -138,7 +139,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-04-28 15:00:14.079306",
+ "modified": "2026-09-09 13:04:53.623636",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packing Slip Item",
