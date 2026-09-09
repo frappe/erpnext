@@ -2,15 +2,18 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
-from frappe.query_builder.functions import Abs, Count, Floor, IfNull, Max, Min, Sum
-from pypika import Case, CustomFunction, Tuple
+from frappe.query_builder.functions import Abs, Cast, Count, Floor, IfNull, Max, Min, Sum
+from pypika import Case, CustomFunction, Field
 from pypika.analytics import CURRENT_ROW, Preceding
 from pypika.analytics import Sum as WindowSum
+from pypika.terms import Star
 
 ArgMin = CustomFunction("arg_min_null", ["value", "order"])
 ArgMax = CustomFunction("arg_max_null", ["value", "order"])
 Row = CustomFunction("row", ["posting_datetime", "creation"])
 Least = CustomFunction("least", ["left", "right"])
+
+FAST_KEYS = "fifo_fast_keys"
 
 
 class SnapshotFIFO:
@@ -20,9 +23,10 @@ class SnapshotFIFO:
 		self.fifo = fifo
 		self.snapshot = fifo.snapshot
 		ledger = frappe.qb.DocType("Stock Ledger Entry")
-		self.entries = fifo._get_stock_ledger_query(ordered=False).select(
+		self.ledger_entries = fifo._get_stock_ledger_query(ordered=False).select(
 			ledger.posting_datetime, ledger.creation
 		)
+		self.entries = self.ledger_entries
 
 	def generate(self, serial_bundles=None, batch_bundles=None):
 		summaries = self.snapshot.run(self.get_summary_query(), as_dict=True)
@@ -44,29 +48,42 @@ class SnapshotFIFO:
 				"has_batch_no": row.has_batch_no,
 			}
 
-		self.fast_keys = list(details)
-		if len(eligible) != len(summaries):
-			entries = frappe.qb.Table("fifo_scope")
-			self.entries = (
-				frappe.qb.from_(self.entries.as_("fifo_scope"))
-				.select(entries.star)
-				.where(Tuple(entries.name, entries.warehouse).isin(self.fast_keys))
-			)
+		replayed = len(eligible) != len(summaries)
+		if replayed:
+			self.register_fast_keys(details)
+			self.entries = self.get_fast_entries()
 		if details:
-			for row in self.snapshot.run(self.get_layers_query(), as_iterator=True):
-				item, warehouse, qty, posting_date, value = row
+			for item, warehouse, qty, posting_date, value in self.snapshot.run(
+				self.get_layers_query(), as_iterator=True
+			):
 				details[(item, warehouse)]["fifo_queue"].append([qty, posting_date, value])
-		if len(eligible) != len(summaries):
+		if replayed:
 			self.fifo.item_details = details
-			serial_bundles = serial_bundles or {}
-			batch_bundles = batch_bundles or {}
-			ledger = frappe.qb.DocType("Stock Ledger Entry")
-			query = self.fifo._get_stock_ledger_query().where(
-				~Tuple(ledger.item_code, ledger.warehouse).isin(self.fast_keys) | ledger.warehouse.isnull()
-			)
-			for row in self.snapshot.run(query, as_dict=True, as_iterator=True):
-				self.fifo._process_stock_ledger_entry(row, serial_bundles, batch_bundles)
+			for row in self.snapshot.run(self.get_replay_query(), as_dict=True, as_iterator=True):
+				self.fifo._process_stock_ledger_entry(row, serial_bundles or {}, batch_bundles or {})
 		return {(row.name, row.warehouse): details[(row.name, row.warehouse)] for row in summaries}
+
+	def register_fast_keys(self, details):
+		"""Publish the aggregated groups to DuckDB so the split needs no per-key parameters."""
+		rows = [{"name": name, "warehouse": warehouse} for name, warehouse in details]
+		self.snapshot.register(FAST_KEYS, rows, {"name": "string", "warehouse": "string"})
+
+	def get_fast_entries(self):
+		entries, keys = self.ledger_entries.as_("fifo_scope"), frappe.qb.Table(FAST_KEYS)
+		return frappe.qb.from_(entries).join(keys).on(self.same_stock(entries, keys)).select(Star(entries))
+
+	def get_replay_query(self):
+		"""Entries left to the existing replay. Rows without a warehouse never match a key."""
+		entries, keys = frappe.qb.Table("fifo_replay"), frappe.qb.Table(FAST_KEYS)
+		return (
+			frappe.qb.with_(self.ledger_entries, "fifo_replay")
+			.from_(entries)
+			.left_join(keys)
+			.on(self.same_stock(entries, keys))
+			.select(*(Field(field, table=entries) for field in DETAIL_FIELDS))
+			.where(Field("name", table=keys).isnull())
+			.orderby(Field("posting_datetime", table=entries), Field("creation", table=entries))
+		)
 
 	def can_aggregate(self, row):
 		return (
@@ -118,8 +135,8 @@ class SnapshotFIFO:
 				Max(Case().when(unsupported, 1).else_(0)).as_("unsupported"),
 				Min(progress.running_qty).as_("min_balance"),
 				Sum(progress.actual_qty).as_("total_qty"),
-				Sum(Abs(progress.actual_qty) * 1024).as_("qty_bound"),
-				Sum(Abs(progress.stock_value_difference) * 1024).as_("value_bound"),
+				Sum(Cast(Abs(progress.actual_qty), "DOUBLE") * 1024).as_("qty_bound"),
+				Sum(Cast(Abs(progress.stock_value_difference), "DOUBLE") * 1024).as_("value_bound"),
 			)
 			.groupby(progress.name, progress.warehouse)
 			.orderby("first_order")
@@ -218,7 +235,9 @@ class SnapshotFIFO:
 
 	@staticmethod
 	def same_stock(left, right):
-		return (left.name == right.name) & (left.warehouse == right.warehouse)
+		return (Field("name", table=left) == Field("name", table=right)) & (
+			Field("warehouse", table=left) == Field("warehouse", table=right)
+		)
 
 
 DETAIL_FIELDS = (

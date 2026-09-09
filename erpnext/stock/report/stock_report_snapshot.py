@@ -7,6 +7,8 @@ import frappe
 from frappe import _
 from frappe.query_builder.terms import NamedParameterWrapper
 
+BATCH_SIZE = 1000
+
 
 def run_stock_query(query, snapshot=None, **kwargs):
 	if snapshot is not None:
@@ -15,11 +17,17 @@ def run_stock_query(query, snapshot=None, **kwargs):
 
 
 class StockReportSnapshot:
-	"""Run stock queries against synced ledger entries and live supporting records."""
+	"""Run stock queries against synced ledger entries and live supporting records.
+
+	Only Stock Ledger Entry comes from the snapshot. Every doctype in LIVE_TABLES is read from
+	the live database the first time a query needs it, so a report combines a frozen ledger with
+	current master data. Those rows cover the ledger keys under the report's company, item and
+	to_date filters, so a query that joins one of them must stay inside the same ledger scope.
+	"""
 
 	def __init__(self, report_name, filters=None):
 		self.conn = self.get_connection(report_name)
-		self.live_tables = {}
+		self.tables = {}
 		self.filters = filters or {}
 
 	def __enter__(self):
@@ -30,37 +38,26 @@ class StockReportSnapshot:
 
 	@staticmethod
 	def get_connection(report_name):
-		sync = frappe.qb.DocType("DuckDB Sync")
-		item = frappe.qb.DocType("DuckDB Sync Item")
-		latest = (
-			frappe.qb.from_(sync)
-			.join(item)
-			.on(item.parent == sync.name)
-			.select(sync.name, item.synced)
-			.where(
-				(sync.doc_type == "Stock Ledger Entry")
-				& (sync.docstatus == 1)
-				& (item.table == "Stock Ledger Entry")
-			)
-			.orderby(sync.creation, order=frappe.qb.desc)
-			.limit(1)
-			.run(as_dict=True)
+		"""Open the latest submitted sync. An older complete sync is not served because the desk
+		labels snapshot results with the latest submitted sync's timestamp."""
+		sync = frappe.db.get_value(
+			"DuckDB Sync",
+			{"doc_type": "Stock Ledger Entry", "docstatus": 1},
+			"name",
+			order_by="creation desc",
 		)
-		# The report's snapshot timestamp refers to the latest submitted sync.
-		if not latest or not latest[0].synced:
+		if not sync or frappe.db.exists("DuckDB Sync Item", {"parent": sync, "synced": 0}):
 			frappe.throw(
 				_("{0} requires a completed Stock Ledger Entry sync to DuckDB").format(_(report_name))
 			)
-		return frappe.get_doc("DuckDB Sync", latest[0].name).get_duckdb_conn()
+		return frappe.get_doc("DuckDB Sync", sync).get_duckdb_conn()
 
 	def run(self, query, as_dict=False, as_iterator=False, pluck=False):
 		sql, parameters = self.compile(query)
 		cursor = self.conn.cursor()
 		try:
-			for doctype in LIVE_TABLES:
-				table_name = f"tab{doctype}"
-				if f'"{table_name}"' in sql:
-					cursor.register(table_name, self.get_live_table(doctype))
+			for name in self.get_referenced_tables(sql):
+				cursor.register(name, self.get_table(name))
 			cursor.execute(sql, parameters)
 		except Exception:
 			cursor.close()
@@ -75,30 +72,44 @@ class StockReportSnapshot:
 		sql = query.get_sql(quote_char='"', alias_quote_char='"', param_wrapper=parameters)
 		return sql, parameters.get_parameters()
 
-	def get_live_table(self, doctype):
+	def get_referenced_tables(self, sql):
+		names = dict.fromkeys([*self.tables, *(f"tab{doctype}" for doctype in LIVE_TABLES)])
+		return [name for name in names if f'"{name}"' in sql]
+
+	def register(self, name, rows, fields):
+		"""Expose a lookup table built in Python to the queries that follow."""
+		self.tables[name] = build_arrow_table(rows, fields)
+
+	def get_table(self, name):
+		if name not in self.tables:
+			self.tables[name] = self.build_live_table(name.removeprefix("tab"))
+		return self.tables[name]
+
+	def build_live_table(self, doctype):
+		"""Read a supporting doctype in batches so a large table never lands in Python at once."""
 		import pyarrow as pa
 
-		if doctype in self.live_tables:
-			return self.live_tables[doctype]
-
 		ledger_field, link_field, fields = LIVE_TABLES[doctype]
+		schema = arrow_schema(fields)
 		names = self.get_ledger_values(ledger_field, doctype)
-		rows = []
-		for offset in range(0, len(names), 1000):
-			rows.extend(
-				frappe.get_all(
-					doctype,
-					filters={link_field: ("in", names[offset : offset + 1000])},
-					fields=list(fields),
-				)
-			)
+		filters = self.get_live_filters(doctype)
+
+		batches = []
+		for offset in range(0, len(names), BATCH_SIZE):
+			filters[link_field] = ("in", names[offset : offset + BATCH_SIZE])
+			rows = frappe.get_all(doctype, filters=filters, fields=list(fields))
+			batches.append(pa.RecordBatch.from_pylist(rows, schema=schema))
 
 		# Explicit types also preserve the schema when a supporting table has no matching rows.
-		schema = pa.schema([(field, getattr(pa, dtype)()) for field, dtype in fields.items()])
-		self.live_tables[doctype] = pa.Table.from_pylist(rows, schema=schema)
-		return self.live_tables[doctype]
+		return pa.Table.from_batches(batches, schema=schema)
+
+	def get_live_filters(self, doctype):
+		"""Report filters that narrow a supporting table beyond the ledger keys it covers."""
+		scope = LIVE_TABLE_SCOPE.get(doctype) or {}
+		return {field: value for key, field in scope.items() if (value := self.filters.get(key))}
 
 	def get_ledger_values(self, field, doctype):
+		"""Ledger keys a supporting table has to cover, under the report's own ledger scope."""
 		ledger = frappe.qb.DocType("Stock Ledger Entry")
 		query = frappe.qb.from_(ledger).select(ledger[field]).distinct().where(ledger[field].notnull())
 		if field == "voucher_no":
@@ -136,6 +147,18 @@ class StockReportSnapshot:
 						yield tuple(row)
 		finally:
 			cursor.close()
+
+
+def arrow_schema(fields):
+	import pyarrow as pa
+
+	return pa.schema([(field, getattr(pa, dtype)()) for field, dtype in fields.items()])
+
+
+def build_arrow_table(rows, fields):
+	import pyarrow as pa
+
+	return pa.Table.from_pylist(rows, schema=arrow_schema(fields))
 
 
 def time_to_timedelta(value):
@@ -190,3 +213,5 @@ LIVE_TABLES = {
 		},
 	),
 }
+
+LIVE_TABLE_SCOPE = {"Serial and Batch Entry": {"batch_no": "batch_no"}}

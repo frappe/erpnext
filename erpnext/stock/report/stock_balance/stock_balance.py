@@ -765,24 +765,23 @@ class StockBalanceReport:
 		se = frappe.qb.DocType("Stock Entry")
 		sr = frappe.qb.DocType("Stock Reconciliation")
 
+		entry_query = (
+			frappe.qb.from_(se)
+			.select(se.name, Coalesce("Stock Entry").as_("voucher_type"))
+			.where((se.docstatus == 1) & (se.posting_date <= self.to_date) & (se.is_opening == "Yes"))
+		)
+		reco_query = (
+			frappe.qb.from_(sr)
+			.select(sr.name, Coalesce("Stock Reconciliation").as_("voucher_type"))
+			.where((sr.docstatus == 1) & (sr.posting_date <= self.to_date) & (sr.purpose == "Opening Stock"))
+		)
+		if company := self.filters.get("company"):
+			entry_query = entry_query.where(se.company == company)
+			reco_query = reco_query.where(sr.company == company)
+
 		vouchers_data = (
-			frappe.qb.from_(
-				(
-					frappe.qb.from_(se)
-					.select(se.name, Coalesce("Stock Entry").as_("voucher_type"))
-					.where((se.docstatus == 1) & (se.posting_date <= self.to_date) & (se.is_opening == "Yes"))
-				)
-				+ (
-					frappe.qb.from_(sr)
-					.select(sr.name, Coalesce("Stock Reconciliation").as_("voucher_type"))
-					.where(
-						(sr.docstatus == 1)
-						& (sr.posting_date <= self.to_date)
-						& (sr.purpose == "Opening Stock")
-					)
-				)
-			).select("voucher_type", "name")
-		).run(as_dict=True)
+			frappe.qb.from_(entry_query + reco_query).select("voucher_type", "name").run(as_dict=True)
+		)
 
 		if vouchers_data:
 			for d in vouchers_data:
