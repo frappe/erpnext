@@ -1150,7 +1150,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		if (this.frm.doc.set_posting_time) return;
 		if (frappe.datetime.get_today() == this.frm.doc.posting_date) return;
 
-		if (!frappe.boot.sysdefaults.confirm_before_resetting_posting_date) return;
+		const is_confirmation_reqd = await frappe.xcall(
+			"erpnext.accounts.doctype.accounts_settings.accounts_settings.get_posting_date_confirmation"
+		);
+		if (!is_confirmation_reqd) return;
 
 		return new Promise((resolve, reject) => {
 			frappe.confirm(
