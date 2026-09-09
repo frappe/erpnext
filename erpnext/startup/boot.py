@@ -27,9 +27,6 @@ def boot_session(bootinfo):
 		bootinfo.sysdefaults.disable_include_dimensions = cint(
 			frappe.get_single_value("Accounts Settings", "disable_include_dimensions")
 		)
-		bootinfo.sysdefaults.confirm_before_resetting_posting_date = cint(
-			frappe.get_single_value("Accounts Settings", "confirm_before_resetting_posting_date")
-		)
 
 		bootinfo.sysdefaults.quotation_valid_till = cint(
 			frappe.db.get_single_value("CRM Settings", "default_valid_till")
