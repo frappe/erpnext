@@ -683,17 +683,10 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 
 
 @frappe.whitelist()
-<<<<<<< HEAD
 def send_emails(customer, customer_outstanding, credit_limit, credit_controller_users_list):
 	if isinstance(credit_controller_users_list, str):
 		credit_controller_users_list = json.loads(credit_controller_users_list)
-=======
-def send_emails(
-	customer: str, customer_outstanding: float, credit_limit: float, credit_controller_users_list: str | list
-):
 	frappe.has_permission("Customer", ptype="email", doc=customer, throw=True)
-	credit_controller_users_list = frappe.parse_json(credit_controller_users_list)
->>>>>>> a8ec43b (fix(selling): add email permission check on `send_emails` (#58935))
 	subject = _("Credit limit reached for customer {0}").format(customer)
 	message = _("Credit limit has been crossed for customer {0} ({1}/{2})").format(
 		customer, customer_outstanding, credit_limit
