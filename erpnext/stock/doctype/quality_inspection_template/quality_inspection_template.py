@@ -3,6 +3,7 @@
 
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
 
 
@@ -23,7 +24,17 @@ class QualityInspectionTemplate(Document):
 		quality_inspection_template_name: DF.Data
 	# end: auto-generated types
 
-	pass
+	def validate(self):
+		parameters = set()
+		for row in self.item_quality_inspection_parameter:
+			if row.specification in parameters:
+				frappe.throw(
+					_("Row #{0}: Parameter {1} is added more than once").format(
+						row.idx, frappe.bold(row.specification)
+					)
+				)
+
+			parameters.add(row.specification)
 
 
 def get_template_details(template):
