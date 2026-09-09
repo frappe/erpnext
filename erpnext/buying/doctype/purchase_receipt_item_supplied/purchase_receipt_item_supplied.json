@@ -25,10 +25,8 @@
   "current_stock",
   "secbreak_3",
   "batch_no",
-  "batch_number",
   "col_break4",
   "serial_no",
-  "serial_number",
   "purchase_order"
  ],
  "fields": [
@@ -205,24 +203,6 @@
    "options": "Purchase Order",
    "print_hide": 1,
    "read_only": 1
-  },
-  {
-   "fieldname": "serial_number",
-   "fieldtype": "Small Text",
-   "label": "Serial No (Physical Input)",
-   "hidden": 1,
-   "no_copy": 1,
-   "print_hide": 1,
-   "description": "Enter physical numbers. These are resolved for the selected Item when saving; reference fields store internal IDs."
-  },
-  {
-   "fieldname": "batch_number",
-   "fieldtype": "Data",
-   "label": "Batch No (Physical Input)",
-   "hidden": 1,
-   "no_copy": 1,
-   "print_hide": 1,
-   "description": "Enter physical numbers. These are resolved for the selected Item when saving; reference fields store internal IDs."
   }
  ],
  "idx": 1,

@@ -77,6 +77,16 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 			matches = scan_barcode(number, allow_multiple=True)["candidates"]
 			self.assertEqual({row.item_code for row in matches}, {item.name for item in items})
 
+	def test_serial_scan_includes_the_physical_batch_number(self):
+		item = make_item(properties={"has_serial_no": 1, "has_batch_no": 1})
+		batch = SerialBatchIdentity("Batch").resolve(item.name, ["Scanned-Batch"], create=True)[0]
+		serial = SerialBatchIdentity("Serial No").resolve(
+			item.name, ["Scanned-Serial"], create=True, defaults={"batch_no": batch}
+		)[0]
+		match = scan_barcode("Scanned-Serial", {"item_code": item.name})
+		self.assertEqual((match.serial_no, match.batch_no), (serial, batch))
+		self.assertEqual((match.serial_number, match.batch_number), ("Scanned-Serial", "Scanned-Batch"))
+
 	def test_receipts_store_ids_and_display_numbers(self):
 		for serialized in (False, True):
 			number = frappe.generate_hash()

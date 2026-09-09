@@ -21,11 +21,12 @@ class TestSerialBatchInput(ERPNextTestSuite):
 		for _ in range(2):
 			receipt = self.make_receipt()
 			row = receipt.items[0]
-			row.serial_number, row.batch_number = "Physical-Serial", "Physical-Batch"
+			row.serial_no, row.batch_no = "Physical-Serial", "Physical-Batch"
+			row.set("__serial_batch_input", ["serial_no", "batch_no"])
 			self.assertFalse(frappe.db.exists("Serial No", {"item_code": row.item_code}))
 			receipt.insert()
-			self.assertFalse(row.serial_number)
-			self.assertFalse(row.batch_number)
+			self.assertFalse(row.get("__serial_batch_input"))
+			self.assertNotIn("__serial_batch_input", receipt.as_dict()["items"][0])
 			self.assertNotEqual(row.serial_no, "Physical-Serial")
 			self.assertNotEqual(row.batch_no, "Physical-Batch")
 			self.assertEqual(frappe.get_doc("Serial No", row.serial_no).status, "Inactive")
@@ -40,7 +41,8 @@ class TestSerialBatchInput(ERPNextTestSuite):
 	def test_failed_save_rolls_back_number_creation(self):
 		receipt = self.make_receipt()
 		row = receipt.items[0]
-		row.serial_number, row.batch_number = "Rollback-Serial", "Rollback-Batch"
+		row.serial_no, row.batch_no = "Rollback-Serial", "Rollback-Batch"
+		row.set("__serial_batch_input", ["serial_no", "batch_no"])
 		frappe.db.savepoint("failed_physical_input")
 		try:
 			with patch.object(type(receipt), "validate", side_effect=frappe.ValidationError):
@@ -92,17 +94,60 @@ class TestSerialBatchInput(ERPNextTestSuite):
 
 	def test_duplicate_physical_serials_are_rejected(self):
 		receipt = self.make_receipt(has_batch_no=0)
-		receipt.items[0].serial_number = "Same-Serial\nSAME-SERIAL"
+		receipt.items[0].serial_no = "Same-Serial\nSAME-SERIAL"
+		receipt.items[0].set("__serial_batch_input", ["serial_no"])
 		with self.assertRaises(frappe.ValidationError):
 			receipt.insert()
 
-	def test_internal_id_and_physical_input_cannot_conflict(self):
+	def test_physical_input_never_falls_back_to_an_internal_id(self):
 		receipt = self.make_receipt(has_batch_no=0)
 		row = receipt.items[0]
+		identity = SerialBatchIdentity("Serial No")
+		original = identity.resolve(row.item_code, ["One"], create=True)[0]
+		other = identity.resolve(row.item_code, [original], create=True)[0]
+		row.serial_no = original
+		row.set("__serial_batch_input", ["serial_no"])
+		receipt.insert()
+		self.assertEqual(row.serial_no, other)
+		receipt.save()
+		self.assertEqual(row.serial_no, other)
+		receipt.reload()
+		self.assertEqual(row.serial_no, other)
+
+	def test_unmarked_fields_preserve_internal_ids(self):
+		receipt = self.make_receipt()
+		row = receipt.items[0]
 		row.serial_no = SerialBatchIdentity("Serial No").resolve(row.item_code, ["One"], create=True)[0]
-		row.serial_number = "Another"
+		row.batch_no = SerialBatchIdentity("Batch").resolve(row.item_code, ["One"], create=True)[0]
+		ids = row.serial_no, row.batch_no
+		receipt.insert()
+		self.assertEqual((row.serial_no, row.batch_no), ids)
+
+	def test_request_metadata_survives_serialization_until_save(self):
+		receipt = self.make_receipt()
+		row = receipt.items[0]
+		row.serial_no, row.batch_no = "API-Serial", "API-Batch"
+		row.set("__serial_batch_input", ["serial_no", "batch_no"])
+		payload = frappe.parse_json(receipt.as_json())
+		self.assertEqual(payload["items"][0]["__serial_batch_input"], ["serial_no", "batch_no"])
+		saved = frappe.get_doc(payload).insert()
+		self.assertEqual(frappe.get_doc("Serial No", saved.items[0].serial_no).serial_no, "API-Serial")
+		self.assertEqual(frappe.get_doc("Batch", saved.items[0].batch_no).batch_id, "API-Batch")
+		self.assertNotIn("__serial_batch_input", saved.as_dict()["items"][0])
+
+	def test_input_metadata_cannot_target_other_fields(self):
+		receipt = self.make_receipt()
+		receipt.items[0].set("__serial_batch_input", ["item_code"])
 		with self.assertRaises(frappe.ValidationError):
 			receipt.insert()
+
+	def test_no_extra_transaction_number_fields(self):
+		from erpnext.stock.serial_batch_fields import NUMBER_INPUT_DOCTYPES
+
+		for doctype in NUMBER_INPUT_DOCTYPES:
+			meta = frappe.get_meta(doctype)
+			for field in ("serial_number", "batch_number", "rejected_serial_number", "current_serial_number"):
+				self.assertFalse(meta.has_field(field), (doctype, field))
 
 	def test_bundle_save_resolves_physical_entries(self):
 		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
@@ -137,8 +182,37 @@ class TestSerialBatchInput(ERPNextTestSuite):
 		self.assertEqual(entries[0]["batch_no"], batch)
 		self.assertEqual(entries[1]["batch_no"], other_batch)
 
-	def test_data_import_accepts_explicit_physical_number_columns(self):
-		from frappe.core.doctype.data_import.importer import ImportFile
+	def test_data_import_can_explicitly_preserve_internal_ids(self):
+		from erpnext.stock.serial_batch_import import SerialBatchImporter
+
+		receipt = self.make_receipt()
+		item = receipt.items[0].item_code
+		serial = SerialBatchIdentity("Serial No").resolve(item, ["Exported-Serial"], create=True)[0]
+		batch = SerialBatchIdentity("Batch").resolve(item, ["Exported-Batch"], create=True)[0]
+		with TemporaryDirectory() as directory:
+			path = Path(directory) / "internal_ids.csv"
+			with path.open("w", newline="") as file:
+				writer = csv.writer(file)
+				writer.writerow(
+					["supplier", "company", "items.item_code", "items.serial_no", "items.batch_no"]
+				)
+				writer.writerow([receipt.supplier, receipt.company, item, serial, batch])
+			importer = SerialBatchImporter(
+				"Purchase Receipt",
+				file_path=str(path),
+				console=True,
+				data_import=frappe.get_doc(
+					doctype="Data Import",
+					import_type="Insert New Records",
+					template_options=frappe.as_json({"column_to_field_map": {}, "serial_batch_input": False}),
+				),
+			)
+			row = importer.import_file.get_payloads_for_import()[0].doc["items"][0]
+			self.assertFalse(row.get("__serial_batch_input"))
+			self.assertEqual((row.serial_no, row.batch_no), (serial, batch))
+
+	def test_data_import_reuses_existing_number_columns(self):
+		from erpnext.stock.serial_batch_import import SerialBatchImporter
 
 		receipt = self.make_receipt()
 		with TemporaryDirectory() as directory:
@@ -153,8 +227,8 @@ class TestSerialBatchInput(ERPNextTestSuite):
 						"items.qty",
 						"items.rate",
 						"items.warehouse",
-						"items.serial_number",
-						"items.batch_number",
+						"items.serial_no",
+						"items.batch_no",
 					]
 				)
 				writer.writerow(
@@ -169,11 +243,38 @@ class TestSerialBatchInput(ERPNextTestSuite):
 						"Imported-Batch",
 					]
 				)
-			payloads = ImportFile(
-				"Purchase Receipt", str(path), import_type="Insert New Records", console=True
-			).get_payloads_for_import()
+			importer = SerialBatchImporter(
+				"Purchase Receipt",
+				file_path=str(path),
+				import_type="Insert New Records",
+				console=True,
+				data_import=frappe.get_doc(doctype="Data Import", import_type="Insert New Records"),
+			)
+			payloads = importer.import_file.get_payloads_for_import()
+			self.assertFalse(importer.import_file.get_all_warnings())
+			file = frappe.get_doc(
+				doctype="File", file_name="physical_numbers.csv", content=path.read_text(), is_private=1
+			).insert()
+			self.addCleanup(frappe.delete_doc, "File", file.name)
 		self.assertEqual(len(payloads), 1)
-		imported = frappe.new_doc("Purchase Receipt").update(payloads[0].doc).insert()
+		data_import = frappe.get_doc(
+			doctype="Data Import",
+			reference_doctype="Purchase Receipt",
+			import_type="Insert New Records",
+			import_file=file.file_url,
+			submit_after_import=1,
+		).insert()
+		self.assertIsInstance(data_import.get_importer(), SerialBatchImporter)
+		with patch.object(frappe.db, "commit"):
+			data_import.start_import()
+		self.assertEqual(data_import.reload().status, "Success")
+		imported = frappe.get_doc(
+			"Purchase Receipt",
+			frappe.db.get_value("Data Import Log", {"data_import": data_import.name}, "docname"),
+		)
+		self.assertEqual(imported.docstatus, 1)
 		row = imported.items[0]
-		self.assertEqual(frappe.get_doc("Serial No", row.serial_no).serial_no, "Imported-Serial")
-		self.assertEqual(frappe.get_doc("Batch", row.batch_no).batch_id, "Imported-Batch")
+		entry = frappe.get_doc("Serial and Batch Bundle", row.serial_and_batch_bundle).entries[0]
+		self.assertEqual(frappe.get_doc("Serial No", entry.serial_no).serial_no, "Imported-Serial")
+		self.assertEqual(frappe.get_doc("Batch", entry.batch_no).batch_id, "Imported-Batch")
+		imported.cancel()

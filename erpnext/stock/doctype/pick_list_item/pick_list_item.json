@@ -36,10 +36,8 @@
   "serial_batch_entries_html",
   "section_break_ecxc",
   "serial_no",
-  "serial_number",
   "column_break_belw",
   "batch_no",
-  "batch_number",
   "column_break_15",
   "sales_order",
   "sales_order_item",
@@ -306,24 +304,6 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
-  },
-  {
-   "fieldname": "serial_number",
-   "fieldtype": "Small Text",
-   "label": "Serial No (Physical Input)",
-   "hidden": 1,
-   "no_copy": 1,
-   "print_hide": 1,
-   "description": "Enter physical numbers. These are resolved for the selected Item when saving; reference fields store internal IDs."
-  },
-  {
-   "fieldname": "batch_number",
-   "fieldtype": "Data",
-   "label": "Batch No (Physical Input)",
-   "hidden": 1,
-   "no_copy": 1,
-   "print_hide": 1,
-   "description": "Enter physical numbers. These are resolved for the selected Item when saving; reference fields store internal IDs."
   }
  ],
  "istable": 1,

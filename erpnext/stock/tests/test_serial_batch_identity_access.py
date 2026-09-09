@@ -63,7 +63,8 @@ class TestSerialBatchIdentityAccess(ERPNextTestSuite):
 		item = make_item(properties={"has_serial_no": 1})
 		user = self.make_stock_user()
 		receipt = make_purchase_receipt(item_code=item.name, qty=1, do_not_save=True)
-		receipt.items[0].serial_number = "UNAUTHORIZED-ON-SAVE"
+		receipt.items[0].serial_no = "UNAUTHORIZED-ON-SAVE"
+		receipt.items[0].set("__serial_batch_input", ["serial_no"])
 		with self.set_user(user.name):
 			with self.assertRaises(frappe.PermissionError):
 				receipt.insert()

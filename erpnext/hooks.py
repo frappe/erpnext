@@ -385,14 +385,14 @@ pre_submit_validation_doctypes = [
 ]
 
 
-extend_doctype_class = {
-	doctype: "erpnext.stock.serial_batch_display.SerialNumberDisplay" for doctype in SERIAL_TEXT_DOCTYPES
-}
+extend_doctype_class.update(
+	{doctype: "erpnext.stock.serial_batch_display.SerialNumberDisplay" for doctype in SERIAL_TEXT_DOCTYPES}
+)
+extend_doctype_class["Data Import"] = "erpnext.stock.serial_batch_import.SerialBatchDataImport"
 
 doc_events = {
 	"*": {
 		"before_print": "erpnext.stock.serial_batch_display.before_print",
-		"before_validate": "erpnext.stock.serial_batch_input.resolve_transaction_numbers",
 		"validate": [
 			"erpnext.support.doctype.service_level_agreement.service_level_agreement.apply",
 			"erpnext.setup.doctype.transaction_deletion_record.transaction_deletion_record.check_for_running_deletion_job",

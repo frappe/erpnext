@@ -4,6 +4,8 @@ from frappe import _
 from erpnext.stock.serial_batch_fields import NUMBER_INPUT_DOCTYPES
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
+NUMBER_FIELDS = ("batch_no", "serial_no", "rejected_serial_no", "current_serial_no")
+
 
 def resolve_transaction_numbers(doc, method=None):
 	if doc.docstatus == 2:
@@ -20,11 +22,17 @@ class TransactionNumberInput:
 		self.item_code = row.get("item_code") or row.get("rm_item_code")
 
 	def resolve(self):
-		for field in ("batch_no", "serial_no", "rejected_serial_no", "current_serial_no"):
-			number_field = field.replace("_no", "_number")
-			value = self.row.get(number_field)
-			if value is None:
+		fields = self.row.get("__serial_batch_input")
+		if fields is None:
+			return
+		if not isinstance(fields, list) or any(field not in NUMBER_FIELDS for field in fields):
+			frappe.throw(_("Physical input must identify serial or batch fields"))
+		for field in NUMBER_FIELDS:
+			if field not in fields:
 				continue
+			value = self.row.get(field)
+			if value is None:
+				value = ""
 			if not isinstance(value, str):
 				frappe.throw(_("Physical numbers must be text"))
 			numbers = (
@@ -34,13 +42,12 @@ class TransactionNumberInput:
 			)
 			if field == "batch_no" and len(numbers) > 1:
 				frappe.throw(_("Enter one physical batch number per row"))
-			if self.row.get(field):
-				frappe.throw(_("Provide either {0} or {1}, not both").format(field, number_field))
 			names = self.resolve_numbers(field, numbers) if numbers else []
 			self.row.set(field, "\n".join(names))
-			self.row.set(number_field, None)
+			fields.remove(field)
 			if names and self.row.meta.has_field("use_serial_batch_fields"):
 				self.row.use_serial_batch_fields = 1
+		self.row.__dict__.pop("__serial_batch_input", None)
 
 	def resolve_numbers(self, field, numbers):
 		doctype = "Batch" if field == "batch_no" else "Serial No"

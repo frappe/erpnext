@@ -168,6 +168,8 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 				for (const match of r.message?.candidates || [r.message || {}]) {
 					if (match.serial_no && match.serial_number)
 						frappe.utils.add_link_title("Serial No", match.serial_no, match.serial_number);
+					if (match.batch_no && match.batch_number)
+						frappe.utils.add_link_title("Batch", match.batch_no, match.batch_number);
 				}
 				callback(r);
 			});
@@ -183,6 +185,16 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 			frappe.flags.trigger_from_barcode_scanner = true;
 
 			const { item_code, barcode, batch_no, serial_no, uom, default_warehouse } = data;
+			if (
+				serial_no &&
+				(this.frm.doc[this.items_table_name] || []).some(
+					(row) => row.item_code === item_code && this.is_duplicate_serial_no(row, serial_no)
+				)
+			) {
+				this.clean_up();
+				reject();
+				return;
+			}
 			let row = this.get_row_to_modify_on_scan(item_code, batch_no, uom, barcode, default_warehouse);
 			const is_new_row = !row?.item_code;
 			if (!row) {
@@ -198,12 +210,6 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 				// trigger any row add triggers defined on child table.
 				this.frm.script_manager.trigger(`${this.items_table_name}_add`, row.doctype, row.name);
 				this.frm.has_items = false;
-			}
-
-			if (this.is_duplicate_serial_no(row, serial_no)) {
-				this.clean_up();
-				reject();
-				return;
 			}
 
 			frappe.run_serially([
@@ -245,11 +251,14 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 	set_item(row, item_code, barcode, batch_no, serial_no) {
 		return new Promise((resolve) => {
 			const increment = async (value = 1) => {
+				const existing = erpnext.serial_batch_input.is_pending(row, this.serial_no_field)
+					? ""
+					: row[this.serial_no_field];
 				const item_data = this.get_scanned_item_values(
 					row,
 					item_code,
 					batch_no,
-					serial_no ? this.merge_serial_nos(row[this.serial_no_field], serial_no) : null
+					serial_no ? this.merge_serial_nos(existing, serial_no) : null
 				);
 				frappe.flags.trigger_from_barcode_scanner = true;
 				item_data[this.qty_field] =
@@ -274,19 +283,20 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 		// Item selection must receive the scanned references before it can auto-pick stock.
 		const values = { item_code, use_serial_batch_fields: 1 };
 		if (serial_no && frappe.meta.has_field(row.doctype, this.serial_no_field)) {
-			if (row.serial_number != null && this.serial_no_field === "serial_no") {
+			if (erpnext.serial_batch_input.is_pending(row, this.serial_no_field)) {
 				const numbers = serial_no
 					.split("\n")
 					.map((id) => frappe.utils.get_link_title("Serial No", id) || id)
 					.join("\n");
-				values.serial_number = this.merge_serial_nos(row.serial_number, numbers);
+				values[this.serial_no_field] = this.merge_serial_nos(row[this.serial_no_field], numbers);
+				erpnext.serial_batch_input.mark(row, this.serial_no_field, values[this.serial_no_field]);
 			} else {
 				values[this.serial_no_field] = serial_no;
 			}
 		}
 		if (batch_no && frappe.meta.has_field(row.doctype, this.batch_no_field)) {
 			values[this.batch_no_field] = batch_no;
-			if (frappe.meta.has_field(row.doctype, "batch_number")) values.batch_number = null;
+			erpnext.serial_batch_input.clear(row, this.batch_no_field);
 		}
 		return values;
 	}
@@ -497,14 +507,11 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 
 	async set_serial_no(row, serial_no) {
 		if (serial_no && frappe.meta.has_field(row.doctype, this.serial_no_field)) {
-			if (row.serial_number != null && this.serial_no_field === "serial_no") {
+			if (erpnext.serial_batch_input.is_pending(row, this.serial_no_field)) {
 				const number = frappe.utils.get_link_title("Serial No", serial_no) || serial_no;
-				await frappe.model.set_value(
-					row.doctype,
-					row.name,
-					"serial_number",
-					this.merge_serial_nos(row.serial_number, number)
-				);
+				const merged = this.merge_serial_nos(row[this.serial_no_field], number);
+				erpnext.serial_batch_input.mark(row, this.serial_no_field, merged);
+				await frappe.model.set_value(row.doctype, row.name, this.serial_no_field, merged);
 				return;
 			}
 			const new_serial_nos = this.merge_serial_nos(row[this.serial_no_field], serial_no);
@@ -528,6 +535,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 	}
 
 	async set_batch_no(row, batch_no) {
+		erpnext.serial_batch_input.clear(row, this.batch_no_field);
 		if (batch_no && frappe.meta.has_field(row.doctype, this.batch_no_field)) {
 			await frappe.model.set_value(row.doctype, row.name, this.batch_no_field, batch_no);
 		}
@@ -562,9 +570,11 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 
 	is_duplicate_serial_no(row, serial_no) {
 		const physical_number = frappe.utils.get_link_title("Serial No", serial_no) || serial_no;
-		const pending_duplicate = row.serial_number
-			?.split("\n")
-			.some((number) => number.toUpperCase() === physical_number?.toUpperCase());
+		const pending_duplicate =
+			erpnext.serial_batch_input.is_pending(row, this.serial_no_field) &&
+			row[this.serial_no_field]
+				?.split("\n")
+				.some((number) => number.toUpperCase() === physical_number?.toUpperCase());
 		const is_duplicate =
 			serial_no && (pending_duplicate || row[this.serial_no_field]?.split("\n").includes(serial_no));
 
@@ -591,7 +601,12 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 
 		const matching_row = (row) => {
 			const item_match = row.item_code == item_code;
-			const batch_match = !row[this.batch_no_field] || row[this.batch_no_field] == batch_no;
+			const batch_match =
+				!row[this.batch_no_field] ||
+				(erpnext.serial_batch_input.is_pending(row, this.batch_no_field)
+					? row[this.batch_no_field].toUpperCase() ===
+					  frappe.utils.get_link_title("Batch", batch_no)?.toUpperCase()
+					: row[this.batch_no_field] === batch_no);
 			const uom_match = !uom || this.max_qty_field || row[this.uom_field] == uom;
 			const has_demand_qty = this.demand_ref_fields.some((fieldname) => row[fieldname]);
 			const qty_in_limit = !has_demand_qty || flt(row[this.qty_field]) < flt(row[this.max_qty_field]);

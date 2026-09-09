@@ -635,7 +635,12 @@ def scan_barcode(search_value: str, ctx: dict | str | None = None, allow_multipl
 			.run(as_dict=True)
 		)
 
+	batch_labels = SerialBatchIdentity("Batch").labels(
+		[candidate.batch_no for candidate in candidates if candidate.get("batch_no")]
+	)
 	for candidate in candidates:
+		if candidate.get("batch_no"):
+			candidate.batch_number = batch_labels.get(candidate.batch_no, candidate.batch_no)
 		_update_item_info(candidate, ctx)
 
 	if len(candidates) > 1:

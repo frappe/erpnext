@@ -93,10 +93,8 @@
   "serial_batch_entries_html",
   "section_break_tlhi",
   "serial_no",
-  "serial_number",
   "column_break_ciit",
   "batch_no",
-  "batch_number",
   "edit_references",
   "sales_order",
   "so_detail",
@@ -887,24 +885,6 @@
    "fieldtype": "Currency",
    "label": "Distributed Discount Amount",
    "options": "currency"
-  },
-  {
-   "fieldname": "serial_number",
-   "fieldtype": "Small Text",
-   "label": "Serial No (Physical Input)",
-   "hidden": 1,
-   "no_copy": 1,
-   "print_hide": 1,
-   "description": "Enter physical numbers. These are resolved for the selected Item when saving; reference fields store internal IDs."
-  },
-  {
-   "fieldname": "batch_number",
-   "fieldtype": "Data",
-   "label": "Batch No (Physical Input)",
-   "hidden": 1,
-   "no_copy": 1,
-   "print_hide": 1,
-   "description": "Enter physical numbers. These are resolved for the selected Item when saving; reference fields store internal IDs."
   }
  ],
  "istable": 1,

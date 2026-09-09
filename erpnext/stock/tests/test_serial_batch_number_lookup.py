@@ -93,7 +93,8 @@ class TestSerialBatchNumberLookup(ERPNextTestSuite):
 		names = identity.resolve(item.name, numbers, create=True)
 		receipt = make_purchase_receipt(item_code=item.name, qty=50, do_not_save=True)
 		row = receipt.items[0]
-		row.serial_number = "\n".join(number.lower() for number in numbers)
+		row.serial_no = "\n".join(number.lower() for number in numbers)
+		row.set("__serial_batch_input", ["serial_no"])
 		load = SerialBatchNumberLookup.load
 		with patch.object(SerialBatchNumberLookup, "load", autospec=True, side_effect=load) as lookup:
 			TransactionNumberInput(receipt, row).resolve()

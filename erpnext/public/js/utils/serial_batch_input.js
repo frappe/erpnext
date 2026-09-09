@@ -1,5 +1,6 @@
 // Physical input remains pending until the transaction is saved.
 const registered_forms = new Set();
+const pending_values = new WeakMap();
 const serial_list_fields = new Set(["serial_no", "rejected_serial_no", "current_serial_no"]);
 
 const with_serial_numbers = (BaseControl) =>
@@ -33,8 +34,7 @@ const with_serial_numbers = (BaseControl) =>
 				return super.parse_validate_and_set_in_model(value, event);
 			}
 			const context = this.number_context();
-			const number_field = this.df.fieldname.replace("_no", "_number");
-			if (frappe.meta.has_field(context.row.doctype, number_field)) {
+			if (context.row.parenttype && context.row.doctype !== "Stock Ledger Entry") {
 				const numbers = split_physical_numbers(value);
 				await set_pending_number(context, this.df.fieldname, numbers.join("\n"));
 				return;
@@ -71,8 +71,7 @@ const with_serial_numbers = (BaseControl) =>
 
 		serial_number_text(value) {
 			const { row } = this.number_context();
-			const pending = row?.[this.df.fieldname.replace("_no", "_number")];
-			if (pending != null) return pending;
+			if (erpnext.serial_batch_input.is_pending(row, this.df.fieldname)) return value || "";
 			return (value || "")
 				.split("\n")
 				.map((id) => frappe.utils.get_link_title("Serial No", id) || id)
@@ -80,6 +79,7 @@ const with_serial_numbers = (BaseControl) =>
 		}
 
 		async load_serial_titles(value) {
+			if (erpnext.serial_batch_input.is_pending(this.number_context().row, this.df.fieldname)) return;
 			const missing = (value || "")
 				.split("\n")
 				.filter((id) => id && !frappe.utils.get_link_title("Serial No", id));
@@ -143,12 +143,15 @@ frappe.ui.form.ControlLink = class extends frappe.ui.form.ControlLink {
 		if (
 			doctype === "Batch" &&
 			this.df.fieldname === "batch_no" &&
-			frappe.meta.has_field(row.doctype, "batch_number")
+			row.parenttype &&
+			["Small Text", "Text", "Long Text"].includes(
+				frappe.meta.get_docfield(row.doctype, "serial_no")?.fieldtype
+			)
 		) {
 			await set_pending_number({ frm, row }, "batch_no", (label ?? this.get_label_value()).trim());
 			return;
 		}
-		if (doctype === "Batch" && label !== undefined) row.batch_number = null;
+		if (label !== undefined) erpnext.serial_batch_input.clear(row, this.df.fieldname);
 
 		// Autocomplete supplies the selected physical label; change/blur supplies typed text.
 		const number = (label ?? this.get_label_value()).trim();
@@ -185,8 +188,8 @@ frappe.ui.form.ControlLink = class extends frappe.ui.form.ControlLink {
 	set_formatted_input(value) {
 		super.set_formatted_input(value);
 		const { row } = this.serial_batch_context || { row: this.doc };
-		if (this.df.fieldname === "batch_no" && row?.batch_number != null) {
-			this.$input?.val(row.batch_number);
+		if (this.df.fieldname === "batch_no" && erpnext.serial_batch_input.is_pending(row, "batch_no")) {
+			this.$input?.val(value);
 		}
 	}
 };
@@ -199,13 +202,17 @@ function split_physical_numbers(value) {
 }
 
 async function set_pending_number({ frm, row }, field, value) {
-	const values = { [field]: "", [field.replace("_no", "_number")]: value };
+	erpnext.serial_batch_input.mark(row, field, value);
+	row[field] = value;
+	frm.dirty();
+	frm.refresh_field(row.parentfield || field);
+	const values = {};
 	if (frappe.meta.has_field(row.doctype, "use_serial_batch_fields")) values.use_serial_batch_fields = 1;
 	if (frappe.meta.has_field(row.doctype, "serial_and_batch_bundle")) values.serial_and_batch_bundle = "";
 	const pending = (async () => {
 		await frappe.model.set_value(row.doctype, row.name, values);
 		const numbers = split_physical_numbers(value);
-		if (field === "serial_no" && numbers.length && !frm.doc.is_return && row.serial_number === value) {
+		if (field === "serial_no" && numbers.length && !frm.doc.is_return && row.serial_no === value) {
 			await frappe.model.set_value(
 				row.doctype,
 				row.name,
@@ -225,9 +232,50 @@ async function set_pending_number({ frm, row }, field, value) {
 function track_number_request(frm, pending) {
 	if (!registered_forms.has(frm.doctype)) {
 		registered_forms.add(frm.doctype);
-		const wait = (form) => Promise.all([...(form.serial_number_requests || [])]);
-		frappe.ui.form.on(frm.doctype, { validate: wait, before_save: wait });
+		const wait = async (form) => {
+			await Promise.all([...(form.serial_number_requests || [])]);
+			for (const row of frappe.model.get_all_docs(form.doc)) {
+				for (const field of [...(row.__serial_batch_input || [])]) {
+					erpnext.serial_batch_input.is_pending(row, field);
+				}
+			}
+		};
+		frappe.ui.form.on(frm.doctype, {
+			validate: wait,
+			before_save: wait,
+			after_save(form) {
+				for (const row of frappe.model.get_all_docs(form.doc)) {
+					delete row.__serial_batch_input;
+					pending_values.delete(row);
+				}
+			},
+		});
 	}
 	frm.serial_number_requests ||= new Set();
 	frm.serial_number_requests.add(pending);
 }
+
+erpnext.serial_batch_input = {
+	mark(row, field, value) {
+		row.__serial_batch_input = [...new Set([...(row.__serial_batch_input || []), field])];
+		const inputs = pending_values.get(row) || {};
+		inputs[field] = value;
+		pending_values.set(row, inputs);
+	},
+	is_pending(row, field) {
+		if (!row?.__serial_batch_input?.includes(field)) return false;
+		const inputs = pending_values.get(row);
+		if (inputs && field in inputs && inputs[field] !== row[field]) {
+			this.clear(row, field);
+			return false;
+		}
+		return true;
+	},
+	clear(row, field) {
+		if (!row?.__serial_batch_input) return;
+		row.__serial_batch_input = row.__serial_batch_input.filter((name) => name !== field);
+		if (!row.__serial_batch_input.length) delete row.__serial_batch_input;
+		const inputs = pending_values.get(row);
+		if (inputs) delete inputs[field];
+	},
+};

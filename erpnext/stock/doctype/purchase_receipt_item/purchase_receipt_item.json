@@ -108,12 +108,9 @@
   "rejected_serial_batch_entries_html",
   "section_break_3vxt",
   "serial_no",
-  "serial_number",
   "rejected_serial_no",
-  "rejected_serial_number",
   "column_break_tolu",
   "batch_no",
-  "batch_number",
   "item_weight_details",
   "weight_per_unit",
   "total_weight",
@@ -1153,33 +1150,6 @@
   {
    "fieldname": "rejected_serial_batch_entries_html",
    "fieldtype": "HTML"
-  },
-  {
-   "fieldname": "serial_number",
-   "fieldtype": "Small Text",
-   "label": "Serial No (Physical Input)",
-   "hidden": 1,
-   "no_copy": 1,
-   "print_hide": 1,
-   "description": "Enter physical numbers. These are resolved for the selected Item when saving; reference fields store internal IDs."
-  },
-  {
-   "fieldname": "rejected_serial_number",
-   "fieldtype": "Small Text",
-   "label": "Rejected Serial No (Physical Input)",
-   "hidden": 1,
-   "no_copy": 1,
-   "print_hide": 1,
-   "description": "Enter physical numbers. These are resolved for the selected Item when saving; reference fields store internal IDs."
-  },
-  {
-   "fieldname": "batch_number",
-   "fieldtype": "Data",
-   "label": "Batch No (Physical Input)",
-   "hidden": 1,
-   "no_copy": 1,
-   "print_hide": 1,
-   "description": "Enter physical numbers. These are resolved for the selected Item when saving; reference fields store internal IDs."
   }
  ],
  "idx": 1,

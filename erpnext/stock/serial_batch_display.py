@@ -81,6 +81,12 @@ def before_print(doc, method=None, print_settings=None, **kwargs):
 
 
 class SerialNumberDisplay:
+	def as_dict(self, *args, **kwargs):
+		doc = super().as_dict(*args, **kwargs)
+		if self.get("__serial_batch_input") and not kwargs.get("no_private_properties"):
+			doc["__serial_batch_input"] = self.get("__serial_batch_input").copy()
+		return doc
+
 	def get_formatted(self, fieldname, *args, **kwargs):
 		field = self.meta.get_field(fieldname)
 		if (

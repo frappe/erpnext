@@ -18,6 +18,12 @@ class UOMMustBeIntegerError(frappe.ValidationError):
 
 
 class TransactionBase(StatusUpdater):
+	def _validate_links(self):
+		from erpnext.stock.serial_batch_input import resolve_transaction_numbers
+
+		resolve_transaction_numbers(self)
+		return super()._validate_links()
+
 	def on_change(self):
 		# `on_change` also fires for `db_set()`, so only run during an actual insert/save.
 		is_real_save = self.flags.in_insert or (self.doctype, self.name) in frappe.flags.currently_saving
