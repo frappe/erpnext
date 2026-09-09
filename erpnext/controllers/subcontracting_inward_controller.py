@@ -1145,7 +1145,15 @@ def get_fg_reference_names(doctype, txt, searchfield, start, page_len, filters):
 		"Subcontracting Inward Order Item",
 		limit_start=start,
 		limit_page_length=page_len,
+<<<<<<< HEAD
 		filters={"parent": filters.get("parent"), "item_code": ("like", "%%%s%%" % txt), "docstatus": 1},
+=======
+		filters={"parent": filters.get("parent"), "docstatus": 1},
+		or_filters=[
+			["name", "like", f"%{txt}%"],
+			["item_code", "like", f"%{txt}%"],
+		],
+>>>>>>> d5e63b8 (fix(subcontracting): cannot select Against Finished Good on customer receipt (#58949))
 		fields=["name", "item_code", "delivery_warehouse"],
 		as_list=True,
 		order_by="idx",
