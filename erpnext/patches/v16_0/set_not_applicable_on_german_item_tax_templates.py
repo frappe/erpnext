@@ -204,9 +204,11 @@ def execute():
 				if any(identifier is None for identifier in zero_rate_accounts_by_detail.values()):
 					continue
 
-				# Compare the row count as well: `account_name` is not unique within a
-				# company, so a user-added zero-rate row can collapse onto a default
-				# identifier and make a customised template look untouched.
+				# Compare the row count as well. Account names are only implicitly unique
+				# among number-less accounts (`Account.name` is `[number - ]account_name - abbr`),
+				# so on a mixed chart a numbered account can share `account_name` with a
+				# default one. Without this, such a user-added zero-rate row collapses onto a
+				# default identifier and makes a customised template look untouched.
 				if len(zero_rate_accounts_by_detail) != len(target_accounts):
 					continue
 
