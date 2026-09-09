@@ -658,11 +658,8 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 
 			# if the current user does not have permissions to override credit limit,
 			# prompt them to send out an email to the controller users
-			frappe.msgprint(
-				message,
-				title=_("Credit Limit Crossed"),
-				raise_exception=1,
-				primary_action={
+			primary_action = (
+				{
 					"label": "Send Email",
 					"server_action": "erpnext.selling.doctype.customer.customer.send_emails",
 					"hide_on_success": True,
@@ -672,7 +669,16 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 						"credit_limit": credit_limit,
 						"credit_controller_users_list": credit_controller_users,
 					},
-				},
+				}
+				if frappe.has_permission("Customer", ptype="email", doc=customer)
+				else None
+			)
+
+			frappe.msgprint(
+				message,
+				title=_("Credit Limit Crossed"),
+				raise_exception=1,
+				primary_action=primary_action,
 			)
 
 
@@ -680,6 +686,7 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 def send_emails(customer, customer_outstanding, credit_limit, credit_controller_users_list):
 	if isinstance(credit_controller_users_list, str):
 		credit_controller_users_list = json.loads(credit_controller_users_list)
+	frappe.has_permission("Customer", ptype="email", doc=customer, throw=True)
 	subject = _("Credit limit reached for customer {0}").format(customer)
 	message = _("Credit limit has been crossed for customer {0} ({1}/{2})").format(
 		customer, customer_outstanding, credit_limit
