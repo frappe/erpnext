@@ -638,7 +638,6 @@ def send_emails(args):
 	args = json.loads(args)
 	subject = _("Credit limit reached for customer {0}").format(args.get("customer"))
 	frappe.has_permission("Customer", ptype="email", doc=args.get("customer"), throw=True)
-	credit_controller_users_list = frappe.parse_json(credit_controller_users_list)
 	message = _("Credit limit has been crossed for customer {0} ({1}/{2})").format(
 		args.get("customer"), args.get("customer_outstanding"), args.get("credit_limit")
 	)
