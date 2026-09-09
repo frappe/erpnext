@@ -1,6 +1,7 @@
 from unittest.mock import patch
 
 import frappe
+from bs4 import BeautifulSoup
 from frappe.utils import escape_html
 from frappe.utils.print_format_generator import PrintFormatGenerator
 from frappe.www.printview import set_link_titles
@@ -127,3 +128,29 @@ class TestSerialBatchPrint(ERPNextTestSuite):
 			"{{ doc.items[0].get_formatted('serial_no') }}"
 		)
 		self.assertEqual(frappe.render_template(template, {"doc": doc}), "PRINT-SERIAL / PRINT-SERIAL")
+
+	def test_merged_builder_columns_preserve_special_characters(self):
+		for number in ("SERIAL-&<001>", "SERIAL-\"quote\"-'single'", "SERIAL-&amp;-&lt;"):
+			for primary in (True, False):
+				with self.subTest(number=number, primary=primary):
+					doc, print_format = self.make_print(number)
+					serial = doc.items[0].serial_no
+					layout = frappe.parse_json(print_format.format_data)
+					table = layout["sections"][0]["columns"][0]["fields"][0]
+					serial_column, batch_column = table["table_columns"]
+					column, merged = (
+						(serial_column, batch_column) if primary else (batch_column, serial_column)
+					)
+					column["merged_fields"] = [{**merged, "style": "secondary"}]
+					table["table_columns"] = [column]
+					print_format.format_data = frappe.as_json(layout)
+					generator = PrintFormatGenerator(print_format, doc)
+					preview = generator.get_html_preview()
+					with patch("frappe.utils.pdf.get_chrome_pdf", return_value=b"pdf") as render_pdf:
+						generator.render_pdf()
+					for html in (preview, render_pdf.call_args.kwargs["html"]):
+						cells = BeautifulSoup(html, "html.parser").select(".cell-line")
+						self.assertIn(number, [cell.get_text() for cell in cells])
+						self.assertTrue(all(cell.find() is None for cell in cells))
+						self.assertNotIn(serial, html)
+					self.assertEqual(doc.items[0].serial_no, serial)
