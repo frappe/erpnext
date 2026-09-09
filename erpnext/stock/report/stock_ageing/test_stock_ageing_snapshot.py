@@ -12,7 +12,11 @@ import frappe
 import pyarrow as pa
 
 from erpnext.stock.report.stock_ageing.stock_ageing import FIFOSlots
-from erpnext.stock.report.stock_ageing.stock_ageing_snapshot import DETAIL_FIELDS, SnapshotFIFO
+from erpnext.stock.report.stock_ageing.stock_ageing_snapshot import (
+	DETAIL_FIELDS,
+	FAST_KEYS,
+	SnapshotFIFO,
+)
 from erpnext.stock.report.stock_report_snapshot import StockReportSnapshot
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -80,12 +84,35 @@ class TestStockAgeingSnapshot(ERPNextTestSuite):
 				other[field] = rows[0][field]
 			self.assertIsNone(self.calculate(rows))
 
+	def test_split_does_not_bind_a_parameter_per_group(self):
+		rows = self.make_rows(5)
+		rows[0].stock_value_difference = 0.1
+		counts = self.count_split_parameters(rows)
+		self.assertTrue(counts)
+		self.assertEqual(set(counts), {0})
+
+	def count_split_parameters(self, rows):
+		"""Parameters bound by the queries that split aggregated groups from replayed ones."""
+		counts = []
+		compile_query = StockReportSnapshot.compile
+
+		def record(query):
+			sql, parameters = compile_query(query)
+			if FAST_KEYS in sql:
+				counts.append(len(parameters))
+			return sql, parameters
+
+		with patch.object(StockReportSnapshot, "compile", staticmethod(record)):
+			self.assertEqual(self.calculate(rows), self.replay(rows))
+
+		return counts
+
 	def calculate(self, rows, method="FIFO"):
 		fifo = self.make_fifo(rows, method)
 		with duckdb.connect(":memory:") as conn:
 			conn.from_arrow(self.as_arrow(rows)).create("tabStock Ledger Entry")
 			snapshot = StockReportSnapshot.__new__(StockReportSnapshot)
-			snapshot.conn, snapshot.filters, snapshot.live_tables = conn, {}, {}
+			snapshot.conn, snapshot.filters, snapshot.tables = conn, {}, {}
 			fifo.snapshot = snapshot
 			ledger = frappe.qb.DocType("Stock Ledger Entry")
 			query = frappe.qb.from_(ledger).select(*(ledger[field] for field in DETAIL_FIELDS))

@@ -79,7 +79,7 @@ class TestStockReportSnapshot(ERPNextTestSuite):
 		with patch.object(StockReportSnapshot, "get_connection", return_value=conn):
 			with StockReportSnapshot("Stock Ledger", self.filters) as snapshot:
 				with patch.object(frappe, "get_all", wraps=frappe.get_all) as get_all:
-					self.assertEqual(snapshot.get_live_table("Stock Reconciliation").num_rows, 0)
+					self.assertEqual(snapshot.get_table("tabStock Reconciliation").num_rows, 0)
 					get_all.assert_not_called()
 
 		reconciliation = create_stock_reconciliation(
@@ -89,11 +89,56 @@ class TestStockReportSnapshot(ERPNextTestSuite):
 		with patch.object(StockReportSnapshot, "get_connection", return_value=conn):
 			with StockReportSnapshot("Stock Ledger", self.filters) as snapshot:
 				with patch.object(frappe, "get_all", wraps=frappe.get_all) as get_all:
-					self.assertEqual(snapshot.get_live_table("Stock Reconciliation").num_rows, 1)
+					self.assertEqual(snapshot.get_table("tabStock Reconciliation").num_rows, 1)
 					get_all.assert_called_once()
 					self.assertEqual(
 						get_all.call_args.kwargs["filters"], {"name": ("in", [reconciliation.name])}
 					)
+
+	def test_supporting_tables_are_read_in_batches(self):
+		items = [self.item, make_item("_Test DuckDB Batched Item").name]
+		self.filters.item_code = items
+		for item in items:
+			self.make_movement(item_code=item, qty=1, basic_rate=100)
+		conn = self.connect(self.capture_ledger(items))
+		with (
+			patch.object(StockReportSnapshot, "get_connection", return_value=conn),
+			patch("erpnext.stock.report.stock_report_snapshot.BATCH_SIZE", 1),
+			patch.object(frappe, "get_all", wraps=frappe.get_all) as get_all,
+		):
+			with StockReportSnapshot("Stock Balance", self.filters) as snapshot:
+				self.assertEqual(snapshot.get_table("tabItem").num_rows, 2)
+
+		self.assertEqual(get_all.call_count, 2)
+		for call in get_all.call_args_list:
+			self.assertEqual(len(call.kwargs["filters"]["name"][1]), 1)
+
+	def test_batch_filter_scopes_serial_and_batch_entries(self):
+		self.set_item(
+			"_Test DuckDB Scoped Batch Item",
+			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "DUCKS-.#####"},
+		)
+		batches = [
+			frappe.get_value(
+				"Serial and Batch Entry",
+				{
+					"parent": self.make_movement(qty=5, basic_rate=100, posting_date=day)
+					.items[0]
+					.serial_and_batch_bundle
+				},
+				"batch_no",
+			)
+			for day in (add_days(today(), -2), add_days(today(), -1))
+		]
+		filters = deepcopy(self.filters)
+		filters.batch_no = batches[0]
+		conn = self.connect(self.capture_ledger())
+		with patch.object(StockReportSnapshot, "get_connection", return_value=conn):
+			with StockReportSnapshot("Stock Ledger", filters) as snapshot:
+				entries = snapshot.get_table("tabSerial and Batch Entry")
+
+		self.assertEqual(set(entries.column("batch_no").to_pylist()), {batches[0]})
+		self.assert_snapshot_matches(stock_ledger, batch_no=batches[0], segregate_serial_batch_bundle=1)
 
 	def test_snapshot_result_types_and_nulls(self):
 		self.make_movement(qty=1, basic_rate=100.25)
@@ -370,7 +415,7 @@ class TestStockReportSnapshot(ERPNextTestSuite):
 		report_filters = deepcopy(self.filters)
 		report_filters.update(filters)
 		expected = report.execute(deepcopy(report_filters))
-		actual = self.run_snapshot(report, self.capture_ledger(), report_filters)
+		actual = self.run_snapshot(report, self.capture_ledger(report_filters.item_code), report_filters)
 		self.assertEqual(expected, actual)
 
 	def run_snapshot(self, report, table, filters=None):
