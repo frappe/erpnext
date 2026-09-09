@@ -192,7 +192,11 @@ def get_rate_locked_source_row(args, doc):
 	if not source_fields or not doc or args.get("is_return") or not maintain_same_rate_enabled(args):
 		return None
 
-	row = next((d for d in doc.get("items") or [] if d.get("name") == args.child_docname), None)
+	row = (
+		next((d for d in doc.get("items") or [] if d.get("name") == args.child_docname), None)
+		if args.child_docname
+		else args
+	)
 	if not row:
 		return None
 
