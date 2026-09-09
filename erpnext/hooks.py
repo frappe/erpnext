@@ -72,7 +72,10 @@ doctype_list_js = {
 
 page_js = {"print": "public/js/print.js"}
 
-extend_doctype_class = {"Address": "erpnext.accounts.custom.address.ERPNextAddress"}
+extend_doctype_class = {
+	"Address": "erpnext.accounts.custom.address.ERPNextAddress",
+	"Data Import": "erpnext.stock.serial_batch_import.SerialBatchDataImport",
+}
 
 override_whitelisted_methods = {"frappe.www.contact.send_message": "erpnext.templates.utils.send_message"}
 
@@ -381,9 +384,6 @@ pre_submit_validation_doctypes = [
 	"Purchase Receipt",
 	"Sales Order",
 ]
-
-
-extend_doctype_class["Data Import"] = "erpnext.stock.serial_batch_import.SerialBatchDataImport"
 
 doc_events = {
 	"*": {
