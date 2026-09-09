@@ -204,6 +204,12 @@ def execute():
 				if any(identifier is None for identifier in zero_rate_accounts_by_detail.values()):
 					continue
 
+				# Compare the row count as well: `account_name` is not unique within a
+				# company, so a user-added zero-rate row can collapse onto a default
+				# identifier and make a customised template look untouched.
+				if len(zero_rate_accounts_by_detail) != len(target_accounts):
+					continue
+
 				if set(zero_rate_accounts_by_detail.values()) != target_accounts:
 					continue
 
