@@ -498,10 +498,7 @@ function hide_fields(frm) {
 	const item_fields_stock = ["warehouse_section", "received_qty", "rejected_qty"];
 
 	if (frm.fields_dict["items"]) {
-		frm.fields_dict["items"].grid.set_column_disp(
-			item_fields_stock,
-			cint(doc.update_stock) == 1 || cint(doc.is_return) == 1
-		);
+		frm.fields_dict["items"].grid.set_column_disp(item_fields_stock, cint(doc.update_stock) == 1);
 	}
 
 	frm.refresh_fields();
