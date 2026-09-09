@@ -1906,6 +1906,9 @@ def make_stock_entry(source_name: str, target_doc: Document | str | None = None)
 			target.qty = pending_rm_qty
 
 	def set_missing_values(source, target):
+		if not source.items:
+			frappe.throw(_("This Job Card has no raw materials to transfer."))
+
 		if source.finished_good and not source.target_warehouse:
 			frappe.throw(_("Please set the Target Warehouse in the Job Card"))
 
