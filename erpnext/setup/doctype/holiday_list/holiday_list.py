@@ -8,7 +8,7 @@ from datetime import date
 import frappe
 from frappe import _, throw
 from frappe.model.document import Document
-from frappe.utils import DateTimeLikeObject, formatdate, getdate, today
+from frappe.utils import DateTimeLikeObject, cint, formatdate, getdate, today
 
 
 class OverlapError(frappe.ValidationError):
@@ -47,7 +47,7 @@ class HolidayList(Document):
 		self.sort_holidays()
 
 	def update_total_holidays(self):
-		self.total_holidays = sum(0.5 if holiday.is_half_day else 1 for holiday in self.holidays)
+		self.total_holidays = sum(0.5 if cint(holiday.is_half_day) else 1 for holiday in self.holidays)
 
 	@frappe.whitelist()
 	def get_weekly_off_dates(self):
