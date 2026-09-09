@@ -88,16 +88,11 @@ frappe.ui.form.on("Inventory Dimension", {
 	set_parent_fields(frm) {
 		const { reference_document, document_type } = frm.doc;
 		if (!reference_document || (!frm.doc.apply_to_all_doctypes && (!document_type || !frm.doc.istable))) {
-			frm.set_df_property("fetch_from_parent", "options", []);
-			frm.set_df_property("fetch_from_parent", "hidden", 1);
-			return frm.set_value("fetch_from_parent", "");
+			return set_parent_field_options(frm, []);
 		}
 
 		if (frm.doc.apply_to_all_doctypes) {
-			let options = ["\n", reference_document];
-
-			frm.set_df_property("fetch_from_parent", "options", options);
-			frm.set_df_property("fetch_from_parent", "hidden", 0);
+			return set_parent_field_options(frm, [{ value: reference_document, label: reference_document }]);
 		} else if (document_type && frm.doc.istable) {
 			frappe.call({
 				method: "erpnext.stock.doctype.inventory_dimension.inventory_dimension.get_parent_fields",
@@ -115,9 +110,7 @@ frappe.ui.form.on("Inventory Dimension", {
 						return;
 					}
 
-					const fields = r.message || [];
-					frm.set_df_property("fetch_from_parent", "options", ["\n"].concat(fields));
-					frm.set_df_property("fetch_from_parent", "hidden", !fields.length);
+					return set_parent_field_options(frm, r.message || []);
 				},
 			});
 		}
@@ -142,3 +135,12 @@ frappe.ui.form.on("Inventory Dimension", {
 		});
 	},
 });
+
+function set_parent_field_options(frm, fields) {
+	frm.set_df_property("fetch_from_parent", "options", ["", ...fields]);
+	frm.set_df_property("fetch_from_parent", "hidden", !fields.length);
+
+	if (frm.doc.fetch_from_parent && !fields.some((field) => field.value === frm.doc.fetch_from_parent)) {
+		return frm.set_value("fetch_from_parent", "");
+	}
+}
