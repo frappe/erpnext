@@ -515,9 +515,6 @@ class MaterialRequest(BuyingController):
 
 
 def is_valid_buying_price_list(price_list: str | None) -> bool:
-	if not price_list:
-		return False
-
 	return is_price_list_enabled(price_list) and bool(frappe.get_value("Price List", price_list, "buying"))
 
 

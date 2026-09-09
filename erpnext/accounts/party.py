@@ -395,12 +395,17 @@ def set_other_values(party_details, party, party_type):
 
 
 def get_default_price_list(party):
-	"""Return default price list for party (Document object)"""
-	if party.get("default_price_list"):
-		return party.default_price_list
+	"""Return the first enabled default price list for party (Document object)"""
+	price_lists = [party.get("default_price_list")]
 
 	if party.doctype == "Customer":
-		return frappe.get_cached_value("Customer Group", party.customer_group, "default_price_list")
+		price_lists.append(
+			frappe.get_cached_value("Customer Group", party.customer_group, "default_price_list")
+		)
+
+	for price_list in price_lists:
+		if is_price_list_enabled(price_list):
+			return price_list
 
 
 def set_price_list(party_details, party, party_type, given_price_list, pos=None):
@@ -413,7 +418,7 @@ def set_price_list(party_details, party, party_type, given_price_list, pos=None)
 	elif pos and party_type == "Customer":
 		customer_price_list = frappe.get_value("Customer", party.name, "default_price_list")
 
-		if customer_price_list:
+		if is_price_list_enabled(customer_price_list):
 			price_list = customer_price_list
 		else:
 			pos_price_list = frappe.get_value("POS Profile", pos, "selling_price_list")

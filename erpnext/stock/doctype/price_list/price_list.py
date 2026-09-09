@@ -92,5 +92,5 @@ def get_price_list_details(price_list):
 	return price_list_details or {}
 
 
-def is_price_list_enabled(price_list: str) -> bool:
-	return bool(frappe.get_cached_value("Price List", price_list, "enabled"))
+def is_price_list_enabled(price_list: str | None) -> bool:
+	return bool(price_list) and bool(frappe.get_cached_value("Price List", price_list, "enabled"))
