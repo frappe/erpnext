@@ -469,22 +469,32 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 		$td.data("editing", 1);
 
 		let name = $td.data("name");
+		let pending_index = $td.data("pending-index");
+		let entry =
+			pending_index != null
+				? this.pending.new_entries[pending_index]
+				: this.last_entries.find((row) => row.name === name);
+		let number_field = opts.field === "serial_no" ? "serial_number" : "batch_number";
 		let current =
-			this.pending.updates[name]?.[opts.field] ||
-			this.last_entries.find((row) => row.name === name)?.[opts.field] ||
-			"";
+			(pending_index == null && this.pending.updates[name]?.[opts.field]) || entry?.[opts.field] || "";
 		$td.empty().addClass("sbie-input-cell").css("cursor", "default");
 		this.wrapper.find(".sbie-table").css("overflow", "visible");
 
 		let control = this.make_row_link_control($td, {
 			options: opts.options,
 			fieldname: "sbie_edit_link",
-			placeholder: opts.placeholder,
+			placeholder: (!current && entry?.[number_field]) || opts.placeholder,
 			get_query: opts.get_query,
 			onchange: () => {
 				let value = control.get_value();
 				if (value && value !== current) {
-					this.update_entry(name, { [opts.field]: value });
+					if (pending_index != null) {
+						entry[opts.field] = value;
+						delete entry[number_field];
+						this.frm.dirty();
+					} else {
+						this.update_entry(name, { [opts.field]: value });
+					}
 					this.refresh_view();
 				}
 			},
@@ -1000,7 +1010,9 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 				<td style="text-align: center;">${base_count + index + 1}</td>
 				${
 					show_serial
-						? `<td>${this.esc(
+						? `<td class="sbie-serial-cell" data-pending-index="${index}" title="${__(
+								"Click to change Serial No"
+						  )}" style="cursor: pointer;">${this.esc(
 								d.serial_number ||
 									frappe.utils.get_link_title("Serial No", d.serial_no) ||
 									d.serial_no ||
@@ -1010,7 +1022,9 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 				}
 				${
 					show_batch
-						? `<td>${this.esc(
+						? `<td class="sbie-batch-cell" data-pending-index="${index}" title="${__(
+								"Click to change Batch No"
+						  )}" style="cursor: pointer;">${this.esc(
 								d.batch_number ||
 									frappe.utils.get_link_title("Batch", d.batch_no) ||
 									d.batch_no ||
