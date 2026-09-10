@@ -32,13 +32,13 @@ class TestCompanyNamingSeries(ERPNextTestSuite):
 	def test_no_rows_means_every_series_is_offered(self):
 		self.company.save()
 
-		self.assertEqual(get_allowed_naming_series(COMPANY, "Journal Entry"), [])
+		self.assertIsNone(get_allowed_naming_series(COMPANY, "Journal Entry"))
 
 	def test_allowed_series_are_read_off_the_company(self):
 		self.restrict("Journal Entry", "ACC-JV-.YYYY.-")
 
 		self.assertEqual(get_allowed_naming_series(COMPANY, "Journal Entry"), ["ACC-JV-.YYYY.-"])
-		self.assertEqual(get_allowed_naming_series(COMPANY, "Sales Invoice"), [])
+		self.assertIsNone(get_allowed_naming_series(COMPANY, "Sales Invoice"))
 
 	def test_a_series_dropped_from_the_doctype_stops_being_allowed(self):
 		self.restrict("Journal Entry", ALLOWED_SERIES)
@@ -46,6 +46,7 @@ class TestCompanyNamingSeries(ERPNextTestSuite):
 
 		with self.patch_naming_series_options("Journal Entry", []):
 			self.assertEqual(get_allowed_naming_series(COMPANY, "Journal Entry"), [])
+			self.assertRaises(frappe.ValidationError, build_journal_entry(ALLOWED_SERIES).insert)
 
 	def patch_naming_series_options(self, doctype, options):
 		return patch.object(frappe.get_meta(doctype), "get_naming_series_options", return_value=options)
