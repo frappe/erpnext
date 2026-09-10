@@ -25,6 +25,7 @@ from erpnext.controllers.tests.test_subcontracting_controller import (
 	set_backflush_based_on,
 )
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+from erpnext.projects.doctype.project.test_project import make_project
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
@@ -111,6 +112,24 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		scr.cancel()
 		sco.load_from_db()
 		self.assertEqual(sco.status, "Partially Received")
+
+	def test_project_is_carried_over_from_purchase_order(self):
+		project = make_project({"project_name": "_Test SCO Project"}).name
+		po = make_subcontracted_purchase_order(project)
+
+		sco = get_mapped_subcontracting_order(source_name=po.name)
+
+		self.assertEqual(sco.project, project)
+		self.assertEqual(sco.items[0].project, project)
+
+	def test_project_cannot_differ_from_purchase_order(self):
+		project = make_project({"project_name": "_Test SCO Project"}).name
+		other_project = make_project({"project_name": "_Test SCO Project 2"}).name
+		po = make_subcontracted_purchase_order(project)
+
+		sco = get_mapped_subcontracting_order(source_name=po.name)
+		sco.items[0].project = other_project
+		self.assertRaises(frappe.ValidationError, sco.save)
 
 	def test_sco_requires_a_subcontracting_purchase_order(self):
 		sco = get_subcontracting_order(do_not_save=1)
@@ -1057,3 +1076,31 @@ def create_subcontracting_order(**args):
 			sco.submit()
 
 	return sco
+
+
+def make_subcontracted_purchase_order(project):
+	from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+	service_items = [
+		{
+			"warehouse": "_Test Warehouse - _TC",
+			"item_code": "Subcontracted Service Item 7",
+			"qty": 10,
+			"rate": 100,
+			"fg_item": "Subcontracted Item SA7",
+			"fg_item_qty": 10,
+		},
+	]
+	po = create_purchase_order(
+		rm_items=service_items,
+		is_subcontracted=1,
+		supplier_warehouse="_Test Warehouse 1 - _TC",
+		do_not_submit=1,
+	)
+	po.project = project
+	for item in po.items:
+		item.project = project
+	po.save()
+	po.submit()
+
+	return po
