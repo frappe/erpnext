@@ -9,7 +9,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.model.naming import getseries
 from frappe.query_builder.functions import IfNull, NullIf
-from frappe.utils import add_days, cint, flt, getdate, nowdate
+from frappe.utils import add_days, cint, date_diff, flt, getdate, nowdate
 from pypika import Case, Order
 from pypika.terms import ExistsCriterion
 
@@ -205,6 +205,8 @@ class Quotation(SellingController):
 		"mode_of_payment",
 		"discount",
 		"discount_type",
+		"discount_date",
+		"payment_amount",
 	)
 
 	def save(self, *args, **kwargs):
@@ -228,7 +230,9 @@ class Quotation(SellingController):
 		draft.revised_from = source.name
 		draft.original_quotation = source.original_quotation or source.name
 		draft.is_latest_revision = 0
-		draft.transaction_date = source.transaction_date
+		for row in source.payment_schedule:
+			draft.append("payment_schedule", frappe.copy_doc(row, ignore_no_copy=False))
+		self.renew_revision_dates(source, draft)
 		for source_item, item in zip(source.items, draft.items, strict=True):
 			item.prevdoc_doctype = source_item.prevdoc_doctype
 			item.prevdoc_docname = source_item.prevdoc_docname
@@ -658,6 +662,17 @@ class Quotation(SellingController):
 		if not source.is_latest_revision or source.status not in ("Open", "Expired"):
 			frappe.throw(_("Only the current Open or Expired quotation can be revised."))
 		source.validate_revision_transactions()
+
+	@staticmethod
+	def renew_revision_dates(source: Document, draft: Document) -> None:
+		shift = date_diff(nowdate(), source.transaction_date)
+		draft.transaction_date = nowdate()
+		if source.valid_till:
+			draft.valid_till = add_days(source.valid_till, shift)
+		for row in draft.payment_schedule:
+			for fieldname in ("due_date", "discount_date"):
+				if row.get(fieldname):
+					row.set(fieldname, add_days(row.get(fieldname), shift))
 
 	def validate_revision_party(self, source: Document) -> None:
 		if any(self.get(field) != source.get(field) for field in ("company", "quotation_to", "party_name")):
