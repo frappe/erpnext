@@ -644,6 +644,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 			target_doc.expense_account = source_doc.expense_account
 
 			if doctype == "Sales Invoice":
+				target_doc.quotation = source_doc.quotation
 				target_doc.sales_invoice_item = source_doc.name
 				target_doc.tax_withholding_category = source_doc.tax_withholding_category
 				target_doc.apply_tds = source_doc.apply_tds

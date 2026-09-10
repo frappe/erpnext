@@ -22,6 +22,11 @@
   "company",
   "has_unit_price_items",
   "amended_from",
+  "original_quotation",
+  "revised_from",
+  "quotation_version",
+  "quote_revision_count",
+  "is_latest_revision",
   "currency_and_price_list",
   "currency",
   "conversion_rate",
@@ -850,10 +855,11 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "Draft\nOpen\nReplied\nPartially Ordered\nOrdered\nLost\nCancelled\nExpired",
+   "options": "Draft\nOpen\nReplied\nPartially Ordered\nOrdered\nLost\nCancelled\nExpired\nSuperseded",
    "print_hide": 1,
    "read_only": 1,
-   "reqd": 1
+   "reqd": 1,
+   "in_standard_filter": 1
   },
   {
    "fieldname": "enq_det",
@@ -1139,13 +1145,69 @@
    "label": "Title",
    "no_copy": 1,
    "print_hide": 1
+  },
+  {
+   "fieldname": "original_quotation",
+   "fieldtype": "Link",
+   "label": "Original Quotation",
+   "options": "Quotation",
+   "read_only": 1,
+   "no_copy": 1,
+   "search_index": 1,
+   "depends_on": "eval:doc.original_quotation",
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "revised_from",
+   "fieldtype": "Link",
+   "label": "Revised From",
+   "options": "Quotation",
+   "read_only": 1,
+   "no_copy": 1,
+   "search_index": 1,
+   "depends_on": "eval:doc.revised_from"
+  },
+  {
+   "fieldname": "quotation_version",
+   "fieldtype": "Int",
+   "label": "Quotation Version",
+   "read_only": 1,
+   "no_copy": 1,
+   "default": "0",
+   "depends_on": "eval:doc.original_quotation",
+   "description": "Number of this separately saved version of the original quotation.",
+   "in_standard_filter": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "quote_revision_count",
+   "fieldtype": "Int",
+   "label": "Quote Revision Count",
+   "read_only": 1,
+   "no_copy": 1,
+   "allow_on_submit": 1,
+   "default": "0",
+   "description": "Number of saves with commercial changes to this quotation, excluding the initial save.",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "is_latest_revision",
+   "fieldtype": "Check",
+   "label": "Current Version",
+   "read_only": 1,
+   "no_copy": 1,
+   "allow_on_submit": 1,
+   "default": "1",
+   "in_standard_filter": 1,
+   "search_index": 1,
+   "description": "The current submitted version, or the original draft before submission."
   }
  ],
  "icon": "fa fa-shopping-cart",
  "idx": 82,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-12 12:00:00.000000",
+ "modified": "2026-09-10 19:08:36.924463",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",
@@ -1243,5 +1305,6 @@
  "sort_order": "DESC",
  "states": [],
  "timeline_field": "party_name",
- "title_field": "customer_name"
+ "title_field": "customer_name",
+ "track_changes": 1
 }

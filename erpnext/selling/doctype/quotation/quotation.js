@@ -110,6 +110,39 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 
 		var me = this;
 
+		if (!doc.__islocal) {
+			this.frm.add_custom_button(
+				__("Revisions"),
+				() =>
+					this.frm.call("get_revisions").then((r) => {
+						if (r.message?.length) {
+							frappe.set_route("List", "Quotation", { name: ["in", r.message] });
+						}
+					}),
+				__("View")
+			);
+		}
+
+		if (
+			doc.docstatus === 1 &&
+			doc.is_latest_revision &&
+			["Open", "Expired"].includes(doc.status) &&
+			frappe.model.can_create("Quotation")
+		) {
+			this.frm.add_custom_button(
+				__("Revision"),
+				() => {
+					this.frm.call("make_revision").then((r) => {
+						if (r.message) {
+							const [revision] = frappe.model.sync(r.message);
+							frappe.set_route("Form", revision.doctype, revision.name);
+						}
+					});
+				},
+				__("Create")
+			);
+		}
+
 		if (doc.__islocal && !doc.valid_till) {
 			if (frappe.boot.sysdefaults.quotation_valid_till) {
 				this.frm.set_value(
@@ -124,7 +157,7 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 			}
 		}
 
-		if (doc.docstatus == 1 && !["Lost", "Ordered"].includes(doc.status)) {
+		if (doc.docstatus == 1 && doc.is_latest_revision && !["Lost", "Ordered"].includes(doc.status)) {
 			if (
 				frappe.model.can_create("Sales Order") &&
 				(frappe.boot.sysdefaults.allow_sales_order_creation_for_expired_quotation ||

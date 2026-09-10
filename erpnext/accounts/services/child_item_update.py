@@ -5,6 +5,7 @@
 
 import frappe
 from frappe import _
+from frappe.model.base_document import get_controller
 from frappe.model.workflow import get_workflow_name
 from frappe.utils import flt, get_link_to_form, getdate
 
@@ -30,7 +31,11 @@ class ChildItemUpdater:
 		self.parent_doctype = parent_doctype
 		self.parent_doctype_name = parent_doctype_name
 		self.child_docname = child_docname
-		self.parent = frappe.get_doc(parent_doctype, parent_doctype_name)
+		if parent_doctype == "Quotation":
+			get_controller("Quotation").lock_quotation(parent_doctype_name)
+		self.parent = frappe.get_doc(
+			parent_doctype, parent_doctype_name, for_update=parent_doctype == "Quotation"
+		)
 		self.allow_zero_qty = get_allow_zero_qty(parent_doctype)
 		self._transacted_stock_qty: dict | None = None
 
@@ -49,6 +54,8 @@ class ChildItemUpdater:
 		self._check_permissions("write")
 
 		if self.parent_doctype == "Quotation":
+			get_controller("Quotation").validate_orderable(self.parent.name)
+			self.quotation_before_update = frappe.get_doc(self.parent.as_dict())
 			self._transacted_stock_qty = get_ordered_items(self.parent.name)
 			items_added_or_removed |= validate_and_delete_children(
 				self.parent, data, self._transacted_stock_qty
@@ -162,6 +169,9 @@ class ChildItemUpdater:
 
 		for idx, row in enumerate(parent.get(self.child_docname), start=1):
 			row.idx = idx
+
+		if self.parent_doctype == "Quotation":
+			parent.flags.quotation_before_update = self.quotation_before_update
 
 		parent.save()
 

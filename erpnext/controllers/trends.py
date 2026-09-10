@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from frappe.model.base_document import get_controller
 from frappe.utils import DateTimeLikeObject, getdate, today
 
 import erpnext
@@ -99,6 +100,14 @@ def get_data(filters, conditions):
 
 	if conditions.get("trans") == "Quotation" and filters.get("group_by") == "Customer":
 		cond += " and t1.quotation_to = 'Customer'"
+	if conditions.get("trans") == "Quotation":
+		period_ends = [
+			end for _, end in get_period_date_ranges(filters.get("period"), filters.get("fiscal_year"))
+		]
+		revision_condition = get_controller("Quotation").get_report_revision_condition(
+			frappe.qb.DocType("Quotation").as_("t1"), period_ends
+		)
+		cond += " and " + revision_condition.get_sql(subquery=True)
 
 	year_start_date, year_end_date = frappe.get_cached_value(
 		"Fiscal Year", filters.get("fiscal_year"), ["year_start_date", "year_end_date"]

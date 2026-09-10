@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _, scrub
+from frappe.model.base_document import get_controller
 from frappe.query_builder import DocType
 from frappe.query_builder.functions import IfNull
 from frappe.utils import add_days, add_to_date, flt, getdate
@@ -193,15 +194,26 @@ class Analytics:
 			self.get_sales_transactions_based_on_project()
 			self.get_rows()
 
+	def get_transaction_filters(self):
+		filters = {
+			"docstatus": 1,
+			"company": ["in", self.filters.company],
+			self.date_field: ("between", [self.filters.from_date, self.filters.to_date]),
+		}
+		if self.filters.doc_type == "Quotation":
+			return [
+				filters,
+				get_controller("Quotation").get_report_revision_condition(
+					DocType("Quotation"), self.periodic_daterange
+				),
+			]
+		return filters
+
 	def _get_permitted_parent_names(self):
 		return frappe.qb.get_query(
 			table=self.filters.doc_type,
 			fields=["name"],
-			filters={
-				"docstatus": 1,
-				"company": ["in", self.filters.company],
-				self.date_field: ("between", [self.filters.from_date, self.filters.to_date]),
-			},
+			filters=self.get_transaction_filters(),
 			ignore_permissions=False,
 		).run(pluck="name")
 
@@ -256,11 +268,7 @@ class Analytics:
 				entity_name = "party_name as entity_name"
 				value_field = "base_paid_amount as value_field"
 
-		filters = {
-			"docstatus": 1,
-			"company": ["in", self.filters.company],
-			self.date_field: ("between", [self.filters.from_date, self.filters.to_date]),
-		}
+		filters = self.get_transaction_filters()
 
 		if self.filters.doc_type in ["Sales Invoice", "Purchase Invoice", "Payment Entry"]:
 			filters.update({"is_opening": "No"})
@@ -323,11 +331,7 @@ class Analytics:
 		else:
 			entity_field = "territory as entity"
 
-		filters = {
-			"docstatus": 1,
-			"company": ["in", self.filters.company],
-			self.date_field: ("between", [self.filters.from_date, self.filters.to_date]),
-		}
+		filters = self.get_transaction_filters()
 
 		if self.filters.doc_type in ["Sales Invoice", "Purchase Invoice", "Payment Entry"]:
 			filters.update({"is_opening": "No"})

@@ -5,6 +5,7 @@ from itertools import groupby
 
 import frappe
 from frappe import _
+from frappe.model.base_document import get_controller
 from frappe.query_builder.functions import Count, Date
 from frappe.utils import flt
 
@@ -51,6 +52,7 @@ def get_funnel_data(from_date: str, to_date: str, company: str):
 		.select(Count("*"))
 		.where(
 			(quotation.docstatus == 1)
+			& get_controller("Quotation").get_report_revision_condition(quotation, [to_date], "creation")
 			& Date(quotation.creation).between(from_date, to_date)
 			& ((quotation.opportunity != "") | (quotation.quotation_to == "Lead"))
 			& (quotation.company == company)

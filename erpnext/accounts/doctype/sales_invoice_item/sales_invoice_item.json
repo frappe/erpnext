@@ -105,6 +105,7 @@
   "column_break_ogff",
   "company_total_stock",
   "edit_references",
+  "quotation",
   "sales_order",
   "so_detail",
   "sales_invoice_item",
@@ -726,6 +727,16 @@
    "label": "References"
   },
   {
+   "fieldname": "quotation",
+   "fieldtype": "Link",
+   "label": "Quotation",
+   "no_copy": 1,
+   "options": "Quotation",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
    "fieldname": "sales_order",
    "fieldtype": "Link",
    "label": "Sales Order",
@@ -1068,7 +1079,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-08-11 12:00:00.000000",
+ "modified": "2026-09-10 16:40:49.272195",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",

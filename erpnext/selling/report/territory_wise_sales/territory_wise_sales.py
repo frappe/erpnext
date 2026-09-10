@@ -94,7 +94,7 @@ def get_data(filters=None):
 		territory_data = {
 			"territory": territory.name,
 			"opportunity_amount": _get_total(territory_opportunities, "opportunity_amount"),
-			"quotation_amount": _get_total(territory_quotations),
+			"quotation_amount": _get_total([q for q in territory_quotations if q.is_latest_revision]),
 			"order_amount": _get_total(territory_orders),
 			"billing_amount": _get_total(territory_invoices),
 		}
@@ -128,7 +128,7 @@ def get_quotations(opportunities):
 
 	return frappe.get_all(
 		"Quotation",
-		fields=["name", "base_grand_total", "opportunity"],
+		fields=["name", "base_grand_total", "opportunity", "is_latest_revision"],
 		filters={"docstatus": 1, "opportunity": ["in", opportunity_names]},
 	)
 

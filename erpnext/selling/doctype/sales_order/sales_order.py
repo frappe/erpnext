@@ -8,6 +8,7 @@ from typing import Literal
 import frappe
 import frappe.utils
 from frappe import _, qb
+from frappe.model.base_document import get_controller
 from frappe.model.document import Document
 from frappe.query_builder import Case
 from frappe.query_builder.functions import Abs, Sum
@@ -199,6 +200,10 @@ class SalesOrder(SellingController):
 		utm_medium: DF.Link | None
 		utm_source: DF.Link | None
 	# end: auto-generated types
+
+	def save(self, *args, **kwargs):
+		get_controller("Quotation").lock_quotation_references(self)
+		return super().save(*args, **kwargs)
 
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
@@ -476,6 +481,7 @@ class SalesOrder(SellingController):
 				)
 
 	def validate_with_previous_doc(self):
+		get_controller("Quotation").validate_quotation_references(self)
 		super().validate_with_previous_doc(
 			{
 				"Quotation": {"ref_dn_field": "prevdoc_docname", "compare_fields": [["company", "="]]},

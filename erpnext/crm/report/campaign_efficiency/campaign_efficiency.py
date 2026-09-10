@@ -64,7 +64,9 @@ def get_lead_data(filters, based_on):
 
 
 def get_lead_quotation_count(leads):
-	return frappe.db.count("Quotation", {"quotation_to": "Lead", "party_name": ["in", leads]})
+	return frappe.db.count(
+		"Quotation", {"quotation_to": "Lead", "party_name": ["in", leads], "is_latest_revision": 1}
+	)
 
 
 def get_lead_opp_count(leads):
