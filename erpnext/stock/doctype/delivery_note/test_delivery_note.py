@@ -1107,7 +1107,7 @@ class TestDeliveryNote(FrappeTestCase):
 		to To Bill.
 		"""
 		from erpnext.patches.v16_0 import recalculate_returned_delivery_note_billing_status as patch
-		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
 
 		# Delivery Note invoiced for 2 of 5 qty, the remaining 3 returned -> fully billed
 		make_stock_entry(target="_Test Warehouse - _TC", qty=5, basic_rate=100)

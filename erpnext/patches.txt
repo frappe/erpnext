@@ -449,10 +449,5 @@ erpnext.patches.v16_0.backfill_repost_accounting_ledger_status
 erpnext.patches.v16_0.merge_seeded_item_group_root
 erpnext.patches.v16_0.remove_frappe_crm_custom_fields
 erpnext.patches.v16_0.append_fieldname_to_pos_search_fields
-<<<<<<< HEAD
 erpnext.patches.v16_0.add_transaction_roles_to_sms_settings
-=======
-erpnext.patches.v16_0.set_supplier_quotation_order_status
-erpnext.patches.v16_0.recalculate_holiday_list_totals
 erpnext.patches.v16_0.recalculate_returned_delivery_note_billing_status
->>>>>>> be8208e (fix(stock): recalculate billing status of returned delivery notes (#58953))
