@@ -3,6 +3,7 @@ import "./stock_reservation";
 import "./queries";
 import "./sms_manager";
 import "./utils/party";
+import "./utils/naming_series";
 import "./utils/draft_link_guard";
 import "./controllers/stock_controller";
 import "./utils/serial_no_batch_selector";
