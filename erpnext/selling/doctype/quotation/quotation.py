@@ -3,6 +3,7 @@
 
 
 from collections import Counter
+from hashlib import sha256
 
 import frappe
 from frappe import _
@@ -579,7 +580,13 @@ class Quotation(SellingController):
 		self.validate_revision_source(source)
 		self.validate_revision_party(source)
 		prefix = f"{self.original_quotation}-REV-"
-		self.quotation_version = cint(getseries(prefix, 1))
+		if len(prefix) >= 140:
+			frappe.throw(_("Quotation name is too long to append a revision suffix."))
+		# Series keys are shorter than document names on existing MariaDB sites.
+		series_key = (
+			prefix if len(prefix) <= 100 else f"quotation-revision-{sha256(prefix.encode()).hexdigest()}"
+		)
+		self.quotation_version = cint(getseries(series_key, 1))
 		name = f"{prefix}{self.quotation_version}"
 		if len(name) > 140:
 			frappe.throw(_("Quotation name is too long to append a revision suffix."))
