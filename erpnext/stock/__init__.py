@@ -68,17 +68,8 @@ def get_warehouse_account(warehouse, warehouse_account=None, *, raise_error=True
 	account = warehouse.account
 	if not account and warehouse.parent_warehouse:
 		if warehouse_account:
-<<<<<<< HEAD
-			if warehouse_account.get(warehouse.parent_warehouse):
-				account = warehouse_account.get(warehouse.parent_warehouse).account
-			else:
-				from frappe.utils.nestedset import rebuild_tree
-
-				rebuild_tree("Warehouse", "parent_warehouse")
-=======
 			if parent := warehouse_account.get(warehouse.parent_warehouse):
 				account = parent.account
->>>>>>> e6b8e90 (fix(stock): do not rebuild the Warehouse tree on an account map miss (#58956))
 		else:
 			account = frappe.db.sql(
 				"""
