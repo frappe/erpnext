@@ -268,7 +268,7 @@ class BOMCostingService:
 
 		for d in self.doc.get("secondary_items"):
 			if not d.is_legacy:
-				d.cost = flt(self.doc.raw_material_cost * (d.cost_allocation_per / 100), precision)
+				d.cost = flt(self.doc.raw_material_cost * (flt(d.cost_allocation_per) / 100), precision)
 				d.base_cost = flt(d.cost * self.doc.conversion_rate, precision)
 
 				total_sm_cost += d.cost
