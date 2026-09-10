@@ -2,23 +2,39 @@
 # License: GNU General Public License v3. See license.txt
 
 import json
+from concurrent.futures import ThreadPoolExecutor
+from threading import Barrier
+from unittest.mock import patch
 
 import frappe
+from frappe.share import add
 from frappe.tests import change_settings
 from frappe.utils import add_days, add_months, flt, getdate, nowdate
+from freezegun import freeze_time
 
+from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return
 from erpnext.controllers.accounts_controller import InvalidQtyError, update_child_qty_rate
-from erpnext.selling.doctype.quotation.mapper import make_sales_order
+from erpnext.crm.doctype.opportunity.mapper import make_quotation as make_opportunity_quotation
+from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
+from erpnext.crm.report.campaign_efficiency.campaign_efficiency import get_lead_quotation_count
+from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+from erpnext.selling.doctype.quotation.mapper import make_sales_invoice, make_sales_order
+from erpnext.selling.doctype.quotation.quotation import Quotation, set_expired_status
+from erpnext.selling.page.sales_funnel.sales_funnel import get_funnel_data
+from erpnext.selling.report.quotation_trends.quotation_trends import execute as quotation_trends
+from erpnext.selling.report.sales_analytics.sales_analytics import execute as sales_analytics
+from erpnext.selling.report.territory_wise_sales.territory_wise_sales import execute as territory_sales
+from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestQuotation(ERPNextTestSuite):
 	def setUp(self):
+		# Keep default dates scoped to each test, including frozen report dates.
+		self.enterContext(patch.object(frappe.local, "new_doc_templates", {}))
 		self.load_test_records("Quotation")
 
 	def test_update_child_quotation_add_item(self):
-		from erpnext.stock.doctype.item.test_item import make_item
-
 		item_1 = frappe.get_doc("Item", "_Test Item")
 		item_2 = make_item("_Test Item 1")
 
@@ -61,8 +77,6 @@ class TestQuotation(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, qo.save)
 
 	def test_update_child_rate_change(self):
-		from erpnext.stock.doctype.item.test_item import make_item
-
 		item_1 = frappe.get_doc("Item", "_Test Item")
 		item_2 = make_item("_Test Item 1")
 
@@ -157,8 +171,6 @@ class TestQuotation(ERPNextTestSuite):
 		self.assertEqual(len(qo.get("items")), 1)
 
 	def test_update_child_qty_with_uom_conversion_factor(self):
-		from erpnext.stock.doctype.item.test_item import make_item
-
 		item = make_item(uoms=[{"uom": "Box", "conversion_factor": 5}])
 		quotation = make_quotation(item_code=item.item_code, qty=6, uom="Box", do_not_submit=1)
 		quotation.submit()
@@ -297,7 +309,6 @@ class TestQuotation(ERPNextTestSuite):
 
 	def test_do_not_add_ordered_items_in_new_sales_order(self):
 		from erpnext.selling.doctype.quotation.mapper import make_sales_order
-		from erpnext.stock.doctype.item.test_item import make_item
 
 		item = make_item("_Test Item for Quotation for SO", {"is_stock_item": 1})
 
@@ -328,7 +339,6 @@ class TestQuotation(ERPNextTestSuite):
 		self.assertEqual(sales_order.items[0].qty, 5.0)
 
 	def test_gross_profit(self):
-		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 		from erpnext.stock.get_item_details import insert_item_price
 
@@ -542,8 +552,6 @@ class TestQuotation(ERPNextTestSuite):
 		si.save()
 
 	def test_create_two_quotations(self):
-		from erpnext.stock.doctype.item.test_item import make_item
-
 		first_item = make_item("_Test Laptop", {"is_stock_item": 1})
 
 		second_item = make_item("_Test CPU", {"is_stock_item": 1})
@@ -575,8 +583,6 @@ class TestQuotation(ERPNextTestSuite):
 		sec_qo.submit()
 
 	def test_quotation_expiry(self):
-		from erpnext.selling.doctype.quotation.quotation import set_expired_status
-
 		quotation_item = [{"item_code": "_Test Item", "warehouse": "", "qty": 1, "rate": 500}]
 
 		yesterday = add_days(nowdate(), -1)
@@ -591,9 +597,7 @@ class TestQuotation(ERPNextTestSuite):
 		self.assertEqual(expired_quotation.status, "Expired")
 
 	def test_product_bundle_mapping_on_creating_so(self):
-		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
 		from erpnext.selling.doctype.quotation.mapper import make_sales_order
-		from erpnext.stock.doctype.item.test_item import make_item
 
 		make_item("_Test Product Bundle", {"is_stock_item": 0})
 		make_item("_Test Bundle Item 1", {"is_stock_item": 1})
@@ -647,9 +651,6 @@ class TestQuotation(ERPNextTestSuite):
 		self.assertEqual(quotation_packed_items, so_packed_items)
 
 	def test_product_bundle_price_calculation_when_calculate_bundle_price_is_unchecked(self):
-		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
-		from erpnext.stock.doctype.item.test_item import make_item
-
 		make_item("_Test Product Bundle", {"is_stock_item": 0})
 		bundle_item1 = make_item("_Test Bundle Item 1", {"is_stock_item": 1})
 		bundle_item2 = make_item("_Test Bundle Item 2", {"is_stock_item": 1})
@@ -666,9 +667,6 @@ class TestQuotation(ERPNextTestSuite):
 		self.assertEqual(quotation.items[0].amount, 200)
 
 	def test_product_bundle_price_calculation_when_calculate_bundle_price_is_checked(self):
-		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
-		from erpnext.stock.doctype.item.test_item import make_item
-
 		make_item("_Test Product Bundle", {"is_stock_item": 0})
 		make_item("_Test Bundle Item 1", {"is_stock_item": 1})
 		make_item("_Test Bundle Item 2", {"is_stock_item": 1})
@@ -690,9 +688,6 @@ class TestQuotation(ERPNextTestSuite):
 	def test_product_bundle_price_calculation_for_multiple_product_bundles_when_calculate_bundle_price_is_checked(
 		self,
 	):
-		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
-		from erpnext.stock.doctype.item.test_item import make_item
-
 		make_item("_Test Product Bundle 1", {"is_stock_item": 0})
 		make_item("_Test Product Bundle 2", {"is_stock_item": 0})
 		make_item("_Test Bundle Item 1", {"is_stock_item": 1})
@@ -738,9 +733,6 @@ class TestQuotation(ERPNextTestSuite):
 		enable_calculate_bundle_price(enable=0)
 
 	def test_packed_items_indices_are_reset_when_product_bundle_is_deleted_from_items_table(self):
-		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
-		from erpnext.stock.doctype.item.test_item import make_item
-
 		make_item("_Test Product Bundle 1", {"is_stock_item": 0})
 		make_item("_Test Product Bundle 2", {"is_stock_item": 0})
 		make_item("_Test Product Bundle 3", {"is_stock_item": 0})
@@ -793,8 +785,6 @@ class TestQuotation(ERPNextTestSuite):
 		- One set of non-alternative & alternative items [first 3 rows]
 		- One simple stock item
 		"""
-		from erpnext.stock.doctype.item.test_item import make_item
-
 		item_list = []
 		stock_items = {
 			"_Test Simple Item 1": 100,
@@ -839,8 +829,6 @@ class TestQuotation(ERPNextTestSuite):
 		All having the same item code and unique item name/description due to
 		dynamic services
 		"""
-		from erpnext.stock.doctype.item.test_item import make_item
-
 		item_list = []
 		service_items = {
 			"Tiling with Standard Tiles": 100,
@@ -890,8 +878,6 @@ class TestQuotation(ERPNextTestSuite):
 
 	def test_amount_calculation_for_alternative_items(self):
 		"""Make sure that the amount is calculated correctly for alternative items when the qty is changed."""
-		from erpnext.stock.doctype.item.test_item import make_item
-
 		item_list = []
 		stock_items = {
 			"_Test Simple Item 1": 100,
@@ -920,7 +906,6 @@ class TestQuotation(ERPNextTestSuite):
 
 	def test_alternative_items_sales_order_mapping_with_stock_items(self):
 		from erpnext.selling.doctype.quotation.mapper import make_sales_order
-		from erpnext.stock.doctype.item.test_item import make_item
 
 		frappe.flags.args = frappe._dict()
 		item_list = []
@@ -959,8 +944,6 @@ class TestQuotation(ERPNextTestSuite):
 		self.assertEqual(quotation.status, "Ordered")
 
 	def test_uom_validation(self):
-		from erpnext.stock.doctype.item.test_item import make_item
-
 		item = "_Test Item FOR UOM Validation"
 		make_item(item, {"is_stock_item": 1})
 
@@ -974,8 +957,6 @@ class TestQuotation(ERPNextTestSuite):
 		{"add_taxes_from_item_tax_template": 1, "add_taxes_from_taxes_and_charges_template": 0},
 	)
 	def test_item_tax_template_for_quotation(self):
-		from erpnext.stock.doctype.item.test_item import make_item
-
 		if not frappe.db.exists("Account", {"account_name": "_Test Vat", "company": "_Test Company"}):
 			frappe.get_doc(
 				{
@@ -1040,7 +1021,6 @@ class TestQuotation(ERPNextTestSuite):
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_zero_qty_in_quotation": 1})
 	def test_so_from_zero_qty_quotation(self):
 		from erpnext.selling.doctype.quotation.mapper import make_sales_order
-		from erpnext.stock.doctype.item.test_item import make_item
 
 		quotation = make_quotation(qty=0, do_not_save=1)
 		quotation.append("items", {"item_code": "_Test Item 2", "qty": 10, "rate": 100})
@@ -1072,7 +1052,6 @@ class TestQuotation(ERPNextTestSuite):
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_duplicate_items_in_quotation(self):
 		from erpnext.selling.doctype.quotation.mapper import make_sales_order
-		from erpnext.stock.doctype.item.test_item import make_item
 
 		# item code same but description different
 		quotation = make_quotation(qty=10, rate=100, do_not_submit=1)
@@ -1216,6 +1195,662 @@ class TestQuotation(ERPNextTestSuite):
 		self.assertEqual(sales_order.payment_schedule[1].due_date, add_days(sales_order.transaction_date, 10))
 		self.assertEqual(sales_order.payment_schedule[0].payment_amount, 5000)
 		self.assertEqual(sales_order.payment_schedule[1].payment_amount, 5000)
+
+	def test_create_revision_preserves_submitted_source(self):
+		source = make_quotation(do_not_submit=True)
+		self.assertRaises(frappe.ValidationError, source.make_revision)
+		source.submit()
+		draft = source.make_revision()
+		self.assertTrue(draft.is_new())
+		self.assertEqual(draft.docstatus, 0)
+		for child in draft.get_all_children():
+			self.assertFalse(child.parent)
+		draft.insert()
+		self.assertEqual(draft.name, f"{source.name}-REV-1")
+		self.assertEqual(draft.original_quotation, source.name)
+		self.assertEqual(draft.revised_from, source.name)
+		self.assertEqual(draft.quotation_version, 1)
+		self.assertEqual(draft.quote_revision_count, 0)
+		self.assertEqual(draft.items[0].qty, source.items[0].qty)
+		self.assertEqual(draft.items[0].rate, source.items[0].rate)
+		self.assertNotEqual(draft.items[0].name, source.items[0].name)
+		draft.items[0].qty += 1
+		draft.items[0].rate += 10
+		draft.save()
+		self.assertEqual(draft.quote_revision_count, 1)
+		source.reload()
+		self.assertEqual(source.docstatus, 1)
+		self.assertEqual(source.status, "Open")
+		self.assertEqual(source.quote_revision_count, 0)
+		self.assertNotEqual(source.items[0].qty, draft.items[0].qty)
+		self.assertNotEqual(source.items[0].rate, draft.items[0].rate)
+
+	def test_ordinary_duplicate_starts_new_family(self):
+		source = make_quotation()
+		version = source.make_revision().insert()
+		duplicate = frappe.copy_doc(version, ignore_no_copy=False).insert()
+		self.assertFalse(duplicate.original_quotation)
+		self.assertFalse(duplicate.revised_from)
+		self.assertEqual(duplicate.quotation_version, 0)
+		self.assertEqual(duplicate.quote_revision_count, 0)
+		self.assertNotIn("-REV-", duplicate.name)
+
+	def test_revision_protects_party_lineage_and_counters(self):
+		source = make_quotation()
+		version = source.make_revision().insert()
+		version.party_name = "_Test Customer 1"
+		self.assertRaises(frappe.ValidationError, version.save)
+		version.reload()
+		payload = version.as_dict()
+		payload.update(revision_fields=[], quotation_version=99)
+		self.assertRaises(frappe.ValidationError, frappe.get_doc(payload).save)
+		version.reload()
+		payload = version.as_dict()
+		payload.update(
+			quote_revision_count=99,
+			is_latest_revision=1,
+			revision_commercial_fields=[],
+			revision_item_fields=[],
+			revision_tax_fields=[],
+			revision_payment_fields=[],
+		)
+		version = frappe.get_doc(payload)
+		version.save()
+		self.assertEqual(version.quote_revision_count, 0)
+		self.assertFalse(version.is_latest_revision)
+		version.items[0].description = "Revised specification"
+		version.save().reload()
+		self.assertEqual(version.quote_revision_count, 1)
+		source.is_latest_revision = 0
+		source.save()
+		self.assertTrue(source.is_latest_revision)
+
+	def test_counter_tracks_commercial_changes(self):
+		for field, value in (
+			("qty", 12),
+			("rate", 125),
+			("discount_percentage", 5),
+			("discount_amount", 5),
+			("description", "Revised specification"),
+			("additional_discount_percentage", 5),
+		):
+			with self.subTest(field=field):
+				quotation = make_quotation(do_not_submit=True)
+				if field.startswith("discount_"):
+					quotation.items[0].price_list_rate = 100
+					quotation.items[0].rate = 95
+				target = quotation if field == "additional_discount_percentage" else quotation.items[0]
+				target.set(field, value)
+				quotation.save()
+				self.assertEqual(quotation.quote_revision_count, 1)
+				quotation.save()
+				self.assertEqual(quotation.quote_revision_count, 1)
+
+	def test_counter_ignores_noncommercial_changes_and_item_reordering(self):
+		quotation = make_quotation(
+			do_not_submit=True,
+			item_list=[
+				{"item_code": "_Test Item", "qty": 10, "rate": 100},
+				{"item_code": "_Test Item 2", "qty": 1, "rate": 50},
+			],
+		)
+		self.assertEqual(quotation.quote_revision_count, 0)
+		quotation.save()
+		self.assertEqual(quotation.quote_revision_count, 0)
+		quotation.letter_head = None
+		quotation.language = "en"
+		quotation.items.reverse()
+		for idx, item in enumerate(quotation.items, 1):
+			item.idx = idx
+		quotation.save()
+		self.assertEqual(quotation.quote_revision_count, 0)
+		quotation.submit().save()
+		self.assertEqual(quotation.quote_revision_count, 0)
+
+	def test_submitted_update_items_counts_once_and_retains_history(self):
+		quotation = make_quotation()
+		items = self.update_items_payload(quotation)
+		items[0].update(qty=12, rate=125, description="New specification")
+		with patch.object(frappe, "in_test", False):
+			update_child_qty_rate("Quotation", items, quotation.name)
+		quotation.reload()
+		self.assertEqual(quotation.quote_revision_count, 1)
+		versions = frappe.get_all(
+			"Version", filters={"ref_doctype": "Quotation", "docname": quotation.name}, pluck="data"
+		)
+		self.assertTrue(any(json.loads(data).get("row_changed") for data in versions))
+		update_child_qty_rate("Quotation", self.update_items_payload(quotation), quotation.name)
+		quotation.reload()
+		self.assertEqual(quotation.quote_revision_count, 1)
+
+	def test_submitted_item_addition_and_removal_are_counted(self):
+		quotation = make_quotation()
+		items = self.update_items_payload(quotation)
+		items.append({"item_code": "_Test Item 2", "qty": 2, "rate": 50})
+		update_child_qty_rate("Quotation", items, quotation.name)
+		quotation.reload()
+		self.assertEqual(quotation.quote_revision_count, 1)
+		update_child_qty_rate("Quotation", self.update_items_payload(quotation)[:1], quotation.name)
+		quotation.reload()
+		self.assertEqual(quotation.quote_revision_count, 2)
+
+	def test_revision_submission_and_cancellation_track_current_version(self):
+		source = make_quotation()
+		first = source.make_revision().insert()
+		self.assertTrue(source.reload().is_latest_revision)
+		self.assertFalse(first.is_latest_revision)
+		self.assertTrue(make_sales_order(source.name).items)
+		first.submit()
+		second = first.make_revision().insert()
+		self.assertEqual(second.name, f"{source.name}-REV-2")
+		self.assertEqual(second.original_quotation, source.name)
+		self.assertEqual(second.revised_from, first.name)
+		self.assertCountEqual(second.get_revisions(), [source.name, first.name, second.name])
+		second.submit()
+		for quotation in (source, first):
+			quotation.reload()
+			self.assertEqual(quotation.status, "Superseded")
+			self.assertFalse(quotation.is_latest_revision)
+			self.assertRaises(frappe.ValidationError, quotation.make_revision)
+		self.assertTrue(second.is_latest_revision)
+		self.assertEqual(second.status, "Open")
+		order = make_sales_order(second.name)
+		self.assertEqual(order.items[0].quotation_item, second.items[0].name)
+		reason = frappe.get_doc(
+			{
+				"doctype": "Quotation Lost Reason",
+				"order_lost_reason": f"_Test Revision Cancellation {frappe.generate_hash(length=8)}",
+			}
+		).insert()
+		second.declare_enquiry_lost([{"lost_reason": reason.name}], [])
+		self.assertTrue(second.reload().lost_reasons)
+		second.cancel().reload()
+		self.assertFalse(second.lost_reasons)
+		self.assertFalse(second.is_latest_revision)
+		self.assertEqual(second.status, "Cancelled")
+		self.assertTrue(first.reload().is_latest_revision)
+		self.assertEqual(first.status, "Open")
+
+	def test_cannot_cancel_source_with_a_draft_revision(self):
+		source = make_quotation()
+		revision = source.make_revision().insert()
+		with self.assertRaisesRegex(frappe.ValidationError, "Delete draft revision"):
+			source.reload().cancel()
+		revision.delete()
+		source.reload().cancel()
+		self.assertEqual(source.status, "Cancelled")
+		self.assertRaises(frappe.ValidationError, source.make_revision)
+
+	def test_cannot_submit_older_sibling_after_newer_version(self):
+		source = make_quotation()
+		first = source.make_revision().insert()
+		second = source.make_revision().insert().submit()
+		with self.assertRaisesRegex(frappe.ValidationError, "already the current version"):
+			first.submit()
+		self.assertTrue(second.reload().is_latest_revision)
+		self.assertEqual(first.reload().docstatus, 0)
+
+	def test_sibling_draft_cannot_replace_a_lost_current_revision(self):
+		source = make_quotation()
+		first = source.make_revision().insert()
+		second = source.make_revision().insert()
+		first.submit().declare_enquiry_lost([], [])
+		self.assertRaises(frappe.ValidationError, first.make_revision)
+		with self.assertRaisesRegex(frappe.ValidationError, "current quotation is Lost"):
+			second.submit()
+		self.assertTrue(first.reload().is_latest_revision)
+		self.assertEqual(first.status, "Lost")
+
+	def test_expired_revisions_renew_payment_dates(self):
+		source = make_quotation(transaction_date=add_days(nowdate(), -20), do_not_submit=True)
+		source.valid_till = add_days(nowdate(), -10)
+		schedule = source.payment_schedule[0]
+		schedule.due_date = add_days(nowdate(), -5)
+		schedule.discount_type = "Percentage"
+		schedule.discount = 2
+		schedule.discount_date = add_days(nowdate(), -10)
+		source.save().submit()
+		self.assertEqual(source.status, "Expired")
+		revision = source.make_revision().insert().submit()
+		self.assertEqual(revision.status, "Open")
+		self.assertEqual(getdate(revision.valid_till), getdate(add_days(nowdate(), 10)))
+		self.assertEqual(getdate(revision.payment_schedule[0].due_date), getdate(add_days(nowdate(), 15)))
+		self.assertEqual(
+			getdate(revision.payment_schedule[0].discount_date), getdate(add_days(nowdate(), 10))
+		)
+		set_expired_status()
+		self.assertEqual(source.reload().status, "Superseded")
+
+	def test_superseded_versions_reject_mapping_and_item_updates(self):
+		source = make_quotation()
+		source.make_revision().insert().submit()
+		self.assertRaises(frappe.ValidationError, make_sales_order, source.name)
+		self.assertRaises(frappe.ValidationError, make_sales_invoice, source.name)
+		items = self.update_items_payload(source)
+		items[0]["qty"] += 1
+		self.assertRaises(frappe.ValidationError, update_child_qty_rate, "Quotation", items, source.name)
+		with self.assertRaisesRegex(frappe.ValidationError, "Only the current quotation"):
+			source.declare_enquiry_lost([], [])
+		self.assertEqual(source.reload().status, "Superseded")
+
+	def test_revision_preserves_opportunity_item_references(self):
+		opportunity = make_opportunity(with_items=1)
+		source = make_opportunity_quotation(opportunity.name).insert().submit()
+		revision = source.make_revision().insert().submit()
+		self.assertEqual(revision.items[0].prevdoc_doctype, "Opportunity")
+		self.assertEqual(revision.items[0].prevdoc_docname, opportunity.name)
+		self.assertTrue(opportunity.reload().has_active_quotation())
+		with self.assertRaisesRegex(frappe.ValidationError, "active Quotation exists"):
+			opportunity.declare_enquiry_lost([], [])
+		self.make_order(revision, 1).submit()
+		self.assertTrue(opportunity.reload().has_ordered_quotation())
+
+	def test_saved_transactions_reject_superseded_quotations(self):
+		for doctype in ("Sales Order", "Sales Invoice"):
+			with self.subTest(doctype=doctype):
+				source = make_quotation()
+				transaction = self.make_quotation_transaction(source, doctype)
+				fieldname = "quotation" if doctype == "Sales Invoice" else "prevdoc_docname"
+				self.assertEqual(transaction.reload().items[0].get(fieldname), source.name)
+				source.make_revision().insert().submit()
+				with self.assertRaisesRegex(frappe.ValidationError, "superseded"):
+					transaction.save()
+				with self.assertRaisesRegex(frappe.ValidationError, "superseded"):
+					transaction.reload().submit()
+				self.assertEqual(transaction.reload().docstatus, 0)
+
+	def test_submitted_transactions_block_revision_until_cancelled(self):
+		for doctype in ("Sales Order", "Sales Invoice"):
+			with self.subTest(doctype=doctype):
+				source = make_quotation()
+				revision = source.make_revision().insert()
+				transaction = self.make_quotation_transaction(source, doctype).submit()
+				self.assertRaises(frappe.ValidationError, source.reload().make_revision)
+				with self.assertRaisesRegex(frappe.ValidationError, f"submitted {doctype}"):
+					revision.submit()
+				transaction.cancel()
+				revision.reload().submit()
+				self.assertTrue(revision.is_latest_revision)
+
+	def test_credit_note_accepts_historical_quotation(self):
+		source = make_quotation()
+		invoice = make_sales_invoice(source.name).insert().submit()
+		# Historical invoices must remain returnable after their offer is superseded.
+		source.db_set("is_latest_revision", 0)
+		source.db_set("status", "Superseded")
+		credit_note = make_sales_return(invoice.name)
+		self.assertEqual(credit_note.items[0].quotation, source.name)
+		credit_note.insert().submit()
+		self.assertEqual(credit_note.docstatus, 1)
+
+	def test_existing_quotation_can_be_revised(self):
+		# Existing quotations did not run the new revision initialization hook.
+		with patch.object(Quotation, "before_insert"):
+			source = make_quotation()
+		revision = source.make_revision().insert()
+		invoice = make_sales_invoice(source.name).insert().submit()
+		with self.assertRaisesRegex(frappe.ValidationError, "submitted Sales Invoice"):
+			source.make_revision()
+		with self.assertRaisesRegex(frappe.ValidationError, "submitted Sales Invoice"):
+			revision.submit()
+
+		invoice.cancel()
+		revision.reload().submit()
+		self.assertEqual(revision.original_quotation, source.name)
+		self.assertEqual(revision.quotation_version, 1)
+		self.assertTrue(revision.is_latest_revision)
+		self.assertEqual(source.reload().status, "Superseded")
+
+	def test_amended_revision_can_become_current(self):
+		source = make_quotation()
+		revision = source.make_revision().insert().submit()
+		revision.cancel()
+		amendment = frappe.copy_doc(revision, ignore_no_copy=False)
+		amendment.docstatus = 0
+		amendment.amended_from = revision.name
+		amendment.insert().submit()
+		self.assertTrue(amendment.is_latest_revision)
+		self.assertEqual(amendment.original_quotation, source.name)
+		self.assertEqual(amendment.quotation_version, 1)
+		self.assertEqual(source.reload().status, "Superseded")
+		self.assertEqual(amendment.make_revision().insert().quotation_version, 2)
+
+	def test_revision_name_length_limits(self):
+		valid_source = make_quotation(do_not_save=True)
+		valid_source.insert(set_name="Q" * 120).submit()
+		revision = valid_source.make_revision().insert()
+		self.assertEqual(revision.name, f"{valid_source.name}-REV-1")
+		source = make_quotation(do_not_save=True)
+		source.insert(set_name="Q" * 135).submit()
+		with self.assertRaisesRegex(frappe.ValidationError, "too long"):
+			source.make_revision().insert()
+		self.assertFalse(frappe.db.exists("Quotation", {"original_quotation": source.name}))
+
+	def test_read_only_sharing_does_not_grant_create_permission(self):
+		source = make_quotation()
+		user = frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": "quotation-readonly@example.test",
+				"first_name": "Quotation Test",
+				"send_welcome_email": 0,
+			}
+		).insert()
+		add("Quotation", source.name, user=user.name, read=1, notify=0)
+		with self.set_user(user.name):
+			self.assertTrue(frappe.has_permission("Quotation", "read", doc=source))
+			self.assertRaises(frappe.PermissionError, source.make_revision)
+
+	def test_concurrent_creation_allocates_distinct_numbers(self):
+		self.setup_revision_requests()
+		gate = Barrier(2)
+		futures = [self.pool.submit(self.request, self.create_revision, gate) for _ in range(2)]
+		names = [future.result(timeout=30) for future in futures]
+		self.assertCountEqual(names, [f"{self.source}-REV-1", f"{self.source}-REV-2"])
+
+	def test_order_and_revision_submission_cannot_both_succeed(self):
+		self.setup_revision_requests()
+		self.check_transaction_submission("Sales Order")
+
+	def test_invoice_and_revision_submission_cannot_both_succeed(self):
+		self.setup_revision_requests()
+		self.check_transaction_submission("Sales Invoice")
+
+	@freeze_time("2026-06-01 09:00:00.123456")
+	def test_funnel_counts_family_once_through_revision_and_cancellation(self):
+		before = self.funnel_count()
+		source = self.make_opportunity_quotation()
+		revision = source.make_revision().insert()
+		self.assertEqual(self.funnel_count() - before, 1)
+		revision.submit()
+		self.assertEqual(self.funnel_count() - before, 1)
+		revision.cancel()
+		self.assertEqual(self.funnel_count() - before, 1)
+
+	@freeze_time("2026-06-01 09:00:00.123456")
+	def test_campaign_counts_current_quotation_including_original_draft(self):
+		lead = frappe.get_doc({"doctype": "Lead", "first_name": "_Test Revision Campaign"}).insert()
+		source = make_quotation(do_not_save=True, transaction_date="2026-06-01")
+		source.quotation_to = "Lead"
+		source.party_name = lead.name
+		source.insert()
+		self.assertEqual(get_lead_quotation_count([lead.name]), 1)
+		source.submit()
+		revision = source.make_revision().insert()
+		self.assertEqual(get_lead_quotation_count([lead.name]), 1)
+		revision.submit()
+		self.assertEqual(get_lead_quotation_count([lead.name]), 1)
+		revision.cancel()
+		self.assertEqual(get_lead_quotation_count([lead.name]), 1)
+
+	@freeze_time("2026-06-01 09:00:00.123456")
+	def test_trends_count_current_version_and_restore_after_cancellation(self):
+		before = self.trends_amount()
+		source = make_quotation(qty=2, rate=100, transaction_date="2026-06-01")
+		revision = self.make_revision(source)
+		self.assertEqual(self.trends_amount() - before, revision.base_net_total)
+		revision.cancel()
+		self.assertEqual(self.trends_amount() - before, source.base_net_total)
+
+	@freeze_time("2026-06-01 09:00:00.123456")
+	def test_analytics_count_current_version_in_each_dimension(self):
+		source = make_quotation(qty=2, rate=100, transaction_date="2026-06-01")
+		dimensions = (
+			("Customer", source.party_name),
+			("Item", source.items[0].item_code),
+			("Customer Group", source.customer_group),
+			("Territory", source.territory),
+			("Item Group", source.items[0].item_group),
+			("Order Type", source.order_type),
+		)
+		before = {dimension: self.analytics_amount(*dimension) for dimension in dimensions}
+		revision = self.make_revision(source)
+		for dimension in dimensions:
+			with self.subTest(dimension=dimension):
+				self.assertEqual(
+					self.analytics_amount(*dimension) - before[dimension],
+					revision.base_net_total - source.base_net_total,
+				)
+
+	@freeze_time("2026-06-01 09:00:00.123456")
+	def test_reports_preserve_versions_in_closed_periods(self):
+		before_funnel = self.funnel_count()
+		source = self.make_opportunity_quotation()
+		first = self.make_revision(source)
+		dimensions = (
+			("Customer", source.party_name),
+			("Item", source.items[0].item_code),
+			("Customer Group", source.customer_group),
+			("Territory", source.territory),
+			("Item Group", source.items[0].item_group),
+			("Order Type", source.order_type),
+		)
+		before_analytics = {dimension: self.analytics_amount(*dimension) for dimension in dimensions}
+		before_months = self.analytics_amount("Customer", source.party_name, to_date="2026-07-31")
+		before_june = self.trends_amount(period="Monthly", column="Jun (Amt)")
+		before_july = self.trends_amount(period="Monthly", column="Jul (Amt)")
+		with freeze_time("2026-07-01 09:00:00.123456"):
+			later = self.make_revision(first)
+		self.assertEqual(self.funnel_count() - before_funnel, 1)
+		self.assertEqual(self.trends_amount(period="Monthly", column="Jun (Amt)"), before_june)
+		self.assertEqual(
+			self.trends_amount(period="Monthly", column="Jul (Amt)") - before_july, later.base_net_total
+		)
+		for dimension in dimensions:
+			with self.subTest(dimension=dimension):
+				self.assertEqual(self.analytics_amount(*dimension), before_analytics[dimension])
+		self.assertEqual(
+			self.analytics_amount("Customer", source.party_name, to_date="2026-07-31") - before_months,
+			later.base_net_total,
+		)
+		before_year = self.trends_amount()
+		with freeze_time("2027-01-01 09:00:00.123456"):
+			self.make_revision(later)
+		self.assertEqual(self.trends_amount(), before_year)
+
+	@freeze_time("2026-06-01 09:00:00.123456")
+	def test_territory_counts_current_offers_and_preserves_historical_orders(self):
+		before_orders = self.territory_amount("order_amount")
+		before_quotations = self.territory_amount("quotation_amount")
+		source = self.make_opportunity_quotation()
+		revision = self.make_revision(source)
+		self.assertEqual(
+			self.territory_amount("quotation_amount") - before_quotations, revision.base_grand_total
+		)
+		order = make_sales_order(revision.name)
+		order.transaction_date = revision.transaction_date
+		order.delivery_date = "2026-06-02"
+		order.insert().submit()
+		# Earlier versions allowed orders against several revisions of the same quotation.
+		revision.db_set("is_latest_revision", 0)
+		self.assertEqual(self.territory_amount("quotation_amount"), before_quotations)
+		self.assertEqual(self.territory_amount("order_amount") - before_orders, order.base_grand_total)
+
+	@staticmethod
+	def update_items_payload(quotation):
+		return [
+			{
+				"docname": row.name,
+				"item_code": row.item_code,
+				"qty": row.qty,
+				"rate": row.rate,
+				"description": row.description,
+				"uom": row.uom,
+				"conversion_factor": row.conversion_factor,
+			}
+			for row in quotation.items
+		]
+
+	@staticmethod
+	def make_order(source, quantity):
+		order = make_sales_order(source.name)
+		order.delivery_date = add_days(nowdate(), 5)
+		for item in order.items:
+			item.delivery_date = order.delivery_date
+			item.qty = quantity
+		return order.insert()
+
+	def setup_revision_requests(self):
+		self.site = frappe.local.site
+		self.sites_path = frappe.local.sites_path
+		self.pool = ThreadPoolExecutor(max_workers=2)
+		self.addCleanup(self.pool.shutdown)
+		self.source = self.pool.submit(self.request, self.create_source).result(timeout=30)
+		self.addCleanup(self.cleanup_source)
+
+	def check_transaction_submission(self, doctype):
+		revision = self.pool.submit(self.request, self.create_revision).result(timeout=30)
+		create_transaction = self.create_order if doctype == "Sales Order" else self.create_invoice
+		transaction = self.pool.submit(self.request, create_transaction).result(timeout=30)
+		gate = Barrier(2)
+		futures = [
+			self.pool.submit(self.request, self.submit_document, doctype, name, gate)
+			for doctype, name in (("Quotation", revision), (doctype, transaction))
+		]
+		results = [future.result(timeout=30) for future in futures]
+		self.assertCountEqual(results, ["submitted", "rejected"])
+
+	def request(self, action, *args):
+		frappe.init(site=self.site, sites_path=self.sites_path)
+		frappe.connect()
+		frappe.set_user("Administrator")
+		frappe.flags.mute_emails = True
+		try:
+			result = action(*args)
+			# Separate committed requests are required to exercise actual database locks.
+			frappe.db.commit()  # nosemgrep: frappe-manual-commit, Dont-commit
+			return result
+		except Exception:
+			frappe.db.rollback()
+			raise
+		finally:
+			frappe.destroy()
+
+	def create_source(self):
+		source = make_quotation(do_not_save=True)
+		source.insert(set_name=f"_Test Quotation {self._testMethodName}").submit()
+		return source.name
+
+	def create_revision(self, gate=None):
+		if gate:
+			gate.wait(timeout=15)
+		return frappe.get_doc("Quotation", self.source).make_revision().insert().name
+
+	def create_order(self):
+		return self.make_order(frappe.get_doc("Quotation", self.source), 10).name
+
+	def create_invoice(self):
+		return make_sales_invoice(self.source).insert().name
+
+	@staticmethod
+	def submit_document(doctype, name, gate):
+		doc = frappe.get_doc(doctype, name)
+		gate.wait(timeout=15)
+		try:
+			doc.submit()
+			return "submitted"
+		except frappe.ValidationError:
+			frappe.db.rollback()
+			return "rejected"
+
+	def cleanup_source(self):
+		frappe.db.rollback()
+		self.pool.submit(self.request, self.delete_source).result(timeout=30)
+
+	def delete_source(self):
+		for doctype, fieldname in (("Sales Invoice", "quotation"), ("Sales Order", "prevdoc_docname")):
+			for name in frappe.get_all(f"{doctype} Item", filters={fieldname: self.source}, pluck="parent"):
+				transaction = frappe.get_doc(doctype, name)
+				if transaction.docstatus == 1:
+					transaction.cancel()
+				transaction.delete()
+		for name in frappe.get_all(
+			"Quotation",
+			filters={"original_quotation": self.source},
+			pluck="name",
+			order_by="quotation_version desc",
+		):
+			revision = frappe.get_doc("Quotation", name)
+			if revision.docstatus == 1:
+				revision.cancel()
+			revision.delete()
+		source = frappe.get_doc("Quotation", self.source)
+		source.cancel()
+		source.delete()
+		frappe.db.delete("Series", {"name": f"{self.source}-REV-"})
+
+	@staticmethod
+	def make_revision(source):
+		revision = source.make_revision()
+		revision.items[0].qty = 3
+		revision.items[0].rate = 150
+		return revision.insert().submit()
+
+	@staticmethod
+	def funnel_count():
+		return next(
+			row["value"]
+			for row in get_funnel_data("2026-06-01", "2026-06-30", "_Test Company")
+			if row["title"] == "Quotations"
+		)
+
+	@staticmethod
+	def trends_amount(period="Yearly", column="Total(Amt)"):
+		columns, rows, *_ = quotation_trends(
+			frappe._dict(
+				company="_Test Company",
+				fiscal_year="_Test Fiscal Year 2026",
+				based_on="Item",
+				period=period,
+			)
+		)
+		labels = [column.split(":")[0] if isinstance(column, str) else column["label"] for column in columns]
+		return next((row[labels.index(column)] or 0 for row in rows if row[0] == "_Test Item"), 0)
+
+	@staticmethod
+	def analytics_amount(tree_type, entity, to_date="2026-06-30"):
+		_, rows, *_ = sales_analytics(
+			{
+				"doc_type": "Quotation",
+				"tree_type": tree_type,
+				"entity": [entity],
+				"value_quantity": "Value",
+				"range": "Monthly",
+				"company": "_Test Company",
+				"from_date": "2026-06-01",
+				"to_date": to_date,
+				"curves": "all",
+			}
+		)
+		return next((row["total"] for row in rows if row["entity"] == entity), 0)
+
+	@staticmethod
+	def territory_amount(field):
+		_, rows = territory_sales(frappe._dict(company="_Test Company"))
+		return next(row[field] for row in rows if row["territory"] == "_Test Territory")
+
+	@staticmethod
+	def make_opportunity_quotation():
+		opportunity = frappe.get_doc(
+			{
+				"doctype": "Opportunity",
+				"opportunity_from": "Customer",
+				"party_name": "_Test Customer",
+				"territory": "_Test Territory",
+				"company": "_Test Company",
+				"currency": "INR",
+				"opportunity_amount": 5000,
+				"transaction_date": "2026-06-01",
+			}
+		).insert()
+		source = make_quotation(qty=2, rate=100, transaction_date="2026-06-01", do_not_save=True)
+		source.opportunity = opportunity.name
+		return source.insert().submit()
+
+	def make_quotation_transaction(self, source, doctype):
+		if doctype == "Sales Order":
+			return self.make_order(source, 4)
+		return make_sales_invoice(source.name).insert()
 
 
 def enable_calculate_bundle_price(enable=1):
