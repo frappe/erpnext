@@ -27,13 +27,18 @@ class CompanyNamingSeries(Document):
 
 
 def get_allowed_naming_series(company: str, doctype: str) -> list[str]:
-	"""Naming series this company may use for a doctype. An empty list means no restriction."""
+	"""Naming series this company may use for a doctype. An empty list means no restriction.
+
+	The stored options are intersected with the ones the document type currently offers, so a
+	series dropped from Document Naming Settings stops being offered without a Company edit.
+	"""
 	if not company or not frappe.db.exists("Company", company):
 		return []
 
 	for row in frappe.get_cached_doc("Company", company).get("document_naming_series") or []:
 		if row.document_type == doctype:
-			return row.get_options()
+			available = frappe.get_meta(doctype).get_naming_series_options()
+			return [series for series in row.get_options() if series in available]
 
 	return []
 

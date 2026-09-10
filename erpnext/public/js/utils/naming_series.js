@@ -18,14 +18,17 @@ function apply_options(frm, options) {
 function set_naming_series_options(frm) {
 	if (!frm.is_new() || !frm.fields_dict.naming_series || !frm.doc.company) return;
 
+	const company = frm.doc.company;
 	const fallback = get_full_options(frm.doctype);
 
 	frappe
 		.xcall(
 			"erpnext.setup.doctype.company_naming_series.company_naming_series.get_naming_series_options",
-			{ company: frm.doc.company, doctype: frm.doctype }
+			{ company: company, doctype: frm.doctype }
 		)
 		.then((allowed) => {
+			if (frm.doc.company !== company) return;
+
 			const options = allowed.length ? allowed : fallback;
 			if (options.length) {
 				apply_options(frm, options);
