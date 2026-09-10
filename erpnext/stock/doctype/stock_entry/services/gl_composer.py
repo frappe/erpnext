@@ -26,17 +26,10 @@ class StockEntryGLComposer(BaseStockGLComposer):
 		doc = self.doc
 		gl_entries = super().compose(inventory_account_map)
 
-		if doc.purpose in ("Repack", "Manufacture"):
-			total_basic_amount = sum(flt(t.basic_amount) for t in doc.get("items") if t.is_finished_item)
-		else:
-			total_basic_amount = sum(flt(t.basic_amount) for t in doc.get("items") if t.t_warehouse)
-
-		divide_based_on = total_basic_amount
-		if doc.get("additional_costs") and not total_basic_amount:
-			divide_based_on = sum(item.qty for item in doc.get("items"))
+		incoming_items, basis, divide_based_on = doc.get_additional_cost_allocation()
 
 		item_account_wise_additional_cost = self._build_additional_cost_per_item_account(
-			total_basic_amount, divide_based_on
+			incoming_items, basis, divide_based_on
 		)
 		if item_account_wise_additional_cost:
 			self._append_additional_cost_gl_entries(gl_entries, item_account_wise_additional_cost)
@@ -102,11 +95,7 @@ class StockEntryGLComposer(BaseStockGLComposer):
 		if not item.t_warehouse or item.s_warehouse:
 			return 0.0
 
-		if (
-			item.get("is_finished_item")
-			or item.get("secondary_item_type")
-			or item.get("is_legacy_scrap_item")
-		):
+		if item.get("is_finished_item") or item.get("secondary_item_type") or item.get("valuation_type"):
 			return 0.0
 
 		if get_valuation_method(item.item_code, self.doc.company) != "Standard Cost":
@@ -187,24 +176,20 @@ class StockEntryGLComposer(BaseStockGLComposer):
 		)
 
 	def _build_additional_cost_per_item_account(
-		self, total_basic_amount: float, divide_based_on: float
+		self, incoming_items: list, basis: str, divide_based_on: float
 	) -> dict:
-		doc = self.doc
 		item_account_wise_additional_cost = {}
+		if not divide_based_on:
+			return item_account_wise_additional_cost
 
-		for t in doc.get("additional_costs"):
-			for d in doc.get("items"):
-				if doc.purpose in ("Repack", "Manufacture") and not d.is_finished_item:
-					continue
-				elif not d.t_warehouse:
-					continue
-
+		for t in self.doc.get("additional_costs"):
+			for d in incoming_items:
 				item_account_wise_additional_cost.setdefault((d.item_code, d.name), {})
 				item_account_wise_additional_cost[(d.item_code, d.name)].setdefault(
 					t.expense_account, {"amount": 0.0, "base_amount": 0.0}
 				)
 
-				multiply_based_on = d.basic_amount if total_basic_amount else d.qty
+				multiply_based_on = flt(d.get(basis))
 				entry = item_account_wise_additional_cost[(d.item_code, d.name)][t.expense_account]
 				entry["amount"] += flt(t.amount * multiply_based_on) / divide_based_on
 				entry["base_amount"] += flt(t.base_amount * multiply_based_on) / divide_based_on

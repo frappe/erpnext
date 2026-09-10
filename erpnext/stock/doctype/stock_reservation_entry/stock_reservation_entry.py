@@ -1971,7 +1971,7 @@ def update_serial_batch_delivered_qty(row, name, is_cancelled=False):
 				.where((doctype.parent == name) & (doctype.batch_no == batch_no))
 			)
 
-		query.run()
+			query.run()
 
 
 def get_reserved_materials(voucher_no):

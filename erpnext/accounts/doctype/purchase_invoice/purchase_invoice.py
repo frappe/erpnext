@@ -235,6 +235,9 @@ class PurchaseInvoice(BuyingController):
 				"overflow_type": "billing",
 			}
 		]
+		self.closed_source_links = [
+			("Purchase Invoice Item", "pr_detail", "Purchase Receipt Item", "Purchase Receipt")
+		]
 
 	def onload(self):
 		super().onload()

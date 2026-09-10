@@ -69,7 +69,7 @@ erpnext.buying = {
 				if (this.frm.fields_dict.buying_price_list) {
 					this.frm.set_query("buying_price_list", function () {
 						return {
-							filters: { buying: 1 },
+							filters: { buying: 1, enabled: 1 },
 						};
 					});
 				}
@@ -541,7 +541,7 @@ erpnext.buying.link_to_mrs = function (frm) {
 			var item_length = frm.doc.items.length;
 			for (let item of frm.doc.items) {
 				var qty = item.qty;
-				(r.message[0] || []).forEach(function (d) {
+				(r.message || []).forEach(function (d) {
 					if (
 						d.qty > 0 &&
 						qty > 0 &&

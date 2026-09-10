@@ -55,6 +55,125 @@ class TestDunning(ERPNextTestSuite):
 		dunning.reload()
 		self.assertEqual(dunning.status, "Resolved")
 
+	def test_dunning_not_resolved_by_payment_of_invoiced_sum_only(self):
+		"""
+		Regression for #58220: paying the invoice without the interest and fee must not
+		resolve the dunning, the interest is still owed and has to stay claimable.
+		"""
+		dunning = create_dunning(overdue_days=15, dunning_type_name="Second Notice - _TC")
+		dunning.submit()
+		sales_invoice = dunning.overdue_payments[0].sales_invoice
+
+		pe = get_payment_entry("Sales Invoice", sales_invoice)
+		pe.reference_no, pe.reference_date = "4", nowdate()
+		pe.insert()
+		pe.submit()
+
+		self.assertEqual(frappe.get_value("Sales Invoice", sales_invoice, "outstanding_amount"), 0)
+
+		dunning.reload()
+		self.assertEqual(dunning.status, "Unresolved")
+		self.assertEqual(round(dunning.get_unpaid_dunning_amount(), 2), 10.41)
+
+		# the interest and fee can still be collected on their own
+		pe = get_payment_entry("Dunning", dunning.name)
+		pe.reference_no, pe.reference_date = "5", nowdate()
+		self.assertEqual(pe.references, [])
+		self.assertEqual(round(pe.paid_amount, 2), 10.41)
+		pe.insert()
+		pe.submit()
+
+		dunning.reload()
+		self.assertEqual(dunning.status, "Resolved")
+		self.assertEqual(dunning.get_unpaid_dunning_amount(), 0)
+
+		# cancelling the interest payment makes the dunning claimable again
+		pe.cancel()
+		dunning.reload()
+		self.assertEqual(dunning.status, "Unresolved")
+		self.assertEqual(round(dunning.get_unpaid_dunning_amount(), 2), 10.41)
+
+	def test_dunning_can_be_cancelled_after_its_interest_was_paid(self):
+		"""
+		The payment collecting the interest links back to the dunning, which must not stand in
+		the way of cancelling it.
+		"""
+		dunning = create_dunning(overdue_days=15, dunning_type_name="Second Notice - _TC")
+		dunning.submit()
+
+		pe = get_payment_entry("Dunning", dunning.name)
+		pe.reference_no, pe.reference_date = "6", nowdate()
+		pe.insert()
+		pe.submit()
+
+		dunning.reload()
+		self.assertEqual(dunning.status, "Resolved")
+
+		dunning.cancel()
+		self.assertEqual(dunning.docstatus, 2)
+
+	def test_waived_interest_keeps_a_manually_resolved_dunning_resolved(self):
+		"""
+		Resolving a dunning by hand waives its interest, so a later payment of the invoice
+		must not reopen it.
+		"""
+		dunning = create_dunning(overdue_days=15, dunning_type_name="Second Notice - _TC")
+		dunning.submit()
+		sales_invoice = dunning.overdue_payments[0].sales_invoice
+
+		# what the "Resolve" button does
+		dunning.reload()
+		dunning.status = "Resolved"
+		dunning.save()
+
+		pe = get_payment_entry("Sales Invoice", sales_invoice)
+		pe.reference_no, pe.reference_date = "7", nowdate()
+		pe.insert()
+		pe.submit()
+
+		dunning.reload()
+		self.assertEqual(dunning.status, "Resolved")
+		self.assertEqual(round(dunning.get_unpaid_dunning_amount(), 2), 10.41)
+
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings", {"allow_multi_currency_invoices_against_single_party_account": 1}
+	)
+	def test_unpaid_dunning_amount_is_tracked_in_company_currency(self):
+		"""
+		The interest and fee are collected as a Payment Entry deduction, a company currency
+		field, so what is left to collect has to be measured in the same currency.
+		"""
+		si = create_sales_invoice(
+			posting_date=add_days(today(), -15),
+			currency="USD",
+			conversion_rate=50,
+			rate=100,
+			debit_to="Debtors - _TC",
+		)
+
+		dunning = create_dunning_from_sales_invoice(si.name)
+		dunning_type = frappe.get_doc("Dunning Type", "Second Notice - _TC")
+		dunning.dunning_type = dunning_type.name
+		dunning.rate_of_interest = dunning_type.rate_of_interest
+		dunning.dunning_fee = dunning_type.dunning_fee
+		dunning.income_account = dunning_type.income_account
+		dunning.cost_center = dunning_type.cost_center
+		dunning.save()
+
+		self.assertEqual(dunning.currency, "USD")
+		self.assertEqual(dunning.conversion_rate, 50)
+		self.assertEqual(round(dunning.dunning_amount, 2), 10.41)
+		self.assertEqual(round(dunning.base_dunning_amount, 2), 520.55)
+
+		# nothing collected yet, in either currency
+		self.assertEqual(round(dunning.get_unpaid_base_dunning_amount(), 2), 520.55)
+		self.assertEqual(round(dunning.get_unpaid_dunning_amount(), 2), 10.41)
+
+		# the deduction booking the interest is in company currency
+		dunning.submit()
+		pe = get_payment_entry("Dunning", dunning.name)
+		self.assertEqual(round(pe.deductions[0].amount, 2), -520.55)
+
 	def test_fetch_overdue_payments(self):
 		"""
 		Create SI with overdue payment. Check if overdue payment is fetched in Dunning.

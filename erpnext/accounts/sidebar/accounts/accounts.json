@@ -854,6 +854,7 @@
    "added": 0,
    "child": 1,
    "collapsible": 1,
+   "filters": "{\"is_return\": 1}",
    "hidden": 0,
    "indent": 0,
    "is_default_module": 0,
@@ -864,8 +865,7 @@
    "open_in_new_tab": 0,
    "route_options": "{\"is_return\": 1}",
    "show_arrow": 0,
-   "type": "Link",
-   "filters": "{\"is_return\": 1}"
+   "type": "Link"
   },
   {
    "added": 0,
@@ -931,6 +931,7 @@
    "added": 0,
    "child": 1,
    "collapsible": 1,
+   "filters": "{\"is_return\": 1}",
    "hidden": 0,
    "indent": 0,
    "is_default_module": 0,
@@ -941,8 +942,7 @@
    "open_in_new_tab": 0,
    "route_options": "{\"is_return\": 1}",
    "show_arrow": 0,
-   "type": "Link",
-   "filters": "{\"is_return\": 1}"
+   "type": "Link"
   },
   {
    "added": 0,
@@ -1153,20 +1153,6 @@
    "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
-  },
-  {
-   "added": 0,
-   "child": 0,
-   "collapsible": 1,
-   "hidden": 0,
-   "indent": 0,
-   "is_default_module": 0,
-   "keep_closed": 1,
-   "label": "Payments",
-   "link_type": "DocType",
-   "open_in_new_tab": 1,
-   "show_arrow": 0,
-   "type": "Section Break"
   },
   {
    "added": 0,
@@ -1418,27 +1404,12 @@
    "child": 0,
    "collapsible": 1,
    "hidden": 0,
-   "indent": 0,
-   "is_default_module": 0,
-   "keep_closed": 1,
-   "label": "Financial Reports",
-   "link_type": "DocType",
-   "open_in_new_tab": 1,
-   "show_arrow": 0,
-   "type": "Section Break"
-  },
-  {
-   "added": 0,
-   "child": 1,
-   "collapsible": 1,
-   "hidden": 0,
-   "icon": "wallet",
    "indent": 1,
    "is_default_module": 0,
    "keep_closed": 0,
    "label": "Financial Reports",
    "link_type": "DocType",
-   "open_in_new_tab": 0,
+   "open_in_new_tab": 1,
    "show_arrow": 0,
    "type": "Section Break"
   },
@@ -1877,7 +1848,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-08-28 12:00:00.000000",
+ "modified": "2026-09-01 17:33:21.459367",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts",

@@ -1920,6 +1920,8 @@ def download_blank_csv_template(content: str | list):
 
 @frappe.whitelist()
 def upload_csv_file(item_code: str, file_path: str):
+	frappe.has_permission("Item", ptype="select", throw=True)
+
 	serial_nos, batch_nos = [], []
 	serial_nos, batch_nos = get_serial_batch_from_csv(item_code, file_path)
 
@@ -1938,9 +1940,11 @@ def get_serial_batch_from_csv(item_code, file_path):
 	if not file_path:
 		return serial_nos, batch_nos
 
-	try:
-		file = frappe.get_doc("File", {"file_url": file_path})
-	except frappe.DoesNotExistError:
+	from frappe.core.doctype.file.utils import find_file_by_url
+
+	# look the file up through find_file_by_url, which returns it only when the caller may download it
+	file = find_file_by_url(file_path)
+	if not file:
 		frappe.msgprint(
 			_("File '{0}' not found").format(frappe.bold(file_path)),
 			alert=True,
@@ -2035,6 +2039,8 @@ def get_serial_batch_from_data(item_code, kwargs):
 
 @frappe.whitelist()
 def create_serial_nos(item_code: str, serial_nos: list | str):
+	frappe.has_permission("Item", ptype="select", throw=True)
+
 	serial_nos = get_serial_batch_from_data(
 		item_code,
 		{
@@ -2158,7 +2164,8 @@ def item_query(
 	if txt:
 		item_filters["name"] = ("like", f"%{txt}%")
 
-	return frappe.get_all(
+	# get_list, not get_all, so Item permissions apply; `select` is what keeps the roles that work bundles usable
+	return frappe.get_list(
 		"Item",
 		filters=item_filters,
 		or_filters={"has_serial_no": 1, "has_batch_no": 1},
@@ -3697,6 +3704,8 @@ def get_batch_no_from_serial_no(serial_no: str):
 def is_serial_batch_no_exists(
 	item_code: str, type_of_transaction: str, serial_no: str | None = None, batch_no: str | None = None
 ):
+	frappe.has_permission("Item", ptype="select", throw=True)
+
 	if serial_no and not frappe.db.exists("Serial No", serial_no):
 		if type_of_transaction != "Inward":
 			frappe.throw(_("Serial No {0} does not exist").format(serial_no))

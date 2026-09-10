@@ -60,10 +60,13 @@ Flag a changed query that uses any of these:
   check_field, True)`, `doc.db_set(field, False)`, or `frappe.qb.update(dt).set(check_field, True)`
   emit `SET col = true`, which PostgreSQL rejects on a `smallint`/`Check` column
   (`column is of type smallint but expression is of type boolean`). Pass `1`/`0`.
-- **`.like()`/`.ilike()` (or raw `LIKE`) on a NON-text column** — `idx`, `docstatus`, a date, etc.
-  frappe maps `.like()` → `ILIKE`, and PostgreSQL has no `bigint ILIKE text` operator (`operator
-  does not exist: bigint ~~* unknown`). Cast the column to text first — **`Cast_(col, "varchar")`**,
-  not `Cast(col, "char")` (see below). MariaDB coerces the int implicitly, so the cast is a no-op there.
+- **A direct `.like()`/`.ilike()` on a pypika field (or raw `LIKE`) on a NON-text column** — `idx`,
+  `docstatus`, a date, etc. frappe maps `.like()` → `ILIKE`, and PostgreSQL has no `bigint ILIKE text`
+  operator (`operator does not exist: bigint ~~* unknown`). Cast the column to text first —
+  **`Cast_(col, "varchar")`**, not `Cast(col, "char")` (see below). MariaDB coerces the int
+  implicitly, so the cast is a no-op there. A `["like", …]` filter passed to `get_all`/`get_list`/
+  `qb.get_query`/`reportview` needs no cast: the framework casts non-text fields itself
+  (frappe/frappe#42449).
 - **`CAST(… AS CHAR)` / `Cast(x, "char")`** — on PostgreSQL bare `CHAR` is `character(1)`, so
   `CAST(12 AS CHAR)` → `'1'` (silently truncates multi-digit values); MariaDB gives the full string.
   Use `VARCHAR` / `Cast_(x, "varchar")`.
@@ -177,6 +180,13 @@ audit of these fixes found four recurring mistakes:
   the arbitrary-pick preservation the wrap is usually justified as. Confirmed on CI; see #56241.
   Note a local macOS PostgreSQL gives a **false all-clear** — its collation happens to agree with
   MariaDB on case. Fix: take a representative row rather than sorting text.
+  **Picking that row is the hard part.** `Min(name)` is still a text sort: `autoname="hash"` is
+  not reliably lower case, because `_get_timestamp_prefix()` prepends `get_trace_id()[-1:]`
+  un-lowered and a client-supplied `X-Frappe-Request-Id` can put an upper case `A-F` there. A
+  non-text key (`Min(idx)`) works only where it is **unique within the group** and the join-back
+  carries the **full group key** — a date is usually neither, and joining on a duplicated value
+  turns one group into several rows (§3). Otherwise select the row in Python, sorting with
+  `key=str.casefold` so the order matches MariaDB's collation without depending on the database's.
 - **Wrong bound** — where the value has a semantic, pick the bound deliberately:
   `Min(schedule_date)` for a "required by", `Min(idx)` for first-line ordering, a qty-weighted
   average for a rate. A blind `Max` can understate urgency or overstate a figure.
@@ -192,8 +202,9 @@ pick a bound for a stated reason, and cover the varying-group case with a test.
 These are auto-handled by the framework and are **not** breaks:
 
 - **`.like()` / `["like", …]`** already renders as `ILIKE` on PostgreSQL — not a
-  case-sensitivity bug. *(Exception: `.like()` on a **non-text** column — `idx`, `docstatus` —
-  is a hard break, `bigint ILIKE`; see §1.)*
+  case-sensitivity bug. A `["like", …]` filter on a **non-text** field is also cast to text by
+  the framework. *(Exception: a direct `.like()` on a **non-text** pypika field — `idx`,
+  `docstatus` — is a hard break, `bigint ILIKE`; see §1.)*
 - **Raw `ifnull(...)`** inside `frappe.db.sql()` is rewritten to `coalesce(...)` on all engines.
 - **Backticks**, **`LOCATE`**, **`REGEXP`** / **`.regexp()`** in raw SQL are auto-translated on
   PostgreSQL (`REGEXP` → `~*`). **But `RLIKE` / `.rlike()` is NOT translated** — that one is a

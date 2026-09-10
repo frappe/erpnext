@@ -96,6 +96,7 @@ def get_reserved_qty(item_code, warehouse):
 
 	open_so = (so.docstatus == 1) & so.status.notin(["On Hold", "Closed"])
 	not_delivered_by_supplier = so_item.delivered_by_supplier.isnull() | (so_item.delivered_by_supplier == 0)
+	not_closed = so_item.closed.isnull() | (so_item.closed == 0)
 
 	# Keep the reserved-qty rollup in the DB (one aggregate per branch) instead of streaming
 	# every open packed-item / SO-item row into Python. `qty <> 0` mirrors the original
@@ -122,6 +123,7 @@ def get_reserved_qty(item_code, warehouse):
 			& (packed_item.parenttype == "Sales Order")
 			& (packed_item.item_code != packed_item.parent_item)
 			& not_delivered_by_supplier
+			& not_closed
 			& open_so
 			& reservable
 		)
@@ -138,6 +140,7 @@ def get_reserved_qty(item_code, warehouse):
 			(so_item.item_code == item_code)
 			& (so_item.warehouse == warehouse)
 			& not_delivered_by_supplier
+			& not_closed
 			& open_so
 			& reservable
 		)
@@ -219,6 +222,7 @@ def get_purchase_order_qty(item_code, warehouse):
 			& (PurchaseOrder.status.notin(["Closed", "Delivered"]))
 			& (PurchaseOrder.docstatus == 1)
 			& (Coalesce(PurchaseOrderItem.delivered_by_supplier, 0) == 0)
+			& (Coalesce(PurchaseOrderItem.closed, 0) == 0)
 		)
 		.run()
 	)

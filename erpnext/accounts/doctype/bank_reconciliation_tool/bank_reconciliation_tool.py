@@ -9,7 +9,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder.custom import ConstantColumn
 from frappe.query_builder.functions import Max, Sum
-from frappe.utils import cint, create_batch, flt
+from frappe.utils import cint, create_batch, flt, getdate
 
 from erpnext import get_default_cost_center
 from erpnext.accounts.doctype.bank_transaction.bank_transaction import get_total_allocated_amount
@@ -54,6 +54,8 @@ def get_bank_transactions(
 	all_transactions: bool = False,
 ):
 	# returns bank transactions for a bank account
+	validate_date_range(from_date, to_date)
+
 	filters = []
 	filters.append(["bank_account", "=", bank_account])
 	filters.append(["docstatus", "=", 1])
@@ -912,7 +914,7 @@ def search_for_transfer_transaction(transaction_id: str | int):
 
 	days = frappe.db.get_single_value("Accounts Settings", "transfer_match_days")
 
-	if not days:
+	if days is None:
 		days = 3
 
 	min_date = frappe.utils.add_days(date, -days)
@@ -962,9 +964,10 @@ def auto_reconcile_vouchers(
 	from_date: str | date | None = None,
 	to_date: str | date | None = None,
 	filter_by_reference_date: bool | None = None,
-	from_reference_date: bool | None = None,
-	to_reference_date: str | None = None,
+	from_reference_date: str | date | None = None,
+	to_reference_date: str | date | None = None,
 ):
+	validate_date_range(from_date, to_date, filter_by_reference_date, from_reference_date, to_reference_date)
 	bank_transactions = get_bank_transactions(bank_account)
 
 	if len(bank_transactions) > 10:
@@ -1079,10 +1082,11 @@ def get_linked_payments(
 	from_date: str | date | None = None,
 	to_date: str | date | None = None,
 	filter_by_reference_date: bool | None = None,
-	from_reference_date: bool | None = None,
-	to_reference_date: str | None = None,
+	from_reference_date: str | date | None = None,
+	to_reference_date: str | date | None = None,
 ):
 	# get all matching payments for a bank transaction
+	validate_date_range(from_date, to_date, filter_by_reference_date, from_reference_date, to_reference_date)
 	transaction = frappe.get_doc("Bank Transaction", bank_transaction_name)
 	bank_account = frappe.db.get_values(
 		"Bank Account", transaction.bank_account, ["account", "company"], as_dict=True
@@ -1100,6 +1104,23 @@ def get_linked_payments(
 		to_reference_date,
 	)
 	return subtract_allocations(gl_account, matching)
+
+
+def validate_date_range(
+	from_date,
+	to_date,
+	filter_by_reference_date=False,
+	from_reference_date=None,
+	to_reference_date=None,
+):
+	if cint(filter_by_reference_date):
+		from_date, to_date = from_reference_date, to_reference_date
+		message = _("From Reference Date cannot be greater than To Reference Date")
+	else:
+		message = _("From Date cannot be greater than To Date")
+
+	if from_date and to_date and getdate(from_date) > getdate(to_date):
+		frappe.throw(message)
 
 
 def subtract_allocations(gl_account, vouchers):
@@ -1138,6 +1159,7 @@ def check_matching(
 	from_reference_date=None,
 	to_reference_date=None,
 ):
+	document_types = document_types or []
 	exact_match = True if "exact_match" in document_types else False
 
 	common_filters = frappe._dict(
@@ -1336,9 +1358,11 @@ def get_pe_matching_query(
 	ref_condition = pe.reference_no == transaction.reference_number
 	ref_rank = frappe.qb.terms.Case().when(ref_condition, 1).else_(0)
 
-	amount_equality = pe.paid_amount == transaction.unallocated_amount
+	amount_field = pe.received_amount_after_tax if account_from_to == "paid_to" else pe.paid_amount_after_tax
+
+	amount_equality = amount_field == transaction.unallocated_amount
 	amount_rank = frappe.qb.terms.Case().when(amount_equality, 1).else_(0)
-	amount_condition = amount_equality if exact_match else pe.paid_amount > 0.0
+	amount_condition = amount_equality if exact_match else amount_field > 0.0
 
 	party_condition = (
 		(pe.party_type == transaction.party_type) & (pe.party == transaction.party) & pe.party.isnotnull()
@@ -1355,7 +1379,7 @@ def get_pe_matching_query(
 			(ref_rank + amount_rank + party_rank + 1).as_("rank"),
 			ConstantColumn("Payment Entry").as_("doctype"),
 			pe.name,
-			pe.base_paid_amount_after_tax.as_("paid_amount"),
+			amount_field.as_("paid_amount"),
 			pe.reference_no,
 			pe.reference_date,
 			pe.party,

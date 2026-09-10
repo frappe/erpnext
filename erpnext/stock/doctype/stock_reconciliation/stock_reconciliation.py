@@ -21,7 +21,12 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.stock_reconciliation_item.stock_reconciliation_item import StockReconciliationItem
-from erpnext.stock.utils import get_incoming_rate, get_stock_balance, get_valuation_method
+from erpnext.stock.utils import (
+	_get_incoming_rate,
+	check_warehouse_company,
+	get_stock_balance,
+	get_valuation_method,
+)
 
 
 class OpeningEntryAccountError(frappe.ValidationError):
@@ -651,7 +656,10 @@ class StockReconciliation(StockController):
 
 			rate_precision = item.precision("valuation_rate")
 			rate = flt(item_dict.get("rate"), rate_precision)
-			valuation_rate = flt(item.valuation_rate, rate_precision) if item.valuation_rate else None
+			# an unset rate means "keep the current one", an explicit zero is a real revaluation
+			valuation_rate = (
+				flt(item.valuation_rate, rate_precision) if item.valuation_rate not in ("", None) else None
+			)
 			if (
 				(item.qty is None or item.qty == item_dict.get("qty"))
 				and (valuation_rate is None or valuation_rate == rate)
@@ -696,7 +704,10 @@ class StockReconciliation(StockController):
 		amount_precision = item.precision("amount")
 
 		new_qty = flt(item.qty, qty_precision)
-		new_valuation_rate = flt(item.valuation_rate or item_dict.get("rate"))
+		# an explicitly set zero rate is a real revaluation, don't fall back to the current rate
+		new_valuation_rate = flt(
+			item.valuation_rate if item.valuation_rate not in ("", None) else item_dict.get("rate")
+		)
 
 		current_qty = flt(item_dict.get("qty"), qty_precision)
 		current_valuation_rate = flt(item_dict.get("rate"))
@@ -1555,7 +1566,10 @@ def get_stock_balance_for(
 			serial_nos = "\n".join(d.serial_no for d in serial_no_details if d.batch_no == batch_no)
 
 		if row and row.use_serial_batch_fields and row.batch_no and (qty or row.current_qty):
-			rate = get_incoming_rate(
+			# inherited from get_incoming_rate before the split; scoped here rather than at the top
+			# of the function so the guard covers exactly the path it covered before
+			check_warehouse_company(row.warehouse)
+			rate = _get_incoming_rate(
 				frappe._dict(
 					{
 						"item_code": row.item_code,

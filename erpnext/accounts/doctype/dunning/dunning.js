@@ -234,8 +234,10 @@ frappe.ui.form.on("Dunning", {
 				dn: frm.doc.name,
 			},
 			callback: function (r) {
-				var doc = frappe.model.sync(r.message);
-				frappe.set_route("Form", doc[0].doctype, doc[0].name);
+				if (!r.exc) {
+					var doc = frappe.model.sync(r.message);
+					frappe.set_route("Form", doc[0].doctype, doc[0].name);
+				}
 			},
 		});
 	},

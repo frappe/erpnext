@@ -74,6 +74,54 @@ class TestRequestedItemsToOrderAndReceive(ERPNextTestSuite):
 		self.assertEqual(len(data), 1)
 		self.assertEqual(getdate(data[0].required_date), getdate(add_days(today(), 1)))
 
+	def test_uom_pair_comes_from_one_line(self):
+		"""uom and stock_uom describe a line, so the reported pair must be one that was posted.
+
+		A request can list the same item twice in different units. Sourcing each column separately
+		can report one line's uom beside another's stock_uom -- a pair belonging to neither.
+		"""
+		create_item("Test MR Report Uom Item")
+		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0])
+		mr.transaction_date = today()
+		mr.schedule_date = add_days(today(), 5)
+		mr.set("items", mr.items[:1])
+		row = mr.items[0]
+		row.item_code = "Test MR Report Uom Item"
+		row.item_name = "Test MR Report Uom Item"
+		row.description = "Test MR Report Uom Item"
+		row.uom = "Nos"
+		row.schedule_date = mr.schedule_date
+		mr.append(
+			"items",
+			{
+				"item_code": "Test MR Report Uom Item",
+				"item_name": "Test MR Report Uom Item",
+				"description": "Test MR Report Uom Item",
+				"uom": "Nos",
+				"qty": row.qty,
+				"warehouse": row.warehouse,
+				"schedule_date": mr.schedule_date,
+			},
+		)
+		mr.submit()
+
+		# cross the two picks: the line holding the higher uom holds the lower stock_uom, so an
+		# independently aggregated pair cannot belong to either line
+		for line, uom, stock_uom in ((mr.items[0], "Nos", "Box"), (mr.items[1], "Box", "Nos")):
+			frappe.db.set_value(
+				"Material Request Item",
+				line.name,
+				{"uom": uom, "stock_uom": stock_uom},
+				update_modified=False,
+			)
+
+		posted = {("Nos", "Box"), ("Box", "Nos")}
+		data = get_data(self.filters.update({"item_code": "Test MR Report Uom Item"}))
+
+		self.assertEqual(len(data), 1)
+		self.assertIn((data[0].uom, data[0].stock_uom), posted)
+		self.assertEqual((data[0].uom, data[0].stock_uom), ("Nos", "Box"), "must be the first line by idx")
+
 	def setup_material_request(self, order=False, receive=False, days=0):
 		po = None
 		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0])

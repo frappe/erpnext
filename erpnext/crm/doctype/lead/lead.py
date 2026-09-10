@@ -236,6 +236,8 @@ class Lead(SellingController, CRMNote):
 
 	@frappe.whitelist()
 	def create_prospect_and_contact(self, data: dict):
+		self.check_permission("write")
+
 		data = frappe._dict(data)
 		if data.create_contact:
 			self.create_contact()
@@ -382,6 +384,9 @@ def get_lead_with_phone_number(number):
 
 @frappe.whitelist(methods=["POST"])
 def add_lead_to_prospect(lead: str, prospect: str):
+	if lead:
+		frappe.has_permission("Lead", "read", lead, throw=True)
+
 	prospect = frappe.get_doc("Prospect", prospect)
 	prospect.append("leads", {"lead": lead})
 	prospect.save()

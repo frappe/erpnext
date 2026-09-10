@@ -47,7 +47,7 @@ class BatchSplitFinishedGood:
 		fg_rows = [
 			row
 			for row in self.doc.items
-			if row.is_finished_item and not row.secondary_item_type and not row.is_legacy_scrap_item
+			if row.is_finished_item and not row.secondary_item_type and not row.valuation_type
 		]
 
 		if len(fg_rows) != 1:
@@ -128,7 +128,7 @@ class BatchSplitFinishedGood:
 		if row.is_finished_item or not row.s_warehouse:
 			return False
 
-		if row.secondary_item_type or row.is_legacy_scrap_item:
+		if row.secondary_item_type or row.valuation_type:
 			return False
 
 		return bool(frappe.get_cached_value("Item", row.item_code, "has_batch_no"))

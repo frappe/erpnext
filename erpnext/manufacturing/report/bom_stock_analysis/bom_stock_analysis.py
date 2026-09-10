@@ -8,7 +8,7 @@ from frappe.utils import flt
 from frappe.utils.data import comma_and
 from pypika.terms import ExistsCriterion
 
-from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter, get_child_warehouses
+from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
 
 
 def execute(filters=None):
@@ -238,11 +238,10 @@ def get_bom_data(filters):
 	bom_item = frappe.qb.DocType(bom_item_table)
 	stock_qty = get_stock_qty_by_item(filters).as_("stock_qty")
 
-	base = frappe.qb.from_(bom_item)
-	base = base.join(stock_qty) if filters.get("warehouse") else base.left_join(stock_qty)
-
 	query = (
-		base.on(bom_item.item_code == stock_qty.item_code)
+		frappe.qb.from_(bom_item)
+		.left_join(stock_qty)
+		.on(bom_item.item_code == stock_qty.item_code)
 		.select(
 			bom_item.item_code,
 			# non-grouped columns are constant per grouped item_code -> Max() keeps the GROUP BY valid
@@ -316,23 +315,6 @@ def explode_phantom_boms(data, filters):
 	return data
 
 
-def get_warehouses_with_children(warehouses):
-	if not warehouses:
-		return []
-
-	if isinstance(warehouses, str) and warehouses.startswith("["):
-		warehouses = frappe.parse_json(warehouses)
-
-	if not isinstance(warehouses, list | tuple):
-		warehouses = [warehouses]
-
-	all_warehouses = []
-	for warehouse in warehouses:
-		all_warehouses.extend(get_child_warehouses(warehouse))
-
-	return list(set(all_warehouses))
-
-
 def get_manufacturer_records():
 	details = frappe.get_all(
 		"Item Manufacturer", fields=["manufacturer", "manufacturer_part_no", "item_code"]
@@ -348,18 +330,11 @@ def get_manufacturer_records():
 def get_producible_fg_items(filters):
 	BOM_ITEM = frappe.qb.DocType("BOM Item")
 	BOM = frappe.qb.DocType("BOM")
-	BIN = frappe.qb.DocType("Bin")
 
-	warehouses = get_warehouses_with_children(filters.get("warehouse"))
-	if not warehouses:
+	if not filters.get("warehouse"):
 		frappe.throw(_("Warehouse is required to get producible FG Items"))
 
-	bin_subquery = (
-		frappe.qb.from_(BIN)
-		.select(BIN.item_code, Sum(BIN.actual_qty).as_("actual_qty"))
-		.where(BIN.warehouse.isin(warehouses))
-		.groupby(BIN.item_code)
-	)
+	bin_subquery = get_stock_qty_by_item(filters).as_("stock_qty")
 
 	query = (
 		frappe.qb.from_(BOM_ITEM)

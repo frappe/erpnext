@@ -8,7 +8,7 @@ from datetime import date
 import frappe
 from frappe import _, throw
 from frappe.model.document import Document
-from frappe.utils import DateTimeLikeObject, formatdate, getdate, today
+from frappe.utils import DateTimeLikeObject, cint, formatdate, getdate, today
 
 
 class OverlapError(frappe.ValidationError):
@@ -34,7 +34,7 @@ class HolidayList(Document):
 		is_half_day: DF.Check
 		subdivision: DF.Autocomplete | None
 		to_date: DF.Date
-		total_holidays: DF.Int
+		total_holidays: DF.Float
 		weekly_off: DF.Literal[
 			"", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
 		]
@@ -42,9 +42,12 @@ class HolidayList(Document):
 
 	def validate(self):
 		self.validate_days()
-		self.total_holidays = len(self.holidays)
+		self.update_total_holidays()
 		self.validate_duplicate_date()
 		self.sort_holidays()
+
+	def update_total_holidays(self):
+		self.total_holidays = sum(0.5 if cint(holiday.is_half_day) else 1 for holiday in self.holidays)
 
 	@frappe.whitelist()
 	def get_weekly_off_dates(self):
@@ -66,6 +69,8 @@ class HolidayList(Document):
 					"is_half_day": self.is_half_day,
 				},
 			)
+
+		self.update_total_holidays()
 
 	@frappe.whitelist()
 	def get_supported_countries(self):
@@ -107,6 +112,8 @@ class HolidayList(Document):
 			self.append(
 				"holidays", {"description": holiday_name, "holiday_date": holiday_date, "weekly_off": 0}
 			)
+
+		self.update_total_holidays()
 
 	def sort_holidays(self):
 		self.holidays.sort(key=lambda x: (x.weekly_off, getdate(x.holiday_date)))
@@ -153,6 +160,7 @@ class HolidayList(Document):
 	@frappe.whitelist()
 	def clear_table(self):
 		self.set("holidays", [])
+		self.update_total_holidays()
 
 	def validate_duplicate_date(self):
 		unique_dates = []

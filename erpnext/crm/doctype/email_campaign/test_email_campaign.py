@@ -59,3 +59,26 @@ class TestEmailCampaign(ERPNextTestSuite):
 		doc.email_campaign_for = "Lead"
 		doc.recipient = lead.name
 		self.assertRaises(frappe.ValidationError, doc.validate_lead)
+
+	def test_contact_without_an_email_is_rejected(self):
+		contact = frappe.get_doc({"doctype": "Contact", "first_name": "_Test Contact No Email"}).insert()
+		campaign = self.make_campaign(schedules=[0])
+		doc = self.make_email_campaign(campaign.name)
+		doc.email_campaign_for = "Contact"
+		doc.recipient = contact.name
+		self.assertRaisesRegex(frappe.ValidationError, "primary email ID", doc.insert)
+
+	def test_contact_with_an_email_is_accepted(self):
+		contact = frappe.get_doc(
+			{
+				"doctype": "Contact",
+				"first_name": "_Test Contact With Email",
+				"email_ids": [{"email_id": "_test_email_campaign@example.com", "is_primary": 1}],
+			}
+		).insert()
+		campaign = self.make_campaign(schedules=[0])
+		doc = self.make_email_campaign(campaign.name)
+		doc.email_campaign_for = "Contact"
+		doc.recipient = contact.name
+		doc.insert()
+		self.assertEqual(doc.status, "In Progress")

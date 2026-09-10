@@ -173,7 +173,7 @@ def apply_putaway_rule(
 					stock_qty_to_allocate = qty_to_allocate * item.conversion_factor
 
 				if not qty_to_allocate:
-					break
+					continue
 
 				updated_table = add_row(
 					item, qty_to_allocate, rule.warehouse, updated_table, rule.name, serial_nos=serial_nos
