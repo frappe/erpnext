@@ -10,7 +10,7 @@ import frappe.utils
 from frappe import _, qb
 from frappe.model.document import Document
 from frappe.query_builder import Case
-from frappe.query_builder.functions import Abs, Sum
+from frappe.query_builder.functions import Abs, IfNull, Round, Sum
 from frappe.utils import cint, flt, get_link_to_form, getdate
 from pypika import Order
 
@@ -952,8 +952,26 @@ def get_stock_reservation_status():
 	return frappe.get_single_value("Stock Settings", "enable_stock_reservation")
 
 
+def get_pending_qty_criterion(sales_order_item):
+	"""Mirror the mapper's pending quantity check."""
+	invoice_item = qb.DocType("Sales Invoice Item")
+	billed_qty = (
+		qb.from_(invoice_item)
+		.select(IfNull(Sum(invoice_item.qty), 0))
+		.where((invoice_item.docstatus == 1) & (invoice_item.so_detail == sales_order_item.name))
+	)
+
+	qty_precision = frappe.get_precision("Sales Order Item", "qty")
+	has_unbilled_ordered_qty = Round(sales_order_item.qty - billed_qty, qty_precision) > 0
+	has_unbilled_delivered_qty = (
+		Round(sales_order_item.qty - sales_order_item.returned_qty - billed_qty, qty_precision) > 0
+	) | (Round(sales_order_item.delivered_qty - billed_qty, qty_precision) > 0)
+
+	return has_unbilled_ordered_qty & has_unbilled_delivered_qty
+
+
 def get_potentially_billable_item_criterion(sales_order, sales_order_item, item):
-	"""Return the amount check for UI candidates. The mapper checks pending quantity."""
+	"""Return the row level checks the Sales Invoice mapper applies."""
 	global_allowance = flt(frappe.get_cached_value("Accounts Settings", None, "over_billing_allowance"))
 	allowance = (
 		Case().when(item.over_billing_allowance != 0, item.over_billing_allowance).else_(global_allowance)
@@ -963,10 +981,11 @@ def get_potentially_billable_item_criterion(sales_order, sales_order_item, item)
 		Abs(sales_order_item.billed_amt) < Abs(sales_order_item.amount) * (1 + allowance / 100)
 	)
 	is_unit_price_row = (sales_order.has_unit_price_items == 1) & (sales_order_item.qty == 0)
-
-	return (sales_order_item.closed == 0) & (
-		is_unit_price_row | ((sales_order_item.qty != 0) & has_amount_headroom)
+	is_billable_row = (
+		(sales_order_item.qty != 0) & has_amount_headroom & get_pending_qty_criterion(sales_order_item)
 	)
+
+	return (sales_order_item.closed == 0) & (is_unit_price_row | is_billable_row)
 
 
 def has_potentially_billable_items(sales_order: str) -> bool:
