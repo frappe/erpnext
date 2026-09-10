@@ -42,6 +42,10 @@ class Company(NestedSet):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+		from erpnext.setup.doctype.company_naming_series.company_naming_series import (
+			CompanyNamingSeries,
+		)
+
 		abbr: DF.Data
 		accounts_frozen_till_date: DF.Date | None
 		accumulated_depreciation_account: DF.Link | None
@@ -97,6 +101,7 @@ class Company(NestedSet):
 		depreciation_expense_account: DF.Link | None
 		disable_sdbnb_in_sr: DF.Check
 		disposal_account: DF.Link | None
+		document_naming_series: DF.Table[CompanyNamingSeries]
 		domain: DF.Data | None
 		email: DF.Data | None
 		enable_item_wise_inventory_account: DF.Check
@@ -196,6 +201,7 @@ class Company(NestedSet):
 		self.cant_change_valuation_method()
 		self.validate_pending_reposts(old_doc)
 		self.validate_sdbnb_configuration()
+		self.validate_document_naming_series()
 
 	def validate_outstanding_sdbnb_transactions(self, account):
 		GLEntry = frappe.qb.DocType("GL Entry")
@@ -340,6 +346,30 @@ class Company(NestedSet):
 					),
 					title=_("Incorrect Warehouse"),
 				)
+
+	def validate_document_naming_series(self):
+		"""Every restricted series has to be one the document type actually offers."""
+		seen = set()
+		for row in self.document_naming_series:
+			if row.document_type in seen:
+				frappe.throw(
+					_("Document Type {0} is listed more than once in Document Naming Series").format(
+						bold(row.document_type)
+					)
+				)
+			seen.add(row.document_type)
+
+			available = frappe.get_meta(row.document_type).get_naming_series_options()
+			if not available:
+				frappe.throw(_("{0} is not named by a Naming Series").format(bold(row.document_type)))
+
+			for series in row.get_options():
+				if series not in available:
+					frappe.throw(
+						_("Naming Series {0} is not set up for {1}").format(
+							bold(series), bold(row.document_type)
+						)
+					)
 
 	def validate_abbr(self):
 		if not self.abbr:

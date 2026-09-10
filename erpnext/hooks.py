@@ -388,6 +388,7 @@ doc_events = {
 			"erpnext.support.doctype.service_level_agreement.service_level_agreement.apply",
 			"erpnext.setup.doctype.transaction_deletion_record.transaction_deletion_record.check_for_running_deletion_job",
 			"erpnext.stock.doctype.company_restriction.company_restriction.validate_transaction_company",
+			"erpnext.setup.doctype.company_naming_series.company_naming_series.validate_naming_series",
 		],
 	},
 	tuple(period_closing_doctypes): {
