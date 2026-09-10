@@ -1,6 +1,8 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from unittest.mock import patch
+
 import frappe
 
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
@@ -37,6 +39,16 @@ class TestCompanyNamingSeries(ERPNextTestSuite):
 
 		self.assertEqual(get_allowed_naming_series(COMPANY, "Journal Entry"), ["ACC-JV-.YYYY.-"])
 		self.assertEqual(get_allowed_naming_series(COMPANY, "Sales Invoice"), [])
+
+	def test_a_series_dropped_from_the_doctype_stops_being_allowed(self):
+		self.restrict("Journal Entry", ALLOWED_SERIES)
+		self.assertEqual(get_allowed_naming_series(COMPANY, "Journal Entry"), [ALLOWED_SERIES])
+
+		with self.patch_naming_series_options("Journal Entry", []):
+			self.assertEqual(get_allowed_naming_series(COMPANY, "Journal Entry"), [])
+
+	def patch_naming_series_options(self, doctype, options):
+		return patch.object(frappe.get_meta(doctype), "get_naming_series_options", return_value=options)
 
 	def test_series_must_be_one_the_document_type_offers(self):
 		self.assertRaises(frappe.ValidationError, self.restrict, "Journal Entry", SERIES)
