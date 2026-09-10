@@ -126,7 +126,7 @@
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2026-04-14 18:15:27.367298",
+ "modified": "2026-08-21 23:11:40.799391",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Cost Center",
@@ -180,6 +180,54 @@
   },
   {
    "role": "HR Manager",
+   "select": 1
+  },
+  {
+   "role": "Delivery Manager",
+   "select": 1
+  },
+  {
+   "role": "Delivery User",
+   "select": 1
+  },
+  {
+   "role": "Maintenance Manager",
+   "select": 1
+  },
+  {
+   "role": "Maintenance User",
+   "select": 1
+  },
+  {
+   "role": "Manufacturing Manager",
+   "select": 1
+  },
+  {
+   "role": "Manufacturing User",
+   "select": 1
+  },
+  {
+   "role": "Projects Manager",
+   "select": 1
+  },
+  {
+   "role": "Projects User",
+   "select": 1
+  },
+  {
+   "role": "Purchase Master Manager",
+   "select": 1
+  },
+  {
+   "role": "Quality Manager",
+   "select": 1
+  },
+  {
+   "role": "Sales Master Manager",
+   "select": 1
+  },
+  {
+   "role": "Stock Manager",
    "select": 1
   }
  ],

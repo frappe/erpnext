@@ -204,7 +204,7 @@
   }
  ],
  "links": [],
- "modified": "2025-01-24 06:22:33.129805",
+ "modified": "2026-08-21 23:11:51.754251",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Vehicle",
@@ -238,9 +238,18 @@
    "role": "Delivery Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "role": "Fulfillment User",
+   "select": 1
+  },
+  {
+   "role": "Stock User",
+   "select": 1
   }
  ],
  "quick_entry": 1,
+ "row_format": "Dynamic",
  "search_fields": "license_plate,location,model",
  "sort_field": "modified",
  "sort_order": "DESC",

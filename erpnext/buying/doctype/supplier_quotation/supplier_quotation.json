@@ -767,7 +767,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "\nDraft\nSubmitted\nStopped\nCancelled\nExpired",
+   "options": "\nDraft\nSubmitted\nPartially Ordered\nOrdered\nStopped\nCancelled\nExpired",
    "print_hide": 1,
    "read_only": 1,
    "reqd": 1,
@@ -948,7 +948,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-12 12:00:00.000000",
+ "modified": "2026-08-30 16:30:00.000000",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation",
@@ -1007,6 +1007,14 @@
    "read": 1,
    "role": "Purchase Manager",
    "write": 1
+  },
+  {
+   "role": "Maintenance Manager",
+   "select": 1
+  },
+  {
+   "role": "Maintenance User",
+   "select": 1
   }
  ],
  "row_format": "Dynamic",

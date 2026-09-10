@@ -87,7 +87,7 @@ erpnext.accounts.ledger_preview = {
 		columns.forEach((col) => {
 			if (col.fieldtype === "Currency") {
 				col.format = (value) => {
-					return format_currency(value);
+					return format_currency(value, col.options);
 				};
 			}
 		});

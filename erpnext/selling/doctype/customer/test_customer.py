@@ -29,29 +29,30 @@ class TestCustomer(ERPNextTestSuite):
 		company_currency = frappe.get_cached_value("Company", company, "default_currency")
 		foreign_currency = "USD" if company_currency != "USD" else "EUR"
 
+		original_company = frappe.defaults.get_user_default("company")
 		frappe.defaults.set_user_default("company", company)
-		self.addCleanup(frappe.defaults.clear_user_default, "company")
+		try:
+			# Master data seeds a current-dated exchange rate, so make_quotation should
+			# resolve that rate instead of falling back to the default conversion rate of 1.0.
+			expected_rate = get_exchange_rate(foreign_currency, company_currency, nowdate())
 
-		# Master data seeds a current-dated exchange rate, so make_quotation should
-		# resolve that rate instead of falling back to the default conversion rate of 1.0.
-		expected_rate = get_exchange_rate(foreign_currency, company_currency, nowdate())
+			customer = frappe.get_doc(
+				{
+					"doctype": "Customer",
+					"customer_name": "_Test Customer FX Quotation",
+					"customer_type": "Company",
+					"default_currency": foreign_currency,
+				}
+			).insert()
 
-		customer = frappe.get_doc(
-			{
-				"doctype": "Customer",
-				"customer_name": "_Test Customer FX Quotation",
-				"customer_type": "Company",
-				"default_currency": foreign_currency,
-			}
-		).insert()
-		self.addCleanup(frappe.delete_doc, "Customer", customer.name, force=1)
+			quotation = make_quotation(customer.name)
 
-		quotation = make_quotation(customer.name)
-
-		self.assertEqual(quotation.currency, foreign_currency)
-		self.assertNotEqual(flt(quotation.conversion_rate), 1.0)
-		self.assertNotEqual(flt(quotation.conversion_rate), 0.0)
-		self.assertEqual(flt(quotation.conversion_rate), flt(expected_rate))
+			self.assertEqual(quotation.currency, foreign_currency)
+			self.assertNotEqual(flt(quotation.conversion_rate), 1.0)
+			self.assertNotEqual(flt(quotation.conversion_rate), 0.0)
+			self.assertEqual(flt(quotation.conversion_rate), flt(expected_rate))
+		finally:
+			frappe.defaults.set_user_default("company", original_company)
 
 	def test_get_customer_name_dedupes_with_numeric_suffix(self):
 		# When a customer name already exists, get_customer_name appends "- <max suffix + 1>". The
@@ -63,7 +64,6 @@ class TestCustomer(ERPNextTestSuite):
 				frappe.get_doc(
 					{"doctype": "Customer", "customer_name": nm, "customer_type": "Individual"}
 				).insert()
-			self.addCleanup(frappe.delete_doc, "Customer", nm, force=1)
 
 		doc = frappe.get_doc({"doctype": "Customer", "customer_name": base, "customer_type": "Individual"})
 		self.assertEqual(doc.get_customer_name(), f"{base} - 4")
@@ -79,7 +79,6 @@ class TestCustomer(ERPNextTestSuite):
 				frappe.get_doc(
 					{"doctype": "Customer", "customer_name": nm, "customer_type": "Individual"}
 				).insert()
-			self.addCleanup(frappe.delete_doc, "Customer", nm, force=1)
 
 		doc = frappe.get_doc({"doctype": "Customer", "customer_name": base, "customer_type": "Individual"})
 		self.assertEqual(doc.get_customer_name(), f"{base} - 4")
@@ -510,9 +509,6 @@ class TestCustomer(ERPNextTestSuite):
 	def test_overdue_billing_threshold_falls_back_to_customer_group(self):
 		customer_group = frappe.get_cached_value("Customer", "_Test Customer", "customer_group")
 		group = frappe.get_doc("Customer Group", customer_group)
-		customer = frappe.get_doc("Customer", "_Test Customer")
-		self._restore_credit_limits_after(group)
-		self._restore_credit_limits_after(customer)
 
 		group.credit_limits = []
 		group.append("credit_limits", {"company": "_Test Company", "overdue_billing_threshold": 5000})
@@ -528,18 +524,6 @@ class TestCustomer(ERPNextTestSuite):
 		# a 0 on the customer inherits the group's limit
 		set_overdue_billing_threshold("_Test Customer", "_Test Company", 0)
 		self.assertEqual(get_overdue_billing_threshold("_Test Customer", "_Test Company"), 5000)
-
-	def _restore_credit_limits_after(self, doc):
-		original = [row.as_dict(no_default_fields=True) for row in doc.credit_limits]
-
-		def restore():
-			fresh = frappe.get_doc(doc.doctype, doc.name)
-			fresh.credit_limits = []
-			for row in original:
-				fresh.append("credit_limits", row)
-			fresh.save()
-
-		self.addCleanup(restore)
 
 	def test_overdue_threshold_row_without_credit_limit(self):
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice

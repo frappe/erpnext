@@ -467,6 +467,8 @@ class MaterialRequirementsPlanningReport:
 					row.lead_time = math.ceil(row.required_qty / row.lead_time)
 				elif not row.required_qty:
 					row.lead_time = 0
+			else:
+				row.type_of_material = "Purchase"
 
 			if not row.lead_time and rm_details.raw_materials:
 				row.lead_time = self.get_lead_time_from_raw_materials(rm_details.raw_materials)
@@ -1111,7 +1113,7 @@ class MaterialRequirementsPlanningReport:
 			args["to_date"] = add_days(from_date, -1)
 
 			if bucket_size == "Monthly":
-				args["label"] = formatdate(from_date, "MMM YYYY")
+				args["label"] = formatdate(args["from_date"], "MMM YYYY")
 			else:
 				if bucket_size == "Weekly":
 					args["label"] = (

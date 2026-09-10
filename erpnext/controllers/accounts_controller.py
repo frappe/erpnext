@@ -39,6 +39,7 @@ from erpnext.accounts.utils import (
 	get_advance_payment_doctypes as _get_advance_payment_doctypes,
 )
 from erpnext.accounts.utils import get_fiscal_year, validate_fiscal_year
+from erpnext.controllers.item_close import clear_closed_rows_on_amend
 from erpnext.controllers.print_settings import (
 	set_print_templates_for_item_table,
 	set_print_templates_for_taxes,
@@ -227,7 +228,23 @@ class AccountsController(TransactionBase):
 
 		return False
 
+	def is_item_closable(self, item):
+		"""A row can be closed while anything is still pending on it.
+
+		Billing is the axis every closable document shares; the order doctypes
+		extend this with their own fulfilment axis.
+
+		Amounts are compared as magnitudes so that return rows stay closable.
+		That is deliberate: writing off a credit note that will never be issued
+		is a real decision, and closing a whole return document is already
+		allowed. Leaving it to the sign of the amount would decide it by
+		accident.
+		"""
+		return abs(flt(item.billed_amt)) < abs(flt(item.amount))
+
 	def validate(self):
+		clear_closed_rows_on_amend(self)
+
 		if not self.get("is_return") and not self.get("is_debit_note"):
 			self.validate_qty_is_not_zero()
 
@@ -240,6 +257,8 @@ class AccountsController(TransactionBase):
 
 		if self.get("_action") and self._action != "update_after_submit":
 			self.set_missing_values(for_validate=True)
+
+		self.validate_price_list()
 
 		if self.get("_action") == "submit":
 			self.remove_bundle_for_non_stock_invoices()
@@ -328,6 +347,28 @@ class AccountsController(TransactionBase):
 		self.set_total_in_words()
 		self.set_default_letter_head()
 		self.validate_company_in_accounting_dimension()
+
+	def validate_price_list(self):
+		price_list_field = "selling_price_list" if self.get("selling_price_list") else "buying_price_list"
+		price_list = self.get(price_list_field)
+		if not price_list or frappe.db.get_value("Price List", price_list, "enabled"):
+			return
+
+		# Returns retain a submitted voucher's pricing even if its price list is now disabled.
+		if (
+			self.get("is_return")
+			and self.get("return_against")
+			and price_list
+			== frappe.db.get_value(
+				self.doctype, {"name": self.return_against, "docstatus": 1}, price_list_field
+			)
+		):
+			return
+
+		frappe.throw(
+			_("Price List {0} is disabled").format(get_link_to_form("Price List", price_list)),
+			title=_("Disabled Price List"),
+		)
 
 	def set_default_letter_head(self):
 		if hasattr(self, "letter_head") and not self.letter_head:
@@ -535,6 +576,8 @@ class AccountsController(TransactionBase):
 			frappe.throw(_("To Date cannot be before From Date"), title=_("Invalid Auto Repeat Date"))
 
 	def before_print(self, settings=None):
+		self.set_missing_terms()
+
 		if self.doctype in [
 			"Purchase Order",
 			"Sales Order",
@@ -557,6 +600,16 @@ class AccountsController(TransactionBase):
 
 		set_print_templates_for_item_table(self, settings)
 		set_print_templates_for_taxes(self, settings)
+
+	def set_missing_terms(self):
+		if not self.get("tc_name") or self.get("terms"):
+			return
+
+		from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import (
+			get_terms_and_conditions,
+		)
+
+		self.terms = get_terms_and_conditions(self.tc_name, self.as_dict())
 
 	def calculate_paid_amount(self):
 		if hasattr(self, "is_pos") or hasattr(self, "is_paid"):

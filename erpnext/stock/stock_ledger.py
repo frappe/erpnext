@@ -714,16 +714,6 @@ class update_entries_after:
 		previous_sle = get_previous_sle_of_current_voucher(args)
 		if previous_sle:
 			self.prev_sle_dict[(args.get("item_code"), args.get("warehouse"))] = previous_sle
-		else:
-			self.prev_sle_dict[(args.get("item_code"), args.get("warehouse"))] = frappe._dict(
-				{
-					"qty_after_transaction": 0.0,
-					"valuation_rate": 0.0,
-					"stock_value": 0.0,
-					"prev_stock_value": 0.0,
-					"stock_queue": [],
-				}
-			)
 
 		warehouse_dict.previous_sle = previous_sle
 
@@ -1607,12 +1597,14 @@ class update_entries_after:
 		stock_entry = frappe.get_lazy_doc("Stock Entry", voucher_no, for_update=True)
 		stock_entry.calculate_rate_and_amount(reset_outgoing_rate=False, raise_error_if_no_rate=False)
 		stock_entry.db_update()
+		update_additional_cost_rows = bool(stock_entry.get("additional_costs"))
 		for d in stock_entry.items:
-			# Update only the row that matches the voucher_detail_no or the row containing the FG/Scrap Item.
+			# Additional costs are redistributed across all incoming rows.
 			if (
 				d.name == voucher_detail_no
 				or (not d.s_warehouse and d.t_warehouse)
 				or stock_entry.purpose in ["Manufacture", "Repack"]
+				or (update_additional_cost_rows and d.t_warehouse)
 			):
 				d.db_update()
 
@@ -1951,6 +1943,30 @@ class update_entries_after:
 
 			frappe.db.set_value("Bin", bin_name, updated_values, update_modified=True)
 
+		self.reset_bin_without_stock_ledger_entries()
+
+	def reset_bin_without_stock_ledger_entries(self):
+		"""Reset the bin when its ledger has no entries left, prev_sle_dict never covers that case."""
+		item_code, warehouse = self.args.get("item_code"), self.args.get("warehouse")
+		if not item_code or not warehouse or (item_code, warehouse) in self.prev_sle_dict:
+			return
+
+		if frappe.db.exists(
+			"Stock Ledger Entry", {"item_code": item_code, "warehouse": warehouse, "is_cancelled": 0}
+		):
+			return
+
+		bin_name = frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse})
+		if not bin_name:
+			return
+
+		frappe.db.set_value(
+			"Bin",
+			bin_name,
+			{"actual_qty": 0.0, "stock_value": 0.0, "valuation_rate": 0.0},
+			update_modified=True,
+		)
+
 
 def get_sle_against_current_voucher(kwargs):
 	kwargs["posting_datetime"] = get_combine_datetime(kwargs.posting_date, kwargs.posting_time)
@@ -2067,9 +2083,6 @@ def get_stock_ledger_entries(
 		else:
 			conditions += " and warehouse = %(warehouse)s"
 
-	elif previous_sle.get("warehouse_condition"):
-		conditions += " and " + previous_sle.get("warehouse_condition")
-
 	if check_serial_no and previous_sle.get("serial_no"):
 		# conditions += " and serial_no like {}".format(frappe.db.escape('%{0}%'.format(previous_sle.get("serial_no"))))
 		serial_no = previous_sle.get("serial_no")
@@ -2170,9 +2183,11 @@ def get_valuation_rate(
 				& (table.warehouse == warehouse)
 				& (table.batch_no == batch_no)
 				& (table.is_cancelled == 0)
-				& ((table.voucher_no != voucher_no) | (table.voucher_type != voucher_type))
 			)
 		)
+		if voucher_no:
+			# Comparing against a None voucher_no yields NULL, which filters out every row
+			query = query.where((table.voucher_no != voucher_no) | (table.voucher_type != voucher_type))
 
 		last_valuation_rate = query.run()
 		if last_valuation_rate and last_valuation_rate[0][0] is not None:
@@ -2198,7 +2213,7 @@ def get_valuation_rate(
 
 	# Get valuation rate from last sle for the same item and warehouse
 	sle_entry = frappe.qb.DocType("Stock Ledger Entry")
-	if last_valuation_rate := (
+	last_sle_query = (
 		frappe.qb.from_(sle_entry)
 		.select(sle_entry.valuation_rate)
 		.where(
@@ -2206,12 +2221,18 @@ def get_valuation_rate(
 			& (sle_entry.warehouse == warehouse)
 			& (sle_entry.valuation_rate >= 0)
 			& (sle_entry.is_cancelled == 0)
-			& ~((sle_entry.voucher_no == voucher_no) & (sle_entry.voucher_type == voucher_type))
 		)
 		.orderby(sle_entry.posting_datetime, order=frappe.qb.desc)
 		.orderby(sle_entry.creation, order=frappe.qb.desc)
 		.limit(1)
-	).run():
+	)
+	if voucher_no:
+		# Comparing against a None voucher_no yields NULL, which filters out every row
+		last_sle_query = last_sle_query.where(
+			~((sle_entry.voucher_no == voucher_no) & (sle_entry.voucher_type == voucher_type))
+		)
+
+	if last_valuation_rate := last_sle_query.run():
 		return flt(last_valuation_rate[0][0])
 
 	if fallbacks:
@@ -2386,9 +2407,6 @@ def get_next_stock_reco(kwargs):
 		.orderby(sle.creation)
 		.limit(1)
 	)
-
-	if kwargs.get("batch_no"):
-		query = query.where(sle.batch_no == kwargs.get("batch_no"))
 
 	return query.run(as_dict=True)
 

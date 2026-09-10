@@ -18,6 +18,7 @@ class ManufacturingSettings(Document):
 		from frappe.types import DF
 
 		add_corrective_operation_cost_in_finished_good_valuation: DF.Check
+		allow_alternative_finished_goods: DF.Check
 		allow_editing_of_items_and_quantities_in_work_order: DF.Check
 		allow_overtime: DF.Check
 		allow_production_on_holidays: DF.Check

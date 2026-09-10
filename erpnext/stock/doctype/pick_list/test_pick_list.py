@@ -29,6 +29,61 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestPickList(ERPNextTestSuite):
+	def test_filter_locations_consumes_picked_qty_across_rows(self):
+		from erpnext.stock.doctype.pick_list.pick_list import filter_locations_by_picked_materials
+
+		key = ("Test Warehouse", "Test Batch")
+		locations = [
+			_dict(warehouse=key[0], batch_no=key[1], qty=5),
+			_dict(warehouse=key[0], batch_no=key[1], qty=5),
+		]
+		picked_item_details = {key: {"picked_qty": 7}}
+
+		filtered_locations = filter_locations_by_picked_materials(locations, picked_item_details)
+
+		self.assertEqual(len(filtered_locations), 1)
+		self.assertEqual(filtered_locations[0].qty, 3)
+		self.assertEqual(picked_item_details[key]["picked_qty"], 0)
+
+	def test_filter_locations_preserves_serial_order(self):
+		from erpnext.stock.doctype.pick_list.pick_list import filter_locations_by_picked_materials
+
+		warehouse = "Test Warehouse"
+		locations = [
+			_dict(
+				warehouse=warehouse,
+				batch_no=None,
+				qty=4,
+				serial_nos=["SN-1", "SN-2", "SN-3", "SN-4"],
+			)
+		]
+		picked_item_details = {warehouse: {"picked_qty": 2, "serial_no": ["SN-2", "SN-4"]}}
+
+		filtered_locations = filter_locations_by_picked_materials(locations, picked_item_details)
+
+		self.assertEqual(filtered_locations[0].serial_nos, ["SN-1", "SN-3"])
+
+	def test_get_items_with_location_trims_allocated_serial_nos(self):
+		from erpnext.stock.doctype.pick_list.pick_list import get_items_with_location_and_quantity
+
+		item = _dict(item_code="Test Serial Item", qty=2, stock_qty=2, conversion_factor=1, uom="Nos")
+		item_location_map = {
+			item.item_code: [
+				_dict(
+					warehouse="Test Warehouse",
+					batch_no=None,
+					qty=4,
+					serial_nos=["SN-1", "SN-2", "SN-3", "SN-4"],
+				)
+			]
+		}
+
+		first_locations = get_items_with_location_and_quantity(item, item_location_map, docstatus=0)
+		second_locations = get_items_with_location_and_quantity(item, item_location_map, docstatus=0)
+
+		self.assertEqual(first_locations[0].serial_no, "SN-1\nSN-2")
+		self.assertEqual(second_locations[0].serial_no, "SN-3\nSN-4")
+
 	def test_pick_list_allocation_takes_advisory_gate(self):
 		if frappe.db.db_type != "postgres":
 			return
@@ -1451,6 +1506,56 @@ class TestPickList(ERPNextTestSuite):
 		pick_list.reload()
 		self.assertEqual(pick_list.locations[0].transferred_qty, 4)
 		self.assertEqual(pick_list.status, "Partially Transferred")
+
+	def test_get_items_keeps_pick_list_rows_on_stock_entry(self):
+		"""Entering fg_completed_qty on a Stock Entry mapped from a Pick List triggers get_items();
+		it must not refetch from the BOM, or the pick_list_item links transferred_qty rides on are
+		lost and the Pick List stays Open with every row offered again."""
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.mapper import create_pick_list as pick_list_for_wo
+		from erpnext.manufacturing.doctype.work_order.work_order import make_work_order
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		source_warehouse = create_warehouse("_Test Partial Transfer Source")
+		wip_warehouse = create_warehouse("_Test Partial Transfer WIP", company="_Test Company")
+		fg_warehouse = create_warehouse("_Test Partial Transfer FG", company="_Test Company")
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, rate=100, raw_materials=[rm_item])
+		make_stock_entry(item=rm_item, to_warehouse=source_warehouse, qty=100)
+
+		wo = make_work_order(item=fg_item, qty=10, bom_no=bom.name, company="_Test Company")
+		wo.required_items[0].source_warehouse = source_warehouse
+		wo.wip_warehouse = wip_warehouse
+		wo.fg_warehouse = fg_warehouse
+		wo.submit()
+
+		pick_list = pick_list_for_wo(wo.name, for_qty=wo.qty)
+		pick_list.save().submit()
+		self.assertEqual(pick_list.status, "Open")
+
+		se = frappe.get_doc(create_stock_entry(pick_list.as_dict()))
+		self.assertTrue(all(row.pick_list_item for row in se.items))
+		self.assertEqual(se.fg_completed_qty, 0)
+
+		se.fg_completed_qty = 4
+		se.get_items()
+		self.assertEqual(len(se.items), len(pick_list.locations))
+		self.assertTrue(all(row.pick_list_item for row in se.items))
+		se.fg_completed_qty = 0
+
+		for row in se.items:
+			row.qty = 4
+		se.save().submit()
+		self.assertEqual(se.fg_completed_qty, 0)
+
+		pick_list.reload()
+		self.assertEqual(pick_list.locations[0].transferred_qty, 4)
+		self.assertEqual(pick_list.status, "Partially Transferred")
+
+		next_se = frappe.get_doc(create_stock_entry(pick_list.as_dict()))
+		self.assertEqual(len(next_se.items), 1)
+		self.assertEqual(next_se.items[0].qty, 6)
 
 	def test_pick_list_validation(self):
 		warehouse = "_Test Warehouse - _TC"

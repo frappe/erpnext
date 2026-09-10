@@ -14,6 +14,7 @@ from erpnext.stock.doctype.material_request.mapper import (
 	create_pick_list,
 	make_in_transit_stock_entry,
 	make_purchase_order,
+	make_request_for_quotation,
 	make_stock_entry,
 	make_supplier_quotation,
 )
@@ -51,6 +52,26 @@ class TestMaterialRequest(ERPNextTestSuite):
 
 		self.assertEqual(po.doctype, "Purchase Order")
 		self.assertEqual(len(po.get("items")), len(mr.get("items")))
+
+	def test_make_request_for_quotation_skips_ordered_items(self):
+		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0]).insert()
+		mr = frappe.get_doc("Material Request", mr.name)
+		mr.submit()
+
+		# fully order the first item, leave the second pending
+		po = make_purchase_order(mr.name)
+		po.supplier = "_Test Supplier"
+		po.schedule_date = today()
+		po.items = [po.items[0]]
+		po.items[0].schedule_date = today()
+		po.insert()
+		po.submit()
+
+		rfq = make_request_for_quotation(mr.name)
+
+		self.assertEqual(len(rfq.get("items")), 1)
+		self.assertEqual(rfq.items[0].material_request_item, mr.items[1].name)
+		self.assertEqual(rfq.items[0].qty, mr.items[1].qty)
 
 	def test_make_subcontracted_purchase_order(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
@@ -944,6 +965,33 @@ class TestMaterialRequest(ERPNextTestSuite):
 		for perm in permissions:
 			perm.delete()
 
+	def test_auto_email_single_company_without_user_permission(self):
+		from unittest.mock import patch
+
+		from erpnext.stock.reorder_item import get_email_list
+
+		users = ["test_reorder_single_1@example.com", "test_reorder_single_2@example.com"]
+		for user in users:
+			if not frappe.db.exists("User", user):
+				frappe.get_doc(
+					{
+						"doctype": "User",
+						"email": user,
+						"first_name": user,
+						"send_notifications": 0,
+						"enabled": 1,
+						"user_type": "System User",
+						"roles": [{"role": "Purchase Manager"}],
+					}
+				).insert(ignore_permissions=True)
+
+		# single company: managers without any Company User Permission must still be emailed
+		with patch("frappe.db.count", return_value=1):
+			emails = get_email_list("_Test Company")
+
+		for user in users:
+			self.assertIn(user, emails)
+
 	def test_manufacture_type_status_over_wo(self):
 		from erpnext.stock.doctype.material_request.material_request import raise_work_orders
 
@@ -1038,6 +1086,18 @@ class TestMaterialRequest(ERPNextTestSuite):
 
 		self.assertEqual(mr.items[0].qty, 5)
 		self.assertEqual(mr.items[1].qty, 5)
+
+	def test_item_change_on_sales_order_row_is_blocked(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_material_request
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		other_item = create_item("_Test MR Item Swap").name
+		so = make_sales_order()
+		mr = make_material_request(so.name)
+		mr.material_request_type = "Purchase"
+		# swapping the fetched item would leave a stale link to the SO row
+		mr.items[0].item_code = other_item
+		self.assertRaises(frappe.ValidationError, mr.insert)
 
 	def test_pending_qty_in_pick_list(self):
 		"""Test for pick list mapped doc qty from partially received Material Request Transfer"""

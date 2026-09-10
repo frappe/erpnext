@@ -18,7 +18,7 @@
   }
  ],
  "links": [],
- "modified": "2025-12-17 12:09:34.687368",
+ "modified": "2026-08-21 23:11:44.435488",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Market Segment",
@@ -36,6 +36,10 @@
    "role": "Sales Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "role": "Sales Master Manager",
+   "select": 1
   }
  ],
  "quick_entry": 1,

@@ -52,6 +52,8 @@ _BOM_OPERATION_FIELDS = [
 	"backflush_from_wip_warehouse",
 	"set_cost_based_on_bom_qty",
 	"quality_inspection_required",
+	"batch_split",
+	"weight_per_piece",
 ]
 
 

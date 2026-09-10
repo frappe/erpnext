@@ -201,8 +201,6 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		)
 		frappe.db.set_value("Company", self.company, "exchange_gain_account", gain_account)
 		frappe.db.set_value("Company", self.company, "exchange_loss_account", loss_account)
-		self.addCleanup(frappe.db.set_value, "Company", self.company, "exchange_gain_account", "")
-		self.addCleanup(frappe.db.set_value, "Company", self.company, "exchange_loss_account", "")
 		return gain_account, loss_account
 
 	def create_foreign_currency_sales_invoice(self, conversion_rate):
@@ -1331,15 +1329,6 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		test_user = "test@example.com"
 		permitted_ccs = ["_Test Cost Center - _TC", "_Test Cost Center 2 - _TC"]
 		restricted_cc = "_Test Write Off Cost Center - _TC"
-		existing_apply_strict_user_permissions = cint(
-			frappe.db.get_single_value("System Settings", "apply_strict_user_permissions")
-		)
-		self.addCleanup(
-			frappe.db.set_single_value,
-			"System Settings",
-			"apply_strict_user_permissions",
-			existing_apply_strict_user_permissions,
-		)
 		transaction_date = nowdate()
 		rate = 100
 

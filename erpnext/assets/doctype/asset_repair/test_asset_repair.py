@@ -20,7 +20,6 @@ from erpnext.assets.doctype.asset.test_asset import (
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	get_asset_depr_schedule_doc,
 )
-from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
 	get_serial_nos_from_bundle,
 	make_serial_batch_bundle,
@@ -32,7 +31,6 @@ class TestAssetRepair(ERPNextTestSuite):
 	def setUp(self):
 		self.load_test_records("Stock Entry")
 		set_depreciation_settings_in_company()
-		create_item("_Test Stock Item")
 
 	def test_asset_status(self):
 		date = nowdate()

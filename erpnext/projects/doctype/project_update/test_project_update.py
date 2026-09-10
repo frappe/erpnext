@@ -42,7 +42,6 @@ class TestProjectUpdate(ERPNextTestSuite):
 				"time": "10:00:00",
 			}
 		).insert()
-		self.addCleanup(frappe.delete_doc, "Project Update", pu.name, force=1)
 
 		# The converted update query (no longer referencing progress/progress_details) must find
 		# yesterday's Project Update, keyed on project.name, on both engines.

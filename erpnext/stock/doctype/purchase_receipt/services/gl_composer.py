@@ -41,6 +41,9 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import (
 			get_purchase_document_details,
 		)
+		from erpnext.stock.doctype.landed_cost_voucher.landed_cost_voucher import (
+			get_custom_dimension_overrides,
+		)
 		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import get_stock_value_difference
 
 		doc = self.doc
@@ -51,6 +54,7 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 		exchange_rate_map, net_rate_map = get_purchase_document_details(doc)
 		stock_items = doc.get_stock_items()
 		warehouse_with_no_account = []
+		landed_cost_entries = doc.get_item_account_wise_lcv_entries()
 
 		def validate_account(account_type):
 			frappe.throw(_("{0} account not found while submitting purchase receipt").format(account_type))
@@ -165,32 +169,38 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 			return outgoing_amount
 
 		def make_landed_cost_gl_entries(item):
-			if item.landed_cost_voucher_amount and landed_cost_entries:
-				if (item.item_code, item.name) in landed_cost_entries:
-					for account, amount in landed_cost_entries[(item.item_code, item.name)].items():
-						account_currency = get_account_currency(account)
-						credit_amount = (
-							flt(amount["base_amount"])
-							if (amount["base_amount"] or account_currency != doc.company_currency)
-							else flt(amount["amount"])
-						)
+			if not (item.landed_cost_voucher_amount and landed_cost_entries):
+				return
 
-						if not account:
-							validate_account("Landed Cost Account")
+			for entry in landed_cost_entries.get((item.item_code, item.name), []):
+				if not (entry.amount or entry.base_amount):
+					continue
 
-						self.add_gl_entry(
-							gl_entries=gl_entries,
-							account=account,
-							cost_center=item.cost_center,
-							debit=0.0,
-							credit=credit_amount,
-							remarks=remarks,
-							against_account=stock_asset_account_name,
-							credit_in_account_currency=flt(amount["amount"]),
-							account_currency=account_currency,
-							project=item.project,
-							item=item,
-						)
+				account = entry.expense_account
+				if not account:
+					validate_account("Landed Cost Account")
+
+				account_currency = get_account_currency(account)
+				credit_amount = (
+					flt(entry.base_amount)
+					if (entry.base_amount or account_currency != doc.company_currency)
+					else flt(entry.amount)
+				)
+
+				self.add_gl_entry(
+					gl_entries=gl_entries,
+					account=account,
+					cost_center=entry.dimensions.cost_center or item.cost_center,
+					debit=0.0,
+					credit=credit_amount,
+					remarks=remarks,
+					against_account=stock_asset_account_name,
+					credit_in_account_currency=flt(entry.amount),
+					account_currency=account_currency,
+					project=entry.dimensions.project or item.project,
+					item=item,
+					dimensions=get_custom_dimension_overrides(entry),
+				)
 
 		def make_expenses_added_to_stock_entries(item):
 			if not self.book_stock_expense_enabled():
@@ -300,7 +310,6 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 					if d.is_fixed_asset
 					else doc.get_company_default("stock_received_but_not_billed")
 				)
-				landed_cost_entries = doc.get_item_account_wise_lcv_entries()
 				if d.is_fixed_asset:
 					stock_asset_account_name = d.expense_account
 					stock_value_diff = (

@@ -46,23 +46,27 @@ frappe.ui.form.on("Payment Entry", {
 	},
 
 	setup: function (frm) {
-		frm.set_query("paid_from", function () {
+		frm.set_query("paid_from", function (doc) {
 			frm.events.validate_company(frm);
 
 			var account_types = ["Pay", "Internal Transfer"].includes(frm.doc.payment_type)
 				? ["Bank", "Cash"]
 				: [frappe.boot.party_account_types[frm.doc.party_type]];
+			let filters = {
+				account_type: ["in", account_types],
+				is_group: 0,
+				company: doc.company,
+			};
 
 			if (frm.doc.party_type == "Shareholder") {
 				account_types.push("Equity");
 			}
+			if (doc.payment_type == "Internal Transfer" && doc.paid_to) {
+				filters.name = ["!=", doc.paid_to];
+			}
 
 			return {
-				filters: {
-					account_type: ["in", account_types],
-					is_group: 0,
-					company: frm.doc.company,
-				},
+				filters,
 			};
 		});
 
@@ -106,21 +110,25 @@ frappe.ui.form.on("Payment Entry", {
 			}
 		});
 
-		frm.set_query("paid_to", function () {
+		frm.set_query("paid_to", function (doc) {
 			frm.events.validate_company(frm);
 
 			var account_types = ["Receive", "Internal Transfer"].includes(frm.doc.payment_type)
 				? ["Bank", "Cash"]
 				: [frappe.boot.party_account_types[frm.doc.party_type]];
+			let filters = {
+				account_type: ["in", account_types],
+				is_group: 0,
+				company: doc.company,
+			};
 			if (frm.doc.party_type == "Shareholder") {
 				account_types.push("Equity");
 			}
+			if (doc.payment_type == "Internal Transfer" && doc.paid_from) {
+				filters.name = ["!=", doc.paid_from];
+			}
 			return {
-				filters: {
-					account_type: ["in", account_types],
-					is_group: 0,
-					company: frm.doc.company,
-				},
+				filters,
 			};
 		});
 
@@ -1279,8 +1287,14 @@ frappe.ui.form.on("Payment Entry", {
 		await frappe.after_ajax();
 		const base_paid_amount = frm.doc.base_paid_amount || 0;
 		const base_received_amount = frm.doc.base_received_amount || 0;
+		let other_deductions = 0;
+		if (frm.doc.payment_type === "Internal Transfer") {
+			other_deductions = (frm.doc.deductions || [])
+				.filter((row) => !row.is_exchange_gain_loss)
+				.reduce((sum, row) => sum + flt(row.amount), 0);
+		}
 		const exchange_gain_loss = flt(
-			base_paid_amount - base_received_amount,
+			base_paid_amount - base_received_amount - other_deductions,
 			get_deduction_amount_precision()
 		);
 
@@ -1857,11 +1871,19 @@ frappe.ui.form.on("Payment Entry Deduction", {
 	},
 
 	amount: function (frm) {
-		frm.events.set_unallocated_amount(frm);
+		if (frm.doc.payment_type === "Internal Transfer") {
+			frm.events.set_exchange_gain_loss_deduction(frm);
+		} else {
+			frm.events.set_unallocated_amount(frm);
+		}
 	},
 
 	deductions_remove: function (frm) {
-		frm.events.set_unallocated_amount(frm);
+		if (frm.doc.payment_type === "Internal Transfer") {
+			frm.events.set_exchange_gain_loss_deduction(frm);
+		} else {
+			frm.events.set_unallocated_amount(frm);
+		}
 	},
 });
 

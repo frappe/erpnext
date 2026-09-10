@@ -122,6 +122,7 @@
    "description": "Setting Account Type helps in selecting this Account in transactions.",
    "fieldname": "account_type",
    "fieldtype": "Select",
+   "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Account Type",
    "oldfieldname": "account_type",
@@ -203,7 +204,7 @@
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2026-04-14 18:14:42.202065",
+ "modified": "2026-09-03 12:59:42.190900",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account",
@@ -263,6 +264,46 @@
   },
   {
    "role": "HR Manager",
+   "select": 1
+  },
+  {
+   "role": "Delivery Manager",
+   "select": 1
+  },
+  {
+   "role": "Delivery User",
+   "select": 1
+  },
+  {
+   "role": "Maintenance Manager",
+   "select": 1
+  },
+  {
+   "role": "Maintenance User",
+   "select": 1
+  },
+  {
+   "role": "Manufacturing Manager",
+   "select": 1
+  },
+  {
+   "role": "Manufacturing User",
+   "select": 1
+  },
+  {
+   "role": "Purchase Master Manager",
+   "select": 1
+  },
+  {
+   "role": "Quality Manager",
+   "select": 1
+  },
+  {
+   "role": "Sales Master Manager",
+   "select": 1
+  },
+  {
+   "role": "Stock Manager",
    "select": 1
   }
  ],

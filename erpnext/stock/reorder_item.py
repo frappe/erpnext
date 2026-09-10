@@ -350,6 +350,10 @@ def get_email_list(company):
 
 
 def get_comapny_wise_users(company):
+	# single company: no explicit permission needed, everyone has access
+	if frappe.db.count("Company") == 1:
+		return []
+
 	companies = [company]
 
 	if parent_company := frappe.db.get_value("Company", company, "parent_company"):

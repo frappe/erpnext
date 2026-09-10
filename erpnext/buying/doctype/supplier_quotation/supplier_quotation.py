@@ -6,9 +6,12 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import getdate, nowdate
+from pypika.terms import ExistsCriterion
 
 from erpnext.buying.utils import validate_for_items
 from erpnext.controllers.buying_controller import BuyingController
+
+from .mapper import get_ordered_items
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
@@ -86,7 +89,9 @@ class SupplierQuotation(BuyingController):
 		shipping_address: DF.Link | None
 		shipping_address_display: DF.TextEditor | None
 		shipping_rule: DF.Link | None
-		status: DF.Literal["", "Draft", "Submitted", "Stopped", "Cancelled", "Expired"]
+		status: DF.Literal[
+			"", "Draft", "Submitted", "Partially Ordered", "Ordered", "Stopped", "Cancelled", "Expired"
+		]
 		supplier: DF.Link
 		supplier_address: DF.Link | None
 		supplier_name: DF.Data | None
@@ -112,13 +117,17 @@ class SupplierQuotation(BuyingController):
 
 	def validate(self):
 		super().validate()
+		self.set_status()
 
 		if not self.status:
 			self.status = "Draft"
 
 		from erpnext.controllers.status_updater import validate_status
 
-		validate_status(self.status, ["Draft", "Submitted", "Stopped", "Cancelled"])
+		validate_status(
+			self.status,
+			["Draft", "Submitted", "Partially Ordered", "Ordered", "Stopped", "Cancelled", "Expired"],
+		)
 
 		validate_for_items(self)
 		self.validate_with_previous_doc()
@@ -126,11 +135,11 @@ class SupplierQuotation(BuyingController):
 		self.validate_valid_till()
 
 	def on_submit(self):
-		self.db_set("status", "Submitted")
+		self.set_status(update=True)
 		self.update_rfq_supplier_status(1)
 
 	def on_cancel(self):
-		self.db_set("status", "Cancelled")
+		self.set_status(update=True)
 		self.update_rfq_supplier_status(0)
 
 	def on_trash(self):
@@ -165,6 +174,24 @@ class SupplierQuotation(BuyingController):
 	def validate_valid_till(self):
 		if self.valid_till and getdate(self.valid_till) < getdate(self.transaction_date):
 			frappe.throw(_("Valid till Date cannot be before Transaction Date"))
+
+	def get_ordered_status(self):
+		ordered_items = get_ordered_items(self.name)
+
+		if not ordered_items:
+			return "Submitted"
+
+		for row in self.items:
+			if row.name not in ordered_items or row.stock_qty > ordered_items[row.name]:
+				return "Partially Ordered"
+
+		return "Ordered"
+
+	def is_fully_ordered(self):
+		return self.get_ordered_status() == "Ordered"
+
+	def is_partially_ordered(self):
+		return self.get_ordered_status() == "Partially Ordered"
 
 	def update_rfq_supplier_status(self, include_me):
 		from frappe.query_builder.functions import Count
@@ -243,27 +270,29 @@ def get_list_context(context=None):
 
 
 def set_expired_status():
-	# Only submitted quotations past their validity should be expired
-	frappe.db.set_value(
-		"Supplier Quotation",
-		{
-			"docstatus": 1,
-			"status": ["not in", ["Cancelled", "Stopped"]],
-			"valid_till": ["<", nowdate()],
-		},
-		"status",
-		"Expired",
-		update_modified=True,
-	)
+	supplier_quotation = frappe.qb.DocType("Supplier Quotation")
+	purchase_order = frappe.qb.DocType("Purchase Order")
+	purchase_order_item = frappe.qb.DocType("Purchase Order Item")
 
-
-def get_purchased_items(supplier_quotation: str):
-	return frappe._dict(
-		frappe.get_all(
-			"Purchase Order Item",
-			filters={"supplier_quotation": supplier_quotation, "docstatus": 1},
-			fields=["supplier_quotation_item", {"SUM": "qty"}],
-			group_by="supplier_quotation_item",
-			as_list=1,
+	purchase_order_against_quotation = (
+		frappe.qb.from_(purchase_order)
+		.from_(purchase_order_item)
+		.select(purchase_order.name)
+		.where(
+			(purchase_order_item.docstatus == 1)
+			& (purchase_order.docstatus == 1)
+			& (purchase_order_item.parent == purchase_order.name)
+			& (purchase_order_item.supplier_quotation == supplier_quotation.name)
 		)
 	)
+
+	(
+		frappe.qb.update(supplier_quotation)
+		.set(supplier_quotation.status, "Expired")
+		.where(
+			(supplier_quotation.docstatus == 1)
+			& (supplier_quotation.status.notin(["Expired", "Stopped"]))
+			& (supplier_quotation.valid_till < nowdate())
+			& ExistsCriterion(purchase_order_against_quotation).negate()
+		)
+	).run()

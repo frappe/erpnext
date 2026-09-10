@@ -19,6 +19,7 @@ class BOMOperation(Document):
 		base_hour_rate: DF.Currency
 		base_operating_cost: DF.Currency
 		batch_size: DF.Float
+		batch_split: DF.Check
 		bom_no: DF.Link | None
 		cost_per_unit: DF.Float
 		description: DF.TextEditor | None
@@ -41,6 +42,7 @@ class BOMOperation(Document):
 		skip_material_transfer: DF.Check
 		source_warehouse: DF.Link | None
 		time_in_mins: DF.Float
+		weight_per_piece: DF.Float
 		wip_warehouse: DF.Link | None
 		workstation: DF.Link | None
 		workstation_type: DF.Link | None

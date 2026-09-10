@@ -47,6 +47,9 @@ from erpnext.manufacturing.doctype.production_plan.services.sub_assembly import 
 from erpnext.manufacturing.doctype.production_plan.services.work_order_planning import (
 	WorkOrderCreationService,
 )
+from erpnext.manufacturing.doctype.production_plan.services.work_order_quantities import (
+	ProductionPlanWorkOrderQuantities,
+)
 from erpnext.stock.utils import get_or_make_bin
 from erpnext.utilities.transaction_base import validate_uom_is_integer
 
@@ -133,6 +136,11 @@ class ProductionPlan(Document):
 			"enable_stock_reservation",
 			frappe.db.get_single_value("Stock Settings", "enable_stock_reservation"),
 		)
+		if self.docstatus == 1:
+			self.set_onload(
+				"pending_work_order_qty",
+				ProductionPlanWorkOrderQuantities(self.name).get_pending_quantities(self),
+			)
 
 	def on_discard(self):
 		self.db_set("status", "Cancelled")
@@ -270,9 +278,21 @@ class ProductionPlan(Document):
 	def on_cancel(self):
 		self.db_set("status", "Cancelled")
 		self.delete_draft_work_order()
+		self.delete_production_plan_schedule()
 		self.update_bin_qty()
 		self.update_sales_order()
 		self.update_stock_reservation()
+		self.delete_sub_assembly_and_material_rows()
+
+	def delete_production_plan_schedule(self):
+		frappe.db.delete("Production Plan Schedule", {"production_plan": self.name})
+
+	def delete_sub_assembly_and_material_rows(self):
+		for doctype in ("Production Plan Sub Assembly Item", "Material Request Plan Item"):
+			frappe.db.delete(doctype, {"parent": self.name, "parenttype": "Production Plan"})
+
+		self.set("sub_assembly_items", [])
+		self.set("mr_items", [])
 
 	def update_stock_reservation(self):
 		if not self.reserve_stock:
@@ -361,6 +381,8 @@ class ProductionPlan(Document):
 
 	@frappe.whitelist()
 	def set_status(self, close: bool | None = None, update_bin: bool = False):
+		self.check_permission("write")
+
 		self.status = {0: "Draft", 1: "Submitted", 2: "Cancelled"}.get(self.docstatus)
 
 		if close:

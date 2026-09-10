@@ -1,4 +1,7 @@
+from unittest.mock import patch
+
 import frappe
+from frappe.core.doctype.doctype.doctype import DocType
 
 from erpnext.tests.utils import ERPNextTestSuite
 from erpnext.utilities import update_doctypes
@@ -57,7 +60,5 @@ class TestUtilitiesInit(ERPNextTestSuite):
 		"""update_doctypes() is the public entry point exercising the converted
 		query; ensure it imports and runs without error against real schema."""
 		self.assertTrue(callable(update_doctypes))
-		# Run it: it should only ever upgrade Text/Small Text description fields to
-		# Text Editor; core fixtures used above are already Text Editor, so this is
-		# effectively a no-op but must not raise.
-		update_doctypes()
+		with patch.object(DocType, "save", autospec=True):
+			update_doctypes()

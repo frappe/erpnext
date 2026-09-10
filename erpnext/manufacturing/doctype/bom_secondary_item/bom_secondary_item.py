@@ -20,7 +20,6 @@ class BOMSecondaryItem(Document):
 		cost_allocation_per: DF.Percent
 		description: DF.TextEditor | None
 		image: DF.AttachImage | None
-		is_legacy: DF.Check
 		item_code: DF.Link
 		item_name: DF.Data | None
 		parent: DF.Data
@@ -29,11 +28,11 @@ class BOMSecondaryItem(Document):
 		process_loss_per: DF.Percent
 		process_loss_qty: DF.Float
 		qty: DF.Float
-		rate: DF.Currency
 		secondary_item_type: DF.Literal["", "Co-Product", "By-Product", "Scrap", "Additional Finished Good"]
 		stock_qty: DF.Float
 		stock_uom: DF.Link | None
 		uom: DF.Link
+		valuation_type: DF.Literal["Valuation Rate", "% of FG Cost", "Manual"]
 	# end: auto-generated types
 
 	pass

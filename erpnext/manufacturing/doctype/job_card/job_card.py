@@ -35,6 +35,9 @@ from erpnext.manufacturing.doctype.bom.bom import (
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import (
 	get_mins_between_operations,
 )
+from erpnext.manufacturing.doctype.production_plan.services.work_order_quantities import (
+	ProductionPlanWorkOrderQuantities,
+)
 from erpnext.manufacturing.doctype.workstation_type.workstation_type import get_workstations
 from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import (
 	get_subcontracting_boms_for_finished_goods,
@@ -85,6 +88,7 @@ class JobCard(Document):
 		amended_from: DF.Link | None
 		backflush_from_wip_warehouse: DF.Check
 		barcode: DF.Barcode | None
+		batch_split: DF.Check
 		batch_no: DF.Link | None
 		bom_no: DF.Link | None
 		company: DF.Link
@@ -141,6 +145,7 @@ class JobCard(Document):
 		time_required: DF.Float
 		total_completed_qty: DF.Float
 		total_time_in_mins: DF.Float
+		weight_per_piece: DF.Float
 		track_semi_finished_goods: DF.Check
 		transferred_qty: DF.Float
 		wip_warehouse: DF.Link | None
@@ -259,15 +264,16 @@ class JobCard(Document):
 		return wo_qty + (wo_qty * over_production_percentage / 100)
 
 	def get_total_job_card_qty(self):
-		job_card_qty = frappe.get_all(
-			"Job Card",
-			fields=[{"SUM": "for_quantity"}],
-			filters={
-				"work_order": self.work_order,
-				"operation_id": self.operation_id,
-				"docstatus": ["!=", 2],
-			},
-			as_list=1,
+		job_card = frappe.qb.DocType("Job Card")
+		job_card_qty = (
+			frappe.qb.from_(job_card)
+			.select(Sum(job_card.for_quantity - IfNull(job_card.pending_qty, 0)))
+			.where(
+				(job_card.work_order == self.work_order)
+				& (job_card.operation_id == self.operation_id)
+				& (job_card.docstatus != 2)
+			)
+			.run()
 		)
 		return flt(job_card_qty[0][0]) if job_card_qty else 0
 
@@ -304,8 +310,9 @@ class JobCard(Document):
 			fetch_exploded=0,
 			fetch_secondary_items=1,
 		)
-		for item_code, values in items_dict.items():
-			self.append_secondary_item(item_code, frappe._dict(values))
+		for values in items_dict.values():
+			values = frappe._dict(values)
+			self.append_secondary_item(values.item_code, values)
 
 	def append_secondary_item(self, item_code, values):
 		secondary_item = {
@@ -317,11 +324,10 @@ class JobCard(Document):
 			"bom_secondary_item": values.name,
 		}
 
-		if not values.is_legacy:
-			secondary_item["stock_qty"] -= flt(
-				secondary_item["stock_qty"] * (values.process_loss_per / 100),
-				self.precision("for_quantity"),
-			)
+		secondary_item["stock_qty"] -= flt(
+			secondary_item["stock_qty"] * (flt(values.process_loss_per) / 100),
+			self.precision("for_quantity"),
+		)
 
 		self.append("secondary_items", secondary_item)
 
@@ -1054,6 +1060,10 @@ class JobCard(Document):
 		if not self.operation_id:
 			return
 
+		work_order = frappe.get_doc("Work Order", self.work_order)
+		if work_order.production_plan:
+			ProductionPlanWorkOrderQuantities(work_order.production_plan).lock_plan_row(work_order)
+
 		job_cards = frappe.get_all(
 			"Job Card",
 			filters={
@@ -1068,14 +1078,13 @@ class JobCard(Document):
 		completed_qty = sum(max(flt(row.manufactured_qty), flt(row.total_completed_qty)) for row in job_cards)
 
 		frappe.db.set_value("Work Order Operation", self.operation_id, "completed_qty", completed_qty)
-		if (
-			self.finished_good
-			and frappe.get_cached_value("Work Order", self.work_order, "production_item")
-			== self.finished_good
-		):
-			_wo_doc = frappe.get_doc("Work Order", self.work_order)
-			_wo_doc.db_set("produced_qty", sum(flt(row.manufactured_qty) for row in job_cards))
-			_wo_doc.db_set("status", _wo_doc.get_status())
+		if self.finished_good and work_order.production_item == self.finished_good:
+			work_order.db_set("produced_qty", sum(flt(row.manufactured_qty) for row in job_cards))
+			if work_order.production_plan:
+				ProductionPlanWorkOrderQuantities(work_order.production_plan).validate_work_order(
+					work_order, process_loss_qty=work_order.process_loss_qty
+				)
+			work_order.db_set("status", work_order.get_status())
 
 	def update_corrective_in_work_order(self, wo):
 		wo.corrective_operation_cost = 0.0
@@ -1878,7 +1887,7 @@ class JobCard(Document):
 		add_additional_cost(ste.stock_entry, wo_doc, self)
 		ManufactureStockEntry(ste.stock_entry).add_secondary_items_from_job_card()
 		for row in ste.stock_entry.items:
-			if (row.secondary_item_type or row.is_legacy_scrap_item) and not row.t_warehouse:
+			if (row.secondary_item_type or row.valuation_type) and not row.t_warehouse:
 				row.t_warehouse = self.target_warehouse
 
 

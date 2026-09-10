@@ -2,11 +2,11 @@
  "app": "erpnext",
  "charts": [
   {
-   "chart_name": "Sales Order Trends",
-   "label": "Sales Order Trends"
+   "chart_name": "Sales Order Analysis",
+   "label": "Sales Order Analysis"
   }
  ],
- "content": "[{\"id\":\"vBSf8Vi9U8\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Sales Order Trends\",\"col\":12}},{\"id\":\"aW2i5R5GRP\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"43fzlS1qZg\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Sales Orders\",\"col\":4}},{\"id\":\"jhtxl-XOGi\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Sales Amount\",\"col\":4}},{\"id\":\"0Ioq-P11FP\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Average Order Value\",\"col\":4}},{\"id\":\"0BcePLg0g1\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports &amp; Masters</b></span>\",\"col\":12}},{\"id\":\"uze5dJ1ipL\",\"type\":\"card\",\"data\":{\"card_name\":\"Selling\",\"col\":4}},{\"id\":\"3j2fYwMAkq\",\"type\":\"card\",\"data\":{\"card_name\":\"Point of Sale\",\"col\":4}},{\"id\":\"xImm8NepFt\",\"type\":\"card\",\"data\":{\"card_name\":\"Items and Pricing\",\"col\":4}},{\"id\":\"6MjIe7KCQo\",\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":4}},{\"id\":\"lBu2EKgmJF\",\"type\":\"card\",\"data\":{\"card_name\":\"Key Reports\",\"col\":4}},{\"id\":\"1ARHrjg4kI\",\"type\":\"card\",\"data\":{\"card_name\":\"Other Reports\",\"col\":4}}]",
+ "content": "[{\"id\": \"f4c73734c4\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Sales Order Analysis\", \"col\": 12}}, {\"id\": \"adf8fed2ff\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Sales Orders to Deliver\", \"col\": 4}}, {\"id\": \"975633cef2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Sales Orders to Bill\", \"col\": 4}}, {\"id\": \"2900555572\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Annual Sales\", \"col\": 4}}]",
  "creation": "2020-01-28 11:49:12.092882",
  "custom_blocks": [],
  "docstatus": 0,
@@ -17,628 +17,24 @@
  "idx": 0,
  "is_hidden": 0,
  "label": "Selling",
- "links": [
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Selling",
-   "link_count": 0,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Customer",
-   "link_count": 0,
-   "link_to": "Customer",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Item, Customer",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Quotation",
-   "link_count": 0,
-   "link_to": "Quotation",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Item, Customer",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Sales Order",
-   "link_count": 0,
-   "link_to": "Sales Order",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Item, Customer",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Sales Invoice",
-   "link_count": 0,
-   "link_to": "Sales Invoice",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Item, Customer",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Blanket Order",
-   "link_count": 0,
-   "link_to": "Blanket Order",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Item",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Sales Partner",
-   "link_count": 0,
-   "link_to": "Sales Partner",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Item, Customer",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Sales Person",
-   "link_count": 0,
-   "link_to": "Sales Person",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Items and Pricing",
-   "link_count": 0,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Item",
-   "link_count": 0,
-   "link_to": "Item",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Item, Price List",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Item Price",
-   "link_count": 0,
-   "link_to": "Item Price",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Price List",
-   "link_count": 0,
-   "link_to": "Price List",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Item Group",
-   "link_count": 0,
-   "link_to": "Item Group",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Item",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Product Bundle",
-   "link_count": 0,
-   "link_to": "Product Bundle",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Promotional Scheme",
-   "link_count": 0,
-   "link_to": "Promotional Scheme",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Item",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Pricing Rule",
-   "link_count": 0,
-   "link_to": "Pricing Rule",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Shipping Rule",
-   "link_count": 0,
-   "link_to": "Shipping Rule",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Coupon Code",
-   "link_count": 0,
-   "link_to": "Coupon Code",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Settings",
-   "link_count": 0,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Selling Settings",
-   "link_count": 0,
-   "link_to": "Selling Settings",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Terms and Conditions Template",
-   "link_count": 0,
-   "link_to": "Terms and Conditions",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Sales Taxes and Charges Template",
-   "link_count": 0,
-   "link_to": "Sales Taxes and Charges Template",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "UTM Source",
-   "link_count": 0,
-   "link_to": "UTM Source",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Customer Group",
-   "link_count": 0,
-   "link_to": "Customer Group",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Contact",
-   "link_count": 0,
-   "link_to": "Contact",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Address",
-   "link_count": 0,
-   "link_to": "Address",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Territory",
-   "link_count": 0,
-   "link_to": "Territory",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Campaign",
-   "link_count": 0,
-   "link_to": "Campaign",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Point of Sale",
-   "link_count": 6,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Point-of-Sale Profile",
-   "link_count": 0,
-   "link_to": "POS Profile",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "POS Settings",
-   "link_count": 0,
-   "link_to": "POS Settings",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "POS Opening Entry",
-   "link_count": 0,
-   "link_to": "POS Opening Entry",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "POS Closing Entry",
-   "link_count": 0,
-   "link_to": "POS Closing Entry",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Loyalty Program",
-   "link_count": 0,
-   "link_to": "Loyalty Program",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Loyalty Point Entry",
-   "link_count": 0,
-   "link_to": "Loyalty Point Entry",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Key Reports",
-   "link_count": 9,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Sales Analytics",
-   "link_count": 0,
-   "link_to": "Sales Analytics",
-   "link_type": "Report",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Sales Order",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Sales Order Analysis",
-   "link_count": 0,
-   "link_to": "Sales Order Analysis",
-   "link_type": "Report",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Sales Funnel",
-   "link_count": 0,
-   "link_to": "sales-funnel",
-   "link_type": "Page",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Sales Order",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Sales Order Trends",
-   "link_count": 0,
-   "link_to": "Sales Order Trends",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Quotation",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Quotation Trends",
-   "link_count": 0,
-   "link_to": "Quotation Trends",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Customer",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Customer Acquisition and Loyalty",
-   "link_count": 0,
-   "link_to": "Customer Acquisition and Loyalty",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Sales Order",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Inactive Customers",
-   "link_count": 0,
-   "link_to": "Inactive Customers",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Sales Order",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Sales Person-wise Transaction Summary",
-   "link_count": 0,
-   "link_to": "Sales Person-wise Transaction Summary",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Item",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Item-wise Sales History",
-   "link_count": 0,
-   "link_to": "Item-wise Sales History",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Other Reports",
-   "link_count": 11,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "dependencies": "Address",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Customer Addresses And Contacts",
-   "link_count": 0,
-   "link_to": "Address And Contacts",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Item",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Available Stock for Packing Items",
-   "link_count": 0,
-   "link_to": "Available Stock for Packing Items",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Sales Order",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Pending SO Items For Purchase Request",
-   "link_count": 0,
-   "link_to": "Pending SO Items For Purchase Request",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Delivery Note",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Delivery Note Trends",
-   "link_count": 0,
-   "link_to": "Delivery Note Trends",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Sales Invoice",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Sales Invoice Trends",
-   "link_count": 0,
-   "link_to": "Sales Invoice Trends",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Customer",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Customer Credit Balance",
-   "link_count": 0,
-   "link_to": "Customer Credit Balance",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Customer",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Customers Without Any Sales Transactions",
-   "link_count": 0,
-   "link_to": "Customers Without Any Sales Transactions",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Customer",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Sales Partners Commission",
-   "link_count": 0,
-   "link_to": "Sales Partners Commission",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Sales Order",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Territory Target Variance Based On Item Group",
-   "link_count": 0,
-   "link_to": "Territory Target Variance Based On Item Group",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Sales Order",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Sales Person Target Variance Based On Item Group",
-   "link_count": 0,
-   "link_to": "Sales Person Target Variance Based On Item Group",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Sales Order",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Sales Partner Target Variance Based On Item Group",
-   "link_count": 0,
-   "link_to": "Sales Partner Target Variance based on Item Group",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  }
- ],
- "modified": "2026-07-03 13:44:07.820564",
+ "links": [],
+ "modified": "2026-08-26 18:34:03.000000",
  "modified_by": "Administrator",
  "module": "Selling",
  "module_onboarding": "Selling Onboarding",
  "name": "Selling",
  "number_cards": [
   {
-   "label": "Total Sales Amount",
-   "number_card_name": "Total Sales Amount"
+   "label": "Sales Orders to Deliver",
+   "number_card_name": "Sales Orders to Deliver"
   },
   {
-   "label": "Sales Orders",
-   "number_card_name": "Sales Orders Count"
+   "label": "Sales Orders to Bill",
+   "number_card_name": "Sales Orders to Bill"
   },
   {
-   "label": "Average Order Value",
-   "number_card_name": "Average Sales Order Value"
+   "label": "Annual Sales",
+   "number_card_name": "Annual Sales"
   }
  ],
  "owner": "Administrator",
@@ -653,6 +49,7 @@
   {
    "child": 0,
    "collapsible": 1,
+   "default_workspace": 0,
    "icon": "house",
    "indent": 0,
    "keep_closed": 0,
@@ -666,6 +63,7 @@
   {
    "child": 0,
    "collapsible": 1,
+   "default_workspace": 0,
    "icon": "chart-column",
    "indent": 0,
    "keep_closed": 0,
@@ -679,6 +77,7 @@
   {
    "child": 0,
    "collapsible": 1,
+   "default_workspace": 0,
    "icon": "receipt-text",
    "indent": 0,
    "keep_closed": 0,
@@ -692,6 +91,7 @@
   {
    "child": 0,
    "collapsible": 1,
+   "default_workspace": 0,
    "icon": "store",
    "indent": 0,
    "keep_closed": 0,
@@ -705,6 +105,7 @@
   {
    "child": 0,
    "collapsible": 1,
+   "default_workspace": 0,
    "icon": "receipt",
    "indent": 0,
    "keep_closed": 0,
@@ -718,6 +119,7 @@
   {
    "child": 0,
    "collapsible": 1,
+   "default_workspace": 0,
    "icon": "computer",
    "indent": 1,
    "keep_closed": 1,
@@ -730,6 +132,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "icon": "",
    "indent": 0,
    "keep_closed": 0,
@@ -743,6 +146,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "POS Profile",
@@ -755,6 +159,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "POS Invoice",
@@ -767,6 +172,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "POS Opening Entry",
@@ -779,6 +185,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "POS Closing Entry",
@@ -791,6 +198,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "POS Invoice Merge Log",
@@ -803,6 +211,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "POS Settings",
@@ -815,6 +224,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "Loyalty Program",
@@ -827,6 +237,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "Loyalty Point Entry",
@@ -839,6 +250,7 @@
   {
    "child": 0,
    "collapsible": 1,
+   "default_workspace": 0,
    "icon": "package",
    "indent": 1,
    "keep_closed": 1,
@@ -851,6 +263,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "icon": "",
    "indent": 0,
    "keep_closed": 0,
@@ -864,6 +277,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "Item Group",
@@ -876,6 +290,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "Price List",
@@ -888,6 +303,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "Item Price",
@@ -900,6 +316,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "Pricing Rule",
@@ -912,6 +329,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "Promotional Scheme",
@@ -924,6 +342,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "Coupon Code",
@@ -936,6 +355,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "Blanket Order",
@@ -948,6 +368,7 @@
   {
    "child": 0,
    "collapsible": 1,
+   "default_workspace": 0,
    "icon": "database",
    "indent": 1,
    "keep_closed": 1,
@@ -960,6 +381,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "icon": "",
    "indent": 0,
    "keep_closed": 0,
@@ -973,6 +395,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "Customer Group",
@@ -985,6 +408,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "Address",
@@ -997,6 +421,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "Contact",
@@ -1009,6 +434,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "Territory",
@@ -1021,6 +447,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "Campaign",
@@ -1033,6 +460,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "Sales Person",
@@ -1045,6 +473,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "Sales Partner",
@@ -1057,6 +486,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "Monthly Distribution",
@@ -1069,6 +499,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "Terms Template",
@@ -1081,6 +512,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "Tax Template",
@@ -1093,6 +525,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "Product Bundle",
@@ -1105,6 +538,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "UTM Source",
@@ -1117,6 +551,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "Shipping Rule",
@@ -1129,6 +564,7 @@
   {
    "child": 0,
    "collapsible": 1,
+   "default_workspace": 0,
    "icon": "sheet",
    "indent": 1,
    "keep_closed": 1,
@@ -1141,6 +577,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "Sales Register",
@@ -1153,6 +590,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "Item-wise Sales Register",
@@ -1165,6 +603,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "Sales Analytics",
@@ -1177,6 +616,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "Customer Addresses And Contacts",
@@ -1189,6 +629,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "Inactive Customers",
@@ -1201,6 +642,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "Sales Invoice Trends",
@@ -1213,6 +655,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "Customer Credit Balance",
@@ -1225,6 +668,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "Customers Without Any Sales Transactions",
@@ -1237,6 +681,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "Sales Partners Commission",
@@ -1249,6 +694,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "Available Stock for Packing Items",
@@ -1261,6 +707,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "Territory Target Variance Based On Item Group",
@@ -1273,6 +720,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "Sales Person Target Variance Based On Item Group",
@@ -1285,6 +733,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "Sales Partner Target Variance Based On Item Group",
@@ -1297,6 +746,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "Pending SO Items For Purchase Request",
@@ -1309,6 +759,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "Sales Funnel",
@@ -1321,6 +772,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "Sales Order Analysis",
@@ -1333,6 +785,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "Customer Acquisition and Loyalty",
@@ -1345,6 +798,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "Quotation Trends",
@@ -1357,6 +811,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "Sales Order Trends",
@@ -1369,6 +824,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "Item-wise Sales History",
@@ -1381,6 +837,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "default_workspace": 0,
    "indent": 0,
    "keep_closed": 0,
    "label": "Sales Person-wise Transaction Summary",
@@ -1393,6 +850,7 @@
   {
    "child": 0,
    "collapsible": 1,
+   "default_workspace": 0,
    "icon": "settings",
    "indent": 0,
    "keep_closed": 0,

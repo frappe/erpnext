@@ -92,6 +92,7 @@ frappe.ui.form.on("Payment Request", "is_a_subscription", function (frm) {
 			freeze: true,
 			callback: function (data) {
 				if (!data.exc) {
+					frm.clear_table("subscription_plans");
 					$.each(data.message || [], function (i, v) {
 						var d = frappe.model.add_child(
 							frm.doc,

@@ -9,6 +9,10 @@ from frappe.utils import add_days, cint, flt, nowtime, today
 
 import erpnext
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
+from erpnext.controllers.ledger_preview import (
+	get_accounting_ledger_preview,
+	get_stock_ledger_preview,
+)
 from erpnext.controllers.sales_and_purchase_return import make_return_doc
 from erpnext.controllers.tests.test_subcontracting_controller import (
 	get_rm_items,
@@ -373,6 +377,38 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		scr.cancel()
 		self.assertTrue(get_gl_entries("Subcontracting Receipt", scr.name))
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
+
+	def test_ledger_preview(self):
+		sco = get_subcontracting_order(
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
+		)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.save()
+
+		gl_columns, gl_data = get_accounting_ledger_preview(
+			scr, frappe._dict(company=scr.company, include_dimensions=1)
+		)
+		scr.reload()
+		sl_columns, sl_data = get_stock_ledger_preview(scr, frappe._dict(company=scr.company))
+
+		self.assertTrue(gl_columns)
+		self.assertTrue(gl_data)
+		self.assertTrue(sl_columns)
+		self.assertTrue(sl_data)
+		self.assertFalse(frappe.db.exists("GL Entry", {"voucher_type": scr.doctype, "voucher_no": scr.name}))
+		self.assertFalse(
+			frappe.db.exists("Stock Ledger Entry", {"voucher_type": scr.doctype, "voucher_no": scr.name})
+		)
 
 	def test_subcontracting_receipt_gl_entry_with_different_rm_expense_accounts(self):
 		service_items = [
@@ -1192,11 +1228,33 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 				"secondary_items",
 				{
 					"item_code": item,
+					"secondary_item_type": "Scrap",
 					"stock_qty": 1 * (idx + 1),
-					"rate": 10 * (idx + 1),
-					"is_legacy": 1,
+					"valuation_type": "Valuation Rate",
 				},
 			)
+		manual_item = make_item(properties={"is_stock_item": 1}).name
+		bom.append(
+			"secondary_items",
+			{
+				"item_code": manual_item,
+				"secondary_item_type": "By-Product",
+				"stock_qty": 1,
+				"valuation_type": "Manual",
+				"cost": 30,
+			},
+		)
+		percentage_item = make_item(properties={"is_stock_item": 1}).name
+		bom.append(
+			"secondary_items",
+			{
+				"item_code": percentage_item,
+				"secondary_item_type": "Co-Product",
+				"stock_qty": 1,
+				"valuation_type": "% of FG Cost",
+				"cost_allocation_per": 10,
+			},
+		)
 		bom.save()
 		bom.submit()
 
@@ -1220,10 +1278,72 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		scr.get_secondary_items()
 
 		scr_secondary_items = set(
-			[item.item_code for item in scr.items if item.secondary_item_type or item.is_legacy_scrap_item]
+			[item.item_code for item in scr.items if item.secondary_item_type or item.valuation_type]
 		)
-		self.assertEqual(len(scr.items), 3)  # 1 FG Item + 2 Scrap Items
-		self.assertEqual(scr_secondary_items, set(secondary_items))
+		self.assertEqual(len(scr.items), 5)  # 1 FG Item + 4 Secondary Items
+		self.assertEqual(scr_secondary_items, {*secondary_items, manual_item, percentage_item})
+
+		# without a document level warehouse the rows fall back to the FG row's warehouse
+		scr.set_warehouse = None
+		scr.get_secondary_items()
+		fg_warehouse = next(item.warehouse for item in scr.items if item.bom)
+		for item in scr.items:
+			if item.secondary_item_type or item.valuation_type:
+				self.assertEqual(item.warehouse, fg_warehouse)
+
+		# the percentage row allocates from the cost net of the own-cost rows, so the
+		# received value equals the consumed value
+		scr.save()
+		fg_row = next(item for item in scr.items if item.bom)
+		fg_gross = (
+			flt(fg_row.rm_cost_per_qty)
+			+ flt(fg_row.service_cost_per_qty)
+			+ flt(fg_row.additional_cost_per_qty)
+		) * flt(fg_row.received_qty)
+		secondary_total = sum(
+			flt(row.amount) for row in scr.items if row.secondary_item_type or row.valuation_type
+		)
+		self.assertAlmostEqual(flt(fg_row.amount) + secondary_total, fg_gross, places=2)
+
+		# valuation rate rows are repriced at their warehouse on every save
+		make_stock_entry(item_code=secondary_item_1, target="_Test Warehouse - _TC", qty=5, basic_rate=40)
+		vr_row = next(item for item in scr.items if item.item_code == secondary_item_1)
+		vr_row.warehouse = "_Test Warehouse - _TC"
+		scr.save()
+		vr_row = next(item for item in scr.items if item.item_code == secondary_item_1)
+		self.assertEqual(vr_row.rate, 40)
+
+		# the manual row starts at the BOM cost per unit and takes the user's own rate
+		manual_row = next(item for item in scr.items if item.item_code == manual_item)
+		self.assertEqual(manual_row.rate, 30)
+		manual_row.rate = 45
+		scr.save()
+		manual_row = next(item for item in scr.items if item.item_code == manual_item)
+		self.assertEqual(manual_row.rate, 45)
+		self.assertEqual(manual_row.amount, 45 * manual_row.qty)
+
+		# percentage rows reprice on save when the own-cost basis changes
+		own_total = sum(
+			flt(row.amount) for row in scr.items if row.valuation_type in ("Valuation Rate", "Manual")
+		)
+		percentage_row = next(item for item in scr.items if item.item_code == percentage_item)
+		self.assertAlmostEqual(flt(percentage_row.amount), (fg_gross - own_total) * 0.10, places=2)
+
+		# the finished good's rate is its cost allocation share of the net cost
+		fg_row = next(item for item in scr.items if item.bom)
+		self.assertTrue(fg_row.secondary_items_cost_per_qty > 0)
+		fg_percent = flt(frappe.get_value("BOM", fg_row.bom, "cost_allocation_per")) / 100
+		self.assertAlmostEqual(
+			flt(fg_row.rate),
+			(
+				flt(fg_row.rm_cost_per_qty)
+				+ flt(fg_row.service_cost_per_qty)
+				+ flt(fg_row.additional_cost_per_qty)
+				- flt(fg_row.secondary_items_cost_per_qty)
+			)
+			* fg_percent,
+			places=2,
+		)
 
 		scr.submit()
 
@@ -1508,6 +1628,73 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertEqual(pr_details[0]["total_taxes_and_charges"], 60)
 
 	@ERPNextTestSuite.change_settings("Buying Settings", {"auto_create_purchase_receipt": 1})
+	def test_auto_create_purchase_receipt_with_tax_withholding_row(self):
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		fg_item = "Subcontracted Item SA1"
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": 5,
+			},
+		]
+
+		po = create_purchase_order(
+			rm_items=service_items,
+			is_subcontracted=1,
+			supplier_warehouse="_Test Warehouse 1 - _TC",
+			do_not_submit=True,
+		)
+		# withheld against the full PO value, and not recomputed on a partial receipt
+		po.append(
+			"taxes",
+			{
+				"account_head": "_Test Account Excise Duty - _TC",
+				"charge_type": "Actual",
+				"add_deduct_tax": "Deduct",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "TDS on Contract",
+				"doctype": "Purchase Taxes and Charges",
+				"tax_amount": 800,
+				"is_tax_withholding_account": 1,
+			},
+		)
+		po.save()
+		po.submit()
+		self.assertEqual(po.grand_total, 200)
+
+		sco = get_subcontracting_order(po_name=po.name)
+
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 3
+		scr.save()
+
+		# carrying the withholding row over would deduct 800 from a 600 receipt,
+		# and Purchase Receipt rejects the resulting negative Grand Total
+		scr.submit()
+
+		pr_name = frappe.db.get_value("Purchase Receipt", {"subcontracting_receipt": scr.name})
+		self.assertTrue(pr_name)
+
+		pr = frappe.get_doc("Purchase Receipt", pr_name)
+		self.assertEqual(pr.items[0].qty, 6)
+		self.assertEqual(pr.net_total, 600)
+		self.assertFalse([row for row in pr.taxes if row.is_tax_withholding_account])
+		self.assertEqual(pr.grand_total, 600)
+
+	@ERPNextTestSuite.change_settings("Buying Settings", {"auto_create_purchase_receipt": 1})
 	def test_auto_create_purchase_receipt_with_no_reference_of_po_item(self):
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 
@@ -1648,6 +1835,10 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		scr.items[0].batch_no = batch_no
 
 		scr.save()
+		get_accounting_ledger_preview(scr, frappe._dict(company=scr.company, include_dimensions=1))
+		scr.reload()
+		self.assertFalse(scr.items[0].serial_and_batch_bundle)
+
 		scr.submit()
 		scr.reload()
 		self.assertTrue(scr.items[0].serial_and_batch_bundle)

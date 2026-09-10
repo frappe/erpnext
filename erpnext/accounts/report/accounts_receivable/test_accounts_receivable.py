@@ -869,9 +869,7 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 		self.assertEqual(rows_b[0].future_amount, 50.0)
 
 	def test_sales_person(self):
-		sales_person = frappe.get_doc(
-			{"doctype": "Sales Person", "sales_person_name": "John Clark", "enabled": True}
-		).insert()
+		sales_person = frappe.get_doc("Sales Person", "_Test Sales Person")
 		si = self.create_sales_invoice(do_not_submit=True)
 		si.append("sales_team", {"sales_person": sales_person.name, "allocated_percentage": 100})
 		si.save().submit()
@@ -1339,6 +1337,28 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 		row = report[1][0]
 		self.assertEqual(expected_data_after_payment, [row.voucher_no, row.cost_center, row.outstanding])
 
+	def test_cost_center_on_payment_before_invoice(self):
+		filters = {
+			"company": self.company,
+			"party_type": "Customer",
+			"party": [self.customer],
+			"report_date": today(),
+			"range": "30, 60, 90, 120",
+		}
+
+		si = self.create_sales_invoice(no_payment_schedule=True, do_not_submit=True)
+		si.posting_date = add_days(today(), 1)
+		si.due_date = si.posting_date
+		si.payment_schedule[0].due_date = si.posting_date
+		si.save().submit()
+
+		pe = self.create_payment_entry(si.name, do_not_submit=True)
+		pe.cost_center = self.cost_center
+		pe.save().submit()
+
+		row = next(row for row in execute(filters)[1] if row.voucher_no == pe.name)
+		self.assertEqual(row.cost_center, pe.cost_center)
+
 	def test_payment_terms_template_filters(self):
 		from erpnext.controllers.accounts_controller import get_payment_terms
 
@@ -1494,17 +1514,8 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 
 	def test_receivable_filtered_by_sales_partner(self):
 		frappe.set_user("Administrator")
-		partner_a, partner_b = "_Test AR Sales Partner A", "_Test AR Sales Partner B"
-		for partner in (partner_a, partner_b):
-			if not frappe.db.exists("Sales Partner", partner):
-				frappe.get_doc(
-					{
-						"doctype": "Sales Partner",
-						"partner_name": partner,
-						"commission_rate": 0,
-						"territory": "All Territories",
-					}
-				).insert()
+		partner_a = "_Test Sales Partner India - 1"
+		partner_b = "_Test Sales Partner India - 2"
 
 		def _si(sales_partner):
 			si = self.create_sales_invoice(no_payment_schedule=True, do_not_submit=True, qty=2)

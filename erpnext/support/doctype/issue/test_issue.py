@@ -28,7 +28,6 @@ class TestIssue(TestSetUp):
 		creation = get_datetime("2019-03-04 12:00")
 
 		# make issue with customer specific SLA
-		create_customer("_Test Customer", "__Test SLA Customer Group", "__Test SLA Territory")
 		issue = make_issue(creation, "_Test Customer", 1)
 
 		self.assertEqual(issue.response_by, get_datetime("2019-03-04 14:00"))
@@ -642,3 +641,201 @@ def create_communication(reference_name, sender, sent_or_received, creation):
 		}
 	)
 	communication.save()
+
+
+class TestSplitIssue(ERPNextTestSuite):
+	def setUp(self):
+		frappe.set_user("Administrator")
+		frappe.db.set_single_value("Support Settings", "track_service_level_agreement", 0)
+
+	def tearDown(self):
+		frappe.set_user("Administrator")
+		super().tearDown()
+
+	def make_issue(self, subject):
+		issue = frappe.get_doc(
+			{
+				"doctype": "Issue",
+				"subject": subject,
+				"raised_by": "split-test@example.com",
+				"status": "Open",
+			}
+		).insert(ignore_permissions=True)
+
+		# split_issue() deepcopies self, so it has to start from a document loaded off the
+		# database the way the desk caller hands it one, not from the freshly inserted object
+		return frappe.get_doc("Issue", issue.name)
+
+	def make_communication(self, subject, communication_date, reference=None, link_to=None, creation=None):
+		"""A Communication attached to an Issue by reference, by Timeline Link, or by both."""
+		communication = frappe.get_doc(
+			{
+				"doctype": "Communication",
+				"communication_type": "Communication",
+				"communication_medium": "Email",
+				"sent_or_received": "Received",
+				"subject": subject,
+				"content": subject,
+				"sender": "split-test@example.com",
+				"status": "Linked",
+				"communication_date": get_datetime(communication_date) if communication_date else None,
+				"reference_doctype": "Issue" if reference else None,
+				"reference_name": reference,
+			}
+		).insert(ignore_permissions=True)
+
+		if link_to:
+			communication.add_link("Issue", link_to, autosave=True)
+
+		if not communication_date:
+			# the field defaults to Now whenever it is unset, so leaving it genuinely empty --
+			# as an import or an API caller can -- means blanking it after the insert
+			frappe.db.set_value(
+				"Communication", communication.name, "communication_date", None, update_modified=False
+			)
+			communication.reload()
+
+		if creation:
+			# insert() always stamps creation with the current time, so a test that needs it to
+			# disagree with communication_date has to write it afterwards
+			frappe.db.set_value(
+				"Communication",
+				communication.name,
+				"creation",
+				get_datetime(creation),
+				update_modified=False,
+			)
+			communication.reload()
+
+		return communication
+
+	def linked_issues(self, communication):
+		return [
+			link.link_name
+			for link in frappe.get_doc("Communication", communication).timeline_links
+			if link.link_doctype == "Issue"
+		]
+
+	def test_split_moves_referenced_communications_from_the_split_point(self):
+		issue = self.make_issue("Split source")
+		first = self.make_communication("First", "2024-01-01 10:00:00", reference=issue.name)
+		second = self.make_communication("Second", "2024-01-01 11:00:00", reference=issue.name)
+		third = self.make_communication("Third", "2024-01-01 12:00:00", reference=issue.name)
+
+		split = issue.split_issue(subject="Split target", communication_id=second.name)
+
+		self.assertEqual(frappe.db.get_value("Communication", first.name, "reference_name"), issue.name)
+		self.assertEqual(frappe.db.get_value("Communication", second.name, "reference_name"), split)
+		self.assertEqual(frappe.db.get_value("Communication", third.name, "reference_name"), split)
+		self.assertEqual(frappe.db.get_value("Issue", split, "issue_split_from"), issue.name)
+
+	def test_split_follows_the_timeline_order_not_the_insertion_order(self):
+		"""The split point is read off the timeline, which is ordered by communication_date.
+
+		A pulled email is created when it is fetched, so creation can run the other way.
+		"""
+		issue = self.make_issue("Split source")
+		first = self.make_communication(
+			"Sent first, fetched last", "2024-01-01 10:00:00", reference=issue.name, creation="2024-06-03"
+		)
+		second = self.make_communication(
+			"Sent second", "2024-01-01 11:00:00", reference=issue.name, creation="2024-06-02"
+		)
+		third = self.make_communication(
+			"Sent last, fetched first", "2024-01-01 12:00:00", reference=issue.name, creation="2024-06-01"
+		)
+
+		split = issue.split_issue(subject="Split target", communication_id=second.name)
+
+		self.assertEqual(frappe.db.get_value("Communication", first.name, "reference_name"), issue.name)
+		self.assertEqual(frappe.db.get_value("Communication", second.name, "reference_name"), split)
+		self.assertEqual(frappe.db.get_value("Communication", third.name, "reference_name"), split)
+
+	def test_split_treats_an_undated_communication_as_the_bottom_of_the_timeline(self):
+		"""communication_date is not mandatory, and an undated item sits below every split point."""
+		# Split from a dated item: the undated one is below the split point, so it stays behind.
+		issue = self.make_issue("Split source")
+		undated = self.make_communication("Undated", None, reference=issue.name)
+		first = self.make_communication("First", "2024-01-01 10:00:00", reference=issue.name)
+		second = self.make_communication("Second", "2024-01-01 11:00:00", reference=issue.name)
+
+		split = issue.split_issue(subject="Split target", communication_id=first.name)
+
+		self.assertEqual(frappe.db.get_value("Communication", undated.name, "reference_name"), issue.name)
+		self.assertEqual(frappe.db.get_value("Communication", first.name, "reference_name"), split)
+		self.assertEqual(frappe.db.get_value("Communication", second.name, "reference_name"), split)
+
+		# Split from the undated item itself: a null split point drops the date filter, so the
+		# whole timeline above it -- which is everything -- moves.
+		source = self.make_issue("Undated split source")
+		from_undated = self.make_communication("Undated", None, reference=source.name)
+		dated = self.make_communication("Dated", "2024-01-01 10:00:00", reference=source.name)
+
+		whole = source.split_issue(subject="Split target", communication_id=from_undated.name)
+
+		self.assertEqual(frappe.db.get_value("Communication", from_undated.name, "reference_name"), whole)
+		self.assertEqual(frappe.db.get_value("Communication", dated.name, "reference_name"), whole)
+
+	def test_split_moves_timeline_linked_communications(self):
+		"""A Communication on the timeline only through a Timeline Link moves with the split."""
+		issue = self.make_issue("Split source")
+		referenced = self.make_communication("Referenced", "2024-01-01 10:00:00", reference=issue.name)
+		linked = self.make_communication("Linked only", "2024-01-01 11:00:00", link_to=issue.name)
+
+		split = issue.split_issue(subject="Split target", communication_id=referenced.name)
+
+		self.assertEqual(frappe.db.get_value("Communication", referenced.name, "reference_name"), split)
+		self.assertEqual(self.linked_issues(linked.name), [split])
+
+	def test_split_from_a_timeline_linked_communication(self):
+		"""The Split button is offered on link-only timeline items, so they are valid split points."""
+		issue = self.make_issue("Split source")
+		linked = self.make_communication("Linked only", "2024-01-01 10:00:00", link_to=issue.name)
+		later = self.make_communication("Later", "2024-01-01 11:00:00", reference=issue.name)
+
+		split = issue.split_issue(subject="Split target", communication_id=linked.name)
+
+		self.assertEqual(self.linked_issues(linked.name), [split])
+		self.assertEqual(frappe.db.get_value("Communication", later.name, "reference_name"), split)
+
+	def test_split_leaves_the_reference_of_a_linked_communication_alone(self):
+		"""Moving a Timeline Link must not rewrite a reference that belongs to another Issue."""
+		issue = self.make_issue("Split source")
+		other = self.make_issue("Unrelated issue")
+		shared = self.make_communication(
+			"Shared", "2024-01-01 10:00:00", reference=other.name, link_to=issue.name
+		)
+
+		split = issue.split_issue(subject="Split target", communication_id=shared.name)
+
+		self.assertEqual(self.linked_issues(shared.name), [split])
+		self.assertEqual(frappe.db.get_value("Communication", shared.name, "reference_name"), other.name)
+
+	def test_split_rejects_a_communication_from_another_issue(self):
+		issue = self.make_issue("Split source")
+		self.make_communication("Own", "2024-01-01 10:00:00", reference=issue.name)
+
+		other = self.make_issue("Other issue")
+		theirs = self.make_communication("Theirs", "2024-01-01 09:00:00", reference=other.name)
+		also_theirs = self.make_communication("Also theirs", "2024-01-01 10:30:00", reference=other.name)
+
+		self.assertRaises(frappe.PermissionError, issue.split_issue, "Split target", theirs.name)
+
+		self.assertEqual(frappe.db.get_value("Communication", theirs.name, "reference_name"), other.name)
+		self.assertEqual(frappe.db.get_value("Communication", also_theirs.name, "reference_name"), other.name)
+
+	def test_split_rejects_a_communication_that_is_not_on_the_timeline(self):
+		issue = self.make_issue("Split source")
+		unattached = self.make_communication("Unattached", "2024-01-01 10:00:00")
+
+		self.assertRaises(frappe.PermissionError, issue.split_issue, "Split target", unattached.name)
+
+	def test_split_requires_write_permission_on_the_issue(self):
+		issue = self.make_issue("Split source")
+		own = self.make_communication("Own", "2024-01-01 10:00:00", reference=issue.name)
+
+		frappe.set_user(create_user("split-no-roles@example.com").email)
+
+		self.assertRaises(
+			frappe.PermissionError, frappe.get_doc("Issue", issue.name).split_issue, "Split target", own.name
+		)

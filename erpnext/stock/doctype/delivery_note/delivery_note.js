@@ -23,6 +23,9 @@ frappe.ui.form.on("Delivery Note", {
 			Shipment: "Shipment",
 		}),
 			frm.set_indicator_formatter("item_code", function (doc) {
+				if (doc.closed) {
+					return "gray";
+				}
 				return doc.docstatus == 1 || doc.qty <= doc.actual_qty ? "green" : "orange";
 			});
 
@@ -353,7 +356,12 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends (
 			}
 		}
 
-		if (doc.docstatus == 1 && doc.status === "Closed" && this.frm.has_perm("submit")) {
+		if (
+			doc.docstatus == 1 &&
+			doc.status === "Closed" &&
+			this.frm.has_perm("submit") &&
+			!doc.items.every((item) => item.closed)
+		) {
 			this.frm.add_custom_button(
 				__("Reopen"),
 				function () {
@@ -363,6 +371,7 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends (
 			);
 		}
 		erpnext.stock.delivery_note.set_print_hide(doc, dt, dn);
+		this.set_item_close_buttons();
 	}
 
 	make_shipment() {
@@ -427,6 +436,10 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends (
 
 	reopen_delivery_note() {
 		this.update_status("Submitted");
+	}
+
+	set_item_close_buttons() {
+		erpnext.item_close.add_buttons(this.frm, erpnext.item_close.billing_config(__("Sales Invoice")));
 	}
 
 	update_status(status) {

@@ -9,7 +9,7 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 class TestMaintenanceVisit(ERPNextTestSuite):
 	def setUp(self):
-		self.sales_person = make_sales_person("_Test Maintenance Service Person")
+		self.sales_person = frappe.get_doc("Sales Person", "_Test Sales Person")
 
 	def make_warranty_claim(self):
 		# Warranty Claim is not submittable; it provides a real target for the
@@ -129,22 +129,12 @@ class TestMaintenanceVisit(ERPNextTestSuite):
 		self.assertIsNone(claim.resolution_date)
 
 
-def make_sales_person(name):
-	sales_person = frappe.get_doc({"doctype": "Sales Person", "sales_person_name": name})
-	sales_person.insert(ignore_if_duplicate=True)
-	if not sales_person.name:
-		sales_person = frappe.get_doc("Sales Person", {"sales_person_name": name})
-	return sales_person
-
-
 def make_maintenance_visit():
 	mv = frappe.new_doc("Maintenance Visit")
 	mv.company = "_Test Company"
 	mv.customer = "_Test Customer"
 	mv.mntc_date = today()
 	mv.completion_status = "Partially Completed"
-
-	sales_person = make_sales_person("Dwight Schrute")
 
 	mv.append(
 		"purposes",
@@ -153,7 +143,7 @@ def make_maintenance_visit():
 			"sales_person": "Sales Team",
 			"description": "Test Item",
 			"work_done": "Test Work Done",
-			"service_person": sales_person.name,
+			"service_person": "_Test Sales Person",
 		},
 	)
 	mv.insert(ignore_permissions=True)

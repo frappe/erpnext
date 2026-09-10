@@ -17,6 +17,10 @@ frappe.ui.form.on("Purchase Receipt", {
 			"Landed Cost Voucher": "Landed Cost Voucher",
 		};
 
+		frm.set_indicator_formatter("item_code", function (doc) {
+			return doc.closed ? "gray" : "green";
+		});
+
 		frm.set_query("wip_composite_asset", "items", function () {
 			return {
 				filters: { asset_type: "Composite Asset", docstatus: 0 },
@@ -275,9 +279,20 @@ erpnext.stock.PurchaseReceiptController = class PurchaseReceiptController extend
 			}
 		}
 
-		if (this.frm.doc.docstatus == 1 && this.frm.doc.status === "Closed" && this.frm.has_perm("submit")) {
+		if (
+			this.frm.doc.docstatus == 1 &&
+			this.frm.doc.status === "Closed" &&
+			this.frm.has_perm("submit") &&
+			!this.frm.doc.items.every((item) => item.closed)
+		) {
 			cur_frm.add_custom_button(__("Reopen"), this.reopen_purchase_receipt, __("Status"));
 		}
+
+		this.set_item_close_buttons();
+	}
+
+	set_item_close_buttons() {
+		erpnext.item_close.add_buttons(this.frm, erpnext.item_close.billing_config(__("Purchase Invoice")));
 	}
 
 	make_purchase_invoice() {

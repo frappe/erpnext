@@ -7,9 +7,11 @@
 				{{ frappe.utils.global_date_format(doc.modified) }}
 			</div>
 		</div>
-		<div class="col-sm-3">
-			<span class="indicator-pill {{ doc.indicator_color or ("blue" if doc.docstatus==1 else "gray") }} list-item-status">{{ _(doc.status) }}</span>
-		</div>
+		{% if doc.doctype != "Request for Quotation" %}
+			<div class="col-sm-3">
+				<span class="indicator-pill {{ doc.indicator_color or ("blue" if doc.docstatus==1 else "gray") }} list-item-status">{{ _(doc.status) }}</span>
+			</div>
+		{% endif %}
 		<div class="col-sm-2">
 			<div class="small text-muted items-preview ellipsis ellipsis-width">
 				{{ doc.items_preview | e }}

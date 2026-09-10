@@ -191,7 +191,7 @@
         <Descrizione>{{ html2text(item.description or '') or item.item_name }}</Descrizione>
         <Quantita>{{ format_float(item.qty) }}</Quantita>
         <UnitaMisura>{{ item.stock_uom }}</UnitaMisura>
-        {%- set item_unit_net_price = (item.price_list_rate / tax_divisor) or (item.net_rate) or (item.rate / tax_divisor) %}
+        {%- set item_unit_net_price = ((item.price_list_rate or 0) / tax_divisor) or (item.net_rate) or (item.rate / tax_divisor) %}
         <PrezzoUnitario>{{ format_float(item_unit_net_price, item_meta.get_field("rate").precision) }}</PrezzoUnitario>
         {{ render_discount_or_margin(item, tax_divisor) }}
         <PrezzoTotale>{{ format_float(item.net_amount, item_meta.get_field("amount").precision) }}</PrezzoTotale>

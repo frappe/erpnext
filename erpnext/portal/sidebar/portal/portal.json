@@ -1,0 +1,17 @@
+{
+ "app": "erpnext",
+ "creation": "2026-08-16 00:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Sidebar",
+ "header_icon": "panels-top-left",
+ "idx": 0,
+ "items": [],
+ "modified": "2026-08-16 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Portal",
+ "name": "Portal",
+ "owner": "Administrator",
+ "sequence_id": 0.0,
+ "standard": 1,
+ "title": "Portal"
+}

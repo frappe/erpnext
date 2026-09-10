@@ -3,7 +3,7 @@
 
 import frappe
 from frappe.tests.utils import change_settings
-from frappe.utils import add_to_date, get_datetime
+from frappe.utils import add_to_date, flt, get_datetime, getdate
 
 from erpnext.manufacturing.doctype.job_card.job_card import OverlapError
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import (
@@ -12,7 +12,11 @@ from erpnext.manufacturing.doctype.production_plan.test_production_plan import (
 )
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_operation, make_workstation
 from erpnext.manufacturing.scheduling import loaders
-from erpnext.manufacturing.scheduling.plan_adapter import apply_schedule, get_schedule_preview
+from erpnext.manufacturing.scheduling.plan_adapter import (
+	apply_schedule,
+	build_plan_tasks,
+	get_schedule_preview,
+)
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -441,6 +445,106 @@ class TestPlanAdapter(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, entry.insert)
 
+	def test_cancelled_plan_clears_computed_rows(self):
+		plan = self.make_plan()
+		plan.cancel()
+
+		self.assertFalse(frappe.get_all("Production Plan Sub Assembly Item", filters={"parent": plan.name}))
+		self.assertFalse(frappe.get_all("Material Request Plan Item", filters={"parent": plan.name}))
+
+		amended = frappe.copy_doc(frappe.get_doc("Production Plan", plan.name))
+		amended.amended_from = plan.name
+		amended.docstatus = 0
+		amended.insert()
+		self.assertFalse(amended.sub_assembly_items)
+
+		amended.get_sub_assembly_items()
+		amended.submit()
+
+		self.assertTrue(amended.sub_assembly_items)
+		for row in amended.sub_assembly_items:
+			self.assertEqual(row.production_plan_item, amended.po_items[0].name)
+
+		tasks, task_info = build_plan_tasks(amended)
+		scheduled_items = {info["item_code"] for info in task_info.values()}
+		self.assertIn(amended.sub_assembly_items[0].production_item, scheduled_items)
+
+	def test_material_row_schedule_date_fallbacks(self):
+		from erpnext.manufacturing.scheduling.plan_adapter import get_material_row_schedule_date
+
+		material = {
+			"start": get_datetime("2026-11-16 09:00:00"),
+			"end": get_datetime("2026-11-22 09:00:00"),
+		}
+		row = frappe._dict(item_code="Test PPS RM", supplier="Test PPS Supplier C")
+
+		self.assertEqual(
+			get_material_row_schedule_date(row, material, {}, {"Test PPS RM": 0}), getdate("2026-11-16")
+		)
+		self.assertEqual(
+			get_material_row_schedule_date(row, material, {}, {"Test PPS RM": None}), getdate("2026-11-22")
+		)
+		self.assertEqual(
+			get_material_row_schedule_date(
+				frappe._dict(item_code="Test PPS RM"), material, {}, {"Test PPS RM": 4}
+			),
+			getdate("2026-11-22"),
+		)
+
+	@change_settings("Manufacturing Settings", {"mins_between_operations": 10, "allow_overtime": 0})
+	def test_split_supplier_rows_keep_own_schedule_dates(self):
+		suppliers = ["Test PPS Supplier A", "Test PPS Supplier B", "Test PPS Supplier C"]
+		self.make_supplier_lead_time("Test PPS RM", suppliers)
+
+		plan = create_production_plan(
+			item_code="Test PPS FG",
+			planned_qty=2,
+			use_multi_level_bom=1,
+			do_not_submit=True,
+			skip_getting_mr_items=True,
+		)
+		plan.get_sub_assembly_items()
+		for supplier in suppliers:
+			plan.append(
+				"mr_items",
+				{
+					"item_code": "Test PPS RM",
+					"warehouse": "_Test Warehouse - _TC",
+					"quantity": 2,
+					"material_request_type": "Purchase",
+					"supplier": supplier,
+				},
+			)
+		plan.submit()
+
+		start_date = get_datetime("2026-11-09 09:00:00")
+		preview = get_schedule_preview(plan.name, start_date)
+		material_row = preview["rows"]["material:Test PPS RM"]
+		self.assertEqual(material_row["supplier"], suppliers[1])
+		self.assertEqual(material_row["end"], add_to_date(start_date, days=6))
+
+		apply_schedule(plan.name, start_date)
+		schedule_dates = dict(
+			frappe.get_all(
+				"Material Request Plan Item",
+				filters={"parent": plan.name, "item_code": "Test PPS RM"},
+				fields=["supplier", "schedule_date"],
+				as_list=True,
+			)
+		)
+		self.assertEqual(schedule_dates[suppliers[0]], getdate(add_to_date(start_date, days=3)))
+		self.assertEqual(schedule_dates[suppliers[1]], getdate(add_to_date(start_date, days=6)))
+		self.assertEqual(schedule_dates[suppliers[2]], getdate(add_to_date(start_date, days=4)))
+
+	def test_plan_cancel_deletes_schedule_entries(self):
+		plan = self.make_plan()
+		apply_schedule(plan.name, "2026-11-02 09:00:00")
+		self.assertTrue(frappe.db.exists("Production Plan Schedule", {"production_plan": plan.name}))
+
+		plan.reload()
+		plan.cancel()
+		self.assertFalse(frappe.db.exists("Production Plan Schedule", {"production_plan": plan.name}))
+
 	def test_incomplete_proposal_is_not_applied(self):
 		from unittest.mock import patch
 
@@ -464,7 +568,6 @@ class TestPlanAdapter(ERPNextTestSuite):
 			frappe.get_doc(
 				{"doctype": "Item Lead Time", "item_code": "Test PPS RM", "purchase_time": 2}
 			).insert()
-		self.addCleanup(frappe.delete_doc, "Item Lead Time", "Test PPS RM", force=True)
 
 		plan = self.make_plan()
 		start_date = get_datetime("2026-11-02 09:00:00")
@@ -480,6 +583,130 @@ class TestPlanAdapter(ERPNextTestSuite):
 			row["start"] for row in preview["rows"].values() if row["row_type"] == "Sub Assembly"
 		)
 		self.assertEqual(sub_starts, [material_arrival, add_to_date(material_arrival, minutes=120)])
+
+	def test_purchase_lead_time_supplier_resolution(self):
+		from erpnext.manufacturing.scheduling.plan_adapter import resolve_purchase_lead_time
+
+		lead_time = frappe._dict(purchase_time=4, buffer_time=0)
+		supplier_rows = {
+			"Supplier A": frappe._dict(supplier="Supplier A", purchase_time=3, buffer_time=0, is_default=1),
+			"Supplier B": frappe._dict(supplier="Supplier B", purchase_time=6, buffer_time=1, is_default=0),
+		}
+
+		self.assertEqual(
+			resolve_purchase_lead_time(lead_time, supplier_rows, {"Supplier B"}), (7, "Supplier B")
+		)
+		self.assertEqual(
+			resolve_purchase_lead_time(lead_time, supplier_rows, {"Supplier A", "Supplier B"}),
+			(7, "Supplier B"),
+		)
+		self.assertEqual(resolve_purchase_lead_time(lead_time, supplier_rows), (3, "Supplier A"))
+		self.assertEqual(resolve_purchase_lead_time(lead_time, None), (4, None))
+		self.assertEqual(resolve_purchase_lead_time(None, None), (None, None))
+		self.assertEqual(
+			resolve_purchase_lead_time(lead_time, supplier_rows, {"Supplier C"}), (4, "Supplier C")
+		)
+		self.assertEqual(
+			resolve_purchase_lead_time(lead_time, supplier_rows, {"Supplier A", "Supplier C"}),
+			(4, "Supplier C"),
+		)
+		self.assertEqual(resolve_purchase_lead_time(None, supplier_rows, {"Supplier C"}), (3, "Supplier A"))
+
+	def make_supplier_lead_time(self, item_code, suppliers):
+		for supplier in suppliers:
+			if not frappe.db.exists("Supplier", supplier):
+				frappe.get_doc(
+					{
+						"doctype": "Supplier",
+						"supplier_name": supplier,
+						"supplier_group": "All Supplier Groups",
+					}
+				).insert()
+
+		frappe.delete_doc("Item Lead Time", item_code, force=True)
+		frappe.get_doc(
+			{
+				"doctype": "Item Lead Time",
+				"item_code": item_code,
+				"purchase_time": 4,
+				"supplier_lead_times": [
+					{"supplier": suppliers[0], "purchase_time": 3, "is_default": 1},
+					{"supplier": suppliers[1], "purchase_time": 6},
+				],
+			}
+		).insert()
+
+	@change_settings("Manufacturing Settings", {"mins_between_operations": 10, "allow_overtime": 0})
+	def test_schedule_uses_supplier_wise_lead_time(self):
+		suppliers = ["Test PPS Supplier A", "Test PPS Supplier B"]
+		self.make_supplier_lead_time("Test PPS RM", suppliers)
+
+		plan = create_production_plan(
+			item_code="Test PPS FG",
+			planned_qty=2,
+			use_multi_level_bom=1,
+			do_not_submit=True,
+			skip_getting_mr_items=True,
+		)
+		plan.get_sub_assembly_items()
+		plan.save()
+		start_date = get_datetime("2026-11-02 09:00:00")
+
+		preview = get_schedule_preview(plan.name, start_date)
+		material_row = preview["rows"]["material:Test PPS RM"]
+		self.assertEqual(material_row["supplier"], suppliers[0])
+		self.assertEqual(material_row["end"], add_to_date(start_date, days=3))
+
+		plan.append(
+			"mr_items",
+			{
+				"item_code": "Test PPS RM",
+				"warehouse": "_Test Warehouse - _TC",
+				"quantity": 4,
+				"material_request_type": "Purchase",
+				"supplier": suppliers[1],
+			},
+		)
+		plan.save()
+
+		preview = get_schedule_preview(plan.name, start_date)
+		material_row = preview["rows"]["material:Test PPS RM"]
+		self.assertEqual(material_row["supplier"], suppliers[1])
+		self.assertEqual(material_row["end"], add_to_date(start_date, days=6))
+
+		plan.submit()
+		apply_schedule(plan.name, start_date)
+		entry = frappe.get_value(
+			"Production Plan Schedule",
+			{"production_plan": plan.name, "row_type": "Raw Material", "item_code": "Test PPS RM"},
+			["supplier", "to_time"],
+			as_dict=True,
+		)
+		self.assertEqual(entry.supplier, suppliers[1])
+		self.assertEqual(
+			frappe.db.get_value(
+				"Material Request Plan Item",
+				{"parent": plan.name, "item_code": "Test PPS RM"},
+				"schedule_date",
+			),
+			getdate(add_to_date(start_date, days=6)),
+		)
+
+	def test_lead_time_duration_counts_partial_day_as_working_hours(self):
+		from erpnext.manufacturing.scheduling.plan_adapter import get_lead_time_duration_mins
+
+		lead_time = frappe._dict(
+			capacity_per_day=8, daily_yield=100, no_of_shift=2, shift_time_in_hours=8, buffer_time=0
+		)
+
+		self.assertEqual(get_lead_time_duration_mins(lead_time, 10, False, 2), 1680.0)
+		self.assertEqual(get_lead_time_duration_mins(lead_time, 16, False, 2), 2400.0)
+		self.assertEqual(get_lead_time_duration_mins(lead_time, 4, False, 2), 480.0)
+
+		mfg_lead_time = frappe._dict(
+			manufacturing_time_in_mins=120, no_of_shift=2, shift_time_in_hours=8, buffer_time=0
+		)
+		self.assertEqual(get_lead_time_duration_mins(mfg_lead_time, 10, False, 2), 1680.0)
 
 	@change_settings("Manufacturing Settings", {"mins_between_operations": 10, "allow_overtime": 0})
 	def test_preview_and_apply_schedule(self):

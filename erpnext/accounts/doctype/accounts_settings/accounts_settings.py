@@ -222,6 +222,13 @@ class AccountsSettings(Document):
 		set_allow_on_submit_for_dimension_fields(doctypes)
 
 
+@frappe.whitelist(methods=["POST"])
+def get_posting_date_confirmation() -> int:
+	return cint(
+		frappe.db.get_single_value("Accounts Settings", "confirm_before_resetting_posting_date", cache=False)
+	)
+
+
 def toggle_accounting_dimension_sections(hide):
 	accounting_dimension_doctypes = frappe.get_hooks("accounting_dimension_doctypes")
 	for doctype in accounting_dimension_doctypes:

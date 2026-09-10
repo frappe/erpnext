@@ -267,6 +267,8 @@ class Quotation(SellingController):
 	def declare_enquiry_lost(
 		self, lost_reasons_list: list, competitors: list, detailed_reason: str | None = None
 	):
+		self.check_permission("write")
+
 		if not (self.is_fully_ordered() or self.is_partially_ordered()):
 			get_lost_reasons = frappe.get_list("Quotation Lost Reason", fields=["name"])
 			lost_reasons_lst = [reason.get("name") for reason in get_lost_reasons]

@@ -6,6 +6,7 @@ import frappe
 from frappe.utils import add_days, flt, now_datetime, nowdate
 
 import erpnext
+from erpnext.stock.doctype.delivery_note.mapper import make_delivery_trip
 from erpnext.stock.doctype.delivery_trip.delivery_trip import (
 	get_contact_and_address,
 	get_default_contact,
@@ -37,7 +38,7 @@ class TestDeliveryTrip(ERPNextTestSuite):
 				"password": "test",
 				"smtp_server": "localhost",
 				"stmp_port": 25,
-				"email_id": "test@example.in",
+				"email_id": f"delivery-trip-{frappe.generate_hash(length=10)}@example.in",
 			}
 		)
 		outgoing.save()
@@ -173,6 +174,32 @@ class TestDeliveryTrip(ERPNextTestSuite):
 		self.assertIsNotNone(result)
 		self.assertEqual(result.parent, orphan_parent)
 		self.assertIsNone(result.is_primary_contact)
+
+	def map_delivery_note_onto_trip(self, existing_stop):
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		delivery_note = create_delivery_note()
+		trip = frappe.new_doc("Delivery Trip")
+		trip.append("delivery_stops", existing_stop)
+
+		return delivery_note, make_delivery_trip(delivery_note.name, trip)
+
+	def test_mapping_drops_placeholder_stop(self):
+		delivery_note, trip = self.map_delivery_note_onto_trip({})
+
+		self.assertEqual(len(trip.delivery_stops), 1)
+		self.assertEqual(trip.delivery_stops[0].delivery_note, delivery_note.name)
+
+	def test_mapping_keeps_partially_filled_stop(self):
+		_, trip = self.map_delivery_note_onto_trip({"customer": "_Test Customer"})
+
+		self.assertEqual(len(trip.delivery_stops), 2)
+		self.assertIsNone(trip.delivery_stops[0].delivery_note)
+
+	def test_stop_without_address_throws_mandatory_error(self):
+		self.delivery_trip.append("delivery_stops", {"customer": "_Test Customer"})
+
+		self.assertRaises(frappe.MandatoryError, self.delivery_trip.save)
 
 
 def create_address(driver):

@@ -130,7 +130,7 @@
  ],
  "icon": "fa fa-user",
  "links": [],
- "modified": "2026-06-16 16:04:12.762960",
+ "modified": "2026-08-21 23:11:41.847540",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Driver",
@@ -173,6 +173,22 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "role": "Fulfillment User",
+   "select": 1
+  },
+  {
+   "role": "Sales User",
+   "select": 1
+  },
+  {
+   "role": "Stock Manager",
+   "select": 1
+  },
+  {
+   "role": "Stock User",
+   "select": 1
   }
  ],
  "quick_entry": 1,

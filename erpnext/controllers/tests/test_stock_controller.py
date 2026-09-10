@@ -8,15 +8,6 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestStockControllerConversions(ERPNextTestSuite):
-	@staticmethod
-	def _cancel_and_delete(doctype, name):
-		if not frappe.db.exists(doctype, name):
-			return
-		doc = frappe.get_doc(doctype, name)
-		if doc.docstatus == 1:
-			doc.cancel()
-		frappe.delete_doc(doctype, name, force=1)
-
 	def test_future_sle_exists_detects_later_entries(self):
 		# future_sle_exists / get_conditions_to_validate_future_sle were converted to query builder
 		# (Count + Criterion.any). A later SLE for the same item+warehouse must be detected, which
@@ -26,8 +17,7 @@ class TestStockControllerConversions(ERPNextTestSuite):
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 		item = make_item("_Test Future SLE Item", {"is_stock_item": 1}).name
-		se = make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
-		self.addCleanup(self._cancel_and_delete, "Stock Entry", se.name)
+		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
 
 		# Pretend a different voucher posts a day earlier for the same item/warehouse: the existing
 		# (later) SLE must be reported as a future entry.
@@ -52,7 +42,6 @@ class TestStockControllerConversions(ERPNextTestSuite):
 			posting_date=add_days(today(), -5),
 			posting_time="01:00:00",
 		)
-		self.addCleanup(self._cancel_and_delete, "Stock Entry", opening.name)
 
 		return opening
 
@@ -106,7 +95,6 @@ class TestStockControllerConversions(ERPNextTestSuite):
 		finally:
 			stock_ledger.make_entry = original_make_entry
 
-		self.addCleanup(self._cancel_and_delete, "Stock Entry", entry.name)
 		if inject is not None:
 			self.assertTrue(injected, "the later SL Entry was not written during the submit")
 
@@ -126,9 +114,6 @@ class TestStockControllerConversions(ERPNextTestSuite):
 				pluck="name",
 			)
 		)
-		for name in names:
-			self.addCleanup(frappe.delete_doc, "Repost Item Valuation", name, force=1)
-
 		return names
 
 	def test_repost_queued_for_entry_backdated_while_its_sl_entries_were_written(self):

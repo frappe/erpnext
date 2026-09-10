@@ -4,6 +4,7 @@ import copy
 
 import frappe
 from frappe import _
+from frappe.utils import add_to_date
 
 from erpnext.accounts.doctype.mode_of_payment.test_mode_of_payment import (
 	set_default_account_for_mode_of_payment,
@@ -53,14 +54,14 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 
 		w2 = frappe.get_doc(w.doctype, w.name)
 
-		import time
-
-		time.sleep(1)
 		w.save()
-
-		import time
-
-		time.sleep(1)
+		frappe.db.set_value(
+			w.doctype,
+			w.name,
+			"modified",
+			add_to_date(w.modified, seconds=1),
+			update_modified=False,
+		)
 		self.assertRaises(frappe.TimestampMismatchError, w2.save)
 
 	def test_change_naming_series(self):
@@ -902,9 +903,6 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		self.assertEqual(pos_inv.items[0].rate, 300)
 
 	def test_delivered_serial_no_case(self):
-		from erpnext.accounts.doctype.pos_invoice_merge_log.test_pos_invoice_merge_log import (
-			init_user_and_profile,
-		)
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 
@@ -915,8 +913,6 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		delivered_serial_no = get_serial_nos_from_bundle(dn.get("items")[0].serial_and_batch_bundle)[0]
 
 		self.assertEqual(serial_no, delivered_serial_no)
-
-		init_user_and_profile()
 
 		pos_inv = create_pos_invoice(
 			item_code="_Test Serialized Item With Series",
@@ -931,13 +927,9 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 
 	def test_bundle_stock_availability_validation(self):
 		from erpnext.accounts.doctype.pos_invoice.pos_invoice import ProductBundleStockValidationError
-		from erpnext.accounts.doctype.pos_invoice_merge_log.test_pos_invoice_merge_log import (
-			init_user_and_profile,
-		)
 		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
 		from erpnext.stock.doctype.item.test_item import create_item
-
-		init_user_and_profile()
+		from erpnext.stock.utils import get_stock_balance
 
 		frappe.set_user("Administrator")
 
@@ -959,9 +951,18 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 				is_stock_item=1,
 			)
 
-		# Add initial stock: SubA=5, SubB=2
-		make_stock_entry(item_code=sub_item_a, target=warehouse, qty=5, company=company)
-		make_stock_entry(item_code=sub_item_b, target=warehouse, qty=2, company=company)
+		# Set initial stock to SubA=5 and SubB=2, even when this test is rerun on the same site.
+		for item_code, target_qty in ((sub_item_a, 5), (sub_item_b, 2)):
+			balance = get_stock_balance(item_code, warehouse)
+			difference = target_qty - balance
+			if difference:
+				make_stock_entry(
+					item_code=item_code,
+					to_warehouse=warehouse if difference > 0 else None,
+					from_warehouse=warehouse if difference < 0 else None,
+					qty=abs(difference),
+					company=company,
+				)
 
 		# Create Product Bundle: Test Bundle (SubA x2 + SubB x1)
 		bundle_item = "_Test Bundle"
@@ -1010,16 +1011,19 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 
 def create_pos_invoice(**args):
 	args = frappe._dict(args)
-	pos_profile = None
-	if not args.pos_profile:
-		pos_profile = make_pos_profile()
-		pos_profile.save()
+	pos_profile_name = args.pos_profile
+	if not pos_profile_name:
+		pos_profile_name = frappe.db.exists("POS Profile", "_Test POS Profile")
+		if not pos_profile_name:
+			pos_profile = make_pos_profile()
+			pos_profile.save()
+			pos_profile_name = pos_profile.name
 
 	pos_inv = frappe.new_doc("POS Invoice")
 	pos_inv.update(args)
 	pos_inv.update_stock = 1
 	pos_inv.is_pos = 1
-	pos_inv.pos_profile = args.pos_profile or pos_profile.name
+	pos_inv.pos_profile = pos_profile_name
 
 	if args.posting_date:
 		pos_inv.set_posting_time = 1

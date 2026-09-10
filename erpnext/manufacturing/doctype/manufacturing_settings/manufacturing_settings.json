@@ -16,6 +16,7 @@
   "update_bom_costs_automatically",
   "column_break_lhyt",
   "allow_editing_of_items_and_quantities_in_work_order",
+  "allow_alternative_finished_goods",
   "over_production_for_sales_and_work_order_section",
   "overproduction_percentage_for_sales_order",
   "column_break_16",
@@ -233,6 +234,13 @@
   },
   {
    "default": "0",
+   "description": "If enabled, the produced item of a Work Order can be converted into one of its alternative items (defined via Item Alternative) using the 'Change Finished Item' action. The conversion creates a Repack entry linked to the Work Order.",
+   "fieldname": "allow_alternative_finished_goods",
+   "fieldtype": "Check",
+   "label": "Allow Alternative Finished Goods"
+  },
+  {
+   "default": "0",
    "description": "To include sub-assembly costs and secondary items in Finished Goods on a work order without using a job card, when the 'Use Multi-Level BOM' option is enabled.",
    "fieldname": "set_op_cost_and_secondary_items_from_sub_assemblies",
    "fieldtype": "Check",
@@ -244,7 +252,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-03-16 13:28:20.714576",
+ "modified": "2026-08-27 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing Settings",

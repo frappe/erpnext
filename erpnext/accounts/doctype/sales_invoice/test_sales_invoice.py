@@ -7,7 +7,7 @@ import json
 import frappe
 from frappe import qb
 from frappe.model.dynamic_links import get_dynamic_link_map
-from frappe.utils import add_days, cint, flt, format_date, getdate, nowdate, today
+from frappe.utils import add_days, add_to_date, cint, flt, format_date, getdate, nowdate, today
 
 import erpnext
 from erpnext.accounts.doctype.account.test_account import create_account, get_inventory_account
@@ -129,14 +129,14 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 		w2 = frappe.get_doc(w.doctype, w.name)
 
-		import time
-
-		time.sleep(1)
 		w.save()
-
-		import time
-
-		time.sleep(1)
+		frappe.db.set_value(
+			w.doctype,
+			w.name,
+			"modified",
+			add_to_date(w.modified, seconds=1),
+			update_modified=False,
+		)
 		self.assertRaises(frappe.TimestampMismatchError, w2.save)
 
 	def test_sales_invoice_change_naming_series(self):
@@ -1580,6 +1580,35 @@ class TestSalesInvoice(ERPNextTestSuite):
 		self.assertEqual(pos.change_amount, 10)
 
 		self.validate_pos_gl_entry(pos, pos, 60, validate_without_change_gle=True)
+
+		frappe.db.set_single_value("POS Settings", "post_change_gl_entries", 1)
+
+	def test_pos_change_amount_multi_currency_gl_entry(self):
+		from erpnext.accounts.doctype.sales_invoice.services.gl_composer import SalesInvoiceGLComposer
+
+		frappe.db.set_single_value("POS Settings", "post_change_gl_entries", 0)
+
+		si = create_sales_invoice(do_not_save=True)
+		si.is_pos = 1
+		si.currency = "USD"
+		si.conversion_rate = 50
+		si.party_account_currency = "USD"
+		si.account_for_change_amount = "Cash - _TC"
+		si.change_amount = 50
+		si.base_change_amount = 2500
+		si.append(
+			"payments",
+			{"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 150, "base_amount": 7500},
+		)
+
+		gl_entries = []
+		SalesInvoiceGLComposer(si).make_pos_gl_entries(gl_entries)
+
+		debtors_entry = next(entry for entry in gl_entries if entry["account"] == si.debit_to)
+		cash_entry = next(entry for entry in gl_entries if entry["account"] == "Cash - _TC")
+
+		self.assertEqual(flt(debtors_entry["credit"]), 5000.0)
+		self.assertEqual(flt(cash_entry["debit"]), 5000.0)
 
 		frappe.db.set_single_value("POS Settings", "post_change_gl_entries", 1)
 
@@ -3817,25 +3846,12 @@ class TestSalesInvoice(ERPNextTestSuite):
 		# enable common party accounting
 		frappe.db.set_single_value("Accounts Settings", "enable_common_party_accounting", 1)
 
-		# create a dimension and make it mandatory
-		if not frappe.get_all("Accounting Dimension", filters={"document_type": "Department"}):
-			dim = frappe.get_doc(
-				{
-					"doctype": "Accounting Dimension",
-					"document_type": "Department",
-					"dimension_defaults": [{"company": "_Test Company", "mandatory_for_bs": True}],
-				}
-			)
-			dim.save()
-		else:
-			dim = frappe.get_doc(
-				"Accounting Dimension",
-				frappe.get_all("Accounting Dimension", filters={"document_type": "Department"})[0],
-			)
-			dim.disabled = False
-			dim.dimension_defaults = []
-			dim.append("dimension_defaults", {"company": "_Test Company", "mandatory_for_bs": True})
-			dim.save()
+		# make the shared department dimension mandatory
+		dim = frappe.get_doc("Accounting Dimension", {"document_type": "Department"})
+		dim.disabled = False
+		dim.dimension_defaults = []
+		dim.append("dimension_defaults", {"company": "_Test Company", "mandatory_for_bs": True})
+		dim.save()
 
 		# create a sales invoice
 		si = create_sales_invoice(
@@ -5790,12 +5806,6 @@ def create_internal_parties():
 	)
 
 	create_internal_customer(
-		customer_name="_Test Internal Customer 2",
-		represents_company="_Test Company with perpetual inventory",
-		allowed_to_interact_with="_Test Company with perpetual inventory",
-	)
-
-	create_internal_customer(
 		customer_name="_Test Internal Customer 3",
 		represents_company="_Test Company",
 		allowed_to_interact_with="_Test Company",
@@ -5813,12 +5823,6 @@ def create_internal_parties():
 		supplier_name="_Test Internal Supplier",
 		represents_company="Wind Power LLC",
 		allowed_to_interact_with="_Test Company 1",
-	)
-
-	create_internal_supplier(
-		supplier_name="_Test Internal Supplier 2",
-		represents_company="_Test Company with perpetual inventory",
-		allowed_to_interact_with="_Test Company with perpetual inventory",
 	)
 
 	create_internal_supplier(

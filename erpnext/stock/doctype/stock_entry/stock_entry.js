@@ -176,6 +176,13 @@ frappe.ui.form.on("Stock Entry", {
 			frm.set_df_property("fg_completed_qty", "read_only", 1);
 			frm.set_df_property("get_items", "hidden", 1);
 		}
+
+		if (frm.doc.pick_list) {
+			frm.set_df_property("get_items", "hidden", 1);
+			if (!frm.doc.job_card) {
+				frm.set_df_property("fg_completed_qty", "read_only", 1);
+			}
+		}
 	},
 
 	setup_quality_inspection: function (frm) {
@@ -281,6 +288,14 @@ frappe.ui.form.on("Stock Entry", {
 	refresh: function (frm) {
 		frm.trigger("get_items_from_transit_entry");
 		frm.trigger("toggle_warehouse_fields");
+		frm.trigger("toggle_weight_per_piece");
+
+		// only BOM-less rows are editable, and they cannot allocate a BOM percentage;
+		// read-only rows from a BOM still display their stored % of FG Cost
+		frm.fields_dict.items.grid.update_docfield_property("valuation_type", "options", [
+			"Valuation Rate",
+			"Manual",
+		]);
 		erpnext.toggle_serial_batch_fields(frm);
 
 		if (!frm.doc.docstatus && !frm.doc.subcontracting_inward_order) {
@@ -601,12 +616,25 @@ frappe.ui.form.on("Stock Entry", {
 		frm.events.show_bom_custom_button(frm);
 		frm.trigger("add_to_transit");
 		frm.trigger("toggle_warehouse_fields");
+		frm.trigger("toggle_weight_per_piece");
 
 		frm.fields_dict.items.grid.update_docfield_property(
 			"basic_rate",
 			"read_only",
 			frm.doc.purpose == "Material Receipt" ? 0 : 1
 		);
+	},
+
+	toggle_weight_per_piece(frm) {
+		if (!frm.doc.stock_entry_type || frm.doc.purpose !== "Repack") {
+			frm.toggle_display("weight_per_piece", false);
+			return;
+		}
+
+		frappe.db.get_value("Stock Entry Type", frm.doc.stock_entry_type, "batch_split", (r) => {
+			frm.toggle_display("weight_per_piece", cint(r.batch_split));
+			frm.toggle_reqd("weight_per_piece", cint(r.batch_split));
+		});
 	},
 
 	toggle_warehouse_fields(frm) {
@@ -998,6 +1026,29 @@ frappe.ui.form.on("Stock Entry Detail", {
 			"read_only",
 			row?.set_basic_rate_manually ? 0 : 1
 		);
+	},
+
+	secondary_item_type(frm, cdt, cdn) {
+		const row = locals[cdt][cdn];
+		if (row.bom_secondary_item) return;
+
+		if (!row.secondary_item_type) {
+			if (row.valuation_type) {
+				frappe.model.set_value(cdt, cdn, { valuation_type: "", set_basic_rate_manually: 0 });
+			}
+			return;
+		}
+
+		if (!row.valuation_type) {
+			frappe.model.set_value(cdt, cdn, "valuation_type", "Valuation Rate");
+		}
+	},
+
+	valuation_type(frm, cdt, cdn) {
+		const row = locals[cdt][cdn];
+		if (!row.secondary_item_type || row.bom_secondary_item) return;
+
+		frappe.model.set_value(cdt, cdn, "set_basic_rate_manually", row.valuation_type === "Manual" ? 1 : 0);
 	},
 
 	conversion_factor(frm, cdt, cdn) {
@@ -1405,10 +1456,14 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 		) {
 			frappe.model.remove_from_locals("Work Order", this.frm.doc.work_order);
 		}
+
+		if (this.frm.doc.pick_list) {
+			frappe.model.remove_from_locals("Pick List", this.frm.doc.pick_list);
+		}
 	}
 
 	fg_completed_qty() {
-		if (!this.frm.doc.job_card) {
+		if (!this.frm.doc.job_card && !this.frm.doc.pick_list) {
 			this.get_items();
 		}
 	}

@@ -1,6 +1,6 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-import unittest
+from unittest.mock import patch
 
 import frappe
 from frappe.query_builder.functions import Sum
@@ -196,7 +196,7 @@ class TestLoyaltyProgram(ERPNextTestSuite):
 		for d in company_wise_info:
 			self.assertTrue(d.get("loyalty_points"))
 
-	@unittest.mock.patch("erpnext.accounts.doctype.loyalty_program.loyalty_program.get_loyalty_details")
+	@patch("erpnext.accounts.doctype.loyalty_program.loyalty_program.get_loyalty_details")
 	def test_tier_selection(self, mock_get_loyalty_details):
 		# Create a new loyalty program with multiple tiers
 		loyalty_program = frappe.get_doc(

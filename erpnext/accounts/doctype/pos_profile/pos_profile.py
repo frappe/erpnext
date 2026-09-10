@@ -289,6 +289,11 @@ def pos_profile_query(doctype: str, txt: str, searchfield: str, start: int, page
 	user = frappe.session["user"]
 	company = filters.get("company") or frappe.defaults.get_user_default("company")
 
+	allowed_pos_profiles = frappe.get_list("POS Profile", pluck="name")
+
+	if not allowed_pos_profiles:
+		return {}
+
 	pf = frappe.qb.DocType("POS Profile")
 	pfu = frappe.qb.DocType("POS Profile User")
 
@@ -298,6 +303,7 @@ def pos_profile_query(doctype: str, txt: str, searchfield: str, start: int, page
 		.on(pfu.parent == pf.name)
 		.select(pf.name)
 		.where((pfu.user == user) & (pf.company == company) & pf.name.like(f"%{txt}%") & (pf.disabled == 0))
+		.where(pf.name.isin(allowed_pos_profiles))
 		.limit(page_len)
 		.offset(start)
 		.run()
@@ -314,6 +320,7 @@ def pos_profile_query(doctype: str, txt: str, searchfield: str, start: int, page
 				& (pf.company == company)
 				& pf.name.like(f"%{txt}%")
 				& (pf.disabled == 0)
+				& (pf.name.isin(allowed_pos_profiles))
 			)
 			.run()
 		)

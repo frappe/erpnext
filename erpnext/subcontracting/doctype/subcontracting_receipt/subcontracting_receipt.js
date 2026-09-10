@@ -31,6 +31,9 @@ frappe.ui.form.on("Subcontracting Receipt", {
 		frappe.dynamic_link = { doc: frm.doc, fieldname: "supplier", doctype: "Supplier" };
 
 		erpnext.toggle_serial_batch_fields(frm);
+		erpnext.accounts.ledger_preview.show_accounting_ledger_preview(frm);
+		erpnext.accounts.ledger_preview.show_stock_ledger_preview(frm);
+
 		if (frm.doc.docstatus === 1) {
 			frm.add_custom_button(
 				__("Stock Ledger"),

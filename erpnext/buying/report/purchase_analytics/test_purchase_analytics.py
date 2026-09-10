@@ -43,6 +43,44 @@ class TestPurchaseAnalytics(ERPNextTestSuite):
 			company=COMPANY, supplier=SUPPLIER, qty=qty, rate=rate, transaction_date="2019-04-10"
 		)
 
+	def test_supplier_entity_filter(self):
+		filters = self._filters(tree_type="Supplier", entity=[SUPPLIER], curves="all")
+		base_total = flt(self._rows(filters).get(SUPPLIER, {}).get("total", 0.0))
+
+		po = self.make_po()
+		columns, data, _message, chart, *_rest = execute(filters)
+
+		self.assertTrue(columns)
+		self.assertEqual({row["entity"] for row in data}, {SUPPLIER})
+		self.assertAlmostEqual(data[0]["total"] - base_total, flt(po.base_net_total), places=2)
+
+		supplier_name = frappe.db.get_value("Supplier", SUPPLIER, "supplier_name")
+		self.assertEqual({dataset["name"] for dataset in chart["data"]["datasets"]}, {supplier_name})
+
+	def test_parent_supplier_group_filter_preserves_rollup(self):
+		self.make_po()
+		filters = self._filters(tree_type="Supplier Group")
+		unfiltered = self._rows(filters)
+		filtered = self._rows(self._filters(tree_type="Supplier Group", entity=["All Supplier Groups"]))
+
+		self.assertEqual(set(filtered), {"All Supplier Groups"})
+		self.assertAlmostEqual(
+			filtered["All Supplier Groups"]["total"],
+			unfiltered["All Supplier Groups"]["total"],
+			places=2,
+		)
+
+	def test_supplier_group_entity_filter(self):
+		self.make_po()
+		unfiltered = self._rows(self._filters(tree_type="Supplier Group"))
+		filtered = self._rows(self._filters(tree_type="Supplier Group", entity=[SUPPLIER_GROUP]))
+
+		self.assertEqual(set(filtered), {SUPPLIER_GROUP})
+		self.assertEqual(filtered[SUPPLIER_GROUP]["indent"], 0)
+		self.assertAlmostEqual(
+			filtered[SUPPLIER_GROUP]["total"], unfiltered[SUPPLIER_GROUP]["total"], places=2
+		)
+
 	def test_supplier_group_tree_rolls_up_to_root(self):
 		filters = self._filters(tree_type="Supplier Group")
 		base = self._rows(filters)

@@ -149,8 +149,8 @@ class RepostItemValuation(Document):
 		year_end_date = self.get_max_period_closing_date(self.company)
 		if year_end_date and getdate(self.posting_date) <= getdate(year_end_date):
 			date = frappe.format(year_end_date, "Date")
-			msg = f"Due to period closing, you cannot repost item valuation before {date}"
-			frappe.throw(_(msg))
+			msg = _("Due to period closing, you cannot repost item valuation before {0}").format(date)
+			frappe.throw(msg)
 
 		# Accounting Period
 		if self.voucher_type:
@@ -286,6 +286,8 @@ class RepostItemValuation(Document):
 
 	@frappe.whitelist()
 	def restart_reposting(self):
+		self.check_permission("write")
+
 		self.set_status("Queued", write=False)
 		self.current_index = 0
 		self.distinct_item_and_warehouse = None

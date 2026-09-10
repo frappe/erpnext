@@ -16,6 +16,8 @@ frappe.ui.form.on("Accounting Dimension", {
 			return {
 				filters: {
 					name: ["not in", invalid_doctypes],
+					istable: 0,
+					issingle: 0,
 				},
 			};
 		});
