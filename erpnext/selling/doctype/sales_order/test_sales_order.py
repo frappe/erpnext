@@ -290,6 +290,48 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 
 		self.assertEqual(len(make_sales_invoice(so.name).items), 0)
 
+	def test_fully_billed_order_is_not_offered_within_billing_allowance(self):
+		item = make_item(
+			"_Test Fully Billed Allowance Item",
+			{"is_stock_item": 1, "over_billing_allowance": 0},
+		).name
+		so = make_sales_order(item_code=item, qty=10, rate=100)
+
+		si = make_sales_invoice(so.name)
+		si.insert()
+		si.submit()
+
+		so.load_from_db()
+		self.assertEqual(flt(so.per_billed), 100)
+
+		filters = {"docstatus": 1, "company": so.company, "customer": so.customer}
+
+		with change_settings("Accounts Settings", {"over_billing_allowance": 100}):
+			self.assertFalse(has_potentially_billable_items(so.name))
+
+			rows = get_potentially_billable_sales_orders("Sales Order", "", "name", 0, 50, filters)
+			self.assertNotIn(so.name, [row.name for row in rows])
+
+			self.assertEqual(len(make_sales_invoice(so.name).get("items")), 0)
+
+	def test_order_with_sub_precision_pending_qty_is_not_offered(self):
+		item = make_item("_Test Sub Precision Qty Item", {"is_stock_item": 1}).name
+		so = make_sales_order(item_code=item, qty=10, rate=100)
+
+		si = make_sales_invoice(so.name)
+		si.get("items")[0].rate = 90
+		si.insert()
+		si.submit()
+
+		qty_precision = frappe.get_precision("Sales Order Item", "qty")
+		billed_qty = 10 - 10 ** -(qty_precision + 1)
+		frappe.db.set_value(
+			"Sales Invoice Item", si.get("items")[0].name, "qty", billed_qty, update_modified=False
+		)
+
+		self.assertFalse(has_potentially_billable_items(so.name))
+		self.assertEqual(len(make_sales_invoice(so.name).get("items")), 0)
+
 	def test_make_sales_invoice_after_return_and_redelivery(self):
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
 
