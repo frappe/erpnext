@@ -15,6 +15,7 @@ def send_message(sender: str, message: str, subject: str = "Website Query"):
 
 	website_send_message(sender, message, subject)
 
+	subject = escape_html(subject)
 	message = escape_html(message)
 
 	oppotunity_creation = frappe.get_single_value(
