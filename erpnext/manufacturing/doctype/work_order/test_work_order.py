@@ -1132,7 +1132,7 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 10))
 		for row in stock_entry.items:
-			if row.secondary_item_type or row.is_legacy_scrap_item:
+			if row.secondary_item_type or row.valuation_type:
 				self.assertEqual(row.qty, 1)
 
 		# Partial Job Card 1 with qty 10
@@ -1144,7 +1144,7 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 10))
 		for row in stock_entry.items:
-			if row.secondary_item_type or row.is_legacy_scrap_item:
+			if row.secondary_item_type or row.valuation_type:
 				self.assertEqual(row.qty, 2)
 
 		# Partial Job Card 2 with qty 10
@@ -1357,7 +1357,7 @@ class TestWorkOrder(ERPNextTestSuite):
 			wo_order = make_wo_order_test_record(item=fg_item, qty=2, skip_transfer=True)
 			serial_nos = self.get_serial_nos_for_fg(wo_order.name)
 
-			stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 2))
+			stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 10))
 			stock_entry.set_work_order_details()
 			for row in stock_entry.items:
 				if row.item_code == fg_item:
@@ -1394,10 +1394,10 @@ class TestWorkOrder(ERPNextTestSuite):
 		item.save()
 
 		try:
-			wo_order = make_wo_order_test_record(item=fg_item, batch_size=1, qty=2, skip_transfer=True)
+			wo_order = make_wo_order_test_record(item=fg_item, batch_size=5, qty=10, skip_transfer=True)
 			serial_nos = self.get_serial_nos_for_fg(wo_order.name)
 
-			stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 2))
+			stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 10))
 			stock_entry.set_work_order_details()
 			for row in stock_entry.items:
 				if row.item_code == fg_item:
@@ -1479,11 +1479,9 @@ class TestWorkOrder(ERPNextTestSuite):
 		del transfer_entry.get("items")[0]  # transfer only one RM
 		transfer_entry.submit()
 
-		# One required item is still missing, so no finished-good quantity is covered yet.
+		# WO's "Material Transferred for Mfg" shows all is transferred, one RM is pending
 		work_order.reload()
-		self.assertEqual(transfer_entry.fg_completed_qty, 0)
-		self.assertEqual(work_order.material_transferred_for_manufacturing, 0)
-		self.assertEqual(work_order.status, "In Process")
+		self.assertEqual(work_order.material_transferred_for_manufacturing, 1)
 		self.assertEqual(work_order.required_items[0].transferred_qty, 0)
 		self.assertEqual(work_order.required_items[1].transferred_qty, 2)
 
@@ -1502,39 +1500,6 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(work_order.material_transferred_for_manufacturing, 1)
 		self.assertEqual(work_order.required_items[0].transferred_qty, 1)
 		self.assertEqual(work_order.required_items[1].transferred_qty, 2)
-
-	def test_material_transfer_claim_follows_actual_coverage(self):
-		work_order = make_wo_order_test_record(planned_start_date=now(), qty=4)
-		test_stock_entry.make_stock_entry(
-			item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=5000.0
-		)
-		test_stock_entry.make_stock_entry(
-			item_code="_Test Item Home Desktop 100",
-			target="_Test Warehouse - _TC",
-			qty=20,
-			basic_rate=1000.0,
-		)
-
-		transfer_entry = frappe.get_doc(
-			make_stock_entry(work_order.name, "Material Transfer for Manufacture", 4)
-		)
-		for row in transfer_entry.items:
-			if row.item_code == "_Test Item":
-				row.qty = 1
-		transfer_entry.submit()
-
-		work_order.reload()
-		self.assertEqual(transfer_entry.fg_completed_qty, 1)
-		self.assertEqual(work_order.material_transferred_for_manufacturing, 1)
-
-		remainder_entry = frappe.get_doc(
-			make_stock_entry(work_order.name, "Material Transfer for Manufacture", 3)
-		)
-		remainder_entry.submit()
-
-		work_order.reload()
-		self.assertEqual(remainder_entry.fg_completed_qty, 3)
-		self.assertEqual(work_order.material_transferred_for_manufacturing, 4)
 
 	def test_material_transferred_min_fraction_on_partial_pick_list(self):
 		"""Pick-list flow (fg_completed_qty = 0): 'Material Transferred for Manufacturing'
@@ -1597,97 +1562,6 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		work_order.reload()
 		self.assertEqual(work_order.material_transferred_for_manufacturing, 2.0)
-
-	def test_material_transferred_ignores_hidden_precision_difference(self):
-		work_order = make_wo_order_test_record(planned_start_date=now(), qty=2)
-		test_stock_entry.make_stock_entry(
-			item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=5000.0
-		)
-		test_stock_entry.make_stock_entry(
-			item_code="_Test Item Home Desktop 100",
-			target="_Test Warehouse - _TC",
-			qty=10,
-			basic_rate=1000.0,
-		)
-
-		precision = work_order.precision("required_qty", "required_items")
-		hidden_difference = 4 / (10 ** (precision + 1))
-		row = work_order.required_items[0]
-		row.db_set("required_qty", flt(row.required_qty) + hidden_difference, update_modified=False)
-		work_order.reload()
-		required_qty = {row.item_code: flt(row.required_qty) for row in work_order.required_items}
-
-		transfer_entry = frappe.get_doc(
-			make_stock_entry(work_order.name, "Material Transfer for Manufacture", 0)
-		)
-		for item in transfer_entry.items:
-			item.qty = flt(required_qty[item.item_code], precision)
-			item.transfer_qty = item.qty
-		transfer_entry.submit()
-
-		work_order.reload()
-		self.assertEqual(
-			flt(work_order.required_items[0].required_qty, precision),
-			flt(work_order.required_items[0].transferred_qty, precision),
-		)
-		self.assertEqual(work_order.material_transferred_for_manufacturing, work_order.qty)
-
-	def test_repair_material_transfer_precision_patch(self):
-		from erpnext.patches.v16_0.repair_work_order_material_transfer import (
-			execute,
-			get_precision_affected_work_orders,
-		)
-
-		precision = frappe.get_precision("Work Order Item", "required_qty")
-		hidden_difference = 4 / (10 ** (precision + 1))
-		work_order = make_wo_order_test_record(planned_start_date=now(), qty=2)
-		for index, row in enumerate(work_order.required_items):
-			required_qty = flt(row.required_qty) + (hidden_difference if index == 0 else 0)
-			row.db_set(
-				{
-					"required_qty": required_qty,
-					"transferred_qty": flt(required_qty, precision),
-				},
-				update_modified=False,
-			)
-		work_order.db_set("material_transferred_for_manufacturing", 1.99, update_modified=False)
-
-		partial_work_order = make_wo_order_test_record(planned_start_date=now(), qty=2)
-		for row in partial_work_order.required_items:
-			row.db_set("transferred_qty", row.required_qty, update_modified=False)
-		partial_row = partial_work_order.required_items[0]
-		partial_row.db_set(
-			"transferred_qty",
-			flt(partial_row.required_qty, precision) - (1 / (10**precision)),
-			update_modified=False,
-		)
-		partial_work_order.db_set("material_transferred_for_manufacturing", 1.99, update_modified=False)
-
-		terminal_work_orders = []
-		for status in ("Stopped", "Closed", "Completed"):
-			terminal_work_order = make_wo_order_test_record(planned_start_date=now(), qty=2)
-			for row in terminal_work_order.required_items:
-				row.db_set("transferred_qty", row.required_qty, update_modified=False)
-			terminal_work_order.db_set(
-				{"material_transferred_for_manufacturing": 1.99, "status": status},
-				update_modified=False,
-			)
-			terminal_work_orders.append(terminal_work_order)
-
-		updates = get_precision_affected_work_orders()
-		self.assertIn(work_order.name, updates)
-		self.assertNotIn(partial_work_order.name, updates)
-		for terminal_work_order in terminal_work_orders:
-			self.assertNotIn(terminal_work_order.name, updates)
-
-		execute()
-		work_order.reload()
-		partial_work_order.reload()
-		self.assertEqual(work_order.material_transferred_for_manufacturing, work_order.qty)
-		self.assertEqual(partial_work_order.material_transferred_for_manufacturing, 1.99)
-		for terminal_work_order in terminal_work_orders:
-			terminal_work_order.reload()
-			self.assertEqual(terminal_work_order.material_transferred_for_manufacturing, 1.99)
 
 	def _make_shared_alternative_transfer(self):
 		work_order = make_wo_order_test_record(planned_start_date=now(), qty=2)
@@ -2924,7 +2798,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertTrue(se_doc.additional_costs)
 		secondary_items = []
 		for item in se_doc.items:
-			if item.secondary_item_type or item.is_legacy_scrap_item:
+			if item.secondary_item_type or item.valuation_type:
 				secondary_items.append(item.item_code)
 
 		self.assertEqual(
@@ -5529,6 +5403,7 @@ class TestWorkOrder(ERPNextTestSuite):
 				"item_name": scrap_item,
 				"qty": 3,
 				"cost_allocation_per": 25,
+				"valuation_type": "% of FG Cost",
 				"process_loss_per": 0,
 			},
 		)
@@ -5577,6 +5452,7 @@ class TestWorkOrder(ERPNextTestSuite):
 				"item_name": scrap_item,
 				"qty": 3,
 				"cost_allocation_per": 25,
+				"valuation_type": "% of FG Cost",
 				"process_loss_per": 0,
 			},
 		)
@@ -5911,7 +5787,15 @@ def prepare_boms_for_sub_assembly_test():
 			do_not_submit=True,
 		)
 
-		bom.append("secondary_items", {"item_code": "Test Final Scrap Item 1", "qty": 1, "is_legacy": 1})
+		bom.append(
+			"secondary_items",
+			{
+				"item_code": "Test Final Scrap Item 1",
+				"secondary_item_type": "Scrap",
+				"qty": 1,
+				"valuation_type": "Valuation Rate",
+			},
+		)
 
 		bom.submit()
 
@@ -5924,7 +5808,15 @@ def prepare_boms_for_sub_assembly_test():
 			do_not_submit=True,
 		)
 
-		bom.append("secondary_items", {"item_code": "Test Final Scrap Item 2", "qty": 1, "is_legacy": 1})
+		bom.append(
+			"secondary_items",
+			{
+				"item_code": "Test Final Scrap Item 2",
+				"secondary_item_type": "Scrap",
+				"qty": 1,
+				"valuation_type": "Valuation Rate",
+			},
+		)
 
 		bom.submit()
 

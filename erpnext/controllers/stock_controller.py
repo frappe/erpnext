@@ -337,8 +337,12 @@ class StockController(AccountsController):
 		items = frappe.get_all(
 			"Delivery Note Item",
 			filters={"parent": self.name, "parenttype": "Delivery Note"},
-			fields=["name", "qty", "returned_qty", "rate", "amount", "billed_amt"],
+			fields=["name", "qty", "returned_qty", "rate", "amount", "billed_amt", "closed"],
 		)
+		# A written off row leaves the basis. Once every row is written off there is
+		# nothing left to measure against, so fall back to the whole table.
+		items = [item for item in items if not item.closed] or items
+
 		total_amount = sum(flt(item.amount) for item in items)
 		total_returned = sum(flt(item.returned_qty) * flt(item.rate) for item in items)
 		# Preserve the original amount basis once the entire Delivery Note is returned.
@@ -637,7 +641,7 @@ def show_accounting_ledger_preview(company: str, doctype: str, docname: str):
 def show_stock_ledger_preview(company: str, doctype: str, docname: str):
 	from erpnext.controllers.ledger_preview import get_stock_ledger_preview
 
-	filters = frappe._dict(company=company)
+	filters = frappe._dict(company=company, valuation_field_type="Currency")
 	doc = frappe.get_lazy_doc(doctype, docname)
 	doc.check_permission("read")
 	doc.run_method("before_sl_preview")

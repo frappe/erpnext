@@ -27,6 +27,7 @@ def get_payment_entry_against_order(
 ) -> dict | Document:
 	"""Build an advance-payment Journal Entry against an unbilled Sales/Purchase Order."""
 	ref_doc = frappe.get_doc(dt, dn)
+	ref_doc.check_permission()
 
 	if flt(ref_doc.per_billed, 2) > 0:
 		frappe.throw(_("Can only make payment against unbilled {0}").format(dt))
@@ -78,6 +79,8 @@ def get_payment_entry_against_invoice(
 ) -> dict | Document:
 	"""Build a payment Journal Entry against a Sales/Purchase Invoice's outstanding amount."""
 	ref_doc = frappe.get_doc(dt, dn)
+	ref_doc.check_permission()
+
 	if dt == "Sales Invoice":
 		party_type = "Customer"
 		party_account = get_party_account_based_on_invoice_discounting(dn) or ref_doc.debit_to
@@ -118,6 +121,8 @@ def get_payment_entry(ref_doc, args: dict) -> dict | Document:
 	Returns the Journal Entry document when `args["journal_entry"]` is truthy, otherwise its
 	dict (for client calls).
 	"""
+	frappe.has_permission("Journal Entry", ptype="create", throw=True)
+
 	je = frappe.new_doc("Journal Entry")
 	je.update({"voucher_type": "Bank Entry", "company": ref_doc.company, "remark": args.get("remarks")})
 

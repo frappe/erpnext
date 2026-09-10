@@ -426,6 +426,26 @@ $.extend(erpnext.utils, {
 		}
 		return rows;
 	},
+	/**
+	 * Row flags for the Account / Cost Center trees: the caller's badges plus
+	 * a shared "Disabled" marker for records shown through the tree's
+	 * "include disabled" toggle.
+	 * @param {Object} node tree node (from treeview_settings.onrender)
+	 * @param {Array<string|HTMLElement>} flags badge markup / elements
+	 */
+	render_tree_node_flags: function (node, flags = []) {
+		if (cint(node.data?.disabled)) {
+			flags.push(frappe.ui.badge({ label: __("Disabled"), variant: "outline" }));
+			node.$tree_link.find("a.tree-label").addClass("text-ink-gray-5");
+		}
+		if (!flags.length) return;
+		const $flags = $(
+			'<span class="tree-node-flags inline-flex items-center gap-1.5 ms-2 shrink-0"></span>'
+		);
+		flags.forEach((flag) => $flags.append(flag));
+		$flags.insertAfter(node.$tree_link.find("a.tree-label"));
+	},
+
 	get_tree_options: function (option) {
 		// get valid options for tree based on user permission & locals dict
 		let unscrub_option = frappe.model.unscrub(option);
@@ -730,24 +750,26 @@ erpnext.utils.update_child_items = function (opts) {
 	const has_reserved_stock = opts.has_reserved_stock ? true : false;
 	const get_precision = (fieldname) => child_meta.fields.find((f) => f.fieldname == fieldname).precision;
 
-	this.data = frm.doc[opts.child_docname].map((d) => {
-		return {
-			docname: d.name,
-			name: d.name,
-			item_code: d.item_code,
-			item_name: d.item_name,
-			delivery_date: d.delivery_date,
-			schedule_date: d.schedule_date,
-			conversion_factor: d.conversion_factor,
-			qty: d.qty,
-			rate: d.rate,
-			uom: d.uom,
-			warehouse: d.warehouse,
-			fg_item: d.fg_item,
-			fg_item_qty: d.fg_item_qty,
-			description: d.description,
-		};
-	});
+	this.data = frm.doc[opts.child_docname]
+		.filter((d) => !d.closed)
+		.map((d) => {
+			return {
+				docname: d.name,
+				name: d.name,
+				item_code: d.item_code,
+				item_name: d.item_name,
+				delivery_date: d.delivery_date,
+				schedule_date: d.schedule_date,
+				conversion_factor: d.conversion_factor,
+				qty: d.qty,
+				rate: d.rate,
+				uom: d.uom,
+				warehouse: d.warehouse,
+				fg_item: d.fg_item,
+				fg_item_qty: d.fg_item_qty,
+				description: d.description,
+			};
+		});
 
 	const fields = [
 		{

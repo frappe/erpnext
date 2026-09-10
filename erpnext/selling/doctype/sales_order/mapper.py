@@ -13,6 +13,8 @@ from frappe.query_builder.functions import Sum
 from frappe.utils import add_days, cint, flt, nowdate, strip_html
 
 from erpnext.accounts.party import CROSS_PARTY_FIELD_NO_MAP, get_party_account
+from erpnext.controllers.item_close import is_bundle_of_closed_row
+from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.manufacturing.doctype.production_plan.production_plan import (
 	get_items_for_material_requests,
 	get_sales_orders,
@@ -130,7 +132,8 @@ def make_material_request(source_name: str, target_doc: str | dict | Document | 
 			"Packed Item": {
 				"doctype": "Material Request Item",
 				"field_map": {"parent": "sales_order", "uom": "stock_uom", "name": "packed_item"},
-				"condition": lambda item: get_remaining_packed_item_qty(item) > 0,
+				"condition": lambda item: get_remaining_packed_item_qty(item) > 0
+				and not is_bundle_of_closed_row(item),
 				"postprocess": update_item,
 			},
 			"Sales Order Item": {
@@ -142,6 +145,7 @@ def make_material_request(source_name: str, target_doc: str | dict | Document | 
 					"bom_no": "bom_no",
 				},
 				"condition": lambda item: not is_product_bundle(item.item_code)
+				and not item.closed
 				and get_remaining_qty(item) > 0,
 				"postprocess": update_item,
 			},
@@ -244,6 +248,8 @@ def make_delivery_note(
 	if kwargs.for_reserved_stock:
 		sre_details = get_sre_reserved_qty_details_for_voucher("Sales Order", source_name)
 
+	mapped_qty_by_item = get_qty_already_mapped(target_doc, "so_detail")
+
 	mapper = {
 		"Sales Order": {
 			"doctype": "Delivery Note",
@@ -307,17 +313,21 @@ def make_delivery_note(
 				return False
 
 		return (
-			((abs(doc.delivered_qty) < abs(doc.qty)) or is_unit_price_row(doc))
+			(
+				(abs(doc.delivered_qty) + abs(mapped_qty_by_item.get(doc.name, 0)) < abs(doc.qty))
+				or (is_unit_price_row(doc) and doc.name not in mapped_qty_by_item)
+			)
 			and doc.delivered_by_supplier != 1
 			and not cint(doc.skip_delivery)
 		)
 
+	def remaining_qty(source):
+		return flt(source.qty) - flt(source.delivered_qty) - flt(mapped_qty_by_item.get(source.name, 0))
+
 	def update_item(source, target, source_parent):
-		target.base_amount = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.base_rate)
-		target.amount = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.rate)
-		target.qty = (
-			flt(source.qty) if is_unit_price_row(source) else flt(source.qty) - flt(source.delivered_qty)
-		)
+		target.base_amount = remaining_qty(source) * flt(source.base_rate)
+		target.amount = remaining_qty(source) * flt(source.rate)
+		target.qty = flt(source.qty) if is_unit_price_row(source) else remaining_qty(source)
 
 		item = get_item_defaults(target.item_code, source_parent.company)
 		item_group = get_item_group_defaults(target.item_code, source_parent.company)
@@ -337,7 +347,7 @@ def make_delivery_note(
 				"name": "so_detail",
 				"parent": "against_sales_order",
 			},
-			"condition": lambda d: condition(d) and select_item(d),
+			"condition": lambda d: condition(d) and not d.closed and select_item(d),
 			"postprocess": update_item,
 		}
 
@@ -445,9 +455,22 @@ def make_sales_invoice(
 	has_unit_price_items = frappe.db.get_value("Sales Order", source_name, "has_unit_price_items")
 	billed_qty_by_item = None
 	pending_qty_by_item = {}
+	amount_allowance_by_item = {}
+	mapped_qty_by_item = get_qty_already_mapped(target_doc, "so_detail")
 
 	def is_unit_price_row(source):
 		return has_unit_price_items and source.qty == 0
+
+	def is_amount_billable(source):
+		from erpnext.controllers.status_updater import get_allowance_for
+
+		if source.item_code not in amount_allowance_by_item:
+			amount_allowance_by_item[source.item_code] = flt(
+				get_allowance_for(source.item_code, qty_or_amount="amount")[0]
+			)
+
+		allowance = amount_allowance_by_item[source.item_code]
+		return abs(flt(source.billed_amt)) < abs(flt(source.amount)) * (1 + allowance / 100)
 
 	def get_billed_qty_by_item():
 		nonlocal billed_qty_by_item
@@ -470,9 +493,8 @@ def make_sales_invoice(
 	def get_pending_qty(source):
 		if source.name not in pending_qty_by_item:
 			billable_qty = get_qty_net_of_returns(source)
-			if source.qty and source.billed_amt:
-				billable_qty -= get_billed_qty_by_item().get(source.name, 0)
-
+			billable_qty -= get_billed_qty_by_item().get(source.name, 0)
+			billable_qty -= mapped_qty_by_item.get(source.name, 0)
 			pending_qty_by_item[source.name] = max(flt(billable_qty, source.precision("qty")), 0)
 
 		return pending_qty_by_item[source.name]
@@ -603,12 +625,13 @@ def make_sales_invoice(
 				"postprocess": update_item,
 				"condition": lambda doc: not args.get("skip_item_mapping")
 				and select_item(doc)
+				and not doc.closed
 				and (
-					True
+					doc.name not in mapped_qty_by_item
 					if is_unit_price_row(doc)
 					else (
 						doc.qty
-						and (doc.base_amount == 0 or abs(doc.billed_amt) < abs(doc.amount))
+						and (doc.base_amount == 0 or is_amount_billable(doc))
 						and get_pending_qty(doc) > 0
 					)
 				),
@@ -818,7 +841,7 @@ def make_purchase_order(
 						"margin_rate_or_amount",
 					],
 					"postprocess": update_item,
-					"condition": lambda doc, s=supplier: filter_items(doc, s),
+					"condition": lambda doc, s=supplier: not doc.closed and filter_items(doc, s),
 				},
 				"Packed Item": {
 					"doctype": "Purchase Order Item",
@@ -840,7 +863,8 @@ def make_purchase_order(
 					],
 					"postprocess": update_item_for_packed_item,
 					"condition": lambda doc: doc.parent_item in item_codes
-					and flt(doc.ordered_qty) < flt(doc.qty),
+					and flt(doc.ordered_qty) < flt(doc.qty)
+					and not is_bundle_of_closed_row(doc),
 				},
 			},
 			target_doc,
@@ -1042,6 +1066,7 @@ def create_pick_list(source_name: str, target_doc: str | dict | Document | None 
 		return (
 			abs(item.delivered_qty) < abs(item.qty)
 			and item.delivered_by_supplier != 1
+			and not item.closed
 			and not is_product_bundle(item.item_code)
 		)
 
@@ -1144,7 +1169,7 @@ def get_mapped_subcontracting_inward_order(
 					"name": "sales_order_item",
 				},
 				"field_no_map": ["qty", "fg_item_qty", "amount"],
-				"condition": lambda item: item.qty != item.subcontracted_qty,
+				"condition": lambda item: item.qty != item.subcontracted_qty and not item.closed,
 			},
 		},
 		target_doc,

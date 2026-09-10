@@ -3,7 +3,7 @@ from collections import defaultdict
 
 import frappe
 from frappe import _, bold
-from frappe.query_builder.functions import Max, Min, Sum
+from frappe.query_builder.functions import Coalesce, Max, Min, NullIf, Sum
 from frappe.utils import ceil, cint, flt, get_link_to_form
 
 from erpnext.manufacturing.doctype.bom.bom import add_additional_cost
@@ -40,7 +40,7 @@ class BaseManufactureStockEntry(BaseStockEntry):
 				not row.s_warehouse
 				and self.doc.from_warehouse
 				and not row.is_finished_item
-				and not row.is_legacy_scrap_item
+				and not row.valuation_type
 				and not row.secondary_item_type
 			):
 				row.s_warehouse = self.doc.from_warehouse
@@ -49,7 +49,7 @@ class BaseManufactureStockEntry(BaseStockEntry):
 			elif (
 				not row.t_warehouse
 				and self.doc.to_warehouse
-				and (row.is_finished_item or row.is_legacy_scrap_item or row.secondary_item_type)
+				and (row.is_finished_item or row.valuation_type or row.secondary_item_type)
 			):
 				row.t_warehouse = self.doc.to_warehouse
 				row.s_warehouse = None
@@ -98,9 +98,12 @@ class BaseManufactureStockEntry(BaseStockEntry):
 		secondary_items = get_secondary_items(self.doc.bom_no, self.doc.work_order)
 		for row in secondary_items:
 			item_args = self.get_item_dict(row)
-			item_args["is_legacy_scrap_item"] = bool(row.get("is_legacy"))
+			item_args["valuation_type"] = row.get("valuation_type")
 			item_args["secondary_item_type"] = row.secondary_item_type
 			item_args["bom_secondary_item"] = row.name
+			if row.get("valuation_type") == "Manual":
+				item_args["set_basic_rate_manually"] = 1
+				item_args["basic_rate"] = flt(row.get("manual_rate"))
 
 			if row.secondary_item_type == "Scrap" and self.wo_doc and self.wo_doc.get("scrap_warehouse"):
 				item_args["t_warehouse"] = self.wo_doc.scrap_warehouse
@@ -597,6 +600,8 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		self.doc.append("items", item_args)
 
 	def _resolve_rm_warehouse(self, row):
+		if self.wo_doc and self.wo_doc.skip_transfer and not self.wo_doc.from_wip_warehouse:
+			return row.get("source_warehouse")
 		if self.doc.from_warehouse:
 			return self.doc.from_warehouse
 		if self.wo_doc and self.wo_doc.from_wip_warehouse:
@@ -866,6 +871,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			return
 
 		secondary_items = self.get_secondary_items_from_job_card()
+		bom_rows = self.get_bom_secondary_item_details(secondary_items)
 		for row in secondary_items:
 			if row.stock_qty <= 0:
 				continue
@@ -875,10 +881,30 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			row.transfer_qty = row.qty
 			row.s_warehouse = None
 			row.t_warehouse = row.warehouse or self.doc.to_warehouse
-			row.is_legacy_scrap_item = row.is_legacy
+			bom_row = bom_rows.get(row.bom_secondary_item, frappe._dict())
+			row.valuation_type = bom_row.get("valuation_type")
+			if row.valuation_type == "Manual":
+				row.set_basic_rate_manually = 1
+				row.basic_rate = (
+					flt(bom_row.cost) / flt(bom_row.stock_qty) if flt(bom_row.get("stock_qty")) else 0
+				)
 			row.secondary_item_type = row.get("secondary_item_type")
 
 			self.doc.append("items", row)
+
+	def get_bom_secondary_item_details(self, secondary_items) -> dict:
+		names = [row.bom_secondary_item for row in secondary_items if row.bom_secondary_item]
+		if not names:
+			return {}
+
+		return {
+			row.name: row
+			for row in frappe.get_all(
+				"BOM Secondary Item",
+				filters={"name": ("in", names)},
+				fields=["name", "valuation_type", "cost", "stock_qty"],
+			)
+		}
 
 	def get_secondary_items_from_job_card(self):
 		if not self.wo_doc.operations:
@@ -896,17 +922,14 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 
 	def _adjust_secondary_item_qtys(self, secondary_items, used_secondary_items, pending_qty):
 		for row in secondary_items:
-			key = (row.item_code, row.secondary_item_type or "")
-			row.stock_qty -= flt(used_secondary_items.get(key))
+			row.stock_qty -= flt(used_secondary_items.get(get_secondary_item_key(row)))
 			row.stock_qty = row.stock_qty * flt(self.doc.fg_completed_qty) / flt(pending_qty)
 
 	def get_used_secondary_items(self):
 		data = self._query_used_secondary_items()
 		used_secondary_items = defaultdict(float)
 		for row in data:
-			secondary_item_type = row.secondary_item_type or ("Scrap" if row.is_legacy_scrap_item else "")
-			key = (row.item_code, secondary_item_type)
-			used_secondary_items[key] += row.qty
+			used_secondary_items[get_secondary_item_key(row)] += row.qty
 		return used_secondary_items
 
 	def _query_used_secondary_items(self):
@@ -916,10 +939,16 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			frappe.qb.from_(se)
 			.inner_join(sed)
 			.on(sed.parent == se.name)
-			.select(sed.item_code, sed.secondary_item_type, sed.is_legacy_scrap_item, sed.qty)
+			.select(
+				sed.item_code,
+				sed.secondary_item_type,
+				sed.valuation_type,
+				sed.qty,
+				sed.bom_secondary_item,
+			)
 			.where(
 				(se.work_order == self.doc.work_order)
-				& ((sed.secondary_item_type.isnotnull()) | (sed.is_legacy_scrap_item == 1))
+				& ((sed.secondary_item_type.isnotnull()) | (Coalesce(sed.valuation_type, "") != ""))
 				& (se.docstatus == 1)
 				& (se.purpose.isin(["Repack", "Manufacture"]))
 			)
@@ -1181,7 +1210,7 @@ def get_bom_items(bom_no, use_multi_level_bom=None, qty=None, fetch_secondary_it
 		table_name = "BOM Explosion Item" if use_multi_level_bom else "BOM Item"
 
 	items = _run_bom_items_query(bom_no, table_name, qty)
-	return _deduplicate_bom_items(items)
+	return _deduplicate_bom_items(items, by_type=fetch_secondary_items)
 
 
 def _run_bom_items_query(bom_no, table_name, qty):
@@ -1197,7 +1226,6 @@ def _run_bom_items_query(bom_no, table_name, qty):
 			doctype.stock_uom,
 			doctype.description,
 			(doctype.stock_qty / bom_doc.quantity.as_("qty") * qty).as_("qty"),
-			doctype.rate.as_("basic_rate"),
 		)
 		.where((bom_doc.name == bom_no) & (bom_doc.docstatus == 1))
 		.orderby(doctype.idx)
@@ -1213,9 +1241,11 @@ def _add_bom_table_specific_fields(query, doctype, table_name):
 			doctype.uom,
 			doctype.process_loss_per,
 			doctype.secondary_item_type,
-			doctype.is_legacy,
+			doctype.valuation_type,
 			doctype.conversion_factor,
+			(doctype.cost / NullIf(doctype.stock_qty, 0)).as_("manual_rate"),
 		)
+	query = query.select(doctype.rate.as_("basic_rate"))
 	if table_name == "BOM Item":
 		return query.select(
 			doctype.allow_alternative_item, doctype.uom, doctype.conversion_factor, doctype.bom_no
@@ -1223,13 +1253,14 @@ def _add_bom_table_specific_fields(query, doctype, table_name):
 	return query
 
 
-def _deduplicate_bom_items(items):
+def _deduplicate_bom_items(items, by_type=False):
 	item_dict = {}
 	for item in items:
-		if item.item_code in item_dict:
-			item_dict[item.item_code].qty += item.qty
+		key = (item.item_code, item.get("secondary_item_type") or "") if by_type else item.item_code
+		if key in item_dict:
+			item_dict[key].qty += item.qty
 		else:
-			item_dict[item.item_code] = item
+			item_dict[key] = item
 	return list(item_dict.values())
 
 
@@ -1259,6 +1290,21 @@ def get_secondary_items_from_sub_assemblies(bom_no):
 	return items
 
 
+def get_secondary_item_key(row):
+	"""Identity of a secondary output: its BOM row when linked, else (item, type).
+
+	Grouping only by (item, type) would merge rows that different BOMs of the same work
+	order produce, and one BOM row's percentage or valuation mode would then govern the
+	other BOMs' quantities too."""
+	if row.get("bom_secondary_item"):
+		return row.bom_secondary_item
+
+	return (
+		row.item_code,
+		row.secondary_item_type or ("Scrap" if row.get("valuation_type") == "Valuation Rate" else ""),
+	)
+
+
 def get_secondary_items_from_job_card(work_order, jc_name=None):
 	job_card = frappe.qb.DocType("Job Card")
 	job_card_secondary_item = frappe.qb.DocType("Job Card Secondary Item")
@@ -1268,12 +1314,12 @@ def get_secondary_items_from_job_card(work_order, jc_name=None):
 		.select(
 			Sum(job_card_secondary_item.stock_qty).as_("stock_qty"),
 			job_card_secondary_item.item_code,
-			# stock_uom and the secondary-item BOM link are constant per grouped
-			# (item_code, secondary_item_type) -> Max() returns their single value. item_name and
-			# description are editable per line, so they come from a representative line below.
+			# stock_uom is constant per grouped item_code -> Max() returns its single value.
+			# item_name and description are editable per line, so they come from a
+			# representative line below.
 			Max(job_card_secondary_item.stock_uom).as_("stock_uom"),
 			job_card_secondary_item.secondary_item_type,
-			Max(job_card_secondary_item.bom_secondary_item).as_("bom_secondary_item"),
+			job_card_secondary_item.bom_secondary_item,
 		)
 		.join(job_card_secondary_item)
 		.on(job_card_secondary_item.parent == job_card.name)
@@ -1282,7 +1328,11 @@ def get_secondary_items_from_job_card(work_order, jc_name=None):
 			& (job_card.work_order == work_order)
 			& (job_card.docstatus == 1)
 		)
-		.groupby(job_card_secondary_item.item_code, job_card_secondary_item.secondary_item_type)
+		.groupby(
+			job_card_secondary_item.item_code,
+			job_card_secondary_item.secondary_item_type,
+			job_card_secondary_item.bom_secondary_item,
+		)
 		.orderby(Min(job_card_secondary_item.idx))
 	)
 

@@ -1,6 +1,6 @@
 {
  "app": "erpnext",
- "creation": "2026-08-16 00:00:00.000000",
+ "creation": "2026-08-16 00:00:00",
  "docstatus": 0,
  "doctype": "Sidebar",
  "header_icon": "globe",
@@ -30,22 +30,6 @@
    "indent": 0,
    "is_default_module": 0,
    "keep_closed": 0,
-   "label": "UAE VAT Settings",
-   "link_to": "UAE VAT Settings",
-   "link_type": "DocType",
-   "open_in_new_tab": 1,
-   "show_arrow": 0,
-   "type": "Link"
-  },
-  {
-   "added": 0,
-   "child": 0,
-   "collapsible": 1,
-   "hidden": 0,
-   "icon": "settings",
-   "indent": 0,
-   "is_default_module": 0,
-   "keep_closed": 0,
    "label": "South Africa VAT Settings",
    "link_to": "South Africa VAT Settings",
    "link_type": "DocType",
@@ -58,7 +42,7 @@
    "child": 0,
    "collapsible": 1,
    "hidden": 0,
-   "indent": 0,
+   "indent": 1,
    "is_default_module": 0,
    "keep_closed": 0,
    "label": "Reports",
@@ -132,12 +116,11 @@
    "type": "Link"
   }
  ],
- "modified": "2026-08-16 00:00:00.000000",
+ "modified": "2026-09-01 17:54:06.004401",
  "modified_by": "Administrator",
  "module": "Regional",
  "name": "Regional",
  "owner": "Administrator",
- "sequence_id": 0.0,
  "standard": 1,
  "title": "Regional"
 }

@@ -634,6 +634,56 @@ class TestLandedCostVoucher(ERPNextTestSuite):
 			self.assertEqual(entry.credit, amounts[0])
 			self.assertEqual(entry.credit_in_account_currency, amounts[1])
 
+	def test_landed_cost_charge_in_transaction_currency(self):
+		from erpnext.setup.doctype.currency_exchange.test_currency_exchange import save_new_records
+
+		save_new_records(self.globalTestRecords["Currency Exchange"])  # USD -> INR 62.9
+
+		company = "_Test Company with perpetual inventory"
+		creditors_usd = create_account(
+			account_name="_Test Creditors USD",
+			parent_account="Accounts Payable - TCP1",
+			company=company,
+			account_type="Payable",
+			account_currency="USD",
+		)
+
+		pi = make_purchase_invoice(
+			company=company,
+			supplier="_Test Supplier USD",
+			currency="USD",
+			conversion_rate=62.9,
+			update_stock=1,
+			warehouse="Stores - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
+			cost_center="Main - TCP1",
+			expense_account="_Test Account Cost for Goods Sold - TCP1",
+			qty=10,
+			rate=100,
+			do_not_save=True,
+		)
+		pi.credit_to = creditors_usd
+		pi.save()
+		pi.submit()
+
+		create_landed_cost_voucher("Purchase Invoice", pi.name, pi.company, charges=100)
+
+		charge_gle = frappe.db.get_value(
+			"GL Entry",
+			{
+				"voucher_no": pi.name,
+				"account": get_expense_account(pi.company),
+				"credit": (">", 0),
+				"is_cancelled": 0,
+			},
+			["credit", "credit_in_transaction_currency"],
+			as_dict=True,
+		)
+
+		self.assertEqual(charge_gle.credit, 100.0)
+		self.assertEqual(charge_gle.credit_in_transaction_currency, flt(100 / 62.9, 2))
+		self.assertNotEqual(charge_gle.credit_in_transaction_currency, pi.items[0].net_amount)
+
 	def test_asset_lcv(self):
 		"Check if LCV for an Asset updates the Assets Net Purchase Amount correctly."
 		frappe.db.set_value(

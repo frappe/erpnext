@@ -27,6 +27,7 @@ from erpnext.stock.tests.test_utils import StockTestMixin
 from erpnext.stock.utils import (
 	get_combine_datetime,
 	get_incoming_rate,
+	get_stock_balance,
 	get_stock_value_on,
 	get_valuation_method,
 )
@@ -1585,6 +1586,85 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 		self.assertEqual(sr.items[0].current_valuation_rate, 100)
 		self.assertEqual(sr.difference_amount, 100 * -1)
 		self.assertEqual(sr.items[0].qty, 0)
+
+	def test_difference_amount_for_zero_valuation_rate(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		item_code = self.make_item("Test Item Stock Reco Zero Valuation Rate").name
+		warehouse = "_Test Warehouse - _TC"
+
+		make_stock_entry(item_code=item_code, target=warehouse, qty=5, basic_rate=100)
+
+		sr = create_stock_reconciliation(
+			item_code=item_code, warehouse=warehouse, qty=5, rate=0, do_not_save=1
+		)
+		sr.items[0].allow_zero_valuation_rate = 1
+		sr.save()
+
+		# qty is unchanged, the stock is revalued from 5 x 100 to 5 x 0
+		self.assertEqual(sr.items[0].current_valuation_rate, 100)
+		self.assertEqual(sr.items[0].valuation_rate, 0)
+		self.assertEqual(sr.difference_amount, -500)
+
+		sr.submit()
+		sr.reload()
+
+		self.assertEqual(sr.difference_amount, -500)
+		self.assertEqual(
+			frappe.db.get_value(
+				"Stock Ledger Entry",
+				{"voucher_no": sr.name, "is_cancelled": 0},
+				"stock_value_difference",
+			),
+			-500,
+		)
+
+	def test_no_change_row_removed_when_valuation_rate_is_blank(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		item_code = self.make_item("Test Item Stock Reco Blank Valuation Rate").name
+		warehouse = "_Test Warehouse - _TC"
+
+		make_stock_entry(item_code=item_code, target=warehouse, qty=5, basic_rate=100)
+
+		sr = create_stock_reconciliation(
+			item_code=item_code, warehouse=warehouse, qty=5, rate=None, do_not_save=1
+		)
+
+		# a blank rate means "keep the current rate", so nothing changed on this row
+		self.assertRaises(EmptyStockReconciliationItemsError, sr.save)
+
+	def test_set_existing_stock_valuation_to_zero(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		item_code = self.make_item("Test Item Stock Reco Set Valuation Zero").name
+		warehouse = "_Test Warehouse - _TC"
+
+		make_stock_entry(item_code=item_code, target=warehouse, qty=10, basic_rate=50)
+
+		sr = create_stock_reconciliation(
+			item_code=item_code, warehouse=warehouse, qty=10, rate=0, do_not_save=1
+		)
+		sr.items[0].allow_zero_valuation_rate = 1
+
+		# only the rate changes, the row must not be dropped as "no change"
+		sr.save()
+		self.assertEqual(len(sr.items), 1)
+
+		sr.submit()
+
+		sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": sr.name, "is_cancelled": 0},
+			["qty_after_transaction", "valuation_rate", "stock_value"],
+			as_dict=True,
+		)
+
+		self.assertEqual(sle.qty_after_transaction, 10)
+		self.assertEqual(sle.valuation_rate, 0)
+		self.assertEqual(sle.stock_value, 0)
+
+		self.assertEqual(get_stock_balance(item_code, warehouse, with_valuation_rate=True), (10, 0.0))
 
 	def test_stock_reco_recalculate_qty_for_backdated_entry(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry

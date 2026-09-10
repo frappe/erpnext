@@ -19,7 +19,10 @@ frappe.query_reports["BOM Stock Analysis"] = {
 			get_query: function () {
 				let company = frappe.query_report.get_filter_value("company");
 				return {
-					filters: company ? { company } : {},
+					filters: {
+						docstatus: 1,
+						...(company ? { company } : {}),
+					},
 				};
 			},
 		},

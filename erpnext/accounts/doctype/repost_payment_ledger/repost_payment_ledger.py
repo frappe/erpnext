@@ -27,6 +27,7 @@ def start_payment_ledger_repost(docname: str | None = None):
 	"""
 	if docname:
 		repost_doc = frappe.get_doc("Repost Payment Ledger", docname)
+		repost_doc.check_permission("submit")
 		if repost_doc.docstatus.is_submitted() and repost_doc.repost_status in ["Queued", "Failed"]:
 			try:
 				for entry in repost_doc.repost_vouchers:

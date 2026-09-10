@@ -53,6 +53,11 @@ class TaxService:
 		if doc.get("taxes") or doc.get("is_pos"):
 			return
 
+		# set by the Opening Invoice Creation Tool, where the outstanding amount
+		# entered against a party is already inclusive of tax
+		if doc.flags.dont_auto_add_taxes:
+			return
+
 		if frappe.get_single_value(
 			"Accounts Settings", "add_taxes_from_taxes_and_charges_template"
 		) and hasattr(doc, "taxes_and_charges"):

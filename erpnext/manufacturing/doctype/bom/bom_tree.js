@@ -46,9 +46,10 @@ frappe.treeview_settings["BOM"] = {
 		me.make_tree();
 	},
 	toolbar: [
-		{ toggle_btn: true },
 		{
 			label: __("Edit"),
+			icon: "pencil",
+			inline: true,
 			condition: function (node) {
 				return node.expandable;
 			},

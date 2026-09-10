@@ -8,163 +8,173 @@ from frappe.utils import flt
 
 
 def execute(filters=None):
-	columns, data = [], []
-	data = get_data(filters)
-	columns = get_column(filters)
-
-	return columns, data
+	return get_column(filters), get_data(filters)
 
 
 def get_data(filters):
-	data = []
+	plan = frappe.get_cached_doc("Production Plan", filters.get("production_plan"))
+	work_orders = get_work_orders(filters)
+	purchase_orders = get_purchase_orders(filters)
 
-	order_details = {}
-	get_work_order_details(filters, order_details)
-	get_purchase_order_details(filters, order_details)
-	get_production_plan_item_details(filters, data, order_details)
+	data = []
+	for row in plan.po_items:
+		fg_work_orders = [d for d in work_orders if d.production_plan_item == row.name]
+		data.append(get_finished_good_row(row, fg_work_orders))
+		data.extend(get_document_row(d, indent=1) for d in fg_work_orders)
+		sub_items = [d for d in plan.sub_assembly_items if d.production_plan_item == row.name]
+		add_sub_assembly_rows(sub_items, data, work_orders, purchase_orders)
+
+	po_row_names = {row.name for row in plan.po_items}
+	orphan_items = [d for d in plan.sub_assembly_items if d.production_plan_item not in po_row_names]
+	add_sub_assembly_rows(orphan_items, data, work_orders, purchase_orders)
 
 	return data
 
 
-def get_production_plan_item_details(filters, data, order_details):
-	production_plan_doc = frappe.get_cached_doc("Production Plan", filters.get("production_plan"))
-	for row in production_plan_doc.po_items:
-		work_orders = frappe.get_all(
-			"Work Order",
-			filters={
-				"production_plan_item": row.name,
-				"bom_no": row.bom_no,
-				"production_item": row.item_code,
-				"docstatus": 1,
-			},
-			pluck="name",
-		)
+def get_finished_good_row(row, fg_work_orders):
+	produced_qty = sum(flt(d.produced_qty) for d in fg_work_orders)
+	return {
+		"indent": 0,
+		"item_code": row.item_code,
+		"item_name": frappe.get_cached_value("Item", row.item_code, "item_name"),
+		"sales_order": row.get("sales_order"),
+		"bom_level": 0,
+		"qty": flt(row.planned_qty),
+		"produced_qty": produced_qty,
+		"pending_qty": flt(row.planned_qty) - produced_qty,
+	}
 
-		order_qty = row.planned_qty
-		total_produced_qty = 0.0
-		# default to the full planned qty so a plan without any work order still
-		# reports everything as pending rather than a misleading zero
-		pending_qty = flt(order_qty)
-		for work_order in work_orders:
-			produced_qty = flt(order_details.get((work_order, row.item_code), {}).get("produced_qty", 0))
-			pending_qty = flt(order_qty) - produced_qty
 
-			total_produced_qty += produced_qty
+def add_sub_assembly_rows(items, data, work_orders, purchase_orders):
+	for item in items:
+		if item.type_of_manufacturing == "Subcontract":
+			documents = [d for d in purchase_orders if d.production_plan_sub_assembly_item == item.name]
+		else:
+			documents = [d for d in work_orders if d.production_plan_sub_assembly_item == item.name]
 
-			data.append(
-				{
-					"indent": 0,
-					"item_code": row.item_code,
-					"sales_order": row.get("sales_order"),
-					"item_name": frappe.get_cached_value("Item", row.item_code, "item_name"),
-					"qty": order_qty,
-					"document_type": "Work Order",
-					"document_name": work_order or "",
-					"bom_level": 0,
-					"produced_qty": produced_qty,
-					"pending_qty": pending_qty,
-				}
-			)
-
-			order_qty = pending_qty
-
+		indent = 1 + (item.indent or 0)
+		produced_qty = sum(flt(d.produced_qty) for d in documents)
 		data.append(
 			{
-				"item_code": row.item_code,
-				"indent": 0,
-				"qty": row.planned_qty,
-				"produced_qty": total_produced_qty,
-				"pending_qty": pending_qty,
+				"indent": indent,
+				"item_code": item.production_item,
+				"item_name": item.item_name,
+				"bom_level": item.bom_level,
+				"qty": flt(item.qty),
+				"produced_qty": produced_qty,
+				"pending_qty": flt(item.qty) - produced_qty,
 			}
 		)
-
-		get_production_plan_sub_assembly_item_details(filters, row, production_plan_doc, data, order_details)
-
-
-def get_production_plan_sub_assembly_item_details(filters, row, production_plan_doc, data, order_details):
-	for item in production_plan_doc.sub_assembly_items:
-		if row.name == item.production_plan_item:
-			subcontracted_item = item.type_of_manufacturing == "Subcontract"
-
-			if subcontracted_item:
-				docnames = frappe.get_all(
-					"Purchase Order Item",
-					filters={"production_plan_sub_assembly_item": item.name, "docstatus": 1},
-					fields=["parent"],
-					order_by="creation",
-					pluck="parent",
-				)
-			else:
-				docnames = frappe.get_all(
-					"Work Order",
-					filters={"production_plan_sub_assembly_item": item.name, "docstatus": 1},
-					fields=["name"],
-					order_by="creation",
-					pluck="name",
-				)
-
-			for docname in docnames:
-				data_to_append = {
-					"indent": 1 + item.indent,
-					"item_code": item.production_item,
-					"item_name": item.item_name,
-					"qty": item.qty,
-					"document_type": "Work Order" if not subcontracted_item else "Purchase Order",
-					"document_name": docname or "",
-					"bom_level": item.bom_level,
-					"produced_qty": order_details.get((docname, item.production_item), {}).get(
-						"produced_qty", 0
-					),
-					"pending_qty": flt(item.qty)
-					- flt(order_details.get((docname, item.production_item), {}).get("produced_qty", 0)),
-				}
-				if data[-1] and data[-1]["item_code"] == item.production_item:
-					data_to_append["pending_qty"] = data[-1]["pending_qty"] - data_to_append["produced_qty"]
-				data.append(data_to_append)
+		data.extend(get_document_row(d, indent=indent + 1) for d in documents)
 
 
-def get_work_order_details(filters, order_details):
-	for row in frappe.get_all(
+def get_document_row(doc, indent):
+	return {
+		"indent": indent,
+		"item_code": doc.item_code,
+		"item_name": doc.item_name,
+		"sales_order": doc.get("sales_order"),
+		"document_type": doc.document_type,
+		"document_name": doc.document_name,
+		"status": doc.status,
+		"qty": flt(doc.qty),
+		"produced_qty": flt(doc.produced_qty),
+		"pending_qty": flt(doc.qty) - flt(doc.produced_qty),
+	}
+
+
+def get_work_orders(filters):
+	work_orders = frappe.get_all(
 		"Work Order",
 		filters={"production_plan": filters.get("production_plan"), "docstatus": 1},
-		fields=["name", "produced_qty", "production_plan", "production_item", "sales_order"],
-	):
-		order_details.setdefault((row.name, row.production_item), row)
+		fields=[
+			"name",
+			"qty",
+			"produced_qty",
+			"status",
+			"sales_order",
+			"production_item as item_code",
+			"item_name",
+			"production_plan_item",
+			"production_plan_sub_assembly_item",
+		],
+	)
+
+	for row in work_orders:
+		row.document_type = "Work Order"
+		row.document_name = row.name
+
+	return work_orders
 
 
-def get_purchase_order_details(filters, order_details):
-	for row in frappe.get_all(
-		"Purchase Order Item",
-		filters={"production_plan": filters.get("production_plan"), "docstatus": 1},
-		fields=["parent", "qty", "received_qty as produced_qty", "item_code", "fg_item", "fg_item_qty"],
-	):
-		if row.fg_item:
-			row.produced_qty /= row.qty / row.fg_item_qty or 1
-		order_details.setdefault((row.parent, row.fg_item or row.item_code), row)
+def get_purchase_orders(filters):
+	po_item = frappe.qb.DocType("Purchase Order Item")
+	purchase_order = frappe.qb.DocType("Purchase Order")
+
+	purchase_orders = (
+		frappe.qb.from_(po_item)
+		.inner_join(purchase_order)
+		.on(po_item.parent == purchase_order.name)
+		.select(
+			po_item.parent.as_("document_name"),
+			po_item.qty.as_("order_qty"),
+			po_item.received_qty,
+			po_item.item_code.as_("po_item_code"),
+			po_item.item_name.as_("po_item_name"),
+			po_item.fg_item,
+			po_item.fg_item_qty,
+			po_item.production_plan_sub_assembly_item,
+			purchase_order.status,
+		)
+		.where((po_item.production_plan == filters.get("production_plan")) & (po_item.docstatus == 1))
+		.run(as_dict=True)
+	)
+
+	return [get_purchase_order_row(row) for row in purchase_orders]
+
+
+def get_purchase_order_row(row):
+	produced_qty = flt(row.received_qty)
+	if row.fg_item:
+		produced_qty = flt(row.received_qty) / (flt(row.order_qty) / flt(row.fg_item_qty) or 1)
+
+	item_code = row.fg_item or row.po_item_code
+	return frappe._dict(
+		{
+			"document_type": "Purchase Order",
+			"document_name": row.document_name,
+			"status": row.status,
+			"item_code": item_code,
+			"item_name": frappe.get_cached_value("Item", item_code, "item_name"),
+			"qty": flt(row.fg_item_qty) if row.fg_item else flt(row.order_qty),
+			"produced_qty": produced_qty,
+			"production_plan_sub_assembly_item": row.production_plan_sub_assembly_item,
+		}
+	)
 
 
 def get_column(filters):
 	return [
 		{
-			"label": _("Finished Good"),
+			"label": _("Item Code"),
 			"fieldtype": "Link",
 			"fieldname": "item_code",
 			"width": 240,
 			"options": "Item",
 		},
-		{"label": _("Item Name"), "fieldtype": "data", "fieldname": "item_name", "width": 150},
+		{"label": _("Item Name"), "fieldtype": "Data", "fieldname": "item_name", "width": 180},
 		{
 			"label": _("Sales Order"),
 			"options": "Sales Order",
 			"fieldtype": "Link",
 			"fieldname": "sales_order",
-			"width": 100,
+			"width": 120,
 		},
 		{
 			"label": _("Document Type"),
 			"fieldtype": "Data",
 			"fieldname": "document_type",
-			"width": 150,
+			"width": 120,
 		},
 		{
 			"label": _("Document Name"),
@@ -173,6 +183,7 @@ def get_column(filters):
 			"options": "document_type",
 			"width": 180,
 		},
+		{"label": _("Status"), "fieldtype": "Data", "fieldname": "status", "width": 110},
 		{"label": _("BOM Level"), "fieldtype": "Int", "fieldname": "bom_level", "width": 100},
 		{"label": _("Order Qty"), "fieldtype": "Float", "fieldname": "qty", "width": 120},
 		{

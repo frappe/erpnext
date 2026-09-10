@@ -73,6 +73,7 @@ frappe.ui.form.on("Item", {
 	},
 
 	setup: function (frm) {
+		frm.set_query("item_group", () => ({ filters: { is_group: 0 } }));
 		frm.set_query("allowed_companies", () => ({
 			query: "erpnext.stock.doctype.company_restriction.company_restriction.company_query",
 		}));

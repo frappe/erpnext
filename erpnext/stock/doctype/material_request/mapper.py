@@ -9,6 +9,7 @@ from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import cint, comma_and, flt, get_link_to_form, getdate, nowdate
 
+from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults
@@ -74,6 +75,7 @@ def make_purchase_order(
 	)
 
 	requested_qty = args.get("requested_qty") or {}
+	mapped_qty_by_item = get_qty_already_mapped(target_doc, "material_request_item", "stock_qty")
 
 	def postprocess(source, target_doc):
 		target_doc.is_subcontracted = is_subcontracted
@@ -90,7 +92,7 @@ def make_purchase_order(
 		filtered_items = args.get("filtered_children", [])
 		child_filter = d.name in filtered_items if filtered_items else True
 
-		qty = d.ordered_qty or d.received_qty
+		qty = (d.ordered_qty or d.received_qty) + flt(mapped_qty_by_item.get(d.name, 0))
 
 		return qty < d.stock_qty and child_filter
 
@@ -139,6 +141,15 @@ def make_purchase_order(
 
 @frappe.whitelist()
 def make_request_for_quotation(source_name: str, target_doc: str | dict | Document | None = None):
+	def update_item(obj, target, source_parent):
+		qty = obj.ordered_qty or obj.received_qty
+		target.qty = flt(flt(obj.stock_qty) - flt(qty)) / target.conversion_factor
+		target.stock_qty = target.qty * target.conversion_factor
+
+	def select_item(d):
+		qty = d.ordered_qty or d.received_qty
+		return qty < d.stock_qty
+
 	doclist = get_mapped_doc(
 		"Material Request",
 		source_name,
@@ -155,6 +166,8 @@ def make_request_for_quotation(source_name: str, target_doc: str | dict | Docume
 					["project", "project_name"],
 					["cost_center", "cost_center"],
 				],
+				"postprocess": update_item,
+				"condition": select_item,
 			},
 		},
 		target_doc,
@@ -385,16 +398,8 @@ def make_stock_entry(source_name: str, target_doc: str | dict | Document | None 
 				target.bom_no = work_order_details.bom_no
 				target.use_multi_level_bom = work_order_details.use_multi_level_bom
 				target.from_bom = 1
-				if not source.job_card:
-					# not fg-qty-driven, mirrors the Pick List -> Stock Entry transfer for this Work Order
-					target.fg_completed_qty = 0
-
-		if source.job_card:
-			from erpnext.stock.doctype.stock_entry.services.material_transfer import (
-				MaterialTransferForManufactureStockEntry,
-			)
-
-			MaterialTransferForManufactureStockEntry(target).cap_completed_qty_to_material_coverage()
+				# not fg-qty-driven, mirrors the Pick List -> Stock Entry transfer for this Work Order
+				target.fg_completed_qty = 0
 
 	doclist = get_mapped_doc(
 		"Material Request",

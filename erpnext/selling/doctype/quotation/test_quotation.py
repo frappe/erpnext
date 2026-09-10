@@ -156,6 +156,46 @@ class TestQuotation(ERPNextTestSuite):
 		qo.reload()
 		self.assertEqual(len(qo.get("items")), 1)
 
+	def test_update_child_qty_with_uom_conversion_factor(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item(uoms=[{"uom": "Box", "conversion_factor": 5}])
+		quotation = make_quotation(item_code=item.item_code, qty=6, uom="Box", do_not_submit=1)
+		quotation.submit()
+
+		sales_order = make_sales_order(quotation.name)
+		sales_order.delivery_date = nowdate()
+		sales_order.items[0].qty = 2
+		sales_order.save()
+		sales_order.submit()
+
+		quotation.reload()
+		self.assertEqual(quotation.items[0].ordered_qty, 10)
+
+		def update_qty(qty, conversion_factor=None):
+			item = quotation.items[0]
+			trans_items = json.dumps(
+				[
+					{
+						"item_code": item.item_code,
+						"description": item.description,
+						"rate": item.rate,
+						"qty": qty,
+						"uom": item.uom,
+						"conversion_factor": conversion_factor or item.conversion_factor,
+						"docname": item.name,
+					}
+				]
+			)
+			update_child_qty_rate("Quotation", trans_items, quotation.name)
+
+		update_qty(5, conversion_factor=2)
+		quotation.reload()
+		self.assertEqual(quotation.items[0].conversion_factor, 2)
+		self.assertEqual(quotation.items[0].stock_qty, 10)
+
+		self.assertRaises(frappe.ValidationError, update_qty, 4)
+
 	def test_quotation_qty(self):
 		qo = make_quotation(qty=0, do_not_save=True)
 		with self.assertRaises(InvalidQtyError):

@@ -277,6 +277,15 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 							if not (entry.amount or entry.base_amount):
 								continue
 
+							lcv_account_currency = get_account_currency(entry.expense_account)
+							credit_in_transaction_currency = (
+								flt(entry.amount)
+								if lcv_account_currency == doc.currency
+								else flt(
+									entry.base_amount / doc.conversion_rate, item.precision("net_amount")
+								)
+							)
+
 							gl_dict = self.get_gl_dict(
 								{
 									"account": entry.expense_account,
@@ -285,7 +294,7 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 									"remarks": doc.get("remarks") or _("Accounting Entry for Stock"),
 									"credit": flt(entry.base_amount),
 									"credit_in_account_currency": flt(entry.amount),
-									"credit_in_transaction_currency": item.net_amount,
+									"credit_in_transaction_currency": credit_in_transaction_currency,
 									"project": entry.dimensions.project or item.project or doc.project,
 								},
 								item=item,

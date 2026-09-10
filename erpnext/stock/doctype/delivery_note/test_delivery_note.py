@@ -1060,6 +1060,56 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assertEqual(dn.per_billed, 100)
 		self.assertEqual(dn.status, "Completed")
 
+	def test_dn_is_completed_when_unbilled_item_is_returned(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		make_stock_entry(target="_Test Warehouse - _TC", qty=1, basic_rate=100)
+		make_stock_entry(item_code="_Test Item 2", target="_Test Warehouse - _TC", qty=1, basic_rate=100)
+
+		dn = create_delivery_note(do_not_submit=True)
+		dn.append(
+			"items",
+			{
+				"item_code": "_Test Item 2",
+				"warehouse": "_Test Warehouse - _TC",
+				"qty": 1,
+				"rate": 100,
+				"conversion_factor": 1,
+				"allow_zero_valuation_rate": 1,
+				"expense_account": "Cost of Goods Sold - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+			},
+		)
+		dn.submit()
+
+		si = make_sales_invoice(dn.name)
+		si.set("items", [item for item in si.items if item.item_code == "_Test Item"])
+		si.insert()
+		si.submit()
+
+		dn.reload()
+		self.assertEqual(dn.per_billed, 50)
+		self.assertEqual(dn.status, "Partially Billed")
+
+		return_dn = make_sales_return(dn.name)
+		return_dn.set("items", [item for item in return_dn.items if item.item_code == "_Test Item 2"])
+		return_dn.insert()
+		# Mimic the submit request, which reconstructs the document from client data.
+		return_dn = frappe.get_doc(return_dn.as_dict())
+		return_dn.submit()
+
+		dn.reload()
+		self.assertEqual(dn.items[1].returned_qty, 1)
+		self.assertEqual(dn.per_billed, 100)
+		self.assertEqual(dn.status, "Completed")
+
+		return_dn.cancel()
+
+		dn.reload()
+		self.assertEqual(dn.items[1].returned_qty, 0)
+		self.assertEqual(dn.per_billed, 50)
+		self.assertEqual(dn.status, "Partially Billed")
+
 	def test_dn_billing_status_case2(self):
 		# SO -> SI and SO -> DN1, DN2
 		from erpnext.selling.doctype.sales_order.mapper import (
@@ -1101,6 +1151,25 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assertEqual(dn2.get("items")[0].billed_amt, 300)
 		self.assertEqual(dn2.per_billed, 100)
 		self.assertEqual(dn2.status, "Completed")
+
+	def test_mapping_same_dn_twice_is_idempotent(self):
+		# "Get Items From > Delivery Note" passes the in-progress invoice back as target_doc.
+		# Selecting the same DN again must not append a second row for the same dn_detail.
+		dn = create_delivery_note(qty=5)
+
+		si = make_sales_invoice(dn.name)
+		self.assertEqual(len(si.items), 1)
+		self.assertEqual(si.items[0].qty, 5)
+
+		si = make_sales_invoice(dn.name, target_doc=si)
+		self.assertEqual(len(si.items), 1)
+		self.assertEqual(si.items[0].qty, 5)
+
+		# a partly reduced draft row still tops up to the delivered qty
+		si.items[0].qty = 2
+		si = make_sales_invoice(dn.name, target_doc=si)
+		self.assertEqual(len(si.items), 2)
+		self.assertEqual([d.qty for d in si.items], [2, 3])
 
 	def test_dn_billing_falls_back_to_qty_when_amount_is_short(self):
 		# SO -> DN (qty 5 @ 100 => amount 500), invoiced fully but at a lower rate.

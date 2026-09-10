@@ -711,6 +711,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 
 	def test_serial_and_batch_bundle_company(self):
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
 
 		item = make_item(
 			"Test Serial and Batch Bundle Company Item",
@@ -747,6 +748,19 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 		item_row.is_rejected = 0
 		sn_doc = add_serial_batch_ledgers(entries, item_row, pr, "_Test Warehouse - _TC")
 		self.assertEqual(sn_doc.company, "_Test Company")
+
+		pr.company = "_Test Company 1"
+		for fieldname in ("serial_and_batch_bundle", "rejected_serial_and_batch_bundle"):
+			item_row.serial_and_batch_bundle = None
+			item_row.rejected_serial_and_batch_bundle = None
+			item_row.set(fieldname, sn_doc.name)
+
+			with self.subTest(fieldname=fieldname):
+				with self.assertRaisesRegex(
+					frappe.ValidationError,
+					"Company _Test Company 1 does not match with the company _Test Company",
+				):
+					SerialBatchBundleService(pr).validate_warehouse_of_sabb()
 
 	def test_auto_cancel_serial_and_batch(self):
 		item_code = make_item(
@@ -1635,6 +1649,10 @@ def make_serial_batch_bundle(kwargs):
 	if kwargs.get("posting_date"):
 		posting_datetime = combine_datetime(kwargs.posting_date, kwargs.posting_time or nowtime())
 
+	company = kwargs.get("company")
+	if not company and kwargs.get("warehouse"):
+		company = frappe.get_cached_value("Warehouse", kwargs.warehouse, "company")
+
 	sb = SerialBatchCreation(
 		{
 			"item_code": kwargs.item_code,
@@ -1647,7 +1665,7 @@ def make_serial_batch_bundle(kwargs):
 			"batches": kwargs.batches,
 			"serial_nos": kwargs.serial_nos,
 			"type_of_transaction": type_of_transaction,
-			"company": kwargs.company or "_Test Company",
+			"company": company or "_Test Company",
 			"do_not_submit": kwargs.do_not_submit,
 			"ignore_sabb_validation": kwargs.ignore_sabb_validation or False,
 		}
