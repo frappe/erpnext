@@ -242,11 +242,17 @@ class DepreciationScheduleController(StraightLineMethod, WDVMethod):
 			computed_available_for_use_date = add_days(
 				add_months(self.fb_row.depreciation_start_date, -1 * asset_used_for_months), 1
 			)
-			if getdate(computed_available_for_use_date) < getdate(self.asset_doc.available_for_use_date):
+			asset_available_mid_period = getdate(computed_available_for_use_date) < getdate(
+				self.asset_doc.available_for_use_date
+			)
+			if asset_available_mid_period:
 				computed_available_for_use_date = self.asset_doc.available_for_use_date
 			depr_booked_for_months = (date_diff(last_depr_date, computed_available_for_use_date) + 1) / (
 				365 / 12
 			)
+			if not asset_available_mid_period:
+				frequency = cint(self.fb_row.frequency_of_depreciation)
+				depr_booked_for_months = round(depr_booked_for_months / frequency) * frequency
 		return depr_booked_for_months
 
 	def get_total_pending_days_or_years(self):
