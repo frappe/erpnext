@@ -11,7 +11,7 @@ function get_full_options(doctype) {
 function apply_options(frm, options) {
 	frm.set_df_property("naming_series", "options", options.join("\n"));
 	if (!options.includes(frm.doc.naming_series)) {
-		frm.set_value("naming_series", options[0]);
+		frm.set_value("naming_series", options[0] || "");
 	}
 }
 
@@ -29,10 +29,7 @@ function set_naming_series_options(frm) {
 		.then((allowed) => {
 			if (frm.doc.company !== company) return;
 
-			const options = allowed.length ? allowed : fallback;
-			if (options.length) {
-				apply_options(frm, options);
-			}
+			apply_options(frm, allowed ?? fallback);
 		});
 }
 
