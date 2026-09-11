@@ -539,6 +539,7 @@ accounting_dimension_doctypes = [
 	"Purchase Taxes and Charges",
 	"Shipping Rule",
 	"Landed Cost Item",
+	"Landed Cost Taxes and Charges",
 	"Asset Value Adjustment",
 	"Asset Repair",
 	"Asset Capitalization",

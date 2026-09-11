@@ -1489,6 +1489,7 @@ class StockController(AccountsController):
 		voucher_detail_no=None,
 		item=None,
 		posting_date=None,
+		dimensions=None,
 	):
 		gl_entry = {
 			"account": account,
@@ -1513,6 +1514,9 @@ class StockController(AccountsController):
 
 		if posting_date:
 			gl_entry.update({"posting_date": posting_date})
+
+		if dimensions:
+			gl_entry.update(dimensions)
 
 		gl_entries.append(self.get_gl_dict(gl_entry, item=item))
 
