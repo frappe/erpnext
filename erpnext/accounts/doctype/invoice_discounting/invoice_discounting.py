@@ -317,13 +317,8 @@ class InvoiceDiscounting(AccountsController):
 
 
 @frappe.whitelist()
-<<<<<<< HEAD
 def get_invoices(filters):
 	filters = frappe._dict(json.loads(filters))
-	cond = []
-=======
-def get_invoices(filters: str | dict):
-	filters = frappe._dict(frappe.parse_json(filters))
 
 	if not filters.get("company"):
 		frappe.throw(_("Please set company on the Document before requesting for invoices."))
@@ -331,24 +326,7 @@ def get_invoices(filters: str | dict):
 	frappe.has_permission("Company", doc=filters.get("company"), throw=True)
 	frappe.has_permission("Invoice Discounting", throw=True)
 
-	si = frappe.qb.DocType("Sales Invoice")
-	di = frappe.qb.DocType("Discounted Invoice")
-
-	discounted = frappe.qb.from_(di).select(di.sales_invoice).where(di.docstatus == 1)
-
-	query = (
-		frappe.qb.from_(si)
-		.select(
-			si.name.as_("sales_invoice"),
-			si.customer,
-			si.posting_date,
-			si.outstanding_amount,
-			si.debit_to,
-		)
-		.where((si.docstatus == 1) & (si.outstanding_amount > 0) & si.name.notin(discounted))
-	)
-
->>>>>>> b481083 (fix(accounts): add permission checks on `invoice_discounting.get_invoices` (#58975))
+	cond = []
 	if filters.customer:
 		cond.append("customer=%(customer)s")
 	if filters.from_date:
