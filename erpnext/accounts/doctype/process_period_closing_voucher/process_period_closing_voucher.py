@@ -133,14 +133,17 @@ def initialize_parallel_threads(docname: str):
 		frappe.db.set_value("Process Period Closing Voucher", docname, "status", "Completed")
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def start_pcv_processing(docname: str):
+	# checked before the status is read, not inside the branch: otherwise an unentitled caller
+	# learns the document's status from whether this returns or throws
+	frappe.has_permission("Process Period Closing Voucher", "write", doc=docname, throw=True)
+
 	if frappe.db.get_value("Process Period Closing Voucher", docname, "status") in ["Queued", "Running"]:
-		frappe.has_permission("Process Period Closing Voucher", "write", doc=docname, throw=True)
 		initialize_parallel_threads(docname)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def pause_pcv_processing(docname: str):
 	frappe.has_permission("Process Period Closing Voucher", ptype="write", doc=docname, throw=True)
 
@@ -157,7 +160,7 @@ def pause_pcv_processing(docname: str):
 		qb.update(ppcvd).set(ppcvd.status, "Paused").where(ppcvd.name.isin(queued_dates)).run()
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def cancel_pcv_processing(docname: str):
 	frappe.has_permission("Process Period Closing Voucher", ptype="cancel", doc=docname, throw=True)
 
@@ -173,7 +176,7 @@ def cancel_pcv_processing(docname: str):
 		qb.update(ppcvd).set(ppcvd.status, "Cancelled").where(ppcvd.name.isin(queued_dates)).run()
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def resume_pcv_processing(docname: str):
 	frappe.has_permission("Process Period Closing Voucher", ptype="write", doc=docname, throw=True)
 
@@ -258,8 +261,14 @@ def get_gle_for_closing_account(pcv, dimension_balance, dimensions):
 	return gl_entry
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def schedule_next_date(docname: str):
+	# this marks a detail row Running and enqueues a long job, so it needs the same write check the
+	# sibling controls in this file already make. Nothing guarded it: what refused an unentitled
+	# caller was an incidental System Manager check three calls deep inside is_scheduler_inactive(),
+	# reached on only one of the two branches and only after the row lock below had been taken.
+	frappe.has_permission("Process Period Closing Voucher", ptype="write", doc=docname, throw=True)
+
 	timeout = frappe.db.get_single_value("Accounts Settings", "pcv_job_timeout") or 3600
 	ppcvd = qb.DocType("Process Period Closing Voucher Detail")
 
