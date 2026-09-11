@@ -1625,6 +1625,10 @@ def get_conversion_factor(item_code: str | None, uom: str):
 
 @frappe.whitelist()
 def get_projected_qty(item_code: str, warehouse: str):
+	# record-level read on the item, matching what get_item_details() in this file already does.
+	# Nothing in the tree calls this, so there is no caller whose roles constrain the choice.
+	frappe.has_permission("Item", doc=item_code, throw=True)
+
 	return {
 		"projected_qty": frappe.db.get_value(
 			"Bin", {"item_code": item_code, "warehouse": warehouse}, "projected_qty"
@@ -1636,6 +1640,12 @@ def get_projected_qty(item_code: str, warehouse: str):
 def get_bin_details(
 	item_code: str, warehouse: str | None, company: str | None = None, include_child_warehouses: bool = False
 ):
+	# `select`, not `read`: this is called from the selling and buying item rows and from
+	# SellingController during validation, so Accounts Manager, Sales Manager, Delivery and
+	# Maintenance roles all reach it while holding no Item `read` row. A read check here would
+	# break saving a Sales Invoice for them. See the unit note for the stronger gate.
+	frappe.has_permission("Item", ptype="select", throw=True)
+
 	bin_details = {"projected_qty": 0, "actual_qty": 0, "reserved_qty": 0}
 
 	if warehouse:
@@ -1817,6 +1827,10 @@ def get_default_bom(item_code: str | None = None):
 
 @frappe.whitelist()
 def get_valuation_rate(item_code: str, company: str, warehouse: str | None = None):
+	# this returns cost price. Record-level read on the item, matching get_item_details() in this
+	# file; nothing in the tree calls it, so no caller's roles constrain the choice.
+	frappe.has_permission("Item", doc=item_code, throw=True)
+
 	if frappe.get_cached_value("Warehouse", warehouse, "is_group"):
 		return {"valuation_rate": 0.0}
 
