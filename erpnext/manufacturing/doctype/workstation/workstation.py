@@ -418,34 +418,40 @@ def get_workstations(**kwargs):
 	frappe.has_permission("Workstation", "read", throw=True)
 
 	kwargs = frappe._dict(kwargs)
-	_workstation = frappe.qb.DocType("Workstation")
 
-	query = (
-		frappe.qb.from_(_workstation)
-		.select(
-			_workstation.name,
-			_workstation.description,
-			_workstation.status,
-			_workstation.on_status_image,
-			_workstation.off_status_image,
-		)
-		.orderby(_workstation.creation, _workstation.workstation_type, _workstation.name)
-		.where((_workstation.plant_floor == kwargs.plant_floor) & (_workstation.disabled == 0))
-	)
+	if not kwargs.plant_floor:
+		# The query this replaced compared `plant_floor` against the argument with `=`, which no
+		# row satisfies when it is empty; `get_list` would read the same filter as `IS NULL` and
+		# start returning floor-less workstations. Keep the original contract.
+		return []
+
+	# A list of filters, not a dict: `workstation` and `workstation_name` both constrain `name`
+	# and a dict would silently drop the first of them.
+	filters = [["plant_floor", "=", kwargs.plant_floor], ["disabled", "=", 0]]
 
 	if kwargs.workstation:
-		query = query.where(_workstation.name == kwargs.workstation)
+		filters.append(["name", "=", kwargs.workstation])
 
 	if kwargs.workstation_type:
-		query = query.where(_workstation.workstation_type == kwargs.workstation_type)
+		filters.append(["workstation_type", "=", kwargs.workstation_type])
 
 	if kwargs.workstation_status:
-		query = query.where(_workstation.status == kwargs.workstation_status)
+		filters.append(["status", "=", kwargs.workstation_status])
 
 	if kwargs.workstation_name:
-		query = query.where(_workstation.name == kwargs.workstation_name)
+		filters.append(["name", "=", kwargs.workstation_name])
 
-	data = query.run(as_dict=True)
+	# get_list, not get_all: it applies Workstation's permission query conditions and the caller's
+	# User Permissions. The check above authorises the doctype but not the rows, so a caller
+	# restricted to one warehouse or plant floor would still be shown every workstation. get_list
+	# needs `select` or `read` and the check above already demands `read`, so no caller that
+	# reaches this line loses it. The board is unpaginated, so no limit is passed.
+	data = frappe.get_list(
+		"Workstation",
+		filters=filters,
+		fields=["name", "description", "status", "on_status_image", "off_status_image"],
+		order_by="creation, workstation_type, name",
+	)
 
 	color_map = get_color_map()
 
