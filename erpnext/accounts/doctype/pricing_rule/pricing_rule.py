@@ -366,6 +366,32 @@ def apply_pricing_rule(args: str | dict, doc: str | dict | Document | None = Non
 
 	args = frappe._dict(args)
 
+	# `args` is caller supplied, and what comes back is pricing: matched Pricing Rules, discounts
+	# and rates. The transaction being priced is what decides who may price it, so authorise that
+	# — and the document itself where the caller named an existing one, so User Permissions apply.
+	transaction_doctype = args.get("doctype")
+	if not transaction_doctype or not isinstance(transaction_doctype, str):
+		frappe.throw(_("Invalid doctype"), frappe.PermissionError)
+
+	transaction_name = args.get("name")
+	if not isinstance(transaction_name, str) or not frappe.db.exists(transaction_doctype, transaction_name):
+		transaction_name = None
+
+	frappe.has_permission(transaction_doctype, doc=transaction_name, throw=True)
+
+	# `company` is caller supplied too and the matched rules are scoped by it, so a caller who is
+	# restricted to particular companies must not price against the others. Checked through the
+	# caller's own Company restrictions rather than a `read` check on Company: several roles that
+	# legitimately fill in these forms (Stock Manager, Purchase Manager, the Delivery and
+	# Maintenance roles) hold no Company permission at all and would lose the form.
+	company = args.get("company")
+	if company:
+		from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies
+
+		allowed_companies = get_allowed_companies(frappe.session.user, transaction_doctype)
+		if allowed_companies and company not in allowed_companies:
+			frappe.throw(_("Not permitted for {0}").format(company), frappe.PermissionError)
+
 	set_transaction_type(args)
 
 	# list of dictionaries
