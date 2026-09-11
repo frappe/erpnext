@@ -20,8 +20,15 @@ class CodeListSelectionMismatchError(Exception):
 	pass
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def import_genericode():
+	# code_list.save() below is the authoritative per-document check, but it only runs AFTER the
+	# uploaded XML has been fetched and parsed and after an existing Code List has been read — so an
+	# unentitled caller could have arbitrary XML parsed on their behalf and learn whether a given
+	# Code List exists. Check first. Code List grants read/write/create to System Manager alone, so
+	# this denies exactly who save() would have denied, only sooner.
+	frappe.has_permission("Code List", "create", throw=True)
+
 	try:
 		content, file_name = get_uploaded_genericode_file()
 
@@ -149,7 +156,7 @@ def parse_genericode_content(content: bytes):
 	return etree.fromstring(content, parser=parser)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def process_genericode_import(
 	code_list_name: str,
 	file_name: str,
@@ -159,6 +166,11 @@ def process_genericode_import(
 	filters: str | dict | None = None,
 ):
 	from erpnext.edi.doctype.common_code.common_code import import_genericode
+
+	# Same reasoning as above: common_code.save() enforces this per document, but only after the
+	# file has been read and its XML parsed and queried.
+	frappe.has_permission("Common Code", "create", throw=True)
+	frappe.has_permission("Code List", doc=code_list_name, throw=True)
 
 	column_map = {"code": code_column, "title": title_column, "description": description_column}
 
