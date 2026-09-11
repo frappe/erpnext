@@ -481,6 +481,8 @@ def bom(
 def get_project_name(
 	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict | None = None
 ):
+	frappe.has_permission("Project", ptype="select", throw=True)
+
 	proj = qb.DocType("Project")
 	qb_filter_and_conditions = []
 	qb_filter_or_conditions = []
@@ -1015,6 +1017,8 @@ def get_doctype_wise_filters(filters):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_batch_numbers(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
+	frappe.has_permission("Batch", ptype="select", throw=True)
+
 	batch = frappe.qb.DocType("Batch")
 	query = (
 		frappe.qb.from_(batch)
@@ -1056,6 +1060,8 @@ def item_manufacturer_query(
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_purchase_receipts(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
+	frappe.has_permission("Purchase Receipt", ptype="select", throw=True)
+
 	pr = frappe.qb.DocType("Purchase Receipt")
 	pr_item = frappe.qb.DocType("Purchase Receipt Item")
 	query = (
@@ -1076,6 +1082,8 @@ def get_purchase_receipts(doctype: str, txt: str, searchfield: str, start: int, 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_purchase_invoices(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
+	frappe.has_permission("Purchase Invoice", ptype="select", throw=True)
+
 	pi = frappe.qb.DocType("Purchase Invoice")
 	pi_item = frappe.qb.DocType("Purchase Invoice Item")
 	query = (
@@ -1177,9 +1185,19 @@ def get_payment_terms_for_references(
 ):
 	terms = []
 	if filters:
+		reference = filters.get("reference")
+
+		# Payment Schedule is a child table and carries no permissions of its own, so the
+		# document the schedule belongs to is what decides access to these rows
+		parenttype = frappe.db.get_value("Payment Schedule", {"parent": reference}, "parenttype")
+		if not parenttype:
+			return terms
+
+		frappe.has_permission(parenttype, doc=reference, throw=True)
+
 		terms = frappe.db.get_all(
 			"Payment Schedule",
-			filters={"parent": filters.get("reference")},
+			filters={"parent": reference},
 			fields=["payment_term"],
 			limit=page_len,
 			as_list=1,
@@ -1192,6 +1210,29 @@ def get_payment_terms_for_references(
 def get_filtered_child_rows(
 	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict
 ):
+	parent = filters.get("parent") if filters else None
+
+	if not parent:
+		frappe.throw(_("Parent document is required to search child rows"), frappe.PermissionError)
+
+	# `doctype` is caller supplied, so it has to be a child table before it is worth checking:
+	# any other doctype would put the caller's filters on a table this query never meant to read
+	if not frappe.get_meta(doctype).istable:
+		frappe.throw(_("{0} is not a child table").format(doctype), frappe.PermissionError)
+
+	# child tables carry no permissions of their own, so the document the rows hang off is what
+	# decides access. Read the parent type off the rows rather than off `filters`, so that the
+	# document being authorised is always the one being returned.
+	parenttype = frappe.db.get_value(doctype, {"parent": parent}, "parenttype")
+
+	if not parenttype or not frappe.db.exists(parenttype, parent):
+		return []
+
+	frappe.has_permission(doctype, parent_doctype=parenttype, throw=True)
+
+	# and on the parent record itself, so that User Permissions still apply
+	frappe.has_permission(parenttype, doc=parent, throw=True)
+
 	table = frappe.qb.DocType(doctype)
 	query = (
 		frappe.get_query(table, filters=filters)
