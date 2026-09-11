@@ -1186,6 +1186,13 @@ def get_payment_terms_for_references(
 	terms = []
 	if filters:
 		reference = filters.get("reference")
+		if not reference:
+			return terms
+
+		# only a plain name names one document: a filter operator (["like", "%"], ["!=", ""]) would
+		# widen this past the document the caller named, and past the one being authorised below
+		if not isinstance(reference, str):
+			frappe.throw(_("Invalid reference"), frappe.PermissionError)
 
 		# Payment Schedule is a child table and carries no permissions of its own, so the
 		# document the schedule belongs to is what decides access to these rows
@@ -1212,7 +1219,9 @@ def get_filtered_child_rows(
 ):
 	parent = filters.get("parent") if filters else None
 
-	if not parent:
+	# a plain name, never a filter operator: ["like", "%"] here would span parents, and only one
+	# of them would be the document authorised below
+	if not parent or not isinstance(parent, str):
 		frappe.throw(_("Parent document is required to search child rows"), frappe.PermissionError)
 
 	# `doctype` is caller supplied, so it has to be a child table before it is worth checking:
