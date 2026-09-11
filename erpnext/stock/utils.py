@@ -95,6 +95,22 @@ def get_stock_value_on(
 	return query.run(as_list=True)[0][0]
 
 
+def check_warehouse_company(warehouse: str | None) -> None:
+	"""Keep a company-restricted caller inside their own companies; a no-op for everyone else."""
+	if not isinstance(warehouse, str) or not warehouse:
+		return
+
+	from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies
+
+	allowed_companies = get_allowed_companies(frappe.session.user, "Item")
+	if not allowed_companies:
+		return
+
+	company = frappe.db.get_value("Warehouse", warehouse, "company")
+	if company and company not in allowed_companies:
+		frappe.throw(_("Not permitted for {0}").format(company), frappe.PermissionError)
+
+
 @frappe.whitelist()
 def get_stock_balance(
 	item_code: str,
@@ -178,6 +194,12 @@ def get_serial_nos_data(serial_nos):
 
 @frappe.whitelist()
 def get_latest_stock_qty(item_code: str, warehouse: str | None = None):
+	# Same guard as get_stock_balance above, which returns the same Bin quantity from the same file.
+	# Loser-free for the only caller: work_order.js:797, and Work Order write is held by
+	# Manufacturing User, who holds Item read. (Manufacturing Manager holds neither.)
+	frappe.has_permission("Item", "read", throw=True)
+	check_warehouse_company(warehouse)
+
 	bin_dt = frappe.qb.DocType("Bin")
 	query = frappe.qb.from_(bin_dt).select(Sum(bin_dt.actual_qty)).where(bin_dt.item_code == item_code)
 
@@ -272,6 +294,12 @@ def get_incoming_rate(args: dict | str, raise_error_if_no_rate: bool = True, fal
 	from erpnext.stock.stock_ledger import get_previous_sle, get_valuation_rate
 
 	args = frappe.parse_json(args)
+
+	# `select`, not `read`: this is reached from transaction.js:1069 on every sales and buying form,
+	# and Accounts Manager — who writes Sales Invoice and Purchase Invoice — holds no Item read. The
+	# company scoping below is what actually closes the cross-company read; see the residual note.
+	frappe.has_permission("Item", ptype="select", throw=True)
+	check_warehouse_company(args.get("warehouse") if isinstance(args, dict | frappe._dict) else None)
 
 	if not args.get("posting_datetime") and args.get("posting_date"):
 		args["posting_datetime"] = get_combine_datetime(args.get("posting_date"), args.get("posting_time"))
@@ -598,6 +626,10 @@ def check_pending_reposting(posting_date: str, company: str | None = None, throw
 
 @frappe.whitelist()
 def scan_barcode(search_value: str, ctx: dict | str | None = None) -> BarcodeScanResult:
+	# Reached from barcode_scanner.js on every form with a scan field, so `select` for the same
+	# reason as get_incoming_rate: Accounts Manager scans on invoices and holds no Item read.
+	frappe.has_permission("Item", ptype="select", throw=True)
+
 	def set_cache(data: BarcodeScanResult):
 		frappe.cache().set_value(f"erpnext:barcode_scan:{search_value}", data, expires_in_sec=120)
 		_update_item_info(data, ctx)
