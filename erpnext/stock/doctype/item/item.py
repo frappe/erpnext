@@ -1495,11 +1495,24 @@ def set_item_default(item_code, company, fieldname, value):
 
 @frappe.whitelist()
 def get_item_details(item_code: str, company: str | None = None):
+	doc = frappe.get_cached_doc("Item", item_code)
+	# the whole Item document is returned below, so the record itself has to be authorised. This is
+	# the check stock/get_item_details.py already makes before returning details for a transaction.
+	doc.check_permission()
+
 	out = frappe._dict()
 	if company:
+		# `company` is caller supplied and scopes the Item Defaults returned alongside the item.
+		# Checked through the caller's own Company restrictions rather than a permission on Company,
+		# so a caller with no Company restriction is unaffected.
+		from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies
+
+		allowed_companies = get_allowed_companies(frappe.session.user, "Item")
+		if allowed_companies and company not in allowed_companies:
+			frappe.throw(_("Not permitted for {0}").format(company), frappe.PermissionError)
+
 		out = get_item_defaults(item_code, company) or frappe._dict()
 
-	doc = frappe.get_cached_doc("Item", item_code)
 	out.update(doc.as_dict())
 
 	return out
@@ -1633,8 +1646,7 @@ ITEM_PRICES_LIMIT = 10
 @frappe.whitelist()
 def get_item_prices(item_code: str):
 	"""Fetch valid item prices for the item prices tab."""
-	if not frappe.has_permission("Item Price", "read"):
-		frappe.throw(_("Not permitted"), frappe.PermissionError)
+	frappe.has_permission("Item Price", "read", throw=True)
 	today = getdate()
 
 	ItemPrice = frappe.qb.DocType("Item Price")
@@ -1675,8 +1687,7 @@ def make_opening_stock_entry(
 	valuation_rate: float,
 	warehouse: str | None = None,
 ):
-	if not frappe.has_permission("Item", "write", item_code):
-		frappe.throw(_("Not permitted"), frappe.PermissionError)
+	frappe.has_permission("Item", "write", item_code, throw=True)
 
 	item = frappe.get_doc("Item", item_code)
 
