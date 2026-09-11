@@ -1,4 +1,9 @@
 {
+<<<<<<< HEAD
+=======
+ "actions": [],
+ "allow_bulk_edit": 1,
+>>>>>>> b481083 (fix(accounts): add permission checks on `invoice_discounting.get_invoices` (#58975))
  "allow_import": 1,
  "autoname": "ACC-INV-DISC-.YYYY.-.#####",
  "creation": "2019-03-07 12:01:56.296952",
@@ -168,7 +173,12 @@
   }
  ],
  "is_submittable": 1,
+<<<<<<< HEAD
  "modified": "2019-05-30 19:08:21.199759",
+=======
+ "links": [],
+ "modified": "2026-09-09 17:04:59.512294",
+>>>>>>> b481083 (fix(accounts): add permission checks on `invoice_discounting.get_invoices` (#58975))
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Invoice Discounting",
@@ -185,13 +195,18 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "System Manager",
+   "role": "Accounts Manager",
    "share": 1,
    "submit": 1,
    "write": 1
   }
  ],
+<<<<<<< HEAD
  "sort_field": "modified",
+=======
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+>>>>>>> b481083 (fix(accounts): add permission checks on `invoice_discounting.get_invoices` (#58975))
  "sort_order": "DESC",
  "track_changes": 1
 }
