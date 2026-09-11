@@ -482,6 +482,20 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertFalse(has_potentially_billable_items(so.name))
 		self.assertEqual(len(make_sales_invoice(so.name).get("items")), 0)
 
+	def test_billable_sales_orders_are_listed_by_name(self):
+		item = make_item("_Test Picker Ordering Item", {"is_stock_item": 1}).name
+		orders = [
+			make_sales_order(
+				item_code=item, qty=1, rate=100, transaction_date=add_days(nowdate(), -days)
+			).name
+			for days in (2, 1, 0)
+		]
+
+		filters = {"docstatus": 1, "company": "_Test Company", "customer": "_Test Customer"}
+		rows = get_potentially_billable_sales_orders("Sales Order", "", "name", 0, 500, filters)
+
+		self.assertEqual([row.name for row in rows if row.name in orders], sorted(orders))
+
 	def test_make_sales_invoice_after_return_and_redelivery(self):
 		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
 
