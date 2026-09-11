@@ -152,6 +152,7 @@ def get_items_for_material_requests(
 	frappe.has_permission("Production Plan", "read", throw=True)
 
 	doc = _normalize_mr_doc(doc)
+	_authorize_mr_request(doc, warehouses)
 	_validate_group_warehouse_target(doc)
 	warehouses = _filter_warehouses(doc, warehouses, get_parent_warehouse_data)
 	doc["mr_items"] = []
@@ -178,6 +179,61 @@ def get_items_for_material_requests(
 def _normalize_mr_doc(doc):
 	doc = frappe._dict(frappe.parse_json(doc))
 	return doc
+
+
+def _authorize_mr_request(doc, warehouses=None):
+	"""Scope a caller-supplied plan to what the caller may actually see.
+
+	`doc` is frequently an UNSAVED plan sent from the form — and `make_raw_material_request` in
+	selling/doctype/sales_order/mapper.py synthesises one with no name at all — so a record-level
+	check can only be required when the caller names a plan that really exists.
+	"""
+	name = doc.get("name")
+	if isinstance(name, str) and frappe.db.exists("Production Plan", name):
+		frappe.has_permission("Production Plan", doc=name, throw=True)
+
+	# Every value below arrives through frappe.parse_json, so container elements are untyped: a dict
+	# in any of these reaches frappe.db.get_value() in its *name* position and becomes a filter.
+	for row in _iter_mr_rows(doc):
+		for fieldname in ("item_code", "warehouse", "bom_no", "sales_order", "uom", "purchase_uom"):
+			value = row.get(fieldname)
+			if value is not None and not isinstance(value, str):
+				frappe.throw(_("Invalid {0}").format(fieldname), frappe.PermissionError)
+
+	# The warehouse — not `company` — is what selects whose stock figures come back, so that is what
+	# a Company User Permission has to be applied to. Costs nobody who holds no such permission.
+	from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies
+
+	allowed_companies = get_allowed_companies(frappe.session.user, "Production Plan")
+	if not allowed_companies:
+		return
+
+	for warehouse in _iter_mr_warehouses(doc, warehouses):
+		company = frappe.db.get_value("Warehouse", warehouse, "company")
+		if company and company not in allowed_companies:
+			frappe.throw(_("Not permitted for {0}").format(company), frappe.PermissionError)
+
+
+def _iter_mr_rows(doc):
+	for key in ("po_items", "items", "sub_assembly_items"):
+		for row in doc.get(key) or []:
+			if isinstance(row, dict):
+				yield row
+
+
+def _iter_mr_warehouses(doc, warehouses):
+	seen = set()
+	for value in (doc.get("for_warehouse"), doc.get("warehouse")):
+		if isinstance(value, str) and value:
+			seen.add(value)
+	for row in _iter_mr_rows(doc):
+		value = row.get("warehouse")
+		if isinstance(value, str) and value:
+			seen.add(value)
+	for value in get_warehouse_list(warehouses) if warehouses else []:
+		if isinstance(value, str) and value:
+			seen.add(value)
+	return seen
 
 
 def _validate_group_warehouse_target(doc):
