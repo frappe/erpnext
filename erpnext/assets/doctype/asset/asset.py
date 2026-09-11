@@ -1171,15 +1171,39 @@ def get_asset_value_after_depreciation(
 	asset_name: str,
 	finance_book: str | None = None,
 ):
+	# Reached from asset_value_adjustment.js:60 and from the validate() of Asset Value Adjustment,
+	# Asset Capitalization and Asset Repair — so one of those three forms is the boundary. `Asset`
+	# itself cannot be: both read AND select exclude Accounts Manager and System Manager, who hold
+	# Asset Value Adjustment write.
+	if not any(
+		frappe.has_permission(dt, "write")
+		for dt in ("Asset Value Adjustment", "Asset Capitalization", "Asset Repair")
+	):
+		frappe.throw(_("Not permitted"), frappe.PermissionError)
+
 	asset = frappe.get_doc("Asset", asset_name)
+
+	_check_asset_company(asset.company)
+
 	if not asset.calculate_depreciation:
 		return flt(asset.value_after_depreciation)
 
 	return asset.get_value_after_depreciation(finance_book)
 
 
+def _check_asset_company(company: str | None) -> None:
+	"""Keep a company-restricted caller inside their own companies; a no-op for everyone else."""
+	from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies
+
+	allowed_companies = get_allowed_companies(frappe.session.user, "Asset")
+	if allowed_companies and company and company not in allowed_companies:
+		frappe.throw(_("Not permitted for {0}").format(company), frappe.PermissionError)
+
+
 @frappe.whitelist()
 def has_active_capitalization(asset: str):
+	frappe.has_permission("Asset", doc=asset, throw=True)
+
 	active_capitalizations = frappe.db.count(
 		"Asset Capitalization", filters={"target_asset": asset, "docstatus": 1}
 	)
@@ -1192,7 +1216,21 @@ def get_values_from_purchase_doc(
 	item_code: str,
 	doctype: str,
 ):
+	# `doctype` is caller-supplied and reaches frappe.get_doc() as the doctype itself, so without
+	# this list any document with an `items` table could be read for its valuation rates. The two
+	# values below are the only ones this function handles — see the branches further down.
+	if doctype not in ("Purchase Receipt", "Purchase Invoice"):
+		frappe.throw(_("Invalid document type"), frappe.PermissionError)
+
+	# The caller is filling in an Asset (asset.js:794), and the Asset form is the boundary: Quality
+	# Manager writes Assets but holds read on neither Purchase Receipt nor Purchase Invoice, so the
+	# purchase document cannot be it.
+	frappe.has_permission("Asset", "write", throw=True)
+
 	purchase_doc = frappe.get_doc(doctype, purchase_doc_name)
+
+	_check_asset_company(purchase_doc.company)
+
 	matching_items = [item for item in purchase_doc.items if item.item_code == item_code]
 
 	if not matching_items:
