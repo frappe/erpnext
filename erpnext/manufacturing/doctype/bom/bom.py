@@ -10,7 +10,7 @@ import frappe
 from frappe import _, bold
 from frappe.core.doctype.version.version import get_diff
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import cint, cstr, flt, today
+from frappe.utils import cint, cstr, flt, get_link_to_form, today
 from frappe.website.website_generator import WebsiteGenerator
 
 import erpnext
@@ -652,6 +652,19 @@ class BOM(WebsiteGenerator):
 			if flt(m.qty) <= 0:
 				frappe.throw(_("Quantity required for Item {0} in row {1}").format(m.item_code, m.idx))
 			check_list.append(m)
+
+		bom_items = {self.item}
+		bom_items.update(d.item_code for d in self.get("items"))
+		bom_items.update(d.item_code for d in self.get("scrap_items"))
+
+		if disabled_items := frappe.db.get_all(
+			"Item", filters={"item_code": ("in", list(bom_items)), "disabled": 1}, pluck="name"
+		):
+			frappe.throw(
+				_("Disabled Item {0} cannot be used in BOMs.").format(
+					", ".join(get_link_to_form("Item", item) for item in disabled_items)
+				)
+			)
 
 	def check_recursion(self, bom_list=None):
 		"""Check whether recursion occurs in any bom"""
