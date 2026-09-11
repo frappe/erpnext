@@ -1661,28 +1661,29 @@ def get_item_prices(item_code: str):
 	frappe.has_permission("Item Price", "read", throw=True)
 	today = getdate()
 
-	ItemPrice = frappe.qb.DocType("Item Price")
-
-	prices = (
-		frappe.qb.from_(ItemPrice)
-		.select(
-			ItemPrice.name,
-			ItemPrice.price_list,
-			ItemPrice.price_list_rate,
-			ItemPrice.currency,
-			ItemPrice.uom,
-			ItemPrice.customer,
-			ItemPrice.supplier,
-			ItemPrice.buying,
-			ItemPrice.selling,
-			ItemPrice.valid_upto,
-		)
-		.where(ItemPrice.item_code == item_code)
-		.where(ItemPrice.docstatus != 2)
-		.where((ItemPrice.valid_upto.isnull()) | (ItemPrice.valid_upto >= today))
-		.orderby(ItemPrice.price_list)
-		.limit(ITEM_PRICES_LIMIT + 1)
-		.run(as_dict=True)
+	# get_list, not get_all: it applies Item Price's permission query conditions and the caller's
+	# User Permissions. The check above authorises the doctype but not the rows: a caller
+	# restricted to one Price List, Customer or Supplier would otherwise be shown every party's
+	# negotiated rate for the item. get_list needs `select` or `read` and the check above already
+	# demands `read`, so no caller that reaches this line loses it.
+	prices = frappe.get_list(
+		"Item Price",
+		filters={"item_code": item_code, "docstatus": ["!=", 2]},
+		or_filters=[["valid_upto", "is", "not set"], ["valid_upto", ">=", today]],
+		fields=[
+			"name",
+			"price_list",
+			"price_list_rate",
+			"currency",
+			"uom",
+			"customer",
+			"supplier",
+			"buying",
+			"selling",
+			"valid_upto",
+		],
+		order_by="price_list",
+		limit=ITEM_PRICES_LIMIT + 1,
 	)
 
 	return {
