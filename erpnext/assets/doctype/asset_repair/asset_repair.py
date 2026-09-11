@@ -351,6 +351,25 @@ class AssetRepair(AccountsController):
 		add_asset_activity(self.asset, subject)
 
 
+def check_asset_repair_access(company: str | None = None) -> None:
+	"""Both pickers below sit on the Asset Repair form, so that form is the boundary.
+
+	Deliberately NOT `Purchase Invoice`, which the sibling get_unallocated_repair_cost uses: that
+	check denies Quality Manager and Manufacturing Manager — the only two roles that can write an
+	Asset Repair — while admitting three roles that cannot. Measured; recorded with this row.
+	"""
+	frappe.has_permission("Asset Repair", throw=True)
+
+	if not isinstance(company, str) or not company:
+		return
+
+	from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies
+
+	allowed_companies = get_allowed_companies(frappe.session.user, "Asset Repair")
+	if allowed_companies and company not in allowed_companies:
+		frappe.throw(_("Not permitted for {0}").format(company), frappe.PermissionError)
+
+
 @frappe.whitelist()
 def get_downtime(failure_date: DateTimeLikeObject, completion_date: DateTimeLikeObject):
 	downtime = time_diff_in_hours(completion_date, failure_date)
@@ -371,6 +390,8 @@ def get_purchase_invoice(
 	Get Purchase Invoices that have expense accounts for non-stock items.
 	Only returns invoices with at least one non-stock, non-fixed-asset item with an expense account.
 	"""
+	check_asset_repair_access(filters.get("company") if isinstance(filters, dict) else None)
+
 	pi = DocType("Purchase Invoice")
 	pi_item = DocType("Purchase Invoice Item")
 	item = DocType("Item")
@@ -413,6 +434,8 @@ def get_expense_accounts(
 	Get expense accounts for non-stock (service) items from the purchase invoice.
 	Used as a query function for link fields.
 	"""
+	check_asset_repair_access()
+
 	purchase_invoice = filters.get("purchase_invoice")
 	if not purchase_invoice:
 		return []
