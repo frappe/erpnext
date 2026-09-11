@@ -326,6 +326,8 @@ class AssetCapitalization(StockController):
 
 	@frappe.whitelist()
 	def set_warehouse_details(self):
+		self.check_permission("write")
+
 		for d in self.get("stock_items"):
 			if d.item_code and d.warehouse:
 				args = self.get_args_for_incoming_rate(d)
@@ -336,6 +338,8 @@ class AssetCapitalization(StockController):
 
 	@frappe.whitelist()
 	def set_asset_values(self):
+		self.check_permission("write")
+
 		for d in self.get("asset_items"):
 			if d.asset:
 				finance_book = d.get("finance_book") or self.get("finance_book")
@@ -511,8 +515,29 @@ class AssetCapitalization(StockController):
 			)
 
 
+def check_capitalization_access(company: str | None = None) -> None:
+	"""Every lookup in this file feeds the Asset Capitalization form, so that form is the boundary.
+
+	Asset Capitalization read is held by exactly Quality Manager and Manufacturing Manager, which
+	makes this loser-free — and neither of them holds `Item` read or `Stock Ledger Entry` read, so
+	the guards already in this file are NOT a usable model (see the note on get_warehouse_details).
+	"""
+	frappe.has_permission("Asset Capitalization", throw=True)
+
+	if not isinstance(company, str) or not company:
+		return
+
+	from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies
+
+	allowed_companies = get_allowed_companies(frappe.session.user, "Asset Capitalization")
+	if allowed_companies and company not in allowed_companies:
+		frappe.throw(_("Not permitted for {0}").format(company), frappe.PermissionError)
+
+
 @frappe.whitelist()
 def get_target_item_details(item_code: str | None = None, company: str | None = None):
+	check_capitalization_access(company)
+
 	out = frappe._dict()
 
 	# Get Item Details
@@ -539,6 +564,8 @@ def get_target_item_details(item_code: str | None = None, company: str | None = 
 
 @frappe.whitelist()
 def get_target_asset_details(asset: str | None = None, company: str | None = None):
+	check_capitalization_access(company)
+
 	out = frappe._dict()
 
 	# Get Asset Details
@@ -636,6 +663,8 @@ def get_warehouse_details(ctx: ItemDetailsCtx) -> frappe._dict:
 @frappe.whitelist()
 @erpnext.normalize_ctx_input(ItemDetailsCtx)
 def get_consumed_asset_details(ctx: ItemDetailsCtx) -> frappe._dict:
+	check_capitalization_access(ctx.get("company"))
+
 	out = frappe._dict()
 
 	asset_details = frappe._dict()
@@ -682,6 +711,8 @@ def get_consumed_asset_details(ctx: ItemDetailsCtx) -> frappe._dict:
 @frappe.whitelist()
 @erpnext.normalize_ctx_input(ItemDetailsCtx)
 def get_service_item_details(ctx: ItemDetailsCtx) -> frappe._dict:
+	check_capitalization_access(ctx.get("company"))
+
 	out = frappe._dict()
 
 	item = frappe._dict()
@@ -705,6 +736,8 @@ def get_service_item_details(ctx: ItemDetailsCtx) -> frappe._dict:
 @frappe.whitelist()
 def get_items_tagged_to_wip_composite_asset(params: dict | str):
 	params = frappe.parse_json(params)
+
+	check_capitalization_access(params.get("company") if isinstance(params, dict | frappe._dict) else None)
 
 	fields = [
 		"item_code",
