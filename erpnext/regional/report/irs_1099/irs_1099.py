@@ -84,6 +84,7 @@ def get_columns():
 	]
 
 
+<<<<<<< HEAD
 @frappe.whitelist()
 def irs_1099_print(filters):
 	if not filters:
@@ -124,6 +125,8 @@ def irs_1099_print(filters):
 	frappe.local.response.type = "download"
 
 
+=======
+>>>>>>> 1dd0b7d (fix(regional)!: remove `irs_1099_print` whitelisted method (#58976))
 def get_payer_address_html(company):
 	address_list = frappe.db.sql(
 		"""
