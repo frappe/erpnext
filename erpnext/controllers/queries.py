@@ -481,8 +481,6 @@ def bom(
 def get_project_name(
 	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict | None = None
 ):
-	frappe.has_permission("Project", ptype="select", throw=True)
-
 	proj = qb.DocType("Project")
 	qb_filter_and_conditions = []
 	qb_filter_or_conditions = []
@@ -498,11 +496,12 @@ def get_project_name(
 
 	qb_filter_and_conditions.append(proj.status.notin(["Completed", "Cancelled", "On hold"]))
 
-	q = qb.from_(proj)
-
 	fields = get_fields(doctype, ["name", "project_name"])
-	for x in fields:
-		q = q.select(proj[x])
+
+	# Base the query on get_query so it applies Project's permission query conditions and the
+	# caller's User Permissions. A doctype-level check authorises the doctype but not the rows,
+	# which would still hand a company-restricted caller the whole open-project register.
+	q = frappe.qb.get_query("Project", fields=fields, ignore_permissions=False)
 
 	# don't consider 'customer' and 'status' fields for pattern search, as they must be exactly matched
 	searchfields = [
@@ -1017,17 +1016,12 @@ def get_doctype_wise_filters(filters):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_batch_numbers(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
-	frappe.has_permission("Batch", ptype="select", throw=True)
-
 	batch = frappe.qb.DocType("Batch")
-	query = (
-		frappe.qb.from_(batch)
-		.select(batch.batch_id)
-		.where(
-			(batch.disabled == 0)
-			& (batch.expiry_date.isnull() | (batch.expiry_date >= today()))
-			& batch.name.like(f"%{txt}%")
-		)
+	# get_query applies the select check and the caller's record-level conditions together
+	query = frappe.qb.get_query("Batch", fields=["batch_id"], ignore_permissions=False).where(
+		(batch.disabled == 0)
+		& (batch.expiry_date.isnull() | (batch.expiry_date >= today()))
+		& batch.name.like(f"%{txt}%")
 	)
 
 	if filters and filters.get("item"):
@@ -1060,15 +1054,13 @@ def item_manufacturer_query(
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_purchase_receipts(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
-	frappe.has_permission("Purchase Receipt", ptype="select", throw=True)
-
 	pr = frappe.qb.DocType("Purchase Receipt")
 	pr_item = frappe.qb.DocType("Purchase Receipt Item")
+	# get_query applies the select check and the caller's record-level conditions together
 	query = (
-		frappe.qb.from_(pr)
+		frappe.qb.get_query("Purchase Receipt", fields=["name"], ignore_permissions=False)
 		.inner_join(pr_item)
 		.on(pr_item.parent == pr.name)
-		.select(pr.name)
 		.distinct()  # one row per receipt, not per matching item line
 		.where((pr.docstatus == 1) & pr.name.like(f"%{txt}%"))
 	)
@@ -1082,15 +1074,13 @@ def get_purchase_receipts(doctype: str, txt: str, searchfield: str, start: int, 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_purchase_invoices(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
-	frappe.has_permission("Purchase Invoice", ptype="select", throw=True)
-
 	pi = frappe.qb.DocType("Purchase Invoice")
 	pi_item = frappe.qb.DocType("Purchase Invoice Item")
+	# get_query applies the select check and the caller's record-level conditions together
 	query = (
-		frappe.qb.from_(pi)
+		frappe.qb.get_query("Purchase Invoice", fields=["name"], ignore_permissions=False)
 		.inner_join(pi_item)
 		.on(pi_item.parent == pi.name)
-		.select(pi.name)
 		.distinct()  # one row per invoice, not per matching item line
 		.where((pi.docstatus == 1) & pi.name.like(f"%{txt}%"))
 	)
