@@ -326,15 +326,19 @@ def get_warehouses_for_reorder(
 	if filters.warehouse and not frappe.db.exists("Warehouse", filters.warehouse):
 		frappe.throw(_("Warehouse {0} does not exist").format(filters.warehouse))
 
-	doctype = frappe.qb.DocType("Warehouse")
-
-	warehouses = (
-		frappe.qb.from_(doctype)
-		.select(doctype.name)
-		.where(doctype.disabled == 0)
-		.where((doctype.is_group == 1) | (doctype.name == filters.warehouse))
-		.orderby(doctype.name)
-		.run(as_list=True)
+	# get_list, not get_all: it applies Warehouse's permission query conditions and the caller's
+	# User Permissions. The check above authorises the doctype but not the rows, which would still
+	# offer a company-restricted caller every warehouse on the site to reorder into. get_list needs
+	# `select` or `read`; the check above already demands `read`, so no caller that reaches this
+	# line loses it. `as_list` keeps the tuple rows the picker expects; the picker is unpaginated,
+	# so no limit is passed.
+	warehouses = frappe.get_list(
+		"Warehouse",
+		filters={"disabled": 0},
+		or_filters=[["is_group", "=", 1], ["name", "=", filters.warehouse]],
+		fields=["name"],
+		order_by="name",
+		as_list=True,
 	)
 
 	return warehouses
