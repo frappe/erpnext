@@ -1048,7 +1048,7 @@ def get_potentially_billable_sales_orders(
 		.on(item.name == so_item.item_code)
 		.where(get_potentially_billable_item_criterion(so, so_item, item))
 		.distinct()
-		.orderby(so.transaction_date, order=Order.desc)
+		.orderby(so.name, order=Order.asc)
 		.limit(cint(page_len))
 		.offset(cint(start))
 		.run(as_dict=True)
