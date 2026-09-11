@@ -544,9 +544,10 @@ class PickList(TransactionBase):
 		work_order = frappe.get_doc("Work Order", self.work_order)
 		RequiredItemsService(work_order).update_picked_qty_for_required_items()
 
-	@frappe.whitelist()
+	@frappe.whitelist(methods=["POST"])
 	def create_stock_reservation_entries(self, notify: bool = True) -> None:
 		"""Creates Stock Reservation Entries for Sales Order Items against Pick List."""
+		self.check_permission("write")
 
 		so_items_details_map = {}
 		for location in self.locations:
@@ -571,9 +572,10 @@ class PickList(TransactionBase):
 					notify=notify,
 				)
 
-	@frappe.whitelist()
+	@frappe.whitelist(methods=["POST"])
 	def cancel_stock_reservation_entries(self, notify: bool = True) -> None:
 		"""Cancel Stock Reservation Entries for Sales Order Items created against Pick List."""
+		self.check_permission("write")
 
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 			cancel_stock_reservation_entries,
@@ -596,8 +598,12 @@ class PickList(TransactionBase):
 					).format(row.item_code, row.sales_order)
 				)
 
-	@frappe.whitelist()
+	@frappe.whitelist(methods=["POST"])
 	def set_item_locations(self, save: bool = False):
+		# save() below enforces this per document, but only after the whole location allocation has
+		# run — gate it up front (see the genericode import for the same ordering point).
+		self.check_permission("write")
+
 		self.validate_for_qty()
 		items = self.aggregate_item_qty()
 
@@ -1637,6 +1643,18 @@ def get_available_item_locations_for_other_item(
 	return item_locations
 
 
+def check_pick_list_company(company: str | None) -> None:
+	"""Keep a company-restricted caller inside their own companies; a no-op for everyone else."""
+	if not isinstance(company, str) or not company:
+		return
+
+	from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies
+
+	allowed_companies = get_allowed_companies(frappe.session.user, "Pick List")
+	if allowed_companies and company not in allowed_companies:
+		frappe.throw(_("Not permitted for {0}").format(company), frappe.PermissionError)
+
+
 @frappe.whitelist()
 def get_pending_work_orders(
 	doctype: Any,
@@ -1647,6 +1665,13 @@ def get_pending_work_orders(
 	filters: dict,
 	as_dict: bool = False,
 ):
+	# Same guard the sibling get_pick_list_query already uses, and verified correct for this form:
+	# Pick List read is held by Stock Manager, Stock User, Manufacturing Manager and Manufacturing
+	# User — all four. A `Work Order` guard would lose Stock Manager and Manufacturing Manager, who
+	# hold no Work Order read.
+	frappe.has_permission("Pick List", throw=True)
+	check_pick_list_company(filters.get("company") if isinstance(filters, dict) else None)
+
 	wo = frappe.qb.DocType("Work Order")
 	return (
 		frappe.qb.from_(wo)
@@ -1673,6 +1698,9 @@ def get_pending_work_orders(
 def get_item_details(
 	item_code: str, uom: str | None = None, warehouse: str | None = None, company: str | None = None
 ):
+	frappe.has_permission("Pick List", throw=True)
+	check_pick_list_company(company)
+
 	details = frappe.db.get_value("Item", item_code, "stock_uom", as_dict=1)
 	details.uom = uom or details.stock_uom
 	if uom:
