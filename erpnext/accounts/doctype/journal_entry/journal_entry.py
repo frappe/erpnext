@@ -1023,9 +1023,10 @@ def get_default_bank_cash_account(
 ) -> dict:
 	from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
 
-	# every branch below reads accounts belonging to this company, so the company is the scope
-	# being authorised. doc= is what brings User Permissions to bear.
-	frappe.has_permission("Company", doc=company, throw=True)
+	# the company is the scope being authorised, and doc= brings User Permissions to bear. `select`,
+	# not `read`: this also runs server-side from get_payment_entry, and Auditor/HR User/Desk User
+	# hold only the select row on Company
+	frappe.has_permission("Company", ptype="select", doc=company, throw=True)
 
 	if mode_of_payment:
 		account = get_bank_cash_account(mode_of_payment, company).get("account")

@@ -290,16 +290,24 @@ def _create_bin(item_code, warehouse):
 
 @frappe.whitelist()
 def get_incoming_rate(args: dict | str, raise_error_if_no_rate: bool = True, fallbacks: bool = True):
+	"""Whitelisted entry point: authorise the caller, then compute the rate."""
+	args = frappe.parse_json(args)
+
+	# `select`, not `read`: this is reached from transaction.js:1069 on every sales and buying form,
+	# and Accounts Manager — who writes Sales Invoice and Purchase Invoice — holds no Item read
+	frappe.has_permission("Item", ptype="select", throw=True)
+	# only on this path: in-process callers legitimately price the counterparty's warehouse, e.g.
+	# buying_controller.set_sales_incoming_rate_for_internal_transfer passes `from_warehouse`
+	check_warehouse_company(args.get("warehouse") if isinstance(args, dict | frappe._dict) else None)
+
+	return _get_incoming_rate(args, raise_error_if_no_rate, fallbacks)
+
+
+def _get_incoming_rate(args: dict | str, raise_error_if_no_rate: bool = True, fallbacks: bool = True):
 	"""Get Incoming Rate based on valuation method"""
 	from erpnext.stock.stock_ledger import get_previous_sle, get_valuation_rate
 
 	args = frappe.parse_json(args)
-
-	# `select`, not `read`: this is reached from transaction.js:1069 on every sales and buying form,
-	# and Accounts Manager — who writes Sales Invoice and Purchase Invoice — holds no Item read. The
-	# company scoping below is what actually closes the cross-company read; see the residual note.
-	frappe.has_permission("Item", ptype="select", throw=True)
-	check_warehouse_company(args.get("warehouse") if isinstance(args, dict | frappe._dict) else None)
 
 	if not args.get("posting_datetime") and args.get("posting_date"):
 		args["posting_datetime"] = get_combine_datetime(args.get("posting_date"), args.get("posting_time"))

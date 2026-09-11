@@ -12,6 +12,22 @@ from frappe import _, throw
 from frappe.model.document import Document
 from frappe.utils import cint, flt
 
+# the transactions the pricing engine is called for, from transaction.js and the POS
+PRICING_TRANSACTION_DOCTYPES = frozenset(
+	{
+		"Quotation",
+		"Sales Order",
+		"Delivery Note",
+		"Sales Invoice",
+		"POS Invoice",
+		"Supplier Quotation",
+		"Purchase Order",
+		"Purchase Receipt",
+		"Purchase Invoice",
+		"Material Request",
+	}
+)
+
 apply_on_dict = {"Item Code": "items", "Item Group": "item_groups", "Brand": "brands"}
 
 other_fields = ["other_item_code", "other_item_group", "other_brand"]
@@ -369,8 +385,10 @@ def apply_pricing_rule(args: str | dict, doc: str | dict | Document | None = Non
 	# `args` is caller supplied, and what comes back is pricing: matched Pricing Rules, discounts
 	# and rates. The transaction being priced is what decides who may price it, so authorise that
 	# — and the document itself where the caller named an existing one, so User Permissions apply.
+	# an allow-list, not just a type check: `doctype` is caller-chosen, and any doctype the caller can
+	# read would otherwise satisfy has_permission below while the pricing engine still ran
 	transaction_doctype = args.get("doctype")
-	if not transaction_doctype or not isinstance(transaction_doctype, str):
+	if transaction_doctype not in PRICING_TRANSACTION_DOCTYPES:
 		frappe.throw(_("Invalid doctype"), frappe.PermissionError)
 
 	transaction_name = args.get("name")

@@ -21,7 +21,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.stock_reconciliation_item.stock_reconciliation_item import StockReconciliationItem
-from erpnext.stock.utils import get_incoming_rate, get_stock_balance, get_valuation_method
+from erpnext.stock.utils import _get_incoming_rate, get_stock_balance, get_valuation_method
 
 
 class OpeningEntryAccountError(frappe.ValidationError):
@@ -1561,7 +1561,7 @@ def get_stock_balance_for(
 			serial_nos = "\n".join(d.serial_no for d in serial_no_details if d.batch_no == batch_no)
 
 		if row and row.use_serial_batch_fields and row.batch_no and (qty or row.current_qty):
-			rate = get_incoming_rate(
+			rate = _get_incoming_rate(
 				frappe._dict(
 					{
 						"item_code": row.item_code,

@@ -502,14 +502,28 @@ def get_project_name(
 		if x not in ["customer", "status"] and not (meta.get_field(x) and meta.get_field(x).permlevel)
 	]
 
-	# pattern search
-	or_filters = [[x, "like", f"%{txt}%"] for x in searchfields] if txt else None
+	fields = get_fields(doctype, ["name", "project_name"])
 
-	# get_list applies the doctype check and record-level conditions; names only, as order_by rejects the CASE below
+	# get_list applies the doctype check and the caller's record-level conditions
+	if not txt:
+		# no search term means no relevance ordering, so the whole query is expressible here and
+		# stays paginated in SQL rather than materialising every permitted name
+		return frappe.get_list(
+			"Project",
+			filters=list_filters,
+			fields=fields,
+			order_by="idx desc, name",
+			limit_start=start,
+			limit_page_length=page_len,
+			as_list=True,
+		)
+
+	# with a search term, resolve the (already LIKE-narrowed) permitted names and rank them below:
+	# the relevance ordering is a CASE expression, which `order_by` rejects
 	permitted = frappe.get_list(
 		"Project",
 		filters=list_filters,
-		or_filters=or_filters,
+		or_filters=[[x, "like", f"%{txt}%"] for x in searchfields],
 		pluck="name",
 		order_by="",
 		limit_page_length=0,
@@ -518,25 +532,21 @@ def get_project_name(
 	if not permitted:
 		return []
 
-	fields = get_fields(doctype, ["name", "project_name"])
-
 	q = (
 		frappe.qb.from_(proj)
 		.select(*[proj[fieldname] for fieldname in fields])
 		.where(proj.name.isin(permitted))
 	)
 
-	# ordering
-	if txt:
-		# project_name containing search string 'txt' will be given higher precedence
-		q = q.orderby(
-			Case()
-			.when(
-				Locate(Lower(txt), Lower(proj.project_name)) > 0,
-				Locate(Lower(txt), Lower(proj.project_name)),
-			)
-			.else_(99999)
+	# project_name containing search string 'txt' will be given higher precedence
+	q = q.orderby(
+		Case()
+		.when(
+			Locate(Lower(txt), Lower(proj.project_name)) > 0,
+			Locate(Lower(txt), Lower(proj.project_name)),
 		)
+		.else_(99999)
+	)
 	q = q.orderby(proj.idx, order=Order.desc).orderby(proj.name)
 
 	if page_len:
@@ -1072,21 +1082,28 @@ def get_purchase_receipts(doctype: str, txt: str, searchfield: str, start: int, 
 	pr_filters = [["docstatus", "=", 1], ["name", "like", f"%{txt}%"]]
 
 	if filters and filters.get("item_code"):
-		# resolve through the child table, not a child filter: that forces distinct, which drops ORDER BY on Postgres
-		parents = frappe.get_all(
-			"Purchase Receipt Item",
-			filters={"item_code": filters.get("item_code"), "parenttype": "Purchase Receipt"},
-			pluck="parent",
-			distinct=True,
-		)
-		# `or [""]`, not an early return: an empty result must still go through get_list's permission check
-		pr_filters.append(["name", "in", parents or [""]])
+		if frappe.has_permission("Purchase Receipt", "read"):
+			# one indexed join, deduped by group_by below
+			pr_filters.append(["Purchase Receipt Item", "item_code", "=", filters.get("item_code")])
+		else:
+			# a select-only caller may use this picker but may not filter on a child table, so resolve
+			# the parents separately rather than losing the filter to a PermissionError
+			parents = frappe.get_all(
+				"Purchase Receipt Item",
+				filters={"item_code": filters.get("item_code"), "parenttype": "Purchase Receipt"},
+				pluck="parent",
+				distinct=True,
+			)
+			pr_filters.append(["name", "in", parents or [""]])
 
-	# get_list applies the select check and the caller's record-level conditions together
+	# get_list applies the select check and the caller's record-level conditions together.
+	# group_by, not distinct: it dedupes the child join just the same, and frappe drops ORDER BY
+	# from a distinct query on Postgres
 	return frappe.get_list(
 		"Purchase Receipt",
 		filters=pr_filters,
 		fields=["name"],
+		group_by="name",
 		order_by="name",
 		limit_start=start,
 		limit_page_length=page_len,
@@ -1100,21 +1117,28 @@ def get_purchase_invoices(doctype: str, txt: str, searchfield: str, start: int, 
 	pi_filters = [["docstatus", "=", 1], ["name", "like", f"%{txt}%"]]
 
 	if filters and filters.get("item_code"):
-		# resolve through the child table, not a child filter: that forces distinct, which drops ORDER BY on Postgres
-		parents = frappe.get_all(
-			"Purchase Invoice Item",
-			filters={"item_code": filters.get("item_code"), "parenttype": "Purchase Invoice"},
-			pluck="parent",
-			distinct=True,
-		)
-		# `or [""]`, not an early return: an empty result must still go through get_list's permission check
-		pi_filters.append(["name", "in", parents or [""]])
+		if frappe.has_permission("Purchase Invoice", "read"):
+			# one indexed join, deduped by group_by below
+			pi_filters.append(["Purchase Invoice Item", "item_code", "=", filters.get("item_code")])
+		else:
+			# a select-only caller may use this picker but may not filter on a child table, so resolve
+			# the parents separately rather than losing the filter to a PermissionError
+			parents = frappe.get_all(
+				"Purchase Invoice Item",
+				filters={"item_code": filters.get("item_code"), "parenttype": "Purchase Invoice"},
+				pluck="parent",
+				distinct=True,
+			)
+			pi_filters.append(["name", "in", parents or [""]])
 
-	# get_list applies the select check and the caller's record-level conditions together
+	# get_list applies the select check and the caller's record-level conditions together.
+	# group_by, not distinct: it dedupes the child join just the same, and frappe drops ORDER BY
+	# from a distinct query on Postgres
 	return frappe.get_list(
 		"Purchase Invoice",
 		filters=pi_filters,
 		fields=["name"],
+		group_by="name",
 		order_by="name",
 		limit_start=start,
 		limit_page_length=page_len,

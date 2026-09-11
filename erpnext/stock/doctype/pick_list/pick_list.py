@@ -600,9 +600,11 @@ class PickList(TransactionBase):
 
 	@frappe.whitelist(methods=["POST"])
 	def set_item_locations(self, save: bool = False):
-		# save() below enforces this per document, but only after the whole location allocation has
-		# run — gate it up front (see the genericode import for the same ordering point).
-		self.check_permission("write")
+		# gate the allocation up front rather than letting save() catch it afterwards — but only for a
+		# document that already exists: before_save and the SO/WO/MR mappers reach this on an unsaved
+		# list, where there is no record to authorise and insert() checks `create` anyway
+		if not self.is_new():
+			self.check_permission("write")
 
 		self.validate_for_qty()
 		items = self.aggregate_item_qty()

@@ -283,7 +283,7 @@ def set_valuation_rate(out: frappe._dict, ctx: frappe._dict):
 
 		for bundle_item in bundled_items.items:
 			valuation_rate += flt(
-				get_valuation_rate(bundle_item.item_code, ctx.company, out.get("warehouse")).get(
+				_get_valuation_rate(bundle_item.item_code, ctx.company, out.get("warehouse")).get(
 					"valuation_rate"
 				)
 				* bundle_item.qty
@@ -292,7 +292,7 @@ def set_valuation_rate(out: frappe._dict, ctx: frappe._dict):
 		out.update({"valuation_rate": valuation_rate})
 
 	else:
-		out.update(get_valuation_rate(ctx.item_code, ctx.company, out.get("warehouse")))
+		out.update(_get_valuation_rate(ctx.item_code, ctx.company, out.get("warehouse")))
 
 
 def update_stock(ctx, out, doc=None):
@@ -1824,10 +1824,15 @@ def get_default_bom(item_code: str | None = None):
 
 @frappe.whitelist()
 def get_valuation_rate(item_code: str, company: str, warehouse: str | None = None):
-	# this returns cost price. Record-level read on the item, matching get_item_details() in this
-	# file; nothing in the tree calls it, so no caller's roles constrain the choice.
+	"""Whitelisted entry point: authorise the item, then return its cost price."""
 	frappe.has_permission("Item", doc=item_code, throw=True)
 
+	return _get_valuation_rate(item_code, company, warehouse)
+
+
+def _get_valuation_rate(item_code: str, company: str, warehouse: str | None = None):
+	# no guard here: set_valuation_rate calls this for the item AND for every Product Bundle
+	# component, and a caller entitled to the bundle is not necessarily entitled to each component
 	if frappe.get_cached_value("Warehouse", warehouse, "is_group"):
 		return {"valuation_rate": 0.0}
 
