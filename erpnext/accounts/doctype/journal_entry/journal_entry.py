@@ -1023,6 +1023,10 @@ def get_default_bank_cash_account(
 ) -> dict:
 	from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
 
+	# every branch below reads accounts belonging to this company, so the company is the scope
+	# being authorised. doc= is what brings User Permissions to bear.
+	frappe.has_permission("Company", doc=company, throw=True)
+
 	if mode_of_payment:
 		account = get_bank_cash_account(mode_of_payment, company).get("account")
 
@@ -1051,6 +1055,11 @@ def get_default_bank_cash_account(
 					account = account_list[0].name
 
 	if account:
+		# `account` may be named by the caller outright, so authorise the account actually being
+		# described. get_balance_on() checks this too, but only on the branch that reads a balance,
+		# and `fetch_balance` is a caller-supplied argument.
+		frappe.has_permission("Account", doc=account, throw=True)
+
 		account_details = frappe.get_cached_value(
 			"Account", account, ["account_currency", "account_type"], as_dict=1
 		)
@@ -1080,30 +1089,44 @@ def get_against_jv(
 	if not frappe.db.has_column("Journal Entry", searchfield):
 		return []
 
-	JournalEntry = frappe.qb.DocType("Journal Entry")
-	JournalEntryAccount = frappe.qb.DocType("Journal Entry Account")
+	account = filters.get("account")
+	party = filters.get("party")
 
-	query = (
-		frappe.qb.from_(JournalEntry)
-		.join(JournalEntryAccount)
-		.on(JournalEntryAccount.parent == JournalEntry.name)
-		.select(JournalEntry.name, JournalEntry.posting_date, JournalEntry.remark)
-		.where(JournalEntryAccount.account == filters.get("account"))
-		.where(JournalEntryAccount.reference_type.isnull() | (JournalEntryAccount.reference_type == ""))
-		.where(JournalEntry.docstatus == 1)
-		.where(JournalEntry[searchfield].like(f"%{txt}%"))
-		.orderby(JournalEntry.name, order=frappe.qb.desc)
-		.limit(page_len)
-		.offset(start)
+	# each names one value. A list would be read as a filter operator below and widen the search
+	# past what the caller named.
+	for value in (account, party):
+		if value and not isinstance(value, str):
+			frappe.throw(_("Invalid filter"), frappe.PermissionError)
+
+	# This returns posting dates and free-text remarks, not just names, so it is a read rather
+	# than a picker lookup. Going through get_list applies the Journal Entry permission query
+	# conditions and User Permissions, so a company-restricted user does not see another
+	# company's entries; filtering on the child table also resolves the check to `read`, since
+	# a select-only caller is refused outright by the child-table field check.
+	je_filters = [
+		["docstatus", "=", 1],
+		[searchfield, "like", f"%{txt}%"],
+		["Journal Entry Account", "account", "=", account],
+		["Journal Entry Account", "reference_type", "is", "not set"],
+	]
+	je_filters.append(
+		["Journal Entry Account", "party", "=", party]
+		if party
+		else ["Journal Entry Account", "party", "is", "not set"]
 	)
 
-	party = filters.get("party")
-	if party:
-		query = query.where(JournalEntryAccount.party == party)
-	else:
-		query = query.where(JournalEntryAccount.party.isnull() | (JournalEntryAccount.party == ""))
-
-	return query.run()
+	return frappe.get_list(
+		"Journal Entry",
+		filters=je_filters,
+		fields=["name", "posting_date", "remark"],
+		order_by="name desc",
+		limit_start=start,
+		limit_page_length=page_len,
+		as_list=True,
+		# one row per entry, not per matching account row. group_by rather than distinct: frappe
+		# drops ORDER BY from a distinct query on postgres, which would lose the ordering above.
+		group_by="name",
+	)
 
 
 @frappe.whitelist()
