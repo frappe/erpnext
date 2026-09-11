@@ -1495,21 +1495,33 @@ def set_item_default(item_code, company, fieldname, value):
 
 @frappe.whitelist()
 def get_item_details(item_code: str, company: str | None = None):
+	# The whitelisted entry point authorises; _get_item_details is the in-process helper that does
+	# not. Deliberately NOT an `ignore_permissions` argument on this function: it is whitelisted, so
+	# a caller could pass it and skip the check.
+	return _get_item_details(item_code, company, ignore_permissions=False)
+
+
+def _get_item_details(item_code: str, company: str | None = None, ignore_permissions: bool = True):
 	doc = frappe.get_cached_doc("Item", item_code)
-	# the whole Item document is returned below, so the record itself has to be authorised. This is
-	# the check stock/get_item_details.py already makes before returning details for a transaction.
-	doc.check_permission()
+	if not ignore_permissions:
+		# the whole Item document is returned below, so the record itself has to be authorised. This
+		# is the check stock/get_item_details.py already makes before returning details for a
+		# transaction.
+		doc.check_permission()
 
 	out = frappe._dict()
 	if company:
-		# `company` is caller supplied and scopes the Item Defaults returned alongside the item.
-		# Checked through the caller's own Company restrictions rather than a permission on Company,
-		# so a caller with no Company restriction is unaffected.
-		from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies
+		if not ignore_permissions:
+			# `company` is caller supplied and scopes the Item Defaults returned alongside the item.
+			# Checked through the caller's own Company restrictions rather than a permission on
+			# Company, so a caller with no Company restriction is unaffected.
+			from erpnext.stock.doctype.company_restriction.company_restriction import (
+				get_allowed_companies,
+			)
 
-		allowed_companies = get_allowed_companies(frappe.session.user, "Item")
-		if allowed_companies and company not in allowed_companies:
-			frappe.throw(_("Not permitted for {0}").format(company), frappe.PermissionError)
+			allowed_companies = get_allowed_companies(frappe.session.user, "Item")
+			if allowed_companies and company not in allowed_companies:
+				frappe.throw(_("Not permitted for {0}").format(company), frappe.PermissionError)
 
 		out = get_item_defaults(item_code, company) or frappe._dict()
 
