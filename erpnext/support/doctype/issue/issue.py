@@ -321,6 +321,11 @@ def make_task(source_name: str, target_doc: str | dict | Document | None = None)
 def make_issue_from_communication(communication: str, ignore_communication_links: bool = False):
 	"""raise a issue from email"""
 
+	# `communication` is caller supplied and nothing checked it. Communication grants read to `All`
+	# only for the owner (if_owner) and carries a has_permission hook, so doc= is what decides
+	# access; the desk button only appears on an email the caller already has open.
+	frappe.has_permission("Communication", doc=communication, throw=True)
+
 	doc = frappe.get_doc("Communication", communication)
 	issue = frappe.get_doc(
 		{
