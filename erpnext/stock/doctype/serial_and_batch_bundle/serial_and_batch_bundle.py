@@ -1942,10 +1942,7 @@ def get_serial_batch_from_csv(item_code, file_path):
 
 	from frappe.core.doctype.file.utils import find_file_by_url
 
-	# `file_path` is caller supplied: look the file up through find_file_by_url, which only returns
-	# it when the caller may actually download it. A plain get_doc() here read any private file on
-	# the site and handed its contents back. A file the caller cannot reach is reported as missing,
-	# so this does not become an existence oracle either.
+	# look the file up through find_file_by_url, which returns it only when the caller may download it
 	file = find_file_by_url(file_path)
 	if not file:
 		frappe.msgprint(
@@ -2167,10 +2164,7 @@ def item_query(
 	if txt:
 		item_filters["name"] = ("like", f"%{txt}%")
 
-	# get_list rather than get_all so the caller's Item permissions apply. `select` is the right
-	# demand for a picker returning names, and it is also what keeps this usable: the roles that
-	# work Serial and Batch Bundles (Delivery Manager/User, Manufacturing Manager, Purchase
-	# Manager, System Manager) hold no Item `read` row at all.
+	# get_list, not get_all, so Item permissions apply; `select` is what keeps the roles that work bundles usable
 	return frappe.get_list(
 		"Item",
 		filters=item_filters,

@@ -181,10 +181,7 @@ class TaxService:
 		return amount, base_amount
 
 
-# The only doctypes any `taxes_and_charges` Link field points at. `master_doctype` is caller-supplied
-# and reaches frappe.get_doc()/get_cached_value() as the doctype itself, so without this list a
-# caller can read the `taxes` child rows of ANY document on the site — measured, a Website User read
-# tax_amount and total off a named Sales Order.
+# the only doctypes a `taxes_and_charges` Link points at; `master_doctype` is caller-supplied and reaches get_doc()
 TAX_MASTER_DOCTYPES = ("Sales Taxes and Charges Template", "Purchase Taxes and Charges Template")
 
 
@@ -195,10 +192,7 @@ def validate_tax_master(master_doctype: str, master_name: str | None = None) -> 
 	if not master_name:
 		return
 
-	# Keep a company-restricted caller inside their own companies. Costs nobody who has no Company
-	# User Permission. NOTE: this does not authorise the template itself — see the STOP recorded for
-	# this row; no ptype on the master is loser-free, because Stock User writes Purchase Receipt and
-	# Delivery Note yet holds neither read nor select on the templates or on Account.
+	# keep a company-restricted caller inside their own companies; this does NOT authorise the template itself
 	from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies
 
 	allowed_companies = get_allowed_companies(frappe.session.user, master_doctype)

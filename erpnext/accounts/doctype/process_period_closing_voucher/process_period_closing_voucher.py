@@ -263,10 +263,7 @@ def get_gle_for_closing_account(pcv, dimension_balance, dimensions):
 
 @frappe.whitelist(methods=["POST"])
 def schedule_next_date(docname: str):
-	# this marks a detail row Running and enqueues a long job, so it needs the same write check the
-	# sibling controls in this file already make. Nothing guarded it: what refused an unentitled
-	# caller was an incidental System Manager check three calls deep inside is_scheduler_inactive(),
-	# reached on only one of the two branches and only after the row lock below had been taken.
+	# marks a row Running and enqueues a long job, so it needs the same write check as the sibling controls
 	frappe.has_permission("Process Period Closing Voucher", ptype="write", doc=docname, throw=True)
 
 	timeout = frappe.db.get_single_value("Accounts Settings", "pcv_job_timeout") or 3600

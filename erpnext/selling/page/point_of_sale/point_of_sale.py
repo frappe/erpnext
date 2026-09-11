@@ -341,10 +341,7 @@ def item_group_query(doctype: str, txt: str, searchfield: str, start: int, page_
 		if item_groups:
 			item_filters.append(["name", "in", item_groups])
 
-	# get_list, not get_all: check_pos_profile_access authorises the POS Profile, and the profile's
-	# own group list narrows this only when one is configured. get_list additionally applies the
-	# caller's User Permissions on Item Group. Item Group carries a `Desk User` select row, so
-	# every System User clears the doctype check and no caller loses the endpoint.
+	# get_list, not get_all: it adds the caller's Item Group User Permissions; a Desk User select row keeps everyone in
 	return frappe.get_list(
 		"Item Group",
 		filters=item_filters,
@@ -359,10 +356,7 @@ def item_group_query(doctype: str, txt: str, searchfield: str, start: int, page_
 
 @frappe.whitelist()
 def check_opening_entry(user: str):
-	# `user` was queried straight from caller input, so anyone could enumerate anyone else's open
-	# POS sessions. The only caller (pos_controller.js:10) always sends frappe.session.user.
-	# Reading somebody else's is a POS Opening Entry question, and deliberately NOT a POS Profile
-	# one: Sales Manager holds POS Opening Entry read and no POS Profile read at all.
+	# `user` was caller input, so anyone could enumerate another's open POS sessions; this is a POS Opening Entry question
 	if user != frappe.session.user:
 		frappe.has_permission("POS Opening Entry", throw=True)
 

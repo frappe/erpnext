@@ -1665,10 +1665,7 @@ def get_pending_work_orders(
 	filters: dict,
 	as_dict: bool = False,
 ):
-	# Same guard the sibling get_pick_list_query already uses, and verified correct for this form:
-	# Pick List read is held by Stock Manager, Stock User, Manufacturing Manager and Manufacturing
-	# User — all four. A `Work Order` guard would lose Stock Manager and Manufacturing Manager, who
-	# hold no Work Order read.
+	# same guard as the sibling get_pick_list_query; a Work Order guard would lose Stock and Manufacturing Manager
 	frappe.has_permission("Pick List", throw=True)
 	check_pick_list_company(filters.get("company") if isinstance(filters, dict) else None)
 

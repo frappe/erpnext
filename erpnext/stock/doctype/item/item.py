@@ -1661,11 +1661,7 @@ def get_item_prices(item_code: str):
 	frappe.has_permission("Item Price", "read", throw=True)
 	today = getdate()
 
-	# get_list, not get_all: it applies Item Price's permission query conditions and the caller's
-	# User Permissions. The check above authorises the doctype but not the rows: a caller
-	# restricted to one Price List, Customer or Supplier would otherwise be shown every party's
-	# negotiated rate for the item. get_list needs `select` or `read` and the check above already
-	# demands `read`, so no caller that reaches this line loses it.
+	# get_list, not get_all: otherwise a caller restricted to one Price List sees every party's negotiated rate
 	prices = frappe.get_list(
 		"Item Price",
 		filters={"item_code": item_code, "docstatus": ["!=", 2]},

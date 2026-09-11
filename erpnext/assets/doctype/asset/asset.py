@@ -1171,10 +1171,7 @@ def get_asset_value_after_depreciation(
 	asset_name: str,
 	finance_book: str | None = None,
 ):
-	# Reached from asset_value_adjustment.js:60 and from the validate() of Asset Value Adjustment,
-	# Asset Capitalization and Asset Repair — so one of those three forms is the boundary. `Asset`
-	# itself cannot be: both read AND select exclude Accounts Manager and System Manager, who hold
-	# Asset Value Adjustment write.
+	# one of the three calling forms is the boundary; Asset itself excludes the roles holding Asset Value Adjustment write
 	if not any(
 		frappe.has_permission(dt, "write")
 		for dt in ("Asset Value Adjustment", "Asset Capitalization", "Asset Repair")

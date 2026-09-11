@@ -182,12 +182,7 @@ def _normalize_mr_doc(doc):
 
 
 def _authorize_mr_request(doc, warehouses=None):
-	"""Scope a caller-supplied plan to what the caller may actually see.
-
-	`doc` is frequently an UNSAVED plan sent from the form — and `make_raw_material_request` in
-	selling/doctype/sales_order/mapper.py synthesises one with no name at all — so a record-level
-	check can only be required when the caller names a plan that really exists.
-	"""
+	"""Scope a caller-supplied plan to what the caller may see; `doc` is often unsaved, so check only a real name."""
 	name = doc.get("name")
 	if isinstance(name, str) and frappe.db.exists("Production Plan", name):
 		frappe.has_permission("Production Plan", doc=name, throw=True)

@@ -554,11 +554,7 @@ def update_regional_gl_entries(gl_list, doc):
 
 @frappe.whitelist()
 def make_lcv(doctype: str, docname: str):
-	# `doctype` is caller-supplied and reaches frappe.db.get_value() as the doctype itself. The
-	# Landed Cost Voucher field allows four receipt types, but this function reads `supplier` and
-	# `base_grand_total`, which only these two carry — anything else raised a SQL error naming the
-	# missing column. Both callers (purchase_receipt.js:105, purchase_invoice.js:678) send their own
-	# form's doctype.
+	# `doctype` is caller-supplied and reaches get_value() as the doctype; only these two carry the fields read below
 	if doctype not in ("Purchase Receipt", "Purchase Invoice"):
 		frappe.throw(_("Invalid document type"), frappe.PermissionError)
 

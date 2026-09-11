@@ -60,11 +60,7 @@ def get_voucher_details(bank_guarantee_type: str, reference_name: str):
 	if not isinstance(reference_name, str):
 		raise TypeError("reference_name must be a string")
 
-	# This picker only exists on the Bank Guarantee form, so that form is what entitles a caller to
-	# it. Deliberately NOT a check on the referenced order: Bank Guarantee is held by Accounts
-	# Manager and Accounts User only, and Accounts Manager holds no Sales Order read while Accounts
-	# User holds no Purchase Order read — an order-level guard would break one of the two roles on
-	# whichever side they were using.
+	# the form is the boundary, not the referenced order: an order guard would break one of the two roles
 	frappe.has_permission("Bank Guarantee", throw=True)
 
 	fields_to_fetch = ["grand_total"]

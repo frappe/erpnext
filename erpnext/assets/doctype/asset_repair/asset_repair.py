@@ -352,12 +352,7 @@ class AssetRepair(AccountsController):
 
 
 def check_asset_repair_access(company: str | None = None) -> None:
-	"""Both pickers below sit on the Asset Repair form, so that form is the boundary.
-
-	Deliberately NOT `Purchase Invoice`, which the sibling get_unallocated_repair_cost uses: that
-	check denies Quality Manager and Manufacturing Manager — the only two roles that can write an
-	Asset Repair — while admitting three roles that cannot. Measured; recorded with this row.
-	"""
+	"""Both pickers below sit on the Asset Repair form, so that form is the boundary, not Purchase Invoice."""
 	frappe.has_permission("Asset Repair", throw=True)
 
 	if not isinstance(company, str) or not company:

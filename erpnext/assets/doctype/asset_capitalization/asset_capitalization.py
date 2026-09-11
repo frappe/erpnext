@@ -516,12 +516,7 @@ class AssetCapitalization(StockController):
 
 
 def check_capitalization_access(company: str | None = None) -> None:
-	"""Every lookup in this file feeds the Asset Capitalization form, so that form is the boundary.
-
-	Asset Capitalization read is held by exactly Quality Manager and Manufacturing Manager, which
-	makes this loser-free — and neither of them holds `Item` read or `Stock Ledger Entry` read, so
-	the guards already in this file are NOT a usable model (see the note on get_warehouse_details).
-	"""
+	"""Every lookup in this file feeds the Asset Capitalization form, so that form is the boundary."""
 	frappe.has_permission("Asset Capitalization", throw=True)
 
 	if not isinstance(company, str) or not company:

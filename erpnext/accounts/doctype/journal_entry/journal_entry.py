@@ -1098,11 +1098,7 @@ def get_against_jv(
 		if value and not isinstance(value, str):
 			frappe.throw(_("Invalid filter"), frappe.PermissionError)
 
-	# This returns posting dates and free-text remarks, not just names, so it is a read rather
-	# than a picker lookup. Going through get_list applies the Journal Entry permission query
-	# conditions and User Permissions, so a company-restricted user does not see another
-	# company's entries; filtering on the child table also resolves the check to `read`, since
-	# a select-only caller is refused outright by the child-table field check.
+	# get_list applies the permission query conditions; the child-table filter resolves the check to `read`
 	je_filters = [
 		["docstatus", "=", 1],
 		[searchfield, "like", f"%{txt}%"],

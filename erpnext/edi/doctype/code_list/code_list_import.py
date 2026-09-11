@@ -22,11 +22,7 @@ class CodeListSelectionMismatchError(Exception):
 
 @frappe.whitelist(methods=["POST"])
 def import_genericode():
-	# code_list.save() below is the authoritative per-document check, but it only runs AFTER the
-	# uploaded XML has been fetched and parsed and after an existing Code List has been read — so an
-	# unentitled caller could have arbitrary XML parsed on their behalf and learn whether a given
-	# Code List exists. Check first. Code List grants read/write/create to System Manager alone, so
-	# this denies exactly who save() would have denied, only sooner.
+	# check before save(), which only runs after the XML is fetched and parsed; denies exactly who save() would, sooner
 	frappe.has_permission("Code List", "create", throw=True)
 
 	try:

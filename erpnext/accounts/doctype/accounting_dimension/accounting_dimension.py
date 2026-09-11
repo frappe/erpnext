@@ -225,10 +225,7 @@ def delete_accounting_dimension(doc):
 
 @frappe.whitelist(methods=["POST"])
 def disable_dimension(doc: str):
-	# toggle_disabling below rewrites `read_only` on the Custom Field for this dimension across
-	# every doctype that carries it, so this is a site-wide schema change. `Accounting Dimension`
-	# write is held by System Manager and Accounts Manager — the two roles that configure dimensions
-	# — so requiring it costs nobody.
+	# toggle_disabling rewrites a Custom Field site-wide, so demand the write that configures dimensions
 	frappe.has_permission("Accounting Dimension", "write", throw=True)
 
 	if frappe.in_test:

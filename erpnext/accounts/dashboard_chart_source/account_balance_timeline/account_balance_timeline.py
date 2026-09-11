@@ -46,10 +46,7 @@ def get(
 	if not account:
 		frappe.throw(_("Account filter not set!"))
 
-	# `filters` is caller supplied and what comes back is this account's balance over time, built
-	# from its GL Entries. Authorise the account itself — the same check get_balance_on() makes
-	# before returning a balance — and doc= brings User Permissions with it, so a company-restricted
-	# caller cannot chart another company's account.
+	# authorise the account itself, as get_balance_on() does; doc= brings User Permissions with it
 	frappe.has_permission("Account", doc=account, throw=True)
 
 	if not to_date:

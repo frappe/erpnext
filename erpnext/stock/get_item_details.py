@@ -1640,10 +1640,7 @@ def get_projected_qty(item_code: str, warehouse: str):
 def get_bin_details(
 	item_code: str, warehouse: str | None, company: str | None = None, include_child_warehouses: bool = False
 ):
-	# `select`, not `read`: this is called from the selling and buying item rows and from
-	# SellingController during validation, so Accounts Manager, Sales Manager, Delivery and
-	# Maintenance roles all reach it while holding no Item `read` row. A read check here would
-	# break saving a Sales Invoice for them. See the unit note for the stronger gate.
+	# `select`, not `read`: the selling/buying rows and SellingController reach this with no Item read row
 	frappe.has_permission("Item", ptype="select", throw=True)
 
 	bin_details = {"projected_qty": 0, "actual_qty": 0, "reserved_qty": 0}

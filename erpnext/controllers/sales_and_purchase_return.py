@@ -1309,10 +1309,7 @@ def get_available_serial_nos(serial_nos, warehouse):
 	)
 
 
-# The only doctypes these endpoints are called for: taxes_and_totals.js:1085 passes a
-# `return_against` invoice, and pos_past_order_summary.js:129,482 pass `this.doc.doctype`. Both
-# reach frappe.db.get_value()/get_all() as the doctype itself — `is_invoice_returnable` even
-# interpolates it into a table name — so without this list any document on the site is readable.
+# the only doctypes these endpoints are called for; both reach get_value()/get_all() as the doctype itself
 RETURNABLE_INVOICE_DOCTYPES = ("Sales Invoice", "POS Invoice")
 
 

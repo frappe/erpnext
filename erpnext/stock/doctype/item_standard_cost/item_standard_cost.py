@@ -385,10 +385,7 @@ def get_standard_cost_items(
 	'Standard Cost' — i.e. the item is explicitly Standard Cost, or it has no valuation method of its
 	own and the applicable default (Company, else Stock Settings) is Standard Cost. This mirrors
 	get_valuation_method, so every shown item also passes validate_item."""
-	# This picker only exists on the Item Standard Cost form, so that form is what entitles a
-	# caller to it. Deliberately NOT a check on Item: Accounts Manager is one of only two roles
-	# that can write Item Standard Cost and holds no Item read or select at all, so an Item guard
-	# would take the picker away from half the people who need it.
+	# the form is the boundary, not Item: Accounts Manager writes this doctype and holds no Item read or select
 	frappe.has_permission("Item Standard Cost", throw=True)
 
 	company = (filters or {}).get("company")

@@ -850,10 +850,7 @@ def get_customer_primary(doctype: str, txt: str, searchfield: str, start: int, p
 	if type not in ("Contact", "Address"):
 		frappe.throw(_("Invalid type"), frappe.PermissionError)
 
-	# Authorise the party whose contacts and addresses are being listed. Deliberately NOT a
-	# permission query on Contact/Address: the `All` row on Address carries `if_owner`, so
-	# `get_query(..., ignore_permissions=False)` returns zero rows for Sales Manager and Stock
-	# User — an empty picker rather than an error.
+	# authorise the party, not Contact/Address: the `if_owner` row on Address would empty the picker rather than error
 	frappe.has_permission("Customer", doc=customer, throw=True)
 
 	type_doctype = qb.DocType(type)

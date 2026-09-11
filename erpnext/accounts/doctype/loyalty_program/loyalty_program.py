@@ -155,10 +155,7 @@ def get_loyalty_program_details(
 
 @frappe.whitelist()
 def get_redeemption_factor(loyalty_program: str | None = None, customer: str | None = None):
-	# Both call sites are the Sales Invoice and POS Invoice forms, and both send only
-	# `loyalty_program` — so there is no customer to scope to on the path the UI actually uses, and
-	# the calling form is the boundary. The customer branch is still guarded for the callers that
-	# supply one.
+	# both call sites send only `loyalty_program`, so the calling form is the boundary; the customer branch stays guarded
 	if not (frappe.has_permission("Sales Invoice") or frappe.has_permission("POS Invoice")):
 		frappe.throw(_("Not permitted"), frappe.PermissionError)
 

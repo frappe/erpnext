@@ -441,11 +441,7 @@ def get_workstations(**kwargs):
 	if kwargs.workstation_name:
 		filters.append(["name", "=", kwargs.workstation_name])
 
-	# get_list, not get_all: it applies Workstation's permission query conditions and the caller's
-	# User Permissions. The check above authorises the doctype but not the rows, so a caller
-	# restricted to one warehouse or plant floor would still be shown every workstation. get_list
-	# needs `select` or `read` and the check above already demands `read`, so no caller that
-	# reaches this line loses it. The board is unpaginated, so no limit is passed.
+	# get_list, not get_all: it applies the caller's User Permissions to rows the doctype check does not scope
 	data = frappe.get_list(
 		"Workstation",
 		filters=filters,

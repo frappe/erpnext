@@ -379,11 +379,7 @@ def apply_pricing_rule(args: str | dict, doc: str | dict | Document | None = Non
 
 	frappe.has_permission(transaction_doctype, doc=transaction_name, throw=True)
 
-	# `company` is caller supplied too and the matched rules are scoped by it, so a caller who is
-	# restricted to particular companies must not price against the others. Checked through the
-	# caller's own Company restrictions rather than a `read` check on Company: several roles that
-	# legitimately fill in these forms (Stock Manager, Purchase Manager, the Delivery and
-	# Maintenance roles) hold no Company permission at all and would lose the form.
+	# scope by the caller's own Company restrictions, not a Company read: several roles that fill these forms hold none
 	company = args.get("company")
 	if company:
 		from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies
