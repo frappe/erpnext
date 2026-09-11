@@ -223,11 +223,18 @@ def add_node():
 	frappe.get_doc(args).insert()
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def convert_to_group_or_ledger(docname: str | None = None):
 	if not docname:
 		docname = frappe.form_dict.docname
-	return frappe.get_doc("Warehouse", docname).convert_to_group_or_ledger()
+
+	# Converting a warehouse between group and ledger restructures the tree, so it needs write on
+	# the warehouse being converted. `Warehouse` write is held by Item Manager alone, which is also
+	# who can open the form this button sits on (warehouse.js:104).
+	warehouse = frappe.get_doc("Warehouse", docname)
+	warehouse.check_permission("write")
+
+	return warehouse.convert_to_group_or_ledger()
 
 
 @request_cache
@@ -310,6 +317,10 @@ def apply_warehouse_filter(query, sle, filters):
 def get_warehouses_for_reorder(
 	doctype: str, txt: Any, searchfield: Any, start: int, page_len: int, filters: dict
 ):
+	# Reached from the Item form's reorder table (item.js:774); `read` on Warehouse is the target
+	# right and costs none of the roles that can edit an Item.
+	frappe.has_permission("Warehouse", throw=True)
+
 	filters = frappe._dict(filters or {})
 
 	if filters.warehouse and not frappe.db.exists("Warehouse", filters.warehouse):
