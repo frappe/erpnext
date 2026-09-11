@@ -121,6 +121,8 @@ jobs:
         env:
           DB: mariadb
           TYPE: server
+          # Anonymous git to github.com gets throttled to a 401; authenticate the clones.
+          CI_GITHUB_TOKEN: ${{ github.token }}
 
       - name: Run Patch Tests
         run: |

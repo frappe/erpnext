@@ -529,13 +529,14 @@ class BOM(WebsiteGenerator):
 		doc.set_status(save=True)
 
 	def set_fg_cost_allocation(self):
+		self.cost_allocation_per = flt(self.cost_allocation_per)
 		total_secondary_items_per = 0
 		own_cost = 0
 		for item in self.secondary_items:
 			if item.valuation_type in ("Valuation Rate", "Manual"):
 				item.cost_allocation_per = 0
 				own_cost += flt(item.cost)
-			total_secondary_items_per += item.cost_allocation_per
+			total_secondary_items_per += flt(item.cost_allocation_per)
 
 		if self.cost_allocation_per == 100 and total_secondary_items_per:
 			self.cost_allocation_per -= total_secondary_items_per
@@ -551,9 +552,9 @@ class BOM(WebsiteGenerator):
 			)
 
 	def validate_total_cost_allocation(self):
-		total_cost_allocation_per = self.cost_allocation_per
+		total_cost_allocation_per = flt(self.cost_allocation_per)
 		for item in self.secondary_items:
-			total_cost_allocation_per += item.cost_allocation_per
+			total_cost_allocation_per += flt(item.cost_allocation_per)
 
 		if total_cost_allocation_per != 100:
 			frappe.throw(_("Cost allocation between finished goods and secondary items should equal 100%"))
@@ -1343,7 +1344,11 @@ def get_bom_items_as_dict(
 	fetch_secondary_items=0,
 	include_non_stock_items=False,
 	fetch_qty_in_stock_uom=True,
+	ignore_permissions=True,
 ):
+	if not ignore_permissions:
+		frappe.has_permission("BOM", "read", doc=bom, throw=True)
+
 	item_dict = {}
 	opts = frappe._dict(
 		qty=qty,
@@ -1351,6 +1356,7 @@ def get_bom_items_as_dict(
 		fetch_secondary_items=fetch_secondary_items,
 		include_non_stock_items=include_non_stock_items,
 		fetch_qty_in_stock_uom=fetch_qty_in_stock_uom,
+		ignore_permissions=ignore_permissions,
 	)
 
 	items = _query_bom_items(bom, company, opts)
@@ -1606,6 +1612,7 @@ def _merge_phantom_bom_items(item_dict, item, company, opts):
 		fetch_secondary_items=opts.fetch_secondary_items,
 		include_non_stock_items=opts.include_non_stock_items,
 		fetch_qty_in_stock_uom=opts.fetch_qty_in_stock_uom,
+		ignore_permissions=opts.ignore_permissions,
 	)
 
 	for k, v in data.items():
@@ -1645,7 +1652,11 @@ def _set_default_accounts_for_items(item_dict, company):
 
 @frappe.whitelist()
 def get_bom_items(bom: str, company: str, qty: float = 1, fetch_exploded: int = 1):
-	items = get_bom_items_as_dict(bom, company, qty, fetch_exploded, include_non_stock_items=True).values()
+	frappe.has_permission("BOM", "read", doc=bom, throw=True)
+
+	items = get_bom_items_as_dict(
+		bom, company, qty, fetch_exploded, include_non_stock_items=True, ignore_permissions=False
+	).values()
 	items = list(items)
 	items.sort(key=lambda item: item.item_code)
 	return items

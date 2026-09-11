@@ -279,7 +279,7 @@ class BOMCostingService:
 
 		for d in self.doc.get("secondary_items"):
 			if d.valuation_type not in ("Valuation Rate", "Manual"):
-				d.cost = flt(allocation_basis * (d.cost_allocation_per / 100), precision)
+				d.cost = flt(allocation_basis * (flt(d.cost_allocation_per) / 100), precision)
 				d.base_cost = flt(d.cost * self.doc.conversion_rate, precision)
 				if save:
 					d.db_update()

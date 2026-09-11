@@ -225,7 +225,8 @@
    "description": "The percentage you are allowed to bill more against the amount ordered. For example, if the order value is $100 for an item and tolerance is set as 10%, then you are allowed to bill up to $110 ",
    "fieldname": "over_billing_allowance",
    "fieldtype": "Currency",
-   "label": "Over Billing Allowance (%)"
+   "label": "Over Billing Allowance (%)",
+   "non_negative": 1
   },
   {
    "default": "1",
@@ -805,7 +806,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-08-14 15:26:49.070889",
+ "modified": "2026-09-04 10:08:30.115003",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

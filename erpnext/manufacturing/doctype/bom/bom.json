@@ -771,7 +771,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-23 15:20:11.032436",
+ "modified": "2026-09-06 20:45:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",
@@ -808,12 +808,12 @@
    "select": 1
   },
   {
-   "role": "Purchase Manager",
-   "select": 1
+   "read": 1,
+   "role": "Purchase Manager"
   },
   {
-   "role": "Purchase User",
-   "select": 1
+   "read": 1,
+   "role": "Purchase User"
   },
   {
    "role": "Sales Manager",
@@ -824,8 +824,12 @@
    "select": 1
   },
   {
-   "role": "Stock Manager",
-   "select": 1
+   "read": 1,
+   "role": "Stock Manager"
+  },
+  {
+   "read": 1,
+   "role": "Stock User"
   }
  ],
  "row_format": "Dynamic",

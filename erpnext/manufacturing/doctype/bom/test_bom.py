@@ -55,7 +55,47 @@ class TestBOM(ERPNextTestSuite):
 	def test_get_items_list(self):
 		from erpnext.manufacturing.doctype.bom.bom import get_bom_items
 
-		self.assertEqual(len(get_bom_items(bom=get_default_bom(), company="_Test Company")), 3)
+		bom = get_default_bom()
+		self.assertEqual(len(get_bom_items(bom=bom, company="_Test Company")), 3)
+
+		# the roles that own the Stock Entry / Material Request workflows fetch components here
+		with self.set_user(make_user_with_roles("_test_bom_stock_user@example.com", "Stock User")):
+			self.assertEqual(len(get_bom_items(bom=bom, company="_Test Company")), 3)
+
+		with self.set_user(make_user_with_roles("_test_bom_no_access@example.com")):
+			self.assertRaises(frappe.PermissionError, get_bom_items, bom, "_Test Company")
+
+	@timeout
+	def test_get_items_as_dict_only_checks_permission_when_asked(self):
+		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
+
+		bom = get_default_bom()
+		with self.set_user(make_user_with_roles("_test_bom_no_access@example.com")):
+			# internal callers keep the privileged default, and nested BOMs inherit it
+			self.assertTrue(get_bom_items_as_dict(bom=bom, company="_Test Company", fetch_exploded=0))
+			self.assertRaises(
+				frappe.PermissionError,
+				partial(
+					get_bom_items_as_dict,
+					bom=bom,
+					company="_Test Company",
+					fetch_exploded=0,
+					ignore_permissions=False,
+				),
+			)
+
+	@timeout
+	def test_get_bom_diff_checks_both_boms(self):
+		from erpnext.manufacturing.doctype.bom.mapper import get_bom_diff
+
+		bom1 = get_default_bom()
+		bom2 = get_default_bom("_Test FG Item")
+
+		with self.set_user(make_user_with_roles("_test_bom_stock_user@example.com", "Stock User")):
+			self.assertTrue(get_bom_diff(bom1, bom2))
+
+		with self.set_user(make_user_with_roles("_test_bom_no_access@example.com")):
+			self.assertRaises(frappe.PermissionError, get_bom_diff, bom1, bom2)
 
 	@timeout
 	def test_get_items_keeps_bom_no_phantom_pair_coherent(self):
@@ -1404,6 +1444,27 @@ class TestBOM(ERPNextTestSuite):
 
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})
+
+
+def make_user_with_roles(email, *roles):
+	"""A user holding exactly `roles`, so permission boundaries are pinned to the roles alone."""
+	if not frappe.db.exists("User", email):
+		frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": email,
+				"first_name": email.split("@")[0],
+				"send_welcome_email": 0,
+			}
+		).insert(ignore_permissions=True)
+
+	user = frappe.get_doc("User", email)
+	if existing := [row.role for row in user.roles]:
+		user.remove_roles(*existing)
+	if roles:
+		user.add_roles(*roles)
+
+	return email
 
 
 def level_order_traversal(node):

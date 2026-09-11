@@ -151,6 +151,8 @@ class StockClosingEntry(Document):
 
 	@frappe.whitelist(methods=["POST"])
 	def enqueue_job(self):
+		self.check_permission("write")
+
 		self.db_set("status", "In Progress")
 		enqueue(prepare_closing_stock_balance, name=self.name, queue="long", timeout=1500)
 		frappe.msgprint(
@@ -161,6 +163,8 @@ class StockClosingEntry(Document):
 
 	@frappe.whitelist(methods=["POST"])
 	def regenerate_closing_balance(self):
+		self.check_permission("write")
+
 		self.validate_closed_period_lock()
 		self.remove_stock_closing()
 		self.enqueue_job()
@@ -187,7 +191,7 @@ class StockClosingEntry(Document):
 			new_doc.posting_datetime = get_combine_datetime(self.to_date, new_doc.posting_time)
 			new_doc.stock_closing_entry = self.name
 			new_doc.company = self.company
-			new_doc.save()
+			new_doc.save(ignore_permissions=True)
 
 	def get_prepared_data(self):
 		if attachments := get_attachments(self.doctype, self.name):
