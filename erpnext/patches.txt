@@ -451,3 +451,4 @@ erpnext.patches.v16_0.remove_frappe_crm_custom_fields
 erpnext.patches.v16_0.append_fieldname_to_pos_search_fields
 erpnext.patches.v16_0.add_transaction_roles_to_sms_settings
 erpnext.patches.v16_0.recalculate_returned_delivery_note_billing_status
+erpnext.patches.v16_0.set_not_applicable_on_german_item_tax_templates
