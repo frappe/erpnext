@@ -1969,7 +1969,15 @@ class update_entries_after:
 
 
 def get_sle_against_current_voucher(kwargs):
-	kwargs["posting_datetime"] = get_combine_datetime(kwargs.posting_date, kwargs.posting_time)
+	# Match on the row's stored posting_datetime. Re-deriving it from posting_date and posting_time
+	# makes rows whose stored value differs unmatchable, so the voucher gets reposted against nothing.
+	if kwargs.get("name") and not kwargs.get("posting_datetime"):
+		kwargs["posting_datetime"] = frappe.db.get_value(
+			"Stock Ledger Entry", kwargs.get("name"), "posting_datetime"
+		)
+
+	if not kwargs.get("posting_datetime"):
+		kwargs["posting_datetime"] = get_combine_datetime(kwargs.posting_date, kwargs.posting_time)
 	doctype = frappe.qb.DocType("Stock Ledger Entry")
 
 	query = (
