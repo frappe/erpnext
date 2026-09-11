@@ -36,37 +36,52 @@ class SnapshotFIFO:
 		if summaries and not eligible:
 			return None
 
-		details = {}
-		for row in eligible:
-			key = (row.name, row.warehouse)
-			details[key] = {
-				"details": frappe._dict({field: row[field] for field in DETAIL_FIELDS}),
-				"fifo_queue": [],
-				"total_qty": row.total_qty,
-				"qty_after_transaction": row.final_qty,
-				"has_serial_no": row.has_serial_no,
-				"has_batch_no": row.has_batch_no,
-			}
-
+		details = {self.stock_key(row): self.build_details(row) for row in eligible}
 		replayed = len(eligible) != len(summaries)
 		if replayed:
-			self.register_fast_keys(details)
-			self.entries = self.get_fast_entries()
+			self.narrow_entries_to(details)
 		if details:
-			for item, warehouse, qty, posting_date, value in self.snapshot.run(
-				self.get_layers_query(), as_iterator=True
-			):
-				details[(item, warehouse)]["fifo_queue"].append([qty, posting_date, value])
+			self.add_surviving_layers(details)
 		if replayed:
-			self.fifo.item_details = details
-			for row in self.snapshot.run(self.get_replay_query(), as_dict=True, as_iterator=True):
-				self.fifo._process_stock_ledger_entry(row, serial_bundles or {}, batch_bundles or {})
-		return {(row.name, row.warehouse): details[(row.name, row.warehouse)] for row in summaries}
+			self.replay_remaining_entries(details, serial_bundles or {}, batch_bundles or {})
 
-	def register_fast_keys(self, details):
-		"""Publish the aggregated groups to DuckDB so the split needs no per-key parameters."""
+		ordered_keys = [self.stock_key(row) for row in summaries]
+		return {key: details[key] for key in ordered_keys}
+
+	@staticmethod
+	def stock_key(row):
+		return (row.name, row.warehouse)
+
+	@staticmethod
+	def build_details(row):
+		return {
+			"details": frappe._dict({field: row[field] for field in DETAIL_FIELDS}),
+			"fifo_queue": [],
+			"total_qty": row.total_qty,
+			"qty_after_transaction": row.final_qty,
+			"has_serial_no": row.has_serial_no,
+			"has_batch_no": row.has_batch_no,
+		}
+
+	def narrow_entries_to(self, details):
+		"""Publish the aggregated groups to DuckDB and scope the entry queries to them, so the
+		split needs no parameter per group. Must run before the layer query is built."""
 		rows = [{"name": name, "warehouse": warehouse} for name, warehouse in details]
 		self.snapshot.register(FAST_KEYS, rows, {"name": "string", "warehouse": "string"})
+		self.entries = self.get_fast_entries()
+
+	def add_surviving_layers(self, details):
+		for item, warehouse, qty, posting_date, value in self.snapshot.run(
+			self.get_layers_query(), as_iterator=True
+		):
+			details[(item, warehouse)]["fifo_queue"].append([qty, posting_date, value])
+
+	def replay_remaining_entries(self, details, serial_bundles, batch_bundles):
+		"""Replay the groups DuckDB did not aggregate into the same details, so they keep the
+		layers attached above."""
+		self.fifo.item_details = details
+		for row in self.snapshot.run(self.get_replay_query(), as_dict=True, as_iterator=True):
+			self.fifo._process_stock_ledger_entry(row, serial_bundles, batch_bundles)
 
 	def get_fast_entries(self):
 		entries, keys = self.ledger_entries.as_("fifo_scope"), frappe.qb.Table(FAST_KEYS)

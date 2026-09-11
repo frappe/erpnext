@@ -2,6 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 from datetime import timedelta
+from operator import itemgetter
+from typing import NamedTuple
 
 import frappe
 from frappe import _
@@ -78,7 +80,9 @@ class StockReportSnapshot:
 
 	def register(self, name, rows, fields):
 		"""Expose a lookup table built in Python to the queries that follow."""
-		self.tables[name] = build_arrow_table(rows, fields)
+		import pyarrow as pa
+
+		self.tables[name] = pa.Table.from_pylist(rows, schema=arrow_schema(fields))
 
 	def get_table(self, name):
 		if name not in self.tables:
@@ -89,24 +93,20 @@ class StockReportSnapshot:
 		"""Read a supporting doctype in batches so a large table never lands in Python at once."""
 		import pyarrow as pa
 
-		ledger_field, link_field, fields = LIVE_TABLES[doctype]
-		schema = arrow_schema(fields)
-		names = self.get_ledger_values(ledger_field, doctype)
-		filters = self.get_live_filters(doctype)
+		table = LIVE_TABLES[doctype]
+		schema = arrow_schema(table.fields)
+		names = self.get_ledger_values(table.ledger_field, doctype)
+		scope = (table.scope or {}).items()
+		filters = {field: value for key, field in scope if (value := self.filters.get(key))}
 
 		batches = []
 		for offset in range(0, len(names), BATCH_SIZE):
-			filters[link_field] = ("in", names[offset : offset + BATCH_SIZE])
-			rows = frappe.get_all(doctype, filters=filters, fields=list(fields))
+			filters[table.link_field] = ("in", names[offset : offset + BATCH_SIZE])
+			rows = frappe.get_all(doctype, filters=filters, fields=list(table.fields))
 			batches.append(pa.RecordBatch.from_pylist(rows, schema=schema))
 
 		# Explicit types also preserve the schema when a supporting table has no matching rows.
 		return pa.Table.from_batches(batches, schema=schema)
-
-	def get_live_filters(self, doctype):
-		"""Report filters that narrow a supporting table beyond the ledger keys it covers."""
-		scope = LIVE_TABLE_SCOPE.get(doctype) or {}
-		return {field: value for key, field in scope.items() if (value := self.filters.get(key))}
 
 	def get_ledger_values(self, field, doctype):
 		"""Ledger keys a supporting table has to cover, under the report's own ledger scope."""
@@ -131,6 +131,15 @@ class StockReportSnapshot:
 			for index, column in enumerate(cursor.description)
 			if (converter := VALUE_CONVERTERS.get(column[1].id))
 		]
+		if pluck:
+			shape = itemgetter(0)
+		elif as_dict:
+
+			def shape(row):
+				return frappe._dict(zip(columns, row, strict=True))
+		else:
+			shape = tuple
+
 		try:
 			while rows := cursor.fetchmany(1000):
 				for row in rows:
@@ -139,12 +148,7 @@ class StockReportSnapshot:
 						for index, converter in converters:
 							if row[index] is not None:
 								row[index] = converter(row[index])
-					if pluck:
-						yield row[0]
-					elif as_dict:
-						yield frappe._dict(zip(columns, row, strict=True))
-					else:
-						yield tuple(row)
+					yield shape(row)
 		finally:
 			cursor.close()
 
@@ -153,12 +157,6 @@ def arrow_schema(fields):
 	import pyarrow as pa
 
 	return pa.schema([(field, getattr(pa, dtype)()) for field, dtype in fields.items()])
-
-
-def build_arrow_table(rows, fields):
-	import pyarrow as pa
-
-	return pa.Table.from_pylist(rows, schema=arrow_schema(fields))
 
 
 def time_to_timedelta(value):
@@ -177,8 +175,21 @@ class DuckDBParameters(NamedParameterWrapper):
 		return f"${key}"
 
 
+class LiveTable(NamedTuple):
+	"""A supporting doctype read from the live database for the queries that need it.
+
+	`ledger_field` is the Stock Ledger Entry column holding its keys and `link_field` the column
+	those keys match. `scope` names report filters that narrow it further than those keys.
+	"""
+
+	ledger_field: str
+	link_field: str
+	fields: dict[str, str]
+	scope: dict[str, str] | None = None
+
+
 LIVE_TABLES = {
-	"Item": (
+	"Item": LiveTable(
 		"item_code",
 		"name",
 		{
@@ -194,14 +205,14 @@ LIVE_TABLES = {
 			"valuation_method": "string",
 		},
 	),
-	"Warehouse": (
+	"Warehouse": LiveTable(
 		"warehouse",
 		"name",
 		{"name": "string", "lft": "int64", "rgt": "int64", "warehouse_type": "string"},
 	),
-	"Batch": ("batch_no", "name", {"name": "string", "use_batchwise_valuation": "int64"}),
-	"Stock Reconciliation": ("voucher_no", "name", {"name": "string", "purpose": "string"}),
-	"Serial and Batch Entry": (
+	"Batch": LiveTable("batch_no", "name", {"name": "string", "use_batchwise_valuation": "int64"}),
+	"Stock Reconciliation": LiveTable("voucher_no", "name", {"name": "string", "purpose": "string"}),
+	"Serial and Batch Entry": LiveTable(
 		"serial_and_batch_bundle",
 		"parent",
 		{
@@ -211,7 +222,6 @@ LIVE_TABLES = {
 			"docstatus": "int64",
 			"batch_no": "string",
 		},
+		{"batch_no": "batch_no"},
 	),
 }
-
-LIVE_TABLE_SCOPE = {"Serial and Batch Entry": {"batch_no": "batch_no"}}

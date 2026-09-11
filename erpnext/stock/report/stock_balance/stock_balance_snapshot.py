@@ -9,6 +9,10 @@ from pypika.analytics import Sum as WindowSum
 
 ArgMaxNull = CustomFunction("arg_max_null", ["value", "order"])
 
+MOVEMENT_PREFIXES = ("opening", "in", "out", "bal")
+MOVEMENT_SUFFIXES = ("qty", "val")
+MOVEMENT_FIELDS = tuple(f"{prefix}_{suffix}" for suffix in MOVEMENT_SUFFIXES for prefix in MOVEMENT_PREFIXES)
+
 
 def prepare_aggregated_balances(report):
 	"""Aggregate movements between balance resets, then apply each reset in ledger order."""
@@ -53,20 +57,18 @@ def get_balance_query(report):
 
 
 def get_movement_columns(segments):
+	opening = segments.snapshot_opening
+	amounts = {"qty": segments.actual_qty, "val": segments.stock_value_difference}
 	columns = []
-	for field, suffix in ((segments.actual_qty, "qty"), (segments.stock_value_difference, "val")):
-		columns.extend(
-			[
-				Sum(Case().when(segments.snapshot_opening == 1, field).else_(0)).as_(f"opening_{suffix}"),
-				Sum(Case().when((segments.snapshot_opening == 0) & (field >= 0), field).else_(0)).as_(
-					f"in_{suffix}"
-				),
-				Sum(Case().when((segments.snapshot_opening == 0) & (field < 0), -field).else_(0)).as_(
-					f"out_{suffix}"
-				),
-				Sum(field).as_(f"bal_{suffix}"),
-			]
-		)
+	for suffix in MOVEMENT_SUFFIXES:
+		field = amounts[suffix]
+		bodies = {
+			"opening": Case().when(opening == 1, field).else_(0),
+			"in": Case().when((opening == 0) & (field >= 0), field).else_(0),
+			"out": Case().when((opening == 0) & (field < 0), -field).else_(0),
+			"bal": field,
+		}
+		columns.extend(Sum(bodies[prefix]).as_(f"{prefix}_{suffix}") for prefix in MOVEMENT_PREFIXES)
 	return columns
 
 
@@ -126,16 +128,7 @@ def apply_segment(report, row):
 		return
 
 	balance = report.item_warehouse_map[key]
-	for field in (
-		"opening_qty",
-		"opening_val",
-		"in_qty",
-		"in_val",
-		"out_qty",
-		"out_val",
-		"bal_qty",
-		"bal_val",
-	):
+	for field in MOVEMENT_FIELDS:
 		balance[field] += row[field]
 	balance.val_rate = row.valuation_rate
 	for field in report.inventory_dimensions:
