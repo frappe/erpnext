@@ -121,8 +121,20 @@ def filter_result_items(result, pos_profile):
 		result["items"] = [item for item in result.get("items") if item.get("item_group") in pos_item_groups]
 
 
+def check_pos_profile_access(pos_profile: str | None) -> None:
+	"""The POS Profile is what entitles a caller to POS data — see the Bin/Item analysis on
+	pos_invoice.get_stock_availability. Record-level when a profile is named, so a Company User
+	Permission applies too."""
+	if isinstance(pos_profile, str) and pos_profile:
+		frappe.has_permission("POS Profile", doc=pos_profile, throw=True)
+	else:
+		frappe.has_permission("POS Profile", throw=True)
+
+
 @frappe.whitelist()
 def get_parent_item_group(pos_profile: str):
+	check_pos_profile_access(pos_profile)
+
 	item_groups = get_item_groups(pos_profile)
 
 	if not item_groups:
@@ -140,6 +152,8 @@ def get_items(
 	pos_profile: str,
 	search_term: str = "",
 ):
+	check_pos_profile_access(pos_profile)
+
 	warehouse, hide_unavailable_items = frappe.db.get_value(
 		"POS Profile", pos_profile, ["warehouse", "hide_unavailable_items"]
 	)
@@ -272,6 +286,9 @@ def get_items(
 
 @frappe.whitelist()
 def search_for_serial_or_batch_or_barcode_number(search_value: str) -> dict[str, str | None]:
+	# POS-page wrapper around scan_barcode; the page's entitlement is the POS Profile.
+	frappe.has_permission("POS Profile", throw=True)
+
 	return scan_barcode(search_value)
 
 
@@ -316,6 +333,7 @@ def get_item_group_condition(pos_profile, item=None):
 @frappe.validate_and_sanitize_search_inputs
 def item_group_query(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
 	pos_profile = filters.get("pos_profile")
+	check_pos_profile_access(pos_profile)
 
 	item_filters = [["name", "like", f"%{txt}%"]]
 	if pos_profile:
@@ -337,6 +355,13 @@ def item_group_query(doctype: str, txt: str, searchfield: str, start: int, page_
 
 @frappe.whitelist()
 def check_opening_entry(user: str):
+	# `user` was queried straight from caller input, so anyone could enumerate anyone else's open
+	# POS sessions. The only caller (pos_controller.js:10) always sends frappe.session.user.
+	# Reading somebody else's is a POS Opening Entry question, and deliberately NOT a POS Profile
+	# one: Sales Manager holds POS Opening Entry read and no POS Profile read at all.
+	if user != frappe.session.user:
+		frappe.has_permission("POS Opening Entry", throw=True)
+
 	open_vouchers = frappe.db.get_all(
 		"POS Opening Entry",
 		filters={"user": user, "pos_closing_entry": ["in", ["", None]], "docstatus": 1},
@@ -349,6 +374,10 @@ def check_opening_entry(user: str):
 
 @frappe.whitelist(methods=["POST"])
 def create_opening_voucher(pos_profile: str, company: str, balance_details: str | list):
+	# submit() enforces POS Opening Entry rights per document, but only after the profile and company
+	# have been accepted from the caller — check the profile the session is being opened against.
+	check_pos_profile_access(pos_profile)
+
 	balance_details = frappe.parse_json(balance_details)
 
 	new_pos_opening = frappe.get_doc(
@@ -521,6 +550,8 @@ def set_customer_info(fieldname: str, customer: str, value: str = ""):
 
 @frappe.whitelist()
 def get_pos_profile_data(pos_profile: str):
+	check_pos_profile_access(pos_profile)
+
 	pos_profile = frappe.get_doc("POS Profile", pos_profile)
 	pos_profile = pos_profile.as_dict()
 
