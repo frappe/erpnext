@@ -181,6 +181,33 @@ class TaxService:
 		return amount, base_amount
 
 
+# The only doctypes any `taxes_and_charges` Link field points at. `master_doctype` is caller-supplied
+# and reaches frappe.get_doc()/get_cached_value() as the doctype itself, so without this list a
+# caller can read the `taxes` child rows of ANY document on the site — measured, a Website User read
+# tax_amount and total off a named Sales Order.
+TAX_MASTER_DOCTYPES = ("Sales Taxes and Charges Template", "Purchase Taxes and Charges Template")
+
+
+def validate_tax_master(master_doctype: str, master_name: str | None = None) -> None:
+	if master_doctype not in TAX_MASTER_DOCTYPES:
+		frappe.throw(_("Invalid tax master doctype"), frappe.PermissionError)
+
+	if not master_name:
+		return
+
+	# Keep a company-restricted caller inside their own companies. Costs nobody who has no Company
+	# User Permission. NOTE: this does not authorise the template itself — see the STOP recorded for
+	# this row; no ptype on the master is loser-free, because Stock User writes Purchase Receipt and
+	# Delivery Note yet holds neither read nor select on the templates or on Account.
+	from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies
+
+	allowed_companies = get_allowed_companies(frappe.session.user, master_doctype)
+	if allowed_companies:
+		company = frappe.db.get_value(master_doctype, master_name, "company")
+		if company and company not in allowed_companies:
+			frappe.throw(_("Not permitted for {0}").format(company), frappe.PermissionError)
+
+
 @frappe.whitelist()
 def get_tax_rate(account_head: str) -> dict:
 	return frappe.get_cached_value("Account", account_head, ["tax_rate", "account_name"], as_dict=True)
@@ -192,6 +219,8 @@ def get_default_taxes_and_charges(
 ) -> dict | None:
 	if not company:
 		return {}
+
+	validate_tax_master(master_doctype, tax_template)
 
 	if tax_template and company:
 		tax_template_company = frappe.get_cached_value(master_doctype, tax_template, "company")
@@ -210,6 +239,9 @@ def get_default_taxes_and_charges(
 def get_taxes_and_charges(master_doctype: str, master_name: str | None = None) -> list | None:
 	if not master_name:
 		return
+
+	validate_tax_master(master_doctype, master_name)
+
 	from frappe.model import child_table_fields, default_fields
 
 	tax_master = frappe.get_doc(master_doctype, master_name)
