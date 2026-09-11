@@ -136,6 +136,7 @@ frappe.ui.form.on("Invoice Discounting", {
 			],
 			primary_action: function () {
 				var data = d.get_values();
+				data.company = frm.doc.company;
 
 				frappe.call({
 					method: "erpnext.accounts.doctype.invoice_discounting.invoice_discounting.get_invoices",
