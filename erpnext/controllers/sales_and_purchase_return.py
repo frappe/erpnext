@@ -1309,14 +1309,41 @@ def get_available_serial_nos(serial_nos, warehouse):
 	)
 
 
+# The only doctypes these endpoints are called for: taxes_and_totals.js:1085 passes a
+# `return_against` invoice, and pos_past_order_summary.js:129,482 pass `this.doc.doctype`. Both
+# reach frappe.db.get_value()/get_all() as the doctype itself — `is_invoice_returnable` even
+# interpolates it into a table name — so without this list any document on the site is readable.
+RETURNABLE_INVOICE_DOCTYPES = ("Sales Invoice", "POS Invoice")
+
+
 @frappe.whitelist()
 def get_payment_data(invoice: str):
+	# `invoice` may be either a Sales Invoice or a POS Invoice — both share the Sales Invoice
+	# Payment child table — so resolve which one it is before authorising rather than guessing.
+	parenttype = frappe.db.get_value("Sales Invoice Payment", {"parent": invoice}, "parenttype")
+	if not parenttype:
+		return []
+
+	if parenttype not in RETURNABLE_INVOICE_DOCTYPES:
+		frappe.throw(_("Invalid document type"), frappe.PermissionError)
+
+	frappe.has_permission(parenttype, doc=invoice, throw=True)
+
 	payment = frappe.db.get_all("Sales Invoice Payment", {"parent": invoice}, ["mode_of_payment", "amount"])
 	return payment
 
 
+def validate_returnable_invoice(doctype: str, invoice: str) -> None:
+	if doctype not in RETURNABLE_INVOICE_DOCTYPES:
+		frappe.throw(_("Invalid document type"), frappe.PermissionError)
+
+	frappe.has_permission(doctype, doc=invoice, throw=True)
+
+
 @frappe.whitelist()
 def get_invoice_item_returned_qty(doctype: str, invoice: str, customer: str, item_row_name: str):
+	validate_returnable_invoice(doctype, invoice)
+
 	is_return, docstatus = frappe.db.get_value(doctype, invoice, ["is_return", "docstatus"])
 	if not is_return and docstatus == 1:
 		return get_returned_qty_map_for_row(invoice, customer, item_row_name, doctype)
@@ -1324,6 +1351,8 @@ def get_invoice_item_returned_qty(doctype: str, invoice: str, customer: str, ite
 
 @frappe.whitelist()
 def is_invoice_returnable(doctype: str, invoice: str):
+	validate_returnable_invoice(doctype, invoice)
+
 	is_return, docstatus, customer = frappe.db.get_value(
 		doctype, invoice, ["is_return", "docstatus", "customer"]
 	)
