@@ -60,6 +60,13 @@ def get_voucher_details(bank_guarantee_type: str, reference_name: str):
 	if not isinstance(reference_name, str):
 		raise TypeError("reference_name must be a string")
 
+	# This picker only exists on the Bank Guarantee form, so that form is what entitles a caller to
+	# it. Deliberately NOT a check on the referenced order: Bank Guarantee is held by Accounts
+	# Manager and Accounts User only, and Accounts Manager holds no Sales Order read while Accounts
+	# User holds no Purchase Order read — an order-level guard would break one of the two roles on
+	# whichever side they were using.
+	frappe.has_permission("Bank Guarantee", throw=True)
+
 	fields_to_fetch = ["grand_total"]
 
 	if bank_guarantee_type == "Receiving":
@@ -69,5 +76,15 @@ def get_voucher_details(bank_guarantee_type: str, reference_name: str):
 	else:
 		doctype = "Purchase Order"
 		fields_to_fetch.append("supplier")
+
+	# and scope the referenced order to the caller's own Company restrictions, which costs nobody
+	# who has none
+	from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies
+
+	allowed_companies = get_allowed_companies(frappe.session.user, "Bank Guarantee")
+	if allowed_companies:
+		company = frappe.db.get_value(doctype, reference_name, "company")
+		if company and company not in allowed_companies:
+			frappe.throw(_("Not permitted for {0}").format(company), frappe.PermissionError)
 
 	return frappe.db.get_value(doctype, reference_name, fields_to_fetch, as_dict=True)
