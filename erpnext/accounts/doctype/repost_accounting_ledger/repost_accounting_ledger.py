@@ -172,8 +172,6 @@ class RepostAccountingLedger(Document):
 
 	@frappe.whitelist()
 	def generate_preview(self):
-		self.check_permission("read")
-
 		from erpnext.accounts.report.general_ledger.general_ledger import get_columns as get_gl_columns
 
 		if not self.vouchers:
