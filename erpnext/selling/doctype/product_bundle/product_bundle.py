@@ -234,9 +234,10 @@ def get_new_item_code(doctype: str, txt: str, searchfield: str, start: int, page
 	searchfield.append("name")
 
 	item = frappe.qb.DocType("Item")
+	# Base the query on get_query so it applies Item's permission conditions and the caller's User
+	# Permissions, the same way item_query() does for the standard item picker.
 	query = (
-		frappe.qb.from_(item)
-		.select(item.name, item.item_name)
+		frappe.qb.get_query("Item", fields=["name", "item_name"], ignore_permissions=False)
 		.where((item.is_stock_item == 0) & (item.is_fixed_asset == 0))
 		.limit(page_len)
 		.offset(start)
