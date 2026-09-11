@@ -2,6 +2,7 @@
 # See license.txt
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -9,10 +10,9 @@ from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.report.warehouse_wise_item_balance_age_and_value.warehouse_wise_item_balance_age_and_value import (
 	execute,
 )
-from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestWarehouseWiseItemBalanceAgeAndValue(ERPNextTestSuite):
+class TestWarehouseWiseItemBalanceAgeAndValue(FrappeTestCase):
 	def run_report(self, **extra):
 		filters = frappe._dict(
 			{
