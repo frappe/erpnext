@@ -533,15 +533,25 @@ frappe.ui.form.on("Asset", {
 	},
 
 	set_finance_book: function (frm) {
+		// Snapshot the fields this request is based on, so a stale response from an
+		// earlier, still-in-flight call (e.g. from rapid successive amount edits)
+		// can't overwrite Finance Books with values computed from an old amount.
+		let item_code = frm.doc.item_code;
+		let net_purchase_amount = frm.doc.net_purchase_amount;
+
 		frappe.call({
 			method: "erpnext.assets.doctype.asset.asset.get_item_details",
 			args: {
-				item_code: frm.doc.item_code,
+				item_code: item_code,
 				asset_category: frm.doc.asset_category,
-				net_purchase_amount: frm.doc.net_purchase_amount,
+				net_purchase_amount: net_purchase_amount,
 			},
 			callback: function (r, rt) {
-				if (r.message) {
+				if (
+					r.message &&
+					frm.doc.item_code === item_code &&
+					frm.doc.net_purchase_amount === net_purchase_amount
+				) {
 					frm.set_value("finance_books", r.message);
 				}
 			},
