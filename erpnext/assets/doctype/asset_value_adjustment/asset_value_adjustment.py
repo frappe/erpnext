@@ -174,6 +174,7 @@ class AssetValueAdjustment(Document):
 		asset = self.update_asset_value_after_depreciation(difference_amount)
 
 		asset.flags.decrease_in_asset_value_due_to_value_adjustment = True
+		asset.flags.value_adjustment_finance_book = self.finance_book
 
 		if self.docstatus == 1:
 			notes = _(
@@ -196,6 +197,7 @@ class AssetValueAdjustment(Document):
 			value_after_depreciation=asset_value,
 			ignore_booked_entry=True,
 			difference_amount=difference_amount,
+			target_finance_book=self.finance_book,
 		)
 		asset.flags.ignore_validate_update_after_submit = True
 		asset.save()
