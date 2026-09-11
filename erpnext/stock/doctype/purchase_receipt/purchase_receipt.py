@@ -554,6 +554,19 @@ def update_regional_gl_entries(gl_list, doc):
 
 @frappe.whitelist()
 def make_lcv(doctype: str, docname: str):
+	# `doctype` is caller-supplied and reaches frappe.db.get_value() as the doctype itself. The
+	# Landed Cost Voucher field allows four receipt types, but this function reads `supplier` and
+	# `base_grand_total`, which only these two carry — anything else raised a SQL error naming the
+	# missing column. Both callers (purchase_receipt.js:105, purchase_invoice.js:678) send their own
+	# form's doctype.
+	if doctype not in ("Purchase Receipt", "Purchase Invoice"):
+		frappe.throw(_("Invalid document type"), frappe.PermissionError)
+
+	# Authorise the source document, not the Landed Cost Voucher: LCV create is held by Stock Manager
+	# alone here, while the roles that actually press this button are the ones who can read the
+	# receipt or invoice they are pressing it on.
+	frappe.has_permission(doctype, doc=docname, throw=True)
+
 	landed_cost_voucher = frappe.new_doc("Landed Cost Voucher")
 
 	details = frappe.db.get_value(doctype, docname, ["supplier", "company", "base_grand_total"], as_dict=1)
