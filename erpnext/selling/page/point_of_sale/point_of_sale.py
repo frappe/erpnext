@@ -341,7 +341,11 @@ def item_group_query(doctype: str, txt: str, searchfield: str, start: int, page_
 		if item_groups:
 			item_filters.append(["name", "in", item_groups])
 
-	return frappe.get_all(
+	# get_list, not get_all: check_pos_profile_access authorises the POS Profile, and the profile's
+	# own group list narrows this only when one is configured. get_list additionally applies the
+	# caller's User Permissions on Item Group. Item Group carries a `Desk User` select row, so
+	# every System User clears the doctype check and no caller loses the endpoint.
+	return frappe.get_list(
 		"Item Group",
 		filters=item_filters,
 		fields=["name"],
