@@ -2105,14 +2105,19 @@ def get_stock_ledger_entries(
 			frappe.db.escape(f"%\n{serial_no}\n%"),
 		)
 
-	if not previous_sle.get("posting_date"):
-		previous_sle["posting_datetime"] = "1900-01-01 00:00:00"
-	else:
-		posting_time = previous_sle.get("posting_time")
-		if not posting_time:
-			posting_time = "00:00:00"
+	if not previous_sle.get("posting_datetime"):
+		# Derive only when the caller has not supplied the stored posting_datetime. Re-deriving it
+		# would shift the boundary for rows whose stored value differs from posting_date + posting_time.
+		if not previous_sle.get("posting_date"):
+			previous_sle["posting_datetime"] = "1900-01-01 00:00:00"
+		else:
+			posting_time = previous_sle.get("posting_time")
+			if not posting_time:
+				posting_time = "00:00:00"
 
-		previous_sle["posting_datetime"] = get_combine_datetime(previous_sle["posting_date"], posting_time)
+			previous_sle["posting_datetime"] = get_combine_datetime(
+				previous_sle["posting_date"], posting_time
+			)
 
 	if operator in (">", "<=") and previous_sle.get("name"):
 		conditions += " and name!=%(name)s"
