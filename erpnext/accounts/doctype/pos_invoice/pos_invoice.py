@@ -909,6 +909,21 @@ class POSInvoice(SalesInvoice):
 
 @frappe.whitelist()
 def get_stock_availability(item_code: str | None, warehouse: str):
+	# The POS Profile is what entitles a caller to POS stock figures, and it is the only boundary
+	# that fits: `Item` read and `Bin` read both exclude Accounts Manager, `Item` select is granted
+	# to every desk user by `Desk User`, and `POS Invoice` read is granted to `All`.
+	frappe.has_permission("POS Profile", throw=True)
+
+	# and keep a company-restricted caller inside their own companies, which costs nobody who has
+	# no Company User Permission
+	from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies
+
+	allowed_companies = get_allowed_companies(frappe.session.user, "POS Profile")
+	if allowed_companies:
+		company = frappe.db.get_value("Warehouse", warehouse, "company")
+		if company and company not in allowed_companies:
+			frappe.throw(_("Not permitted for {0}").format(company), frappe.PermissionError)
+
 	if frappe.db.get_value("Item", item_code, "is_stock_item"):
 		is_stock_item = True
 		bin_qty = get_bin_qty(item_code, warehouse)
