@@ -233,17 +233,14 @@ def get_new_item_code(doctype: str, txt: str, searchfield: str, start: int, page
 	searchfield = searchfield.split(",")
 	searchfield.append("name")
 
-	item = frappe.qb.DocType("Item")
-	# Base the query on get_query so it applies Item's permission conditions and the caller's User
-	# Permissions, the same way item_query() does for the standard item picker.
-	query = (
-		frappe.qb.get_query("Item", fields=["name", "item_name"], ignore_permissions=False)
-		.where((item.is_stock_item == 0) & (item.is_fixed_asset == 0))
-		.limit(page_len)
-		.offset(start)
+	# get_list applies Item's permission conditions and User Permissions, as item_query() does
+	return frappe.get_list(
+		"Item",
+		filters=[["is_stock_item", "=", 0], ["is_fixed_asset", "=", 0]],
+		or_filters=[[fieldname, "like", f"%{txt}%"] for fieldname in searchfield] if searchfield else None,
+		fields=["name", "item_name"],
+		order_by="",  # the query this replaced had no ORDER BY; suppress the injected default
+		limit_start=start,
+		limit_page_length=page_len,
+		as_list=True,
 	)
-
-	if searchfield:
-		query = query.where(Criterion.any([item[fieldname].like(f"%{txt}%") for fieldname in searchfield]))
-
-	return query.run()
