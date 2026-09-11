@@ -611,14 +611,20 @@ def item_last_purchase_rate(name, conversion_rate, item_code, conversion_factor=
 			return item_last_purchase_rate
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def close_or_unclose_purchase_orders(names: str | list, status: str):
 	if not frappe.has_permission("Purchase Order", "write"):
 		frappe.throw(_("Not permitted"), frappe.PermissionError)
 
 	names = frappe.parse_json(names)
 	for name in names:
-		po = frappe.get_lazy_doc("Purchase Order", name)
+		if not isinstance(name, str):
+			frappe.throw(_("Invalid name"), frappe.PermissionError)
+
+		# the check above is doctype level and never consults User Permissions, so on its own it
+		# lets a caller restricted to one company close another company's orders. Checking each
+		# document is what scopes it, and matches what update_status() below already does.
+		po = frappe.get_lazy_doc("Purchase Order", name, check_permission="submit")
 		if po.docstatus == 1:
 			if status == "Closed":
 				if po.status not in ("Cancelled", "Closed") and (
@@ -649,7 +655,7 @@ def get_list_context(context=None):
 	return list_context
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def update_status(status: str, name: str):
 	po = frappe.get_lazy_doc("Purchase Order", name, check_permission="submit")
 	po.update_status(status)
