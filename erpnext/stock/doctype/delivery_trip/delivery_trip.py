@@ -311,6 +311,12 @@ class DeliveryTrip(Document):
 
 @frappe.whitelist()
 def get_contact_and_address(name: str):
+	# `name` is a Customer, and this returns that customer's primary contact and shipping address.
+	# `select`, not `read`: Delivery Manager, Delivery User and Fulfillment User run Delivery Trips
+	# while holding no Customer `read` row, so a read check would take three of the four roles that
+	# use this form. select still denies portal and role-less callers, measured.
+	frappe.has_permission("Customer", ptype="select", doc=name, throw=True)
+
 	out = frappe._dict()
 
 	get_default_contact(out, name)
