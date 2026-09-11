@@ -242,6 +242,19 @@ def get_supplier_primary(
 ):
 	supplier = filters.get("supplier")
 	type = filters.get("type")
+
+	# `type` is caller-supplied and was interpolated straight into qb.DocType(), so any doctype on
+	# the site could be joined to Dynamic Link and read. The two pickers that call this
+	# (supplier.js:51,61) send only these two values.
+	if type not in ("Contact", "Address"):
+		frappe.throw(_("Invalid type"), frappe.PermissionError)
+
+	# Authorise the party whose contacts and addresses are being listed. Deliberately NOT a
+	# permission query on Contact/Address: the `All` row on Address carries `if_owner`, so
+	# `get_query(..., ignore_permissions=False)` returns zero rows for Purchase Manager and Stock
+	# User — an empty picker rather than an error.
+	frappe.has_permission("Supplier", doc=supplier, throw=True)
+
 	type_doctype = frappe.qb.DocType(type)
 	dynamic_link = frappe.qb.DocType("Dynamic Link")
 
