@@ -1082,7 +1082,10 @@ def get_children(doctype: str, parent: str | None = None, company: str | None = 
 
 	filters = {"parent_company": parent} if parent else {"parent_company": ["is", "not set"]}
 
-	return frappe.get_all(
+	# get_list, not get_all: it applies the caller's Company permission and their Company User
+	# Permissions, so a restricted user sees only their own companies. Matches the sibling tree
+	# source in accounts/utils.py, which already uses get_list.
+	return frappe.get_list(
 		"Company",
 		filters=filters,
 		fields=["name as value", "is_group as expandable"],
@@ -1095,6 +1098,11 @@ def add_node():
 
 	args = frappe.form_dict
 	args = make_tree_args(**args)
+
+	# This is the Company tree's "add node" action; `args` comes straight from form_dict, so without
+	# this the caller chooses the doctype that gets created. insert() would still check permissions
+	# on whatever they named, but nothing else here is meant to build anything but a Company.
+	args.doctype = "Company"
 
 	if args.parent_company == "All Companies":
 		args.parent_company = None
@@ -1165,6 +1173,22 @@ def get_default_company_address(
 	sort_key: Literal["is_shipping_address", "is_primary_address"] = "is_primary_address",
 	existing_address: str | None = None,
 ):
+	# `Literal` is NOT enforced by typing_validations — measured, sort_key="name" was accepted — and
+	# addr[sort_key] is a column reference, so check it here.
+	if sort_key not in ("is_shipping_address", "is_primary_address"):
+		frappe.throw(_("Invalid sort key"), frappe.PermissionError)
+
+	# Same boundary as accounts/custom/address.py::get_shipping_address: `select` denies the portal
+	# identities and costs none of the twelve transaction-writing roles, and the company scoping is
+	# what actually closes the cross-company read.
+	frappe.has_permission("Company", ptype="select", throw=True)
+
+	from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies
+
+	allowed_companies = get_allowed_companies(frappe.session.user, "Address")
+	if allowed_companies and name not in allowed_companies:
+		frappe.throw(_("Not permitted for {0}").format(name), frappe.PermissionError)
+
 	addr = frappe.qb.DocType("Address")
 	dl = frappe.qb.DocType("Dynamic Link")
 	out = (
