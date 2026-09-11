@@ -1653,14 +1653,22 @@ erpnext.stock.select_batch_and_serial_no = (frm, item) => {
 
 			new erpnext.SerialBatchPackageSelector(frm, item, (r) => {
 				if (r) {
-					frappe.model.set_value(item.doctype, item.name, {
+					let update_values = {
 						serial_and_batch_bundle: r.name,
 						use_serial_batch_fields: 0,
-						basic_rate: r.avg_rate,
 						qty:
 							Math.abs(r.total_qty) /
 							flt(item.conversion_factor || 1, precision("conversion_factor", item)),
-					});
+					};
+
+					let is_rate_derived_from_bundle =
+						item.type_of_transaction === "Outward" || flt(r.avg_rate) !== 0;
+
+					if (is_rate_derived_from_bundle) {
+						update_values.basic_rate = r.avg_rate;
+					}
+
+					frappe.model.set_value(item.doctype, item.name, update_values);
 				}
 			});
 		}
