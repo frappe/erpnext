@@ -34,7 +34,12 @@ def update_itemised_tax_data(doc):
 def export_invoices(filters: str | None = None):
 	frappe.has_permission("Sales Invoice", throw=True)
 
-	invoices = frappe.get_all(
+	# get_list, not get_all: the check above authorises the doctype but not the rows, and what
+	# leaves here is a zip of e-invoice XML attachments. A caller restricted to one company or
+	# customer would otherwise download every submitted invoice on the site. `get_list` needs
+	# `select` or `read` and the check above already demands `read`, so no caller that reaches
+	# this line loses it.
+	invoices = frappe.get_list(
 		"Sales Invoice", filters=get_conditions(filters), fields=["name", "company_tax_id"]
 	)
 
