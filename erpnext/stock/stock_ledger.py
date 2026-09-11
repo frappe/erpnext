@@ -2041,16 +2041,20 @@ def get_valuation_rate(
 
 	# Get moving average rate of a specific batch number
 	if warehouse and serial_and_batch_bundle:
+		bundle = frappe.get_value(
+			"Serial and Batch Bundle",
+			serial_and_batch_bundle,
+			["total_qty", "posting_datetime"],
+			as_dict=True,
+		)
 		batch_obj = BatchNoValuation(
 			sle=frappe._dict(
 				{
 					"item_code": item_code,
 					"warehouse": warehouse,
-					"actual_qty": -1,
+					"actual_qty": -abs(flt(bundle.total_qty)),
 					"serial_and_batch_bundle": serial_and_batch_bundle,
-					"posting_datetime": frappe.get_value(
-						"Serial and Batch Bundle", serial_and_batch_bundle, "posting_datetime"
-					),
+					"posting_datetime": bundle.posting_datetime,
 				}
 			)
 		)
