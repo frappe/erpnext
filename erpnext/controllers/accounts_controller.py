@@ -1444,10 +1444,70 @@ class AccountsController(TransactionBase):
 
 		set_transaction_currency_and_rate_in_gl_map(self, gl_entries)
 
-	def after_mapping(self, source_doc):
-		self.set_discount_amount_after_mapping(source_doc)
+	def before_mapping(self, source_doc, table_maps):
+		source_items_field = source_doc.meta.get_field("items")
+		item_map = table_maps.get(source_items_field.options, {}) if source_items_field else {}
+		field_map = item_map.get("field_map", {})
+		self.flags.mapped_discount_reference_field = dict(field_map).get("name")
+		if not self._has_mixed_additional_discount(source_doc):
+			return
 
-	def set_discount_amount_after_mapping(self, source_doc):
+		# Recalculate quantities and discounts supplied by the form before carrying them forward.
+		self.calculate_taxes_and_totals()
+		self.move_additional_discount_to_items()
+		# Calculate the incoming discount using only that source's mapped quantities.
+		self.flags.discount_mapping_previous_items = self.items
+		self.items = []
+
+	def after_mapping(self, source_doc):
+		item_reference_field = self.flags.pop("mapped_discount_reference_field", None)
+		self.set_discount_amount_after_mapping(source_doc, item_reference_field=item_reference_field)
+
+		previous_items = self.flags.pop("discount_mapping_previous_items", None)
+		if previous_items is not None:
+			self.move_additional_discount_to_items()
+			self.set("items", previous_items + self.items)
+			for idx, item in enumerate(self.items, 1):
+				item.idx = idx
+			self.calculate_taxes_and_totals()
+
+	def _has_mixed_additional_discount(self, source_doc):
+		if not self.get("items") or not any(
+			self.doctype in transaction_types and source_doc.doctype in transaction_types
+			for transaction_types in (PURCHASE_TRANSACTION_TYPES, SALES_TRANSACTION_TYPES)
+		):
+			return False
+
+		if not flt(self.get("discount_amount")) and not flt(source_doc.get("discount_amount")):
+			return False
+
+		discount_percentage = flt(self.get("additional_discount_percentage"))
+		source_discount_percentage = flt(source_doc.get("additional_discount_percentage"))
+		return not (
+			discount_percentage
+			and discount_percentage == source_discount_percentage
+			and self.get("apply_discount_on") == source_doc.get("apply_discount_on")
+		)
+
+	def move_additional_discount_to_items(self):
+		if not self.discount_amount:
+			return
+
+		for item in self.items:
+			if item.qty:
+				item.mapped_additional_discount_amount = flt(
+					flt(item.get("mapped_additional_discount_amount"))
+					+ flt(item.distributed_discount_amount) / item.qty,
+					item.precision("mapped_additional_discount_amount"),
+				)
+			item.distributed_discount_amount = 0
+
+		self.apply_discount_on = ""
+		self.base_discount_amount = 0
+		self.additional_discount_percentage = 0
+		self.discount_amount = 0
+
+	def set_discount_amount_after_mapping(self, source_doc, *, item_reference_field=None):
 		"""
 		Ensures that Additional Discount Amount is not copied repeatedly
 		for multiple mappings of a single source transaction.
@@ -1526,7 +1586,9 @@ class AccountsController(TransactionBase):
 		if not result:
 			return
 
-		discount_already_applied = result[0][0]
+		discount_already_applied = flt(result[0][0])
+		if item_reference_field:
+			discount_already_applied += self.get_mapped_discount_applied(source_doc, item_reference_field)
 		if not discount_already_applied:
 			return
 
@@ -1541,6 +1603,30 @@ class AccountsController(TransactionBase):
 		self.discount_amount = flt(discount_amount, self.precision("discount_amount"))
 
 		self.calculate_taxes_and_totals()
+
+	def get_mapped_discount_applied(self, source_doc, item_reference_field):
+		from frappe.query_builder.functions import Coalesce
+
+		distributed_discount = sum(flt(item.distributed_discount_amount) for item in source_doc.items)
+		if not distributed_discount:
+			return 0
+
+		item_table = frappe.qb.DocType(self.meta.get_field("items").options)
+		source_item_table = frappe.qb.DocType(source_doc.meta.get_field("items").options).as_("source_item")
+		mapped_discount = (
+			Coalesce(item_table.mapped_additional_discount_amount, 0)
+			- Coalesce(source_item_table.mapped_additional_discount_amount, 0)
+		) * item_table.qty
+		consumed = (
+			frappe.qb.from_(item_table)
+			.join(source_item_table)
+			.on(item_table[item_reference_field] == source_item_table.name)
+			.where((item_table.docstatus == 1) & (source_item_table.parent == source_doc.name))
+			.select(Sum(mapped_discount))
+		).run()[0][0]
+
+		# Grand Total discounts include tax; stored item allocations are tax-exclusive.
+		return flt(consumed) * source_doc.discount_amount / distributed_discount
 
 
 from erpnext.accounts.services.advances import (
