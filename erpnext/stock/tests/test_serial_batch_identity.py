@@ -40,19 +40,11 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 			with self.assertRaises(frappe.DuplicateEntryError):
 				duplicate.insert()
 
-	def test_database_rejects_duplicate_even_without_controller_validation(self):
-		for serialized in (False, True):
-			item = self.make_item(serialized)
-			name = self.create_number(item, frappe.generate_hash(), serialized)
-			doctype = "Serial No" if serialized else "Batch"
-			duplicate = frappe.get_doc(doctype, name)
-			duplicate.name = frappe.generate_hash()
-			frappe.db.savepoint("duplicate_number")
-			try:
-				with self.assertRaises((frappe.DuplicateEntryError, frappe.UniqueValidationError)):
-					duplicate.db_insert()
-			finally:
-				frappe.db.rollback(save_point="duplicate_number")
+	def test_database_rejects_duplicate_serial_without_controller_validation(self):
+		self.assert_database_rejects_duplicate(serialized=True)
+
+	def test_database_rejects_duplicate_batch_without_controller_validation(self):
+		self.assert_database_rejects_duplicate(serialized=False)
 
 	def test_legacy_id_is_not_used_to_resolve_another_items_number(self):
 		for serialized in (False, True):
@@ -312,3 +304,12 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 		for text in ("EMPTY-BATCH", name):
 			options = get_batch_no("Batch", text, "name", 0, 20, {"item_code": item.name, "is_inward": 1})
 			self.assertEqual([(row[0], row[1]) for row in options], [(name, "EMPTY-BATCH")])
+
+	def assert_database_rejects_duplicate(self, serialized):
+		item = self.make_item(serialized)
+		name = self.create_number(item, frappe.generate_hash(), serialized)
+		doctype = "Serial No" if serialized else "Batch"
+		duplicate = frappe.get_doc(doctype, name)
+		duplicate.name = frappe.generate_hash()
+		with self.assertRaises((frappe.DuplicateEntryError, frappe.UniqueValidationError)):
+			duplicate.db_insert()

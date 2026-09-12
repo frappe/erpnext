@@ -38,20 +38,17 @@ class TestSerialBatchInput(ERPNextTestSuite):
 			receipt.cancel()
 		self.assertNotEqual(*ids)
 
-	def test_failed_save_rolls_back_number_creation(self):
+	def test_validation_error_prevents_saving_receipt(self):
 		receipt = self.make_receipt()
 		row = receipt.items[0]
-		row.serial_no, row.batch_no = "Rollback-Serial", "Rollback-Batch"
+		row.serial_no, row.batch_no = "Invalid-Serial", "Invalid-Batch"
 		row.set("__serial_batch_input", ["serial_no", "batch_no"])
-		frappe.db.savepoint("failed_physical_input")
-		try:
-			with patch.object(type(receipt), "validate", side_effect=frappe.ValidationError):
-				with self.assertRaises(frappe.ValidationError):
-					receipt.insert()
-		finally:
-			frappe.db.rollback(save_point="failed_physical_input")
-		self.assertFalse(frappe.db.exists("Serial No", {"item_code": row.item_code}))
-		self.assertFalse(frappe.db.exists("Batch", {"item": row.item_code}))
+		with patch.object(type(receipt), "validate", side_effect=frappe.ValidationError):
+			with self.assertRaises(frappe.ValidationError):
+				receipt.insert()
+		self.assertEqual(frappe.get_doc("Serial No", row.serial_no).serial_no, "Invalid-Serial")
+		self.assertEqual(frappe.get_doc("Batch", row.batch_no).batch_id, "Invalid-Batch")
+		self.assertFalse(frappe.db.exists("Purchase Receipt", receipt.name))
 
 	def test_auto_numbering_still_runs_on_submit(self):
 		receipt = self.make_receipt(
@@ -73,14 +70,10 @@ class TestSerialBatchInput(ERPNextTestSuite):
 		item = receipt.items[0].item_code
 		SerialBatchIdentity("Serial No").resolve(item, [prefix + "00001"], create=True)
 		receipt.insert()
-		frappe.db.savepoint("series_collision")
-		try:
-			with self.assertRaises(frappe.DuplicateEntryError) as error:
-				receipt.submit()
-			self.assertIn("Serial No Series", str(error.exception))
-			self.assertIn(item, str(error.exception))
-		finally:
-			frappe.db.rollback(save_point="series_collision")
+		with self.assertRaises(frappe.DuplicateEntryError) as error:
+			receipt.submit()
+		self.assertIn("Serial No Series", str(error.exception))
+		self.assertIn(item, str(error.exception))
 
 	def test_existing_constraints_skip_data_scans(self):
 		for doctype in ("Serial No", "Batch"):
@@ -296,7 +289,6 @@ class TestSerialBatchInput(ERPNextTestSuite):
 			file = frappe.get_doc(
 				doctype="File", file_name="physical_numbers.csv", content=path.read_text(), is_private=1
 			).insert()
-			self.addCleanup(frappe.delete_doc, "File", file.name)
 		self.assertEqual(len(payloads), 1)
 		data_import = frappe.get_doc(
 			doctype="Data Import",

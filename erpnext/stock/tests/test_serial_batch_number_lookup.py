@@ -80,12 +80,8 @@ class TestSerialBatchNumberLookup(ERPNextTestSuite):
 
 	def test_prechecked_batch_still_has_database_uniqueness(self):
 		item, identity = self.make_item_and_identity("Batch")
-		frappe.db.savepoint("prechecked_batch")
-		try:
-			with self.assertRaises((frappe.DuplicateEntryError, frappe.UniqueValidationError)):
-				identity.create_batch(item.name, "EXISTING")
-		finally:
-			frappe.db.rollback(save_point="prechecked_batch")
+		with self.assertRaises((frappe.DuplicateEntryError, frappe.UniqueValidationError)):
+			identity.create_batch(item.name, "EXISTING")
 
 	def test_transaction_and_bundle_resolution_reuse_the_lookup(self):
 		item, identity = self.make_item_and_identity("Serial No")

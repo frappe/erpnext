@@ -43,18 +43,11 @@ class TestSerialBatchIdentityMatching(ERPNextTestSuite):
 			with self.assertRaises(frappe.DuplicateEntryError):
 				duplicate.insert()
 
-	def test_database_rejects_case_variant_without_controller_validation(self):
-		for doctype in ("Serial No", "Batch"):
-			identity, _, name = self.make_number(doctype, "Mixed-Lot-001")
-			duplicate = frappe.get_doc(doctype, name)
-			duplicate.name = frappe.generate_hash()
-			duplicate.set(identity.number_field, "MIXED-LOT-001")
-			frappe.db.savepoint("case_variant")
-			try:
-				with self.assertRaises((frappe.DuplicateEntryError, frappe.UniqueValidationError)):
-					duplicate.db_insert()
-			finally:
-				frappe.db.rollback(save_point="case_variant")
+	def test_database_rejects_serial_case_variant_without_controller_validation(self):
+		self.assert_database_rejects_case_variant("Serial No")
+
+	def test_database_rejects_batch_case_variant_without_controller_validation(self):
+		self.assert_database_rejects_case_variant("Batch")
 
 	def test_item_merge_rejects_case_variants(self):
 		for doctype in ("Serial No", "Batch"):
@@ -101,30 +94,38 @@ class TestSerialBatchIdentityMatching(ERPNextTestSuite):
 			self.assertEqual(names[0], names[1])
 			self.assertEqual(identity.labels(names)[names[0]], "Café-Lot")
 
-	def test_migration_reports_case_conflicts_before_changing_records(self):
+	def test_migration_reports_serial_case_conflicts_before_changing_records(self):
+		self.assert_migration_reports_case_conflicts("Serial No", "serial_no_number_item_ci")
+
+	def test_migration_reports_batch_case_conflicts_before_changing_records(self):
+		self.assert_migration_reports_case_conflicts("Batch", "batch_number_item_ci")
+
+	def assert_database_rejects_case_variant(self, doctype):
+		identity, _, name = self.make_number(doctype, "Mixed-Lot-001")
+		duplicate = frappe.get_doc(doctype, name)
+		duplicate.name = frappe.generate_hash()
+		duplicate.set(identity.number_field, "MIXED-LOT-001")
+		with self.assertRaises((frappe.DuplicateEntryError, frappe.UniqueValidationError)):
+			duplicate.db_insert()
+
+	def assert_migration_reports_case_conflicts(self, doctype, index):
 		if frappe.db.db_type != "postgres":
 			self.skipTest("Legacy case-only duplicates are possible on PostgreSQL")
 		from erpnext.patches.v17_0.separate_serial_batch_identity import execute
 
-		for doctype, index in (("Serial No", "serial_no_number_item_ci"), ("Batch", "batch_number_item_ci")):
-			identity, item, name = self.make_number(doctype, "Legacy-Lot")
-			frappe.db.savepoint("legacy_case_conflict")
-			try:
-				# PostgreSQL DDL is transactional, so rollback restores the unique index.
-				frappe.db.sql(f'DROP INDEX "{index}"')
-				duplicate = frappe.get_doc(doctype, name)
-				duplicate.name = frappe.generate_hash()
-				duplicate.set(identity.number_field, "LEGACY-LOT")
-				duplicate.db_insert()
-				with patch("frappe.reload_doc") as reload_doc:
-					with self.assertRaises(frappe.ValidationError) as error:
-						execute()
-					reload_doc.assert_not_called()
-				for value in (item.name, name, duplicate.name):
-					self.assertIn(value, str(error.exception))
-				self.assertEqual(
-					identity.labels([name, duplicate.name]),
-					{name: "Legacy-Lot", duplicate.name: "LEGACY-LOT"},
-				)
-			finally:
-				frappe.db.rollback(save_point="legacy_case_conflict")
+		identity, item, name = self.make_number(doctype, "Legacy-Lot")
+		frappe.db.sql(f'DROP INDEX "{index}"')
+		duplicate = frappe.get_doc(doctype, name)
+		duplicate.name = frappe.generate_hash()
+		duplicate.set(identity.number_field, "LEGACY-LOT")
+		duplicate.db_insert()
+		with patch("frappe.reload_doc") as reload_doc:
+			with self.assertRaises(frappe.ValidationError) as error:
+				execute()
+			reload_doc.assert_not_called()
+		for value in (item.name, name, duplicate.name):
+			self.assertIn(value, str(error.exception))
+		self.assertEqual(
+			identity.labels([name, duplicate.name]),
+			{name: "Legacy-Lot", duplicate.name: "LEGACY-LOT"},
+		)
