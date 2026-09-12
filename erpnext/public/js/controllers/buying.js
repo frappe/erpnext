@@ -160,6 +160,7 @@ erpnext.buying = {
 
 			supplier() {
 				var me = this;
+				if (this.frm.doc.__onload?.load_after_mapping) return;
 				erpnext.utils.get_party_details(this.frm, null, null, function () {
 					me.apply_price_list();
 				});
