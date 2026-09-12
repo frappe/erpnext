@@ -9,6 +9,7 @@ import frappe
 from frappe import _
 from frappe.query_builder.functions import Abs, Count
 from frappe.utils import cint, date_diff, flt, get_datetime
+from pypika.queries import QueryBuilder
 
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
@@ -31,6 +32,32 @@ BATCH_SLOT_VALUE_INDEX = 4
 
 AVERAGE_AGE_COLUMN = 6
 MAX_CHART_ITEMS = 10
+
+ITEM_FIELDS = (
+	"name",
+	"item_name",
+	"item_group",
+	"brand",
+	"description",
+	"stock_uom",
+	"has_batch_no",
+	"has_serial_no",
+)
+LEDGER_FIELDS = (
+	"actual_qty",
+	"stock_value_difference",
+	"valuation_rate",
+	"posting_date",
+	"voucher_type",
+	"voucher_no",
+	"voucher_detail_no",
+	"serial_no",
+	"batch_no",
+	"qty_after_transaction",
+	"serial_and_batch_bundle",
+	"warehouse",
+)
+DETAIL_FIELDS = ITEM_FIELDS + LEDGER_FIELDS
 
 
 def execute(filters: Filters = None) -> tuple:
@@ -327,14 +354,9 @@ class FIFOSlots:
 			self._prefetch_valuation_methods()
 			query = self._get_stock_ledger_query()
 
-			snapshot_details = None
-			if self.snapshot:
-				from erpnext.stock.report.stock_ageing.stock_ageing_snapshot import SnapshotFIFO
-
-				snapshot_details = SnapshotFIFO(self).generate(bundle_wise_serial_nos, bundle_wise_batch_nos)
-			if snapshot_details is not None:
-				self.item_details = snapshot_details
-			else:
+			if not self.snapshot or not self._generate_from_snapshot(
+				bundle_wise_serial_nos, bundle_wise_batch_nos
+			):
 				with nullcontext() if self.snapshot else frappe.db.unbuffered_cursor():
 					for row in run_stock_query(query, self.snapshot, as_dict=True, as_iterator=True):
 						self._process_stock_ledger_entry(row, bundle_wise_serial_nos, bundle_wise_batch_nos)
@@ -351,6 +373,21 @@ class FIFOSlots:
 			self.item_details = self._aggregate_details_by_item(self.item_details)
 
 		return self.item_details
+
+	def _generate_from_snapshot(self, serial_bundles: dict, batch_bundles: dict) -> bool:
+		from erpnext.stock.report.stock_ageing.stock_ageing_snapshot import SnapshotFIFO
+
+		result = SnapshotFIFO(self).generate()
+		if result is None:
+			return False
+
+		self.item_details = result.details
+		if result.replay_query is not None:
+			for row in self.snapshot.run(result.replay_query, as_dict=True, as_iterator=True):
+				self._process_stock_ledger_entry(row, serial_bundles, batch_bundles)
+
+		self.item_details = {key: self.item_details[key] for key in result.ordered_keys}
+		return True
 
 	def _recompute_moving_average_slots(self) -> None:
 		for item_dict in self.item_details.values():
@@ -1032,7 +1069,7 @@ class FIFOSlots:
 
 		return item_aggregated_data
 
-	def _get_stock_ledger_query(self, ordered=True):
+	def _get_stock_ledger_query(self, ordered: bool = True) -> QueryBuilder:
 		sle = frappe.qb.DocType("Stock Ledger Entry")
 		item = self._get_item_query()  # used as derived table in sle query
 		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59")
@@ -1041,26 +1078,8 @@ class FIFOSlots:
 			frappe.qb.from_(sle)
 			.from_(item)
 			.select(
-				item.name,
-				item.item_name,
-				item.item_group,
-				item.brand,
-				item.description,
-				item.stock_uom,
-				item.has_batch_no,
-				item.has_serial_no,
-				sle.actual_qty,
-				sle.stock_value_difference,
-				sle.valuation_rate,
-				sle.posting_date,
-				sle.voucher_type,
-				sle.voucher_no,
-				sle.voucher_detail_no,
-				sle.serial_no,
-				sle.batch_no,
-				sle.qty_after_transaction,
-				sle.serial_and_batch_bundle,
-				sle.warehouse,
+				*(item[field] for field in ITEM_FIELDS),
+				*(sle[field] for field in LEDGER_FIELDS),
 			)
 			.where(
 				(sle.item_code == item.name)
@@ -1156,19 +1175,10 @@ class FIFOSlots:
 
 		return bundle_wise_batch_nos
 
-	def _get_item_query(self) -> str:
+	def _get_item_query(self) -> QueryBuilder:
 		item_table = frappe.qb.DocType("Item")
 
-		item = frappe.qb.from_("Item").select(
-			"name",
-			"item_name",
-			"description",
-			"stock_uom",
-			"brand",
-			"item_group",
-			"has_serial_no",
-			"has_batch_no",
-		)
+		item = frappe.qb.from_("Item").select(*ITEM_FIELDS)
 
 		item = self._apply_filter(item, item_table, "item_code")
 

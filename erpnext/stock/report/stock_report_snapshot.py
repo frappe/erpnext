@@ -58,7 +58,7 @@ class StockReportSnapshot:
 		sql, parameters = self.compile(query)
 		cursor = self.conn.cursor()
 		try:
-			for name in self.get_referenced_tables(sql):
+			for name in self.get_referenced_tables(query):
 				cursor.register(name, self.get_table(name))
 			cursor.execute(sql, parameters)
 		except Exception:
@@ -74,9 +74,13 @@ class StockReportSnapshot:
 		sql = query.get_sql(quote_char='"', alias_quote_char='"', param_wrapper=parameters)
 		return sql, parameters.get_parameters()
 
-	def get_referenced_tables(self, sql):
+	def get_referenced_tables(self, query) -> list[str]:
+		# DuckDB's dependency parser does not accept prepared parameters. Only inspection uses
+		# literal values rendered by the query builder; run() executes with bound parameters.
+		sql = query.get_sql(quote_char='"', alias_quote_char='"')
+		referenced = self.conn.get_table_names(sql)
 		names = dict.fromkeys([*self.tables, *(f"tab{doctype}" for doctype in LIVE_TABLES)])
-		return [name for name in names if f'"{name}"' in sql]
+		return [name for name in names if name in referenced]
 
 	def register(self, name, rows, fields):
 		"""Expose a lookup table built in Python to the queries that follow."""

@@ -17,7 +17,6 @@ from erpnext.stock.report.stock_ageing.stock_ageing import FIFOSlots
 from erpnext.stock.report.stock_ageing.stock_ageing_snapshot import (
 	DETAIL_FIELDS,
 	FAST_KEYS,
-	SnapshotFIFO,
 )
 from erpnext.stock.report.stock_report_snapshot import StockReportSnapshot
 from erpnext.tests.utils import ERPNextTestSuite
@@ -137,11 +136,9 @@ class TestStockAgeingSnapshot(ERPNextTestSuite):
 				if ordered
 				else query,
 			):
-				details = SnapshotFIFO(fifo).generate()
-			if details is not None:
-				fifo.item_details = details
-				fifo._recompute_moving_average_slots()
-			return details
+				if fifo._generate_from_snapshot({}, {}):
+					fifo._recompute_moving_average_slots()
+					return fifo.item_details
 
 	def replay(self, rows, method="FIFO"):
 		fifo = self.make_fifo(rows, method)

@@ -411,6 +411,19 @@ class TestStockReportSnapshot(ERPNextTestSuite):
 						query = builder.from_(sle).select(sle.name).where(sle.item_code == "x' OR 1=1 -- `")
 						self.assertEqual(snapshot.run(query), [])
 
+	def test_cte_named_after_live_table_does_not_load_that_doctype(self):
+		self.make_movement(qty=1, basic_rate=100)
+		ledger = frappe.qb.DocType("Stock Ledger Entry")
+		item = frappe.qb.DocType("Item")
+		entries = frappe.qb.from_(ledger).select(ledger.item_code.as_("name"))
+		query = frappe.qb.with_(entries, "tabItem").from_(item).select(item.name)
+		conn = self.connect(self.capture_ledger())
+		with patch.object(StockReportSnapshot, "get_connection", return_value=conn):
+			with StockReportSnapshot("Stock Ledger", self.filters) as snapshot:
+				with patch.object(snapshot, "build_live_table") as build_live_table:
+					self.assertEqual(snapshot.run(query, pluck=True), [self.item])
+					build_live_table.assert_not_called()
+
 	def assert_snapshot_matches(self, report, **filters):
 		report_filters = deepcopy(self.filters)
 		report_filters.update(filters)

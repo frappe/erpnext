@@ -1,12 +1,18 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from collections import defaultdict
+from typing import NamedTuple
+
 import frappe
 from frappe.query_builder.functions import Abs, Cast, Count, Floor, IfNull, Max, Min, Sum
 from pypika import Case, CustomFunction, Field
 from pypika.analytics import CURRENT_ROW, Preceding
 from pypika.analytics import Sum as WindowSum
+from pypika.queries import QueryBuilder
 from pypika.terms import Star
+
+from erpnext.stock.report.stock_ageing.stock_ageing import DETAIL_FIELDS
 
 ArgMin = CustomFunction("arg_min_null", ["value", "order"])
 ArgMax = CustomFunction("arg_max_null", ["value", "order"])
@@ -14,6 +20,20 @@ Row = CustomFunction("row", ["posting_datetime", "creation"])
 Least = CustomFunction("least", ["left", "right"])
 
 FAST_KEYS = "fifo_fast_keys"
+# Scaling by a power of two admits exact binary fractions. Keep scaled totals below 2**52
+# to leave headroom for intermediate additions and subtractions in the layer calculation.
+BINARY_FRACTION_SCALE = 1024
+MAX_EXACT_SCALED_SUM = 2**52
+
+StockKey = tuple[str, str | None]
+
+
+class SnapshotFIFOResult(NamedTuple):
+	"""Aggregated groups and the remaining query for FIFOSlots to replay in ledger order."""
+
+	details: dict[StockKey, dict]
+	replay_query: QueryBuilder | None
+	ordered_keys: list[StockKey]
 
 
 class SnapshotFIFO:
@@ -26,9 +46,9 @@ class SnapshotFIFO:
 		self.ledger_entries = fifo._get_stock_ledger_query(ordered=False).select(
 			ledger.posting_datetime, ledger.creation
 		)
-		self.entries = self.ledger_entries
 
-	def generate(self, serial_bundles=None, batch_bundles=None):
+	def generate(self) -> SnapshotFIFOResult | None:
+		"""Return aggregated groups and optional replay, or None when every entry needs replay."""
 		summaries = self.snapshot.run(self.get_summary_query(), as_dict=True)
 		if len({row.first_order for row in summaries}) != len(summaries):
 			return None
@@ -36,58 +56,53 @@ class SnapshotFIFO:
 		if summaries and not eligible:
 			return None
 
-		details = {self.stock_key(row): self.build_details(row) for row in eligible}
-		replayed = len(eligible) != len(summaries)
-		if replayed:
-			self.narrow_entries_to(details)
-		if details:
-			self.add_surviving_layers(details)
-		if replayed:
-			self.replay_remaining_entries(details, serial_bundles or {}, batch_bundles or {})
+		entries = self.ledger_entries
+		replay_query = None
+		if len(eligible) != len(summaries):
+			self.register_fast_keys([self.stock_key(row) for row in eligible])
+			entries = self.get_fast_entries()
+			replay_query = self.get_replay_query()
 
-		ordered_keys = [self.stock_key(row) for row in summaries]
-		return {key: details[key] for key in ordered_keys}
+		layers = self.get_surviving_layers(entries) if eligible else {}
+		details = {
+			self.stock_key(row): self.build_details(row, layers.get(self.stock_key(row), []))
+			for row in eligible
+		}
+		return SnapshotFIFOResult(details, replay_query, [self.stock_key(row) for row in summaries])
 
 	@staticmethod
-	def stock_key(row):
+	def stock_key(row) -> StockKey:
 		return (row.name, row.warehouse)
 
 	@staticmethod
-	def build_details(row):
+	def build_details(row, layers: list) -> dict:
 		return {
 			"details": frappe._dict({field: row[field] for field in DETAIL_FIELDS}),
-			"fifo_queue": [],
+			"fifo_queue": layers,
 			"total_qty": row.total_qty,
 			"qty_after_transaction": row.final_qty,
 			"has_serial_no": row.has_serial_no,
 			"has_batch_no": row.has_batch_no,
 		}
 
-	def narrow_entries_to(self, details):
-		"""Publish the aggregated groups to DuckDB and scope the entry queries to them, so the
-		split needs no parameter per group. Must run before the layer query is built."""
-		rows = [{"name": name, "warehouse": warehouse} for name, warehouse in details]
+	def register_fast_keys(self, keys: list[StockKey]) -> None:
+		"""Publish the aggregated groups to DuckDB so the split needs no parameter per group."""
+		rows = [{"name": name, "warehouse": warehouse} for name, warehouse in keys]
 		self.snapshot.register(FAST_KEYS, rows, {"name": "string", "warehouse": "string"})
-		self.entries = self.get_fast_entries()
 
-	def add_surviving_layers(self, details):
+	def get_surviving_layers(self, entries: QueryBuilder) -> dict[StockKey, list]:
+		layers = defaultdict(list)
 		for item, warehouse, qty, posting_date, value in self.snapshot.run(
-			self.get_layers_query(), as_iterator=True
+			self.get_layers_query(entries), as_iterator=True
 		):
-			details[(item, warehouse)]["fifo_queue"].append([qty, posting_date, value])
+			layers[(item, warehouse)].append([qty, posting_date, value])
+		return dict(layers)
 
-	def replay_remaining_entries(self, details, serial_bundles, batch_bundles):
-		"""Replay the groups DuckDB did not aggregate into the same details, so they keep the
-		layers attached above."""
-		self.fifo.item_details = details
-		for row in self.snapshot.run(self.get_replay_query(), as_dict=True, as_iterator=True):
-			self.fifo._process_stock_ledger_entry(row, serial_bundles, batch_bundles)
-
-	def get_fast_entries(self):
+	def get_fast_entries(self) -> QueryBuilder:
 		entries, keys = self.ledger_entries.as_("fifo_scope"), frappe.qb.Table(FAST_KEYS)
 		return frappe.qb.from_(entries).join(keys).on(self.same_stock(entries, keys)).select(Star(entries))
 
-	def get_replay_query(self):
+	def get_replay_query(self) -> QueryBuilder:
 		"""Entries left to the existing replay. Rows without a warehouse never match a key."""
 		entries, keys = frappe.qb.Table("fifo_replay"), frappe.qb.Table(FAST_KEYS)
 		return (
@@ -100,17 +115,17 @@ class SnapshotFIFO:
 			.orderby(Field("posting_datetime", table=entries), Field("creation", table=entries))
 		)
 
-	def can_aggregate(self, row):
+	def can_aggregate(self, row) -> bool:
 		return (
 			not row.unsupported
 			and row.min_balance >= 0
 			and row.row_count == row.voucher_count == row.order_count
-			and row.qty_bound < 2**52
-			and row.value_bound < 2**52
+			and row.qty_bound < MAX_EXACT_SCALED_SUM
+			and row.value_bound < MAX_EXACT_SCALED_SUM
 			and self.fifo._get_item_valuation_method(row.name) in ("FIFO", "Moving Average")
 		)
 
-	def get_summary_query(self):
+	def get_summary_query(self) -> QueryBuilder:
 		entries = frappe.qb.Table("fifo_entries")
 		progress = frappe.qb.Table("fifo_progress")
 		order = Row(progress.posting_datetime, progress.creation)
@@ -127,10 +142,11 @@ class SnapshotFIFO:
 		unsupported |= progress.warehouse.isnull() | progress.creation.isnull()
 		# Restrict reassociation to exactly representable binary fractions with bounded sums.
 		for field in (progress.actual_qty, progress.stock_value_difference):
-			unsupported |= field.isnull() | (field * 1024 != Floor(field * 1024))
+			scaled = field * BINARY_FRACTION_SCALE
+			unsupported |= field.isnull() | (scaled != Floor(scaled))
 
 		return (
-			frappe.qb.with_(self.entries, "fifo_entries")
+			frappe.qb.with_(self.ledger_entries, "fifo_entries")
 			.with_(progress_query, "fifo_progress")
 			.from_(progress)
 			.select(
@@ -150,55 +166,25 @@ class SnapshotFIFO:
 				Max(Case().when(unsupported, 1).else_(0)).as_("unsupported"),
 				Min(progress.running_qty).as_("min_balance"),
 				Sum(progress.actual_qty).as_("total_qty"),
-				Sum(Cast(Abs(progress.actual_qty), "DOUBLE") * 1024).as_("qty_bound"),
-				Sum(Cast(Abs(progress.stock_value_difference), "DOUBLE") * 1024).as_("value_bound"),
+				Sum(Cast(Abs(progress.actual_qty), "DOUBLE") * BINARY_FRACTION_SCALE).as_("qty_bound"),
+				Sum(Cast(Abs(progress.stock_value_difference), "DOUBLE") * BINARY_FRACTION_SCALE).as_(
+					"value_bound"
+				),
 			)
 			.groupby(progress.name, progress.warehouse)
 			.orderby("first_order")
 		)
 
-	def get_layers_query(self):
+	def get_layers_query(self, ledger_entries: QueryBuilder) -> QueryBuilder:
 		entries = frappe.qb.Table("fifo_entries")
 		progress = frappe.qb.Table("fifo_progress")
 		receipts = frappe.qb.Table("fifo_receipts")
 		issues = frappe.qb.Table("fifo_issues")
 		totals = frappe.qb.Table("fifo_totals")
 		resets = frappe.qb.Table("fifo_resets")
-		progress_query = frappe.qb.from_(entries).select(
-			entries.name,
-			entries.warehouse,
-			entries.actual_qty,
-			entries.stock_value_difference,
-			entries.posting_date,
-			entries.posting_datetime,
-			entries.creation,
-			*self.get_cumulative_columns(entries),
-		)
-		totals_query = (
-			frappe.qb.from_(progress)
-			.select(
-				progress.name,
-				progress.warehouse,
-				Max(progress.out_qty).as_("out_qty"),
-				Max(progress.out_value).as_("out_value"),
-			)
-			.groupby(progress.name, progress.warehouse)
-		)
-		# Exact layer exhaustion discards the issue's residual value in the existing FIFO replay.
-		resets_query = (
-			frappe.qb.from_(issues)
-			.join(receipts)
-			.on(self.same_stock(issues, receipts) & (issues.out_qty == receipts.in_qty))
-			.select(
-				issues.name,
-				issues.warehouse,
-				ArgMax(issues.out_value - receipts.in_value, issues.out_qty).as_("correction"),
-			)
-			.groupby(issues.name, issues.warehouse)
-		)
 		return (
-			frappe.qb.with_(self.entries, "fifo_entries")
-			.with_(progress_query, "fifo_progress")
+			frappe.qb.with_(ledger_entries, "fifo_entries")
+			.with_(self.get_progress_query(entries), "fifo_progress")
 			.with_(
 				frappe.qb.from_(progress).select(progress.star).where(progress.actual_qty > 0),
 				"fifo_receipts",
@@ -206,8 +192,8 @@ class SnapshotFIFO:
 			.with_(
 				frappe.qb.from_(progress).select(progress.star).where(progress.actual_qty < 0), "fifo_issues"
 			)
-			.with_(totals_query, "fifo_totals")
-			.with_(resets_query, "fifo_resets")
+			.with_(self.get_totals_query(progress), "fifo_totals")
+			.with_(self.get_resets_query(issues, receipts), "fifo_resets")
 			.from_(receipts)
 			.join(totals)
 			.on(self.same_stock(receipts, totals))
@@ -228,6 +214,48 @@ class SnapshotFIFO:
 			)
 			.where(receipts.in_qty > totals.out_qty)
 			.orderby(receipts.name, receipts.warehouse, receipts.posting_datetime, receipts.creation)
+		)
+
+	def get_progress_query(self, entries) -> QueryBuilder:
+		return frappe.qb.from_(entries).select(
+			entries.name,
+			entries.warehouse,
+			entries.actual_qty,
+			entries.stock_value_difference,
+			entries.posting_date,
+			entries.posting_datetime,
+			entries.creation,
+			*self.get_cumulative_columns(entries),
+		)
+
+	def get_totals_query(self, progress) -> QueryBuilder:
+		return (
+			frappe.qb.from_(progress)
+			.select(
+				progress.name,
+				progress.warehouse,
+				Max(progress.out_qty).as_("out_qty"),
+				Max(progress.out_value).as_("out_value"),
+			)
+			.groupby(progress.name, progress.warehouse)
+		)
+
+	def get_resets_query(self, issues, receipts) -> QueryBuilder:
+		"""Match replay's discarded residual value when a receipt layer is exhausted.
+
+		For (quantity, value): receive (10, 100), issue (10, 90), receive (5, 50), issue (1, 10).
+		The exhausted first layer discards 10 of value, leaving (4, 40) in the second layer.
+		"""
+		return (
+			frappe.qb.from_(issues)
+			.join(receipts)
+			.on(self.same_stock(issues, receipts) & (issues.out_qty == receipts.in_qty))
+			.select(
+				issues.name,
+				issues.warehouse,
+				ArgMax(issues.out_value - receipts.in_value, issues.out_qty).as_("correction"),
+			)
+			.groupby(issues.name, issues.warehouse)
 		)
 
 	def get_cumulative_columns(self, entries):
@@ -253,27 +281,3 @@ class SnapshotFIFO:
 		return (Field("name", table=left) == Field("name", table=right)) & (
 			Field("warehouse", table=left) == Field("warehouse", table=right)
 		)
-
-
-DETAIL_FIELDS = (
-	"name",
-	"item_name",
-	"item_group",
-	"brand",
-	"description",
-	"stock_uom",
-	"has_batch_no",
-	"has_serial_no",
-	"actual_qty",
-	"stock_value_difference",
-	"valuation_rate",
-	"posting_date",
-	"voucher_type",
-	"voucher_no",
-	"voucher_detail_no",
-	"serial_no",
-	"batch_no",
-	"qty_after_transaction",
-	"serial_and_batch_bundle",
-	"warehouse",
-)
