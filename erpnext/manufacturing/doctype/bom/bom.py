@@ -471,7 +471,7 @@ class BOM(WebsiteGenerator):
 			if item.valuation_type in ("Valuation Rate", "Manual"):
 				item.cost_allocation_per = 0
 				own_cost += flt(item.cost)
-			total_secondary_items_per += item.cost_allocation_per
+			total_secondary_items_per += flt(item.cost_allocation_per)
 
 		if self.cost_allocation_per == 100 and total_secondary_items_per:
 			self.cost_allocation_per -= total_secondary_items_per
@@ -487,9 +487,9 @@ class BOM(WebsiteGenerator):
 			)
 
 	def validate_total_cost_allocation(self):
-		total_cost_allocation_per = self.cost_allocation_per
+		total_cost_allocation_per = flt(self.cost_allocation_per)
 		for item in self.secondary_items:
-			total_cost_allocation_per += item.cost_allocation_per
+			total_cost_allocation_per += flt(item.cost_allocation_per)
 
 		if total_cost_allocation_per != 100:
 			frappe.throw(_("Cost allocation between finished goods and secondary items should equal 100%"))
@@ -1092,7 +1092,7 @@ class BOM(WebsiteGenerator):
 
 	def calculate_secondary_items_costs(self, save=False):
 		"""Valuation Rate and Manual rows carry their own cost, deducted from the raw
-		material cost; the % of FG Cost rows split the remainder by their percentage."""
+		material cost; the % of Component Cost rows split the remainder by their percentage."""
 		total_sm_cost = 0
 		base_total_sm_cost = 0
 		precision = self.precision("raw_material_cost")
@@ -1100,7 +1100,7 @@ class BOM(WebsiteGenerator):
 
 		for d in self.get("secondary_items"):
 			if d.valuation_type not in ("Valuation Rate", "Manual"):
-				d.cost = flt(allocation_basis * (d.cost_allocation_per / 100), precision)
+				d.cost = flt(allocation_basis * (flt(d.cost_allocation_per) / 100), precision)
 				d.base_cost = flt(d.cost * self.conversion_rate, precision)
 				if save:
 					d.db_update()
