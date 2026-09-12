@@ -50,12 +50,22 @@ def get_data(filters):
 	)
 
 	if filters.get("warehouse"):
-		query = query.where(bin.warehouse.isin(filters.get("warehouse")))
+		query = query.where(bin.warehouse.isin(get_filter_values(filters.get("warehouse"))))
 
 	if filters.get("company"):
 		query = query.where(wh.company == filters.get("company"))
 
 	return query.run(as_dict=True)
+
+
+def get_filter_values(value):
+	if isinstance(value, str) and value.startswith("["):
+		value = frappe.parse_json(value)
+
+	if isinstance(value, list | tuple):
+		return value
+
+	return [value]
 
 
 def get_chart_data(data):

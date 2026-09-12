@@ -95,9 +95,20 @@ def get_data(filters):
 	if filters.get("status"):
 		query = query.where(so.status.isin(filters.get("status")))
 	if filters.get("warehouse"):
-		query = query.where(soi.warehouse == filters.get("warehouse"))
+		warehouses = get_filter_values(filters.get("warehouse"))
+		query = query.where(soi.warehouse.isin(warehouses))
 
 	return query.run(as_dict=True)
+
+
+def get_filter_values(value):
+	if isinstance(value, str) and value.startswith("["):
+		value = frappe.parse_json(value)
+
+	if isinstance(value, list | tuple):
+		return value
+
+	return [value]
 
 
 def get_so_elapsed_time(data):

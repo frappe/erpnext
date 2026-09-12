@@ -276,6 +276,12 @@ def apply_warehouse_filter(query, sle, filters):
 
 	warehouse_table = frappe.qb.DocType("Warehouse")
 
+	if isinstance(warehouses, str) and warehouses.startswith("["):
+		warehouses = frappe.parse_json(warehouses)
+
+	if not warehouses:
+		return query
+
 	if isinstance(warehouses, str):
 		warehouses = [warehouses]
 
@@ -288,11 +294,17 @@ def apply_warehouse_filter(query, sle, filters):
 		as_list=True,
 	)
 
+	if len(warehouse_range) != len(set(warehouses)):
+		frappe.throw(_("Invalid warehouse filter"))
+
 	child_query = frappe.qb.from_(warehouse_table).select(warehouse_table.name)
 
 	range_conditions = [
 		(warehouse_table.lft >= lft) & (warehouse_table.rgt <= rgt) for lft, rgt in warehouse_range
 	]
+
+	if not range_conditions:
+		frappe.throw(_("Invalid warehouse filter"))
 
 	combined_condition = range_conditions[0]
 	for condition in range_conditions[1:]:

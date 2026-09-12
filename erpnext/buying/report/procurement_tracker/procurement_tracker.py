@@ -132,10 +132,15 @@ def apply_filters_on_query(filters, parent, child, query):
 	if filters.get("company"):
 		query = query.where(parent.company == filters.get("company"))
 
-	if filters.get("cost_center") or filters.get("project"):
-		query = query.where(
-			(child.cost_center == filters.get("cost_center")) | (child.project == filters.get("project"))
-		)
+	cost_center_condition = get_qb_filter_condition(child.cost_center, filters.get("cost_center"))
+	project_condition = get_qb_filter_condition(child.project, filters.get("project"))
+
+	if cost_center_condition is not None and project_condition is not None:
+		query = query.where(cost_center_condition | project_condition)
+	elif cost_center_condition is not None:
+		query = query.where(cost_center_condition)
+	elif project_condition is not None:
+		query = query.where(project_condition)
 
 	if filters.get("from_date"):
 		query = query.where(parent.transaction_date >= filters.get("from_date"))
@@ -144,6 +149,19 @@ def apply_filters_on_query(filters, parent, child, query):
 		query = query.where(parent.transaction_date <= filters.get("to_date"))
 
 	return query
+
+
+def get_qb_filter_condition(field, value):
+	if not value:
+		return None
+
+	if isinstance(value, str) and value.startswith("["):
+		value = frappe.parse_json(value)
+
+	if isinstance(value, list | tuple):
+		return field.isin(value)
+
+	return field == value
 
 
 def get_data(filters):
