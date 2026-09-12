@@ -96,6 +96,54 @@ class TestUaeVat201(ERPNextTestSuite):
 		self.assertEqual(get_standard_rated_expenses_total(filters), 917.5)
 		self.assertEqual(get_standard_rated_expenses_tax(filters), 50)
 
+	def test_uae_vat_201_report_with_purchase_return(self):
+		def make_pi(**kwargs):
+			pi = make_purchase_invoice(
+				company="_Test Company UAE VAT",
+				supplier="_Test UAE Supplier",
+				supplier_warehouse="_Test UAE VAT Supplier Warehouse - _TCUV",
+				warehouse="_Test UAE VAT Supplier Warehouse - _TCUV",
+				currency="AED",
+				cost_center="Main - _TCUV",
+				expense_account="Cost of Goods Sold - _TCUV",
+				item="_Test UAE VAT Item",
+				rate=100,
+				do_not_save=1,
+				uom="Nos",
+				**kwargs,
+			)
+			pi.append(
+				"taxes",
+				{
+					"charge_type": "On Net Total",
+					"account_head": "VAT 5% - _TCUV",
+					"cost_center": "Main - _TCUV",
+					"description": "VAT 5% @ 5.0",
+					"rate": 5.0,
+				},
+			)
+			return pi
+
+		pi = make_pi(qty=10)
+		pi.recoverable_standard_rated_expenses = 50
+		pi.save().submit()
+
+		linked_return = make_pi(qty=-4, is_return=1, return_against=pi.name)
+		linked_return.recoverable_standard_rated_expenses = 20
+		linked_return.save().submit()
+
+		standalone_return = make_pi(qty=-2, is_return=1)
+		standalone_return.recoverable_standard_rated_expenses = -10
+		standalone_return.save().submit()
+
+		typo = make_pi(qty=3)
+		typo.recoverable_standard_rated_expenses = -5
+		typo.save().submit()
+
+		filters = {"company": "_Test Company UAE VAT"}
+		self.assertEqual(get_standard_rated_expenses_total(filters), 400)
+		self.assertEqual(get_standard_rated_expenses_tax(filters), 20)
+
 
 def set_vat_accounts():
 	if not frappe.db.exists("UAE VAT Settings", "_Test Company UAE VAT"):
