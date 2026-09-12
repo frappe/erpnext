@@ -2,11 +2,15 @@ from typing import Any
 
 import frappe
 from frappe import _dict
-from frappe.utils import today
+from frappe.utils import flt, today
 
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-from erpnext.stock.report.stock_balance.stock_balance import execute, get_stock_ageing_data
+from erpnext.stock.report.stock_balance.stock_balance import (
+	StockBalanceReport,
+	execute,
+	get_stock_ageing_data,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -50,7 +54,7 @@ class TestStockBalance(ERPNextTestSuite):
 		# Latest balance per (item_code, warehouse): first row wins because of the desc ordering.
 		for line in frappe.get_all(
 			"Stock Ledger Entry",
-			filters={"is_cancelled": 0},
+			filters={"is_cancelled": 0, "item_code": ("in", [row.item_code for row in rows])},
 			fields=["item_code", "warehouse", "stock_value", "qty_after_transaction"],
 			order_by="posting_datetime desc, creation desc",
 		):
@@ -75,6 +79,18 @@ class TestStockBalance(ERPNextTestSuite):
 			self.assertAlmostEqual(row.val_rate, row.bal_val / row.bal_qty, 3, msg)
 
 	# ----------- tests
+
+	def test_movement_sign_preserves_rounding_methods(self):
+		report = StockBalanceReport(self.filters)
+		for method in ("Banker's Rounding", "Banker's Rounding (legacy)", "Commercial Rounding"):
+			for precision in (-2, 0, 3, 9):
+				report.float_precision = precision
+				report.rounding_unit = 10**-precision
+				report.rounding_method = method
+				for multiplier in (-2, -1, -0.51, -0.5, -0.49, -0.00001, 0, 0.5, 2):
+					value = multiplier * report.rounding_unit
+					with self.subTest(method=method, precision=precision, value=value):
+						self.assertEqual(report.is_incoming(value), flt(value, precision, method) >= 0)
 
 	def test_basic_stock_balance(self):
 		"""Check very basic functionality and item info"""
