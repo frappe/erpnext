@@ -5,6 +5,7 @@ import json
 
 import frappe
 from frappe import _
+from frappe.model.base_document import get_controller
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import cint, flt, getdate, nowdate
@@ -31,6 +32,7 @@ def make_sales_order(
 
 
 def _make_sales_order(source_name, target_doc=None, ignore_permissions=False, args=None):
+	get_controller("Quotation").validate_orderable(source_name)
 	if args is None:
 		args = {}
 	args = frappe.parse_json(args)
@@ -156,6 +158,7 @@ def make_sales_invoice(
 
 
 def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, args=None):
+	get_controller("Quotation").validate_orderable(source_name)
 	if args is None:
 		args = {}
 	args = frappe.parse_json(args)
@@ -187,6 +190,7 @@ def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, 
 			"Quotation": {"doctype": "Sales Invoice", "validation": {"docstatus": ["=", 1]}},
 			"Quotation Item": {
 				"doctype": "Sales Invoice Item",
+				"field_map": {"parent": "quotation"},
 				"postprocess": update_item,
 				"condition": lambda row: not row.is_alternative and select_item(row),
 			},

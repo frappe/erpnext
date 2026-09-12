@@ -5,6 +5,7 @@
 import frappe
 import frappe.utils
 from frappe import _, msgprint, throw
+from frappe.model.base_document import get_controller
 from frappe.query_builder import Case
 from frappe.utils import cint, flt, formatdate, get_link_to_form
 from frappe.utils.data import comma_and
@@ -259,6 +260,10 @@ class SalesInvoice(SellingController):
 		write_off_cost_center: DF.Link | None
 		write_off_outstanding_amount_automatically: DF.Check
 	# end: auto-generated types
+
+	def save(self, *args, **kwargs):
+		get_controller("Quotation").lock_quotation_references(self)
+		return super().save(*args, **kwargs)
 
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
@@ -791,8 +796,10 @@ class SalesInvoice(SellingController):
 		self.party_account_currency = account.account_currency
 
 	def validate_with_previous_doc(self):
+		get_controller("Quotation").validate_quotation_references(self)
 		super().validate_with_previous_doc(
 			{
+				"Quotation": {"ref_dn_field": "quotation", "compare_fields": [["company", "="]]},
 				"Sales Order": {
 					"ref_dn_field": "sales_order",
 					"compare_fields": [

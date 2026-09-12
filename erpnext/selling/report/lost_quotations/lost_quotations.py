@@ -68,6 +68,7 @@ def get_data(company: str, from_date: str, to_date: str, group_by: Literal["Lost
 
 	lost_quotation_condition = (
 		(q.status == "Lost")
+		& (q.is_latest_revision == 1)
 		& (q.docstatus == DocStatus.submitted())
 		& (q.transaction_date >= from_date)
 		& (q.transaction_date <= to_date)

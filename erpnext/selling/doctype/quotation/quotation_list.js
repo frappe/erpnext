@@ -36,6 +36,8 @@ frappe.listview_settings["Quotation"] = {
 			return [__("Lost"), "gray", "status,=,Lost"];
 		} else if (doc.status === "Expired") {
 			return [__("Expired"), "gray", "status,=,Expired"];
+		} else if (doc.status === "Superseded") {
+			return [__("Superseded"), "gray", "status,=,Superseded"];
 		}
 	},
 };

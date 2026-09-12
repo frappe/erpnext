@@ -300,7 +300,7 @@ class Opportunity(TransactionBase, CRMNote):
 				"Quotation",
 				{
 					"opportunity": self.name,
-					"status": ("not in", ["Lost", "Cancelled", "Expired"]),
+					"status": ("not in", ["Lost", "Cancelled", "Expired", "Superseded"]),
 					"docstatus": 1,
 				},
 				"name",
@@ -316,7 +316,7 @@ class Opportunity(TransactionBase, CRMNote):
 				.where(
 					(q.docstatus == 1)
 					& (qi.prevdoc_docname == self.name)
-					& q.status.notin(["Lost", "Cancelled", "Expired"])
+					& q.status.notin(["Lost", "Cancelled", "Expired", "Superseded"])
 				)
 				.run()
 			)

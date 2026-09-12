@@ -2,10 +2,16 @@
 # License: GNU General Public License v3. See license.txt
 
 
+from collections import Counter
+from hashlib import sha256
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import getdate, nowdate
+from frappe.model.naming import getseries
+from frappe.query_builder.functions import IfNull, NullIf
+from frappe.utils import add_days, cint, date_diff, flt, getdate, nowdate
+from pypika import Case, Order
 from pypika.terms import ExistsCriterion
 
 from erpnext.controllers.selling_controller import SellingController
@@ -76,6 +82,7 @@ class Quotation(SellingController):
 		ignore_pricing_rule: DF.Check
 		in_words: DF.Data | None
 		incoterm: DF.Link | None
+		is_latest_revision: DF.Check
 		item_wise_tax_details: DF.Table[ItemWiseTaxDetail]
 		items: DF.Table[QuotationItem]
 		language: DF.Link | None
@@ -87,6 +94,7 @@ class Quotation(SellingController):
 		opportunity: DF.Link | None
 		order_lost_reason: DF.SmallText | None
 		order_type: DF.Literal["", "Sales", "Maintenance", "Shopping Cart"]
+		original_quotation: DF.Link | None
 		other_charges_calculation: DF.TextEditor | None
 		packed_items: DF.Table[PackedItem]
 		party_name: DF.DynamicLink | None
@@ -96,7 +104,10 @@ class Quotation(SellingController):
 		price_list_currency: DF.Link
 		pricing_rules: DF.Table[PricingRuleDetail]
 		quotation_to: DF.Link
+		quotation_version: DF.Int
+		quote_revision_count: DF.Int
 		referral_sales_partner: DF.Link | None
+		revised_from: DF.Link | None
 		rounded_total: DF.Currency
 		rounding_adjustment: DF.Currency
 		scan_barcode: DF.Data | None
@@ -106,7 +117,15 @@ class Quotation(SellingController):
 		shipping_address_name: DF.Link | None
 		shipping_rule: DF.Link | None
 		status: DF.Literal[
-			"Draft", "Open", "Replied", "Partially Ordered", "Ordered", "Lost", "Cancelled", "Expired"
+			"Draft",
+			"Open",
+			"Replied",
+			"Partially Ordered",
+			"Ordered",
+			"Lost",
+			"Cancelled",
+			"Expired",
+			"Superseded",
 		]
 		supplier_quotation: DF.Link | None
 		tax_category: DF.Link | None
@@ -128,6 +147,181 @@ class Quotation(SellingController):
 		valid_till: DF.Date | None
 	# end: auto-generated types
 
+	revision_fields = ("original_quotation", "revised_from", "quotation_version")
+	revision_commercial_fields = (
+		"valid_till",
+		"currency",
+		"conversion_rate",
+		"selling_price_list",
+		"price_list_currency",
+		"plc_conversion_rate",
+		"apply_discount_on",
+		"additional_discount_percentage",
+		"discount_amount",
+		"coupon_code",
+		"tax_category",
+		"taxes_and_charges",
+		"shipping_rule",
+		"incoterm",
+		"named_place",
+		"payment_terms_template",
+		"tc_name",
+		"terms",
+	)
+	revision_item_fields = (
+		"item_code",
+		"item_name",
+		"description",
+		"qty",
+		"rate",
+		"uom",
+		"stock_uom",
+		"conversion_factor",
+		"price_list_rate",
+		"discount_percentage",
+		"discount_amount",
+		"margin_type",
+		"margin_rate_or_amount",
+		"is_alternative",
+		"is_free_item",
+		"item_tax_template",
+		"item_tax_rate",
+		"product_bundle",
+		"blanket_order",
+		"blanket_order_rate",
+	)
+	revision_tax_fields = (
+		"charge_type",
+		"account_head",
+		"description",
+		"row_id",
+		"rate",
+		"included_in_print_rate",
+		"cost_center",
+	)
+	revision_payment_fields = (
+		"payment_term",
+		"invoice_portion",
+		"due_date",
+		"mode_of_payment",
+		"discount",
+		"discount_type",
+		"discount_date",
+		"payment_amount",
+	)
+
+	def save(self, *args, **kwargs):
+		# Acquire the family lock before Frappe locks this particular version.
+		self.lock_revision_family()
+		return super().save(*args, **kwargs)
+
+	def before_insert(self):
+		self.initialize_revision()
+
+	@frappe.whitelist(methods=["POST"])
+	def make_revision(self) -> Document:
+		source = frappe.get_doc("Quotation", self.name)
+		self.validate_revision_source(source)
+		frappe.has_permission("Quotation", "create", throw=True)
+
+		draft = frappe.copy_doc(source, ignore_no_copy=False)
+		draft.docstatus = 0
+		draft.status = "Draft"
+		draft.naming_series = source.naming_series
+		draft.revised_from = source.name
+		draft.original_quotation = source.original_quotation or source.name
+		draft.is_latest_revision = 0
+		for row in source.payment_schedule:
+			draft.append("payment_schedule", frappe.copy_doc(row, ignore_no_copy=False))
+		self.renew_revision_dates(source, draft)
+		for source_item, item in zip(source.items, draft.items, strict=True):
+			item.prevdoc_doctype = source_item.prevdoc_doctype
+			item.prevdoc_docname = source_item.prevdoc_docname
+			item.ordered_qty = 0
+			item.has_alternative_item = 0
+		for child in draft.get_all_children():
+			child.docstatus = 0
+			child.parent = None
+		return draft
+
+	@frappe.whitelist()
+	def get_revisions(self) -> list[str]:
+		self.check_permission("read")
+		original = self.original_quotation or self.name
+		return frappe.get_list(
+			"Quotation", or_filters={"name": original, "original_quotation": original}, pluck="name", limit=0
+		)
+
+	def before_update_after_submit(self):
+		self.update_revision_fields()
+
+	def before_cancel(self):
+		self.validate_revision_cancellation()
+		self.lost_reasons = []
+
+	def get_status(self):
+		status = super().get_status()
+		if self.docstatus == 1 and status["status"] not in ("Lost", "Ordered", "Partially Ordered"):
+			if not self.is_latest_revision:
+				status["status"] = "Superseded"
+			elif self.valid_till and getdate(self.valid_till) < getdate(nowdate()):
+				status["status"] = "Expired"
+		return status
+
+	@staticmethod
+	def validate_orderable(name: str) -> None:
+		quotation = frappe.db.get_value(
+			"Quotation", name, ["name", "is_latest_revision", "status"], as_dict=True
+		)
+		Quotation.check_orderable(quotation)
+
+	@staticmethod
+	def check_orderable(quotation) -> None:
+		if quotation and (not quotation.is_latest_revision or quotation.status == "Superseded"):
+			frappe.throw(
+				_("Quotation {0} has been superseded. Use its current revision.").format(quotation.name)
+			)
+		if quotation and quotation.status == "Lost":
+			frappe.throw(
+				_("Quotation {0} is Lost and cannot be used for an order or invoice.").format(quotation.name)
+			)
+
+	@staticmethod
+	def validate_quotation_references(doc: Document) -> None:
+		if getattr(doc, "_action", None) == "update_after_submit" or doc.get("is_return"):
+			return
+		names = Quotation.lock_quotation_references(doc)
+		if not names:
+			return
+		table = frappe.qb.DocType("Quotation")
+		for quotation in (
+			frappe.qb.from_(table)
+			.select(table.name, table.is_latest_revision, table.status)
+			.where(table.name.isin(names))
+			.for_update()
+			.run(as_dict=True)
+		):
+			Quotation.check_orderable(quotation)
+
+	@staticmethod
+	def lock_quotation_references(doc: Document) -> list[str]:
+		fieldname = "quotation" if doc.doctype == "Sales Invoice" else "prevdoc_docname"
+		names = sorted({row.get(fieldname) for row in doc.items if row.get(fieldname)})
+		if not names:
+			return []
+		quotations = frappe.get_all(
+			"Quotation", filters={"name": ["in", names]}, fields=["name", "original_quotation"]
+		)
+		# Lock before Frappe locks the order or invoice, matching revision submission.
+		for original in sorted({row.original_quotation or row.name for row in quotations}):
+			frappe.db.get_value("Quotation", original, "name", for_update=True)
+		return names
+
+	@staticmethod
+	def lock_quotation(name: str) -> None:
+		original = frappe.db.get_value("Quotation", name, "original_quotation") or name
+		frappe.db.get_value("Quotation", original, "name", for_update=True)
+
 	def set_indicator(self):
 		if self.docstatus == 1:
 			self.indicator_color = "blue"
@@ -142,7 +336,6 @@ class Quotation(SellingController):
 
 	def validate(self):
 		super().validate()
-		self.set_status()
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_valid_till()
@@ -153,11 +346,14 @@ class Quotation(SellingController):
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 
 		make_packing_list(self)
+		self.update_revision_fields()
+		self.set_status()
 
 	def after_insert(self):
 		self.carry_forward_communication()
 
 	def before_submit(self):
+		self.validate_revision_submission()
 		self.set_has_alternative_item()
 
 	def validate_valid_till(self):
@@ -268,6 +464,9 @@ class Quotation(SellingController):
 		self, lost_reasons_list: list, competitors: list, detailed_reason: str | None = None
 	):
 		self.check_permission("write")
+		self.lock_quotation(self.name)
+		if not frappe.db.get_value("Quotation", self.name, "is_latest_revision", for_update=True):
+			frappe.throw(_("Only the current quotation can be marked as Lost."))
 
 		if not (self.is_fully_ordered() or self.is_partially_ordered()):
 			get_lost_reasons = frappe.get_list("Quotation Lost Reason", fields=["name"])
@@ -302,18 +501,18 @@ class Quotation(SellingController):
 		frappe.get_cached_doc("Authorization Control").validate_approving_authority(
 			self.doctype, self.company, self.base_grand_total, self
 		)
+		self.sync_revision_status()
 
 		# update enquiry status
 		self.update_opportunity("Quotation")
 		self.update_lead()
 
 	def on_cancel(self):
-		if self.lost_reasons:
-			self.lost_reasons = []
 		super().on_cancel()
 
 		# update enquiry status
 		self.set_status(update=True)
+		self.sync_revision_status()
 		self.update_opportunity("Open")
 		self.update_lead()
 
@@ -357,6 +556,256 @@ class Quotation(SellingController):
 
 		return rows_with_alternatives
 
+	def initialize_revision(self) -> None:
+		self.is_latest_revision = int(not self.revised_from)
+		if self.amended_from:
+			source = frappe.get_doc("Quotation", self.amended_from)
+			source.check_permission("read")
+			for field in Quotation.revision_fields:
+				self.set(field, source.get(field))
+			self.is_latest_revision = int(not self.original_quotation)
+			return
+
+		if not self.revised_from:
+			self.original_quotation = None
+			self.quotation_version = 0
+			return
+
+		source = frappe.get_doc("Quotation", self.revised_from)
+		self.original_quotation = source.original_quotation or source.name
+
+		# Serialize the first allocation as well as later revisions of the same quotation.
+		self.lock_revision_family()
+		source = frappe.get_doc("Quotation", self.revised_from, for_update=True)
+		self.validate_revision_source(source)
+		self.validate_revision_party(source)
+		prefix = f"{self.original_quotation}-REV-"
+		if len(prefix) >= 140:
+			frappe.throw(_("Quotation name is too long to append a revision suffix."))
+		# Series keys are shorter than document names on existing MariaDB sites.
+		series_key = (
+			prefix if len(prefix) <= 100 else f"quotation-revision-{sha256(prefix.encode()).hexdigest()}"
+		)
+		self.quotation_version = cint(getseries(series_key, 1))
+		name = f"{prefix}{self.quotation_version}"
+		if len(name) > 140:
+			frappe.throw(_("Quotation name is too long to append a revision suffix."))
+		self.set_new_name(set_name=name)
+
+	def update_revision_fields(self) -> None:
+		previous = self.flags.pop("quotation_before_update", None)
+		if previous:
+			# Update Items persists children before saving the parent. Preserve the original
+			# snapshot for both the commercial-change count and the Version history.
+			self._doc_before_save = previous
+		else:
+			previous = self.get_doc_before_save()
+
+		if previous:
+			for field in Quotation.revision_fields:
+				if self.get(field) != previous.get(field):
+					frappe.throw(_("Quotation version references cannot be changed."))
+		elif self.amended_from:
+			previous = frappe.get_doc("Quotation", self.amended_from)
+
+		if self.revised_from:
+			self.validate_revision_party(frappe.get_cached_doc("Quotation", self.revised_from))
+
+		if self._action == "submit":
+			self.is_latest_revision = 1
+		elif self.is_new():
+			self.is_latest_revision = int(not self.original_quotation)
+		else:
+			self.is_latest_revision = cint(previous.is_latest_revision)
+		self.quote_revision_count = (
+			cint(previous.get("quote_revision_count")) + int(self.has_commercial_changes(previous))
+			if previous
+			else 0
+		)
+
+	def has_commercial_changes(self, previous: Document) -> bool:
+		return self.get_revision_values(previous) != self.get_revision_values(self)
+
+	def get_revision_values(self, doc: Document) -> tuple:
+		items = [self.get_revision_field_values(row, Quotation.revision_item_fields) for row in doc.items]
+		if not any(row.is_alternative for row in doc.items):
+			items = Counter(items)
+		taxes = [
+			(
+				*self.get_revision_field_values(row, Quotation.revision_tax_fields),
+				flt(row.tax_amount) if row.charge_type == "Actual" else None,
+			)
+			for row in doc.taxes
+		]
+		payments = [
+			self.get_revision_field_values(row, Quotation.revision_payment_fields)
+			for row in doc.payment_schedule
+		]
+		return (
+			self.get_revision_field_values(doc, Quotation.revision_commercial_fields),
+			items,
+			taxes,
+			payments,
+		)
+
+	@staticmethod
+	def get_revision_field_values(doc: Document, fieldnames: tuple[str, ...]) -> tuple:
+		values = []
+		for fieldname in fieldnames:
+			field = doc.meta.get_field(fieldname)
+			value = doc.get(fieldname)
+			if field and field.fieldtype in ("Float", "Currency", "Percent", "Int", "Check"):
+				value = flt(value)
+			else:
+				value = str(value or "")
+			values.append(value)
+		return tuple(values)
+
+	@staticmethod
+	def validate_revision_source(source: Document) -> None:
+		source.check_permission("read")
+		if source.docstatus != 1:
+			frappe.throw(_("Only submitted quotations can be revised."))
+		if not source.is_latest_revision or source.status not in ("Open", "Expired"):
+			frappe.throw(_("Only the current Open or Expired quotation can be revised."))
+		source.validate_revision_transactions()
+
+	@staticmethod
+	def renew_revision_dates(source: Document, draft: Document) -> None:
+		shift = date_diff(nowdate(), source.transaction_date)
+		draft.transaction_date = nowdate()
+		if source.valid_till:
+			draft.valid_till = add_days(source.valid_till, shift)
+		for row in draft.payment_schedule:
+			for fieldname in ("due_date", "discount_date"):
+				if row.get(fieldname):
+					row.set(fieldname, add_days(row.get(fieldname), shift))
+
+	def validate_revision_party(self, source: Document) -> None:
+		if any(self.get(field) != source.get(field) for field in ("company", "quotation_to", "party_name")):
+			frappe.throw(_("A quotation revision must use the same company and party as its source."))
+
+	def validate_revision_submission(self) -> None:
+		self.lock_revision_family()
+		if not self.original_quotation:
+			return
+
+		source = frappe.get_doc("Quotation", self.revised_from, for_update=True)
+		if source.docstatus != 1 or source.status == "Lost":
+			frappe.throw(_("The source quotation must remain submitted and must not be Lost."))
+		self.validate_revision_transactions()
+		current = self.get_current_revision()
+		if current and current.status == "Lost":
+			frappe.throw(_("The current quotation is Lost and cannot be replaced by a draft revision."))
+		if current and cint(current.quotation_version) >= cint(self.quotation_version):
+			frappe.throw(
+				_("Quotation {0} is already the current version. Create a revision from it instead.").format(
+					current.name
+				)
+			)
+
+	def validate_revision_cancellation(self) -> None:
+		self.lock_revision_family()
+		quotation = frappe.qb.DocType("Quotation")
+		drafts = (
+			frappe.qb.from_(quotation)
+			.select(quotation.name)
+			.where(
+				(quotation.docstatus == 0)
+				& ((quotation.original_quotation == self.name) | (quotation.revised_from == self.name))
+			)
+			.limit(1)
+			.for_update()
+			.run(pluck=True)
+		)
+		if drafts:
+			frappe.throw(
+				_("Delete draft revision {0} before cancelling quotation {1}.").format(drafts[0], self.name)
+			)
+
+	def sync_revision_status(self) -> None:
+		original = self.original_quotation or self.name
+		self.lock_revision_family()
+		members = self.get_revision_family()
+		current = next((row.name for row in members if row.docstatus == 1), None)
+		for row in members:
+			is_current = int(
+				row.name == current or (not current and row.name == original and row.docstatus == 0)
+			)
+			if cint(row.is_latest_revision) == is_current:
+				continue
+			quotation = self if row.name == self.name else frappe.get_doc("Quotation", row.name)
+			quotation.db_set("is_latest_revision", is_current)
+			quotation.set_status(update=True)
+
+	def validate_revision_transactions(self) -> None:
+		self.lock_revision_family()
+		names = [row.name for row in self.get_revision_family()]
+		# Older direct invoices without a quotation reference cannot be matched retrospectively.
+		for doctype, fieldname in (("Sales Order", "prevdoc_docname"), ("Sales Invoice", "quotation")):
+			item = frappe.qb.DocType(f"{doctype} Item")
+			if (
+				frappe.qb.from_(item)
+				.select(item.name)
+				.where((item.docstatus == 1) & item[fieldname].isin(names))
+				.limit(1)
+				.for_update()
+				.run()
+			):
+				frappe.throw(_("A quotation with a submitted {0} cannot be revised.").format(_(doctype)))
+
+	def lock_revision_family(self) -> None:
+		original = self.original_quotation or self.name
+		if original:
+			frappe.db.get_value("Quotation", original, "name", for_update=True)
+
+	def get_current_revision(self):
+		return next((row for row in self.get_revision_family() if row.docstatus == 1), None)
+
+	def get_revision_family(self):
+		original = self.original_quotation or self.name
+		quotation = frappe.qb.DocType("Quotation")
+		return (
+			frappe.qb.from_(quotation)
+			.select(
+				quotation.name,
+				quotation.docstatus,
+				quotation.status,
+				quotation.quotation_version,
+				quotation.is_latest_revision,
+			)
+			.where((quotation.name == original) | (quotation.original_quotation == original))
+			.orderby(quotation.quotation_version, quotation.creation, order=Order.desc)
+			.for_update()
+			.run(as_dict=True)
+		)
+
+	@staticmethod
+	def get_report_revision_condition(quotation, period_end_dates, date_field="transaction_date"):
+		"""Select the latest submitted version within each reporting period."""
+		period_end = Case()
+		for end_date in period_end_dates:
+			next_day = getdate(add_days(end_date, 1))
+			period_end = period_end.when(quotation[date_field] < next_day, next_day)
+
+		revision = frappe.qb.DocType("Quotation").as_("later_revision")
+		original = IfNull(NullIf(quotation.original_quotation, ""), quotation.name)
+		newer_version = (revision.quotation_version > quotation.quotation_version) | (
+			(revision.quotation_version == quotation.quotation_version)
+			& (revision.creation > quotation.creation)
+		)
+		later_revisions = (
+			frappe.qb.from_(revision)
+			.select(revision.name)
+			.where(
+				(revision.original_quotation == original)
+				& (revision.docstatus == 1)
+				& (revision[date_field] < period_end)
+				& newer_version
+			)
+		)
+		return ExistsCriterion(later_revisions).negate()
+
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
@@ -399,7 +848,7 @@ def set_expired_status():
 		.set(quotation.status, "Expired")
 		.where(
 			(quotation.docstatus == 1)
-			& (quotation.status.notin(["Expired", "Lost"]))
+			& (quotation.status.notin(["Expired", "Lost", "Superseded"]))
 			& (quotation.valid_till < nowdate())
 			& ExistsCriterion(so_against_quo).negate()
 		)
