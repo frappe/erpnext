@@ -138,7 +138,7 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:doc.valuation_type == '% of FG Cost'",
+   "depends_on": "eval:doc.valuation_type == '% of Component Cost'",
    "fieldname": "cost_allocation_per",
    "fieldtype": "Percent",
    "label": "Cost Allocation %",
@@ -178,11 +178,11 @@
   },
   {
    "default": "Valuation Rate",
-   "description": "Valuation Rate and Manual value this item on its own and deduct that cost from the raw material cost, like the pre-v16 scrap items. % of FG Cost allocates a percentage of the remaining raw material cost.",
+   "description": "Valuation Rate and Manual value this item on its own and deduct that cost from the raw material cost, like the pre-v16 scrap items. % of Component Cost allocates a percentage of the remaining raw material cost.",
    "fieldname": "valuation_type",
    "fieldtype": "Select",
    "label": "Valuation Type",
-   "options": "Valuation Rate\n% of FG Cost\nManual",
+   "options": "Valuation Rate\n% of Component Cost\nManual",
    "reqd": 1,
    "show_description_on_click": 1
   },
