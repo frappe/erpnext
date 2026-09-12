@@ -7,6 +7,9 @@ from frappe.utils import today
 from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+	get_batch_from_bundle,
+)
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.report.batch_wise_balance_history.batch_wise_balance_history import execute
 from erpnext.tests.utils import ERPNextTestSuite
@@ -68,9 +71,11 @@ class TestBatchWiseBalanceHistory(ERPNextTestSuite):
 		posting_date = today()
 		report_dates = {"from_date": posting_date, "to_date": posting_date}
 		item = self.make_batch_item()
-		make_stock_entry(item_code=item, to_warehouse=WH, qty=10, rate=100, posting_date=posting_date)
+		stock_entry = make_stock_entry(
+			item_code=item, to_warehouse=WH, qty=10, rate=100, posting_date=posting_date
+		)
 		(row,) = self.run_report(item, **report_dates)
-		batch = row[4]
+		batch = get_batch_from_bundle(stock_entry.items[0].serial_and_batch_bundle)
 		self.assertEqual(row[12], 0)
 
 		order = make_sales_order(item_code=item, warehouse=WH, qty=6, transaction_date=posting_date)
