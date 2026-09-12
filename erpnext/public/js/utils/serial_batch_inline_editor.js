@@ -1,3 +1,5 @@
+import { number_key } from "./serial_batch_numbers";
+
 frappe.provide("erpnext.stock");
 
 erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
@@ -724,20 +726,22 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 		if (p.delete_all) return null;
 
 		return this.last_entries.find(
-			(d) => this.get_entry_number(d, field) === value && !p.deleted.some((x) => x.name === d.name)
+			(d) =>
+				number_key(this.get_entry_number(d, field)) === number_key(value) &&
+				!p.deleted.some((x) => x.name === d.name)
 		);
 	}
 
 	get_known_identifiers() {
 		let p = this.pending;
 		let field = cint(this.item.has_serial_no) ? "serial_no" : "batch_no";
-		let known = new Set(p.new_entries.map((d) => this.get_entry_number(d, field)));
+		let known = new Set(p.new_entries.map((d) => number_key(this.get_entry_number(d, field))));
 
 		if (!p.delete_all) {
 			let deleted = new Set(p.deleted.map((d) => d.name));
 			for (const d of this.last_entries) {
 				if (!deleted.has(d.name)) {
-					known.add(this.get_entry_number(d, field));
+					known.add(number_key(this.get_entry_number(d, field)));
 				}
 			}
 		}
@@ -749,7 +753,7 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 		let p = this.pending;
 
 		if (cint(this.item.has_serial_no)) {
-			if (this.get_known_identifiers().has(value)) {
+			if (this.get_known_identifiers().has(number_key(value))) {
 				frappe.show_alert({
 					message: __("Serial No {0} already added", [this.esc(value)]),
 					indicator: "orange",
@@ -759,7 +763,9 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 
 			p.new_entries.push({ serial_number: value, qty: 1 });
 		} else {
-			let existing = p.new_entries.find((d) => this.get_entry_number(d, "batch_no") === value);
+			let existing = p.new_entries.find(
+				(d) => number_key(this.get_entry_number(d, "batch_no")) === number_key(value)
+			);
 			let server_row = this.get_active_server_row("batch_no", value);
 			if (existing) {
 				existing.qty = flt(existing.qty) + 1;
@@ -817,8 +823,10 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 
 		let added = 0;
 		for (const serial_no of serial_nos) {
-			if (known.has(serial_no)) continue;
+			const key = number_key(serial_no);
+			if (known.has(key)) continue;
 			p.new_entries.push({ serial_number: serial_no, qty: 1 });
+			known.add(key);
 			added++;
 		}
 

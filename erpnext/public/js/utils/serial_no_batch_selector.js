@@ -1,3 +1,5 @@
+import { number_key } from "./serial_batch_numbers";
+
 erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 	constructor(frm, item, callback) {
 		this.frm = frm;
@@ -593,14 +595,14 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 			const entries = this.dialog.fields_dict.entries.df.data;
 			if (
 				scan_serial_no &&
-				entries.some((row) => row.serial_number?.toUpperCase() === scan_serial_no.toUpperCase())
+				entries.some((row) => number_key(row.serial_number) === number_key(scan_serial_no))
 			) {
 				frappe.throw(__("Serial No {0} already exists", [scan_serial_no]));
 			}
 			if (scan_serial_no || scan_batch_no) {
 				const batch =
 					!scan_serial_no &&
-					entries.find((row) => row.batch_number?.toUpperCase() === scan_batch_no.toUpperCase());
+					entries.find((row) => number_key(row.batch_number) === number_key(scan_batch_no));
 				if (batch) batch.qty = flt(batch.qty) + 1;
 				else entries.push({ serial_number: scan_serial_no, batch_number: scan_batch_no, qty: 1 });
 				this.dialog.set_value("scan_serial_no", "");

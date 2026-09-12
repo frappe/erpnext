@@ -276,26 +276,6 @@ def get_serial_batch_labels(doctype: str, names: list | str):
 	)
 
 
-@frappe.whitelist(methods=["POST"])
-def resolve_transaction_serial_numbers(parent: dict | str, row: dict | str, numbers: list | str):
-	parent, row = frappe.parse_json(parent), frappe.parse_json(row)
-	if not isinstance(parent, dict) or not isinstance(parent.get("doctype"), str):
-		frappe.throw(_("Transaction DocType is required"))
-	if not frappe.db.exists("DocType", parent["doctype"]):
-		frappe.throw(_("Invalid transaction DocType"))
-	if not isinstance(row, dict) or not (row.get("item_code") or row.get("rm_item_code")):
-		frappe.throw(_("Item is required"))
-	frappe.has_permission(
-		parent["doctype"],
-		"write",
-		doc=parent.get("name") if not parent.get("__islocal") else None,
-		throw=True,
-	)
-	return resolve_serial_batch_numbers(
-		row.get("item_code") or row.get("rm_item_code"), serial_numbers=numbers
-	)["serial_nos"]
-
-
 def add_number_labels(entries):
 	"""Attach display values without changing the references or their field names."""
 	for field, doctype, label in (
@@ -308,44 +288,39 @@ def add_number_labels(entries):
 	return entries
 
 
-def resolve_number_entries(item_code, entries, *, create=False):
-	"""Only explicit physical-number fields are resolved. Link fields already contain IDs."""
+def resolve_number_entries(item_code: str, entries: list[dict], *, create: bool = False) -> list[dict]:
+	"""Populate links from explicit physical numbers, preserving existing IDs."""
 	for field, doctype, number_field in (
 		("batch_no", "Batch", "batch_number"),
 		("serial_no", "Serial No", "serial_number"),
 	):
 		rows = [row for row in entries if row.get(number_field) and not row.get(field)]
-		ids = (
-			resolve_serial_batch_numbers(
-				item_code,
-				**{
-					"serial_numbers" if doctype == "Serial No" else "batch_numbers": [
-						row[number_field] for row in rows
-					]
-				},
-				create=create,
-			)["serial_nos" if doctype == "Serial No" else "batch_nos"]
-			if rows
-			else []
+		if not rows:
+			continue
+		frappe.has_permission("Item", "read", doc=item_code, throw=True)
+		ids = SerialBatchIdentity(doctype).resolve(
+			item_code,
+			[row[number_field] for row in rows],
+			create=create,
+			check_permissions=True,
 		)
 		for row, name in zip(rows, ids, strict=True):
 			row[field] = name
 	serials = [row["serial_no"] for row in entries if row.get("serial_no") and not row.get("batch_no")]
-	batches = (
-		dict(
-			frappe.get_all(
-				"Serial No",
-				filters={"name": ("in", serials), "item_code": item_code},
-				fields=["name", "batch_no"],
-				as_list=True,
-			)
+	if not serials:
+		return entries
+	batches = dict(
+		frappe.get_all(
+			"Serial No",
+			filters={"name": ("in", serials), "item_code": item_code},
+			fields=["name", "batch_no"],
+			as_list=True,
 		)
-		if serials
-		else {}
 	)
 	for row in entries:
-		if not row.get("batch_no") and row.get("serial_no") in batches and batches[row["serial_no"]]:
-			row["batch_no"] = batches[row["serial_no"]]
+		batch = batches.get(row.get("serial_no"))
+		if not row.get("batch_no") and batch:
+			row["batch_no"] = batch
 	return entries
 
 

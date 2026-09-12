@@ -1,205 +1,167 @@
-// Physical input remains pending until the transaction is saved.
+import { split_numbers } from "./serial_batch_numbers";
+import { format_serial_numbers, load_serial_titles, serial_number_text } from "./serial_batch_display";
+
 const registered_forms = new Set();
+const configured_fields = new WeakSet();
+const configured_controls = new WeakSet();
 const pending_values = new WeakMap();
 const serial_list_fields = new Set(["serial_no", "rejected_serial_no", "current_serial_no"]);
 
-const with_serial_numbers = (BaseControl) =>
-	class extends BaseControl {
-		number_context() {
-			return this.serial_batch_context || { frm: this.frm, row: this.doc };
+$(document).on("form-refresh", (_event, frm) => {
+	const doctypes = [frm.doctype, ...frappe.meta.get_table_fields(frm.doctype).map((df) => df.options)];
+	for (const doctype of new Set(doctypes)) {
+		for (const df of frappe.meta.get_docfields(doctype, frm.docname)) {
+			setup_field(df);
 		}
+	}
+	for (const control of frm.fields) setup_control(control);
+});
 
-		is_serial_list() {
-			const { frm, row } = this.number_context();
-			return (
-				frm &&
-				this.df.parent !== "Serial No" &&
-				serial_list_fields.has(this.df.fieldname) &&
-				(row?.item_code || row?.rm_item_code)
-			);
-		}
+$(document).on("grid-row-render", (_event, grid_row) => {
+	for (const df of grid_row.docfields) {
+		setup_field(df);
+		if (is_serial_list(df) && grid_row.columns[df.fieldname]) grid_row.refresh_field(df.fieldname);
+	}
+});
 
-		bind_change_event() {
-			if (!this.frm || !serial_list_fields.has(this.df.fieldname) || this.df.parent === "Serial No")
-				return super.bind_change_event();
-			this.$input.on("change", (event) =>
-				this.parse_validate_and_set_in_model(this.get_input_value(), event)
-			);
-			this.$input.on("input", () => this.number_context().frm.dirty());
-		}
+function setup_field(df) {
+	if (configured_fields.has(df) || !number_doctype(df)) return;
+	configured_fields.add(df);
+	const on_make = df.on_make;
+	if (on_make !== setup_control) {
+		df.on_make = on_make
+			? (control) => {
+					on_make(control);
+					setup_control(control);
+			  }
+			: setup_control;
+	}
+	if (is_serial_list(df)) df.formatter = format_serial_numbers;
+}
 
-		async parse_validate_and_set_in_model(value, event) {
-			const revision = (this.number_revision = (this.number_revision || 0) + 1);
-			if (!this.is_serial_list() || !event) {
-				return super.parse_validate_and_set_in_model(value, event);
-			}
-			const context = this.number_context();
-			if (
-				context.row.parenttype &&
-				frappe.meta.has_field(context.row.doctype, "serial_and_batch_bundle")
-			) {
-				const numbers = split_physical_numbers(value);
-				await set_pending_number(context, this.df.fieldname, numbers.join("\n"));
-				return;
-			}
-			const { frm, row } = this.number_context();
-			const item_code = row.item_code || row.rm_item_code;
-			const pending = (async () => {
-				const numbers = (value || "")
-					.split(/[,\n]/)
-					.map((number) => number.trim())
-					.filter(Boolean);
-				const result = numbers.length
-					? await frappe.xcall("erpnext.stock.serial_batch_identity.resolve_serial_batch_numbers", {
-							item_code,
-							serial_numbers: numbers,
-					  })
-					: { serial_nos: [] };
-				const ids = result.serial_nos;
-				if (revision !== this.number_revision || item_code !== (row.item_code || row.rm_item_code))
-					return;
-				ids.forEach((id, index) => frappe.utils.add_link_title("Serial No", id, numbers[index]));
-				return super.parse_validate_and_set_in_model(ids.join("\n"), event);
-			})();
-			track_number_request(frm, pending);
-			try {
-				return await pending;
-			} catch (error) {
-				if (revision === this.number_revision) this.set_formatted_input(this.get_model_value());
-				throw error;
-			} finally {
-				frm.serial_number_requests.delete(pending);
-			}
-		}
+function setup_control(control) {
+	const { df } = control;
+	if (configured_controls.has(control) || !number_doctype(df)) return;
+	const { frm } = get_context(control);
+	if (!frm) return;
+	setup_field(df);
+	if (!control.$input) return;
+	configured_controls.add(control);
+	control.number_revision = 0;
+	control.change = (event) => change_number(control, event);
+	control.$input.on("input.serial-batch", () => {
+		control.number_revision++;
+		frm.dirty();
+	});
+	control.$input.on("awesomplete-selectcomplete.serial-batch", (event) => {
+		control.number_revision++;
+		if (event.originalEvent.text.value.includes("__link_option")) return;
+		erpnext.serial_batch_input.clear(get_context(control).row, df.fieldname);
+	});
 
-		serial_number_text(value) {
-			const { row } = this.number_context();
-			if (erpnext.serial_batch_input.is_pending(row, this.df.fieldname)) return value || "";
-			return (value || "")
-				.split("\n")
-				.map((id) => frappe.utils.get_link_title("Serial No", id) || id)
-				.join("\n");
-		}
-
-		async load_serial_titles(value) {
-			if (erpnext.serial_batch_input.is_pending(this.number_context().row, this.df.fieldname)) return;
-			const missing = (value || "")
-				.split("\n")
-				.filter((id) => id && !frappe.utils.get_link_title("Serial No", id));
-			if (!missing.length) return;
-			if (this.title_request_value !== value) {
-				this.title_request_value = value;
-				this.title_request = frappe.xcall(
-					"erpnext.stock.serial_batch_identity.get_serial_batch_labels",
-					{
-						doctype: "Serial No",
-						names: missing,
-					}
-				);
-			}
-			const labels = await this.title_request;
-			Object.entries(labels).forEach(([id, label]) =>
-				frappe.utils.add_link_title("Serial No", id, label)
-			);
-		}
-
-		set_formatted_input(value) {
-			if (!this.is_serial_list()) return super.set_formatted_input(value);
-			super.set_formatted_input(this.serial_number_text(value));
-			this.load_serial_titles(value).then(() => {
-				if (this.get_model_value() === value && !this.$input?.is(":focus")) {
-					super.set_formatted_input(this.serial_number_text(value));
+	const set_formatted_input = control.set_formatted_input.bind(control);
+	control.set_formatted_input = (value) => {
+		const { row } = get_context(control);
+		if (erpnext.serial_batch_input.is_pending(row, df.fieldname)) {
+			control.$input.val(value || "");
+		} else if (is_serial_list(df)) {
+			const revision = control.number_revision;
+			set_formatted_input(serial_number_text(value));
+			load_serial_titles(value).then(() => {
+				if (
+					revision === control.number_revision &&
+					row === get_context(control).row &&
+					row[df.fieldname] === value &&
+					!erpnext.serial_batch_input.is_pending(row, df.fieldname) &&
+					!control.$input.is(":focus")
+				) {
+					set_formatted_input(serial_number_text(value));
 				}
 			});
-		}
-
-		set_disp_area(value) {
-			if (!this.is_serial_list()) return super.set_disp_area(value);
-			if (this.disp_area) $(this.disp_area).text(this.serial_number_text(value));
-			this.load_serial_titles(value).then(() => {
-				if (this.disp_area && this.get_model_value() === value) {
-					$(this.disp_area).text(this.serial_number_text(value));
-				}
-			});
+		} else {
+			set_formatted_input(value);
 		}
 	};
+}
 
-frappe.ui.form.ControlSmallText = with_serial_numbers(frappe.ui.form.ControlSmallText);
-frappe.ui.form.ControlText = with_serial_numbers(frappe.ui.form.ControlText);
-frappe.ui.form.ControlLongText = with_serial_numbers(frappe.ui.form.ControlLongText);
+async function change_number(control, event) {
+	if (event.type === "input") return;
+	const { frm, row } = get_context(control);
+	const value = control.$input.val().trim();
+	if (!get_item_code(row)) {
+		return control.parse_validate_and_set_in_model(control.get_input_value(), event);
+	}
+	const { df } = control;
+	const serial_list = is_serial_list(df);
+	const numbers = serial_list ? split_numbers(value) : value ? [value] : [];
+	const revision = ++control.number_revision;
+	if (
+		row.parenttype &&
+		frappe.meta.has_field(row.doctype, "serial_and_batch_bundle") &&
+		(serial_list || df.fieldname === "batch_no")
+	) {
+		return set_pending_number({ frm, row }, df.fieldname, numbers.join("\n"));
+	}
+	return resolve_input(control, numbers, revision, (ids) =>
+		control.parse_validate_and_set_in_model(serial_list ? ids.join("\n") : ids[0] || "", event)
+	);
+}
 
-frappe.ui.form.ControlLink = class extends frappe.ui.form.ControlLink {
-	async parse_validate_and_set_in_model(value, event, label) {
-		const revision = (this.number_revision = (this.number_revision || 0) + 1);
-		const doctype = this.get_options();
-		const { frm, row } = this.serial_batch_context || { frm: this.frm, row: this.doc };
-		const item_code = row?.item_code || row?.rm_item_code || row?.item;
-		if (
-			!frm ||
-			!item_code ||
-			!["Serial No", "Batch"].includes(doctype) ||
-			(!event && label === undefined)
-		) {
-			return super.parse_validate_and_set_in_model(value, event, label);
-		}
-
-		if (
-			doctype === "Batch" &&
-			this.df.fieldname === "batch_no" &&
-			row.parenttype &&
-			frappe.meta.has_field(row.doctype, "serial_and_batch_bundle")
-		) {
-			await set_pending_number({ frm, row }, "batch_no", (label ?? this.get_label_value()).trim());
-			return;
-		}
-		if (label !== undefined) erpnext.serial_batch_input.clear(row, this.df.fieldname);
-
-		// Autocomplete supplies the selected physical label; change/blur supplies typed text.
-		const number = (label ?? this.get_label_value()).trim();
-		const pending = (async () => {
-			let name = "";
-			if (number) {
+async function resolve_input(control, numbers, revision, apply) {
+	const { frm, row } = get_context(control);
+	const item_code = get_item_code(row);
+	const previous_value = row[control.df.fieldname];
+	const doctype = number_doctype(control.df);
+	const is_current = () =>
+		revision === control.number_revision &&
+		row === get_context(control).row &&
+		item_code === get_item_code(row) &&
+		previous_value === row[control.df.fieldname];
+	return run_number_request(frm, async () => {
+		try {
+			let ids = [];
+			if (numbers.length) {
 				const serial = doctype === "Serial No";
 				const result = await frappe.xcall(
 					"erpnext.stock.serial_batch_identity.resolve_serial_batch_numbers",
-					{
-						item_code,
-						[serial ? "serial_numbers" : "batch_numbers"]: [number],
-					}
+					{ item_code, [serial ? "serial_numbers" : "batch_numbers"]: numbers }
 				);
-				name = result[serial ? "serial_nos" : "batch_nos"][0];
+				ids = result[serial ? "serial_nos" : "batch_nos"];
 			}
-			if (
-				revision !== this.number_revision ||
-				item_code !== (row?.item_code || row?.rm_item_code || row?.item)
-			)
-				return;
-			return super.parse_validate_and_set_in_model(name, event, number);
-		})();
-		track_number_request(frm, pending);
-		try {
-			return await pending;
+			if (!is_current()) return;
+			ids.forEach((id, index) => frappe.utils.add_link_title(doctype, id, numbers[index]));
+			return await apply(ids);
 		} catch (error) {
-			if (revision === this.number_revision) this.set_formatted_input(this.get_model_value());
+			if (is_current()) control.set_formatted_input(row[control.df.fieldname]);
 			throw error;
-		} finally {
-			frm.serial_number_requests.delete(pending);
 		}
-	}
-	set_formatted_input(value) {
-		super.set_formatted_input(value);
-		const { row } = this.serial_batch_context || { row: this.doc };
-		if (this.df.fieldname === "batch_no" && erpnext.serial_batch_input.is_pending(row, "batch_no")) {
-			this.$input?.val(value);
-		}
-	}
-};
+	});
+}
 
-function split_physical_numbers(value) {
-	return (value || "")
-		.split(/[,\n]/)
-		.map((number) => number.trim())
-		.filter(Boolean);
+function number_doctype(df) {
+	if (
+		!df.parent ||
+		!["item_code", "rm_item_code", "item"].some((field) => frappe.meta.has_field(df.parent, field))
+	)
+		return;
+	if (is_serial_list(df)) return "Serial No";
+	if (df.fieldtype === "Link" && ["Serial No", "Batch"].includes(df.options)) return df.options;
+}
+
+function is_serial_list(df) {
+	return (
+		df.parent !== "Serial No" &&
+		serial_list_fields.has(df.fieldname) &&
+		["Small Text", "Text", "Long Text"].includes(df.fieldtype)
+	);
+}
+
+function get_context(control) {
+	return control.serial_batch_context || { frm: control.frm, row: control.doc };
+}
+
+function get_item_code(row) {
+	return row?.item_code || row?.rm_item_code || row?.item;
 }
 
 async function set_pending_number({ frm, row }, field, value) {
@@ -210,9 +172,9 @@ async function set_pending_number({ frm, row }, field, value) {
 	const values = {};
 	if (frappe.meta.has_field(row.doctype, "use_serial_batch_fields")) values.use_serial_batch_fields = 1;
 	if (frappe.meta.has_field(row.doctype, "serial_and_batch_bundle")) values.serial_and_batch_bundle = "";
-	const pending = (async () => {
+	return run_number_request(frm, async () => {
 		await frappe.model.set_value(row.doctype, row.name, values);
-		const numbers = split_physical_numbers(value);
+		const numbers = split_numbers(value);
 		if (field === "serial_no" && numbers.length && !frm.doc.is_return && row.serial_no === value) {
 			await frappe.model.set_value(
 				row.doctype,
@@ -221,16 +183,10 @@ async function set_pending_number({ frm, row }, field, value) {
 				numbers.length / (row.conversion_factor || 1)
 			);
 		}
-	})();
-	track_number_request(frm, pending);
-	try {
-		await pending;
-	} finally {
-		frm.serial_number_requests.delete(pending);
-	}
+	});
 }
 
-function track_number_request(frm, pending) {
+function run_number_request(frm, task) {
 	if (!registered_forms.has(frm.doctype)) {
 		registered_forms.add(frm.doctype);
 		const wait = async (form) => {
@@ -253,10 +209,13 @@ function track_number_request(frm, pending) {
 		});
 	}
 	frm.serial_number_requests ||= new Set();
+	const pending = Promise.resolve().then(task);
 	frm.serial_number_requests.add(pending);
+	return pending.finally(() => frm.serial_number_requests.delete(pending));
 }
 
 erpnext.serial_batch_input = {
+	setup_control,
 	mark(row, field, value) {
 		row.__serial_batch_input = [...new Set([...(row.__serial_batch_input || []), field])];
 		const inputs = pending_values.get(row) || {};

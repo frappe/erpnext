@@ -1377,7 +1377,7 @@ class SerialBatchCreation:
 	def set_auto_serial_batch_entries_for_inward(self):
 		if (self.get("batches") and self.has_batch_no) or (self.get("serial_nos") and self.has_serial_no):
 			if self.use_serial_batch_fields and self.get("serial_nos"):
-				self.make_serial_no_if_not_exists()
+				self.validate_serial_nos_exist()
 
 			return
 
@@ -1390,7 +1390,7 @@ class SerialBatchCreation:
 		else:
 			self.batches = frappe._dict({self.batch_no: abs(self.actual_qty)})
 
-	def make_serial_no_if_not_exists(self):
+	def validate_serial_nos_exist(self):
 		# Transaction fields contain IDs. Physical input is resolved during save.
 		existing = set(
 			frappe.get_all(

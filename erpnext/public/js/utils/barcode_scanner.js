@@ -1,3 +1,5 @@
+import { number_key } from "./serial_batch_numbers";
+
 erpnext.utils.BarcodeScanner = class BarcodeScanner {
 	constructor(opts) {
 		this.frm = opts.frm;
@@ -574,7 +576,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 			erpnext.serial_batch_input.is_pending(row, this.serial_no_field) &&
 			row[this.serial_no_field]
 				?.split("\n")
-				.some((number) => number.toUpperCase() === physical_number?.toUpperCase());
+				.some((number) => number_key(number) === number_key(physical_number));
 		const is_duplicate =
 			serial_no && (pending_duplicate || row[this.serial_no_field]?.split("\n").includes(serial_no));
 
@@ -604,8 +606,8 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 			const batch_match =
 				!row[this.batch_no_field] ||
 				(erpnext.serial_batch_input.is_pending(row, this.batch_no_field)
-					? row[this.batch_no_field].toUpperCase() ===
-					  frappe.utils.get_link_title("Batch", batch_no)?.toUpperCase()
+					? number_key(row[this.batch_no_field]) ===
+					  number_key(frappe.utils.get_link_title("Batch", batch_no))
 					: row[this.batch_no_field] === batch_no);
 			const uom_match = !uom || this.max_qty_field || row[this.uom_field] == uom;
 			const has_demand_qty = this.demand_ref_fields.some((fieldname) => row[fieldname]);
