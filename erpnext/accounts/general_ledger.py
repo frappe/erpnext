@@ -653,8 +653,13 @@ def make_reverse_gl_entries(
 
 		if partial_cancel:
 			# Partial cancel is only used by `Advance` in separate account feature.
-			# Only cancel GL entries for unlinked reference using `voucher_detail_no`
+			# Only cancel GL entries for unlinked reference using `voucher_detail_no`.
+			# Match nullable columns with IS NULL, as `NULL = NULL` is false in SQL.
 			gle = frappe.qb.DocType("GL Entry")
+
+			def _eq_or_null(column, value):
+				return column.isnull() if value in (None, "") else column == value
+
 			for x in gl_entries:
 				query = (
 					frappe.qb.update(gle)
@@ -663,13 +668,13 @@ def make_reverse_gl_entries(
 					.where(
 						(gle.company == x.company)
 						& (gle.account == x.account)
-						& (gle.party_type == x.party_type)
-						& (gle.party == x.party)
+						& _eq_or_null(gle.party_type, x.party_type)
+						& _eq_or_null(gle.party, x.party)
 						& (gle.voucher_type == x.voucher_type)
 						& (gle.voucher_no == x.voucher_no)
-						& (gle.against_voucher_type == x.against_voucher_type)
-						& (gle.against_voucher == x.against_voucher)
-						& (gle.voucher_detail_no == x.voucher_detail_no)
+						& _eq_or_null(gle.against_voucher_type, x.against_voucher_type)
+						& _eq_or_null(gle.against_voucher, x.against_voucher)
+						& _eq_or_null(gle.voucher_detail_no, x.voucher_detail_no)
 					)
 				)
 

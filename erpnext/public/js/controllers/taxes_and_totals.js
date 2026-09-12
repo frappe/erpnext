@@ -952,9 +952,23 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	}
 
 	calculate_total_advance(update_paid_amount) {
+		// Re-derive gross so manual edits to allocated_amount propagate.
+		(this.frm.doc["advances"] || []).forEach((adv) => {
+			const advance_net = flt(adv.advance_amount);
+			const advance_gross = flt(adv.advance_gross_amount) || advance_net;
+			if (advance_net && advance_gross) {
+				adv.allocated_gross_amount = flt(
+					(flt(adv.allocated_amount) * advance_gross) / advance_net,
+					precision("allocated_gross_amount", adv)
+				);
+			}
+		});
+
 		var total_allocated_amount = frappe.utils.sum(
 			$.map(this.frm.doc["advances"] || [], function (adv) {
-				return flt(adv.allocated_amount, precision("allocated_amount", adv));
+				const gross = flt(adv.allocated_gross_amount);
+				const net = flt(adv.allocated_amount, precision("allocated_amount", adv));
+				return gross || net;
 			})
 		);
 		this.frm.doc.total_advance = flt(total_allocated_amount, precision("total_advance"));

@@ -19,6 +19,7 @@ class PaymentEntryReference(Document):
 		advance_voucher_no: DF.DynamicLink | None
 		advance_voucher_type: DF.Link | None
 		allocated_amount: DF.Currency
+		allocated_gross_amount: DF.Currency
 		bill_no: DF.Data | None
 		due_date: DF.Date | None
 		exchange_gain_loss: DF.Currency
