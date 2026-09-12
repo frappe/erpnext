@@ -629,6 +629,25 @@ class GrossProfitGenerator:
 		if self.grouped:
 			self.get_average_rate_based_on_group_by()
 
+		if grouped_by_invoice:
+			self.hide_fully_returned_invoices()
+
+	def hide_fully_returned_invoices(self):
+		segments = []
+		for row in self.si_list:
+			if row.indent == 0.0:
+				segments.append([row])
+			elif segments:
+				segments[-1].append(row)
+
+		kept = []
+		for header, *rows in segments:
+			if any(flt(item.qty) for item in rows if item.indent == 1.0):
+				kept.append(header)
+				kept.extend(rows)
+
+		self.si_list = kept
+
 	def update_return_invoices(self, row, sales_invoice_item):
 		returned_item_rows = self.returned_invoices.get(row.parent, {}).get(sales_invoice_item)
 		if not returned_item_rows:
