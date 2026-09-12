@@ -377,17 +377,44 @@ class FIFOSlots:
 	def _generate_from_snapshot(self, serial_bundles: dict, batch_bundles: dict) -> bool:
 		from erpnext.stock.report.stock_ageing.stock_ageing_snapshot import SnapshotFIFO
 
-		result = SnapshotFIFO(self).generate()
+		result = SnapshotFIFO(self).generate(serial_bundles, batch_bundles)
 		if result is None:
 			return False
 
 		self.item_details = result.details
-		if result.replay_query is not None:
-			for row in self.snapshot.run(result.replay_query, as_dict=True, as_iterator=True):
-				self._process_stock_ledger_entry(row, serial_bundles, batch_bundles)
+		rows = (
+			self.snapshot.run(result.replay_query, as_dict=True, as_iterator=True)
+			if result.replay_query is not None
+			else ()
+		)
+		self._replay_with_receipt_dates(rows, result.date_events, serial_bundles, batch_bundles)
+		for key in result.tracked_keys:
+			details = self.item_details[key]
+			dates = self.serial_no_details if details["has_serial_no"] else self.batch_no_details
+			for slot in details["fifo_queue"]:
+				slot[FIFO_POSTING_DATE_INDEX] = dates[slot[0]]
 
 		self.item_details = {key: self.item_details[key] for key in result.ordered_keys}
 		return True
+
+	def _replay_with_receipt_dates(self, rows, date_events, serial_bundles, batch_bundles):
+		"""Publish optimized receipt dates in ledger order, including before a replayed transfer."""
+		events = iter(date_events)
+		event = next(events, None)
+		for row in rows:
+			if date_events:
+				order = (row.pop("posting_datetime"), row.pop("creation"))
+				while event and event.order < order:
+					self._remember_receipt_date(event)
+					event = next(events, None)
+			self._process_stock_ledger_entry(row, serial_bundles, batch_bundles)
+		while event:
+			self._remember_receipt_date(event)
+			event = next(events, None)
+
+	def _remember_receipt_date(self, event):
+		dates = self.serial_no_details if event.is_serial else self.batch_no_details
+		dates.setdefault(event.number, event.date)
 
 	def _recompute_moving_average_slots(self) -> None:
 		for item_dict in self.item_details.values():
