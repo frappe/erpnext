@@ -546,15 +546,25 @@ frappe.ui.form.on("Asset", {
 	},
 
 	set_finance_book: function (frm) {
+		// Snapshot the fields this request is based on, so a stale response from an
+		// earlier, still-in-flight call (e.g. from rapid successive amount edits)
+		// can't overwrite Finance Books with values computed from an old amount.
+		let item_code = frm.doc.item_code;
+		let net_purchase_amount = frm.doc.net_purchase_amount;
+
 		frappe.call({
 			method: "erpnext.assets.doctype.asset.asset.get_item_details",
 			args: {
-				item_code: frm.doc.item_code,
+				item_code: item_code,
 				asset_category: frm.doc.asset_category,
-				net_purchase_amount: frm.doc.net_purchase_amount,
+				net_purchase_amount: net_purchase_amount,
 			},
 			callback: function (r, rt) {
-				if (r.message) {
+				if (
+					r.message &&
+					frm.doc.item_code === item_code &&
+					frm.doc.net_purchase_amount === net_purchase_amount
+				) {
 					frm.set_value("finance_books", r.message);
 				}
 			},
@@ -752,10 +762,14 @@ frappe.ui.form.on("Asset", {
 	},
 
 	net_purchase_amount: function (frm) {
-		if (frm.doc.finance_books) {
+		if (frm.doc.finance_books && frm.doc.finance_books.length) {
 			frm.doc.finance_books.forEach((d) => {
 				frm.events.set_depreciation_rate(frm, d);
 			});
+		} else if (frm.doc.item_code && frm.doc.calculate_depreciation && frm.doc.net_purchase_amount) {
+			// "Calculate Depreciation" (or the Item) was set before an amount existed, so the
+			// finance books table was left empty -- build it now that there's an amount to base it on.
+			frm.trigger("set_finance_book");
 		}
 	},
 
