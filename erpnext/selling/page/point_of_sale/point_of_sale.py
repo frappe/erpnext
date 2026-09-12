@@ -123,12 +123,7 @@ def filter_result_items(result, pos_profile):
 
 @frappe.whitelist()
 def get_parent_item_group(pos_profile: str):
-	item_groups = get_item_groups(pos_profile)
-
-	if not item_groups:
-		item_groups = frappe.get_all("Item Group", {"lft": 1, "is_group": 1}, pluck="name")
-
-	return item_groups[0] if item_groups else None
+	return get_root_of("Item Group")
 
 
 @frappe.whitelist()
