@@ -1251,7 +1251,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 				"item_code": percentage_item,
 				"secondary_item_type": "Co-Product",
 				"stock_qty": 1,
-				"valuation_type": "% of FG Cost",
+				"valuation_type": "% of Component Cost",
 				"cost_allocation_per": 10,
 			},
 		)
