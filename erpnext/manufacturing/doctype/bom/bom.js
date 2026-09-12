@@ -1026,7 +1026,7 @@ frappe.tour["BOM"] = [
 frappe.ui.form.on("BOM Secondary Item", {
 	valuation_type(frm, cdt, cdn) {
 		const row = locals[cdt][cdn];
-		if (row.valuation_type !== "% of FG Cost") {
+		if (row.valuation_type !== "% of Component Cost") {
 			frappe.model.set_value(cdt, cdn, "cost_allocation_per", 0);
 		}
 		if (row.valuation_type === "Valuation Rate") {

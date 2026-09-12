@@ -623,7 +623,7 @@
    "fieldname": "valuation_type",
    "fieldtype": "Select",
    "label": "Valuation Type",
-   "options": "\nValuation Rate\n% of FG Cost\nManual",
+   "options": "\nValuation Rate\n% of Component Cost\nManual",
    "read_only": 1
   },
   {

@@ -1124,7 +1124,7 @@ class TestStockEntry(ERPNextTestSuite):
 				"secondary_item_type": "By-Product",
 				"qty": 1,
 				"cost_allocation_per": 10,
-				"valuation_type": "% of FG Cost",
+				"valuation_type": "% of Component Cost",
 			},
 		)
 		bom_doc.save()
@@ -1208,7 +1208,7 @@ class TestStockEntry(ERPNextTestSuite):
 				"secondary_item_type": "By-Product",
 				"qty": 1,
 				"cost_allocation_per": 10,
-				"valuation_type": "% of FG Cost",
+				"valuation_type": "% of Component Cost",
 			},
 		)
 		bom_doc.save()
@@ -1422,7 +1422,7 @@ class TestStockEntry(ERPNextTestSuite):
 		self.assertEqual(fg_row.basic_amount, 830)
 
 		# there is no percentage to allocate without a BOM row
-		manual_row.valuation_type = "% of FG Cost"
+		manual_row.valuation_type = "% of Component Cost"
 		self.assertRaises(frappe.ValidationError, entry.save)
 
 	def test_valuation_rate_lookup_without_voucher_no(self):
@@ -3348,7 +3348,7 @@ class TestStockEntry(ERPNextTestSuite):
 				"qty": 5,
 				"cost_allocation_per": 25,
 				"process_loss_per": 0,
-				"valuation_type": "% of FG Cost",
+				"valuation_type": "% of Component Cost",
 			},
 		)
 		bom.insert()
@@ -3410,7 +3410,7 @@ class TestStockEntry(ERPNextTestSuite):
 				"qty": 5,
 				"cost_allocation_per": 0,
 				"process_loss_per": 0,
-				"valuation_type": "% of FG Cost",
+				"valuation_type": "% of Component Cost",
 			},
 		)
 		bom.insert()
@@ -3497,7 +3497,7 @@ class TestStockEntry(ERPNextTestSuite):
 				"qty": 5,
 				"cost_allocation_per": 25,
 				"process_loss_per": 0,
-				"valuation_type": "% of FG Cost",
+				"valuation_type": "% of Component Cost",
 			},
 		)
 		bom.insert()
