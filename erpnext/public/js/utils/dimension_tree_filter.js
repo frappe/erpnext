@@ -4,12 +4,12 @@ erpnext.accounts.dimensions = {
 	setup_dimension_filters(frm, doctype) {
 		this.accounting_dimensions = [];
 		this.default_dimensions = {};
-		this.fetch_custom_dimensions(frm, doctype);
+		return this.fetch_custom_dimensions(frm, doctype);
 	},
 
 	fetch_custom_dimensions(frm, doctype) {
 		let me = this;
-		frappe.call({
+		return frappe.call({
 			method: "erpnext.accounts.doctype.accounting_dimension.accounting_dimension.get_dimensions",
 			args: {
 				with_cost_center_and_project: true,
