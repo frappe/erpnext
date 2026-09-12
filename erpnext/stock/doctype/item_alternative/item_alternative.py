@@ -108,3 +108,37 @@ def get_alternative_items(doctype: Any, txt: str, searchfield: Any, start: int, 
 	# union (dedupe, preserve order) + paginate
 	unique_items = list(dict.fromkeys(alternatives))
 	return [[item] for item in unique_items[start : start + page_len]]
+
+
+def get_alternative_item_codes(item_code: str) -> list[str]:
+	"""Item codes that may replace ``item_code``, from both legs of Item Alternative."""
+	alternatives = frappe.get_all(
+		"Item Alternative", filters={"item_code": item_code}, pluck="alternative_item_code"
+	)
+	alternatives += frappe.get_all(
+		"Item Alternative",
+		filters={"alternative_item_code": item_code, "two_way": 1},
+		pluck="item_code",
+	)
+
+	return list(dict.fromkeys(alternatives))
+
+
+def validate_alternative_item(item_code: str, alternative_item_code: str) -> None:
+	"""Throw unless ``alternative_item_code`` is a declared alternative of ``item_code``."""
+	if item_code == alternative_item_code:
+		return
+
+	if not frappe.db.get_value("Item", item_code, "allow_alternative_item"):
+		frappe.throw(
+			_("Alternative items are not allowed for the item {0}.").format(frappe.bold(item_code)),
+			title=_("Invalid Alternative Item"),
+		)
+
+	if alternative_item_code not in get_alternative_item_codes(item_code):
+		frappe.throw(
+			_("Item {0} is not an alternative of the item {1}.").format(
+				frappe.bold(alternative_item_code), frappe.bold(item_code)
+			),
+			title=_("Invalid Alternative Item"),
+		)

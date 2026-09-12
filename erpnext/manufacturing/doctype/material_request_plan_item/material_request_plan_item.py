@@ -33,6 +33,7 @@ class MaterialRequestPlanItem(Document):
 		]
 		min_order_qty: DF.Float
 		ordered_qty: DF.Float
+		original_item: DF.Link | None
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data

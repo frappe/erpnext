@@ -14,6 +14,9 @@ from erpnext.manufacturing.doctype.production_plan.mapper import (
 	get_so_details,
 	sales_order_query,
 )
+from erpnext.manufacturing.doctype.production_plan.services.alternative_item import (
+	AlternativeItemService,
+)
 from erpnext.manufacturing.doctype.production_plan.services.material_request import (
 	MaterialRequestService,
 	download_raw_materials,
@@ -511,6 +514,14 @@ class ProductionPlan(Document):
 
 	def all_items_completed(self):
 		return SubAssemblyService(self).all_items_completed()
+
+	@frappe.whitelist()
+	def get_substitutable_rows(self, table_name: str):
+		return AlternativeItemService(self).get_substitutable_rows(table_name)
+
+	@frappe.whitelist()
+	def substitute_alternative_items(self, table_name: str, substitutions: str | list):
+		return AlternativeItemService(self).substitute(table_name, substitutions)
 
 
 @frappe.whitelist()
