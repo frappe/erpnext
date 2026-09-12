@@ -249,7 +249,7 @@ class TestAsset(AssetSetup):
 			asset.precision("net_purchase_amount"),
 		)
 
-		second_asset_depr_schedule.depreciation_amount = 9006.17
+		second_asset_depr_schedule.depreciation_amount = 9000.0
 		second_asset_depr_schedule.asset_doc = asset
 		second_asset_depr_schedule.get_finance_book_row()
 		second_asset_depr_schedule.fetch_asset_details()

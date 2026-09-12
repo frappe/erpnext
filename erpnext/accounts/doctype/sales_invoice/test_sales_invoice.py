@@ -3726,7 +3726,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 		)
 		asset.load_from_db()
 
-		expected_values = [["2020-12-31", 30000, 30000], ["2021-12-31", 30041.15, 60041.15]]
+		expected_values = [["2020-12-31", 30000, 30000], ["2021-12-31", 30000, 60000]]
 
 		for i, schedule in enumerate(get_depr_schedule(asset.name, "Active")):
 			self.assertEqual(getdate(expected_values[i][0]), schedule.schedule_date)

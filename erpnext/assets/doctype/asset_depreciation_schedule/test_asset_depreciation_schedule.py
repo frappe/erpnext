@@ -188,6 +188,24 @@ class TestAssetDepreciationSchedule(ERPNextTestSuite):
 		]
 		self.assertEqual(schedules, expected_schedules)
 
+	def test_schedule_slm_for_period_aligned_existing_asset(self):
+		asset = create_asset(
+			calculate_depreciation=1,
+			depreciation_method="Straight Line",
+			available_for_use_date="2023-01-31",
+			asset_type="Existing Asset",
+			opening_number_of_booked_depreciations=1,
+			opening_accumulated_depreciation=1000,
+			depreciation_start_date="2023-03-31",
+			total_number_of_depreciations=12,
+			frequency_of_depreciation=1,
+			net_purchase_amount=12000,
+		)
+
+		amounts = [d.depreciation_amount for d in get_depr_schedule(asset.name, "Draft")]
+
+		self.assertEqual(amounts, [1000.0] * 11)
+
 	# Enable Checkbox to Calculate depreciation using total days in depreciation period
 	def test_daily_prorata_based_depr_after_enabling_configuration(self):
 		frappe.db.set_single_value("Accounts Settings", "calculate_depr_using_total_days", 1)
