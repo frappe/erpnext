@@ -128,53 +128,150 @@ frappe.query_reports["Material Requirements Planning Report"] = {
 
 	onload(report) {
 		report.page.add_inner_button(__("Make Purchase / Work Order"), () => {
-			let indexes = frappe.query_report.datatable.rowmanager.getCheckedRows();
-			let selected_rows = indexes.map((i) => frappe.query_report.data[i]);
+			const indexes = frappe.query_report.datatable.rowmanager.getCheckedRows();
+			const selected_rows = indexes
+				.map((i) => frappe.query_report.data[i])
+				.filter((row) => row && row.item_code);
 
 			if (!selected_rows.length) {
 				frappe.throw(__("Please select a row to create a Reposting Entry"));
-			} else {
-				let show_in_bucket_view = frappe.query_report.get_filter_value("show_in_bucket_view");
-				if (show_in_bucket_view) {
-					frappe.throw(__("Please uncheck 'Show in Bucket View' to create Orders"));
-				}
-
-				frappe.prompt(
-					[
-						{
-							fieldname: "use_default_warehouse",
-							label: __("Use Default Warehouse"),
-							fieldtype: "Check",
-							default: 1,
-						},
-						{
-							fieldname: "warehouse",
-							label: __("Warehouse"),
-							fieldtype: "Link",
-							options: "Warehouse",
-							depends_on: "eval:!doc.use_default_warehouse",
-							mandatory_depends_on: "eval:!doc.use_default_warehouse",
-						},
-					],
-					(prompt_data) => {
-						frappe.call({
-							method: "erpnext.manufacturing.report.material_requirements_planning_report.material_requirements_planning_report.make_order",
-							freeze: true,
-							args: {
-								selected_rows: selected_rows,
-								company: frappe.query_report.get_filter_value("company"),
-								warehouse: !prompt_data.use_default_warehouse ? prompt_data.warehouse : null,
-								mps: frappe.query_report.get_filter_value("mps"),
-							},
-							callback: function (r) {
-								if (r.message) {
-									frappe.set_route("List", r.message);
-								}
-							},
-						});
-					}
-				);
 			}
+
+			if (frappe.query_report.get_filter_value("show_in_bucket_view")) {
+				frappe.throw(__("Please uncheck 'Show in Bucket View' to create Orders"));
+			}
+
+			prompt_and_make_order(selected_rows);
 		});
 	},
 };
+
+function items_missing_bom(selected_rows) {
+	const seen = new Set();
+	const items = [];
+	for (const row of selected_rows) {
+		if (row.type_of_material !== "Manufacture" || row.bom_no || seen.has(row.item_code)) {
+			continue;
+		}
+		seen.add(row.item_code);
+		items.push({ item_code: row.item_code, item_name: row.item_name });
+	}
+	return items;
+}
+
+function apply_selected_boms(selected_rows, bom_rows) {
+	const bom_by_item = {};
+	for (const row of bom_rows || []) {
+		if (row.item_code && row.bom_no) {
+			bom_by_item[row.item_code] = row.bom_no;
+		}
+	}
+	for (const row of selected_rows) {
+		if (!row.bom_no && bom_by_item[row.item_code]) {
+			row.bom_no = bom_by_item[row.item_code];
+		}
+	}
+}
+
+function prompt_and_make_order(selected_rows) {
+	const missing_bom = items_missing_bom(selected_rows);
+	const fields = [
+		{
+			fieldname: "use_default_warehouse",
+			label: __("Use Default Warehouse"),
+			fieldtype: "Check",
+			default: 1,
+		},
+		{
+			fieldname: "warehouse",
+			label: __("Warehouse"),
+			fieldtype: "Link",
+			options: "Warehouse",
+			depends_on: "eval:!doc.use_default_warehouse",
+			mandatory_depends_on: "eval:!doc.use_default_warehouse",
+		},
+	];
+
+	if (missing_bom.length) {
+		fields.push({
+			label: __("Select BOM"),
+			fieldtype: "Table",
+			fieldname: "boms",
+			reqd: 1,
+			cannot_add_rows: true,
+			cannot_delete_rows: true,
+			in_place_edit: true,
+			description: __("These items have no default BOM. Select one to create Work Orders."),
+			data: missing_bom,
+			get_data: () => missing_bom,
+			fields: [
+				{
+					fieldtype: "Link",
+					fieldname: "item_code",
+					options: "Item",
+					label: __("Item Code"),
+					in_list_view: 1,
+					read_only: 1,
+				},
+				{
+					fieldtype: "Data",
+					fieldname: "item_name",
+					label: __("Item Name"),
+					in_list_view: 1,
+					read_only: 1,
+				},
+				{
+					fieldtype: "Link",
+					fieldname: "bom_no",
+					options: "BOM",
+					reqd: 1,
+					label: __("BOM"),
+					in_list_view: 1,
+					get_query: (doc) => ({
+						query: "erpnext.controllers.queries.bom",
+						filters: { item: doc.item_code },
+					}),
+				},
+			],
+		});
+	}
+
+	const dialog = new frappe.ui.Dialog({
+		title: __("Make Purchase / Work Order"),
+		fields: fields,
+		primary_action_label: __("Create"),
+		primary_action(values) {
+			if (missing_bom.length) {
+				const bom_rows = dialog.fields_dict.boms.grid.get_data();
+				const without_bom = bom_rows.filter((row) => !row.bom_no);
+				if (without_bom.length) {
+					frappe.msgprint(
+						__("Please select a BOM for {0}", [
+							without_bom.map((row) => row.item_code).join(", "),
+						])
+					);
+					return;
+				}
+				apply_selected_boms(selected_rows, bom_rows);
+			}
+
+			dialog.hide();
+			frappe.call({
+				method: "erpnext.manufacturing.report.material_requirements_planning_report.material_requirements_planning_report.make_order",
+				freeze: true,
+				args: {
+					selected_rows: selected_rows,
+					company: frappe.query_report.get_filter_value("company"),
+					warehouse: values.use_default_warehouse ? null : values.warehouse,
+					mps: frappe.query_report.get_filter_value("mps"),
+				},
+				callback: function (r) {
+					if (r.message) {
+						frappe.set_route("List", r.message);
+					}
+				},
+			});
+		},
+	});
+	dialog.show();
+}

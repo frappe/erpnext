@@ -108,7 +108,7 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		self.assertEqual([d.item_code for d in purchase_order.items], [plan.item])
 		self.assertFalse(frappe.get_all("Work Order", filters={"mps": plan.mps}, pluck="name"))
 
-	def test_make_order_prompts_when_manufactured_item_has_no_bom(self):
+	def test_make_order_rejects_manufactured_item_without_bom(self):
 		plan = make_mps_item(
 			self,
 			{
@@ -126,6 +126,30 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		self.assertIn("Default BOM", str(ctx.exception))
 		self.assertFalse(frappe.get_all("Work Order", filters={"mps": plan.mps}, pluck="name"))
 		self.assertFalse(frappe.get_all("Purchase Order", filters={"mps": plan.mps}, pluck="name"))
+
+	def test_make_order_uses_the_bom_passed_on_the_row(self):
+		plan = make_mps_item(
+			self,
+			{
+				"is_stock_item": 1,
+				"is_purchase_item": 0,
+				"item_defaults": [{"company": COMPANY, "default_warehouse": WAREHOUSE}],
+			},
+		)
+		rm_item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"is_purchase_item": 1,
+				"item_defaults": [{"company": COMPANY, "default_warehouse": WAREHOUSE}],
+			}
+		).name
+		plan.row.bom_no = make_bom(item=plan.item, raw_materials=[rm_item], rm_qty=1, rate=100).name
+
+		make_order([plan.row], COMPANY, warehouse=WAREHOUSE, mps=plan.mps)
+
+		work_order = get_created_order(plan.mps, "Work Order")
+		self.assertEqual(work_order.production_item, plan.item)
+		self.assertEqual(work_order.bom_no, plan.row.bom_no)
 
 	def test_make_order_creates_draft_purchase_and_work_orders(self):
 		plan = make_mrp_plan(self)
