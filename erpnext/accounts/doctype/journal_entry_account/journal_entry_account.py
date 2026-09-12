@@ -34,6 +34,7 @@ class JournalEntryAccount(Document):
 		parenttype: DF.Data
 		party: DF.DynamicLink | None
 		party_type: DF.Link | None
+		payment_term: DF.Link | None
 		project: DF.Link | None
 		reference_detail_no: DF.Data | None
 		reference_due_date: DF.Date | None

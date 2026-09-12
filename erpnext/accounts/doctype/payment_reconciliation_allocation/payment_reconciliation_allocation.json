@@ -11,6 +11,7 @@
   "column_break_3",
   "invoice_type",
   "invoice_number",
+  "payment_term",
   "section_break_6",
   "allocated_amount",
   "unreconciled_amount",
@@ -105,6 +106,13 @@
    "options": "DocType",
    "read_only": 1,
    "reqd": 1
+  },
+  {
+   "fieldname": "payment_term",
+   "fieldtype": "Link",
+   "label": "Payment Term",
+   "options": "Payment Term",
+   "read_only": 1
   },
   {
    "fieldname": "section_break_6",

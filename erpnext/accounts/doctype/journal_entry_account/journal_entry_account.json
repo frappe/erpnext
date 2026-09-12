@@ -30,6 +30,7 @@
   "reference",
   "reference_type",
   "reference_name",
+  "payment_term",
   "reference_due_date",
   "reference_detail_no",
   "advance_voucher_type",
@@ -196,6 +197,14 @@
    "no_copy": 1,
    "options": "reference_type",
    "search_index": 1
+  },
+  {
+   "fieldname": "payment_term",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Payment Term",
+   "options": "Payment Term",
+   "read_only": 1
   },
   {
    "depends_on": "eval:doc.reference_type&&!in_list(doc.reference_type, ['Expense Claim', 'Asset', 'Employee Loan', 'Employee Advance', 'Bank Transaction'])",
