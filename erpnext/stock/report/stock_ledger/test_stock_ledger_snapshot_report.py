@@ -82,6 +82,18 @@ class TestStockLedgerSnapshotReport(StockSnapshotReportMixin, StockSnapshotTestC
 		]
 		self.assertEqual(actual, expected)
 
+	def test_ledger_aggregates_opening_history_in_duckdb(self):
+		from erpnext.stock.report.stock_ledger import stock_ledger_snapshot
+
+		self.make_movement(qty=10, basic_rate=100, posting_date=add_days(today(), -10))
+		self.make_movement(qty=3, from_warehouse="Stores - _TC", to_warehouse=None)
+		expected = stock_ledger.execute(deepcopy(self.filters))
+		with patch.object(
+			stock_ledger_snapshot, "get_opening_query", wraps=stock_ledger_snapshot.get_opening_query
+		) as prepare:
+			self.assertEqual(expected, self.run_snapshot(stock_ledger, self.capture_ledger()))
+			prepare.assert_called_once()
+
 	def test_serial_bundle_details_match(self):
 		self.set_item("_Test DuckDB Serial Item", {"has_serial_no": 1, "serial_no_series": "DUCK-SN-.#####"})
 		self.make_movement(qty=3, basic_rate=100)

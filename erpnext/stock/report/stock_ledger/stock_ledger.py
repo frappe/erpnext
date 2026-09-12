@@ -777,14 +777,6 @@ def get_opening_balance(filters, columns, sl_entries, inv_dimension_wise_value=N
 
 	subq = (
 		frappe.qb.from_(sle_doctype)
-		.select(
-			sle_doctype.qty_after_transaction,
-			sle_doctype.stock_value,
-			RowNumber()
-			.over(sle_doctype.item_code, sle_doctype.warehouse)
-			.orderby(sle_doctype.posting_datetime, sle_doctype.creation, sle_doctype.name, order=Order.desc)
-			.as_("rn"),
-		)
 		.where(sle_doctype.docstatus < 2)
 		.where(sle_doctype.is_cancelled == 0)
 		.where(sle_doctype.item_code.isin(item_codes))
@@ -802,14 +794,27 @@ def get_opening_balance(filters, columns, sl_entries, inv_dimension_wise_value=N
 			if filters.get(fieldname):
 				subq = subq.where(sle_doctype[fieldname].isin(filters.get(fieldname)))
 
-	query = (
-		frappe.qb.from_(subq)
-		.select(
-			IfNull(Sum(subq.qty_after_transaction), 0.0).as_("total_qty"),
-			IfNull(Sum(subq.stock_value), 0.0).as_("total_stock_value"),
+	if snapshot:
+		from erpnext.stock.report.stock_ledger.stock_ledger_snapshot import get_opening_query
+
+		query = get_opening_query(subq, sle_doctype, snapshot)
+	else:
+		subq = subq.select(
+			sle_doctype.qty_after_transaction,
+			sle_doctype.stock_value,
+			RowNumber()
+			.over(sle_doctype.item_code, sle_doctype.warehouse)
+			.orderby(sle_doctype.posting_datetime, sle_doctype.creation, sle_doctype.name, order=Order.desc)
+			.as_("rn"),
 		)
-		.where(subq.rn == 1)
-	)
+		query = (
+			frappe.qb.from_(subq)
+			.select(
+				IfNull(Sum(subq.qty_after_transaction), 0.0).as_("total_qty"),
+				IfNull(Sum(subq.stock_value), 0.0).as_("total_stock_value"),
+			)
+			.where(subq.rn == 1)
+		)
 
 	res = run_stock_query(query, snapshot, as_dict=True)
 
