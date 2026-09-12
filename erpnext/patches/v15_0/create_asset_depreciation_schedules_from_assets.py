@@ -1,5 +1,5 @@
 import frappe
-from frappe.utils import cstr
+from frappe.utils import cstr, flt
 
 
 def execute():
@@ -12,7 +12,29 @@ def execute():
 			continue
 
 		asset_depr_schedule_doc = frappe.new_doc("Asset Depreciation Schedule")
-		asset_depr_schedule_doc.set_draft_asset_depr_schedule_details(fb_row, fb_row)
+		# set_draft_asset_depr_schedule_details no longer exists; set the
+		# details directly from the queried finance book + asset row
+		asset_depr_schedule_doc.update(
+			{
+				"asset": fb_row.asset_name,
+				"company": fb_row.company,
+				"finance_book": fb_row.finance_book,
+				"finance_book_id": fb_row.idx,
+				"depreciation_method": fb_row.depreciation_method,
+				"total_number_of_depreciations": fb_row.total_number_of_depreciations,
+				"frequency_of_depreciation": fb_row.frequency_of_depreciation,
+				"rate_of_depreciation": fb_row.rate_of_depreciation,
+				"expected_value_after_useful_life": fb_row.expected_value_after_useful_life,
+				"daily_prorata_based": fb_row.daily_prorata_based,
+				"shift_based": fb_row.shift_based,
+				"opening_accumulated_depreciation": fb_row.opening_accumulated_depreciation,
+				"opening_number_of_booked_depreciations": fb_row.opening_number_of_booked_depreciations,
+				"net_purchase_amount": fb_row.net_purchase_amount,
+				"value_after_depreciation": flt(fb_row.net_purchase_amount)
+				- flt(fb_row.opening_accumulated_depreciation),
+				"status": "Draft",
+			}
+		)
 		asset_depr_schedule_doc.flags.ignore_validate = True
 		asset_depr_schedule_doc.insert()
 
@@ -47,6 +69,7 @@ def get_asset_finance_books_map():
 			afb.shift_based,
 			asset.docstatus,
 			asset.name,
+			asset.company,
 			asset.opening_accumulated_depreciation,
 			asset.net_purchase_amount,
 			asset.opening_number_of_booked_depreciations,
