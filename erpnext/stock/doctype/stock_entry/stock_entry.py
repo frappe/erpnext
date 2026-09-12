@@ -1656,7 +1656,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 	def set_bomless_secondary_valuation_types(self):
 		"""Secondary rows without a BOM link choose their own costing: valuation rate or manual.
 
-		There is no percentage to allocate without a BOM row, so % of FG Cost is rejected."""
+		There is no percentage to allocate without a BOM row, so % of Component Cost is rejected."""
 		for d in self.get("items"):
 			if d.bom_secondary_item:
 				continue
@@ -1667,10 +1667,10 @@ class StockEntry(StockController, SubcontractingInwardController):
 					d.set_basic_rate_manually = 0
 				continue
 
-			if d.valuation_type == "% of FG Cost":
+			if d.valuation_type == "% of Component Cost":
 				frappe.throw(
 					_(
-						"Row #{0}: % of FG Cost needs a BOM secondary item. Choose Valuation Rate or Manual for {1}."
+						"Row #{0}: % of Component Cost needs a BOM secondary item. Choose Valuation Rate or Manual for {1}."
 					).format(d.idx, frappe.bold(d.item_code))
 				)
 
