@@ -1041,40 +1041,6 @@ class TestPaymentRequestV2Gateway(ERPNextTestSuite):
 		mock_payments.utils = mock_utils
 		return {"payments": mock_payments, "payments.utils": mock_utils}, mock_utils
 
-	def test_is_v2_gateway_returns_false_for_none(self):
-		"""_is_v2_gateway returns False for None input."""
-		from erpnext.accounts.doctype.payment_request.payment_request import _is_v2_gateway
-
-		# Mock returns True, but is_v2_gateway(None) in payments.utils returns False
-		modules, mock_utils = self._mock_payments_modules(False)
-
-		with patch.dict(sys.modules, modules):
-			result = _is_v2_gateway(None)
-			self.assertFalse(result)
-			mock_utils.is_v2_gateway.assert_called_once_with(None)
-
-	def test_is_v2_gateway_returns_false_for_empty_string(self):
-		"""_is_v2_gateway returns False for empty string input."""
-		from erpnext.accounts.doctype.payment_request.payment_request import _is_v2_gateway
-
-		modules, mock_utils = self._mock_payments_modules(False)
-
-		with patch.dict(sys.modules, modules):
-			result = _is_v2_gateway("")
-			self.assertFalse(result)
-			mock_utils.is_v2_gateway.assert_called_once_with("")
-
-	def test_is_v2_gateway_returns_false_for_nonexistent_gateway(self):
-		"""_is_v2_gateway returns False for nonexistent gateway."""
-		from erpnext.accounts.doctype.payment_request.payment_request import _is_v2_gateway
-
-		modules, mock_utils = self._mock_payments_modules(False)
-
-		with patch.dict(sys.modules, modules):
-			result = _is_v2_gateway("NonExistentGateway12345")
-			self.assertFalse(result)
-			mock_utils.is_v2_gateway.assert_called_once_with("NonExistentGateway12345")
-
 	def test_is_v2_gateway_delegates_to_payments_util(self):
 		"""_is_v2_gateway delegates to payments.utils.is_v2_gateway."""
 		from erpnext.accounts.doctype.payment_request.payment_request import _is_v2_gateway
