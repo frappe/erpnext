@@ -203,7 +203,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 
 	def test_outward_batch_valuation_takes_transaction_advisory_lock(self):
 		if frappe.db.db_type != "postgres":
-			return
+			self.skipTest("advisory locks are a PostgreSQL feature")
 
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt

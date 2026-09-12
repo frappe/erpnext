@@ -2046,27 +2046,24 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			create_inventory_dimension,
 		)
 
-		if frappe.db.exists("DocType", "Plant"):
-			return
-
-		doctype = frappe.get_doc(
-			{
-				"doctype": "DocType",
-				"name": "Plant",
-				"module": "Stock",
-				"custom": 1,
-				"fields": [
-					{
-						"fieldname": "plant_name",
-						"fieldtype": "Data",
-						"label": "Plant Name",
-						"reqd": 1,
-					}
-				],
-				"autoname": "field:plant_name",
-			}
-		)
-		doctype.insert(ignore_permissions=True)
+		if not frappe.db.exists("DocType", "Plant"):
+			frappe.get_doc(
+				{
+					"doctype": "DocType",
+					"name": "Plant",
+					"module": "Stock",
+					"custom": 1,
+					"fields": [
+						{
+							"fieldname": "plant_name",
+							"fieldtype": "Data",
+							"label": "Plant Name",
+							"reqd": 1,
+						}
+					],
+					"autoname": "field:plant_name",
+				}
+			).insert(ignore_permissions=True)
 		create_inventory_dimension(dimension_name="ID-Plant", reference_document="Plant")
 
 		plant_a = frappe.get_doc(
@@ -2130,11 +2127,10 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			{"voucher_type": "Stock Reconciliation", "voucher_no": sr.name, "is_cancelled": 0},
 			["item_code", "id_plant", "actual_qty", "valuation_rate"],
 		)
-		for s in sle:
-			if s.id_plant == plant_a.name:
-				self.assertEqual(s.actual_qty, 5)
-			elif s.id_plant == plant_b.name:
-				self.assertEqual(s.actual_qty, 3)
+		self.assertEqual(
+			{row.id_plant: row.actual_qty for row in sle},
+			{plant_a.name: 5, plant_b.name: 3},
+		)
 
 	def test_serial_no_status_with_backdated_stock_reco(self):
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
