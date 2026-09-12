@@ -1233,7 +1233,8 @@ frappe.form.link_formatters["Project"] = function (value, doc, df) {
  * @returns {string} - The link value with the added title.
  */
 function add_link_title(value, doc, df, title_field) {
-	if (value && doc[title_field]) {
+	const title_belongs_to_value = df.options !== df.parent || value === doc.name;
+	if (value && title_belongs_to_value && doc[title_field]) {
 		if (doc[title_field] !== value && doc[df.fieldname] === value) {
 			return value + ": " + doc[title_field];
 		} else if (doc.doctype == df.parent) {
