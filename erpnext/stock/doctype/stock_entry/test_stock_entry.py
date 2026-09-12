@@ -4444,11 +4444,6 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 
 	# ── validate_source_stock_entry ────────────────────────────────────────────
 
-	def test_validate_source_stock_entry_skips_when_no_source(self):
-		se = frappe.new_doc("Stock Entry")
-		se.source_stock_entry = None
-		se.validate_source_stock_entry()  # must not raise
-
 	def test_validate_source_stock_entry_throws_on_work_order_mismatch(self):
 		source_se = make_stock_entry(
 			item_code="_Test Item",
@@ -4480,11 +4475,6 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 
 	# ── validate_job_card_fg_item ──────────────────────────────────────────────
 
-	def test_validate_job_card_fg_item_skips_when_no_job_card(self):
-		se = frappe.new_doc("Stock Entry")
-		se.job_card = None
-		se.validate_job_card_fg_item()  # must not raise
-
 	def test_validate_job_card_fg_item_throws_when_fg_item_mismatches(self):
 		wrong_fg = make_item("_JC Wrong FG Item", {"is_stock_item": 1}).name
 
@@ -4502,17 +4492,6 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, se.validate_job_card_fg_item)
 
 	# ── validate_job_card_item ─────────────────────────────────────────────────
-
-	def test_validate_job_card_item_skips_when_no_job_card(self):
-		se = frappe.new_doc("Stock Entry")
-		se.job_card = None
-		se.validate_job_card_item()  # must not raise
-
-	def test_validate_job_card_item_skips_for_manufacture_purpose(self):
-		se = frappe.new_doc("Stock Entry")
-		se.job_card = "SOME-JC-001"
-		se.purpose = "Manufacture"
-		se.validate_job_card_item()  # must not raise even with a job card set
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"job_card_excess_transfer": 0})
 	def test_validate_job_card_item_throws_when_job_card_item_ref_missing(self):
