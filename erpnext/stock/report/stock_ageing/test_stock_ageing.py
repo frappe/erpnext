@@ -19,6 +19,26 @@ class TestStockAgeing(ERPNextTestSuite):
 	def setUp(self) -> None:
 		self.filters = frappe._dict(company="_Test Company", to_date="2021-12-10", ranges=["30", "60", "90"])
 
+	def test_receipt_does_not_allocate_transfer_history(self):
+		slots = FIFOSlots(self.filters, [])
+		row = frappe._dict(name="Item A", warehouse="WH 1", voucher_no="Receipt 1")
+		slots._init_key_stores(row)
+		self.assertEqual(slots.transferred_item_details, {})
+
+	def test_empty_prefetched_bundles_do_not_query_during_streaming(self):
+		slots = FIFOSlots(self.filters)
+		for serial in (0, 1):
+			row = frappe._dict(
+				serial_and_batch_bundle="Missing bundle", has_serial_no=serial, has_batch_no=not serial
+			)
+			with (
+				patch("erpnext.stock.serial_batch_bundle.get_serial_nos_from_bundle") as serial_lookup,
+				patch.object(slots, "_get_bundle_wise_batch_nos") as batch_lookup,
+			):
+				self.assertEqual(slots._get_serial_and_batch_nos(row, {}, {}), ([], []))
+				serial_lookup.assert_not_called()
+				batch_lookup.assert_not_called()
+
 	def test_normal_inward_outward_queue(self):
 		"Reference: Case 1 in stock_ageing_fifo_logic.md (same wh)"
 		sle = [
