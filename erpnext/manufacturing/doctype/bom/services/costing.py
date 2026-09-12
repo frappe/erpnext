@@ -269,7 +269,7 @@ class BOMCostingService:
 
 	def calculate_secondary_items_costs(self, save=False):
 		"""Valuation Rate and Manual rows carry their own cost, deducted from the raw
-		material cost; the % of FG Cost rows split the remainder by their percentage."""
+		material cost; the % of Component Cost rows split the remainder by their percentage."""
 		total_sm_cost = 0
 		base_total_sm_cost = 0
 		precision = self.doc.precision("raw_material_cost")

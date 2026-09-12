@@ -291,7 +291,7 @@ frappe.ui.form.on("Stock Entry", {
 		frm.trigger("toggle_weight_per_piece");
 
 		// only BOM-less rows are editable, and they cannot allocate a BOM percentage;
-		// read-only rows from a BOM still display their stored % of FG Cost
+		// read-only rows from a BOM still display their stored % of Component Cost
 		frm.fields_dict.items.grid.update_docfield_property("valuation_type", "options", [
 			"Valuation Rate",
 			"Manual",
