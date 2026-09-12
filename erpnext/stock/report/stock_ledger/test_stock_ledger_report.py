@@ -1,8 +1,10 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from unittest.mock import patch
+
 import frappe
-from frappe.utils import add_days, today
+from frappe.utils import add_days, cint, flt, today
 
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.report.stock_ledger.stock_ledger import execute
@@ -52,6 +54,31 @@ class TestStockLedgerReport(ERPNextTestSuite):
 		self.assertEqual(receipt["qty_after_transaction"], 10)
 		self.assertEqual(issue["out_qty"], -4)
 		self.assertEqual(issue["qty_after_transaction"], 6)
+
+	def test_repeated_rates_respect_each_reports_rounding_method(self):
+		item = "_Test Item"
+		self.make_movements(item, [{"qty": 10, "to_warehouse": WAREHOUSE, "basic_rate": 100}])
+		for value in (1.2345, 1.2345, 2.3455):
+			entry = make_stock_entry(item_code=item, qty=1, from_warehouse=WAREHOUSE)
+			frappe.db.set_value(
+				"Stock Ledger Entry", {"voucher_no": entry.name}, "stock_value_difference", -value
+			)
+
+		precision = cint(frappe.db.get_single_value("System Settings", "float_precision"))
+		get_setting = frappe.get_system_settings
+		for method in ("Banker's Rounding", "Commercial Rounding", "Banker's Rounding (legacy)"):
+			with patch(
+				"frappe.get_system_settings",
+				side_effect=lambda key, rounding=method: rounding
+				if key == "rounding_method"
+				else get_setting(key),
+			):
+				issues = [row for row in self.run_report(item) if row.get("out_qty")]
+			self.assertEqual(len(issues), 3)
+			for row in issues:
+				self.assertEqual(
+					row.in_out_rate, flt(row.stock_value_difference / row.actual_qty, precision, method)
+				)
 
 	def test_opening_balance_reflects_movements_before_from_date(self):
 		item = "_Test Item"
