@@ -5,8 +5,8 @@ from collections import defaultdict
 from typing import NamedTuple
 
 import frappe
+from frappe.query_builder import Case, CustomFunction, Field
 from frappe.query_builder.functions import Abs, Cast, Count, Floor, IfNull, Max, Min, Sum
-from pypika import Case, CustomFunction, Field
 from pypika.analytics import CURRENT_ROW, Preceding
 from pypika.analytics import Sum as WindowSum
 from pypika.queries import QueryBuilder

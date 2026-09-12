@@ -7,9 +7,9 @@ from functools import lru_cache, partial
 
 import frappe
 from frappe import _
+from frappe.query_builder import CustomFunction, Order
 from frappe.query_builder.functions import Cast, IfNull, Sum
 from frappe.utils import cint, flt, get_datetime
-from pypika import CustomFunction, Order
 from pypika.analytics import RowNumber
 
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions

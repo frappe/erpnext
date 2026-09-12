@@ -2,8 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
+from frappe.query_builder import Case, CustomFunction
 from frappe.query_builder.functions import Abs, Min, Sum
-from pypika import Case, CustomFunction
 from pypika.analytics import CURRENT_ROW, Preceding, RowNumber
 from pypika.analytics import Sum as WindowSum
 
