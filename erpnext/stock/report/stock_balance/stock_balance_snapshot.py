@@ -3,11 +3,12 @@
 
 import frappe
 from frappe.query_builder import Case, CustomFunction
-from frappe.query_builder.functions import Abs, Min, Sum
+from frappe.query_builder.functions import Abs, Function, IfNull, Min, Sum
 from pypika.analytics import CURRENT_ROW, Preceding, RowNumber
 from pypika.analytics import Sum as WindowSum
 
 ArgMaxNull = CustomFunction("arg_max_null", ["value", "order"])
+ListConcat = CustomFunction("list_concat", ["left", "right"])
 
 MOVEMENT_PREFIXES = ("opening", "in", "out", "bal")
 MOVEMENT_SUFFIXES = ("qty", "val")
@@ -16,11 +17,6 @@ MOVEMENT_FIELDS = tuple(f"{prefix}_{suffix}" for suffix in MOVEMENT_SUFFIXES for
 
 def prepare_aggregated_balances(report):
 	"""Aggregate movements between balance resets, then apply each reset in ledger order."""
-	if report.filters.get("show_dimension_wise_stock") or any(
-		report.filters.get(field) for field in report.inventory_dimensions
-	):
-		return False
-
 	query = get_balance_query(report)
 	for row in report.snapshot.run(query, as_dict=True, as_iterator=True):
 		apply_segment(report, row)
@@ -30,10 +26,11 @@ def prepare_aggregated_balances(report):
 def get_balance_query(report):
 	entries = frappe.qb.Table("snapshot_entries")
 	segments = frappe.qb.Table("snapshot_segments")
+	group_fields = ("item_code", "warehouse", "snapshot_dimensions")
 	segment_query = frappe.qb.from_(entries).select(
 		entries.star,
 		WindowSum(entries.snapshot_detail)
-		.over(entries.item_code, entries.warehouse)
+		.over(*(entries[field] for field in group_fields))
 		.orderby(entries.snapshot_row)
 		.rows(Preceding(), CURRENT_ROW)
 		.as_("snapshot_segment"),
@@ -51,7 +48,9 @@ def get_balance_query(report):
 			*get_latest_columns(report, segments),
 			*get_movement_columns(segments),
 		)
-		.groupby(segments.item_code, segments.warehouse, segments.snapshot_segment, segments.snapshot_detail)
+		.groupby(
+			*(segments[field] for field in group_fields), segments.snapshot_segment, segments.snapshot_detail
+		)
 		.orderby("snapshot_row")
 	)
 
@@ -85,10 +84,26 @@ def get_segment_query(report):
 		detail |= (field < 0) & (Abs(field) < 10**-report.float_precision)
 
 	return report.sle_query.select(
+		get_dimension_key(report, ledger).as_("snapshot_dimensions"),
 		RowNumber().orderby(ledger.posting_datetime, ledger.creation).as_("snapshot_row"),
 		Case().when(opening, 1).else_(0).as_("snapshot_opening"),
 		Case().when(detail, 1).else_(0).as_("snapshot_detail"),
 	)
+
+
+def get_dimension_key(report, ledger):
+	"""Match get_group_by_key(), including its omission of empty dimension values."""
+	key = Function("list_value")
+	for field in report.inventory_dimensions:
+		if report.filters.get(field) or report.filters.get("show_dimension_wise_stock"):
+			value = ledger[field]
+			key = ListConcat(
+				key,
+				Case()
+				.when(IfNull(value, "") != "", Function("list_value", value))
+				.else_(Function("list_value")),
+			)
+	return key
 
 
 def get_latest_columns(report, segments):
