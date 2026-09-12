@@ -116,3 +116,13 @@ class TestSalesInvoiceTrends(ERPNextTestSuite):
 		labels, after = self.run_report(based_on="Customer", group_by="Item")
 		self.assertIn("Item", labels)
 		self.assertEqual(self._cell(after, "Item", "_Test Item", "Total(Amt)", labels) - before_amt, 600)
+
+	def test_item_filter_restricts_rows(self):
+		# the Item filter is applied in the query, so the excluded item never reaches the rows
+		create_sales_invoice(item="_Test Item", qty=4, rate=200, posting_date=POSTING_DATE)
+		create_sales_invoice(item="_Test Item 2", qty=2, rate=200, posting_date=POSTING_DATE)
+
+		labels, data = self.run_report(item_code=["_Test Item"])
+		items = {row[labels.index("Item")] for row in data}
+		self.assertIn("_Test Item", items)
+		self.assertNotIn("_Test Item 2", items)
