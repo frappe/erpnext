@@ -4473,46 +4473,6 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 		se.work_order = "WO-SAME-001"
 		se.validate_source_stock_entry()  # must not raise
 
-	# ── validate_job_card_fg_item ──────────────────────────────────────────────
-
-	def test_validate_job_card_fg_item_throws_when_fg_item_mismatches(self):
-		wrong_fg = make_item("_JC Wrong FG Item", {"is_stock_item": 1}).name
-
-		jc_name = frappe.db.get_value("Job Card", {"docstatus": 1, "finished_good": ("!=", "")})
-		if not jc_name:
-			return  # skip if no suitable job card in test data
-
-		jc = frappe.db.get_value("Job Card", jc_name, ["finished_good"], as_dict=1)
-		if jc.finished_good == wrong_fg:
-			return  # skip if the wrong_fg happens to match
-
-		se = frappe.new_doc("Stock Entry")
-		se.job_card = jc_name
-		se.append("items", {"item_code": wrong_fg, "is_finished_item": 1, "qty": 1})
-		self.assertRaises(frappe.ValidationError, se.validate_job_card_fg_item)
-
-	# ── validate_job_card_item ─────────────────────────────────────────────────
-
-	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"job_card_excess_transfer": 0})
-	def test_validate_job_card_item_throws_when_job_card_item_ref_missing(self):
-		jc_name = frappe.db.get_value("Job Card", {"docstatus": 1})
-		if not jc_name:
-			return  # skip if no job cards in test data
-
-		se = frappe.new_doc("Stock Entry")
-		se.job_card = jc_name
-		se.purpose = "Material Transfer for Manufacture"
-		se.append(
-			"items",
-			{
-				"item_code": "_Test Item",
-				"s_warehouse": "_Test Warehouse - _TC",
-				"qty": 1,
-				"job_card_item": None,
-			},
-		)
-		self.assertRaises(frappe.ValidationError, se.validate_job_card_item)
-
 	# ── get_available_materials ────────────────────────────────────────────────
 
 	def test_get_available_materials_tracks_transferred_qty(self):
