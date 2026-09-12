@@ -19,6 +19,7 @@ from erpnext.crm.doctype.opportunity.opportunity import make_request_for_quotati
 from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
 from erpnext.exceptions import PartyDisabled
 from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.doctype.material_request.test_material_request import make_material_request
 from erpnext.templates.pages.rfq import check_supplier_has_docname_access
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -43,6 +44,16 @@ class TestRequestforQuotation(ERPNextTestSuite):
 		with change_settings("Buying Settings", {"allow_zero_qty_in_request_for_quotation": 1}):
 			rfq.save()
 			self.assertEqual(rfq.items[0].qty, 0)
+
+	def test_item_change_on_material_request_row_is_blocked(self):
+		other_item = make_item("_Test RFQ Item Swap").name
+		mr = make_material_request(qty=5)
+		rfq = make_request_for_quotation(do_not_save=True)
+		rfq.items[0].material_request = mr.name
+		rfq.items[0].material_request_item = mr.items[0].name
+		# swapping the fetched item would leave a stale link to the MR row
+		rfq.items[0].item_code = other_item
+		self.assertRaises(frappe.ValidationError, rfq.insert)
 
 	def test_quote_status(self):
 		rfq = make_request_for_quotation()

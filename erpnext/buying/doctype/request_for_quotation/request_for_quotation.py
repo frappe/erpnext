@@ -87,6 +87,7 @@ class RequestforQuotation(BuyingController):
 		validate_for_items(self)
 		super().set_qty_as_per_stock_uom()
 		self.update_email_id()
+		self.validate_with_previous_doc()
 
 		if self.docstatus < 1:
 			# after amend and save, status still shows as cancelled, until submit
@@ -123,6 +124,22 @@ class RequestforQuotation(BuyingController):
 
 			if not self.subject:
 				self.subject = data.subject
+
+	def validate_with_previous_doc(self):
+		super().validate_with_previous_doc(
+			{
+				"Material Request": {
+					"ref_dn_field": "material_request",
+					"compare_fields": [["company", "="]],
+				},
+				"Material Request Item": {
+					"ref_dn_field": "material_request_item",
+					"compare_fields": [["item_code", "="], ["uom", "="]],
+					"is_child_table": True,
+					"allow_duplicate_prev_row_id": True,
+				},
+			}
+		)
 
 	def validate_duplicate_supplier(self):
 		supplier_list = [d.supplier for d in self.suppliers]
