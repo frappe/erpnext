@@ -3,23 +3,19 @@ from frappe.query_builder import Case
 
 
 def execute():
-	required_columns = [
-		"is_existing_asset",
-		"is_composite_asset",
-		"is_composite_component",
-	]
-
-	# Skip patch if any required column is missing
-	if not all(frappe.db.has_column("Asset", col) for col in required_columns):
+	# v15 sites never had is_composite_component; only migrate columns that exist.
+	column_values = (
+		("is_existing_asset", "Existing Asset"),
+		("is_composite_asset", "Composite Asset"),
+		("is_composite_component", "Composite Component"),
+	)
+	existing = [(col, value) for col, value in column_values if frappe.db.has_column("Asset", col)]
+	if not existing:
 		return
 
 	Asset = frappe.qb.DocType("Asset")
+	case = Case()
+	for column, value in existing:
+		case = case.when(getattr(Asset, column) == 1, value)
 
-	frappe.qb.update(Asset).set(
-		Asset.asset_type,
-		Case()
-		.when(Asset.is_existing_asset == 1, "Existing Asset")
-		.when(Asset.is_composite_asset == 1, "Composite Asset")
-		.when(Asset.is_composite_component == 1, "Composite Component")
-		.else_(""),
-	).run()
+	frappe.qb.update(Asset).set(Asset.asset_type, case.else_("")).run()
