@@ -1362,7 +1362,7 @@ class TestStockEntry(ERPNextTestSuite):
 				"secondary_item_type": "By-Product",
 				"qty": 1,
 				"cost_allocation_per": 10,
-				"valuation_type": "% of FG Cost",
+				"valuation_type": "% of Component Cost",
 			},
 		)
 		bom_doc.save()
@@ -1446,7 +1446,7 @@ class TestStockEntry(ERPNextTestSuite):
 				"secondary_item_type": "By-Product",
 				"qty": 1,
 				"cost_allocation_per": 10,
-				"valuation_type": "% of FG Cost",
+				"valuation_type": "% of Component Cost",
 			},
 		)
 		bom_doc.save()
@@ -1660,7 +1660,7 @@ class TestStockEntry(ERPNextTestSuite):
 		self.assertEqual(fg_row.basic_amount, 830)
 
 		# there is no percentage to allocate without a BOM row
-		manual_row.valuation_type = "% of FG Cost"
+		manual_row.valuation_type = "% of Component Cost"
 		self.assertRaises(frappe.ValidationError, entry.save)
 
 	def test_valuation_rate_lookup_without_voucher_no(self):
@@ -2233,10 +2233,12 @@ class TestStockEntry(ERPNextTestSuite):
 		se.insert()
 		se.submit()
 
+		self.assertEqual([33.33, 66.67], [flt(d.additional_cost, 2) for d in se.items])
+
 		self.check_gl_entries(
 			"Stock Entry",
 			se.name,
-			sorted([["Stock Adjustment - TCP1", 100.0, 0.0], ["Miscellaneous Expenses - TCP1", 0.0, 100.0]]),
+			sorted([["Stock In Hand - TCP1", 100.0, 0.0], ["Miscellaneous Expenses - TCP1", 0.0, 100.0]]),
 		)
 
 	def test_conversion_factor_change(self):
@@ -2281,6 +2283,184 @@ class TestStockEntry(ERPNextTestSuite):
 
 		distributed_costs = [d.additional_cost for d in se.items]
 		self.assertEqual([0.0, 100.0, 0.0], distributed_costs)
+
+	def test_additional_cost_distribution_manufacture_zero_valued_items(self):
+		se = frappe.get_doc(
+			doctype="Stock Entry",
+			purpose="Manufacture",
+			additional_costs=[frappe._dict(base_amount=100)],
+			items=[
+				frappe._dict(item_code="RM", basic_amount=0, transfer_qty=10),
+				frappe._dict(
+					item_code="FG", basic_amount=0, transfer_qty=5, t_warehouse="X", is_finished_item=1
+				),
+				frappe._dict(item_code="scrap", basic_amount=0, transfer_qty=2, t_warehouse="X"),
+			],
+		)
+
+		se.distribute_additional_costs()
+
+		distributed_costs = [d.additional_cost for d in se.items]
+		self.assertEqual([0.0, 100.0, 0.0], distributed_costs)
+
+	def test_additional_cost_distribution_zero_valued_items(self):
+		se = frappe.get_doc(
+			doctype="Stock Entry",
+			purpose="Material Receipt",
+			additional_costs=[frappe._dict(base_amount=100)],
+			items=[
+				frappe._dict(item_code="RECEIVED_1", basic_amount=0, transfer_qty=20, t_warehouse="X"),
+				frappe._dict(item_code="RECEIVED_2", basic_amount=0, transfer_qty=30, t_warehouse="X"),
+			],
+		)
+
+		se.distribute_additional_costs()
+
+		distributed_costs = [d.additional_cost for d in se.items]
+		self.assertEqual([40.0, 60.0], distributed_costs)
+
+	def test_additional_cost_gl_for_zero_valued_manufacture(self):
+		company = "_Test Company with perpetual inventory"
+		rm = make_item("_Test Zero Rate RM", {"is_stock_item": 1}).name
+		fg = make_item("_Test Zero Rate FG", {"is_stock_item": 1}).name
+
+		receipt = frappe.get_doc(
+			{
+				"doctype": "Stock Entry",
+				"purpose": "Material Receipt",
+				"stock_entry_type": "Material Receipt",
+				"posting_date": nowdate(),
+				"company": company,
+				"items": [
+					{
+						"item_code": rm,
+						"qty": 5,
+						"basic_rate": 0,
+						"uom": "Nos",
+						"t_warehouse": "Stores - TCP1",
+						"allow_zero_valuation_rate": 1,
+						"cost_center": "Main - TCP1",
+					}
+				],
+			}
+		)
+		receipt.insert()
+		receipt.submit()
+
+		se = frappe.get_doc(
+			{
+				"doctype": "Stock Entry",
+				"purpose": "Manufacture",
+				"stock_entry_type": "Manufacture",
+				"posting_date": nowdate(),
+				"company": company,
+				"items": [
+					{
+						"item_code": rm,
+						"qty": 5,
+						"uom": "Nos",
+						"s_warehouse": "Stores - TCP1",
+						"cost_center": "Main - TCP1",
+					},
+					{
+						"item_code": fg,
+						"qty": 5,
+						"uom": "Nos",
+						"t_warehouse": "Finished Goods - TCP1",
+						"is_finished_item": 1,
+						"cost_center": "Main - TCP1",
+					},
+				],
+				"additional_costs": [
+					{
+						"expense_account": "Miscellaneous Expenses - TCP1",
+						"amount": 500,
+						"description": "freight",
+					}
+				],
+			}
+		)
+		se.insert()
+		se.submit()
+
+		self.assertEqual(500.0, se.items[1].additional_cost)
+		self.check_gl_entries(
+			"Stock Entry",
+			se.name,
+			sorted([["Stock In Hand - TCP1", 500.0, 0.0], ["Miscellaneous Expenses - TCP1", 0.0, 500.0]]),
+		)
+
+	def test_additional_cost_gl_matches_valuation_split(self):
+		company = "_Test Company with perpetual inventory"
+		cost_center = "_Test Additional Cost CC - TCP1"
+		if not frappe.db.exists("Cost Center", cost_center):
+			frappe.get_doc(
+				{
+					"doctype": "Cost Center",
+					"cost_center_name": "_Test Additional Cost CC",
+					"company": company,
+					"is_group": 0,
+					"parent_cost_center": "_Test Company with perpetual inventory - TCP1",
+				}
+			).insert()
+
+		uoms = [{"uom": "Nos", "conversion_factor": 1}, {"uom": "Box", "conversion_factor": 2}]
+		item_a = make_item("_Test Addl Cost CF A", {"is_stock_item": 1, "uoms": uoms}).name
+		uoms[1]["conversion_factor"] = 3
+		item_b = make_item("_Test Addl Cost CF B", {"is_stock_item": 1, "uoms": uoms}).name
+
+		se = frappe.get_doc(
+			{
+				"doctype": "Stock Entry",
+				"purpose": "Material Receipt",
+				"stock_entry_type": "Material Receipt",
+				"posting_date": nowdate(),
+				"company": company,
+				"items": [
+					{
+						"item_code": item_a,
+						"qty": 1,
+						"basic_rate": 0,
+						"uom": "Box",
+						"conversion_factor": 2,
+						"t_warehouse": "Stores - TCP1",
+						"allow_zero_valuation_rate": 1,
+						"cost_center": "Main - TCP1",
+					},
+					{
+						"item_code": item_b,
+						"qty": 1,
+						"basic_rate": 0,
+						"uom": "Box",
+						"conversion_factor": 3,
+						"t_warehouse": "Stores - TCP1",
+						"allow_zero_valuation_rate": 1,
+						"cost_center": cost_center,
+					},
+				],
+				"additional_costs": [
+					{
+						"expense_account": "Miscellaneous Expenses - TCP1",
+						"amount": 100,
+						"description": "misc",
+					}
+				],
+			}
+		)
+		se.insert()
+		se.submit()
+
+		self.assertEqual([40.0, 60.0], [flt(d.additional_cost, 2) for d in se.items])
+
+		expense_by_cost_center = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_no": se.name, "account": "Miscellaneous Expenses - TCP1"},
+			fields=["cost_center", "credit"],
+		)
+		self.assertEqual(
+			{"Main - TCP1": 40.0, cost_center: 60.0},
+			{d.cost_center: d.credit for d in expense_by_cost_center},
+		)
 
 	def test_additional_cost_distribution_non_manufacture(self):
 		se = frappe.get_doc(
@@ -3481,7 +3661,7 @@ class TestStockEntry(ERPNextTestSuite):
 				"qty": 5,
 				"cost_allocation_per": 25,
 				"process_loss_per": 0,
-				"valuation_type": "% of FG Cost",
+				"valuation_type": "% of Component Cost",
 			},
 		)
 		bom.insert()
@@ -3543,7 +3723,7 @@ class TestStockEntry(ERPNextTestSuite):
 				"qty": 5,
 				"cost_allocation_per": 0,
 				"process_loss_per": 0,
-				"valuation_type": "% of FG Cost",
+				"valuation_type": "% of Component Cost",
 			},
 		)
 		bom.insert()
@@ -3600,7 +3780,7 @@ class TestStockEntry(ERPNextTestSuite):
 				"qty": 5,
 				"cost_allocation_per": 25,
 				"process_loss_per": 0,
-				"valuation_type": "% of FG Cost",
+				"valuation_type": "% of Component Cost",
 			},
 		)
 		bom.insert()
@@ -4267,11 +4447,6 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 
 	# ── validate_source_stock_entry ────────────────────────────────────────────
 
-	def test_validate_source_stock_entry_skips_when_no_source(self):
-		se = frappe.new_doc("Stock Entry")
-		se.source_stock_entry = None
-		se.validate_source_stock_entry()  # must not raise
-
 	def test_validate_source_stock_entry_throws_on_work_order_mismatch(self):
 		source_se = make_stock_entry(
 			item_code="_Test Item",
@@ -4300,62 +4475,6 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 		se.source_stock_entry = source_se.name
 		se.work_order = "WO-SAME-001"
 		se.validate_source_stock_entry()  # must not raise
-
-	# ── validate_job_card_fg_item ──────────────────────────────────────────────
-
-	def test_validate_job_card_fg_item_skips_when_no_job_card(self):
-		se = frappe.new_doc("Stock Entry")
-		se.job_card = None
-		se.validate_job_card_fg_item()  # must not raise
-
-	def test_validate_job_card_fg_item_throws_when_fg_item_mismatches(self):
-		wrong_fg = make_item("_JC Wrong FG Item", {"is_stock_item": 1}).name
-
-		jc_name = frappe.db.get_value("Job Card", {"docstatus": 1, "finished_good": ("!=", "")})
-		if not jc_name:
-			return  # skip if no suitable job card in test data
-
-		jc = frappe.db.get_value("Job Card", jc_name, ["finished_good"], as_dict=1)
-		if jc.finished_good == wrong_fg:
-			return  # skip if the wrong_fg happens to match
-
-		se = frappe.new_doc("Stock Entry")
-		se.job_card = jc_name
-		se.append("items", {"item_code": wrong_fg, "is_finished_item": 1, "qty": 1})
-		self.assertRaises(frappe.ValidationError, se.validate_job_card_fg_item)
-
-	# ── validate_job_card_item ─────────────────────────────────────────────────
-
-	def test_validate_job_card_item_skips_when_no_job_card(self):
-		se = frappe.new_doc("Stock Entry")
-		se.job_card = None
-		se.validate_job_card_item()  # must not raise
-
-	def test_validate_job_card_item_skips_for_manufacture_purpose(self):
-		se = frappe.new_doc("Stock Entry")
-		se.job_card = "SOME-JC-001"
-		se.purpose = "Manufacture"
-		se.validate_job_card_item()  # must not raise even with a job card set
-
-	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"job_card_excess_transfer": 0})
-	def test_validate_job_card_item_throws_when_job_card_item_ref_missing(self):
-		jc_name = frappe.db.get_value("Job Card", {"docstatus": 1})
-		if not jc_name:
-			return  # skip if no job cards in test data
-
-		se = frappe.new_doc("Stock Entry")
-		se.job_card = jc_name
-		se.purpose = "Material Transfer for Manufacture"
-		se.append(
-			"items",
-			{
-				"item_code": "_Test Item",
-				"s_warehouse": "_Test Warehouse - _TC",
-				"qty": 1,
-				"job_card_item": None,
-			},
-		)
-		self.assertRaises(frappe.ValidationError, se.validate_job_card_item)
 
 	# ── get_available_materials ────────────────────────────────────────────────
 

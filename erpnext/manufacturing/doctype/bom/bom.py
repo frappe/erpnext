@@ -529,13 +529,14 @@ class BOM(WebsiteGenerator):
 		doc.set_status(save=True)
 
 	def set_fg_cost_allocation(self):
+		self.cost_allocation_per = flt(self.cost_allocation_per)
 		total_secondary_items_per = 0
 		own_cost = 0
 		for item in self.secondary_items:
 			if item.valuation_type in ("Valuation Rate", "Manual"):
 				item.cost_allocation_per = 0
 				own_cost += flt(item.cost)
-			total_secondary_items_per += item.cost_allocation_per
+			total_secondary_items_per += flt(item.cost_allocation_per)
 
 		if self.cost_allocation_per == 100 and total_secondary_items_per:
 			self.cost_allocation_per -= total_secondary_items_per
@@ -551,9 +552,9 @@ class BOM(WebsiteGenerator):
 			)
 
 	def validate_total_cost_allocation(self):
-		total_cost_allocation_per = self.cost_allocation_per
+		total_cost_allocation_per = flt(self.cost_allocation_per)
 		for item in self.secondary_items:
-			total_cost_allocation_per += item.cost_allocation_per
+			total_cost_allocation_per += flt(item.cost_allocation_per)
 
 		if total_cost_allocation_per != 100:
 			frappe.throw(_("Cost allocation between finished goods and secondary items should equal 100%"))
@@ -898,6 +899,19 @@ class BOM(WebsiteGenerator):
 			frappe.throw(
 				_("Fixed Asset item {0} cannot be used in BOMs.").format(
 					", ".join(get_link_to_form("Item", item) for item in fixed_asset_items)
+				)
+			)
+
+		bom_items = {self.item, *items}
+		bom_items.update(d.item_code for d in self.get("secondary_items"))
+		bom_items.update(d.finished_good for d in self.get("operations") if d.finished_good)
+
+		if disabled_items := frappe.db.get_all(
+			"Item", filters={"item_code": ("in", list(bom_items)), "disabled": 1}, pluck="name"
+		):
+			frappe.throw(
+				_("Disabled Item {0} cannot be used in BOMs.").format(
+					", ".join(get_link_to_form("Item", item) for item in disabled_items)
 				)
 			)
 

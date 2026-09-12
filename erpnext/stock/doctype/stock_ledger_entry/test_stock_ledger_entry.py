@@ -37,7 +37,7 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 
 	def test_stock_write_takes_sle_advisory_gate(self):
 		if frappe.db.db_type != "postgres":
-			return
+			self.skipTest("advisory locks are a PostgreSQL feature")
 
 		item = make_item(properties={"is_stock_item": 1}).name
 

@@ -129,7 +129,33 @@ def get_linked_material_requests(items: str | list):
 	Retrieve Material Requests linked to a list of items.
 	"""
 
-	items = frappe.parse_json(items)
+	try:
+		items = frappe.parse_json(items)
+	except (TypeError, ValueError):
+		frappe.throw(_("Items must be a list of Item codes"))
+
+	if isinstance(items, str):
+		items = [items]
+
+	if not isinstance(items, list | tuple) or any(not isinstance(item, str) for item in items):
+		frappe.throw(_("Items must be a list of Item codes"))
+
+	permitted_material_requests = frappe.get_list(
+		"Material Request",
+		filters=[
+			["material_request_type", "=", "Purchase"],
+			["docstatus", "=", 1],
+			["status", "!=", "Stopped"],
+			["per_ordered", "<", 99.99],
+			["Material Request Item", "item_code", "in", items],
+		],
+		pluck="name",
+		distinct=True,
+	)
+
+	if not permitted_material_requests:
+		return []
+
 	mr_list = []
 
 	mr = frappe.qb.DocType("Material Request")
@@ -146,6 +172,7 @@ def get_linked_material_requests(items: str | list):
 				mr_item.item_code,
 				mr_item.name.as_("mr_item"),
 			)
+			.where(mr.name.isin(permitted_material_requests))
 			.where(mr_item.item_code == item)
 			.where(mr.material_request_type == "Purchase")
 			.where(mr.per_ordered < 99.99)

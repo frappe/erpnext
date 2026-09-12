@@ -80,7 +80,7 @@ class StockEntryDetail(SerialBatchReference):
 		transferred_qty: DF.Float
 		secondary_item_type: DF.Literal["", "Co-Product", "By-Product", "Scrap", "Additional Finished Good"]
 		uom: DF.Link
-		valuation_type: DF.Literal["", "Valuation Rate", "% of FG Cost", "Manual"]
+		valuation_type: DF.Literal["", "Valuation Rate", "% of Component Cost", "Manual"]
 		use_serial_batch_fields: DF.Check
 		valuation_rate: DF.Currency
 	# end: auto-generated types

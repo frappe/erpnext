@@ -110,6 +110,23 @@ class TestProductionPlan(ERPNextTestSuite):
 		pln = frappe.get_doc("Production Plan", pln.name)
 		pln.cancel()
 
+	def test_production_plan_material_request_skips_zero_qty_items(self):
+		pln = create_production_plan(item_code="Test Production Item 1")
+		zero_qty_item, requested_item = pln.mr_items
+		zero_qty_item.quantity = "0"
+
+		pln.make_material_request()
+
+		material_request_items = frappe.get_all(
+			"Material Request Item",
+			filters={"production_plan": pln.name},
+			fields=["item_code", "qty"],
+		)
+		self.assertEqual(
+			material_request_items,
+			[{"item_code": requested_item.item_code, "qty": requested_item.quantity}],
+		)
+
 	def test_production_plan_start_date(self):
 		"Test if Work Order has same Planned Start Date as Prod Plan."
 		planned_date = add_to_date(date=None, days=3)
@@ -4081,7 +4098,7 @@ def make_bom(**args):
 					"stock_uom": item_doc.stock_uom,
 					"qty": args.scrap_qty or 1,
 					"cost_allocation_per": args.scrap_cost_allocation_per or 10,
-					"valuation_type": "% of FG Cost",
+					"valuation_type": "% of Component Cost",
 					"process_loss_per": args.scrap_process_loss_per or 10,
 				},
 			)
