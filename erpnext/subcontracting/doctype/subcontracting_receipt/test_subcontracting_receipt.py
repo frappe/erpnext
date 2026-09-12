@@ -27,6 +27,7 @@ from erpnext.controllers.tests.test_subcontracting_controller import (
 	set_backflush_based_on,
 )
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+from erpnext.projects.doctype.project.test_project import make_project
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import get_gl_entries
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
@@ -40,6 +41,9 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
 	make_subcontracting_receipt,
 )
+from erpnext.subcontracting.doctype.subcontracting_order.test_subcontracting_order import (
+	make_subcontracted_purchase_order,
+)
 from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
 	BOMQuantityError,
 )
@@ -52,6 +56,26 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		make_raw_materials()
 		make_service_items()
 		make_bom_for_subcontracted_items()
+
+	def test_project_is_carried_over_from_subcontracting_order(self):
+		project = make_project({"project_name": "_Test SCR Project"}).name
+		po = make_subcontracted_purchase_order(project)
+		sco = get_subcontracting_order(po_name=po.name)
+
+		scr = make_subcontracting_receipt(sco.name)
+
+		self.assertEqual(scr.project, project)
+		self.assertEqual(scr.items[0].project, project)
+
+	def test_project_cannot_differ_from_subcontracting_order(self):
+		project = make_project({"project_name": "_Test SCR Project"}).name
+		other_project = make_project({"project_name": "_Test SCR Project 2"}).name
+		po = make_subcontracted_purchase_order(project)
+		sco = get_subcontracting_order(po_name=po.name)
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].project = other_project
+		self.assertRaises(frappe.ValidationError, scr.save)
 
 	def test_subcontracting(self):
 		set_backflush_based_on("BOM")
