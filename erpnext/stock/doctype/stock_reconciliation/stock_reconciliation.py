@@ -3,6 +3,7 @@
 
 
 from datetime import timedelta
+from math import isfinite
 
 import frappe
 from frappe import _, bold, json, msgprint
@@ -71,8 +72,15 @@ class StockReconciliation(StockController):
 
 		sbb = SerialBatchBundleService(self)
 
-		self.validate_standard_cost_items()
 		self.validate_items_exist()
+		self._reconciliation_item_cache = {
+			item_code: frappe.get_cached_doc("Item", item_code)
+			for item_code in {row.item_code for row in self.items if row.item_code}
+		}
+		for item in self._reconciliation_item_cache.values():
+			item.check_permission("read")
+		self.set_stock_uom_quantities()
+		self.validate_standard_cost_items()
 		if not self.expense_account:
 			self.expense_account = frappe.get_cached_value(
 				"Company", self.company, "stock_adjustment_account"
@@ -97,6 +105,31 @@ class StockReconciliation(StockController):
 
 		if self._action == "submit":
 			self.validate_reserved_stock()
+
+	def set_stock_uom_quantities(self):
+		# Keep qty in Stock UOM for the ledger, valuation, bundles and existing integrations.
+		if not hasattr(self, "_reconciliation_item_cache"):
+			self._reconciliation_item_cache = {
+				item_code: frappe.get_cached_doc("Item", item_code)
+				for item_code in {row.item_code for row in self.items if row.item_code}
+			}
+		for row in self.items:
+			item = self._reconciliation_item_cache[row.item_code]
+			details = _get_reconciliation_uom_details(item, row.get("uom"))
+			row.stock_uom = details.stock_uom
+			row.uom = details.uom
+			row.conversion_factor = details.conversion_factor
+			if row.uom != row.stock_uom:
+				row.qty = (
+					flt(flt(row.counted_qty) * row.conversion_factor, row.precision("qty"))
+					if row.counted_qty not in (None, "")
+					else None
+				)
+			else:
+				row.counted_qty = row.qty
+
+		self.validate_uom_is_integer("uom", "counted_qty")
+		self.validate_uom_is_integer("stock_uom", "qty")
 
 	def on_update(self):
 		super().on_update()
@@ -807,9 +840,7 @@ class StockReconciliation(StockController):
 		)
 
 		def validate_serial_batch_items():
-			has_batch_no, has_serial_no = frappe.get_value(
-				"Item", item_code, ["has_batch_no", "has_serial_no"]
-			)
+			has_batch_no, has_serial_no = item.has_batch_no, item.has_serial_no
 			if row.use_serial_batch_fields and self.purpose == "Stock Reconciliation":
 				if has_batch_no and not row.batch_no:
 					raise frappe.ValidationError(_("Please enter Batch No"))
@@ -819,7 +850,7 @@ class StockReconciliation(StockController):
 		# using try except to catch all validation msgs and display together
 
 		try:
-			item = frappe.get_cached_doc("Item", item_code)
+			item = self._reconciliation_item_cache.get(item_code) or frappe.get_cached_doc("Item", item_code)
 
 			# end of life and stock item
 			validate_end_of_life(item_code, item.end_of_life, item.disabled)
@@ -1135,6 +1166,13 @@ class StockReconciliation(StockController):
 
 	def set_total_qty_and_amount(self):
 		for d in self.get("items"):
+			conversion_factor = d.conversion_factor or 1
+			qty_precision = d.precision("qty")
+			# Preserve the entered count when its conversion matches the rounded Stock UOM quantity.
+			if d.counted_qty in (None, "") or flt(
+				flt(d.counted_qty) * conversion_factor, qty_precision
+			) != flt(d.qty, qty_precision):
+				d.counted_qty = flt(d.qty) / conversion_factor
 			d.amount = flt(flt(d.qty) * flt(d.valuation_rate), d.precision("amount"))
 			d.current_amount = flt(
 				flt(d.current_qty) * flt(d.current_valuation_rate), d.precision("current_amount")
@@ -1409,6 +1447,54 @@ def get_items_for_stock_reco(warehouse, company):
 	]
 
 	return items
+
+
+@frappe.whitelist()
+def get_reconciliation_uom_details(item_code: str, uom: str | None = None):
+	"""Return the permitted reconciliation UOM and its Stock UOM conversion factor.
+
+	The item must be readable; alternate UOMs must have a positive conversion factor.
+	Returns a dict containing ``stock_uom``, ``uom`` and ``conversion_factor``.
+	"""
+	item = frappe.get_cached_doc("Item", item_code)
+	item.check_permission("read")
+	return _get_reconciliation_uom_details(item, uom)
+
+
+def _get_reconciliation_uom_details(item, uom=None):
+	uom = uom or item.stock_uom
+	conversion_factor = 1.0
+	if uom != item.stock_uom:
+		conversion = next((d for d in item.uoms if d.uom == uom), None)
+		if not conversion:
+			frappe.throw(
+				_("UOM {0} is not defined for item {1}. Please add it under UOM Conversion Detail.").format(
+					bold(uom), bold(item.name)
+				)
+			)
+		conversion_factor = flt(conversion.conversion_factor)
+		if not isfinite(conversion_factor) or conversion_factor <= 0:
+			frappe.throw(
+				_("Conversion factor for UOM {0} in item {1} must be greater than zero.").format(
+					bold(uom), bold(item.name)
+				)
+			)
+
+	return frappe._dict(stock_uom=item.stock_uom, uom=uom, conversion_factor=conversion_factor)
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_reconciliation_uom_query(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict
+):
+	"""Return readable Stock UOMs and configured alternate UOMs for an item."""
+	if not filters.get("item_code"):
+		return []
+	item = frappe.get_cached_doc("Item", filters["item_code"])
+	item.check_permission("read")
+	uoms = dict.fromkeys([item.stock_uom, *(d.uom for d in item.uoms if flt(d.conversion_factor) > 0)])
+	return [[uom] for uom in uoms if txt.lower() in uom.lower()][start : start + page_len]
 
 
 def get_item_data(row, qty, valuation_rate, serial_no=None):

@@ -13,6 +13,9 @@
   "item_group",
   "column_break_6",
   "warehouse",
+  "uom",
+  "counted_qty",
+  "conversion_factor",
   "qty",
   "stock_uom",
   "valuation_rate",
@@ -50,7 +53,7 @@
    "print_hide": 1
   },
   {
-   "columns": 3,
+   "columns": 2,
    "fieldname": "item_code",
    "fieldtype": "Link",
    "in_global_search": 1,
@@ -70,7 +73,7 @@
    "read_only": 1
   },
   {
-   "columns": 3,
+   "columns": 2,
    "fieldname": "warehouse",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -83,14 +86,39 @@
    "fieldtype": "Column Break"
   },
   {
-   "columns": 2,
+   "columns": 1,
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "UOM",
+   "options": "UOM"
+  },
+  {
+   "columns": 1,
+   "depends_on": "eval:doc.uom && doc.uom !== doc.stock_uom",
+   "description": "Physical count in the selected UOM.",
+   "fieldname": "counted_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Counted Quantity"
+  },
+  {
+   "depends_on": "eval:doc.uom && doc.uom !== doc.stock_uom",
+   "fieldname": "conversion_factor",
+   "fieldtype": "Float",
+   "label": "Conversion Factor",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
    "fieldname": "qty",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Quantity"
+   "label": "Quantity (Stock UOM)",
+   "read_only_depends_on": "eval:doc.uom && doc.uom !== doc.stock_uom"
   },
   {
-   "columns": 2,
+   "columns": 1,
    "fetch_from": "item_code.stock_uom",
    "fieldname": "stock_uom",
    "fieldtype": "Link",
@@ -101,6 +129,7 @@
   },
   {
    "columns": 2,
+   "description": "Value per Stock UOM.",
    "fieldname": "valuation_rate",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -277,7 +306,7 @@
  "grid_page_length": 50,
  "istable": 1,
  "links": [],
- "modified": "2026-07-18 10:00:00.000000",
+ "modified": "2026-09-08 19:10:44.704387",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reconciliation Item",

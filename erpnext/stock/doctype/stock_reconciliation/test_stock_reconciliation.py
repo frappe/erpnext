@@ -20,6 +20,8 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 	EmptyStockReconciliationItemsError,
 	get_items,
+	get_reconciliation_uom_details,
+	get_reconciliation_uom_query,
 )
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.stock_ledger import get_previous_sle, update_entries_after
@@ -39,6 +41,167 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 1)
 		frappe.local.future_sle = {}
 		frappe.flags.pop("dont_execute_stock_reposts", None)
+
+	def make_alternate_uom_item(self, **properties):
+		return self.make_item(
+			properties={
+				"stock_uom": "Nos",
+				"uoms": [{"uom": "Box", "conversion_factor": 12}],
+				**properties,
+			}
+		)
+
+	def test_alternate_uom_reconciliation(self):
+		transaction_args = {
+			"company": frappe.db.get_value("Warehouse", "Stores - TCP1", "company"),
+			"warehouse": "Stores - TCP1",
+			"expense_account": "Stock Adjustment - TCP1",
+		}
+		for valuation_method in ("FIFO", "Moving Average"):
+			with self.subTest(valuation_method=valuation_method):
+				item = self.make_alternate_uom_item(valuation_method=valuation_method)
+				opening = create_stock_reconciliation(
+					item_code=item.name, qty=20, rate=100, **transaction_args
+				)
+				reco = create_stock_reconciliation(
+					item_code=item.name,
+					uom="Box",
+					counted_qty=2,
+					rate=100,
+					do_not_submit=True,
+					**transaction_args,
+				)
+				# Repeated validation must not multiply an already converted quantity.
+				reco.save()
+				reco.submit()
+				reco.reload()
+				row = reco.items[0]
+				self.assertEqual((row.counted_qty, row.conversion_factor, row.qty), (2, 12, 24))
+				self.assertEqual(row.stock_uom, "Nos")
+				self.assertEqual(flt(row.quantity_difference), 4)
+				self.assertEqual(row.amount, 2400)
+				self.assertEqual(reco.difference_amount, 400)
+				self.assertSLEs(reco, [{"qty_after_transaction": 24, "stock_value": 2400}])
+				self.assertGLEs(reco, [{"debit": 400, "credit": 0}], {"debit": [">", 0]})
+				reco.cancel()
+				self.assertEqual(
+					frappe.db.get_value(
+						"Bin", {"item_code": item.name, "warehouse": row.warehouse}, "actual_qty"
+					),
+					20,
+				)
+				opening.cancel()
+
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
+	def test_alternate_uom_count_preserved_after_rounding(self):
+		item = self.make_alternate_uom_item(
+			stock_uom="Kg", uoms=[{"uom": "Nos", "conversion_factor": 0.333333333}]
+		)
+		reco = create_stock_reconciliation(
+			item_code=item.name, uom="Nos", counted_qty=1, rate=100, do_not_submit=True
+		)
+		for _ in range(2):
+			reco.reload()
+			self.assertEqual(reco.items[0].counted_qty, 1)
+			self.assertEqual(reco.items[0].qty, 0.33)
+			reco.save()
+
+		reco.submit()
+		reco.reload()
+		self.assertEqual(reco.items[0].counted_qty, 1)
+		self.assertSLEs(reco, [{"qty_after_transaction": 0.33, "stock_value": 33}])
+		reco.cancel()
+
+	def test_alternate_uom_valuation_only(self):
+		item = self.make_alternate_uom_item()
+		create_stock_reconciliation(item_code=item.name, qty=24, rate=100)
+		reco = create_stock_reconciliation(item_code=item.name, uom="Box", rate=200)
+		self.assertEqual(reco.items[0].counted_qty, 2)
+		self.assertEqual(reco.items[0].qty, 24)
+		self.assertSLEs(reco, [{"qty_after_transaction": 24, "stock_value": 4800}])
+
+	def test_alternate_uom_zero_count(self):
+		item = self.make_alternate_uom_item()
+		create_stock_reconciliation(item_code=item.name, qty=24, rate=100)
+		reco = create_stock_reconciliation(item_code=item.name, uom="Box", counted_qty=0, rate=100)
+		self.assertEqual(reco.items[0].qty, 0)
+		self.assertEqual(reco.items[0].amount, 0)
+		self.assertEqual(reco.difference_amount, -2400)
+		self.assertSLEs(reco, [{"qty_after_transaction": 0, "stock_value": 0}])
+
+	def test_alternate_uom_unchanged_count(self):
+		item = self.make_alternate_uom_item()
+		create_stock_reconciliation(item_code=item.name, qty=24, rate=100)
+		with self.assertRaises(EmptyStockReconciliationItemsError):
+			create_stock_reconciliation(item_code=item.name, uom="Box", counted_qty=2, rate=100)
+
+	def test_alternate_uom_validation(self):
+		item = self.make_alternate_uom_item()
+		reco = create_stock_reconciliation(
+			item_code=item.name, uom="Box", counted_qty=2, rate=100, do_not_save=True
+		)
+		row = reco.items[0]
+		row.conversion_factor = 99
+		row.stock_uom = "Kg"
+		reco.set_stock_uom_quantities()
+		self.assertEqual((row.qty, row.conversion_factor, row.stock_uom), (24, 12, "Nos"))
+		row.uom = "Kg"
+		with self.assertRaisesRegex(frappe.ValidationError, "UOM Conversion Detail"):
+			reco.set_stock_uom_quantities()
+
+		for factor in (0, -1):
+			with self.subTest(factor=factor):
+				frappe.db.set_value(
+					"UOM Conversion Detail", {"parent": item.name, "uom": "Box"}, "conversion_factor", factor
+				)
+				frappe.clear_document_cache("Item", item.name)
+				with self.assertRaisesRegex(frappe.ValidationError, "must be greater than zero"):
+					get_reconciliation_uom_details(item.name, "Box")
+
+	def test_alternate_uom_whole_number_validation(self):
+		item = self.make_alternate_uom_item()
+		reco = create_stock_reconciliation(
+			item_code=item.name, uom="Box", counted_qty=0.1, rate=100, do_not_save=True
+		)
+		with self.assertRaisesRegex(frappe.ValidationError, "cannot be a fraction"):
+			reco.set_stock_uom_quantities()
+
+		item = self.make_alternate_uom_item(stock_uom="Kg", uoms=[{"uom": "Nos", "conversion_factor": 12}])
+		reco = create_stock_reconciliation(
+			item_code=item.name, uom="Nos", counted_qty=0.5, rate=100, do_not_save=True
+		)
+		with self.assertRaisesRegex(frappe.ValidationError, "cannot be a fraction"):
+			reco.set_stock_uom_quantities()
+
+	def test_alternate_uom_query(self):
+		item = self.make_alternate_uom_item()
+		self.assertEqual(
+			get_reconciliation_uom_query("UOM", "", "name", 0, 20, {"item_code": item.name}),
+			[["Nos"], ["Box"]],
+		)
+
+	def test_alternate_uom_serial_numbers(self):
+		item = self.make_alternate_uom_item(has_serial_no=1, serial_no_series="UOM-SERIAL-.#####")
+		reco = create_stock_reconciliation(
+			item_code=item.name, uom="Box", counted_qty=1, rate=100, purpose="Opening Stock"
+		)
+		self.assertEqual(reco.items[0].qty, 12)
+		bundle = frappe.get_doc("Serial and Batch Bundle", reco.items[0].serial_and_batch_bundle)
+		self.assertEqual(len(bundle.entries), 12)
+		self.assertEqual(bundle.total_qty, 12)
+		reco.cancel()
+
+	def test_alternate_uom_batch(self):
+		item = self.make_alternate_uom_item(
+			has_batch_no=1, create_new_batch=1, batch_number_series="UOM-BATCH-.#####"
+		)
+		reco = create_stock_reconciliation(
+			item_code=item.name, uom="Box", counted_qty=2, rate=100, purpose="Opening Stock"
+		)
+		bundle = frappe.get_doc("Serial and Batch Bundle", reco.items[0].serial_and_batch_bundle)
+		self.assertEqual(bundle.total_qty, 24)
+		self.assertSLEs(reco, [{"qty_after_transaction": 24, "stock_value": 2400}])
+		reco.cancel()
 
 	def test_reco_for_fifo(self):
 		self._test_reco_sle_gle("FIFO")
@@ -2319,6 +2482,8 @@ def create_stock_reconciliation(**args):
 			"warehouse": args.warehouse or "_Test Warehouse - _TC",
 			"qty": args.qty,
 			"reconcile_all_serial_batch": args.reconcile_all_serial_batch,
+			"uom": args.uom,
+			"counted_qty": args.counted_qty,
 			"valuation_rate": args.rate,
 			"serial_no": args.serial_no if args.use_serial_batch_fields else None,
 			"batch_no": args.batch_no if args.use_serial_batch_fields else None,
