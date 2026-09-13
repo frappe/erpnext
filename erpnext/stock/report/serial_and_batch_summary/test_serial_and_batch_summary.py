@@ -24,6 +24,9 @@ class TestSerialAndBatchSummary(ERPNextTestSuite):
 		self.assertEqual(len({row.serial_no for row in data}), 3)
 		for row in data:
 			self.assertTrue(row.serial_no)
+			self.assertEqual(
+				row.serial_no_number, frappe.db.get_value("Serial No", row.serial_no, "serial_no")
+			)
 			self.assertEqual(row.qty, 1)
 			self.assertEqual(row.incoming_rate, 100)
 			self.assertEqual(row.warehouse, "Stores - _TC")
@@ -51,6 +54,7 @@ class TestSerialAndBatchSummary(ERPNextTestSuite):
 
 		row = next((d for d in data if d.batch_no == batch_no), None)
 		self.assertIsNotNone(row)
+		self.assertEqual(row.batch_no_number, frappe.db.get_value("Batch", batch_no, "batch_id"))
 		self.assertEqual(row.qty, 10)
 		self.assertEqual(row.incoming_rate, 50)
 		self.assertEqual(row.warehouse, "_Test Warehouse - _TC")
