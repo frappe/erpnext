@@ -198,7 +198,9 @@ def auto_fetch_serial_number(
 	batch_nos: str | list[str] | None = None,
 	for_doctype: str | None = None,
 	exclude_sr_nos: str | None = None,
+	as_numbers: bool = False,
 ) -> list[str]:
+	frappe.has_permission("Item", "read", doc=item_code, throw=True)
 	filters = frappe._dict({"item_code": item_code, "warehouse": warehouse})
 
 	if exclude_sr_nos is None:
@@ -227,7 +229,16 @@ def auto_fetch_serial_number(
 
 	serial_numbers = fetch_serial_numbers(filters, qty, do_not_include=exclude_sr_nos)
 
-	return sorted([d.get("name") for d in serial_numbers])
+	serial_ids = sorted(d.name for d in serial_numbers)
+	if not serial_ids:
+		return []
+	serials = {
+		row.name: row.serial_no
+		for row in frappe.get_list(
+			"Serial No", filters={"name": ("in", serial_ids)}, fields=["name", "serial_no"]
+		)
+	}
+	return [serials[name] if as_numbers else name for name in serial_ids if name in serials]
 
 
 @frappe.whitelist()

@@ -59,7 +59,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 			this.scan_api_call(input, async (r) => {
 				let data = r && r.message;
 				if (data?.candidates) {
-					data = await this.select_scan_match(data.candidates);
+					data = await erpnext.utils.BarcodeScanner.select_scan_match(data.candidates);
 					if (!data) {
 						resolve();
 						return;
@@ -124,7 +124,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 			});
 	}
 
-	select_scan_match(candidates) {
+	static select_scan_match(candidates) {
 		return new Promise((resolve) => {
 			const items = [...new Set(candidates.map((d) => d.item_code))];
 			let matches = [];
