@@ -1,8 +1,10 @@
 from unittest.mock import patch
 
 import frappe
+from frappe.utils import get_url_to_form
 
 from erpnext.controllers.sales_and_purchase_return import get_returned_serial_nos
+from erpnext.controllers.subcontracting_controller import add_items_in_ste
 from erpnext.manufacturing.doctype.work_order.mapper import get_serial_nos_for_job_card
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
@@ -18,6 +20,7 @@ from erpnext.stock.doctype.stock_entry.services.manufacturing import Manufacture
 from erpnext.stock.doctype.stock_entry.services.serial_batch import StockEntrySABB
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import get_items, get_stock_balance_for
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import get_reserved_materials
+from erpnext.stock.get_item_details import get_filtered_serial_nos
 from erpnext.stock.report.stock_ledger.stock_ledger import update_available_serial_nos
 from erpnext.stock.serial_batch_bundle import get_serial_batch_list_from_item
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
@@ -382,6 +385,202 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 					self.assertEqual(row.serial_no, numbers)
 		self.assertEqual(row.current_serial_no, "Keep-001\nRemove-002")
 		self.assertFalse(frappe.db.exists("Serial No", {"item_code": self.item.name, "serial_no": "New-003"}))
+
+	def test_serial_filter_uses_each_rows_item_and_physical_number(self):
+		selected = self.make_number("Serial No", "Selected-001")
+		other = self.make_number("Serial No", "Selected-001", self.other_item.name)
+		available = self.make_number("Serial No", "Available-002")
+		for table, item_field in (("items", "item_code"), ("supplied_items", "rm_item_code")):
+			with self.subTest(table=table):
+				row = frappe._dict({item_field: self.item.name, "serial_no": "SELECTED-001\nselected-001"})
+				doc = frappe._dict({table: [row]})
+				serial_ids = [available.name, other.name, selected.name]
+				self.assertEqual(
+					get_filtered_serial_nos(serial_ids, doc, table), [available.name, other.name]
+				)
+				self.assertEqual(row.serial_no, "SELECTED-001\nselected-001")
+
+	def test_serial_filter_does_not_interpret_physical_numbers_as_ids(self):
+		first = self.make_number("Serial No", "Selected-001")
+		second = self.make_number("Serial No", first.name)
+		doc = frappe._dict(items=[{"item_code": self.item.name, "serial_no": first.name}])
+		self.assertEqual(get_filtered_serial_nos([first.name, second.name], doc), [first.name])
+
+	def test_supplied_item_automatic_selection_fills_physical_serial_text(self):
+		first = self.make_number("Serial No", "Automatic-001")
+		second = self.make_number("Serial No", "Automatic-002")
+		self.make_number("Serial No", "Automatic-001", self.other_item.name)
+		doc = frappe.get_doc(
+			doctype="Subcontracting Receipt",
+			supplier_warehouse="_Test Warehouse - _TC",
+			supplied_items=[
+				{"rm_item_code": self.item.name, "consumed_qty": 2, "use_serial_batch_fields": 1}
+			],
+		)
+		available = [frappe._dict(serial_no=second.name), frappe._dict(serial_no=first.name)]
+		with patch(
+			"erpnext.controllers.subcontracting_controller.get_available_serial_nos", return_value=available
+		) as lookup:
+			doc.set_batch_for_supplied_items()
+
+		self.assertEqual(doc.supplied_items[0].serial_no, "Automatic-002\nAutomatic-001")
+		self.assertEqual(doc.supplied_items[0].consumed_qty, 2)
+		self.assertEqual([serial.serial_no for serial in available], [second.name, first.name])
+		self.assertEqual(lookup.call_args.args[0].item_code, self.item.name)
+		self.assertEqual(lookup.call_args.args[0].warehouse, doc.supplier_warehouse)
+
+	def test_supplier_availability_deducts_serials_across_text_and_bundles(self):
+		consumed = self.make_number("Serial No", "Supplier-001")
+		remaining = self.make_number("Serial No", "Supplier-002")
+		self.make_number("Serial No", "Supplier-001", self.other_item.name)
+		warehouse = "_Test Warehouse - _TC"
+		key = (self.item.name, "Finished Item", "Subcontracting Order")
+		for transfer_text, receipt_text in ((True, True), (True, False), (False, True)):
+			with self.subTest(transfer_text=transfer_text, receipt_text=receipt_text):
+				doc = frappe.get_doc(doctype="Subcontracting Receipt", supplier_warehouse=warehouse)
+				doc.subcontract_orders = [key[2]]
+				doc.available_materials = {}
+				transfer = frappe._dict(
+					rm_item_code=self.item.name,
+					main_item_code=key[1],
+					subcontracting_order=key[2],
+					voucher_no="Transfer",
+					t_warehouse=warehouse,
+					qty=2,
+					serial_no="supplier-001\nSUPPLIER-002" if transfer_text else None,
+				)
+				receipt = frappe._dict(
+					rm_item_code=self.item.name,
+					main_item_code=key[1],
+					reference_name="Receipt Row",
+					voucher_no="Receipt",
+					consumed_qty=1,
+					serial_no="SUPPLIER-001" if receipt_text else None,
+				)
+				transfer_bundles = (
+					{}
+					if transfer_text
+					else {
+						(self.item.name, key[1], warehouse, "Transfer"): frappe._dict(
+							serial_nos=[consumed.name, remaining.name]
+						)
+					}
+				)
+				receipt_bundles = (
+					{}
+					if receipt_text
+					else {
+						(self.item.name, key[1], warehouse, "Receipt"): frappe._dict(
+							serial_nos=[consumed.name]
+						)
+					}
+				)
+				with (
+					patch.object(
+						doc, "_SubcontractingController__get_transferred_items", return_value=[transfer]
+					),
+					patch.object(
+						doc,
+						"_SubcontractingController__get_received_items",
+						return_value=[frappe._dict(name="Receipt Row", subcontracting_order=key[2])],
+					),
+					patch.object(
+						doc, "_SubcontractingController__get_consumed_items", return_value=[receipt]
+					),
+					patch(
+						"erpnext.controllers.subcontracting_controller.get_voucher_wise_serial_batch_from_bundle",
+						side_effect=[transfer_bundles, receipt_bundles],
+					),
+					patch("erpnext.deprecation_dumpster.deprecation_warning"),
+				):
+					doc.get_available_materials()
+				self.assertEqual(doc.available_materials[key].serial_no, [remaining.name])
+				self.assertEqual(doc.available_materials[key].qty, 1)
+				self.assertEqual(transfer.serial_no, "supplier-001\nSUPPLIER-002" if transfer_text else None)
+				self.assertEqual(receipt.serial_no, "SUPPLIER-001" if receipt_text else None)
+
+	def test_supplied_item_serial_text_keeps_allocation_order_and_quantity(self):
+		first = self.make_number("Serial No", "Supplied-001")
+		second = self.make_number("Serial No", "Supplied-002")
+		remaining = self.make_number("Serial No", "Supplied-003")
+		self.make_number("Serial No", "Supplied-001", self.other_item.name)
+		doc = frappe.get_doc(doctype="Subcontracting Receipt")
+		item = frappe._dict(item_code="Finished Item", subcontracting_order="Subcontracting Order")
+		key = (self.item.name, item.item_code, item.subcontracting_order)
+		doc.available_materials = {key: {"serial_no": [second.name, first.name, remaining.name]}}
+		row = frappe._dict(rm_item_code=self.item.name, consumed_qty=2)
+
+		doc._SubcontractingController__set_serial_nos(item, row)
+
+		self.assertEqual(row.serial_no, "Supplied-002\nSupplied-001")
+		self.assertEqual(row.consumed_qty, 2)
+		self.assertEqual(doc.available_materials[key]["serial_no"], [remaining.name])
+		next_row = frappe._dict(rm_item_code=self.item.name, consumed_qty=1)
+
+		doc._SubcontractingController__set_serial_nos(item, next_row)
+
+		self.assertEqual(next_row.serial_no, "Supplied-003")
+		self.assertEqual(doc.available_materials[key]["serial_no"], [])
+		self.assertEqual(row.serial_no, "Supplied-002\nSupplied-001")
+
+	def test_subcontracting_return_stock_entry_uses_physical_serial_text(self):
+		first = self.make_number("Serial No", "Return-001")
+		second = self.make_number("Serial No", "Return-002")
+		self.make_number("Serial No", "Return-001", self.other_item.name)
+		batch = self.make_number("Batch", "Return-Batch")
+		materials = frappe._dict(
+			serial_no=[second.name, first.name],
+			sco_rm_details=["Order-Row"],
+			item_details={
+				"rm_item_code": self.item.name,
+				"main_item_code": "Finished Item",
+				"rate": 10,
+				"s_warehouse": "_Test Warehouse - _TC",
+				"t_warehouse": "_Test Warehouse 1 - _TC",
+			},
+		)
+		doc = frappe.get_doc(doctype="Stock Entry")
+
+		add_items_in_ste(doc, materials, 2, ["Order-Row"], batch_no=batch.name)
+
+		row = doc.items[0]
+		self.assertEqual(row.item_code, self.item.name)
+		self.assertEqual(row.serial_no, "Return-002\nReturn-001")
+		self.assertEqual(row.batch_no, batch.name)
+		self.assertEqual(row.qty, 2)
+		self.assertEqual(row.sco_rm_detail, "Order-Row")
+		self.assertEqual(row.s_warehouse, "_Test Warehouse 1 - _TC")
+		self.assertEqual(row.t_warehouse, "_Test Warehouse - _TC")
+		self.assertEqual(materials.serial_no, [second.name, first.name])
+
+	def test_subcontracting_errors_link_physical_numbers_to_their_records(self):
+		for doctype in ("Serial No", "Batch"):
+			record = self.make_number(doctype, "Unreserved-<001>")
+			doc = frappe.get_doc(
+				doctype="Stock Entry",
+				purpose="Subcontracting Delivery",
+				subcontracting_inward_order="_Identity Inward Order",
+				items=[
+					{
+						"item_code": self.item.name,
+						"serial_no": "Unreserved-<001>" if doctype == "Serial No" else None,
+						"batch_no": record.name if doctype == "Batch" else None,
+					}
+				],
+			)
+			with (
+				self.subTest(doctype=doctype),
+				patch.object(doc, "get_serial_nos_and_batches_from_sres", return_value=([], {})),
+				self.assertRaisesRegex(
+					frappe.ValidationError, "not a part of the linked Subcontracting Inward Order"
+				) as error,
+			):
+				doc.validate_serial_batch_for_return_or_delivery()
+			message = str(error.exception)
+			self.assertIn(f'href="{get_url_to_form(doctype, record.name)}"', message)
+			self.assertIn(">Unreserved-&lt;001&gt;</a>", message)
+			self.assertNotIn(f">{record.name}</a>", message)
+			self.assertNotIn("Unreserved-<001>", message)
 
 	def test_subcontracting_fields_show_numbers_and_keep_bundle_inputs_as_ids(self):
 		first = self.make_number("Serial No", "Subcontracting-001")
