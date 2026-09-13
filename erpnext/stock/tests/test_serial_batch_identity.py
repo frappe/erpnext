@@ -4,6 +4,7 @@ import frappe
 from frappe.utils import get_url_to_form
 
 from erpnext.controllers.sales_and_purchase_return import get_returned_serial_nos
+from erpnext.controllers.selling_controller import get_delivered_serial_batch_for_reservation
 from erpnext.controllers.subcontracting_controller import add_items_in_ste
 from erpnext.manufacturing.doctype.work_order.mapper import get_serial_nos_for_job_card
 from erpnext.stock.doctype.item.test_item import make_item
@@ -20,7 +21,7 @@ from erpnext.stock.doctype.stock_entry.services.manufacturing import Manufacture
 from erpnext.stock.doctype.stock_entry.services.serial_batch import StockEntrySABB
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import get_items, get_stock_balance_for
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import get_reserved_materials
-from erpnext.stock.get_item_details import get_filtered_serial_nos
+from erpnext.stock.get_item_details import get_filtered_serial_nos, update_stock
 from erpnext.stock.report.stock_ledger.stock_ledger import update_available_serial_nos
 from erpnext.stock.serial_batch_bundle import get_serial_batch_list_from_item
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
@@ -386,6 +387,69 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 		self.assertEqual(row.current_serial_no, "Keep-001\nRemove-002")
 		self.assertFalse(frappe.db.exists("Serial No", {"item_code": self.item.name, "serial_no": "New-003"}))
 
+	def test_landed_cost_updates_serial_rates_using_item_and_physical_number(self):
+		first = self.make_number("Serial No", "Receipt-001")
+		second = self.make_number("Serial No", "Receipt-002")
+		other = self.make_number("Serial No", "Receipt-001", self.other_item.name)
+		receipt = frappe.get_doc(
+			doctype="Purchase Receipt",
+			items=[
+				{
+					"item_code": self.item.name,
+					"serial_no": "receipt-001\nRECEIPT-002",
+					"valuation_rate": 25,
+				},
+				{"item_code": self.other_item.name, "serial_no": "RECEIPT-001", "valuation_rate": 40},
+			],
+		)
+		voucher = frappe.get_doc(doctype="Landed Cost Voucher")
+
+		voucher.update_rate_in_serial_no_for_non_asset_items(receipt)
+
+		self.assertEqual(first.reload().purchase_rate, 25)
+		self.assertEqual(second.reload().purchase_rate, 25)
+		self.assertEqual(other.reload().purchase_rate, 40)
+		self.assertEqual(receipt.items[0].serial_no, "receipt-001\nRECEIPT-002")
+		self.assertEqual(receipt.items[1].serial_no, "RECEIPT-001")
+
+	def test_delivered_reservations_resolve_physical_serial_text_by_item(self):
+		first = self.make_number("Serial No", "Delivered-001")
+		second = self.make_number("Serial No", "Delivered-002")
+		self.make_number("Serial No", "Delivered-001", self.other_item.name)
+		batch = self.make_number("Batch", "Delivered-Batch")
+		row = frappe._dict(
+			item_code=self.item.name,
+			serial_no="delivered-002\nDELIVERED-001",
+			batch_no=batch.name,
+			stock_qty=-2,
+		)
+		self.assertEqual(
+			get_delivered_serial_batch_for_reservation(row),
+			([second.name, first.name], {batch.name: 2}),
+		)
+		self.assertEqual(row.serial_no, "delivered-002\nDELIVERED-001")
+		self.assertEqual(row.batch_no, batch.name)
+
+	def test_delivered_reservations_prefer_bundle_ids(self):
+		serial = self.make_number("Serial No", "Delivered-001")
+		batch = self.make_number("Batch", "Delivered-Batch")
+		bundle = frappe.get_doc(
+			doctype="Serial and Batch Bundle",
+			item_code=self.item.name,
+			entries=[{"serial_no": serial.name, "batch_no": batch.name, "qty": -1}],
+		)
+		row = frappe._dict(
+			item_code=self.item.name,
+			serial_and_batch_bundle="Delivered-Bundle",
+			serial_no="Different-Selection",
+		)
+		with patch("frappe.get_doc", return_value=bundle) as lookup:
+			self.assertEqual(
+				get_delivered_serial_batch_for_reservation(row), ([serial.name], {batch.name: 1})
+			)
+		lookup.assert_called_once_with("Serial and Batch Bundle", "Delivered-Bundle")
+		self.assertEqual(bundle.entries[0].serial_no, serial.name)
+
 	def test_serial_filter_uses_each_rows_item_and_physical_number(self):
 		selected = self.make_number("Serial No", "Selected-001")
 		other = self.make_number("Serial No", "Selected-001", self.other_item.name)
@@ -405,6 +469,42 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 		second = self.make_number("Serial No", first.name)
 		doc = frappe._dict(items=[{"item_code": self.item.name, "serial_no": first.name}])
 		self.assertEqual(get_filtered_serial_nos([first.name, second.name], doc), [first.name])
+
+	def test_sales_automatic_selection_returns_physical_serial_text(self):
+		selected = self.make_number("Serial No", "Selected-001")
+		first = self.make_number("Serial No", "Automatic-001")
+		second = self.make_number("Serial No", "Automatic-002")
+		self.make_number("Serial No", "Automatic-001", self.other_item.name)
+		batch = self.make_number("Batch", "Automatic-Batch")
+		for doctype in ("Delivery Note", "Sales Invoice", "POS Invoice"):
+			for has_batch_no in (0, 1):
+				with self.subTest(doctype=doctype, has_batch_no=has_batch_no):
+					ctx = frappe._dict(
+						doctype=doctype,
+						item_code=self.item.name,
+						warehouse="_Test Warehouse - _TC",
+						update_stock=1,
+						batch_no=batch.name if has_batch_no else None,
+					)
+					out = frappe._dict(
+						item_code=self.item.name,
+						warehouse=ctx.warehouse,
+						has_serial_no=1,
+						has_batch_no=has_batch_no,
+						stock_qty=1,
+					)
+					doc = frappe._dict(items=[{"item_code": self.item.name, "serial_no": "SELECTED-001"}])
+					with patch(
+						"erpnext.stock.doctype.serial_no.serial_no.get_serial_nos_for_outward",
+						return_value=[selected.name, first.name, second.name],
+					) as lookup:
+						update_stock(ctx, out, doc)
+					self.assertEqual(out.serial_no, "Automatic-001")
+					self.assertEqual(out.stock_qty, 1)
+					self.assertEqual(doc["items"][0]["serial_no"], "SELECTED-001")
+					self.assertEqual(lookup.call_args.args[0].item_code, self.item.name)
+					if has_batch_no:
+						self.assertEqual(lookup.call_args.args[0].batches, [batch.name])
 
 	def test_supplied_item_automatic_selection_fills_physical_serial_text(self):
 		first = self.make_number("Serial No", "Automatic-001")
