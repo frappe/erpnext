@@ -322,7 +322,7 @@ class MaintenanceSchedule(TransactionBase):
 		for serial_no in serial_nos:
 			serial_no_doc = frappe.get_doc("Serial No", serial_no)
 			serial_no_doc.amc_expiry_date = amc_expiry_date
-			serial_no_doc.save(ignore_permissions=True)
+			serial_no_doc.save()
 
 	def validate_serial_no(self, item_code, serial_nos, amc_start_date):
 		for serial_no in serial_nos:
