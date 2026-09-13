@@ -1662,7 +1662,7 @@ def get_batchwise_qty(voucher_type, voucher_no):
 
 def get_serial_batch_list_from_item(item):
 	serial_list, batch_list = [], []
-	if item.serial_and_batch_bundle:
+	if item.get("serial_and_batch_bundle"):
 		table = frappe.qb.DocType("Serial and Batch Entry")
 		query = (
 			frappe.qb.from_(table)
@@ -1679,10 +1679,10 @@ def get_serial_batch_list_from_item(item):
 	else:
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
-		if item.serial_no:
+		if item.get("serial_no"):
 			serial_list = SerialBatchIdentity("Serial No").resolve(
 				item.item_code, get_serial_nos(item.serial_no), ignore_permissions=True
 			)
-		batch_list = [item.batch_no] if item.batch_no else []
+		batch_list = [item.batch_no] if item.get("batch_no") else []
 
 	return serial_list, batch_list
