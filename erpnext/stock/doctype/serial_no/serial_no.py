@@ -8,7 +8,7 @@ import frappe
 from frappe import ValidationError, _
 from frappe.model.naming import make_autoname
 from frappe.query_builder.functions import Coalesce
-from frappe.utils import cint, cstr, getdate, nowdate, safe_json_loads
+from frappe.utils import cint, cstr, escape_html, getdate, nowdate, safe_json_loads
 
 from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
@@ -106,23 +106,17 @@ class SerialNo(StockController):
 			self.maintenance_status = "Under Warranty"
 
 	def on_trash(self):
-		sl_entries = frappe.get_all(
+		for serial_nos in frappe.get_all(
 			"Stock Ledger Entry",
 			filters={"serial_no": ["like", f"%{self.name}%"], "item_code": self.item_code, "is_cancelled": 0},
-			fields=["serial_no"],
-		)
-
-		# Find the exact match
-		sle_exists = False
-		for d in sl_entries:
-			if self.name.upper() in get_serial_nos(d.serial_no):
-				sle_exists = True
-				break
-
-		if sle_exists:
-			frappe.throw(
-				_("Cannot delete Serial No {0}, as it is used in stock transactions").format(self.name)
-			)
+			pluck="serial_no",
+		):
+			if self.name.upper() in (serial_no.upper() for serial_no in get_serial_nos(serial_nos)):
+				frappe.throw(
+					_("Cannot delete Serial No {0}, as it is used in stock transactions").format(
+						escape_html(self.serial_no)
+					)
+				)
 
 
 def get_available_serial_nos(serial_no_series, qty, item_code) -> list[str]:

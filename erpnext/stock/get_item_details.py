@@ -26,6 +26,7 @@ from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.item.item import get_item_defaults, get_uom_conv_factor
 from erpnext.stock.doctype.item_manufacturer.item_manufacturer import get_item_manufacturer_part_no
 from erpnext.stock.doctype.price_list.price_list import get_price_list_details
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 ItemDetailsCtx = frappe._dict
 
@@ -297,7 +298,6 @@ def set_valuation_rate(out: frappe._dict, ctx: frappe._dict):
 
 def update_stock(ctx, out, doc=None):
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos_for_outward
-	from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 	if (
 		(
@@ -397,7 +397,6 @@ def filter_batches(batches, doc):
 
 def get_filtered_serial_nos(serial_nos, doc, table=None):
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-	from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 	if not table:
 		table = "items"
@@ -432,9 +431,18 @@ def get_item_code(barcode=None, serial_no=None):
 		if not item_code:
 			frappe.throw(_("No Item with Barcode {0}").format(barcode))
 	elif serial_no:
-		item_code = frappe.db.get_value("Serial No", serial_no, "item_code")
-		if not item_code:
-			frappe.throw(_("No Item with Serial No {0}").format(serial_no))
+		serials = SerialBatchIdentity("Serial No").get_records(
+			None, [serial_no.strip()], ["item_code"], ignore_permissions=False
+		)
+		if not serials:
+			frappe.throw(_("No Item with Serial No {0}").format(frappe.utils.escape_html(serial_no)))
+		if len(serials) > 1:
+			frappe.throw(
+				_("Serial No {0} belongs to multiple items. Please select an Item first.").format(
+					frappe.utils.escape_html(serial_no)
+				)
+			)
+		item_code = serials[0].item_code
 
 	return item_code
 

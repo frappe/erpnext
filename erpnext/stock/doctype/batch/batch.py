@@ -401,14 +401,16 @@ def make_batch_bundle(
 
 
 def validate_serial_no_with_batch(serial_nos, item_code):
+	identity = SerialBatchIdentity("Serial No")
 	if frappe.get_cached_value("Serial No", serial_nos[0], "item_code") != item_code:
 		frappe.throw(
 			_("The serial no {0} does not belong to item {1}").format(
-				get_link_to_form("Serial No", serial_nos[0]), get_link_to_form("Item", item_code)
+				get_link_to_form("Serial No", serial_nos[0], identity.get_label(serial_nos[0])),
+				get_link_to_form("Item", item_code),
 			)
 		)
 
-	serial_no_link = ",".join(get_link_to_form("Serial No", sn) for sn in serial_nos)
+	serial_no_link = ",".join(get_link_to_form("Serial No", sn, identity.get_label(sn)) for sn in serial_nos)
 
 	message = _("Serial Nos") if len(serial_nos) > 1 else _("Serial No")
 	frappe.throw(_("There is no batch found against the {0}: {1}").format(message, serial_no_link))

@@ -1233,7 +1233,9 @@ def filter_serial_batches(parent_doc, data, row, warehouse_field=None, qty_field
 
 				if batch_qty <= 0:
 					frappe.throw(
-						_("Batch {0} is not available in warehouse {1}").format(batch_no, warehouse),
+						_("Batch {0} is not available in warehouse {1}").format(
+							SerialBatchIdentity("Batch").get_label(batch_no), warehouse
+						),
 						title=_("Batch Not Available for Return"),
 					)
 

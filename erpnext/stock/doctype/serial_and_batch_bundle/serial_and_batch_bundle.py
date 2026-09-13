@@ -34,6 +34,7 @@ from erpnext.stock.serial_batch_bundle import (
 	get_batches_from_bundle,
 )
 from erpnext.stock.serial_batch_bundle import get_serial_nos as get_serial_nos_from_bundle
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.valuation import FIFOValuation
 
 
@@ -161,7 +162,7 @@ class SerialandBatchBundle(Document):
 				"name": ("in", serial_nos),
 				"warehouse": ("!=", self.warehouse),
 			},
-			pluck="name",
+			pluck="serial_no",
 		)
 
 		if invalid_serial_nos:
@@ -169,7 +170,7 @@ class SerialandBatchBundle(Document):
 				"You cannot outward the following {0} as they are either Delivered, Inactive or located in a different warehouse."
 			).format(_("Serial Nos") if len(invalid_serial_nos) > 1 else _("Serial No"))
 			msg += "<hr>"
-			msg += ", ".join(sn for sn in invalid_serial_nos)
+			msg += escape_html(", ".join(invalid_serial_nos))
 			frappe.throw(msg)
 
 	def validate_voucher_detail_no(self):
@@ -230,7 +231,7 @@ class SerialandBatchBundle(Document):
 				_(
 					"You cannot process the serial number {0} as it has already been used in the SABB {1}. {2} If you want to inward the same serial number multiple times, then enable 'Allow existing Serial No to be Manufactured/Received again' in the {3}"
 				).format(
-					row.serial_no,
+					SerialBatchIdentity("Serial No").get_label(row.serial_no),
 					get_link_to_form("Serial and Batch Bundle", row.parent),
 					note,
 					get_link_to_form("Stock Settings", "Stock Settings"),
@@ -310,10 +311,11 @@ class SerialandBatchBundle(Document):
 
 		for serial_no in serial_nos:
 			if not serial_no_warehouse.get(serial_no) or serial_no_warehouse.get(serial_no) != self.warehouse:
+				serial_number = SerialBatchIdentity("Serial No").get_label(serial_no)
 				reservation = get_serial_no_reservation(self.item_code, serial_no, self.warehouse)
 				if reservation:
 					self.throw_error_message(
-						f"Serial No {bold(serial_no)} is in warehouse {bold(self.warehouse)}"
+						f"Serial No {bold(serial_number)} is in warehouse {bold(self.warehouse)}"
 						f" but is reserved for {reservation.voucher_type} {bold(reservation.voucher_no)}"
 						f" via {get_link_to_form('Stock Reservation Entry', reservation.name)}."
 						f" Please use an unreserved serial number or cancel the reservation.",
@@ -321,7 +323,7 @@ class SerialandBatchBundle(Document):
 					)
 				else:
 					self.throw_error_message(
-						f"Serial No {bold(serial_no)} is not present in the warehouse {bold(self.warehouse)}.",
+						f"Serial No {bold(serial_number)} is not present in the warehouse {bold(self.warehouse)}.",
 						SerialNoWarehouseError,
 					)
 
@@ -358,8 +360,9 @@ class SerialandBatchBundle(Document):
 		available_serial_nos = get_available_serial_nos(kwargs)
 		for data in available_serial_nos:
 			if data.serial_no in serial_nos:
+				serial_number = SerialBatchIdentity("Serial No").get_label(data.serial_no)
 				self.throw_error_message(
-					f"Serial No {bold(data.serial_no)} is already present in the warehouse {bold(data.warehouse)}.",
+					f"Serial No {bold(serial_number)} is already present in the warehouse {bold(data.warehouse)}.",
 					SerialNoDuplicateError,
 				)
 
@@ -370,7 +373,7 @@ class SerialandBatchBundle(Document):
 			in ["Manufacture", "Repack"]
 		):
 			serial_nos = frappe.get_all(
-				"Serial No", filters={"name": ("in", serial_nos), "status": "Delivered"}, pluck="name"
+				"Serial No", filters={"name": ("in", serial_nos), "status": "Delivered"}, pluck="serial_no"
 			)
 
 			if serial_nos:
@@ -378,13 +381,13 @@ class SerialandBatchBundle(Document):
 					frappe.throw(
 						_(
 							"Serial No {0} is already Delivered. You cannot use it again in Manufacture / Repack entry."
-						).format(bold(serial_nos[0]))
+						).format(bold(escape_html(serial_nos[0])))
 					)
 				else:
 					frappe.throw(
 						_(
 							"Serial Nos {0} are already Delivered. You cannot use them again in Manufacture / Repack entry."
-						).format(bold(", ".join(serial_nos)))
+						).format(bold(escape_html(", ".join(serial_nos))))
 					)
 
 	def throw_error_message(self, message, exception=frappe.ValidationError):
@@ -533,14 +536,22 @@ class SerialandBatchBundle(Document):
 			self.throw_error_message(
 				_(
 					"Serial No {0} is not present in the {1} {2}, hence you can't return it against the {1} {2}"
-				).format(bold(row.serial_no), self.voucher_type, bold(return_against))
+				).format(
+					bold(SerialBatchIdentity("Serial No").get_label(row.serial_no)),
+					self.voucher_type,
+					bold(return_against),
+				)
 			)
 
 		if row.batch_no and row.batch_no not in original_inv_details["batches"]:
 			self.throw_error_message(
 				_(
 					"Batch No {0} is not present in the original {1} {2}, hence you can't return it against the {1} {2}"
-				).format(bold(row.batch_no), self.voucher_type, bold(return_against))
+				).format(
+					bold(SerialBatchIdentity("Batch").get_label(row.batch_no)),
+					self.voucher_type,
+					bold(return_against),
+				)
 			)
 
 	def get_valuation_rate_for_return_entry(self, return_against):
@@ -772,7 +783,10 @@ class SerialandBatchBundle(Document):
 		if available_qty < 0 and not self.is_stock_reco_for_valuation_adjustment(available_qty):
 			frappe.throw(
 				_("Batch No {0} of Item {1} has negative stock of quantity {2} in the warehouse {3}").format(
-					bold(batch_no), bold(self.item_code), bold(available_qty), self.warehouse
+					bold(SerialBatchIdentity("Batch").get_label(batch_no)),
+					bold(self.item_code),
+					bold(available_qty),
+					self.warehouse,
 				),
 				BatchNegativeStockError,
 			)
@@ -1094,9 +1108,10 @@ class SerialandBatchBundle(Document):
 
 			for d in future_entries:
 				if self.has_serial_no:
-					msg += f"<li>{d.serial_no} in {get_link_to_form(d.voucher_type, d.voucher_no)}</li>"
+					number = SerialBatchIdentity("Serial No").get_label(d.serial_no)
 				else:
-					msg += f"<li>{d.batch_no} in {get_link_to_form(d.voucher_type, d.voucher_no)}</li>"
+					number = SerialBatchIdentity("Batch").get_label(d.batch_no)
+				msg += f"<li>{number} in {get_link_to_form(d.voucher_type, d.voucher_no)}</li>"
 			msg += "</li></ul>"
 
 			frappe.throw(_(msg), title=_(title), exc=SerialNoExistsInFutureTransactionError)
@@ -1115,8 +1130,6 @@ class SerialandBatchBundle(Document):
 		return serial_nos, batch_nos
 
 	def get_skip_serial_nos_for_stock_reconciliation(self, is_cancelled=False):
-		from erpnext.stock.serial_batch_identity import SerialBatchIdentity
-
 		data = get_stock_reco_details(self.voucher_detail_no)
 
 		if not data:
@@ -1293,7 +1306,7 @@ class SerialandBatchBundle(Document):
 
 				frappe.throw(
 					_("At row {0}: Qty is mandatory for the batch {1}").format(
-						bold(row.idx), bold(row.batch_no)
+						bold(row.idx), bold(SerialBatchIdentity("Batch").get_label(row.batch_no))
 					)
 				)
 
@@ -1343,37 +1356,37 @@ class SerialandBatchBundle(Document):
 
 		for serial_no, batch_no in serial_batches.items():
 			if correct_batches.get(serial_no) and correct_batches.get(serial_no) != batch_no:
+				serial_number = SerialBatchIdentity("Serial No").get_label(serial_no)
+				batch_number = SerialBatchIdentity("Batch").get_label(batch_no)
 				self.throw_error_message(
-					f"Serial No {bold(serial_no)} does not belong to Batch No {bold(batch_no)}"
+					f"Serial No {bold(serial_number)} does not belong to Batch No {bold(batch_number)}"
 				)
 
 	def validate_incorrect_serial_nos(self, serial_nos):
 		incorrect_serial_nos = frappe.get_all(
 			"Serial No",
 			filters={"name": ("in", serial_nos), "item_code": ("!=", self.item_code)},
-			fields=["name"],
+			pluck="serial_no",
 		)
 
 		if incorrect_serial_nos:
-			incorrect_serial_nos = ", ".join([d.name for d in incorrect_serial_nos])
+			incorrect_serial_nos = escape_html(", ".join(incorrect_serial_nos))
 			self.throw_error_message(
 				f"Serial Nos {bold(incorrect_serial_nos)} does not belong to Item {bold(self.item_code)}"
 			)
 
 	def validate_incorrect_batch_nos(self, batch_nos):
 		incorrect_batch_nos = frappe.get_all(
-			"Batch", filters={"name": ("in", batch_nos), "item": ("!=", self.item_code)}, fields=["name"]
+			"Batch", filters={"name": ("in", batch_nos), "item": ("!=", self.item_code)}, pluck="batch_id"
 		)
 
 		if incorrect_batch_nos:
-			incorrect_batch_nos = ", ".join([d.name for d in incorrect_batch_nos])
+			incorrect_batch_nos = escape_html(", ".join(incorrect_batch_nos))
 			self.throw_error_message(
 				f"Batch Nos {bold(incorrect_batch_nos)} does not belong to Item {bold(self.item_code)}"
 			)
 
 	def validate_serial_and_batch_no_for_returned(self):
-		from erpnext.stock.serial_batch_identity import SerialBatchIdentity
-
 		if not self.returned_against:
 			return
 
@@ -1423,9 +1436,14 @@ class SerialandBatchBundle(Document):
 					)
 
 			if batches:
-				if not set(current_batches).issubset(set(batches)):
+				if invalid_batches := set(current_batches) - set(batches):
+					numbers = frappe.get_all(
+						"Batch", filters={"name": ("in", invalid_batches)}, pluck="batch_id"
+					)
 					self.throw_error_message(
-						f"Batch Nos {bold(', '.join(batches))} are not part of the original document."
+						_("Batch Nos {0} are not part of the original document.").format(
+							bold(escape_html(", ".join(numbers)))
+						)
 					)
 
 	def get_orignal_document_data(self):
@@ -1453,12 +1471,18 @@ class SerialandBatchBundle(Document):
 		if serial_nos:
 			for key, value in collections.Counter(serial_nos).items():
 				if value > 1:
-					self.throw_error_message(f"Duplicate Serial No {key} found")
+					self.throw_error_message(
+						_("Duplicate Serial No {0} found").format(
+							SerialBatchIdentity("Serial No").get_label(key)
+						)
+					)
 
 		if batch_nos:
 			for key, value in collections.Counter(batch_nos).items():
 				if value > 1:
-					self.throw_error_message(f"Duplicate Batch No {key} found")
+					self.throw_error_message(
+						_("Duplicate Batch No {0} found").format(SerialBatchIdentity("Batch").get_label(key))
+					)
 
 	def before_cancel(self):
 		self.delink_serial_and_batch_bundle()
@@ -1650,8 +1674,9 @@ class SerialandBatchBundle(Document):
 				if flt(available_batches.get(batch_no)) < 0:
 					self.validate_negative_batch(batch_no, available_batches[batch_no])
 
+				batch_number = SerialBatchIdentity("Batch").get_label(batch_no)
 				self.throw_error_message(
-					f"Batch {bold(batch_no)} is not available in the selected warehouse {self.warehouse}"
+					f"Batch {bold(batch_number)} is not available in the selected warehouse {self.warehouse}"
 				)
 
 	def on_cancel(self):
@@ -1730,7 +1755,7 @@ class SerialandBatchBundle(Document):
 			"However, enabling this setting may lead to negative stock in the system. "
 			"So please ensure the stock levels are adjusted as soon as possible to maintain the correct valuation rate."
 		).format(
-			bold(batch_no),
+			bold(SerialBatchIdentity("Batch").get_label(batch_no)),
 			bold(self.item_code),
 			bold(self.warehouse),
 			date_msg,
@@ -2653,7 +2678,6 @@ def get_reserved_voucher_details(kwargs):
 
 def get_reserved_serial_nos_for_pos(kwargs):
 	from erpnext.controllers.sales_and_purchase_return import get_returned_serial_nos
-	from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 	ignore_serial_nos = []
 	pos_invoices = frappe.get_all(
@@ -2740,7 +2764,11 @@ def get_reserved_serial_nos_for_voucher(kwargs, reserved_entries, reserved_vouch
 			frappe.throw(
 				_(
 					"The Serial No {0} is reserved against the {1} {2} and cannot be used for any other transaction."
-				).format(bold(entry.serial_no), entry.voucher_type, bold(entry.voucher_no)),
+				).format(
+					bold(SerialBatchIdentity("Serial No").get_label(entry.serial_no)),
+					entry.voucher_type,
+					bold(entry.voucher_no),
+				),
 				title=_("Serial No Reserved"),
 			)
 
@@ -3598,8 +3626,6 @@ def get_stock_ledgers_batches(kwargs):
 
 @frappe.whitelist()
 def get_serial_batch_scan(item_code: str, number: str, doctype: Literal["Serial No", "Batch"]):
-	from erpnext.stock.serial_batch_identity import SerialBatchIdentity
-
 	if not item_code:
 		frappe.throw(_("Item is required"))
 	frappe.has_permission("Item", "read", doc=item_code, throw=True)

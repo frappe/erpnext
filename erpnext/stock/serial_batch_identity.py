@@ -92,6 +92,12 @@ class SerialBatchIdentity:
 				)
 		return names
 
+	def get_label(self, name):
+		"""Return an escaped physical number for messages."""
+		if not name:
+			return ""
+		return escape_html(frappe.get_cached_value(self.doctype, name, self.number_field) or name)
+
 	def get_numbers(self, item_code, names):
 		if not names:
 			return []

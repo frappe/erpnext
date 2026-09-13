@@ -136,7 +136,7 @@ class SerialBatchBundleService:
 							_("Row #{0}: Serial No {1} does not belong to Batch {2}").format(
 								d.idx,
 								escape_html(row.serial_no),
-								escape_html(frappe.get_cached_value("Batch", d.batch_no, "batch_id")),
+								SerialBatchIdentity("Batch").get_label(d.batch_no),
 							)
 						)
 
@@ -154,7 +154,10 @@ class SerialBatchBundleService:
 				if expiry_date and getdate(expiry_date) < getdate(self.doc.posting_date):
 					frappe.throw(
 						_("Row #{0}: The batch {1} has already expired.").format(
-							d.idx, get_link_to_form("Batch", d.get("batch_no"))
+							d.idx,
+							get_link_to_form(
+								"Batch", d.batch_no, SerialBatchIdentity("Batch").get_label(d.batch_no)
+							),
 						),
 						BatchExpiredError,
 					)
@@ -674,7 +677,7 @@ class SerialBatchBundleService:
 				_(
 					"The batch {0} is reserved for {1} in the warehouse {2} and the remaining quantity is not enough to cover the reservations. So, cannot proceed with the {3} {4}."
 				).format(
-					frappe.bold(batch_no),
+					frappe.bold(SerialBatchIdentity("Batch").get_label(batch_no)),
 					vouchers,
 					frappe.bold(warehouse),
 					frappe.bold(self.doc.doctype),
