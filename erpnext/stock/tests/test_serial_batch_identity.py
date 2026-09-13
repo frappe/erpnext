@@ -7,6 +7,12 @@ from erpnext.controllers.sales_and_purchase_return import get_returned_serial_no
 from erpnext.controllers.selling_controller import get_delivered_serial_batch_for_reservation
 from erpnext.controllers.subcontracting_controller import add_items_in_ste
 from erpnext.manufacturing.doctype.work_order.mapper import get_serial_nos_for_job_card
+from erpnext.selling.page.point_of_sale.point_of_sale import (
+	filter_result_items,
+	get_serials_by_batch,
+	search_by_term,
+	search_for_serial_or_batch_or_barcode_number,
+)
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.pick_list.pick_list import (
 	get_items_with_location_and_quantity,
@@ -1166,6 +1172,138 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 			)
 		self.assertCountEqual(numbers, [serial.serial_no for serial in serials])
 
+	def test_pos_scan_returns_candidates_and_prices_the_selected_item(self):
+		serials = [
+			self.make_number("Serial No", "POS-Scan", item.name) for item in (self.item, self.other_item)
+		]
+		warehouse = "_Test Warehouse - _TC"
+		with patch(
+			"erpnext.selling.page.point_of_sale.point_of_sale.get_stock_availability", return_value=(2, 1, 0)
+		):
+			result = search_by_term("pos-scan", warehouse, "Standard Selling")
+			self.assertCountEqual(
+				[row["serial_no_id"] for row in result["candidates"]], [serial.name for serial in serials]
+			)
+			selected = search_by_term("pos-scan", warehouse, "Standard Selling", self.item.name, "Serial No")
+		self.assertTrue(selected["barcode_scan"])
+		self.assertEqual(len(selected["items"]), 1)
+		self.assertEqual(selected["items"][0]["item_code"], self.item.name)
+		self.assertEqual(selected["items"][0]["serial_no"], "POS-Scan")
+
+	def test_pos_batch_scan_keeps_the_selected_batch_id(self):
+		items = [make_item(f"_Identity POS Batch {suffix}", {"has_batch_no": 1}) for suffix in ("A", "B")]
+		batches = [self.make_number("Batch", "POS-Batch", item.name) for item in items]
+		result = search_for_serial_or_batch_or_barcode_number("pos-batch")
+		self.assertCountEqual(
+			[row["batch_no"] for row in result["candidates"]], [batch.name for batch in batches]
+		)
+		selected = search_for_serial_or_batch_or_barcode_number("pos-batch", items[1].name, "Batch")
+		self.assertEqual(selected["batch_no"], batches[1].name)
+		self.assertEqual(selected["batch_id"], "POS-Batch")
+
+	def test_pos_same_item_scan_requires_record_selection(self):
+		serial = self.make_number("Serial No", "POS-Shared")
+		self.make_number("Batch", "POS-Shared")
+		result = search_for_serial_or_batch_or_barcode_number("pos-shared", self.item.name)
+		self.assertCountEqual([row["record_type"] for row in result["candidates"]], ["Serial No", "Batch"])
+		selected = search_for_serial_or_batch_or_barcode_number("pos-shared", self.item.name, "Serial No")
+		self.assertEqual(selected["serial_no_id"], serial.name)
+		with self.assertRaisesRegex(frappe.ValidationError, "requires serial numbers"):
+			search_for_serial_or_batch_or_barcode_number("pos-shared", self.item.name, "Batch")
+		with self.assertRaisesRegex(frappe.ValidationError, "no longer available"):
+			search_for_serial_or_batch_or_barcode_number("pos-shared", self.other_item.name, "Serial No")
+
+	def test_pos_candidate_selection_respects_profile_item_groups(self):
+		for item in (self.item, self.other_item):
+			self.make_number("Serial No", "POS-Scan", item.name)
+		self.other_item.db_set("item_group", "_Test Item Group")
+		result = search_for_serial_or_batch_or_barcode_number("POS-Scan")
+		profile = frappe._dict(item_groups=[frappe._dict(item_group=self.item.item_group)])
+		with patch("frappe.get_cached_doc", return_value=profile):
+			filter_result_items(result, "_Identity POS Profile")
+		self.assertEqual([row["item_code"] for row in result["candidates"]], [self.item.name])
+
+	def test_pos_groups_physical_serials_by_their_items_batches(self):
+		first_batch = self.make_number("Batch", "POS-Batch-1")
+		second_batch = self.make_number("Batch", "POS-Batch-2")
+		for number, batch in (("POS-Serial-1", first_batch), ("POS-Serial-2", second_batch)):
+			serial = self.make_number("Serial No", number)
+			serial.db_set("batch_no", batch.name)
+			self.make_number("Serial No", number, self.other_item.name)
+		self.assertEqual(
+			get_serials_by_batch(self.item.name, "pos-serial-2\nPOS-SERIAL-1"),
+			{second_batch.name: ["POS-Serial-2"], first_batch.name: ["POS-Serial-1"]},
+		)
+		count = frappe.db.count("Serial No")
+		with self.assertRaises(frappe.DoesNotExistError):
+			get_serials_by_batch(self.item.name, "POS-Missing")
+		self.assertEqual(frappe.db.count("Serial No"), count)
+		with self.set_user("Guest"), self.assertRaises(frappe.PermissionError):
+			get_serials_by_batch(self.item.name, "POS-Serial-1")
+
+	def test_pos_return_checks_the_original_item_and_literal_serial_number(self):
+		serial = self.make_number("Serial No", "POS-<Return_1>")
+		self.make_number("Serial No", serial.serial_no, self.other_item.name)
+		self.make_number("Serial No", "POS-<ReturnX1>")
+		frappe.get_doc(
+			doctype="POS Invoice Item",
+			parent="Identity-POS-Sale",
+			parenttype="POS Invoice",
+			parentfield="items",
+			item_code=self.item.name,
+			serial_no="pos-<return_1>",
+		).db_insert()
+		doc = frappe.get_doc(
+			doctype="POS Invoice",
+			is_return=1,
+			return_against="Identity-POS-Sale",
+			items=[{"item_code": self.item.name, "serial_no": "POS-<RETURN_1>", "qty": -1}],
+		)
+		doc.validate_return_items_qty()
+		self.assertEqual(doc.items[0].serial_no, "POS-<RETURN_1>")
+		for item, number in ((self.other_item.name, serial.serial_no), (self.item.name, "POS-<ReturnX1>")):
+			doc.items[0].item_code = item
+			doc.items[0].serial_no = number
+			with self.assertRaises(frappe.ValidationError) as error:
+				doc.validate_return_items_qty()
+			self.assertIn(frappe.utils.escape_html(number), str(error.exception))
+			self.assertNotIn(serial.name, str(error.exception))
+
+	def test_pos_return_accepts_bundle_serials_without_changing_references(self):
+		serial = self.make_number("Serial No", "POS-Bundled")
+		for bundle in ("Identity-POS-Sale-Bundle", "Identity-POS-Return-Bundle"):
+			frappe.get_doc(
+				doctype="Serial and Batch Entry",
+				parent=bundle,
+				parenttype="Serial and Batch Bundle",
+				parentfield="entries",
+				serial_no=serial.name,
+				qty=1,
+			).db_insert()
+		frappe.get_doc(
+			doctype="POS Invoice Item",
+			parent="Identity-POS-Sale",
+			parenttype="POS Invoice",
+			parentfield="items",
+			item_code=self.item.name,
+			serial_and_batch_bundle="Identity-POS-Sale-Bundle",
+			serial_no="Ignored-Text",
+		).db_insert()
+		doc = frappe.get_doc(
+			doctype="POS Invoice",
+			is_return=1,
+			return_against="Identity-POS-Sale",
+			items=[
+				{
+					"item_code": self.item.name,
+					"serial_and_batch_bundle": "Identity-POS-Return-Bundle",
+					"qty": -1,
+				}
+			],
+		)
+		doc.validate_return_items_qty()
+		self.assertEqual(doc.items[0].serial_and_batch_bundle, "Identity-POS-Return-Bundle")
+
 	def test_pos_screen_reservation_lookup_requires_item_read_permission(self):
 		with self.set_user("Guest"), self.assertRaises(frappe.PermissionError):
 			get_pos_reserved_serial_nos({"item_code": self.item.name, "warehouse": "_Test Warehouse - _TC"})
@@ -1191,6 +1329,17 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 					exclude_sr_nos=frappe.as_json([selected.name]),
 				),
 				[available.name],
+			)
+			self.assertEqual(
+				auto_fetch_serial_number(
+					5,
+					self.item.name,
+					warehouse,
+					for_doctype="POS Invoice",
+					exclude_sr_nos=frappe.as_json([selected.name]),
+					as_numbers=True,
+				),
+				[available.serial_no],
 			)
 
 	def test_pos_serial_text_reservations_exclude_returns(self):
