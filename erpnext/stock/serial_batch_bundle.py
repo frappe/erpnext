@@ -4,7 +4,7 @@ import frappe
 from frappe import _, bold
 from frappe.model.naming import NamingSeries, make_autoname, parse_naming_series
 from frappe.query_builder.functions import Max, Sum
-from frappe.utils import add_days, cint, cstr, flt, get_link_to_form, getdate, now
+from frappe.utils import add_days, cint, cstr, escape_html, flt, get_link_to_form, getdate, now
 from pypika import Order
 from pypika.terms import ExistsCriterion
 
@@ -612,7 +612,7 @@ def get_serial_nos_from_bundle(serial_and_batch_bundle, serial_nos=None):
 
 
 def get_serial_or_batch_nos(bundle):
-	# For print format
+	"""Render physical numbers without changing bundle references."""
 
 	bundle_data = frappe.get_cached_value(
 		"Serial and Batch Bundle", bundle, ["has_serial_no", "has_batch_no"], as_dict=True
@@ -625,7 +625,16 @@ def get_serial_or_batch_nos(bundle):
 	if bundle_data.has_batch_no:
 		fields.extend(["batch_no", "qty"])
 
-	data = frappe.get_all("Serial and Batch Entry", fields=fields, filters={"parent": bundle})
+	data = frappe.get_all("Serial and Batch Entry", fields=fields, filters={"parent": bundle}, order_by="idx")
+	for fieldname, doctype in (("serial_no", "Serial No"), ("batch_no", "Batch")):
+		if fieldname not in fields:
+			continue
+		numbers = SerialBatchIdentity(doctype).get_number_map(
+			[row[fieldname] for row in data if row[fieldname]]
+		)
+		for row in data:
+			if row[fieldname]:
+				row[fieldname] = escape_html(numbers.get(row[fieldname], row[fieldname]))
 
 	if bundle_data.has_serial_no and not bundle_data.has_batch_no:
 		return ", ".join([d.serial_no for d in data])
