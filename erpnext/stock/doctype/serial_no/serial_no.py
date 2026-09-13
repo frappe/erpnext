@@ -11,6 +11,7 @@ from frappe.query_builder.functions import Coalesce
 from frappe.utils import cint, cstr, getdate, nowdate, safe_json_loads
 
 from erpnext.controllers.stock_controller import StockController
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 
 class SerialNoCannotCreateDirectError(ValidationError):
@@ -63,6 +64,10 @@ class SerialNo(StockController):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.via_stock_ledger = False
+
+	def show_unique_validation_message(self, error):
+		SerialBatchIdentity("Serial No").raise_duplicate(error, self.item_code, self.serial_no)
+		super().show_unique_validation_message(error)
 
 	def validate(self):
 		if self.get("__islocal") and self.warehouse and not self.via_stock_ledger:
@@ -307,3 +312,4 @@ def get_serial_nos_for_outward(kwargs):
 
 def on_doctype_update():
 	frappe.db.add_index("Serial No", ["item_code", "warehouse"])
+	SerialBatchIdentity("Serial No").add_unique_constraint()
