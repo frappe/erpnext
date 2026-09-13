@@ -1207,9 +1207,12 @@ def get_delivered_serial_batch_for_reservation(item):
 				batch_qty[row.batch_no] = batch_qty.get(row.batch_no, 0) + abs(flt(row.qty))
 	else:
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+		from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 		if item.get("serial_no"):
-			serial_nos = get_serial_nos(item.serial_no)
+			serial_nos = SerialBatchIdentity("Serial No").resolve(
+				item.item_code, get_serial_nos(item.serial_no), ignore_permissions=True
+			)
 		if item.get("batch_no"):
 			batch_qty[item.batch_no] = abs(flt(item.get("stock_qty") or item.get("qty")))
 

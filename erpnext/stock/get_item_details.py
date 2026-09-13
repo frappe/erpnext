@@ -297,6 +297,7 @@ def set_valuation_rate(out: frappe._dict, ctx: frappe._dict):
 
 def update_stock(ctx, out, doc=None):
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos_for_outward
+	from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 	if (
 		(
@@ -346,13 +347,17 @@ def update_stock(ctx, out, doc=None):
 			serial_nos = get_serial_nos_for_outward(kwargs)
 			serial_nos = get_filtered_serial_nos(serial_nos, doc)
 
-			out["serial_no"] = "\n".join(serial_nos[: cint(out.stock_qty)])
+			out["serial_no"] = "\n".join(
+				SerialBatchIdentity("Serial No").get_numbers(ctx.item_code, serial_nos[: cint(out.stock_qty)])
+			)
 
 		elif out.has_serial_no and not ctx.get("serial_no"):
 			serial_nos = get_serial_nos_for_outward(kwargs)
 			serial_nos = get_filtered_serial_nos(serial_nos, doc)
 
-			out["serial_no"] = "\n".join(serial_nos[: cint(out.stock_qty)])
+			out["serial_no"] = "\n".join(
+				SerialBatchIdentity("Serial No").get_numbers(ctx.item_code, serial_nos[: cint(out.stock_qty)])
+			)
 
 
 def has_incorrect_serial_nos(ctx, out):
