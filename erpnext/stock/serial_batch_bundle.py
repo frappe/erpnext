@@ -1679,7 +1679,10 @@ def get_serial_batch_list_from_item(item):
 	else:
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
-		serial_list = get_serial_nos(item.serial_no) if item.serial_no else []
+		if item.serial_no:
+			serial_list = SerialBatchIdentity("Serial No").resolve(
+				item.item_code, get_serial_nos(item.serial_no), ignore_permissions=True
+			)
 		batch_list = [item.batch_no] if item.batch_no else []
 
 	return serial_list, batch_list

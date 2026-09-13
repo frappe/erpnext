@@ -21,6 +21,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.stock_reconciliation_item.stock_reconciliation_item import StockReconciliationItem
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.utils import get_incoming_rate, get_stock_balance, get_valuation_method
 
 
@@ -199,7 +200,6 @@ class StockReconciliation(StockController):
 
 	def make_bundle_for_current_qty(self):
 		from erpnext.stock.serial_batch_bundle import SerialBatchCreation
-		from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 		for row in self.items:
 			if not row.use_serial_batch_fields:
@@ -1580,16 +1580,9 @@ def get_stock_balance_for(
 			rate = standard_rate
 
 	if serial_nos:
-		serial_ids = get_serial_nos(serial_nos)
-		numbers = dict(
-			frappe.get_all(
-				"Serial No",
-				filters={"item_code": item_code, "name": ("in", serial_ids)},
-				fields=["name", "serial_no"],
-				as_list=True,
-			)
+		serial_nos = "\n".join(
+			SerialBatchIdentity("Serial No").get_numbers(item_code, get_serial_nos(serial_nos))
 		)
-		serial_nos = "\n".join(numbers[name] for name in serial_ids)
 
 	return {
 		"qty": qty,

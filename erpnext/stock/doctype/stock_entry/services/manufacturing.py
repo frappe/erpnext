@@ -15,6 +15,7 @@ from erpnext.stock.serial_batch_bundle import (
 	get_empty_batches_based_work_order,
 	get_serial_nos_from_bundle,
 )
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.utils import get_combine_datetime
 
 from .serial_batch import create_serial_and_batch_bundle
@@ -330,12 +331,25 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 	def check_invalid_serial_batch_nos_for_finished_good_item(self, row) -> bool:
 		if self.wo_doc.has_serial_no:
 			serial_nos = get_serial_nos(row.serial_no) if row.serial_no else []
+			if serial_nos:
+				try:
+					serial_nos = SerialBatchIdentity("Serial No").resolve(
+						row.item_code, serial_nos, ignore_permissions=True
+					)
+				except frappe.DoesNotExistError:
+					if not frappe.flags.mute_messages:
+						frappe.clear_last_message()
+					return True
 			if not serial_nos and row.serial_and_batch_bundle:
 				serial_nos = get_serial_nos_from_bundle(row.serial_and_batch_bundle)
 			if serial_nos:
 				valid_serial_nos = frappe.get_all(
 					"Serial No",
-					filters={"name": ("in", serial_nos), "work_order": self.doc.work_order},
+					filters={
+						"name": ("in", serial_nos),
+						"item_code": row.item_code,
+						"work_order": self.doc.work_order,
+					},
 					pluck="name",
 				)
 				return bool(set(serial_nos) - set(valid_serial_nos))
@@ -701,7 +715,9 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 
 	def _append_with_serial_nos(self, item_args, row, qty):
 		if serial_nos := row.serial_nos[: cint(qty)]:
-			item_args["serial_no"] = "\n".join(serial_nos)
+			item_args["serial_no"] = "\n".join(
+				SerialBatchIdentity("Serial No").get_numbers(item_args["item_code"], serial_nos)
+			)
 		if not item_args.get("uom"):
 			item_args["uom"] = row.stock_uom
 		item_args["use_serial_batch_fields"] = 1

@@ -6,6 +6,7 @@ from frappe.utils import cint, cstr, flt, nowdate
 
 from erpnext.manufacturing.doctype.bom.bom import get_backflush_based_on
 from erpnext.stock.serial_batch_bundle import SerialBatchCreation, get_serial_or_batch_items
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.utils import get_combine_datetime
 
 from .stock_entry_base import BaseStockEntry
@@ -121,7 +122,9 @@ class StockEntrySABB(BaseStockEntry):
 
 					if row.use_serial_batch_fields:
 						if serial_nos_list and not row.serial_no:
-							row.serial_no = "\n".join(serial_nos_list)
+							row.serial_no = "\n".join(
+								SerialBatchIdentity("Serial No").get_numbers(row.item_code, serial_nos_list)
+							)
 						if batch_nos_list and not row.batch_no:
 							row.batch_no = next(iter(batch_nos_list.keys()))
 
@@ -156,9 +159,9 @@ class StockEntrySABB(BaseStockEntry):
 			if d.batch_no:
 				details.batch_no[d.batch_no] += d.qty
 				if d.serial_no:
-					details.batchwise_sn[d.batch_no].extend(d.serial_no.split("\n"))
+					details.batchwise_sn[d.batch_no].append(d.serial_number)
 			elif d.serial_no:
-				details.serial_no.append(d.serial_no)
+				details.serial_no.append(d.serial_number)
 
 		return itemwise_serial_batch_qty
 

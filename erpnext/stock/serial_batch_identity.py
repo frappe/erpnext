@@ -68,7 +68,8 @@ class SerialBatchIdentity:
 					frappe.throw(
 						_("{0} {1} does not exist for Item {2}").format(
 							_(self.doctype), escape_html(numbers[index]), escape_html(item_code)
-						)
+						),
+						exc=frappe.DoesNotExistError,
 					)
 				if first_index not in created:
 					created[first_index] = self._create_record(
@@ -90,6 +91,19 @@ class SerialBatchIdentity:
 					_("Not permitted to select these serial or batch records"), frappe.PermissionError
 				)
 		return names
+
+	def get_numbers(self, item_code, names):
+		if not names:
+			return []
+		numbers = dict(
+			frappe.get_all(
+				self.doctype,
+				filters={self.item_field: item_code, "name": ("in", names)},
+				fields=["name", self.number_field],
+				as_list=True,
+			)
+		)
+		return [numbers[name] for name in names]
 
 	def get_records(self, item_code, numbers, fields, *, ignore_permissions=True):
 		if not numbers:
