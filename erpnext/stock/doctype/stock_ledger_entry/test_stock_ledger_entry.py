@@ -1691,7 +1691,9 @@ def setup_item_valuation_test(
 	batches = [f"IV - Test Batch {i} {valuation_method} {suffix}" for i in batches_list]
 
 	for i, batch_id in enumerate(batches):
-		if not frappe.db.exists("Batch", batch_id):
+		if batch_name := frappe.db.get_value("Batch", {"item": item.item_code, "batch_id": batch_id}, "name"):
+			batches[i] = batch_name
+		else:
 			ubw = use_batchwise_valuation
 			if isinstance(use_batchwise_valuation, list | tuple):
 				ubw = use_batchwise_valuation[i]
@@ -1702,6 +1704,7 @@ def setup_item_valuation_test(
 			).insert()
 			batch.use_batchwise_valuation = ubw
 			batch.db_update()
+			batches[i] = batch.name
 
 	return item.item_code, warehouses, batches
 

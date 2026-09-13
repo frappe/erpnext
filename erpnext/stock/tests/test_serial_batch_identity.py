@@ -506,7 +506,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 		self.assertEqual(doc.locations[0].batch_no, batch.name)
 
 	def test_pick_list_batch_messages_and_availability_show_physical_number(self):
-		batch = self.make_number("Batch", "Pick-<Batch>")
+		batch = self.make_number("Batch", "Pick-Batch & Lot")
 		batch.db_set("expiry_date", frappe.utils.add_days(frappe.utils.nowdate(), -1))
 		doc = frappe.get_doc(
 			doctype="Pick List",
@@ -526,19 +526,19 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 		doc.locations[0].db_insert()
 		with self.assertRaises(frappe.ValidationError) as error:
 			doc.validate_expired_batches()
-		self.assertIn("Pick-&lt;Batch&gt;", str(error.exception))
+		self.assertIn("Pick-Batch &amp; Lot", str(error.exception))
 		self.assertNotIn(batch.name, str(error.exception))
 		with (
 			patch("erpnext.stock.doctype.batch.batch.get_batch_qty", return_value=0),
 			self.assertRaises(frappe.ValidationError) as error,
 		):
 			doc.validate_stock_qty()
-		self.assertIn("Pick-&lt;Batch&gt;", str(error.exception))
+		self.assertIn("Pick-Batch &amp; Lot", str(error.exception))
 		self.assertNotIn(batch.name, str(error.exception))
 		holders = get_pick_list_holders([self.item.name])
 		self.assertEqual(len(holders), 1)
 		self.assertEqual(holders[0].batch_no, batch.name)
-		self.assertEqual(holders[0].batch_id, "Pick-<Batch>")
+		self.assertEqual(holders[0].batch_id, "Pick-Batch & Lot")
 		self.assertEqual(holders[0].holding_qty, 1)
 
 	def test_landed_cost_updates_serial_rates_using_item_and_physical_number(self):
@@ -1070,7 +1070,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 		service._wo_doc = frappe._dict(has_serial_no=1)
 		row = frappe._dict(item_code=self.item.name, serial_no="Missing-Finished-Serial")
 		with patch.dict(frappe.flags, {"mute_messages": False}):
-			frappe.msgprint("Existing notice")
+			frappe.msgprint(frappe._("Existing notice"))
 		messages = frappe.get_message_log()
 		for muted in (False, True):
 			with self.subTest(muted=muted), patch.dict(frappe.flags, {"mute_messages": muted}):
@@ -1242,26 +1242,26 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 			get_serials_by_batch(self.item.name, "POS-Serial-1")
 
 	def test_pos_return_checks_the_original_item_and_literal_serial_number(self):
-		serial = self.make_number("Serial No", "POS-<Return_1>")
+		serial = self.make_number("Serial No", "POS-Return_1")
 		self.make_number("Serial No", serial.serial_no, self.other_item.name)
-		self.make_number("Serial No", "POS-<ReturnX1>")
+		self.make_number("Serial No", "POS-ReturnX1")
 		frappe.get_doc(
 			doctype="POS Invoice Item",
 			parent="Identity-POS-Sale",
 			parenttype="POS Invoice",
 			parentfield="items",
 			item_code=self.item.name,
-			serial_no="pos-<return_1>",
+			serial_no="pos-return_1",
 		).db_insert()
 		doc = frappe.get_doc(
 			doctype="POS Invoice",
 			is_return=1,
 			return_against="Identity-POS-Sale",
-			items=[{"item_code": self.item.name, "serial_no": "POS-<RETURN_1>", "qty": -1}],
+			items=[{"item_code": self.item.name, "serial_no": "POS-RETURN_1", "qty": -1}],
 		)
 		doc.validate_return_items_qty()
-		self.assertEqual(doc.items[0].serial_no, "POS-<RETURN_1>")
-		for item, number in ((self.other_item.name, serial.serial_no), (self.item.name, "POS-<ReturnX1>")):
+		self.assertEqual(doc.items[0].serial_no, "POS-RETURN_1")
+		for item, number in ((self.other_item.name, serial.serial_no), (self.item.name, "POS-ReturnX1")):
 			doc.items[0].item_code = item
 			doc.items[0].serial_no = number
 			with self.assertRaises(frappe.ValidationError) as error:
@@ -1489,7 +1489,10 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 	def test_creation_reuses_existing_records_and_groups_case_variants(self):
 		serial = self.make_number("Serial No", "Existing-001")
 		names = SerialBatchIdentity("Serial No").resolve(
-			self.item.name, ["New-001", "existing-001", "NEW-001"], create=True
+			self.item.name,
+			["New-001", "existing-001", "NEW-001"],
+			create=True,
+			defaults={"company": "_Test Company"},
 		)
 		self.assertEqual(names, [names[0], serial.name, names[0]])
 		created = frappe.get_doc("Serial No", names[0])

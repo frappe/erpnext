@@ -69,7 +69,7 @@ class TestPickList(ERPNextTestSuite):
 
 		item_code = make_item("Test Serial Item", properties={"has_serial_no": 1}).name
 		serial_ids = SerialBatchIdentity("Serial No").resolve(
-			item_code, ["SN-1", "SN-2", "SN-3", "SN-4"], create=True
+			item_code, ["SN-1", "SN-2", "SN-3", "SN-4"], create=True, defaults={"company": "_Test Company"}
 		)
 		item = _dict(item_code=item_code, qty=2, stock_qty=2, conversion_factor=1, uom="Nos")
 		item_location_map = {
@@ -1152,8 +1152,9 @@ class TestPickList(ERPNextTestSuite):
 		).name
 
 		# create batch
+		batches = {}
 		for batch_id in ["PICKLT-000001", "PICKLT-000002"]:
-			if not frappe.db.exists("Batch", batch_id):
+			if not frappe.db.exists("Batch", {"item": item, "batch_id": batch_id}):
 				frappe.get_doc(
 					{
 						"doctype": "Batch",
@@ -1161,13 +1162,14 @@ class TestPickList(ERPNextTestSuite):
 						"item": item,
 					}
 				).insert()
+			batches[batch_id] = frappe.db.get_value("Batch", {"item": item, "batch_id": batch_id}, "name")
 
 		make_stock_entry(
 			item=item,
 			to_warehouse=warehouse,
 			qty=50,
 			basic_rate=100,
-			batches=frappe._dict({"PICKLT-000001": 30, "PICKLT-000002": 20}),
+			batches=frappe._dict({batches["PICKLT-000001"]: 30, batches["PICKLT-000002"]: 20}),
 		)
 
 		so = make_sales_order(item_code=item, qty=25.0, rate=100)
@@ -1197,10 +1199,10 @@ class TestPickList(ERPNextTestSuite):
 			)
 
 			for d in data:
-				self.assertIn(d.batch_no, ["PICKLT-000001", "PICKLT-000002"])
-				if d.batch_no == "PICKLT-000001":
+				self.assertIn(d.batch_no, batches.values())
+				if d.batch_no == batches["PICKLT-000001"]:
 					self.assertEqual(d.qty, 5.0 * -1)
-				elif d.batch_no == "PICKLT-000002":
+				elif d.batch_no == batches["PICKLT-000002"]:
 					self.assertEqual(d.qty, 5.0 * -1)
 
 		pl1.cancel()

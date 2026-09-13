@@ -79,6 +79,7 @@ class TestSerialBatchServices(ERPNextTestSuite):
 		schedule = self.make_schedule(serial_no="Service-001")
 		schedule.docstatus = 1
 		schedule.db_insert()
+		schedule.set_parent_in_children()
 		schedule.items[0].db_insert()
 		detail = schedule.append(
 			"schedules",

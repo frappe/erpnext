@@ -1860,7 +1860,7 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertEqual(len(entries), 5)
 		for entry in entries:
 			self.assertEqual(flt(entry.qty), 10.0)
-			self.assertTrue(entry.batch_no.startswith("BS-ROD-PC-"))
+			self.assertTrue(frappe.db.get_value("Batch", entry.batch_no, "batch_id").startswith("BS-ROD-PC-"))
 			self.assertEqual(frappe.db.get_value("Batch", entry.batch_no, "parent_batch"), parent_batch)
 
 		manufacture_entry.reload()

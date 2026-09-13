@@ -54,5 +54,6 @@ class TestSerialNumberGeneration(ERPNextTestSuite):
 				"doctype": "Serial No",
 				"item_code": item_code,
 				"serial_no": number,
+				"company": "_Test Company",
 			}
 		).insert()

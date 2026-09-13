@@ -5,6 +5,7 @@
 # For license information, please see license.txt
 
 import json
+from unittest.mock import patch
 
 import frappe
 from frappe.utils import add_days, cstr, flt, nowdate, nowtime
@@ -607,7 +608,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 		item_code = item.name
 		warehouse = "_Test Warehouse - _TC"
 
-		if not frappe.db.exists("Serial No", "SR-CREATED-SR-NO"):
+		if not frappe.db.exists("Serial No", {"item_code": item_code, "serial_no": "SR-CREATED-SR-NO"}):
 			frappe.get_doc(
 				{
 					"doctype": "Serial No",
@@ -620,7 +621,11 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 		sr = create_stock_reconciliation(
 			item_code=item.name,
 			warehouse=warehouse,
-			serial_no=["SR-CREATED-SR-NO"],
+			serial_no=[
+				frappe.db.get_value(
+					"Serial No", {"item_code": item_code, "serial_no": "SR-CREATED-SR-NO"}, "name"
+				)
+			],
 			qty=1,
 			do_not_submit=True,
 			rate=100,
@@ -1339,60 +1344,57 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 
 		warehouse = "_Test Warehouse - _TC"
 
-		frappe.flags.ignore_serial_batch_bundle_validation = True
-		frappe.flags.use_serial_and_batch_fields = True
+		with patch.dict(
+			frappe.flags, {"ignore_serial_batch_bundle_validation": True, "use_serial_and_batch_fields": True}
+		):
+			batch_id = "BH1-NRALL-S-0001"
+			if not frappe.db.exists("Batch", batch_id):
+				batch_doc = frappe.get_doc(
+					{
+						"doctype": "Batch",
+						"batch_id": batch_id,
+						"item": batch_item_code,
+						"use_batchwise_valuation": 0,
+					}
+				).insert(ignore_permissions=True, set_name=batch_id)
 
-		batch_id = "BH1-NRALL-S-0001"
-		if not frappe.db.exists("Batch", batch_id):
-			batch_doc = frappe.get_doc(
-				{
-					"doctype": "Batch",
-					"batch_id": batch_id,
-					"item": batch_item_code,
-					"use_batchwise_valuation": 0,
-				}
-			).insert(ignore_permissions=True)
+				self.assertTrue(batch_doc.use_batchwise_valuation)
 
-			self.assertTrue(batch_doc.use_batchwise_valuation)
+			stock_queue = []
+			qty_after_transaction = 0
+			balance_value = 0
+			i = 0
+			for qty, valuation in {10: 100, 20: 200}.items():
+				i += 1
+				stock_queue.append([qty, valuation])
+				qty_after_transaction += qty
+				balance_value += qty_after_transaction * valuation
 
-		stock_queue = []
-		qty_after_transaction = 0
-		balance_value = 0
-		i = 0
-		for qty, valuation in {10: 100, 20: 200}.items():
-			i += 1
-			stock_queue.append([qty, valuation])
-			qty_after_transaction += qty
-			balance_value += qty_after_transaction * valuation
+				doc = frappe.get_doc(
+					{
+						"doctype": "Stock Ledger Entry",
+						"posting_date": add_days(nowdate(), -2 * i),
+						"posting_time": nowtime(),
+						"batch_no": batch_id,
+						"incoming_rate": valuation,
+						"qty_after_transaction": qty_after_transaction,
+						"stock_value_difference": valuation * qty,
+						"balance_value": balance_value,
+						"valuation_rate": balance_value / qty_after_transaction,
+						"actual_qty": qty,
+						"item_code": batch_item_code,
+						"warehouse": "_Test Warehouse - _TC",
+						"stock_queue": json.dumps(stock_queue),
+					}
+				)
 
-			doc = frappe.get_doc(
-				{
-					"doctype": "Stock Ledger Entry",
-					"posting_date": add_days(nowdate(), -2 * i),
-					"posting_time": nowtime(),
-					"batch_no": batch_id,
-					"incoming_rate": valuation,
-					"qty_after_transaction": qty_after_transaction,
-					"stock_value_difference": valuation * qty,
-					"balance_value": balance_value,
-					"valuation_rate": balance_value / qty_after_transaction,
-					"actual_qty": qty,
-					"item_code": batch_item_code,
-					"warehouse": "_Test Warehouse - _TC",
-					"stock_queue": json.dumps(stock_queue),
-				}
-			)
-
-			doc.set_posting_datetime()
-			doc.flags.ignore_permissions = True
-			doc.flags.ignore_mandatory = True
-			doc.flags.ignore_links = True
-			doc.flags.ignore_validate = True
-			doc.submit()
-			doc.reload()
-
-		frappe.flags.ignore_serial_batch_bundle_validation = False
-		frappe.flags.use_serial_and_batch_fields = False
+				doc.set_posting_datetime()
+				doc.flags.ignore_permissions = True
+				doc.flags.ignore_mandatory = True
+				doc.flags.ignore_links = True
+				doc.flags.ignore_validate = True
+				doc.submit()
+				doc.reload()
 
 		batch_doc = frappe.get_doc("Batch", batch_id)
 
@@ -2222,11 +2224,14 @@ def create_batch_item_with_batch(item_name, batch_id):
 		batch_item_doc.create_new_batch = 1
 		batch_item_doc.save(ignore_permissions=True)
 
-	if not frappe.db.exists("Batch", batch_id):
-		b = frappe.new_doc("Batch")
-		b.item = item_name
-		b.batch_id = batch_id
-		b.save()
+	if batch_name := frappe.db.get_value("Batch", {"item": item_name, "batch_id": batch_id}, "name"):
+		return batch_name
+
+	b = frappe.new_doc("Batch")
+	b.item = item_name
+	b.batch_id = batch_id
+	b.save()
+	return b.name
 
 
 def insert_existing_sle(warehouse, item_code="_Test Item"):

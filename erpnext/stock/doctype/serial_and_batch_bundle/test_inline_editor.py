@@ -421,7 +421,11 @@ class TestSerialBatchInlineEditor(ERPNextTestSuite):
 		other = make_item(properties={"is_stock_item": 1, "has_serial_no": 1, "has_batch_no": 1}).name
 		batch = frappe.get_doc(doctype="Batch", item=other, batch_id="CSV-Batch").insert()
 		frappe.get_doc(
-			doctype="Serial No", item_code=other, serial_no="CSV-Serial", batch_no=batch.name
+			doctype="Serial No",
+			item_code=other,
+			serial_no="CSV-Serial",
+			batch_no=batch.name,
+			company="_Test Company",
 		).insert()
 		rows = [{"serial_no": "CSV-Serial", "batch_no": "CSV-Batch", "qty": 1}]
 		pr = self.make_draft_pr(item, qty=1)
@@ -446,7 +450,11 @@ class TestSerialBatchInlineEditor(ERPNextTestSuite):
 		item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1, "has_batch_no": 1}).name
 		batch = frappe.get_doc(doctype="Batch", item=item, batch_id="Selected-Batch").insert()
 		serial = frappe.get_doc(
-			doctype="Serial No", item_code=item, serial_no="Selected-Serial", batch_no=batch.name
+			doctype="Serial No",
+			item_code=item,
+			serial_no="Selected-Serial",
+			batch_no=batch.name,
+			company="_Test Company",
 		).insert()
 		rows = [
 			{"serial_no_id": serial.name, "batch_no": batch.batch_id, "qty": 1},
@@ -507,6 +515,7 @@ class TestSerialBatchInlineEditor(ERPNextTestSuite):
 					item_code=item,
 					serial_no="Export-Serial",
 					batch_no=entry.get("batch_no"),
+					company=pr.company,
 				).insert()
 				entry["serial_no"] = serial.name
 			summary = self.upsert(pr, entries=[entry])
@@ -745,6 +754,7 @@ class TestSerialBatchInlineEditor(ERPNextTestSuite):
 					"doctype": "Serial No",
 					"item_code": item_code,
 					"serial_no": number or f"SN-{frappe.generate_hash(length=8)}",
+					"company": "_Test Company",
 				}
 			)
 			.insert()

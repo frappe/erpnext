@@ -905,13 +905,21 @@ class TestStockEntry(ERPNextTestSuite):
 	def test_serial_no_transfer_in(self):
 		serial_nos = ["ABCD1", "EFGH1"]
 		for serial_no in serial_nos:
-			if not frappe.db.exists("Serial No", serial_no):
+			if not frappe.db.exists(
+				"Serial No", {"item_code": "_Test Serialized Item", "serial_no": serial_no}
+			):
 				doc = frappe.new_doc("Serial No")
 				doc.serial_no = serial_no
 				doc.item_code = "_Test Serialized Item"
 				doc.company = "_Test Company"
 				doc.insert(ignore_permissions=True)
 
+		serial_nos = [
+			frappe.db.get_value(
+				"Serial No", {"item_code": "_Test Serialized Item", "serial_no": number}, "name"
+			)
+			for number in serial_nos
+		]
 		se = frappe.copy_doc(self.globalTestRecords["Stock Entry"][0])
 		se.get("items")[0].item_code = "_Test Serialized Item"
 		se.get("items")[0].qty = 2
@@ -937,11 +945,11 @@ class TestStockEntry(ERPNextTestSuite):
 		se.insert()
 		se.submit()
 
-		self.assertTrue(frappe.db.get_value("Serial No", "ABCD1", "warehouse"))
-		self.assertTrue(frappe.db.get_value("Serial No", "EFGH1", "warehouse"))
+		self.assertTrue(frappe.db.get_value("Serial No", serial_nos[0], "warehouse"))
+		self.assertTrue(frappe.db.get_value("Serial No", serial_nos[1], "warehouse"))
 
 		se.cancel()
-		self.assertFalse(frappe.db.get_value("Serial No", "ABCD1", "warehouse"))
+		self.assertFalse(frappe.db.get_value("Serial No", serial_nos[0], "warehouse"))
 
 	def test_serial_by_series(self):
 		se = make_serialized_item(self)
@@ -2524,6 +2532,7 @@ class TestStockEntry(ERPNextTestSuite):
 		)
 
 		# Executing an illegal sequence should raise an error
+		batch_no = frappe.db.get_value("Batch", {"item": item_code, "batch_id": batch_no}, "name")
 		sequence_of_entries = [
 			dict(
 				item_code=item_code,
@@ -4794,7 +4803,7 @@ def initialize_records_for_future_negative_sle_test(
 	from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 	TestBatch.make_batch_item(item_code)
-	make_new_batch(item_code=item_code, batch_id=batch_no)
+	batch = make_new_batch(item_code=item_code, batch_id=batch_no)
 	warehouse_names = [create_warehouse(w) for w in warehouses]
 	create_stock_reconciliation(
 		purpose="Opening Stock",
@@ -4804,7 +4813,7 @@ def initialize_records_for_future_negative_sle_test(
 		warehouse=warehouse_names[0],
 		valuation_rate=100,
 		qty=opening_qty,
-		batch_no=batch_no,
+		batch_no=batch.name,
 	)
 	return warehouse_names
 

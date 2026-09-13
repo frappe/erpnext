@@ -4,6 +4,7 @@
 
 import json
 from collections import defaultdict
+from unittest.mock import patch
 
 import frappe
 from frappe.utils import add_days, cstr, flt, getdate, nowdate, nowtime, today
@@ -29,6 +30,7 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import get_gl_
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
 	get_batch_from_bundle,
 	get_serial_nos_from_bundle,
+	get_serial_numbers_from_bundle,
 	make_serial_batch_bundle,
 )
 from erpnext.stock.doctype.stock_entry.test_stock_entry import (
@@ -204,81 +206,78 @@ class TestDeliveryNote(ERPNextTestSuite):
 		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
-		frappe.flags.ignore_serial_batch_bundle_validation = True
-		sn_item = "Old Serial NO Item Return Test - 1"
-		make_item(
-			sn_item,
-			{
-				"has_serial_no": 1,
-				"serial_no_series": "OSN-.####",
-				"is_stock_item": 1,
-			},
-		)
+		with patch.dict(frappe.flags, {"ignore_serial_batch_bundle_validation": True}):
+			sn_item = "Old Serial NO Item Return Test - 1"
+			make_item(
+				sn_item,
+				{
+					"has_serial_no": 1,
+					"serial_no_series": "OSN-.####",
+					"is_stock_item": 1,
+				},
+			)
 
-		serial_nos = [
-			"OSN-1",
-			"OSN-2",
-			"OSN-3",
-			"OSN-4",
-			"OSN-5",
-			"OSN-6",
-			"OSN-7",
-			"OSN-8",
-			"OSN-9",
-			"OSN-10",
-			"OSN-11",
-			"OSN-12",
-		]
+			serial_nos = [
+				"OSN-1",
+				"OSN-2",
+				"OSN-3",
+				"OSN-4",
+				"OSN-5",
+				"OSN-6",
+				"OSN-7",
+				"OSN-8",
+				"OSN-9",
+				"OSN-10",
+				"OSN-11",
+				"OSN-12",
+			]
 
-		for sn in serial_nos:
-			if not frappe.db.exists("Serial No", sn):
-				sn_doc = frappe.get_doc(
-					{
-						"doctype": "Serial No",
-						"item_code": sn_item,
-						"serial_no": sn,
-						"company": "_Test Company",
-					}
-				)
-				sn_doc.insert()
+			for sn in serial_nos:
+				if not frappe.db.exists("Serial No", sn):
+					sn_doc = frappe.get_doc(
+						{
+							"doctype": "Serial No",
+							"item_code": sn_item,
+							"serial_no": sn,
+							"company": "_Test Company",
+						}
+					)
+					sn_doc.insert(set_name=sn)
 
-		warehouse = "_Test Warehouse - _TC"
-		company = frappe.db.get_value("Warehouse", warehouse, "company")
-		se_doc = make_stock_entry(
-			item_code=sn_item,
-			company=company,
-			target="_Test Warehouse - _TC",
-			qty=12,
-			basic_rate=100,
-			do_not_submit=1,
-		)
+			warehouse = "_Test Warehouse - _TC"
+			company = frappe.db.get_value("Warehouse", warehouse, "company")
+			se_doc = make_stock_entry(
+				item_code=sn_item,
+				company=company,
+				target="_Test Warehouse - _TC",
+				qty=12,
+				basic_rate=100,
+				do_not_submit=1,
+			)
 
-		se_doc.items[0].serial_no = "\n".join(serial_nos)
+			se_doc.items[0].serial_no = "\n".join(serial_nos)
 
-		frappe.flags.use_serial_and_batch_fields = True
-		se_doc.submit()
+			frappe.flags.use_serial_and_batch_fields = True
+			se_doc.submit()
 
-		self.assertEqual(sorted(get_serial_nos(se_doc.items[0].serial_no)), sorted(serial_nos))
+			self.assertEqual(sorted(get_serial_nos(se_doc.items[0].serial_no)), sorted(serial_nos))
 
-		dn = create_delivery_note(
-			item_code=sn_item,
-			qty=12,
-			rate=500,
-			warehouse=warehouse,
-			company=company,
-			expense_account="Cost of Goods Sold - _TC",
-			cost_center="Main - _TC",
-			do_not_submit=1,
-		)
+			dn = create_delivery_note(
+				item_code=sn_item,
+				qty=12,
+				rate=500,
+				warehouse=warehouse,
+				company=company,
+				expense_account="Cost of Goods Sold - _TC",
+				cost_center="Main - _TC",
+				do_not_submit=1,
+			)
 
-		dn.items[0].serial_no = "\n".join(serial_nos)
-		dn.submit()
-		dn.reload()
+			dn.items[0].serial_no = "\n".join(serial_nos)
+			dn.submit()
+			dn.reload()
 
-		self.assertTrue(dn.items[0].serial_no)
-
-		frappe.flags.ignore_serial_batch_bundle_validation = False
-		frappe.flags.use_serial_and_batch_fields = False
+			self.assertTrue(dn.items[0].serial_no)
 
 		# return entry
 		dn1 = make_sales_return(dn.name)
@@ -894,7 +893,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 			target_warehouse=target,
 			ignore_pricing_rule=0,
 			use_serial_batch_fields=1,
-			serial_no="\n".join(serial_nos),
+			serial_no="\n".join(get_serial_numbers_from_bundle(se.items[0].serial_and_batch_bundle)),
 		)
 
 		for serial_no in serial_nos:
@@ -2125,7 +2124,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 			if row.item_code == serial_item.name:
 				serial_and_batch_bundle = item_details[serial_item.name]
-				row.serial_no = get_serial_nos_from_bundle(serial_and_batch_bundle)[3]
+				row.serial_no = get_serial_numbers_from_bundle(serial_and_batch_bundle)[3]
 				serial_no = row.serial_no
 			else:
 				serial_and_batch_bundle = item_details[batch_item.name]
@@ -2144,72 +2143,71 @@ class TestDeliveryNote(ERPNextTestSuite):
 	def test_delivery_note_legacy_serial_no_valuation(self):
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
-		frappe.flags.ignore_serial_batch_bundle_validation = True
-		sn_item = "Old Serial NO Item Valuation Test - 2"
-		make_item(
-			sn_item,
-			{
-				"has_serial_no": 1,
-				"serial_no_series": "SN-SOVOSN-.####",
-				"is_stock_item": 1,
-			},
-		)
-
-		serial_nos = [
-			"SN-SOVOSN-1234",
-			"SN-SOVOSN-2234",
-		]
-
-		for sn in serial_nos:
-			if not frappe.db.exists("Serial No", sn):
-				sn_doc = frappe.get_doc(
-					{
-						"doctype": "Serial No",
-						"item_code": sn_item,
-						"serial_no": sn,
-						"company": "_Test Company",
-					}
-				)
-				sn_doc.insert()
-
-		warehouse = "_Test Warehouse - _TC"
-		company = frappe.db.get_value("Warehouse", warehouse, "company")
-		se_doc = make_stock_entry(
-			item_code=sn_item,
-			company=company,
-			target="_Test Warehouse - _TC",
-			qty=2,
-			basic_rate=150,
-			do_not_submit=1,
-			use_serial_batch_fields=0,
-		)
-		se_doc.submit()
-
-		se_doc.items[0].db_set("serial_no", "\n".join(serial_nos))
-
-		sle_data = frappe.get_all(
-			"Stock Ledger Entry",
-			filters={"voucher_no": se_doc.name, "voucher_type": "Stock Entry"},
-		)[0]
-
-		sle_doc = frappe.get_doc("Stock Ledger Entry", sle_data.name)
-		self.assertFalse(sle_doc.serial_no)
-		sle_doc.db_set("serial_no", "\n".join(serial_nos))
-		sle_doc.reload()
-		self.assertTrue(sle_doc.serial_no)
-		self.assertFalse(sle_doc.is_cancelled)
-
-		for sn in serial_nos:
-			sn_doc = frappe.get_doc("Serial No", sn)
-			sn_doc.db_set(
+		with patch.dict(frappe.flags, {"ignore_serial_batch_bundle_validation": True}):
+			sn_item = "Old Serial NO Item Valuation Test - 2"
+			make_item(
+				sn_item,
 				{
-					"status": "Active",
-					"warehouse": warehouse,
-				}
+					"has_serial_no": 1,
+					"serial_no_series": "SN-SOVOSN-.####",
+					"is_stock_item": 1,
+				},
 			)
 
-		self.assertEqual(sorted(get_serial_nos(se_doc.items[0].serial_no)), sorted(serial_nos))
-		frappe.flags.ignore_serial_batch_bundle_validation = False
+			serial_nos = [
+				"SN-SOVOSN-1234",
+				"SN-SOVOSN-2234",
+			]
+
+			for sn in serial_nos:
+				if not frappe.db.exists("Serial No", sn):
+					sn_doc = frappe.get_doc(
+						{
+							"doctype": "Serial No",
+							"item_code": sn_item,
+							"serial_no": sn,
+							"company": "_Test Company",
+						}
+					)
+					sn_doc.insert(set_name=sn)
+
+			warehouse = "_Test Warehouse - _TC"
+			company = frappe.db.get_value("Warehouse", warehouse, "company")
+			se_doc = make_stock_entry(
+				item_code=sn_item,
+				company=company,
+				target="_Test Warehouse - _TC",
+				qty=2,
+				basic_rate=150,
+				do_not_submit=1,
+				use_serial_batch_fields=0,
+			)
+			se_doc.submit()
+
+			se_doc.items[0].db_set("serial_no", "\n".join(serial_nos))
+
+			sle_data = frappe.get_all(
+				"Stock Ledger Entry",
+				filters={"voucher_no": se_doc.name, "voucher_type": "Stock Entry"},
+			)[0]
+
+			sle_doc = frappe.get_doc("Stock Ledger Entry", sle_data.name)
+			self.assertFalse(sle_doc.serial_no)
+			sle_doc.db_set("serial_no", "\n".join(serial_nos))
+			sle_doc.reload()
+			self.assertTrue(sle_doc.serial_no)
+			self.assertFalse(sle_doc.is_cancelled)
+
+			for sn in serial_nos:
+				sn_doc = frappe.get_doc("Serial No", sn)
+				sn_doc.db_set(
+					{
+						"status": "Active",
+						"warehouse": warehouse,
+					}
+				)
+
+			self.assertEqual(sorted(get_serial_nos(se_doc.items[0].serial_no)), sorted(serial_nos))
 
 		se_doc = make_stock_entry(
 			item_code=sn_item,
@@ -2219,7 +2217,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 			basic_rate=200,
 		)
 
-		serial_nos.extend(get_serial_nos_from_bundle(se_doc.items[0].serial_and_batch_bundle))
+		serial_nos.extend(get_serial_numbers_from_bundle(se_doc.items[0].serial_and_batch_bundle))
 
 		dn = create_delivery_note(
 			item_code=sn_item,
@@ -2683,7 +2681,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 			se = make_stock_entry(
 				item_code=serial_item, target="_Test Warehouse - _TC", qty=qty, basic_rate=rate
 			)
-			serial_nos.extend(get_serial_nos_from_bundle(se.items[0].serial_and_batch_bundle))
+			serial_nos.extend(get_serial_numbers_from_bundle(se.items[0].serial_and_batch_bundle))
 
 		dn = create_delivery_note(
 			item_code=batch_item,
@@ -3233,7 +3231,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 		).name
 
 		se = make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=1, basic_rate=100)
-		serial_nos = get_serial_nos_from_bundle(se.items[0].serial_and_batch_bundle)
+		serial_nos = get_serial_numbers_from_bundle(se.items[0].serial_and_batch_bundle)
 
 		dn = create_delivery_note(
 			item_code=item_code,

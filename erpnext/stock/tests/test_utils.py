@@ -103,9 +103,13 @@ class TestStockUtilities(ERPNextTestSuite, StockTestMixin):
 		first = self.make_item(properties={"has_serial_no": 1})
 		second = self.make_item(properties={"has_serial_no": 1})
 		number = f"Scan-{frappe.generate_hash()}"
-		first_serial = frappe.get_doc(doctype="Serial No", item_code=first.name, serial_no=number).insert()
+		first_serial = frappe.get_doc(
+			doctype="Serial No", item_code=first.name, serial_no=number, company="_Test Company"
+		).insert()
 		self.assertEqual(scan_barcode(number)["serial_no_id"], first_serial.name)
-		second_serial = frappe.get_doc(doctype="Serial No", item_code=second.name, serial_no=number).insert()
+		second_serial = frappe.get_doc(
+			doctype="Serial No", item_code=second.name, serial_no=number, company="_Test Company"
+		).insert()
 
 		candidates = scan_barcode(number.lower())["candidates"]
 		self.assertEqual({row["item_code"] for row in candidates}, {first.name, second.name})
@@ -131,7 +135,11 @@ class TestStockUtilities(ERPNextTestSuite, StockTestMixin):
 		number = f"Shared-{frappe.generate_hash()}"
 		batch = frappe.get_doc(doctype="Batch", item=item.name, batch_id=number).insert()
 		frappe.get_doc(
-			doctype="Serial No", item_code=item.name, serial_no=number, batch_no=batch.name
+			doctype="Serial No",
+			item_code=item.name,
+			serial_no=number,
+			batch_no=batch.name,
+			company="_Test Company",
 		).insert()
 		candidates = scan_barcode(number, item_code=item.name)["candidates"]
 		self.assertEqual({row["record_type"] for row in candidates}, {"Serial No", "Batch"})
@@ -140,7 +148,9 @@ class TestStockUtilities(ERPNextTestSuite, StockTestMixin):
 		number = f"Barcode-{frappe.generate_hash()}"
 		barcode_item = self.make_item(properties={"barcodes": [{"barcode": number}]})
 		serial_item = self.make_item(properties={"has_serial_no": 1})
-		frappe.get_doc(doctype="Serial No", item_code=serial_item.name, serial_no=number).insert()
+		frappe.get_doc(
+			doctype="Serial No", item_code=serial_item.name, serial_no=number, company="_Test Company"
+		).insert()
 		candidates = scan_barcode(number)["candidates"]
 		self.assertEqual({row["item_code"] for row in candidates}, {barcode_item.name, serial_item.name})
 
@@ -235,7 +245,7 @@ class TestStockUtilities(ERPNextTestSuite, StockTestMixin):
 		serial_nos = []
 		for rate in (10, 30):
 			sn = "_TAVG" + random_string(8)
-			frappe.get_doc(
+			serial = frappe.get_doc(
 				{
 					"doctype": "Serial No",
 					"serial_no": sn,
@@ -244,6 +254,6 @@ class TestStockUtilities(ERPNextTestSuite, StockTestMixin):
 					"purchase_rate": rate,
 				}
 			).insert()
-			serial_nos.append(sn)
+			serial_nos.append(serial.name)
 
 		self.assertEqual(flt(get_avg_purchase_rate("\n".join(serial_nos))), 20.0)
