@@ -2296,10 +2296,6 @@ def get_type_of_transaction(parent_doc, child_row):
 	match parent_doc.get("doctype"):
 		case "Stock Entry":
 			return "Outward" if child_row.get("s_warehouse") else "Inward"
-		case "Asset Repair":
-			return "Inward" if flt(child_row.get("consumed_quantity")) < 0 else "Outward"
-		case "Pick List":
-			return "Inward" if flt(child_row.get("qty")) < 0 else "Outward"
 		case "Purchase Receipt" | "Purchase Invoice" | "Stock Reconciliation":
 			inward = True
 		case "Subcontracting Receipt":
