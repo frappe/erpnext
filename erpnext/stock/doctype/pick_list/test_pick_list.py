@@ -25,6 +25,7 @@ from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 	EmptyStockReconciliationItemsError,
 )
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -66,14 +67,18 @@ class TestPickList(ERPNextTestSuite):
 	def test_get_items_with_location_trims_allocated_serial_nos(self):
 		from erpnext.stock.doctype.pick_list.pick_list import get_items_with_location_and_quantity
 
-		item = _dict(item_code="Test Serial Item", qty=2, stock_qty=2, conversion_factor=1, uom="Nos")
+		item_code = make_item("Test Serial Item", properties={"has_serial_no": 1}).name
+		serial_ids = SerialBatchIdentity("Serial No").resolve(
+			item_code, ["SN-1", "SN-2", "SN-3", "SN-4"], create=True
+		)
+		item = _dict(item_code=item_code, qty=2, stock_qty=2, conversion_factor=1, uom="Nos")
 		item_location_map = {
 			item.item_code: [
 				_dict(
 					warehouse="Test Warehouse",
 					batch_no=None,
 					qty=4,
-					serial_nos=["SN-1", "SN-2", "SN-3", "SN-4"],
+					serial_nos=serial_ids,
 				)
 			]
 		}
@@ -267,7 +272,9 @@ class TestPickList(ERPNextTestSuite):
 		serial_nos = ["SADD-0001", "SADD-0002", "SADD-0003", "SADD-0004", "SADD-0005"]
 
 		for serial_no in serial_nos:
-			if not frappe.db.exists("Serial No", serial_no):
+			if not frappe.db.exists(
+				"Serial No", {"item_code": "_Test Serialized Item", "serial_no": serial_no}
+			):
 				frappe.get_doc(
 					{
 						"doctype": "Serial No",
@@ -277,6 +284,7 @@ class TestPickList(ERPNextTestSuite):
 					}
 				).insert()
 
+		serial_ids = SerialBatchIdentity("Serial No").resolve("_Test Serialized Item", serial_nos)
 		stock_reconciliation = frappe.get_doc(
 			{
 				"doctype": "Stock Reconciliation",
@@ -299,7 +307,7 @@ class TestPickList(ERPNextTestSuite):
 									"type_of_transaction": "Inward",
 									"do_not_submit": True,
 									"voucher_type": "Stock Reconciliation",
-									"serial_nos": serial_nos,
+									"serial_nos": serial_ids,
 								}
 							)
 						).name,
@@ -345,7 +353,7 @@ class TestPickList(ERPNextTestSuite):
 		self.assertEqual(pick_list.locations[0].warehouse, "_Test Warehouse - _TC")
 		self.assertEqual(pick_list.locations[0].qty, 5)
 		self.assertEqual(
-			get_serial_nos_from_bundle(pick_list.locations[0].serial_and_batch_bundle), serial_nos
+			get_serial_nos_from_bundle(pick_list.locations[0].serial_and_batch_bundle), serial_ids
 		)
 
 	def test_pick_list_shows_batch_no_for_batched_item(self):

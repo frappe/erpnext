@@ -8,6 +8,10 @@ from erpnext.controllers.selling_controller import get_delivered_serial_batch_fo
 from erpnext.controllers.subcontracting_controller import add_items_in_ste
 from erpnext.manufacturing.doctype.work_order.mapper import get_serial_nos_for_job_card
 from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.doctype.pick_list.pick_list import (
+	get_items_with_location_and_quantity,
+	get_pick_list_holders,
+)
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 	get_reserved_serial_nos_for_pos,
 	get_serial_batch_scan,
@@ -386,6 +390,150 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 					self.assertEqual(row.serial_no, numbers)
 		self.assertEqual(row.current_serial_no, "Keep-001\nRemove-002")
 		self.assertFalse(frappe.db.exists("Serial No", {"item_code": self.item.name, "serial_no": "New-003"}))
+
+	def test_pick_list_allocation_shows_numbers_and_preserves_remaining_ids(self):
+		first = self.make_number("Serial No", "Pick-001")
+		second = self.make_number("Serial No", "Pick-002")
+		self.make_number("Serial No", "Pick-001", self.other_item.name)
+		item = frappe._dict(item_code=self.item.name, stock_qty=1, qty=1, conversion_factor=1, uom="Nos")
+		locations = {
+			self.item.name: [
+				frappe._dict(warehouse="_Test Warehouse - _TC", qty=2, serial_nos=[second.name, first.name])
+			]
+		}
+		selected = get_items_with_location_and_quantity(item, locations, docstatus=0)
+		self.assertEqual(selected[0].serial_no, "Pick-002")
+		self.assertEqual(locations[self.item.name][0].serial_nos, [first.name])
+		selected = get_items_with_location_and_quantity(item, locations, docstatus=0)
+		self.assertEqual(selected[0].serial_no, "Pick-001")
+		self.assertEqual(locations[self.item.name], [])
+
+	def test_pick_list_validates_physical_serials_for_item_and_warehouse(self):
+		serial = self.make_number("Serial No", "Pick-<001>")
+		other = self.make_number("Serial No", "Pick-<001>", self.other_item.name)
+		serial.db_set("warehouse", "_Test Warehouse - _TC")
+		other.db_set("warehouse", "_Test Warehouse 1 - _TC")
+		doc = frappe.get_doc(
+			doctype="Pick List",
+			locations=[
+				{"item_code": self.item.name, "serial_no": "pick-<001>", "warehouse": serial.warehouse}
+			],
+		)
+		doc.check_serial_no_status()
+		doc.locations[0].warehouse = other.warehouse
+		with self.assertRaises(frappe.ValidationError) as error:
+			doc.check_serial_no_status()
+		self.assertIn("pick-&lt;001&gt;", str(error.exception))
+		self.assertNotIn(serial.name, str(error.exception))
+		self.assertEqual(doc.locations[0].serial_no, "pick-<001>")
+
+	def test_pick_list_combines_existing_text_and_bundle_serial_ids(self):
+		first = self.make_number("Serial No", "Pick-001")
+		second = self.make_number("Serial No", "Pick-002")
+		third = self.make_number("Serial No", "Pick-003")
+		warehouse = "_Test Warehouse - _TC"
+		frappe.get_doc(
+			doctype="Serial and Batch Entry",
+			parent="Picked-Bundle",
+			parenttype="Serial and Batch Bundle",
+			parentfield="entries",
+			serial_no=second.name,
+			qty=1,
+		).db_insert()
+		doc = frappe.get_doc(
+			doctype="Pick List",
+			locations=[
+				{
+					"item_code": self.item.name,
+					"warehouse": warehouse,
+					"serial_no": "PICK-003",
+					"picked_qty": 1,
+					"stock_qty": 1,
+				}
+			],
+		)
+		rows = [
+			frappe._dict(item_code=self.item.name, warehouse=warehouse, serial_no="pick-001", picked_qty=1),
+			frappe._dict(
+				item_code=self.item.name,
+				warehouse=warehouse,
+				serial_and_batch_bundle="Picked-Bundle",
+				serial_no="Ignored-Text",
+				picked_qty=1,
+			),
+		]
+		with patch.object(doc, "_get_pick_list_items", return_value=rows):
+			picked = doc.get_picked_items_details([frappe._dict(item_code=self.item.name)])
+		self.assertEqual(picked[self.item.name][warehouse].serial_no, [first.name, second.name, third.name])
+		self.assertEqual(picked[self.item.name][warehouse].picked_qty, 3)
+		self.assertEqual(doc.locations[0].serial_no, "PICK-003")
+
+	def test_pick_list_bundle_creation_resolves_text_without_changing_row(self):
+		serial = self.make_number("Serial No", "Pick-001")
+		self.make_number("Serial No", "Pick-001", self.other_item.name)
+		batch = self.make_number("Batch", "Pick-Batch")
+		doc = frappe.get_doc(
+			doctype="Pick List",
+			company="_Test Company",
+			locations=[
+				{
+					"item_code": self.item.name,
+					"serial_no": "pick-001",
+					"batch_no": batch.name,
+					"stock_qty": 1,
+					"use_serial_batch_fields": 1,
+					"warehouse": "_Test Warehouse - _TC",
+				}
+			],
+		)
+		with (
+			patch("erpnext.stock.doctype.pick_list.pick_list.SerialBatchCreation") as creation,
+			patch.object(doc.locations[0], "db_set"),
+		):
+			creation.return_value.make_serial_and_batch_bundle.return_value = frappe._dict(
+				name="Picked-Bundle"
+			)
+			doc.make_bundle_using_old_serial_batch_fields()
+		self.assertEqual(creation.call_args.args[0]["serial_nos"], [serial.name])
+		self.assertEqual(creation.call_args.args[0]["batches"], {batch.name: 1})
+		self.assertEqual(doc.locations[0].serial_no, "pick-001")
+		self.assertEqual(doc.locations[0].batch_no, batch.name)
+
+	def test_pick_list_batch_messages_and_availability_show_physical_number(self):
+		batch = self.make_number("Batch", "Pick-<Batch>")
+		batch.db_set("expiry_date", frappe.utils.add_days(frappe.utils.nowdate(), -1))
+		doc = frappe.get_doc(
+			doctype="Pick List",
+			name="Identity-Pick-List",
+			status="Open",
+			locations=[
+				{
+					"item_code": self.item.name,
+					"warehouse": "_Test Warehouse - _TC",
+					"batch_no": batch.name,
+					"picked_qty": 1,
+					"stock_qty": 1,
+				}
+			],
+		)
+		doc.db_insert()
+		doc.locations[0].db_insert()
+		with self.assertRaises(frappe.ValidationError) as error:
+			doc.validate_expired_batches()
+		self.assertIn("Pick-&lt;Batch&gt;", str(error.exception))
+		self.assertNotIn(batch.name, str(error.exception))
+		with (
+			patch("erpnext.stock.doctype.batch.batch.get_batch_qty", return_value=0),
+			self.assertRaises(frappe.ValidationError) as error,
+		):
+			doc.validate_stock_qty()
+		self.assertIn("Pick-&lt;Batch&gt;", str(error.exception))
+		self.assertNotIn(batch.name, str(error.exception))
+		holders = get_pick_list_holders([self.item.name])
+		self.assertEqual(len(holders), 1)
+		self.assertEqual(holders[0].batch_no, batch.name)
+		self.assertEqual(holders[0].batch_id, "Pick-<Batch>")
+		self.assertEqual(holders[0].holding_qty, 1)
 
 	def test_landed_cost_updates_serial_rates_using_item_and_physical_number(self):
 		first = self.make_number("Serial No", "Receipt-001")
