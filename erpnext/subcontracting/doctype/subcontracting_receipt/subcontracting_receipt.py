@@ -165,13 +165,12 @@ class SubcontractingReceipt(SubcontractingController):
 		self.set_supplied_items_cost_center()
 		self.set_supplied_items_inventory_dimensions()
 
-<<<<<<< HEAD
 		# SubcontractingController.validate() does not call super() for Subcontracting Receipt, so
 		# the shared mandatory inventory dimension check must be invoked explicitly here. It runs
 		# last so auto-populated supplied-item dimensions (set_supplied_items_inventory_dimensions)
 		# are already in place.
 		self.validate_inventory_dimension_mandatory()
-=======
+
 	def validate_with_previous_doc(self):
 		super().validate_with_previous_doc(
 			{
@@ -189,7 +188,6 @@ class SubcontractingReceipt(SubcontractingController):
 				},
 			}
 		)
->>>>>>> fe25746 (fix(subcontracting): validate project across the subcontracting flow (#58965))
 
 	def on_submit(self):
 		self.validate_closed_subcontracting_order()
@@ -1232,5 +1230,7 @@ def add_po_items_to_pr(scr_doc, target_doc):
 						"warehouse": item.warehouse,
 						"purchase_order": item.parent,
 						"purchase_order_item": item.name,
+						"project": item.project,
+						"cost_center": item.cost_center,
 					},
 				)
