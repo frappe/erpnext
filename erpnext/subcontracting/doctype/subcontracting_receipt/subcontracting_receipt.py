@@ -145,6 +145,7 @@ class SubcontractingReceipt(SubcontractingController):
 		super().validate()
 
 		self.set_missing_values()
+		self.validate_with_previous_doc()
 
 		# after set_missing_values, so the secondary rates are computed from the same
 		# calculated per-qty costs the Get Secondary Items button uses
@@ -164,11 +165,31 @@ class SubcontractingReceipt(SubcontractingController):
 		self.set_supplied_items_cost_center()
 		self.set_supplied_items_inventory_dimensions()
 
+<<<<<<< HEAD
 		# SubcontractingController.validate() does not call super() for Subcontracting Receipt, so
 		# the shared mandatory inventory dimension check must be invoked explicitly here. It runs
 		# last so auto-populated supplied-item dimensions (set_supplied_items_inventory_dimensions)
 		# are already in place.
 		self.validate_inventory_dimension_mandatory()
+=======
+	def validate_with_previous_doc(self):
+		super().validate_with_previous_doc(
+			{
+				"Subcontracting Order Item": {
+					"ref_dn_field": "subcontracting_order_item",
+					"compare_fields": [["project", "="]],
+					"is_child_table": True,
+					"allow_duplicate_prev_row_id": True,
+				},
+				"Purchase Order Item": {
+					"ref_dn_field": "purchase_order_item",
+					"compare_fields": [["project", "="]],
+					"is_child_table": True,
+					"allow_duplicate_prev_row_id": True,
+				},
+			}
+		)
+>>>>>>> fe25746 (fix(subcontracting): validate project across the subcontracting flow (#58965))
 
 	def on_submit(self):
 		self.validate_closed_subcontracting_order()
