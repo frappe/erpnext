@@ -578,7 +578,7 @@ function get_holding_tree_rows_html(row) {
 		<tr>
 			${child_cell(frappe.utils.get_form_link("Pick List", d.pick_list, true))}
 			<td>${__(d.status)}</td>
-			<td>${frappe.utils.escape_html(d.batch_no || "")}</td>
+			<td>${frappe.utils.escape_html(d.batch_id || "")}</td>
 			<td class="text-right">${format_float(d.holding_qty)}</td>
 		</tr>`;
 	});
