@@ -506,7 +506,7 @@ class POSInvoice(SalesInvoice):
 			self.validate_return_serial_nos(d)
 
 	def validate_return_serial_nos(self, item):
-		serial_ids, _ = get_serial_batch_list_from_item(item)
+		serial_ids = get_serial_batch_list_from_item(item)[0]
 		if not serial_ids:
 			return
 		original_serials = set()
