@@ -334,7 +334,6 @@ class MaintenanceSchedule(TransactionBase):
 					"warranty_expiry_date",
 					"amc_expiry_date",
 					"warehouse",
-					"delivery_date",
 					"item_code",
 				],
 				as_dict=1,
@@ -368,11 +367,23 @@ class MaintenanceSchedule(TransactionBase):
 					)
 				)
 
-			if (
-				not sr_details.warehouse
-				and sr_details.delivery_date
-				and getdate(sr_details.delivery_date) >= getdate(amc_start_date)
-			):
+			if sr_details.warehouse:
+				continue
+
+			delivery_date = frappe.db.get_value(
+				"Serial and Batch Entry",
+				{
+					"serial_no": serial_no,
+					"item_code": item_code,
+					"docstatus": 1,
+					"is_cancelled": 0,
+					"type_of_transaction": "Outward",
+					"voucher_type": ("in", ["Delivery Note", "Sales Invoice"]),
+				},
+				"posting_datetime",
+				order_by="posting_datetime desc",
+			)
+			if delivery_date and getdate(delivery_date) >= getdate(amc_start_date):
 				throw(
 					_("Maintenance start date can not be before delivery date for Serial No {0}").format(
 						number
