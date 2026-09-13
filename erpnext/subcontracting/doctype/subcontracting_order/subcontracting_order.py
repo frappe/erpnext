@@ -224,29 +224,10 @@ class SubcontractingOrder(SubcontractingController):
 			if si.fg_item:
 				item = frappe.get_doc("Item", si.fg_item)
 
-<<<<<<< HEAD
-				qty, subcontracted_quantity, fg_item_qty = frappe.db.get_value(
+				qty, subcontracted_quantity, fg_item_qty, project = frappe.db.get_value(
 					"Purchase Order Item",
 					si.purchase_order_item,
-					["qty", "subcontracted_quantity", "fg_item_qty"],
-=======
-				(
-					qty,
-					subcontracted_qty,
-					fg_item_qty,
-					production_plan_sub_assembly_item,
-					project,
-				) = frappe.db.get_value(
-					"Purchase Order Item",
-					si.purchase_order_item,
-					[
-						"qty",
-						"subcontracted_qty",
-						"fg_item_qty",
-						"production_plan_sub_assembly_item",
-						"project",
-					],
->>>>>>> fe25746 (fix(subcontracting): validate project across the subcontracting flow (#58965))
+					["qty", "subcontracted_quantity", "fg_item_qty", "project"],
 				)
 				available_qty = flt(qty) - flt(subcontracted_quantity)
 
@@ -282,11 +263,7 @@ class SubcontractingOrder(SubcontractingController):
 						"purchase_order_item": si.purchase_order_item,
 						"material_request": si.material_request,
 						"material_request_item": si.material_request_item,
-<<<<<<< HEAD
-=======
-						"production_plan_sub_assembly_item": production_plan_sub_assembly_item,
 						"project": project,
->>>>>>> fe25746 (fix(subcontracting): validate project across the subcontracting flow (#58965))
 					}
 				)
 			else:
