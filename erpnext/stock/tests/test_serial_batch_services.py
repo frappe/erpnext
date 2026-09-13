@@ -3,13 +3,16 @@ from unittest.mock import patch
 import frappe
 from frappe.utils import add_days, getdate, nowdate
 
+from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule import (
 	get_serial_no_query,
 	get_serial_nos_from_schedule,
 	make_maintenance_visit,
 )
 from erpnext.stock.doctype.delivery_note.mapper import make_installation_note
+from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -104,6 +107,32 @@ class TestSerialBatchServices(ERPNextTestSuite):
 		self.assertEqual(visit.purposes[0].serial_no, self.serial.name)
 		with self.set_user("Guest"), self.assertRaises(frappe.PermissionError):
 			get_serial_nos_from_schedule(self.item.name, schedule.name)
+
+	def test_schedule_validates_delivery_date_from_stock_entries(self):
+		make_stock_entry(
+			item_code=self.item.name,
+			qty=1,
+			rate=100,
+			to_warehouse="_Test Warehouse - _TC",
+			serial_no=self.serial.serial_no,
+			use_serial_batch_fields=1,
+			posting_date=add_days(nowdate(), -3),
+		)
+		schedule = self.make_schedule()
+		for create_delivery in (create_delivery_note, create_sales_invoice):
+			with self.subTest(voucher=create_delivery.__name__):
+				delivery = create_delivery(
+					item_code=self.item.name,
+					qty=1,
+					serial_no=[self.serial.name],
+					update_stock=1,
+					posting_date=add_days(nowdate(), -2),
+				)
+				with self.assertRaisesRegex(frappe.ValidationError, "before delivery date.*Service-001"):
+					schedule.validate_serial_no(self.item.name, [self.serial.name], add_days(nowdate(), -3))
+				schedule.validate_serial_no(self.item.name, [self.serial.name], nowdate())
+				delivery.cancel()
+				schedule.validate_serial_no(self.item.name, [self.serial.name], add_days(nowdate(), -3))
 
 	def test_service_links_reject_a_serial_from_another_item(self):
 		visit = frappe.get_doc(
