@@ -392,15 +392,19 @@ def filter_batches(batches, doc):
 
 def get_filtered_serial_nos(serial_nos, doc, table=None):
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+	from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 	if not table:
 		table = "items"
 
 	for row in doc.get(table):
-		if row.get("serial_no"):
-			for serial_no in get_serial_nos(row.get("serial_no")):
-				if serial_no in serial_nos:
-					serial_nos.remove(serial_no)
+		item_code = row.get("item_code") or row.get("rm_item_code")
+		if item_code and row.get("serial_no"):
+			for serial in SerialBatchIdentity("Serial No").get_records(
+				item_code, get_serial_nos(row.get("serial_no")), ["name"]
+			):
+				if serial.name in serial_nos:
+					serial_nos.remove(serial.name)
 
 	return serial_nos
 

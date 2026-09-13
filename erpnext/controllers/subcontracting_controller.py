@@ -21,6 +21,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.serial_batch_bundle import SerialBatchCreation, get_serial_nos_from_bundle
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.utils import get_incoming_rate
 
 
@@ -449,8 +450,11 @@ class SubcontractingController(StockController):
 				from erpnext.deprecation_dumpster import deprecation_warning
 
 				deprecation_warning("unknown", "v16", "No instructions.")
+				consumed_serials = SerialBatchIdentity("Serial No").resolve(
+					row.rm_item_code, get_serial_nos(row.serial_no), ignore_permissions=True
+				)
 				self.available_materials[key]["serial_no"] = list(
-					set(self.available_materials[key]["serial_no"]) - set(get_serial_nos(row.serial_no))
+					set(self.available_materials[key]["serial_no"]) - set(consumed_serials)
 				)
 
 			# Will be deprecated in v16
@@ -508,7 +512,11 @@ class SubcontractingController(StockController):
 			)
 
 			if row.serial_no:
-				details.serial_no.extend(get_serial_nos(row.serial_no))
+				details.serial_no.extend(
+					SerialBatchIdentity("Serial No").resolve(
+						row.rm_item_code, get_serial_nos(row.serial_no), ignore_permissions=True
+					)
+				)
 			if row.batch_no:
 				details.batch_no[row.batch_no] += row.qty
 
@@ -765,7 +773,9 @@ class SubcontractingController(StockController):
 				if serial_nos:
 					serial_nos = [sn.get("serial_no") for sn in serial_nos]
 					serial_nos = get_filtered_serial_nos(serial_nos, self, "supplied_items")
-					row.serial_no = "\n".join(serial_nos)
+					row.serial_no = "\n".join(
+						SerialBatchIdentity("Serial No").get_numbers(row.rm_item_code, serial_nos)
+					)
 
 			elif (
 				item_details.has_batch_no
@@ -890,7 +900,9 @@ class SubcontractingController(StockController):
 		key = (rm_obj.rm_item_code, item_row.item_code, item_row.get(self.subcontract_data.order_field))
 		if self.available_materials.get(key) and self.available_materials[key]["serial_no"]:
 			used_serial_nos = self.available_materials[key]["serial_no"][0 : cint(rm_obj.consumed_qty)]
-			rm_obj.serial_no = "\n".join(used_serial_nos)
+			rm_obj.serial_no = "\n".join(
+				SerialBatchIdentity("Serial No").get_numbers(rm_obj.rm_item_code, used_serial_nos)
+			)
 
 			# Removed the used serial nos from the list
 			for sn in used_serial_nos:
@@ -1480,7 +1492,9 @@ def add_items_in_ste(ste_doc, row, qty, rm_details, rm_detail_field="sco_rm_deta
 			"t_warehouse": row.item_details["s_warehouse"],
 			"item_code": row.item_details["rm_item_code"],
 			"subcontracted_item": row.item_details["main_item_code"],
-			"serial_no": "\n".join(row.serial_no) if row.serial_no else "",
+			"serial_no": "\n".join(
+				SerialBatchIdentity("Serial No").get_numbers(row.item_details["rm_item_code"], row.serial_no)
+			),
 			"use_serial_batch_fields": 1,
 		}
 	)
