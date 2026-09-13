@@ -3,6 +3,7 @@ from unittest.mock import patch
 import frappe
 
 from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_serial_batch_scan
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
 from erpnext.tests.utils import ERPNextTestSuite
@@ -64,6 +65,55 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 			self.make_number(doctype, "Physical-001")
 			with self.set_user("Guest"), self.assertRaises(frappe.PermissionError):
 				SerialBatchIdentity(doctype).resolve(self.item.name, ["Physical-001"])
+
+	def test_scan_lookup_returns_the_selected_items_record(self):
+		for item in (self.item, self.other_item):
+			batch = self.make_number("Batch", "Scan-Batch", item.name)
+			serial = self.make_number("Serial No", "Scan-Serial", item.name)
+			serial.batch_no = batch.name
+			serial.save()
+			self.assertEqual(
+				get_serial_batch_scan(item.name, " scan-serial ", "Serial No"),
+				{"name": serial.name, "serial_no": "Scan-Serial", "batch_no": batch.name},
+			)
+			self.assertEqual(
+				get_serial_batch_scan(item.name, " SCAN-BATCH ", "Batch"),
+				{"name": batch.name, "batch_id": "Scan-Batch"},
+			)
+
+	def test_scan_lookup_does_not_create_or_interpret_ids(self):
+		for doctype in ("Serial No", "Batch"):
+			record = self.make_number(doctype, "Scan-001")
+			count = frappe.db.count(doctype)
+			for number in ("Missing-Scan", record.name, " "):
+				self.assertEqual(get_serial_batch_scan(self.item.name, number, doctype), {})
+			self.assertEqual(get_serial_batch_scan(self.other_item.name, "Scan-001", doctype), {})
+			self.assertEqual(frappe.db.count(doctype), count)
+
+	def test_scan_lookup_requires_read_permission(self):
+		for doctype in ("Serial No", "Batch"):
+			self.make_number(doctype, "Scan-001")
+			with self.set_user("Guest"), self.assertRaises(frappe.PermissionError):
+				get_serial_batch_scan(self.item.name, "Scan-001", doctype)
+
+	def test_scan_lookup_works_without_serial_create_permission(self):
+		serial = self.make_number("Serial No", "Scan-001")
+		user = frappe.get_doc(
+			doctype="User",
+			email="identity-scan-reader@example.com",
+			first_name="Scan Reader",
+			send_welcome_email=0,
+			roles=[{"role": "Stock User"}],
+		).insert()
+		with self.set_user(user.name):
+			self.assertFalse(frappe.has_permission("Serial No", "create"))
+			self.assertEqual(
+				get_serial_batch_scan(self.item.name, "Scan-001", "Serial No")["name"], serial.name
+			)
+			self.assertEqual(get_serial_batch_scan(self.item.name, "Missing-Scan", "Serial No"), {})
+		self.assertFalse(
+			frappe.db.exists("Serial No", {"item_code": self.item.name, "serial_no": "Missing-Scan"})
+		)
 
 	def test_sql_characters_in_physical_numbers(self):
 		for doctype in ("Serial No", "Batch"):
