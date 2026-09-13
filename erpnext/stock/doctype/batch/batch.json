@@ -216,7 +216,7 @@
  "image_field": "image",
  "links": [],
  "max_attachments": 5,
- "modified": "2026-08-21 23:11:39.905227",
+ "modified": "2026-09-23 15:02:48.588285",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Batch",
@@ -241,32 +241,44 @@
    "select": 1
   },
   {
+   "create": 1,
+   "read": 1,
    "role": "Accounts User",
-   "select": 1
+   "select": 1,
+   "write": 1
   },
   {
    "role": "Delivery Manager",
    "select": 1
   },
   {
+   "create": 1,
+   "read": 1,
    "role": "Delivery User",
-   "select": 1
+   "select": 1,
+   "write": 1
   },
   {
    "role": "Maintenance Manager",
    "select": 1
   },
   {
+   "create": 1,
+   "read": 1,
    "role": "Maintenance User",
-   "select": 1
+   "select": 1,
+   "write": 1
   },
   {
    "role": "Manufacturing Manager",
    "select": 1
   },
   {
+   "create": 1,
+   "read": 1,
    "role": "Manufacturing User",
-   "select": 1
+   "select": 1,
+   "write": 1
   },
   {
    "role": "Purchase Master Manager",
@@ -285,8 +297,23 @@
    "select": 1
   },
   {
+   "create": 1,
+   "read": 1,
    "role": "Sales User",
-   "select": 1
+   "select": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock User",
+   "share": 1,
+   "write": 1
   }
  ],
  "quick_entry": 1,

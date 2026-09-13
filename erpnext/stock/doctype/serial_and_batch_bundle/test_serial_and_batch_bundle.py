@@ -13,6 +13,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 	get_available_batches_qty,
 	get_qty_based_available_batches,
 	get_type_of_transaction,
+	is_serial_batch_no_exists,
 	make_batch_nos,
 	make_serial_nos,
 	parse_serial_nos,
@@ -2249,6 +2250,50 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 		item.reload()
 		self.assertEqual(item.use_serial_no_wise_valuation, 1)
 
+	def test_scan_creates_serial_batch_on_inward(self):
+		item_code = make_item(
+			"_Test Scan Serial Batch Item",
+			{"is_stock_item": 1, "has_serial_no": 1, "has_batch_no": 1},
+		).name
+		user = make_scan_test_user("_test_scan_item_manager@example.com", ["Item Manager"])
+		frappe.defaults.set_user_default("company", "_Test Company", user)
+
+		with self.set_user(user):
+			is_serial_batch_no_exists(
+				item_code, "Inward", serial_no="_TEST-SCAN-SN-01", batch_no="_TEST-SCAN-B-01"
+			)
+			# existing records pass for outward, missing ones are not created
+			is_serial_batch_no_exists(
+				item_code, "Outward", serial_no="_TEST-SCAN-SN-01", batch_no="_TEST-SCAN-B-01"
+			)
+			self.assertRaises(
+				frappe.ValidationError,
+				is_serial_batch_no_exists,
+				item_code,
+				"Outward",
+				serial_no="_TEST-SCAN-SN-02",
+			)
+
+		self.assertTrue(frappe.db.exists("Serial No", "_TEST-SCAN-SN-01"))
+		self.assertTrue(frappe.db.exists("Batch", "_TEST-SCAN-B-01"))
+		self.assertFalse(frappe.db.exists("Serial No", "_TEST-SCAN-SN-02"))
+
+	def test_scan_requires_create_permission_on_inward(self):
+		item_code = make_item("_Test Scan Serial Item", {"is_stock_item": 1, "has_serial_no": 1}).name
+		# Stock User can read Serial No but not create it
+		user = make_scan_test_user("_test_scan_stock_user@example.com", ["Stock User"])
+
+		with self.set_user(user):
+			self.assertRaises(
+				frappe.PermissionError,
+				is_serial_batch_no_exists,
+				item_code,
+				"Inward",
+				serial_no="_TEST-SCAN-SN-03",
+			)
+
+		self.assertFalse(frappe.db.exists("Serial No", "_TEST-SCAN-SN-03"))
+
 
 def get_batch_from_bundle(bundle):
 	from erpnext.stock.serial_batch_bundle import get_batch_nos
@@ -2305,6 +2350,21 @@ def make_serial_batch_bundle(kwargs):
 		return sb.make_serial_and_batch_bundle()
 
 	return sb
+
+
+def make_scan_test_user(email, roles):
+	if not frappe.db.exists("User", email):
+		frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": email,
+				"first_name": email.split("@")[0],
+				"send_welcome_email": 0,
+				"roles": [{"role": role} for role in roles],
+			}
+		).insert(ignore_permissions=True)
+
+	return email
 
 
 class TestSerialandBatchBundleLogic(ERPNextTestSuite):
