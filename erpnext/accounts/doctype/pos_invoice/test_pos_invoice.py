@@ -847,7 +847,7 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 				"voucher_no": pos_inv2.name,
 				"qty": 2,
 				"avg_rate": 300,
-				"batches": frappe._dict({"TestBatch 01": 2}),
+				"batches": frappe._dict({batch_no: 2}),
 				"type_of_transaction": "Outward",
 				"company": pos_inv2.company,
 			}

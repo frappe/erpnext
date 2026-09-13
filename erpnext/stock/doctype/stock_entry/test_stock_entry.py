@@ -3034,8 +3034,11 @@ class TestStockEntry(ERPNextTestSuite):
 		self.assertTrue(se.items[0].serial_and_batch_bundle)
 
 		for serial_no in serial_nos:
-			self.assertTrue(frappe.db.exists("Serial No", serial_no))
-			self.assertEqual(frappe.db.get_value("Serial No", serial_no, "status"), "Active")
+			self.assertTrue(frappe.db.exists("Serial No", {"item_code": item.name, "serial_no": serial_no}))
+			self.assertEqual(
+				frappe.db.get_value("Serial No", {"item_code": item.name, "serial_no": serial_no}, "status"),
+				"Active",
+			)
 
 		se1 = make_stock_entry(
 			item_code=item.name,
@@ -3052,8 +3055,11 @@ class TestStockEntry(ERPNextTestSuite):
 		self.assertTrue(se1.items[0].serial_and_batch_bundle)
 
 		for serial_no in serial_nos:
-			self.assertTrue(frappe.db.exists("Serial No", serial_no))
-			self.assertEqual(frappe.db.get_value("Serial No", serial_no, "status"), "Consumed")
+			self.assertTrue(frappe.db.exists("Serial No", {"item_code": item.name, "serial_no": serial_no}))
+			self.assertEqual(
+				frappe.db.get_value("Serial No", {"item_code": item.name, "serial_no": serial_no}, "status"),
+				"Consumed",
+			)
 
 	def test_serial_batch_bundle_type_of_transaction(self):
 		item = make_item(
@@ -3420,7 +3426,7 @@ class TestStockEntry(ERPNextTestSuite):
 				"uom": item_doc.stock_uom,
 				"qty": 1,
 				"use_serial_batch_fields": 1,
-				"serial_no": delivered_serial_no,
+				"serial_no": frappe.db.get_value("Serial No", delivered_serial_no, "serial_no"),
 			},
 		)
 

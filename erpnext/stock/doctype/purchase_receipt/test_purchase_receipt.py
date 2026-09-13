@@ -1135,7 +1135,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			).insert()
 
 		pr_doc = make_purchase_receipt(
-			item_code=item_code, qty=1, serial_no=serial_no, use_serial_batch_fields=1
+			item_code=item_code, qty=1, serial_no="\n".join(serial_no), use_serial_batch_fields=1
 		)
 		pr_doc.load_from_db()
 

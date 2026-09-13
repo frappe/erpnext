@@ -424,8 +424,8 @@ class TestBatch(ERPNextTestSuite):
 			filters=filters,
 		)
 		returned = {row[0] for row in result}
-		self.assertIn("batch picker a", returned)
-		self.assertIn("batch picker b", returned)
+		expected = frappe.get_all("Batch", filters={"item": "ITEM-BATCH-PICKER"}, pluck="name")
+		self.assertEqual(returned, set(expected))
 
 		# These batches have no manufacturing/expiry date. MariaDB CONCAT('MFG-', NULL)
 		# is NULL, but Postgres CONCAT drops the NULL and would surface a bare "MFG-"/
@@ -547,7 +547,7 @@ class TestBatch(ERPNextTestSuite):
 		batch.delete()
 		batch = self.make_new_batch("_Test Stock Item For Batch Test2")
 
-		self.assertEqual(batch_name, batch.name)
+		self.assertEqual(batch_name, batch.batch_id)
 
 		# reset Stock Settings
 		if not use_naming_series:

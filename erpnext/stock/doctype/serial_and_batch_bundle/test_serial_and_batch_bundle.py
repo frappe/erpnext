@@ -1352,7 +1352,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 		self.assertIsNone(frappe.get_value("Serial No", serial_no, "reference_name"))
 
 		se1 = frappe.copy_doc(se, ignore_no_copy=False)
-		se1.items[0].serial_no = serial_no
+		se1.items[0].serial_no = frappe.db.get_value("Serial No", serial_no, "serial_no")
 		se1.submit()
 
 		self.assertEqual(frappe.get_value("Serial No", serial_no, "reference_name"), se1.name)

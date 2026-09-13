@@ -61,7 +61,7 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 		company_a, company_b = "_Test Company", "_Test Company 1"
 		if frappe.db.exists("Serial No", serial):
 			frappe.delete_doc("Serial No", serial, force=1)
-		frappe.get_doc(
+		serial_doc = frappe.get_doc(
 			{"doctype": "Serial No", "serial_no": serial, "item_code": item, "company": company_b}
 		).insert(ignore_permissions=True)
 
@@ -79,7 +79,7 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 					"actual_qty": 1,
 					"incoming_rate": rate,
 					"is_cancelled": 0,
-					"serial_no": serial,
+					"serial_no": serial_doc.name,
 					"voucher_type": "Stock Entry",
 					"voucher_no": "TEST-TIE",
 				}
@@ -92,7 +92,7 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 		mk_sle("MAT-SLE-TIE-B", 200)  # later/larger name -> deterministic winner
 
 		value = update_entries_after.get_incoming_value_for_serial_nos(
-			frappe._dict(company=company_a), [serial]
+			frappe._dict(company=company_a), [serial_doc.name]
 		)
 		# the latest (creation/name desc) same-date SLE wins -> 200 on both engines
 		self.assertEqual(value, 200.0)

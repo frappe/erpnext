@@ -301,7 +301,9 @@ class TestSerialBatchInlineEditor(ERPNextTestSuite):
 				self.upsert(pr, entries=[{field: number, "qty": 1}])
 			self.assertFalse(frappe.db.exists(doctype, {item_field: item, number_field: number}))
 
-			master = frappe.get_doc({"doctype": doctype, item_field: item, number_field: number}).insert()
+			master = frappe.get_doc(
+				{"doctype": doctype, item_field: item, number_field: number, "company": pr.company}
+			).insert()
 			with self.assertRaises(frappe.LinkValidationError):
 				self.upsert(pr, entries=[{field: number, "qty": 1}])
 			summary = self.upsert(pr, entries=[{field: master.name, "qty": 1}])

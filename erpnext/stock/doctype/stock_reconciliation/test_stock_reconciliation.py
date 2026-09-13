@@ -1771,7 +1771,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			qty=1,
 			rate=200,
 			use_serial_batch_fields=1,
-			serial_no=serial_no,
+			serial_no=frappe.db.get_value("Serial No", serial_no, "serial_no"),
 		)
 
 		sr.reload()
