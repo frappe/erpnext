@@ -2,7 +2,7 @@ from collections import defaultdict
 
 import frappe
 from frappe import _, bold
-from frappe.model.naming import NamingSeries, parse_naming_series
+from frappe.model.naming import NamingSeries, make_autoname, parse_naming_series
 from frappe.query_builder.functions import Max, Sum
 from frappe.utils import add_days, cint, cstr, flt, get_link_to_form, getdate, now
 from pypika import Order
@@ -12,6 +12,7 @@ from erpnext.stock.deprecated_serial_batch import (
 	DeprecatedBatchNoValuation,
 	DeprecatedSerialNoValuation,
 )
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.valuation import round_off_if_near_zero
 
 CONSUMED_SERIAL_NO_STOCK_ENTRY_PURPOSES = (
@@ -246,7 +247,13 @@ class SerialBatchBundle:
 				"Stock Settings", "do_not_update_serial_batch_on_creation_of_auto_bundle"
 			):
 				if sn_doc.has_serial_no:
-					values_to_update["serial_no"] = ",".join(cstr(d.serial_no) for d in sn_doc.entries)
+					serial_numbers = frappe.get_all(
+						"Serial and Batch Entry",
+						filters={"parent": sn_doc.name},
+						pluck="serial_no.serial_no",
+						order_by="idx",
+					)
+					values_to_update["serial_no"] = "\n".join(serial_numbers)
 				elif sn_doc.has_batch_no and len(sn_doc.entries) == 1:
 					values_to_update["batch_no"] = sn_doc.entries[0].batch_no
 
@@ -1369,9 +1376,6 @@ class SerialBatchCreation:
 
 	def set_auto_serial_batch_entries_for_inward(self):
 		if (self.get("batches") and self.has_batch_no) or (self.get("serial_nos") and self.has_serial_no):
-			if self.use_serial_batch_fields and self.get("serial_nos"):
-				self.make_serial_no_if_not_exists()
-
 			return
 
 		self.batch_no = None
@@ -1382,59 +1386,6 @@ class SerialBatchCreation:
 			self.serial_nos = self.get_auto_created_serial_nos()
 		else:
 			self.batches = frappe._dict({self.batch_no: abs(self.actual_qty)})
-
-	def make_serial_no_if_not_exists(self):
-		non_exists_serial_nos = []
-		for row in self.serial_nos:
-			if not frappe.db.exists("Serial No", row):
-				non_exists_serial_nos.append(row)
-
-		if non_exists_serial_nos:
-			self.make_serial_nos(non_exists_serial_nos)
-
-	def make_serial_nos(self, serial_nos):
-		serial_nos_details = []
-		batch_no = None
-		if self.batches:
-			batch_no = next(iter(self.batches.keys()))
-
-		for serial_no in serial_nos:
-			serial_nos_details.append(
-				(
-					serial_no,
-					serial_no,
-					now(),
-					now(),
-					frappe.session.user,
-					frappe.session.user,
-					self.warehouse,
-					self.company,
-					self.item_code,
-					self.item_name,
-					self.description,
-					"Active",
-					batch_no,
-				)
-			)
-
-		if serial_nos_details:
-			fields = [
-				"name",
-				"serial_no",
-				"creation",
-				"modified",
-				"owner",
-				"modified_by",
-				"warehouse",
-				"company",
-				"item_code",
-				"item_name",
-				"description",
-				"status",
-				"batch_no",
-			]
-
-			frappe.db.bulk_insert("Serial No", fields=fields, values=set(serial_nos_details))
 
 	def set_serial_batch_entries(self, doc):
 		incoming_rate = self.get("incoming_rate")
@@ -1565,11 +1516,12 @@ class SerialBatchCreation:
 		for _i in range(abs(cint(self.actual_qty))):
 			current_value += 1
 			serial_no = parse_naming_series(self.serial_no_series, number_generator=get_series)
+			serial_id = make_autoname("hash", "Serial No")
 
-			sr_nos.append(serial_no)
+			sr_nos.append(serial_id)
 			serial_nos_details.append(
 				(
-					serial_no,
+					serial_id,
 					serial_no,
 					now(),
 					now(),
@@ -1610,16 +1562,15 @@ class SerialBatchCreation:
 
 			try:
 				frappe.db.bulk_insert("Serial No", fields=fields, values=set(serial_nos_details))
-			except Exception as e:
-				if e and len(e.args) > 1 and "Duplicate" in e.args[1]:
-					frappe.throw(
-						_(
-							"A naming series conflict occurred while creating serial numbers. Please change the naming series for the item {0}."
-						).format(bold(self.item_code)),
-						title=_("Duplicate Serial Number Error"),
-					)
-				else:
-					raise e
+			except Exception as error:
+				SerialBatchIdentity("Serial No").raise_duplicate(
+					error,
+					self.item_code,
+					message=_(
+						"A naming series conflict occurred while creating serial numbers. Please change the naming series for the item {0}."
+					).format(bold(self.item_code)),
+				)
+				raise
 
 		obj.update_counter(current_value)
 

@@ -5,6 +5,7 @@ from frappe import _
 from frappe.query_builder.functions import Lower
 from frappe.query_builder.terms import ParameterizedValueWrapper
 from frappe.utils import escape_html
+from pypika.analytics import Min
 
 
 class SerialBatchIdentity:
@@ -28,7 +29,7 @@ class SerialBatchIdentity:
 		else:
 			frappe.db.add_unique(self.doctype, [self.item_field, self.number_field], self.constraint_name)
 
-	def raise_duplicate(self, error, item_code, number):
+	def raise_duplicate(self, error, item_code, number=None, *, message=None):
 		if not frappe.db.is_unique_key_violation(error):
 			return
 		constraint = getattr(getattr(error, "diag", None), "constraint_name", None)
@@ -36,15 +37,14 @@ class SerialBatchIdentity:
 			matches = re.findall(r"for key ['`](?:[^'`]+\.)?([^'`]+)['`]", str(error))
 			constraint = matches[-1] if matches else None
 		if constraint == self.constraint_name:
-			frappe.throw(
-				_("{0} {1} already exists for Item {2}").format(
+			if message is None:
+				message = _("{0} {1} already exists for Item {2}").format(
 					_(self.doctype), escape_html(number), escape_html(item_code)
-				),
-				frappe.UniqueValidationError,
-			)
+				)
+			frappe.throw(message, frappe.UniqueValidationError)
 
-	def resolve(self, item_code, numbers, *, ignore_permissions=False):
-		"""Resolve physical numbers to IDs in input order, without creating records."""
+	def resolve(self, item_code, numbers, *, create=False, defaults=None, ignore_permissions=False):
+		"""Resolve physical numbers to IDs. Creation is opt-in for authorized saves."""
 		if not isinstance(item_code, str) or not item_code:
 			frappe.throw(_("Item is required"))
 		if not isinstance(numbers, list | tuple) or any(not isinstance(number, str) for number in numbers):
@@ -61,13 +61,20 @@ class SerialBatchIdentity:
 			frappe.has_permission(self.doctype, permission, throw=True)
 
 		names = [None] * len(numbers)
-		for index, name in self._match_numbers(item_code, numbers):
+		created = {}
+		for index, name, first_index in self._match_numbers(item_code, numbers):
 			if not name:
-				frappe.throw(
-					_("{0} {1} does not exist for Item {2}").format(
-						_(self.doctype), escape_html(numbers[index]), escape_html(item_code)
+				if not create:
+					frappe.throw(
+						_("{0} {1} does not exist for Item {2}").format(
+							_(self.doctype), escape_html(numbers[index]), escape_html(item_code)
+						)
 					)
-				)
+				if first_index not in created:
+					created[first_index] = self._create_record(
+						item_code, numbers[first_index], defaults, ignore_permissions
+					)
+				name = created[first_index]
 			if names[index]:
 				frappe.throw(
 					_("{0} {1} matches multiple records for Item {2}").format(
@@ -83,6 +90,40 @@ class SerialBatchIdentity:
 					_("Not permitted to select these serial or batch records"), frappe.PermissionError
 				)
 		return names
+
+	def get_records(self, item_code, numbers, fields):
+		if not numbers:
+			return []
+		table = frappe.qb.DocType(self.doctype)
+		return (
+			frappe.qb.get_query(
+				self.doctype,
+				fields=fields,
+				filters={self.item_field: item_code},
+				ignore_permissions=True,
+			)
+			.where(
+				self._number_key(table[self.number_field]).isin(
+					[self._number_key(number) for number in numbers]
+				)
+			)
+			.run(as_dict=True)
+		)
+
+	def _create_record(self, item_code, number, defaults, ignore_permissions):
+		values = {
+			**(defaults or {}),
+			"doctype": self.doctype,
+			self.item_field: item_code,
+			self.number_field: number,
+		}
+		if self.doctype == "Serial No":
+			if not frappe.get_cached_value("Item", item_code, "has_serial_no"):
+				frappe.throw(
+					_("Item {0} does not have serial numbers enabled").format(escape_html(item_code))
+				)
+			values["status"] = "Inactive"
+		return frappe.get_doc(values).insert(ignore_permissions=ignore_permissions).name
 
 	def _match_numbers(self, item_code, numbers):
 		table = frappe.qb.DocType(self.doctype)
@@ -107,7 +148,7 @@ class SerialBatchIdentity:
 				(table[self.item_field] == item_code)
 				& (self._number_key(table[self.number_field]) == self._number_key(inputs.number))
 			)
-			.select(inputs.ordinal, table.name)
+			.select(inputs.ordinal, table.name, Min(inputs.ordinal).over(self._number_key(inputs.number)))
 		).run()
 
 	def _number_key(self, value):
