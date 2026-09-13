@@ -55,7 +55,7 @@ frappe.query_reports["Stock Qty vs Batch Qty"] = {
 	},
 
 	formatter: function (value, row, column, data, default_formatter) {
-		value = default_formatter(value, row, column, data);
+		value = erpnext.utils.format_serial_batch_number(value, row, column, data, default_formatter);
 		if (column.fieldname == "difference" && data) {
 			if (data.difference > 0) {
 				value = "<span style='color:red'>" + value + "</span>";

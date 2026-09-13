@@ -2,6 +2,7 @@
 // For license information, please see license.txt
 
 frappe.query_reports["Serial No Ledger"] = {
+	formatter: erpnext.utils.format_serial_batch_number,
 	filters: [
 		{
 			label: __("Item Code"),

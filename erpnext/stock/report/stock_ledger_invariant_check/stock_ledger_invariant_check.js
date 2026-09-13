@@ -41,7 +41,7 @@ frappe.query_reports["Stock Ledger Invariant Check"] = {
 	],
 
 	formatter(value, row, column, data, default_formatter) {
-		value = default_formatter(value, row, column, data);
+		value = erpnext.utils.format_serial_batch_number(value, row, column, data, default_formatter);
 		if (DIFFERENCE_FIELD_NAMES.includes(column.fieldname) && Math.abs(data[column.fieldname]) > 0.001) {
 			value = '<span style="color:red">' + value + "</span>";
 		}

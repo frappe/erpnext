@@ -5,6 +5,8 @@ import frappe
 from frappe import _
 from frappe.query_builder import Case
 
+from erpnext.stock.report.utils import prepare_serial_batch_report
+
 
 def execute(filters: dict | None = None):
 	report = ReportData(filters)
@@ -13,7 +15,7 @@ def execute(filters: dict | None = None):
 	has_serial_no, has_batch_no = check_has_serial_no_in_data(data)
 	columns = report.get_columns(has_serial_no, has_batch_no)
 
-	return columns, data
+	return prepare_serial_batch_report(columns, data)
 
 
 def check_has_serial_no_in_data(data):

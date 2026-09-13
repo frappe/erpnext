@@ -6,6 +6,7 @@ from typing import Any
 import frappe
 from frappe import _
 
+from erpnext.stock.report.utils import prepare_serial_batch_report
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 
@@ -13,7 +14,7 @@ def execute(filters=None):
 	data = get_data(filters)
 	columns = get_columns(filters, data)
 
-	return columns, data
+	return prepare_serial_batch_report(columns, data)
 
 
 def get_data(filters):
@@ -161,7 +162,13 @@ def get_columns(filters, data):
 	if not item_details or item_details.get("has_batch_no"):
 		columns.extend(
 			[
-				{"label": _("Batch No"), "fieldname": "batch_no", "fieldtype": "Data", "width": 120},
+				{
+					"label": _("Batch No"),
+					"fieldname": "batch_no",
+					"fieldtype": "Link",
+					"options": "Batch",
+					"width": 120,
+				},
 				{"label": _("Batch Qty"), "fieldname": "qty", "fieldtype": "Float", "width": 120},
 			]
 		)

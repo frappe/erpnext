@@ -95,15 +95,23 @@ class SerialBatchIdentity:
 	def get_numbers(self, item_code, names):
 		if not names:
 			return []
-		numbers = dict(
+		numbers = self.get_number_map(names, item_code=item_code)
+		return [numbers[name] for name in names]
+
+	def get_number_map(self, names, *, item_code=None):
+		if not names:
+			return {}
+		filters = {"name": ("in", list(set(names)))}
+		if item_code is not None:
+			filters[self.item_field] = item_code
+		return dict(
 			frappe.get_all(
 				self.doctype,
-				filters={self.item_field: item_code, "name": ("in", names)},
+				filters=filters,
 				fields=["name", self.number_field],
 				as_list=True,
 			)
 		)
-		return [numbers[name] for name in names]
 
 	def get_records(self, item_code, numbers, fields, *, ignore_permissions=True):
 		if not numbers:

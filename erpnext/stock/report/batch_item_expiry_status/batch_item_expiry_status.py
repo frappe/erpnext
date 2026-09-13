@@ -6,6 +6,8 @@ import frappe
 from frappe import _
 from frappe.query_builder.functions import Date
 
+from erpnext.stock.report.utils import prepare_serial_batch_report
+
 
 def execute(filters=None):
 	validate_filters(filters)
@@ -13,7 +15,7 @@ def execute(filters=None):
 	columns = get_columns()
 	data = get_data(filters)
 
-	return columns, data
+	return prepare_serial_batch_report(columns, data)
 
 
 def validate_filters(filters):

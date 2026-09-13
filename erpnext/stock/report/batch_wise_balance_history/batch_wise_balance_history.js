@@ -79,22 +79,13 @@ frappe.query_reports["Batch-Wise Balance History"] = {
 		},
 	],
 	formatter: function (value, row, column, data, default_formatter) {
-		if (column.fieldname == "Batch" && data && !!data["Batch"]) {
-			value = data["Batch"];
-			column.link_onclick =
-				"frappe.query_reports['Batch-Wise Balance History'].set_batch_route_to_stock_ledger(" +
-				JSON.stringify(data) +
-				")";
+		const reference = column.serial_batch;
+		if (reference?.doctype === "Batch" && data?.[reference.fieldname]) {
+			const batch = encodeURIComponent(data[reference.fieldname]);
+			return `<a href="/desk/query-report/Stock Ledger?batch_no=${batch}">${frappe.utils.escape_html(
+				value
+			)}</a>`;
 		}
-
-		value = default_formatter(value, row, column, data);
-		return value;
-	},
-	set_batch_route_to_stock_ledger: function (data) {
-		frappe.route_options = {
-			batch_no: data["Batch"],
-		};
-
-		frappe.set_route("query-report", "Stock Ledger");
+		return default_formatter(value, row, column, data);
 	},
 };

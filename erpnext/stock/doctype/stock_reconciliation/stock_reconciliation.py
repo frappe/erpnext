@@ -1419,7 +1419,7 @@ def get_item_data(row, qty, valuation_rate, serial_no=None):
 
 
 def get_itemwise_batch(warehouse, posting_date, company, item_code=None):
-	from erpnext.stock.report.batch_wise_balance_history.batch_wise_balance_history import execute
+	from erpnext.stock.report.batch_wise_balance_history.batch_wise_balance_history import get_data
 
 	itemwise_batch_data = {}
 
@@ -1430,7 +1430,7 @@ def get_itemwise_batch(warehouse, posting_date, company, item_code=None):
 	if item_code:
 		filters.item_code = item_code
 
-	columns, data = execute(filters)
+	data = get_data(filters)
 
 	for row in data:
 		itemwise_batch_data.setdefault((row[0], row[3]), []).append(

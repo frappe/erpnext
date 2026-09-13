@@ -61,55 +61,26 @@ frappe.query_reports["Serial No and Batch Traceability"] = {
 			return "";
 		}
 
-		return custom_formatter(value, row, column, data, default_formatter);
+		value = erpnext.utils.format_serial_batch_number(value, row, column, data, default_formatter);
+		if (!column.serial_batch || !value) {
+			return value;
+		}
+
+		const element = $("<span>").html(value);
+		element.find("a").addClass(get_traceability_class(column.serial_batch, data));
+		return element.html();
 	},
 };
 
-function getTraceabilityLink({ type, value, original_value, item_code, data, filter_values }) {
-	if (!value) return value;
-
-	const link_doctype = type === "batch_no" ? "Batch" : "Serial No";
-	const filter_list = filter_values[type]; // either batches or serial_nos
-
-	let css_class = "ellipsis";
-
-	if (filter_list?.length && !filter_list.includes(original_value)) {
-		// value not in filtered list
-		css_class = "ellipsis";
-	} else if (item_code && data.item_code && data.item_code !== item_code) {
-		// mismatch in item code
-		css_class = "ellipsis";
-	} else {
-		// color by direction
-		css_class = data.direction === "Backward" ? "ellipsis text-success" : "ellipsis text-danger";
+function get_traceability_class(reference, data) {
+	const filter = reference.doctype === "Batch" ? "batches" : "serial_nos";
+	const selected = frappe.query_report.get_filter_value(filter);
+	const item_code = frappe.query_report.get_filter_value("item_code");
+	if (
+		(selected?.length && !selected.includes(data[reference.fieldname])) ||
+		(item_code && data.item_code && data.item_code !== item_code)
+	) {
+		return "ellipsis";
 	}
-
-	return `<a class="${css_class}" href="${frappe.utils.get_form_link(
-		link_doctype,
-		original_value
-	)}">${frappe.utils.escape_html(original_value)}</a>`;
-}
-
-function custom_formatter(value, row, column, data, default_formatter) {
-	let original_value = value;
-	let filter_values = {
-		batch_no: frappe.query_report.get_filter_value("batches"),
-		serial_no: frappe.query_report.get_filter_value("serial_nos"),
-	};
-	let item_code = frappe.query_report.get_filter_value("item_code");
-
-	value = default_formatter(value, row, column, data);
-
-	if (["batch_no", "serial_no"].includes(column.fieldname) && value) {
-		value = getTraceabilityLink({
-			type: column.fieldname,
-			value,
-			original_value,
-			item_code,
-			data,
-			filter_values,
-		});
-	}
-
-	return value;
+	return data.direction === "Backward" ? "ellipsis text-success" : "ellipsis text-danger";
 }

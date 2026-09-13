@@ -40,7 +40,7 @@ frappe.query_reports["FIFO Queue vs Qty After Transaction Comparison"] = {
 		},
 	],
 	formatter(value, row, column, data, default_formatter) {
-		value = default_formatter(value, row, column, data);
+		value = erpnext.utils.format_serial_batch_number(value, row, column, data, default_formatter);
 		if (DIFFERNCE_FIELD_NAMES.includes(column.fieldname) && Math.abs(data[column.fieldname]) > 0.001) {
 			value = "<span style='color:red'>" + value + "</span>";
 		}
