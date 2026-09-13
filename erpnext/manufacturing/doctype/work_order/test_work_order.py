@@ -1353,9 +1353,27 @@ class TestWorkOrder(ERPNextTestSuite):
 		item.serial_no_series = f"{item.name}.#####"
 		item.save()
 
+		other_item = make_item(f"{fg_item}-other", {"has_serial_no": 1})
+		for item_code, number in (
+			(item.name, f"{item.name.upper()}00001"),
+			(other_item.name, f"{item.name}00002"),
+		):
+			frappe.get_doc({"doctype": "Serial No", "item_code": item_code, "serial_no": number}).insert()
+
 		try:
 			wo_order = make_wo_order_test_record(item=fg_item, qty=2, skip_transfer=True)
 			serial_nos = self.get_serial_nos_for_fg(wo_order.name)
+			serials = frappe.get_all(
+				"Serial No",
+				filters={"work_order": wo_order.name},
+				fields=["name", "serial_no", "item_code", "status"],
+				order_by="serial_no",
+			)
+			self.assertEqual([d.serial_no for d in serials], [f"{item.name}00002", f"{item.name}00003"])
+			for serial in serials:
+				self.assertNotEqual(serial.name, serial.serial_no)
+				self.assertEqual(serial.item_code, item.name)
+				self.assertEqual(serial.status, "Inactive")
 
 			stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 10))
 			stock_entry.set_work_order_details()
