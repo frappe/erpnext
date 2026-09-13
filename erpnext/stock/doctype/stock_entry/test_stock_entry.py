@@ -1,6 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from unittest.mock import patch
 
 from frappe.permissions import add_user_permission, remove_user_permission
 from frappe.utils import add_days, cstr, flt, get_time, getdate, nowtime, today
@@ -964,24 +965,24 @@ class TestStockEntry(ERPNextTestSuite):
 	def test_serial_move(self):
 		se = make_serialized_item(self)
 		serial_no = get_serial_nos_from_bundle(se.get("items")[0].serial_and_batch_bundle)[0]
-		frappe.flags.use_serial_and_batch_fields = True
+		with patch.dict(frappe.flags, {"use_serial_and_batch_fields": True}):
+			se = frappe.copy_doc(self.globalTestRecords["Stock Entry"][0])
+			se.purpose = "Material Transfer"
+			se.get("items")[0].item_code = "_Test Serialized Item With Series"
+			se.get("items")[0].qty = 1
+			se.get("items")[0].transfer_qty = 1
+			se.get("items")[0].serial_no = frappe.db.get_value("Serial No", serial_no, "serial_no")
+			se.get("items")[0].s_warehouse = "_Test Warehouse - _TC"
+			se.get("items")[0].t_warehouse = "_Test Warehouse 1 - _TC"
+			se.set_stock_entry_type()
+			se.insert()
+			se.submit()
+			self.assertTrue(
+				frappe.db.get_value("Serial No", serial_no, "warehouse"), "_Test Warehouse 1 - _TC"
+			)
 
-		se = frappe.copy_doc(self.globalTestRecords["Stock Entry"][0])
-		se.purpose = "Material Transfer"
-		se.get("items")[0].item_code = "_Test Serialized Item With Series"
-		se.get("items")[0].qty = 1
-		se.get("items")[0].transfer_qty = 1
-		se.get("items")[0].serial_no = [serial_no]
-		se.get("items")[0].s_warehouse = "_Test Warehouse - _TC"
-		se.get("items")[0].t_warehouse = "_Test Warehouse 1 - _TC"
-		se.set_stock_entry_type()
-		se.insert()
-		se.submit()
-		self.assertTrue(frappe.db.get_value("Serial No", serial_no, "warehouse"), "_Test Warehouse 1 - _TC")
-
-		se.cancel()
-		self.assertTrue(frappe.db.get_value("Serial No", serial_no, "warehouse"), "_Test Warehouse - _TC")
-		frappe.flags.use_serial_and_batch_fields = False
+			se.cancel()
+			self.assertTrue(frappe.db.get_value("Serial No", serial_no, "warehouse"), "_Test Warehouse - _TC")
 
 	def test_serial_cancel(self):
 		se, serial_nos = self.test_serial_by_series()
