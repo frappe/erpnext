@@ -91,7 +91,7 @@ class SerialBatchIdentity:
 				)
 		return names
 
-	def get_records(self, item_code, numbers, fields):
+	def get_records(self, item_code, numbers, fields, *, ignore_permissions=True):
 		if not numbers:
 			return []
 		table = frappe.qb.DocType(self.doctype)
@@ -99,8 +99,8 @@ class SerialBatchIdentity:
 			frappe.qb.get_query(
 				self.doctype,
 				fields=fields,
-				filters={self.item_field: item_code},
-				ignore_permissions=True,
+				filters={self.item_field: item_code} if item_code is not None else {},
+				ignore_permissions=ignore_permissions,
 			)
 			.where(
 				self._number_key(table[self.number_field]).isin(

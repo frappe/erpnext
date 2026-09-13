@@ -286,17 +286,12 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 	}
 
 	async import_csv_file(file_url) {
-		let data = await this.call(
-			"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.upload_csv_file",
-			{ item_code: this.row.item_code, file_path: file_url }
+		let [serials, batches] = await this.call(
+			"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.read_serial_batch_csv",
+			{ file_path: file_url }
 		);
 
-		let entries = [];
-		if (data.serial_nos && data.serial_nos.length) {
-			entries = data.serial_nos;
-		} else if (data.batch_nos && data.batch_nos.length) {
-			entries = data.batch_nos;
-		}
+		let entries = serials.length ? serials : batches;
 
 		if (!entries.length) {
 			frappe.msgprint(__("No entries found in the uploaded file"));
@@ -312,12 +307,18 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 		}
 	}
 
-	async replace_entries(entries) {
+	replace_entries(entries) {
 		this.clear_pending();
-		await this.upsert({ entries, replace: 1 });
-		if (this.frm.is_dirty()) {
-			this.frm.save();
-		}
+		this.pending.delete_all = 1;
+		this.pending.new_entries = entries.map((entry) => ({
+			serial_number: entry.serial_no,
+			batch_number: entry.batch_no,
+			qty: flt(entry.qty),
+			from_csv: true,
+		}));
+		this.start = 0;
+		this.frm.dirty();
+		this.refresh_view();
 	}
 
 	async add_new_row() {
@@ -469,7 +470,13 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 		$td.data("editing", 1);
 
 		let name = $td.data("name");
-		let current = $td.text().trim();
+		let index = $td.data("pending-index");
+		let pending = index != null ? this.pending.new_entries[index] : null;
+		let current =
+			pending?.[opts.field] ||
+			this.pending.updates[name]?.[opts.field] ||
+			this.last_entries.find((d) => d.name === name)?.[opts.field] ||
+			"";
 		$td.empty().addClass("sbie-input-cell").css("cursor", "default");
 		this.wrapper.find(".sbie-table").css("overflow", "visible");
 
@@ -481,7 +488,13 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 			onchange: () => {
 				let value = control.get_value();
 				if (value && value !== current) {
-					this.update_entry(name, { [opts.field]: value });
+					if (pending) {
+						pending[opts.field] = value;
+						delete pending[opts.field === "serial_no" ? "serial_number" : "batch_number"];
+						this.frm.dirty();
+					} else {
+						this.update_entry(name, { [opts.field]: value });
+					}
 					this.refresh_view();
 				}
 			},
@@ -692,22 +705,25 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 		dialog.show();
 	}
 
-	get_active_server_row(field, value) {
-		let p = this.pending;
-		if (p.delete_all) return null;
-
-		return this.last_entries.find((d) => d[field] === value && !p.deleted.some((x) => x.name === d.name));
-	}
-
 	get_known_identifiers() {
 		let p = this.pending;
-		let known = new Set(p.new_entries.map((d) => d.serial_no || d.batch_no));
+		const number = (row) =>
+			(
+				row.serial_number ||
+				frappe.utils.get_link_title("Serial No", row.serial_no) ||
+				row.serial_no ||
+				row.batch_number ||
+				frappe.utils.get_link_title("Batch", row.batch_no) ||
+				row.batch_no ||
+				""
+			).toLowerCase();
+		let known = new Set(p.new_entries.map(number));
 
 		if (!p.delete_all) {
 			let deleted = new Set(p.deleted.map((d) => d.name));
 			for (const d of this.last_entries) {
 				if (!deleted.has(d.name)) {
-					known.add(d.serial_no || d.batch_no);
+					known.add(number({ ...d, ...p.updates[d.name] }));
 				}
 			}
 		}
@@ -719,7 +735,7 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 		let p = this.pending;
 
 		if (cint(this.item.has_serial_no)) {
-			if (this.get_known_identifiers().has(value)) {
+			if (this.get_known_identifiers().has(value.toLowerCase())) {
 				frappe.show_alert({
 					message: __("Serial No {0} already added", [this.esc(value)]),
 					indicator: "orange",
@@ -727,18 +743,13 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 				return false;
 			}
 
-			p.new_entries.push({ serial_no: value, batch_no: "", qty: 1 });
+			p.new_entries.push({ serial_number: value, qty: 1 });
 		} else {
-			let existing = p.new_entries.find((d) => d.batch_no === value);
-			let server_row = this.get_active_server_row("batch_no", value);
+			let existing = p.new_entries.find((d) => d.batch_number === value);
 			if (existing) {
 				existing.qty = flt(existing.qty) + 1;
-			} else if (server_row) {
-				let update = p.updates[server_row.name];
-				let current = update && update.qty != null ? flt(update.qty) : Math.abs(flt(server_row.qty));
-				this.update_entry(server_row.name, { qty: current + 1 });
 			} else {
-				p.new_entries.push({ serial_no: "", batch_no: value, qty: 1 });
+				p.new_entries.push({ batch_number: value, qty: 1 });
 			}
 		}
 
@@ -787,8 +798,9 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 
 		let added = 0;
 		for (const serial_no of serial_nos) {
-			if (known.has(serial_no)) continue;
-			p.new_entries.push({ serial_no: serial_no, batch_no: "", qty: 1 });
+			if (known.has(serial_no.toLowerCase())) continue;
+			p.new_entries.push({ serial_number: serial_no, qty: 1 });
+			known.add(serial_no.toLowerCase());
 			added++;
 		}
 
@@ -854,10 +866,41 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 		this.reconcile_row_qty();
 	}
 
-	refresh_view() {
+	async refresh_view() {
+		await this.load_link_titles();
 		this.render_rows(this.last_entries);
 		this.update_summary();
 		this.sync_row_qty();
+	}
+
+	async load_link_titles() {
+		const pending_offset = Math.max(
+			0,
+			this.start - (this.pending.delete_all ? 0 : this.server_total_count)
+		);
+		const rows = [
+			...this.last_entries.map((row) => ({ ...row, ...this.pending.updates[row.name] })),
+			...this.pending.new_entries.slice(pending_offset, pending_offset + this.page_length),
+		];
+		await Promise.all(
+			[
+				["Serial No", "serial_no", "serial_no"],
+				["Batch", "batch_no", "batch_id"],
+			].map(async ([doctype, field, title_field]) => {
+				const names = [...new Set(rows.map((row) => row[field]))].filter(
+					(name) => name && !frappe.utils.get_link_title(doctype, name)
+				);
+				if (!names.length) return;
+				const records = await frappe.db.get_list(doctype, {
+					filters: { name: ["in", names] },
+					fields: ["name", title_field],
+					limit: names.length,
+				});
+				for (const record of records) {
+					frappe.utils.add_link_title(doctype, record.name, record[title_field]);
+				}
+			})
+		);
 	}
 
 	get_effective_count() {
@@ -935,8 +978,12 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 			.map((d, i) => {
 				let update = p.updates[d.name] || {};
 				let qty = update.qty != null ? flt(update.qty) : Math.abs(flt(d.qty));
-				let batch_no = this.esc(update.batch_no || d.batch_no || "");
-				let serial_no = this.esc(update.serial_no || d.serial_no || "");
+				let batch_no = this.esc(
+					frappe.utils.get_link_title("Batch", update.batch_no || d.batch_no) || ""
+				);
+				let serial_no = this.esc(
+					frappe.utils.get_link_title("Serial No", update.serial_no || d.serial_no) || ""
+				);
 				let name = this.esc(d.name);
 
 				return `<tr data-name="${name}">
@@ -975,10 +1022,26 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 				<td style="text-align: center;">
 					<input type="checkbox" class="sbie-check" data-pending-index="${index}"></td>
 				<td style="text-align: center;">${base_count + index + 1}</td>
-				${show_serial ? `<td>${this.esc(d.serial_no || "")}</td>` : ""}
-				${show_batch ? `<td>${this.esc(d.batch_no || "")}</td>` : ""}
-				<td class="${!d.serial_no && show_batch ? "sbie-input-cell" : ""}" style="text-align: right;">${
-					!d.serial_no && show_batch
+				${
+					show_serial
+						? `<td class="${d.serial_no || d.serial_number ? "sbie-serial-cell" : ""}"
+							data-pending-index="${index}" style="cursor: pointer;">${this.esc(
+								d.serial_number || frappe.utils.get_link_title("Serial No", d.serial_no) || ""
+						  )}</td>`
+						: ""
+				}
+				${
+					show_batch
+						? `<td class="${d.batch_no || d.batch_number ? "sbie-batch-cell" : ""}"
+							data-pending-index="${index}" style="cursor: pointer;">${this.esc(
+								d.batch_number || frappe.utils.get_link_title("Batch", d.batch_no) || ""
+						  )}</td>`
+						: ""
+				}
+				<td class="${
+					!d.serial_no && !d.serial_number && show_batch ? "sbie-input-cell" : ""
+				}" style="text-align: right;">${
+					!d.serial_no && !d.serial_number && show_batch
 						? this.get_pending_qty_input(d, index)
 						: this.format_float(d.qty)
 				}</td>
@@ -1131,27 +1194,6 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 		);
 	}
 
-	async upsert({ entries = [], deleted = [], replace = 0 }) {
-		let summary = await this.call(
-			"erpnext.stock.doctype.serial_and_batch_bundle.inline_editor.upsert_bundle_entries",
-			{
-				child_row: Object.assign({}, this.row, { is_rejected: this.is_rejected }),
-				doc: this.frm.doc,
-				entries: entries,
-				deleted: deleted,
-				replace: replace,
-			}
-		);
-
-		if (this.bundle !== summary.bundle) {
-			await frappe.model.set_value(this.cdt, this.cdn, this.bundle_field, summary.bundle);
-		}
-		await frappe.model.set_value(this.cdt, this.cdn, this.qty_field, summary.total_qty);
-
-		this._totals_loaded = false;
-		await this.load_page();
-	}
-
 	call(method, args) {
 		return new Promise((resolve, reject) => {
 			frappe.call({
@@ -1242,15 +1284,17 @@ erpnext.stock.flush_serial_batch_pending = async function (frm) {
 			continue;
 		}
 
-		let entries = p.new_entries.concat(
-			Object.keys(p.updates).map((name) => {
-				let update = { name: name };
-				if (p.updates[name].qty != null) update.qty = p.updates[name].qty;
-				if (p.updates[name].batch_no) update.batch_no = p.updates[name].batch_no;
-				if (p.updates[name].serial_no) update.serial_no = p.updates[name].serial_no;
-				return update;
-			})
-		);
+		let entries = p.new_entries
+			.filter((d) => !d.from_csv && !d.serial_number && !d.batch_number)
+			.concat(
+				Object.keys(p.updates).map((name) => {
+					let update = { name: name };
+					if (p.updates[name].qty != null) update.qty = p.updates[name].qty;
+					if (p.updates[name].batch_no) update.batch_no = p.updates[name].batch_no;
+					if (p.updates[name].serial_no) update.serial_no = p.updates[name].serial_no;
+					return update;
+				})
+			);
 
 		let summary = await frappe.xcall(
 			"erpnext.stock.doctype.serial_and_batch_bundle.inline_editor.upsert_bundle_entries",
@@ -1258,6 +1302,19 @@ erpnext.stock.flush_serial_batch_pending = async function (frm) {
 				child_row: Object.assign({}, row, { is_rejected: cint(is_rejected) }),
 				doc: frm.doc,
 				entries: entries,
+				serial_numbers: p.new_entries
+					.filter((d) => !d.from_csv && d.serial_number)
+					.map((d) => d.serial_number),
+				batch_numbers: p.new_entries.filter((d) => !d.from_csv && d.batch_number),
+				csv_entries: p.new_entries
+					.filter((d) => d.from_csv)
+					.map((d) => ({
+						serial_no: d.serial_number,
+						batch_no: d.batch_number,
+						serial_no_id: d.serial_no,
+						batch_no_id: d.batch_no,
+						qty: d.qty,
+					})),
 				deleted: p.deleted.map((d) => d.name),
 				replace: cint(p.delete_all),
 			}
