@@ -72,9 +72,10 @@ doctype_list_js = {
 
 page_js = {"print": "public/js/print.js"}
 
-extend_doctype_class = {"Address": "erpnext.accounts.custom.address.ERPNextAddress"}
-
-override_doctype_class = {"Data Import": "erpnext.stock.data_import.ERPNextDataImport"}
+extend_doctype_class = {
+	"Address": "erpnext.accounts.custom.address.ERPNextAddress",
+	"Data Import": "erpnext.stock.data_import.ERPNextDataImport",
+}
 
 override_whitelisted_methods = {
 	"frappe.www.contact.send_message": "erpnext.templates.utils.send_message",

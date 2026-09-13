@@ -1,6 +1,5 @@
 import frappe
 from frappe import _
-from frappe.core.doctype.data_import.data_import import DataImport
 from frappe.core.doctype.data_import.exporter import Exporter
 from frappe.core.doctype.data_import.importer import INVALID_VALUES, Importer, Row, df_as_json
 from frappe.model.utils.user_settings import get_user_settings
@@ -9,7 +8,7 @@ from frappe.utils import cstr, escape_html
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 
-class ERPNextDataImport(DataImport):
+class ERPNextDataImport:
 	def get_importer(self):
 		return ERPNextImporter(self.reference_doctype, data_import=self, use_sniffer=self.use_csv_sniffer)
 
@@ -63,7 +62,7 @@ class SerialBatchImportRow(Row):
 			if col.index not in self.serial_batch_columns or value in INVALID_VALUES:
 				continue
 			if record_id := self.resolve_number(col, item_code, cstr(value).strip()):
-				doc[col.df.fieldname] = record_id
+				doc.update({col.df.fieldname: record_id})
 		return doc
 
 	def resolve_number(self, col, item_code, number):
