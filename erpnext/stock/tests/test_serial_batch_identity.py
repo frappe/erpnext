@@ -2,8 +2,15 @@ from unittest.mock import patch
 
 import frappe
 
+from erpnext.controllers.sales_and_purchase_return import get_returned_serial_nos
 from erpnext.stock.doctype.item.test_item import make_item
-from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_serial_batch_scan
+from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+	get_reserved_serial_nos_for_pos,
+	get_serial_batch_scan,
+)
+from erpnext.stock.doctype.serial_no.serial_no import auto_fetch_serial_number, get_pos_reserved_serial_nos
+from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import get_items, get_stock_balance_for
+from erpnext.stock.report.stock_ledger.stock_ledger import update_available_serial_nos
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
 from erpnext.tests.utils import ERPNextTestSuite
@@ -129,6 +136,328 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 			self.assertNotEqual(first.name, second.name)
 			self.assertEqual(identity.resolve(self.item.name, ["SHARED-001"]), [first.name])
 			self.assertEqual(identity.resolve(self.other_item.name, ["shared-001"]), [second.name])
+
+	def test_returned_serial_text_resolves_by_item(self):
+		serials = [
+			self.make_number("Serial No", "Returned-001", item.name) for item in (self.item, self.other_item)
+		]
+		parent = frappe._dict(doctype="POS Invoice", name="Original-Invoice")
+		child = frappe._dict(doctype="POS Invoice Item", name="Original-Row")
+		for serial in serials:
+			row = frappe._dict(item_code=serial.item_code, serial_no="returned-001")
+			with self.set_user("Guest"), patch("frappe.get_all", return_value=[row]):
+				self.assertEqual(get_returned_serial_nos(child, parent), [serial.name])
+			self.assertEqual(row.serial_no, "returned-001")
+
+	def test_returned_serial_lookup_uses_the_selected_bundle(self):
+		parent = frappe._dict(doctype="Purchase Receipt", name="Original-Receipt")
+		child = frappe._dict(doctype="Purchase Receipt Item", name="Original-Row")
+		row = frappe._dict(
+			item_code=self.item.name,
+			serial_no="Ignored-Text",
+			rejected_serial_no="Ignored-Text",
+			serial_and_batch_bundle="Accepted-Bundle",
+			rejected_serial_and_batch_bundle="Rejected-Bundle",
+		)
+		for field, bundle in (
+			("serial_and_batch_bundle", "Accepted-Bundle"),
+			("rejected_serial_and_batch_bundle", "Rejected-Bundle"),
+		):
+			serial = self.make_number("Serial No", bundle)
+			with (
+				self.subTest(field=field),
+				patch("frappe.get_all", return_value=[row]),
+				patch(
+					"erpnext.stock.serial_batch_bundle.get_serial_nos", return_value=[serial.name]
+				) as lookup,
+			):
+				self.assertEqual(get_returned_serial_nos(child, parent, field), [serial.name])
+				lookup.assert_called_once_with([bundle])
+
+	def test_return_validation_resolves_original_serial_text_by_item(self):
+		serial = self.make_number("Serial No", "Returned-001")
+		other_serial = self.make_number("Serial No", "Returned-001", self.other_item.name)
+		original = frappe._dict(item_code=self.item.name, serial_no="returned-001")
+		bundle = frappe.get_doc(
+			doctype="Serial and Batch Bundle",
+			item_code=self.item.name,
+			has_serial_no=1,
+			voucher_type="Delivery Note",
+			returned_against="Original-Row",
+			entries=[{"serial_no": serial.name}],
+		)
+		with patch.object(bundle, "get_orignal_document_data", return_value=[original]):
+			bundle.validate_serial_and_batch_no_for_returned()
+			bundle.item_code = self.other_item.name
+			bundle.entries[0].serial_no = other_serial.name
+			with self.assertRaisesRegex(frappe.ValidationError, "Returned-001.*not part") as error:
+				bundle.validate_serial_and_batch_no_for_returned()
+		self.assertNotIn(other_serial.name, str(error.exception))
+		self.assertEqual(original.serial_no, "returned-001")
+		self.assertEqual(bundle.entries[0].serial_no, other_serial.name)
+
+	def test_return_validation_prefers_bundle_and_reports_invalid_physical_numbers(self):
+		serial = self.make_number("Serial No", "Returned-001")
+		invalid_serial = self.make_number("Serial No", "Other-002")
+		original = frappe._dict(
+			item_code=self.item.name, serial_no="Ignored-Text", serial_and_batch_bundle="Original-Bundle"
+		)
+		bundle = frappe.get_doc(
+			doctype="Serial and Batch Bundle",
+			item_code=self.item.name,
+			has_serial_no=1,
+			voucher_type="Purchase Receipt",
+			returned_against="Original-Row",
+			entries=[{"serial_no": serial.name}],
+		)
+		with (
+			patch.object(bundle, "get_orignal_document_data", return_value=[original]),
+			patch(
+				"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_serial_nos_from_bundle",
+				return_value=[serial.name],
+			),
+		):
+			bundle.validate_serial_and_batch_no_for_returned()
+			bundle.entries[0].serial_no = invalid_serial.name
+			with self.assertRaisesRegex(frappe.ValidationError, "Other-002.*not part") as error:
+				bundle.validate_serial_and_batch_no_for_returned()
+		self.assertNotIn(invalid_serial.name, str(error.exception))
+		self.assertNotIn(serial.serial_no, str(error.exception))
+		self.assertEqual(bundle.entries[0].serial_no, invalid_serial.name)
+
+	def test_reconciliation_balance_returns_physical_serials_in_order(self):
+		item = make_item("_Identity Serial Only", {"has_serial_no": 1})
+		first = self.make_number("Serial No", "Balance-001", item.name)
+		second = self.make_number("Serial No", "Balance-002", item.name)
+		self.make_number("Serial No", "Balance-001", self.other_item.name)
+		serial_ids = f"{second.name}\n{first.name}"
+		with patch(
+			"erpnext.stock.doctype.stock_reconciliation.stock_reconciliation.get_stock_balance",
+			return_value=(2, 100, serial_ids),
+		):
+			balance = get_stock_balance_for(item.name, "_Test Warehouse - _TC", "2026-01-01", "12:00:00")
+		self.assertEqual(balance["serial_nos"], "Balance-002\nBalance-001")
+		self.assertEqual(balance["qty"], 2)
+		self.assertEqual(balance["rate"], 100)
+
+	def test_reconciliation_fetch_items_populates_physical_serial_text(self):
+		item = make_item("_Identity Serial Only", {"has_serial_no": 1})
+		serial = self.make_number("Serial No", "Fetch-001", item.name)
+		with (
+			patch(
+				"erpnext.stock.doctype.stock_reconciliation.stock_reconciliation.get_itemwise_batch",
+				return_value={},
+			),
+			patch(
+				"erpnext.stock.doctype.stock_reconciliation.stock_reconciliation.get_stock_balance",
+				return_value=(1, 100, serial.name),
+			) as balance,
+		):
+			args = {
+				"warehouse": "_Test Warehouse - _TC",
+				"posting_date": "2026-01-01",
+				"posting_time": "12:00:00",
+				"company": "_Test Company",
+				"item_code": item.name,
+				"ignore_empty_stock": True,
+			}
+			(row,) = get_items(**args)
+			self.assertEqual(row["serial_no"], "Fetch-001")
+			self.assertEqual(row["current_serial_no"], "Fetch-001")
+			self.assertEqual(row["qty"], 1)
+			self.assertEqual(row["valuation_rate"], 100)
+			balance.return_value = (0, 0, None)
+			self.assertEqual(get_items(**args), [])
+
+	def test_stock_ledger_serial_balance_keeps_internal_ids(self):
+		first = self.make_number("Serial No", "Ledger-001")
+		second = self.make_number("Serial No", "Ledger-002")
+		sle = frappe._dict(
+			item_code=self.item.name,
+			warehouse="_Test Warehouse - _TC",
+			posting_date="2026-01-01",
+			posting_time="12:00:00",
+			serial_no=second.name,
+			actual_qty=1,
+		)
+		available = {}
+		with patch(
+			"erpnext.stock.report.stock_ledger.stock_ledger.get_available_serial_nos",
+			return_value=[frappe._dict(serial_no=first.name), frappe._dict(serial_no=second.name)],
+		) as lookup:
+			update_available_serial_nos(available, sle)
+			self.assertEqual(available[(sle.item_code, sle.warehouse)], [first.name])
+			self.assertEqual(sle.balance_serial_no, first.name)
+			self.assertEqual(lookup.call_args.args[0].warehouse, sle.warehouse)
+			self.assertEqual(lookup.call_args.args[0].posting_date, sle.posting_date)
+			self.assertEqual(lookup.call_args.args[0].posting_time, sle.posting_time)
+			self.assertEqual(lookup.call_args.args[0].ignore_warehouse, 1)
+
+	def test_reconciliation_current_bundle_resolves_only_existing_item_serials(self):
+		self.make_number("Serial No", "Current-001", self.other_item.name)
+		doc = frappe.get_doc(
+			doctype="Stock Reconciliation",
+			company="_Test Company",
+			posting_date="2026-01-01",
+			posting_time="12:00:00",
+			items=[
+				{
+					"item_code": self.item.name,
+					"warehouse": "_Test Warehouse - _TC",
+					"use_serial_batch_fields": 1,
+					"current_qty": 1,
+					"current_serial_no": "current-001",
+				}
+			],
+		)
+		row = doc.items[0]
+		with (
+			patch("erpnext.stock.serial_batch_bundle.SerialBatchCreation") as creation,
+			patch.object(row, "db_set"),
+		):
+			with self.assertRaisesRegex(frappe.ValidationError, "current-001.*does not exist"):
+				doc.make_bundle_for_current_qty()
+			creation.assert_not_called()
+			self.assertFalse(
+				frappe.db.exists("Serial No", {"item_code": self.item.name, "serial_no": "Current-001"})
+			)
+			serial = self.make_number("Serial No", "Current-001")
+			creation.return_value.make_serial_and_batch_bundle.return_value = frappe._dict(name="Test-Bundle")
+			doc.make_bundle_for_current_qty()
+			self.assertEqual(creation.call_args.args[0]["serial_nos"], [serial.name])
+			self.assertEqual(creation.call_args.args[0]["type_of_transaction"], "Outward")
+			self.assertEqual(creation.call_args.args[0]["qty"], -1)
+		self.assertEqual(row.current_serial_and_batch_bundle, "Test-Bundle")
+
+	def test_reconciliation_excludes_unchanged_serial_ids(self):
+		kept = self.make_number("Serial No", "Keep-001")
+		removed = self.make_number("Serial No", "Remove-002")
+		self.make_number("Serial No", "Keep-001", self.other_item.name)
+		row = frappe._dict(item_code=self.item.name, current_serial_no="Keep-001\nRemove-002")
+		bundle = frappe.get_doc(
+			doctype="Serial and Batch Bundle",
+			item_code=self.item.name,
+			has_serial_no=1,
+			voucher_type="Stock Reconciliation",
+			voucher_detail_no="Reconciliation-Row",
+			entries=[{"serial_no": kept.name}, {"serial_no": removed.name}],
+		)
+		with patch(
+			"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_stock_reco_details",
+			return_value=row,
+		):
+			for numbers, expected in (
+				("keep-001\nNew-003", {removed.name}),
+				("", {kept.name, removed.name}),
+			):
+				with self.subTest(numbers=numbers):
+					row.serial_no = numbers
+					serials, batches = bundle.get_serial_nos_for_validate()
+					self.assertEqual(set(serials), expected)
+					self.assertEqual(batches, [])
+					self.assertEqual(row.serial_no, numbers)
+		self.assertEqual(row.current_serial_no, "Keep-001\nRemove-002")
+		self.assertFalse(frappe.db.exists("Serial No", {"item_code": self.item.name, "serial_no": "New-003"}))
+
+	def test_pos_screen_reservations_return_all_physical_numbers_for_item_and_warehouse(self):
+		serials = [self.make_number("Serial No", f"POS-Screen-{index:02}") for index in range(21)]
+		other_item = self.make_number("Serial No", "POS-Screen-00", self.other_item.name)
+		other_warehouse = self.make_number("Serial No", "POS-Other-Warehouse")
+		warehouse = "_Test Warehouse - _TC"
+		for serial in [*serials, other_item]:
+			serial.db_set("warehouse", warehouse)
+		other_warehouse.db_set("warehouse", "_Test Warehouse 1 - _TC")
+		reserved = [serial.name for serial in [*serials, other_item, other_warehouse]]
+		with patch(
+			"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_reserved_serial_nos_for_pos",
+			return_value=reserved,
+		):
+			numbers = get_pos_reserved_serial_nos(
+				frappe.as_json({"item_code": self.item.name, "warehouse": warehouse})
+			)
+		self.assertCountEqual(numbers, [serial.serial_no for serial in serials])
+
+	def test_pos_screen_reservation_lookup_requires_item_read_permission(self):
+		with self.set_user("Guest"), self.assertRaises(frappe.PermissionError):
+			get_pos_reserved_serial_nos({"item_code": self.item.name, "warehouse": "_Test Warehouse - _TC"})
+
+	def test_pos_auto_selection_excludes_reserved_and_selected_serial_ids(self):
+		reserved = self.make_number("Serial No", "POS-Reserved")
+		selected = self.make_number("Serial No", "POS-Selected")
+		available = self.make_number("Serial No", "POS-Available")
+		other = self.make_number("Serial No", "POS-Available", self.other_item.name)
+		warehouse = "_Test Warehouse - _TC"
+		for serial in (reserved, selected, available, other):
+			serial.db_set("warehouse", warehouse)
+		with patch(
+			"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_reserved_serial_nos_for_pos",
+			return_value=[reserved.name],
+		):
+			self.assertEqual(
+				auto_fetch_serial_number(
+					5,
+					self.item.name,
+					warehouse,
+					for_doctype="POS Invoice",
+					exclude_sr_nos=frappe.as_json([selected.name]),
+				),
+				[available.name],
+			)
+
+	def test_pos_serial_text_reservations_exclude_returns(self):
+		returned = self.make_number("Serial No", "POS-001")
+		reserved = self.make_number("Serial No", "POS-002")
+		self.make_number("Serial No", "POS-002", self.other_item.name)
+		row = frappe._dict(serial_no="pos-001\nPOS-002", parent_docname="POS-Sale", child_docname="POS-Row")
+		with (
+			patch("frappe.get_all", return_value=[row]),
+			patch(
+				"erpnext.controllers.sales_and_purchase_return.get_returned_serial_nos",
+				return_value=[returned.name],
+			),
+		):
+			self.assertEqual(
+				get_reserved_serial_nos_for_pos(frappe._dict(item_code=self.item.name)), [reserved.name]
+			)
+		self.assertEqual(row.serial_no, "pos-001\nPOS-002")
+
+	def test_pos_does_not_count_both_serial_text_and_bundle(self):
+		serial = self.make_number("Serial No", "POS-001")
+		row = frappe._dict(
+			serial_no="POS-001",
+			serial_and_batch_bundle="POS-Bundle",
+			parent_docname="POS-Sale",
+			child_docname="POS-Row",
+		)
+		with (
+			patch("frappe.get_all", return_value=[row]),
+			patch(
+				"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_serial_batch_ledgers",
+				return_value=[frappe._dict(serial_no=serial.name)],
+			),
+			patch(
+				"erpnext.controllers.sales_and_purchase_return.get_returned_serial_nos",
+				return_value=[serial.name],
+			),
+		):
+			self.assertEqual(get_reserved_serial_nos_for_pos(frappe._dict(item_code=self.item.name)), [])
+
+	def test_pos_resale_keeps_the_serial_reserved(self):
+		serial = self.make_number("Serial No", "POS-001")
+		rows = [
+			frappe._dict(serial_no="pos-001", parent_docname=f"POS-Sale-{i}", child_docname=f"POS-Row-{i}")
+			for i in range(2)
+		]
+		with (
+			patch("frappe.get_all", return_value=rows),
+			patch(
+				"erpnext.controllers.sales_and_purchase_return.get_returned_serial_nos",
+				side_effect=[[serial.name], []],
+			),
+		):
+			self.assertEqual(
+				get_reserved_serial_nos_for_pos(frappe._dict(item_code=self.item.name)), [serial.name]
+			)
 
 	def test_duplicate_serial_is_rejected_by_database(self):
 		self.check_duplicate("Serial No", "Number-001")

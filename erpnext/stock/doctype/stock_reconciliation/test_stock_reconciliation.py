@@ -1839,6 +1839,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 
 		first_batch, second_batch = batch_wise_serial_nos
 		serial_nos = batch_wise_serial_nos[second_batch]
+		serial_numbers = [frappe.get_cached_value("Serial No", name, "serial_no") for name in serial_nos]
 
 		data = get_stock_balance_for(
 			item_code,
@@ -1856,7 +1857,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 		)
 
 		self.assertEqual(data["qty"], 3)
-		self.assertEqual(sorted(data["serial_nos"].split("\n")), sorted(serial_nos))
+		self.assertEqual(sorted(data["serial_nos"].split("\n")), sorted(serial_numbers))
 
 		reco = create_stock_reconciliation(
 			item_code=item_code,
@@ -1864,7 +1865,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			qty=2,
 			rate=100,
 			batch_no=second_batch,
-			serial_no="\n".join(serial_nos[:2]),
+			serial_no="\n".join(serial_numbers[:2]),
 			use_serial_batch_fields=1,
 			reconcile_all_serial_batch=0,
 		)
@@ -1896,7 +1897,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 		)
 
 		self.assertEqual(data["qty"], 3)
-		self.assertEqual(sorted(data["serial_nos"].split("\n")), sorted(serial_nos))
+		self.assertEqual(sorted(data["serial_nos"].split("\n")), sorted(serial_numbers))
 
 	def test_change_valuation_of_batch_using_backdated_stock_reco(self):
 		from erpnext.stock.doctype.batch.batch import get_batch_qty
