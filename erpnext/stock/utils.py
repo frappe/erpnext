@@ -658,7 +658,7 @@ def get_barcode_matches(search_value, item_code=None):
 		return []
 	allowed_items = set(
 		frappe.get_list(
-			"Item", filters={"name": ("in", [row["item_code"] for row in candidates])}, pluck="name", limit=0
+			"Item", filters={"name": ("in", [row["item_code"] for row in candidates])}, pluck="name"
 		)
 	)
 	return [row for row in candidates if row["item_code"] in allowed_items]

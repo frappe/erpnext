@@ -84,7 +84,7 @@ class SerialBatchIdentity:
 			names[index] = name
 
 		if not ignore_permissions:
-			allowed = frappe.get_list(self.doctype, filters={"name": ("in", names)}, pluck="name", limit=0)
+			allowed = frappe.get_list(self.doctype, filters={"name": ("in", names)}, pluck="name")
 			if set(names) - set(allowed):
 				frappe.throw(
 					_("Not permitted to select these serial or batch records"), frappe.PermissionError

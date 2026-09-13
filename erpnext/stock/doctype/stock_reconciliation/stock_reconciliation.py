@@ -199,6 +199,7 @@ class StockReconciliation(StockController):
 
 	def make_bundle_for_current_qty(self):
 		from erpnext.stock.serial_batch_bundle import SerialBatchCreation
+		from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 		for row in self.items:
 			if not row.use_serial_batch_fields:
@@ -220,7 +221,9 @@ class StockReconciliation(StockController):
 						"type_of_transaction": "Outward" if row.current_qty > 0 else "Inward",
 						"company": self.company,
 						"is_rejected": 0,
-						"serial_nos": get_serial_nos(row.current_serial_no)
+						"serial_nos": SerialBatchIdentity("Serial No").resolve(
+							row.item_code, get_serial_nos(row.current_serial_no), ignore_permissions=True
+						)
 						if row.current_serial_no
 						else None,
 						"batches": frappe._dict({row.batch_no: row.current_qty}) if row.batch_no else None,
@@ -1295,24 +1298,12 @@ def get_items(
 				args = get_item_data(row, row.qty, row.valuation_rate)
 				res.append(args)
 		else:
-			stock_bal = get_stock_balance(
-				d.item_code,
-				d.warehouse,
-				posting_date,
-				posting_time,
-				with_valuation_rate=True,
-				with_serial_no=cint(d.has_serial_no),
-			)
-			qty, valuation_rate, serial_no = (
-				stock_bal[0],
-				stock_bal[1],
-				stock_bal[2] if cint(d.has_serial_no) else "",
-			)
+			stock_bal = get_stock_balance_for(d.item_code, d.warehouse, posting_date, posting_time)
 
-			if ignore_empty_stock and not stock_bal[0]:
+			if ignore_empty_stock and not stock_bal["qty"]:
 				continue
 
-			args = get_item_data(d, qty, valuation_rate, serial_no)
+			args = get_item_data(d, stock_bal["qty"], stock_bal["rate"], stock_bal["serial_nos"])
 
 			res.append(args)
 
@@ -1587,6 +1578,18 @@ def get_stock_balance_for(
 		standard_rate = get_item_standard_rate(item_code, company, posting_date)
 		if standard_rate is not None:
 			rate = standard_rate
+
+	if serial_nos:
+		serial_ids = get_serial_nos(serial_nos)
+		numbers = dict(
+			frappe.get_all(
+				"Serial No",
+				filters={"item_code": item_code, "name": ("in", serial_ids)},
+				fields=["name", "serial_no"],
+				as_list=True,
+			)
+		)
+		serial_nos = "\n".join(numbers[name] for name in serial_ids)
 
 	return {
 		"qty": qty,

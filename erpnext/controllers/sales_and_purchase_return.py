@@ -12,6 +12,7 @@ from frappe.utils import cint, flt, format_datetime, get_datetime
 
 import erpnext
 from erpnext.stock.serial_batch_bundle import get_batches_from_bundle
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.utils import get_combine_datetime, get_incoming_rate, get_valuation_method, getdate
 
 
@@ -930,6 +931,7 @@ def get_returned_serial_nos(child_doc, parent_doc, serial_no_field=None, ignore_
 	fields = [
 		f"`{'tab' + child_doc.doctype}`.`{serial_no_field}`",
 		f"`{'tab' + child_doc.doctype}`.`{old_field}`",
+		f"`{'tab' + child_doc.doctype}`.`item_code`",
 	]
 
 	filters = [
@@ -948,9 +950,16 @@ def get_returned_serial_nos(child_doc, parent_doc, serial_no_field=None, ignore_
 
 	ids = []
 	for row in frappe.get_all(parent_doc.doctype, fields=fields, filters=filters):
-		ids.append(row.get("serial_and_batch_bundle"))
-		if row.get(old_field) and not row.get(serial_no_field):
-			serial_nos.extend(get_serial_nos_from_serial_no(row.get(old_field)))
+		if bundle := row.get(serial_no_field):
+			ids.append(bundle)
+		elif row.get(old_field):
+			serial_nos.extend(
+				SerialBatchIdentity("Serial No").resolve(
+					row.item_code,
+					get_serial_nos_from_serial_no(row.get(old_field)),
+					ignore_permissions=True,
+				)
+			)
 
 	if ids:
 		serial_nos.extend(get_serial_nos(ids))

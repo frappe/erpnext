@@ -219,7 +219,11 @@ def auto_fetch_serial_number(
 
 	serial_numbers = []
 	if for_doctype == "POS Invoice":
-		exclude_sr_nos.extend(get_pos_reserved_serial_nos(filters))
+		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+			get_reserved_serial_nos_for_pos,
+		)
+
+		exclude_sr_nos.extend(get_reserved_serial_nos_for_pos(filters))
 
 	serial_numbers = fetch_serial_numbers(filters, qty, do_not_include=exclude_sr_nos)
 
@@ -228,40 +232,21 @@ def auto_fetch_serial_number(
 
 @frappe.whitelist()
 def get_pos_reserved_serial_nos(filters: str | dict):
-	filters = frappe.parse_json(filters)
-
-	POSInvoice = frappe.qb.DocType("POS Invoice")
-	POSInvoiceItem = frappe.qb.DocType("POS Invoice Item")
-	query = (
-		frappe.qb.from_(POSInvoice)
-		.from_(POSInvoiceItem)
-		.select(POSInvoice.is_return, POSInvoiceItem.serial_no)
-		.where(
-			(POSInvoice.name == POSInvoiceItem.parent)
-			& (POSInvoice.docstatus == 1)
-			& (POSInvoiceItem.docstatus == 1)
-			& (POSInvoiceItem.item_code == filters.get("item_code"))
-			& (POSInvoiceItem.warehouse == filters.get("warehouse"))
-			& (POSInvoiceItem.serial_no.isnotnull())
-			& (POSInvoiceItem.serial_no != "")
-		)
+	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+		get_reserved_serial_nos_for_pos,
 	)
 
-	pos_transacted_sr_nos = query.run(as_dict=True)
+	filters = frappe._dict(frappe.parse_json(filters))
+	frappe.has_permission("Item", "read", doc=filters.item_code, throw=True)
+	serial_ids = get_reserved_serial_nos_for_pos(frappe._dict(item_code=filters.item_code))
+	if not serial_ids:
+		return []
 
-	reserved_sr_nos = list()
-	returned_sr_nos = list()
-	for d in pos_transacted_sr_nos:
-		if d.is_return == 0:
-			[reserved_sr_nos.append(x) for x in get_serial_nos(d.serial_no)]
-		elif d.is_return == 1:
-			[returned_sr_nos.append(x) for x in get_serial_nos(d.serial_no)]
-
-	for x in returned_sr_nos:
-		if x in reserved_sr_nos:
-			reserved_sr_nos.remove(x)
-
-	return reserved_sr_nos
+	return frappe.get_list(
+		"Serial No",
+		filters={"name": ("in", serial_ids), "item_code": filters.item_code, "warehouse": filters.warehouse},
+		pluck="serial_no",
+	)
 
 
 def fetch_serial_numbers(filters, qty, do_not_include=None):
