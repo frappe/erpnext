@@ -316,7 +316,9 @@ def get_incoming_rate(args: dict | str, raise_error_if_no_rate: bool = True, fal
 
 	elif (args.get("serial_no") or "").strip() and not args.get("serial_and_batch_bundle"):
 		args.actual_qty = args.qty
-		args.serial_nos = get_serial_nos_data(args.get("serial_no"))
+		args.serial_nos = SerialBatchIdentity("Serial No").resolve(
+			args.item_code, get_serial_nos_data(args.serial_no), ignore_permissions=True
+		)
 
 		sn_obj = SerialNoValuation(sle=args, warehouse=args.get("warehouse"), item_code=args.get("item_code"))
 
