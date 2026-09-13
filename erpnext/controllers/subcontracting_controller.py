@@ -690,13 +690,11 @@ class SubcontractingController(StockController):
 		return available_batches
 
 	def __get_serial_nos_for_bundle(self, qty, key):
-		available_sns = sorted(self.available_materials[key]["serial_no"])[0 : cint(qty)]
-		serial_nos = []
-
-		for serial_no in available_sns:
-			serial_nos.append(serial_no)
-
-			self.available_materials[key]["serial_no"].remove(serial_no)
+		available_serials = self.available_materials[key]["serial_no"]
+		numbers = SerialBatchIdentity("Serial No").get_number_map(available_serials)
+		serial_nos = sorted(available_serials, key=lambda name: numbers[name])[: cint(qty)]
+		for serial_no in serial_nos:
+			available_serials.remove(serial_no)
 
 		return serial_nos
 
