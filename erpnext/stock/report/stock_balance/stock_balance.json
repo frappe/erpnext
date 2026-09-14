@@ -8,6 +8,9 @@
  "doctype_to_sync": [
   {
    "doc_type": "Stock Ledger Entry"
+  },
+  {
+   "doc_type": "Serial and Batch Bundle"
   }
  ],
  "snapshot_report": 0,

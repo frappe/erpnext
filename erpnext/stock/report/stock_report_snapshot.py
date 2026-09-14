@@ -14,11 +14,12 @@ from typing import NamedTuple
 import frappe
 from frappe import _
 from frappe.query_builder import CustomFunction
-from frappe.query_builder.functions import Cast
+from frappe.query_builder.functions import Cast, Count
 from frappe.query_builder.terms import NamedParameterWrapper
 from pypika.terms import Star
 
 BATCH_SIZE = 1000
+DUCKDB_TYPES = {"string": "VARCHAR", "int64": "BIGINT", "float64": "DOUBLE", "timestamp": "TIMESTAMP"}
 MAX_LIVE_TABLE_BYTES = 64 * 1024 * 1024
 
 
@@ -55,6 +56,7 @@ class StockReportSnapshot:
 	"""
 
 	def __init__(self, report_name, filters=None):
+		self.report_name = report_name
 		self.conn = self.get_connection(report_name)
 		self.tables = {}
 		self.filters = filters or {}
@@ -76,19 +78,21 @@ class StockReportSnapshot:
 
 	@staticmethod
 	def get_connection(report_name):
-		"""Open the latest submitted sync. An older complete sync is not served because the desk
+		return StockReportSnapshot.get_sync("Stock Ledger Entry", report_name).get_duckdb_conn()
+
+	def get_synced_connection(self, doctype):
+		return self.get_sync(doctype, self.report_name).get_duckdb_conn()
+
+	@staticmethod
+	def get_sync(doctype, report_name):
+		"""The latest submitted sync. An older complete sync is not served because the desk
 		labels snapshot results with the latest submitted sync's timestamp."""
 		sync = frappe.db.get_value(
-			"DuckDB Sync",
-			{"doc_type": "Stock Ledger Entry", "docstatus": 1},
-			"name",
-			order_by="creation desc",
+			"DuckDB Sync", {"doc_type": doctype, "docstatus": 1}, "name", order_by="creation desc"
 		)
 		if not sync or frappe.db.exists("DuckDB Sync Item", {"parent": sync, "synced": 0}):
-			frappe.throw(
-				_("{0} requires a completed Stock Ledger Entry sync to DuckDB").format(_(report_name))
-			)
-		return frappe.get_doc("DuckDB Sync", sync).get_duckdb_conn()
+			frappe.throw(_("{0} requires a completed {1} sync to DuckDB").format(_(report_name), _(doctype)))
+		return frappe.get_doc("DuckDB Sync", sync)
 
 	def run(self, query, as_dict=False, as_iterator=False, pluck=False):
 		cursor = self.execute_query(query, convert=True)
@@ -176,9 +180,14 @@ class StockReportSnapshot:
 		return self.tables[name]
 
 	def build_live_table(self, doctype):
-		schema = arrow_schema(LIVE_TABLES[doctype].fields)
-		with closing(self.iter_live_batches(doctype, schema)) as reader:
-			return self.store_batches(doctype, reader, schema)
+		table = LIVE_TABLES[doctype]
+		schema = arrow_schema(table.fields)
+		if table.sync:
+			reader = self.iter_synced_batches(doctype, table)
+		else:
+			reader = self.iter_live_batches(doctype, schema)
+		with closing(reader) as batches:
+			return self.store_batches(doctype, batches, schema)
 
 	def store_batches(self, name, reader, schema):
 		"""Keep small results in memory and spill large ones to a reusable Arrow file."""
@@ -230,6 +239,51 @@ class StockReportSnapshot:
 					rows = query.run(as_dict=True, as_iterator=True)
 					for batch in batched(rows, BATCH_SIZE):
 						yield pa.RecordBatch.from_pylist(batch, schema=schema)
+
+	def iter_synced_batches(self, doctype, table):
+		"""Copy the rows another doctype's sync holds for the ledger keys. A sync taken before the
+		ledger sync can miss records the ledger refers to, so every key has to be present."""
+		import pyarrow as pa
+
+		with closing(self.get_ledger_values(table.ledger_field, doctype)) as values:
+			keys = pa.table({"key": pa.array(list(values), pa.string())})
+		if not keys.num_rows:
+			return
+		source, wanted = frappe.qb.DocType(doctype), frappe.qb.Table("snapshot_keys")
+		present = (
+			frappe.qb.from_(source).select(source[table.link_field].as_("key")).distinct().as_("present")
+		)
+		missing = (
+			frappe.qb.from_(wanted)
+			.left_join(present)
+			.on(present.key == wanted.key)
+			.select(Count("*"))
+			.where(present.key.isnull())
+		)
+		query = (
+			frappe.qb.from_(source)
+			.join(wanted)
+			.on(source[table.link_field] == wanted.key)
+			.select(
+				*(
+					Cast(source[field], DUCKDB_TYPES[dtype]).as_(field)
+					for field, dtype in table.fields.items()
+				)
+			)
+		)
+		for key, field in (table.scope or {}).items():
+			if value := self.filters.get(key):
+				query = query.where(source[field] == value)
+		with closing(self.get_synced_connection(table.sync)) as conn, closing(conn.cursor()) as cursor:
+			cursor.register("snapshot_keys", keys)
+			if absent := cursor.execute(*self.compile(missing)).fetchone()[0]:
+				frappe.throw(
+					_(
+						"{0} requires a {1} sync taken after its Stock Ledger Entry sync: {2} records are missing"
+					).format(_(self.report_name), _(table.sync), absent)
+				)
+			cursor.execute(*self.compile(query))
+			yield from cursor.fetch_record_batch(BATCH_SIZE)
 
 	def get_ledger_values(self, field, doctype):
 		"""Ledger keys a supporting table has to cover, under the report's own ledger scope."""
@@ -323,7 +377,11 @@ def has_repeated_names(columns):
 def arrow_schema(fields):
 	import pyarrow as pa
 
-	return pa.schema([(field, getattr(pa, dtype)()) for field, dtype in fields.items()])
+	types = {
+		dtype: pa.timestamp("us") if dtype == "timestamp" else getattr(pa, dtype)()
+		for dtype in fields.values()
+	}
+	return pa.schema([(field, types[dtype]) for field, dtype in fields.items()])
 
 
 def time_to_timedelta(value):
@@ -357,7 +415,8 @@ class LiveTable(NamedTuple):
 
 	`ledger_field` is the Stock Ledger Entry column holding its keys and `link_field` the column
 	those keys match. `scope` names report filters that narrow it further than those keys and
-	`bundle_field` a Serial and Batch Entry column that holds more of its keys.
+	`bundle_field` a Serial and Batch Entry column that holds more of its keys. A table with
+	`sync` is copied from that doctype's own DuckDB sync instead of the live database.
 	"""
 
 	ledger_field: str
@@ -365,6 +424,7 @@ class LiveTable(NamedTuple):
 	fields: dict[str, str]
 	scope: dict[str, str] | None = None
 	bundle_field: str | None = None
+	sync: str | None = None
 
 
 LIVE_TABLES = {
@@ -396,6 +456,22 @@ LIVE_TABLES = {
 		bundle_field="batch_no",
 	),
 	"Stock Reconciliation": LiveTable("voucher_no", "name", {"name": "string", "purpose": "string"}),
+	"Serial and Batch Bundle": LiveTable(
+		"serial_and_batch_bundle",
+		"name",
+		{
+			"name": "string",
+			"docstatus": "int64",
+			"company": "string",
+			"item_code": "string",
+			"warehouse": "string",
+			"posting_datetime": "timestamp",
+			"voucher_no": "string",
+			"has_serial_no": "int64",
+			"has_batch_no": "int64",
+		},
+		sync="Serial and Batch Bundle",
+	),
 	"Serial and Batch Entry": LiveTable(
 		"serial_and_batch_bundle",
 		"parent",
@@ -403,11 +479,13 @@ LIVE_TABLES = {
 			"parent": "string",
 			"idx": "int64",
 			"serial_no": "string",
+			"batch_no": "string",
 			"qty": "float64",
 			"stock_value_difference": "float64",
+			"incoming_rate": "float64",
 			"docstatus": "int64",
-			"batch_no": "string",
 		},
 		{"batch_no": "batch_no"},
+		sync="Serial and Batch Bundle",
 	),
 }
