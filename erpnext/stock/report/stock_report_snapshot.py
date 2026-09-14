@@ -1,7 +1,7 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from contextlib import ExitStack, closing
+from contextlib import ExitStack, closing, nullcontext
 from datetime import timedelta
 from itertools import batched
 from operator import itemgetter
@@ -17,10 +17,27 @@ BATCH_SIZE = 1000
 MAX_LIVE_TABLE_BYTES = 64 * 1024 * 1024
 
 
-def run_stock_query(query, snapshot=None, **kwargs):
-	if snapshot is not None:
+def active_snapshot():
+	"""The snapshot serving the report that is running, if any."""
+	return getattr(frappe.local, "stock_report_snapshot", None)
+
+
+def run_stock_query(query, **kwargs):
+	if snapshot := active_snapshot():
 		return snapshot.run(query, **kwargs)
 	return query.run(**kwargs)
+
+
+def ledger_cursor():
+	"""Stream ledger rows from the live database; DuckDB streams on its own."""
+	return nullcontext() if active_snapshot() else frappe.db.unbuffered_cursor()
+
+
+def in_keys(column, values):
+	"""`column IN values` without binding one parameter per value in DuckDB."""
+	if snapshot := active_snapshot():
+		return column.isin(snapshot.publish_keys(values))
+	return column.isin(values)
 
 
 class StockReportSnapshot:
@@ -39,9 +56,12 @@ class StockReportSnapshot:
 		self.temp_directory = None
 
 	def __enter__(self):
+		self.previous = active_snapshot()
+		frappe.local.stock_report_snapshot = self
 		return self
 
 	def __exit__(self, *exc):
+		frappe.local.stock_report_snapshot = self.previous
 		try:
 			self.conn.close()
 		finally:
@@ -110,6 +130,13 @@ class StockReportSnapshot:
 		import pyarrow as pa
 
 		self.tables[name] = pa.Table.from_pylist(rows, schema=arrow_schema(fields))
+
+	def publish_keys(self, values):
+		"""A lookup table of the values, as the subquery to match a column against."""
+		name = f"snapshot_keys_{len(self.tables)}"
+		self.register(name, [{"key": value} for value in dict.fromkeys(values)], {"key": "string"})
+		keys = frappe.qb.Table(name)
+		return frappe.qb.from_(keys).select(keys.key)
 
 	def get_table(self, name):
 		if name not in self.tables:
