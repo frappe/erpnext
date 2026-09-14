@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-09-06 09:35+0000\n"
-"PO-Revision-Date: 2026-09-07 04:07\n"
+"PO-Revision-Date: 2026-09-14 04:08\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: German\n"
 "MIME-Version: 1.0\n"
@@ -1172,13 +1172,13 @@ msgstr "Ein neues Geschäftsjahr wurde automatisch erstellt."
 #. DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "A quality inspection must be completed before generating a Delivery Note for this item."
-msgstr ""
+msgstr "Bevor für diesen Artikel ein Lieferschein erstellt wird, muss eine Qualitätsprüfung durchgeführt werden."
 
 #. Description of the 'Inspection Required before Purchase' (Check) field in
 #. DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "A quality inspection must be completed before generating a Purchase Receipt for this item."
-msgstr ""
+msgstr "Bevor für diesen Artikel ein Eingangsbeleg erstellt wird, muss eine Qualitätsprüfung durchgeführt werden."
 
 #: erpnext/stock/doctype/material_request/material_request.js:495
 msgid "A separate Purchase Order is created for each Supplier."
@@ -4034,7 +4034,7 @@ msgstr "Alle Lager"
 
 #: erpnext/stock/doctype/item/item_prices.html:72
 msgid "All active prices for this item across buying and selling price lists."
-msgstr ""
+msgstr "Alle aktuell gültigen Preise für diesen Artikel in den Einkaufs- und Vertriebspreislisten."
 
 #. Description of the 'Reconciled' (Check) field in DocType 'Process Payment
 #. Reconciliation Log'
@@ -4049,7 +4049,7 @@ msgstr "Alle Mitteilungen einschließlich und darüber sollen in die neue Anfrag
 #. Description of the 'Billing Currency' (Link) field in DocType 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
 msgid "All invoices and orders for this customer will be created in this currency."
-msgstr ""
+msgstr "Alle Rechnungen und Bestellungen für diesen Kunden werden in dieser Währung erstellt."
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.py:971
 msgid "All items are already requested"
@@ -9363,7 +9363,7 @@ msgstr "Kreditprüfung im Auftrag umgehen"
 #. Credit Limit'
 #: erpnext/selling/doctype/customer_credit_limit/customer_credit_limit.json
 msgid "Bypass credit limit check at sales order"
-msgstr ""
+msgstr "Kreditlimitprüfung im Auftrag umgehen"
 
 #. Label of the cc_to (Table MultiSelect) field in DocType 'Process Statement
 #. Of Accounts'
@@ -14099,7 +14099,7 @@ msgstr "Haben"
 #: erpnext/selling/doctype/customer/customer.json
 #: erpnext/setup/doctype/customer_group/customer_group.json
 msgid "Credit & Overdue Limits"
-msgstr ""
+msgstr "Kredit- und Überziehungslimits"
 
 #: erpnext/accounts/report/general_ledger/general_ledger.py:744
 msgid "Credit (Transaction)"
@@ -16449,7 +16449,7 @@ msgstr "Definiert das Datum, nach dem der Artikel nicht mehr in Transaktionen od
 #. 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
 msgid "Defines when payment is due (e.g. Net 30, 50% advance). Applied automatically on invoices for this customer."
-msgstr ""
+msgstr "Legt fest, wann die Zahlung fällig ist (z. B. netto 30 Tage, 50 % Anzahlung). Wird automatisch auf Ausgangsrechnungen für diesen Kunden angewendet."
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -17507,7 +17507,7 @@ msgstr "Deaktiviertes Lager {0} kann für diese Transaktion nicht verwendet werd
 #. Description of the 'Disabled' (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Disabled items cannot be selected in any transaction."
-msgstr ""
+msgstr "Deaktivierte Artikel können in keiner Transaktion ausgewählt werden."
 
 #: erpnext/controllers/accounts_controller.py:984
 msgid "Disabled pricing rules since this {} is an internal transfer"
@@ -19295,18 +19295,18 @@ msgstr ""
 #. DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Enable for drop shipping - supplier delivers directly to the customer without passing through your warehouse."
-msgstr ""
+msgstr "Für Drop-Shipping aktivieren – der Lieferant liefert direkt an den Kunden, ohne dass die Ware Ihr Lager durchläuft."
 
 #. Description of the 'Include Item In Manufacturing' (Check) field in DocType
 #. 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Enable for raw material items used in BOM. Uncheck for additional services like 'washing' used in manufacturing."
-msgstr ""
+msgstr "Diese Option für Rohmaterialartikel aktivieren, die in der Stückliste verwendet werden. Für zusätzliche Dienstleistungen wie z. B. «Waschen», die in der Fertigung eingesetzt werden, deaktivieren."
 
 #. Description of the 'Is Subcontracted Item' (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Enable if a vendor manufactures this item for you. You can choose to provide them raw materials using the default BOM."
-msgstr ""
+msgstr "Diese Option aktivieren, wenn ein Lieferant diesen Artikel fertigt. Die Rohmaterialien können ihm mithilfe der Standard-Stückliste bereitgestellt werden."
 
 #. Description of the 'Is Fixed Asset' (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -20651,7 +20651,7 @@ msgstr ""
 #. Description of the 'Price List' (Link) field in DocType 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
 msgid "Fetched automatically on sales orders and invoices for this customer."
-msgstr ""
+msgstr "Wird bei Aufträgen und Ausgangsrechnungen für diesen Kunden automatisch übernommen."
 
 #: erpnext/selling/page/point_of_sale/pos_item_details.js:468
 msgid "Fetched only {0} available serial numbers."
@@ -23920,7 +23920,7 @@ msgstr ""
 #. Description of the 'Grant Commission' (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "If enabled, sales from this item will be included in Sales Person and Sales Partner commission calculations"
-msgstr ""
+msgstr "Wenn diese Option aktiviert ist, werden die Umsätze dieses Artikels in die Provisionsberechnungen für Vertriebsmitarbeiter und Vertriebspartner einbezogen"
 
 #. Description of the 'Allow delivery of overproduced quantity' (Check) field
 #. in DocType 'Selling Settings'
@@ -24091,7 +24091,7 @@ msgstr "Wenn die ausgewählte Preisregel für 'Rate' (Einzelpreis) festgelegt is
 #. Description of the 'Default Accounts' (Table) field in DocType 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
 msgid "If set, accounting entries for this customer will post to these accounts instead of the company default."
-msgstr ""
+msgstr "Wenn diese Einstellung aktiviert ist, werden die Buchungssätze für diesen Kunden auf diese Konten anstatt auf die Standardkonten des Unternehmens gebucht."
 
 #. Description of the 'Fixed Outgoing Email Account' (Link) field in DocType
 #. 'Buying Settings'
@@ -29719,7 +29719,7 @@ msgstr "Treueprogrammtyp"
 #. Description of the 'Loyalty Program' (Link) field in DocType 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
 msgid "Loyalty scheme this customer earns points under. Auto-assigned if a matching program exists."
-msgstr ""
+msgstr "Treueprogramm, für das dieser Kunde Punkte sammelt. Automatische Zuordnung, falls ein passendes Programm existiert."
 
 #. Label of the mps (Link) field in DocType 'Purchase Order'
 #. Label of the mps (Link) field in DocType 'Work Order'
@@ -30568,7 +30568,7 @@ msgstr ""
 #. 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
 msgid "Mark if this customer represents an internal company. Enables inter-company transactions."
-msgstr ""
+msgstr "Aktivieren Sie dieses Feld, wenn es sich bei diesem Kunden um ein internes Unternehmen handelt. Dies ermöglicht konzerninterne Transaktionen."
 
 #. Label of the market_segment (Link) field in DocType 'Lead'
 #. Name of a DocType
@@ -31129,7 +31129,7 @@ msgstr "Maximalwert"
 #: erpnext/stock/doctype/item/item.json
 #, python-format
 msgid "Maximum discount % allowed when selling this item. Eg: if set to 20%, a discount greater than 20% cannot be applied in sales transactions."
-msgstr ""
+msgstr "Maximal zulässiger Rabattprozentsatz beim Verkauf dieses Artikels. Beispiel: Bei einem festgelegten Rabatt von 20 % kann kein höherer Rabatt als 20 % gewährt werden."
 
 #: erpnext/controllers/selling_controller.py:271
 msgid "Maximum discount for Item {0} is {1}%"
@@ -31525,12 +31525,12 @@ msgstr "Minimalwert"
 #. Description of the 'Minimum Order Qty' (Float) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Minimum quantity should be as per Stock UOM\n\n"
-msgstr ""
+msgstr "Die Mindestmenge sollte in der Standardmaßeinheit angegeben werden\n\n"
 
 #. Description of the 'Safety Stock' (Float) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Minimum stock level to maintain as a buffer. Used to calculate recommended reorder level: Reorder Level = Safety Stock + (Average Daily Consumption × Lead Time)."
-msgstr ""
+msgstr "Mindestbestand, der als Puffer vorgehalten werden soll. Wird zur Berechnung des empfohlenen Meldebestands verwendet: Meldebestand = Sicherheitsbestand + (durchschnittlicher Tagesverbrauch × Wiederbeschaffungszeit)."
 
 #. Label of the minute (Text Editor) field in DocType 'Quality Meeting Minutes'
 #. Name of a UOM
@@ -32776,7 +32776,7 @@ msgstr "Für Artikel {0} wurde keine aktive Stückliste gefunden. Die Lieferung 
 
 #: erpnext/stock/doctype/item/item_prices.html:135
 msgid "No active item prices found."
-msgstr ""
+msgstr "Es wurden keine aktiven Artikelpreise gefunden."
 
 #: erpnext/stock/doctype/item_variant_settings/item_variant_settings.js:46
 msgid "No additional fields available"
@@ -39540,7 +39540,7 @@ msgstr "Vorverkauf"
 #. Description of the 'Company Bank Account' (Link) field in DocType 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
 msgid "Pre-filled on payment entries for this customer. Must be a company account."
-msgstr ""
+msgstr "Bei Zahlungen für diesen Kunden bereits vorausgefüllt. Es muss sich um ein Unternehmenskonto handeln."
 
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:310
 msgid "Preference"
@@ -39607,7 +39607,7 @@ msgstr "Vermeidung von Ausschreibungen"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Prevent Sales Invoice when Customer is Overdue"
-msgstr ""
+msgstr "Ausgangsrechnungen verhindern, wenn der Kunde überfällige Rechnungen hat"
 
 #. Option for the 'Corrective/Preventive' (Select) field in DocType 'Quality
 #. Action'
@@ -55922,7 +55922,7 @@ msgstr "Der Prozentsatz, den Sie mehr als die bestellte Menge übertragen dürfe
 #. Description of the 'Last Purchase Rate' (Float) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "The rate at which this item was last purchased via a Purchase Invoice. Auto-updated by the system."
-msgstr ""
+msgstr "Der Preis, zu dem dieser Artikel zuletzt über eine Eingangsrechnung eingekauft wurde. Wird vom System automatisch aktualisiert."
 
 #: banking/src/pages/BankStatementImporter.tsx:205
 msgid "The reference number of the transaction"
@@ -58384,7 +58384,7 @@ msgstr "Es gibt bereits Transaktionen für das Unternehmen! Kontenpläne können
 #. 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
 msgid "Transactions are blocked when the outstanding balance exceeds the credit limit. When Restrict Customer Over Billing is enabled, new invoices are also blocked when the customer's overdue amount exceeds the Overdue Limit."
-msgstr ""
+msgstr "Transaktionen werden blockiert, wenn der offene Saldo das Kreditlimit überschreitet. Wenn „Ausgangsrechnungen verhindern, wenn der Kunde überfällige Rechnungen hat\" in den Buchhaltungseinstellungen aktiviert ist, werden neue Ausgangsrechnungen zusätzlich blockiert, sobald der überfällige Betrag des Kunden das Überfälligkeitslimit überschreitet."
 
 #: banking/src/components/features/BankStatementImporter/CSV/StatementDetails.tsx:239
 msgid "Transactions to be imported into the system"
