@@ -1109,7 +1109,7 @@ class FIFOSlots:
 
 		query = query.orderby(entry.parent, entry.idx)
 		bundle_wise_serial_nos = frappe._dict({})
-		for bundle_name, serial_no in query.run():
+		for bundle_name, serial_no in run_stock_query(query):
 			bundle_wise_serial_nos.setdefault(bundle_name, []).append(serial_no)
 
 		return bundle_wise_serial_nos
@@ -1151,7 +1151,9 @@ class FIFOSlots:
 
 		query = query.orderby(entry.parent, entry.idx)
 		bundle_wise_batch_nos = frappe._dict({})
-		for bundle_name, batch_no, use_batchwise_valuation, qty, stock_value_difference in query.run():
+		for bundle_name, batch_no, use_batchwise_valuation, qty, stock_value_difference in run_stock_query(
+			query
+		):
 			bundle_wise_batch_nos.setdefault(bundle_name, []).append(
 				[batch_no.upper(), use_batchwise_valuation, qty, stock_value_difference]
 			)

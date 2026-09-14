@@ -15,7 +15,12 @@ from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_in
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import get_stock_balance_for
 from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
-from erpnext.stock.report.stock_report_snapshot import StockReportSnapshot, active_snapshot, run_stock_query
+from erpnext.stock.report.stock_report_snapshot import (
+	StockReportSnapshot,
+	active_snapshot,
+	in_keys,
+	run_stock_query,
+)
 from erpnext.stock.utils import (
 	is_reposting_item_valuation_in_progress,
 	update_included_uom_in_report,
@@ -238,29 +243,34 @@ def get_segregated_bundle_entries(sle, bundle_details, batch_balance_dict, filte
 
 
 def get_serial_batch_bundle_details(sl_entries, filters=None):
-	bundle_details = []
-	for sle in sl_entries:
-		if sle.serial_and_batch_bundle:
-			bundle_details.append(sle.serial_and_batch_bundle)
-
-	if not bundle_details:
+	bundles = list(
+		dict.fromkeys(sle.serial_and_batch_bundle for sle in sl_entries if sle.serial_and_batch_bundle)
+	)
+	if not bundles:
 		return frappe._dict({})
 
-	query_filers = {"parent": ("in", bundle_details)}
-	if filters.get("batch_no"):
-		query_filers["batch_no"] = filters.batch_no
-
-	_bundle_details = frappe._dict({})
-	batch_entries = frappe.get_all(
-		"Serial and Batch Entry",
-		filters=query_filers,
-		fields=["parent", "qty", "incoming_rate", "stock_value_difference", "batch_no", "serial_no"],
-		order_by="parent, idx",
+	entry = frappe.qb.DocType("Serial and Batch Entry")
+	query = (
+		frappe.qb.from_(entry)
+		.select(
+			entry.parent,
+			entry.qty,
+			entry.incoming_rate,
+			entry.stock_value_difference,
+			entry.batch_no,
+			entry.serial_no,
+		)
+		.orderby(entry.parent, entry.idx)
 	)
-	for entry in batch_entries:
-		_bundle_details.setdefault(entry.parent, []).append(entry)
+	if filters.get("batch_no"):
+		query = query.where(entry.batch_no == filters.batch_no)
+	query = query.where(in_keys(entry.parent, bundles))
 
-	return _bundle_details
+	bundle_details = frappe._dict({})
+	for row in run_stock_query(query, as_dict=True):
+		bundle_details.setdefault(row.parent, []).append(row)
+
+	return bundle_details
 
 
 def update_available_serial_nos(available_serial_nos, sle):
@@ -538,7 +548,7 @@ def get_serial_and_batch_bundles(filters):
 		)
 	)
 
-	return query.run(pluck=SBE.parent)
+	return run_stock_query(query, pluck=True)
 
 
 def get_inventory_dimension_fields():
