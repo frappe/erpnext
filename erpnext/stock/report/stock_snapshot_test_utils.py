@@ -127,8 +127,8 @@ def ledger_scope(filters):
 	return {}
 
 
-def execute_on_snapshot(report, filters):
-	"""Run a report the way the live tests call execute, but from a snapshot of the ledger."""
+def captured_ledger(filters):
+	"""The ledger rows in the filters' scope, as a snapshot table."""
 	rows = frappe.get_all(
 		"Stock Ledger Entry",
 		filters=ledger_scope(filters),
@@ -138,8 +138,12 @@ def execute_on_snapshot(report, filters):
 		if isinstance(row.posting_time, timedelta):
 			seconds = row.posting_time.seconds
 			row.posting_time = time(seconds // 3600, seconds % 3600 // 60, seconds % 60)
-	table = pa.Table.from_pylist(rows, schema=DuckDBTable("Stock Ledger Entry").get_arrow_schema())
-	with snapshot_of(table):
+	return pa.Table.from_pylist(rows, schema=DuckDBTable("Stock Ledger Entry").get_arrow_schema())
+
+
+def execute_on_snapshot(report, filters):
+	"""Run a report the way the live tests call execute, but from a snapshot of the ledger."""
+	with snapshot_of(captured_ledger(filters)):
 		return report.execute_snapshot_report(deepcopy(filters))
 
 
