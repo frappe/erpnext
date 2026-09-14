@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-09-06 09:35+0000\n"
-"PO-Revision-Date: 2026-09-07 04:08\n"
+"PO-Revision-Date: 2026-09-14 04:08\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -1635,7 +1635,7 @@ msgstr "Konto erfordras att hämta Betalning Poster"
 
 #: erpnext/accounts/dashboard_chart_source/account_balance_timeline/account_balance_timeline.py:44
 msgid "Account is not set for the dashboard chart {0}"
-msgstr "Konto är inte angiven för Översikt Panel Diagram {0}"
+msgstr "Konto är inte angiven för Översikt Diagram {0}"
 
 #: banking/src/components/features/BankReconciliation/BankEntryModalContent.tsx:611
 #: banking/src/components/features/BankReconciliation/RecordPaymentModalContent.tsx:217
@@ -1730,7 +1730,7 @@ msgstr "Konto {0} finns inte"
 
 #: erpnext/accounts/dashboard_chart_source/account_balance_timeline/account_balance_timeline.py:51
 msgid "Account {0} does not exists in the dashboard chart {1}"
-msgstr "Konto {0} finns inte i Översikt Panel Diagram {1}"
+msgstr "Konto {0} finns inte i Översikt Diagram {1}"
 
 #: erpnext/accounts/doctype/mode_of_payment/mode_of_payment.py:48
 msgid "Account {0} does not match with Company {1} in Mode of Account: {2}"
@@ -20259,7 +20259,7 @@ msgstr "Kostnad Konto saknas"
 #. Account'
 #: erpnext/accounts/doctype/journal_entry_account/journal_entry_account.json
 msgid "Expense Claim"
-msgstr "Kostnad Anspråk"
+msgstr "Utgift Ersättning"
 
 #. Label of the expense_account (Link) field in DocType 'Purchase Invoice Item'
 #: erpnext/accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
@@ -24177,7 +24177,7 @@ msgstr "Om artikel har varianter, kan den inte väljas i Försäljning Order osv
 
 #: erpnext/buying/doctype/buying_settings/buying_settings.js:76
 msgid "If this option is configured 'Yes', ERPNext will prevent you from creating a Purchase Invoice or Receipt without creating a Purchase Order first. This configuration can be overridden for a particular supplier by enabling the 'Allow Purchase Invoice Creation Without Purchase Order' checkbox in the Supplier master."
-msgstr "Om 'Ja' kommer System att hindra dig från att skapa Inköp Faktura eller Faktura utan att först skapa Inköp Order.Vald konfiguration kan åsidosättas för viss Leverantör genom att aktivera kryssruta 'Tillåt skapande av Inköp Faktura utan Inköp Order' i Leverantör Inställningar."
+msgstr "Om 'Ja' kommer System att hindra från att skapa Inköp Faktura eller Faktura utan att först skapa Inköp Order. Vald inställning kan åsidosättas för vald Leverantör genom att aktivera 'Tillåt skapande av Inköp Faktura utan Inköp Order' i Leverantör Inställningar.."
 
 #: erpnext/buying/doctype/buying_settings/buying_settings.js:83
 msgid "If this option is configured 'Yes', ERPNext will prevent you from creating a Purchase Invoice without creating a Purchase Receipt first. This configuration can be overridden for a particular supplier by enabling the 'Allow Purchase Invoice Creation Without Purchase Receipt' checkbox in the Supplier master."
@@ -25817,7 +25817,7 @@ msgstr "Ogiltig Prioritet"
 
 #: erpnext/manufacturing/doctype/bom/bom.py:1359
 msgid "Invalid Process Loss Configuration"
-msgstr "Ogiltig Process Förlust Konfiguration"
+msgstr "Ogiltig Process Förlust Inställningar"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:722
 msgid "Invalid Purchase Invoice"
@@ -33074,7 +33074,7 @@ msgstr "Inget lager tillgängligt för denna parti."
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:815
 msgid "No stock ledger entries were created. Please set the quantity or valuation rate for the items properly and try again."
-msgstr "Inga Lager Register Poster skapade. Ange kvantitet eller grund pris för artiklar på rätt sätt och försök igen."
+msgstr "Inga Lager Register Poster skapade. Ange kvantitet eller värdering pris för artiklar på rätt sätt och försök igen."
 
 #. Description of the 'Stock frozen up to' (Date) field in DocType 'Stock
 #. Settings'
@@ -37936,7 +37936,7 @@ msgstr "Planer"
 #. Label of the plant_dashboard (HTML) field in DocType 'Plant Floor'
 #: erpnext/manufacturing/doctype/plant_floor/plant_floor.json
 msgid "Plant Dashboard"
-msgstr "Fabrik Översikt Panel"
+msgstr "Produktion Översikt"
 
 #. Name of a DocType
 #. Label of the plant_floor (Link) field in DocType 'Workstation'
@@ -38844,7 +38844,7 @@ msgstr "Välj DocType."
 
 #: erpnext/stock/report/batch_item_expiry_status/batch_item_expiry_status.py:21
 msgid "Please select the required filters"
-msgstr "Välj de filter som krävs"
+msgstr "Välj de filter som erfordras"
 
 #: erpnext/support/doctype/service_level_agreement/service_level_agreement.py:200
 msgid "Please select valid document type."
@@ -38955,11 +38955,11 @@ msgstr "Ange Orealiserat Växelkurs Resultat Konto i Bolag {0}"
 
 #: erpnext/regional/report/vat_audit_report/vat_audit_report.py:56
 msgid "Please set VAT Accounts in {0}"
-msgstr "Ange Moms Konton i {0}"
+msgstr "Ange Moms Konto i {0}"
 
 #: erpnext/regional/united_arab_emirates/utils.py:83
 msgid "Please set Vat Accounts for Company: \"{0}\" in UAE VAT Settings"
-msgstr "Ange Moms Konton för Bolag: \"{0}\" i moms inställningarna i Förenade Arabemirater"
+msgstr "Ange Moms Konto för Bolag: \"{0}\" i moms inställningarna i Förenade Arabemirater"
 
 #: erpnext/accounts/doctype/account/account_tree.js:19
 msgid "Please set a Company"
@@ -44768,7 +44768,7 @@ msgstr "Återskapa Fel Logg"
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.json
 #: erpnext/workspace_sidebar/stock.json
 msgid "Repost Item Valuation"
-msgstr "Boka om Artikel Värdering"
+msgstr "Artikel Värde Ombokning"
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:379
 msgid "Repost Item Valuation restarted for selected failed records."
@@ -51713,7 +51713,7 @@ msgstr "Sydafrika Moms Konto"
 #. Name of a DocType
 #: erpnext/regional/doctype/south_africa_vat_settings/south_africa_vat_settings.json
 msgid "South Africa VAT Settings"
-msgstr "Sydafrika Moms Konto Inställningar"
+msgstr "Sydafrika Moms Konto"
 
 #. Description of a DocType
 #: erpnext/setup/doctype/currency_exchange/currency_exchange.json
@@ -54276,11 +54276,11 @@ msgstr "Avstängd"
 
 #: erpnext/selling/page/point_of_sale/pos_payment.js:442
 msgid "Switch Between Payment Modes"
-msgstr "Växla Mellan Betalning Sätt"
+msgstr "Byt Mellan Betalning Sätt"
 
 #: banking/src/components/features/Settings/Preferences.tsx:186
 msgid "Switch between light, dark, or system theme"
-msgstr "Växla mellan ljus, mörk eller system tema"
+msgstr "Byt mellan ljus, mörk eller system tema"
 
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.js:23
 msgid "Sync Now"
@@ -57454,7 +57454,7 @@ msgstr "Total Färdig Kvantitet ({0}), Processförlust Kvantitet ({1}) och Vänt
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:196
 msgid "Total Completed Qty is required for Job Card {0}, please start and complete the job card before submission"
-msgstr "Total Färdig Kvantitet krävs för Jobbkort {0}, starta och slutför jobbkort innan godkännande"
+msgstr "Total Färdig Kvantitet erfordras för Jobbkort {0}, starta och slutför jobbkort innan godkännande"
 
 #. Label of the total_consumed_material_cost (Currency) field in DocType
 #. 'Project'
@@ -59983,7 +59983,7 @@ msgstr "Pension Kostnader"
 #. Settings'
 #: erpnext/regional/doctype/south_africa_vat_settings/south_africa_vat_settings.json
 msgid "VAT Accounts"
-msgstr "Moms Konton"
+msgstr "Moms Konto"
 
 #: erpnext/regional/report/uae_vat_201/uae_vat_201.py:40
 msgid "VAT Amount (AED)"
@@ -62033,7 +62033,7 @@ msgstr "Arbetsplats Kostnad"
 #. Label of the workstation_dashboard (HTML) field in DocType 'Workstation'
 #: erpnext/manufacturing/doctype/workstation/workstation.json
 msgid "Workstation Dashboard"
-msgstr "Arbetsplats Översikt Panel"
+msgstr "Arbetsplats Översikt"
 
 #. Label of the workstation_name (Data) field in DocType 'Workstation'
 #: erpnext/manufacturing/doctype/workstation/workstation.json
@@ -62277,7 +62277,7 @@ msgstr "Du har inte behörighet att skapa Uppgift för Projekt {0}"
 
 #: erpnext/stock/doctype/pick_list/pick_list.py:546
 msgid "You are picking more than required quantity for the item {0}. Check if there is any other pick list created for the sales order {1}."
-msgstr "Du väljer mer än vad som krävs för artikel {0}. Kontrollera om det finns någon annan plocklista skapad för försäljning order {1}."
+msgstr "Du väljer mer än vad som erfordras för artikel {0}. Kontrollera om det finns någon annan plocklista skapad för försäljning order {1}."
 
 #: erpnext/accounts/doctype/pos_invoice_merge_log/pos_invoice_merge_log.py:111
 msgid "You can add the original invoice {} manually to proceed."
@@ -62390,7 +62390,7 @@ msgstr "Du kan inte lösa in mer än {0}."
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:211
 msgid "You cannot repost item valuation before {}"
-msgstr "Du kan inte boka om artikel värdering före {}"
+msgstr "Du kan inte boka om artikel värde före {}"
 
 #: erpnext/accounts/doctype/subscription/subscription.py:766
 msgid "You cannot restart a Subscription that is not cancelled."
