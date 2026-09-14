@@ -91,8 +91,11 @@ def get_segment_query(report):
 
 	# flt() can classify tiny negative amounts as incoming. Preserve its exact rounding rules.
 	detail = ledger.voucher_type == "Stock Reconciliation"
-	for field in (ledger.actual_qty, ledger.stock_value_difference):
-		detail |= (field < 0) & (Abs(field) < 10**-report.float_precision)
+	for field, precision in (
+		(ledger.actual_qty, report.float_precision),
+		(ledger.stock_value_difference, report.currency_precision),
+	):
+		detail |= (field < 0) & (Abs(field) < 10**-precision)
 
 	return report.sle_query.select(
 		get_dimension_key(report, ledger).as_("snapshot_dimensions"),

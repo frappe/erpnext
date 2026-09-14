@@ -13,6 +13,7 @@ from frappe.utils import add_days, cint, date_diff, flt, getdate
 from frappe.utils.nestedset import get_descendants_of
 
 import erpnext
+from erpnext.accounts.utils import get_currency_precision
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.stock_closing_entry.stock_closing_entry import StockClosing
 from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
@@ -73,6 +74,7 @@ class StockBalanceReport:
 
 	def run(self):
 		self.float_precision = cint(frappe.db.get_default("float_precision")) or 3
+		self.currency_precision = get_currency_precision()
 
 		self.item_warehouse_map = frappe._dict({})
 		self.inventory_dimensions = self.get_inventory_dimension_fields()
@@ -204,7 +206,10 @@ class StockBalanceReport:
 		self.opening_vouchers = self.get_opening_vouchers()
 		self.process_current_period_entries()
 		self.item_warehouse_map = filter_items_with_no_transactions(
-			self.item_warehouse_map, self.float_precision, self.inventory_dimensions
+			self.item_warehouse_map,
+			self.float_precision,
+			self.inventory_dimensions,
+			currency_precision=self.currency_precision,
 		)
 
 	def process_current_period_entries(self):
@@ -382,7 +387,7 @@ class StockBalanceReport:
 			else:
 				qty_dict.out_qty += abs(qty_diff)
 
-			if flt(value_diff, self.float_precision) >= 0:
+			if flt(value_diff, self.currency_precision) >= 0:
 				qty_dict.in_val += value_diff
 			else:
 				qty_dict.out_val += abs(value_diff)
@@ -804,9 +809,18 @@ def get_stock_ageing_data(fifo_queue: list, to_date: str) -> dict:
 	return stock_ageing_data
 
 
+def is_value_field(key: str) -> bool:
+	return key.endswith("_val") or key == "val_rate"
+
+
 def filter_items_with_no_transactions(
-	iwb_map, float_precision: float, inventory_dimensions: list | None = None
+	iwb_map,
+	float_precision: float,
+	inventory_dimensions: list | None = None,
+	currency_precision: float | None = None,
 ):
+	if currency_precision is None:
+		currency_precision = float_precision
 	pop_keys = []
 	for group_by_key in iwb_map:
 		qty_dict = iwb_map[group_by_key]
@@ -828,7 +842,7 @@ def filter_items_with_no_transactions(
 			]:
 				continue
 
-			val = flt(val, float_precision)
+			val = flt(val, currency_precision if is_value_field(key) else float_precision)
 			qty_dict[key] = val
 			if key != "val_rate" and val:
 				no_transactions = False

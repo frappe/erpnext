@@ -11,6 +11,7 @@ from frappe.utils import cint, flt, get_datetime
 from pypika import Order
 from pypika.analytics import RowNumber
 
+from erpnext.accounts.utils import get_currency_precision
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import get_stock_balance_for
@@ -58,6 +59,7 @@ def execute(filters=None):
 		opening_row = get_opening_balance(filters, columns, sl_entries, inv_dimension_wise_value)
 
 	precision = cint(frappe.db.get_single_value("System Settings", "float_precision"))
+	currency_precision = get_currency_precision()
 	bundle_details = {}
 
 	if filters.get("segregate_serial_batch_bundle"):
@@ -123,7 +125,7 @@ def execute(filters=None):
 			update_available_serial_nos(available_serial_nos, sle)
 
 		if sle.actual_qty < 0:
-			sle["in_out_rate"] = flt(sle.stock_value_difference / sle.actual_qty, precision)
+			sle["in_out_rate"] = flt(sle.stock_value_difference / sle.actual_qty, currency_precision)
 			sle["incoming_rate"] = 0
 
 		elif sle.voucher_type == "Stock Reconciliation" and sle.actual_qty < 0:

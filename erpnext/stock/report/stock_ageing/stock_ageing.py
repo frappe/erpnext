@@ -3,6 +3,7 @@
 
 
 from operator import itemgetter
+from typing import NamedTuple
 
 import frappe
 from frappe import _
@@ -10,6 +11,7 @@ from frappe.query_builder.functions import Abs, Count
 from frappe.utils import cint, date_diff, flt, get_datetime
 from pypika.queries import QueryBuilder
 
+from erpnext.accounts.utils import get_currency_precision
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
 from erpnext.stock.report.stock_report_snapshot import StockReportSnapshot, ledger_cursor, run_stock_query
@@ -91,14 +93,25 @@ def get_float_precision() -> int:
 	return cint(frappe.db.get_single_value("System Settings", "float_precision", cache=True))
 
 
+class Precisions(NamedTuple):
+	"""Quantities round to the float precision, values and rates to the currency precision."""
+
+	qty: int
+	value: int
+
+
+def get_precisions() -> Precisions:
+	return Precisions(get_float_precision(), get_currency_precision())
+
+
 def format_report_data(filters: Filters, item_details: dict, to_date: str) -> list[list]:
 	"Returns ordered, formatted data with ranges."
 	data = []
 
-	precision = get_float_precision()
+	precision = get_precisions()
 
 	for _item, item_dict in item_details.items():
-		if not flt(item_dict.get("total_qty"), precision):
+		if not flt(item_dict.get("total_qty"), precision.qty):
 			continue
 
 		details = item_dict["details"]
@@ -133,7 +146,9 @@ def get_batch_report_slot(slot: list) -> list:
 	return slot
 
 
-def get_report_row(filters: Filters, item_dict: dict, fifo_queue: list, to_date: str, precision: int) -> list:
+def get_report_row(
+	filters: Filters, item_dict: dict, fifo_queue: list, to_date: str, precision: Precisions
+) -> list:
 	details = item_dict["details"]
 	range_values = get_range_age(filters, fifo_queue, to_date, item_dict, precision)
 	row = [details.name, details.item_name, details.description, details.item_group, details.brand]
@@ -143,7 +158,7 @@ def get_report_row(filters: Filters, item_dict: dict, fifo_queue: list, to_date:
 
 	row.extend(
 		[
-			flt(item_dict.get("total_qty"), precision),
+			flt(item_dict.get("total_qty"), precision.qty),
 			get_average_age(fifo_queue, to_date),
 			*range_values,
 			date_diff(to_date, fifo_queue[0][FIFO_DATE_INDEX]),
@@ -173,9 +188,9 @@ def get_slot_qty(slot: list) -> float:
 
 
 def get_range_age(
-	filters: Filters, fifo_queue: list, to_date: str, item_dict: dict, precision: int | None = None
+	filters: Filters, fifo_queue: list, to_date: str, item_dict: dict, precision: Precisions | None = None
 ) -> list:
-	precision = precision if precision is not None else get_float_precision()
+	precision = precision if precision is not None else get_precisions()
 	range_values = [0.0] * ((len(filters.ranges) * 2) + 2)
 
 	for slot in fifo_queue:
@@ -198,10 +213,10 @@ def get_age_bucket_index(age_ranges: list, slot: list, to_date: str) -> int:
 
 
 def add_to_range_bucket(
-	range_values: list, bucket_index: int, qty: float, stock_value: float, precision: int
+	range_values: list, bucket_index: int, qty: float, stock_value: float, precision: Precisions
 ) -> None:
-	range_values[bucket_index] = flt(range_values[bucket_index] + qty, precision)
-	range_values[bucket_index + 1] = flt(range_values[bucket_index + 1] + stock_value, precision)
+	range_values[bucket_index] = flt(range_values[bucket_index] + qty, precision.qty)
+	range_values[bucket_index + 1] = flt(range_values[bucket_index + 1] + stock_value, precision.value)
 
 	if range_values[bucket_index] == 0.0 and round_off_if_near_zero(range_values[bucket_index + 1], 2) == 0:
 		range_values[bucket_index + 1] = 0.0
