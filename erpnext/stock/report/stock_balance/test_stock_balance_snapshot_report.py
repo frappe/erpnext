@@ -66,6 +66,32 @@ class TestStockBalanceSnapshotReport(StockSnapshotReportMixin, StockSnapshotTest
 			self.assertEqual(expected, self.run_snapshot(stock_balance, self.capture_ledger()))
 			process_entry.assert_not_called()
 
+	def test_balance_aggregates_sparse_inventory_dimensions(self):
+		for index, (project, detail) in enumerate((("A", ""), ("", "A"), ("B", "A"), (None, None), ("", ""))):
+			entry = self.make_movement(
+				qty=index + 1, basic_rate=100, posting_date=add_days(today(), index - 4)
+			)
+			frappe.db.set_value(
+				"Stock Ledger Entry",
+				{"voucher_no": entry.name},
+				{"project": project, "voucher_detail_no": detail},
+			)
+		dimensions = [
+			frappe._dict(fieldname=field, doctype="Project") for field in ("project", "voucher_detail_no")
+		]
+		with patch.object(stock_balance, "get_inventory_dimensions", return_value=dimensions):
+			for dimension_filters in ({"show_dimension_wise_stock": 1}, {"project": ["A", "B"]}, {}):
+				filters = frappe._dict(self.filters, **dimension_filters)
+				expected = stock_balance.execute(deepcopy(filters))
+				with patch.object(
+					stock_balance.StockBalanceReport,
+					"prepare_item_warehouse_map",
+					side_effect=AssertionError("Unexpected ledger replay"),
+				):
+					self.assertEqual(
+						expected, self.run_snapshot(stock_balance, self.capture_ledger(), filters)
+					)
+
 	def test_serial_bundle_details_match(self):
 		self.make_serial_history()
 		self.assert_snapshot_matches(stock_balance, show_stock_ageing_data=1)
