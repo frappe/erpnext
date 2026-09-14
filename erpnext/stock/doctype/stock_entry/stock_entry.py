@@ -743,14 +743,12 @@ class StockEntry(StockController, SubcontractingInwardController):
 	@property
 	def first_sle_creation(self):
 		"""Creation of this entry's earliest ledger entry, if it has posted any yet."""
-		if "first_sle_creation" not in self.flags:
-			self.flags.first_sle_creation = frappe.db.get_value(
-				"Stock Ledger Entry",
-				{"voucher_no": self.name, "voucher_type": self.doctype, "is_cancelled": 0},
-				"creation",
-				order_by="creation asc",
-			)
-		return self.flags.first_sle_creation
+		return frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": self.name, "voucher_type": self.doctype, "is_cancelled": 0},
+			"creation",
+			order_by="creation asc",
+		)
 
 	def _notify_zero_valuation_rate(self, items):
 		if len(items) > 1:
