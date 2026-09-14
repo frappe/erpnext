@@ -15,10 +15,16 @@ from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_in
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import get_stock_balance_for
 from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
+from erpnext.stock.report.stock_report_snapshot import StockReportSnapshot, run_stock_query
 from erpnext.stock.utils import (
 	is_reposting_item_valuation_in_progress,
 	update_included_uom_in_report,
 )
+
+
+def execute_snapshot_report(filters):
+	with StockReportSnapshot("Stock Ledger", filters):
+		return execute(filters)
 
 
 def execute(filters=None):
@@ -483,6 +489,7 @@ def get_stock_ledger_entries(filters, items):
 		.where((sle.docstatus < 2) & (sle.is_cancelled == 0) & (sle.posting_datetime[from_date:to_date]))
 		.orderby(sle.posting_datetime)
 		.orderby(sle.creation)
+		.orderby(sle.name)
 	)
 
 	inventory_dimension_fields = get_inventory_dimension_fields()
@@ -511,7 +518,7 @@ def get_stock_ledger_entries(filters, items):
 
 	query = apply_warehouse_filter(query, sle, filters)
 
-	return query.run(as_dict=True)
+	return run_stock_query(query, as_dict=True)
 
 
 def get_serial_and_batch_bundles(filters):
@@ -630,14 +637,15 @@ def get_opening_balance_from_batch(filters, columns, sl_entries):
 		if value := filters.get(fields):
 			query_filters[fields] = ("in", value)
 
-	opening_data = frappe.get_all(
+	opening_query = frappe.qb.get_query(
 		"Stock Ledger Entry",
 		fields=[
 			{"SUM": "actual_qty", "as": "qty_after_transaction"},
 			{"SUM": "stock_value_difference", "as": "stock_value"},
 		],
 		filters=query_filters,
-	)[0]
+	)
+	opening_data = run_stock_query(opening_query, as_dict=True)[0]
 
 	for field in ["qty_after_transaction", "stock_value", "valuation_rate"]:
 		if opening_data.get(field) is None:
@@ -673,7 +681,7 @@ def get_opening_balance_from_batch(filters, columns, sl_entries):
 		else:
 			query = query.where(table[field] == value)
 
-	bundle_data = query.run(as_dict=True)
+	bundle_data = run_stock_query(query, as_dict=True)
 
 	if bundle_data:
 		opening_data.qty_after_transaction += flt(bundle_data[0].qty)
@@ -720,7 +728,7 @@ def get_opening_balance(filters, columns, sl_entries, inv_dimension_wise_value=N
 		.where(sr_doctype.purpose == "Opening Stock")
 	)
 
-	opening_reco_vouchers = set(opening_reco_query.run(pluck=True))
+	opening_reco_vouchers = set(run_stock_query(opening_reco_query, pluck=True))
 
 	if opening_reco_vouchers:
 		sl_entries[:] = [sle for sle in sl_entries if sle.get("voucher_no") not in opening_reco_vouchers]
@@ -770,7 +778,7 @@ def get_opening_balance(filters, columns, sl_entries, inv_dimension_wise_value=N
 		.where(subq.rn == 1)
 	)
 
-	res = query.run(as_dict=True)
+	res = run_stock_query(query, as_dict=True)
 
 	total_qty = flt(res[0].total_qty) if res else 0.0
 	total_stock_value = flt(res[0].total_stock_value) if res else 0.0
@@ -906,7 +914,7 @@ def get_opening_balance_for_inv_dimension(filters, inv_dimension_wise_value):
 
 	query = query.groupby(sl_doctype.item_code, sl_doctype.warehouse)
 
-	opening_data = query.run(as_dict=True)
+	opening_data = run_stock_query(query, as_dict=True)
 
 	if opening_data:
 		return frappe._dict(
