@@ -3,7 +3,7 @@
 
 import frappe
 from frappe.query_builder import Case, CustomFunction
-from frappe.query_builder.functions import Abs, Cast, Min, Sum
+from frappe.query_builder.functions import Abs, Cast, Function, IfNull, Min, Sum
 from pypika.analytics import CURRENT_ROW, Preceding, RowNumber
 from pypika.analytics import Sum as WindowSum
 
@@ -12,6 +12,7 @@ from erpnext.stock.report.stock_balance.stock_balance import StockBalanceReport
 from erpnext.stock.report.stock_report_snapshot import in_keys, run_stock_query
 
 ArgMaxNull = CustomFunction("arg_max_null", ["value", "order"])
+ListConcat = CustomFunction("list_concat", ["left", "right"])
 
 MOVEMENT_PREFIXES = ("opening", "in", "out", "bal")
 MOVEMENT_SUFFIXES = ("qty", "val")
@@ -19,15 +20,10 @@ MOVEMENT_FIELDS = tuple(f"{prefix}_{suffix}" for suffix in MOVEMENT_SUFFIXES for
 
 
 class StockBalanceSnapshotReport(StockBalanceReport):
-	"""Stock Balance that sums ordinary movements in DuckDB and applies each reset in Python."""
+	"""Stock Balance that sums movements per stock group and dimension key in DuckDB and applies
+	each reset in Python."""
 
 	def process_current_period_entries(self):
-		if self.filters.get("show_dimension_wise_stock") or any(
-			self.filters.get(field) for field in self.inventory_dimensions
-		):
-			super().process_current_period_entries()
-			return
-
 		for row in run_stock_query(get_balance_query(self), as_dict=True, as_iterator=True):
 			apply_segment(self, row)
 
@@ -38,10 +34,11 @@ class StockBalanceSnapshotReport(StockBalanceReport):
 def get_balance_query(report):
 	entries = frappe.qb.Table("snapshot_entries")
 	segments = frappe.qb.Table("snapshot_segments")
+	group_fields = ("item_code", "warehouse", "snapshot_dimensions")
 	segment_query = frappe.qb.from_(entries).select(
 		entries.star,
 		WindowSum(entries.snapshot_detail)
-		.over(entries.item_code, entries.warehouse)
+		.over(*(entries[field] for field in group_fields))
 		.orderby(entries.snapshot_row)
 		.rows(Preceding(), CURRENT_ROW)
 		.as_("snapshot_segment"),
@@ -59,7 +56,9 @@ def get_balance_query(report):
 			*get_latest_columns(report, segments),
 			*get_movement_columns(segments),
 		)
-		.groupby(segments.item_code, segments.warehouse, segments.snapshot_segment, segments.snapshot_detail)
+		.groupby(
+			*(segments[field] for field in group_fields), segments.snapshot_segment, segments.snapshot_detail
+		)
 		.orderby("snapshot_row")
 	)
 
@@ -96,10 +95,26 @@ def get_segment_query(report):
 		detail |= (field < 0) & (Abs(field) < 10**-report.float_precision)
 
 	return report.sle_query.select(
+		get_dimension_key(report, ledger).as_("snapshot_dimensions"),
 		RowNumber().orderby(ledger.posting_datetime, ledger.creation, ledger.name).as_("snapshot_row"),
 		Case().when(opening, 1).else_(0).as_("snapshot_opening"),
 		Case().when(detail, 1).else_(0).as_("snapshot_detail"),
 	)
+
+
+def get_dimension_key(report, ledger):
+	"""Match get_group_by_key(), including its omission of empty dimension values."""
+	key = Function("list_value")
+	for field in report.inventory_dimensions:
+		if report.filters.get(field) or report.filters.get("show_dimension_wise_stock"):
+			value = ledger[field]
+			key = ListConcat(
+				key,
+				Case()
+				.when(IfNull(value, "") != "", Function("list_value", value))
+				.else_(Function("list_value")),
+			)
+	return key
 
 
 def get_latest_columns(report, segments):
