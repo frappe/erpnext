@@ -627,9 +627,6 @@ def get_empty_batches(filters, start, page_len, filtered_batches=None, txt=None)
 	)
 	if txt:
 		query = query.where(batch.batch_id.like(f"%{txt}%") | batch.name.like(f"%{txt}%"))
-	if not filters.get("include_expired_batches"):
-		expiry_date = filters.get("posting_date") or today()
-		query = query.where((batch.expiry_date >= expiry_date) | batch.expiry_date.isnull())
 	return query.run(as_list=True)
 
 
