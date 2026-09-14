@@ -2,10 +2,14 @@
 # License: GNU General Public License v3. See license.txt
 
 from contextlib import nullcontext
+from datetime import time, timedelta
+from decimal import Decimal
 from pathlib import Path
+from random import Random
 from unittest.mock import patch
 
 import frappe
+import pyarrow as pa
 import pyarrow.dataset as ds
 from frappe.core.doctype.duckdb_sync.duckdb_sync import DuckDBSync
 from frappe.query_builder.builder import MariaDB, Postgres
@@ -96,6 +100,43 @@ class TestStockReportSnapshot(StockSnapshotTestCase):
 				)
 				repeated = repeated.where(ledger.item_code == self.item)
 				self.assertEqual(snapshot.run(repeated, as_dict=True), repeated.run(as_dict=True))
+
+	def test_result_conversion_preserves_python_values(self):
+		random = Random(42)
+		values = [None, Decimal("999999999999.999999999"), Decimal("-0.000000001"), Decimal("0.1")]
+		values.extend(Decimal(random.randrange(-(10**21), 10**21)).scaleb(-9) for _ in range(1000))
+		times = [None, time(), time(23, 59, 59, 999999), time(12, 30, 45, 123456)] * 251
+		source = frappe.qb.Table("native_values")
+		query = frappe.qb.from_(source).select(source.actual_qty, source.posting_time)
+		with (
+			patch.object(
+				StockReportSnapshot, "get_connection", return_value=self.connect(self.capture_ledger())
+			),
+			patch("erpnext.stock.report.stock_report_snapshot.VALUE_CONVERTERS", {}),
+		):
+			with StockReportSnapshot("Stock Ledger", self.filters) as snapshot:
+				snapshot.tables["native_values"] = pa.table(
+					{
+						"actual_qty": pa.array(values, type=pa.decimal128(21, 9)),
+						"posting_time": pa.array(times, type=pa.time64("us")),
+					}
+				)
+				actual = snapshot.run(query)
+		expected = [
+			(
+				float(value) if value is not None else None,
+				timedelta(
+					hours=clock.hour,
+					minutes=clock.minute,
+					seconds=clock.second,
+					microseconds=clock.microsecond,
+				)
+				if clock is not None
+				else None,
+			)
+			for value, clock in zip(values, times, strict=True)
+		]
+		self.assertEqual(actual, expected)
 
 	def test_queries_run_on_the_active_snapshot(self):
 		self.make_movement(qty=1, basic_rate=100)
