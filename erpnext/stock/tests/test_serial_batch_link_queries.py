@@ -39,26 +39,39 @@ class TestSerialBatchLinkQueries(ERPNextTestSuite):
 		self.assertEqual(option["value"], batch.name)
 		self.assertEqual(option["label"], "Link-Batch")
 
-	def test_empty_batch_search_retains_text_exclusion_and_expiry_filters(self):
+	def test_empty_batch_search_preserves_expired_batches(self):
 		stocked = self.make_number("Batch", "Link-Stocked")
 		empty = self.make_number("Batch", "Link-Empty")
 		unrelated = self.make_number("Batch", "Unrelated")
 		expired = self.make_number("Batch", "Link-Expired")
 		expired.db_set("expiry_date", add_days(nowdate(), -1))
+		disabled = self.make_number("Batch", "Link-Disabled")
+		disabled.db_set("disabled", 1)
 		self.make_number("Batch", "Link-Empty", self.other_item.name)
 		filters = {"item_code": self.item.name, "is_inward": 1}
 		rows = get_empty_batches(filters, 0, 20, [(stocked.name, 1)], "link-")
-		self.assertEqual([row[0] for row in rows], [empty.name])
+		self.assertEqual([row[0] for row in rows], [expired.name, empty.name])
 		filters["include_expired_batches"] = 1
 		rows = get_empty_batches(filters, 0, 20, [(stocked.name, 1)], "link-")
 		self.assertCountEqual([row[0] for row in rows], [empty.name, expired.name])
 		self.assertNotIn(unrelated.name, [row[0] for row in rows])
+		rows = get_empty_batches(filters, 1, 1, [(stocked.name, 1)], "link-")
+		self.assertEqual([row[0] for row in rows], [empty.name])
 
 	def test_batch_number_query_returns_ids_and_titles_for_the_selected_item(self):
 		batch = self.make_number("Batch", "Link-Batch")
-		self.make_number("Batch", "Link-Batch", self.other_item.name)
+		other = self.make_number("Batch", "Link-Batch", self.other_item.name)
 		rows = get_batch_numbers("Batch", "link-batch", "name", 0, 20, {"item": self.item.name})
 		self.assertEqual([tuple(row) for row in rows], [(batch.name, "Link-Batch", self.item.name)])
+		option = build_for_autosuggest(rows, "Batch")[0]
+		self.assertEqual(option["value"], batch.name)
+		self.assertEqual(option["label"], "Link-Batch")
+		rows = get_batch_numbers("Batch", batch.name, "name", 0, 20, {"item": self.item.name})
+		self.assertEqual([row[0] for row in rows], [batch.name])
+		rows = get_batch_numbers("Batch", "link-batch", "name", 0, 20, {})
+		self.assertCountEqual([row[0] for row in rows], [batch.name, other.name])
+		page = get_batch_numbers("Batch", "link-batch", "name", 1, 1, {})
+		self.assertEqual(page, rows[1:2])
 		with self.set_user("Guest"), self.assertRaises(frappe.PermissionError):
 			get_batch_numbers("Batch", "link-batch", "name", 0, 20, {"item": self.item.name})
 
