@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-09-06 09:35+0000\n"
-"PO-Revision-Date: 2026-09-07 04:08\n"
+"PO-Revision-Date: 2026-09-14 04:08\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: German\n"
 "MIME-Version: 1.0\n"
@@ -1129,13 +1129,13 @@ msgstr "Ein neues Geschäftsjahr wurde automatisch erstellt."
 #. DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "A quality inspection must be completed before generating a Delivery Note for this item."
-msgstr ""
+msgstr "Bevor für diesen Artikel ein Lieferschein erstellt wird, muss eine Qualitätsprüfung durchgeführt werden."
 
 #. Description of the 'Inspection Required before Purchase' (Check) field in
 #. DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "A quality inspection must be completed before generating a Purchase Receipt for this item."
-msgstr ""
+msgstr "Bevor für diesen Artikel ein Eingangsbeleg erstellt wird, muss eine Qualitätsprüfung durchgeführt werden."
 
 #: erpnext/stock/doctype/material_request/material_request.js:496
 msgid "A separate Purchase Order is created for each Supplier."
@@ -4005,7 +4005,7 @@ msgstr "Alle Lager"
 
 #: erpnext/stock/doctype/item/item.js:877
 msgid "All active prices for this item across buying and selling price lists."
-msgstr ""
+msgstr "Alle aktuell gültigen Preise für diesen Artikel in den Einkaufs- und Vertriebspreislisten."
 
 #. Description of the 'Reconciled' (Check) field in DocType 'Process Payment
 #. Reconciliation Log'
@@ -19735,12 +19735,12 @@ msgstr ""
 #. 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Enable for raw material items used in BOM. Uncheck for additional services like 'washing' used in manufacturing."
-msgstr ""
+msgstr "Diese Option für Rohmaterialartikel aktivieren, die in der Stückliste verwendet werden. Für zusätzliche Dienstleistungen wie z. B. «Waschen», die in der Fertigung eingesetzt werden, deaktivieren."
 
 #. Description of the 'Is Subcontracted Item' (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Enable if a vendor manufactures this item for you. You can choose to provide them raw materials using the default BOM."
-msgstr ""
+msgstr "Diese Option aktivieren, wenn ein Lieferant diesen Artikel fertigt. Die Rohmaterialien können ihm mithilfe der Standard-Stückliste bereitgestellt werden."
 
 #. Description of the 'Is Fixed Asset' (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -31915,7 +31915,7 @@ msgstr "Maximalwert"
 #: erpnext/stock/doctype/item/item.json
 #, python-format
 msgid "Maximum discount % allowed when selling this item. Eg: if set to 20%, a discount greater than 20% cannot be applied in sales transactions."
-msgstr ""
+msgstr "Maximal zulässiger Rabattprozentsatz beim Verkauf dieses Artikels. Beispiel: Bei einem festgelegten Rabatt von 20 % kann kein höherer Rabatt als 20 % gewährt werden."
 
 #: erpnext/controllers/selling_controller.py:272
 msgid "Maximum discount for Item {0} is {1}%"
@@ -33626,7 +33626,7 @@ msgstr "Für Artikel {0} wurde keine aktive Stückliste gefunden. Die Lieferung 
 
 #: erpnext/stock/doctype/item/item.js:881
 msgid "No active item prices found."
-msgstr ""
+msgstr "Es wurden keine aktiven Artikelpreise gefunden."
 
 #: erpnext/public/js/templates/shop_floor_template.html:869
 msgid "No active jobs and the queue is empty."
@@ -60624,7 +60624,7 @@ msgstr "Es gibt bereits Transaktionen für das Unternehmen! Kontenpläne können
 #. 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
 msgid "Transactions are blocked when the outstanding balance exceeds the credit limit. When Restrict Customer Over Billing is enabled, new invoices are also blocked when the customer's overdue amount exceeds the Overdue Limit."
-msgstr ""
+msgstr "Transaktionen werden blockiert, wenn der offene Saldo das Kreditlimit überschreitet. Wenn „Ausgangsrechnungen verhindern, wenn der Kunde überfällige Rechnungen hat\" in den Buchhaltungseinstellungen aktiviert ist, werden neue Ausgangsrechnungen zusätzlich blockiert, sobald der überfällige Betrag des Kunden das Überfälligkeitslimit überschreitet."
 
 #: banking/src/components/features/BankStatementImporter/CSV/StatementDetails.tsx:239
 msgid "Transactions to be imported into the system"
