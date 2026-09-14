@@ -6,6 +6,7 @@ from unittest.mock import patch
 import frappe
 
 from erpnext.stock.report.stock_ageing.stock_ageing import (
+	BATCH_SLOT_DATE_INDEX,
 	BATCH_SLOT_QTY_INDEX,
 	BATCH_SLOT_VALUE_INDEX,
 	FIFOSlots,
@@ -782,6 +783,59 @@ class TestStockAgeing(ERPNextTestSuite):
 		self.assertEqual(unfiltered[(item_code, "WH 2")]["fifo_queue"], aged_from_transfer)
 		self.assertEqual(warehouse_filtered[(item_code, "WH 2")]["fifo_queue"], aged_from_transfer)
 		self.assertEqual(unfiltered[(item_code, "WH 1")]["fifo_queue"], [])
+
+	def test_lifo_batch_item_consumes_the_most_recent_slot(self):
+		"""Ledger (same wh, LIFO item): +100 of an old pooled batch in January,
+		+50 of a newer one in September, then -20. Pooled slots are interchangeable,
+		so LIFO has to take the September slot, not the January one."""
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item_code = make_item(
+			"Test Stock Ageing LIFO Batch",
+			{"is_stock_item": 1, "has_batch_no": 1, "valuation_method": "LIFO"},
+		).name
+
+		older_batch = "SA-LIFO-OLDER"
+		newer_batch = "SA-LIFO-NEWER"
+		for batch_id in (older_batch, newer_batch):
+			frappe.get_doc({"doctype": "Batch", "batch_id": batch_id, "item": item_code}).insert(
+				ignore_permissions=True, ignore_if_duplicate=True
+			)
+			frappe.db.set_value("Batch", batch_id, "use_batchwise_valuation", 0)
+
+		qty_after = 0
+
+		def make_sle(posting_date, voucher_no, batch_no, actual_qty):
+			nonlocal qty_after
+
+			qty_after += actual_qty
+			return frappe._dict(
+				name=item_code,
+				actual_qty=actual_qty,
+				qty_after_transaction=qty_after,
+				stock_value_difference=actual_qty * 10,
+				valuation_rate=10,
+				warehouse="WH 1",
+				posting_date=posting_date,
+				voucher_type="Stock Entry",
+				voucher_no=voucher_no,
+				has_serial_no=False,
+				has_batch_no=True,
+				serial_no=None,
+				batch_no=batch_no,
+			)
+
+		sle = [
+			make_sle("2021-01-01", "001", older_batch, 100),
+			make_sle("2021-09-01", "002", newer_batch, 50),
+			make_sle("2021-09-10", "003", newer_batch, -20),
+		]
+
+		queue = FIFOSlots(self.filters, sle).generate()[item_code]["fifo_queue"]
+		quantities = {slot[BATCH_SLOT_DATE_INDEX]: slot[BATCH_SLOT_QTY_INDEX] for slot in queue}
+
+		self.assertEqual(quantities["2021-01-01"], 100.0)
+		self.assertEqual(quantities["2021-09-01"], 30.0)
 
 	def test_batch_pooling_preserves_total_on_repeating_rate(self):
 		"""Ledger (same wh, batch B): [+3 @ 100/3, +6 @ 0, +2 @ 0]

@@ -717,7 +717,7 @@ class FIFOSlots:
 		if serial_nos:
 			self._consume_serial_fifo_slots(fifo_queue, serial_nos)
 		elif batch_nos:
-			self._consume_batch_fifo_slots(row, fifo_queue, transfer_key, batch_nos)
+			self._consume_batch_fifo_slots(row, fifo_queue, transfer_key, batch_nos, from_end)
 		else:
 			self._consume_fifo_slots(row, fifo_queue, transfer_key, from_end)
 
@@ -725,12 +725,16 @@ class FIFOSlots:
 		fifo_queue[:] = [slot for slot in fifo_queue if slot[FIFO_QTY_INDEX] not in serial_nos]
 
 	def _consume_batch_fifo_slots(
-		self, row: dict, fifo_queue: list, transfer_key: tuple, batch_nos: list
+		self, row: dict, fifo_queue: list, transfer_key: tuple, batch_nos: list, from_end: bool = False
 	) -> None:
+		"""LIFO consumes the most recent inward first, so walk the queue from the tail.
+		Slots of one batch valued batchwise share a date and the walk cannot tell them
+		apart, but slots pooled across batches carry the date of the batch that filled
+		them."""
 		for batch_no, use_batchwise_valuation, qty, stock_value_difference in batch_nos:
 			items_to_remove = []
 
-			for slot in fifo_queue:
+			for slot in reversed(fifo_queue) if from_end else fifo_queue:
 				if not self._can_consume_batch_slot(slot, batch_no, use_batchwise_valuation):
 					continue
 
