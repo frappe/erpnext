@@ -86,7 +86,7 @@ class StockReportSnapshot:
 		return frappe.get_doc("DuckDB Sync", sync).get_duckdb_conn()
 
 	def run(self, query, as_dict=False, as_iterator=False, pluck=False):
-		cursor = self.execute_query(query)
+		cursor = self.execute_query(query, convert=True)
 		rows = self.iter_rows(cursor, as_dict, pluck)
 		return rows if as_iterator else list(rows)
 
@@ -98,18 +98,38 @@ class StockReportSnapshot:
 		finally:
 			cursor.close()
 
-	def execute_query(self, query):
+	def execute_query(self, query, convert=False):
 		sql, parameters = self.compile(query)
 		cursor = self.conn.cursor()
 		try:
 			for name in self.get_referenced_tables(query):
 				cursor.register(name, self.get_table(name))
+			if convert:
+				sql = self.convert_result_types(cursor, sql, parameters)
 			cursor.execute(sql, parameters)
 		except Exception:
 			cursor.close()
 			raise
 
 		return cursor
+
+	@staticmethod
+	def convert_result_types(cursor, sql, parameters):
+		"""Return decimals as doubles and times as intervals, so Python receives the floats and
+		timedeltas the live database returns without converting every value itself."""
+		relation = cursor.sql(sql, params=parameters)
+		if has_repeated_names(relation.columns):
+			return sql
+		replaced = []
+		for column, dtype in zip(relation.columns, relation.types, strict=True):
+			name = '"' + column.replace('"', '""') + '"'
+			if str(dtype).startswith("DECIMAL"):
+				replaced.append(f"CAST({name} AS DOUBLE) AS {name}")
+			elif str(dtype) == "TIME":
+				replaced.append(f"to_microseconds(epoch_us({name})) AS {name}")
+		if not replaced:
+			return sql
+		return f"SELECT * REPLACE ({', '.join(replaced)}) FROM ({sql}) AS converted"
 
 	@staticmethod
 	def compile(query):
@@ -234,6 +254,17 @@ class StockReportSnapshot:
 					yield shape(row)
 		finally:
 			cursor.close()
+
+
+def has_repeated_names(columns):
+	"""A repeated column comes back suffixed with _1, _2 ... once a subquery binds it, which
+	would change the keys a report reads; such results keep the live column names instead."""
+	names = set(columns)
+	for column in columns:
+		base, _, suffix = column.rpartition("_")
+		if suffix.isdigit() and base in names:
+			return True
+	return False
 
 
 def arrow_schema(fields):
