@@ -22,7 +22,7 @@ class TestSerialBatchPrinting(ERPNextTestSuite):
 		self.assert_print(bundle, "<tr><td>LOT&lt;001&gt;</td><td>SER&amp;001</td><td>1.0</td></tr>")
 
 	def assert_print(self, bundle, expected):
-		before = bundle.as_dict()
+		before = bundle.reload().as_dict()
 		row = frappe._dict(serial_and_batch_bundle=bundle.name)
 		for _ in range(2):
 			html = get_serial_or_batch_nos(bundle.name)
