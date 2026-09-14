@@ -192,6 +192,30 @@ class TestStockReportSnapshot(StockSnapshotTestCase):
 				unbuffered.assert_called_once()
 		self.assertFalse(path.exists())
 
+	def test_registered_query_spills_and_can_be_registered_again(self):
+		self.make_movement(qty=3, basic_rate=100)
+		ledger = frappe.qb.DocType("Stock Ledger Entry")
+		query = frappe.qb.from_(ledger).select(ledger.item_code, ledger.actual_qty)
+		cached = frappe.qb.Table("cached_movements")
+		cached_query = frappe.qb.from_(cached).select(cached.item_code, cached.actual_qty)
+		conn = self.connect(self.capture_ledger())
+		with (
+			patch.object(StockReportSnapshot, "get_connection", return_value=conn),
+			patch("erpnext.stock.report.stock_report_snapshot.MAX_LIVE_TABLE_BYTES", 1),
+		):
+			with StockReportSnapshot("Stock Ledger", self.filters) as snapshot:
+				expected = snapshot.run(query)
+				snapshot.register_query("cached_movements", query)
+				self.assertIsInstance(snapshot.tables["cached_movements"], ds.FileSystemDataset)
+				path = Path(snapshot.tables["cached_movements"].files[0])
+				self.assertTrue(path.exists())
+				self.assertEqual(snapshot.run(cached_query), expected)
+				self.assertEqual(snapshot.run(cached_query), expected)
+				snapshot.register_query("cached_movements", query)
+				self.assertNotEqual(Path(snapshot.tables["cached_movements"].files[0]), path)
+				self.assertEqual(snapshot.run(cached_query), expected)
+		self.assertFalse(path.exists())
+
 	def test_failed_spill_cleans_files_and_restores_live_cursor(self):
 		self.make_movement(qty=1, basic_rate=100)
 		conn = self.connect(self.capture_ledger())

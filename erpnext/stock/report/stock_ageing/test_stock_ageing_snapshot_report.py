@@ -125,8 +125,7 @@ class TestStockAgeingSnapshotReport(StockSnapshotReportMixin, StockSnapshotTestC
 			self.assertEqual(default.call_count, int("Moving Average" in expected.values()))
 
 	def test_serial_bundle_details_match(self):
-		self.set_item("_Test DuckDB Serial Item", {"has_serial_no": 1, "serial_no_series": "DUCK-SN-.#####"})
-		self.make_movement(qty=3, basic_rate=100)
+		self.make_serial_history()
 		self.assert_snapshot_matches(stock_ageing)
 
 	def test_batch_opening_and_bundle_details_match(self):

@@ -88,6 +88,20 @@ class StockSnapshotTestCase(ERPNextTestSuite):
 	def reports(self):
 		return (self.report,)
 
+	def make_serial_history(self):
+		"""A receipt whose bundle lists its serials in reverse of their creation order."""
+		self.set_item("_Test DuckDB Serial Item", {"has_serial_no": 1, "serial_no_series": "DUCK-SN-.#####"})
+		receipt = self.make_movement(qty=3, basic_rate=100)
+		entries = frappe.get_all(
+			"Serial and Batch Entry",
+			filters={"parent": receipt.items[0].serial_and_batch_bundle},
+			fields=["name", "serial_no"],
+			order_by="idx",
+		)
+		serials = [entry.serial_no for entry in entries]
+		for entry, serial in zip(entries, reversed(serials), strict=True):
+			frappe.db.set_value("Serial and Batch Entry", entry.name, "serial_no", serial)
+
 	def make_batch_history(self):
 		self.set_item(
 			"_Test DuckDB Batch Item",
