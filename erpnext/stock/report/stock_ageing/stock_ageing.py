@@ -288,6 +288,7 @@ class FIFOSlots:
 		self.transferred_item_details = {}
 		self.serial_no_details = {}
 		self.batch_no_details = {}
+		self.batches_with_negative_slots = set()
 		self.batchwise_valuation_by_batch = {}
 		self.valuation_method_by_item = {}
 		self.filters = filters
@@ -659,6 +660,9 @@ class FIFOSlots:
 		if not qty:
 			return qty, stock_value_difference
 
+		if (batch_no, row.warehouse) not in self.batches_with_negative_slots:
+			return qty, stock_value_difference
+
 		for slot in list(fifo_queue):
 			if not self._is_matching_negative_batch_slot(slot, batch_no, use_batchwise_valuation):
 				continue
@@ -791,9 +795,13 @@ class FIFOSlots:
 		qty: float,
 		stock_value_difference: float,
 	) -> None:
+		"""The only place a batch slot goes negative, so it is also where the warehouse
+		is recorded as owing stock on that batch. A key that outlives the negative slot
+		only costs the scan that ran before."""
 		fifo_queue.append(
 			[batch_no, use_batchwise_valuation, -(qty), row.posting_date, -(stock_value_difference)]
 		)
+		self.batches_with_negative_slots.add((batch_no, row.warehouse))
 		self.transferred_item_details[transfer_key].append([qty, row.posting_date, stock_value_difference])
 
 	def _consume_fifo_slots(
