@@ -2528,13 +2528,7 @@ def get_stock_value_difference(
 	elif voucher_no:
 		query = query.where(table.voucher_no != voucher_no)
 
-	if creation:
-		query = query.where(
-			(table.posting_datetime < posting_datetime)
-			| ((table.posting_datetime == posting_datetime) & (table.creation < creation))
-		)
-	else:
-		query = query.where(table.posting_datetime <= posting_datetime)
+	query = query.where(get_prior_ledger_condition(table, posting_datetime, creation))
 
 	difference_amount = query.run()
 	return flt(difference_amount[0][0]) if difference_amount else 0
