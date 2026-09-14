@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from contextlib import ExitStack, closing, nullcontext
+from copy import copy
 from datetime import timedelta
 from itertools import batched
 from operator import itemgetter
@@ -11,7 +12,10 @@ from typing import NamedTuple
 
 import frappe
 from frappe import _
+from frappe.query_builder import CustomFunction
+from frappe.query_builder.functions import Cast
 from frappe.query_builder.terms import NamedParameterWrapper
+from pypika.terms import Star
 
 BATCH_SIZE = 1000
 MAX_LIVE_TABLE_BYTES = 64 * 1024 * 1024
@@ -105,7 +109,7 @@ class StockReportSnapshot:
 			for name in self.get_referenced_tables(query):
 				cursor.register(name, self.get_table(name))
 			if convert:
-				sql = self.convert_result_types(cursor, sql, parameters)
+				sql, parameters = self.convert_result_types(cursor, query, sql, parameters)
 			cursor.execute(sql, parameters)
 		except Exception:
 			cursor.close()
@@ -113,23 +117,29 @@ class StockReportSnapshot:
 
 		return cursor
 
-	@staticmethod
-	def convert_result_types(cursor, sql, parameters):
+	def convert_result_types(self, cursor, query, sql, parameters):
 		"""Return decimals as doubles and times as intervals, so Python receives the floats and
-		timedeltas the live database returns without converting every value itself."""
-		relation = cursor.sql(sql, params=parameters)
-		if has_repeated_names(relation.columns):
-			return sql
+		timedeltas the live database returns without converting every value itself. DESCRIBE
+		binds the statement without running it."""
+		description = cursor.execute(f"DESCRIBE {sql}", parameters).fetchall()
+		columns = [row[0] for row in description]
+		conversions = [
+			(index, base_type(row[1]))
+			for index, row in enumerate(description)
+			if base_type(row[1]) in CONVERTED_TERMS
+		]
+		if not conversions:
+			return sql, parameters
+		casted = cast_selected_columns(query, conversions)
+		if casted is not None:
+			return self.compile(casted)
+		if has_repeated_names(columns):
+			return sql, parameters
 		replaced = []
-		for column, dtype in zip(relation.columns, relation.types, strict=True):
-			name = '"' + column.replace('"', '""') + '"'
-			if str(dtype).startswith("DECIMAL"):
-				replaced.append(f"CAST({name} AS DOUBLE) AS {name}")
-			elif str(dtype) == "TIME":
-				replaced.append(f"to_microseconds(epoch_us({name})) AS {name}")
-		if not replaced:
-			return sql
-		return f"SELECT * REPLACE ({', '.join(replaced)}) FROM ({sql}) AS converted"
+		for index, dtype in conversions:
+			name = '"' + columns[index].replace('"', '""') + '"'
+			replaced.append(f"{CONVERTED_TYPES[dtype](name)} AS {name}")
+		return f"SELECT * REPLACE ({', '.join(replaced)}) FROM ({sql}) AS converted", parameters
 
 	@staticmethod
 	def compile(query):
@@ -256,6 +266,30 @@ class StockReportSnapshot:
 			cursor.close()
 
 
+def base_type(dtype):
+	return str(dtype).split("(")[0]
+
+
+def cast_selected_columns(query, conversions):
+	"""The query with its converted columns cast in the select list, which DuckDB streams, or None
+	when the select list does not map onto the result columns one to one."""
+	selects = getattr(query, "_selects", None)
+	if not selects or any(isinstance(term, Star) for term in selects):
+		return None
+	selects = list(selects)
+	for index, dtype in conversions:
+		if index >= len(selects):
+			return None
+		term = selects[index]
+		name = term.alias or getattr(term, "name", None)
+		if not name:
+			return None
+		selects[index] = CONVERTED_TERMS[dtype](term).as_(name)
+	casted = copy(query)
+	casted._selects = selects
+	return casted
+
+
 def has_repeated_names(columns):
 	"""A repeated column comes back suffixed with _1, _2 ... once a subquery binds it, which
 	would change the keys a report reads; such results keep the live column names instead."""
@@ -280,6 +314,16 @@ def time_to_timedelta(value):
 
 
 VALUE_CONVERTERS = {"decimal": float, "time": time_to_timedelta, "time_tz": time_to_timedelta}
+EpochMicroseconds = CustomFunction("epoch_us", ["value"])
+ToMicroseconds = CustomFunction("to_microseconds", ["value"])
+CONVERTED_TERMS = {
+	"DECIMAL": lambda term: Cast(term, "DOUBLE"),
+	"TIME": lambda term: ToMicroseconds(EpochMicroseconds(term)),
+}
+CONVERTED_TYPES = {
+	"DECIMAL": lambda name: f"CAST({name} AS DOUBLE)",
+	"TIME": lambda name: f"to_microseconds(epoch_us({name}))",
+}
 
 
 class DuckDBParameters(NamedParameterWrapper):
