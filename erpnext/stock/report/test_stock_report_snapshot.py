@@ -1,6 +1,7 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from contextlib import nullcontext
 from pathlib import Path
 from unittest.mock import patch
 
@@ -13,7 +14,13 @@ from frappe.utils import add_days, today
 
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import create_stock_reconciliation
-from erpnext.stock.report.stock_report_snapshot import StockReportSnapshot
+from erpnext.stock.report.stock_report_snapshot import (
+	StockReportSnapshot,
+	active_snapshot,
+	in_keys,
+	ledger_cursor,
+	run_stock_query,
+)
 from erpnext.stock.report.stock_snapshot_test_utils import StockSnapshotTestCase
 
 
@@ -82,6 +89,34 @@ class TestStockReportSnapshot(StockSnapshotTestCase):
 				self.assertEqual(snapshot.run(query, as_dict=True), expected_dicts)
 				self.assertEqual(list(snapshot.run(query, as_iterator=True)), expected)
 				self.assertEqual(snapshot.run(query, pluck=True), [100.25])
+				with patch("erpnext.stock.report.stock_report_snapshot.VALUE_CONVERTERS", {}):
+					self.assertEqual(snapshot.run(query), expected)
+				repeated = frappe.qb.from_(ledger).select(
+					ledger.item_code, ledger.item_code, ledger.incoming_rate
+				)
+				repeated = repeated.where(ledger.item_code == self.item)
+				self.assertEqual(snapshot.run(repeated, as_dict=True), repeated.run(as_dict=True))
+
+	def test_queries_run_on_the_active_snapshot(self):
+		self.make_movement(qty=1, basic_rate=100)
+		ledger = frappe.qb.DocType("Stock Ledger Entry")
+		query = frappe.qb.from_(ledger).select(ledger.item_code).where(ledger.item_code == self.item)
+		keyed = query.where(in_keys(ledger.item_code, [self.item, "other"]))
+		conn = self.connect(self.capture_ledger())
+		self.assertIsNone(active_snapshot())
+		with patch.object(StockReportSnapshot, "get_connection", return_value=conn):
+			with StockReportSnapshot("Stock Ledger", self.filters) as snapshot:
+				self.assertIs(active_snapshot(), snapshot)
+				self.assertIsInstance(ledger_cursor(), nullcontext)
+				with patch.object(frappe.db, "sql", side_effect=AssertionError("live query")):
+					self.assertEqual(run_stock_query(query, pluck=True), [self.item])
+					matched = query.where(in_keys(ledger.item_code, [self.item, "other"]))
+					self.assertEqual(run_stock_query(matched, pluck=True), [self.item])
+					self.assertEqual(len(StockReportSnapshot.compile(matched)[1]), 1)
+		self.assertIsNone(active_snapshot())
+		with ledger_cursor():
+			self.assertEqual(run_stock_query(query, pluck=True), [self.item])
+		self.assertEqual(len(StockReportSnapshot.compile(keyed)[1]), 3)
 
 	def test_large_supporting_table_spills_and_can_be_scanned_repeatedly(self):
 		self.set_item("_Test DuckDB Spill Item", {"has_serial_no": 1, "serial_no_series": "DUCK-SP-.#####"})
