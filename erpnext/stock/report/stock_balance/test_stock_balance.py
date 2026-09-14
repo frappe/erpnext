@@ -2,8 +2,9 @@ from typing import Any
 
 import frappe
 from frappe import _dict
-from frappe.utils import today
+from frappe.utils import cint, flt, today
 
+from erpnext.accounts.utils import get_currency_precision
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.report.stock_balance.stock_balance import execute, get_stock_ageing_data
@@ -259,3 +260,22 @@ class TestStockBalance(ERPNextTestSuite):
 			stock_ageing_data["fifo_queue"],
 			[[3.0, "2021-12-01", 30.0], [2.0, "2021-12-05", 20.0]],
 		)
+
+	def test_values_round_to_currency_precision(self):
+		self.generate_stock_ledger(self.item.name, [_dict(qty=1, rate=100)])
+		entry = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"item_code": self.item.name, "warehouse": self.test_warehouse, "is_cancelled": 0},
+			"name",
+			order_by="creation desc",
+		)
+		frappe.db.set_value(
+			"Stock Ledger Entry", entry, {"actual_qty": 1.2345, "stock_value_difference": 123.456}
+		)
+		float_precision = cint(frappe.db.get_default("float_precision")) or 3
+		currency_precision = get_currency_precision()
+		row = stock_balance(self.filters)[0]
+		self.assertEqual(row.in_qty, flt(1.2345, float_precision))
+		self.assertEqual(row.in_val, flt(123.456, currency_precision))
+		if currency_precision != float_precision:
+			self.assertNotEqual(row.in_val, flt(123.456, float_precision))

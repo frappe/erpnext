@@ -5,8 +5,9 @@ from copy import deepcopy
 from unittest.mock import patch
 
 import frappe
-from frappe.utils import add_days, today
+from frappe.utils import add_days, flt, today
 
+from erpnext.accounts.utils import get_currency_precision
 from erpnext.stock.report.stock_ageing import stock_ageing
 from erpnext.stock.report.stock_ageing import test_stock_ageing as live_tests
 from erpnext.stock.report.stock_ageing.stock_ageing_snapshot import SnapshotFIFOSlots
@@ -125,6 +126,23 @@ class TestStockAgeingSnapshotReport(StockSnapshotReportMixin, StockSnapshotTestC
 			slots._prefetch_valuation_methods()
 			self.assertEqual(slots.valuation_method_by_item, expected)
 			self.assertEqual(default.call_count, int("Moving Average" in expected.values()))
+
+	def test_range_values_round_to_currency_precision(self):
+		entry = self.make_movement(qty=1, basic_rate=100)
+		frappe.db.set_value(
+			"Stock Ledger Entry",
+			{"voucher_no": entry.name},
+			{"actual_qty": 1.2345, "stock_value_difference": 123.456, "qty_after_transaction": 1.2345},
+		)
+		float_precision = stock_ageing.get_float_precision()
+		currency_precision = get_currency_precision()
+		row = stock_ageing.execute(deepcopy(self.filters))[1][0]
+		self.assertEqual(row[5], flt(1.2345, float_precision))
+		self.assertEqual(row[7], flt(1.2345, float_precision))
+		self.assertEqual(row[8], flt(123.456, currency_precision))
+		if currency_precision != float_precision:
+			self.assertNotEqual(row[8], flt(123.456, float_precision))
+		self.assert_snapshot_matches(stock_ageing)
 
 	def test_serial_bundle_details_match(self):
 		self.make_serial_history()

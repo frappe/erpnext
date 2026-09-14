@@ -2,8 +2,9 @@
 # See license.txt
 
 import frappe
-from frappe.utils import add_days, today
+from frappe.utils import add_days, cint, flt, today
 
+from erpnext.accounts.utils import get_currency_precision
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.report.stock_ledger.stock_ledger import execute
 from erpnext.tests.utils import ERPNextTestSuite
@@ -334,3 +335,17 @@ class TestStockLedgerReport(ERPNextTestSuite):
 			opening_rows[0]["qty_after_transaction"],
 			sum(sle.qty_after_transaction for sle in sle_rows),
 		)
+
+	def test_in_out_rate_rounds_to_currency_precision(self):
+		item = "_Test Item"
+		self.make_movements(item, [{"qty": 10, "to_warehouse": WAREHOUSE, "basic_rate": 100}])
+		issue = make_stock_entry(item_code=item, qty=1, from_warehouse=WAREHOUSE)
+		frappe.db.set_value(
+			"Stock Ledger Entry", {"voucher_no": issue.name}, "stock_value_difference", -123.456
+		)
+		float_precision = cint(frappe.db.get_single_value("System Settings", "float_precision"))
+		currency_precision = get_currency_precision()
+		row = next(row for row in self.run_report(item) if row.get("out_qty"))
+		self.assertEqual(row["in_out_rate"], flt(123.456, currency_precision))
+		if currency_precision != float_precision:
+			self.assertNotEqual(row["in_out_rate"], flt(123.456, float_precision))
