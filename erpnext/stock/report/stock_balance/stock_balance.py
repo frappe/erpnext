@@ -21,6 +21,7 @@ from erpnext.stock.report.stock_ageing.stock_ageing import (
 	get_average_age,
 	normalize_fifo_queue,
 )
+from erpnext.stock.report.stock_report_snapshot import StockReportSnapshot, ledger_cursor, run_stock_query
 from erpnext.stock.utils import add_additional_uom_columns
 
 
@@ -43,6 +44,13 @@ SLEntry = dict[str, Any]
 
 def execute(filters: StockBalanceFilter | None = None):
 	return StockBalanceReport(filters).run()
+
+
+def execute_snapshot_report(filters):
+	from erpnext.stock.report.stock_balance.stock_balance_snapshot import StockBalanceSnapshotReport
+
+	with StockReportSnapshot("Stock Balance", filters):
+		return StockBalanceSnapshotReport(filters).run()
 
 
 class StockBalanceReport:
@@ -179,6 +187,7 @@ class StockBalanceReport:
 			.where((sle.docstatus < 2) & (sle.is_cancelled == 0))
 			.orderby(sle.posting_datetime)
 			.orderby(sle.creation)
+			.orderby(sle.name)
 		)
 
 		query = self.apply_inventory_dimensions_filters(query, sle)
@@ -193,17 +202,18 @@ class StockBalanceReport:
 
 	def prepare_item_warehouse_map_for_current_period(self):
 		self.opening_vouchers = self.get_opening_vouchers()
+		self.process_current_period_entries()
+		self.item_warehouse_map = filter_items_with_no_transactions(
+			self.item_warehouse_map, self.float_precision, self.inventory_dimensions
+		)
 
-		if self.filters.get("show_stock_ageing_data"):
-			self.sle_entries = self.sle_query.run(as_dict=True)
-
+	def process_current_period_entries(self):
 		self.prepare_stock_reco_voucher_wise_count()
 
 		# HACK: This is required to avoid causing db query in flt
 		_system_settings = frappe.get_cached_doc("System Settings")
-		with frappe.db.unbuffered_cursor():
-			if not self.filters.get("show_stock_ageing_data"):
-				self.sle_entries = self.sle_query.run(as_dict=True, as_iterator=True)
+		with ledger_cursor():
+			self.sle_entries = run_stock_query(self.sle_query, as_dict=True, as_iterator=True)
 
 			for entry in self.sle_entries:
 				group_by_key = self.get_group_by_key(entry)
@@ -211,10 +221,6 @@ class StockBalanceReport:
 					self.initialize_data(group_by_key, entry)
 
 				self.prepare_item_warehouse_map(entry, group_by_key)
-
-		self.item_warehouse_map = filter_items_with_no_transactions(
-			self.item_warehouse_map, self.float_precision, self.inventory_dimensions
-		)
 
 	def prepare_stock_reco_voucher_wise_count(self):
 		self.stock_reco_voucher_wise_count = frappe._dict()
@@ -266,7 +272,7 @@ class StockBalanceReport:
 			if childrens:
 				query = query.where(doctype.warehouse.isin(childrens))
 
-		data = query.run(as_dict=True)
+		data = run_stock_query(query, as_dict=True)
 		if not data:
 			return
 
@@ -281,10 +287,13 @@ class StockBalanceReport:
 			if sr_item.qty and sr_item.current_qty:
 				self.stock_reco_voucher_wise_count[row.voucher_detail_no] = sr_item.current_qty
 
+	def get_fifo_slots(self):
+		return FIFOSlots(self.filters)
+
 	def prepare_new_data(self):
 		if self.filters.get("show_stock_ageing_data"):
 			self.filters["show_warehouse_wise_stock"] = True
-			item_wise_fifo_queue = FIFOSlots(self.filters).generate()
+			item_wise_fifo_queue = self.get_fifo_slots().generate()
 
 		del self.sle_entries
 
