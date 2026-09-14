@@ -4,7 +4,7 @@
 from contextlib import contextmanager
 from copy import deepcopy
 from datetime import time, timedelta
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import duckdb
 import frappe
@@ -39,35 +39,39 @@ class StockSnapshotTestCase(ERPNextTestSuite):
 		self.assertEqual(expected, actual)
 
 	def run_snapshot(self, report, table, filters=None):
-		with snapshot_of(table):
-			return report.execute_snapshot_report(deepcopy(filters or self.filters))
-
-	def capture_ledger(self, items=None):
-		rows = frappe.get_all(
-			"Stock Ledger Entry",
-			filters={"item_code": ("in", items or [self.item])},
-			fields=frappe.get_meta("Stock Ledger Entry").get_valid_columns(),
-		)
-		for row in rows:
-			if isinstance(row.posting_time, timedelta):
-				seconds = row.posting_time.seconds
-				row.posting_time = time(seconds // 3600, seconds % 3600 // 60, seconds % 60)
-		return pa.Table.from_pylist(rows, schema=DuckDBTable("Stock Ledger Entry").get_arrow_schema())
+		filters = deepcopy(filters or self.filters)
+		with snapshot_of(table, self.capture_bundles(filters.item_code)):
+			return report.execute_snapshot_report(filters)
 
 	@staticmethod
-	def connect(table):
-		conn = duckdb.connect(":memory:")
-		DuckDBTable("Stock Ledger Entry").sync(conn)
-		conn.register("snapshot_data", table)
-		source = frappe.qb.Table("snapshot_data")
-		query = (
-			frappe.qb.into(frappe.qb.DocType("Stock Ledger Entry"))
-			.columns(*table.column_names)
-			.from_(source)
-			.select(*(source[field] for field in table.column_names))
+	def serve(conn):
+		"""Serve one in-memory database as both the ledger sync and the bundle sync."""
+		return patch.multiple(
+			StockReportSnapshot,
+			get_connection=Mock(return_value=conn),
+			get_synced_connection=Mock(side_effect=lambda doctype: conn.cursor()),
 		)
-		conn.execute(*StockReportSnapshot.compile(query))
-		conn.unregister("snapshot_data")
+
+	def capture_ledger(self, items=None):
+		return capture("Stock Ledger Entry", {"item_code": ("in", items or [self.item])})
+
+	def capture_bundles(self, items=None):
+		return captured_bundles({"item_code": ("in", items or [self.item])})
+
+	@staticmethod
+	def connect(table, bundles=None):
+		"""An in-memory database holding the ledger and, when given, the bundle tables."""
+		conn = duckdb.connect(":memory:")
+		tables = {
+			"Stock Ledger Entry": table,
+			"Serial and Batch Bundle": None,
+			"Serial and Batch Entry": None,
+		}
+		tables.update(bundles or {})
+		for doctype, rows in tables.items():
+			DuckDBTable(doctype).sync(conn)
+			if rows is not None:
+				load_rows(conn, doctype, rows)
 		return conn
 
 	def make_movement(self, **kwargs):
@@ -115,21 +119,42 @@ class StockSnapshotTestCase(ERPNextTestSuite):
 		return batch
 
 
+def capture(doctype, filters):
+	rows = frappe.get_all(doctype, filters=filters, fields=frappe.get_meta(doctype).get_valid_columns())
+	for row in rows:
+		for field, value in row.items():
+			if isinstance(value, timedelta):
+				seconds = value.seconds
+				row[field] = time(seconds // 3600, seconds % 3600 // 60, seconds % 60)
+	return pa.Table.from_pylist(rows, schema=DuckDBTable(doctype).get_arrow_schema())
+
+
+def load_rows(conn, doctype, table):
+	conn.register("snapshot_data", table)
+	source = frappe.qb.Table("snapshot_data")
+	query = (
+		frappe.qb.into(frappe.qb.DocType(doctype))
+		.columns(*table.column_names)
+		.from_(source)
+		.select(*(source[field] for field in table.column_names))
+	)
+	conn.execute(*StockReportSnapshot.compile(query))
+	conn.unregister("snapshot_data")
+
+
 @contextmanager
-def snapshot_of(table):
-	"""Serve the ledger rows as the report's snapshot and refuse any live ledger query meanwhile."""
-	conn = StockSnapshotTestCase.connect(table)
+def snapshot_of(table, bundles=None):
+	"""Serve the rows as the ledger and bundle syncs and refuse any live query on those tables."""
+	conn = StockSnapshotTestCase.connect(table, bundles)
 	original_sql = frappe.db.sql
 
 	def guarded_sql(query, *args, **kwargs):
-		if "tabStock Ledger Entry" in str(query):
-			raise AssertionError(f"live ledger query during a snapshot run: {query}")
+		for name in ("tabStock Ledger Entry", "tabSerial and Batch Bundle", "tabSerial and Batch Entry"):
+			if name in str(query):
+				raise AssertionError(f"live {name} query during a snapshot run: {query}")
 		return original_sql(query, *args, **kwargs)
 
-	with (
-		patch.object(StockReportSnapshot, "get_connection", return_value=conn),
-		patch.object(frappe.db, "sql", side_effect=guarded_sql),
-	):
+	with StockSnapshotTestCase.serve(conn), patch.object(frappe.db, "sql", side_effect=guarded_sql):
 		yield conn
 
 
@@ -143,21 +168,20 @@ def ledger_scope(filters):
 
 def captured_ledger(filters):
 	"""The ledger rows in the filters' scope, as a snapshot table."""
-	rows = frappe.get_all(
-		"Stock Ledger Entry",
-		filters=ledger_scope(filters),
-		fields=frappe.get_meta("Stock Ledger Entry").get_valid_columns(),
-	)
-	for row in rows:
-		if isinstance(row.posting_time, timedelta):
-			seconds = row.posting_time.seconds
-			row.posting_time = time(seconds // 3600, seconds % 3600 // 60, seconds % 60)
-	return pa.Table.from_pylist(rows, schema=DuckDBTable("Stock Ledger Entry").get_arrow_schema())
+	return capture("Stock Ledger Entry", ledger_scope(filters))
+
+
+def captured_bundles(scope):
+	"""The bundle and entry rows a bundle sync would hold for the scope."""
+	bundles = capture("Serial and Batch Bundle", scope)
+	names = bundles.column("name").to_pylist()
+	entries = capture("Serial and Batch Entry", {"parent": ("in", names or [""])})
+	return {"Serial and Batch Bundle": bundles, "Serial and Batch Entry": entries}
 
 
 def execute_on_snapshot(report, filters):
 	"""Run a report the way the live tests call execute, but from a snapshot of the ledger."""
-	with snapshot_of(captured_ledger(filters)):
+	with snapshot_of(captured_ledger(filters), captured_bundles(ledger_scope(filters))):
 		return report.execute_snapshot_report(deepcopy(filters))
 
 

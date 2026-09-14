@@ -19,8 +19,10 @@ from frappe.utils import add_days, today
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import create_stock_reconciliation
 from erpnext.stock.report.stock_report_snapshot import (
+	LIVE_TABLES,
 	StockReportSnapshot,
 	active_snapshot,
+	arrow_schema,
 	in_keys,
 	ledger_cursor,
 	run_stock_query,
@@ -162,14 +164,13 @@ class TestStockReportSnapshot(StockSnapshotTestCase):
 	def test_large_supporting_table_spills_and_can_be_scanned_repeatedly(self):
 		self.set_item("_Test DuckDB Spill Item", {"has_serial_no": 1, "serial_no_series": "DUCK-SP-.#####"})
 		self.make_movement(qty=7, basic_rate=100)
-		conn = self.connect(self.capture_ledger())
+		conn = self.connect(self.capture_ledger(), self.capture_bundles())
 		entries = frappe.qb.DocType("Serial and Batch Entry")
 		query = frappe.qb.from_(entries).select(entries.qty, entries.batch_no)
 		with (
-			patch.object(StockReportSnapshot, "get_connection", return_value=conn),
+			self.serve(conn),
 			patch("erpnext.stock.report.stock_report_snapshot.BATCH_SIZE", 2),
 			patch("erpnext.stock.report.stock_report_snapshot.MAX_LIVE_TABLE_BYTES", 1),
-			patch.object(frappe.db, "unbuffered_cursor", wraps=frappe.db.unbuffered_cursor) as unbuffered,
 		):
 			with StockReportSnapshot("Stock Ledger", self.filters) as snapshot:
 				table = snapshot.get_table("tabSerial and Batch Entry")
@@ -189,8 +190,38 @@ class TestStockReportSnapshot(StockSnapshotTestCase):
 					.select(Count(entries.parent))
 				)
 				self.assertEqual(snapshot.run(join), [(49,)])
-				unbuffered.assert_called_once()
 		self.assertFalse(path.exists())
+
+	def test_bundle_tables_come_from_their_sync_with_declared_types(self):
+		self.set_item("_Test DuckDB Sync Item", {"has_serial_no": 1, "serial_no_series": "DUCK-SY-.#####"})
+		self.make_movement(qty=2, basic_rate=100)
+		conn = self.connect(self.capture_ledger(), self.capture_bundles())
+		stale = self.connect(self.capture_ledger())
+		with (
+			self.serve(conn),
+			patch.object(frappe, "get_all", wraps=frappe.get_all) as get_all,
+		):
+			with StockReportSnapshot("Stock Ledger", self.filters) as snapshot:
+				for doctype in ("Serial and Batch Bundle", "Serial and Batch Entry"):
+					table = snapshot.get_table(f"tab{doctype}")
+					self.assertEqual(table.schema, arrow_schema(LIVE_TABLES[doctype].fields))
+				self.assertEqual(snapshot.get_table("tabSerial and Batch Entry").num_rows, 2)
+				get_all.assert_not_called()
+
+		conn = self.connect(self.capture_ledger())
+		with (
+			patch.object(StockReportSnapshot, "get_connection", return_value=conn),
+			patch.object(
+				StockReportSnapshot, "get_synced_connection", side_effect=lambda doctype: stale.cursor()
+			),
+		):
+			with StockReportSnapshot("Stock Ledger", self.filters) as snapshot:
+				self.assertRaisesRegex(
+					frappe.ValidationError,
+					"1 records are missing",
+					snapshot.get_table,
+					"tabSerial and Batch Entry",
+				)
 
 	def test_registered_query_spills_and_can_be_registered_again(self):
 		self.make_movement(qty=3, basic_rate=100)

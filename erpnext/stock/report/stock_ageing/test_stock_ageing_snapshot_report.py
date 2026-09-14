@@ -14,7 +14,9 @@ from erpnext.stock.report.stock_report_snapshot import StockReportSnapshot
 from erpnext.stock.report.stock_snapshot_test_utils import (
 	StockSnapshotReportMixin,
 	StockSnapshotTestCase,
+	captured_bundles,
 	captured_ledger,
+	ledger_scope,
 	on_snapshot,
 	snapshot_of,
 )
@@ -139,7 +141,8 @@ class FIFOSlotsOnSnapshot(SnapshotFIFOSlots):
 	def generate(self):
 		if self.sle is not None:
 			return super().generate()
-		with snapshot_of(captured_ledger(self.filters)), StockReportSnapshot("Stock Ageing", self.filters):
+		snapshot = snapshot_of(captured_ledger(self.filters), captured_bundles(ledger_scope(self.filters)))
+		with snapshot, StockReportSnapshot("Stock Ageing", self.filters):
 			return super().generate()
 
 

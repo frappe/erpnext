@@ -42,10 +42,9 @@ class TestStockLedgerSnapshotReport(StockSnapshotReportMixin, StockSnapshotTestC
 		]
 		filters = deepcopy(self.filters)
 		filters.batch_no = batches[0]
-		conn = self.connect(self.capture_ledger())
-		with patch.object(StockReportSnapshot, "get_connection", return_value=conn):
-			with StockReportSnapshot("Stock Ledger", filters) as snapshot:
-				entries = snapshot.get_table("tabSerial and Batch Entry")
+		conn = self.connect(self.capture_ledger(), self.capture_bundles())
+		with self.serve(conn), StockReportSnapshot("Stock Ledger", filters) as snapshot:
+			entries = snapshot.get_table("tabSerial and Batch Entry")
 
 		self.assertEqual(set(entries.column("batch_no").to_pylist()), {batches[0]})
 		self.assert_snapshot_matches(stock_ledger, batch_no=batches[0], segregate_serial_batch_bundle=1)
