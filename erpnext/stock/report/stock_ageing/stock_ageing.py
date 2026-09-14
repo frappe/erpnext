@@ -729,9 +729,11 @@ class FIFOSlots:
 	) -> None:
 		for batch_no, use_batchwise_valuation, qty, stock_value_difference in batch_nos:
 			items_to_remove = []
+			has_remaining_slot = False
 
 			for slot in fifo_queue:
 				if not self._can_consume_batch_slot(slot, batch_no, use_batchwise_valuation):
+					has_remaining_slot = has_remaining_slot or self._is_slot_of_batch(slot, batch_no)
 					continue
 
 				slot_qty = flt(slot[BATCH_SLOT_QTY_INDEX])
@@ -753,6 +755,7 @@ class FIFOSlots:
 					)
 					qty = 0
 					stock_value_difference = 0
+					has_remaining_slot = True
 					break
 
 			for item in items_to_remove:
@@ -768,6 +771,22 @@ class FIFOSlots:
 					qty,
 					stock_value_difference,
 				)
+				has_remaining_slot = True
+
+			self._drop_depleted_batch_date(row, batch_no, use_batchwise_valuation, has_remaining_slot)
+
+	def _drop_depleted_batch_date(
+		self, row: dict, batch_no: str, use_batchwise_valuation: bool, has_remaining_slot: bool
+	) -> None:
+		"""Stock received into a warehouse the batch has fully left is new stock and
+		ages from its own date. Negative stock still holds a slot. Batches valued as one
+		pool share their slots, so the batch that owns a slot cannot be told apart there
+		and the date is kept."""
+		if use_batchwise_valuation and not has_remaining_slot:
+			self.batch_no_details.pop((batch_no, row.warehouse), None)
+
+	def _is_slot_of_batch(self, slot: list, batch_no: str) -> bool:
+		return is_batch_slot(slot) and slot[BATCH_SLOT_BATCH_INDEX] == batch_no
 
 	def _can_consume_batch_slot(self, slot: list, batch_no: str, use_batchwise_valuation: bool) -> bool:
 		if not is_batch_slot(slot):
