@@ -79,12 +79,11 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 		}
 
 		if (serial_nos.length) {
-			const table = this.dialog.fields_dict.number_entries;
+			const table = this.dialog.fields_dict.entries;
 			table.df.data = serial_nos.map((serial_no) => ({
-				serial_no,
-				batch_no: batch_number,
+				serial_number: serial_no,
+				batch_no,
 				qty: 1,
-				from_transaction: true,
 			}));
 			table.grid.refresh();
 			this.dialog.set_value("enter_manually", 0);
@@ -219,48 +218,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 			fields: this.get_dialog_table_fields(),
 		});
 
-		fields.push(
-			{
-				fieldtype: "Section Break",
-				depends_on: "eval:doc.number_entries?.length > 0",
-			},
-			{
-				fieldname: "number_entries",
-				fieldtype: "Table",
-				label: __("Entered Numbers"),
-				depends_on: "eval:doc.number_entries?.length > 0",
-				data: [],
-				fields: this.get_number_table_fields(),
-			}
-		);
-
 		return fields;
-	}
-
-	get_number_table_fields() {
-		return [
-			{
-				fieldname: "serial_no",
-				fieldtype: "Data",
-				label: __("Serial No"),
-				in_list_view: 1,
-				hidden: !this.item.has_serial_no,
-			},
-			{
-				fieldname: "batch_no",
-				fieldtype: "Data",
-				label: __("Batch No"),
-				in_list_view: 1,
-				hidden: !this.item.has_batch_no,
-			},
-			{
-				fieldname: "qty",
-				fieldtype: "Float",
-				label: __("Quantity"),
-				in_list_view: 1,
-				default: 1,
-			},
-		];
 	}
 
 	get_attach_field() {
@@ -408,11 +366,16 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 			: [[], []];
 		if (file_path !== this.dialog.get_value("attach_serial_batch_csv")) return;
 
-		const table = this.dialog.fields_dict.number_entries;
+		const table = this.dialog.fields_dict.entries;
 		const rows = serials.length ? serials : batches;
 		table.df.data = [
-			...table.df.data.filter((row) => row.from_scan || row.from_transaction),
-			...rows.map((row) => ({ ...row, qty: Math.abs(flt(row.qty)) })),
+			...table.df.data.filter((row) => !row.from_csv),
+			...rows.map((row) => ({
+				serial_number: row.serial_no,
+				batch_number: row.batch_no,
+				qty: Math.abs(flt(row.qty)),
+				from_csv: true,
+			})),
 		];
 		table.grid.refresh();
 		this.dialog.refresh_dependency();
@@ -477,6 +440,11 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 				fieldname: "serial_no",
 				label: __("Serial No"),
 				in_list_view: 1,
+				formatter: (value, df, options, doc) =>
+					this.format_number(value, df, options, doc, "serial_number"),
+				change() {
+					if (this.doc.serial_no) delete this.doc.serial_number;
+				},
 				get_query: () => {
 					return {
 						filters: this.get_serial_no_filters(),
@@ -494,6 +462,8 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 					fieldname: "batch_no",
 					label: __("Batch No"),
 					in_list_view: 1,
+					formatter: (value, df, options, doc) =>
+						this.format_number(value, df, options, doc, "batch_number"),
 					get_route_options_for_new_doc: () => {
 						return {
 							item: this.item.item_code,
@@ -501,6 +471,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 					},
 					change() {
 						let doc = this.doc;
+						if (doc.batch_no) delete doc.batch_number;
 						if (!doc.qty && me.item.type_of_transaction === "Outward") {
 							me.get_batch_qty(doc.batch_no, (qty) => {
 								doc.qty = qty;
@@ -560,6 +531,12 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 		return fields;
 	}
 
+	format_number(value, df, options, doc, number_field) {
+		return value
+			? frappe.form.formatters.Link(value, df, options, doc)
+			: frappe.utils.escape_html(doc?.[number_field] || "");
+	}
+
 	include_expired_batches() {
 		return (
 			this.frm.doc.doctype === "Stock Reconciliation" ||
@@ -606,8 +583,14 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 				},
 				callback: (r) => {
 					if (r.message) {
-						this.dialog.fields_dict.entries.df.data = r.message;
-						this.dialog.fields_dict.entries.grid.refresh();
+						const table = this.dialog.fields_dict.entries;
+						table.df.data = [
+							...r.message,
+							...table.df.data.filter(
+								(row) => row.serial_number || row.batch_number || row.from_csv
+							),
+						];
+						table.grid.refresh();
 					}
 				},
 			});
@@ -653,29 +636,26 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 
 	update_serial_batch_no(number, record) {
 		const fieldname = this.item.has_serial_no ? "serial_no" : "batch_no";
+		const number_field = this.item.has_serial_no ? "serial_number" : "batch_number";
 		const entries = this.dialog.fields_dict.entries;
-		const numbers = this.dialog.fields_dict.number_entries;
 		const known_numbers = [number, record.serial_no, record.batch_id]
 			.filter(Boolean)
 			.map((value) => value.toLowerCase());
-		const existing_row = record.name && entries.df.data.find((row) => row[fieldname] === record.name);
-		const pending_row = numbers.df.data.find((row) =>
-			known_numbers.includes(row[fieldname]?.trim().toLowerCase())
+		const existing_row = entries.df.data.find(
+			(row) =>
+				(record.name && row[fieldname] === record.name) ||
+				known_numbers.includes(row[number_field]?.trim().toLowerCase())
 		);
 
-		if (existing_row || pending_row) {
-			if (!this.item.has_serial_no) {
-				const row = existing_row || pending_row;
-				row.qty = flt(row.qty) + 1;
-			}
+		if (existing_row) {
+			if (!this.item.has_serial_no) existing_row.qty = flt(existing_row.qty) + 1;
 		} else if (record.name) {
 			entries.df.data.push({ batch_no: record.batch_no, [fieldname]: record.name, qty: 1 });
 		} else {
-			numbers.df.data.push({ [fieldname]: number, qty: 1, from_scan: true });
+			entries.df.data.push({ [number_field]: number, qty: 1 });
 		}
 
 		entries.grid.refresh();
-		numbers.grid.refresh();
 		this.dialog.refresh_dependency();
 	}
 
@@ -683,10 +663,19 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 		if (this.pending_scans) {
 			frappe.throw(__("Please wait for barcode scanning to finish"));
 		}
-		let entries = this.dialog.get_values().entries || [];
+		const rows = this.dialog.get_values().entries || [];
+		const entries = rows.filter((row) => !row.serial_number && !row.batch_number);
+		let csv_entries = rows
+			.filter((row) => row.serial_number || row.batch_number)
+			.map((row) => ({
+				serial_no_id: row.serial_no,
+				batch_no_id: row.batch_no,
+				serial_no: row.serial_number,
+				batch_no: row.batch_number,
+				qty: row.qty,
+			}));
 		let warehouse = this.dialog.get_value("warehouse");
 		let upload_serial_nos = this.dialog.get_value("upload_serial_nos");
-		let csv_entries = this.dialog.get_value("number_entries") || [];
 
 		if (!entries.length && !csv_entries.length && upload_serial_nos) {
 			csv_entries = upload_serial_nos
