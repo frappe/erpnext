@@ -688,10 +688,9 @@ class TestStockAgeing(ERPNextTestSuite):
 		).name
 
 		batch_no = "SA-WAREHOUSE-SCOPE-BATCH"
-		if not frappe.db.exists("Batch", batch_no):
-			frappe.get_doc({"doctype": "Batch", "batch_id": batch_no, "item": item_code}).insert(
-				ignore_permissions=True
-			)
+		frappe.get_doc({"doctype": "Batch", "batch_id": batch_no, "item": item_code}).insert(
+			ignore_permissions=True, ignore_if_duplicate=True
+		)
 		frappe.db.set_value("Batch", batch_no, "use_batchwise_valuation", 1)
 
 		def make_sle(posting_date, voucher_no, warehouse, actual_qty, qty_after, stock_value_difference):
@@ -729,6 +728,57 @@ class TestStockAgeing(ERPNextTestSuite):
 			self.filters.show_warehouse_wise_stock = False
 
 		aged_from_transfer = [[batch_no, 1, 10.0, "2021-12-05", 100.0]]
+		self.assertEqual(unfiltered[(item_code, "WH 2")]["fifo_queue"], aged_from_transfer)
+		self.assertEqual(warehouse_filtered[(item_code, "WH 2")]["fifo_queue"], aged_from_transfer)
+		self.assertEqual(unfiltered[(item_code, "WH 1")]["fifo_queue"], [])
+
+	def test_serial_age_in_warehouse_ignores_receipt_in_another_warehouse(self):
+		"""Ledger (serial SN): received into WH 1, transferred to WH 2 four days later.
+		WH 2 has held the serial since the transfer, whether or not the warehouse
+		filter narrowed the scanned entries to WH 2."""
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item_code = make_item(
+			"Test Stock Ageing Serial Warehouse Scope",
+			{"is_stock_item": 1, "has_serial_no": 1, "valuation_method": "FIFO"},
+		).name
+		serial_no = "SA-WAREHOUSE-SCOPE-SN1"
+
+		def make_sle(posting_date, voucher_no, warehouse, actual_qty, qty_after):
+			return frappe._dict(
+				name=item_code,
+				actual_qty=actual_qty,
+				qty_after_transaction=qty_after,
+				stock_value_difference=actual_qty * 100,
+				valuation_rate=100,
+				warehouse=warehouse,
+				posting_date=posting_date,
+				voucher_type="Stock Entry",
+				voucher_no=voucher_no,
+				has_serial_no=True,
+				has_batch_no=False,
+				serial_no=serial_no,
+				batch_no=None,
+			)
+
+		def make_transfer_in():
+			return make_sle("2021-12-05", "002", "WH 2", 1, 1)
+
+		def make_whole_ledger():
+			return [
+				make_sle("2021-12-01", "001", "WH 1", 1, 1),
+				make_sle("2021-12-05", "002", "WH 1", -1, 0),
+				make_transfer_in(),
+			]
+
+		self.filters.show_warehouse_wise_stock = True
+		try:
+			unfiltered = FIFOSlots(self.filters, make_whole_ledger()).generate()
+			warehouse_filtered = FIFOSlots(self.filters, [make_transfer_in()]).generate()
+		finally:
+			self.filters.show_warehouse_wise_stock = False
+
+		aged_from_transfer = [[serial_no, "2021-12-05", 100.0]]
 		self.assertEqual(unfiltered[(item_code, "WH 2")]["fifo_queue"], aged_from_transfer)
 		self.assertEqual(warehouse_filtered[(item_code, "WH 2")]["fifo_queue"], aged_from_transfer)
 		self.assertEqual(unfiltered[(item_code, "WH 1")]["fifo_queue"], [])
