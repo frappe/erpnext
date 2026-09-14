@@ -2,14 +2,21 @@
 # License: GNU General Public License v3. See license.txt
 
 from copy import deepcopy
+from functools import partial
 from unittest.mock import patch
 
 import frappe
 from frappe.utils import add_days, today
 
 from erpnext.stock.report.stock_ledger import stock_ledger
+from erpnext.stock.report.stock_ledger import test_stock_ledger_report as live_tests
 from erpnext.stock.report.stock_report_snapshot import StockReportSnapshot
-from erpnext.stock.report.stock_snapshot_test_utils import StockSnapshotReportMixin, StockSnapshotTestCase
+from erpnext.stock.report.stock_snapshot_test_utils import (
+	StockSnapshotReportMixin,
+	StockSnapshotTestCase,
+	execute_on_snapshot,
+	on_snapshot,
+)
 
 
 class TestStockLedgerSnapshotReport(StockSnapshotReportMixin, StockSnapshotTestCase):
@@ -60,3 +67,8 @@ class TestStockLedgerSnapshotReport(StockSnapshotReportMixin, StockSnapshotTestC
 		dimensions = [frappe._dict(fieldname="project", doctype="Project")]
 		with patch.object(stock_ledger, "get_inventory_dimensions", return_value=dimensions):
 			self.assert_snapshot_matches(stock_ledger, project=["DuckDB Project"])
+
+
+TestStockLedgerReportOnSnapshot = on_snapshot(
+	live_tests.TestStockLedgerReport, execute=partial(execute_on_snapshot, stock_ledger)
+)
