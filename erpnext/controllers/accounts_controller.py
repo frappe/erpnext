@@ -4,12 +4,13 @@
 
 import json
 from collections import defaultdict
+from contextlib import contextmanager
 
 import frappe
 from frappe import _, bold, qb, throw
 from frappe.contacts.doctype.address.address import get_address_display
 from frappe.query_builder import DocType
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import Coalesce, Sum
 from frappe.utils import (
 	cint,
 	comma_and,
@@ -1455,21 +1456,31 @@ class AccountsController(TransactionBase):
 		# Recalculate quantities and discounts supplied by the form before carrying them forward.
 		self.calculate_taxes_and_totals()
 		self.move_additional_discount_to_items()
-		# Calculate the incoming discount using only that source's mapped quantities.
-		self.flags.discount_mapping_previous_items = self.items
-		self.items = []
+		self.flags.mapped_discount_item_count = len(self.items)
 
 	def after_mapping(self, source_doc):
 		item_reference_field = self.flags.pop("mapped_discount_reference_field", None)
-		self.set_discount_amount_after_mapping(source_doc, item_reference_field=item_reference_field)
+		existing_item_count = self.flags.pop("mapped_discount_item_count", None)
+		if existing_item_count is None:
+			self.set_discount_amount_after_mapping(source_doc, item_reference_field=item_reference_field)
+			return
 
-		previous_items = self.flags.pop("discount_mapping_previous_items", None)
-		if previous_items is not None:
-			self.move_additional_discount_to_items()
-			self.set("items", previous_items + self.items)
-			for idx, item in enumerate(self.items, 1):
-				item.idx = idx
+		with self.mapped_items_only(existing_item_count):
+			self.set_discount_amount_after_mapping(source_doc, item_reference_field=item_reference_field)
 			self.calculate_taxes_and_totals()
+			self.move_additional_discount_to_items()
+
+		self.calculate_taxes_and_totals()
+
+	@contextmanager
+	def mapped_items_only(self, existing_item_count):
+		"""Hide rows carried over from earlier sources, so a source discount lands on its own items."""
+		existing_items = self.items[:existing_item_count]
+		self.set("items", self.items[existing_item_count:])
+		try:
+			yield
+		finally:
+			self.set("items", existing_items + self.items)
 
 	def _has_mixed_additional_discount(self, source_doc):
 		if not self.get("items") or not any(
@@ -1605,8 +1616,6 @@ class AccountsController(TransactionBase):
 		self.calculate_taxes_and_totals()
 
 	def get_mapped_discount_applied(self, source_doc, item_reference_field):
-		from frappe.query_builder.functions import Coalesce
-
 		distributed_discount = sum(flt(item.distributed_discount_amount) for item in source_doc.items)
 		if not distributed_discount:
 			return 0
