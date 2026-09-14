@@ -1723,6 +1723,57 @@ class TestStockAgeing(ERPNextTestSuite):
 			[[5.0, "2021-09-01", 50.0]],
 		)
 
+	def test_second_negative_batch_slot_survives_a_partial_refill(self):
+		"""Ledger (same wh, batch B): two issues against no stock, then two receipts.
+		The first receipt clears only the first negative slot, so the second receipt
+		must still find and clear the one left behind."""
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item_code = make_item(
+			"Test Stock Ageing Twice Negative Batch",
+			{"is_stock_item": 1, "has_batch_no": 1, "valuation_method": "FIFO"},
+		).name
+
+		batch_no = "SA-TWICE-NEGATIVE-BATCH"
+		frappe.get_doc({"doctype": "Batch", "batch_id": batch_no, "item": item_code}).insert(
+			ignore_permissions=True, ignore_if_duplicate=True
+		)
+		frappe.db.set_value("Batch", batch_no, "use_batchwise_valuation", 1)
+
+		qty_after = 0
+
+		def make_sle(posting_date, voucher_no, actual_qty):
+			nonlocal qty_after
+
+			qty_after += actual_qty
+			return frappe._dict(
+				name=item_code,
+				actual_qty=actual_qty,
+				qty_after_transaction=qty_after,
+				stock_value_difference=actual_qty * 10,
+				valuation_rate=10,
+				warehouse="WH 1",
+				posting_date=posting_date,
+				voucher_type="Stock Entry",
+				voucher_no=voucher_no,
+				has_serial_no=False,
+				has_batch_no=True,
+				serial_no=None,
+				batch_no=batch_no,
+			)
+
+		sle = [
+			make_sle("2021-12-01", "001", -10),
+			make_sle("2021-12-02", "002", -5),
+			make_sle("2021-12-03", "003", 10),
+			make_sle("2021-12-04", "004", 5),
+		]
+
+		result = FIFOSlots(self.filters, sle).generate()[item_code]
+
+		self.assertEqual(result["fifo_queue"], [])
+		self.assertEqual(result["total_qty"], 0)
+
 	def test_batchwise_valuation_negative_stock_same_voucher(self):
 		from erpnext.stock.doctype.item.test_item import make_item
 
