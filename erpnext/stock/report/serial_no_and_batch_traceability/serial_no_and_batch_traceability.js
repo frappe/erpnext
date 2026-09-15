@@ -2,6 +2,7 @@
 // For license information, please see license.txt
 
 frappe.query_reports["Serial No and Batch Traceability"] = {
+	export_hidden_cols: true,
 	filters: [
 		{
 			fieldname: "item_code",

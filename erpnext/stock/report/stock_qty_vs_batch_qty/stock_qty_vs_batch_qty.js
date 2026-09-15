@@ -2,6 +2,7 @@
 // For license information, please see license.txt
 
 frappe.query_reports["Stock Qty vs Batch Qty"] = {
+	export_hidden_cols: true,
 	filters: [
 		{
 			fieldname: "item",

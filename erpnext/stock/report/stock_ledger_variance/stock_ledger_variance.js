@@ -12,6 +12,7 @@ const DIFFERENCE_FIELD_NAMES = [
 ];
 
 frappe.query_reports["Stock Ledger Variance"] = {
+	export_hidden_cols: true,
 	filters: [
 		{
 			fieldname: "company",

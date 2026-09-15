@@ -12,6 +12,7 @@ const DIFFERENCE_FIELD_NAMES = [
 ];
 
 frappe.query_reports["Stock Ledger Invariant Check"] = {
+	export_hidden_cols: true,
 	filters: [
 		{
 			fieldname: "item_code",

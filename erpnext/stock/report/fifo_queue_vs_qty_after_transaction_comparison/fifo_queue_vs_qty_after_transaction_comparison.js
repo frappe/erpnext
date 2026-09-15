@@ -4,6 +4,7 @@
 const DIFFERNCE_FIELD_NAMES = ["fifo_qty_diff", "fifo_value_diff"];
 
 frappe.query_reports["FIFO Queue vs Qty After Transaction Comparison"] = {
+	export_hidden_cols: true,
 	filters: [
 		{
 			fieldname: "item_code",

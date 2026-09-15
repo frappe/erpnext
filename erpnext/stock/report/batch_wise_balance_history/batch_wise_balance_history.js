@@ -2,6 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.query_reports["Batch-Wise Balance History"] = {
+	export_hidden_cols: true,
 	filters: [
 		{
 			fieldname: "company",
