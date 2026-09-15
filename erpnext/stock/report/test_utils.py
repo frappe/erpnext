@@ -49,7 +49,12 @@ class TestSerialBatchReportUtils(ERPNextTestSuite):
 			self.assertEqual(row.received_batch, original["received_batch"])
 			self.assertEqual(row.received_serial_number, "Report-001")
 			self.assertEqual(row.received_batch_number, "Report-001")
-		self.assertEqual([column["width"] for column in result_columns[:2]], [160, 120])
+		self.assertEqual(
+			[column["fieldname"] for column in result_columns],
+			["received_serial_number", "received_serial", "received_batch_number", "received_batch"],
+		)
+		widths = {column["fieldname"]: column["width"] for column in result_columns}
+		self.assertEqual([widths["received_serial_number"], widths["received_batch_number"]], [160, 120])
 		self.assertEqual(
 			get_linked_doctypes(result_columns, result),
 			{"Serial No": "received_serial", "Batch": "received_batch"},
