@@ -320,6 +320,13 @@ def get_html(doc, filters, entry, col, res, ageing):
 		from frappe.www.printview import get_letter_head
 
 		letter_head = get_letter_head(doc, 0)
+		# render letter head content as a template so its Jinja resolves against the doc
+		if letter_head.get("content"):
+			# nosemgrep: frappe-semgrep-rules.rules.security.frappe-ssti
+			letter_head["content"] = frappe.render_template(letter_head["content"], {"doc": doc})
+		if letter_head.get("footer"):
+			# nosemgrep: frappe-semgrep-rules.rules.security.frappe-ssti
+			letter_head["footer"] = frappe.render_template(letter_head["footer"], {"doc": doc})
 	html = frappe.render_template(
 		template_path,
 		{
