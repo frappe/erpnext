@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import qb
-from frappe.utils import add_days, flt, nowdate
+from frappe.utils import add_days, cint, flt, nowdate
 
 from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.accounts.doctype.payment_entry.payment_entry import (
@@ -27,6 +27,35 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestPaymentEntry(ERPNextTestSuite):
+	def enable_advance_in_separate_party_account(self, company="_Test Company", account_currency=None):
+		"""Book advances in a separate party account for the duration of one test."""
+		advance_account = create_account(
+			parent_account="Current Assets - _TC",
+			account_name=f"Advances Received For Tax Test {account_currency or ''}".strip(),
+			company=company,
+			account_type="Receivable",
+			account_currency=account_currency,
+		)
+		previous = frappe.db.get_value("Company", company, "default_advance_received_account")
+		frappe.db.set_value(
+			"Company",
+			company,
+			{
+				"book_advance_payments_in_separate_party_account": 1,
+				"default_advance_received_account": advance_account,
+			},
+		)
+		self.addCleanup(
+			frappe.db.set_value,
+			"Company",
+			company,
+			{
+				"book_advance_payments_in_separate_party_account": 0,
+				"default_advance_received_account": previous,
+			},
+		)
+		return advance_account
+
 	def get_journals_for(self, voucher_type: str, voucher_no: str) -> list:
 		journals = []
 		if voucher_type and voucher_no:
@@ -218,6 +247,1213 @@ class TestPaymentEntry(ERPNextTestSuite):
 		pe.load_from_db()
 		self.assertEqual(pe.references[0].reference_name, si.name)
 		self.assertEqual(pe.references[0].outstanding_amount, si.outstanding_amount)
+
+	def test_allocated_gross_amount_no_taxes(self):
+		"""With no advance-tax rows, allocated_gross_amount == allocated_amount."""
+		so = make_sales_order()
+		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Cash - _TC")
+		pe.paid_from = "Debtors - _TC"
+		pe.save()
+		self.assertEqual(pe.references[0].allocated_amount, pe.references[0].allocated_gross_amount)
+
+	def test_allocated_gross_amount_single_reference(self):
+		"""Single reference + 19% included-in-paid-amount tax → gross resolves to 119."""
+		advance_account = self.enable_advance_in_separate_party_account()
+		so = make_sales_order(qty=1, rate=119)
+		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Cash - _TC")
+		pe.paid_amount = pe.received_amount = 119
+		pe.references[0].allocated_amount = 100
+
+		pe.append(
+			"taxes",
+			{
+				"account_head": "_Test Account Service Tax - _TC",
+				"charge_type": "On Paid Amount",
+				"rate": 19,
+				"tax_amount": 0,
+				"base_tax_amount": 0,
+				"add_deduct_tax": "Add",
+				"included_in_paid_amount": 1,
+				"description": "VAT 19%",
+			},
+		)
+		pe.save()
+
+		self.assertEqual(flt(pe.taxes[0].tax_amount, 2), 19.0)
+		self.assertEqual(flt(pe.references[0].allocated_amount, 2), 100.0)
+		self.assertEqual(flt(pe.references[0].allocated_gross_amount, 2), 119.0)
+		self.assertEqual(flt(pe.difference_amount, 2), 0.0)
+
+		pe.save()
+		self.assertEqual(flt(pe.difference_amount, 2), 0.0)
+
+		pe.submit()
+		self.assertEqual(pe.docstatus, 1)
+
+		# GL: advance account Cr 100, VAT Cr 19, Cash Dr 119.
+		expected_gle = {
+			advance_account: (advance_account, 0, 100, pe.name),
+			"_Test Account Service Tax - _TC": (
+				"_Test Account Service Tax - _TC",
+				0,
+				19,
+				None,
+			),
+			"_Test Cash - _TC": ("_Test Cash - _TC", 119, 0, None),
+		}
+		self.validate_gl_entries(pe.name, expected_gle)
+
+	def test_allocated_gross_amount_proportional_split(self):
+		"""A tax row distributes proportionally across all references by allocated_amount."""
+		self.enable_advance_in_separate_party_account()
+		so1 = make_sales_order(qty=1, rate=119)
+		so2 = make_sales_order(qty=1, rate=119)
+		pe = get_payment_entry("Sales Order", so1.name, bank_account="_Test Cash - _TC")
+		pe.paid_amount = pe.received_amount = 238
+		pe.references[0].allocated_amount = 100
+		pe.append(
+			"references",
+			{
+				"reference_doctype": "Sales Order",
+				"reference_name": so2.name,
+				"total_amount": so2.grand_total,
+				"outstanding_amount": so2.grand_total,
+				"allocated_amount": 100,
+			},
+		)
+
+		pe.append(
+			"taxes",
+			{
+				"account_head": "_Test Account Service Tax - _TC",
+				"charge_type": "On Paid Amount",
+				"rate": 19,
+				"tax_amount": 0,
+				"base_tax_amount": 0,
+				"add_deduct_tax": "Add",
+				"included_in_paid_amount": 1,
+				"description": "VAT 19%",
+			},
+		)
+		pe.save()
+		# Equal allocations → 50/50 split of the 38 tax across both refs.
+		self.assertEqual(flt(pe.references[0].allocated_gross_amount, 2), 119.0)
+		self.assertEqual(flt(pe.references[1].allocated_gross_amount, 2), 119.0)
+
+	def test_allocated_gross_amount_excludes_deductions(self):
+		"""A `Deduct` row is withheld from the payment, not collected on top of it."""
+		so = make_sales_order(qty=1, rate=100)
+		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Cash - _TC")
+		pe.paid_from = "Debtors - _TC"
+		pe.paid_amount = pe.received_amount = 95
+		pe.references[0].allocated_amount = 100
+		pe.append(
+			"taxes",
+			{
+				"account_head": "_Test Account Service Tax - _TC",
+				"charge_type": "On Paid Amount",
+				"rate": 5,
+				"add_deduct_tax": "Deduct",
+				"included_in_paid_amount": 1,
+				"description": "Withheld 5%",
+			},
+		)
+		pe.save()
+		self.assertEqual(flt(pe.references[0].allocated_gross_amount, 2), 100.0)
+
+	def test_unallocated_gross_matches_allocated_gross_with_deduction(self):
+		"""The same money must be worth the same whether it sits allocated or unallocated."""
+		so = make_sales_order(qty=1, rate=1000)
+		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Cash - _TC")
+		pe.paid_from = "Debtors - _TC"
+		for rate, add_deduct in ((19, "Add"), (5, "Deduct")):
+			pe.append(
+				"taxes",
+				{
+					"account_head": "_Test Account Service Tax - _TC",
+					"charge_type": "On Paid Amount",
+					"rate": rate,
+					"add_deduct_tax": add_deduct,
+					"included_in_paid_amount": 1,
+					"description": f"{add_deduct} {rate}%",
+				},
+			)
+
+		pe.allocate_amount_to_references(
+			paid_amount=pe.paid_amount, paid_amount_change=True, allocate_payment_amount=True
+		)
+		pe.save()
+		allocated_gross = flt(pe.references[0].allocated_gross_amount, 2)
+
+		pe.references[0].allocated_amount = 0
+		pe.save()
+		self.assertEqual(flt(pe.unallocated_gross_amount, 2), allocated_gross)
+
+	def test_allocated_gross_amount_excludes_withholding(self):
+		"""Tax-withholding rows (is_tax_withholding_account=1) do not contribute to gross."""
+		so = make_sales_order(qty=1, rate=119)
+		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Cash - _TC")
+		pe.paid_from = "Debtors - _TC"
+		pe.paid_amount = pe.received_amount = 119
+		pe.references[0].allocated_amount = 100
+
+		pe.append(
+			"taxes",
+			{
+				"account_head": "_Test Account Service Tax - _TC",
+				"charge_type": "On Paid Amount",
+				"rate": 5,
+				"tax_amount": 0,
+				"base_tax_amount": 0,
+				"add_deduct_tax": "Add",
+				"included_in_paid_amount": 1,
+				"is_tax_withholding_account": 1,
+				"description": "Withholding (excluded)",
+			},
+		)
+		pe.save()
+		self.assertEqual(flt(pe.references[0].allocated_gross_amount, 2), 100.0)
+
+	def test_advance_tax_reversal_on_si_consume(self):
+		"""SI consuming the full gross of an advance with a tax row must:
+		1. carry the tax row across the reference rewrite (SO → SI)
+		2. emit tax-reversal GL legs (Dr tax_account / Cr Debtors) so net VAT
+		   posted to the tax account from the PE is zero after reconciliation.
+
+		Setup: SO is 119 (gross), PE pays 119 = 100 net + 19 VAT, SI is also 119
+		(consuming the full gross). All three match → full consume.
+		"""
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
+
+		self.enable_advance_in_separate_party_account()
+		so = make_sales_order(qty=1, rate=119)
+		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Cash - _TC")
+		pe.paid_amount = pe.received_amount = 119
+		pe.references[0].allocated_amount = 100
+		pe.append(
+			"taxes",
+			{
+				"account_head": "_Test Account Service Tax - _TC",
+				"charge_type": "On Paid Amount",
+				"rate": 19,
+				"tax_amount": 0,
+				"base_tax_amount": 0,
+				"add_deduct_tax": "Add",
+				"included_in_paid_amount": 1,
+				"description": "VAT 19%",
+			},
+		)
+		pe.save()
+		pe.submit()
+
+		si = make_sales_invoice(so.name)
+		si.allocate_advances_automatically = 1
+		si.save()
+		si.submit()
+
+		# Tax-reversal GL leg posted — Dr 19 on the tax account balances the
+		# original Cr 19 from PE submit (net 0 from the PE).
+		rows = frappe.db.sql(
+			"""SELECT debit, credit
+			FROM `tabGL Entry`
+			WHERE voucher_type = 'Payment Entry'
+			  AND voucher_no = %s
+			  AND account = %s
+			  AND is_cancelled = 0""",
+			(pe.name, "_Test Account Service Tax - _TC"),
+			as_dict=1,
+		)
+		self.assertEqual(flt(sum(r.debit for r in rows), 2), 19.0)
+		self.assertEqual(flt(sum(r.credit for r in rows), 2), 19.0)
+
+		# Counter-leg on Debtors: PE credits the customer's receivable for
+		# the full gross (net 100 + tax 19 = 119) so SI outstanding clears.
+		tax_party_legs = frappe.db.sql(
+			"""SELECT debit, credit
+			FROM `tabGL Entry`
+			WHERE voucher_type = 'Payment Entry'
+			  AND voucher_no = %s
+			  AND account = 'Debtors - _TC'
+			  AND is_cancelled = 0""",
+			(pe.name,),
+			as_dict=1,
+		)
+		total_credit = sum(r.credit for r in tax_party_legs)
+		self.assertEqual(flt(total_credit, 2), 119.0)
+
+	def test_advance_tax_reverses_on_si_cancel(self):
+		"""Cancelling an SI that consumed an advance-with-tax must reverse the
+		tax-account GL entries posted at consume time, so the PE's tax position
+		returns to its post-submit state. Uses partial_cancel which matches
+		entries by voucher_detail_no, so cancel templates are required even when
+		the breakdown for the cancelled ref collapses to 0."""
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
+
+		self.enable_advance_in_separate_party_account()
+		so = make_sales_order(qty=1, rate=119)
+		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Cash - _TC")
+		pe.paid_amount = pe.received_amount = 119
+		pe.references[0].allocated_amount = 100
+		pe.append(
+			"taxes",
+			{
+				"account_head": "_Test Account Service Tax - _TC",
+				"charge_type": "On Paid Amount",
+				"rate": 19,
+				"tax_amount": 0,
+				"base_tax_amount": 0,
+				"add_deduct_tax": "Add",
+				"included_in_paid_amount": 1,
+				"description": "VAT 19%",
+			},
+		)
+		pe.save()
+		pe.submit()
+
+		si = make_sales_invoice(so.name)
+		si.allocate_advances_automatically = 1
+		si.save()
+		si.submit()
+
+		# At this point: PE-side GL on the tax account nets to zero (Cr 19
+		# from PE submit, Dr 19 from SI consume reversal).
+		tax_rows = frappe.db.sql(
+			"""SELECT debit, credit
+			FROM `tabGL Entry`
+			WHERE voucher_type = 'Payment Entry'
+			  AND voucher_no = %s
+			  AND account = %s
+			  AND is_cancelled = 0""",
+			(pe.name, "_Test Account Service Tax - _TC"),
+			as_dict=1,
+		)
+		self.assertEqual(flt(sum(r.debit for r in tax_rows), 2), 19.0)
+		self.assertEqual(flt(sum(r.credit for r in tax_rows), 2), 19.0)
+
+		# Cancel SI — the consume-side reversal GL must itself be cancelled,
+		# leaving only the original PE submit credit on the tax account.
+		si.reload()
+		si.cancel()
+
+		tax_rows = frappe.db.sql(
+			"""SELECT debit, credit
+			FROM `tabGL Entry`
+			WHERE voucher_type = 'Payment Entry'
+			  AND voucher_no = %s
+			  AND account = %s
+			  AND is_cancelled = 0""",
+			(pe.name, "_Test Account Service Tax - _TC"),
+			as_dict=1,
+		)
+		# Only the PE submit's original Cr 19 should remain.
+		self.assertEqual(flt(sum(r.debit for r in tax_rows), 2), 0.0)
+		self.assertEqual(flt(sum(r.credit for r in tax_rows), 2), 19.0)
+
+	def test_no_tax_partial_consume_unchanged(self):
+		"""Regression: when a PE has no advance taxes, partial SI consumption
+		must produce the same allocation behaviour as before this feature —
+		`allocated_gross_amount` equals `allocated_amount` everywhere because
+		the backfill writes net == gross for tax-free advances."""
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
+
+		so = make_sales_order(qty=2, rate=300)
+		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Cash - _TC")
+		pe.paid_amount = pe.received_amount = 600
+		pe.references[0].allocated_amount = 600
+		pe.insert()
+		pe.submit()
+
+		so.reload()
+		self.assertEqual(so.advance_paid, 600)
+
+		# Partial SI: half of the SO.
+		si = make_sales_invoice(so.name)
+		si.items[0].qty = 1
+		si.allocate_advances_automatically = 1
+		si.save()
+		self.assertEqual(flt(si.advances[0].allocated_amount, 2), 300.0)
+		# With no advance taxes, the gross column carries net forward 1:1.
+		self.assertEqual(
+			flt(si.advances[0].allocated_gross_amount, 2),
+			flt(si.advances[0].allocated_amount, 2),
+		)
+		si.submit()
+
+		# After SI submit: PE has a SO ref at 300 (partial remainder) and a SI ref at 300.
+		pe.reload()
+		ref_by_dt = {(r.reference_doctype, r.reference_name): r for r in pe.references}
+		so_ref = ref_by_dt.get(("Sales Order", so.name))
+		si_ref = ref_by_dt.get(("Sales Invoice", si.name))
+		self.assertIsNotNone(so_ref)
+		self.assertIsNotNone(si_ref)
+		self.assertEqual(flt(so_ref.allocated_amount, 2), 300.0)
+		self.assertEqual(flt(so_ref.allocated_gross_amount, 2), 300.0)
+		self.assertEqual(flt(si_ref.allocated_amount, 2), 300.0)
+		self.assertEqual(flt(si_ref.allocated_gross_amount, 2), 300.0)
+
+		# SI outstanding fully covered by the partial advance.
+		si.reload()
+		self.assertEqual(flt(si.outstanding_amount, 2), 0.0)
+
+	def test_advance_gross_ignored_without_separate_party_account(self):
+		"""Without a separate party account there is no consumption GL to reverse the
+		advance tax on, so the invoice must keep allocating on net as before."""
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
+
+		self.assertFalse(
+			frappe.db.get_value("Company", "_Test Company", "book_advance_payments_in_separate_party_account")
+		)
+
+		so = make_sales_order(qty=1, rate=119)
+		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Cash - _TC")
+		pe.paid_amount = pe.received_amount = 119
+		pe.references[0].allocated_amount = 100
+		pe.append(
+			"taxes",
+			{
+				"account_head": "_Test Account Service Tax - _TC",
+				"charge_type": "On Paid Amount",
+				"rate": 19,
+				"add_deduct_tax": "Add",
+				"included_in_paid_amount": 1,
+				"description": "VAT 19%",
+			},
+		)
+		pe.save()
+		# Nothing grosses up here, so the reference must not claim more than the party leg moves.
+		self.assertEqual(flt(pe.references[0].allocated_gross_amount, 2), 100.0)
+		pe.submit()
+
+		si = make_sales_invoice(so.name)
+		si.allocate_advances_automatically = 1
+		si.save()
+
+		self.assertEqual(flt(si.advances[0].advance_gross_amount, 2), 100.0)
+		self.assertEqual(flt(si.advances[0].allocated_gross_amount, 2), 100.0)
+		si.submit()
+
+		si.reload()
+		self.assertEqual(flt(si.total_advance, 2), 100.0)
+		self.assertEqual(flt(si.outstanding_amount, 2), 19.0)
+
+	def test_si_advance_allocated_gross_tracks_manual_edits(self):
+		"""When the user manually reduces `allocated_amount` on a fetched advance,
+		`allocated_gross_amount` must scale proportionally so `total_advance` stays
+		consistent with the source PE's gross/net ratio."""
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
+
+		self.enable_advance_in_separate_party_account()
+		# SO grand_total = 119 so the SI can absorb the full gross advance.
+		so = make_sales_order(qty=1, rate=119)
+		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Cash - _TC")
+		pe.paid_from = "Debtors - _TC"
+		pe.paid_amount = pe.received_amount = 119
+		pe.references[0].allocated_amount = 100
+		pe.append(
+			"taxes",
+			{
+				"account_head": "_Test Account Service Tax - _TC",
+				"charge_type": "On Paid Amount",
+				"rate": 19,
+				"tax_amount": 0,
+				"base_tax_amount": 0,
+				"add_deduct_tax": "Add",
+				"included_in_paid_amount": 1,
+				"description": "VAT 19%",
+			},
+		)
+		pe.save()
+		pe.submit()
+
+		si = make_sales_invoice(so.name)
+		si.allocate_advances_automatically = 1
+		si.save()
+		# Fetched row carries advance_gross_amount (119) alongside advance_amount (100).
+		self.assertEqual(flt(si.advances[0].advance_amount, 2), 100.0)
+		self.assertEqual(flt(si.advances[0].advance_gross_amount, 2), 119.0)
+		self.assertEqual(flt(si.advances[0].allocated_amount, 2), 100.0)
+		self.assertEqual(flt(si.advances[0].allocated_gross_amount, 2), 119.0)
+
+		# User reduces the net allocation by half. The gross must follow
+		# proportionally. Disable auto-allocation so the user's edit isn't
+		# overwritten by `set_advance_entries` on save.
+		si.allocate_advances_automatically = 0
+		si.advances[0].allocated_amount = 50.0
+		si.save()
+		self.assertEqual(flt(si.advances[0].allocated_amount, 2), 50.0)
+		self.assertEqual(flt(si.advances[0].allocated_gross_amount, 2), 59.5)
+		self.assertEqual(flt(si.total_advance, 2), 59.5)
+
+	def test_allocated_gross_amount_multicurrency(self):
+		"""Multi-currency PE: party currency (USD) differs from company currency (INR).
+		Advance-tax rows are written in company currency (`tax.tax_amount` is in INR
+		because tax accounts are company-currency only), but `allocated_amount` is in
+		party currency (USD). `set_allocated_gross_amount` must convert the tax share
+		via the exchange rate so `allocated_gross_amount` stays in USD."""
+		# USD SO at uneven amount; deliberate 17% VAT (instead of even 19%/20%) and a
+		# realistic uneven USD->INR rate to surface any FX mishandling.
+		self.enable_advance_in_separate_party_account(account_currency="USD")
+		so = make_sales_order(
+			customer="_Test Customer USD",
+			currency="USD",
+			qty=1,
+			rate=2499.93,
+			do_not_save=True,
+		)
+		so.conversion_rate = 82.5
+		so.plc_conversion_rate = 82.5
+		so.insert()
+		so.submit()
+
+		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Bank USD - _TC")
+		pe.reference_no = "MC-TEST-1"
+		pe.reference_date = nowdate()
+		pe.source_exchange_rate = 82.5
+		pe.target_exchange_rate = 82.5
+		pe.paid_amount = pe.received_amount = 2499.93
+		# Net portion in USD: 2499.93 / 1.17 ≈ 2136.69
+		pe.references[0].allocated_amount = 2136.69
+		pe.append(
+			"taxes",
+			{
+				"account_head": "_Test Account Service Tax - _TC",
+				"charge_type": "On Paid Amount",
+				"rate": 17,
+				"tax_amount": 0,
+				"base_tax_amount": 0,
+				"add_deduct_tax": "Add",
+				"included_in_paid_amount": 1,
+				"description": "VAT 17%",
+			},
+		)
+		pe.save()
+
+		# tax.tax_amount is in company currency (INR), roughly:
+		#   base_paid = 2499.93 * 82.5 = 206,244.225
+		#   net = base_paid / 1.17 = 176,277.97; tax = 0.17 * net = ~29,967 INR
+		# (exact value drifts a fraction of an INR from cumulated_tax_fraction rounding)
+		self.assertAlmostEqual(flt(pe.taxes[0].tax_amount, 2), 29967.25, delta=1.0)
+
+		# allocated_gross_amount must be in USD = 2136.69 + (29,967.25 / 82.5) = 2499.93.
+		# Without the FX conversion, the bug would add ~29,967 INR to 2136.69 USD,
+		# producing a value > 30,000 — i.e. > 10x the actual USD gross.
+		self.assertAlmostEqual(flt(pe.references[0].allocated_gross_amount, 2), 2499.93, delta=0.10)
+
+	def test_allocated_gross_matches_reversal_legs_multicurrency(self):
+		"""The stored gross must round like the GL reversal legs, or a cent is left outstanding."""
+		self.enable_advance_in_separate_party_account(account_currency="USD")
+		so = make_sales_order(
+			customer="_Test Customer USD", currency="USD", qty=3, rate=333.33, do_not_save=True
+		)
+		so.conversion_rate = so.plc_conversion_rate = 82.5
+		so.insert()
+		so.submit()
+
+		so2 = make_sales_order(
+			customer="_Test Customer USD", currency="USD", qty=1, rate=777.77, do_not_save=True
+		)
+		so2.conversion_rate = so2.plc_conversion_rate = 82.5
+		so2.insert()
+		so2.submit()
+
+		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Bank USD - _TC")
+		pe.reference_no, pe.reference_date = "MC-ROUND-1", nowdate()
+		pe.source_exchange_rate = pe.target_exchange_rate = 82.5
+		pe.append(
+			"references",
+			{
+				"reference_doctype": "Sales Order",
+				"reference_name": so2.name,
+				"total_amount": so2.grand_total,
+				"outstanding_amount": so2.grand_total,
+				"allocated_amount": 0,
+			},
+		)
+		pe.append(
+			"taxes",
+			{
+				"account_head": "_Test Account Service Tax - _TC",
+				"charge_type": "On Paid Amount",
+				"rate": 19,
+				"add_deduct_tax": "Add",
+				"included_in_paid_amount": 1,
+				"description": "VAT 19%",
+			},
+		)
+		pe.paid_amount = pe.received_amount = flt(so.grand_total + so2.grand_total, 2)
+		pe.allocate_amount_to_references(
+			paid_amount=pe.paid_amount, paid_amount_change=True, allocate_payment_amount=True
+		)
+		pe.save()
+
+		rate = pe.get_party_exchange_rate()
+		breakdown = pe.compute_advance_tax_breakdown()
+		for ref in pe.references:
+			precision = pe.precision("allocated_amount", ref)
+			posted = sum(flt(a / rate, precision) for a in breakdown.get(ref.name, {}).values())
+			stored = flt(ref.allocated_gross_amount - ref.allocated_amount, precision)
+			self.assertEqual(stored, flt(posted, precision))
+
+	def test_advance_tax_reversal_gl_multicurrency(self):
+		"""A USD advance in an INR company: the tax legs are booked in company currency on
+		the tax account and converted back to party currency on the receivable, so the
+		invoice clears by the full gross and the ledger balances in both currencies."""
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
+
+		advance_usd = create_account(
+			parent_account="Current Assets - _TC",
+			account_name="Advances Received USD",
+			company="_Test Company",
+			account_type="Receivable",
+			account_currency="USD",
+		)
+		previous = frappe.db.get_value("Company", "_Test Company", "default_advance_received_account")
+		frappe.db.set_value(
+			"Company",
+			"_Test Company",
+			{
+				"book_advance_payments_in_separate_party_account": 1,
+				"default_advance_received_account": advance_usd,
+			},
+		)
+		self.addCleanup(
+			frappe.db.set_value,
+			"Company",
+			"_Test Company",
+			{
+				"book_advance_payments_in_separate_party_account": 0,
+				"default_advance_received_account": previous,
+			},
+		)
+
+		so = make_sales_order(
+			customer="_Test Customer USD", currency="USD", qty=1, rate=1190, do_not_save=True
+		)
+		so.conversion_rate = 82.5
+		so.plc_conversion_rate = 82.5
+		so.insert()
+		so.submit()
+
+		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Bank USD - _TC")
+		pe.reference_no, pe.reference_date = "MC-GL-1", nowdate()
+		pe.source_exchange_rate = pe.target_exchange_rate = 82.5
+		pe.paid_amount = pe.received_amount = 1190
+		pe.references[0].allocated_amount = 1000
+		pe.append(
+			"taxes",
+			{
+				"account_head": "_Test Account Service Tax - _TC",
+				"charge_type": "On Paid Amount",
+				"rate": 19,
+				"add_deduct_tax": "Add",
+				"included_in_paid_amount": 1,
+				"description": "VAT 19%",
+			},
+		)
+		pe.save()
+
+		# `calculate_taxes` writes both fields in company currency.
+		self.assertEqual(pe.taxes[0].tax_amount, pe.taxes[0].base_tax_amount)
+		self.assertAlmostEqual(flt(pe.taxes[0].base_tax_amount, 2), 190 * 82.5, delta=1.0)
+		self.assertAlmostEqual(flt(pe.get_included_taxes(in_account_currency=True), 2), 190.0, delta=0.05)
+		self.assertAlmostEqual(flt(pe.references[0].allocated_gross_amount, 2), 1190.0, delta=0.05)
+		pe.submit()
+
+		si = make_sales_invoice(so.name)
+		si.allocate_advances_automatically = 1
+		si.due_date = nowdate()
+		si.save()
+		si.submit()
+		si.reload()
+		self.assertEqual(flt(si.outstanding_amount, 2), 0.0)
+
+		rows = frappe.db.get_all(
+			"GL Entry",
+			filters={"voucher_no": pe.name, "is_cancelled": 0},
+			fields=["account", "debit", "credit", "debit_in_account_currency", "credit_in_account_currency"],
+		)
+		self.assertAlmostEqual(sum(flt(r.debit) for r in rows), sum(flt(r.credit) for r in rows), places=2)
+		# Receivable is relieved by the full gross in party currency.
+		receivable = [r for r in rows if r.account == "_Test Receivable USD - _TC"]
+		self.assertAlmostEqual(
+			sum(flt(r.credit_in_account_currency) - flt(r.debit_in_account_currency) for r in receivable),
+			1190.0,
+			delta=0.05,
+		)
+		# Tax account nets to zero once the advance is consumed.
+		tax_rows = [r for r in rows if r.account == "_Test Account Service Tax - _TC"]
+		self.assertAlmostEqual(sum(flt(r.credit) - flt(r.debit) for r in tax_rows), 0.0, delta=0.05)
+
+	def test_allocated_gross_amount_multicurrency_pay(self):
+		"""Pay direction: the party side is `paid_to`, so the gross/net ratio must be
+		anchored on `received_amount` and `target_exchange_rate`, not on the bank-side
+		`paid_amount`."""
+		pe = create_payment_entry(
+			payment_type="Pay",
+			party_type="Supplier",
+			party="_Test Supplier USD",
+			paid_from="_Test Bank - _TC",
+			paid_to="_Test Payable USD - _TC",
+			paid_amount=8250,
+		)
+		pe.paid_to_account_currency = "USD"
+		pe.target_exchange_rate = 82.5
+		pe.source_exchange_rate = 1
+		pe.received_amount = 100
+		pe.append(
+			"taxes",
+			{
+				"account_head": "_Test Account Service Tax - _TC",
+				"charge_type": "On Paid Amount",
+				"rate": 25,
+				"add_deduct_tax": "Add",
+				"included_in_paid_amount": 1,
+				"description": "VAT 25%",
+			},
+		)
+		pe.set_amounts_in_company_currency()
+		pe.apply_taxes()
+
+		# Company-currency tax on a base paid amount of 8250 at 25% inclusive = 1650 INR,
+		# i.e. 20 USD at 82.5. Party-currency net is therefore 80 of the 100 received.
+		self.assertAlmostEqual(flt(pe.get_included_taxes(), 2), 1650.0, delta=1.0)
+		self.assertAlmostEqual(flt(pe.get_included_taxes(in_account_currency=True), 2), 20.0, delta=0.05)
+		self.assertEqual(flt(pe.get_party_paid_amount(), 2), 100.0)
+		self.assertEqual(flt(pe.get_party_exchange_rate(), 2), 82.5)
+
+	def test_unlink_keeps_surviving_gross_stable(self):
+		"""Each ref's tax share is anchored to `total_net_paid` (not to the sum of
+		current allocations), so unlinking one ref must leave the surviving refs'
+		`allocated_gross_amount` unchanged. The unlinked row itself is deleted by
+		`clear_unallocated_reference_document_rows`."""
+		from erpnext.accounts.utils import remove_ref_doc_link_from_pe
+
+		# Two SOs with room to spare for a 1547.39 gross advance + 17% VAT (net 1322.56).
+		self.enable_advance_in_separate_party_account()
+		so1 = make_sales_order(qty=1, rate=900.00)
+		so2 = make_sales_order(qty=1, rate=750.00)
+		pe = get_payment_entry("Sales Order", so1.name, bank_account="_Test Cash - _TC")
+		pe.paid_amount = pe.received_amount = 1547.39
+		pe.references[0].allocated_amount = 700.00
+		pe.append(
+			"references",
+			{
+				"reference_doctype": "Sales Order",
+				"reference_name": so2.name,
+				"total_amount": so2.grand_total,
+				"outstanding_amount": so2.grand_total,
+				"allocated_amount": 622.56,
+			},
+		)
+		pe.append(
+			"taxes",
+			{
+				"account_head": "_Test Account Service Tax - _TC",
+				"charge_type": "On Paid Amount",
+				"rate": 17,
+				"tax_amount": 0,
+				"base_tax_amount": 0,
+				"add_deduct_tax": "Add",
+				"included_in_paid_amount": 1,
+				"description": "VAT 17%",
+			},
+		)
+		pe.save()
+		pe.submit()
+
+		pe.reload()
+		so1_ref = next(r for r in pe.references if r.reference_name == so1.name)
+		so2_ref = next(r for r in pe.references if r.reference_name == so2.name)
+		# Fully allocated → grosses sum to paid_amount.
+		gross_sum = flt(so1_ref.allocated_gross_amount) + flt(so2_ref.allocated_gross_amount)
+		self.assertAlmostEqual(gross_sum, 1547.39, delta=0.05)
+		so2_gross_before = flt(so2_ref.allocated_gross_amount, 2)
+
+		remove_ref_doc_link_from_pe("Sales Order", so1.name, pe.name)
+
+		pe.reload()
+		self.assertFalse(
+			any(r.reference_name == so1.name for r in pe.references),
+			"unlinked row should be removed from DB",
+		)
+		# Stability: surviving ref's gross is unchanged. The freed tax share now
+		# belongs to the (newly grown) unallocated portion.
+		so2_ref = next(r for r in pe.references if r.reference_name == so2.name)
+		self.assertEqual(flt(so2_ref.allocated_gross_amount, 2), so2_gross_before)
+		self.assertEqual(
+			flt(pe.unallocated_gross_amount, 2),
+			flt(frappe.db.get_value("Payment Entry", pe.name, "unallocated_gross_amount"), 2),
+		)
+
+	def test_unallocated_pe_consume_propagates_gross_to_si(self):
+		"""Fully-unallocated PE with included tax exposes its gross via
+		`unallocated_gross_amount`, so a downstream SI consuming the advance
+		applies the gross (net + tax-reversal) against its outstanding."""
+		self.enable_advance_in_separate_party_account()
+		pe = create_payment_entry(
+			payment_type="Receive",
+			party_type="Customer",
+			party="_Test Customer",
+			paid_from="Debtors - _TC",
+			paid_to="_Test Cash - _TC",
+			paid_amount=1547.39,
+		)
+		pe.append(
+			"taxes",
+			{
+				"account_head": "_Test Account Service Tax - _TC",
+				"charge_type": "On Paid Amount",
+				"rate": 17,
+				"tax_amount": 0,
+				"base_tax_amount": 0,
+				"add_deduct_tax": "Add",
+				"included_in_paid_amount": 1,
+				"description": "VAT 17%",
+			},
+		)
+		pe.save()
+		pe.submit()
+
+		pe.reload()
+		self.assertAlmostEqual(flt(pe.unallocated_amount, 2), 1322.56, delta=0.05)
+		self.assertAlmostEqual(flt(pe.unallocated_gross_amount, 2), 1547.39, delta=0.05)
+
+		# Disable rounded_total so SI grand_total stays at 1547.39 — otherwise
+		# it'd round to 1547 and shave 0.39 off the consume.
+		si = create_sales_invoice(rate=1547.39, do_not_save=True)
+		si.disable_rounded_total = 1
+		si.allocate_advances_automatically = 1
+		si.insert()
+		si.submit()
+
+		si.reload()
+		self.assertEqual(len(si.advances), 1)
+		self.assertAlmostEqual(flt(si.advances[0].allocated_amount, 2), 1322.56, delta=0.05)
+		self.assertAlmostEqual(flt(si.advances[0].allocated_gross_amount, 2), 1547.39, delta=0.05)
+		# Outstanding clears: the tax-reversal GL leg added by PE's advance flow
+		# moves the 224.83 of tax from the tax account onto Debtors.
+		self.assertAlmostEqual(flt(si.outstanding_amount, 2), 0.0, delta=0.05)
+
+	def test_partial_allocation_anchors_tax_to_net_paid(self):
+		"""When refs cover only part of the PE's net, each ref gets exactly its own
+		`allocated_amount * tax_rate` — not the full tax pro-rated across refs. The
+		un-attributed remainder stays with the unallocated portion."""
+		self.enable_advance_in_separate_party_account()
+		# Order is worth more than the allocation, so the gross is not capped by it.
+		so = make_sales_order(qty=1, rate=1500.00)
+		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Cash - _TC")
+		# Pay 1547.39 (net 1322.56 + tax 224.83) but only allocate 600 of net to the SO.
+		pe.paid_amount = pe.received_amount = 1547.39
+		pe.references[0].allocated_amount = 600.00
+		pe.append(
+			"taxes",
+			{
+				"account_head": "_Test Account Service Tax - _TC",
+				"charge_type": "On Paid Amount",
+				"rate": 17,
+				"tax_amount": 0,
+				"base_tax_amount": 0,
+				"add_deduct_tax": "Add",
+				"included_in_paid_amount": 1,
+				"description": "VAT 17%",
+			},
+		)
+		pe.save()
+
+		# Anchored share: 224.83 * 600 / 1322.56 = 101.98 → gross 701.98.
+		# Under the old "divide by total_allocated" formula this would have been
+		# 224.83 (full tax) → gross 824.83.
+		self.assertAlmostEqual(flt(pe.references[0].allocated_gross_amount, 2), 701.98, delta=0.05)
+		self.assertNotAlmostEqual(flt(pe.references[0].allocated_gross_amount, 2), 824.83, delta=1.0)
+
+	def test_allocate_amount_to_references_subtracts_included_taxes(self):
+		"""Allocating the gross leaves a non-zero difference_amount, blocking save."""
+		so = make_sales_order(qty=1, rate=119)
+		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Cash - _TC")
+		pe.paid_from = "Debtors - _TC"
+		pe.paid_amount = pe.received_amount = 119
+		pe.append(
+			"taxes",
+			{
+				"account_head": "_Test Account Service Tax - _TC",
+				"charge_type": "On Paid Amount",
+				"rate": 19,
+				"add_deduct_tax": "Add",
+				"included_in_paid_amount": 1,
+				"description": "VAT 19%",
+			},
+		)
+		pe.apply_taxes()
+
+		pe.allocate_amount_to_references(
+			paid_amount=119, paid_amount_change=True, allocate_payment_amount=True
+		)
+
+		self.assertEqual(flt(pe.references[0].allocated_amount, 2), 100.0)
+		pe.save()
+		self.assertEqual(flt(pe.difference_amount, 2), 0.0)
+
+	def test_allocate_amount_to_references_refreshes_stale_taxes(self):
+		"""A shrinking paid_amount leaves stale tax rows; allocation must refresh them."""
+		so = make_sales_order(qty=1, rate=1190)
+		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Cash - _TC")
+		pe.paid_from = "Debtors - _TC"
+		pe.paid_amount = pe.received_amount = 1190
+		pe.append(
+			"taxes",
+			{
+				"account_head": "_Test Account Service Tax - _TC",
+				"charge_type": "On Paid Amount",
+				"rate": 19,
+				"add_deduct_tax": "Add",
+				"included_in_paid_amount": 1,
+				"description": "VAT 19%",
+			},
+		)
+		pe.apply_taxes()
+		self.assertEqual(flt(pe.taxes[0].tax_amount, 2), 190.0)
+
+		pe.paid_amount = pe.received_amount = 1000
+		pe.base_paid_amount = pe.base_received_amount = 1000
+		pe.allocate_amount_to_references(
+			paid_amount=1000, paid_amount_change=True, allocate_payment_amount=True
+		)
+
+		self.assertEqual(flt(pe.taxes[0].tax_amount, 2), 159.66)
+		self.assertEqual(flt(pe.references[0].allocated_amount, 2), 840.34)
+
+	def test_auto_allocation_splits_advance_by_gross(self):
+		"""Two orders paid in full by one advance: each row takes its own gross.
+		Allocating the net pot against gross outstandings emptied it on the first row."""
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
+
+		self.enable_advance_in_separate_party_account()
+		so1 = make_sales_order(qty=1, rate=1190)
+		so2 = make_sales_order(qty=1, rate=595)
+
+		pe = get_payment_entry("Sales Order", so1.name, bank_account="_Test Cash - _TC")
+		pe.append(
+			"references",
+			{
+				"reference_doctype": "Sales Order",
+				"reference_name": so2.name,
+				"total_amount": so2.grand_total,
+				"outstanding_amount": so2.grand_total,
+				"allocated_amount": 0,
+			},
+		)
+		pe.append(
+			"taxes",
+			{
+				"account_head": "_Test Account Service Tax - _TC",
+				"charge_type": "On Paid Amount",
+				"rate": 19,
+				"add_deduct_tax": "Add",
+				"included_in_paid_amount": 1,
+				"description": "VAT 19%",
+			},
+		)
+		pe.paid_amount = pe.received_amount = 1785
+		pe.base_paid_amount = pe.base_received_amount = 1785
+		pe.allocate_amount_to_references(
+			paid_amount=1785, paid_amount_change=True, allocate_payment_amount=True
+		)
+
+		self.assertEqual(flt(pe.references[0].allocated_amount, 2), 1000.0)
+		self.assertEqual(flt(pe.references[1].allocated_amount, 2), 500.0)
+
+		pe.save()
+		self.assertEqual(flt(pe.references[0].allocated_gross_amount, 2), 1190.0)
+		self.assertEqual(flt(pe.references[1].allocated_gross_amount, 2), 595.0)
+		pe.submit()
+
+		# Each order's invoice clears in full: the advance covers its whole gross.
+		for so in (so1, so2):
+			si = make_sales_invoice(so.name)
+			si.allocate_advances_automatically = 1
+			si.save()
+			si.submit()
+			self.assertEqual(flt(si.outstanding_amount, 2), 0.0)
+
+	def test_order_advance_paid_covers_advance_tax(self):
+		"""An order paid in full must not look underpaid before it is invoiced. The tax
+		sits in the tax account until consumption, so the ledger alone is short by it."""
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
+
+		self.enable_advance_in_separate_party_account()
+		so = make_sales_order(qty=1, rate=1190)
+		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Cash - _TC")
+		pe.paid_amount = pe.received_amount = 1190
+		pe.base_paid_amount = pe.base_received_amount = 1190
+		pe.append(
+			"taxes",
+			{
+				"account_head": "_Test Account Service Tax - _TC",
+				"charge_type": "On Paid Amount",
+				"rate": 19,
+				"add_deduct_tax": "Add",
+				"included_in_paid_amount": 1,
+				"description": "VAT 19%",
+			},
+		)
+		pe.allocate_amount_to_references(
+			paid_amount=1190, paid_amount_change=True, allocate_payment_amount=True
+		)
+		pe.save()
+		pe.submit()
+
+		# 1000 net reached the ledger; the 190 of tax is still on the reference row.
+		so.reload()
+		self.assertEqual(flt(so.advance_paid, 2), 1190.0)
+
+		# Consuming it moves the tax into the ledger — it must not be counted twice.
+		si = make_sales_invoice(so.name)
+		si.allocate_advances_automatically = 1
+		si.save()
+		si.submit()
+
+		so.reload()
+		self.assertEqual(flt(so.advance_paid, 2), 1190.0)
+
+	def test_reconciled_advance_does_not_overpay_invoice(self):
+		"""The reconciliation tool allocates the net it sees in the ledger. Grossing that
+		up would credit the party more than the invoice is worth."""
+		advance_account = self.enable_advance_in_separate_party_account()
+
+		pe = create_payment_entry(
+			party_type="Customer",
+			party="_Test Customer",
+			payment_type="Receive",
+			paid_from="Debtors - _TC",
+			paid_to="_Test Cash - _TC",
+			paid_amount=1190,
+		)
+		pe.append(
+			"taxes",
+			{
+				"account_head": "_Test Account Service Tax - _TC",
+				"charge_type": "On Paid Amount",
+				"rate": 19,
+				"add_deduct_tax": "Add",
+				"included_in_paid_amount": 1,
+				"description": "VAT 19%",
+			},
+		)
+		pe.save()
+		pe.submit()
+		self.assertEqual(flt(pe.unallocated_amount, 2), 1000.0)
+		self.assertEqual(flt(pe.unallocated_gross_amount, 2), 1190.0)
+
+		si = create_sales_invoice(qty=1, rate=1000, customer="_Test Customer")
+
+		pr = frappe.get_doc("Payment Reconciliation")
+		pr.company = "_Test Company"
+		pr.party_type = "Customer"
+		pr.party = "_Test Customer"
+		pr.receivable_payable_account = si.debit_to
+		pr.default_advance_account = advance_account
+		pr.payment_name = pe.name
+		pr.invoice_name = si.name
+		pr.get_unreconciled_entries()
+		pr.allocate_entries(
+			frappe._dict(
+				{
+					"invoices": [x.as_dict() for x in pr.get("invoices")],
+					"payments": [x.as_dict() for x in pr.get("payments")],
+				}
+			)
+		)
+		pr.reconcile()
+
+		si.reload()
+		self.assertEqual(flt(si.outstanding_amount, 2), 0.0)
+
+		# 840.34 of net plus its 159.66 of tax settle the invoice; the rest stays an advance.
+		pe.reload()
+		ref = next(r for r in pe.references if r.reference_name == si.name)
+		self.assertEqual(flt(ref.allocated_amount, 2), 840.34)
+		self.assertEqual(flt(ref.allocated_gross_amount, 2), 1000.0)
+		self.assertEqual(flt(pe.unallocated_gross_amount, 2), 190.0)
+
+	def test_reconciled_advance_does_not_overpay_invoice_without_ref_details(self):
+		"""Process Payment Reconciliation skips the reference details update for multi-currency,
+		so the row does not know its outstanding yet. The cap still has to hold."""
+		advance_account = self.enable_advance_in_separate_party_account()
+
+		pe = create_payment_entry(
+			party_type="Customer",
+			party="_Test Customer",
+			payment_type="Receive",
+			paid_from="Debtors - _TC",
+			paid_to="_Test Cash - _TC",
+			paid_amount=1190,
+		)
+		pe.append(
+			"taxes",
+			{
+				"account_head": "_Test Account Service Tax - _TC",
+				"charge_type": "On Paid Amount",
+				"rate": 19,
+				"add_deduct_tax": "Add",
+				"included_in_paid_amount": 1,
+				"description": "VAT 19%",
+			},
+		)
+		pe.save()
+		pe.submit()
+
+		si = create_sales_invoice(qty=1, rate=1000, customer="_Test Customer")
+
+		pr = frappe.get_doc("Payment Reconciliation")
+		pr.company = "_Test Company"
+		pr.party_type = "Customer"
+		pr.party = "_Test Customer"
+		pr.receivable_payable_account = si.debit_to
+		pr.default_advance_account = advance_account
+		pr.payment_name = pe.name
+		pr.invoice_name = si.name
+		pr.get_unreconciled_entries()
+		pr.allocate_entries(
+			frappe._dict(
+				{
+					"invoices": [x.as_dict() for x in pr.get("invoices")],
+					"payments": [x.as_dict() for x in pr.get("payments")],
+				}
+			)
+		)
+		pr.reconcile_allocations(skip_ref_details_update_for_pe=True)
+
+		si.reload()
+		self.assertEqual(flt(si.outstanding_amount, 2), 0.0)
+
+		pe.reload()
+		ref = next(r for r in pe.references if r.reference_name == si.name)
+		self.assertEqual(flt(ref.allocated_amount, 2), 840.34)
+		self.assertEqual(flt(ref.allocated_gross_amount, 2), 1000.0)
+
+	def test_hand_typed_allocation_cannot_overpay_reference_gross(self):
+		"""A net allocation the user types is settled by its gross, so the gross is what has
+		to fit the reference. Without the cap the order ends up over-paid."""
+		self.enable_advance_in_separate_party_account()
+		so = make_sales_order(qty=1, rate=1190)
+
+		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Cash - _TC")
+		pe.append(
+			"taxes",
+			{
+				"account_head": "_Test Account Service Tax - _TC",
+				"charge_type": "On Paid Amount",
+				"rate": 19,
+				"add_deduct_tax": "Add",
+				"included_in_paid_amount": 1,
+				"description": "VAT 19%",
+			},
+		)
+		pe.paid_amount = pe.received_amount = 1785
+		pe.base_paid_amount = pe.base_received_amount = 1785
+		# 1100 net is 1309 gross against an order that only owes 1190.
+		pe.references[0].allocated_amount = 1100
+		pe.save()
+
+		ref = pe.references[0]
+		self.assertEqual(flt(ref.allocated_gross_amount, 2), 1190.0)
+		self.assertEqual(flt(ref.allocated_amount, 2), 1000.0)
+
+	def test_larger_invoice_consumes_full_advance_gross(self):
+		"""An invoice bigger than the advance must take the whole gross. Capping
+		against the leftover outstanding (already net of this advance) would
+		under-consume the deposit."""
+		self.enable_advance_in_separate_party_account()
+		pe = create_payment_entry(
+			party_type="Customer",
+			party="_Test Customer",
+			payment_type="Receive",
+			paid_from="Debtors - _TC",
+			paid_to="_Test Cash - _TC",
+			paid_amount=1190,
+		)
+		pe.append(
+			"taxes",
+			{
+				"account_head": "_Test Account Service Tax - _TC",
+				"charge_type": "On Paid Amount",
+				"rate": 19,
+				"add_deduct_tax": "Add",
+				"included_in_paid_amount": 1,
+				"description": "VAT 19%",
+			},
+		)
+		pe.save()
+		pe.submit()
+
+		si = create_sales_invoice(qty=1, rate=1428, customer="_Test Customer", do_not_save=True)
+		si.disable_rounded_total = 1
+		si.allocate_advances_automatically = 1
+		si.insert()
+		si.submit()
+
+		si.reload()
+		self.assertEqual(flt(si.advances[0].allocated_amount, 2), 1000.0)
+		self.assertEqual(flt(si.advances[0].allocated_gross_amount, 2), 1190.0)
+		self.assertEqual(flt(si.outstanding_amount, 2), 238.0)
+
+		pe.reload()
+		ref = next(r for r in pe.references if r.reference_name == si.name)
+		self.assertEqual(flt(ref.allocated_amount, 2), 1000.0)
+		self.assertEqual(flt(ref.allocated_gross_amount, 2), 1190.0)
+
+	def test_advance_exchange_gain_loss_follows_gross(self):
+		"""The party leg clears the invoice by the gross, so the rate difference must be
+		booked on the gross or the receivable keeps a company-currency residue."""
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
+
+		self.enable_advance_in_separate_party_account(account_currency="USD")
+		so = make_sales_order(
+			customer="_Test Customer USD", currency="USD", qty=1, rate=1190, do_not_save=True
+		)
+		so.conversion_rate = so.plc_conversion_rate = 82.5
+		so.insert()
+		so.submit()
+
+		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Bank USD - _TC")
+		pe.reference_no, pe.reference_date = "FX-GROSS-1", nowdate()
+		pe.source_exchange_rate = pe.target_exchange_rate = 82.5
+		pe.paid_amount = pe.received_amount = 1190
+		pe.references[0].allocated_amount = 1000
+		pe.append(
+			"taxes",
+			{
+				"account_head": "_Test Account Service Tax - _TC",
+				"charge_type": "On Paid Amount",
+				"rate": 19,
+				"add_deduct_tax": "Add",
+				"included_in_paid_amount": 1,
+				"description": "VAT 19%",
+			},
+		)
+		pe.save()
+		pe.submit()
+
+		si = make_sales_invoice(so.name)
+		si.conversion_rate = si.plc_conversion_rate = 85.0
+		si.allocate_advances_automatically = 1
+		si.save()
+		si.submit()
+
+		si.reload()
+		self.assertEqual(flt(si.outstanding_amount, 2), 0.0)
+		# 1190 USD * (85.0 - 82.5); on the net it would have been 2500.00, leaving 475 behind.
+		self.assertEqual(flt(si.advances[0].exchange_gain_loss, 2), -2975.0)
+
+		# Receivable is flat in both currencies once the gain/loss journal is in.
+		balance = frappe.db.sql(
+			"""SELECT sum(debit - credit), sum(debit_in_account_currency - credit_in_account_currency)
+			FROM `tabGL Entry`
+			WHERE account = %s AND party = %s AND is_cancelled = 0""",
+			(si.debit_to, si.customer),
+		)[0]
+		self.assertEqual(flt(balance[0], 2), 0.0)
+		self.assertEqual(flt(balance[1], 2), 0.0)
 
 	def test_payment_entry_against_pi(self):
 		pi = make_purchase_invoice(
