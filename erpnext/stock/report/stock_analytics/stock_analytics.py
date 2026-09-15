@@ -270,7 +270,7 @@ def get_chart_data(period_columns):
 def get_items(filters):
 	"Get items based on item code, item group or brand."
 	if item_code := filters.get("item_code"):
-		return [item_code]
+		return [item_code] if isinstance(item_code, str) else list(item_code)
 	else:
 		item_filters = {"is_stock_item": 1}
 		if item_group := filters.get("item_group"):
