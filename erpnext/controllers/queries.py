@@ -599,7 +599,7 @@ def get_batch_no(doctype: str, txt: str, searchfield: str, start: int, page_len:
 	if not filtered_batches:
 		return []
 	numbers = dict(
-		frappe.get_list(
+		frappe.get_all(
 			"Batch",
 			filters={"name": ("in", [row[0] for row in filtered_batches]), "item": filters.get("item_code")},
 			fields=["name", "batch_id"],
