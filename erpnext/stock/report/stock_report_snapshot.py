@@ -328,4 +328,5 @@ LIVE_TABLES = {
 		"name",
 		{"name": "string", "lft": "int64", "rgt": "int64", "warehouse_type": "string"},
 	),
+	"Batch": LiveTable("batch_no", "name", {"name": "string", "use_batchwise_valuation": "int64"}),
 }

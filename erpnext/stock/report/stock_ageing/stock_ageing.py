@@ -9,6 +9,7 @@ import frappe
 from frappe import _
 from frappe.query_builder.functions import Abs, Count
 from frappe.utils import cint, date_diff, flt, get_datetime
+from pypika.queries import QueryBuilder
 
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
@@ -547,7 +548,7 @@ class FIFOSlots:
 
 		query = self._apply_filter(query, sle, "item_code")
 
-		for batch_no, use_batchwise_valuation in query.run():
+		for batch_no, use_batchwise_valuation in self._run_query(query):
 			self.batchwise_valuation_by_batch[batch_no] = use_batchwise_valuation
 
 	def _get_item_valuation_method(self, item_code: str) -> str:
@@ -582,7 +583,7 @@ class FIFOSlots:
 
 		# items with no item-level method share the company/settings default; resolve it once
 		default_method = None
-		for item_code, valuation_method in query.run():
+		for item_code, valuation_method in self._run_query(query):
 			if not valuation_method:
 				if default_method is None:
 					default_method = get_valuation_method(item_code, company)
@@ -1050,7 +1051,17 @@ class FIFOSlots:
 
 		return item_aggregated_data
 
+	def _run_query(self, query, **kwargs):
+		return query.run(**kwargs)
+
 	def _get_stock_ledger_entries(self) -> Iterator[dict]:
+		# postgres server-side (named) cursors can't run nested queries mid-iteration, which
+		# _process_stock_ledger_entry needs; fall back to a buffered fetch there. MariaDB streams.
+		return self._run_query(
+			self._get_stock_ledger_query(), as_dict=True, as_iterator=frappe.db.db_type != "postgres"
+		)
+
+	def _get_stock_ledger_query(self) -> QueryBuilder:
 		sle = frappe.qb.DocType("Stock Ledger Entry")
 		item = self._get_item_query()  # used as derived table in sle query
 		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59")
@@ -1100,11 +1111,7 @@ class FIFOSlots:
 			if warehouses:
 				sle_query = sle_query.where(sle.warehouse.isin(warehouses))
 
-		sle_query = sle_query.orderby(sle.posting_datetime, sle.creation)
-
-		# postgres server-side (named) cursors can't run nested queries mid-iteration, which
-		# _process_stock_ledger_entry needs; fall back to a buffered fetch there. MariaDB streams.
-		return sle_query.run(as_dict=True, as_iterator=frappe.db.db_type != "postgres")
+		return sle_query.orderby(sle.posting_datetime, sle.creation)
 
 	def _get_bundle_wise_serial_nos(self) -> dict:
 		bundle = frappe.qb.DocType("Serial and Batch Bundle")
@@ -1232,7 +1239,7 @@ class FIFOSlots:
 			.groupby(doctype.voucher_detail_no)
 		)
 
-		data = query.run(as_dict=True)
+		data = self._run_query(query, as_dict=True)
 		if not data:
 			return
 

@@ -21,6 +21,7 @@ from erpnext.stock.report.stock_ageing.stock_ageing import (
 	get_average_age,
 	normalize_fifo_queue,
 )
+from erpnext.stock.report.stock_report_snapshot import StockReportSnapshot
 from erpnext.stock.utils import add_additional_uom_columns
 
 
@@ -43,6 +44,13 @@ SLEntry = dict[str, Any]
 
 def execute(filters: StockBalanceFilter | None = None):
 	return StockBalanceReport(filters).run()
+
+
+def execute_snapshot_report(filters):
+	from erpnext.stock.report.stock_balance.stock_balance_snapshot import StockBalanceSnapshotReport
+
+	with StockReportSnapshot("Stock Balance", filters) as snapshot:
+		return StockBalanceSnapshotReport(filters, snapshot).run()
 
 
 class StockBalanceReport:
@@ -216,6 +224,9 @@ class StockBalanceReport:
 			self.item_warehouse_map, self.float_precision, self.inventory_dimensions
 		)
 
+	def run_query(self, query, **kwargs):
+		return query.run(**kwargs)
+
 	def prepare_stock_reco_voucher_wise_count(self):
 		self.stock_reco_voucher_wise_count = frappe._dict()
 
@@ -266,7 +277,7 @@ class StockBalanceReport:
 			if childrens:
 				query = query.where(doctype.warehouse.isin(childrens))
 
-		data = query.run(as_dict=True)
+		data = self.run_query(query, as_dict=True)
 		if not data:
 			return
 
@@ -281,10 +292,13 @@ class StockBalanceReport:
 			if sr_item.qty and sr_item.current_qty:
 				self.stock_reco_voucher_wise_count[row.voucher_detail_no] = sr_item.current_qty
 
+	def get_fifo_slots(self):
+		return FIFOSlots(self.filters)
+
 	def prepare_new_data(self):
 		if self.filters.get("show_stock_ageing_data"):
 			self.filters["show_warehouse_wise_stock"] = True
-			item_wise_fifo_queue = FIFOSlots(self.filters).generate()
+			item_wise_fifo_queue = self.get_fifo_slots().generate()
 
 		del self.sle_entries
 
