@@ -1233,6 +1233,10 @@ frappe.form.link_formatters["Project"] = function (value, doc, df) {
  * @returns {string} - The link value with the added title.
  */
 function add_link_title(value, doc, df, title_field) {
+	// self-link to another row (e.g. Employee.reports_to): doc[title_field] is this row's title, not the target's
+	if (df.options && df.options === df.parent && value !== doc.name) {
+		return value;
+	}
 	if (value && doc[title_field]) {
 		if (doc[title_field] !== value && doc[df.fieldname] === value) {
 			return value + ": " + doc[title_field];
