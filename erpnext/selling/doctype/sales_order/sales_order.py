@@ -886,6 +886,41 @@ def update_produced_qty_in_so_item(sales_order, sales_order_item):
 	frappe.db.set_value("Sales Order Item", sales_order_item, "produced_qty", total_produced_qty)
 
 
+def get_produced_serial_nos(sales_order: str, item_code: str) -> list[str]:
+	"""Serial Nos manufactured against the Work Orders of a Sales Order."""
+	work_orders = frappe.get_all(
+		"Work Order",
+		filters={"sales_order": sales_order, "production_item": item_code, "docstatus": 1},
+		pluck="name",
+	)
+
+	if not work_orders:
+		return []
+
+	serial_nos = frappe.get_all(
+		"Serial No", filters={"item_code": item_code, "work_order": ("in", work_orders)}, pluck="name"
+	)
+
+	stock_entries = frappe.get_all(
+		"Stock Entry",
+		filters={"work_order": ("in", work_orders), "purpose": "Manufacture", "docstatus": 1},
+		pluck="name",
+	)
+
+	if stock_entries:
+		serial_nos += frappe.get_all(
+			"Serial No",
+			filters={
+				"item_code": item_code,
+				"reference_doctype": "Stock Entry",
+				"reference_name": ("in", stock_entries),
+			},
+			pluck="name",
+		)
+
+	return list(set(serial_nos))
+
+
 @frappe.whitelist()
 def get_work_order_items(sales_order: str, for_raw_material_request: int = 0):
 	"""Returns items with BOM that already do not have a linked work order"""

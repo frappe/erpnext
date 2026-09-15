@@ -2,10 +2,14 @@
 # License: GNU General Public License v3. See license.txt
 
 
+import json
+from urllib.parse import quote
+
 import frappe
 from frappe import _, bold, throw
 from frappe.query_builder.functions import Sum
 from frappe.utils import cint, flt, get_link_to_form, nowtime
+from frappe.utils.data import get_url_to_list
 
 from erpnext.accounts.party import render_address
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
@@ -67,6 +71,70 @@ class SellingController(StockController):
 		for table_field in ["items", "packed_items"]:
 			if self.get(table_field):
 				self.set_serial_and_batch_bundle(table_field)
+		self.validate_delivery_based_on_produced_serial_no()
+
+	def validate_delivery_based_on_produced_serial_no(self):
+		"""Restrict delivery to Serial Nos produced for the Sales Order, if the Sales Order Item demands it."""
+		if self.doctype not in ("Delivery Note", "Sales Invoice") or self.get("is_return"):
+			return
+
+		if self.doctype == "Sales Invoice" and not self.get("update_stock"):
+			return
+
+		so_details = [d.so_detail for d in self.get("items") if d.get("so_detail")]
+		if not so_details:
+			return
+
+		reserved_so_details = frappe.get_all(
+			"Sales Order Item",
+			filters={"name": ("in", so_details), "ensure_delivery_based_on_produced_serial_no": 1},
+			pluck="name",
+		)
+
+		if not reserved_so_details:
+			return
+
+		from erpnext.selling.doctype.sales_order.sales_order import get_produced_serial_nos
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos as parse_serial_nos
+		from erpnext.stock.serial_batch_bundle import get_serial_nos_from_bundle
+
+		produced_serial_nos_map = {}
+		for d in self.get("items"):
+			sales_order = d.get("against_sales_order") or d.get("sales_order")
+			if not sales_order or d.so_detail not in reserved_so_details:
+				continue
+
+			serial_nos = (
+				get_serial_nos_from_bundle(d.serial_and_batch_bundle)
+				if d.get("serial_and_batch_bundle")
+				else parse_serial_nos(d.get("serial_no"))
+			)
+
+			if not serial_nos:
+				continue
+
+			key = (sales_order, d.item_code)
+			if key not in produced_serial_nos_map:
+				produced_serial_nos_map[key] = get_produced_serial_nos(sales_order, d.item_code)
+
+			produced_serial_nos = produced_serial_nos_map[key]
+			invalid_serial_nos = sorted(set(serial_nos) - set(produced_serial_nos))
+			if not invalid_serial_nos:
+				continue
+
+			active_serial_nos = get_active_serial_nos(produced_serial_nos, d.warehouse)
+
+			throw(
+				_("Row #{0}: The following Serial Nos are not produced against Sales Order {1}:").format(
+					d.idx, get_link_to_form("Sales Order", sales_order)
+				)
+				+ "<br><br><ul><li>"
+				+ "</li><li>".join(invalid_serial_nos)
+				+ "</li></ul>"
+				+ get_produced_serial_nos_message(produced_serial_nos, active_serial_nos, d.warehouse),
+				title=_("Invalid Serial No"),
+				primary_action=get_produced_serial_nos_action(active_serial_nos),
+			)
 
 	def validate_standalone_serial_nos_customer(self):
 		if not self.is_return or self.return_against:
@@ -1132,6 +1200,46 @@ class SellingController(StockController):
 		pick_lists = {row.against_pick_list for row in self.items if row.against_pick_list}
 		for pick_list in pick_lists:
 			update_pick_list_status(pick_list)
+
+
+def get_active_serial_nos(serial_nos: list[str], warehouse: str | None = None) -> list[str]:
+	if not serial_nos:
+		return []
+
+	filters = {"name": ("in", serial_nos), "status": "Active"}
+	if warehouse:
+		filters["warehouse"] = warehouse
+
+	return frappe.get_all("Serial No", filters=filters, pluck="name")
+
+
+def get_produced_serial_nos_message(
+	serial_nos: list[str], active_serial_nos: list[str], warehouse: str | None = None
+) -> str:
+	if not serial_nos:
+		return _("No Serial No has been produced against this Sales Order yet.")
+
+	if not active_serial_nos:
+		return _("None of the {0} Serial Nos produced against this Sales Order are available in {1}.").format(
+			bold(len(serial_nos)), bold(warehouse)
+		)
+
+	return _(
+		"Please pick from the {0} Serial Nos produced against this Sales Order that are available in {1}."
+	).format(bold(len(active_serial_nos)), bold(warehouse))
+
+
+def get_produced_serial_nos_action(active_serial_nos: list[str]) -> dict | None:
+	if not active_serial_nos:
+		return None
+
+	name_filter = quote(json.dumps(["in", sorted(active_serial_nos)], separators=(",", ":")))
+
+	return {
+		"label": _("Show produced Serial Nos"),
+		"client_action": "window.open",
+		"args": f"{get_url_to_list('Serial No')}?name={name_filter}",
+	}
 
 
 def set_default_income_account_for_item(obj):
