@@ -11,11 +11,17 @@ from erpnext.accounts.report.utils import validate_mandatory_date_range
 from erpnext.deprecation_dumpster import deprecated
 from erpnext.stock.doctype.stock_closing_entry.stock_closing_entry import StockClosing
 from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
+from erpnext.stock.report.utils import prepare_serial_batch_report
 
 SLE_COUNT_LIMIT = 100_000
 
 
 def execute(filters=None):
+	data = get_data(filters)
+	return prepare_serial_batch_report(get_columns(filters), data)
+
+
+def get_data(filters=None):
 	if not filters:
 		filters = {}
 
@@ -35,7 +41,6 @@ def execute(filters=None):
 
 	float_precision = cint(frappe.db.get_default("float_precision")) or 3
 
-	columns = get_columns(filters)
 	item_map = get_item_details(filters)
 	iwb_map = get_item_warehouse_batch_map(filters, float_precision)
 	reserved_stock = get_reserved_stock(filters, iwb_map)
@@ -68,7 +73,7 @@ def execute(filters=None):
 							]
 						)
 
-	return columns, data
+	return data
 
 
 def get_columns(filters):

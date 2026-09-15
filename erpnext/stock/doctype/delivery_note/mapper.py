@@ -18,6 +18,8 @@ from erpnext.controllers.accounts_controller import get_taxes_and_charges, merge
 from erpnext.controllers.item_close import is_bundle_of_closed_row
 from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.stock.doctype.packed_item.packed_item import is_product_bundle
+from erpnext.stock.serial_batch_bundle import get_serial_batch_list_from_item
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 
 def get_invoiced_qty_map(delivery_note: str) -> dict:
@@ -243,7 +245,9 @@ def make_installation_note(
 ):
 	def update_item(obj, target, source_parent):
 		target.qty = flt(obj.qty) - flt(obj.installed_qty)
-		target.serial_no = obj.serial_no
+		serial_ids = get_serial_batch_list_from_item(obj)[0]
+		target.serial_no = "\n".join(SerialBatchIdentity("Serial No").get_numbers(obj.item_code, serial_ids))
+		target.serial_and_batch_bundle = None
 
 	doclist = get_mapped_doc(
 		"Delivery Note",

@@ -1,6 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from unittest.mock import patch
 
 from frappe.permissions import add_user_permission, remove_user_permission
 from frappe.utils import add_days, cstr, flt, get_time, getdate, nowtime, today
@@ -918,13 +919,21 @@ class TestStockEntry(ERPNextTestSuite):
 	def test_serial_no_transfer_in(self):
 		serial_nos = ["ABCD1", "EFGH1"]
 		for serial_no in serial_nos:
-			if not frappe.db.exists("Serial No", serial_no):
+			if not frappe.db.exists(
+				"Serial No", {"item_code": "_Test Serialized Item", "serial_no": serial_no}
+			):
 				doc = frappe.new_doc("Serial No")
 				doc.serial_no = serial_no
 				doc.item_code = "_Test Serialized Item"
 				doc.company = "_Test Company"
 				doc.insert(ignore_permissions=True)
 
+		serial_nos = [
+			frappe.db.get_value(
+				"Serial No", {"item_code": "_Test Serialized Item", "serial_no": number}, "name"
+			)
+			for number in serial_nos
+		]
 		se = frappe.copy_doc(self.globalTestRecords["Stock Entry"][0])
 		se.get("items")[0].item_code = "_Test Serialized Item"
 		se.get("items")[0].qty = 2
@@ -950,11 +959,11 @@ class TestStockEntry(ERPNextTestSuite):
 		se.insert()
 		se.submit()
 
-		self.assertTrue(frappe.db.get_value("Serial No", "ABCD1", "warehouse"))
-		self.assertTrue(frappe.db.get_value("Serial No", "EFGH1", "warehouse"))
+		self.assertTrue(frappe.db.get_value("Serial No", serial_nos[0], "warehouse"))
+		self.assertTrue(frappe.db.get_value("Serial No", serial_nos[1], "warehouse"))
 
 		se.cancel()
-		self.assertFalse(frappe.db.get_value("Serial No", "ABCD1", "warehouse"))
+		self.assertFalse(frappe.db.get_value("Serial No", serial_nos[0], "warehouse"))
 
 	def test_serial_by_series(self):
 		se = make_serialized_item(self)
@@ -969,24 +978,24 @@ class TestStockEntry(ERPNextTestSuite):
 	def test_serial_move(self):
 		se = make_serialized_item(self)
 		serial_no = get_serial_nos_from_bundle(se.get("items")[0].serial_and_batch_bundle)[0]
-		frappe.flags.use_serial_and_batch_fields = True
+		with patch.dict(frappe.flags, {"use_serial_and_batch_fields": True}):
+			se = frappe.copy_doc(self.globalTestRecords["Stock Entry"][0])
+			se.purpose = "Material Transfer"
+			se.get("items")[0].item_code = "_Test Serialized Item With Series"
+			se.get("items")[0].qty = 1
+			se.get("items")[0].transfer_qty = 1
+			se.get("items")[0].serial_no = frappe.db.get_value("Serial No", serial_no, "serial_no")
+			se.get("items")[0].s_warehouse = "_Test Warehouse - _TC"
+			se.get("items")[0].t_warehouse = "_Test Warehouse 1 - _TC"
+			se.set_stock_entry_type()
+			se.insert()
+			se.submit()
+			self.assertTrue(
+				frappe.db.get_value("Serial No", serial_no, "warehouse"), "_Test Warehouse 1 - _TC"
+			)
 
-		se = frappe.copy_doc(self.globalTestRecords["Stock Entry"][0])
-		se.purpose = "Material Transfer"
-		se.get("items")[0].item_code = "_Test Serialized Item With Series"
-		se.get("items")[0].qty = 1
-		se.get("items")[0].transfer_qty = 1
-		se.get("items")[0].serial_no = [serial_no]
-		se.get("items")[0].s_warehouse = "_Test Warehouse - _TC"
-		se.get("items")[0].t_warehouse = "_Test Warehouse 1 - _TC"
-		se.set_stock_entry_type()
-		se.insert()
-		se.submit()
-		self.assertTrue(frappe.db.get_value("Serial No", serial_no, "warehouse"), "_Test Warehouse 1 - _TC")
-
-		se.cancel()
-		self.assertTrue(frappe.db.get_value("Serial No", serial_no, "warehouse"), "_Test Warehouse - _TC")
-		frappe.flags.use_serial_and_batch_fields = False
+			se.cancel()
+			self.assertTrue(frappe.db.get_value("Serial No", serial_no, "warehouse"), "_Test Warehouse - _TC")
 
 	def test_serial_cancel(self):
 		se, serial_nos = self.test_serial_by_series()
@@ -2612,6 +2621,7 @@ class TestStockEntry(ERPNextTestSuite):
 		)
 
 		# Executing an illegal sequence should raise an error
+		batch_no = frappe.db.get_value("Batch", {"item": item_code, "batch_id": batch_no}, "name")
 		sequence_of_entries = [
 			dict(
 				item_code=item_code,
@@ -3113,8 +3123,11 @@ class TestStockEntry(ERPNextTestSuite):
 		self.assertTrue(se.items[0].serial_and_batch_bundle)
 
 		for serial_no in serial_nos:
-			self.assertTrue(frappe.db.exists("Serial No", serial_no))
-			self.assertEqual(frappe.db.get_value("Serial No", serial_no, "status"), "Active")
+			self.assertTrue(frappe.db.exists("Serial No", {"item_code": item.name, "serial_no": serial_no}))
+			self.assertEqual(
+				frappe.db.get_value("Serial No", {"item_code": item.name, "serial_no": serial_no}, "status"),
+				"Active",
+			)
 
 		se1 = make_stock_entry(
 			item_code=item.name,
@@ -3131,8 +3144,11 @@ class TestStockEntry(ERPNextTestSuite):
 		self.assertTrue(se1.items[0].serial_and_batch_bundle)
 
 		for serial_no in serial_nos:
-			self.assertTrue(frappe.db.exists("Serial No", serial_no))
-			self.assertEqual(frappe.db.get_value("Serial No", serial_no, "status"), "Consumed")
+			self.assertTrue(frappe.db.exists("Serial No", {"item_code": item.name, "serial_no": serial_no}))
+			self.assertEqual(
+				frappe.db.get_value("Serial No", {"item_code": item.name, "serial_no": serial_no}, "status"),
+				"Consumed",
+			)
 
 	def test_serial_batch_bundle_type_of_transaction(self):
 		item = make_item(
@@ -3499,7 +3515,7 @@ class TestStockEntry(ERPNextTestSuite):
 				"uom": item_doc.stock_uom,
 				"qty": 1,
 				"use_serial_batch_fields": 1,
-				"serial_no": delivered_serial_no,
+				"serial_no": frappe.db.get_value("Serial No", delivered_serial_no, "serial_no"),
 			},
 		)
 
@@ -4882,7 +4898,7 @@ def initialize_records_for_future_negative_sle_test(
 	from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 	TestBatch.make_batch_item(item_code)
-	make_new_batch(item_code=item_code, batch_id=batch_no)
+	batch = make_new_batch(item_code=item_code, batch_id=batch_no)
 	warehouse_names = [create_warehouse(w) for w in warehouses]
 	create_stock_reconciliation(
 		purpose="Opening Stock",
@@ -4892,7 +4908,7 @@ def initialize_records_for_future_negative_sle_test(
 		warehouse=warehouse_names[0],
 		valuation_rate=100,
 		qty=opening_qty,
-		batch_no=batch_no,
+		batch_no=batch.name,
 	)
 	return warehouse_names
 

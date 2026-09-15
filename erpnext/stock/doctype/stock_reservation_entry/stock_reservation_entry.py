@@ -1977,13 +1977,17 @@ def update_serial_batch_delivered_qty(row, name, is_cancelled=False):
 def get_reserved_materials(voucher_no):
 	doctype = frappe.qb.DocType("Stock Reservation Entry")
 	serial_batch_doc = frappe.qb.DocType("Serial and Batch Entry")
+	serial_no = frappe.qb.DocType("Serial No")
 
 	query = (
 		frappe.qb.from_(doctype)
 		.inner_join(serial_batch_doc)
 		.on(doctype.name == serial_batch_doc.parent)
+		.left_join(serial_no)
+		.on((serial_no.name == serial_batch_doc.serial_no) & (serial_no.item_code == doctype.item_code))
 		.select(
 			serial_batch_doc.serial_no,
+			serial_no.serial_no.as_("serial_number"),
 			serial_batch_doc.batch_no,
 			serial_batch_doc.qty,
 			doctype.item_code,

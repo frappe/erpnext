@@ -4,6 +4,7 @@
 
 import datetime
 import json
+from typing import Any
 
 import frappe
 from frappe import _
@@ -17,9 +18,10 @@ from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_in
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_available_serial_nos
 from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
 from erpnext.stock.serial_batch_bundle import BatchNoValuation, SerialNoValuation
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.valuation import FIFOValuation, LIFOValuation
 
-BarcodeScanResult = dict[str, str | None]
+BarcodeScanResult = dict[str, Any]
 
 
 class InvalidWarehouseCompany(frappe.ValidationError):
@@ -314,7 +316,9 @@ def get_incoming_rate(args: dict | str, raise_error_if_no_rate: bool = True, fal
 
 	elif (args.get("serial_no") or "").strip() and not args.get("serial_and_batch_bundle"):
 		args.actual_qty = args.qty
-		args.serial_nos = get_serial_nos_data(args.get("serial_no"))
+		args.serial_nos = SerialBatchIdentity("Serial No").resolve(
+			args.item_code, get_serial_nos_data(args.serial_no), ignore_permissions=True
+		)
 
 		sn_obj = SerialNoValuation(sle=args, warehouse=args.get("warehouse"), item_code=args.get("item_code"))
 
@@ -597,72 +601,69 @@ def check_pending_reposting(posting_date: str, company: str | None = None, throw
 
 
 @frappe.whitelist()
-def scan_barcode(search_value: str, ctx: dict | str | None = None) -> BarcodeScanResult:
-	def set_cache(data: BarcodeScanResult):
-		frappe.cache().set_value(f"erpnext:barcode_scan:{search_value}", data, expires_in_sec=120)
-		_update_item_info(data, ctx)
+def scan_barcode(
+	search_value: str, ctx: dict | str | None = None, item_code: str | None = None
+) -> BarcodeScanResult:
+	ctx = frappe.parse_json(ctx) or {}
+	candidates = get_barcode_matches(search_value, item_code)
+	for candidate in candidates:
+		_update_item_info(candidate, ctx)
 
-	def get_cache() -> BarcodeScanResult | None:
-		data = frappe.cache().get_value(f"erpnext:barcode_scan:{search_value}")
-		if not data:
-			return
-
-		_update_item_info(data, ctx)
-		return data
-
-	if ctx is None:
-		ctx = frappe._dict()
-
-	if scan_data := get_cache():
-		return scan_data
-
-	# search barcode no
-	barcode_data = frappe.db.get_value(
-		"Item Barcode",
-		{"barcode": search_value},
-		["barcode", "parent as item_code", "uom"],
-		as_dict=True,
-	)
-	if barcode_data:
-		set_cache(barcode_data)
-		return barcode_data
-
-	# search serial no
-	serial_no_data = frappe.db.get_value(
-		"Serial No",
-		search_value,
-		["name as serial_no", "item_code", "batch_no"],
-		as_dict=True,
-	)
-	if serial_no_data:
-		set_cache(serial_no_data)
-		return serial_no_data
-
-	# search batch no
-	batch_no_data = frappe.db.get_value(
-		"Batch",
-		search_value,
-		["name as batch_no", "item as item_code"],
-		as_dict=True,
-	)
-	if batch_no_data:
-		if frappe.get_cached_value("Item", batch_no_data.item_code, "has_serial_no"):
+	if len(candidates) > 1:
+		return {"candidates": candidates}
+	if candidates:
+		candidate = candidates[0]
+		if candidate.get("record_type") == "Batch" and candidate.get("has_serial_no"):
 			frappe.throw(
 				_(
 					"Batch No {0} is linked with Item {1} which has serial no. Please scan serial no instead."
-				).format(search_value, batch_no_data.item_code)
+				).format(
+					frappe.utils.escape_html(candidate["batch_id"]),
+					frappe.utils.escape_html(candidate["item_code"]),
+				)
 			)
-
-		set_cache(batch_no_data)
-		return batch_no_data
+		return candidate
 
 	warehouse = frappe.get_cached_value("Warehouse", search_value, ("name", "disabled"), as_dict=True)
 	if warehouse and not warehouse.disabled:
-		warehouse_data = {"warehouse": warehouse.name}
-		set_cache(warehouse_data)
-		return warehouse_data
+		return {"warehouse": warehouse.name}
 
 	return {}
+
+
+def get_barcode_matches(search_value, item_code=None):
+	cache_key = f"erpnext:item_barcode_scan:{search_value}"
+	barcode = frappe.cache().get_value(cache_key)
+	if not barcode:
+		barcode = frappe.db.get_value(
+			"Item Barcode", {"barcode": search_value}, ["barcode", "parent as item_code", "uom"], as_dict=True
+		)
+		if barcode:
+			frappe.cache().set_value(cache_key, barcode, expires_in_sec=120)
+
+	candidates = []
+	if barcode and (item_code is None or barcode.get("item_code") == item_code):
+		candidates.append({**barcode, "record_type": "Item Barcode"})
+
+	for doctype, fields in (
+		("Serial No", ["name as serial_no_id", "serial_no", "item_code", "batch_no"]),
+		("Batch", ["name as batch_no", "batch_id", "item as item_code"]),
+	):
+		if not frappe.has_permission(doctype, "read"):
+			continue
+		matches = SerialBatchIdentity(doctype).get_records(
+			item_code, [search_value], fields, ignore_permissions=False
+		)
+		candidates.extend({**row, "record_type": doctype} for row in matches)
+
+	if not candidates:
+		return []
+	allowed_items = set(
+		frappe.get_list(
+			"Item", filters={"name": ("in", [row["item_code"] for row in candidates])}, pluck="name"
+		)
+	)
+	return [row for row in candidates if row["item_code"] in allowed_items]
 
 
 def _update_item_info(scan_result: dict[str, str | None], ctx: dict | None = None) -> dict[str, str | None]:

@@ -3,10 +3,12 @@ from collections import defaultdict
 import frappe
 from frappe import _
 
+from erpnext.stock.report.utils import prepare_serial_batch_report
+
 
 def execute(filters=None):
 	filters = frappe._dict(filters or {})
-	return get_columns(), get_data(filters)
+	return prepare_serial_batch_report(get_columns(), get_data(filters))
 
 
 def get_data(filters):

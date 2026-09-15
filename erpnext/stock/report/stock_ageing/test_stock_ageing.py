@@ -534,7 +534,7 @@ class TestStockAgeing(ERPNextTestSuite):
 		batch_no = "SA-RECO-REVALUE-BATCH"
 		if not frappe.db.exists("Batch", batch_no):
 			frappe.get_doc({"doctype": "Batch", "batch_id": batch_no, "item": item_code}).insert(
-				ignore_permissions=True
+				ignore_permissions=True, set_name=batch_no
 			)
 		frappe.db.set_value("Batch", batch_no, "use_batchwise_valuation", 1)
 
@@ -587,7 +587,7 @@ class TestStockAgeing(ERPNextTestSuite):
 		batch_no = "SA-PARTIAL-RECO-BATCH"
 		if not frappe.db.exists("Batch", batch_no):
 			frappe.get_doc({"doctype": "Batch", "batch_id": batch_no, "item": item_code}).insert(
-				ignore_permissions=True
+				ignore_permissions=True, set_name=batch_no
 			)
 		frappe.db.set_value("Batch", batch_no, "use_batchwise_valuation", 1)
 
@@ -640,7 +640,7 @@ class TestStockAgeing(ERPNextTestSuite):
 		batch_no = "SA-POOL-SPLIT-BATCH"
 		if not frappe.db.exists("Batch", batch_no):
 			frappe.get_doc({"doctype": "Batch", "batch_id": batch_no, "item": item_code}).insert(
-				ignore_permissions=True
+				ignore_permissions=True, set_name=batch_no
 			)
 		frappe.db.set_value("Batch", batch_no, "use_batchwise_valuation", 1)
 
@@ -690,7 +690,7 @@ class TestStockAgeing(ERPNextTestSuite):
 
 		batch_no = "SA-WAREHOUSE-SCOPE-BATCH"
 		frappe.get_doc({"doctype": "Batch", "batch_id": batch_no, "item": item_code}).insert(
-			ignore_permissions=True, ignore_if_duplicate=True
+			ignore_permissions=True, ignore_if_duplicate=True, set_name=batch_no
 		)
 		frappe.db.set_value("Batch", batch_no, "use_batchwise_valuation", 1)
 
@@ -799,7 +799,7 @@ class TestStockAgeing(ERPNextTestSuite):
 		newer_batch = "SA-LIFO-NEWER"
 		for batch_id in (older_batch, newer_batch):
 			frappe.get_doc({"doctype": "Batch", "batch_id": batch_id, "item": item_code}).insert(
-				ignore_permissions=True, ignore_if_duplicate=True
+				ignore_permissions=True, ignore_if_duplicate=True, set_name=batch_id
 			)
 			frappe.db.set_value("Batch", batch_id, "use_batchwise_valuation", 0)
 
@@ -851,7 +851,7 @@ class TestStockAgeing(ERPNextTestSuite):
 		batch_no = "SA-POOL-RESIDUAL-BATCH"
 		if not frappe.db.exists("Batch", batch_no):
 			frappe.get_doc({"doctype": "Batch", "batch_id": batch_no, "item": item_code}).insert(
-				ignore_permissions=True
+				ignore_permissions=True, set_name=batch_no
 			)
 		frappe.db.set_value("Batch", batch_no, "use_batchwise_valuation", 1)
 
@@ -898,7 +898,7 @@ class TestStockAgeing(ERPNextTestSuite):
 		batch_no = "SA-POOL-REBALANCE-BATCH"
 		if not frappe.db.exists("Batch", batch_no):
 			frappe.get_doc({"doctype": "Batch", "batch_id": batch_no, "item": item_code}).insert(
-				ignore_permissions=True
+				ignore_permissions=True, set_name=batch_no
 			)
 		frappe.db.set_value("Batch", batch_no, "use_batchwise_valuation", 1)
 
@@ -1702,7 +1702,7 @@ class TestStockAgeing(ERPNextTestSuite):
 						"batch_id": batch_id,
 						"item": item_code,
 					}
-				).insert(ignore_permissions=True)
+				).insert(ignore_permissions=True, set_name=batch_id)
 
 			frappe.db.set_value("Batch", batch_id, "use_batchwise_valuation", use_batchwise_valuation)
 
@@ -1810,7 +1810,7 @@ class TestStockAgeing(ERPNextTestSuite):
 						"batch_id": batch_id,
 						"item": item_code,
 					}
-				).insert(ignore_permissions=True)
+				).insert(ignore_permissions=True, set_name=batch_id)
 
 			frappe.db.set_value("Batch", batch_id, "use_batchwise_valuation", 1)
 
@@ -1904,7 +1904,7 @@ class TestStockAgeing(ERPNextTestSuite):
 					"batch_id": batch_no,
 					"item": item_code,
 				}
-			).insert(ignore_permissions=True)
+			).insert(ignore_permissions=True, set_name=batch_no)
 
 		frappe.db.set_value("Batch", batch_no, "use_batchwise_valuation", 1)
 
@@ -1985,7 +1985,7 @@ class TestStockAgeing(ERPNextTestSuite):
 						"batch_id": batch_no,
 						"item": item_code,
 					}
-				).insert(ignore_permissions=True)
+				).insert(ignore_permissions=True, set_name=batch_no)
 
 			frappe.db.set_value("Batch", batch_no, "use_batchwise_valuation", 1)
 
@@ -2074,7 +2074,7 @@ class TestStockAgeing(ERPNextTestSuite):
 					"batch_id": batch_no,
 					"item": item_code,
 				}
-			).insert(ignore_permissions=True)
+			).insert(ignore_permissions=True, set_name=batch_no)
 
 		frappe.db.set_value("Batch", batch_no, "use_batchwise_valuation", 1)
 

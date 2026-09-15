@@ -69,7 +69,7 @@ erpnext.PointOfSale.ItemSelector = class {
 			});
 	}
 
-	get_items({ start = 0, page_length = 40, search_term = "" }) {
+	get_items({ start = 0, page_length = 40, search_term = "", item_code, record_type }) {
 		const doc = this.events.get_frm().doc;
 		const price_list = (doc && doc.selling_price_list) || this.price_list;
 		let { item_group, pos_profile } = this;
@@ -77,7 +77,16 @@ erpnext.PointOfSale.ItemSelector = class {
 		return frappe.call({
 			method: "erpnext.selling.page.point_of_sale.point_of_sale.get_items",
 			freeze: true,
-			args: { start, page_length, price_list, item_group, search_term, pos_profile },
+			args: {
+				start,
+				page_length,
+				price_list,
+				item_group,
+				search_term,
+				pos_profile,
+				item_code,
+				record_type,
+			},
 		});
 	}
 
@@ -432,46 +441,39 @@ erpnext.PointOfSale.ItemSelector = class {
 		});
 	}
 
-	filter_items({ search_term = "" } = {}) {
+	async filter_items({ search_term = "" } = {}) {
 		this.start_item_loading_animation();
-
 		const selling_price_list = this.events.get_frm().doc.selling_price_list;
+		this.search_index = this.search_index || {};
+		const cache = (this.search_index[selling_price_list] ||= {});
+		const cache_key = search_term.toLowerCase();
 
-		if (search_term) {
-			search_term = search_term.toLowerCase();
-
-			// memoize
-			this.search_index = this.search_index || {};
-			this.search_index[selling_price_list] = this.search_index[selling_price_list] || {};
-			if (this.search_index[selling_price_list][search_term]) {
-				const items = this.search_index[selling_price_list][search_term];
-				this.items = items;
-				this.render_item_list(items);
-				this.auto_add_item &&
-					this.search_field.$input[0].value &&
-					this.items.length == 1 &&
-					this.add_filtered_item_to_cart();
-				return;
-			}
-		}
-
-		this.get_items({ search_term })
-			.then(({ message }) => {
-				// eslint-disable-next-line no-unused-vars
-				const { items, serial_no, batch_no, barcode } = message;
-				if (search_term && !barcode) {
-					this.search_index[selling_price_list][search_term] = items;
+		try {
+			let items = search_term && cache[cache_key];
+			if (!items) {
+				let { message } = await this.get_items({ search_term });
+				if (message.candidates?.length) {
+					this.items = [];
+					this.$items_container.empty();
+					const selected = await erpnext.utils.BarcodeScanner.select_scan_match(message.candidates);
+					if (!selected) return;
+					({ message } = await this.get_items({
+						search_term,
+						item_code: selected.item_code,
+						record_type: selected.record_type,
+					}));
 				}
-				this.items = items;
-				this.render_item_list(items);
-				this.auto_add_item &&
-					this.search_field.$input[0].value &&
-					this.items.length == 1 &&
-					this.add_filtered_item_to_cart();
-			})
-			.always(() => {
-				this.stop_item_loading_animation();
-			});
+				items = message.items || [];
+				if (search_term && !message.barcode_scan && !message.candidates) cache[cache_key] = items;
+			}
+			this.items = items;
+			this.render_item_list(items);
+			if (this.auto_add_item && this.search_field.get_value() && items.length === 1) {
+				this.add_filtered_item_to_cart();
+			}
+		} finally {
+			this.stop_item_loading_animation();
+		}
 	}
 
 	start_item_loading_animation() {

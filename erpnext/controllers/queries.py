@@ -585,7 +585,7 @@ def get_delivery_notes_to_be_billed(
 def get_batch_no(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
 	doctype = "Batch"
 	meta = frappe.get_meta(doctype, cached=True)
-	searchfields = meta.get_search_fields()
+	searchfields = [field for field in meta.get_search_fields() if field not in ("name", "batch_id")]
 	page_len = 300
 
 	batches = get_batches_from_stock_ledger_entries(searchfields, txt, filters, start, page_len)
@@ -596,26 +596,38 @@ def get_batch_no(doctype: str, txt: str, searchfield: str, start: int, page_len:
 	if filters.get("is_inward"):
 		filtered_batches.extend(get_empty_batches(filters, start, page_len, filtered_batches, txt))
 
-	return filtered_batches
+	if not filtered_batches:
+		return []
+	numbers = dict(
+		frappe.get_all(
+			"Batch",
+			filters={"name": ("in", [row[0] for row in filtered_batches]), "item": filters.get("item_code")},
+			fields=["name", "batch_id"],
+			as_list=True,
+		)
+	)
+	return [(name, numbers[name], *details) for name, *details in filtered_batches if name in numbers]
 
 
 def get_empty_batches(filters, start, page_len, filtered_batches=None, txt=None):
+	batch = frappe.qb.DocType("Batch")
 	query_filter = {"item": filters.get("item_code"), "disabled": 0}
-	if txt:
-		query_filter["name"] = ("like", f"%{txt}%")
 
 	exclude_batches = [batch[0] for batch in filtered_batches] if filtered_batches else []
 	if exclude_batches:
 		query_filter["name"] = ("not in", exclude_batches)
 
-	return frappe.get_all(
+	query = frappe.qb.get_query(
 		"Batch",
 		fields=["name", "batch_qty"],
 		filters=query_filter,
-		limit_start=start,
-		limit_page_length=page_len,
-		as_list=1,
+		order_by="creation desc",
+		offset=start,
+		limit=page_len,
 	)
+	if txt:
+		query = query.where(batch.batch_id.like(f"%{txt}%") | batch.name.like(f"%{txt}%"))
+	return query.run(as_list=True)
 
 
 def get_filterd_batches(data):
@@ -687,7 +699,7 @@ def get_batches_from_stock_ledger_entries(searchfields, txt, filters, start=0, p
 		query = query.select(batch_table[field])
 
 	if txt:
-		txt_condition = batch_table.name.like(f"%{txt}%")
+		txt_condition = batch_table.batch_id.like(f"%{txt}%")
 		for field in [*searchfields, "name"]:
 			txt_condition |= batch_table[field].like(f"%{txt}%")
 
@@ -753,7 +765,7 @@ def get_batches_from_serial_and_batch_bundle(searchfields, txt, filters, start=0
 		bundle_query = bundle_query.select(batch_table[field])
 
 	if txt:
-		txt_condition = batch_table.name.like(f"%{txt}%")
+		txt_condition = batch_table.batch_id.like(f"%{txt}%")
 		for field in [*searchfields, "name"]:
 			txt_condition |= batch_table[field].like(f"%{txt}%")
 
@@ -1016,20 +1028,16 @@ def get_doctype_wise_filters(filters):
 @frappe.validate_and_sanitize_search_inputs
 def get_batch_numbers(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
 	batch = frappe.qb.DocType("Batch")
-	query = (
-		frappe.qb.from_(batch)
-		.select(batch.batch_id)
-		.where(
-			(batch.disabled == 0)
-			& (batch.expiry_date.isnull() | (batch.expiry_date >= today()))
-			& batch.name.like(f"%{txt}%")
-		)
+	query = frappe.qb.get_query("Batch", fields=["name", "batch_id", "item"], ignore_permissions=False).where(
+		(batch.disabled == 0)
+		& (batch.expiry_date.isnull() | (batch.expiry_date >= today()))
+		& (batch.batch_id.like(f"%{txt}%") | batch.name.like(f"%{txt}%"))
 	)
 
 	if filters and filters.get("item"):
 		query = query.where(batch.item == filters.get("item"))
 
-	return query.orderby(batch.batch_id).limit(page_len).offset(start).run()
+	return query.orderby(batch.batch_id, batch.name).limit(page_len).offset(start).run()
 
 
 @frappe.whitelist()

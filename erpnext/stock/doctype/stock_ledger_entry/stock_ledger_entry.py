@@ -17,6 +17,7 @@ from erpnext.controllers.item_variant import ItemTemplateCannotHaveStock
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos as get_parsed_serial_nos
 from erpnext.stock.serial_batch_bundle import SerialBatchBundle, get_serial_nos
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 
 class StockFreezeError(frappe.ValidationError):
@@ -210,7 +211,8 @@ class StockLedgerEntry(Document):
 			if mismatches:
 				frappe.throw(
 					_("Serial No {0} is not available in the selected inventory dimensions: {1}").format(
-						frappe.bold(serial_no), frappe.bold(", ".join(mismatches))
+						frappe.bold(SerialBatchIdentity("Serial No").get_label(serial_no)),
+						frappe.bold(", ".join(mismatches)),
 					),
 					title=_("Incorrect Inventory Dimension"),
 					exc=SerialNoInventoryDimensionError,
