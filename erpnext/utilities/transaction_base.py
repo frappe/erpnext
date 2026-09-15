@@ -387,7 +387,6 @@ class TransactionBase(StatusUpdater):
 		self.calculate_taxes_and_totals()
 
 	def get_selected_item_row(self, parentfield: str, item_idx: int):
-		"""Row at `item_idx` in the given child table, or None if it is no longer there."""
 		if not self.get_table_field_doctype(parentfield):
 			frappe.throw(_("{0} is not a child table of {1}").format(parentfield, self.doctype))
 
