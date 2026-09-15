@@ -2510,6 +2510,8 @@ def get_available_serial_nos(kwargs):
 
 	filters = {"item_code": kwargs.item_code}
 
+	only_serial_nos = get_produced_serial_nos_to_pick(kwargs)
+
 	# ignore_warehouse is used for backdated stock transactions
 	# There might be chances that the serial no not exists in the warehouse during backdated stock transactions
 	if not kwargs.get("ignore_warehouse"):
@@ -2531,6 +2533,9 @@ def get_available_serial_nos(kwargs):
 			kwargs, reserved_entries, reserved_voucher_details
 		):
 			filters["name"] = ("in", reserved_serial_nos)
+			if not restrict_to_serial_nos(filters, only_serial_nos):
+				return []
+
 			return get_serial_nos_based_on_filters(filters, fields, order_by, kwargs)
 
 		# Check if serial nos are reserved for other vouchers then ignore those serial nos
@@ -2570,7 +2575,42 @@ def get_available_serial_nos(kwargs):
 
 		filters["batch_no"] = ("in", batches)
 
+	if not restrict_to_serial_nos(filters, only_serial_nos):
+		return []
+
 	return get_serial_nos_based_on_filters(filters, fields, order_by, kwargs)
+
+
+def get_produced_serial_nos_to_pick(kwargs):
+	sales_order, sales_order_item = kwargs.get("sales_order"), kwargs.get("sales_order_item")
+	if not sales_order or not sales_order_item:
+		return None
+
+	if not frappe.db.get_value(
+		"Sales Order Item", sales_order_item, "ensure_delivery_based_on_produced_serial_no"
+	):
+		return None
+
+	from erpnext.selling.doctype.sales_order.sales_order import get_produced_serial_nos
+
+	return get_produced_serial_nos(sales_order, kwargs.item_code)
+
+
+def restrict_to_serial_nos(filters, only_serial_nos):
+	if only_serial_nos is None:
+		return True
+
+	condition = filters.get("name")
+	if condition and condition[0] == "in":
+		only_serial_nos = [sn for sn in condition[1] if sn in set(only_serial_nos)]
+	elif condition and condition[0] == "not in":
+		only_serial_nos = [sn for sn in only_serial_nos if sn not in set(condition[1])]
+
+	if not only_serial_nos:
+		return False
+
+	filters["name"] = ("in", only_serial_nos)
+	return True
 
 
 def get_serial_nos_based_on_filters(filters, fields, order_by, kwargs):
