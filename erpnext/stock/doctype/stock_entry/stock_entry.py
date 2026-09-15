@@ -34,7 +34,7 @@ from erpnext.stock.get_item_details import (
 	get_default_cost_center,
 )
 from erpnext.stock.stock_ledger import get_previous_sle, get_valuation_rate
-from erpnext.stock.utils import _get_incoming_rate, get_combine_datetime
+from erpnext.stock.utils import _get_incoming_rate, check_warehouse_company, get_combine_datetime
 
 from .services.disassemble import DisassembleStockEntry
 from .services.manufacturing import (
@@ -1959,6 +1959,13 @@ def get_warehouse_details(args: str | dict):
 	args = frappe.parse_json(args)
 
 	args = frappe._dict(args)
+
+	# Restored explicitly: both checks were inherited from get_incoming_rate until it was split into
+	# a guarded whitelist wrapper and the unguarded _get_incoming_rate this now calls.
+	# `select`, not `read`: this is reached from stock_entry.js:740, and the desk roles that open
+	# that form clear select through the Desk User row while holding no Item read of their own.
+	frappe.has_permission("Item", ptype="select", throw=True)
+	check_warehouse_company(args.get("warehouse"))
 
 	ret = {}
 	if args.warehouse and args.item_code:
