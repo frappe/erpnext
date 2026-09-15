@@ -1590,6 +1590,124 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 
 		self.assertFalse(frappe.db.exists("Stock Ledger Entry", {"voucher_no": voucher_no}))
 
+	def test_repost_with_diverged_posting_datetime(self):
+		"""Reposting must use the stored posting_datetime, not one rebuilt from posting_date and posting_time."""
+		from erpnext.stock.stock_ledger import get_sle_against_current_voucher
+
+		raw = make_item().name
+		fg = make_item().name
+		warehouse = "_Test Warehouse - _TC"
+		clash_time = "09:04:25.784069"
+
+		make_stock_entry(
+			item_code=fg,
+			to_warehouse=warehouse,
+			qty=123,
+			rate=2,
+			posting_date="2026-08-20",
+			posting_time="10:00:00",
+		)
+		make_stock_entry(
+			item_code=fg,
+			to_warehouse=warehouse,
+			qty=500,
+			rate=2,
+			posting_date="2026-08-22",
+			posting_time="10:00:00",
+		)
+		make_stock_entry(
+			item_code=raw,
+			to_warehouse=warehouse,
+			qty=500,
+			rate=2,
+			posting_date="2026-08-21",
+			posting_time="10:00:00",
+		)
+
+		# issue posted first, then a repack producing the same item at the same posting time
+		make_stock_entry(
+			item_code=fg,
+			from_warehouse=warehouse,
+			qty=500,
+			posting_date="2026-08-24",
+			posting_time=clash_time,
+		)
+
+		repack = make_stock_entry(
+			item_code=raw, source=warehouse, qty=500, rate=2, purpose="Repack", do_not_save=True
+		)
+		repack.set_posting_time = 1
+		repack.posting_date = "2026-08-24"
+		repack.posting_time = clash_time
+		repack.append(
+			"items", {"item_code": fg, "t_warehouse": warehouse, "qty": 500, "conversion_factor": 1}
+		)
+		repack.save()
+		repack.submit()
+
+		make_stock_entry(
+			item_code=fg, from_warehouse=warehouse, qty=8, posting_date="2026-08-25", posting_time="10:00:00"
+		)
+
+		# mimic a repair that backdates the stored value and leaves posting_time untouched
+		incoming = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": repack.name, "item_code": fg, "actual_qty": (">", 0)},
+			["name", "posting_date", "posting_time", "creation"],
+			as_dict=True,
+		)
+		frappe.db.set_value(
+			"Stock Ledger Entry",
+			incoming.name,
+			"posting_datetime",
+			"2026-08-24 09:04:25.784068",
+			update_modified=False,
+		)
+
+		# the row must stay reachable through its own voucher
+		found = get_sle_against_current_voucher(
+			frappe._dict(
+				{
+					"item_code": fg,
+					"warehouse": warehouse,
+					"posting_date": incoming.posting_date,
+					"posting_time": incoming.posting_time,
+					"creation": incoming.creation,
+					"name": incoming.name,
+				}
+			)
+		)
+		self.assertEqual([d.name for d in found], [incoming.name])
+
+		riv = frappe.get_doc(
+			{
+				"doctype": "Repost Item Valuation",
+				"based_on": "Item and Warehouse",
+				"item_code": raw,
+				"warehouse": warehouse,
+				"posting_date": "2026-08-21",
+				"posting_time": "00:00:00",
+				"company": "_Test Company",
+				"allow_negative_stock": 1,
+			}
+		).insert()
+		riv.submit()
+
+		# the backdated row is replayed instead of contributing a stale balance
+		sle = frappe.qb.DocType("Stock Ledger Entry")
+		balances = (
+			frappe.qb.from_(sle)
+			.select(sle.qty_after_transaction)
+			.where((sle.item_code == fg) & (sle.warehouse == warehouse) & (sle.is_cancelled == 0))
+			.orderby(sle.posting_datetime)
+			.orderby(sle.creation)
+		).run(pluck=True)
+
+		self.assertEqual([flt(b) for b in balances], [123.0, 623.0, 1123.0, 623.0, 615.0])
+		self.assertEqual(
+			flt(frappe.db.get_value("Bin", {"item_code": fg, "warehouse": warehouse}, "actual_qty")), 615.0
+		)
+
 
 def create_repack_entry(**args):
 	args = frappe._dict(args)
