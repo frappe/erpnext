@@ -47,7 +47,12 @@ def execute(filters: StockBalanceFilter | None = None):
 
 
 def execute_snapshot_report(filters):
+	"""Ageing columns replay the ledger with live serial and batch lookups, which a frozen
+	ledger cannot match, so they keep the live report."""
 	from erpnext.stock.report.stock_balance.stock_balance_snapshot import StockBalanceSnapshotReport
+
+	if filters.get("show_stock_ageing_data"):
+		return execute(filters)
 
 	with StockReportSnapshot("Stock Balance", filters) as snapshot:
 		return StockBalanceSnapshotReport(filters, snapshot).run()
@@ -292,13 +297,10 @@ class StockBalanceReport:
 			if sr_item.qty and sr_item.current_qty:
 				self.stock_reco_voucher_wise_count[row.voucher_detail_no] = sr_item.current_qty
 
-	def get_fifo_slots(self):
-		return FIFOSlots(self.filters)
-
 	def prepare_new_data(self):
 		if self.filters.get("show_stock_ageing_data"):
 			self.filters["show_warehouse_wise_stock"] = True
-			item_wise_fifo_queue = self.get_fifo_slots().generate()
+			item_wise_fifo_queue = FIFOSlots(self.filters).generate()
 
 		del self.sle_entries
 

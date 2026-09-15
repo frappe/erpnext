@@ -7,7 +7,6 @@ from frappe.query_builder.functions import Abs, Cast, Function, IfNull, Min, Sum
 from pypika.analytics import CURRENT_ROW, Preceding, RowNumber
 from pypika.analytics import Sum as WindowSum
 
-from erpnext.stock.report.stock_ageing.stock_ageing import FIFOSlots
 from erpnext.stock.report.stock_balance.stock_balance import (
 	StockBalanceReport,
 	filter_items_with_no_transactions,
@@ -26,7 +25,7 @@ class StockBalanceSnapshotReport(StockBalanceReport):
 
 	Ordinary movements are summed per stock group and dimension key in DuckDB, between the
 	reconciliation rows that reset a balance; those rows and everything else go through the
-	live report's own methods.
+	live report's own methods. Ageing columns are served by the live report instead.
 	"""
 
 	def __init__(self, filters, snapshot):
@@ -43,20 +42,6 @@ class StockBalanceSnapshotReport(StockBalanceReport):
 		self.item_warehouse_map = filter_items_with_no_transactions(
 			self.item_warehouse_map, self.float_precision, self.inventory_dimensions
 		)
-
-	def get_fifo_slots(self):
-		return SnapshotFIFOSlots(self.filters, self.snapshot)
-
-
-class SnapshotFIFOSlots(FIFOSlots):
-	"""The unchanged FIFO replay, reading its ledger and lookups from the snapshot."""
-
-	def __init__(self, filters, snapshot):
-		super().__init__(filters)
-		self.snapshot = snapshot
-
-	def _run_query(self, query, **kwargs):
-		return self.snapshot.run(query, **kwargs)
 
 
 def get_balance_query(report):
