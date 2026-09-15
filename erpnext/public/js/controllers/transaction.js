@@ -2377,6 +2377,13 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 						frappe.model.set_value(child.doctype, child.name, key, value);
 					}
 
+					if (key === "discount_amount" && flt(child.discount_percentage)) {
+						// Setting both queues conflicting triggers (each zeroes the other),
+						// so the discount is lost until save. The discount_percentage
+						// trigger derives discount_amount, so skip setting it directly.
+						continue;
+					}
+
 					if (key !== "free_item_data") {
 						if (
 							child.apply_rule_on_other_items &&
