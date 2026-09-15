@@ -1,6 +1,7 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from contextlib import contextmanager
 from copy import deepcopy
 from datetime import time, timedelta
 from unittest.mock import patch
@@ -38,17 +39,7 @@ class StockSnapshotTestCase(ERPNextTestSuite):
 		self.assertEqual(expected, actual)
 
 	def run_snapshot(self, report, table, filters=None):
-		conn = self.connect(table)
-		original_sql = frappe.db.sql
-
-		def reject_live_ledger(query, *args, **kwargs):
-			self.assertNotIn("tabStock Ledger Entry", str(query))
-			return original_sql(query, *args, **kwargs)
-
-		with (
-			patch.object(StockReportSnapshot, "get_connection", return_value=conn),
-			patch.object(frappe.db, "sql", side_effect=reject_live_ledger),
-		):
+		with snapshot_of(table):
 			return report.execute_snapshot_report(deepcopy(filters or self.filters))
 
 	def capture_ledger(self, items=None):
@@ -108,6 +99,61 @@ class StockSnapshotTestCase(ERPNextTestSuite):
 		)
 		self.make_movement(qty=3, batch_no=batch, from_warehouse="Stores - _TC", to_warehouse=None)
 		return batch
+
+
+@contextmanager
+def snapshot_of(table):
+	"""Serve the ledger rows as the report's snapshot and refuse any live ledger query meanwhile."""
+	conn = StockSnapshotTestCase.connect(table)
+	original_sql = frappe.db.sql
+
+	def guarded_sql(query, *args, **kwargs):
+		if "tabStock Ledger Entry" in str(query):
+			raise AssertionError(f"live ledger query during a snapshot run: {query}")
+		return original_sql(query, *args, **kwargs)
+
+	with (
+		patch.object(StockReportSnapshot, "get_connection", return_value=conn),
+		patch.object(frappe.db, "sql", side_effect=guarded_sql),
+	):
+		yield conn
+
+
+def ledger_scope(filters):
+	if items := filters.get("item_code"):
+		return {"item_code": ("in", items if isinstance(items, list | tuple) else [items])}
+	if company := filters.get("company"):
+		return {"company": company}
+	return {}
+
+
+def execute_on_snapshot(report, filters):
+	"""Run a report the way the live tests call execute, but from a snapshot of the ledger."""
+	rows = frappe.get_all(
+		"Stock Ledger Entry",
+		filters=ledger_scope(filters),
+		fields=frappe.get_meta("Stock Ledger Entry").get_valid_columns(),
+	)
+	for row in rows:
+		if isinstance(row.posting_time, timedelta):
+			seconds = row.posting_time.seconds
+			row.posting_time = time(seconds // 3600, seconds % 3600 // 60, seconds % 60)
+	table = pa.Table.from_pylist(rows, schema=DuckDBTable("Stock Ledger Entry").get_arrow_schema())
+	with snapshot_of(table):
+		return report.execute_snapshot_report(deepcopy(filters))
+
+
+def on_snapshot(live_tests, **replacements):
+	"""A copy of a live report test class that runs the report from a DuckDB snapshot instead."""
+
+	def setUp(self):
+		for name, replacement in replacements.items():
+			patcher = patch(f"{live_tests.__module__}.{name}", replacement)
+			patcher.start()
+			self.addCleanup(patcher.stop)
+		live_tests.setUp(self)
+
+	return type(f"{live_tests.__name__}OnSnapshot", (live_tests,), {"setUp": setUp})
 
 
 class StockSnapshotReportMixin:
