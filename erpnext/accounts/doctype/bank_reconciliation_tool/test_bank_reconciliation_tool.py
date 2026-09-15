@@ -188,6 +188,10 @@ class TestBankReconciliationTool(ERPNextTestSuite, AccountsTestMixin):
 				to_reference_date=to_date,
 			)
 
+	def test_get_linked_payments_without_document_types(self):
+		bank_transaction = self.make_bank_transaction(date=today())
+		self.assertEqual(get_linked_payments(bank_transaction.name), [])
+
 	def test_deposit_matches_amount_received_in_bank_account(self):
 		# money leaves another bank account and lands here minus a charge, so the two sides differ
 		payment = frappe.get_doc(
