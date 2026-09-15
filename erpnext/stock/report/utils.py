@@ -18,7 +18,7 @@ def prepare_serial_batch_report(columns, data, *, serial_fields=()):
 def prepare_number_columns(columns, serial_fields):
 	number_columns = []
 	fieldnames = {column.fieldname for column in columns}
-	for column in columns.copy():
+	for index, column in reversed(list(enumerate(columns))):
 		multiple = column.fieldname in serial_fields
 		doctype = column.options if column.fieldtype == "Link" else None
 		if multiple:
@@ -30,7 +30,7 @@ def prepare_number_columns(columns, serial_fields):
 		number_field = f"{fieldname}_number"
 		if number_field in fieldnames:
 			frappe.throw(_("Report already contains column {0}").format(frappe.bold(number_field)))
-		columns.append({**column, "label": _("{0} ID").format(column.label), "hidden": 1})
+		columns.insert(index + 1, {**column, "label": _("{0} ID").format(column.label), "hidden": 1})
 		column.update(
 			fieldname=number_field,
 			fieldtype="Data",
