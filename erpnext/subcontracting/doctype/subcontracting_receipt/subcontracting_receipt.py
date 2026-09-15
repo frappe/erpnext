@@ -146,6 +146,7 @@ class SubcontractingReceipt(SubcontractingController):
 			self.get_scrap_items()
 
 		self.set_missing_values()
+		self.validate_with_previous_doc()
 
 		if self.get("_action") == "submit":
 			self.validate_scrap_items()
@@ -158,6 +159,24 @@ class SubcontractingReceipt(SubcontractingController):
 
 		self.set_supplied_items_expense_account()
 		self.set_supplied_items_cost_center()
+
+	def validate_with_previous_doc(self):
+		super().validate_with_previous_doc(
+			{
+				"Subcontracting Order Item": {
+					"ref_dn_field": "subcontracting_order_item",
+					"compare_fields": [["project", "="]],
+					"is_child_table": True,
+					"allow_duplicate_prev_row_id": True,
+				},
+				"Purchase Order Item": {
+					"ref_dn_field": "purchase_order_item",
+					"compare_fields": [["project", "="]],
+					"is_child_table": True,
+					"allow_duplicate_prev_row_id": True,
+				},
+			}
+		)
 
 	def on_submit(self):
 		self.validate_closed_subcontracting_order()
@@ -962,5 +981,7 @@ def add_po_items_to_pr(scr_doc, target_doc):
 						"warehouse": item.warehouse,
 						"purchase_order": item.parent,
 						"purchase_order_item": item.name,
+						"project": item.project,
+						"cost_center": item.cost_center,
 					},
 				)

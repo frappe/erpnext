@@ -50,6 +50,8 @@ class StockRepostingSettings(Document):
 	def convert_to_item_wh_reposting(self):
 		"""Convert Transaction reposting to Item Warehouse based reposting if Item Based Reposting has enabled."""
 
+		self.check_permission("write")
+
 		reposting_data = get_reposting_entries()
 
 		vouchers = [d.voucher_no for d in reposting_data]

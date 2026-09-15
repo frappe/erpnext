@@ -4,20 +4,66 @@ import frappe
 from frappe.test_runner import make_test_records
 from frappe.tests.utils import FrappeTestCase
 
+from erpnext.manufacturing.doctype.job_card.job_card import make_stock_entry
 from erpnext.manufacturing.doctype.operation.test_operation import make_operation
 from erpnext.manufacturing.doctype.routing.test_routing import create_routing, setup_bom
 from erpnext.manufacturing.doctype.workstation.workstation import (
 	NotInWorkingHoursError,
 	WorkstationHolidayError,
 	check_if_within_operating_hours,
+	get_raw_materials,
 )
 
-test_dependencies = ["Warehouse"]
+test_dependencies = ["Warehouse", "Item"]
 test_records = frappe.get_test_records("Workstation")
 make_test_records("Workstation")
 
 
 class TestWorkstation(FrappeTestCase):
+	def test_get_raw_materials_without_items(self):
+		job_card = frappe.get_doc(
+			{
+				"doctype": "Job Card",
+				"company": "_Test Company",
+				"wip_warehouse": "_Test Warehouse 1 - _TC",
+			}
+		).insert(ignore_mandatory=True)
+
+		self.assertEqual(get_raw_materials([job_card.name]), {})
+		with self.assertRaisesRegex(frappe.ValidationError, "This Job Card has no raw materials to transfer"):
+			make_stock_entry(job_card.name)
+
+		job_card.reload()
+		self.assertFalse(job_card.items)
+		self.assertFalse(frappe.db.exists("Stock Entry", {"job_card": job_card.name}))
+
+	def test_get_raw_materials_with_items(self):
+		job_card = frappe.get_doc(
+			{
+				"doctype": "Job Card",
+				"company": "_Test Company",
+				"wip_warehouse": "_Test Warehouse 1 - _TC",
+				"items": [
+					{
+						"item_code": "_Test Item",
+						"source_warehouse": "_Test Warehouse - _TC",
+						"required_qty": 5,
+						"transferred_qty": 2,
+					}
+				],
+			}
+		).insert(ignore_mandatory=True)
+
+		materials = get_raw_materials([job_card.name])
+
+		self.assertEqual(list(materials), [job_card.name])
+		self.assertEqual(len(materials[job_card.name]), 1)
+		material = materials[job_card.name][0]
+		self.assertEqual(material.item_code, "_Test Item")
+		self.assertEqual(material.required_qty, 5)
+		self.assertEqual(material.transferred_qty, 2)
+		self.assertEqual(material.source_warehouse, "_Test Warehouse - _TC")
+
 	def test_validate_timings(self):
 		check_if_within_operating_hours(
 			"_Test Workstation 1", "Operation 1", "2013-02-02 11:00:00", "2013-02-02 19:00:00"

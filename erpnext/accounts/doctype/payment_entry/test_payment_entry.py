@@ -733,6 +733,23 @@ class TestPaymentEntry(FrappeTestCase):
 
 		self.validate_gl_entries(pe.name, expected_gle)
 
+	def test_internal_transfer_rejects_same_account(self):
+		pe = frappe.new_doc("Payment Entry")
+		pe.payment_type = "Internal Transfer"
+		pe.company = "_Test Company"
+		pe.paid_from = "_Test Bank - _TC"
+		pe.paid_to = "_Test Bank - _TC"
+		pe.paid_amount = 100
+		pe.received_amount = 100
+		pe.reference_no = "same-account-transfer"
+		pe.reference_date = nowdate()
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Paid From and Paid To accounts must be different",
+			pe.insert,
+		)
+
 	def test_payment_against_negative_sales_invoice(self):
 		si1 = create_sales_invoice()
 
