@@ -40,8 +40,9 @@ def get_variant(
 	:param item: Template Item
 	:param args: A dictionary with "Attribute" as key and "Attribute Value" as value
 	"""
-	# Every caller is the Item form (item.js:1144, 1483), so the template Item is the boundary and
-	# `read` is loser-free: the roles that cannot read Item cannot open that form either.
+	# The client callers are the Item form (item.js:1144, 1483), so the template Item is the boundary
+	# and `read` is loser-free: the roles that cannot read Item cannot open that form either. The two
+	# server-side callers (item.py:1083 on Item save, item_variant.py:393) already hold the template.
 	frappe.has_permission("Item", doc=template, throw=True)
 
 	item_template = frappe.get_doc("Item", template)

@@ -296,8 +296,10 @@ def get_incoming_rate(args: dict | str, raise_error_if_no_rate: bool = True, fal
 	# `select`, not `read`: this is reached from transaction.js:1069 on every sales and buying form,
 	# and Accounts Manager — who writes Sales Invoice and Purchase Invoice — holds no Item read
 	frappe.has_permission("Item", ptype="select", throw=True)
-	# only on this path: in-process callers legitimately price the counterparty's warehouse, e.g.
-	# buying_controller.set_sales_incoming_rate_for_internal_transfer passes `from_warehouse`
+	# only on this path: in-process callers legitimately price a warehouse the caller is not scoped
+	# to — Delivery Note submit, Stock Entry transfer, Subcontracting Receipt and the Product Bundle
+	# set_valuation_rate loop all raised "Not permitted for ..." for an entitled Company-restricted
+	# identity while this guard sat on the shared function
 	check_warehouse_company(args.get("warehouse") if isinstance(args, dict | frappe._dict) else None)
 
 	return _get_incoming_rate(args, raise_error_if_no_rate, fallbacks)
