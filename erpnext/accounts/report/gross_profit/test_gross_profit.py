@@ -352,30 +352,27 @@ class TestGrossProfit(ERPNextTestSuite):
 		)
 
 		columns, data = execute(filters=filters)
-		expected_entry = {
-			"parent_invoice": sinv.name,
-			"currency": "INR",
-			"sales_invoice": self.item,
-			"customer": self.customer,
-			"posting_date": frappe.utils.datetime.date.fromisoformat(nowdate()),
-			"item_code": self.item,
-			"item_name": self.item,
-			"warehouse": "Stores - _TC",
-			"qty": 0.0,
-			"avg._selling_rate": 100.0,
-			"valuation_rate": 100.0,
-			"selling_amount": 0.0,
-			"buying_amount": 0.0,
-			"gross_profit": 0.0,
-			"gross_profit_%": 0.0,
-		}
 		gp_entry = [x for x in data if x.parent_invoice == sinv.name]
-		# Both items of Invoice should have '0' qty
-		self.assertEqual(len(gp_entry), 2)
-		report_output = {k: v for k, v in gp_entry[0].items() if k in expected_entry}
-		self.assertEqual(report_output, expected_entry)
-		report_output = {k: v for k, v in gp_entry[1].items() if k in expected_entry}
-		self.assertEqual(report_output, expected_entry)
+		# Both item instances net to '0' qty, so the fully returned invoice is hidden
+		self.assertEqual(len(gp_entry), 0)
+
+	def test_fully_returned_invoice_is_hidden(self):
+		"""
+		A Sales Invoice fully reversed by a Credit Note has zero impact on Gross
+		Profit and should not appear in the report at all.
+		"""
+		sinv = self.create_sales_invoice(qty=1, rate=100, posting_date=nowdate())
+
+		cr_note = make_sales_return(sinv.name)
+		cr_note = cr_note.save().submit()
+
+		filters = frappe._dict(
+			company=self.company, from_date=nowdate(), to_date=nowdate(), group_by="Invoice"
+		)
+
+		columns, data = execute(filters=filters)
+		gp_entry = [x for x in data if x.parent_invoice == sinv.name or x.sales_invoice == sinv.name]
+		self.assertEqual(len(gp_entry), 0)
 
 	def test_standalone_cr_notes(self):
 		"""
