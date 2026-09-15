@@ -319,6 +319,13 @@ class InvoiceDiscounting(AccountsController):
 @frappe.whitelist()
 def get_invoices(filters):
 	filters = frappe._dict(json.loads(filters))
+
+	if not filters.get("company"):
+		frappe.throw(_("Please set company on the Document before requesting for invoices."))
+
+	frappe.has_permission("Company", doc=filters.get("company"), throw=True)
+	frappe.has_permission("Invoice Discounting", throw=True)
+
 	cond = []
 	if filters.customer:
 		cond.append("customer=%(customer)s")
