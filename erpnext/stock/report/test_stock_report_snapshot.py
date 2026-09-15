@@ -1,7 +1,6 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from contextlib import nullcontext
 from datetime import time, timedelta
 from decimal import Decimal
 from pathlib import Path
@@ -14,10 +13,8 @@ import pyarrow.dataset as ds
 from frappe.core.doctype.duckdb_sync.duckdb_sync import DuckDBSync
 from frappe.query_builder.builder import MariaDB, Postgres
 from frappe.query_builder.functions import Cast, Count
-from frappe.utils import add_days, today
 
 from erpnext.stock.doctype.item.test_item import make_item
-from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import create_stock_reconciliation
 from erpnext.stock.report.stock_report_snapshot import StockReportSnapshot
 from erpnext.stock.report.stock_snapshot_test_utils import StockSnapshotTestCase
 
