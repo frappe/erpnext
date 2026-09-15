@@ -29,7 +29,7 @@ from erpnext.stock.get_item_details import (
 	get_item_warehouse_,
 )
 from erpnext.stock.stock_ledger import get_previous_sle
-from erpnext.stock.utils import _get_incoming_rate
+from erpnext.stock.utils import _get_incoming_rate, check_warehouse_company
 
 force_fields = [
 	"target_item_name",
@@ -646,6 +646,8 @@ def get_warehouse_details(ctx: ItemDetailsCtx) -> frappe._dict:
 		frappe.has_permission("Item", doc=ctx.item_code, throw=True)
 		frappe.has_permission("Warehouse", doc=ctx.warehouse, throw=True)
 		frappe.has_permission("Stock Ledger Entry", throw=True)
+		# inherited from get_incoming_rate before the split; _get_incoming_rate does not scope
+		check_warehouse_company(ctx.warehouse)
 		out = frappe._dict(
 			{
 				"actual_qty": get_previous_sle(ctx).get("qty_after_transaction") or 0,
