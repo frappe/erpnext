@@ -57,6 +57,19 @@ def get_sle(**args):
 	)
 
 
+def stock_entry_row(item_code, qty, **kwargs):
+	stock_uom = frappe.db.get_value("Item", item_code, "stock_uom")
+	return {
+		"item_code": item_code,
+		"qty": qty,
+		"transfer_qty": qty,
+		"uom": stock_uom,
+		"stock_uom": stock_uom,
+		"conversion_factor": 1,
+		**kwargs,
+	}
+
+
 class TestStockEntry(ERPNextTestSuite):
 	def setUp(self):
 		self.load_test_records("Stock Entry")
@@ -1371,32 +1384,25 @@ class TestStockEntry(ERPNextTestSuite):
 
 		make_stock_entry(item_code=rm_item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
 
-		def row(item_code, qty, **kwargs):
-			stock_uom = frappe.db.get_value("Item", item_code, "stock_uom")
-			return {
-				"item_code": item_code,
-				"qty": qty,
-				"transfer_qty": qty,
-				"uom": stock_uom,
-				"stock_uom": stock_uom,
-				"conversion_factor": 1,
-				**kwargs,
-			}
-
 		entry = frappe.new_doc("Stock Entry")
 		entry.company = "_Test Company"
 		entry.purpose = "Manufacture"
 		entry.set_stock_entry_type()
 		entry.fg_completed_qty = 1
-		entry.append("items", row(rm_item, 10, s_warehouse="_Test Warehouse - _TC"))
-		entry.append("items", row(fg_item, 1, t_warehouse="_Test Warehouse 1 - _TC", is_finished_item=1))
+		entry.append("items", stock_entry_row(rm_item, 10, s_warehouse="_Test Warehouse - _TC"))
 		entry.append(
 			"items",
-			row(scrap_item, 2, t_warehouse="_Test Warehouse 1 - _TC", secondary_item_type="Scrap"),
+			stock_entry_row(fg_item, 1, t_warehouse="_Test Warehouse 1 - _TC", is_finished_item=1),
 		)
 		entry.append(
 			"items",
-			row(
+			stock_entry_row(
+				scrap_item, 2, t_warehouse="_Test Warehouse 1 - _TC", secondary_item_type="Scrap"
+			),
+		)
+		entry.append(
+			"items",
+			stock_entry_row(
 				manual_item,
 				1,
 				t_warehouse="_Test Warehouse 1 - _TC",
@@ -1424,6 +1430,88 @@ class TestStockEntry(ERPNextTestSuite):
 		# there is no percentage to allocate without a BOM row
 		manual_row.valuation_type = "% of Component Cost"
 		self.assertRaises(frappe.ValidationError, entry.save)
+
+	@ERPNextTestSuite.change_settings("Stock Reposting Settings", {"item_based_reposting": 0})
+	def test_repost_values_costed_out_row_as_of_posting_date(self):
+		from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import repost_sl_entries
+
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_method": "Moving Average"}).name
+		scrap_item = make_item(properties={"is_stock_item": 1}).name
+
+		make_stock_entry(
+			item_code=rm_item,
+			target="_Test Warehouse - _TC",
+			qty=10,
+			basic_rate=100,
+			posting_date=add_days(today(), -10),
+		)
+		make_stock_entry(
+			item_code=scrap_item,
+			target="_Test Warehouse 1 - _TC",
+			qty=5,
+			basic_rate=50,
+			posting_date=add_days(today(), -10),
+		)
+
+		entry = frappe.new_doc("Stock Entry")
+		entry.company = "_Test Company"
+		entry.purpose = "Manufacture"
+		entry.set_stock_entry_type()
+		entry.set_posting_time = 1
+		entry.posting_date = add_days(today(), -5)
+		entry.posting_time = "10:00:00"
+		entry.fg_completed_qty = 1
+		entry.append("items", stock_entry_row(rm_item, 10, s_warehouse="_Test Warehouse - _TC"))
+		entry.append(
+			"items",
+			stock_entry_row(fg_item, 1, t_warehouse="_Test Warehouse 1 - _TC", is_finished_item=1),
+		)
+		entry.append(
+			"items",
+			stock_entry_row(
+				scrap_item, 2, t_warehouse="_Test Warehouse 1 - _TC", secondary_item_type="Scrap"
+			),
+		)
+		entry.insert()
+		entry.submit()
+
+		self.assertEqual(entry.items[2].basic_rate, 50)
+		self.assertEqual(entry.items[1].basic_rate, 900)
+
+		make_stock_entry(
+			item_code=scrap_item,
+			target="_Test Warehouse 1 - _TC",
+			qty=10,
+			basic_rate=5000,
+			posting_date=add_days(today(), -1),
+		)
+
+		make_stock_entry(
+			item_code=scrap_item,
+			target="_Test Warehouse 1 - _TC",
+			qty=10,
+			basic_rate=9000,
+			posting_date=add_days(today(), -5),
+			posting_time="10:00:00",
+		)
+
+		backdated_receipt = make_stock_entry(
+			item_code=rm_item,
+			target="_Test Warehouse - _TC",
+			qty=10,
+			basic_rate=200,
+			posting_date=add_days(today(), -8),
+		)
+		repost = frappe.db.get_value(
+			"Repost Item Valuation", {"voucher_no": backdated_receipt.name, "docstatus": 1}, "name"
+		)
+		repost_sl_entries(frappe.get_doc("Repost Item Valuation", repost))
+
+		entry.load_from_db()
+
+		self.assertEqual(entry.items[2].basic_rate, 50)
+		self.assertEqual(entry.items[1].basic_rate, 1400)
 
 	def test_valuation_rate_lookup_without_voucher_no(self):
 		from erpnext.stock.stock_ledger import get_valuation_rate
