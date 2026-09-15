@@ -6,7 +6,6 @@ from datetime import datetime, timedelta
 
 import frappe
 from frappe import _
-from frappe.query_builder import Case
 from frappe.query_builder.functions import Sum
 from frappe.utils import (
 	add_days,
@@ -441,7 +440,6 @@ class MaterialRequirementsPlanningReport:
 
 			row.indent = 0
 			row.bom_no = rm_details.get("bom_no")
-			row.lead_time = math.ceil(rm_details.get("lead_time", 0))
 			if not row.sales_forecast_qty:
 				row.sales_forecast_qty = 0
 
@@ -463,17 +461,10 @@ class MaterialRequirementsPlanningReport:
 			if rm_details.raw_materials:
 				row.capacity = get_item_capacity(row.item_code, self.filters.bucket_size)
 				row.type_of_material = "Manufacture"
-				if row.lead_time and row.required_qty:
-					row.lead_time = math.ceil(row.required_qty / row.lead_time)
-				elif not row.required_qty:
-					row.lead_time = 0
 			else:
 				row.type_of_material = "Purchase"
 
-			if not row.lead_time and rm_details.raw_materials:
-				row.lead_time = self.get_lead_time_from_raw_materials(rm_details.raw_materials)
-
-			row.release_date = add_days(row.delivery_date, row.lead_time * -1)
+			self.set_lead_time(row, rm_details.raw_materials)
 			data.append(row)
 			if rm_details.raw_materials:
 				self.update_rm_details(
@@ -482,12 +473,36 @@ class MaterialRequirementsPlanningReport:
 
 		return data
 
-	def get_lead_time_from_raw_materials(self, raw_materials):
+	def set_lead_time(self, row, raw_materials=None):
+		lead_time = get_item_lead_time(row.item_code, row.type_of_material, row.required_qty)
+		if (
+			raw_materials
+			and row.required_qty > 0
+			and flt(get_item_lead_time_details(row.item_code).manufacturing_time_in_mins) <= 0
+		):
+			lead_time += self.get_lead_time_from_raw_materials(raw_materials, row.required_qty)
+
+		row.lead_time = math.ceil(lead_time)
+		row.release_date = add_days(row.delivery_date, -row.lead_time)
+
+	def get_lead_time_from_raw_materials(self, raw_materials, qty=1):
 		lead_time = 0
 		for material in raw_materials:
-			lead_time += math.ceil(material.lead_time)
-			if material.raw_materials:
-				lead_time += self.get_lead_time_from_raw_materials(material.raw_materials)
+			material_qty = material.stock_qty * qty
+			# Reuse descendant totals within this report, keeping different net quantities separate.
+			subtree_lead_times = material.setdefault("subtree_lead_times", {})
+			if material_qty not in subtree_lead_times:
+				type_of_material = "Manufacture" if material.raw_materials else "Purchase"
+				material_lead_time = math.ceil(
+					get_item_lead_time(material.item_code, type_of_material, material_qty)
+				)
+				if material.raw_materials:
+					material_lead_time += self.get_lead_time_from_raw_materials(
+						material.raw_materials, material_qty
+					)
+				subtree_lead_times[material_qty] = material_lead_time
+
+			lead_time += subtree_lead_times[material_qty]
 
 		return lead_time
 
@@ -783,7 +798,6 @@ class MaterialRequirementsPlanningReport:
 
 	def update_rm_details(self, raw_materials, delivery_date, planned_qty, bom_no, data):
 		for material in raw_materials:
-			lead_time = math.ceil(material.lead_time)
 			row = frappe._dict(
 				{
 					"item_code": material.item_code,
@@ -793,8 +807,6 @@ class MaterialRequirementsPlanningReport:
 					"planned_qty": material.stock_qty * planned_qty,
 					"projected_qty": 0,
 					"delivery_date": delivery_date,
-					"lead_time": lead_time,
-					"release_date": add_days(delivery_date, lead_time * -1),
 					"indent": material.indent + 1,
 					"parent_bom": bom_no,
 					"bom_no": material.bom_no,
@@ -813,6 +825,7 @@ class MaterialRequirementsPlanningReport:
 				row.type_of_material = "Purchase"
 
 			self.update_required_qty(row)
+			self.set_lead_time(row, material.raw_materials)
 
 			data.append(row)
 
@@ -900,9 +913,6 @@ class MaterialRequirementsPlanningReport:
 				)
 
 			item_data = item_wise_rm_details[item_code]
-			item_data.lead_time = get_item_lead_time(
-				item_code, "Manufacture" if item_data.bom_no else "Purchase"
-			)
 
 			if item_code not in self.fg_items:
 				self.fg_items.append(item_code)
@@ -940,9 +950,6 @@ class MaterialRequirementsPlanningReport:
 
 			if material.bom_no:
 				material.raw_materials = self.get_raw_materials(material.bom_no, indent + 1)
-				material.lead_time = get_item_lead_time(material.item_code, "Manufacture")
-			else:
-				material.lead_time = get_item_lead_time(material.item_code, "Purchase")
 
 		return raw_materials
 
@@ -1209,32 +1216,33 @@ def get_item_details(item_code, company):
 	return data
 
 
-@frappe.request_cache
-def get_item_lead_time(item_code, type_of_material):
-	doctype = frappe.qb.DocType("Item Lead Time")
-
-	query = frappe.qb.from_(doctype).where(doctype.item_code == item_code)
-
+def get_item_lead_time(item_code, type_of_material, qty=1):
+	"""Return calendar days, scaling only manufacturing time by the required quantity."""
+	details = get_item_lead_time_details(item_code)
 	if type_of_material == "Manufacture":
-		query = query.select(
-			Case()
-			.when(
-				(doctype.manufacturing_time_in_mins.isnull() | (doctype.manufacturing_time_in_mins <= 0)), 0
-			)
-			.else_(1440.0 / doctype.manufacturing_time_in_mins + doctype.buffer_time)
-			.as_("lead_time")
-		)
+		if qty <= 0:
+			return 0
+		# Keep MRP's 24-hour planning day; buffer days do not increase production capacity.
+		time_in_days = max(flt(details.manufacturing_time_in_mins), 0) * qty / 1440.0
 	else:
-		query = query.select(
-			Case()
-			.when(doctype.purchase_time.isnull(), 0)
-			.else_(doctype.purchase_time + doctype.buffer_time)
-			.as_("lead_time")
+		if details.purchase_time is None:
+			return 0
+		time_in_days = flt(details.purchase_time)
+
+	return time_in_days + flt(details.buffer_time)
+
+
+@frappe.request_cache
+def get_item_lead_time_details(item_code):
+	return (
+		frappe.db.get_value(
+			"Item Lead Time",
+			{"item_code": item_code},
+			["manufacturing_time_in_mins", "purchase_time", "buffer_time"],
+			as_dict=True,
 		)
-
-	time = query.run(pluck="lead_time")
-
-	return time[0] if time else 0
+		or frappe._dict()
+	)
 
 
 def convert_to_daily_bucket_data(data):
