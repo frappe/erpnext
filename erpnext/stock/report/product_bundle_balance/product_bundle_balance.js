@@ -48,9 +48,13 @@ frappe.query_reports["Product Bundle Balance"] = {
 		{
 			fieldname: "warehouse",
 			label: __("Warehouse"),
-			fieldtype: "Link",
+			fieldtype: "MultiSelectList",
 			width: "80",
 			options: "Warehouse",
+			get_data: function (txt) {
+				let company = frappe.query_report.get_filter_value("company");
+				return frappe.db.get_link_options("Warehouse", txt, company ? { company } : {});
+			},
 		},
 	],
 	initial_depth: 0,
