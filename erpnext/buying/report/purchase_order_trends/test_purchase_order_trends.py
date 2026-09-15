@@ -196,3 +196,26 @@ class TestPurchaseOrderTrends(ERPNextTestSuite):
 
 		self.assertGreater(chart_total, 0)
 		self.assertEqual(chart_total, 300)
+
+	def test_item_filter_restricts_rows(self):
+		# the Item filter is applied in the query, so the excluded item never reaches the rows
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+		from erpnext.buying.report.purchase_order_trends.purchase_order_trends import execute
+
+		create_purchase_order(item_code="_Test Item", qty=3, rate=100, transaction_date=today())
+		create_purchase_order(item_code="_Test Item 2", qty=2, rate=100, transaction_date=today())
+
+		filters = frappe._dict(
+			{
+				"company": "_Test Company",
+				"fiscal_year": get_fiscal_year(today())[0],
+				"period": "Monthly",
+				"based_on": "Item",
+				"item_code": ["_Test Item"],
+			}
+		)
+
+		_columns, data, _message, _chart = execute(filters)
+		items = {row[0] for row in data}
+		self.assertIn("_Test Item", items)
+		self.assertNotIn("_Test Item 2", items)
