@@ -450,7 +450,7 @@ class MaterialRequirementsPlanningReport:
 			if row.get("is_adhoc"):
 				row.planned_qty += row.adhoc_qty
 
-			for field in ["min_order_qty", "purchase_uom", "safety_stock"]:
+			for field in ("min_order_qty", "purchase_uom", "safety_stock", "default_supplier"):
 				if rm_details.get(field):
 					row[field] = rm_details.get(field)
 
@@ -460,15 +460,13 @@ class MaterialRequirementsPlanningReport:
 
 			i += 1
 			row.capacity = 0
+			row.type_of_material = get_type_of_material(rm_details.get("is_purchase_item"), row.bom_no)
 			if rm_details.raw_materials:
 				row.capacity = get_item_capacity(row.item_code, self.filters.bucket_size)
-				row.type_of_material = "Manufacture"
 				if row.lead_time and row.required_qty:
 					row.lead_time = math.ceil(row.required_qty / row.lead_time)
 				elif not row.required_qty:
 					row.lead_time = 0
-			else:
-				row.type_of_material = "Purchase"
 
 			if not row.lead_time and rm_details.raw_materials:
 				row.lead_time = self.get_lead_time_from_raw_materials(rm_details.raw_materials)
@@ -806,11 +804,9 @@ class MaterialRequirementsPlanningReport:
 			)
 
 			row.capacity = 0
+			row.type_of_material = get_type_of_material(material.get("is_purchase_item"), material.bom_no)
 			if material.raw_materials:
 				row.capacity = get_item_capacity(material.item_code, self.filters.bucket_size)
-				row.type_of_material = "Manufacture"
-			else:
-				row.type_of_material = "Purchase"
 
 			self.update_required_qty(row)
 
@@ -895,13 +891,22 @@ class MaterialRequirementsPlanningReport:
 				item_wise_rm_details[item_code] = frappe.db.get_value(
 					"Item",
 					item_code,
-					["default_bom as bom_no", "safety_stock", "min_order_qty", "purchase_uom"],
+					[
+						"default_bom as bom_no",
+						"safety_stock",
+						"min_order_qty",
+						"purchase_uom",
+						"is_purchase_item",
+					],
 					as_dict=True,
 				)
 
 			item_data = item_wise_rm_details[item_code]
+			if details := get_item_details(item_code, self.filters.get("company")):
+				item_data.update(details)
+
 			item_data.lead_time = get_item_lead_time(
-				item_code, "Manufacture" if item_data.bom_no else "Purchase"
+				item_code, get_type_of_material(item_data.is_purchase_item, item_data.bom_no)
 			)
 
 			if item_code not in self.fg_items:
@@ -940,9 +945,10 @@ class MaterialRequirementsPlanningReport:
 
 			if material.bom_no:
 				material.raw_materials = self.get_raw_materials(material.bom_no, indent + 1)
-				material.lead_time = get_item_lead_time(material.item_code, "Manufacture")
-			else:
-				material.lead_time = get_item_lead_time(material.item_code, "Purchase")
+
+			material.lead_time = get_item_lead_time(
+				material.item_code, get_type_of_material(material.get("is_purchase_item"), material.bom_no)
+			)
 
 		return raw_materials
 
@@ -1190,10 +1196,17 @@ class MaterialRequirementsPlanningReport:
 		return convert_to_daily_bucket_data(sales_data)
 
 
+def get_type_of_material(is_purchase_item, bom_no):
+	return "Purchase" if is_purchase_item and not bom_no else "Manufacture"
+
+
 @frappe.request_cache
 def get_item_details(item_code, company):
 	data = frappe.db.get_value(
-		"Item", item_code, ["safety_stock", "min_order_qty", "purchase_uom"], as_dict=True
+		"Item",
+		item_code,
+		["safety_stock", "min_order_qty", "purchase_uom", "is_purchase_item"],
+		as_dict=True,
 	) or frappe._dict({"safety_stock": 0})
 
 	default_data = frappe.db.get_value(
@@ -1313,6 +1326,7 @@ def make_order(selected_rows: str | list, company: str, warehouse: str | None = 
 	purchase_orders = {}
 	work_orders = []
 	covered_rows = 0
+	missing_bom = []
 	for row in selected_rows:
 		row = frappe._dict(row)
 		# what is left to order once stock and the orders already placed are counted. rounding
@@ -1325,8 +1339,14 @@ def make_order(selected_rows: str | list, company: str, warehouse: str | None = 
 		if row.type_of_material == "Purchase":
 			purchase_orders.setdefault((row.default_supplier, row.release_date), []).append(row)
 
-		if row.type_of_material == "Manufacture" and row.bom_no:
-			work_orders.append(row)
+		if row.type_of_material == "Manufacture":
+			if row.bom_no:
+				work_orders.append(row)
+			elif row.item_code not in missing_bom:
+				missing_bom.append(row.item_code)
+
+	if missing_bom:
+		frappe.throw(_("Default BOM for {0} not found").format(", ".join(missing_bom)))
 
 	if not purchase_orders and not work_orders:
 		frappe.msgprint(
