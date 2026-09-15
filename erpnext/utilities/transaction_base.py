@@ -350,11 +350,13 @@ class TransactionBase(StatusUpdater):
 		)
 
 	@frappe.whitelist()
-	def process_item_selection(self, item_idx: int, reset_item_details: bool = False):
+	def process_item_selection(
+		self, item_idx: int, reset_item_details: bool = False, parentfield: str = "items"
+	):
 		# Server side 'item' doc. Update this to reflect in UI
-		item_obj = self.get("items", {"idx": item_idx})[0]
+		item_obj = self.get_selected_item_row(parentfield, item_idx)
 
-		if not item_obj.item_code:
+		if not item_obj or not item_obj.item_code:
 			return
 
 		if cint(reset_item_details):
@@ -383,6 +385,14 @@ class TransactionBase(StatusUpdater):
 		self.handle_internal_parties(item_obj, item_details)
 		self.conversion_factor(item_obj, item_details)
 		self.calculate_taxes_and_totals()
+
+	def get_selected_item_row(self, parentfield: str, item_idx: int):
+		"""Row at `item_idx` in the given child table, or None if it is no longer there."""
+		if not self.get_table_field_doctype(parentfield):
+			frappe.throw(_("{0} is not a child table of {1}").format(parentfield, self.doctype))
+
+		rows = self.get(parentfield, {"idx": item_idx})
+		return rows[0] if rows else None
 
 	def set_fetched_values(self, item_obj: object, item_details: dict) -> None:
 		for k, v in item_details.items():

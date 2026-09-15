@@ -785,6 +785,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				args: {
 					item_idx: item.idx,
 					reset_item_details: true,
+					parentfield: item.parentfield,
 				},
 				callback: function (r) {
 					if (!r.exc) {
