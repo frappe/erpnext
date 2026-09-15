@@ -55,9 +55,16 @@ class SupplierScorecard(Document):
 		self.update_standing()
 
 	def on_update(self):
-		score = make_all_scorecards(self.name)
-		if score > 0:
-			self.save()
+		# Guard against recursion: the save() below re-enters on_update().
+		if self.flags.in_rescore:
+			return
+		if make_all_scorecards(self.name) > 0:
+			# New periods were created; re-save to refresh score and standings.
+			self.flags.in_rescore = True
+			try:
+				self.save()
+			finally:
+				self.flags.in_rescore = False
 
 	def validate_standings(self):
 		# Check that there are no overlapping scores and check that there are no missing scores
@@ -213,25 +220,18 @@ def make_all_scorecards(docname):
 
 	while (start_date < todays) and (end_date <= todays):
 		# check to make sure there is no scorecard period already created
-		scorecards = frappe.db.sql(
-			"""
-			SELECT
-				scp.name
-			FROM
-				`tabSupplier Scorecard Period` scp
-			WHERE
-				scp.scorecard = %(sc)s
-				AND scp.docstatus = 1
-				AND (
-					(scp.start_date > %(end_date)s
-					AND scp.end_date < %(start_date)s)
-				OR
-					(scp.start_date < %(end_date)s
-					AND scp.end_date > %(start_date)s))
-			ORDER BY
-				scp.end_date DESC""",
-			{"sc": docname, "start_date": start_date, "end_date": end_date},
-			as_dict=1,
+		# (inclusive bounds: a single-day period — supplier created on a month's
+		# last day — must match its own window, else it is re-created every run)
+		scorecards = frappe.get_all(
+			"Supplier Scorecard Period",
+			fields=["name"],
+			filters={
+				"scorecard": docname,
+				"docstatus": 1,
+				"start_date": ["<=", end_date],
+				"end_date": [">=", start_date],
+			},
+			order_by="end_date desc",
 		)
 		if len(scorecards) == 0:
 			period_card = make_supplier_scorecard(docname, None)
