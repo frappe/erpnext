@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-09-06 09:35+0000\n"
-"PO-Revision-Date: 2026-09-07 04:08\n"
+"PO-Revision-Date: 2026-09-14 04:08\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -2751,7 +2751,7 @@ msgstr "افزودن تخفیف سفارش"
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:289
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:424
 msgid "Add Phantom Item"
-msgstr "اضافه کردن آیتم فانتوم"
+msgstr "افزودن آیتم فانتوم"
 
 #. Label of the add_quote (Check) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
@@ -7703,13 +7703,13 @@ msgstr "ثبت بانکی"
 
 #: banking/src/components/features/BankReconciliation/BankEntryModalContent.tsx:295
 msgid "Bank Entry Created"
-msgstr ""
+msgstr "ثبت بانکی ایجاد شد"
 
 #. Label of the bank_entry_type (Select) field in DocType 'Bank Transaction
 #. Rule'
 #: erpnext/accounts/doctype/bank_transaction_rule/bank_transaction_rule.json
 msgid "Bank Entry Type"
-msgstr ""
+msgstr "نوع ثبت بانکی"
 
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:213
 msgid "Bank Fee, Salary, etc."
@@ -27627,7 +27627,7 @@ msgstr "قیمت آیتم چندین بار بر اساس لیست قیمت، ت
 
 #: erpnext/stock/doctype/item/item.py:185
 msgid "Item Price created at rate {0}"
-msgstr ""
+msgstr "قیمت آیتم با نرخ {0} ایجاد شد"
 
 #: erpnext/stock/get_item_details.py:1213
 msgid "Item Price updated for {0} in Price List {1}"
@@ -32742,7 +32742,7 @@ msgstr "هیچ تفاوتی برای حساب موجودی {0} یافت نشد"
 
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:164
 msgid "No email found for {0} {1}"
-msgstr ""
+msgstr "ایمیلی برای {0} {1} یافت نشد"
 
 #: erpnext/telephony/doctype/call_log/call_log.py:117
 msgid "No employee was scheduled for call popup"
@@ -36503,7 +36503,7 @@ msgstr "ثبت پرداخت"
 
 #: banking/src/components/features/BankReconciliation/RecordPaymentModalContent.tsx:342
 msgid "Payment Entry Created"
-msgstr ""
+msgstr "ثبت پرداخت ایجاد شد"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/payment_entry_deduction/payment_entry_deduction.json
@@ -38386,7 +38386,7 @@ msgstr "لطفا اول ذخیره کنید"
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:865
 msgid "Please save the Sales Order before adding a delivery schedule."
-msgstr "لطفا قبل از اضافه کردن زمان‌بندی تحویل، سفارش فروش را ذخیره کنید."
+msgstr "لطفا قبل از افزودن زمان‌بندی تحویل، سفارش فروش را ذخیره کنید."
 
 #: erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.js:79
 msgid "Please select <b>Template Type</b> to download template"
@@ -39830,7 +39830,7 @@ msgstr "لیست قیمت {0} غیرفعال است یا وجود ندارد"
 
 #: erpnext/manufacturing/doctype/blanket_order/blanket_order_pricing.py:72
 msgid "Price List {0} is not enabled for {1}"
-msgstr ""
+msgstr "لیست قیمت {0} برای {1} فعال نیست"
 
 #. Label of the price_not_uom_dependent (Check) field in DocType 'Price List'
 #: erpnext/stock/doctype/price_list/price_list.json
@@ -45759,7 +45759,7 @@ msgstr ""
 
 #: erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.js:39
 msgid "Reversal Journal Entries"
-msgstr ""
+msgstr "ثبت‌های معکوس در دفتر روزنامه"
 
 #. Label of the reversal_of (Link) field in DocType 'Journal Entry'
 #: erpnext/accounts/doctype/journal_entry/journal_entry.json

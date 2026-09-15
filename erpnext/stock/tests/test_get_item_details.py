@@ -456,3 +456,65 @@ class TestGetItemDetail(ERPNextTestSuite):
 			frappe.set_user("Administrator")
 			frappe.db.set_single_value("Buying Settings", "maintain_same_rate", original)
 			frappe.clear_cache(doctype="Buying Settings")
+
+	def test_rate_lock_keeps_each_rows_rate_for_batch_items(self):
+		"""Batch rows mapped PR->PI must each keep their own rate, not collapse onto the first."""
+		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
+		from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+			get_batch_from_bundle,
+		)
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		original = frappe.db.get_single_value("Buying Settings", "maintain_same_rate")
+		frappe.db.set_single_value("Buying Settings", "maintain_same_rate", 1)
+		frappe.clear_cache(doctype="Buying Settings")
+		self.addCleanup(frappe.clear_cache, doctype="Buying Settings")
+		self.addCleanup(frappe.db.set_single_value, "Buying Settings", "maintain_same_rate", original)
+
+		def batched_item():
+			code = make_item(
+				properties={
+					"is_stock_item": 1,
+					"has_batch_no": 1,
+					"create_new_batch": 1,
+					"batch_number_series": "FBQ-.#####",
+				}
+			).name
+			se = make_stock_entry(item_code=code, target="_Test Warehouse - _TC", qty=5, basic_rate=100)
+			return code, get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+
+		item_a, batch_a = batched_item()
+		item_b, batch_b = batched_item()
+
+		# one PO with both items at different rates
+		po = create_purchase_order(item_code=item_a, qty=5, rate=28, do_not_save=True)
+		po.append(
+			"items",
+			{
+				"item_code": item_b,
+				"qty": 5,
+				"rate": 275,
+				"warehouse": "_Test Warehouse - _TC",
+				"schedule_date": frappe.utils.nowdate(),
+			},
+		)
+		po.set_missing_values()
+		po.insert()
+		po.submit()
+
+		# receive both against their own batches
+		pr = make_purchase_receipt(po.name)
+		for row in pr.items:
+			row.use_serial_batch_fields = 1
+		pr.items[0].batch_no = batch_a
+		pr.items[1].batch_no = batch_b
+		pr.insert()
+		pr.submit()
+
+		# the batch_no branch force-writes the fetched rate during mapping
+		pi = make_purchase_invoice(pr.name)
+		self.assertEqual(pi.items[0].rate, 28)
+		self.assertEqual(pi.items[1].rate, 275)  # used to collapse onto the first row (28)

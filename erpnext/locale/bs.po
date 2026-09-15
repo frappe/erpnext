@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-09-06 09:35+0000\n"
-"PO-Revision-Date: 2026-09-07 04:07\n"
+"PO-Revision-Date: 2026-09-14 04:08\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Bosnian\n"
 "MIME-Version: 1.0\n"
@@ -80,7 +80,7 @@ msgstr " Viritualni Artikal"
 
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py:602
 msgid " Rate"
-msgstr " Cjena"
+msgstr " Cijena"
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:130
 msgid " Raw Material"
@@ -918,7 +918,7 @@ msgstr "<p>Datum registracije {0} ne može biti prije datuma Nabavnog Naloga za 
 
 #: erpnext/stock/doctype/stock_settings/stock_settings.js:134
 msgid "<p>Price List Rate has not been set as editable in Selling Settings. In this scenario, setting <strong>Update Price List Based On</strong> to <strong>Price List Rate</strong> will prevent auto-updation of Item Price.</p>Are you sure you want to continue?"
-msgstr "<p>Cjena Cjenovnika nije postavljena za uređivanje u Postavkama Prodaje. U ovom scenariju, postavljanje <strong>Ažuriraj Cjenovnik na Osnovu</strong>na <strong>Cjena Cjenovnika</strong> spriječit će automatsko ažuriranje cjene artikla.</p>Jeste li sigurni da želite nastaviti?"
+msgstr "<p>Cijena Cjenovnika nije postavljena za uređivanje u Postavkama Prodaje. U ovom scenariju, postavljanje <strong>Ažuriraj Cjenovnik na Osnovu</strong>na <strong>Cijena Cjenovnika</strong> spriječit će automatsko ažuriranje cjene artikla.</p>Jeste li sigurni da želite nastaviti?"
 
 #: erpnext/controllers/accounts_controller.py:2367
 msgid "<p>To allow over-billing, please set allowance in Accounts Settings.</p>"
@@ -1103,7 +1103,7 @@ msgstr "Verifikat Zatvaranje Perioda je već podnesen i početni unos se više n
 #. Description of a DocType
 #: erpnext/stock/doctype/price_list/price_list.json
 msgid "A Price List is a collection of Item Prices either Selling, Buying, or both"
-msgstr "Cjenovnik je skup cjena artikala za Prodaju, Nabavu ili oboje"
+msgstr "Cjenovnik je skup cijena artikala za Prodaju, Nabavu ili oboje"
 
 #. Description of a DocType
 #: erpnext/stock/doctype/item/item.json
@@ -4547,7 +4547,7 @@ msgstr "Omogući izradu prodajne fakture bez prodajnog naloga"
 #. DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Allow sales transactions with zero quantities if the rate is fixed but the quantities are not. e.g. Rate Contracts"
-msgstr "Dozvoli prodajne transakcije s nultom količinom ako je cjena fiksna, ali količine nisu. Npr. Ugovori o cjeni"
+msgstr "Dozvoli prodajne transakcije s nultom količinom ako je cijena fiksna, ali količine nisu. Npr. Ugovori o cjeni"
 
 #. Label of the allow_multiple_items (Check) field in DocType 'Selling
 #. Settings'
@@ -4663,19 +4663,19 @@ msgstr "Omogućava zadržavanje određene količine zaliha za određeni Prodajni
 #. in DocType 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "Allows users to submit Purchase Orders with zero quantity. Useful when rates are fixed but the quantities are not. Eg. Rate Contracts."
-msgstr "Omogućava korisnicima da podnose narudžbenice s nultom količinom. Korisno kada su cjene fiksne, ali količine nisu. Npr. Ugovori o cjenama."
+msgstr "Omogućava korisnicima da podnose narudžbenice s nultom količinom. Korisno kada su cjene fiksne, ali količine nisu. Npr. Ugovori o cijenama."
 
 #. Description of the 'Allow Request for Quotation with Zero Quantity' (Check)
 #. field in DocType 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "Allows users to submit Request for Quotations with zero quantity. Useful when rates are fixed but the quantities are not. Eg. Rate Contracts."
-msgstr "Omogućava korisnicima da podnesu zahtjev za ponude s nultom količinom. Korisno kada su cjene fiksne, ali količine nisu. Npr. Ugovori o cjenama."
+msgstr "Omogućava korisnicima da podnesu zahtjev za ponude s nultom količinom. Korisno kada su cjene fiksne, ali količine nisu. Npr. Ugovori o cijenama."
 
 #. Description of the 'Allow Supplier Quotation with Zero Quantity' (Check)
 #. field in DocType 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "Allows users to submit Supplier Quotations with zero quantity. Useful when rates are fixed but the quantities are not. Eg. Rate Contracts."
-msgstr "Omogućava korisnicima da dostave ponude dobavljača s nultom količinom. Korisno kada su cjene fiksne, ali količine nisu. Npr. Ugovori o cjenama."
+msgstr "Omogućava korisnicima da dostave ponude dobavljača s nultom količinom. Korisno kada su cjene fiksne, ali količine nisu. Npr. Ugovori o cijenama."
 
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.py:1190
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.py:1211
@@ -5446,7 +5446,7 @@ msgstr "Primijeni Popust na Cjenu"
 #: erpnext/accounts/doctype/promotional_scheme_price_discount/promotional_scheme_price_discount.json
 #: erpnext/accounts/doctype/promotional_scheme_product_discount/promotional_scheme_product_discount.json
 msgid "Apply Multiple Pricing Rules"
-msgstr "Primijenite više pravila o cjenama"
+msgstr "Primijenite više pravila o cijenama"
 
 #. Label of the apply_on (Select) field in DocType 'Pricing Rule'
 #. Label of the apply_on (Select) field in DocType 'Promotional Scheme'
@@ -6999,7 +6999,7 @@ msgstr "Prosječne Vrijednosti Naloga"
 #: erpnext/accounts/report/share_balance/share_balance.py:60
 #: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.json
 msgid "Average Rate"
-msgstr "Prosječna Cjena"
+msgstr "Prosječna Cijena"
 
 #. Label of the avg_response_time (Duration) field in DocType 'Issue'
 #: erpnext/support/doctype/issue/issue.json
@@ -7018,24 +7018,24 @@ msgstr "Prosječna Dnevna Isporuka"
 #. Label of the avg_rate (Float) field in DocType 'Serial and Batch Bundle'
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.json
 msgid "Avg Rate"
-msgstr "Prosječna Cjena"
+msgstr "Prosječna Cijena"
 
 #: erpnext/stock/report/available_serial_no/available_serial_no.py:154
 #: erpnext/stock/report/stock_ledger/stock_ledger.py:372
 msgid "Avg Rate (Balance Stock)"
-msgstr "Prosječna Cjena (Stanje Zaliha)"
+msgstr "Prosječna Cijena (Stanje Zaliha)"
 
 #: erpnext/stock/report/item_variant_details/item_variant_details.py:96
 msgid "Avg. Buying Price List Rate"
-msgstr "Prosječna Nabavna Cjena Cjenovnika"
+msgstr "Prosječna Nabavna Cijena Cjenovnika"
 
 #: erpnext/stock/report/item_variant_details/item_variant_details.py:102
 msgid "Avg. Selling Price List Rate"
-msgstr "Prosječna Prodajna Cjena Cjenovnika"
+msgstr "Prosječna Prodajna Cijena Cjenovnika"
 
 #: erpnext/accounts/report/gross_profit/gross_profit.py:349
 msgid "Avg. Selling Rate"
-msgstr "Prosječna Prodajna Cjena"
+msgstr "Prosječna Prodajna Cijena"
 
 #. Option for the 'Blood Group' (Select) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
@@ -7267,7 +7267,7 @@ msgstr "Sastavnica"
 
 #: erpnext/stock/report/item_prices/item_prices.py:60
 msgid "BOM Rate"
-msgstr "Cjena Sastavnice"
+msgstr "Cijena Sastavnice"
 
 #. Label of a Link in the Manufacturing Workspace
 #. Name of a report
@@ -8055,12 +8055,12 @@ msgstr "Osnovni Trošak po Jedinici"
 #. Label of the base_hour_rate (Currency) field in DocType 'BOM Operation'
 #: erpnext/manufacturing/doctype/bom_operation/bom_operation.json
 msgid "Base Hour Rate(Company Currency)"
-msgstr "Osnovna Cjena po Satu (Valuta Poduzeća)"
+msgstr "Osnovna Cijena po Satu (Valuta Poduzeća)"
 
 #. Label of the base_rate (Currency) field in DocType 'BOM Creator Item'
 #: erpnext/manufacturing/doctype/bom_creator_item/bom_creator_item.json
 msgid "Base Rate"
-msgstr "Osnovna Cjena"
+msgstr "Osnovna Cijena"
 
 #. Label of the withholding_amount (Currency) field in DocType 'Tax Withholding
 #. Entry'
@@ -8144,12 +8144,12 @@ msgstr "Osnovni Iznos"
 #: erpnext/manufacturing/doctype/bom_item/bom_item.json
 #: erpnext/selling/doctype/sales_order_item/sales_order_item.json
 msgid "Basic Rate (Company Currency)"
-msgstr "Osnovna Cjena(Valuta Poduzeća)"
+msgstr "Osnovna Cijena(Valuta Poduzeća)"
 
 #. Label of the basic_rate (Currency) field in DocType 'Stock Entry Detail'
 #: erpnext/stock/doctype/stock_entry_detail/stock_entry_detail.json
 msgid "Basic Rate (as per Stock UOM)"
-msgstr "Osnovna Cjena (prema Jedinici Zaliha)"
+msgstr "Osnovna Cijena (prema Jedinici Zaliha)"
 
 #. Name of a DocType
 #. Label of a Link in the Stock Workspace
@@ -8649,7 +8649,7 @@ msgstr "Faktura Interval u Planu pretplate mora biti Mjesec koji prati kalendars
 #: erpnext/projects/doctype/activity_cost/activity_cost.json
 #: erpnext/projects/doctype/timesheet_detail/timesheet_detail.json
 msgid "Billing Rate"
-msgstr "Faktura Cjena"
+msgstr "Faktura Cijena"
 
 #. Label of the billing_state (Data) field in DocType 'Tax Rule'
 #: erpnext/accounts/doctype/tax_rule/tax_rule.json
@@ -8786,7 +8786,7 @@ msgstr "Ugovorni Nalog Artikal"
 #: erpnext/selling/doctype/quotation_item/quotation_item.json
 #: erpnext/selling/doctype/sales_order_item/sales_order_item.json
 msgid "Blanket Order Rate"
-msgstr "Cjena po Ugovornom Nalogu"
+msgstr "Cijena po Ugovornom Nalogu"
 
 #. Label of the blanket_order_section (Section Break) field in DocType 'Buying
 #. Settings'
@@ -9307,7 +9307,7 @@ msgstr "Nabavni Cjenovnik"
 
 #: erpnext/stock/report/item_price_stock/item_price_stock.py:46
 msgid "Buying Rate"
-msgstr "Nabavna Cjena"
+msgstr "Nabavna Cijena"
 
 #. Name of a DocType
 #. Label of a Link in the Buying Workspace
@@ -9456,7 +9456,7 @@ msgstr "Izračunaj procijenjeno vrijeme dolaska"
 #. Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Calculate Product Bundle price based on child Item's rates"
-msgstr "Obračunaj Cjenu Paketa Artikala na osnovu cjena Podređenih Artikala"
+msgstr "Obračunaj Cjenu Paketa Artikala na osnovu cijena Podređenih Artikala"
 
 #. Description of the 'Hidden Line (Internal Use Only)' (Check) field in
 #. DocType 'Financial Report Row'
@@ -13348,7 +13348,7 @@ msgstr "Detalji Obračuna Troškova"
 #: erpnext/projects/doctype/activity_cost/activity_cost.json
 #: erpnext/projects/doctype/timesheet_detail/timesheet_detail.json
 msgid "Costing Rate"
-msgstr "Obračunata Cjena"
+msgstr "Obračunata Cijena"
 
 #. Label of the project_details (Section Break) field in DocType 'Project'
 #: erpnext/projects/doctype/project/project.json
@@ -15354,7 +15354,7 @@ msgstr "Dobavljač Klijenta"
 #. Name of a report
 #: erpnext/selling/report/customer_wise_item_price/customer_wise_item_price.json
 msgid "Customer-wise Item Price"
-msgstr "Cjena artikla po Klijentu"
+msgstr "Cijena artikla po Klijentu"
 
 #: erpnext/crm/report/lost_opportunity/lost_opportunity.py:44
 msgid "Customer/Lead Name"
@@ -15973,7 +15973,7 @@ msgstr "Standard Bankovni Račun"
 #. Label of the billing_rate (Currency) field in DocType 'Activity Type'
 #: erpnext/projects/doctype/activity_type/activity_type.json
 msgid "Default Billing Rate"
-msgstr "Standard Faktura Cjena"
+msgstr "Standard Faktura Cijena"
 
 #. Label of the buying_cost_center (Link) field in DocType 'Item Default'
 #: erpnext/stock/doctype/item_default/item_default.json
@@ -16028,7 +16028,7 @@ msgstr "Standard Račun Troškova Prodanih Proizvoda"
 #. Label of the costing_rate (Currency) field in DocType 'Activity Type'
 #: erpnext/projects/doctype/activity_type/activity_type.json
 msgid "Default Costing Rate"
-msgstr "Standard Obračunata Cjena"
+msgstr "Standard Obračunata Cijena"
 
 #. Label of the default_currency (Link) field in DocType 'Company'
 #. Label of the default_currency (Link) field in DocType 'Global Defaults'
@@ -19355,13 +19355,13 @@ msgstr "Omogući ovu opciju za izračunavanje dnevne amortizacije uzimajući u o
 #. 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Enable this option to permit the use of negative rates for items in sales transactions. This setting is useful for applying substantial discounts, processing refunds or returns, and handling special promotional pricing."
-msgstr "Omogući ovu opciju kako biste dozvolili upotrebu negativnih cjena za artiklee u prodajnim transakcijama. Ova postavka je korisna za primjenu značajnih popusta, obradu povrata novca ili vraćanja robe te za rukovanje posebnim promotivnim cjenama."
+msgstr "Omogući ovu opciju kako biste dozvolili upotrebu negativnih cijena za artiklee u prodajnim transakcijama. Ova postavka je korisna za primjenu značajnih popusta, obradu povrata novca ili vraćanja robe te za rukovanje posebnim promotivnim cijenama."
 
 #. Description of the 'Validate selling price for Item against purchase or
 #. valuation rate' (Check) field in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Enable this to block transactions where the selling price is less than the purchase or valuation rate"
-msgstr "Omogući ovo da blokira transakcije u kojima je prodajna cjena manja od cjene nabave ili procjene"
+msgstr "Omogući ovo da blokira transakcije u kojima je prodajna cijena manja od cjene nabave ili procjene"
 
 #: erpnext/support/doctype/service_level_agreement/service_level_agreement.js:34
 msgid "Enable to apply SLA on every {0}"
@@ -19435,9 +19435,9 @@ msgid "Enabling this will do the following:\n"
 msgstr "Omogućavanje ovoga će učiniti sljedeće:\n"
 "<ul style=\"padding-left:16px\">\n"
 "<li>Omogućiti uređivanje kolone cjene u svim tabelama Pakiranih/Paketnih artikala.</li>\n"
-"<li>Izračunati cjene svih <a href=\"/desk/product-bundle\" rel=\"noopener noreferrer\">paketa artikala</a> u tabeli artikala na osnovu cjena njihovih podređenih artikala navedenih u tabeli pakiranih/paketiranih artikala. </li>\n"
+"<li>Izračunati cjene svih <a href=\"/desk/product-bundle\" rel=\"noopener noreferrer\">paketa artikala</a> u tabeli artikala na osnovu cijena njihovih podređenih artikala navedenih u tabeli pakiranih/paketiranih artikala. </li>\n"
 "</ul>\n"
-"Napomena: Ako je ovo omogućeno, ažuriranje cjene artikala u paketu u tabeli artikala neće promijeniti njegovu cjenu. Cjena će se vratiti na cjenu zasnovanu na podređenim artiklima prilikom spremanja dokumenta."
+"Napomena: Ako je ovo omogućeno, ažuriranje cjene artikala u paketu u tabeli artikala neće promijeniti njegovu cjenu. Cijena će se vratiti na cjenu zasnovanu na podređenim artiklima prilikom spremanja dokumenta."
 
 #. Label of the encashment_date (Date) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
@@ -19777,7 +19777,7 @@ msgstr "Očekivani Trošak"
 #. Order Operation'
 #: erpnext/manufacturing/doctype/work_order_operation/work_order_operation.json
 msgid "Estimated Time and Cost"
-msgstr "Procijenjeno Vrijeme i Cjena"
+msgstr "Procijenjeno Vrijeme i Cijena"
 
 #. Label of the period (Select) field in DocType 'Supplier Scorecard'
 #: erpnext/buying/doctype/supplier_scorecard/supplier_scorecard.json
@@ -19786,7 +19786,7 @@ msgstr "Period Evaluacije"
 
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.js:87
 msgid "Even if there are multiple Pricing Rules with highest priority, then following internal priorities are applied:"
-msgstr "Čak i ako postoji više pravila za određivanje cjena s najvišim prioritetom, primjenjuju se sljedeći interni prioriteti:"
+msgstr "Čak i ako postoji više pravila za određivanje cijena s najvišim prioritetom, primjenjuju se sljedeći interni prioriteti:"
 
 #. Title of an incoterm
 #: erpnext/setup/doctype/incoterm/incoterms.csv:2
@@ -20448,7 +20448,7 @@ msgstr "Poređenje FIFO reda u odnosu na Količinu Nakon Transakcije"
 #: erpnext/stock/doctype/serial_and_batch_entry/serial_and_batch_entry.json
 #: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.json
 msgid "FIFO Stock Queue (qty, rate)"
-msgstr "FIFO red Zaliha (količina, cjena)"
+msgstr "FIFO red Zaliha (količina, cijena)"
 
 #: erpnext/stock/report/fifo_queue_vs_qty_after_transaction_comparison/fifo_queue_vs_qty_after_transaction_comparison.py:179
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:238
@@ -21231,7 +21231,7 @@ msgstr "Ispravak Unosa Paketa Serijskog i Šaržnog Broja"
 #. Rule'
 #: erpnext/accounts/doctype/shipping_rule/shipping_rule.json
 msgid "Fixed"
-msgstr "Fiksna Cjena"
+msgstr "Fiksna Cijena"
 
 #. Option for the 'Account Type' (Select) field in DocType 'Account'
 #: erpnext/accounts/doctype/account/account.json
@@ -21293,7 +21293,7 @@ msgstr "Fiksni račun odlazne e-pošte"
 #. 'Subscription Plan'
 #: erpnext/accounts/doctype/subscription_plan/subscription_plan.json
 msgid "Fixed Rate"
-msgstr "Fiksna Cjena"
+msgstr "Fiksna Cijena"
 
 #. Label of the fixed_time (Check) field in DocType 'BOM Operation'
 #: erpnext/manufacturing/doctype/bom_operation/bom_operation.json
@@ -21732,7 +21732,7 @@ msgstr "Besplatni Artikal"
 #. Label of the free_item_rate (Currency) field in DocType 'Pricing Rule'
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.json
 msgid "Free Item Rate"
-msgstr "Cjena Besplatnog Artikla"
+msgstr "Cijena Besplatnog Artikla"
 
 #. Title of an incoterm
 #: erpnext/setup/doctype/incoterm/incoterms.csv:5
@@ -23854,7 +23854,7 @@ msgstr "Ako je onemogućeno, polje 'Ukopno Zaokruženo' neće biti vidljivo ni u
 #. List'
 #: erpnext/stock/doctype/pick_list/pick_list.json
 msgid "If enabled then system won't apply the pricing rule on the delivery note which will be create from the pick list"
-msgstr "Ako je omogućeno, sistem neće primijeniti pravilo cjena na dostavnicu koja će biti izrađena sa liste odabira"
+msgstr "Ako je omogućeno, sistem neće primijeniti pravilo cijena na dostavnicu koja će biti izrađena sa liste odabira"
 
 #. Description of the 'Pick Manually' (Check) field in DocType 'Pick List'
 #: erpnext/stock/doctype/pick_list/pick_list.json
@@ -23954,7 +23954,7 @@ msgstr "Ako je omogućeno, objedinjene fakture će imati onemogućeno zaokružen
 #. field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "If enabled, the item rate won't adjust to the valuation rate during internal transfers, but accounting will still use the valuation rate. This will allow the user to specify a different rate for printing or taxation purposes."
-msgstr "Ako je omogućeno, cjena artikla se neće prilagođavati stopi vrednovanja tokom internih transfera, ali će knjigovodstvo i dalje koristiti stopu vrednovanja. Ovo će omogućiti korisniku da odredi drugačiju stopu za potrebe ispisa ili oporezivanja."
+msgstr "Ako je omogućeno, cijena artikla se neće prilagođavati stopi vrednovanja tokom internih transfera, ali će knjigovodstvo i dalje koristiti stopu vrednovanja. Ovo će omogućiti korisniku da odredi drugačiju stopu za potrebe ispisa ili oporezivanja."
 
 #. Description of the 'Validate Material Transfer warehouses' (Check) field in
 #. DocType 'Stock Settings'
@@ -24008,7 +24008,7 @@ msgstr "Ako je omogućeno, sistem će koristiti metodu vrednovanja pokretnog pro
 #. Rule'
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.json
 msgid "If enabled, then system will only validate the pricing rule and not apply automatically. User has to manually set the discount percentage / margin / free items to validate the pricing rule"
-msgstr "Ako je omogućeno, sistem će samo potvrditi pravilo cjena i neće se automatski primjenjivati. Korisnik mora ručno podesiti postotak popusta / maržu / besplatne artikle kako bi potvrdio pravilo cjena"
+msgstr "Ako je omogućeno, sistem će samo potvrditi pravilo cijena i neće se automatski primjenjivati. Korisnik mora ručno podesiti postotak popusta / maržu / besplatne artikle kako bi potvrdio pravilo cijena"
 
 #. Description of the 'Include in Charts' (Check) field in DocType 'Financial
 #. Report Row'
@@ -24031,7 +24031,7 @@ msgstr "Ako je omogućeno, korisnici moraju ručno unijeti Serijski broj / Šar�
 #. Description of the 'Variant Of' (Link) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "If item is a variant of another item then description, image, pricing, taxes etc will be set from the template unless explicitly specified"
-msgstr "Ako je artikal varijanta drugog artikla, opis, slika, cjena, PDV  itd. bit će postavljeni iz predloška osim ako nije eksplicitno navedeno"
+msgstr "Ako je artikal varijanta drugog artikla, opis, slika, cijena, PDV  itd. bit će postavljeni iz predloška osim ako nije eksplicitno navedeno"
 
 #. Description of the 'Get Items for Purchase / Transfer' (Button) field in
 #. DocType 'Production Plan'
@@ -24058,7 +24058,7 @@ msgstr "Ukoliko više cjenovnih pravila nastavljaju da važe, korisnik treba ru�
 #. field in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "If no Item Price is found for an item in the Price List set in the transaction, prices from the Default Price List will be fetched."
-msgstr "Ako se za artikl u cjenovniku postavljenom u transakciji ne pronađe cjena, cjene će se preuzeti iz standard cjenovnika."
+msgstr "Ako se za artikl u cjenovniku postavljenom u transakciji ne pronađe cijena, cjene će se preuzeti iz standard cjenovnika."
 
 #. Description of the 'Automatically add taxes from Taxes and Charges Template'
 #. (Check) field in DocType 'Accounts Settings'
@@ -24082,7 +24082,7 @@ msgstr "Ako stranka ne postoji, izradi je pomoću polja Ime Dobavljača."
 #. Rule'
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.json
 msgid "If rate is zero then item will be treated as \"Free Item\""
-msgstr "Ako je cjena nula, artikal će se tretirati kao \"Besplatni Artikal\""
+msgstr "Ako je cijena nula, artikal će se tretirati kao \"Besplatni Artikal\""
 
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:259
 msgid "If rule matches, then:"
@@ -24090,7 +24090,7 @@ msgstr "Ako je pravilo usklađeno, onda:"
 
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.js:51
 msgid "If selected Pricing Rule is made for 'Rate', it will overwrite Price List. Pricing Rule rate is the final rate, so no further discount should be applied. Hence, in transactions like Sales Order, Purchase Order etc, it will be fetched in 'Rate' field, rather than 'Price List Rate' field."
-msgstr "Ako je odabrano Cjenovno Pravilo napravljeno za 'Cjenu', ono će yamjenuti Cjenovnik. Cjenovno Pravilo cjena je konačna cjena, tako da se ne treba primjenjivati daljnji popust. Stoga će se u transakcijama poput Narudžbenice, Narudžbenice itd., cjena postaviti u polje 'Cjena', a ne u polje 'Cjena Cjenovnika'."
+msgstr "Ako je odabrano Cjenovno Pravilo napravljeno za 'Cjenu', ono će yamjenuti Cjenovnik. Cjenovno Pravilo cijena je konačna cijena, tako da se ne treba primjenjivati daljnji popust. Stoga će se u transakcijama poput Narudžbenice, Narudžbenice itd., cijena postaviti u polje 'Cijena', a ne u polje 'Cijena Cjenovnika'."
 
 #. Description of the 'Default Accounts' (Table) field in DocType 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
@@ -24187,7 +24187,7 @@ msgstr "Ako je odabrano, trošak Sastavnice će se automatski ažurirati na osno
 
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.js:82
 msgid "If two or more Pricing Rules are found based on the above conditions, Priority is applied. Priority is a number between 0 to 20 while default value is zero (blank). Higher number means it will take precedence if there are multiple Pricing Rules with same conditions."
-msgstr "Ako se pronađu dva ili više pravila za određivanje cjena na osnovu gore navedenih uslova, primjenjuje se prioritet. Prioritet je broj između 0 i 20, dok je podrazumijevana vrijednost nula (prazno). Veći broj znači da će imati prioritet ako postoji više pravila za određivanje cjena sa istim uslovima."
+msgstr "Ako se pronađu dva ili više pravila za određivanje cijena na osnovu gore navedenih uslova, primjenjuje se prioritet. Prioritet je broj između 0 i 20, dok je podrazumijevana vrijednost nula (prazno). Veći broj znači da će imati prioritet ako postoji više pravila za određivanje cijena sa istim uslovima."
 
 #: erpnext/accounts/doctype/loyalty_program/loyalty_program.js:31
 msgid "If unlimited expiry for the Loyalty Points, keep the Expiry Duration empty or 0."
@@ -24327,11 +24327,11 @@ msgstr "Zanemari Početno kontrolu za izvještaj"
 #: erpnext/stock/doctype/pick_list/pick_list.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Ignore Pricing Rule"
-msgstr "Zanemari Pravilo Cjena"
+msgstr "Zanemari Pravilo Cijena"
 
 #: erpnext/selling/page/point_of_sale/pos_payment.js:335
 msgid "Ignore Pricing Rule is enabled. Cannot apply coupon code."
-msgstr "Zanemari da je Pravilnik Cjena omogućen. Nije moguće primijeniti kod kupona."
+msgstr "Zanemari da je Pravilnik Cijena omogućen. Nije moguće primijeniti kod kupona."
 
 #. Label of the ignore_cr_dr_notes (Check) field in DocType 'Process Statement
 #. Of Accounts'
@@ -25004,12 +25004,12 @@ msgstr "Dolazna Plaćanja"
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:213
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.py:96
 msgid "Incoming Rate"
-msgstr "Nabavna Cjena"
+msgstr "Nabavna Cijena"
 
 #. Label of the incoming_rate (Currency) field in DocType 'Sales Invoice Item'
 #: erpnext/accounts/doctype/sales_invoice_item/sales_invoice_item.json
 msgid "Incoming Rate (Costing)"
-msgstr "Nabavna Cjena (Obračun Troškova)"
+msgstr "Nabavna Cijena (Obračun Troškova)"
 
 #: erpnext/public/js/call_popup/call_popup.js:38
 msgid "Incoming call from {0}"
@@ -25849,7 +25849,7 @@ msgstr "Nevažeći Raspored"
 
 #: erpnext/controllers/selling_controller.py:303
 msgid "Invalid Selling Price"
-msgstr "Nevažeća Prodajna Cjena"
+msgstr "Nevažeća Prodajna Cijena"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:2247
 msgid "Invalid Serial and Batch Bundle"
@@ -27692,7 +27692,7 @@ msgstr "Artikal nije na Zalihi"
 #: erpnext/stock/workspace/stock/stock.json
 #: erpnext/workspace_sidebar/selling.json
 msgid "Item Price"
-msgstr "Cjena Artikla"
+msgstr "Cijena Artikla"
 
 #. Label of the item_price_settings_section (Section Break) field in DocType
 #. 'Accounts Settings'
@@ -27707,24 +27707,24 @@ msgstr "Postavke Cjene Artikla"
 #: erpnext/stock/workspace/stock/stock.json
 #: erpnext/workspace_sidebar/stock.json
 msgid "Item Price Stock"
-msgstr "Cjena Artikla na Zalihama"
+msgstr "Cijena Artikla na Zalihama"
 
 #: erpnext/stock/get_item_details.py:1230
 #: erpnext/stock/get_item_details.py:1254
 msgid "Item Price added for {0} in Price List - {1}"
-msgstr "Cjena artikla dodana za {0} u Cjenovniku - {1}"
+msgstr "Cijena artikla dodana za {0} u Cjenovniku - {1}"
 
 #: erpnext/stock/doctype/item_price/item_price.py:140
 msgid "Item Price appears multiple times based on Price List, Supplier/Customer, Currency, Item, Batch, UOM, Qty, and Dates."
-msgstr "Cjena Artikla se pojavljuje više puta na osnovu Cjenovnika, Dobavljača/Klijenta, Valute, Artikla, Šarže, Jedinice, Količine i Datuma."
+msgstr "Cijena Artikla se pojavljuje više puta na osnovu Cjenovnika, Dobavljača/Klijenta, Valute, Artikla, Šarže, Jedinice, Količine i Datuma."
 
 #: erpnext/stock/doctype/item/item.py:185
 msgid "Item Price created at rate {0}"
-msgstr "Cjena Artikla izrađena po stopi {0}"
+msgstr "Cijena Artikla izrađena po stopi {0}"
 
 #: erpnext/stock/get_item_details.py:1213
 msgid "Item Price updated for {0} in Price List {1}"
-msgstr "Cjena Artikla je ažurirana za {0} u Cjenovniku {1}"
+msgstr "Cijena Artikla je ažurirana za {0} u Cjenovniku {1}"
 
 #. Label of the item_prices_column (Column Break) field in DocType 'Item'
 #. Name of a report
@@ -28058,7 +28058,7 @@ msgstr "Količina artikla se ne može ažurirati jer su sirovine već obrađene.
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1553
 msgid "Item rate has been updated to zero as Allow Zero Valuation Rate is checked for item {0}"
-msgstr "Cjena Artikla je ažurirana na nulu jer je Dozvoli Nultu Stopu Vrednovanja odabrana za artikal {0}"
+msgstr "Cijena Artikla je ažurirana na nulu jer je Dozvoli Nultu Stopu Vrednovanja odabrana za artikal {0}"
 
 #: erpnext/stock/doctype/material_request/material_request.py:258
 msgid "Item rates have been updated based on the selected Buying Price List {0}"
@@ -28325,7 +28325,7 @@ msgstr "Artikli nisu pronađeni."
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1549
 msgid "Items rate has been updated to zero as Allow Zero Valuation Rate is checked for the following items: {0}"
-msgstr "Cjena Artikala je ažurirana na nulu jer je Dozvoli Nultu Stopu Vrednovanja izabrana za sljedeće artikle: {0}"
+msgstr "Cijena Artikala je ažurirana na nulu jer je Dozvoli Nultu Stopu Vrednovanja izabrana za sljedeće artikle: {0}"
 
 #. Label of the items_to_be_repost (Code) field in DocType 'Repost Item
 #. Valuation'
@@ -28926,7 +28926,7 @@ msgstr "Datum Posljednjeg Naloga"
 #: erpnext/stock/doctype/item/item.json
 #: erpnext/stock/report/item_prices/item_prices.py:56
 msgid "Last Purchase Rate"
-msgstr "Posljednja Nabavna Cjena"
+msgstr "Posljednja Nabavna Cijena"
 
 #. Label of the last_scanned_warehouse (Data) field in DocType 'POS Invoice'
 #. Label of the last_scanned_warehouse (Data) field in DocType 'Purchase
@@ -31094,7 +31094,7 @@ msgstr "Maksimalni Iznos Fakture"
 #. Label of the maximum_net_rate (Float) field in DocType 'Item Tax'
 #: erpnext/stock/doctype/item_tax/item_tax.json
 msgid "Maximum Net Rate"
-msgstr "Maksimalna Neto Cjena"
+msgstr "Maksimalna Neto Cijena"
 
 #. Label of the maximum_payment_amount (Currency) field in DocType 'Payment
 #. Reconciliation'
@@ -31488,7 +31488,7 @@ msgstr "Minimalna Dob Potencijalnog Klijenta (Dana)"
 #. Label of the minimum_net_rate (Float) field in DocType 'Item Tax'
 #: erpnext/stock/doctype/item_tax/item_tax.json
 msgid "Minimum Net Rate"
-msgstr "Minimalna Neto Cjena"
+msgstr "Minimalna Neto Cijena"
 
 #. Label of the min_order_qty (Float) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -31804,7 +31804,7 @@ msgstr "Mjesečne Inspekcije Kvaliteta"
 #. 'Subscription Plan'
 #: erpnext/accounts/doctype/subscription_plan/subscription_plan.json
 msgid "Monthly Rate"
-msgstr "Mjesečna Cjena"
+msgstr "Mjesečna Cijena"
 
 #. Label of the monthly_sales_target (Currency) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
@@ -32260,7 +32260,7 @@ msgstr "Neto Nabavni Iznos {0} ne može se amortizirati tokom {1} ciklusa."
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgid "Net Rate"
-msgstr "Neto Cjena"
+msgstr "Neto Cijena"
 
 #. Label of the base_net_rate (Currency) field in DocType 'POS Invoice Item'
 #. Label of the base_net_rate (Currency) field in DocType 'Purchase Invoice
@@ -32284,7 +32284,7 @@ msgstr "Neto Cjena"
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgid "Net Rate (Company Currency)"
-msgstr "Neto Cjena (Valuta Poduzeća)"
+msgstr "Neto Cijena (Valuta Poduzeća)"
 
 #. Label of the net_total (Currency) field in DocType 'POS Closing Entry'
 #. Label of the net_total (Currency) field in DocType 'POS Invoice'
@@ -32587,7 +32587,7 @@ msgstr "Novi Zadatak"
 
 #: erpnext/accounts/doctype/promotional_scheme/promotional_scheme.py:254
 msgid "New {0} pricing rules are created"
-msgstr "Nova {0} pravila određivanja cjena su izrađena"
+msgstr "Nova {0} pravila određivanja cijena su izrađena"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:34
 msgid "Newspaper Publishers"
@@ -34808,7 +34808,7 @@ msgstr "Odlazno Plaćanje"
 #: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.json
 #: erpnext/stock/report/stock_ledger/stock_ledger.py:382
 msgid "Outgoing Rate"
-msgstr "Odlazna Cjena"
+msgstr "Odlazna Cijena"
 
 #. Label of the outstanding (Currency) field in DocType 'Overdue Payment'
 #. Label of the outstanding_amount (Currency) field in DocType 'Payment Entry
@@ -39687,11 +39687,11 @@ msgstr "Prethodna Godina nije zatvorena, prvo je zatvorite"
 #: erpnext/buying/report/supplier_quotation_comparison/supplier_quotation_comparison.py:237
 #: erpnext/selling/page/point_of_sale/pos_item_selector.js:116
 msgid "Price"
-msgstr "Cjena"
+msgstr "Cijena"
 
 #: erpnext/buying/report/supplier_quotation_comparison/supplier_quotation_comparison.py:251
 msgid "Price ({0})"
-msgstr "Cjena ({0})"
+msgstr "Cijena ({0})"
 
 #. Label of the price_discount_scheme_section (Section Break) field in DocType
 #. 'Pricing Rule'
@@ -39703,7 +39703,7 @@ msgstr "Šema Popusta Cjene"
 #. Scheme'
 #: erpnext/accounts/doctype/promotional_scheme/promotional_scheme.json
 msgid "Price Discount Slabs"
-msgstr "Tabele Popusta Cjena"
+msgstr "Tabele Popusta Cijena"
 
 #. Label of the selling_price_list (Link) field in DocType 'POS Invoice'
 #. Label of the selling_price_list (Link) field in DocType 'POS Profile'
@@ -39878,7 +39878,7 @@ msgstr "Naziv Cjenovnika"
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Price List Rate"
-msgstr "Cjena Cjenovnika"
+msgstr "Cijena Cjenovnika"
 
 #. Label of the base_price_list_rate (Currency) field in DocType 'POS Invoice
 #. Item'
@@ -39911,7 +39911,7 @@ msgstr "Cjena Cjenovnika"
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgid "Price List Rate (Company Currency)"
-msgstr "Cjena Cjenovnika (Valuta Poduzeća)"
+msgstr "Cijena Cjenovnika (Valuta Poduzeća)"
 
 #: erpnext/stock/doctype/price_list/price_list.py:33
 msgid "Price List must be applicable for Buying or Selling"
@@ -39929,33 +39929,33 @@ msgstr "Cjenovnik {0} nije omogućen za {1}"
 #. Label of the price_not_uom_dependent (Check) field in DocType 'Price List'
 #: erpnext/stock/doctype/price_list/price_list.json
 msgid "Price Not UOM Dependent"
-msgstr "Cjena ne ovisi o Jedinici"
+msgstr "Cijena ne ovisi o Jedinici"
 
 #: erpnext/buying/report/supplier_quotation_comparison/supplier_quotation_comparison.py:258
 msgid "Price Per Unit ({0})"
-msgstr "Cjena po Jedinici ({0})"
+msgstr "Cijena po Jedinici ({0})"
 
 #: erpnext/selling/page/point_of_sale/pos_controller.js:687
 msgid "Price is not set for the item."
-msgstr "Cjena nije određena za artikal."
+msgstr "Cijena nije određena za artikal."
 
 #: erpnext/manufacturing/doctype/bom/bom.py:663
 msgid "Price not found for item {0} in price list {1}"
-msgstr "Cjena nije pronađena za artikal {0} u cjenovniku {1}"
+msgstr "Cijena nije pronađena za artikal {0} u cjenovniku {1}"
 
 #. Label of the price_or_product_discount (Select) field in DocType 'Pricing
 #. Rule'
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.json
 msgid "Price or Product Discount"
-msgstr "Cjena ili Popust na Artikal"
+msgstr "Cijena ili Popust na Artikal"
 
 #: erpnext/accounts/doctype/promotional_scheme/promotional_scheme.py:149
 msgid "Price or product discount slabs are required"
-msgstr "Tabele sa Cjenama ili Popustom su obevezne"
+msgstr "Tabele sa Cijenama ili Popustom su obevezne"
 
 #: erpnext/buying/report/supplier_quotation_comparison/supplier_quotation_comparison.py:244
 msgid "Price per Unit (Stock UOM)"
-msgstr "Cjena po Jedinici (Jedinica Zaliha)"
+msgstr "Cijena po Jedinici (Jedinica Zaliha)"
 
 #. Label of the prices_html (HTML) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -39972,7 +39972,7 @@ msgstr "Cjene HTML"
 #: erpnext/stock/doctype/item/item.json
 #: erpnext/stock/doctype/item/item_dashboard.py:19
 msgid "Pricing"
-msgstr "Određivanje Cjena"
+msgstr "Određivanje Cijena"
 
 #. Label of the pricing_rule (Link) field in DocType 'Coupon Code'
 #. Name of a DocType
@@ -39989,14 +39989,14 @@ msgstr "Određivanje Cjena"
 #: erpnext/stock/workspace/stock/stock.json
 #: erpnext/workspace_sidebar/selling.json
 msgid "Pricing Rule"
-msgstr "Pravilo Određivanja Cjena"
+msgstr "Pravilo Određivanja Cijena"
 
 #. Name of a DocType
 #. Label of the brands (Table) field in DocType 'Promotional Scheme'
 #: erpnext/accounts/doctype/pricing_rule_brand/pricing_rule_brand.json
 #: erpnext/accounts/doctype/promotional_scheme/promotional_scheme.json
 msgid "Pricing Rule Brand"
-msgstr "Brend Pravila Određivanja Cjena"
+msgstr "Brend Pravila Određivanja Cijena"
 
 #. Label of the pricing_rules (Table) field in DocType 'POS Invoice'
 #. Name of a DocType
@@ -40017,26 +40017,26 @@ msgstr "Brend Pravila Određivanja Cjena"
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Pricing Rule Detail"
-msgstr "Detalji Pravila Određivanja Cjena"
+msgstr "Detalji Pravila Određivanja Cijena"
 
 #. Label of the pricing_rule_help (HTML) field in DocType 'Pricing Rule'
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.json
 msgid "Pricing Rule Help"
-msgstr "Pomoć Pravila Određivanja Cjena"
+msgstr "Pomoć Pravila Određivanja Cijena"
 
 #. Name of a DocType
 #. Label of the items (Table) field in DocType 'Promotional Scheme'
 #: erpnext/accounts/doctype/pricing_rule_item_code/pricing_rule_item_code.json
 #: erpnext/accounts/doctype/promotional_scheme/promotional_scheme.json
 msgid "Pricing Rule Item Code"
-msgstr "Kod Artikla Pravila Određivanja Cjena"
+msgstr "Kod Artikla Pravila Određivanja Cijena"
 
 #. Name of a DocType
 #. Label of the item_groups (Table) field in DocType 'Promotional Scheme'
 #: erpnext/accounts/doctype/pricing_rule_item_group/pricing_rule_item_group.json
 #: erpnext/accounts/doctype/promotional_scheme/promotional_scheme.json
 msgid "Pricing Rule Item Group"
-msgstr "Grupa Artikal Pravila Određivanja Cjena"
+msgstr "Grupa Artikal Pravila Određivanja Cijena"
 
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.js:71
 msgid "Pricing Rule is first selected based on 'Apply On' field, which can be Item, Item Group or Brand."
@@ -40048,7 +40048,7 @@ msgstr "Cjenovno Pravilo je napravljeno da zamjeni cjenovnik / definiše procena
 
 #: erpnext/accounts/doctype/promotional_scheme/promotional_scheme.py:251
 msgid "Pricing Rule {0} is updated"
-msgstr "Pravilo Određivanja Cjena {0} je ažurirano"
+msgstr "Pravilo Određivanja Cijena {0} je ažurirano"
 
 #. Label of the pricing_rule_details (Section Break) field in DocType 'POS
 #. Invoice'
@@ -40102,7 +40102,7 @@ msgstr "Pravilo Određivanja Cjena {0} je ažurirano"
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgid "Pricing Rules"
-msgstr "Pravila Određivanja Cjena"
+msgstr "Pravila Određivanja Cijena"
 
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.js:79
 msgid "Pricing Rules are further filtered based on quantity."
@@ -41121,7 +41121,7 @@ msgstr "Pisanje Ponude"
 #: erpnext/setup/setup_wizard/data/sales_stage.txt:7
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:446
 msgid "Proposal/Price Quote"
-msgstr "Ponuda/Cjena"
+msgstr "Ponuda/Cijena"
 
 #. Label of the prorate (Check) field in DocType 'Subscription Settings'
 #: erpnext/accounts/doctype/subscription_settings/subscription_settings.json
@@ -42116,7 +42116,7 @@ msgstr "Količinski Dijagram"
 #. Capitalization Service Item'
 #: erpnext/assets/doctype/asset_capitalization_service_item/asset_capitalization_service_item.json
 msgid "Qty and Rate"
-msgstr "Količina i Cjena"
+msgstr "Količina i Cijena"
 
 #. Label of the tracking_section (Section Break) field in DocType 'Purchase
 #. Receipt Item'
@@ -42722,7 +42722,7 @@ msgstr "Količina i Opis"
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.json
 #: erpnext/subcontracting/doctype/subcontracting_order_item/subcontracting_order_item.json
 msgid "Quantity and Rate"
-msgstr "Količina i Cjena"
+msgstr "Količina i Cijena"
 
 #. Label of the quantity_and_warehouse (Section Break) field in DocType
 #. 'Material Request Item'
@@ -43081,12 +43081,12 @@ msgstr "Podigao (e-pošta)"
 #: erpnext/templates/form_grid/item_grid.html:8
 #: erpnext/templates/pages/order.html:100 erpnext/templates/pages/rfq.html:40
 msgid "Rate"
-msgstr "Cjena"
+msgstr "Cijena"
 
 #. Label of the rate_amount_section (Section Break) field in DocType 'BOM Item'
 #: erpnext/manufacturing/doctype/bom_item/bom_item.json
 msgid "Rate & Amount"
-msgstr "Cjena & Iznos"
+msgstr "Cijena & Iznos"
 
 #. Label of the base_rate (Currency) field in DocType 'POS Invoice Item'
 #. Label of the base_rate (Currency) field in DocType 'Purchase Invoice Item'
@@ -43109,14 +43109,14 @@ msgstr "Cjena & Iznos"
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgid "Rate (Company Currency)"
-msgstr "Cjena (Valuta Poduzeća)"
+msgstr "Cijena (Valuta Poduzeća)"
 
 #. Label of the rm_cost_as_per (Select) field in DocType 'BOM'
 #. Label of the rm_cost_as_per (Select) field in DocType 'BOM Creator'
 #: erpnext/manufacturing/doctype/bom/bom.json
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.json
 msgid "Rate Of Materials Based On"
-msgstr "Cjena Materijala na osnovu"
+msgstr "Cijena Materijala na osnovu"
 
 #. Label of the rate (Percent) field in DocType 'Lower Deduction Certificate'
 #: erpnext/regional/doctype/lower_deduction_certificate/lower_deduction_certificate.json
@@ -43127,7 +43127,7 @@ msgstr "Stopa PDV-a po odbitku prema certifikatu"
 #. Batch Entry'
 #: erpnext/stock/doctype/serial_and_batch_entry/serial_and_batch_entry.json
 msgid "Rate Section"
-msgstr "Sekcija Cjena"
+msgstr "Sekcija Cijena"
 
 #. Label of the rate_with_margin (Currency) field in DocType 'POS Invoice Item'
 #. Label of the rate_with_margin (Currency) field in DocType 'Purchase Invoice
@@ -43154,7 +43154,7 @@ msgstr "Sekcija Cjena"
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgid "Rate With Margin"
-msgstr "Cjena s Maržom"
+msgstr "Cijena s Maržom"
 
 #. Label of the base_rate_with_margin (Currency) field in DocType 'POS Invoice
 #. Item'
@@ -43181,7 +43181,7 @@ msgstr "Cjena s Maržom"
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgid "Rate With Margin (Company Currency)"
-msgstr "Cjena s Maržom (Valuta Poduzeća)"
+msgstr "Cijena s Maržom (Valuta Poduzeća)"
 
 #. Label of the rate_and_amount (Section Break) field in DocType 'Purchase
 #. Receipt Item'
@@ -43190,7 +43190,7 @@ msgstr "Cjena s Maržom (Valuta Poduzeća)"
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Rate and Amount"
-msgstr "Cjena i Iznos"
+msgstr "Cijena i Iznos"
 
 #. Description of the 'Exchange Rate' (Float) field in DocType 'POS Invoice'
 #. Description of the 'Exchange Rate' (Float) field in DocType 'Sales Invoice'
@@ -43292,18 +43292,18 @@ msgstr "Godišnja Kamatna Stopa (%)"
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgid "Rate of Stock UOM"
-msgstr "Cjena Jedinice Zaliha"
+msgstr "Cijena Jedinice Zaliha"
 
 #. Label of the rate_or_discount (Select) field in DocType 'Pricing Rule'
 #. Label of the rate_or_discount (Data) field in DocType 'Pricing Rule Detail'
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.json
 #: erpnext/accounts/doctype/pricing_rule_detail/pricing_rule_detail.json
 msgid "Rate or Discount"
-msgstr "Cjena ili Popust"
+msgstr "Cijena ili Popust"
 
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:202
 msgid "Rate or Discount is required for the price discount."
-msgstr "Za popust na cjenu potrebna je cjena ili popust."
+msgstr "Za popust na cjenu potrebna je cijena ili popust."
 
 #. Label of the rates (Table) field in DocType 'Tax Withholding Category'
 #. Label of the rates_section (Section Break) field in DocType 'Stock Entry
@@ -43335,7 +43335,7 @@ msgstr "Troškak Sirovine"
 #. Label of the base_raw_material_cost (Currency) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "Raw Material Cost (Company Currency)"
-msgstr "Cjena Sirovina (Valuta Poduzeća)"
+msgstr "Cijena Sirovina (Valuta Poduzeća)"
 
 #. Label of the rm_cost_per_qty (Currency) field in DocType 'Subcontracting
 #. Order Item'
@@ -43344,7 +43344,7 @@ msgstr "Cjena Sirovina (Valuta Poduzeća)"
 #: erpnext/subcontracting/doctype/subcontracting_order_item/subcontracting_order_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Raw Material Cost Per Qty"
-msgstr "Cjena Sirovine po Količini"
+msgstr "Cijena Sirovine po Količini"
 
 #: erpnext/manufacturing/report/work_order_consumed_materials/work_order_consumed_materials.py:132
 msgid "Raw Material Item"
@@ -43452,7 +43452,7 @@ msgstr "Dostavljene Sirovine"
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Raw Materials Supplied Cost"
-msgstr "Cjena Dostavljenih Sirovina"
+msgstr "Cijena Dostavljenih Sirovina"
 
 #: erpnext/manufacturing/doctype/bom/bom.py:823
 msgid "Raw Materials cannot be blank."
@@ -46289,7 +46289,7 @@ msgstr "Red br. {0}: Unesi količinu za artikal {1} jer nije nula."
 
 #: erpnext/controllers/sales_and_purchase_return.py:150
 msgid "Row # {0}: Rate cannot be greater than the rate used in {1} {2}"
-msgstr "Red # {0}: Cjena ne može biti veća od cjene korištene u {1} {2}"
+msgstr "Red # {0}: Cijena ne može biti veća od cjene korištene u {1} {2}"
 
 #: erpnext/controllers/sales_and_purchase_return.py:134
 msgid "Row # {0}: Returned Item {1} does not exist in {2} {3}"
@@ -46434,7 +46434,7 @@ msgstr "Red #{0}: Ne može se izbrisati artikal {1} koja je već u ovom Prodajno
 
 #: erpnext/controllers/accounts_controller.py:4228
 msgid "Row #{0}: Cannot set Rate if the billed amount is greater than the amount for Item {1}."
-msgstr "Red #{0}: Ne može se postaviti cjena ako je fakturisani iznos veći od iznosa za artikal {1}."
+msgstr "Red #{0}: Ne može se postaviti cijena ako je fakturisani iznos veći od iznosa za artikal {1}."
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:1171
 msgid "Row #{0}: Cannot transfer more than Required Qty {1} for Item {2} against Job Card {3}"
@@ -46780,7 +46780,7 @@ msgstr "Red #{0}: Količina koju treba rezervisati za artikal {1} treba biti ve�
 #: erpnext/utilities/transaction_base.py:172
 #: erpnext/utilities/transaction_base.py:178
 msgid "Row #{0}: Rate must be same as {1}: {2} ({3} / {4})"
-msgstr "Red #{0}: Cjena mora biti ista kao {1}: {2} ({3} / {4})"
+msgstr "Red #{0}: Cijena mora biti ista kao {1}: {2} ({3} / {4})"
 
 #: erpnext/stock/doctype/quality_inspection/quality_inspection.py:320
 msgid "Row #{0}: Reading {1} {2} is not a valid number in the {3} number format. Use {4} as the decimal separator."
@@ -47023,7 +47023,7 @@ msgstr "Red #{idx}: Ne može se odabrati Skladište Dobavljača dok isporučuje 
 
 #: erpnext/controllers/buying_controller.py:663
 msgid "Row #{idx}: Item rate has been updated as per valuation rate since its an internal stock transfer."
-msgstr "Red #{idx}: Cjena artikla je ažurirana prema stopi vrednovanja zato što je ovo interni prijenos zaliha."
+msgstr "Red #{idx}: Cijena artikla je ažurirana prema stopi vrednovanja zato što je ovo interni prijenos zaliha."
 
 #: erpnext/controllers/buying_controller.py:1142
 msgid "Row #{idx}: Please enter a location for the asset item {item_code}."
@@ -47278,7 +47278,7 @@ msgstr "Red {0}: Šablon PDV-a za Artikal ažuriran je prema valjanosti i primij
 
 #: erpnext/controllers/selling_controller.py:636
 msgid "Row {0}: Item rate has been updated as per valuation rate since its an internal stock transfer"
-msgstr "Red {0}: Cjena artikla je ažurirana prema stopi vrednovanja zato što je ovo interni prijenos zaliha"
+msgstr "Red {0}: Cijena artikla je ažurirana prema stopi vrednovanja zato što je ovo interni prijenos zaliha"
 
 #: erpnext/controllers/subcontracting_controller.py:152
 msgid "Row {0}: Item {1} must be a stock item."
@@ -47822,7 +47822,7 @@ msgstr "Lijevak Prodaje"
 #: erpnext/accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgid "Sales Incoming Rate"
-msgstr "Prodajna Ulazna Cjena"
+msgstr "Prodajna Ulazna Cijena"
 
 #. Option for the 'Reference Type' (Select) field in DocType 'Journal Entry
 #. Account'
@@ -49504,7 +49504,7 @@ msgstr "Prodajni Cjenovnik"
 #: erpnext/selling/report/customer_wise_item_price/customer_wise_item_price.py:36
 #: erpnext/stock/report/item_price_stock/item_price_stock.py:54
 msgid "Selling Rate"
-msgstr "Prodajna Cjena"
+msgstr "Prodajna Cijena"
 
 #. Name of a DocType
 #. Label of a Link in the Selling Workspace
@@ -50113,7 +50113,7 @@ msgstr "Servis Adresa"
 #: erpnext/subcontracting/doctype/subcontracting_order_item/subcontracting_order_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Service Cost Per Qty"
-msgstr "Cjena Servisa po Kolicini"
+msgstr "Cijena Servisa po Kolicini"
 
 #. Name of a DocType
 #: erpnext/support/doctype/service_day/service_day.json
@@ -51857,7 +51857,7 @@ msgstr "Standard Prodaja"
 #. Label of the standard_rate (Currency) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Standard Selling Rate"
-msgstr "Standard Prodajna Cjena"
+msgstr "Standard Prodajna Cijena"
 
 #. Option for the 'Create Chart Of Accounts Based On' (Select) field in DocType
 #. 'Company'
@@ -53508,7 +53508,7 @@ msgstr "Planovi Pretplate"
 #. Plan'
 #: erpnext/accounts/doctype/subscription_plan/subscription_plan.json
 msgid "Subscription Price Based On"
-msgstr "Cjena Pretplate na osnovu"
+msgstr "Cijena Pretplate na osnovu"
 
 #. Name of a DocType
 #. Label of a Link in the Invoicing Workspace
@@ -54453,7 +54453,7 @@ msgstr "Račun Fiksne Imovine"
 #. Capitalization'
 #: erpnext/assets/doctype/asset_capitalization/asset_capitalization.json
 msgid "Target Incoming Rate"
-msgstr "Ciljana Nabavna Cjena"
+msgstr "Ciljana Nabavna Cijena"
 
 #. Label of the target_item_code (Link) field in DocType 'Asset Capitalization'
 #: erpnext/assets/doctype/asset_capitalization/asset_capitalization.json
@@ -55929,7 +55929,7 @@ msgstr "Procenat kojim vam je dozvoljeno prenijeti više naspram naručene koli�
 #. Description of the 'Last Purchase Rate' (Float) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "The rate at which this item was last purchased via a Purchase Invoice. Auto-updated by the system."
-msgstr "Cjena po kojoj je ovaj artikal posljednji put nabavljen putem fakture. Sistem automatski ažurira."
+msgstr "Cijena po kojoj je ovaj artikal posljednji put nabavljen putem fakture. Sistem automatski ažurira."
 
 #: banking/src/pages/BankStatementImporter.tsx:205
 msgid "The reference number of the transaction"
@@ -59141,7 +59141,7 @@ msgstr "Jedinica"
 
 #: erpnext/controllers/accounts_controller.py:4218
 msgid "Unit Price"
-msgstr "Jedinična Cjena"
+msgstr "Jedinična Cijena"
 
 #: erpnext/buying/report/procurement_tracker/procurement_tracker.py:68
 msgid "Unit of Measure"
@@ -60111,7 +60111,7 @@ msgstr "Potvrdi Negativne Zalihe"
 #. 'Pricing Rule'
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.json
 msgid "Validate Pricing Rule"
-msgstr "Potvrdi Pravilo Cjena"
+msgstr "Potvrdi Pravilo Cijena"
 
 #. Label of the validate_stock_on_save (Check) field in DocType 'POS Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
@@ -60470,7 +60470,7 @@ msgstr "Izrada varijante je stavljeno u red čekanja."
 
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:172
 msgid "Variant {0} and its template {1} cannot both be added to the same Pricing Rule"
-msgstr "Varijanta {0} i njen predložak {1} ne mogu oboje biti dodani istom Pravilu Određivanja cjena."
+msgstr "Varijanta {0} i njen predložak {1} ne mogu oboje biti dodani istom Pravilu Određivanja cijena."
 
 #. Name of a DocType
 #. Label of the vehicle (Link) field in DocType 'Delivery Trip'
@@ -60591,7 +60591,7 @@ msgstr "Prikaži Pokrivenost Računa"
 
 #: erpnext/stock/doctype/item/item_prices.html:123
 msgid "View All Prices"
-msgstr "Prikaži Sve Cjena"
+msgstr "Prikaži Sve Cijena"
 
 #: erpnext/manufacturing/doctype/bom_update_tool/bom_update_tool.js:25
 msgid "View BOM Update Log"
@@ -61016,7 +61016,7 @@ msgstr "Radni nalozi u toku"
 #: erpnext/patches/v16_0/make_workstation_operating_components.py:50
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:320
 msgid "Wages"
-msgstr "Cjena Rada"
+msgstr "Cijena Rada"
 
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.js:435
 msgid "Waiting for payment..."
@@ -61267,13 +61267,13 @@ msgstr "Upozori pri novim Zahtjevima za Ponudu"
 #. in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Warn or stop if Item rate is changed in Delivery Notes and Sales Invoices generated from a Sales Order."
-msgstr "Upozori ili zaustavi ako se cjena artikla promijeni u Otpremnicama i Prodajnim Fakturama izrađenih iz Prodajnog Naloga."
+msgstr "Upozori ili zaustavi ako se cijena artikla promijeni u Otpremnicama i Prodajnim Fakturama izrađenih iz Prodajnog Naloga."
 
 #. Description of the 'Maintain same rate throughout the purchase  cycle'
 #. (Check) field in DocType 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "Warn or stop if Item rate is changed in Purchase Invoice or Purchase Receipt generated from a Purchase Order."
-msgstr "Upozori ili zaustavi ako se cjena artikla promijeni u fakturi ili potvrdi o nabavi izrađenoj iz naloga nabave."
+msgstr "Upozori ili zaustavi ako se cijena artikla promijeni u fakturi ili potvrdi o nabavi izrađenoj iz naloga nabave."
 
 #: erpnext/projects/doctype/timesheet_detail/timesheet_detail.py:134
 msgid "Warning - Row {0}: Billing Hours are more than Actual Hours"
@@ -61602,7 +61602,7 @@ msgstr "Kada je odabrano, sistem će za imenovanje dokumenta koristiti datum i v
 
 #: erpnext/stock/doctype/item/item.js:1312
 msgid "When creating an Item, entering a value for this field will automatically create an Item Price at the backend."
-msgstr "Kada izradi artikal, unosom vrijednosti za ovo polje automatski će se izraditi Cjena Artikla u pozadini."
+msgstr "Kada izradi artikal, unosom vrijednosti za ovo polje automatski će se izraditi Cijena Artikla u pozadini."
 
 #. Description of the 'Enable cut-off date on creating bulk Delivery Notes'
 #. (Check) field in DocType 'Selling Settings'
@@ -61617,7 +61617,7 @@ msgstr "Kada je omogućeno, transakcije s ovim dobavljačem bit će blokirane na
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:437
 msgid "When there are multiple finished goods ({0}) in a Repack stock entry, the basic rate for all finished goods must be set manually. To set rate manually, enable the checkbox 'Set Basic Rate Manually' in the respective finished good row."
-msgstr "Kada postoji više gotovih proizvoda ({0}) u unosu zaliha za ponovno pakovanje, osnovna cjena za sve gotove proizvode mora se postaviti ručno. Da biste cjenu postavili ručno, odaberi polje za potvrdu 'Ručno postavi osnovnu cjenu' u odgovarajućem redu gotovih proizvoda."
+msgstr "Kada postoji više gotovih proizvoda ({0}) u unosu zaliha za ponovno pakovanje, osnovna cijena za sve gotove proizvode mora se postaviti ručno. Da biste cjenu postavili ručno, odaberi polje za potvrdu 'Ručno postavi osnovnu cjenu' u odgovarajućem redu gotovih proizvoda."
 
 #. Description of the 'Deferred Expense Account' (Link) field in DocType 'Item
 #. Default'
@@ -62456,11 +62456,11 @@ msgstr "Pozvani ste da sarađujete na projektu {0}."
 
 #: erpnext/stock/doctype/stock_settings/stock_settings.py:260
 msgid "You have enabled {0} and {1} in {2}. This can lead to prices from the default price list being inserted in the transaction price list."
-msgstr "Omogućili ste {0} i {1} u {2}. Ovo može dovesti do umetanja cjena iz standardnog cjenovnika u cjenovnik transakcija."
+msgstr "Omogućili ste {0} i {1} u {2}. Ovo može dovesti do umetanja cijena iz standardnog cjenovnika u cjenovnik transakcija."
 
 #: erpnext/selling/doctype/selling_settings/selling_settings.py:110
 msgid "You have enabled {0} and {1} in {2}. This can lead to prices from the default price list being inserted into the transaction price list."
-msgstr "Omogućili ste {0} i {1} u {2}. Ovo može dovesti do umetanja cjena iz standardnog cjenovnika u cjenovnik transakcija."
+msgstr "Omogućili ste {0} i {1} u {2}. Ovo može dovesti do umetanja cijena iz standardnog cjenovnika u cjenovnik transakcija."
 
 #: erpnext/stock/doctype/shipment/shipment.js:445
 msgid "You have entered a duplicate Delivery Note on Row"

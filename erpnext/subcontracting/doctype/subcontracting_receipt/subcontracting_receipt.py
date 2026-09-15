@@ -145,6 +145,7 @@ class SubcontractingReceipt(SubcontractingController):
 		super().validate()
 
 		self.set_missing_values()
+		self.validate_with_previous_doc()
 
 		# after set_missing_values, so the secondary rates are computed from the same
 		# calculated per-qty costs the Get Secondary Items button uses
@@ -169,6 +170,24 @@ class SubcontractingReceipt(SubcontractingController):
 		# last so auto-populated supplied-item dimensions (set_supplied_items_inventory_dimensions)
 		# are already in place.
 		self.validate_inventory_dimension_mandatory()
+
+	def validate_with_previous_doc(self):
+		super().validate_with_previous_doc(
+			{
+				"Subcontracting Order Item": {
+					"ref_dn_field": "subcontracting_order_item",
+					"compare_fields": [["project", "="]],
+					"is_child_table": True,
+					"allow_duplicate_prev_row_id": True,
+				},
+				"Purchase Order Item": {
+					"ref_dn_field": "purchase_order_item",
+					"compare_fields": [["project", "="]],
+					"is_child_table": True,
+					"allow_duplicate_prev_row_id": True,
+				},
+			}
+		)
 
 	def on_submit(self):
 		self.validate_closed_subcontracting_order()
@@ -1211,5 +1230,7 @@ def add_po_items_to_pr(scr_doc, target_doc):
 						"warehouse": item.warehouse,
 						"purchase_order": item.parent,
 						"purchase_order_item": item.name,
+						"project": item.project,
+						"cost_center": item.cost_center,
 					},
 				)

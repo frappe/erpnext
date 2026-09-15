@@ -682,7 +682,7 @@
    "fieldname": "valuation_type",
    "fieldtype": "Select",
    "label": "Valuation Type",
-   "options": "\nValuation Rate\n% of FG Cost\nManual",
+   "options": "\nValuation Rate\n% of Component Cost\nManual",
    "read_only_depends_on": "eval:!doc.secondary_item_type || doc.bom_secondary_item"
   }
  ],

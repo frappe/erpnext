@@ -2,8 +2,6 @@
 # For license information, please see license.txt
 
 
-import json
-
 import frappe
 from frappe import _
 from frappe.utils import add_days, flt, getdate, nowdate
@@ -317,8 +315,15 @@ class InvoiceDiscounting(AccountsController):
 
 
 @frappe.whitelist()
-def get_invoices(filters):
-	filters = frappe._dict(json.loads(filters))
+def get_invoices(filters: str | dict):
+	filters = frappe._dict(frappe.parse_json(filters))
+
+	if not filters.get("company"):
+		frappe.throw(_("Please set company on the Document before requesting for invoices."))
+
+	frappe.has_permission("Company", doc=filters.get("company"), throw=True)
+	frappe.has_permission("Invoice Discounting", throw=True)
+
 	cond = []
 	if filters.customer:
 		cond.append("customer=%(customer)s")
