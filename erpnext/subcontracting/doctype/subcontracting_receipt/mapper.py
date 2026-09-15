@@ -168,5 +168,7 @@ def add_po_items_to_pr(scr_doc, target_doc):
 						"warehouse": item.warehouse,
 						"purchase_order": item.parent,
 						"purchase_order_item": item.name,
+						"project": item.project,
+						"cost_center": item.cost_center,
 					},
 				)
