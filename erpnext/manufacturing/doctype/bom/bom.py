@@ -842,6 +842,19 @@ class BOM(WebsiteGenerator):
 				)
 			)
 
+		bom_items = {self.item, *items}
+		bom_items.update(d.item_code for d in self.get("secondary_items"))
+		bom_items.update(d.finished_good for d in self.get("operations") if d.finished_good)
+
+		if disabled_items := frappe.db.get_all(
+			"Item", filters={"item_code": ("in", list(bom_items)), "disabled": 1}, pluck="name"
+		):
+			frappe.throw(
+				_("Disabled Item {0} cannot be used in BOMs.").format(
+					", ".join(get_link_to_form("Item", item) for item in disabled_items)
+				)
+			)
+
 	def check_recursion(self, bom_list=None):
 		"""Check whether recursion occurs in any bom"""
 
