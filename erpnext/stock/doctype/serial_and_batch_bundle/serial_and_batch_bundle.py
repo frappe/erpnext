@@ -3697,6 +3697,12 @@ def get_batch_no_from_serial_no(serial_no: str):
 def is_serial_batch_no_exists(
 	item_code: str, type_of_transaction: str, serial_no: str | None = None, batch_no: str | None = None
 ):
+	if serial_no:
+		frappe.has_permission("Serial No", "read", throw=True)
+
+	if batch_no:
+		frappe.has_permission("Batch", "read", throw=True)
+
 	if serial_no and not frappe.db.exists("Serial No", serial_no):
 		if type_of_transaction != "Inward":
 			frappe.throw(_("Serial No {0} does not exist").format(serial_no))
@@ -3714,14 +3720,14 @@ def make_serial_no(serial_no, item_code):
 	serial_no_doc = frappe.new_doc("Serial No")
 	serial_no_doc.serial_no = serial_no
 	serial_no_doc.item_code = item_code
-	serial_no_doc.save(ignore_permissions=True)
+	serial_no_doc.save()
 
 
 def make_batch_no(batch_no, item_code):
 	batch_doc = frappe.new_doc("Batch")
 	batch_doc.batch_id = batch_no
 	batch_doc.item = item_code
-	batch_doc.save(ignore_permissions=True)
+	batch_doc.save()
 
 
 @frappe.whitelist()
