@@ -9,6 +9,7 @@ from erpnext.buying.doctype.supplier_scorecard.supplier_scorecard import (
 	get_scorecard_date,
 	make_all_scorecards,
 )
+from erpnext.buying.doctype.supplier_scorecard.supplier_scorecard_dashboard import get_data
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -88,6 +89,30 @@ class TestSupplierScorecard(ERPNextTestSuite):
 		created = frappe.db.count("Supplier Scorecard Period", {"scorecard": doc.name, "docstatus": 1})
 		self.assertGreater(created, 0)
 		self.assertEqual(make_all_scorecards(doc.name), 0)
+
+	def test_dashboard_endpoint_returns_connection_count_and_heatmap(self):
+		supplier = create_test_supplier("_Test Supplier SC Dashboard")
+		frappe.db.set_value("Supplier", supplier, "creation", add_days(nowdate(), -75))
+
+		frappe.delete_doc_if_exists("Supplier Scorecard", supplier)
+		doc = make_supplier_scorecard()
+		doc.supplier = supplier
+		doc.name = supplier
+		doc.insert()
+
+		endpoint = get_data().get("method") or "frappe.desk.notifications.get_open_count"
+		dashboard = frappe.get_attr(endpoint)("Supplier Scorecard", doc.name)
+
+		counts = {link["doctype"]: link["count"] for link in dashboard["count"]["external_links_found"]}
+		periods = frappe.db.count("Supplier Scorecard Period", {"supplier": supplier})
+		self.assertGreater(periods, 0)
+		self.assertEqual(counts["Supplier Scorecard Period"], periods)
+
+		timeline_data = dashboard["timeline_data"]
+		self.assertTrue(timeline_data)
+		for timestamp, score in timeline_data.items():
+			self.assertIsInstance(timestamp, int | float)
+			self.assertIsInstance(score, int | float)
 
 
 def make_supplier_scorecard():
