@@ -602,8 +602,10 @@ class PickList(TransactionBase):
 	def set_item_locations(self, save: bool = False):
 		# gate the allocation up front rather than letting save() catch it afterwards — but only for a
 		# document that already exists: before_save and the SO/WO/MR mappers reach this on an unsaved
-		# list, where there is no record to authorise and insert() checks `create` anyway
-		if not self.is_new():
+		# list, where there is no record to authorise and insert() checks `create` anyway.
+		# Test the record, not is_new(): that reads `__islocal`, which arrives in the client's own
+		# JSON through run_doc_method, so a caller can skip the check by setting it on a saved list.
+		if self.name and frappe.db.exists("Pick List", self.name):
 			self.check_permission("write")
 
 		self.validate_for_qty()
