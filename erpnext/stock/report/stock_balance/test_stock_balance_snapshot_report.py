@@ -10,6 +10,7 @@ from frappe.utils import add_days, today
 
 from erpnext.stock.report.stock_balance import stock_balance
 from erpnext.stock.report.stock_balance import test_stock_balance as live_tests
+from erpnext.stock.report.stock_report_snapshot import StockReportSnapshot
 from erpnext.stock.report.stock_snapshot_test_utils import (
 	StockSnapshotReportMixin,
 	StockSnapshotTestCase,
@@ -20,7 +21,7 @@ from erpnext.stock.report.stock_snapshot_test_utils import (
 
 class TestStockBalanceSnapshotReport(StockSnapshotReportMixin, StockSnapshotTestCase):
 	report = stock_balance
-	receipt_options = ({}, {"show_stock_ageing_data": 1})
+	receipt_options = ({},)
 
 	def test_stock_closing_balance_matches(self):
 		self.make_movement(qty=10, basic_rate=100, posting_date=add_days(today(), -10))
@@ -35,7 +36,17 @@ class TestStockBalanceSnapshotReport(StockSnapshotReportMixin, StockSnapshotTest
 		closing.db_set("status", "Completed")
 		self.make_movement(qty=5, basic_rate=100)
 		self.assert_snapshot_matches(stock_balance)
-		self.assert_snapshot_matches(stock_balance, show_stock_ageing_data=1)
+
+	def test_ageing_columns_use_the_live_report(self):
+		self.make_movement(qty=10, basic_rate=100, posting_date=add_days(today(), -10))
+		filters = frappe._dict(self.filters, show_stock_ageing_data=1)
+		with patch.object(
+			StockReportSnapshot, "get_connection", side_effect=AssertionError("snapshot opened")
+		):
+			self.assertEqual(
+				stock_balance.execute_snapshot_report(deepcopy(filters)),
+				stock_balance.execute(deepcopy(filters)),
+			)
 
 	def test_small_negative_amounts_use_existing_rounding(self):
 		self.make_movement(qty=10, basic_rate=100)
@@ -95,11 +106,11 @@ class TestStockBalanceSnapshotReport(StockSnapshotReportMixin, StockSnapshotTest
 	def test_serial_bundle_details_match(self):
 		self.set_item("_Test DuckDB Serial Item", {"has_serial_no": 1, "serial_no_series": "DUCK-SN-.#####"})
 		self.make_movement(qty=3, basic_rate=100)
-		self.assert_snapshot_matches(stock_balance, show_stock_ageing_data=1)
+		self.assert_snapshot_matches(stock_balance)
 
 	def test_batch_opening_and_bundle_details_match(self):
 		self.make_batch_history()
-		self.assert_snapshot_matches(stock_balance, show_stock_ageing_data=1)
+		self.assert_snapshot_matches(stock_balance)
 
 	def test_inventory_dimension_opening_and_grouping_match(self):
 		opening = self.make_movement(qty=10, basic_rate=100, posting_date=add_days(today(), -10))
@@ -120,5 +131,7 @@ class TestStockBalanceSnapshotReport(StockSnapshotReportMixin, StockSnapshotTest
 
 
 TestStockBalanceOnSnapshot = on_snapshot(
-	live_tests.TestStockBalance, execute=partial(execute_on_snapshot, stock_balance)
+	live_tests.TestStockBalance,
+	skip=("test_show_stock_ageing_data_adds_ageing_columns",),
+	execute=partial(execute_on_snapshot, stock_balance),
 )

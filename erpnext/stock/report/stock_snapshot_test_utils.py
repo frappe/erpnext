@@ -143,8 +143,9 @@ def execute_on_snapshot(report, filters):
 		return report.execute_snapshot_report(deepcopy(filters))
 
 
-def on_snapshot(live_tests, **replacements):
-	"""A copy of a live report test class that runs the report from a DuckDB snapshot instead."""
+def on_snapshot(live_tests, skip=(), **replacements):
+	"""A copy of a live report test class that runs the report from a DuckDB snapshot instead,
+	without the tests named in `skip`."""
 
 	def setUp(self):
 		for name, replacement in replacements.items():
@@ -153,7 +154,8 @@ def on_snapshot(live_tests, **replacements):
 			self.addCleanup(patcher.stop)
 		live_tests.setUp(self)
 
-	return type(f"{live_tests.__name__}OnSnapshot", (live_tests,), {"setUp": setUp})
+	members = {"setUp": setUp, **dict.fromkeys(skip)}
+	return type(f"{live_tests.__name__}OnSnapshot", (live_tests,), members)
 
 
 class StockSnapshotReportMixin:
