@@ -12,7 +12,7 @@ from pypika.terms import Bracket, LiteralValue
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
-	get_dimension_with_children,
+	get_dimension_filter_condition,
 )
 
 TREE_DOCTYPES = frozenset(
@@ -385,27 +385,23 @@ class PartyLedgerSummaryReport:
 			query = query.where(IfNull(gle.finance_book, "") == self.filters.finance_book)
 
 		if self.filters.cost_center:
-			query = query.where((gle.cost_center).isin(self.filters.cost_center))
+			query = query.where(get_dimension_filter_condition(gle.cost_center, self.filters.cost_center))
 
 		if self.filters.project:
-			query = query.where((gle.project).isin(self.filters.project))
+			query = query.where(get_dimension_filter_condition(gle.project, self.filters.project, "Project"))
 
 		accounting_dimensions = get_accounting_dimensions(as_list=False)
 
 		if accounting_dimensions:
 			for dimension in accounting_dimensions:
 				if self.filters.get(dimension.fieldname):
-					if frappe.get_cached_value("DocType", dimension.document_type, "is_tree"):
-						self.filters[dimension.fieldname] = get_dimension_with_children(
-							dimension.document_type, self.filters.get(dimension.fieldname)
+					query = query.where(
+						get_dimension_filter_condition(
+							gle[dimension.fieldname],
+							self.filters[dimension.fieldname],
+							dimension.document_type,
 						)
-						query = query.where(
-							(gle[dimension.fieldname]).isin(self.filters.get(dimension.fieldname))
-						)
-					else:
-						query = query.where(
-							(gle[dimension.fieldname]).isin(self.filters.get(dimension.fieldname))
-						)
+					)
 
 		return query
 

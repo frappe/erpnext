@@ -16,6 +16,9 @@ from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger 
 	get_allowed_types_from_settings,
 )
 
+# Document names cannot contain ">", so this cannot collide with a dimension value.
+BLANK_ACCOUNTING_DIMENSION = "__blank__>"
+
 
 class AccountingDimension(Document):
 	# begin: auto-generated types
@@ -303,6 +306,54 @@ def get_dimension_with_children(doctype, dimensions):
 		all_dimensions += [c.name for c in children]
 
 	return all_dimensions
+
+
+def get_dimension_filter_values(values, dimension_doctype=None):
+	if isinstance(values, str):
+		try:
+			parsed_values = json.loads(values)
+		except json.JSONDecodeError:
+			pass
+		else:
+			if isinstance(parsed_values, list):
+				values = parsed_values
+
+	if values is None:
+		values = []
+	elif not isinstance(values, list | tuple):
+		values = [values]
+
+	include_blank = BLANK_ACCOUNTING_DIMENSION in values
+	values = [value for value in values if value != BLANK_ACCOUNTING_DIMENSION]
+
+	if values and dimension_doctype and frappe.get_cached_value("DocType", dimension_doctype, "is_tree"):
+		values = get_dimension_with_children(dimension_doctype, values)
+
+	return values, include_blank
+
+
+def get_dimension_filter_condition(field, values, dimension_doctype=None):
+	values, include_blank = get_dimension_filter_values(values, dimension_doctype)
+	condition = field.isin(values) if values else None
+
+	if include_blank:
+		blank_condition = field.isnull() | (field == "")
+		condition = condition | blank_condition if condition else blank_condition
+
+	return condition
+
+
+def get_dimension_filter_sql_condition(fieldname, values, dimension_doctype=None):
+	values, include_blank = get_dimension_filter_values(values, dimension_doctype)
+	parts = []
+
+	if values:
+		parts.append(f"{fieldname} IN ({', '.join(['?'] * len(values))})")
+
+	if include_blank:
+		parts.append(f"({fieldname} IS NULL OR {fieldname} = '')")
+
+	return f"({' OR '.join(parts)})" if parts else None, values
 
 
 @frappe.whitelist()
