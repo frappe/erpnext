@@ -21,6 +21,7 @@ from erpnext.stock.report.stock_ageing.stock_ageing import (
 	get_average_age,
 	normalize_fifo_queue,
 )
+from erpnext.stock.report.stock_report_snapshot import StockReportSnapshot
 from erpnext.stock.utils import add_additional_uom_columns
 
 
@@ -43,6 +44,18 @@ SLEntry = dict[str, Any]
 
 def execute(filters: StockBalanceFilter | None = None):
 	return StockBalanceReport(filters).run()
+
+
+def execute_snapshot_report(filters):
+	"""Ageing columns replay the ledger with live serial and batch lookups, which a frozen
+	ledger cannot match, so they keep the live report."""
+	from erpnext.stock.report.stock_balance.stock_balance_snapshot import StockBalanceSnapshotReport
+
+	if filters.get("show_stock_ageing_data"):
+		return execute(filters)
+
+	with StockReportSnapshot("Stock Balance", filters) as snapshot:
+		return StockBalanceSnapshotReport(filters, snapshot).run()
 
 
 class StockBalanceReport:
@@ -216,6 +229,9 @@ class StockBalanceReport:
 			self.item_warehouse_map, self.float_precision, self.inventory_dimensions
 		)
 
+	def run_query(self, query, **kwargs):
+		return query.run(**kwargs)
+
 	def prepare_stock_reco_voucher_wise_count(self):
 		self.stock_reco_voucher_wise_count = frappe._dict()
 
@@ -266,7 +282,7 @@ class StockBalanceReport:
 			if childrens:
 				query = query.where(doctype.warehouse.isin(childrens))
 
-		data = query.run(as_dict=True)
+		data = self.run_query(query, as_dict=True)
 		if not data:
 			return
 
