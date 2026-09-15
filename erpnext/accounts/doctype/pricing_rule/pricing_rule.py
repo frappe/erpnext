@@ -25,6 +25,13 @@ PRICING_TRANSACTION_DOCTYPES = frozenset(
 		"Purchase Receipt",
 		"Purchase Invoice",
 		"Material Request",
+		# these three also extend a controller that calls the pricing engine: BOM and BOM Creator
+		# through TransactionController, Request for Quotation through BuyingController
+		"BOM",
+		"BOM Creator",
+		"Request for Quotation",
+		# no client sends this one, but set_transaction_type below still branches on it
+		"Opportunity",
 	}
 )
 
