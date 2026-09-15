@@ -231,7 +231,7 @@ export const BANK_LOGOS: { keywords: string[], logo: string, locale?: string[], 
     {
         keywords: ['Federal Bank'],
         logo: 'Federal_Bank.png',
-        logoDark: 'Federal_Bank-dark.png',
+        logoDark: 'Federal_Bank-Dark.png',
         locale: ['India']
     },
     {

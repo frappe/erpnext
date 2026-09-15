@@ -34,7 +34,7 @@ from erpnext.stock.get_item_details import (
 	get_default_cost_center,
 )
 from erpnext.stock.stock_ledger import get_previous_sle, get_valuation_rate
-from erpnext.stock.utils import get_incoming_rate
+from erpnext.stock.utils import get_combine_datetime, get_incoming_rate
 
 from .services.disassemble import DisassembleStockEntry
 from .services.manufacturing import (
@@ -736,6 +736,18 @@ class StockEntry(StockController, SubcontractingInwardController):
 			raise_error_if_no_rate=raise_error_if_no_rate,
 			batch_no=d.batch_no,
 			serial_and_batch_bundle=d.serial_and_batch_bundle,
+			posting_datetime=get_combine_datetime(self.posting_date, self.posting_time),
+			creation=self.first_sle_creation,
+		)
+
+	@property
+	def first_sle_creation(self):
+		"""Creation of this entry's earliest ledger entry, if it has posted any yet."""
+		return frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": self.name, "voucher_type": self.doctype, "is_cancelled": 0},
+			"creation",
+			order_by="creation asc",
 		)
 
 	def _notify_zero_valuation_rate(self, items):
@@ -808,7 +820,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 	def set_bomless_secondary_valuation_types(self):
 		"""Secondary rows without a BOM link choose their own costing: valuation rate or manual.
 
-		There is no percentage to allocate without a BOM row, so % of FG Cost is rejected."""
+		There is no percentage to allocate without a BOM row, so % of Component Cost is rejected."""
 		for d in self.get("items"):
 			if d.bom_secondary_item:
 				continue
@@ -819,10 +831,10 @@ class StockEntry(StockController, SubcontractingInwardController):
 					d.set_basic_rate_manually = 0
 				continue
 
-			if d.valuation_type == "% of FG Cost":
+			if d.valuation_type == "% of Component Cost":
 				frappe.throw(
 					_(
-						"Row #{0}: % of FG Cost needs a BOM secondary item. Choose Valuation Rate or Manual for {1}."
+						"Row #{0}: % of Component Cost needs a BOM secondary item. Choose Valuation Rate or Manual for {1}."
 					).format(d.idx, frappe.bold(d.item_code))
 				)
 
@@ -920,22 +932,28 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		self.total_additional_costs = sum(flt(t.base_amount) for t in self.get("additional_costs"))
 
-		if self.purpose in ("Repack", "Manufacture"):
-			incoming_items_cost = sum(flt(t.basic_amount) for t in self.get("items") if t.is_finished_item)
-		else:
-			incoming_items_cost = sum(flt(t.basic_amount) for t in self.get("items") if t.t_warehouse)
-
-		if not incoming_items_cost:
-			return
+		incoming_items, basis, total_basis = self.get_additional_cost_allocation()
 
 		for d in self.get("items"):
-			if self.purpose in ("Repack", "Manufacture") and not d.is_finished_item:
-				d.additional_cost = 0
-				continue
-			elif not d.t_warehouse:
-				d.additional_cost = 0
-				continue
-			d.additional_cost = (flt(d.basic_amount) / incoming_items_cost) * self.total_additional_costs
+			d.additional_cost = 0
+
+		if not total_basis:
+			return
+
+		for d in incoming_items:
+			d.additional_cost = (flt(d.get(basis)) / total_basis) * self.total_additional_costs
+
+	def get_additional_cost_allocation(self):
+		if self.purpose in ("Repack", "Manufacture"):
+			incoming_items = [d for d in self.get("items") if d.is_finished_item]
+		else:
+			incoming_items = [d for d in self.get("items") if d.t_warehouse]
+
+		total_basic_amount = sum(flt(d.basic_amount) for d in incoming_items)
+		if total_basic_amount:
+			return incoming_items, "basic_amount", total_basic_amount
+
+		return incoming_items, "transfer_qty", sum(flt(d.transfer_qty) for d in incoming_items)
 
 	def update_valuation_rate(self, reset_outgoing_rate=True):
 		for d in self.get("items"):

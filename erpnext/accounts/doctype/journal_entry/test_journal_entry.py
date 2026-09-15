@@ -461,6 +461,59 @@ class TestJournalEntry(ERPNextTestSuite):
 
 		self.check_gl_entries()
 
+	def make_jv_with_fractional_totals(self):
+		"""0.10 + 0.20 sums to 0.30000000000000004, the residue this guards against."""
+		jv = frappe.new_doc("Journal Entry")
+		jv.posting_date = nowdate()
+		jv.company = "_Test Company"
+		jv.voucher_type = "Journal Entry"
+		jv.remark = "test"
+		for amount in (0.10, 0.20):
+			jv.append(
+				"accounts",
+				{
+					"account": "_Test Cash - _TC",
+					"cost_center": "_Test Cost Center - _TC",
+					"debit_in_account_currency": amount,
+				},
+			)
+		jv.append(
+			"accounts",
+			{
+				"account": "_Test Bank - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"credit_in_account_currency": 0.30,
+			},
+		)
+		jv.insert()
+		return jv
+
+	def test_totals_are_rounded_to_precision(self):
+		jv = self.make_jv_with_fractional_totals()
+		jv.submit()
+
+		stored = frappe.db.get_value(
+			"Journal Entry", jv.name, ["total_debit", "total_credit", "difference"], as_dict=True
+		)
+		self.assertEqual(jv.total_debit, flt(jv.total_debit, jv.precision("total_debit")))
+		self.assertEqual(jv.total_credit, flt(jv.total_credit, jv.precision("total_credit")))
+		self.assertEqual(jv.total_debit, stored.total_debit)
+		self.assertEqual(jv.total_credit, stored.total_credit)
+		self.assertEqual(jv.difference, stored.difference)
+
+	def test_update_after_submit_with_fractional_totals(self):
+		"""An unrounded total is stored rounded, so updating a submitted entry used to throw."""
+		jv = self.make_jv_with_fractional_totals()
+		jv.submit()
+
+		jv.pay_to_recd_from = "_Test Supplier"
+		jv.save()
+
+		self.assertEqual(jv.docstatus, 1)
+		self.assertEqual(
+			jv.pay_to_recd_from, frappe.db.get_value("Journal Entry", jv.name, "pay_to_recd_from")
+		)
+
 	def test_jv_account_and_party_balance_with_cost_centre(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 		from erpnext.accounts.utils import get_balance_on

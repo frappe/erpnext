@@ -227,6 +227,27 @@ class TestWarehouse(ERPNextTestSuite):
 
 		self.assertNotIn("account", warehouse.get_onload())
 
+	def test_stock_accounts_are_fetched_once_per_company(self):
+		from unittest.mock import patch
+
+		from erpnext.stock import get_company_stock_accounts, get_warehouse_account_map
+
+		company, warehouse = create_ambiguous_inventory_account_warehouse()
+		other_warehouse = frappe.get_all(
+			"Warehouse",
+			filters={"company": company, "is_group": 0, "name": ["!=", warehouse.name]},
+			pluck="name",
+			limit=1,
+		)[0]
+		frappe.db.set_value("Warehouse", other_warehouse, "account", None)
+
+		with patch(
+			"erpnext.stock.get_company_stock_accounts", wraps=get_company_stock_accounts
+		) as fetch_stock_accounts:
+			get_warehouse_account_map(company)
+
+		fetch_stock_accounts.assert_called_once_with(company)
+
 
 def create_inventory_fallback_company():
 	company = "_Test Company Inventory Fallback"

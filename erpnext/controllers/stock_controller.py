@@ -641,7 +641,7 @@ def show_accounting_ledger_preview(company: str, doctype: str, docname: str):
 def show_stock_ledger_preview(company: str, doctype: str, docname: str):
 	from erpnext.controllers.ledger_preview import get_stock_ledger_preview
 
-	filters = frappe._dict(company=company)
+	filters = frappe._dict(company=company, valuation_field_type="Currency")
 	doc = frappe.get_lazy_doc(doctype, docname)
 	doc.check_permission("read")
 	doc.run_method("before_sl_preview")

@@ -60,10 +60,13 @@ Flag a changed query that uses any of these:
   check_field, True)`, `doc.db_set(field, False)`, or `frappe.qb.update(dt).set(check_field, True)`
   emit `SET col = true`, which PostgreSQL rejects on a `smallint`/`Check` column
   (`column is of type smallint but expression is of type boolean`). Pass `1`/`0`.
-- **`.like()`/`.ilike()` (or raw `LIKE`) on a NON-text column** — `idx`, `docstatus`, a date, etc.
-  frappe maps `.like()` → `ILIKE`, and PostgreSQL has no `bigint ILIKE text` operator (`operator
-  does not exist: bigint ~~* unknown`). Cast the column to text first — **`Cast_(col, "varchar")`**,
-  not `Cast(col, "char")` (see below). MariaDB coerces the int implicitly, so the cast is a no-op there.
+- **A direct `.like()`/`.ilike()` on a pypika field (or raw `LIKE`) on a NON-text column** — `idx`,
+  `docstatus`, a date, etc. frappe maps `.like()` → `ILIKE`, and PostgreSQL has no `bigint ILIKE text`
+  operator (`operator does not exist: bigint ~~* unknown`). Cast the column to text first —
+  **`Cast_(col, "varchar")`**, not `Cast(col, "char")` (see below). MariaDB coerces the int
+  implicitly, so the cast is a no-op there. A `["like", …]` filter passed to `get_all`/`get_list`/
+  `qb.get_query`/`reportview` needs no cast: the framework casts non-text fields itself
+  (frappe/frappe#42449).
 - **`CAST(… AS CHAR)` / `Cast(x, "char")`** — on PostgreSQL bare `CHAR` is `character(1)`, so
   `CAST(12 AS CHAR)` → `'1'` (silently truncates multi-digit values); MariaDB gives the full string.
   Use `VARCHAR` / `Cast_(x, "varchar")`.
@@ -192,8 +195,9 @@ pick a bound for a stated reason, and cover the varying-group case with a test.
 These are auto-handled by the framework and are **not** breaks:
 
 - **`.like()` / `["like", …]`** already renders as `ILIKE` on PostgreSQL — not a
-  case-sensitivity bug. *(Exception: `.like()` on a **non-text** column — `idx`, `docstatus` —
-  is a hard break, `bigint ILIKE`; see §1.)*
+  case-sensitivity bug. A `["like", …]` filter on a **non-text** field is also cast to text by
+  the framework. *(Exception: a direct `.like()` on a **non-text** pypika field — `idx`,
+  `docstatus` — is a hard break, `bigint ILIKE`; see §1.)*
 - **Raw `ifnull(...)`** inside `frappe.db.sql()` is rewritten to `coalesce(...)` on all engines.
 - **Backticks**, **`LOCATE`**, **`REGEXP`** / **`.regexp()`** in raw SQL are auto-translated on
   PostgreSQL (`REGEXP` → `~*`). **But `RLIKE` / `.rlike()` is NOT translated** — that one is a

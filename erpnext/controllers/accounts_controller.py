@@ -258,6 +258,8 @@ class AccountsController(TransactionBase):
 		if self.get("_action") and self._action != "update_after_submit":
 			self.set_missing_values(for_validate=True)
 
+		self.validate_price_list()
+
 		if self.get("_action") == "submit":
 			self.remove_bundle_for_non_stock_invoices()
 
@@ -345,6 +347,28 @@ class AccountsController(TransactionBase):
 		self.set_total_in_words()
 		self.set_default_letter_head()
 		self.validate_company_in_accounting_dimension()
+
+	def validate_price_list(self):
+		price_list_field = "selling_price_list" if self.get("selling_price_list") else "buying_price_list"
+		price_list = self.get(price_list_field)
+		if not price_list or frappe.db.get_value("Price List", price_list, "enabled"):
+			return
+
+		# Returns retain a submitted voucher's pricing even if its price list is now disabled.
+		if (
+			self.get("is_return")
+			and self.get("return_against")
+			and price_list
+			== frappe.db.get_value(
+				self.doctype, {"name": self.return_against, "docstatus": 1}, price_list_field
+			)
+		):
+			return
+
+		frappe.throw(
+			_("Price List {0} is disabled").format(get_link_to_form("Price List", price_list)),
+			title=_("Disabled Price List"),
+		)
 
 	def set_default_letter_head(self):
 		if hasattr(self, "letter_head") and not self.letter_head:

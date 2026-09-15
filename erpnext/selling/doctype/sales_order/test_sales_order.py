@@ -33,6 +33,8 @@ from erpnext.selling.doctype.sales_order.mapper import (
 )
 from erpnext.selling.doctype.sales_order.sales_order import (
 	WarehouseRequired,
+	get_potentially_billable_sales_orders,
+	has_potentially_billable_items,
 )
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -381,6 +383,104 @@ class TestSalesOrder(ERPNextTestSuite):
 
 		si1 = make_sales_invoice(so.name)
 		self.assertEqual(len(si1.get("items")), 0)
+
+	def test_make_sales_invoice_for_pending_qty_with_item_billing_allowance(self):
+		item = make_item(
+			"_Test Over Billed Pending Qty Item",
+			{"is_stock_item": 1, "over_billing_allowance": 0},
+		).name
+		so = make_sales_order(item_code=item, qty=390, rate=100)
+
+		for _ in range(2):
+			si = make_sales_invoice(so.name)
+			si.get("items")[0].qty = 120
+			si.get("items")[0].rate = 162.50
+			si.insert()
+			si.submit()
+
+		so.load_from_db()
+		self.assertEqual(flt(so.per_billed), 100)
+		self.assertEqual(so.get("items")[0].billed_amt, so.get("items")[0].amount)
+
+		filters = {"docstatus": 1, "company": so.company, "customer": so.customer}
+
+		def is_offered(txt=""):
+			rows = get_potentially_billable_sales_orders("Sales Order", txt, "name", 0, 50, filters)
+			return so.name in [row.name for row in rows]
+
+		with change_settings("Accounts Settings", {"over_billing_allowance": 100}):
+			self.assertTrue(has_potentially_billable_items(so.name))
+			self.assertTrue(is_offered())
+			self.assertEqual(make_sales_invoice(so.name).get("items")[0].qty, 150)
+
+		with change_settings("Accounts Settings", {"over_billing_allowance": 0}):
+			self.assertFalse(has_potentially_billable_items(so.name))
+			self.assertEqual(len(make_sales_invoice(so.name).get("items")), 0)
+
+			frappe.db.set_value("Item", item, "over_billing_allowance", 100)
+
+			so.run_method("onload")
+			self.assertTrue(so.get_onload("has_potentially_billable_items"))
+			self.assertTrue(is_offered(so.customer))
+
+			si = make_sales_invoice(so.name)
+			self.assertEqual(len(si.get("items")), 1)
+			self.assertEqual(si.get("items")[0].qty, 150)
+
+	def test_make_sales_invoice_skips_fully_invoiced_free_item(self):
+		free_item = make_item("_Test Free Item", {"is_stock_item": 1}).name
+		so = make_sales_order(qty=10, rate=100, do_not_submit=True)
+		so.append("items", {"item_code": free_item, "qty": 5, "rate": 0, "warehouse": so.items[0].warehouse})
+		so.submit()
+
+		si = make_sales_invoice(so.name)
+		self.assertEqual([row.qty for row in si.items], [10, 5])
+		si.insert()
+		si.submit()
+
+		self.assertEqual(len(make_sales_invoice(so.name).items), 0)
+
+	def test_fully_billed_order_is_not_offered_within_billing_allowance(self):
+		item = make_item(
+			"_Test Fully Billed Allowance Item",
+			{"is_stock_item": 1, "over_billing_allowance": 0},
+		).name
+		so = make_sales_order(item_code=item, qty=10, rate=100)
+
+		si = make_sales_invoice(so.name)
+		si.insert()
+		si.submit()
+
+		so.load_from_db()
+		self.assertEqual(flt(so.per_billed), 100)
+
+		filters = {"docstatus": 1, "company": so.company, "customer": so.customer}
+
+		with change_settings("Accounts Settings", {"over_billing_allowance": 100}):
+			self.assertFalse(has_potentially_billable_items(so.name))
+
+			rows = get_potentially_billable_sales_orders("Sales Order", "", "name", 0, 50, filters)
+			self.assertNotIn(so.name, [row.name for row in rows])
+
+			self.assertEqual(len(make_sales_invoice(so.name).get("items")), 0)
+
+	def test_order_with_sub_precision_pending_qty_is_not_offered(self):
+		item = make_item("_Test Sub Precision Qty Item", {"is_stock_item": 1}).name
+		so = make_sales_order(item_code=item, qty=10, rate=100)
+
+		si = make_sales_invoice(so.name)
+		si.get("items")[0].rate = 90
+		si.insert()
+		si.submit()
+
+		qty_precision = frappe.get_precision("Sales Order Item", "qty")
+		billed_qty = 10 - 10 ** -(qty_precision + 1)
+		frappe.db.set_value(
+			"Sales Invoice Item", si.get("items")[0].name, "qty", billed_qty, update_modified=False
+		)
+
+		self.assertFalse(has_potentially_billable_items(so.name))
+		self.assertEqual(len(make_sales_invoice(so.name).get("items")), 0)
 
 	def test_make_sales_invoice_after_return_and_redelivery(self):
 		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return

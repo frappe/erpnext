@@ -9,6 +9,7 @@ import Fuse from "fuse.js"
 import { ChevronDownIcon } from "lucide-react"
 import { useLayoutEffect, useMemo, useRef, useState } from "react"
 import { FormControl } from "../ui/form"
+import useResetScrollOnSearch from "@/hooks/useResetScrollOnSearch"
 
 
 export interface AccountsDropdownProps {
@@ -104,6 +105,10 @@ const AccountsDropdown = ({ root_type, report_type, account_type, value, onChang
 
     const buttonRef = useRef<HTMLButtonElement>(null)
 
+    // Searching replaces the grouped list with a short result list, so pin the scroll back to
+    // the top - otherwise the auto-selected first result can be out of view.
+    const listRef = useResetScrollOnSearch(search)
+
     const [width, setWidth] = useState(320)
 
     useLayoutEffect(() => {
@@ -153,7 +158,7 @@ const AccountsDropdown = ({ root_type, report_type, account_type, value, onChang
             <PopoverContent className="p-0" style={{ minWidth: width }} align="start">
                 <Command shouldFilter={false} className="w-full">
                     <CommandInput placeholder={_("Search account...")} onValueChange={setSearch} value={search} />
-                    <CommandList>
+                    <CommandList ref={listRef}>
                         <CommandEmpty>{_("No accounts found.")}</CommandEmpty>
 
                         {recommendedAccounts.length > 0 && (

@@ -699,7 +699,9 @@ erpnext.bom.BomController = class BomController extends erpnext.TransactionContr
 		get_bom_material_detail(doc, cdt, cdn, secondary_items);
 	}
 
-	buying_price_list(doc) {
+	buying_price_list() {
+		const doc = this.frm.doc;
+
 		if (doc.rm_cost_as_per !== "Price List" && doc.buying_price_list) {
 			this.frm.set_value("buying_price_list", "");
 			return;
@@ -710,8 +712,8 @@ erpnext.bom.BomController = class BomController extends erpnext.TransactionContr
 		}
 	}
 
-	plc_conversion_rate(doc) {
-		if (!this.in_apply_price_list && doc.rm_cost_as_per === "Price List") {
+	plc_conversion_rate() {
+		if (!this.in_apply_price_list && this.frm.doc.rm_cost_as_per === "Price List") {
 			this.apply_price_list(null, true);
 		}
 	}
@@ -1038,7 +1040,7 @@ frappe.tour["BOM"] = [
 frappe.ui.form.on("BOM Secondary Item", {
 	valuation_type(frm, cdt, cdn) {
 		const row = locals[cdt][cdn];
-		if (row.valuation_type !== "% of FG Cost") {
+		if (row.valuation_type !== "% of Component Cost") {
 			frappe.model.set_value(cdt, cdn, "cost_allocation_per", 0);
 		}
 		if (row.valuation_type === "Valuation Rate") {

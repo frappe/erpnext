@@ -197,8 +197,10 @@
  "quick_entry": 1,
  "row_format": "Dynamic",
  "search_fields": "item_name",
+ "show_title_field_in_link": 1,
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
+ "title_field": "item_code",
  "track_changes": 1
 }

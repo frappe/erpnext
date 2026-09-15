@@ -1113,7 +1113,7 @@ class MaterialRequirementsPlanningReport:
 			args["to_date"] = add_days(from_date, -1)
 
 			if bucket_size == "Monthly":
-				args["label"] = formatdate(from_date, "MMM YYYY")
+				args["label"] = formatdate(args["from_date"], "MMM YYYY")
 			else:
 				if bucket_size == "Weekly":
 					args["label"] = (

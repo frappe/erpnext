@@ -655,4 +655,5 @@ def get_list_context(context=None):
 @frappe.whitelist()
 def update_delivery_note_status(docname: str, status: str):
 	dn = frappe.get_lazy_doc("Delivery Note", docname)
+	dn.check_permission("submit")
 	dn.update_status(status)

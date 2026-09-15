@@ -97,6 +97,8 @@ def get_loyalty_program_details_with_points(
 	include_expired_entry: bool = False,
 	current_transaction_amount: int | float = 0,
 ):
+	frappe.has_permission("Customer", doc=customer, throw=True)
+
 	lp_details = get_loyalty_program_details(customer, loyalty_program, company=company, silent=silent)
 	loyalty_program = frappe.get_doc("Loyalty Program", loyalty_program)
 	loyalty_details = get_loyalty_details(

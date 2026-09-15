@@ -86,7 +86,7 @@ class TestPickList(ERPNextTestSuite):
 
 	def test_pick_list_allocation_takes_advisory_gate(self):
 		if frappe.db.db_type != "postgres":
-			return
+			self.skipTest("advisory locks are a PostgreSQL feature")
 
 		item = make_item(properties={"is_stock_item": 1}).name
 		make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=5, basic_rate=100)

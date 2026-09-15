@@ -29,6 +29,9 @@ class BillingStatusService:
 	def update_billing_status(self, update_modified: bool = True) -> None:
 		doc = self.doc
 		updated_delivery_notes = [doc.name]
+		if doc.is_return and doc.return_against:
+			updated_delivery_notes.append(doc.return_against)
+
 		for d in doc.get("items"):
 			if d.si_detail and not d.so_detail:
 				d.db_set("billed_amt", d.amount, update_modified=update_modified)
@@ -37,7 +40,8 @@ class BillingStatusService:
 
 		for dn in set(updated_delivery_notes):
 			dn_doc = doc if (dn == doc.name) else frappe.get_lazy_doc("Delivery Note", dn)
-			dn_doc.update_billing_percentage(update_modified=update_modified)
+			update_dn_modified = update_modified and dn != doc.return_against
+			dn_doc.update_billing_percentage(update_modified=update_dn_modified)
 
 		doc.load_from_db()
 

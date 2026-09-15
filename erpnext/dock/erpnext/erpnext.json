@@ -136,45 +136,13 @@
   {
    "added": 0,
    "hidden": 0,
-   "icon": "messages-square",
-   "link_to": "Communication",
-   "link_type": "Sidebar",
-   "title": "Communication"
-  },
-  {
-   "added": 0,
-   "hidden": 0,
-   "icon": "phone",
-   "link_to": "Telephony",
-   "link_type": "Sidebar",
-   "title": "Telephony"
-  },
-  {
-   "added": 0,
-   "hidden": 0,
-   "icon": "layers",
-   "link_to": "Bulk Transaction",
-   "link_type": "Sidebar",
-   "title": "Bulk Transaction"
-  },
-  {
-   "added": 0,
-   "hidden": 0,
    "icon": "factory",
    "link_to": "Subcontracting",
    "link_type": "Sidebar",
    "title": "Subcontracting"
-  },
-  {
-   "added": 0,
-   "hidden": 0,
-   "icon": "file-code",
-   "link_to": "EDI",
-   "link_type": "Sidebar",
-   "title": "EDI"
   }
  ],
- "modified": "2026-08-28 12:00:00.000000",
+ "modified": "2026-09-02 14:58:17.082794",
  "modified_by": "Administrator",
  "name": "erpnext",
  "owner": "Administrator",
