@@ -737,7 +737,7 @@ class Item(Document):
 
 	def set_last_purchase_rate(self, new_name):
 		last_purchase_rate = get_last_purchase_details(new_name).get("base_net_rate", 0)
-		frappe.db.set_value("Item", new_name, "last_purchase_rate", last_purchase_rate)
+		frappe.db.set_value("Item", new_name, "last_purchase_rate", last_purchase_rate, update_modified=False)
 
 	def recalculate_bin_qty(self, new_name):
 		from erpnext.stock.stock_balance import repost_stock
