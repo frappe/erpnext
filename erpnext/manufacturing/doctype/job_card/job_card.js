@@ -299,7 +299,6 @@ frappe.ui.form.on("Job Card", {
 				fieldtype: "Float",
 				label: __("Completed Quantity"),
 				fieldname: "completed_qty",
-				reqd: 1,
 				default: pending_qty,
 				change() {
 					const dialog = frm.job_completion_dialog;
@@ -424,8 +423,8 @@ frappe.ui.form.on("Job Card", {
 		frm.job_completion_dialog = frappe.prompt(
 			fields,
 			(data) => {
-				if (data.qty <= 0) {
-					frappe.throw(__("Quantity should be greater than 0"));
+				if (data.completed_qty < 0) {
+					frappe.throw(__("Completed Quantity cannot be negative"));
 				}
 
 				frm.call({
