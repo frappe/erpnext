@@ -3,7 +3,6 @@
 
 import ast
 import json
-import math
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from functools import cache, reduce
@@ -29,6 +28,7 @@ from erpnext.accounts.doctype.financial_report_template.financial_report_templat
 	FinancialReportTemplate,
 )
 from erpnext.accounts.doctype.financial_report_template.financial_report_validation import (
+	FORMULA_FUNCTIONS,
 	AccountFilterValidator,
 	CalculationFormulaValidator,
 	DependencyValidator,
@@ -1328,18 +1328,6 @@ class FormulaCalculator:
 		self.precision = get_currency_precision()
 		self.validator = CalculationFormulaValidator(set(row_data.keys()))
 
-		self.math_functions = {
-			"abs": abs,
-			"round": round,
-			"min": min,
-			"max": max,
-			"sum": sum,
-			"sqrt": math.sqrt,
-			"pow": math.pow,
-			"ceil": math.ceil,
-			"floor": math.floor,
-		}
-
 	def evaluate_formula(self, report_row: dict[str, Any]) -> list[float]:
 		validation_result = self.validator.validate(report_row)
 		formula = report_row.calculation_formula
@@ -1362,7 +1350,7 @@ class FormulaCalculator:
 		# TODO: consistent error handling
 		try:
 			context = self._build_context(period_index)
-			result = frappe.safe_eval(formula, context)
+			result = frappe.safe_eval(formula, eval_globals=None, eval_locals=context)
 			return flt(result * negation_factor, self.precision)
 
 		except ZeroDivisionError:
@@ -1383,7 +1371,7 @@ class FormulaCalculator:
 				context[code] = 0.0
 
 		# math functions
-		context.update(self.math_functions)
+		context.update(FORMULA_FUNCTIONS)
 
 		return context
 

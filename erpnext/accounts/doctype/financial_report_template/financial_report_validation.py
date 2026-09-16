@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import json
+import math
 import re
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
@@ -10,6 +11,18 @@ from typing import Any
 import frappe
 from frappe import _, is_whitelisted
 from frappe.database.operator_map import OPERATOR_MAP
+
+FORMULA_FUNCTIONS = {
+	"abs": abs,
+	"round": round,
+	"min": min,
+	"max": max,
+	"sum": sum,
+	"sqrt": math.sqrt,
+	"pow": math.pow,
+	"ceil": math.ceil,
+	"floor": math.floor,
+}
 
 
 def get_valid_api_method(api_path: str):
@@ -368,19 +381,7 @@ class CalculationFormulaValidator(Validator):
 	def _test_formula_evaluation(self, formula: str, available_codes: list[str]) -> str | None:
 		try:
 			context = {code: 1.0 for code in available_codes}
-			context.update(
-				{
-					"abs": abs,
-					"round": round,
-					"min": min,
-					"max": max,
-					"sum": sum,
-					"sqrt": lambda x: x**0.5,
-					"pow": pow,
-					"ceil": lambda x: int(x) + (1 if x % 1 else 0),
-					"floor": int,
-				}
-			)
+			context.update(FORMULA_FUNCTIONS)
 
 			result = frappe.safe_eval(formula, eval_globals=None, eval_locals=context)
 
