@@ -574,6 +574,129 @@ class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
 
 			self.assertSLEs(return_pr, expected_sles)
 
+	def test_skip_later_repost_covered_by_manufacture_dependant(self):
+		"""A finished good reposted as a dependant of its raw material makes a later
+		repost queued for the same finished good and warehouse redundant."""
+		rm = self.make_item(properties={"valuation_method": "FIFO"}).name
+		fg = self.make_item(properties={"valuation_method": "FIFO"}).name
+		warehouse = "_Test Warehouse - _TC"
+
+		make_stock_entry(
+			item_code=rm, target=warehouse, qty=100, rate=100, posting_date=add_days(today(), -10)
+		)
+
+		manufacture = make_stock_entry(
+			item_code=rm,
+			source=warehouse,
+			qty=10,
+			purpose="Manufacture",
+			posting_date=add_days(today(), -5),
+			do_not_save=True,
+		)
+		manufacture.append(
+			"items",
+			{
+				"item_code": fg,
+				"t_warehouse": warehouse,
+				"qty": 1,
+				"transfer_qty": 1,
+				"uom": "Nos",
+				"stock_uom": "Nos",
+				"conversion_factor": 1.0,
+				"is_finished_item": 1,
+			},
+		)
+		manufacture.save()
+		manufacture.submit()
+
+		# a repost queued for the finished good, dated after the manufacture entry
+		later_riv = frappe.get_doc(
+			doctype="Repost Item Valuation",
+			based_on="Item and Warehouse",
+			item_code=fg,
+			warehouse=warehouse,
+			posting_date=today(),
+			posting_time="00:00:01",
+		)
+		later_riv.flags.dont_run_in_test = True
+		later_riv.submit()
+		self.assertEqual(later_riv.status, "Queued")
+
+		# reposting the raw material walks the finished good forward as a dependant
+		rm_riv = frappe.get_doc(
+			doctype="Repost Item Valuation",
+			based_on="Item and Warehouse",
+			item_code=rm,
+			warehouse=warehouse,
+			posting_date=add_days(today(), -10),
+			posting_time="00:00:01",
+		)
+		rm_riv.submit()
+
+		later_riv.load_from_db()
+		self.assertEqual(later_riv.status, "Skipped")
+
+	def test_repost_covering_earlier_date_is_not_skipped(self):
+		"""A repost for the finished good that starts before the manufacture entry still
+		has work to do, so it must survive."""
+		rm = self.make_item(properties={"valuation_method": "FIFO"}).name
+		fg = self.make_item(properties={"valuation_method": "FIFO"}).name
+		warehouse = "_Test Warehouse - _TC"
+
+		make_stock_entry(
+			item_code=rm, target=warehouse, qty=100, rate=100, posting_date=add_days(today(), -10)
+		)
+		make_stock_entry(item_code=fg, target=warehouse, qty=5, rate=50, posting_date=add_days(today(), -9))
+
+		manufacture = make_stock_entry(
+			item_code=rm,
+			source=warehouse,
+			qty=10,
+			purpose="Manufacture",
+			posting_date=add_days(today(), -5),
+			do_not_save=True,
+		)
+		manufacture.append(
+			"items",
+			{
+				"item_code": fg,
+				"t_warehouse": warehouse,
+				"qty": 1,
+				"transfer_qty": 1,
+				"uom": "Nos",
+				"stock_uom": "Nos",
+				"conversion_factor": 1.0,
+				"is_finished_item": 1,
+			},
+		)
+		manufacture.save()
+		manufacture.submit()
+
+		earlier_riv = frappe.get_doc(
+			doctype="Repost Item Valuation",
+			based_on="Item and Warehouse",
+			item_code=fg,
+			warehouse=warehouse,
+			posting_date=add_days(today(), -9),
+			posting_time="00:00:01",
+		)
+		earlier_riv.flags.dont_run_in_test = True
+		earlier_riv.submit()
+
+		rm_riv = frappe.get_doc(
+			doctype="Repost Item Valuation",
+			based_on="Item and Warehouse",
+			item_code=rm,
+			warehouse=warehouse,
+			posting_date=add_days(today(), -10),
+			posting_time="00:00:01",
+		)
+		rm_riv.submit()
+
+		earlier_riv.load_from_db()
+		self.assertEqual(earlier_riv.status, "Queued")
+		earlier_riv.set_status("Skipped")
+
 	def test_remove_attached_file(self):
 		item_code = make_item("_Test Remove Attached File Item", properties={"is_stock_item": 1})
 
