@@ -43,7 +43,9 @@ def update_last_purchase_rate(doc, is_submit) -> None:
 				frappe.throw(_("UOM Conversion factor is required in row {0}").format(d.idx))
 
 		# update last purchsae rate
-		frappe.db.set_value("Item", d.item_code, "last_purchase_rate", flt(last_purchase_rate))
+		frappe.db.set_value(
+			"Item", d.item_code, "last_purchase_rate", flt(last_purchase_rate), update_modified=False
+		)
 
 
 def validate_for_items(doc) -> None:
