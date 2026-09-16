@@ -820,28 +820,33 @@ def get_account_list(
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_blanket_orders(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
-	bo = frappe.qb.DocType("Blanket Order")
-	bo_item = frappe.qb.DocType("Blanket Order Item")
+	bo_filters = [
+		["docstatus", "=", 1],
+		["blanket_order_type", "=", filters.get("blanket_order_type")],
+		["company", "=", filters.get("company")],
+	]
 
-	query = (
-		frappe.qb.from_(bo)
-		.from_(bo_item)
-		.select(bo.name)
-		.distinct()
-		.select(bo.blanket_order_type, bo.to_date)
-		.where(
-			(bo_item.parent == bo.name)
-			& (bo_item.item_code == filters.get("item"))
-			& (bo.blanket_order_type == filters.get("blanket_order_type"))
-			& (bo.company == filters.get("company"))
-			& (bo.docstatus == 1)
+	if frappe.has_permission("Blanket Order", "read"):
+		bo_filters.append(["Blanket Order Item", "item_code", "=", filters.get("item")])
+	else:
+		parents = frappe.get_all(
+			"Blanket Order Item",
+			filters={"item_code": filters.get("item"), "parenttype": "Blanket Order"},
+			pluck="parent",
+			distinct=True,
 		)
-	)
+		bo_filters.append(["name", "in", parents or [""]])
 
 	if currency := filters.get("currency"):
-		query = query.where(bo.currency == currency)
+		bo_filters.append(["currency", "=", currency])
 
-	return query.run()
+	return frappe.get_list(
+		"Blanket Order",
+		filters=bo_filters,
+		fields=["name", "blanket_order_type", "to_date"],
+		group_by="name",
+		as_list=True,
+	)
 
 
 @frappe.whitelist()
@@ -1312,7 +1317,11 @@ def get_filtered_child_rows(
 @frappe.validate_and_sanitize_search_inputs
 def get_item_uom_query(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
 	if frappe.get_single_value("Stock Settings", "allow_uom_with_conversion_rate_defined_in_item"):
-		query_filters = {"parent": filters.get("item_code")}
+		item_code = filters.get("item_code")
+		if not item_code or not frappe.get_list("Item", filters=[["name", "=", item_code]], pluck="name"):
+			return []
+
+		query_filters = {"parent": item_code, "parenttype": "Item"}
 
 		if txt:
 			query_filters["uom"] = ["like", f"%{txt}%"]
@@ -1327,7 +1336,7 @@ def get_item_uom_query(doctype: str, txt: str, searchfield: str, start: int, pag
 			as_list=1,
 		)
 
-	return frappe.get_all(
+	return frappe.get_list(
 		"UOM",
 		filters={"name": ["like", f"%{txt}%"], "enabled": 1},
 		fields=["name"],
