@@ -1720,6 +1720,27 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 		item.valuation_method = "FIFO"
 		self.assertRaises(frappe.ValidationError, item.save)
 
+	def test_valuation_helpers_not_stale_after_disabling_in_same_request(self):
+		from collections import defaultdict
+
+		from erpnext.stock.utils import get_valuation_method, is_serial_no_wise_valuation_disabled
+
+		item = self.make_serial_item_for_valuation("_Test Serial Wise Valuation Cache", 1)
+
+		previous_cache = getattr(frappe.local, "request_cache", None)
+		self.addCleanup(setattr, frappe.local, "request_cache", previous_cache)
+		frappe.local.request_cache = defaultdict(dict)
+
+		self.assertEqual(get_valuation_method(item.name), "FIFO")
+		self.assertFalse(is_serial_no_wise_valuation_disabled(item.name))
+
+		item.reload()
+		item.use_serial_no_wise_valuation = 0
+		item.save()
+
+		self.assertEqual(get_valuation_method(item.name), "Moving Average")
+		self.assertTrue(is_serial_no_wise_valuation_disabled(item.name))
+
 	def test_valuation_method_untouched_when_serial_no_wise_valuation_enabled(self):
 		item = self.make_serial_item_for_valuation("_Test Serial Wise Valuation Keeps FIFO", 1)
 

@@ -376,7 +376,6 @@ def get_avg_purchase_rate(serial_nos):
 	)
 
 
-@frappe.request_cache
 def is_serial_no_wise_valuation_disabled(item_code) -> bool:
 	item_details = frappe.get_cached_value(
 		"Item", item_code, ["has_serial_no", "use_serial_no_wise_valuation"], as_dict=1
@@ -396,6 +395,14 @@ def get_valuation_method(item_code, company=None):
 			else frappe.get_single_value("Stock Settings", "valuation_method") or "FIFO"
 		)
 	return val_method
+
+
+def clear_valuation_method_cache():
+	cache = getattr(frappe.local, "request_cache", None)
+	if not cache:
+		return
+
+	cache.pop(getattr(get_valuation_method, "__wrapped__", get_valuation_method), None)
 
 
 def get_fifo_rate(previous_stock_queue, qty):
