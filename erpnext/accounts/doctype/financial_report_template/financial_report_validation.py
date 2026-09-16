@@ -313,7 +313,6 @@ class CalculationFormulaValidator(Validator):
 			return result
 
 		formula = self._preprocess_formula(row.calculation_formula)
-		row.calculation_formula = formula
 
 		# Check parentheses
 		if not self._are_parentheses_balanced(formula):

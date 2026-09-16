@@ -366,5 +366,24 @@ class TestLineReferenceNames(FinancialReportTemplateTestCase):
 		template = frappe.new_doc("Financial Report Template")
 		template.template_name = "Spaces"
 		template.append("rows", {"reference_code": "  REV  ", "data_source": "Blank Line"})
+		template.append(
+			"rows",
+			{
+				"reference_code": "X",
+				"data_source": "Calculated Amount",
+				"calculation_formula": "  REV * 2  ",
+			},
+		)
 		template.before_validate()
 		self.assertEqual(template.rows[0].reference_code, "REV")
+		self.assertEqual(template.rows[1].calculation_formula, "REV * 2")
+
+	def test_validation_does_not_modify_the_row(self):
+		row = frappe._dict(
+			calculation_formula="  REV * 2  ",
+			idx=1,
+			data_source="Calculated Amount",
+			reference_code="X",
+		)
+		CalculationFormulaValidator({"REV", "X"}).validate(row)
+		self.assertEqual(row.calculation_formula, "  REV * 2  ")
