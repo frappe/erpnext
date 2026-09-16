@@ -519,6 +519,58 @@ class TestAsset(AssetSetup):
 		self.assertEqual(new_asset.asset_quantity, 2)
 		self.assertEqual(new_asset.gross_purchase_amount, 24000)
 
+	def test_split_of_composite_asset_keeps_purchase_amount_in_sync(self):
+		composite_asset = frappe.get_doc(
+			{
+				"doctype": "Asset",
+				"asset_name": "Composite Asset for Split Test",
+				"asset_category": "Computers",
+				"item_code": "Macbook Pro",
+				"company": "_Test Company",
+				"is_composite_asset": 1,
+				"booked_fixed_asset": 1,
+				"location": "Test Location",
+				"available_for_use_date": "2020-01-01",
+				"purchase_date": "2020-01-01",
+				"gross_purchase_amount": 120000,
+				"purchase_amount": 120000,
+				"asset_quantity": 10,
+			}
+		)
+		composite_asset.insert()
+
+		asset_capitalization = frappe.get_doc(
+			{
+				"doctype": "Asset Capitalization",
+				"naming_series": "ACC-ASC-.YYYY.-",
+				"capitalization_method": "Choose a WIP composite asset",
+				"target_asset": composite_asset.name,
+				"target_item_code": composite_asset.item_code,
+				"company": composite_asset.company,
+				"posting_date": composite_asset.purchase_date,
+			}
+		)
+		asset_capitalization.flags.ignore_validate = True
+		asset_capitalization.flags.ignore_mandatory = True
+		asset_capitalization.insert(ignore_permissions=True)
+		frappe.db.set_value("Asset Capitalization", asset_capitalization.name, "docstatus", 1)
+
+		composite_asset.submit()
+
+		new_asset = split_asset(composite_asset.name, 4)
+
+		composite_asset.load_from_db()
+		self.assertEqual(composite_asset.asset_quantity, 6)
+		self.assertEqual(composite_asset.gross_purchase_amount, 72000)
+		self.assertEqual(composite_asset.purchase_amount, composite_asset.gross_purchase_amount)
+
+		self.assertEqual(new_asset.docstatus, 1)
+		self.assertEqual(new_asset.asset_quantity, 4)
+		self.assertEqual(new_asset.gross_purchase_amount, 48000)
+		self.assertEqual(new_asset.purchase_amount, new_asset.gross_purchase_amount)
+
+		composite_asset.save()
+
 	def test_asset_splitting(self):
 		asset = create_asset(
 			calculate_depreciation=1,
