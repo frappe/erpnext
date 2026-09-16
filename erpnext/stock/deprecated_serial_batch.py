@@ -10,6 +10,7 @@ from pypika import Order
 from pypika.functions import Coalesce
 
 
+@frappe.request_cache
 @deprecated
 def has_legacy_batch_ledgers(item_code: str, warehouse: str) -> bool:
 	"""`False` when no Stock Ledger Entry of the item and warehouse uses the
@@ -25,28 +26,20 @@ def has_legacy_batch_ledgers(item_code: str, warehouse: str) -> bool:
 	Cached for the request, nothing creates a legacy ledger midway.
 	"""
 
-	cache = getattr(frappe.local, "legacy_batch_ledgers", None)
-	if cache is None:
-		cache = frappe.local.legacy_batch_ledgers = {}
+	sle = frappe.qb.DocType("Stock Ledger Entry")
 
-	key = (item_code, warehouse)
-	if key not in cache:
-		sle = frappe.qb.DocType("Stock Ledger Entry")
-
-		cache[key] = bool(
-			frappe.qb.from_(sle)
-			.select(sle.batch_no)
-			.where(
-				sle.batch_no.isnotnull()
-				& (sle.batch_no != "")
-				& (sle.item_code == item_code)
-				& (sle.warehouse == warehouse)
-			)
-			.limit(1)
-			.run()
+	return bool(
+		frappe.qb.from_(sle)
+		.select(sle.batch_no)
+		.where(
+			sle.batch_no.isnotnull()
+			& (sle.batch_no != "")
+			& (sle.item_code == item_code)
+			& (sle.warehouse == warehouse)
 		)
-
-	return cache[key]
+		.limit(1)
+		.run()
+	)
 
 
 class DeprecatedSerialNoValuation:
