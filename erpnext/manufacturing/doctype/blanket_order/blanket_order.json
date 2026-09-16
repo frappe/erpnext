@@ -215,7 +215,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-27 10:55:37.000000",
+ "modified": "2026-09-16 11:42:07.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Blanket Order",
@@ -235,6 +235,30 @@
    "share": 1,
    "submit": 1,
    "write": 1
+  },
+  {
+   "role": "Maintenance Manager",
+   "select": 1
+  },
+  {
+   "role": "Maintenance User",
+   "select": 1
+  },
+  {
+   "role": "Purchase Manager",
+   "select": 1
+  },
+  {
+   "role": "Purchase User",
+   "select": 1
+  },
+  {
+   "role": "Sales Manager",
+   "select": 1
+  },
+  {
+   "role": "Sales User",
+   "select": 1
   }
  ],
  "quick_entry": 1,

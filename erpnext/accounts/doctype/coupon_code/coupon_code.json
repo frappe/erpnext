@@ -125,7 +125,7 @@
   }
  ],
  "links": [],
- "modified": "2024-11-19 16:35:11.836441",
+ "modified": "2026-09-16 11:42:07.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Coupon Code",
@@ -179,6 +179,14 @@
    "role": "Website Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "role": "Maintenance Manager",
+   "select": 1
+  },
+  {
+   "role": "Maintenance User",
+   "select": 1
   }
  ],
  "sort_field": "creation",
