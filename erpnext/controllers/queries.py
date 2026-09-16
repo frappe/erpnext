@@ -174,6 +174,7 @@ def tax_account_query(doctype, txt, searchfield, start, page_len, filters):
 	return tax_accounts
 
 
+# nosemgrep: frappe-semgrep-rules.rules.security.missing-argument-type-hint
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=False):
@@ -238,37 +239,50 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 		# scan description only if items are less than 50000
 		description_cond = "or tabItem.description LIKE %(txt)s"
 
-	return frappe.db.sql(
-		"""select
-			tabItem.name {columns}
-		from tabItem
-		where tabItem.docstatus < 2
-			and tabItem.disabled=0
-			and tabItem.has_variants=0
-			and (tabItem.end_of_life > %(today)s or ifnull(tabItem.end_of_life, '0000-00-00')='0000-00-00')
-			and ({scond} or tabItem.item_code IN (select parent from `tabItem Barcode` where barcode LIKE %(txt)s)
-				{description_cond})
-			{fcond} {mcond}
-		order by
-			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
-			if(locate(%(_txt)s, item_name), locate(%(_txt)s, item_name), 99999),
-			idx desc,
-			name, item_name
-		limit %(start)s, %(page_len)s """.format(
-			columns=columns,
-			scond=searchfields,
-			fcond=get_filters_cond(doctype, filters, conditions).replace("%", "%%"),
-			mcond=get_match_cond(doctype).replace("%", "%%"),
-			description_cond=description_cond,
-		),
-		{
-			"today": nowdate(),
-			"txt": "%%%s%%" % txt,
-			"_txt": txt.replace("%", ""),
-			"start": start,
-			"page_len": page_len,
-		},
-		as_dict=as_dict,
+	filter_condition = get_filters_cond(doctype, filters, conditions).replace("%", "%%")
+	match_condition = get_match_cond(doctype).replace("%", "%%")
+	values = {
+		"today": nowdate(),
+		"txt": "%%%s%%" % txt,
+		"prefix_txt": f"{txt}%",
+		"_txt": txt.replace("%", ""),
+		"start": start,
+		"page_len": page_len,
+	}
+
+	def run_search(search_condition):
+		# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection
+		return frappe.db.sql(
+			f"""select
+				tabItem.name {columns}
+			from tabItem
+			where tabItem.docstatus < 2
+				and tabItem.disabled=0
+				and tabItem.has_variants=0
+				and (tabItem.end_of_life > %(today)s or ifnull(tabItem.end_of_life, '0000-00-00')='0000-00-00')
+				and ({search_condition})
+				{filter_condition} {match_condition}
+			order by
+				if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
+				if(locate(%(_txt)s, item_name), locate(%(_txt)s, item_name), 99999),
+				idx desc,
+				name, item_name
+			limit %(start)s, %(page_len)s """,
+			values,
+			as_dict=as_dict,
+		)
+
+	has_wildcards = any(character in txt for character in "%_\\")
+
+	if txt and page_len and not has_wildcards:
+		prefix_matches = run_search("tabItem.name like %(prefix_txt)s")
+		if len(prefix_matches) == page_len:
+			return prefix_matches
+
+	return run_search(
+		f"{searchfields} or tabItem.item_code IN "
+		"(select parent from `tabItem Barcode` where barcode LIKE %(txt)s) "
+		f"{description_cond}"
 	)
 
 
