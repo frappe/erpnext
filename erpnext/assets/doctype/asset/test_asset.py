@@ -808,6 +808,28 @@ class TestDepreciationMethods(AssetSetup):
 		]
 		self.assertEqual(schedules, expected_schedules)
 
+	def test_daily_prorata_based_sl_schedule_for_existing_asset_spreads_remaining_value(self):
+		asset = create_asset(
+			calculate_depreciation=1,
+			available_for_use_date="2023-01-01",
+			purchase_date="2023-01-01",
+			gross_purchase_amount=120000,
+			is_existing_asset=1,
+			opening_number_of_booked_depreciations=2,
+			opening_accumulated_depreciation=40000,
+			depreciation_start_date="2023-03-31",
+			total_number_of_depreciations=12,
+			frequency_of_depreciation=1,
+			daily_prorata_based=1,
+		)
+
+		schedules = get_depr_schedule(asset.name, "Draft")
+
+		self.assertEqual(len(schedules), 10)
+		self.assertEqual(cstr(schedules[-1].schedule_date), "2023-12-31")
+		self.assertEqual(flt(schedules[-1].accumulated_depreciation_amount, 2), 120000.0)
+		self.assertEqual(flt(sum(d.depreciation_amount for d in schedules), 2), 80000.0)
+
 	def test_schedule_for_straight_line_method_for_existing_asset(self):
 		asset = create_asset(
 			calculate_depreciation=1,
