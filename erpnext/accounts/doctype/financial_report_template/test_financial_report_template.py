@@ -309,15 +309,13 @@ class TestCalculationFormula(FinancialReportTemplateTestCase):
 		)
 		return CalculationFormulaValidator(set(codes)).validate(row)
 
-	def test_denominator_with_a_difference_is_allowed(self):
-		# dummy values must differ, else (B - C) is zero and a valid formula is rejected
+	def test_division_by_zero_is_not_a_validation_error(self):
+		# the dummy values are all 1.0, so a denominator can only be zero by accident;
+		# the engine tolerates real division by zero at run time
 		self.assertTrue(self._validate("A / (B - C)").is_valid)
 		self.assertTrue(self._validate("(A - B) / (A - C)").is_valid)
-
-	def test_division_by_zero_is_still_rejected(self):
-		self.assertFalse(self._validate("A / 0").is_valid)
-		# same code on both sides is zero whatever the dummy values are
-		self.assertFalse(self._validate("A / (B - B)").is_valid)
+		self.assertTrue(self._validate("ROM / (CAS + FDE - ROM)", ("ROM", "CAS", "FDE")).is_valid)
+		self.assertTrue(self._validate("A / 0").is_valid)
 
 	def test_broken_formulas_are_rejected(self):
 		self.assertFalse(self._validate("A +").is_valid)

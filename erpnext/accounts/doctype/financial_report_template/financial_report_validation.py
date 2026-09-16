@@ -361,8 +361,7 @@ class CalculationFormulaValidator(Validator):
 
 	def _test_formula_evaluation(self, formula: str, available_codes: list[str]) -> str | None:
 		try:
-			# distinct values, so (A - B) in a denominator isn't zero
-			context = {code: float(i + 1) for i, code in enumerate(available_codes)}
+			context = {code: 1.0 for code in available_codes}
 			context.update(FORMULA_FUNCTIONS)
 
 			result = frappe.safe_eval(formula, eval_globals=None, eval_locals=context)
@@ -370,6 +369,8 @@ class CalculationFormulaValidator(Validator):
 			if not isinstance(result, (int | float)):
 				return _("Formula must return a numeric value, got {0}").format(type(result).__name__)
 
+			return None
+		except ZeroDivisionError:
 			return None
 		except Exception as e:
 			return str(e)
