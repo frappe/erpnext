@@ -23,7 +23,11 @@ from erpnext.stock.get_item_details import (
 	get_conversion_factor,
 	get_item_defaults,
 )
+<<<<<<< HEAD
 from erpnext.stock.utils import _get_incoming_rate
+=======
+from erpnext.stock.utils import get_incoming_rate, is_serial_no_wise_valuation_disabled
+>>>>>>> f09ce05 (feat: use serial no wise valuation switch on item (#59082))
 
 
 class QtyMismatchError(ValidationError):
@@ -817,9 +821,11 @@ class BuyingController(SubcontractingController):
 					)
 
 					if self.is_return:
-						outgoing_rate = get_rate_for_return(
-							self.doctype, self.name, d.item_code, self.return_against, item_row=d
-						)
+						outgoing_rate = 0.0
+						if not is_serial_no_wise_valuation_disabled(d.item_code):
+							outgoing_rate = get_rate_for_return(
+								self.doctype, self.name, d.item_code, self.return_against, item_row=d
+							)
 
 						sle.update(
 							{
