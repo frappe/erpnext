@@ -12,6 +12,7 @@ from typing import Any
 import frappe
 from frappe import _, is_whitelisted
 from frappe.database.operator_map import OPERATOR_MAP
+from frappe.utils import escape_html
 
 FORMULA_FUNCTIONS = {
 	"abs": abs,
@@ -103,8 +104,9 @@ class ValidationResult:
 		self.warnings.append(issue)
 
 	def notify_user(self) -> None:
-		warnings = "<br><br>".join(str(w) for w in self.warnings if w)
-		errors = "<br><br>".join(str(e) for e in self.issues if e)
+		# messages quote user input back, and both are rendered as HTML
+		warnings = "<br><br>".join(escape_html(str(w)) for w in self.warnings if w)
+		errors = "<br><br>".join(escape_html(str(e)) for e in self.issues if e)
 
 		if warnings:
 			frappe.msgprint(warnings, title=_("Warnings"), indicator="orange")
@@ -443,8 +445,7 @@ class AccountFilterValidator(Validator):
 				return _("Field and operator must be strings")
 
 			if field not in account_fields:
-				# escape: `field` is caller-supplied and this message renders as HTML
-				return _("Field '{0}' is not a valid Account field").format(frappe.utils.escape_html(field))
+				return _("Field '{0}' is not a valid Account field").format(field)
 
 			normalized_operator = operator.casefold()
 

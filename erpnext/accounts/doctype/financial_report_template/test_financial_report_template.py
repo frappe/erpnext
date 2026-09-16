@@ -192,8 +192,13 @@ class TestAccountFilter(FinancialReportTemplateTestCase):
 	def test_error_message_labels_and_escapes_field(self):
 		validator = AccountFilterValidator()
 		result = validator.validate_filter(self._row('["<script>", "=", "x"]'))
-		message = str(result.issues[0])
-		self.assertIn("[Account Filter]", message)
+		self.assertIn("[Account Filter]", str(result.issues[0]))
+
+		# escaping happens where the message is rendered, not where it is built
+		frappe.clear_messages()
+		with self.assertRaises(frappe.ValidationError):
+			result.notify_user()
+		message = frappe.get_message_log()[-1]["message"]
 		self.assertIn("&lt;script&gt;", message)
 		self.assertNotIn("<script>", message)
 
@@ -387,3 +392,15 @@ class TestLineReferenceNames(FinancialReportTemplateTestCase):
 		)
 		CalculationFormulaValidator({"REV", "X"}).validate(row)
 		self.assertEqual(row.calculation_formula, "  REV * 2  ")
+
+	def test_invalid_reference_code_is_escaped(self):
+		# this message fires when the code fails the format check, so it can hold anything
+		template = frappe._dict(rows=[frappe._dict(reference_code="<img src=x onerror=alert(1)>", idx=1)])
+		result = TemplateStructureValidator()._validate_reference_codes(template)
+
+		frappe.clear_messages()
+		with self.assertRaises(frappe.ValidationError):
+			result.notify_user()
+		message = frappe.get_message_log()[-1]["message"]
+		self.assertIn("&lt;img", message)
+		self.assertNotIn("<img", message)

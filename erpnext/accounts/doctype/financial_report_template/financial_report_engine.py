@@ -1335,7 +1335,7 @@ class FormulaCalculator:
 
 		if validation_result.issues:
 			# TODO: Throw?
-			messages = "<br><br>".join(issue.message for issue in validation_result.issues)
+			messages = "<br><br>".join(str(issue) for issue in validation_result.issues)
 			frappe.log_error(f"Formula validation errors found:\n{messages}")
 			return [0.0] * len(self.period_list)
 
