@@ -43,6 +43,7 @@ from erpnext.stock.utils import (
 	get_serial_nos_data,
 	get_stock_balance,
 	get_valuation_method,
+	is_serial_no_wise_valuation_disabled,
 )
 from erpnext.stock.valuation import FIFOValuation, LIFOValuation, round_off_if_near_zero
 
@@ -519,6 +520,7 @@ class update_entries_after:
 		self.company = frappe.get_cached_value("Warehouse", self.args.warehouse, "company")
 		self.set_precision()
 		self.valuation_method = get_valuation_method(self.item_code, self.company)
+		self.skip_serial_batch_valuation = is_serial_no_wise_valuation_disabled(self.item_code)
 		self.repost_affected_transaction = args.get("repost_affected_transaction") or set()
 
 		self.new_items_found = False
@@ -929,9 +931,9 @@ class update_entries_after:
 				if sle.get(dimension.get("fieldname")):
 					has_dimensions = True
 
-		if sle.serial_and_batch_bundle:
+		if sle.serial_and_batch_bundle and not self.skip_serial_batch_valuation:
 			self.calculate_valuation_for_serial_batch_bundle(sle)
-		elif sle.serial_no and not self.args.get("sle_id"):
+		elif sle.serial_no and not self.skip_serial_batch_valuation and not self.args.get("sle_id"):
 			# Only run in reposting
 			self.get_serialized_values(sle)
 			self.wh_data.qty_after_transaction += flt(sle.actual_qty)
@@ -943,6 +945,7 @@ class update_entries_after:
 			)
 		elif (
 			sle.batch_no
+			and not self.skip_serial_batch_valuation
 			and frappe.db.get_value("Batch", sle.batch_no, "use_batchwise_valuation", cache=True)
 			and not self.args.get("sle_id")
 		):
@@ -1286,11 +1289,9 @@ class update_entries_after:
 					get_rate_for_return,  # don't move this import to top
 				)
 
-				if (
-					self.valuation_method == "Moving Average"
-					and not sle.get("serial_no")
-					and not sle.get("batch_no")
-					and not sle.get("serial_and_batch_bundle")
+				if self.valuation_method == "Moving Average" and (
+					self.skip_serial_batch_valuation
+					or not (sle.get("serial_no") or sle.get("batch_no") or sle.get("serial_and_batch_bundle"))
 				):
 					rate = self.get_moving_average_rate_for_return(sle)
 
@@ -1302,6 +1303,9 @@ class update_entries_after:
 							voucher_detail_no=sle.voucher_detail_no,
 							sle=sle,
 						)
+
+				elif self.skip_serial_batch_valuation and flt(sle.actual_qty) < 0:
+					rate = 0.0
 
 				else:
 					rate = get_rate_for_return(
@@ -1641,6 +1645,9 @@ class update_entries_after:
 			self.wh_data.valuation_rate = self.wh_data.stock_value / self.wh_data.qty_after_transaction
 
 	def is_return_purchase_entry(self, sle):
+		if self.skip_serial_batch_valuation:
+			return False
+
 		if sle.voucher_type in ["Purchase Invoice", "Purchase Receipt"]:
 			return frappe.get_cached_value(sle.voucher_type, sle.voucher_no, "is_return")
 
