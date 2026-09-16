@@ -1130,6 +1130,67 @@ class TestSerialandBatchBundle(FrappeTestCase):
 		self.assertTrue(bundle_doc.docstatus == 0)
 		self.assertRaises(frappe.ValidationError, bundle_doc.submit)
 
+	@change_settings("Stock Settings", {"do_not_use_batchwise_valuation": 0})
+	def test_amended_material_receipt_rate_after_batch_selection(self):
+		warehouse = "_Test Warehouse - _TC"
+		for valuation_method in ("FIFO", "Moving Average"):
+			with self.subTest(valuation_method=valuation_method):
+				item = make_item(
+					properties={
+						"is_stock_item": 1,
+						"has_batch_no": 1,
+						"stock_uom": "Nos",
+						"valuation_method": valuation_method,
+					}
+				)
+				batches = [
+					frappe.get_doc(
+						{"doctype": "Batch", "item": item.name, "batch_id": f"{item.name}-{index}"}
+					)
+					.insert()
+					.name
+					for index in range(2)
+				]
+				for index, (batch, qty) in enumerate(((batches[0], 10), (batches[1], 10), (batches[0], 5))):
+					receipt = make_stock_entry(
+						item_code=item.name,
+						company="_Test Company",
+						to_warehouse=warehouse,
+						qty=qty,
+						rate=10,
+						batch_no=batch,
+						posting_date=add_days(today(), index - 2),
+						posting_time="10:00:00",
+					)
+
+				receipt.cancel()
+				amended = frappe.copy_doc(receipt, ignore_no_copy=False)
+				amended.amended_from = receipt.name
+				amended.docstatus = 0
+				row = amended.items[0]
+				row.batch_no = None
+				row.serial_and_batch_bundle = None
+				row.use_serial_batch_fields = 0
+
+				# The selector returns an unpriced bundle and copies its rate to the receipt row.
+				bundle = add_serial_batch_ledgers(
+					[{"batch_no": batches[1], "qty": 5}],
+					row.as_dict(),
+					amended.as_dict(),
+					warehouse,
+				)
+				row.serial_and_batch_bundle = bundle.name
+				row.basic_rate = bundle.avg_rate
+				amended.insert()
+				self.assertEqual(row.basic_rate, 10)
+				self.assertEqual(row.basic_amount, 50)
+
+				amended.submit()
+				ledger = frappe.get_doc("Stock Ledger Entry", {"voucher_no": amended.name, "is_cancelled": 0})
+				self.assertEqual(ledger.incoming_rate, 10)
+				self.assertEqual(ledger.stock_value_difference, 50)
+				self.assertEqual(ledger.stock_value, 250)
+
 	def test_stock_queue_for_return_entry_with_non_batchwise_valuation(self):
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
