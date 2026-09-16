@@ -1246,7 +1246,11 @@ def get_payment_terms_for_references(
 
 		# Payment Schedule is a child table and carries no permissions of its own, so the
 		# document the schedule belongs to is what decides access to these rows
-		parenttype = frappe.db.get_value("Payment Schedule", {"parent": reference}, "parenttype")
+		# prefer the caller's own reference type; the lookup below cannot tell two parents of
+		# different types apart when they share a name
+		parenttype = filters.get("reference_doctype") or frappe.db.get_value(
+			"Payment Schedule", {"parent": reference}, "parenttype"
+		)
 		if not parenttype:
 			return terms
 
@@ -1254,7 +1258,7 @@ def get_payment_terms_for_references(
 
 		terms = frappe.db.get_all(
 			"Payment Schedule",
-			filters={"parent": reference},
+			filters={"parent": reference, "parenttype": parenttype},
 			fields=["payment_term"],
 			limit=page_len,
 			as_list=1,
