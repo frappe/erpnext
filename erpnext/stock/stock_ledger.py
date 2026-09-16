@@ -1969,7 +1969,15 @@ class update_entries_after:
 
 
 def get_sle_against_current_voucher(kwargs):
-	kwargs["posting_datetime"] = get_combine_datetime(kwargs.posting_date, kwargs.posting_time)
+	# Match on the row's stored posting_datetime. Re-deriving it from posting_date and posting_time
+	# makes rows whose stored value differs unmatchable, so the voucher gets reposted against nothing.
+	if kwargs.get("name") and not kwargs.get("posting_datetime"):
+		kwargs["posting_datetime"] = frappe.db.get_value(
+			"Stock Ledger Entry", kwargs.get("name"), "posting_datetime"
+		)
+
+	if not kwargs.get("posting_datetime"):
+		kwargs["posting_datetime"] = get_combine_datetime(kwargs.posting_date, kwargs.posting_time)
 	doctype = frappe.qb.DocType("Stock Ledger Entry")
 
 	query = (
@@ -2105,14 +2113,19 @@ def get_stock_ledger_entries(
 			frappe.db.escape(f"%\n{serial_no}\n%"),
 		)
 
-	if not previous_sle.get("posting_date"):
-		previous_sle["posting_datetime"] = "1900-01-01 00:00:00"
-	else:
-		posting_time = previous_sle.get("posting_time")
-		if not posting_time:
-			posting_time = "00:00:00"
+	if not previous_sle.get("posting_datetime"):
+		# Derive only when the caller has not supplied the stored posting_datetime. Re-deriving it
+		# would shift the boundary for rows whose stored value differs from posting_date + posting_time.
+		if not previous_sle.get("posting_date"):
+			previous_sle["posting_datetime"] = "1900-01-01 00:00:00"
+		else:
+			posting_time = previous_sle.get("posting_time")
+			if not posting_time:
+				posting_time = "00:00:00"
 
-		previous_sle["posting_datetime"] = get_combine_datetime(previous_sle["posting_date"], posting_time)
+			previous_sle["posting_datetime"] = get_combine_datetime(
+				previous_sle["posting_date"], posting_time
+			)
 
 	if operator in (">", "<=") and previous_sle.get("name"):
 		conditions += " and name!=%(name)s"
