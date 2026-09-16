@@ -1702,6 +1702,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 
 	def test_valuation_method_forced_to_moving_average_when_disabled(self):
 		item = self.make_serial_item_for_valuation("_Test Serial Wise Valuation Forced MA", 1)
+		self.receive_serial_stock(item.name, 1, 100, "_Test Warehouse - _TC")
 
 		item.reload()
 		item.valuation_method = "FIFO"
@@ -1711,8 +1712,30 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 		item.reload()
 		self.assertEqual(item.valuation_method, "Moving Average")
 
+	def test_valuation_method_kept_when_disabled_without_stock_transactions(self):
+		item = self.make_serial_item_for_valuation("_Test Serial Wise Valuation No MA Yet", 1)
+
+		item.reload()
+		item.valuation_method = "FIFO"
+		item.use_serial_no_wise_valuation = 0
+		item.save()
+
+		item.reload()
+		self.assertEqual(item.valuation_method, "FIFO")
+
+	def test_fifo_allowed_when_disabled_without_stock_transactions(self):
+		item = self.make_serial_item_for_valuation("_Test Serial Wise Valuation FIFO Ok", 0)
+
+		item.reload()
+		item.valuation_method = "FIFO"
+		item.save()
+
+		item.reload()
+		self.assertEqual(item.valuation_method, "FIFO")
+
 	def test_cannot_set_fifo_when_serial_no_wise_valuation_disabled(self):
 		item = self.make_serial_item_for_valuation("_Test Serial Wise Valuation No FIFO", 0)
+		self.receive_serial_stock(item.name, 1, 100, "_Test Warehouse - _TC")
 
 		item.reload()
 		self.assertEqual(item.valuation_method, "Moving Average")
@@ -1726,6 +1749,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 		from erpnext.stock.utils import get_valuation_method, is_serial_no_wise_valuation_disabled
 
 		item = self.make_serial_item_for_valuation("_Test Serial Wise Valuation Cache", 1)
+		self.receive_serial_stock(item.name, 1, 100, "_Test Warehouse - _TC")
 
 		previous_cache = getattr(frappe.local, "request_cache", None)
 		self.addCleanup(setattr, frappe.local, "request_cache", previous_cache)

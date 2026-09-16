@@ -1155,6 +1155,9 @@ class Item(Document):
 		if not self.has_serial_no or self.use_serial_no_wise_valuation:
 			return
 
+		if not frappe.db.exists("Stock Ledger Entry", {"item_code": self.name, "is_cancelled": 0}):
+			return
+
 		if (
 			not self.is_new()
 			and self._doc_before_save
