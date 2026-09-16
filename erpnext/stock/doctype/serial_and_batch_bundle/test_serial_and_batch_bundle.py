@@ -537,6 +537,12 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 
 				batch_doc.db_set("use_batchwise_valuation", use_batchwise_valuation)
 
+		# ERPNextTestSuite.tearDown only rolls the db back, it does not restore
+		# frappe.local.flags, so these have to be put back even if a submit raises
+		previous_flags = (
+			frappe.flags.ignore_serial_batch_bundle_validation,
+			frappe.flags.use_serial_and_batch_fields,
+		)
 		frappe.flags.ignore_serial_batch_bundle_validation = True
 		frappe.flags.use_serial_and_batch_fields = True
 
@@ -551,34 +557,37 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 			(non_batchwise_batch, -20, -5000, 20, 5000),
 		]
 
-		for batch_id, qty, svd, qty_after_transaction, stock_value in legacy_entries:
-			doc = frappe.get_doc(
-				{
-					"doctype": "Stock Ledger Entry",
-					"posting_date": today(),
-					"posting_time": nowtime(),
-					"batch_no": batch_id,
-					"incoming_rate": (svd / qty) if qty > 0 else 0,
-					"qty_after_transaction": qty_after_transaction,
-					"stock_value_difference": svd,
-					"stock_value": stock_value,
-					"balance_value": stock_value,
-					"valuation_rate": stock_value / qty_after_transaction,
-					"actual_qty": qty,
-					"item_code": item_code,
-					"warehouse": warehouse,
-				}
-			)
+		try:
+			for batch_id, qty, svd, qty_after_transaction, stock_value in legacy_entries:
+				doc = frappe.get_doc(
+					{
+						"doctype": "Stock Ledger Entry",
+						"posting_date": today(),
+						"posting_time": nowtime(),
+						"batch_no": batch_id,
+						"incoming_rate": (svd / qty) if qty > 0 else 0,
+						"qty_after_transaction": qty_after_transaction,
+						"stock_value_difference": svd,
+						"stock_value": stock_value,
+						"balance_value": stock_value,
+						"valuation_rate": stock_value / qty_after_transaction,
+						"actual_qty": qty,
+						"item_code": item_code,
+						"warehouse": warehouse,
+					}
+				)
 
-			doc.set_posting_datetime()
-			doc.flags.ignore_permissions = True
-			doc.flags.ignore_mandatory = True
-			doc.flags.ignore_links = True
-			doc.flags.ignore_validate = True
-			doc.submit()
-
-		frappe.flags.ignore_serial_batch_bundle_validation = False
-		frappe.flags.use_serial_and_batch_fields = False
+				doc.set_posting_datetime()
+				doc.flags.ignore_permissions = True
+				doc.flags.ignore_mandatory = True
+				doc.flags.ignore_links = True
+				doc.flags.ignore_validate = True
+				doc.submit()
+		finally:
+			(
+				frappe.flags.ignore_serial_batch_bundle_validation,
+				frappe.flags.use_serial_and_batch_fields,
+			) = previous_flags
 
 		# Refill the drained non batchwise batch, then consume it back out.
 		make_stock_entry(
