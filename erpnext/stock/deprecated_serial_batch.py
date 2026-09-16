@@ -503,12 +503,6 @@ class DeprecatedBatchNoValuation:
 		return get_valuation_method(item_code, self.sle.company)
 
 	def use_batch_pool_for_moving_average(self):
-		"""Value a Moving Average item's non batchwise batches from each batch's own pool.
-
-		Only applies while batch wise valuation is switched on globally; with
-		`do_not_use_batchwise_valuation` set, every batch of the item is non batchwise and
-		the warehouse level pool is the right basis.
-		"""
 		if not hasattr(self, "_use_batch_pool_for_moving_average"):
 			self._use_batch_pool_for_moving_average = self.get_valuation_method(
 				self.sle.item_code
