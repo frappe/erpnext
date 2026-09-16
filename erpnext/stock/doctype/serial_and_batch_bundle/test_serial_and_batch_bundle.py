@@ -493,6 +493,152 @@ class TestSerialandBatchBundle(FrappeTestCase):
 		self.assertEqual(flt(sle.stock_value), 0.0)
 		self.assertEqual(flt(sle.qty_after_transaction), 0.0)
 
+	def test_moving_avg_item_with_mixed_batchwise_valuation(self):
+		"""A Moving Average item holding both batchwise and non batchwise batches.
+
+		The non batchwise batches were consumed at the pooled warehouse rate before batch
+		level valuation existed, so the sum of their stock value differences no longer
+		tracks the sum of their quantities. Valuing a later outward off that drained pool
+		used to hand back a negative rate, which the callers read as abs() and used to
+		overdraw the warehouse, driving stock value negative.
+		"""
+		frappe.db.set_single_value("Stock Settings", "do_not_use_batchwise_valuation", 0)
+
+		item_code = "Old Batch Item Mixed Valuation 1"
+		make_item(
+			item_code,
+			{
+				"has_batch_no": 1,
+				"batch_number_series": "TEST-MIX-BAT-VAL-.#####",
+				"create_new_batch": 1,
+				"is_stock_item": 1,
+				"valuation_method": "Moving Average",
+			},
+		)
+
+		warehouse = "_Test Warehouse - _TC"
+		non_batchwise_batch = "TEST-MIX-BAT-VAL-00001"
+		batchwise_batch = "TEST-MIX-BAT-VAL-00002"
+
+		for batch_id, use_batchwise_valuation in (
+			(non_batchwise_batch, 0),
+			(batchwise_batch, 1),
+		):
+			if not frappe.db.exists("Batch", batch_id):
+				batch_doc = frappe.get_doc(
+					{
+						"doctype": "Batch",
+						"batch_id": batch_id,
+						"item": item_code,
+						"use_batchwise_valuation": use_batchwise_valuation,
+					}
+				).insert(ignore_permissions=True)
+
+				batch_doc.db_set("use_batchwise_valuation", use_batchwise_valuation)
+
+		# put the flags back even if a submit raises, so they cannot leak into later tests
+		previous_flags = (
+			frappe.flags.ignore_serial_batch_bundle_validation,
+			frappe.flags.use_serial_and_batch_fields,
+		)
+		frappe.flags.ignore_serial_batch_bundle_validation = True
+		frappe.flags.use_serial_and_batch_fields = True
+
+		# Legacy ledger, written the way the pre batch-level-valuation code posted it:
+		#   in  20 @ 50  of the non batchwise batch  -> warehouse 20 qty / 1000
+		#   in  20 @ 450 of the batchwise batch      -> warehouse 40 qty / 10000, rate 250
+		#   out 20       of the non batchwise batch, priced at the pooled rate of 250
+		# which leaves the non batchwise batch with a pool of -4000 value against 0 qty.
+		legacy_entries = [
+			(non_batchwise_batch, 20, 1000, 20, 1000),
+			(batchwise_batch, 20, 9000, 40, 10000),
+			(non_batchwise_batch, -20, -5000, 20, 5000),
+		]
+
+		try:
+			for batch_id, qty, svd, qty_after_transaction, stock_value in legacy_entries:
+				doc = frappe.get_doc(
+					{
+						"doctype": "Stock Ledger Entry",
+						"posting_date": today(),
+						"posting_time": nowtime(),
+						"batch_no": batch_id,
+						"incoming_rate": (svd / qty) if qty > 0 else 0,
+						"qty_after_transaction": qty_after_transaction,
+						"stock_value_difference": svd,
+						"stock_value": stock_value,
+						"balance_value": stock_value,
+						"valuation_rate": stock_value / qty_after_transaction,
+						"actual_qty": qty,
+						"item_code": item_code,
+						"warehouse": warehouse,
+					}
+				)
+
+				doc.set_posting_datetime()
+				doc.flags.ignore_permissions = True
+				doc.flags.ignore_mandatory = True
+				doc.flags.ignore_links = True
+				doc.flags.ignore_validate = True
+				doc.submit()
+		finally:
+			(
+				frappe.flags.ignore_serial_batch_bundle_validation,
+				frappe.flags.use_serial_and_batch_fields,
+			) = previous_flags
+
+		# Refill the drained non batchwise batch, then consume it back out.
+		make_stock_entry(
+			item_code=item_code,
+			target=warehouse,
+			qty=10,
+			rate=50,
+			batch_no=non_batchwise_batch,
+			use_serial_batch_fields=True,
+		)
+
+		se = make_stock_entry(
+			item_code=item_code,
+			source=warehouse,
+			qty=10,
+			batch_no=non_batchwise_batch,
+			use_serial_batch_fields=True,
+		)
+
+		sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"item_code": item_code, "is_cancelled": 0, "voucher_no": se.name},
+			["qty_after_transaction", "stock_value", "stock_value_difference"],
+			as_dict=True,
+		)
+
+		self.assertEqual(flt(sle.qty_after_transaction), 20.0)
+
+		# The non batchwise batch is left holding a pool of -3500 against 10 qty, so its
+		# own rate works out to -350. That used to be taken as abs() = 350 and the 10 units
+		# drew 3500 out of the warehouse, against the 50 each they were actually bought at.
+		# The drained pool is rejected now and the warehouse rate of 5500 / 30 is used.
+		self.assertEqual(flt(sle.stock_value_difference, 2), -1833.33)
+		self.assertEqual(flt(sle.stock_value, 2), 3666.67)
+		self.assertGreaterEqual(flt(sle.stock_value), 0.0)
+
+		# a batch is never valued at a negative rate, and the rate stored on the ledger
+		# entry stays in step with the sign every reader applies to it
+		bundle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"item_code": item_code, "is_cancelled": 0, "voucher_no": se.name},
+			"serial_and_batch_bundle",
+		)
+
+		incoming_rate = frappe.db.get_value(
+			"Serial and Batch Entry",
+			{"parent": bundle, "batch_no": non_batchwise_batch},
+			"incoming_rate",
+		)
+
+		self.assertGreaterEqual(flt(incoming_rate), 0.0)
+		self.assertEqual(flt(incoming_rate, 2), 183.33)
+
 	def test_old_serial_no_valuation(self):
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 
