@@ -639,6 +639,185 @@ class TestSerialandBatchBundle(FrappeTestCase):
 		self.assertGreaterEqual(flt(incoming_rate), 0.0)
 		self.assertEqual(flt(incoming_rate, 2), 183.33)
 
+	def _make_legacy_sle(self, item_code, warehouse, batch_no, qty, svd, qty_after, stock_value):
+		doc = frappe.get_doc(
+			{
+				"doctype": "Stock Ledger Entry",
+				"posting_date": add_days(today(), -5),
+				"posting_time": nowtime(),
+				"batch_no": batch_no,
+				"incoming_rate": (svd / qty) if qty > 0 else 0,
+				"qty_after_transaction": qty_after,
+				"stock_value_difference": svd,
+				"stock_value": stock_value,
+				"balance_value": stock_value,
+				"valuation_rate": stock_value / qty_after,
+				"actual_qty": qty,
+				"item_code": item_code,
+				"warehouse": warehouse,
+			}
+		)
+
+		doc.set_posting_datetime()
+		doc.flags.ignore_permissions = True
+		doc.flags.ignore_mandatory = True
+		doc.flags.ignore_links = True
+		doc.flags.ignore_validate = True
+		doc.submit()
+
+	def _make_mixed_valuation_item(self, item_code, series, batches):
+		frappe.db.set_single_value("Stock Settings", "do_not_use_batchwise_valuation", 0)
+
+		make_item(
+			item_code,
+			{
+				"has_batch_no": 1,
+				"batch_number_series": series,
+				"create_new_batch": 1,
+				"is_stock_item": 1,
+				"valuation_method": "Moving Average",
+			},
+		)
+
+		for batch_id, use_batchwise_valuation in batches:
+			if not frappe.db.exists("Batch", batch_id):
+				batch_doc = frappe.get_doc(
+					{
+						"doctype": "Batch",
+						"batch_id": batch_id,
+						"item": item_code,
+						"use_batchwise_valuation": use_batchwise_valuation,
+					}
+				).insert(ignore_permissions=True)
+
+				batch_doc.db_set("use_batchwise_valuation", use_batchwise_valuation)
+
+	def test_moving_avg_non_batchwise_batch_without_history(self):
+		"""A non batchwise batch that no balance query can find any history for.
+
+		The pool comes back empty, so the batch used to be valued at a rate of zero: the
+		qty would leave the warehouse while none of the value did, quietly inflating the
+		valuation rate of everything left behind. It falls back to the pooled rate now.
+
+		Driven through BatchNoValuation directly because SerialandBatchBundle.validate
+		rejects an outward for a batch with no stock before valuation is ever reached, so
+		this branch is only live for reposts and legacy batch_no field entries.
+		"""
+		from erpnext.stock.serial_batch_bundle import BatchNoValuation
+		from erpnext.stock.utils import get_combine_datetime
+
+		item_code = "Old Batch Item Mixed Valuation 2"
+		warehouse = "_Test Warehouse - _TC"
+		non_batchwise_batch = "TEST-MIX2-BAT-VAL-00001"
+		batchwise_batch = "TEST-MIX2-BAT-VAL-00002"
+
+		self._make_mixed_valuation_item(
+			item_code,
+			"TEST-MIX2-BAT-VAL-.#####",
+			[(non_batchwise_batch, 0), (batchwise_batch, 1)],
+		)
+
+		# only the batchwise batch ever receives stock, so the non batchwise one has no
+		# history at all for the balance queries to pick up
+		previous_flags = (
+			frappe.flags.ignore_serial_batch_bundle_validation,
+			frappe.flags.use_serial_and_batch_fields,
+		)
+		frappe.flags.ignore_serial_batch_bundle_validation = True
+		frappe.flags.use_serial_and_batch_fields = True
+
+		try:
+			self._make_legacy_sle(item_code, warehouse, batchwise_batch, 20, 4000, 20, 4000)
+		finally:
+			(
+				frappe.flags.ignore_serial_batch_bundle_validation,
+				frappe.flags.use_serial_and_batch_fields,
+			) = previous_flags
+
+		sle = frappe._dict(
+			{
+				"item_code": item_code,
+				"warehouse": warehouse,
+				"company": "_Test Company",
+				"actual_qty": -5,
+				"posting_date": today(),
+				"posting_time": nowtime(),
+				"batch_nos": {non_batchwise_batch: frappe._dict({"qty": -5})},
+			}
+		)
+		sle.posting_datetime = get_combine_datetime(sle.posting_date, sle.posting_time)
+
+		sn_obj = BatchNoValuation(sle=sle, item_code=item_code, warehouse=warehouse)
+
+		# the warehouse holds 20 @ 200, so the 5 units have to take value out with them
+		self.assertEqual(flt(sn_obj.batch_avg_rate[non_batchwise_batch], 2), 200.0)
+		self.assertEqual(flt(sn_obj.stock_value_change, 2), -1000.0)
+
+	def test_moving_avg_non_batchwise_batch_equal_timestamp_bundles(self):
+		"""Pins the valuation of two bundles posted at the very same instant.
+
+		The bundle balance query and the stock ledger balance query disagreed on whether an
+		entry sharing the outward's timestamp came before it, so one pool could have its qty
+		and its value summed as of two different points in time. Telling the two apart needs
+		a bundle whose creation and whose SLE's creation straddle the outward, which does
+		not arise from ordinary vouchers, so this pins the equal-timestamp result rather
+		than reproducing that divergence.
+		"""
+		item_code = "Old Batch Item Mixed Valuation 3"
+		warehouse = "_Test Warehouse - _TC"
+		non_batchwise_batch = "TEST-MIX3-BAT-VAL-00001"
+
+		self._make_mixed_valuation_item(item_code, "TEST-MIX3-BAT-VAL-.#####", [(non_batchwise_batch, 0)])
+
+		previous_flags = (
+			frappe.flags.ignore_serial_batch_bundle_validation,
+			frappe.flags.use_serial_and_batch_fields,
+		)
+		frappe.flags.ignore_serial_batch_bundle_validation = True
+		frappe.flags.use_serial_and_batch_fields = True
+
+		try:
+			self._make_legacy_sle(item_code, warehouse, non_batchwise_batch, 10, 1000, 10, 1000)
+		finally:
+			(
+				frappe.flags.ignore_serial_batch_bundle_validation,
+				frappe.flags.use_serial_and_batch_fields,
+			) = previous_flags
+
+		posting_date, posting_time = today(), "10:00:00"
+
+		make_stock_entry(
+			item_code=item_code,
+			target=warehouse,
+			qty=10,
+			rate=300,
+			batch_no=non_batchwise_batch,
+			posting_date=posting_date,
+			posting_time=posting_time,
+			use_serial_batch_fields=True,
+		)
+
+		se = make_stock_entry(
+			item_code=item_code,
+			source=warehouse,
+			qty=10,
+			batch_no=non_batchwise_batch,
+			posting_date=posting_date,
+			posting_time=posting_time,
+			use_serial_batch_fields=True,
+		)
+
+		sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"item_code": item_code, "is_cancelled": 0, "voucher_no": se.name},
+			["qty_after_transaction", "stock_value", "stock_value_difference"],
+			as_dict=True,
+		)
+
+		# the inward sharing the timestamp counts, so the pool is (1000 + 3000) / 20 = 200
+		self.assertEqual(flt(sle.qty_after_transaction), 10.0)
+		self.assertEqual(flt(sle.stock_value_difference, 2), -2000.0)
+
 	def test_old_serial_no_valuation(self):
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 
