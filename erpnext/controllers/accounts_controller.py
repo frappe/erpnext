@@ -1244,8 +1244,12 @@ class AccountsController(TransactionBase):
 			.run()
 		)
 
+		items_by_ordered_qty = defaultdict(list)
 		for so_item in so_items:
-			frappe.db.set_value("Sales Order Item", so_item, "ordered_qty", flt(ordered_qty.get(so_item)))
+			items_by_ordered_qty[flt(ordered_qty.get(so_item))].append(so_item)
+
+		for qty, items in items_by_ordered_qty.items():
+			frappe.db.set_value("Sales Order Item", {"name": ["in", items]}, "ordered_qty", qty)
 
 	def get_company_default(self, fieldname, ignore_validation=False):
 		from erpnext.accounts.utils import get_company_default
