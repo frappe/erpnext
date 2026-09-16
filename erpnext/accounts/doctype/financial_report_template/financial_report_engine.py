@@ -1330,7 +1330,7 @@ class FormulaCalculator:
 
 	def evaluate_formula(self, report_row: dict[str, Any]) -> list[float]:
 		validation_result = self.validator.validate(report_row)
-		formula = report_row.calculation_formula
+		formula = (report_row.calculation_formula or "").strip()
 		negation_factor = -1 if report_row.reverse_sign else 1
 
 		if validation_result.issues:
