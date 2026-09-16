@@ -1212,32 +1212,40 @@ class AccountsController(TransactionBase):
 				self.unlink_ref_doc_from_po()
 
 	def unlink_ref_doc_from_po(self):
-		so_items = []
-		for item in self.items:
-			so_items.append(item.name)
+		so_items = [item.name for item in self.items]
+		filters = {
+			"sales_order": self.name,
+			"sales_order_item": ["in", so_items],
+			"docstatus": ["<", 2],
+		}
 
-		linked_po = list(
-			set(
-				frappe.get_all(
-					"Purchase Order Item",
-					filters={
-						"sales_order": self.name,
-						"sales_order_item": ["in", so_items],
-						"docstatus": ["<", 2],
-					},
-					pluck="parent",
-				)
+		linked_po_items = frappe.get_all(
+			"Purchase Order Item", filters=filters, fields=["parent", "sales_order_item"]
+		)
+		if not linked_po_items:
+			return
+
+		frappe.db.set_value("Purchase Order Item", filters, {"sales_order": None, "sales_order_item": None})
+		self.update_ordered_qty_in_items({item.sales_order_item for item in linked_po_items})
+
+		linked_po = sorted({item.parent for item in linked_po_items})
+		frappe.msgprint(_("Purchase Orders {0} are unlinked").format("\n".join(linked_po)))
+
+	def update_ordered_qty_in_items(self, so_items: set[str]):
+		purchase_order_item = frappe.qb.DocType("Purchase Order Item")
+		ordered_qty = dict(
+			frappe.qb.from_(purchase_order_item)
+			.select(purchase_order_item.sales_order_item, Sum(purchase_order_item.stock_qty))
+			.where(
+				purchase_order_item.sales_order_item.isin(list(so_items))
+				& (purchase_order_item.docstatus == 1)
 			)
+			.groupby(purchase_order_item.sales_order_item)
+			.run()
 		)
 
-		if linked_po:
-			frappe.db.set_value(
-				"Purchase Order Item",
-				{"sales_order": self.name, "sales_order_item": ["in", so_items], "docstatus": ["<", 2]},
-				{"sales_order": None, "sales_order_item": None},
-			)
-
-			frappe.msgprint(_("Purchase Orders {0} are unlinked").format("\n".join(linked_po)))
+		for so_item in so_items:
+			frappe.db.set_value("Sales Order Item", so_item, "ordered_qty", flt(ordered_qty.get(so_item)))
 
 	def get_company_default(self, fieldname, ignore_validation=False):
 		from erpnext.accounts.utils import get_company_default
