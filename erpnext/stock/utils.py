@@ -640,6 +640,13 @@ def scan_barcode(search_value: str, ctx: dict | str | None = None) -> BarcodeSca
 	# reason as get_incoming_rate: Accounts Manager scans on invoices and holds no Item read.
 	frappe.has_permission("Item", ptype="select", throw=True)
 
+	def authorised(data: BarcodeScanResult) -> BarcodeScanResult:
+		# the check above is doctype level; the scan resolves to one Item and that is what the
+		# caller receives, so authorise the resolved row before returning it
+		if data and data.get("item_code"):
+			frappe.has_permission("Item", ptype="select", doc=data.get("item_code"), throw=True)
+		return data
+
 	def set_cache(data: BarcodeScanResult):
 		frappe.cache().set_value(f"erpnext:barcode_scan:{search_value}", data, expires_in_sec=120)
 		_update_item_info(data, ctx)
@@ -656,7 +663,7 @@ def scan_barcode(search_value: str, ctx: dict | str | None = None) -> BarcodeSca
 		ctx = frappe._dict()
 
 	if scan_data := get_cache():
-		return scan_data
+		return authorised(scan_data)
 
 	# search barcode no
 	barcode_data = frappe.db.get_value(
@@ -667,7 +674,7 @@ def scan_barcode(search_value: str, ctx: dict | str | None = None) -> BarcodeSca
 	)
 	if barcode_data:
 		set_cache(barcode_data)
-		return barcode_data
+		return authorised(barcode_data)
 
 	# search serial no
 	serial_no_data = frappe.db.get_value(
@@ -678,7 +685,7 @@ def scan_barcode(search_value: str, ctx: dict | str | None = None) -> BarcodeSca
 	)
 	if serial_no_data:
 		set_cache(serial_no_data)
-		return serial_no_data
+		return authorised(serial_no_data)
 
 	# search batch no
 	batch_no_data = frappe.db.get_value(
@@ -696,7 +703,7 @@ def scan_barcode(search_value: str, ctx: dict | str | None = None) -> BarcodeSca
 			)
 
 		set_cache(batch_no_data)
-		return batch_no_data
+		return authorised(batch_no_data)
 
 	warehouse = frappe.get_cached_value("Warehouse", search_value, ("name", "disabled"), as_dict=True)
 	if warehouse and not warehouse.disabled:
