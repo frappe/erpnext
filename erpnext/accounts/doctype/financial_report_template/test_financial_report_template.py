@@ -361,3 +361,10 @@ class TestLineReferenceNames(FinancialReportTemplateTestCase):
 		# these would be overwritten by the function of the same name
 		for code in ("sum", "round", "abs"):
 			self.assertFalse(self._validate(code).is_valid, code)
+
+	def test_surrounding_spaces_are_normalised_before_validation(self):
+		template = frappe.new_doc("Financial Report Template")
+		template.template_name = "Spaces"
+		template.append("rows", {"reference_code": "  REV  ", "data_source": "Blank Line"})
+		template.before_validate()
+		self.assertEqual(template.rows[0].reference_code, "REV")

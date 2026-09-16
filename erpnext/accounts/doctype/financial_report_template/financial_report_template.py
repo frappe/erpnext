@@ -34,6 +34,10 @@ class FinancialReportTemplate(Document):
 	def before_validate(self):
 		self.clear_hidden_fields()
 
+		for row in self.rows:
+			if row.reference_code:
+				row.reference_code = row.reference_code.strip()
+
 	def clear_hidden_fields(self):
 		style_data_sources = {"Blank Line", "Column Break", "Section Break"}
 

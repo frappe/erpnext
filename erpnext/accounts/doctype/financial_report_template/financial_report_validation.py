@@ -161,7 +161,7 @@ class TemplateStructureValidator(Validator):
 			if not row.reference_code:
 				continue
 
-			ref_code = row.reference_code.strip()
+			ref_code = row.reference_code
 
 			# a line reference is used as a name in formulas, so it must be a usable one
 			if not re.match(r"^[A-Za-z][A-Za-z0-9_]*$", ref_code):
