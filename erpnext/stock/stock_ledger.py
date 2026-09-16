@@ -54,6 +54,11 @@ from erpnext.stock.valuation import FIFOValuation, LIFOValuation, round_off_if_n
 # entries so that a repost spanning millions of entries does not blow up the worker.
 REPOST_SLE_BATCH_SIZE = 500
 
+# How many of the most recent messages to keep when trimming `frappe.local.message_log`
+# during a repost. The failure handler in Repost Item Valuation reads the tail of this
+# log to build the error log, so the recent entries have to survive.
+REPOST_MESSAGE_LOG_LIMIT = 50
+
 # Columns needed to queue and sort an entry for reposting. The remaining columns are
 # fetched in batches of REPOST_SLE_BATCH_SIZE just before the entry is processed.
 REPOST_SLE_QUEUE_FIELDS = (
@@ -326,8 +331,12 @@ def release_reposting_memory():
 		for key in [key for key in local_cache if b"|document_cache::" in frappe.safe_encode(key)]:
 			local_cache.pop(key, None)
 
-	# msgprint during reposting (eg. negative stock warnings) accumulates here
-	frappe.local.message_log = []
+	# msgprint during reposting (eg. negative stock warnings) accumulates here and is
+	# never trimmed. Keep the most recent messages so that a failure later in the repost
+	# can still report them, and drop only the older ones.
+	message_log = getattr(frappe.local, "message_log", None)
+	if message_log and len(message_log) > REPOST_MESSAGE_LOG_LIMIT:
+		frappe.local.message_log = message_log[-REPOST_MESSAGE_LOG_LIMIT:]
 
 	gc.collect()
 
@@ -722,6 +731,12 @@ class update_entries_after:
 
 			sle = self.get_sle_to_repost(queued_sle)
 			if not sle:
+				# the entry was cancelled or deleted after it was queued, so it must not be
+				# reposted. Cancellation queues its own repost, which picks up from there.
+				frappe.logger("stock_ledger").info(
+					f"Skipped {queued_sle.name} while reposting {self.item_code}, "
+					"entry is no longer active"
+				)
 				continue
 
 			self.repost_stock_ledger_entry(sle)
