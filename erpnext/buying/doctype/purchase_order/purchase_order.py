@@ -613,8 +613,7 @@ def item_last_purchase_rate(name, conversion_rate, item_code, conversion_factor=
 
 @frappe.whitelist(methods=["POST"])
 def close_or_unclose_purchase_orders(names: str | list, status: str):
-	if not frappe.has_permission("Purchase Order", "write"):
-		frappe.throw(_("Not permitted"), frappe.PermissionError)
+	frappe.has_permission("Purchase Order", "write", throw=True)
 
 	names = frappe.parse_json(names)
 	for name in names:

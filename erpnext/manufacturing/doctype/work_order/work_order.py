@@ -1136,8 +1136,7 @@ def get_default_warehouse(company: str):
 def stop_unstop(work_order: str, status: str):
 	"""Called from client side on Stop/Unstop event"""
 
-	if not frappe.has_permission("Work Order", "write"):
-		frappe.throw(_("Not permitted"), frappe.PermissionError)
+	frappe.has_permission("Work Order", "write", throw=True)
 
 	# the check above is doctype level and never consults User Permissions, so on its own it lets
 	# a caller restricted to one company stop another company's orders
@@ -1174,8 +1173,7 @@ def query_sales_order(doctype: str, txt: str, searchfield: str, start: int, page
 
 @frappe.whitelist(methods=["POST"])
 def close_work_order(work_order: str, status: str):
-	if not frappe.has_permission("Work Order", "write"):
-		frappe.throw(_("Not permitted"), frappe.PermissionError)
+	frappe.has_permission("Work Order", "write", throw=True)
 
 	# doctype level above, record level here — see stop_unstop()
 	work_order = frappe.get_doc("Work Order", work_order, check_permission="write")

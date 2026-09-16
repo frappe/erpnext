@@ -792,8 +792,7 @@ def is_enable_cutoff_date_on_bulk_delivery_note_creation():
 
 @frappe.whitelist(methods=["POST"])
 def close_or_unclose_sales_orders(names: str | list, status: str):
-	if not frappe.has_permission("Sales Order", "write"):
-		frappe.throw(_("Not permitted"), frappe.PermissionError)
+	frappe.has_permission("Sales Order", "write", throw=True)
 
 	names = frappe.parse_json(names)
 	for name in names:
