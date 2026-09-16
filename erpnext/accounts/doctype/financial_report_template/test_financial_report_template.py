@@ -5,7 +5,9 @@ import frappe
 from frappe.tests.utils import whitelist_for_tests
 
 from erpnext.accounts.doctype.financial_report_template.financial_report_validation import (
+	FORMULA_FUNCTIONS,
 	AccountFilterValidator,
+	CalculationFormulaValidator,
 	FormulaValidator,
 	get_valid_api_method,
 )
@@ -248,3 +250,44 @@ class TestAccountFilter(FinancialReportTemplateTestCase):
 			pluck="name",
 		)
 		self.assertEqual(sorted(get_filtered_accounts(company, "[]")), sorted(expected))
+
+
+class TestFormulaEnvironment(FinancialReportTemplateTestCase):
+	"""Validator and engine must evaluate a formula in the same environment."""
+
+	@staticmethod
+	def _calc(row_data):
+		from erpnext.accounts.doctype.financial_report_template.financial_report_engine import (
+			FormulaCalculator,
+		)
+
+		return FormulaCalculator(row_data, [{"key": "p1"}])
+
+	@staticmethod
+	def _row(formula):
+		return frappe._dict(
+			calculation_formula=formula,
+			idx=1,
+			reverse_sign=0,
+			data_source="Calculated Amount",
+			reference_code="X",
+		)
+
+	def test_engine_keeps_reference_codes_named_like_builtins(self):
+		# "int" and "long" are whitelisted safe_eval globals; the row values must win
+		calc = self._calc({"int": [500.0], "long": [2000.0]})
+		self.assertEqual(calc.evaluate_formula(self._row("int + long"))[0], 2500.0)
+
+	def test_validator_keeps_reference_codes_named_like_builtins(self):
+		validator = CalculationFormulaValidator({"int", "long"})
+		self.assertTrue(validator.validate(self._row("int + long")).is_valid)
+
+	def test_engine_uses_the_shared_function_list(self):
+		context = self._calc({"A": [1.0]})._build_context(0)
+		for name, function in FORMULA_FUNCTIONS.items():
+			self.assertIs(context[name], function)
+
+	def test_rounding_matches_math_module(self):
+		calc = self._calc({"A": [1.0]})
+		self.assertEqual(calc.evaluate_formula(self._row("floor(-2.5)"))[0], -3.0)
+		self.assertEqual(calc.evaluate_formula(self._row("ceil(-2.5)"))[0], -2.0)
