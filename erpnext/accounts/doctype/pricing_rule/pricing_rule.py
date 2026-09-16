@@ -772,14 +772,18 @@ def set_transaction_type(pricing_ctx: frappe._dict) -> None:
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_item_uoms(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
-	items = [filters.get("value")]
-	if filters.get("apply_on") != "Item Code":
-		field = frappe.scrub(filters.get("apply_on"))
-		items = [d.name for d in frappe.db.get_all("Item", filters={field: filters.get("value")})]
+	if filters.get("apply_on") == "Item Code":
+		item_filters = [["name", "=", filters.get("value")]]
+	else:
+		item_filters = [[frappe.scrub(filters.get("apply_on")), "=", filters.get("value")]]
+
+	items = frappe.get_list("Item", filters=item_filters, pluck="name")
+	if not items:
+		return []
 
 	return frappe.get_all(
 		"UOM Conversion Detail",
-		filters={"parent": ("in", items), "uom": ("like", f"{txt}%")},
+		filters={"parent": ("in", items), "parenttype": "Item", "uom": ("like", f"{txt}%")},
 		fields=["uom"],
 		as_list=1,
 		distinct=True,

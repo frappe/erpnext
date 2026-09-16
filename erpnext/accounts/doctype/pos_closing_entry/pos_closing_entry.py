@@ -256,6 +256,13 @@ class POSClosingEntry(StatusUpdater):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_cashiers(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
+	pos_profile = filters.get("parent")
+	if not pos_profile or not frappe.db.exists("POS Profile", pos_profile):
+		return []
+
+	ptype = "select" if frappe.only_has_select_perm("POS Profile") else "read"
+	frappe.has_permission("POS Profile", ptype, doc=pos_profile, throw=True)
+
 	cashiers_list = frappe.get_all("POS Profile User", filters=filters, fields=["user"], as_list=1)
 	return [c for c in cashiers_list]
 
