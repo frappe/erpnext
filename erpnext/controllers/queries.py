@@ -30,6 +30,8 @@ from erpnext.stock.get_item_details import _get_item_tax_template
 from erpnext.stock.utils import get_combine_datetime
 from erpnext.utilities.query import get_filter_conditions_qb
 
+BARCODE_SEARCH_LIMIT = 1000
+
 
 # searches for active employees
 @frappe.whitelist()
@@ -392,11 +394,14 @@ def item_query(
 		if fieldname in db_fields:
 			search_conditions.append(item[fieldname].like(search_str))
 
-	barcode_tbl = DocType("Item Barcode")
-	barcode_subquery = (
-		frappe.qb.from_(barcode_tbl).select(barcode_tbl.parent).where(barcode_tbl.barcode.like(search_str))
+	barcode_items = frappe.get_all(
+		"Item Barcode",
+		filters={"barcode": ("like", search_str)},
+		pluck="parent",
+		limit=BARCODE_SEARCH_LIMIT + 1,
 	)
-	search_conditions.append(item.item_code.isin(barcode_subquery))
+	if barcode_items and len(barcode_items) <= BARCODE_SEARCH_LIMIT:
+		search_conditions.append(item.item_code.isin(barcode_items))
 
 	# Condition for the description
 	if frappe.db.estimate_count("Item") < 50000 and "description" not in fields_to_process:
