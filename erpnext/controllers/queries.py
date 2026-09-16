@@ -412,7 +412,6 @@ def item_query(
 		.where(item.disabled == 0)
 		.where(item.has_variants == 0)
 		.where(date_condition)
-		.where(Criterion.any(search_conditions))
 		.orderby(
 			Case()
 			.when(
@@ -439,7 +438,14 @@ def item_query(
 	if company:
 		query = query.where(get_restriction_criterion("Item", [company]))
 
-	return query.run(as_dict=as_dict)
+	has_wildcards = any(character in txt for character in "%_\\")
+
+	if txt and page_len and not has_wildcards:
+		prefix_matches = query.where(item.name.like(f"{txt}%")).run(as_dict=as_dict)
+		if len(prefix_matches) == page_len:
+			return prefix_matches
+
+	return query.where(Criterion.any(search_conditions)).run(as_dict=as_dict)
 
 
 @frappe.whitelist()
