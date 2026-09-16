@@ -56,7 +56,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-05-09 14:55:01.394387", 
+ "modified": "2026-09-16 12:00:00.000000", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Finance Book", 
@@ -119,6 +119,18 @@
    "share": 1, 
    "submit": 0, 
    "write": 0
+  }, 
+  {
+   "role": "HR Manager", 
+   "select": 1
+  }, 
+  {
+   "role": "Manufacturing Manager", 
+   "select": 1
+  }, 
+  {
+   "role": "Quality Manager", 
+   "select": 1
   }
  ], 
  "quick_entry": 1, 
