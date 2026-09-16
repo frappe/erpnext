@@ -380,12 +380,13 @@ class CalculationFormulaValidator(Validator):
 
 	def _test_formula_evaluation(self, formula: str, available_codes: list[str]) -> str | None:
 		try:
-			context = {code: 1.0 for code in available_codes}
+			# distinct values, so (A - B) in a denominator isn't zero
+			context = {code: float(i + 1) for i, code in enumerate(available_codes)}
 			context.update(FORMULA_FUNCTIONS)
 
 			result = frappe.safe_eval(formula, eval_globals=None, eval_locals=context)
 
-			if not isinstance(result, (int, float)):  # noqa: UP038
+			if not isinstance(result, (int | float)):
 				return _("Formula must return a numeric value, got {0}").format(type(result).__name__)
 
 			return None
@@ -466,10 +467,12 @@ class AccountFilterValidator(Validator):
 				# escape: `field` is caller-supplied and this message renders as HTML
 				return _("Field '{0}' is not a valid Account field").format(frappe.utils.escape_html(field))
 
-			if operator.casefold() not in OPERATOR_MAP:
+			normalized_operator = operator.casefold()
+
+			if normalized_operator not in OPERATOR_MAP:
 				return _("Invalid operator '{0}'").format(operator)
 
-			if operator in ["in", "not in"] and not isinstance(value, list):
+			if normalized_operator in ["in", "not in"] and not isinstance(value, list):
 				return _("Operator '{0}' requires a list value").format(operator)
 
 		# logical condition: {"and": [condition1, condition2]}

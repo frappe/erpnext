@@ -291,3 +291,48 @@ class TestFormulaEnvironment(FinancialReportTemplateTestCase):
 		calc = self._calc({"A": [1.0]})
 		self.assertEqual(calc.evaluate_formula(self._row("floor(-2.5)"))[0], -3.0)
 		self.assertEqual(calc.evaluate_formula(self._row("ceil(-2.5)"))[0], -2.0)
+
+
+class TestCalculationFormula(FinancialReportTemplateTestCase):
+	"""Formulas are test-evaluated with dummy values before a template can be saved."""
+
+	@staticmethod
+	def _validate(formula, codes=("A", "B", "C")):
+		row = frappe._dict(
+			calculation_formula=formula, idx=1, data_source="Calculated Amount", reference_code="X"
+		)
+		return CalculationFormulaValidator(set(codes)).validate(row)
+
+	def test_denominator_with_a_difference_is_allowed(self):
+		# dummy values must differ, else (B - C) is zero and a valid formula is rejected
+		self.assertTrue(self._validate("A / (B - C)").is_valid)
+		self.assertTrue(self._validate("(A - B) / (A - C)").is_valid)
+
+	def test_division_by_zero_is_still_rejected(self):
+		self.assertFalse(self._validate("A / 0").is_valid)
+		# same code on both sides is zero whatever the dummy values are
+		self.assertFalse(self._validate("A / (B - B)").is_valid)
+
+	def test_broken_formulas_are_rejected(self):
+		self.assertFalse(self._validate("A +").is_valid)
+		self.assertFalse(self._validate("NOPE * 2").is_valid)
+		self.assertFalse(self._validate("'text'").is_valid)
+
+
+class TestFilterOperatorCase(FinancialReportTemplateTestCase):
+	"""Operators are matched case-insensitively, so their value checks must be too."""
+
+	@staticmethod
+	def _row(formula):
+		return frappe._dict(calculation_formula=formula, idx=1)
+
+	def test_uppercase_in_requires_a_list_value(self):
+		validator = AccountFilterValidator()
+		self.assertFalse(validator.validate_filter(self._row('["root_type", "IN", "Income"]')).is_valid)
+		self.assertFalse(
+			validator.validate_filter(self._row('["root_type", "NOT IN", "Income"]')).is_valid
+		)
+
+	def test_uppercase_in_accepts_a_list_value(self):
+		validator = AccountFilterValidator()
+		self.assertTrue(validator.validate_filter(self._row('["root_type", "IN", ["Income"]]')).is_valid)
