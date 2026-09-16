@@ -207,7 +207,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 		]
 		if field not in searchfields
 	]
-	searchfields = " or ".join([field + " like %(txt)s" for field in searchfields])
+	searchfields = " or ".join([field + " like %(txt)s" for field in searchfields if field != "item_code"])
 
 	if filters and isinstance(filters, dict):
 		if filters.get("customer") or filters.get("supplier"):
