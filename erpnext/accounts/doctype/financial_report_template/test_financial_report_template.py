@@ -330,9 +330,7 @@ class TestFilterOperatorCase(FinancialReportTemplateTestCase):
 	def test_uppercase_in_requires_a_list_value(self):
 		validator = AccountFilterValidator()
 		self.assertFalse(validator.validate_filter(self._row('["root_type", "IN", "Income"]')).is_valid)
-		self.assertFalse(
-			validator.validate_filter(self._row('["root_type", "NOT IN", "Income"]')).is_valid
-		)
+		self.assertFalse(validator.validate_filter(self._row('["root_type", "NOT IN", "Income"]')).is_valid)
 
 	def test_uppercase_in_accepts_a_list_value(self):
 		validator = AccountFilterValidator()
@@ -344,9 +342,7 @@ class TestLineReferenceNames(FinancialReportTemplateTestCase):
 
 	@staticmethod
 	def _validate(code):
-		template = frappe._dict(
-			rows=[frappe._dict(reference_code=code, idx=1, data_source="Blank Line")]
-		)
+		template = frappe._dict(rows=[frappe._dict(reference_code=code, idx=1, data_source="Blank Line")])
 		return TemplateStructureValidator()._validate_reference_codes(template)
 
 	def test_plain_codes_are_accepted(self):

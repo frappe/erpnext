@@ -231,12 +231,7 @@ class DependencyValidator(Validator):
 		self.dependencies = self._build_dependency_graph()
 
 	def validate(self, context=None) -> ValidationResult:
-		result = ValidationResult()
-
-		result.merge(self._validate_circular_dependencies())
-		result.merge(self._validate_missing_dependencies())
-
-		return result
+		return self._validate_circular_dependencies()
 
 	def _build_dependency_graph(self) -> dict[str, list[str]]:
 		graph = {}
@@ -302,31 +297,6 @@ class DependencyValidator(Validator):
 				dfs(node, [])
 
 		return result
-
-	def _validate_missing_dependencies(self) -> ValidationResult:
-		available = {row.reference_code for row in self.template.rows if row.reference_code}
-		result = ValidationResult()
-
-		for ref_code, deps in self.dependencies.items():
-			undefined = [d for d in deps if d not in available]
-			if undefined:
-				row_idx = self._get_row_idx(ref_code)
-				result.add_error(
-					ValidationIssue(
-						message=_("Line references undefined in {0}: {1}").format(
-							get_formula_field_label("Calculated Amount"), ", ".join(undefined)
-						),
-						row_idx=row_idx,
-					)
-				)
-
-		return result
-
-	def _get_row_idx(self, reference_code: str) -> int | None:
-		for row in self.template.rows:
-			if row.reference_code == reference_code:
-				return row.idx
-		return None
 
 
 class CalculationFormulaValidator(Validator):
