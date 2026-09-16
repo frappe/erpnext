@@ -3,10 +3,10 @@ import json
 from collections import defaultdict
 
 import frappe
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import Locate, Sum
 from frappe.utils import flt
 from pypika import Order
-from pypika.functions import Coalesce
+from pypika.functions import Coalesce, Concat
 
 from erpnext.deprecation_dumpster import deprecated
 
@@ -64,35 +64,38 @@ class DeprecatedSerialNoValuation:
 				incoming_values += self.serial_no_incoming_rate[serial_no]
 				continue
 
-			table = frappe.qb.DocType("Stock Ledger Entry")
-			stock_ledgers = (
-				frappe.qb.from_(table)
-				.select(table.incoming_rate, table.actual_qty, table.stock_value_difference)
-				.where(
-					(
-						(table.serial_no == serial_no)
-						| (table.serial_no.like(serial_no + "\n%"))
-						| (table.serial_no.like("%\n" + serial_no))
-						| (table.serial_no.like("%\n" + serial_no + "\n%"))
-					)
-					& (table.item_code == self.sle.item_code)
-					& (table.company == self.sle.company)
-					& (table.warehouse == self.sle.warehouse)
-					& (table.serial_and_batch_bundle.isnull())
-					& (table.actual_qty > 0)
-					& (table.is_cancelled == 0)
-					& table.posting_datetime
-					<= posting_datetime
-				)
-				.orderby(table.posting_datetime, order=Order.desc)
-				.limit(1)
-			).run(as_dict=1)
-
-			for sle in stock_ledgers:
+			for sle in self.get_last_inward_sle_for_serial_no(serial_no, posting_datetime):
 				self.serial_no_incoming_rate[serial_no] += flt(sle.incoming_rate)
 				incoming_values += self.serial_no_incoming_rate[serial_no]
 
 		return incoming_values
+
+	def get_last_inward_sle_for_serial_no(self, serial_no, posting_datetime):
+		table = frappe.qb.DocType("Stock Ledger Entry")
+
+		query = (
+			frappe.qb.from_(table)
+			.select(table.incoming_rate, table.actual_qty, table.stock_value_difference)
+			.where(
+				(table.item_code == self.sle.item_code)
+				& (table.company == self.sle.company)
+				& (table.warehouse == self.sle.warehouse)
+				& (table.posting_datetime <= posting_datetime)
+				& (table.is_cancelled == 0)
+				& (table.actual_qty > 0)
+				& (table.serial_and_batch_bundle.isnull())
+				& (Locate(serial_no, table.serial_no) > 0)
+				& (Locate(f"\n{serial_no}\n", Concat("\n", table.serial_no, "\n")) > 0)
+			)
+			.orderby(table.posting_datetime, order=Order.desc)
+			.orderby(table.creation, order=Order.desc)
+			.limit(1)
+		)
+
+		if frappe.db.db_type == "mariadb":
+			query = query.force_index("item_code_warehouse_posting_datetime_creation_index")
+
+		return query.run(as_dict=1)
 
 
 class DeprecatedBatchNoValuation:
