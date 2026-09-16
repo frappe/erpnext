@@ -461,10 +461,6 @@ class PaymentReconciliation(Document):
 		return difference_amount
 
 	@frappe.whitelist()
-	def is_auto_process_enabled(self):
-		return frappe.get_single_value("Accounts Settings", "auto_reconcile_payments")
-
-	@frappe.whitelist()
 	def calculate_difference_on_allocation_change(
 		self, payment_entry: list, invoice: list, allocated_amount: float
 	):
@@ -967,3 +963,8 @@ def get_queries_for_dimension_filters(company: str | None = None):
 		dimensions_with_filters.append({"fieldname": d.fieldname, "filters": filters})
 
 	return dimensions_with_filters
+
+
+@frappe.whitelist()
+def is_auto_process_enabled():
+	return frappe.get_single_value("Accounts Settings", "auto_reconcile_payments")

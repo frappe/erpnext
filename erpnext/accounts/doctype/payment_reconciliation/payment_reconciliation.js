@@ -109,12 +109,13 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 		}
 
 		this.frm.trigger("set_query_for_dimension_filters");
+		this.update_totals();
+		this.bind_totals_on_row_select();
 
 		// check for any running reconciliation jobs
 		if (this.frm.doc.receivable_payable_account) {
-			this.frm.call({
-				doc: this.frm.doc,
-				method: "is_auto_process_enabled",
+			frappe.call({
+				method: "erpnext.accounts.doctype.payment_reconciliation.payment_reconciliation.is_auto_process_enabled",
 				callback: (r) => {
 					if (r.message) {
 						this.frm
@@ -223,6 +224,40 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 		this.frm.clear_table("payments");
 		this.frm.clear_table("allocation");
 		this.frm.refresh_fields();
+		this.update_totals();
+	}
+
+	update_totals() {
+		const sum_outstanding = (rows) =>
+			rows.reduce((total, row) => total + flt(row.outstanding_amount), 0);
+		const sum_amount = (rows) => rows.reduce((total, row) => total + flt(row.amount), 0);
+
+		const total_invoice_amount_all = sum_outstanding(this.frm.doc.invoices || []);
+		const total_payment_amount_all = sum_amount(this.frm.doc.payments || []);
+		this.frm.set_value({
+			total_invoice_amount_all,
+			total_payment_amount_all,
+			difference_amount_all: total_invoice_amount_all - total_payment_amount_all,
+		});
+
+		const selected_invoices = this.frm.fields_dict.invoices.grid.get_selected_children();
+		const selected_payments = this.frm.fields_dict.payments.grid.get_selected_children();
+
+		const total_invoice_amount = sum_outstanding(selected_invoices);
+		const total_payment_amount = sum_amount(selected_payments);
+		this.frm.set_value({
+			total_invoice_amount,
+			total_payment_amount,
+			difference_amount: total_invoice_amount - total_payment_amount,
+		});
+	}
+
+	bind_totals_on_row_select() {
+		["invoices", "payments"].forEach((fieldname) => {
+			this.frm.fields_dict[fieldname].grid.wrapper
+				.off("click.pr_totals")
+				.on("click.pr_totals", ".grid-row-check", () => this.update_totals());
+		});
 	}
 
 	get_unreconciled_entries() {
@@ -231,6 +266,7 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 			doc: this.frm.doc,
 			method: "get_unreconciled_entries",
 			callback: () => {
+				this.update_totals();
 				if (!(this.frm.doc.payments.length || this.frm.doc.invoices.length)) {
 					frappe.throw({
 						message: __("No Unreconciled Invoices and Payments found for this party and account"),
