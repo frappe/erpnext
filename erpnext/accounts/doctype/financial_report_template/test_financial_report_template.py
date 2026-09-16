@@ -9,6 +9,7 @@ from erpnext.accounts.doctype.financial_report_template.financial_report_validat
 	AccountFilterValidator,
 	CalculationFormulaValidator,
 	FormulaValidator,
+	TemplateStructureValidator,
 	get_valid_api_method,
 )
 from erpnext.tests.utils import ERPNextTestSuite
@@ -336,3 +337,31 @@ class TestFilterOperatorCase(FinancialReportTemplateTestCase):
 	def test_uppercase_in_accepts_a_list_value(self):
 		validator = AccountFilterValidator()
 		self.assertTrue(validator.validate_filter(self._row('["root_type", "IN", ["Income"]]')).is_valid)
+
+
+class TestLineReferenceNames(FinancialReportTemplateTestCase):
+	"""A line reference becomes a name in formulas, so it must be usable as one."""
+
+	@staticmethod
+	def _validate(code):
+		template = frappe._dict(
+			rows=[frappe._dict(reference_code=code, idx=1, data_source="Blank Line")]
+		)
+		return TemplateStructureValidator()._validate_reference_codes(template)
+
+	def test_plain_codes_are_accepted(self):
+		for code in ("REV", "CA100", "cash_flow_2"):
+			self.assertTrue(self._validate(code).is_valid, code)
+
+	def test_hyphen_is_rejected(self):
+		# "-" reads as subtraction in a formula and is not a valid Python name
+		self.assertFalse(self._validate("REV-COGS").is_valid)
+
+	def test_python_keyword_is_rejected(self):
+		for code in ("if", "None", "class"):
+			self.assertFalse(self._validate(code).is_valid, code)
+
+	def test_formula_function_name_is_rejected(self):
+		# these would be overwritten by the function of the same name
+		for code in ("sum", "round", "abs"):
+			self.assertFalse(self._validate(code).is_valid, code)

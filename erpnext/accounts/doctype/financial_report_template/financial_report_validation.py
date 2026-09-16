@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import json
+import keyword
 import math
 import re
 from abc import ABC, abstractmethod
@@ -162,13 +163,22 @@ class TemplateStructureValidator(Validator):
 
 			ref_code = row.reference_code.strip()
 
-			# Check format
-			if not re.match(r"^[A-Za-z][A-Za-z0-9_-]*$", ref_code):
+			# a line reference is used as a name in formulas, so it must be a usable one
+			if not re.match(r"^[A-Za-z][A-Za-z0-9_]*$", ref_code):
 				result.add_error(
 					ValidationIssue(
 						message=_(
-							"Invalid line reference format: '{0}'. Must start with letter and contain only letters, numbers, underscores, and hyphens"
+							"Invalid line reference format: '{0}'. Must start with a letter and contain only letters, numbers and underscores"
 						).format(ref_code),
+						row_idx=row.idx,
+					)
+				)
+			elif keyword.iskeyword(ref_code) or ref_code in FORMULA_FUNCTIONS:
+				result.add_error(
+					ValidationIssue(
+						message=_("'{0}' is a reserved name and cannot be used as a line reference").format(
+							ref_code
+						),
 						row_idx=row.idx,
 					)
 				)
