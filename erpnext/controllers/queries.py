@@ -389,7 +389,7 @@ def item_query(
 	search_str = f"%{txt}%"
 	search_conditions = []
 	for fieldname in fields_to_process:
-		if fieldname in db_fields:
+		if fieldname in db_fields and fieldname != "item_code":
 			search_conditions.append(item[fieldname].like(search_str))
 
 	barcode_tbl = DocType("Item Barcode")
