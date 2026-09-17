@@ -1229,10 +1229,11 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 		for item in (self.item, self.other_item):
 			self.make_number("Serial No", "POS-Scan", item.name)
 		self.other_item.db_set("item_group", "_Test Item Group")
-		result = search_for_serial_or_batch_or_barcode_number("POS-Scan", self.pos_profile())
-		profile = frappe._dict(item_groups=[frappe._dict(item_group=self.item.item_group)])
-		with patch("frappe.get_cached_doc", return_value=profile):
-			filter_result_items(result, "_Identity POS Profile")
+		profile = frappe.get_doc("POS Profile", self.pos_profile())
+		profile.append("item_groups", {"item_group": self.item.item_group})
+		profile.save()
+		result = search_for_serial_or_batch_or_barcode_number("POS-Scan", profile.name)
+		filter_result_items(result, profile.name)
 		self.assertEqual([row["item_code"] for row in result["candidates"]], [self.item.name])
 
 	def test_pos_groups_physical_serials_by_their_items_batches(self):
