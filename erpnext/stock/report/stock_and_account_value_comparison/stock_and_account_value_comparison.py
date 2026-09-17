@@ -268,3 +268,95 @@ def repost_based_on_transaction(rows, company=None, entries=None):
 				entries.append(get_link_to_form("Repost Item Valuation", doc.name))
 			except frappe.DuplicateEntryError:
 				frappe.db.rollback(save_point="repost_based_on_transaction")
+
+
+@frappe.whitelist()
+def create_gl_reposting_entries(rows: str | list, company: str):
+	"""Repost only the accounting ledgers for the selected vouchers.
+
+	Unlike `create_reposting_entries`, the stock ledgers and the valuation rates are left untouched.
+	This is meant for the case where the stock valuation itself is correct but the General Ledger has
+	drifted away from it, so there is no need to pay for a full (and much slower) revaluation.
+	"""
+
+	frappe.has_permission("Repost Item Valuation", "create", throw=True)
+
+	if isinstance(rows, str):
+		rows = parse_json(rows)
+
+	validate_rows_for_gl_reposting(rows)
+
+	entries = []
+	processed_vouchers = set()
+
+	for row in rows:
+		voucher_type, voucher_no = row.get("voucher_type"), row.get("voucher_no")
+		if (voucher_type, voucher_no) in processed_vouchers:
+			continue
+
+		processed_vouchers.add((voucher_type, voucher_no))
+
+		if has_pending_gl_reposting(voucher_type, voucher_no):
+			continue
+
+		doc = frappe.get_doc(
+			{
+				"doctype": "Repost Item Valuation",
+				"based_on": "Transaction",
+				"status": "Queued",
+				"voucher_type": voucher_type,
+				"voucher_no": voucher_no,
+				"posting_date": row.get("posting_date"),
+				"posting_time": row.get("posting_time"),
+				"company": company,
+				"repost_only_accounting_ledgers": 1,
+			}
+		).submit()
+
+		entries.append(get_link_to_form("Repost Item Valuation", doc.name))
+
+	if entries:
+		frappe.msgprint(_("GL reposting entries created: {0}").format(", ".join(entries)))
+	else:
+		frappe.msgprint(_("GL reposting entries are already queued for the selected vouchers."))
+
+
+def validate_rows_for_gl_reposting(rows: list):
+	if not rows:
+		frappe.throw(_("Please select rows to create GL Reposting Entries"))
+
+	# Rows of ledger type "GL Entry" have accounting entries but no stock ledger entries to rebuild them
+	# from, so a GL-only repost would simply wipe their GL entries. They need a full repost instead.
+	invalid_vouchers = [
+		row.get("voucher_no")
+		for row in rows
+		if "GL Entry" in (row.get("ledger_type"), row.get("voucher_type"))
+	]
+
+	if invalid_vouchers:
+		frappe.throw(
+			_(
+				"GL reposting is not allowed against the ledger type {0}. The following vouchers have no stock ledger entries to repost the accounting ledgers from, use {1} instead: {2}"
+			).format(
+				frappe.bold(_("GL Entry")),
+				frappe.bold(_("Create Reposting Entries")),
+				frappe.bold(", ".join(invalid_vouchers)),
+			),
+			title=_("Invalid Rows Selected"),
+		)
+
+
+def has_pending_gl_reposting(voucher_type: str, voucher_no: str) -> bool:
+	return bool(
+		frappe.db.exists(
+			"Repost Item Valuation",
+			{
+				"based_on": "Transaction",
+				"voucher_type": voucher_type,
+				"voucher_no": voucher_no,
+				"repost_only_accounting_ledgers": 1,
+				"docstatus": 1,
+				"status": ("in", ["Queued", "In Progress"]),
+			},
+		)
+	)
