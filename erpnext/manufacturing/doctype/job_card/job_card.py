@@ -755,9 +755,10 @@ class JobCard(Document):
 
 	def set_process_loss(self):
 		precision = self.precision("total_completed_qty")
+		should_set_process_loss = self.total_completed_qty or self.process_loss_qty
 
 		self.process_loss_qty = 0.0
-		if self.total_completed_qty and self.for_quantity > self.total_completed_qty:
+		if should_set_process_loss and self.for_quantity > self.total_completed_qty:
 			self.process_loss_qty = flt(self.for_quantity, precision) - flt(
 				self.total_completed_qty, precision
 			)
