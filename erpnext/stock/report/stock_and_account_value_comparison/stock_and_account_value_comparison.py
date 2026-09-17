@@ -2,9 +2,11 @@
 # For license information, please see license.txt
 
 
+from datetime import date
+
 import frappe
 from frappe import _
-from frappe.utils import get_datetime, get_link_to_form, parse_json
+from frappe.utils import get_datetime, get_link_to_form, getdate, parse_json
 
 import erpnext
 from erpnext.accounts.utils import get_currency_precision, get_stock_accounts
@@ -271,12 +273,15 @@ def repost_based_on_transaction(rows, company=None, entries=None):
 
 
 @frappe.whitelist()
-def create_gl_reposting_entries(rows: str | list, company: str):
-	"""Repost only the accounting ledgers for the selected vouchers.
+def create_gl_reposting_entries(rows: str | list, company: str, from_date: str | date | None = None):
+	"""Repost only the accounting ledgers for the selected vouchers posted on or after `from_date`.
 
 	Unlike `create_reposting_entries`, the stock ledgers and the valuation rates are left untouched.
 	This is meant for the case where the stock valuation itself is correct but the General Ledger has
 	drifted away from it, so there is no need to pay for a full (and much slower) revaluation.
+
+	`from_date` bounds how far back the accounting ledgers are rewritten: selected rows posted before
+	it are ignored, so a stale selection cannot reach into an already reconciled period.
 	"""
 
 	frappe.has_permission("Repost Item Valuation", "create", throw=True)
@@ -284,20 +289,34 @@ def create_gl_reposting_entries(rows: str | list, company: str):
 	if isinstance(rows, str):
 		rows = parse_json(rows)
 
-	validate_rows_for_gl_reposting(rows)
+	if not rows:
+		frappe.throw(_("Please select rows to create GL Reposting Entries"))
+
+	if not from_date:
+		frappe.throw(_("Please select the date to repost the accounting ledgers from"))
+
+	from_date = getdate(from_date)
 
 	entries = []
 	processed_vouchers = set()
 
 	for row in rows:
+		# Rows posted before the From Date are skipped, so a stale selection cannot rewrite the
+		# accounting ledgers of an already reconciled period.
+		if getdate(row.get("posting_date")) < from_date:
+			continue
+
 		voucher_type, voucher_no = row.get("voucher_type"), row.get("voucher_no")
+
+		# journal entry has not stock stock value, so no need to create a reposting entry for it
+		if voucher_type == "Journal Entry":
+			continue
+
+		# Skip duplicate vouchers in the selection: a single reposting entry is enough to rewrite the accounting ledgers for a given voucher.
 		if (voucher_type, voucher_no) in processed_vouchers:
 			continue
 
 		processed_vouchers.add((voucher_type, voucher_no))
-
-		if has_pending_gl_reposting(voucher_type, voucher_no):
-			continue
 
 		doc = frappe.get_doc(
 			{
@@ -316,47 +335,9 @@ def create_gl_reposting_entries(rows: str | list, company: str):
 		entries.append(get_link_to_form("Repost Item Valuation", doc.name))
 
 	if entries:
+		if len(entries) > 20:
+			entries = entries[:20] + ["..."]
+
 		frappe.msgprint(_("GL reposting entries created: {0}").format(", ".join(entries)))
 	else:
-		frappe.msgprint(_("GL reposting entries are already queued for the selected vouchers."))
-
-
-def validate_rows_for_gl_reposting(rows: list):
-	if not rows:
-		frappe.throw(_("Please select rows to create GL Reposting Entries"))
-
-	# Rows of ledger type "GL Entry" have accounting entries but no stock ledger entries to rebuild them
-	# from, so a GL-only repost would simply wipe their GL entries. They need a full repost instead.
-	invalid_vouchers = [
-		row.get("voucher_no")
-		for row in rows
-		if "GL Entry" in (row.get("ledger_type"), row.get("voucher_type"))
-	]
-
-	if invalid_vouchers:
-		frappe.throw(
-			_(
-				"GL reposting is not allowed against the ledger type {0}. The following vouchers have no stock ledger entries to repost the accounting ledgers from, use {1} instead: {2}"
-			).format(
-				frappe.bold(_("GL Entry")),
-				frappe.bold(_("Create Reposting Entries")),
-				frappe.bold(", ".join(invalid_vouchers)),
-			),
-			title=_("Invalid Rows Selected"),
-		)
-
-
-def has_pending_gl_reposting(voucher_type: str, voucher_no: str) -> bool:
-	return bool(
-		frappe.db.exists(
-			"Repost Item Valuation",
-			{
-				"based_on": "Transaction",
-				"voucher_type": voucher_type,
-				"voucher_no": voucher_no,
-				"repost_only_accounting_ledgers": 1,
-				"docstatus": 1,
-				"status": ("in", ["Queued", "In Progress"]),
-			},
-		)
-	)
+		frappe.msgprint(_("No new GL reposting entries were created for the selected rows."))

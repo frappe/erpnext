@@ -395,6 +395,7 @@ def bulk_restart_reposting(names):
 
 def on_doctype_update():
 	frappe.db.add_index("Repost Item Valuation", ["warehouse", "item_code"], "item_warehouse")
+	frappe.db.add_index("Repost Item Valuation", ["voucher_no", "voucher_type", "status"], "voucher_status")
 
 
 def repost(doc):
