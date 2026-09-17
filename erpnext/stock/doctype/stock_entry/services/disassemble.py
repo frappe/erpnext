@@ -410,7 +410,7 @@ class DisassembleStockEntry(BaseStockEntry):
 				(SE.docstatus == 1) & (SE.purpose == "Manufacture") & (SE.work_order == self.doc.work_order)
 			)
 			.orderby(SE.creation)
-			.orderby(SE.name)
+			.orderby(SED.creation)
 			.orderby(SED.idx)
 			.run(as_dict=True)
 		)
