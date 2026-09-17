@@ -135,7 +135,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 			self.assertEqual(get_serial_batch_scan(self.other_item.name, "Scan-001", doctype), {})
 			self.assertEqual(frappe.db.count(doctype), count)
 
-	def test_scan_lookup_requires_read_permission(self):
+	def test_scan_lookup_requires_item_permission(self):
 		for doctype in ("Serial No", "Batch"):
 			self.make_number(doctype, "Scan-001")
 			with self.set_user("Guest"), self.assertRaises(frappe.PermissionError):
@@ -1535,25 +1535,43 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 			SerialBatchBundleService(doc).create_serial_batch_bundle(details, doc.items[0])
 		self.assertEqual(frappe.db.count("Serial No"), count)
 
-	def test_missing_serial_creation_requires_create_permission(self):
-		user = frappe.get_doc(
-			{
-				"doctype": "User",
-				"email": "identity-stock-user@example.com",
-				"first_name": "Identity",
-				"send_welcome_email": 0,
-				"roles": [{"role": "Stock User"}],
-			}
-		).insert()
+	def test_the_item_entitles_serial_and_batch_work(self):
+		user = self.make_role_user("identity-stock-user@example.com", "Stock User")
 		serial = self.make_number("Serial No", "Existing-001")
-		identity = SerialBatchIdentity("Serial No")
-		with self.set_user(user.name):
-			self.assertEqual(identity.resolve(self.item.name, ["Existing-001"], create=True), [serial.name])
-			with self.assertRaises(frappe.PermissionError):
-				identity.resolve(self.item.name, ["Missing-001"], create=True)
-		self.assertFalse(
-			frappe.db.exists("Serial No", {"item_code": self.item.name, "serial_no": "Missing-001"})
+		batch = self.make_number("Batch", "Existing-Batch")
+		with self.set_user(user):
+			self.assertFalse(frappe.has_permission("Serial No", "create"))
+			self.assertFalse(frappe.has_permission("Batch", "select"))
+			self.assertEqual(
+				SerialBatchIdentity("Serial No").resolve(self.item.name, ["Existing-001"], create=True),
+				[serial.name],
+			)
+			self.assertEqual(
+				SerialBatchIdentity("Batch").resolve(self.item.name, ["Existing-Batch"]), [batch.name]
+			)
+			self.assertEqual(
+				get_serial_batch_scan(self.item.name, "Existing-Batch", "Batch")["name"], batch.name
+			)
+			created = SerialBatchIdentity("Serial No").resolve(
+				self.item.name, ["Missing-001"], create=True, defaults={"company": "_Test Company"}
+			)
+		self.assertEqual(
+			frappe.db.get_value("Serial No", created[0], "serial_no"),
+			"Missing-001",
 		)
+
+	def make_role_user(self, email, role):
+		if not frappe.db.exists("User", email):
+			frappe.get_doc(
+				{
+					"doctype": "User",
+					"email": email,
+					"first_name": "Identity",
+					"send_welcome_email": 0,
+					"roles": [{"role": role}],
+				}
+			).insert()
+		return email
 
 	def make_receipt(self, serial_no):
 		return frappe.get_doc(
