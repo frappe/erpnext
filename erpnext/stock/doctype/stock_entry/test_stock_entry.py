@@ -4932,29 +4932,6 @@ class TestJobCardSecondaryItems(ERPNextTestSuite):
 		)
 		job_card.submit()
 
-	def set_item_stock_uom(self, item, stock_uom):
-		item.reload()
-		item.stock_uom = stock_uom
-		item.save()
-
-	def make_bom_secondary_item(self, work_order, item_code):
-		"""A real BOM Secondary Item row: it snapshots the item's UOM as the submitted BOM saw it."""
-		row = frappe.get_doc(
-			{
-				"doctype": "BOM Secondary Item",
-				"parent": frappe.db.get_value("Work Order", work_order, "bom_no"),
-				"parenttype": "BOM",
-				"parentfield": "secondary_items",
-				"item_code": item_code,
-				"secondary_item_type": "Scrap",
-				"uom": "Box",
-				"conversion_factor": 1,
-				"stock_qty": 1,
-				"qty": 1,
-			}
-		).insert()
-		return row.name
-
 	def make_work_order_with_two_job_cards(self):
 		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 
@@ -4970,26 +4947,30 @@ class TestJobCardSecondaryItems(ERPNextTestSuite):
 		self.assertGreaterEqual(len(job_cards), 2, "fixture must produce at least two job cards")
 		return work_order, job_cards
 
-	def test_secondary_item_uom_comes_from_the_bom(self):
-		"""The submitted BOM row is the authority, not the Item master or a job card's snapshot."""
+	def test_secondary_item_columns_come_from_one_line(self):
+		"""stock_uom is a stored snapshot, so it can differ between a work order's job cards.
+
+		It was aggregated with Max(), a sort over text that MariaDB and PostgreSQL resolve
+		differently, and one that can also report a unit belonging to neither the name nor the
+		description beside it. Take it off the same representative line as those.
+		"""
 		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.stock.doctype.stock_entry.services.manufacturing import (
 			get_secondary_items_from_job_card,
 		)
 
+		# the first card snapshots "Box"; Max() over the pair returns "Nos", so the two disagree
 		scrap_item = make_item("_Test JC Secondary Snapshot", {"is_stock_item": 1, "stock_uom": "Box"})
 		work_order, job_cards = self.make_work_order_with_two_job_cards()
-		bom_row = self.make_bom_secondary_item(work_order.name, scrap_item.name)
 
-		# the item is re-measured after the BOM row exists, so neither card snapshots "Box"
-		self.set_item_stock_uom(scrap_item, "Nos")
-		self.make_submitted_job_card(job_cards[0], scrap_item.name, 5, bom_row)
+		self.make_submitted_job_card(job_cards[0], scrap_item.name, 5, "BOM-ROW-A")
 
 		scrap_item.reload()
+		scrap_item.stock_uom = "Nos"
 		scrap_item.item_name = "_Test JC Secondary Snapshot Renamed"
 		scrap_item.save()
-		self.set_item_stock_uom(scrap_item, "Kg")
-		self.make_submitted_job_card(job_cards[1], scrap_item.name, 3, bom_row)
+
+		self.make_submitted_job_card(job_cards[1], scrap_item.name, 3, "BOM-ROW-A")
 
 		rows = [
 			row
