@@ -383,8 +383,8 @@ class DisassembleStockEntry(BaseStockEntry):
 		on its own can pair values from different lines into a row that was never posted, so take
 		the columns from a single real line instead. UOM is normalized separately to stock UOM.
 
-		Ties are settled on the line's hash name, which is lower case and so sorts the same on both
-		engines -- creation cannot settle them, since frappe copies the parent's to every child.
+		Ordered in Python rather than SQL: the name is the only distinguishing tie-break and hash
+		names can start with an upper case character, so sorting it in the database would diverge.
 		"""
 		SE = frappe.qb.DocType("Stock Entry")
 		SED = frappe.qb.DocType("Stock Entry Detail")
@@ -394,6 +394,9 @@ class DisassembleStockEntry(BaseStockEntry):
 			.join(SE)
 			.on(SED.parent == SE.name)
 			.select(
+				SE.creation.as_("parent_creation"),
+				SED.idx,
+				SED.name,
 				SED.item_code,
 				SED.item_name,
 				SED.description,
@@ -412,14 +415,13 @@ class DisassembleStockEntry(BaseStockEntry):
 			.where(
 				(SE.docstatus == 1) & (SE.purpose == "Manufacture") & (SE.work_order == self.doc.work_order)
 			)
-			.orderby(SE.creation)
-			.orderby(SED.idx)
-			.orderby(SED.name)
 			.run(as_dict=True)
 		)
+		lines.sort(key=lambda line: (line.parent_creation, line.idx, line.name))
 
 		representative = {}
 		for line in lines:
+			line.pop("parent_creation")
 			representative.setdefault(line.item_code, line)
 
 		return representative
