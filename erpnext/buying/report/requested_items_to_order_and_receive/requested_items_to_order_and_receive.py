@@ -77,13 +77,7 @@ def get_data(filters):
 
 
 def apply_representative_lines(rows):
-	"""Fill the line-level columns from one real Material Request Item line per group.
-
-	All are editable per line, so a request listing the same item twice holds several values per
-	group. Aggregating them sorts text, and MariaDB folds case while PostgreSQL orders by byte
-	value, so the engines pick differently. Take the first line by idx -- and take uom and
-	stock_uom off that same line, so the pair always describes one row.
-	"""
+	"""Fill the line-level columns from one real Material Request Item line: the first by idx."""
 	material_requests = list({row.material_request for row in rows})
 	representative = {}
 	if material_requests:
