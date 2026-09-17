@@ -47,21 +47,25 @@ def get_columns(filters):
 
 def get_pos_sales_payment_data(filters):
 	sales_invoice_data = get_pos_invoice_data(filters)
-	modes_of_payment = get_pos_modes_of_payment(filters)
+	labels = get_pos_row_labels(filters)
 
-	return [
-		[
-			row["posting_date"],
-			row["owner"],
-			modes_of_payment.get(get_pos_row_key(row), ""),
-			row["net_total"],
-			row["total_taxes"],
-			row["paid_amount"],
-			row["warehouse"],
-			row["cost_center"],
-		]
-		for row in sales_invoice_data
-	]
+	data = []
+	for row in sales_invoice_data:
+		label = labels.get(get_pos_row_key(row)) or frappe._dict()
+		data.append(
+			[
+				row["posting_date"],
+				row["owner"],
+				label.mode_of_payment,
+				row["net_total"],
+				row["total_taxes"],
+				row["paid_amount"],
+				row["warehouse"],
+				label.cost_center,
+			]
+		)
+
+	return data
 
 
 def get_sales_payment_data(filters, columns):
@@ -169,6 +173,7 @@ def get_invoice_totals():
 			si.name,
 			si.posting_date,
 			si.owner,
+			si.creation,
 			Sum(si.base_total).as_("base_total"),
 			Sum(si.net_total).as_("net_total"),
 			Sum(si.total_taxes_and_charges).as_("total_taxes"),
@@ -180,36 +185,65 @@ def get_invoice_totals():
 
 
 def get_pos_row_key(row):
-	return (row.owner, row.posting_date, row.warehouse, row.cost_center)
+	return (row.owner, row.posting_date, row.warehouse)
 
 
-def get_pos_modes_of_payment(filters):
-	"""Every distinct payment mode per POS summary row, keyed the way get_pos_invoice_data groups.
-
-	A row covers many invoices, which between them can use several modes, so no single mode
-	describes it. Collect them all and join them, as the non-POS path does.
-	"""
+def get_representative_payments():
+	"""One payment line per invoice: the first the user entered."""
 	sip = frappe.qb.DocType("Sales Invoice Payment")
+	grouped_payments = (
+		frappe.qb.from_(sip).select(sip.parent, Min(sip.idx).as_("representative_idx")).groupby(sip.parent)
+	).as_("grouped_payments")
+	representative_payment = frappe.qb.DocType("Sales Invoice Payment").as_("representative_payment")
+
+	return (
+		frappe.qb.from_(grouped_payments)
+		.inner_join(representative_payment)
+		.on(
+			(representative_payment.parent == grouped_payments.parent)
+			& (representative_payment.idx == grouped_payments.representative_idx)
+		)
+		.select(grouped_payments.parent, representative_payment.mode_of_payment.as_("mode_of_payment"))
+	)
+
+
+def get_pos_row_labels(filters):
+	"""cost_center and mode_of_payment off the earliest invoice in each reported row.
+
+	A row covers every invoice sharing an owner, date and warehouse, and both columns describe one
+	of them. Aggregating each independently sorts text, which MariaDB (case-folding) and PostgreSQL
+	(byte order) resolve differently, and can pair one invoice's cost centre with another's payment
+	mode. creation is a date, so the pick is the same on both engines.
+	"""
 	t1 = get_invoice_item_totals()
+	t3 = get_representative_payments()
 	a = get_invoice_totals()
 
 	query = (
 		frappe.qb.from_(t1)
+		.left_join(t3)
+		.on(t3.parent == t1.parent)
 		.join(a)
 		.on((t1.parent == a.name) & (t1.base_total == a.base_total))
-		.inner_join(sip)
-		.on(sip.parent == a.name)
-		.select(a.owner, a.posting_date, t1.warehouse, t1.cost_center, sip.mode_of_payment)
-		.distinct()
+		.select(
+			a.owner,
+			a.posting_date,
+			a.creation,
+			t1.warehouse,
+			t1.cost_center,
+			t3.mode_of_payment,
+		)
 		.where(a.docstatus == 1)
 	)
 	query = apply_conditions(query, a, filters)
 
-	modes = {}
+	labels = {}
 	for row in query.run(as_dict=True):
-		modes.setdefault(get_pos_row_key(row), set()).add(cstr(row.mode_of_payment))
+		key = get_pos_row_key(row)
+		if key not in labels or row.creation < labels[key].creation:
+			labels[key] = row
 
-	return {key: ", ".join(sorted(values)) for key, values in modes.items()}
+	return labels
 
 
 def get_pos_invoice_data(filters):
@@ -228,10 +262,9 @@ def get_pos_invoice_data(filters):
 			Sum(a.paid_amount).as_("paid_amount"),
 			Sum(a.outstanding_amount).as_("outstanding_amount"),
 			t1.warehouse,
-			t1.cost_center,
 		)
 		.where(a.docstatus == 1)
-		.groupby(a.owner, a.posting_date, t1.warehouse, t1.cost_center)
+		.groupby(a.owner, a.posting_date, t1.warehouse)
 	)
 	query = apply_conditions(query, a, filters)
 
