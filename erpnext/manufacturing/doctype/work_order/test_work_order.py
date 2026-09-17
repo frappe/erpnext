@@ -3417,9 +3417,8 @@ class TestWorkOrder(ERPNextTestSuite):
 	def test_disassembly_representative_is_stable_when_entries_share_a_creation(self):
 		"""The representative line must be decided by the query, not by row order on disk.
 
-		frappe copies a parent's creation timestamp to every child, so a tie on Stock Entry creation
-		ties the line's creation too, and idx repeats across parents. Stock Entry Detail is
-		hash-named and hashes are lower case, so name settles it identically on both engines.
+		When two Manufacture entries share a creation timestamp the entry name decides, as it always
+		did -- but compared in Python, so the database's collation does not.
 		"""
 		from erpnext.stock.doctype.stock_entry.services.disassemble import DisassembleStockEntry
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import (
@@ -3475,7 +3474,7 @@ class TestWorkOrder(ERPNextTestSuite):
 			row for row in service.get_items_from_manufacture_stock_entry() if row.item_code == raw_item
 		)
 
-		self.assertEqual(source_row.s_warehouse, warehouses[rows[0].name])
+		self.assertEqual(source_row.s_warehouse, warehouses[min(warehouses, key=str.casefold)])
 
 	def test_disassembly_with_additional_rm_not_in_bom(self):
 		"""
