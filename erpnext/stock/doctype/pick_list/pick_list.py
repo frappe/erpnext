@@ -546,14 +546,18 @@ class PickList(TransactionBase):
 
 	@frappe.whitelist(methods=["POST"])
 	def create_stock_reservation_entries(self, notify: bool = True) -> None:
-		"""Creates Stock Reservation Entries for Sales Order Items against Pick List."""
+		"""Creates Stock Reservation Entries for Sales Order Items against Pick List.
+
+		A bundle component reserves against its Packed Item, because the bundle itself
+		is a non-stock Sales Order Item and can never hold reserved stock.
+		"""
 		self.check_permission("write")
 
 		so_items_details_map = {}
 		for location in self.locations:
 			if location.warehouse and location.sales_order and location.sales_order_item:
 				item_details = {
-					"sales_order_item": location.sales_order_item,
+					"sales_order_item": location.product_bundle_item or location.sales_order_item,
 					"item_code": location.item_code,
 					"warehouse": location.warehouse,
 					"qty_to_reserve": (flt(location.picked_qty) - flt(location.stock_reserved_qty)),
