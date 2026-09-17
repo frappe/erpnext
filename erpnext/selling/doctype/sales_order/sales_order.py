@@ -918,11 +918,16 @@ class SalesOrder(SellingController):
 		if items_details:
 			for item in items_details:
 				if not frappe.db.exists("Sales Order Item", item.get("sales_order_item")):
-					item["qty"] = item.pop("qty_to_reserve")
 					packed_items.append(item)
 
 			for item in packed_items:
 				items_details.remove(item)
+				item["qty"] = item.pop("qty_to_reserve")
+				item["from_voucher_type"] = from_voucher_type
+
+				picked_bundle = item.pop("serial_and_batch_bundle", None)
+				if picked_bundle:
+					item["serial_and_batch_bundles"] = [picked_bundle]
 
 		sre_count = 0
 		if items_details != []:
