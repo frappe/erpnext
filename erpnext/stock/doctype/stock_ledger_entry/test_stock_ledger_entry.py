@@ -28,6 +28,7 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 )
 from erpnext.stock.stock_ledger import get_previous_sle
 from erpnext.stock.tests.test_utils import StockTestMixin
+from erpnext.stock.utils import get_stock_balance, get_stock_value_on
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -1465,6 +1466,46 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 			.run(as_dict=True)
 		)
 		self.assertEqual(abs(sles[0].stock_value_difference), sles[1].stock_value_difference)
+
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 4, "currency_precision": 2})
+	def test_zero_quantity_clears_residual_stock_value(self):
+		warehouse = "_Test Warehouse - _TC"
+		settings = frappe.get_doc("System Settings")
+		for valuation_method in ("FIFO", "Moving Average"):
+			for receipt_qty in (100.004, 99.996):
+				with self.subTest(valuation_method=valuation_method, receipt_qty=receipt_qty):
+					settings.float_precision = 4
+					settings.save()
+					item = make_item(
+						properties={"valuation_method": valuation_method, "stock_uom": "Kg"}
+					).name
+					receipt = make_stock_entry(
+						item_code=item, target=warehouse, qty=receipt_qty, rate=1000, posting_time="10:00:00"
+					)
+					receipt_value = frappe.db.get_value(
+						"Stock Ledger Entry", {"voucher_no": receipt.name, "is_cancelled": 0}, "stock_value"
+					)
+					self.assertEqual(receipt_value, receipt_qty * 1000)
+
+					# Keep a fractional balance that rounds to zero at the new quantity precision.
+					settings.float_precision = 2
+					settings.save()
+					issue = make_stock_entry(
+						item_code=item, source=warehouse, qty=100, posting_time="11:00:00"
+					)
+					sle = frappe.db.get_value(
+						"Stock Ledger Entry",
+						{"voucher_no": issue.name, "is_cancelled": 0},
+						["qty_after_transaction", "stock_value", "stock_value_difference"],
+						as_dict=True,
+					)
+					self.assertEqual(sle.qty_after_transaction, 0)
+					self.assertEqual(sle.stock_value, 0)
+					self.assertEqual(sle.stock_value_difference, -receipt_value)
+					self.assertEqual(
+						get_stock_balance(item, warehouse, issue.posting_date, issue.posting_time), 0
+					)
+					self.assertEqual(get_stock_value_on(warehouses=warehouse, item_code=item), 0)
 
 	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 4})
 	def test_negative_qty_with_precision(self):
