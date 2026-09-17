@@ -213,7 +213,8 @@ def get_pos_row_labels(filters):
 	A row covers every invoice sharing an owner, date and warehouse, and both columns describe one
 	of them. Aggregating each independently sorts text, which MariaDB (case-folding) and PostgreSQL
 	(byte order) resolve differently, and can pair one invoice's cost centre with another's payment
-	mode. creation is a date, so the pick is the same on both engines.
+	mode. The pick is made here rather than in SQL, so ordering on (creation, name) settles it in
+	Python and no database collation applies -- invoices sharing a creation timestamp included.
 	"""
 	t1 = get_invoice_item_totals()
 	t3 = get_representative_payments()
@@ -229,6 +230,7 @@ def get_pos_row_labels(filters):
 			a.owner,
 			a.posting_date,
 			a.creation,
+			a.name,
 			t1.warehouse,
 			t1.cost_center,
 			t3.mode_of_payment,
@@ -240,7 +242,8 @@ def get_pos_row_labels(filters):
 	labels = {}
 	for row in query.run(as_dict=True):
 		key = get_pos_row_key(row)
-		if key not in labels or row.creation < labels[key].creation:
+		current = labels.get(key)
+		if current is None or (row.creation, row.name) < (current.creation, current.name):
 			labels[key] = row
 
 	return labels
