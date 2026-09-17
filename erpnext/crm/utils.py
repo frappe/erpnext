@@ -150,6 +150,11 @@ def link_open_events(ref_doctype, ref_docname, doc):
 
 @frappe.whitelist()
 def get_open_activities(ref_doctype: str, ref_docname: str):
+	# both arguments are caller supplied and nothing below checked them: the ToDo and Event rows are
+	# read with get_all, so the referenced document is what decides who may see its activities.
+	# doc= applies User Permissions; the desk only asks this for a form the caller has open.
+	frappe.has_permission(ref_doctype, doc=ref_docname, throw=True)
+
 	tasks = get_open_todos(ref_doctype, ref_docname)
 	events = get_open_events(ref_doctype, ref_docname)
 	tasks_history = get_closed_todos(ref_doctype, ref_docname)

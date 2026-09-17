@@ -843,6 +843,16 @@ def get_credit_limit(customer, company):
 def get_customer_primary(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
 	customer = filters.get("customer")
 	type = filters.get("type")
+
+	# `type` is caller-supplied and was interpolated straight into qb.DocType(), so any doctype on
+	# the site could be joined to Dynamic Link and read. The two pickers that call this
+	# (customer.js:84,94) send only these two values.
+	if type not in ("Contact", "Address"):
+		frappe.throw(_("Invalid type"), frappe.PermissionError)
+
+	# authorise the party, not Contact/Address: the `if_owner` row on Address would empty the picker rather than error
+	frappe.has_permission("Customer", doc=customer, throw=True)
+
 	type_doctype = qb.DocType(type)
 	dlink = qb.DocType("Dynamic Link")
 

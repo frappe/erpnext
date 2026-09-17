@@ -260,13 +260,16 @@ def get_issue_list(doctype, txt, filters, limit_start, limit_page_length=20, ord
 	)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def set_multiple_status(names: str | list, status: str):
 	for name in frappe.parse_json(names):
+		if not isinstance(name, str):
+			frappe.throw(_("Invalid name"), frappe.PermissionError)
+
 		set_status(name, status)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def set_status(name: str, status: str):
 	frappe.has_permission("Issue", "write", name, throw=True)
 	frappe.db.set_value("Issue", name, "status", status)
@@ -320,6 +323,11 @@ def make_task(source_name: str, target_doc: str | dict | Document | None = None)
 @frappe.whitelist(methods=["POST"])
 def make_issue_from_communication(communication: str, ignore_communication_links: bool = False):
 	"""raise a issue from email"""
+
+	# `communication` is caller supplied and nothing checked it. Communication grants read to `All`
+	# only for the owner (if_owner) and carries a has_permission hook, so doc= is what decides
+	# access; the desk button only appears on an email the caller already has open.
+	frappe.has_permission("Communication", doc=communication, throw=True)
 
 	doc = frappe.get_doc("Communication", communication)
 	issue = frappe.get_doc(

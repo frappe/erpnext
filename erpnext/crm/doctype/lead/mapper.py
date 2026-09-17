@@ -114,6 +114,16 @@ def make_quotation(source_name: str, target_doc: str | dict | Document | None = 
 def make_lead_from_communication(communication: str, ignore_communication_links: bool = False):
 	"""raise a issue from email"""
 
+	# `communication` is caller supplied and nothing here checked it. Communication grants read to
+	# `All` only for the owner (if_owner) and carries a has_permission hook, so doc= is what decides
+	# access; the desk button only appears on an email the caller already has open.
+	frappe.has_permission("Communication", doc=communication, throw=True)
+
+	# both paths below end in a Lead. The insert path checks `create` on its own, but the path that
+	# reuses an existing Lead required nothing, so it returned a Lead's name and linked the email
+	# for callers with no access to Leads at all.
+	frappe.has_permission("Lead", ptype="create", throw=True)
+
 	doc = frappe.get_doc("Communication", communication)
 	lead_name = None
 	if doc.sender:

@@ -503,23 +503,20 @@ class Account(NestedSet):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_parent_account(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
-	Account = frappe.qb.DocType("Account")
-
-	search_field_obj = getattr(Account, searchfield)
-
-	query = (
-		frappe.qb.from_(Account)
-		.select(Account.name)
-		.where(Account.is_group == 1)
-		.where(Account.docstatus != 2)
-		.where(Account.company == filters["company"])
-		.where(search_field_obj.like(f"%{txt}%"))
-		.order_by(Account.name)
-		.limit(page_len)
-		.offset(start)
+	return frappe.get_list(
+		"Account",
+		filters=[
+			["is_group", "=", 1],
+			["docstatus", "!=", 2],
+			["company", "=", filters["company"]],
+			[searchfield, "like", f"%{txt}%"],
+		],
+		fields=["name"],
+		order_by="name",
+		limit_start=start,
+		limit_page_length=page_len,
+		as_list=True,
 	)
-
-	return query.run(as_list=1)
 
 
 def get_account_currency(account):
