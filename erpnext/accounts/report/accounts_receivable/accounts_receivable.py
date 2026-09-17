@@ -975,6 +975,7 @@ class ReceivablePayableReport:
 
 			elif self.account_type == "Payable":
 				self.add_supplier_filters()
+				self.exclude_employee_transaction()
 
 		if self.filters.cost_center:
 			self.get_cost_center_conditions()
@@ -1071,7 +1072,14 @@ class ReceivablePayableReport:
 			self.qb_selection_filter.append(Criterion.any([customer_ptt, sales_ptt]))
 
 	def exclude_employee_transaction(self):
-		self.qb_selection_filter.append(self.ple.party_type != "Employee")
+		if self.filters.get("party_type") == "Employee":
+			return
+
+		criterion = self.ple.party_type != "Employee"
+		if self.filters.get("handle_employee_advances"):
+			criterion = criterion | (self.ple.against_voucher_type == "Employee Advance")
+
+		self.qb_selection_filter.append(criterion)
 
 	def add_supplier_filters(self):
 		supplier = qb.DocType("Supplier")
