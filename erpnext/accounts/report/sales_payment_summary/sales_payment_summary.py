@@ -128,13 +128,7 @@ def apply_conditions(query, a, filters):
 
 
 def get_invoice_item_totals():
-	"""One row per invoice: summed item base_total, plus warehouse and cost_center off one line.
-
-	Both describe an item line, not the invoice, and an invoice may carry several. They become outer
-	grouping keys, so which line wins decides how rows are partitioned and what each row totals --
-	not merely which label is shown. The representative is the first line the user entered: Min(idx)
-	is an integer, so the pick is free of the collation divergence that sorting text has.
-	"""
+	"""One row per invoice: summed item base_total, plus warehouse and cost_center off its first line."""
 	sii = frappe.qb.DocType("Sales Invoice Item")
 	grouped_items = (
 		frappe.qb.from_(sii)
@@ -208,13 +202,9 @@ def get_representative_payments():
 
 
 def get_pos_row_labels(filters):
-	"""cost_center and mode_of_payment off the earliest invoice in each reported row.
+	"""cost_center and mode_of_payment off the earliest invoice in each row.
 
-	A row covers every invoice sharing an owner, date and warehouse, and both columns describe one
-	of them. Aggregating each independently sorts text, which MariaDB (case-folding) and PostgreSQL
-	(byte order) resolve differently, and can pair one invoice's cost centre with another's payment
-	mode. The pick is made here rather than in SQL, so ordering on (creation, name) settles it in
-	Python and no database collation applies -- invoices sharing a creation timestamp included.
+	Ordered in Python rather than SQL, so no database collation applies to the tie-break.
 	"""
 	t1 = get_invoice_item_totals()
 	t3 = get_representative_payments()
