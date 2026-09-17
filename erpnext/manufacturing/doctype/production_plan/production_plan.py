@@ -5,7 +5,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt
+from frappe.utils import flt, get_link_to_form
 
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
 
@@ -154,7 +154,50 @@ class ProductionPlan(Document):
 		self.validate_sales_orders()
 		self.validate_material_request_type()
 		self.validate_raw_material_group_warehouse()
+		self.validate_consolidation_of_produced_serial_no_items()
 		self.enable_auto_reserve_stock()
+
+	def validate_consolidation_of_produced_serial_no_items(self):
+		if not self.combine_items:
+			return
+
+		sales_order_items = [row.sales_order_item for row in self.po_items if row.sales_order_item]
+		sales_order_items += [
+			row.sales_order_item for row in self.prod_plan_references if row.sales_order_item
+		]
+
+		if not sales_order_items:
+			return
+
+		reserved_items = frappe.get_all(
+			"Sales Order Item",
+			filters={
+				"name": ("in", sales_order_items),
+				"ensure_delivery_based_on_produced_serial_no": 1,
+			},
+			fields=["parent", "item_code"],
+		)
+
+		if not reserved_items:
+			return
+
+		frappe.throw(
+			_(
+				"{0} cannot be used, because the following Sales Order Items ensure delivery based on produced Serial No:"
+			).format(frappe.bold(self.meta.get_label("combine_items")))
+			+ "<br><br><ul><li>"
+			+ "</li><li>".join(
+				_("{0} of Sales Order {1}").format(
+					frappe.bold(row.item_code), get_link_to_form("Sales Order", row.parent)
+				)
+				for row in reserved_items
+			)
+			+ "</li></ul>"
+			+ _(
+				"Such items must be delivered from the Serial Nos produced for their own Sales Order, which a consolidated Work Order cannot guarantee."
+			),
+			title=_("Cannot Consolidate Sales Order Items"),
+		)
 
 	def validate_raw_material_group_warehouse(self):
 		if not self.raw_material_group_warehouse:
