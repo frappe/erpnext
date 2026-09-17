@@ -4897,6 +4897,92 @@ def initialize_records_for_future_negative_sle_test(
 	return warehouse_names
 
 
+class TestJobCardSecondaryItems(ERPNextTestSuite):
+	"""get_secondary_items_from_job_card aggregates a work order's job cards into one row per item."""
+
+	def setUp(self):
+		from erpnext.manufacturing.doctype.job_card.test_job_card import (
+			create_bom_with_multiple_operations,
+		)
+		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+
+		self.load_test_records("BOM")
+		make_operation({"operation": "_Test Operation 1", "workstation": "_Test Workstation A"})
+		create_bom_with_multiple_operations()
+
+	def make_submitted_job_card(self, job_card_name, item_code, stock_qty, bom_secondary_item):
+		job_card = frappe.get_doc("Job Card", job_card_name)
+		job_card.append(
+			"secondary_items",
+			{
+				"item_code": item_code,
+				"stock_qty": stock_qty,
+				"secondary_item_type": "Scrap",
+				"bom_secondary_item": bom_secondary_item,
+			},
+		)
+		job_card.append(
+			"time_logs",
+			{
+				"from_time": "2009-01-01 12:06:25",
+				"to_time": "2009-01-01 12:37:25",
+				"time_in_mins": "31.00002",
+				"completed_qty": job_card.for_quantity,
+			},
+		)
+		job_card.submit()
+
+	def test_secondary_items_are_not_summed_across_stock_uoms(self):
+		"""stock_uom is a stored snapshot, so it can differ between a work order's job cards.
+
+		It was aggregated with Max() while stock_qty was summed beneath it, so the two job cards'
+		quantities were added across different units and labelled with whichever sorted higher.
+		item_name is snapshotted the same way, and the representative lookup keyed on less than the
+		query grouped by, so both rows took the earliest line's name.
+		"""
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.services.manufacturing import (
+			get_secondary_items_from_job_card,
+		)
+
+		scrap_item = make_item("_Test JC Secondary Snapshot", {"is_stock_item": 1, "stock_uom": "Nos"})
+		work_order = make_wo_order_test_record(
+			item="_Test FG Item 2",
+			qty=2,
+			transfer_material_against="Work Order",
+			source_warehouse="Stores - _TC",
+		)
+		job_cards = frappe.get_all(
+			"Job Card", filters={"work_order": work_order.name}, order_by="creation", pluck="name"
+		)
+		self.assertGreaterEqual(len(job_cards), 2, "fixture must produce at least two job cards")
+
+		self.make_submitted_job_card(job_cards[0], scrap_item.name, 5, "BOM-ROW-A")
+
+		# the item is re-measured and renamed between the two job cards, so the second card
+		# snapshots different values for the same item_code
+		scrap_item.reload()
+		scrap_item.stock_uom = "Box"
+		scrap_item.item_name = "_Test JC Secondary Snapshot Renamed"
+		scrap_item.save()
+
+		self.make_submitted_job_card(job_cards[1], scrap_item.name, 3, "BOM-ROW-A")
+
+		rows = [
+			row
+			for row in get_secondary_items_from_job_card(work_order.name)
+			if row.item_code == scrap_item.name
+		]
+
+		by_uom = {row.stock_uom: row for row in rows}
+		self.assertEqual(set(by_uom), {"Nos", "Box"}, "quantities in two units must not share a row")
+		self.assertEqual(flt(by_uom["Nos"].stock_qty), 5)
+		self.assertEqual(flt(by_uom["Box"].stock_qty), 3)
+		self.assertEqual(by_uom["Nos"].item_name, "_Test JC Secondary Snapshot")
+		self.assertEqual(by_uom["Box"].item_name, "_Test JC Secondary Snapshot Renamed")
+
+
 def create_stock_entries(sequence_of_entries):
 	for entry_detail in sequence_of_entries:
 		make_stock_entry(**entry_detail)
