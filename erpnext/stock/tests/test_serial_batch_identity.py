@@ -1180,11 +1180,13 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 		with patch(
 			"erpnext.selling.page.point_of_sale.point_of_sale.get_stock_availability", return_value=(2, 1, 0)
 		):
-			result = search_by_term("pos-scan", warehouse, "Standard Selling")
+			result = search_by_term("pos-scan", warehouse, "Standard Selling", self.pos_profile())
 			self.assertCountEqual(
 				[row["serial_no_id"] for row in result["candidates"]], [serial.name for serial in serials]
 			)
-			selected = search_by_term("pos-scan", warehouse, "Standard Selling", self.item.name, "Serial No")
+			selected = search_by_term(
+				"pos-scan", warehouse, "Standard Selling", self.pos_profile(), self.item.name, "Serial No"
+			)
 		self.assertTrue(selected["barcode_scan"])
 		self.assertEqual(len(selected["items"]), 1)
 		self.assertEqual(selected["items"][0]["item_code"], self.item.name)
@@ -1193,31 +1195,41 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 	def test_pos_batch_scan_keeps_the_selected_batch_id(self):
 		items = [make_item(f"_Identity POS Batch {suffix}", {"has_batch_no": 1}) for suffix in ("A", "B")]
 		batches = [self.make_number("Batch", "POS-Batch", item.name) for item in items]
-		result = search_for_serial_or_batch_or_barcode_number("pos-batch")
+		result = search_for_serial_or_batch_or_barcode_number("pos-batch", self.pos_profile())
 		self.assertCountEqual(
 			[row["batch_no"] for row in result["candidates"]], [batch.name for batch in batches]
 		)
-		selected = search_for_serial_or_batch_or_barcode_number("pos-batch", items[1].name, "Batch")
+		selected = search_for_serial_or_batch_or_barcode_number(
+			"pos-batch", self.pos_profile(), items[1].name, "Batch"
+		)
 		self.assertEqual(selected["batch_no"], batches[1].name)
 		self.assertEqual(selected["batch_id"], "POS-Batch")
 
 	def test_pos_same_item_scan_requires_record_selection(self):
 		serial = self.make_number("Serial No", "POS-Shared")
 		self.make_number("Batch", "POS-Shared")
-		result = search_for_serial_or_batch_or_barcode_number("pos-shared", self.item.name)
+		result = search_for_serial_or_batch_or_barcode_number(
+			"pos-shared", self.pos_profile(), self.item.name
+		)
 		self.assertCountEqual([row["record_type"] for row in result["candidates"]], ["Serial No", "Batch"])
-		selected = search_for_serial_or_batch_or_barcode_number("pos-shared", self.item.name, "Serial No")
+		selected = search_for_serial_or_batch_or_barcode_number(
+			"pos-shared", self.pos_profile(), self.item.name, "Serial No"
+		)
 		self.assertEqual(selected["serial_no_id"], serial.name)
 		with self.assertRaisesRegex(frappe.ValidationError, "requires serial numbers"):
-			search_for_serial_or_batch_or_barcode_number("pos-shared", self.item.name, "Batch")
+			search_for_serial_or_batch_or_barcode_number(
+				"pos-shared", self.pos_profile(), self.item.name, "Batch"
+			)
 		with self.assertRaisesRegex(frappe.ValidationError, "no longer available"):
-			search_for_serial_or_batch_or_barcode_number("pos-shared", self.other_item.name, "Serial No")
+			search_for_serial_or_batch_or_barcode_number(
+				"pos-shared", self.pos_profile(), self.other_item.name, "Serial No"
+			)
 
 	def test_pos_candidate_selection_respects_profile_item_groups(self):
 		for item in (self.item, self.other_item):
 			self.make_number("Serial No", "POS-Scan", item.name)
 		self.other_item.db_set("item_group", "_Test Item Group")
-		result = search_for_serial_or_batch_or_barcode_number("POS-Scan")
+		result = search_for_serial_or_batch_or_barcode_number("POS-Scan", self.pos_profile())
 		profile = frappe._dict(item_groups=[frappe._dict(item_group=self.item.item_group)])
 		with patch("frappe.get_cached_doc", return_value=profile):
 			filter_result_items(result, "_Identity POS Profile")
@@ -1231,15 +1243,30 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 			serial.db_set("batch_no", batch.name)
 			self.make_number("Serial No", number, self.other_item.name)
 		self.assertEqual(
-			get_serials_by_batch(self.item.name, "pos-serial-2\nPOS-SERIAL-1"),
+			get_serials_by_batch(self.item.name, "pos-serial-2\nPOS-SERIAL-1", self.pos_profile()),
 			{second_batch.name: ["POS-Serial-2"], first_batch.name: ["POS-Serial-1"]},
 		)
 		count = frappe.db.count("Serial No")
 		with self.assertRaises(frappe.DoesNotExistError):
-			get_serials_by_batch(self.item.name, "POS-Missing")
+			get_serials_by_batch(self.item.name, "POS-Missing", self.pos_profile())
 		self.assertEqual(frappe.db.count("Serial No"), count)
 		with self.set_user("Guest"), self.assertRaises(frappe.PermissionError):
-			get_serials_by_batch(self.item.name, "POS-Serial-1")
+			get_serials_by_batch(self.item.name, "POS-Serial-1", self.pos_profile())
+
+	def test_pos_endpoints_refuse_items_outside_the_profile(self):
+		self.make_number("Serial No", "POS-Outside")
+		profile = frappe.get_doc("POS Profile", self.pos_profile())
+		profile.append("item_groups", {"item_group": "_Test Item Group"})
+		profile.save()
+		self.item.db_set("item_group", "All Item Groups")
+		for call in (
+			lambda: search_for_serial_or_batch_or_barcode_number(
+				"POS-Outside", profile.name, self.item.name, "Serial No"
+			),
+			lambda: get_serials_by_batch(self.item.name, "POS-Outside", profile.name),
+		):
+			with self.subTest(call=call), self.assertRaises(frappe.PermissionError):
+				call()
 
 	def test_pos_return_checks_the_original_item_and_literal_serial_number(self):
 		serial = self.make_number("Serial No", "POS-Return_1")
@@ -1559,6 +1586,13 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 			frappe.db.get_value("Serial No", created[0], "serial_no"),
 			"Missing-001",
 		)
+
+	def pos_profile(self):
+		from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
+
+		if not frappe.db.exists("POS Profile", "_Test POS Profile"):
+			make_pos_profile()
+		return "_Test POS Profile"
 
 	def make_role_user(self, email, role):
 		if not frappe.db.exists("User", email):
