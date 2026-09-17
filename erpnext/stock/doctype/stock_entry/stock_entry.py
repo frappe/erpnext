@@ -34,7 +34,7 @@ from erpnext.stock.get_item_details import (
 	get_default_cost_center,
 )
 from erpnext.stock.stock_ledger import get_previous_sle, get_valuation_rate
-from erpnext.stock.utils import get_incoming_rate
+from erpnext.stock.utils import _get_incoming_rate, check_warehouse_company, get_combine_datetime
 
 from .services.disassemble import DisassembleStockEntry
 from .services.manufacturing import (
@@ -736,6 +736,18 @@ class StockEntry(StockController, SubcontractingInwardController):
 			raise_error_if_no_rate=raise_error_if_no_rate,
 			batch_no=d.batch_no,
 			serial_and_batch_bundle=d.serial_and_batch_bundle,
+			posting_datetime=get_combine_datetime(self.posting_date, self.posting_time),
+			creation=self.first_sle_creation,
+		)
+
+	@property
+	def first_sle_creation(self):
+		"""Creation of this entry's earliest ledger entry, if it has posted any yet."""
+		return frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": self.name, "voucher_type": self.doctype, "is_cancelled": 0},
+			"creation",
+			order_by="creation asc",
 		)
 
 	def _notify_zero_valuation_rate(self, items):
@@ -756,7 +768,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			if d.s_warehouse:
 				if reset_outgoing_rate:
 					args = self.get_args_for_incoming_rate(d)
-					rate = get_incoming_rate(args, raise_error_if_no_rate)
+					rate = _get_incoming_rate(args, raise_error_if_no_rate)
 					if rate >= 0:
 						d.basic_rate = rate
 
@@ -1948,6 +1960,13 @@ def get_warehouse_details(args: str | dict):
 
 	args = frappe._dict(args)
 
+	# Restored explicitly: both checks were inherited from get_incoming_rate until it was split into
+	# a guarded whitelist wrapper and the unguarded _get_incoming_rate this now calls.
+	# `select`, not `read`: this is reached from stock_entry.js:740, and the desk roles that open
+	# that form clear select through the Desk User row while holding no Item read of their own.
+	frappe.has_permission("Item", ptype="select", throw=True)
+	check_warehouse_company(args.get("warehouse"))
+
 	ret = {}
 	if args.warehouse and args.item_code:
 		args.update(
@@ -1958,6 +1977,6 @@ def get_warehouse_details(args: str | dict):
 		)
 		ret = {
 			"actual_qty": get_previous_sle(args).get("qty_after_transaction") or 0,
-			"basic_rate": get_incoming_rate(args),
+			"basic_rate": _get_incoming_rate(args),
 		}
 	return ret

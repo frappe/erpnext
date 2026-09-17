@@ -1,9 +1,11 @@
 # Copyright (c) 2024, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from unittest.mock import patch
+
 import frappe
 from frappe.tests.classes.context_managers import freeze_time
-from frappe.utils import add_days, flt, formatdate, today
+from frappe.utils import add_days, flt, formatdate, getdate, today
 
 from erpnext.accounts.doctype.tax_rule.test_tax_rule import make_tax_rule
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
@@ -14,6 +16,7 @@ from erpnext.manufacturing.report.material_requirements_planning_report.material
 	make_order,
 )
 from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.tests.utils import ERPNextTestSuite
 
 COMPANY = "_Test Company"
@@ -71,10 +74,8 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 				[formatdate(delivery_date, "dd MMM") for delivery_date in delivery_dates],
 			)
 
-	def test_manufacture_lead_time_is_not_int_truncated(self):
-		"""lead_time = 1440 / manufacturing_time_in_mins + buffer_time. Both columns are Int;
-		integer/integer division truncates on Postgres (1440/7 -> 205) while MariaDB yields a
-		decimal, so the computed lead time (and the derived release date) diverged by engine."""
+	def test_manufacture_lead_time_preserves_fractional_days(self):
+		"""Manufacturing duration must retain fractional days until the report rounds it."""
 		item = make_item("_Test MRP Lead Time Item", {"is_stock_item": 1}).name
 		frappe.get_doc(
 			{
@@ -86,8 +87,222 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		).insert()
 
 		lead_time = get_item_lead_time(item, "Manufacture")
-		# 1440 / 7 + 2 = 207.714...; a truncating integer division on Postgres would give 207.
-		self.assertAlmostEqual(float(lead_time), 1440 / 7 + 2, places=2)
+		self.assertAlmostEqual(lead_time, 7 / 1440 + 2, places=8)
+
+	@freeze_time("2026-09-01 10:00:00.123456")
+	def test_manufacturing_buffer_moves_release_date_earlier(self):
+		plan = make_mrp_plan(self, planned_qty=49, rm_qty=1)
+		mps = frappe.get_doc("Master Production Schedule", plan.mps)
+		mps.items[0].delivery_date = "2026-09-30"
+		mps.save()
+		lead_time = frappe.get_doc(
+			{"doctype": "Item Lead Time", "item_code": plan.fg_item, "manufacturing_time_in_mins": 30}
+		).insert()
+		frappe.get_doc(
+			{"doctype": "Item Lead Time", "item_code": plan.rm_item, "purchase_time": 3, "buffer_time": 1}
+		).insert()
+
+		for buffer_days, expected_days in ((0, 2), (1, 3), (2, 4)):
+			with self.subTest(buffer_days=buffer_days):
+				lead_time.buffer_time = buffer_days
+				lead_time.save()
+				rows = get_mrp_rows(mps)
+				fg_row, rm_row = rows[plan.fg_item], rows[plan.rm_item]
+				self.assertEqual(fg_row.required_qty, 49)
+				self.assertEqual(fg_row.lead_time, expected_days)
+				self.assertEqual(
+					getdate(fg_row.release_date), getdate(add_days("2026-09-30", -expected_days))
+				)
+				self.assertEqual(rm_row.lead_time, 4)
+				self.assertEqual(rm_row.delivery_date, fg_row.release_date)
+
+	def test_manufacturing_duration_boundaries_and_missing_operation_time(self):
+		plan = make_mrp_plan(self, planned_qty=49, rm_qty=1)
+		mps = frappe.get_doc("Master Production Schedule", plan.mps)
+		lead_time = frappe.get_doc({"doctype": "Item Lead Time", "item_code": plan.fg_item}).insert()
+		frappe.get_doc({"doctype": "Item Lead Time", "item_code": plan.rm_item, "purchase_time": 3}).insert()
+
+		cases = (
+			(30, 48, 0, 1),
+			(30, 49, 0, 2),
+			(30, 96, 0, 2),
+			(31, 47, 0, 2),
+			(3000, 1, 0, 3),
+			(30, 0.5, 1, 2),
+			(30, 0, 1, 0),
+			(0, 49, 1, 4),
+			(-30, 49, 1, 4),
+		)
+		for minutes, qty, buffer_days, expected_days in cases:
+			with self.subTest(minutes=minutes, qty=qty, buffer_days=buffer_days):
+				mps.items[0].planned_qty = qty
+				mps.save()
+				lead_time.update({"manufacturing_time_in_mins": minutes, "buffer_time": buffer_days})
+				lead_time.save()
+				row = get_mrp_rows(mps)[plan.fg_item]
+				self.assertEqual(row.lead_time, expected_days)
+				self.assertEqual(row.release_date, add_days(row.delivery_date, -expected_days))
+
+	def test_subassembly_buffer_uses_net_required_quantity(self):
+		plan = make_mrp_plan(self, planned_qty=49, rm_qty=1)
+		parent_item = make_item(properties={"is_stock_item": 1}).name
+		parent_bom = make_bom(item=parent_item, raw_materials=[plan.fg_item], rm_qty=2, rate=100)
+		self.assertEqual(parent_bom.items[0].bom_no, plan.bom)
+		mps = frappe.get_doc("Master Production Schedule", plan.mps)
+		mps.items[0].item_code = parent_item
+		mps.save()
+		for item in (parent_item, plan.fg_item):
+			frappe.get_doc(
+				{
+					"doctype": "Item Lead Time",
+					"item_code": item,
+					"manufacturing_time_in_mins": 30,
+					"buffer_time": 1,
+				}
+			).insert()
+		frappe.get_doc({"doctype": "Item Lead Time", "item_code": plan.rm_item, "purchase_time": 3}).insert()
+
+		rows = get_mrp_rows(mps)
+		self.assertEqual(rows[parent_item].lead_time, 3)
+		self.assertEqual(rows[plan.fg_item].required_qty, 98)
+		self.assertEqual(rows[plan.fg_item].lead_time, 4)
+		self.assertEqual(rows[plan.fg_item].delivery_date, rows[parent_item].release_date)
+		self.assertEqual(rows[plan.rm_item].delivery_date, rows[plan.fg_item].release_date)
+
+		make_stock_entry(item_code=plan.fg_item, target=WAREHOUSE, qty=50, rate=100)
+		rows = get_mrp_rows(mps)
+		self.assertEqual(rows[plan.fg_item].required_qty, 48)
+		self.assertEqual(rows[plan.fg_item].lead_time, 2)
+		self.assertEqual(rows[plan.rm_item].required_qty, 48)
+		self.assertEqual(rows[plan.rm_item].lead_time, 3)
+
+	def test_raw_material_fallback_reuses_subtrees_by_required_quantity(self):
+		plan = make_mrp_plan(self, planned_qty=49, rm_qty=1)
+		frappe.get_doc(
+			{
+				"doctype": "Item Lead Time",
+				"item_code": plan.fg_item,
+				"manufacturing_time_in_mins": 30,
+				"buffer_time": 1,
+			}
+		).insert()
+		frappe.get_doc({"doctype": "Item Lead Time", "item_code": plan.rm_item, "purchase_time": 3}).insert()
+
+		parents = []
+		child_item = plan.fg_item
+		for _ in range(6):
+			parent_item = make_item(properties={"is_stock_item": 1}).name
+			make_bom(item=parent_item, raw_materials=[child_item], rm_qty=1, rate=100)
+			frappe.get_doc({"doctype": "Item Lead Time", "item_code": parent_item, "buffer_time": 1}).insert()
+			parents.append(parent_item)
+			child_item = parent_item
+
+		mps = frappe.get_doc("Master Production Schedule", plan.mps)
+		mps.items[0].item_code = parents[-1]
+		mps.save()
+		with patch(f"{execute.__module__}.get_item_lead_time", wraps=get_item_lead_time) as lead_time:
+			rows = get_mrp_rows(mps)
+			# Descendant calculations should grow with the row count, not the square of BOM depth.
+			self.assertLessEqual(lead_time.call_count, 2 * len(rows))
+
+		for level, parent_item in enumerate(parents):
+			self.assertEqual(rows[parent_item].required_qty, 49)
+			self.assertEqual(rows[parent_item].lead_time, level + 7)
+		self.assertEqual(rows[plan.fg_item].lead_time, 3)
+		self.assertEqual(rows[plan.rm_item].lead_time, 3)
+
+		# Stock changes the quantity below this assembly after the ancestor fallback was calculated.
+		make_stock_entry(item_code=parents[2], target=WAREHOUSE, qty=1, rate=100)
+		rows = get_mrp_rows(mps)
+		self.assertEqual(rows[parents[-1]].lead_time, 12)
+		self.assertEqual(rows[parents[2]].required_qty, 48)
+		self.assertEqual(rows[parents[2]].lead_time, 8)
+		self.assertEqual(rows[plan.fg_item].required_qty, 48)
+		self.assertEqual(rows[plan.fg_item].lead_time, 2)
+
+	def test_manufactured_component_without_bom_keeps_buffer_duration(self):
+		plan = make_mrp_plan(self, planned_qty=49, rm_qty=1)
+		item = frappe.get_doc("Item", plan.rm_item)
+		item.is_purchase_item = 0
+		item.save()
+		frappe.get_doc(
+			{
+				"doctype": "Item Lead Time",
+				"item_code": plan.rm_item,
+				"manufacturing_time_in_mins": 30,
+				"buffer_time": 1,
+			}
+		).insert()
+
+		rows = get_mrp_rows(frappe.get_doc("Master Production Schedule", plan.mps))
+		component = rows[plan.rm_item]
+		self.assertEqual(component.type_of_material, "Manufacture")
+		self.assertFalse(component.bom_no)
+		self.assertEqual(component.lead_time, 3)
+		self.assertEqual(rows[plan.fg_item].lead_time, 3)
+		self.assertEqual(component.delivery_date, rows[plan.fg_item].release_date)
+
+	def test_purchase_item_without_bom_is_purchased(self):
+		plan = make_mps_item(
+			self,
+			{
+				"is_stock_item": 1,
+				"is_purchase_item": 1,
+				"item_defaults": [
+					{"company": COMPANY, "default_warehouse": WAREHOUSE, "default_supplier": SUPPLIER}
+				],
+			},
+		)
+		self.assertEqual(plan.row.type_of_material, "Purchase")
+
+		make_order([plan.row], COMPANY, warehouse=WAREHOUSE, mps=plan.mps)
+
+		purchase_order = get_created_order(plan.mps, "Purchase Order")
+		self.assertEqual([d.item_code for d in purchase_order.items], [plan.item])
+		self.assertFalse(frappe.get_all("Work Order", filters={"mps": plan.mps}, pluck="name"))
+
+	def test_make_order_rejects_manufactured_item_without_bom(self):
+		plan = make_mps_item(
+			self,
+			{
+				"is_stock_item": 1,
+				"is_purchase_item": 0,
+				"item_defaults": [{"company": COMPANY, "default_warehouse": WAREHOUSE}],
+			},
+		)
+		self.assertEqual(plan.row.type_of_material, "Manufacture")
+		self.assertFalse(plan.row.bom_no)
+
+		with self.assertRaises(frappe.ValidationError) as ctx:
+			make_order([plan.row], COMPANY, warehouse=WAREHOUSE, mps=plan.mps)
+
+		self.assertIn("Default BOM", str(ctx.exception))
+		self.assertFalse(frappe.get_all("Work Order", filters={"mps": plan.mps}, pluck="name"))
+		self.assertFalse(frappe.get_all("Purchase Order", filters={"mps": plan.mps}, pluck="name"))
+
+	def test_make_order_uses_the_bom_passed_on_the_row(self):
+		plan = make_mps_item(
+			self,
+			{
+				"is_stock_item": 1,
+				"is_purchase_item": 0,
+				"item_defaults": [{"company": COMPANY, "default_warehouse": WAREHOUSE}],
+			},
+		)
+		rm_item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"is_purchase_item": 1,
+				"item_defaults": [{"company": COMPANY, "default_warehouse": WAREHOUSE}],
+			}
+		).name
+		plan.row.bom_no = make_bom(item=plan.item, raw_materials=[rm_item], rm_qty=1, rate=100).name
+
+		make_order([plan.row], COMPANY, warehouse=WAREHOUSE, mps=plan.mps)
+
+		work_order = get_created_order(plan.mps, "Work Order")
+		self.assertEqual(work_order.production_item, plan.item)
+		self.assertEqual(work_order.bom_no, plan.row.bom_no)
 
 	def test_make_order_creates_draft_purchase_and_work_orders(self):
 		plan = make_mrp_plan(self)
@@ -201,6 +416,47 @@ def make_chart_row(delivery_date, planned_qty=1):
 	)
 
 
+def make_mps_item(test_case, item_properties, planned_qty=10):
+	item = make_item(properties=item_properties).name
+	mps = frappe.get_doc(
+		{
+			"doctype": "Master Production Schedule",
+			"company": COMPANY,
+			"posting_date": today(),
+			"from_date": today(),
+			"parent_warehouse": WAREHOUSE,
+			"items": [
+				{
+					"item_code": item,
+					"warehouse": WAREHOUSE,
+					"delivery_date": add_days(today(), 30),
+					"planned_qty": planned_qty,
+					"uom": frappe.get_cached_value("Item", item, "stock_uom"),
+				}
+			],
+		}
+	)
+	mps.insert()
+
+	_, data, _, _ = execute(
+		frappe._dict(
+			{
+				"company": COMPANY,
+				"from_date": today(),
+				"to_date": add_days(today(), 90),
+				"warehouse": WAREHOUSE,
+				"mps": mps.name,
+				"type_of_material": "All",
+				"add_safety_stock": 0,
+			}
+		)
+	)
+	rows = [row for row in data if row.get("item_code")]
+	test_case.assertTrue(rows, msg="the report returned no rows to create orders from")
+
+	return frappe._dict(item=item, mps=mps.name, row=rows[0], rows=rows)
+
+
 def make_mrp_plan(test_case, planned_qty=10, rm_qty=2):
 	"""Build a finished good with a submitted BOM and an MPS demanding it, then return the
 	report's own output rows -- the same payload the report's client sends to `make_order`."""
@@ -271,6 +527,26 @@ def make_mrp_plan(test_case, planned_qty=10, rm_qty=2):
 		rm_qty=rm_qty,
 		rows=rows,
 	)
+
+
+def get_mrp_rows(mps):
+	# Changing settings and refreshing the report happens in separate requests in Desk.
+	frappe.local.request_cache.clear()
+	_, rows, _, _ = execute(
+		frappe._dict(
+			{
+				"company": mps.company,
+				"warehouse": mps.parent_warehouse,
+				"mps": mps.name,
+				"from_date": mps.from_date,
+				"to_date": mps.to_date,
+				"type_of_material": "All",
+				"bucket_size": "Daily",
+				"add_safety_stock": 0,
+			}
+		)
+	)
+	return {row.item_code: row for row in rows if row.get("item_code")}
 
 
 def get_ordered_items(doctype, order):

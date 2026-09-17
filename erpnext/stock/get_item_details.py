@@ -284,7 +284,7 @@ def set_valuation_rate(out: frappe._dict, ctx: frappe._dict):
 
 		for bundle_item in bundled_items.items:
 			valuation_rate += flt(
-				get_valuation_rate(bundle_item.item_code, ctx.company, out.get("warehouse")).get(
+				_get_valuation_rate(bundle_item.item_code, ctx.company, out.get("warehouse")).get(
 					"valuation_rate"
 				)
 				* bundle_item.qty
@@ -293,7 +293,7 @@ def set_valuation_rate(out: frappe._dict, ctx: frappe._dict):
 		out.update({"valuation_rate": valuation_rate})
 
 	else:
-		out.update(get_valuation_rate(ctx.item_code, ctx.company, out.get("warehouse")))
+		out.update(_get_valuation_rate(ctx.item_code, ctx.company, out.get("warehouse")))
 
 
 def update_stock(ctx, out, doc=None):
@@ -1642,6 +1642,10 @@ def get_conversion_factor(item_code: str | None, uom: str):
 
 @frappe.whitelist()
 def get_projected_qty(item_code: str, warehouse: str):
+	# record-level read on the item, matching what get_item_details() in this file already does.
+	# Nothing in the tree calls this, so there is no caller whose roles constrain the choice.
+	frappe.has_permission("Item", doc=item_code, throw=True)
+
 	return {
 		"projected_qty": frappe.db.get_value(
 			"Bin", {"item_code": item_code, "warehouse": warehouse}, "projected_qty"
@@ -1653,6 +1657,9 @@ def get_projected_qty(item_code: str, warehouse: str):
 def get_bin_details(
 	item_code: str, warehouse: str | None, company: str | None = None, include_child_warehouses: bool = False
 ):
+	# `select`, not `read`: the selling/buying rows and SellingController reach this with no Item read row
+	frappe.has_permission("Item", ptype="select", throw=True)
+
 	bin_details = {"projected_qty": 0, "actual_qty": 0, "reserved_qty": 0}
 
 	if warehouse:
@@ -1834,6 +1841,15 @@ def get_default_bom(item_code: str | None = None):
 
 @frappe.whitelist()
 def get_valuation_rate(item_code: str, company: str, warehouse: str | None = None):
+	"""Whitelisted entry point: authorise the item, then return its cost price."""
+	frappe.has_permission("Item", doc=item_code, throw=True)
+
+	return _get_valuation_rate(item_code, company, warehouse)
+
+
+def _get_valuation_rate(item_code: str, company: str, warehouse: str | None = None):
+	# no guard here: set_valuation_rate calls this for the item AND for every Product Bundle
+	# component, and a caller entitled to the bundle is not necessarily entitled to each component
 	if frappe.get_cached_value("Warehouse", warehouse, "is_group"):
 		return {"valuation_rate": 0.0}
 

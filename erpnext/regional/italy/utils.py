@@ -34,7 +34,8 @@ def update_itemised_tax_data(doc):
 def export_invoices(filters: str | None = None):
 	frappe.has_permission("Sales Invoice", throw=True)
 
-	invoices = frappe.get_all(
+	# get_list, not get_all: what leaves here is a zip of e-invoice attachments, so the rows must be scoped too
+	invoices = frappe.get_list(
 		"Sales Invoice", filters=get_conditions(filters), fields=["name", "company_tax_id"]
 	)
 

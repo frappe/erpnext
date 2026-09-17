@@ -14,7 +14,7 @@ from frappe.query_builder import Field
 from frappe.query_builder.functions import IfNull
 from frappe.utils import today
 
-from erpnext.stock.doctype.item.item import get_item_details
+from erpnext.stock.doctype.item.item import _get_item_details
 
 _BOM_DIFF_IDENTIFIERS = {
 	"operations": "operation",
@@ -195,7 +195,7 @@ def make_variant_bom(
 def _postprocess_variant_bom(source, doc, item, variant_items, source_name):
 	from erpnext.manufacturing.doctype.work_order.work_order import add_variant_item
 
-	item_data = get_item_details(item)
+	item_data = _get_item_details(item)
 	doc.item = item
 	doc.quantity = 1
 	doc.update(

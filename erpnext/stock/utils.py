@@ -97,6 +97,22 @@ def get_stock_value_on(
 	return query.run(as_list=True)[0][0]
 
 
+def check_warehouse_company(warehouse: str | None) -> None:
+	"""Keep a company-restricted caller inside their own companies; a no-op for everyone else."""
+	if not isinstance(warehouse, str) or not warehouse:
+		return
+
+	from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies
+
+	allowed_companies = get_allowed_companies(frappe.session.user, "Item")
+	if not allowed_companies:
+		return
+
+	company = frappe.db.get_value("Warehouse", warehouse, "company")
+	if company and company not in allowed_companies:
+		frappe.throw(_("Not permitted for {0}").format(company), frappe.PermissionError)
+
+
 @frappe.whitelist()
 def get_stock_balance(
 	item_code: str,
@@ -180,6 +196,12 @@ def get_serial_nos_data(serial_nos):
 
 @frappe.whitelist()
 def get_latest_stock_qty(item_code: str, warehouse: str | None = None):
+	# Same guard as get_stock_balance above, which returns the same Bin quantity from the same file.
+	# Loser-free for the only caller: work_order.js:797, and Work Order write is held by
+	# Manufacturing User, who holds Item read. (Manufacturing Manager holds neither.)
+	frappe.has_permission("Item", "read", throw=True)
+	check_warehouse_company(warehouse)
+
 	bin_dt = frappe.qb.DocType("Bin")
 	query = frappe.qb.from_(bin_dt).select(Sum(bin_dt.actual_qty)).where(bin_dt.item_code == item_code)
 
@@ -270,6 +292,22 @@ def _create_bin(item_code, warehouse):
 
 @frappe.whitelist()
 def get_incoming_rate(args: dict | str, raise_error_if_no_rate: bool = True, fallbacks: bool = True):
+	"""Whitelisted entry point: authorise the caller, then compute the rate."""
+	args = frappe.parse_json(args)
+
+	# `select`, not `read`: this is reached from transaction.js:1069 on every sales and buying form,
+	# and Accounts Manager — who writes Sales Invoice and Purchase Invoice — holds no Item read
+	frappe.has_permission("Item", ptype="select", throw=True)
+	# only on this path: in-process callers legitimately price a warehouse the caller is not scoped
+	# to — Delivery Note submit, Stock Entry transfer, Subcontracting Receipt and the Product Bundle
+	# set_valuation_rate loop all raised "Not permitted for ..." for an entitled Company-restricted
+	# identity while this guard sat on the shared function
+	check_warehouse_company(args.get("warehouse") if isinstance(args, dict | frappe._dict) else None)
+
+	return _get_incoming_rate(args, raise_error_if_no_rate, fallbacks)
+
+
+def _get_incoming_rate(args: dict | str, raise_error_if_no_rate: bool = True, fallbacks: bool = True):
 	"""Get Incoming Rate based on valuation method"""
 	from erpnext.stock.stock_ledger import get_previous_sle, get_valuation_rate
 
@@ -604,6 +642,8 @@ def check_pending_reposting(posting_date: str, company: str | None = None, throw
 def scan_barcode(
 	search_value: str, ctx: dict | str | None = None, item_code: str | None = None
 ) -> BarcodeScanResult:
+	frappe.has_permission("Item", ptype="select", throw=True)
+
 	ctx = frappe.parse_json(ctx) or {}
 	candidates = get_barcode_matches(search_value, item_code)
 	for candidate in candidates:

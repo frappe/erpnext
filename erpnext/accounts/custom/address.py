@@ -55,6 +55,18 @@ class ERPNextAddress(Address):
 
 @frappe.whitelist()
 def get_shipping_address(company: str, address: str | None = None):
+	# `company` is caller supplied and this returns that company's own registered address with every
+	# field. `select` rather than `read` on Company: Delivery, Maintenance, Purchase Manager and
+	# Stock Manager all fill in transactions that ask for this while holding no Company `read` row.
+	frappe.has_permission("Company", ptype="select", throw=True)
+
+	# and scope it to the caller's own Company restrictions, which costs nobody who has none
+	from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies
+
+	allowed_companies = get_allowed_companies(frappe.session.user, "Address")
+	if allowed_companies and company not in allowed_companies:
+		frappe.throw(_("Not permitted for {0}").format(company), frappe.PermissionError)
+
 	filters = [
 		["Dynamic Link", "link_doctype", "=", "Company"],
 		["Dynamic Link", "link_name", "=", company],

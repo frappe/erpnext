@@ -1539,7 +1539,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 			create_stock_reconciliation,
 		)
-		from erpnext.stock.get_item_details import get_valuation_rate
+		from erpnext.stock.get_item_details import _get_valuation_rate
 		from erpnext.stock.utils import get_stock_balance
 
 		prepare_data_for_internal_transfer()
@@ -1556,7 +1556,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		)
 
 		if (
-			get_valuation_rate(
+			_get_valuation_rate(
 				pr1.items[0].item_code, "_Test Company with perpetual inventory", warehouse="Stores - TCP1"
 			)
 			!= 50

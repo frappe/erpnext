@@ -223,8 +223,11 @@ def delete_accounting_dimension(doc):
 		frappe.clear_cache(doctype=doctype)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def disable_dimension(doc: str):
+	# toggle_disabling rewrites a Custom Field site-wide, so demand the write that configures dimensions
+	frappe.has_permission("Accounting Dimension", "write", throw=True)
+
 	if frappe.in_test:
 		toggle_disabling(doc=doc)
 	else:

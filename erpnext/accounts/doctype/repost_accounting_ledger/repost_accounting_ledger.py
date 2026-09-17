@@ -514,6 +514,11 @@ def validate_docs_for_voucher_types(doc_voucher_types):
 def get_repost_allowed_types(
 	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict
 ):
+	# Reached only from this doctype's own form (repost_accounting_ledger.js:8), and Repost
+	# Accounting Ledger is System-Manager-only, so the form is the boundary. `filters` is passed
+	# straight to db.get_all, which is why reaching it needs to be gated rather than merely typed.
+	frappe.has_permission("Repost Accounting Ledger", throw=True)
+
 	if txt:
 		filters.update({"document_type": ("like", f"%{txt}%")})
 

@@ -311,6 +311,9 @@ class DeliveryTrip(Document):
 
 @frappe.whitelist()
 def get_contact_and_address(name: str):
+	# `select`, not `read`: three of the four roles that run Delivery Trips hold no Customer read row
+	frappe.has_permission("Customer", ptype="select", doc=name, throw=True)
+
 	out = frappe._dict()
 
 	get_default_contact(out, name)

@@ -1982,9 +1982,11 @@ def read_serial_batch_csv(file_path: str):
 	if not file_path:
 		return serial_nos, batch_nos
 
-	try:
-		file = frappe.get_doc("File", {"file_url": file_path})
-	except frappe.DoesNotExistError:
+	from frappe.core.doctype.file.utils import find_file_by_url
+
+	# look the file up through find_file_by_url, which returns it only when the caller may download it
+	file = find_file_by_url(file_path)
+	if not file:
 		frappe.msgprint(
 			_("File '{0}' not found").format(frappe.bold(file_path)),
 			alert=True,
@@ -2061,7 +2063,8 @@ def item_query(
 	if txt:
 		item_filters["name"] = ("like", f"%{txt}%")
 
-	return frappe.get_all(
+	# get_list, not get_all, so Item permissions apply; `select` is what keeps the roles that work bundles usable
+	return frappe.get_list(
 		"Item",
 		filters=item_filters,
 		or_filters={"has_serial_no": 1, "has_batch_no": 1},

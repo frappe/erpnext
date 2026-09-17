@@ -13,7 +13,7 @@ from erpnext.controllers.sales_and_purchase_return import get_rate_for_return, i
 from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.doctype.item.item import set_item_default
 from erpnext.stock.get_item_details import get_bin_details, get_conversion_factor
-from erpnext.stock.utils import get_combine_datetime, get_incoming_rate, get_valuation_method
+from erpnext.stock.utils import _get_incoming_rate, get_combine_datetime, get_valuation_method
 
 
 class SellingController(StockController):
@@ -588,7 +588,7 @@ class SellingController(StockController):
 						and self.get("is_return")
 					)
 				):
-					d.incoming_rate = get_incoming_rate(
+					d.incoming_rate = _get_incoming_rate(
 						{
 							"item_code": d.item_code,
 							"warehouse": d.warehouse,

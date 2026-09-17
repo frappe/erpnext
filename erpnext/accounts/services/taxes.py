@@ -181,6 +181,27 @@ class TaxService:
 		return amount, base_amount
 
 
+# the only doctypes a `taxes_and_charges` Link points at; `master_doctype` is caller-supplied and reaches get_doc()
+TAX_MASTER_DOCTYPES = ("Sales Taxes and Charges Template", "Purchase Taxes and Charges Template")
+
+
+def validate_tax_master(master_doctype: str, master_name: str | None = None) -> None:
+	if master_doctype not in TAX_MASTER_DOCTYPES:
+		frappe.throw(_("Invalid tax master doctype"), frappe.PermissionError)
+
+	if not master_name:
+		return
+
+	# keep a company-restricted caller inside their own companies; this does NOT authorise the template itself
+	from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies
+
+	allowed_companies = get_allowed_companies(frappe.session.user, master_doctype)
+	if allowed_companies:
+		company = frappe.db.get_value(master_doctype, master_name, "company")
+		if company and company not in allowed_companies:
+			frappe.throw(_("Not permitted for {0}").format(company), frappe.PermissionError)
+
+
 @frappe.whitelist()
 def get_tax_rate(account_head: str) -> dict:
 	return frappe.get_cached_value("Account", account_head, ["tax_rate", "account_name"], as_dict=True)
@@ -192,6 +213,8 @@ def get_default_taxes_and_charges(
 ) -> dict | None:
 	if not company:
 		return {}
+
+	validate_tax_master(master_doctype, tax_template)
 
 	if tax_template and company:
 		tax_template_company = frappe.get_cached_value(master_doctype, tax_template, "company")
@@ -210,6 +233,9 @@ def get_default_taxes_and_charges(
 def get_taxes_and_charges(master_doctype: str, master_name: str | None = None) -> list | None:
 	if not master_name:
 		return
+
+	validate_tax_master(master_doctype, master_name)
+
 	from frappe.model import child_table_fields, default_fields
 
 	tax_master = frappe.get_doc(master_doctype, master_name)
