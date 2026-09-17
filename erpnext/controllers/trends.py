@@ -400,12 +400,15 @@ def quotation_party_name_expr():
 
 
 def quotation_territory_expr():
-	"""Territory from the party master, which only Customer and Lead have.
+	"""Territory from the party master, for each type that stores one.
 
-	A Prospect or CRM Deal quotation therefore reports no territory, even though the Quotation
-	itself stores one. Falling back to it would mean Max() over a text column -- the collation
-	divergence this expression exists to avoid -- or adding it to the GROUP BY and splitting one
-	party into a row per territory. Reporting nothing is the deliberate choice of the three.
+	Customer, Lead and Prospect all carry the field, so each is read from its own master -- keyed on
+	the grouped party_name, so no text is sorted and the GROUP BY does not grow. A CRM Deal quotation
+	reports none: that doctype ships with the CRM app, so erpnext cannot rely on its schema.
+
+	Falling back to the Quotation's own stored territory is not available to the types left out. It
+	is not in the GROUP BY, so it would need Max() over a text column -- the collation divergence
+	this expression exists to avoid -- or a row split per territory.
 	"""
 	return (
 		"case "
@@ -413,6 +416,8 @@ def quotation_territory_expr():
 		"(select c.territory from `tabCustomer` c where c.name = t1.party_name) "
 		"when t1.quotation_to = 'Lead' then "
 		"(select l.territory from `tabLead` l where l.name = t1.party_name) "
+		"when t1.quotation_to = 'Prospect' then "
+		"(select p.territory from `tabProspect` p where p.name = t1.party_name) "
 		"end"
 	)
 
