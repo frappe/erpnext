@@ -1305,7 +1305,7 @@ def get_secondary_item_key(row):
 	)
 
 
-SECONDARY_GROUP_KEY = ("item_code", "secondary_item_type", "bom_secondary_item", "stock_uom")
+SECONDARY_GROUP_KEY = ("item_code", "secondary_item_type", "bom_secondary_item")
 
 
 def get_secondary_items_from_job_card(work_order, jc_name=None):
@@ -1317,7 +1317,6 @@ def get_secondary_items_from_job_card(work_order, jc_name=None):
 		.select(
 			Sum(job_card_secondary_item.stock_qty).as_("stock_qty"),
 			job_card_secondary_item.item_code,
-			job_card_secondary_item.stock_uom,
 			job_card_secondary_item.secondary_item_type,
 			job_card_secondary_item.bom_secondary_item,
 		)
@@ -1332,7 +1331,6 @@ def get_secondary_items_from_job_card(work_order, jc_name=None):
 			job_card_secondary_item.item_code,
 			job_card_secondary_item.secondary_item_type,
 			job_card_secondary_item.bom_secondary_item,
-			job_card_secondary_item.stock_uom,
 		)
 		.orderby(Min(job_card_secondary_item.idx))
 	)
@@ -1346,11 +1344,12 @@ def get_secondary_items_from_job_card(work_order, jc_name=None):
 
 
 def apply_representative_secondary_lines(rows, work_order, jc_name=None):
-	"""Fill item_name/description from one real Job Card Secondary Item line per group.
+	"""Fill the line-level columns from one real Job Card Secondary Item line per group.
 
-	Both are editable per line, so the same secondary item across a work order's job cards can
-	carry several values per group. Aggregating them sorts text, and MariaDB folds case while
-	PostgreSQL orders by byte value, so the engines pick differently.
+	item_name and description are editable per line, and stock_uom is a stored fetch_from snapshot
+	that an item's stock UOM change leaves behind, so the same secondary item across a work order's
+	job cards can carry several values per group. Aggregating them sorts text, and MariaDB folds
+	case while PostgreSQL orders by byte value, so the engines pick differently.
 	"""
 	job_cards = frappe.get_all(
 		"Job Card",
@@ -1366,7 +1365,7 @@ def apply_representative_secondary_lines(rows, work_order, jc_name=None):
 			# idx first, so the rule really is "first by idx"; creation breaks ties across job cards.
 			# Never order by parent -- the Job Card name is text, and sorting text is the divergence
 			# this is here to avoid.
-			fields=[*SECONDARY_GROUP_KEY, "item_name", "description"],
+			fields=[*SECONDARY_GROUP_KEY, "stock_uom", "item_name", "description"],
 			order_by="idx, creation",
 		):
 			representative.setdefault(tuple(line.get(field) for field in SECONDARY_GROUP_KEY), line)
@@ -1375,6 +1374,7 @@ def apply_representative_secondary_lines(rows, work_order, jc_name=None):
 		line = representative.get(tuple(row.get(field) for field in SECONDARY_GROUP_KEY))
 		row.item_name = line.item_name if line else None
 		row.description = line.description if line else None
+		row.stock_uom = line.stock_uom if line else None
 
 
 def get_previous_operation_output_sn_batch(work_order, item_code, warehouse):
