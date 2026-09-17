@@ -382,6 +382,11 @@ class DisassembleStockEntry(BaseStockEntry):
 		is_finished_item decides whether the row is the output or an input. Aggregating each column
 		on its own can pair values from different lines into a row that was never posted, so take
 		the columns from a single real line instead. UOM is normalized separately to stock UOM.
+
+		Two entries can share a creation timestamp -- frappe copies the parent's to every child, so
+		the line's own creation ties with it -- and idx repeats across parents. Stock Entry Detail is
+		hash-named, and those are lower case, so name settles the tie without the collation
+		divergence that sorting a naming series would carry.
 		"""
 		SE = frappe.qb.DocType("Stock Entry")
 		SED = frappe.qb.DocType("Stock Entry Detail")
@@ -410,8 +415,8 @@ class DisassembleStockEntry(BaseStockEntry):
 				(SE.docstatus == 1) & (SE.purpose == "Manufacture") & (SE.work_order == self.doc.work_order)
 			)
 			.orderby(SE.creation)
-			.orderby(SED.creation)
 			.orderby(SED.idx)
+			.orderby(SED.name)
 			.run(as_dict=True)
 		)
 
