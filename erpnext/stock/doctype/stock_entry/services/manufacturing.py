@@ -1344,13 +1344,7 @@ def get_secondary_items_from_job_card(work_order, jc_name=None):
 
 
 def apply_representative_secondary_lines(rows, work_order, jc_name=None):
-	"""Fill the line-level columns from one real Job Card Secondary Item line per group.
-
-	item_name and description are editable per line, and stock_uom is a stored fetch_from snapshot
-	that an item's stock UOM change leaves behind, so the same secondary item across a work order's
-	job cards can carry several values per group. Aggregating them sorts text, and MariaDB folds
-	case while PostgreSQL orders by byte value, so the engines pick differently.
-	"""
+	"""Fill item_name/description from one real line, and stock_uom from the submitted BOM row."""
 	job_cards = frappe.get_all(
 		"Job Card",
 		filters={"work_order": work_order, "docstatus": 1, **({"name": jc_name} if jc_name else {})},
@@ -1370,11 +1364,28 @@ def apply_representative_secondary_lines(rows, work_order, jc_name=None):
 		):
 			representative.setdefault(tuple(line.get(field) for field in SECONDARY_GROUP_KEY), line)
 
+	bom_uoms = get_bom_secondary_uoms(rows)
 	for row in rows:
 		line = representative.get(tuple(row.get(field) for field in SECONDARY_GROUP_KEY))
 		row.item_name = line.item_name if line else None
 		row.description = line.description if line else None
-		row.stock_uom = line.stock_uom if line else None
+		row.stock_uom = bom_uoms.get(row.bom_secondary_item) or (line.stock_uom if line else None)
+
+
+def get_bom_secondary_uoms(rows):
+	"""Stock UOM per BOM Secondary Item: the submitted BOM is the authority, not the Item master."""
+	names = [row.bom_secondary_item for row in rows if row.bom_secondary_item]
+	if not names:
+		return {}
+
+	return dict(
+		frappe.get_all(
+			"BOM Secondary Item",
+			filters={"name": ("in", names)},
+			fields=["name", "stock_uom"],
+			as_list=True,
+		)
+	)
 
 
 def get_previous_operation_output_sn_batch(work_order, item_code, warehouse):
