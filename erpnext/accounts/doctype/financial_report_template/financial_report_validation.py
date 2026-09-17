@@ -14,9 +14,6 @@ from typing import Any, ClassVar
 import frappe
 from frappe import _, is_whitelisted
 from frappe.database.operator_map import OPERATOR_MAP
-<<<<<<< HEAD
-from frappe.database.query import SQLFunctionParser
-=======
 from frappe.utils import escape_html
 
 FORMULA_FUNCTIONS = {
@@ -30,7 +27,6 @@ FORMULA_FUNCTIONS = {
 	"ceil": math.ceil,
 	"floor": math.floor,
 }
->>>>>>> 4e3e301 (fix: formula evaluation and line reference validation for FRT (#59084))
 
 
 def get_valid_api_method(api_path: str):
@@ -368,23 +364,7 @@ class CalculationFormulaValidator(Validator):
 	def _test_formula_evaluation(self, formula: str, available_codes: list[str]) -> str | None:
 		try:
 			context = {code: 1.0 for code in available_codes}
-<<<<<<< HEAD
-			context.update(
-				{
-					"abs": abs,
-					"round": round,
-					"min": min,
-					"max": max,
-					"sum": sum,
-					"sqrt": lambda x: x**0.5,
-					"pow": pow,
-					"ceil": lambda x: int(x) + (1 if x % 1 else 0),
-					"floor": lambda x: int(x),
-				}
-			)
-=======
 			context.update(FORMULA_FUNCTIONS)
->>>>>>> 4e3e301 (fix: formula evaluation and line reference validation for FRT (#59084))
 
 			result = frappe.safe_eval(formula, eval_globals=None, eval_locals=context)
 
