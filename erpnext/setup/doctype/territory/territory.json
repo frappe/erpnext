@@ -124,7 +124,7 @@
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2025-12-02 13:58:55.190485",
+ "modified": "2026-08-21 23:11:51.487537",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Territory",
@@ -183,6 +183,22 @@
    "report": 1,
    "role": "Accounts User",
    "share": 1
+  },
+  {
+   "role": "Delivery Manager",
+   "select": 1
+  },
+  {
+   "role": "Delivery User",
+   "select": 1
+  },
+  {
+   "role": "Maintenance Manager",
+   "select": 1
+  },
+  {
+   "role": "Website Manager",
+   "select": 1
   }
  ],
  "row_format": "Dynamic",

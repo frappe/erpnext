@@ -29,8 +29,9 @@ class ProductionPlanSchedule(Document):
 		operation: DF.Link | None
 		plan_row: DF.Data | None
 		production_plan: DF.Link
-		row_type: DF.Literal["Finished Good", "Sub Assembly"]
+		row_type: DF.Literal["Finished Good", "Sub Assembly", "Raw Material"]
 		subject: DF.Data | None
+		supplier: DF.Link | None
 		task_key: DF.Data | None
 		to_time: DF.Datetime
 		workstation: DF.Link | None

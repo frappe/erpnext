@@ -642,7 +642,7 @@ class TestGrossProfit(ERPNextTestSuite):
 		self.assertEqual(total.get("gross_profit_%"), -50.0)
 
 	def test_sales_person_wise_gross_profit(self):
-		sales_person = make_sales_person("_Test Sales Person")
+		sales_person = frappe.get_doc("Sales Person", "_Test Sales Person")
 
 		posting_date = get_first_day(nowdate())
 		qty = 10
@@ -1194,19 +1194,3 @@ class TestGrossProfit(ERPNextTestSuite):
 		self.assertEqual(base_rate, 220.0)  # avg selling rate = 220/1
 		self.assertEqual(gross_profit, 120.0)  # 220 - 100
 		self.assertAlmostEqual(gp_percent, 54.545, places=2)  # 120/220 * 100
-
-
-def make_sales_person(sales_person_name="_Test Sales Person"):
-	if not frappe.db.exists("Sales Person", {"sales_person_name": sales_person_name}):
-		sales_person_doc = frappe.get_doc(
-			{
-				"doctype": "Sales Person",
-				"is_group": 0,
-				"parent_sales_person": "Sales Team",
-				"sales_person_name": sales_person_name,
-			}
-		).insert(ignore_permissions=True)
-	else:
-		sales_person_doc = frappe.get_doc("Sales Person", {"sales_person_name": sales_person_name})
-
-	return sales_person_doc

@@ -18,25 +18,6 @@ class TestMaintenanceSchedule(ERPNextTestSuite):
 	def setUp(self):
 		self.load_test_records("Stock Entry")
 
-	@classmethod
-	def make_sales_person(cls):
-		records = [
-			{
-				"doctype": "Sales Person",
-				"is_group": 0,
-				"parent_sales_person": "Sales Team",
-				"sales_person_name": "_Test Sales Person",
-			},
-		]
-		cls.sales_person = []
-		for x in records:
-			if not frappe.db.exists("Sales Person", {"sales_person_name": x.get("sales_person_name")}):
-				cls.sales_person.append(frappe.get_doc(x).insert())
-			else:
-				cls.sales_person.append(
-					frappe.get_doc("Sales Person", {"sales_person_name": x.get("sales_person_name")})
-				)
-
 	def test_events_should_be_created_and_deleted(self):
 		ms = make_maintenance_schedule()
 		ms.generate_schedule()

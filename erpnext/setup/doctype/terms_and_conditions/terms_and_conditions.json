@@ -89,7 +89,7 @@
  "icon": "icon-legal",
  "idx": 1,
  "links": [],
- "modified": "2026-06-06 16:35:34.394675",
+ "modified": "2026-08-21 23:11:51.312054",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Terms and Conditions",
@@ -161,6 +161,22 @@
    "report": 1,
    "role": "Accounts User",
    "share": 1
+  },
+  {
+   "role": "Delivery Manager",
+   "select": 1
+  },
+  {
+   "role": "Delivery User",
+   "select": 1
+  },
+  {
+   "role": "Maintenance Manager",
+   "select": 1
+  },
+  {
+   "role": "Maintenance User",
+   "select": 1
   }
  ],
  "quick_entry": 1,

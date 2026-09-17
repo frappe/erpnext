@@ -1,0 +1,54 @@
+name: Upload main.pot to Crowdin
+
+on:
+  push:
+    branches:
+      - develop
+      - version-16-hotfix
+    paths:
+      - "erpnext/locale/main.pot"
+  workflow_dispatch:
+
+concurrency:
+  group: crowdin-upload-${{ github.ref_name }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  upload-sources:
+    name: Upload sources from ${{ github.ref_name }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout ${{ github.ref_name }}
+        uses: actions/checkout@v6
+
+      - name: Restore Crowdin cache
+        uses: actions/cache/restore@v6
+        with:
+          path: .crowdin
+          key: crowdin-${{ github.ref_name }}
+          restore-keys: crowdin-${{ github.ref_name }}-
+
+      - name: Upload main.pot to Crowdin
+        uses: crowdin/github-action@8f01d54f70f1713ee3f09d82c2bbb2daeac28689 # v2.17.1
+        with:
+          config: crowdin.yml
+          upload_sources: true
+          upload_translations: false
+          download_translations: false
+          create_pull_request: false
+          crowdin_branch_name: "[frappe.erpnext] ${{ github.ref_name }}"
+          upload_sources_args: "--cache"
+        env:
+          CROWDIN_PROJECT_ID: ${{ secrets.CROWDIN_PROJECT_ID }}
+          CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
+
+      - name: Save Crowdin cache
+        uses: actions/cache/save@v6
+        if: always()
+        with:
+          path: .crowdin
+          key: crowdin-${{ github.ref_name }}-${{ github.run_id }}

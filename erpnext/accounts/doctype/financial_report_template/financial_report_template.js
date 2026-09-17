@@ -163,7 +163,7 @@ function show_accounts_tree(template_rows, has_selection) {
 				fieldname: "company",
 				fieldtype: "Link",
 				options: "Company",
-				label: "Company",
+				label: __("Company"),
 				reqd: 1,
 				default: frappe.defaults.get_user_default("Company"),
 				onchange: () => {
@@ -176,7 +176,7 @@ function show_accounts_tree(template_rows, has_selection) {
 				fieldname: "view_type",
 				fieldtype: "Select",
 				options: ["Missing Accounts", "Filtered Accounts"],
-				label: "View",
+				label: __("View"),
 				default: has_selection ? "Filtered Accounts" : "Missing Accounts",
 				reqd: 1,
 				onchange: () => {
@@ -192,10 +192,10 @@ function show_accounts_tree(template_rows, has_selection) {
 			{
 				fieldname: "tip",
 				fieldtype: "HTML",
-				label: "Tip",
+				label: __("Tip"),
 				options: `
 					<div class="alert alert-success" role="alert">
-							Tip: Select report lines to view their accounts
+							${__("Tip: Select report lines to view their accounts")}
 					</div>
 				`,
 				depends_on: has_selection ? "eval: false" : "eval: true",
@@ -203,7 +203,7 @@ function show_accounts_tree(template_rows, has_selection) {
 			{
 				fieldname: "tree_area",
 				fieldtype: "HTML",
-				label: "Chart of Accounts",
+				label: __("Chart of Accounts"),
 				read_only: 1,
 				depends_on: "eval: doc.company",
 			},
@@ -236,6 +236,8 @@ async function refresh_tree_view(dialog, account_rows) {
 		parent: wrapper,
 		label: company,
 		root_value: company,
+		// read-only preview: row-mode visuals without actions
+		row_style: true,
 		method: "erpnext.accounts.doctype.financial_report_template.financial_report_engine.get_children_accounts",
 		args: { doctype: "Account", company: company, filtered_accounts: filtered_accounts, missed: missed },
 		toolbar: [],
@@ -288,14 +290,14 @@ function update_formula_label(frm, data_source) {
 	if (!field) return;
 
 	const labels = {
-		"Account Data": "Account Filter",
-		"Custom API": "API Method Path",
+		"Account Data": __("Account Filter"),
+		"Custom API": __("API Method Path"),
 	};
 
 	grid.update_docfield_property(
 		"calculation_formula",
 		"label",
-		labels[data_source] || "Calculation Formula"
+		labels[data_source] || __("Calculation Formula")
 	);
 }
 
@@ -370,7 +372,7 @@ function update_formula_description(frm, data_source) {
 		description_html = `
 			<div ${container_style}>
 				<h5 ${title_style}>Custom API Setup</h5>
-				<p ${text_style}>Path to your custom method that returns financial data.</p>
+				<p ${text_style}>Path to your custom whitelisted method that returns financial data. It must permit GET requests.</p>
 
 				<h6 ${subtitle_style}>Format:</h6>
 				<ul ${list_style}>
@@ -380,7 +382,8 @@ function update_formula_description(frm, data_source) {
 
 				<h6 ${subtitle_style}>Method Signature:</h6>
 				<div ${code_style}>
-					<pre ${pre_style}>def get_custom_data(filters, periods, row): <br>&nbsp; # filters: dict — report filters (company, period, etc.) <br>&nbsp; # periods: list[dict] — period definitions <br>&nbsp; # row: dict — the current report row <br><br>&nbsp; return [1000.0, 1200.0, 1150.0]  # one value per period</pre>
+					<!-- &#10; is used for line breaks since frappe.render replaces newlines with spaces -->
+					<pre ${pre_style} class="language-python">@frappe.whitelist(methods=["GET"])&#10;def get_custom_data(filters, periods, row):&#10;    # filters: dict — report filters (company, period, etc.)&#10;    # periods: list[dict] — period definitions&#10;    # row: dict — the current report row&#10;&#10;    return [1000.0, 1200.0, 1150.0]  # one value per period</pre>
 				</div>
 
 				<h6 ${subtitle_style}>Return Format:</h6>

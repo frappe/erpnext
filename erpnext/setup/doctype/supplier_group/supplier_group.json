@@ -109,7 +109,7 @@
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2025-12-02 13:57:57.814686",
+ "modified": "2026-08-21 23:11:50.079034",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Supplier Group",
@@ -167,6 +167,14 @@
    "report": 1,
    "role": "Accounts User",
    "share": 1
+  },
+  {
+   "role": "Sales Manager",
+   "select": 1
+  },
+  {
+   "role": "Website Manager",
+   "select": 1
   }
  ],
  "row_format": "Dynamic",

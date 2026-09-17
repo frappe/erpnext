@@ -727,7 +727,7 @@
 										<button class="btn btn-primary mes-btn-start" data-job-card="{{ frappe.utils.escape_html(slot.name) }}">
 											{{ __("Start Job") }} &rarr;
 										</button>
-									{% } else { %}
+									{% } else if (slot.materials && slot.materials.length) { %}
 										<button class="btn btn-default mes-btn-transfer" data-job-card="{{ frappe.utils.escape_html(slot.name) }}">
 											{{ __("Transfer Materials") }}
 										</button>
@@ -990,7 +990,7 @@
 						<button class="btn btn-default btn-sm mes-btn-start" data-job-card="{{ frappe.utils.escape_html(jc.name) }}">
 							{{ __("Start") }}
 						</button>
-					{% } else { %}
+					{% } else if (jc.materials && jc.materials.length) { %}
 						<button class="btn btn-default btn-sm mes-btn-transfer" data-job-card="{{ frappe.utils.escape_html(jc.name) }}">
 							{{ __("Transfer") }}
 						</button>

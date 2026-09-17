@@ -140,7 +140,7 @@
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2025-12-02 13:58:03.378607",
+ "modified": "2026-08-21 23:11:41.519748",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Customer Group",
@@ -207,6 +207,26 @@
    "report": 1,
    "role": "Accounts User",
    "share": 1
+  },
+  {
+   "role": "Item Manager",
+   "select": 1
+  },
+  {
+   "role": "Maintenance Manager",
+   "select": 1
+  },
+  {
+   "role": "Maintenance User",
+   "select": 1
+  },
+  {
+   "role": "Purchase Manager",
+   "select": 1
+  },
+  {
+   "role": "Website Manager",
+   "select": 1
   }
  ],
  "row_format": "Dynamic",

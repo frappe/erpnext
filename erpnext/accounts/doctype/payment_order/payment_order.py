@@ -57,9 +57,27 @@ class PaymentOrder(Document):
 			frappe.db.set_value(self.payment_order_type, d.get(ref_doc_field), ref_field, status)
 
 
+def _readable_payment_order(filters: dict) -> str | None:
+	"""Authorise the parent before reading its rows.
+
+	A child table carries no permissions of its own, so a read of it has to be authorised on the
+	Payment Order the rows belong to.
+	"""
+	parent = filters.get("parent")
+	if not parent or not frappe.db.exists("Payment Order", parent):
+		return None
+
+	ptype = "select" if frappe.only_has_select_perm("Payment Order") else "read"
+	frappe.has_permission("Payment Order", ptype, doc=parent, throw=True)
+	return parent
+
+
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_mop_query(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
+	if not _readable_payment_order(filters):
+		return []
+
 	return frappe.get_all(
 		"Payment Order Reference",
 		filters={"parent": filters.get("parent"), "mode_of_payment": ["like", f"%{txt}%"]},
@@ -74,6 +92,9 @@ def get_mop_query(doctype: str, txt: str, searchfield: str, start: int, page_len
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_supplier_query(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
+	if not _readable_payment_order(filters):
+		return []
+
 	return frappe.get_all(
 		"Payment Order Reference",
 		filters={
@@ -92,6 +113,7 @@ def get_supplier_query(doctype: str, txt: str, searchfield: str, start: int, pag
 @frappe.whitelist()
 def make_payment_records(name: str, supplier: str, mode_of_payment: str | None = None):
 	doc = frappe.get_doc("Payment Order", name)
+	doc.check_permission()
 	make_journal_entry(doc, supplier, mode_of_payment)
 
 

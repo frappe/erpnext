@@ -1200,12 +1200,12 @@ def fix_total_debit_credit():
 
 
 def get_currency_precision():
-	precision = cint(frappe.db.get_default("currency_precision"))
-	if not precision:
-		number_format = frappe.db.get_default("number_format") or "#,###.##"
-		precision = get_number_format_info(number_format)[2]
+	currency_precision = frappe.db.get_default("currency_precision")
+	if currency_precision not in (None, ""):
+		return cint(currency_precision)
 
-	return precision
+	number_format = frappe.db.get_default("number_format") or "#,###.##"
+	return get_number_format_info(number_format)[2]
 
 
 def get_fraction_units(currency: str) -> int:
@@ -1359,21 +1359,28 @@ def get_children(
 	parent_fieldname = "parent_" + doctype.lower().replace(" ", "_")
 	fields = ["name as value", "is_group as expandable"]
 	filters = [["docstatus", "<", 2]]
-	if frappe.db.has_column(doctype, "disabled") and not include_disabled:
-		filters.append(["disabled", "=", False])
+	if frappe.db.has_column(doctype, "disabled"):
+		if include_disabled:
+			# the tree marks disabled rows, so it needs the flag
+			fields.append("disabled")
+		else:
+			filters.append(["disabled", "=", False])
+
+	# extra columns the tree views render as badges / clean labels
+	node_fields = {
+		"Account": ["root_type", "account_name", "account_number", "account_currency", "freeze_account"],
+		"Cost Center": ["cost_center_name", "cost_center_number"],
+	}
+	fields += node_fields.get(doctype, [])
 
 	if is_root:
 		filters.append(IfNull(Field(parent_fieldname), "") == "")
+		filters.append(["company", "=", company])
+		if doctype == "Account":
+			fields.append("report_type")
 	else:
 		filters.append([parent_fieldname, "=", parent])
-
-	if is_root:
-		fields += ["root_type", "report_type", "account_currency"] if doctype == "Account" else []
-		filters.append(["company", "=", company])
-
-	else:
-		fields += ["root_type", "account_currency"] if doctype == "Account" else []
-		fields += [parent_fieldname + " as parent"]
+		fields.append(parent_fieldname + " as parent")
 
 	acc = frappe.get_list(doctype, fields=fields, filters=filters)
 
@@ -2408,8 +2415,8 @@ class QueryPaymentLedger:
 			.groupby(ple.account, ple.voucher_type, ple.voucher_no, ple.party_type, ple.party)
 		).as_("grouped")
 
-		# Payment Ledger Entry has no autoname rule, so frappe names it by hash -- lower-case, which
-		# keeps Min(name) free of the collation divergence that picking Max() over free text has.
+		# KNOWN DIVERGENCE: Min(name) is a text sort. Hash names are not reliably lower case -- the
+		# trace-id prefix is not lowered -- so the engines can pick different rows here.
 		representative_ple = qb.DocType("Payment Ledger Entry").as_("representative_ple")
 		query_voucher_amount = (
 			qb.from_(grouped_voucher_amount)

@@ -19,6 +19,9 @@ from frappe.utils import (
 
 from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
+from erpnext.manufacturing.doctype.production_plan.services.work_order_quantities import (
+	ProductionPlanWorkOrderQuantities,
+)
 
 # Backward-compatible re-exports: these functions were moved to mapper.py.
 # Importing them here preserves existing whitelist dotted-paths
@@ -187,6 +190,9 @@ class WorkOrder(Document):
 		self.set_onload("backflush_raw_materials_based_on", ms.backflush_raw_materials_based_on)
 		self.set_onload("overproduction_percentage", ms.overproduction_percentage_for_work_order)
 		self.set_onload("transfer_extra_materials_percentage", ms.transfer_extra_materials_percentage)
+		self.set_onload("allow_alternative_finished_goods", ms.allow_alternative_finished_goods)
+		if ms.allow_alternative_finished_goods and self.docstatus == 1 and flt(self.produced_qty):
+			self.set_onload("has_alternative_finished_goods", self.has_alternative_finished_goods())
 		self.set_onload("show_create_job_card_button", self.show_create_job_card_button())
 		self.set_onload(
 			"enable_stock_reservation",
@@ -196,6 +202,14 @@ class WorkOrder(Document):
 		if self.bom_no:
 			if based_on := frappe.get_cached_value("BOM", self.bom_no, "backflush_based_on"):
 				self.set_onload("backflush_raw_materials_based_on", based_on)
+
+	def has_alternative_finished_goods(self):
+		return bool(
+			frappe.db.exists("Item Alternative", {"item_code": self.production_item})
+			or frappe.db.exists(
+				"Item Alternative", {"alternative_item_code": self.production_item, "two_way": 1}
+			)
+		)
 
 	@property
 	def secondary_items(self):
@@ -208,7 +222,7 @@ class WorkOrder(Document):
 			.where(
 				(parent.work_order == self.name)
 				& (parent.docstatus == 1)
-				& ((child.secondary_item_type != "") | (child.is_legacy_scrap_item == 1))
+				& ((child.secondary_item_type != "") | (Coalesce(child.valuation_type, "") != ""))
 			)
 			.select(
 				child.item_code,
@@ -516,7 +530,7 @@ class WorkOrder(Document):
 			PackedItem = frappe.qb.DocType("Packed Item")
 			ProductBundleItem = frappe.qb.DocType("Product Bundle Item")
 
-			so = (
+			so_query = (
 				frappe.qb.from_(SalesOrder)
 				.inner_join(SalesOrderItem)
 				.on(SalesOrderItem.parent == SalesOrder.name)
@@ -524,7 +538,8 @@ class WorkOrder(Document):
 				.on(ProductBundleItem.parent == SalesOrderItem.item_code)
 				.select(SalesOrder.name, SalesOrder.project, SalesOrderItem.delivery_date)
 				.where(
-					(SalesOrder.skip_delivery_note == 0)
+					(SalesOrderItem.skip_delivery == 0)
+					& (SalesOrder.skip_delivery_note == 0)
 					& (SalesOrder.docstatus == 1)
 					& (SalesOrder.name == self.sales_order)
 					& (
@@ -532,26 +547,41 @@ class WorkOrder(Document):
 						| (ProductBundleItem.item_code == production_item)
 					)
 				)
-				.run(as_dict=1)
 			)
 
+			if self.sales_order_item:
+				so_query = so_query.where(SalesOrderItem.name == self.sales_order_item)
+
+			so = so_query.run(as_dict=1)
+
 			if not so:
-				so = (
+				packed_so_query = (
 					frappe.qb.from_(SalesOrder)
 					.inner_join(SalesOrderItem)
 					.on(SalesOrderItem.parent == SalesOrder.name)
 					.inner_join(PackedItem)
-					.on(PackedItem.parent == SalesOrder.name)
+					.on(
+						(PackedItem.parent == SalesOrder.name)
+						& (PackedItem.parent_detail_docname == SalesOrderItem.name)
+					)
 					.select(SalesOrder.name, SalesOrder.project, SalesOrderItem.delivery_date)
 					.where(
 						(SalesOrder.name == self.sales_order)
+						& (SalesOrderItem.skip_delivery == 0)
 						& (SalesOrder.skip_delivery_note == 0)
 						& (SalesOrderItem.item_code == PackedItem.parent_item)
 						& (SalesOrder.docstatus == 1)
 						& (PackedItem.item_code == production_item)
 					)
-					.run(as_dict=1)
 				)
+
+				if self.sales_order_item:
+					packed_so_query = packed_so_query.where(
+						(PackedItem.name == self.sales_order_item)
+						| (SalesOrderItem.name == self.sales_order_item)
+					)
+
+				so = packed_so_query.run(as_dict=1)
 
 			if len(so):
 				if not self.expected_delivery_date:
@@ -619,6 +649,8 @@ class WorkOrder(Document):
 			frappe.throw(_("Target Warehouse is required before Submit"))
 
 	def before_submit(self):
+		if self.production_plan:
+			ProductionPlanWorkOrderQuantities(self.production_plan).validate_work_order(self)
 		self.create_serial_no_batch_no()
 
 	def on_submit(self):
@@ -894,36 +926,6 @@ class WorkOrder(Document):
 				),
 			)
 
-		if self.production_plan and self.production_plan_item and not self.production_plan_sub_assembly_item:
-			qty_dict = frappe.db.get_value(
-				"Production Plan Item", self.production_plan_item, ["planned_qty", "ordered_qty"], as_dict=1
-			)
-
-			if not qty_dict:
-				return
-
-			allowance_qty = (
-				flt(
-					frappe.db.get_single_value(
-						"Manufacturing Settings", "overproduction_percentage_for_work_order"
-					)
-				)
-				/ 100
-				* qty_dict.get("planned_qty", 0)
-			)
-
-			max_qty = qty_dict.get("planned_qty", 0) + allowance_qty - qty_dict.get("ordered_qty", 0)
-
-			if max_qty <= 0:
-				frappe.throw(
-					_("Cannot produce more item for {0}").format(self.production_item), OverProductionError
-				)
-			elif self.qty > max_qty:
-				frappe.throw(
-					_("Cannot produce more than {0} items for {1}").format(max_qty, self.production_item),
-					OverProductionError,
-				)
-
 		if self.subcontracting_inward_order and self.qty > self.max_producible_qty:
 			frappe.msgprint(
 				_(
@@ -1085,6 +1087,14 @@ class WorkOrder(Document):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_bom_operations(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
+	parent = filters.get("parent")
+	parenttype = filters.get("parenttype") or "BOM"
+	if not parent or not frappe.db.exists(parenttype, parent):
+		return []
+
+	ptype = "select" if frappe.only_has_select_perm(parenttype) else "read"
+	frappe.has_permission(parenttype, ptype, doc=parent, throw=True)
+
 	if txt:
 		filters["operation"] = ("like", "%%%s%%" % txt)
 
@@ -1130,14 +1140,15 @@ def get_default_warehouse(company: str):
 	}
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def stop_unstop(work_order: str, status: str):
 	"""Called from client side on Stop/Unstop event"""
 
-	if not frappe.has_permission("Work Order", "write"):
-		frappe.throw(_("Not permitted"), frappe.PermissionError)
+	frappe.has_permission("Work Order", "write", throw=True)
 
-	pro_order = frappe.get_doc("Work Order", work_order)
+	# the check above is doctype level and never consults User Permissions, so on its own it lets
+	# a caller restricted to one company stop another company's orders
+	pro_order = frappe.get_doc("Work Order", work_order, check_permission="write")
 
 	if pro_order.status == "Closed":
 		frappe.throw(_("Closed Work Order can not be stopped or Re-opened"))
@@ -1168,12 +1179,12 @@ def query_sales_order(doctype: str, txt: str, searchfield: str, start: int, page
 	)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def close_work_order(work_order: str, status: str):
-	if not frappe.has_permission("Work Order", "write"):
-		frappe.throw(_("Not permitted"), frappe.PermissionError)
+	frappe.has_permission("Work Order", "write", throw=True)
 
-	work_order = frappe.get_doc("Work Order", work_order)
+	# doctype level above, record level here — see stop_unstop()
+	work_order = frappe.get_doc("Work Order", work_order, check_permission="write")
 	if work_order.get("operations"):
 		job_cards = frappe.get_list(
 			"Job Card",

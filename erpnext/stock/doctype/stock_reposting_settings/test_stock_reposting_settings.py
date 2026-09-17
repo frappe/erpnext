@@ -17,10 +17,6 @@ TEST_WAREHOUSE = "_Test Warehouse - _TC"
 
 
 class TestStockRepostingSettings(ERPNextTestSuite):
-	def tearDown(self):
-		frappe.db.set_single_value("Stock Reposting Settings", "repost_incorrect_valuation_entries", 0)
-		super().tearDown()
-
 	def test_auto_repost_disabled_does_nothing(self):
 		frappe.db.set_single_value("Stock Reposting Settings", "repost_incorrect_valuation_entries", 0)
 		with patch("frappe.enqueue") as enqueue:

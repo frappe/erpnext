@@ -9,6 +9,8 @@ from erpnext.accounts.report.sales_payment_summary.sales_payment_summary import 
 	get_mode_of_payment_details,
 	get_mode_of_payments,
 	get_pos_invoice_data,
+	get_pos_row_key,
+	get_pos_row_labels,
 )
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -94,12 +96,43 @@ class TestSalesPaymentSummary(ERPNextTestSuite):
 		posted = {(row.warehouse, row.cost_center) for row in si.items}
 		self.assertGreater(len(posted), 1, "fixture must post more than one distinct pair")
 
+		labels = get_pos_row_labels(get_filters())
 		rows = get_pos_invoice_data(get_filters())
 		reported = [r for r in rows if r.get("warehouse") in {w for w, _ in posted}]
 		self.assertTrue(reported)
 
 		for row in reported:
-			self.assertIn((row["warehouse"], row["cost_center"]), posted)
+			label = labels[get_pos_row_key(row)]
+			self.assertIn((row["warehouse"], label.cost_center), posted)
+
+	def test_pos_row_labels_come_from_the_earliest_invoice(self):
+		"""The reported cost centre and payment mode must be one invoice's, and the same one's.
+
+		A row covers every invoice sharing an owner, date and warehouse, so neither column describes
+		it. Aggregating each independently sorts text -- which the two engines resolve differently --
+		and can pair one invoice's cost centre with another's payment mode.
+		"""
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		warehouse = create_warehouse("_Test POS Row Labels")
+		card = create_mode_of_payment("_Test POS Card", "_Test Bank - _TC")
+
+		# cross the two picks: the earlier invoice holds the lower cost centre and the higher mode
+		posted = [("Main - _TC", card, "_Test Bank - _TC"), ("Sub - _TC", "Cash", "_Test Cash - _TC")]
+		for cost_center, mode_of_payment, account in posted:
+			si = create_sales_invoice_record()
+			si.is_pos = 1
+			si.items[0].warehouse = warehouse
+			si.items[0].cost_center = cost_center
+			si.append("payments", {"mode_of_payment": mode_of_payment, "account": account, "amount": 10000})
+			si.insert()
+			si.submit()
+
+		rows = [row for row in get_pos_invoice_data(get_filters()) if row.get("warehouse") == warehouse]
+		self.assertEqual(len(rows), 1, "the reported row count must not change")
+
+		label = get_pos_row_labels(get_filters())[get_pos_row_key(rows[0])]
+		self.assertEqual((label.cost_center, label.mode_of_payment), ("Main - _TC", card))
 
 	def test_get_mode_of_payments_details(self):
 		filters = get_filters()
@@ -180,6 +213,21 @@ class TestSalesPaymentSummary(ERPNextTestSuite):
 
 def get_filters():
 	return {"from_date": "1900-01-01", "to_date": today(), "company": "_Test Company"}
+
+
+def create_mode_of_payment(name, account, company="_Test Company"):
+	"""A POS payment row needs its mode to carry a default account for the company."""
+	if not frappe.db.exists("Mode of Payment", name):
+		frappe.get_doc(
+			{
+				"doctype": "Mode of Payment",
+				"mode_of_payment": name,
+				"type": "Bank",
+				"accounts": [{"company": company, "default_account": account}],
+			}
+		).insert()
+
+	return name
 
 
 def create_sales_invoice_record(qty=1):

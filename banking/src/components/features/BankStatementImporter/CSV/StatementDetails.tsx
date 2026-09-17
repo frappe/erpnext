@@ -83,10 +83,13 @@ const StatementDetails = ({ data }: Props) => {
 
     }
 
+    // `progress` is a percentage (drives the bar); `current`/`total` are actual counts.
     const [progress, setProgress] = useState(0)
+    const [imported, setImported] = useState({ current: 0, total: 0 })
 
     useFrappeEventListener("bank-rec-statement-import-progress", (event) => {
         setProgress(event.progress)
+        setImported({ current: event.current ?? 0, total: event.total ?? 0 })
     })
 
     const file_name = data.doc.file.split("/").pop() ?? ""
@@ -112,7 +115,9 @@ const StatementDetails = ({ data }: Props) => {
                     {data.doc.status === 'Completed' ? <Badge theme='green'>{_("Completed")}</Badge> :
                         <Button onClick={onImport} disabled={loading || data.final_transactions?.length === 0} size='sm' type='button'>
                             {loading ? <Loader2Icon className='size-4 animate-spin' /> : null}
-                            {loading ? _("Importing...") : _("Import {0} transactions", [data.final_transactions?.length?.toString() || "0"])}</Button>
+                            {loading ? _("Importing...") : data.final_transactions?.length === 1
+                                ? _("Import 1 transaction")
+                                : _("Import {0} transactions", [data.final_transactions?.length?.toString() || "0"])}</Button>
                     }
                 </div>
                 <div className='flex items-start gap-4'>
@@ -129,7 +134,9 @@ const StatementDetails = ({ data }: Props) => {
                 </div>
 
                 {progress > 0 && <div className='flex flex-col gap-2'><Progress value={progress} max={100} size="lg" />
-                    <span className='text-sm'>{_("Importing {0} transactions", [progress.toString()])}
+                    <span className='text-sm'>{imported.total === 1
+                        ? _("Importing 1 transaction")
+                        : _("Importing {0} of {1} transactions", [imported.current.toString(), imported.total.toString()])}
                     </span>
                 </div>}
 

@@ -947,6 +947,7 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 			& (child.warehouse == self.sle.warehouse)
 			& (child.batch_no.isin(self.batchwise_valuation_batches))
 			& (child.docstatus == 1)
+			& (child.is_cancelled == 0)
 			& (child.type_of_transaction.isin(["Inward", "Outward"]))
 		)
 

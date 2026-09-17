@@ -19,7 +19,7 @@
   }
  ],
  "links": [],
- "modified": "2024-03-27 13:10:37.773308",
+ "modified": "2026-08-21 23:11:48.555976",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Partner Type",
@@ -37,9 +37,14 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "role": "Sales Master Manager",
+   "select": 1
   }
  ],
  "quick_entry": 1,
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],

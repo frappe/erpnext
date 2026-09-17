@@ -528,8 +528,6 @@ class TestQualityInspection(ERPNextTestSuite):
 		"""Submitting a QI with reference_type 'Job Card' writes its name onto the
 		Job Card's quality_inspection field (the Job Card branch of
 		QualityInspection.update_qc_reference)."""
-		create_item("_Test Item")
-
 		# Job Card whose production_item matches the QI item_code -> must be updated.
 		matching_jc = make_minimal_job_card(production_item="_Test Item")
 		# Job Card with a different production_item -> the production_item filter must
@@ -554,7 +552,6 @@ class TestQualityInspection(ERPNextTestSuite):
 	def test_qi_job_card_reference_respects_production_item(self):
 		"""A QI referencing a Job Card by name but whose item_code does not match the
 		Job Card's production_item must NOT update that Job Card."""
-		create_item("_Test Item")
 		mismatch_item = create_item("_Test Item Mismatch QC " + frappe.utils.random_string(6)).name
 
 		# Job Card produces a different item than the QI's item_code.

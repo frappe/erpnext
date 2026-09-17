@@ -484,7 +484,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 4,
- "modified": "2026-07-21 11:23:22.000000",
+ "modified": "2026-08-21 23:11:46.332012",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",
@@ -547,6 +547,78 @@
   },
   {
    "role": "HR Manager",
+   "select": 1
+  },
+  {
+   "role": "Accounts Manager",
+   "select": 1
+  },
+  {
+   "role": "Accounts User",
+   "select": 1
+  },
+  {
+   "role": "Delivery Manager",
+   "select": 1
+  },
+  {
+   "role": "Delivery User",
+   "select": 1
+  },
+  {
+   "role": "Maintenance Manager",
+   "select": 1
+  },
+  {
+   "role": "Maintenance User",
+   "select": 1
+  },
+  {
+   "role": "Manufacturing Manager",
+   "select": 1
+  },
+  {
+   "role": "Manufacturing User",
+   "select": 1
+  },
+  {
+   "role": "Purchase Manager",
+   "select": 1
+  },
+  {
+   "role": "Purchase Master Manager",
+   "select": 1
+  },
+  {
+   "role": "Purchase User",
+   "select": 1
+  },
+  {
+   "role": "Quality Manager",
+   "select": 1
+  },
+  {
+   "role": "Sales Manager",
+   "select": 1
+  },
+  {
+   "role": "Sales Master Manager",
+   "select": 1
+  },
+  {
+   "role": "Sales User",
+   "select": 1
+  },
+  {
+   "role": "Stock Manager",
+   "select": 1
+  },
+  {
+   "role": "Stock User",
+   "select": 1
+  },
+  {
+   "role": "Support Team",
    "select": 1
   }
  ],

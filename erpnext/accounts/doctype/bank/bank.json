@@ -101,7 +101,7 @@
   }
  ],
  "links": [],
- "modified": "2024-03-27 13:06:36.896195",
+ "modified": "2026-08-21 23:11:39.423431",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank",
@@ -118,9 +118,18 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "role": "Accounts Manager",
+   "select": 1
+  },
+  {
+   "role": "Accounts User",
+   "select": 1
   }
  ],
  "quick_entry": 1,
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],

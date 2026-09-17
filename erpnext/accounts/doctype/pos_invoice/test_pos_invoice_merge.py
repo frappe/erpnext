@@ -26,14 +26,10 @@ class TestPOSInvoiceMerging(POSInvoiceTestMixin):
 		from erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry import (
 			make_closing_entry_from_opening,
 		)
-		from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import (
-			init_user_and_profile,
-		)
 		from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import (
 			consolidate_pos_invoices,
 		)
 
-		test_user, pos_profile = init_user_and_profile()
 		pos_inv = create_pos_invoice(rate=300, additional_discount_percentage=10, do_not_submit=1)
 		pos_inv.append("payments", {"mode_of_payment": "Cash", "amount": 270})
 		pos_inv.save()
@@ -55,14 +51,10 @@ class TestPOSInvoiceMerging(POSInvoiceTestMixin):
 		from erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry import (
 			make_closing_entry_from_opening,
 		)
-		from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import (
-			init_user_and_profile,
-		)
 		from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import (
 			consolidate_pos_invoices,
 		)
 
-		test_user, pos_profile = init_user_and_profile()
 		pos_inv = create_pos_invoice(rate=300, do_not_submit=1)
 		pos_inv.append("payments", {"mode_of_payment": "Cash", "amount": 300})
 		pos_inv.append(
@@ -107,9 +99,6 @@ class TestPOSInvoiceMerging(POSInvoiceTestMixin):
 		from erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry import (
 			make_closing_entry_from_opening,
 		)
-		from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import (
-			init_user_and_profile,
-		)
 		from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import (
 			consolidate_pos_invoices,
 		)
@@ -121,7 +110,6 @@ class TestPOSInvoiceMerging(POSInvoiceTestMixin):
 		make_item(item, {"is_stock_item": 1})
 		make_purchase_receipt(item_code=item, warehouse="_Test Warehouse - _TC", qty=1, rate=300)
 
-		test_user, pos_profile = init_user_and_profile()
 		pos_inv = create_pos_invoice(item=item, rate=300, do_not_submit=1)
 		pos_inv.append("payments", {"mode_of_payment": "Cash", "amount": 300})
 		pos_inv.append(

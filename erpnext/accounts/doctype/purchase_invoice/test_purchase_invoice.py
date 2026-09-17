@@ -578,17 +578,7 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 			make_purchase_invoice as create_purchase_invoice,
 		)
 
-		original_value = frappe.db.get_single_value(
-			"Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate"
-		)
-
 		frappe.db.set_single_value("Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate", 0)
-		self.addCleanup(
-			frappe.db.set_single_value,
-			"Buying Settings",
-			"set_landed_cost_based_on_purchase_invoice_rate",
-			original_value,
-		)
 
 		pr = make_purchase_receipt(
 			company="_Test Company with perpetual inventory",
@@ -616,16 +606,7 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 			make_purchase_invoice as create_purchase_invoice,
 		)
 
-		original_value = frappe.db.get_single_value(
-			"Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate"
-		)
 		frappe.db.set_single_value("Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate", 0)
-		self.addCleanup(
-			frappe.db.set_single_value,
-			"Buying Settings",
-			"set_landed_cost_based_on_purchase_invoice_rate",
-			original_value,
-		)
 
 		pr = frappe.new_doc("Purchase Receipt")
 		pr.currency = "USD"
@@ -3080,6 +3061,23 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 
 		self.assertRaises(StockOverReturnError, return_doc.save)
 
+	def test_partial_returns_ignore_received_qty_without_update_stock(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		invoice = make_purchase_invoice(qty=10, received_qty=10)
+
+		first_return = make_return_doc(invoice.doctype, invoice.name)
+		first_return.items[0].qty = -4
+		first_return.save().submit()
+
+		self.assertEqual(first_return.items[0].received_qty, -10)
+
+		second_return = make_return_doc(invoice.doctype, invoice.name)
+		second_return.items[0].qty = -6
+		second_return.save().submit()
+
+		self.assertEqual(second_return.docstatus, 1)
+
 	def test_apply_discount_on_grand_total(self):
 		"""
 		To test if after applying discount on grand total,
@@ -3545,7 +3543,6 @@ def make_purchase_invoice_against_cost_center(**args):
 
 def setup_provisional_accounting(**args):
 	args = frappe._dict(args)
-	create_item("_Test Non Stock Item", is_stock_item=0)
 	company = args.company or "_Test Company"
 	provisional_account = create_account(
 		account_name=args.account_name or "Provision Account",

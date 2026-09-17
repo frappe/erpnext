@@ -82,7 +82,7 @@
  "icon": "fa fa-calendar",
  "idx": 1,
  "links": [],
- "modified": "2024-05-27 17:29:55.560840",
+ "modified": "2026-08-21 23:11:42.509102",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Fiscal Year",
@@ -131,8 +131,13 @@
   {
    "read": 1,
    "role": "Auditor"
+  },
+  {
+   "role": "Sales Master Manager",
+   "select": 1
   }
  ],
+ "row_format": "Dynamic",
  "show_name_in_global_search": 1,
  "sort_field": "name",
  "sort_order": "DESC",

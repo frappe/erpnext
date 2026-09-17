@@ -67,9 +67,9 @@ frappe.ui.form.on("Project", {
 	},
 
 	refresh: function (frm) {
-		if (frm.doc.__islocal) {
-			frm.web_link && frm.web_link.remove();
-		} else {
+		frm.web_link && frm.web_link.closest(".user-action-row").remove();
+
+		if (!frm.doc.__islocal) {
 			frm.add_web_link("/projects?project=" + encodeURIComponent(frm.doc.name));
 
 			frm.trigger("show_dashboard");

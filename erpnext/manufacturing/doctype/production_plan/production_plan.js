@@ -151,6 +151,15 @@ frappe.ui.form.on("Production Plan", {
 				__("View")
 			);
 
+			frm.add_custom_button(
+				__("Plan Visualizer"),
+				() => {
+					frappe.route_options = { production_plan: frm.doc.name };
+					frappe.set_route("production-plan-visualizer");
+				},
+				__("View")
+			);
+
 			if (!["Completed", "Closed"].includes(frm.doc.status)) {
 				frm.add_custom_button(__("Schedule Items"), () => {
 					frm.events.show_schedule_dialog(frm);
@@ -493,9 +502,12 @@ frappe.ui.form.on("Production Plan", {
 			<span class="${is_fg ? "item-fg" : ""}${is_material ? " text-muted" : ""}">${frappe.utils.escape_html(
 			row.item_code
 		)}</span>`;
+		let procurement_label = row.supplier
+			? __("Procurement ({0})", [frappe.utils.escape_html(row.supplier)])
+			: __("Procurement");
 		let detail = is_material
-			? `<span class="text-muted">${__("Procurement")}</span>`
-			: frappe.utils.escape_html(workstations.join(", ") || "-");
+			? `<span class="text-muted">${procurement_label}</span>`
+			: frappe.utils.escape_html(workstations.join(", ") || row.supplier || "-");
 
 		let starts_in = schedule_starts_in(row.start);
 
@@ -589,6 +601,14 @@ frappe.ui.form.on("Production Plan", {
 
 		let has_items =
 			items.filter((item) => {
+				const reference_field =
+					item.doctype === "Production Plan Item"
+						? "production_plan_item"
+						: "production_plan_sub_assembly_item";
+				const pending_qty = frm.doc.__onload?.pending_work_order_qty?.[reference_field]?.[item.name];
+				if (pending_qty !== undefined) {
+					return pending_qty > 0;
+				}
 				if (item.planned_qty) {
 					return item.planned_qty > item.ordered_qty;
 				} else {

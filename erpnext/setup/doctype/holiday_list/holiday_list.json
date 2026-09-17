@@ -58,9 +58,10 @@
   },
   {
    "fieldname": "total_holidays",
-   "fieldtype": "Int",
+   "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Total Holidays",
+   "precision": "1",
    "read_only": 1
   },
   {
@@ -153,7 +154,7 @@
  "icon": "fa fa-calendar",
  "idx": 1,
  "links": [],
- "modified": "2026-04-14 18:21:08.018741",
+ "modified": "2026-08-21 23:11:42.675539",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Holiday List",
@@ -173,6 +174,26 @@
   },
   {
    "role": "HR User",
+   "select": 1
+  },
+  {
+   "role": "Accounts Manager",
+   "select": 1
+  },
+  {
+   "role": "Manufacturing User",
+   "select": 1
+  },
+  {
+   "role": "Projects Manager",
+   "select": 1
+  },
+  {
+   "role": "Projects User",
+   "select": 1
+  },
+  {
+   "role": "Sales Manager",
    "select": 1
   }
  ],

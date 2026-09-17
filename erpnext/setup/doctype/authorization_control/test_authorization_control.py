@@ -27,7 +27,7 @@ class TestAuthorizationControl(ERPNextTestSuite):
 				}
 			).insert(ignore_permissions=True)
 
-		rule = frappe.get_doc(
+		frappe.get_doc(
 			{
 				"doctype": "Authorization Rule",
 				"transaction": "Sales Order",
@@ -37,19 +37,17 @@ class TestAuthorizationControl(ERPNextTestSuite):
 				"approving_role": "_Test Approver Role",
 			}
 		).insert()
-		self.addCleanup(frappe.delete_doc, "Authorization Rule", rule.name, force=1)
 
 		controller = frappe.get_cached_doc("Authorization Control")
-		frappe.set_user(user)
-		self.addCleanup(frappe.set_user, "Administrator")
 		# User lacks _Test Approver Role and the total exceeds the rule value -> not authorized.
-		self.assertRaises(
-			frappe.ValidationError,
-			controller.validate_approving_authority,
-			"Sales Order",
-			"_Test Company",
-			5000,
-		)
+		with self.set_user(user):
+			self.assertRaises(
+				frappe.ValidationError,
+				controller.validate_approving_authority,
+				"Sales Order",
+				"_Test Company",
+				5000,
+			)
 
 	def test_get_value_based_rule_runs(self):
 		# Exercises the four query-builder lookups (incl. the Employee designation subquery) added in

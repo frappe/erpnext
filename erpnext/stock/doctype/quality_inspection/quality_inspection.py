@@ -446,7 +446,7 @@ def item_query(doctype: Any, txt: str | None, searchfield: Any, start: int, page
 					"and",
 					["items.secondary_item_type", "is", "not set"],
 					"and",
-					["items.is_legacy_scrap_item", "=", 0],
+					["items.valuation_type", "is", "not set"],
 				]
 			)
 			if purpose == "Manufacture":
@@ -520,7 +520,7 @@ def item_query(doctype: Any, txt: str | None, searchfield: Any, start: int, page
 def quality_inspection_query(
 	doctype: Any, txt: str | None, searchfield: Any, start: int, page_len: int, filters: dict
 ):
-	return frappe.get_all(
+	return frappe.get_list(
 		"Quality Inspection",
 		limit_start=start,
 		limit_page_length=page_len,

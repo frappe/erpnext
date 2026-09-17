@@ -73,6 +73,7 @@
   "landed_cost_voucher_amount",
   "amount_difference_with_purchase_invoice",
   "billed_amt",
+  "closed",
   "warehouse_and_reference",
   "warehouse",
   "rejected_warehouse",
@@ -647,6 +648,15 @@
    "read_only": 1
   },
   {
+   "default": "0",
+   "fieldname": "closed",
+   "fieldtype": "Check",
+   "label": "Closed",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
    "allow_on_submit": 1,
    "fieldname": "landed_cost_voucher_amount",
    "fieldtype": "Currency",
@@ -1145,7 +1155,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-08-07 17:31:31.732720",
+ "modified": "2026-08-07 18:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",

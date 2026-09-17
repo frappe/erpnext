@@ -27,6 +27,8 @@
   "finished_good",
   "column_break_mcnb",
   "semi_fg_bom",
+  "batch_split",
+  "weight_per_piece",
   "section_break_folk",
   "pending_qty",
   "column_break_cyjw",
@@ -553,6 +555,20 @@
   },
   {
    "default": "0",
+   "fieldname": "batch_split",
+   "fieldtype": "Check",
+   "label": "Batch Split",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.batch_split",
+   "fieldname": "weight_per_piece",
+   "fieldtype": "Float",
+   "label": "Weight Per Piece",
+   "read_only": 1
+  },
+  {
+   "default": "0",
    "depends_on": "eval:!doc.is_corrective_job_card",
    "fieldname": "is_subcontracted",
    "fieldtype": "Check",
@@ -700,7 +716,7 @@
  "grid_page_length": 50,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-12 15:28:19.126628",
+ "modified": "2026-08-28 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",

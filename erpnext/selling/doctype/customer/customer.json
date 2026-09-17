@@ -730,7 +730,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2026-08-14 16:10:58.600553",
+ "modified": "2026-08-21 23:11:41.175219",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
@@ -800,6 +800,62 @@
    "read": 1,
    "report": 1,
    "role": "Accounts Manager"
+  },
+  {
+   "role": "Delivery Manager",
+   "select": 1
+  },
+  {
+   "role": "Delivery User",
+   "select": 1
+  },
+  {
+   "role": "Employee",
+   "select": 1
+  },
+  {
+   "role": "Fulfillment User",
+   "select": 1
+  },
+  {
+   "role": "HR Manager",
+   "select": 1
+  },
+  {
+   "role": "HR User",
+   "select": 1
+  },
+  {
+   "role": "Maintenance Manager",
+   "select": 1
+  },
+  {
+   "role": "Maintenance User",
+   "select": 1
+  },
+  {
+   "role": "Projects Manager",
+   "select": 1
+  },
+  {
+   "role": "Projects User",
+   "select": 1
+  },
+  {
+   "role": "Purchase Master Manager",
+   "select": 1
+  },
+  {
+   "role": "Quality Manager",
+   "select": 1
+  },
+  {
+   "role": "Support Team",
+   "select": 1
+  },
+  {
+   "role": "Website Manager",
+   "select": 1
   }
  ],
  "quick_entry": 1,

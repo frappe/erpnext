@@ -543,7 +543,7 @@
  "idx": 5,
  "image_field": "image",
  "links": [],
- "modified": "2026-02-10 14:36:37.157961",
+ "modified": "2026-08-21 23:11:43.771048",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",
@@ -600,6 +600,10 @@
    "read": 1,
    "report": 1,
    "role": "Sales User"
+  },
+  {
+   "role": "Support Team",
+   "select": 1
   }
  ],
  "row_format": "Dynamic",

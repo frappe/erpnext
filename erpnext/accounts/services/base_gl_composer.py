@@ -67,9 +67,12 @@ def get_gl_dict(doc, args: dict, account_currency: str | None = None, item=None)
 	accounting_dimensions = get_accounting_dimensions()
 	dimension_dict = frappe._dict()
 	for dimension in accounting_dimensions:
-		dimension_dict[dimension] = doc.get(dimension)
+		value = doc.get(dimension)
 		if item and item.get(dimension):
-			dimension_dict[dimension] = item.get(dimension)
+			value = item.get(dimension)
+		if isinstance(value, list | dict):
+			continue
+		dimension_dict[dimension] = value
 
 	gl_dict.update(dimension_dict)
 	gl_dict.update(args)
@@ -139,8 +142,13 @@ def add_gl_entry(
 	voucher_detail_no: str | None = None,
 	item=None,
 	posting_date=None,
+	dimensions: dict | None = None,
 ) -> None:
-	"""Build a GL entry via get_gl_dict and append it to gl_entries."""
+	"""Build a GL entry via get_gl_dict and append it to gl_entries.
+
+	`dimensions` sets accounting dimensions explicitly, overriding the values `get_gl_dict`
+	would otherwise derive from `item` and the parent document.
+	"""
 	gl_entry = {
 		"account": account,
 		"cost_center": cost_center,
@@ -164,6 +172,9 @@ def add_gl_entry(
 
 	if posting_date:
 		gl_entry["posting_date"] = posting_date
+
+	if dimensions:
+		gl_entry.update(dimensions)
 
 	gl_entries.append(get_gl_dict(doc, gl_entry, account_currency, item=item))
 
@@ -252,6 +263,7 @@ class BaseGLComposer:
 		voucher_detail_no: str | None = None,
 		item=None,
 		posting_date=None,
+		dimensions: dict | None = None,
 	) -> None:
 		add_gl_entry(
 			self.doc,
@@ -269,4 +281,5 @@ class BaseGLComposer:
 			voucher_detail_no,
 			item,
 			posting_date,
+			dimensions,
 		)

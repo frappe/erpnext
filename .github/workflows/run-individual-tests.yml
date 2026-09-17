@@ -129,6 +129,8 @@ jobs:
           TYPE: server
           FRAPPE_USER: ${{ github.event.inputs.user }}
           FRAPPE_BRANCH: ${{ github.event.inputs.branch }}
+          # Anonymous git to github.com gets throttled to a 401; authenticate the clones.
+          CI_GITHUB_TOKEN: ${{ github.token }}
 
       - name: Run Tests
         run: |

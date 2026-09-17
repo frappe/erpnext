@@ -1,0 +1,45 @@
+name: Notify Support on PR release
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions: {}
+
+jobs:
+  notify-support:
+    if: >-
+      github.event.issue.pull_request
+      && github.event.comment.user.id == 28699486
+      && contains(github.event.comment.body, 'This PR is included in version')
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+
+    steps:
+      - name: Notify support.frappe.io
+        env:
+          COMMENT_ID: ${{ github.event.comment.id }}
+          PR_NUMBER: ${{ github.event.issue.number }}
+          REPOSITORY: ${{ github.repository }}
+          SUPPORT_FRAPPE_AUTH: ${{ secrets.SUPPORT_FRAPPE_AUTH }}
+        run: |
+          payload="$(
+            jq -n \
+              --arg repository "$REPOSITORY" \
+              --argjson pr_number "$PR_NUMBER" \
+              --argjson comment_id "$COMMENT_ID" \
+              '{
+                repository: $repository,
+                pr_number: $pr_number,
+                comment_id: $comment_id
+              }'
+          )"
+
+          curl --fail-with-body \
+            --retry 3 \
+            --retry-all-errors \
+            --request POST \
+            --header "Authorization: $SUPPORT_FRAPPE_AUTH" \
+            --header "Content-Type: application/json" \
+            --data "$payload" \
+            "https://support.frappe.io/api/method/notify_pr_release"

@@ -256,6 +256,13 @@ class POSClosingEntry(StatusUpdater):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_cashiers(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
+	pos_profile = filters.get("parent")
+	if not pos_profile or not frappe.db.exists("POS Profile", pos_profile):
+		return []
+
+	ptype = "select" if frappe.only_has_select_perm("POS Profile") else "read"
+	frappe.has_permission("POS Profile", ptype, doc=pos_profile, throw=True)
+
 	cashiers_list = frappe.get_all("POS Profile User", filters=filters, fields=["user"], as_list=1)
 	return [c for c in cashiers_list]
 
@@ -263,12 +270,15 @@ def get_cashiers(doctype: str, txt: str, searchfield: str, start: int, page_len:
 @frappe.whitelist()
 def get_invoices(start: str | datetime, end: str | datetime, pos_profile: str, user: str):
 	invoice_doctype = frappe.db.get_single_value("POS Settings", "invoice_type")
+	frappe.has_permission("POS Profile", doc=pos_profile, throw=True)
 
+	frappe.has_permission("Sales Invoice", throw=True)
 	sales_inv_query = build_invoice_query("Sales Invoice", user, pos_profile, start, end)
 
 	query = sales_inv_query
 
 	if invoice_doctype == "POS Invoice":
+		frappe.has_permission("POS Invoice", throw=True)
 		pos_inv_query = build_invoice_query("POS Invoice", user, pos_profile, start, end)
 		query = query + pos_inv_query
 

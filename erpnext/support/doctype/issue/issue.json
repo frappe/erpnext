@@ -393,7 +393,7 @@
  "icon": "fa fa-ticket",
  "idx": 7,
  "links": [],
- "modified": "2026-04-09 19:14:57.692236",
+ "modified": "2026-08-21 23:11:43.274229",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue",
@@ -417,6 +417,10 @@
   },
   {
    "role": "HR User",
+   "select": 1
+  },
+  {
+   "role": "Projects User",
    "select": 1
   }
  ],

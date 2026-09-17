@@ -6,7 +6,7 @@
    "label": "Quality Inspections"
   }
  ],
- "content": "[{\"id\":\"QfrnBKYYhz\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Quality Inspections\",\"col\":12}},{\"id\":\"p9r5Sh0Obh\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports &amp; Masters</b></span>\",\"col\":12}},{\"id\":\"_xoM1u7Nt_\",\"type\":\"card\",\"data\":{\"card_name\":\"Goal and Procedure\",\"col\":4}},{\"id\":\"f08WeA5xp6\",\"type\":\"card\",\"data\":{\"card_name\":\"Feedback\",\"col\":4}},{\"id\":\"K01wIxeEDE\",\"type\":\"card\",\"data\":{\"card_name\":\"Meeting\",\"col\":4}},{\"id\":\"3_Up_1FcOP\",\"type\":\"card\",\"data\":{\"card_name\":\"Review and Action\",\"col\":4}}]",
+ "content": "[{\"id\": \"94a9c2ac37\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Quality Inspections\", \"col\": 12}}, {\"id\": \"e150b6a2e8\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Quality Actions\", \"col\": 4}}, {\"id\": \"c40c46970c\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Non Conformances\", \"col\": 4}}, {\"id\": \"5319691877\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Quality Reviews\", \"col\": 4}}]",
  "creation": "2020-03-02 15:49:28.632014",
  "custom_blocks": [],
  "docstatus": 0,
@@ -17,155 +17,25 @@
  "idx": 0,
  "is_hidden": 0,
  "label": "Quality",
- "links": [
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Feedback",
-   "link_count": 0,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Quality Feedback",
-   "link_count": 0,
-   "link_to": "Quality Feedback",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Quality Feedback Template",
-   "link_count": 0,
-   "link_to": "Quality Feedback Template",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Meeting",
-   "link_count": 0,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Quality Meeting",
-   "link_count": 0,
-   "link_to": "Quality Meeting",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Review and Action",
-   "link_count": 0,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Non Conformance",
-   "link_count": 0,
-   "link_to": "Non Conformance",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Quality Review",
-   "link_count": 0,
-   "link_to": "Quality Review",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Quality Action",
-   "link_count": 0,
-   "link_to": "Quality Action",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Goal and Procedure",
-   "link_count": 4,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Quality Goal",
-   "link_count": 0,
-   "link_to": "Quality Goal",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Quality Procedure",
-   "link_count": 0,
-   "link_to": "Quality Procedure",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Tree of Procedures",
-   "link_count": 0,
-   "link_to": "Quality Procedure",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Quality Inspection",
-   "link_count": 0,
-   "link_to": "Quality Inspection",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  }
- ],
- "modified": "2026-07-03 13:44:07.920643",
+ "links": [],
+ "modified": "2026-08-26 18:34:03.000000",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality",
- "number_cards": [],
+ "number_cards": [
+  {
+   "label": "Open Quality Actions",
+   "number_card_name": "Open Quality Actions"
+  },
+  {
+   "label": "Open Non Conformances",
+   "number_card_name": "Open Non Conformances"
+  },
+  {
+   "label": "Open Quality Reviews",
+   "number_card_name": "Open Quality Reviews"
+  }
+ ],
  "owner": "Administrator",
  "parent_page": "",
  "public": 1,

@@ -145,7 +145,7 @@
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2026-06-21 12:52:33.742603",
+ "modified": "2026-08-21 23:11:48.642478",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Sales Person",
@@ -177,8 +177,37 @@
    "role": "Sales Master Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "role": "Accounts Manager",
+   "select": 1
+  },
+  {
+   "role": "Accounts User",
+   "select": 1
+  },
+  {
+   "role": "Delivery Manager",
+   "select": 1
+  },
+  {
+   "role": "Delivery User",
+   "select": 1
+  },
+  {
+   "role": "Maintenance Manager",
+   "select": 1
+  },
+  {
+   "role": "Maintenance User",
+   "select": 1
+  },
+  {
+   "role": "Stock Manager",
+   "select": 1
   }
  ],
+ "row_format": "Dynamic",
  "search_fields": "parent_sales_person",
  "show_name_in_global_search": 1,
  "sort_field": "creation",

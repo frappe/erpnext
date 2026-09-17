@@ -228,7 +228,11 @@ def get_rate_locked_source_row(ctx: ItemDetailsCtx, doc) -> frappe._dict | None:
 	if not source_fields or not doc or ctx.get("is_return") or not maintain_same_rate_enabled(ctx):
 		return None
 
-	row = next((d for d in doc.get("items") or [] if d.get("name") == ctx.child_docname), None)
+	row = (
+		next((d for d in doc.get("items") or [] if d.get("name") == ctx.child_docname), None)
+		if ctx.child_docname
+		else ctx
+	)
 	if not row:
 		return None
 
@@ -279,7 +283,7 @@ def set_valuation_rate(out: frappe._dict, ctx: frappe._dict):
 
 		for bundle_item in bundled_items.items:
 			valuation_rate += flt(
-				get_valuation_rate(bundle_item.item_code, ctx.company, out.get("warehouse")).get(
+				_get_valuation_rate(bundle_item.item_code, ctx.company, out.get("warehouse")).get(
 					"valuation_rate"
 				)
 				* bundle_item.qty
@@ -288,11 +292,10 @@ def set_valuation_rate(out: frappe._dict, ctx: frappe._dict):
 		out.update({"valuation_rate": valuation_rate})
 
 	else:
-		out.update(get_valuation_rate(ctx.item_code, ctx.company, out.get("warehouse")))
+		out.update(_get_valuation_rate(ctx.item_code, ctx.company, out.get("warehouse")))
 
 
 def update_stock(ctx, out, doc=None):
-	from erpnext.stock.doctype.batch.batch import get_available_batches
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos_for_outward
 
 	if (
@@ -325,32 +328,21 @@ def update_stock(ctx, out, doc=None):
 		if ctx.get("ignore_serial_nos"):
 			kwargs["ignore_serial_nos"] = ctx.get("ignore_serial_nos")
 
-		qty = out.stock_qty
-		batches = []
 		if out.has_batch_no and not ctx.get("batch_no"):
-			batches = get_available_batches(kwargs)
-			if doc:
-				filter_batches(batches, doc)
-
-			for batch_no, batch_qty in batches.items():
+			batch_no = get_batch_no_covering_qty(kwargs, doc, out.stock_qty)
+			if batch_no:
+				out.update({"batch_no": batch_no, "actual_batch_qty": out.stock_qty})
 				rate = get_batch_based_item_price(
 					{"price_list": doc.get("selling_price_list"), "uom": out.uom, "batch_no": batch_no},
 					out.item_code,
 				)
-				if batch_qty >= qty:
-					out.update({"batch_no": batch_no, "actual_batch_qty": qty})
-					if rate:
-						out.update({"rate": rate, "price_list_rate": rate})
-					break
-				else:
-					qty -= batch_qty
-
-				out.update({"batch_no": batch_no, "actual_batch_qty": batch_qty})
 				if rate:
 					out.update({"rate": rate, "price_list_rate": rate})
 
 		if out.has_serial_no and out.has_batch_no and has_incorrect_serial_nos(ctx, out):
-			kwargs["batches"] = [ctx.get("batch_no")] if ctx.get("batch_no") else [out.get("batch_no")]
+			batch_no = ctx.get("batch_no") or out.get("batch_no")
+			if batch_no:
+				kwargs["batches"] = [batch_no]
 			serial_nos = get_serial_nos_for_outward(kwargs)
 			serial_nos = get_filtered_serial_nos(serial_nos, doc)
 
@@ -376,10 +368,24 @@ def has_incorrect_serial_nos(ctx, out):
 	return False
 
 
+def get_batch_no_covering_qty(kwargs, doc, qty):
+	from erpnext.stock.doctype.batch.batch import get_available_batches
+
+	batches = get_available_batches(frappe._dict(kwargs, qty=0))
+	if doc:
+		filter_batches(batches, doc)
+
+	batch_no = next(iter(batches), None)
+	if batch_no and flt(batches[batch_no]) >= flt(qty):
+		return batch_no
+
+	return None
+
+
 def filter_batches(batches, doc):
 	for row in doc.get("items"):
 		if row.get("batch_no") in batches:
-			batches[row.get("batch_no")] -= row.get("qty")
+			batches[row.get("batch_no")] -= flt(row.get("stock_qty"))
 			if batches[row.get("batch_no")] <= 0:
 				del batches[row.get("batch_no")]
 
@@ -1551,6 +1557,11 @@ def get_pos_profile(company: str, pos_profile: str | None = None, user: str | No
 	if not user:
 		user = frappe.session["user"]
 
+	allowed_pos_profiles = frappe.get_list("POS Profile", pluck="name")
+
+	if not allowed_pos_profiles:
+		return None
+
 	pf = frappe.qb.DocType("POS Profile")
 	pfu = frappe.qb.DocType("POS Profile User")
 
@@ -1560,6 +1571,7 @@ def get_pos_profile(company: str, pos_profile: str | None = None, user: str | No
 		.on(pf.name == pfu.parent)
 		.select(pf.star)
 		.where((pfu.user == user) & (pfu.default == 1))
+		.where(pf.name.isin(allowed_pos_profiles))
 	)
 
 	if company:
@@ -1574,6 +1586,7 @@ def get_pos_profile(company: str, pos_profile: str | None = None, user: str | No
 			.on(pf.name == pfu.parent)
 			.select(pf.star)
 			.where((pf.company == company) & (pf.disabled == 0))
+			.where(pf.name.isin(allowed_pos_profiles))
 		).run(as_dict=True)
 
 	return pos_profile and pos_profile[0] or None
@@ -1612,6 +1625,10 @@ def get_conversion_factor(item_code: str | None, uom: str):
 
 @frappe.whitelist()
 def get_projected_qty(item_code: str, warehouse: str):
+	# record-level read on the item, matching what get_item_details() in this file already does.
+	# Nothing in the tree calls this, so there is no caller whose roles constrain the choice.
+	frappe.has_permission("Item", doc=item_code, throw=True)
+
 	return {
 		"projected_qty": frappe.db.get_value(
 			"Bin", {"item_code": item_code, "warehouse": warehouse}, "projected_qty"
@@ -1623,6 +1640,9 @@ def get_projected_qty(item_code: str, warehouse: str):
 def get_bin_details(
 	item_code: str, warehouse: str | None, company: str | None = None, include_child_warehouses: bool = False
 ):
+	# `select`, not `read`: the selling/buying rows and SellingController reach this with no Item read row
+	frappe.has_permission("Item", ptype="select", throw=True)
+
 	bin_details = {"projected_qty": 0, "actual_qty": 0, "reserved_qty": 0}
 
 	if warehouse:
@@ -1804,6 +1824,15 @@ def get_default_bom(item_code: str | None = None):
 
 @frappe.whitelist()
 def get_valuation_rate(item_code: str, company: str, warehouse: str | None = None):
+	"""Whitelisted entry point: authorise the item, then return its cost price."""
+	frappe.has_permission("Item", doc=item_code, throw=True)
+
+	return _get_valuation_rate(item_code, company, warehouse)
+
+
+def _get_valuation_rate(item_code: str, company: str, warehouse: str | None = None):
+	# no guard here: set_valuation_rate calls this for the item AND for every Product Bundle
+	# component, and a caller entitled to the bundle is not necessarily entitled to each component
 	if frappe.get_cached_value("Warehouse", warehouse, "is_group"):
 		return {"valuation_rate": 0.0}
 
@@ -1883,6 +1912,8 @@ def get_blanket_order_details(ctx: ItemDetailsCtx):
 			query = query.where(bo.supplier == ctx.supplier)
 		if ctx.blanket_order:
 			query = query.where(bo.name == ctx.blanket_order)
+		if ctx.currency:
+			query = query.where(bo.currency == ctx.currency)
 		if ctx.transaction_date:
 			query = query.where(bo.to_date >= ctx.transaction_date)
 

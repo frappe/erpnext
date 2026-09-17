@@ -36,7 +36,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-03-27 13:06:35.869900",
+ "modified": "2026-08-21 23:11:39.003078",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Shift Factor",
@@ -66,8 +66,13 @@
    "role": "Accounts User",
    "share": 1,
    "write": 1
+  },
+  {
+   "role": "Quality Manager",
+   "select": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": []

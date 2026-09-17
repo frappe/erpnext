@@ -834,7 +834,7 @@
  "image_field": "image",
  "is_tree": 1,
  "links": [],
- "modified": "2026-03-23 15:26:05.149280",
+ "modified": "2026-08-21 23:11:42.091886",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Employee",
@@ -874,6 +874,46 @@
    "role": "HR Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "role": "Accounts Manager",
+   "select": 1
+  },
+  {
+   "role": "Accounts User",
+   "select": 1
+  },
+  {
+   "role": "Delivery Manager",
+   "select": 1
+  },
+  {
+   "role": "Fleet Manager",
+   "select": 1
+  },
+  {
+   "role": "Manufacturing Manager",
+   "select": 1
+  },
+  {
+   "role": "Manufacturing User",
+   "select": 1
+  },
+  {
+   "role": "Projects User",
+   "select": 1
+  },
+  {
+   "role": "Quality Manager",
+   "select": 1
+  },
+  {
+   "role": "Sales Master Manager",
+   "select": 1
+  },
+  {
+   "role": "Stock Manager",
+   "select": 1
   }
  ],
  "row_format": "Dynamic",

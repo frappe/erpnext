@@ -1276,7 +1276,7 @@ erpnext.stock.mount_serial_batch_inline_editor = async function (frm, cdt, cdn) 
 	let config = erpnext.stock.get_sbie_config(frm.doc.doctype, cdt);
 	if (!config || !frm.fields_dict[config.table]) return;
 
-	let grid_row = frm.fields_dict[config.table].grid.grid_rows_by_docname[cdn];
+	let grid_row = frm.fields_dict[config.table].grid?.grid_rows_by_docname?.[cdn];
 	let grid_form = grid_row && grid_row.grid_form;
 	if (!grid_form) return;
 

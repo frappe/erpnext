@@ -28,6 +28,8 @@
   "purchase_time",
   "column_break_lsfp",
   "buffer_time",
+  "supplier_lead_time_section",
+  "supplier_lead_times",
   "item_details_tab",
   "item_name",
   "stock_uom"
@@ -169,6 +171,18 @@
    "label": "Purchase Time"
   },
   {
+   "fieldname": "supplier_lead_time_section",
+   "fieldtype": "Section Break",
+   "label": "Supplier Wise Purchase Time"
+  },
+  {
+   "description": "Overrides the Purchase Time above for the selected supplier. The row marked as default is used when no supplier is selected.",
+   "fieldname": "supplier_lead_times",
+   "fieldtype": "Table",
+   "label": "Supplier Lead Times",
+   "options": "Item Lead Time Supplier"
+  },
+  {
    "fieldname": "manufacturing_time_tab",
    "fieldtype": "Tab Break",
    "label": "Manufacturing Time"
@@ -177,7 +191,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-10-30 11:45:03.602345",
+ "modified": "2026-08-22 11:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Lead Time",

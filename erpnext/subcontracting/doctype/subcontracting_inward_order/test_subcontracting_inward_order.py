@@ -169,6 +169,10 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		wo.submit()
 
 		manufacture = frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture"))
+		self.assertEqual(
+			next(item.s_warehouse for item in manufacture.items if item.item_code == "Self RM"),
+			"Stores - _TC",
+		)
 		manufacture.save()
 		frappe.new_doc(
 			"Stock Entry Detail",
@@ -451,7 +455,7 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 
 		scio.reload()
 		si = make_sales_invoice(so.name)
-		self.assertEqual(len(si.items), 1)
+		self.assertEqual(len(si.items), 0)
 
 	def test_extra_items_reservation_transfer(self):
 		so, scio = create_so_scio()

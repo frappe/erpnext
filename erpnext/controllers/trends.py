@@ -400,13 +400,15 @@ def quotation_party_name_expr():
 
 
 def quotation_territory_expr():
-	"""Only Customer and Lead carry a territory; other party types have none."""
+	"""Territory from the party master. CRM Deal has none here: it ships with the CRM app."""
 	return (
 		"case "
 		"when t1.quotation_to = 'Customer' then "
 		"(select c.territory from `tabCustomer` c where c.name = t1.party_name) "
 		"when t1.quotation_to = 'Lead' then "
 		"(select l.territory from `tabLead` l where l.name = t1.party_name) "
+		"when t1.quotation_to = 'Prospect' then "
+		"(select p.territory from `tabProspect` p where p.name = t1.party_name) "
 		"end"
 	)
 

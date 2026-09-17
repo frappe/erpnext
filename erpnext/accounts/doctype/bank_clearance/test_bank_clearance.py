@@ -4,29 +4,18 @@
 import frappe
 from frappe.utils import add_months, getdate
 
-from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 from erpnext.accounts.doctype.mode_of_payment.test_mode_of_payment import (
 	set_default_account_for_mode_of_payment,
 )
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-from erpnext.stock.doctype.item.test_item import create_item
-from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.tests.utils import ERPNextTestSuite, if_lending_app_installed, if_lending_app_not_installed
 
 
 class TestBankClearance(ERPNextTestSuite):
 	def setUp(self):
 		frappe.clear_cache()
-		create_warehouse(
-			warehouse_name="_Test Warehouse",
-			properties={"parent_warehouse": "All Warehouses - _TC"},
-			company="_Test Company",
-		)
-		create_item("_Test Item")
-		create_cost_center(cost_center_name="_Test Cost Center", company="_Test Company")
-
 		make_bank_account()
 		add_transactions()
 
@@ -139,11 +128,8 @@ def add_transactions():
 
 
 def make_payment_entry():
-	from erpnext.buying.doctype.supplier.test_supplier import create_supplier
-
-	supplier = create_supplier(supplier_name="_Test Supplier")
 	pi = make_purchase_invoice(
-		supplier=supplier.name,
+		supplier="_Test Supplier",
 		supplier_warehouse="_Test Warehouse - _TC",
 		expense_account="Cost of Goods Sold - _TC",
 		uom="Nos",
@@ -158,10 +144,6 @@ def make_payment_entry():
 
 
 def make_pos_sales_invoice():
-	from erpnext.accounts.doctype.opening_invoice_creation_tool.test_opening_invoice_creation_tool import (
-		make_customer,
-	)
-
 	mode_of_payment = frappe.get_doc({"doctype": "Mode of Payment", "name": "Cash"})
 
 	if not frappe.db.get_value("Mode of Payment Account", {"company": "_Test Company", "parent": "Cash"}):
@@ -170,13 +152,13 @@ def make_pos_sales_invoice():
 		)
 		mode_of_payment.save()
 
-	customer = make_customer(customer="_Test Customer")
-
 	mode_of_payment = frappe.get_doc("Mode of Payment", "Wire Transfer")
 
 	set_default_account_for_mode_of_payment(mode_of_payment, "_Test Company", "_Test Bank Clearance - _TC")
 
-	si = create_sales_invoice(customer=customer, item="_Test Item", is_pos=1, qty=1, rate=1000, do_not_save=1)
+	si = create_sales_invoice(
+		customer="_Test Customer", item="_Test Item", is_pos=1, qty=1, rate=1000, do_not_save=1
+	)
 	si.set("payments", [])
 	si.append("payments", {"mode_of_payment": "Wire Transfer", "amount": 1000})
 	si.insert()

@@ -176,6 +176,7 @@ class PaymentEntry(AccountsController):
 		self.set_liability_account()
 		self.set_missing_ref_details(force=True)
 		self.validate_payment_type()
+		self.validate_internal_transfer_accounts()
 		self.validate_party_details()
 		self.set_exchange_rate()
 		self.validate_mandatory()
@@ -208,8 +209,14 @@ class PaymentEntry(AccountsController):
 		self.update_payment_schedule()
 		self.make_gl_entries()
 		self.update_outstanding_amounts()
+		self.update_linked_dunnings()
 		self.set_status()
 		self.trigger_invoice_update_for_subscriptions()
+
+	def update_linked_dunnings(self):
+		from erpnext.accounts.doctype.dunning.dunning import update_dunnings_linked_to_payment
+
+		update_dunnings_linked_to_payment(self)
 
 	def validate_for_repost(self):
 		validate_docs_for_voucher_types(["Payment Entry"])
@@ -315,6 +322,7 @@ class PaymentEntry(AccountsController):
 		self.update_payment_schedule(cancel=1)
 		self.make_gl_entries(cancel=1)
 		self.update_outstanding_amounts()
+		self.update_linked_dunnings()
 		self.delink_advance_entry_references()
 		self.set_status()
 		self.trigger_invoice_update_for_subscriptions()
@@ -626,6 +634,10 @@ class PaymentEntry(AccountsController):
 	def validate_payment_type(self):
 		if self.payment_type not in ("Receive", "Pay", "Internal Transfer"):
 			frappe.throw(_("Payment Type must be one of Receive, Pay, or Internal Transfer"))
+
+	def validate_internal_transfer_accounts(self):
+		if self.payment_type == "Internal Transfer" and self.paid_from and self.paid_from == self.paid_to:
+			frappe.throw(_("Paid From and Paid To accounts must be different for an Internal Transfer."))
 
 	def validate_party_details(self):
 		if self.party and not frappe.db.exists(self.party_type, self.party):
@@ -1118,8 +1130,14 @@ class PaymentEntry(AccountsController):
 			)
 
 	def set_exchange_gain_loss(self):
+		other_deductions = 0
+		if self.payment_type == "Internal Transfer":
+			other_deductions = sum(
+				flt(row.amount) for row in self.get("deductions") if not row.is_exchange_gain_loss
+			)
+
 		exchange_gain_loss = flt(
-			self.base_paid_amount - self.base_received_amount,
+			self.base_paid_amount - self.base_received_amount - other_deductions,
 			self.precision("amount", "deductions"),
 		)
 
@@ -2620,7 +2638,11 @@ def get_payment_entry(
 	reference_date: str | date | None = None,
 	created_from_payment_request: bool | None = None,
 ):
+	frappe.has_permission("Payment Entry", ptype="create", throw=True)
+
 	doc = frappe.get_doc(dt, dn)
+	doc.check_permission()
+
 	over_billing_allowance = frappe.get_single_value("Accounts Settings", "over_billing_allowance")
 	if dt in ("Sales Order", "Purchase Order") and flt(doc.per_billed, 2) >= (100.0 + over_billing_allowance):
 		frappe.throw(_("Can only make payment against unbilled {0}").format(_(dt)))
@@ -2715,7 +2737,7 @@ def get_payment_entry(
 				pe.append("references", reference)
 		else:
 			if dt == "Dunning":
-				for overdue_payment in doc.overdue_payments:
+				for overdue_payment, outstanding in doc.get_unpaid_overdue_payments():
 					pe.append(
 						"references",
 						{
@@ -2723,21 +2745,23 @@ def get_payment_entry(
 							"reference_name": overdue_payment.sales_invoice,
 							"payment_term": overdue_payment.payment_term,
 							"due_date": overdue_payment.due_date,
-							"total_amount": overdue_payment.outstanding,
-							"outstanding_amount": overdue_payment.outstanding,
-							"allocated_amount": overdue_payment.outstanding,
+							"total_amount": outstanding,
+							"outstanding_amount": outstanding,
+							"allocated_amount": outstanding,
 						},
 					)
 
-				pe.append(
-					"deductions",
-					{
-						"account": doc.income_account,
-						"cost_center": doc.cost_center,
-						"amount": -1 * doc.dunning_amount,
-						"description": _("Interest and/or dunning fee"),
-					},
-				)
+				if (unpaid_dunning_amount := doc.get_unpaid_base_dunning_amount()) > 0:
+					pe.append(
+						"deductions",
+						{
+							"account": doc.income_account,
+							"cost_center": doc.cost_center,
+							"amount": -1 * unpaid_dunning_amount,
+							"description": _("Interest and/or dunning fee"),
+							"dunning": doc.name,
+						},
+					)
 			else:
 				pe.append(
 					"references",
@@ -3030,8 +3054,10 @@ def set_grand_total_and_outstanding_amount(party_amount, dt, party_account_curre
 			grand_total = doc.rounded_total or doc.grand_total
 		outstanding_amount = doc.outstanding_amount
 	elif dt == "Dunning":
-		grand_total = doc.grand_total
-		outstanding_amount = doc.grand_total
+		# only what is left to collect, the totals on the dunning are the ones it was raised with
+		grand_total = sum(outstanding for _row, outstanding in doc.get_unpaid_overdue_payments())
+		grand_total += doc.get_unpaid_dunning_amount()
+		outstanding_amount = grand_total
 	else:
 		if party_account_currency == doc.company_currency:
 			grand_total = flt(doc.get("base_rounded_total") or doc.get("base_grand_total"))

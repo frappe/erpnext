@@ -12,21 +12,11 @@ class TestSerialAndBatchSummary(ERPNextTestSuite):
 
 		return execute(frappe._dict(extra))[1]
 
-	@staticmethod
-	def _cancel_and_delete_stock_entry(name):
-		if not frappe.db.exists("Stock Entry", name):
-			return
-		doc = frappe.get_doc("Stock Entry", name)
-		if doc.docstatus == 1:
-			doc.cancel()
-		frappe.delete_doc("Stock Entry", name, force=1)
-
 	def test_serial_receipt_listed(self):
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 		item = "_Test Serialized Item With Series"
 		se = make_stock_entry(item_code=item, to_warehouse="Stores - _TC", qty=3, basic_rate=100)
-		self.addCleanup(self._cancel_and_delete_stock_entry, se.name)
 
 		data = self.run_report(voucher_no=[se.name], voucher_type="Stock Entry")
 
@@ -55,7 +45,6 @@ class TestSerialAndBatchSummary(ERPNextTestSuite):
 			}
 		).name
 		se = make_stock_entry(item_code=item, to_warehouse="_Test Warehouse - _TC", qty=10, basic_rate=50)
-		self.addCleanup(self._cancel_and_delete_stock_entry, se.name)
 		batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
 
 		data = self.run_report(voucher_no=[se.name], voucher_type="Stock Entry")

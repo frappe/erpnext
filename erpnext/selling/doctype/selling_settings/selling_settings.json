@@ -32,6 +32,7 @@
   "sales_transactions_settings_section",
   "so_required",
   "dn_required",
+  "skip_delivery_note_for_service_items",
   "sales_update_frequency",
   "column_break_5",
   "allow_multiple_items",
@@ -115,6 +116,13 @@
    "fieldtype": "Select",
    "label": "Is Delivery Note required to create Sales Invoice?",
    "options": "No\nYes"
+  },
+  {
+   "default": "0",
+   "description": "Non-stock items will not require a Delivery Note. Sales Orders will be marked as Completed once all stock items are delivered and the order is fully billed",
+   "fieldname": "skip_delivery_note_for_service_items",
+   "fieldtype": "Check",
+   "label": "Skip Delivery Note Creation for Service Items"
   },
   {
    "default": "Daily",
@@ -435,7 +443,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-04-29 11:05:48.836362",
+ "modified": "2026-08-19 11:00:00.000000",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",

@@ -2,7 +2,7 @@ import frappe
 from frappe import _
 from frappe.desk.query_report import get_filtered_data
 from frappe.model.docstatus import DocStatus
-from frappe.utils import getdate
+from frappe.utils import add_days, getdate
 
 VALUE_FIELDNAMES = ("hours", "billing_hours", "billing_amount")
 
@@ -99,7 +99,7 @@ def get_data(filters):
 	if filters.get("from_date"):
 		_filters.append(("Timesheet Detail", "from_time", ">=", filters.get("from_date")))
 	if filters.get("to_date"):
-		_filters.append(("Timesheet Detail", "to_time", "<=", filters.get("to_date") + " 23:59:59"))
+		_filters.append(("Timesheet Detail", "from_time", "<", add_days(getdate(filters.get("to_date")), 1)))
 	if not filters.get("include_draft_timesheets"):
 		_filters.append(("docstatus", "=", DocStatus.submitted()))
 	else:

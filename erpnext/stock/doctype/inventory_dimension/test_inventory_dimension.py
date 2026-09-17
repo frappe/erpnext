@@ -12,10 +12,13 @@ from erpnext.stock.doctype.inventory_dimension.inventory_dimension import (
 	DoNotChangeError,
 	delete_dimension,
 )
-from erpnext.stock.doctype.item.test_item import create_item
+from erpnext.stock.doctype.item.test_item import create_item, make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import InventoryDimensionNegativeStockError
+from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import (
+	InventoryDimensionNegativeStockError,
+	SerialNoInventoryDimensionError,
+)
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -440,6 +443,8 @@ class TestInventoryDimension(ERPNextTestSuite):
 			document_type="Inv Site",
 			validate_negative_stock=1,
 		)
+		inv_dimension.db_set("validate_negative_stock", 1)
+		frappe.clear_cache(doctype="Inventory Dimension")
 
 		warehouse = create_warehouse("Negative Stock Warehouse")
 
@@ -491,6 +496,193 @@ class TestInventoryDimension(ERPNextTestSuite):
 		)[0].inv_site
 
 		self.assertEqual(site_name, "Site 1")
+
+	def test_serial_no_cannot_be_issued_from_incorrect_inventory_dimension(self):
+		item = make_item(
+			"Test Serialized Inventory Dimension Item",
+			{"has_serial_no": 1, "is_stock_item": 1},
+		)
+		serial_no = "Test Serialized Inventory Dimension Serial No"
+		warehouse = create_warehouse("Serialized Inventory Dimension Warehouse")
+
+		create_inventory_dimension(
+			apply_to_all_doctypes=1,
+			dimension_name="Serial Rack",
+			reference_document="Rack",
+			validate_negative_stock=0,
+		)
+
+		receipt = make_stock_entry(
+			item_code=item.name,
+			to_warehouse=warehouse,
+			qty=1,
+			serial_no=serial_no,
+			use_serial_batch_fields=1,
+			do_not_submit=True,
+		)
+		receipt.items[0].to_serial_rack = "Rack 1"
+		receipt.save()
+		receipt.submit()
+
+		transfer = make_stock_entry(
+			item_code=item.name,
+			from_warehouse=warehouse,
+			to_warehouse=warehouse,
+			qty=1,
+			serial_no=serial_no,
+			use_serial_batch_fields=1,
+			do_not_submit=True,
+		)
+		transfer.items[0].serial_rack = "Rack 1"
+		transfer.items[0].to_serial_rack = "Rack 2"
+		transfer.save()
+		transfer.submit()
+
+		issue = make_stock_entry(
+			item_code=item.name,
+			from_warehouse=warehouse,
+			qty=1,
+			serial_no=serial_no,
+			use_serial_batch_fields=1,
+			do_not_submit=True,
+		)
+		issue.items[0].serial_rack = "Rack 1"
+		issue.save()
+
+		self.assertRaises(SerialNoInventoryDimensionError, issue.submit)
+		self.assertFalse(
+			frappe.db.exists(
+				"Stock Ledger Entry",
+				{"voucher_no": issue.name, "is_cancelled": 0},
+			)
+		)
+
+	def test_serial_no_cannot_move_from_empty_inventory_dimension(self):
+		item = make_item(
+			"Test Serialized Empty Inventory Dimension Item",
+			{"has_serial_no": 1, "is_stock_item": 1},
+		)
+		serial_no = "Test Serialized Empty Inventory Dimension Serial No"
+		warehouse = create_warehouse("Serialized Empty Inventory Dimension Warehouse")
+
+		create_inventory_dimension(
+			apply_to_all_doctypes=1,
+			dimension_name="Empty Serial Rack",
+			reference_document="Rack",
+			validate_negative_stock=0,
+		)
+
+		make_stock_entry(
+			item_code=item.name,
+			to_warehouse=warehouse,
+			qty=1,
+			serial_no=serial_no,
+			use_serial_batch_fields=1,
+		)
+
+		issue = make_stock_entry(
+			item_code=item.name,
+			from_warehouse=warehouse,
+			qty=1,
+			serial_no=serial_no,
+			use_serial_batch_fields=1,
+			do_not_submit=True,
+		)
+		issue.items[0].empty_serial_rack = "Rack 1"
+		issue.save()
+
+		self.assertRaises(SerialNoInventoryDimensionError, issue.submit)
+
+	def test_serial_no_cannot_be_issued_without_inventory_dimension(self):
+		item = make_item(
+			"Test Serialized Required Inventory Dimension Item",
+			{"has_serial_no": 1, "is_stock_item": 1},
+		)
+		serial_no = "Test Serialized Required Inventory Dimension Serial No"
+		warehouse = create_warehouse("Serialized Required Inventory Dimension Warehouse")
+
+		create_inventory_dimension(
+			apply_to_all_doctypes=1,
+			dimension_name="Required Serial Rack",
+			reference_document="Rack",
+			validate_negative_stock=0,
+		)
+
+		receipt = make_stock_entry(
+			item_code=item.name,
+			to_warehouse=warehouse,
+			qty=1,
+			serial_no=serial_no,
+			use_serial_batch_fields=1,
+			do_not_submit=True,
+		)
+		receipt.items[0].to_required_serial_rack = "Rack 1"
+		receipt.save()
+		receipt.submit()
+
+		issue = make_stock_entry(
+			item_code=item.name,
+			from_warehouse=warehouse,
+			qty=1,
+			serial_no=serial_no,
+			use_serial_batch_fields=1,
+			do_not_submit=True,
+		)
+		issue.save()
+
+		self.assertRaises(SerialNoInventoryDimensionError, issue.submit)
+		self.assertFalse(
+			frappe.db.exists(
+				"Stock Ledger Entry",
+				{"voucher_no": issue.name, "is_cancelled": 0},
+			)
+		)
+
+	def test_serial_no_inventory_dimension_with_legacy_inward_sle(self):
+		item = make_item(
+			"Test Serialized Legacy Inventory Dimension Item",
+			{"has_serial_no": 1, "is_stock_item": 1},
+		)
+		serial_no = "Test Serialized Legacy Inventory Dimension Serial No"
+		warehouse = create_warehouse("Serialized Legacy Inventory Dimension Warehouse")
+
+		create_inventory_dimension(
+			apply_to_all_doctypes=1,
+			dimension_name="Legacy Serial Rack",
+			reference_document="Rack",
+			validate_negative_stock=0,
+		)
+
+		receipt = make_stock_entry(
+			item_code=item.name,
+			to_warehouse=warehouse,
+			qty=1,
+			serial_no=serial_no,
+			use_serial_batch_fields=1,
+			do_not_submit=True,
+		)
+		receipt.items[0].to_legacy_serial_rack = "Rack 2"
+		receipt.save()
+		receipt.submit()
+
+		frappe.db.set_value(
+			"Stock Ledger Entry",
+			{"voucher_no": receipt.name, "actual_qty": (">", 0), "is_cancelled": 0},
+			{"serial_and_batch_bundle": None, "serial_no": f"Other Legacy Serial, {serial_no}"},
+		)
+
+		issue = make_stock_entry(
+			item_code=item.name,
+			from_warehouse=warehouse,
+			qty=1,
+			serial_no=serial_no,
+			use_serial_batch_fields=1,
+			do_not_submit=True,
+		)
+		issue.items[0].legacy_serial_rack = "Rack 1"
+		issue.save()
+
+		self.assertRaises(SerialNoInventoryDimensionError, issue.submit)
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_validate_negative_stock_with_multiple_dimension(self):
@@ -568,24 +760,13 @@ def create_inventory_dimension(**args):
 
 
 def prepare_data_for_internal_transfer():
-	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
-	from erpnext.selling.doctype.customer.test_customer import create_internal_customer
 	from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 	from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 	company = "_Test Company with perpetual inventory"
 
-	customer = create_internal_customer(
-		"_Test Internal Customer 2",
-		company,
-		company,
-	)
-
-	supplier = create_internal_supplier(
-		"_Test Internal Supplier 2",
-		company,
-		company,
-	)
+	customer = "_Test Internal Customer 2"
+	supplier = "_Test Internal Supplier 2"
 
 	for store in ["Inter Transfer Store 1", "Inter Transfer Store 2", "Inter Transfer Store 3"]:
 		if not frappe.db.exists("Store", store):

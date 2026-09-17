@@ -98,7 +98,9 @@ class ProformaInvoice(Document):
 @frappe.whitelist()
 def get_sales_order_items(sales_order: str) -> list[dict]:
 	"""Sales Order lines (with already-proformed totals) to drive the create-proforma dialog."""
-	sales_order_doc = frappe.get_doc("Sales Order", sales_order)
+	# this returns line rates and amounts for a caller-named order, so the order itself is what
+	# decides access. check_permission applies User Permissions, which a doctype check would not.
+	sales_order_doc = frappe.get_doc("Sales Order", sales_order, check_permission="read")
 	proformed = get_proformed_totals(sales_order)
 	return [
 		{
@@ -212,6 +214,7 @@ def _proforma_line(so_item, based_on: str, row: dict) -> dict | None:
 @frappe.whitelist()
 def send_proforma_email(proforma_name: str, recipients: str) -> None:
 	proforma = frappe.get_doc("Proforma Invoice", proforma_name)
+	proforma.check_permission("email")
 	if proforma.docstatus != 1:
 		frappe.throw(_("Only an issued Proforma Invoice can be emailed."))
 	if not proforma.proforma_pdf:

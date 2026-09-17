@@ -15,6 +15,8 @@ from frappe.utils import flt
 
 from erpnext.accounts.party import CROSS_PARTY_FIELD_NO_MAP, get_due_date
 from erpnext.controllers.accounts_controller import get_taxes_and_charges, merge_taxes
+from erpnext.controllers.item_close import is_bundle_of_closed_row
+from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.stock.doctype.packed_item.packed_item import is_product_bundle
 
 
@@ -73,6 +75,8 @@ def make_sales_invoice(
 	to_make_invoice_qty_map = {}
 	returned_qty_map = get_returned_qty_map(source_name)
 	invoiced_qty_map = get_invoiced_qty_map(source_name)
+	for ref, qty in get_qty_already_mapped(target_doc, "dn_detail").items():
+		invoiced_qty_map[ref] = invoiced_qty_map.get(ref, 0) + qty
 
 	def set_missing_values(source, target):
 		target.run_method("set_missing_values")
@@ -123,7 +127,7 @@ def make_sales_invoice(
 	def select_item(d):
 		filtered_items = args.get("filtered_children", [])
 		child_filter = d.name in filtered_items if filtered_items else True
-		return child_filter
+		return child_filter and not d.closed
 
 	doc = get_mapped_doc(
 		"Delivery Note",
@@ -147,7 +151,7 @@ def make_sales_invoice(
 				"postprocess": update_item,
 				"filter": lambda d: get_pending_qty(d) <= 0
 				if not doc.get("is_return")
-				else get_pending_qty(d) > 0,
+				else get_pending_qty(d) >= 0,
 				"condition": select_item,
 			},
 			"Sales Taxes and Charges": {
@@ -254,7 +258,7 @@ def make_installation_note(
 					"parenttype": "prevdoc_doctype",
 				},
 				"postprocess": update_item,
-				"condition": lambda doc: doc.installed_qty < doc.qty,
+				"condition": lambda doc: doc.installed_qty < doc.qty and not doc.closed,
 			},
 		},
 		target_doc,
@@ -293,7 +297,9 @@ def make_packing_slip(source_name: str, target_doc: str | dict | Document | None
 				},
 				"postprocess": update_item,
 				"condition": lambda item: (
-					not is_product_bundle(item.item_code) and flt(item.packed_qty) < flt(item.qty)
+					not is_product_bundle(item.item_code)
+					and not item.closed
+					and flt(item.packed_qty) < flt(item.qty)
 				),
 			},
 			"Packed Item": {
@@ -307,7 +313,9 @@ def make_packing_slip(source_name: str, target_doc: str | dict | Document | None
 					"name": "pi_detail",
 				},
 				"postprocess": update_item,
-				"condition": lambda item: (flt(item.packed_qty) < flt(item.qty)),
+				"condition": lambda item: (
+					flt(item.packed_qty) < flt(item.qty) and not is_bundle_of_closed_row(item)
+				),
 			},
 		},
 		target_doc,
@@ -576,7 +584,8 @@ def make_inter_company_transaction(doctype: str, source_name: str, target_doc=No
 					"Material_request_item": "material_request_item",
 				},
 				"field_no_map": ["warehouse"],
-				"condition": lambda item: item.received_qty < item.qty + item.returned_qty,
+				"condition": lambda item: item.received_qty < item.qty + item.returned_qty
+				and not item.closed,
 				"postprocess": update_item,
 			},
 		},

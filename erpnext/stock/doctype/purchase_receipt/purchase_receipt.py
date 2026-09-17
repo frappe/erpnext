@@ -11,6 +11,7 @@ from frappe.utils import cint, flt, getdate, nowdate
 import erpnext
 from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_enabled
 from erpnext.controllers.buying_controller import BuyingController
+from erpnext.controllers.item_close import validate_parent_reopen
 from erpnext.stock.doctype.purchase_receipt.services.billing_status import BillingStatusService
 from erpnext.stock.doctype.purchase_receipt.services.provisional_accounting import (
 	ProvisionalAccountingService,
@@ -498,9 +499,15 @@ class PurchaseReceipt(BuyingController):
 			)
 
 	def update_status(self, status):
+		if status != "Closed" and self.status == "Closed":
+			validate_parent_reopen(self)
+
 		self.set_status(update=True, status=status)
 		self.notify_update()
 		clear_doctype_notifications(self)
+
+	def on_item_close_status_change(self):
+		self.update_billing_status()
 
 	def update_billing_status(self, update_modified=True):
 		BillingStatusService(self).update_billing_status(update_modified)
@@ -547,6 +554,15 @@ def update_regional_gl_entries(gl_list, doc):
 
 @frappe.whitelist()
 def make_lcv(doctype: str, docname: str):
+	# `doctype` is caller-supplied and reaches get_value() as the doctype; only these two carry the fields read below
+	if doctype not in ("Purchase Receipt", "Purchase Invoice"):
+		frappe.throw(_("Invalid document type"), frappe.PermissionError)
+
+	# Authorise the source document, not the Landed Cost Voucher: LCV create is held by Stock Manager
+	# alone here, while the roles that actually press this button are the ones who can read the
+	# receipt or invoice they are pressing it on.
+	frappe.has_permission(doctype, doc=docname, throw=True)
+
 	landed_cost_voucher = frappe.new_doc("Landed Cost Voucher")
 
 	details = frappe.db.get_value(doctype, docname, ["supplier", "company", "base_grand_total"], as_dict=1)
