@@ -119,6 +119,54 @@ class TestQuotationTrends(ERPNextTestSuite):
 		self.assertEqual(len(lead_rows), 1)
 		self.assertEqual(lead_rows[0][name_idx], lead.company_name or lead_name)
 
+	def test_prospect_quotation_reports_its_master_territory(self):
+		"""Prospect stores a territory, so its quotations must report it, not a blank cell.
+
+		The CASE resolved territory for Customer and Lead only, so a Prospect quotation fell through
+		to NULL even though the master carries the field.
+		"""
+		territory = "_Test Trends Prospect Territory"
+		if not frappe.db.exists("Territory", territory):
+			frappe.get_doc(
+				{
+					"doctype": "Territory",
+					"territory_name": territory,
+					"parent_territory": "All Territories",
+					"is_group": 0,
+				}
+			).insert()
+
+		prospect_name = "_Test Trends Prospect Party"
+		if not frappe.db.exists("Prospect", prospect_name):
+			frappe.get_doc(
+				{
+					"doctype": "Prospect",
+					"company_name": prospect_name,
+					"company": "_Test Company",
+					"territory": territory,
+				}
+			).insert()
+
+		quotation = frappe.new_doc("Quotation")
+		quotation.company = "_Test Company"
+		quotation.transaction_date = TXN_DATE
+		quotation.currency = "INR"
+		quotation.quotation_to = "Prospect"
+		quotation.party_name = prospect_name
+		quotation.append(
+			"items",
+			{"item_code": "_Test Item", "qty": 1, "rate": 100, "warehouse": "_Test Warehouse - _TC"},
+		)
+		quotation.insert()
+		quotation.submit()
+
+		labels, rows = self.run_report(based_on="Customer")
+		party_idx, territory_idx = labels.index("Party"), labels.index("Territory")
+		prospect_rows = [row for row in rows if row[party_idx] == prospect_name]
+
+		self.assertEqual(len(prospect_rows), 1)
+		self.assertEqual(prospect_rows[0][territory_idx], territory)
+
 	def test_group_by_chart_matches_table_total_with_mixed_group_sizes(self):
 		# _Test Item is quoted to two customers -> two detail rows under one header row.
 		# _Test Item 2 is quoted to only one customer -> exactly one detail row under its
