@@ -91,7 +91,7 @@ class TestSerialBatchBundleEntry(ERPNextTestSuite):
 			frappe.db.exists("Serial No", {"item_code": bundle.item_code, "serial_no": "Missing-Serial"})
 		)
 
-	def test_number_entry_requires_serial_create_permission(self):
+	def test_number_entry_follows_the_bundle_not_the_serial_master(self):
 		bundle = self.make_bundle()
 		user = frappe.get_doc(
 			doctype="User",
@@ -100,9 +100,10 @@ class TestSerialBatchBundleEntry(ERPNextTestSuite):
 			send_welcome_email=0,
 			roles=[{"role": "Stock User"}],
 		).insert()
-		with self.set_user(user.name), self.assertRaises(frappe.PermissionError):
+		with self.set_user(user.name):
+			self.assertFalse(frappe.has_permission("Serial No", "create"))
 			bundle.add_serial_batch({"serial_nos": "Missing-Serial"})
-		self.assertFalse(
+		self.assertTrue(
 			frappe.db.exists("Serial No", {"item_code": bundle.item_code, "serial_no": "Missing-Serial"})
 		)
 

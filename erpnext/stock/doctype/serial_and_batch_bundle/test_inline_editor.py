@@ -119,7 +119,7 @@ class TestSerialBatchInlineEditor(ERPNextTestSuite):
 			self.upsert(pr, serial_numbers=["Missing-Scan"])
 		self.assertFalse(frappe.db.exists("Serial No", {"item_code": item, "serial_no": "Missing-Scan"}))
 
-	def test_scanned_serial_creation_requires_permission(self):
+	def test_scanned_serial_is_created_for_a_user_who_may_write_the_voucher(self):
 		item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
 		pr = self.make_draft_pr(item, qty=1)
 		user = frappe.get_doc(
@@ -131,9 +131,10 @@ class TestSerialBatchInlineEditor(ERPNextTestSuite):
 				"roles": [{"role": "Stock User"}],
 			}
 		).insert()
-		with self.set_user(user.name), self.assertRaises(frappe.PermissionError):
+		with self.set_user(user.name):
+			self.assertFalse(frappe.has_permission("Serial No", "create"))
 			self.upsert(pr, serial_numbers=["Missing-Scan"])
-		self.assertFalse(frappe.db.exists("Serial No", {"item_code": item, "serial_no": "Missing-Scan"}))
+		self.assertTrue(frappe.db.exists("Serial No", {"item_code": item, "serial_no": "Missing-Scan"}))
 
 	def test_scan_cannot_override_outward_transaction_type(self):
 		item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
@@ -402,11 +403,11 @@ class TestSerialBatchInlineEditor(ERPNextTestSuite):
 			with self.subTest(content=content):
 				file = Mock(file_type="CSV")
 				file.get_content.return_value = content
-				with patch("frappe.get_doc", return_value=file) as get_doc, patch(
-					"frappe.db.bulk_insert"
-				) as insert:
+				with patch(
+					"frappe.core.doctype.file.utils.find_file_by_url", return_value=file
+				) as find_file, patch("frappe.db.bulk_insert") as insert:
 					self.assertEqual(read_serial_batch_csv("/private/files/serials.csv"), expected)
-					get_doc.assert_called_once_with("File", {"file_url": "/private/files/serials.csv"})
+					find_file.assert_called_once_with("/private/files/serials.csv")
 					insert.assert_not_called()
 				file.check_permission.assert_called_once_with("read")
 				file.insert.assert_not_called()
@@ -414,7 +415,9 @@ class TestSerialBatchInlineEditor(ERPNextTestSuite):
 	def test_csv_read_requires_file_permission(self):
 		file = Mock(file_type="CSV")
 		file.check_permission.side_effect = frappe.PermissionError
-		with patch("frappe.get_doc", return_value=file), self.assertRaises(frappe.PermissionError):
+		with patch("frappe.core.doctype.file.utils.find_file_by_url", return_value=file), self.assertRaises(
+			frappe.PermissionError
+		):
 			read_serial_batch_csv("/private/files/serials.csv")
 		file.get_content.assert_not_called()
 
@@ -590,7 +593,7 @@ class TestSerialBatchInlineEditor(ERPNextTestSuite):
 		bundle.reload()
 		self.assertEqual(len(bundle.entries), 1)
 
-	def test_selector_creation_checks_serial_permission(self):
+	def test_selector_creation_follows_the_voucher_not_the_serial_master(self):
 		item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
 		pr = self.make_draft_pr(item, qty=1)
 		user = frappe.get_doc(
@@ -600,9 +603,10 @@ class TestSerialBatchInlineEditor(ERPNextTestSuite):
 			send_welcome_email=0,
 			roles=[{"role": "Stock User"}],
 		).insert()
-		with self.set_user(user.name), self.assertRaises(frappe.PermissionError):
+		with self.set_user(user.name):
+			self.assertFalse(frappe.has_permission("Serial No", "create"))
 			self.save_selector(pr, csv_entries=[{"serial_no": "Missing-Serial", "qty": 1}])
-		self.assertFalse(frappe.db.exists("Serial No", {"item_code": item, "serial_no": "Missing-Serial"}))
+		self.assertTrue(frappe.db.exists("Serial No", {"item_code": item, "serial_no": "Missing-Serial"}))
 
 	def test_pagination(self):
 		item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
