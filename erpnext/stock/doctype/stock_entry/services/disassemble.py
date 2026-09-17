@@ -25,7 +25,6 @@ def _qty_tolerance(precision: int) -> float:
 
 
 def _manufacture_line_order(line):
-	"""Entry creation, then entry name, then line idx -- the order the query used to apply."""
 	return (line.parent_creation, line.parent_name.casefold(), line.parent_name, line.idx)
 
 

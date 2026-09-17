@@ -3464,7 +3464,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		warehouses = {}
 		for offset, row in enumerate(rows):
 			warehouse = create_warehouse(f"_Test Disassembly Tie {offset}")
-			warehouses[row.name] = warehouse
+			warehouses[row.parent] = warehouse
 			frappe.db.set_value(
 				"Stock Entry Detail", row.name, "s_warehouse", warehouse, update_modified=False
 			)
