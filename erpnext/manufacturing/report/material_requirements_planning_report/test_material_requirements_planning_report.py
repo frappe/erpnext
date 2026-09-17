@@ -403,6 +403,32 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 			purchase_order.grand_total, net_total + net_total * flt(template.taxes[0].rate) / 100
 		)
 
+	def test_buckets_include_the_period_that_ends_on_a_bucket_boundary(self):
+		"""A to_date landing on a bucket's first day must still get that bucket's column."""
+		cases = [
+			("Monthly", "2026-11-01", "2026-12-01", ["2026-11-01", "2026-12-01"]),
+			("Monthly", "2026-12-01", "2026-12-01", ["2026-12-01"]),
+			("Daily", "2026-11-30", "2026-12-01", ["2026-11-30", "2026-12-01"]),
+			("Weekly", "2026-11-30", "2026-12-07", ["2026-11-30", "2026-12-07"]),
+		]
+
+		for bucket_size, from_date, to_date, bucket_starts in cases:
+			with self.subTest(bucket_size=bucket_size, to_date=to_date):
+				report = MaterialRequirementsPlanningReport(
+					frappe._dict({"bucket_size": bucket_size, "from_date": from_date, "to_date": to_date})
+				)
+
+				dates = report.get_dates()
+				self.assertEqual(
+					[getdate(d["from_date"]) for d in dates],
+					[getdate(start) for start in bucket_starts],
+				)
+				if bucket_size == "Monthly":
+					self.assertEqual(
+						[d["label"] for d in dates],
+						[formatdate(start, "MMM YYYY") for start in bucket_starts],
+					)
+
 
 def make_chart_row(delivery_date, planned_qty=1):
 	return frappe._dict(
