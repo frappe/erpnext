@@ -180,6 +180,10 @@ audit of these fixes found four recurring mistakes:
   the arbitrary-pick preservation the wrap is usually justified as. Confirmed on CI; see #56241.
   Note a local macOS PostgreSQL gives a **false all-clear** — its collation happens to agree with
   MariaDB on case. Fix: take a representative row rather than sorting text.
+  **Pick that row on a non-text key** (`Min(idx)`, a date), or in Python. `Min(name)` is still a
+  text sort: `autoname="hash"` is not reliably lower case, because `_get_timestamp_prefix()`
+  prepends `get_trace_id()[-1:]` un-lowered and a client-supplied `X-Frappe-Request-Id` can put an
+  upper case `A-F` there.
 - **Wrong bound** — where the value has a semantic, pick the bound deliberately:
   `Min(schedule_date)` for a "required by", `Min(idx)` for first-line ordering, a qty-weighted
   average for a rate. A blind `Max` can understate urgency or overstate a figure.

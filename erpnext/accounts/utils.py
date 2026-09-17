@@ -2415,8 +2415,8 @@ class QueryPaymentLedger:
 			.groupby(ple.account, ple.voucher_type, ple.voucher_no, ple.party_type, ple.party)
 		).as_("grouped")
 
-		# Payment Ledger Entry has no autoname rule, so frappe names it by hash -- lower-case, which
-		# keeps Min(name) free of the collation divergence that picking Max() over free text has.
+		# KNOWN DIVERGENCE: Min(name) is a text sort. Hash names are not reliably lower case -- the
+		# trace-id prefix is not lowered -- so the engines can pick different rows here.
 		representative_ple = qb.DocType("Payment Ledger Entry").as_("representative_ple")
 		query_voucher_amount = (
 			qb.from_(grouped_voucher_amount)
