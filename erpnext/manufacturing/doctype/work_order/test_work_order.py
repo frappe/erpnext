@@ -3414,6 +3414,68 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(flt(disassembly_row.transfer_qty), expected_disassembly_qty)
 		disassembly.submit()
 
+	def test_disassembly_representative_is_stable_when_entries_share_a_creation(self):
+		"""The representative line must be decided by the query, not by row order on disk.
+
+		When two Manufacture entries share a creation timestamp the entry name decides, as it always
+		did -- but compared in Python, so the database's collation does not.
+		"""
+		from erpnext.stock.doctype.stock_entry.services.disassemble import DisassembleStockEntry
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import (
+			make_stock_entry as make_stock_entry_test_record,
+		)
+
+		raw_item = make_item("Test RM for Disassembly Tie", {"is_stock_item": 1}).name
+		fg_item = make_item("Test FG for Disassembly Tie", {"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, quantity=1, raw_materials=[raw_item], rm_qty=2)
+
+		wo = make_wo_order_test_record(production_item=fg_item, qty=10, bom_no=bom.name, status="Not Started")
+		make_stock_entry_test_record(
+			item_code=raw_item,
+			purpose="Material Receipt",
+			target=wo.wip_warehouse,
+			qty=50,
+			basic_rate=100,
+		)
+		transfer = frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", wo.qty))
+		for item in transfer.items:
+			item.s_warehouse = wo.wip_warehouse
+		transfer.save()
+		transfer.submit()
+
+		first = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 5))
+		first.submit()
+		second = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 5))
+		second.submit()
+
+		shared_creation = frappe.db.get_value("Stock Entry", first.name, "creation")
+		frappe.db.set_value("Stock Entry", second.name, "creation", shared_creation, update_modified=False)
+
+		rows = frappe.get_all(
+			"Stock Entry Detail",
+			filters={"parent": ("in", [first.name, second.name]), "item_code": raw_item},
+			fields=["name", "parent", "idx"],
+			order_by="name",
+		)
+		self.assertEqual(len(rows), 2)
+		self.assertEqual(len({row.idx for row in rows}), 1, "idx must repeat for the tie to matter")
+
+		# mark the two lines apart on a column the representative alone supplies
+		warehouses = {}
+		for offset, row in enumerate(rows):
+			warehouse = create_warehouse(f"_Test Disassembly Tie {offset}")
+			warehouses[row.parent] = warehouse
+			frappe.db.set_value(
+				"Stock Entry Detail", row.name, "s_warehouse", warehouse, update_modified=False
+			)
+
+		service = DisassembleStockEntry(frappe._dict(work_order=wo.name, source_stock_entry=None))
+		source_row = next(
+			row for row in service.get_items_from_manufacture_stock_entry() if row.item_code == raw_item
+		)
+
+		self.assertEqual(source_row.s_warehouse, warehouses[min(warehouses, key=str.casefold)])
+
 	def test_disassembly_with_additional_rm_not_in_bom(self):
 		"""
 		Test that SE-linked disassembly includes additional raw materials
