@@ -383,10 +383,8 @@ class DisassembleStockEntry(BaseStockEntry):
 		on its own can pair values from different lines into a row that was never posted, so take
 		the columns from a single real line instead. UOM is normalized separately to stock UOM.
 
-		Two entries can share a creation timestamp -- frappe copies the parent's to every child, so
-		the line's own creation ties with it -- and idx repeats across parents. Stock Entry Detail is
-		hash-named, and those are lower case, so name settles the tie without the collation
-		divergence that sorting a naming series would carry.
+		Ties are settled on the line's hash name, which is lower case and so sorts the same on both
+		engines -- creation cannot settle them, since frappe copies the parent's to every child.
 		"""
 		SE = frappe.qb.DocType("Stock Entry")
 		SED = frappe.qb.DocType("Stock Entry Detail")
