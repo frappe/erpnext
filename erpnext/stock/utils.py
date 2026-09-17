@@ -689,11 +689,7 @@ def get_barcode_matches(search_value, item_code=None):
 		("Serial No", ["name as serial_no_id", "serial_no", "item_code", "batch_no"]),
 		("Batch", ["name as batch_no", "batch_id", "item as item_code"]),
 	):
-		if not frappe.has_permission(doctype, "read"):
-			continue
-		matches = SerialBatchIdentity(doctype).get_records(
-			item_code, [search_value], fields, ignore_permissions=False
-		)
+		matches = SerialBatchIdentity(doctype).get_records(item_code, [search_value], fields)
 		candidates.extend({**row, "record_type": doctype} for row in matches)
 
 	if not candidates:

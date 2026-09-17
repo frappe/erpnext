@@ -56,9 +56,7 @@ class SerialBatchIdentity:
 			return []
 
 		if not ignore_permissions:
-			frappe.has_permission("Item", "read", doc=item_code, throw=True)
-			permission = "select" if frappe.only_has_select_perm(self.doctype) else "read"
-			frappe.has_permission(self.doctype, permission, throw=True)
+			frappe.has_permission("Item", "select", doc=item_code, throw=True)
 
 		names = [None] * len(numbers)
 		created = {}
@@ -72,9 +70,7 @@ class SerialBatchIdentity:
 						exc=frappe.DoesNotExistError,
 					)
 				if first_index not in created:
-					created[first_index] = self._create_record(
-						item_code, numbers[first_index], defaults, ignore_permissions
-					)
+					created[first_index] = self._create_record(item_code, numbers[first_index], defaults)
 				name = created[first_index]
 			if names[index]:
 				frappe.throw(
@@ -84,12 +80,6 @@ class SerialBatchIdentity:
 				)
 			names[index] = name
 
-		if not ignore_permissions:
-			allowed = frappe.get_list(self.doctype, filters={"name": ("in", names)}, pluck="name")
-			if set(names) - set(allowed):
-				frappe.throw(
-					_("Not permitted to select these serial or batch records"), frappe.PermissionError
-				)
 		return names
 
 	def get_label(self, name):
@@ -138,7 +128,7 @@ class SerialBatchIdentity:
 			.run(as_dict=True)
 		)
 
-	def _create_record(self, item_code, number, defaults, ignore_permissions):
+	def _create_record(self, item_code, number, defaults):
 		values = {
 			**(defaults or {}),
 			"doctype": self.doctype,
@@ -151,7 +141,7 @@ class SerialBatchIdentity:
 					_("Item {0} does not have serial numbers enabled").format(escape_html(item_code))
 				)
 			values["status"] = "Inactive"
-		return frappe.get_doc(values).insert(ignore_permissions=ignore_permissions).name
+		return frappe.get_doc(values).insert(ignore_permissions=True).name
 
 	def _match_numbers(self, item_code, numbers):
 		table = frappe.qb.DocType(self.doctype)

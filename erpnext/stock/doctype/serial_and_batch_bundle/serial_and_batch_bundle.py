@@ -3627,8 +3627,7 @@ def get_stock_ledgers_batches(kwargs):
 def get_serial_batch_scan(item_code: str, number: str, doctype: Literal["Serial No", "Batch"]):
 	if not item_code:
 		frappe.throw(_("Item is required"))
-	frappe.has_permission("Item", "read", doc=item_code, throw=True)
-	frappe.has_permission(doctype, "read", throw=True)
+	frappe.has_permission("Item", "select", doc=item_code, throw=True)
 	if not number.strip():
 		return {}
 
@@ -3636,7 +3635,7 @@ def get_serial_batch_scan(item_code: str, number: str, doctype: Literal["Serial 
 	fields = ["name", identity.number_field]
 	if doctype == "Serial No":
 		fields.append("batch_no")
-	records = identity.get_records(item_code, [number.strip()], fields, ignore_permissions=False)
+	records = identity.get_records(item_code, [number.strip()], fields)
 	return records[0] if records else {}
 
 
