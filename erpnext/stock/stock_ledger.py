@@ -924,8 +924,11 @@ class update_entries_after:
 		)
 
 	def get_future_entries_to_repost(self, kwargs):
+		# The queue holds only the identity and sort keys, and is not locked. Rows are
+		# locked REPOST_SLE_BATCH_SIZE at a time in `get_sle_to_repost`, so a repost
+		# spanning millions of entries does not hold a lock on all of them.
 		return get_stock_ledger_entries(
-			kwargs, ">=", "asc", for_update=True, check_serial_no=False, fields=REPOST_SLE_QUEUE_FIELDS
+			kwargs, ">=", "asc", check_serial_no=False, fields=REPOST_SLE_QUEUE_FIELDS
 		)
 
 	def get_sles_for_repack(self, sle):
