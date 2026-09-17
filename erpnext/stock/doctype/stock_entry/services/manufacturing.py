@@ -3,7 +3,7 @@ from collections import defaultdict
 
 import frappe
 from frappe import _, bold
-from frappe.query_builder.functions import Coalesce, Max, Min, NullIf, Sum
+from frappe.query_builder.functions import Coalesce, Min, NullIf, Sum
 from frappe.utils import ceil, cint, flt, get_link_to_form
 
 from erpnext.manufacturing.doctype.bom.bom import add_additional_cost
@@ -1305,6 +1305,9 @@ def get_secondary_item_key(row):
 	)
 
 
+SECONDARY_GROUP_KEY = ("item_code", "secondary_item_type", "bom_secondary_item", "stock_uom")
+
+
 def get_secondary_items_from_job_card(work_order, jc_name=None):
 	job_card = frappe.qb.DocType("Job Card")
 	job_card_secondary_item = frappe.qb.DocType("Job Card Secondary Item")
@@ -1314,10 +1317,7 @@ def get_secondary_items_from_job_card(work_order, jc_name=None):
 		.select(
 			Sum(job_card_secondary_item.stock_qty).as_("stock_qty"),
 			job_card_secondary_item.item_code,
-			# stock_uom is constant per grouped item_code -> Max() returns its single value.
-			# item_name and description are editable per line, so they come from a
-			# representative line below.
-			Max(job_card_secondary_item.stock_uom).as_("stock_uom"),
+			job_card_secondary_item.stock_uom,
 			job_card_secondary_item.secondary_item_type,
 			job_card_secondary_item.bom_secondary_item,
 		)
@@ -1332,6 +1332,7 @@ def get_secondary_items_from_job_card(work_order, jc_name=None):
 			job_card_secondary_item.item_code,
 			job_card_secondary_item.secondary_item_type,
 			job_card_secondary_item.bom_secondary_item,
+			job_card_secondary_item.stock_uom,
 		)
 		.orderby(Min(job_card_secondary_item.idx))
 	)
@@ -1365,13 +1366,13 @@ def apply_representative_secondary_lines(rows, work_order, jc_name=None):
 			# idx first, so the rule really is "first by idx"; creation breaks ties across job cards.
 			# Never order by parent -- the Job Card name is text, and sorting text is the divergence
 			# this is here to avoid.
-			fields=["item_code", "secondary_item_type", "item_name", "description"],
+			fields=[*SECONDARY_GROUP_KEY, "item_name", "description"],
 			order_by="idx, creation",
 		):
-			representative.setdefault((line.item_code, line.secondary_item_type), line)
+			representative.setdefault(tuple(line.get(field) for field in SECONDARY_GROUP_KEY), line)
 
 	for row in rows:
-		line = representative.get((row.item_code, row.secondary_item_type))
+		line = representative.get(tuple(row.get(field) for field in SECONDARY_GROUP_KEY))
 		row.item_name = line.item_name if line else None
 		row.description = line.description if line else None
 
