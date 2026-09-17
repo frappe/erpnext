@@ -400,7 +400,13 @@ def quotation_party_name_expr():
 
 
 def quotation_territory_expr():
-	"""Only Customer and Lead carry a territory; other party types have none."""
+	"""Territory from the party master, which only Customer and Lead have.
+
+	A Prospect or CRM Deal quotation therefore reports no territory, even though the Quotation
+	itself stores one. Falling back to it would mean Max() over a text column -- the collation
+	divergence this expression exists to avoid -- or adding it to the GROUP BY and splitting one
+	party into a row per territory. Reporting nothing is the deliberate choice of the three.
+	"""
 	return (
 		"case "
 		"when t1.quotation_to = 'Customer' then "
