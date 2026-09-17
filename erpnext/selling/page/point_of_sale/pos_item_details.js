@@ -379,6 +379,7 @@ erpnext.PointOfSale.ItemDetails = class {
 				args: {
 					item_code: this.current_item.item_code,
 					serial_nos: selected_serial_nos.join("\n"),
+					pos_profile: this.events.get_frm().doc.pos_profile,
 				},
 			});
 			// set current item's batch no and serial no

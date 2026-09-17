@@ -18,8 +18,8 @@ from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.utils import scan_barcode
 
 
-def search_by_term(search_term, warehouse, price_list, item_code=None, record_type=None):
-	result = search_for_serial_or_batch_or_barcode_number(search_term, item_code, record_type)
+def search_by_term(search_term, warehouse, price_list, pos_profile, item_code=None, record_type=None):
+	result = search_for_serial_or_batch_or_barcode_number(search_term, pos_profile, item_code, record_type)
 	if result.get("candidates"):
 		return result
 	if not result.get("item_code"):
@@ -136,6 +136,15 @@ def filter_result_items(result, pos_profile):
 		result["items"] = [item for item in result.get("items") if item.get("item_group") in pos_item_groups]
 
 
+def check_pos_item_access(pos_profile: str, item_code: str | None) -> None:
+	"""Entitle a POS endpoint that takes an Item from the caller, which get_items scopes for itself."""
+	check_pos_profile_access(pos_profile)
+	item_groups = get_item_groups(pos_profile)
+	if item_code and item_groups:
+		if frappe.db.get_value("Item", item_code, "item_group") not in item_groups:
+			frappe.throw(_("The selected Item is not available on this POS Profile"), frappe.PermissionError)
+
+
 def check_pos_profile_access(pos_profile: str | None) -> None:
 	"""The POS Profile is what entitles a caller to POS data — see the Bin/Item analysis on
 	pos_invoice.get_stock_availability. Record-level when a profile is named, so a Company User
@@ -178,7 +187,7 @@ def get_items(
 	result = []
 
 	if search_term:
-		result = search_by_term(search_term, warehouse, price_list, item_code, record_type) or []
+		result = search_by_term(search_term, warehouse, price_list, pos_profile, item_code, record_type) or []
 		filter_result_items(result, pos_profile)
 		if result:
 			return result
@@ -303,9 +312,9 @@ def get_items(
 
 @frappe.whitelist()
 def search_for_serial_or_batch_or_barcode_number(
-	search_value: str, item_code: str | None = None, record_type: str | None = None
+	search_value: str, pos_profile: str, item_code: str | None = None, record_type: str | None = None
 ):
-	frappe.has_permission("POS Profile", throw=True)
+	check_pos_item_access(pos_profile, item_code)
 
 	result = scan_barcode(search_value, item_code=item_code)
 	if not record_type:
@@ -321,8 +330,8 @@ def search_for_serial_or_batch_or_barcode_number(
 
 
 @frappe.whitelist()
-def get_serials_by_batch(item_code: str, serial_nos: str):
-	frappe.has_permission("POS Profile", throw=True)
+def get_serials_by_batch(item_code: str, serial_nos: str, pos_profile: str):
+	check_pos_item_access(pos_profile, item_code)
 
 	serial_ids = SerialBatchIdentity("Serial No").resolve(item_code, get_serial_nos(serial_nos))
 	if not serial_ids:
