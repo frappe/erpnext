@@ -1242,6 +1242,7 @@ class SerialBatchCreation:
 			{
 				"item_code": self.item_code,
 				"warehouse": self.warehouse,
+				"company": self.get("company"),
 				"qty": abs(self.actual_qty) if self.actual_qty else 0,
 				"based_on": frappe.db.get_single_value("Stock Settings", "pick_serial_and_batch_based_on"),
 			}
