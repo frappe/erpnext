@@ -1,6 +1,7 @@
 from unittest.mock import patch
 
 import frappe
+from frappe.search.sqlite_search import get_search_classes, index_docs_in_queue, update_doc_index
 
 from erpnext.controllers import queries
 from erpnext.stock.doctype.item.item_search import ItemSearch, build_match_query
@@ -48,6 +49,27 @@ class TestItemSearchIndex(ERPNextTestSuite):
 		cls.search.drop_index()
 		cls.enabled.stop()
 		super().tearDownClass()
+
+	def test_item_search_is_registered_for_the_lifecycle(self):
+		"""Without the sqlite_search hook nothing syncs the index and it silently rots."""
+		self.assertIn(ItemSearch, get_search_classes())
+
+	def test_a_new_item_is_searchable_before_the_queue_drains(self):
+		"""index_doc only queues, and the scheduler drains every 5 minutes."""
+		item = frappe.get_doc(
+			{
+				"doctype": "Item",
+				"item_code": "ZZ-QUEUE-PROBE-4471",
+				"item_name": "Queue Probe",
+				"item_group": frappe.db.get_value("Item Group", {"is_group": 0}, "name"),
+				"stock_uom": frappe.db.get_value("UOM", {}, "name"),
+			}
+		).insert()
+		self.addCleanup(index_docs_in_queue)
+		update_doc_index(item)
+
+		self.assertIn("ZZ-QUEUE-PROBE-4471", self.search.get_candidate_item_codes("4471"))
+		self.assertEqual(self.run_query("4471", None), self.run_query("4471", None, False))
 
 	def test_index_uses_the_trigram_tokenizer(self):
 		self.assertEqual(self.search.schema["tokenizer"], "trigram")
