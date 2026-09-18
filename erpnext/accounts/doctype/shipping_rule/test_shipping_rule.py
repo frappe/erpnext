@@ -15,6 +15,39 @@ test_records = frappe.get_test_records("Shipping Rule")
 
 
 class TestShippingRule(unittest.TestCase):
+	def test_account_company_on_insert(self):
+		for rule_type in ("Selling", "Buying"):
+			with self.subTest(shipping_rule_type=rule_type):
+				shipping_rule = frappe.copy_doc(test_records[0])
+				shipping_rule.label = f"{rule_type} Delivery"
+				shipping_rule.shipping_rule_type = rule_type
+				shipping_rule.company = "_Test Company 1"
+				shipping_rule.cost_center = None
+				with self.assertRaisesRegex(frappe.ValidationError, "does not belong to Company"):
+					shipping_rule.insert()
+
+	def test_account_company_on_update(self):
+		shipping_rule = frappe.copy_doc(test_records[0])
+		shipping_rule.label = "Standard Delivery"
+		shipping_rule.insert()
+		shipping_rule.company = "_Test Company 1"
+		shipping_rule.cost_center = None
+		with self.assertRaisesRegex(frappe.ValidationError, "does not belong to Company"):
+			shipping_rule.save()
+
+		shipping_rule.reload()
+		shipping_rule.company = "_Test Company 1"
+		shipping_rule.account = "_Test Account Shipping Charges - _TC1"
+		shipping_rule.cost_center = None
+		shipping_rule.save()
+		shipping_rule.reload()
+		self.assertEqual(shipping_rule.company, "_Test Company 1")
+		self.assertEqual(shipping_rule.account, "_Test Account Shipping Charges - _TC1")
+
+		shipping_rule.account = "_Test Account Shipping Charges - _TC"
+		with self.assertRaisesRegex(frappe.ValidationError, "does not belong to Company"):
+			shipping_rule.save()
+
 	def test_from_greater_than_to(self):
 		shipping_rule = frappe.copy_doc(test_records[0])
 		shipping_rule.name = test_records[0].get("name")
