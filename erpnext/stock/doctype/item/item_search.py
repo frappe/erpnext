@@ -22,7 +22,14 @@ def get_searched_fieldnames() -> list[str]:
 
 
 class ItemSearch(SQLiteSearch):
-	"""FTS5 trigram index over Item, for substring search on large catalogues."""
+	"""FTS5 trigram index over Item, for substring search on large catalogues.
+
+	Requires a single app server. The index and its pending queue are files under the site
+	path, so every host builds and updates its own copy. A host whose copy is behind omits
+	committed Items from its candidate list, and item_query then filters those valid rows
+	out, making results depend on which host answered. Leave enable_item_search_index off
+	wherever the bench runs more than one app server.
+	"""
 
 	INDEX_NAME = "item_search.db"
 
@@ -48,6 +55,7 @@ class ItemSearch(SQLiteSearch):
 		return [f for f in fieldnames if f not in ("item_code", "item_name")]
 
 	def is_search_enabled(self) -> bool:
+		"""Off unless the site opts in. Single app server only, see the class docstring."""
 		return bool(frappe.conf.get("enable_item_search_index"))
 
 	def get_search_filters(self) -> dict:
