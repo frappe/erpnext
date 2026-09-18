@@ -1066,12 +1066,15 @@ class AccountsController(TransactionBase):
 				args = "for_buying"
 
 			if self.meta.get_field(fieldname) and self.get(fieldname):
+				previous_price_list_currency = self.price_list_currency
 				self.price_list_currency = frappe.db.get_value("Price List", self.get(fieldname), "currency")
 
 				if self.price_list_currency == self.company_currency:
 					self.plc_conversion_rate = 1.0
 
-				elif not self.plc_conversion_rate:
+				elif not self.plc_conversion_rate or (
+					previous_price_list_currency and previous_price_list_currency != self.price_list_currency
+				):
 					self.plc_conversion_rate = get_exchange_rate(
 						self.price_list_currency, self.company_currency, transaction_date, args
 					)
