@@ -5,6 +5,7 @@ import frappe
 from frappe.search.sqlite_search import get_search_classes, index_docs_in_queue, update_doc_index
 
 from erpnext.controllers import queries
+from erpnext.stock.doctype.item import item_search
 from erpnext.stock.doctype.item.item_search import ItemSearch, build_match_query
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -112,9 +113,30 @@ class TestItemSearchIndex(ERPNextTestSuite):
 
 	def test_a_changed_search_field_set_falls_back(self):
 		"""The built table lags a search-field change and would miss matches on the new field."""
-		drifted = ItemSearch()
-		drifted.schema["text_fields"] = [*drifted.schema["text_fields"], "a_new_custom_search_field"]
-		self.assertIsNone(drifted.get_candidate_item_codes("Test"))
+		self.assertIsNone(self.drifted_search().get_candidate_item_codes("Test"))
+
+	def test_the_builder_recovers_from_a_search_field_change(self):
+		"""Falling back is only safe if something rebuilds; frappe's own builder does not."""
+		drifted = self.drifted_search()
+		self.assertFalse(drifted.index_exists())
+
+		with patch.object(item_search, "ItemSearch", type(drifted)):
+			item_search.build_index_if_missing()
+		self.addCleanup(self.search.build_index)
+
+		rebuilt = self.drifted_search()
+		self.assertTrue(rebuilt.index_exists())
+		self.assertIsNotNone(rebuilt.get_candidate_item_codes("Test"))
+
+	def drifted_search(self) -> ItemSearch:
+		extra = [*self.search.schema["text_fields"], "a_new_custom_search_field"]
+
+		class DriftedItemSearch(ItemSearch):
+			def __init__(self, *args, **kwargs):
+				super().__init__(*args, **kwargs)
+				self.schema["text_fields"] = extra
+
+		return DriftedItemSearch()
 
 	def test_candidates_are_a_superset_of_the_scan(self):
 		"""The query re-filters, so extra candidates are safe but missing ones are not."""
