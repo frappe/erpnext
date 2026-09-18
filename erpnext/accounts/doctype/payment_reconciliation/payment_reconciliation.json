@@ -110,7 +110,7 @@
   },
   {
    "depends_on": "eval:(doc.payments).length || (doc.invoices).length",
-   "description": "The (All) figures total every row above; the (Selected) figures reflect only the rows you've checked.",
+   "description": "The `All` figures total every row above; the `Selected` figures reflect only the rows you've checked.",
    "fieldname": "totals_section",
    "fieldtype": "Section Break",
    "label": "Totals"
