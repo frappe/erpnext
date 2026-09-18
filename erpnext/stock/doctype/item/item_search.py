@@ -1,9 +1,10 @@
+import os
 import re
 import sqlite3
 from collections import defaultdict
 
 import frappe
-from frappe.search.sqlite_search import SQLiteSearch
+from frappe.search.sqlite_search import SQLiteSearch, SQLiteSearchIndexMissingError, build_index
 
 MINIMUM_TERM_LENGTH = 3
 CANDIDATE_LIMIT = 25000
@@ -115,9 +116,6 @@ class ItemSearch(SQLiteSearch):
 		"""None means the index cannot answer. An empty list means it answered: nothing matches."""
 		connection = self._get_connection(read_only=True)
 		try:
-			if not self.has_current_schema(connection):
-				return None
-
 			matched = connection.execute(
 				"SELECT name FROM search_fts WHERE search_fts MATCH ? LIMIT ?",
 				(match_query, CANDIDATE_LIMIT),
@@ -134,9 +132,29 @@ class ItemSearch(SQLiteSearch):
 		names = [row["name"] for row in matched]
 		return names + [doc_id.removeprefix(QUEUE_PREFIX) for doc_id in queued_item_ids(queued)]
 
-	def has_current_schema(self, connection) -> bool:
-		"""A rebuild lags a search-field change, and the older table would miss the new field."""
-		columns = {row["name"] for row in connection.execute("PRAGMA table_info(search_fts)")}
+	def index_exists(self) -> bool:
+		"""Also false once the built columns stop covering the searched fields.
+
+		The scheduled builder only rebuilds an index it considers missing, and it creates the
+		table with IF NOT EXISTS, so reporting a drifted index as present would strand the site
+		on the full scan until someone deleted the file by hand.
+		"""
+		return super().index_exists() and self.has_current_schema()
+
+	def has_current_schema(self) -> bool:
+		"""Whether the built table still carries every field the search term is matched against."""
+		try:
+			connection = self._get_connection(read_only=True)
+		except SQLiteSearchIndexMissingError:
+			return False
+
+		try:
+			columns = {row["name"] for row in connection.execute("PRAGMA table_info(search_fts)")}
+		except sqlite3.Error:
+			return False
+		finally:
+			connection.close()
+
 		return set(self.schema["text_fields"]) <= columns
 
 
@@ -161,6 +179,23 @@ def build_match_query(txt: str) -> str | None:
 def quote_fragment(fragment: str) -> str:
 	escaped = fragment.replace('"', '""')
 	return f'"{escaped}"'
+
+
+def build_index_if_missing():
+	"""Build the index when it is absent or its columns have drifted.
+
+	frappe's own scheduled builder cannot do this: it calls build_index with force=False, which
+	returns before building. A build already in progress leaves a temp database behind, and that
+	one frappe does resume, so leave it alone.
+	"""
+	search = ItemSearch()
+	if not search.is_search_enabled() or search.index_exists():
+		return
+
+	if os.path.exists(search._get_db_path(is_temp=True)):
+		return
+
+	build_index(ItemSearch, force=True)
 
 
 def get_item_search_candidates(txt: str) -> list[str] | None:

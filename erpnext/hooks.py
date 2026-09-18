@@ -498,6 +498,7 @@ scheduler_events = {
 		# Hourly but offset by 30 minutes
 		"30 * * * *": [
 			"erpnext.accounts.doctype.gl_entry.gl_entry.rename_gle_sle_docs",
+			"erpnext.stock.doctype.item.item_search.build_index_if_missing",
 		],
 		# Daily but offset by 45 minutes
 		"45 0 * * *": [],
