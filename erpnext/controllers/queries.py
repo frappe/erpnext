@@ -405,9 +405,6 @@ def item_query(
 		search_conditions.append(item.description.like(search_str))
 
 	candidates = None if searches_description else get_item_search_candidates(txt)
-	search_criterion = (
-		item.name.isin(candidates) if candidates is not None else Criterion.any(search_conditions)
-	)
 
 	txt_no_percent = txt.replace("%", "")
 
@@ -419,7 +416,7 @@ def item_query(
 		.where(item.disabled == 0)
 		.where(item.has_variants == 0)
 		.where(date_condition)
-		.where(search_criterion)
+		.where(Criterion.any(search_conditions))
 		.orderby(
 			Case()
 			.when(
@@ -442,6 +439,11 @@ def item_query(
 		.limit(page_len)
 		.offset(start)
 	)
+
+	if candidates is not None:
+		if not candidates:
+			return []
+		query = query.where(item.name.isin(candidates))
 
 	if company:
 		query = query.where(get_restriction_criterion("Item", [company]))

@@ -1,3 +1,4 @@
+import re
 import sqlite3
 
 import frappe
@@ -5,7 +6,7 @@ from frappe.search.sqlite_search import SQLiteSearch
 
 MINIMUM_TERM_LENGTH = 3
 CANDIDATE_LIMIT = 5000
-LIKE_WILDCARDS = ("%", "_")
+LIKE_WILDCARDS = r"[%_]"
 
 
 def get_searched_fieldnames() -> list[str]:
@@ -57,7 +58,7 @@ class ItemSearch(SQLiteSearch):
 		return " ".join(barcode for barcode in barcodes if barcode)
 
 	def get_candidate_item_codes(self, txt: str) -> list[str] | None:
-		"""Item codes whose indexed text contains txt, or None when the index cannot answer."""
+		"""Item codes that can match txt, a superset the caller must still recheck with LIKE."""
 		if not self.is_search_enabled() or not self.index_exists():
 			return None
 
@@ -84,12 +85,20 @@ class ItemSearch(SQLiteSearch):
 
 
 def build_match_query(txt: str) -> str | None:
-	"""FTS5 substring query for txt, or None when a trigram index cannot match it exactly."""
-	if any(wildcard in txt for wildcard in LIKE_WILDCARDS) or "\\" in txt:
+	"""FTS5 query matching a superset of LIKE %txt%, or None when it cannot narrow the scan."""
+	if "\\" in txt:
 		return None
-	if len(txt.strip()) < MINIMUM_TERM_LENGTH:
+
+	fragments = [fragment.strip() for fragment in re.split(LIKE_WILDCARDS, txt)]
+	usable = [fragment for fragment in fragments if len(fragment) >= MINIMUM_TERM_LENGTH]
+	if not usable:
 		return None
-	escaped = txt.replace('"', '""')
+
+	return " AND ".join(quote_fragment(fragment) for fragment in usable)
+
+
+def quote_fragment(fragment: str) -> str:
+	escaped = fragment.replace('"', '""')
 	return f'"{escaped}"'
 
 
