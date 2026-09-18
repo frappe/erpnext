@@ -49,6 +49,9 @@ class ItemSearch(SQLiteSearch):
 	def get_search_filters(self) -> dict:
 		return {}
 
+	def _build_vocabulary_incremental(self):
+		"""Spelling correction is unused: item_query matches search_fts directly."""
+
 	def get_documents_paginated(
 		self, doctype, limit=1000, last_indexed_modified=None, last_indexed_name=None
 	):
