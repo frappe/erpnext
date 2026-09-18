@@ -1,7 +1,6 @@
 import os
 import re
 import sqlite3
-from collections import defaultdict
 
 import frappe
 from frappe.search.sqlite_search import SQLiteSearch, SQLiteSearchIndexMissingError, build_index
@@ -47,9 +46,8 @@ class ItemSearch(SQLiteSearch):
 		}
 		self.INDEX_SCHEMA = {
 			"tokenizer": TOKENIZER,
-			"text_fields": ["title", "content", *self._extra_text_fields(fieldnames), "barcode"],
+			"text_fields": ["title", "content", *self._extra_text_fields(fieldnames)],
 		}
-		self.barcode_cache = None
 		super().__init__(db_name)
 
 	@staticmethod
@@ -66,38 +64,6 @@ class ItemSearch(SQLiteSearch):
 	def _build_vocabulary_incremental(self):
 		"""Spelling correction is unused: item_query matches search_fts directly."""
 
-	def get_documents_paginated(
-		self, doctype, limit=1000, last_indexed_modified=None, last_indexed_name=None
-	):
-		"""Preload the batch's barcodes so prepare_document does not query per item."""
-		docs = super().get_documents_paginated(doctype, limit, last_indexed_modified, last_indexed_name)
-		self.barcode_cache = self.get_barcode_map([doc.name for doc in docs])
-		return docs
-
-	def prepare_document(self, doc):
-		document = super().prepare_document(doc)
-		if document is not None:
-			document["barcode"] = self.get_barcode_text(doc.name)
-		return document
-
-	def get_barcode_text(self, item_code: str) -> str:
-		if self.barcode_cache is not None:
-			return self.barcode_cache.get(item_code, "")
-		return self.get_barcode_map([item_code]).get(item_code, "")
-
-	def get_barcode_map(self, item_codes: list[str]) -> dict[str, str]:
-		if not item_codes:
-			return {}
-
-		rows = frappe.get_all(
-			"Item Barcode", filters={"parent": ("in", item_codes)}, fields=["parent", "barcode"]
-		)
-		grouped = defaultdict(list)
-		for row in rows:
-			if row.barcode:
-				grouped[row.parent].append(row.barcode)
-		return {parent: " ".join(barcodes) for parent, barcodes in grouped.items()}
-
 	def get_candidate_item_codes(self, txt: str) -> list[str] | None:
 		"""Item codes that can match txt, a superset the caller must still recheck with LIKE."""
 		if not self.is_search_enabled() or not self.index_exists():
@@ -108,10 +74,11 @@ class ItemSearch(SQLiteSearch):
 			return None
 
 		names = self.run_match(match_query)
-		if names is None or len(names) >= CANDIDATE_LIMIT:
+		if names is None:
 			return None
 
-		return names
+		names += get_item_codes_by_barcode(txt)
+		return None if len(names) >= CANDIDATE_LIMIT else names
 
 	def run_match(self, match_query: str) -> list[str] | None:
 		"""None means the index cannot answer. An empty list means it answered: nothing matches."""
@@ -157,6 +124,21 @@ class ItemSearch(SQLiteSearch):
 			connection.close()
 
 		return set(self.schema["text_fields"]) <= columns
+
+
+def get_item_codes_by_barcode(txt: str) -> list[str]:
+	"""Item codes whose barcode contains txt.
+
+	Barcodes are searched by item_query but deliberately stay out of the index. They live in a
+	child table, and update_doc_index only reindexes when a watched Item field changed, which a
+	barcode edit never does, so an indexed copy would go stale the moment a barcode was added.
+	"""
+	return frappe.get_all(
+		"Item Barcode",
+		filters={"barcode": ("like", f"%{txt}%")},
+		pluck="parent",
+		limit=CANDIDATE_LIMIT,
+	)
 
 
 def queued_item_ids(rows) -> list[str]:
