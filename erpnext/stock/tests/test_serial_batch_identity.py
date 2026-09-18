@@ -1254,7 +1254,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 		with self.set_user("Guest"), self.assertRaises(frappe.PermissionError):
 			get_serials_by_batch(self.item.name, "POS-Serial-1", self.pos_profile())
 
-	def test_pos_endpoints_refuse_items_outside_the_profile(self):
+	def test_pos_endpoints_do_not_reach_items_outside_the_profile(self):
 		self.make_number("Serial No", "POS-Outside")
 		profile = frappe.get_doc("POS Profile", self.pos_profile())
 		profile.append("item_groups", {"item_group": "_Test Item Group"})
@@ -1268,6 +1268,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 		):
 			with self.subTest(call=call), self.assertRaises(frappe.PermissionError):
 				call()
+		self.assertEqual(search_for_serial_or_batch_or_barcode_number("POS-Outside", profile.name), {})
 
 	def test_pos_return_checks_the_original_item_and_literal_serial_number(self):
 		serial = self.make_number("Serial No", "POS-Return_1")
