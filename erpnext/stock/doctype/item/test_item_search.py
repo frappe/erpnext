@@ -1,4 +1,5 @@
-from unittest.mock import patch
+import sqlite3
+from unittest.mock import MagicMock, patch
 
 import frappe
 from frappe.search.sqlite_search import get_search_classes, index_docs_in_queue, update_doc_index
@@ -82,8 +83,38 @@ class TestItemSearchIndex(ERPNextTestSuite):
 		finally:
 			connection.close()
 
-	def test_index_uses_the_trigram_tokenizer(self):
-		self.assertEqual(self.search.schema["tokenizer"], "trigram")
+	def test_tokenizer_folds_accents(self):
+		"""MariaDB's utf8mb4_unicode_ci LIKE is accent insensitive, so the index must be too."""
+		self.assertEqual(self.search.schema["tokenizer"], "trigram remove_diacritics 1")
+
+	def test_an_accented_item_is_found_by_an_unaccented_term(self):
+		item = frappe.get_doc(
+			{
+				"doctype": "Item",
+				"item_code": "ZZ-CAFÉ-7781",
+				"item_name": "Café Filter",
+				"item_group": frappe.db.get_value("Item Group", {"is_group": 0}, "name"),
+				"stock_uom": frappe.db.get_value("UOM", {}, "name"),
+			}
+		).insert()
+		update_doc_index(item)
+		self.addCleanup(index_docs_in_queue)
+
+		self.assertIn("ZZ-CAFÉ-7781", self.search.get_candidate_item_codes("CAFE-7781"))
+		self.assertEqual(self.run_query("CAFE-7781", None), self.run_query("CAFE-7781", None, False))
+
+	def test_a_broken_index_falls_back_to_the_scan(self):
+		"""An unreadable index must not answer 'nothing matches' and hide every row."""
+		broken = MagicMock()
+		broken.execute.side_effect = sqlite3.DatabaseError("database disk image is malformed")
+		with patch.object(ItemSearch, "_get_connection", return_value=broken):
+			self.assertIsNone(self.search.get_candidate_item_codes("Test"))
+
+	def test_a_changed_search_field_set_falls_back(self):
+		"""The built table lags a search-field change and would miss matches on the new field."""
+		drifted = ItemSearch()
+		drifted.schema["text_fields"] = [*drifted.schema["text_fields"], "a_new_custom_search_field"]
+		self.assertIsNone(drifted.get_candidate_item_codes("Test"))
 
 	def test_candidates_are_a_superset_of_the_scan(self):
 		"""The query re-filters, so extra candidates are safe but missing ones are not."""
