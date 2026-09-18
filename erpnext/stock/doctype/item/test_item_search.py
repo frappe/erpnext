@@ -35,6 +35,15 @@ class TestBuildMatchQuery(ERPNextTestSuite):
 		self.assertIsNone(build_match_query("ab\\_cd"))
 
 
+class TestItemSearchSetting(ERPNextTestSuite):
+	def test_the_stock_settings_checkbox_drives_the_index(self):
+		with self.change_settings("Stock Settings", enable_item_search_index=0):
+			self.assertFalse(ItemSearch().is_search_enabled())
+
+		with self.change_settings("Stock Settings", enable_item_search_index=1):
+			self.assertTrue(ItemSearch().is_search_enabled())
+
+
 class TestItemSearchIndex(ERPNextTestSuite):
 	@classmethod
 	def setUpClass(cls):
