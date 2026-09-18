@@ -78,6 +78,93 @@ class LandedCostVoucher(Document):
 			self.get_items_from_purchase_receipts()
 
 		self.set_applicable_charges_on_item()
+		self.validate_mandatory_dimensions()
+
+	def validate_mandatory_dimensions(self):
+		from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+			get_accounting_dimensions,
+			get_checks_for_pl_and_bs_accounts,
+		)
+		from erpnext.accounts.doctype.accounting_dimension_filter.accounting_dimension_filter import (
+			get_dimension_filter_map,
+		)
+
+		if not is_perpetual_inventory_enabled(self.company):
+			return
+
+		company_checks = [
+			check
+			for check in get_checks_for_pl_and_bs_accounts()
+			if check.company == self.company and (check.mandatory_for_pl or check.mandatory_for_bs)
+		]
+		dimension_filter_map = get_dimension_filter_map()
+
+		if not company_checks and not dimension_filter_map:
+			return
+
+		labels = {d.fieldname: d.label for d in get_accounting_dimensions(as_list=False)}
+		receipts = {}
+
+		for tax in self.get("taxes"):
+			if not tax.expense_account:
+				continue
+
+			report_type = frappe.get_cached_value("Account", tax.expense_account, "report_type")
+
+			mandatory = {}
+			for check in company_checks:
+				is_mandatory = (
+					check.mandatory_for_pl if report_type == "Profit and Loss" else check.mandatory_for_bs
+				)
+				if is_mandatory:
+					mandatory[check.fieldname] = check.label
+
+			for (fieldname, account), dimension_filter in dimension_filter_map.items():
+				if account == tax.expense_account and dimension_filter.get("is_mandatory"):
+					mandatory.setdefault(fieldname, labels.get(fieldname) or frappe.unscrub(fieldname))
+
+			for fieldname, label in mandatory.items():
+				if tax.get(fieldname):
+					continue
+
+				for item in self.get("items"):
+					if self.get_receipt_dimension(receipts, item, fieldname):
+						continue
+
+					frappe.throw(
+						_(
+							"Row {0}: Accounting Dimension {1} is mandatory for account {2}."
+							" Set it on this Taxes and Charges row, or on Item Row {3} ({4})."
+						).format(
+							tax.idx,
+							frappe.bold(label),
+							frappe.bold(tax.expense_account),
+							item.idx,
+							frappe.bold(item.item_code),
+						),
+						title=_("Missing Accounting Dimension"),
+					)
+
+	def get_receipt_dimension(self, receipts, item, fieldname):
+		if item.get(fieldname):
+			return item.get(fieldname)
+
+		key = (item.receipt_document_type, item.receipt_document)
+		if key not in receipts:
+			receipts[key] = frappe.get_doc(*key) if item.receipt_document else None
+
+		receipt = receipts[key]
+		if not receipt:
+			return None
+
+		row_fieldname = "stock_entry_item" if receipt.doctype == "Stock Entry" else "purchase_receipt_item"
+		receipt_row_name = item.get(row_fieldname)
+
+		for row in receipt.get("items") or []:
+			if row.name == receipt_row_name and row.get(fieldname):
+				return row.get(fieldname)
+
+		return receipt.get(fieldname)
 
 	def validate_line_items(self):
 		for d in self.get("items"):
@@ -379,3 +466,25 @@ def get_pr_items(purchase_receipt):
 		.orderby(pr_item.idx)
 		.run(as_dict=True)
 	)
+
+
+def get_lcv_dimension_fields():
+	from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+		get_accounting_dimensions,
+	)
+
+	return ["cost_center", "project", *get_accounting_dimensions()]
+
+
+def get_row_dimensions(tax_row, lcv_item, dimension_fields):
+	return frappe._dict(
+		{field: (tax_row.get(field) or lcv_item.get(field) or None) for field in dimension_fields}
+	)
+
+
+def get_custom_dimension_overrides(entry):
+	return {
+		dimension: value
+		for dimension, value in (entry.dimensions or {}).items()
+		if value and dimension not in ("cost_center", "project")
+	}
