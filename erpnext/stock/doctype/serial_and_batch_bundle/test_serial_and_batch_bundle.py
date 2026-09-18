@@ -259,6 +259,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 					"item_code": batch_item_code,
 					"warehouse": "_Test Warehouse - _TC",
 					"stock_queue": json.dumps(stock_queue),
+					"company": "_Test Company",
 				}
 			)
 
@@ -430,6 +431,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 					"actual_qty": qty,
 					"item_code": batch_item_code,
 					"warehouse": "_Test Warehouse - _TC",
+					"company": "_Test Company",
 				}
 			)
 
