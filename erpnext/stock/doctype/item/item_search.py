@@ -65,7 +65,11 @@ class ItemSearch(SQLiteSearch):
 		"""Spelling correction is unused: item_query matches search_fts directly."""
 
 	def get_candidate_item_codes(self, txt: str) -> list[str] | None:
-		"""Item codes that can match txt, a superset the caller must still recheck with LIKE."""
+		"""Item codes the index says can match txt.
+
+		A superset of what the index covers, which the caller must still recheck with LIKE.
+		Barcodes are not in it: item_query searches those separately.
+		"""
 		if not self.is_search_enabled() or not self.index_exists():
 			return None
 
@@ -74,11 +78,10 @@ class ItemSearch(SQLiteSearch):
 			return None
 
 		names = self.run_match(match_query)
-		if names is None:
+		if names is None or len(names) >= CANDIDATE_LIMIT:
 			return None
 
-		names += get_item_codes_by_barcode(txt)
-		return None if len(names) >= CANDIDATE_LIMIT else names
+		return names
 
 	def run_match(self, match_query: str) -> list[str] | None:
 		"""None means the index cannot answer. An empty list means it answered: nothing matches."""
@@ -124,21 +127,6 @@ class ItemSearch(SQLiteSearch):
 			connection.close()
 
 		return set(self.schema["text_fields"]) <= columns
-
-
-def get_item_codes_by_barcode(txt: str) -> list[str]:
-	"""Item codes whose barcode contains txt.
-
-	Barcodes are searched by item_query but deliberately stay out of the index. They live in a
-	child table, and update_doc_index only reindexes when a watched Item field changed, which a
-	barcode edit never does, so an indexed copy would go stale the moment a barcode was added.
-	"""
-	return frappe.get_all(
-		"Item Barcode",
-		filters={"barcode": ("like", f"%{txt}%")},
-		pluck="parent",
-		limit=CANDIDATE_LIMIT,
-	)
 
 
 def queued_item_ids(rows) -> list[str]:
