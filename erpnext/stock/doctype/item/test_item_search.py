@@ -71,9 +71,8 @@ class TestItemSearchIndex(ERPNextTestSuite):
 		self.assertIn(ItemSearch, get_search_classes())
 
 	def test_a_barcode_added_after_the_build_is_searchable(self):
-		"""Barcodes stay out of the index: a barcode edit changes no watched Item field, so the
-		sync never fires and an indexed copy would be stale from the moment one was added.
-		item_query adds them to the candidates itself."""
+		"""A barcode edit changes no other Item field, so this only works because modified is
+		watched: without it the sync never fires and the indexed barcodes go stale."""
 		item = frappe.get_doc(
 			{
 				"doctype": "Item",
@@ -83,7 +82,7 @@ class TestItemSearchIndex(ERPNextTestSuite):
 				"stock_uom": frappe.db.get_value("UOM", {}, "name"),
 			}
 		).insert()
-		self.assertNotIn("barcode", self.search.schema["text_fields"])
+		self.assertIn("barcode", self.search.schema["text_fields"])
 
 		item.append("barcodes", {"barcode": "8809988776655"})
 		item.save()
@@ -91,8 +90,7 @@ class TestItemSearchIndex(ERPNextTestSuite):
 		index_docs_in_queue()
 		self.addCleanup(index_docs_in_queue)
 
-		self.assertNotIn("ZZ-BARCODE-PROBE", self.search.get_candidate_item_codes("8809988776655"))
-		self.assertIn("ZZ-BARCODE-PROBE", queries.get_item_candidates("8809988776655"))
+		self.assertIn("ZZ-BARCODE-PROBE", self.search.get_candidate_item_codes("8809988776655"))
 		self.assertEqual(self.run_query("8809988776655", None), self.run_query("8809988776655", None, False))
 
 	def test_a_new_item_is_searchable_before_the_queue_drains(self):
