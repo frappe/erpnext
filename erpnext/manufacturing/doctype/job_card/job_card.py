@@ -194,10 +194,12 @@ class JobCard(Document):
 				).format(self.name)
 			)
 
-		if self.docstatus == 1 and not self.total_completed_qty:
+		if self.docstatus == 1 and not (
+			self.total_completed_qty or self.process_loss_qty or self.pending_qty
+		):
 			frappe.throw(
 				_(
-					"Total Completed Qty is required for Job Card {0}, please start and complete the job card before submission"
+					"Completed, Process Loss or Pending Qty is required for Job Card {0}, please start and complete the job card before submission"
 				).format(self.name)
 			)
 
@@ -951,9 +953,10 @@ class JobCard(Document):
 
 	def set_process_loss(self):
 		precision = self.precision("total_completed_qty")
+		should_set_process_loss = self.total_completed_qty or self.process_loss_qty
 
 		self.process_loss_qty = 0.0
-		if self.total_completed_qty and self.for_quantity > self.total_completed_qty:
+		if should_set_process_loss and self.for_quantity > self.total_completed_qty:
 			self.process_loss_qty = (
 				flt(self.for_quantity, precision)
 				- flt(self.total_completed_qty, precision)
@@ -1543,7 +1546,7 @@ class JobCard(Document):
 					row.to_time = kwargs.to_time
 					row.time_in_mins = time_diff_in_minutes(row.to_time, row.from_time)
 
-					if kwargs.completed_qty:
+					if kwargs.get("completed_qty") is not None:
 						row.completed_qty = kwargs.completed_qty
 					row.db_update()
 		else:
@@ -1559,13 +1562,13 @@ class JobCard(Document):
 		for employee in kwargs.employees:
 			kwargs.employee = employee.get("employee")
 			if kwargs.from_time and not kwargs.to_time:
-				if kwargs.qty:
+				if kwargs.get("qty") is not None:
 					kwargs.completed_qty = kwargs.qty
 
 				row = self.append("time_logs", kwargs)
 				row.db_update()
 				self.db_set("status", "Work In Progress")
-			elif not kwargs.from_time and not kwargs.to_time and kwargs.completed_qty:
+			elif not kwargs.from_time and not kwargs.to_time and kwargs.get("completed_qty") is not None:
 				update_status = True
 				for row in self.time_logs:
 					if row.employee != kwargs.employee:
@@ -1659,6 +1662,9 @@ class JobCard(Document):
 			frappe.throw(_("Submitted Job Card cannot be processed."))
 
 	def validate_complete_job_card_qty(self, kwargs):
+		if flt(kwargs.qty) < 0:
+			frappe.throw(_("Completed quantity cannot be negative."))
+
 		if flt(kwargs.pending_qty) and flt(kwargs.pending_qty) < 0:
 			frappe.throw(_("Pending quantity cannot be negative."))
 
