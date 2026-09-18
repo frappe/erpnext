@@ -71,6 +71,17 @@ class TestItemSearchIndex(ERPNextTestSuite):
 		self.assertIn("ZZ-QUEUE-PROBE-4471", self.search.get_candidate_item_codes("4471"))
 		self.assertEqual(self.run_query("4471", None), self.run_query("4471", None, False))
 
+	def test_vocabulary_is_not_built(self):
+		"""Guards a no-op override of a private base method: a rename there would silently
+		restore the pass, which costs a third of the build and nothing reads its output."""
+		connection = self.search._get_connection(read_only=True)
+		try:
+			for table in ("search_vocabulary", "search_trigrams"):
+				count = connection.execute(f"SELECT count(*) FROM {table}").fetchone()[0]
+				self.assertEqual(count, 0, table)
+		finally:
+			connection.close()
+
 	def test_index_uses_the_trigram_tokenizer(self):
 		self.assertEqual(self.search.schema["tokenizer"], "trigram")
 
