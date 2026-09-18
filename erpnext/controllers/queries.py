@@ -26,6 +26,7 @@ from pypika import Order
 import erpnext
 from erpnext.accounts.utils import build_qb_match_conditions
 from erpnext.stock.doctype.company_restriction.company_restriction import get_restriction_criterion
+from erpnext.stock.doctype.item.item_search import get_item_search_candidates
 from erpnext.stock.get_item_details import _get_item_tax_template
 from erpnext.stock.utils import get_combine_datetime
 from erpnext.utilities.query import get_filter_conditions_qb
@@ -399,8 +400,14 @@ def item_query(
 	search_conditions.append(item.item_code.isin(barcode_subquery))
 
 	# Condition for the description
-	if frappe.db.estimate_count("Item") < 50000 and "description" not in fields_to_process:
+	searches_description = frappe.db.estimate_count("Item") < 50000 and "description" not in fields_to_process
+	if searches_description:
 		search_conditions.append(item.description.like(search_str))
+
+	candidates = None if searches_description else get_item_search_candidates(txt)
+	search_criterion = (
+		item.name.isin(candidates) if candidates is not None else Criterion.any(search_conditions)
+	)
 
 	txt_no_percent = txt.replace("%", "")
 
@@ -412,7 +419,7 @@ def item_query(
 		.where(item.disabled == 0)
 		.where(item.has_variants == 0)
 		.where(date_condition)
-		.where(Criterion.any(search_conditions))
+		.where(search_criterion)
 		.orderby(
 			Case()
 			.when(
