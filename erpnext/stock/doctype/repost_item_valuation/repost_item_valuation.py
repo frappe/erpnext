@@ -83,6 +83,7 @@ class RepostItemValuation(Document):
 	def validate(self):
 		self.set_default_posting_time()
 		self.reset_repost_only_accounting_ledgers()
+		self.validate_repost_only_accounting_ledgers()
 		self.set_company()
 		self.validate_update_stock()
 		self.validate_period_closing_voucher()
@@ -102,6 +103,19 @@ class RepostItemValuation(Document):
 	def reset_repost_only_accounting_ledgers(self):
 		if self.repost_only_accounting_ledgers and self.based_on != "Transaction":
 			self.repost_only_accounting_ledgers = 0
+
+	def validate_repost_only_accounting_ledgers(self):
+		if not self.repost_only_accounting_ledgers:
+			return
+
+		# A GL Entry is not a stock transaction, so there are no stock ledger entries to rebuild its
+		# accounting ledgers from; reposting it would only delete the entries it already has.
+		if self.voucher_type == "GL Entry":
+			frappe.throw(
+				_("GL reposting is not allowed against the voucher type {0}.").format(
+					frappe.bold(_("GL Entry"))
+				)
+			)
 
 	def validate_update_stock(self):
 		if (
@@ -381,6 +395,7 @@ def bulk_restart_reposting(names):
 
 def on_doctype_update():
 	frappe.db.add_index("Repost Item Valuation", ["warehouse", "item_code"], "item_warehouse")
+	frappe.db.add_index("Repost Item Valuation", ["voucher_no", "voucher_type", "status"], "voucher_status")
 
 
 def repost(doc):
