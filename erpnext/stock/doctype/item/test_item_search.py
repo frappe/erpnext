@@ -3,10 +3,15 @@ from unittest.mock import MagicMock, patch
 
 import frappe
 from frappe.search.sqlite_search import get_search_classes, index_docs_in_queue, update_doc_index
+from frappe.utils import add_to_date, now_datetime
 
 from erpnext.controllers import queries
 from erpnext.stock.doctype.item import item_search
-from erpnext.stock.doctype.item.item_search import ItemSearch, build_match_query
+from erpnext.stock.doctype.item.item_search import (
+	ItemSearch,
+	build_match_query,
+	queue_items_changed_during_build,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -123,6 +128,32 @@ class TestItemSearchIndex(ERPNextTestSuite):
 	def test_a_changed_search_field_set_falls_back(self):
 		"""The built table lags a search-field change and would miss matches on the new field."""
 		self.assertIsNone(self.drifted_search().get_candidate_item_codes("Test"))
+
+	def test_an_item_saved_during_a_build_is_requeued(self):
+		"""frappe skips the sync while a build runs, so such a save leaves stale indexed text."""
+		item = frappe.get_doc(
+			{
+				"doctype": "Item",
+				"item_code": "ZZ-MIDBUILD-5512",
+				"item_name": "Original Name",
+				"item_group": frappe.db.get_value("Item Group", {"is_group": 0}, "name"),
+				"stock_uom": frappe.db.get_value("UOM", {}, "name"),
+			}
+		).insert()
+		update_doc_index(item)
+		index_docs_in_queue()
+		self.addCleanup(index_docs_in_queue)
+
+		started_at = add_to_date(now_datetime(), seconds=-1)
+		with patch.object(ItemSearch, "index_exists", return_value=False):
+			item.item_name = "Renamed Midbuild Widget"
+			item.save()
+
+		self.assertNotIn("ZZ-MIDBUILD-5512", self.search.get_candidate_item_codes("Renamed Midbuild"))
+
+		queue_items_changed_during_build(started_at)
+
+		self.assertIn("ZZ-MIDBUILD-5512", self.search.get_candidate_item_codes("Renamed Midbuild"))
 
 	def test_the_builder_recovers_from_a_search_field_change(self):
 		"""Falling back is only safe if something rebuilds; frappe's own builder does not."""
