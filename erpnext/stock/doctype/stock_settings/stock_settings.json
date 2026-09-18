@@ -13,6 +13,7 @@
   "column_break_4",
   "item_group",
   "valuation_method",
+  "enable_item_search_index",
   "price_list_defaults_section",
   "auto_insert_price_list_rate_if_missing",
   "update_existing_price_list_rate",
@@ -256,6 +257,13 @@
    "fieldname": "item_defaults_section",
    "fieldtype": "Section Break",
    "label": "Item Defaults"
+  },
+  {
+   "default": "0",
+   "description": "Speeds up Item search on large catalogues. Requires a single app server: the index is a file on that server's disk, and several servers would each answer from a different copy. Building it takes about 20 minutes for 3 million items, and runs in the background.",
+   "fieldname": "enable_item_search_index",
+   "fieldtype": "Check",
+   "label": "Enable Item Search Index"
   },
   {
    "fieldname": "section_break_9",
@@ -593,7 +601,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-08-01 23:35:02.896836",
+ "modified": "2026-09-18 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",
