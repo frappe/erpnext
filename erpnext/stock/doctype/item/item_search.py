@@ -25,11 +25,10 @@ class ItemSearch(SQLiteSearch):
 
 	A host whose copy of the index is behind leaves committed Items out of its candidate list,
 	and item_query then filters those valid rows away, so results depend on which host answered.
-	Switched on per site from its Search Index record, which carries that warning.
+	Switched on per site from Stock Settings, which carries that warning.
 	"""
 
 	INDEX_NAME = "item_search.db"
-	ENABLED_BY_DEFAULT = False
 	BUILD_VOCABULARY = False
 
 	def __init__(self, db_name=None):
@@ -52,6 +51,10 @@ class ItemSearch(SQLiteSearch):
 	@staticmethod
 	def _extra_text_fields(fieldnames: list[str]) -> list[str]:
 		return [f for f in fieldnames if f not in ("item_code", "item_name")]
+
+	def is_search_enabled(self) -> bool:
+		"""Off unless Stock Settings opts in: building reads every Item, which is not free."""
+		return bool(frappe.get_single_value("Stock Settings", "enable_item_search_index"))
 
 	def get_search_filters(self) -> dict:
 		return {}

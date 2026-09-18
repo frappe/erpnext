@@ -2,7 +2,6 @@ import sqlite3
 from unittest.mock import MagicMock, patch
 
 import frappe
-from frappe.core.doctype.search_index.search_index import sync_search_indexes
 from frappe.search.sqlite_search import get_search_classes, index_docs_in_queue, update_doc_index
 
 from erpnext.controllers import queries
@@ -36,22 +35,12 @@ class TestBuildMatchQuery(ERPNextTestSuite):
 
 
 class TestItemSearchSetting(ERPNextTestSuite):
-	def test_the_search_index_record_drives_the_index(self):
-		"""The switch belongs to frappe now, one record per registered search class."""
-		name = ItemSearch().search_class_path
-		if not frappe.db.exists("Search Index", name):
-			sync_search_indexes()
-		self.addCleanup(frappe.clear_document_cache, "Search Index", name)
+	def test_the_stock_settings_checkbox_drives_the_index(self):
+		with self.change_settings("Stock Settings", enable_item_search_index=0):
+			self.assertFalse(ItemSearch().is_search_enabled())
 
-		self.set_enabled(name, 0)
-		self.assertFalse(ItemSearch().is_search_enabled())
-
-		self.set_enabled(name, 1)
-		self.assertTrue(ItemSearch().is_search_enabled())
-
-	def set_enabled(self, name, value):
-		frappe.db.set_value("Search Index", name, "enabled", value)
-		frappe.clear_document_cache("Search Index", name)
+		with self.change_settings("Stock Settings", enable_item_search_index=1):
+			self.assertTrue(ItemSearch().is_search_enabled())
 
 
 class TestItemSearchIndex(ERPNextTestSuite):
