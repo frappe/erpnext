@@ -1,6 +1,7 @@
 import os
 import re
 import sqlite3
+from collections import defaultdict
 
 import frappe
 from frappe.search.sqlite_search import SQLiteSearch, SQLiteSearchIndexMissingError, build_index
@@ -37,7 +38,7 @@ class ItemSearch(SQLiteSearch):
 	def __init__(self, db_name=None):
 		fieldnames = get_searched_fieldnames()
 		mapped = {"title": "item_code", "content": "item_name"}
-		plain = [f for f in dict.fromkeys(["name", *fieldnames]) if f not in mapped.values()]
+		plain = [f for f in dict.fromkeys(["name", "modified", *fieldnames]) if f not in mapped.values()]
 		self.INDEXABLE_DOCTYPES = {
 			"Item": {
 				"fields": [*plain, mapped],
@@ -46,8 +47,9 @@ class ItemSearch(SQLiteSearch):
 		}
 		self.INDEX_SCHEMA = {
 			"tokenizer": TOKENIZER,
-			"text_fields": ["title", "content", *self._extra_text_fields(fieldnames)],
+			"text_fields": ["title", "content", *self._extra_text_fields(fieldnames), "barcode"],
 		}
+		self.barcode_cache = None
 		super().__init__(db_name)
 
 	@staticmethod
@@ -61,14 +63,48 @@ class ItemSearch(SQLiteSearch):
 	def get_search_filters(self) -> dict:
 		return {}
 
+	def get_documents_paginated(
+		self, doctype, limit=1000, last_indexed_modified=None, last_indexed_name=None
+	):
+		"""Preload the batch's barcodes so prepare_document does not query per item."""
+		docs = super().get_documents_paginated(doctype, limit, last_indexed_modified, last_indexed_name)
+		self.barcode_cache = self.get_barcode_map([doc.name for doc in docs])
+		return docs
+
+	def prepare_document(self, doc):
+		document = super().prepare_document(doc)
+		if document is not None:
+			document["barcode"] = self.get_barcode_text(doc.name)
+		return document
+
+	def get_barcode_text(self, item_code: str) -> str:
+		if self.barcode_cache is not None:
+			return self.barcode_cache.get(item_code, "")
+		return self.get_barcode_map([item_code]).get(item_code, "")
+
+	def get_barcode_map(self, item_codes: list[str]) -> dict[str, str]:
+		"""Barcodes for these Items, as one space separated string each."""
+		if not item_codes:
+			return {}
+
+		rows = frappe.get_all(
+			"Item Barcode", filters={"parent": ("in", item_codes)}, fields=["parent", "barcode"]
+		)
+		grouped = defaultdict(list)
+		for row in rows:
+			if row.barcode:
+				grouped[row.parent].append(row.barcode)
+		return {parent: " ".join(barcodes) for parent, barcodes in grouped.items()}
+
 	def _build_vocabulary_incremental(self):
 		"""Spelling correction is unused: item_query matches search_fts directly."""
 
 	def get_candidate_item_codes(self, txt: str) -> list[str] | None:
-		"""Item codes the index says can match txt.
+		"""Item codes that can match txt, a superset the caller must still recheck with LIKE.
 
-		A superset of what the index covers, which the caller must still recheck with LIKE.
-		Barcodes are not in it: item_query searches those separately.
+		Covers barcodes too. They sit in a child table, so the index only stays current because
+		`modified` is watched: a barcode edit changes no other Item field, and without it the sync
+		would never fire.
 		"""
 		if not self.is_search_enabled() or not self.index_exists():
 			return None

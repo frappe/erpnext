@@ -26,7 +26,7 @@ from pypika import Order
 import erpnext
 from erpnext.accounts.utils import build_qb_match_conditions
 from erpnext.stock.doctype.company_restriction.company_restriction import get_restriction_criterion
-from erpnext.stock.doctype.item.item_search import CANDIDATE_LIMIT, get_item_search_candidates
+from erpnext.stock.doctype.item.item_search import get_item_search_candidates
 from erpnext.stock.get_item_details import _get_item_tax_template
 from erpnext.stock.utils import get_combine_datetime
 from erpnext.utilities.query import get_filter_conditions_qb
@@ -404,7 +404,7 @@ def item_query(
 	if searches_description:
 		search_conditions.append(item.description.like(search_str))
 
-	candidates = None if searches_description else get_item_candidates(txt)
+	candidates = None if searches_description else get_item_search_candidates(txt)
 
 	txt_no_percent = txt.replace("%", "")
 
@@ -449,31 +449,6 @@ def item_query(
 		query = query.where(get_restriction_criterion("Item", [company]))
 
 	return query.run(as_dict=as_dict)
-
-
-def get_item_candidates(txt: str) -> list[str] | None:
-	"""Item codes that can match txt, or None when the scan has to run.
-
-	The search index covers the Item fields. Barcodes are added here because they sit in a child
-	table the index deliberately leaves out: a barcode edit changes no watched Item field, so the
-	index would never be told about one.
-	"""
-	candidates = get_item_search_candidates(txt)
-	if candidates is None:
-		return None
-
-	candidates += get_item_codes_by_barcode(txt)
-	return None if len(candidates) >= CANDIDATE_LIMIT else candidates
-
-
-def get_item_codes_by_barcode(txt: str) -> list[str]:
-	"""Item codes whose barcode contains txt, matching the barcode clause in item_query."""
-	return frappe.get_all(
-		"Item Barcode",
-		filters={"barcode": ("like", f"%{txt}%")},
-		pluck="parent",
-		limit=CANDIDATE_LIMIT,
-	)
 
 
 @frappe.whitelist()
