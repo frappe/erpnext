@@ -8,6 +8,7 @@ from frappe.search.sqlite_search import SQLiteSearch
 MINIMUM_TERM_LENGTH = 3
 CANDIDATE_LIMIT = 25000
 LIKE_WILDCARDS = r"[%_]"
+QUEUE_PREFIX = "Item:"
 
 
 def get_searched_fieldnames() -> list[str]:
@@ -26,9 +27,11 @@ class ItemSearch(SQLiteSearch):
 
 	def __init__(self, db_name=None):
 		fieldnames = get_searched_fieldnames()
+		mapped = {"title": "item_code", "content": "item_name"}
+		plain = [f for f in dict.fromkeys(["name", *fieldnames]) if f not in mapped.values()]
 		self.INDEXABLE_DOCTYPES = {
 			"Item": {
-				"fields": ["name", *fieldnames, {"title": "item_code", "content": "item_name"}],
+				"fields": [*plain, mapped],
 				"filters": {"disabled": 0, "has_variants": 0},
 			}
 		}
@@ -99,16 +102,26 @@ class ItemSearch(SQLiteSearch):
 	def run_match(self, match_query: str) -> list[str]:
 		connection = self._get_connection(read_only=True)
 		try:
-			rows = connection.execute(
+			matched = connection.execute(
 				"SELECT name FROM search_fts WHERE search_fts MATCH ? LIMIT ?",
 				(match_query, CANDIDATE_LIMIT),
 			).fetchall()
-			return [row["name"] for row in rows]
+			queued = connection.execute(
+				"SELECT doc_id FROM search_index_queue LIMIT ?", (CANDIDATE_LIMIT,)
+			).fetchall()
 		except sqlite3.Error:
 			frappe.log_error("Item search index lookup failed")
 			return []
 		finally:
 			connection.close()
+
+		names = [row["name"] for row in matched]
+		return names + [doc_id.removeprefix(QUEUE_PREFIX) for doc_id in queued_item_ids(queued)]
+
+
+def queued_item_ids(rows) -> list[str]:
+	"""Items waiting to be re-indexed. Their indexed text is stale or absent, so they stay candidates."""
+	return [row["doc_id"] for row in rows if row["doc_id"].startswith(QUEUE_PREFIX)]
 
 
 def build_match_query(txt: str) -> str | None:
