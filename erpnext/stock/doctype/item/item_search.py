@@ -9,6 +9,7 @@ MINIMUM_TERM_LENGTH = 3
 CANDIDATE_LIMIT = 25000
 LIKE_WILDCARDS = r"[%_]"
 QUEUE_PREFIX = "Item:"
+TOKENIZER = "trigram remove_diacritics 1"
 
 
 def get_searched_fieldnames() -> list[str]:
@@ -36,7 +37,7 @@ class ItemSearch(SQLiteSearch):
 			}
 		}
 		self.INDEX_SCHEMA = {
-			"tokenizer": "trigram",
+			"tokenizer": TOKENIZER,
 			"text_fields": ["title", "content", *self._extra_text_fields(fieldnames), "barcode"],
 		}
 		self.barcode_cache = None
@@ -97,11 +98,18 @@ class ItemSearch(SQLiteSearch):
 			return None
 
 		names = self.run_match(match_query)
-		return None if len(names) >= CANDIDATE_LIMIT else names
+		if names is None or len(names) >= CANDIDATE_LIMIT:
+			return None
 
-	def run_match(self, match_query: str) -> list[str]:
+		return names
+
+	def run_match(self, match_query: str) -> list[str] | None:
+		"""None means the index cannot answer. An empty list means it answered: nothing matches."""
 		connection = self._get_connection(read_only=True)
 		try:
+			if not self.has_current_schema(connection):
+				return None
+
 			matched = connection.execute(
 				"SELECT name FROM search_fts WHERE search_fts MATCH ? LIMIT ?",
 				(match_query, CANDIDATE_LIMIT),
@@ -111,12 +119,17 @@ class ItemSearch(SQLiteSearch):
 			).fetchall()
 		except sqlite3.Error:
 			frappe.log_error("Item search index lookup failed")
-			return []
+			return None
 		finally:
 			connection.close()
 
 		names = [row["name"] for row in matched]
 		return names + [doc_id.removeprefix(QUEUE_PREFIX) for doc_id in queued_item_ids(queued)]
+
+	def has_current_schema(self, connection) -> bool:
+		"""A rebuild lags a search-field change, and the older table would miss the new field."""
+		columns = {row["name"] for row in connection.execute("PRAGMA table_info(search_fts)")}
+		return set(self.schema["text_fields"]) <= columns
 
 
 def queued_item_ids(rows) -> list[str]:
