@@ -1102,7 +1102,7 @@ class MaterialRequirementsPlanningReport:
 			from_date = get_first_day(from_date)
 
 		dates_list = []
-		while getdate(self.filters.to_date) > getdate(from_date):
+		while getdate(from_date) <= getdate(self.filters.to_date):
 			args = {"from_date": from_date}
 
 			days = 1 if bucket_size == "Daily" else 7
