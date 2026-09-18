@@ -14,13 +14,9 @@
   "column_break_ztxc",
   "quantity",
   "uom",
+  "materials_section",
   "set_qty_based_on_percentage",
-  "cost_allocation__process_loss_section",
-  "cost_allocation_per",
-  "cost_allocation",
-  "column_break_tgkb",
-  "process_loss_percentage",
-  "process_loss_qty",
+  "items",
   "operations_section_section",
   "with_operations",
   "track_semi_finished_goods",
@@ -33,26 +29,28 @@
   "operating_cost_per_bom_quantity",
   "operations_section",
   "operations",
-  "materials_section",
-  "items",
+  "cost_allocation__process_loss_section",
+  "column_break_obmy",
+  "process_loss_percentage",
+  "column_break_wahk",
+  "process_loss_qty",
   "section_break_hygk",
   "secondary_items",
+  "cost_allocation_per",
+  "cost_allocation",
   "bom_conf_tab",
   "bom_configuration_section",
   "column_break_zbzp",
   "is_active",
   "is_default",
-  "set_rate_of_sub_assembly_item_based_on_bom",
-  "cb0",
-  "is_phantom_bom",
   "allow_alternative_item",
+  "is_phantom_bom",
+  "set_rate_of_sub_assembly_item_based_on_bom",
   "quality_inspection_section_break",
   "inspection_required",
-  "column_break_dxp7",
   "quality_inspection_template",
   "default_warehouse_section",
   "default_source_warehouse",
-  "column_break_inep",
   "default_target_warehouse",
   "consume_components_section",
   "backflush_based_on",
@@ -110,7 +108,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Item to Manufacture",
+   "label": "Item to manufacture",
    "oldfieldname": "item",
    "oldfieldtype": "Link",
    "options": "Item",
@@ -151,7 +149,7 @@
    "description": "Component quantities are derived from their percentage of the Output Qty. One component row can be marked as Balance Item to absorb the remaining percentage.",
    "fieldname": "set_qty_based_on_percentage",
    "fieldtype": "Check",
-   "label": "Set Component Quantities Based On Percentage",
+   "label": "Set component quantities based on percentage",
    "show_description_on_click": 1
   },
   {
@@ -168,16 +166,12 @@
    "show_description_on_click": 1
   },
   {
-   "fieldname": "cb0",
-   "fieldtype": "Column Break"
-  },
-  {
    "allow_on_submit": 1,
    "default": "1",
    "fieldname": "is_active",
    "fieldtype": "Check",
    "in_list_view": 1,
-   "label": "Is Active",
+   "label": "Is active",
    "no_copy": 1,
    "oldfieldname": "is_active",
    "oldfieldtype": "Select"
@@ -185,10 +179,11 @@
   {
    "allow_on_submit": 1,
    "default": "1",
+   "description": "This BOM will be selected by default in Work Orders etc. when the Item is selected.",
    "fieldname": "is_default",
    "fieldtype": "Check",
    "in_list_view": 1,
-   "label": "Is Default",
+   "label": "Set as default",
    "no_copy": 1,
    "oldfieldname": "is_default",
    "oldfieldtype": "Check"
@@ -205,17 +200,19 @@
    "default": "0",
    "fieldname": "inspection_required",
    "fieldtype": "Check",
-   "label": "Quality Inspection Required"
+   "label": "Quality inspection required"
   },
   {
    "default": "0",
+   "description": "Enable this to select an alternative material when the required item is unavailable.\n",
    "fieldname": "allow_alternative_item",
    "fieldtype": "Check",
-   "label": "Allow Alternative Item"
+   "label": "Allow alternative raw material"
   },
   {
    "allow_on_submit": 1,
    "default": "1",
+   "documentation_url": "https://docs.frappe.io/erpnext/bill-of-materials#23-additional-options-when-creating-a-bill-of-materials",
    "fieldname": "set_rate_of_sub_assembly_item_based_on_bom",
    "fieldtype": "Check",
    "label": "Set rate of sub-assembly item based on BOM"
@@ -247,7 +244,7 @@
    "depends_on": "eval: doc.with_operations === 1 && doc.track_semi_finished_goods === 0",
    "fieldname": "transfer_material_against",
    "fieldtype": "Select",
-   "label": "Transfer Material Against",
+   "label": "Transfer material against",
    "options": "\nWork Order\nJob Card"
   },
   {
@@ -307,13 +304,13 @@
   {
    "fieldname": "materials_section",
    "fieldtype": "Section Break",
+   "label": "Components",
    "oldfieldtype": "Section Break"
   },
   {
    "allow_bulk_edit": 1,
    "fieldname": "items",
    "fieldtype": "Table",
-   "label": "Components",
    "oldfieldname": "bom_materials",
    "oldfieldtype": "Table",
    "options": "BOM Item",
@@ -550,13 +547,13 @@
   {
    "fieldname": "process_loss_percentage",
    "fieldtype": "Percent",
-   "label": "% Process Loss",
+   "label": "% Process loss",
    "non_negative": 1
   },
   {
    "fieldname": "process_loss_qty",
    "fieldtype": "Float",
-   "label": "Process Loss Qty",
+   "label": "Process loss qty",
    "non_negative": 1,
    "read_only": 1
   },
@@ -564,10 +561,6 @@
    "fieldname": "more_info_tab",
    "fieldtype": "Tab Break",
    "label": "More Info"
-  },
-  {
-   "fieldname": "column_break_dxp7",
-   "fieldtype": "Column Break"
   },
   {
    "depends_on": "eval:!doc.is_phantom_bom",
@@ -588,7 +581,7 @@
    "default": "0",
    "fieldname": "fg_based_operating_cost",
    "fieldtype": "Check",
-   "label": "Finished Goods based Operating Cost"
+   "label": "Finished goods based operating cost"
   },
   {
    "depends_on": "fg_based_operating_cost",
@@ -600,7 +593,7 @@
    "depends_on": "fg_based_operating_cost",
    "fieldname": "operating_cost_per_bom_quantity",
    "fieldtype": "Currency",
-   "label": "Operating Cost Per BOM Quantity"
+   "label": "Operating cost per BOM quantity"
   },
   {
    "fieldname": "reference_section",
@@ -636,7 +629,7 @@
    "description": "Users can make manufacture entry against Job Cards",
    "fieldname": "track_semi_finished_goods",
    "fieldtype": "Check",
-   "label": "Track Semi Finished Goods"
+   "label": "Track semi finished goods"
   },
   {
    "fieldname": "default_source_warehouse",
@@ -652,18 +645,17 @@
   },
   {
    "default": "0",
+   "description": "Enable this to define the BOM as a logical grouping of raw materials without producing an item. The Production Item must be non-stock and will be automatically exploded when used as a raw material in another BOM.",
    "fieldname": "is_phantom_bom",
    "fieldtype": "Check",
-   "label": "Is Phantom BOM"
+   "label": "Set as Phantom BOM",
+   "show_description_on_click": 1
   },
   {
+   "depends_on": "eval:!doc.is_phantom_bom",
    "fieldname": "default_warehouse_section",
    "fieldtype": "Section Break",
    "label": "Default Warehouse"
-  },
-  {
-   "fieldname": "column_break_inep",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "column_break_omye",
@@ -705,7 +697,7 @@
   {
    "fieldname": "cost_allocation",
    "fieldtype": "Currency",
-   "label": "Cost Allocation",
+   "label": "Cost allocation",
    "non_negative": 1,
    "options": "currency",
    "read_only": 1
@@ -714,7 +706,7 @@
    "default": "100",
    "fieldname": "cost_allocation_per",
    "fieldtype": "Percent",
-   "label": "% Cost Allocation",
+   "label": "% Cost allocation",
    "non_negative": 1
   },
   {
@@ -734,15 +726,15 @@
    "collapsible": 1,
    "fieldname": "cost_allocation__process_loss_section",
    "fieldtype": "Section Break",
-   "label": "Cost Allocation / Process Loss"
+   "label": "Process Loss"
   },
   {
-   "fieldname": "column_break_tgkb",
-   "fieldtype": "Column Break"
-  },
-  {
+   "collapsible": 1,
+   "description": "This section can be used to record the co-products, by-products, scrap, or additional finished goods that come out of the same production run alongside the main item, and to set how much of the total cost is allocated to each of them.",
    "fieldname": "section_break_hygk",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "hide_border": 1,
+   "label": "Secondary Items"
   },
   {
    "fieldname": "final_product_section",
@@ -765,6 +757,14 @@
    "label": "Based On",
    "options": "\nBOM\nMaterial Transferred for Manufacture",
    "show_description_on_click": 1
+  },
+  {
+   "fieldname": "column_break_obmy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_wahk",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "list-tree",
@@ -772,7 +772,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-06 20:45:00.000000",
+ "modified": "2026-09-18 17:06:36.017470",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",
