@@ -183,11 +183,12 @@ def quote_fragment(fragment: str) -> str:
 
 
 def build_index_if_missing():
-	"""Build the index when it is absent or its columns have drifted.
+	"""Build the index when it is absent or its columns have drifted, then reconcile it.
 
-	frappe's own scheduled builder cannot do this: it calls build_index with force=False, which
-	returns before building. A build already in progress leaves a temp database behind, and that
-	one frappe does resume, so leave it alone.
+	frappe's scheduled builder also builds a missing index as of frappe#42968, but it does not
+	queue the Items saved while it ran. Building here keeps the build and that reconciliation
+	together. A build already in progress leaves a temp database behind, and frappe resumes that
+	one, so leave it alone.
 	"""
 	search = ItemSearch()
 	if not search.is_search_enabled() or search.index_exists():
