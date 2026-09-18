@@ -52,12 +52,7 @@ frappe.query_reports["Stock and Account Value Comparison"] = {
 				<p>Are you sure you want to create Reposting Entries?</p>
 				</div>
 			`;
-			let indexes = frappe.query_report.datatable.rowmanager.getCheckedRows();
-			let selected_rows = indexes.map((i) => frappe.query_report.data[i]);
-
-			if (!selected_rows.length) {
-				frappe.throw(__("Please select rows to create Reposting Entries"));
-			}
+			let selected_rows = get_selected_rows(__("Reposting Entries"));
 
 			frappe.confirm(__(message), () => {
 				frappe.call({
@@ -69,5 +64,52 @@ frappe.query_reports["Stock and Account Value Comparison"] = {
 				});
 			});
 		});
+
+		report.page.add_inner_button(__("Create GL Reposting Entries"), function () {
+			let selected_rows = get_selected_rows(__("GL Reposting Entries"));
+
+			frappe.prompt(
+				[
+					{
+						label: __("From Date"),
+						fieldname: "from_date",
+						fieldtype: "Date",
+						reqd: 1,
+					},
+					{
+						fieldname: "note",
+						fieldtype: "HTML",
+						options: `<p class="text-muted small">
+							${__(
+								"Only the accounting ledgers (General Ledger and Payment Ledger) will be reposted, and only for the selected rows posted on or after the From Date. Selected rows posted before it are ignored. Stock Ledger Entries and item valuation rates are left untouched."
+							)}
+						</p>`,
+					},
+				],
+				(values) => {
+					frappe.call({
+						method: "erpnext.stock.report.stock_and_account_value_comparison.stock_and_account_value_comparison.create_gl_reposting_entries",
+						args: {
+							rows: selected_rows,
+							company: frappe.query_report.get_filter_values().company,
+							from_date: values.from_date,
+						},
+					});
+				},
+				__("Create GL Reposting Entries"),
+				__("Create")
+			);
+		});
 	},
 };
+
+function get_selected_rows(label) {
+	let indexes = frappe.query_report.datatable.rowmanager.getCheckedRows();
+	let selected_rows = indexes.map((i) => frappe.query_report.data[i]);
+
+	if (!selected_rows.length) {
+		frappe.throw(__("Please select rows to create {0}", [label]));
+	}
+
+	return selected_rows;
+}
