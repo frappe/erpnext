@@ -2,21 +2,23 @@
 # See license.txt
 
 
-from unittest.mock import MagicMock, call
+from unittest.mock import MagicMock, call, patch
 
 import frappe
 from frappe.tests.utils import FrappeTestCase, change_settings
-from frappe.utils import add_days, add_to_date, flt, now, nowdate, today
+from frappe.utils import add_days, add_to_date, flt, get_datetime, now, nowdate, today
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.utils import repost_gle_for_stock_vouchers
 from erpnext.controllers.stock_controller import create_item_wise_repost_entries
+from erpnext.stock import stock_ledger
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import (
 	in_configured_timeslot,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.stock.stock_ledger import update_entries_after
 from erpnext.stock.tests.test_utils import StockTestMixin
 from erpnext.stock.utils import PendingRepostingError
 
@@ -573,6 +575,228 @@ class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
 			riv.submit()
 
 			self.assertSLEs(return_pr, expected_sles)
+
+	def test_skip_later_repost_covered_by_manufacture_dependant(self):
+		"""A finished good reposted as a dependant of its raw material makes a later
+		repost queued for the same finished good and warehouse redundant."""
+		rm = self.make_item(properties={"valuation_method": "FIFO"}).name
+		fg = self.make_item(properties={"valuation_method": "FIFO"}).name
+		warehouse = "_Test Warehouse - _TC"
+
+		make_stock_entry(
+			item_code=rm, target=warehouse, qty=100, rate=100, posting_date=add_days(today(), -10)
+		)
+
+		manufacture = make_stock_entry(
+			item_code=rm,
+			source=warehouse,
+			qty=10,
+			purpose="Manufacture",
+			posting_date=add_days(today(), -5),
+			do_not_save=True,
+		)
+		manufacture.append(
+			"items",
+			{
+				"item_code": fg,
+				"t_warehouse": warehouse,
+				"qty": 1,
+				"transfer_qty": 1,
+				"uom": "Nos",
+				"stock_uom": "Nos",
+				"conversion_factor": 1.0,
+				"is_finished_item": 1,
+			},
+		)
+		manufacture.save()
+		manufacture.submit()
+
+		# a repost queued for the finished good, dated after the manufacture entry
+		later_riv = frappe.get_doc(
+			doctype="Repost Item Valuation",
+			based_on="Item and Warehouse",
+			item_code=fg,
+			warehouse=warehouse,
+			posting_date=today(),
+			posting_time="00:00:01",
+		)
+		later_riv.flags.dont_run_in_test = True
+		later_riv.submit()
+		self.assertEqual(later_riv.status, "Queued")
+
+		# reposting the raw material walks the finished good forward as a dependant
+		rm_riv = frappe.get_doc(
+			doctype="Repost Item Valuation",
+			based_on="Item and Warehouse",
+			item_code=rm,
+			warehouse=warehouse,
+			posting_date=add_days(today(), -10),
+			posting_time="00:00:01",
+		)
+		rm_riv.submit()
+
+		later_riv.load_from_db()
+		self.assertEqual(later_riv.status, "Skipped")
+
+	def test_repost_covering_earlier_date_is_not_skipped(self):
+		"""A repost for the finished good that starts before the manufacture entry still
+		has work to do, so it must survive."""
+		rm = self.make_item(properties={"valuation_method": "FIFO"}).name
+		fg = self.make_item(properties={"valuation_method": "FIFO"}).name
+		warehouse = "_Test Warehouse - _TC"
+
+		make_stock_entry(
+			item_code=rm, target=warehouse, qty=100, rate=100, posting_date=add_days(today(), -10)
+		)
+		make_stock_entry(item_code=fg, target=warehouse, qty=5, rate=50, posting_date=add_days(today(), -9))
+
+		manufacture = make_stock_entry(
+			item_code=rm,
+			source=warehouse,
+			qty=10,
+			purpose="Manufacture",
+			posting_date=add_days(today(), -5),
+			do_not_save=True,
+		)
+		manufacture.append(
+			"items",
+			{
+				"item_code": fg,
+				"t_warehouse": warehouse,
+				"qty": 1,
+				"transfer_qty": 1,
+				"uom": "Nos",
+				"stock_uom": "Nos",
+				"conversion_factor": 1.0,
+				"is_finished_item": 1,
+			},
+		)
+		manufacture.save()
+		manufacture.submit()
+
+		earlier_riv = frappe.get_doc(
+			doctype="Repost Item Valuation",
+			based_on="Item and Warehouse",
+			item_code=fg,
+			warehouse=warehouse,
+			posting_date=add_days(today(), -9),
+			posting_time="00:00:01",
+		)
+		earlier_riv.flags.dont_run_in_test = True
+		earlier_riv.submit()
+
+		rm_riv = frappe.get_doc(
+			doctype="Repost Item Valuation",
+			based_on="Item and Warehouse",
+			item_code=rm,
+			warehouse=warehouse,
+			posting_date=add_days(today(), -10),
+			posting_time="00:00:01",
+		)
+		rm_riv.submit()
+
+		earlier_riv.load_from_db()
+		self.assertEqual(earlier_riv.status, "Queued")
+		earlier_riv.set_status("Skipped")
+
+	def test_repost_covers_every_entry_once_across_batches(self):
+		"""Full rows are fetched REPOST_SLE_BATCH_SIZE at a time, and the prefetched
+		window is dropped whenever a dependant repost re-sorts the queue. Every active
+		entry must still be reposted exactly once, in posting order."""
+		rm = self.make_item(properties={"valuation_method": "FIFO"}).name
+		fg = self.make_item(properties={"valuation_method": "FIFO"}).name
+		warehouse = "_Test Warehouse - _TC"
+
+		make_stock_entry(
+			item_code=rm, target=warehouse, qty=100, rate=100, posting_date=add_days(today(), -10)
+		)
+		for day, rate in ((-9, 110), (-8, 120), (-7, 130)):
+			make_stock_entry(
+				item_code=rm, target=warehouse, qty=10, rate=rate, posting_date=add_days(today(), day)
+			)
+
+		manufacture = make_stock_entry(
+			item_code=rm,
+			source=warehouse,
+			qty=10,
+			purpose="Manufacture",
+			posting_date=add_days(today(), -6),
+			do_not_save=True,
+		)
+		manufacture.append(
+			"items",
+			{
+				"item_code": fg,
+				"t_warehouse": warehouse,
+				"qty": 1,
+				"transfer_qty": 1,
+				"uom": "Nos",
+				"stock_uom": "Nos",
+				"conversion_factor": 1.0,
+				"is_finished_item": 1,
+			},
+		)
+		manufacture.save()
+		manufacture.submit()
+
+		# the finished good is pulled in as a dependant while the raw material is being
+		# reposted, so the queue grows and is re-sorted part way through
+		for day in (-5, -4, -3):
+			make_stock_entry(
+				item_code=fg, target=warehouse, qty=2, rate=200, posting_date=add_days(today(), day)
+			)
+
+		reposted = []
+		fetched_batches = []
+		original_repost = update_entries_after.repost_stock_ledger_entry
+		original_fetch = stock_ledger.get_sle_entries_by_names
+
+		def record_repost(self, sle):
+			reposted.append(sle.name)
+			return original_repost(self, sle)
+
+		def record_fetch(names):
+			fetched_batches.append(len(names))
+			return original_fetch(names)
+
+		batch_size = 2
+		with (
+			patch.object(stock_ledger, "REPOST_SLE_BATCH_SIZE", batch_size),
+			patch.object(update_entries_after, "repost_stock_ledger_entry", record_repost),
+			patch.object(stock_ledger, "get_sle_entries_by_names", record_fetch),
+		):
+			riv = frappe.get_doc(
+				doctype="Repost Item Valuation",
+				based_on="Item and Warehouse",
+				item_code=rm,
+				warehouse=warehouse,
+				posting_date=add_days(today(), -10),
+				posting_time="00:00:00",
+			)
+			riv.submit()
+
+		active_sles = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"item_code": ("in", [rm, fg]), "warehouse": warehouse, "is_cancelled": 0},
+			fields=["name", "posting_datetime", "creation"],
+		)
+		self.assertGreater(len(active_sles), batch_size)
+
+		# every active entry was reposted, and none of them twice
+		self.assertEqual(sorted(reposted), sorted(row.name for row in active_sles))
+		self.assertEqual(len(reposted), len(set(reposted)))
+
+		# and they were reposted in posting order, across the batch boundaries and the
+		# flush that the dependant discovery triggers
+		posting_order = {
+			row.name: (get_datetime(row.posting_datetime), get_datetime(row.creation)) for row in active_sles
+		}
+		reposted_order = [posting_order[name] for name in reposted]
+		self.assertEqual(reposted_order, sorted(reposted_order))
+
+		# the rows really were fetched a batch at a time, never the whole queue at once
+		self.assertGreater(len(fetched_batches), 1)
+		self.assertLessEqual(max(fetched_batches), batch_size)
 
 	def test_remove_attached_file(self):
 		item_code = make_item("_Test Remove Attached File Item", properties={"is_stock_item": 1})
