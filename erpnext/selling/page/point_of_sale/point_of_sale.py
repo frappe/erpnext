@@ -145,6 +145,32 @@ def check_pos_item_access(pos_profile: str, item_code: str | None) -> None:
 			frappe.throw(_("The selected Item is not available on this POS Profile"), frappe.PermissionError)
 
 
+def scope_scan_result(result, pos_profile):
+	"""Narrow a scan to the Items the profile sells, the way get_items narrows its own results."""
+	item_groups = get_item_groups(pos_profile)
+	if not result or not item_groups:
+		return result
+
+	rows = result.get("candidates") or ([result] if result.get("item_code") else [])
+	if not rows:
+		return result
+
+	allowed = set(
+		frappe.get_all(
+			"Item",
+			filters={"name": ("in", [row["item_code"] for row in rows]), "item_group": ("in", item_groups)},
+			pluck="name",
+		)
+	)
+	rows = [row for row in rows if row["item_code"] in allowed]
+	if not rows:
+		return {}
+	if result.get("candidates"):
+		result["candidates"] = rows
+		return result
+	return rows[0]
+
+
 def check_pos_profile_access(pos_profile: str | None) -> None:
 	"""The POS Profile is what entitles a caller to POS data — see the Bin/Item analysis on
 	pos_invoice.get_stock_availability. Record-level when a profile is named, so a Company User
@@ -316,7 +342,7 @@ def search_for_serial_or_batch_or_barcode_number(
 ):
 	check_pos_item_access(pos_profile, item_code)
 
-	result = scan_barcode(search_value, item_code=item_code)
+	result = scope_scan_result(scan_barcode(search_value, item_code=item_code), pos_profile)
 	if not record_type:
 		return result
 	candidates = result.get("candidates", [result])
