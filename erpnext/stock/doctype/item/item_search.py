@@ -5,6 +5,7 @@ from collections import defaultdict
 
 import frappe
 from frappe.search.sqlite_search import SQLiteSearch, SQLiteSearchIndexMissingError, build_index
+from frappe.utils import now_datetime
 
 MINIMUM_TERM_LENGTH = 3
 CANDIDATE_LIMIT = 25000
@@ -195,7 +196,26 @@ def build_index_if_missing():
 	if os.path.exists(search._get_db_path(is_temp=True)):
 		return
 
+	started_at = now_datetime()
 	build_index(ItemSearch, force=True)
+	queue_items_changed_during_build(started_at)
+
+
+def queue_items_changed_during_build(started_at):
+	"""Re-queue Items saved while the index was building.
+
+	A build reads each Item once, and frappe skips the doc_events sync for an index it
+	considers absent, which it does throughout a build. An Item saved after its row was read
+	therefore lands in the new index with stale text. Queueing it makes it a candidate again
+	straight away, and the scheduled drain reindexes it.
+	"""
+	search = ItemSearch()
+	if not search.index_exists():
+		return
+
+	names = frappe.get_all("Item", filters={"modified": (">=", started_at)}, pluck="name")
+	for name in names:
+		search.index_doc("Item", name)
 
 
 def get_item_search_candidates(txt: str) -> list[str] | None:
