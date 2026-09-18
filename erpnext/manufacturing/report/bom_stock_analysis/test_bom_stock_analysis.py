@@ -8,6 +8,10 @@ from erpnext.manufacturing.report.bom_stock_analysis.bom_stock_analysis import (
 	execute as bom_stock_analysis_report,
 )
 from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+	create_stock_reconciliation,
+)
+from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -78,6 +82,41 @@ class TestBOMStockAnalysis(ERPNextTestSuite):
 			set(tuple(sorted(r.items())) for r in expected_data),
 		)
 		self.assertEqual(footer.get("description"), expected_min)
+
+	def test_components_without_stock_in_selected_warehouse_remain_visible(self):
+		group = create_warehouse("_Test BOM Stock Analysis Group", {"is_group": 1})
+		warehouse = create_warehouse("_Test BOM Stock Analysis Stores", {"parent_warehouse": group})
+		stocked_item, missing_item = self.rm_items
+		create_stock_reconciliation(item_code=stocked_item, warehouse=warehouse, qty=100, rate=100)
+		self.assertFalse(frappe.db.exists("Bin", {"item_code": missing_item, "warehouse": warehouse}))
+
+		for selected_warehouse in (warehouse, group):
+			for exploded in (False, True):
+				with self.subTest(warehouse=selected_warehouse, exploded=exploded):
+					items, footer = run_report(self.boms[0].name, selected_warehouse, exploded, qty_to_make=1)
+					self.assertEqual(set(items), {stocked_item, missing_item})
+					self.assertEqual(items[stocked_item]["available_qty"], fmt_qty(100))
+					self.assertEqual(items[missing_item]["available_qty"], fmt_qty(0))
+					self.assertEqual(items[missing_item]["required_qty"], fmt_qty(10))
+					self.assertEqual(items[missing_item]["difference_qty"], fmt_qty(-10))
+					self.assertEqual(footer["description"], 0)
+
+		items, footer = run_report(self.boms[0].name, warehouse, exploded=False, qty_to_make=0)
+		self.assertEqual(set(items), {stocked_item, missing_item})
+		self.assertEqual(items[missing_item]["available_qty"], fmt_qty(0))
+		self.assertEqual(footer["description"], 0)
+
+
+def run_report(bom, warehouse, exploded, qty_to_make):
+	"""Component rows keyed by item code, plus the footer row."""
+	filters = {
+		"bom": bom,
+		"warehouse": warehouse,
+		"show_exploded_view": exploded,
+		"qty_to_make": qty_to_make,
+	}
+	data, footer = split_data_and_footer(bom_stock_analysis_report(filters)[1])
+	return {row["item"]: row for row in data}, footer
 
 
 def split_data_and_footer(raw_data):
