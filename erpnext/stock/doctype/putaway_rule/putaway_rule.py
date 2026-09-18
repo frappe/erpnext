@@ -10,6 +10,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint, cstr, floor, flt, nowdate
+from pydantic import InstanceOf
 
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.utils import get_stock_balance
@@ -100,10 +101,17 @@ def get_available_putaway_capacity(rule):
 
 
 @frappe.whitelist()
-def apply_putaway_rule(doctype, items, company, sync=None, purpose=None):
+def apply_putaway_rule(
+	doctype: str,
+	items: InstanceOf[list] | str,
+	company: str,
+	sync: str | bool | None = None,
+	purpose: str | None = None,
+):
 	"""Applies Putaway Rule on line items.
 
-	items: List of Purchase Receipt/Stock Entry Items
+	items: List of Purchase Receipt/Stock Entry Items, updated in place.
+	InstanceOf preserves the caller's list during argument validation.
 	company: Company in the Purchase Receipt/Stock Entry
 	doctype: Doctype to apply rule on
 	purpose: Purpose of Stock Entry
@@ -172,7 +180,7 @@ def apply_putaway_rule(doctype, items, company, sync=None, purpose=None):
 					stock_qty_to_allocate = qty_to_allocate * item.conversion_factor
 
 				if not qty_to_allocate:
-					break
+					continue
 
 				updated_table = add_row(
 					item, qty_to_allocate, rule.warehouse, updated_table, rule.name, serial_nos=serial_nos
