@@ -1532,6 +1532,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if self.pick_list:
 			return
 
+		if self.purpose in ("Manufacture", "Repack") and self.from_bom and not flt(self.fg_completed_qty):
+			frappe.throw(_("Please set Finished Good Quantity before fetching items from the BOM."))
+
 		self.set("items", [])
 		if self.purpose_cls and hasattr(self.purpose_cls, "add_items"):
 			self.purpose_cls(self).add_items()
