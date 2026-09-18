@@ -1,5 +1,6 @@
 import re
 import sqlite3
+from collections import defaultdict
 
 import frappe
 from frappe.search.sqlite_search import SQLiteSearch
@@ -35,6 +36,7 @@ class ItemSearch(SQLiteSearch):
 			"tokenizer": "trigram",
 			"text_fields": ["title", "content", *self._extra_text_fields(fieldnames), "barcode"],
 		}
+		self.barcode_cache = None
 		super().__init__(db_name)
 
 	@staticmethod
@@ -47,6 +49,14 @@ class ItemSearch(SQLiteSearch):
 	def get_search_filters(self) -> dict:
 		return {}
 
+	def get_documents_paginated(
+		self, doctype, limit=1000, last_indexed_modified=None, last_indexed_name=None
+	):
+		"""Preload the batch's barcodes so prepare_document does not query per item."""
+		docs = super().get_documents_paginated(doctype, limit, last_indexed_modified, last_indexed_name)
+		self.barcode_cache = self.get_barcode_map([doc.name for doc in docs])
+		return docs
+
 	def prepare_document(self, doc):
 		document = super().prepare_document(doc)
 		if document is not None:
@@ -54,8 +64,22 @@ class ItemSearch(SQLiteSearch):
 		return document
 
 	def get_barcode_text(self, item_code: str) -> str:
-		barcodes = frappe.get_all("Item Barcode", filters={"parent": item_code}, pluck="barcode")
-		return " ".join(barcode for barcode in barcodes if barcode)
+		if self.barcode_cache is not None:
+			return self.barcode_cache.get(item_code, "")
+		return self.get_barcode_map([item_code]).get(item_code, "")
+
+	def get_barcode_map(self, item_codes: list[str]) -> dict[str, str]:
+		if not item_codes:
+			return {}
+
+		rows = frappe.get_all(
+			"Item Barcode", filters={"parent": ("in", item_codes)}, fields=["parent", "barcode"]
+		)
+		grouped = defaultdict(list)
+		for row in rows:
+			if row.barcode:
+				grouped[row.parent].append(row.barcode)
+		return {parent: " ".join(barcodes) for parent, barcodes in grouped.items()}
 
 	def get_candidate_item_codes(self, txt: str) -> list[str] | None:
 		"""Item codes that can match txt, a superset the caller must still recheck with LIKE."""
