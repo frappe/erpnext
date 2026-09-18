@@ -75,6 +75,24 @@ frappe.ui.form.on("Item Group", {
 				},
 			};
 		};
+
+		frm.set_query("default_warehouse", "item_group_defaults", (doc, cdt, cdn) => {
+			const row = locals[cdt][cdn];
+			return {
+				filters: { company: row.company, is_group: 0 },
+			};
+		});
+
+		frm.set_query("default_provisional_account", "item_group_defaults", (doc, cdt, cdn) => {
+			const row = locals[cdt][cdn];
+			return {
+				filters: {
+					company: row.company,
+					root_type: ["in", ["Liability", "Asset"]],
+					is_group: 0,
+				},
+			};
+		});
 	},
 
 	refresh: function (frm) {
