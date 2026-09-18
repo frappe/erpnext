@@ -6,7 +6,7 @@ import frappe
 from frappe.search.sqlite_search import SQLiteSearch
 
 MINIMUM_TERM_LENGTH = 3
-CANDIDATE_LIMIT = 5000
+CANDIDATE_LIMIT = 25000
 LIKE_WILDCARDS = r"[%_]"
 
 
