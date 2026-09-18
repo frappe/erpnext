@@ -2416,7 +2416,7 @@ def get_negative_outstanding_invoices(
 			'{voucher_type}' as voucher_type, name as voucher_no, {account} as account,
 			coalesce(nullif({rounded_total_field}, 0), {grand_total_field}) as invoice_amount,
 			outstanding_amount, posting_date,
-			due_date, conversion_rate as exchange_rate
+			due_date, conversion_rate as exchange_rate, currency
 		from
 			`tab{voucher_type}`
 		where
