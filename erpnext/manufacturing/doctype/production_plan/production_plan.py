@@ -98,6 +98,7 @@ class ProductionPlan(Document):
 		material_requests: DF.Table[ProductionPlanMaterialRequest]
 		mr_items: DF.Table[MaterialRequestPlanItem]
 		naming_series: DF.Literal["MFG-PP-.YYYY.-"]
+		no_of_shifts: DF.Int
 		po_items: DF.Table[ProductionPlanItem]
 		posting_date: DF.Date
 		prod_plan_references: DF.Table[ProductionPlanItemReference]
