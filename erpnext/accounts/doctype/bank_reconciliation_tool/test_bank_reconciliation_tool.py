@@ -10,6 +10,7 @@ from frappe.utils import add_days, today
 from erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool import (
 	auto_reconcile_vouchers,
 	get_bank_transactions,
+	get_linked_payments,
 )
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
@@ -98,3 +99,42 @@ class TestBankReconciliationTool(AccountsTestMixin, FrappeTestCase):
 		# assert API output post reconciliation
 		transactions = get_bank_transactions(self.bank_account, from_date, to_date)
 		self.assertEqual(len(transactions), 0)
+
+	def test_rejects_reversed_date_ranges(self):
+		from_date, to_date = today(), add_days(today(), -1)
+		with self.assertRaisesRegex(frappe.ValidationError, "From Date cannot be greater than To Date"):
+			get_bank_transactions(self.bank_account, from_date, to_date)
+
+		with self.assertRaisesRegex(
+			frappe.ValidationError, "From Reference Date cannot be greater than To Reference Date"
+		):
+			auto_reconcile_vouchers(
+				self.bank_account,
+				filter_by_reference_date=True,
+				from_reference_date=from_date,
+				to_reference_date=to_date,
+			)
+
+		transaction = (
+			frappe.get_doc(
+				{
+					"doctype": "Bank Transaction",
+					"date": today(),
+					"deposit": 100,
+					"bank_account": self.bank_account,
+					"currency": "INR",
+				}
+			)
+			.insert()
+			.submit()
+		)
+		with self.assertRaisesRegex(
+			frappe.ValidationError, "From Reference Date cannot be greater than To Reference Date"
+		):
+			get_linked_payments(
+				transaction.name,
+				["payment_entry"],
+				filter_by_reference_date=True,
+				from_reference_date=from_date,
+				to_reference_date=to_date,
+			)

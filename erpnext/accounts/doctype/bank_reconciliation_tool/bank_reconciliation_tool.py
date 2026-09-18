@@ -3,13 +3,14 @@
 
 
 import json
+from datetime import date
 
 import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder.custom import ConstantColumn
 from frappe.query_builder.functions import Sum
-from frappe.utils import cint, create_batch, flt
+from frappe.utils import cint, create_batch, flt, getdate
 
 from erpnext import get_default_cost_center
 from erpnext.accounts.doctype.bank_transaction.bank_transaction import get_total_allocated_amount
@@ -47,8 +48,12 @@ class BankReconciliationTool(Document):
 
 
 @frappe.whitelist()
-def get_bank_transactions(bank_account, from_date=None, to_date=None):
+def get_bank_transactions(
+	bank_account: str, from_date: str | date | None = None, to_date: str | date | None = None
+):
 	# returns bank transactions for a bank account
+	validate_date_range(from_date, to_date)
+
 	filters = []
 	filters.append(["bank_account", "=", bank_account])
 	filters.append(["docstatus", "=", 1])
@@ -372,13 +377,14 @@ def create_payment_entry_bts(
 
 @frappe.whitelist()
 def auto_reconcile_vouchers(
-	bank_account,
-	from_date=None,
-	to_date=None,
-	filter_by_reference_date=None,
-	from_reference_date=None,
-	to_reference_date=None,
+	bank_account: str,
+	from_date: str | date | None = None,
+	to_date: str | date | None = None,
+	filter_by_reference_date: bool | None = None,
+	from_reference_date: str | date | None = None,
+	to_reference_date: str | date | None = None,
 ):
+	validate_date_range(from_date, to_date, filter_by_reference_date, from_reference_date, to_reference_date)
 	bank_transactions = get_bank_transactions(bank_account)
 
 	if len(bank_transactions) > 10:
@@ -488,15 +494,16 @@ def reconcile_vouchers(bank_transaction_name, vouchers):
 
 @frappe.whitelist()
 def get_linked_payments(
-	bank_transaction_name,
-	document_types=None,
-	from_date=None,
-	to_date=None,
-	filter_by_reference_date=None,
-	from_reference_date=None,
-	to_reference_date=None,
+	bank_transaction_name: str,
+	document_types: str | list[str] | None = None,
+	from_date: str | date | None = None,
+	to_date: str | date | None = None,
+	filter_by_reference_date: bool | None = None,
+	from_reference_date: str | date | None = None,
+	to_reference_date: str | date | None = None,
 ):
 	# get all matching payments for a bank transaction
+	validate_date_range(from_date, to_date, filter_by_reference_date, from_reference_date, to_reference_date)
 	transaction = frappe.get_doc("Bank Transaction", bank_transaction_name)
 	bank_account = frappe.db.get_values(
 		"Bank Account", transaction.bank_account, ["account", "company"], as_dict=True
@@ -514,6 +521,23 @@ def get_linked_payments(
 		to_reference_date,
 	)
 	return subtract_allocations(gl_account, matching)
+
+
+def validate_date_range(
+	from_date,
+	to_date,
+	filter_by_reference_date=False,
+	from_reference_date=None,
+	to_reference_date=None,
+):
+	if cint(filter_by_reference_date):
+		from_date, to_date = from_reference_date, to_reference_date
+		message = _("From Reference Date cannot be greater than To Reference Date")
+	else:
+		message = _("From Date cannot be greater than To Date")
+
+	if from_date and to_date and getdate(from_date) > getdate(to_date):
+		frappe.throw(message)
 
 
 def subtract_allocations(gl_account, vouchers):
