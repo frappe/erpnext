@@ -93,7 +93,19 @@ class TestItemSearchIndex(ERPNextTestSuite):
 	def test_no_candidates_returns_no_rows(self):
 		"""An empty candidate list must not reach the query, IN () is a syntax error."""
 		with patch.object(queries, "get_item_search_candidates", return_value=[]):
-			self.assertEqual(queries.item_query("Item", "Test", "name", 0, 20, None), [])
+			self.assertEqual(queries.item_query("Item", "Test", "name", 0, 20, None), ())
+			self.assertEqual(queries.item_query("Item", "Test", "name", 0, 20, None, as_dict=True), [])
+
+	def test_empty_result_matches_the_scan_shape(self):
+		"""The early return must give back what the query itself would, tuple or list."""
+		for as_dict in (False, True):
+			with self.subTest(as_dict=as_dict):
+				with patch.object(queries, "get_item_search_candidates", return_value=[]):
+					early = queries.item_query("Item", "ZZQQNOTHING", "name", 0, 20, None, as_dict=as_dict)
+				with patch.object(queries, "get_item_search_candidates", return_value=None):
+					scanned = queries.item_query("Item", "ZZQQNOTHING", "name", 0, 20, None, as_dict=as_dict)
+				self.assertEqual(early, scanned)
+				self.assertIs(type(early), type(scanned))
 
 	def test_item_query_paging_is_unchanged(self):
 		for start in (0, 3, 6):
