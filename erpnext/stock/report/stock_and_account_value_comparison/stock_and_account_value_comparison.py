@@ -6,7 +6,7 @@ from datetime import date
 
 import frappe
 from frappe import _
-from frappe.utils import get_datetime, get_link_to_form, getdate, parse_json
+from frappe.utils import create_batch, get_datetime, get_link_to_form, getdate, parse_json
 
 import erpnext
 from erpnext.accounts.utils import get_currency_precision, get_stock_accounts
@@ -300,6 +300,12 @@ def create_gl_reposting_entries(rows: str | list, company: str, from_date: str |
 	entries = []
 	processed_vouchers = set()
 
+	# One batched lookup for the whole selection. Checking each row on its own meant a query per
+	# row, which does not hold up when the report is used on the large selections it is meant for.
+	pending_vouchers = get_pending_gl_reposting_vouchers(
+		[(row.get("voucher_type"), row.get("voucher_no")) for row in rows]
+	)
+
 	for row in rows:
 		# Rows posted before the From Date are skipped, so a stale selection cannot rewrite the
 		# accounting ledgers of an already reconciled period.
@@ -317,6 +323,11 @@ def create_gl_reposting_entries(rows: str | list, company: str, from_date: str |
 			continue
 
 		processed_vouchers.add((voucher_type, voucher_no))
+
+		# A repost queued by an earlier run still has to rewrite this voucher, so queuing another one
+		# now would just rebuild the same ledgers twice.
+		if (voucher_type, voucher_no) in pending_vouchers:
+			continue
 
 		doc = frappe.get_doc(
 			{
@@ -341,3 +352,26 @@ def create_gl_reposting_entries(rows: str | list, company: str, from_date: str |
 		frappe.msgprint(_("GL reposting entries created: {0}").format(", ".join(entries)))
 	else:
 		frappe.msgprint(_("No new GL reposting entries were created for the selected rows."))
+
+
+def get_pending_gl_reposting_vouchers(transactions) -> set[tuple[str, str]]:
+	"""Vouchers that already have a GL-only repost queued or running."""
+
+	pending_vouchers = set()
+
+	for chunk in create_batch(transactions, 1000):
+		entries = frappe.get_all(
+			"Repost Item Valuation",
+			filters={
+				"based_on": "Transaction",
+				"repost_only_accounting_ledgers": 1,
+				"docstatus": 1,
+				"status": ("in", ["Queued", "In Progress"]),
+				"voucher_no": ("in", [voucher_no for _, voucher_no in chunk]),
+			},
+			fields=["voucher_type", "voucher_no"],
+		)
+
+		pending_vouchers.update((d.voucher_type, d.voucher_no) for d in entries)
+
+	return pending_vouchers
