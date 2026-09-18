@@ -18,10 +18,18 @@ class TestBuildMatchQuery(ERPNextTestSuite):
 		for txt in ("", "a", "ab", "  b "):
 			self.assertIsNone(build_match_query(txt), txt)
 
-	def test_skips_like_wildcards(self):
-		"""LIKE reads these as wildcards, the index would match them literally."""
-		for txt in ("ab%cd", "ab_cd", "ab\\cd"):
+	def test_splits_on_like_wildcards(self):
+		"""A wildcard splits the term, the fragments narrow, and the caller rechecks with LIKE."""
+		self.assertEqual(build_match_query("RAW_MAT_000123"), '"RAW" AND "MAT" AND "000123"')
+		self.assertEqual(build_match_query("abc%def"), '"abc" AND "def"')
+
+	def test_skips_terms_with_no_usable_fragment(self):
+		for txt in ("ab%cd", "ab_cd", "a%b%c"):
 			self.assertIsNone(build_match_query(txt), txt)
+
+	def test_skips_escaped_terms(self):
+		"""Backslash escapes the next LIKE wildcard, so the split would be wrong."""
+		self.assertIsNone(build_match_query("ab\\_cd"))
 
 
 class TestItemSearchIndex(ERPNextTestSuite):
@@ -46,7 +54,7 @@ class TestItemSearchIndex(ERPNextTestSuite):
 
 	def test_candidates_are_a_superset_of_the_scan(self):
 		"""The query re-filters, so extra candidates are safe but missing ones are not."""
-		for txt in ("Test", "Item", "est"):
+		for txt in ("Test", "Item", "est", "_Test"):
 			candidates = self.search.get_candidate_item_codes(txt)
 			self.assertIsNotNone(candidates, txt)
 			matched = frappe.get_all(
@@ -71,9 +79,21 @@ class TestItemSearchIndex(ERPNextTestSuite):
 			with self.subTest(txt=txt, filters=filters):
 				self.assertEqual(self.run_query(txt, filters), self.run_query(txt, filters, False))
 
-	def test_underscore_in_the_term_falls_back(self):
-		"""LIKE reads _ as a single-character wildcard, so the index cannot answer exactly."""
-		self.assertIsNone(self.search.get_candidate_item_codes("_Test"))
+	def test_underscore_in_the_term_still_narrows(self):
+		"""_ is a LIKE wildcard, but the fragments around it are still indexable."""
+		candidates = self.search.get_candidate_item_codes("_Test Item")
+		self.assertIsNotNone(candidates)
+		matched = frappe.get_all(
+			"Item",
+			filters={"name": ("like", "%_Test Item%"), "disabled": 0, "has_variants": 0},
+			pluck="name",
+		)
+		self.assertTrue(set(matched) <= set(candidates))
+
+	def test_no_candidates_returns_no_rows(self):
+		"""An empty candidate list must not reach the query, IN () is a syntax error."""
+		with patch.object(queries, "get_item_search_candidates", return_value=[]):
+			self.assertEqual(queries.item_query("Item", "Test", "name", 0, 20, None), [])
 
 	def test_item_query_paging_is_unchanged(self):
 		for start in (0, 3, 6):
