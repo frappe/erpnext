@@ -4913,6 +4913,121 @@ def initialize_records_for_future_negative_sle_test(
 	return warehouse_names
 
 
+class TestJobCardSecondaryItems(ERPNextTestSuite):
+	"""get_secondary_items_from_job_card aggregates a work order's job cards into one row per item."""
+
+	def setUp(self):
+		from erpnext.manufacturing.doctype.job_card.test_job_card import (
+			create_bom_with_multiple_operations,
+		)
+		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+
+		self.load_test_records("BOM")
+		make_operation({"operation": "_Test Operation 1", "workstation": "_Test Workstation A"})
+		create_bom_with_multiple_operations()
+
+	def make_submitted_job_card(self, job_card_name, item_code, stock_qty, bom_secondary_item):
+		job_card = frappe.get_doc("Job Card", job_card_name)
+		job_card.append(
+			"secondary_items",
+			{
+				"item_code": item_code,
+				"stock_qty": stock_qty,
+				"secondary_item_type": "Scrap",
+				"bom_secondary_item": bom_secondary_item,
+			},
+		)
+		job_card.append(
+			"time_logs",
+			{
+				"from_time": "2009-01-01 12:06:25",
+				"to_time": "2009-01-01 12:37:25",
+				"time_in_mins": "31.00002",
+				"completed_qty": job_card.for_quantity,
+			},
+		)
+		job_card.submit()
+
+	def make_work_order_with_two_job_cards(self):
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+
+		work_order = make_wo_order_test_record(
+			item="_Test FG Item 2",
+			qty=2,
+			transfer_material_against="Work Order",
+			source_warehouse="Stores - _TC",
+		)
+		job_cards = frappe.get_all(
+			"Job Card", filters={"work_order": work_order.name}, order_by="creation", pluck="name"
+		)
+		self.assertGreaterEqual(len(job_cards), 2, "fixture must produce at least two job cards")
+		return work_order, job_cards
+
+	def test_secondary_item_columns_come_from_one_line(self):
+		"""stock_uom is a stored snapshot, so it can differ between a work order's job cards.
+
+		It was aggregated with Max(), a sort over text that MariaDB and PostgreSQL resolve
+		differently, and one that can also report a unit belonging to neither the name nor the
+		description beside it. Take it off the same representative line as those.
+		"""
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.services.manufacturing import (
+			get_secondary_items_from_job_card,
+		)
+
+		# the first card snapshots "Box"; Max() over the pair returns "Nos", so the two disagree
+		scrap_item = make_item("_Test JC Secondary Snapshot", {"is_stock_item": 1, "stock_uom": "Box"})
+		work_order, job_cards = self.make_work_order_with_two_job_cards()
+
+		self.make_submitted_job_card(job_cards[0], scrap_item.name, 5, "BOM-ROW-A")
+
+		scrap_item.reload()
+		scrap_item.stock_uom = "Nos"
+		scrap_item.item_name = "_Test JC Secondary Snapshot Renamed"
+		scrap_item.save()
+
+		self.make_submitted_job_card(job_cards[1], scrap_item.name, 3, "BOM-ROW-A")
+
+		rows = [
+			row
+			for row in get_secondary_items_from_job_card(work_order.name)
+			if row.item_code == scrap_item.name
+		]
+
+		self.assertEqual(len(rows), 1, "the reported row count must not change")
+		self.assertEqual(rows[0].stock_uom, "Box")
+		self.assertEqual(rows[0].item_name, "_Test JC Secondary Snapshot")
+		self.assertEqual(flt(rows[0].stock_qty), 8)
+
+	def test_secondary_item_metadata_is_scoped_to_its_bom_row(self):
+		"""Two BOM rows for the same item and type are separate groups, each with its own line."""
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.services.manufacturing import (
+			get_secondary_items_from_job_card,
+		)
+
+		scrap_item = make_item("_Test JC Secondary Bom Row", {"is_stock_item": 1, "stock_uom": "Nos"})
+		work_order, job_cards = self.make_work_order_with_two_job_cards()
+
+		self.make_submitted_job_card(job_cards[0], scrap_item.name, 5, "BOM-ROW-A")
+
+		scrap_item.reload()
+		scrap_item.item_name = "_Test JC Secondary Bom Row Renamed"
+		scrap_item.save()
+
+		self.make_submitted_job_card(job_cards[1], scrap_item.name, 3, "BOM-ROW-B")
+
+		by_bom_row = {
+			row.bom_secondary_item: row
+			for row in get_secondary_items_from_job_card(work_order.name)
+			if row.item_code == scrap_item.name
+		}
+
+		self.assertEqual(set(by_bom_row), {"BOM-ROW-A", "BOM-ROW-B"})
+		self.assertEqual(by_bom_row["BOM-ROW-A"].item_name, "_Test JC Secondary Bom Row")
+		self.assertEqual(by_bom_row["BOM-ROW-B"].item_name, "_Test JC Secondary Bom Row Renamed")
+
+
 def create_stock_entries(sequence_of_entries):
 	for entry_detail in sequence_of_entries:
 		make_stock_entry(**entry_detail)

@@ -135,6 +135,33 @@ class TestBankReconciliationTool(ERPNextTestSuite, AccountsTestMixin):
 		bank_transaction = self.make_bank_transaction(date=today())
 		self.assertEqual(get_linked_payments(bank_transaction.name), [])
 
+	def test_rejects_reversed_date_ranges(self):
+		from_date, to_date = today(), add_days(today(), -1)
+		with self.assertRaisesRegex(frappe.ValidationError, "From Date cannot be greater than To Date"):
+			get_bank_transactions(self.bank_account, from_date, to_date)
+
+		with self.assertRaisesRegex(
+			frappe.ValidationError, "From Reference Date cannot be greater than To Reference Date"
+		):
+			auto_reconcile_vouchers(
+				self.bank_account,
+				filter_by_reference_date=True,
+				from_reference_date=from_date,
+				to_reference_date=to_date,
+			)
+
+		transaction = self.make_bank_transaction(date=today())
+		with self.assertRaisesRegex(
+			frappe.ValidationError, "From Reference Date cannot be greater than To Reference Date"
+		):
+			get_linked_payments(
+				transaction.name,
+				["payment_entry"],
+				filter_by_reference_date=True,
+				from_reference_date=from_date,
+				to_reference_date=to_date,
+			)
+
 	def test_deposit_matches_amount_received_in_bank_account(self):
 		# money leaves another bank account and lands here minus a charge, so the two sides differ
 		payment = frappe.get_doc(

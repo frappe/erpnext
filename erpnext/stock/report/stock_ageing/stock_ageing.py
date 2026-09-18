@@ -288,6 +288,7 @@ class FIFOSlots:
 		self.transferred_item_details = {}
 		self.serial_no_details = {}
 		self.batch_no_details = {}
+		self.batches_with_negative_slots = set()
 		self.batchwise_valuation_by_batch = {}
 		self.valuation_method_by_item = {}
 		self.filters = filters
@@ -659,6 +660,11 @@ class FIFOSlots:
 		if not qty:
 			return qty, stock_value_difference
 
+		if (batch_no, row.warehouse) not in self.batches_with_negative_slots:
+			return qty, stock_value_difference
+
+		negative_slot_may_remain = False
+
 		for slot in list(fifo_queue):
 			if not self._is_matching_negative_batch_slot(slot, batch_no, use_batchwise_valuation):
 				continue
@@ -679,9 +685,15 @@ class FIFOSlots:
 
 			if not flt(slot[BATCH_SLOT_QTY_INDEX]) and not flt(slot[BATCH_SLOT_VALUE_INDEX]):
 				fifo_queue.remove(slot)
+			elif flt(slot[BATCH_SLOT_QTY_INDEX]) < 0:
+				negative_slot_may_remain = True
 
 			if not qty:
+				negative_slot_may_remain = True
 				break
+
+		if not negative_slot_may_remain:
+			self.batches_with_negative_slots.discard((batch_no, row.warehouse))
 
 		return qty, stock_value_difference
 
@@ -795,9 +807,13 @@ class FIFOSlots:
 		qty: float,
 		stock_value_difference: float,
 	) -> None:
+		"""The only place a batch slot goes negative, so it is also where the warehouse
+		is recorded as owing stock on that batch. The record is discarded again by a walk
+		that reaches the end of the queue and leaves nothing negative behind."""
 		fifo_queue.append(
 			[batch_no, use_batchwise_valuation, -(qty), row.posting_date, -(stock_value_difference)]
 		)
+		self.batches_with_negative_slots.add((batch_no, row.warehouse))
 		self.transferred_item_details[transfer_key].append([qty, row.posting_date, stock_value_difference])
 
 	def _consume_fifo_slots(

@@ -3,7 +3,7 @@
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import Coalesce, Max, Min, Sum
+from frappe.query_builder.functions import Coalesce, Min, Sum
 from frappe.utils import cstr
 
 
@@ -47,19 +47,23 @@ def get_columns(filters):
 
 def get_pos_sales_payment_data(filters):
 	sales_invoice_data = get_pos_invoice_data(filters)
-	data = [
-		[
-			row["posting_date"],
-			row["owner"],
-			row["mode_of_payment"],
-			row["net_total"],
-			row["total_taxes"],
-			row["paid_amount"],
-			row["warehouse"],
-			row["cost_center"],
-		]
-		for row in sales_invoice_data
-	]
+	labels = get_pos_row_labels(filters)
+
+	data = []
+	for row in sales_invoice_data:
+		label = labels.get(get_pos_row_key(row)) or frappe._dict()
+		data.append(
+			[
+				row["posting_date"],
+				row["owner"],
+				label.mode_of_payment,
+				row["net_total"],
+				row["total_taxes"],
+				row["paid_amount"],
+				row["warehouse"],
+				label.cost_center,
+			]
+		)
 
 	return data
 
@@ -123,25 +127,17 @@ def apply_conditions(query, a, filters):
 	return query
 
 
-def get_pos_invoice_data(filters):
+def get_invoice_item_totals():
+	"""One row per invoice: summed item base_total, plus warehouse and cost_center off its first line."""
 	sii = frappe.qb.DocType("Sales Invoice Item")
-	sip = frappe.qb.DocType("Sales Invoice Payment")
-	si = frappe.qb.DocType("Sales Invoice")
-
-	# t1: one row per invoice with the summed item base_total. warehouse and cost_center describe an
-	# item line, not the invoice, and an invoice may carry several. warehouse then becomes an outer
-	# grouping key below, so which line wins decides how rows are partitioned and what each row totals
-	# -- not merely which label is shown. Max() over text is a sort, and MariaDB (case-folding) and
-	# PostgreSQL (byte order) resolve it differently, so take both off one real line instead.
-	# The representative is the first line the user entered: Min(idx) is an integer, so the pick is
-	# free of collation and is meaningful, rather than turning on an unrelated hash-named row.
 	grouped_items = (
 		frappe.qb.from_(sii)
 		.select(sii.parent, Sum(sii.amount).as_("base_total"), Min(sii.idx).as_("representative_idx"))
 		.groupby(sii.parent)
 	).as_("grouped_items")
 	representative_item = frappe.qb.DocType("Sales Invoice Item").as_("representative_item")
-	t1 = (
+
+	return (
 		frappe.qb.from_(grouped_items)
 		.inner_join(representative_item)
 		.on(
@@ -156,24 +152,12 @@ def get_pos_invoice_data(filters):
 		)
 	)
 
-	# t3: mode_of_payment per invoice, from one real payment line for the same reason
-	grouped_payments = (
-		frappe.qb.from_(sip).select(sip.parent, Min(sip.idx).as_("representative_idx")).groupby(sip.parent)
-	).as_("grouped_payments")
-	representative_payment = frappe.qb.DocType("Sales Invoice Payment").as_("representative_payment")
-	t3 = (
-		frappe.qb.from_(grouped_payments)
-		.inner_join(representative_payment)
-		.on(
-			(representative_payment.parent == grouped_payments.parent)
-			& (representative_payment.idx == grouped_payments.representative_idx)
-		)
-		.select(grouped_payments.parent, representative_payment.mode_of_payment.as_("mode_of_payment"))
-	)
 
-	# a: invoice-level aggregates. Grouped by the primary key (si.name), so the other plain si columns
-	# (incl. customer, needed by the customer filter) are functionally dependent and valid on Postgres.
-	a = (
+def get_invoice_totals():
+	"""Invoice-level aggregates, grouped by the primary key so every plain column is dependent."""
+	si = frappe.qb.DocType("Sales Invoice")
+
+	return (
 		frappe.qb.from_(si)
 		.select(
 			si.docstatus,
@@ -183,6 +167,7 @@ def get_pos_invoice_data(filters):
 			si.name,
 			si.posting_date,
 			si.owner,
+			si.creation,
 			Sum(si.base_total).as_("base_total"),
 			Sum(si.net_total).as_("net_total"),
 			Sum(si.total_taxes_and_charges).as_("total_taxes"),
@@ -192,10 +177,74 @@ def get_pos_invoice_data(filters):
 		.groupby(si.name)
 	)
 
+
+def get_pos_row_key(row):
+	return (row.owner, row.posting_date, row.warehouse)
+
+
+def get_representative_payments():
+	"""One payment line per invoice: the first the user entered."""
+	sip = frappe.qb.DocType("Sales Invoice Payment")
+	grouped_payments = (
+		frappe.qb.from_(sip).select(sip.parent, Min(sip.idx).as_("representative_idx")).groupby(sip.parent)
+	).as_("grouped_payments")
+	representative_payment = frappe.qb.DocType("Sales Invoice Payment").as_("representative_payment")
+
+	return (
+		frappe.qb.from_(grouped_payments)
+		.inner_join(representative_payment)
+		.on(
+			(representative_payment.parent == grouped_payments.parent)
+			& (representative_payment.idx == grouped_payments.representative_idx)
+		)
+		.select(grouped_payments.parent, representative_payment.mode_of_payment.as_("mode_of_payment"))
+	)
+
+
+def get_pos_row_labels(filters):
+	"""cost_center and mode_of_payment off the earliest invoice in each row.
+
+	Ordered in Python rather than SQL, so no database collation applies to the tie-break.
+	"""
+	t1 = get_invoice_item_totals()
+	t3 = get_representative_payments()
+	a = get_invoice_totals()
+
 	query = (
 		frappe.qb.from_(t1)
 		.left_join(t3)
 		.on(t3.parent == t1.parent)
+		.join(a)
+		.on((t1.parent == a.name) & (t1.base_total == a.base_total))
+		.select(
+			a.owner,
+			a.posting_date,
+			a.creation,
+			a.name,
+			t1.warehouse,
+			t1.cost_center,
+			t3.mode_of_payment,
+		)
+		.where(a.docstatus == 1)
+	)
+	query = apply_conditions(query, a, filters)
+
+	labels = {}
+	for row in query.run(as_dict=True):
+		key = get_pos_row_key(row)
+		current = labels.get(key)
+		if current is None or (row.creation, row.name) < (current.creation, current.name):
+			labels[key] = row
+
+	return labels
+
+
+def get_pos_invoice_data(filters):
+	t1 = get_invoice_item_totals()
+	a = get_invoice_totals()
+
+	query = (
+		frappe.qb.from_(t1)
 		.join(a)
 		.on((t1.parent == a.name) & (t1.base_total == a.base_total))
 		.select(
@@ -205,10 +254,7 @@ def get_pos_invoice_data(filters):
 			Sum(a.total_taxes).as_("total_taxes"),
 			Sum(a.paid_amount).as_("paid_amount"),
 			Sum(a.outstanding_amount).as_("outstanding_amount"),
-			# mode_of_payment/cost_center are not in the outer GROUP BY -> Max() (deterministic, both engines)
-			Max(t3.mode_of_payment).as_("mode_of_payment"),
 			t1.warehouse,
-			Max(t1.cost_center).as_("cost_center"),
 		)
 		.where(a.docstatus == 1)
 		.groupby(a.owner, a.posting_date, t1.warehouse)

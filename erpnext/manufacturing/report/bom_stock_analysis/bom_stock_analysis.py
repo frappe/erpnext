@@ -229,11 +229,10 @@ def get_bom_data(filters):
 	bom_item = frappe.qb.DocType(bom_item_table)
 	stock_qty = get_stock_qty_by_item(filters).as_("stock_qty")
 
-	base = frappe.qb.from_(bom_item)
-	base = base.join(stock_qty) if filters.get("warehouse") else base.left_join(stock_qty)
-
 	query = (
-		base.on(bom_item.item_code == stock_qty.item_code)
+		frappe.qb.from_(bom_item)
+		.left_join(stock_qty)
+		.on(bom_item.item_code == stock_qty.item_code)
 		.select(
 			bom_item.item_code,
 			# non-grouped columns are constant per grouped item_code -> Max() keeps the GROUP BY valid
