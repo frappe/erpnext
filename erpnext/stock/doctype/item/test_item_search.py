@@ -70,6 +70,28 @@ class TestItemSearchIndex(ERPNextTestSuite):
 		"""Without the sqlite_search hook nothing syncs the index and it silently rots."""
 		self.assertIn(ItemSearch, get_search_classes())
 
+	def test_a_barcode_added_after_the_build_is_searchable(self):
+		"""Barcodes stay out of the index: a barcode edit changes no watched Item field, so the
+		sync never fires and an indexed copy would be stale from the moment one was added."""
+		item = frappe.get_doc(
+			{
+				"doctype": "Item",
+				"item_code": "ZZ-BARCODE-PROBE",
+				"item_name": "Barcode Probe",
+				"item_group": frappe.db.get_value("Item Group", {"is_group": 0}, "name"),
+				"stock_uom": frappe.db.get_value("UOM", {}, "name"),
+			}
+		).insert()
+		self.assertNotIn("barcode", self.search.schema["text_fields"])
+
+		item.append("barcodes", {"barcode": "8809988776655"})
+		item.save()
+		update_doc_index(item)
+		self.addCleanup(index_docs_in_queue)
+
+		self.assertIn("ZZ-BARCODE-PROBE", self.search.get_candidate_item_codes("8809988776655"))
+		self.assertEqual(self.run_query("8809988776655", None), self.run_query("8809988776655", None, False))
+
 	def test_a_new_item_is_searchable_before_the_queue_drains(self):
 		"""index_doc only queues, and the scheduler drains every 5 minutes."""
 		item = frappe.get_doc(
