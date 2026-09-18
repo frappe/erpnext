@@ -442,7 +442,7 @@ def item_query(
 
 	if candidates is not None:
 		if not candidates:
-			return []
+			return [] if as_dict else ()
 		query = query.where(item.name.isin(candidates))
 
 	if company:
