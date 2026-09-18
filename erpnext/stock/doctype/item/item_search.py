@@ -39,6 +39,7 @@ class ItemSearch(SQLiteSearch):
 		self.INDEXABLE_DOCTYPES = {
 			"Item": {
 				"fields": [*plain, mapped],
+				"child_fields": {"barcodes": ["barcode"]},
 				"filters": {"disabled": 0, "has_variants": 0},
 			}
 		}
@@ -58,8 +59,8 @@ class ItemSearch(SQLiteSearch):
 	def get_candidate_item_codes(self, txt: str) -> list[str] | None:
 		"""Item codes that can match txt, a superset the caller must still recheck with LIKE.
 
-		Covers barcodes: `Item Barcode.barcode` carries `in_search_index`, so the framework reads
-		them through the child table and reindexes the Item when one of them moves.
+		Covers barcodes, declared as a child table source, so the framework reads them through
+		Item Barcode and reindexes the Item when one of them moves.
 		"""
 		if not self.is_search_enabled() or not self.index_exists():
 			return None
