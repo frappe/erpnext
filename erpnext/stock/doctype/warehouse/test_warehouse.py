@@ -228,6 +228,57 @@ class TestWarehouse(ERPNextTestSuite):
 
 		self.assertNotIn("account", warehouse.get_onload())
 
+<<<<<<< HEAD
+=======
+	def test_stock_accounts_are_fetched_once_per_company(self):
+		from unittest.mock import patch
+
+		from erpnext.stock import get_company_stock_accounts, get_warehouse_account_map
+
+		company, warehouse = create_ambiguous_inventory_account_warehouse()
+		other_warehouse = frappe.get_all(
+			"Warehouse",
+			filters={"company": company, "is_group": 0, "name": ["!=", warehouse.name]},
+			pluck="name",
+			limit=1,
+		)[0]
+		frappe.db.set_value("Warehouse", other_warehouse, "account", None)
+
+		with patch(
+			"erpnext.stock.get_company_stock_accounts", wraps=get_company_stock_accounts
+		) as fetch_stock_accounts:
+			get_warehouse_account_map(company)
+
+		fetch_stock_accounts.assert_called_once_with(company)
+
+	def test_warehouse_account_company_validation(self):
+		company_1 = "_Test Company"
+		company_2 = "_Test Company 1"
+
+		account_company_2 = frappe.db.get_value(
+			"Account", {"company": company_2, "account_type": "Stock", "is_group": 0}, "name"
+		)
+
+		warehouse = frappe.get_doc(
+			{
+				"doctype": "Warehouse",
+				"warehouse_name": "Test Company Account Mismatch",
+				"company": company_1,
+				"account": account_company_2,
+			}
+		)
+
+		self.assertRaisesRegex(frappe.ValidationError, "does not belong to Company", warehouse.insert)
+
+		warehouse.account = None
+		warehouse.insert()
+
+		warehouse.account = account_company_2
+		self.assertRaisesRegex(frappe.ValidationError, "does not belong to Company", warehouse.save)
+
+		warehouse.delete()
+
+>>>>>>> db6e089 (fix(stock): validate warehouse account belongs to selected company (#59191))
 
 def create_inventory_fallback_company():
 	company = "_Test Company Inventory Fallback"
