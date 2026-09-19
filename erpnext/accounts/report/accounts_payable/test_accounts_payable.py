@@ -4,6 +4,7 @@ from frappe.utils import add_days, today
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.report.accounts_payable.accounts_payable import execute
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
+from erpnext.setup.doctype.employee.test_employee import make_employee
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -237,3 +238,44 @@ class TestAccountsPayable(ERPNextTestSuite, AccountsTestMixin):
 		self.assertEqual(len(report[1]), 1)
 		row = report[1][0]
 		self.assertEqual([pi.name, project.name, 300], [row.voucher_no, row.project, row.outstanding])
+
+	def test_employee_transactions_excluded(self):
+		employee = make_employee("test_ap_employee@example.com", company=self.company)
+
+		je = frappe.new_doc("Journal Entry")
+		je.company = self.company
+		je.posting_date = today()
+		je.append(
+			"accounts",
+			{
+				"account": "Creditors - _TC",
+				"party_type": "Employee",
+				"party": employee,
+				"credit": 250,
+				"credit_in_account_currency": 250,
+				"cost_center": "Main - _TC",
+			},
+		)
+		je.append(
+			"accounts",
+			{
+				"account": "Cash - _TC",
+				"debit": 250,
+				"debit_in_account_currency": 250,
+				"cost_center": "Main - _TC",
+			},
+		)
+		je.save().submit()
+
+		filters = {
+			"company": self.company,
+			"report_date": today(),
+			"range": "30, 60, 90, 120",
+		}
+
+		def employee_rows(extra=None):
+			return [row for row in execute({**filters, **(extra or {})})[1] if row.get("party") == employee]
+
+		self.assertFalse(employee_rows())
+		self.assertFalse(employee_rows({"handle_employee_advances": 1}))
+		self.assertTrue(employee_rows({"party_type": "Employee"}))
