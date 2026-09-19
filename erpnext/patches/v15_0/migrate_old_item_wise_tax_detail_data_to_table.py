@@ -92,7 +92,9 @@ def get_items_for_docs(parents, doctype):
 	item = frappe.qb.DocType(f"{doctype} Item")
 	additional_fields = []
 
-	if doctype in TAX_WITHHOLDING_DOCS:
+	# the tax withholding refactor removed these columns; fresh migrations of
+	# old databases never get them, so select only what exists
+	if doctype in TAX_WITHHOLDING_DOCS and frappe.db.has_column(f"{doctype} Item", "apply_tds"):
 		additional_fields.append(item.apply_tds)
 
 	return (
@@ -116,7 +118,7 @@ def get_items_for_docs(parents, doctype):
 def get_doc_details(parents, doctype):
 	inv = frappe.qb.DocType(doctype)
 	additional_fields = []
-	if doctype in TAX_WITHHOLDING_DOCS:
+	if doctype in TAX_WITHHOLDING_DOCS and frappe.db.has_column(doctype, "base_tax_withholding_net_total"):
 		additional_fields.append(inv.base_tax_withholding_net_total)
 
 	return (
