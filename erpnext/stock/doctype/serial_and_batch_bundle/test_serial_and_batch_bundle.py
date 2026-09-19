@@ -2048,6 +2048,24 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 		item.reload()
 		self.assertEqual(item.valuation_method, "FIFO")
 
+	def test_valuation_method_kept_when_disabled_and_saved_after_stock_transactions(self):
+		"""An item that has always had the switch off keeps its own valuation method. Only turning the
+		switch off forces Moving Average, so an unrelated save cannot silently revalue the ledger."""
+		item = self.make_serial_item_for_valuation("_Test Serial Wise Valuation Keeps FIFO On Save", 0)
+		item.reload()
+		item.valuation_method = "FIFO"
+		item.save()
+
+		self.receive_serial_stock(item.name, 2, 100, "_Test Warehouse - _TC")
+		self.receive_serial_stock(item.name, 2, 200, "_Test Warehouse - _TC")
+
+		item.reload()
+		item.description = "saved for an unrelated reason"
+		item.save()
+
+		item.reload()
+		self.assertEqual(item.valuation_method, "FIFO")
+
 	def test_fifo_allowed_when_disabled_without_stock_transactions(self):
 		item = self.make_serial_item_for_valuation("_Test Serial Wise Valuation FIFO Ok", 0)
 
