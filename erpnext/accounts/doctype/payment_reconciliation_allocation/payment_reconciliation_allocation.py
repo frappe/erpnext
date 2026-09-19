@@ -29,6 +29,7 @@ class PaymentReconciliationAllocation(Document):
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
+		payment_term: DF.Link | None
 		reference_name: DF.DynamicLink
 		reference_row: DF.Data | None
 		reference_type: DF.Link

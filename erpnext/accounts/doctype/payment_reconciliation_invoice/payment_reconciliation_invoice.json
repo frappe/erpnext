@@ -8,6 +8,7 @@
   "invoice_type",
   "invoice_number",
   "invoice_date",
+  "payment_term",
   "col_break1",
   "amount",
   "outstanding_amount",
@@ -36,6 +37,13 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "Invoice Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "payment_term",
+   "fieldtype": "Link",
+   "label": "Payment Term",
+   "options": "Payment Term",
    "read_only": 1
   },
   {
