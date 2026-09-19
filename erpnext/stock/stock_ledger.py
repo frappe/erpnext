@@ -1422,6 +1422,19 @@ class update_entries_after:
 			else:
 				sle.outgoing_rate = rate
 
+		elif self.has_stale_serial_no_wise_outgoing_rate(sle):
+			# Serial No Wise Valuation is off, but the entry still carries its serial nos' rate and has
+			# no recalculate_rate flag to re-derive it. Value it at the rate running just before it.
+			sle.outgoing_rate = flt(self.wh_data.valuation_rate)
+
+	def has_stale_serial_no_wise_outgoing_rate(self, sle):
+		return bool(
+			self.skip_serial_batch_valuation
+			and self.valuation_method == "Moving Average"
+			and flt(sle.actual_qty) < 0
+			and flt(sle.outgoing_rate)
+		)
+
 	def has_landed_cost_based_on_pi(self, sle):
 		if sle.voucher_type == "Purchase Receipt" and frappe.db.get_single_value(
 			"Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate"

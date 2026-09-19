@@ -1694,19 +1694,25 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 			},
 		)
 
-	def receive_serial_stock(self, item_code, qty, rate, warehouse):
+	def receive_serial_stock(self, item_code, qty, rate, warehouse, posting_date=None):
 		entry = make_stock_entry(
-			item_code=item_code, target=warehouse, qty=qty, basic_rate=rate, use_serial_batch_fields=1
+			item_code=item_code,
+			target=warehouse,
+			qty=qty,
+			basic_rate=rate,
+			posting_date=posting_date,
+			use_serial_batch_fields=1,
 		)
 
 		return get_serial_nos_from_bundle(entry.items[0].serial_and_batch_bundle)
 
-	def issue_serial_no(self, item_code, serial_no, warehouse):
+	def issue_serial_no(self, item_code, serial_no, warehouse, posting_date=None):
 		return make_stock_entry(
 			item_code=item_code,
 			source=warehouse,
 			qty=1,
 			serial_no=serial_no,
+			posting_date=posting_date,
 			use_serial_batch_fields=1,
 		)
 
@@ -1810,6 +1816,115 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 		entry = self.make_purchase_return_for_serial_no(item.name, serial_nos[-1], costlier_receipt)
 
 		self.assertEqual(flt(self.get_stock_value_difference(entry.name)), -200.0)
+
+	def deliver_serial_no(self, item_code, serial_no, warehouse, posting_date=None):
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		return create_delivery_note(
+			item_code=item_code,
+			warehouse=warehouse,
+			qty=1,
+			serial_no=serial_no,
+			posting_date=posting_date,
+			use_serial_batch_fields=1,
+		)
+
+	def repost_item_and_warehouse(self, item_code, warehouse, posting_date):
+		from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import repost
+
+		riv = frappe.get_doc(
+			{
+				"doctype": "Repost Item Valuation",
+				"based_on": "Item and Warehouse",
+				"item_code": item_code,
+				"warehouse": warehouse,
+				"posting_date": posting_date,
+				"posting_time": "00:00:01",
+				"company": frappe.get_cached_value("Warehouse", warehouse, "company"),
+			}
+		)
+		riv.flags.dont_run_in_test = True
+		riv.submit()
+		riv.reload()
+		repost(riv)
+		riv.reload()
+		self.assertEqual(riv.status, "Completed")
+
+	def assert_outward_sle_at_moving_average(self, voucher_no, warehouse, rate, qty_after_transaction):
+		sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": voucher_no, "warehouse": warehouse, "is_cancelled": 0},
+			["outgoing_rate", "valuation_rate", "stock_value", "stock_value_difference"],
+			as_dict=True,
+		)
+
+		self.assertEqual(flt(sle.outgoing_rate), rate, voucher_no)
+		self.assertEqual(flt(sle.valuation_rate), rate, voucher_no)
+		self.assertEqual(flt(sle.stock_value), rate * qty_after_transaction, voucher_no)
+		self.assertEqual(flt(sle.stock_value_difference), -rate, voucher_no)
+
+	def test_repost_values_outward_entries_at_moving_average_when_disabled(self):
+		"""A repost must value plain outward entries at the moving average once the switch is off. The
+		serial rates are seeded because such entries come from ledgers written before the switch."""
+		warehouse = "_Test Warehouse - _TC"
+		item = self.make_serial_item_for_valuation("_Test Serial Wise Valuation Repost Outward", 1)
+		posting_date = add_days(today(), -10)
+
+		cheaper = self.receive_serial_stock(item.name, 2, 100, warehouse, posting_date)
+		costlier = self.receive_serial_stock(item.name, 2, 200, warehouse, add_days(posting_date, 1))
+
+		issue = self.issue_serial_no(item.name, costlier[-1], warehouse, add_days(posting_date, 2))
+		delivery = self.deliver_serial_no(item.name, cheaper[-1], warehouse, add_days(posting_date, 3))
+
+		for voucher_no, serial_rate in ((issue.name, 200.0), (delivery.name, 100.0)):
+			sle_name = frappe.db.get_value(
+				"Stock Ledger Entry", {"voucher_no": voucher_no, "is_cancelled": 0}, "name"
+			)
+			frappe.db.set_value(
+				"Stock Ledger Entry", sle_name, "outgoing_rate", serial_rate, update_modified=False
+			)
+
+		item.reload()
+		item.use_serial_no_wise_valuation = 0
+		item.save()
+
+		self.repost_item_and_warehouse(item.name, warehouse, posting_date)
+
+		# 2 @ 100 plus 2 @ 200 makes the moving average 150, and neither outward entry may move it
+		self.assert_outward_sle_at_moving_average(issue.name, warehouse, 150.0, 3.0)
+		self.assert_outward_sle_at_moving_average(delivery.name, warehouse, 150.0, 2.0)
+
+	def test_repost_values_purchase_return_at_moving_average_when_disabled(self):
+		"""Same as above for a purchase return: it must leave the remaining stock at the moving average,
+		not at the returned serial's own rate."""
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		warehouse = "_Test Warehouse - _TC"
+		item = self.make_serial_item_for_valuation("_Test Serial Wise Valuation Repost Return", 1)
+		posting_date = add_days(today(), -10)
+
+		make_purchase_receipt(
+			item_code=item.name, qty=2, rate=100, warehouse=warehouse, posting_date=posting_date
+		)
+		costlier_receipt = make_purchase_receipt(
+			item_code=item.name,
+			qty=2,
+			rate=200,
+			warehouse=warehouse,
+			posting_date=add_days(posting_date, 1),
+		)
+		serial_nos = get_serial_nos_from_bundle(costlier_receipt.items[0].serial_and_batch_bundle)
+
+		entry = self.make_purchase_return_for_serial_no(item.name, serial_nos[-1], costlier_receipt)
+		self.assertEqual(flt(self.get_stock_value_difference(entry.name)), -200.0)
+
+		item.reload()
+		item.use_serial_no_wise_valuation = 0
+		item.save()
+
+		self.repost_item_and_warehouse(item.name, warehouse, posting_date)
+
+		self.assert_outward_sle_at_moving_average(entry.name, warehouse, 150.0, 3.0)
 
 	def test_valuation_method_forced_to_moving_average_when_disabled(self):
 		item = self.make_serial_item_for_valuation("_Test Serial Wise Valuation Forced MA", 1)
