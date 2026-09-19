@@ -1111,6 +1111,101 @@ class TestPaymentEntry(ERPNextTestSuite):
 		outstanding_amount = flt(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"))
 		self.assertEqual(outstanding_amount, 0)
 
+	def test_payment_entry_journal_entry_reference_uses_booked_exchange_rate(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+		from erpnext.setup.doctype.currency_exchange.test_currency_exchange import save_new_records
+
+		# Currency Exchange fixture has USD -> INR = 60 on 2016-01-01, deliberately
+		# different from the rate booked on the Journal Entry below (40), to prove
+		# the booked rate is used instead of a fresh Currency Exchange lookup.
+		self.load_test_records("Currency Exchange")
+		save_new_records(self.globalTestRecords["Currency Exchange"])
+
+		jv = make_journal_entry(
+			"_Test Receivable USD - _TC",
+			"_Test Bank - _TC",
+			100,
+			posting_date="2016-01-01",
+			exchange_rate=40,
+			save=False,
+		)
+		jv.accounts[0].update({"party_type": "Customer", "party": "_Test Customer USD"})
+		jv.accounts[1].update({"exchange_rate": 1, "credit_in_account_currency": 4000})
+		jv.submit()
+
+		ref_details = get_reference_details(
+			"Journal Entry",
+			jv.name,
+			"USD",
+			"Customer",
+			"_Test Customer USD",
+			"_Test Receivable USD - _TC",
+		)
+		self.assertEqual(ref_details.exchange_rate, 40)
+
+		pe = frappe.new_doc("Payment Entry")
+		pe.payment_type = "Receive"
+		pe.company = "_Test Company"
+		pe.party_type = "Customer"
+		pe.party = "_Test Customer USD"
+		pe.paid_from = "_Test Receivable USD - _TC"
+		pe.paid_to = "_Test Bank - _TC"
+		pe.paid_amount = 100
+		pe.source_exchange_rate = 45
+		pe.received_amount = 4500
+		pe.reference_no = "je-ref-exchange-rate"
+		pe.reference_date = "2016-01-01"
+		pe.append(
+			"references",
+			{
+				"reference_doctype": "Journal Entry",
+				"reference_name": jv.name,
+				"allocated_amount": 100,
+			},
+		)
+		pe.insert()
+
+		self.assertEqual(pe.references[0].exchange_rate, 40)
+		self.assertEqual(pe.references[0].exchange_gain_loss, 500)
+
+	def test_journal_entry_reference_exchange_rate_is_scoped_to_account(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
+		second_receivable_usd = create_account(
+			account_name="_Test Receivable USD 2",
+			account_type="Receivable",
+			account_currency="USD",
+			company="_Test Company",
+			parent_account=frappe.db.get_value("Account", "_Test Receivable USD - _TC", "parent_account"),
+		)
+
+		jv = make_journal_entry(
+			"_Test Receivable USD - _TC", "_Test Bank - _TC", 100, exchange_rate=40, save=False
+		)
+		jv.accounts[0].update({"party_type": "Customer", "party": "_Test Customer USD"})
+		jv.accounts[1].update({"exchange_rate": 1, "credit_in_account_currency": 11000})
+		jv.append(
+			"accounts",
+			{
+				"account": second_receivable_usd,
+				"party_type": "Customer",
+				"party": "_Test Customer USD",
+				"debit_in_account_currency": 100,
+				"exchange_rate": 70,
+			},
+		)
+		jv.submit()
+
+		first_ref = get_reference_details(
+			"Journal Entry", jv.name, "USD", "Customer", "_Test Customer USD", "_Test Receivable USD - _TC"
+		)
+		self.assertEqual(first_ref.exchange_rate, 40)
+
+		second_ref = get_reference_details(
+			"Journal Entry", jv.name, "USD", "Customer", "_Test Customer USD", second_receivable_usd
+		)
+		self.assertEqual(second_ref.exchange_rate, 70)
+
 	def test_exchange_gain_loss_split_accounts(self):
 		gain_account = create_account(
 			account_name="_Test Exchange Gain",
