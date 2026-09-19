@@ -4,7 +4,8 @@
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import Sum
+from frappe.query_builder import Case
+from frappe.query_builder.functions import Abs, Sum
 
 from erpnext import get_region
 
@@ -286,42 +287,40 @@ def get_conditions_join(filters, p):
 	return conditions
 
 
+def standard_rated_expenses_scope(p):
+	recoverable = p.recoverable_standard_rated_expenses
+	return ((p.is_return != 1) & (recoverable > 0)) | ((p.is_return == 1) & (recoverable != 0))
+
+
 def get_standard_rated_expenses_total(filters):
-	"""Returns the sum of the total of each Purchase invoice made with recoverable reverse charge."""
-	query_filters = get_filters(filters)
-	query_filters.append(["recoverable_standard_rated_expenses", ">", 0])
-	query_filters.append(["docstatus", "=", 1])
+	"""Returns the net base amount of standard rated purchases, less purchase returns."""
+	p = frappe.qb.DocType("Purchase Invoice")
+	query = (
+		frappe.qb.from_(p)
+		.select(Sum(p.base_total))
+		.where((p.docstatus == 1) & standard_rated_expenses_scope(p))
+	)
+	for condition in get_conditions_join(filters, p):
+		query = query.where(condition)
 	try:
-		return (
-			frappe.db.get_all(
-				"Purchase Invoice",
-				filters=query_filters,
-				fields=[{"SUM": "base_total"}],
-				as_list=True,
-				limit=1,
-			)[0][0]
-			or 0
-		)
+		return query.run()[0][0] or 0
 	except (IndexError, TypeError):
 		return 0
 
 
 def get_standard_rated_expenses_tax(filters):
-	"""Returns the sum of the tax of each Purchase invoice made."""
-	query_filters = get_filters(filters)
-	query_filters.append(["recoverable_standard_rated_expenses", ">", 0])
-	query_filters.append(["docstatus", "=", 1])
+	"""Returns the net recoverable standard rated input VAT, less purchase returns."""
+	p = frappe.qb.DocType("Purchase Invoice")
+	recoverable = p.recoverable_standard_rated_expenses
+	query = (
+		frappe.qb.from_(p)
+		.select(Sum(Case().when(p.is_return == 1, Abs(recoverable) * -1).else_(recoverable)))
+		.where((p.docstatus == 1) & standard_rated_expenses_scope(p))
+	)
+	for condition in get_conditions_join(filters, p):
+		query = query.where(condition)
 	try:
-		return (
-			frappe.db.get_all(
-				"Purchase Invoice",
-				filters=query_filters,
-				fields=[{"SUM": "recoverable_standard_rated_expenses"}],
-				as_list=True,
-				limit=1,
-			)[0][0]
-			or 0
-		)
+		return query.run()[0][0] or 0
 	except (IndexError, TypeError):
 		return 0
 
