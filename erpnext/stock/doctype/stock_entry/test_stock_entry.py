@@ -3563,6 +3563,193 @@ class TestStockEntry(ERPNextTestSuite):
 		material_request.reload()
 		self.assertEqual(material_request.transfer_status, "Completed")
 
+	def test_end_transit_with_uom_conversion(self):
+		source_warehouse = "_Test Warehouse - _TC"
+		target_warehouse = "_Test Warehouse 1 - _TC"
+		company = "_Test Company"
+		in_transit_wh = get_in_transit_warehouse(company)
+
+		item_uom_1 = make_item(
+			"_Test UOM Item 1",
+			{
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"uoms": [{"uom": "Kg", "conversion_factor": 0.5}],
+			},
+		).name
+		item_uom_2 = make_item(
+			"_Test UOM Item 2",
+			{
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"uoms": [{"uom": "Kg", "conversion_factor": 0.2}],
+			},
+		).name
+		item_normal = make_item(
+			"_Test Normal UOM Item",
+			{
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+			},
+		).name
+
+		make_stock_entry(item_code=item_uom_1, target=source_warehouse, qty=100, rate=10)
+		make_stock_entry(item_code=item_uom_2, target=source_warehouse, qty=100, rate=10)
+		make_stock_entry(item_code=item_normal, target=source_warehouse, qty=100, rate=10)
+
+		# Step 1: Create Stock Entry - Material Transfer with In Transit
+		se_transit = frappe.get_doc(
+			{
+				"doctype": "Stock Entry",
+				"stock_entry_type": "Material Transfer",
+				"purpose": "Material Transfer",
+				"company": company,
+				"add_to_transit": 1,
+				"items": [
+					{
+						"item_code": item_uom_1,
+						"s_warehouse": source_warehouse,
+						"t_warehouse": in_transit_wh,
+						"uom": "Kg",
+						"conversion_factor": 0.5,
+						"qty": 10,
+						"basic_rate": 10,
+					},
+					{
+						"item_code": item_uom_2,
+						"s_warehouse": source_warehouse,
+						"t_warehouse": in_transit_wh,
+						"uom": "Kg",
+						"conversion_factor": 0.2,
+						"qty": 10,
+						"basic_rate": 10,
+					},
+					{
+						"item_code": item_normal,
+						"s_warehouse": source_warehouse,
+						"t_warehouse": in_transit_wh,
+						"uom": "Nos",
+						"conversion_factor": 1.0,
+						"qty": 5,
+						"basic_rate": 10,
+					},
+				],
+			}
+		).insert()
+		se_transit.submit()
+
+		# Step 2: End transit for both UOM-converted items with complete quantities
+		end_transit_1 = make_stock_in_entry(se_transit.name)
+		self.assertEqual(len(end_transit_1.items), 3)
+
+		# Keep only UOM-converted items and submit
+		end_transit_1.items = [it for it in end_transit_1.items if it.item_code in [item_uom_1, item_uom_2]]
+		for it in end_transit_1.items:
+			it.t_warehouse = target_warehouse
+
+		end_transit_1.insert()
+		end_transit_1.submit()
+
+		# Step 3: End transit again for remaining items
+		# Expected: Only the normal UOM item should be fetched
+		end_transit_2 = make_stock_in_entry(se_transit.name)
+		self.assertEqual(len(end_transit_2.items), 1)
+		self.assertEqual(end_transit_2.items[0].item_code, item_normal)
+		self.assertEqual(end_transit_2.items[0].qty, 5.0)
+
+		for it in end_transit_2.items:
+			it.t_warehouse = target_warehouse
+
+		end_transit_2.insert()
+		end_transit_2.submit()
+
+		# Step 4: After completing all transfers, per_transferred should be 100%
+		se_transit.reload()
+		self.assertEqual(se_transit.per_transferred, 100)
+
+		# Ending transit again should fetch no items
+		end_transit_3 = make_stock_in_entry(se_transit.name)
+		self.assertEqual(len(end_transit_3.items), 0)
+
+	def test_end_transit_small_remainder_with_precision(self):
+		source_warehouse = "_Test Warehouse - _TC"
+		target_warehouse = "_Test Warehouse 1 - _TC"
+		company = "_Test Company"
+		in_transit_wh = get_in_transit_warehouse(company)
+
+		old_precision = frappe.db.get_default("float_precision")
+		frappe.db.set_default("float_precision", 6)
+
+		try:
+			for u in ["Liter", "Kg"]:
+				if not frappe.db.exists("UOM", u):
+					frappe.get_doc({"doctype": "UOM", "uom_name": u, "must_be_whole_number": 0}).insert()
+				else:
+					frappe.db.set_value("UOM", u, "must_be_whole_number", 0)
+
+			item_code = make_item(
+				"_Test Small Remainder Precision Item",
+				{
+					"is_stock_item": 1,
+					"stock_uom": "Kg",
+					"uoms": [{"uom": "Liter", "conversion_factor": 0.5}],
+				},
+			).name
+
+			make_stock_entry(item_code=item_code, target=source_warehouse, qty=10, rate=100)
+
+			# Transit entry: 3 Liter = 1.5 Kg
+			se_transit = frappe.get_doc(
+				{
+					"doctype": "Stock Entry",
+					"stock_entry_type": "Material Transfer",
+					"purpose": "Material Transfer",
+					"company": company,
+					"add_to_transit": 1,
+					"items": [
+						{
+							"item_code": item_code,
+							"s_warehouse": source_warehouse,
+							"t_warehouse": in_transit_wh,
+							"uom": "Liter",
+							"conversion_factor": 0.5,
+							"qty": 3.0,
+							"basic_rate": 100,
+						}
+					],
+				}
+			).insert()
+			se_transit.submit()
+
+			# Partially receive 2.999990 Liter (1.499995 Kg), leaving 0.000005 Kg (0.000010 Liter)
+			end_1 = make_stock_in_entry(se_transit.name)
+			end_1.items[0].t_warehouse = target_warehouse
+			end_1.items[0].qty = 2.999990
+			end_1.insert()
+			end_1.submit()
+
+			se_transit.reload()
+			self.assertEqual(flt(se_transit.items[0].transferred_qty, 6), 1.499995)
+
+			# Remainder of 0.000005 Kg is <= 0.00001 but valid at precision 6
+			end_2 = make_stock_in_entry(se_transit.name)
+			self.assertEqual(len(end_2.items), 1)
+			self.assertEqual(flt(end_2.items[0].qty, 6), 0.000010)
+			self.assertEqual(flt(end_2.items[0].transfer_qty, 6), 0.000005)
+
+			end_2.items[0].t_warehouse = target_warehouse
+			end_2.insert()
+			end_2.submit()
+
+			se_transit.reload()
+			self.assertEqual(se_transit.per_transferred, 100)
+
+			# Nothing left to transfer
+			end_3 = make_stock_in_entry(se_transit.name)
+			self.assertEqual(len(end_3.items), 0)
+		finally:
+			frappe.db.set_default("float_precision", old_precision)
+
 	def test_manufacture_entry_without_wo(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 
