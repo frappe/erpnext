@@ -6,8 +6,8 @@ import frappe
 from frappe import _, bold
 from frappe.model.document import Document
 from frappe.model.mapper import map_child_doc, map_doc
-from frappe.query_builder.functions import IfNull, Lower, Sum
-from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
+from frappe.query_builder.functions import IfNull, Sum
+from frappe.utils import cint, escape_html, flt, get_link_to_form, getdate, nowdate
 from frappe.utils.nestedset import get_descendants_of
 
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_loyalty_points
@@ -22,7 +22,8 @@ from erpnext.accounts.party import get_due_date, get_party_account
 from erpnext.controllers.queries import item_query as _item_query
 from erpnext.controllers.sales_and_purchase_return import get_sales_invoice_item_from_consolidated_invoice
 from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
-from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.serial_batch_bundle import get_serial_batch_list_from_item
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.stock_ledger import is_negative_stock_allowed
 
 
@@ -502,33 +503,27 @@ class POSInvoice(SalesInvoice):
 					).format(d.idx, frappe.bold(d.item_code)),
 					title=_("Invalid Item"),
 				)
-			if d.get("serial_no"):
-				serial_nos = get_serial_nos(d.serial_no)
-				for sr in serial_nos:
-					POI = frappe.qb.DocType("POS Invoice Item")
-					s = sr.lower()
-					serial_no_exists = (
-						frappe.qb.from_(POI)
-						.select(POI.name)
-						.where(POI.parent == self.return_against)
-						.where(
-							(Lower(POI.serial_no) == s)
-							| Lower(POI.serial_no).like(f"{s}\n%")
-							| Lower(POI.serial_no).like(f"%\n{s}")
-							| Lower(POI.serial_no).like(f"%\n{s}\n%")
-						)
-						.limit(1)
-						.run()
-					)
+			self.validate_return_serial_nos(d)
 
-					if not serial_no_exists:
-						bold_return_against = frappe.bold(self.return_against)
-						bold_serial_no = frappe.bold(sr)
-						frappe.throw(
-							_(
-								"Row #{0}: Serial No {1} cannot be returned since it was not transacted in original invoice {2}"
-							).format(d.idx, bold_serial_no, bold_return_against)
-						)
+	def validate_return_serial_nos(self, item):
+		serial_ids = get_serial_batch_list_from_item(item)[0]
+		if not serial_ids:
+			return
+		original_serials = set()
+		for row in frappe.get_all(
+			"POS Invoice Item",
+			filters={"parent": self.return_against, "item_code": item.item_code},
+			fields=["item_code", "serial_no", "batch_no", "serial_and_batch_bundle"],
+		):
+			original_serials.update(get_serial_batch_list_from_item(row)[0])
+
+		invalid_serials = [name for name in serial_ids if name not in original_serials]
+		for number in SerialBatchIdentity("Serial No").get_numbers(item.item_code, invalid_serials):
+			frappe.throw(
+				_(
+					"Row #{0}: Serial No {1} cannot be returned since it was not transacted in original invoice {2}"
+				).format(item.idx, bold(escape_html(number)), bold(escape_html(self.return_against)))
+			)
 
 	def validate_mode_of_payment(self):
 		if len(self.payments) == 0:

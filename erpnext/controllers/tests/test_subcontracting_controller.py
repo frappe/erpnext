@@ -19,6 +19,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
 	make_subcontracting_receipt,
 )
@@ -997,7 +998,8 @@ class TestSubcontractingController(ERPNextTestSuite):
 					if field == "serial_no":
 						data = sorted(data)
 
-					self.assertEqual(data, transferred_detais.get(field))
+					expected = transferred_detais.get(field)
+					self.assertEqual(data, sorted(expected) if field == "serial_no" else expected)
 
 		scr2 = make_subcontracting_receipt(sco.name)
 		scr2.save()
@@ -1012,7 +1014,8 @@ class TestSubcontractingController(ERPNextTestSuite):
 					if field == "serial_no":
 						data = sorted(data)
 
-					self.assertEqual(data, transferred_detais.get(field))
+					expected = transferred_detais.get(field)
+					self.assertEqual(data, sorted(expected) if field == "serial_no" else expected)
 
 	def test_subcontracting_with_same_components_different_fg_with_serial_batch_fields(self):
 		"""
@@ -1300,12 +1303,13 @@ def update_item_details(child_row, details):
 		doc = frappe.get_doc("Serial and Batch Bundle", child_row.serial_and_batch_bundle)
 		for row in doc.get("entries"):
 			if row.serial_no:
-				details.serial_no.append(row.serial_no)
+				details.serial_no.append(frappe.db.get_value("Serial No", row.serial_no, "serial_no"))
 
 			if row.batch_no:
 				details.batch_no[row.batch_no] += row.qty * (
 					-1 if doc.type_of_transaction == "Outward" else 1
 				)
+		details.serial_no.sort()
 	else:
 		if child_row.serial_no:
 			details.serial_no.extend(get_serial_nos(child_row.serial_no))
@@ -1338,7 +1342,7 @@ def make_stock_transfer_entry(**args):
 		batches = defaultdict(float)
 		if item_details and item_details.serial_no:
 			serial_nos = item_details.serial_no[0 : cint(row.qty)]
-			item_details.serial_no = list(set(item_details.serial_no) - set(serial_nos))
+			item_details.serial_no = item_details.serial_no[len(serial_nos) :]
 
 		if item_details and item_details.batch_no:
 			for batch_no, batch_qty in item_details.batch_no.items():
@@ -1358,7 +1362,7 @@ def make_stock_transfer_entry(**args):
 						"warehouse": row.warehouse or "_Test Warehouse - _TC",
 						"qty": (row.qty or 1) * -1,
 						"batches": batches,
-						"serial_nos": serial_nos,
+						"serial_nos": SerialBatchIdentity("Serial No").resolve(row.item_code, serial_nos),
 						"voucher_type": "Delivery Note",
 						"type_of_transaction": "Outward",
 						"do_not_submit": True,

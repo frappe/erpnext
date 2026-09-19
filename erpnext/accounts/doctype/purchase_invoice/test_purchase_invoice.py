@@ -2643,7 +2643,7 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		batch_no = "BATCH-PI-BNU-TPRBI-0001"
 		serial_nos = ["SNU-PI-TPRSI-0001", "SNU-PI-TPRSI-0002", "SNU-PI-TPRSI-0003"]
 
-		if not frappe.db.exists("Batch", batch_no):
+		if not frappe.db.exists("Batch", {"item": batch_item, "batch_id": batch_no}):
 			frappe.get_doc(
 				{
 					"doctype": "Batch",
@@ -2651,6 +2651,7 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 					"item": batch_item,
 				}
 			).insert()
+		batch_no = frappe.db.get_value("Batch", {"item": batch_item, "batch_id": batch_no}, "name")
 
 		for serial_no in serial_nos:
 			if not frappe.db.exists("Serial No", serial_no):

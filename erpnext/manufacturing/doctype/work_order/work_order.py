@@ -6,6 +6,7 @@ import json
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.model.naming import make_autoname
 from frappe.query_builder import Case
 from frappe.query_builder.functions import Coalesce, IfNull, Sum
 from frappe.utils import (
@@ -67,6 +68,7 @@ from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.batch.batch import make_batch
 from erpnext.stock.doctype.item.item import get_item_defaults, validate_end_of_life
 from erpnext.stock.doctype.serial_no.serial_no import get_available_serial_nos
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.utils import validate_warehouse_company
 from erpnext.utilities.transaction_base import validate_uom_is_integer
 
@@ -830,7 +832,9 @@ class WorkOrder(Document):
 
 		serial_nos = []
 		if item_details.serial_no_series:
-			serial_nos = get_available_serial_nos(item_details.serial_no_series, self.qty)
+			serial_nos = get_available_serial_nos(
+				item_details.serial_no_series, self.qty, self.production_item
+			)
 
 		if not serial_nos:
 			return
@@ -864,7 +868,7 @@ class WorkOrder(Document):
 
 			serial_nos_details.append(
 				(
-					serial_no,
+					make_autoname("hash", "Serial No"),
 					serial_no,
 					now(),
 					now(),
@@ -880,7 +884,17 @@ class WorkOrder(Document):
 				)
 			)
 
-		frappe.db.bulk_insert("Serial No", fields=fields, values=set(serial_nos_details))
+		try:
+			frappe.db.bulk_insert("Serial No", fields=fields, values=set(serial_nos_details))
+		except Exception as error:
+			SerialBatchIdentity("Serial No").raise_duplicate(
+				error,
+				self.production_item,
+				message=_(
+					"A naming series conflict occurred while creating serial numbers. Please change the naming series for the item {0}."
+				).format(frappe.bold(self.production_item)),
+			)
+			raise
 
 	def validate_cancel(self):
 		if self.status == "Stopped":

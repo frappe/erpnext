@@ -2,6 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.query_reports["Available Serial No"] = {
+	export_hidden_cols: true,
 	filters: [
 		{
 			fieldname: "company",
@@ -66,7 +67,7 @@ frappe.query_reports["Available Serial No"] = {
 		},
 	],
 	formatter: function (value, row, column, data, default_formatter) {
-		value = default_formatter(value, row, column, data);
+		value = erpnext.utils.format_serial_batch_number(value, row, column, data, default_formatter);
 		if (column.fieldname == "out_qty" && data && data.out_qty < 0) {
 			value = "<span style='color:red'>" + value + "</span>";
 		} else if (column.fieldname == "in_qty" && data && data.in_qty > 0) {

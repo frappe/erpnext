@@ -5,26 +5,30 @@
 import json
 
 import frappe
+from frappe import _
 from frappe.query_builder import Criterion, DocType, Order
 from frappe.utils import cint, get_datetime
 from frappe.utils.nestedset import get_root_of
 
 from erpnext.accounts.doctype.pos_invoice.pos_invoice import get_item_group, get_stock_availability
 from erpnext.accounts.doctype.pos_profile.pos_profile import get_child_nodes, get_item_groups
+from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.get_item_details import get_conversion_factor
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.utils import scan_barcode
 
 
-def search_by_term(search_term, warehouse, price_list):
-	result = search_for_serial_or_batch_or_barcode_number(search_term) or {}
+def search_by_term(search_term, warehouse, price_list, pos_profile, item_code=None, record_type=None):
+	result = search_for_serial_or_batch_or_barcode_number(search_term, pos_profile, item_code, record_type)
+	if result.get("candidates"):
+		return result
+	if not result.get("item_code"):
+		return
 
-	item_code = result.get("item_code", search_term)
+	item_code = result["item_code"]
 	serial_no = result.get("serial_no", "")
 	batch_no = result.get("batch_no", "")
 	barcode = result.get("barcode", "")
-
-	if not result:
-		return
 
 	item_doc = frappe.get_doc("Item", item_code)
 
@@ -109,16 +113,62 @@ def search_by_term(search_term, warehouse, price_list):
 			}
 		)
 
-	return {"items": [item]}
+	return {"items": [item], "barcode_scan": True}
 
 
 def filter_result_items(result, pos_profile):
-	if result and result.get("items"):
-		pos_profile_doc = frappe.get_cached_doc("POS Profile", pos_profile)
-		pos_item_groups = get_item_group(pos_profile_doc)
-		if not pos_item_groups:
-			return
+	if not result:
+		return
+	pos_item_groups = get_item_group(frappe.get_cached_doc("POS Profile", pos_profile))
+	if not pos_item_groups:
+		return
+	if result.get("candidates"):
+		allowed_items = frappe.get_list(
+			"Item",
+			filters={
+				"name": ("in", [row["item_code"] for row in result["candidates"]]),
+				"item_group": ("in", pos_item_groups),
+			},
+			pluck="name",
+		)
+		result["candidates"] = [row for row in result["candidates"] if row["item_code"] in allowed_items]
+	if result.get("items"):
 		result["items"] = [item for item in result.get("items") if item.get("item_group") in pos_item_groups]
+
+
+def check_pos_item_access(pos_profile: str, item_code: str | None) -> None:
+	"""Entitle a POS endpoint that takes an Item from the caller, which get_items scopes for itself."""
+	check_pos_profile_access(pos_profile)
+	item_groups = get_item_groups(pos_profile)
+	if item_code and item_groups:
+		if frappe.db.get_value("Item", item_code, "item_group") not in item_groups:
+			frappe.throw(_("The selected Item is not available on this POS Profile"), frappe.PermissionError)
+
+
+def scope_scan_result(result, pos_profile):
+	"""Narrow a scan to the Items the profile sells, the way get_items narrows its own results."""
+	item_groups = get_item_groups(pos_profile)
+	if not result or not item_groups:
+		return result
+
+	rows = result.get("candidates") or ([result] if result.get("item_code") else [])
+	if not rows:
+		return result
+
+	allowed = set(
+		frappe.get_all(
+			"Item",
+			filters={"name": ("in", [row["item_code"] for row in rows]), "item_group": ("in", item_groups)},
+			pluck="name",
+		)
+	)
+	rows = [row for row in rows if row["item_code"] in allowed]
+	if not rows:
+		return {}
+	if result.get("candidates"):
+		result["candidates"] = rows
+		return result
+	return rows[0]
 
 
 def check_pos_profile_access(pos_profile: str | None) -> None:
@@ -151,6 +201,8 @@ def get_items(
 	item_group: str,
 	pos_profile: str,
 	search_term: str = "",
+	item_code: str | None = None,
+	record_type: str | None = None,
 ):
 	check_pos_profile_access(pos_profile)
 
@@ -161,7 +213,7 @@ def get_items(
 	result = []
 
 	if search_term:
-		result = search_by_term(search_term, warehouse, price_list) or []
+		result = search_by_term(search_term, warehouse, price_list, pos_profile, item_code, record_type) or []
 		filter_result_items(result, pos_profile)
 		if result:
 			return result
@@ -285,11 +337,42 @@ def get_items(
 
 
 @frappe.whitelist()
-def search_for_serial_or_batch_or_barcode_number(search_value: str) -> dict[str, str | None]:
-	# POS-page wrapper around scan_barcode; the page's entitlement is the POS Profile.
-	frappe.has_permission("POS Profile", throw=True)
+def search_for_serial_or_batch_or_barcode_number(
+	search_value: str, pos_profile: str, item_code: str | None = None, record_type: str | None = None
+):
+	check_pos_item_access(pos_profile, item_code)
 
-	return scan_barcode(search_value)
+	result = scope_scan_result(scan_barcode(search_value, item_code=item_code), pos_profile)
+	if not record_type:
+		return result
+	candidates = result.get("candidates", [result])
+	matches = [row for row in candidates if row.get("record_type") == record_type]
+	if len(matches) != 1:
+		frappe.throw(_("The scanned record is no longer available. Please scan again."))
+	match = matches[0]
+	if match.get("record_type") == "Batch" and match.get("has_serial_no"):
+		frappe.throw(_("This item requires serial numbers. Please scan a serial number."))
+	return match
+
+
+@frappe.whitelist()
+def get_serials_by_batch(item_code: str, serial_nos: str, pos_profile: str):
+	check_pos_item_access(pos_profile, item_code)
+
+	serial_ids = SerialBatchIdentity("Serial No").resolve(item_code, get_serial_nos(serial_nos))
+	if not serial_ids:
+		return {}
+	serials = {
+		row.name: row
+		for row in frappe.get_all(
+			"Serial No", filters={"name": ("in", serial_ids)}, fields=["name", "serial_no", "batch_no"]
+		)
+	}
+	batches = {}
+	for serial_id in serial_ids:
+		serial = serials[serial_id]
+		batches.setdefault(serial.batch_no or "", []).append(serial.serial_no)
+	return batches
 
 
 def get_conditions(search_term, item=None):

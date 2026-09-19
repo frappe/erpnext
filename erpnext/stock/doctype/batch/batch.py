@@ -12,12 +12,14 @@ from frappe.model.naming import make_autoname, revert_series_if_last
 from frappe.utils import cint, flt, get_link_to_form
 from frappe.utils.data import DateTimeLikeObject, add_days
 
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
+
 
 class UnableToSelectBatchError(frappe.ValidationError):
 	pass
 
 
-def get_name_from_hash():
+def get_name_from_hash(item_code):
 	"""
 	Get a name for a Batch by generating a unique hash.
 	:return: The hash that was generated.
@@ -25,7 +27,7 @@ def get_name_from_hash():
 	temp = None
 	while not temp:
 		temp = frappe.generate_hash()[:7].upper()
-		if frappe.db.exists("Batch", temp):
+		if frappe.db.exists("Batch", {"item": item_code, "batch_id": temp}):
 			temp = None
 
 	return temp
@@ -114,11 +116,14 @@ class Batch(Document):
 		use_batchwise_valuation: DF.Check
 	# end: auto-generated types
 
-	def autoname(self):
-		"""Generate random ID for batch if not specified"""
+	def show_unique_validation_message(self, error):
+		SerialBatchIdentity("Batch").raise_duplicate(error, self.item, self.batch_id)
+		super().show_unique_validation_message(error)
+
+	def before_naming(self):
+		"""Generate the physical batch number separately from the document ID."""
 
 		if self.batch_id:
-			self.name = self.batch_id
 			return
 
 		create_new_batch, batch_number_series = frappe.db.get_value(
@@ -134,19 +139,17 @@ class Batch(Document):
 			elif batch_uses_naming_series():
 				self.batch_id = self.get_name_from_naming_series()
 			else:
-				self.batch_id = get_name_from_hash()
+				self.batch_id = get_name_from_hash(self.item)
 
 			# User might have manually created a batch with next number
-			if frappe.db.exists("Batch", self.batch_id):
+			if frappe.db.exists("Batch", {"item": self.item, "batch_id": self.batch_id}):
 				self.batch_id = None
-
-		self.name = self.batch_id
 
 	def onload(self):
 		self.image = frappe.db.get_value("Item", self.item, "image")
 
 	def after_delete(self):
-		revert_series_if_last(get_batch_naming_series(), self.name)
+		revert_series_if_last(get_batch_naming_series(), self.batch_id)
 
 	def validate(self):
 		self.item_has_batch_enabled()
@@ -231,6 +234,10 @@ class Batch(Document):
 		name = make_autoname(key, doc=self)
 
 		return name
+
+
+def on_doctype_update():
+	SerialBatchIdentity("Batch").add_unique_constraint()
 
 
 @frappe.whitelist()
@@ -394,14 +401,16 @@ def make_batch_bundle(
 
 
 def validate_serial_no_with_batch(serial_nos, item_code):
+	identity = SerialBatchIdentity("Serial No")
 	if frappe.get_cached_value("Serial No", serial_nos[0], "item_code") != item_code:
 		frappe.throw(
 			_("The serial no {0} does not belong to item {1}").format(
-				get_link_to_form("Serial No", serial_nos[0]), get_link_to_form("Item", item_code)
+				get_link_to_form("Serial No", serial_nos[0], identity.get_label(serial_nos[0])),
+				get_link_to_form("Item", item_code),
 			)
 		)
 
-	serial_no_link = ",".join(get_link_to_form("Serial No", sn) for sn in serial_nos)
+	serial_no_link = ",".join(get_link_to_form("Serial No", sn, identity.get_label(sn)) for sn in serial_nos)
 
 	message = _("Serial Nos") if len(serial_nos) > 1 else _("Serial No")
 	frappe.throw(_("There is no batch found against the {0}: {1}").format(message, serial_no_link))
