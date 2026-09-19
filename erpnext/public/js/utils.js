@@ -327,26 +327,64 @@ $.extend(erpnext.utils, {
 		});
 	},
 
+	add_blank_option_to_dimension_filter: function (filter) {
+		if (filter.has_blank_option) {
+			return;
+		}
+
+		const blank_option = {
+			// Document names cannot contain ">", so this cannot collide with a dimension value.
+			value: "__blank__>",
+			label: __("Blank"),
+			description: __("Not Set"),
+		};
+		const get_data =
+			filter.get_data?.bind(filter) ||
+			((txt) => {
+				const query = filter.get_query?.call(filter) || {};
+				return frappe.db.get_link_options(filter.options, txt, query.filters);
+			});
+		const on_make = filter.on_make;
+
+		filter.fieldtype = "MultiSelectList";
+		filter.on_make = function (control) {
+			on_make?.call(this, control);
+			control._options = [
+				blank_option,
+				...(control._options || []).filter((option) => option.value !== blank_option.value),
+			];
+		};
+		filter.get_data = (txt) =>
+			Promise.resolve(get_data(txt)).then((options) => [blank_option, ...(options || [])]);
+		filter.has_blank_option = true;
+	},
+
 	add_dimensions: function (report_name, index) {
 		let filters = frappe.query_reports[report_name].filters;
+		filters
+			.filter((filter) => ["cost_center", "project"].includes(filter.fieldname))
+			.forEach((filter) => erpnext.utils.add_blank_option_to_dimension_filter(filter));
 
 		frappe.call({
 			method: "erpnext.accounts.doctype.accounting_dimension.accounting_dimension.get_dimensions",
 			callback: function (r) {
 				let accounting_dimensions = r.message[0];
 				accounting_dimensions.forEach((dimension) => {
-					let found = filters.some((el) => el.fieldname === dimension["fieldname"]);
+					let filter = filters.find((el) => el.fieldname === dimension["fieldname"]);
 
-					if (!found) {
-						filters.splice(index, 0, {
+					if (!filter) {
+						filter = {
 							fieldname: dimension["fieldname"],
 							label: __(dimension["label"]),
 							fieldtype: "MultiSelectList",
 							get_data: function (txt) {
 								return frappe.db.get_link_options(dimension["document_type"], txt);
 							},
-						});
+						};
+						filters.splice(index, 0, filter);
 					}
+
+					erpnext.utils.add_blank_option_to_dimension_filter(filter);
 				});
 			},
 		});
