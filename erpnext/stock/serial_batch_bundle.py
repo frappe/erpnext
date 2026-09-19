@@ -1328,10 +1328,36 @@ class SerialBatchCreation:
 			required_qty = flt(abs(self.actual_qty), precision)
 
 			if required_qty - total_qty > 0:
-				msg = _(
-					"For the item {0}, the Available qty {1} is less than the Required Qty {2} in the warehouse {3}. Please add sufficient qty in the warehouse."
-				).format(bold(doc.item_code), bold(total_qty), bold(required_qty), bold(doc.warehouse))
-				frappe.throw(msg, title=_("Insufficient Stock"))
+				frappe.throw(
+					self.get_insufficient_stock_message(doc, total_qty, required_qty),
+					title=_("Insufficient Stock"),
+				)
+
+	def get_insufficient_stock_message(self, doc, total_qty, required_qty):
+		sales_order_details = self.get("sales_order_details") or {}
+		if sales_order_details and frappe.db.get_value(
+			"Sales Order Item",
+			sales_order_details.get("sales_order_item"),
+			"ensure_delivery_based_on_produced_serial_no",
+		):
+			return (
+				_(
+					"For the item {0}, only {1} qty is available from the Serial Nos produced against the Sales Order {2}, which is less than the Required Qty {3}."
+				).format(
+					bold(doc.item_code),
+					bold(total_qty),
+					get_link_to_form("Sales Order", sales_order_details.get("sales_order")),
+					bold(required_qty),
+				)
+				+ "<br>"
+				+ _(
+					"The Sales Order is set to ensure delivery based on produced Serial No, hence only those Serial Nos can be delivered."
+				)
+			)
+
+		return _(
+			"For the item {0}, the Available qty {1} is less than the Required Qty {2} in the warehouse {3}. Please add sufficient qty in the warehouse."
+		).format(bold(doc.item_code), bold(total_qty), bold(required_qty), bold(doc.warehouse))
 
 	def set_auto_serial_batch_entries_for_outward(self):
 		from erpnext.stock.doctype.batch.batch import get_available_batches
@@ -1349,6 +1375,12 @@ class SerialBatchCreation:
 
 		if self.get("ignore_serial_nos"):
 			kwargs["ignore_serial_nos"] = self.ignore_serial_nos
+
+		if self.has_serial_no and self.get("voucher_detail_no"):
+			self.sales_order_details = get_sales_order_details(
+				self.get("voucher_type"), self.voucher_detail_no
+			)
+			kwargs.update(self.sales_order_details)
 
 		if (
 			self.has_serial_no
@@ -1640,6 +1672,25 @@ def get_serial_or_batch_items(items):
 		serial_or_batch_items = [d.name for d in serial_or_batch_items]
 
 	return serial_or_batch_items
+
+
+def get_sales_order_details(voucher_type, voucher_detail_no):
+	sales_order_field = {
+		"Delivery Note": "against_sales_order",
+		"Sales Invoice": "sales_order",
+	}.get(voucher_type)
+
+	if not sales_order_field:
+		return {}
+
+	row = frappe.db.get_value(
+		voucher_type + " Item", voucher_detail_no, [sales_order_field, "so_detail"], as_dict=True
+	)
+
+	if not row or not row.get(sales_order_field) or not row.so_detail:
+		return {}
+
+	return {"sales_order": row.get(sales_order_field), "sales_order_item": row.so_detail}
 
 
 def get_serial_nos_batch(serial_nos):

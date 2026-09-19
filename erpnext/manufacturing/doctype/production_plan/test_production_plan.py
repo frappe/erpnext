@@ -494,6 +494,67 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		self.assertFalse(pln.po_items)
 
+	def test_consolidation_blocked_for_produced_serial_no_items(self):
+		"Test that Sales Order Items delivered by produced Serial No cannot be consolidated."
+		warehouse = "_Test Warehouse - _TC"
+		fg_item = make_item(
+			"_Test Consolidation Serial FG",
+			{
+				"is_stock_item": 1,
+				"has_serial_no": 1,
+				"serial_no_series": "TCSFG.####",
+				"valuation_rate": 500,
+				"item_defaults": [{"default_warehouse": warehouse, "company": "_Test Company"}],
+			},
+		)
+
+		raw_material = make_item(
+			"_Test Consolidation Serial RM",
+			{
+				"is_stock_item": 1,
+				"valuation_rate": 100,
+				"item_defaults": [{"default_warehouse": warehouse, "company": "_Test Company"}],
+			},
+		)
+		make_stock_entry(item_code=raw_material.name, target=warehouse, qty=20, basic_rate=100)
+
+		if not frappe.db.exists("BOM", {"item": fg_item.name, "docstatus": 1}):
+			make_bom(item=fg_item.name, rate=1000, raw_materials=[raw_material.name])
+
+		sales_orders = []
+		for qty in (1, 2):
+			so = make_sales_order(
+				item_code=fg_item.name, qty=qty, rate=1000, warehouse=warehouse, do_not_submit=True
+			)
+			so.items[0].ensure_delivery_based_on_produced_serial_no = 1
+			so.save()
+			so.submit()
+			sales_orders.append(so)
+
+		pln = frappe.new_doc("Production Plan")
+		pln.company = sales_orders[0].company
+		pln.get_items_from = "Sales Order"
+		for so in sales_orders:
+			pln.append(
+				"sales_orders",
+				{
+					"sales_order": so.name,
+					"sales_order_date": so.transaction_date,
+					"customer": so.customer,
+					"grand_total": so.grand_total,
+				},
+			)
+
+		pln.combine_items = 1
+		pln.get_items()
+		self.assertRaisesRegex(frappe.ValidationError, "Consolidate Sales Order Items", pln.save)
+
+		# the same items plan fine when they are not consolidated
+		pln.combine_items = 0
+		pln.get_items()
+		pln.save()
+		self.assertTrue(pln.po_items)
+
 	def test_production_plan_combine_items(self):
 		"Test combining FG items in Production Plan."
 		item = "Test Production Item 1"

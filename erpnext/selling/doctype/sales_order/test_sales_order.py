@@ -3774,6 +3774,88 @@ class TestSalesOrder(ERPNextTestSuite):
 		)
 		self.assertNotIn("shipping_contact_person", purchase_details)
 
+	def test_delivery_based_on_produced_serial_no(self):
+		from erpnext.stock.serial_batch_bundle import get_serial_nos_from_bundle
+
+		so, produced_serial_no, other_serial_no = create_so_for_produced_serial_no_delivery()
+
+		dn = make_delivery_note(so.name)
+		dn.items[0].use_serial_batch_fields = 1
+		dn.items[0].serial_no = other_serial_no
+		self.assertRaises(frappe.ValidationError, dn.save)
+
+		dn.items[0].serial_no = produced_serial_no
+		dn.submit()
+		dn.reload()
+
+		self.assertEqual(
+			get_serial_nos_from_bundle(dn.items[0].serial_and_batch_bundle), [produced_serial_no]
+		)
+
+	@change_settings("Stock Settings", {"auto_create_serial_and_batch_bundle_for_outward": 1})
+	def test_auto_fetch_of_produced_serial_no_on_delivery(self):
+		from erpnext.stock.get_item_details import get_item_details
+		from erpnext.stock.serial_batch_bundle import get_serial_nos_from_bundle
+
+		# the non-produced serial no is the older one, so plain FIFO would pick it
+		so, produced_serial_no, _other_serial_no = create_so_for_produced_serial_no_delivery()
+
+		dn = make_delivery_note(so.name)
+		row = dn.items[0]
+
+		details = get_item_details(
+			{
+				"doctype": "Delivery Note",
+				"company": dn.company,
+				"customer": dn.customer,
+				"currency": dn.currency,
+				"conversion_rate": dn.conversion_rate,
+				"price_list": dn.selling_price_list,
+				"price_list_currency": dn.price_list_currency,
+				"plc_conversion_rate": dn.plc_conversion_rate,
+				"posting_date": dn.posting_date,
+				"posting_time": dn.posting_time,
+				"item_code": row.item_code,
+				"warehouse": row.warehouse,
+				"qty": 1,
+				"stock_qty": 1,
+				"conversion_factor": 1,
+				"uom": row.uom,
+				"use_serial_batch_fields": 1,
+				"against_sales_order": so.name,
+				"so_detail": row.so_detail,
+				"child_docname": row.name,
+			},
+			doc=dn.as_dict(),
+		)
+
+		self.assertEqual(details.get("serial_no"), produced_serial_no)
+
+		# the same restriction applies when the bundle is auto created on submit
+		dn.items[0].use_serial_batch_fields = 0
+		dn.items[0].serial_no = None
+		dn.submit()
+		dn.reload()
+
+		self.assertEqual(
+			get_serial_nos_from_bundle(dn.items[0].serial_and_batch_bundle), [produced_serial_no]
+		)
+
+	@change_settings(
+		"Stock Settings",
+		{"auto_create_serial_and_batch_bundle_for_outward": 1, "over_delivery_receipt_allowance": 100},
+	)
+	def test_over_delivery_is_limited_to_produced_serial_nos(self):
+		so, _produced_serial_no, _other_serial_no = create_so_for_produced_serial_no_delivery()
+
+		# the allowance permits qty 2, but only one Serial No was produced against the Sales Order
+		dn = make_delivery_note(so.name)
+		dn.items[0].qty = 2
+		dn.items[0].use_serial_batch_fields = 0
+		dn.items[0].serial_no = None
+
+		self.assertRaisesRegex(frappe.ValidationError, "produced against the Sales Order", dn.submit)
+
 
 def compare_payment_schedules(doc, doc1, doc2):
 	for index, schedule in enumerate(doc1.get("payment_schedule")):
@@ -3940,3 +4022,64 @@ def make_sales_order_edit_perm_workflow():
 	workflow.insert(ignore_permissions=True)
 
 	return workflow
+
+
+def create_so_for_produced_serial_no_delivery():
+	"""Sales Order that ensures delivery by produced Serial No, with one produced and one unrelated Serial No."""
+	from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+	from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+	from erpnext.manufacturing.doctype.work_order.work_order import (
+		make_stock_entry as make_production_stock_entry,
+	)
+	from erpnext.stock.serial_batch_bundle import get_serial_nos_from_bundle
+
+	warehouse = "_Test Warehouse - _TC"
+	fg_item = make_item(
+		"_Test Produced Serial FG",
+		{
+			"is_stock_item": 1,
+			"has_serial_no": 1,
+			"serial_no_series": "TPSFG.####",
+			"valuation_rate": 500,
+			"item_defaults": [{"default_warehouse": warehouse, "company": "_Test Company"}],
+		},
+	)
+
+	raw_materials = ["_Test Produced Serial RM A", "_Test Produced Serial RM B"]
+	for raw_material in raw_materials:
+		make_item(
+			raw_material,
+			{
+				"is_stock_item": 1,
+				"valuation_rate": 100,
+				"item_defaults": [{"default_warehouse": warehouse, "company": "_Test Company"}],
+			},
+		)
+		make_stock_entry(item_code=raw_material, target=warehouse, qty=10, basic_rate=100)
+
+	make_bom(item=fg_item.name, rate=1000, raw_materials=raw_materials)
+
+	# a serial no of the same item that is not produced for the Sales Order, received first
+	other_se = make_stock_entry(item_code=fg_item.name, target=warehouse, qty=1, basic_rate=500)
+	other_serial_no = get_serial_nos_from_bundle(other_se.items[0].serial_and_batch_bundle)[0]
+
+	so = make_sales_order(item_code=fg_item.name, qty=1, rate=1000, warehouse=warehouse, do_not_submit=True)
+	so.items[0].ensure_delivery_based_on_produced_serial_no = 1
+	so.save()
+	so.submit()
+
+	wo = make_wo_order_test_record(item=fg_item.name, qty=1, do_not_save=True)
+	wo.fg_warehouse = wo.wip_warehouse = warehouse
+	wo.skip_transfer = 1
+	wo.sales_order = so.name
+	wo.submit()
+
+	se = frappe.get_doc(make_production_stock_entry(wo.name, "Manufacture", 1))
+	se.save()
+	se.submit()
+	se.reload()
+	produced_serial_no = get_serial_nos_from_bundle(
+		next(d for d in se.items if d.is_finished_item).serial_and_batch_bundle
+	)[0]
+
+	return so, produced_serial_no, other_serial_no
