@@ -34,6 +34,8 @@ def execute(filters=None):
 		total_credit += flt(d.credit)
 
 	amounts_not_reflected_in_system = get_amounts_not_reflected_in_system(filters)
+	if not filters.get("include_entries_cleared_after_report_date", 1):
+		data = [entry for entry in data if not entry.get("clearance_date")]
 
 	bank_bal = (
 		flt(balance_as_per_system) - flt(total_debit) + flt(total_credit) + amounts_not_reflected_in_system
