@@ -317,15 +317,26 @@ def _get_incoming_rate(args: dict | str, raise_error_if_no_rate: bool = True, fa
 	in_rate = None
 
 	item_details = frappe.get_cached_value(
-		"Item", args.get("item_code"), ["has_serial_no", "has_batch_no"], as_dict=1
+		"Item",
+		args.get("item_code"),
+		["has_serial_no", "has_batch_no", "use_serial_no_wise_valuation"],
+		as_dict=1,
 	)
 
 	use_moving_avg_for_batch = frappe.get_single_value("Stock Settings", "do_not_use_batchwise_valuation")
+	skip_serial_batch_valuation = bool(
+		item_details and item_details.has_serial_no and not item_details.use_serial_no_wise_valuation
+	)
 
 	if isinstance(args, dict):
 		args = frappe._dict(args)
 
-	if item_details and item_details.has_serial_no and args.get("serial_and_batch_bundle"):
+	if (
+		item_details
+		and item_details.has_serial_no
+		and args.get("serial_and_batch_bundle")
+		and not skip_serial_batch_valuation
+	):
 		args.actual_qty = args.qty
 		sn_obj = SerialNoValuation(
 			sle=args,
@@ -340,6 +351,7 @@ def _get_incoming_rate(args: dict | str, raise_error_if_no_rate: bool = True, fa
 		and item_details.has_batch_no
 		and args.get("serial_and_batch_bundle")
 		and not use_moving_avg_for_batch
+		and not skip_serial_batch_valuation
 	):
 		args.actual_qty = args.qty
 		batch_obj = BatchNoValuation(
@@ -350,14 +362,23 @@ def _get_incoming_rate(args: dict | str, raise_error_if_no_rate: bool = True, fa
 
 		return batch_obj.get_incoming_rate()
 
-	elif (args.get("serial_no") or "").strip() and not args.get("serial_and_batch_bundle"):
+	elif (
+		(args.get("serial_no") or "").strip()
+		and not args.get("serial_and_batch_bundle")
+		and not skip_serial_batch_valuation
+	):
 		args.actual_qty = args.qty
 		args.serial_nos = get_serial_nos_data(args.get("serial_no"))
 
 		sn_obj = SerialNoValuation(sle=args, warehouse=args.get("warehouse"), item_code=args.get("item_code"))
 
 		return sn_obj.get_incoming_rate()
-	elif args.get("batch_no") and not args.get("serial_and_batch_bundle") and not use_moving_avg_for_batch:
+	elif (
+		args.get("batch_no")
+		and not args.get("serial_and_batch_bundle")
+		and not use_moving_avg_for_batch
+		and not skip_serial_batch_valuation
+	):
 		args.actual_qty = args.qty
 		args.batch_nos = frappe._dict({args.batch_no: args})
 
@@ -410,6 +431,14 @@ def get_avg_purchase_rate(serial_nos):
 	)
 
 
+def is_serial_no_wise_valuation_disabled(item_code) -> bool:
+	item_details = frappe.get_cached_value(
+		"Item", item_code, ["has_serial_no", "use_serial_no_wise_valuation"], as_dict=1
+	)
+
+	return bool(item_details and item_details.has_serial_no and not item_details.use_serial_no_wise_valuation)
+
+
 @frappe.request_cache
 def get_valuation_method(item_code, company=None):
 	"""get valuation method from item or default"""
@@ -421,6 +450,14 @@ def get_valuation_method(item_code, company=None):
 			else frappe.get_single_value("Stock Settings", "valuation_method") or "FIFO"
 		)
 	return val_method
+
+
+def clear_valuation_method_cache():
+	cache = getattr(frappe.local, "request_cache", None)
+	if not cache:
+		return
+
+	cache.pop(getattr(get_valuation_method, "__wrapped__", get_valuation_method), None)
 
 
 def get_fifo_rate(previous_stock_queue, qty):
