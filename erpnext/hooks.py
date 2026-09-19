@@ -387,6 +387,8 @@ pre_submit_validation_doctypes = [
 	"Sales Order",
 ]
 
+sqlite_search = ["erpnext.stock.doctype.item.item_search.ItemSearch"]
+
 doc_events = {
 	"*": {
 		"validate": [
