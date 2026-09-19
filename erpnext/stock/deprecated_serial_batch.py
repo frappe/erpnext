@@ -12,6 +12,38 @@ from pypika.terms import ExistsCriterion
 from erpnext.deprecation_dumpster import deprecated
 
 
+@frappe.request_cache
+@deprecated
+def has_legacy_batch_ledgers(item_code: str, warehouse: str) -> bool:
+	"""`False` when no Stock Ledger Entry of the item and warehouse uses the
+	denormalized `batch_no` field.
+
+	Batches are tracked through the Serial and Batch Bundle since v15, so this is
+	`False` for most of the item and warehouse combinations and the expensive
+	aggregates (`FOR UPDATE`) below can be skipped without reading the ledger. The
+	probe is an index only scan on the `batch_no, item_code, warehouse` index,
+	`is_cancelled` is intentionally left out of it to keep it so, an item with only
+	cancelled legacy ledgers simply falls back to the aggregate.
+
+	Cached for the request, nothing creates a legacy ledger midway.
+	"""
+
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+
+	return bool(
+		frappe.qb.from_(sle)
+		.select(sle.batch_no)
+		.where(
+			sle.batch_no.isnotnull()
+			& (sle.batch_no != "")
+			& (sle.item_code == item_code)
+			& (sle.warehouse == warehouse)
+		)
+		.limit(1)
+		.run()
+	)
+
+
 class DeprecatedSerialNoValuation:
 	@deprecated(
 		"erpnext.stock.serial_batch_bundle.SerialNoValuation.calculate_stock_value_from_deprecarated_ledgers",
@@ -121,7 +153,9 @@ class DeprecatedBatchNoValuation:
 	def get_sle_for_batches(self):
 		from erpnext.stock.utils import get_combine_datetime
 
-		if not self.batchwise_valuation_batches:
+		if not self.batchwise_valuation_batches or not has_legacy_batch_ledgers(
+			self.sle.item_code, self.sle.warehouse
+		):
 			return []
 
 		sle = frappe.qb.DocType("Stock Ledger Entry")
@@ -284,6 +318,9 @@ class DeprecatedBatchNoValuation:
 	)
 	def set_balance_value_from_sl_entries(self) -> None:
 		from erpnext.stock.utils import get_combine_datetime
+
+		if not has_legacy_batch_ledgers(self.sle.item_code, self.sle.warehouse):
+			return
 
 		sle = frappe.qb.DocType("Stock Ledger Entry")
 		batch = frappe.qb.DocType("Batch")
