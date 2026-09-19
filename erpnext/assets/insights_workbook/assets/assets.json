@@ -1,0 +1,1771 @@
+{
+ "charts": {
+  "assets-assets-by-book-life-2": {
+   "chart_type": "Table",
+   "config": {
+    "columns": [],
+    "conditional_formatting": {
+     "columns": [],
+     "formats": [
+      {
+       "color": "red",
+       "column": {
+        "column_name": "Status",
+        "type": "column"
+       },
+       "mode": "cell_rules",
+       "operator": "=",
+       "value": "Fully Depreciated"
+      },
+      {
+       "color": "amber",
+       "column": {
+        "column_name": "Book Value",
+        "type": "column"
+       },
+       "mode": "rank_rules",
+       "operator": "top_n",
+       "value": 3
+      }
+     ]
+    },
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 10,
+    "number_formats": {
+     "Book Value": {
+      "decimals": 1,
+      "shorten": true
+     },
+     "Written Off": {
+      "decimals": 1,
+      "shorten": false
+     },
+     "Years in Use": {
+      "decimals": 1,
+      "shorten": false,
+      "suffix": " yrs"
+     }
+    },
+    "order_by": [
+     {
+      "column": {
+       "column_name": "Written Off",
+       "type": "column"
+      },
+      "direction": "desc"
+     }
+    ],
+    "rows": [
+     {
+      "column_name": "name",
+      "data_type": "String",
+      "dimension_name": "Asset"
+     },
+     {
+      "column_name": "asset_name",
+      "data_type": "String",
+      "dimension_name": "Name"
+     },
+     {
+      "column_name": "asset_category",
+      "data_type": "String",
+      "dimension_name": "Category"
+     },
+     {
+      "column_name": "location",
+      "data_type": "String",
+      "dimension_name": "Location"
+     },
+     {
+      "column_name": "status",
+      "data_type": "String",
+      "dimension_name": "Status"
+     }
+    ],
+    "values": [
+     {
+      "data_type": "Decimal",
+      "expression": {
+       "expression": "max(depreciated_share)",
+       "type": "expression"
+      },
+      "format": "percent",
+      "measure_name": "Written Off"
+     },
+     {
+      "data_type": "Decimal",
+      "expression": {
+       "expression": "sum(net_book_value)",
+       "type": "expression"
+      },
+      "format": "currency",
+      "measure_name": "Book Value"
+     },
+     {
+      "data_type": "Decimal",
+      "expression": {
+       "expression": "max(years_in_use)",
+       "type": "expression"
+      },
+      "measure_name": "Years in Use"
+     }
+    ]
+   },
+   "folder": null,
+   "name": "assets-assets-by-book-life-2",
+   "query": "assets-assets-by-book-life",
+   "sort_order": 10,
+   "title": "Assets by Book Life",
+   "workbook": "assets"
+  },
+  "assets-assets-in-use-2": {
+   "chart_type": "Number",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_column_options": [
+     {
+      "comparison": {
+       "label": "vs a year ago",
+       "measure": {
+        "aggregation": "max",
+        "column_name": "assets_in_use_a_year_ago",
+        "data_type": "Integer",
+        "measure_name": "A Year Ago"
+       },
+       "show": "change",
+       "source": "measure"
+      },
+      "decimals": 0,
+      "shorten": false
+     }
+    ],
+    "number_columns": [
+     {
+      "aggregation": "max",
+      "column_name": "assets_in_use",
+      "data_type": "Integer",
+      "id": "Assets in Use",
+      "measure_name": "Assets in Use"
+     }
+    ],
+    "order_by": [],
+    "sparkline": false
+   },
+   "folder": null,
+   "name": "assets-assets-in-use-2",
+   "query": "assets-assets-in-use-count",
+   "sort_order": 4,
+   "title": "Assets in Use",
+   "workbook": "assets"
+  },
+  "assets-book-value-by-age": {
+   "chart_type": "Bar",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_format": {
+     "decimals": 1,
+     "shorten": true
+    },
+    "order_by": [
+     {
+      "column": {
+       "column_name": "Age",
+       "type": "column"
+      },
+      "direction": "asc"
+     }
+    ],
+    "x_axis": {
+     "dimension": {
+      "column_name": "age_band",
+      "data_type": "String",
+      "dimension_name": "Age"
+     }
+    },
+    "y_axis": {
+     "min": 0,
+     "series": [
+      {
+       "measure": {
+        "aggregation": "sum",
+        "column_name": "net_book_value",
+        "data_type": "Decimal",
+        "format": "currency",
+        "measure_name": "Book Value"
+       },
+       "type": "bar"
+      }
+     ]
+    }
+   },
+   "folder": null,
+   "name": "assets-book-value-by-age",
+   "query": "assets-assets-in-use",
+   "sort_order": 9,
+   "title": "Book Value by Age",
+   "workbook": "assets"
+  },
+  "assets-book-value-by-category": {
+   "chart_type": "Row",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_format": {
+     "decimals": 1,
+     "shorten": true
+    },
+    "order_by": [
+     {
+      "column": {
+       "column_name": "Cost",
+       "type": "column"
+      },
+      "direction": "desc"
+     }
+    ],
+    "x_axis": {
+     "dimension": {
+      "column_name": "asset_category",
+      "data_type": "String",
+      "dimension_name": "Category"
+     }
+    },
+    "y_axis": {
+     "series": [
+      {
+       "measure": {
+        "aggregation": "sum",
+        "column_name": "net_purchase_amount",
+        "data_type": "Decimal",
+        "format": "currency",
+        "measure_name": "Cost"
+       },
+       "type": "bar"
+      },
+      {
+       "measure": {
+        "aggregation": "sum",
+        "column_name": "net_book_value",
+        "data_type": "Decimal",
+        "format": "currency",
+        "measure_name": "Book Value"
+       },
+       "type": "bar"
+      }
+     ]
+    }
+   },
+   "folder": null,
+   "name": "assets-book-value-by-category",
+   "query": "assets-assets-in-use",
+   "sort_order": 7,
+   "title": "Book Value by Category",
+   "workbook": "assets"
+  },
+  "assets-book-value-by-location": {
+   "chart_type": "Row",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 10,
+    "number_format": {
+     "decimals": 1,
+     "shorten": true
+    },
+    "order_by": [
+     {
+      "column": {
+       "column_name": "Book Value",
+       "type": "column"
+      },
+      "direction": "desc"
+     }
+    ],
+    "x_axis": {
+     "dimension": {
+      "column_name": "location",
+      "data_type": "String",
+      "dimension_name": "Location"
+     }
+    },
+    "y_axis": {
+     "series": [
+      {
+       "measure": {
+        "aggregation": "sum",
+        "column_name": "net_book_value",
+        "data_type": "Decimal",
+        "format": "currency",
+        "measure_name": "Book Value"
+       },
+       "type": "bar"
+      }
+     ]
+    }
+   },
+   "folder": null,
+   "name": "assets-book-value-by-location",
+   "query": "assets-assets-in-use",
+   "sort_order": 8,
+   "title": "Book Value by Location",
+   "workbook": "assets"
+  },
+  "assets-capitalised-by-quarter": {
+   "chart_type": "Bar",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_format": {
+     "decimals": 1,
+     "shorten": true
+    },
+    "order_by": [
+     {
+      "column": {
+       "column_name": "Quarter",
+       "type": "column"
+      },
+      "direction": "asc"
+     }
+    ],
+    "x_axis": {
+     "dimension": {
+      "column_name": "purchase_date",
+      "data_type": "Date",
+      "dimension_name": "Quarter",
+      "granularity": "quarter"
+     }
+    },
+    "y_axis": {
+     "min": 0,
+     "reference_lines": [
+      {
+       "aggregate": "average",
+       "axis": "y",
+       "dashed": true,
+       "id": "5409e11e",
+       "label": "12-quarter average",
+       "measure_name": "Capitalised"
+      }
+     ],
+     "series": [
+      {
+       "measure": {
+        "aggregation": "sum",
+        "column_name": "net_purchase_amount",
+        "data_type": "Decimal",
+        "format": "currency",
+        "measure_name": "Capitalised"
+       },
+       "type": "bar"
+      }
+     ]
+    }
+   },
+   "folder": null,
+   "name": "assets-capitalised-by-quarter",
+   "query": "assets-capitalised-12-quarters",
+   "sort_order": 6,
+   "title": "Capitalised by Quarter",
+   "workbook": "assets"
+  },
+  "assets-capitalised-this-year-2": {
+   "chart_type": "Number",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_column_options": [
+     {
+      "comparison": {
+       "label": "vs last year",
+       "measure": {
+        "aggregation": "max",
+        "column_name": "capitalised_ytd_last_year",
+        "data_type": "Decimal",
+        "format": "currency",
+        "measure_name": "Same Days Last Year"
+       },
+       "show": "change",
+       "source": "measure"
+      },
+      "decimals": 1,
+      "shorten": true
+     }
+    ],
+    "number_columns": [
+     {
+      "aggregation": "max",
+      "column_name": "capitalised_ytd",
+      "data_type": "Decimal",
+      "format": "currency",
+      "id": "Capitalised This Year",
+      "measure_name": "Capitalised This Year"
+     }
+    ],
+    "order_by": [],
+    "sparkline": false
+   },
+   "folder": null,
+   "name": "assets-capitalised-this-year-2",
+   "query": "assets-capitalised-this-year",
+   "sort_order": 2,
+   "title": "Capitalised This Year",
+   "workbook": "assets"
+  },
+  "assets-depreciation-by-month": {
+   "chart_type": "Bar",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_format": {
+     "decimals": 1,
+     "shorten": true
+    },
+    "order_by": [
+     {
+      "column": {
+       "column_name": "Month",
+       "type": "column"
+      },
+      "direction": "asc"
+     }
+    ],
+    "x_axis": {
+     "dimension": {
+      "column_name": "schedule_date",
+      "data_type": "Date",
+      "dimension_name": "Month",
+      "granularity": "month"
+     }
+    },
+    "y_axis": {
+     "min": 0,
+     "reference_lines": [
+      {
+       "aggregate": "average",
+       "axis": "y",
+       "dashed": true,
+       "id": "28c7d0a7",
+       "label": "24-month average",
+       "measure_name": "Depreciation"
+      }
+     ],
+     "series": [
+      {
+       "measure": {
+        "aggregation": "sum",
+        "column_name": "depreciation_amount",
+        "data_type": "Decimal",
+        "format": "currency",
+        "measure_name": "Depreciation"
+       },
+       "type": "bar"
+      }
+     ]
+    }
+   },
+   "folder": null,
+   "name": "assets-depreciation-by-month",
+   "query": "assets-depreciation-24-months",
+   "sort_order": 5,
+   "title": "Depreciation by Month",
+   "workbook": "assets"
+  },
+  "assets-depreciation-this-year-2": {
+   "chart_type": "Number",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_column_options": [
+     {
+      "comparison": {
+       "label": "vs last year",
+       "measure": {
+        "aggregation": "max",
+        "column_name": "depreciation_ytd_last_year",
+        "data_type": "Decimal",
+        "format": "currency",
+        "measure_name": "Same Days Last Year"
+       },
+       "show": "change",
+       "source": "measure"
+      },
+      "decimals": 1,
+      "shorten": true
+     }
+    ],
+    "number_columns": [
+     {
+      "aggregation": "max",
+      "column_name": "depreciation_ytd",
+      "data_type": "Decimal",
+      "format": "currency",
+      "id": "Depreciation This Year",
+      "measure_name": "Depreciation This Year"
+     }
+    ],
+    "order_by": [],
+    "sparkline": false
+   },
+   "folder": null,
+   "name": "assets-depreciation-this-year-2",
+   "query": "assets-depreciation-this-year",
+   "sort_order": 3,
+   "title": "Depreciation This Year",
+   "workbook": "assets"
+  },
+  "assets-insurance-cover-expiring-2": {
+   "chart_type": "Table",
+   "config": {
+    "columns": [],
+    "conditional_formatting": {
+     "columns": [],
+     "formats": [
+      {
+       "color": "red",
+       "column": {
+        "column_name": "Days of Cover Left",
+        "type": "column"
+       },
+       "mode": "cell_rules",
+       "operator": "<",
+       "value": 0
+      },
+      {
+       "color": "amber",
+       "column": {
+        "column_name": "Book Value",
+        "type": "column"
+       },
+       "mode": "rank_rules",
+       "operator": "top_n",
+       "value": 3
+      }
+     ]
+    },
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 10,
+    "number_formats": {
+     "Book Value": {
+      "decimals": 1,
+      "shorten": true
+     },
+     "Days of Cover Left": {
+      "decimals": 0,
+      "shorten": false,
+      "suffix": " days"
+     }
+    },
+    "order_by": [
+     {
+      "column": {
+       "column_name": "Days of Cover Left",
+       "type": "column"
+      },
+      "direction": "asc"
+     }
+    ],
+    "rows": [
+     {
+      "column_name": "name",
+      "data_type": "String",
+      "dimension_name": "Asset"
+     },
+     {
+      "column_name": "asset_name",
+      "data_type": "String",
+      "dimension_name": "Name"
+     },
+     {
+      "column_name": "location",
+      "data_type": "String",
+      "dimension_name": "Location"
+     },
+     {
+      "column_name": "insurer",
+      "data_type": "String",
+      "dimension_name": "Insurer"
+     },
+     {
+      "column_name": "policy_number",
+      "data_type": "String",
+      "dimension_name": "Policy"
+     }
+    ],
+    "values": [
+     {
+      "data_type": "Decimal",
+      "expression": {
+       "expression": "sum(net_book_value)",
+       "type": "expression"
+      },
+      "format": "currency",
+      "measure_name": "Book Value"
+     },
+     {
+      "aggregation": "min",
+      "column_name": "days_of_cover_left",
+      "data_type": "Integer",
+      "measure_name": "Days of Cover Left"
+     }
+    ]
+   },
+   "folder": null,
+   "name": "assets-insurance-cover-expiring-2",
+   "query": "assets-insurance-cover-expiring",
+   "sort_order": 11,
+   "title": "Insurance Cover Expiring",
+   "workbook": "assets"
+  },
+  "assets-net-book-value-2": {
+   "chart_type": "Number",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_column_options": [
+     {
+      "comparison": {
+       "label": "vs a year ago",
+       "measure": {
+        "aggregation": "max",
+        "column_name": "net_book_value_a_year_ago",
+        "data_type": "Decimal",
+        "format": "currency",
+        "measure_name": "A Year Ago"
+       },
+       "show": "change",
+       "source": "measure"
+      },
+      "decimals": 1,
+      "shorten": true
+     }
+    ],
+    "number_columns": [
+     {
+      "aggregation": "max",
+      "column_name": "net_book_value_now",
+      "data_type": "Decimal",
+      "format": "currency",
+      "id": "Net Book Value",
+      "measure_name": "Net Book Value"
+     }
+    ],
+    "order_by": [],
+    "sparkline": false
+   },
+   "folder": null,
+   "name": "assets-net-book-value-2",
+   "query": "assets-net-book-value",
+   "sort_order": 1,
+   "title": "Net Book Value",
+   "workbook": "assets"
+  }
+ },
+ "creation": "2026-09-19 18:42:20.370820",
+ "dashboards": {
+  "assets": {
+   "items": [
+    {
+     "filter_name": "Company",
+     "filter_type": "String",
+     "layout": {
+      "h": 2,
+      "i": "filter-company",
+      "w": 4,
+      "x": 0,
+      "y": 0
+     },
+     "layouts": {
+      "sm": {
+       "h": 2,
+       "w": 20,
+       "x": 0,
+       "y": 0
+      }
+     },
+     "links": {
+      "assets-assets-by-book-life-2": "`assets-assets-by-book-life`.`company`",
+      "assets-assets-in-use-2": "`assets-asset-book-value`.`company`",
+      "assets-book-value-by-age": "`assets-assets-in-use`.`company`",
+      "assets-book-value-by-category": "`assets-assets-in-use`.`company`",
+      "assets-book-value-by-location": "`assets-assets-in-use`.`company`",
+      "assets-capitalised-by-quarter": "`assets-capitalised-12-quarters`.`company`",
+      "assets-capitalised-this-year-2": "`assets-assets`.`company`",
+      "assets-depreciation-by-month": "`assets-depreciation-24-months`.`company`",
+      "assets-depreciation-this-year-2": "`assets-depreciation-schedule`.`company`",
+      "assets-insurance-cover-expiring-2": "`assets-insurance-cover-expiring`.`company`",
+      "assets-net-book-value-2": "`assets-asset-book-value`.`company`"
+     },
+     "type": "filter"
+    },
+    {
+     "filter_name": "Asset Category",
+     "filter_type": "String",
+     "layout": {
+      "h": 2,
+      "i": "filter-asset-category",
+      "w": 4,
+      "x": 4,
+      "y": 0
+     },
+     "layouts": {
+      "sm": {
+       "h": 2,
+       "w": 10,
+       "x": 0,
+       "y": 3
+      }
+     },
+     "links": {
+      "assets-assets-by-book-life-2": "`assets-assets-by-book-life`.`asset_category`",
+      "assets-assets-in-use-2": "`assets-asset-book-value`.`asset_category`",
+      "assets-book-value-by-age": "`assets-assets-in-use`.`asset_category`",
+      "assets-book-value-by-category": "`assets-assets-in-use`.`asset_category`",
+      "assets-book-value-by-location": "`assets-assets-in-use`.`asset_category`",
+      "assets-capitalised-by-quarter": "`assets-capitalised-12-quarters`.`asset_category`",
+      "assets-capitalised-this-year-2": "`assets-assets`.`asset_category`",
+      "assets-depreciation-by-month": "`assets-depreciation-24-months`.`asset_category`",
+      "assets-depreciation-this-year-2": "`assets-depreciation-schedule`.`asset_category`",
+      "assets-insurance-cover-expiring-2": "`assets-insurance-cover-expiring`.`asset_category`",
+      "assets-net-book-value-2": "`assets-asset-book-value`.`asset_category`"
+     },
+     "type": "filter"
+    },
+    {
+     "filter_name": "Location",
+     "filter_type": "String",
+     "layout": {
+      "h": 2,
+      "i": "filter-location",
+      "w": 4,
+      "x": 8,
+      "y": 0
+     },
+     "layouts": {
+      "sm": {
+       "h": 2,
+       "w": 10,
+       "x": 10,
+       "y": 3
+      }
+     },
+     "links": {
+      "assets-assets-by-book-life-2": "`assets-assets-by-book-life`.`location`",
+      "assets-assets-in-use-2": "`assets-asset-book-value`.`location`",
+      "assets-book-value-by-age": "`assets-assets-in-use`.`location`",
+      "assets-book-value-by-category": "`assets-assets-in-use`.`location`",
+      "assets-book-value-by-location": "`assets-assets-in-use`.`location`",
+      "assets-capitalised-by-quarter": "`assets-capitalised-12-quarters`.`location`",
+      "assets-capitalised-this-year-2": "`assets-assets`.`location`",
+      "assets-depreciation-by-month": "`assets-depreciation-24-months`.`location`",
+      "assets-depreciation-this-year-2": "`assets-depreciation-schedule`.`location`",
+      "assets-insurance-cover-expiring-2": "`assets-insurance-cover-expiring`.`location`",
+      "assets-net-book-value-2": "`assets-asset-book-value`.`location`"
+     },
+     "type": "filter"
+    },
+    {
+     "chart": "assets-net-book-value-2",
+     "layout": {
+      "h": 5,
+      "i": "chart-pgbni606oc",
+      "w": 5,
+      "x": 0,
+      "y": 3
+     },
+     "layouts": {
+      "sm": {
+       "h": 5,
+       "w": 10,
+       "x": 0,
+       "y": 5
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "assets-capitalised-this-year-2",
+     "layout": {
+      "h": 5,
+      "i": "chart-pgb9s1cjgq",
+      "w": 5,
+      "x": 5,
+      "y": 3
+     },
+     "layouts": {
+      "sm": {
+       "h": 5,
+       "w": 10,
+       "x": 10,
+       "y": 5
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "assets-depreciation-this-year-2",
+     "layout": {
+      "h": 5,
+      "i": "chart-pgbpprjdae",
+      "w": 5,
+      "x": 10,
+      "y": 3
+     },
+     "layouts": {
+      "sm": {
+       "h": 5,
+       "w": 10,
+       "x": 0,
+       "y": 10
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "assets-assets-in-use-2",
+     "layout": {
+      "h": 5,
+      "i": "chart-pgbgnq4o96",
+      "w": 5,
+      "x": 15,
+      "y": 3
+     },
+     "layouts": {
+      "sm": {
+       "h": 5,
+       "w": 10,
+       "x": 10,
+       "y": 10
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "assets-depreciation-by-month",
+     "layout": {
+      "h": 17,
+      "i": "chart-pgbmvu2evi",
+      "w": 20,
+      "x": 0,
+      "y": 8
+     },
+     "layouts": {
+      "sm": {
+       "h": 17,
+       "w": 20,
+       "x": 0,
+       "y": 15
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "assets-capitalised-by-quarter",
+     "layout": {
+      "h": 17,
+      "i": "chart-pgb98ejvp5",
+      "w": 10,
+      "x": 0,
+      "y": 25
+     },
+     "layouts": {
+      "sm": {
+       "h": 17,
+       "w": 20,
+       "x": 0,
+       "y": 32
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "assets-book-value-by-age",
+     "layout": {
+      "h": 17,
+      "i": "chart-pgcogq0no7",
+      "w": 10,
+      "x": 10,
+      "y": 25
+     },
+     "layouts": {
+      "sm": {
+       "h": 17,
+       "w": 20,
+       "x": 0,
+       "y": 49
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "assets-book-value-by-category",
+     "layout": {
+      "h": 17,
+      "i": "chart-pgcvmv3gf1",
+      "w": 10,
+      "x": 0,
+      "y": 42
+     },
+     "layouts": {
+      "sm": {
+       "h": 19,
+       "w": 20,
+       "x": 0,
+       "y": 66
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "assets-book-value-by-location",
+     "layout": {
+      "h": 17,
+      "i": "chart-pgcvqk3voa",
+      "w": 10,
+      "x": 10,
+      "y": 42
+     },
+     "layouts": {
+      "sm": {
+       "h": 17,
+       "w": 20,
+       "x": 0,
+       "y": 85
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "assets-assets-by-book-life-2",
+     "layout": {
+      "h": 22,
+      "i": "chart-pgcacavtl0",
+      "w": 10,
+      "x": 0,
+      "y": 59
+     },
+     "layouts": {
+      "sm": {
+       "h": 24,
+       "w": 20,
+       "x": 0,
+       "y": 102
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "assets-insurance-cover-expiring-2",
+     "layout": {
+      "h": 22,
+      "i": "chart-pgcr7henr7",
+      "w": 10,
+      "x": 10,
+      "y": 59
+     },
+     "layouts": {
+      "sm": {
+       "h": 24,
+       "w": 20,
+       "x": 0,
+       "y": 126
+      }
+     },
+     "type": "chart"
+    }
+   ],
+   "name": "assets",
+   "title": "Assets",
+   "vertical_compact_layout": 1,
+   "workbook": "assets"
+  }
+ },
+ "docstatus": 0,
+ "doctype": "Insights Workbook",
+ "folders": [],
+ "idx": 0,
+ "is_standard": 1,
+ "modified": "2026-09-19 19:02:15.833865",
+ "modified_by": "Administrator",
+ "module": "Assets",
+ "name": "assets",
+ "owner": "Administrator",
+ "queries": {
+  "assets-asset-book-value": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "assets-asset-book-value",
+   "operations": [
+    {
+     "table": {
+      "query_name": "assets-assets",
+      "type": "query",
+      "workbook": "assets"
+     },
+     "type": "source"
+    },
+    {
+     "join_condition": {
+      "left_column": {
+       "column_name": "name",
+       "type": "column"
+      },
+      "right_column": {
+       "column_name": "asset",
+       "type": "column"
+      }
+     },
+     "join_type": "left",
+     "select_columns": [
+      {
+       "column_name": "depreciation_to_date",
+       "type": "column"
+      },
+      {
+       "column_name": "depreciation_a_year_ago",
+       "type": "column"
+      }
+     ],
+     "table": {
+      "query_name": "assets-depreciation-by-asset",
+      "type": "query",
+      "workbook": "assets"
+     },
+     "type": "join"
+    },
+    {
+     "data_type": "Decimal",
+     "expression": {
+      "expression": "coalesce(depreciation_to_date, 0)",
+      "type": "expression"
+     },
+     "new_name": "accumulated_depreciation",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Decimal",
+     "expression": {
+      "expression": "coalesce(depreciation_a_year_ago, 0)",
+      "type": "expression"
+     },
+     "new_name": "accumulated_a_year_ago",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Decimal",
+     "expression": {
+      "expression": "net_purchase_amount - coalesce(depreciation_to_date, 0)",
+      "type": "expression"
+     },
+     "new_name": "net_book_value",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Decimal",
+     "expression": {
+      "expression": "net_purchase_amount - coalesce(depreciation_a_year_ago, 0)",
+      "type": "expression"
+     },
+     "new_name": "net_book_value_a_year_ago",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Decimal",
+     "expression": {
+      "expression": "coalesce(depreciation_to_date, 0) / net_purchase_amount",
+      "type": "expression"
+     },
+     "new_name": "depreciated_share",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Date",
+     "expression": {
+      "expression": "coalesce(disposal_date, date_add(today(), 100, 'year'))",
+      "type": "expression"
+     },
+     "new_name": "disposed_on",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Decimal",
+     "expression": {
+      "expression": "date_diff(today(), available_for_use_date, 'day') / 365.0",
+      "type": "expression"
+     },
+     "new_name": "years_in_use",
+     "type": "mutate"
+    },
+    {
+     "data_type": "String",
+     "expression": {
+      "expression": "case(years_in_use < 1, '0-1 years', years_in_use < 2, '1-2 years', years_in_use < 3, '2-3 years', '3+ years')",
+      "type": "expression"
+     },
+     "new_name": "age_band",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Integer",
+     "expression": {
+      "expression": "date_diff(insurance_end_date, today(), 'day')",
+      "type": "expression"
+     },
+     "new_name": "days_of_cover_left",
+     "type": "mutate"
+    },
+    {
+     "column_names": [
+      "name",
+      "asset_name",
+      "asset_category",
+      "location",
+      "cost_center",
+      "company",
+      "status",
+      "purchase_date",
+      "available_for_use_date",
+      "disposed_on",
+      "net_purchase_amount",
+      "accumulated_depreciation",
+      "accumulated_a_year_ago",
+      "net_book_value",
+      "net_book_value_a_year_ago",
+      "depreciated_share",
+      "years_in_use",
+      "age_band",
+      "insurer",
+      "policy_number",
+      "insurance_end_date",
+      "days_of_cover_left"
+     ],
+     "type": "select"
+    }
+   ],
+   "sort_order": 4,
+   "title": "Asset Book Value",
+   "use_live_connection": 1,
+   "workbook": "assets"
+  },
+  "assets-assets": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "assets-assets",
+   "operations": [
+    {
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabAsset",
+      "type": "table"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "docstatus",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 1
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "column_names": [
+      "name",
+      "asset_name",
+      "asset_category",
+      "location",
+      "cost_center",
+      "company",
+      "status",
+      "purchase_date",
+      "available_for_use_date",
+      "disposal_date",
+      "net_purchase_amount",
+      "insurer",
+      "policy_number",
+      "insurance_end_date"
+     ],
+     "type": "select"
+    }
+   ],
+   "sort_order": 1,
+   "title": "Assets",
+   "use_live_connection": 1,
+   "workbook": "assets"
+  },
+  "assets-assets-by-book-life": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "assets-assets-by-book-life",
+   "operations": [
+    {
+     "table": {
+      "query_name": "assets-assets-in-use",
+      "type": "query",
+      "workbook": "assets"
+     },
+     "type": "source"
+    },
+    {
+     "column": {
+      "column_name": "depreciated_share",
+      "type": "column"
+     },
+     "direction": "desc",
+     "type": "order_by"
+    }
+   ],
+   "sort_order": 12,
+   "title": "Assets by Book Life",
+   "use_live_connection": 1,
+   "workbook": "assets"
+  },
+  "assets-assets-in-use": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "assets-assets-in-use",
+   "operations": [
+    {
+     "table": {
+      "query_name": "assets-asset-book-value",
+      "type": "query",
+      "workbook": "assets"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "expression": {
+        "expression": "(available_for_use_date <= today()) & (disposed_on > today())",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    }
+   ],
+   "sort_order": 5,
+   "title": "Assets in Use",
+   "use_live_connection": 1,
+   "workbook": "assets"
+  },
+  "assets-assets-in-use-count": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "assets-assets-in-use-count",
+   "operations": [
+    {
+     "table": {
+      "query_name": "assets-asset-book-value",
+      "type": "query",
+      "workbook": "assets"
+     },
+     "type": "source"
+    },
+    {
+     "dimensions": [],
+     "measures": [
+      {
+       "data_type": "Integer",
+       "expression": {
+        "expression": "count_if((available_for_use_date <= today()) & (disposed_on > today()))",
+        "type": "expression"
+       },
+       "measure_name": "assets_in_use"
+      },
+      {
+       "data_type": "Integer",
+       "expression": {
+        "expression": "count_if((available_for_use_date <= date_sub(today(), 1, 'year')) & (disposed_on > date_sub(today(), 1, 'year')))",
+        "type": "expression"
+       },
+       "measure_name": "assets_in_use_a_year_ago"
+      }
+     ],
+     "type": "summarize"
+    }
+   ],
+   "sort_order": 7,
+   "title": "Assets in Use, Count",
+   "use_live_connection": 1,
+   "workbook": "assets"
+  },
+  "assets-capitalised-12-quarters": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "assets-capitalised-12-quarters",
+   "operations": [
+    {
+     "table": {
+      "query_name": "assets-assets",
+      "type": "query",
+      "workbook": "assets"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "expression": {
+        "expression": "purchase_date.between(date_sub(quarter_start(today()), 36, 'month'), date_sub(quarter_start(today()), 1, 'day'))",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    }
+   ],
+   "sort_order": 11,
+   "title": "Capitalised, 12 Quarters",
+   "use_live_connection": 1,
+   "workbook": "assets"
+  },
+  "assets-capitalised-this-year": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "assets-capitalised-this-year",
+   "operations": [
+    {
+     "table": {
+      "query_name": "assets-assets",
+      "type": "query",
+      "workbook": "assets"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "expression": {
+        "expression": "purchase_date.between(date_sub(year_start(today()), 1, 'year'), today())",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "dimensions": [],
+     "measures": [
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if(purchase_date >= year_start(today()), net_purchase_amount)",
+        "type": "expression"
+       },
+       "format": "currency",
+       "measure_name": "capitalised_ytd"
+      },
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if(purchase_date <= date_sub(today(), 1, 'year'), net_purchase_amount)",
+        "type": "expression"
+       },
+       "format": "currency",
+       "measure_name": "capitalised_ytd_last_year"
+      }
+     ],
+     "type": "summarize"
+    }
+   ],
+   "sort_order": 8,
+   "title": "Capitalised This Year",
+   "use_live_connection": 1,
+   "workbook": "assets"
+  },
+  "assets-depreciation-24-months": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "assets-depreciation-24-months",
+   "operations": [
+    {
+     "table": {
+      "query_name": "assets-depreciation-schedule",
+      "type": "query",
+      "workbook": "assets"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "expression": {
+        "expression": "schedule_date.between(date_sub(month_start(today()), 24, 'month'), date_sub(month_start(today()), 1, 'day'))",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    }
+   ],
+   "sort_order": 10,
+   "title": "Depreciation, 24 Months",
+   "use_live_connection": 1,
+   "workbook": "assets"
+  },
+  "assets-depreciation-by-asset": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "assets-depreciation-by-asset",
+   "operations": [
+    {
+     "table": {
+      "query_name": "assets-depreciation-schedule",
+      "type": "query",
+      "workbook": "assets"
+     },
+     "type": "source"
+    },
+    {
+     "dimensions": [
+      {
+       "column_name": "asset",
+       "data_type": "String",
+       "dimension_name": "asset"
+      }
+     ],
+     "measures": [
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if(schedule_date <= today(), depreciation_amount)",
+        "type": "expression"
+       },
+       "measure_name": "depreciation_to_date"
+      },
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if(schedule_date <= date_sub(today(), 1, 'year'), depreciation_amount)",
+        "type": "expression"
+       },
+       "measure_name": "depreciation_a_year_ago"
+      }
+     ],
+     "type": "summarize"
+    }
+   ],
+   "sort_order": 3,
+   "title": "Depreciation by Asset",
+   "use_live_connection": 1,
+   "workbook": "assets"
+  },
+  "assets-depreciation-schedule": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "assets-depreciation-schedule",
+   "operations": [
+    {
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabDepreciation Schedule",
+      "type": "table"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "docstatus",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 1
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "join_condition": {
+      "left_column": {
+       "column_name": "parent",
+       "type": "column"
+      },
+      "right_column": {
+       "column_name": "name",
+       "type": "column"
+      }
+     },
+     "join_type": "inner",
+     "select_columns": [
+      {
+       "column_name": "asset",
+       "type": "column"
+      }
+     ],
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabAsset Depreciation Schedule",
+      "type": "table"
+     },
+     "type": "join"
+    },
+    {
+     "join_condition": {
+      "left_column": {
+       "column_name": "asset",
+       "type": "column"
+      },
+      "right_column": {
+       "column_name": "name",
+       "type": "column"
+      }
+     },
+     "join_type": "inner",
+     "select_columns": [
+      {
+       "column_name": "asset_category",
+       "type": "column"
+      },
+      {
+       "column_name": "location",
+       "type": "column"
+      },
+      {
+       "column_name": "company",
+       "type": "column"
+      },
+      {
+       "column_name": "net_purchase_amount",
+       "type": "column"
+      }
+     ],
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabAsset",
+      "type": "table"
+     },
+     "type": "join"
+    },
+    {
+     "column_names": [
+      "asset",
+      "asset_category",
+      "location",
+      "company",
+      "schedule_date",
+      "depreciation_amount",
+      "journal_entry"
+     ],
+     "type": "select"
+    }
+   ],
+   "sort_order": 2,
+   "title": "Depreciation Schedule",
+   "use_live_connection": 1,
+   "workbook": "assets"
+  },
+  "assets-depreciation-this-year": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "assets-depreciation-this-year",
+   "operations": [
+    {
+     "table": {
+      "query_name": "assets-depreciation-schedule",
+      "type": "query",
+      "workbook": "assets"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "expression": {
+        "expression": "schedule_date.between(date_sub(year_start(today()), 1, 'year'), today())",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "dimensions": [],
+     "measures": [
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if(schedule_date >= year_start(today()), depreciation_amount)",
+        "type": "expression"
+       },
+       "format": "currency",
+       "measure_name": "depreciation_ytd"
+      },
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if(schedule_date <= date_sub(today(), 1, 'year'), depreciation_amount)",
+        "type": "expression"
+       },
+       "format": "currency",
+       "measure_name": "depreciation_ytd_last_year"
+      }
+     ],
+     "type": "summarize"
+    }
+   ],
+   "sort_order": 9,
+   "title": "Depreciation This Year",
+   "use_live_connection": 1,
+   "workbook": "assets"
+  },
+  "assets-insurance-cover-expiring": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "assets-insurance-cover-expiring",
+   "operations": [
+    {
+     "table": {
+      "query_name": "assets-assets-in-use",
+      "type": "query",
+      "workbook": "assets"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "expression": {
+        "expression": "is_set(insurance_end_date) & (days_of_cover_left <= 90)",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "column": {
+      "column_name": "days_of_cover_left",
+      "type": "column"
+     },
+     "direction": "asc",
+     "type": "order_by"
+    }
+   ],
+   "sort_order": 13,
+   "title": "Insurance Cover Expiring",
+   "use_live_connection": 1,
+   "workbook": "assets"
+  },
+  "assets-net-book-value": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "assets-net-book-value",
+   "operations": [
+    {
+     "table": {
+      "query_name": "assets-asset-book-value",
+      "type": "query",
+      "workbook": "assets"
+     },
+     "type": "source"
+    },
+    {
+     "dimensions": [],
+     "measures": [
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if((available_for_use_date <= today()) & (disposed_on > today()), net_book_value)",
+        "type": "expression"
+       },
+       "format": "currency",
+       "measure_name": "net_book_value_now"
+      },
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if((available_for_use_date <= date_sub(today(), 1, 'year')) & (disposed_on > date_sub(today(), 1, 'year')), net_book_value_a_year_ago)",
+        "type": "expression"
+       },
+       "format": "currency",
+       "measure_name": "net_book_value_a_year_ago"
+      }
+     ],
+     "type": "summarize"
+    }
+   ],
+   "sort_order": 6,
+   "title": "Net Book Value",
+   "use_live_connection": 1,
+   "workbook": "assets"
+  }
+ },
+ "title": "Assets"
+}

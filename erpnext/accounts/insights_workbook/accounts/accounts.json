@@ -1,0 +1,1988 @@
+{
+ "charts": {
+  "accounts-cash-bank": {
+   "chart_type": "Number",
+   "config": {
+    "date_column": {
+     "column_name": "period",
+     "data_type": "Date",
+     "dimension_name": "Month"
+    },
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_column_options": [
+     {
+      "comparison": {
+       "label": "vs last month",
+       "show": "change",
+       "source": "previous"
+      },
+      "decimals": 1,
+      "shorten": true
+     }
+    ],
+    "number_columns": [
+     {
+      "aggregation": "max",
+      "column_name": "cash_balance",
+      "data_type": "Decimal",
+      "format": "currency",
+      "id": "Cash & Bank",
+      "measure_name": "Cash & Bank"
+     }
+    ],
+    "order_by": [
+     {
+      "column": {
+       "column_name": "Month",
+       "type": "column"
+      },
+      "direction": "asc"
+     }
+    ],
+    "sparkline": false,
+    "window": {
+     "grain": "month"
+    }
+   },
+   "folder": null,
+   "name": "accounts-cash-bank",
+   "query": "accounts-cash-bank-by-month",
+   "sort_order": 1,
+   "title": "Cash & Bank",
+   "workbook": "accounts"
+  },
+  "accounts-cash-bank-12-months": {
+   "chart_type": "Line",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_format": {
+     "decimals": 1,
+     "shorten": true
+    },
+    "order_by": [
+     {
+      "column": {
+       "column_name": "Month",
+       "type": "column"
+      },
+      "direction": "asc"
+     }
+    ],
+    "x_axis": {
+     "dimension": {
+      "column_name": "period",
+      "data_type": "Date",
+      "dimension_name": "Month",
+      "granularity": "month"
+     }
+    },
+    "y_axis": {
+     "reference_lines": [
+      {
+       "aggregate": "average",
+       "axis": "y",
+       "dashed": true,
+       "id": "d7684717",
+       "label": "12-month average",
+       "measure_name": "Cash & Bank"
+      }
+     ],
+     "series": [
+      {
+       "measure": {
+        "aggregation": "max",
+        "column_name": "cash_balance",
+        "data_type": "Decimal",
+        "format": "currency",
+        "measure_name": "Cash & Bank"
+       },
+       "show_data_points": true,
+       "smooth": true,
+       "type": "line"
+      }
+     ]
+    }
+   },
+   "folder": null,
+   "name": "accounts-cash-bank-12-months",
+   "query": "accounts-cash-bank-by-month",
+   "sort_order": 6,
+   "title": "Cash & Bank, 12 Months",
+   "workbook": "accounts"
+  },
+  "accounts-days-sales-outstanding-2": {
+   "chart_type": "Number",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_column_options": [
+     {
+      "decimals": 0,
+      "shorten": false,
+      "suffix": " days"
+     },
+     {
+      "decimals": 1,
+      "shorten": true
+     }
+    ],
+    "number_columns": [
+     {
+      "aggregation": "max",
+      "column_name": "days_sales_outstanding",
+      "data_type": "Decimal",
+      "id": "Days Sales Outstanding",
+      "measure_name": "Days Sales Outstanding"
+     },
+     {
+      "aggregation": "sum",
+      "column_name": "credit_sales",
+      "data_type": "Decimal",
+      "format": "currency",
+      "id": "Credit Sales, 13 Weeks",
+      "measure_name": "Credit Sales, 13 Weeks"
+     }
+    ],
+    "order_by": [],
+    "sparkline": false
+   },
+   "folder": null,
+   "name": "accounts-days-sales-outstanding-2",
+   "query": "accounts-days-sales-outstanding",
+   "sort_order": 10,
+   "title": "Days Sales Outstanding",
+   "workbook": "accounts"
+  },
+  "accounts-gross-margin": {
+   "chart_type": "Number",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_column_options": [
+     {
+      "comparison": {
+       "label": "vs last year",
+       "measure": {
+        "aggregation": "max",
+        "column_name": "gross_margin_last_year",
+        "data_type": "Decimal",
+        "format": "percent",
+        "measure_name": "Same Days Last Year"
+       },
+       "show": "delta",
+       "source": "measure"
+      },
+      "decimals": 1,
+      "shorten": false
+     }
+    ],
+    "number_columns": [
+     {
+      "aggregation": "max",
+      "column_name": "gross_margin",
+      "data_type": "Decimal",
+      "format": "percent",
+      "id": "Gross Margin, Year to Date",
+      "measure_name": "Gross Margin, Year to Date"
+     }
+    ],
+    "order_by": [],
+    "sparkline": false
+   },
+   "folder": null,
+   "name": "accounts-gross-margin",
+   "query": "accounts-gross-margin-year-to-date",
+   "sort_order": 3,
+   "title": "Gross Margin",
+   "workbook": "accounts"
+  },
+  "accounts-net-profit": {
+   "chart_type": "Number",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_column_options": [
+     {
+      "comparison": {
+       "label": "vs last year",
+       "measure": {
+        "aggregation": "max",
+        "column_name": "net_profit_last_year",
+        "data_type": "Decimal",
+        "format": "currency",
+        "measure_name": "Same Days Last Year"
+       },
+       "show": "change",
+       "source": "measure"
+      },
+      "decimals": 1,
+      "shorten": true
+     },
+     {
+      "comparison": {
+       "label": "vs last year",
+       "measure": {
+        "aggregation": "max",
+        "column_name": "net_margin_last_year",
+        "data_type": "Decimal",
+        "format": "percent",
+        "measure_name": "Net Margin Last Year"
+       },
+       "show": "delta",
+       "source": "measure"
+      },
+      "decimals": 1,
+      "shorten": false
+     }
+    ],
+    "number_columns": [
+     {
+      "aggregation": "max",
+      "column_name": "net_profit",
+      "data_type": "Decimal",
+      "format": "currency",
+      "id": "Net Profit, Year to Date",
+      "measure_name": "Net Profit, Year to Date"
+     },
+     {
+      "aggregation": "max",
+      "column_name": "net_margin",
+      "data_type": "Decimal",
+      "format": "percent",
+      "id": "Net Margin",
+      "measure_name": "Net Margin"
+     }
+    ],
+    "order_by": [],
+    "sparkline": false
+   },
+   "folder": null,
+   "name": "accounts-net-profit",
+   "query": "accounts-profit-loss-year-to-date",
+   "sort_order": 4,
+   "title": "Net Profit",
+   "workbook": "accounts"
+  },
+  "accounts-payables": {
+   "chart_type": "Number",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_column_options": [
+     {
+      "decimals": 1,
+      "shorten": true
+     },
+     {
+      "decimals": 0,
+      "shorten": false
+     }
+    ],
+    "number_columns": [
+     {
+      "aggregation": "sum",
+      "column_name": "outstanding_amount",
+      "data_type": "Decimal",
+      "format": "currency",
+      "id": "Payables Outstanding",
+      "measure_name": "Payables Outstanding"
+     },
+     {
+      "aggregation": "count",
+      "column_name": "voucher_no",
+      "data_type": "Integer",
+      "id": "Open Bills",
+      "measure_name": "Open Bills"
+     }
+    ],
+    "order_by": [],
+    "sparkline": false
+   },
+   "folder": null,
+   "name": "accounts-payables",
+   "query": "accounts-payables-outstanding",
+   "sort_order": 9,
+   "title": "Payables",
+   "workbook": "accounts"
+  },
+  "accounts-receivables": {
+   "chart_type": "Number",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_column_options": [
+     {
+      "decimals": 1,
+      "shorten": true
+     },
+     {
+      "decimals": 1,
+      "shorten": true
+     }
+    ],
+    "number_columns": [
+     {
+      "aggregation": "sum",
+      "column_name": "outstanding_amount",
+      "data_type": "Decimal",
+      "format": "currency",
+      "id": "Receivables Outstanding",
+      "measure_name": "Receivables Outstanding"
+     },
+     {
+      "data_type": "Decimal",
+      "expression": {
+       "expression": "sum_if(days_past_due > 0, outstanding_amount)",
+       "type": "expression"
+      },
+      "format": "currency",
+      "id": "Of Which Past Due",
+      "measure_name": "Of Which Past Due"
+     }
+    ],
+    "order_by": [],
+    "sparkline": false
+   },
+   "folder": null,
+   "name": "accounts-receivables",
+   "query": "accounts-receivables-outstanding",
+   "sort_order": 8,
+   "title": "Receivables",
+   "workbook": "accounts"
+  },
+  "accounts-revenue-and-gross-margin-12-months": {
+   "chart_type": "Bar",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_formats": {
+     "Gross Margin": {
+      "decimals": 1,
+      "shorten": false
+     },
+     "Revenue": {
+      "decimals": 1,
+      "shorten": true
+     }
+    },
+    "order_by": [
+     {
+      "column": {
+       "column_name": "Month",
+       "type": "column"
+      },
+      "direction": "asc"
+     }
+    ],
+    "x_axis": {
+     "dimension": {
+      "column_name": "period",
+      "data_type": "Date",
+      "dimension_name": "Month",
+      "granularity": "month"
+     }
+    },
+    "y_axis": {
+     "min": 0,
+     "reference_lines": [
+      {
+       "aggregate": "average",
+       "align": "Right",
+       "axis": "y",
+       "dashed": true,
+       "id": "c1420d51",
+       "label": "12-month average",
+       "measure_name": "Gross Margin"
+      }
+     ],
+     "series": [
+      {
+       "measure": {
+        "aggregation": "sum",
+        "column_name": "revenue",
+        "data_type": "Decimal",
+        "format": "currency",
+        "measure_name": "Revenue"
+       },
+       "type": "bar"
+      },
+      {
+       "align": "Right",
+       "measure": {
+        "aggregation": "max",
+        "column_name": "gross_margin",
+        "data_type": "Decimal",
+        "format": "percent",
+        "measure_name": "Gross Margin"
+       },
+       "show_data_points": true,
+       "smooth": true,
+       "type": "line"
+      }
+     ]
+    }
+   },
+   "folder": null,
+   "name": "accounts-revenue-and-gross-margin-12-months",
+   "query": "accounts-revenue-gross-margin-by-month",
+   "sort_order": 5,
+   "title": "Revenue and Gross Margin, 12 Months",
+   "workbook": "accounts"
+  },
+  "accounts-revenue-mix-by-item-group": {
+   "chart_type": "Bar",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "order_by": [
+     {
+      "column": {
+       "column_name": "Year",
+       "type": "column"
+      },
+      "direction": "asc"
+     }
+    ],
+    "split_by": {
+     "dimension": {
+      "column_name": "item_group",
+      "data_type": "String",
+      "dimension_name": "Item Group"
+     },
+     "max_split_values": 3
+    },
+    "x_axis": {
+     "dimension": {
+      "column_name": "posting_date",
+      "data_type": "Date",
+      "dimension_name": "Year",
+      "granularity": "year"
+     }
+    },
+    "y_axis": {
+     "axis_label": "Share of revenue",
+     "normalize": true,
+     "series": [
+      {
+       "measure": {
+        "aggregation": "sum",
+        "column_name": "base_net_amount",
+        "data_type": "Decimal",
+        "format": "currency",
+        "measure_name": "Revenue"
+       },
+       "type": "bar"
+      }
+     ],
+     "show_axis_label": true,
+     "stack": true
+    }
+   },
+   "folder": null,
+   "name": "accounts-revenue-mix-by-item-group",
+   "query": "accounts-revenue-mix-by-item-group-year",
+   "sort_order": 7,
+   "title": "Revenue Mix by Item Group",
+   "workbook": "accounts"
+  },
+  "accounts-revenue-this-month-2": {
+   "chart_type": "Number",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_column_options": [
+     {
+      "comparison": {
+       "label": "vs last year",
+       "measure": {
+        "aggregation": "max",
+        "column_name": "revenue_last_year",
+        "data_type": "Decimal",
+        "format": "currency",
+        "measure_name": "Same Days Last Year"
+       },
+       "show": "change",
+       "source": "measure"
+      },
+      "decimals": 1,
+      "shorten": true
+     }
+    ],
+    "number_columns": [
+     {
+      "aggregation": "max",
+      "column_name": "revenue_mtd",
+      "data_type": "Decimal",
+      "format": "currency",
+      "id": "Revenue This Month",
+      "measure_name": "Revenue This Month"
+     }
+    ],
+    "order_by": [],
+    "sparkline": false
+   },
+   "folder": null,
+   "name": "accounts-revenue-this-month-2",
+   "query": "accounts-revenue-this-month",
+   "sort_order": 2,
+   "title": "Revenue This Month",
+   "workbook": "accounts"
+  },
+  "accounts-top-8-overdue-customers": {
+   "chart_type": "Table",
+   "config": {
+    "columns": [],
+    "conditional_formatting": {
+     "columns": [],
+     "formats": [
+      {
+       "color": "red",
+       "column": {
+        "column_name": "Days Past Due",
+        "type": "column"
+       },
+       "mode": "cell_rules",
+       "operator": ">",
+       "value": 90
+      },
+      {
+       "color": "amber",
+       "column": {
+        "column_name": "Outstanding",
+        "type": "column"
+       },
+       "mode": "rank_rules",
+       "operator": "top_n",
+       "value": 3
+      }
+     ]
+    },
+    "filters": {
+     "filters": [
+      {
+       "column": {
+        "column_name": "days_past_due",
+        "type": "column"
+       },
+       "operator": ">",
+       "value": 0
+      }
+     ],
+     "logical_operator": "And"
+    },
+    "limit": 8,
+    "number_formats": {
+     "Outstanding": {
+      "decimals": 1,
+      "shorten": true
+     }
+    },
+    "order_by": [
+     {
+      "column": {
+       "column_name": "Outstanding",
+       "type": "column"
+      },
+      "direction": "desc"
+     }
+    ],
+    "rows": [
+     {
+      "column_name": "customer",
+      "data_type": "String",
+      "dimension_name": "Customer"
+     },
+     {
+      "column_name": "customer_group",
+      "data_type": "String",
+      "dimension_name": "Group"
+     }
+    ],
+    "values": [
+     {
+      "data_type": "Decimal",
+      "expression": {
+       "expression": "sum(outstanding_amount)",
+       "type": "expression"
+      },
+      "format": "currency",
+      "measure_name": "Outstanding"
+     },
+     {
+      "aggregation": "max",
+      "column_name": "days_past_due",
+      "data_type": "Integer",
+      "measure_name": "Days Past Due"
+     },
+     {
+      "aggregation": "count",
+      "column_name": "voucher_no",
+      "data_type": "Integer",
+      "measure_name": "Invoices"
+     }
+    ]
+   },
+   "folder": null,
+   "name": "accounts-top-8-overdue-customers",
+   "query": "accounts-receivables-outstanding",
+   "sort_order": 11,
+   "title": "Top 8 Overdue Customers",
+   "workbook": "accounts"
+  }
+ },
+ "creation": "2026-09-19 18:37:02.161053",
+ "dashboards": {
+  "accounts": {
+   "items": [
+    {
+     "filter_name": "Company",
+     "filter_type": "String",
+     "layout": {
+      "h": 2,
+      "i": "filter-company",
+      "w": 4,
+      "x": 0,
+      "y": 0
+     },
+     "layouts": {
+      "sm": {
+       "h": 2,
+       "w": 20,
+       "x": 0,
+       "y": 0
+      }
+     },
+     "links": {
+      "accounts-cash-bank": "`accounts-gl-entries`.`company`",
+      "accounts-cash-bank-12-months": "`accounts-gl-entries`.`company`",
+      "accounts-days-sales-outstanding-2": "`accounts-receivable-ledger`.`company`",
+      "accounts-gross-margin": "`accounts-sales-invoice-lines`.`company`",
+      "accounts-net-profit": "`accounts-gl-entries`.`company`",
+      "accounts-payables": "`accounts-payable-ledger`.`company`",
+      "accounts-receivables": "`accounts-receivable-ledger`.`company`",
+      "accounts-revenue-and-gross-margin-12-months": "`accounts-sales-invoice-lines`.`company`",
+      "accounts-revenue-mix-by-item-group": "`accounts-revenue-mix-by-item-group-year`.`company`",
+      "accounts-revenue-this-month-2": "`accounts-sales-invoice-lines`.`company`",
+      "accounts-top-8-overdue-customers": "`accounts-receivable-ledger`.`company`"
+     },
+     "type": "filter"
+    },
+    {
+     "chart": "accounts-cash-bank",
+     "layout": {
+      "h": 5,
+      "i": "chart-mctfsf2dum",
+      "w": 4,
+      "x": 0,
+      "y": 3
+     },
+     "layouts": {
+      "sm": {
+       "h": 5,
+       "w": 10,
+       "x": 0,
+       "y": 3
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "accounts-revenue-this-month-2",
+     "layout": {
+      "h": 5,
+      "i": "chart-mctp782rkt",
+      "w": 4,
+      "x": 4,
+      "y": 3
+     },
+     "layouts": {
+      "sm": {
+       "h": 5,
+       "w": 10,
+       "x": 10,
+       "y": 3
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "accounts-gross-margin",
+     "layout": {
+      "h": 5,
+      "i": "chart-mctogq5jo3",
+      "w": 4,
+      "x": 8,
+      "y": 3
+     },
+     "layouts": {
+      "sm": {
+       "h": 5,
+       "w": 10,
+       "x": 0,
+       "y": 8
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "accounts-net-profit",
+     "layout": {
+      "h": 5,
+      "i": "chart-mctua850b6",
+      "w": 4,
+      "x": 12,
+      "y": 3
+     },
+     "layouts": {
+      "sm": {
+       "h": 5,
+       "w": 10,
+       "x": 0,
+       "y": 13
+      }
+     },
+     "reading": "Net Profit, Year to Date",
+     "type": "chart"
+    },
+    {
+     "chart": "accounts-net-profit",
+     "layout": {
+      "h": 5,
+      "i": "chart-mctua850b6-2",
+      "w": 4,
+      "x": 16,
+      "y": 3
+     },
+     "layouts": {
+      "sm": {
+       "h": 5,
+       "w": 10,
+       "x": 10,
+       "y": 13
+      }
+     },
+     "reading": "Net Margin",
+     "type": "chart"
+    },
+    {
+     "chart": "accounts-revenue-and-gross-margin-12-months",
+     "layout": {
+      "h": 17,
+      "i": "chart-mct7jvhl2s",
+      "w": 10,
+      "x": 0,
+      "y": 8
+     },
+     "layouts": {
+      "sm": {
+       "h": 17,
+       "w": 20,
+       "x": 0,
+       "y": 18
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "accounts-cash-bank-12-months",
+     "layout": {
+      "h": 17,
+      "i": "chart-mctk082a6f",
+      "w": 10,
+      "x": 10,
+      "y": 8
+     },
+     "layouts": {
+      "sm": {
+       "h": 17,
+       "w": 20,
+       "x": 0,
+       "y": 35
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "accounts-revenue-mix-by-item-group",
+     "layout": {
+      "h": 15,
+      "i": "chart-mct2jv68gi",
+      "w": 12,
+      "x": 0,
+      "y": 25
+     },
+     "layouts": {
+      "sm": {
+       "h": 17,
+       "w": 20,
+       "x": 0,
+       "y": 52
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "accounts-receivables",
+     "layout": {
+      "h": 4,
+      "i": "chart-mcttoae94m",
+      "w": 4,
+      "x": 12,
+      "y": 25
+     },
+     "layouts": {
+      "sm": {
+       "h": 4,
+       "w": 10,
+       "x": 0,
+       "y": 69
+      }
+     },
+     "reading": "Receivables Outstanding",
+     "type": "chart"
+    },
+    {
+     "chart": "accounts-receivables",
+     "layout": {
+      "h": 4,
+      "i": "chart-mcttoae94m-2",
+      "w": 4,
+      "x": 16,
+      "y": 25
+     },
+     "layouts": {
+      "sm": {
+       "h": 4,
+       "w": 10,
+       "x": 10,
+       "y": 69
+      }
+     },
+     "reading": "Of Which Past Due",
+     "type": "chart"
+    },
+    {
+     "chart": "accounts-payables",
+     "layout": {
+      "h": 4,
+      "i": "chart-mctuuc6oup",
+      "w": 4,
+      "x": 12,
+      "y": 29
+     },
+     "layouts": {
+      "sm": {
+       "h": 4,
+       "w": 10,
+       "x": 0,
+       "y": 73
+      }
+     },
+     "reading": "Payables Outstanding",
+     "type": "chart"
+    },
+    {
+     "chart": "accounts-payables",
+     "layout": {
+      "h": 4,
+      "i": "chart-mctuuc6oup-2",
+      "w": 4,
+      "x": 16,
+      "y": 29
+     },
+     "layouts": {
+      "sm": {
+       "h": 4,
+       "w": 10,
+       "x": 10,
+       "y": 73
+      }
+     },
+     "reading": "Open Bills",
+     "type": "chart"
+    },
+    {
+     "chart": "accounts-days-sales-outstanding-2",
+     "layout": {
+      "h": 4,
+      "i": "chart-mctn2fqte4",
+      "w": 4,
+      "x": 12,
+      "y": 34
+     },
+     "layouts": {
+      "sm": {
+       "h": 4,
+       "w": 10,
+       "x": 0,
+       "y": 77
+      }
+     },
+     "reading": "Days Sales Outstanding",
+     "type": "chart"
+    },
+    {
+     "chart": "accounts-days-sales-outstanding-2",
+     "layout": {
+      "h": 4,
+      "i": "chart-mctn2fqte4-2",
+      "w": 4,
+      "x": 16,
+      "y": 34
+     },
+     "layouts": {
+      "sm": {
+       "h": 4,
+       "w": 10,
+       "x": 10,
+       "y": 77
+      }
+     },
+     "reading": "Credit Sales, 13 Weeks",
+     "type": "chart"
+    },
+    {
+     "chart": "accounts-top-8-overdue-customers",
+     "layout": {
+      "h": 22,
+      "i": "chart-mctucdpjfb",
+      "w": 20,
+      "x": 0,
+      "y": 40
+     },
+     "layouts": {
+      "sm": {
+       "h": 22,
+       "w": 20,
+       "x": 0,
+       "y": 81
+      }
+     },
+     "type": "chart"
+    }
+   ],
+   "name": "accounts",
+   "title": "Business Overview",
+   "vertical_compact_layout": 1,
+   "workbook": "accounts"
+  }
+ },
+ "docstatus": 0,
+ "doctype": "Insights Workbook",
+ "folders": [],
+ "idx": 0,
+ "is_standard": 1,
+ "modified": "2026-09-19 19:02:10.805459",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "accounts",
+ "owner": "Administrator",
+ "queries": {
+  "accounts-cash-bank-by-month": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "accounts-cash-bank-by-month",
+   "operations": [
+    {
+     "table": {
+      "query_name": "accounts-gl-entries",
+      "type": "query",
+      "workbook": "accounts"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "account_type",
+        "type": "column"
+       },
+       "operator": "in",
+       "value": [
+        "Bank",
+        "Cash"
+       ]
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "dimensions": [
+      {
+       "column_name": "posting_date",
+       "data_type": "Date",
+       "dimension_name": "period",
+       "granularity": "month"
+      }
+     ],
+     "measures": [
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum(debit) - sum(credit)",
+        "type": "expression"
+       },
+       "measure_name": "movement"
+      }
+     ],
+     "type": "summarize"
+    },
+    {
+     "data_type": "Decimal",
+     "expression": {
+      "expression": "movement.sum().over(ibis.cumulative_window(order_by=period))",
+      "type": "expression"
+     },
+     "new_name": "cash_balance",
+     "type": "mutate"
+    },
+    {
+     "filters": [
+      {
+       "expression": {
+        "expression": "period >= date_sub(month_start(today()), 11, 'month')",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "column": {
+      "column_name": "period",
+      "type": "column"
+     },
+     "direction": "asc",
+     "type": "order_by"
+    }
+   ],
+   "sort_order": 5,
+   "title": "Cash & Bank by Month",
+   "use_live_connection": 1,
+   "workbook": "accounts"
+  },
+  "accounts-days-sales-outstanding": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "accounts-days-sales-outstanding",
+   "operations": [
+    {
+     "table": {
+      "query_name": "accounts-receivable-ledger",
+      "type": "query",
+      "workbook": "accounts"
+     },
+     "type": "source"
+    },
+    {
+     "dimensions": [
+      {
+       "column_name": "against_voucher_no",
+       "data_type": "String",
+       "dimension_name": "voucher_no"
+      }
+     ],
+     "measures": [
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum(amount)",
+        "type": "expression"
+       },
+       "measure_name": "voucher_outstanding"
+      },
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if((posting_date.between(date_sub(today(), 90, 'day'), today())) & (amount > 0), amount)",
+        "type": "expression"
+       },
+       "measure_name": "voucher_invoiced"
+      }
+     ],
+     "type": "summarize"
+    },
+    {
+     "dimensions": [],
+     "measures": [
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if(abs(voucher_outstanding) > 0.5, voucher_outstanding)",
+        "type": "expression"
+       },
+       "format": "currency",
+       "measure_name": "receivables"
+      },
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum(voucher_invoiced)",
+        "type": "expression"
+       },
+       "format": "currency",
+       "measure_name": "credit_sales"
+      }
+     ],
+     "type": "summarize"
+    },
+    {
+     "data_type": "Decimal",
+     "expression": {
+      "expression": "receivables / credit_sales * 91",
+      "type": "expression"
+     },
+     "new_name": "days_sales_outstanding",
+     "type": "mutate"
+    }
+   ],
+   "sort_order": 13,
+   "title": "Days Sales Outstanding",
+   "use_live_connection": 1,
+   "workbook": "accounts"
+  },
+  "accounts-gl-entries": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "accounts-gl-entries",
+   "operations": [
+    {
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabGL Entry",
+      "type": "table"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "is_cancelled",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 0
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "join_condition": {
+      "left_column": {
+       "column_name": "account",
+       "type": "column"
+      },
+      "right_column": {
+       "column_name": "name",
+       "type": "column"
+      }
+     },
+     "join_type": "inner",
+     "select_columns": [
+      {
+       "column_name": "account_type",
+       "type": "column"
+      },
+      {
+       "column_name": "root_type",
+       "type": "column"
+      }
+     ],
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabAccount",
+      "type": "table"
+     },
+     "type": "join"
+    },
+    {
+     "column_names": [
+      "posting_date",
+      "account_type",
+      "root_type",
+      "debit",
+      "credit",
+      "company"
+     ],
+     "type": "select"
+    }
+   ],
+   "sort_order": 1,
+   "title": "GL Entries",
+   "use_live_connection": 1,
+   "workbook": "accounts"
+  },
+  "accounts-gross-margin-year-to-date": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "accounts-gross-margin-year-to-date",
+   "operations": [
+    {
+     "table": {
+      "query_name": "accounts-sales-invoice-lines",
+      "type": "query",
+      "workbook": "accounts"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "expression": {
+        "expression": "posting_date.between(date_sub(year_start(today()), 1, 'year'), today())",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "dimensions": [],
+     "measures": [
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "(sum_if(posting_date >= year_start(today()), base_net_amount) - sum_if(posting_date >= year_start(today()), line_cogs)) / sum_if(posting_date >= year_start(today()), base_net_amount)",
+        "type": "expression"
+       },
+       "format": "percent",
+       "measure_name": "gross_margin"
+      },
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "(sum_if(posting_date <= date_sub(today(), 1, 'year'), base_net_amount) - sum_if(posting_date <= date_sub(today(), 1, 'year'), line_cogs)) / sum_if(posting_date <= date_sub(today(), 1, 'year'), base_net_amount)",
+        "type": "expression"
+       },
+       "format": "percent",
+       "measure_name": "gross_margin_last_year"
+      }
+     ],
+     "type": "summarize"
+    }
+   ],
+   "sort_order": 7,
+   "title": "Gross Margin, Year to Date",
+   "use_live_connection": 1,
+   "workbook": "accounts"
+  },
+  "accounts-payable-ledger": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "accounts-payable-ledger",
+   "operations": [
+    {
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabPayment Ledger Entry",
+      "type": "table"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "delinked",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 0
+      },
+      {
+       "column": {
+        "column_name": "account_type",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": "Payable"
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "column_names": [
+      "posting_date",
+      "party",
+      "against_voucher_type",
+      "against_voucher_no",
+      "amount",
+      "company"
+     ],
+     "type": "select"
+    }
+   ],
+   "sort_order": 4,
+   "title": "Payable Ledger",
+   "use_live_connection": 1,
+   "workbook": "accounts"
+  },
+  "accounts-payables-outstanding": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "accounts-payables-outstanding",
+   "operations": [
+    {
+     "table": {
+      "query_name": "accounts-payable-ledger",
+      "type": "query",
+      "workbook": "accounts"
+     },
+     "type": "source"
+    },
+    {
+     "dimensions": [
+      {
+       "column_name": "against_voucher_type",
+       "data_type": "String",
+       "dimension_name": "voucher_type"
+      },
+      {
+       "column_name": "against_voucher_no",
+       "data_type": "String",
+       "dimension_name": "voucher_no"
+      },
+      {
+       "column_name": "party",
+       "data_type": "String",
+       "dimension_name": "supplier"
+      },
+      {
+       "column_name": "company",
+       "data_type": "String",
+       "dimension_name": "company"
+      }
+     ],
+     "measures": [
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum(amount)",
+        "type": "expression"
+       },
+       "format": "currency",
+       "measure_name": "outstanding_amount"
+      }
+     ],
+     "type": "summarize"
+    },
+    {
+     "filters": [
+      {
+       "expression": {
+        "expression": "abs(outstanding_amount) > 0.5",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    }
+   ],
+   "sort_order": 12,
+   "title": "Payables Outstanding",
+   "use_live_connection": 1,
+   "workbook": "accounts"
+  },
+  "accounts-profit-loss-year-to-date": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "accounts-profit-loss-year-to-date",
+   "operations": [
+    {
+     "table": {
+      "query_name": "accounts-gl-entries",
+      "type": "query",
+      "workbook": "accounts"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "root_type",
+        "type": "column"
+       },
+       "operator": "in",
+       "value": [
+        "Income",
+        "Expense"
+       ]
+      },
+      {
+       "expression": {
+        "expression": "posting_date.between(date_sub(year_start(today()), 1, 'year'), today())",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "dimensions": [],
+     "measures": [
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if(posting_date >= year_start(today()), credit) - sum_if(posting_date >= year_start(today()), debit)",
+        "type": "expression"
+       },
+       "format": "currency",
+       "measure_name": "net_profit"
+      },
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if(posting_date <= date_sub(today(), 1, 'year'), credit) - sum_if(posting_date <= date_sub(today(), 1, 'year'), debit)",
+        "type": "expression"
+       },
+       "format": "currency",
+       "measure_name": "net_profit_last_year"
+      },
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if((root_type == 'Income') & (posting_date >= year_start(today())), credit) - sum_if((root_type == 'Income') & (posting_date >= year_start(today())), debit)",
+        "type": "expression"
+       },
+       "format": "currency",
+       "measure_name": "income"
+      },
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if((root_type == 'Income') & (posting_date <= date_sub(today(), 1, 'year')), credit) - sum_if((root_type == 'Income') & (posting_date <= date_sub(today(), 1, 'year')), debit)",
+        "type": "expression"
+       },
+       "format": "currency",
+       "measure_name": "income_last_year"
+      }
+     ],
+     "type": "summarize"
+    },
+    {
+     "data_type": "Decimal",
+     "expression": {
+      "expression": "net_profit / income",
+      "type": "expression"
+     },
+     "new_name": "net_margin",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Decimal",
+     "expression": {
+      "expression": "net_profit_last_year / income_last_year",
+      "type": "expression"
+     },
+     "new_name": "net_margin_last_year",
+     "type": "mutate"
+    }
+   ],
+   "sort_order": 8,
+   "title": "Profit & Loss, Year to Date",
+   "use_live_connection": 1,
+   "workbook": "accounts"
+  },
+  "accounts-receivable-ledger": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "accounts-receivable-ledger",
+   "operations": [
+    {
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabPayment Ledger Entry",
+      "type": "table"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "delinked",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 0
+      },
+      {
+       "column": {
+        "column_name": "account_type",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": "Receivable"
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "column_names": [
+      "posting_date",
+      "due_date",
+      "party",
+      "against_voucher_type",
+      "against_voucher_no",
+      "amount",
+      "company"
+     ],
+     "type": "select"
+    }
+   ],
+   "sort_order": 3,
+   "title": "Receivable Ledger",
+   "use_live_connection": 1,
+   "workbook": "accounts"
+  },
+  "accounts-receivables-outstanding": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "accounts-receivables-outstanding",
+   "operations": [
+    {
+     "table": {
+      "query_name": "accounts-receivable-ledger",
+      "type": "query",
+      "workbook": "accounts"
+     },
+     "type": "source"
+    },
+    {
+     "data_type": "Integer",
+     "expression": {
+      "expression": "date_diff(today(), due_date, 'day')",
+      "type": "expression"
+     },
+     "new_name": "row_days_past_due",
+     "type": "mutate"
+    },
+    {
+     "dimensions": [
+      {
+       "column_name": "against_voucher_type",
+       "data_type": "String",
+       "dimension_name": "voucher_type"
+      },
+      {
+       "column_name": "against_voucher_no",
+       "data_type": "String",
+       "dimension_name": "voucher_no"
+      },
+      {
+       "column_name": "party",
+       "data_type": "String",
+       "dimension_name": "customer"
+      },
+      {
+       "column_name": "company",
+       "data_type": "String",
+       "dimension_name": "company"
+      }
+     ],
+     "measures": [
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum(amount)",
+        "type": "expression"
+       },
+       "format": "currency",
+       "measure_name": "outstanding_amount"
+      },
+      {
+       "data_type": "Integer",
+       "expression": {
+        "expression": "max(row_days_past_due)",
+        "type": "expression"
+       },
+       "measure_name": "days_past_due"
+      }
+     ],
+     "type": "summarize"
+    },
+    {
+     "filters": [
+      {
+       "expression": {
+        "expression": "abs(outstanding_amount) > 0.5",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "join_condition": {
+      "left_column": {
+       "column_name": "customer",
+       "type": "column"
+      },
+      "right_column": {
+       "column_name": "name",
+       "type": "column"
+      }
+     },
+     "join_type": "inner",
+     "select_columns": [
+      {
+       "column_name": "customer_group",
+       "type": "column"
+      }
+     ],
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabCustomer",
+      "type": "table"
+     },
+     "type": "join"
+    },
+    {
+     "column_names": [
+      "voucher_type",
+      "voucher_no",
+      "customer",
+      "customer_group",
+      "company",
+      "outstanding_amount",
+      "days_past_due"
+     ],
+     "type": "select"
+    }
+   ],
+   "sort_order": 11,
+   "title": "Receivables Outstanding",
+   "use_live_connection": 1,
+   "workbook": "accounts"
+  },
+  "accounts-revenue-gross-margin-by-month": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "accounts-revenue-gross-margin-by-month",
+   "operations": [
+    {
+     "table": {
+      "query_name": "accounts-sales-invoice-lines",
+      "type": "query",
+      "workbook": "accounts"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "expression": {
+        "expression": "posting_date.between(date_sub(month_start(today()), 12, 'month'), date_sub(month_start(today()), 1, 'day'))",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "dimensions": [
+      {
+       "column_name": "posting_date",
+       "data_type": "Date",
+       "dimension_name": "period",
+       "granularity": "month"
+      }
+     ],
+     "measures": [
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum(base_net_amount)",
+        "type": "expression"
+       },
+       "format": "currency",
+       "measure_name": "revenue"
+      },
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "(sum(base_net_amount) - sum(line_cogs)) / sum(base_net_amount)",
+        "type": "expression"
+       },
+       "format": "percent",
+       "measure_name": "gross_margin"
+      }
+     ],
+     "type": "summarize"
+    },
+    {
+     "column": {
+      "column_name": "period",
+      "type": "column"
+     },
+     "direction": "asc",
+     "type": "order_by"
+    }
+   ],
+   "sort_order": 9,
+   "title": "Revenue & Gross Margin by Month",
+   "use_live_connection": 1,
+   "workbook": "accounts"
+  },
+  "accounts-revenue-mix-by-item-group-year": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "accounts-revenue-mix-by-item-group-year",
+   "operations": [
+    {
+     "table": {
+      "query_name": "accounts-sales-invoice-lines",
+      "type": "query",
+      "workbook": "accounts"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "expression": {
+        "expression": "posting_date >= date_sub(year_start(today()), 2, 'year')",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    }
+   ],
+   "sort_order": 10,
+   "title": "Revenue Mix by Item Group & Year",
+   "use_live_connection": 1,
+   "workbook": "accounts"
+  },
+  "accounts-revenue-this-month": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "accounts-revenue-this-month",
+   "operations": [
+    {
+     "table": {
+      "query_name": "accounts-sales-invoice-lines",
+      "type": "query",
+      "workbook": "accounts"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "expression": {
+        "expression": "posting_date.between(date_sub(month_start(today()), 1, 'year'), today())",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "dimensions": [],
+     "measures": [
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if(posting_date >= month_start(today()), base_net_amount)",
+        "type": "expression"
+       },
+       "format": "currency",
+       "measure_name": "revenue_mtd"
+      },
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if(posting_date <= date_sub(today(), 1, 'year'), base_net_amount)",
+        "type": "expression"
+       },
+       "format": "currency",
+       "measure_name": "revenue_last_year"
+      }
+     ],
+     "type": "summarize"
+    }
+   ],
+   "sort_order": 6,
+   "title": "Revenue This Month",
+   "use_live_connection": 1,
+   "workbook": "accounts"
+  },
+  "accounts-sales-invoice-lines": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "accounts-sales-invoice-lines",
+   "operations": [
+    {
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabSales Invoice Item",
+      "type": "table"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "docstatus",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 1
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "join_condition": {
+      "left_column": {
+       "column_name": "parent",
+       "type": "column"
+      },
+      "right_column": {
+       "column_name": "name",
+       "type": "column"
+      }
+     },
+     "join_type": "inner",
+     "select_columns": [
+      {
+       "column_name": "posting_date",
+       "type": "column"
+      },
+      {
+       "column_name": "customer",
+       "type": "column"
+      },
+      {
+       "column_name": "customer_group",
+       "type": "column"
+      },
+      {
+       "column_name": "company",
+       "type": "column"
+      }
+     ],
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabSales Invoice",
+      "type": "table"
+     },
+     "type": "join"
+    },
+    {
+     "data_type": "Decimal",
+     "expression": {
+      "expression": "incoming_rate * qty",
+      "type": "expression"
+     },
+     "new_name": "line_cogs",
+     "type": "mutate"
+    },
+    {
+     "data_type": "String",
+     "expression": {
+      "expression": "parent",
+      "type": "expression"
+     },
+     "new_name": "sales_invoice",
+     "type": "mutate"
+    },
+    {
+     "column_names": [
+      "sales_invoice",
+      "posting_date",
+      "customer",
+      "customer_group",
+      "company",
+      "item_group",
+      "brand",
+      "base_net_amount",
+      "line_cogs"
+     ],
+     "type": "select"
+    }
+   ],
+   "sort_order": 2,
+   "title": "Sales Invoice Lines",
+   "use_live_connection": 1,
+   "workbook": "accounts"
+  }
+ },
+ "title": "Business Overview"
+}

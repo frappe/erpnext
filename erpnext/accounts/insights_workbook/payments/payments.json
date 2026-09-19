@@ -1,0 +1,1587 @@
+{
+ "charts": {
+  "payments-billed-vs-collected-13-weeks": {
+   "chart_type": "Bar",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_format": {
+     "decimals": 1,
+     "shorten": true
+    },
+    "order_by": [
+     {
+      "column": {
+       "column_name": "Week",
+       "type": "column"
+      },
+      "direction": "asc"
+     }
+    ],
+    "x_axis": {
+     "dimension": {
+      "column_name": "period",
+      "data_type": "Date",
+      "dimension_name": "Week",
+      "granularity": "week"
+     }
+    },
+    "y_axis": {
+     "series": [
+      {
+       "measure": {
+        "aggregation": "sum",
+        "column_name": "billed",
+        "data_type": "Decimal",
+        "format": "currency",
+        "measure_name": "Billed"
+       },
+       "type": "bar"
+      },
+      {
+       "measure": {
+        "aggregation": "sum",
+        "column_name": "collected",
+        "data_type": "Decimal",
+        "format": "currency",
+        "measure_name": "Collected"
+       },
+       "show_data_points": true,
+       "smooth": true,
+       "type": "line"
+      }
+     ]
+    }
+   },
+   "folder": null,
+   "name": "payments-billed-vs-collected-13-weeks",
+   "query": "payments-billed-and-collected-by-week",
+   "sort_order": 7,
+   "title": "Billed vs Collected, 13 Weeks",
+   "workbook": "payments"
+  },
+  "payments-collections-this-month-2": {
+   "chart_type": "Number",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_column_options": [
+     {
+      "comparison": {
+       "label": "vs last month",
+       "measure": {
+        "aggregation": "max",
+        "column_name": "collected_last_month",
+        "data_type": "Decimal",
+        "format": "currency",
+        "measure_name": "Same Days Last Month"
+       },
+       "show": "change",
+       "source": "measure"
+      },
+      "decimals": 1,
+      "shorten": true
+     },
+     {
+      "comparison": {
+       "label": "vs last month",
+       "measure": {
+        "aggregation": "max",
+        "column_name": "collected_vs_billed_last_month",
+        "data_type": "Decimal",
+        "format": "percent",
+        "measure_name": "Collected vs Billed, Same Days Last Month"
+       },
+       "show": "delta",
+       "source": "measure"
+      },
+      "decimals": 1,
+      "shorten": false
+     }
+    ],
+    "number_columns": [
+     {
+      "aggregation": "max",
+      "column_name": "collected_mtd",
+      "data_type": "Decimal",
+      "format": "currency",
+      "id": "Collections This Month",
+      "measure_name": "Collections This Month"
+     },
+     {
+      "aggregation": "max",
+      "column_name": "collected_vs_billed",
+      "data_type": "Decimal",
+      "format": "percent",
+      "id": "Collected vs Billed",
+      "measure_name": "Collected vs Billed"
+     }
+    ],
+    "order_by": [],
+    "sparkline": false
+   },
+   "folder": null,
+   "name": "payments-collections-this-month-2",
+   "query": "payments-collections-this-month",
+   "sort_order": 3,
+   "title": "Collections This Month",
+   "workbook": "payments"
+  },
+  "payments-dso": {
+   "chart_type": "Number",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_column_options": [
+     {
+      "comparison": {
+       "label": "vs a month ago",
+       "measure": {
+        "aggregation": "max",
+        "column_name": "dso_days_a_month_ago",
+        "data_type": "Decimal",
+        "measure_name": "A Month Ago"
+       },
+       "show": "delta",
+       "source": "measure"
+      },
+      "decimals": 0,
+      "negative_is_better": true,
+      "shorten": false,
+      "suffix": " days"
+     }
+    ],
+    "number_columns": [
+     {
+      "aggregation": "max",
+      "column_name": "dso_days",
+      "data_type": "Decimal",
+      "id": "DSO",
+      "measure_name": "DSO"
+     }
+    ],
+    "order_by": [],
+    "sparkline": false
+   },
+   "folder": null,
+   "name": "payments-dso",
+   "query": "payments-dso-now",
+   "sort_order": 2,
+   "title": "DSO",
+   "workbook": "payments"
+  },
+  "payments-dso-12-months": {
+   "chart_type": "Line",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_format": {
+     "decimals": 0,
+     "shorten": false,
+     "suffix": " days"
+    },
+    "order_by": [
+     {
+      "column": {
+       "column_name": "Month",
+       "type": "column"
+      },
+      "direction": "asc"
+     }
+    ],
+    "x_axis": {
+     "dimension": {
+      "column_name": "period",
+      "data_type": "Date",
+      "dimension_name": "Month",
+      "granularity": "month"
+     }
+    },
+    "y_axis": {
+     "axis_label": "Days",
+     "min": 0,
+     "reference_lines": [
+      {
+       "aggregate": "average",
+       "axis": "y",
+       "dashed": true,
+       "id": "dcb57883",
+       "label": "12-month average",
+       "measure_name": "DSO"
+      }
+     ],
+     "series": [
+      {
+       "measure": {
+        "aggregation": "max",
+        "column_name": "dso_days",
+        "data_type": "Decimal",
+        "measure_name": "DSO"
+       },
+       "show_data_points": true,
+       "smooth": true,
+       "type": "line"
+      }
+     ],
+     "show_axis_label": true
+    }
+   },
+   "folder": null,
+   "name": "payments-dso-12-months",
+   "query": "payments-receivables-by-month",
+   "sort_order": 5,
+   "title": "DSO, 12 Months",
+   "workbook": "payments"
+  },
+  "payments-overdue-aging-by-customer-group": {
+   "chart_type": "Bar",
+   "config": {
+    "filters": {
+     "filters": [
+      {
+       "column": {
+        "column_name": "days_past_due",
+        "type": "column"
+       },
+       "operator": ">",
+       "value": 0
+      }
+     ],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_format": {
+     "decimals": 1,
+     "shorten": true
+    },
+    "order_by": [
+     {
+      "column": {
+       "column_name": "Bucket",
+       "type": "column"
+      },
+      "direction": "asc"
+     }
+    ],
+    "split_by": {
+     "dimension": {
+      "column_name": "customer_group",
+      "data_type": "String",
+      "dimension_name": "Customer Group"
+     },
+     "max_split_values": 4
+    },
+    "x_axis": {
+     "dimension": {
+      "column_name": "aging_bucket",
+      "data_type": "String",
+      "dimension_name": "Bucket"
+     }
+    },
+    "y_axis": {
+     "series": [
+      {
+       "measure": {
+        "aggregation": "sum",
+        "column_name": "outstanding_amount",
+        "data_type": "Decimal",
+        "format": "currency",
+        "measure_name": "Overdue"
+       },
+       "type": "bar"
+      }
+     ],
+     "stack": true
+    }
+   },
+   "folder": null,
+   "name": "payments-overdue-aging-by-customer-group",
+   "query": "payments-receivables-outstanding",
+   "sort_order": 6,
+   "title": "Overdue Aging by Customer Group",
+   "workbook": "payments"
+  },
+  "payments-overdue-share": {
+   "chart_type": "Number",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_column_options": [
+     {
+      "comparison": {
+       "label": "vs last week",
+       "measure": {
+        "aggregation": "max",
+        "column_name": "overdue_share_last_week",
+        "data_type": "Decimal",
+        "format": "percent",
+        "measure_name": "Last Week"
+       },
+       "show": "delta",
+       "source": "measure"
+      },
+      "decimals": 1,
+      "negative_is_better": true,
+      "shorten": false
+     }
+    ],
+    "number_columns": [
+     {
+      "aggregation": "max",
+      "column_name": "overdue_share",
+      "data_type": "Decimal",
+      "format": "percent",
+      "id": "Overdue Share",
+      "measure_name": "Overdue Share"
+     }
+    ],
+    "order_by": [],
+    "sparkline": false
+   },
+   "folder": null,
+   "name": "payments-overdue-share",
+   "query": "payments-receivables-position",
+   "sort_order": 4,
+   "title": "Overdue Share",
+   "workbook": "payments"
+  },
+  "payments-top-10-overdue-customers": {
+   "chart_type": "Table",
+   "config": {
+    "columns": [],
+    "conditional_formatting": {
+     "columns": [],
+     "formats": [
+      {
+       "color": "amber",
+       "column": {
+        "column_name": "Overdue",
+        "type": "column"
+       },
+       "mode": "rank_rules",
+       "operator": "top_n",
+       "value": 3
+      },
+      {
+       "color": "red",
+       "column": {
+        "column_name": "Days Past Due",
+        "type": "column"
+       },
+       "mode": "cell_rules",
+       "operator": ">",
+       "value": 90
+      }
+     ]
+    },
+    "filters": {
+     "filters": [
+      {
+       "column": {
+        "column_name": "days_past_due",
+        "type": "column"
+       },
+       "operator": ">",
+       "value": 0
+      }
+     ],
+     "logical_operator": "And"
+    },
+    "limit": 10,
+    "number_formats": {
+     "Overdue": {
+      "decimals": 1,
+      "shorten": true
+     }
+    },
+    "order_by": [
+     {
+      "column": {
+       "column_name": "Overdue",
+       "type": "column"
+      },
+      "direction": "desc"
+     }
+    ],
+    "rows": [
+     {
+      "column_name": "customer",
+      "data_type": "String",
+      "dimension_name": "Customer"
+     },
+     {
+      "column_name": "customer_group",
+      "data_type": "String",
+      "dimension_name": "Group"
+     }
+    ],
+    "values": [
+     {
+      "data_type": "Decimal",
+      "expression": {
+       "expression": "sum(outstanding_amount)",
+       "type": "expression"
+      },
+      "format": "currency",
+      "measure_name": "Overdue"
+     },
+     {
+      "aggregation": "count",
+      "column_name": "voucher_no",
+      "data_type": "Integer",
+      "measure_name": "Invoices"
+     },
+     {
+      "aggregation": "min",
+      "column_name": "invoice_date",
+      "data_type": "Date",
+      "measure_name": "Oldest Invoice"
+     },
+     {
+      "aggregation": "max",
+      "column_name": "days_past_due",
+      "data_type": "Integer",
+      "measure_name": "Days Past Due"
+     },
+     {
+      "aggregation": "max",
+      "column_name": "last_payment_date",
+      "data_type": "Date",
+      "measure_name": "Last Payment"
+     }
+    ]
+   },
+   "folder": null,
+   "name": "payments-top-10-overdue-customers",
+   "query": "payments-receivables-outstanding",
+   "sort_order": 8,
+   "title": "Top 10 Overdue Customers",
+   "workbook": "payments"
+  },
+  "payments-total-outstanding": {
+   "chart_type": "Number",
+   "config": {
+    "filters": {
+     "filters": [],
+     "logical_operator": "And"
+    },
+    "limit": 100,
+    "number_column_options": [
+     {
+      "comparison": {
+       "label": "vs last week",
+       "measure": {
+        "aggregation": "max",
+        "column_name": "total_last_week",
+        "data_type": "Decimal",
+        "format": "currency",
+        "measure_name": "Last Week"
+       },
+       "show": "change",
+       "source": "measure"
+      },
+      "decimals": 1,
+      "negative_is_better": true,
+      "shorten": true
+     }
+    ],
+    "number_columns": [
+     {
+      "aggregation": "max",
+      "column_name": "total_now",
+      "data_type": "Decimal",
+      "format": "currency",
+      "id": "Total Outstanding",
+      "measure_name": "Total Outstanding"
+     }
+    ],
+    "order_by": [],
+    "sparkline": false
+   },
+   "folder": null,
+   "name": "payments-total-outstanding",
+   "query": "payments-receivables-position",
+   "sort_order": 1,
+   "title": "Total Outstanding",
+   "workbook": "payments"
+  }
+ },
+ "creation": "2026-09-19 18:35:07.209612",
+ "dashboards": {
+  "payments": {
+   "items": [
+    {
+     "filter_name": "Company",
+     "filter_type": "String",
+     "layout": {
+      "h": 2,
+      "i": "filter-company",
+      "w": 4,
+      "x": 0,
+      "y": 0
+     },
+     "layouts": {
+      "sm": {
+       "h": 2,
+       "w": 20,
+       "x": 0,
+       "y": 0
+      }
+     },
+     "links": {
+      "payments-billed-vs-collected-13-weeks": "`payments-receivable-ledger`.`company`",
+      "payments-collections-this-month-2": "`payments-receivable-ledger`.`company`",
+      "payments-dso": "`payments-receivable-ledger`.`company`",
+      "payments-dso-12-months": "`payments-receivable-ledger`.`company`",
+      "payments-overdue-aging-by-customer-group": "`payments-receivable-ledger`.`company`",
+      "payments-overdue-share": "`payments-receivable-ledger`.`company`",
+      "payments-top-10-overdue-customers": "`payments-receivable-ledger`.`company`",
+      "payments-total-outstanding": "`payments-receivable-ledger`.`company`"
+     },
+     "type": "filter"
+    },
+    {
+     "filter_name": "Customer Group",
+     "filter_type": "String",
+     "layout": {
+      "h": 2,
+      "i": "filter-customer-group",
+      "w": 4,
+      "x": 4,
+      "y": 0
+     },
+     "layouts": {
+      "sm": {
+       "h": 2,
+       "w": 10,
+       "x": 0,
+       "y": 3
+      }
+     },
+     "links": {
+      "payments-billed-vs-collected-13-weeks": "`payments-receivable-ledger`.`customer_group`",
+      "payments-collections-this-month-2": "`payments-receivable-ledger`.`customer_group`",
+      "payments-dso": "`payments-receivable-ledger`.`customer_group`",
+      "payments-dso-12-months": "`payments-receivable-ledger`.`customer_group`",
+      "payments-overdue-aging-by-customer-group": "`payments-receivable-ledger`.`customer_group`",
+      "payments-overdue-share": "`payments-receivable-ledger`.`customer_group`",
+      "payments-top-10-overdue-customers": "`payments-receivable-ledger`.`customer_group`",
+      "payments-total-outstanding": "`payments-receivable-ledger`.`customer_group`"
+     },
+     "type": "filter"
+    },
+    {
+     "filter_name": "Customer",
+     "filter_type": "String",
+     "layout": {
+      "h": 2,
+      "i": "filter-customer",
+      "w": 4,
+      "x": 8,
+      "y": 0
+     },
+     "layouts": {
+      "sm": {
+       "h": 2,
+       "w": 10,
+       "x": 10,
+       "y": 3
+      }
+     },
+     "links": {
+      "payments-billed-vs-collected-13-weeks": "`payments-receivable-ledger`.`customer`",
+      "payments-collections-this-month-2": "`payments-receivable-ledger`.`customer`",
+      "payments-dso": "`payments-receivable-ledger`.`customer`",
+      "payments-dso-12-months": "`payments-receivable-ledger`.`customer`",
+      "payments-overdue-aging-by-customer-group": "`payments-receivable-ledger`.`customer`",
+      "payments-overdue-share": "`payments-receivable-ledger`.`customer`",
+      "payments-top-10-overdue-customers": "`payments-receivable-ledger`.`customer`",
+      "payments-total-outstanding": "`payments-receivable-ledger`.`customer`"
+     },
+     "type": "filter"
+    },
+    {
+     "chart": "payments-total-outstanding",
+     "layout": {
+      "h": 5,
+      "i": "chart-l901jcp2vg",
+      "w": 4,
+      "x": 0,
+      "y": 3
+     },
+     "layouts": {
+      "sm": {
+       "h": 5,
+       "w": 10,
+       "x": 0,
+       "y": 5
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "payments-dso",
+     "layout": {
+      "h": 5,
+      "i": "chart-l90hfflhpr",
+      "w": 4,
+      "x": 4,
+      "y": 3
+     },
+     "layouts": {
+      "sm": {
+       "h": 5,
+       "w": 10,
+       "x": 10,
+       "y": 5
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "payments-collections-this-month-2",
+     "layout": {
+      "h": 5,
+      "i": "chart-l90u9k47ej",
+      "w": 4,
+      "x": 8,
+      "y": 3
+     },
+     "layouts": {
+      "sm": {
+       "h": 5,
+       "w": 10,
+       "x": 0,
+       "y": 10
+      }
+     },
+     "reading": "Collections This Month",
+     "type": "chart"
+    },
+    {
+     "chart": "payments-collections-this-month-2",
+     "layout": {
+      "h": 5,
+      "i": "chart-l90u9k47ej-2",
+      "w": 4,
+      "x": 12,
+      "y": 3
+     },
+     "layouts": {
+      "sm": {
+       "h": 5,
+       "w": 10,
+       "x": 10,
+       "y": 10
+      }
+     },
+     "reading": "Collected vs Billed",
+     "type": "chart"
+    },
+    {
+     "chart": "payments-overdue-share",
+     "layout": {
+      "h": 5,
+      "i": "chart-l90fda98kp",
+      "w": 4,
+      "x": 16,
+      "y": 3
+     },
+     "layouts": {
+      "sm": {
+       "h": 5,
+       "w": 10,
+       "x": 0,
+       "y": 15
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "payments-dso-12-months",
+     "layout": {
+      "h": 17,
+      "i": "chart-l9089mc2du",
+      "w": 10,
+      "x": 0,
+      "y": 8
+     },
+     "layouts": {
+      "sm": {
+       "h": 17,
+       "w": 20,
+       "x": 0,
+       "y": 20
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "payments-overdue-aging-by-customer-group",
+     "layout": {
+      "h": 17,
+      "i": "chart-l9048hq604",
+      "w": 10,
+      "x": 10,
+      "y": 8
+     },
+     "layouts": {
+      "sm": {
+       "h": 17,
+       "w": 20,
+       "x": 0,
+       "y": 37
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "payments-billed-vs-collected-13-weeks",
+     "layout": {
+      "h": 22,
+      "i": "chart-l907efi7kh",
+      "w": 10,
+      "x": 0,
+      "y": 25
+     },
+     "layouts": {
+      "sm": {
+       "h": 17,
+       "w": 20,
+       "x": 0,
+       "y": 54
+      }
+     },
+     "type": "chart"
+    },
+    {
+     "chart": "payments-top-10-overdue-customers",
+     "layout": {
+      "h": 22,
+      "i": "chart-l90a5a5eat",
+      "w": 10,
+      "x": 10,
+      "y": 25
+     },
+     "layouts": {
+      "sm": {
+       "h": 24,
+       "w": 20,
+       "x": 0,
+       "y": 71
+      }
+     },
+     "type": "chart"
+    }
+   ],
+   "name": "payments",
+   "title": "Receivables",
+   "vertical_compact_layout": 1,
+   "workbook": "payments"
+  }
+ },
+ "docstatus": 0,
+ "doctype": "Insights Workbook",
+ "folders": [],
+ "idx": 0,
+ "is_standard": 1,
+ "modified": "2026-09-19 19:02:05.703811",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "payments",
+ "owner": "Administrator",
+ "queries": {
+  "payments-billed-and-collected-by-week": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "payments-billed-and-collected-by-week",
+   "operations": [
+    {
+     "table": {
+      "query_name": "payments-receivable-ledger",
+      "type": "query",
+      "workbook": "payments"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "expression": {
+        "expression": "posting_date.between(date_sub(week_start(today()), 91, 'day'), date_sub(week_start(today()), 1, 'day'))",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "dimensions": [
+      {
+       "column_name": "posting_date",
+       "data_type": "Date",
+       "dimension_name": "period",
+       "granularity": "week"
+      }
+     ],
+     "measures": [
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if(voucher_type == 'Sales Invoice', amount)",
+        "type": "expression"
+       },
+       "format": "currency",
+       "measure_name": "billed"
+      },
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if((voucher_type != 'Sales Invoice') & (amount < 0), -amount)",
+        "type": "expression"
+       },
+       "format": "currency",
+       "measure_name": "collected"
+      }
+     ],
+     "type": "summarize"
+    },
+    {
+     "column": {
+      "column_name": "period",
+      "type": "column"
+     },
+     "direction": "asc",
+     "type": "order_by"
+    }
+   ],
+   "sort_order": 7,
+   "title": "Billed and Collected by Week",
+   "use_live_connection": 1,
+   "workbook": "payments"
+  },
+  "payments-collections-this-month": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "payments-collections-this-month",
+   "operations": [
+    {
+     "table": {
+      "query_name": "payments-receivable-ledger",
+      "type": "query",
+      "workbook": "payments"
+     },
+     "type": "source"
+    },
+    {
+     "dimensions": [],
+     "measures": [
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if((voucher_type != 'Sales Invoice') & (amount < 0) & (posting_date.between(month_start(today()), today())), -amount)",
+        "type": "expression"
+       },
+       "format": "currency",
+       "measure_name": "collected_mtd"
+      },
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if((voucher_type != 'Sales Invoice') & (amount < 0) & (posting_date.between(date_sub(month_start(today()), 1, 'month'), date_sub(today(), 1, 'month'))), -amount)",
+        "type": "expression"
+       },
+       "format": "currency",
+       "measure_name": "collected_last_month"
+      },
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if((voucher_type == 'Sales Invoice') & (posting_date.between(month_start(today()), today())), amount)",
+        "type": "expression"
+       },
+       "format": "currency",
+       "measure_name": "billed_mtd"
+      },
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if((voucher_type == 'Sales Invoice') & (posting_date.between(date_sub(month_start(today()), 1, 'month'), date_sub(today(), 1, 'month'))), amount)",
+        "type": "expression"
+       },
+       "format": "currency",
+       "measure_name": "billed_last_month"
+      }
+     ],
+     "type": "summarize"
+    },
+    {
+     "data_type": "Decimal",
+     "expression": {
+      "expression": "collected_mtd / billed_mtd",
+      "type": "expression"
+     },
+     "new_name": "collected_vs_billed",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Decimal",
+     "expression": {
+      "expression": "collected_last_month / billed_last_month",
+      "type": "expression"
+     },
+     "new_name": "collected_vs_billed_last_month",
+     "type": "mutate"
+    }
+   ],
+   "sort_order": 8,
+   "title": "Collections This Month",
+   "use_live_connection": 1,
+   "workbook": "payments"
+  },
+  "payments-dso-now": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "payments-dso-now",
+   "operations": [
+    {
+     "table": {
+      "query_name": "payments-receivable-ledger",
+      "type": "query",
+      "workbook": "payments"
+     },
+     "type": "source"
+    },
+    {
+     "dimensions": [],
+     "measures": [
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if(posting_date <= today(), amount)",
+        "type": "expression"
+       },
+       "format": "currency",
+       "measure_name": "ar_now"
+      },
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if(posting_date <= date_sub(today(), 30, 'day'), amount)",
+        "type": "expression"
+       },
+       "format": "currency",
+       "measure_name": "ar_a_month_ago"
+      },
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if((voucher_type == 'Sales Invoice') & (posting_date.between(date_sub(today(), 90, 'day'), today())), amount)",
+        "type": "expression"
+       },
+       "format": "currency",
+       "measure_name": "billed_window"
+      },
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if((voucher_type == 'Sales Invoice') & (posting_date.between(date_sub(today(), 120, 'day'), date_sub(today(), 30, 'day'))), amount)",
+        "type": "expression"
+       },
+       "format": "currency",
+       "measure_name": "billed_window_a_month_ago"
+      }
+     ],
+     "type": "summarize"
+    },
+    {
+     "data_type": "Decimal",
+     "expression": {
+      "expression": "ar_now / billed_window * 91",
+      "type": "expression"
+     },
+     "new_name": "dso_days",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Decimal",
+     "expression": {
+      "expression": "ar_a_month_ago / billed_window_a_month_ago * 91",
+      "type": "expression"
+     },
+     "new_name": "dso_days_a_month_ago",
+     "type": "mutate"
+    }
+   ],
+   "sort_order": 6,
+   "title": "DSO Now",
+   "use_live_connection": 1,
+   "workbook": "payments"
+  },
+  "payments-last-payment-by-customer": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "payments-last-payment-by-customer",
+   "operations": [
+    {
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabPayment Entry",
+      "type": "table"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "docstatus",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 1
+      },
+      {
+       "column": {
+        "column_name": "payment_type",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": "Receive"
+      },
+      {
+       "column": {
+        "column_name": "party_type",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": "Customer"
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "dimensions": [
+      {
+       "column_name": "party",
+       "data_type": "String",
+       "dimension_name": "customer"
+      }
+     ],
+     "measures": [
+      {
+       "data_type": "Date",
+       "expression": {
+        "expression": "max(posting_date)",
+        "type": "expression"
+       },
+       "measure_name": "last_payment_date"
+      }
+     ],
+     "type": "summarize"
+    }
+   ],
+   "sort_order": 1,
+   "title": "Last Payment by Customer",
+   "use_live_connection": 1,
+   "workbook": "payments"
+  },
+  "payments-receivable-ledger": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "payments-receivable-ledger",
+   "operations": [
+    {
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabPayment Ledger Entry",
+      "type": "table"
+     },
+     "type": "source"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "delinked",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": 0
+      },
+      {
+       "column": {
+        "column_name": "account_type",
+        "type": "column"
+       },
+       "operator": "=",
+       "value": "Receivable"
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "join_condition": {
+      "left_column": {
+       "column_name": "party",
+       "type": "column"
+      },
+      "right_column": {
+       "column_name": "name",
+       "type": "column"
+      }
+     },
+     "join_type": "inner",
+     "select_columns": [
+      {
+       "column_name": "customer_group",
+       "type": "column"
+      },
+      {
+       "column_name": "territory",
+       "type": "column"
+      }
+     ],
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabCustomer",
+      "type": "table"
+     },
+     "type": "join"
+    },
+    {
+     "column_names": [
+      "name",
+      "posting_date",
+      "due_date",
+      "amount",
+      "voucher_type",
+      "against_voucher_type",
+      "against_voucher_no",
+      "party",
+      "company",
+      "customer_group",
+      "territory"
+     ],
+     "type": "select"
+    },
+    {
+     "data_type": "String",
+     "expression": {
+      "expression": "party",
+      "type": "expression"
+     },
+     "new_name": "customer",
+     "type": "mutate"
+    }
+   ],
+   "sort_order": 2,
+   "title": "Receivable Ledger",
+   "use_live_connection": 1,
+   "workbook": "payments"
+  },
+  "payments-receivables-by-month": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "payments-receivables-by-month",
+   "operations": [
+    {
+     "table": {
+      "query_name": "payments-receivable-ledger",
+      "type": "query",
+      "workbook": "payments"
+     },
+     "type": "source"
+    },
+    {
+     "dimensions": [
+      {
+       "column_name": "posting_date",
+       "data_type": "Date",
+       "dimension_name": "period",
+       "granularity": "month"
+      }
+     ],
+     "measures": [
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum(amount)",
+        "type": "expression"
+       },
+       "measure_name": "movement"
+      },
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if(voucher_type == 'Sales Invoice', amount)",
+        "type": "expression"
+       },
+       "format": "currency",
+       "measure_name": "billed"
+      }
+     ],
+     "type": "summarize"
+    },
+    {
+     "data_type": "Decimal",
+     "expression": {
+      "expression": "movement.sum().over(ibis.cumulative_window(order_by=period))",
+      "type": "expression"
+     },
+     "new_name": "ar_balance",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Decimal",
+     "expression": {
+      "expression": "billed.sum().over(ibis.window(order_by=period, preceding=2, following=0))",
+      "type": "expression"
+     },
+     "new_name": "billed_3m",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Decimal",
+     "expression": {
+      "expression": "ar_balance / billed_3m * 91",
+      "type": "expression"
+     },
+     "new_name": "dso_days",
+     "type": "mutate"
+    },
+    {
+     "filters": [
+      {
+       "expression": {
+        "expression": "period.between(date_sub(month_start(today()), 12, 'month'), date_sub(month_start(today()), 1, 'day'))",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "column_names": [
+      "period",
+      "ar_balance",
+      "billed",
+      "dso_days"
+     ],
+     "type": "select"
+    },
+    {
+     "column": {
+      "column_name": "period",
+      "type": "column"
+     },
+     "direction": "asc",
+     "type": "order_by"
+    }
+   ],
+   "sort_order": 5,
+   "title": "Receivables by Month",
+   "use_live_connection": 1,
+   "workbook": "payments"
+  },
+  "payments-receivables-outstanding": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "payments-receivables-outstanding",
+   "operations": [
+    {
+     "table": {
+      "query_name": "payments-receivable-ledger",
+      "type": "query",
+      "workbook": "payments"
+     },
+     "type": "source"
+    },
+    {
+     "data_type": "Integer",
+     "expression": {
+      "expression": "date_diff(today(), due_date, 'day')",
+      "type": "expression"
+     },
+     "new_name": "row_days_past_due",
+     "type": "mutate"
+    },
+    {
+     "dimensions": [
+      {
+       "column_name": "against_voucher_type",
+       "data_type": "String",
+       "dimension_name": "voucher_type"
+      },
+      {
+       "column_name": "against_voucher_no",
+       "data_type": "String",
+       "dimension_name": "voucher_no"
+      },
+      {
+       "column_name": "customer",
+       "data_type": "String",
+       "dimension_name": "customer"
+      },
+      {
+       "column_name": "customer_group",
+       "data_type": "String",
+       "dimension_name": "customer_group"
+      },
+      {
+       "column_name": "territory",
+       "data_type": "String",
+       "dimension_name": "territory"
+      },
+      {
+       "column_name": "company",
+       "data_type": "String",
+       "dimension_name": "company"
+      }
+     ],
+     "measures": [
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum(amount)",
+        "type": "expression"
+       },
+       "format": "currency",
+       "measure_name": "outstanding_amount"
+      },
+      {
+       "data_type": "Integer",
+       "expression": {
+        "expression": "max(row_days_past_due)",
+        "type": "expression"
+       },
+       "measure_name": "days_past_due"
+      },
+      {
+       "data_type": "Date",
+       "expression": {
+        "expression": "min(posting_date)",
+        "type": "expression"
+       },
+       "measure_name": "invoice_date"
+      }
+     ],
+     "type": "summarize"
+    },
+    {
+     "filters": [
+      {
+       "expression": {
+        "expression": "abs(outstanding_amount) > 0.5",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
+    },
+    {
+     "join_condition": {
+      "left_column": {
+       "column_name": "customer",
+       "type": "column"
+      },
+      "right_column": {
+       "column_name": "customer",
+       "type": "column"
+      }
+     },
+     "join_type": "left",
+     "select_columns": [
+      {
+       "column_name": "last_payment_date",
+       "type": "column"
+      }
+     ],
+     "table": {
+      "query_name": "payments-last-payment-by-customer",
+      "type": "query",
+      "workbook": "payments"
+     },
+     "type": "join"
+    },
+    {
+     "data_type": "String",
+     "expression": {
+      "expression": "case(days_past_due <= 0, 'Current', days_past_due <= 30, '1-30 days', days_past_due <= 60, '31-60 days', days_past_due <= 90, '61-90 days', '90+ days')",
+      "type": "expression"
+     },
+     "new_name": "aging_bucket",
+     "type": "mutate"
+    }
+   ],
+   "sort_order": 3,
+   "title": "Receivables Outstanding",
+   "use_live_connection": 1,
+   "workbook": "payments"
+  },
+  "payments-receivables-position": {
+   "folder": null,
+   "is_builder_query": 1,
+   "is_native_query": 0,
+   "is_script_query": 0,
+   "name": "payments-receivables-position",
+   "operations": [
+    {
+     "table": {
+      "query_name": "payments-receivable-ledger",
+      "type": "query",
+      "workbook": "payments"
+     },
+     "type": "source"
+    },
+    {
+     "dimensions": [
+      {
+       "column_name": "against_voucher_type",
+       "data_type": "String",
+       "dimension_name": "voucher_type"
+      },
+      {
+       "column_name": "against_voucher_no",
+       "data_type": "String",
+       "dimension_name": "voucher_no"
+      },
+      {
+       "column_name": "customer",
+       "data_type": "String",
+       "dimension_name": "customer"
+      }
+     ],
+     "measures": [
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if(posting_date <= today(), amount)",
+        "type": "expression"
+       },
+       "format": "currency",
+       "measure_name": "balance_now"
+      },
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if(posting_date <= date_sub(today(), 7, 'day'), amount)",
+        "type": "expression"
+       },
+       "format": "currency",
+       "measure_name": "balance_last_week"
+      },
+      {
+       "data_type": "Date",
+       "expression": {
+        "expression": "max(due_date)",
+        "type": "expression"
+       },
+       "measure_name": "due_on"
+      }
+     ],
+     "type": "summarize"
+    },
+    {
+     "dimensions": [],
+     "measures": [
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum(balance_now)",
+        "type": "expression"
+       },
+       "format": "currency",
+       "measure_name": "total_now"
+      },
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum(balance_last_week)",
+        "type": "expression"
+       },
+       "format": "currency",
+       "measure_name": "total_last_week"
+      },
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if((due_on < today()) & (balance_now > 0.5), balance_now)",
+        "type": "expression"
+       },
+       "format": "currency",
+       "measure_name": "overdue_now"
+      },
+      {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum_if((due_on < date_sub(today(), 7, 'day')) & (balance_last_week > 0.5), balance_last_week)",
+        "type": "expression"
+       },
+       "format": "currency",
+       "measure_name": "overdue_last_week"
+      }
+     ],
+     "type": "summarize"
+    },
+    {
+     "data_type": "Decimal",
+     "expression": {
+      "expression": "overdue_now / total_now",
+      "type": "expression"
+     },
+     "new_name": "overdue_share",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Decimal",
+     "expression": {
+      "expression": "overdue_last_week / total_last_week",
+      "type": "expression"
+     },
+     "new_name": "overdue_share_last_week",
+     "type": "mutate"
+    }
+   ],
+   "sort_order": 4,
+   "title": "Receivables Position",
+   "use_live_connection": 1,
+   "workbook": "payments"
+  }
+ },
+ "title": "Receivables"
+}
