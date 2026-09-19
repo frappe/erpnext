@@ -148,7 +148,19 @@ frappe.ui.form.on("Stock Entry", {
 			};
 		});
 
-		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
+		frm.accounting_dimensions_ready = erpnext.accounts.dimensions
+			.setup_dimension_filters(frm, frm.doctype)
+			.then(({ message }) => {
+				const dimensions = message[0].filter(({ document_type }) => document_type !== "Project");
+				dimensions.forEach(({ fieldname }) => {
+					if (frappe.meta.has_field("Stock Entry Detail", fieldname)) {
+						frm.cscript[fieldname] = (doc, cdt, cdn) => {
+							erpnext.utils.copy_value_in_all_rows(doc, cdt, cdn, "items", fieldname);
+						};
+					}
+				});
+				return dimensions;
+			});
 
 		frappe.db.get_single_value("Stock Settings", "disable_serial_no_and_batch_selector").then((value) => {
 			if (value) {
@@ -1006,8 +1018,15 @@ frappe.ui.form.on("Stock Entry", {
 });
 
 frappe.ui.form.on("Stock Entry Detail", {
-	items_add(frm, cdt, cdn) {
+	async items_add(frm, cdt, cdn) {
 		let item = frappe.get_doc(cdt, cdn);
+		const dimensions = await frm.accounting_dimensions_ready;
+		(dimensions || []).forEach(({ fieldname }) => {
+			if (frm.doc[fieldname] && !item[fieldname] && frappe.meta.has_field(cdt, fieldname)) {
+				frappe.model.set_value(cdt, cdn, fieldname, frm.doc[fieldname]);
+			}
+		});
+
 		if (item.is_finished_item) {
 			frm.events.set_fg_completed_qty(frm);
 		}
