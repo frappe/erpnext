@@ -6,6 +6,7 @@
  "engine": "InnoDB",
  "field_order": [
   "production_item",
+  "original_item",
   "item_name",
   "fg_warehouse",
   "parent_item_code",
@@ -153,6 +154,14 @@
    "read_only": 1
   },
   {
+   "fieldname": "original_item",
+   "fieldtype": "Link",
+   "label": "Original Item",
+   "no_copy": 1,
+   "options": "Item",
+   "read_only": 1
+  },
+  {
    "fieldname": "indent",
    "fieldtype": "Int",
    "label": "Indent"
@@ -278,7 +287,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-08-12 00:00:00.000000",
+ "modified": "2026-09-07 16:36:55.120844",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan Sub Assembly Item",

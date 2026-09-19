@@ -23,6 +23,7 @@ class ProductionPlanSubAssemblyItem(Document):
 		indent: DF.Int
 		item_name: DF.Data | None
 		ordered_qty: DF.Float
+		original_item: DF.Link | None
 		parent: DF.Data
 		parent_item_code: DF.Link | None
 		parentfield: DF.Data
