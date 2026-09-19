@@ -32,9 +32,10 @@
    "is_default_module": 0,
    "keep_closed": 0,
    "label": "Dashboard",
-   "link_to": "Selling",
-   "link_type": "Dashboard",
+   "link_to": "insights-dashboard",
+   "link_type": "Page",
    "open_in_new_tab": 0,
+   "route": "selling",
    "show_arrow": 0,
    "type": "Link"
   },
@@ -943,7 +944,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-08-16 00:00:00.000000",
+ "modified": "2026-09-19 21:30:00.000000",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling",

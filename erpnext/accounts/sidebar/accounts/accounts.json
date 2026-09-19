@@ -799,9 +799,10 @@
    "is_default_module": 0,
    "keep_closed": 0,
    "label": "Dashboard",
-   "link_to": "Accounts",
-   "link_type": "Dashboard",
+   "link_to": "insights-dashboard",
+   "link_type": "Page",
    "open_in_new_tab": 0,
+   "route": "accounts",
    "show_arrow": 0,
    "type": "Link"
   },
@@ -1180,9 +1181,10 @@
    "is_default_module": 0,
    "keep_closed": 0,
    "label": "Dashboard",
-   "link_to": "Payments",
-   "link_type": "Dashboard",
+   "link_to": "insights-dashboard",
+   "link_type": "Page",
    "open_in_new_tab": 0,
+   "route": "payments",
    "show_arrow": 0,
    "type": "Link"
   },
@@ -1848,7 +1850,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-09-01 17:33:21.459367",
+ "modified": "2026-09-19 21:30:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts",
