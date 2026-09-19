@@ -5,7 +5,7 @@
 import frappe
 from frappe import _, scrub
 from frappe.model.document import Document
-from frappe.utils import escape_html, flt, nowdate
+from frappe.utils import cint, escape_html, flt, nowdate
 from frappe.utils.background_jobs import enqueue, is_job_enqueued
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
@@ -33,14 +33,40 @@ class OpeningInvoiceCreationTool(Document):
 		invoice_type: DF.Literal["Sales", "Purchase"]
 		invoices: DF.Table[OpeningInvoiceCreationToolItem]
 		project: DF.Link | None
+		status: DF.Literal["Pending", "In Progress", "Success", "Partial Success", "Error"]
 	# end: auto-generated types
+
+	def validate(self):
+		if self.get_doc_before_save() and self.get_doc_before_save().status != "Pending":
+			frappe.throw(_("Started import runs cannot be changed."))
+
+	def on_trash(self):
+		frappe.db.delete("Opening Invoice Creation Log", {"opening_invoice_creation_tool": self.name})
 
 	def onload(self):
 		"""Load the Opening Invoice summary"""
-		summary, max_count = self.get_opening_invoice_summary()
-		self.set_onload("opening_invoices_summary", summary)
-		self.set_onload("max_count", max_count)
+		if self.is_new() or self.status == "Pending":
+			summary, max_count = self.get_opening_invoice_summary()
+			self.set_onload("opening_invoices_summary", summary)
+			self.set_onload("max_count", max_count)
+		self.set_onload("import_result_summary", self.get_import_result_summary())
 		self.set_onload("temporary_opening_account", get_temporary_opening_account(self.company))
+
+	def get_import_result_summary(self):
+		if self.is_new() or self.status not in ("Success", "Partial Success", "Error"):
+			return None
+
+		result = frappe.get_all(
+			"Opening Invoice Creation Log",
+			filters={"opening_invoice_creation_tool": self.name},
+			fields=[{"COUNT": "*", "as": "total"}, {"SUM": "success", "as": "successes"}],
+		)[0]
+		successes = cint(result.successes)
+		return {
+			"total": cint(result.total),
+			"successes": successes,
+			"failures": cint(result.total) - successes,
+		}
 
 	def get_opening_invoice_summary(self):
 		def prepare_invoice_summary(doctype, invoices):
@@ -144,33 +170,26 @@ class OpeningInvoiceCreationTool(Document):
 				)
 			)
 
-	def get_invoices(self):
-		invoices = []
-		for row in self.invoices:
-			if not row:
-				continue
-			self.set_missing_values(row)
-			self.validate_mandatory_invoice_fields(row)
-			invoice = self.get_invoice_dict(row)
-			company_details = (
-				frappe.get_cached_value(
-					"Company", self.company, ["default_currency", "default_letter_head"], as_dict=1
-				)
-				or {}
+	def get_invoice(self, row):
+		self.set_missing_values(row)
+		self.validate_mandatory_invoice_fields(row)
+		invoice = self.get_invoice_dict(row)
+		company_details = (
+			frappe.get_cached_value(
+				"Company", self.company, ["default_currency", "default_letter_head"], as_dict=1
 			)
+			or {}
+		)
 
-			default_currency = frappe.db.get_value(row.party_type, row.party, "default_currency")
-
-			if company_details:
-				invoice.update(
-					{
-						"currency": default_currency or company_details.get("default_currency"),
-						"letter_head": company_details.get("default_letter_head"),
-					}
-				)
-			invoices.append(invoice)
-
-		return invoices
+		default_currency = frappe.db.get_value(row.party_type, row.party, "default_currency")
+		if company_details:
+			invoice.update(
+				{
+					"currency": default_currency or company_details.get("default_currency"),
+					"letter_head": company_details.get("default_letter_head"),
+				}
+			)
+		return invoice
 
 	def add_party(self, party_type, party):
 		party_doc = frappe.new_doc(party_type)
@@ -254,17 +273,26 @@ class OpeningInvoiceCreationTool(Document):
 
 	@frappe.whitelist()
 	def make_invoices(self):
-		self.validate_company()
-		invoices = self.get_invoices()
-		if len(invoices) < 50:
-			return start_import(invoices)
+		self.check_permission("write")
+		frappe.db.sql(
+			"select name from `tabOpening Invoice Creation Tool` where name=%s for update", self.name
+		)
+		run = frappe.get_doc(self.doctype, self.name)
+		if run.status != "Pending":
+			frappe.throw(_("This import run has already started."))
+
+		run.validate_company()
+		total = len([row for row in run.invoices if row])
+		run.db_set("status", "In Progress", update_modified=False)
+		if total < 50:
+			return start_import(run.name)
 		else:
 			from frappe.utils.scheduler import is_scheduler_inactive
 
 			if is_scheduler_inactive() and not frappe.in_test:
 				frappe.throw(_("Scheduler is inactive. Cannot import data."), title=_("Scheduler Inactive"))
 
-			job_id = f"opening_invoice::{self.name}"
+			job_id = f"opening_invoice::{run.name}"
 
 			if not is_job_enqueued(job_id):
 				enqueue(
@@ -273,16 +301,32 @@ class OpeningInvoiceCreationTool(Document):
 					timeout=6000,
 					event="opening_invoice_creation",
 					job_id=job_id,
-					invoices=invoices,
+					run_name=run.name,
+					enqueue_after_commit=True,
 					now=frappe.conf.developer_mode or frappe.in_test,
 				)
 
 
-def start_import(invoices):
+@frappe.whitelist()
+def create_and_start_import(doc: str | dict):
+	"""Create a run without resolving party links, then process it immediately."""
+	run = frappe.get_doc(frappe.parse_json(doc))
+	if run.doctype != "Opening Invoice Creation Tool":
+		frappe.throw(_("Invalid import run."))
+
+	# Create Missing Party must run before Dynamic Link validation rejects new parties.
+	run.flags.ignore_links = True
+	run.insert()
+	return {"name": run.name, "invoices": run.make_invoices()}
+
+
+def start_import(run_name):
+	run = frappe.get_doc("Opening Invoice Creation Tool", run_name)
 	errors = 0
 	names = []
-	total = len(invoices)
-	for idx, d in enumerate(invoices):
+	rows = [row for row in run.invoices if row]
+	total = len(rows)
+	for idx, row in enumerate(rows):
 		# Scope each invoice to a savepoint so a failure only undoes that invoice.
 		# A plain rollback() would discard the whole transaction — including invoices
 		# imported earlier in this batch and the error logs of earlier failures (the
@@ -291,10 +335,10 @@ def start_import(invoices):
 		savepoint = f"opening_invoice_{frappe.generate_hash(length=8)}"
 		frappe.db.savepoint(savepoint)
 		is_last = idx == total - 1
+		frappe.clear_messages()
 		try:
-			invoice_number = None
-			if d.invoice_number:
-				invoice_number = d.invoice_number
+			d = run.get_invoice(row)
+			invoice_number = d.invoice_number
 			doc = frappe.get_doc(d)
 			doc.flags.ignore_mandatory = True
 			# the outstanding amount is entered inclusive of tax, so taxes must not
@@ -302,27 +346,65 @@ def start_import(invoices):
 			doc.flags.dont_auto_add_taxes = True
 			doc.insert(set_name=invoice_number)
 			doc.submit()
+			create_log(run.name, idx + 1, success=True, invoice=doc)
 			if not frappe.in_test:
 				frappe.db.commit()
 			names.append(doc.name)
-			publish(idx, total, d.doctype, errors=errors if is_last else None)
+			publish(
+				run,
+				idx,
+				total,
+				d.doctype,
+				errors=errors if is_last else None,
+				successes=idx + 1 - errors if is_last else None,
+			)
 		except Exception:
 			errors += 1
+			messages = frappe.get_message_log()
 			frappe.db.rollback(save_point=savepoint)
-			doc.log_error("Opening invoice creation failed")
-			publish(idx, total, d.doctype, errors=errors if is_last else None)
-	if errors:
-		frappe.msgprint(
-			_("You had {0} errors while creating opening invoices. Check {1} for more details").format(
-				errors, "<a href='/app/List/Error Log' class='variant-click'>Error Log</a>"
-			),
-			indicator="red",
-			title=_("Error Occurred"),
-		)
+			create_log(run.name, idx + 1, messages=messages, exception=frappe.get_traceback())
+			frappe.clear_messages()
+			publish(
+				run,
+				idx,
+				total,
+				"Sales Invoice" if run.invoice_type == "Sales" else "Purchase Invoice",
+				errors=errors if is_last else None,
+				successes=idx + 1 - errors if is_last else None,
+			)
+
+	successes = total - errors
+	if errors == total:
+		status = "Error"
+	elif errors:
+		status = "Partial Success"
+	else:
+		status = "Success"
+	run.db_set("status", status, update_modified=False)
+	frappe.msgprint(
+		_("Opening invoice creation completed: {0} succeeded, {1} failed.").format(successes, errors),
+		indicator="green" if not errors else "orange" if successes else "red",
+		title=_("Opening Invoice Creation Complete"),
+	)
 	return names
 
 
-def publish(index, total, doctype, errors=None):
+def create_log(run_name, source_row_index, success=False, invoice=None, messages=None, exception=None):
+	frappe.get_doc(
+		{
+			"doctype": "Opening Invoice Creation Log",
+			"opening_invoice_creation_tool": run_name,
+			"source_row_index": source_row_index,
+			"success": success,
+			"reference_type": invoice.doctype if invoice else None,
+			"reference_name": invoice.name if invoice else None,
+			"messages": frappe.as_json(messages) if messages else None,
+			"exception": exception,
+		}
+	).insert(ignore_permissions=True)
+
+
+def publish(run, index, total, doctype, errors=None, successes=None):
 	frappe.publish_realtime(
 		"opening_invoice_creation_progress",
 		dict(
@@ -331,8 +413,10 @@ def publish(index, total, doctype, errors=None):
 			count=index + 1,
 			total=total,
 			errors=errors,
+			successes=successes,
+			run_name=run.name,
 		),
-		user=frappe.session.user,
+		user=run.owner,
 	)
 
 

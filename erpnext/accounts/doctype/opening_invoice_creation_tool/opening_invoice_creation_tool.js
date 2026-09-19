@@ -16,6 +16,8 @@ frappe.ui.form.on("Opening Invoice Creation Tool", {
 		}
 
 		frappe.realtime.on("opening_invoice_creation_progress", (data) => {
+			// A new form has no server-assigned run name until Create Invoices starts it.
+			if (!frm.is_new() && data.run_name !== frm.doc.name) return;
 			if (!frm.doc.import_in_progress) {
 				frm.dashboard.reset();
 				frm.doc.import_in_progress = true;
@@ -27,20 +29,14 @@ frappe.ui.form.on("Opening Invoice Creation Tool", {
 						frm.page.clear_indicator();
 						frm.dashboard.hide_progress();
 
-						if (!data.errors) {
-							frm.clear_table("invoices");
-							frm.refresh_fields();
-							const message =
-								frm.doc.invoice_type == "Sales"
-									? __("Opening Sales Invoice(s) have been created.")
-									: __("Opening Purchase Invoice(s) have been created.");
-							frappe.show_alert({
-								message: message,
-								indicator: "green",
-							});
-						} else {
-							frm.refresh_fields();
-						}
+						frm.reload_doc();
+						frappe.show_alert({
+							message: __("{0} succeeded, {1} failed.", [
+								data.successes || 0,
+								data.errors || 0,
+							]),
+							indicator: data.errors ? "orange" : "green",
+						});
 					},
 					1500,
 					data.title
@@ -56,25 +52,50 @@ frappe.ui.form.on("Opening Invoice Creation Tool", {
 	},
 
 	refresh: function (frm) {
-		frm.disable_save();
+		if (frm.is_new()) {
+			// Keep the singleton workflow: start processing before unresolved parties are link-validated.
+			frm.disable_save();
+		}
+
+		if (!frm.is_new() && frm.doc.status !== "Pending") {
+			frm.disable_save();
+			frm.set_read_only();
+		}
 		frm.trigger("create_missing_party");
-		!frm.doc.import_in_progress && frm.trigger("make_dashboard");
+		if (["Success", "Partial Success", "Error"].includes(frm.doc.status)) {
+			frm.trigger("make_result_dashboard");
+		} else if ((frm.is_new() || frm.doc.status === "Pending") && !frm.doc.import_in_progress) {
+			frm.trigger("make_dashboard");
+		}
+		if (!frm.is_new() && frm.doc.status !== "Pending") {
+			frm.add_custom_button(__("View Result Logs"), () => {
+				frappe.route_options = { opening_invoice_creation_tool: frm.doc.name };
+				frappe.set_route("List", "Opening Invoice Creation Log");
+			});
+			return;
+		}
+
 		frm.page.set_primary_action(__("Create Invoices"), () => {
 			let btn_primary = frm.page.btn_primary.get(0);
-			let freeze_message;
-			if (frm.doc.invoice_type == "Sales") {
-				freeze_message = __("Creating Sales Invoices ...");
-			} else {
-				freeze_message = __("Creating Purchase Invoices ...");
+			const args = {
+				btn: $(btn_primary),
+				no_spinner: true,
+			};
+
+			if (frm.is_new()) {
+				return frappe
+					.xcall(
+						"erpnext.accounts.doctype.opening_invoice_creation_tool.opening_invoice_creation_tool.create_and_start_import",
+						{ doc: frm.doc },
+						undefined,
+						{ no_spinner: true }
+					)
+					.then((message) =>
+						frappe.set_route("Form", "Opening Invoice Creation Tool", message.name)
+					);
 			}
 
-			return frm.call({
-				doc: frm.doc,
-				btn: $(btn_primary),
-				method: "make_invoices",
-				freeze: 1,
-				freeze_message: freeze_message,
-			});
+			return frm.call({ ...args, doc: frm.doc, method: "make_invoices" });
 		});
 
 		frm.trigger("update_party_labels");
@@ -119,7 +140,7 @@ frappe.ui.form.on("Opening Invoice Creation Tool", {
 				},
 				callback: (r) => {
 					if (r.message) {
-						frm.doc.__onload.temporary_opening_account = r.message;
+						(frm.doc.__onload ??= {}).temporary_opening_account = r.message;
 						frm.trigger("update_invoice_table");
 					}
 				},
@@ -135,8 +156,7 @@ frappe.ui.form.on("Opening Invoice Creation Tool", {
 	},
 
 	make_dashboard: function (frm) {
-		let max_count = frm.doc.__onload.max_count;
-		let opening_invoices_summary = frm.doc.__onload.opening_invoices_summary;
+		let { max_count = {}, opening_invoices_summary = {} } = frm.doc.__onload || {};
 		if (!$.isEmptyObject(opening_invoices_summary)) {
 			let section = frm.dashboard.add_section(
 				frappe.render_template("opening_invoice_creation_tool_dashboard", {
@@ -155,10 +175,43 @@ frappe.ui.form.on("Opening Invoice Creation Tool", {
 		}
 	},
 
+	make_result_dashboard: function (frm) {
+		const summary = frm.doc.__onload?.import_result_summary;
+		if (!summary) return;
+		const status_theme = {
+			Success: "green",
+			"Partial Success": "amber",
+			Error: "red",
+		}[frm.doc.status];
+
+		frm.dashboard.add_section(
+			`<div class="d-flex align-items-center justify-content-between mb-4">
+				<span class="text-muted">${__("Opening Invoice Creation")}</span>
+				<span class="es-badge" data-theme="${status_theme}" data-variant="subtle">${__(frm.doc.status)}</span>
+			</div>
+			<div class="row">
+				<div class="col-sm-4">
+					<div class="text-muted mb-1">${__("Processed")}</div>
+					<div class="h4 mb-0">${summary.total}</div>
+				</div>
+				<div class="col-sm-4">
+					<div class="text-muted mb-1">${__("Succeeded")}</div>
+					<div class="h4 mb-0">${summary.successes}</div>
+				</div>
+				<div class="col-sm-4">
+					<div class="text-muted mb-1">${__("Failed")}</div>
+					<div class="h4 mb-0">${summary.failures}</div>
+				</div>
+			</div>`,
+			__("Import Result")
+		);
+	},
+
 	update_invoice_table: function (frm) {
+		const temporary_opening_account = frm.doc.__onload?.temporary_opening_account;
 		$.each(frm.doc.invoices, (idx, row) => {
-			if (!row.temporary_opening_account) {
-				row.temporary_opening_account = frm.doc.__onload.temporary_opening_account;
+			if (!row.temporary_opening_account && temporary_opening_account) {
+				row.temporary_opening_account = temporary_opening_account;
 			}
 
 			if (!row.cost_center) {
