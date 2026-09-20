@@ -1769,6 +1769,11 @@ def make_stock_in_entry(source_name: str, target_doc: str | dict | Document | No
 		remaining_transfer_qty = flt(source_doc.transfer_qty) - flt(source_doc.transferred_qty)
 		target_doc.qty = remaining_transfer_qty / flt(source_doc.conversion_factor)
 
+	precision_allowance = 1 / (10 ** frappe.get_precision("Stock Entry Detail", "transfer_qty"))
+
+	def has_qty_in_transit(source_doc):
+		return flt(source_doc.transfer_qty) - flt(source_doc.transferred_qty) >= precision_allowance
+
 	doclist = get_mapped_doc(
 		"Stock Entry",
 		source_name,
@@ -1787,7 +1792,7 @@ def make_stock_in_entry(source_name: str, target_doc: str | dict | Document | No
 					"batch_no": "batch_no",
 				},
 				"postprocess": update_item,
-				"condition": lambda doc: flt(doc.transfer_qty) - flt(doc.transferred_qty) > 0.00001,
+				"condition": has_qty_in_transit,
 			},
 		},
 		target_doc,
