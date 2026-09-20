@@ -323,6 +323,51 @@ class TestStockEntry(ERPNextTestSuite):
 		transit_entry.reload()
 		self.assertEqual(transit_entry.per_transferred, 100)
 
+	def test_end_transit_qty_with_uom_conversion(self):
+		"""transferred_qty is tracked in the stock UOM, so the end transit qty must be converted back."""
+		company = "_Test Company"
+		source_warehouse = "_Test Warehouse - _TC"
+		target_warehouse = "_Test Warehouse 1 - _TC"
+		transit_warehouse = get_in_transit_warehouse(company)
+
+		item_code = make_item(
+			"_Test Transit UOM Conversion Item",
+			{"is_stock_item": 1, "stock_uom": "Nos", "uoms": [{"uom": "Kg", "conversion_factor": 0.5}]},
+		).name
+
+		make_stock_entry(item_code=item_code, target=source_warehouse, qty=100, basic_rate=100)
+
+		transit_entry = make_stock_entry(
+			item_code=item_code,
+			source=source_warehouse,
+			target=transit_warehouse,
+			purpose="Material Transfer",
+			add_to_transit=1,
+			qty=10,
+			basic_rate=100,
+			do_not_save=True,
+		)
+		transit_entry.items[0].uom = "Kg"
+		transit_entry.items[0].conversion_factor = 0.5
+		transit_entry.save().submit()
+		self.assertEqual(transit_entry.items[0].transfer_qty, 5)
+
+		partial_entry = make_stock_in_entry(transit_entry.name)
+		partial_entry.to_warehouse = target_warehouse
+		partial_entry.items[0].qty = 4
+		partial_entry.items[0].t_warehouse = target_warehouse
+		partial_entry.save().submit()
+
+		remaining_entry = make_stock_in_entry(transit_entry.name)
+		self.assertEqual(remaining_entry.items[0].uom, "Kg")
+		self.assertEqual(remaining_entry.items[0].qty, 6)
+
+		remaining_entry.to_warehouse = target_warehouse
+		remaining_entry.items[0].t_warehouse = target_warehouse
+		remaining_entry.save().submit()
+
+		self.assertFalse(make_stock_in_entry(transit_entry.name).get("items"))
+
 	def test_material_receipt_gl_entry(self):
 		company = frappe.db.get_value("Warehouse", "Stores - TCP1", "company")
 
