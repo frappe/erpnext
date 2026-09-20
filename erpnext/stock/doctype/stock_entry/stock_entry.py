@@ -1766,7 +1766,8 @@ def make_stock_in_entry(source_name: str, target_doc: str | dict | Document | No
 				target_doc.t_warehouse = warehouse
 
 		target_doc.s_warehouse = source_doc.t_warehouse
-		target_doc.qty = source_doc.qty - source_doc.transferred_qty
+		remaining_transfer_qty = flt(source_doc.transfer_qty) - flt(source_doc.transferred_qty)
+		target_doc.qty = remaining_transfer_qty / flt(source_doc.conversion_factor)
 
 	doclist = get_mapped_doc(
 		"Stock Entry",
@@ -1786,7 +1787,7 @@ def make_stock_in_entry(source_name: str, target_doc: str | dict | Document | No
 					"batch_no": "batch_no",
 				},
 				"postprocess": update_item,
-				"condition": lambda doc: flt(doc.qty) - flt(doc.transferred_qty) > 0.00001,
+				"condition": lambda doc: flt(doc.transfer_qty) - flt(doc.transferred_qty) > 0.00001,
 			},
 		},
 		target_doc,
