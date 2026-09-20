@@ -1747,6 +1747,12 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 @frappe.whitelist()
 def make_stock_in_entry(source_name: str, target_doc: str | dict | Document | None = None):
+	qty_precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
+
+	def get_remaining_transfer_qty(source_doc):
+		remaining_qty = flt(source_doc.transfer_qty) - flt(source_doc.transferred_qty)
+		return flt(remaining_qty, qty_precision)
+
 	def set_missing_values(source, target):
 		target.stock_entry_type = "Material Transfer"
 		target.set_missing_values()
@@ -1766,13 +1772,7 @@ def make_stock_in_entry(source_name: str, target_doc: str | dict | Document | No
 				target_doc.t_warehouse = warehouse
 
 		target_doc.s_warehouse = source_doc.t_warehouse
-		remaining_transfer_qty = flt(source_doc.transfer_qty) - flt(source_doc.transferred_qty)
-		target_doc.qty = remaining_transfer_qty / flt(source_doc.conversion_factor)
-
-	precision_allowance = 1 / (10 ** frappe.get_precision("Stock Entry Detail", "transfer_qty"))
-
-	def has_qty_in_transit(source_doc):
-		return flt(source_doc.transfer_qty) - flt(source_doc.transferred_qty) >= precision_allowance
+		target_doc.qty = get_remaining_transfer_qty(source_doc) / flt(source_doc.conversion_factor)
 
 	doclist = get_mapped_doc(
 		"Stock Entry",
@@ -1792,7 +1792,7 @@ def make_stock_in_entry(source_name: str, target_doc: str | dict | Document | No
 					"batch_no": "batch_no",
 				},
 				"postprocess": update_item,
-				"condition": has_qty_in_transit,
+				"condition": lambda doc: get_remaining_transfer_qty(doc) > 0,
 			},
 		},
 		target_doc,
