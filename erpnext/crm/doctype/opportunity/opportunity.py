@@ -555,8 +555,13 @@ def make_opportunity_from_communication(
 ):
 	from erpnext.crm.doctype.lead.lead import make_lead_from_communication
 
+	# Communication grants read to `All` only for the owner and carries a has_permission hook, so doc=
+	# is what decides access.
+	frappe.has_permission("Communication", doc=communication, throw=True)
+
 	doc = frappe.get_doc("Communication", communication)
 
+	# make_lead_from_communication() checks, but is skipped when the email already references a Lead.
 	lead = doc.reference_name if doc.reference_doctype == "Lead" else None
 	if not lead:
 		lead = make_lead_from_communication(communication, ignore_communication_links=True)
