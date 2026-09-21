@@ -2409,6 +2409,24 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			sorted(get_serial_nos_from_bundle(package[rejected_warehouse])), sorted(serial_nos[7:])
 		)
 
+		pr.cancel()
+
+		self.assertEqual(
+			frappe.db.get_value(
+				"Bin", {"warehouse": transit_warehouse, "item_code": item_doc.name}, "actual_qty"
+			),
+			10,
+		)
+		self.assertEqual(
+			frappe.get_all(
+				"Serial No",
+				filters={"name": ("in", serial_nos), "warehouse": transit_warehouse},
+				pluck="name",
+				order_by="name",
+			),
+			sorted(serial_nos),
+		)
+
 	def test_internal_transfer_rejected_qty_for_batch_item(self):
 		"""A batch item rejected on an internal transfer leaves the in-transit warehouse with the
 		accepted material, and the outgoing package holds both."""
