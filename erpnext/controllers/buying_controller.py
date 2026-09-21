@@ -152,7 +152,7 @@ class BuyingController(SubcontractingController):
 						item.from_warehouse,
 						type_of_transaction="Outward",
 						do_not_submit=True,
-						qty=item.qty if self.is_internal_receipt() else 0,
+						qty=item.stock_qty if self.is_internal_receipt() else 0,
 						exclude_serial_nos=self.get_rejected_serial_nos(item)
 						if self.is_internal_receipt()
 						else None,
@@ -818,6 +818,20 @@ class BuyingController(SubcontractingController):
 	def get_source_warehouse_package(self, row, package):
 		if not (package and row.get("rejected_serial_and_batch_bundle") and self.is_internal_receipt()):
 			return package
+
+		if existing_package := frappe.db.get_value(
+			"Serial and Batch Bundle",
+			{
+				"voucher_type": self.doctype,
+				"voucher_no": self.name,
+				"voucher_detail_no": row.name,
+				"warehouse": row.from_warehouse,
+				"docstatus": 1,
+				"is_cancelled": 0,
+			},
+			"name",
+		):
+			return existing_package
 
 		return self.make_package_for_transfer(
 			package,
