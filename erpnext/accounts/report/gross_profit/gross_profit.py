@@ -734,7 +734,7 @@ class GrossProfitGenerator:
 	def get_returned_invoice_items(self):
 		si = frappe.qb.DocType("Sales Invoice")
 		si_item = frappe.qb.DocType("Sales Invoice Item")
-		returned_invoices = (
+		query = (
 			frappe.qb.from_(si)
 			.inner_join(si_item)
 			.on(si.name == si_item.parent)
@@ -751,8 +751,12 @@ class GrossProfitGenerator:
 				& (si.is_return == 1)
 				& si.posting_date.between(self.filters.from_date, self.filters.to_date)
 			)
-			.run(as_dict=1)
 		)
+
+		if self.filters.company:
+			query = query.where(si.company == self.filters.company)
+
+		returned_invoices = query.run(as_dict=1)
 
 		self.returned_invoices = frappe._dict()
 		self.legacy_returned_invoices = frappe._dict()
