@@ -478,8 +478,6 @@ class StockReconciliation(StockController):
 			frappe.db.set_value("Serial and Batch Entry", batch.name, update_values)
 
 	def remove_items_with_no_change(self):
-		from erpnext.stock.stock_ledger import get_stock_value_difference
-
 		"""Remove items if qty or rate is not changed"""
 		self.difference_amount = 0.0
 
@@ -516,11 +514,7 @@ class StockReconciliation(StockController):
 			)
 
 			if not item_dict.get("qty") and not item.qty and not item.valuation_rate and not item.current_qty:
-				difference_amount = get_stock_value_difference(
-					item.item_code, item.warehouse, self.posting_date, self.posting_time, self.name
-				)
-
-				if abs(difference_amount) > 0:
+				if abs(self.get_stranded_stock_value(item)) > 0:
 					return True
 
 			rate_precision = item.precision("valuation_rate")
@@ -806,12 +800,35 @@ class StockReconciliation(StockController):
 				)
 			)
 
-	def make_adjustment_entry(self, row, sl_entries):
-		from erpnext.stock.stock_ledger import get_stock_value_difference
+	def get_stranded_stock_value(self, row) -> float:
+		"""Stock value the ledger still carries for an item-warehouse that has no quantity on hand.
 
-		difference_amount = get_stock_value_difference(
+		This is what an adjustment entry writes off. The write-off is measured at item-warehouse
+		level, so it is only stranded value when nothing is left in that warehouse. ``current_qty``
+		alone does not say so: on a batch row it is the qty of the selected batch, so a row pointing
+		at an already empty batch while other batches of the same item still hold stock would
+		otherwise write off the valuation of the stock that remains.
+		"""
+		from erpnext.stock.stock_ledger import get_previous_sle, get_stock_value_difference
+
+		previous_sle = get_previous_sle(
+			{
+				"item_code": row.item_code,
+				"warehouse": row.warehouse,
+				"posting_date": self.posting_date,
+				"posting_time": self.posting_time,
+			}
+		)
+
+		if flt(previous_sle.get("qty_after_transaction")):
+			return 0.0
+
+		return get_stock_value_difference(
 			row.item_code, row.warehouse, self.posting_date, self.posting_time, self.name
 		)
+
+	def make_adjustment_entry(self, row, sl_entries):
+		difference_amount = self.get_stranded_stock_value(row)
 
 		if not difference_amount:
 			return

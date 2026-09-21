@@ -2085,6 +2085,136 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 
 		self.assertEqual(frappe.get_value("Serial No", serial_no, "status"), "Delivered")
 
+	def _make_batch_item(self, item_code, series):
+		return self.make_item(
+			item_code,
+			frappe._dict(
+				{
+					"is_stock_item": 1,
+					"has_batch_no": 1,
+					"create_new_batch": 1,
+					"batch_number_series": series,
+				}
+			),
+		).name
+
+	def test_zeroing_a_batch_does_not_make_an_adjustment_entry(self):
+		"""Emptying a batch that holds stock is an ordinary outward entry, not a value write-off."""
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		item_code = self._make_batch_item("Test Stock Reco Zero Batch Qty", "TSRZBQ-.#####")
+		warehouse = "_Test Warehouse - _TC"
+
+		se = make_stock_entry(item_code=item_code, target=warehouse, qty=5, basic_rate=50)
+		batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+
+		sr = create_stock_reconciliation(
+			item_code=item_code, warehouse=warehouse, qty=0, rate=0, do_not_save=1
+		)
+		sr.items[0].batch_no = batch_no
+		sr.items[0].use_serial_batch_fields = 1
+		sr.items[0].allow_zero_valuation_rate = 1
+		sr.save()
+		sr.submit()
+
+		sles = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_no": sr.name, "is_cancelled": 0},
+			fields=["actual_qty", "qty_after_transaction", "stock_value", "is_adjustment_entry"],
+		)
+
+		self.assertEqual(len(sles), 1)
+		self.assertEqual(sles[0].is_adjustment_entry, 0)
+		self.assertEqual(sles[0].actual_qty, -5)
+		self.assertEqual(sles[0].qty_after_transaction, 0)
+		self.assertEqual(sles[0].stock_value, 0)
+
+	def test_no_adjustment_entry_while_other_batches_hold_stock(self):
+		"""An adjustment entry writes the whole item + warehouse value off, so it must not be
+		emitted for a row that only points at an empty batch: the value it would strand belongs
+		to the batches that still hold stock."""
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		item_code = self._make_batch_item("Test Stock Reco Empty Batch Row", "TSREBR-.#####")
+		warehouse = "_Test Warehouse - _TC"
+
+		emptied = make_stock_entry(item_code=item_code, target=warehouse, qty=5, basic_rate=50)
+		emptied_batch = get_batch_from_bundle(emptied.items[0].serial_and_batch_bundle)
+		make_stock_entry(item_code=item_code, target=warehouse, qty=5, basic_rate=50)
+		make_stock_entry(
+			item_code=item_code,
+			source=warehouse,
+			qty=5,
+			batch_no=emptied_batch,
+			use_serial_batch_fields=1,
+		)
+
+		self.assertEqual(get_stock_balance(item_code, warehouse, with_valuation_rate=True), (5.0, 50.0))
+
+		sr = create_stock_reconciliation(
+			item_code=item_code, warehouse=warehouse, qty=0, rate=0, do_not_save=1
+		)
+		sr.items[0].batch_no = emptied_batch
+		sr.items[0].use_serial_batch_fields = 1
+		sr.items[0].allow_zero_valuation_rate = 1
+		sr.items[0].current_qty = 0
+		sr.items[0].current_valuation_rate = 0
+		sr.save()
+
+		# nothing is stranded while stock is on hand, so there is nothing for the row to post
+		self.assertRaises(frappe.ValidationError, sr.submit)
+
+		self.assertFalse(
+			frappe.db.exists("Stock Ledger Entry", {"voucher_no": sr.name, "is_adjustment_entry": 1})
+		)
+		self.assertEqual(get_stock_balance(item_code, warehouse, with_valuation_rate=True), (5.0, 50.0))
+
+	def test_adjustment_entry_writes_off_stranded_stock_value(self):
+		"""The write-off itself still happens once the item + warehouse has no quantity left."""
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		item_code = self._make_batch_item("Test Stock Reco Stranded Value", "TSRSV-.#####")
+		warehouse = "_Test Warehouse - _TC"
+
+		receipt = make_stock_entry(item_code=item_code, target=warehouse, qty=10, basic_rate=100)
+		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
+		issue = make_stock_entry(
+			item_code=item_code, source=warehouse, qty=10, batch_no=batch_no, use_serial_batch_fields=1
+		)
+
+		# strand 100 of value on the ledger: qty nets out, stock_value_difference does not
+		outgoing_sle = frappe.db.get_value(
+			"Stock Ledger Entry", {"voucher_no": issue.name, "is_cancelled": 0}, "name"
+		)
+		frappe.db.set_value(
+			"Stock Ledger Entry",
+			outgoing_sle,
+			"stock_value_difference",
+			flt(frappe.db.get_value("Stock Ledger Entry", outgoing_sle, "stock_value_difference")) + 100,
+			update_modified=False,
+		)
+
+		sr = create_stock_reconciliation(
+			item_code=item_code, warehouse=warehouse, qty=0, rate=0, do_not_save=1
+		)
+		sr.items[0].batch_no = batch_no
+		sr.items[0].use_serial_batch_fields = 1
+		sr.items[0].allow_zero_valuation_rate = 1
+		sr.save()
+		sr.submit()
+
+		sles = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_no": sr.name, "is_cancelled": 0},
+			fields=["actual_qty", "qty_after_transaction", "stock_value_difference", "is_adjustment_entry"],
+		)
+
+		self.assertEqual(len(sles), 1)
+		self.assertEqual(sles[0].is_adjustment_entry, 1)
+		self.assertEqual(sles[0].actual_qty, 0)
+		self.assertEqual(sles[0].qty_after_transaction, 0)
+		self.assertEqual(flt(sles[0].stock_value_difference), -100.0)
+
 
 def create_batch_item_with_batch(item_name, batch_id):
 	batch_item_doc = create_item(item_name, is_stock_item=1)
