@@ -152,8 +152,10 @@ class BuyingController(SubcontractingController):
 						item.from_warehouse,
 						type_of_transaction="Outward",
 						do_not_submit=True,
-						qty=item.qty,
-						exclude_serial_nos=self.get_rejected_serial_nos(item),
+						qty=item.qty if self.is_internal_receipt() else 0,
+						exclude_serial_nos=self.get_rejected_serial_nos(item)
+						if self.is_internal_receipt()
+						else None,
 					)
 				elif (
 					not self.is_new()
@@ -178,8 +180,6 @@ class BuyingController(SubcontractingController):
 					frappe.set_value("Serial and Batch Entry", sabe[0], "qty", item.qty)
 
 	def get_rejected_serial_nos(self, row) -> list:
-		"""Serial numbers received into the rejected warehouse; they do not belong to the package of
-		accepted material."""
 		if not flt(row.get("rejected_qty")):
 			return []
 
@@ -771,9 +771,11 @@ class BuyingController(SubcontractingController):
 					)
 				)
 
+	def is_internal_receipt(self) -> bool:
+		return self.doctype == "Purchase Receipt" and self.is_internal_transfer()
+
 	def get_source_warehouse_qty(self, row, accepted_qty):
-		"""Rejected material leaves the in-transit warehouse with the accepted material."""
-		if not (self.is_internal_transfer() and flt(row.rejected_qty)):
+		if not (self.is_internal_receipt() and flt(row.rejected_qty)):
 			return accepted_qty
 
 		if row.get("serial_and_batch_bundle") and not row.get("rejected_serial_and_batch_bundle"):
@@ -798,7 +800,7 @@ class BuyingController(SubcontractingController):
 					via_landed_cost_voucher=via_landed_cost_voucher,
 				)
 
-			if row.get("rejected_serial_and_batch_bundle"):
+			if row.get("rejected_serial_and_batch_bundle") and self.is_internal_receipt():
 				return frappe.db.get_value(
 					"Stock Ledger Entry",
 					{"voucher_detail_no": row.name, "warehouse": row.warehouse, "is_cancelled": 0},
@@ -808,9 +810,7 @@ class BuyingController(SubcontractingController):
 		return row.serial_and_batch_bundle
 
 	def get_source_warehouse_package(self, row, package):
-		"""Outward package holding the accepted and the rejected material, since the row package is
-		validated against the accepted qty alone."""
-		if not (package and row.get("rejected_serial_and_batch_bundle")):
+		if not (package and row.get("rejected_serial_and_batch_bundle") and self.is_internal_receipt()):
 			return package
 
 		return self.make_package_for_transfer(
