@@ -1020,6 +1020,11 @@ class BuyingController(SubcontractingController):
 						},
 					)
 
+					if self.is_internal_transfer() and self.is_return:
+						from_warehouse_sle.incoming_rate = get_rate_for_return(
+							self.doctype, self.name, d.item_code, self.return_against, item_row=d
+						)
+
 					source_reversal_sle = from_warehouse_sle
 
 			if flt(d.rejected_qty) != 0:
