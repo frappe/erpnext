@@ -115,7 +115,7 @@ class BaseManufactureStockEntry(BaseStockEntry):
 					"BOM", self.doc.bom_no, "default_target_warehouse"
 				)
 
-			row.qty = row.qty * self.doc.fg_completed_qty
+			row.qty = row.qty * flt(self.doc.fg_completed_qty)
 			if row.get("process_loss_per"):
 				row.qty -= flt(
 					row.qty * row.get("process_loss_per") / 100, self.doc.precision("fg_completed_qty")
@@ -589,9 +589,9 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			}
 		)
 		qty = (
-			(row.required_qty / self.wo_doc.qty) * self.doc.fg_completed_qty
+			(row.required_qty / self.wo_doc.qty) * flt(self.doc.fg_completed_qty)
 			if self.wo_doc
-			else flt(row.qty) * self.doc.fg_completed_qty
+			else flt(row.qty) * flt(self.doc.fg_completed_qty)
 		)
 		item_args["qty"] = ceil_qty_if_uom_has_whole_number(qty, row.stock_uom)
 		item_args["transfer_qty"] = item_args["qty"]
@@ -1126,7 +1126,7 @@ class RepackStockEntry(BaseManufactureStockEntry):
 
 		for row in bom_items:
 			row.s_warehouse = self.doc.from_warehouse
-			row.qty = row.qty * self.doc.fg_completed_qty
+			row.qty = row.qty * flt(self.doc.fg_completed_qty)
 			row.transfer_qty = row.qty
 			if not row.uom:
 				row.uom = row.stock_uom

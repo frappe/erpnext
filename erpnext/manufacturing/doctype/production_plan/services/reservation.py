@@ -180,8 +180,8 @@ def cancel_stock_reservation_entries(doc: str | Document, sre_list: str | list):
 	ProductionPlanStockReservation(doc).cancel(sre_list)
 
 
-def _load_production_plan(doc: str | Document) -> Document:
-	if isinstance(doc, str):
+def _load_production_plan(doc: str | dict | Document) -> Document:
+	if isinstance(doc, str | dict):
 		doc = parse_json(doc)
 		doc = frappe.get_doc("Production Plan", doc.get("name"))
 	return doc
