@@ -32,7 +32,7 @@ from erpnext.stock.get_item_details import (
 	get_item_warehouse_,
 )
 from erpnext.stock.stock_ledger import get_previous_sle
-from erpnext.stock.utils import get_incoming_rate
+from erpnext.stock.utils import _get_incoming_rate
 
 force_fields = [
 	"target_item_name",
@@ -197,7 +197,7 @@ class AssetCapitalization(StockController):
 				cumulative_qty += flt(d.stock_qty)
 				args = self.get_args_for_incoming_rate(d)
 				args["qty"] = -1 * cumulative_qty
-				cumulative_rate = flt(get_incoming_rate(args, raise_error_if_no_rate=False))
+				cumulative_rate = flt(_get_incoming_rate(args, raise_error_if_no_rate=False))
 				cumulative_value = cumulative_rate * cumulative_qty
 
 				row_value = cumulative_value - prev_cumulative_value
@@ -332,6 +332,8 @@ class AssetCapitalization(StockController):
 
 	@frappe.whitelist()
 	def set_warehouse_details(self):
+		self.check_permission("write")
+
 		for d in self.get("stock_items"):
 			if d.item_code and d.warehouse:
 				args = self.get_args_for_incoming_rate(d)
@@ -342,6 +344,8 @@ class AssetCapitalization(StockController):
 
 	@frappe.whitelist()
 	def set_asset_values(self):
+		self.check_permission("write")
+
 		for d in self.get("asset_items"):
 			if d.asset:
 				finance_book = d.get("finance_book") or self.get("finance_book")
@@ -640,8 +644,18 @@ class AssetCapitalization(StockController):
 			)
 
 
+def check_capitalization_access(company=None):
+	"""Every lookup in this file feeds the Asset Capitalization form, so that form is the boundary.
+
+	`company` is accepted so the call sites read the same as on develop, where it also narrows the
+	caller to their permitted companies. There is no Company Restriction on this branch.
+	"""
+	frappe.has_permission("Asset Capitalization", throw=True)
+
+
 @frappe.whitelist()
 def get_target_item_details(item_code: str | None = None, company: str | None = None) -> frappe._dict:
+	check_capitalization_access(company)
 	out = frappe._dict()
 
 	# Get Item Details
@@ -668,6 +682,7 @@ def get_target_item_details(item_code: str | None = None, company: str | None = 
 
 @frappe.whitelist()
 def get_target_asset_details(asset: str | None = None, company: str | None = None) -> frappe._dict:
+	check_capitalization_access(company)
 	out = frappe._dict()
 
 	# Get Asset Details
@@ -759,7 +774,7 @@ def get_warehouse_details(args):
 		frappe.has_permission("Stock Ledger Entry", throw=True)
 		out = {
 			"actual_qty": get_previous_sle(args).get("qty_after_transaction") or 0,
-			"valuation_rate": get_incoming_rate(args, raise_error_if_no_rate=False),
+			"valuation_rate": _get_incoming_rate(args, raise_error_if_no_rate=False),
 		}
 	return out
 
@@ -767,6 +782,8 @@ def get_warehouse_details(args):
 @frappe.whitelist()
 @erpnext.normalize_ctx_input(ItemDetailsCtx)
 def get_consumed_asset_details(ctx):
+	check_capitalization_access(ctx.get("company"))
+
 	out = frappe._dict()
 
 	asset_details = frappe._dict()
@@ -813,6 +830,8 @@ def get_consumed_asset_details(ctx):
 @frappe.whitelist()
 @erpnext.normalize_ctx_input(ItemDetailsCtx)
 def get_service_item_details(ctx):
+	check_capitalization_access(ctx.get("company"))
+
 	out = frappe._dict()
 
 	item = frappe._dict()
@@ -837,6 +856,8 @@ def get_service_item_details(ctx):
 def get_items_tagged_to_wip_composite_asset(params):
 	if isinstance(params, str):
 		params = json.loads(params)
+
+	check_capitalization_access(params.get("company") if isinstance(params, dict | frappe._dict) else None)
 
 	fields = [
 		"item_code",
