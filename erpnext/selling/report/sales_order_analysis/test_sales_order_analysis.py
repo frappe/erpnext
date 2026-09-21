@@ -3,7 +3,11 @@ from frappe.utils import add_days
 
 from erpnext.selling.doctype.sales_order.mapper import make_delivery_note, make_sales_invoice
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-from erpnext.selling.report.sales_order_analysis.sales_order_analysis import execute
+from erpnext.selling.report.sales_order_analysis.sales_order_analysis import (
+	AGGREGATED_FIELDS,
+	execute,
+	group_by_item,
+)
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -28,6 +32,11 @@ class TestSalesOrderAnalysis(ERPNextTestSuite):
 			if not do_not_submit:
 				so.submit()
 		return item, so
+
+	def make_item_row(self, company, qty):
+		row = frappe._dict(dict.fromkeys(AGGREGATED_FIELDS, 0))
+		row.update({"company": company, "item_code": "_Test Excavator", "uom": "Nos", "qty": qty})
+		return row
 
 	def add_uom(self, item_code, uom, conversion_factor):
 		item = frappe.get_doc("Item", item_code)
@@ -324,4 +333,18 @@ class TestSalesOrderAnalysis(ERPNextTestSuite):
 				"group_by_so": 1,
 				"group_by_item": 1,
 			},
+		)
+
+	def test_11_group_by_item_keeps_each_company_apart(self):
+		rows = [
+			self.make_item_row("_Test Company", 10),
+			self.make_item_row("_Test Company 1", 4),
+			self.make_item_row("_Test Company", 6),
+		]
+
+		grouped = group_by_item(rows)
+
+		self.assertEqual(
+			[(row["company"], row["qty"]) for row in grouped],
+			[("_Test Company", 16), ("_Test Company 1", 4)],
 		)
