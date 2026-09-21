@@ -796,6 +796,7 @@ def create_bulk_payment_entry_and_reconcile(
 				"deposit",
 				"withdrawal",
 				"bank_account",
+				"company",
 				"currency",
 				"unallocated_amount",
 				"date",
@@ -830,11 +831,7 @@ def create_bulk_payment_entry_and_reconcile(
 				"paid_from": paid_from,
 				"paid_to": paid_to,
 				"paid_amount": bank_transaction.unallocated_amount,
-				"base_paid_amount": bank_transaction.unallocated_amount,
 				"received_amount": bank_transaction.unallocated_amount,
-				"base_received_amount": bank_transaction.unallocated_amount,
-				"target_exchange_rate": 1,
-				"source_exchange_rate": 1,
 				"reference_date": bank_transaction.date,
 				"posting_date": bank_transaction.date,
 				"reference_no": (bank_transaction.reference_number or bank_transaction.description or "")[
@@ -842,6 +839,8 @@ def create_bulk_payment_entry_and_reconcile(
 				],
 			}
 		)
+
+		set_multi_currency_amounts(payment_entry_doc)
 
 		payment_entry_doc.insert()
 		payment_entry_doc.submit()
@@ -881,6 +880,7 @@ def create_payment_entry_and_reconcile(bank_transaction_name: str | int, payment
 			"doctype": "Payment Entry",
 		}
 	)
+	set_multi_currency_amounts(payment_entry)
 	payment_entry.insert()
 	payment_entry.submit()
 	transaction = reconcile_vouchers(
@@ -901,6 +901,33 @@ def create_payment_entry_and_reconcile(bank_transaction_name: str | int, payment
 		"transaction": transaction,
 		"payment_entry": payment_entry,
 	}
+
+
+def set_multi_currency_amounts(pe):
+	"""Set real exchange rates when the bank and party accounts differ in currency."""
+	company_currency = frappe.get_cached_value("Company", pe.company, "default_currency")
+	pe.paid_from_account_currency = frappe.get_cached_value("Account", pe.paid_from, "account_currency")
+	pe.paid_to_account_currency = frappe.get_cached_value("Account", pe.paid_to, "account_currency")
+
+	pe.source_exchange_rate = (
+		1.0
+		if pe.paid_from_account_currency == company_currency
+		else get_exchange_rate(pe.paid_from_account_currency, company_currency, pe.posting_date)
+	)
+	pe.target_exchange_rate = (
+		1.0
+		if pe.paid_to_account_currency == company_currency
+		else get_exchange_rate(pe.paid_to_account_currency, company_currency, pe.posting_date)
+	)
+
+	# derive the party-side amount from the authoritative bank-side amount; Payment Entry books any
+	# rounding residual to Exchange Gain/Loss during validation (set_exchange_gain_loss)
+	if pe.payment_type == "Receive" and pe.source_exchange_rate:
+		base_amount = flt(pe.received_amount) * pe.target_exchange_rate
+		pe.paid_amount = flt(base_amount / pe.source_exchange_rate, pe.precision("paid_amount"))
+	elif pe.payment_type == "Pay" and pe.target_exchange_rate:
+		base_amount = flt(pe.paid_amount) * pe.source_exchange_rate
+		pe.received_amount = flt(base_amount / pe.target_exchange_rate, pe.precision("received_amount"))
 
 
 @frappe.whitelist(methods=["GET"])
