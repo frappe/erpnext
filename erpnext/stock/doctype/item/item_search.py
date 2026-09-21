@@ -1,13 +1,15 @@
+import os
 import re
 import sqlite3
 
 import frappe
-from frappe.search.sqlite_search import SQLiteSearch
+from frappe.search.sqlite_search import SQLiteSearch, SQLiteSearchIndexMissingError
 
 MINIMUM_TERM_LENGTH = 3
 CANDIDATE_LIMIT = 25000
 LIKE_WILDCARDS = r"[%_]"
 QUEUE_PREFIX = "Item:"
+BARCODE_COLUMN = "barcodes"
 TOKENIZER = "trigram remove_diacritics 1"
 
 
@@ -38,19 +40,71 @@ class ItemSearch(SQLiteSearch):
 		self.INDEXABLE_DOCTYPES = {
 			"Item": {
 				"fields": [*plain, mapped],
-				"child_fields": {"barcodes": ["barcode"]},
 				"filters": {"disabled": 0, "has_variants": 0},
 			}
 		}
 		self.INDEX_SCHEMA = {
 			"tokenizer": TOKENIZER,
-			"text_fields": ["title", "content", *self._extra_text_fields(fieldnames)],
+			"text_fields": [
+				"title",
+				"content",
+				BARCODE_COLUMN,
+				*self._extra_text_fields(fieldnames),
+			],
 		}
+		self._barcodes = {}
 		super().__init__(db_name)
 
 	@staticmethod
 	def _extra_text_fields(fieldnames: list[str]) -> list[str]:
 		return [f for f in fieldnames if f not in ("item_code", "item_name")]
+
+	def index_exists(self) -> bool:
+		"""A table missing a searched column cannot answer for it, so it reports itself absent.
+
+		The searched fields come from the Item meta, so a site that adds one leaves an older
+		table incomplete, as does the barcode column this class fills itself. Callers fall back
+		and the builder replaces it. One connection answers this, because it runs on every save.
+		"""
+		if not os.path.exists(self.db_path):
+			return False
+
+		return set(self.schema["text_fields"]) <= self.get_indexed_columns()
+
+	def get_indexed_columns(self) -> set[str]:
+		"""Columns the built table carries, empty when there is no table."""
+		try:
+			connection = self._get_connection(read_only=True)
+		except SQLiteSearchIndexMissingError:
+			return set()
+
+		try:
+			return {row["name"] for row in connection.execute("PRAGMA table_info(search_fts)")}
+		except sqlite3.Error:
+			return set()
+		finally:
+			connection.close()
+
+	def get_documents_paginated(self, doctype, *args, **kwargs):
+		"""Preload the batch's barcodes: reading them per document would be one query each."""
+		documents = super().get_documents_paginated(doctype, *args, **kwargs)
+		self._barcodes = get_barcodes_by_item([document.name for document in documents])
+		return documents
+
+	def prepare_document(self, doc):
+		document = super().prepare_document(doc)
+		if document is None:
+			return None
+
+		document[BARCODE_COLUMN] = self.get_barcode_text(doc.name)
+		return document
+
+	def get_barcode_text(self, item_code: str) -> str:
+		"""Always a string: a text column left unset drops the document from the index entirely."""
+		if item_code in self._barcodes:
+			return self._barcodes[item_code]
+
+		return get_barcodes_by_item([item_code]).get(item_code, "")
 
 	def is_search_enabled(self) -> bool:
 		"""Off unless Stock Settings opts in: building reads every Item, which is not free."""
@@ -62,8 +116,8 @@ class ItemSearch(SQLiteSearch):
 	def get_candidate_item_codes(self, txt: str) -> list[str] | None:
 		"""Item codes that can match txt, a superset the caller must still recheck with LIKE.
 
-		Covers barcodes, declared as a child table source, so the framework reads them through
-		Item Barcode and reindexes the Item when one of them moves.
+		Covers barcodes, which item_query also searches: an Item the candidate list left out is
+		filtered away even when its barcode matches.
 		"""
 		if not self.is_search_enabled() or not self.index_exists():
 			return None
@@ -120,6 +174,35 @@ def build_match_query(txt: str) -> str | None:
 def quote_fragment(fragment: str) -> str:
 	escaped = fragment.replace('"', '""')
 	return f'"{escaped}"'
+
+
+def get_barcodes_by_item(item_codes: list[str]) -> dict[str, str]:
+	"""Barcodes of each item, joined into the one string the index column holds."""
+	if not item_codes:
+		return {}
+
+	rows = frappe.get_all(
+		"Item Barcode",
+		filters={"parent": ("in", item_codes), "parentfield": BARCODE_COLUMN},
+		fields=["parent", "barcode"],
+	)
+
+	barcodes = {}
+	for row in rows:
+		barcodes[row.parent] = f"{barcodes.get(row.parent, '')} {row.barcode}".strip()
+
+	return barcodes
+
+
+def reindex_item(doc, method=None):
+	"""Queue an Item on every save.
+
+	Item Barcode rows raise no document events of their own, so the Item save is the only signal
+	that one of them moved, and none of the Item's own indexed fields need have changed for that.
+	"""
+	search = ItemSearch()
+	if search.is_search_enabled() and search.index_exists():
+		search.index_doc("Item", doc.name)
 
 
 def get_item_search_candidates(txt: str) -> list[str] | None:
