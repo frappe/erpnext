@@ -11,7 +11,6 @@ from frappe.core.doctype.communication.email import make
 from frappe.desk.form.load import get_attachments
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
-from frappe.query_builder import Order
 from frappe.utils import get_url
 from frappe.utils.print_format import download_pdf
 from frappe.utils.user import get_user_fullname
@@ -687,32 +686,34 @@ def get_supplier_tag():
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_rfq_containing_supplier(doctype, txt, searchfield, start, page_len, filters):
-	rfq = frappe.qb.DocType("Request for Quotation")
-	rfq_supplier = frappe.qb.DocType("Request for Quotation Supplier")
+	rfq_filters = [
+		["docstatus", "=", 1],
+		["company", "=", filters.get("company")],
+	]
 
-	query = (
-		frappe.qb.from_(rfq)
-		.from_(rfq_supplier)
-		.select(rfq.name)
-		.distinct()
-		.select(rfq.transaction_date, rfq.company)
-		.where(
-			(rfq.name == rfq_supplier.parent)
-			& (rfq_supplier.supplier == filters.get("supplier"))
-			& (rfq.docstatus == 1)
-			& (rfq.company == filters.get("company"))
+	if frappe.has_permission("Request for Quotation", "read"):
+		rfq_filters.append(["Request for Quotation Supplier", "supplier", "=", filters.get("supplier")])
+	else:
+		parents = frappe.get_all(
+			"Request for Quotation Supplier",
+			filters={"supplier": filters.get("supplier"), "parenttype": "Request for Quotation"},
+			pluck="parent",
+			distinct=True,
 		)
-		.orderby(rfq.transaction_date, order=Order.asc)
-		.limit(page_len)
-		.offset(start)
-	)
+		rfq_filters.append(["name", "in", parents or [""]])
 
 	if txt:
-		query = query.where(rfq.name.like(f"%%{txt}%%"))
+		rfq_filters.append(["name", "like", f"%{txt}%"])
 
 	if filters.get("transaction_date"):
-		query = query.where(rfq.transaction_date == filters.get("transaction_date"))
+		rfq_filters.append(["transaction_date", "=", filters.get("transaction_date")])
 
-	rfq_data = query.run(as_dict=1)
-
-	return rfq_data
+	return frappe.get_list(
+		"Request for Quotation",
+		filters=rfq_filters,
+		fields=["name", "transaction_date", "company"],
+		group_by="name",
+		order_by="transaction_date asc",
+		limit_start=start,
+		limit_page_length=page_len,
+	)
