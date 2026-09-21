@@ -220,7 +220,7 @@ def get_linked_call_logs(doctype, docname):
 		log.show_call_button = 0
 		timeline_contents.append(
 			{
-				"icon": "call",
+				"icon": "phone",
 				"is_card": True,
 				"creation": log.creation,
 				"template": "call_link",

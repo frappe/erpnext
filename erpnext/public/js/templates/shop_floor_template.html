@@ -804,7 +804,7 @@
 							<div class="mes-materials-summary">
 								<span class="mes-materials-summary-row">
 									<span class="mes-materials-summary-left">
-										<span class="mes-materials-toggle">{{ frappe.utils.icon("es-line-down", "sm") }}</span>
+										<span class="mes-materials-toggle">{{ frappe.utils.icon("chevron-down", "sm") }}</span>
 										<span>{{ __("Materials") }}</span>
 										<span class="mes-materials-count">{{ slot.materials.length }}</span>
 										<span class="mes-materials-status-dots">
@@ -845,7 +845,7 @@
 					{% if (slot && slot.instructions) { %}
 						<div class="mes-instructions-inline" data-job-card="{{ frappe.utils.escape_html(slot.name) }}">
 							<div class="mes-instructions-summary">
-								<span class="mes-instructions-toggle">{{ frappe.utils.icon("es-line-down", "sm") }}</span>
+								<span class="mes-instructions-toggle">{{ frappe.utils.icon("chevron-down", "sm") }}</span>
 								<span>{{ __("Work Instructions") }}</span>
 							</div>
 							<div class="mes-instructions-body">
