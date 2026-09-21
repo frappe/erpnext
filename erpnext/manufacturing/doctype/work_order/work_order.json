@@ -6,6 +6,7 @@
  "creation": "2025-04-09 12:09:40.634472",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/work-order",
  "engine": "InnoDB",
  "field_order": [
   "item",
@@ -734,7 +735,7 @@
   }
  ],
  "grid_page_length": 50,
- "icon": "fa fa-cogs",
+ "icon": "factory",
  "idx": 1,
  "image_field": "image",
  "is_submittable": 1,

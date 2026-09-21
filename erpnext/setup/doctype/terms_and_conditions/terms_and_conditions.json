@@ -7,6 +7,7 @@
  "description": "Standard Terms and Conditions that can be added to Sales and Purchases. Examples: Validity of the offer, Payment Terms, Safety and Usage, etc.",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/terms-and-conditions",
  "engine": "InnoDB",
  "field_order": [
   "title",
@@ -86,7 +87,7 @@
    "label": "Copy Attachments to Transaction"
   }
  ],
- "icon": "icon-legal",
+ "icon": "file-text",
  "idx": 1,
  "links": [],
  "modified": "2026-09-16 11:42:07.000000",

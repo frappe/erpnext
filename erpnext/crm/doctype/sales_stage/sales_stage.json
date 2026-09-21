@@ -4,6 +4,7 @@
  "autoname": "field:stage_name",
  "creation": "2018-10-01 09:28:16.399518",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/sales_stage",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -17,6 +18,7 @@
    "unique": 1
   }
  ],
+ "icon": "milestone",
  "links": [],
  "modified": "2024-03-27 13:10:38.067960",
  "modified_by": "Administrator",

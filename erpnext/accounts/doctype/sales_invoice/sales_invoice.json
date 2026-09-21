@@ -4,6 +4,7 @@
  "autoname": "naming_series:",
  "creation": "2022-01-25 10:29:57.771398",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/sales-invoice",
  "engine": "InnoDB",
  "field_order": [
   "customer_section",
@@ -2355,7 +2356,7 @@
   }
  ],
  "grid_page_length": 50,
- "icon": "fa fa-file-text",
+ "icon": "receipt-text",
  "idx": 181,
  "is_submittable": 1,
  "links": [

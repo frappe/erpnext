@@ -3,6 +3,7 @@
  "autoname": "field:label",
  "creation": "2019-05-04 18:13:37.002352",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/accounting-dimensions",
  "engine": "InnoDB",
  "field_order": [
   "document_type",
@@ -49,6 +50,7 @@
    "options": "Accounting Dimension Detail"
   }
  ],
+ "icon": "layers",
  "links": [],
  "modified": "2024-03-27 13:05:56.890002",
  "modified_by": "Administrator",

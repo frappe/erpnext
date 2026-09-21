@@ -4,6 +4,7 @@
  "creation": "2014-07-11 11:33:42.547339",
  "doctype": "DocType",
  "document_type": "Document",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/landed-cost-voucher",
  "engine": "InnoDB",
  "field_order": [
   "naming_series",
@@ -159,7 +160,7 @@
   }
  ],
  "grid_page_length": 50,
- "icon": "icon-usd",
+ "icon": "ship",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],

@@ -6,6 +6,7 @@
  "creation": "2026-01-29 21:18:32.391385",
  "doctype": "DocType",
  "document_type": "Document",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/quotation",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -1133,7 +1134,7 @@
    "print_hide": 1
   }
  ],
- "icon": "fa fa-shopping-cart",
+ "icon": "file-text",
  "idx": 82,
  "is_submittable": 1,
  "links": [],

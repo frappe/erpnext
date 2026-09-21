@@ -7,6 +7,7 @@
  "description": "Heads (or groups) against which Accounting Entries are made and balances are maintained.",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/chart-of-accounts",
  "engine": "InnoDB",
  "field_order": [
   "properties",
@@ -200,7 +201,7 @@
    "options": "Account Category"
   }
  ],
- "icon": "fa fa-money",
+ "icon": "vault",
  "idx": 1,
  "is_tree": 1,
  "links": [],

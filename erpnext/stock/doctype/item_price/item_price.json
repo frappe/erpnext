@@ -6,6 +6,7 @@
  "description": "Log the selling and buying rate of an Item",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/item-price",
  "engine": "InnoDB",
  "field_order": [
   "item_code",
@@ -222,7 +223,7 @@
   }
  ],
  "grid_page_length": 50,
- "icon": "fa fa-flag",
+ "icon": "tag",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "links": [],

@@ -5,6 +5,7 @@
  "description": "Import Chart of Accounts from a csv file",
  "doctype": "DocType",
  "document_type": "Other",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/chart-of-accounts-importer",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -47,6 +48,7 @@
   }
  ],
  "hide_toolbar": 1,
+ "icon": "file-input",
  "in_create": 1,
  "issingle": 1,
  "links": [],

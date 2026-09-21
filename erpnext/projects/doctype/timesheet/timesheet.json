@@ -5,6 +5,7 @@
  "creation": "2013-02-28 17:57:33",
  "doctype": "DocType",
  "document_type": "Document",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/timesheets",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -311,7 +312,7 @@
    "label": "Billing"
   }
  ],
- "icon": "fa fa-clock-o",
+ "icon": "clock",
  "idx": 1,
  "is_submittable": 1,
  "links": [],

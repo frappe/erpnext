@@ -3,6 +3,7 @@
  "autoname": "naming_series:",
  "creation": "2019-07-11 16:03:13.681045",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/pick-list",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -276,6 +277,7 @@
    "show_dashboard": 1
   }
  ],
+ "icon": "list-checks",
  "is_submittable": 1,
  "links": [],
  "modified": "2026-07-06 18:17:18.000000",

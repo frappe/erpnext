@@ -3,6 +3,7 @@
  "autoname": "naming_series:",
  "creation": "2018-07-20 16:43:08.505978",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/payment-order",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -107,6 +108,7 @@
    "label": "Account"
   }
  ],
+ "icon": "send",
  "is_submittable": 1,
  "links": [],
  "modified": "2024-03-27 13:10:10.186727",

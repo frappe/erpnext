@@ -8,6 +8,7 @@
  "description": "Supplier of Goods or Services.",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/supplier",
  "engine": "InnoDB",
  "field_order": [
   "naming_series",
@@ -556,7 +557,7 @@
   }
  ],
  "grid_page_length": 50,
- "icon": "fa fa-user",
+ "icon": "truck",
  "idx": 370,
  "image_field": "image",
  "links": [

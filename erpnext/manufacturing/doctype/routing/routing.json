@@ -3,6 +3,7 @@
  "autoname": "field:routing_name",
  "creation": "2018-07-15 11:03:24.191613",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/routing",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -31,6 +32,7 @@
    "options": "BOM Operation"
   }
  ],
+ "icon": "route",
  "links": [],
  "modified": "2024-03-27 13:10:33.725991",
  "modified_by": "Administrator",

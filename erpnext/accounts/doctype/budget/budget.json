@@ -4,6 +4,7 @@
  "autoname": "naming_series:",
  "creation": "2016-05-16 11:42:29.632528",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/budgeting",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -330,6 +331,7 @@
   }
  ],
  "grid_page_length": 50,
+ "icon": "piggy-bank",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],

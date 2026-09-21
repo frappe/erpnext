@@ -6,6 +6,7 @@
  "creation": "2013-03-05 10:14:59",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/activity-type",
  "engine": "InnoDB",
  "field_order": [
   "activity_type",
@@ -44,7 +45,7 @@
    "label": "Disabled"
   }
  ],
- "icon": "icon-flag",
+ "icon": "tag",
  "idx": 1,
  "links": [],
  "modified": "2026-09-16 11:42:07.000000",

@@ -2,6 +2,7 @@
  "actions": [],
  "creation": "2018-02-26 17:39:11.249778",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/item-alternative",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -50,6 +51,7 @@
    "label": "Alternative Item Name"
   }
  ],
+ "icon": "replace",
  "links": [],
  "modified": "2024-03-27 13:09:53.809482",
  "modified_by": "Administrator",

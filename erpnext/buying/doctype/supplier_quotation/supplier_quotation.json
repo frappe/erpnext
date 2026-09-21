@@ -6,6 +6,7 @@
  "creation": "2013-05-21 16:16:45",
  "doctype": "DocType",
  "document_type": "Document",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/supplier-quotation",
  "engine": "InnoDB",
  "field_order": [
   "supplier_section",
@@ -943,7 +944,7 @@
   }
  ],
  "grid_page_length": 50,
- "icon": "fa fa-shopping-cart",
+ "icon": "file-text",
  "idx": 29,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,

@@ -5,6 +5,7 @@
  "autoname": "field:payment_term_name",
  "creation": "2017-08-10 15:24:54.876365",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/payment-terms",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -115,6 +116,7 @@
    "fieldtype": "Column Break"
   }
  ],
+ "icon": "calendar-clock",
  "links": [],
  "modified": "2026-09-16 11:42:07.000000",
  "modified_by": "Administrator",

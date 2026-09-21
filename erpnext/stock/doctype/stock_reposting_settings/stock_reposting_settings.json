@@ -5,6 +5,7 @@
  "beta": 1,
  "creation": "2021-10-01 10:56:30.814787",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/stock-reposting-settings",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -129,6 +130,7 @@
    "label": "Auto Repost Incorrect Valuation Entries (Weekly)"
   }
  ],
+ "icon": "settings",
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],

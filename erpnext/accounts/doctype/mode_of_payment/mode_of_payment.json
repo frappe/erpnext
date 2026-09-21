@@ -6,6 +6,7 @@
  "creation": "2012-12-04 17:49:20",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/mode-of-payment",
  "engine": "InnoDB",
  "field_order": [
   "mode_of_payment",
@@ -44,7 +45,7 @@
    "label": "Enabled"
   }
  ],
- "icon": "fa fa-credit-card",
+ "icon": "wallet",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "links": [],

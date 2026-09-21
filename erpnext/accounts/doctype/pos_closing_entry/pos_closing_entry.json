@@ -254,6 +254,7 @@
   }
  ],
  "grid_page_length": 50,
+ "icon": "book-lock",
  "is_submittable": 1,
  "links": [
   {

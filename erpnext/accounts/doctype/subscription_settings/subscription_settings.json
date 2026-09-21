@@ -2,6 +2,7 @@
  "actions": [],
  "creation": "2018-02-26 06:13:37.910139",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/subscription-settings",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -32,6 +33,7 @@
  ],
  "grid_page_length": 50,
  "hide_toolbar": 0,
+ "icon": "settings",
  "issingle": 1,
  "links": [],
  "modified": "2026-03-16 13:28:20.485964",

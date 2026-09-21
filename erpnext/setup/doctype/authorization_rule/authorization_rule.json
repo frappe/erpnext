@@ -5,6 +5,7 @@
  "creation": "2013-01-10 16:34:22",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/authorization-rule",
  "engine": "InnoDB",
  "field_order": [
   "transaction",
@@ -159,7 +160,7 @@
    "options": "User"
   }
  ],
- "icon": "fa fa-shield",
+ "icon": "shield-check",
  "idx": 1,
  "links": [],
  "modified": "2024-03-27 13:06:36.613880",

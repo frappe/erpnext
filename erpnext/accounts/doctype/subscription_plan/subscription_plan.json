@@ -4,6 +4,7 @@
  "autoname": "field:plan_name",
  "creation": "2018-02-24 11:31:23.066506",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/subscription-plan",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -148,6 +149,7 @@
    "label": "Product Price ID"
   }
  ],
+ "icon": "calendar-sync",
  "links": [],
  "modified": "2024-03-27 13:10:47.998597",
  "modified_by": "Administrator",
