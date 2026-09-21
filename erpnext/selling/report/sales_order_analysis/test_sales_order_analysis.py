@@ -9,12 +9,13 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestSalesOrderAnalysis(ERPNextTestSuite):
-	def create_sales_order(self, transaction_date, do_not_save=False, do_not_submit=False):
+	def create_sales_order(self, transaction_date, do_not_save=False, do_not_submit=False, qty=10, uom=None):
 		item = create_item(item_code="_Test Excavator", is_stock_item=0)
 		so = make_sales_order(
 			transaction_date=transaction_date,
 			item=item.item_code,
-			qty=10,
+			qty=qty,
+			uom=uom,
 			rate=100000,
 			do_not_save=True,
 		)
@@ -27,6 +28,12 @@ class TestSalesOrderAnalysis(ERPNextTestSuite):
 			if not do_not_submit:
 				so.submit()
 		return item, so
+
+	def add_uom(self, item_code, uom, conversion_factor):
+		item = frappe.get_doc("Item", item_code)
+		if not any(row.uom == uom for row in item.uoms):
+			item.append("uoms", {"uom": uom, "conversion_factor": conversion_factor})
+			item.save()
 
 	def create_sales_invoice(self, so, do_not_save=False, do_not_submit=False):
 		sinv = make_sales_invoice(so.name)
@@ -255,3 +262,66 @@ class TestSalesOrderAnalysis(ERPNextTestSuite):
 		for key, val in expected_value.items():
 			with self.subTest(key=key, val=val):
 				self.assertEqual(data[0][key], val)
+
+	def test_08_group_by_item_across_sales_orders(self):
+		transaction_date = "2021-06-01"
+		item, so1 = self.create_sales_order(transaction_date)
+		self.create_sales_order(transaction_date, qty=4)
+
+		dn = self.create_delivery_note(so1, do_not_save=True)
+		dn.items[0].qty = 3
+		dn.save().submit()
+
+		columns, data, message, chart = execute(
+			{
+				"company": "_Test Company",
+				"from_date": "2021-06-01",
+				"to_date": "2021-06-30",
+				"group_by_item": 1,
+			}
+		)
+		expected_value = {
+			"item_code": item.item_code,
+			"uom": "Nos",
+			"qty": 14,
+			"delivered_qty": 3,
+			"pending_qty": 11,
+		}
+		self.assertEqual(len(data), 1)
+		for key, val in expected_value.items():
+			with self.subTest(key=key, val=val):
+				self.assertEqual(data[0][key], val)
+
+		fieldnames = [column["fieldname"] for column in columns]
+		self.assertIn("uom", fieldnames)
+		self.assertNotIn("sales_order", fieldnames)
+
+	def test_09_group_by_item_keeps_each_uom_apart(self):
+		transaction_date = "2021-06-01"
+		item, so = self.create_sales_order(transaction_date)
+		self.add_uom(item.item_code, "Box", 10)
+		self.create_sales_order(transaction_date, qty=2, uom="Box")
+
+		columns, data, message, chart = execute(
+			{
+				"company": "_Test Company",
+				"from_date": "2021-06-01",
+				"to_date": "2021-06-30",
+				"group_by_item": 1,
+			}
+		)
+		self.assertEqual(len(data), 2)
+		self.assertEqual([(row["uom"], row["qty"]) for row in data], [("Box", 2), ("Nos", 10)])
+
+	def test_10_group_by_filters_cannot_be_combined(self):
+		self.assertRaises(
+			frappe.ValidationError,
+			execute,
+			{
+				"company": "_Test Company",
+				"from_date": "2021-06-01",
+				"to_date": "2021-06-30",
+				"group_by_so": 1,
+				"group_by_item": 1,
+			},
+		)
