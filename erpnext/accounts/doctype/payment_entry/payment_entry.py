@@ -2426,8 +2426,8 @@ def get_negative_outstanding_invoices(
 			{condition}
 		order by
 			posting_date, name
-		""".format(
-			**{
+		""".format_map(
+			{
 				"supplier_condition": supplier_condition,
 				"condition": condition,
 				"rounded_total_field": rounded_total_field,
