@@ -3,6 +3,7 @@
  "autoname": "field:loyalty_program_name",
  "creation": "2018-01-23 06:23:05.731431",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/loyalty-program",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -153,6 +154,7 @@
    "options": "Project"
   }
  ],
+ "icon": "gift",
  "links": [],
  "modified": "2026-08-21 23:11:44.144864",
  "modified_by": "Administrator",

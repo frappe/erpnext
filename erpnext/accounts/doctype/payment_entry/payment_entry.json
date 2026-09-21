@@ -5,6 +5,7 @@
  "autoname": "naming_series:",
  "creation": "2016-06-01 14:38:51.012597",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/payment-entry",
  "engine": "InnoDB",
  "field_order": [
   "type_of_payment",
@@ -784,6 +785,7 @@
   }
  ],
  "grid_page_length": 50,
+ "icon": "banknote",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [

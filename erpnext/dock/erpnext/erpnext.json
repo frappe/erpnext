@@ -56,7 +56,7 @@
   {
    "added": 0,
    "hidden": 0,
-   "icon": "building-2",
+   "icon": "building-complex",
    "link_to": "Manufacturing",
    "link_type": "Sidebar",
    "title": "Manufacturing"
@@ -142,7 +142,7 @@
    "title": "Subcontracting"
   }
  ],
- "modified": "2026-09-21 00:00:00.000000",
+ "modified": "2026-09-21 08:00:00.000000",
  "modified_by": "Administrator",
  "name": "erpnext",
  "owner": "Administrator",

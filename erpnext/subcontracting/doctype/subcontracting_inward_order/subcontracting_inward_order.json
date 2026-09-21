@@ -301,6 +301,7 @@
   }
  ],
  "grid_page_length": 50,
+ "icon": "package-plus",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],

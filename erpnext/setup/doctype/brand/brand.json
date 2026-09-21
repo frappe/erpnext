@@ -6,6 +6,7 @@
  "creation": "2013-02-22 01:27:54",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/brand",
  "engine": "InnoDB",
  "field_order": [
   "brand",
@@ -52,7 +53,7 @@
    "label": "Image"
   }
  ],
- "icon": "fa fa-certificate",
+ "icon": "award",
  "idx": 1,
  "image_field": "image",
  "links": [],

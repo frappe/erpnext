@@ -3,6 +3,7 @@
  "autoname": "field:supplier",
  "creation": "2017-05-29 01:40:54.786555",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/supplier-scorecard",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -171,6 +172,7 @@
    "read_only": 1
   }
  ],
+ "icon": "award",
  "links": [],
  "modified": "2024-03-27 13:10:49.727302",
  "modified_by": "Administrator",
