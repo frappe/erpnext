@@ -2860,9 +2860,25 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 
 @frappe.whitelist()
 def get_received_items(reference_name: str, doctype: str, reference_fieldname: str):
-	reference_field = "inter_company_invoice_reference"
-	if doctype == "Purchase Order":
-		reference_field = "inter_company_order_reference"
+	# The only two targets this resolves a reference field for. Stating them rejects a caller
+	# supplied doctype that would otherwise be filtered on a column it does not have.
+	reference_fields = {
+		"Purchase Invoice": ("inter_company_invoice_reference", "Sales Invoice"),
+		"Purchase Order": ("inter_company_order_reference", "Sales Order"),
+	}
+	if doctype not in reference_fields:
+		frappe.throw(_("Invalid doctype {0}").format(doctype), frappe.PermissionError)
+
+	reference_field, source_doctype = reference_fields[doctype]
+
+	# The targets belong to the counterpart company and the caller may legitimately not read them, so
+	# the source document decides access. doc= brings User Permissions in.
+	frappe.has_permission(source_doctype, doc=reference_name, throw=True)
+
+	# `reference_fieldname` is selected as a column below and its value becomes the result key,
+	# so an unchecked one returns any field of the item table to the caller.
+	if not frappe.get_meta(doctype + " Item").has_field(reference_fieldname):
+		frappe.throw(_("Invalid field {0}").format(reference_fieldname), frappe.PermissionError)
 
 	filters = {
 		reference_field: reference_name,

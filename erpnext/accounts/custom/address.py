@@ -55,6 +55,10 @@ class ERPNextAddress(Address):
 
 @frappe.whitelist()
 def get_shipping_address(company, address=None):
+	# `company` is caller supplied and this returns that company's own registered address with every
+	# field. `select` rather than `read` on Company: Delivery, Maintenance, Purchase Manager and
+	# Stock Manager all fill in transactions that ask for this while holding no Company `read` row.
+	frappe.has_permission("Company", ptype="select", throw=True)
 	filters = [
 		["Dynamic Link", "link_doctype", "=", "Company"],
 		["Dynamic Link", "link_name", "=", company],
