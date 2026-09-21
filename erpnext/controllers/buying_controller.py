@@ -801,13 +801,16 @@ class BuyingController(SubcontractingController):
 				)
 
 			if row.get("rejected_serial_and_batch_bundle") and self.is_internal_receipt():
-				return frappe.db.get_value(
-					"Stock Ledger Entry",
-					{"voucher_detail_no": row.name, "warehouse": row.warehouse, "is_cancelled": 0},
-					"serial_and_batch_bundle",
-				)
+				return self.get_submitted_package(row, row.warehouse)
 
 		return row.serial_and_batch_bundle
+
+	def get_submitted_package(self, row, warehouse):
+		return frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_detail_no": row.name, "warehouse": warehouse, "is_cancelled": 0},
+			"serial_and_batch_bundle",
+		)
 
 	def get_source_warehouse_package(self, row, package):
 		if not (package and row.get("rejected_serial_and_batch_bundle") and self.is_internal_receipt()):
@@ -843,6 +846,8 @@ class BuyingController(SubcontractingController):
 		for d in self.get("items"):
 			if d.item_code not in stock_items:
 				continue
+
+			source_reversal_sle = None
 
 			if d.warehouse:
 				pr_qty = flt(flt(d.qty) * flt(d.conversion_factor), d.precision("stock_qty"))
@@ -922,11 +927,10 @@ class BuyingController(SubcontractingController):
 					):
 						serial_and_batch_bundle = None
 						if self.is_internal_transfer() and self.docstatus == 2:
-							serial_and_batch_bundle = frappe.db.get_value(
-								"Stock Ledger Entry",
-								{"voucher_detail_no": d.name, "warehouse": d.warehouse},
-								"serial_and_batch_bundle",
+							reversed_warehouse = (
+								d.from_warehouse if d.get("rejected_serial_and_batch_bundle") else d.warehouse
 							)
+							serial_and_batch_bundle = self.get_submitted_package(d, reversed_warehouse)
 
 						from_warehouse_sle = self.get_sl_entries(
 							d,
@@ -942,7 +946,7 @@ class BuyingController(SubcontractingController):
 							},
 						)
 
-						sl_entries.append(from_warehouse_sle)
+						source_reversal_sle = from_warehouse_sle
 
 			if flt(d.rejected_qty) != 0:
 				valuation_rate_for_rejected_item = 0.0
@@ -963,6 +967,9 @@ class BuyingController(SubcontractingController):
 						},
 					)
 				)
+
+			if source_reversal_sle:
+				sl_entries.append(source_reversal_sle)
 
 		self.make_sl_entries(
 			sl_entries,
