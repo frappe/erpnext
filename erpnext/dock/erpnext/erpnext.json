@@ -15,7 +15,7 @@
   },
   {
    "added": 0,
-   "hidden": 0,
+   "hidden": 1,
    "icon": "handshake",
    "link_to": "CRM",
    "link_type": "Sidebar",
@@ -71,7 +71,7 @@
   },
   {
    "added": 0,
-   "hidden": 0,
+   "hidden": 1,
    "icon": "headset",
    "link_to": "Support",
    "link_type": "Sidebar",
@@ -142,7 +142,7 @@
    "title": "Subcontracting"
   }
  ],
- "modified": "2026-09-02 14:58:17.082794",
+ "modified": "2026-09-21 00:00:00.000000",
  "modified_by": "Administrator",
  "name": "erpnext",
  "owner": "Administrator",
