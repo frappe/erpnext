@@ -755,12 +755,7 @@ class BuyingController(SubcontractingController):
 				)
 
 	def get_source_warehouse_qty(self, row, accepted_qty):
-		"""Stock qty that leaves the source warehouse.
-
-		On an internal transfer the rejected material was shipped out of the in-transit warehouse
-		as well, so it leaves the source warehouse along with the accepted material. Rows tracked
-		by a serial and batch package keep the qty of that package.
-		"""
+		"""Rejected material leaves the in-transit warehouse with the accepted material."""
 		if not (self.is_internal_transfer() and flt(row.rejected_qty)):
 			return accepted_qty
 
