@@ -151,69 +151,63 @@ def get_so_elapsed_time(data):
 	return so_elapsed_time
 
 
+AGGREGATED_FIELDS = (
+	"qty",
+	"delivered_qty",
+	"pending_qty",
+	"billed_qty",
+	"qty_to_bill",
+	"amount",
+	"delivered_qty_amount",
+	"billed_amount",
+	"pending_amount",
+)
+
+
 def prepare_data(data, so_elapsed_time, filters):
 	completed, pending = 0, 0
 
-	if filters.get("group_by_so"):
-		sales_order_map = {}
-
 	for row in data:
-		# sum data for chart
 		completed += row["billed_amount"]
 		pending += row["pending_amount"]
 
-		# prepare data for report view
 		row["qty_to_bill"] = flt(row["qty"]) - flt(row["billed_qty"])
-
 		row["delay"] = 0 if row["delay"] and row["delay"] < 0 else row["delay"]
-
 		row["time_taken_to_deliver"] = (
 			so_elapsed_time.get((row.sales_order, row.item_code))
 			if row["status"] in ("To Bill", "Completed")
 			else 0
 		)
 
-		if filters.get("group_by_so"):
-			so_name = row["sales_order"]
-
-			if so_name not in sales_order_map:
-				# create an entry
-				row_copy = copy.deepcopy(row)
-				sales_order_map[so_name] = row_copy
-			else:
-				# update existing entry
-				so_row = sales_order_map[so_name]
-				so_row["required_date"] = max(getdate(so_row["delivery_date"]), getdate(row["delivery_date"]))
-				so_row["delay"] = (
-					min(so_row["delay"], row["delay"])
-					if row["delay"] and so_row["delay"]
-					else so_row["delay"]
-				)
-
-				# sum numeric columns
-				fields = [
-					"qty",
-					"delivered_qty",
-					"pending_qty",
-					"billed_qty",
-					"qty_to_bill",
-					"amount",
-					"delivered_qty_amount",
-					"billed_amount",
-					"pending_amount",
-				]
-				for field in fields:
-					so_row[field] = flt(row[field]) + flt(so_row[field])
-
 	chart_data = prepare_chart_data(pending, completed)
 
 	if filters.get("group_by_so"):
-		data = []
-		for so in sales_order_map:
-			data.append(sales_order_map[so])
-		return data, chart_data
+		data = group_by_sales_order(data)
 
 	return data, chart_data
+
+
+def group_by_sales_order(data):
+	sales_order_map = {}
+
+	for row in data:
+		group = sales_order_map.get(row["sales_order"])
+		if not group:
+			sales_order_map[row["sales_order"]] = copy.deepcopy(row)
+			continue
+
+		group["required_date"] = max(getdate(group["delivery_date"]), getdate(row["delivery_date"]))
+		group["delay"] = (
+			min(group["delay"], row["delay"]) if row["delay"] and group["delay"] else group["delay"]
+		)
+		add_aggregated_fields(group, row)
+
+	return list(sales_order_map.values())
+
+
+def add_aggregated_fields(group, row):
+	for field in AGGREGATED_FIELDS:
+		group[field] = flt(group[field]) + flt(row[field])
 
 
 def prepare_chart_data(pending, completed):
@@ -227,7 +221,23 @@ def prepare_chart_data(pending, completed):
 
 
 def get_columns(filters):
-	columns = [
+	columns = get_sales_order_columns()
+
+	if not filters.get("group_by_so"):
+		columns += get_item_columns()
+
+	columns += get_quantity_columns() + get_amount_columns() + get_delivery_columns()
+
+	if not filters.get("group_by_so"):
+		columns.append(get_warehouse_column())
+
+	columns.append(get_company_column())
+
+	return columns
+
+
+def get_sales_order_columns():
+	return [
 		{"label": _("Date"), "fieldname": "date", "fieldtype": "Date", "width": 90},
 		{
 			"label": _("Sales Order"),
@@ -246,117 +256,129 @@ def get_columns(filters):
 		},
 	]
 
-	if not filters.get("group_by_so"):
-		columns.append(
-			{
-				"label": _("Item Code"),
-				"fieldname": "item_code",
-				"fieldtype": "Link",
-				"options": "Item",
-				"width": 100,
-			}
-		)
-		columns.append(
-			{"label": _("Description"), "fieldname": "description", "fieldtype": "Small Text", "width": 100}
-		)
 
-	columns.extend(
-		[
-			{
-				"label": _("Qty"),
-				"fieldname": "qty",
-				"fieldtype": "Float",
-				"width": 120,
-				"convertible": "qty",
-			},
-			{
-				"label": _("Delivered Qty"),
-				"fieldname": "delivered_qty",
-				"fieldtype": "Float",
-				"width": 120,
-				"convertible": "qty",
-			},
-			{
-				"label": _("Qty to Deliver"),
-				"fieldname": "pending_qty",
-				"fieldtype": "Float",
-				"width": 120,
-				"convertible": "qty",
-			},
-			{
-				"label": _("Billed Qty"),
-				"fieldname": "billed_qty",
-				"fieldtype": "Float",
-				"width": 80,
-				"convertible": "qty",
-			},
-			{
-				"label": _("Qty to Bill"),
-				"fieldname": "qty_to_bill",
-				"fieldtype": "Float",
-				"width": 80,
-				"convertible": "qty",
-			},
-			{
-				"label": _("Amount"),
-				"fieldname": "amount",
-				"fieldtype": "Currency",
-				"width": 110,
-				"options": "Company:company:default_currency",
-				"convertible": "rate",
-			},
-			{
-				"label": _("Billed Amount"),
-				"fieldname": "billed_amount",
-				"fieldtype": "Currency",
-				"width": 110,
-				"options": "Company:company:default_currency",
-				"convertible": "rate",
-			},
-			{
-				"label": _("Pending Amount"),
-				"fieldname": "pending_amount",
-				"fieldtype": "Currency",
-				"width": 130,
-				"options": "Company:company:default_currency",
-				"convertible": "rate",
-			},
-			{
-				"label": _("Amount Delivered"),
-				"fieldname": "delivered_qty_amount",
-				"fieldtype": "Currency",
-				"width": 100,
-				"options": "Company:company:default_currency",
-				"convertible": "rate",
-			},
-			{"label": _("Delivery Date"), "fieldname": "delivery_date", "fieldtype": "Date", "width": 120},
-			{"label": _("Delay (in Days)"), "fieldname": "delay", "fieldtype": "Data", "width": 100},
-			{
-				"label": _("Time Taken to Deliver"),
-				"fieldname": "time_taken_to_deliver",
-				"fieldtype": "Duration",
-				"width": 100,
-			},
-		]
-	)
-	if not filters.get("group_by_so"):
-		columns.append(
-			{
-				"label": _("Warehouse"),
-				"fieldname": "warehouse",
-				"fieldtype": "Link",
-				"options": "Warehouse",
-				"width": 100,
-			}
-		)
-	columns.append(
+def get_item_columns():
+	return [
+		get_item_code_column(),
+		{"label": _("Description"), "fieldname": "description", "fieldtype": "Small Text", "width": 100},
+	]
+
+
+def get_item_code_column():
+	return {
+		"label": _("Item Code"),
+		"fieldname": "item_code",
+		"fieldtype": "Link",
+		"options": "Item",
+		"width": 100,
+	}
+
+
+def get_quantity_columns():
+	return [
 		{
-			"label": _("Company"),
-			"fieldname": "company",
-			"fieldtype": "Link",
-			"options": "Company",
-			"width": 100,
-		}
-	)
+			"label": _("Qty"),
+			"fieldname": "qty",
+			"fieldtype": "Float",
+			"width": 120,
+			"convertible": "qty",
+		},
+		{
+			"label": _("Delivered Qty"),
+			"fieldname": "delivered_qty",
+			"fieldtype": "Float",
+			"width": 120,
+			"convertible": "qty",
+		},
+		{
+			"label": _("Qty to Deliver"),
+			"fieldname": "pending_qty",
+			"fieldtype": "Float",
+			"width": 120,
+			"convertible": "qty",
+		},
+		{
+			"label": _("Billed Qty"),
+			"fieldname": "billed_qty",
+			"fieldtype": "Float",
+			"width": 80,
+			"convertible": "qty",
+		},
+		{
+			"label": _("Qty to Bill"),
+			"fieldname": "qty_to_bill",
+			"fieldtype": "Float",
+			"width": 80,
+			"convertible": "qty",
+		},
+	]
 
-	return columns
+
+def get_amount_columns():
+	return [
+		{
+			"label": _("Amount"),
+			"fieldname": "amount",
+			"fieldtype": "Currency",
+			"width": 110,
+			"options": "Company:company:default_currency",
+			"convertible": "rate",
+		},
+		{
+			"label": _("Billed Amount"),
+			"fieldname": "billed_amount",
+			"fieldtype": "Currency",
+			"width": 110,
+			"options": "Company:company:default_currency",
+			"convertible": "rate",
+		},
+		{
+			"label": _("Pending Amount"),
+			"fieldname": "pending_amount",
+			"fieldtype": "Currency",
+			"width": 130,
+			"options": "Company:company:default_currency",
+			"convertible": "rate",
+		},
+		{
+			"label": _("Amount Delivered"),
+			"fieldname": "delivered_qty_amount",
+			"fieldtype": "Currency",
+			"width": 100,
+			"options": "Company:company:default_currency",
+			"convertible": "rate",
+		},
+	]
+
+
+def get_delivery_columns():
+	return [
+		{"label": _("Delivery Date"), "fieldname": "delivery_date", "fieldtype": "Date", "width": 120},
+		{"label": _("Delay (in Days)"), "fieldname": "delay", "fieldtype": "Data", "width": 100},
+		{
+			"label": _("Time Taken to Deliver"),
+			"fieldname": "time_taken_to_deliver",
+			"fieldtype": "Duration",
+			"width": 100,
+		},
+	]
+
+
+def get_warehouse_column():
+	return {
+		"label": _("Warehouse"),
+		"fieldname": "warehouse",
+		"fieldtype": "Link",
+		"options": "Warehouse",
+		"width": 100,
+	}
+
+
+def get_company_column():
+	return {
+		"label": _("Company"),
+		"fieldname": "company",
+		"fieldtype": "Link",
+		"options": "Company",
+		"width": 100,
+	}
