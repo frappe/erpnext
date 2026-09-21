@@ -483,7 +483,7 @@ class BuyingController(SubcontractingController):
 
 				net_rate = item.base_net_amount
 				if item.sales_incoming_rate:  # for internal transfer
-					net_rate = (flt(item.qty) or flt(item.rejected_qty)) * item.sales_incoming_rate
+					net_rate = self.get_internal_transfer_qty(item) * item.sales_incoming_rate
 
 				if (
 					not net_rate
@@ -773,6 +773,12 @@ class BuyingController(SubcontractingController):
 
 	def is_internal_receipt(self) -> bool:
 		return self.doctype == "Purchase Receipt" and self.is_internal_transfer()
+
+	def get_internal_transfer_qty(self, row) -> float:
+		if flt(row.qty) or not self.is_internal_receipt():
+			return flt(row.qty)
+
+		return flt(row.rejected_qty)
 
 	def get_source_warehouse_qty(self, row, accepted_qty):
 		if not (self.is_internal_receipt() and flt(row.rejected_qty)):
