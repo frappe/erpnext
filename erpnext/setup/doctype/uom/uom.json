@@ -6,6 +6,7 @@
  "creation": "2013-01-10 16:34:24",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/uom",
  "engine": "InnoDB",
  "field_order": [
   "uom_name",
@@ -72,7 +73,7 @@
    "options": "UOM Category"
   }
  ],
- "icon": "fa fa-compass",
+ "icon": "ruler",
  "idx": 1,
  "links": [],
  "modified": "2026-08-21 23:11:51.629905",

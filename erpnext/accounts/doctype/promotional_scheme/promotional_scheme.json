@@ -5,6 +5,7 @@
  "autoname": "Prompt",
  "creation": "2019-02-08 17:10:36.077402",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/promotional-scheme",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -279,6 +280,7 @@
    "options": "Promotional Scheme Product Discount"
   }
  ],
+ "icon": "megaphone",
  "links": [],
  "modified": "2025-08-20 11:48:23.231081",
  "modified_by": "Administrator",

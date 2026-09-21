@@ -3,6 +3,7 @@
  "autoname": "field:dimension_name",
  "creation": "2022-06-17 13:04:16.554051",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/inventory_dimension",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -180,6 +181,7 @@
    "label": "Validate Negative Stock"
   }
  ],
+ "icon": "layers",
  "index_web_pages_for_search": 1,
  "links": [],
  "modified": "2026-04-08 10:10:16.884388",

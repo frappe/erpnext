@@ -4,6 +4,7 @@
  "creation": "2020-04-09 01:32:51.332301",
  "doctype": "DocType",
  "document_type": "Document",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/journal-entry-template",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -85,6 +86,7 @@
    "label": "Multi Currency"
   }
  ],
+ "icon": "notebook-text-dashed",
  "links": [],
  "modified": "2024-03-27 13:09:58.814734",
  "modified_by": "Administrator",

@@ -4,6 +4,7 @@
  "description": "Settings for Selling Module",
  "doctype": "DocType",
  "document_type": "Other",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/selling-settings",
  "engine": "InnoDB",
  "field_order": [
   "customer_defaults_tab",
@@ -438,7 +439,7 @@
   }
  ],
  "grid_page_length": 50,
- "icon": "fa fa-cog",
+ "icon": "settings",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,

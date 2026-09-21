@@ -8,6 +8,7 @@
  "description": "An Item Group is a way to classify items based on types.",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/item-group",
  "engine": "InnoDB",
  "field_order": [
   "gs",
@@ -130,7 +131,7 @@
    "report_hide": 1
   }
  ],
- "icon": "fa fa-sitemap",
+ "icon": "boxes",
  "idx": 1,
  "image_field": "image",
  "is_tree": 1,

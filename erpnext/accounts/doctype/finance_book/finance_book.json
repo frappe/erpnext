@@ -5,6 +5,7 @@
  "creation": "2018-04-13 17:42:43.252224",
  "doctype": "DocType",
  "document_type": "Document",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/finance-book",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -18,7 +19,7 @@
    "unique": 1
   }
  ],
- "icon": "fa fa-book",
+ "icon": "book",
  "links": [],
  "modified": "2026-08-21 23:11:42.386104",
  "modified_by": "Administrator",

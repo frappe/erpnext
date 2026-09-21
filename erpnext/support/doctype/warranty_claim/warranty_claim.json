@@ -5,6 +5,7 @@
  "creation": "2013-01-10 16:34:30",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/warranty-claim",
  "engine": "InnoDB",
  "field_order": [
   "naming_series",
@@ -376,7 +377,7 @@
    "width": "150px"
   }
  ],
- "icon": "fa fa-bug",
+ "icon": "shield-alert",
  "idx": 1,
  "links": [],
  "modified": "2024-03-27 13:10:59.601423",

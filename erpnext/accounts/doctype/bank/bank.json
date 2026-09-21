@@ -6,6 +6,7 @@
  "creation": "2018-04-07 16:59:59.496668",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/bank",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -100,6 +101,7 @@
    "read_only": 1
   }
  ],
+ "icon": "landmark",
  "links": [],
  "modified": "2026-08-21 23:11:39.423431",
  "modified_by": "Administrator",

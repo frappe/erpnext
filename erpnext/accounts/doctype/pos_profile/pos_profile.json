@@ -4,6 +4,7 @@
  "autoname": "Prompt",
  "creation": "2013-05-24 12:15:51",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/pos-profile",
  "engine": "InnoDB",
  "field_order": [
   "company",
@@ -557,7 +558,7 @@
   }
  ],
  "grid_page_length": 50,
- "icon": "icon-cog",
+ "icon": "monitor",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "links": [

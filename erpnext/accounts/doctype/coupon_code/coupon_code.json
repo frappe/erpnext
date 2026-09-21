@@ -5,6 +5,7 @@
  "creation": "2018-01-22 14:34:39.701832",
  "doctype": "DocType",
  "document_type": "Other",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/coupon-code",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -124,6 +125,7 @@
    "label": "From External Ecomm Platform"
   }
  ],
+ "icon": "ticket-percent",
  "links": [],
  "modified": "2026-08-21 23:11:41.010871",
  "modified_by": "Administrator",

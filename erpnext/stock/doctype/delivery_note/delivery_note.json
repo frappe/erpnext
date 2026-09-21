@@ -6,6 +6,7 @@
  "creation": "2013-05-24 19:29:09",
  "doctype": "DocType",
  "document_type": "Document",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/delivery-note",
  "engine": "InnoDB",
  "field_order": [
   "naming_series",
@@ -1505,7 +1506,7 @@
    "print_hide": 1
   }
  ],
- "icon": "fa fa-truck",
+ "icon": "truck",
  "idx": 146,
  "is_submittable": 1,
  "links": [],

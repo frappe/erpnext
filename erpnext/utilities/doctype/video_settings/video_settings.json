@@ -33,6 +33,7 @@
    "options": "30 mins\n1 hr\n6 hrs\nDaily"
   }
  ],
+ "icon": "settings",
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],

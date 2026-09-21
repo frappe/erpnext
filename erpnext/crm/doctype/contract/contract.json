@@ -5,6 +5,7 @@
  "autoname": "CON-.YYYY.-.#####",
  "creation": "2018-04-12 06:32:04.582486",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/contract",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -255,6 +256,7 @@
   }
  ],
  "grid_page_length": 50,
+ "icon": "signature",
  "is_submittable": 1,
  "links": [],
  "modified": "2025-12-24 21:33:51.240497",

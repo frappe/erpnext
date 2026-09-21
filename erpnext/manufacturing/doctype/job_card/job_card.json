@@ -4,6 +4,7 @@
  "autoname": "naming_series:",
  "creation": "2026-03-31 21:06:16.282931",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/job-card",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -714,6 +715,7 @@
   }
  ],
  "grid_page_length": 50,
+ "icon": "clipboard-list",
  "is_submittable": 1,
  "links": [],
  "modified": "2026-08-28 12:00:00.000000",

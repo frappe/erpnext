@@ -7,6 +7,7 @@
  "description": "Manufacturers used in Items",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/manufacturer",
  "engine": "InnoDB",
  "field_order": [
   "short_name",
@@ -85,7 +86,7 @@
    "fieldtype": "Section Break"
   }
  ],
- "icon": "fa fa-certificate",
+ "icon": "factory",
  "links": [],
  "modified": "2026-08-21 23:11:44.296381",
  "modified_by": "Administrator",

@@ -5,6 +5,7 @@
  "creation": "2017-05-29 21:35:13.136357",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/bank-account",
  "engine": "InnoDB",
  "field_order": [
   "account_name",
@@ -227,6 +228,7 @@
   }
  ],
  "grid_page_length": 50,
+ "icon": "credit-card",
  "links": [
   {
    "group": "Transactions",

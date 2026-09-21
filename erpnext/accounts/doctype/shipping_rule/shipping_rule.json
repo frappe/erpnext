@@ -5,6 +5,7 @@
  "creation": "2013-06-25 11:48:03",
  "description": "Specify conditions to calculate shipping amount",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/shipping-rule",
  "engine": "InnoDB",
  "field_order": [
   "label",
@@ -146,7 +147,7 @@
    "options": "Project"
   }
  ],
- "icon": "fa fa-truck",
+ "icon": "truck",
  "idx": 1,
  "links": [],
  "modified": "2026-08-21 23:11:49.532098",

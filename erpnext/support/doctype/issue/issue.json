@@ -6,6 +6,7 @@
  "creation": "2013-02-01 10:36:25",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/issue",
  "email_append_to": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -390,7 +391,7 @@
    "read_only": 1
   }
  ],
- "icon": "fa fa-ticket",
+ "icon": "ticket",
  "idx": 7,
  "links": [],
  "modified": "2026-08-21 23:11:43.274229",
