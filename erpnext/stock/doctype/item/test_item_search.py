@@ -65,8 +65,7 @@ class TestItemSearchIndex(ERPNextTestSuite):
 		self.assertIn(ItemSearch, get_search_classes())
 
 	def test_a_barcode_added_after_the_build_is_searchable(self):
-		"""A barcode edit changes no other Item field. The framework reindexes anyway because
-		Item Barcode.barcode carries in_search_index, which makes it a related source."""
+		"""A barcode edit changes no Item field, so the Item save is the only signal there is."""
 		item = frappe.get_doc(
 			{
 				"doctype": "Item",
@@ -80,7 +79,6 @@ class TestItemSearchIndex(ERPNextTestSuite):
 
 		item.append("barcodes", {"barcode": "8809988776655"})
 		item.save()
-		update_doc_index(item)
 		index_docs_in_queue()
 		self.addCleanup(index_docs_in_queue)
 
@@ -109,9 +107,8 @@ class TestItemSearchIndex(ERPNextTestSuite):
 		self.assertFalse(ItemSearch.BUILD_VOCABULARY)
 		connection = self.search._get_connection(read_only=True)
 		try:
-			for table in ("search_vocabulary", "search_trigrams"):
-				count = connection.execute(f"SELECT count(*) FROM {table}").fetchone()[0]
-				self.assertEqual(count, 0, table)
+			self.assertEqual(connection.execute("SELECT count(*) FROM search_vocabulary").fetchone()[0], 0)
+			self.assertEqual(connection.execute("SELECT count(*) FROM search_trigrams").fetchone()[0], 0)
 		finally:
 			connection.close()
 
@@ -151,6 +148,27 @@ class TestItemSearchIndex(ERPNextTestSuite):
 				self.schema["text_fields"] = extra
 
 		return DriftedItemSearch()
+
+	def test_an_item_without_barcodes_is_still_indexed(self):
+		"""A text column left unset drops the document from the index entirely."""
+		frappe.get_doc(
+			{
+				"doctype": "Item",
+				"item_code": "ZZ-NO-BARCODE-3312",
+				"item_name": "No Barcode Probe",
+				"item_group": frappe.db.get_value("Item Group", {"is_group": 0}, "name"),
+				"stock_uom": frappe.db.get_value("UOM", {}, "name"),
+			}
+		).insert()
+		self.addCleanup(index_docs_in_queue)
+		index_docs_in_queue()
+
+		self.assertIn("ZZ-NO-BARCODE-3312", self.search.get_candidate_item_codes("3312"))
+
+	def test_a_drifted_schema_reports_the_index_as_absent(self):
+		"""A site that adds an Item search field leaves the built table a column short."""
+		self.assertTrue(self.search.index_exists())
+		self.assertFalse(self.drifted_search().index_exists())
 
 	def test_candidates_are_a_superset_of_the_scan(self):
 		"""The query re-filters, so extra candidates are safe but missing ones are not."""
