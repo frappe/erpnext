@@ -19,7 +19,7 @@ def execute(filters=None):
 
 	columns = get_columns(filters)
 	data = get_data(filters)
-	so_elapsed_time = get_so_elapsed_time(data)
+	so_elapsed_time = {} if filters.get("group_by_item") else get_so_elapsed_time(data)
 
 	if not data:
 		return [], [], None, []
@@ -36,6 +36,9 @@ def validate_filters(filters):
 		frappe.throw(_("From and To Dates are required."))
 	elif date_diff(to_date, from_date) < 0:
 		frappe.throw(_("To Date cannot be before From Date."))
+
+	if filters.get("group_by_so") and filters.get("group_by_item"):
+		frappe.throw(_("Group the report by Sales Order or by Item, not both."))
 
 
 def get_data(filters):
@@ -65,6 +68,7 @@ def get_data(filters):
 			so.status,
 			so.customer,
 			soi.item_code,
+			soi.uom,
 			delay.as_("delay_days"),
 			Case().when(so.status.isin(["Completed", "To Bill"]), 0).else_(delay).as_("delay"),
 			soi.qty,
@@ -183,6 +187,8 @@ def prepare_data(data, so_elapsed_time, filters):
 
 	if filters.get("group_by_so"):
 		data = group_by_sales_order(data)
+	elif filters.get("group_by_item"):
+		data = group_by_item(data)
 
 	return data, chart_data
 
@@ -205,6 +211,22 @@ def group_by_sales_order(data):
 	return list(sales_order_map.values())
 
 
+def group_by_item(data):
+	"""Key on UOM as well: quantities are in the line UOM, so two UOMs of one item cannot sum."""
+	item_map = {}
+
+	for row in data:
+		key = (row["item_code"], row["uom"])
+		group = item_map.get(key)
+		if not group:
+			item_map[key] = copy.deepcopy(row)
+			continue
+
+		add_aggregated_fields(group, row)
+
+	return sorted(item_map.values(), key=lambda row: (row["item_code"], row["uom"]))
+
+
 def add_aggregated_fields(group, row):
 	for field in AGGREGATED_FIELDS:
 		group[field] = flt(group[field]) + flt(row[field])
@@ -221,6 +243,9 @@ def prepare_chart_data(pending, completed):
 
 
 def get_columns(filters):
+	if filters.get("group_by_item"):
+		return get_grouped_by_item_columns()
+
 	columns = get_sales_order_columns()
 
 	if not filters.get("group_by_so"):
@@ -231,6 +256,14 @@ def get_columns(filters):
 	if not filters.get("group_by_so"):
 		columns.append(get_warehouse_column())
 
+	columns.append(get_company_column())
+
+	return columns
+
+
+def get_grouped_by_item_columns():
+	columns = [get_item_code_column(), get_uom_column()]
+	columns += get_quantity_columns() + get_amount_columns()
 	columns.append(get_company_column())
 
 	return columns
@@ -270,6 +303,16 @@ def get_item_code_column():
 		"fieldname": "item_code",
 		"fieldtype": "Link",
 		"options": "Item",
+		"width": 100,
+	}
+
+
+def get_uom_column():
+	return {
+		"label": _("UOM"),
+		"fieldname": "uom",
+		"fieldtype": "Link",
+		"options": "UOM",
 		"width": 100,
 	}
 
