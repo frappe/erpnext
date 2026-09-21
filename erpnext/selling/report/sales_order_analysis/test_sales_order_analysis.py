@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import frappe
 from frappe.utils import add_days
 
@@ -349,9 +351,20 @@ class TestSalesOrderAnalysis(ERPNextTestSuite):
 			[("_Test Company", 16), ("_Test Company 1", 4)],
 		)
 
-	def test_12_company_is_mandatory(self):
-		self.assertRaises(
-			frappe.ValidationError,
-			execute,
-			{"from_date": "2021-06-01", "to_date": "2021-06-30"},
-		)
+	def test_12_company_falls_back_to_the_default(self):
+		transaction_date = "2021-06-01"
+		item, so = self.create_sales_order(transaction_date)
+
+		with patch("erpnext.get_default_company", return_value="_Test Company"):
+			columns, data, message, chart = execute({"from_date": "2021-06-01", "to_date": "2021-06-30"})
+
+		self.assertEqual(len(data), 1)
+		self.assertEqual(data[0]["sales_order"], so.name)
+
+	def test_13_company_is_mandatory_without_a_default(self):
+		with patch("erpnext.get_default_company", return_value=None):
+			self.assertRaises(
+				frappe.ValidationError,
+				execute,
+				{"from_date": "2021-06-01", "to_date": "2021-06-30"},
+			)
