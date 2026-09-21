@@ -843,6 +843,16 @@ class SerialandBatchBundle(Document):
 
 		return return_against
 
+	def is_material_from_in_transit_warehouse(self) -> bool:
+		"""Material of an internal transfer carries the value it had in the in-transit warehouse,
+		rejected or not, because that warehouse is credited for all of it."""
+		if self.voucher_type not in ("Purchase Receipt", "Purchase Invoice") or not self.voucher_detail_no:
+			return False
+
+		return bool(
+			frappe.get_cached_value(self.voucher_type + " Item", self.voucher_detail_no, "from_warehouse")
+		)
+
 	def set_incoming_rate_for_inward_transaction(self, row=None, save=False, prev_sle=None):
 		from erpnext.stock.utils import get_valuation_method
 
@@ -903,13 +913,17 @@ class SerialandBatchBundle(Document):
 			"Buying Settings", "set_valuation_rate_for_rejected_materials"
 		)
 
+		values_rejected_material = (
+			set_valuation_rate_for_rejected_materials or self.is_material_from_in_transit_warehouse()
+		)
+
 		precision = frappe.get_precision("Serial and Batch Entry", "incoming_rate")
 		for d in self.entries:
 			fifo_batch_wise_val = True
 			if valuation_method == "FIFO" and d.batch_no in batches:
 				fifo_batch_wise_val = False
 
-			if self.is_rejected and not set_valuation_rate_for_rejected_materials:
+			if self.is_rejected and not values_rejected_material:
 				rate = 0.0
 			elif (
 				(flt(d.incoming_rate, precision) == flt(rate, precision))
