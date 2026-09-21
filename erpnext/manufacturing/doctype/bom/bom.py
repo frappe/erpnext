@@ -17,7 +17,7 @@ from frappe.website.website_generator import WebsiteGenerator
 
 import erpnext
 from erpnext.setup.utils import get_exchange_rate
-from erpnext.stock.doctype.item.item import get_item_details
+from erpnext.stock.doctype.item.item import _get_item_details
 from erpnext.stock.get_item_details import ItemDetailsCtx, get_conversion_factor, get_price_list_rate
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
@@ -499,7 +499,7 @@ class BOM(WebsiteGenerator):
 		self.manage_default_bom()
 
 	def get_item_det(self, item_code):
-		item = get_item_details(item_code)
+		item = _get_item_details(item_code)
 
 		if not item:
 			frappe.throw(_("Item: {0} does not exist in the system").format(item_code))
@@ -905,7 +905,7 @@ class BOM(WebsiteGenerator):
 		for row in items:
 			row = parse_json(row)
 
-			row.update(get_item_details(row.get("item_code")))
+			row.update(_get_item_details(row.get("item_code")))
 			row.operation_row_id = operation_row_id
 
 			item_row = self.get_item_data(row.item_code, operation_row_id)
@@ -2040,7 +2040,7 @@ def make_variant_bom(source_name, bom_no, item, variant_items, target_doc=None):
 		doc.item = item
 		doc.quantity = 1
 
-		item_data = get_item_details(item)
+		item_data = _get_item_details(item)
 		doc.update(
 			{
 				"item_name": item_data.item_name,
