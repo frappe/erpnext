@@ -10,6 +10,7 @@
   "column_break_4",
   "party",
   "receivable_payable_account",
+  "currency",
   "default_advance_account",
   "col_break1",
   "from_invoice_date",
@@ -80,6 +81,15 @@
    "reqd": 1
   },
   {
+   "fetch_from": "receivable_payable_account.account_currency",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Currency",
+   "options": "Currency",
+   "read_only": 1
+  },
+  {
    "description": "This filter will be applied to Journal Entry.",
    "fieldname": "bank_cash_account",
    "fieldtype": "Link",
@@ -119,12 +129,14 @@
    "fieldname": "total_invoice_amount_all",
    "fieldtype": "Currency",
    "label": "Total Invoice Amount (All)",
+   "options": "currency",
    "read_only": 1
   },
   {
    "fieldname": "total_invoice_amount",
    "fieldtype": "Currency",
    "label": "Total Invoice Amount (Selected)",
+   "options": "currency",
    "read_only": 1
   },
   {
@@ -135,12 +147,14 @@
    "fieldname": "total_payment_amount_all",
    "fieldtype": "Currency",
    "label": "Total Payment Amount (All)",
+   "options": "currency",
    "read_only": 1
   },
   {
    "fieldname": "total_payment_amount",
    "fieldtype": "Currency",
    "label": "Total Payment Amount (Selected)",
+   "options": "currency",
    "read_only": 1
   },
   {
@@ -151,12 +165,14 @@
    "fieldname": "difference_amount_all",
    "fieldtype": "Currency",
    "label": "Difference Amount (All)",
+   "options": "currency",
    "read_only": 1
   },
   {
    "fieldname": "difference_amount",
    "fieldtype": "Currency",
    "label": "Difference Amount (Selected)",
+   "options": "currency",
    "read_only": 1
   },
   {
