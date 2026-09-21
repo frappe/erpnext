@@ -18,6 +18,7 @@ from erpnext.buying.utils import update_last_purchase_rate, validate_for_items
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
 from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
 from erpnext.controllers.subcontracting_controller import SubcontractingController
+from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.get_item_details import (
 	NOT_APPLICABLE_TAX,
 	get_conversion_factor,
@@ -152,6 +153,7 @@ class BuyingController(SubcontractingController):
 						type_of_transaction="Outward",
 						do_not_submit=True,
 						qty=item.qty,
+						exclude_serial_nos=self.get_rejected_serial_nos(item),
 					)
 				elif (
 					not self.is_new()
@@ -174,6 +176,21 @@ class BuyingController(SubcontractingController):
 					== 1
 				):
 					frappe.set_value("Serial and Batch Entry", sabe[0], "qty", item.qty)
+
+	def get_rejected_serial_nos(self, row) -> list:
+		"""Serial numbers received into the rejected warehouse; they do not belong to the package of
+		accepted material."""
+		if not flt(row.get("rejected_qty")):
+			return []
+
+		if row.get("rejected_serial_and_batch_bundle"):
+			return frappe.get_all(
+				"Serial and Batch Entry",
+				filters={"parent": row.rejected_serial_and_batch_bundle, "serial_no": ("is", "set")},
+				pluck="serial_no",
+			)
+
+		return get_serial_nos(row.get("rejected_serial_no"))
 
 	def set_rate_for_standalone_debit_note(self):
 		if self.get("is_return") and self.get("update_stock") and not self.return_against:
@@ -759,12 +776,49 @@ class BuyingController(SubcontractingController):
 		if not (self.is_internal_transfer() and flt(row.rejected_qty)):
 			return accepted_qty
 
-		if row.get("serial_and_batch_bundle") or row.get("rejected_serial_and_batch_bundle"):
+		if row.get("serial_and_batch_bundle") and not row.get("rejected_serial_and_batch_bundle"):
 			return accepted_qty
 
 		rejected_qty = flt(flt(row.rejected_qty) * flt(row.conversion_factor), row.precision("stock_qty"))
 
 		return flt(accepted_qty + rejected_qty, row.precision("stock_qty"))
+
+	def get_accepted_warehouse_package(self, row, type_of_transaction, via_landed_cost_voucher):
+		"""Package for the entry into the accepted warehouse.
+
+		On cancellation of an internal transfer the row package is reused, except when the rejected
+		material has a package of its own: the row package then belongs to no entry and is still a
+		draft, so the package of the submitted entry is taken instead.
+		"""
+		if self.is_internal_transfer() and not self.is_return:
+			if self.docstatus != 2:
+				return self.get_package_for_target_warehouse(
+					row,
+					type_of_transaction=type_of_transaction,
+					via_landed_cost_voucher=via_landed_cost_voucher,
+				)
+
+			if row.get("rejected_serial_and_batch_bundle"):
+				return frappe.db.get_value(
+					"Stock Ledger Entry",
+					{"voucher_detail_no": row.name, "warehouse": row.warehouse, "is_cancelled": 0},
+					"serial_and_batch_bundle",
+				)
+
+		return row.serial_and_batch_bundle
+
+	def get_source_warehouse_package(self, row, package):
+		"""Outward package holding the accepted and the rejected material, since the row package is
+		validated against the accepted qty alone."""
+		if not (package and row.get("rejected_serial_and_batch_bundle")):
+			return package
+
+		return self.make_package_for_transfer(
+			package,
+			row.from_warehouse,
+			type_of_transaction="Outward",
+			include_bundle=row.rejected_serial_and_batch_bundle,
+		)
 
 	def update_stock_ledger(self, allow_negative_stock=False, via_landed_cost_voucher=False):
 		self.update_ordered_and_reserved_qty()
@@ -801,7 +855,9 @@ class BuyingController(SubcontractingController):
 								"outgoing_rate": d.rate,
 								"recalculate_rate": 1,
 								"dependant_sle_voucher_detail_no": d.name,
-								"serial_and_batch_bundle": serial_and_batch_bundle,
+								"serial_and_batch_bundle": self.get_source_warehouse_package(
+									d, serial_and_batch_bundle
+								),
 							},
 						)
 
@@ -815,16 +871,8 @@ class BuyingController(SubcontractingController):
 						d,
 						{
 							"actual_qty": flt(pr_qty),
-							"serial_and_batch_bundle": (
-								d.serial_and_batch_bundle
-								if not self.is_internal_transfer()
-								or self.is_return
-								or (self.is_internal_transfer() and self.docstatus == 2)
-								else self.get_package_for_target_warehouse(
-									d,
-									type_of_transaction=type_of_transaction,
-									via_landed_cost_voucher=via_landed_cost_voucher,
-								)
+							"serial_and_batch_bundle": self.get_accepted_warehouse_package(
+								d, type_of_transaction, via_landed_cost_voucher
 							),
 						},
 					)
