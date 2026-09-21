@@ -998,14 +998,18 @@ def is_enable_cutoff_date_on_bulk_delivery_note_creation():
 	return frappe.get_single_value("Selling Settings", "enable_cutoff_date_on_bulk_delivery_note_creation")
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def close_or_unclose_sales_orders(names, status):
-	if not frappe.has_permission("Sales Order", "write"):
-		frappe.throw(_("Not permitted"), frappe.PermissionError)
+	frappe.has_permission("Sales Order", "write", throw=True)
 
 	names = json.loads(names)
 	for name in names:
-		so = frappe.get_lazy_doc("Sales Order", name)
+		if not isinstance(name, str):
+			frappe.throw(_("Invalid name"), frappe.PermissionError)
+
+		# the check above is doctype level, so on its own it lets a caller restricted to one company close
+		# another company's orders. Matches what update_status() already does.
+		so = frappe.get_lazy_doc("Sales Order", name, check_permission="submit")
 		if so.docstatus == 1:
 			if status == "Closed":
 				if so.status not in ("Cancelled", "Closed") and (
@@ -1891,7 +1895,7 @@ def make_production_plan(source_name, target_doc=None):
 	return production_plan
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def update_status(status, name):
 	so = frappe.get_doc("Sales Order", name, check_permission="submit")
 	so.update_status(status)
