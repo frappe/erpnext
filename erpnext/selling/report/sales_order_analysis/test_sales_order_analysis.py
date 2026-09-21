@@ -348,3 +348,10 @@ class TestSalesOrderAnalysis(ERPNextTestSuite):
 			[(row["company"], row["qty"]) for row in grouped],
 			[("_Test Company", 16), ("_Test Company 1", 4)],
 		)
+
+	def test_12_company_is_mandatory(self):
+		self.assertRaises(
+			frappe.ValidationError,
+			execute,
+			{"from_date": "2021-06-01", "to_date": "2021-06-30"},
+		)
