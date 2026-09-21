@@ -8,7 +8,7 @@ import frappe
 from frappe import _, qb
 from frappe.query_builder import Case, CustomFunction
 from frappe.query_builder.functions import Coalesce, DateDiff, Max, Sum
-from frappe.utils import date_diff, flt, getdate, nowdate
+from frappe.utils import date_diff, flt, nowdate
 
 
 def execute(filters=None):
@@ -202,7 +202,6 @@ def group_by_sales_order(data):
 			sales_order_map[row["sales_order"]] = copy.deepcopy(row)
 			continue
 
-		group["required_date"] = max(getdate(group["delivery_date"]), getdate(row["delivery_date"]))
 		group["delay"] = (
 			min(group["delay"], row["delay"]) if row["delay"] and group["delay"] else group["delay"]
 		)
