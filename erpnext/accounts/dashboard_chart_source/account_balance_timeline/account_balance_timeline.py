@@ -25,6 +25,7 @@ def get(
 ):
 	if chart_name:
 		chart = frappe.get_doc("Dashboard Chart", chart_name)
+		chart.check_permission("read")
 	else:
 		chart = frappe._dict(frappe.parse_json(chart))
 	timespan = chart.timespan
@@ -52,6 +53,9 @@ def get(
 				account, get_link_to_form("Dashboard Chart", chart_name)
 			)
 		)
+
+	# authorise the account itself, as get_balance_on() does; doc= brings User Permissions with it
+	frappe.has_permission("Account", doc=account, throw=True)
 
 	if not to_date:
 		to_date = nowdate()
