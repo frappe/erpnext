@@ -771,9 +771,11 @@ class BuyingController(SubcontractingController):
 					)
 				)
 
+	def is_internal_receipt(self) -> bool:
+		return self.doctype == "Purchase Receipt" and self.is_internal_transfer()
+
 	def get_source_warehouse_qty(self, row, accepted_qty):
-		"""Rejected material leaves the in-transit warehouse with the accepted material."""
-		if not (self.is_internal_transfer() and flt(row.rejected_qty)):
+		if not (self.is_internal_receipt() and flt(row.rejected_qty)):
 			return accepted_qty
 
 		if row.get("serial_and_batch_bundle") and not row.get("rejected_serial_and_batch_bundle"):
