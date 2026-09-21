@@ -2660,6 +2660,92 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		self.assertEqual(packages, [-10])
 
+	def test_return_of_a_transfer_that_rejected_batch_material(self):
+		"""Returning the whole receipt puts the accepted and the rejected material back into the
+		in-transit warehouse, and leaves the batch qty where it started."""
+		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
+
+		prepare_data_for_internal_transfer()
+		company = "_Test Company with perpetual inventory"
+
+		from_warehouse = create_warehouse("_Test Return Transfer From", company=company)
+		transit_warehouse = create_warehouse("_Test Return Transfer Transit", company=company)
+		to_warehouse = create_warehouse("_Test Return Transfer To", company=company)
+		rejected_warehouse = create_warehouse("_Test Return Transfer Rejected", company=company)
+
+		item_doc = make_item(
+			"_Test Batch Item For Returned Transfer",
+			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "BT-BIFRET-.####"},
+		)
+
+		receipt = make_purchase_receipt(
+			item_code=item_doc.name, company=company, warehouse=from_warehouse, qty=10, rate=100
+		)
+		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
+
+		dn = create_delivery_note(
+			item_code=item_doc.name,
+			company=company,
+			customer="_Test Internal Customer 2",
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=10,
+			rate=100,
+			warehouse=from_warehouse,
+			target_warehouse=transit_warehouse,
+			batch_no=batch_no,
+		)
+
+		pr = make_inter_company_purchase_receipt(dn.name)
+		pr.items[0].warehouse = to_warehouse
+		pr.items[0].qty = 7
+		pr.items[0].rejected_qty = 3
+		pr.items[0].received_qty = 10
+		pr.items[0].rejected_warehouse = rejected_warehouse
+		pr.items[0].rejected_serial_and_batch_bundle = make_serial_batch_bundle(
+			frappe._dict(
+				{
+					"item_code": item_doc.name,
+					"warehouse": rejected_warehouse,
+					"qty": 3,
+					"batches": frappe._dict({batch_no: 3}),
+					"voucher_type": "Purchase Receipt",
+					"type_of_transaction": "Inward",
+					"do_not_submit": True,
+					"posting_date": pr.posting_date,
+					"posting_time": pr.posting_time,
+				}
+			)
+		).name
+		pr.save()
+		pr.submit()
+
+		self.assertEqual(frappe.db.get_value("Batch", batch_no, "batch_qty"), 10)
+
+		pr_return = make_purchase_return(pr.name)
+		pr_return.save()
+		pr_return.submit()
+
+		sl_entries = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_no": pr_return.name, "is_cancelled": 0},
+			fields=["warehouse", "actual_qty", "serial_and_batch_bundle"],
+		)
+
+		stock_qty = {d.warehouse: d.actual_qty for d in sl_entries}
+		self.assertEqual(stock_qty[transit_warehouse], 10)
+		self.assertEqual(stock_qty[to_warehouse], -7)
+		self.assertEqual(stock_qty[rejected_warehouse], -3)
+
+		package = {d.warehouse: d.serial_and_batch_bundle for d in sl_entries}
+		self.assertEqual(
+			frappe.db.get_value("Serial and Batch Bundle", package[transit_warehouse], "total_qty"), 10
+		)
+
+		self.assertEqual(frappe.db.get_value("Batch", batch_no, "batch_qty"), 10)
+
 	def test_internal_transfer_pr_incoming_sle_anchored_to_dn_rate(self):
 		"""Internal-transfer PR's inward SLE must use DN.incoming_rate even when
 		PR.item.valuation_rate was wrong at submit, so divisional_loss does not
