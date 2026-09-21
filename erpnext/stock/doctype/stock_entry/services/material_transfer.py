@@ -22,6 +22,46 @@ class BaseMaterialTransferStockEntry(BaseStockEntry):
 			if not row.s_warehouse:
 				frappe.throw(_("Source Warehouse is required for item {0}").format(row.item_code))
 
+		self.validate_transit_warehouses()
+
+	def validate_transit_warehouses(self):
+		if not self.doc.add_to_transit:
+			return
+
+		target_warehouses = {row.t_warehouse for row in self.doc.items if row.t_warehouse}
+		if self.doc.to_warehouse:
+			target_warehouses.add(self.doc.to_warehouse)
+
+		if not target_warehouses:
+			return
+
+		transit_warehouses = set(
+			frappe.get_all(
+				"Warehouse",
+				filters={
+					"name": ("in", list(target_warehouses)),
+					"warehouse_type": "Transit",
+					"company": self.doc.company,
+				},
+				pluck="name",
+			)
+		)
+
+		if self.doc.to_warehouse and self.doc.to_warehouse not in transit_warehouses:
+			frappe.throw(
+				_(
+					"Default Target Warehouse {0} must be a Transit warehouse when Add to Transit is enabled."
+				).format(frappe.bold(self.doc.to_warehouse))
+			)
+
+		for row in self.doc.items:
+			if row.t_warehouse and row.t_warehouse not in transit_warehouses:
+				frappe.throw(
+					_(
+						"Row #{0}: Target Warehouse {1} must be a Transit warehouse when Add to Transit is enabled."
+					).format(row.idx, frappe.bold(row.t_warehouse))
+				)
+
 	def validate_same_source_target_warehouse(self):
 		"""
 		Raises: frappe.ValidationError: If warehouses are same and no inventory dimensions differ
