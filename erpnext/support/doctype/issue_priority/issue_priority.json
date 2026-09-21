@@ -15,7 +15,7 @@
   }
  ],
  "links": [],
- "modified": "2024-08-16 19:23:40.697426",
+ "modified": "2026-09-16 11:42:07.000000",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue Priority",
@@ -32,6 +32,10 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "role": "Support Team",
+   "select": 1
   }
  ],
  "quick_entry": 1,
