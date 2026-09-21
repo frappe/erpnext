@@ -2975,6 +2975,101 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(booked_value[get_inventory_account(company, transit_warehouse)], 1000)
 		self.assertEqual(booked_value[get_inventory_account(company, rejected_warehouse)], -1000)
 
+	def make_transfer_receipt(self, tag, item_doc, qty, rejected):
+		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		prepare_data_for_internal_transfer()
+		company = "_Test Company with perpetual inventory"
+		wh = frappe._dict(
+			source=create_warehouse(f"_Test {tag} Transfer From", company=company),
+			transit=create_warehouse(f"_Test {tag} Transfer Transit", company=company),
+			accepted=create_warehouse(f"_Test {tag} Transfer To", company=company),
+			rejected=create_warehouse(f"_Test {tag} Transfer Rejected", company=company),
+		)
+		seed = make_purchase_receipt(
+			item_code=item_doc.name, company=company, warehouse=wh.source, qty=qty + rejected, rate=100
+		)
+		batch_no = (
+			get_batch_from_bundle(seed.items[0].serial_and_batch_bundle) if item_doc.has_batch_no else None
+		)
+		dn = create_delivery_note(
+			item_code=item_doc.name,
+			company=company,
+			customer="_Test Internal Customer 2",
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=qty + rejected,
+			rate=100,
+			warehouse=wh.source,
+			target_warehouse=wh.transit,
+			batch_no=batch_no,
+		)
+		pr = make_inter_company_purchase_receipt(dn.name)
+		pr.items[0].warehouse = wh.accepted
+		pr.items[0].qty = qty
+		pr.items[0].rejected_qty = rejected
+		pr.items[0].received_qty = qty + rejected
+		pr.items[0].rejected_warehouse = wh.rejected
+		return pr, wh, company, batch_no
+
+	def test_removing_the_rejection_moves_the_package_back(self):
+		"""A row that no longer rejects anything carries the package of the in-transit warehouse
+		again, which is the entry it belongs to."""
+		item_doc = make_item(
+			"_Test Batch Item For Removed Rejection",
+			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "BT-BIFRR-.####"},
+		)
+
+		pr, warehouses, company, batch_no = self.make_transfer_receipt("Removed", item_doc, 7, 3)
+		pr.items[0].rejected_serial_and_batch_bundle = make_serial_batch_bundle(
+			frappe._dict(
+				{
+					"item_code": item_doc.name,
+					"warehouse": warehouses.rejected,
+					"qty": 3,
+					"batches": frappe._dict({batch_no: 3}),
+					"voucher_type": "Purchase Receipt",
+					"type_of_transaction": "Inward",
+					"is_rejected": 1,
+					"do_not_submit": True,
+					"posting_date": pr.posting_date,
+					"posting_time": pr.posting_time,
+				}
+			)
+		).name
+		pr.save()
+
+		self.assertEqual(
+			frappe.db.get_value("Serial and Batch Bundle", pr.items[0].serial_and_batch_bundle, "warehouse"),
+			warehouses.accepted,
+		)
+
+		pr.items[0].qty = 10
+		pr.items[0].rejected_qty = 0
+		pr.items[0].rejected_serial_and_batch_bundle = None
+		pr.items[0].received_qty = 10
+		pr.save()
+
+		self.assertEqual(
+			frappe.db.get_value("Serial and Batch Bundle", pr.items[0].serial_and_batch_bundle, "warehouse"),
+			warehouses.transit,
+		)
+
+		pr.submit()
+
+		stock_qty = {
+			d.warehouse: d.actual_qty
+			for d in frappe.get_all(
+				"Stock Ledger Entry",
+				filters={"voucher_no": pr.name, "is_cancelled": 0},
+				fields=["warehouse", "actual_qty"],
+			)
+		}
+
+		self.assertEqual(stock_qty[warehouses.transit], -10)
+		self.assertEqual(stock_qty[warehouses.accepted], 10)
+
 	def test_internal_transfer_pr_incoming_sle_anchored_to_dn_rate(self):
 		"""Internal-transfer PR's inward SLE must use DN.incoming_rate even when
 		PR.item.valuation_rate was wrong at submit, so divisional_loss does not

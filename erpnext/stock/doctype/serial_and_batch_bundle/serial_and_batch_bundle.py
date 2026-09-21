@@ -846,7 +846,7 @@ class SerialandBatchBundle(Document):
 	def is_material_from_in_transit_warehouse(self) -> bool:
 		"""Material of an internal transfer carries the value it had in the in-transit warehouse,
 		rejected or not, because that warehouse is credited for all of it."""
-		if self.voucher_type not in ("Purchase Receipt", "Purchase Invoice") or not self.voucher_detail_no:
+		if self.voucher_type != "Purchase Receipt" or not self.voucher_detail_no:
 			return False
 
 		return bool(

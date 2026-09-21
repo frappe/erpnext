@@ -190,6 +190,9 @@ class BuyingController(SubcontractingController):
 				qty=flt(row.stock_qty),
 			)
 
+		if not flt(row.stock_qty):
+			return ""
+
 		return self.make_package_for_transfer(
 			package,
 			row.warehouse,
@@ -200,13 +203,18 @@ class BuyingController(SubcontractingController):
 		)
 
 	def sync_accepted_packages(self) -> None:
-		"""Move the package of a row to the accepted warehouse once the row rejects material."""
+		"""Keep the package of a row in the shape its own entry needs.
+
+		A row that rejects material carries the package of its accepted warehouse; a row that
+		rejects nothing carries the package of the in-transit warehouse it came out of. Editing the
+		split moves the package from one to the other.
+		"""
 		if not self.is_internal_receipt() or self.is_return:
 			return
 
 		for row in self.get("items"):
 			package = row.get("serial_and_batch_bundle")
-			if not (package and flt(row.rejected_qty)):
+			if not package:
 				continue
 
 			details = frappe.db.get_value(
@@ -218,7 +226,12 @@ class BuyingController(SubcontractingController):
 			if not details or details.docstatus != 0:
 				continue
 
-			if details.warehouse == row.warehouse and details.type_of_transaction == "Inward":
+			if flt(row.rejected_qty):
+				wanted = (row.warehouse, "Inward")
+			else:
+				wanted = (row.from_warehouse, "Outward")
+
+			if (details.warehouse, details.type_of_transaction) == wanted:
 				continue
 
 			row.serial_and_batch_bundle = self.make_accepted_package(row, package)
@@ -862,28 +875,25 @@ class BuyingController(SubcontractingController):
 		if not (self.is_internal_transfer() and self.is_return):
 			return package
 
+		if existing_package := self.get_package_of_source_warehouse(row):
+			return existing_package
+
 		if not row.get("rejected_serial_and_batch_bundle"):
 			return self.get_package_for_target_warehouse(row, row.from_warehouse, "Inward")
 
 		return self.get_returned_source_package(row)
 
 	def get_source_warehouse_package(self, row, package):
-		if not (package and row.get("rejected_serial_and_batch_bundle") and self.is_internal_receipt()):
+		if not (row.get("rejected_serial_and_batch_bundle") and self.is_internal_receipt()):
 			return package
 
-		if existing_package := frappe.db.get_value(
-			"Serial and Batch Bundle",
-			{
-				"voucher_type": self.doctype,
-				"voucher_no": self.name,
-				"voucher_detail_no": row.name,
-				"warehouse": row.from_warehouse,
-				"docstatus": 1,
-				"is_cancelled": 0,
-			},
-			"name",
-		):
+		if existing_package := self.get_package_of_source_warehouse(row):
 			return existing_package
+
+		if not package:
+			return self.make_package_for_transfer(
+				row.rejected_serial_and_batch_bundle, row.from_warehouse, type_of_transaction="Outward"
+			)
 
 		return self.make_package_for_transfer(
 			package,
@@ -892,8 +902,8 @@ class BuyingController(SubcontractingController):
 			include_bundle=row.rejected_serial_and_batch_bundle,
 		)
 
-	def get_returned_source_package(self, row):
-		if existing_package := frappe.db.get_value(
+	def get_package_of_source_warehouse(self, row) -> str | None:
+		return frappe.db.get_value(
 			"Serial and Batch Bundle",
 			{
 				"voucher_type": self.doctype,
@@ -904,9 +914,9 @@ class BuyingController(SubcontractingController):
 				"is_cancelled": 0,
 			},
 			"name",
-		):
-			return existing_package
+		)
 
+	def get_returned_source_package(self, row):
 		return self.make_package_for_transfer(
 			row.serial_and_batch_bundle,
 			row.from_warehouse,
