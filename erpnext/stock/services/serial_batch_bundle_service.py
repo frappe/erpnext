@@ -575,8 +575,12 @@ class SerialBatchBundleService:
 		for row in self.doc.get(table_name):
 			for field in QTY_FIELD.keys():
 				if row.get(field):
+					qty_field = QTY_FIELD[field]
+					if field == "serial_and_batch_bundle" and hasattr(self.doc, "get_package_qty_field"):
+						qty_field = self.doc.get_package_qty_field(row) or qty_field
+
 					frappe.get_doc("Serial and Batch Bundle", row.get(field)).set_serial_and_batch_values(
-						self.doc, row, qty_field=QTY_FIELD[field]
+						self.doc, row, qty_field=qty_field
 					)
 
 	def make_package_for_transfer(

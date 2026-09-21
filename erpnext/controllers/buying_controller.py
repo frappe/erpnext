@@ -152,10 +152,9 @@ class BuyingController(SubcontractingController):
 						item.from_warehouse,
 						type_of_transaction="Outward",
 						do_not_submit=True,
-						qty=item.stock_qty if self.is_internal_receipt() else 0,
-						exclude_serial_nos=self.get_rejected_serial_nos(item)
+						qty=self.get_source_warehouse_qty(item, flt(item.stock_qty))
 						if self.is_internal_receipt()
-						else None,
+						else 0,
 					)
 				elif (
 					not self.is_new()
@@ -178,6 +177,18 @@ class BuyingController(SubcontractingController):
 					== 1
 				):
 					frappe.set_value("Serial and Batch Entry", sabe[0], "qty", item.qty)
+
+	def get_package_qty_field(self, row) -> str | None:
+		if self.is_internal_receipt() and row.get("from_warehouse") and flt(row.get("rejected_qty")):
+			return "received_stock_qty"
+
+		return None
+
+	def get_internal_transfer_qty(self, row) -> float:
+		if flt(row.qty) or not self.is_internal_receipt():
+			return flt(row.qty)
+
+		return flt(row.rejected_qty)
 
 	def get_rejected_serial_nos(self, row) -> list:
 		if not flt(row.get("rejected_qty")):
@@ -774,12 +785,6 @@ class BuyingController(SubcontractingController):
 	def is_internal_receipt(self) -> bool:
 		return self.doctype == "Purchase Receipt" and self.is_internal_transfer()
 
-	def get_internal_transfer_qty(self, row) -> float:
-		if flt(row.qty) or not self.is_internal_receipt():
-			return flt(row.qty)
-
-		return flt(row.rejected_qty)
-
 	def get_source_warehouse_qty(self, row, accepted_qty):
 		if not (self.is_internal_receipt() and flt(row.rejected_qty)):
 			return accepted_qty
@@ -807,18 +812,27 @@ class BuyingController(SubcontractingController):
 				)
 
 			if row.get("rejected_serial_and_batch_bundle") and self.is_internal_receipt():
-				return frappe.db.get_value(
-					"Stock Ledger Entry",
-					{"voucher_detail_no": row.name, "warehouse": row.warehouse, "is_cancelled": 0},
-					"serial_and_batch_bundle",
-				)
+				return self.get_submitted_package(row, row.warehouse)
 
 		return row.serial_and_batch_bundle
 
-	def get_source_warehouse_package(self, row, package):
-		if not (package and row.get("rejected_serial_and_batch_bundle") and self.is_internal_receipt()):
+	def get_submitted_package(self, row, warehouse):
+		return frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_detail_no": row.name, "warehouse": warehouse, "is_cancelled": 0},
+			"serial_and_batch_bundle",
+		)
+
+	def get_source_warehouse_reversal_package(self, row, package):
+		if not (self.is_internal_transfer() and self.is_return):
 			return package
 
+		if not row.get("rejected_serial_and_batch_bundle"):
+			return self.get_package_for_target_warehouse(row, row.from_warehouse, "Inward")
+
+		return self.get_returned_source_package(row)
+
+	def get_returned_source_package(self, row):
 		if existing_package := frappe.db.get_value(
 			"Serial and Batch Bundle",
 			{
@@ -834,9 +848,9 @@ class BuyingController(SubcontractingController):
 			return existing_package
 
 		return self.make_package_for_transfer(
-			package,
+			row.serial_and_batch_bundle,
 			row.from_warehouse,
-			type_of_transaction="Outward",
+			type_of_transaction="Inward",
 			include_bundle=row.rejected_serial_and_batch_bundle,
 		)
 
@@ -849,6 +863,8 @@ class BuyingController(SubcontractingController):
 		for d in self.get("items"):
 			if d.item_code not in stock_items:
 				continue
+
+			source_reversal_sle = None
 
 			pr_qty = flt(flt(d.qty) * flt(d.conversion_factor), d.precision("stock_qty"))
 			source_qty = self.get_source_warehouse_qty(d, pr_qty)
@@ -874,9 +890,7 @@ class BuyingController(SubcontractingController):
 							"outgoing_rate": d.rate,
 							"recalculate_rate": 1,
 							"dependant_sle_voucher_detail_no": d.name,
-							"serial_and_batch_bundle": self.get_source_warehouse_package(
-								d, serial_and_batch_bundle
-							),
+							"serial_and_batch_bundle": serial_and_batch_bundle,
 						},
 					)
 
@@ -927,11 +941,10 @@ class BuyingController(SubcontractingController):
 				):
 					serial_and_batch_bundle = None
 					if self.is_internal_transfer() and self.docstatus == 2:
-						serial_and_batch_bundle = frappe.db.get_value(
-							"Stock Ledger Entry",
-							{"voucher_detail_no": d.name, "warehouse": d.warehouse},
-							"serial_and_batch_bundle",
+						reversed_warehouse = (
+							d.from_warehouse if d.get("rejected_serial_and_batch_bundle") else d.warehouse
 						)
+						serial_and_batch_bundle = self.get_submitted_package(d, reversed_warehouse)
 
 					from_warehouse_sle = self.get_sl_entries(
 						d,
@@ -939,15 +952,13 @@ class BuyingController(SubcontractingController):
 							"actual_qty": -1 * source_qty,
 							"warehouse": d.from_warehouse,
 							"recalculate_rate": 1,
-							"serial_and_batch_bundle": (
-								self.get_package_for_target_warehouse(d, d.from_warehouse, "Inward")
-								if self.is_internal_transfer() and self.is_return
-								else serial_and_batch_bundle
+							"serial_and_batch_bundle": self.get_source_warehouse_reversal_package(
+								d, serial_and_batch_bundle
 							),
 						},
 					)
 
-					sl_entries.append(from_warehouse_sle)
+					source_reversal_sle = from_warehouse_sle
 
 			if flt(d.rejected_qty) != 0:
 				valuation_rate_for_rejected_item = 0.0
@@ -968,6 +979,9 @@ class BuyingController(SubcontractingController):
 						},
 					)
 				)
+
+			if source_reversal_sle:
+				sl_entries.append(source_reversal_sle)
 
 		self.make_sl_entries(
 			sl_entries,
@@ -997,8 +1011,14 @@ class BuyingController(SubcontractingController):
 		if not warehouse:
 			warehouse = item.warehouse
 
+		takes_rejected_material = self.is_internal_receipt() and flt(item.get("rejected_qty"))
+
 		return self.make_package_for_transfer(
-			item.serial_and_batch_bundle, warehouse, type_of_transaction=type_of_transaction
+			item.serial_and_batch_bundle,
+			warehouse,
+			type_of_transaction=type_of_transaction,
+			qty=flt(item.stock_qty) if takes_rejected_material else 0,
+			exclude_serial_nos=self.get_rejected_serial_nos(item) if takes_rejected_material else None,
 		)
 
 	def check_purchase_order_on_hold_or_close(self, ref_fieldname, exclude_if_field=None):
