@@ -3243,10 +3243,27 @@ def get_tax_rate(account_head):
 	return frappe.get_cached_value("Account", account_head, ["tax_rate", "account_name"], as_dict=True)
 
 
+# the only doctypes a `taxes_and_charges` Link points at; `master_doctype` is caller-supplied and
+# reaches get_doc()
+TAX_MASTER_DOCTYPES = ("Sales Taxes and Charges Template", "Purchase Taxes and Charges Template")
+
+
+def validate_tax_master(master_doctype, master_name=None):
+	"""Reject a caller-supplied doctype that is not a tax template.
+
+	`master_name` is accepted so the call sites read the same as on develop, where it also narrows
+	the caller to their permitted companies. There is no Company Restriction on this branch.
+	"""
+	if master_doctype not in TAX_MASTER_DOCTYPES:
+		frappe.throw(_("Invalid tax master doctype"), frappe.PermissionError)
+
+
 @frappe.whitelist()
 def get_default_taxes_and_charges(master_doctype, tax_template=None, company=None):
 	if not company:
 		return {}
+
+	validate_tax_master(master_doctype, tax_template)
 
 	if tax_template and company:
 		tax_template_company = frappe.get_cached_value(master_doctype, tax_template, "company")
@@ -3265,6 +3282,9 @@ def get_default_taxes_and_charges(master_doctype, tax_template=None, company=Non
 def get_taxes_and_charges(master_doctype, master_name):
 	if not master_name:
 		return
+
+	validate_tax_master(master_doctype, master_name)
+
 	from frappe.model import child_table_fields, default_fields
 
 	tax_master = frappe.get_doc(master_doctype, master_name)
