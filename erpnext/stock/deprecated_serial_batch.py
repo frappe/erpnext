@@ -13,7 +13,6 @@ from erpnext.deprecation_dumpster import deprecated
 
 
 @frappe.request_cache
-@deprecated
 def has_legacy_batch_ledgers(item_code: str, warehouse: str) -> bool:
 	"""`False` when no Stock Ledger Entry of the item and warehouse uses the
 	denormalized `batch_no` field.
