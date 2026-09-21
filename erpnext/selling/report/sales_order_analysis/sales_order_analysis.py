@@ -10,10 +10,15 @@ from frappe.query_builder import Case, CustomFunction
 from frappe.query_builder.functions import Coalesce, DateDiff, Max, Sum
 from frappe.utils import date_diff, flt, nowdate
 
+import erpnext
+
 
 def execute(filters=None):
 	if not filters:
 		return [], [], None, []
+
+	filters = frappe._dict(filters)
+	filters.company = filters.get("company") or erpnext.get_default_company()
 
 	validate_filters(filters)
 
