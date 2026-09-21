@@ -6,6 +6,7 @@
  "creation": "2015-08-07 02:33:52.670866",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/tax-rule",
  "engine": "InnoDB",
  "field_order": [
   "tax_type",
@@ -225,6 +226,7 @@
    "remember_last_selected_value": 1
   }
  ],
+ "icon": "badge-percent",
  "links": [],
  "modified": "2024-03-27 13:10:52.121252",
  "modified_by": "Administrator",

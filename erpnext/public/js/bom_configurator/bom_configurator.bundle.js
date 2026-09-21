@@ -200,7 +200,7 @@ class BOMConfigurator {
 							},
 							{
 								label: __("Delete Item"),
-								icon: "trash-2",
+								icon: "trash",
 								danger: true,
 								click: function (node) {
 									let view = frappe.views.trees["BOM Configurator"];

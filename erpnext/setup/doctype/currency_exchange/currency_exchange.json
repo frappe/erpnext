@@ -10,6 +10,7 @@
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Setup", 
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/currency-exchange",
  "editable_grid": 0, 
  "engine": "InnoDB", 
  "fields": [
@@ -239,7 +240,7 @@
  "has_web_view": 0, 
  "hide_heading": 0, 
  "hide_toolbar": 0, 
- "icon": "fa fa-exchange", 
+ "icon": "arrow-right-left",
  "idx": 1, 
  "image_view": 0, 
  "in_create": 0, 

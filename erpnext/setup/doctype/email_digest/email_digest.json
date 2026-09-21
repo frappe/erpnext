@@ -5,6 +5,7 @@
  "description": "Send regular summary reports via Email.",
  "doctype": "DocType",
  "document_type": "System",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/email-digest",
  "engine": "InnoDB",
  "field_order": [
   "settings",
@@ -306,7 +307,7 @@
    "reqd": 1
   }
  ],
- "icon": "fa fa-envelope",
+ "icon": "mail",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "links": [],

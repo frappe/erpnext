@@ -7,6 +7,7 @@
  "description": "All Sales Transactions can be tagged against multiple Sales Persons so that you can set and monitor targets.",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/sales-person",
  "engine": "InnoDB",
  "field_order": [
   "name_and_employee_id",
@@ -141,7 +142,7 @@
    "options": "Target Detail"
   }
  ],
- "icon": "icon-user",
+ "icon": "user-round",
  "idx": 1,
  "is_tree": 1,
  "links": [],

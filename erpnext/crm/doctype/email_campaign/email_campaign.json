@@ -3,6 +3,7 @@
  "autoname": "format:MAIL-CAMP-{YYYY}-{#####}",
  "creation": "2019-06-30 16:05:30.015615",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/email-campaign",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -71,6 +72,7 @@
    "options": "User"
   }
  ],
+ "icon": "mails",
  "links": [],
  "modified": "2024-03-27 13:09:36.177528",
  "modified_by": "Administrator",

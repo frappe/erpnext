@@ -3,6 +3,7 @@
  "autoname": "format:APMT-{customer_name}-{####}",
  "creation": "2019-08-27 10:48:27.926283",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/appointment",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -136,6 +137,7 @@
    "search_index": 1
   }
  ],
+ "icon": "clipboard-clock",
  "links": [],
  "modified": "2026-07-20 02:00:00.000000",
  "modified_by": "Administrator",

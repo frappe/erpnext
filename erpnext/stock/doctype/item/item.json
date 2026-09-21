@@ -7,6 +7,7 @@
  "description": "A Product or a Service that is bought, sold or kept in stock.",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/item",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -1099,7 +1100,7 @@
    "label": "Item Prices"
   }
  ],
- "icon": "fa fa-tag",
+ "icon": "package",
  "idx": 2,
  "image_field": "image",
  "links": [],

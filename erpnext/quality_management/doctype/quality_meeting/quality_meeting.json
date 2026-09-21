@@ -3,6 +3,7 @@
  "autoname": "format:QA-MEET-{YY}-{MM}-{DD}",
  "creation": "2018-10-15 16:25:41.548432",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/quality_meeting",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -46,6 +47,7 @@
    "fieldtype": "Section Break"
   }
  ],
+ "icon": "users",
  "index_web_pages_for_search": 1,
  "links": [],
  "modified": "2024-03-27 13:10:29.470120",

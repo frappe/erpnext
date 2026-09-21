@@ -5,6 +5,7 @@
  "creation": "2013-02-05 11:48:26",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/department",
  "engine": "InnoDB",
  "field_order": [
   "department_name",
@@ -86,7 +87,7 @@
    "fieldtype": "Column Break"
   }
  ],
- "icon": "fa fa-sitemap",
+ "icon": "building",
  "idx": 1,
  "is_tree": 1,
  "links": [],
