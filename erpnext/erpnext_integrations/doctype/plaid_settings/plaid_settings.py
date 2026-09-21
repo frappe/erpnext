@@ -37,8 +37,12 @@ class PlaidSettings(Document):
 		return plaid.get_link_token()
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def get_plaid_configuration():
+	# Plaid Settings is a System-Manager-only single doctype and every caller reaches this from its
+	# own form, so that is the boundary.
+	frappe.has_permission("Plaid Settings", throw=True)
+
 	if frappe.db.get_single_value("Plaid Settings", "enabled"):
 		plaid_settings = frappe.get_single("Plaid Settings")
 		return {
@@ -50,9 +54,11 @@ def get_plaid_configuration():
 	return "disabled"
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def add_institution(token, response):
-	response = json.loads(response)
+	frappe.has_permission("Plaid Settings", throw=True)
+
+	response = frappe.parse_json(response)
 
 	plaid = PlaidConnector()
 	access_token = plaid.get_access_token(token)
@@ -78,15 +84,12 @@ def add_institution(token, response):
 	return bank
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def add_bank_accounts(response, bank, company):
-	try:
-		response = json.loads(response)
-	except TypeError:
-		pass
+	frappe.has_permission("Plaid Settings", throw=True)
 
-	if isinstance(bank, str):
-		bank = json.loads(bank)
+	response = frappe.parse_json(response)
+	bank = frappe.parse_json(bank)
 	result = []
 
 	parent_gl_account = frappe.db.get_all(
@@ -271,7 +274,7 @@ def new_bank_transaction(transaction):
 	if transaction["category"]:
 		try:
 			tags += transaction["category"]
-			tags += [f'Plaid Cat. {transaction["category_id"]}']
+			tags += [f"Plaid Cat. {transaction['category_id']}"]
 		except KeyError:
 			pass
 
@@ -319,8 +322,10 @@ def automatic_synchronization():
 		enqueue_synchronization()
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def enqueue_synchronization():
+	frappe.has_permission("Plaid Settings", throw=True)
+
 	plaid_accounts = frappe.get_all(
 		"Bank Account", filters={"integration_id": ["!=", ""]}, fields=["name", "bank"]
 	)
@@ -333,8 +338,12 @@ def enqueue_synchronization():
 		)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def get_link_token_for_update(access_token):
+	# `access_token` is caller-supplied and mints a link token at Plaid, so this creates state at the
+	# provider even though it writes nothing here.
+	frappe.has_permission("Plaid Settings", throw=True)
+
 	plaid = PlaidConnector(access_token)
 	return plaid.get_link_token(update_mode=True)
 
@@ -353,9 +362,11 @@ def get_company(bank_account_name):
 	frappe.throw(_("Could not detect the Company for updating Bank Accounts"))
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def update_bank_account_ids(response):
-	data = json.loads(response)
+	frappe.has_permission("Plaid Settings", throw=True)
+
+	data = frappe.parse_json(response)
 	institution_name = data["institution"]["name"]
 	bank = frappe.get_doc("Bank", institution_name).as_dict()
 	bank_account_name = f"{data['account']['name']} - {institution_name}"
