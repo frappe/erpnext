@@ -30,6 +30,9 @@ def execute(filters=None):
 
 
 def validate_filters(filters):
+	if not filters.get("company"):
+		frappe.throw(_("{0} is mandatory").format(_("Company")))
+
 	from_date, to_date = filters.get("from_date"), filters.get("to_date")
 
 	if not from_date and to_date:
@@ -85,6 +88,7 @@ def get_data(filters):
 			soi.description.as_("description"),
 		)
 		.where((so.status.notin(["Stopped", "On Hold"])) & (so.docstatus == 1))
+		.where(so.company == filters.get("company"))
 		.groupby(soi.name, so.name)
 		.orderby(so.transaction_date)
 		.orderby(soi.item_code)
@@ -92,8 +96,6 @@ def get_data(filters):
 
 	if filters.get("from_date") and filters.get("to_date"):
 		query = query.where(so.transaction_date[filters.get("from_date") : filters.get("to_date")])
-	if filters.get("company"):
-		query = query.where(so.company == filters.get("company"))
 	if filters.get("sales_order"):
 		query = query.where(so.name.isin(filters.get("sales_order")))
 	if filters.get("status"):
