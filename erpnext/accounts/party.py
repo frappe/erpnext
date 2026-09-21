@@ -6,7 +6,10 @@ from datetime import date
 import frappe
 from frappe import _, msgprint, qb, scrub
 from frappe.contacts.doctype.address.address import get_company_address, get_default_address
-from frappe.core.doctype.user_permission.user_permission import get_permitted_documents
+from frappe.core.doctype.user_permission.user_permission import (
+	get_permitted_documents,
+	get_user_permissions,
+)
 from frappe.model.utils import get_fetch_values
 from frappe.query_builder.functions import Abs, Date, Sum
 from frappe.utils import (
@@ -159,7 +162,7 @@ def _get_party_details(
 	)
 	set_contact_details(party_details, party, party_type, doctype)
 	set_other_values(party_details, party, party_type)
-	set_price_list(party_details, party, party_type, price_list, pos_profile)
+	set_price_list(party_details, party, party_type, price_list, pos_profile, doctype)
 
 	tax_template = set_taxes(
 		party.name,
@@ -408,7 +411,21 @@ def get_default_price_list(party):
 		return price_list
 
 
-def set_price_list(party_details, party, party_type, given_price_list, pos=None):
+def get_default_permitted_price_list(doctype=None):
+	# prefer a default scoped to this transaction, else an unscoped default
+	fallback = None
+	for perm in get_user_permissions().get("Price List", []):
+		if not perm.get("is_default") or not is_price_list_enabled(perm.get("doc")):
+			continue
+		applicable_for = perm.get("applicable_for")
+		if applicable_for == doctype:
+			return perm.get("doc")
+		if not applicable_for:
+			fallback = perm.get("doc")
+	return fallback
+
+
+def set_price_list(party_details, party, party_type, given_price_list, pos=None, doctype=None):
 	# price list
 	price_list = get_permitted_documents("Price List")
 
@@ -424,7 +441,11 @@ def set_price_list(party_details, party, party_type, given_price_list, pos=None)
 			pos_price_list = frappe.get_value("POS Profile", pos, "selling_price_list")
 			price_list = pos_price_list or given_price_list
 	else:
+		permitted = price_list
 		price_list = get_default_price_list(party) or given_price_list
+		# restricted user: never set a price list outside their permissions, fall back to their default
+		if permitted and price_list not in permitted:
+			price_list = get_default_permitted_price_list(doctype)
 
 	if price_list and not is_price_list_enabled(price_list):
 		price_list = None
