@@ -68,6 +68,7 @@ class BuyingController(SubcontractingController):
 
 		if self.doctype in ("Purchase Receipt", "Purchase Invoice"):
 			self.update_valuation_rate()
+			self.top_up_source_packages()
 			self.set_serial_and_batch_bundle()
 
 	def onload(self):
@@ -177,6 +178,37 @@ class BuyingController(SubcontractingController):
 					== 1
 				):
 					frappe.set_value("Serial and Batch Entry", sabe[0], "qty", item.qty)
+
+	def top_up_source_packages(self) -> None:
+		"""Keep the package of a row covering everything that left the in-transit warehouse.
+
+		The package is built when the row first gets one, so a later change to the split between
+		accepted and rejected material leaves it holding the accepted material alone.
+		"""
+		if not self.is_internal_receipt() or self.is_return:
+			return
+
+		for row in self.get("items"):
+			package = row.get("serial_and_batch_bundle")
+			rejected_package = row.get("rejected_serial_and_batch_bundle")
+			if not (package and rejected_package and flt(row.rejected_qty)):
+				continue
+
+			package_qty = abs(flt(frappe.db.get_value("Serial and Batch Bundle", package, "total_qty")))
+			if flt(package_qty, row.precision("received_stock_qty")) >= flt(
+				row.received_stock_qty, row.precision("received_stock_qty")
+			):
+				continue
+
+			row.serial_and_batch_bundle = self.make_package_for_transfer(
+				package,
+				row.from_warehouse,
+				type_of_transaction="Outward",
+				do_not_submit=True,
+				include_bundle=rejected_package,
+			)
+
+			frappe.delete_doc("Serial and Batch Bundle", package, force=True, ignore_permissions=True)
 
 	def get_package_qty_field(self, row) -> str | None:
 		if self.is_internal_receipt() and row.get("from_warehouse") and flt(row.get("rejected_qty")):

@@ -2750,6 +2750,100 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		self.assertEqual(frappe.db.get_value("Batch", batch_no, "batch_qty"), 10)
 
+	def test_rejecting_serial_numbers_after_the_package_was_built(self):
+		"""Rejecting material after the row already has a package tops that package up, so it still
+		covers everything that left the in-transit warehouse."""
+		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		prepare_data_for_internal_transfer()
+		company = "_Test Company with perpetual inventory"
+
+		from_warehouse = create_warehouse("_Test Top Up From", company=company)
+		transit_warehouse = create_warehouse("_Test Top Up Transit", company=company)
+		to_warehouse = create_warehouse("_Test Top Up To", company=company)
+		rejected_warehouse = create_warehouse("_Test Top Up Rejected", company=company)
+
+		item_doc = make_item(
+			"_Test Serial Item For Topped Up Package",
+			{"has_serial_no": 1, "serial_no_series": "SN-SIFTUP-.####"},
+		)
+
+		receipt = make_purchase_receipt(
+			item_code=item_doc.name, company=company, warehouse=from_warehouse, qty=10, rate=100
+		)
+		serial_nos = get_serial_nos_from_bundle(receipt.items[0].serial_and_batch_bundle)
+
+		dn = create_delivery_note(
+			item_code=item_doc.name,
+			company=company,
+			customer="_Test Internal Customer 2",
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=10,
+			rate=100,
+			warehouse=from_warehouse,
+			target_warehouse=transit_warehouse,
+			serial_no=serial_nos,
+		)
+
+		pr = make_inter_company_purchase_receipt(dn.name)
+		pr.items[0].warehouse = to_warehouse
+		pr.items[0].qty = 4
+		pr.items[0].rejected_qty = 6
+		pr.items[0].received_qty = 10
+		pr.items[0].rejected_warehouse = rejected_warehouse
+
+		# the desk fills the package of the row with the accepted serial numbers alone
+		pr.items[0].serial_and_batch_bundle = make_serial_batch_bundle(
+			frappe._dict(
+				{
+					"item_code": item_doc.name,
+					"warehouse": transit_warehouse,
+					"qty": -4,
+					"serial_nos": serial_nos[:4],
+					"voucher_type": "Purchase Receipt",
+					"type_of_transaction": "Outward",
+					"do_not_submit": True,
+					"posting_date": pr.posting_date,
+					"posting_time": pr.posting_time,
+				}
+			)
+		).name
+		pr.items[0].rejected_serial_and_batch_bundle = make_serial_batch_bundle(
+			frappe._dict(
+				{
+					"item_code": item_doc.name,
+					"warehouse": rejected_warehouse,
+					"qty": 6,
+					"serial_nos": serial_nos[4:],
+					"voucher_type": "Purchase Receipt",
+					"type_of_transaction": "Inward",
+					"is_rejected": 1,
+					"do_not_submit": True,
+					"posting_date": pr.posting_date,
+					"posting_time": pr.posting_time,
+				}
+			)
+		).name
+		pr.save()
+		pr.submit()
+
+		sl_entries = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_type": "Purchase Receipt", "voucher_no": pr.name, "is_cancelled": 0},
+			fields=["warehouse", "actual_qty", "serial_and_batch_bundle"],
+		)
+
+		stock_qty = {d.warehouse: d.actual_qty for d in sl_entries}
+		self.assertEqual(stock_qty[transit_warehouse], -10)
+		self.assertEqual(stock_qty[to_warehouse], 4)
+		self.assertEqual(stock_qty[rejected_warehouse], 6)
+
+		package = {d.warehouse: d.serial_and_batch_bundle for d in sl_entries}
+		self.assertEqual(sorted(get_serial_nos_from_bundle(package[transit_warehouse])), sorted(serial_nos))
+		self.assertEqual(sorted(get_serial_nos_from_bundle(package[to_warehouse])), sorted(serial_nos[:4]))
+
 	def test_internal_transfer_with_every_unit_rejected(self):
 		"""A receipt that rejects everything still empties the in-transit warehouse, and its entry
 		balances."""
