@@ -211,11 +211,15 @@ def group_by_sales_order(data):
 
 
 def group_by_item(data):
-	"""Key on UOM as well: quantities are in the line UOM, so two UOMs of one item cannot sum."""
+	"""Group on company and UOM as well as the item.
+
+	Quantities are in the line UOM and amounts are in the company currency, so neither sums
+	across a second UOM of the same item or a second company.
+	"""
 	item_map = {}
 
 	for row in data:
-		key = (row["item_code"], row["uom"])
+		key = (row["company"], row["item_code"], row["uom"])
 		group = item_map.get(key)
 		if not group:
 			item_map[key] = copy.deepcopy(row)
@@ -223,7 +227,7 @@ def group_by_item(data):
 
 		add_aggregated_fields(group, row)
 
-	return sorted(item_map.values(), key=lambda row: (row["item_code"], row["uom"]))
+	return sorted(item_map.values(), key=lambda row: (row["company"], row["item_code"], row["uom"]))
 
 
 def add_aggregated_fields(group, row):
