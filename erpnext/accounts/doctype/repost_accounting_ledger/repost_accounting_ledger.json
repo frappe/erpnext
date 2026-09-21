@@ -4,6 +4,7 @@
  "creation": "2023-07-04 13:07:32.923675",
  "default_view": "List",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/repost-accounting-ledger",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [

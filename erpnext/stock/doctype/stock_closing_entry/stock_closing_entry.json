@@ -5,6 +5,7 @@
  "creation": "2024-12-07 14:07:01.356963",
  "default_view": "List",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/stock-closing-entry",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [

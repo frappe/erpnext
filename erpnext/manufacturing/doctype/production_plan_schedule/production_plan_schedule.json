@@ -3,6 +3,7 @@
  "autoname": "hash",
  "creation": "2026-08-12 00:00:00.000000",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/production-plan-schedule",
  "editable_grid": 0,
  "engine": "InnoDB",
  "field_order": [
