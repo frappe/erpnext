@@ -959,8 +959,10 @@ class update_entries_after:
 
 	def process_sle_against_current_timestamp(self):
 		sl_entries = get_sle_against_current_voucher(self.args)
-		if self.args.get("cancelled") and sl_entries:
-			self.seed_previous_sle_for_cancellation(sl_entries[0])
+		if self.args.get("cancelled"):
+			# Cancellation flags every entry of the voucher first, so this query usually returns
+			# nothing and the args are the only anchor left to seed the previous values from.
+			self.seed_previous_sle_for_cancellation(sl_entries[0] if sl_entries else self.args)
 		for sle in sl_entries:
 			sle["timestamp"] = sle.posting_datetime
 			self.process_sle(sle)
@@ -971,7 +973,7 @@ class update_entries_after:
 			return
 
 		args = frappe._dict(anchor_sle)
-		args["sle_id"] = args.name
+		args["sle_id"] = args.get("name")
 		prev_sle = get_previous_sle_of_current_voucher(args)
 		if prev_sle:
 			self.prev_sle_dict[key] = prev_sle
