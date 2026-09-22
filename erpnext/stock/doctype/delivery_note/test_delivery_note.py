@@ -1848,6 +1848,38 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assertEqual(received_batch, sent_batch)
 		self.assertEqual(frappe.db.count("Batch", {"item": item}), 1)
 
+	def test_internal_transfer_of_an_item_that_cannot_create_batches(self):
+		"""An item whose batches are made by hand travels through an in-transit warehouse."""
+		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
+
+		company = "_Test Company"
+		warehouse = "_Test Warehouse - _TC"
+		transit_warehouse = "Stores - _TC"
+		item = make_item(properties={"has_batch_no": 1, "create_new_batch": 0}).name
+		batch = frappe.get_doc({"doctype": "Batch", "batch_id": f"_T-MANUAL-{item}", "item": item}).insert()
+		customer = create_internal_customer(represents_company=company)
+
+		make_stock_entry(target=warehouse, qty=5, basic_rate=100, item_code=item, batch_no=batch.name)
+
+		with self.change_settings("Stock Settings", auto_create_serial_and_batch_bundle_for_outward=1):
+			dn = create_delivery_note(
+				item_code=item,
+				company=company,
+				customer=customer,
+				qty=5,
+				rate=100,
+				warehouse=warehouse,
+				target_warehouse=transit_warehouse,
+			)
+
+		received_package = frappe.db.get_value(
+			"Serial and Batch Bundle", {"voucher_no": dn.name, "warehouse": transit_warehouse}
+		)
+		self.assertEqual(
+			frappe.db.get_value("Serial and Batch Entry", {"parent": received_package}, "batch_no"),
+			batch.name,
+		)
+
 	def test_internal_transfer_precision_gle(self):
 		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
 
