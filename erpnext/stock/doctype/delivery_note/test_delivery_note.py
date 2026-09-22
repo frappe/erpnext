@@ -1848,6 +1848,53 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assertEqual(received_batch, sent_batch)
 		self.assertEqual(frappe.db.count("Batch", {"item": item}), 1)
 
+	def test_internal_transfer_carries_the_batch_of_a_bundle_component(self):
+		"""A batched component of a product bundle keeps its batch on the way to transit."""
+		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+
+		company = "_Test Company"
+		warehouse = "_Test Warehouse - _TC"
+		transit_warehouse = "Stores - _TC"
+		component = make_item(
+			properties={
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "_T-BUNDLE-BATCH-.####",
+			}
+		).name
+		bundle_item = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(bundle_item, [component], qty=1)
+		customer = create_internal_customer(represents_company=company)
+
+		make_stock_entry(target=warehouse, qty=5, basic_rate=100, item_code=component)
+
+		dn = create_delivery_note(
+			item_code=bundle_item,
+			company=company,
+			customer=customer,
+			qty=5,
+			rate=100,
+			warehouse=warehouse,
+			target_warehouse=transit_warehouse,
+		)
+
+		packages = {
+			d.warehouse: d.name
+			for d in frappe.get_all(
+				"Serial and Batch Bundle", filters={"voucher_no": dn.name}, fields=["name", "warehouse"]
+			)
+		}
+		sent_batch = frappe.db.get_value(
+			"Serial and Batch Entry", {"parent": packages[warehouse]}, "batch_no"
+		)
+		received_batch = frappe.db.get_value(
+			"Serial and Batch Entry", {"parent": packages[transit_warehouse]}, "batch_no"
+		)
+
+		self.assertEqual(received_batch, sent_batch)
+		self.assertEqual(frappe.db.count("Batch", {"item": component}), 1)
+
 	def test_internal_transfer_of_an_item_that_cannot_create_batches(self):
 		"""An item whose batches are made by hand travels through an in-transit warehouse."""
 		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
