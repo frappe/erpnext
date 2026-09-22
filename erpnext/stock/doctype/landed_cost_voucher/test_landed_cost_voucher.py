@@ -79,11 +79,45 @@ class TestLandedCostVoucher(FrappeTestCase):
 				)
 				lcv.get_items_from_purchase_receipts()
 				self.assertEqual([item.amount for item in lcv.items], [100, -100])
-				with self.assertRaisesRegex(frappe.ValidationError, "total amount is zero"):
+				with self.assertRaisesRegex(frappe.ValidationError, "of all items is zero"):
 					lcv.insert()
 				lcv.distribute_charges_based_on = "Qty"
 				lcv.insert()
 				self.assertEqual([item.applicable_charges for item in lcv.items], [160, -80])
+
+	def test_landed_cost_rejects_fully_discounted_purchase(self):
+		for make_purchase in (make_purchase_receipt, make_purchase_invoice):
+			with self.subTest(purchase=make_purchase.__name__):
+				purchase = make_purchase(qty=2, rate=100, update_stock=1, do_not_save=True)
+				purchase.apply_discount_on = "Net Total"
+				purchase.additional_discount_percentage = 100
+				purchase.items[0].allow_zero_valuation_rate = 1
+				purchase.insert()
+				purchase.submit()
+				lcv = make_landed_cost_voucher(
+					receipt_document_type=purchase.doctype,
+					receipt_document=purchase.name,
+					charges=80,
+					do_not_save=True,
+				)
+				with self.assertRaisesRegex(frappe.ValidationError, "of all items is zero"):
+					lcv.insert()
+				lcv.distribute_charges_based_on = "Qty"
+				lcv.insert()
+				self.assertEqual([item.applicable_charges for item in lcv.items], [80])
+
+	def test_landed_cost_rejects_amounts_that_cancel_to_float_residue(self):
+		lcv = frappe.new_doc("Landed Cost Voucher")
+		lcv.company = "_Test Company"
+		lcv.distribute_charges_based_on = "Amount"
+		for amount in (100.10, 200.20, -300.30):
+			lcv.append("items", {"item_code": "_Test Item", "qty": 1, "amount": amount})
+		lcv.append("taxes", {"amount": 80})
+		lcv.total_taxes_and_charges = 80
+
+		self.assertNotEqual(sum(item.amount for item in lcv.items), 0)
+		with self.assertRaisesRegex(frappe.ValidationError, "of all items is zero"):
+			lcv.set_applicable_charges_on_item()
 
 	def test_landed_cost_voucher(self):
 		frappe.db.set_single_value("Buying Settings", "allow_multiple_items", 1)
