@@ -2624,6 +2624,51 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		return_pi.submit()
 		self.assertEqual(return_pi.docstatus, 1)
 
+	def test_rejected_material_is_not_valued_on_a_stock_updating_invoice(self):
+		"""An invoice bills the accepted quantity alone, so its rejected material has no cost and the
+		stock it moves must match the entries it books."""
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		company = "_Test Company with perpetual inventory"
+		item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
+		rejected_warehouse = create_warehouse("_Test Invoice Rejected Warehouse", company=company)
+
+		frappe.db.set_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials", 1)
+		self.addCleanup(
+			frappe.db.set_single_value, "Buying Settings", "set_valuation_rate_for_rejected_materials", 0
+		)
+
+		pi = make_purchase_invoice(
+			item_code=item,
+			company=company,
+			warehouse="Stores - TCP1",
+			rejected_warehouse=rejected_warehouse,
+			cost_center="Main - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
+			expense_account="_Test Account Cost for Goods Sold - TCP1",
+			update_stock=1,
+			received_qty=10,
+			qty=6,
+			rejected_qty=4,
+			rate=100,
+		)
+
+		stock_value = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_no": pi.name, "is_cancelled": 0},
+			fields=["warehouse", "stock_value_difference"],
+		)
+		by_warehouse = {d.warehouse: d.stock_value_difference for d in stock_value}
+
+		self.assertEqual(by_warehouse["Stores - TCP1"], 600)
+		self.assertEqual(by_warehouse[rejected_warehouse], 0)
+
+		booked = frappe.get_all(
+			"GL Entry", filters={"voucher_no": pi.name, "is_cancelled": 0}, fields=["debit"]
+		)
+		self.assertEqual(sum(flt(d.debit) for d in booked), sum(by_warehouse.values()))
+
 	def test_purchase_invoice_with_use_serial_batch_field_for_rejected_qty(self):
 		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
