@@ -151,6 +151,9 @@ class BuyingController(SubcontractingController):
 					item.serial_and_batch_bundle = self.make_accepted_package(
 						item, bundle_ids.get(item.get(field))
 					)
+
+				if item.get(field) and bundle_ids.get(item.get(field)):
+					self.set_rejected_package(item, bundle_ids.get(item.get(field)))
 				elif (
 					not self.is_new()
 					and item.serial_and_batch_bundle
@@ -202,6 +205,50 @@ class BuyingController(SubcontractingController):
 			exclude_serial_nos=self.get_rejected_serial_nos(row),
 		)
 
+	def get_delivered_package(self, row) -> str | None:
+		"""Package of the material the delivery note put in the in-transit warehouse."""
+		field = "delivery_note_item" if self.doctype == "Purchase Receipt" else "sales_invoice_item"
+		doctype = "Delivery Note Item" if self.doctype == "Purchase Receipt" else "Sales Invoice Item"
+		if not row.get(field):
+			return None
+
+		return frappe.db.get_value(doctype, row.get(field), "serial_and_batch_bundle")
+
+	def set_rejected_package(self, row, package) -> None:
+		"""Package of the material the row rejects.
+
+		A receipt of an internal transfer builds no package for it on its own, so rejected material
+		of a tracked item would have nothing to say where it came from.
+		"""
+		if not (self.is_internal_receipt() and flt(row.rejected_qty)) or self.is_return:
+			return
+
+		if row.get("rejected_serial_and_batch_bundle") or not row.rejected_warehouse:
+			return
+
+		rejected_qty = flt(flt(row.rejected_qty) * flt(row.conversion_factor), row.precision("stock_qty"))
+
+		row.rejected_serial_and_batch_bundle = self.make_package_for_transfer(
+			package,
+			row.rejected_warehouse,
+			type_of_transaction="Inward",
+			do_not_submit=True,
+			qty=rejected_qty,
+			exclude_serial_nos=self.get_accepted_serial_nos(row),
+		)
+
+		frappe.db.set_value("Serial and Batch Bundle", row.rejected_serial_and_batch_bundle, "is_rejected", 1)
+
+	def get_accepted_serial_nos(self, row) -> list:
+		if not row.get("serial_and_batch_bundle"):
+			return []
+
+		return frappe.get_all(
+			"Serial and Batch Entry",
+			filters={"parent": row.serial_and_batch_bundle, "serial_no": ("is", "set")},
+			pluck="serial_no",
+		)
+
 	def sync_accepted_packages(self) -> None:
 		"""Keep the package of a row in the shape its own entry needs.
 
@@ -234,7 +281,9 @@ class BuyingController(SubcontractingController):
 			if (details.warehouse, details.type_of_transaction) == wanted:
 				continue
 
-			row.serial_and_batch_bundle = self.make_accepted_package(row, package)
+			row.serial_and_batch_bundle = self.make_accepted_package(
+				row, self.get_delivered_package(row) or package
+			)
 			frappe.delete_doc("Serial and Batch Bundle", package, force=True, ignore_permissions=True)
 
 	def get_rejected_serial_nos(self, row) -> list:
