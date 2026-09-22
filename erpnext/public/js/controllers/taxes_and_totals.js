@@ -158,11 +158,15 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	}
 
 	get_billed_qty(item) {
+		const settings = frappe.boot.sysdefaults || {};
+		const is_internal_transfer =
+			this.frm.doc.is_internal_supplier && this.frm.doc.represents_company === this.frm.doc.company;
 		const bills_rejected_quantity =
 			this.frm.doc.doctype === "Purchase Invoice" &&
 			this.frm.doc.update_stock &&
-			this.frm.doc.set_valuation_rate_for_rejected_materials &&
-			this.frm.doc.bill_for_rejected_quantity_in_purchase_invoice;
+			!is_internal_transfer &&
+			cint(settings.set_valuation_rate_for_rejected_materials) &&
+			cint(settings.bill_for_rejected_quantity_in_purchase_invoice);
 
 		if (!flt(item.rejected_qty) || !bills_rejected_quantity) {
 			return flt(item.qty);
