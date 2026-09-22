@@ -2813,6 +2813,43 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		self.assertEqual(flt(sum(booked.values()), 2), 0)
 
+	def test_return_of_a_fully_rejected_receipt(self):
+		"""A receipt that rejected every unit can be sent back."""
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		company = "_Test Company with perpetual inventory"
+		rejected_warehouse = create_warehouse("_Test Fully Rejected Return", company=company)
+		item = make_item("_Test Item For A Fully Rejected Receipt").name
+
+		pr = make_purchase_receipt(
+			company=company,
+			item_code=item,
+			warehouse="Stores - TCP1",
+			qty=0,
+			rejected_qty=10,
+			received_qty=10,
+			rate=100,
+			rejected_warehouse=rejected_warehouse,
+			do_not_save=True,
+		)
+		pr.submit()
+
+		returned = make_return_doc("Purchase Receipt", pr.name)
+		returned.submit()
+
+		self.assertEqual(returned.items[0].qty, 0)
+		self.assertEqual(returned.items[0].rejected_qty, -10)
+
+		moved_qty = {
+			d.warehouse: d.actual_qty
+			for d in frappe.get_all(
+				"Stock Ledger Entry",
+				filters={"voucher_no": returned.name, "is_cancelled": 0},
+				fields=["warehouse", "actual_qty"],
+			)
+		}
+		self.assertEqual(moved_qty, {rejected_warehouse: -10})
+
 	def test_return_of_a_transfer_that_rejected_batch_material(self):
 		"""Returning the whole receipt puts the accepted and the rejected material back into the
 		in-transit warehouse, and leaves the batch qty where it started."""
