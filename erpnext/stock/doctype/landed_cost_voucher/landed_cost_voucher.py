@@ -306,13 +306,14 @@ class LandedCostVoucher(Document):
 
 	def set_applicable_charges_on_item(self):
 		if self.get("taxes") and self.distribute_charges_based_on != "Distribute Manually":
-			total_item_cost = 0.0
+			items = self.get("items")
 			total_charges = 0.0
 			item_count = 0
 			based_on_field = frappe.scrub(self.distribute_charges_based_on)
 
-			for item in self.get("items"):
-				total_item_cost += flt(item.get(based_on_field))
+			total_item_cost = sum(flt(item.get(based_on_field)) for item in items)
+			if items:
+				total_item_cost = flt(total_item_cost, items[0].precision(based_on_field))
 
 			if not total_item_cost:
 				frappe.throw(
