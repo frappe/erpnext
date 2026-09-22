@@ -977,7 +977,19 @@ class StockReconciliation(StockController):
 				)
 			)
 
-	def get_stranded_stock_value(self, row) -> float:
+	def get_balance_before_reconciliation(self, row) -> dict:
+		from erpnext.stock.stock_ledger import get_previous_sle
+
+		return get_previous_sle(
+			{
+				"item_code": row.item_code,
+				"warehouse": row.warehouse,
+				"posting_date": self.posting_date,
+				"posting_time": self.posting_time,
+			}
+		)
+
+	def get_stranded_stock_value(self, row, previous_sle=None) -> float:
 		"""Stock value the ledger still carries for an item-warehouse that has no quantity on hand.
 
 		This is what an adjustment entry writes off. The write-off is measured at item-warehouse
@@ -986,16 +998,10 @@ class StockReconciliation(StockController):
 		at an already empty batch while other batches of the same item still hold stock would
 		otherwise write off the valuation of the stock that remains.
 		"""
-		from erpnext.stock.stock_ledger import get_previous_sle, get_stock_value_difference
+		from erpnext.stock.stock_ledger import get_stock_value_difference
 
-		previous_sle = get_previous_sle(
-			{
-				"item_code": row.item_code,
-				"warehouse": row.warehouse,
-				"posting_date": self.posting_date,
-				"posting_time": self.posting_time,
-			}
-		)
+		if previous_sle is None:
+			previous_sle = self.get_balance_before_reconciliation(row)
 
 		if flt(previous_sle.get("qty_after_transaction")):
 			return 0.0
@@ -1005,13 +1011,23 @@ class StockReconciliation(StockController):
 		)
 
 	def make_adjustment_entry(self, row, sl_entries):
-		difference_amount = self.get_stranded_stock_value(row)
+		previous_sle = self.get_balance_before_reconciliation(row)
+		difference_amount = self.get_stranded_stock_value(row, previous_sle=previous_sle)
 
-		if not difference_amount:
+		# rounded, so float dust does not post an entry whose GL counterpart rounds away to zero
+		if not flt(difference_amount, self.precision("difference_amount")):
 			return
 
 		args = self.get_sle_for_items(row)
-		args.update({"stock_value_difference": -1 * difference_amount, "is_adjustment_entry": 1})
+		args.update(
+			{
+				"stock_value_difference": -1 * difference_amount,
+				# the row carries no rate, so carry the running one forward rather than stamp a zero
+				# that later rate lookups would read back as the last known valuation
+				"valuation_rate": flt(previous_sle.get("valuation_rate")),
+				"is_adjustment_entry": 1,
+			}
+		)
 
 		sl_entries.append(args)
 
