@@ -308,13 +308,12 @@ def get_payment_entries(filters, args):
 			pe.party_name.as_(args.party_name),
 			pe.remarks,
 			pe.paid_amount.as_("base_net_total"),
-			pe.paid_amount_after_tax.as_("base_grand_total"),
+			pe.base_paid_amount_after_tax,
+			pe.base_received_amount_after_tax,
 			pe.mode_of_payment,
 			pe.project,
 			pe.cost_center,
 			pe.payment_type,
-			pe.source_exchange_rate,
-			pe.target_exchange_rate,
 		)
 		.where(
 			(pe.docstatus == 1)
@@ -336,10 +335,12 @@ def get_payment_entries(filters, args):
 			.run()
 		)
 		for d in payment_entries:
-			exchange_rate = (
-				d.source_exchange_rate if d.payment_type == "Receive" else d.target_exchange_rate
-			) or 1
-			d.base_grand_total = flt(d.base_grand_total) + flt(deduction_totals.get(d.name)) / exchange_rate
+			base_amount = (
+				d.base_paid_amount_after_tax
+				if d.payment_type == "Receive"
+				else d.base_received_amount_after_tax
+			)
+			d.base_grand_total = flt(base_amount) + flt(deduction_totals.get(d.name))
 
 	return payment_entries
 
