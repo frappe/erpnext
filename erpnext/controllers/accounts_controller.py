@@ -364,7 +364,7 @@ class AccountsController(TransactionBase):
 		)
 
 		# An internal transfer carries the price list of the outward document into the inward one.
-		fits_transaction = bool(details.get(transaction_side)) or self.is_internal_transfer()
+		fits_transaction = details.get(transaction_side) or self.is_internal_transfer()
 		if details.enabled and fits_transaction:
 			return
 
