@@ -271,6 +271,11 @@
    "link_fieldname": "bank_account"
   },
   {
+   "group": "Accounting",
+   "link_doctype": "Cheque Book",
+   "link_fieldname": "bank_account"
+  },
+  {
    "group": "Party",
    "link_doctype": "Customer",
    "link_fieldname": "default_bank_account"
@@ -281,7 +286,7 @@
    "link_fieldname": "default_bank_account"
   }
  ],
- "modified": "2026-08-21 23:11:39.585456",
+ "modified": "2026-09-17 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Account",

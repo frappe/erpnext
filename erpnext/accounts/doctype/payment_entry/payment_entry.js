@@ -98,6 +98,10 @@ frappe.ui.form.on("Payment Entry", {
 			};
 		});
 
+		frm.set_query("cheque_book", () => ({
+			filters: { account: frm.doc.paid_from, docstatus: 1, status: "Submitted" },
+		}));
+
 		frm.set_query("contact_person", function () {
 			if (frm.doc.party) {
 				return {
@@ -265,6 +269,7 @@ frappe.ui.form.on("Payment Entry", {
 		}
 		erpnext.accounts.unreconcile_payment.add_unreconcile_btn(frm);
 		frappe.flags.allocate_payment_amount = true;
+		frm.events.set_cheque_book(frm);
 	},
 
 	validate: async function (frm) {
@@ -470,6 +475,66 @@ frappe.ui.form.on("Payment Entry", {
 			let payment_account_field = frm.doc.payment_type == "Receive" ? "paid_to" : "paid_from";
 			frm.set_value(payment_account_field, account);
 		});
+		frm.events.set_cheque_book(frm);
+	},
+
+	set_cheque_book: async function (frm, reset) {
+		const is_cheque = is_cheque_payment(frm);
+		frm.toggle_display("cheque_book", is_cheque);
+		if (frm.doc.docstatus !== 0) return;
+
+		if (!is_cheque || !frm.doc.paid_from) {
+			frm.set_value("cheque_book", "");
+			return;
+		}
+
+		if (frm.doc.cheque_book && !reset) {
+			frm.events.cheque_book(frm);
+			return;
+		}
+
+		const account = frm.doc.paid_from;
+		const { cheque_book } = await frappe.xcall(
+			"erpnext.accounts.doctype.cheque_book.cheque_book.get_next_cheque",
+			{ account }
+		);
+		// Paid From changed while waiting, a newer call will set the book
+		if (account !== frm.doc.paid_from) return;
+
+		if (cheque_book === frm.doc.cheque_book) {
+			frm.events.cheque_book(frm);
+		} else {
+			frm.set_value("cheque_book", cheque_book || "");
+		}
+	},
+
+	cheque_book: async function (frm) {
+		const cheque_book = frm.doc.cheque_book;
+		let cheque = {};
+		if (cheque_book) {
+			cheque = await frappe.xcall("erpnext.accounts.doctype.cheque_book.cheque_book.get_next_cheque", {
+				account: frm.doc.paid_from,
+				cheque_book,
+			});
+			if (cheque_book !== frm.doc.cheque_book) return;
+		}
+
+		let description = "";
+		if (cheque.cheque_no) {
+			description = __("Remaining: {0}", [cheque.remaining]);
+		} else if (frm.doc.cheque_book) {
+			description = __("No unused cheque left in this Cheque Book");
+		}
+		frm.set_df_property("cheque_book", "description", description);
+
+		// never overwrite a number typed by the user
+		if (!frm.doc.reference_no || frm.doc.reference_no === frm.suggested_cheque_no) {
+			frm.suggested_cheque_no = cheque.cheque_no;
+			frm.set_value("reference_no", cheque.cheque_no || "");
+			if (cheque.cheque_no && !frm.doc.reference_date) {
+				frm.set_value("reference_date", frm.doc.posting_date);
+			}
+		}
 	},
 
 	party_type: function (frm) {
@@ -609,6 +674,7 @@ frappe.ui.form.on("Payment Entry", {
 		if (frm.set_party_account_based_on_party) return;
 
 		frm.events.set_company_bank_account(frm);
+		frm.events.set_cheque_book(frm, true);
 
 		frm.events.set_account_currency_and_balance(
 			frm,
@@ -1751,8 +1817,8 @@ frappe.ui.form.on("Payment Entry", {
 		});
 	},
 
-	before_cancel: function (frm) {
-		return new Promise((resolve, reject) => {
+	before_cancel: async function (frm) {
+		await new Promise((resolve, reject) => {
 			frappe.call({
 				method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_linked_bank_transactions",
 				args: { payment_entry: frm.doc.name },
@@ -1778,6 +1844,63 @@ frappe.ui.form.on("Payment Entry", {
 				},
 			});
 		});
+		await frm.events.ask_cheque_cancellation(frm);
+	},
+
+	ask_cheque_cancellation: async function (frm) {
+		frm.cheque_cancellation = null;
+		if (!frm.doc.cheque_book) return;
+
+		await frappe.model.with_doctype("Cancelled Cheque");
+		return new Promise((resolve, reject) => {
+			let answered = false;
+			const dialog = new frappe.ui.Dialog({
+				title: __("Cheque {0}", [frm.doc.reference_no]),
+				// the reason list would otherwise open by itself, as the first input
+				no_focus: true,
+				fields: [
+					{
+						fieldname: "reason",
+						fieldtype: "Autocomplete",
+						label: __("Cancellation Reason"),
+						options: frappe.meta.get_docfield("Cancelled Cheque", "reason").options,
+						description: __(
+							"Leave empty if the cheque was never handed over, its number can then be used again."
+						),
+					},
+					{
+						fieldname: "remarks",
+						fieldtype: "Small Text",
+						label: __("Remarks"),
+						depends_on: "reason",
+					},
+				],
+				primary_action_label: __("Continue"),
+				primary_action(values) {
+					answered = true;
+					frm.cheque_cancellation = values.reason ? values : null;
+					dialog.hide();
+					resolve();
+				},
+			});
+			dialog.onhide = () => answered || reject();
+			dialog.show();
+		});
+	},
+
+	after_cancel: function (frm) {
+		if (!frm.cheque_cancellation) return;
+
+		frappe.db
+			.insert({
+				doctype: "Cancelled Cheque",
+				cheque_book: frm.doc.cheque_book,
+				cheque_no: frm.doc.reference_no,
+				payment_entry: frm.doc.name,
+				...frm.cheque_cancellation,
+			})
+			.then(() => frappe.show_alert({ message: __("Cheque marked as cancelled"), indicator: "green" }));
+		frm.cheque_cancellation = null;
 	},
 });
 
@@ -1942,6 +2065,15 @@ function prompt_for_missing_account(frm, account) {
 			__("Please Specify Account")
 		);
 	});
+}
+
+function is_cheque_payment(frm) {
+	// the setup wizard creates this Mode of Payment as __("Cheque"), "Check" in the US
+	const cheque_modes = ["Cheque", "Check", __("Cheque"), __("Check")];
+	return (
+		["Pay", "Internal Transfer"].includes(frm.doc.payment_type) &&
+		cheque_modes.includes(frm.doc.mode_of_payment)
+	);
 }
 
 function get_deduction_amount_precision() {
