@@ -479,8 +479,6 @@ class PurchaseReceipt(BuyingController):
 		return process_gl_map(gl_entries, from_repost=frappe.flags.through_repost_item_valuation)
 
 	def is_rejected_material_valued(self) -> bool:
-		"""Rejected material carries stock value when Buying Settings asks for it, and always on an
-		internal transfer, where that value is credited out of the in-transit warehouse."""
 		if self.is_internal_transfer():
 			return True
 
