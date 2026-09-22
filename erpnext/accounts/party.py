@@ -416,10 +416,19 @@ def get_permitted_price_lists(doctype=None):
 	)
 
 	# a permission applicable for another doctype doesn't restrict this transaction
-	if doctype:
-		return get_allowed_docs_for_doctype(permissions, doctype)
+	return get_allowed_docs_for_doctype(permissions, doctype)
 
-	return [p.get("doc") for p in permissions if p.get("doc")]
+
+def get_usable_price_list(price_lists, party_doctype):
+	"""Return the first price list that is enabled and valid for this side of the transaction."""
+	transaction_side = "selling" if party_doctype == "Customer" else "buying"
+
+	for price_list in price_lists:
+		details = frappe.get_cached_value(
+			"Price List", price_list, ["enabled", transaction_side], as_dict=True
+		)
+		if details.enabled and details[transaction_side]:
+			return price_list
 
 
 def set_price_list(party_details, party, party_type, given_price_list, pos=None, doctype=None):
@@ -440,9 +449,9 @@ def set_price_list(party_details, party, party_type, given_price_list, pos=None,
 	else:
 		price_list = get_default_price_list(party) or given_price_list
 
-	# don't set a price list the user has no permission for, the transaction can't be saved with it
-	if permitted_price_lists and price_list not in permitted_price_lists:
-		price_list = next((pl for pl in permitted_price_lists if is_price_list_enabled(pl)), None)
+		# don't set a price list the user has no permission for, the transaction can't be saved with it
+		if price_list and permitted_price_lists and price_list not in permitted_price_lists:
+			price_list = get_usable_price_list(permitted_price_lists, party.doctype) or price_list
 
 	if price_list and not is_price_list_enabled(price_list):
 		price_list = None
