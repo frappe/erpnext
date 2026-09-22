@@ -253,6 +253,10 @@ def make_reverse_journal_entry(source_name: str, target_doc: str | dict | Docume
 
 	def post_process(source, target) -> None:
 		target.reversal_of = source.name
+		target.naming_series = source.naming_series
+		if source.voucher_type == "Bank Entry":
+			target.cheque_no = source.cheque_no
+			target.cheque_date = source.cheque_date
 
 	doclist = get_mapped_doc(
 		"Journal Entry",
