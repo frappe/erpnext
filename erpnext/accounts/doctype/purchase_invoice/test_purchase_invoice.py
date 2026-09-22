@@ -858,12 +858,14 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 			existing_purchase_cost + 15500,
 		)
 
+		pi1.reload()
 		pi1.cancel()
 		self.assertEqual(
 			frappe.db.get_value("Project", project.name, "total_purchase_cost"),
 			existing_purchase_cost + 15000,
 		)
 
+		pi.reload()
 		pi.cancel()
 		self.assertEqual(
 			frappe.db.get_value("Project", project.name, "total_purchase_cost"), existing_purchase_cost
