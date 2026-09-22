@@ -82,7 +82,7 @@ class TestItemSearchIndex(ERPNextTestSuite):
 		index_docs_in_queue()
 		self.addCleanup(index_docs_in_queue)
 
-		self.assertIn("ZZ-BARCODE-PROBE", self.search.get_candidate_item_codes("8809988776655"))
+		self.assertIn("ZZ-BARCODE-PROBE", self.candidates("8809988776655"))
 		self.assertEqual(self.run_query("8809988776655", None), self.run_query("8809988776655", None, False))
 
 	def test_a_new_item_is_searchable_before_the_queue_drains(self):
@@ -99,7 +99,7 @@ class TestItemSearchIndex(ERPNextTestSuite):
 		self.addCleanup(index_docs_in_queue)
 		update_doc_index(item)
 
-		self.assertIn("ZZ-QUEUE-PROBE-4471", self.search.get_candidate_item_codes("4471"))
+		self.assertIn("ZZ-QUEUE-PROBE-4471", self.candidates("4471"))
 		self.assertEqual(self.run_query("4471", None), self.run_query("4471", None, False))
 
 	def test_vocabulary_is_not_built(self):
@@ -129,7 +129,7 @@ class TestItemSearchIndex(ERPNextTestSuite):
 		update_doc_index(item)
 		self.addCleanup(index_docs_in_queue)
 
-		self.assertIn("ZZ-CAFÉ-7781", self.search.get_candidate_item_codes("CAFE-7781"))
+		self.assertIn("ZZ-CAFÉ-7781", self.candidates("CAFE-7781"))
 		self.assertEqual(self.run_query("CAFE-7781", None), self.run_query("CAFE-7781", None, False))
 
 	def test_a_broken_index_falls_back_to_the_scan(self):
@@ -137,7 +137,7 @@ class TestItemSearchIndex(ERPNextTestSuite):
 		broken = MagicMock()
 		broken.execute.side_effect = sqlite3.DatabaseError("database disk image is malformed")
 		with patch.object(ItemSearch, "_get_connection", return_value=broken):
-			self.assertIsNone(self.search.get_candidate_item_codes("Test"))
+			self.assertIsNone(self.candidates("Test"))
 
 	def drifted_search(self) -> ItemSearch:
 		extra = [*self.search.schema["text_fields"], "a_new_custom_search_field"]
@@ -163,17 +163,32 @@ class TestItemSearchIndex(ERPNextTestSuite):
 		self.addCleanup(index_docs_in_queue)
 		index_docs_in_queue()
 
-		self.assertIn("ZZ-NO-BARCODE-3312", self.search.get_candidate_item_codes("3312"))
+		self.assertIn("ZZ-NO-BARCODE-3312", self.candidates("3312"))
 
 	def test_a_drifted_schema_reports_the_index_as_absent(self):
 		"""A site that adds an Item search field leaves the built table a column short."""
 		self.assertTrue(self.search.index_exists())
 		self.assertFalse(self.drifted_search().index_exists())
 
+	def test_a_search_field_outside_the_index_is_refused(self):
+		"""A caller may pass any Item field as searchfield, and the index carries only some."""
+		outside = "stock_uom"
+		self.assertNotIn(outside, self.search.indexed_fieldnames)
+
+		self.assertIsNone(self.candidates("Test", ["name", outside]))
+		self.assertIsNotNone(self.candidates("Test", ["name", "item_code"]))
+
+	def test_item_query_with_an_unindexed_searchfield_matches_the_scan(self):
+		"""Narrowing on a field the index does not carry would drop rows the scan returns."""
+		self.assertEqual(
+			self.run_query("Test", None, searchfield="stock_uom"),
+			self.run_query("Test", None, False, searchfield="stock_uom"),
+		)
+
 	def test_candidates_are_a_superset_of_the_scan(self):
 		"""The query re-filters, so extra candidates are safe but missing ones are not."""
 		for txt in ("Test", "Item", "est", "_Test"):
-			candidates = self.search.get_candidate_item_codes(txt)
+			candidates = self.candidates(txt)
 			self.assertIsNotNone(candidates, txt)
 			matched = frappe.get_all(
 				"Item",
@@ -199,7 +214,7 @@ class TestItemSearchIndex(ERPNextTestSuite):
 
 	def test_underscore_in_the_term_still_narrows(self):
 		"""_ is a LIKE wildcard, but the fragments around it are still indexable."""
-		candidates = self.search.get_candidate_item_codes("_Test Item")
+		candidates = self.candidates("_Test Item")
 		self.assertIsNotNone(candidates)
 		matched = frappe.get_all(
 			"Item",
@@ -232,9 +247,14 @@ class TestItemSearchIndex(ERPNextTestSuite):
 				scanned = self.run_query("Test", None, False, page_len=3, start=start)
 				self.assertEqual(indexed, scanned)
 
-	def run_query(self, txt, filters, use_index=True, page_len=20, start=0):
+	def candidates(self, txt, searched_fields=None):
+		return self.search.get_candidate_item_codes(
+			txt, searched_fields or ["name", "item_code", "item_name"]
+		)
+
+	def run_query(self, txt, filters, use_index=True, page_len=20, start=0, searchfield="name"):
 		if use_index:
-			return queries.item_query("Item", txt, "name", start, page_len, filters, as_dict=True)
+			return queries.item_query("Item", txt, searchfield, start, page_len, filters, as_dict=True)
 
 		with patch.object(queries, "get_item_search_candidates", return_value=None):
-			return queries.item_query("Item", txt, "name", start, page_len, filters, as_dict=True)
+			return queries.item_query("Item", txt, searchfield, start, page_len, filters, as_dict=True)
