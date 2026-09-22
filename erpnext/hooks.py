@@ -32,6 +32,9 @@ navigation_item_resolvers = {
 	"Default Company": "erpnext.setup.navigation_item_type.default_company.default_company"
 }
 
+# desk v2 only: the names a stored Client Script may import from ERPNext.
+import_map = {"erpnext/lib": "./frontend/lib/index.js"}
+
 add_to_apps_screen = [
 	{
 		"name": app_name,
