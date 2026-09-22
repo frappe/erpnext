@@ -2219,6 +2219,140 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 		self.assertEqual(sles[0].qty_after_transaction, 0)
 		self.assertEqual(flt(sles[0].stock_value_difference), -100.0)
 
+	def test_adjustment_entry_clears_value_stranded_at_zero_qty(self):
+		"""bal_qty 0 with bal_val 500: the write-off has to bring the reported value to zero."""
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		from erpnext.stock.report.stock_balance.stock_balance import execute
+
+		item_code = self.make_item("Test Stock Reco Stranded Value Non Batch").name
+		warehouse = "_Test Warehouse - _TC"
+
+		receipt = make_stock_entry(
+			item_code=item_code,
+			target=warehouse,
+			qty=10,
+			basic_rate=100,
+			posting_date=add_days(nowdate(), -3),
+		)
+		make_stock_entry(item_code=item_code, source=warehouse, qty=10, posting_date=add_days(nowdate(), -2))
+
+		# strand 500 of value: qty nets out, stock_value_difference does not
+		receipt_sle = frappe.db.get_value(
+			"Stock Ledger Entry", {"voucher_no": receipt.name, "is_cancelled": 0}, "name"
+		)
+		frappe.db.set_value(
+			"Stock Ledger Entry",
+			receipt_sle,
+			"stock_value_difference",
+			flt(frappe.db.get_value("Stock Ledger Entry", receipt_sle, "stock_value_difference")) + 500,
+			update_modified=False,
+		)
+
+		report_filters = frappe._dict(
+			{"item_code": [item_code], "warehouse": [warehouse], "company": "_Test Company"}
+		)
+
+		# this is what the user sees before the reconciliation
+		_columns, data = execute(filters=report_filters)
+		self.assertEqual(flt(data[0].get("bal_qty")), 0.0)
+		self.assertEqual(flt(data[0].get("bal_val")), 500.0)
+
+		sr = create_stock_reconciliation(
+			item_code=item_code, warehouse=warehouse, qty=0, rate=0, do_not_save=1
+		)
+		sr.items[0].allow_zero_valuation_rate = 1
+		sr.save()
+		sr.submit()
+
+		sles = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_no": sr.name, "is_cancelled": 0},
+			fields=["actual_qty", "qty_after_transaction", "stock_value_difference", "is_adjustment_entry"],
+		)
+
+		self.assertEqual(len(sles), 1)
+		self.assertEqual(sles[0].is_adjustment_entry, 1)
+		self.assertEqual(flt(sles[0].actual_qty), 0.0)
+		self.assertEqual(flt(sles[0].qty_after_transaction), 0.0)
+		self.assertEqual(flt(sles[0].stock_value_difference), -500.0)
+
+		# the report, and the GL basis behind it, both land on zero
+		# (the row drops out entirely once every figure on it is zero)
+		_columns, data = execute(filters=report_filters)
+		self.assertEqual(flt(data[0].get("bal_val")) if data else 0.0, 0.0)
+		self.assertEqual(
+			flt(get_stock_value_on(warehouses=warehouse, posting_date=nowdate(), item_code=item_code)),
+			0.0,
+		)
+
+	def test_adjustment_entry_does_not_zero_out_backdated_stock(self):
+		"""An adjustment entry restates value, so a backdated receipt posted before it must survive."""
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		item_code = self.make_item("Test Stock Reco Backdated Adjustment").name
+		warehouse = "_Test Warehouse - _TC"
+
+		receipt = make_stock_entry(
+			item_code=item_code,
+			target=warehouse,
+			qty=10,
+			basic_rate=100,
+			posting_date=add_days(nowdate(), -10),
+		)
+		make_stock_entry(item_code=item_code, source=warehouse, qty=10, posting_date=add_days(nowdate(), -9))
+
+		# strand 100 of value on the ledger: qty nets out, stock_value_difference does not
+		outgoing_sle = frappe.db.get_value(
+			"Stock Ledger Entry", {"voucher_no": receipt.name, "is_cancelled": 0}, "name"
+		)
+		frappe.db.set_value(
+			"Stock Ledger Entry",
+			outgoing_sle,
+			"stock_value_difference",
+			flt(frappe.db.get_value("Stock Ledger Entry", outgoing_sle, "stock_value_difference")) + 100,
+			update_modified=False,
+		)
+
+		sr = create_stock_reconciliation(
+			item_code=item_code,
+			warehouse=warehouse,
+			qty=0,
+			rate=0,
+			posting_date=add_days(nowdate(), -5),
+			do_not_save=1,
+		)
+		sr.items[0].allow_zero_valuation_rate = 1
+		sr.save()
+		sr.submit()
+
+		self.assertTrue(
+			frappe.db.exists("Stock Ledger Entry", {"voucher_no": sr.name, "is_adjustment_entry": 1})
+		)
+
+		# a backdated receipt lands before the write-off
+		make_stock_entry(
+			item_code=item_code, target=warehouse, qty=4, basic_rate=50, posting_date=add_days(nowdate(), -7)
+		)
+
+		adjustment_sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": sr.name, "is_cancelled": 0},
+			["qty_after_transaction", "stock_value", "stock_value_difference", "valuation_rate"],
+			as_dict=True,
+		)
+
+		# the backdated stock is carried through the adjustment entry, not wiped out by it
+		self.assertEqual(flt(adjustment_sle.qty_after_transaction), 4.0)
+		self.assertEqual(flt(adjustment_sle.stock_value), 200.0)
+		self.assertEqual(flt(adjustment_sle.valuation_rate), 50.0)
+
+		# and the write-off still lands the running ledger value on the stock value it holds
+		self.assertEqual(
+			flt(get_stock_value_on(warehouses=warehouse, posting_date=nowdate(), item_code=item_code)),
+			200.0,
+		)
+		self.assertEqual(get_stock_balance(item_code, warehouse), 4.0)
+
 
 def create_batch_item_with_batch(item_name, batch_id):
 	batch_item_doc = create_item(item_name, is_stock_item=1)
