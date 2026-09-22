@@ -117,19 +117,31 @@ class Issue(Document):
 		communication.flags.ignore_mandatory = True
 		communication.save()
 
-	def get_timeline_communications(self, after=None):
+	def get_timeline_communications(self, after=None, after_name=None):
 		"""Return the Communications on this Issue's timeline, split by how they are attached.
 
 		Mirrors the two sources `frappe.desk.form.load.get_communication_data` reads, since
 		Split is offered on every timeline item. `after` matches `communication_date`, what
 		the timeline is ordered by, not `creation`: a pulled email is created when fetched.
+
+		`communication_date` is not unique and the timeline carries no secondary sort, so the
+		boundary is the pair (communication_date, name) rather than the date alone. Without the
+		tie-break, two messages written in the same second both move however the split point was
+		chosen, and one of them can be a message shown below it.
 		"""
 		date_filter = {"communication_date": (">=", after)} if after else {}
 
-		referenced = frappe.get_all(
-			"Communication",
-			filters={"reference_doctype": "Issue", "reference_name": self.name, **date_filter},
-			pluck="name",
+		def at_or_after(rows):
+			if not after or not after_name:
+				return {row.name for row in rows}
+			return {row.name for row in rows if (row.communication_date, row.name) >= (after, after_name)}
+
+		referenced = at_or_after(
+			frappe.get_all(
+				"Communication",
+				filters={"reference_doctype": "Issue", "reference_name": self.name, **date_filter},
+				fields=["name", "communication_date"],
+			)
 		)
 
 		link_parents = frappe.get_all(
@@ -138,16 +150,18 @@ class Issue(Document):
 			pluck="parent",
 		)
 		linked = (
-			frappe.get_all(
-				"Communication",
-				filters={"name": ("in", link_parents), **date_filter},
-				pluck="name",
+			at_or_after(
+				frappe.get_all(
+					"Communication",
+					filters={"name": ("in", link_parents), **date_filter},
+					fields=["name", "communication_date"],
+				)
 			)
 			if link_parents
-			else []
+			else set()
 		)
 
-		return set(referenced), set(linked)
+		return referenced, linked
 
 	@frappe.whitelist()
 	def split_issue(self, subject: str, communication_id: str):
@@ -187,7 +201,9 @@ class Issue(Document):
 
 		# Move the whole timeline from the split point on: Communications referencing this Issue and those
 		# joined to it only through a Timeline Link.
-		referenced, linked = self.get_timeline_communications(after=comm_to_split_from.communication_date)
+		referenced, linked = self.get_timeline_communications(
+			after=comm_to_split_from.communication_date, after_name=comm_to_split_from.name
+		)
 
 		for name in sorted(referenced | linked):
 			doc = frappe.get_doc("Communication", name)

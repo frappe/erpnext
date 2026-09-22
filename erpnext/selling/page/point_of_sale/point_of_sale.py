@@ -125,10 +125,14 @@ def check_pos_profile_access(pos_profile):
 	"""The POS Profile is what entitles a caller to POS data — see the Bin/Item analysis on
 	pos_invoice.get_stock_availability. Record-level when a profile is named, so a Company User
 	Permission applies too."""
+	# select-or-read: a bare check defaults to `read`, and the shipped POS Profile rows give Sales
+	# Manager only `select`. Defaulting to read denies the role the page exists for.
+	ptype = "select" if frappe.only_has_select_perm("POS Profile") else "read"
+
 	if isinstance(pos_profile, str) and pos_profile:
-		frappe.has_permission("POS Profile", doc=pos_profile, throw=True)
+		frappe.has_permission("POS Profile", ptype, doc=pos_profile, throw=True)
 	else:
-		frappe.has_permission("POS Profile", throw=True)
+		frappe.has_permission("POS Profile", ptype, throw=True)
 
 
 @frappe.whitelist()

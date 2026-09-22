@@ -1317,6 +1317,7 @@ def is_cwip_accounting_enabled(asset_category):
 
 @frappe.whitelist()
 def get_asset_value_after_depreciation(asset_name, finance_book=None):
+	"""Whitelisted entry point: authorise the caller, then return the value."""
 	# one of the three calling forms is the boundary; Asset itself excludes the roles holding Asset Value Adjustment write
 	if not any(
 		frappe.has_permission(dt, "write")
@@ -1324,6 +1325,15 @@ def get_asset_value_after_depreciation(asset_name, finance_book=None):
 	):
 		frappe.throw(_("Not permitted"), frappe.PermissionError)
 
+	# select-or-read: these roles hold `select` on Asset, which does not satisfy a `read` check.
+	# Guard only here -- the in-process callers use _get_asset_value_after_depreciation() below.
+	ptype = "select" if frappe.only_has_select_perm("Asset") else "read"
+	frappe.has_permission("Asset", ptype, doc=asset_name, throw=True)
+
+	return _get_asset_value_after_depreciation(asset_name, finance_book)
+
+
+def _get_asset_value_after_depreciation(asset_name, finance_book=None):
 	asset = frappe.get_doc("Asset", asset_name)
 
 	if not asset.calculate_depreciation:
@@ -1353,7 +1363,9 @@ def get_values_from_purchase_doc(purchase_doc_name: str, item_code: str, doctype
 	# nor Purchase Invoice, so the purchase document cannot be it.
 	frappe.has_permission("Asset", "write", throw=True)
 
-	purchase_doc = frappe.get_doc(doctype, purchase_doc_name)
+	# and the purchase document itself, whose company, posting date and amount are returned below.
+	# Asset write is not authority to read a Purchase Receipt or Invoice.
+	purchase_doc = frappe.get_doc(doctype, purchase_doc_name, check_permission="read")
 
 	matching_items = [item for item in purchase_doc.items if item.item_code == item_code]
 

@@ -256,7 +256,25 @@ def get_incoming_rate(args: dict | str, raise_error_if_no_rate: bool = True, fal
 
 	# `select`, not `read`: reached from every sales and buying form, and Accounts Manager holds no
 	# Item read. doc= so the named item is checked, not merely the doctype.
-	frappe.has_permission("Item", ptype="select", throw=True)
+	item_code = args.get("item_code") if isinstance(args, dict | frappe._dict) else None
+	warehouse = args.get("warehouse") if isinstance(args, dict | frappe._dict) else None
+
+	if item_code:
+		frappe.has_permission("Item", ptype="select", doc=item_code, throw=True)
+	else:
+		frappe.has_permission("Item", ptype="select", throw=True)
+
+	# the warehouse is scoped by User Permissions alone, not by a permission on Warehouse: Accounts
+	# Manager reaches this from every sales and buying form and holds neither read nor select on
+	# Warehouse, so a check on the doctype would deny the role this endpoint exists for. This costs
+	# nobody who holds no Warehouse User Permission.
+	if warehouse:
+		from frappe.permissions import get_allowed_docs_for_doctype, get_user_permissions
+
+		if warehouse_permissions := get_user_permissions(frappe.session.user).get("Warehouse"):
+			allowed_warehouses = get_allowed_docs_for_doctype(warehouse_permissions, "Item")
+			if allowed_warehouses and warehouse not in allowed_warehouses:
+				frappe.throw(_("Not permitted for {0}").format(warehouse), frappe.PermissionError)
 
 	return _get_incoming_rate(args, raise_error_if_no_rate, fallbacks)
 
