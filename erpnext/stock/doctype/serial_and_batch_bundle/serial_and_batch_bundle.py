@@ -870,6 +870,16 @@ class SerialandBatchBundle(Document):
 
 		return return_against
 
+	def is_material_from_in_transit_warehouse(self) -> bool:
+		"""Material of an internal transfer carries the value it had in the in-transit warehouse,
+		rejected or not, because that warehouse is credited for all of it."""
+		if self.voucher_type != "Purchase Receipt" or not self.voucher_detail_no:
+			return False
+
+		return bool(
+			frappe.get_cached_value(self.voucher_type + " Item", self.voucher_detail_no, "from_warehouse")
+		)
+
 	def set_incoming_rate_for_inward_transaction(self, row=None, save=False, prev_sle=None):
 		from erpnext.stock.utils import get_valuation_method
 
@@ -930,6 +940,15 @@ class SerialandBatchBundle(Document):
 			"Buying Settings", "set_valuation_rate_for_rejected_materials"
 		)
 
+		values_rejected_material = (
+			set_valuation_rate_for_rejected_materials or self.is_material_from_in_transit_warehouse()
+		)
+
+		if self.is_rejected and self.is_material_from_in_transit_warehouse():
+			# Rejected material of a transfer keeps the value it had in transit. A charge spread
+			# over the accepted quantity does not belong to it.
+			rate = flt(self.get_transit_rate(row)) or rate
+
 		transfer_rates = self.get_transfer_rates()
 		precision = frappe.get_precision("Serial and Batch Entry", "incoming_rate")
 		for d in self.entries:
@@ -937,7 +956,7 @@ class SerialandBatchBundle(Document):
 
 			entry_rate = transfer_rates.get((d.serial_no, d.batch_no), rate)
 
-			if self.is_rejected and not set_valuation_rate_for_rejected_materials:
+			if self.is_rejected and not values_rejected_material:
 				entry_rate = 0.0
 			elif (
 				(flt(d.incoming_rate, precision) == flt(entry_rate, precision))
@@ -1280,6 +1299,16 @@ class SerialandBatchBundle(Document):
 				fields=["serial_no", "batch_no", "incoming_rate"],
 			)
 		}
+
+	def get_transit_rate(self, row) -> float:
+		"""What the material was worth on its way into the in-transit warehouse."""
+		if row and row.get("sales_incoming_rate"):
+			return flt(row.get("sales_incoming_rate"))
+
+		if not (self.voucher_detail_no and self.voucher_no):
+			return 0.0
+
+		return flt(frappe.db.get_value(self.child_table, self.voucher_detail_no, "sales_incoming_rate"))
 
 	def get_qty_field(self, row, qty_field=None) -> str:
 		if not qty_field:
