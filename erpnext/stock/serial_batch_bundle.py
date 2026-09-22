@@ -110,21 +110,30 @@ class SerialBatchBundle:
 			return True
 
 	def get_transit_package(self) -> str | None:
-		"""Package a delivery sends to its in-transit warehouse."""
 		if self.sle.is_cancelled or self.sle.voucher_type not in ["Delivery Note", "Sales Invoice"]:
 			return None
 
-		row = frappe.db.get_value(
-			self.child_doctype,
-			self.sle.voucher_detail_no,
-			["target_warehouse", "serial_and_batch_bundle"],
-			as_dict=True,
-		)
-
+		row = self.get_delivered_row()
 		if row and row.target_warehouse == self.sle.warehouse:
 			return row.serial_and_batch_bundle
 
 		return None
+
+	def get_delivered_row(self):
+		fields = ["target_warehouse", "serial_and_batch_bundle"]
+
+		if self.is_packed_entry():
+			return frappe.db.get_value(
+				"Packed Item",
+				{
+					"parent_detail_docname": self.sle.voucher_detail_no,
+					"item_code": self.sle.item_code,
+				},
+				fields,
+				as_dict=True,
+			)
+
+		return frappe.db.get_value(self.child_doctype, self.sle.voucher_detail_no, fields, as_dict=True)
 
 	def make_serial_batch_no_bundle_for_material_transfer(self, bundle):
 		from erpnext.controllers.stock_controller import make_bundle_for_material_transfer
