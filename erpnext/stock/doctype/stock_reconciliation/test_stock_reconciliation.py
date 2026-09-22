@@ -2442,11 +2442,11 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			0.0,
 		)
 
-	def test_adjustment_entry_does_not_zero_out_backdated_stock(self):
-		"""An adjustment entry restates value, so a backdated receipt posted before it must survive."""
+	def _make_backdated_adjustment_scenario(self, item_name, valuation_method):
+		"""Strand 100 of value at zero qty, write it off, then backdate a receipt before the write-off."""
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
-		item_code = self.make_item("Test Stock Reco Backdated Adjustment").name
+		item_code = self.make_item(item_name, {"valuation_method": valuation_method}).name
 		warehouse = "_Test Warehouse - _TC"
 
 		receipt = make_stock_entry(
@@ -2459,14 +2459,14 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 		make_stock_entry(item_code=item_code, source=warehouse, qty=10, posting_date=add_days(nowdate(), -9))
 
 		# strand 100 of value on the ledger: qty nets out, stock_value_difference does not
-		outgoing_sle = frappe.db.get_value(
+		receipt_sle = frappe.db.get_value(
 			"Stock Ledger Entry", {"voucher_no": receipt.name, "is_cancelled": 0}, "name"
 		)
 		frappe.db.set_value(
 			"Stock Ledger Entry",
-			outgoing_sle,
+			receipt_sle,
 			"stock_value_difference",
-			flt(frappe.db.get_value("Stock Ledger Entry", outgoing_sle, "stock_value_difference")) + 100,
+			flt(frappe.db.get_value("Stock Ledger Entry", receipt_sle, "stock_value_difference")) + 100,
 			update_modified=False,
 		)
 
@@ -2488,9 +2488,16 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 
 		# a backdated receipt lands before the write-off
 		make_stock_entry(
-			item_code=item_code, target=warehouse, qty=4, basic_rate=50, posting_date=add_days(nowdate(), -7)
+			item_code=item_code,
+			target=warehouse,
+			qty=4,
+			basic_rate=50,
+			posting_date=add_days(nowdate(), -7),
 		)
 
+		return item_code, warehouse, sr
+
+	def _assert_backdated_stock_survives(self, item_code, warehouse, sr):
 		adjustment_sle = frappe.db.get_value(
 			"Stock Ledger Entry",
 			{"voucher_no": sr.name, "is_cancelled": 0},
@@ -2509,6 +2516,46 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			200.0,
 		)
 		self.assertEqual(get_stock_balance(item_code, warehouse), 4.0)
+
+	def test_adjustment_entry_does_not_zero_out_backdated_stock(self):
+		"""An adjustment entry restates value, so a backdated receipt posted before it must survive."""
+		item_code, warehouse, sr = self._make_backdated_adjustment_scenario(
+			"Test Stock Reco Backdated Adjustment", "FIFO"
+		)
+		self._assert_backdated_stock_survives(item_code, warehouse, sr)
+
+	def test_adjustment_entry_does_not_zero_out_backdated_stock_moving_average(self):
+		"""Same, through the moving average path rather than the queue."""
+		item_code, warehouse, sr = self._make_backdated_adjustment_scenario(
+			"Test Stock Reco Backdated Adjustment MA", "Moving Average"
+		)
+		self._assert_backdated_stock_survives(item_code, warehouse, sr)
+
+	def test_cancelling_adjustment_entry_shifts_no_qty(self):
+		"""Reversing a value-only entry must not push the preserved quantity into later entries."""
+		from erpnext.stock.stock_ledger import get_stock_reco_qty_shift
+
+		_item_code, _warehouse, sr = self._make_backdated_adjustment_scenario(
+			"Test Stock Reco Adjustment Cancel", "FIFO"
+		)
+
+		sr.reload()
+		row = sr.items[0]
+
+		# the refreshed document reports the balance the ledger carries and no quantity movement
+		self.assertEqual(flt(row.current_qty), 4.0)
+		self.assertEqual(flt(row.quantity_difference), 0.0)
+		self.assertEqual(flt(row.current_valuation_rate), 50.0)
+		self.assertEqual(flt(row.current_amount), 200.0)
+		self.assertEqual(flt(row.amount_difference), -100.0)
+
+		# the reversal built on cancellation moves nothing, so later entries are not shifted
+		sr.docstatus = 2
+		args = sr.get_sle_for_items(row)
+		args.actual_qty = -flt(args.actual_qty)  # as make_sl_entries flips it for a cancellation
+
+		self.assertEqual(flt(args.actual_qty), 0.0)
+		self.assertEqual(flt(get_stock_reco_qty_shift(args)), 0.0)
 
 
 def create_batch_item_with_batch(item_name, batch_id):
