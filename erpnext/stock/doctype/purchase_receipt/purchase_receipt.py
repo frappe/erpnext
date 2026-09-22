@@ -478,6 +478,16 @@ class PurchaseReceipt(BuyingController):
 
 		return process_gl_map(gl_entries, from_repost=frappe.flags.through_repost_item_valuation)
 
+	def is_rejected_material_valued(self) -> bool:
+		"""Rejected material carries stock value when Buying Settings asks for it, and always on an
+		internal transfer, where that value is credited out of the in-transit warehouse."""
+		if self.is_internal_transfer():
+			return True
+
+		return bool(
+			frappe.db.get_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials")
+		)
+
 	def make_item_gl_entries(self, gl_entries, inventory_account_map=None):
 		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import (
 			get_purchase_document_details,
@@ -544,8 +554,10 @@ class PurchaseReceipt(BuyingController):
 				outgoing_amount = abs(get_stock_value_difference(self.name, item.name, item.from_warehouse))
 				credit_amount = outgoing_amount
 
-			if item.get("rejected_qty") and frappe.db.get_single_value(
-				"Buying Settings", "set_valuation_rate_for_rejected_materials"
+			if (
+				item.get("rejected_qty")
+				and not self.is_internal_transfer()
+				and frappe.db.get_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials")
 			):
 				outgoing_amount += get_stock_value_difference(self.name, item.name, item.rejected_warehouse)
 				credit_amount = outgoing_amount
@@ -701,9 +713,7 @@ class PurchaseReceipt(BuyingController):
 				valuation_amount_as_per_doc - flt(stock_value_diff), item.precision("base_net_amount")
 			)
 
-			if item.get("rejected_qty") and frappe.db.get_single_value(
-				"Buying Settings", "set_valuation_rate_for_rejected_materials"
-			):
+			if item.get("rejected_qty") and self.is_rejected_material_valued():
 				rejected_item_cost = get_stock_value_difference(self.name, item.name, item.rejected_warehouse)
 				divisional_loss -= rejected_item_cost
 
@@ -813,9 +823,7 @@ class PurchaseReceipt(BuyingController):
 			if d.is_fixed_asset and d.landed_cost_voucher_amount:
 				self.update_assets(d, d.valuation_rate)
 
-			if d.rejected_qty and frappe.db.get_single_value(
-				"Buying Settings", "set_valuation_rate_for_rejected_materials"
-			):
+			if d.rejected_qty and self.is_rejected_material_valued():
 				stock_asset_rbnb = (
 					self.get_company_default("asset_received_but_not_billed")
 					if d.is_fixed_asset
