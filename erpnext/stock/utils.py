@@ -441,14 +441,6 @@ def is_serial_no_wise_valuation_disabled(item_code) -> bool:
 
 @frappe.request_cache
 def get_valuation_method(item_code, company=None):
-	"""get valuation method from item or default"""
-	# Per serial no costs are not tracked when serial no wise valuation is disabled, so such
-	# items are always valued at Moving Average. The stored method is only forced to Moving
-	# Average on save once stock exists, which leaves the first transaction reading FIFO, LIFO
-	# or Standard Cost off the item, so coerce the effective method here as well.
-	if is_serial_no_wise_valuation_disabled(item_code):
-		return "Moving Average"
-
 	val_method = frappe.get_cached_value("Item", item_code, "valuation_method")
 	if not val_method:
 		val_method = (

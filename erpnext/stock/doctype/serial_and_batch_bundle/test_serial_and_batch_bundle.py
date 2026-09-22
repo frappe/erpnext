@@ -1978,25 +1978,45 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 		self.assertEqual(item.valuation_method, "FIFO")
 
 	def test_first_transaction_uses_moving_average_when_disabled(self):
+		from collections import defaultdict
+
 		from erpnext.stock.utils import get_valuation_method
 
 		item = self.make_serial_item_for_valuation("_Test Serial Wise Valuation First Txn", 0)
+		warehouse = "_Test Warehouse - _TC"
 
 		item.reload()
 		item.valuation_method = "FIFO"
 		item.save()
 
-		# FIFO may be stored while no stock exists, but the effective method must already be
-		# Moving Average so the first transaction does not build a FIFO queue. The item is not
-		# saved by posting stock, so the stored method stays FIFO until someone edits the item.
+		previous_cache = getattr(frappe.local, "request_cache", None)
+		self.addCleanup(setattr, frappe.local, "request_cache", previous_cache)
+		frappe.local.request_cache = defaultdict(dict)
+
+		# Any method may be stored and used while the item has no ledger. Reading it here also
+		# primes the request cache with FIFO, the way validate() does before entries exist.
 		self.assertEqual(item.valuation_method, "FIFO")
-		self.assertEqual(get_valuation_method(item.name), "Moving Average")
+		self.assertEqual(get_valuation_method(item.name), "FIFO")
 
-		self.receive_serial_stock(item.name, 1, 100, "_Test Warehouse - _TC")
+		serial_nos = self.receive_serial_stock(item.name, 1, 100, warehouse)
+		self.receive_serial_stock(item.name, 1, 200, warehouse)
 
+		# The issue must be valued at the moving average of 150, not the FIFO rate of 100, even
+		# though the cache primed above still holds FIFO.
+		entry = self.issue_serial_no(item.name, serial_nos[0], warehouse)
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": entry.name, "is_cancelled": 0},
+			"stock_value_difference",
+		)
+		self.assertEqual(flt(stock_value_difference, 2), -100.0)
+
+		# Posting stock does not save the item, so the stored method stays FIFO while the
+		# effective method is Moving Average now that a ledger exists.
 		item.reload()
 		self.assertEqual(item.valuation_method, "FIFO")
-		self.assertEqual(get_valuation_method(item.name), "Moving Average")
+		frappe.local.request_cache = defaultdict(dict)
+		self.assertEqual(get_valuation_method(item.name), "FIFO")
 
 	def test_legacy_serial_no_lookup_is_case_insensitive(self):
 		# MariaDB matches serial_no under a case insensitive collation, PostgreSQL does not.
