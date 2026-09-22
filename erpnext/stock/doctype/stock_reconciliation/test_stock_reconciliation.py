@@ -1324,6 +1324,39 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			self.assertAlmostEqual(row.incoming_rate, 1000.00)
 			self.assertEqual(row.serial_no, serial_nos[row.idx - 1])
 
+	def test_opening_stock_reco_for_serial_nos_without_stock(self):
+		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import make_serial_nos
+
+		item = self.make_item(
+			"Test Serial No Item Opening Stock Not Reconcile All",
+			{
+				"is_stock_item": 1,
+				"has_serial_no": 1,
+				"serial_no_series": "SNN-TEST-OPENING-NRALL-S-.###",
+			},
+		)
+
+		warehouse = "_Test Warehouse - _TC"
+		serial_nos = [f"SNN-TEST-OPENING-NRALL-{idx}" for idx in range(1, 6)]
+		make_serial_nos(item.name, [{"serial_no": serial_no} for serial_no in serial_nos])
+
+		with self.change_settings("Stock Settings", {"allow_negative_stock": 0}):
+			sr = create_stock_reconciliation(
+				item_code=item.name,
+				warehouse=warehouse,
+				qty=5,
+				rate=100,
+				purpose="Opening Stock",
+				expense_account="Temporary Opening - _TC",
+				reconcile_all_serial_batch=0,
+				serial_no=serial_nos,
+			)
+
+		self.assertEqual(sr.docstatus, 1)
+		self.assertEqual(sr.items[0].current_qty, 0)
+		self.assertFalse(sr.items[0].current_serial_and_batch_bundle)
+		self.assertEqual(get_stock_balance(item.name, warehouse), 5)
+
 	def test_stock_reco_with_legacy_batch(self):
 		from erpnext.stock.doctype.batch.batch import get_batch_qty
 
