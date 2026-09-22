@@ -77,3 +77,14 @@ class BuyingSettings(Document):
 	def check_maintain_same_rate(self):
 		if self.maintain_same_rate:
 			self.set_landed_cost_based_on_purchase_invoice_rate = 0
+
+
+def is_rejected_material_valued(voucher_type: str) -> bool:
+	"""Rejected material carries stock value only when something is going to pay for it. A Purchase
+	Receipt books it against Stock Received But Not Billed, so the supplier still owes an invoice for
+	it. A stock updating Purchase Invoice bills the accepted quantity alone, so its rejected material
+	has no cost to carry."""
+	if voucher_type == "Purchase Invoice":
+		return False
+
+	return bool(frappe.db.get_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials"))
