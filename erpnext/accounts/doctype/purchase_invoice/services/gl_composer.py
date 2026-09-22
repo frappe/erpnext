@@ -216,6 +216,11 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 						if doc.is_internal_supplier and item.valuation_rate:
 							credit_amount = flt(item.valuation_rate * item.stock_qty)
 
+						rejected_amount = self.make_rejected_warehouse_gl_entry(
+							gl_entries, item, voucher_wise_stock_value, inventory_account_map
+						)
+						credit_amount += rejected_amount
+
 						# Intentionally passed negative debit amount to avoid incorrect GL Entry validation
 						gl_entries.append(
 							self.get_gl_dict(
@@ -563,6 +568,40 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 		)
 
 		return stock_asset_rbnb or item.expense_account
+
+	def make_rejected_warehouse_gl_entry(
+		self, gl_entries, item, voucher_wise_stock_value, inventory_account_map
+	) -> float:
+		"""Book the rejected material of an internal transfer, whose value was credited out of the
+		in-transit warehouse along with the accepted material."""
+		doc = self.doc
+		if not (doc.is_internal_transfer() and flt(item.rejected_qty) and item.rejected_warehouse):
+			return 0.0
+
+		rejected_amount = flt(
+			voucher_wise_stock_value.get((item.name, item.rejected_warehouse)),
+			item.precision("base_net_amount"),
+		)
+		if not rejected_amount:
+			return 0.0
+
+		_inv_dict = doc.get_inventory_account_dict(item, inventory_account_map, "rejected_warehouse")
+		gl_entries.append(
+			self.get_gl_dict(
+				{
+					"account": _inv_dict["account"],
+					"against": item.expense_account,
+					"cost_center": item.cost_center,
+					"project": item.project or doc.project,
+					"remarks": doc.get("remarks") or _("Accounting Entry for Stock"),
+					"debit": rejected_amount,
+				},
+				_inv_dict["account_currency"],
+				item=item,
+			)
+		)
+
+		return rejected_amount
 
 	def make_stock_adjustment_entry(self, gl_entries, item, voucher_wise_stock_value, account_currency):
 		doc = self.doc
