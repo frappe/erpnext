@@ -73,6 +73,18 @@ class PartyTestCase(ERPNextTestSuite):
 
 		self.assertEqual(party_details.selling_price_list, given_price_list)
 
+	def test_a_single_permitted_price_list_should_fit_the_transaction(self):
+		buying_price_list = self.create_price_list(enabled=1, selling=0, buying=1)
+		user = self.create_user_with_price_list_permissions([buying_price_list])
+		customer = self.create_customer()
+		given_price_list = self.create_price_list(enabled=1)
+
+		party_details = frappe._dict()
+		with self.set_user(user):
+			set_price_list(party_details, customer, "Customer", given_price_list, doctype="Sales Order")
+
+		self.assertIsNone(party_details.selling_price_list)
+
 	def test_buying_transaction_should_not_take_a_selling_price_list(self):
 		permitted = [self.create_price_list(enabled=1) for _ in range(2)]
 		user = self.create_user_with_price_list_permissions(permitted)
