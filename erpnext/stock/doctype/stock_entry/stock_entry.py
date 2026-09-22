@@ -4318,7 +4318,6 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 
 @frappe.whitelist()
-<<<<<<< HEAD
 def move_sample_to_retention_warehouse(company, items):
 	from erpnext.stock.serial_batch_bundle import (
 		SerialBatchCreation,
@@ -4401,15 +4400,12 @@ def move_sample_to_retention_warehouse(company, items):
 
 @frappe.whitelist()
 def make_stock_in_entry(source_name, target_doc=None):
-=======
-def make_stock_in_entry(source_name: str, target_doc: str | dict | Document | None = None):
 	qty_precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
 
 	def get_remaining_transfer_qty(source_doc):
 		remaining_qty = flt(source_doc.transfer_qty) - flt(source_doc.transferred_qty)
 		return flt(remaining_qty, qty_precision)
 
->>>>>>> d2b1965 (fix(stock): compare transit quantities in stock UOM (#59202))
 	def set_missing_values(source, target):
 		target.stock_entry_type = "Material Transfer"
 		target.set_missing_values()
