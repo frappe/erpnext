@@ -14,13 +14,10 @@ APP = frappe.get_app_path("erpnext")
 
 class TestDeskV2Publishing(UnitTestCase):
 	def test_the_published_name_points_at_a_file(self):
-		import_map = {}
-		for hook in frappe.get_hooks("import_map", app_name="erpnext", default=[]):
-			import_map.update(hook)
+		targets = frappe.get_hooks("import_map", app_name="erpnext", default={}).get("erpnext/lib")
 
-		target = import_map.get("erpnext/lib")
-		self.assertTrue(target, "hooks.py publishes no erpnext/lib")
-		self.assertTrue(os.path.isfile(os.path.join(APP, target)))
+		self.assertTrue(targets, "hooks.py publishes no erpnext/lib")
+		self.assertTrue(os.path.isfile(os.path.join(APP, targets[-1])))
 
 	def test_the_preset_is_an_es_module_that_only_extends(self):
 		with open(os.path.join(APP, "frontend", "tailwind.preset.js")) as handle:
