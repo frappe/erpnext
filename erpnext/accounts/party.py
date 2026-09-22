@@ -417,16 +417,10 @@ def set_price_list(party_details, party, party_type, given_price_list, pos=None,
 	else:
 		price_list = get_default_price_list(party) or given_price_list
 
-<<<<<<< HEAD
-=======
 		# don't set a price list the user has no permission for, the transaction can't be saved with it
 		if price_list and permitted_price_lists and price_list not in permitted_price_lists:
 			price_list = get_usable_price_list(permitted_price_lists, party.doctype)
 
-	if price_list and not is_price_list_enabled(price_list):
-		price_list = None
-
->>>>>>> e814d13 (fix(accounts): keep price list within user permissions (#59231))
 	if price_list:
 		party_details.price_list_currency = frappe.db.get_value(
 			"Price List", price_list, "currency", cache=True
