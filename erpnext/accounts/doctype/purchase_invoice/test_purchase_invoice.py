@@ -844,7 +844,9 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		)
 		existing_purchase_cost = existing_purchase_cost and existing_purchase_cost[0].base_net_amount or 0
 
-		pi = make_purchase_invoice(currency="USD", conversion_rate=60, project=project.name)
+		pi = make_purchase_invoice(currency="USD", conversion_rate=60, project=project.name, do_not_save=True)
+		pi.credit_to = "_Test Payable USD - _TC"
+		pi.submit()
 		self.assertEqual(
 			frappe.db.get_value("Project", project.name, "total_purchase_cost"),
 			existing_purchase_cost + 15000,
