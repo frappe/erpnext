@@ -358,7 +358,10 @@ class AccountsController(TransactionBase):
 		if not price_list:
 			return
 
-		details = frappe.db.get_value("Price List", price_list, ["enabled", transaction_side], as_dict=True)
+		details = (
+			frappe.db.get_value("Price List", price_list, ["enabled", transaction_side], as_dict=True)
+			or frappe._dict()
+		)
 
 		# An internal transfer carries the price list of the outward document into the inward one.
 		fits_transaction = bool(details.get(transaction_side)) or self.is_internal_transfer()
