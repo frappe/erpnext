@@ -346,7 +346,7 @@ class calculate_taxes_and_totals:
 
 				item._unrounded_net_amount = amount / (1 + total_tax_slope)
 				item.net_amount = flt(item._unrounded_net_amount, item.precision("net_amount"))
-				item.net_rate = flt(item.net_amount / item.qty, item.precision("net_rate"))
+				item.net_rate = flt(item.net_amount / self.get_billed_qty(item), item.precision("net_rate"))
 				item.discount_percentage = flt(
 					item.discount_percentage, item.precision("discount_percentage")
 				)
@@ -952,8 +952,9 @@ class calculate_taxes_and_totals:
 						)
 						net_total += rounding_difference
 
+					billed_qty = self.get_billed_qty(item)
 					item.net_rate = (
-						flt(item.net_amount / item.qty, item.precision("net_rate")) if item.qty else 0
+						flt(item.net_amount / billed_qty, item.precision("net_rate")) if billed_qty else 0
 					)
 
 					self._set_in_company_currency(item, ["net_rate", "net_amount"])
