@@ -27,7 +27,10 @@ from frappe.utils import (
 )
 from frappe.utils.csvutils import build_csv_response
 
-from erpnext.buying.doctype.buying_settings.buying_settings import is_rejected_material_valued
+from erpnext.buying.doctype.buying_settings.buying_settings import (
+	is_material_from_in_transit_warehouse,
+	is_rejected_material_valued,
+)
 from erpnext.stock.doctype.purchase_receipt_item.purchase_receipt_item import PurchaseReceiptItem
 from erpnext.stock.serial_batch_bundle import (
 	BatchNoValuation,
@@ -902,7 +905,9 @@ class SerialandBatchBundle(Document):
 
 		values_rejected_material = is_rejected_material_valued(self.voucher_type, self.voucher_detail_no)
 
-		if self.is_rejected and self.is_material_from_in_transit_warehouse():
+		if self.is_rejected and is_material_from_in_transit_warehouse(
+			self.voucher_type, self.voucher_detail_no
+		):
 			# Rejected material of a transfer keeps the value it had in transit. A charge spread
 			# over the accepted quantity does not belong to it.
 			rate = flt(self.get_transit_rate(row)) or rate
