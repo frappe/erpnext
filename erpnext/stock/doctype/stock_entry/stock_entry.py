@@ -899,6 +899,46 @@ class StockEntry(StockController):
 			if not (d.s_warehouse or d.t_warehouse):
 				frappe.throw(_("Atleast one warehouse is mandatory"))
 
+		self.validate_transit_warehouses()
+
+	def validate_transit_warehouses(self):
+		if not self.add_to_transit:
+			return
+
+		target_warehouses = {row.t_warehouse for row in self.items if row.t_warehouse}
+		if self.to_warehouse:
+			target_warehouses.add(self.to_warehouse)
+
+		if not target_warehouses:
+			return
+
+		transit_warehouses = set(
+			frappe.get_all(
+				"Warehouse",
+				filters={
+					"name": ("in", list(target_warehouses)),
+					"warehouse_type": "Transit",
+					"company": self.company,
+				},
+				pluck="name",
+			)
+		)
+
+		if self.to_warehouse and self.to_warehouse not in transit_warehouses:
+			frappe.throw(
+				_(
+					"Default Target Warehouse {0} must be a Transit warehouse when Add to Transit is enabled."
+				).format(frappe.bold(self.to_warehouse))
+			)
+
+		for row in self.items:
+			if row.t_warehouse and row.t_warehouse not in transit_warehouses:
+				frappe.throw(
+					_(
+						"Row #{0}: Target Warehouse {1} must be a Transit warehouse when Add to Transit is enabled."
+					).format(row.idx, frappe.bold(row.t_warehouse))
+				)
+
 	def validate_work_order(self):
 		if self.purpose in (
 			"Manufacture",
