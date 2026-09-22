@@ -2628,6 +2628,13 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		return_pi.submit()
 		self.assertEqual(return_pi.docstatus, 1)
 
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings",
+		{
+			"bill_for_rejected_quantity_in_purchase_invoice": 1,
+			"set_valuation_rate_for_rejected_materials": 1,
+		},
+	)
 	def test_stock_updating_invoice_bills_the_rejected_quantity(self):
 		"""With the rejected quantity billed and valued, the invoice pays for every unit received and
 		the stock it moves matches the entries it books."""
@@ -2637,14 +2644,6 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		company = "_Test Company with perpetual inventory"
 		item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
 		rejected_warehouse = create_warehouse("_Test Invoice Billed Rejected Warehouse", company=company)
-
-		settings = frappe.get_doc("Buying Settings")
-		settings.bill_for_rejected_quantity_in_purchase_invoice = 1
-		settings.set_valuation_rate_for_rejected_materials = 1
-		settings.save()
-		self.addCleanup(
-			frappe.db.set_single_value, "Buying Settings", "set_valuation_rate_for_rejected_materials", 0
-		)
 
 		pi = make_purchase_invoice(
 			item_code=item,
@@ -2679,6 +2678,13 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		)
 		self.assertEqual(sum(flt(d.debit) for d in booked), 1000)
 
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings",
+		{
+			"set_valuation_rate_for_rejected_materials": 1,
+			"bill_for_rejected_quantity_in_purchase_invoice": 0,
+		},
+	)
 	def test_rejected_material_is_not_valued_on_a_stock_updating_invoice(self):
 		"""An invoice that does not bill the rejected quantity has nothing to pay for that material,
 		so it carries no cost and the stock the invoice moves matches the entries it books."""
@@ -2688,18 +2694,6 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		company = "_Test Company with perpetual inventory"
 		item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
 		rejected_warehouse = create_warehouse("_Test Invoice Rejected Warehouse", company=company)
-
-		frappe.db.set_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials", 1)
-		frappe.db.set_single_value("Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice", 0)
-		self.addCleanup(
-			frappe.db.set_single_value, "Buying Settings", "set_valuation_rate_for_rejected_materials", 0
-		)
-		self.addCleanup(
-			frappe.db.set_single_value,
-			"Buying Settings",
-			"bill_for_rejected_quantity_in_purchase_invoice",
-			1,
-		)
 
 		pi = make_purchase_invoice(
 			item_code=item,
