@@ -25,9 +25,8 @@ def get_searched_fieldnames() -> list[str]:
 class ItemSearch(SQLiteSearch):
 	"""FTS5 trigram index over Item, for substring search on large catalogues.
 
-	A host whose copy of the index is behind leaves committed Items out of its candidate list,
-	and item_query then filters those valid rows away, so results depend on which host answered.
-	Switched on per site from Stock Settings, which carries that warning.
+	A host whose copy is behind drops valid Items from its candidate list, so results depend on
+	which host answered. Switched on per site from Stock Settings, which carries that warning.
 	"""
 
 	INDEX_NAME = "item_search.db"
@@ -62,9 +61,8 @@ class ItemSearch(SQLiteSearch):
 	def index_exists(self) -> bool:
 		"""A table missing a searched column cannot answer for it, so it reports itself absent.
 
-		The searched fields come from the Item meta, so a site that adds one leaves an older
-		table incomplete, as does the barcode column this class fills itself. Callers fall back
-		and the builder replaces it. One connection answers this, because it runs on every save.
+		The searched fields come from the Item meta, so a site that adds one leaves an older table
+		short. Callers fall back and the builder replaces it. One connection: this runs on every save.
 		"""
 		if not os.path.exists(self.db_path):
 			return False
@@ -92,8 +90,8 @@ class ItemSearch(SQLiteSearch):
 		return documents
 
 	def index_documents_by_name(self, doctype, names: list[str]):
-		"""Preload this batch too: the build catch-up does not come through get_documents_paginated,
-		and the barcodes left over from the last build batch may since have moved."""
+		"""Preload this batch: the catch-up skips get_documents_paginated, and the barcodes left
+		from the last build batch may since have moved."""
 		self._barcodes = get_barcodes_by_item(names)
 		super().index_documents_by_name(doctype, names)
 
@@ -122,8 +120,8 @@ class ItemSearch(SQLiteSearch):
 	def get_candidate_item_codes(self, txt: str) -> list[str] | None:
 		"""Item codes that can match txt, a superset the caller must still recheck with LIKE.
 
-		Covers barcodes, which item_query also searches: an Item the candidate list left out is
-		filtered away even when its barcode matches.
+		Covers barcodes, which item_query also searches: an Item left out is filtered away even
+		when its barcode matches.
 		"""
 		if not self.is_search_enabled() or not self.index_exists():
 			return None
@@ -203,8 +201,8 @@ def get_barcodes_by_item(item_codes: list[str]) -> dict[str, str]:
 def reindex_item(doc, method=None):
 	"""Queue an Item on every save.
 
-	Item Barcode rows raise no document events of their own, so the Item save is the only signal
-	that one of them moved, and none of the Item's own indexed fields need have changed for that.
+	Item Barcode rows raise no document events, so the Item save is the only signal one moved, and
+	no indexed field of the Item need have changed.
 	"""
 	search = ItemSearch()
 	if search.is_search_enabled() and search.index_exists():
