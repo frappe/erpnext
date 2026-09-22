@@ -1659,6 +1659,46 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		# Should not raise frappe.exceptions.ValidationError: Payment Entry has been modified after you pulled it. Please pull it again.
 		pr.reconcile()
 
+	def test_get_difference_amount_plugs_prior_leg_rounding_residue(self):
+		pi = make_purchase_invoice(
+			supplier="_Test Supplier USD",
+			credit_to="_Test Payable USD - _TC",
+			currency="USD",
+			conversion_rate=61.46,
+			qty=1,
+			rate=3111.18,
+			do_not_save=True,
+		)
+		pi.name = frappe.generate_hash(length=10)
+		pi.insert()
+		pi.submit()
+
+		pe1 = get_payment_entry(
+			"Purchase Invoice", pi.name, party_amount=408.56, bank_account="_Test Bank USD - _TC"
+		)
+		pe1.reference_no = "1"
+		pe1.reference_date = "2016-01-01"
+		pe1.target_exchange_rate = 61.46
+		pe1.insert()
+		pe1.submit()
+
+		pr = frappe.new_doc("Payment Reconciliation")
+		pr.company = pi.company
+		pr.receivable_payable_account = pi.credit_to
+
+		remaining_amount = flt(pi.grand_total - 408.56, 2)
+		difference_amount = pr.get_difference_amount(
+			{"exchange_rate": 62.0, "reference_name": None},
+			{
+				"invoice_type": "Purchase Invoice",
+				"invoice_number": pi.name,
+				"exchange_rate": 61.46,
+			},
+			remaining_amount,
+		)
+
+		self.assertEqual(flt(difference_amount, 2), 1459.42)
+
 	def test_reverse_payment_against_payment_for_supplier(self):
 		"""
 		Reconcile a payment against a reverse payment, for a supplier.

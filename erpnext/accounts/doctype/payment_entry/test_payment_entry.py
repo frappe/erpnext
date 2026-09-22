@@ -1111,6 +1111,53 @@ class TestPaymentEntry(ERPNextTestSuite):
 		outstanding_amount = flt(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"))
 		self.assertEqual(outstanding_amount, 0)
 
+	def test_multiple_payments_at_same_rate_close_fx_invoice_without_residue(self):
+		pi = make_purchase_invoice(
+			supplier="_Test Supplier USD",
+			currency="USD",
+			conversion_rate=61.46,
+			qty=1,
+			rate=3111.18,
+			do_not_save=True,
+		)
+		pi.name = frappe.generate_hash(length=10)
+		pi.insert()
+		pi.submit()
+
+		pe1 = get_payment_entry(
+			"Purchase Invoice", pi.name, party_amount=408.56, bank_account="_Test Bank USD - _TC"
+		)
+		pe1.reference_no = "1"
+		pe1.reference_date = "2016-01-01"
+		pe1.target_exchange_rate = 61.46
+		pe1.insert()
+		pe1.submit()
+
+		pe2 = get_payment_entry("Purchase Invoice", pi.name, bank_account="_Test Bank USD - _TC")
+		pe2.reference_no = "2"
+		pe2.reference_date = "2016-01-02"
+		pe2.target_exchange_rate = 61.46
+		pe2.insert()
+		pe2.submit()
+
+		pi.reload()
+		self.assertEqual(pi.outstanding_amount, 0)
+
+		voucher_nos = [pi.name, pe1.name, pe2.name]
+		for pe in (pe1, pe2):
+			voucher_nos += [j.parent for j in self.get_journals_for(pe.doctype, pe.name)]
+
+		net_movement = frappe.db.sql(
+			"""
+			select sum(debit) - sum(credit)
+			from `tabGL Entry`
+			where account = %s and voucher_no in %s and is_cancelled = 0
+			""",
+			(pi.credit_to, voucher_nos),
+		)[0][0]
+
+		self.assertEqual(flt(net_movement, 2), 0)
+
 	def test_exchange_gain_loss_split_accounts(self):
 		gain_account = create_account(
 			account_name="_Test Exchange Gain",

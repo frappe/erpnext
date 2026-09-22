@@ -1040,6 +1040,36 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 
 		self.assertFalse(gle)
 
+	def test_multi_item_fx_invoice_total_matches_single_conversion(self):
+		pi = make_purchase_invoice(
+			supplier="_Test Supplier USD",
+			credit_to="_Test Payable USD - _TC",
+			currency="USD",
+			conversion_rate=61.46,
+			qty=1,
+			rate=408.56,
+			do_not_save=True,
+		)
+		pi.append(
+			"items",
+			{
+				"item_code": "_Test Item",
+				"warehouse": "_Test Warehouse - _TC",
+				"qty": 1,
+				"rate": 2702.62,
+				"price_list_rate": 2702.62,
+				"expense_account": "_Test Account Cost for Goods Sold - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"conversion_factor": 1.0,
+				"stock_uom": "_Test UOM",
+			},
+		)
+		pi.name = frappe.generate_hash(length=10)
+		pi.insert()
+
+		self.assertEqual(pi.grand_total, 3111.18)
+		self.assertEqual(pi.base_grand_total, flt(pi.grand_total * pi.conversion_rate, 2))
+
 	def test_purchase_invoice_update_stock_gl_entry_with_perpetual_inventory(self):
 		pi = make_purchase_invoice(
 			update_stock=1,
