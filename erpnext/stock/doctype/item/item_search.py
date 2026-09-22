@@ -91,6 +91,12 @@ class ItemSearch(SQLiteSearch):
 		self._barcodes = get_barcodes_by_item([document.name for document in documents])
 		return documents
 
+	def index_documents_by_name(self, doctype, names: list[str]):
+		"""Preload this batch too: the build catch-up does not come through get_documents_paginated,
+		and the barcodes left over from the last build batch may since have moved."""
+		self._barcodes = get_barcodes_by_item(names)
+		super().index_documents_by_name(doctype, names)
+
 	def prepare_document(self, doc):
 		document = super().prepare_document(doc)
 		if document is None:
