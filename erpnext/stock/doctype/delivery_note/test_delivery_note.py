@@ -1896,7 +1896,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assertEqual(frappe.db.count("Batch", {"item": component}), 1)
 
 	def test_internal_transfer_of_a_bundle_with_a_repeated_component(self):
-		"""A component listed twice on a bundle keeps one package per packed row."""
+		"""A component listed twice on a bundle keeps its batch on both packed rows."""
 		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
 
 		company = "_Test Company"
@@ -1936,6 +1936,64 @@ class TestDeliveryNote(ERPNextTestSuite):
 			pluck="total_qty",
 		)
 		self.assertEqual(sorted(received), [5, 10])
+		self.assertEqual(frappe.db.count("Batch", {"item": component}), 1)
+
+	def test_internal_transfer_return_carries_the_batch_back(self):
+		"""Material coming back from an in-transit warehouse returns under the batch it left with."""
+		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
+
+		company = "_Test Company"
+		warehouse = "_Test Warehouse - _TC"
+		transit_warehouse = "Stores - _TC"
+		item = make_item(
+			properties={
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "_T-RETURNED-BATCH-.####",
+			}
+		).name
+		customer = create_internal_customer(represents_company=company)
+
+		make_stock_entry(target=warehouse, qty=5, basic_rate=100, item_code=item)
+
+		dn = create_delivery_note(
+			item_code=item,
+			company=company,
+			customer=customer,
+			qty=5,
+			rate=100,
+			warehouse=warehouse,
+			target_warehouse=transit_warehouse,
+		)
+
+		returned = create_delivery_note(
+			item_code=item,
+			company=company,
+			customer=customer,
+			qty=-5,
+			rate=100,
+			warehouse=warehouse,
+			target_warehouse=transit_warehouse,
+			is_return=1,
+			return_against=dn.name,
+		)
+
+		received_package = frappe.db.get_value(
+			"Serial and Batch Bundle", {"voucher_no": returned.name, "warehouse": warehouse}
+		)
+		self.assertEqual(
+			frappe.db.get_value("Serial and Batch Entry", {"parent": received_package}, "batch_no"),
+			frappe.db.get_value(
+				"Serial and Batch Entry",
+				{
+					"parent": frappe.db.get_value(
+						"Serial and Batch Bundle", {"voucher_no": dn.name, "warehouse": warehouse}
+					)
+				},
+				"batch_no",
+			),
+		)
+		self.assertEqual(frappe.db.count("Batch", {"item": item}), 1)
 
 	def test_internal_transfer_of_an_item_that_cannot_create_batches(self):
 		"""An item whose batches are made by hand travels through an in-transit warehouse."""
