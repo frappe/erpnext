@@ -139,7 +139,7 @@
   },
   {
    "default": "1",
-   "description": "If checked, Rejected Quantity will be included while making Purchase Invoice from Purchase Receipt.",
+   "description": "If checked, the rejected quantity is billed anywhere in the purchase cycle.",
    "fieldname": "bill_for_rejected_quantity_in_purchase_invoice",
    "fieldtype": "Check",
    "label": "Bill for rejected quantity in Purchase Invoice"
