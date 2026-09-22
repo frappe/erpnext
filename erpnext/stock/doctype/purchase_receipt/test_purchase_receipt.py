@@ -2260,9 +2260,18 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 	def test_internal_transfer_pr_rejected_qty_leaves_in_transit_warehouse(self):
 		"""Rejected material of an internal transfer leaves the in-transit warehouse along with the
-		accepted material, and is booked into the rejected warehouse."""
+		accepted material, and is booked into the rejected warehouse, whatever Buying Settings says
+		about valuing rejected material."""
 		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		self.addCleanup(
+			frappe.db.set_single_value,
+			"Buying Settings",
+			"set_valuation_rate_for_rejected_materials",
+			frappe.db.get_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials"),
+		)
+		frappe.db.set_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials", 0)
 
 		prepare_data_for_internal_transfer()
 		customer = "_Test Internal Customer 2"
