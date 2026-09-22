@@ -247,7 +247,7 @@
   {
    "default": "0",
    "depends_on": "bill_for_rejected_quantity_in_purchase_invoice",
-   "description": "If enabled, the system will generate an accounting entry for materials rejected in the Purchase Receipt.",
+   "description": "If enabled, the system will generate an accounting entry for material rejected anywhere in the purchase cycle.",
    "fieldname": "set_valuation_rate_for_rejected_materials",
    "fieldtype": "Check",
    "label": "Set valuation rate for rejected Materials"

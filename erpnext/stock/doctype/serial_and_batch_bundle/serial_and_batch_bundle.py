@@ -27,6 +27,10 @@ from frappe.utils import (
 )
 from frappe.utils.csvutils import build_csv_response
 
+from erpnext.buying.doctype.buying_settings.buying_settings import (
+	is_material_from_in_transit_warehouse,
+	is_rejected_material_valued,
+)
 from erpnext.stock.doctype.purchase_receipt_item.purchase_receipt_item import PurchaseReceiptItem
 from erpnext.stock.serial_batch_bundle import (
 	BatchNoValuation,
@@ -850,16 +854,6 @@ class SerialandBatchBundle(Document):
 
 		return return_against
 
-	def is_material_from_in_transit_warehouse(self) -> bool:
-		"""Material of an internal transfer carries the value it had in the in-transit warehouse,
-		rejected or not, because that warehouse is credited for all of it."""
-		if self.voucher_type != "Purchase Receipt" or not self.voucher_detail_no:
-			return False
-
-		return bool(
-			frappe.get_cached_value(self.voucher_type + " Item", self.voucher_detail_no, "from_warehouse")
-		)
-
 	def set_incoming_rate_for_inward_transaction(self, row=None, save=False, prev_sle=None):
 		from erpnext.stock.utils import get_valuation_method
 
@@ -916,15 +910,11 @@ class SerialandBatchBundle(Document):
 			if batches and valuation_method == "FIFO":
 				stock_queue = parse_json(prev_sle.stock_queue)
 
-		set_valuation_rate_for_rejected_materials = frappe.db.get_single_value(
-			"Buying Settings", "set_valuation_rate_for_rejected_materials"
-		)
+		values_rejected_material = is_rejected_material_valued(self.voucher_type, self.voucher_detail_no)
 
-		values_rejected_material = (
-			set_valuation_rate_for_rejected_materials or self.is_material_from_in_transit_warehouse()
-		)
-
-		if self.is_rejected and self.is_material_from_in_transit_warehouse():
+		if self.is_rejected and is_material_from_in_transit_warehouse(
+			self.voucher_type, self.voucher_detail_no
+		):
 			# Rejected material of a transfer keeps the value it had in transit. A charge spread
 			# over the accepted quantity does not belong to it.
 			rate = flt(self.get_transit_rate(row)) or rate

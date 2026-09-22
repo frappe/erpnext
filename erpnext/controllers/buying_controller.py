@@ -14,6 +14,7 @@ import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
 from erpnext.accounts.party import _get_party_details
+from erpnext.buying.doctype.buying_settings.buying_settings import is_rejected_material_valued
 from erpnext.buying.utils import update_last_purchase_rate, validate_for_items
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
 from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
@@ -1091,7 +1092,7 @@ class BuyingController(SubcontractingController):
 
 			if flt(d.rejected_qty) != 0:
 				valuation_rate_for_rejected_item = 0.0
-				if frappe.db.get_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials"):
+				if is_rejected_material_valued(self.doctype, d.name):
 					valuation_rate_for_rejected_item = d.valuation_rate
 
 				sl_entries.append(
