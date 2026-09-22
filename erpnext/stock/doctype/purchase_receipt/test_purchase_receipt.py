@@ -2590,6 +2590,73 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(stock_qty[transit_warehouse], -12)
 		self.assertEqual(stock_qty[to_warehouse], 12)
 
+	def test_rejected_package_of_a_transfer_bought_in_another_uom(self):
+		"""The package of rejected material is sized in stock UOM, like every other package."""
+		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		prepare_data_for_internal_transfer()
+		company = "_Test Company with perpetual inventory"
+
+		from_warehouse = create_warehouse("_Test Box Reject From", company=company)
+		transit_warehouse = create_warehouse("_Test Box Reject Transit", company=company)
+		to_warehouse = create_warehouse("_Test Box Reject To", company=company)
+		rejected_warehouse = create_warehouse("_Test Box Reject Rejected", company=company)
+
+		item_doc = make_item(
+			"_Test Box Batch Item For Rejection",
+			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "BT-BOXR-.####"},
+		)
+		make_uom_conversion_factor("Box", "Nos", 12)
+
+		receipt = make_purchase_receipt(
+			item_code=item_doc.name, company=company, warehouse=from_warehouse, qty=24, rate=100
+		)
+		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
+
+		dn = create_delivery_note(
+			item_code=item_doc.name,
+			company=company,
+			customer="_Test Internal Customer 2",
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=24,
+			rate=100,
+			warehouse=from_warehouse,
+			target_warehouse=transit_warehouse,
+			batch_no=batch_no,
+		)
+
+		pr = make_inter_company_purchase_receipt(dn.name)
+		pr.items[0].warehouse = to_warehouse
+		pr.items[0].rejected_warehouse = rejected_warehouse
+		pr.items[0].uom = "Box"
+		pr.items[0].conversion_factor = 12
+		pr.items[0].qty = 1
+		pr.items[0].rejected_qty = 1
+		pr.items[0].received_qty = 2
+		pr.submit()
+		pr.reload()
+
+		self.assertEqual(
+			frappe.db.get_value(
+				"Serial and Batch Bundle", pr.items[0].rejected_serial_and_batch_bundle, "total_qty"
+			),
+			12,
+		)
+
+		moved_qty = {
+			d.warehouse: d.actual_qty
+			for d in frappe.get_all(
+				"Stock Ledger Entry",
+				filters={"voucher_no": pr.name, "is_cancelled": 0},
+				fields=["warehouse", "actual_qty"],
+			)
+		}
+		self.assertEqual(moved_qty[transit_warehouse], -24)
+		self.assertEqual(moved_qty[to_warehouse], 12)
+		self.assertEqual(moved_qty[rejected_warehouse], 12)
+
 	def test_landed_cost_voucher_on_a_receipt_with_rejected_batch_material(self):
 		"""A landed cost voucher rebuilds the entries of the receipt; the package of the in-transit
 		warehouse has to be reused, or the batch is counted twice."""
