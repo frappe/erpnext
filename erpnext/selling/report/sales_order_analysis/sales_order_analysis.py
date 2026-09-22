@@ -6,17 +6,11 @@ from collections import OrderedDict
 
 import frappe
 from frappe import _, qb
-<<<<<<< HEAD
 from frappe.query_builder import CustomFunction
 from frappe.query_builder.functions import Max
-from frappe.utils import date_diff, flt, getdate
-=======
-from frappe.query_builder import Case, CustomFunction
-from frappe.query_builder.functions import Coalesce, DateDiff, Max, Sum
-from frappe.utils import date_diff, flt, nowdate
+from frappe.utils import date_diff, flt
 
 import erpnext
->>>>>>> 30e0382 (feat(selling): group Sales Order Analysis by item (#59236))
 
 
 def execute(filters=None):
@@ -29,14 +23,9 @@ def execute(filters=None):
 	validate_filters(filters)
 
 	columns = get_columns(filters)
-<<<<<<< HEAD
 	conditions = get_conditions(filters)
 	data = get_data(conditions, filters)
-	so_elapsed_time = get_so_elapsed_time(data)
-=======
-	data = get_data(filters)
 	so_elapsed_time = {} if filters.get("group_by_item") else get_so_elapsed_time(data)
->>>>>>> 30e0382 (feat(selling): group Sales Order Analysis by item (#59236))
 
 	if not data:
 		return [], [], None, []
@@ -66,10 +55,8 @@ def get_conditions(filters):
 	if filters.get("from_date") and filters.get("to_date"):
 		conditions += " and so.transaction_date between %(from_date)s and %(to_date)s"
 
-	if filters.get("company"):
-		conditions += " and so.company = %(company)s"
+	conditions += " and so.company = %(company)s"
 
-<<<<<<< HEAD
 	if filters.get("sales_order"):
 		conditions += " and so.name in %(sales_order)s"
 
@@ -89,7 +76,7 @@ def get_data(conditions, filters):
 			so.transaction_date as date,
 			soi.delivery_date as delivery_date,
 			so.name as sales_order,
-			so.status, so.customer, soi.item_code,
+			so.status, so.customer, soi.item_code, soi.uom,
 			DATEDIFF(CURRENT_DATE, soi.delivery_date) as delay_days,
 			IF(so.status in ('Completed','To Bill'), 0, (SELECT delay_days)) as delay,
 			soi.qty, soi.delivered_qty,
@@ -120,54 +107,6 @@ def get_data(conditions, filters):
 	)
 
 	return data
-=======
-	query = (
-		qb.from_(so)
-		.join(soi)
-		.on(soi.parent == so.name)
-		.left_join(sii)
-		.on((sii.so_detail == soi.name) & (sii.docstatus == 1))
-		.select(
-			so.transaction_date.as_("date"),
-			soi.delivery_date.as_("delivery_date"),
-			so.name.as_("sales_order"),
-			so.status,
-			so.customer,
-			soi.item_code,
-			soi.uom,
-			delay.as_("delay_days"),
-			Case().when(so.status.isin(["Completed", "To Bill"]), 0).else_(delay).as_("delay"),
-			soi.qty,
-			soi.delivered_qty,
-			(soi.qty - soi.delivered_qty).as_("pending_qty"),
-			Coalesce(Sum(sii.qty), 0).as_("billed_qty"),
-			soi.base_amount.as_("amount"),
-			(soi.delivered_qty * soi.base_rate).as_("delivered_qty_amount"),
-			(soi.billed_amt * conversion_rate).as_("billed_amount"),
-			(soi.base_amount - (soi.billed_amt * conversion_rate)).as_("pending_amount"),
-			soi.warehouse.as_("warehouse"),
-			so.company,
-			soi.name,
-			soi.description.as_("description"),
-		)
-		.where((so.status.notin(["Stopped", "On Hold"])) & (so.docstatus == 1))
-		.where(so.company == filters.get("company"))
-		.groupby(soi.name, so.name)
-		.orderby(so.transaction_date)
-		.orderby(soi.item_code)
-	)
-
-	if filters.get("from_date") and filters.get("to_date"):
-		query = query.where(so.transaction_date[filters.get("from_date") : filters.get("to_date")])
-	if filters.get("sales_order"):
-		query = query.where(so.name.isin(filters.get("sales_order")))
-	if filters.get("status"):
-		query = query.where(so.status.isin(filters.get("status")))
-	if filters.get("warehouse"):
-		query = query.where(soi.warehouse == filters.get("warehouse"))
-
-	return query.run(as_dict=True)
->>>>>>> 30e0382 (feat(selling): group Sales Order Analysis by item (#59236))
 
 
 def get_so_elapsed_time(data):
