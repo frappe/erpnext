@@ -1092,26 +1092,27 @@ class StockReconciliation(StockController):
 		)
 
 	def is_adjustment_row(self, row) -> bool:
-		"""Did this row post a value-only adjustment entry rather than move any stock?"""
-		return bool(
-			frappe.db.get_value(
-				"Stock Ledger Entry",
-				{
-					"voucher_type": self.doctype,
-					"voucher_no": self.name,
-					"voucher_detail_no": row.name,
-					"is_cancelled": 0,
-				},
-				"is_adjustment_entry",
+		# Read once for the whole voucher: both callers run per row, and a reconciliation
+		# submits and cancels synchronously for up to 100 of them.
+		if self.flags.adjustment_rows is None:
+			self.flags.adjustment_rows = set(
+				frappe.get_all(
+					"Stock Ledger Entry",
+					filters={
+						"voucher_type": self.doctype,
+						"voucher_no": self.name,
+						"is_adjustment_entry": 1,
+						"is_cancelled": 0,
+					},
+					pluck="voucher_detail_no",
+				)
 			)
-		)
+
+		return row.name in self.flags.adjustment_rows
 
 	def set_adjustment_row_values(self, row, amount_difference):
-		"""Refresh a value-only row from the ledger.
-
-		The write-off moves no stock, so the qty and rate on either side of it are the ones the
-		ledger already carried and the quantity difference is zero. Only ``amount_difference``
-		changes, and it is the write-off booked to the GL rather than a change in what is on hand.
+		"""Refresh a value-only row: it moves no stock, so both sides carry the ledger's own figures
+		and ``amount_difference`` is the write-off booked to the GL, not a change in what is on hand.
 		"""
 		previous_sle = self.get_previous_ledger_entry(row) or frappe._dict()
 
@@ -1119,7 +1120,8 @@ class StockReconciliation(StockController):
 		current_valuation_rate = flt(
 			previous_sle.get("valuation_rate"), row.precision("current_valuation_rate")
 		)
-		current_amount = flt(current_qty * current_valuation_rate, row.precision("current_amount"))
+		# from the ledger's stock value, since rounding the rate first loses money on large qtys
+		current_amount = flt(previous_sle.get("stock_value"), row.precision("current_amount"))
 
 		row.db_set(
 			{
@@ -1154,10 +1156,7 @@ class StockReconciliation(StockController):
 		return flt(previous_sle.get("qty_after_transaction"), row.precision("current_qty"))
 
 	def get_previous_ledger_entry(self, row):
-		"""Balance and rate the ledger carried just before this row's own entries.
-
-		Returns ``None`` when the row has no Stock Ledger Entry of its own.
-		"""
+		"""Balance, rate and value carried just before this row's own entries, or None if it has none."""
 		reco_sle = frappe.db.get_value(
 			"Stock Ledger Entry",
 			{
@@ -1175,7 +1174,7 @@ class StockReconciliation(StockController):
 		sle = frappe.qb.DocType("Stock Ledger Entry")
 		previous_sle = (
 			frappe.qb.from_(sle)
-			.select(sle.qty_after_transaction, sle.valuation_rate)
+			.select(sle.qty_after_transaction, sle.valuation_rate, sle.stock_value)
 			.where(
 				(sle.item_code == row.item_code)
 				& (sle.warehouse == row.warehouse)

@@ -2281,7 +2281,7 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 			0.0,
 		)
 
-	def _make_backdated_adjustment_scenario(self, item_name, valuation_method):
+	def _make_backdated_adjustment_scenario(self, item_name, valuation_method, backdated_qty=4):
 		"""Strand 100 of value at zero qty, write it off, then backdate a receipt before the write-off."""
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
@@ -2326,13 +2326,14 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		)
 
 		# a backdated receipt lands before the write-off
-		make_stock_entry(
-			item_code=item_code,
-			target=warehouse,
-			qty=4,
-			basic_rate=50,
-			posting_date=add_days(nowdate(), -7),
-		)
+		if backdated_qty:
+			make_stock_entry(
+				item_code=item_code,
+				target=warehouse,
+				qty=backdated_qty,
+				basic_rate=50,
+				posting_date=add_days(nowdate(), -7),
+			)
 
 		return item_code, warehouse, sr
 
@@ -2369,6 +2370,29 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 			"Test Stock Reco Backdated Adjustment MA", "Moving Average"
 		)
 		self._assert_backdated_stock_survives(item_code, warehouse, sr)
+
+	def test_adjustment_row_amount_is_not_distorted_by_rate_rounding(self):
+		"""The refreshed amount comes from the ledger's stock value, not from a rounded rate."""
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		item_code, warehouse, sr = self._make_backdated_adjustment_scenario(
+			"Test Stock Reco Adjustment Rounding", "FIFO", backdated_qty=0
+		)
+
+		# a backdated receipt whose value does not divide evenly into a 2 decimal rate
+		make_stock_entry(
+			item_code=item_code,
+			target=warehouse,
+			qty=10000,
+			basic_rate=1.2345,
+			posting_date=add_days(nowdate(), -7),
+		)
+
+		sr.reload()
+		row = sr.items[0]
+
+		self.assertEqual(flt(row.current_qty), 10000.0)
+		self.assertEqual(flt(row.current_amount), 12345.0)
 
 	def test_cancelling_adjustment_entry_shifts_no_qty(self):
 		"""Reversing a value-only entry must not push the preserved quantity into later entries."""
