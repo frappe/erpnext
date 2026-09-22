@@ -120,7 +120,35 @@ def check_on_hold_or_closed_status(doctype, docname) -> None:
 
 @frappe.whitelist()
 def get_linked_material_requests(items):
-	items = json.loads(items)
+	try:
+		items = frappe.parse_json(items)
+	except (TypeError, ValueError):
+		frappe.throw(_("Items must be a list of Item codes"))
+
+	if isinstance(items, str):
+		items = [items]
+
+	if not isinstance(items, list | tuple) or any(not isinstance(item, str) for item in items):
+		frappe.throw(_("Items must be a list of Item codes"))
+
+	# get_list, not the raw query below on its own: it applies the caller's Material Request
+	# permission and their User Permissions, so the loop can only ever return permitted documents
+	permitted_material_requests = frappe.get_list(
+		"Material Request",
+		filters=[
+			["material_request_type", "=", "Purchase"],
+			["docstatus", "=", 1],
+			["status", "!=", "Stopped"],
+			["per_ordered", "<", 99.99],
+			["Material Request Item", "item_code", "in", items],
+		],
+		pluck="name",
+		distinct=True,
+	)
+
+	if not permitted_material_requests:
+		return []
+
 	mr_list = []
 	for item in items:
 		material_request = frappe.db.sql(
@@ -131,12 +159,13 @@ def get_linked_material_requests(items):
 			FROM `tabMaterial Request` mr, `tabMaterial Request Item` mr_item
 			WHERE mr.name = mr_item.parent
 				AND mr_item.item_code = %(item)s
+				AND mr.name in %(permitted)s
 				AND mr.material_request_type = 'Purchase'
 				AND mr.per_ordered < 99.99
 				AND mr.docstatus = 1
 				AND mr.status != 'Stopped'
                         ORDER BY mr_item.item_code ASC""",
-			{"item": item},
+			{"item": item, "permitted": permitted_material_requests},
 			as_dict=1,
 		)
 		if material_request:
