@@ -76,6 +76,7 @@
   "override_tax_withholding_entries",
   "tax_withholding_entries",
   "transaction_references",
+  "cheque_book",
   "reference_no",
   "column_break_23",
   "reference_date",
@@ -411,6 +412,15 @@
    "fieldname": "transaction_references",
    "fieldtype": "Section Break",
    "label": "Transaction ID"
+  },
+  {
+   "fieldname": "cheque_book",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "in_standard_filter": 1,
+   "label": "Cheque Book",
+   "options": "Cheque Book",
+   "search_index": 1
   },
   {
    "bold": 1,
@@ -797,7 +807,7 @@
    "table_fieldname": "payment_entries"
   }
  ],
- "modified": "2026-05-15 13:31:01.166010",
+ "modified": "2026-09-17 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",

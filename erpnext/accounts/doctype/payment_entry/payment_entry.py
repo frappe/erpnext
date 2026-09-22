@@ -22,6 +22,7 @@ from erpnext.accounts.doctype.bank_account.bank_account import (
 	get_default_company_bank_account,
 	get_party_bank_account,
 )
+from erpnext.accounts.doctype.cheque_book.cheque_book import update_cheque_book, validate_cheque
 from erpnext.accounts.doctype.invoice_discounting.invoice_discounting import (
 	get_party_account_based_on_invoice_discounting,
 )
@@ -95,6 +96,7 @@ class PaymentEntry(AccountsController):
 		base_total_allocated_amount: DF.Currency
 		base_total_taxes_and_charges: DF.Currency
 		book_advance_payments_in_separate_party_account: DF.Check
+		cheque_book: DF.Link | None
 		clearance_date: DF.Date | None
 		company: DF.Link
 		contact_email: DF.Data | None
@@ -186,6 +188,7 @@ class PaymentEntry(AccountsController):
 		self.apply_taxes()
 		self.set_amounts_after_tax()
 		self.clear_unallocated_reference_document_rows()
+		validate_cheque(self)
 		self.validate_transaction_reference()
 		self.set_title()
 		self.set_remarks()
@@ -212,6 +215,7 @@ class PaymentEntry(AccountsController):
 		self.update_linked_dunnings()
 		self.set_status()
 		self.trigger_invoice_update_for_subscriptions()
+		update_cheque_book(self)
 
 	def update_linked_dunnings(self):
 		from erpnext.accounts.doctype.dunning.dunning import update_dunnings_linked_to_payment
