@@ -80,7 +80,6 @@ class TestItemSearchIndex(ERPNextTestSuite):
 		item.append("barcodes", {"barcode": "8809988776655"})
 		item.save()
 		index_docs_in_queue()
-		self.addCleanup(index_docs_in_queue)
 
 		self.assertIn("ZZ-BARCODE-PROBE", self.candidates("8809988776655"))
 		self.assertEqual(self.run_query("8809988776655", None), self.run_query("8809988776655", None, False))
@@ -96,7 +95,6 @@ class TestItemSearchIndex(ERPNextTestSuite):
 				"stock_uom": frappe.db.get_value("UOM", {}, "name"),
 			}
 		).insert()
-		self.addCleanup(index_docs_in_queue)
 		update_doc_index(item)
 
 		self.assertIn("ZZ-QUEUE-PROBE-4471", self.candidates("4471"))
@@ -127,7 +125,6 @@ class TestItemSearchIndex(ERPNextTestSuite):
 			}
 		).insert()
 		update_doc_index(item)
-		self.addCleanup(index_docs_in_queue)
 
 		self.assertIn("ZZ-CAFÉ-7781", self.candidates("CAFE-7781"))
 		self.assertEqual(self.run_query("CAFE-7781", None), self.run_query("CAFE-7781", None, False))
@@ -160,7 +157,6 @@ class TestItemSearchIndex(ERPNextTestSuite):
 				"stock_uom": frappe.db.get_value("UOM", {}, "name"),
 			}
 		).insert()
-		self.addCleanup(index_docs_in_queue)
 		index_docs_in_queue()
 
 		self.assertIn("ZZ-NO-BARCODE-3312", self.candidates("3312"))
