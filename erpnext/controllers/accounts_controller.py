@@ -1002,7 +1002,7 @@ class AccountsController(TransactionBase):
 	def validate_zero_qty_for_return_invoices_with_stock(self):
 		rows = []
 		for item in self.items:
-			if not flt(item.qty):
+			if not (flt(item.qty) or flt(item.get("rejected_qty"))):
 				rows.append(item)
 		if rows:
 			frappe.throw(
