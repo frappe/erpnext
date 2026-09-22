@@ -898,7 +898,7 @@ class BuyingController(SubcontractingController):
 				)
 
 	def is_internal_receipt(self) -> bool:
-		return self.doctype == "Purchase Receipt" and self.is_internal_transfer()
+		return self.is_internal_transfer() and self.is_stock_receipt()
 
 	def get_source_warehouse_qty(self, row, accepted_qty):
 		if not (self.is_internal_receipt() and flt(row.rejected_qty)):
