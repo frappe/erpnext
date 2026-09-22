@@ -2420,9 +2420,12 @@ def make_stock_reservation_entries(doc, items=None, table_name=None, notify=Fals
 
 @frappe.whitelist()
 def cancel_stock_reservation_entries(doc, sre_list):
+	"""Whitelisted entry point: authorise the caller against the Production Plan, then unreserve."""
 	if isinstance(doc, str):
 		doc = parse_json(doc)
 		doc = frappe.get_doc("Production Plan", doc.get("name"))
+
+	frappe.has_permission("Production Plan", "write", doc=doc, throw=True)
 
 	sre = StockReservation(doc)
 	sre.cancel_stock_reservation_entries(sre_list)

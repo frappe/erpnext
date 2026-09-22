@@ -2283,7 +2283,7 @@ class WorkOrder(Document):
 			)
 
 			if sre_list:
-				cancel_stock_reservation_entries(self, sre_list)
+				unreserve_stock_for_work_order(self, sre_list)
 
 	def release_reserved_qty_for_subcontract_transfer(self):
 		"""Free this Work Order's own reservation for items sent to a subcontractor.
@@ -2458,10 +2458,19 @@ def make_stock_reservation_entries(doc, items=None, is_transfer=True, notify=Fal
 
 @frappe.whitelist()
 def cancel_stock_reservation_entries(doc, sre_list):
+	"""Whitelisted entry point: authorise the caller against the Work Order, then unreserve."""
 	if isinstance(doc, str):
 		doc = parse_json(doc)
 		doc = frappe.get_doc("Work Order", doc.get("name"))
 
+	frappe.has_permission("Work Order", "write", doc=doc, throw=True)
+	unreserve_stock_for_work_order(doc, sre_list)
+
+
+def unreserve_stock_for_work_order(doc, sre_list):
+	"""Cancel a Work Order's stock reservations. Internal: no permission check, because the
+	Stock Entry cancellation lifecycle reaches it for a user who need not hold Work Order write.
+	"""
 	sre = StockReservation(doc)
 	sre.cancel_stock_reservation_entries(sre_list)
 
