@@ -27,7 +27,10 @@ from frappe.utils import (
 )
 from frappe.utils.csvutils import build_csv_response
 
-from erpnext.buying.doctype.buying_settings.buying_settings import is_rejected_material_valued
+from erpnext.buying.doctype.buying_settings.buying_settings import (
+	is_material_from_in_transit_warehouse,
+	is_rejected_material_valued,
+)
 from erpnext.stock.doctype.purchase_receipt_item.purchase_receipt_item import PurchaseReceiptItem
 from erpnext.stock.serial_batch_bundle import (
 	BatchNoValuation,
@@ -902,6 +905,13 @@ class SerialandBatchBundle(Document):
 
 		values_rejected_material = is_rejected_material_valued(self.voucher_type, self.voucher_detail_no)
 
+		if self.is_rejected and is_material_from_in_transit_warehouse(
+			self.voucher_type, self.voucher_detail_no
+		):
+			# Rejected material of a transfer keeps the value it had in transit. A charge spread
+			# over the accepted quantity does not belong to it.
+			rate = flt(self.get_transit_rate(row)) or rate
+
 		precision = frappe.get_precision("Serial and Batch Entry", "incoming_rate")
 		for d in self.entries:
 			fifo_batch_wise_val = True
@@ -1206,6 +1216,16 @@ class SerialandBatchBundle(Document):
 			self.throw_error_message(
 				f"Total quantity {total_qty} in the Serial and Batch Bundle {bold(self.name)} does not match with the quantity {set_qty} for the Item {bold(self.item_code)} in the {self.voucher_type} # {self.voucher_no}"
 			)
+
+	def get_transit_rate(self, row) -> float:
+		"""What the material was worth on its way into the in-transit warehouse."""
+		if row and row.get("sales_incoming_rate"):
+			return flt(row.get("sales_incoming_rate"))
+
+		if not (self.voucher_detail_no and self.voucher_no):
+			return 0.0
+
+		return flt(frappe.db.get_value(self.child_table, self.voucher_detail_no, "sales_incoming_rate"))
 
 	def get_qty_field(self, row, qty_field=None) -> str:
 		if not qty_field:

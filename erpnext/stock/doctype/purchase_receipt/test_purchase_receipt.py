@@ -2739,6 +2739,80 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		self.assertEqual(packages, [-10])
 
+	def test_landed_cost_voucher_leaves_the_rejected_material_of_a_transfer_alone(self):
+		"""A charge is spread over the material the receipt accepted; what was rejected keeps the
+		value it arrived in transit with."""
+		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
+			create_landed_cost_voucher,
+		)
+
+		prepare_data_for_internal_transfer()
+		company = "_Test Company with perpetual inventory"
+
+		from_warehouse = create_warehouse("_Test Charge Transfer From", company=company)
+		transit_warehouse = create_warehouse("_Test Charge Transfer Transit", company=company)
+		to_warehouse = create_warehouse("_Test Charge Transfer To", company=company)
+		rejected_warehouse = create_warehouse("_Test Charge Transfer Rejected", company=company)
+
+		item_doc = make_item(
+			"_Test Batch Item For Charged Transfer",
+			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "BT-BIFCT-.####"},
+		)
+
+		receipt = make_purchase_receipt(
+			item_code=item_doc.name, company=company, warehouse=from_warehouse, qty=10, rate=100
+		)
+		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
+
+		dn = create_delivery_note(
+			item_code=item_doc.name,
+			company=company,
+			customer="_Test Internal Customer 2",
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=10,
+			rate=100,
+			warehouse=from_warehouse,
+			target_warehouse=transit_warehouse,
+			batch_no=batch_no,
+		)
+
+		pr = make_inter_company_purchase_receipt(dn.name)
+		pr.items[0].warehouse = to_warehouse
+		pr.items[0].qty = 7
+		pr.items[0].rejected_qty = 3
+		pr.items[0].received_qty = 10
+		pr.items[0].rejected_warehouse = rejected_warehouse
+		pr.submit()
+
+		create_landed_cost_voucher("Purchase Receipt", pr.name, pr.company, charges=120)
+
+		moved_value = {
+			d.warehouse: flt(d.stock_value_difference)
+			for d in frappe.get_all(
+				"Stock Ledger Entry",
+				filters={"voucher_no": pr.name, "is_cancelled": 0},
+				fields=["warehouse", "stock_value_difference"],
+			)
+		}
+
+		self.assertEqual(moved_value[transit_warehouse], -1000)
+		self.assertEqual(moved_value[to_warehouse], 784)
+		self.assertEqual(moved_value[rejected_warehouse], 300)
+
+		booked = {}
+		for entry in frappe.get_all(
+			"GL Entry",
+			filters={"voucher_no": pr.name, "is_cancelled": 0},
+			fields=["account", "debit", "credit"],
+		):
+			booked.setdefault(entry.account, 0)
+			booked[entry.account] += flt(entry.debit) - flt(entry.credit)
+
+		self.assertEqual(flt(sum(booked.values()), 2), 0)
+
 	def test_return_of_a_transfer_that_rejected_batch_material(self):
 		"""Returning the whole receipt puts the accepted and the rejected material back into the
 		in-transit warehouse, and leaves the batch qty where it started."""
