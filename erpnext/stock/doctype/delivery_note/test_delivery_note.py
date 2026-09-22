@@ -1895,6 +1895,48 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assertEqual(received_batch, sent_batch)
 		self.assertEqual(frappe.db.count("Batch", {"item": component}), 1)
 
+	def test_internal_transfer_of_a_bundle_with_a_repeated_component(self):
+		"""A component listed twice on a bundle keeps one package per packed row."""
+		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
+
+		company = "_Test Company"
+		warehouse = "_Test Warehouse - _TC"
+		transit_warehouse = "Stores - _TC"
+		component = make_item(
+			properties={
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "_T-REPEATED-BATCH-.####",
+			}
+		).name
+		bundle_item = make_item(properties={"is_stock_item": 0}).name
+
+		product_bundle = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": bundle_item})
+		product_bundle.append("items", {"item_code": component, "qty": 1})
+		product_bundle.append("items", {"item_code": component, "qty": 2})
+		product_bundle.insert()
+		product_bundle.submit()
+
+		make_stock_entry(target=warehouse, qty=20, basic_rate=100, item_code=component)
+		customer = create_internal_customer(represents_company=company)
+
+		dn = create_delivery_note(
+			item_code=bundle_item,
+			company=company,
+			customer=customer,
+			qty=5,
+			rate=100,
+			warehouse=warehouse,
+			target_warehouse=transit_warehouse,
+		)
+
+		received = frappe.get_all(
+			"Serial and Batch Bundle",
+			filters={"voucher_no": dn.name, "warehouse": transit_warehouse},
+			pluck="total_qty",
+		)
+		self.assertEqual(sorted(received), [5, 10])
+
 	def test_internal_transfer_of_an_item_that_cannot_create_batches(self):
 		"""An item whose batches are made by hand travels through an in-transit warehouse."""
 		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
