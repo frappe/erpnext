@@ -77,3 +77,27 @@ class BuyingSettings(Document):
 	def check_maintain_same_rate(self):
 		if self.maintain_same_rate:
 			self.set_landed_cost_based_on_purchase_invoice_rate = 0
+
+
+def is_rejected_material_valued(voucher_type: str, voucher_detail_no: str | None = None) -> bool:
+	"""Rejected material carries stock value only when something has paid for it.
+
+	Material of an internal transfer always has: its value was credited out of the in-transit
+	warehouse. A Purchase Receipt books rejected material against Stock Received But Not Billed, so
+	the supplier still owes an invoice for it, and Buying Settings decides. A stock updating Purchase
+	Invoice bills the accepted qty alone, so its rejected material has no cost to carry.
+	"""
+	if is_material_from_in_transit_warehouse(voucher_type, voucher_detail_no):
+		return True
+
+	if voucher_type == "Purchase Invoice":
+		return False
+
+	return bool(frappe.db.get_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials"))
+
+
+def is_material_from_in_transit_warehouse(voucher_type: str, voucher_detail_no: str | None) -> bool:
+	if voucher_type not in ("Purchase Receipt", "Purchase Invoice") or not voucher_detail_no:
+		return False
+
+	return bool(frappe.get_cached_value(voucher_type + " Item", voucher_detail_no, "from_warehouse"))
