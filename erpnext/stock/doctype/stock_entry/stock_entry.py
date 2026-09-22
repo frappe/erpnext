@@ -3697,6 +3697,12 @@ def _qty_tolerance(precision: int) -> float:
 
 @frappe.whitelist()
 def make_stock_in_entry(source_name, target_doc=None):
+	qty_precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
+
+	def get_remaining_transfer_qty(source_doc):
+		remaining_qty = flt(source_doc.transfer_qty) - flt(source_doc.transferred_qty)
+		return flt(remaining_qty, qty_precision)
+
 	def set_missing_values(source, target):
 		target.stock_entry_type = "Material Transfer"
 		target.set_missing_values()
@@ -3716,7 +3722,7 @@ def make_stock_in_entry(source_name, target_doc=None):
 				target_doc.t_warehouse = warehouse
 
 		target_doc.s_warehouse = source_doc.t_warehouse
-		target_doc.qty = source_doc.qty - source_doc.transferred_qty
+		target_doc.qty = get_remaining_transfer_qty(source_doc) / flt(source_doc.conversion_factor)
 
 	doclist = get_mapped_doc(
 		"Stock Entry",
@@ -3736,7 +3742,7 @@ def make_stock_in_entry(source_name, target_doc=None):
 					"batch_no": "batch_no",
 				},
 				"postprocess": update_item,
-				"condition": lambda doc: flt(doc.qty) - flt(doc.transferred_qty) > 0.00001,
+				"condition": lambda doc: get_remaining_transfer_qty(doc) > 0,
 			},
 		},
 		target_doc,
