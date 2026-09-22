@@ -156,8 +156,6 @@ class BuyingController(SubcontractingController):
 						item, bundle_ids.get(item.get(field))
 					)
 
-				if item.get(field) and bundle_ids.get(item.get(field)):
-					self.set_rejected_package(item, bundle_ids.get(item.get(field)))
 				elif (
 					not self.is_new()
 					and item.serial_and_batch_bundle
@@ -179,6 +177,9 @@ class BuyingController(SubcontractingController):
 					== 1
 				):
 					frappe.set_value("Serial and Batch Entry", sabe[0], "qty", item.qty)
+
+				if item.get(field) and bundle_ids.get(item.get(field)):
+					self.set_rejected_package(item, bundle_ids.get(item.get(field)))
 
 	def make_accepted_package(self, row, package) -> str:
 		"""Package of the material the row accepts.
