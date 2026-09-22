@@ -410,7 +410,6 @@ def get_default_price_list(party):
 
 
 def get_permitted_price_lists(doctype=None):
-	"""Return the price lists permitted to the user for the transaction, the default one first."""
 	permissions = sorted(
 		get_user_permissions().get("Price List", []), key=lambda p: p.get("is_default"), reverse=True
 	)
@@ -420,7 +419,6 @@ def get_permitted_price_lists(doctype=None):
 
 
 def get_usable_price_list(price_lists, party_doctype):
-	"""Return the first price list that is enabled and valid for this side of the transaction."""
 	transaction_side = "selling" if party_doctype == "Customer" else "buying"
 
 	for price_list in price_lists:
@@ -451,7 +449,7 @@ def set_price_list(party_details, party, party_type, given_price_list, pos=None,
 
 		# don't set a price list the user has no permission for, the transaction can't be saved with it
 		if price_list and permitted_price_lists and price_list not in permitted_price_lists:
-			price_list = get_usable_price_list(permitted_price_lists, party.doctype) or price_list
+			price_list = get_usable_price_list(permitted_price_lists, party.doctype)
 
 	if price_list and not is_price_list_enabled(price_list):
 		price_list = None
