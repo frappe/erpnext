@@ -60,7 +60,7 @@ NOT_APPLICABLE_TAX = "N/A"
 def get_item_details(
 	args: dict | str,
 	doc: Document | dict | str | None = None,
-	for_validate: bool | str = False,
+	for_validate: bool | str | None = False,
 	overwrite_warehouse: bool | str = True,
 ):
 	"""
