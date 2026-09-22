@@ -15,6 +15,7 @@ from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_in
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 	combine_datetime,
 	get_available_serial_nos,
+	get_serial_nos_based_on_posting_date,
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.utils import get_incoming_rate, get_stock_balance
@@ -367,36 +368,63 @@ class StockReconciliation(StockController):
 		reco_obj = cls_obj.duplicate_package()
 
 		total_current_qty = 0.0
+		entries_in_stock = []
+		serial_nos_in_stock = self.get_serial_nos_in_stock(row, reco_obj.entries)
+
 		for entry in reco_obj.entries:
 			if not entry.batch_no or entry.serial_no:
-				total_current_qty += entry.qty
-				entry.qty *= -1
-				continue
+				if entry.serial_no not in serial_nos_in_stock:
+					continue
 
-			current_qty = get_batch_qty(
-				entry.batch_no,
-				row.warehouse,
-				row.item_code,
-				ignore_voucher_nos=[self.name],
-				posting_date=self.posting_date,
-				posting_time=self.posting_time,
-				for_stock_levels=True,
-				consider_negative_batches=True,
-				do_not_check_future_batches=True,
-			)
+				current_qty = entry.qty
+			else:
+				current_qty = get_batch_qty(
+					entry.batch_no,
+					row.warehouse,
+					row.item_code,
+					ignore_voucher_nos=[self.name],
+					posting_date=self.posting_date,
+					posting_time=self.posting_time,
+					for_stock_levels=True,
+					consider_negative_batches=True,
+					do_not_check_future_batches=True,
+				)
 
-			if not current_qty:
-				continue
+				if not current_qty:
+					continue
 
 			total_current_qty += current_qty
 			entry.qty = current_qty * -1
+			entries_in_stock.append(entry)
 
 		if total_current_qty:
+			reco_obj.set("entries", entries_in_stock)
 			reco_obj.save()
 
 			row.current_qty = total_current_qty
 
 			return reco_obj
+
+	def get_serial_nos_in_stock(self, row, entries) -> set:
+		serial_nos = [entry.serial_no for entry in entries if entry.serial_no]
+		if not serial_nos:
+			return set()
+
+		in_stock = get_serial_nos_based_on_posting_date(
+			frappe._dict(
+				{
+					"item_code": row.item_code,
+					"warehouse": row.warehouse,
+					"posting_datetime": combine_datetime(self.posting_date, self.posting_time),
+					"serial_nos": serial_nos,
+					"check_serial_nos": True,
+					"voucher_no": self.name,
+				}
+			),
+			[],
+		)
+
+		return set(in_stock)
 
 	def has_change_in_serial_batch(self, row) -> bool:
 		bundles = {row.serial_and_batch_bundle: [], row.current_serial_and_batch_bundle: []}
