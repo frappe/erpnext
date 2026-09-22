@@ -1207,7 +1207,7 @@ class SerialandBatchBundle(Document):
 			qty_field = "consumed_qty"
 		elif row.get("doctype") == "Stock Entry Detail":
 			qty_field = "transfer_qty"
-		elif row.get("doctype") in ["Sales Invoice Item", "Purchase Invoice Item"]:
+		elif row.get("doctype") in ["Sales Invoice Item", "Purchase Invoice Item"] and qty_field == "qty":
 			qty_field = "stock_qty"
 
 		return qty_field
