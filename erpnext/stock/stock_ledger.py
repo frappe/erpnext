@@ -28,13 +28,6 @@ from frappe.utils import (
 import erpnext
 from erpnext.stock.doctype.bin.bin import update_qty_from_sle
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
-from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-	get_auto_batch_nos,
-)
-from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
-	get_sre_reserved_batch_nos_details,
-	get_sre_reserved_serial_nos_details,
-)
 from erpnext.stock.utils import (
 	get_combine_datetime,
 	get_incoming_outgoing_rate_for_cancel,
@@ -2584,51 +2577,6 @@ def validate_reserved_stock(kwargs):
 			nowtime(),
 		)
 		frappe.throw(msg, title=_("Reserved Stock"))
-
-
-def validate_reserved_serial_nos(item_code, warehouse, serial_nos):
-	if reserved_serial_nos_details := get_sre_reserved_serial_nos_details(item_code, warehouse, serial_nos):
-		if common_serial_nos := list(set(serial_nos).intersection(set(reserved_serial_nos_details.keys()))):
-			msg = _(
-				"Serial Nos are reserved in Stock Reservation Entries, you need to unreserve them before proceeding."
-			)
-			msg += "<br />"
-			msg += _("Example: Serial No {0} reserved in {1}.").format(
-				frappe.bold(common_serial_nos[0]),
-				frappe.get_desk_link(
-					"Stock Reservation Entry", reserved_serial_nos_details[common_serial_nos[0]]
-				),
-			)
-			frappe.throw(msg, title=_("Reserved Serial No."))
-
-
-def validate_reserved_batch_nos(item_code, warehouse, batch_nos):
-	if reserved_batches_map := get_sre_reserved_batch_nos_details(item_code, warehouse, batch_nos):
-		available_batches = get_auto_batch_nos(
-			frappe._dict(
-				{
-					"item_code": item_code,
-					"warehouse": warehouse,
-					"posting_datetime": get_combine_datetime(nowdate(), nowtime()),
-				}
-			)
-		)
-		available_batches_map = {row.batch_no: row.qty for row in available_batches}
-		precision = cint(frappe.db.get_default("float_precision")) or 2
-
-		for batch_no in batch_nos:
-			diff = flt(
-				available_batches_map.get(batch_no, 0) - reserved_batches_map.get(batch_no, 0), precision
-			)
-			if diff < 0 and abs(diff) > 0.0001:
-				msg = _("{0} units of {1} needed in {2} on {3} {4} to complete this transaction.").format(
-					abs(diff),
-					frappe.get_desk_link("Batch", batch_no),
-					frappe.get_desk_link("Warehouse", warehouse),
-					nowdate(),
-					nowtime(),
-				)
-				frappe.throw(msg, title=_("Reserved Stock for Batch"))
 
 
 def is_negative_stock_allowed(*, item_code: str | None = None) -> bool:
