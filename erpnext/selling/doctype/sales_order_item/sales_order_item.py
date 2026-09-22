@@ -42,7 +42,6 @@ class SalesOrderItem(Document):
 		discount_amount: DF.Currency
 		discount_percentage: DF.Percent
 		distributed_discount_amount: DF.Currency
-		ensure_delivery_based_on_produced_serial_no: DF.Check
 		fg_item: DF.Link | None
 		fg_item_qty: DF.Float
 		grant_commission: DF.Check
