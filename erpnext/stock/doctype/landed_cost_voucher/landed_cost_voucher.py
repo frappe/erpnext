@@ -64,7 +64,7 @@ class LandedCostVoucher(Document):
 					item.item_code = d.item_code
 					item.description = d.description
 					item.qty = d.qty
-					item.rate = d.get("base_rate") or d.get("rate")
+					item.rate = d.base_rate
 					item.cost_center = d.cost_center or erpnext.get_default_cost_center(self.company)
 					item.amount = d.base_amount
 					item.receipt_document_type = pr.receipt_document_type
@@ -296,14 +296,14 @@ class LandedCostVoucher(Document):
 			for item in self.get("items"):
 				total_item_cost += item.get(based_on_field)
 
-			for item in self.get("items"):
-				if not total_item_cost and not item.get(based_on_field):
-					frappe.throw(
-						_(
-							"It's not possible to distribute charges equally when total amount is zero, please set 'Distribute Charges Based On' as 'Quantity'"
-						)
+			if not total_item_cost:
+				frappe.throw(
+					_(
+						"It's not possible to distribute charges equally when total amount is zero, please set 'Distribute Charges Based On' as 'Quantity'"
 					)
+				)
 
+			for item in self.get("items"):
 				item.applicable_charges = flt(
 					flt(item.get(based_on_field))
 					* (flt(self.total_taxes_and_charges) / flt(total_item_cost)),
@@ -548,8 +548,8 @@ def get_pr_items(purchase_receipt):
 		query = query.where(pr_item.is_finished_item == 1)
 	else:
 		query = query.select(
-			pr_item.base_rate,
-			pr_item.base_amount,
+			pr_item.base_net_rate.as_("base_rate"),
+			pr_item.base_net_amount.as_("base_amount"),
 			pr_item.is_fixed_asset,
 		)
 
