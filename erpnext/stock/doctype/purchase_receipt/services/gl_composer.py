@@ -80,6 +80,7 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 			if (
 				doc.get("is_return")
 				and item.return_qty_from_rejected_warehouse
+				and not doc.is_internal_transfer()
 				and not frappe.db.get_single_value(
 					"Buying Settings", "set_valuation_rate_for_rejected_materials"
 				)
@@ -101,7 +102,9 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 
 			outgoing_amount = item.base_net_amount
 			if doc.is_internal_transfer() and item.valuation_rate:
-				outgoing_amount = abs(get_stock_value_difference(doc.name, item.name, item.from_warehouse))
+				outgoing_amount = -1 * flt(
+					get_stock_value_difference(doc.name, item.name, item.from_warehouse)
+				)
 				credit_amount = outgoing_amount
 
 			if (
@@ -347,7 +350,7 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 					make_sub_contracting_gl_entries(d)
 					make_divisional_loss_gl_entry(d, outgoing_amount)
 			elif (d.warehouse and d.qty and d.warehouse not in warehouse_with_no_account) or (
-				not frappe.db.get_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials")
+				not self.is_rejected_material_valued()
 				and d.rejected_warehouse
 				and d.rejected_warehouse not in warehouse_with_no_account
 			):
