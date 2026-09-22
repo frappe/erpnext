@@ -930,7 +930,16 @@ class StockReconciliation(StockController):
 				has_dimensions = True
 
 		if self.docstatus == 2:
-			if row.current_qty and current_bundle:
+			if self.is_adjustment_row(row):
+				# Reversing a value-only entry must not shift any quantity, so mirror the balance the
+				# ledger carried across it and let get_stock_reco_qty_shift resolve to zero.
+				data.actual_qty = 0.0
+				data.qty_after_transaction = flt(row.current_qty)
+				data.previous_qty_after_transaction = flt(row.current_qty)
+				data.valuation_rate = flt(row.current_valuation_rate)
+				data.stock_value = flt(row.current_amount)
+				data.stock_value_difference = -1 * flt(row.amount_difference)
+			elif row.current_qty and current_bundle:
 				data.actual_qty = -1 * row.current_qty
 				data.qty_after_transaction = flt(row.current_qty)
 				data.previous_qty_after_transaction = flt(row.qty)
@@ -1062,9 +1071,14 @@ class StockReconciliation(StockController):
 
 		for row in self.items:
 			stock_value_difference = flt(get_row_stock_value_difference(self.doctype, self.name, row.name))
+			amount_difference = flt(stock_value_difference, row.precision("amount_difference"))
+
+			if self.is_adjustment_row(row):
+				self.set_adjustment_row_values(row, amount_difference)
+				difference_amount += amount_difference
+				continue
 
 			amount = flt(flt(row.qty) * flt(row.valuation_rate), row.precision("amount"))
-			amount_difference = flt(stock_value_difference, row.precision("amount_difference"))
 			current_amount = flt(amount - amount_difference, row.precision("current_amount"))
 
 			current_qty = self.get_current_qty_from_ledger(row)
@@ -1094,6 +1108,48 @@ class StockReconciliation(StockController):
 			update_modified=False,
 		)
 
+	def is_adjustment_row(self, row: StockReconciliationItem) -> bool:
+		"""Did this row post a value-only adjustment entry rather than move any stock?"""
+		return bool(
+			frappe.db.get_value(
+				"Stock Ledger Entry",
+				{
+					"voucher_type": self.doctype,
+					"voucher_no": self.name,
+					"voucher_detail_no": row.name,
+					"is_cancelled": 0,
+				},
+				"is_adjustment_entry",
+			)
+		)
+
+	def set_adjustment_row_values(self, row: StockReconciliationItem, amount_difference: float):
+		"""Refresh a value-only row from the ledger.
+
+		The write-off moves no stock, so the qty and rate on either side of it are the ones the
+		ledger already carried and the quantity difference is zero. Only ``amount_difference``
+		changes, and it is the write-off booked to the GL rather than a change in what is on hand.
+		"""
+		previous_sle = self.get_previous_ledger_entry(row) or frappe._dict()
+
+		current_qty = flt(previous_sle.get("qty_after_transaction"), row.precision("current_qty"))
+		current_valuation_rate = flt(
+			previous_sle.get("valuation_rate"), row.precision("current_valuation_rate")
+		)
+		current_amount = flt(current_qty * current_valuation_rate, row.precision("current_amount"))
+
+		row.db_set(
+			{
+				"amount": current_amount,
+				"current_qty": current_qty,
+				"current_valuation_rate": current_valuation_rate,
+				"current_amount": current_amount,
+				"quantity_difference": 0.0,
+				"amount_difference": amount_difference,
+			},
+			update_modified=False,
+		)
+
 	def get_current_qty_from_ledger(self, row: StockReconciliationItem):
 		"""Current (pre-reconciliation) qty for a row, recomputed from the ledger after reposting.
 
@@ -1108,6 +1164,17 @@ class StockReconciliation(StockController):
 			)
 			return abs(flt(total_qty, row.precision("current_qty")))
 
+		previous_sle = self.get_previous_ledger_entry(row)
+		if previous_sle is None:
+			return flt(row.current_qty, row.precision("current_qty"))
+
+		return flt(previous_sle.get("qty_after_transaction"), row.precision("current_qty"))
+
+	def get_previous_ledger_entry(self, row: StockReconciliationItem):
+		"""Balance and rate the ledger carried just before this row's own entries.
+
+		Returns ``None`` when the row has no Stock Ledger Entry of its own.
+		"""
 		reco_sle = frappe.db.get_value(
 			"Stock Ledger Entry",
 			{
@@ -1120,12 +1187,12 @@ class StockReconciliation(StockController):
 			as_dict=True,
 		)
 		if not reco_sle:
-			return flt(row.current_qty, row.precision("current_qty"))
+			return None
 
 		sle = frappe.qb.DocType("Stock Ledger Entry")
 		previous_sle = (
 			frappe.qb.from_(sle)
-			.select(sle.qty_after_transaction)
+			.select(sle.qty_after_transaction, sle.valuation_rate)
 			.where(
 				(sle.item_code == row.item_code)
 				& (sle.warehouse == row.warehouse)
@@ -1141,9 +1208,9 @@ class StockReconciliation(StockController):
 			.orderby(sle.posting_datetime, order=frappe.qb.desc)
 			.orderby(sle.creation, order=frappe.qb.desc)
 			.limit(1)
-		).run()
+		).run(as_dict=True)
 
-		return flt(previous_sle[0][0], row.precision("current_qty")) if previous_sle else 0.0
+		return previous_sle[0] if previous_sle else frappe._dict()
 
 	def submit(self):
 		if len(self.items) > 100:
