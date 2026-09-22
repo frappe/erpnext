@@ -15,6 +15,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import g
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
 from erpnext.accounts.party import _get_party_details
 from erpnext.buying.doctype.buying_settings.buying_settings import (
+	bills_rejected_quantity,
 	is_rejected_material_valued,
 )
 from erpnext.buying.utils import update_last_purchase_rate, validate_for_items
@@ -480,7 +481,7 @@ class BuyingController(SubcontractingController):
 				):
 					net_rate = item.rejected_qty * item.net_rate
 
-				qty_in_stock_uom = flt(item.qty * item.conversion_factor)
+				qty_in_stock_uom = flt(self.get_valued_qty(item) * item.conversion_factor)
 				if not qty_in_stock_uom and item.get("rejected_qty"):
 					qty_in_stock_uom = flt(item.rejected_qty * item.conversion_factor)
 
@@ -494,6 +495,14 @@ class BuyingController(SubcontractingController):
 				item.valuation_rate = 0.0
 
 		update_regional_item_valuation_rate(self)
+
+	def get_valued_qty(self, row):
+		"""Quantity the net amount of the row was billed for, which is what its valuation spreads
+		over."""
+		if not flt(row.get("rejected_qty")) or not bills_rejected_quantity(self):
+			return flt(row.qty)
+
+		return flt(row.qty) + flt(row.rejected_qty)
 
 	def get_tax_details(self):
 		tax_accounts = []

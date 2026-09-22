@@ -81,10 +81,20 @@ class BuyingSettings(Document):
 
 def is_rejected_material_valued(voucher_type: str) -> bool:
 	"""Rejected material carries stock value only when something is going to pay for it. A Purchase
-	Receipt books it against Stock Received But Not Billed, so the supplier still owes an invoice for
-	it. A stock updating Purchase Invoice bills the accepted quantity alone, so its rejected material
-	has no cost to carry."""
-	if voucher_type == "Purchase Invoice":
+	Receipt books it against Stock Received But Not Billed. A Purchase Invoice pays for it only when
+	it bills the received quantity, which is what the setting asks for."""
+	if not frappe.db.get_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials"):
 		return False
 
-	return bool(frappe.db.get_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials"))
+	return voucher_type != "Purchase Invoice" or bool(
+		frappe.db.get_single_value("Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice")
+	)
+
+
+def bills_rejected_quantity(doc) -> bool:
+	"""An invoice that moves stock itself has no receipt to bill the rejected material for it, so it
+	bills the received quantity when the settings ask for the material to be valued."""
+	if doc.doctype != "Purchase Invoice" or not doc.get("update_stock"):
+		return False
+
+	return is_rejected_material_valued(doc.doctype)

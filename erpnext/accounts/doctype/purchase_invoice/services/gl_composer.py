@@ -10,6 +10,7 @@ from erpnext.accounts.general_ledger import get_round_off_account_and_cost_cente
 from erpnext.accounts.services.base_gl_composer import BaseGLComposer
 from erpnext.accounts.services.taxes import TaxService
 from erpnext.accounts.utils import get_account_currency
+from erpnext.buying.doctype.buying_settings.buying_settings import bills_rejected_quantity
 
 
 class PurchaseInvoiceGLComposer(BaseGLComposer):
@@ -251,6 +252,10 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 							)
 
 					else:
+						self.make_rejected_warehouse_gl_entry(
+							gl_entries, item, voucher_wise_stock_value, inventory_account_map
+						)
+
 						if not doc.is_internal_transfer():
 							gl_entries.append(
 								self.get_gl_dict(
@@ -563,6 +568,41 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 		)
 
 		return stock_asset_rbnb or item.expense_account
+
+	def make_rejected_warehouse_gl_entry(
+		self, gl_entries, item, voucher_wise_stock_value, inventory_account_map
+	) -> None:
+		"""Book the rejected material of an invoice that bills the received quantity, whose cost the
+		supplier gl entry already carries."""
+		doc = self.doc
+		if not (item.rejected_warehouse and bills_rejected_quantity(doc)):
+			return
+
+		rejected_amount = flt(
+			voucher_wise_stock_value.get((item.name, item.rejected_warehouse)),
+			item.precision("base_net_amount"),
+		)
+		if not rejected_amount:
+			return
+
+		rejected_account = doc.get_inventory_account_dict(item, inventory_account_map, "rejected_warehouse")
+		gl_entries.append(
+			self.get_gl_dict(
+				{
+					"account": rejected_account["account"],
+					"against": doc.supplier,
+					"cost_center": item.cost_center,
+					"project": item.project or doc.project,
+					"remarks": doc.get("remarks") or _("Accounting Entry for Stock"),
+					"debit": rejected_amount,
+					"debit_in_transaction_currency": flt(
+						rejected_amount / doc.conversion_rate, item.precision("net_amount")
+					),
+				},
+				rejected_account["account_currency"],
+				item=item,
+			)
+		)
 
 	def make_stock_adjustment_entry(self, gl_entries, item, voucher_wise_stock_value, account_currency):
 		doc = self.doc
