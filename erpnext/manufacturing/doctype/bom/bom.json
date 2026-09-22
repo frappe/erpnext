@@ -45,7 +45,6 @@
   "is_default",
   "allow_alternative_item",
   "is_phantom_bom",
-  "set_rate_of_sub_assembly_item_based_on_bom",
   "quality_inspection_section_break",
   "inspection_required",
   "quality_inspection_template",
@@ -121,7 +120,7 @@
    "fieldname": "item_name",
    "fieldtype": "Data",
    "in_global_search": 1,
-   "label": "Item Name",
+   "label": "Item name",
    "read_only": 1
   },
   {
@@ -139,7 +138,7 @@
    "fetch_from": "item.stock_uom",
    "fieldname": "uom",
    "fieldtype": "Link",
-   "label": "Unit Of Measure",
+   "label": "Unit of Measure",
    "options": "UOM",
    "read_only": 1
   },
@@ -200,7 +199,7 @@
    "default": "0",
    "fieldname": "inspection_required",
    "fieldtype": "Check",
-   "label": "Quality inspection required"
+   "label": "Quality Inspection required"
   },
   {
    "default": "0",
@@ -208,14 +207,6 @@
    "fieldname": "allow_alternative_item",
    "fieldtype": "Check",
    "label": "Allow alternative raw material"
-  },
-  {
-   "allow_on_submit": 1,
-   "default": "1",
-   "documentation_url": "https://docs.frappe.io/erpnext/bill-of-materials#23-additional-options-when-creating-a-bill-of-materials",
-   "fieldname": "set_rate_of_sub_assembly_item_based_on_bom",
-   "fieldtype": "Check",
-   "label": "Set rate of sub-assembly item based on BOM"
   },
   {
    "depends_on": "inspection_required",
@@ -251,7 +242,7 @@
    "default": "1",
    "fieldname": "conversion_rate",
    "fieldtype": "Float",
-   "label": "Conversion Rate",
+   "label": "Conversion rate",
    "precision": "9",
    "reqd": 1
   },
@@ -267,7 +258,7 @@
    "default": "Valuation Rate",
    "fieldname": "rm_cost_as_per",
    "fieldtype": "Select",
-   "label": "Rate Of Materials Based On",
+   "label": "Rate of Materials based on",
    "options": "Valuation Rate\nLast Purchase Rate\nPrice List"
   },
   {
@@ -525,7 +516,7 @@
    "fieldtype": "Check",
    "hidden": 1,
    "in_list_view": 1,
-   "label": "Has Variants",
+   "label": "Has variants",
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
@@ -696,7 +687,7 @@
   {
    "fieldname": "cost_allocation",
    "fieldtype": "Currency",
-   "label": "Cost allocation",
+   "label": "Cost allocation for Finished Good",
    "non_negative": 1,
    "options": "currency",
    "read_only": 1
@@ -705,8 +696,9 @@
    "default": "100",
    "fieldname": "cost_allocation_per",
    "fieldtype": "Percent",
-   "label": "% Cost allocation",
-   "non_negative": 1
+   "label": "% Cost allocation for Finished Good",
+   "non_negative": 1,
+   "read_only": 1
   },
   {
    "collapsible": 1,
@@ -753,7 +745,7 @@
    "description": "Controls how raw materials are consumed during the \u2018Manufacture\u2019 stock entry.",
    "fieldname": "backflush_based_on",
    "fieldtype": "Select",
-   "label": "Based On",
+   "label": "Based on",
    "options": "\nBOM\nMaterial Transferred for Manufacture",
    "show_description_on_click": 1
   },
@@ -771,7 +763,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-21 15:14:47.052817",
+ "modified": "2026-09-23 16:13:07.932185",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",

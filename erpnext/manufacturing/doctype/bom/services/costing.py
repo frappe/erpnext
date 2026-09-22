@@ -50,7 +50,7 @@ class BOMCostingService:
 			return 0
 
 		if arg.get("bom_no") and (
-			self.doc.set_rate_of_sub_assembly_item_based_on_bom or arg.get("is_phantom_item")
+			arg.get("set_rate_of_sub_assembly_item_based_on_bom") or arg.get("is_phantom_item")
 		):
 			return flt(self.get_bom_unitcost(arg["bom_no"])) * (arg.get("conversion_factor") or 1)
 
@@ -254,6 +254,7 @@ class BOMCostingService:
 			"conversion_factor": d.conversion_factor,
 			"sourced_by_supplier": d.sourced_by_supplier,
 			"is_phantom_item": d.is_phantom_item,
+			"set_rate_of_sub_assembly_item_based_on_bom": d.set_rate_of_sub_assembly_item_based_on_bom,
 			"source_warehouse": d.source_warehouse or self.doc.default_source_warehouse,
 		}
 

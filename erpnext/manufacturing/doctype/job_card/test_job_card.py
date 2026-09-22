@@ -38,7 +38,8 @@ class TestJobCard(ERPNextTestSuite):
 
 	def make_bom_for_jc_tests(self):
 		bom = frappe.copy_doc(self.globalTestRecords["BOM"][2])
-		bom.set_rate_of_sub_assembly_item_based_on_bom = 0
+		for item in bom.items:
+			item.set_rate_of_sub_assembly_item_based_on_bom = 0
 		bom.rm_cost_as_per = "Valuation Rate"
 		bom.items[0].uom = "_Test UOM 1"
 		bom.items[0].conversion_factor = 5
