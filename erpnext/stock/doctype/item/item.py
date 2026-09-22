@@ -146,6 +146,7 @@ class Item(Document):
 		taxes: DF.Table[ItemTax]
 		total_projected_qty: DF.Float
 		uoms: DF.Table[UOMConversionDetail]
+		use_serial_no_wise_valuation: DF.Check
 		valuation_method: DF.Literal["", "FIFO", "Moving Average", "LIFO", "Standard Cost"]
 		valuation_rate: DF.Currency
 		variant_based_on: DF.Literal["Item Attribute", "Manufacturer"]
@@ -244,6 +245,8 @@ class Item(Document):
 		self.validate_auto_reorder_enabled_in_stock_settings()
 		self.cant_change()
 		self.validate_serialized_change_with_bundle()
+		self.validate_serial_no_wise_valuation()
+		self.set_valuation_method_for_serial_no_wise_valuation()
 		self.validate_standard_cost_change()
 		self.validate_item_tax_net_rate_range()
 
@@ -251,8 +254,11 @@ class Item(Document):
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
 
 	def on_update(self):
+		from erpnext.stock.utils import clear_valuation_method_cache
+
 		self.update_variants()
 		self.update_item_price()
+		clear_valuation_method_cache()
 
 	def validate_description(self):
 		"""Clean HTML description if set"""
@@ -1160,6 +1166,49 @@ class Item(Document):
 				)
 
 			frappe.throw(msg, title=_("Linked with submitted documents"))
+
+	def validate_serial_no_wise_valuation(self):
+		if self.is_new() or not self._doc_before_save:
+			return
+
+		if not self.use_serial_no_wise_valuation or self._doc_before_save.use_serial_no_wise_valuation:
+			return
+
+		if frappe.db.exists("Serial No", {"item_code": self.name}):
+			frappe.throw(
+				_(
+					"Serial No Wise Valuation cannot be enabled for Item {0} because Serial Nos already exist for it. Valuation for those Serial Nos was not tracked, so enabling it now would value outward entries incorrectly."
+				).format(frappe.bold(self.name)),
+				title=_("Serial Nos Exist"),
+			)
+
+	def set_valuation_method_for_serial_no_wise_valuation(self):
+		if not self.has_serial_no or self.use_serial_no_wise_valuation:
+			return
+
+		# Only the switch turning off forces Moving Average, because the per serial costs already in the
+		# ledger cannot be replayed as a FIFO queue. An item that has always had the switch off keeps its
+		# own method, so an unrelated save cannot silently revalue a ledger nothing reposts.
+		if self._doc_before_save and not self._doc_before_save.use_serial_no_wise_valuation:
+			return
+
+		if not frappe.db.exists("Stock Ledger Entry", {"item_code": self.name, "is_cancelled": 0}):
+			return
+
+		if (
+			not self.is_new()
+			and self._doc_before_save
+			and self.has_value_changed("valuation_method")
+			and self.valuation_method in ("FIFO", "LIFO", "Standard Cost")
+		):
+			frappe.throw(
+				_(
+					"Valuation Method for Item {0} must be Moving Average because Serial No Wise Valuation is disabled. Enable Serial No Wise Valuation to use FIFO, LIFO or Standard Cost."
+				).format(frappe.bold(self.name)),
+				title=_("Invalid Valuation Method"),
+			)
+
+		self.valuation_method = "Moving Average"
 
 	def validate_serialized_change_with_bundle(self):
 		"""Block turning a serialized item non-serialized while any Serial and Batch Bundle still exists

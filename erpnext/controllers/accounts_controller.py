@@ -349,12 +349,26 @@ class AccountsController(TransactionBase):
 		self.validate_company_in_accounting_dimension()
 
 	def validate_price_list(self):
-		price_list_field = "selling_price_list" if self.get("selling_price_list") else "buying_price_list"
+		if self.get("selling_price_list"):
+			price_list_field, transaction_side = "selling_price_list", "selling"
+		else:
+			price_list_field, transaction_side = "buying_price_list", "buying"
+
 		price_list = self.get(price_list_field)
-		if not price_list or frappe.db.get_value("Price List", price_list, "enabled"):
+		if not price_list:
 			return
 
-		# Returns retain a submitted voucher's pricing even if its price list is now disabled.
+		details = (
+			frappe.db.get_value("Price List", price_list, ["enabled", transaction_side], as_dict=True)
+			or frappe._dict()
+		)
+
+		# An internal transfer carries the price list of the outward document into the inward one.
+		fits_transaction = details.get(transaction_side) or self.is_internal_transfer()
+		if details.enabled and fits_transaction:
+			return
+
+		# Returns retain a submitted voucher's pricing even if its price list no longer fits.
 		if (
 			self.get("is_return")
 			and self.get("return_against")
@@ -365,9 +379,20 @@ class AccountsController(TransactionBase):
 		):
 			return
 
+		if not details.enabled:
+			frappe.throw(
+				_("Price List {0} is disabled").format(get_link_to_form("Price List", price_list)),
+				title=_("Disabled Price List"),
+			)
+
+		if transaction_side == "selling":
+			message = _("Price List {0} cannot be used on a selling transaction")
+		else:
+			message = _("Price List {0} cannot be used on a buying transaction")
+
 		frappe.throw(
-			_("Price List {0} is disabled").format(get_link_to_form("Price List", price_list)),
-			title=_("Disabled Price List"),
+			message.format(get_link_to_form("Price List", price_list)),
+			title=_("Invalid Price List"),
 		)
 
 	def set_default_letter_head(self):
@@ -724,12 +749,15 @@ class AccountsController(TransactionBase):
 				args = "for_buying"
 
 			if self.meta.get_field(fieldname) and self.get(fieldname):
+				previous_price_list_currency = self.price_list_currency
 				self.price_list_currency = frappe.db.get_value("Price List", self.get(fieldname), "currency")
 
 				if self.price_list_currency == self.company_currency:
 					self.plc_conversion_rate = 1.0
 
-				elif not self.plc_conversion_rate:
+				elif not self.plc_conversion_rate or (
+					previous_price_list_currency and previous_price_list_currency != self.price_list_currency
+				):
 					self.plc_conversion_rate = get_exchange_rate(
 						self.price_list_currency, self.company_currency, transaction_date, args
 					)
