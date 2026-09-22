@@ -885,8 +885,13 @@ def get_filters(
 		if reference_voucher_detail_no:
 			warehouses = get_warehouses_for_return(voucher_type, reference_voucher_detail_no)
 
-		if item_row.get("warehouse") and item_row.get("warehouse") in warehouses:
-			filters["warehouse"] = item_row.get("warehouse")
+		# A row that accepted nothing goes back at the rate the rejected warehouse received it at.
+		warehouse_field = "warehouse"
+		if not flt(item_row.get("qty")) and flt(item_row.get("rejected_qty")):
+			warehouse_field = "rejected_warehouse"
+
+		if item_row.get(warehouse_field) and item_row.get(warehouse_field) in warehouses:
+			filters["warehouse"] = item_row.get(warehouse_field)
 
 	return filters
 

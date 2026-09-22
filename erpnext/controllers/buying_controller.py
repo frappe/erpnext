@@ -760,7 +760,11 @@ class BuyingController(SubcontractingController):
 			return
 
 		if cint(self.get("is_return")):
-			# Get outgoing rate based on original item cost based on valuation method
+			# Material of a transfer goes back at the rate it came in with. Anything else is
+			# valued from the original item cost by its valuation method.
+			if self.is_internal_transfer():
+				self.set_sales_incoming_rate_for_internal_transfer()
+
 			return
 
 		if not self.is_internal_transfer():
@@ -801,8 +805,13 @@ class BuyingController(SubcontractingController):
 		}
 
 		ref_doctype = ref_doctype_map.get(self.doctype)
+		returned_field = frappe.scrub(self.doctype) + "_item"
 		for d in self.get("items"):
-			if not d.get(frappe.scrub(ref_doctype)):
+			if self.get("is_return") and d.get(returned_field):
+				d.sales_incoming_rate = flt(
+					frappe.db.get_value(self.doctype + " Item", d.get(returned_field), "sales_incoming_rate")
+				)
+			elif not d.get(frappe.scrub(ref_doctype)):
 				posting_time = self.get("posting_time")
 				if not posting_time:
 					posting_time = nowtime()
