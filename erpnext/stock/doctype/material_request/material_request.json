@@ -443,6 +443,11 @@
    "write": 1
   },
   {
+   "read": 1,
+   "report": 1,
+   "role": "Manufacturing Manager"
+  },
+  {
    "role": "Delivery Manager",
    "select": 1
   },
