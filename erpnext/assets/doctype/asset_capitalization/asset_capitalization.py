@@ -784,6 +784,12 @@ def get_warehouse_details(args):
 def get_consumed_asset_details(ctx):
 	check_capitalization_access(ctx.get("company"))
 
+	# and the Asset the caller named: its depreciation values are returned through the unguarded
+	# _get_asset_value_after_depreciation. select-or-read, as in the asset.py wrapper.
+	if ctx.get("asset"):
+		ptype = "select" if frappe.only_has_select_perm("Asset") else "read"
+		frappe.has_permission("Asset", ptype, doc=ctx.get("asset"), throw=True)
+
 	out = frappe._dict()
 
 	asset_details = frappe._dict()

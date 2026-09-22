@@ -9,7 +9,7 @@ import frappe
 from frappe import _, qb, scrub
 from frappe.desk.reportview import get_filters_cond, get_match_cond
 from frappe.permissions import has_permission
-from frappe.query_builder import Criterion, CustomFunction
+from frappe.query_builder import Case, Criterion
 from frappe.query_builder.functions import Concat, Locate, Sum
 from frappe.utils import cint, nowdate, today, unique
 from pypika import Order
@@ -337,8 +337,6 @@ def get_project_name(
 ):
 	proj = qb.DocType("Project")
 	meta = frappe.get_meta(doctype)
-	ifelse = CustomFunction("IF", ["condition", "then", "else"])
-
 	list_filters = [["status", "not in", ["Completed", "Cancelled", "On hold"]]]
 
 	if filters:
@@ -393,8 +391,10 @@ def get_project_name(
 		.where(proj.name.isin(permitted))
 	)
 
-	# project_name containing search string 'txt' will be given higher precedence
-	q = q.orderby(ifelse(Locate(txt, proj.project_name) > 0, Locate(txt, proj.project_name), 99999))
+	# CASE, not IF(): IF() is MariaDB-only and is emitted verbatim, so it fails on postgres.
+	q = q.orderby(
+		Case().when(Locate(txt, proj.project_name) > 0, Locate(txt, proj.project_name)).else_(99999)
+	)
 	q = q.orderby(proj.idx, order=Order.desc).orderby(proj.name)
 
 	if page_len:
