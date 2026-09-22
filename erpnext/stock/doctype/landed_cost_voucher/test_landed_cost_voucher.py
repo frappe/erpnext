@@ -112,6 +112,19 @@ class TestLandedCostVoucher(ERPNextTestSuite):
 				lcv.insert()
 				self.assertEqual([item.applicable_charges for item in lcv.items], [80])
 
+	def test_landed_cost_rejects_amounts_that_cancel_to_float_residue(self):
+		lcv = frappe.new_doc("Landed Cost Voucher")
+		lcv.company = "_Test Company"
+		lcv.distribute_charges_based_on = "Amount"
+		for amount in (100.10, 200.20, -300.30):
+			lcv.append("items", {"item_code": "_Test Item", "qty": 1, "amount": amount})
+		lcv.append("taxes", {"amount": 80})
+		lcv.total_taxes_and_charges = 80
+
+		self.assertNotEqual(sum(item.amount for item in lcv.items), 0)
+		with self.assertRaisesRegex(frappe.ValidationError, "of all items is zero"):
+			lcv.set_applicable_charges_on_item()
+
 	def test_get_vendor_invoices_runs(self):
 		# get_vendor_invoice_query filters unclaimed vendor invoices; the threshold moved from a HAVING
 		# (which referenced a SELECT alias with no GROUP BY -- invalid on Postgres) to a WHERE.
