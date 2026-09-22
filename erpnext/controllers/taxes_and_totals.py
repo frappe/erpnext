@@ -250,10 +250,10 @@ class calculate_taxes_and_totals:
 
 	def _set_in_company_currency(self, doc, fields):
 		"""set values in base currency"""
+		high_precision_fields = ("amount", "net_amount")
 		for f in fields:
-			val = flt(
-				flt(doc.get(f), doc.precision(f)) * self.doc.conversion_rate, doc.precision("base_" + f)
-			)
+			base_precision = 9 if f in high_precision_fields else doc.precision("base_" + f)
+			val = flt(flt(doc.get(f), doc.precision(f)) * self.doc.conversion_rate, base_precision)
 			doc.set("base_" + f, val)
 
 	def initialize_taxes(self):

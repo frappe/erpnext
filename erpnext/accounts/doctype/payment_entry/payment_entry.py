@@ -46,6 +46,7 @@ from erpnext.accounts.utils import (
 	cancel_exchange_gain_loss_journal,
 	get_account_currency,
 	get_advance_payment_doctypes,
+	get_base_amount_and_reference_rate_value,
 	get_outstanding_invoices,
 	get_reconciliation_effect_date,
 )
@@ -55,6 +56,11 @@ from erpnext.controllers.accounts_controller import (
 	validate_taxes_and_charges,
 )
 from erpnext.setup.utils import get_exchange_rate
+
+REFERENCE_TOTAL_FIELD = {
+	"Sales Invoice": ("base_grand_total", "grand_total"),
+	"Purchase Invoice": ("base_grand_total", "grand_total"),
+}
 
 
 class InvalidPaymentEntry(ValidationError):
@@ -1065,8 +1071,22 @@ class PaymentEntry(AccountsController):
 			if d.exchange_rate is None:
 				d.exchange_rate = 1
 
-			allocated_amount_in_ref_exchange_rate = flt(
-				flt(d.allocated_amount) * flt(d.exchange_rate), self.precision("base_paid_amount")
+			reference_total_field, reference_amount_field = REFERENCE_TOTAL_FIELD.get(
+				d.reference_doctype, (None, None)
+			)
+			(
+				base_allocated_amount,
+				allocated_amount_in_ref_exchange_rate,
+			) = get_base_amount_and_reference_rate_value(
+				d.reference_doctype,
+				d.reference_name,
+				reference_total_field,
+				reference_amount_field,
+				d.allocated_amount,
+				exchange_rate,
+				d.exchange_rate,
+				self.precision("base_paid_amount"),
+				exclude_payment_entry=self.name,
 			)
 			d.exchange_gain_loss = base_allocated_amount - allocated_amount_in_ref_exchange_rate
 		return base_allocated_amount

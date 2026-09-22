@@ -1208,6 +1208,64 @@ def get_currency_precision():
 	return get_number_format_info(number_format)[2]
 
 
+def get_prior_reference_allocations(reference_doctype, reference_name, exclude_payment_entry=None):
+	filters = {
+		"reference_doctype": reference_doctype,
+		"reference_name": reference_name,
+		"docstatus": 1,
+	}
+	if exclude_payment_entry:
+		filters["parent"] = ["!=", exclude_payment_entry]
+
+	return frappe.get_all(
+		"Payment Entry Reference",
+		filters=filters,
+		fields=["allocated_amount", "exchange_rate"],
+	)
+
+
+def get_base_amount_and_reference_rate_value(
+	reference_doctype,
+	reference_name,
+	reference_total_field,
+	reference_amount_field,
+	allocated_amount,
+	own_rate,
+	reference_rate,
+	precision,
+	exclude_payment_entry=None,
+):
+	allocated_amount = flt(allocated_amount)
+	base_amount = flt(allocated_amount * flt(own_rate), precision)
+	amount_at_reference_rate = flt(allocated_amount * flt(reference_rate), precision)
+
+	if reference_total_field and reference_amount_field:
+		ref_values = frappe.db.get_value(
+			reference_doctype, reference_name, [reference_total_field, reference_amount_field]
+		)
+		if ref_values:
+			reference_total_base, reference_total_account_currency = ref_values
+			reference_total_base = flt(reference_total_base, precision)
+			reference_total_account_currency = flt(reference_total_account_currency)
+
+			prior_allocations = get_prior_reference_allocations(
+				reference_doctype, reference_name, exclude_payment_entry
+			)
+			already_allocated_account_currency = sum(flt(row.allocated_amount) for row in prior_allocations)
+			remaining_account_currency = flt(
+				reference_total_account_currency - already_allocated_account_currency, precision
+			)
+
+			if reference_total_base and flt(remaining_account_currency - allocated_amount, precision) == 0:
+				already_recognized_base = sum(
+					flt(flt(row.allocated_amount) * flt(row.exchange_rate or 1), precision)
+					for row in prior_allocations
+				)
+				amount_at_reference_rate = flt(reference_total_base - already_recognized_base, precision)
+
+	return base_amount, amount_at_reference_rate
+
+
 def get_fraction_units(currency: str) -> int:
 	"""Returns the number of fraction units for a currency."""
 	fraction_units = frappe.db.get_value("Currency", currency, "fraction_units")
