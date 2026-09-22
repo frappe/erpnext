@@ -84,6 +84,8 @@ erpnext.stock.LandedCostVoucher = class LandedCostVoucher extends erpnext.stock.
 					total_item_cost += flt(d[based_on]);
 				});
 
+				if (!total_item_cost) return;
+
 				var total_charges = 0.0;
 				$.each(this.frm.doc.items || [], function (i, item) {
 					item.applicable_charges =

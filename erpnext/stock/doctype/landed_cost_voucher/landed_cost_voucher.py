@@ -294,12 +294,13 @@ class LandedCostVoucher(Document):
 			based_on_field = frappe.scrub(self.distribute_charges_based_on)
 
 			for item in self.get("items"):
-				total_item_cost += item.get(based_on_field)
+				total_item_cost += flt(item.get(based_on_field))
 
 			if not total_item_cost:
 				frappe.throw(
-					_(
-						"It's not possible to distribute charges equally when total amount is zero, please set 'Distribute Charges Based On' as 'Quantity'"
+					_("Total {0} of all items is zero. Set 'Distribute Charges Based On' to {1}.").format(
+						self.distribute_charges_based_on,
+						_("Qty") if based_on_field == "amount" else _("Amount"),
 					)
 				)
 
