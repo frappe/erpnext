@@ -1111,6 +1111,8 @@ class update_entries_after:
 		else:
 			if (
 				sle.voucher_type == "Stock Reconciliation"
+				# an adjustment entry counted nothing, so it must not assert a balance
+				and not sle.is_adjustment_entry
 				and not sle.batch_no
 				and not sle.has_batch_no
 				and not has_dimensions
@@ -1172,25 +1174,20 @@ class update_entries_after:
 
 		sle.stock_value_difference = stock_value_difference
 
-		if (
-			sle.is_adjustment_entry
-			and flt(sle.qty_after_transaction, self.flt_precision) == 0
-			and (
-				flt(sle.stock_value, self.currency_precision) != 0
-				or flt(sle.stock_value_difference, self.currency_precision) == 0
+		# Re-derive the write-off on every repost: whatever brings the running sum of
+		# stock_value_difference back in line with the stock value held at this point. A non-zero
+		# difference above means the entry moved something, so it is not a write-off and is left alone.
+		if sle.is_adjustment_entry and flt(sle.stock_value_difference, self.currency_precision) == 0:
+			value_till_now = get_stock_value_difference(
+				sle.item_code,
+				sle.warehouse,
+				sle.posting_date,
+				sle.posting_time,
+				voucher_detail_no=sle.voucher_detail_no,
+				creation=sle.creation,
 			)
-		):
-			sle.stock_value_difference = (
-				get_stock_value_difference(
-					sle.item_code,
-					sle.warehouse,
-					sle.posting_date,
-					sle.posting_time,
-					voucher_detail_no=sle.voucher_detail_no,
-					creation=sle.creation,
-				)
-				* -1
-			)
+
+			sle.stock_value_difference = flt(flt(sle.stock_value) - value_till_now, self.currency_precision)
 
 		sle.doctype = "Stock Ledger Entry"
 		sle.modified = now()
