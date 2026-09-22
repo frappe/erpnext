@@ -13,6 +13,7 @@ from frappe.utils import cint, flt, round_based_on_smallest_currency_fraction
 import erpnext
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_exchange_rate
 from erpnext.accounts.doctype.pricing_rule.utils import get_applied_pricing_rules
+from erpnext.buying.doctype.buying_settings.buying_settings import bills_rejected_quantity
 from erpnext.controllers.accounts_controller import (
 	validate_conversion_rate,
 	validate_inclusive_tax,
@@ -241,12 +242,18 @@ class calculate_taxes_and_totals:
 			elif not item.qty and self.doc.get("is_debit_note"):
 				item.amount = flt(item.rate, item.precision("amount"))
 			else:
-				item.amount = flt(item.rate * item.qty, item.precision("amount"))
+				item.amount = flt(item.rate * self.get_billed_qty(item), item.precision("amount"))
 			item.net_amount = item.amount
 			self._set_in_company_currency(
 				item, ["price_list_rate", "rate_with_margin", "rate", "net_rate", "amount", "net_amount"]
 			)
 			item.item_tax_amount = 0.0
+
+	def get_billed_qty(self, item):
+		if not flt(item.get("rejected_qty")) or not bills_rejected_quantity(self.doc):
+			return flt(item.qty)
+
+		return flt(item.qty) + flt(item.rejected_qty)
 
 	def _set_in_company_currency(self, doc, fields):
 		"""set values in base currency"""
