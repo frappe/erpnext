@@ -217,6 +217,11 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 						if doc.is_internal_supplier and item.valuation_rate:
 							credit_amount = flt(item.valuation_rate * item.stock_qty)
 
+						rejected_amount = self.make_rejected_warehouse_gl_entry(
+							gl_entries, item, voucher_wise_stock_value, inventory_account_map
+						)
+						credit_amount += rejected_amount
+
 						# Intentionally passed negative debit amount to avoid incorrect GL Entry validation
 						gl_entries.append(
 							self.get_gl_dict(
@@ -571,26 +576,35 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 
 	def make_rejected_warehouse_gl_entry(
 		self, gl_entries, item, voucher_wise_stock_value, inventory_account_map
-	) -> None:
-		"""Book the rejected material of an invoice that bills the received quantity, whose cost the
-		supplier gl entry already carries."""
+	) -> float:
+		"""Book the rejected material of an invoice that moves stock.
+
+		An internal transfer carries the value credited out of the in-transit warehouse along with
+		the accepted material, so the entry against it is that warehouse, and the caller credits it
+		for both. An ordinary invoice carries the value only when it bills the received qty, and its
+		supplier entry already holds the cost.
+		"""
 		doc = self.doc
-		if not (item.rejected_warehouse and bills_rejected_quantity(doc)):
-			return
+		if not (item.rejected_warehouse and flt(item.rejected_qty)):
+			return 0.0
+
+		transfers_rejected_material = doc.is_internal_transfer()
+		if not (transfers_rejected_material or bills_rejected_quantity(doc)):
+			return 0.0
 
 		rejected_amount = flt(
 			voucher_wise_stock_value.get((item.name, item.rejected_warehouse)),
 			item.precision("base_net_amount"),
 		)
 		if not rejected_amount:
-			return
+			return 0.0
 
 		rejected_account = doc.get_inventory_account_dict(item, inventory_account_map, "rejected_warehouse")
 		gl_entries.append(
 			self.get_gl_dict(
 				{
 					"account": rejected_account["account"],
-					"against": doc.supplier,
+					"against": item.expense_account if transfers_rejected_material else doc.supplier,
 					"cost_center": item.cost_center,
 					"project": item.project or doc.project,
 					"remarks": doc.get("remarks") or _("Accounting Entry for Stock"),
@@ -603,6 +617,8 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 				item=item,
 			)
 		)
+
+		return rejected_amount if transfers_rejected_material else 0.0
 
 	def make_stock_adjustment_entry(self, gl_entries, item, voucher_wise_stock_value, account_currency):
 		doc = self.doc
