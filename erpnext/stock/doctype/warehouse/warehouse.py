@@ -70,8 +70,19 @@ class Warehouse(NestedSet):
 		self.set_onload("stock_exists", self.check_if_sle_exists(non_cancelled_only=True))
 
 	def validate(self):
+		self.validate_warehouse_account()
 		self.validate_inventory_account()
 		self.warn_about_multiple_warehouse_account()
+
+	def validate_warehouse_account(self):
+		if self.account and self.company:
+			account_company = frappe.get_cached_value("Account", self.account, "company")
+			if account_company and account_company != self.company:
+				frappe.throw(
+					_("Account {0} does not belong to Company {1}").format(
+						frappe.bold(self.account), frappe.bold(self.company)
+					)
+				)
 
 	def validate_inventory_account(self):
 		if (

@@ -39,7 +39,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Asset",
-   "link_filters": "[[\"Asset\",\"docstatus\",\"<\",\"2\"],[\"Asset\",\"company\",\"=\",\"eval:doc.company\"]]",
+   "link_filters": "[[\"Asset\",\"docstatus\",\"<\",\"2\"]]",
    "options": "Asset",
    "reqd": 1
   },
