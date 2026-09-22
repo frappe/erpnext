@@ -336,6 +336,7 @@ class SerialBatchBundle:
 					)
 					and self.sle.actual_qty < 0
 				)
+				or (self.sle.actual_qty > 0 and self.get_transit_package())
 			)
 		):
 			self.make_serial_batch_no_bundle()
