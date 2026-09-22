@@ -45,6 +45,39 @@ class TestPriceListValidation(ERPNextTestSuite):
 
 		self.assertEqual(invoice.selling_price_list, price_list)
 
+	def test_internal_transfer_should_keep_the_outward_price_list(self):
+		"""The inward document of an internal transfer takes the price list of the outward one, which
+		is flagged for the opposite side."""
+		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
+			prepare_data_for_internal_transfer,
+		)
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		prepare_data_for_internal_transfer()
+		company = "_Test Company with perpetual inventory"
+		selling_only = self.create_price_list(selling=1)
+
+		delivery_note = create_delivery_note(
+			company=company,
+			customer="_Test Internal Customer 2",
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			warehouse="Stores - TCP1",
+			target_warehouse=create_warehouse("_Test Transit For Price List", company=company),
+			do_not_submit=1,
+		)
+		delivery_note.selling_price_list = selling_only
+		delivery_note.save()
+		delivery_note.submit()
+
+		receipt = make_inter_company_purchase_receipt(delivery_note.name)
+		receipt.items[0].warehouse = "Stores - TCP1"
+		receipt.save()
+
+		self.assertEqual(receipt.buying_price_list, selling_only)
+
 	def test_disabled_price_list_should_still_report_as_disabled(self):
 		invoice = create_sales_invoice(do_not_save=1)
 		invoice.selling_price_list = self.create_price_list(selling=1, enabled=0)
