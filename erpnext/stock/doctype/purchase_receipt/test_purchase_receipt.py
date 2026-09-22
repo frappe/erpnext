@@ -2939,6 +2939,44 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(stock_qty[warehouses.transit], -10)
 		self.assertEqual(stock_qty[warehouses.accepted], 10)
 
+	def test_rejected_package_is_built_for_a_transfer_that_rejects_batch_material(self):
+		"""A receipt of an internal transfer builds no package for rejected material on its own, so
+		the row gets one from the material that was delivered into the in-transit warehouse."""
+		item_doc = make_item(
+			"_Test Batch Item For Built Rejection",
+			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "BT-BIFBR-.####"},
+		)
+
+		pr, warehouses, company, batch_no = self.make_transfer_receipt("Built", item_doc, 7, 3)
+		pr.save()
+
+		self.assertTrue(pr.items[0].rejected_serial_and_batch_bundle)
+		self.assertEqual(
+			frappe.db.get_value(
+				"Serial and Batch Bundle",
+				pr.items[0].rejected_serial_and_batch_bundle,
+				["warehouse", "total_qty", "is_rejected"],
+				as_dict=True,
+			),
+			frappe._dict({"warehouse": warehouses.rejected, "total_qty": 3, "is_rejected": 1}),
+		)
+
+		pr.submit()
+
+		stock_qty = {
+			d.warehouse: d.actual_qty
+			for d in frappe.get_all(
+				"Stock Ledger Entry",
+				filters={"voucher_no": pr.name, "is_cancelled": 0},
+				fields=["warehouse", "actual_qty"],
+			)
+		}
+
+		self.assertEqual(stock_qty[warehouses.transit], -10)
+		self.assertEqual(stock_qty[warehouses.accepted], 7)
+		self.assertEqual(stock_qty[warehouses.rejected], 3)
+		self.assertEqual(frappe.db.get_value("Batch", batch_no, "batch_qty"), 10)
+
 	def test_internal_transfer_pr_incoming_sle_anchored_to_dn_rate(self):
 		"""Internal-transfer PR's inward SLE must use DN.incoming_rate even when
 		PR.item.valuation_rate was wrong at submit, so divisional_loss does not
