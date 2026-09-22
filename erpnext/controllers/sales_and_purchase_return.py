@@ -170,7 +170,7 @@ def validate_returned_items(doc):
 				"Delivery Note",
 				"POS Invoice",
 			):
-				if flt(d.qty) < 0 or flt(d.get("received_qty")) < 0:
+				if flt(d.qty) < 0 or flt(d.get("received_qty")) < 0 or flt(d.get("rejected_qty")) < 0:
 					items_returned = True
 			else:
 				items_returned = True
@@ -736,7 +736,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 		if return_against_rejected_qty:
 			return doc.rejected_qty
 
-		return doc.qty
+		return doc.qty or doc.get("rejected_qty")
 
 	doclist = get_mapped_doc(
 		doctype,
