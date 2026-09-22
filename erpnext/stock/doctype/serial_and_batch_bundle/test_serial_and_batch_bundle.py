@@ -1998,6 +1998,42 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 		self.assertEqual(item.valuation_method, "FIFO")
 		self.assertEqual(get_valuation_method(item.name), "Moving Average")
 
+	def test_legacy_serial_no_lookup_is_case_insensitive(self):
+		# MariaDB matches serial_no under a case insensitive collation, PostgreSQL does not.
+		# This asserts the lookup behaves the same on both; it can only fail on PostgreSQL.
+		from erpnext.stock.deprecated_serial_batch import DeprecatedSerialNoValuation
+
+		item = self.make_serial_item_for_valuation("_Test Legacy Serial Case", 1)
+		warehouse = "_Test Warehouse - _TC"
+		serial_no = self.receive_serial_stock(item.name, 1, 100, warehouse)[0]
+
+		# Rewrite the receipt into the pre-bundle representation.
+		sles = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"item_code": item.name, "is_cancelled": 0},
+			fields=["name", "posting_datetime"],
+		)
+		for sle in sles:
+			frappe.db.set_value(
+				"Stock Ledger Entry", sle.name, {"serial_and_batch_bundle": None, "serial_no": serial_no}
+			)
+
+		class LegacyLookup(DeprecatedSerialNoValuation):
+			def __init__(self, sle):
+				self.sle = sle
+
+		lookup = LegacyLookup(
+			frappe._dict(
+				item_code=item.name,
+				company=frappe.get_cached_value("Warehouse", warehouse, "company"),
+				warehouse=warehouse,
+			)
+		)
+		posting_datetime = sles[0].posting_datetime
+
+		self.assertTrue(lookup.get_last_inward_sle_for_serial_no(serial_no, posting_datetime))
+		self.assertTrue(lookup.get_last_inward_sle_for_serial_no(serial_no.swapcase(), posting_datetime))
+
 	def test_cannot_set_fifo_when_serial_no_wise_valuation_disabled(self):
 		item = self.make_serial_item_for_valuation("_Test Serial Wise Valuation No FIFO", 0)
 		self.receive_serial_stock(item.name, 1, 100, "_Test Warehouse - _TC")

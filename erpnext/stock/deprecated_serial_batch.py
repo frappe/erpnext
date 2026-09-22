@@ -6,7 +6,7 @@ import frappe
 from frappe.query_builder.functions import Locate, Sum
 from frappe.utils import flt
 from pypika import Order
-from pypika.functions import Coalesce, Concat
+from pypika.functions import Coalesce, Concat, Lower
 
 from erpnext.deprecation_dumpster import deprecated
 
@@ -73,6 +73,18 @@ class DeprecatedSerialNoValuation:
 	def get_last_inward_sle_for_serial_no(self, serial_no, posting_datetime):
 		table = frappe.qb.DocType("Stock Ledger Entry")
 
+		serial_no_column = table.serial_no
+		needle = serial_no
+		padded_needle = f"\n{serial_no}\n"
+
+		if frappe.db.db_type != "mariadb":
+			# Locate maps to strpos on PostgreSQL and instr on SQLite, both case sensitive, while
+			# MariaDB compares serial_no under a case insensitive collation. Lower both operands so
+			# a mixed case serial no resolves the same legacy Stock Ledger Entry on every database.
+			serial_no_column = Lower(serial_no_column)
+			needle = needle.lower()
+			padded_needle = padded_needle.lower()
+
 		query = (
 			frappe.qb.from_(table)
 			.select(table.incoming_rate, table.actual_qty, table.stock_value_difference)
@@ -84,8 +96,8 @@ class DeprecatedSerialNoValuation:
 				& (table.is_cancelled == 0)
 				& (table.actual_qty > 0)
 				& (table.serial_and_batch_bundle.isnull())
-				& (Locate(serial_no, table.serial_no) > 0)
-				& (Locate(f"\n{serial_no}\n", Concat("\n", table.serial_no, "\n")) > 0)
+				& (Locate(needle, serial_no_column) > 0)
+				& (Locate(padded_needle, Concat("\n", serial_no_column, "\n")) > 0)
 			)
 			.orderby(table.posting_datetime, order=Order.desc)
 			.orderby(table.creation, order=Order.desc)
