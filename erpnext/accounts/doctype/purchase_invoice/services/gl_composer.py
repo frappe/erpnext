@@ -10,7 +10,6 @@ from erpnext.accounts.general_ledger import get_round_off_account_and_cost_cente
 from erpnext.accounts.services.base_gl_composer import BaseGLComposer
 from erpnext.accounts.services.taxes import TaxService
 from erpnext.accounts.utils import get_account_currency
-from erpnext.buying.doctype.buying_settings.buying_settings import bills_rejected_quantity
 
 
 class PurchaseInvoiceGLComposer(BaseGLComposer):
@@ -577,20 +576,17 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 	def make_rejected_warehouse_gl_entry(
 		self, gl_entries, item, voucher_wise_stock_value, inventory_account_map
 	) -> float:
-		"""Book the rejected material of an invoice that moves stock.
+		"""Book the material the invoice moved into the rejected warehouse.
 
 		An internal transfer carries the value credited out of the in-transit warehouse along with
 		the accepted material, so the entry against it is that warehouse, and the caller credits it
-		for both. An ordinary invoice carries the value only when it bills the received qty, and its
-		supplier entry already holds the cost.
+		for both. On an ordinary invoice the supplier entry already holds the cost.
 		"""
 		doc = self.doc
 		if not (item.rejected_warehouse and flt(item.rejected_qty)):
 			return 0.0
 
 		transfers_rejected_material = doc.is_internal_transfer()
-		if not (transfers_rejected_material or bills_rejected_quantity(doc)):
-			return 0.0
 
 		rejected_amount = flt(
 			voucher_wise_stock_value.get((item.name, item.rejected_warehouse)),
@@ -640,9 +636,15 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 				voucher_wise_stock_value.get((item.name, item.warehouse)), net_amt_precision
 			)
 
-			if flt(stock_amount, net_amt_precision) != flt(warehouse_debit_amount, net_amt_precision):
+			# The rejected warehouse carries the rest of what the invoice paid for, and is booked
+			# by its own entry, so it is not a variance.
+			returned_stock_value = warehouse_debit_amount + flt(
+				voucher_wise_stock_value.get((item.name, item.rejected_warehouse)), net_amt_precision
+			)
+
+			if flt(stock_amount, net_amt_precision) != flt(returned_stock_value, net_amt_precision):
 				cost_of_goods_sold_account = self.get_stock_variance_account(item)
-				stock_adjustment_amt = stock_amount - warehouse_debit_amount
+				stock_adjustment_amt = stock_amount - returned_stock_value
 
 				gl_entries.append(
 					self.get_gl_dict(
