@@ -23,7 +23,7 @@ from erpnext.stock.get_item_details import (
 	get_conversion_factor,
 	get_item_defaults,
 )
-from erpnext.stock.utils import get_incoming_rate
+from erpnext.stock.utils import _get_incoming_rate
 
 
 class QtyMismatchError(ValidationError):
@@ -180,7 +180,7 @@ class BuyingController(SubcontractingController):
 			for row in self.items:
 				if row.rate <= 0:
 					# override the rate with valuation rate
-					row.rate = get_incoming_rate(
+					row.rate = _get_incoming_rate(
 						{
 							"item_code": row.item_code,
 							"warehouse": row.warehouse,
@@ -664,7 +664,7 @@ class BuyingController(SubcontractingController):
 				if not posting_time:
 					posting_time = nowtime()
 
-				outgoing_rate = get_incoming_rate(
+				outgoing_rate = _get_incoming_rate(
 					{
 						"item_code": d.item_code,
 						"warehouse": d.get("from_warehouse"),

@@ -91,14 +91,10 @@ class BOMCreator(Document):
 
 			key = (row.item_code, row.fg_reference_id)
 			if key in item_map:
-				parent_item_code = next(
-					item.item_code for item in self.items if item.name == row.fg_reference_id
-				)
-
 				frappe.throw(
 					_(
 						"Item {0} added multiple times under the same parent item {1} at rows {2} and {3}"
-					).format(bold(row.item_code), bold(parent_item_code), item_map[key], row.idx),
+					).format(bold(row.item_code), bold(row.fg_item), item_map[key], row.idx),
 					title=_("Duplicate Item Under Same Parent"),
 				)
 			else:

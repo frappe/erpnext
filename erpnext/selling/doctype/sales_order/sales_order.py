@@ -9,8 +9,10 @@ import frappe
 import frappe.utils
 from frappe import _, qb
 from frappe.model.document import Document
-from frappe.query_builder.functions import Sum
+from frappe.query_builder import Case
+from frappe.query_builder.functions import Abs, IfNull, Round, Sum
 from frappe.utils import cint, flt, get_link_to_form, getdate
+from pypika import Order
 
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	unlink_inter_company_doc,
@@ -31,6 +33,18 @@ from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry impor
 from erpnext.stock.get_item_details import get_default_bom
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
+
+LINK_SEARCH_FIELDTYPES = {
+	"Autocomplete",
+	"Data",
+	"Link",
+	"Long Text",
+	"Read Only",
+	"Select",
+	"Small Text",
+	"Text",
+	"Text Editor",
+}
 
 
 class WarehouseRequired(frappe.ValidationError):
@@ -212,6 +226,12 @@ class SalesOrder(SellingController):
 
 		if has_reserved_stock(self.doctype, self.name):
 			self.set_onload("has_reserved_stock", True)
+
+		if self.docstatus == 1 and self.status not in {"Closed", "On Hold"}:
+			self.set_onload(
+				"has_potentially_billable_items",
+				has_potentially_billable_items(self.name),
+			)
 
 	def can_update_items(self) -> bool:
 		return SubcontractingService(self).can_update_items()
@@ -585,6 +605,22 @@ class SalesOrder(SellingController):
 	def update_status(self, status):
 		StatusService(self).update_status(status)
 
+	def on_item_close_status_change(self):
+		StatusService(self).recalculate_after_item_close()
+
+	def is_item_closable(self, item):
+		return flt(item.delivered_qty) < flt(item.qty) or super().is_item_closable(item)
+
+	def validate_item_close(self, items):
+		"""Reserved stock has to be released deliberately before a row is closed."""
+		for item in items:
+			if has_reserved_stock(self.doctype, self.name, item.name):
+				frappe.throw(
+					_("Row #{0}: {1} has reserved stock. Unreserve it before closing the row.").format(
+						item.idx, frappe.bold(item.item_code)
+					)
+				)
+
 	def update_reserved_qty(self, so_item_rows=None):
 		SalesOrderStockReservation(self).update_reserved_qty(so_item_rows)
 
@@ -754,14 +790,19 @@ def is_enable_cutoff_date_on_bulk_delivery_note_creation():
 	return frappe.get_single_value("Selling Settings", "enable_cutoff_date_on_bulk_delivery_note_creation")
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def close_or_unclose_sales_orders(names: str | list, status: str):
-	if not frappe.has_permission("Sales Order", "write"):
-		frappe.throw(_("Not permitted"), frappe.PermissionError)
+	frappe.has_permission("Sales Order", "write", throw=True)
 
 	names = frappe.parse_json(names)
 	for name in names:
-		so = frappe.get_lazy_doc("Sales Order", name)
+		if not isinstance(name, str):
+			frappe.throw(_("Invalid name"), frappe.PermissionError)
+
+		# the check above is doctype level and never consults User Permissions, so on its own it
+		# lets a caller restricted to one company close another company's orders. Checking each
+		# document is what scopes it, and matches what update_status() below already does.
+		so = frappe.get_lazy_doc("Sales Order", name, check_permission="submit")
 		if so.docstatus == 1:
 			if status == "Closed":
 				if so.status not in ("Cancelled", "Closed") and (
@@ -821,7 +862,7 @@ def get_events(start: str, end: str, filters: str | dict | None = None):
 	return data
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def update_status(status: str, name: str):
 	so = frappe.get_doc("Sales Order", name, check_permission="submit")
 	so.update_status(status)
@@ -914,3 +955,107 @@ def get_work_order_items(sales_order: str, for_raw_material_request: int = 0):
 @frappe.whitelist()
 def get_stock_reservation_status():
 	return frappe.get_single_value("Stock Settings", "enable_stock_reservation")
+
+
+def get_pending_qty_criterion(sales_order_item):
+	"""Mirror the mapper's pending quantity check."""
+	invoice_item = qb.DocType("Sales Invoice Item")
+	billed_qty = (
+		qb.from_(invoice_item)
+		.select(IfNull(Sum(invoice_item.qty), 0))
+		.where((invoice_item.docstatus == 1) & (invoice_item.so_detail == sales_order_item.name))
+	)
+
+	qty_precision = frappe.get_precision("Sales Order Item", "qty")
+	has_unbilled_ordered_qty = Round(sales_order_item.qty - billed_qty, qty_precision) > 0
+	has_unbilled_delivered_qty = (
+		Round(sales_order_item.qty - sales_order_item.returned_qty - billed_qty, qty_precision) > 0
+	) | (Round(sales_order_item.delivered_qty - billed_qty, qty_precision) > 0)
+
+	return has_unbilled_ordered_qty & has_unbilled_delivered_qty
+
+
+def get_potentially_billable_item_criterion(sales_order, sales_order_item, item):
+	"""Return the row level checks the Sales Invoice mapper applies."""
+	global_allowance = flt(frappe.get_cached_value("Accounts Settings", None, "over_billing_allowance"))
+	allowance = (
+		Case().when(item.over_billing_allowance != 0, item.over_billing_allowance).else_(global_allowance)
+	)
+
+	has_amount_headroom = (sales_order_item.base_amount == 0) | (
+		Abs(sales_order_item.billed_amt) < Abs(sales_order_item.amount) * (1 + allowance / 100)
+	)
+	is_unit_price_row = (sales_order.has_unit_price_items == 1) & (sales_order_item.qty == 0)
+	is_billable_row = (
+		(sales_order_item.qty != 0) & has_amount_headroom & get_pending_qty_criterion(sales_order_item)
+	)
+
+	return (sales_order_item.closed == 0) & (is_unit_price_row | is_billable_row)
+
+
+def has_potentially_billable_items(sales_order: str) -> bool:
+	"""Return whether a Sales Order has an item with billing amount headroom."""
+	so = qb.DocType("Sales Order")
+	so_item = qb.DocType("Sales Order Item")
+	item = qb.DocType("Item")
+
+	return bool(
+		qb.from_(so_item)
+		.inner_join(so)
+		.on(so.name == so_item.parent)
+		.left_join(item)
+		.on(item.name == so_item.item_code)
+		.select(so_item.name)
+		.where((so_item.parent == sales_order) & get_potentially_billable_item_criterion(so, so_item, item))
+		.limit(1)
+		.run()
+	)
+
+
+@frappe.whitelist(methods=["GET"])
+@frappe.validate_and_sanitize_search_inputs
+def get_potentially_billable_sales_orders(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict
+):
+	"""Return Sales Orders that have an item with billing amount headroom."""
+	so = qb.DocType("Sales Order")
+	so_item = qb.DocType("Sales Order Item")
+	item = qb.DocType("Item")
+	meta = frappe.get_meta("Sales Order")
+
+	search_fields = list(dict.fromkeys(["name", meta.title_field, *meta.get_search_fields()]))
+	or_filters = (
+		{
+			fieldname: ("like", f"%{txt}%")
+			for fieldname in search_fields
+			if fieldname
+			and (
+				fieldname == "name"
+				or ((field := meta.get_field(fieldname)) and field.fieldtype in LINK_SEARCH_FIELDTYPES)
+			)
+		}
+		if txt
+		else None
+	)
+
+	query = frappe.qb.get_query(
+		so,
+		fields=[so.name, so.customer, so.transaction_date, so.creation],
+		filters=filters,
+		or_filters=or_filters,
+		ignore_permissions=False,
+	)
+
+	return (
+		query.inner_join(so_item)
+		.on(so_item.parent == so.name)
+		.left_join(item)
+		.on(item.name == so_item.item_code)
+		.where(get_potentially_billable_item_criterion(so, so_item, item))
+		.distinct()
+		.orderby(so.transaction_date, order=Order.asc)
+		.orderby(so.creation, order=Order.asc)
+		.limit(cint(page_len))
+		.offset(cint(start))
+		.run(as_dict=True)
+	)

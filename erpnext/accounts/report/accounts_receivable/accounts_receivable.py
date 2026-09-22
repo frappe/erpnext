@@ -171,6 +171,7 @@ class ReceivablePayableReport:
 			party_account=ple.account,
 			posting_date=ple.posting_date,
 			account_currency=ple.account_currency,
+			cost_center=ple.cost_center,
 			remarks=ple.remarks,
 			invoiced=0.0,
 			paid=0.0,

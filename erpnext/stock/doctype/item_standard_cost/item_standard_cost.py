@@ -385,8 +385,19 @@ def get_standard_cost_items(
 	'Standard Cost' — i.e. the item is explicitly Standard Cost, or it has no valuation method of its
 	own and the applicable default (Company, else Stock Settings) is Standard Cost. This mirrors
 	get_valuation_method, so every shown item also passes validate_item."""
+	# the form is the boundary, not Item: Accounts Manager writes this doctype and holds no Item read or select
+	frappe.has_permission("Item Standard Cost", throw=True)
+
 	company = (filters or {}).get("company")
 	if company:
+		# `company` is caller supplied and selects whose default valuation method is applied, so a
+		# caller restricted to particular companies must not ask about the others
+		from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies
+
+		allowed_companies = get_allowed_companies(frappe.session.user, "Item Standard Cost")
+		if allowed_companies and company not in allowed_companies:
+			frappe.throw(_("Not permitted for {0}").format(company), frappe.PermissionError)
+
 		default_method = frappe.get_cached_value("Company", company, "valuation_method")
 	else:
 		default_method = frappe.db.get_single_value("Stock Settings", "valuation_method")

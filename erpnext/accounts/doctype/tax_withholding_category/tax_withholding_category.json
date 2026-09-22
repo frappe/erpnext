@@ -5,6 +5,7 @@
  "autoname": "Prompt",
  "creation": "2018-04-13 18:42:06.431683",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/tax-withholding-category",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -98,6 +99,7 @@
    "label": "Disable Transaction Threshold"
   }
  ],
+ "icon": "badge-percent",
  "index_web_pages_for_search": 1,
  "links": [],
  "modified": "2026-08-21 23:11:50.979676",

@@ -1111,6 +1111,8 @@ class update_entries_after:
 		else:
 			if (
 				sle.voucher_type == "Stock Reconciliation"
+				# an adjustment entry counted nothing, so it must not assert a balance
+				and not sle.is_adjustment_entry
 				and not sle.batch_no
 				and not sle.has_batch_no
 				and not has_dimensions
@@ -1153,7 +1155,7 @@ class update_entries_after:
 
 		# rounding as per precision
 		self.wh_data.stock_value = flt(self.wh_data.stock_value, self.currency_precision)
-		if not self.wh_data.qty_after_transaction:
+		if not flt(self.wh_data.qty_after_transaction, self.flt_precision):
 			self.wh_data.stock_value = 0.0
 
 		if sle.actual_qty < 0:
@@ -1172,25 +1174,20 @@ class update_entries_after:
 
 		sle.stock_value_difference = stock_value_difference
 
-		if (
-			sle.is_adjustment_entry
-			and flt(sle.qty_after_transaction, self.flt_precision) == 0
-			and (
-				flt(sle.stock_value, self.currency_precision) != 0
-				or flt(sle.stock_value_difference, self.currency_precision) == 0
+		# Re-derive the write-off on every repost: whatever brings the running sum of
+		# stock_value_difference back in line with the stock value held at this point. A non-zero
+		# difference above means the entry moved something, so it is not a write-off and is left alone.
+		if sle.is_adjustment_entry and flt(sle.stock_value_difference, self.currency_precision) == 0:
+			value_till_now = get_stock_value_difference(
+				sle.item_code,
+				sle.warehouse,
+				sle.posting_date,
+				sle.posting_time,
+				voucher_detail_no=sle.voucher_detail_no,
+				creation=sle.creation,
 			)
-		):
-			sle.stock_value_difference = (
-				get_stock_value_difference(
-					sle.item_code,
-					sle.warehouse,
-					sle.posting_date,
-					sle.posting_time,
-					voucher_detail_no=sle.voucher_detail_no,
-					creation=sle.creation,
-				)
-				* -1
-			)
+
+			sle.stock_value_difference = flt(flt(sle.stock_value) - value_till_now, self.currency_precision)
 
 		sle.doctype = "Stock Ledger Entry"
 		sle.modified = now()
@@ -1969,7 +1966,15 @@ class update_entries_after:
 
 
 def get_sle_against_current_voucher(kwargs):
-	kwargs["posting_datetime"] = get_combine_datetime(kwargs.posting_date, kwargs.posting_time)
+	# Match on the row's stored posting_datetime. Re-deriving it from posting_date and posting_time
+	# makes rows whose stored value differs unmatchable, so the voucher gets reposted against nothing.
+	if kwargs.get("name") and not kwargs.get("posting_datetime"):
+		kwargs["posting_datetime"] = frappe.db.get_value(
+			"Stock Ledger Entry", kwargs.get("name"), "posting_datetime"
+		)
+
+	if not kwargs.get("posting_datetime"):
+		kwargs["posting_datetime"] = get_combine_datetime(kwargs.posting_date, kwargs.posting_time)
 	doctype = frappe.qb.DocType("Stock Ledger Entry")
 
 	query = (
@@ -2105,14 +2110,19 @@ def get_stock_ledger_entries(
 			frappe.db.escape(f"%\n{serial_no}\n%"),
 		)
 
-	if not previous_sle.get("posting_date"):
-		previous_sle["posting_datetime"] = "1900-01-01 00:00:00"
-	else:
-		posting_time = previous_sle.get("posting_time")
-		if not posting_time:
-			posting_time = "00:00:00"
+	if not previous_sle.get("posting_datetime"):
+		# Derive only when the caller has not supplied the stored posting_datetime. Re-deriving it
+		# would shift the boundary for rows whose stored value differs from posting_date + posting_time.
+		if not previous_sle.get("posting_date"):
+			previous_sle["posting_datetime"] = "1900-01-01 00:00:00"
+		else:
+			posting_time = previous_sle.get("posting_time")
+			if not posting_time:
+				posting_time = "00:00:00"
 
-		previous_sle["posting_datetime"] = get_combine_datetime(previous_sle["posting_date"], posting_time)
+			previous_sle["posting_datetime"] = get_combine_datetime(
+				previous_sle["posting_date"], posting_time
+			)
 
 	if operator in (">", "<=") and previous_sle.get("name"):
 		conditions += " and name!=%(name)s"
@@ -2155,6 +2165,15 @@ def get_sle_by_voucher_detail_no(voucher_detail_no):
 	)
 
 
+def get_prior_ledger_condition(table, posting_datetime, creation):
+	"""Restrict a ledger lookup to the entries that precede a voucher in ledger order."""
+	if creation:
+		return (table.posting_datetime < posting_datetime) | (
+			(table.posting_datetime == posting_datetime) & (table.creation < creation)
+		)
+	return table.posting_datetime <= posting_datetime
+
+
 def get_valuation_rate(
 	item_code,
 	warehouse,
@@ -2167,6 +2186,8 @@ def get_valuation_rate(
 	raise_error_if_no_rate=True,
 	batch_no=None,
 	serial_and_batch_bundle=None,
+	posting_datetime=None,
+	creation=None,
 ):
 	from erpnext.stock.serial_batch_bundle import BatchNoValuation
 
@@ -2183,9 +2204,14 @@ def get_valuation_rate(
 				& (table.warehouse == warehouse)
 				& (table.batch_no == batch_no)
 				& (table.is_cancelled == 0)
-				& ((table.voucher_no != voucher_no) | (table.voucher_type != voucher_type))
 			)
 		)
+		if voucher_no:
+			# Comparing against a None voucher_no yields NULL, which filters out every row
+			query = query.where((table.voucher_no != voucher_no) | (table.voucher_type != voucher_type))
+
+		if posting_datetime:
+			query = query.where(get_prior_ledger_condition(table, posting_datetime, creation))
 
 		last_valuation_rate = query.run()
 		if last_valuation_rate and last_valuation_rate[0][0] is not None:
@@ -2193,16 +2219,20 @@ def get_valuation_rate(
 
 	# Get moving average rate of a specific batch number
 	if warehouse and serial_and_batch_bundle:
+		bundle = frappe.get_value(
+			"Serial and Batch Bundle",
+			serial_and_batch_bundle,
+			["total_qty", "posting_datetime"],
+			as_dict=True,
+		)
 		batch_obj = BatchNoValuation(
 			sle=frappe._dict(
 				{
 					"item_code": item_code,
 					"warehouse": warehouse,
-					"actual_qty": -1,
+					"actual_qty": -abs(flt(bundle.total_qty)),
 					"serial_and_batch_bundle": serial_and_batch_bundle,
-					"posting_datetime": frappe.get_value(
-						"Serial and Batch Bundle", serial_and_batch_bundle, "posting_datetime"
-					),
+					"posting_datetime": bundle.posting_datetime,
 				}
 			)
 		)
@@ -2211,7 +2241,7 @@ def get_valuation_rate(
 
 	# Get valuation rate from last sle for the same item and warehouse
 	sle_entry = frappe.qb.DocType("Stock Ledger Entry")
-	if last_valuation_rate := (
+	last_sle_query = (
 		frappe.qb.from_(sle_entry)
 		.select(sle_entry.valuation_rate)
 		.where(
@@ -2219,12 +2249,23 @@ def get_valuation_rate(
 			& (sle_entry.warehouse == warehouse)
 			& (sle_entry.valuation_rate >= 0)
 			& (sle_entry.is_cancelled == 0)
-			& ~((sle_entry.voucher_no == voucher_no) & (sle_entry.voucher_type == voucher_type))
 		)
 		.orderby(sle_entry.posting_datetime, order=frappe.qb.desc)
 		.orderby(sle_entry.creation, order=frappe.qb.desc)
 		.limit(1)
-	).run():
+	)
+	if voucher_no:
+		# Comparing against a None voucher_no yields NULL, which filters out every row
+		last_sle_query = last_sle_query.where(
+			~((sle_entry.voucher_no == voucher_no) & (sle_entry.voucher_type == voucher_type))
+		)
+
+	if posting_datetime:
+		last_sle_query = last_sle_query.where(
+			get_prior_ledger_condition(sle_entry, posting_datetime, creation)
+		)
+
+	if last_valuation_rate := last_sle_query.run():
 		return flt(last_valuation_rate[0][0])
 
 	if fallbacks:
@@ -2659,13 +2700,7 @@ def get_stock_value_difference(
 	elif voucher_no:
 		query = query.where(table.voucher_no != voucher_no)
 
-	if creation:
-		query = query.where(
-			(table.posting_datetime < posting_datetime)
-			| ((table.posting_datetime == posting_datetime) & (table.creation < creation))
-		)
-	else:
-		query = query.where(table.posting_datetime <= posting_datetime)
+	query = query.where(get_prior_ledger_condition(table, posting_datetime, creation))
 
 	difference_amount = query.run()
 	return flt(difference_amount[0][0]) if difference_amount else 0

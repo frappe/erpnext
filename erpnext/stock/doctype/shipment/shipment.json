@@ -3,6 +3,7 @@
  "autoname": "SHIPMENT-.#####",
  "creation": "2020-07-09 10:58:52.508703",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/shipment",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -439,6 +440,7 @@
    "read_only": 1
   }
  ],
+ "icon": "truck",
  "is_submittable": 1,
  "links": [],
  "modified": "2026-01-16 14:59:28.547953",

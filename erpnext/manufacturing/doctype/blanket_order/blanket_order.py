@@ -9,6 +9,9 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import Sum
 from frappe.utils import flt, getdate
 
+from erpnext import get_company_currency
+from erpnext.accounts.services.taxes import validate_conversion_rate
+from erpnext.manufacturing.doctype.blanket_order import blanket_order_pricing
 from erpnext.stock.doctype.item.item import get_item_defaults
 
 
@@ -25,7 +28,10 @@ class BlanketOrder(Document):
 
 		amended_from: DF.Link | None
 		blanket_order_type: DF.Literal["", "Selling", "Purchasing"]
+		buying_price_list: DF.Link | None
 		company: DF.Link
+		conversion_rate: DF.Float
+		currency: DF.Link
 		customer: DF.Link | None
 		customer_name: DF.Data | None
 		from_date: DF.Date
@@ -33,6 +39,9 @@ class BlanketOrder(Document):
 		naming_series: DF.Literal["MFG-BLR-.YYYY.-"]
 		order_date: DF.Date | None
 		order_no: DF.Data | None
+		plc_conversion_rate: DF.Float
+		price_list_currency: DF.Link | None
+		selling_price_list: DF.Link | None
 		supplier: DF.Link | None
 		supplier_name: DF.Data | None
 		tc_name: DF.Link | None
@@ -40,11 +49,42 @@ class BlanketOrder(Document):
 		to_date: DF.Date
 	# end: auto-generated types
 
+	def before_validate(self):
+		self.set_currency()
+		self.set_conversion_rate()
+		blanket_order_pricing.set_price_list(self)
+
 	def validate(self):
 		self.validate_dates()
 		self.validate_duplicate_items()
 		self.validate_item_qty()
 		self.set_party_item_code()
+		self.set_base_rates()
+
+	def set_currency(self):
+		if self.currency:
+			return
+
+		config = blanket_order_pricing.get_order_type_config(self.blanket_order_type)
+		party_type = config["party_type"]
+		party = self.get(config["party_field"])
+		party_currency = frappe.get_cached_value(party_type, party, "default_currency") if party else None
+		self.currency = party_currency or get_company_currency(self.company)
+
+	def set_conversion_rate(self):
+		company_currency = get_company_currency(self.company)
+		if self.currency == company_currency:
+			self.conversion_rate = 1.0
+		elif not self.conversion_rate:
+			self.conversion_rate = blanket_order_pricing.get_exchange_rate_to_company(self, self.currency)
+
+		validate_conversion_rate(
+			self.currency,
+			self.conversion_rate,
+			self.meta.get_translated_label("conversion_rate"),
+			self.company,
+		)
+		self.conversion_rate = flt(self.conversion_rate, self.precision("conversion_rate"))
 
 	def validate_dates(self):
 		if getdate(self.from_date) > getdate(self.to_date):
@@ -123,6 +163,26 @@ class BlanketOrder(Document):
 			if flt(d.qty) <= 0:
 				frappe.throw(_("Row {0}: Quantity must be greater than zero.").format(d.idx))
 
+	def set_base_rates(self):
+		blanket_order_pricing.set_base_rates(self)
+
+
+@frappe.whitelist()
+def apply_price_list(
+	doc: str | dict,
+	item_name: str | None = None,
+	reset_party_values: bool = False,
+	reset_plc_conversion_rate: bool = False,
+	reset_conversion_rate: bool = False,
+):
+	return blanket_order_pricing.apply_price_list(
+		doc=doc,
+		item_name=item_name,
+		reset_party_values=reset_party_values,
+		reset_plc_conversion_rate=reset_plc_conversion_rate,
+		reset_conversion_rate=reset_conversion_rate,
+	)
+
 
 @frappe.whitelist()
 def make_order(source_name: str):
@@ -136,14 +196,12 @@ def make_order(source_name: str):
 	def update_item(source, target, source_parent):
 		target_qty = source.get("qty") - source.get("ordered_qty")
 		target.qty = target_qty if flt(target_qty) >= 0 else 0
-		target.rate = source.get("rate")
 		item = get_item_defaults(target.item_code, source_parent.company)
 		if item:
 			target.item_name = item.get("item_name")
 			target.description = item.get("description")
 			target.uom = item.get("stock_uom")
 			target.against_blanket_order = 1
-			target.blanket_order = source_name
 
 	target_doc = get_mapped_doc(
 		"Blanket Order",
@@ -156,7 +214,10 @@ def make_order(source_name: str):
 			},
 			"Blanket Order Item": {
 				"doctype": doctype + " Item",
-				"field_map": {"rate": "blanket_order_rate", "parent": "blanket_order"},
+				"field_map": {
+					"rate": "blanket_order_rate",
+					"parent": "blanket_order",
+				},
 				"postprocess": update_item,
 				"condition": lambda item: not (flt(item.qty)) or (flt(item.qty) - flt(item.ordered_qty)) > 0,
 			},

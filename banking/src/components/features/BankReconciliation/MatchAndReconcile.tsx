@@ -37,7 +37,7 @@ import { Link } from "react-router"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { InputGroup, InputGroupAddon, InputGroupText } from "@/components/ui/input-group"
 
-const MatchAndReconcile = ({ contentHeight }: { contentHeight: number }) => {
+const MatchAndReconcile = () => {
     const selectedBank = useAtomValue(selectedBankAccountAtom)
 
     if (!selectedBank) {
@@ -52,15 +52,15 @@ const MatchAndReconcile = ({ contentHeight }: { contentHeight: number }) => {
     }
 
     return <>
-        <div className={`flex items-start space-x-2`} >
-            <div className="flex-1">
-                <H4 className="text-sm font-medium">{_("Unreconciled Transactions")}</H4>
-                <UnreconciledTransactions contentHeight={contentHeight} />
+        <div className="flex min-h-0 flex-1 items-stretch space-x-2" >
+            <div className="flex min-h-0 flex-1 flex-col">
+                <H4 className="shrink-0 text-sm font-medium">{_("Unreconciled Transactions")}</H4>
+                <UnreconciledTransactions />
             </div>
-            <Separator orientation="vertical" style={{ minHeight: `${contentHeight}px` }} />
-            <div className="flex-1 px-1">
-                <H4 className="text-sm font-medium">{_("Match or Create")}</H4>
-                <VouchersSection contentHeight={contentHeight} />
+            <Separator orientation="vertical" className="self-stretch" />
+            <div className="flex min-h-0 flex-1 flex-col px-1">
+                <H4 className="shrink-0 text-sm font-medium">{_("Match or Create")}</H4>
+                <VouchersSection />
             </div>
         </div>
         <TransferModal />
@@ -69,16 +69,19 @@ const MatchAndReconcile = ({ contentHeight }: { contentHeight: number }) => {
     </>
 }
 
-/** TanStack requires `estimateSize` for initial scroll range; `measureElement` on each row sets the real height. */
+/**
+ * TanStack requires `estimateSize` for initial scroll range; `measureElement` on each row sets
+ * the real height. The scroll container fills its flex parent rather than taking a pixel
+ * height - the virtualizer observes its own rect, so it stays correct across resizes and any
+ * layout change above it.
+ */
 function VirtualizedListBody<T>({
     items,
-    height,
     getItemKey,
     children,
     estimateSize = 74,
 }: {
     items: T[]
-    height: number
     getItemKey: (item: T, index: number) => string | number
     children: (item: T, index: number) => React.ReactNode
     estimateSize?: number
@@ -100,8 +103,7 @@ function VirtualizedListBody<T>({
     return (
         <div
             ref={scrollRef}
-            className="overflow-auto contain-strict"
-            style={{ height }}
+            className="min-h-0 flex-1 overflow-auto contain-strict"
         >
             <div
                 className="relative w-full"
@@ -123,7 +125,7 @@ function VirtualizedListBody<T>({
     )
 }
 
-const UnreconciledTransactions = ({ contentHeight }: { contentHeight: number }) => {
+const UnreconciledTransactions = () => {
     const bankAccount = useAtomValue(selectedBankAccountAtom)
 
     const currency = bankAccount?.account_currency ?? getCompanyCurrency(bankAccount?.company ?? '')
@@ -187,14 +189,13 @@ const UnreconciledTransactions = ({ contentHeight }: { contentHeight: number }) 
     }
 
     const hasFilters = search !== '' || typeFilter !== 'All' || amountFilter.value !== 0
-    const listHeight = contentHeight - 72
 
     if (isLoading) {
         return <UnreconciledTransactionsLoadingState />
     }
 
-    return <div className="space-y-1">
-        <div className="flex py-2 w-full gap-2">
+    return <div className="flex min-h-0 flex-1 flex-col space-y-1">
+        <div className="flex py-2 w-full gap-2 shrink-0">
 
             <InputGroup variant='outline'>
                 <label className="sr-only">{_("Search transactions")}</label>
@@ -278,7 +279,6 @@ const UnreconciledTransactions = ({ contentHeight }: { contentHeight: number }) 
 
         <VirtualizedListBody
             items={results}
-            height={listHeight}
             estimateSize={74}
             getItemKey={(transaction) => transaction.name}
         >
@@ -381,7 +381,7 @@ const UnreconciledTransactionItem = ({ transaction }: { transaction: Unreconcile
 }
 
 
-const VouchersSection = ({ contentHeight }: { contentHeight: number }) => {
+const VouchersSection = () => {
 
     const selectedBank = useAtomValue(selectedBankAccountAtom)
     const selectedTransactions = useAtomValue(bankRecSelectedTransactionAtom(selectedBank?.name || ''))
@@ -402,8 +402,8 @@ const VouchersSection = ({ contentHeight }: { contentHeight: number }) => {
         return <OptionsForMultipleTransactions transactions={selectedTransactions} />
     }
 
-    return <div style={{ minHeight: contentHeight }} className="mt-2">
-        <OptionsForSingleTransaction transaction={selectedTransactions[0]} contentHeight={contentHeight} />
+    return <div className="mt-2 flex min-h-0 flex-1 flex-col">
+        <OptionsForSingleTransaction transaction={selectedTransactions[0]} />
     </div>
 }
 
@@ -535,11 +535,11 @@ const OptionsForMultipleTransactions = ({ transactions }: { transactions: Unreco
 }
 
 
-const OptionsForSingleTransaction = ({ transaction, contentHeight }: { transaction: UnreconciledTransaction, contentHeight: number }) => {
+const OptionsForSingleTransaction = ({ transaction }: { transaction: UnreconciledTransaction }) => {
 
     const { setTransferModalOpen, setRecordPaymentModalOpen, setRecordJournalEntryModalOpen } = useKeyboardShortcuts()
 
-    return <div className="flex flex-col gap-3">
+    return <div className="flex min-h-0 flex-1 flex-col gap-3">
         <TooltipProvider>
             <div className="flex items-center justify-between pt-2">
                 <div className="flex gap-4 justify-center">
@@ -602,7 +602,7 @@ const OptionsForSingleTransaction = ({ transaction, contentHeight }: { transacti
             </div>
         </TooltipProvider>
         {transaction.matched_transaction_rule && <RuleAction transaction={transaction} />}
-        <VouchersForTransaction transaction={transaction} contentHeight={contentHeight} />
+        <VouchersForTransaction transaction={transaction} />
     </div>
 }
 
@@ -774,12 +774,11 @@ const RuleAction = ({ transaction }: { transaction: UnreconciledTransaction }) =
     )
 }
 
-const VouchersForTransaction = ({ transaction, contentHeight }: { transaction: UnreconciledTransaction, contentHeight: number }) => {
+const VouchersForTransaction = ({ transaction }: { transaction: UnreconciledTransaction }) => {
 
     const { data: vouchers, isLoading, error } = useGetVouchersForTransaction(transaction)
 
     const voucherList = vouchers?.message ?? []
-    const listHeight = contentHeight - 120
 
     if (error) {
         return <ErrorBanner error={error} />
@@ -801,8 +800,8 @@ const VouchersForTransaction = ({ transaction, contentHeight }: { transaction: U
         </div>
     }
 
-    return <div className="relative space-y-2">
-        <div className="flex items-center gap-2 text-sm text-ink-gray-5">
+    return <div className="relative flex min-h-0 flex-1 flex-col space-y-2">
+        <div className="flex shrink-0 items-center gap-2 text-sm text-ink-gray-5">
             <Separator className="flex-1" />
             <span>or</span>
             <Separator className="flex-1" />
@@ -818,7 +817,6 @@ const VouchersForTransaction = ({ transaction, contentHeight }: { transaction: U
         </Empty>}
         <VirtualizedListBody
             items={voucherList}
-            height={listHeight}
             estimateSize={121}
             getItemKey={(voucher) => voucher.name}
         >

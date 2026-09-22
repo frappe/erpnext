@@ -5,6 +5,7 @@
  "creation": "2023-10-06 15:06:07.976066",
  "default_view": "List",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/plant-floor",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -72,6 +73,7 @@
   }
  ],
  "hide_toolbar": 1,
+ "icon": "layout-grid",
  "index_web_pages_for_search": 1,
  "links": [],
  "modified": "2026-08-21 23:11:45.858553",

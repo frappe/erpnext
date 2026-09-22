@@ -6,6 +6,7 @@
  "description": "A logical Warehouse against which stock entries are made.",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/warehouse",
  "engine": "InnoDB",
  "field_order": [
   "warehouse_detail",
@@ -282,7 +283,7 @@
   }
  ],
  "grid_page_length": 50,
- "icon": "fa fa-building",
+ "icon": "warehouse",
  "idx": 1,
  "is_tree": 1,
  "links": [],

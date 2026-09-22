@@ -3,6 +3,7 @@
  "autoname": "field:template_name",
  "creation": "2025-08-02 04:44:15.184541",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/financial-report-template",
  "engine": "InnoDB",
  "field_order": [
   "template_name",
@@ -64,6 +65,7 @@
   }
  ],
  "grid_page_length": 50,
+ "icon": "file-spreadsheet",
  "index_web_pages_for_search": 1,
  "links": [],
  "modified": "2026-02-23 01:04:05.797161",

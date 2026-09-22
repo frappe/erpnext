@@ -181,6 +181,40 @@ class TestPutawayRule(ERPNextTestSuite):
 		rule_1.delete()
 		rule_2.delete()
 
+	def test_putaway_rules_skip_undersized_whole_uom_rule(self):
+		item = frappe.get_doc("Item", "_Rice")
+		if not frappe.db.get_value("UOM Conversion Detail", {"parent": item.name, "uom": "Bag"}):
+			item.append("uoms", {"uom": "Bag", "conversion_factor": 1000})
+			item.save()
+
+		frappe.db.set_value("UOM", "Bag", "must_be_whole_number", 1)
+		rule_1 = create_putaway_rule(
+			item_code=item.name, warehouse=self.warehouse_1, capacity=500, uom="Kg", priority=1
+		)
+		rule_2 = create_putaway_rule(
+			item_code=item.name, warehouse=self.warehouse_2, capacity=2000, uom="Kg", priority=2
+		)
+
+		pr = make_purchase_receipt(
+			item_code=item.name,
+			qty=2,
+			uom="Bag",
+			stock_uom="Kg",
+			conversion_factor=1000,
+			apply_putaway_rule=1,
+			do_not_submit=1,
+		)
+
+		self.assertEqual(len(pr.items), 1)
+		self.assertEqual(pr.items[0].warehouse, self.warehouse_2)
+		self.assertEqual(pr.items[0].putaway_rule, rule_2.name)
+		self.assertEqual(pr.items[0].qty, 2)
+		self.assertEqual(pr.items[0].stock_qty, 2000)
+
+		pr.delete()
+		rule_1.delete()
+		rule_2.delete()
+
 	def test_putaway_rules_with_reoccurring_item(self):
 		"""Test rules on same item entered multiple times with different rate."""
 		rule_1 = create_putaway_rule(item_code="_Rice", warehouse=self.warehouse_1, capacity=200, uom="Kg")

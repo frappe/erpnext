@@ -158,6 +158,8 @@ class Batch(Document):
 
 	@frappe.whitelist()
 	def recalculate_batch_qty(self):
+		self.check_permission("write")
+
 		batches = get_batch_qty(
 			batch_no=self.name,
 			item_code=self.item,

@@ -4,6 +4,7 @@
  "autoname": "CC-ALLOC-.#####",
  "creation": "2022-01-13 20:07:29.871109",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/cost_center_allocation",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -65,6 +66,7 @@
    "read_only": 1
   }
  ],
+ "icon": "chart-pie",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],

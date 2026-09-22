@@ -7,6 +7,7 @@
  "description": "Classification of Customers by region",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/territory",
  "engine": "InnoDB",
  "field_order": [
   "territory_name",
@@ -120,7 +121,7 @@
    "options": "Target Detail"
   }
  ],
- "icon": "fa fa-map-marker",
+ "icon": "map",
  "idx": 1,
  "is_tree": 1,
  "links": [],

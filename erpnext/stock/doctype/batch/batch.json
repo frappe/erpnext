@@ -5,6 +5,7 @@
  "creation": "2013-03-05 14:50:38",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/batch",
  "engine": "InnoDB",
  "field_order": [
   "sb_batch",
@@ -210,7 +211,7 @@
    "no_copy": 1
   }
  ],
- "icon": "fa fa-archive",
+ "icon": "layers",
  "idx": 1,
  "image_field": "image",
  "links": [],

@@ -7,6 +7,7 @@
  "description": "Legal Entity / Subsidiary with a separate Chart of Accounts belonging to the Organization.",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/company-setup",
  "engine": "InnoDB",
  "field_order": [
   "details",
@@ -1154,12 +1155,12 @@
   }
  ],
  "grid_page_length": 50,
- "icon": "fa fa-building",
+ "icon": "building-complex",
  "idx": 1,
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2026-08-21 23:11:40.429841",
+ "modified": "2026-09-06 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
@@ -1191,6 +1192,10 @@
   {
    "read": 1,
    "role": "Sales User"
+  },
+  {
+   "read": 1,
+   "role": "Sales Manager"
   },
   {
    "read": 1,

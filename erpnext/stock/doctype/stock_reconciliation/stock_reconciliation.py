@@ -18,10 +18,16 @@ from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_in
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 	combine_datetime,
 	get_available_serial_nos,
+	get_serial_nos_based_on_posting_date,
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.stock_reconciliation_item.stock_reconciliation_item import StockReconciliationItem
-from erpnext.stock.utils import get_incoming_rate, get_stock_balance, get_valuation_method
+from erpnext.stock.utils import (
+	_get_incoming_rate,
+	check_warehouse_company,
+	get_stock_balance,
+	get_valuation_method,
+)
 
 
 class OpeningEntryAccountError(frappe.ValidationError):
@@ -482,36 +488,64 @@ class StockReconciliation(StockController):
 		reco_obj = cls_obj.duplicate_package()
 
 		total_current_qty = 0.0
+		entries_in_stock = []
+		serial_nos_in_stock = self.get_serial_nos_in_stock(row, reco_obj.entries)
+
 		for entry in reco_obj.entries:
 			if not entry.batch_no or entry.serial_no:
-				total_current_qty += entry.qty
-				entry.qty *= -1
-				continue
+				if entry.serial_no not in serial_nos_in_stock:
+					continue
 
-			current_qty = get_batch_qty(
-				entry.batch_no,
-				row.warehouse,
-				row.item_code,
-				ignore_voucher_nos=[self.name],
-				posting_date=self.posting_date,
-				posting_time=self.posting_time,
-				for_stock_levels=True,
-				consider_negative_batches=True,
-				do_not_check_future_batches=True,
-			)
+				current_qty = entry.qty
+			else:
+				current_qty = get_batch_qty(
+					entry.batch_no,
+					row.warehouse,
+					row.item_code,
+					ignore_voucher_nos=[self.name],
+					posting_date=self.posting_date,
+					posting_time=self.posting_time,
+					for_stock_levels=True,
+					consider_negative_batches=True,
+					do_not_check_future_batches=True,
+				)
 
-			if not current_qty:
-				continue
+				if not current_qty:
+					continue
 
 			total_current_qty += current_qty
 			entry.qty = current_qty * -1
+			entries_in_stock.append(entry)
 
 		if total_current_qty:
+			reco_obj.set("entries", entries_in_stock)
 			reco_obj.save()
 
 			row.current_qty = total_current_qty
 
 			return reco_obj
+
+	def get_serial_nos_in_stock(self, row, entries) -> set:
+		"""Serial nos of the row that hold stock in the warehouse as of the posting datetime."""
+		serial_nos = [entry.serial_no for entry in entries if entry.serial_no]
+		if not serial_nos:
+			return set()
+
+		in_stock = get_serial_nos_based_on_posting_date(
+			frappe._dict(
+				{
+					"item_code": row.item_code,
+					"warehouse": row.warehouse,
+					"posting_datetime": combine_datetime(self.posting_date, self.posting_time),
+					"serial_nos": serial_nos,
+					"check_serial_nos": True,
+					"voucher_no": self.name,
+				}
+			),
+			[],
+		)
+
+		return set(in_stock)
 
 	def has_change_in_serial_batch(self, row) -> bool:
 		bundles = {row.serial_and_batch_bundle: [], row.current_serial_and_batch_bundle: []}
@@ -604,8 +638,6 @@ class StockReconciliation(StockController):
 			frappe.db.set_value("Serial and Batch Entry", batch.name, update_values)
 
 	def remove_items_with_no_change(self):
-		from erpnext.stock.stock_ledger import get_stock_value_difference
-
 		"""Remove items if qty or rate is not changed"""
 		self.difference_amount = 0.0
 
@@ -642,16 +674,15 @@ class StockReconciliation(StockController):
 			)
 
 			if not item_dict.get("qty") and not item.qty and not item.valuation_rate and not item.current_qty:
-				difference_amount = get_stock_value_difference(
-					item.item_code, item.warehouse, self.posting_date, self.posting_time, self.name
-				)
-
-				if abs(difference_amount) > 0:
+				if abs(self.get_stranded_stock_value(item)) > 0:
 					return True
 
 			rate_precision = item.precision("valuation_rate")
 			rate = flt(item_dict.get("rate"), rate_precision)
-			valuation_rate = flt(item.valuation_rate, rate_precision) if item.valuation_rate else None
+			# an unset rate means "keep the current one", an explicit zero is a real revaluation
+			valuation_rate = (
+				flt(item.valuation_rate, rate_precision) if item.valuation_rate not in ("", None) else None
+			)
 			if (
 				(item.qty is None or item.qty == item_dict.get("qty"))
 				and (valuation_rate is None or valuation_rate == rate)
@@ -696,7 +727,10 @@ class StockReconciliation(StockController):
 		amount_precision = item.precision("amount")
 
 		new_qty = flt(item.qty, qty_precision)
-		new_valuation_rate = flt(item.valuation_rate or item_dict.get("rate"))
+		# an explicitly set zero rate is a real revaluation, don't fall back to the current rate
+		new_valuation_rate = flt(
+			item.valuation_rate if item.valuation_rate not in ("", None) else item_dict.get("rate")
+		)
 
 		current_qty = flt(item_dict.get("qty"), qty_precision)
 		current_valuation_rate = flt(item_dict.get("rate"))
@@ -943,18 +977,57 @@ class StockReconciliation(StockController):
 				)
 			)
 
-	def make_adjustment_entry(self, row, sl_entries):
+	def get_balance_before_reconciliation(self, row) -> dict:
+		from erpnext.stock.stock_ledger import get_previous_sle
+
+		return get_previous_sle(
+			{
+				"item_code": row.item_code,
+				"warehouse": row.warehouse,
+				"posting_date": self.posting_date,
+				"posting_time": self.posting_time,
+			}
+		)
+
+	def get_stranded_stock_value(self, row, previous_sle=None) -> float:
+		"""Stock value the ledger still carries for an item-warehouse that has no quantity on hand.
+
+		This is what an adjustment entry writes off. The write-off is measured at item-warehouse
+		level, so it is only stranded value when nothing is left in that warehouse. ``current_qty``
+		alone does not say so: on a batch row it is the qty of the selected batch, so a row pointing
+		at an already empty batch while other batches of the same item still hold stock would
+		otherwise write off the valuation of the stock that remains.
+		"""
 		from erpnext.stock.stock_ledger import get_stock_value_difference
 
-		difference_amount = get_stock_value_difference(
+		if previous_sle is None:
+			previous_sle = self.get_balance_before_reconciliation(row)
+
+		if flt(previous_sle.get("qty_after_transaction")):
+			return 0.0
+
+		return get_stock_value_difference(
 			row.item_code, row.warehouse, self.posting_date, self.posting_time, self.name
 		)
 
-		if not difference_amount:
+	def make_adjustment_entry(self, row, sl_entries):
+		previous_sle = self.get_balance_before_reconciliation(row)
+		difference_amount = self.get_stranded_stock_value(row, previous_sle=previous_sle)
+
+		# rounded, so float dust does not post an entry whose GL counterpart rounds away to zero
+		if not flt(difference_amount, self.precision("difference_amount")):
 			return
 
 		args = self.get_sle_for_items(row)
-		args.update({"stock_value_difference": -1 * difference_amount, "is_adjustment_entry": 1})
+		args.update(
+			{
+				"stock_value_difference": -1 * difference_amount,
+				# the row carries no rate, so carry the running one forward rather than stamp a zero
+				# that later rate lookups would read back as the last known valuation
+				"valuation_rate": flt(previous_sle.get("valuation_rate")),
+				"is_adjustment_entry": 1,
+			}
+		)
 
 		sl_entries.append(args)
 
@@ -1017,7 +1090,16 @@ class StockReconciliation(StockController):
 				has_dimensions = True
 
 		if self.docstatus == 2:
-			if row.current_qty and current_bundle:
+			if self.is_adjustment_row(row):
+				# Reversing a value-only entry must not shift any quantity, so mirror the balance the
+				# ledger carried across it and let get_stock_reco_qty_shift resolve to zero.
+				data.actual_qty = 0.0
+				data.qty_after_transaction = flt(row.current_qty)
+				data.previous_qty_after_transaction = flt(row.current_qty)
+				data.valuation_rate = flt(row.current_valuation_rate)
+				data.stock_value = flt(row.current_amount)
+				data.stock_value_difference = -1 * flt(row.amount_difference)
+			elif row.current_qty and current_bundle:
 				data.actual_qty = -1 * row.current_qty
 				data.qty_after_transaction = flt(row.current_qty)
 				data.previous_qty_after_transaction = flt(row.qty)
@@ -1150,9 +1232,14 @@ class StockReconciliation(StockController):
 
 		for row in self.items:
 			stock_value_difference = flt(get_row_stock_value_difference(self.doctype, self.name, row.name))
+			amount_difference = flt(stock_value_difference, row.precision("amount_difference"))
+
+			if self.is_adjustment_row(row):
+				self.set_adjustment_row_values(row, amount_difference)
+				difference_amount += amount_difference
+				continue
 
 			amount = flt(flt(row.qty) * flt(row.valuation_rate), row.precision("amount"))
-			amount_difference = flt(stock_value_difference, row.precision("amount_difference"))
 			current_amount = flt(amount - amount_difference, row.precision("current_amount"))
 
 			current_qty = self.get_current_qty_from_ledger(row)
@@ -1182,6 +1269,50 @@ class StockReconciliation(StockController):
 			update_modified=False,
 		)
 
+	def is_adjustment_row(self, row: StockReconciliationItem) -> bool:
+		# Read once for the whole voucher: both callers run per row, and a reconciliation
+		# submits and cancels synchronously for up to 100 of them.
+		if self.flags.adjustment_rows is None:
+			self.flags.adjustment_rows = set(
+				frappe.get_all(
+					"Stock Ledger Entry",
+					filters={
+						"voucher_type": self.doctype,
+						"voucher_no": self.name,
+						"is_adjustment_entry": 1,
+						"is_cancelled": 0,
+					},
+					pluck="voucher_detail_no",
+				)
+			)
+
+		return row.name in self.flags.adjustment_rows
+
+	def set_adjustment_row_values(self, row: StockReconciliationItem, amount_difference: float):
+		"""Refresh a value-only row: it moves no stock, so both sides carry the ledger's own figures
+		and ``amount_difference`` is the write-off booked to the GL, not a change in what is on hand.
+		"""
+		previous_sle = self.get_previous_ledger_entry(row) or frappe._dict()
+
+		current_qty = flt(previous_sle.get("qty_after_transaction"), row.precision("current_qty"))
+		current_valuation_rate = flt(
+			previous_sle.get("valuation_rate"), row.precision("current_valuation_rate")
+		)
+		# from the ledger's stock value, since rounding the rate first loses money on large qtys
+		current_amount = flt(previous_sle.get("stock_value"), row.precision("current_amount"))
+
+		row.db_set(
+			{
+				"amount": current_amount,
+				"current_qty": current_qty,
+				"current_valuation_rate": current_valuation_rate,
+				"current_amount": current_amount,
+				"quantity_difference": 0.0,
+				"amount_difference": amount_difference,
+			},
+			update_modified=False,
+		)
+
 	def get_current_qty_from_ledger(self, row: StockReconciliationItem):
 		"""Current (pre-reconciliation) qty for a row, recomputed from the ledger after reposting.
 
@@ -1196,6 +1327,14 @@ class StockReconciliation(StockController):
 			)
 			return abs(flt(total_qty, row.precision("current_qty")))
 
+		previous_sle = self.get_previous_ledger_entry(row)
+		if previous_sle is None:
+			return flt(row.current_qty, row.precision("current_qty"))
+
+		return flt(previous_sle.get("qty_after_transaction"), row.precision("current_qty"))
+
+	def get_previous_ledger_entry(self, row: StockReconciliationItem):
+		"""Balance, rate and value carried just before this row's own entries, or None if it has none."""
 		reco_sle = frappe.db.get_value(
 			"Stock Ledger Entry",
 			{
@@ -1208,12 +1347,12 @@ class StockReconciliation(StockController):
 			as_dict=True,
 		)
 		if not reco_sle:
-			return flt(row.current_qty, row.precision("current_qty"))
+			return None
 
 		sle = frappe.qb.DocType("Stock Ledger Entry")
 		previous_sle = (
 			frappe.qb.from_(sle)
-			.select(sle.qty_after_transaction)
+			.select(sle.qty_after_transaction, sle.valuation_rate, sle.stock_value)
 			.where(
 				(sle.item_code == row.item_code)
 				& (sle.warehouse == row.warehouse)
@@ -1229,9 +1368,9 @@ class StockReconciliation(StockController):
 			.orderby(sle.posting_datetime, order=frappe.qb.desc)
 			.orderby(sle.creation, order=frappe.qb.desc)
 			.limit(1)
-		).run()
+		).run(as_dict=True)
 
-		return flt(previous_sle[0][0], row.precision("current_qty")) if previous_sle else 0.0
+		return previous_sle[0] if previous_sle else frappe._dict()
 
 	def submit(self):
 		if len(self.items) > 100:
@@ -1555,7 +1694,10 @@ def get_stock_balance_for(
 			serial_nos = "\n".join(d.serial_no for d in serial_no_details if d.batch_no == batch_no)
 
 		if row and row.use_serial_batch_fields and row.batch_no and (qty or row.current_qty):
-			rate = get_incoming_rate(
+			# inherited from get_incoming_rate before the split; scoped here rather than at the top
+			# of the function so the guard covers exactly the path it covered before
+			check_warehouse_company(row.warehouse)
+			rate = _get_incoming_rate(
 				frappe._dict(
 					{
 						"item_code": row.item_code,

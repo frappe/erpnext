@@ -38,6 +38,7 @@ def execute(filters=None):
 	columns = get_columns(filters)
 	item_map = get_item_details(filters)
 	iwb_map = get_item_warehouse_batch_map(filters, float_precision)
+	reserved_stock = get_reserved_stock(filters, iwb_map)
 
 	data = []
 	for item in sorted(iwb_map):
@@ -63,6 +64,7 @@ def execute(filters=None):
 								),
 								flt(qty_dict.bal_value, float_precision),
 								item_map[item]["stock_uom"],
+								flt(reserved_stock.get((item, wh, batch), 0), float_precision),
 							]
 						)
 
@@ -85,9 +87,46 @@ def get_columns(filters):
 		_("Valuation Rate") + ":Float:120",
 		_("Balance Value") + ":Currency:120",
 		_("UOM") + "::90",
+		_("Reserved Stock (Current)") + ":Float:175",
 	]
 
 	return columns
+
+
+def get_reserved_stock(filters, iwb_map):
+	if not iwb_map:
+		return {}
+
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	sb_entry = frappe.qb.DocType("Serial and Batch Entry")
+	warehouses = {warehouse for item in iwb_map.values() for warehouse in item}
+	query = (
+		frappe.qb.from_(sre)
+		.inner_join(sb_entry)
+		.on(sre.name == sb_entry.parent)
+		.select(
+			sre.item_code,
+			sre.warehouse,
+			sb_entry.batch_no,
+			fn.Sum(sb_entry.qty - sb_entry.delivered_qty).as_("reserved_qty"),
+		)
+		.where(
+			(sre.docstatus == 1)
+			& (sre.reservation_based_on == "Serial and Batch")
+			& (sre.status.notin(["Closed", "Delivered"]))
+			& (sre.item_code.isin(list(iwb_map)))
+			& (sre.warehouse.isin(warehouses))
+			& (sb_entry.batch_no.isnotnull())
+			& (sb_entry.qty > sb_entry.delivered_qty)
+		)
+		.groupby(sre.item_code, sre.warehouse, sb_entry.batch_no)
+	)
+	if filters.get("company"):
+		query = query.where(sre.company == filters.company)
+	if filters.get("batch_no"):
+		query = query.where(sb_entry.batch_no == filters.batch_no)
+
+	return {(row.item_code, row.warehouse, row.batch_no): row.reserved_qty for row in query.run(as_dict=True)}
 
 
 def get_stock_ledger_entries(filters):

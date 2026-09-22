@@ -289,6 +289,13 @@ frappe.ui.form.on("Stock Entry", {
 		frm.trigger("get_items_from_transit_entry");
 		frm.trigger("toggle_warehouse_fields");
 		frm.trigger("toggle_weight_per_piece");
+
+		// only BOM-less rows are editable, and they cannot allocate a BOM percentage;
+		// read-only rows from a BOM still display their stored % of Component Cost
+		frm.fields_dict.items.grid.update_docfield_property("valuation_type", "options", [
+			"Valuation Rate",
+			"Manual",
+		]);
 		erpnext.toggle_serial_batch_fields(frm);
 
 		if (!frm.doc.docstatus && !frm.doc.subcontracting_inward_order) {
@@ -896,22 +903,15 @@ frappe.ui.form.on("Stock Entry", {
 
 	add_to_transit: function (frm) {
 		if (frm.doc.purpose == "Material Transfer") {
-			var filters = {
-				is_group: 0,
-				company: frm.doc.company,
-			};
-
 			if (frm.doc.add_to_transit) {
-				filters["warehouse_type"] = "Transit";
 				frm.set_value("to_warehouse", "");
+				(frm.doc.items || []).forEach((item) => {
+					if (item.t_warehouse) {
+						frappe.model.set_value(item.doctype, item.name, "t_warehouse", "");
+					}
+				});
 				frm.trigger("set_transit_warehouse");
 			}
-
-			frm.fields_dict.to_warehouse.get_query = function () {
-				return {
-					filters: filters,
-				};
-			};
 		}
 	},
 
@@ -1019,6 +1019,29 @@ frappe.ui.form.on("Stock Entry Detail", {
 			"read_only",
 			row?.set_basic_rate_manually ? 0 : 1
 		);
+	},
+
+	secondary_item_type(frm, cdt, cdn) {
+		const row = locals[cdt][cdn];
+		if (row.bom_secondary_item) return;
+
+		if (!row.secondary_item_type) {
+			if (row.valuation_type) {
+				frappe.model.set_value(cdt, cdn, { valuation_type: "", set_basic_rate_manually: 0 });
+			}
+			return;
+		}
+
+		if (!row.valuation_type) {
+			frappe.model.set_value(cdt, cdn, "valuation_type", "Valuation Rate");
+		}
+	},
+
+	valuation_type(frm, cdt, cdn) {
+		const row = locals[cdt][cdn];
+		if (!row.secondary_item_type || row.bom_secondary_item) return;
+
+		frappe.model.set_value(cdt, cdn, "set_basic_rate_manually", row.valuation_type === "Manual" ? 1 : 0);
 	},
 
 	conversion_factor(frm, cdt, cdn) {
@@ -1200,6 +1223,28 @@ frappe.ui.form.on("Landed Cost Taxes and Charges", {
 });
 
 erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockController {
+	setup_warehouse_query() {
+		super.setup_warehouse_query();
+
+		const transit_warehouse_query = () => {
+			const filters = {
+				is_group: 0,
+				company: this.frm.doc.company,
+			};
+
+			if (this.frm.doc.purpose === "Material Transfer" && this.frm.doc.add_to_transit) {
+				filters["warehouse_type"] = "Transit";
+			}
+
+			return {
+				filters: filters,
+			};
+		};
+
+		this.frm.set_query("to_warehouse", transit_warehouse_query);
+		this.frm.set_query("t_warehouse", "items", transit_warehouse_query);
+	}
+
 	setup() {
 		var me = this;
 

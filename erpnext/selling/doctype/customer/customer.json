@@ -8,6 +8,7 @@
  "description": "Buyer of Goods and Services.",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/customer",
  "engine": "InnoDB",
  "field_order": [
   "basic_info",
@@ -719,7 +720,7 @@
    "fieldtype": "Section Break"
   }
  ],
- "icon": "fa fa-user",
+ "icon": "user-round",
  "idx": 363,
  "image_field": "image",
  "index_web_pages_for_search": 1,

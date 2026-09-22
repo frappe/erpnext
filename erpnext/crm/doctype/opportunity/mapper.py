@@ -130,8 +130,15 @@ def make_opportunity_from_communication(
 ):
 	from erpnext.crm.doctype.lead.mapper import make_lead_from_communication
 
+	# `communication` is caller supplied and nothing checked it. Communication grants read to `All`
+	# only for the owner (if_owner) and carries a has_permission hook, so doc= is what decides
+	# access; the desk button only appears on an email the caller already has open.
+	frappe.has_permission("Communication", doc=communication, throw=True)
+
 	doc = frappe.get_doc("Communication", communication)
 
+	# make_lead_from_communication() carries its own check, but it is skipped entirely when the
+	# email already references a Lead, so this cannot rely on it.
 	lead = doc.reference_name if doc.reference_doctype == "Lead" else None
 	if not lead:
 		lead = make_lead_from_communication(communication, ignore_communication_links=True)

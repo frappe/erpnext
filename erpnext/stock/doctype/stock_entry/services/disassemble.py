@@ -24,6 +24,10 @@ def _qty_tolerance(precision: int) -> float:
 	return 1.0 / (10**precision)
 
 
+def _manufacture_line_order(line):
+	return (line.parent_creation, line.parent_name.casefold(), line.parent_name, line.idx)
+
+
 class DisassembleStockEntry(BaseStockEntry):
 	def validate(self):
 		self.validate_warehouse()
@@ -230,7 +234,7 @@ class DisassembleStockEntry(BaseStockEntry):
 			"t_warehouse": t_warehouse,
 			"is_finished_item": source_row.is_finished_item,
 			"secondary_item_type": source_row.secondary_item_type,
-			"is_legacy_scrap_item": source_row.is_legacy_scrap_item,
+			"valuation_type": source_row.valuation_type,
 			"bom_secondary_item": source_row.bom_secondary_item,
 			"bom_no": source_row.bom_no,
 			"use_serial_batch_fields": 1 if (source_row.batch_no or source_row.serial_no) else 0,
@@ -284,7 +288,7 @@ class DisassembleStockEntry(BaseStockEntry):
 			for field in fields:
 				item_args[field] = row.get(field)
 
-			item_args["is_legacy_scrap_item"] = row.get("is_legacy")
+			item_args["valuation_type"] = row.get("valuation_type")
 			item_args["s_warehouse"] = self.doc.from_warehouse
 			item_args["uom"] = item_args.get("uom") or item_args.get("stock_uom")
 			item_args["bom_secondary_item"] = row.get("name")
@@ -330,7 +334,7 @@ class DisassembleStockEntry(BaseStockEntry):
 			SED.conversion_factor,
 			SED.is_finished_item,
 			SED.secondary_item_type,
-			SED.is_legacy_scrap_item,
+			SED.valuation_type,
 			SED.bom_secondary_item,
 			SED.batch_no,
 			SED.serial_no,
@@ -382,6 +386,10 @@ class DisassembleStockEntry(BaseStockEntry):
 		is_finished_item decides whether the row is the output or an input. Aggregating each column
 		on its own can pair values from different lines into a row that was never posted, so take
 		the columns from a single real line instead. UOM is normalized separately to stock UOM.
+
+		Ordered in Python rather than SQL, keeping the original (entry creation, entry name, line idx)
+		precedence. casefold reproduces MariaDB's case-insensitive collation without depending on the
+		database's, which PostgreSQL resolves by byte value.
 		"""
 		SE = frappe.qb.DocType("Stock Entry")
 		SED = frappe.qb.DocType("Stock Entry Detail")
@@ -391,13 +399,16 @@ class DisassembleStockEntry(BaseStockEntry):
 			.join(SE)
 			.on(SED.parent == SE.name)
 			.select(
+				SE.creation.as_("parent_creation"),
+				SE.name.as_("parent_name"),
+				SED.idx,
 				SED.item_code,
 				SED.item_name,
 				SED.description,
 				SED.stock_uom,
 				SED.is_finished_item,
 				SED.secondary_item_type,
-				SED.is_legacy_scrap_item,
+				SED.valuation_type,
 				SED.bom_secondary_item,
 				SED.batch_no,
 				SED.serial_no,
@@ -409,14 +420,14 @@ class DisassembleStockEntry(BaseStockEntry):
 			.where(
 				(SE.docstatus == 1) & (SE.purpose == "Manufacture") & (SE.work_order == self.doc.work_order)
 			)
-			.orderby(SE.creation)
-			.orderby(SE.name)
-			.orderby(SED.idx)
 			.run(as_dict=True)
 		)
+		lines.sort(key=_manufacture_line_order)
 
 		representative = {}
 		for line in lines:
+			line.pop("parent_creation")
+			line.pop("parent_name")
 			representative.setdefault(line.item_code, line)
 
 		return representative

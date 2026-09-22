@@ -600,7 +600,7 @@ def _reserve_or_transfer(sre, doc, is_transfer):
 @frappe.whitelist()
 def cancel_stock_reservation_entries(doc: str | dict, sre_list: str | list):
 	"""Whitelisted entry point: verify Work Order write access, then cancel reservations."""
-	if isinstance(doc, str):
+	if isinstance(doc, str | dict):
 		doc = parse_json(doc)
 		doc = frappe.get_doc("Work Order", doc.get("name"))
 

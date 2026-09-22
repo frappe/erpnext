@@ -2410,4 +2410,10 @@ class TestAccountsController(ERPNextTestSuite):
 		si.set_posting_time = 1
 		si.posting_date = "2026-01-01"
 		si.save()
+		self.assertEqual(si.name, "SI-01-2026-00001")
+
+		si = create_sales_invoice(do_not_save=True)
+		si.set_posting_time = 1
+		si.posting_date = "2026-01-15"
+		si.save()
 		self.assertEqual(si.name, "SI-01-2026-00002")

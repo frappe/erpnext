@@ -4,6 +4,7 @@
  "autoname": "Prompt",
  "creation": "2020-05-22 16:46:18.712954",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/process-statement-of-accounts",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -424,6 +425,7 @@
    "label": "Show Opening Entries"
   }
  ],
+ "icon": "mail",
  "links": [],
  "modified": "2026-06-01 15:37:07.660442",
  "modified_by": "Administrator",

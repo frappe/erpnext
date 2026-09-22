@@ -5,6 +5,7 @@
  "creation": "2013-01-29 19:25:50",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/tasks",
  "engine": "InnoDB",
  "field_order": [
   "subject",
@@ -418,7 +419,7 @@
    "fieldtype": "Column Break"
   }
  ],
- "icon": "fa fa-check",
+ "icon": "list-checks",
  "idx": 1,
  "is_tree": 1,
  "links": [],

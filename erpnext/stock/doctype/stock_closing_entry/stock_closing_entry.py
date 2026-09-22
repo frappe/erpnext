@@ -7,7 +7,7 @@ import frappe
 from frappe import _
 from frappe.desk.form.load import get_attachments
 from frappe.model.document import Document
-from frappe.utils import add_days, get_date_str, get_link_to_form, nowtime, parse_json
+from frappe.utils import add_days, flt, get_date_str, get_link_to_form, nowtime, parse_json
 from frappe.utils.background_jobs import enqueue
 from frappe.utils.caching import request_cache
 
@@ -151,6 +151,8 @@ class StockClosingEntry(Document):
 
 	@frappe.whitelist(methods=["POST"])
 	def enqueue_job(self):
+		self.check_permission("write")
+
 		self.db_set("status", "In Progress")
 		enqueue(prepare_closing_stock_balance, name=self.name, queue="long", timeout=1500)
 		frappe.msgprint(
@@ -161,6 +163,8 @@ class StockClosingEntry(Document):
 
 	@frappe.whitelist(methods=["POST"])
 	def regenerate_closing_balance(self):
+		self.check_permission("write")
+
 		self.validate_closed_period_lock()
 		self.remove_stock_closing()
 		self.enqueue_job()
@@ -187,7 +191,7 @@ class StockClosingEntry(Document):
 			new_doc.posting_datetime = get_combine_datetime(self.to_date, new_doc.posting_time)
 			new_doc.stock_closing_entry = self.name
 			new_doc.company = self.company
-			new_doc.save()
+			new_doc.save(ignore_permissions=True)
 
 	def get_prepared_data(self):
 		if attachments := get_attachments(self.doctype, self.name):
@@ -228,18 +232,18 @@ class StockClosing:
 		sl_entries = self.get_sle_entries()
 
 		closing_stock = frappe._dict()
+		counted_sles = set()
 		for row in sl_entries:
 			dimensions_keys = self.get_keys(row)
 			for dimension_key in dimensions_keys:
 				for dimension_fields, dimension_values in dimension_key.items():
 					key = dimension_values
+					value_difference = self.get_value_difference(row, dimension_fields, key, counted_sles)
 
 					if key in closing_stock:
 						actual_qty = row.sabb_qty or row.actual_qty
 						closing_stock[key].actual_qty += actual_qty
-						closing_stock[key].stock_value_difference += (
-							row.sabb_stock_value_difference or row.stock_value_difference
-						)
+						closing_stock[key].stock_value_difference += value_difference
 
 						if not row.actual_qty and row.qty_after_transaction:
 							closing_stock[key].actual_qty = row.qty_after_transaction
@@ -249,10 +253,32 @@ class StockClosing:
 							self.update_fifo_queue(fifo_queue, actual_qty, row.posting_date)
 							closing_stock[key].fifo_queue = fifo_queue
 					else:
-						entries = self.get_initialized_entry(row, dimension_fields)
+						entries = self.get_initialized_entry(row, dimension_fields, value_difference)
 						closing_stock[key] = entries
 
 		return closing_stock
+
+	def get_value_difference(self, row, dimension_fields, key, counted_sles):
+		"""Value `row` contributes to `key`.
+
+		The Serial and Batch Entry join fans a batched Stock Ledger Entry out into one row per batch,
+		so batch and inventory dimension keys are built from those per-batch values. The item +
+		warehouse total instead stays on the Stock Ledger Entry's own `stock_value_difference`, which
+		is the basis an `is_adjustment_entry` write-off is computed against (see
+		`get_stock_value_difference`). Summing per-batch values there would subtract that write-off
+		from a batch total that already nets out and strand a phantom balance value in the closing.
+		"""
+		if dimension_fields != ("item_code", "warehouse"):
+			return flt(row.sabb_stock_value_difference or row.stock_value_difference)
+
+		# Only the first of an entry's fanned out rows carries the entry level value.
+		if row.name:
+			if (key, row.name) in counted_sles:
+				return 0.0
+
+			counted_sles.add((key, row.name))
+
+		return flt(row.stock_value_difference)
 
 	def update_fifo_queue(self, fifo_queue, actual_qty, posting_date):
 		if actual_qty > 0:
@@ -269,7 +295,7 @@ class StockClosing:
 					remaining_qty += queue[0]
 					fifo_queue.pop(0)
 
-	def get_initialized_entry(self, row, dimension_fields):
+	def get_initialized_entry(self, row, dimension_fields, value_difference):
 		item_details = frappe.get_cached_value(
 			"Item", row.item_code, ["item_group", "item_name", "stock_uom", "has_serial_no"], as_dict=1
 		)
@@ -278,14 +304,17 @@ class StockClosing:
 		if dimension_fields not in [("item_code", "warehouse"), ("item_code", "warehouse", "batch_no")]:
 			inventory_dimension_key = json.dumps(dimension_fields)
 
-		actual_qty = row.sabb_qty or row.actual_qty or row.qty_after_transaction
+		# A carried forward Stock Closing Balance row has no qty_after_transaction, so an item that
+		# closed at zero qty (what an is_adjustment_entry write-off leaves behind) would seed the
+		# entry with None and break the next closing's `actual_qty +=`.
+		actual_qty = flt(row.sabb_qty or row.actual_qty or row.qty_after_transaction)
 
 		entry = frappe._dict(
 			{
 				"item_code": row.item_code,
 				"warehouse": row.warehouse,
 				"actual_qty": actual_qty,
-				"stock_value_difference": row.sabb_stock_value_difference or row.stock_value_difference,
+				"stock_value_difference": value_difference,
 				"item_group": item_details.item_group,
 				"item_name": item_details.item_name,
 				"stock_uom": item_details.stock_uom,
@@ -313,6 +342,7 @@ class StockClosing:
 			sl_entries += self.get_entries(
 				"Stock Closing Balance",
 				fields=[
+					"name",
 					"item_code",
 					"warehouse",
 					"posting_date",
@@ -336,6 +366,7 @@ class StockClosing:
 		sl_entries += self.get_entries(
 			"Stock Ledger Entry",
 			fields=[
+				"name",
 				"item_code",
 				"warehouse",
 				"posting_date",

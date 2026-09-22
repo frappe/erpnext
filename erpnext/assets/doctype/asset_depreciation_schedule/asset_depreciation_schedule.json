@@ -4,6 +4,7 @@
  "autoname": "naming_series:",
  "creation": "2022-10-31 15:03:35.424877",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/asset-depreciation",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -39,7 +40,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Asset",
-   "link_filters": "[[\"Asset\",\"docstatus\",\"<\",\"2\"],[\"Asset\",\"company\",\"=\",\"eval:doc.company\"]]",
+   "link_filters": "[[\"Asset\",\"docstatus\",\"<\",\"2\"]]",
    "options": "Asset",
    "reqd": 1
   },
@@ -212,6 +213,7 @@
    "read_only": 1
   }
  ],
+ "icon": "trending-down",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],

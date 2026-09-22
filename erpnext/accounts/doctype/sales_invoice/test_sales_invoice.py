@@ -52,7 +52,7 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 	create_stock_reconciliation,
 )
 from erpnext.stock.get_item_details import get_item_tax_map
-from erpnext.stock.utils import get_incoming_rate, get_stock_balance
+from erpnext.stock.utils import _get_incoming_rate, get_stock_balance
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -1580,6 +1580,35 @@ class TestSalesInvoice(ERPNextTestSuite):
 		self.assertEqual(pos.change_amount, 10)
 
 		self.validate_pos_gl_entry(pos, pos, 60, validate_without_change_gle=True)
+
+		frappe.db.set_single_value("POS Settings", "post_change_gl_entries", 1)
+
+	def test_pos_change_amount_multi_currency_gl_entry(self):
+		from erpnext.accounts.doctype.sales_invoice.services.gl_composer import SalesInvoiceGLComposer
+
+		frappe.db.set_single_value("POS Settings", "post_change_gl_entries", 0)
+
+		si = create_sales_invoice(do_not_save=True)
+		si.is_pos = 1
+		si.currency = "USD"
+		si.conversion_rate = 50
+		si.party_account_currency = "USD"
+		si.account_for_change_amount = "Cash - _TC"
+		si.change_amount = 50
+		si.base_change_amount = 2500
+		si.append(
+			"payments",
+			{"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 150, "base_amount": 7500},
+		)
+
+		gl_entries = []
+		SalesInvoiceGLComposer(si).make_pos_gl_entries(gl_entries)
+
+		debtors_entry = next(entry for entry in gl_entries if entry["account"] == si.debit_to)
+		cash_entry = next(entry for entry in gl_entries if entry["account"] == "Cash - _TC")
+
+		self.assertEqual(flt(debtors_entry["credit"]), 5000.0)
+		self.assertEqual(flt(cash_entry["debit"]), 5000.0)
 
 		frappe.db.set_single_value("POS Settings", "post_change_gl_entries", 1)
 
@@ -3327,7 +3356,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 		rate = 0.0
 		for d in si.get("items"):
-			rate = get_incoming_rate(
+			rate = _get_incoming_rate(
 				{
 					"item_code": d.item_code,
 					"warehouse": d.warehouse,

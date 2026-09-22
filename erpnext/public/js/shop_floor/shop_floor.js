@@ -414,7 +414,7 @@ class ShopFloor {
 		// The detail pane reuses the operator rendering for a single work order.
 		this.detail_container.html(`
 			<div class="sf-detail-head">
-				<button class="btn btn-default btn-sm sf-detail-back">${frappe.utils.icon("left", "sm")} ${__(
+				<button class="btn btn-default btn-sm sf-detail-back">${frappe.utils.icon("chevron-left", "sm")} ${__(
 			"Back"
 		)} (Esc)</button>
 				<span class="sf-detail-title">${frappe.utils.escape_html(name)}</span>

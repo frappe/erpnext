@@ -2,14 +2,44 @@
 # For license information, please see license.txt
 
 import json
+import keyword
+import math
 import re
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any
 
 import frappe
-from frappe import _
+from frappe import _, is_whitelisted
 from frappe.database.operator_map import OPERATOR_MAP
+from frappe.utils import escape_html
+
+FORMULA_FUNCTIONS = {
+	"abs": abs,
+	"round": round,
+	"min": min,
+	"max": max,
+	"sum": sum,
+	"sqrt": math.sqrt,
+	"pow": math.pow,
+	"ceil": math.ceil,
+	"floor": math.floor,
+}
+
+
+def get_valid_api_method(api_path: str):
+	"""Resolve `api_path`, ensuring it is whitelisted and permits GET (i.e. read-only)."""
+	method = frappe.get_attr(api_path)
+	is_whitelisted(method)
+
+	if "GET" not in frappe.allowed_http_methods_for_whitelisted_func.get(method, ()):
+		frappe.throw(
+			_("Method {0} must permit GET requests").format(frappe.bold(api_path)),
+			frappe.PermissionError,
+			title=_("Method Not Allowed"),
+		)
+
+	return method
 
 
 def get_formula_field_label(data_source: str) -> str:
@@ -74,8 +104,9 @@ class ValidationResult:
 		self.warnings.append(issue)
 
 	def notify_user(self) -> None:
-		warnings = "<br><br>".join(str(w) for w in self.warnings if w)
-		errors = "<br><br>".join(str(e) for e in self.issues if e)
+		# messages quote user input back, and both are rendered as HTML
+		warnings = "<br><br>".join(escape_html(str(w)) for w in self.warnings if w)
+		errors = "<br><br>".join(escape_html(str(e)) for e in self.issues if e)
 
 		if warnings:
 			frappe.msgprint(warnings, title=_("Warnings"), indicator="orange")
@@ -132,15 +163,24 @@ class TemplateStructureValidator(Validator):
 			if not row.reference_code:
 				continue
 
-			ref_code = row.reference_code.strip()
+			ref_code = row.reference_code
 
-			# Check format
-			if not re.match(r"^[A-Za-z][A-Za-z0-9_-]*$", ref_code):
+			# a line reference is used as a name in formulas, so it must be a usable one
+			if not re.match(r"^[A-Za-z][A-Za-z0-9_]*$", ref_code):
 				result.add_error(
 					ValidationIssue(
 						message=_(
-							"Invalid line reference format: '{0}'. Must start with letter and contain only letters, numbers, underscores, and hyphens"
+							"Invalid line reference format: '{0}'. Must start with a letter and contain only letters, numbers and underscores"
 						).format(ref_code),
+						row_idx=row.idx,
+					)
+				)
+			elif keyword.iskeyword(ref_code) or ref_code in FORMULA_FUNCTIONS:
+				result.add_error(
+					ValidationIssue(
+						message=_("'{0}' is a reserved name and cannot be used as a line reference").format(
+							ref_code
+						),
 						row_idx=row.idx,
 					)
 				)
@@ -175,8 +215,10 @@ class TemplateStructureValidator(Validator):
 				if not row.calculation_formula:
 					result.add_error(
 						ValidationIssue(
-							message=_("{0} is required for {1}").format(
-								get_formula_field_label(row.data_source), row.data_source
+							message=_("{0} is required when {1} is {2}").format(
+								get_formula_field_label(row.data_source),
+								row.meta.get_translated_label("data_source"),
+								_(row.data_source),
 							),
 							row_idx=row.idx,
 						)
@@ -191,12 +233,7 @@ class DependencyValidator(Validator):
 		self.dependencies = self._build_dependency_graph()
 
 	def validate(self, context=None) -> ValidationResult:
-		result = ValidationResult()
-
-		result.merge(self._validate_circular_dependencies())
-		result.merge(self._validate_missing_dependencies())
-
-		return result
+		return self._validate_circular_dependencies()
 
 	def _build_dependency_graph(self) -> dict[str, list[str]]:
 		graph = {}
@@ -204,7 +241,14 @@ class DependencyValidator(Validator):
 
 		for row in self.template.rows:
 			if row.reference_code and row.data_source == "Calculated Amount" and row.calculation_formula:
-				deps = extract_reference_codes_from_formula(row.calculation_formula, list(available_codes))
+				# skip self-reference, `CalculationFormulaValidator` already reports it
+				deps = [
+					code
+					for code in extract_reference_codes_from_formula(
+						row.calculation_formula, list(available_codes)
+					)
+					if code != row.reference_code
+				]
 				if deps:
 					graph[row.reference_code] = deps
 
@@ -256,29 +300,6 @@ class DependencyValidator(Validator):
 
 		return result
 
-	def _validate_missing_dependencies(self) -> ValidationResult:
-		available = {row.reference_code for row in self.template.rows if row.reference_code}
-		result = ValidationResult()
-
-		for ref_code, deps in self.dependencies.items():
-			undefined = [d for d in deps if d not in available]
-			if undefined:
-				row_idx = self._get_row_idx(ref_code)
-				result.add_error(
-					ValidationIssue(
-						message=_("Line References undefined in Formula: {0}").format(", ".join(undefined)),
-						row_idx=row_idx,
-					)
-				)
-
-		return result
-
-	def _get_row_idx(self, reference_code: str) -> int | None:
-		for row in self.template.rows:
-			if row.reference_code == reference_code:
-				return row.idx
-		return None
-
 
 class CalculationFormulaValidator(Validator):
 	"""Validates calculation formulas used in Calculated Amount rows"""
@@ -293,19 +314,7 @@ class CalculationFormulaValidator(Validator):
 		if row.data_source != "Calculated Amount":
 			return result
 
-		if not row.calculation_formula:
-			result.add_error(
-				ValidationIssue(
-					message=_("{0} is required for Calculated Amount").format(
-						get_formula_field_label(row.data_source)
-					),
-					row_idx=row.idx,
-				)
-			)
-			return result
-
 		formula = self._preprocess_formula(row.calculation_formula)
-		row.calculation_formula = formula
 
 		# Check parentheses
 		if not self._are_parentheses_balanced(formula):
@@ -324,16 +333,6 @@ class CalculationFormulaValidator(Validator):
 			result.add_error(
 				ValidationIssue(
 					message=_("Formula references itself ('{0}')").format(row.reference_code),
-					row_idx=row.idx,
-				)
-			)
-
-		# Check undefined references
-		undefined = set(refs) - set(available_codes)
-		if undefined:
-			result.add_error(
-				ValidationIssue(
-					message=_("Formula references undefined codes: {0}").format(", ".join(undefined)),
 					row_idx=row.idx,
 				)
 			)
@@ -363,25 +362,15 @@ class CalculationFormulaValidator(Validator):
 	def _test_formula_evaluation(self, formula: str, available_codes: list[str]) -> str | None:
 		try:
 			context = {code: 1.0 for code in available_codes}
-			context.update(
-				{
-					"abs": abs,
-					"round": round,
-					"min": min,
-					"max": max,
-					"sum": sum,
-					"sqrt": lambda x: x**0.5,
-					"pow": pow,
-					"ceil": lambda x: int(x) + (1 if x % 1 else 0),
-					"floor": int,
-				}
-			)
+			context.update(FORMULA_FUNCTIONS)
 
 			result = frappe.safe_eval(formula, eval_globals=None, eval_locals=context)
 
-			if not isinstance(result, (int, float)):  # noqa: UP038
+			if not isinstance(result, (int | float)):
 				return _("Formula must return a numeric value, got {0}").format(type(result).__name__)
 
+			return None
+		except ZeroDivisionError:
 			return None
 		except Exception as e:
 			return str(e)
@@ -395,21 +384,19 @@ class AccountFilterValidator(Validator):
 		self.account_fields = account_fields or set(self.account_meta._valid_columns)
 
 	def validate(self, row) -> ValidationResult:
-		result = ValidationResult()
-
+		# dispatch-path guard: only account-data rows are validated here
 		if row.data_source != "Account Data":
-			return result
+			return ValidationResult()
 
-		if not row.calculation_formula:
-			result.add_error(
-				ValidationIssue(
-					message=_("{0} is required for Account Data").format(
-						get_formula_field_label(row.data_source)
-					),
-					row_idx=row.idx,
-				)
-			)
-			return result
+		return self.validate_filter(row)
+
+	def validate_filter(self, row) -> ValidationResult:
+		"""Validate calculation_formula as an Account filter, regardless of data_source.
+
+		The caller has already decided this row is an account filter, so unlike
+		`validate()` this does not opt out based on `data_source`.
+		"""
+		result = ValidationResult()
 
 		try:
 			filter_config = json.loads(row.calculation_formula)
@@ -422,7 +409,9 @@ class AccountFilterValidator(Validator):
 			if error:
 				result.add_error(
 					ValidationIssue(
-						message=_("{0}: {1}").format(get_formula_field_label(row.data_source), error),
+						message=_("[{0}] {1}", context="Financial Report Template").format(
+							get_formula_field_label("Account Data"), error
+						),
 						row_idx=row.idx,
 					)
 				)
@@ -430,8 +419,9 @@ class AccountFilterValidator(Validator):
 		except json.JSONDecodeError as e:
 			result.add_error(
 				ValidationIssue(
-					message=_("{0}: Invalid JSON format: {1}").format(
-						get_formula_field_label(row.data_source), str(e)
+					message=_("[{0}] {1}", context="Financial Report Template").format(
+						get_formula_field_label("Account Data"),
+						_("Invalid JSON format: {0}").format(str(e)),
 					),
 					row_idx=row.idx,
 				)
@@ -455,17 +445,15 @@ class AccountFilterValidator(Validator):
 			if not isinstance(field, str) or not isinstance(operator, str):
 				return _("Field and operator must be strings")
 
-			display = (
-				field if advanced_filtering else self.account_meta.get_translated_label(field)
-			) or field
-
 			if field not in account_fields:
-				return _("Field '{0}' is not a valid Account field").format(display)
+				return _("Field '{0}' is not a valid Account field").format(field)
 
-			if operator.casefold() not in OPERATOR_MAP:
+			normalized_operator = operator.casefold()
+
+			if normalized_operator not in OPERATOR_MAP:
 				return _("Invalid operator '{0}'").format(operator)
 
-			if operator in ["in", "not in"] and not isinstance(value, list):
+			if normalized_operator in ["in", "not in"] and not isinstance(value, list):
 				return _("Operator '{0}' requires a list value").format(operator)
 
 		# logical condition: {"and": [condition1, condition2]}
@@ -531,29 +519,24 @@ class FormulaValidator(Validator):
 			)
 			return result
 
-		# Method exists?
 		try:
-			module_path, method_name = api_path.rsplit(".", 1)
-			module = frappe.get_module(module_path)
-
-			if not hasattr(module, method_name):
-				result.add_error(
-					ValidationIssue(
-						message=_(
-							"{0}: Method '{1}' not found in module '{2}' (might be environment-specific)"
-						).format(get_formula_field_label(row.data_source), method_name, module_path),
-						row_idx=row.idx,
-					)
-				)
+			get_valid_api_method(api_path)
 		except Exception as e:
-			result.add_error(
-				ValidationIssue(
-					message=_("Could not validate {0}: {1}").format(
-						get_formula_field_label(row.data_source), str(e)
-					),
-					row_idx=row.idx,
+			if isinstance(e, frappe.PermissionError | frappe.ValidationError):
+				# frappe.throw inside get_valid_api_method logs a message that would pop up in UI
+				frappe.clear_last_message()
+
+			if isinstance(e, frappe.PermissionError):
+				message = _("[{0}] {1}", context="Financial Report Template").format(
+					get_formula_field_label(row.data_source),
+					_("Method '{0}' must be whitelisted and permit GET requests").format(api_path),
 				)
-			)
+			else:
+				message = _("Could not validate {0}: {1}").format(
+					get_formula_field_label(row.data_source), str(e)
+				)
+
+			result.add_error(ValidationIssue(message=message, row_idx=row.idx))
 
 		return result
 

@@ -288,6 +288,7 @@ class FIFOSlots:
 		self.transferred_item_details = {}
 		self.serial_no_details = {}
 		self.batch_no_details = {}
+		self.batches_with_negative_slots = set()
 		self.batchwise_valuation_by_batch = {}
 		self.valuation_method_by_item = {}
 		self.filters = filters
@@ -629,7 +630,7 @@ class FIFOSlots:
 	def _add_serial_fifo_slots(self, row: dict, fifo_queue: list, serial_nos: list) -> None:
 		valuation = row.stock_value_difference / row.actual_qty
 		for serial_no in serial_nos:
-			posting_date = self.serial_no_details.setdefault(serial_no, row.posting_date)
+			posting_date = self.serial_no_details.setdefault((serial_no, row.warehouse), row.posting_date)
 			fifo_queue.append([serial_no, posting_date, valuation])
 
 	def _add_batch_fifo_slots(self, row: dict, fifo_queue: list, batch_nos: list) -> None:
@@ -641,7 +642,7 @@ class FIFOSlots:
 			if not qty:
 				continue
 
-			posting_date = self.batch_no_details.setdefault(batch_no, row.posting_date)
+			posting_date = self.batch_no_details.setdefault((batch_no, row.warehouse), row.posting_date)
 			fifo_queue.append([batch_no, use_batchwise_valuation, qty, posting_date, stock_value_difference])
 
 	def _neutralize_negative_batch_stock(
@@ -658,6 +659,11 @@ class FIFOSlots:
 
 		if not qty:
 			return qty, stock_value_difference
+
+		if (batch_no, row.warehouse) not in self.batches_with_negative_slots:
+			return qty, stock_value_difference
+
+		negative_slot_may_remain = False
 
 		for slot in list(fifo_queue):
 			if not self._is_matching_negative_batch_slot(slot, batch_no, use_batchwise_valuation):
@@ -679,9 +685,15 @@ class FIFOSlots:
 
 			if not flt(slot[BATCH_SLOT_QTY_INDEX]) and not flt(slot[BATCH_SLOT_VALUE_INDEX]):
 				fifo_queue.remove(slot)
+			elif flt(slot[BATCH_SLOT_QTY_INDEX]) < 0:
+				negative_slot_may_remain = True
 
 			if not qty:
+				negative_slot_may_remain = True
 				break
+
+		if not negative_slot_may_remain:
+			self.batches_with_negative_slots.discard((batch_no, row.warehouse))
 
 		return qty, stock_value_difference
 
@@ -717,7 +729,7 @@ class FIFOSlots:
 		if serial_nos:
 			self._consume_serial_fifo_slots(fifo_queue, serial_nos)
 		elif batch_nos:
-			self._consume_batch_fifo_slots(row, fifo_queue, transfer_key, batch_nos)
+			self._consume_batch_fifo_slots(row, fifo_queue, transfer_key, batch_nos, from_end)
 		else:
 			self._consume_fifo_slots(row, fifo_queue, transfer_key, from_end)
 
@@ -725,12 +737,16 @@ class FIFOSlots:
 		fifo_queue[:] = [slot for slot in fifo_queue if slot[FIFO_QTY_INDEX] not in serial_nos]
 
 	def _consume_batch_fifo_slots(
-		self, row: dict, fifo_queue: list, transfer_key: tuple, batch_nos: list
+		self, row: dict, fifo_queue: list, transfer_key: tuple, batch_nos: list, from_end: bool = False
 	) -> None:
+		"""LIFO consumes the most recent inward first, so walk the queue from the tail.
+		Slots of one batch valued batchwise share a date and the walk cannot tell them
+		apart, but slots pooled across batches carry the date of the batch that filled
+		them."""
 		for batch_no, use_batchwise_valuation, qty, stock_value_difference in batch_nos:
 			items_to_remove = []
 
-			for slot in fifo_queue:
+			for slot in reversed(fifo_queue) if from_end else fifo_queue:
 				if not self._can_consume_batch_slot(slot, batch_no, use_batchwise_valuation):
 					continue
 
@@ -791,9 +807,13 @@ class FIFOSlots:
 		qty: float,
 		stock_value_difference: float,
 	) -> None:
+		"""The only place a batch slot goes negative, so it is also where the warehouse
+		is recorded as owing stock on that batch. The record is discarded again by a walk
+		that reaches the end of the queue and leaves nothing negative behind."""
 		fifo_queue.append(
 			[batch_no, use_batchwise_valuation, -(qty), row.posting_date, -(stock_value_difference)]
 		)
+		self.batches_with_negative_slots.add((batch_no, row.warehouse))
 		self.transferred_item_details[transfer_key].append([qty, row.posting_date, stock_value_difference])
 
 	def _consume_fifo_slots(
@@ -852,13 +872,25 @@ class FIFOSlots:
 				transfer_qty_to_pop -= transfer_qty
 				stock_value -= transfer_value
 				self._add_incoming_transfer_slots(
-					fifo_queue, batch_nos, transfer_qty, transfer_date, transfer_value, serial_nos
+					fifo_queue,
+					row.warehouse,
+					batch_nos,
+					transfer_qty,
+					transfer_date,
+					transfer_value,
+					serial_nos,
 				)
 				transfer_data.pop(0)
 			elif not transfer_data:
 				# transfer bucket is empty, extra incoming qty
 				self._add_incoming_transfer_slots(
-					fifo_queue, batch_nos, transfer_qty_to_pop, row.posting_date, stock_value, serial_nos
+					fifo_queue,
+					row.warehouse,
+					batch_nos,
+					transfer_qty_to_pop,
+					row.posting_date,
+					stock_value,
+					serial_nos,
 				)
 				transfer_qty_to_pop = 0
 				stock_value = 0
@@ -868,6 +900,7 @@ class FIFOSlots:
 				transfer_data[0][FIFO_VALUE_INDEX] -= stock_value
 				self._add_incoming_transfer_slots(
 					fifo_queue,
+					row.warehouse,
 					batch_nos,
 					transfer_qty_to_pop,
 					transfer_data[0][FIFO_DATE_INDEX],
@@ -880,17 +913,21 @@ class FIFOSlots:
 	def _add_incoming_transfer_slots(
 		self,
 		fifo_queue: list,
+		warehouse: str,
 		batch_nos: list,
 		qty: float,
 		posting_date: str,
 		value: float,
 		serial_nos: list | None = None,
 	) -> None:
-		for slot in self._get_incoming_transfer_slots(batch_nos, qty, posting_date, value, serial_nos):
+		for slot in self._get_incoming_transfer_slots(
+			warehouse, batch_nos, qty, posting_date, value, serial_nos
+		):
 			self._add_transfer_slot_to_fifo_queue(fifo_queue, slot)
 
 	def _get_incoming_transfer_slots(
 		self,
+		warehouse: str,
 		batch_nos: list,
 		qty: float,
 		posting_date: str,
@@ -898,7 +935,7 @@ class FIFOSlots:
 		serial_nos: list | None = None,
 	) -> list:
 		if serial_nos:
-			return self._get_serial_incoming_transfer_slots(serial_nos, qty, posting_date, value)
+			return self._get_serial_incoming_transfer_slots(serial_nos, warehouse, qty, posting_date, value)
 
 		if not batch_nos:
 			return [[qty, posting_date, value]]
@@ -932,7 +969,7 @@ class FIFOSlots:
 		return incoming_slots
 
 	def _get_serial_incoming_transfer_slots(
-		self, serial_nos: list, qty: float, posting_date: str, value: float
+		self, serial_nos: list, warehouse: str, qty: float, posting_date: str, value: float
 	) -> list:
 		incoming_slots = []
 		remaining_value = flt(value)
@@ -941,7 +978,7 @@ class FIFOSlots:
 		for index in range(serial_count):
 			serial_no = serial_nos.pop(0)
 			serial_value = remaining_value if index == serial_count - 1 else flt(value / serial_count)
-			serial_posting_date = self.serial_no_details.setdefault(serial_no, posting_date)
+			serial_posting_date = self.serial_no_details.setdefault((serial_no, warehouse), posting_date)
 
 			incoming_slots.append([serial_no, serial_posting_date, serial_value])
 			remaining_value = flt(remaining_value - serial_value)

@@ -231,6 +231,17 @@
    "read_only": 1
   },
   {
+   "default": "0",
+   "fieldname": "ordered_qty",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "Ordered Qty",
+   "no_copy": 1,
+   "non_negative": 1,
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
    "fieldname": "base_price_list_rate",
    "fieldtype": "Currency",
    "label": "Price List Rate (Company Currency)",
@@ -615,7 +626,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-08-07 17:31:31.732720",
+ "modified": "2026-08-31 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation Item",

@@ -857,6 +857,51 @@ class TestStockReservationEntry(ERPNextTestSuite):
 		{
 			"allow_negative_stock": 0,
 			"enable_stock_reservation": 1,
+			"allow_partial_reservation": 1,
+		},
+	)
+	def test_stock_reservation_from_pick_list_for_product_bundle(self) -> None:
+		from erpnext.stock.doctype.packed_item.test_packed_item import create_product_bundle
+
+		bundle, components = create_product_bundle(quantities=[2, 3], warehouse=self.warehouse)
+		so = make_sales_order(item_code=bundle, qty=2, warehouse=self.warehouse)
+
+		pl = create_pick_list(so.name)
+		pl.save()
+		pl.submit()
+		pl.create_stock_reservation_entries()
+		pl.reload()
+		so.reload()
+
+		packed_item_by_code = {row.item_code: row for row in so.packed_items}
+		self.assertEqual(len(pl.locations), len(components))
+
+		for location in pl.locations:
+			packed_item = packed_item_by_code[location.item_code]
+
+			# Test - 1: Bundle components should be reserved against their Packed Item.
+			sre_details = _get_stock_reservation_entries_for_voucher(
+				"Sales Order", so.name, packed_item.name, fields=["reserved_qty", "from_voucher_type"]
+			)
+			self.assertEqual(len(sre_details), 1)
+			self.assertEqual(sre_details[0].reserved_qty, packed_item.qty)
+			self.assertEqual(sre_details[0].from_voucher_type, "Pick List")
+
+			# Test - 2: Reserved Qty should be updated in Pick List Item.
+			self.assertEqual(location.stock_reserved_qty, location.picked_qty)
+
+		pl.cancel_stock_reservation_entries()
+		pl.reload()
+
+		# Test - 3: Unreserving from the Pick List should clear the reserved qty.
+		for location in pl.locations:
+			self.assertEqual(location.stock_reserved_qty, 0)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"allow_negative_stock": 0,
+			"enable_stock_reservation": 1,
 			"auto_reserve_serial_and_batch": 1,
 			"pick_serial_and_batch_based_on": "FIFO",
 			"auto_reserve_stock_for_sales_order_on_purchase": 1,
@@ -1168,3 +1213,44 @@ class TestStockReservationEntryValidation(ERPNextTestSuite):
 		result = doc.get_serial_batch_entries()
 		self.assertEqual(result.serial_nos, ["SN1", "SN2"])
 		self.assertEqual(result.batches["B1"], 8)
+
+	def test_update_serial_batch_delivered_qty_updates_each_batch(self):
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			update_serial_batch_delivered_qty,
+		)
+
+		item = make_batch_item()
+		first_batch = frappe.get_doc(doctype="Batch", item=item.name).insert()
+		second_batch = frappe.get_doc(doctype="Batch", item=item.name).insert()
+		batches = {first_batch.name: 2, second_batch.name: 3}
+		sre = make_stock_reservation_entry(
+			item_code=item.name,
+			warehouse="_Test Warehouse - _TC",
+			reserved_qty=5,
+			ignore_validate=True,
+			do_not_submit=True,
+		)
+		sre.reservation_based_on = "Serial and Batch"
+		for batch_no, qty in batches.items():
+			sre.append("sb_entries", {"batch_no": batch_no, "qty": qty})
+		sre.save()
+
+		row = frappe._dict(serial_nos=[], batches=batches)
+		update_serial_batch_delivered_qty(row, sre.name)
+		delivered_qty_by_batch = {
+			d.batch_no: d.delivered_qty
+			for d in frappe.get_all(
+				"Serial and Batch Entry",
+				filters={"parent": sre.name},
+				fields=["batch_no", "delivered_qty"],
+			)
+		}
+		self.assertEqual(delivered_qty_by_batch, batches)
+
+		update_serial_batch_delivered_qty(row, sre.name, is_cancelled=True)
+		delivered_qty = frappe.get_all(
+			"Serial and Batch Entry",
+			filters={"parent": sre.name},
+			pluck="delivered_qty",
+		)
+		self.assertEqual(delivered_qty, [0, 0])
