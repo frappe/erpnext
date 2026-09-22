@@ -285,7 +285,7 @@ erpnext.crm.Opportunity = class Opportunity extends frappe.ui.form.Controller {
 		}
 
 		if (this.frm.is_new() && this.frm.doc.opportunity_type === undefined) {
-			this.frm.doc.opportunity_type = __("Sales");
+			this.frm.doc.opportunity_type = "Sales";
 		}
 		this.setup_queries();
 	}
