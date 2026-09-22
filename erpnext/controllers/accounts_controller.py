@@ -359,7 +359,10 @@ class AccountsController(TransactionBase):
 			return
 
 		details = frappe.db.get_value("Price List", price_list, ["enabled", transaction_side], as_dict=True)
-		if details.enabled and details.get(transaction_side):
+
+		# An internal transfer carries the price list of the outward document into the inward one.
+		fits_transaction = bool(details.get(transaction_side)) or self.is_internal_transfer()
+		if details.enabled and fits_transaction:
 			return
 
 		# Returns retain a submitted voucher's pricing even if its price list no longer fits.
