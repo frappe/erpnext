@@ -467,7 +467,7 @@ class BuyingController(SubcontractingController):
 
 				net_rate = item.base_net_amount
 				if item.sales_incoming_rate:  # for internal transfer
-					net_rate = item.qty * item.sales_incoming_rate
+					net_rate = self.get_internal_transfer_qty(item) * item.sales_incoming_rate
 
 				if (
 					not net_rate
@@ -803,6 +803,26 @@ class BuyingController(SubcontractingController):
 					)
 				)
 
+	def get_internal_transfer_qty(self, row) -> float:
+		if flt(row.qty) or not self.is_internal_receipt():
+			return flt(row.qty)
+
+		return flt(row.rejected_qty)
+
+	def is_internal_receipt(self) -> bool:
+		return self.doctype == "Purchase Receipt" and self.is_internal_transfer()
+
+	def get_source_warehouse_qty(self, row, accepted_qty):
+		if not (self.is_internal_receipt() and flt(row.rejected_qty)):
+			return accepted_qty
+
+		if row.get("serial_and_batch_bundle") or row.get("rejected_serial_and_batch_bundle"):
+			return accepted_qty
+
+		rejected_qty = flt(flt(row.rejected_qty) * flt(row.conversion_factor), row.precision("stock_qty"))
+
+		return flt(accepted_qty + rejected_qty, row.precision("stock_qty"))
+
 	def update_stock_ledger(self, allow_negative_stock=False, via_landed_cost_voucher=False):
 		self.update_ordered_and_reserved_qty()
 
@@ -815,8 +835,9 @@ class BuyingController(SubcontractingController):
 
 			if d.warehouse:
 				pr_qty = flt(flt(d.qty) * flt(d.conversion_factor), d.precision("stock_qty"))
+				source_qty = self.get_source_warehouse_qty(d, pr_qty)
 
-				if pr_qty:
+				if pr_qty or source_qty:
 					if d.from_warehouse and (
 						(not cint(self.is_return) and self.docstatus == 1)
 						or (cint(self.is_return) and self.docstatus == 2)
@@ -832,7 +853,7 @@ class BuyingController(SubcontractingController):
 						from_warehouse_sle = self.get_sl_entries(
 							d,
 							{
-								"actual_qty": -1 * pr_qty,
+								"actual_qty": -1 * source_qty,
 								"warehouse": d.from_warehouse,
 								"outgoing_rate": d.rate,
 								"recalculate_rate": 1,
@@ -907,7 +928,7 @@ class BuyingController(SubcontractingController):
 						from_warehouse_sle = self.get_sl_entries(
 							d,
 							{
-								"actual_qty": -1 * pr_qty,
+								"actual_qty": -1 * source_qty,
 								"warehouse": d.from_warehouse,
 								"recalculate_rate": 1,
 								"serial_and_batch_bundle": (
