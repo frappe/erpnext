@@ -286,6 +286,12 @@ class BuyingController(SubcontractingController):
 			)
 			frappe.delete_doc("Serial and Batch Bundle", package, force=True, ignore_permissions=True)
 
+	def get_internal_transfer_qty(self, row) -> float:
+		if flt(row.qty) or not self.is_internal_receipt():
+			return flt(row.qty)
+
+		return flt(row.rejected_qty)
+
 	def get_rejected_serial_nos(self, row) -> list:
 		if not flt(row.get("rejected_qty")):
 			return []
@@ -590,7 +596,7 @@ class BuyingController(SubcontractingController):
 
 				net_rate = item.base_net_amount
 				if item.sales_incoming_rate:  # for internal transfer
-					net_rate = item.qty * item.sales_incoming_rate
+					net_rate = self.get_internal_transfer_qty(item) * item.sales_incoming_rate
 
 				if (
 					not net_rate
@@ -979,102 +985,106 @@ class BuyingController(SubcontractingController):
 
 			source_reversal_sle = None
 
-			if d.warehouse:
-				pr_qty = flt(flt(d.qty) * flt(d.conversion_factor), d.precision("stock_qty"))
-				source_qty = self.get_source_warehouse_qty(d, pr_qty)
+			pr_qty = flt(flt(d.qty) * flt(d.conversion_factor), d.precision("stock_qty"))
+			source_qty = self.get_source_warehouse_qty(d, pr_qty)
 
-				if pr_qty:
-					if d.from_warehouse and (
-						(not cint(self.is_return) and self.docstatus == 1)
-						or (cint(self.is_return) and self.docstatus == 2)
-					):
-						serial_and_batch_bundle = d.get("serial_and_batch_bundle")
-						if self.is_internal_transfer() and self.is_return and self.docstatus == 2:
-							serial_and_batch_bundle = frappe.db.get_value(
-								"Stock Ledger Entry",
-								{"voucher_detail_no": d.name, "warehouse": d.from_warehouse},
-								"serial_and_batch_bundle",
-							)
-
-						from_warehouse_sle = self.get_sl_entries(
-							d,
-							{
-								"actual_qty": -1 * source_qty,
-								"warehouse": d.from_warehouse,
-								"outgoing_rate": d.rate,
-								"recalculate_rate": 1,
-								"dependant_sle_voucher_detail_no": d.name,
-								"serial_and_batch_bundle": self.get_source_warehouse_package(
-									d, serial_and_batch_bundle
-								),
-							},
+			if source_qty and (d.warehouse or not pr_qty):
+				if d.from_warehouse and (
+					(not cint(self.is_return) and self.docstatus == 1)
+					or (cint(self.is_return) and self.docstatus == 2)
+				):
+					serial_and_batch_bundle = d.get("serial_and_batch_bundle")
+					if self.is_internal_transfer() and self.is_return and self.docstatus == 2:
+						serial_and_batch_bundle = frappe.db.get_value(
+							"Stock Ledger Entry",
+							{"voucher_detail_no": d.name, "warehouse": d.from_warehouse},
+							"serial_and_batch_bundle",
 						)
 
-						sl_entries.append(from_warehouse_sle)
-
-					type_of_transaction = "Inward"
-					if self.docstatus == 2:
-						type_of_transaction = "Outward"
-
-					sle = self.get_sl_entries(
+					from_warehouse_sle = self.get_sl_entries(
 						d,
 						{
-							"actual_qty": flt(pr_qty),
-							"serial_and_batch_bundle": self.get_accepted_warehouse_package(
-								d, type_of_transaction, via_landed_cost_voucher
+							"actual_qty": -1 * source_qty,
+							"warehouse": d.from_warehouse,
+							"outgoing_rate": d.rate,
+							"recalculate_rate": 1,
+							"dependant_sle_voucher_detail_no": d.name,
+							"serial_and_batch_bundle": self.get_source_warehouse_package(
+								d, serial_and_batch_bundle
 							),
 						},
 					)
 
-					if self.is_return:
-						outgoing_rate = get_rate_for_return(
+					sl_entries.append(from_warehouse_sle)
+
+				type_of_transaction = "Inward"
+				if self.docstatus == 2:
+					type_of_transaction = "Outward"
+
+				sle = self.get_sl_entries(
+					d,
+					{
+						"actual_qty": flt(pr_qty),
+						"serial_and_batch_bundle": self.get_accepted_warehouse_package(
+							d, type_of_transaction, via_landed_cost_voucher
+						),
+					},
+				)
+
+				if self.is_return:
+					outgoing_rate = get_rate_for_return(
+						self.doctype, self.name, d.item_code, self.return_against, item_row=d
+					)
+
+					sle.update(
+						{
+							"outgoing_rate": outgoing_rate,
+							"recalculate_rate": 1,
+							"serial_and_batch_bundle": d.serial_and_batch_bundle,
+						}
+					)
+					if d.from_warehouse:
+						sle.dependant_sle_voucher_detail_no = d.name
+				else:
+					sle.update(
+						{
+							"incoming_rate": d.valuation_rate,
+							"recalculate_rate": 1
+							if (self.is_subcontracted and (d.bom or d.get("fg_item"))) or d.from_warehouse
+							else 0,
+						}
+					)
+				sl_entries.append(sle)
+
+				if d.from_warehouse and (
+					(not cint(self.is_return) and self.docstatus == 2)
+					or (cint(self.is_return) and self.docstatus == 1)
+				):
+					serial_and_batch_bundle = None
+					if self.is_internal_transfer() and self.docstatus == 2:
+						reversed_warehouse = (
+							d.from_warehouse if d.get("rejected_serial_and_batch_bundle") else d.warehouse
+						)
+						serial_and_batch_bundle = self.get_submitted_package(d, reversed_warehouse)
+
+					from_warehouse_sle = self.get_sl_entries(
+						d,
+						{
+							"actual_qty": -1 * source_qty,
+							"warehouse": d.from_warehouse,
+							"recalculate_rate": 1,
+							"serial_and_batch_bundle": self.get_source_warehouse_reversal_package(
+								d, serial_and_batch_bundle
+							),
+						},
+					)
+
+					if self.is_internal_transfer() and self.is_return:
+						from_warehouse_sle.incoming_rate = get_rate_for_return(
 							self.doctype, self.name, d.item_code, self.return_against, item_row=d
 						)
 
-						sle.update(
-							{
-								"outgoing_rate": outgoing_rate,
-								"recalculate_rate": 1,
-								"serial_and_batch_bundle": d.serial_and_batch_bundle,
-							}
-						)
-						if d.from_warehouse:
-							sle.dependant_sle_voucher_detail_no = d.name
-					else:
-						sle.update(
-							{
-								"incoming_rate": d.valuation_rate,
-								"recalculate_rate": 1
-								if (self.is_subcontracted and (d.bom or d.get("fg_item"))) or d.from_warehouse
-								else 0,
-							}
-						)
-					sl_entries.append(sle)
-
-					if d.from_warehouse and (
-						(not cint(self.is_return) and self.docstatus == 2)
-						or (cint(self.is_return) and self.docstatus == 1)
-					):
-						serial_and_batch_bundle = None
-						if self.is_internal_transfer() and self.docstatus == 2:
-							reversed_warehouse = (
-								d.from_warehouse if d.get("rejected_serial_and_batch_bundle") else d.warehouse
-							)
-							serial_and_batch_bundle = self.get_submitted_package(d, reversed_warehouse)
-
-						from_warehouse_sle = self.get_sl_entries(
-							d,
-							{
-								"actual_qty": -1 * source_qty,
-								"warehouse": d.from_warehouse,
-								"recalculate_rate": 1,
-								"serial_and_batch_bundle": self.get_source_warehouse_reversal_package(
-									d, serial_and_batch_bundle
-								),
-							},
-						)
-
-						source_reversal_sle = from_warehouse_sle
+					source_reversal_sle = from_warehouse_sle
 
 			if flt(d.rejected_qty) != 0:
 				valuation_rate_for_rejected_item = 0.0
