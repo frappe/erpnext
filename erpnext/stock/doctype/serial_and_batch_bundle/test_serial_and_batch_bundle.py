@@ -1977,6 +1977,27 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 		item.reload()
 		self.assertEqual(item.valuation_method, "FIFO")
 
+	def test_first_transaction_uses_moving_average_when_disabled(self):
+		from erpnext.stock.utils import get_valuation_method
+
+		item = self.make_serial_item_for_valuation("_Test Serial Wise Valuation First Txn", 0)
+
+		item.reload()
+		item.valuation_method = "FIFO"
+		item.save()
+
+		# FIFO may be stored while no stock exists, but the effective method must already be
+		# Moving Average so the first transaction does not build a FIFO queue. The item is not
+		# saved by posting stock, so the stored method stays FIFO until someone edits the item.
+		self.assertEqual(item.valuation_method, "FIFO")
+		self.assertEqual(get_valuation_method(item.name), "Moving Average")
+
+		self.receive_serial_stock(item.name, 1, 100, "_Test Warehouse - _TC")
+
+		item.reload()
+		self.assertEqual(item.valuation_method, "FIFO")
+		self.assertEqual(get_valuation_method(item.name), "Moving Average")
+
 	def test_cannot_set_fifo_when_serial_no_wise_valuation_disabled(self):
 		item = self.make_serial_item_for_valuation("_Test Serial Wise Valuation No FIFO", 0)
 		self.receive_serial_stock(item.name, 1, 100, "_Test Warehouse - _TC")
