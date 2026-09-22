@@ -37,13 +37,10 @@
   "payment_name",
   "payments",
   "totals_section",
-  "total_invoice_amount_all",
   "total_invoice_amount",
   "column_break_totals_1",
-  "total_payment_amount_all",
   "total_payment_amount",
   "column_break_totals_2",
-  "difference_amount_all",
   "difference_amount",
   "sec_break2",
   "allocation"
@@ -120,22 +117,14 @@
   },
   {
    "depends_on": "eval:(doc.payments).length || (doc.invoices).length",
-   "description": "The `All` figures total every row above; the `Selected` figures reflect only the rows you've checked.",
    "fieldname": "totals_section",
    "fieldtype": "Section Break",
    "label": "Totals"
   },
   {
-   "fieldname": "total_invoice_amount_all",
-   "fieldtype": "Currency",
-   "label": "Total Invoice Amount (All)",
-   "options": "currency",
-   "read_only": 1
-  },
-  {
    "fieldname": "total_invoice_amount",
    "fieldtype": "Currency",
-   "label": "Total Invoice Amount (Selected)",
+   "label": "Total Invoice Amount",
    "options": "currency",
    "read_only": 1
   },
@@ -144,16 +133,9 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "total_payment_amount_all",
-   "fieldtype": "Currency",
-   "label": "Total Payment Amount (All)",
-   "options": "currency",
-   "read_only": 1
-  },
-  {
    "fieldname": "total_payment_amount",
    "fieldtype": "Currency",
-   "label": "Total Payment Amount (Selected)",
+   "label": "Total Payment Amount",
    "options": "currency",
    "read_only": 1
   },
@@ -162,16 +144,9 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "difference_amount_all",
-   "fieldtype": "Currency",
-   "label": "Difference Amount (All)",
-   "options": "currency",
-   "read_only": 1
-  },
-  {
    "fieldname": "difference_amount",
    "fieldtype": "Currency",
-   "label": "Difference Amount (Selected)",
+   "label": "Difference Amount",
    "options": "currency",
    "read_only": 1
   },

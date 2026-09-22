@@ -231,14 +231,6 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 		const sum_outstanding = (rows) => rows.reduce((total, row) => total + flt(row.outstanding_amount), 0);
 		const sum_amount = (rows) => rows.reduce((total, row) => total + flt(row.amount), 0);
 
-		const total_invoice_amount_all = sum_outstanding(this.frm.doc.invoices || []);
-		const total_payment_amount_all = sum_amount(this.frm.doc.payments || []);
-		this.frm.set_value({
-			total_invoice_amount_all,
-			total_payment_amount_all,
-			difference_amount_all: total_invoice_amount_all - total_payment_amount_all,
-		});
-
 		const selected_invoices = this.frm.fields_dict.invoices.grid.get_selected_children();
 		const selected_payments = this.frm.fields_dict.payments.grid.get_selected_children();
 
