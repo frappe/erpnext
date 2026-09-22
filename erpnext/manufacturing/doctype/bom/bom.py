@@ -1486,7 +1486,11 @@ def get_bom_items_as_dict(
 	fetch_secondary_items=0,
 	include_non_stock_items=False,
 	fetch_qty_in_stock_uom=True,
+	ignore_permissions=True,
 ):
+	if not ignore_permissions:
+		frappe.has_permission("BOM", "read", doc=bom, throw=True)
+
 	item_dict = {}
 
 	group_by_cond = "group by item_code, stock_uom, operation"
@@ -1589,6 +1593,7 @@ def get_bom_items_as_dict(
 				fetch_secondary_items=fetch_secondary_items,
 				include_non_stock_items=include_non_stock_items,
 				fetch_qty_in_stock_uom=fetch_qty_in_stock_uom,
+				ignore_permissions=ignore_permissions,
 			)
 
 			for k, v in data.items():
@@ -1617,7 +1622,11 @@ def get_bom_items_as_dict(
 
 @frappe.whitelist()
 def get_bom_items(bom, company, qty=1, fetch_exploded=1):
-	items = get_bom_items_as_dict(bom, company, qty, fetch_exploded, include_non_stock_items=True).values()
+	frappe.has_permission("BOM", "read", doc=bom, throw=True)
+
+	items = get_bom_items_as_dict(
+		bom, company, qty, fetch_exploded, include_non_stock_items=True, ignore_permissions=False
+	).values()
 	items = list(items)
 	items.sort(key=functools.cmp_to_key(lambda a, b: a.item_code > b.item_code and 1 or -1))
 	return items
@@ -1932,6 +1941,9 @@ def get_bom_diff(bom1, bom2):
 
 	doc1 = frappe.get_doc("BOM", bom1)
 	doc2 = frappe.get_doc("BOM", bom2)
+
+	doc1.check_permission()
+	doc2.check_permission()
 
 	out = get_diff(doc1, doc2)
 	out.row_changed = []
