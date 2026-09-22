@@ -167,8 +167,16 @@ def _execute(filters, additional_table_columns=None):
 					),
 				}
 			)
+		elif inv.doctype == "Payment Entry":
+			is_receive = inv.payment_type == "Receive"
+			row.update(
+				{
+					"debit": 0.0 if is_receive else inv.base_grand_total,
+					"credit": inv.base_grand_total if is_receive else 0.0,
+				}
+			)
 		else:
-			row.update({"debit": 0.0, "credit": inv.base_grand_total})
+			row.update({"debit": flt(inv.account_debit), "credit": flt(inv.account_credit)})
 		data.append(row)
 
 	res += sorted(data, key=lambda x: x["posting_date"])
@@ -523,7 +531,6 @@ def get_conditions(filters, query, doctype):
 def get_payments(filters):
 	args = frappe._dict(
 		account="debit_to",
-		account_fieldname="paid_from",
 		party="customer",
 		party_name="customer_name",
 		party_account=get_party_account("Customer", filters.customer, filters.company, include_advance=True),
