@@ -2291,6 +2291,68 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(booked_value[get_inventory_account(company, to_warehouse)], 700)
 		self.assertEqual(booked_value[get_inventory_account(company, rejected_warehouse)], 300)
 
+	@ERPNextTestSuite.change_settings("Buying Settings", {"set_valuation_rate_for_rejected_materials": 0})
+	def test_internal_transfer_pr_with_every_unit_rejected(self):
+		"""A receipt that rejects the whole transfer still empties the in-transit warehouse."""
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		prepare_data_for_internal_transfer()
+		company = "_Test Company with perpetual inventory"
+
+		from_warehouse = create_warehouse("_Test All Rejected From", company=company)
+		transit_warehouse = create_warehouse("_Test All Rejected Transit", company=company)
+		to_warehouse = create_warehouse("_Test All Rejected To", company=company)
+		rejected_warehouse = create_warehouse("_Test All Rejected Rejected", company=company)
+
+		item_doc = create_item("Test All Rejected Internal Transfer Item")
+
+		make_purchase_receipt(
+			item_code=item_doc.name, company=company, warehouse=from_warehouse, qty=10, rate=100
+		)
+
+		dn = create_delivery_note(
+			item_code=item_doc.name,
+			company=company,
+			customer="_Test Internal Customer 2",
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=10,
+			rate=100,
+			warehouse=from_warehouse,
+			target_warehouse=transit_warehouse,
+		)
+
+		pr = make_inter_company_purchase_receipt(dn.name)
+		pr.items[0].warehouse = to_warehouse
+		pr.items[0].qty = 0
+		pr.items[0].rejected_qty = 10
+		pr.items[0].received_qty = 10
+		pr.items[0].rejected_warehouse = rejected_warehouse
+		pr.submit()
+
+		sl_entries = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_type": "Purchase Receipt", "voucher_no": pr.name, "is_cancelled": 0},
+			fields=["warehouse", "actual_qty", "stock_value_difference"],
+		)
+
+		stock_qty = {d.warehouse: d.actual_qty for d in sl_entries}
+		stock_value = {d.warehouse: d.stock_value_difference for d in sl_entries}
+
+		self.assertNotIn(to_warehouse, stock_qty)
+		self.assertEqual(stock_qty[transit_warehouse], -10)
+		self.assertEqual(stock_qty[rejected_warehouse], 10)
+		self.assertEqual(stock_value[transit_warehouse], -1000)
+		self.assertEqual(stock_value[rejected_warehouse], 1000)
+
+		gl_entries = get_gl_entries("Purchase Receipt", pr.name, skip_cancelled=True)
+		booked_value = {d.account: flt(d.debit) - flt(d.credit) for d in gl_entries}
+
+		self.assertEqual(sum(booked_value.values()), 0)
+		self.assertEqual(booked_value[get_inventory_account(company, transit_warehouse)], -1000)
+		self.assertEqual(booked_value[get_inventory_account(company, rejected_warehouse)], 1000)
+
 	def test_internal_transfer_pr_incoming_sle_anchored_to_dn_rate(self):
 		"""Internal-transfer PR's inward SLE must use DN.incoming_rate even when
 		PR.item.valuation_rate was wrong at submit, so divisional_loss does not
