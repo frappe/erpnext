@@ -148,6 +148,15 @@ class SerialBatchBundle:
 	def make_serial_batch_no_bundle(self):
 		if self.sle.actual_qty > 0 and (transit_package := self.get_transit_package()):
 			self.make_serial_batch_no_bundle_for_material_transfer(transit_package)
+
+			if not self.is_packed_entry():
+				frappe.db.set_value(
+					self.child_doctype,
+					self.sle.voucher_detail_no,
+					"serial_and_batch_bundle",
+					self.sle.serial_and_batch_bundle,
+				)
+
 			return
 
 		self.validate_item()
