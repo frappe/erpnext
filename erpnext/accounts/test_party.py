@@ -83,7 +83,7 @@ class PartyTestCase(ERPNextTestSuite):
 		with self.set_user(user):
 			set_price_list(party_details, supplier, "Supplier", None, doctype="Purchase Order")
 
-		self.assertEqual(party_details.buying_price_list, supplier_price_list)
+		self.assertIsNone(party_details.buying_price_list)
 
 	def test_permission_for_another_doctype_should_not_apply_without_a_doctype(self):
 		permitted = [self.create_price_list(enabled=1), self.create_price_list(enabled=1)]
@@ -112,7 +112,7 @@ class PartyTestCase(ERPNextTestSuite):
 
 		self.assertEqual(party_details.selling_price_list, pos_price_list)
 
-	def test_disabled_permitted_price_lists_should_keep_the_given_one(self):
+	def test_disabled_permitted_price_lists_should_clear_the_price_list(self):
 		permitted = [self.create_price_list(enabled=0), self.create_price_list(enabled=0)]
 		user = self.create_user_with_price_list_permissions(permitted)
 		customer = self.create_customer()
@@ -122,7 +122,7 @@ class PartyTestCase(ERPNextTestSuite):
 		with self.set_user(user):
 			set_price_list(party_details, customer, "Customer", given_price_list, doctype="Sales Order")
 
-		self.assertEqual(party_details.selling_price_list, given_price_list)
+		self.assertIsNone(party_details.selling_price_list)
 
 	def create_user_with_price_list_permissions(self, price_lists, applicable_for=None):
 		user = frappe.get_doc(
