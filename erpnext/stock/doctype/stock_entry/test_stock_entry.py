@@ -272,7 +272,8 @@ class TestStockEntry(ERPNextTestSuite):
 		company = "_Test Company"
 
 		create_warehouse("Test From Warehouse")
-		create_warehouse("Test Transit Warehouse")
+		create_warehouse("Test Transit Warehouse", properties={"warehouse_type": "Transit"})
+		frappe.db.set_value("Warehouse", "Test Transit Warehouse - _TC", "warehouse_type", "Transit")
 		create_warehouse("Test To Warehouse")
 
 		create_item(
@@ -400,6 +401,53 @@ class TestStockEntry(ERPNextTestSuite):
 
 		remaining_entry = make_stock_in_entry(transit_entry.name)
 		self.assertEqual(remaining_entry.items[0].qty, smallest_qty)
+
+	def test_add_to_transit_non_transit_target_warehouse_validation(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		item_code = "_Test Transit Item 2"
+		company = "_Test Company"
+
+		create_warehouse("Test Source Warehouse")
+		create_warehouse("Test Regular Target Warehouse")
+
+		create_item(
+			item_code=item_code,
+			is_stock_item=1,
+			is_purchase_item=1,
+			company=company,
+		)
+
+		make_stock_entry(
+			item_code=item_code,
+			target="Test Source Warehouse - _TC",
+			qty=10,
+			basic_rate=100,
+			expense_account="Stock Adjustment - _TC",
+			cost_center="Main - _TC",
+		)
+
+		# Submitting or saving with add_to_transit=1 and a non-transit target warehouse must be rejected
+		se = frappe.new_doc("Stock Entry")
+		se.purpose = "Material Transfer"
+		se.stock_entry_type = "Material Transfer"
+		se.company = company
+		se.from_warehouse = "Test Source Warehouse - _TC"
+		se.to_warehouse = "Test Regular Target Warehouse - _TC"
+		se.add_to_transit = 1
+		se.append(
+			"items",
+			{
+				"item_code": item_code,
+				"s_warehouse": "Test Source Warehouse - _TC",
+				"t_warehouse": "Test Regular Target Warehouse - _TC",
+				"qty": 5,
+				"basic_rate": 100,
+				"expense_account": "Stock Adjustment - _TC",
+				"cost_center": "Main - _TC",
+			},
+		)
+		self.assertRaises(frappe.ValidationError, se.save)
 
 	def test_material_receipt_gl_entry(self):
 		company = frappe.db.get_value("Warehouse", "Stores - TCP1", "company")

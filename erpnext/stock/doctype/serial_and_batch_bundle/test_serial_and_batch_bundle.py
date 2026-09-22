@@ -1682,6 +1682,426 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 		)
 		self.assertRaises(NegativeStockError, backdated.submit)
 
+	def make_serial_item_for_valuation(self, item_code, use_serial_no_wise_valuation):
+		return make_item(
+			item_code,
+			{
+				"is_stock_item": 1,
+				"has_serial_no": 1,
+				"serial_no_series": item_code + "-.####",
+				"valuation_method": "FIFO" if use_serial_no_wise_valuation else "Moving Average",
+				"use_serial_no_wise_valuation": use_serial_no_wise_valuation,
+			},
+		)
+
+	def receive_serial_stock(self, item_code, qty, rate, warehouse, posting_date=None):
+		entry = make_stock_entry(
+			item_code=item_code,
+			target=warehouse,
+			qty=qty,
+			basic_rate=rate,
+			posting_date=posting_date,
+			use_serial_batch_fields=1,
+		)
+
+		return get_serial_nos_from_bundle(entry.items[0].serial_and_batch_bundle)
+
+	def issue_serial_no(self, item_code, serial_no, warehouse, posting_date=None):
+		return make_stock_entry(
+			item_code=item_code,
+			source=warehouse,
+			qty=1,
+			serial_no=serial_no,
+			posting_date=posting_date,
+			use_serial_batch_fields=1,
+		)
+
+	def get_stock_value_difference(self, voucher_no):
+		return frappe.db.get_value(
+			"Stock Ledger Entry", {"voucher_no": voucher_no, "is_cancelled": 0}, "stock_value_difference"
+		)
+
+	def test_serial_no_wise_valuation_uses_serial_rate_when_enabled(self):
+		warehouse = "_Test Warehouse - _TC"
+		item = self.make_serial_item_for_valuation("_Test Serial Wise Valuation On", 1)
+
+		self.receive_serial_stock(item.name, 2, 100, warehouse)
+		newer_serial_nos = self.receive_serial_stock(item.name, 2, 200, warehouse)
+
+		issue = self.issue_serial_no(item.name, newer_serial_nos[-1], warehouse)
+
+		self.assertEqual(flt(self.get_stock_value_difference(issue.name)), -200.0)
+
+	def test_serial_no_wise_valuation_uses_item_valuation_method_when_disabled(self):
+		warehouse = "_Test Warehouse - _TC"
+		item = self.make_serial_item_for_valuation("_Test Serial Wise Valuation Off", 0)
+
+		self.receive_serial_stock(item.name, 2, 100, warehouse)
+		newer_serial_nos = self.receive_serial_stock(item.name, 2, 200, warehouse)
+
+		issue = self.issue_serial_no(item.name, newer_serial_nos[-1], warehouse)
+
+		self.assertEqual(flt(self.get_stock_value_difference(issue.name)), -150.0)
+
+	def test_outward_bundle_rate_not_set_when_serial_no_wise_valuation_disabled(self):
+		warehouse = "_Test Warehouse - _TC"
+		item = self.make_serial_item_for_valuation("_Test Serial Wise Valuation No Rate", 0)
+
+		serial_nos = self.receive_serial_stock(item.name, 2, 100, warehouse)
+		issue = self.issue_serial_no(item.name, serial_nos[-1], warehouse)
+
+		rates = frappe.get_all(
+			"Serial and Batch Entry",
+			filters={"parent": issue.items[0].serial_and_batch_bundle},
+			pluck="incoming_rate",
+		)
+
+		self.assertTrue(rates)
+		for rate in rates:
+			self.assertEqual(flt(rate), 0.0)
+
+	def test_cannot_enable_serial_no_wise_valuation_when_serial_nos_exist(self):
+		warehouse = "_Test Warehouse - _TC"
+		item = self.make_serial_item_for_valuation("_Test Serial Wise Valuation Toggle", 1)
+		self.receive_serial_stock(item.name, 1, 100, warehouse)
+
+		item.reload()
+		item.use_serial_no_wise_valuation = 0
+		item.save()
+
+		item.reload()
+		item.use_serial_no_wise_valuation = 1
+		self.assertRaises(frappe.ValidationError, item.save)
+
+	def make_purchase_return_for_serial_no(self, item_code, serial_no, receipt):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		entry = make_return_doc("Purchase Receipt", receipt.name)
+		entry.items[0].qty = -1
+		entry.items[0].received_qty = -1
+		for row in entry.items:
+			row.serial_and_batch_bundle = None
+			row.use_serial_batch_fields = 1
+			row.serial_no = serial_no
+
+		entry.save()
+		entry.submit()
+
+		return entry
+
+	def test_purchase_return_uses_item_valuation_method_when_disabled(self):
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		warehouse = "_Test Warehouse - _TC"
+		item = self.make_serial_item_for_valuation("_Test Serial Wise Valuation Pur Return Off", 0)
+
+		make_purchase_receipt(item_code=item.name, qty=2, rate=100, warehouse=warehouse)
+		costlier_receipt = make_purchase_receipt(item_code=item.name, qty=2, rate=200, warehouse=warehouse)
+		serial_nos = get_serial_nos_from_bundle(costlier_receipt.items[0].serial_and_batch_bundle)
+
+		entry = self.make_purchase_return_for_serial_no(item.name, serial_nos[-1], costlier_receipt)
+
+		self.assertEqual(flt(self.get_stock_value_difference(entry.name)), -150.0)
+
+	def test_purchase_return_uses_serial_rate_when_enabled(self):
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		warehouse = "_Test Warehouse - _TC"
+		item = self.make_serial_item_for_valuation("_Test Serial Wise Valuation Pur Return On", 1)
+
+		make_purchase_receipt(item_code=item.name, qty=2, rate=100, warehouse=warehouse)
+		costlier_receipt = make_purchase_receipt(item_code=item.name, qty=2, rate=200, warehouse=warehouse)
+		serial_nos = get_serial_nos_from_bundle(costlier_receipt.items[0].serial_and_batch_bundle)
+
+		entry = self.make_purchase_return_for_serial_no(item.name, serial_nos[-1], costlier_receipt)
+
+		self.assertEqual(flt(self.get_stock_value_difference(entry.name)), -200.0)
+
+	def deliver_serial_no(self, item_code, serial_no, warehouse, posting_date=None):
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		return create_delivery_note(
+			item_code=item_code,
+			warehouse=warehouse,
+			qty=1,
+			serial_no=serial_no,
+			posting_date=posting_date,
+			use_serial_batch_fields=1,
+		)
+
+	def repost_item_and_warehouse(self, item_code, warehouse, posting_date):
+		from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import repost
+
+		riv = frappe.get_doc(
+			{
+				"doctype": "Repost Item Valuation",
+				"based_on": "Item and Warehouse",
+				"item_code": item_code,
+				"warehouse": warehouse,
+				"posting_date": posting_date,
+				"posting_time": "00:00:01",
+				"company": frappe.get_cached_value("Warehouse", warehouse, "company"),
+			}
+		)
+		riv.flags.dont_run_in_test = True
+		riv.submit()
+		riv.reload()
+		repost(riv)
+		riv.reload()
+		self.assertEqual(riv.status, "Completed")
+
+	def assert_outward_sle_at_moving_average(self, voucher_no, warehouse, rate, qty_after_transaction):
+		sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": voucher_no, "warehouse": warehouse, "is_cancelled": 0},
+			["outgoing_rate", "valuation_rate", "stock_value", "stock_value_difference"],
+			as_dict=True,
+		)
+
+		self.assertEqual(flt(sle.outgoing_rate), rate, voucher_no)
+		self.assertEqual(flt(sle.valuation_rate), rate, voucher_no)
+		self.assertEqual(flt(sle.stock_value), rate * qty_after_transaction, voucher_no)
+		self.assertEqual(flt(sle.stock_value_difference), -rate, voucher_no)
+
+	def test_repost_values_outward_entries_at_moving_average_when_disabled(self):
+		"""A repost must value plain outward entries at the moving average once the switch is off. The
+		serial rates are seeded because such entries come from ledgers written before the switch."""
+		warehouse = "_Test Warehouse - _TC"
+		item = self.make_serial_item_for_valuation("_Test Serial Wise Valuation Repost Outward", 1)
+		posting_date = add_days(today(), -10)
+
+		cheaper = self.receive_serial_stock(item.name, 2, 100, warehouse, posting_date)
+		costlier = self.receive_serial_stock(item.name, 2, 200, warehouse, add_days(posting_date, 1))
+
+		issue = self.issue_serial_no(item.name, costlier[-1], warehouse, add_days(posting_date, 2))
+		delivery = self.deliver_serial_no(item.name, cheaper[-1], warehouse, add_days(posting_date, 3))
+
+		for voucher_no, serial_rate in ((issue.name, 200.0), (delivery.name, 100.0)):
+			sle_name = frappe.db.get_value(
+				"Stock Ledger Entry", {"voucher_no": voucher_no, "is_cancelled": 0}, "name"
+			)
+			frappe.db.set_value(
+				"Stock Ledger Entry", sle_name, "outgoing_rate", serial_rate, update_modified=False
+			)
+
+		item.reload()
+		item.use_serial_no_wise_valuation = 0
+		item.save()
+
+		self.repost_item_and_warehouse(item.name, warehouse, posting_date)
+
+		# 2 @ 100 plus 2 @ 200 makes the moving average 150, and neither outward entry may move it
+		self.assert_outward_sle_at_moving_average(issue.name, warehouse, 150.0, 3.0)
+		self.assert_outward_sle_at_moving_average(delivery.name, warehouse, 150.0, 2.0)
+
+	def test_repost_values_purchase_return_at_moving_average_when_disabled(self):
+		"""Same as above for a purchase return: it must leave the remaining stock at the moving average,
+		not at the returned serial's own rate."""
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		warehouse = "_Test Warehouse - _TC"
+		item = self.make_serial_item_for_valuation("_Test Serial Wise Valuation Repost Return", 1)
+		posting_date = add_days(today(), -10)
+
+		make_purchase_receipt(
+			item_code=item.name, qty=2, rate=100, warehouse=warehouse, posting_date=posting_date
+		)
+		costlier_receipt = make_purchase_receipt(
+			item_code=item.name,
+			qty=2,
+			rate=200,
+			warehouse=warehouse,
+			posting_date=add_days(posting_date, 1),
+		)
+		serial_nos = get_serial_nos_from_bundle(costlier_receipt.items[0].serial_and_batch_bundle)
+
+		entry = self.make_purchase_return_for_serial_no(item.name, serial_nos[-1], costlier_receipt)
+		self.assertEqual(flt(self.get_stock_value_difference(entry.name)), -200.0)
+
+		item.reload()
+		item.use_serial_no_wise_valuation = 0
+		item.save()
+
+		self.repost_item_and_warehouse(item.name, warehouse, posting_date)
+
+		self.assert_outward_sle_at_moving_average(entry.name, warehouse, 150.0, 3.0)
+
+	def test_valuation_method_forced_to_moving_average_when_disabled(self):
+		item = self.make_serial_item_for_valuation("_Test Serial Wise Valuation Forced MA", 1)
+		self.receive_serial_stock(item.name, 1, 100, "_Test Warehouse - _TC")
+
+		item.reload()
+		item.valuation_method = "FIFO"
+		item.use_serial_no_wise_valuation = 0
+		item.save()
+
+		item.reload()
+		self.assertEqual(item.valuation_method, "Moving Average")
+
+	def test_valuation_method_kept_when_disabled_without_stock_transactions(self):
+		item = self.make_serial_item_for_valuation("_Test Serial Wise Valuation No MA Yet", 1)
+
+		item.reload()
+		item.valuation_method = "FIFO"
+		item.use_serial_no_wise_valuation = 0
+		item.save()
+
+		item.reload()
+		self.assertEqual(item.valuation_method, "FIFO")
+
+	def test_valuation_method_kept_when_disabled_and_saved_after_stock_transactions(self):
+		"""An item that has always had the switch off keeps its own valuation method. Only turning the
+		switch off forces Moving Average, so an unrelated save cannot silently revalue the ledger."""
+		item = self.make_serial_item_for_valuation("_Test Serial Wise Valuation Keeps FIFO On Save", 0)
+		item.reload()
+		item.valuation_method = "FIFO"
+		item.save()
+
+		self.receive_serial_stock(item.name, 2, 100, "_Test Warehouse - _TC")
+		self.receive_serial_stock(item.name, 2, 200, "_Test Warehouse - _TC")
+
+		item.reload()
+		item.description = "saved for an unrelated reason"
+		item.save()
+
+		item.reload()
+		self.assertEqual(item.valuation_method, "FIFO")
+
+	def test_fifo_allowed_when_disabled_without_stock_transactions(self):
+		item = self.make_serial_item_for_valuation("_Test Serial Wise Valuation FIFO Ok", 0)
+
+		item.reload()
+		item.valuation_method = "FIFO"
+		item.save()
+
+		item.reload()
+		self.assertEqual(item.valuation_method, "FIFO")
+
+	def test_first_transaction_uses_moving_average_when_disabled(self):
+		from collections import defaultdict
+
+		from erpnext.stock.utils import get_valuation_method
+
+		item = self.make_serial_item_for_valuation("_Test Serial Wise Valuation First Txn", 0)
+		warehouse = "_Test Warehouse - _TC"
+
+		item.reload()
+		item.valuation_method = "FIFO"
+		item.save()
+
+		previous_cache = getattr(frappe.local, "request_cache", None)
+		self.addCleanup(setattr, frappe.local, "request_cache", previous_cache)
+		frappe.local.request_cache = defaultdict(dict)
+
+		# Any method may be stored and used while the item has no ledger. Reading it here also
+		# primes the request cache with FIFO, the way validate() does before entries exist.
+		self.assertEqual(item.valuation_method, "FIFO")
+		self.assertEqual(get_valuation_method(item.name), "FIFO")
+
+		serial_nos = self.receive_serial_stock(item.name, 1, 100, warehouse)
+		self.receive_serial_stock(item.name, 1, 200, warehouse)
+
+		# The issue must be valued at the moving average of 150, not the FIFO rate of 100, even
+		# though the cache primed above still holds FIFO.
+		entry = self.issue_serial_no(item.name, serial_nos[0], warehouse)
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": entry.name, "is_cancelled": 0},
+			"stock_value_difference",
+		)
+		self.assertEqual(flt(stock_value_difference, 2), -100.0)
+
+		# Posting stock does not save the item, so the stored method stays FIFO while the
+		# effective method is Moving Average now that a ledger exists.
+		item.reload()
+		self.assertEqual(item.valuation_method, "FIFO")
+		frappe.local.request_cache = defaultdict(dict)
+		self.assertEqual(get_valuation_method(item.name), "FIFO")
+
+	def test_legacy_serial_no_lookup_is_case_insensitive(self):
+		# MariaDB matches serial_no under a case insensitive collation, PostgreSQL does not.
+		# This asserts the lookup behaves the same on both; it can only fail on PostgreSQL.
+		from erpnext.stock.deprecated_serial_batch import DeprecatedSerialNoValuation
+
+		item = self.make_serial_item_for_valuation("_Test Legacy Serial Case", 1)
+		warehouse = "_Test Warehouse - _TC"
+		serial_no = self.receive_serial_stock(item.name, 1, 100, warehouse)[0]
+
+		# Rewrite the receipt into the pre-bundle representation.
+		sles = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"item_code": item.name, "is_cancelled": 0},
+			fields=["name", "posting_datetime"],
+		)
+		for sle in sles:
+			frappe.db.set_value(
+				"Stock Ledger Entry", sle.name, {"serial_and_batch_bundle": None, "serial_no": serial_no}
+			)
+
+		class LegacyLookup(DeprecatedSerialNoValuation):
+			def __init__(self, sle):
+				self.sle = sle
+
+		lookup = LegacyLookup(
+			frappe._dict(
+				item_code=item.name,
+				company=frappe.get_cached_value("Warehouse", warehouse, "company"),
+				warehouse=warehouse,
+			)
+		)
+		posting_datetime = sles[0].posting_datetime
+
+		self.assertTrue(lookup.get_last_inward_sle_for_serial_no(serial_no, posting_datetime))
+		self.assertTrue(lookup.get_last_inward_sle_for_serial_no(serial_no.swapcase(), posting_datetime))
+
+	def test_cannot_set_fifo_when_serial_no_wise_valuation_disabled(self):
+		item = self.make_serial_item_for_valuation("_Test Serial Wise Valuation No FIFO", 0)
+		self.receive_serial_stock(item.name, 1, 100, "_Test Warehouse - _TC")
+
+		item.reload()
+		self.assertEqual(item.valuation_method, "Moving Average")
+
+		item.valuation_method = "FIFO"
+		self.assertRaises(frappe.ValidationError, item.save)
+
+	def test_valuation_helpers_not_stale_after_disabling_in_same_request(self):
+		from collections import defaultdict
+
+		from erpnext.stock.utils import get_valuation_method, is_serial_no_wise_valuation_disabled
+
+		item = self.make_serial_item_for_valuation("_Test Serial Wise Valuation Cache", 1)
+		self.receive_serial_stock(item.name, 1, 100, "_Test Warehouse - _TC")
+
+		previous_cache = getattr(frappe.local, "request_cache", None)
+		self.addCleanup(setattr, frappe.local, "request_cache", previous_cache)
+		frappe.local.request_cache = defaultdict(dict)
+
+		self.assertEqual(get_valuation_method(item.name), "FIFO")
+		self.assertFalse(is_serial_no_wise_valuation_disabled(item.name))
+
+		item.reload()
+		item.use_serial_no_wise_valuation = 0
+		item.save()
+
+		self.assertEqual(get_valuation_method(item.name), "Moving Average")
+		self.assertTrue(is_serial_no_wise_valuation_disabled(item.name))
+
+	def test_valuation_method_untouched_when_serial_no_wise_valuation_enabled(self):
+		item = self.make_serial_item_for_valuation("_Test Serial Wise Valuation Keeps FIFO", 1)
+
+		item.reload()
+		self.assertEqual(item.valuation_method, "FIFO")
+
+	def test_enable_serial_no_wise_valuation_allowed_without_serial_nos(self):
+		item = self.make_serial_item_for_valuation("_Test Serial Wise Valuation No Serials", 0)
+
+		item.reload()
+		item.use_serial_no_wise_valuation = 1
+		item.save()
+
+		item.reload()
+		self.assertEqual(item.use_serial_no_wise_valuation, 1)
+
 
 def get_batch_from_bundle(bundle):
 	from erpnext.stock.serial_batch_bundle import get_batch_nos

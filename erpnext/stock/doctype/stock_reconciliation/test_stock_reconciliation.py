@@ -1324,6 +1324,39 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			self.assertAlmostEqual(row.incoming_rate, 1000.00)
 			self.assertEqual(row.serial_no, serial_nos[row.idx - 1])
 
+	def test_opening_stock_reco_for_serial_nos_without_stock(self):
+		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import make_serial_nos
+
+		item = self.make_item(
+			"Test Serial No Item Opening Stock Not Reconcile All",
+			{
+				"is_stock_item": 1,
+				"has_serial_no": 1,
+				"serial_no_series": "SNN-TEST-OPENING-NRALL-S-.###",
+			},
+		)
+
+		warehouse = "_Test Warehouse - _TC"
+		serial_nos = [f"SNN-TEST-OPENING-NRALL-{idx}" for idx in range(1, 6)]
+		make_serial_nos(item.name, [{"serial_no": serial_no} for serial_no in serial_nos])
+
+		with self.change_settings("Stock Settings", {"allow_negative_stock": 0}):
+			sr = create_stock_reconciliation(
+				item_code=item.name,
+				warehouse=warehouse,
+				qty=5,
+				rate=100,
+				purpose="Opening Stock",
+				expense_account="Temporary Opening - _TC",
+				reconcile_all_serial_batch=0,
+				serial_no=serial_nos,
+			)
+
+		self.assertEqual(sr.docstatus, 1)
+		self.assertEqual(sr.items[0].current_qty, 0)
+		self.assertFalse(sr.items[0].current_serial_and_batch_bundle)
+		self.assertEqual(get_stock_balance(item.name, warehouse), 5)
+
 	def test_stock_reco_with_legacy_batch(self):
 		from erpnext.stock.doctype.batch.batch import get_batch_qty
 
@@ -2342,6 +2375,211 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 		self.assertEqual(sles[0].actual_qty, 0)
 		self.assertEqual(sles[0].qty_after_transaction, 0)
 		self.assertEqual(flt(sles[0].stock_value_difference), -100.0)
+
+	def test_adjustment_entry_clears_value_stranded_at_zero_qty(self):
+		"""bal_qty 0 with bal_val 500: the write-off has to bring the reported value to zero."""
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		from erpnext.stock.report.stock_balance.stock_balance import execute
+
+		item_code = self.make_item("Test Stock Reco Stranded Value Non Batch").name
+		warehouse = "_Test Warehouse - _TC"
+
+		receipt = make_stock_entry(
+			item_code=item_code,
+			target=warehouse,
+			qty=10,
+			basic_rate=100,
+			posting_date=add_days(nowdate(), -3),
+		)
+		make_stock_entry(item_code=item_code, source=warehouse, qty=10, posting_date=add_days(nowdate(), -2))
+
+		# strand 500 of value: qty nets out, stock_value_difference does not
+		receipt_sle = frappe.db.get_value(
+			"Stock Ledger Entry", {"voucher_no": receipt.name, "is_cancelled": 0}, "name"
+		)
+		frappe.db.set_value(
+			"Stock Ledger Entry",
+			receipt_sle,
+			"stock_value_difference",
+			flt(frappe.db.get_value("Stock Ledger Entry", receipt_sle, "stock_value_difference")) + 500,
+			update_modified=False,
+		)
+
+		report_filters = frappe._dict(
+			{"item_code": [item_code], "warehouse": [warehouse], "company": "_Test Company"}
+		)
+
+		# this is what the user sees before the reconciliation
+		_columns, data = execute(filters=report_filters)
+		self.assertEqual(flt(data[0].get("bal_qty")), 0.0)
+		self.assertEqual(flt(data[0].get("bal_val")), 500.0)
+
+		sr = create_stock_reconciliation(
+			item_code=item_code, warehouse=warehouse, qty=0, rate=0, do_not_save=1
+		)
+		sr.items[0].allow_zero_valuation_rate = 1
+		sr.save()
+		sr.submit()
+
+		sles = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_no": sr.name, "is_cancelled": 0},
+			fields=["actual_qty", "qty_after_transaction", "stock_value_difference", "is_adjustment_entry"],
+		)
+
+		self.assertEqual(len(sles), 1)
+		self.assertEqual(sles[0].is_adjustment_entry, 1)
+		self.assertEqual(flt(sles[0].actual_qty), 0.0)
+		self.assertEqual(flt(sles[0].qty_after_transaction), 0.0)
+		self.assertEqual(flt(sles[0].stock_value_difference), -500.0)
+
+		# the report, and the GL basis behind it, both land on zero
+		# (the row drops out entirely once every figure on it is zero)
+		_columns, data = execute(filters=report_filters)
+		self.assertEqual(flt(data[0].get("bal_val")) if data else 0.0, 0.0)
+		self.assertEqual(
+			flt(get_stock_value_on(warehouses=warehouse, posting_date=nowdate(), item_code=item_code)),
+			0.0,
+		)
+
+	def _make_backdated_adjustment_scenario(self, item_name, valuation_method, backdated_qty=4):
+		"""Strand 100 of value at zero qty, write it off, then backdate a receipt before the write-off."""
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		item_code = self.make_item(item_name, {"valuation_method": valuation_method}).name
+		warehouse = "_Test Warehouse - _TC"
+
+		receipt = make_stock_entry(
+			item_code=item_code,
+			target=warehouse,
+			qty=10,
+			basic_rate=100,
+			posting_date=add_days(nowdate(), -10),
+		)
+		make_stock_entry(item_code=item_code, source=warehouse, qty=10, posting_date=add_days(nowdate(), -9))
+
+		# strand 100 of value on the ledger: qty nets out, stock_value_difference does not
+		receipt_sle = frappe.db.get_value(
+			"Stock Ledger Entry", {"voucher_no": receipt.name, "is_cancelled": 0}, "name"
+		)
+		frappe.db.set_value(
+			"Stock Ledger Entry",
+			receipt_sle,
+			"stock_value_difference",
+			flt(frappe.db.get_value("Stock Ledger Entry", receipt_sle, "stock_value_difference")) + 100,
+			update_modified=False,
+		)
+
+		sr = create_stock_reconciliation(
+			item_code=item_code,
+			warehouse=warehouse,
+			qty=0,
+			rate=0,
+			posting_date=add_days(nowdate(), -5),
+			do_not_save=1,
+		)
+		sr.items[0].allow_zero_valuation_rate = 1
+		sr.save()
+		sr.submit()
+
+		self.assertTrue(
+			frappe.db.exists("Stock Ledger Entry", {"voucher_no": sr.name, "is_adjustment_entry": 1})
+		)
+
+		# a backdated receipt lands before the write-off
+		if backdated_qty:
+			make_stock_entry(
+				item_code=item_code,
+				target=warehouse,
+				qty=backdated_qty,
+				basic_rate=50,
+				posting_date=add_days(nowdate(), -7),
+			)
+
+		return item_code, warehouse, sr
+
+	def _assert_backdated_stock_survives(self, item_code, warehouse, sr):
+		adjustment_sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": sr.name, "is_cancelled": 0},
+			["qty_after_transaction", "stock_value", "stock_value_difference", "valuation_rate"],
+			as_dict=True,
+		)
+
+		# the backdated stock is carried through the adjustment entry, not wiped out by it
+		self.assertEqual(flt(adjustment_sle.qty_after_transaction), 4.0)
+		self.assertEqual(flt(adjustment_sle.stock_value), 200.0)
+		self.assertEqual(flt(adjustment_sle.valuation_rate), 50.0)
+
+		# and the write-off still lands the running ledger value on the stock value it holds
+		self.assertEqual(
+			flt(get_stock_value_on(warehouses=warehouse, posting_date=nowdate(), item_code=item_code)),
+			200.0,
+		)
+		self.assertEqual(get_stock_balance(item_code, warehouse), 4.0)
+
+	def test_adjustment_entry_does_not_zero_out_backdated_stock(self):
+		"""An adjustment entry restates value, so a backdated receipt posted before it must survive."""
+		item_code, warehouse, sr = self._make_backdated_adjustment_scenario(
+			"Test Stock Reco Backdated Adjustment", "FIFO"
+		)
+		self._assert_backdated_stock_survives(item_code, warehouse, sr)
+
+	def test_adjustment_entry_does_not_zero_out_backdated_stock_moving_average(self):
+		"""Same, through the moving average path rather than the queue."""
+		item_code, warehouse, sr = self._make_backdated_adjustment_scenario(
+			"Test Stock Reco Backdated Adjustment MA", "Moving Average"
+		)
+		self._assert_backdated_stock_survives(item_code, warehouse, sr)
+
+	def test_adjustment_row_amount_is_not_distorted_by_rate_rounding(self):
+		"""The refreshed amount comes from the ledger's stock value, not from a rounded rate."""
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		item_code, warehouse, sr = self._make_backdated_adjustment_scenario(
+			"Test Stock Reco Adjustment Rounding", "FIFO", backdated_qty=0
+		)
+
+		# a backdated receipt whose value does not divide evenly into a 2 decimal rate
+		make_stock_entry(
+			item_code=item_code,
+			target=warehouse,
+			qty=10000,
+			basic_rate=1.2345,
+			posting_date=add_days(nowdate(), -7),
+		)
+
+		sr.reload()
+		row = sr.items[0]
+
+		self.assertEqual(flt(row.current_qty), 10000.0)
+		self.assertEqual(flt(row.current_amount), 12345.0)
+
+	def test_cancelling_adjustment_entry_shifts_no_qty(self):
+		"""Reversing a value-only entry must not push the preserved quantity into later entries."""
+		from erpnext.stock.stock_ledger import get_stock_reco_qty_shift
+
+		_item_code, _warehouse, sr = self._make_backdated_adjustment_scenario(
+			"Test Stock Reco Adjustment Cancel", "FIFO"
+		)
+
+		sr.reload()
+		row = sr.items[0]
+
+		# the refreshed document reports the balance the ledger carries and no quantity movement
+		self.assertEqual(flt(row.current_qty), 4.0)
+		self.assertEqual(flt(row.quantity_difference), 0.0)
+		self.assertEqual(flt(row.current_valuation_rate), 50.0)
+		self.assertEqual(flt(row.current_amount), 200.0)
+		self.assertEqual(flt(row.amount_difference), -100.0)
+
+		# the reversal built on cancellation moves nothing, so later entries are not shifted
+		sr.docstatus = 2
+		args = sr.get_sle_for_items(row)
+		args.actual_qty = -flt(args.actual_qty)  # as make_sl_entries flips it for a cancellation
+
+		self.assertEqual(flt(args.actual_qty), 0.0)
+		self.assertEqual(flt(get_stock_reco_qty_shift(args)), 0.0)
 
 
 def create_batch_item_with_batch(item_name, batch_id):
