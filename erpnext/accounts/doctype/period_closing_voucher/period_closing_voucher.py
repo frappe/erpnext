@@ -280,12 +280,13 @@ class PeriodClosingVoucher(AccountsController):
 
 			data = self.get_data_for_mapreduce()
 			mapreduce(
-				"erpnext.accounts.doctype.period_closing_voucher.period_closing_voucher.mapper",
-				"erpnext.accounts.doctype.period_closing_voucher.period_closing_voucher.reducer",
+				"erpnext.accounts.doctype.period_closing_voucher.period_closing_voucher.process_date_range",
+				"erpnext.accounts.doctype.period_closing_voucher.period_closing_voucher.aggregate_partial_result",
 				"erpnext.accounts.doctype.period_closing_voucher.period_closing_voucher.summarize_and_post_ledger",
 				data,
 				self.doctype,
 				self.name,
+				f"Closing FY {self.fiscal_year}",
 			)
 
 	def on_cancel(self):
@@ -330,8 +331,8 @@ class PeriodClosingVoucher(AccountsController):
 
 	def make_gl_entries(self):
 		if frappe.db.estimate_count("GL Entry") > 100_000:
-			frappe.enqueue(
-				process_gl_and_closing_entries,
+			frappe.enqueue_task(
+				method=process_gl_and_closing_entries,
 				doc=self,
 				timeout=1800,
 			)
@@ -834,7 +835,7 @@ def get_previous_closed_period_in_current_year(fiscal_year, company):
 	return prev_closed_period_end_date
 
 
-def mapper(val):
+def process_date_range(val):
 	start_date = val.from_date
 	end_date = val.to_date
 	pcv = val.pcv
@@ -881,7 +882,7 @@ def mapper(val):
 	return res
 
 
-def reducer(final, partial_res):
+def aggregate_partial_result(final, partial_res):
 	if final is None:
 		final = []
 
