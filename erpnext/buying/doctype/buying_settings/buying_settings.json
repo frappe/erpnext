@@ -139,7 +139,7 @@
   },
   {
    "default": "1",
-   "description": "If checked, the rejected quantity is billed anywhere in the purchase cycle: on an invoice made from a receipt, and on an invoice that updates stock itself.",
+   "description": "If checked, the rejected quantity is billed anywhere in the purchase cycle.",
    "fieldname": "bill_for_rejected_quantity_in_purchase_invoice",
    "fieldtype": "Check",
    "label": "Bill for rejected quantity in Purchase Invoice"
