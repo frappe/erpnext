@@ -264,7 +264,8 @@
    "description": "Speeds up Item search on large catalogues. Requires a single app server: the index is a file on that server's disk, and several servers would each answer from a different copy. Building it takes about 20 minutes for 3 million items, and runs in the background.",
    "fieldname": "enable_item_search_index",
    "fieldtype": "Check",
-   "label": "Enable Item Search Index"
+   "label": "Enable Item Search Index",
+   "show_description_on_click": 1
   },
   {
    "fieldname": "section_break_9",
