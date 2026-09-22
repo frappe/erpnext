@@ -94,7 +94,9 @@ frappe.query_reports["Sales Order Analysis"] = {
 					report.set_filter_value("group_by_item", 0);
 					return;
 				}
-				report.refresh();
+				if (!report._no_refresh) {
+					report.refresh(true);
+				}
 			},
 		},
 		{
@@ -107,7 +109,9 @@ frappe.query_reports["Sales Order Analysis"] = {
 					report.set_filter_value("group_by_so", 0);
 					return;
 				}
-				report.refresh();
+				if (!report._no_refresh) {
+					report.refresh(true);
+				}
 			},
 		},
 	],
