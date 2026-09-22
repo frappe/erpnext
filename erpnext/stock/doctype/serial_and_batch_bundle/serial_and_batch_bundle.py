@@ -924,6 +924,11 @@ class SerialandBatchBundle(Document):
 			set_valuation_rate_for_rejected_materials or self.is_material_from_in_transit_warehouse()
 		)
 
+		if self.is_rejected and self.is_material_from_in_transit_warehouse():
+			# Rejected material of a transfer keeps the value it had in transit. A charge spread
+			# over the accepted quantity does not belong to it.
+			rate = flt(self.get_transit_rate(row)) or rate
+
 		precision = frappe.get_precision("Serial and Batch Entry", "incoming_rate")
 		for d in self.entries:
 			fifo_batch_wise_val = True
@@ -1220,6 +1225,16 @@ class SerialandBatchBundle(Document):
 			self.throw_error_message(
 				f"Total quantity {total_qty} in the Serial and Batch Bundle {bold(self.name)} does not match with the quantity {set_qty} for the Item {bold(self.item_code)} in the {self.voucher_type} # {self.voucher_no}"
 			)
+
+	def get_transit_rate(self, row) -> float:
+		"""What the material was worth on its way into the in-transit warehouse."""
+		if row and row.get("sales_incoming_rate"):
+			return flt(row.get("sales_incoming_rate"))
+
+		if not (self.voucher_detail_no and self.voucher_no):
+			return 0.0
+
+		return flt(frappe.db.get_value(self.child_table, self.voucher_detail_no, "sales_incoming_rate"))
 
 	def get_qty_field(self, row, qty_field=None) -> str:
 		if not qty_field:
