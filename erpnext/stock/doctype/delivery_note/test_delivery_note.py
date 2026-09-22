@@ -1804,6 +1804,50 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assertEqual(dn.items[0].rate, rate)
 		self.assertEqual(dn.items[0].net_rate, rate)
 
+	def test_internal_transfer_carries_the_batch_into_transit(self):
+		"""Material sent to an in-transit warehouse keeps the batch it left the source warehouse with."""
+		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
+
+		company = "_Test Company"
+		warehouse = "_Test Warehouse - _TC"
+		transit_warehouse = "Stores - _TC"
+		item = make_item(
+			properties={
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "_T-TRANSIT-BATCH-.####",
+			}
+		).name
+		customer = create_internal_customer(represents_company=company)
+
+		make_stock_entry(target=warehouse, qty=5, basic_rate=100, item_code=item)
+
+		dn = create_delivery_note(
+			item_code=item,
+			company=company,
+			customer=customer,
+			qty=5,
+			rate=100,
+			warehouse=warehouse,
+			target_warehouse=transit_warehouse,
+		)
+
+		packages = {
+			d.warehouse: d.name
+			for d in frappe.get_all(
+				"Serial and Batch Bundle", filters={"voucher_no": dn.name}, fields=["name", "warehouse"]
+			)
+		}
+		sent_batch = frappe.db.get_value(
+			"Serial and Batch Entry", {"parent": packages[warehouse]}, "batch_no"
+		)
+		received_batch = frappe.db.get_value(
+			"Serial and Batch Entry", {"parent": packages[transit_warehouse]}, "batch_no"
+		)
+
+		self.assertEqual(received_batch, sent_batch)
+		self.assertEqual(frappe.db.count("Batch", {"item": item}), 1)
+
 	def test_internal_transfer_precision_gle(self):
 		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
 
