@@ -122,18 +122,19 @@ class SerialBatchBundle:
 	def get_delivered_row(self):
 		fields = ["target_warehouse", "serial_and_batch_bundle"]
 
-		if self.is_packed_entry():
-			return frappe.db.get_value(
-				"Packed Item",
-				{
-					"parent_detail_docname": self.sle.voucher_detail_no,
-					"item_code": self.sle.item_code,
-				},
-				fields,
-				as_dict=True,
-			)
+		if not self.is_packed_entry():
+			return frappe.db.get_value(self.child_doctype, self.sle.voucher_detail_no, fields, as_dict=True)
 
-		return frappe.db.get_value(self.child_doctype, self.sle.voucher_detail_no, fields, as_dict=True)
+		packed_rows = frappe.get_all(
+			"Packed Item",
+			filters={
+				"parent_detail_docname": self.sle.voucher_detail_no,
+				"item_code": self.sle.item_code,
+			},
+			fields=fields,
+		)
+
+		return packed_rows[0] if len(packed_rows) == 1 else None
 
 	def make_serial_batch_no_bundle_for_material_transfer(self, bundle):
 		from erpnext.controllers.stock_controller import make_bundle_for_material_transfer
