@@ -389,9 +389,11 @@ def item_query(
 	db_fields = [f.fieldname for f in meta.fields] + ["name"]
 	search_str = f"%{txt}%"
 	search_conditions = []
+	searched_fields = []
 	for fieldname in fields_to_process:
 		if fieldname in db_fields:
 			search_conditions.append(item[fieldname].like(search_str))
+			searched_fields.append(fieldname)
 
 	barcode_tbl = DocType("Item Barcode")
 	barcode_subquery = (
@@ -404,7 +406,7 @@ def item_query(
 	if searches_description:
 		search_conditions.append(item.description.like(search_str))
 
-	candidates = None if searches_description else get_item_search_candidates(txt)
+	candidates = None if searches_description else get_item_search_candidates(txt, searched_fields)
 
 	txt_no_percent = txt.replace("%", "")
 

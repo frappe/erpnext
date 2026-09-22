@@ -51,6 +51,7 @@ class ItemSearch(SQLiteSearch):
 				*self._extra_text_fields(fieldnames),
 			],
 		}
+		self.indexed_fieldnames = {"name", *fieldnames}
 		self._barcodes = {}
 		super().__init__(db_name)
 
@@ -117,13 +118,18 @@ class ItemSearch(SQLiteSearch):
 	def get_search_filters(self) -> dict:
 		return {}
 
-	def get_candidate_item_codes(self, txt: str) -> list[str] | None:
+	def get_candidate_item_codes(self, txt: str, searched_fields: list[str]) -> list[str] | None:
 		"""Item codes that can match txt, a superset the caller must still recheck with LIKE.
 
 		Covers barcodes, which item_query also searches: an Item left out is filtered away even
-		when its barcode matches.
+		when its barcode matches. Answers only when the index carries every field the query
+		searches, because a caller may pass any Item field as searchfield. `name` counts as
+		indexed: Item.autoname assigns it from item_code.
 		"""
 		if not self.is_search_enabled() or not self.index_exists():
+			return None
+
+		if not set(searched_fields) <= self.indexed_fieldnames:
 			return None
 
 		match_query = build_match_query(txt)
@@ -209,9 +215,9 @@ def reindex_item(doc, method=None):
 		search.index_doc("Item", doc.name)
 
 
-def get_item_search_candidates(txt: str) -> list[str] | None:
+def get_item_search_candidates(txt: str, searched_fields: list[str]) -> list[str] | None:
 	try:
-		return ItemSearch().get_candidate_item_codes(txt)
+		return ItemSearch().get_candidate_item_codes(txt, searched_fields)
 	except Exception:
 		frappe.log_error("Item search index unavailable")
 		return None
