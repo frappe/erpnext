@@ -96,6 +96,27 @@ class TestBin(ERPNextTestSuite):
 		self.assertEqual(bin.valuation_rate, 0)
 		self.assertEqual(bin.stock_value, 0)
 
+	def test_cancelling_transfer_restores_bin_stock_value(self):
+		"""Cancelling a transfer must put back the stock value of both bins, not just the quantity."""
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		item_code = make_item().name
+		source = "_Test Warehouse - _TC"
+		target = "_Test Warehouse 1 - _TC"
+		make_stock_entry(item_code=item_code, target=source, qty=10, rate=100, posting_time="01:00:00")
+		make_stock_entry(item_code=item_code, target=target, qty=10, rate=200, posting_time="02:00:00")
+
+		se = make_stock_entry(
+			item_code=item_code, source=source, target=target, qty=5, posting_time="03:00:00"
+		)
+		se.cancel()
+
+		for warehouse, valuation_rate, stock_value in ((source, 100, 1000), (target, 200, 2000)):
+			bin = frappe.get_doc("Bin", {"item_code": item_code, "warehouse": warehouse})
+			self.assertEqual(bin.actual_qty, 10)
+			self.assertEqual(bin.valuation_rate, valuation_rate)
+			self.assertEqual(bin.stock_value, stock_value)
+
 	def test_deleting_last_voucher_resets_bin(self):
 		"""Deleting the only voucher wipes its ledger entries outright, the bin must still be cleared."""
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
