@@ -11,8 +11,8 @@
   "operation",
   "operation_row_id",
   "column_break_3",
-  "bom_no",
   "do_not_explode",
+  "bom_no",
   "quantity_and_rate",
   "percentage",
   "qty",
@@ -286,6 +286,7 @@
    "fetch_from": "item_code.has_variants",
    "fieldname": "has_variants",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Has variants",
    "no_copy": 1,
    "print_hide": 1,
@@ -300,10 +301,12 @@
   },
   {
    "default": "0",
+   "description": "A sub-assembly is a component with its own BOM. By default it's broken down into its own raw materials; enable this to keep it as a single finished part.",
    "fieldname": "do_not_explode",
    "fieldtype": "Check",
    "label": "Do not explode",
-   "read_only_depends_on": "eval:doc.is_phantom_item"
+   "read_only_depends_on": "eval:doc.is_phantom_item",
+   "show_description_on_click": 1
   },
   {
    "default": "0",
@@ -325,6 +328,7 @@
    "description": "Set automatically when this component is a semi-finished good produced by an operation in this BOM. It's made in-house during the process, so it's excluded from raw-material requirement and explosion calculations to avoid double-counting.",
    "fieldname": "is_sub_assembly_item",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Is sub assembly Item",
    "no_copy": 1,
    "read_only": 1,
@@ -335,6 +339,7 @@
    "description": "When this is enabled it defines the BOM as a logical grouping of raw materials without producing an item. The Production Item must be non-stock and will be automatically exploded when used as a raw material in another BOM.",
    "fieldname": "is_phantom_item",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Is Phantom Item",
    "read_only": 1,
    "show_description_on_click": 1
@@ -361,7 +366,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-09-18 17:08:13.223993",
+ "modified": "2026-09-22 12:40:00.082400",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Item",
