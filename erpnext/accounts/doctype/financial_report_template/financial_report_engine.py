@@ -1326,7 +1326,7 @@ class FormulaCalculator:
 		self.row_data = row_data
 		self.period_list = period_list
 		self.precision = get_currency_precision()
-		self.validator = CalculationFormulaValidator(set(row_data.keys()))
+		self.validator = CalculationFormulaValidator(set(row_data.keys()), strict=False)
 
 	def evaluate_formula(self, report_row: dict[str, Any]) -> list[float]:
 		validation_result = self.validator.validate(report_row)
@@ -1351,7 +1351,6 @@ class FormulaCalculator:
 		try:
 			context = self._build_context(period_index)
 			result = frappe.safe_eval(formula, eval_globals=None, eval_locals=context)
-			return flt(result * negation_factor, self.precision)
 
 		except ZeroDivisionError:
 			frappe.log_error(f"Division by zero in formula: {formula}")
@@ -1359,6 +1358,12 @@ class FormulaCalculator:
 		except Exception as e:
 			frappe.log_error(f"Formula evaluation error: {formula} - {e!s}")
 			return 0.0
+
+		if isinstance(result, bool) or not isinstance(result, int | float):
+			frappe.log_error(f"Formula did not return a number: {formula} - got {type(result).__name__}")
+			return 0.0
+
+		return flt(result * negation_factor, self.precision)
 
 	def _build_context(self, period_index: int) -> dict[str, Any]:
 		context = {}
