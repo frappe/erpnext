@@ -354,12 +354,18 @@ class TestSalesOrderAnalysis(ERPNextTestSuite):
 	def test_12_company_falls_back_to_the_default(self):
 		transaction_date = "2021-06-01"
 		item, so = self.create_sales_order(transaction_date)
+		filters = {"from_date": "2021-06-01", "to_date": "2021-06-30"}
 
 		with patch("erpnext.get_default_company", return_value="_Test Company"):
-			columns, data, message, chart = execute({"from_date": "2021-06-01", "to_date": "2021-06-30"})
+			columns, data, message, chart = execute(filters)
 
 		self.assertEqual(len(data), 1)
 		self.assertEqual(data[0]["sales_order"], so.name)
+
+		with patch("erpnext.get_default_company", return_value="_Test Company 1"):
+			columns, data, message, chart = execute(filters)
+
+		self.assertNotIn(so.name, [row["sales_order"] for row in data])
 
 	def test_13_company_is_mandatory_without_a_default(self):
 		with patch("erpnext.get_default_company", return_value=None):
