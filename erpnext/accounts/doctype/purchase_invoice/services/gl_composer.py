@@ -572,10 +572,10 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 	def make_rejected_warehouse_gl_entry(
 		self, gl_entries, item, voucher_wise_stock_value, inventory_account_map
 	) -> None:
-		"""Book the rejected material of an invoice that bills the received quantity, whose cost the
-		supplier gl entry already carries."""
+		"""Book the material the invoice moved into the rejected warehouse, whose cost the supplier
+		gl entry already carries."""
 		doc = self.doc
-		if not (item.rejected_warehouse and bills_rejected_quantity(doc)):
+		if not item.rejected_warehouse:
 			return
 
 		rejected_amount = flt(
@@ -624,9 +624,15 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 				voucher_wise_stock_value.get((item.name, item.warehouse)), net_amt_precision
 			)
 
-			if flt(stock_amount, net_amt_precision) != flt(warehouse_debit_amount, net_amt_precision):
+			# The rejected warehouse carries the rest of what the invoice paid for, and is booked
+			# by its own entry, so it is not a variance.
+			returned_stock_value = warehouse_debit_amount + flt(
+				voucher_wise_stock_value.get((item.name, item.rejected_warehouse)), net_amt_precision
+			)
+
+			if flt(stock_amount, net_amt_precision) != flt(returned_stock_value, net_amt_precision):
 				cost_of_goods_sold_account = self.get_stock_variance_account(item)
-				stock_adjustment_amt = stock_amount - warehouse_debit_amount
+				stock_adjustment_amt = stock_amount - returned_stock_value
 
 				gl_entries.append(
 					self.get_gl_dict(
