@@ -3,6 +3,7 @@
 
 import frappe
 from frappe.model.mapper import map_docs
+from frappe.utils import add_days, nowdate
 
 from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
@@ -12,6 +13,7 @@ from erpnext.tests.utils import ERPNextTestSuite
 PURCHASE_RECEIPT_FROM_ORDER = "erpnext.buying.doctype.purchase_order.mapper.make_purchase_receipt"
 PURCHASE_INVOICE_FROM_ORDER = "erpnext.buying.doctype.purchase_order.mapper.make_purchase_invoice"
 PURCHASE_INVOICE_FROM_RECEIPT = "erpnext.stock.doctype.purchase_receipt.mapper.make_purchase_invoice"
+SALES_ORDER_FROM_QUOTATION = "erpnext.selling.doctype.quotation.mapper.make_sales_order"
 DELIVERY_NOTE_FROM_ORDER = "erpnext.selling.doctype.sales_order.mapper.make_delivery_note"
 SALES_INVOICE_FROM_ORDER = "erpnext.selling.doctype.sales_order.mapper.make_sales_invoice"
 SALES_INVOICE_FROM_DELIVERY_NOTE = "erpnext.stock.doctype.delivery_note.mapper.make_sales_invoice"
@@ -303,6 +305,30 @@ class TestMappedDiscounts(ERPNextTestSuite):
 				self.assertEqual(item.rate, 100)
 				self.assertEqual(item.net_rate, 90)
 				self.assertEqual(item.mapped_additional_discount_amount, 0)
+
+	def test_purchase_order_from_sales_order_skips_the_sales_discount(self):
+		from erpnext.selling.doctype.quotation.test_quotation import make_quotation
+		from erpnext.selling.doctype.sales_order.mapper import make_purchase_order
+
+		quotations = []
+		for item, percentage in (("_Test Item", 10), ("_Test Item 2", 0)):
+			quotation = make_quotation(item_code=item, qty=1, rate=100, do_not_save=True)
+			quotation.apply_discount_on = "Net Total"
+			quotation.additional_discount_percentage = percentage
+			quotations.append(quotation.insert().submit())
+
+		sales_order = self.combine(*quotations, mapper=SALES_ORDER_FROM_QUOTATION, doctype="Sales Order")
+		sales_order.delivery_date = add_days(nowdate(), 5)
+		for item in sales_order.items:
+			item.delivery_date = sales_order.delivery_date
+		sales_order.insert().submit()
+		self.assertEqual(sales_order.items[0].mapped_additional_discount_amount, 10)
+
+		purchase_order = make_purchase_order(
+			sales_order.name, [{"item_code": "_Test Item", "supplier": "_Test Supplier"}]
+		)[0]
+		self.assertEqual(purchase_order.items[0].mapped_additional_discount_amount, 0)
+		self.assertEqual(purchase_order.net_total, purchase_order.total)
 
 	def assert_percentage_discounts(self, document, source_field, expected_net_amounts):
 		items = {item.get(source_field): item for item in document.items}
