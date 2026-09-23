@@ -3830,6 +3830,33 @@ class TestStockEntry(ERPNextTestSuite):
 		self.assertEqual(fg_row.basic_rate, 0)
 		self.assertEqual(fg_row.basic_amount, 0)
 
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"material_consumption": 1, "get_rm_cost_from_consumption_entry": 1}
+	)
+	def test_manufacture_after_partial_consumption_entry(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			make_stock_entry as make_stock_entry_from_wo,
+		)
+
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=rm_item, target="Stores - _TC", qty=10, basic_rate=100)
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=1).name
+
+		wo = make_wo_order_test_record(
+			production_item=fg_item, bom_no=bom, qty=10, source_warehouse="Stores - _TC"
+		)
+		frappe.get_doc(make_stock_entry_from_wo(wo.name, "Material Transfer for Manufacture", 10)).submit()
+		frappe.get_doc(make_stock_entry_from_wo(wo.name, "Material Consumption for Manufacture", 6)).submit()
+
+		manufacture = frappe.get_doc(make_stock_entry_from_wo(wo.name, "Manufacture", 10))
+		manufacture.submit()
+
+		self.assertEqual([(d.item_code, d.basic_amount) for d in manufacture.items], [(fg_item, 600)])
+		self.assertEqual(frappe.db.get_value("Work Order", wo.name, "status"), "Completed")
+
 	def test_disassemble_entry_without_wo(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 
