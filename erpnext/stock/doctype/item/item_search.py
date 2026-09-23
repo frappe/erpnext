@@ -229,22 +229,29 @@ def reindex_renamed_item(doc, method=None, old=None, new=None, merge=False):
 
 
 def queue_item(item_code: str, drop: str | None = None):
-	"""Queue one Item, and drop another name first when a rename replaced it.
+	"""Queue one Item, and drop the name a rename replaced.
 
-	A failed index write must not fail the Item save: the index is an optimisation that every
-	caller already falls back from, so the error is logged rather than raised.
+	Queues before dropping, so a failure leaves the replaced name in the index rather than losing
+	both: a name nobody holds is an extra candidate the query filters out, a missing one hides a row.
+
+	A failed write must not fail the Item save, and must not leave the index answering either.
+	Nothing would record this Item as stale, and a candidate list missing it hides rows the scan
+	returns, so the index goes and every caller falls back until the scheduler rebuilds it.
 	"""
 	search = ItemSearch()
 	if not (search.is_search_enabled() and search.index_exists()):
 		return
 
 	try:
+		search.index_doc("Item", item_code)
 		if drop:
 			search.remove_doc("Item", drop)
-
-		search.index_doc("Item", item_code)
 	except Exception:
-		frappe.log_error("Item search index update failed")
+		frappe.log_error("Item search index update failed, dropping the index")
+		try:
+			search.drop_index()
+		except Exception:
+			frappe.log_error("Item search index could not be dropped")
 
 
 def get_item_search_candidates(txt: str, searched_fields: list[str]) -> list[str] | None:
