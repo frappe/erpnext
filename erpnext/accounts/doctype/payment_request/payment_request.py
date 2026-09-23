@@ -942,6 +942,8 @@ def get_dummy_message(doc):
 
 @frappe.whitelist()
 def get_subscription_details(reference_doctype, reference_name):
+	frappe.has_permission(reference_doctype, "read", reference_name, throw=True)
+
 	if reference_doctype == "Sales Invoice":
 		subscriptions = frappe.db.sql(
 			"""SELECT parent as sub_name FROM `tabSubscription Invoice` WHERE invoice=%s""",
