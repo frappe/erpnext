@@ -11,6 +11,13 @@ frappe.ui.form.on("Blanket Order", {
 	},
 
 	setup: function (frm) {
+		frm.set_indicator_formatter("item_code", function (doc) {
+			if (doc.closed) {
+				return "gray";
+			}
+			return flt(doc.ordered_qty) >= flt(doc.qty) ? "green" : "orange";
+		});
+
 		frm.custom_make_buttons = {
 			"Purchase Order": "Purchase Order",
 			"Sales Order": "Sales Order",
