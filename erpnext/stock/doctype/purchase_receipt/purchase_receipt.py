@@ -965,7 +965,9 @@ class PurchaseReceipt(BuyingController):
 
 			for so, items_details in so_items_details_map.items():
 				so_doc = frappe.get_doc("Sales Order", so)
-				so_doc.create_stock_reservation_entries(
+				# internal: reserving against someone else's Sales Order, and no role that
+				# creates a Purchase Receipt holds Sales Order write
+				so_doc._create_stock_reservation_entries(
 					items_details=items_details,
 					from_voucher_type="Purchase Receipt",
 					notify=True,
