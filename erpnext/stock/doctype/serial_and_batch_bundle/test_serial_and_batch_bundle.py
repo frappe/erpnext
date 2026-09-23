@@ -649,7 +649,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 						"item": item_code,
 						"use_batchwise_valuation": use_batchwise_valuation,
 					}
-				).insert(ignore_permissions=True)
+				).insert(ignore_permissions=True, set_name=batch_id)
 
 				batch_doc.db_set("use_batchwise_valuation", use_batchwise_valuation)
 
