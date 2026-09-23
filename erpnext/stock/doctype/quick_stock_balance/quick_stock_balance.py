@@ -33,6 +33,10 @@ class QuickStockBalance(Document):
 
 @frappe.whitelist()
 def get_stock_item_details(warehouse, date, item=None, barcode=None):
+	# get_stock_balance() checks Item at doctype level only and get_stock_value_on() checks nothing,
+	# so neither the warehouse nor the particular item is authorised for this caller
+	frappe.has_permission("Warehouse", doc=warehouse, throw=True)
+
 	out = {}
 	if barcode:
 		out["item"] = frappe.db.get_value("Item Barcode", filters={"barcode": barcode}, fieldname=["parent"])
@@ -40,6 +44,8 @@ def get_stock_item_details(warehouse, date, item=None, barcode=None):
 			frappe.throw(_("Invalid Barcode. There is no Item attached to this barcode."))
 	else:
 		out["item"] = item
+
+	frappe.has_permission("Item", doc=out["item"], throw=True)
 
 	barcodes = frappe.db.get_values("Item Barcode", filters={"parent": out["item"]}, fieldname=["barcode"])
 
