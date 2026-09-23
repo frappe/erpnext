@@ -9,6 +9,7 @@ import frappe
 from frappe import _
 from frappe.utils import (
 	cint,
+	comma_and,
 	flt,
 	get_datetime,
 	get_last_day,
@@ -1186,6 +1187,21 @@ def make_asset_movement(assets, purpose=None):
 
 	if len(assets) == 0:
 		frappe.throw(_("Atleast one asset has to be selected."))
+
+	# the movement is never saved here, so no insert() check fires anywhere in this chain and
+	# each asset name comes from the request. get_list() resolves the whole selection in one
+	# query: it picks its ptype from the caller's own grants, so the roles that can create an
+	# Asset Movement -- which hold `select` on Asset rather than `read` -- are checked for
+	# `select`, and User Permissions are applied to the rows either way.
+	names = [asset.get("name") for asset in assets if asset.get("name")]
+	permitted = set(
+		frappe.get_list("Asset", filters={"name": ("in", names)}, pluck="name", limit_page_length=0)
+	)
+	if unpermitted := [name for name in names if name not in permitted]:
+		frappe.throw(
+			_("No permission to read {0} {1}").format(_("Asset"), comma_and(unpermitted)),
+			frappe.PermissionError,
+		)
 
 	asset_movement = frappe.new_doc("Asset Movement")
 	asset_movement.quantity = len(assets)
