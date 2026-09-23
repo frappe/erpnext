@@ -140,7 +140,8 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 		self.add_column(
 			label=_("Party Type"),
 			fieldname="party_type",
-			fieldtype="Data",
+			fieldtype="Link",
+			options="DocType",
 			width=100,
 		)
 		self.add_column(

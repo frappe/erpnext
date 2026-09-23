@@ -38,7 +38,8 @@ def get_columns() -> list[dict]:
 		{
 			"label": _("Purchase Voucher Type"),
 			"fieldname": "voucher_type",
-			"fieldtype": "Data",
+			"fieldtype": "Link",
+			"options": "DocType",
 			"width": 200,
 		},
 		{

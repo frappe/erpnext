@@ -757,7 +757,13 @@ def get_columns(filters):
 		]
 
 	columns += [
-		{"label": _("Voucher Type"), "fieldname": "voucher_type", "width": 120},
+		{
+			"label": _("Voucher Type"),
+			"fieldname": "voucher_type",
+			"fieldtype": "Link",
+			"options": "DocType",
+			"width": 120,
+		},
 		{
 			"label": _("Voucher Subtype"),
 			"fieldname": "voucher_subtype",
