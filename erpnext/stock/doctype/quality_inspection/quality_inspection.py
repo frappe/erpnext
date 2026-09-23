@@ -155,7 +155,12 @@ class QualityInspection(Document):
 			)
 
 	def before_submit(self):
+		self.validate_sample_size()
 		self.validate_readings_status_mandatory()
+
+	def validate_sample_size(self):
+		if flt(self.sample_size) <= 0:
+			frappe.throw(_("Sample Size must be greater than zero"), title=_("Invalid Sample Size"))
 
 	@frappe.whitelist()
 	def get_item_specification_details(self):

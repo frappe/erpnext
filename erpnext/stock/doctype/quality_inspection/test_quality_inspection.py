@@ -79,6 +79,17 @@ class TestQualityInspection(ERPNextTestSuite):
 		qa.delete()
 		dn.delete()
 
+	def test_qa_submit_requires_sample_size(self):
+		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
+		qa = create_quality_inspection(
+			reference_type="Delivery Note", reference_name=dn.name, do_not_submit=True
+		)
+
+		for sample_size in (0, -1):
+			qa.reload()
+			qa.sample_size = sample_size
+			self.assertRaisesRegex(frappe.ValidationError, "Sample Size must be greater than zero", qa.submit)
+
 	def test_doc_update_published_for_reference_on_submit(self):
 		"""Submitting a QI publishes doc_update so open reference forms resync their timestamp."""
 		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
