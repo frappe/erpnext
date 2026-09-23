@@ -1563,7 +1563,7 @@ erpnext.work_order.LinkedLists = class WorkOrderLinkedLists {
 			job_card_tab: {
 				html_field: "job_card_list_html",
 				doctype: "Job Card",
-				fields: ["name", "status", "operation", "workstation", "for_quantity"],
+				fields: ["name", "status", "docstatus", "operation", "workstation", "for_quantity"],
 				columns: [
 					{
 						label: __("Job Card"),
@@ -1573,8 +1573,17 @@ erpnext.work_order.LinkedLists = class WorkOrderLinkedLists {
 					},
 					{ label: __("Operation"), fieldname: "operation" },
 					{ label: __("Workstation"), fieldname: "workstation" },
-					{ label: __("For Qty"), fieldname: "for_quantity", align: "center" },
-					{ label: __("Status"), fieldname: "status", type: "badge" },
+					{ label: __("For Qty"), fieldname: "for_quantity", align: "right" },
+					{
+						label: __("Status"),
+						render: (row) => {
+							const [label, color] = frappe.get_indicator(row, "Job Card") || [
+								row.status,
+								"gray",
+							];
+							return frappe.ui.badge.html({ label, theme: color });
+						},
+					},
 				],
 			},
 			material_request_tab: {
@@ -1674,8 +1683,7 @@ erpnext.work_order.LinkedLists = class WorkOrderLinkedLists {
 
 		const can_add = !cfg.can_add || cfg.can_add(this.frm);
 
-		const ListClass = erpnext.work_order.get_embedded_list_class();
-		const list = new ListClass({
+		const opts = {
 			wrapper,
 			doctype: cfg.doctype,
 			filters: { work_order: this.frm.doc.name },
@@ -1686,8 +1694,18 @@ erpnext.work_order.LinkedLists = class WorkOrderLinkedLists {
 			empty_state_action: can_add ? cfg.empty_state_action : undefined,
 			empty_description: cfg.empty_description,
 			empty_message: cfg.empty_message || __("No {0} linked to this Work Order.", [__(cfg.doctype)]),
-		});
+		};
+		const ListClass = erpnext.work_order.get_embedded_list_class();
+		const list = new ListClass(opts);
 		this.lists[tab_fieldname] = list;
+
+		if (tab_fieldname === "job_card_tab") {
+			// Load Job Card's list settings first so the status badge can reuse its
+			// indicator colors on the very first render.
+			frappe.model.with_doctype("Job Card", () => list.refresh());
+			return;
+		}
+
 		list.refresh();
 	}
 
