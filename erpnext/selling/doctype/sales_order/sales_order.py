@@ -252,7 +252,6 @@ class SalesOrder(SellingController):
 		self.validate_warehouse()
 		self.validate_drop_ship()
 		SalesOrderStockReservation(self).validate_reserved_stock()
-		self.validate_serial_no_based_delivery()
 		validate_against_blanket_order(self)
 		validate_inter_company_party(
 			self.doctype, self.customer, self.company, self.inter_company_order_reference
@@ -693,41 +692,6 @@ class SalesOrder(SellingController):
 					reference_delivery_date, reference_doc.transaction_date, self.transaction_date
 				),
 			)
-
-	def validate_serial_no_based_delivery(self):
-		reserved_items = []
-		normal_items = []
-		for item in self.items:
-			if item.ensure_delivery_based_on_produced_serial_no:
-				if item.item_code in normal_items:
-					frappe.throw(
-						_(
-							"Cannot ensure delivery by Serial No as Item {0} is added with and without Ensure Delivery by Serial No."
-						).format(item.item_code)
-					)
-				if item.item_code not in reserved_items:
-					if not frappe.get_cached_value("Item", item.item_code, "has_serial_no"):
-						frappe.throw(
-							_(
-								"Item {0} has no Serial No. Only serialized items can have delivery based on Serial No"
-							).format(item.item_code)
-						)
-					if not frappe.db.exists("BOM", {"item": item.item_code, "is_active": 1}):
-						frappe.throw(
-							_(
-								"No active BOM found for item {0}. Delivery by Serial No cannot be ensured"
-							).format(item.item_code)
-						)
-				reserved_items.append(item.item_code)
-			else:
-				normal_items.append(item.item_code)
-
-			if not item.ensure_delivery_based_on_produced_serial_no and item.item_code in reserved_items:
-				frappe.throw(
-					_(
-						"Cannot ensure delivery by Serial No as Item {0} is added with and without Ensure Delivery by Serial No."
-					).format(item.item_code)
-				)
 
 	@frappe.whitelist()
 	def has_unreserved_stock(self, table_name: str = "items") -> dict:

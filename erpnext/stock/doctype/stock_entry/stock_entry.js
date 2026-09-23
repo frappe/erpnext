@@ -1434,7 +1434,10 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 			this.frm.trigger("toggle_display_account_head");
 
 			erpnext.accounts.dimensions.update_dimension(this.frm, this.frm.doctype);
-			this.set_default_account("cost_center", "cost_center");
+
+			if (!this.frm.doc.__onload?.load_after_mapping) {
+				this.set_default_account("cost_center", "cost_center");
+			}
 
 			this.frm.refresh_fields("items");
 		}

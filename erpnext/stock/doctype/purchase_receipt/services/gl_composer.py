@@ -80,6 +80,7 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 			if (
 				doc.get("is_return")
 				and item.return_qty_from_rejected_warehouse
+				and not doc.is_internal_transfer()
 				and not frappe.db.get_single_value(
 					"Buying Settings", "set_valuation_rate_for_rejected_materials"
 				)
@@ -101,11 +102,15 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 
 			outgoing_amount = item.base_net_amount
 			if doc.is_internal_transfer() and item.valuation_rate:
-				outgoing_amount = abs(get_stock_value_difference(doc.name, item.name, item.from_warehouse))
+				outgoing_amount = -1 * flt(
+					get_stock_value_difference(doc.name, item.name, item.from_warehouse)
+				)
 				credit_amount = outgoing_amount
 
-			if item.get("rejected_qty") and frappe.db.get_single_value(
-				"Buying Settings", "set_valuation_rate_for_rejected_materials"
+			if (
+				item.get("rejected_qty")
+				and not doc.is_internal_transfer()
+				and frappe.db.get_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials")
 			):
 				outgoing_amount += get_stock_value_difference(doc.name, item.name, item.rejected_warehouse)
 				credit_amount = outgoing_amount
@@ -257,9 +262,7 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 				valuation_amount_as_per_doc - flt(stock_value_diff), item.precision("base_net_amount")
 			)
 
-			if item.get("rejected_qty") and frappe.db.get_single_value(
-				"Buying Settings", "set_valuation_rate_for_rejected_materials"
-			):
+			if item.get("rejected_qty") and self.is_rejected_material_valued():
 				rejected_item_cost = get_stock_value_difference(doc.name, item.name, item.rejected_warehouse)
 				divisional_loss -= rejected_item_cost
 
@@ -347,7 +350,7 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 					make_sub_contracting_gl_entries(d)
 					make_divisional_loss_gl_entry(d, outgoing_amount)
 			elif (d.warehouse and d.qty and d.warehouse not in warehouse_with_no_account) or (
-				not frappe.db.get_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials")
+				not self.is_rejected_material_valued()
 				and d.rejected_warehouse
 				and d.rejected_warehouse not in warehouse_with_no_account
 			):
@@ -356,9 +359,7 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 			if d.is_fixed_asset and d.landed_cost_voucher_amount:
 				doc.update_assets(d, d.valuation_rate)
 
-			if d.rejected_qty and frappe.db.get_single_value(
-				"Buying Settings", "set_valuation_rate_for_rejected_materials"
-			):
+			if d.rejected_qty and self.is_rejected_material_valued():
 				stock_asset_rbnb = (
 					doc.get_company_default("asset_received_but_not_billed")
 					if d.is_fixed_asset
@@ -379,6 +380,16 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 				+ ": \n"
 				+ "\n".join(warehouse_with_no_account)
 			)
+
+	def is_rejected_material_valued(self) -> bool:
+		"""Rejected material carries stock value when Buying Settings asks for it, and always on an
+		internal transfer, where that value is credited out of the in-transit warehouse."""
+		if self.doc.is_internal_transfer():
+			return True
+
+		return bool(
+			frappe.db.get_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials")
+		)
 
 	def get_divisional_loss_account(self, item, stock_asset_rbnb):
 		"""Account that absorbs the difference between the document value and the value actually
