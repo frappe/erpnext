@@ -390,6 +390,20 @@ class TestMappedDiscounts(ERPNextTestSuite):
 		with self.assertRaisesRegex(frappe.ValidationError, "cannot be combined"):
 			combined.save()
 
+	def test_changing_the_item_drops_its_carried_discount(self):
+		discounted = self.make_sales_order(percentage=10)
+		regular = self.make_sales_order(item="_Test Item 2")
+		invoice = self.combine(discounted, regular, mapper=SALES_INVOICE_FROM_ORDER, doctype="Sales Invoice")
+		invoice.save()
+		row = invoice.getone("items", {"sales_order": discounted.name})
+		self.assertEqual(row.mapped_additional_discount_amount, 10)
+
+		row.item_code = make_item("_Test Mixed Replacement Item").name
+		invoice.process_item_selection(row.idx, reset_item_details=True)
+		invoice.calculate_taxes_and_totals()
+		self.assertFalse(row.mapped_additional_discount_amount)
+		self.assertEqual(invoice.discount_amount, 0)
+
 	def assert_percentage_discounts(self, document, source_field, expected_net_amounts):
 		items = {item.get(source_field): item for item in document.items}
 		self.assertEqual(document.apply_discount_on, "Net Total")
