@@ -231,9 +231,17 @@ class DepreciationScheduleController(StraightLineMethod, WDVMethod):
 			last_depr_date = add_months(
 				self.fb_row.depreciation_start_date, -1 * self.fb_row.frequency_of_depreciation
 			)
+			if self.has_complete_opening_periods() and self.should_get_last_day:
+				last_depr_date = get_last_day(last_depr_date)
 		return last_depr_date
 
 	def get_booked_depr_for_months_count(self, last_depr_date):
+		if last_depr_date and self.has_complete_opening_periods():
+			first_period_end = self.get_next_schedule_date(
+				-cint(self.asset_doc.opening_number_of_booked_depreciations)
+			)
+			return month_diff(last_depr_date, first_period_end) - 1 + self.fb_row.frequency_of_depreciation
+
 		depr_booked_for_months = 0
 		if last_depr_date:
 			asset_used_for_months = self.fb_row.frequency_of_depreciation * (
@@ -248,6 +256,20 @@ class DepreciationScheduleController(StraightLineMethod, WDVMethod):
 				365 / 12
 			)
 		return depr_booked_for_months
+
+	def has_complete_opening_periods(self):
+		if (
+			self.fb_row.depreciation_method not in ("Straight Line", "Manual")
+			or self.fb_row.daily_prorata_based
+			or self.fb_row.shift_based
+			or not self.asset_doc.opening_number_of_booked_depreciations
+		):
+			return False
+
+		first_period_start = add_days(
+			self.get_next_schedule_date(-cint(self.asset_doc.opening_number_of_booked_depreciations) - 1), 1
+		)
+		return first_period_start == getdate(self.asset_doc.available_for_use_date)
 
 	def get_total_pending_days_or_years(self):
 		if cint(frappe.get_single_value("Accounts Settings", "calculate_depr_using_total_days")):
