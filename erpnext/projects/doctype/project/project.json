@@ -6,6 +6,7 @@
  "creation": "2013-03-07 11:55:07",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/project",
  "engine": "InnoDB",
  "field_order": [
   "naming_series",
@@ -479,7 +480,7 @@
    "show_dashboard": 1
   }
  ],
- "icon": "fa fa-puzzle-piece",
+ "icon": "folder-kanban",
  "idx": 29,
  "index_web_pages_for_search": 1,
  "links": [],

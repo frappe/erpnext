@@ -6,6 +6,7 @@
  "creation": "2013-01-10 16:34:14",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/holiday-list",
  "engine": "InnoDB",
  "field_order": [
   "holiday_list_name",
@@ -58,9 +59,10 @@
   },
   {
    "fieldname": "total_holidays",
-   "fieldtype": "Int",
+   "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Total Holidays",
+   "precision": "1",
    "read_only": 1
   },
   {
@@ -150,7 +152,7 @@
    "label": "Is Half Day"
   }
  ],
- "icon": "fa fa-calendar",
+ "icon": "calendar-off",
  "idx": 1,
  "links": [],
  "modified": "2026-08-21 23:11:42.675539",

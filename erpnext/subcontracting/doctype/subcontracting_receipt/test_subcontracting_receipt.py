@@ -27,6 +27,7 @@ from erpnext.controllers.tests.test_subcontracting_controller import (
 	set_backflush_based_on,
 )
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+from erpnext.projects.doctype.project.test_project import make_project
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import get_gl_entries
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
@@ -40,6 +41,9 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
 	make_subcontracting_receipt,
 )
+from erpnext.subcontracting.doctype.subcontracting_order.test_subcontracting_order import (
+	make_subcontracted_purchase_order,
+)
 from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
 	BOMQuantityError,
 )
@@ -52,6 +56,26 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		make_raw_materials()
 		make_service_items()
 		make_bom_for_subcontracted_items()
+
+	def test_project_is_carried_over_from_subcontracting_order(self):
+		project = make_project({"project_name": "_Test SCR Project"}).name
+		po = make_subcontracted_purchase_order(project)
+		sco = get_subcontracting_order(po_name=po.name)
+
+		scr = make_subcontracting_receipt(sco.name)
+
+		self.assertEqual(scr.project, project)
+		self.assertEqual(scr.items[0].project, project)
+
+	def test_project_cannot_differ_from_subcontracting_order(self):
+		project = make_project({"project_name": "_Test SCR Project"}).name
+		other_project = make_project({"project_name": "_Test SCR Project 2"}).name
+		po = make_subcontracted_purchase_order(project)
+		sco = get_subcontracting_order(po_name=po.name)
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].project = other_project
+		self.assertRaises(frappe.ValidationError, scr.save)
 
 	def test_subcontracting(self):
 		set_backflush_based_on("BOM")
@@ -1251,7 +1275,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 				"item_code": percentage_item,
 				"secondary_item_type": "Co-Product",
 				"stock_qty": 1,
-				"valuation_type": "% of FG Cost",
+				"valuation_type": "% of Component Cost",
 				"cost_allocation_per": 10,
 			},
 		)
@@ -1626,6 +1650,73 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertEqual(pr_qty, 6)
 
 		self.assertEqual(pr_details[0]["total_taxes_and_charges"], 60)
+
+	@ERPNextTestSuite.change_settings("Buying Settings", {"auto_create_purchase_receipt": 1})
+	def test_auto_create_purchase_receipt_with_tax_withholding_row(self):
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		fg_item = "Subcontracted Item SA1"
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": 5,
+			},
+		]
+
+		po = create_purchase_order(
+			rm_items=service_items,
+			is_subcontracted=1,
+			supplier_warehouse="_Test Warehouse 1 - _TC",
+			do_not_submit=True,
+		)
+		# withheld against the full PO value, and not recomputed on a partial receipt
+		po.append(
+			"taxes",
+			{
+				"account_head": "_Test Account Excise Duty - _TC",
+				"charge_type": "Actual",
+				"add_deduct_tax": "Deduct",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "TDS on Contract",
+				"doctype": "Purchase Taxes and Charges",
+				"tax_amount": 800,
+				"is_tax_withholding_account": 1,
+			},
+		)
+		po.save()
+		po.submit()
+		self.assertEqual(po.grand_total, 200)
+
+		sco = get_subcontracting_order(po_name=po.name)
+
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 3
+		scr.save()
+
+		# carrying the withholding row over would deduct 800 from a 600 receipt,
+		# and Purchase Receipt rejects the resulting negative Grand Total
+		scr.submit()
+
+		pr_name = frappe.db.get_value("Purchase Receipt", {"subcontracting_receipt": scr.name})
+		self.assertTrue(pr_name)
+
+		pr = frappe.get_doc("Purchase Receipt", pr_name)
+		self.assertEqual(pr.items[0].qty, 6)
+		self.assertEqual(pr.net_total, 600)
+		self.assertFalse([row for row in pr.taxes if row.is_tax_withholding_account])
+		self.assertEqual(pr.grand_total, 600)
 
 	@ERPNextTestSuite.change_settings("Buying Settings", {"auto_create_purchase_receipt": 1})
 	def test_auto_create_purchase_receipt_with_no_reference_of_po_item(self):

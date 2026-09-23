@@ -6,6 +6,7 @@
  "creation": "2016-03-01 17:41:39.778765",
  "doctype": "DocType",
  "document_type": "Document",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/asset-category",
  "engine": "InnoDB",
  "field_order": [
   "asset_category_name",
@@ -72,6 +73,7 @@
    "label": "Non Depreciable Category"
   }
  ],
+ "icon": "folder",
  "links": [],
  "modified": "2026-08-21 23:11:38.710171",
  "modified_by": "Administrator",

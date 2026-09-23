@@ -4,6 +4,7 @@
  "autoname": "Prompt",
  "creation": "2019-02-18 17:23:11.708371",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/project-template",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -33,6 +34,7 @@
    "label": "Disabled"
   }
  ],
+ "icon": "folder",
  "links": [],
  "modified": "2026-08-21 23:11:46.618525",
  "modified_by": "Administrator",

@@ -3,6 +3,7 @@
  "autoname": "field:period_name",
  "creation": "2018-04-13 18:50:14.672323",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/accounting-period",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -77,6 +78,7 @@
    "options": "Role"
   }
  ],
+ "icon": "calendar-range",
  "links": [],
  "modified": "2026-03-09 17:15:33.577217",
  "modified_by": "Administrator",

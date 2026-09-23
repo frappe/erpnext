@@ -13,6 +13,9 @@ from frappe import _
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import cint, flt, get_link_to_form
 
+from erpnext.manufacturing.doctype.production_plan.services.work_order_quantities import (
+	ProductionPlanWorkOrderQuantities,
+)
 from erpnext.stock.stock_balance import get_planned_qty, update_bin_qty
 
 _QTY_PURPOSES = (
@@ -193,6 +196,8 @@ class StatusService:
 		if self.doc.track_semi_finished_goods:
 			return
 
+		# Lock the plan row before any Work Order quantity update takes a row lock.
+		self.set_process_loss_qty()
 		for purpose, fieldname in _QTY_PURPOSES:
 			self._update_qty_for_purpose(purpose, fieldname)
 
@@ -211,11 +216,15 @@ class StatusService:
 
 		qty = self.get_transferred_or_manufactured_qty(purpose, fieldname)
 		completed_qty = self.doc.qty + (self._qty_allowance(purpose) / 100 * self.doc.qty)
-		if qty > completed_qty:
+		qty_to_validate = qty + flt(self.doc.process_loss_qty) if purpose == "Manufacture" else qty
+		precision = self.doc.precision(fieldname)
+		if flt(qty_to_validate, precision) > flt(completed_qty, precision):
 			frappe.throw(
 				_("{0} ({1}) cannot be greater than planned quantity ({2}) in Work Order {3}").format(
-					self.doc.meta.get_translated_label(fieldname),
-					qty,
+					_("Manufactured Qty (including Process Loss)")
+					if purpose == "Manufacture"
+					else self.doc.meta.get_translated_label(fieldname),
+					flt(qty_to_validate, precision),
 					completed_qty,
 					self.doc.name,
 				),
@@ -223,7 +232,10 @@ class StatusService:
 			)
 
 		self.doc.db_set(fieldname, qty)
-		self.set_process_loss_qty()
+		if purpose == "Manufacture" and self.doc.production_plan:
+			ProductionPlanWorkOrderQuantities(self.doc.production_plan).validate_work_order(
+				self.doc, process_loss_qty=self.doc.process_loss_qty
+			)
 		self._update_produced_qty_in_so()
 
 	def _skip_transfer_purpose(self, purpose):
@@ -298,7 +310,20 @@ class StatusService:
 		)
 
 	def set_process_loss_qty(self):
-		self.doc.db_set("process_loss_qty", self._process_loss_qty())
+		quantities = None
+		if self.doc.docstatus == 1 and self.doc.production_plan:
+			quantities = ProductionPlanWorkOrderQuantities(self.doc.production_plan)
+			quantities.lock_plan_row(self.doc)
+
+		process_loss_qty = self._process_loss_qty()
+		if quantities:
+			previous_loss_qty = frappe.db.get_value(
+				"Work Order", self.doc.name, "process_loss_qty", for_update=True
+			)
+			if process_loss_qty < flt(previous_loss_qty):
+				# Replacement Work Orders may have consumed the recorded loss.
+				quantities.validate_work_order(self.doc, process_loss_qty=process_loss_qty)
+		self.doc.db_set("process_loss_qty", process_loss_qty)
 
 	def _process_loss_qty(self):
 		if self.doc.track_semi_finished_goods:

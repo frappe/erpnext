@@ -3,6 +3,7 @@
  "autoname": "naming_series:",
  "creation": "2018-01-18 09:44:47.565494",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/project-update",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -76,6 +77,7 @@
    "read_only": 1
   }
  ],
+ "icon": "message-square",
  "is_submittable": 1,
  "links": [],
  "modified": "2024-03-27 13:10:21.721160",

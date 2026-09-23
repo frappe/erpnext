@@ -6,8 +6,9 @@ from datetime import date
 import frappe
 from frappe import _, msgprint, qb, scrub
 from frappe.contacts.doctype.address.address import get_company_address, get_default_address
-from frappe.core.doctype.user_permission.user_permission import get_permitted_documents
+from frappe.core.doctype.user_permission.user_permission import get_user_permissions
 from frappe.model.utils import get_fetch_values
+from frappe.permissions import get_allowed_docs_for_doctype
 from frappe.query_builder.functions import Abs, Date, Sum
 from frappe.utils import (
 	add_days,
@@ -26,6 +27,7 @@ import erpnext
 from erpnext import get_company_currency
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.exceptions import InvalidAccountCurrency, PartyDisabled, PartyFrozen
+from erpnext.stock.doctype.price_list.price_list import is_price_list_enabled
 from erpnext.utilities.regional import temporary_flag
 
 try:
@@ -158,7 +160,7 @@ def _get_party_details(
 	)
 	set_contact_details(party_details, party, party_type, doctype)
 	set_other_values(party_details, party, party_type)
-	set_price_list(party_details, party, party_type, price_list, pos_profile)
+	set_price_list(party_details, party, party_type, price_list, pos_profile, doctype)
 
 	tax_template = set_taxes(
 		party.name,
@@ -394,31 +396,63 @@ def set_other_values(party_details, party, party_type):
 
 
 def get_default_price_list(party):
-	"""Return default price list for party (Document object)"""
-	if party.get("default_price_list"):
-		return party.default_price_list
+	"""Return the first enabled default price list for party (Document object)"""
+	price_list = party.get("default_price_list")
+	if is_price_list_enabled(price_list):
+		return price_list
 
-	if party.doctype == "Customer":
-		return frappe.get_cached_value("Customer Group", party.customer_group, "default_price_list")
+	if party.doctype != "Customer":
+		return
+
+	price_list = frappe.get_cached_value("Customer Group", party.customer_group, "default_price_list")
+	if is_price_list_enabled(price_list):
+		return price_list
 
 
-def set_price_list(party_details, party, party_type, given_price_list, pos=None):
+def get_permitted_price_lists(doctype=None):
+	permissions = sorted(
+		get_user_permissions().get("Price List", []), key=lambda p: p.get("is_default"), reverse=True
+	)
+
+	# a permission applicable for another doctype doesn't restrict this transaction
+	return get_allowed_docs_for_doctype(permissions, doctype)
+
+
+def get_usable_price_list(price_lists, party_doctype):
+	transaction_side = "selling" if party_doctype == "Customer" else "buying"
+
+	for price_list in price_lists:
+		details = frappe.get_cached_value(
+			"Price List", price_list, ["enabled", transaction_side], as_dict=True
+		)
+		if details.enabled and details[transaction_side]:
+			return price_list
+
+
+def set_price_list(party_details, party, party_type, given_price_list, pos=None, doctype=None):
 	# price list
-	price_list = get_permitted_documents("Price List")
+	permitted_price_lists = get_permitted_price_lists(doctype)
 
 	# if there is only one permitted document based on user permissions, set it
-	if price_list and len(price_list) == 1:
-		price_list = price_list[0]
+	if len(permitted_price_lists) == 1:
+		price_list = get_usable_price_list(permitted_price_lists, party.doctype)
 	elif pos and party_type == "Customer":
 		customer_price_list = frappe.get_value("Customer", party.name, "default_price_list")
 
-		if customer_price_list:
+		if is_price_list_enabled(customer_price_list):
 			price_list = customer_price_list
 		else:
 			pos_price_list = frappe.get_value("POS Profile", pos, "selling_price_list")
 			price_list = pos_price_list or given_price_list
 	else:
 		price_list = get_default_price_list(party) or given_price_list
+
+		# don't set a price list the user has no permission for, the transaction can't be saved with it
+		if price_list and permitted_price_lists and price_list not in permitted_price_lists:
+			price_list = get_usable_price_list(permitted_price_lists, party.doctype)
+
+	if price_list and not is_price_list_enabled(price_list):
+		price_list = None
 
 	if price_list:
 		party_details.price_list_currency = frappe.db.get_value(

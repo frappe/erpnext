@@ -6,6 +6,7 @@
  "creation": "2015-03-23 02:00:21.861546",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/activity-cost",
  "engine": "InnoDB",
  "field_order": [
   "activity_type",
@@ -85,6 +86,7 @@
    "read_only": 1
   }
  ],
+ "icon": "coins",
  "links": [],
  "modified": "2024-03-27 13:05:57.800347",
  "modified_by": "Administrator",

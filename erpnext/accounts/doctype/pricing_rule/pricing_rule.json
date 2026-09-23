@@ -5,6 +5,7 @@
  "autoname": "naming_series:",
  "creation": "2014-02-21 15:02:51",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/pricing-rule",
  "engine": "InnoDB",
  "field_order": [
   "applicability_section",
@@ -654,7 +655,7 @@
    "label": "Don't Enforce Free Item Qty"
   }
  ],
- "icon": "fa fa-gift",
+ "icon": "badge-percent",
  "idx": 1,
  "links": [],
  "modified": "2026-02-17 12:24:07.553505",

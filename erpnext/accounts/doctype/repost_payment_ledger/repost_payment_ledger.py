@@ -123,6 +123,8 @@ class RepostPaymentLedger(Document):
 def execute_repost_payment_ledger(docname: str):
 	"""Repost Payment Ledger Entries by background job."""
 
+	frappe.has_permission("Repost Payment Ledger", ptype="submit", doc=docname, throw=True)
+
 	job_name = "payment_ledger_repost_" + docname
 
 	frappe.enqueue(

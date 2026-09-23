@@ -4,6 +4,7 @@
  "autoname": "field:title",
  "creation": "2022-01-19 01:09:28.920486",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/tax-category",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -27,6 +28,7 @@
    "label": "Disabled"
   }
  ],
+ "icon": "badge-percent",
  "index_web_pages_for_search": 1,
  "links": [],
  "modified": "2026-08-21 23:11:50.740962",

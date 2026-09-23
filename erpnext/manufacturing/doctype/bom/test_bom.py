@@ -610,7 +610,7 @@ class TestBOM(ERPNextTestSuite):
 				"secondary_item_type": "Additional Finished Good",
 				"qty": 1,
 				"cost_allocation_per": 10,
-				"valuation_type": "% of FG Cost",
+				"valuation_type": "% of Component Cost",
 			},
 		)
 
@@ -645,7 +645,7 @@ class TestBOM(ERPNextTestSuite):
 				"secondary_item_type": "Scrap",
 				"qty": 1,
 				"cost_allocation_per": 10,
-				"valuation_type": "% of FG Cost",
+				"valuation_type": "% of Component Cost",
 			},
 		)
 		self.assertRaises(frappe.ValidationError, bom_doc.save)
@@ -718,7 +718,7 @@ class TestBOM(ERPNextTestSuite):
 				"secondary_item_type": "By-Product",
 				"qty": 1,
 				"cost_allocation_per": 10,
-				"valuation_type": "% of FG Cost",
+				"valuation_type": "% of Component Cost",
 			},
 		)
 		bom_doc.save()

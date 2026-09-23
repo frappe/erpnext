@@ -12,7 +12,7 @@ from frappe.utils import cint, flt, format_datetime, get_datetime
 
 import erpnext
 from erpnext.stock.serial_batch_bundle import get_batches_from_bundle
-from erpnext.stock.utils import get_combine_datetime, get_incoming_rate, get_valuation_method, getdate
+from erpnext.stock.utils import _get_incoming_rate, get_combine_datetime, get_valuation_method, getdate
 
 
 class StockOverReturnError(frappe.ValidationError):
@@ -170,7 +170,7 @@ def validate_returned_items(doc):
 				"Delivery Note",
 				"POS Invoice",
 			):
-				if flt(d.qty) < 0 or flt(d.get("received_qty")) < 0:
+				if flt(d.qty) < 0 or flt(d.get("received_qty")) < 0 or flt(d.get("rejected_qty")) < 0:
 					items_returned = True
 			else:
 				items_returned = True
@@ -194,7 +194,12 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
 	if (doc.doctype == "Purchase Invoice" or doc.doctype == "Sales Invoice") and not doc.update_stock:
 		fields = ["qty"]
 
-	if doc.doctype in ["Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"]:
+	tracks_accepted_rejected_split = doc.doctype in (
+		"Purchase Receipt",
+		"Subcontracting Receipt",
+	) or (doc.doctype == "Purchase Invoice" and doc.update_stock)
+
+	if tracks_accepted_rejected_split:
 		if not args.get("return_qty_from_rejected_warehouse"):
 			fields.extend(["received_qty", "rejected_qty"])
 		else:
@@ -731,7 +736,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 		if return_against_rejected_qty:
 			return doc.rejected_qty
 
-		return doc.qty
+		return doc.qty or doc.get("rejected_qty")
 
 	doclist = get_mapped_doc(
 		doctype,
@@ -816,7 +821,7 @@ def get_rate_for_return(
 		rate = frappe.db.get_value(f"{voucher_type} Item", voucher_detail_no, "incoming_rate")
 
 		if rate is None and sle:
-			rate = get_incoming_rate(
+			rate = _get_incoming_rate(
 				{
 					"item_code": sle.item_code,
 					"warehouse": sle.warehouse,
@@ -880,8 +885,13 @@ def get_filters(
 		if reference_voucher_detail_no:
 			warehouses = get_warehouses_for_return(voucher_type, reference_voucher_detail_no)
 
-		if item_row.get("warehouse") and item_row.get("warehouse") in warehouses:
-			filters["warehouse"] = item_row.get("warehouse")
+		# A row that accepted nothing goes back at the rate the rejected warehouse received it at.
+		warehouse_field = "warehouse"
+		if not flt(item_row.get("qty")) and flt(item_row.get("rejected_qty")):
+			warehouse_field = "rejected_warehouse"
+
+		if item_row.get(warehouse_field) and item_row.get(warehouse_field) in warehouses:
+			filters["warehouse"] = item_row.get(warehouse_field)
 
 	return filters
 
@@ -1304,14 +1314,38 @@ def get_available_serial_nos(serial_nos, warehouse):
 	)
 
 
+# the only doctypes these endpoints are called for; both reach get_value()/get_all() as the doctype itself
+RETURNABLE_INVOICE_DOCTYPES = ("Sales Invoice", "POS Invoice")
+
+
 @frappe.whitelist()
 def get_payment_data(invoice: str):
+	# `invoice` may be either a Sales Invoice or a POS Invoice — both share the Sales Invoice
+	# Payment child table — so resolve which one it is before authorising rather than guessing.
+	parenttype = frappe.db.get_value("Sales Invoice Payment", {"parent": invoice}, "parenttype")
+	if not parenttype:
+		return []
+
+	if parenttype not in RETURNABLE_INVOICE_DOCTYPES:
+		frappe.throw(_("Invalid document type"), frappe.PermissionError)
+
+	frappe.has_permission(parenttype, doc=invoice, throw=True)
+
 	payment = frappe.db.get_all("Sales Invoice Payment", {"parent": invoice}, ["mode_of_payment", "amount"])
 	return payment
 
 
+def validate_returnable_invoice(doctype: str, invoice: str) -> None:
+	if doctype not in RETURNABLE_INVOICE_DOCTYPES:
+		frappe.throw(_("Invalid document type"), frappe.PermissionError)
+
+	frappe.has_permission(doctype, doc=invoice, throw=True)
+
+
 @frappe.whitelist()
 def get_invoice_item_returned_qty(doctype: str, invoice: str, customer: str, item_row_name: str):
+	validate_returnable_invoice(doctype, invoice)
+
 	is_return, docstatus = frappe.db.get_value(doctype, invoice, ["is_return", "docstatus"])
 	if not is_return and docstatus == 1:
 		return get_returned_qty_map_for_row(invoice, customer, item_row_name, doctype)
@@ -1319,6 +1353,8 @@ def get_invoice_item_returned_qty(doctype: str, invoice: str, customer: str, ite
 
 @frappe.whitelist()
 def is_invoice_returnable(doctype: str, invoice: str):
+	validate_returnable_invoice(doctype, invoice)
+
 	is_return, docstatus, customer = frappe.db.get_value(
 		doctype, invoice, ["is_return", "docstatus", "customer"]
 	)

@@ -7,6 +7,7 @@
  "description": "A Product or a Service that is bought, sold or kept in stock.",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/item",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -98,6 +99,7 @@
   "column_break_37",
   "has_serial_no",
   "serial_no_series",
+  "use_serial_no_wise_valuation",
   "variants_section",
   "variant_of",
   "variant_based_on",
@@ -197,7 +199,6 @@
    "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Item Group",
-   "link_filters": "[[\"Item Group\",\"is_group\",\"=\",0]]",
    "oldfieldname": "item_group",
    "oldfieldtype": "Link",
    "options": "Item Group",
@@ -387,6 +388,7 @@
    "fieldname": "valuation_method",
    "fieldtype": "Select",
    "label": "Valuation Method",
+   "description": "Serialized items are valued at Moving Average once stock transactions exist and Serial No Wise Valuation is disabled.",
    "options": "\nFIFO\nMoving Average\nLIFO\nStandard Cost"
   },
   {
@@ -527,6 +529,15 @@
    "fieldname": "serial_no_series",
    "fieldtype": "Data",
    "label": "Serial Number Series",
+   "show_description_on_click": 1
+  },
+  {
+   "default": "1",
+   "depends_on": "eval:doc.is_stock_item && doc.has_serial_no",
+   "description": "Value every outward movement at each Serial No's own incoming rate. If unchecked, the item is valued at Moving Average once stock transactions exist. Cannot be enabled once Serial Nos exist for this item.",
+   "fieldname": "use_serial_no_wise_valuation",
+   "fieldtype": "Check",
+   "label": "Use Serial No Wise Valuation",
    "show_description_on_click": 1
   },
   {
@@ -855,6 +866,7 @@
    "fieldname": "over_delivery_receipt_allowance",
    "fieldtype": "Float",
    "label": "Over Delivery/Receipt Allowance (%)",
+   "non_negative": 1,
    "oldfieldname": "tolerance",
    "oldfieldtype": "Currency"
   },
@@ -863,7 +875,8 @@
    "description": "Percentage by which over-billing is allowed against a Sales/Purchase Order for this item. If not set, value from Accounts Settings will be used.",
    "fieldname": "over_billing_allowance",
    "fieldtype": "Float",
-   "label": "Over Billing Allowance (%)"
+   "label": "Over Billing Allowance (%)",
+   "non_negative": 1
   },
   {
    "default": "0",
@@ -1111,12 +1124,12 @@
    "permlevel": 1
   }
  ],
- "icon": "fa fa-tag",
+ "icon": "package",
  "idx": 2,
  "image_field": "image",
  "links": [],
  "make_attachments_public": 1,
- "modified": "2026-07-28 18:58:43.328497",
+ "modified": "2026-09-16 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

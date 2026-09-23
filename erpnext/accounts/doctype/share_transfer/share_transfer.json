@@ -3,6 +3,7 @@
  "autoname": "ACC-SHT-.YYYY.-.#####",
  "creation": "2017-12-25 17:18:03.143726",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/share-transfer",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -190,6 +191,7 @@
    "fieldtype": "Column Break"
   }
  ],
+ "icon": "arrow-right-left",
  "is_submittable": 1,
  "links": [],
  "modified": "2024-03-27 13:10:40.003178",

@@ -6,6 +6,7 @@
  "creation": "2022-01-18 02:26:55.975005",
  "doctype": "DocType",
  "document_type": "Document",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/asset",
  "engine": "InnoDB",
  "field_order": [
   "naming_series",
@@ -586,6 +587,7 @@
    "fieldtype": "Column Break"
   }
  ],
+ "icon": "building",
  "idx": 72,
  "image_field": "image",
  "is_submittable": 1,

@@ -146,11 +146,7 @@ class SupplierScorecard(Document):
 			frappe.db.set_value("Supplier", self.supplier, fieldname, self.get(fieldname))
 
 
-@frappe.whitelist()
-def get_timeline_data(doctype: str, name: str):
-	# Get a list of all the associated scorecards
-
-	out = {}
+def get_timeline_data(doctype: str, name: str) -> dict[float, float]:
 	timeline_data = {}
 
 	scorecards = frappe.get_all(
@@ -164,8 +160,7 @@ def get_timeline_data(doctype: str, name: str):
 		for single_date in daterange(sc.start_date, sc.end_date):
 			timeline_data[time.mktime(single_date.timetuple())] = sc.total_score
 
-	out["timeline_data"] = timeline_data
-	return out
+	return timeline_data
 
 
 def daterange(start_date, end_date):

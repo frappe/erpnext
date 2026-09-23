@@ -4,6 +4,7 @@
  "creation": "2017-10-29 11:53:09.523362",
  "doctype": "DocType",
  "document_type": "Document",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/production-plan",
  "engine": "InnoDB",
  "field_order": [
   "naming_series",
@@ -479,7 +480,7 @@
   }
  ],
  "grid_page_length": 50,
- "icon": "fa fa-calendar",
+ "icon": "calendar-check",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],

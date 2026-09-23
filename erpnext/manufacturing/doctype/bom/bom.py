@@ -15,7 +15,7 @@ from frappe.website.website_generator import WebsiteGenerator
 
 import erpnext
 from erpnext.setup.utils import get_exchange_rate
-from erpnext.stock.doctype.item.item import get_item_details
+from erpnext.stock.doctype.item.item import _get_item_details
 from erpnext.stock.get_item_details import get_conversion_factor, get_price_list_rate
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
@@ -529,13 +529,14 @@ class BOM(WebsiteGenerator):
 		doc.set_status(save=True)
 
 	def set_fg_cost_allocation(self):
+		self.cost_allocation_per = flt(self.cost_allocation_per)
 		total_secondary_items_per = 0
 		own_cost = 0
 		for item in self.secondary_items:
 			if item.valuation_type in ("Valuation Rate", "Manual"):
 				item.cost_allocation_per = 0
 				own_cost += flt(item.cost)
-			total_secondary_items_per += item.cost_allocation_per
+			total_secondary_items_per += flt(item.cost_allocation_per)
 
 		if self.cost_allocation_per == 100 and total_secondary_items_per:
 			self.cost_allocation_per -= total_secondary_items_per
@@ -551,9 +552,9 @@ class BOM(WebsiteGenerator):
 			)
 
 	def validate_total_cost_allocation(self):
-		total_cost_allocation_per = self.cost_allocation_per
+		total_cost_allocation_per = flt(self.cost_allocation_per)
 		for item in self.secondary_items:
-			total_cost_allocation_per += item.cost_allocation_per
+			total_cost_allocation_per += flt(item.cost_allocation_per)
 
 		if total_cost_allocation_per != 100:
 			frappe.throw(_("Cost allocation between finished goods and secondary items should equal 100%"))
@@ -563,7 +564,7 @@ class BOM(WebsiteGenerator):
 		self.manage_default_bom()
 
 	def get_item_det(self, item_code):
-		item = get_item_details(item_code)
+		item = _get_item_details(item_code)
 
 		if not item:
 			frappe.throw(_("Item: {0} does not exist in the system").format(item_code))
@@ -901,6 +902,19 @@ class BOM(WebsiteGenerator):
 				)
 			)
 
+		bom_items = {self.item, *items}
+		bom_items.update(d.item_code for d in self.get("secondary_items"))
+		bom_items.update(d.finished_good for d in self.get("operations") if d.finished_good)
+
+		if disabled_items := frappe.db.get_all(
+			"Item", filters={"item_code": ("in", list(bom_items)), "disabled": 1}, pluck="name"
+		):
+			frappe.throw(
+				_("Disabled Item {0} cannot be used in BOMs.").format(
+					", ".join(get_link_to_form("Item", item) for item in disabled_items)
+				)
+			)
+
 	def check_recursion(self):
 		"""Check whether recursion occurs in any bom"""
 		bom_list = self.traverse_tree()
@@ -958,7 +972,7 @@ class BOM(WebsiteGenerator):
 	def _add_raw_material_row(self, operation_row_id, row):
 		row = parse_json(row)
 
-		row.update(get_item_details(row.get("item_code")))
+		row.update(_get_item_details(row.get("item_code")))
 		row.operation_row_id = operation_row_id
 
 		item_row = self.get_item_data(row.item_code, operation_row_id)
