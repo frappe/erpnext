@@ -1076,6 +1076,19 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		self.assertEqual(sco.items[0].rate, sco.items[0].rm_cost_per_qty + 500 * 80)
 		self.assertEqual(sco.total, sco.items[0].amount)
 
+	def test_service_cost_backfill_updates_draft_receipt(self):
+		sco = make_foreign_currency_subcontracting_order()
+		scr = make_subcontracting_receipt(sco.name).save()
+		set_unconverted_service_cost(sco)
+		frappe.db.set_value("Subcontracting Receipt Item", scr.items[0].name, "service_cost_per_qty", 500)
+
+		recalculate_subcontracting_order_service_cost()
+
+		self.assertEqual(
+			frappe.db.get_value("Subcontracting Receipt Item", scr.items[0].name, "service_cost_per_qty"),
+			500 * 80,
+		)
+
 
 def make_foreign_currency_subcontracting_order():
 	from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
