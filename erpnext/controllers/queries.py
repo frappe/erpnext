@@ -829,10 +829,11 @@ def get_blanket_orders(doctype: str, txt: str, searchfield: str, start: int, pag
 
 	if frappe.has_permission("Blanket Order", "read"):
 		bo_filters.append(["Blanket Order Item", "item_code", "=", filters.get("item")])
+		bo_filters.append(["Blanket Order Item", "closed", "=", 0])
 	else:
 		parents = frappe.get_all(
 			"Blanket Order Item",
-			filters={"item_code": filters.get("item"), "parenttype": "Blanket Order"},
+			filters={"item_code": filters.get("item"), "parenttype": "Blanket Order", "closed": 0},
 			pluck="parent",
 			distinct=True,
 		)

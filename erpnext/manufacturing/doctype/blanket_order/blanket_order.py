@@ -246,7 +246,8 @@ def make_order(source_name: str):
 					"parent": "blanket_order",
 				},
 				"postprocess": update_item,
-				"condition": lambda item: not (flt(item.qty)) or (flt(item.qty) - flt(item.ordered_qty)) > 0,
+				"condition": lambda item: not item.closed
+				and (not flt(item.qty) or (flt(item.qty) - flt(item.ordered_qty)) > 0),
 			},
 		},
 	)
@@ -279,7 +280,7 @@ def validate_against_blanket_order(order_doc):
 				)
 			)
 			for bo_name, item_data in order_data.items():
-				check_on_hold_or_closed_status("Blanket Order", bo_name)
+				validate_blanket_order_is_open(bo_name, list(item_data))
 				bo_doc = frappe.get_doc("Blanket Order", bo_name)
 				for item in bo_doc.get("items"):
 					if item.item_code in item_data:
@@ -291,3 +292,25 @@ def validate_against_blanket_order(order_doc):
 									"Item {0} cannot be ordered more than {1} against Blanket Order {2}."
 								).format(item.item_code, allowed_qty, bo_name)
 							)
+
+
+def validate_blanket_order_is_open(blanket_order: str, item_codes: list[str]) -> None:
+	check_on_hold_or_closed_status("Blanket Order", blanket_order)
+
+	closed_item_code = frappe.db.get_value(
+		"Blanket Order Item",
+		{
+			"parent": blanket_order,
+			"parenttype": "Blanket Order",
+			"item_code": ("in", item_codes),
+			"closed": 1,
+		},
+		"item_code",
+	)
+	if closed_item_code:
+		frappe.throw(
+			_("Item {0} is closed in Blanket Order {1}").format(
+				frappe.bold(closed_item_code), frappe.bold(blanket_order)
+			),
+			frappe.InvalidStatusError,
+		)
