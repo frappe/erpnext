@@ -479,7 +479,7 @@ class SellingController(StockController):
 		return so_qty, so_warehouse
 
 	def ensure_customer_is_not_blocked(self):
-		if self.doctype == "Quotation" or self.get("is_consolidated"):
+		if self.doctype == "Quotation":
 			return
 
 		if self.customer and is_customer_blocked(self.customer):
