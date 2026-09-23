@@ -795,7 +795,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			.where(
 				(stock_entry.work_order == self.doc.work_order)
 				& (stock_entry_detail.s_warehouse.isnotnull())
-				& (stock_entry.purpose == "Manufacture")
+				& (stock_entry.purpose.isin(["Manufacture", "Material Consumption for Manufacture"]))
 				& (stock_entry.docstatus == 1)
 			)
 			.orderby(stock_entry_detail.idx)
