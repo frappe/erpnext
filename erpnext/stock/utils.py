@@ -256,9 +256,30 @@ def get_incoming_rate(args: dict | str, raise_error_if_no_rate: bool = True, fal
 	"""Whitelisted entry point: authorise the caller, then compute the rate."""
 	args = frappe.parse_json(args)
 
-	# `select`, not `read`: this is reached from transaction.js:1069 on every sales and buying form,
-	# and Accounts Manager — who writes Sales Invoice and Purchase Invoice — holds no Item read
-	frappe.has_permission("Item", ptype="select", throw=True)
+	# `select`, not `read`: reached from every sales and buying form, and Accounts Manager holds no
+	# Item read. doc= so the named item is checked, not merely the doctype.
+	item_code = args.get("item_code") if isinstance(args, dict | frappe._dict) else None
+	warehouse = args.get("warehouse") if isinstance(args, dict | frappe._dict) else None
+
+	if item_code:
+		frappe.has_permission("Item", ptype="select", doc=item_code, throw=True)
+	else:
+		frappe.has_permission("Item", ptype="select", throw=True)
+
+	# scoped by User Permissions alone: Accounts Manager reaches this holding no Warehouse row at all.
+	# Only unscoped rules apply -- an `applicable_for` rule governs that doctype's documents, and a
+	# rate is not one. Not args["voucher_type"]: it is caller-supplied, so it cannot select the scope.
+	if warehouse:
+		from frappe.permissions import get_user_permissions
+
+		if warehouse_permissions := get_user_permissions(frappe.session.user).get("Warehouse"):
+			allowed_warehouses = {
+				perm.get("doc")
+				for perm in warehouse_permissions
+				if perm.get("doc") and not perm.get("applicable_for")
+			}
+			if allowed_warehouses and warehouse not in allowed_warehouses:
+				frappe.throw(_("Not permitted for {0}").format(warehouse), frappe.PermissionError)
 
 	return _get_incoming_rate(args, raise_error_if_no_rate, fallbacks)
 
