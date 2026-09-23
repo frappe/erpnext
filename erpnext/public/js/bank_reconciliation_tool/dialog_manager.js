@@ -595,6 +595,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 		return voucher_type.create(this, values, allow_edit).then((message) => {
 			if (allow_edit) {
 				const doc = frappe.model.sync(message);
+				track_voucher(doc[0].doctype, doc[0].name, this.bank_transaction.name);
 				frappe.set_route("Form", doc[0].doctype, doc[0].name);
 				return;
 			}
@@ -627,7 +628,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 
 	edit_in_full_page() {
 		const values = this.dialog.get_values(true);
-		this.create_voucher(values, true);
+		return this.create_voucher(values, true);
 	}
 };
 
@@ -639,7 +640,7 @@ const track_voucher = (doctype, docname, bank_transaction_name) => {
 	pending_reconciliations.set(voucher_key(doctype, docname), bank_transaction_name);
 };
 
-for (const voucher_doctype of ["Payment Entry", "Journal Entry"]) {
+for (const voucher_doctype of Object.keys(erpnext.accounts.bank_reconciliation.voucher_types)) {
 	frappe.ui.form.on(voucher_doctype, {
 		before_save(frm) {
 			frm.__pending_reconciliation_key = voucher_key(frm.doctype, frm.doc.name);
