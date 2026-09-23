@@ -3,7 +3,7 @@
 from unittest.mock import patch
 
 import frappe
-from frappe.utils import add_months, flt, today
+from frappe.utils import add_days, add_months, flt, today
 
 from erpnext import get_company_currency
 from erpnext.controllers.queries import get_blanket_orders
@@ -146,6 +146,32 @@ class TestBlanketOrder(ERPNextTestSuite):
 			},
 		)
 		self.assertRaises(frappe.ValidationError, so.submit)
+
+	def test_expired_blanket_order_cannot_be_ordered_against(self):
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100)
+		bo.db_set("to_date", today())
+
+		frappe.flags.args.doctype = "Purchase Order"
+		po = make_order(bo.name)
+		po.currency = get_company_currency(po.company)
+		po.transaction_date = add_days(today(), 1)
+		po.schedule_date = po.transaction_date
+		self.assertRaisesRegex(frappe.ValidationError, "expired on", po.save)
+
+		po.transaction_date = today()
+		po.save()
+
+		bo.db_set("to_date", add_days(today(), -1))
+		self.assertRaisesRegex(frappe.ValidationError, "expired on", make_order, bo.name)
+
+		filters = {
+			"company": bo.company,
+			"blanket_order_type": "Purchasing",
+			"item": bo.items[0].item_code,
+			"transaction_date": today(),
+		}
+		orders = get_blanket_orders("Blanket Order", "", "name", 0, 20, filters)
+		self.assertNotIn(bo.name, [order[0] for order in orders])
 
 	def test_party_item_code(self):
 		item_doc = make_item("_Test Item 1 for Blanket Order")
