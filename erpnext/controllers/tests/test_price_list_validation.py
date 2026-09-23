@@ -58,6 +58,7 @@ class TestPriceListValidation(FrappeTestCase):
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
+			make_purchase_receipt,
 			prepare_data_for_internal_transfer,
 		)
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
@@ -65,6 +66,7 @@ class TestPriceListValidation(FrappeTestCase):
 		prepare_data_for_internal_transfer()
 		company = "_Test Company with perpetual inventory"
 		selling_only = self.create_price_list(selling=1)
+		make_purchase_receipt(warehouse="Stores - TCP1", company=company)
 
 		delivery_note = create_delivery_note(
 			company=company,
