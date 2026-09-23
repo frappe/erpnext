@@ -44,7 +44,8 @@ class TestMappedDiscounts(ERPNextTestSuite):
 							self.assertEqual(
 								receipt.grand_total, discounted.grand_total + regular.grand_total
 							)
-							self.assertEqual(receipt.discount_amount, 0)
+							self.assertEqual(receipt.apply_discount_on, "Net Total")
+							self.assertEqual(receipt.discount_amount, percentage)
 							items = {item.purchase_order: item for item in receipt.items}
 							self.assertEqual(items[discounted.name].rate, rate)
 							self.assertEqual(items[discounted.name].net_amount, discounted.net_total)
@@ -248,7 +249,6 @@ class TestMappedDiscounts(ERPNextTestSuite):
 
 	def test_percentage_discounts_of_sales_documents(self):
 		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
-		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
 		self.enterContext(self.change_settings("Stock Settings", allow_negative_stock=1))
 		self.enterContext(
@@ -258,12 +258,10 @@ class TestMappedDiscounts(ERPNextTestSuite):
 		)
 		regular_item = make_item("_Test Mixed Sales Discount Item").name
 		for apply_discount_on in ("Net Total", "Grand Total"):
-			orders = []
-			for item, percentage in (("_Test Item", 10), ("_Test Item 2", 20), (regular_item, 0)):
-				order = make_sales_order(item_code=item, qty=1, rate=100, do_not_save=True)
-				order.apply_discount_on = apply_discount_on
-				order.additional_discount_percentage = percentage
-				orders.append(order.save().submit())
+			orders = [
+				self.make_sales_order(item=item, percentage=percentage, apply_discount_on=apply_discount_on)
+				for item, percentage in (("_Test Item", 10), ("_Test Item 2", 20), (regular_item, 0))
+			]
 
 			expected_net_amounts = dict(zip([order.name for order in orders], (90, 80, 100), strict=True))
 			for sources in (orders, list(reversed(orders))):
@@ -330,10 +328,73 @@ class TestMappedDiscounts(ERPNextTestSuite):
 		self.assertEqual(purchase_order.items[0].mapped_additional_discount_amount, 0)
 		self.assertEqual(purchase_order.net_total, purchase_order.total)
 
+	def test_fixed_discount_remainder_ignores_other_carried_discounts(self):
+		fixed = self.make_order(qty=10, fixed=100)
+		percentage = self.make_order(item="_Test Item 2", percentage=20)
+		combined = self.combine(fixed, percentage)
+		combined.getone("items", {"purchase_order": fixed.name}).qty = 5
+		combined.save().submit()
+		self.assertEqual(combined.discount_amount, 70)
+
+		remaining = make_purchase_receipt(fixed.name).save()
+		self.assertEqual(remaining.discount_amount, 50)
+
+	def test_discount_accounting_books_carried_discounts(self):
+		from erpnext.accounts.doctype.account.test_account import create_account
+
+		self.enterContext(self.change_settings("Selling Settings", enable_discount_accounting=1))
+		discount_account = create_account(
+			account_name="Discount Account", parent_account="Indirect Expenses - _TC", company="_Test Company"
+		)
+		orders = [
+			self.make_sales_order(item=item, percentage=percentage)
+			for item, percentage in (("_Test Item", 10), ("_Test Item 2", 0))
+		]
+		invoice = self.combine(*orders, mapper=SALES_INVOICE_FROM_ORDER, doctype="Sales Invoice")
+		invoice.additional_discount_account = discount_account
+		invoice.save().submit()
+
+		ledger = {}
+		for entry in frappe.get_all("GL Entry", {"voucher_no": invoice.name}, ["account", "debit", "credit"]):
+			debit, credit = ledger.get(entry.account, (0, 0))
+			ledger[entry.account] = (debit + entry.debit, credit + entry.credit)
+
+		self.assertEqual(ledger[discount_account], (10, 0))
+		self.assertEqual(ledger["Sales - _TC"], (0, 200))
+		self.assertEqual(ledger["Debtors - _TC"], (190, 0))
+
+	def test_cash_discount_is_kept_when_an_undiscounted_order_is_added(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
+
+		first = self.make_sales_order()
+		second = self.make_sales_order(item="_Test Item 2")
+		invoice = self.make_invoice_with_cash_discount(first)
+
+		invoice = make_sales_invoice(second.name, invoice.as_dict())
+		self.assertEqual(invoice.is_cash_or_non_trade_discount, 1)
+		self.assertEqual(invoice.apply_discount_on, "Grand Total")
+		self.assertEqual(invoice.discount_amount, 5)
+		self.assertEqual(invoice.grand_total, 195)
+
+	def test_cash_discount_cannot_be_combined_with_carried_discounts(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
+
+		regular = self.make_sales_order()
+		discounted = self.make_sales_order(item="_Test Item 2", percentage=10)
+		invoice = self.make_invoice_with_cash_discount(regular)
+		with self.assertRaisesRegex(frappe.ValidationError, "cannot be combined"):
+			make_sales_invoice(discounted.name, invoice.as_dict())
+
+		combined = self.combine(regular, discounted, mapper=SALES_INVOICE_FROM_ORDER, doctype="Sales Invoice")
+		combined.is_cash_or_non_trade_discount = 1
+		with self.assertRaisesRegex(frappe.ValidationError, "cannot be combined"):
+			combined.save()
+
 	def assert_percentage_discounts(self, document, source_field, expected_net_amounts):
 		items = {item.get(source_field): item for item in document.items}
+		self.assertEqual(document.apply_discount_on, "Net Total")
 		self.assertEqual(document.additional_discount_percentage, 0)
-		self.assertEqual(document.discount_amount, 0)
+		self.assertEqual(document.discount_amount, 30)
 		self.assertEqual(document.grand_total, 270)
 		for source, net_amount in expected_net_amounts.items():
 			self.assertEqual(items[source].rate, 100)
@@ -368,6 +429,23 @@ class TestMappedDiscounts(ERPNextTestSuite):
 					"add_deduct_tax": "Add",
 				},
 			)
+		return order.save().submit()
+
+	def make_invoice_with_cash_discount(self, order):
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
+
+		invoice = make_sales_invoice(order.name)
+		invoice.apply_discount_on = "Grand Total"
+		invoice.is_cash_or_non_trade_discount = 1
+		invoice.discount_amount = 5
+		return invoice
+
+	def make_sales_order(self, *, item="_Test Item", percentage=0, apply_discount_on="Net Total"):
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		order = make_sales_order(item_code=item, qty=1, rate=100, do_not_save=True)
+		order.apply_discount_on = apply_discount_on
+		order.additional_discount_percentage = percentage
 		return order.save().submit()
 
 	def combine(self, *sources, mapper=PURCHASE_RECEIPT_FROM_ORDER, doctype="Purchase Receipt"):
