@@ -2089,8 +2089,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 	)
 
 
-@frappe.whitelist()
-def get_serial_batch_ledgers(item_code=None, docstatus=None, voucher_no=None, name=None, child_row=None):
+def _serial_batch_ledger_query(item_code=None, docstatus=None, voucher_no=None, name=None, child_row=None):
 	filters = get_filters_for_bundle(
 		item_code=item_code, docstatus=docstatus, voucher_no=voucher_no, name=name, child_row=child_row
 	)
@@ -2107,11 +2106,53 @@ def get_serial_batch_ledgers(item_code=None, docstatus=None, voucher_no=None, na
 	if not child_row:
 		fields.append("`tabSerial and Batch Bundle`.`name`")
 
+	return fields, filters
+
+
+def _get_serial_batch_ledgers(item_code=None, docstatus=None, voucher_no=None, name=None, child_row=None):
+	"""Internal read. Callers here are resolving ledgers for a document they are already
+	processing, so this deliberately keeps get_all and does not apply the permission model."""
+	fields, filters = _serial_batch_ledger_query(
+		item_code=item_code, docstatus=docstatus, voucher_no=voucher_no, name=name, child_row=child_row
+	)
+
 	return frappe.get_all(
 		"Serial and Batch Bundle",
 		fields=fields,
 		filters=filters,
 		order_by="`tabSerial and Batch Entry`.`idx`",
+	)
+
+
+@frappe.whitelist()
+def get_serial_batch_ledgers(item_code=None, docstatus=None, voucher_no=None, name=None, child_row=None):
+	# request boundary. get_list() applies the permission model including User Permissions, and
+	# picks its ptype from the caller's own grants, so a select-only role is checked for `select`.
+	# It is run over the parent alone on purpose: pulling the Serial and Batch Entry columns into
+	# the same query would also demand `read` on that child table, which the roles holding only
+	# `select` here do not have. The scoped names then drive the entry lookup.
+	filters = get_filters_for_bundle(
+		item_code=item_code, docstatus=docstatus, voucher_no=voucher_no, name=name, child_row=child_row
+	)
+	bundle_filters = [
+		["Serial and Batch Bundle", "name", condition, value]
+		if doctype == "Serial and Batch Entry" and fieldname == "parent"
+		else [doctype, fieldname, condition, value]
+		for doctype, fieldname, condition, value in filters
+	]
+
+	permitted = frappe.get_list(
+		"Serial and Batch Bundle", filters=bundle_filters, pluck="name", limit_page_length=0
+	)
+	if not permitted:
+		return []
+
+	return _get_serial_batch_ledgers(
+		item_code=item_code,
+		docstatus=docstatus,
+		voucher_no=voucher_no,
+		name=permitted,
+		child_row=child_row,
 	)
 
 
@@ -2246,6 +2287,14 @@ def create_serial_batch_no_ledgers(
 	doc.save()
 
 	if do_not_save:
+		# doc.save() above authorises the bundle, but this repoints a row of another document and
+		# both names come from the request body — db.set_value bypasses permissions and the
+		# submit lock, so authorise the row being written
+		if not frappe.get_meta(child_row.doctype).get_field("serial_and_batch_bundle"):
+			frappe.throw(_("{0} has no Serial and Batch Bundle field").format(child_row.doctype))
+
+		frappe.has_permission(child_row.doctype, ptype="write", doc=child_row.name, throw=True)
+
 		frappe.db.set_value(child_row.doctype, child_row.name, "serial_and_batch_bundle", doc.name)
 
 	frappe.msgprint(_("Serial and Batch Bundle created"), alert=True)
@@ -2619,7 +2668,7 @@ def get_reserved_serial_nos_for_pos(kwargs):
 	if not ids:
 		return []
 
-	for d in get_serial_batch_ledgers(kwargs.item_code, docstatus=1, name=ids):
+	for d in _get_serial_batch_ledgers(kwargs.item_code, docstatus=1, name=ids):
 		ignore_serial_nos.append(d.serial_no)
 
 	returned_serial_nos = []
@@ -2755,7 +2804,7 @@ def get_reserved_batches_for_pos(kwargs) -> dict:
 	]
 
 	if ids:
-		for d in get_serial_batch_ledgers(kwargs.item_code, docstatus=1, name=ids):
+		for d in _get_serial_batch_ledgers(kwargs.item_code, docstatus=1, name=ids):
 			key = (d.batch_no, d.warehouse)
 			if key not in pos_batches:
 				pos_batches[key] = frappe._dict(
