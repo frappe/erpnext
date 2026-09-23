@@ -219,9 +219,26 @@ def reindex_item(doc, method=None):
 	Item Barcode rows raise no document events, so the Item save is the only signal one moved, and
 	no indexed field of the Item need have changed.
 	"""
+	queue_item(doc.name)
+
+
+def queue_item(item_code: str, drop: str | None = None):
+	"""Queue one Item, and drop another name first when a rename replaced it.
+
+	A failed index write must not fail the Item save: the index is an optimisation that every
+	caller already falls back from, so the error is logged rather than raised.
+	"""
 	search = ItemSearch()
-	if search.is_search_enabled() and search.index_exists():
-		search.index_doc("Item", doc.name)
+	if not (search.is_search_enabled() and search.index_exists()):
+		return
+
+	try:
+		if drop:
+			search.remove_doc("Item", drop)
+
+		search.index_doc("Item", item_code)
+	except Exception:
+		frappe.log_error("Item search index update failed")
 
 
 def get_item_search_candidates(txt: str, searched_fields: list[str]) -> list[str] | None:
