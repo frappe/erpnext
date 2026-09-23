@@ -566,9 +566,12 @@ def get_pos_profile_data(pos_profile: str):
 
 @frappe.whitelist()
 def get_receipt_email_content(doctype: str, name: str) -> dict[str, str]:
+	if doctype not in ("POS Invoice", "Sales Invoice"):
+		frappe.throw(_("Receipts can only be emailed for a POS Invoice or a Sales Invoice."))
+
 	doc = frappe.get_doc(doctype, name)
 	doc.check_permission("email")
-	template_name = doc.get("pos_profile") and frappe.db.get_value(
+	template_name = doc.pos_profile and frappe.db.get_value(
 		"POS Profile", doc.pos_profile, "receipt_email_template"
 	)
 	default_text = f"{_(doctype)}: {name}"
