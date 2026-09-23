@@ -151,9 +151,13 @@ def get_party_details(party, party_type, args=None):
 			if args.get(fieldname) and not isinstance(args.get(fieldname), str):
 				frappe.throw(_("Invalid address"), frappe.PermissionError)
 
+		# the names are already constrained to plain strings above, but get_doc still checks
+		# nothing — the address these resolve to is returned field by field to the caller
 		if args.get("billing_address"):
+			frappe.has_permission("Address", doc=args.get("billing_address"), throw=True)
 			billing_address = frappe.get_doc("Address", args.get("billing_address"))
 		if args.get("shipping_address"):
+			frappe.has_permission("Address", doc=args.get("shipping_address"), throw=True)
 			shipping_address = frappe.get_doc("Address", args.get("shipping_address"))
 	else:
 		billing_address_name = get_default_address(party_type, party)
