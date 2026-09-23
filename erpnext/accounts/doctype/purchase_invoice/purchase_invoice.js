@@ -476,7 +476,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 	}
 };
 
-cur_frm.script_manager.make(erpnext.accounts.PurchaseInvoice);
+frappe.ui.form.set_controller("Purchase Invoice", erpnext.accounts.PurchaseInvoice);
 
 // Hide Fields
 // ------------

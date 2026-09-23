@@ -389,7 +389,7 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 	}
 };
 
-cur_frm.script_manager.make(erpnext.selling.QuotationController);
+frappe.ui.form.set_controller("Quotation", erpnext.selling.QuotationController);
 
 frappe.ui.form.on(
 	"Quotation Item",

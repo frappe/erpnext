@@ -840,8 +840,7 @@ erpnext.buying.MaterialRequestController = class MaterialRequestController exten
 	}
 };
 
-// for backward compatibility: combine new and previous states
-extend_cscript(cur_frm.cscript, new erpnext.buying.MaterialRequestController({ frm: cur_frm }));
+frappe.ui.form.set_controller("Material Request", erpnext.buying.MaterialRequestController);
 
 function set_schedule_date(frm) {
 	if (frm.doc.schedule_date) {

@@ -768,7 +768,7 @@ erpnext.bom.BomController = class BomController extends erpnext.TransactionContr
 	}
 };
 
-extend_cscript(cur_frm.cscript, new erpnext.bom.BomController({ frm: cur_frm }));
+frappe.ui.form.set_controller("BOM", erpnext.bom.BomController);
 
 var get_bom_material_detail = function (doc, cdt, cdn, secondary_items) {
 	if (!doc.company) {

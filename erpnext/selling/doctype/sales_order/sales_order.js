@@ -1922,7 +1922,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 	}
 };
 
-extend_cscript(cur_frm.cscript, new erpnext.selling.SalesOrderController({ frm: cur_frm }));
+frappe.ui.form.set_controller("Sales Order", erpnext.selling.SalesOrderController);
 
 function prevent_past_delivery_dates(frm) {
 	if (frm.doc.transaction_date) {

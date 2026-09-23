@@ -739,8 +739,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 	}
 };
 
-// for backward compatibility: combine new and previous states
-extend_cscript(cur_frm.cscript, new erpnext.accounts.SalesInvoiceController({ frm: cur_frm }));
+frappe.ui.form.set_controller("Sales Invoice", erpnext.accounts.SalesInvoiceController);
 
 frappe.ui.form.on("Sales Invoice Item", {
 	income_account: function (frm, cdt, cdn) {

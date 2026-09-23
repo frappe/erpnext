@@ -1708,4 +1708,4 @@ function check_should_not_attach_bom_items(bom_no) {
 	return bom_no === undefined || (erpnext.stock.bom && erpnext.stock.bom.name === bom_no);
 }
 
-extend_cscript(cur_frm.cscript, new erpnext.stock.StockEntry({ frm: cur_frm }));
+frappe.ui.form.set_controller("Stock Entry", erpnext.stock.StockEntry);

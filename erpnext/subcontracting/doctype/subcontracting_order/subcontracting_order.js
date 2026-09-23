@@ -708,4 +708,4 @@ erpnext.buying.SubcontractingOrderController = class SubcontractingOrderControll
 	}
 };
 
-extend_cscript(cur_frm.cscript, new erpnext.buying.SubcontractingOrderController({ frm: cur_frm }));
+frappe.ui.form.set_controller("Subcontracting Order", erpnext.buying.SubcontractingOrderController);

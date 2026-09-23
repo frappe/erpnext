@@ -839,8 +839,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 	}
 };
 
-// for backward compatibility: combine new and previous states
-extend_cscript(cur_frm.cscript, new erpnext.buying.PurchaseOrderController({ frm: cur_frm }));
+frappe.ui.form.set_controller("Purchase Order", erpnext.buying.PurchaseOrderController);
 
 function set_schedule_date(frm) {
 	if (frm.doc.schedule_date) {

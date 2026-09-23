@@ -457,7 +457,7 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends (
 	}
 };
 
-extend_cscript(cur_frm.cscript, new erpnext.stock.DeliveryNoteController({ frm: cur_frm }));
+frappe.ui.form.set_controller("Delivery Note", erpnext.stock.DeliveryNoteController);
 
 frappe.ui.form.on("Delivery Note", {
 	setup: function (frm) {
