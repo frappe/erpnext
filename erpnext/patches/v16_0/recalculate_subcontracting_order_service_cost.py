@@ -1,109 +1,58 @@
 import frappe
-from frappe.utils import flt
-
-# Statuses that can still produce a Subcontracting Receipt.
-PENDING_STATUSES = (
-	"Draft",
-	"Open",
-	"Material Transferred",
-	"Partial Material Transferred",
-	"Partially Received",
-)
 
 
 def execute():
-	orders = [
-		order
-		for order in frappe.get_all(
-			"Subcontracting Order",
-			filters={"docstatus": ["<", 2]},
-			fields=["name", "purchase_order", "status"],
-		)
-		if order.purchase_order
-	]
-	if not orders:
-		return
+	set_conversion_rates()
+	set_company_currency_service_amounts()
 
-	conversion_rate_by_po = dict(
-		frappe.get_all(
-			"Purchase Order",
-			filters={"name": ["in", list({order.purchase_order for order in orders})]},
-			fields=["name", "conversion_rate"],
-			as_list=True,
-		)
-	)
-	conversion_rates = {
-		order.name: flt(conversion_rate_by_po.get(order.purchase_order)) or 1.0 for order in orders
-	}
-
-	frappe.db.bulk_update(
+	for name in frappe.get_all(
 		"Subcontracting Order",
-		{name: {"conversion_rate": rate} for name, rate in conversion_rates.items()},
-		update_modified=False,
-	)
-
-	service_items = frappe.get_all(
-		"Subcontracting Order Service Item",
-		filters={"parent": ["in", list(conversion_rates)]},
-		fields=["name", "parent", "rate", "amount", "purchase_order_item"],
-	)
-	frappe.db.bulk_update(
-		"Subcontracting Order Service Item",
-		{
-			service_item.name: {
-				"base_rate": flt(service_item.rate) * conversion_rates[service_item.parent],
-				"base_amount": flt(service_item.amount) * conversion_rates[service_item.parent],
-			}
-			for service_item in service_items
-		},
-		update_modified=False,
-	)
-
-	# Only orders that can still be received are recosted, so that receipts made from them stop
-	# carrying the unconverted service cost. Completed orders keep the values their receipts used.
-	pending = {
-		order.name
-		for order in orders
-		if order.status in PENDING_STATUSES and conversion_rates[order.name] != 1.0
-	}
-	if not pending:
-		return
-
-	base_amounts = {
-		(service_item.parent, service_item.purchase_order_item): flt(service_item.amount)
-		* conversion_rates[service_item.parent]
-		for service_item in service_items
-		if service_item.parent in pending
-	}
-
-	item_updates = {}
-	totals = {}
-	for item in frappe.get_all(
-		"Subcontracting Order Item",
-		filters={"parent": ["in", list(pending)]},
-		fields=[
-			"name",
-			"parent",
-			"qty",
-			"purchase_order_item",
-			"rm_cost_per_qty",
-			"additional_cost_per_qty",
-		],
+		filters={"docstatus": ["<", 2], "conversion_rate": ["!=", 1]},
+		pluck="name",
 	):
-		base_amount = base_amounts.get((item.parent, item.purchase_order_item), 0.0)
-		service_cost_per_qty = base_amount / item.qty if item.qty else 0.0
-		rate = flt(item.rm_cost_per_qty) + service_cost_per_qty + flt(item.additional_cost_per_qty)
-		amount = flt(item.qty) * rate
-		item_updates[item.name] = {
-			"service_cost_per_qty": service_cost_per_qty,
-			"rate": rate,
-			"amount": amount,
-		}
-		totals[item.parent] = totals.get(item.parent, 0.0) + amount
+		recost_order(frappe.get_doc("Subcontracting Order", name))
 
-	frappe.db.bulk_update("Subcontracting Order Item", item_updates, update_modified=False)
+
+def set_conversion_rates():
+	order = frappe.qb.DocType("Subcontracting Order")
+	purchase_order = frappe.qb.DocType("Purchase Order")
+	rates = (
+		frappe.qb.from_(order)
+		.join(purchase_order)
+		.on(purchase_order.name == order.purchase_order)
+		.select(order.name, purchase_order.conversion_rate)
+		.where((order.docstatus < 2) & (purchase_order.conversion_rate != 1))
+		.run()
+	)
 	frappe.db.bulk_update(
 		"Subcontracting Order",
-		{name: {"total": total} for name, total in totals.items()},
+		{name: {"conversion_rate": rate} for name, rate in rates},
 		update_modified=False,
 	)
+
+
+def set_company_currency_service_amounts():
+	order = frappe.qb.DocType("Subcontracting Order")
+	service_item = frappe.qb.DocType("Subcontracting Order Service Item")
+	company_currency_orders = (
+		frappe.qb.from_(order).select(order.name).where((order.docstatus < 2) & (order.conversion_rate == 1))
+	)
+	(
+		frappe.qb.update(service_item)
+		.set(service_item.base_rate, service_item.rate)
+		.set(service_item.base_amount, service_item.amount)
+		.where(service_item.parent.isin(company_currency_orders))
+		.run()
+	)
+
+
+def recost_order(order):
+	rows = order.items + order.service_items
+	if not all(row.purchase_order_item for row in rows):
+		return
+
+	order.calculate_service_costs()
+	order.calculate_items_qty_and_amount()
+	order.db_update()
+	for row in rows:
+		row.db_update()
