@@ -11,6 +11,13 @@ frappe.ui.form.on("Blanket Order", {
 	},
 
 	setup: function (frm) {
+		frm.set_indicator_formatter("item_code", function (doc) {
+			if (doc.closed) {
+				return "gray";
+			}
+			return flt(doc.ordered_qty) >= flt(doc.qty) ? "green" : "orange";
+		});
+
 		frm.custom_make_buttons = {
 			"Purchase Order": "Purchase Order",
 			"Sales Order": "Sales Order",
@@ -27,6 +34,7 @@ frappe.ui.form.on("Blanket Order", {
 		erpnext.hide_company(frm);
 		blanket_order_pricing.update_labels(frm);
 		add_blanket_order_status_buttons(frm);
+		erpnext.item_close.add_buttons(frm, get_blanket_order_item_close_config());
 		if (frm.doc.status === "Closed") {
 			return;
 		}
@@ -250,6 +258,31 @@ function add_blanket_order_status_buttons(frm) {
 	} else {
 		frm.add_custom_button(__("Close"), () => update_blanket_order_status(frm, "Closed"), __("Status"));
 	}
+}
+
+function get_blanket_order_item_close_config() {
+	return {
+		is_closable: (item) => !item.closed && flt(item.ordered_qty) < flt(item.qty),
+		help: __(
+			"Closed rows can no longer be ordered. They are skipped when creating an order from this Blanket Order."
+		),
+		summarise: (item) => ({
+			item_code: item.item_code,
+			item_name: item.item_name,
+			qty: item.qty,
+			ordered_qty: item.ordered_qty || 0,
+			pending_qty: Math.max(flt(item.qty) - flt(item.ordered_qty), 0),
+			stock_uom: item.stock_uom,
+		}),
+		columns: [
+			erpnext.item_close.column("item_code", __("Item Code"), "Data", 3),
+			erpnext.item_close.column("item_name", __("Item Name"), "Data", 2),
+			erpnext.item_close.column("qty", __("Qty")),
+			erpnext.item_close.column("ordered_qty", __("Ordered Qty")),
+			erpnext.item_close.column("pending_qty", __("Pending Qty")),
+			erpnext.item_close.column("stock_uom", __("Stock UOM"), "Data"),
+		],
+	};
 }
 
 function update_blanket_order_status(frm, status) {

@@ -20,6 +20,7 @@ REOPEN_STATUS = {
 	"Sales Order": "Draft",
 	"Delivery Note": "Submitted",
 	"Purchase Receipt": "Submitted",
+	"Blanket Order": "Submitted",
 }
 
 SETTLED_BY_CLOSE = ("per_ordered", "per_received", "per_delivered", "per_billed")
@@ -76,7 +77,10 @@ def update_closed_status(doctype: str, name: str, item_names: str | list[str], c
 	for row in changed:
 		row.db_set("closed", closed)
 
-	doc.on_item_close_status_change()
+	recalculate = getattr(doc, "on_item_close_status_change", None)
+	if recalculate:
+		recalculate()
+
 	doc.reload()
 
 	if closed:
