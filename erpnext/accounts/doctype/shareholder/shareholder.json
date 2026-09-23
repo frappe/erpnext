@@ -3,6 +3,7 @@
  "autoname": "naming_series:",
  "creation": "2017-12-25 16:50:53.878430",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/shareholder",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -112,6 +113,7 @@
    "read_only": 1
   }
  ],
+ "icon": "user-star",
  "links": [],
  "modified": "2024-03-27 13:10:40.356171",
  "modified_by": "Administrator",

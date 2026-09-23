@@ -120,7 +120,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	validate_conversion_rate() {
 		this.frm.doc.conversion_rate = flt(
 			this.frm.doc.conversion_rate,
-			cur_frm ? precision("conversion_rate") : 9
+			frappe.meta.get_field_precision(this.frm.get_docfield("conversion_rate"), this.frm.doc)
 		);
 		var conversion_rate_label = frappe.meta.get_translated_label(
 			this.frm.doc.doctype,
@@ -157,6 +157,24 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			.filter((fieldname) => !do_not_round_fields.includes(fieldname));
 	}
 
+	get_billed_qty(item) {
+		const settings = frappe.boot.sysdefaults || {};
+		const is_internal_transfer =
+			this.frm.doc.is_internal_supplier && this.frm.doc.represents_company === this.frm.doc.company;
+		const bills_rejected_quantity =
+			this.frm.doc.doctype === "Purchase Invoice" &&
+			this.frm.doc.update_stock &&
+			!is_internal_transfer &&
+			cint(settings.set_valuation_rate_for_rejected_materials) &&
+			cint(settings.bill_for_rejected_quantity_in_purchase_invoice);
+
+		if (!flt(item.rejected_qty) || !bills_rejected_quantity) {
+			return flt(item.qty);
+		}
+
+		return flt(item.qty) + flt(item.rejected_qty);
+	}
+
 	calculate_item_values() {
 		var me = this;
 		if (!this.discount_amount_applied) {
@@ -167,7 +185,10 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 				item.qty = item.qty === undefined ? (me.frm.doc.is_return ? -1 : 1) : item.qty;
 
 				if (!(me.frm.doc.is_return || me.frm.doc.is_debit_note)) {
-					item.net_amount = item.amount = flt(item.rate * item.qty, precision("amount", item));
+					item.net_amount = item.amount = flt(
+						item.rate * me.get_billed_qty(item),
+						precision("amount", item)
+					);
 				} else {
 					// allow for '0' qty on Credit/Debit notes
 					let qty = flt(item.qty);

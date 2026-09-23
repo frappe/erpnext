@@ -101,6 +101,7 @@
    "fieldtype": "Column Break"
   }
  ],
+ "icon": "bell",
  "links": [
   {
    "link_doctype": "Dunning",

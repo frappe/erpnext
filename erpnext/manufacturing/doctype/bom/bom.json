@@ -4,6 +4,7 @@
  "creation": "2013-01-22 15:11:38",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/bill-of-materials",
  "engine": "InnoDB",
  "field_order": [
   "production_item_tab",
@@ -766,7 +767,7 @@
    "show_description_on_click": 1
   }
  ],
- "icon": "fa fa-sitemap",
+ "icon": "list-tree",
  "idx": 1,
  "image_field": "image",
  "is_submittable": 1,

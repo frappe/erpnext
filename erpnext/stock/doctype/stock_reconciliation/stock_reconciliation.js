@@ -381,4 +381,4 @@ erpnext.stock.StockReconciliation = class StockReconciliation extends erpnext.st
 	}
 };
 
-cur_frm.cscript = new erpnext.stock.StockReconciliation({ frm: cur_frm });
+frappe.ui.form.set_controller("Stock Reconciliation", erpnext.stock.StockReconciliation);

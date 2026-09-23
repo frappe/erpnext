@@ -1,4 +1,49 @@
 frappe.provide("erpnext.accounts.bank_reconciliation");
+frappe.provide("erpnext.accounts.bank_reconciliation.voucher_types");
+
+// other apps can register more "Create Voucher" types: { get_fields(dm), is_applicable(bank_transaction), create(dm, values, allow_edit) }
+erpnext.accounts.bank_reconciliation.voucher_types = {
+	"Payment Entry": {
+		create(dialog_manager, values, allow_edit) {
+			return frappe.xcall(
+				"erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.create_payment_entry_bts",
+				{
+					bank_transaction_name: dialog_manager.bank_transaction.name,
+					reference_number: values.reference_number,
+					reference_date: values.reference_date,
+					party_type: values.party_type,
+					party: values.party,
+					posting_date: values.posting_date,
+					mode_of_payment: values.mode_of_payment,
+					project: values.project,
+					cost_center: values.cost_center,
+					allow_edit: allow_edit,
+					company_bank_account: values?.bank_account || dialog_manager?.bank_account,
+				}
+			);
+		},
+	},
+	"Journal Entry": {
+		create(dialog_manager, values, allow_edit) {
+			return frappe.xcall(
+				"erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.create_journal_entry_bts",
+				{
+					bank_transaction_name: dialog_manager.bank_transaction.name,
+					reference_number: values.reference_number,
+					reference_date: values.reference_date,
+					party_type: values.party_type,
+					party: values.party,
+					posting_date: values.posting_date,
+					mode_of_payment: values.mode_of_payment,
+					entry_type: values.journal_entry_type,
+					second_account: values.second_account,
+					allow_edit: allow_edit,
+				}
+			);
+		},
+	},
+	...erpnext.accounts.bank_reconciliation.voucher_types,
+};
 
 erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 	constructor(
@@ -49,12 +94,36 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 					this.bank_transaction = r.message;
 					r.message.payment_entry = 1;
 					r.message.journal_entry = 1;
+					this.set_document_type_options();
 					this.dialog.set_values(r.message);
 					this.copy_data_to_voucher();
 					this.dialog.show();
 				}
 			},
 		});
+	}
+
+	get_voucher_types() {
+		return erpnext.accounts.bank_reconciliation.voucher_types;
+	}
+
+	get_document_types() {
+		return Object.entries(this.get_voucher_types())
+			.filter(
+				([, voucher_type]) =>
+					!this.bank_transaction ||
+					!voucher_type.is_applicable ||
+					voucher_type.is_applicable(this.bank_transaction)
+			)
+			.map(([document_type]) => document_type);
+	}
+
+	set_document_type_options() {
+		const document_types = this.get_document_types();
+		this.dialog.set_df_property("document_type", "options", document_types.join("\n"));
+		if (!document_types.includes(this.dialog.get_value("document_type"))) {
+			this.dialog.set_value("document_type", document_types[0]);
+		}
 	}
 
 	copy_data_to_voucher() {
@@ -186,7 +255,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				label: __("Document Type"),
 				fieldname: "document_type",
 				fieldtype: "Select",
-				options: `Payment Entry\nJournal Entry`,
+				options: this.get_document_types().join("\n"),
 				default: "Payment Entry",
 				depends_on: "eval:doc.action=='Create Voucher'",
 			},
@@ -398,6 +467,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 					};
 				},
 			},
+			...this.get_additional_voucher_fields(),
 			{
 				fieldtype: "Section Break",
 				fieldname: "details_section",
@@ -459,6 +529,12 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 		];
 	}
 
+	get_additional_voucher_fields() {
+		return Object.values(this.get_voucher_types()).flatMap((voucher_type) =>
+			voucher_type.get_fields ? voucher_type.get_fields(this) : []
+		);
+	}
+
 	get_selected_attributes() {
 		let selected_attributes = [];
 		this.dialog.$wrapper.find(".checkbox input").each((i, col) => {
@@ -477,10 +553,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 
 	reconciliation_dialog_primary_action(values) {
 		if (values.action == "Match Against Voucher") this.match(values);
-		if (values.action == "Create Voucher" && values.document_type == "Payment Entry")
-			this.add_payment_entry(values);
-		if (values.action == "Create Voucher" && values.document_type == "Journal Entry")
-			this.add_journal_entry(values);
+		else if (values.action == "Create Voucher") this.create_voucher(values);
 		else if (values.action == "Update Bank Transaction") this.update_transaction(values);
 	}
 
@@ -513,54 +586,25 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 		});
 	}
 
-	add_payment_entry(values) {
-		frappe.call({
-			method: "erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.create_payment_entry_bts",
-			args: {
-				bank_transaction_name: this.bank_transaction.name,
-				reference_number: values.reference_number,
-				reference_date: values.reference_date,
-				party_type: values.party_type,
-				party: values.party,
-				posting_date: values.posting_date,
-				mode_of_payment: values.mode_of_payment,
-				project: values.project,
-				cost_center: values.cost_center,
-				company_bank_account: values?.bank_account || this?.bank_account,
-			},
-			callback: (response) => {
-				const alert_string = __("Bank Transaction {0} added as Payment Entry", [
-					this.bank_transaction.name,
-				]);
-				frappe.show_alert(alert_string);
-				this.update_dt_cards(response.message);
-				this.dialog.hide();
-			},
-		});
-	}
+	create_voucher(values, allow_edit = false) {
+		const voucher_type = this.get_voucher_types()[values.document_type];
+		if (!voucher_type) {
+			frappe.throw(__("Cannot create {0} from a Bank Transaction", [values.document_type]));
+		}
 
-	add_journal_entry(values) {
-		frappe.call({
-			method: "erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.create_journal_entry_bts",
-			args: {
-				bank_transaction_name: this.bank_transaction.name,
-				reference_number: values.reference_number,
-				reference_date: values.reference_date,
-				party_type: values.party_type,
-				party: values.party,
-				posting_date: values.posting_date,
-				mode_of_payment: values.mode_of_payment,
-				entry_type: values.journal_entry_type,
-				second_account: values.second_account,
-			},
-			callback: (response) => {
-				const alert_string = __("Bank Transaction {0} added as Journal Entry", [
-					this.bank_transaction.name,
-				]);
-				frappe.show_alert(alert_string);
-				this.update_dt_cards(response.message);
-				this.dialog.hide();
-			},
+		return voucher_type.create(this, values, allow_edit).then((message) => {
+			if (allow_edit) {
+				const doc = frappe.model.sync(message);
+				track_voucher(doc[0].doctype, doc[0].name, this.bank_transaction.name);
+				frappe.set_route("Form", doc[0].doctype, doc[0].name);
+				return;
+			}
+
+			frappe.show_alert(
+				__("Bank Transaction {0} added as {1}", [this.bank_transaction.name, values.document_type])
+			);
+			this.update_dt_cards(message);
+			this.dialog.hide();
 		});
 	}
 
@@ -584,50 +628,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 
 	edit_in_full_page() {
 		const values = this.dialog.get_values(true);
-		if (values.document_type == "Payment Entry") {
-			frappe.call({
-				method: "erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.create_payment_entry_bts",
-				args: {
-					bank_transaction_name: this.bank_transaction.name,
-					reference_number: values.reference_number,
-					reference_date: values.reference_date,
-					party_type: values.party_type,
-					party: values.party,
-					posting_date: values.posting_date,
-					mode_of_payment: values.mode_of_payment,
-					project: values.project,
-					cost_center: values.cost_center,
-					allow_edit: true,
-					company_bank_account: values?.bank_account || this?.bank_account,
-				},
-				callback: (r) => {
-					const doc = frappe.model.sync(r.message);
-					track_voucher(doc[0].doctype, doc[0].name, this.bank_transaction.name);
-					frappe.set_route("Form", doc[0].doctype, doc[0].name);
-				},
-			});
-		} else {
-			frappe.call({
-				method: "erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.create_journal_entry_bts",
-				args: {
-					bank_transaction_name: this.bank_transaction.name,
-					reference_number: values.reference_number,
-					reference_date: values.reference_date,
-					party_type: values.party_type,
-					party: values.party,
-					posting_date: values.posting_date,
-					mode_of_payment: values.mode_of_payment,
-					entry_type: values.journal_entry_type,
-					second_account: values.second_account,
-					allow_edit: true,
-				},
-				callback: (r) => {
-					var doc = frappe.model.sync(r.message);
-					track_voucher(doc[0].doctype, doc[0].name, this.bank_transaction.name);
-					frappe.set_route("Form", doc[0].doctype, doc[0].name);
-				},
-			});
-		}
+		return this.create_voucher(values, true);
 	}
 };
 
@@ -639,7 +640,7 @@ const track_voucher = (doctype, docname, bank_transaction_name) => {
 	pending_reconciliations.set(voucher_key(doctype, docname), bank_transaction_name);
 };
 
-for (const voucher_doctype of ["Payment Entry", "Journal Entry"]) {
+for (const voucher_doctype of Object.keys(erpnext.accounts.bank_reconciliation.voucher_types)) {
 	frappe.ui.form.on(voucher_doctype, {
 		before_save(frm) {
 			frm.__pending_reconciliation_key = voucher_key(frm.doctype, frm.doc.name);

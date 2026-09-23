@@ -3,6 +3,7 @@
  "creation": "2014-11-27 14:12:07.542534",
  "doctype": "DocType",
  "document_type": "Document",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/manufacturing-settings",
  "engine": "InnoDB",
  "field_order": [
   "bom_and_work_order_tab",
@@ -248,7 +249,7 @@
   }
  ],
  "hide_toolbar": 0,
- "icon": "icon-wrench",
+ "icon": "settings",
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],

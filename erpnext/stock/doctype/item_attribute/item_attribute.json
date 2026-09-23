@@ -6,6 +6,7 @@
  "creation": "2014-09-26 03:49:54.899170",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/item-attribute",
  "engine": "InnoDB",
  "field_order": [
   "attribute_name",
@@ -84,7 +85,7 @@
    "label": "Disabled"
   }
  ],
- "icon": "fa fa-edit",
+ "icon": "tags",
  "index_web_pages_for_search": 1,
  "links": [],
  "modified": "2024-11-26 20:05:29.421714",

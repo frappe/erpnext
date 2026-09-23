@@ -248,6 +248,33 @@ class TestWarehouse(ERPNextTestSuite):
 
 		fetch_stock_accounts.assert_called_once_with(company)
 
+	def test_warehouse_account_company_validation(self):
+		company_1 = "_Test Company"
+		company_2 = "_Test Company 1"
+
+		account_company_2 = frappe.db.get_value(
+			"Account", {"company": company_2, "account_type": "Stock", "is_group": 0}, "name"
+		)
+
+		warehouse = frappe.get_doc(
+			{
+				"doctype": "Warehouse",
+				"warehouse_name": "Test Company Account Mismatch",
+				"company": company_1,
+				"account": account_company_2,
+			}
+		)
+
+		self.assertRaisesRegex(frappe.ValidationError, "does not belong to Company", warehouse.insert)
+
+		warehouse.account = None
+		warehouse.insert()
+
+		warehouse.account = account_company_2
+		self.assertRaisesRegex(frappe.ValidationError, "does not belong to Company", warehouse.save)
+
+		warehouse.delete()
+
 
 def create_inventory_fallback_company():
 	company = "_Test Company Inventory Fallback"

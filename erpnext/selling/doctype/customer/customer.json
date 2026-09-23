@@ -8,6 +8,7 @@
  "description": "Buyer of Goods and Services.",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/customer",
  "engine": "InnoDB",
  "field_order": [
   "basic_info",
@@ -74,6 +75,9 @@
   "column_break_53",
   "disabled",
   "is_frozen",
+  "block_customer_section",
+  "on_hold",
+  "release_date",
   "sales_team_tab",
   "account_manager",
   "sales_team",
@@ -417,6 +421,26 @@
    "show_description_on_click": 1
   },
   {
+   "fieldname": "block_customer_section",
+   "fieldtype": "Section Break",
+   "label": "Block Customer"
+  },
+  {
+   "default": "0",
+   "description": "Blocks saving or submitting Sales Orders, Delivery Notes, Sales Invoices and POS Invoices for this customer.",
+   "fieldname": "on_hold",
+   "fieldtype": "Check",
+   "label": "Block Customer",
+   "show_description_on_click": 1
+  },
+  {
+   "depends_on": "eval:doc.on_hold",
+   "description": "Leave blank if the Customer is blocked indefinitely",
+   "fieldname": "release_date",
+   "fieldtype": "Date",
+   "label": "Release Date"
+  },
+  {
    "description": "Loyalty scheme this customer earns points under. Auto-assigned if a matching program exists.",
    "fieldname": "loyalty_program",
    "fieldtype": "Link",
@@ -719,7 +743,7 @@
    "fieldtype": "Section Break"
   }
  ],
- "icon": "fa fa-user",
+ "icon": "user-round",
  "idx": 363,
  "image_field": "image",
  "index_web_pages_for_search": 1,
@@ -730,7 +754,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2026-08-21 23:11:41.175219",
+ "modified": "2026-09-23 11:29:53.410448",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

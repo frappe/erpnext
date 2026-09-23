@@ -3,8 +3,6 @@
 
 frappe.provide("erpnext.accounts");
 
-cur_frm.cscript.tax_table = "Sales Taxes and Charges";
-
 erpnext.accounts.taxes.setup_tax_validations("Sales Invoice");
 erpnext.accounts.payment_triggers.setup("Sales Invoice");
 erpnext.accounts.pos.setup("Sales Invoice");
@@ -127,7 +125,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 					if (should_create_delivery_note) {
 						this.frm.add_custom_button(
 							__("Delivery Note"),
-							this.frm.cscript["Make Delivery Note"],
+							() => this.make_delivery_note(),
 							__("Create")
 						);
 					}
@@ -732,28 +730,31 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 	is_return() {
 		this.toggle_get_items();
 	}
+
+	make_delivery_note() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.accounts.doctype.sales_invoice.mapper.make_delivery_note",
+			frm: this.frm,
+		});
+	}
 };
 
-// for backward compatibility: combine new and previous states
-extend_cscript(cur_frm.cscript, new erpnext.accounts.SalesInvoiceController({ frm: cur_frm }));
+frappe.ui.form.set_controller("Sales Invoice", erpnext.accounts.SalesInvoiceController);
 
-cur_frm.cscript["Make Delivery Note"] = function () {
-	frappe.model.open_mapped_doc({
-		method: "erpnext.accounts.doctype.sales_invoice.mapper.make_delivery_note",
-		frm: cur_frm,
-	});
-};
+frappe.ui.form.on("Sales Invoice Item", {
+	income_account: function (frm, cdt, cdn) {
+		erpnext.utils.copy_value_in_all_rows(frm.doc, cdt, cdn, "items", "income_account");
+	},
 
-cur_frm.cscript.income_account = function (doc, cdt, cdn) {
-	erpnext.utils.copy_value_in_all_rows(doc, cdt, cdn, "items", "income_account");
-};
-
-cur_frm.cscript.expense_account = function (doc, cdt, cdn) {
-	erpnext.utils.copy_value_in_all_rows(doc, cdt, cdn, "items", "expense_account");
-};
+	expense_account: function (frm, cdt, cdn) {
+		erpnext.utils.copy_value_in_all_rows(frm.doc, cdt, cdn, "items", "expense_account");
+	},
+});
 
 frappe.ui.form.on("Sales Invoice", {
 	setup: function (frm) {
+		frm.cscript.tax_table = "Sales Taxes and Charges";
+
 		frm.add_fetch("customer", "tax_id", "tax_id");
 		frm.add_fetch("payment_term", "invoice_portion", "invoice_portion");
 		frm.add_fetch("payment_term", "description", "description");

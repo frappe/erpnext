@@ -431,4 +431,4 @@ frappe.ui.form.on("Payment Reconciliation Allocation", {
 	},
 });
 
-extend_cscript(cur_frm.cscript, new erpnext.accounts.PaymentReconciliationController({ frm: cur_frm }));
+frappe.ui.form.set_controller("Payment Reconciliation", erpnext.accounts.PaymentReconciliationController);

@@ -7,6 +7,7 @@
  "description": "A third party distributor / dealer / commission agent / affiliate / reseller who sells the companies products for a commission.",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/sales-partner",
  "engine": "InnoDB",
  "field_order": [
   "partner_name",
@@ -189,7 +190,7 @@
    "label": "Description"
   }
  ],
- "icon": "fa fa-user",
+ "icon": "handshake",
  "idx": 1,
  "links": [],
  "modified": "2026-08-21 23:11:48.371608",

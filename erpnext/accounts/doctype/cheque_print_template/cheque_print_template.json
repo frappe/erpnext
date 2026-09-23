@@ -4,6 +4,7 @@
  "autoname": "field:bank_name",
  "creation": "2016-05-04 14:35:00.402544",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/cheque-print-template",
  "engine": "InnoDB",
  "field_order": [
   "settings",
@@ -293,6 +294,7 @@
    "fieldtype": "HTML"
   }
  ],
+ "icon": "printer",
  "links": [],
  "max_attachments": 1,
  "modified": "2026-06-08 12:10:35.829531",

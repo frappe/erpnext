@@ -1109,7 +1109,8 @@ def create_pick_list(source_name: str, target_doc: str | dict | Document | None 
 
 	doc.purpose = "Delivery"
 
-	doc.set_item_locations()
+	if not doc.pick_manually:
+		doc.set_item_locations()
 
 	return doc
 

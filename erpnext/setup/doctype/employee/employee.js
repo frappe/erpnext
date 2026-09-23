@@ -22,7 +22,7 @@ erpnext.setup.EmployeeController = class EmployeeController extends frappe.ui.fo
 	}
 
 	refresh() {
-		erpnext.toggle_naming_series();
+		erpnext.toggle_naming_series(this.frm);
 	}
 };
 
@@ -221,9 +221,7 @@ frappe.ui.form.on("Employee", {
 	},
 });
 
-cur_frm.cscript = new erpnext.setup.EmployeeController({
-	frm: cur_frm,
-});
+frappe.ui.form.set_controller("Employee", erpnext.setup.EmployeeController);
 
 frappe.tour["Employee"] = [
 	{

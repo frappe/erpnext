@@ -116,7 +116,7 @@ class BaseManufactureStockEntry(BaseStockEntry):
 					"BOM", self.doc.bom_no, "default_target_warehouse"
 				)
 
-			row.qty = row.qty * self.doc.fg_completed_qty
+			row.qty = row.qty * flt(self.doc.fg_completed_qty)
 			if row.get("process_loss_per"):
 				row.qty -= flt(
 					row.qty * row.get("process_loss_per") / 100, self.doc.precision("fg_completed_qty")
@@ -603,9 +603,9 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			}
 		)
 		qty = (
-			(row.required_qty / self.wo_doc.qty) * self.doc.fg_completed_qty
+			(row.required_qty / self.wo_doc.qty) * flt(self.doc.fg_completed_qty)
 			if self.wo_doc
-			else flt(row.qty) * self.doc.fg_completed_qty
+			else flt(row.qty) * flt(self.doc.fg_completed_qty)
 		)
 		item_args["qty"] = ceil_qty_if_uom_has_whole_number(qty, row.stock_uom)
 		item_args["transfer_qty"] = item_args["qty"]
@@ -811,7 +811,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			.where(
 				(stock_entry.work_order == self.doc.work_order)
 				& (stock_entry_detail.s_warehouse.isnotnull())
-				& (stock_entry.purpose == "Manufacture")
+				& (stock_entry.purpose.isin(["Manufacture", "Material Consumption for Manufacture"]))
 				& (stock_entry.docstatus == 1)
 			)
 			.orderby(stock_entry_detail.idx)
@@ -821,6 +821,9 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		for row in self._consumption_entries:
 			row.warehouse = row.s_warehouse
 			buckets = self._get_available_buckets(row)
+			if not buckets:
+				continue
+
 			if row.serial_and_batch_bundle:
 				self._deduct_consumed_serial_batch(buckets, row.serial_and_batch_bundle)
 			else:
@@ -1142,7 +1145,7 @@ class RepackStockEntry(BaseManufactureStockEntry):
 
 		for row in bom_items:
 			row.s_warehouse = self.doc.from_warehouse
-			row.qty = row.qty * self.doc.fg_completed_qty
+			row.qty = row.qty * flt(self.doc.fg_completed_qty)
 			row.transfer_qty = row.qty
 			if not row.uom:
 				row.uom = row.stock_uom

@@ -8,6 +8,7 @@
  "description": "Potential Sales Deal",
  "doctype": "DocType",
  "document_type": "Document",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/opportunity",
  "editable_grid": 1,
  "email_append_to": 1,
  "engine": "InnoDB",
@@ -649,7 +650,7 @@
   }
  ],
  "grid_page_length": 50,
- "icon": "fa fa-info-sign",
+ "icon": "user-star",
  "idx": 195,
  "links": [],
  "modified": "2026-02-10 14:36:01.387984",

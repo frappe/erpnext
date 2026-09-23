@@ -3,6 +3,7 @@
  "creation": "2013-06-24 16:37:54",
  "description": "Default settings for your stock-related transactions",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/stock-settings",
  "engine": "InnoDB",
  "field_order": [
   "defaults_tab",
@@ -588,7 +589,7 @@
    "label": "Use Inline Serial / Batch Editor"
   }
  ],
- "icon": "icon-cog",
+ "icon": "settings",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,

@@ -3,6 +3,7 @@
  "autoname": "hash",
  "creation": "2023-08-11 17:22:12.907518",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/serial-and-batch-bundle",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -249,6 +250,7 @@
   }
  ],
  "grid_page_length": 50,
+ "icon": "layers",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],

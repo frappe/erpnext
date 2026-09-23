@@ -41,34 +41,28 @@ $.extend(erpnext.queries, {
 		return { query: "erpnext.projects.utils.query_task" };
 	},
 
-	customer_filter: function (doc) {
+	alert_missing_field: function (frm, doc, fieldname) {
+		frm?.scroll_to_field(fieldname);
+		frappe.show_alert({
+			message: __("Please set {0} first.", [
+				frappe.meta.get_translated_label(doc.doctype, fieldname, doc.name),
+			]),
+			indicator: "orange",
+		});
+	},
+
+	customer_filter: function (doc, cdt, cdn, frm) {
 		if (!doc.customer) {
-			cur_frm.scroll_to_field("customer");
-			frappe.show_alert({
-				message: __("Please set {0} first.", [
-					frappe.meta.get_translated_label(doc.doctype, "customer", doc.name),
-				]),
-				indicator: "orange",
-			});
+			erpnext.queries.alert_missing_field(frm, doc, "customer");
 		}
 
 		return { filters: { customer: doc.customer } };
 	},
 
-	contact_query: function (doc) {
+	contact_query: function (doc, cdt, cdn, frm) {
 		if (frappe.dynamic_link) {
 			if (!doc[frappe.dynamic_link.fieldname]) {
-				cur_frm.scroll_to_field(frappe.dynamic_link.fieldname);
-				frappe.show_alert({
-					message: __("Please set {0} first.", [
-						frappe.meta.get_translated_label(
-							doc.doctype,
-							frappe.dynamic_link.fieldname,
-							doc.name
-						),
-					]),
-					indicator: "orange",
-				});
+				erpnext.queries.alert_missing_field(frm, doc, frappe.dynamic_link.fieldname);
 			}
 
 			return {
@@ -94,20 +88,10 @@ $.extend(erpnext.queries, {
 		};
 	},
 
-	address_query: function (doc) {
+	address_query: function (doc, cdt, cdn, frm) {
 		if (frappe.dynamic_link) {
 			if (!doc[frappe.dynamic_link.fieldname]) {
-				cur_frm.scroll_to_field(frappe.dynamic_link.fieldname);
-				frappe.show_alert({
-					message: __("Please set {0} first.", [
-						frappe.meta.get_translated_label(
-							doc.doctype,
-							frappe.dynamic_link.fieldname,
-							doc.name
-						),
-					]),
-					indicator: "orange",
-				});
+				erpnext.queries.alert_missing_field(frm, doc, frappe.dynamic_link.fieldname);
 			}
 
 			return {
@@ -120,15 +104,9 @@ $.extend(erpnext.queries, {
 		}
 	},
 
-	company_address_query: function (doc) {
+	company_address_query: function (doc, cdt, cdn, frm) {
 		if (!doc.company) {
-			cur_frm.scroll_to_field("company");
-			frappe.show_alert({
-				message: __("Please set {0} first.", [
-					frappe.meta.get_translated_label(doc.doctype, "company", doc.name),
-				]),
-				indicator: "orange",
-			});
+			erpnext.queries.alert_missing_field(frm, doc, "company");
 		}
 
 		let filters = { link_doctype: "Company", link_name: doc.company || "" };
@@ -151,23 +129,17 @@ $.extend(erpnext.queries, {
 		};
 	},
 
-	supplier_filter: function (doc) {
+	supplier_filter: function (doc, cdt, cdn, frm) {
 		if (!doc.supplier) {
-			cur_frm.scroll_to_field("supplier");
-			frappe.show_alert({
-				message: __("Please set {0} first.", [
-					frappe.meta.get_translated_label(doc.doctype, "supplier", doc.name),
-				]),
-				indicator: "orange",
-			});
+			erpnext.queries.alert_missing_field(frm, doc, "supplier");
 		}
 
 		return { filters: { supplier: doc.supplier } };
 	},
 
-	lead_filter: function (doc) {
+	lead_filter: function (doc, cdt, cdn, frm) {
 		if (!doc.lead) {
-			cur_frm.scroll_to_field("lead");
+			frm?.scroll_to_field("lead");
 			frappe.show_alert({
 				message: __("Please specify a {0} first.", [
 					frappe.meta.get_translated_label(doc.doctype, "lead", doc.name),
