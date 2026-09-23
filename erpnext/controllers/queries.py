@@ -402,11 +402,11 @@ def item_query(
 	search_conditions.append(item.item_code.isin(barcode_subquery))
 
 	# Condition for the description
-	searches_description = frappe.db.estimate_count("Item") < 50000 and "description" not in fields_to_process
-	if searches_description:
+	if frappe.db.estimate_count("Item") < 50000 and "description" not in fields_to_process:
 		search_conditions.append(item.description.like(search_str))
+		searched_fields.append("description")
 
-	candidates = None if searches_description else get_item_search_candidates(txt, searched_fields)
+	candidates = get_item_search_candidates(txt, searched_fields)
 
 	txt_no_percent = txt.replace("%", "")
 

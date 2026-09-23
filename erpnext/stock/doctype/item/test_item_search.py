@@ -5,7 +5,11 @@ import frappe
 from frappe.search.sqlite_search import get_search_classes, index_docs_in_queue, update_doc_index
 
 from erpnext.controllers import queries
-from erpnext.stock.doctype.item.item_search import ItemSearch, build_match_query
+from erpnext.stock.doctype.item.item_search import (
+	MINIMUM_ITEM_COUNT,
+	ItemSearch,
+	build_match_query,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -35,11 +39,12 @@ class TestBuildMatchQuery(ERPNextTestSuite):
 
 
 class TestItemSearchSetting(ERPNextTestSuite):
-	def test_the_stock_settings_checkbox_drives_the_index(self):
-		with self.change_settings("Stock Settings", enable_item_search_index=0):
+	def test_the_item_count_drives_the_index(self):
+		"""No setting to tick: a catalogue this size costs more to scan than to index."""
+		with patch.object(frappe.db, "estimate_count", return_value=MINIMUM_ITEM_COUNT - 1):
 			self.assertFalse(ItemSearch().is_search_enabled())
 
-		with self.change_settings("Stock Settings", enable_item_search_index=1):
+		with patch.object(frappe.db, "estimate_count", return_value=MINIMUM_ITEM_COUNT):
 			self.assertTrue(ItemSearch().is_search_enabled())
 
 
