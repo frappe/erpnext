@@ -26,6 +26,11 @@ frappe.ui.form.on("Blanket Order", {
 	refresh: function (frm) {
 		erpnext.hide_company(frm);
 		blanket_order_pricing.update_labels(frm);
+		add_blanket_order_status_buttons(frm);
+		if (frm.doc.status === "Closed") {
+			return;
+		}
+
 		if (frm.doc.customer && frm.doc.docstatus === 1 && frm.doc.to_date > frappe.datetime.get_today()) {
 			frm.add_custom_button(
 				__("Sales Order"),
@@ -228,6 +233,31 @@ const blanket_order_pricing = {
 		}
 	},
 };
+
+function add_blanket_order_status_buttons(frm) {
+	if (frm.doc.docstatus !== 1 || !frm.has_perm("submit")) {
+		return;
+	}
+
+	if (frm.doc.status === "Closed") {
+		frm.add_custom_button(
+			__("Re-open"),
+			() => update_blanket_order_status(frm, "Submitted"),
+			__("Status")
+		);
+	} else {
+		frm.add_custom_button(__("Close"), () => update_blanket_order_status(frm, "Closed"), __("Status"));
+	}
+}
+
+function update_blanket_order_status(frm, status) {
+	frappe.call({
+		method: "erpnext.manufacturing.doctype.blanket_order.blanket_order.update_status",
+		args: { status: status, name: frm.doc.name },
+		freeze: true,
+		callback: () => frm.reload_doc(),
+	});
+}
 
 function reset_party_pricing(frm) {
 	return blanket_order_pricing.apply(frm, null, { reset_party_values: true });

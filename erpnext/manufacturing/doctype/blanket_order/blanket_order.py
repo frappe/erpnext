@@ -4,18 +4,18 @@
 
 import frappe
 from frappe import _
-from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import Sum
 from frappe.utils import flt, getdate
 
 from erpnext import get_company_currency
 from erpnext.accounts.services.taxes import validate_conversion_rate
+from erpnext.controllers.status_updater import StatusUpdater
 from erpnext.manufacturing.doctype.blanket_order import blanket_order_pricing
 from erpnext.stock.doctype.item.item import get_item_defaults
 
 
-class BlanketOrder(Document):
+class BlanketOrder(StatusUpdater):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
 
@@ -42,6 +42,7 @@ class BlanketOrder(Document):
 		plc_conversion_rate: DF.Float
 		price_list_currency: DF.Link | None
 		selling_price_list: DF.Link | None
+		status: DF.Literal["Draft", "Submitted", "Closed", "Cancelled"]
 		supplier: DF.Link | None
 		supplier_name: DF.Data | None
 		tc_name: DF.Link | None
@@ -60,6 +61,16 @@ class BlanketOrder(Document):
 		self.validate_item_qty()
 		self.set_party_item_code()
 		self.set_base_rates()
+
+	def on_submit(self):
+		self.set_status(update=True)
+
+	def on_cancel(self):
+		self.set_status(update=True)
+
+	def update_status(self, status: str) -> None:
+		self.set_status(update=True, status=status)
+		self.notify_update()
 
 	def set_currency(self):
 		if self.currency:
@@ -182,6 +193,12 @@ def apply_price_list(
 		reset_plc_conversion_rate=reset_plc_conversion_rate,
 		reset_conversion_rate=reset_conversion_rate,
 	)
+
+
+@frappe.whitelist(methods=["POST"])
+def update_status(status: str, name: str):
+	blanket_order = frappe.get_doc("Blanket Order", name, check_permission="submit")
+	blanket_order.update_status(status)
 
 
 @frappe.whitelist()
