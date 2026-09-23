@@ -175,6 +175,8 @@ def get_columns(invoice_list, additional_table_columns, include_payments=False):
 		{
 			"label": _("Voucher Type"),
 			"fieldname": "voucher_type",
+			"fieldtype": "Link",
+			"options": "DocType",
 			"width": 120,
 		},
 		{
