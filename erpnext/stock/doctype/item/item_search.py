@@ -5,7 +5,6 @@ import sqlite3
 import frappe
 from frappe.search.sqlite_search import SQLiteSearch, SQLiteSearchIndexMissingError
 
-MINIMUM_ITEM_COUNT = 500000
 MINIMUM_TERM_LENGTH = 3
 CANDIDATE_LIMIT = 25000
 LIKE_WILDCARDS = r"[%_]"
@@ -26,8 +25,8 @@ def get_searched_fieldnames() -> list[str]:
 class ItemSearch(SQLiteSearch):
 	"""FTS5 trigram index over Item, for substring search on large catalogues.
 
-	Builds itself once the catalogue passes MINIMUM_ITEM_COUNT. A host whose copy is behind drops
-	valid Items from its candidate list, so results depend on which host answered.
+	A host whose copy is behind drops valid Items from its candidate list, so results depend on
+	which host answered. Switched on per site from Global Defaults, which carries that warning.
 	"""
 
 	INDEX_NAME = "item_search.db"
@@ -113,8 +112,8 @@ class ItemSearch(SQLiteSearch):
 		return get_barcodes_by_item([item_code]).get(item_code, "")
 
 	def is_search_enabled(self) -> bool:
-		"""On once the catalogue is large enough that scanning it costs more than the index."""
-		return frappe.db.estimate_count("Item") >= MINIMUM_ITEM_COUNT
+		"""Off unless Global Defaults opts in: building reads every Item, which is not free."""
+		return bool(frappe.get_single_value("Global Defaults", "enable_item_search_index"))
 
 	def get_search_filters(self) -> dict:
 		return {}
