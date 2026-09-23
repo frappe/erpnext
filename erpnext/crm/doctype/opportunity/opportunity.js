@@ -42,7 +42,7 @@ frappe.ui.form.on("Opportunity", {
 			erpnext.utils.map_current_doc({
 				method: "erpnext.crm.doctype.lead.mapper.make_opportunity",
 				source_name: frm.doc.party_name,
-				frm: frm,
+				target: frm,
 			});
 		}
 	},
@@ -73,7 +73,7 @@ frappe.ui.form.on("Opportunity", {
 	refresh: function (frm) {
 		var doc = frm.doc;
 		frm.trigger("setup_opportunity_from");
-		erpnext.toggle_naming_series();
+		erpnext.toggle_naming_series(frm);
 
 		if (!frm.is_new() && doc.status !== "Lost") {
 			if (doc.items) {

@@ -6,7 +6,6 @@ frappe.provide("erpnext.stock.utils");
 
 $.extend(erpnext, {
 	get_currency: function (company) {
-		if (!company && cur_frm) company = cur_frm.doc.company;
 		if (company)
 			return frappe.get_doc(":Company", company)?.default_currency || frappe.boot.sysdefaults.currency;
 		else return frappe.boot.sysdefaults.currency;
@@ -110,13 +109,9 @@ $.extend(erpnext, {
 		frm.fields_dict[child_name].grid.reset_grid();
 	},
 
-	toggle_naming_series: function () {
-		if (
-			cur_frm &&
-			cur_frm.fields_dict.naming_series &&
-			cur_frm.meta.naming_rule == 'By "Naming Series" field'
-		) {
-			cur_frm.toggle_display("naming_series", cur_frm.doc.__islocal ? true : false);
+	toggle_naming_series: function (frm = cur_frm) {
+		if (frm?.fields_dict.naming_series && frm.meta.naming_rule == 'By "Naming Series" field') {
+			frm.toggle_display("naming_series", frm.doc.__islocal ? true : false);
 		}
 	},
 
@@ -1067,15 +1062,17 @@ erpnext.utils.update_child_items = function (opts) {
 };
 
 erpnext.utils.map_current_doc = function (opts) {
+	const frm = opts.target || cur_frm;
+
 	function _map() {
-		if ($.isArray(cur_frm.doc.items) && cur_frm.doc.items.length > 0) {
+		if ($.isArray(frm.doc.items) && frm.doc.items.length > 0) {
 			// remove first item row if empty
-			if (!cur_frm.doc.items[0].item_code) {
-				cur_frm.doc.items = cur_frm.doc.items.splice(1);
+			if (!frm.doc.items[0].item_code) {
+				frm.doc.items = frm.doc.items.splice(1);
 			}
 
 			// find the doctype of the items table
-			var items_doctype = frappe.meta.get_docfield(cur_frm.doctype, "items").options;
+			var items_doctype = frappe.meta.get_docfield(frm.doctype, "items").options;
 
 			// find the link fieldname from items table for the given
 			// source_doctype
@@ -1088,7 +1085,7 @@ erpnext.utils.map_current_doc = function (opts) {
 			var already_set = false;
 			var item_qty_map = {};
 
-			$.each(cur_frm.doc.items, function (i, d) {
+			$.each(frm.doc.items, function (i, d) {
 				opts.source_name.forEach(function (src) {
 					if (d[link_fieldname] == src) {
 						already_set = true;
@@ -1128,7 +1125,7 @@ erpnext.utils.map_current_doc = function (opts) {
 			args: {
 				method: opts.method,
 				source_names: opts.source_name,
-				target_doc: cur_frm.doc,
+				target_doc: frm.doc,
 				args: opts.args,
 			},
 			freeze: true,
@@ -1136,8 +1133,8 @@ erpnext.utils.map_current_doc = function (opts) {
 			callback: function (r) {
 				if (!r.exc) {
 					frappe.model.sync(r.message);
-					cur_frm.dirty();
-					cur_frm.refresh();
+					frm.dirty();
+					frm.refresh();
 				}
 			},
 		});
@@ -1159,7 +1156,7 @@ erpnext.utils.map_current_doc = function (opts) {
 	if (opts.source_doctype) {
 		let data_fields = [];
 		if (["Purchase Receipt", "Delivery Note", "Purchase Invoice"].includes(opts.source_doctype)) {
-			let target_meta = frappe.get_meta(cur_frm.doc.doctype);
+			let target_meta = frappe.get_meta(frm.doc.doctype);
 			if (target_meta.fields.find((f) => f.fieldname === "taxes")) {
 				data_fields.push({
 					fieldname: "merge_taxes",

@@ -659,7 +659,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 
 	refresh() {
-		erpnext.toggle_naming_series();
+		erpnext.toggle_naming_series(this.frm);
 		erpnext.hide_company(this.frm);
 		// Remember the currency the rendered document is denominated in, so that a
 		// real currency change can be told apart from a mere exchange rate refresh

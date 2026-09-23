@@ -46,20 +46,18 @@ erpnext.buying = {
 
 				// no idea where me is coming from
 				if (this.frm.get_field("shipping_address")) {
-					this.frm.set_query("shipping_address", () => {
+					this.frm.set_query("shipping_address", (doc, cdt, cdn, frm) => {
 						if (this.frm.doc.customer) {
 							return {
 								query: "frappe.contacts.doctype.address.address.address_query",
 								filters: { link_doctype: "Customer", link_name: this.frm.doc.customer },
 							};
-						} else return erpnext.queries.company_address_query(this.frm.doc);
+						} else return erpnext.queries.company_address_query(doc, cdt, cdn, frm);
 					});
 				}
 
 				if (this.frm.get_field("dispatch_address")) {
-					this.frm.set_query("dispatch_address", () => {
-						return erpnext.queries.address_query(this.frm.doc);
-					});
+					this.frm.set_query("dispatch_address", erpnext.queries.address_query);
 				}
 			}
 

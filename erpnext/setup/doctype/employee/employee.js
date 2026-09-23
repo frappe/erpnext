@@ -22,7 +22,7 @@ erpnext.setup.EmployeeController = class EmployeeController extends frappe.ui.fo
 	}
 
 	refresh() {
-		erpnext.toggle_naming_series();
+		erpnext.toggle_naming_series(this.frm);
 	}
 };
 

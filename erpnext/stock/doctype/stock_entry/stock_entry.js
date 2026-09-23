@@ -947,7 +947,7 @@ frappe.ui.form.on("Stock Entry", {
 			erpnext.utils.map_current_doc({
 				method: "erpnext.stock.doctype.stock_entry.services.subcontracting.get_items_from_subcontract_order",
 				source_name: frm.doc.purchase_order,
-				target_doc: frm,
+				target: frm,
 				freeze: true,
 			});
 		}
@@ -959,7 +959,7 @@ frappe.ui.form.on("Stock Entry", {
 			erpnext.utils.map_current_doc({
 				method: "erpnext.stock.doctype.stock_entry.services.subcontracting.get_items_from_subcontract_order",
 				source_name: frm.doc.subcontracting_order,
-				target_doc: frm,
+				target: frm,
 				freeze: true,
 			});
 		}
@@ -1345,7 +1345,7 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 	}
 
 	refresh() {
-		erpnext.toggle_naming_series();
+		erpnext.toggle_naming_series(this.frm);
 		this.toggle_related_fields(this.frm.doc);
 		this.toggle_enable_bom();
 		this.show_stock_ledger();

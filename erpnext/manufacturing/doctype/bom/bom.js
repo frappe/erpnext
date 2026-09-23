@@ -870,8 +870,8 @@ erpnext.bom.calculate_rm_cost = function (doc) {
 		total_rm_cost += amount;
 		base_total_rm_cost += base_amount;
 	}
-	cur_frm.set_value("raw_material_cost", total_rm_cost);
-	cur_frm.set_value("base_raw_material_cost", base_total_rm_cost);
+	frappe.model.set_value(doc.doctype, doc.name, "raw_material_cost", total_rm_cost);
+	frappe.model.set_value(doc.doctype, doc.name, "base_raw_material_cost", base_total_rm_cost);
 };
 
 // Calculate Total Cost
@@ -880,8 +880,8 @@ erpnext.bom.calculate_total = function (doc) {
 	var base_total_cost =
 		flt(doc.base_operating_cost) + flt(doc.base_raw_material_cost) - flt(doc.base_secondary_items_cost);
 
-	cur_frm.set_value("total_cost", total_cost);
-	cur_frm.set_value("base_total_cost", base_total_cost);
+	frappe.model.set_value(doc.doctype, doc.name, "total_cost", total_cost);
+	frappe.model.set_value(doc.doctype, doc.name, "base_total_cost", base_total_cost);
 };
 
 frappe.ui.form.on("BOM Operation", "operation", function (frm, cdt, cdn) {

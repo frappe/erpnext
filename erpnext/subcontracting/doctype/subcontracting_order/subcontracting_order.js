@@ -127,9 +127,7 @@ frappe.ui.form.on("Subcontracting Order", {
 
 		frm.set_query("billing_address", erpnext.queries.company_address_query);
 
-		frm.set_query("shipping_address", () => {
-			return erpnext.queries.company_address_query(frm.doc);
-		});
+		frm.set_query("shipping_address", erpnext.queries.company_address_query);
 	},
 
 	onload: (frm) => {
@@ -147,7 +145,7 @@ frappe.ui.form.on("Subcontracting Order", {
 			erpnext.utils.map_current_doc({
 				method: "erpnext.buying.doctype.purchase_order.mapper.make_subcontracting_order",
 				source_name: frm.doc.purchase_order,
-				target_doc: frm,
+				target: frm,
 				freeze: true,
 				freeze_message: __("Mapping Subcontracting Order ..."),
 			});
