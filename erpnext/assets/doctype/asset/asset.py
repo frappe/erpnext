@@ -1218,6 +1218,15 @@ def get_asset_value_after_depreciation(asset_name, finance_book=None):
 	):
 		frappe.throw(_("Not permitted"), frappe.PermissionError)
 
+	# select-or-read: these roles hold `select` on Asset, which does not satisfy a `read` check.
+	# Guard only here -- the in-process callers use _get_asset_value_after_depreciation() below.
+	ptype = "select" if frappe.only_has_select_perm("Asset") else "read"
+	frappe.has_permission("Asset", ptype, doc=asset_name, throw=True)
+
+	return _get_asset_value_after_depreciation(asset_name, finance_book)
+
+
+def _get_asset_value_after_depreciation(asset_name, finance_book=None):
 	asset = frappe.get_doc("Asset", asset_name)
 	if not asset.calculate_depreciation:
 		return flt(asset.value_after_depreciation)
