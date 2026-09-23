@@ -241,11 +241,6 @@ class POSInvoiceMergeLog(Document):
 				si_item.pos_invoice = doc.name
 				si_item.pos_invoice_item = item.name
 				if doc.is_return:
-<<<<<<< HEAD
-					si_item.sales_invoice_item = get_sales_invoice_item(
-						doc.return_against, item.pos_invoice_item
-					)
-=======
 					reversed_row = reversed_rows.get(item.pos_invoice_item) or frappe._dict()
 					si_item.sales_invoice_item = reversed_row.get("name")
 					# quote the rate of the row being reversed: rounding an invoice-level discount
@@ -253,7 +248,6 @@ class POSInvoiceMergeLog(Document):
 					# validate_returned_items refuses a return priced above its original
 					if si_item.sales_invoice_item:
 						si_item.rate = reversed_row.rate
->>>>>>> 5de2ac1 (fix(pos): quote the reversed row's rate on a consolidated credit note (#59320))
 				if item.serial_and_batch_bundle:
 					si_item.serial_and_batch_bundle = item.serial_and_batch_bundle
 				items.append(si_item)
@@ -432,7 +426,6 @@ class POSInvoiceMergeLog(Document):
 			si.cancel()
 
 
-<<<<<<< HEAD
 def update_item_wise_tax_detail(consolidate_tax_row, tax_row):
 	consolidated_tax_detail = json.loads(consolidate_tax_row.item_wise_tax_detail)
 	tax_row_detail = json.loads(tax_row.item_wise_tax_detail)
@@ -450,7 +443,8 @@ def update_item_wise_tax_detail(consolidate_tax_row, tax_row):
 			consolidated_tax_detail.update({item_code: [tax_data[0], tax_data[1]]})
 
 	consolidate_tax_row.item_wise_tax_detail = json.dumps(consolidated_tax_detail, separators=(",", ":"))
-=======
+
+
 def get_reversed_rows(return_against):
 	"""Rows of the consolidated sales these returns reverse, keyed by the POS invoice row."""
 	if not return_against:
@@ -467,11 +461,11 @@ def get_reversed_rows(return_against):
 			(sales_invoice.name == sales_invoice_item.parent)
 			& (sales_invoice.is_return == 0)
 			& (sales_invoice_item.pos_invoice.isin(return_against))
+			& (sales_invoice.docstatus == 1)
 		)
 	).run(as_dict=True)
 
 	return {row.pos_invoice_item: row for row in rows}
->>>>>>> 5de2ac1 (fix(pos): quote the reversed row's rate on a consolidated credit note (#59320))
 
 
 def get_all_unconsolidated_invoices():
@@ -718,27 +712,3 @@ def get_error_message(message) -> str:
 		return message["message"]
 	except Exception:
 		return str(message)
-
-
-def get_sales_invoice_item(return_against_pos_invoice, pos_invoice_item):
-	try:
-		SalesInvoice = DocType("Sales Invoice")
-		SalesInvoiceItem = DocType("Sales Invoice Item")
-
-		query = (
-			frappe.qb.from_(SalesInvoice)
-			.from_(SalesInvoiceItem)
-			.select(SalesInvoiceItem.name)
-			.where(
-				(SalesInvoice.name == SalesInvoiceItem.parent)
-				& (SalesInvoice.is_return == 0)
-				& (SalesInvoiceItem.pos_invoice == return_against_pos_invoice)
-				& (SalesInvoiceItem.pos_invoice_item == pos_invoice_item)
-				& (SalesInvoice.docstatus == 1)
-			)
-		)
-
-		result = query.run(as_dict=True)
-		return result[0].name if result else None
-	except Exception:
-		return None
