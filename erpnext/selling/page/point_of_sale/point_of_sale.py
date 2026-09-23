@@ -283,7 +283,10 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 @frappe.whitelist()
 def search_for_serial_or_batch_or_barcode_number(search_value: str) -> dict[str, str | None]:
 	# POS-page wrapper around scan_barcode; the page's entitlement is the POS Profile.
-	frappe.has_permission("POS Profile", throw=True)
+	# select-or-read, as in the page entry points: this is reached in-process from get_items via
+	# search_by_term, so a bare read check breaks search for the role the page exists for.
+	ptype = "select" if frappe.only_has_select_perm("POS Profile") else "read"
+	frappe.has_permission("POS Profile", ptype, throw=True)
 
 	return scan_barcode(search_value)
 
