@@ -1341,7 +1341,6 @@ class StockEntry(StockController):
 		return {}
 
 	def get_consumed_items(self):
-		"""Get all raw materials consumed through consumption entries"""
 		parent = frappe.qb.DocType("Stock Entry")
 		child = frappe.qb.DocType("Stock Entry Detail")
 
