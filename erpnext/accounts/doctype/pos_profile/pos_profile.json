@@ -75,6 +75,7 @@
   "more_info_tab",
   "section_break_16",
   "print_format",
+  "receipt_email_template",
   "letter_head",
   "column_break0",
   "tc_name",
@@ -315,6 +316,13 @@
    "fieldtype": "Link",
    "label": "Print Format",
    "options": "Print Format"
+  },
+  {
+   "description": "Subject and message for receipts emailed from the POS. The template gets the invoice as doc. A message typed by the cashier replaces the template message. Leave empty to send the default email.",
+   "fieldname": "receipt_email_template",
+   "fieldtype": "Link",
+   "label": "Receipt Email Template",
+   "options": "Email Template"
   },
   {
    "depends_on": "update_stock",
@@ -583,7 +591,7 @@
    "link_fieldname": "pos_profile"
   }
  ],
- "modified": "2026-08-21 23:11:45.419667",
+ "modified": "2026-09-23 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",

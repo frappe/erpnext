@@ -58,6 +58,7 @@ class POSProfile(Document):
 		print_format: DF.Link | None
 		print_receipt_on_order_complete: DF.Check
 		project: DF.Link | None
+		receipt_email_template: DF.Link | None
 		select_print_heading: DF.Link | None
 		selling_price_list: DF.Link | None
 		set_grand_total_to_default_mop: DF.Check
