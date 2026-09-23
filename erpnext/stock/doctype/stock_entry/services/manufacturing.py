@@ -805,6 +805,9 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		for row in self._consumption_entries:
 			row.warehouse = row.s_warehouse
 			buckets = self._get_available_buckets(row)
+			if not buckets:
+				continue
+
 			if row.serial_and_batch_bundle:
 				self._deduct_consumed_serial_batch(buckets, row.serial_and_batch_bundle)
 			else:
