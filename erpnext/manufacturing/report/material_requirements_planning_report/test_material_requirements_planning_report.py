@@ -280,6 +280,52 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		self.assertFalse(frappe.get_all("Work Order", filters={"mps": plan.mps}, pluck="name"))
 		self.assertFalse(frappe.get_all("Purchase Order", filters={"mps": plan.mps}, pluck="name"))
 
+	def test_make_order_rejects_purchase_item_without_supplier(self):
+		plan = make_mps_item(
+			self,
+			{
+				"is_stock_item": 1,
+				"is_purchase_item": 1,
+				"item_defaults": [{"company": COMPANY, "default_warehouse": WAREHOUSE}],
+			},
+		)
+		self.assertEqual(plan.row.type_of_material, "Purchase")
+		self.assertFalse(plan.row.default_supplier)
+
+		with self.assertRaises(frappe.ValidationError) as ctx:
+			make_order([plan.row], COMPANY, warehouse=WAREHOUSE, mps=plan.mps)
+
+		self.assertIn("Default Supplier", str(ctx.exception))
+		self.assertFalse(frappe.get_all("Purchase Order", filters={"mps": plan.mps}, pluck="name"))
+
+	def test_make_order_falls_back_to_item_group_default_supplier(self):
+		group = "_Test MRP Item Group With Supplier"
+		if not frappe.db.exists("Item Group", group):
+			frappe.get_doc(
+				{
+					"doctype": "Item Group",
+					"item_group_name": group,
+					"parent_item_group": "All Item Groups",
+					"item_group_defaults": [{"company": COMPANY, "default_supplier": SUPPLIER}],
+				}
+			).insert()
+
+		plan = make_mps_item(
+			self,
+			{
+				"is_stock_item": 1,
+				"is_purchase_item": 1,
+				"item_group": group,
+				"item_defaults": [{"company": COMPANY, "default_warehouse": WAREHOUSE}],
+			},
+		)
+		self.assertEqual(plan.row.type_of_material, "Purchase")
+		self.assertEqual(plan.row.default_supplier, SUPPLIER)
+
+		make_order([plan.row], COMPANY, warehouse=WAREHOUSE, mps=plan.mps)
+
+		self.assertEqual(get_created_order(plan.mps, "Purchase Order").supplier, SUPPLIER)
+
 	def test_make_order_uses_the_bom_passed_on_the_row(self):
 		plan = make_mps_item(
 			self,
