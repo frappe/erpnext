@@ -254,9 +254,7 @@ class DependencyValidator(Validator):
 				# skip self-reference, `CalculationFormulaValidator` already reports it
 				deps = [
 					code
-					for code in extract_reference_codes_from_formula(
-						row.calculation_formula, list(available_codes)
-					)
+					for code in extract_reference_codes_from_formula(row.calculation_formula, available_codes)
 					if code != row.reference_code
 				]
 				if deps:
@@ -389,7 +387,19 @@ class CalculationFormulaValidator(Validator):
 			return str(e)
 
 	def _non_numeric_reason(self, tree: ast.Expression) -> str | None:
-		node = tree.body
+		return self._non_numeric_node(tree.body)
+
+	def _non_numeric_node(self, node: ast.expr) -> str | None:
+		"""Describe the result type when an expression can never produce a number, else None."""
+		# `A if X else B` and `A and B` return one of their operands, so every operand
+		# must be able to produce a number
+		if isinstance(node, ast.IfExp):
+			return self._non_numeric_node(node.body) or self._non_numeric_node(node.orelse)
+		if isinstance(node, ast.BoolOp):
+			for value in node.values:
+				if reason := self._non_numeric_node(value):
+					return reason
+			return None
 
 		if isinstance(node, ast.Compare):
 			return _("a true/false comparison")
@@ -672,19 +682,17 @@ class FormulaValidator(Validator):
 		return result
 
 
-def extract_reference_codes_from_formula(formula: str, available_codes: list[str]) -> list[str]:
-	"""Return the reference codes a formula depends on, preserving `available_codes` order."""
+def extract_reference_codes_from_formula(formula: str, available_codes: set[str]) -> list[str]:
+	"""Return the reference codes a formula depends on, sorted so the result is stable."""
 	if not formula:
 		return []
-
-	available = set(available_codes)
 
 	try:
 		tree = ast.parse(formula, mode="eval")
 	except SyntaxError:
 		# An unparseable formula is reported by CalculationFormulaValidator. Fall back to
 		# a word match so dependency ordering still sees the codes it can recognise.
-		found = {code for code in available if re.search(r"\b" + re.escape(code) + r"\b", formula)}
+		found = {code for code in available_codes if re.search(r"\b" + re.escape(code) + r"\b", formula)}
 	else:
 		called_names = {
 			node.func.id
@@ -701,9 +709,10 @@ def extract_reference_codes_from_formula(formula: str, available_codes: list[str
 			node.id
 			for node in ast.walk(tree)
 			if isinstance(node, ast.Name)
-			and node.id in available
+			and node.id in available_codes
 			and node.id not in called_names
 			and node.id not in bound
 		}
 
-	return [code for code in available_codes if code in found]
+	# sorted so the order is the same in every process
+	return sorted(found)

@@ -349,6 +349,21 @@ class TestCalculationFormula(FinancialReportTemplateTestCase):
 		self.assertTrue(self._validate("A / (0 + 1)").is_valid)
 		self.assertTrue(self._validate("ROM / (CAS + FDE - ROM)", ("ROM", "CAS", "FDE")).is_valid)
 
+	def test_conditional_branches_must_all_give_a_number(self):
+		# only the branches can become the value, so each one has to be numeric
+		self.assertFalse(self._validate("'Hello' if A else 'Hello'").is_valid)
+		self.assertFalse(self._validate("'a' if A else B").is_valid)
+		self.assertFalse(self._validate("A if A else 'a'").is_valid)
+		self.assertFalse(self._validate("A or 'text'").is_valid)
+		self.assertFalse(self._validate("A and 'text'").is_valid)
+		# nested one level down
+		self.assertFalse(self._validate("A if B else (B if A else 'x')").is_valid)
+
+	def test_the_condition_itself_may_be_a_comparison(self):
+		# shipped templates use this shape for every ratio line
+		self.assertTrue(self._validate("A / B if B != 0 else 0").is_valid)
+		self.assertTrue(self._validate("A if A > B else B").is_valid)
+
 	def test_expressions_that_may_return_a_number_are_allowed(self):
 		# these yield one of their operands, so they can be numeric
 		self.assertTrue(self._validate("A and B").is_valid)
@@ -445,13 +460,13 @@ class TestLineReferenceNames(FinancialReportTemplateTestCase):
 class TestReferenceCodeExtraction(FinancialReportTemplateTestCase):
 	"""Dependency ordering relies on knowing which codes a formula reads."""
 
-	CODES: ClassVar[list[str]] = ["REV", "COGS", "sum"]
+	CODES: ClassVar[set[str]] = {"REV", "COGS", "sum"}
 
 	def _extract(self, formula):
 		return extract_reference_codes_from_formula(formula, self.CODES)
 
 	def test_codes_the_formula_reads(self):
-		self.assertEqual(self._extract("REV - COGS"), ["REV", "COGS"])
+		self.assertEqual(self._extract("REV - COGS"), ["COGS", "REV"])
 		self.assertEqual(self._extract("round(REV, 2)"), ["REV"])
 
 	def test_a_called_name_is_not_a_dependency(self):
@@ -468,5 +483,5 @@ class TestReferenceCodeExtraction(FinancialReportTemplateTestCase):
 		self.assertEqual(self._extract(""), [])
 		self.assertEqual(self._extract(None), [])
 
-	def test_order_follows_available_codes(self):
-		self.assertEqual(self._extract("COGS + REV"), ["REV", "COGS"])
+	def test_result_is_sorted_so_it_is_stable(self):
+		self.assertEqual(self._extract("COGS + REV"), ["COGS", "REV"])
