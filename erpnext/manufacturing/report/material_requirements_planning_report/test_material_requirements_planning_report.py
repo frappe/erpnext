@@ -306,7 +306,9 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 					"doctype": "Item Group",
 					"item_group_name": group,
 					"parent_item_group": "All Item Groups",
-					"item_group_defaults": [{"company": COMPANY, "default_supplier": SUPPLIER}],
+					"item_group_defaults": [
+						{"company": COMPANY, "default_supplier": SUPPLIER, "default_warehouse": WAREHOUSE}
+					],
 				}
 			).insert()
 
