@@ -1224,6 +1224,13 @@ def get_item_details(item_code, company):
 	if default_data:
 		data.update(default_data)
 
+	if not data.get("default_supplier"):
+		# fall back to the item's Item Group default supplier (mirrors BuyingController)
+		item_group = frappe.db.get_value("Item", item_code, "item_group")
+		data.default_supplier = frappe.db.get_value(
+			"Item Default", {"parent": item_group, "company": company}, "default_supplier"
+		)
+
 	return data
 
 
@@ -1333,6 +1340,7 @@ def make_order(selected_rows: str | list, company: str, warehouse: str | None = 
 	work_orders = []
 	covered_rows = 0
 	missing_bom = []
+	missing_supplier = []
 	for row in selected_rows:
 		row = frappe._dict(row)
 		# what is left to order once stock and the orders already placed are counted. rounding
@@ -1343,7 +1351,10 @@ def make_order(selected_rows: str | list, company: str, warehouse: str | None = 
 			continue
 
 		if row.type_of_material == "Purchase":
-			purchase_orders.setdefault((row.default_supplier, row.release_date), []).append(row)
+			if row.default_supplier:
+				purchase_orders.setdefault((row.default_supplier, row.release_date), []).append(row)
+			elif row.item_code not in missing_supplier:
+				missing_supplier.append(row.item_code)
 
 		if row.type_of_material == "Manufacture":
 			if row.bom_no:
@@ -1353,6 +1364,9 @@ def make_order(selected_rows: str | list, company: str, warehouse: str | None = 
 
 	if missing_bom:
 		frappe.throw(_("Default BOM for {0} not found").format(", ".join(missing_bom)))
+
+	if missing_supplier:
+		frappe.throw(_("Default Supplier for {0} not found").format(", ".join(missing_supplier)))
 
 	if not purchase_orders and not work_orders:
 		frappe.msgprint(
