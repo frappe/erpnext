@@ -337,6 +337,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 						currency: doc.currency,
 						blanket_order_type: doc.doctype === "Sales Order" ? "Selling" : "Purchasing",
 						item: item.item_code,
+						transaction_date: doc.transaction_date,
 					},
 				};
 			});
