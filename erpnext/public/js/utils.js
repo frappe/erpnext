@@ -367,10 +367,11 @@ $.extend(erpnext.utils, {
 								fieldname: dimension["fieldname"],
 								label: __(dimension["doctype"]),
 								fieldtype: "MultiSelectList",
-								depends_on:
-									report_name === "Stock Balance"
-										? "eval:doc.show_dimension_wise_stock === 1"
-										: "",
+								depends_on: ["Stock Balance", "Serial and Batch Wise Stock Balance"].includes(
+									report_name
+								)
+									? "eval:doc.show_dimension_wise_stock === 1"
+									: "",
 								get_data: function (txt) {
 									return frappe.db.get_link_options(dimension["doctype"], txt);
 								},
