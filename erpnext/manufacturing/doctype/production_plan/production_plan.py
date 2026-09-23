@@ -1543,10 +1543,38 @@ def get_warehouse_list(warehouses):
 	return warehouse_list
 
 
+def _iter_mr_rows(doc):
+	for key in ("po_items", "items", "sub_assembly_items"):
+		for row in doc.get(key) or []:
+			if isinstance(row, dict):
+				yield row
+
+
+def _authorize_mr_request(doc):
+	"""Scope a caller-supplied plan to what the caller may see; `doc` is often unsaved, so check only a real name."""
+	# the doctype floor the record check below relies on: that one fires only for a saved plan, and
+	# `doc` here is very often an unsaved one posted by the client
+	frappe.has_permission("Production Plan", "read", throw=True)
+
+	name = doc.get("name")
+	if isinstance(name, str) and frappe.db.exists("Production Plan", name):
+		frappe.has_permission("Production Plan", doc=name, throw=True)
+
+	# Every value below arrives through json.loads, so container elements are untyped: a dict in
+	# any of these reaches frappe.db.get_value() in its *name* position and becomes a filter.
+	for row in _iter_mr_rows(doc):
+		for fieldname in ("item_code", "warehouse", "bom_no", "sales_order", "uom", "purchase_uom"):
+			value = row.get(fieldname)
+			if value is not None and not isinstance(value, str):
+				frappe.throw(_("Invalid {0}").format(fieldname), frappe.PermissionError)
+
+
 @frappe.whitelist()
 def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_data=None):
 	if isinstance(doc, str):
 		doc = frappe._dict(json.loads(doc))
+
+	_authorize_mr_request(doc)
 
 	if warehouses:
 		warehouses = list(set(get_warehouse_list(warehouses)))

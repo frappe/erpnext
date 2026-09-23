@@ -52,7 +52,7 @@ from erpnext.stock.serial_batch_bundle import (
 	get_serial_or_batch_items,
 )
 from erpnext.stock.stock_ledger import NegativeStockError, get_previous_sle, get_valuation_rate
-from erpnext.stock.utils import get_bin, get_combine_datetime, get_incoming_rate
+from erpnext.stock.utils import _get_incoming_rate, get_bin, get_combine_datetime
 
 
 class FinishedGoodError(frappe.ValidationError):
@@ -1485,7 +1485,7 @@ class StockEntry(StockController):
 			if d.s_warehouse:
 				if reset_outgoing_rate:
 					args = self.get_args_for_incoming_rate(d)
-					rate = get_incoming_rate(args, raise_error_if_no_rate)
+					rate = _get_incoming_rate(args, raise_error_if_no_rate)
 					if rate >= 0:
 						d.basic_rate = rate
 
@@ -3974,6 +3974,10 @@ def get_warehouse_details(args):
 
 	args = frappe._dict(args)
 
+	# `select`, not `read`: reached from stock_entry.js:740, and the desk roles that open that form
+	# clear select through the Desk User row while holding no Item read.
+	frappe.has_permission("Item", ptype="select", throw=True)
+
 	ret = {}
 	if args.warehouse and args.item_code:
 		args.update(
@@ -3984,7 +3988,7 @@ def get_warehouse_details(args):
 		)
 		ret = {
 			"actual_qty": get_previous_sle(args).get("qty_after_transaction") or 0,
-			"basic_rate": get_incoming_rate(args),
+			"basic_rate": _get_incoming_rate(args),
 		}
 	return ret
 

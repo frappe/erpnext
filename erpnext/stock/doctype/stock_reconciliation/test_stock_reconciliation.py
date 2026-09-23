@@ -26,7 +26,7 @@ from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.stock_ledger import get_previous_sle, update_entries_after
 from erpnext.stock.tests.test_utils import StockTestMixin
 from erpnext.stock.utils import (
-	get_incoming_rate,
+	_get_incoming_rate,
 	get_stock_balance,
 	get_stock_value_on,
 	get_valuation_method,
@@ -183,7 +183,7 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 			"serial_and_batch_bundle": sr.items[0].serial_and_batch_bundle,
 		}
 
-		valuation_rate = get_incoming_rate(args)
+		valuation_rate = _get_incoming_rate(args)
 		self.assertEqual(valuation_rate, 200)
 
 		to_delete_records.append(sr.name)
@@ -205,7 +205,7 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 			"serial_and_batch_bundle": sr.items[0].serial_and_batch_bundle,
 		}
 
-		valuation_rate = get_incoming_rate(args)
+		valuation_rate = _get_incoming_rate(args)
 		self.assertEqual(valuation_rate, 300)
 
 		to_delete_records.append(sr.name)
@@ -256,7 +256,7 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 			"serial_and_batch_bundle": sr1.items[0].serial_and_batch_bundle,
 		}
 
-		valuation_rate = get_incoming_rate(args)
+		valuation_rate = _get_incoming_rate(args)
 		self.assertEqual(valuation_rate, 300)
 		to_delete_records.append(sr1.name)
 
@@ -1278,7 +1278,7 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 
 	def test_not_reconcile_all_serial_nos(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
-		from erpnext.stock.utils import get_incoming_rate
+		from erpnext.stock.utils import _get_incoming_rate
 
 		item = self.make_item(
 			"Test Serial NO Item Not Reconcile All Serial Batch",

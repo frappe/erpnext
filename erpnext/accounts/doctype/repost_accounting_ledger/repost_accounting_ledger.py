@@ -524,6 +524,10 @@ def validate_docs_for_voucher_types(doc_voucher_types):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_repost_allowed_types(doctype, txt, searchfield, start, page_len, filters):
+	# `filters` goes straight to db.get_all, so reaching this needs gating rather than typing.
+	# Reached only from this doctype's own form, which is System-Manager-only.
+	frappe.has_permission("Repost Accounting Ledger", throw=True)
+
 	filters = {"allowed": True}
 
 	if txt:
