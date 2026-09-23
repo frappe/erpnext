@@ -12,7 +12,6 @@ import frappe.defaults
 from frappe import _, msgprint
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
-from frappe.query_builder import Order
 from frappe.query_builder.functions import Sum
 from frappe.utils import cint, cstr, flt, get_link_to_form, getdate, new_line_sep, nowdate
 
@@ -655,39 +654,41 @@ def get_material_requests_based_on_supplier(doctype, txt, searchfield, start, pa
 	if not supplier_items:
 		frappe.throw(_("{0} is not the default supplier for any items.").format(supplier))
 
-	mr = frappe.qb.DocType("Material Request")
-	mr_item = frappe.qb.DocType("Material Request Item")
+	mr_filters = [
+		["material_request_type", "=", "Purchase"],
+		["per_ordered", "<", 99.99],
+		["docstatus", "=", 1],
+		["status", "!=", "Stopped"],
+		["company", "=", filters.get("company")],
+	]
 
-	query = (
-		frappe.qb.from_(mr)
-		.from_(mr_item)
-		.select(mr.name)
-		.distinct()
-		.select(mr.transaction_date, mr.company)
-		.where(
-			(mr.name == mr_item.parent)
-			& (mr_item.item_code.isin(supplier_items))
-			& (mr.material_request_type == "Purchase")
-			& (mr.per_ordered < 99.99)
-			& (mr.docstatus == 1)
-			& (mr.status != "Stopped")
-			& (mr.company == filters.get("company"))
+	if frappe.has_permission("Material Request", "read"):
+		mr_filters.append(["Material Request Item", "item_code", "in", supplier_items])
+	else:
+		parents = frappe.get_all(
+			"Material Request Item",
+			filters={"item_code": ("in", supplier_items), "parenttype": "Material Request"},
+			pluck="parent",
+			distinct=True,
 		)
-		.orderby(mr_item.item_code, order=Order.asc)
-		.limit(cint(page_len))
-		.offset(cint(start))
-	)
+		mr_filters.append(["name", "in", parents or [""]])
 
 	if txt:
-		query = query.where(mr.name.like(f"%%{txt}%%"))
+		mr_filters.append(["name", "like", f"%{txt}%"])
 
 	if filters.get("transaction_date"):
 		date = filters.get("transaction_date")[1]
-		query = query.where(mr.transaction_date[date[0] : date[1]])
+		mr_filters.append(["transaction_date", "between", [date[0], date[1]]])
 
-	material_requests = query.run(as_dict=True)
-
-	return material_requests
+	return frappe.get_list(
+		"Material Request",
+		filters=mr_filters,
+		fields=["name", "transaction_date", "company"],
+		group_by="name",
+		order_by="name",
+		limit_start=cint(start),
+		limit_page_length=cint(page_len),
+	)
 
 
 @frappe.whitelist()

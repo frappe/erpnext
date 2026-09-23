@@ -474,6 +474,14 @@ def get_lead_details(lead, posting_date=None, company=None, doctype=None):
 def make_lead_from_communication(communication: str, ignore_communication_links: bool = False):
 	"""raise a issue from email"""
 
+	# `communication` is caller-supplied. Communication grants read to `All` only for the owner and
+	# carries a has_permission hook, so doc= is what decides access.
+	frappe.has_permission("Communication", doc=communication, throw=True)
+
+	# the insert path checks `create` itself, but the path that reuses an existing Lead required
+	# nothing, so it returned a Lead name to callers with no access to Leads at all
+	frappe.has_permission("Lead", ptype="create", throw=True)
+
 	doc = frappe.get_doc("Communication", communication)
 	lead_name = None
 	if doc.sender:

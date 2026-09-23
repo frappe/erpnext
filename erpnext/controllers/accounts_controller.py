@@ -387,12 +387,26 @@ class AccountsController(TransactionBase):
 		return any(item.delivered_by_supplier for item in items)
 
 	def validate_price_list(self):
-		price_list_field = "selling_price_list" if self.get("selling_price_list") else "buying_price_list"
+		if self.get("selling_price_list"):
+			price_list_field, transaction_side = "selling_price_list", "selling"
+		else:
+			price_list_field, transaction_side = "buying_price_list", "buying"
+
 		price_list = self.get(price_list_field)
-		if not price_list or frappe.db.get_value("Price List", price_list, "enabled"):
+		if not price_list:
 			return
 
-		# Returns retain a submitted voucher's pricing even if its price list is now disabled.
+		details = (
+			frappe.db.get_value("Price List", price_list, ["enabled", transaction_side], as_dict=True)
+			or frappe._dict()
+		)
+
+		# An internal transfer carries the price list of the outward document into the inward one.
+		fits_transaction = details.get(transaction_side) or self.is_internal_transfer()
+		if details.enabled and fits_transaction:
+			return
+
+		# Returns retain a submitted voucher's pricing even if its price list no longer fits.
 		if (
 			self.get("is_return")
 			and self.get("return_against")
@@ -403,9 +417,20 @@ class AccountsController(TransactionBase):
 		):
 			return
 
+		if not details.enabled:
+			frappe.throw(
+				_("Price List {0} is disabled").format(get_link_to_form("Price List", price_list)),
+				title=_("Disabled Price List"),
+			)
+
+		if transaction_side == "selling":
+			message = _("Price List {0} cannot be used on a selling transaction")
+		else:
+			message = _("Price List {0} cannot be used on a buying transaction")
+
 		frappe.throw(
-			_("Price List {0} is disabled").format(get_link_to_form("Price List", price_list)),
-			title=_("Disabled Price List"),
+			message.format(get_link_to_form("Price List", price_list)),
+			title=_("Invalid Price List"),
 		)
 
 	def set_default_letter_head(self):
@@ -3199,10 +3224,21 @@ def get_tax_rate(account_head):
 	return frappe.get_cached_value("Account", account_head, ["tax_rate", "account_name"], as_dict=True)
 
 
+# the only doctypes a `taxes_and_charges` Link points at; `master_doctype` is caller-supplied and reaches get_doc()
+TAX_MASTER_DOCTYPES = ("Sales Taxes and Charges Template", "Purchase Taxes and Charges Template")
+
+
+def validate_tax_master(master_doctype):
+	if master_doctype not in TAX_MASTER_DOCTYPES:
+		frappe.throw(_("Invalid tax master doctype"), frappe.PermissionError)
+
+
 @frappe.whitelist()
 def get_default_taxes_and_charges(master_doctype, tax_template=None, company=None):
 	if not company:
 		return {}
+
+	validate_tax_master(master_doctype)
 
 	if tax_template and company:
 		tax_template_company = frappe.get_cached_value(master_doctype, tax_template, "company")
@@ -3221,6 +3257,9 @@ def get_default_taxes_and_charges(master_doctype, tax_template=None, company=Non
 def get_taxes_and_charges(master_doctype, master_name):
 	if not master_name:
 		return
+
+	validate_tax_master(master_doctype)
+
 	from frappe.model import child_table_fields, default_fields
 
 	tax_master = frappe.get_doc(master_doctype, master_name)

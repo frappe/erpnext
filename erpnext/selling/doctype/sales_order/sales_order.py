@@ -781,8 +781,21 @@ class SalesOrder(SellingController):
 		from_voucher_type: Literal["Pick List", "Purchase Receipt"] = None,
 		notify=True,
 	) -> None:
-		"""Creates Stock Reservation Entries for Sales Order Items."""
+		"""Whitelisted entry point: authorise the caller, then reserve."""
+		self.check_permission("write")
+		self._create_stock_reservation_entries(items_details, from_voucher_type, notify)
 
+	def _create_stock_reservation_entries(
+		self,
+		items_details: list[dict] | None = None,
+		from_voucher_type: Literal["Pick List", "Purchase Receipt"] = None,
+		notify=True,
+	) -> None:
+		"""Creates Stock Reservation Entries for Sales Order Items.
+
+		Internal: no permission check. Pick List and Purchase Receipt reserve against someone
+		else's Sales Order, and no role that creates either holds Sales Order write.
+		"""
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 			create_stock_reservation_entries_for_so_items as create_stock_reservation_entries,
 		)
@@ -797,6 +810,8 @@ class SalesOrder(SellingController):
 	@frappe.whitelist()
 	def cancel_stock_reservation_entries(self, sre_list=None, notify=True) -> None:
 		"""Cancel Stock Reservation Entries for Sales Order Items."""
+		# same guard as the sibling method on Pick List; run_doc_method only gates on `read`
+		self.check_permission("write")
 
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 			cancel_stock_reservation_entries,
@@ -838,14 +853,19 @@ def get_list_context(context=None):
 	return list_context
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def close_or_unclose_sales_orders(names, status):
-	if not frappe.has_permission("Sales Order", "write"):
-		frappe.throw(_("Not permitted"), frappe.PermissionError)
+	frappe.has_permission("Sales Order", "write", throw=True)
 
 	names = json.loads(names)
 	for name in names:
+		if not isinstance(name, str):
+			frappe.throw(_("Invalid name"), frappe.PermissionError)
+
+		# the check above is doctype level and never consults User Permissions, so on its own it lets
+		# a caller restricted to one company close another company's orders
 		so = frappe.get_doc("Sales Order", name)
+		so.check_permission("submit")
 		if so.docstatus == 1:
 			if status == "Closed":
 				if so.status not in ("Cancelled", "Closed") and (

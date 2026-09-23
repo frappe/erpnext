@@ -597,7 +597,7 @@
    "link_fieldname": "target_asset"
   }
  ],
- "modified": "2026-03-13 12:15:25.734623",
+ "modified": "2026-09-23 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",
@@ -633,6 +633,38 @@
    "share": 1,
    "submit": 1,
    "write": 1
+  },
+  {
+   "role": "Manufacturing Manager",
+   "select": 1
+  },
+  {
+   "role": "Manufacturing User",
+   "select": 1
+  },
+  {
+   "role": "Purchase Manager",
+   "select": 1
+  },
+  {
+   "role": "Purchase User",
+   "select": 1
+  },
+  {
+   "role": "Stock Manager",
+   "select": 1
+  },
+  {
+   "role": "Stock User",
+   "select": 1
+  },
+  {
+   "role": "Accounts Manager",
+   "select": 1
+  },
+  {
+   "role": "System Manager",
+   "select": 1
   }
  ],
  "row_format": "Dynamic",

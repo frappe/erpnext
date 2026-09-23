@@ -355,6 +355,10 @@ frappe.ui.form.on("Job Card", {
 							default: frm.doc.for_quantity - frm.doc.total_completed_qty,
 						},
 						(data) => {
+							if (data.qty < 0) {
+								frappe.throw(__("Completed Quantity cannot be negative"));
+							}
+
 							frm.events.complete_job(frm, "Complete", data.qty);
 						},
 						__("Enter Value")

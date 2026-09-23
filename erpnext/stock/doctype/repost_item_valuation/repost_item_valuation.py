@@ -213,6 +213,8 @@ class RepostItemValuation(Document):
 
 	@frappe.whitelist()
 	def set_company(self):
+		self.check_permission("write")
+
 		if self.based_on == "Transaction":
 			self.company = frappe.get_cached_value(self.voucher_type, self.voucher_no, "company")
 		elif self.warehouse:
@@ -575,7 +577,10 @@ def in_configured_timeslot(repost_settings=None, current_time=None):
 		return now_time >= start_time or now_time <= end_time
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def execute_repost_item_valuation():
 	"""Execute repost item valuation via scheduler."""
+	# Force-enqueues the site-wide reposting job, so it needs write on Repost Item Valuation.
+	frappe.has_permission("Repost Item Valuation", "write", throw=True)
+
 	frappe.get_doc("Scheduled Job Type", "repost_item_valuation.repost_entries").enqueue(force=True)

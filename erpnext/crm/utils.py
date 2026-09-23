@@ -150,6 +150,10 @@ def link_open_events(ref_doctype, ref_docname, doc):
 
 @frappe.whitelist()
 def get_open_activities(ref_doctype, ref_docname):
+	# both arguments are caller-supplied and the ToDo/Event rows are read with get_all, so the
+	# referenced document decides who may see its activities. doc= applies User Permissions.
+	frappe.has_permission(ref_doctype, doc=ref_docname, throw=True)
+
 	tasks = get_open_todos(ref_doctype, ref_docname)
 	events = get_open_events(ref_doctype, ref_docname)
 

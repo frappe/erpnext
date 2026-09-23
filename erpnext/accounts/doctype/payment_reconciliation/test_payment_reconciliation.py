@@ -1484,6 +1484,75 @@ class TestPaymentReconciliation(FrappeTestCase):
 		# Should not raise frappe.exceptions.ValidationError: Payment Entry has been modified after you pulled it. Please pull it again.
 		pr.reconcile()
 
+	@change_settings("System Settings", {"currency_precision": 2})
+	def test_allocate_entries_rounds_running_balance_to_currency_precision(self):
+		pr = frappe.new_doc("Payment Reconciliation")
+		pr.company = self.company
+		pr.party_type = "Customer"
+		pr.party = self.customer
+		pr.receivable_payable_account = self.debit_to
+		pr.set("invoices", [{"invoice_number": "INV-1"}])
+		pr.set("payments", [{"reference_name": "PAY-1"}])
+
+		invoices = [
+			{
+				"invoice_type": "Sales Invoice",
+				"invoice_number": "INV-1",
+				"outstanding_amount": 17592.415,
+				"currency": "INR",
+			},
+		]
+		payments = [
+			{
+				"reference_type": "Payment Entry",
+				"reference_name": "PAY-1",
+				"amount": 18230,
+				"currency": "INR",
+			}
+		]
+
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+
+		self.assertEqual(payments[0]["amount"], flt(637.585, 2))
+
+	@change_settings("System Settings", {"currency_precision": "", "use_number_format_from_currency": 1})
+	def test_allocate_entries_rounds_running_balance_to_account_currency_precision(self):
+		account_currency = frappe.get_cached_value("Account", self.debit_to, "account_currency")
+		original_number_format = frappe.db.get_value("Currency", account_currency, "number_format")
+		frappe.db.set_value("Currency", account_currency, "number_format", "#,###.###")
+		self.addCleanup(
+			frappe.db.set_value, "Currency", account_currency, "number_format", original_number_format
+		)
+
+		pr = frappe.new_doc("Payment Reconciliation")
+		pr.company = self.company
+		pr.party_type = "Customer"
+		pr.party = self.customer
+		pr.receivable_payable_account = self.debit_to
+		pr.set("invoices", [{"invoice_number": "INV-1"}])
+		pr.set("payments", [{"reference_name": "PAY-1"}])
+
+		invoices = [
+			{
+				"invoice_type": "Sales Invoice",
+				"invoice_number": "INV-1",
+				"outstanding_amount": 17592.415,
+				"currency": account_currency,
+			},
+		]
+		payments = [
+			{
+				"reference_type": "Payment Entry",
+				"reference_name": "PAY-1",
+				"amount": 18230,
+				"currency": account_currency,
+			}
+		]
+
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+
+		self.assertEqual(payments[0]["amount"], flt(637.585, 3))
+
 	def test_reverse_payment_against_payment_for_supplier(self):
 		"""
 		Reconcile a payment against a reverse payment, for a supplier.

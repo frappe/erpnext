@@ -36,7 +36,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-11-29 04:04:24.272872",
+ "modified": "2026-09-16 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Shift Factor",
@@ -66,6 +66,10 @@
    "role": "Accounts User",
    "share": 1,
    "write": 1
+  },
+  {
+   "role": "Quality Manager",
+   "select": 1
   }
  ],
  "sort_field": "modified",

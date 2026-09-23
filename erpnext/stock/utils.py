@@ -177,6 +177,10 @@ def get_serial_nos_data(serial_nos):
 
 @frappe.whitelist()
 def get_latest_stock_qty(item_code, warehouse=None):
+	# same guard as get_stock_balance above, which returns the same Bin quantity. Loser-free for
+	# the only caller: Work Order write is held by Manufacturing User, who holds Item read.
+	frappe.has_permission("Item", "read", throw=True)
+
 	values, condition = [item_code], ""
 	if warehouse:
 		lft, rgt, is_group = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt", "is_group"])
@@ -249,6 +253,38 @@ def _create_bin(item_code, warehouse):
 
 @frappe.whitelist()
 def get_incoming_rate(args: dict | str, raise_error_if_no_rate: bool = True, fallbacks: bool = True):
+	"""Whitelisted entry point: authorise the caller, then compute the rate."""
+	args = frappe.parse_json(args)
+
+	# `select`, not `read`: reached from every sales and buying form, and Accounts Manager holds no
+	# Item read. doc= so the named item is checked, not merely the doctype.
+	item_code = args.get("item_code") if isinstance(args, dict | frappe._dict) else None
+	warehouse = args.get("warehouse") if isinstance(args, dict | frappe._dict) else None
+
+	if item_code:
+		frappe.has_permission("Item", ptype="select", doc=item_code, throw=True)
+	else:
+		frappe.has_permission("Item", ptype="select", throw=True)
+
+	# scoped by User Permissions alone: Accounts Manager reaches this holding no Warehouse row at all.
+	# Only unscoped rules apply -- an `applicable_for` rule governs that doctype's documents, and a
+	# rate is not one. Not args["voucher_type"]: it is caller-supplied, so it cannot select the scope.
+	if warehouse:
+		from frappe.permissions import get_user_permissions
+
+		if warehouse_permissions := get_user_permissions(frappe.session.user).get("Warehouse"):
+			allowed_warehouses = {
+				perm.get("doc")
+				for perm in warehouse_permissions
+				if perm.get("doc") and not perm.get("applicable_for")
+			}
+			if allowed_warehouses and warehouse not in allowed_warehouses:
+				frappe.throw(_("Not permitted for {0}").format(warehouse), frappe.PermissionError)
+
+	return _get_incoming_rate(args, raise_error_if_no_rate, fallbacks)
+
+
+def _get_incoming_rate(args: dict | str, raise_error_if_no_rate: bool = True, fallbacks: bool = True):
 	"""Get Incoming Rate based on valuation method"""
 	from erpnext.stock.stock_ledger import get_previous_sle, get_valuation_rate
 
@@ -599,6 +635,17 @@ def check_pending_reposting(posting_date: str, throw_error: bool = True) -> bool
 
 @frappe.whitelist()
 def scan_barcode(search_value: str, ctx: dict | str | None = None) -> BarcodeScanResult:
+	# Reached from barcode_scanner.js on every form with a scan field, so `select` for the same
+	# reason as get_incoming_rate: Accounts Manager scans on invoices and holds no Item read.
+	frappe.has_permission("Item", ptype="select", throw=True)
+
+	def authorised(data):
+		# the check above is doctype level; the scan resolves to one Item and that is what the
+		# caller receives, so authorise the resolved row before returning it
+		if data and data.get("item_code"):
+			frappe.has_permission("Item", ptype="select", doc=data.get("item_code"), throw=True)
+		return data
+
 	def set_cache(data: BarcodeScanResult):
 		frappe.cache().set_value(f"erpnext:barcode_scan:{search_value}", data, expires_in_sec=120)
 		_update_item_info(data, ctx)
@@ -618,7 +665,7 @@ def scan_barcode(search_value: str, ctx: dict | str | None = None) -> BarcodeSca
 		ctx = frappe.parse_json(ctx)
 
 	if scan_data := get_cache():
-		return scan_data
+		return authorised(scan_data)
 
 	# search barcode no
 	barcode_data = frappe.db.get_value(
@@ -629,7 +676,7 @@ def scan_barcode(search_value: str, ctx: dict | str | None = None) -> BarcodeSca
 	)
 	if barcode_data:
 		set_cache(barcode_data)
-		return barcode_data
+		return authorised(barcode_data)
 
 	# search serial no
 	serial_no_data = frappe.db.get_value(
@@ -640,7 +687,7 @@ def scan_barcode(search_value: str, ctx: dict | str | None = None) -> BarcodeSca
 	)
 	if serial_no_data:
 		set_cache(serial_no_data)
-		return serial_no_data
+		return authorised(serial_no_data)
 
 	# search batch no
 	batch_no_data = frappe.db.get_value(
@@ -658,7 +705,7 @@ def scan_barcode(search_value: str, ctx: dict | str | None = None) -> BarcodeSca
 			)
 
 		set_cache(batch_no_data)
-		return batch_no_data
+		return authorised(batch_no_data)
 
 	warehouse = frappe.get_cached_value("Warehouse", search_value, ("name", "disabled"), as_dict=True)
 	if warehouse and not warehouse.disabled:

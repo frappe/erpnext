@@ -82,7 +82,7 @@
  "icon": "fa fa-calendar",
  "idx": 1,
  "links": [],
- "modified": "2024-05-27 17:29:55.560840",
+ "modified": "2026-09-16 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Fiscal Year",
@@ -131,6 +131,10 @@
   {
    "read": 1,
    "role": "Auditor"
+  },
+  {
+   "role": "Sales Master Manager",
+   "select": 1
   }
  ],
  "show_name_in_global_search": 1,
