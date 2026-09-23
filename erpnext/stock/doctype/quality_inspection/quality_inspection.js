@@ -1,8 +1,6 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-cur_frm.cscript.refresh = cur_frm.cscript.inspection_type;
-
 frappe.ui.form.on("Quality Inspection", {
 	onload(frm) {
 		frm.trigger("set_default_company");

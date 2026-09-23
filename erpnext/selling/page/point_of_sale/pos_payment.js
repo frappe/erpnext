@@ -366,7 +366,7 @@ erpnext.PointOfSale.Payment = class {
 						format_currency(amount, doc.currency, 0),
 					]);
 					this.events.submit_invoice();
-					cur_frm.reload_doc();
+					this.events.get_frm().reload_doc();
 				} else {
 					message = __(
 						"Payment of {0} received successfully. Waiting for other requests to complete...",

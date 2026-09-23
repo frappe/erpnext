@@ -12,7 +12,7 @@ frappe.ui.form.on("Accounting Period", {
 				doc: frm.doc,
 				callback: function (r) {
 					if (r.message) {
-						cur_frm.clear_table("closed_documents");
+						frm.clear_table("closed_documents");
 						r.message.forEach(function (element) {
 							var c = frm.add_child("closed_documents");
 							c.document_type = element.document_type;

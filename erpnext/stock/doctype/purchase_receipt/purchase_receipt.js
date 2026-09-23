@@ -3,14 +3,14 @@
 
 frappe.provide("erpnext.stock");
 
-cur_frm.cscript.tax_table = "Purchase Taxes and Charges";
-
 erpnext.accounts.taxes.setup_tax_filters("Purchase Taxes and Charges");
 erpnext.accounts.taxes.setup_tax_validations("Purchase Receipt");
 erpnext.buying.setup_buying_controller();
 
 frappe.ui.form.on("Purchase Receipt", {
 	setup: (frm) => {
+		frm.cscript.tax_table = "Purchase Taxes and Charges";
+
 		frm.custom_make_buttons = {
 			"Stock Entry": "Return",
 			"Purchase Invoice": "Purchase Invoice",
@@ -32,6 +32,23 @@ frappe.ui.form.on("Purchase Receipt", {
 				filters: { company: frm.doc.company },
 			};
 		});
+
+		frm.set_query("select_print_heading", function () {
+			return {
+				filters: [["Print Heading", "docstatus", "!=", "2"]],
+			};
+		});
+
+		frm.set_query("bom", "items", function (doc, cdt, cdn) {
+			let d = locals[cdt][cdn];
+			return {
+				filters: [
+					["BOM", "item", "=", d.item_code],
+					["BOM", "is_active", "=", "1"],
+					["BOM", "docstatus", "=", "1"],
+				],
+			};
+		});
 	},
 	onload: function (frm) {
 		erpnext.queries.setup_queries(frm, "Warehouse", function () {
@@ -50,7 +67,7 @@ frappe.ui.form.on("Purchase Receipt", {
 				function () {
 					frappe.model.open_mapped_doc({
 						method: "erpnext.stock.doctype.purchase_receipt.mapper.make_purchase_invoice",
-						frm: cur_frm,
+						frm: frm,
 					});
 				},
 				__("Create")
@@ -64,7 +81,7 @@ frappe.ui.form.on("Purchase Receipt", {
 				function () {
 					frappe.model.open_mapped_doc({
 						method: "erpnext.stock.doctype.purchase_receipt.mapper.make_inter_company_delivery_note",
-						frm: cur_frm,
+						frm: frm,
 					});
 				},
 				__("Create")
@@ -251,31 +268,39 @@ erpnext.stock.PurchaseReceiptController = class PurchaseReceiptController extend
 
 			if (this.frm.doc.docstatus == 1 && this.frm.doc.status != "Closed") {
 				if (this.frm.has_perm("submit")) {
-					cur_frm.add_custom_button(__("Close"), this.close_purchase_receipt, __("Status"));
+					this.frm.add_custom_button(
+						__("Close"),
+						() => this.close_purchase_receipt(),
+						__("Status")
+					);
 				}
 
-				cur_frm.add_custom_button(__("Purchase Return"), this.make_purchase_return, __("Create"));
+				this.frm.add_custom_button(
+					__("Purchase Return"),
+					() => this.make_purchase_return(),
+					__("Create")
+				);
 
-				cur_frm.add_custom_button(
+				this.frm.add_custom_button(
 					__("Make Stock Entry"),
-					cur_frm.cscript["Make Stock Entry"],
+					() => this.make_stock_entry(),
 					__("Create")
 				);
 
 				if (flt(this.frm.doc.per_billed) < 100) {
-					cur_frm.add_custom_button(
+					this.frm.add_custom_button(
 						__("Purchase Invoice"),
-						this.make_purchase_invoice,
+						() => this.make_purchase_invoice(),
 						__("Create")
 					);
 				}
-				cur_frm.add_custom_button(
+				this.frm.add_custom_button(
 					__("Sample Retention Stock Entry"),
-					this.make_retention_stock_entry,
+					() => this.make_retention_stock_entry(),
 					__("Create")
 				);
 
-				cur_frm.page.set_inner_btn_group_as_primary(__("Create"));
+				this.frm.page.set_inner_btn_group_as_primary(__("Create"));
 			}
 		}
 
@@ -285,7 +310,7 @@ erpnext.stock.PurchaseReceiptController = class PurchaseReceiptController extend
 			this.frm.has_perm("submit") &&
 			!this.frm.doc.items.every((item) => item.closed)
 		) {
-			cur_frm.add_custom_button(__("Reopen"), this.reopen_purchase_receipt, __("Status"));
+			this.frm.add_custom_button(__("Reopen"), () => this.reopen_purchase_receipt(), __("Status"));
 		}
 
 		this.set_item_close_buttons();
@@ -298,14 +323,21 @@ erpnext.stock.PurchaseReceiptController = class PurchaseReceiptController extend
 	make_purchase_invoice() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.stock.doctype.purchase_receipt.mapper.make_purchase_invoice",
-			frm: cur_frm,
+			frm: this.frm,
+		});
+	}
+
+	make_stock_entry() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.stock.doctype.purchase_receipt.mapper.make_stock_entry",
+			frm: this.frm,
 		});
 	}
 
 	make_purchase_return() {
 		let me = this;
 
-		let has_rejected_items = cur_frm.doc.items.filter((item) => {
+		let has_rejected_items = this.frm.doc.items.filter((item) => {
 			if (item.rejected_qty > 0) {
 				return true;
 			}
@@ -326,7 +358,7 @@ erpnext.stock.PurchaseReceiptController = class PurchaseReceiptController extend
 						frappe.call({
 							method: "erpnext.stock.doctype.purchase_receipt.mapper.make_purchase_return_against_rejected_warehouse",
 							args: {
-								source_name: cur_frm.doc.name,
+								source_name: me.frm.doc.name,
 							},
 							callback: function (r) {
 								if (r.message) {
@@ -336,31 +368,52 @@ erpnext.stock.PurchaseReceiptController = class PurchaseReceiptController extend
 							},
 						});
 					} else {
-						cur_frm.cscript._make_purchase_return();
+						me.open_purchase_return();
 					}
 				},
 				__("Return Qty"),
 				__("Make Return Entry")
 			);
 		} else {
-			cur_frm.cscript._make_purchase_return();
+			this.open_purchase_return();
 		}
 	}
 
+	open_purchase_return() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.stock.doctype.purchase_receipt.mapper.make_purchase_return",
+			frm: this.frm,
+		});
+	}
+
 	close_purchase_receipt() {
-		cur_frm.cscript.update_status("Closed");
+		this.update_status("Closed");
 	}
 
 	reopen_purchase_receipt() {
-		cur_frm.cscript.update_status("Submitted");
+		this.update_status("Submitted");
+	}
+
+	update_status(status) {
+		frappe.ui.form.is_saving = true;
+		frappe.call({
+			method: "erpnext.stock.doctype.purchase_receipt.purchase_receipt.update_purchase_receipt_status",
+			args: { docname: this.frm.doc.name, status: status },
+			callback: (r) => {
+				if (!r.exc) this.frm.reload_doc();
+			},
+			always: function () {
+				frappe.ui.form.is_saving = false;
+			},
+		});
 	}
 
 	make_retention_stock_entry() {
 		frappe.call({
 			method: "erpnext.stock.doctype.stock_entry.services.manufacturing.move_sample_to_retention_warehouse",
 			args: {
-				company: cur_frm.doc.company,
-				items: cur_frm.doc.items,
+				company: this.frm.doc.company,
+				items: this.frm.doc.items,
 			},
 			callback: function (r) {
 				if (r.message) {
@@ -391,45 +444,7 @@ erpnext.stock.PurchaseReceiptController = class PurchaseReceiptController extend
 	}
 };
 
-// for backward compatibility: combine new and previous states
-extend_cscript(cur_frm.cscript, new erpnext.stock.PurchaseReceiptController({ frm: cur_frm }));
-
-cur_frm.cscript.update_status = function (status) {
-	frappe.ui.form.is_saving = true;
-	frappe.call({
-		method: "erpnext.stock.doctype.purchase_receipt.purchase_receipt.update_purchase_receipt_status",
-		args: { docname: cur_frm.doc.name, status: status },
-		callback: function (r) {
-			if (!r.exc) cur_frm.reload_doc();
-		},
-		always: function () {
-			frappe.ui.form.is_saving = false;
-		},
-	});
-};
-
-cur_frm.fields_dict["items"].grid.get_field("project").get_query = function (doc, cdt, cdn) {
-	return {
-		filters: [["Project", "status", "not in", "Completed, Cancelled"]],
-	};
-};
-
-cur_frm.fields_dict["select_print_heading"].get_query = function (doc, cdt, cdn) {
-	return {
-		filters: [["Print Heading", "docstatus", "!=", "2"]],
-	};
-};
-
-cur_frm.fields_dict["items"].grid.get_field("bom").get_query = function (doc, cdt, cdn) {
-	var d = locals[cdt][cdn];
-	return {
-		filters: [
-			["BOM", "item", "=", d.item_code],
-			["BOM", "is_active", "=", "1"],
-			["BOM", "docstatus", "=", "1"],
-		],
-	};
-};
+frappe.ui.form.set_controller("Purchase Receipt", erpnext.stock.PurchaseReceiptController);
 
 frappe.provide("erpnext.buying");
 
@@ -451,20 +466,6 @@ frappe.ui.form.on("Purchase Receipt Item", {
 		validate_sample_quantity(frm, cdt, cdn);
 	},
 });
-
-cur_frm.cscript._make_purchase_return = function () {
-	frappe.model.open_mapped_doc({
-		method: "erpnext.stock.doctype.purchase_receipt.mapper.make_purchase_return",
-		frm: cur_frm,
-	});
-};
-
-cur_frm.cscript["Make Stock Entry"] = function () {
-	frappe.model.open_mapped_doc({
-		method: "erpnext.stock.doctype.purchase_receipt.mapper.make_stock_entry",
-		frm: cur_frm,
-	});
-};
 
 var validate_sample_quantity = function (frm, cdt, cdn) {
 	var d = locals[cdt][cdn];

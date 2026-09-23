@@ -131,7 +131,7 @@ erpnext.stock.LandedCostVoucher = class LandedCostVoucher extends erpnext.stock.
 	}
 };
 
-cur_frm.script_manager.make(erpnext.stock.LandedCostVoucher);
+frappe.ui.form.set_controller("Landed Cost Voucher", erpnext.stock.LandedCostVoucher);
 
 frappe.ui.form.on("Landed Cost Taxes and Charges", {
 	expense_account: function (frm, cdt, cdn) {

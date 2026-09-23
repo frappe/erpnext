@@ -273,4 +273,4 @@ erpnext.bom.BomConfigurator = class BomConfigurator extends erpnext.TransactionC
 	}
 };
 
-extend_cscript(cur_frm.cscript, new erpnext.bom.BomConfigurator({ frm: cur_frm }));
+frappe.ui.form.set_controller("BOM Creator", erpnext.bom.BomConfigurator);

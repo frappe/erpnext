@@ -26,7 +26,7 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 	refresh() {
 		var me = this;
 		let doc = this.frm.doc;
-		erpnext.toggle_naming_series();
+		erpnext.toggle_naming_series(this.frm);
 
 		if (!this.frm.is_new() && doc.__onload && !doc.__onload.is_customer) {
 			this.frm.add_custom_button(__("Customer"), this.make_customer.bind(this), __("Create"));
@@ -240,6 +240,4 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 	}
 };
 
-if (cur_frm) {
-	extend_cscript(cur_frm.cscript, new erpnext.LeadController({ frm: cur_frm }));
-}
+frappe.ui.form.set_controller("Lead", erpnext.LeadController);
