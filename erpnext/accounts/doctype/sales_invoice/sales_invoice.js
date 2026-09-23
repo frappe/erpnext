@@ -716,7 +716,9 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 			this.frm.doc.is_cash_or_non_trade_discount
 		);
 
-		if (!this.frm.doc.is_cash_or_non_trade_discount) {
+		if (this.frm.doc.is_cash_or_non_trade_discount) {
+			this.clear_mapped_discounts();
+		} else {
 			this.frm.set_value("additional_discount_account", "");
 		}
 
