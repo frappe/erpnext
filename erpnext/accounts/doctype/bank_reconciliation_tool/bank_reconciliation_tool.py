@@ -10,7 +10,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder.custom import ConstantColumn
 from frappe.query_builder.functions import Sum
-from frappe.utils import cint, create_batch, flt, getdate
+from frappe.utils import cint, comma_and, create_batch, flt, getdate
 
 from erpnext import get_default_cost_center
 from erpnext.accounts.doctype.bank_transaction.bank_transaction import get_total_allocated_amount
@@ -21,6 +21,15 @@ from erpnext.accounts.report.bank_reconciliation_statement.bank_reconciliation_s
 )
 from erpnext.accounts.utils import get_account_currency, get_balance_on
 from erpnext.setup.utils import get_exchange_rate
+
+# the voucher types the reconciliation tool can match and clear against a Bank Transaction
+RECONCILABLE_DOCTYPES = (
+	"Payment Entry",
+	"Journal Entry",
+	"Sales Invoice",
+	"Purchase Invoice",
+	"Bank Transaction",
+)
 
 
 class BankReconciliationTool(Document):
@@ -152,6 +161,9 @@ def create_journal_entry_bts(
 	party=None,
 	allow_edit=None,
 ):
+	# see create_payment_entry_bts: the `allow_edit` path returns before insert()
+	frappe.has_permission("Bank Transaction", ptype="write", doc=bank_transaction_name, throw=True)
+
 	# Create a new journal entry based on the bank transaction
 	bank_transaction = frappe.db.get_values(
 		"Bank Transaction",
@@ -295,7 +307,7 @@ def create_journal_entry_bts(
 		]
 	)
 
-	return reconcile_vouchers(bank_transaction_name, vouchers)
+	return _reconcile_vouchers(bank_transaction_name, vouchers)
 
 
 @frappe.whitelist()
@@ -312,6 +324,10 @@ def create_payment_entry_bts(
 	allow_edit=None,
 	company_bank_account=None,
 ):
+	# with `allow_edit` the built document is returned before insert(), so nothing downstream
+	# checks anything — authorise the transaction being drawn from here
+	frappe.has_permission("Bank Transaction", ptype="write", doc=bank_transaction_name, throw=True)
+
 	# Create a new payment entry based on the bank transaction
 	bank_transaction = frappe.db.get_values(
 		"Bank Transaction",
@@ -372,7 +388,7 @@ def create_payment_entry_bts(
 			}
 		]
 	)
-	return reconcile_vouchers(bank_transaction_name, vouchers)
+	return _reconcile_vouchers(bank_transaction_name, vouchers)
 
 
 @frappe.whitelist()
@@ -442,7 +458,16 @@ def start_auto_reconcile(
 			)
 		)
 
-		updated_transaction = reconcile_vouchers(transaction.name, json.dumps(vouchers))
+		# reconciling clears each voucher through db.set_value, which checks nothing. The matcher
+		# is server-side, so silently leave alone what this caller may not write rather than
+		# failing the whole run on one unreachable voucher.
+		if unpermitted := set(unpermitted_vouchers(vouchers)):
+			vouchers = [v for v in vouchers if v.get("payment_name") not in unpermitted]
+
+		if not vouchers:
+			continue
+
+		updated_transaction = _reconcile_vouchers(transaction.name, json.dumps(vouchers))
 
 		if updated_transaction.status == "Reconciled":
 			reconciled.add(updated_transaction.name)
@@ -477,10 +502,63 @@ def get_auto_reconcile_message(partially_reconciled, reconciled):
 	return alert_message, indicator
 
 
+def unpermitted_vouchers(vouchers):
+	"""Names the caller may not write, resolved with one query per voucher type.
+
+	get_list() applies the permission model including User Permissions, so a name the caller
+	cannot reach simply does not come back.
+	"""
+	by_doctype = {}
+	for voucher in vouchers:
+		if name := voucher.get("payment_name"):
+			by_doctype.setdefault(voucher.get("payment_doctype"), set()).add(name)
+
+	unpermitted = []
+	for doctype, names in by_doctype.items():
+		if not frappe.has_permission(doctype, ptype="write"):
+			unpermitted.extend(sorted(names))
+			continue
+
+		permitted = set(
+			frappe.get_list(doctype, filters={"name": ("in", list(names))}, pluck="name", limit_page_length=0)
+		)
+
+		# get_list() unions in documents shared with `read`, so a name reachable only through a
+		# read-only share would otherwise satisfy a write check. Confirm those individually; the
+		# extra lookups are bounded by the share count, not by the size of the request.
+		for shared in permitted & set(frappe.share.get_shared(doctype, rights=["read"])):
+			if not frappe.has_permission(doctype, ptype="write", doc=shared):
+				permitted.discard(shared)
+
+		unpermitted.extend(sorted(names - permitted))
+
+	return unpermitted
+
+
 @frappe.whitelist()
 def reconcile_vouchers(bank_transaction_name, vouchers):
+	# request boundary: `vouchers` is caller-supplied and `payment_document` is a plain Link to
+	# DocType, so the allocation targets are authorised here rather than in the shared body.
+	# transaction.save() inside _reconcile_vouchers() authorises the Bank Transaction itself.
+	parsed = json.loads(vouchers)
+
+	for voucher in parsed:
+		payment_doctype = voucher.get("payment_doctype")
+		if payment_doctype not in RECONCILABLE_DOCTYPES:
+			frappe.throw(_("{0} cannot be reconciled against a Bank Transaction").format(payment_doctype))
+
+	if unpermitted := unpermitted_vouchers(parsed):
+		frappe.throw(
+			_("Not permitted to reconcile {0}").format(comma_and(unpermitted)), frappe.PermissionError
+		)
+
+	return _reconcile_vouchers(bank_transaction_name, vouchers)
+
+
+def _reconcile_vouchers(bank_transaction_name, vouchers):
 	# updated clear date of all the vouchers based on the bank transaction
 	vouchers = json.loads(vouchers)
+
 	transaction = frappe.get_doc("Bank Transaction", bank_transaction_name)
 	transaction.add_payment_entries(vouchers)
 	transaction.validate_duplicate_references()
@@ -502,6 +580,8 @@ def get_linked_payments(
 	from_reference_date: str | date | None = None,
 	to_reference_date: str | date | None = None,
 ):
+	frappe.has_permission("Bank Transaction", doc=bank_transaction_name, throw=True)
+
 	# get all matching payments for a bank transaction
 	validate_date_range(from_date, to_date, filter_by_reference_date, from_reference_date, to_reference_date)
 	transaction = frappe.get_doc("Bank Transaction", bank_transaction_name)
