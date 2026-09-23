@@ -125,10 +125,14 @@ def check_pos_profile_access(pos_profile):
 	"""The POS Profile is what entitles a caller to POS data — see the Bin/Item analysis on
 	pos_invoice.get_stock_availability. Record-level when a profile is named, so a Company User
 	Permission applies too."""
+	# select-or-read: a bare check defaults to `read`, and the shipped POS Profile rows give
+	# Sales Manager only `select`. Defaulting to read denies the role the page exists for.
+	ptype = "select" if frappe.only_has_select_perm("POS Profile") else "read"
+
 	if isinstance(pos_profile, str) and pos_profile:
-		frappe.has_permission("POS Profile", doc=pos_profile, throw=True)
+		frappe.has_permission("POS Profile", ptype, doc=pos_profile, throw=True)
 	else:
-		frappe.has_permission("POS Profile", throw=True)
+		frappe.has_permission("POS Profile", ptype, throw=True)
 
 
 @frappe.whitelist()
@@ -273,7 +277,10 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 @frappe.whitelist()
 def search_for_serial_or_batch_or_barcode_number(search_value: str) -> dict[str, str | None]:
 	# POS-page wrapper around scan_barcode; the page's entitlement is the POS Profile.
-	frappe.has_permission("POS Profile", throw=True)
+	# select-or-read for the same reason as check_pos_profile_access: get_items() reaches this
+	# in-process, so a bare read check denies POS search to Sales Manager.
+	ptype = "select" if frappe.only_has_select_perm("POS Profile") else "read"
+	frappe.has_permission("POS Profile", ptype, throw=True)
 
 	return scan_barcode(search_value)
 

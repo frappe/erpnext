@@ -803,7 +803,9 @@ class POSInvoice(SalesInvoice):
 def get_stock_availability(item_code, warehouse):
 	# POS Profile is the only boundary that fits: Item/Bin `read` exclude Accounts Manager, Item
 	# `select` is granted to every desk user, and POS Invoice `read` is granted to `All`.
-	frappe.has_permission("POS Profile", throw=True)
+	# select-or-read: the shipped rows give Sales Manager only `select`.
+	ptype = "select" if frappe.only_has_select_perm("POS Profile") else "read"
+	frappe.has_permission("POS Profile", ptype, throw=True)
 
 	# the caller picks the warehouse when allow_warehouse_change is set; costs nobody who has no
 	# Warehouse User Permission
