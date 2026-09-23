@@ -96,7 +96,10 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	}
 
 	calculate_discount_amount() {
-		if (frappe.meta.get_docfield(this.frm.doc.doctype, "discount_amount")) {
+		if (
+			frappe.meta.get_docfield(this.frm.doc.doctype, "discount_amount") &&
+			!this.has_mapped_discount()
+		) {
 			this.set_discount_amount();
 			this.apply_discount_amount();
 		}
@@ -119,19 +122,49 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	}
 
 	apply_mapped_additional_discount() {
-		if (this.discount_amount_applied || this.frm.doc.is_consolidated) return;
+		if (this.discount_amount_applied || !this.has_mapped_discount()) return;
 
 		for (const item of this.frm._items || []) {
-			const billed_qty = this.get_billed_qty(item);
-			if (!item.mapped_additional_discount_amount || !billed_qty) continue;
+			this.apply_mapped_discount_to_item(item);
+		}
 
-			item.net_amount = flt(
-				item.net_amount - item.mapped_additional_discount_amount * billed_qty,
-				precision("net_amount", item)
-			);
-			item.net_rate = flt(item.net_amount / billed_qty, precision("net_rate", item));
-			item._unrounded_net_amount = null;
-			this.set_in_company_currency(item, ["net_rate", "net_amount"]);
+		const doc = this.frm.doc;
+		doc.apply_discount_on = "Net Total";
+		doc.additional_discount_percentage = 0;
+		doc.discount_amount = flt(
+			(this.frm._items || []).reduce((total, item) => total + flt(item.distributed_discount_amount), 0),
+			precision("discount_amount")
+		);
+		this.set_in_company_currency(doc, ["discount_amount"]);
+	}
+
+	apply_mapped_discount_to_item(item) {
+		const billed_qty = this.get_billed_qty(item);
+		item.distributed_discount_amount = flt(
+			flt(item.mapped_additional_discount_amount) * billed_qty,
+			precision("distributed_discount_amount", item)
+		);
+		if (!item.distributed_discount_amount) return;
+
+		item.net_amount = flt(
+			item.net_amount - item.distributed_discount_amount,
+			precision("net_amount", item)
+		);
+		item.net_rate = flt(item.net_amount / billed_qty, precision("net_rate", item));
+		item._unrounded_net_amount = null;
+		this.set_in_company_currency(item, ["net_rate", "net_amount"]);
+	}
+
+	has_mapped_discount() {
+		return (
+			!this.frm.doc.is_consolidated &&
+			(this.frm._items || []).some((item) => flt(item.mapped_additional_discount_amount))
+		);
+	}
+
+	clear_mapped_discounts() {
+		for (const item of this.frm.doc.items || []) {
+			item.mapped_additional_discount_amount = 0;
 		}
 	}
 
