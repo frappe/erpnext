@@ -205,21 +205,23 @@ class TestBlanketOrder(ERPNextTestSuite):
 		bo.update_status("Closed")
 		row = po.items[0]
 
-		def update_qty(qty):
-			payload = {
-				"docname": row.name,
-				"item_code": row.item_code,
-				"qty": qty,
-				"rate": row.rate,
-				"uom": row.uom,
-				"conversion_factor": row.conversion_factor,
-				"schedule_date": str(row.schedule_date),
-			}
-			update_child_qty_rate("Purchase Order", json.dumps([payload]), po.name)
+		self.assertRaises(frappe.InvalidStatusError, update_purchase_order_row_qty, po, row, 20)
 
-		self.assertRaises(frappe.InvalidStatusError, update_qty, 20)
+		update_purchase_order_row_qty(po, row, 5)
+		self.assertEqual(frappe.db.get_value("Purchase Order Item", row.name, "qty"), 5)
 
-		update_qty(5)
+	def test_update_items_cannot_raise_qty_after_blanket_order_expires(self):
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100)
+		po = make_purchase_order_against(bo, qty=10)
+		po.submit()
+		bo.db_set("to_date", add_days(po.transaction_date, -1))
+		row = po.items[0]
+
+		self.assertRaisesRegex(
+			frappe.ValidationError, "expired on", update_purchase_order_row_qty, po, row, 20
+		)
+
+		update_purchase_order_row_qty(po, row, 5)
 		self.assertEqual(frappe.db.get_value("Purchase Order Item", row.name, "qty"), 5)
 
 	def test_expired_blanket_order_cannot_be_ordered_against(self):
@@ -546,6 +548,19 @@ def make_purchase_order_against(blanket_order, qty):
 	po.schedule_date = today()
 	po.items[0].qty = qty
 	return po
+
+
+def update_purchase_order_row_qty(po, row, qty):
+	payload = {
+		"docname": row.name,
+		"item_code": row.item_code,
+		"qty": qty,
+		"rate": row.rate,
+		"uom": row.uom,
+		"conversion_factor": row.conversion_factor,
+		"schedule_date": str(row.schedule_date),
+	}
+	update_child_qty_rate("Purchase Order", json.dumps([payload]), po.name)
 
 
 def make_priced_blanket_order(
