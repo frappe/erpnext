@@ -286,8 +286,8 @@ def validate_against_blanket_order(order_doc):
 					"blanket_order_allowance",
 				)
 			)
-			for bo_name, item_data in order_data.items():
-				bo_doc = frappe.get_doc("Blanket Order", bo_name)
+			for bo_name, item_data in sorted(order_data.items()):
+				bo_doc = frappe.get_doc("Blanket Order", bo_name, for_update=True)
 				bo_doc.validate_is_open()
 				bo_doc.validate_not_expired(order_doc.transaction_date)
 				for item in bo_doc.get("items"):

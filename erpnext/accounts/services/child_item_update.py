@@ -291,7 +291,7 @@ class ChildItemUpdater:
 			child_item.precision("stock_qty"),
 		)
 		if new_stock_qty > flt(child_item.stock_qty):
-			frappe.get_doc("Blanket Order", child_item.blanket_order).validate_is_open()
+			frappe.get_doc("Blanket Order", child_item.blanket_order, for_update=True).validate_is_open()
 
 	def _validate_quantity_and_rate(self, child_item, new_data: dict, rate_unchanged: bool | None) -> None:
 		if not flt(new_data.get("qty")) and not self.allow_zero_qty:
