@@ -26,6 +26,7 @@ class BlanketOrderItem(Document):
 		price_list_rate: DF.Currency
 		qty: DF.Float
 		rate: DF.Currency
+		stock_uom: DF.Link | None
 		terms_and_conditions: DF.Text | None
 	# end: auto-generated types
 
