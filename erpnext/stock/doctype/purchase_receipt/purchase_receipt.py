@@ -478,6 +478,14 @@ class PurchaseReceipt(BuyingController):
 
 		return process_gl_map(gl_entries, from_repost=frappe.flags.through_repost_item_valuation)
 
+	def is_rejected_material_valued(self) -> bool:
+		if self.is_internal_transfer():
+			return True
+
+		return bool(
+			frappe.db.get_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials")
+		)
+
 	def make_item_gl_entries(self, gl_entries, inventory_account_map=None):
 		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import (
 			get_purchase_document_details,
@@ -544,8 +552,10 @@ class PurchaseReceipt(BuyingController):
 				outgoing_amount = abs(get_stock_value_difference(self.name, item.name, item.from_warehouse))
 				credit_amount = outgoing_amount
 
-			if item.get("rejected_qty") and frappe.db.get_single_value(
-				"Buying Settings", "set_valuation_rate_for_rejected_materials"
+			if (
+				item.get("rejected_qty")
+				and not self.is_internal_transfer()
+				and frappe.db.get_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials")
 			):
 				outgoing_amount += get_stock_value_difference(self.name, item.name, item.rejected_warehouse)
 				credit_amount = outgoing_amount
@@ -701,9 +711,7 @@ class PurchaseReceipt(BuyingController):
 				valuation_amount_as_per_doc - flt(stock_value_diff), item.precision("base_net_amount")
 			)
 
-			if item.get("rejected_qty") and frappe.db.get_single_value(
-				"Buying Settings", "set_valuation_rate_for_rejected_materials"
-			):
+			if item.get("rejected_qty") and self.is_rejected_material_valued():
 				rejected_item_cost = get_stock_value_difference(self.name, item.name, item.rejected_warehouse)
 				divisional_loss -= rejected_item_cost
 
@@ -813,9 +821,7 @@ class PurchaseReceipt(BuyingController):
 			if d.is_fixed_asset and d.landed_cost_voucher_amount:
 				self.update_assets(d, d.valuation_rate)
 
-			if d.rejected_qty and frappe.db.get_single_value(
-				"Buying Settings", "set_valuation_rate_for_rejected_materials"
-			):
+			if d.rejected_qty and self.is_rejected_material_valued():
 				stock_asset_rbnb = (
 					self.get_company_default("asset_received_but_not_billed")
 					if d.is_fixed_asset
@@ -1027,7 +1033,7 @@ class PurchaseReceipt(BuyingController):
 
 			for so, items_details in so_items_details_map.items():
 				so_doc = frappe.get_lazy_doc("Sales Order", so)
-				so_doc.create_stock_reservation_entries(
+				so_doc._create_stock_reservation_entries(
 					items_details=items_details,
 					from_voucher_type="Purchase Receipt",
 					notify=True,
@@ -1764,6 +1770,14 @@ def update_regional_gl_entries(gl_list, doc):
 
 @frappe.whitelist()
 def make_lcv(doctype, docname):
+	# `doctype` is caller-supplied and reaches get_value() as the doctype; only these two carry the fields read below
+	if doctype not in ("Purchase Receipt", "Purchase Invoice"):
+		frappe.throw(_("Invalid document type"), frappe.PermissionError)
+
+	# Authorise the source document, not the Landed Cost Voucher: LCV create is Stock Manager alone,
+	# while the roles pressing this button are those who can read the receipt or invoice.
+	frappe.has_permission(doctype, doc=docname, throw=True)
+
 	landed_cost_voucher = frappe.new_doc("Landed Cost Voucher")
 
 	details = frappe.db.get_value(doctype, docname, ["supplier", "company", "base_grand_total"], as_dict=1)

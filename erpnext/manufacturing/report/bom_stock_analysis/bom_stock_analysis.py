@@ -196,10 +196,29 @@ def get_bom_data(filters):
 	bom_item = frappe.qb.DocType(bom_item_table)
 	bin = frappe.qb.DocType("Bin")
 
+	stock_join_condition = bom_item.item_code == bin.item_code
+	if filters.get("warehouse"):
+		warehouse_details = frappe.db.get_value(
+			"Warehouse", filters.get("warehouse"), ["lft", "rgt"], as_dict=1
+		)
+		if warehouse_details:
+			wh = frappe.qb.DocType("Warehouse")
+			stock_join_condition &= ExistsCriterion(
+				frappe.qb.from_(wh)
+				.select(wh.name)
+				.where(
+					(wh.lft >= warehouse_details.lft)
+					& (wh.rgt <= warehouse_details.rgt)
+					& (bin.warehouse == wh.name)
+				)
+			)
+		else:
+			stock_join_condition &= bin.warehouse == filters.get("warehouse")
+
 	query = (
 		frappe.qb.from_(bom_item)
 		.left_join(bin)
-		.on(bom_item.item_code == bin.item_code)
+		.on(stock_join_condition)
 		.select(
 			bom_item.item_code,
 			bom_item.description,
@@ -211,26 +230,6 @@ def get_bom_data(filters):
 		.groupby(bom_item.item_code)
 		.orderby(bom_item.idx)
 	)
-
-	if filters.get("warehouse"):
-		warehouse_details = frappe.db.get_value(
-			"Warehouse", filters.get("warehouse"), ["lft", "rgt"], as_dict=1
-		)
-		if warehouse_details:
-			wh = frappe.qb.DocType("Warehouse")
-			query = query.where(
-				ExistsCriterion(
-					frappe.qb.from_(wh)
-					.select(wh.name)
-					.where(
-						(wh.lft >= warehouse_details.lft)
-						& (wh.rgt <= warehouse_details.rgt)
-						& (bin.warehouse == wh.name)
-					)
-				)
-			)
-		else:
-			query = query.where(bin.warehouse == filters.get("warehouse"))
 
 	if bom_item_table == "BOM Item":
 		query = query.select(bom_item.bom_no, bom_item.is_phantom_item)

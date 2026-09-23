@@ -17,7 +17,7 @@ from frappe.website.website_generator import WebsiteGenerator
 
 import erpnext
 from erpnext.setup.utils import get_exchange_rate
-from erpnext.stock.doctype.item.item import get_item_details
+from erpnext.stock.doctype.item.item import _get_item_details
 from erpnext.stock.get_item_details import ItemDetailsCtx, get_conversion_factor, get_price_list_rate
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
@@ -499,7 +499,7 @@ class BOM(WebsiteGenerator):
 		self.manage_default_bom()
 
 	def get_item_det(self, item_code):
-		item = get_item_details(item_code)
+		item = _get_item_details(item_code)
 
 		if not item:
 			frappe.throw(_("Item: {0} does not exist in the system").format(item_code))
@@ -905,7 +905,7 @@ class BOM(WebsiteGenerator):
 		for row in items:
 			row = parse_json(row)
 
-			row.update(get_item_details(row.get("item_code")))
+			row.update(_get_item_details(row.get("item_code")))
 			row.operation_row_id = operation_row_id
 
 			item_row = self.get_item_data(row.item_code, operation_row_id)
@@ -1486,7 +1486,11 @@ def get_bom_items_as_dict(
 	fetch_secondary_items=0,
 	include_non_stock_items=False,
 	fetch_qty_in_stock_uom=True,
+	ignore_permissions=True,
 ):
+	if not ignore_permissions:
+		frappe.has_permission("BOM", "read", doc=bom, throw=True)
+
 	item_dict = {}
 
 	group_by_cond = "group by item_code, stock_uom, operation"
@@ -1589,6 +1593,7 @@ def get_bom_items_as_dict(
 				fetch_secondary_items=fetch_secondary_items,
 				include_non_stock_items=include_non_stock_items,
 				fetch_qty_in_stock_uom=fetch_qty_in_stock_uom,
+				ignore_permissions=ignore_permissions,
 			)
 
 			for k, v in data.items():
@@ -1617,7 +1622,11 @@ def get_bom_items_as_dict(
 
 @frappe.whitelist()
 def get_bom_items(bom, company, qty=1, fetch_exploded=1):
-	items = get_bom_items_as_dict(bom, company, qty, fetch_exploded, include_non_stock_items=True).values()
+	frappe.has_permission("BOM", "read", doc=bom, throw=True)
+
+	items = get_bom_items_as_dict(
+		bom, company, qty, fetch_exploded, include_non_stock_items=True, ignore_permissions=False
+	).values()
 	items = list(items)
 	items.sort(key=functools.cmp_to_key(lambda a, b: a.item_code > b.item_code and 1 or -1))
 	return items
@@ -1933,6 +1942,9 @@ def get_bom_diff(bom1, bom2):
 	doc1 = frappe.get_doc("BOM", bom1)
 	doc2 = frappe.get_doc("BOM", bom2)
 
+	doc1.check_permission()
+	doc2.check_permission()
+
 	out = get_diff(doc1, doc2)
 	out.row_changed = []
 	out.added = []
@@ -2040,7 +2052,7 @@ def make_variant_bom(source_name, bom_no, item, variant_items, target_doc=None):
 		doc.item = item
 		doc.quantity = 1
 
-		item_data = get_item_details(item)
+		item_data = _get_item_details(item)
 		doc.update(
 			{
 				"item_name": item_data.item_name,

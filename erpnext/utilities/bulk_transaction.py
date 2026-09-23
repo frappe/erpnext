@@ -6,7 +6,7 @@ from frappe import _
 from frappe.utils import get_link_to_form, today
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def transaction_processing(data, from_doctype, to_doctype, args=None):
 	frappe.has_permission(from_doctype, "read", throw=True)
 	frappe.has_permission(to_doctype, "create", throw=True)
@@ -22,6 +22,15 @@ def transaction_processing(data, from_doctype, to_doctype, args=None):
 	skipped_records = [d for d in deserialized_data if d.get("status") in ("On Hold", "Closed")]
 
 	deserialized_data = [d for d in deserialized_data if d.get("status") not in ("On Hold", "Closed")]
+
+	# The checks above are doctype level, so on their own they let a caller convert documents they
+	# cannot read. Each source document is checked before anything is enqueued.
+	for row in deserialized_data:
+		source_name = row.get("name")
+		if not source_name or not isinstance(source_name, str):
+			frappe.throw(_("Invalid name"), frappe.PermissionError)
+
+		frappe.has_permission(from_doctype, "read", source_name, throw=True)
 
 	length_of_data = len(deserialized_data)
 
@@ -52,7 +61,7 @@ def transaction_processing(data, from_doctype, to_doctype, args=None):
 	)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def retry(date: str | None = None):
 	frappe.only_for("System Manager")
 	if not date:

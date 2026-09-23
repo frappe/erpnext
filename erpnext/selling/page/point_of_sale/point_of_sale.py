@@ -121,8 +121,24 @@ def filter_result_items(result, pos_profile):
 		result["items"] = [item for item in result.get("items") if item.get("item_group") in pos_item_groups]
 
 
+def check_pos_profile_access(pos_profile):
+	"""The POS Profile is what entitles a caller to POS data — see the Bin/Item analysis on
+	pos_invoice.get_stock_availability. Record-level when a profile is named, so a Company User
+	Permission applies too."""
+	# select-or-read: a bare check defaults to `read`, and the shipped POS Profile rows give Sales
+	# Manager only `select`. Defaulting to read denies the role the page exists for.
+	ptype = "select" if frappe.only_has_select_perm("POS Profile") else "read"
+
+	if isinstance(pos_profile, str) and pos_profile:
+		frappe.has_permission("POS Profile", ptype, doc=pos_profile, throw=True)
+	else:
+		frappe.has_permission("POS Profile", ptype, throw=True)
+
+
 @frappe.whitelist()
 def get_parent_item_group(pos_profile):
+	check_pos_profile_access(pos_profile)
+
 	item_groups = get_item_groups(pos_profile)
 
 	if not item_groups:
@@ -133,6 +149,8 @@ def get_parent_item_group(pos_profile):
 
 @frappe.whitelist()
 def get_items(start, page_length, price_list, item_group, pos_profile, search_term=""):
+	check_pos_profile_access(pos_profile)
+
 	warehouse, hide_unavailable_items = frappe.db.get_value(
 		"POS Profile", pos_profile, ["warehouse", "hide_unavailable_items"]
 	)
@@ -264,6 +282,12 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 
 @frappe.whitelist()
 def search_for_serial_or_batch_or_barcode_number(search_value: str) -> dict[str, str | None]:
+	# POS-page wrapper around scan_barcode; the page's entitlement is the POS Profile.
+	# select-or-read, as in the page entry points: this is reached in-process from get_items via
+	# search_by_term, so a bare read check breaks search for the role the page exists for.
+	ptype = "select" if frappe.only_has_select_perm("POS Profile") else "read"
+	frappe.has_permission("POS Profile", ptype, throw=True)
+
 	return scan_barcode(search_value)
 
 
@@ -308,6 +332,7 @@ def get_item_group_condition(pos_profile, item=None):
 @frappe.validate_and_sanitize_search_inputs
 def item_group_query(doctype, txt, searchfield, start, page_len, filters):
 	pos_profile = filters.get("pos_profile")
+	check_pos_profile_access(pos_profile)
 
 	item_filters = [["name", "like", f"%{txt}%"]]
 	if pos_profile:
@@ -315,7 +340,8 @@ def item_group_query(doctype, txt, searchfield, start, page_len, filters):
 		if item_groups:
 			item_filters.append(["name", "in", item_groups])
 
-	return frappe.get_all(
+	# get_list, not get_all: it adds the caller's Item Group User Permissions; a Desk User select row keeps everyone in
+	return frappe.get_list(
 		"Item Group",
 		filters=item_filters,
 		fields=["name"],
@@ -329,6 +355,10 @@ def item_group_query(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 def check_opening_entry(user):
+	# `user` was caller input, so anyone could enumerate another's open POS sessions; this is a POS Opening Entry question
+	if user != frappe.session.user:
+		frappe.has_permission("POS Opening Entry", throw=True)
+
 	open_vouchers = frappe.db.get_all(
 		"POS Opening Entry",
 		filters={"user": user, "pos_closing_entry": ["in", ["", None]], "docstatus": 1},
@@ -339,9 +369,13 @@ def check_opening_entry(user):
 	return open_vouchers
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def create_opening_voucher(pos_profile, company, balance_details):
-	balance_details = json.loads(balance_details)
+	# submit() enforces this per document, but only after the profile and company are accepted from
+	# the caller -- check the profile the session is opened against.
+	check_pos_profile_access(pos_profile)
+
+	balance_details = frappe.parse_json(balance_details)
 
 	new_pos_opening = frappe.get_doc(
 		{
@@ -510,6 +544,8 @@ def set_customer_info(fieldname, customer, value=""):
 
 @frappe.whitelist()
 def get_pos_profile_data(pos_profile):
+	check_pos_profile_access(pos_profile)
+
 	pos_profile = frappe.get_doc("POS Profile", pos_profile)
 	pos_profile = pos_profile.as_dict()
 

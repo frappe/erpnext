@@ -446,6 +446,9 @@ class SubcontractingOrder(SubcontractingController):
 
 	@frappe.whitelist()
 	def cancel_stock_reservation_entries(self, sre_list=None, notify=True) -> None:
+		# same guard as the sibling method on Pick List; run_doc_method only gates on `read`
+		self.check_permission("write")
+
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 			cancel_stock_reservation_entries,
 		)

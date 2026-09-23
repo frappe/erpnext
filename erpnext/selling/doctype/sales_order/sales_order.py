@@ -537,7 +537,7 @@ class SalesOrder(SellingController):
 			update_coupon_code_count(self.coupon_code, "used")
 
 		if self.get("reserve_stock") and not self.get("is_subcontracted"):
-			self.create_stock_reservation_entries()
+			self._create_stock_reservation_entries()
 
 	def delete_removed_delivery_schedule_items(self):
 		items = [d.name for d in self.get("items")]
@@ -859,8 +859,21 @@ class SalesOrder(SellingController):
 		from_voucher_type: Literal["Pick List", "Purchase Receipt"] = None,
 		notify=True,
 	) -> None:
-		"""Creates Stock Reservation Entries for Sales Order Items."""
+		"""Whitelisted entry point: authorise the caller, then reserve."""
+		self.check_permission("write")
+		self._create_stock_reservation_entries(items_details, from_voucher_type, notify)
 
+	def _create_stock_reservation_entries(
+		self,
+		items_details: list[dict] | None = None,
+		from_voucher_type: Literal["Pick List", "Purchase Receipt"] = None,
+		notify=True,
+	) -> None:
+		"""Creates Stock Reservation Entries for Sales Order Items.
+
+		Internal: no permission check. Pick List and Purchase Receipt reserve against someone
+		else's Sales Order, and no role that creates either holds Sales Order write.
+		"""
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 			create_stock_reservation_entries_for_so_items as create_stock_reservation_entries,
 		)
@@ -875,6 +888,8 @@ class SalesOrder(SellingController):
 	@frappe.whitelist()
 	def cancel_stock_reservation_entries(self, sre_list=None, notify=True) -> None:
 		"""Cancel Stock Reservation Entries for Sales Order Items."""
+		# same guard as the sibling method on Pick List; run_doc_method only gates on `read`
+		self.check_permission("write")
 
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 			cancel_stock_reservation_entries,
@@ -998,14 +1013,18 @@ def is_enable_cutoff_date_on_bulk_delivery_note_creation():
 	return frappe.get_single_value("Selling Settings", "enable_cutoff_date_on_bulk_delivery_note_creation")
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def close_or_unclose_sales_orders(names, status):
-	if not frappe.has_permission("Sales Order", "write"):
-		frappe.throw(_("Not permitted"), frappe.PermissionError)
+	frappe.has_permission("Sales Order", "write", throw=True)
 
 	names = json.loads(names)
 	for name in names:
-		so = frappe.get_lazy_doc("Sales Order", name)
+		if not isinstance(name, str):
+			frappe.throw(_("Invalid name"), frappe.PermissionError)
+
+		# the check above is doctype level, so on its own it lets a caller restricted to one company close
+		# another company's orders. Matches what update_status() already does.
+		so = frappe.get_lazy_doc("Sales Order", name, check_permission="submit")
 		if so.docstatus == 1:
 			if status == "Closed":
 				if so.status not in ("Cancelled", "Closed") and (
@@ -1891,7 +1910,7 @@ def make_production_plan(source_name, target_doc=None):
 	return production_plan
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def update_status(status, name):
 	so = frappe.get_doc("Sales Order", name, check_permission="submit")
 	so.update_status(status)
@@ -1965,7 +1984,7 @@ def make_inter_company_purchase_order(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def create_pick_list(source_name, target_doc=None):
+def create_pick_list(source_name: str, target_doc: str | dict | Document | None = None):
 	from erpnext.stock.doctype.packed_item.packed_item import is_product_bundle
 
 	def validate_sales_order():
@@ -2040,7 +2059,8 @@ def create_pick_list(source_name, target_doc=None):
 
 	doc.purpose = "Delivery"
 
-	doc.set_item_locations()
+	if not doc.pick_manually:
+		doc.set_item_locations()
 
 	return doc
 

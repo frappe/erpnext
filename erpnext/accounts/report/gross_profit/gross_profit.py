@@ -16,7 +16,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 )
 from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
 from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
-from erpnext.stock.utils import get_incoming_rate
+from erpnext.stock.utils import _get_incoming_rate
 
 
 def execute(filters=None):
@@ -732,22 +732,31 @@ class GrossProfitGenerator:
 		)
 
 	def get_returned_invoice_items(self):
-		returned_invoices = frappe.db.sql(
-			"""
-			select
-				si.name, si_item.item_code, si_item.sales_invoice_item, si_item.stock_qty as qty,
-				si_item.base_net_amount as base_amount, si.return_against
-			from
-				`tabSales Invoice` si, `tabSales Invoice Item` si_item
-			where
-				si.name = si_item.parent
-				and si.docstatus = 1
-				and si.is_return = 1
-				and si.posting_date between %(from_date)s and %(to_date)s
-		""",
-			{"from_date": self.filters.from_date, "to_date": self.filters.to_date},
-			as_dict=1,
+		si = frappe.qb.DocType("Sales Invoice")
+		si_item = frappe.qb.DocType("Sales Invoice Item")
+		query = (
+			frappe.qb.from_(si)
+			.inner_join(si_item)
+			.on(si.name == si_item.parent)
+			.select(
+				si.name,
+				si_item.item_code,
+				si_item.sales_invoice_item,
+				si_item.stock_qty.as_("qty"),
+				si_item.base_net_amount.as_("base_amount"),
+				si.return_against,
+			)
+			.where(
+				(si.docstatus == 1)
+				& (si.is_return == 1)
+				& si.posting_date.between(self.filters.from_date, self.filters.to_date)
+			)
 		)
+
+		if self.filters.company:
+			query = query.where(si.company == self.filters.company)
+
+		returned_invoices = query.run(as_dict=1)
 
 		self.returned_invoices = frappe._dict()
 		self.legacy_returned_invoices = frappe._dict()
@@ -964,7 +973,7 @@ class GrossProfitGenerator:
 			if row.serial_and_batch_bundle:
 				args.update({"serial_and_batch_bundle": row.serial_and_batch_bundle})
 
-			average_buying_rate = get_incoming_rate(args)
+			average_buying_rate = _get_incoming_rate(args)
 			self.average_buying_rate[key] = flt(average_buying_rate)
 
 		return self.average_buying_rate[key]
@@ -1347,7 +1356,4 @@ class GrossProfitGenerator:
 			).setdefault(d.parent_item, []).append(d)
 
 	def load_non_stock_items(self):
-		self.non_stock_items = frappe.db.sql_list(
-			"""select name from tabItem
-			where is_stock_item=0"""
-		)
+		self.non_stock_items = frappe.get_all("Item", filters={"is_stock_item": 0}, pluck="name")

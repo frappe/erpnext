@@ -95,6 +95,7 @@
   "column_break_37",
   "has_serial_no",
   "serial_no_series",
+  "use_serial_no_wise_valuation",
   "variants_section",
   "variant_of",
   "variant_based_on",
@@ -387,7 +388,8 @@
    "fieldname": "valuation_method",
    "fieldtype": "Select",
    "label": "Valuation Method",
-   "options": "\nFIFO\nMoving Average\nLIFO"
+   "options": "\nFIFO\nMoving Average\nLIFO",
+   "description": "Serialized items are valued at Moving Average once stock transactions exist and Serial No Wise Valuation is disabled."
   },
   {
    "depends_on": "is_stock_item",
@@ -527,6 +529,15 @@
    "fieldname": "serial_no_series",
    "fieldtype": "Data",
    "label": "Serial Number Series",
+   "show_description_on_click": 1
+  },
+  {
+   "default": "1",
+   "depends_on": "eval:doc.is_stock_item && doc.has_serial_no",
+   "description": "Value every outward movement at each Serial No's own incoming rate. If unchecked, the item is valued at Moving Average once stock transactions exist. Cannot be enabled once Serial Nos exist for this item.",
+   "fieldname": "use_serial_no_wise_valuation",
+   "fieldtype": "Check",
+   "label": "Use Serial No Wise Valuation",
    "show_description_on_click": 1
   },
   {
@@ -1095,7 +1106,7 @@
  "image_field": "image",
  "links": [],
  "make_attachments_public": 1,
- "modified": "2026-09-04 10:08:30.115003",
+ "modified": "2026-09-16 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

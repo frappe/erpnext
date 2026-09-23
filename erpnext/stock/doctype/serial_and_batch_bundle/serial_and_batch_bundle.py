@@ -410,8 +410,9 @@ class SerialandBatchBundle(Document):
 
 	def set_valuation_rate_for_return_entry(self, return_against, row, save=False, prev_sle=None):
 		if valuation_details := self.get_valuation_rate_for_return_entry(return_against):
-			from erpnext.stock.utils import get_valuation_method
+			from erpnext.stock.utils import get_valuation_method, is_serial_no_wise_valuation_disabled
 
+			skip_rate_update = is_serial_no_wise_valuation_disabled(self.item_code)
 			valuation_method = get_valuation_method(self.item_code, self.company)
 
 			# An outward return must go out at the batch's current average rate for a
@@ -439,6 +440,9 @@ class SerialandBatchBundle(Document):
 			for row in self.entries:
 				if valuation_details:
 					self.validate_returned_serial_batch_no(return_against, row, valuation_details)
+
+				if skip_rate_update:
+					continue
 
 				if row.serial_no:
 					valuation_rate = valuation_details["serial_nos"].get(row.serial_no)
@@ -696,7 +700,10 @@ class SerialandBatchBundle(Document):
 				)
 
 	def set_incoming_rate_for_outward_transaction(self, row=None, save=False, allow_negative_stock=False):
-		from erpnext.stock.utils import get_valuation_method
+		from erpnext.stock.utils import get_valuation_method, is_serial_no_wise_valuation_disabled
+
+		if is_serial_no_wise_valuation_disabled(self.item_code):
+			return
 
 		sle = self.get_sle_for_outward_transaction()
 
@@ -1899,6 +1906,8 @@ def download_blank_csv_template(content):
 
 @frappe.whitelist()
 def upload_csv_file(item_code, file_path):
+	frappe.has_permission("Item", ptype="select", throw=True)
+
 	serial_nos, batch_nos = [], []
 	serial_nos, batch_nos = get_serial_batch_from_csv(item_code, file_path)
 
@@ -1917,9 +1926,11 @@ def get_serial_batch_from_csv(item_code, file_path):
 	if not file_path:
 		return serial_nos, batch_nos
 
-	try:
-		file = frappe.get_doc("File", {"file_url": file_path})
-	except frappe.DoesNotExistError:
+	from frappe.core.doctype.file.utils import find_file_by_url
+
+	# look the file up through find_file_by_url, which returns it only when the caller may download it
+	file = find_file_by_url(file_path)
+	if not file:
 		frappe.msgprint(
 			_("File '{0}' not found").format(frappe.bold(file_path)),
 			alert=True,
@@ -2014,6 +2025,8 @@ def get_serial_batch_from_data(item_code, kwargs):
 
 @frappe.whitelist()
 def create_serial_nos(item_code, serial_nos):
+	frappe.has_permission("Item", ptype="select", throw=True)
+
 	serial_nos = get_serial_batch_from_data(
 		item_code,
 		{
@@ -2135,7 +2148,8 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 	if txt:
 		item_filters["name"] = ("like", f"%{txt}%")
 
-	return frappe.get_all(
+	# get_list, not get_all, so Item permissions apply; `select` is what keeps the roles that work bundles usable
+	return frappe.get_list(
 		"Item",
 		filters=item_filters,
 		or_filters={"has_serial_no": 1, "has_batch_no": 1},
@@ -3589,6 +3603,8 @@ def get_batch_no_from_serial_no(serial_no):
 
 @frappe.whitelist()
 def is_serial_batch_no_exists(item_code, type_of_transaction, serial_no=None, batch_no=None):
+	frappe.has_permission("Item", ptype="select", throw=True)
+
 	if serial_no and not frappe.db.exists("Serial No", serial_no):
 		if type_of_transaction != "Inward":
 			frappe.throw(_("Serial No {0} does not exists").format(serial_no))

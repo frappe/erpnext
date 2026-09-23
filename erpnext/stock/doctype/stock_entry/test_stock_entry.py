@@ -208,7 +208,8 @@ class TestStockEntry(ERPNextTestSuite):
 		company = "_Test Company"
 
 		create_warehouse("Test From Warehouse")
-		create_warehouse("Test Transit Warehouse")
+		create_warehouse("Test Transit Warehouse", properties={"warehouse_type": "Transit"})
+		frappe.db.set_value("Warehouse", "Test Transit Warehouse - _TC", "warehouse_type", "Transit")
 		create_warehouse("Test To Warehouse")
 
 		create_item(
@@ -258,6 +259,131 @@ class TestStockEntry(ERPNextTestSuite):
 
 		transit_entry.reload()
 		self.assertEqual(transit_entry.per_transferred, 100)
+
+	def test_add_to_transit_non_transit_target_warehouse_validation(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		item_code = "_Test Transit Item 2"
+		company = "_Test Company"
+
+		create_warehouse("Test Source Warehouse")
+		create_warehouse("Test Regular Target Warehouse")
+
+		create_item(
+			item_code=item_code,
+			is_stock_item=1,
+			is_purchase_item=1,
+			company=company,
+		)
+
+		make_stock_entry(
+			item_code=item_code,
+			target="Test Source Warehouse - _TC",
+			qty=10,
+			basic_rate=100,
+			expense_account="Stock Adjustment - _TC",
+			cost_center="Main - _TC",
+		)
+
+		# Submitting or saving with add_to_transit=1 and a non-transit target warehouse must be rejected
+		se = frappe.new_doc("Stock Entry")
+		se.purpose = "Material Transfer"
+		se.stock_entry_type = "Material Transfer"
+		se.company = company
+		se.from_warehouse = "Test Source Warehouse - _TC"
+		se.to_warehouse = "Test Regular Target Warehouse - _TC"
+		se.add_to_transit = 1
+		se.append(
+			"items",
+			{
+				"item_code": item_code,
+				"s_warehouse": "Test Source Warehouse - _TC",
+				"t_warehouse": "Test Regular Target Warehouse - _TC",
+				"qty": 5,
+				"basic_rate": 100,
+				"expense_account": "Stock Adjustment - _TC",
+				"cost_center": "Main - _TC",
+			},
+		)
+		self.assertRaises(frappe.ValidationError, se.save)
+
+	def test_end_transit_qty_with_uom_conversion(self):
+		"""transferred_qty is tracked in the stock UOM, so the end transit qty must be converted back."""
+		company = "_Test Company"
+		source_warehouse = "_Test Warehouse - _TC"
+		target_warehouse = "_Test Warehouse 1 - _TC"
+		transit_warehouse = get_in_transit_warehouse(company)
+
+		item_code = make_item(
+			"_Test Transit UOM Conversion Item",
+			{"is_stock_item": 1, "stock_uom": "Nos", "uoms": [{"uom": "Kg", "conversion_factor": 0.5}]},
+		).name
+
+		make_stock_entry(item_code=item_code, target=source_warehouse, qty=100, basic_rate=100)
+
+		transit_entry = make_stock_entry(
+			item_code=item_code,
+			source=source_warehouse,
+			target=transit_warehouse,
+			purpose="Material Transfer",
+			add_to_transit=1,
+			qty=10,
+			basic_rate=100,
+			do_not_save=True,
+		)
+		transit_entry.items[0].uom = "Kg"
+		transit_entry.items[0].conversion_factor = 0.5
+		transit_entry.save().submit()
+		self.assertEqual(transit_entry.items[0].transfer_qty, 5)
+
+		partial_entry = make_stock_in_entry(transit_entry.name)
+		partial_entry.to_warehouse = target_warehouse
+		partial_entry.items[0].qty = 4
+		partial_entry.items[0].t_warehouse = target_warehouse
+		partial_entry.save().submit()
+
+		remaining_entry = make_stock_in_entry(transit_entry.name)
+		self.assertEqual(remaining_entry.items[0].uom, "Kg")
+		self.assertEqual(remaining_entry.items[0].qty, 6)
+
+		remaining_entry.to_warehouse = target_warehouse
+		remaining_entry.items[0].t_warehouse = target_warehouse
+		remaining_entry.save().submit()
+
+		self.assertFalse(make_stock_in_entry(transit_entry.name).get("items"))
+
+	def test_end_transit_maps_smallest_remaining_qty(self):
+		"""The smallest storable remainder survives binary subtraction, 2.001 - 2 is 0.0009999999999998899."""
+		company = "_Test Company"
+		source_warehouse = "_Test Warehouse - _TC"
+		target_warehouse = "_Test Warehouse 1 - _TC"
+		transit_warehouse = get_in_transit_warehouse(company)
+
+		item_code = make_item(
+			"_Test Transit Fractional Item", {"is_stock_item": 1, "stock_uom": "Litre"}
+		).name
+		smallest_qty = 1 / (10 ** frappe.get_precision("Stock Entry Detail", "transfer_qty"))
+
+		make_stock_entry(item_code=item_code, target=source_warehouse, qty=100, basic_rate=100)
+
+		transit_entry = make_stock_entry(
+			item_code=item_code,
+			source=source_warehouse,
+			target=transit_warehouse,
+			purpose="Material Transfer",
+			add_to_transit=1,
+			qty=2 + smallest_qty,
+			basic_rate=100,
+		)
+
+		partial_entry = make_stock_in_entry(transit_entry.name)
+		partial_entry.to_warehouse = target_warehouse
+		partial_entry.items[0].qty = 2
+		partial_entry.items[0].t_warehouse = target_warehouse
+		partial_entry.save().submit()
+
+		remaining_entry = make_stock_in_entry(transit_entry.name)
+		self.assertEqual(remaining_entry.items[0].qty, smallest_qty)
 
 	def test_material_receipt_gl_entry(self):
 		company = frappe.db.get_value("Warehouse", "Stores - TCP1", "company")
@@ -3703,6 +3829,33 @@ class TestStockEntry(ERPNextTestSuite):
 		fg_row = next(d for d in manufacture.items if d.is_finished_item)
 		self.assertEqual(fg_row.basic_rate, 0)
 		self.assertEqual(fg_row.basic_amount, 0)
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"material_consumption": 1, "get_rm_cost_from_consumption_entry": 1}
+	)
+	def test_manufacture_after_partial_consumption_entry(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			make_stock_entry as make_stock_entry_from_wo,
+		)
+
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=rm_item, target="Stores - _TC", qty=10, basic_rate=100)
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=1).name
+
+		wo = make_wo_order_test_record(
+			production_item=fg_item, bom_no=bom, qty=10, source_warehouse="Stores - _TC"
+		)
+		frappe.get_doc(make_stock_entry_from_wo(wo.name, "Material Transfer for Manufacture", 10)).submit()
+		frappe.get_doc(make_stock_entry_from_wo(wo.name, "Material Consumption for Manufacture", 6)).submit()
+
+		manufacture = frappe.get_doc(make_stock_entry_from_wo(wo.name, "Manufacture", 10))
+		manufacture.submit()
+
+		self.assertEqual([(d.item_code, d.basic_amount) for d in manufacture.items], [(fg_item, 600)])
+		self.assertEqual(frappe.db.get_value("Work Order", wo.name, "status"), "Completed")
 
 	def test_disassemble_entry_without_wo(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom

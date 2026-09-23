@@ -464,15 +464,11 @@ class Customer(TransactionBase):
 
 @frappe.whitelist()
 def make_quotation(source_name: str, target_doc: str | Document | None = None) -> Document:
-	def set_missing_values(source, target):
-		_set_missing_values(source, target)
-
 	target_doc = get_mapped_doc(
 		"Customer",
 		source_name,
 		{"Customer": {"doctype": "Quotation", "field_map": {"name": "party_name"}}},
 		target_doc,
-		set_missing_values,
 	)
 
 	target_doc.quotation_to = "Customer"
@@ -1014,6 +1010,15 @@ def make_address(args, is_primary_address=1, is_shipping_address=1):
 def get_customer_primary(doctype, txt, searchfield, start, page_len, filters):
 	customer = filters.get("customer")
 	type = filters.get("type")
+
+	# `type` is caller-supplied and reaches qb.DocType(), so any doctype could be joined to Dynamic
+	# Link. The two pickers that call this send only these two values.
+	if type not in ("Contact", "Address"):
+		frappe.throw(_("Invalid type"), frappe.PermissionError)
+
+	# authorise the party, not Contact/Address: the `if_owner` row on Address would empty the picker rather than error
+	frappe.has_permission("Customer", doc=customer, throw=True)
+
 	type_doctype = qb.DocType(type)
 	dlink = qb.DocType("Dynamic Link")
 

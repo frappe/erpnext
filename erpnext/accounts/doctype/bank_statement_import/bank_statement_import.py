@@ -436,6 +436,9 @@ def get_import_logs(docname: str):
 
 @frappe.whitelist()
 def upload_bank_statement(**args):
+	# The only caller routes into a new Bank Statement Import form, so `create` is the right to require.
+	frappe.has_permission("Bank Statement Import", "create", throw=True)
+
 	args = frappe._dict(args)
 	bsi = frappe.new_doc("Bank Statement Import")
 

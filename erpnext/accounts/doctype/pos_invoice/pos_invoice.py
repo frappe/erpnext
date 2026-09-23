@@ -899,6 +899,19 @@ class POSInvoice(SalesInvoice):
 
 @frappe.whitelist()
 def get_stock_availability(item_code, warehouse):
+	# select-or-read on POS Profile: a bare check defaults to `read`, which Sales Manager lacks.
+	# The profile is the only boundary that fits -- Item and Bin read both exclude Accounts Manager.
+	ptype = "select" if frappe.only_has_select_perm("POS Profile") else "read"
+	frappe.has_permission("POS Profile", ptype, throw=True)
+
+	# the caller picks the warehouse when allow_warehouse_change is set; costs nobody who has no
+	# Warehouse User Permission
+	from frappe.permissions import get_allowed_docs_for_doctype, get_user_permissions
+
+	if warehouse_permissions := get_user_permissions(frappe.session.user).get("Warehouse"):
+		allowed_warehouses = get_allowed_docs_for_doctype(warehouse_permissions, "POS Invoice")
+		if allowed_warehouses and warehouse not in allowed_warehouses:
+			frappe.throw(_("Not permitted for {0}").format(warehouse), frappe.PermissionError)
 	if frappe.db.get_value("Item", item_code, "is_stock_item"):
 		is_stock_item = True
 		bin_qty = get_bin_qty(item_code, warehouse)

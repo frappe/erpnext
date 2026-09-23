@@ -10,7 +10,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder.custom import ConstantColumn
 from frappe.query_builder.functions import Sum
-from frappe.utils import cint, create_batch, flt
+from frappe.utils import cint, create_batch, flt, getdate
 
 from erpnext import get_default_cost_center
 from erpnext.accounts.doctype.bank_transaction.bank_transaction import get_total_allocated_amount
@@ -55,6 +55,8 @@ def get_bank_transactions(
 	all_transactions: bool = False,
 ):
 	# returns bank transactions for a bank account
+	validate_date_range(from_date, to_date)
+
 	filters = []
 	filters.append(["bank_account", "=", bank_account])
 	filters.append(["docstatus", "=", 1])
@@ -794,6 +796,7 @@ def create_bulk_payment_entry_and_reconcile(
 				"deposit",
 				"withdrawal",
 				"bank_account",
+				"company",
 				"currency",
 				"unallocated_amount",
 				"date",
@@ -828,11 +831,7 @@ def create_bulk_payment_entry_and_reconcile(
 				"paid_from": paid_from,
 				"paid_to": paid_to,
 				"paid_amount": bank_transaction.unallocated_amount,
-				"base_paid_amount": bank_transaction.unallocated_amount,
 				"received_amount": bank_transaction.unallocated_amount,
-				"base_received_amount": bank_transaction.unallocated_amount,
-				"target_exchange_rate": 1,
-				"source_exchange_rate": 1,
 				"reference_date": bank_transaction.date,
 				"posting_date": bank_transaction.date,
 				"reference_no": (bank_transaction.reference_number or bank_transaction.description or "")[
@@ -840,6 +839,8 @@ def create_bulk_payment_entry_and_reconcile(
 				],
 			}
 		)
+
+		set_multi_currency_amounts(payment_entry_doc)
 
 		payment_entry_doc.insert()
 		payment_entry_doc.submit()
@@ -879,6 +880,7 @@ def create_payment_entry_and_reconcile(bank_transaction_name: str | int, payment
 			"doctype": "Payment Entry",
 		}
 	)
+	set_multi_currency_amounts(payment_entry)
 	payment_entry.insert()
 	payment_entry.submit()
 	transaction = reconcile_vouchers(
@@ -899,6 +901,33 @@ def create_payment_entry_and_reconcile(bank_transaction_name: str | int, payment
 		"transaction": transaction,
 		"payment_entry": payment_entry,
 	}
+
+
+def set_multi_currency_amounts(pe):
+	"""Set real exchange rates when the bank and party accounts differ in currency."""
+	company_currency = frappe.get_cached_value("Company", pe.company, "default_currency")
+	pe.paid_from_account_currency = frappe.get_cached_value("Account", pe.paid_from, "account_currency")
+	pe.paid_to_account_currency = frappe.get_cached_value("Account", pe.paid_to, "account_currency")
+
+	pe.source_exchange_rate = (
+		1.0
+		if pe.paid_from_account_currency == company_currency
+		else get_exchange_rate(pe.paid_from_account_currency, company_currency, pe.posting_date)
+	)
+	pe.target_exchange_rate = (
+		1.0
+		if pe.paid_to_account_currency == company_currency
+		else get_exchange_rate(pe.paid_to_account_currency, company_currency, pe.posting_date)
+	)
+
+	# derive the party-side amount from the authoritative bank-side amount; Payment Entry books any
+	# rounding residual to Exchange Gain/Loss during validation (set_exchange_gain_loss)
+	if pe.payment_type == "Receive" and pe.source_exchange_rate:
+		base_amount = flt(pe.received_amount) * pe.target_exchange_rate
+		pe.paid_amount = flt(base_amount / pe.source_exchange_rate, pe.precision("paid_amount"))
+	elif pe.payment_type == "Pay" and pe.target_exchange_rate:
+		base_amount = flt(pe.paid_amount) * pe.source_exchange_rate
+		pe.received_amount = flt(base_amount / pe.target_exchange_rate, pe.precision("received_amount"))
 
 
 @frappe.whitelist(methods=["GET"])
@@ -969,6 +998,7 @@ def auto_reconcile_vouchers(
 	from_reference_date: str | date | None = None,
 	to_reference_date: str | date | None = None,
 ):
+	validate_date_range(from_date, to_date, filter_by_reference_date, from_reference_date, to_reference_date)
 	bank_transactions = get_bank_transactions(bank_account)
 
 	if len(bank_transactions) > 10:
@@ -1087,6 +1117,7 @@ def get_linked_payments(
 	to_reference_date: str | date | None = None,
 ):
 	# get all matching payments for a bank transaction
+	validate_date_range(from_date, to_date, filter_by_reference_date, from_reference_date, to_reference_date)
 	transaction = frappe.get_doc("Bank Transaction", bank_transaction_name)
 	bank_account = frappe.db.get_values(
 		"Bank Account", transaction.bank_account, ["account", "company"], as_dict=True
@@ -1104,6 +1135,23 @@ def get_linked_payments(
 		to_reference_date,
 	)
 	return subtract_allocations(gl_account, matching)
+
+
+def validate_date_range(
+	from_date,
+	to_date,
+	filter_by_reference_date=False,
+	from_reference_date=None,
+	to_reference_date=None,
+):
+	if cint(filter_by_reference_date):
+		from_date, to_date = from_reference_date, to_reference_date
+		message = _("From Reference Date cannot be greater than To Reference Date")
+	else:
+		message = _("From Date cannot be greater than To Date")
+
+	if from_date and to_date and getdate(from_date) > getdate(to_date):
+		frappe.throw(message)
 
 
 def subtract_allocations(gl_account, vouchers):

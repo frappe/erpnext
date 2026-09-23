@@ -145,6 +145,7 @@ class Item(Document):
 		taxes: DF.Table[ItemTax]
 		total_projected_qty: DF.Float
 		uoms: DF.Table[UOMConversionDetail]
+		use_serial_no_wise_valuation: DF.Check
 		valuation_method: DF.Literal["", "FIFO", "Moving Average", "LIFO"]
 		valuation_rate: DF.Currency
 		variant_based_on: DF.Literal["Item Attribute", "Manufacturer"]
@@ -227,14 +228,19 @@ class Item(Document):
 		self.validate_auto_reorder_enabled_in_stock_settings()
 		self.cant_change()
 		self.validate_serialized_change_with_bundle()
+		self.validate_serial_no_wise_valuation()
+		self.set_valuation_method_for_serial_no_wise_valuation()
 		self.validate_item_tax_net_rate_range()
 
 		if not self.is_new():
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
 
 	def on_update(self):
+		from erpnext.stock.utils import clear_valuation_method_cache
+
 		self.update_variants()
 		self.update_item_price()
+		clear_valuation_method_cache()
 
 	def validate_description(self):
 		"""Clean HTML description if set"""
@@ -724,7 +730,7 @@ class Item(Document):
 
 	def set_last_purchase_rate(self, new_name):
 		last_purchase_rate = get_last_purchase_details(new_name).get("base_net_rate", 0)
-		frappe.db.set_value("Item", new_name, "last_purchase_rate", last_purchase_rate)
+		frappe.db.set_value("Item", new_name, "last_purchase_rate", last_purchase_rate, update_modified=False)
 
 	def recalculate_bin_qty(self, new_name):
 		from erpnext.stock.stock_balance import repost_stock
@@ -1130,6 +1136,49 @@ class Item(Document):
 
 			frappe.throw(msg, title=_("Linked with submitted documents"))
 
+	def validate_serial_no_wise_valuation(self):
+		if self.is_new() or not self._doc_before_save:
+			return
+
+		if not self.use_serial_no_wise_valuation or self._doc_before_save.use_serial_no_wise_valuation:
+			return
+
+		if frappe.db.exists("Serial No", {"item_code": self.name}):
+			frappe.throw(
+				_(
+					"Serial No Wise Valuation cannot be enabled for Item {0} because Serial Nos already exist for it. Valuation for those Serial Nos was not tracked, so enabling it now would value outward entries incorrectly."
+				).format(frappe.bold(self.name)),
+				title=_("Serial Nos Exist"),
+			)
+
+	def set_valuation_method_for_serial_no_wise_valuation(self):
+		if not self.has_serial_no or self.use_serial_no_wise_valuation:
+			return
+
+		# Only the switch turning off forces Moving Average, because the per serial costs already in the
+		# ledger cannot be replayed as a FIFO queue. An item that has always had the switch off keeps its
+		# own method, so an unrelated save cannot silently revalue a ledger nothing reposts.
+		if self._doc_before_save and not self._doc_before_save.use_serial_no_wise_valuation:
+			return
+
+		if not frappe.db.exists("Stock Ledger Entry", {"item_code": self.name, "is_cancelled": 0}):
+			return
+
+		if (
+			not self.is_new()
+			and self._doc_before_save
+			and self.has_value_changed("valuation_method")
+			and self.valuation_method in ("FIFO", "LIFO")
+		):
+			frappe.throw(
+				_(
+					"Valuation Method for Item {0} must be Moving Average because Serial No Wise Valuation is disabled. Enable Serial No Wise Valuation to use FIFO or LIFO."
+				).format(frappe.bold(self.name)),
+				title=_("Invalid Valuation Method"),
+			)
+
+		self.valuation_method = "Moving Average"
+
 	def validate_serialized_change_with_bundle(self):
 		"""Block turning a serialized item non-serialized while any Serial and Batch Bundle still exists
 		for it. Such bundles carry the item's serial numbers; the user must delete or cancel them first."""
@@ -1459,11 +1508,21 @@ def set_item_default(item_code, company, fieldname, value):
 
 @frappe.whitelist()
 def get_item_details(item_code, company=None):
+	# The whitelisted entry point authorises; _get_item_details does not. Deliberately not an
+	# `ignore_permissions` argument: this is whitelisted, so a caller could pass it and skip the check.
+	return _get_item_details(item_code, company, ignore_permissions=False)
+
+
+def _get_item_details(item_code, company=None, ignore_permissions=True):
+	doc = frappe.get_cached_doc("Item", item_code)
+	if not ignore_permissions:
+		# the whole Item document is returned below, so the record itself has to be authorised.
+		doc.check_permission()
+
 	out = frappe._dict()
 	if company:
 		out = get_item_defaults(item_code, company) or frappe._dict()
 
-	doc = frappe.get_cached_doc("Item", item_code)
 	out.update(doc.as_dict())
 
 	return out
@@ -1579,32 +1638,28 @@ def get_child_warehouses(warehouse):
 @frappe.whitelist()
 def get_item_prices(item_code: str):
 	"""Fetch valid item prices for the item prices tab."""
-	if not frappe.has_permission("Item Price", "read"):
-		frappe.throw(_("Not permitted"), frappe.PermissionError)
+	frappe.has_permission("Item Price", "read", throw=True)
 	today = getdate()
 
-	ItemPrice = frappe.qb.DocType("Item Price")
-
-	prices = (
-		frappe.qb.from_(ItemPrice)
-		.select(
-			ItemPrice.name,
-			ItemPrice.price_list,
-			ItemPrice.price_list_rate,
-			ItemPrice.currency,
-			ItemPrice.uom,
-			ItemPrice.customer,
-			ItemPrice.supplier,
-			ItemPrice.buying,
-			ItemPrice.selling,
-			ItemPrice.valid_upto,
-		)
-		.where(ItemPrice.item_code == item_code)
-		.where(ItemPrice.docstatus != 2)
-		.where((ItemPrice.valid_upto.isnull()) | (ItemPrice.valid_upto >= today))
-		.orderby(ItemPrice.price_list)
-		.limit(11)
-		.run(as_dict=True)
+	# get_list, not get_all: otherwise a caller restricted to one Price List sees every party's negotiated rate
+	prices = frappe.get_list(
+		"Item Price",
+		filters={"item_code": item_code, "docstatus": ["!=", 2]},
+		or_filters=[["valid_upto", "is", "not set"], ["valid_upto", ">=", today]],
+		fields=[
+			"name",
+			"price_list",
+			"price_list_rate",
+			"currency",
+			"uom",
+			"customer",
+			"supplier",
+			"buying",
+			"selling",
+			"valid_upto",
+		],
+		order_by="price_list",
+		limit=11,
 	)
 
 	has_more = len(prices) == 11
