@@ -1342,7 +1342,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 
 		warehouse = "_Test Warehouse - _TC"
 		serial_nos = [f"SNN-TEST-OPENING-NRALL-{idx}" for idx in range(1, 6)]
-		SerialBatchIdentity("Serial No").resolve(
+		serial_ids = SerialBatchIdentity("Serial No").resolve(
 			item.name, serial_nos, create=True, defaults={"company": "_Test Company"}
 		)
 
@@ -1355,7 +1355,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 				purpose="Opening Stock",
 				expense_account="Temporary Opening - _TC",
 				reconcile_all_serial_batch=0,
-				serial_no=serial_nos,
+				serial_no=serial_ids,
 			)
 
 		self.assertEqual(sr.docstatus, 1)
