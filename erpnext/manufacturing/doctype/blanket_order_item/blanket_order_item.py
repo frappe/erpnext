@@ -16,6 +16,7 @@ class BlanketOrderItem(Document):
 
 		base_price_list_rate: DF.Currency
 		base_rate: DF.Currency
+		closed: DF.Check
 		item_code: DF.Link
 		item_name: DF.Data | None
 		ordered_qty: DF.Float

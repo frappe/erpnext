@@ -11,6 +11,7 @@ from frappe.utils import flt, getdate
 from erpnext import get_company_currency
 from erpnext.accounts.services.taxes import validate_conversion_rate
 from erpnext.buying.utils import check_on_hold_or_closed_status
+from erpnext.controllers.item_close import clear_closed_rows_on_amend, validate_parent_reopen
 from erpnext.controllers.status_updater import StatusUpdater
 from erpnext.manufacturing.doctype.blanket_order import blanket_order_pricing
 from erpnext.stock.doctype.item.item import get_item_defaults
@@ -62,6 +63,7 @@ class BlanketOrder(StatusUpdater):
 		self.validate_item_qty()
 		self.set_party_item_code()
 		self.set_base_rates()
+		clear_closed_rows_on_amend(self)
 
 	def on_submit(self):
 		self.set_status(update=True)
@@ -70,8 +72,14 @@ class BlanketOrder(StatusUpdater):
 		self.set_status(update=True)
 
 	def update_status(self, status: str) -> None:
+		if status != "Closed" and self.status == "Closed":
+			validate_parent_reopen(self)
+
 		self.set_status(update=True, status=status)
 		self.notify_update()
+
+	def is_item_closable(self, item) -> bool:
+		return flt(item.ordered_qty) < flt(item.qty)
 
 	def set_currency(self):
 		if self.currency:
