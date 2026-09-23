@@ -45,6 +45,7 @@
   "discount_percentage",
   "discount_amount",
   "distributed_discount_amount",
+  "mapped_additional_discount_amount",
   "base_rate_with_margin",
   "section_break1",
   "rate",
@@ -696,6 +697,17 @@
    "fieldtype": "Currency",
    "label": "Distributed Discount Amount",
    "options": "currency"
+  },
+  {
+   "default": "0",
+   "description": "Tax-exclusive additional discount carried from a source document, per unit.",
+   "fieldname": "mapped_additional_discount_amount",
+   "fieldtype": "Currency",
+   "label": "Additional Discount per Unit",
+   "options": "currency",
+   "precision": "9",
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fieldname": "available_quantity_section",

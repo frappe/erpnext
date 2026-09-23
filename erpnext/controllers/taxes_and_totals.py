@@ -83,6 +83,7 @@ class calculate_taxes_and_totals:
 		self.update_item_tax_map()
 		self.initialize_taxes()
 		self.determine_exclusive_rate()
+		self.apply_mapped_additional_discount()
 		self.calculate_net_total()
 		self.calculate_taxes()
 		self.adjust_grand_total_for_inclusive_tax()
@@ -234,6 +235,7 @@ class calculate_taxes_and_totals:
 		]
 		for item in self.doc.items:
 			self.doc.round_floats_in(item, do_not_round_fields=do_not_round_fields)
+			item._mapped_discount_inclusive_amount = 0
 			self.calculate_item_rate(item)
 
 			item.net_rate = item.rate
@@ -254,6 +256,23 @@ class calculate_taxes_and_totals:
 			return flt(item.qty)
 
 		return flt(item.qty) + flt(item.rejected_qty)
+
+	def apply_mapped_additional_discount(self):
+		if self.discount_amount_applied or self.doc.get("is_consolidated"):
+			return
+
+		for item in self._items:
+			billed_qty = self.get_billed_qty(item)
+			if not item.get("mapped_additional_discount_amount") or not billed_qty:
+				continue
+
+			item.net_amount = flt(
+				item.net_amount - item.mapped_additional_discount_amount * billed_qty,
+				item.precision("net_amount"),
+			)
+			item.net_rate = flt(item.net_amount / billed_qty, item.precision("net_rate"))
+			item._unrounded_net_amount = None
+			self._set_in_company_currency(item, ["net_rate", "net_amount"])
 
 	def _set_in_company_currency(self, doc, fields):
 		"""set values in base currency"""
@@ -340,6 +359,12 @@ class calculate_taxes_and_totals:
 
 				total_tax_slope += tax.tax_fraction_for_current_item
 				total_tax_intercept += tax_intercept_per_qty * flt(item.qty)
+
+			item._mapped_discount_inclusive_amount = (
+				flt(item.get("mapped_additional_discount_amount"))
+				* self.get_billed_qty(item)
+				* (1 + total_tax_slope)
+			)
 
 			if not self.discount_amount_applied and item.qty and (total_tax_slope or total_tax_intercept):
 				amount = flt(item.amount) - total_tax_intercept
@@ -761,6 +786,7 @@ class calculate_taxes_and_totals:
 			diff = (
 				self.doc.total + non_inclusive_tax_amount - flt(last_tax.total, last_tax.precision("total"))
 			)
+			diff -= sum(flt(item.get("_mapped_discount_inclusive_amount")) for item in self._items)
 
 			# If discount amount applied, deduct the discount amount
 			# because self.doc.total is always without discount, but last_tax.total is after discount
