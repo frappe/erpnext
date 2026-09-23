@@ -1,7 +1,6 @@
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 import json
-
 from contextlib import contextmanager
 
 import frappe
