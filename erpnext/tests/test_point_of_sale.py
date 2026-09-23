@@ -65,3 +65,6 @@ class TestPointOfSale(ERPNextTestSuite):
 		email = get_receipt_email_content("Sales Invoice", invoice.name)
 
 		self.assertEqual(email, {"subject": f"Receipt {invoice.name}", "message": "Thanks, _Test Customer"})
+
+	def test_receipt_email_rejects_other_doctypes(self):
+		self.assertRaises(frappe.ValidationError, get_receipt_email_content, "User", "Administrator")
