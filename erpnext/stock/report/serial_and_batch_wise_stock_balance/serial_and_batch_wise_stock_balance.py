@@ -110,14 +110,17 @@ class SerialAndBatchWiseStockBalanceReport(StockBalanceReport):
 		item_row.indent = 0
 		item_row.serial_no = self.get_serial_nos_in_stock(key, None)
 
-		return [item_row, *self.get_batch_rows(key)]
+		return [item_row, *self.get_batch_rows(key, item_row)]
 
-	def get_batch_rows(self, key) -> list:
+	def get_batch_rows(self, key, item_row) -> list:
+		dimensions = {field: item_row.get(field) for field in self.inventory_dimensions}
+
 		rows = []
 		for batch_no, batch_data in sorted(self.batch_map.get(key, {}).items()):
 			if self.is_hidden_zero_stock(batch_data):
 				continue
 
+			batch_data.update(dimensions)
 			batch_data.update(
 				{
 					"indent": 1,
