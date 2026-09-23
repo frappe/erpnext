@@ -271,6 +271,20 @@ class TestBlanketOrder(ERPNextTestSuite):
 		update_purchase_order_row_qty(po, row, 5)
 		self.assertEqual(frappe.db.get_value("Purchase Order Item", row.name, "qty"), 5)
 
+	def test_update_items_cannot_raise_qty_after_blanket_order_expires(self):
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100)
+		po = make_purchase_order_against(bo, qty=10)
+		po.submit()
+		bo.db_set("to_date", add_days(po.transaction_date, -1))
+		row = po.items[0]
+
+		self.assertRaisesRegex(
+			frappe.ValidationError, "expired on", update_purchase_order_row_qty, po, row, 20
+		)
+
+		update_purchase_order_row_qty(po, row, 5)
+		self.assertEqual(frappe.db.get_value("Purchase Order Item", row.name, "qty"), 5)
+
 	def test_expired_blanket_order_cannot_be_ordered_against(self):
 		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100)
 		bo.db_set("to_date", today())

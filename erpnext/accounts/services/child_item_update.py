@@ -292,7 +292,7 @@ class ChildItemUpdater:
 		)
 		if new_stock_qty > flt(child_item.stock_qty):
 			blanket_order = frappe.get_doc("Blanket Order", child_item.blanket_order, for_update=True)
-			blanket_order.validate_is_open()
+			blanket_order.validate_can_be_ordered(self.parent.transaction_date)
 			blanket_order.validate_items_are_open([child_item.item_code])
 
 	def _validate_quantity_and_rate(self, child_item, new_data: dict, rate_unchanged: bool | None) -> None:

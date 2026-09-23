@@ -80,6 +80,10 @@ class BlanketOrder(StatusUpdater):
 	def is_item_closable(self, item) -> bool:
 		return flt(item.ordered_qty) < flt(item.qty)
 
+	def validate_can_be_ordered(self, order_date) -> None:
+		self.validate_is_open()
+		self.validate_not_expired(order_date)
+
 	def validate_is_open(self) -> None:
 		if self.status == "Closed":
 			frappe.throw(
@@ -237,8 +241,7 @@ def update_status(status: str, name: str):
 @frappe.whitelist()
 def make_order(source_name: str):
 	blanket_order = frappe.get_doc("Blanket Order", source_name, check_permission="read")
-	blanket_order.validate_is_open()
-	blanket_order.validate_not_expired(today())
+	blanket_order.validate_can_be_ordered(today())
 	doctype = frappe.flags.args.doctype
 
 	def update_doc(source_doc, target_doc, source_parent):
@@ -307,9 +310,8 @@ def validate_against_blanket_order(order_doc):
 			)
 			for bo_name, item_data in sorted(order_data.items()):
 				bo_doc = frappe.get_doc("Blanket Order", bo_name, for_update=True)
-				bo_doc.validate_is_open()
+				bo_doc.validate_can_be_ordered(order_doc.transaction_date)
 				bo_doc.validate_items_are_open(list(item_data))
-				bo_doc.validate_not_expired(order_doc.transaction_date)
 				for item in bo_doc.get("items"):
 					if item.item_code in item_data:
 						remaining_qty = item.qty - item.ordered_qty
