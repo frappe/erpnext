@@ -49,6 +49,7 @@ class SubcontractingOrder(SubcontractingController):
 		contact_email: DF.SmallText | None
 		contact_mobile: DF.SmallText | None
 		contact_person: DF.Link | None
+		conversion_rate: DF.Float
 		cost_center: DF.Link | None
 		distribute_additional_costs_based_on: DF.Literal["Qty", "Amount"]
 		items: DF.Table[SubcontractingOrderItem]
@@ -199,11 +200,19 @@ class SubcontractingOrder(SubcontractingController):
 		self.calculate_supplied_items_qty_and_amount()
 		self.calculate_items_qty_and_amount()
 
+	def set_service_item_base_amounts(self):
+		# Service items carry the Purchase Order's currency, so convert them for the costing fields.
+		conversion_rate = flt(self.conversion_rate) or 1.0
+		for item in self.get("service_items"):
+			item.base_rate = flt(item.rate) * conversion_rate
+			item.base_amount = flt(item.amount) * conversion_rate
+
 	def calculate_service_costs(self):
+		self.set_service_item_base_amounts()
 		# Match by purchase_order_item rather than list position: the service_items and items
 		# tables are not guaranteed to stay index-aligned (e.g. a skipped zero-qty service item).
 		service_amount_by_po_item = {
-			service_item.purchase_order_item: service_item.amount
+			service_item.purchase_order_item: service_item.base_amount
 			for service_item in self.get("service_items")
 		}
 		for item in self.items:
