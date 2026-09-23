@@ -152,6 +152,33 @@ class TestProformaInvoice(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, send_proforma_email, proforma.name, "customer@example.com")
 
+	def test_email_content_uses_template_from_selling_settings(self):
+		template = frappe.get_doc(
+			{
+				"doctype": "Email Template",
+				"name": "_Test Proforma Email",
+				"subject": "Proforma {{ doc.name }}",
+				"response": "Advance payment for {{ doc.sales_order }}",
+			}
+		).insert()
+		frappe.db.set_single_value("Selling Settings", "proforma_email_template", template.name)
+		proforma = frappe.get_doc(
+			{"doctype": "Proforma Invoice", "name": "PRO-TEST-0001", "sales_order": "SO-TEST-0001"}
+		)
+
+		self.assertEqual(
+			proforma.get_email_content(), ("Proforma PRO-TEST-0001", "Advance payment for SO-TEST-0001")
+		)
+
+	def test_email_content_without_template_is_default_text(self):
+		frappe.db.set_single_value("Selling Settings", "proforma_email_template", None)
+		proforma = frappe.get_doc({"doctype": "Proforma Invoice", "name": "PRO-TEST-0001"})
+
+		self.assertEqual(
+			proforma.get_email_content(),
+			("Proforma Invoice PRO-TEST-0001", "Please find attached the proforma invoice PRO-TEST-0001."),
+		)
+
 	def test_requires_submitted_sales_order(self):
 		"""The server rejects a proforma against a draft Sales Order (the button is JS-gated only)."""
 		sales_order = make_sales_order(qty=10, do_not_submit=True)
