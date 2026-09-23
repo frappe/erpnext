@@ -392,6 +392,35 @@ class TestMappedDiscounts(ERPNextTestSuite):
 		self.assertFalse(row.mapped_additional_discount_amount)
 		self.assertEqual(invoice.discount_amount, 0)
 
+	def test_billed_rejected_quantity_uses_its_carried_discount(self):
+		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice
+
+		self.enterContext(
+			self.change_settings(
+				"Buying Settings",
+				bill_for_rejected_quantity_in_purchase_invoice=1,
+				set_valuation_rate_for_rejected_materials=1,
+			)
+		)
+		fixed = self.make_order(qty=10, fixed=100)
+		regular = self.make_order(item="_Test Item 2")
+		invoice = self.combine(fixed, regular, mapper=PURCHASE_INVOICE_FROM_ORDER, doctype="Purchase Invoice")
+		invoice.update_stock = 1
+		row = invoice.getone("items", {"purchase_order": fixed.name})
+		row.update(
+			{
+				"received_qty": 5,
+				"qty": 3,
+				"rejected_qty": 2,
+				"rejected_warehouse": "_Test Rejected Warehouse - _TC",
+			}
+		)
+		invoice.save().submit()
+		self.assertEqual(row.distributed_discount_amount, 50)
+
+		remaining = make_purchase_invoice(fixed.name).save()
+		self.assertEqual(remaining.discount_amount, 50)
+
 	def test_removing_the_last_discounted_row_clears_the_header(self):
 		discounted = self.make_sales_order(percentage=10)
 		regular = self.make_sales_order(item="_Test Item 2")
