@@ -6,6 +6,7 @@ from datetime import date
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import Min
 from frappe.utils import create_batch, get_datetime, get_link_to_form, getdate, parse_json
 
 import erpnext
@@ -305,22 +306,33 @@ def create_gl_reposting_entries(rows: str | list, company: str, from_date: str |
 	entries = []
 	processed_vouchers = set()
 
-	# One batched lookup for the whole selection. Checking each row on its own meant a query per
-	# row, which does not hold up when the report is used on the large selections it is meant for.
-	pending_vouchers = get_pending_gl_reposting_vouchers(
-		[(row.get("voucher_type"), row.get("voucher_no")) for row in rows]
-	)
-
+	vouchers = []
 	for row in rows:
-		# Rows posted before the From Date are skipped, so a stale selection cannot rewrite the
-		# accounting ledgers of an already reconciled period.
-		if getdate(row.get("posting_date")) < from_date:
+		if not isinstance(row, dict):
 			continue
 
 		voucher_type, voucher_no = row.get("voucher_type"), row.get("voucher_no")
+		if isinstance(voucher_type, str) and isinstance(voucher_no, str):
+			vouchers.append((voucher_type, voucher_no))
 
-		# journal entry has not stock stock value, so no need to create a reposting entry for it
-		if voucher_type == "Journal Entry":
+	# The posting date and time are taken from the voucher's own stock ledger entries, never from the
+	# selected row, so the From Date bound and the closing/freeze checks run against the real date.
+	# Vouchers without stock ledger entries (Journal Entries and the report's GL-only rows) have
+	# nothing to rebuild the accounting ledgers from, so they are skipped.
+	stock_vouchers = get_stock_voucher_postings(vouchers, company)
+
+	# One batched lookup for the whole selection. Checking each row on its own meant a query per
+	# row, which does not hold up when the report is used on the large selections it is meant for.
+	pending_vouchers = get_pending_gl_reposting_vouchers(list(stock_vouchers))
+
+	for voucher_type, voucher_no in vouchers:
+		posting = stock_vouchers.get((voucher_type, voucher_no))
+		if not posting:
+			continue
+
+		# Rows posted before the From Date are skipped, so a stale selection cannot rewrite the
+		# accounting ledgers of an already reconciled period.
+		if getdate(posting.posting_date) < from_date:
 			continue
 
 		# Skip duplicate vouchers in the selection: a single reposting entry is enough to rewrite the accounting ledgers for a given voucher.
@@ -341,8 +353,8 @@ def create_gl_reposting_entries(rows: str | list, company: str, from_date: str |
 				"status": "Queued",
 				"voucher_type": voucher_type,
 				"voucher_no": voucher_no,
-				"posting_date": row.get("posting_date"),
-				"posting_time": row.get("posting_time"),
+				"posting_date": posting.posting_date,
+				"posting_time": posting.posting_time,
 				"company": company,
 				"repost_only_accounting_ledgers": 1,
 			}
@@ -357,6 +369,37 @@ def create_gl_reposting_entries(rows: str | list, company: str, from_date: str |
 		frappe.msgprint(_("GL reposting entries created: {0}").format(", ".join(entries)))
 	else:
 		frappe.msgprint(_("No new GL reposting entries were created for the selected rows."))
+
+
+def get_stock_voucher_postings(vouchers, company) -> dict[tuple[str, str], frappe._dict]:
+	"""Posting date and time of each voucher that has active stock ledger entries in the company."""
+
+	postings = {}
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+
+	for chunk in create_batch(list(set(vouchers)), 1000):
+		chunk = set(chunk)
+		entries = (
+			frappe.qb.from_(sle)
+			.select(
+				sle.voucher_type,
+				sle.voucher_no,
+				Min(sle.posting_date).as_("posting_date"),
+				Min(sle.posting_time).as_("posting_time"),
+			)
+			.where(
+				(sle.is_cancelled == 0)
+				& (sle.company == company)
+				& (sle.voucher_no.isin([voucher_no for _, voucher_no in chunk]))
+			)
+			.groupby(sle.voucher_type, sle.voucher_no)
+		).run(as_dict=True)
+
+		for d in entries:
+			if (d.voucher_type, d.voucher_no) in chunk:
+				postings[(d.voucher_type, d.voucher_no)] = d
+
+	return postings
 
 
 def get_pending_gl_reposting_vouchers(transactions) -> set[tuple[str, str]]:

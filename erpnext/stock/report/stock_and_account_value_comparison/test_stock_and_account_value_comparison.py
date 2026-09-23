@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe.utils import add_days, today
+from frappe.utils import add_days, getdate, today
 
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
@@ -261,6 +261,56 @@ class TestStockAndAccountValueComparison(ERPNextTestSuite):
 			"Row posted before the From Date must be ignored",
 		)
 		self.assertTrue(frappe.db.exists("Repost Item Valuation", {"voucher_no": new_pr.name}))
+
+	def test_gl_reposting_skips_gl_only_rows(self):
+		# The report's GL-only rows carry their real voucher type (eg. a Payment Entry posted to a stock
+		# account), but without stock ledger entries there is nothing to rebuild the ledgers from.
+		row = {
+			"ledger_type": "GL Entry",
+			"voucher_type": "Payment Entry",
+			"voucher_no": "_Test PE for GL Reposting",
+			"posting_date": today(),
+		}
+
+		create_gl_reposting_entries([row], COMPANY, from_date=today())
+
+		self.assertFalse(frappe.db.exists("Repost Item Valuation", {"voucher_no": row["voucher_no"]}))
+
+	def test_gl_reposting_uses_voucher_posting_date(self):
+		# A row claiming a later posting date than the voucher really has must not get past the From
+		# Date bound, and the repost is created with the voucher's own posting date.
+		item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
+
+		old_pr = make_purchase_receipt(
+			item_code=item,
+			company=COMPANY,
+			warehouse=PI_STORES,
+			qty=5,
+			rate=100,
+			posting_date=add_days(today(), -10),
+		)
+
+		row = {
+			"ledger_type": "Stock Ledger Entry",
+			"voucher_type": "Purchase Receipt",
+			"voucher_no": old_pr.name,
+			"posting_date": today(),
+			"posting_time": old_pr.posting_time,
+		}
+
+		frappe.flags.dont_execute_stock_reposts = True
+		try:
+			create_gl_reposting_entries([row], COMPANY, from_date=add_days(today(), -1))
+			self.assertFalse(frappe.db.exists("Repost Item Valuation", {"voucher_no": old_pr.name}))
+
+			create_gl_reposting_entries([row], COMPANY, from_date=add_days(today(), -20))
+		finally:
+			frappe.flags.dont_execute_stock_reposts = False
+
+		posting_date = frappe.db.get_value(
+			"Repost Item Valuation", {"voucher_no": old_pr.name}, "posting_date"
+		)
+		self.assertEqual(getdate(posting_date), getdate(old_pr.posting_date))
 
 	def test_gl_reposting_requires_from_date(self):
 		row = {
