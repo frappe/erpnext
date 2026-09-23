@@ -819,6 +819,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		item.uom = null; // make UOM blank to update the existing UOM when item changes
 		item.conversion_factor = 0;
 		item.barcode = null;
+		item.mapped_additional_discount_amount = 0;
 
 		if (item.item_code || item.serial_no) {
 			if (!this.validate_company_and_party()) {
