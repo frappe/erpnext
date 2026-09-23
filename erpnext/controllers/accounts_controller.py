@@ -249,6 +249,7 @@ class AccountsController(TransactionBase):
 
 	def validate(self):
 		clear_closed_rows_on_amend(self)
+		self.clear_mapped_discount_total_of_removed_rows()
 
 		if not self.get("is_return") and not self.get("is_debit_note"):
 			self.validate_qty_is_not_zero()
@@ -1505,8 +1506,19 @@ class AccountsController(TransactionBase):
 
 	def drop_mapped_discount(self, item):
 		item.mapped_additional_discount_amount = 0
+		self.clear_stale_mapped_discount_total()
+
+	def clear_stale_mapped_discount_total(self):
 		if not self.has_mapped_discount:
 			self.discount_amount = 0
+
+	def clear_mapped_discount_total_of_removed_rows(self):
+		previous = self.get_doc_before_save()
+		if not previous or not previous.has_mapped_discount:
+			return
+
+		if not any(self.has_value_changed(field) for field in ADDITIONAL_DISCOUNT_FIELDS):
+			self.clear_stale_mapped_discount_total()
 
 	def is_same_transaction_side(self, source_doc):
 		return any(

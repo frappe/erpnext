@@ -134,7 +134,11 @@ class ChildItemUpdater:
 		self, any_qty_changed: bool, items_added_or_removed: bool, any_conversion_factor_changed: bool
 	) -> None:
 		parent = self.parent
+		had_mapped_discount = parent.has_mapped_discount
 		parent.reload()
+		if had_mapped_discount:
+			parent.clear_stale_mapped_discount_total()
+
 		parent.flags.ignore_validate_update_after_submit = True
 		parent.set_qty_as_per_stock_uom()
 		parent.calculate_taxes_and_totals()
