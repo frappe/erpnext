@@ -18,6 +18,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 	parse_serial_nos,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -1947,7 +1948,11 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 			use_serial_batch_fields=1,
 		)
 
-		return get_serial_nos_from_bundle(entry.items[0].serial_and_batch_bundle)
+		return self.get_serial_numbers(item_code, entry.items[0].serial_and_batch_bundle)
+
+	def get_serial_numbers(self, item_code, bundle):
+		"""Physical numbers, which is what the serial_no field on a voucher row holds."""
+		return SerialBatchIdentity("Serial No").get_numbers(item_code, get_serial_nos_from_bundle(bundle))
 
 	def issue_serial_no(self, item_code, serial_no, warehouse, posting_date=None):
 		return make_stock_entry(
@@ -2040,7 +2045,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 
 		make_purchase_receipt(item_code=item.name, qty=2, rate=100, warehouse=warehouse)
 		costlier_receipt = make_purchase_receipt(item_code=item.name, qty=2, rate=200, warehouse=warehouse)
-		serial_nos = get_serial_nos_from_bundle(costlier_receipt.items[0].serial_and_batch_bundle)
+		serial_nos = self.get_serial_numbers(item.name, costlier_receipt.items[0].serial_and_batch_bundle)
 
 		entry = self.make_purchase_return_for_serial_no(item.name, serial_nos[-1], costlier_receipt)
 
@@ -2054,7 +2059,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 
 		make_purchase_receipt(item_code=item.name, qty=2, rate=100, warehouse=warehouse)
 		costlier_receipt = make_purchase_receipt(item_code=item.name, qty=2, rate=200, warehouse=warehouse)
-		serial_nos = get_serial_nos_from_bundle(costlier_receipt.items[0].serial_and_batch_bundle)
+		serial_nos = self.get_serial_numbers(item.name, costlier_receipt.items[0].serial_and_batch_bundle)
 
 		entry = self.make_purchase_return_for_serial_no(item.name, serial_nos[-1], costlier_receipt)
 
@@ -2156,7 +2161,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 			warehouse=warehouse,
 			posting_date=add_days(posting_date, 1),
 		)
-		serial_nos = get_serial_nos_from_bundle(costlier_receipt.items[0].serial_and_batch_bundle)
+		serial_nos = self.get_serial_numbers(item.name, costlier_receipt.items[0].serial_and_batch_bundle)
 
 		entry = self.make_purchase_return_for_serial_no(item.name, serial_nos[-1], costlier_receipt)
 		self.assertEqual(flt(self.get_stock_value_difference(entry.name)), -200.0)
