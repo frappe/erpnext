@@ -795,7 +795,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			.where(
 				(stock_entry.work_order == self.doc.work_order)
 				& (stock_entry_detail.s_warehouse.isnotnull())
-				& (stock_entry.purpose == "Manufacture")
+				& (stock_entry.purpose.isin(["Manufacture", "Material Consumption for Manufacture"]))
 				& (stock_entry.docstatus == 1)
 			)
 			.orderby(stock_entry_detail.idx)
@@ -805,6 +805,9 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		for row in self._consumption_entries:
 			row.warehouse = row.s_warehouse
 			buckets = self._get_available_buckets(row)
+			if not buckets:
+				continue
+
 			if row.serial_and_batch_bundle:
 				self._deduct_consumed_serial_batch(buckets, row.serial_and_batch_bundle)
 			else:
