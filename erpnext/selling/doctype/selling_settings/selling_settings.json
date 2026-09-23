@@ -53,6 +53,7 @@
   "proforma_invoice_section",
   "enable_proforma_invoice",
   "default_proforma_print_format",
+  "proforma_email_template",
   "advanced_features_tab",
   "section_break_avhb",
   "enable_tracking_sales_commissions",
@@ -374,6 +375,14 @@
    "options": "Print Format"
   },
   {
+   "depends_on": "enable_proforma_invoice",
+   "description": "Subject and message used when emailing a Proforma Invoice. The template gets the Proforma Invoice as doc, e.g. {{ doc.customer_name }}. Leave empty to send the default text.",
+   "fieldname": "proforma_email_template",
+   "fieldtype": "Link",
+   "label": "Proforma Email Template",
+   "options": "Email Template"
+  },
+  {
    "fieldname": "customer_defaults_tab",
    "fieldtype": "Tab Break",
    "label": "Customer Defaults"
@@ -444,7 +453,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-08-19 11:00:00.000000",
+ "modified": "2026-09-23 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",
