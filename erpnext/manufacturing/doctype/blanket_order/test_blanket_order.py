@@ -8,6 +8,7 @@ from frappe.utils import add_months, flt, today
 
 from erpnext import get_company_currency
 from erpnext.accounts.services.child_item_update import update_child_qty_rate
+from erpnext.controllers.item_close import update_closed_status
 from erpnext.controllers.queries import get_blanket_orders
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.get_item_details import get_blanket_order_details
@@ -213,6 +214,27 @@ class TestBlanketOrder(ERPNextTestSuite):
 
 		update_qty(5)
 		self.assertEqual(frappe.db.get_value("Purchase Order Item", row.name, "qty"), 5)
+
+	def test_closing_every_row_closes_the_blanket_order(self):
+		bo = make_blanket_order(blanket_order_type="Selling")
+		row = bo.items[0].name
+
+		update_closed_status("Blanket Order", bo.name, [row], 1)
+		self.assertEqual(frappe.db.get_value("Blanket Order", bo.name, "status"), "Closed")
+
+		bo.reload()
+		self.assertRaises(frappe.ValidationError, bo.update_status, "Submitted")
+
+		update_closed_status("Blanket Order", bo.name, [row], 0)
+		self.assertEqual(frappe.db.get_value("Blanket Order", bo.name, "status"), "Submitted")
+
+	def test_fully_ordered_row_cannot_be_closed(self):
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=10)
+		make_purchase_order_against(bo, qty=10).submit()
+
+		self.assertRaises(
+			frappe.ValidationError, update_closed_status, "Blanket Order", bo.name, [bo.items[0].name], 1
+		)
 
 	def test_party_item_code(self):
 		item_doc = make_item("_Test Item 1 for Blanket Order")
