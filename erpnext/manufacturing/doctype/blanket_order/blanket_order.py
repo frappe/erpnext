@@ -6,7 +6,7 @@ import frappe
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import Sum
-from frappe.utils import flt, getdate
+from frappe.utils import flt, formatdate, getdate, today
 
 from erpnext import get_company_currency
 from erpnext.accounts.services.taxes import validate_conversion_rate
@@ -125,6 +125,15 @@ class BlanketOrder(StatusUpdater):
 		if getdate(self.from_date) > getdate(self.to_date):
 			frappe.throw(_("From date cannot be greater than To date"))
 
+	def validate_not_expired(self, order_date) -> None:
+		if getdate(order_date) > getdate(self.to_date):
+			frappe.throw(
+				_("Blanket Order {0} expired on {1}").format(
+					frappe.bold(self.name), formatdate(self.to_date)
+				),
+				title=_("Blanket Order Expired"),
+			)
+
 	def set_party_item_code(self):
 		item_ref = {}
 		if self.blanket_order_type == "Selling":
@@ -229,6 +238,7 @@ def update_status(status: str, name: str):
 def make_order(source_name: str):
 	blanket_order = frappe.get_doc("Blanket Order", source_name, check_permission="read")
 	blanket_order.validate_is_open()
+	blanket_order.validate_not_expired(today())
 	doctype = frappe.flags.args.doctype
 
 	def update_doc(source_doc, target_doc, source_parent):
@@ -299,6 +309,7 @@ def validate_against_blanket_order(order_doc):
 				bo_doc = frappe.get_doc("Blanket Order", bo_name)
 				bo_doc.validate_is_open()
 				bo_doc.validate_items_are_open(list(item_data))
+				bo_doc.validate_not_expired(order_doc.transaction_date)
 				for item in bo_doc.get("items"):
 					if item.item_code in item_data:
 						remaining_qty = item.qty - item.ordered_qty
