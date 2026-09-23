@@ -291,7 +291,7 @@ class ChildItemUpdater:
 			child_item.precision("stock_qty"),
 		)
 		if new_stock_qty > flt(child_item.stock_qty):
-			blanket_order = frappe.get_doc("Blanket Order", child_item.blanket_order)
+			blanket_order = frappe.get_doc("Blanket Order", child_item.blanket_order, for_update=True)
 			blanket_order.validate_is_open()
 			blanket_order.validate_items_are_open([child_item.item_code])
 

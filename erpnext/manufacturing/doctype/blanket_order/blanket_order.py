@@ -289,7 +289,7 @@ def validate_against_blanket_order(order_doc):
 		order_data = {}
 
 		for item in order_doc.get("items"):
-			if item.against_blanket_order and item.blanket_order:
+			if item.blanket_order:
 				if item.blanket_order in order_data:
 					if item.item_code in order_data[item.blanket_order]:
 						order_data[item.blanket_order][item.item_code] += item.qty
@@ -305,8 +305,8 @@ def validate_against_blanket_order(order_doc):
 					"blanket_order_allowance",
 				)
 			)
-			for bo_name, item_data in order_data.items():
-				bo_doc = frappe.get_doc("Blanket Order", bo_name)
+			for bo_name, item_data in sorted(order_data.items()):
+				bo_doc = frappe.get_doc("Blanket Order", bo_name, for_update=True)
 				bo_doc.validate_is_open()
 				bo_doc.validate_items_are_open(list(item_data))
 				bo_doc.validate_not_expired(order_doc.transaction_date)
