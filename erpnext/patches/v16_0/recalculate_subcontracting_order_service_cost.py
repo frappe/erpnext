@@ -12,6 +12,8 @@ def execute():
 	):
 		recost_order(frappe.get_doc("Subcontracting Order", name))
 
+	update_draft_receipts()
+
 
 def set_conversion_rates():
 	order = frappe.qb.DocType("Subcontracting Order")
@@ -56,3 +58,32 @@ def recost_order(order):
 	order.db_update()
 	for row in rows:
 		row.db_update()
+
+
+def update_draft_receipts():
+	receipt = frappe.qb.DocType("Subcontracting Receipt")
+	receipt_item = frappe.qb.DocType("Subcontracting Receipt Item")
+	order = frappe.qb.DocType("Subcontracting Order")
+	order_item = frappe.qb.DocType("Subcontracting Order Item")
+	service_costs = (
+		frappe.qb.from_(receipt_item)
+		.join(receipt)
+		.on(receipt.name == receipt_item.parent)
+		.join(order_item)
+		.on(order_item.name == receipt_item.subcontracting_order_item)
+		.join(order)
+		.on(order.name == order_item.parent)
+		.select(receipt_item.name, order_item.service_cost_per_qty)
+		.where(
+			(receipt.docstatus == 0)
+			& (receipt.is_return == 0)
+			& (order.conversion_rate != 1)
+			& (receipt_item.service_cost_per_qty != order_item.service_cost_per_qty)
+		)
+		.run()
+	)
+	frappe.db.bulk_update(
+		"Subcontracting Receipt Item",
+		{name: {"service_cost_per_qty": cost} for name, cost in service_costs},
+		update_modified=False,
+	)
