@@ -22,9 +22,15 @@ from erpnext.accounts.services.exchange_gain_loss import get_exchange_gain_loss_
 from erpnext.accounts.utils import (
 	QueryPaymentLedger,
 	create_gain_loss_journal,
+	get_base_amount_and_reference_rate_value,
 	get_outstanding_invoices,
 	reconcile_against_document,
 )
+
+REFERENCE_TOTAL_FIELD = {
+	"Sales Invoice": ("base_grand_total", "grand_total"),
+	"Purchase Invoice": ("base_grand_total", "grand_total"),
+}
 
 
 class PaymentReconciliation(Document):
@@ -441,13 +447,22 @@ class PaymentReconciliation(Document):
 			if invoice.get("exchange_rate") and payment_entry.get("exchange_rate", 1) != invoice.get(
 				"exchange_rate", 1
 			):
-				allocated_amount_in_ref_rate = flt(
-					payment_entry.get("exchange_rate", 1) * flt(allocated_amount, allocated_amount_precision),
-					difference_amount_precision,
+				reference_total_field, reference_amount_field = REFERENCE_TOTAL_FIELD.get(
+					invoice.get("invoice_type"), (None, None)
 				)
-				allocated_amount_in_inv_rate = flt(
-					invoice.get("exchange_rate", 1) * flt(allocated_amount, allocated_amount_precision),
+				(
+					allocated_amount_in_ref_rate,
+					allocated_amount_in_inv_rate,
+				) = get_base_amount_and_reference_rate_value(
+					invoice.get("invoice_type"),
+					invoice.get("invoice_number"),
+					reference_total_field,
+					reference_amount_field,
+					flt(allocated_amount, allocated_amount_precision),
+					payment_entry.get("exchange_rate", 1),
+					invoice.get("exchange_rate", 1),
 					difference_amount_precision,
+					exclude_payment_entry=payment_entry.get("reference_name"),
 				)
 
 				# Added If clause to handle return Adhoc payments for account type holders ("Payable")
