@@ -305,21 +305,9 @@ class TestMappedDiscounts(ERPNextTestSuite):
 				self.assertEqual(item.mapped_additional_discount_amount, 0)
 
 	def test_purchase_order_from_sales_order_skips_the_sales_discount(self):
-		from erpnext.selling.doctype.quotation.test_quotation import make_quotation
 		from erpnext.selling.doctype.sales_order.mapper import make_purchase_order
 
-		quotations = []
-		for item, percentage in (("_Test Item", 10), ("_Test Item 2", 0)):
-			quotation = make_quotation(item_code=item, qty=1, rate=100, do_not_save=True)
-			quotation.apply_discount_on = "Net Total"
-			quotation.additional_discount_percentage = percentage
-			quotations.append(quotation.insert().submit())
-
-		sales_order = self.combine(*quotations, mapper=SALES_ORDER_FROM_QUOTATION, doctype="Sales Order")
-		sales_order.delivery_date = add_days(nowdate(), 5)
-		for item in sales_order.items:
-			item.delivery_date = sales_order.delivery_date
-		sales_order.insert().submit()
+		sales_order = self.make_combined_sales_order()
 		self.assertEqual(sales_order.items[0].mapped_additional_discount_amount, 10)
 
 		purchase_order = make_purchase_order(
@@ -404,6 +392,41 @@ class TestMappedDiscounts(ERPNextTestSuite):
 		self.assertFalse(row.mapped_additional_discount_amount)
 		self.assertEqual(invoice.discount_amount, 0)
 
+	def test_removing_the_last_discounted_row_clears_the_header(self):
+		discounted = self.make_sales_order(percentage=10)
+		regular = self.make_sales_order(item="_Test Item 2")
+		invoice = self.combine(discounted, regular, mapper=SALES_INVOICE_FROM_ORDER, doctype="Sales Invoice")
+		invoice.save()
+
+		invoice.remove(invoice.getone("items", {"sales_order": discounted.name}))
+		invoice.save()
+		self.assertEqual(invoice.discount_amount, 0)
+		self.assertEqual(invoice.grand_total, 100)
+
+	def test_update_items_removing_the_last_discounted_row_clears_the_header(self):
+		from erpnext.accounts.services.child_item_update import update_child_qty_rate
+
+		sales_order = self.make_combined_sales_order()
+		regular = sales_order.items[1]
+		update_child_qty_rate(
+			"Sales Order",
+			frappe.as_json(
+				[
+					{
+						"docname": regular.name,
+						"item_code": regular.item_code,
+						"qty": regular.qty,
+						"rate": regular.rate,
+					}
+				]
+			),
+			sales_order.name,
+		)
+
+		sales_order.reload()
+		self.assertEqual(sales_order.discount_amount, 0)
+		self.assertEqual(sales_order.grand_total, 100)
+
 	def assert_percentage_discounts(self, document, source_field, expected_net_amounts):
 		items = {item.get(source_field): item for item in document.items}
 		self.assertEqual(document.apply_discount_on, "Net Total")
@@ -444,6 +467,22 @@ class TestMappedDiscounts(ERPNextTestSuite):
 				},
 			)
 		return order.save().submit()
+
+	def make_combined_sales_order(self):
+		from erpnext.selling.doctype.quotation.test_quotation import make_quotation
+
+		quotations = []
+		for item, percentage in (("_Test Item", 10), ("_Test Item 2", 0)):
+			quotation = make_quotation(item_code=item, qty=1, rate=100, do_not_save=True)
+			quotation.apply_discount_on = "Net Total"
+			quotation.additional_discount_percentage = percentage
+			quotations.append(quotation.insert().submit())
+
+		sales_order = self.combine(*quotations, mapper=SALES_ORDER_FROM_QUOTATION, doctype="Sales Order")
+		sales_order.delivery_date = add_days(nowdate(), 5)
+		for item in sales_order.items:
+			item.delivery_date = sales_order.delivery_date
+		return sales_order.insert().submit()
 
 	def make_invoice_with_cash_discount(self, order):
 		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
