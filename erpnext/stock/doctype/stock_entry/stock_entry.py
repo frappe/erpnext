@@ -1430,6 +1430,9 @@ class StockEntry(StockController):
 		if any(d.s_warehouse for d in self.get("items")):
 			return True
 
+		return self.is_rm_cost_from_consumption_entries()
+
+	def is_rm_cost_from_consumption_entries(self) -> bool:
 		settings = frappe.get_single("Manufacturing Settings")
 		if settings.material_consumption and settings.get_rm_cost_from_consumption_entry and self.work_order:
 			return bool(self.get_consumption_entries())
@@ -2582,6 +2585,9 @@ class StockEntry(StockController):
 						for item in item_dict.values():
 							item["to_warehouse"] = self.pro_doc.wip_warehouse
 					self.add_to_stock_entry_detail(item_dict)
+
+				elif self.purpose == "Manufacture" and self.is_rm_cost_from_consumption_entries():
+					pass
 
 				elif (
 					self.work_order
