@@ -218,8 +218,9 @@ class TestItemSearchIndex(ERPNextTestSuite):
 			with self.subTest(txt=txt):
 				self.assertEqual(self.run_query(txt, None), self.run_query(txt, None, False))
 
-	def test_an_index_write_failure_does_not_fail_the_save(self):
-		"""The index is an optimisation every caller falls back from; the save is not."""
+	def test_an_index_write_failure_saves_the_item_and_drops_the_index(self):
+		"""The save must survive, and the index must stop answering: nothing recorded the Item as
+		stale, so its candidate list would hide a row the scan returns."""
 		with (
 			patch.object(ItemSearch, "index_doc", side_effect=sqlite3.OperationalError("disk I/O error")),
 			patch.object(frappe, "log_error") as logged,
@@ -236,6 +237,10 @@ class TestItemSearchIndex(ERPNextTestSuite):
 
 		self.assertTrue(frappe.db.exists("Item", item.name))
 		logged.assert_called()
+		self.assertFalse(self.search.index_exists())
+		self.assertIsNone(self.candidates("3390"), "a dropped index must force the scan")
+
+		self.search.build_index()
 
 	def test_candidates_are_a_superset_of_the_scan(self):
 		"""The query re-filters, so extra candidates are safe but missing ones are not."""
