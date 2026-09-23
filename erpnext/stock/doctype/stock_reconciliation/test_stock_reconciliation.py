@@ -23,6 +23,7 @@ from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 	get_items,
 )
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.stock_ledger import get_previous_sle, update_entries_after
 from erpnext.stock.tests.test_utils import StockTestMixin
 from erpnext.stock.utils import (
@@ -1330,8 +1331,6 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			self.assertEqual(row.serial_no, serial_nos[row.idx - 1])
 
 	def test_opening_stock_reco_for_serial_nos_without_stock(self):
-		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import make_serial_nos
-
 		item = self.make_item(
 			"Test Serial No Item Opening Stock Not Reconcile All",
 			{
@@ -1343,7 +1342,9 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 
 		warehouse = "_Test Warehouse - _TC"
 		serial_nos = [f"SNN-TEST-OPENING-NRALL-{idx}" for idx in range(1, 6)]
-		make_serial_nos(item.name, [{"serial_no": serial_no} for serial_no in serial_nos])
+		SerialBatchIdentity("Serial No").resolve(
+			item.name, serial_nos, create=True, defaults={"company": "_Test Company"}
+		)
 
 		with self.change_settings("Stock Settings", {"allow_negative_stock": 0}):
 			sr = create_stock_reconciliation(

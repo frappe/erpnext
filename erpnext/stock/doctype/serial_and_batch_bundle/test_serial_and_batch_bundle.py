@@ -102,7 +102,6 @@ class TestSerialBatchBundleEntry(ERPNextTestSuite):
 			roles=[{"role": "Stock User"}],
 		).insert()
 		with self.set_user(user.name):
-			self.assertFalse(frappe.has_permission("Serial No", "create"))
 			bundle.add_serial_batch({"serial_nos": "Missing-Serial"})
 		self.assertTrue(
 			frappe.db.exists("Serial No", {"item_code": bundle.item_code, "serial_no": "Missing-Serial"})

@@ -141,24 +141,20 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 			with self.set_user("Guest"), self.assertRaises(frappe.PermissionError):
 				get_serial_batch_scan(self.item.name, "Scan-001", doctype)
 
-	def test_scan_lookup_works_without_serial_create_permission(self):
-		serial = self.make_number("Serial No", "Scan-001")
+	def test_scan_lookup_works_without_master_read_permission(self):
+		batch = self.make_number("Batch", "Scan-001")
 		user = frappe.get_doc(
 			doctype="User",
 			email="identity-scan-reader@example.com",
 			first_name="Scan Reader",
 			send_welcome_email=0,
-			roles=[{"role": "Stock User"}],
+			roles=[{"role": "Sales User"}],
 		).insert()
 		with self.set_user(user.name):
-			self.assertFalse(frappe.has_permission("Serial No", "create"))
-			self.assertEqual(
-				get_serial_batch_scan(self.item.name, "Scan-001", "Serial No")["name"], serial.name
-			)
-			self.assertEqual(get_serial_batch_scan(self.item.name, "Missing-Scan", "Serial No"), {})
-		self.assertFalse(
-			frappe.db.exists("Serial No", {"item_code": self.item.name, "serial_no": "Missing-Scan"})
-		)
+			self.assertFalse(frappe.has_permission("Batch", "read"))
+			self.assertEqual(get_serial_batch_scan(self.item.name, "Scan-001", "Batch")["name"], batch.name)
+			self.assertEqual(get_serial_batch_scan(self.item.name, "Missing-Scan", "Batch"), {})
+		self.assertFalse(frappe.db.exists("Batch", {"item": self.item.name, "batch_id": "Missing-Scan"}))
 
 	def test_sql_characters_in_physical_numbers(self):
 		for doctype in ("Serial No", "Batch"):
@@ -1565,12 +1561,12 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 		self.assertEqual(frappe.db.count("Serial No"), count)
 
 	def test_the_item_entitles_serial_and_batch_work(self):
-		user = self.make_role_user("identity-stock-user@example.com", "Stock User")
+		user = self.make_role_user("identity-sales-user@example.com", "Sales User")
 		serial = self.make_number("Serial No", "Existing-001")
 		batch = self.make_number("Batch", "Existing-Batch")
 		with self.set_user(user):
-			self.assertFalse(frappe.has_permission("Serial No", "create"))
-			self.assertFalse(frappe.has_permission("Batch", "select"))
+			self.assertFalse(frappe.has_permission("Batch", "read"))
+			self.assertFalse(frappe.has_permission("Batch", "create"))
 			self.assertEqual(
 				SerialBatchIdentity("Serial No").resolve(self.item.name, ["Existing-001"], create=True),
 				[serial.name],

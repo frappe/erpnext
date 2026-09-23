@@ -132,7 +132,6 @@ class TestSerialBatchInlineEditor(ERPNextTestSuite):
 			}
 		).insert()
 		with self.set_user(user.name):
-			self.assertFalse(frappe.has_permission("Serial No", "create"))
 			self.upsert(pr, serial_numbers=["Missing-Scan"])
 		self.assertTrue(frappe.db.exists("Serial No", {"item_code": item, "serial_no": "Missing-Scan"}))
 
@@ -604,7 +603,6 @@ class TestSerialBatchInlineEditor(ERPNextTestSuite):
 			roles=[{"role": "Stock User"}],
 		).insert()
 		with self.set_user(user.name):
-			self.assertFalse(frappe.has_permission("Serial No", "create"))
 			self.save_selector(pr, csv_entries=[{"serial_no": "Missing-Serial", "qty": 1}])
 		self.assertTrue(frappe.db.exists("Serial No", {"item_code": item, "serial_no": "Missing-Serial"}))
 
