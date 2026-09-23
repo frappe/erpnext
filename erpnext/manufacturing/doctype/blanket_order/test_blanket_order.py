@@ -147,6 +147,19 @@ class TestBlanketOrder(ERPNextTestSuite):
 		)
 		self.assertRaises(frappe.ValidationError, so.submit)
 
+	def test_status_follows_close_reopen_and_cancel(self):
+		bo = make_blanket_order(blanket_order_type="Selling")
+		self.assertEqual(bo.status, "Submitted")
+
+		bo.update_status("Closed")
+		self.assertEqual(frappe.db.get_value("Blanket Order", bo.name, "status"), "Closed")
+
+		bo.update_status("Submitted")
+		self.assertEqual(frappe.db.get_value("Blanket Order", bo.name, "status"), "Submitted")
+
+		bo.cancel()
+		self.assertEqual(frappe.db.get_value("Blanket Order", bo.name, "status"), "Cancelled")
+
 	def test_party_item_code(self):
 		item_doc = make_item("_Test Item 1 for Blanket Order")
 		item_code = item_doc.name
