@@ -347,6 +347,8 @@ period_closing_doctypes = [
 	"Subcontracting Receipt",
 ]
 
+sqlite_search = ["erpnext.stock.doctype.item.item_search.ItemSearch"]
+
 doc_events = {
 	"*": {
 		"validate": [
@@ -356,6 +358,10 @@ doc_events = {
 	},
 	tuple(period_closing_doctypes): {
 		"validate": "erpnext.accounts.doctype.accounting_period.accounting_period.validate_accounting_period_on_doc_save",
+	},
+	"Item": {
+		"on_update": "erpnext.stock.doctype.item.item_search.reindex_item",
+		"after_rename": "erpnext.stock.doctype.item.item_search.reindex_renamed_item",
 	},
 	"Stock Entry": {
 		"on_submit": "erpnext.stock.doctype.material_request.material_request.update_completed_and_requested_qty",
