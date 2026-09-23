@@ -5,6 +5,7 @@ from frappe.utils import today
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.report.serial_and_batch_wise_stock_balance.serial_and_batch_wise_stock_balance import (
+	SerialAndBatchWiseStockBalanceReport,
 	execute,
 )
 from erpnext.tests.utils import ERPNextTestSuite
@@ -74,3 +75,20 @@ class TestSerialAndBatchWiseStockBalance(ERPNextTestSuite):
 		self.assertEqual(rows[0].serial_no, "")
 		for row in rows[1:]:
 			self.assertEqual(row.serial_no, self.get_serial_nos_in_warehouse(row.item_code, row.batch_no))
+
+	def test_batch_rows_carry_item_row_dimensions(self):
+		report = SerialAndBatchWiseStockBalanceReport(
+			_dict(company="_Test Company", from_date=today(), to_date=today(), show_dimension_wise_stock=1)
+		)
+		report.inventory_dimensions = ["project"]
+		report.serial_map = {}
+		report.batch_map = {
+			("SBW Item", WAREHOUSE, "SBW Project"): {"SBW Batch": _dict(bal_qty=5, bal_val=500)}
+		}
+		item_row = _dict(
+			item_code="SBW Item", warehouse=WAREHOUSE, project="SBW Project", bal_qty=5, bal_val=500
+		)
+
+		batch_row = report.get_item_and_batch_rows(item_row)[1]
+
+		self.assertEqual((batch_row.batch_no, batch_row.project), ("SBW Batch", "SBW Project"))
