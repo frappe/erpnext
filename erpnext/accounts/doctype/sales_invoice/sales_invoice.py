@@ -2593,22 +2593,25 @@ def get_received_items(reference_name: str, doctype: str, reference_fieldname: s
 	# The only two targets this resolves a reference field for. Stating them rejects a caller
 	# supplied doctype that would otherwise be filtered on a column it does not have.
 	reference_fields = {
-		"Purchase Invoice": ("inter_company_invoice_reference", "Sales Invoice"),
-		"Purchase Order": ("inter_company_order_reference", "Sales Order"),
+		"Purchase Invoice": ("inter_company_invoice_reference", "Sales Invoice", "sales_invoice_item"),
+		"Purchase Order": ("inter_company_order_reference", "Sales Order", "sales_order_item"),
 	}
 	if doctype not in reference_fields:
 		frappe.throw(_("Invalid doctype {0}").format(doctype), frappe.PermissionError)
 
-	reference_field, source_doctype = reference_fields[doctype]
+	reference_field, source_doctype, expected_fieldname = reference_fields[doctype]
 
 	# the source document decides access, not the targets: those belong to the counterpart company
 	# and the caller legitimately may not read them. doc= for User Permissions.
 	frappe.has_permission(source_doctype, doc=reference_name, throw=True)
 
-	# `reference_fieldname` is selected as a column below and its value becomes the result key,
-	# so an unchecked one returns any field of the item table to the caller.
-	if not frappe.get_meta(doctype + " Item").has_field(reference_fieldname):
-		frappe.throw(_("Invalid field {0}").format(reference_fieldname), frappe.PermissionError)
+	# `reference_fieldname` becomes a selected column and the result key, so it has to be this
+	# target's own reference field: any other item-table column would be returned from unauthorised rows.
+	if reference_fieldname != expected_fieldname:
+		frappe.throw(
+			_("{0} is not a valid reference field for {1}").format(reference_fieldname, doctype),
+			frappe.ValidationError,
+		)
 
 	filters = {
 		reference_field: reference_name,
