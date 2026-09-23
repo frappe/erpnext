@@ -4,14 +4,14 @@
 frappe.provide("erpnext.buying");
 frappe.provide("erpnext.accounts.dimensions");
 
-cur_frm.cscript.tax_table = "Purchase Taxes and Charges";
-
 erpnext.accounts.taxes.setup_tax_filters("Purchase Taxes and Charges");
 erpnext.accounts.taxes.setup_tax_validations("Purchase Order");
 erpnext.buying.setup_buying_controller();
 
 frappe.ui.form.on("Purchase Order", {
 	setup: function (frm) {
+		frm.cscript.tax_table = "Purchase Taxes and Charges";
+
 		frm.set_indicator_formatter("item_code", function (doc) {
 			let color;
 			if (doc.closed) {
@@ -826,21 +826,21 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 	items_on_form_rendered() {
 		set_schedule_date(this.frm);
 	}
+
+	update_status(label, status) {
+		frappe.call({
+			method: "erpnext.buying.doctype.purchase_order.purchase_order.update_status",
+			args: { status: status, name: this.frm.doc.name },
+			callback: () => {
+				this.frm.set_value("status", status);
+				this.frm.reload_doc();
+			},
+		});
+	}
 };
 
 // for backward compatibility: combine new and previous states
 extend_cscript(cur_frm.cscript, new erpnext.buying.PurchaseOrderController({ frm: cur_frm }));
-
-cur_frm.cscript.update_status = function (label, status) {
-	frappe.call({
-		method: "erpnext.buying.doctype.purchase_order.purchase_order.update_status",
-		args: { status: status, name: cur_frm.doc.name },
-		callback: function (r) {
-			cur_frm.set_value("status", status);
-			cur_frm.reload_doc();
-		},
-	});
-};
 
 function set_schedule_date(frm) {
 	if (frm.doc.schedule_date) {

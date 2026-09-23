@@ -641,7 +641,7 @@ erpnext.buying.SubcontractingOrderController = class SubcontractingOrderControll
 					if (me.has_unsupplied_items()) {
 						this.frm.add_custom_button(
 							__("Material to Supplier"),
-							this.make_stock_entry,
+							() => this.make_stock_entry(),
 							__("Transfer")
 						);
 					}
@@ -686,7 +686,7 @@ erpnext.buying.SubcontractingOrderController = class SubcontractingOrderControll
 	make_subcontracting_receipt(items) {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order.make_subcontracting_receipt",
-			frm: cur_frm,
+			frm: this.frm,
 			args: { items: items || [] },
 			freeze: true,
 			freeze_message: __("Creating Subcontracting Receipt ..."),
@@ -697,8 +697,8 @@ erpnext.buying.SubcontractingOrderController = class SubcontractingOrderControll
 		frappe.call({
 			method: "erpnext.controllers.subcontracting_controller.make_rm_stock_entry",
 			args: {
-				subcontract_order: cur_frm.doc.name,
-				order_doctype: cur_frm.doc.doctype,
+				subcontract_order: this.frm.doc.name,
+				order_doctype: this.frm.doc.doctype,
 			},
 			callback: (r) => {
 				var doclist = frappe.model.sync(r.message);

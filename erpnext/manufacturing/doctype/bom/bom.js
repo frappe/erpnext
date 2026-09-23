@@ -728,24 +728,47 @@ erpnext.bom.BomController = class BomController extends erpnext.TransactionContr
 			this.frm.events.update_cost(this.frm);
 		}
 	}
+
+	hour_rate(doc) {
+		erpnext.bom.calculate_op_cost(doc);
+		erpnext.bom.calculate_total(doc);
+	}
+
+	time_in_mins(doc) {
+		this.hour_rate(doc);
+	}
+
+	bom_no(doc, cdt, cdn) {
+		get_bom_material_detail(doc, cdt, cdn, false);
+	}
+
+	is_default(doc) {
+		if (doc.is_default) this.frm.set_value("is_active", 1);
+	}
+
+	qty(doc) {
+		erpnext.bom.calculate_rm_cost(doc);
+		erpnext.bom.calculate_total(doc);
+	}
+
+	rate(doc, cdt, cdn) {
+		let d = locals[cdt][cdn];
+
+		if (d.bom_no) {
+			frappe.msgprint(__("You cannot change the rate if BOM is mentioned against any Item."));
+			get_bom_material_detail(doc, cdt, cdn, false);
+		} else {
+			erpnext.bom.calculate_rm_cost(doc);
+			erpnext.bom.calculate_total(doc);
+		}
+	}
+
+	validate(doc) {
+		erpnext.bom.update_cost(doc);
+	}
 };
 
 extend_cscript(cur_frm.cscript, new erpnext.bom.BomController({ frm: cur_frm }));
-
-cur_frm.cscript.hour_rate = function (doc) {
-	erpnext.bom.calculate_op_cost(doc);
-	erpnext.bom.calculate_total(doc);
-};
-
-cur_frm.cscript.time_in_mins = cur_frm.cscript.hour_rate;
-
-cur_frm.cscript.bom_no = function (doc, cdt, cdn) {
-	get_bom_material_detail(doc, cdt, cdn, false);
-};
-
-cur_frm.cscript.is_default = function (doc) {
-	if (doc.is_default) cur_frm.set_value("is_active", 1);
-};
 
 var get_bom_material_detail = function (doc, cdt, cdn, secondary_items) {
 	if (!doc.company) {
@@ -787,23 +810,6 @@ var get_bom_material_detail = function (doc, cdt, cdn, secondary_items) {
 			},
 			freeze: true,
 		});
-	}
-};
-
-cur_frm.cscript.qty = function (doc) {
-	erpnext.bom.calculate_rm_cost(doc);
-	erpnext.bom.calculate_total(doc);
-};
-
-cur_frm.cscript.rate = function (doc, cdt, cdn) {
-	var d = locals[cdt][cdn];
-
-	if (d.bom_no) {
-		frappe.msgprint(__("You cannot change the rate if BOM is mentioned against any Item."));
-		get_bom_material_detail(doc, cdt, cdn, false);
-	} else {
-		erpnext.bom.calculate_rm_cost(doc);
-		erpnext.bom.calculate_total(doc);
 	}
 };
 
@@ -876,10 +882,6 @@ erpnext.bom.calculate_total = function (doc) {
 
 	cur_frm.set_value("total_cost", total_cost);
 	cur_frm.set_value("base_total_cost", base_total_cost);
-};
-
-cur_frm.cscript.validate = function (doc) {
-	erpnext.bom.update_cost(doc);
 };
 
 frappe.ui.form.on("BOM Operation", "operation", function (frm, cdt, cdn) {

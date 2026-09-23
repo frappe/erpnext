@@ -849,7 +849,7 @@ frappe.ui.form.on("Stock Entry", {
 					} else {
 						erpnext.utils.remove_empty_first_row(frm, "items");
 						$.each(r.message, function (i, item) {
-							let d = frappe.model.add_child(cur_frm.doc, "Stock Entry Detail", "items");
+							let d = frappe.model.add_child(frm.doc, "Stock Entry Detail", "items");
 							d.item_code = item.item_code;
 							d.item_name = item.item_name;
 							d.item_group = item.item_group;

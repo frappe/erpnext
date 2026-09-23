@@ -269,6 +269,23 @@ frappe.ui.form.on("Opportunity Item", {
 	rate: function (frm, cdt, cdn) {
 		frm.trigger("calculate", cdt, cdn);
 	},
+	item_code: function (frm, cdt, cdn) {
+		let d = locals[cdt][cdn];
+		if (d.item_code) {
+			return frappe.call({
+				method: "erpnext.crm.doctype.opportunity.opportunity.get_item_details",
+				args: { item_code: d.item_code },
+				callback: function (r) {
+					if (r.message) {
+						$.each(r.message, function (k, v) {
+							frappe.model.set_value(cdt, cdn, k, v);
+						});
+						refresh_field("image_view", d.name, "items");
+					}
+				},
+			});
+		}
+	},
 });
 
 // TODO commonify this code
@@ -373,21 +390,3 @@ erpnext.crm.Opportunity = class Opportunity extends frappe.ui.form.Controller {
 };
 
 extend_cscript(cur_frm.cscript, new erpnext.crm.Opportunity({ frm: cur_frm }));
-
-cur_frm.cscript.item_code = function (doc, cdt, cdn) {
-	var d = locals[cdt][cdn];
-	if (d.item_code) {
-		return frappe.call({
-			method: "erpnext.crm.doctype.opportunity.opportunity.get_item_details",
-			args: { item_code: d.item_code },
-			callback: function (r, rt) {
-				if (r.message) {
-					$.each(r.message, function (k, v) {
-						frappe.model.set_value(cdt, cdn, k, v);
-					});
-					refresh_field("image_view", d.name, "items");
-				}
-			},
-		});
-	}
-};

@@ -1261,7 +1261,7 @@ $(document).on("app_ready", function () {
 			],
 			function (i, d) {
 				frappe.ui.form.on(d, "onload", function (frm) {
-					cur_frm.set_df_property("posting_time", "description", frappe.sys_defaults.time_zone);
+					frm.set_df_property("posting_time", "description", frappe.sys_defaults.time_zone);
 				});
 			}
 		);

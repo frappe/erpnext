@@ -1,10 +1,6 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-cur_frm.add_fetch("customer", "tax_id", "tax_id");
-
-cur_frm.cscript.tax_table = "Sales Taxes and Charges";
-
 frappe.provide("erpnext.stock");
 frappe.provide("erpnext.stock.delivery_note");
 frappe.provide("erpnext.accounts.dimensions");
@@ -15,6 +11,9 @@ erpnext.sales_common.setup_selling_controller();
 
 frappe.ui.form.on("Delivery Note", {
 	setup: function (frm) {
+		frm.add_fetch("customer", "tax_id", "tax_id");
+		frm.cscript.tax_table = "Sales Taxes and Charges";
+
 		(frm.custom_make_buttons = {
 			"Packing Slip": "Packing Slip",
 			"Installation Note": "Installation Note",
@@ -93,7 +92,7 @@ frappe.ui.form.on("Delivery Note", {
 				function () {
 					frappe.model.open_mapped_doc({
 						method: "erpnext.stock.doctype.delivery_note.mapper.make_sales_invoice",
-						frm: cur_frm,
+						frm: frm,
 					});
 				},
 				__("Create")
@@ -143,7 +142,7 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends (
 		this.setup_posting_date_time_check();
 		super.setup(doc);
 		this.frm.make_methods = {
-			"Delivery Trip": this.make_delivery_trip,
+			"Delivery Trip": () => this.make_delivery_trip(),
 		};
 	}
 	refresh(doc, dt, dn) {
@@ -414,7 +413,7 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends (
 	make_delivery_trip() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.stock.doctype.delivery_note.mapper.make_delivery_trip",
-			frm: cur_frm,
+			frm: this.frm,
 		});
 	}
 
