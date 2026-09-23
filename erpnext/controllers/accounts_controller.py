@@ -1700,13 +1700,25 @@ class AccountsController(TransactionBase):
 		self.calculate_taxes_and_totals()
 
 	def get_mapped_discount_applied(self, source_doc, reference_fieldname):
-		item_table = frappe.qb.DocType(self.meta.get_field("items").options)
-		applied = (
-			frappe.qb.from_(item_table)
-			.select(Sum(item_table.mapped_additional_discount_amount * item_table.qty))
-			.where(item_table.docstatus == 1)
-			.where(item_table[reference_fieldname] == source_doc.name)
-		).run()[0][0]
+		item_meta = frappe.get_meta(self.meta.get_field("items").options)
+		fields = ["parent", "qty", "mapped_additional_discount_amount"]
+		if item_meta.has_field("rejected_qty"):
+			fields.append("rejected_qty")
+
+		rows = frappe.get_all(
+			item_meta.name,
+			filters={
+				reference_fieldname: source_doc.name,
+				"docstatus": 1,
+				"mapped_additional_discount_amount": ("!=", 0),
+			},
+			fields=fields,
+		)
+		applied = sum(
+			row.mapped_additional_discount_amount
+			* get_billed_qty(frappe.get_cached_doc(self.doctype, row.parent), row)
+			for row in rows
+		)
 
 		distributed_discount = sum(flt(item.distributed_discount_amount) for item in source_doc.items)
 		if not distributed_discount:
