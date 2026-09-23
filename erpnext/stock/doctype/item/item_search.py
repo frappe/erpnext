@@ -104,6 +104,15 @@ class ItemSearch(SQLiteSearch):
 		document[BARCODE_COLUMN] = self.get_barcode_text(doc.name)
 		return document
 
+	def _process_content(self, content):
+		"""Store values verbatim.
+
+		item_query rechecks every candidate with LIKE against the column in MariaDB, so the
+		indexed text has to be what that column holds. The framework's cleaning collapses
+		whitespace and replaces a URL with "[link]", which would lose those rows.
+		"""
+		return "" if content is None else str(content)
+
 	def get_barcode_text(self, item_code: str) -> str:
 		"""Always a string: a text column left unset drops the document from the index entirely."""
 		if item_code in self._barcodes:
