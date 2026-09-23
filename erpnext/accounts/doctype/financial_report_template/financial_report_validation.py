@@ -344,6 +344,10 @@ class CalculationFormulaValidator(Validator):
 				)
 			)
 			return result
+		except RecursionError:
+			# too deeply nested for the parser to walk
+			result.add_error(ValidationIssue(message=_("Formula is too complex"), row_idx=row.idx))
+			return result
 
 		if error := self._formula_error(tree, formula):
 			result.add_error(ValidationIssue(message=error, row_idx=row.idx))
@@ -383,6 +387,8 @@ class CalculationFormulaValidator(Validator):
 			if isinstance(reasons, list | tuple):
 				return "; ".join(str(r) for r in reasons)
 			return str(reasons or e)
+		except RecursionError:
+			return _("it is too deeply nested")
 		except Exception as e:
 			return str(e)
 
