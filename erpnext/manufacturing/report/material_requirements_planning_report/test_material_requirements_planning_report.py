@@ -242,6 +242,68 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		self.assertEqual(rows[plan.fg_item].lead_time, 3)
 		self.assertEqual(component.delivery_date, rows[plan.fg_item].release_date)
 
+	def test_purchase_item_without_bom_is_purchased(self):
+		plan = make_mps_item(
+			self,
+			{
+				"is_stock_item": 1,
+				"is_purchase_item": 1,
+				"item_defaults": [
+					{"company": COMPANY, "default_warehouse": WAREHOUSE, "default_supplier": SUPPLIER}
+				],
+			},
+		)
+		self.assertEqual(plan.row.type_of_material, "Purchase")
+
+		make_order([plan.row], COMPANY, warehouse=WAREHOUSE, mps=plan.mps)
+
+		purchase_order = get_created_order(plan.mps, "Purchase Order")
+		self.assertEqual([d.item_code for d in purchase_order.items], [plan.item])
+		self.assertFalse(frappe.get_all("Work Order", filters={"mps": plan.mps}, pluck="name"))
+
+	def test_make_order_rejects_manufactured_item_without_bom(self):
+		plan = make_mps_item(
+			self,
+			{
+				"is_stock_item": 1,
+				"is_purchase_item": 0,
+				"item_defaults": [{"company": COMPANY, "default_warehouse": WAREHOUSE}],
+			},
+		)
+		self.assertEqual(plan.row.type_of_material, "Manufacture")
+		self.assertFalse(plan.row.bom_no)
+
+		with self.assertRaises(frappe.ValidationError) as ctx:
+			make_order([plan.row], COMPANY, warehouse=WAREHOUSE, mps=plan.mps)
+
+		self.assertIn("Default BOM", str(ctx.exception))
+		self.assertFalse(frappe.get_all("Work Order", filters={"mps": plan.mps}, pluck="name"))
+		self.assertFalse(frappe.get_all("Purchase Order", filters={"mps": plan.mps}, pluck="name"))
+
+	def test_make_order_uses_the_bom_passed_on_the_row(self):
+		plan = make_mps_item(
+			self,
+			{
+				"is_stock_item": 1,
+				"is_purchase_item": 0,
+				"item_defaults": [{"company": COMPANY, "default_warehouse": WAREHOUSE}],
+			},
+		)
+		rm_item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"is_purchase_item": 1,
+				"item_defaults": [{"company": COMPANY, "default_warehouse": WAREHOUSE}],
+			}
+		).name
+		plan.row.bom_no = make_bom(item=plan.item, raw_materials=[rm_item], rm_qty=1, rate=100).name
+
+		make_order([plan.row], COMPANY, warehouse=WAREHOUSE, mps=plan.mps)
+
+		work_order = get_created_order(plan.mps, "Work Order")
+		self.assertEqual(work_order.production_item, plan.item)
+		self.assertEqual(work_order.bom_no, plan.row.bom_no)
+
 	def test_make_order_creates_draft_purchase_and_work_orders(self):
 		plan = make_mrp_plan(self)
 
@@ -368,6 +430,59 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 					)
 
 
+def make_chart_row(delivery_date, planned_qty=1):
+	return frappe._dict(
+		{
+			"delivery_date": delivery_date,
+			"planned_qty": planned_qty,
+			"in_hand_qty": 0,
+			"po_ordered_qty": 0,
+			"wo_ordered_qty": 0,
+		}
+	)
+
+
+def make_mps_item(test_case, item_properties, planned_qty=10):
+	item = make_item(properties=item_properties).name
+	mps = frappe.get_doc(
+		{
+			"doctype": "Master Production Schedule",
+			"company": COMPANY,
+			"posting_date": today(),
+			"from_date": today(),
+			"parent_warehouse": WAREHOUSE,
+			"items": [
+				{
+					"item_code": item,
+					"warehouse": WAREHOUSE,
+					"delivery_date": add_days(today(), 30),
+					"planned_qty": planned_qty,
+					"uom": frappe.get_cached_value("Item", item, "stock_uom"),
+				}
+			],
+		}
+	)
+	mps.insert()
+
+	_, data, _, _ = execute(
+		frappe._dict(
+			{
+				"company": COMPANY,
+				"from_date": today(),
+				"to_date": add_days(today(), 90),
+				"warehouse": WAREHOUSE,
+				"mps": mps.name,
+				"type_of_material": "All",
+				"add_safety_stock": 0,
+			}
+		)
+	)
+	rows = [row for row in data if row.get("item_code")]
+	test_case.assertTrue(rows, msg="the report returned no rows to create orders from")
+
+	return frappe._dict(item=item, mps=mps.name, row=rows[0], rows=rows)
+
+
 def make_mrp_plan(test_case, planned_qty=10, rm_qty=2):
 	"""Build a finished good with a submitted BOM and an MPS demanding it, then return the
 	report's own output rows -- the same payload the report's client sends to `make_order`."""
@@ -474,15 +589,3 @@ def get_created_order(mps, doctype):
 		frappe.throw(f"Expected exactly one {doctype} for {mps}, got {names}")
 
 	return frappe.get_doc(doctype, names[0])
-
-
-def make_chart_row(delivery_date, planned_qty=1):
-	return frappe._dict(
-		{
-			"delivery_date": delivery_date,
-			"planned_qty": planned_qty,
-			"in_hand_qty": 0,
-			"po_ordered_qty": 0,
-			"wo_ordered_qty": 0,
-		}
-	)
