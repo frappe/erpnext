@@ -204,8 +204,8 @@ class SubcontractingOrder(SubcontractingController):
 		# Service items carry the Purchase Order's currency, so convert them for the costing fields.
 		conversion_rate = flt(self.conversion_rate) or 1.0
 		for item in self.get("service_items"):
-			item.base_rate = flt(item.rate) * conversion_rate
-			item.base_amount = flt(item.amount) * conversion_rate
+			item.base_rate = flt(item.rate * conversion_rate, item.precision("base_rate"))
+			item.base_amount = flt(item.amount * conversion_rate, item.precision("base_amount"))
 
 	def calculate_service_costs(self):
 		self.set_service_item_base_amounts()
