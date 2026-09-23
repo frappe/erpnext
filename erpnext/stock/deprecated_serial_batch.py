@@ -7,8 +7,33 @@ from frappe.query_builder.functions import Locate, Sum
 from frappe.utils import flt
 from pypika import Order
 from pypika.functions import Coalesce, Concat, Lower
+from pypika.terms import ExistsCriterion
 
 from erpnext.deprecation_dumpster import deprecated
+
+
+@frappe.request_cache
+def has_legacy_batch_ledgers(batch_nos: tuple[str, ...]) -> bool:
+	"""`False` when no Stock Ledger Entry of these batches uses the denormalized
+	`batch_no` field.
+
+	Batches are tracked through the Serial and Batch Bundle since v15, so this is
+	`False` for most batches and the expensive aggregates (`FOR UPDATE`) below can be
+	skipped without reading the ledger. The probe is an equality lookup on the
+	`batch_no` index, covered by it and stopping at the first row; `item_code`,
+	`warehouse` and `is_cancelled` are intentionally left out of it to keep it that
+	way, a batch with only cancelled legacy ledgers simply falls back to the
+	aggregate.
+
+	Cached for the request, nothing creates a legacy ledger midway.
+	"""
+
+	if not batch_nos:
+		return False
+
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+
+	return bool(frappe.qb.from_(sle).select(sle.batch_no).where(sle.batch_no.isin(batch_nos)).limit(1).run())
 
 
 class DeprecatedSerialNoValuation:
@@ -130,7 +155,9 @@ class DeprecatedBatchNoValuation:
 		"No known instructions.",
 	)
 	def get_sle_for_batches(self):
-		if not self.batchwise_valuation_batches:
+		if not self.batchwise_valuation_batches or not has_legacy_batch_ledgers(
+			tuple(sorted(self.batchwise_valuation_batches))
+		):
 			return []
 
 		sle = frappe.qb.DocType("Stock Ledger Entry")
@@ -195,36 +222,78 @@ class DeprecatedBatchNoValuation:
 
 		self.set_balance_value_for_non_batchwise_valuation_batches()
 
+		fallback_rate = self.get_pooled_fallback_rate()
+
 		for batch_no, ledger in self.batch_nos.items():
 			if batch_no not in self.non_batchwise_valuation_batches:
 				continue
 
-			if not self.non_batchwise_balance_qty:
-				continue
-
-			if not self.non_batchwise_balance_qty.get(batch_no):
-				self.batch_avg_rate[batch_no] = 0.0
-				self.stock_value_differece[batch_no] = 0.0
-			else:
-				self.batch_avg_rate[batch_no] = (
-					self.non_batchwise_balance_value[batch_no] / self.non_batchwise_balance_qty[batch_no]
-				)
-				self.stock_value_differece[batch_no] = self.non_batchwise_balance_value
+			self.batch_avg_rate[batch_no] = self.get_non_batchwise_avg_rate(batch_no, fallback_rate)
+			self.stock_value_differece[batch_no] = flt(self.non_batchwise_balance_value.get(batch_no))
 
 			stock_value_change = self.batch_avg_rate[batch_no] * ledger.qty
 			self.stock_value_change += stock_value_change
 
-			self.non_batchwise_balance_value[batch_no] -= stock_value_change
-			self.non_batchwise_balance_qty[batch_no] -= ledger.qty
+			# ledger.qty is negative for outward entries, so adding drains the pool
+			self.non_batchwise_balance_value[batch_no] += stock_value_change
+			self.non_batchwise_balance_qty[batch_no] += ledger.qty
+
+			# on the legacy batch_no field path the ledger is the Stock Ledger Entry itself,
+			# so there is no Serial and Batch Entry row to write the rate back to
+			if not self.sle.get("serial_and_batch_bundle") or not ledger.get("name"):
+				continue
 
 			frappe.db.set_value(
 				"Serial and Batch Entry",
 				ledger.name,
 				{
 					"stock_value_difference": stock_value_change,
-					"incoming_rate": self.batch_avg_rate[batch_no],
+					# every reader of incoming_rate takes abs(), keep the stored value in step
+					"incoming_rate": abs(self.batch_avg_rate[batch_no]),
 				},
 			)
+
+	def get_non_batchwise_avg_rate(self, batch_no, fallback_rate):
+		balance_qty = flt(self.non_batchwise_balance_qty.get(batch_no))
+		balance_value = flt(self.non_batchwise_balance_value.get(batch_no))
+
+		# The value and the qty of a batch are summed independently over its whole history
+		# and the two can drift apart: outward entries posted before batch level valuation
+		# existed were priced at the pooled warehouse rate, and a Stock Reconciliation posts
+		# value with no matching qty. A drained or a negative pool would otherwise yield a
+		# negative or an exploding rate, which is read back as abs() by the callers and
+		# silently overdraws the warehouse stock value.
+		if balance_qty > 0 and balance_value > 0:
+			return balance_value / balance_qty
+
+		return fallback_rate
+
+	def get_pooled_fallback_rate(self):
+		"""Moving average rate of the stock that is not valued batch wise.
+
+		`last_sle` carries the balance of the whole warehouse, so the batches that are
+		valued batch wise have to be netted off before it can price the ones that are not.
+		"""
+		last_sle = self.last_sle or frappe._dict()
+
+		total_qty = flt(last_sle.qty_after_transaction)
+		total_value = flt(last_sle.stock_value)
+
+		qty, value = total_qty, total_value
+		for batch_no in self.batchwise_valuation_batches:
+			qty -= flt(self.available_qty.get(batch_no))
+			value -= flt(self.stock_value_differece.get(batch_no))
+
+		if qty > 0 and value > 0:
+			return value / qty
+
+		# The batchwise batches can account for more than the warehouse holds when the
+		# legacy ledger is itself inconsistent, which is what an overdrawn history leaves
+		# behind. The plain warehouse rate is then the best basis left.
+		if total_qty > 0 and total_value > 0:
+			return total_value / total_qty
+
+		return 0.0
 
 	@deprecated(
 		"erpnext.stock.serial_batch_bundle.BatchNoValuation.set_balance_value_for_non_batchwise_valuation_batches",
@@ -254,6 +323,9 @@ class DeprecatedBatchNoValuation:
 	)
 	def set_balance_value_from_sl_entries(self) -> None:
 		from erpnext.stock.utils import get_combine_datetime
+
+		if not has_legacy_batch_ledgers(tuple(sorted(self.non_batchwise_valuation_batches))):
+			return
 
 		sle = frappe.qb.DocType("Stock Ledger Entry")
 		batch = frappe.qb.DocType("Batch")
@@ -300,13 +372,9 @@ class DeprecatedBatchNoValuation:
 		)
 
 		# Moving Average items with no Use Batch wise Valuation but want to use batch wise valuation
-		moving_avg_item_non_batch_value = False
-		if valuation_method := self.get_valuation_method(self.sle.item_code):
-			if valuation_method == "Moving Average" and not frappe.db.get_single_value(
-				"Stock Settings", "do_not_use_batchwise_valuation"
-			):
-				query = query.where(batch.use_batchwise_valuation == 0)
-				moving_avg_item_non_batch_value = True
+		moving_avg_item_non_batch_value = self.use_batch_pool_for_moving_average()
+		if moving_avg_item_non_batch_value:
+			query = query.where(batch.use_batchwise_valuation == 0)
 
 		if frappe.db.db_type != "postgres":
 			query = query.for_update()
@@ -391,11 +459,37 @@ class DeprecatedBatchNoValuation:
 		if not posting_datetime and self.sle.posting_date:
 			posting_datetime = get_combine_datetime(self.sle.posting_date, self.sle.posting_time)
 
+		sle_creation = self.sle.creation
+		if not sle_creation and self.sle.get("serial_and_batch_bundle"):
+			sle_creation = frappe.db.get_value(
+				"Stock Ledger Entry",
+				{"serial_and_batch_bundle": self.sle.serial_and_batch_bundle, "is_cancelled": 0},
+				"creation",
+			)
+
+		if not sle_creation:
+			# the current entry is not in the ledger yet, so it sorts after everything posted
+			# at the same instant; nudge the boundary to take them in, the same way
+			# set_balance_value_from_sl_entries does, otherwise the two halves of one bundle
+			# are summed as of two different points in time
+			posting_datetime = posting_datetime + datetime.timedelta(milliseconds=1)
+
 		timestamp_condition = bundle.posting_datetime < posting_datetime
 
-		if self.sle.creation:
-			timestamp_condition |= (bundle.posting_datetime == posting_datetime) & (
-				bundle.creation < self.sle.creation
+		if sle_creation:
+			sle_table = frappe.qb.DocType("Stock Ledger Entry")
+
+			# bundle creation and SLE creation are different timelines (a bundle can be
+			# created much before its SLE), so break the tie on the creation of the
+			# bundle's own SLE, exactly like BatchNoValuation.get_batch_stock_before_date
+			timestamp_condition |= (bundle.posting_datetime == posting_datetime) & ExistsCriterion(
+				frappe.qb.from_(sle_table)
+				.select(sle_table.name)
+				.where(
+					(sle_table.serial_and_batch_bundle == bundle.name)
+					& (sle_table.is_cancelled == 0)
+					& (sle_table.creation < sle_creation)
+				)
 			)
 
 		conditions = (
@@ -430,13 +524,9 @@ class DeprecatedBatchNoValuation:
 		)
 
 		# Moving Average items with no Use Batch wise Valuation but want to use batch wise valuation
-		moving_avg_item_non_batch_value = False
-		if valuation_method := self.get_valuation_method(self.sle.item_code):
-			if valuation_method == "Moving Average" and not frappe.db.get_single_value(
-				"Stock Settings", "do_not_use_batchwise_valuation"
-			):
-				query = query.where(batch.use_batchwise_valuation == 0)
-				moving_avg_item_non_batch_value = True
+		moving_avg_item_non_batch_value = self.use_batch_pool_for_moving_average()
+		if moving_avg_item_non_batch_value:
+			query = query.where(batch.use_batchwise_valuation == 0)
 
 		if frappe.db.db_type != "postgres":
 			query = query.for_update()
@@ -462,3 +552,13 @@ class DeprecatedBatchNoValuation:
 		from erpnext.stock.utils import get_valuation_method
 
 		return get_valuation_method(item_code, self.sle.company)
+
+	def use_batch_pool_for_moving_average(self):
+		if not hasattr(self, "_use_batch_pool_for_moving_average"):
+			self._use_batch_pool_for_moving_average = self.get_valuation_method(
+				self.sle.item_code
+			) == "Moving Average" and not frappe.get_single_value(
+				"Stock Settings", "do_not_use_batchwise_valuation"
+			)
+
+		return self._use_batch_pool_for_moving_average
