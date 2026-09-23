@@ -88,11 +88,13 @@ class Customer(TransactionBase):
 		market_segment: DF.Link | None
 		mobile_no: DF.ReadOnly | None
 		naming_series: DF.Literal["CUST-.YYYY.-"]
+		on_hold: DF.Check
 		opportunity_name: DF.Link | None
 		payment_terms: DF.Link | None
 		portal_users: DF.Table[PortalUser]
 		primary_address: DF.TextEditor | None
 		prospect_name: DF.Link | None
+		release_date: DF.Date | None
 		represents_company: DF.Link | None
 		sales_team: DF.Table[SalesTeam]
 		so_required: DF.Check
@@ -113,6 +115,10 @@ class Customer(TransactionBase):
 	def load_dashboard_info(self):
 		info = get_dashboard_info(self.doctype, self.name, self.loyalty_program)
 		self.set_onload("dashboard_info", info)
+
+	def before_save(self):
+		if not self.on_hold:
+			self.release_date = None
 
 	def autoname(self):
 		cust_master_name = frappe.defaults.get_global_default("cust_master_name")
@@ -633,6 +639,13 @@ def get_nested_links(link_doctype, link_name, ignore_permissions=False):
 		links.append(d.value)
 
 	return links
+
+
+def is_customer_blocked(customer: str) -> bool:
+	on_hold, release_date = frappe.db.get_value("Customer", customer, ["on_hold", "release_date"])
+	if not on_hold:
+		return False
+	return not release_date or getdate(today()) <= getdate(release_date)
 
 
 def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, extra_amount=0):
