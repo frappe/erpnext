@@ -1039,6 +1039,49 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 
 		self.assertEqual(sbe_pp_list, sbe_so_list)
 
+	def test_service_cost_is_converted_to_company_currency(self):
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 7",
+				"qty": 10,
+				"rate": 500,
+				"fg_item": "Subcontracted Item SA7",
+				"fg_item_qty": 10,
+			},
+		]
+		po = create_purchase_order(
+			rm_items=service_items,
+			is_subcontracted=1,
+			supplier="_Test Supplier USD",
+			currency="USD",
+			supplier_warehouse="_Test Warehouse 1 - _TC",
+			do_not_submit=1,
+		)
+		po.conversion_rate = 80
+		po.submit()
+
+		sco = create_subcontracting_order(po_name=po.name)
+
+		self.assertEqual(sco.supplier_currency, "USD")
+		self.assertEqual(sco.conversion_rate, 80)
+
+		# service items stay in the supplier's currency, as on the Purchase Order
+		self.assertEqual(sco.service_items[0].rate, 500)
+		self.assertEqual(sco.service_items[0].amount, 5000)
+		self.assertEqual(sco.service_items[0].base_rate, 500 * 80)
+		self.assertEqual(sco.service_items[0].base_amount, 5000 * 80)
+
+		# costing fields are in company currency
+		self.assertEqual(sco.items[0].service_cost_per_qty, 500 * 80)
+		self.assertEqual(
+			sco.items[0].rate,
+			sco.items[0].rm_cost_per_qty + sco.items[0].service_cost_per_qty,
+		)
+		self.assertEqual(sco.total, sco.items[0].amount)
+
 
 def create_subcontracting_order(**args):
 	args = frappe._dict(args)
