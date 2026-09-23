@@ -1503,6 +1503,11 @@ class AccountsController(TransactionBase):
 	def has_cash_discount(self):
 		return bool(self.get("is_cash_or_non_trade_discount") and self.get("discount_amount"))
 
+	def drop_mapped_discount(self, item):
+		item.mapped_additional_discount_amount = 0
+		if not self.has_mapped_discount:
+			self.discount_amount = 0
+
 	def is_same_transaction_side(self, source_doc):
 		return any(
 			self.doctype in transaction_types and source_doc.doctype in transaction_types
