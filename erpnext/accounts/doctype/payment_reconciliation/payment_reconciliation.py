@@ -452,17 +452,15 @@ class PaymentReconciliation(Document):
 			"Accounts Settings", "exchange_gain_loss_posting_date", cache=True
 		)
 		invoice_exchange_map = self.get_invoice_exchange_map(args.get("invoices"), args.get("payments"))
-<<<<<<< HEAD
 		default_exchange_gain_loss_account = frappe.get_cached_value(
 			"Company", self.company, "exchange_gain_loss_account"
-=======
+		)
 		account_currency = frappe.get_cached_value(
 			"Account", self.receivable_payable_account, "account_currency"
 		)
 		allocated_amount_precision = get_field_precision(
 			frappe.get_meta("Payment Reconciliation Allocation").get_field("allocated_amount"),
 			currency=account_currency,
->>>>>>> f7d16fb (fix: round running allocation balance in payment reconciliation (#58393))
 		)
 
 		entries = []

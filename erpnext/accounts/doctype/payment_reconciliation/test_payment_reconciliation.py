@@ -1484,7 +1484,7 @@ class TestPaymentReconciliation(FrappeTestCase):
 		# Should not raise frappe.exceptions.ValidationError: Payment Entry has been modified after you pulled it. Please pull it again.
 		pr.reconcile()
 
-	@ERPNextTestSuite.change_settings("System Settings", {"currency_precision": 2})
+	@change_settings("System Settings", {"currency_precision": 2})
 	def test_allocate_entries_rounds_running_balance_to_currency_precision(self):
 		pr = frappe.new_doc("Payment Reconciliation")
 		pr.company = self.company
@@ -1515,9 +1515,7 @@ class TestPaymentReconciliation(FrappeTestCase):
 
 		self.assertEqual(payments[0]["amount"], flt(637.585, 2))
 
-	@ERPNextTestSuite.change_settings(
-		"System Settings", {"currency_precision": "", "use_number_format_from_currency": 1}
-	)
+	@change_settings("System Settings", {"currency_precision": "", "use_number_format_from_currency": 1})
 	def test_allocate_entries_rounds_running_balance_to_account_currency_precision(self):
 		account_currency = frappe.get_cached_value("Account", self.debit_to, "account_currency")
 		original_number_format = frappe.db.get_value("Currency", account_currency, "number_format")
