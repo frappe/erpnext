@@ -311,6 +311,8 @@ def _get_incoming_rate(args: dict | str, raise_error_if_no_rate: bool = True, fa
 
 	args = frappe.parse_json(args)
 
+	frappe.has_permission("Item", "read", throw=True)
+
 	if not args.get("posting_datetime") and args.get("posting_date"):
 		args["posting_datetime"] = get_combine_datetime(args.get("posting_date"), args.get("posting_time"))
 

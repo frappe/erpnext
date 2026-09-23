@@ -1822,7 +1822,6 @@ def get_default_bom(item_code: str | None = None):
 	return bom_name
 
 
-@frappe.whitelist()
 def get_valuation_rate(item_code: str, company: str, warehouse: str | None = None):
 	"""Whitelisted entry point: authorise the item, then return its cost price."""
 	frappe.has_permission("Item", doc=item_code, throw=True)
@@ -1839,6 +1838,7 @@ def _get_valuation_rate(item_code: str, company: str, warehouse: str | None = No
 	item = get_item_defaults(item_code, company)
 	item_group = get_item_group_defaults(item_code, company)
 	brand = get_brand_defaults(item_code, company)
+
 	if item.get("is_stock_item"):
 		if not warehouse:
 			warehouse = (
@@ -1851,18 +1851,17 @@ def _get_valuation_rate(item_code: str, company: str, warehouse: str | None = No
 			"Bin", {"item_code": item_code, "warehouse": warehouse}, ["valuation_rate"], as_dict=True
 		) or {"valuation_rate": item.get("valuation_rate") or 0}
 
-	elif not item.get("is_stock_item"):
-		pi_item = frappe.qb.DocType("Purchase Invoice Item")
-		valuation_rate = (
-			frappe.qb.from_(pi_item)
-			.select(Sum(pi_item.base_net_amount) / NullIf(Sum(pi_item.qty * pi_item.conversion_factor), 0))
-			.where((pi_item.docstatus == 1) & (pi_item.item_code == item_code))
-		).run()
+	pi = frappe.qb.DocType("Purchase Invoice")
+	pi_item = frappe.qb.DocType("Purchase Invoice Item")
+	valuation_rate = (
+		frappe.qb.from_(pi_item)
+		.inner_join(pi)
+		.on(pi_item.parent == pi.name)
+		.select(Sum(pi_item.base_net_amount) / NullIf(Sum(pi_item.qty * pi_item.conversion_factor), 0))
+		.where((pi_item.docstatus == 1) & (pi_item.item_code == item_code) & (pi.company == company))
+	).run()
 
-		if valuation_rate:
-			return {"valuation_rate": valuation_rate[0][0] or 0.0}
-	else:
-		return {"valuation_rate": 0.0}
+	return {"valuation_rate": flt(valuation_rate[0][0]) if valuation_rate else 0.0}
 
 
 def get_gross_profit(out: frappe._dict):
