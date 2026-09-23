@@ -408,6 +408,7 @@ doc_events = {
 	},
 	"Item": {
 		"on_update": "erpnext.stock.doctype.item.item_search.reindex_item",
+		"after_rename": "erpnext.stock.doctype.item.item_search.reindex_renamed_item",
 	},
 	"Stock Entry": {
 		"on_submit": "erpnext.stock.doctype.material_request.material_request.update_completed_and_requested_qty",
