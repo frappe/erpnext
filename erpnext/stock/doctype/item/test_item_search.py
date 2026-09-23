@@ -181,6 +181,62 @@ class TestItemSearchIndex(ERPNextTestSuite):
 			self.run_query("Test", None, False, searchfield="stock_uom"),
 		)
 
+	def test_a_renamed_item_is_searchable_under_the_new_name(self):
+		"""A rename writes the new name without saving the Item, so on_update never fires."""
+		item = frappe.get_doc(
+			{
+				"doctype": "Item",
+				"item_code": "ZZ-RENAME-FROM-5521",
+				"item_name": "Rename Probe",
+				"item_group": frappe.db.get_value("Item Group", {"is_group": 0}, "name"),
+				"stock_uom": frappe.db.get_value("UOM", {}, "name"),
+			}
+		).insert()
+		index_docs_in_queue()
+		self.assertIn("ZZ-RENAME-FROM-5521", self.candidates("5521"))
+
+		frappe.rename_doc("Item", item.name, "ZZ-RENAME-TO-5521", force=True)
+		index_docs_in_queue()
+
+		self.assertIn("ZZ-RENAME-TO-5521", self.candidates("5521"))
+		self.assertNotIn("ZZ-RENAME-FROM-5521", self.candidates("5521"))
+
+	def test_repeated_spaces_and_urls_match_the_scan(self):
+		"""Values are indexed verbatim: cleaning them would lose rows the LIKE still matches."""
+		frappe.get_doc(
+			{
+				"doctype": "Item",
+				"item_code": "ZZ-VERBATIM-6612",
+				"item_name": "Valve  3 MM see https://example.com/spec",
+				"item_group": frappe.db.get_value("Item Group", {"is_group": 0}, "name"),
+				"stock_uom": frappe.db.get_value("UOM", {}, "name"),
+			}
+		).insert()
+		index_docs_in_queue()
+
+		for txt in ("Valve  3", "example.com"):
+			with self.subTest(txt=txt):
+				self.assertEqual(self.run_query(txt, None), self.run_query(txt, None, False))
+
+	def test_an_index_write_failure_does_not_fail_the_save(self):
+		"""The index is an optimisation every caller falls back from; the save is not."""
+		with (
+			patch.object(ItemSearch, "index_doc", side_effect=sqlite3.OperationalError("disk I/O error")),
+			patch.object(frappe, "log_error") as logged,
+		):
+			item = frappe.get_doc(
+				{
+					"doctype": "Item",
+					"item_code": "ZZ-WRITE-FAILURE-3390",
+					"item_name": "Write Failure Probe",
+					"item_group": frappe.db.get_value("Item Group", {"is_group": 0}, "name"),
+					"stock_uom": frappe.db.get_value("UOM", {}, "name"),
+				}
+			).insert()
+
+		self.assertTrue(frappe.db.exists("Item", item.name))
+		logged.assert_called()
+
 	def test_candidates_are_a_superset_of_the_scan(self):
 		"""The query re-filters, so extra candidates are safe but missing ones are not."""
 		for txt in ("Test", "Item", "est", "_Test"):
