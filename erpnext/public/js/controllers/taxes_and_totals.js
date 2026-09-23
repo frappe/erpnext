@@ -162,6 +162,15 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		);
 	}
 
+	drop_mapped_discount(item) {
+		if (!flt(item.mapped_additional_discount_amount)) return;
+
+		item.mapped_additional_discount_amount = 0;
+		if (!this.frm.doc.items.some((row) => flt(row.mapped_additional_discount_amount))) {
+			this.frm.doc.discount_amount = 0;
+		}
+	}
+
 	clear_mapped_discounts() {
 		for (const item of this.frm.doc.items || []) {
 			item.mapped_additional_discount_amount = 0;
