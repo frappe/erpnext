@@ -190,6 +190,14 @@ class TestBlanketOrder(ERPNextTestSuite):
 		bo.update_status("Submitted")
 		po.save()
 
+	def test_linked_row_is_checked_without_against_blanket_order(self):
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100)
+		po = make_purchase_order_against(bo, qty=10)
+		po.items[0].against_blanket_order = 0
+
+		bo.update_status("Closed")
+		self.assertRaises(frappe.InvalidStatusError, po.save)
+
 	def test_update_items_cannot_raise_qty_against_closed_blanket_order(self):
 		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100)
 		po = make_purchase_order_against(bo, qty=10)
