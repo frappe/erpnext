@@ -4,18 +4,18 @@
 
 import frappe
 from frappe import _
-from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import Sum
 from frappe.utils import flt, formatdate, getdate, today
 
 from erpnext import get_company_currency
 from erpnext.accounts.services.taxes import validate_conversion_rate
+from erpnext.controllers.status_updater import StatusUpdater
 from erpnext.manufacturing.doctype.blanket_order import blanket_order_pricing
 from erpnext.stock.doctype.item.item import get_item_defaults
 
 
-class BlanketOrder(Document):
+class BlanketOrder(StatusUpdater):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
 
@@ -42,6 +42,7 @@ class BlanketOrder(Document):
 		plc_conversion_rate: DF.Float
 		price_list_currency: DF.Link | None
 		selling_price_list: DF.Link | None
+		status: DF.Literal["Draft", "Submitted", "Closed", "Cancelled"]
 		supplier: DF.Link | None
 		supplier_name: DF.Data | None
 		tc_name: DF.Link | None
@@ -60,6 +61,26 @@ class BlanketOrder(Document):
 		self.validate_item_qty()
 		self.set_party_item_code()
 		self.set_base_rates()
+
+	def on_submit(self):
+		self.set_status(update=True)
+
+	def on_cancel(self):
+		self.set_status(update=True)
+
+	def update_status(self, status: str) -> None:
+		self.set_status(update=True, status=status)
+		self.notify_update()
+
+	def validate_can_be_ordered(self, order_date) -> None:
+		self.validate_is_open()
+		self.validate_not_expired(order_date)
+
+	def validate_is_open(self) -> None:
+		if self.status == "Closed":
+			frappe.throw(
+				_("Blanket Order {0} is closed").format(frappe.bold(self.name)), frappe.InvalidStatusError
+			)
 
 	def set_currency(self):
 		if self.currency:
@@ -193,10 +214,16 @@ def apply_price_list(
 	)
 
 
+@frappe.whitelist(methods=["POST"])
+def update_status(status: str, name: str):
+	blanket_order = frappe.get_doc("Blanket Order", name, check_permission="submit")
+	blanket_order.update_status(status)
+
+
 @frappe.whitelist()
 def make_order(source_name: str):
 	blanket_order = frappe.get_doc("Blanket Order", source_name, check_permission="read")
-	blanket_order.validate_not_expired(today())
+	blanket_order.validate_can_be_ordered(today())
 	doctype = frappe.flags.args.doctype
 
 	def update_doc(source_doc, target_doc, source_parent):
@@ -246,7 +273,7 @@ def validate_against_blanket_order(order_doc):
 		order_data = {}
 
 		for item in order_doc.get("items"):
-			if item.against_blanket_order and item.blanket_order:
+			if item.blanket_order:
 				if item.blanket_order in order_data:
 					if item.item_code in order_data[item.blanket_order]:
 						order_data[item.blanket_order][item.item_code] += item.qty
@@ -262,9 +289,9 @@ def validate_against_blanket_order(order_doc):
 					"blanket_order_allowance",
 				)
 			)
-			for bo_name, item_data in order_data.items():
-				bo_doc = frappe.get_doc("Blanket Order", bo_name)
-				bo_doc.validate_not_expired(order_doc.transaction_date)
+			for bo_name, item_data in sorted(order_data.items()):
+				bo_doc = frappe.get_doc("Blanket Order", bo_name, for_update=True)
+				bo_doc.validate_can_be_ordered(order_doc.transaction_date)
 				for item in bo_doc.get("items"):
 					if item.item_code in item_data:
 						remaining_qty = item.qty - item.ordered_qty

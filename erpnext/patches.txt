@@ -525,3 +525,4 @@ erpnext.patches.v16_0.recalculate_returned_delivery_note_billing_status
 erpnext.patches.v16_0.rename_component_cost_valuation_type
 erpnext.patches.v16_0.enable_serial_no_wise_valuation
 erpnext.patches.v16_0.add_voucher_index_to_repost_item_valuation
+erpnext.patches.v16_0.set_blanket_order_status

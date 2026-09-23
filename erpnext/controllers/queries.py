@@ -833,6 +833,7 @@ def get_account_list(
 def get_blanket_orders(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
 	bo_filters = [
 		["docstatus", "=", 1],
+		["status", "!=", "Closed"],
 		["blanket_order_type", "=", filters.get("blanket_order_type")],
 		["company", "=", filters.get("company")],
 	]
