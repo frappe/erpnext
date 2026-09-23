@@ -109,6 +109,7 @@ $.extend(erpnext, {
 		frm.fields_dict[child_name].grid.reset_grid();
 	},
 
+	// nosemgrep: frappe-semgrep-rules.rules.frappe-cur-frm-usage
 	toggle_naming_series: function (frm = cur_frm) {
 		if (frm?.fields_dict.naming_series && frm.meta.naming_rule == 'By "Naming Series" field') {
 			frm.toggle_display("naming_series", frm.doc.__islocal ? true : false);
@@ -1062,6 +1063,7 @@ erpnext.utils.update_child_items = function (opts) {
 };
 
 erpnext.utils.map_current_doc = function (opts) {
+	// nosemgrep: frappe-semgrep-rules.rules.frappe-cur-frm-usage
 	const frm = opts.target || cur_frm;
 
 	function _map() {
