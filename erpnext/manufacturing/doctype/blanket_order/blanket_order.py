@@ -90,6 +90,15 @@ class BlanketOrder(Document):
 		if getdate(self.from_date) > getdate(self.to_date):
 			frappe.throw(_("From date cannot be greater than To date"))
 
+	def validate_not_expired(self, order_date) -> None:
+		if getdate(order_date) > getdate(self.to_date):
+			frappe.throw(
+				_("Blanket Order {0} expired on {1}").format(
+					frappe.bold(self.name), formatdate(self.to_date)
+				),
+				title=_("Blanket Order Expired"),
+			)
+
 	def set_party_item_code(self):
 		item_ref = {}
 		if self.blanket_order_type == "Selling":
@@ -186,7 +195,8 @@ def apply_price_list(
 
 @frappe.whitelist()
 def make_order(source_name: str):
-	validate_blanket_order_not_expired(source_name, today())
+	blanket_order = frappe.get_doc("Blanket Order", source_name, check_permission="read")
+	blanket_order.validate_not_expired(today())
 	doctype = frappe.flags.args.doctype
 
 	def update_doc(source_doc, target_doc, source_parent):
@@ -253,8 +263,8 @@ def validate_against_blanket_order(order_doc):
 				)
 			)
 			for bo_name, item_data in order_data.items():
-				validate_blanket_order_not_expired(bo_name, order_doc.transaction_date)
 				bo_doc = frappe.get_doc("Blanket Order", bo_name)
+				bo_doc.validate_not_expired(order_doc.transaction_date)
 				for item in bo_doc.get("items"):
 					if item.item_code in item_data:
 						remaining_qty = item.qty - item.ordered_qty
@@ -265,12 +275,3 @@ def validate_against_blanket_order(order_doc):
 									"Item {0} cannot be ordered more than {1} against Blanket Order {2}."
 								).format(item.item_code, allowed_qty, bo_name)
 							)
-
-
-def validate_blanket_order_not_expired(blanket_order: str, order_date) -> None:
-	to_date = frappe.db.get_value("Blanket Order", blanket_order, "to_date")
-	if getdate(order_date) > getdate(to_date):
-		frappe.throw(
-			_("Blanket Order {0} expired on {1}").format(frappe.bold(blanket_order), formatdate(to_date)),
-			title=_("Blanket Order Expired"),
-		)
