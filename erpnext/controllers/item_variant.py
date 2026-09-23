@@ -34,6 +34,10 @@ def get_variant(template, args=None, variant=None, manufacturer=None, manufactur
 	:param item: Template Item
 	:param args: A dictionary with "Attribute" as key and "Attribute Value" as value
 	"""
+	# The Item form is the boundary and `read` is loser-free: roles that cannot read Item cannot open
+	# that form. The two server-side callers already hold the template.
+	frappe.has_permission("Item", doc=template, throw=True)
+
 	item_template = frappe.get_doc("Item", template)
 
 	if item_template.variant_based_on == "Manufacturer" and manufacturer:
@@ -309,6 +313,11 @@ def find_variant(template, args, variant_item_code=None):
 
 @frappe.whitelist()
 def create_variant(item, args, use_template_image=False):
+	# Same right as the sibling enqueue_multiple_variant_creation, plus record-level read on the
+	# template it copies from.
+	frappe.has_permission("Item", ptype="create", throw=True)
+	frappe.has_permission("Item", doc=item, throw=True)
+
 	use_template_image = frappe.parse_json(use_template_image)
 	if isinstance(args, str):
 		args = json.loads(args)
@@ -334,7 +343,7 @@ def create_variant(item, args, use_template_image=False):
 	return variant
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def enqueue_multiple_variant_creation(item, args, use_template_image=False):
 	frappe.has_permission("Item", ptype="create", throw=True)
 	use_template_image = frappe.parse_json(use_template_image)
@@ -527,6 +536,9 @@ def make_variant_item_code(template_item_code, template_item_name, variant):
 
 @frappe.whitelist()
 def create_variant_doc_for_quick_entry(template, args):
+	# get_variant and create_variant carry their own checks; this fails fast rather than relying on them.
+	frappe.has_permission("Item", doc=template, throw=True)
+
 	variant_based_on = frappe.db.get_value("Item", template, "variant_based_on")
 	args = json.loads(args)
 	if variant_based_on == "Manufacturer":

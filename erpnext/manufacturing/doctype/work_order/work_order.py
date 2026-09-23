@@ -1028,7 +1028,7 @@ class WorkOrder(Document):
 
 	def update_stock_reservation(self):
 		self.set_qty_change()
-		make_stock_reservation_entries(self)
+		reserve_stock_for_work_order(self)
 		self.db_set("status", self.get_status())
 
 	def set_qty_change(self):
@@ -2030,7 +2030,7 @@ class WorkOrder(Document):
 			return
 
 		item_list = list(items.values())
-		make_stock_reservation_entries(self, item_list, is_transfer=False, notify=True)
+		reserve_stock_for_work_order(self, item_list, is_transfer=False, notify=True)
 
 	def get_list_of_materials_for_reservation(self, stock_entry):
 		items = frappe._dict()
@@ -2283,7 +2283,7 @@ class WorkOrder(Document):
 			)
 
 			if sre_list:
-				cancel_stock_reservation_entries(self, sre_list)
+				unreserve_stock_for_work_order(self, sre_list)
 
 	def release_reserved_qty_for_subcontract_transfer(self):
 		"""Free this Work Order's own reservation for items sent to a subcontractor.
@@ -2423,11 +2423,22 @@ class WorkOrder(Document):
 
 @frappe.whitelist()
 def make_stock_reservation_entries(doc, items=None, is_transfer=True, notify=False):
-	is_transfer = cint(is_transfer)
+	"""Whitelisted entry point: authorise the caller against the Work Order, then reserve."""
 	if isinstance(doc, str):
 		doc = parse_json(doc)
 		doc = frappe.get_doc("Work Order", doc.get("name"))
 
+	frappe.has_permission("Work Order", "write", doc=doc, throw=True)
+	reserve_stock_for_work_order(doc, items, is_transfer, notify)
+
+
+def reserve_stock_for_work_order(doc, items=None, is_transfer=True, notify=False):
+	"""Reserve stock for a Work Order. Internal: no permission check, because the Work Order and
+	Stock Entry lifecycles reach it for a user who need not hold Work Order write. The cancelled and
+	closed branches unreserve, so the whitelisted entry point above needs the same right as the
+	cancel sibling.
+	"""
+	is_transfer = cint(is_transfer)
 	if items and isinstance(items, str):
 		items = parse_json(items)
 
@@ -2458,10 +2469,19 @@ def make_stock_reservation_entries(doc, items=None, is_transfer=True, notify=Fal
 
 @frappe.whitelist()
 def cancel_stock_reservation_entries(doc, sre_list):
+	"""Whitelisted entry point: authorise the caller against the Work Order, then unreserve."""
 	if isinstance(doc, str):
 		doc = parse_json(doc)
 		doc = frappe.get_doc("Work Order", doc.get("name"))
 
+	frappe.has_permission("Work Order", "write", doc=doc, throw=True)
+	unreserve_stock_for_work_order(doc, sre_list)
+
+
+def unreserve_stock_for_work_order(doc, sre_list):
+	"""Cancel a Work Order's stock reservations. Internal: no permission check, because the
+	Stock Entry cancellation lifecycle reaches it for a user who need not hold Work Order write.
+	"""
 	sre = StockReservation(doc)
 	sre.cancel_stock_reservation_entries(sre_list)
 
@@ -2522,6 +2542,14 @@ def get_consumed_qty(work_order, item_code):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_bom_operations(doctype, txt, searchfield, start, page_len, filters):
+	parent = filters.get("parent")
+	parenttype = filters.get("parenttype") or "BOM"
+	if not parent or not frappe.db.exists(parenttype, parent):
+		return []
+
+	ptype = "select" if frappe.only_has_select_perm(parenttype) else "read"
+	frappe.has_permission(parenttype, ptype, doc=parent, throw=True)
+
 	if txt:
 		filters["operation"] = ("like", "%%%s%%" % txt)
 
@@ -2799,14 +2827,15 @@ def get_default_warehouse(company):
 	}
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def stop_unstop(work_order, status):
 	"""Called from client side on Stop/Unstop event"""
 
-	if not frappe.has_permission("Work Order", "write"):
-		frappe.throw(_("Not permitted"), frappe.PermissionError)
+	frappe.has_permission("Work Order", "write", throw=True)
 
-	pro_order = frappe.get_doc("Work Order", work_order)
+	# the check above is doctype level, so on its own it lets a caller restricted to one company stop
+	# another company's orders.
+	pro_order = frappe.get_doc("Work Order", work_order, check_permission="write")
 
 	if pro_order.status == "Closed":
 		frappe.throw(_("Closed Work Order can not be stopped or Re-opened"))
@@ -2871,12 +2900,12 @@ def get_operation_details(name, work_order, parent_bom):
 			}
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def close_work_order(work_order, status):
-	if not frappe.has_permission("Work Order", "write"):
-		frappe.throw(_("Not permitted"), frappe.PermissionError)
+	frappe.has_permission("Work Order", "write", throw=True)
 
-	work_order = frappe.get_doc("Work Order", work_order)
+	# doctype level above, record level here — see stop_unstop()
+	work_order = frappe.get_doc("Work Order", work_order, check_permission="write")
 	if work_order.get("operations"):
 		job_cards = frappe.get_list(
 			"Job Card",

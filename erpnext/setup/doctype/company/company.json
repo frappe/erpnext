@@ -1072,6 +1072,10 @@
   },
   {
    "read": 1,
+   "role": "Sales Manager"
+  },
+  {
+   "read": 1,
    "role": "Purchase User"
   },
   {

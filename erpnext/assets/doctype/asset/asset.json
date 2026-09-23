@@ -627,7 +627,7 @@
    "link_fieldname": "target_asset"
   }
  ],
- "modified": "2026-09-16 11:42:07.000000",
+ "modified": "2026-09-22 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",
@@ -686,6 +686,14 @@
   },
   {
    "role": "Stock User",
+   "select": 1
+  },
+  {
+   "role": "Accounts Manager",
+   "select": 1
+  },
+  {
+   "role": "System Manager",
    "select": 1
   }
  ],

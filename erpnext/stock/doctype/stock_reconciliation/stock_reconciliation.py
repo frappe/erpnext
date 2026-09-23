@@ -18,7 +18,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 	get_serial_nos_based_on_posting_date,
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-from erpnext.stock.utils import get_incoming_rate, get_stock_balance
+from erpnext.stock.utils import _get_incoming_rate, get_stock_balance
 
 
 class OpeningEntryAccountError(frappe.ValidationError):
@@ -1523,7 +1523,7 @@ def get_stock_balance_for(
 		)
 
 		if row and row.use_serial_batch_fields and row.batch_no and (qty or row.current_qty):
-			rate = get_incoming_rate(
+			rate = _get_incoming_rate(
 				frappe._dict(
 					{
 						"item_code": row.item_code,

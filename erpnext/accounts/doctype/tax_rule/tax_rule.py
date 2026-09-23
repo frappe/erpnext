@@ -145,6 +145,12 @@ def get_party_details(party, party_type, args=None):
 	out = {}
 	billing_address, shipping_address = None, None
 	if args:
+		# each names a single Address: a dict is read as a filter and get_doc would resolve it to
+		# whichever Address matched.
+		for fieldname in ("billing_address", "shipping_address"):
+			if args.get(fieldname) and not isinstance(args.get(fieldname), str):
+				frappe.throw(_("Invalid address"), frappe.PermissionError)
+
 		if args.get("billing_address"):
 			billing_address = frappe.get_doc("Address", args.get("billing_address"))
 		if args.get("shipping_address"):

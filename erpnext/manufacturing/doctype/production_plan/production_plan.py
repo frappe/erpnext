@@ -615,7 +615,7 @@ class ProductionPlan(Document):
 		if not self.reserve_stock:
 			return
 
-		make_stock_reservation_entries(self)
+		reserve_stock_for_production_plan(self)
 
 	def add_reference_to_raw_materials(self):
 		for item in self.mr_items:
@@ -1741,11 +1741,40 @@ def get_warehouse_list(warehouses):
 	return warehouse_list
 
 
+def _authorize_mr_request(doc, warehouses=None):
+	"""Scope a caller-supplied plan to what the caller may see; `doc` is often unsaved, so check only a real name.
+
+	`warehouses` is accepted so the call site reads the same as on develop, where it also narrows
+	the caller to their permitted companies. There is no Company Restriction on this branch.
+	"""
+	name = doc.get("name")
+	if isinstance(name, str) and frappe.db.exists("Production Plan", name):
+		frappe.has_permission("Production Plan", doc=name, throw=True)
+
+	# Values arrive through frappe.parse_json, so container elements are untyped: a dict reaches
+	# frappe.db.get_value() in its *name* position and becomes a filter.
+	for row in _iter_mr_rows(doc):
+		for fieldname in ("item_code", "warehouse", "bom_no", "sales_order", "uom", "purchase_uom"):
+			value = row.get(fieldname)
+			if value is not None and not isinstance(value, str):
+				frappe.throw(_("Invalid {0}").format(fieldname), frappe.PermissionError)
+
+
+def _iter_mr_rows(doc):
+	for key in ("po_items", "items", "sub_assembly_items"):
+		for row in doc.get(key) or []:
+			if isinstance(row, dict):
+				yield row
+
+
 @frappe.whitelist()
 def get_items_for_material_requests(
 	doc: str | dict, warehouses: str | list[dict] | None = None, get_parent_warehouse_data: bool | None = None
 ):
+	frappe.has_permission("Production Plan", "read", throw=True)
+
 	doc = frappe._dict(json.loads(doc) if isinstance(doc, str) else doc)
+	_authorize_mr_request(doc, warehouses)
 
 	if warehouses:
 		warehouses = list(set(get_warehouse_list(warehouses)))
@@ -2354,10 +2383,21 @@ def get_reserved_qty_for_sub_assembly(item_code, warehouse):
 
 @frappe.whitelist()
 def make_stock_reservation_entries(doc, items=None, table_name=None, notify=False):
+	"""Whitelisted entry point: authorise the caller against the Production Plan, then reserve."""
 	if isinstance(doc, str):
 		doc = parse_json(doc)
 		doc = frappe.get_doc("Production Plan", doc.get("name"))
 
+	frappe.has_permission("Production Plan", "write", doc=doc, throw=True)
+	reserve_stock_for_production_plan(doc, items, table_name, notify)
+
+
+def reserve_stock_for_production_plan(doc, items=None, table_name=None, notify=False):
+	"""Reserve stock for a Production Plan. Internal: no permission check, because the Production
+	Plan submit and cancel lifecycles reach it for a user who need not hold Production Plan write.
+	The cancelled branch unreserves, so the whitelisted entry point above needs the same right as
+	the cancel sibling.
+	"""
 	if items and isinstance(items, str):
 		items = parse_json(items)
 
@@ -2391,9 +2431,12 @@ def make_stock_reservation_entries(doc, items=None, table_name=None, notify=Fals
 
 @frappe.whitelist()
 def cancel_stock_reservation_entries(doc, sre_list):
+	"""Whitelisted entry point: authorise the caller against the Production Plan, then unreserve."""
 	if isinstance(doc, str):
 		doc = parse_json(doc)
 		doc = frappe.get_doc("Production Plan", doc.get("name"))
+
+	frappe.has_permission("Production Plan", "write", doc=doc, throw=True)
 
 	sre = StockReservation(doc)
 	sre.cancel_stock_reservation_entries(sre_list)

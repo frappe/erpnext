@@ -1033,7 +1033,7 @@ class PurchaseReceipt(BuyingController):
 
 			for so, items_details in so_items_details_map.items():
 				so_doc = frappe.get_lazy_doc("Sales Order", so)
-				so_doc.create_stock_reservation_entries(
+				so_doc._create_stock_reservation_entries(
 					items_details=items_details,
 					from_voucher_type="Purchase Receipt",
 					notify=True,
@@ -1770,6 +1770,14 @@ def update_regional_gl_entries(gl_list, doc):
 
 @frappe.whitelist()
 def make_lcv(doctype, docname):
+	# `doctype` is caller-supplied and reaches get_value() as the doctype; only these two carry the fields read below
+	if doctype not in ("Purchase Receipt", "Purchase Invoice"):
+		frappe.throw(_("Invalid document type"), frappe.PermissionError)
+
+	# Authorise the source document, not the Landed Cost Voucher: LCV create is Stock Manager alone,
+	# while the roles pressing this button are those who can read the receipt or invoice.
+	frappe.has_permission(doctype, doc=docname, throw=True)
+
 	landed_cost_voucher = frappe.new_doc("Landed Cost Voucher")
 
 	details = frappe.db.get_value(doctype, docname, ["supplier", "company", "base_grand_total"], as_dict=1)

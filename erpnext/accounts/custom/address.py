@@ -55,6 +55,9 @@ class ERPNextAddress(Address):
 
 @frappe.whitelist()
 def get_shipping_address(company, address=None):
+	# `select`, not `read`: Delivery, Maintenance, Purchase and Stock Manager fill in forms that ask
+	# for this while holding no Company `read` row. doc= so User Permissions apply to the named company.
+	frappe.has_permission("Company", ptype="select", doc=company, throw=True)
 	filters = [
 		["Dynamic Link", "link_doctype", "=", "Company"],
 		["Dynamic Link", "link_name", "=", company],

@@ -21,7 +21,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.serial_batch_bundle import SerialBatchCreation, get_serial_nos_from_bundle
-from erpnext.stock.utils import get_incoming_rate
+from erpnext.stock.utils import _get_incoming_rate
 
 
 class SubcontractingController(StockController):
@@ -99,7 +99,7 @@ class SubcontractingController(StockController):
 					}
 				)
 
-				rate = get_incoming_rate(kwargs)
+				rate = _get_incoming_rate(kwargs)
 				precision = frappe.get_precision("Subcontracting Receipt Supplied Item", "rate")
 				if flt(rate, precision) != flt(row.rate, precision):
 					row.rate = rate
@@ -859,7 +859,7 @@ class SubcontractingController(StockController):
 			args["batch_no"] = rm_obj.batch_no
 			args["serial_no"] = rm_obj.serial_no
 
-		rm_obj.rate = get_incoming_rate(args)
+		rm_obj.rate = _get_incoming_rate(args)
 
 	def __set_batch_nos(self, bom_item, item_row, rm_obj, qty):
 		key = (rm_obj.rm_item_code, item_row.item_code, item_row.get(self.subcontract_data.order_field))
@@ -1068,7 +1068,7 @@ class SubcontractingController(StockController):
 			link = get_link_to_form(
 				self.subcontract_data.order_doctype, row.get(self.subcontract_data.order_field)
 			)
-			msg = f'The Batch No {frappe.bold(row.get("batch_no"))} has not supplied against the {self.subcontract_data.order_doctype} {link}'
+			msg = f"The Batch No {frappe.bold(row.get('batch_no'))} has not supplied against the {self.subcontract_data.order_doctype} {link}"
 			frappe.throw(_(msg), title=_("Incorrect Batch Consumed"))
 
 	def __validate_serial_no(self, row, key):
@@ -1247,7 +1247,7 @@ class SubcontractingController(StockController):
 					and reset_outgoing_rate
 					and frappe.get_cached_value("Item", item.rm_item_code, "is_stock_item")
 				):
-					rate = get_incoming_rate(
+					rate = _get_incoming_rate(
 						{
 							"item_code": item.rm_item_code,
 							"warehouse": self.supplier_warehouse,
