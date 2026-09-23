@@ -13,7 +13,7 @@ from frappe.utils import cint, flt, round_based_on_smallest_currency_fraction
 import erpnext
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_exchange_rate
 from erpnext.accounts.doctype.pricing_rule.utils import get_applied_pricing_rules
-from erpnext.buying.doctype.buying_settings.buying_settings import bills_rejected_quantity
+from erpnext.buying.doctype.buying_settings.buying_settings import get_billed_qty
 from erpnext.controllers.accounts_controller import (
 	validate_conversion_rate,
 	validate_inclusive_tax,
@@ -54,7 +54,7 @@ class calculate_taxes_and_totals:
 
 		self._calculate()
 
-		if self.doc.meta.get_field("discount_amount"):
+		if self.doc.meta.get_field("discount_amount") and not self.has_mapped_discount:
 			self.set_discount_amount()
 			self.apply_discount_amount()
 
@@ -252,27 +252,52 @@ class calculate_taxes_and_totals:
 			item.item_tax_amount = 0.0
 
 	def get_billed_qty(self, item):
-		if not flt(item.get("rejected_qty")) or not bills_rejected_quantity(self.doc):
-			return flt(item.qty)
+		return get_billed_qty(self.doc, item)
 
-		return flt(item.qty) + flt(item.rejected_qty)
+	@property
+	def has_mapped_discount(self):
+		return not self.doc.get("is_consolidated") and any(
+			item.get("mapped_additional_discount_amount") for item in self._items
+		)
 
 	def apply_mapped_additional_discount(self):
-		if self.discount_amount_applied or self.doc.get("is_consolidated"):
+		if self.discount_amount_applied or not self.has_mapped_discount:
 			return
 
-		for item in self._items:
-			billed_qty = self.get_billed_qty(item)
-			if not item.get("mapped_additional_discount_amount") or not billed_qty:
-				continue
-
-			item.net_amount = flt(
-				item.net_amount - item.mapped_additional_discount_amount * billed_qty,
-				item.precision("net_amount"),
+		if self.doc.get("is_cash_or_non_trade_discount"):
+			frappe.throw(
+				_(
+					"The cash or non-trade discount cannot be combined with discounts carried from other documents."
+				),
+				title=_("Discounts Cannot Be Combined"),
 			)
-			item.net_rate = flt(item.net_amount / billed_qty, item.precision("net_rate"))
-			item._unrounded_net_amount = None
-			self._set_in_company_currency(item, ["net_rate", "net_amount"])
+
+		for item in self._items:
+			self.apply_mapped_discount_to_item(item)
+
+		self.doc.apply_discount_on = "Net Total"
+		self.doc.additional_discount_percentage = 0
+		self.doc.discount_amount = flt(
+			sum(flt(item.distributed_discount_amount) for item in self._items),
+			self.doc.precision("discount_amount"),
+		)
+		self._set_in_company_currency(self.doc, ["discount_amount"])
+
+	def apply_mapped_discount_to_item(self, item):
+		billed_qty = self.get_billed_qty(item)
+		item.distributed_discount_amount = flt(
+			flt(item.mapped_additional_discount_amount) * billed_qty,
+			item.precision("distributed_discount_amount"),
+		)
+		if not item.distributed_discount_amount:
+			return
+
+		item.net_amount = flt(
+			item.net_amount - item.distributed_discount_amount, item.precision("net_amount")
+		)
+		item.net_rate = flt(item.net_amount / billed_qty, item.precision("net_rate"))
+		item._unrounded_net_amount = None
+		self._set_in_company_currency(item, ["net_rate", "net_amount"])
 
 	def _set_in_company_currency(self, doc, fields):
 		"""set values in base currency"""

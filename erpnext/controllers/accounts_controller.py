@@ -10,7 +10,7 @@ import frappe
 from frappe import _, bold, qb, throw
 from frappe.contacts.doctype.address.address import get_address_display
 from frappe.query_builder import DocType
-from frappe.query_builder.functions import Coalesce, Sum
+from frappe.query_builder.functions import Sum
 from frappe.utils import (
 	cint,
 	comma_and,
@@ -40,6 +40,7 @@ from erpnext.accounts.utils import (
 	get_advance_payment_doctypes as _get_advance_payment_doctypes,
 )
 from erpnext.accounts.utils import get_fiscal_year, validate_fiscal_year
+from erpnext.buying.doctype.buying_settings.buying_settings import get_billed_qty
 from erpnext.controllers.item_close import clear_closed_rows_on_amend
 from erpnext.controllers.print_settings import (
 	set_print_templates_for_item_table,
@@ -74,6 +75,9 @@ force_item_fields = (
 	"total_weight",
 	"valuation_rate",
 )
+
+
+ADDITIONAL_DISCOUNT_FIELDS = ("apply_discount_on", "additional_discount_percentage", "discount_amount")
 
 
 class AccountsController(TransactionBase):
@@ -1491,27 +1495,68 @@ class AccountsController(TransactionBase):
 
 		set_transaction_currency_and_rate_in_gl_map(self, gl_entries)
 
+	@property
+	def has_mapped_discount(self):
+		return any(item.get("mapped_additional_discount_amount") for item in self.get("items"))
+
+	@property
+	def has_cash_discount(self):
+		return bool(self.get("is_cash_or_non_trade_discount") and self.get("discount_amount"))
+
+	def is_same_transaction_side(self, source_doc):
+		return any(
+			self.doctype in transaction_types and source_doc.doctype in transaction_types
+			for transaction_types in (PURCHASE_TRANSACTION_TYPES, SALES_TRANSACTION_TYPES)
+		)
+
 	def before_mapping(self, source_doc, table_maps):
-		source_items_field = source_doc.meta.get_field("items")
-		item_map = table_maps.get(source_items_field.options, {}) if source_items_field else {}
-		field_map = item_map.get("field_map", {})
-		self.flags.mapped_discount_reference_field = dict(field_map).get("name")
-		if not self._has_mixed_additional_discount(source_doc):
+		if not self.get("items") or not self.is_same_transaction_side(source_doc):
 			return
 
-		self.calculate_taxes_and_totals()
-		self.move_additional_discount_to_items()
-		self.flags.mapped_discount_item_count = len(self.items)
+		if self.has_cash_discount:
+			self.keep_cash_discount(source_doc)
+		elif self.has_different_discount(source_doc):
+			self.calculate_taxes_and_totals()
+			self.move_additional_discount_to_items()
+			self.flags.mapped_discount_item_count = len(self.items)
 
 	def after_mapping(self, source_doc):
-		item_reference_field = self.flags.pop("mapped_discount_reference_field", None)
+		cash_discount = self.flags.pop("mapped_cash_discount", None)
 		existing_item_count = self.flags.pop("mapped_discount_item_count", None)
-		if existing_item_count is None:
-			self.set_discount_amount_after_mapping(source_doc, item_reference_field=item_reference_field)
-			return
+		if cash_discount:
+			self.update(cash_discount)
+			self.calculate_taxes_and_totals()
+		elif existing_item_count is None:
+			self.set_discount_amount_after_mapping(source_doc)
+		else:
+			self.apply_source_discount_to_mapped_items(source_doc, existing_item_count)
 
+	def keep_cash_discount(self, source_doc):
+		if source_doc.get("discount_amount") or source_doc.has_mapped_discount:
+			frappe.throw(
+				_("The cash or non-trade discount cannot be combined with the discount of {0}.").format(
+					get_link_to_form(source_doc.doctype, source_doc.name)
+				),
+				title=_("Discounts Cannot Be Combined"),
+			)
+
+		self.flags.mapped_cash_discount = {field: self.get(field) for field in ADDITIONAL_DISCOUNT_FIELDS}
+
+	def has_different_discount(self, source_doc):
+		if not flt(self.get("discount_amount")) and not flt(source_doc.get("discount_amount")):
+			return False
+
+		discount_percentage = flt(self.get("additional_discount_percentage"))
+		return not (
+			discount_percentage
+			and discount_percentage == flt(source_doc.get("additional_discount_percentage"))
+			and self.get("apply_discount_on") == source_doc.get("apply_discount_on")
+		)
+
+	def apply_source_discount_to_mapped_items(self, source_doc, existing_item_count):
 		with self.mapped_items_only(existing_item_count):
-			self.set_discount_amount_after_mapping(source_doc, item_reference_field=item_reference_field)
+			self.update({field: source_doc.get(field) for field in ADDITIONAL_DISCOUNT_FIELDS})
+			self.set_discount_amount_after_mapping(source_doc)
 			self.calculate_taxes_and_totals()
 			self.move_additional_discount_to_items()
 
@@ -1526,54 +1571,25 @@ class AccountsController(TransactionBase):
 		finally:
 			self.set("items", existing_items + self.items)
 
-	def _has_mixed_additional_discount(self, source_doc):
-		if not self.get("items") or not any(
-			self.doctype in transaction_types and source_doc.doctype in transaction_types
-			for transaction_types in (PURCHASE_TRANSACTION_TYPES, SALES_TRANSACTION_TYPES)
-		):
-			return False
-
-		if not flt(self.get("discount_amount")) and not flt(source_doc.get("discount_amount")):
-			return False
-
-		discount_percentage = flt(self.get("additional_discount_percentage"))
-		source_discount_percentage = flt(source_doc.get("additional_discount_percentage"))
-		return not (
-			discount_percentage
-			and discount_percentage == source_discount_percentage
-			and self.get("apply_discount_on") == source_doc.get("apply_discount_on")
-		)
-
 	def move_additional_discount_to_items(self):
-		if not self.discount_amount:
+		if not self.discount_amount or self.has_mapped_discount:
 			return
 
 		for item in self.items:
-			if item.qty:
+			billed_qty = get_billed_qty(self, item)
+			if billed_qty:
 				item.mapped_additional_discount_amount = flt(
-					flt(item.get("mapped_additional_discount_amount"))
-					+ flt(item.distributed_discount_amount) / item.qty,
+					flt(item.distributed_discount_amount) / billed_qty,
 					item.precision("mapped_additional_discount_amount"),
 				)
-			item.distributed_discount_amount = 0
 
-		self.apply_discount_on = ""
-		self.base_discount_amount = 0
-		self.additional_discount_percentage = 0
-		self.discount_amount = 0
-
-	def set_discount_amount_after_mapping(self, source_doc, *, item_reference_field=None):
+	def set_discount_amount_after_mapping(self, source_doc):
 		"""
 		Ensures that Additional Discount Amount is not copied repeatedly
 		for multiple mappings of a single source transaction.
 		"""
 
-		# source and target doctypes should both be buying / selling
-		for transaction_types in (PURCHASE_TRANSACTION_TYPES, SALES_TRANSACTION_TYPES):
-			if self.doctype in transaction_types and source_doc.doctype in transaction_types:
-				break
-
-		else:
+		if not self.is_same_transaction_side(source_doc):
 			return
 
 		# ensure both doctypes have discount_amount field
@@ -1585,7 +1601,7 @@ class AccountsController(TransactionBase):
 			return
 
 		# ensure additional_discount_percentage is not set in the source doc
-		if source_doc.get("additional_discount_percentage"):
+		if source_doc.get("additional_discount_percentage") or source_doc.has_mapped_discount:
 			return
 
 		item_doctype = self.meta.get_field("items").options
@@ -1628,13 +1644,20 @@ class AccountsController(TransactionBase):
 			if not reference_fieldname:
 				return
 
-			query = query.where(
-				doctype_table.name.isin(
-					frappe.qb.from_(item_table)
-					.select(item_table.parent)
-					.where(item_table[reference_fieldname] == source_doc.name)
-					.distinct()
-				)
+			linked_documents = (
+				frappe.qb.from_(item_table)
+				.select(item_table.parent)
+				.where(item_table[reference_fieldname] == source_doc.name)
+				.distinct()
+			)
+			documents_with_mapped_discount = (
+				frappe.qb.from_(item_table)
+				.select(item_table.parent)
+				.where(item_table.parent.isin(linked_documents))
+				.where(item_table.mapped_additional_discount_amount != 0)
+			)
+			query = query.where(doctype_table.name.isin(linked_documents)).where(
+				doctype_table.name.notin(documents_with_mapped_discount)
 			)
 
 		result = query.run()
@@ -1642,8 +1665,8 @@ class AccountsController(TransactionBase):
 			return
 
 		discount_already_applied = flt(result[0][0])
-		if item_reference_field:
-			discount_already_applied += self.get_mapped_discount_applied(source_doc, item_reference_field)
+		if not is_return:
+			discount_already_applied += self.get_mapped_discount_applied(source_doc, reference_fieldname)
 		if not discount_already_applied:
 			return
 
@@ -1659,26 +1682,20 @@ class AccountsController(TransactionBase):
 
 		self.calculate_taxes_and_totals()
 
-	def get_mapped_discount_applied(self, source_doc, item_reference_field):
-		distributed_discount = sum(flt(item.distributed_discount_amount) for item in source_doc.items)
-		if not distributed_discount:
-			return 0
-
+	def get_mapped_discount_applied(self, source_doc, reference_fieldname):
 		item_table = frappe.qb.DocType(self.meta.get_field("items").options)
-		source_item_table = frappe.qb.DocType(source_doc.meta.get_field("items").options).as_("source_item")
-		mapped_discount = (
-			Coalesce(item_table.mapped_additional_discount_amount, 0)
-			- Coalesce(source_item_table.mapped_additional_discount_amount, 0)
-		) * item_table.qty
-		consumed = (
+		applied = (
 			frappe.qb.from_(item_table)
-			.join(source_item_table)
-			.on(item_table[item_reference_field] == source_item_table.name)
-			.where((item_table.docstatus == 1) & (source_item_table.parent == source_doc.name))
-			.select(Sum(mapped_discount))
+			.select(Sum(item_table.mapped_additional_discount_amount * item_table.qty))
+			.where(item_table.docstatus == 1)
+			.where(item_table[reference_fieldname] == source_doc.name)
 		).run()[0][0]
 
-		return flt(consumed) * source_doc.discount_amount / distributed_discount
+		distributed_discount = sum(flt(item.distributed_discount_amount) for item in source_doc.items)
+		if not distributed_discount:
+			return flt(applied)
+
+		return flt(applied) * source_doc.discount_amount / distributed_discount
 
 
 from erpnext.accounts.services.advances import (
