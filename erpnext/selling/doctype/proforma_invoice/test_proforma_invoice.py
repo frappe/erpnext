@@ -12,7 +12,7 @@ from erpnext.selling.doctype.proforma_invoice.proforma_invoice import (
 	send_proforma_email,
 )
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-from erpnext.tests.utils import ERPNextTestSuite
+from erpnext.tests.utils import ERPNextTestSuite, make_email_template
 
 
 class TestProformaInvoice(ERPNextTestSuite):
@@ -153,15 +153,8 @@ class TestProformaInvoice(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, send_proforma_email, proforma.name, "customer@example.com")
 
 	def test_email_content_uses_template_from_selling_settings(self):
-		template = frappe.get_doc(
-			{
-				"doctype": "Email Template",
-				"name": "_Test Proforma Email",
-				"subject": "Proforma {{ doc.name }}",
-				"response": "Advance payment for {{ doc.sales_order }}",
-			}
-		).insert()
-		frappe.db.set_single_value("Selling Settings", "proforma_email_template", template.name)
+		template = make_email_template("Proforma {{ doc.name }}", "Advance payment for {{ doc.sales_order }}")
+		frappe.db.set_single_value("Selling Settings", "proforma_email_template", template)
 		proforma = frappe.get_doc(
 			{"doctype": "Proforma Invoice", "name": "PRO-TEST-0001", "sales_order": "SO-TEST-0001"}
 		)
