@@ -35,6 +35,12 @@ def enqueue_replace_bom(boms: dict | str | None = None, args: dict | str | None 
 	if isinstance(boms, str):
 		boms = json.loads(boms)
 
+	# the BOM Update Log is authorised by its own submit(), but replacing a BOM rewrites every
+	# parent BOM that uses it and nothing else authorises the two BOMs named in the request
+	for fieldname in ("current_bom", "new_bom"):
+		if bom := (boms or {}).get(fieldname):
+			frappe.has_permission("BOM", ptype="write", doc=bom, throw=True)
+
 	update_log = create_bom_update_log(boms=boms)
 	return update_log
 
