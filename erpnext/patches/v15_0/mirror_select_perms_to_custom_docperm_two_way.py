@@ -21,12 +21,14 @@ GRANTS = {
 		"Manufacturing User",
 	],
 	"Asset": [
+		"Accounts Manager",
 		"Manufacturing Manager",
 		"Manufacturing User",
 		"Purchase Manager",
 		"Purchase User",
 		"Stock Manager",
 		"Stock User",
+		"System Manager",
 	],
 	"Asset Category": [
 		"Item Manager",
