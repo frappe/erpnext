@@ -10,6 +10,7 @@ from frappe.utils import flt, getdate
 
 from erpnext import get_company_currency
 from erpnext.accounts.services.taxes import validate_conversion_rate
+from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.status_updater import StatusUpdater
 from erpnext.manufacturing.doctype.blanket_order import blanket_order_pricing
 from erpnext.stock.doctype.item.item import get_item_defaults
@@ -203,6 +204,7 @@ def update_status(status: str, name: str):
 
 @frappe.whitelist()
 def make_order(source_name: str):
+	check_on_hold_or_closed_status("Blanket Order", source_name)
 	doctype = frappe.flags.args.doctype
 
 	def update_doc(source_doc, target_doc, source_parent):
@@ -269,6 +271,7 @@ def validate_against_blanket_order(order_doc):
 				)
 			)
 			for bo_name, item_data in order_data.items():
+				check_on_hold_or_closed_status("Blanket Order", bo_name)
 				bo_doc = frappe.get_doc("Blanket Order", bo_name)
 				for item in bo_doc.get("items"):
 					if item.item_code in item_data:
