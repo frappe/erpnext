@@ -1,11 +1,13 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
+import json
 from unittest.mock import patch
 
 import frappe
 from frappe.utils import add_months, flt, today
 
 from erpnext import get_company_currency
+from erpnext.accounts.services.child_item_update import update_child_qty_rate
 from erpnext.controllers.queries import get_blanket_orders
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.get_item_details import get_blanket_order_details
@@ -159,6 +161,58 @@ class TestBlanketOrder(ERPNextTestSuite):
 
 		bo.cancel()
 		self.assertEqual(frappe.db.get_value("Blanket Order", bo.name, "status"), "Cancelled")
+
+	def test_closed_blanket_order_cannot_be_ordered_against(self):
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100)
+		po = make_purchase_order_against(bo, qty=10)
+
+		bo.update_status("Closed")
+		self.assertRaises(frappe.InvalidStatusError, make_order, bo.name)
+		self.assertRaises(frappe.InvalidStatusError, po.save)
+
+		filters = {"company": bo.company, "blanket_order_type": "Purchasing", "item": bo.items[0].item_code}
+		orders = get_blanket_orders("Blanket Order", "", "name", 0, 20, filters)
+		self.assertNotIn(bo.name, [order[0] for order in orders])
+
+		details = get_blanket_order_details(
+			{
+				"blanket_order": bo.name,
+				"company": bo.company,
+				"currency": bo.currency,
+				"supplier": bo.supplier,
+				"doctype": "Purchase Order",
+				"item_code": bo.items[0].item_code,
+				"transaction_date": today(),
+			}
+		)
+		self.assertFalse(details)
+
+		bo.update_status("Submitted")
+		po.save()
+
+	def test_update_items_cannot_raise_qty_against_closed_blanket_order(self):
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100)
+		po = make_purchase_order_against(bo, qty=10)
+		po.submit()
+		bo.update_status("Closed")
+		row = po.items[0]
+
+		def update_qty(qty):
+			payload = {
+				"docname": row.name,
+				"item_code": row.item_code,
+				"qty": qty,
+				"rate": row.rate,
+				"uom": row.uom,
+				"conversion_factor": row.conversion_factor,
+				"schedule_date": str(row.schedule_date),
+			}
+			update_child_qty_rate("Purchase Order", json.dumps([payload]), po.name)
+
+		self.assertRaises(frappe.InvalidStatusError, update_qty, 20)
+
+		update_qty(5)
+		self.assertEqual(frappe.db.get_value("Purchase Order Item", row.name, "qty"), 5)
 
 	def test_party_item_code(self):
 		item_doc = make_item("_Test Item 1 for Blanket Order")
@@ -449,6 +503,15 @@ def make_blanket_order(**args):
 	bo.insert()
 	bo.submit()
 	return bo
+
+
+def make_purchase_order_against(blanket_order, qty):
+	frappe.flags.args.doctype = "Purchase Order"
+	po = make_order(blanket_order.name)
+	po.currency = get_company_currency(po.company)
+	po.schedule_date = today()
+	po.items[0].qty = qty
+	return po
 
 
 def make_priced_blanket_order(
