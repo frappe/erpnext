@@ -851,6 +851,9 @@ def get_blanket_orders(doctype: str, txt: str, searchfield: str, start: int, pag
 	if currency := filters.get("currency"):
 		bo_filters.append(["currency", "=", currency])
 
+	if transaction_date := filters.get("transaction_date"):
+		bo_filters.append(["to_date", ">=", transaction_date])
+
 	return frappe.get_list(
 		"Blanket Order",
 		filters=bo_filters,

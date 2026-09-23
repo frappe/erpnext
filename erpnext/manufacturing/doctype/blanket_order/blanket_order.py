@@ -7,7 +7,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import Sum
-from frappe.utils import flt, getdate
+from frappe.utils import flt, formatdate, getdate, today
 
 from erpnext import get_company_currency
 from erpnext.accounts.services.taxes import validate_conversion_rate
@@ -89,6 +89,15 @@ class BlanketOrder(Document):
 	def validate_dates(self):
 		if getdate(self.from_date) > getdate(self.to_date):
 			frappe.throw(_("From date cannot be greater than To date"))
+
+	def validate_not_expired(self, order_date) -> None:
+		if getdate(order_date) > getdate(self.to_date):
+			frappe.throw(
+				_("Blanket Order {0} expired on {1}").format(
+					frappe.bold(self.name), formatdate(self.to_date)
+				),
+				title=_("Blanket Order Expired"),
+			)
 
 	def set_party_item_code(self):
 		item_ref = {}
@@ -186,6 +195,8 @@ def apply_price_list(
 
 @frappe.whitelist()
 def make_order(source_name: str):
+	blanket_order = frappe.get_doc("Blanket Order", source_name, check_permission="read")
+	blanket_order.validate_not_expired(today())
 	doctype = frappe.flags.args.doctype
 
 	def update_doc(source_doc, target_doc, source_parent):
@@ -253,6 +264,7 @@ def validate_against_blanket_order(order_doc):
 			)
 			for bo_name, item_data in order_data.items():
 				bo_doc = frappe.get_doc("Blanket Order", bo_name)
+				bo_doc.validate_not_expired(order_doc.transaction_date)
 				for item in bo_doc.get("items"):
 					if item.item_code in item_data:
 						remaining_qty = item.qty - item.ordered_qty
