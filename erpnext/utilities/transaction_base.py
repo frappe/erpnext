@@ -368,6 +368,7 @@ class TransactionBase(StatusUpdater):
 				"conversion_factor",
 				"barcode",
 				"pricing_rules",
+				"mapped_additional_discount_amount",
 			):
 				item_obj.set(fieldname, None)
 
