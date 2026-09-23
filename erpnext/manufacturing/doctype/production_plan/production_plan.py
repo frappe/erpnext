@@ -615,7 +615,7 @@ class ProductionPlan(Document):
 		if not self.reserve_stock:
 			return
 
-		make_stock_reservation_entries(self)
+		reserve_stock_for_production_plan(self)
 
 	def add_reference_to_raw_materials(self):
 		for item in self.mr_items:
@@ -2383,10 +2383,21 @@ def get_reserved_qty_for_sub_assembly(item_code, warehouse):
 
 @frappe.whitelist()
 def make_stock_reservation_entries(doc, items=None, table_name=None, notify=False):
+	"""Whitelisted entry point: authorise the caller against the Production Plan, then reserve."""
 	if isinstance(doc, str):
 		doc = parse_json(doc)
 		doc = frappe.get_doc("Production Plan", doc.get("name"))
 
+	frappe.has_permission("Production Plan", "write", doc=doc, throw=True)
+	reserve_stock_for_production_plan(doc, items, table_name, notify)
+
+
+def reserve_stock_for_production_plan(doc, items=None, table_name=None, notify=False):
+	"""Reserve stock for a Production Plan. Internal: no permission check, because the Production
+	Plan submit and cancel lifecycles reach it for a user who need not hold Production Plan write.
+	The cancelled branch unreserves, so the whitelisted entry point above needs the same right as
+	the cancel sibling.
+	"""
 	if items and isinstance(items, str):
 		items = parse_json(items)
 

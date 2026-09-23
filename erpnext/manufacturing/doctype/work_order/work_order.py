@@ -1028,7 +1028,7 @@ class WorkOrder(Document):
 
 	def update_stock_reservation(self):
 		self.set_qty_change()
-		make_stock_reservation_entries(self)
+		reserve_stock_for_work_order(self)
 		self.db_set("status", self.get_status())
 
 	def set_qty_change(self):
@@ -2030,7 +2030,7 @@ class WorkOrder(Document):
 			return
 
 		item_list = list(items.values())
-		make_stock_reservation_entries(self, item_list, is_transfer=False, notify=True)
+		reserve_stock_for_work_order(self, item_list, is_transfer=False, notify=True)
 
 	def get_list_of_materials_for_reservation(self, stock_entry):
 		items = frappe._dict()
@@ -2423,11 +2423,22 @@ class WorkOrder(Document):
 
 @frappe.whitelist()
 def make_stock_reservation_entries(doc, items=None, is_transfer=True, notify=False):
-	is_transfer = cint(is_transfer)
+	"""Whitelisted entry point: authorise the caller against the Work Order, then reserve."""
 	if isinstance(doc, str):
 		doc = parse_json(doc)
 		doc = frappe.get_doc("Work Order", doc.get("name"))
 
+	frappe.has_permission("Work Order", "write", doc=doc, throw=True)
+	reserve_stock_for_work_order(doc, items, is_transfer, notify)
+
+
+def reserve_stock_for_work_order(doc, items=None, is_transfer=True, notify=False):
+	"""Reserve stock for a Work Order. Internal: no permission check, because the Work Order and
+	Stock Entry lifecycles reach it for a user who need not hold Work Order write. The cancelled and
+	closed branches unreserve, so the whitelisted entry point above needs the same right as the
+	cancel sibling.
+	"""
+	is_transfer = cint(is_transfer)
 	if items and isinstance(items, str):
 		items = parse_json(items)
 
