@@ -1051,8 +1051,9 @@ def get_default_company_address(name, sort_key="is_primary_address", existing_ad
 		return None
 
 	# Same boundary as accounts/custom/address.py::get_shipping_address: `select` denies the portal
-	# identities and costs none of the transaction-writing roles.
-	frappe.has_permission("Company", ptype="select", throw=True)
+	# identities and costs none of the transaction-writing roles. doc= so the named company is
+	# evaluated and User Permissions apply.
+	frappe.has_permission("Company", ptype="select", doc=name, throw=True)
 
 	out = frappe.db.sql(
 		""" SELECT
