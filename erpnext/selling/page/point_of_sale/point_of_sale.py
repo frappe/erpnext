@@ -5,6 +5,7 @@
 import json
 
 import frappe
+from frappe import _
 from frappe.query_builder import Criterion, DocType, Order
 from frappe.utils import cint, get_datetime
 from frappe.utils.nestedset import get_root_of
@@ -13,6 +14,7 @@ from erpnext.accounts.doctype.pos_invoice.pos_invoice import get_item_group, get
 from erpnext.accounts.doctype.pos_profile.pos_profile import get_child_nodes, get_item_groups
 from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.stock.utils import scan_barcode
+from erpnext.utilities.email_template import get_email_subject_and_message
 
 
 def search_by_term(search_term, warehouse, price_list):
@@ -560,6 +562,20 @@ def get_pos_profile_data(pos_profile: str):
 
 	pos_profile.customer_groups = _customer_groups_with_children
 	return pos_profile
+
+
+@frappe.whitelist()
+def get_receipt_email_content(doctype: str, name: str) -> dict[str, str]:
+	doc = frappe.get_doc(doctype, name)
+	doc.check_permission("email")
+	template_name = doc.get("pos_profile") and frappe.db.get_value(
+		"POS Profile", doc.pos_profile, "receipt_email_template"
+	)
+	default_text = f"{_(doctype)}: {name}"
+	subject, message = get_email_subject_and_message(
+		template_name, {"doc": doc}, default_subject=default_text, default_message=default_text
+	)
+	return {"subject": subject, "message": message}
 
 
 def add_doctype_to_results(doctype, results):
