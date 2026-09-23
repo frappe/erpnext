@@ -102,6 +102,106 @@ class TestUaeVat201(TestCase):
 		self.assertEqual(get_standard_rated_expenses_total(filters), 917.5)
 		self.assertEqual(get_standard_rated_expenses_tax(filters), 50)
 
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings", {"allow_multi_currency_invoices_against_single_party_account": True}
+	)
+	def test_uae_vat_201_sales_vat_in_foreign_currency(self):
+		"""VAT on a foreign currency invoice must be reported in company currency."""
+		si = create_sales_invoice(
+			company="_Test Company UAE VAT",
+			customer="_Test UAE Customer",
+			currency="USD",
+			conversion_rate=3.67,
+			rate=1000,
+			qty=1,
+			warehouse="Finished Goods - _TCUV",
+			debit_to="Debtors - _TCUV",
+			income_account="Sales - _TCUV",
+			expense_account="Cost of Goods Sold - _TCUV",
+			cost_center="Main - _TCUV",
+			item="_Test UAE VAT Item",
+			do_not_save=1,
+		)
+		si.vat_emirate = "Dubai"
+		si.append(
+			"taxes",
+			{
+				"charge_type": "On Net Total",
+				"account_head": "VAT 5% - _TCUV",
+				"cost_center": "Main - _TCUV",
+				"description": "VAT 5% @ 5.0",
+				"rate": 5.0,
+			},
+		)
+		si.submit()
+
+		filters = {"company": "_Test Company UAE VAT"}
+		amounts_by_emirate = dict(
+			(emirate, (amount, vat)) for emirate, amount, vat in get_total_emiratewise(filters)
+		)
+		amount, vat = amounts_by_emirate["Dubai"]
+
+		self.assertEqual(amount, 3670)
+		self.assertEqual(vat, 183.5)
+		self.assertEqual(vat, si.taxes[0].base_tax_amount_after_discount_amount)
+		self.assertNotEqual(vat, si.items[0].tax_amount)
+
+	def test_uae_vat_201_mixed_invoice_excludes_exempt_and_zero_rated_vat(self):
+		si = create_sales_invoice(
+			company="_Test Company UAE VAT",
+			customer="_Test UAE Customer",
+			currency="AED",
+			rate=100,
+			qty=1,
+			warehouse="Finished Goods - _TCUV",
+			debit_to="Debtors - _TCUV",
+			income_account="Sales - _TCUV",
+			expense_account="Cost of Goods Sold - _TCUV",
+			cost_center="Main - _TCUV",
+			item="_Test UAE VAT Item",
+			do_not_save=1,
+		)
+		si.vat_emirate = "Ajman"
+		for item_code in ("_Test UAE VAT Zero Rated Item", "_Test UAE VAT Exempt Item"):
+			si.append(
+				"items",
+				{
+					"item_code": item_code,
+					"qty": 1,
+					"rate": 100,
+					"warehouse": "Finished Goods - _TCUV",
+					"income_account": "Sales - _TCUV",
+					"expense_account": "Cost of Goods Sold - _TCUV",
+					"cost_center": "Main - _TCUV",
+				},
+			)
+		si.append(
+			"taxes",
+			{
+				"charge_type": "On Net Total",
+				"account_head": "VAT 5% - _TCUV",
+				"cost_center": "Main - _TCUV",
+				"description": "VAT 5% @ 5.0",
+				"rate": 5.0,
+			},
+		)
+		si.submit()
+
+		# the single On Net Total row taxes all three items, so the invoice level figure is 15
+		self.assertEqual(si.taxes[0].base_tax_amount_after_discount_amount, 15)
+
+		filters = {"company": "_Test Company UAE VAT"}
+		amounts_by_emirate = dict(
+			(emirate, (amount, vat)) for emirate, amount, vat in get_total_emiratewise(filters)
+		)
+		amount, vat = amounts_by_emirate["Ajman"]
+
+		# only the standard rated row belongs in box 1
+		self.assertEqual(amount, 100)
+		self.assertEqual(vat, 5)
+		self.assertEqual(get_zero_rated_total(filters), 100)
+		self.assertEqual(get_exempt_total(filters), 100)
+
 
 def make_company(company_name, abbr):
 	if not frappe.db.exists("Company", company_name):
