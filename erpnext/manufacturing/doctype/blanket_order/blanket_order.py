@@ -270,7 +270,7 @@ def validate_against_blanket_order(order_doc):
 		order_data = {}
 
 		for item in order_doc.get("items"):
-			if item.against_blanket_order and item.blanket_order:
+			if item.blanket_order:
 				if item.blanket_order in order_data:
 					if item.item_code in order_data[item.blanket_order]:
 						order_data[item.blanket_order][item.item_code] += item.qty
