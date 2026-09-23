@@ -3690,6 +3690,18 @@ def get_payment_term_details(
 ):
 	term_details = frappe._dict()
 	if isinstance(term, str):
+		# a caller-supplied name, and get_doc checks nothing. Every transaction form passes a
+		# string here, and the selling/buying/maintenance roles that do so hold `select` on
+		# Payment Term while accounts roles hold `read` — v15 implies neither from the other,
+		# so either grant is accepted.
+		if not (
+			frappe.has_permission("Payment Term", ptype="select", doc=term)
+			or frappe.has_permission("Payment Term", ptype="read", doc=term)
+		):
+			frappe.throw(
+				_("No permission to read {0} {1}").format(_("Payment Term"), term), frappe.PermissionError
+			)
+
 		term = frappe.get_doc("Payment Term", term)
 	else:
 		term_details.payment_term = term.payment_term
