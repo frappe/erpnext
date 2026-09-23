@@ -13,34 +13,27 @@ from erpnext.deprecation_dumpster import deprecated
 
 
 @frappe.request_cache
-def has_legacy_batch_ledgers(item_code: str, warehouse: str) -> bool:
-	"""`False` when no Stock Ledger Entry of the item and warehouse uses the
-	denormalized `batch_no` field.
+def has_legacy_batch_ledgers(batch_nos: tuple[str, ...]) -> bool:
+	"""`False` when no Stock Ledger Entry of these batches uses the denormalized
+	`batch_no` field.
 
 	Batches are tracked through the Serial and Batch Bundle since v15, so this is
-	`False` for most of the item and warehouse combinations and the expensive
-	aggregates (`FOR UPDATE`) below can be skipped without reading the ledger. The
-	probe is an index only scan on the `batch_no, item_code, warehouse` index,
-	`is_cancelled` is intentionally left out of it to keep it so, an item with only
-	cancelled legacy ledgers simply falls back to the aggregate.
+	`False` for most batches and the expensive aggregates (`FOR UPDATE`) below can be
+	skipped without reading the ledger. The probe is an equality lookup on the
+	`batch_no` index, covered by it and stopping at the first row; `item_code`,
+	`warehouse` and `is_cancelled` are intentionally left out of it to keep it that
+	way, a batch with only cancelled legacy ledgers simply falls back to the
+	aggregate.
 
 	Cached for the request, nothing creates a legacy ledger midway.
 	"""
 
+	if not batch_nos:
+		return False
+
 	sle = frappe.qb.DocType("Stock Ledger Entry")
 
-	return bool(
-		frappe.qb.from_(sle)
-		.select(sle.batch_no)
-		.where(
-			sle.batch_no.isnotnull()
-			& (sle.batch_no != "")
-			& (sle.item_code == item_code)
-			& (sle.warehouse == warehouse)
-		)
-		.limit(1)
-		.run()
-	)
+	return bool(frappe.qb.from_(sle).select(sle.batch_no).where(sle.batch_no.isin(batch_nos)).limit(1).run())
 
 
 class DeprecatedSerialNoValuation:
@@ -163,7 +156,7 @@ class DeprecatedBatchNoValuation:
 	)
 	def get_sle_for_batches(self):
 		if not self.batchwise_valuation_batches or not has_legacy_batch_ledgers(
-			self.sle.item_code, self.sle.warehouse
+			tuple(sorted(self.batchwise_valuation_batches))
 		):
 			return []
 
@@ -331,7 +324,7 @@ class DeprecatedBatchNoValuation:
 	def set_balance_value_from_sl_entries(self) -> None:
 		from erpnext.stock.utils import get_combine_datetime
 
-		if not has_legacy_batch_ledgers(self.sle.item_code, self.sle.warehouse):
+		if not has_legacy_batch_ledgers(tuple(sorted(self.non_batchwise_valuation_batches))):
 			return
 
 		sle = frappe.qb.DocType("Stock Ledger Entry")
