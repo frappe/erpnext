@@ -14,7 +14,6 @@ from frappe.utils import (
 	days_diff,
 	flt,
 	formatdate,
-	get_date_str,
 	get_first_day,
 	getdate,
 	parse_json,
@@ -449,7 +448,7 @@ class MaterialRequirementsPlanningReport:
 			if row.get("is_adhoc"):
 				row.planned_qty += row.adhoc_qty
 
-			for field in ["min_order_qty", "purchase_uom", "safety_stock"]:
+			for field in ("min_order_qty", "purchase_uom", "safety_stock", "default_supplier"):
 				if rm_details.get(field):
 					row[field] = rm_details.get(field)
 
@@ -905,7 +904,13 @@ class MaterialRequirementsPlanningReport:
 				item_wise_rm_details[item_code] = frappe.db.get_value(
 					"Item",
 					item_code,
-					["default_bom as bom_no", "safety_stock", "min_order_qty", "purchase_uom"],
+					[
+						"default_bom as bom_no",
+						"safety_stock",
+						"min_order_qty",
+						"purchase_uom",
+						"is_purchase_item",
+					],
 					as_dict=True,
 				)
 
@@ -1219,6 +1224,13 @@ def get_item_details(item_code, company):
 	if default_data:
 		data.update(default_data)
 
+	if not data.get("default_supplier"):
+		# fall back to the item's Item Group default supplier (mirrors BuyingController)
+		item_group = frappe.db.get_value("Item", item_code, "item_group")
+		data.default_supplier = frappe.db.get_value(
+			"Item Default", {"parent": item_group, "company": company}, "default_supplier"
+		)
+
 	return data
 
 
@@ -1327,6 +1339,8 @@ def make_order(selected_rows: str | list, company: str, warehouse: str | None = 
 	purchase_orders = {}
 	work_orders = []
 	covered_rows = 0
+	missing_bom = []
+	missing_supplier = []
 	for row in selected_rows:
 		row = frappe._dict(row)
 		# what is left to order once stock and the orders already placed are counted. rounding
@@ -1337,10 +1351,22 @@ def make_order(selected_rows: str | list, company: str, warehouse: str | None = 
 			continue
 
 		if row.type_of_material == "Purchase":
-			purchase_orders.setdefault((row.default_supplier, row.release_date), []).append(row)
+			if row.default_supplier:
+				purchase_orders.setdefault((row.default_supplier, row.release_date), []).append(row)
+			elif row.item_code not in missing_supplier:
+				missing_supplier.append(row.item_code)
 
-		if row.type_of_material == "Manufacture" and row.bom_no:
-			work_orders.append(row)
+		if row.type_of_material == "Manufacture":
+			if row.bom_no:
+				work_orders.append(row)
+			elif row.item_code not in missing_bom:
+				missing_bom.append(row.item_code)
+
+	if missing_bom:
+		frappe.throw(_("Default BOM for {0} not found").format(", ".join(missing_bom)))
+
+	if missing_supplier:
+		frappe.throw(_("Default Supplier for {0} not found").format(", ".join(missing_supplier)))
 
 	if not purchase_orders and not work_orders:
 		frappe.msgprint(
