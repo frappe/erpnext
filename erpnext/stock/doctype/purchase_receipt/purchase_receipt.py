@@ -1027,7 +1027,7 @@ class PurchaseReceipt(BuyingController):
 
 			for so, items_details in so_items_details_map.items():
 				so_doc = frappe.get_lazy_doc("Sales Order", so)
-				so_doc.create_stock_reservation_entries(
+				so_doc._create_stock_reservation_entries(
 					items_details=items_details,
 					from_voucher_type="Purchase Receipt",
 					notify=True,

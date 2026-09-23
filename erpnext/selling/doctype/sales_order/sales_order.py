@@ -537,7 +537,7 @@ class SalesOrder(SellingController):
 			update_coupon_code_count(self.coupon_code, "used")
 
 		if self.get("reserve_stock") and not self.get("is_subcontracted"):
-			self.create_stock_reservation_entries()
+			self._create_stock_reservation_entries()
 
 	def delete_removed_delivery_schedule_items(self):
 		items = [d.name for d in self.get("items")]
@@ -859,8 +859,21 @@ class SalesOrder(SellingController):
 		from_voucher_type: Literal["Pick List", "Purchase Receipt"] = None,
 		notify=True,
 	) -> None:
-		"""Creates Stock Reservation Entries for Sales Order Items."""
+		"""Whitelisted entry point: authorise the caller, then reserve."""
+		self.check_permission("write")
+		self._create_stock_reservation_entries(items_details, from_voucher_type, notify)
 
+	def _create_stock_reservation_entries(
+		self,
+		items_details: list[dict] | None = None,
+		from_voucher_type: Literal["Pick List", "Purchase Receipt"] = None,
+		notify=True,
+	) -> None:
+		"""Creates Stock Reservation Entries for Sales Order Items.
+
+		Internal: no permission check. Pick List and Purchase Receipt reserve against someone
+		else's Sales Order, and no role that creates either holds Sales Order write.
+		"""
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 			create_stock_reservation_entries_for_so_items as create_stock_reservation_entries,
 		)

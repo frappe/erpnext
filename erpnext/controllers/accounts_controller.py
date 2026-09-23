@@ -4425,7 +4425,7 @@ def update_child_qty_rate(
 			cancel_stock_reservation_entries(parent.doctype, parent.name)
 
 			if parent.per_picked == 0:
-				parent.create_stock_reservation_entries()
+				parent._create_stock_reservation_entries()
 
 
 def check_if_child_table_updated(child_table_before_update, child_table_after_update, fields_to_check):
