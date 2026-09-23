@@ -31,7 +31,9 @@ frappe.ui.form.on("Blanket Order", {
 			return;
 		}
 
-		if (frm.doc.customer && frm.doc.docstatus === 1 && frm.doc.to_date > frappe.datetime.get_today()) {
+		const can_order = frm.doc.docstatus === 1 && frm.doc.to_date >= frappe.datetime.get_today();
+
+		if (frm.doc.customer && can_order) {
 			frm.add_custom_button(
 				__("Sales Order"),
 				function () {
@@ -61,7 +63,7 @@ frappe.ui.form.on("Blanket Order", {
 			);
 		}
 
-		if (frm.doc.supplier && frm.doc.docstatus === 1) {
+		if (frm.doc.supplier && can_order) {
 			frm.add_custom_button(
 				__("Purchase Order"),
 				function () {

@@ -157,11 +157,18 @@ def get_columns(filters):
 		{
 			"label": _("Ledger Type"),
 			"fieldname": "ledger_type",
-			"fieldtype": "Data",
+			"fieldtype": "Link",
+			"options": "DocType",
 		},
 		{"label": _("Posting Date"), "fieldname": "posting_date", "fieldtype": "Date"},
 		{"label": _("Posting Time"), "fieldname": "posting_time", "fieldtype": "Time"},
-		{"label": _("Voucher Type"), "fieldname": "voucher_type", "width": "110"},
+		{
+			"label": _("Voucher Type"),
+			"fieldname": "voucher_type",
+			"fieldtype": "Link",
+			"options": "DocType",
+			"width": "110",
+		},
 		{
 			"label": _("Voucher No"),
 			"fieldname": "voucher_no",
