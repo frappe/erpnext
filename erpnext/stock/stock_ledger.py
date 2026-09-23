@@ -1282,6 +1282,8 @@ class update_entries_after:
 			self.wh_data.stock_queue = json.loads(stock_queue[0]) if stock_queue else []
 
 		self.wh_data.stock_value = round_off_if_near_zero(self.wh_data.stock_value + doc.total_amount)
+		if sle.actual_qty > 0 and doc.total_qty:
+			sle.incoming_rate = abs(flt(doc.total_amount) / flt(doc.total_qty))
 		# Replay the immutable qty recorded on the SLE at submission, not the bundle's recomputed
 		# total_qty. A valuation repost must never rewrite physical quantities; if the bundle's child
 		# rows were edited after submission, doc.total_qty would silently corrupt qty_after_transaction
@@ -1587,7 +1589,11 @@ class update_entries_after:
 		frappe.db.set_value("Stock Entry Detail", sle.voucher_detail_no, "basic_rate", outgoing_rate)
 
 		# Update outgoing item's rate, recalculate FG Item's rate and total incoming/outgoing amount
-		if not sle.dependant_sle_voucher_detail_no or self.is_manufacture_entry_with_sabb(sle):
+		if (
+			not sle.dependant_sle_voucher_detail_no
+			or sle.dependant_sle_voucher_detail_no == sle.voucher_detail_no
+			or self.is_manufacture_entry_with_sabb(sle)
+		):
 			self.recalculate_amounts_in_stock_entry(sle.voucher_no, sle.voucher_detail_no)
 
 	def is_manufacture_entry_with_sabb(self, sle):
@@ -1603,7 +1609,7 @@ class update_entries_after:
 		return False
 
 	def recalculate_amounts_in_stock_entry(self, voucher_no, voucher_detail_no):
-		stock_entry = frappe.get_lazy_doc("Stock Entry", voucher_no, for_update=True)
+		stock_entry = frappe.get_doc("Stock Entry", voucher_no, for_update=True)
 		stock_entry.calculate_rate_and_amount(reset_outgoing_rate=False, raise_error_if_no_rate=False)
 		stock_entry.db_update()
 		update_additional_cost_rows = bool(stock_entry.get("additional_costs"))

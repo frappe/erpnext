@@ -910,6 +910,33 @@ class SerialandBatchBundle(Document):
 			if batches and valuation_method == "FIFO":
 				stock_queue = parse_json(prev_sle.stock_queue)
 
+		transfer_rates = {}
+		transfer_rate_adjustment = 0.0
+		if self.voucher_type == "Stock Entry" and frappe.get_cached_value(
+			"Stock Entry", self.voucher_no, "purpose"
+		) in ["Material Transfer", "Send to Subcontractor", "Material Transfer for Manufacture"]:
+			outward_bundle = frappe.db.get_value(
+				"Serial and Batch Bundle",
+				{
+					"voucher_no": self.voucher_no,
+					"voucher_detail_no": self.voucher_detail_no,
+					"type_of_transaction": "Outward",
+					"is_cancelled": 0,
+				},
+				["name", "avg_rate"],
+				as_dict=True,
+			)
+			if outward_bundle:
+				transfer_rate_adjustment = flt(rate) - flt(outward_bundle.avg_rate)
+				transfer_rates = {
+					(d.serial_no, d.batch_no): d.incoming_rate
+					for d in frappe.get_all(
+						"Serial and Batch Entry",
+						filters={"parent": outward_bundle.name},
+						fields=["serial_no", "batch_no", "incoming_rate"],
+					)
+				}
+
 		values_rejected_material = is_rejected_material_valued(self.voucher_type, self.voucher_detail_no)
 
 		if self.is_rejected and is_material_from_in_transit_warehouse(
@@ -938,6 +965,8 @@ class SerialandBatchBundle(Document):
 
 			if is_packed_item and d.incoming_rate:
 				rate = d.incoming_rate
+			elif (d.serial_no, d.batch_no) in transfer_rates:
+				rate = flt(transfer_rates[d.serial_no, d.batch_no]) + transfer_rate_adjustment
 
 			d.incoming_rate = flt(rate)
 			if d.qty:

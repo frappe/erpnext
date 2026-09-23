@@ -3597,6 +3597,68 @@ class TestStockEntry(ERPNextTestSuite):
 
 		self.assertEqual(incoming_rate, 125.0)
 
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"auto_create_serial_and_batch_bundle_for_outward": 1, "do_not_use_batchwise_valuation": 0},
+	)
+	def test_auto_picked_batches_keep_their_rates_on_material_transfer(self):
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "AUTO-TRANSFER-.#####",
+				"valuation_method": "Moving Average",
+			}
+		)
+		source = "_Test Warehouse - _TC"
+		target = "_Test Warehouse 1 - _TC"
+
+		for rate in (100, 200, 300):
+			make_stock_entry(
+				item_code=item.name,
+				target=source,
+				qty=1,
+				rate=rate,
+				use_serial_batch_fields=1,
+			)
+
+		transfer = make_stock_entry(
+			item_code=item.name,
+			source=source,
+			target=target,
+			qty=2,
+			use_serial_batch_fields=1,
+			do_not_submit=True,
+		)
+		self.assertEqual(transfer.items[0].amount, 400)
+
+		transfer.submit()
+		transfer.reload()
+
+		self.assertEqual(transfer.items[0].basic_rate, 150)
+		self.assertEqual(transfer.items[0].basic_amount, 300)
+		self.assertEqual(transfer.items[0].amount, 300)
+		self.assertEqual(transfer.total_outgoing_value, 300)
+		self.assertEqual(transfer.total_incoming_value, 300)
+
+		sles = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_no": transfer.name, "is_cancelled": 0},
+			fields=["actual_qty", "incoming_rate", "stock_value_difference", "serial_and_batch_bundle"],
+		)
+		outgoing = next(sle for sle in sles if sle.actual_qty < 0)
+		incoming = next(sle for sle in sles if sle.actual_qty > 0)
+		self.assertEqual(outgoing.stock_value_difference, -300)
+		self.assertEqual(incoming.incoming_rate, 150)
+		self.assertEqual(incoming.stock_value_difference, 300)
+
+		for bundle in (outgoing.serial_and_batch_bundle, incoming.serial_and_batch_bundle):
+			rates = frappe.get_all(
+				"Serial and Batch Entry", filters={"parent": bundle}, pluck="incoming_rate", order_by="idx"
+			)
+			self.assertEqual(rates, [100, 200])
+
 	def test_prevent_reuse_delivered_serial_no_in_repack(self):
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
