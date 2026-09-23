@@ -10,7 +10,6 @@ from frappe.utils import flt, get_link_to_form, getdate
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 from erpnext.buying.utils import update_last_purchase_rate
-from erpnext.manufacturing.doctype.blanket_order.blanket_order import validate_blanket_order_is_open
 from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 from erpnext.stock.get_item_details import (
 	get_bin_details,
@@ -292,7 +291,9 @@ class ChildItemUpdater:
 			child_item.precision("stock_qty"),
 		)
 		if new_stock_qty > flt(child_item.stock_qty):
-			validate_blanket_order_is_open(child_item.blanket_order, [child_item.item_code])
+			blanket_order = frappe.get_doc("Blanket Order", child_item.blanket_order)
+			blanket_order.validate_is_open()
+			blanket_order.validate_items_are_open([child_item.item_code])
 
 	def _validate_quantity_and_rate(self, child_item, new_data: dict, rate_unchanged: bool | None) -> None:
 		if not flt(new_data.get("qty")) and not self.allow_zero_qty:

@@ -10,7 +10,6 @@ from frappe.utils import flt, getdate
 
 from erpnext import get_company_currency
 from erpnext.accounts.services.taxes import validate_conversion_rate
-from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.item_close import clear_closed_rows_on_amend, validate_parent_reopen
 from erpnext.controllers.status_updater import StatusUpdater
 from erpnext.manufacturing.doctype.blanket_order import blanket_order_pricing
@@ -80,6 +79,22 @@ class BlanketOrder(StatusUpdater):
 
 	def is_item_closable(self, item) -> bool:
 		return flt(item.ordered_qty) < flt(item.qty)
+
+	def validate_is_open(self) -> None:
+		if self.status == "Closed":
+			frappe.throw(
+				_("Blanket Order {0} is closed").format(frappe.bold(self.name)), frappe.InvalidStatusError
+			)
+
+	def validate_items_are_open(self, item_codes: list[str]) -> None:
+		for row in self.items:
+			if row.closed and row.item_code in item_codes:
+				frappe.throw(
+					_("Item {0} is closed in Blanket Order {1}").format(
+						frappe.bold(row.item_code), frappe.bold(self.name)
+					),
+					frappe.InvalidStatusError,
+				)
 
 	def set_currency(self):
 		if self.currency:
@@ -212,7 +227,8 @@ def update_status(status: str, name: str):
 
 @frappe.whitelist()
 def make_order(source_name: str):
-	check_on_hold_or_closed_status("Blanket Order", source_name)
+	blanket_order = frappe.get_doc("Blanket Order", source_name, check_permission="read")
+	blanket_order.validate_is_open()
 	doctype = frappe.flags.args.doctype
 
 	def update_doc(source_doc, target_doc, source_parent):
@@ -280,8 +296,9 @@ def validate_against_blanket_order(order_doc):
 				)
 			)
 			for bo_name, item_data in order_data.items():
-				validate_blanket_order_is_open(bo_name, list(item_data))
 				bo_doc = frappe.get_doc("Blanket Order", bo_name)
+				bo_doc.validate_is_open()
+				bo_doc.validate_items_are_open(list(item_data))
 				for item in bo_doc.get("items"):
 					if item.item_code in item_data:
 						remaining_qty = item.qty - item.ordered_qty
@@ -292,25 +309,3 @@ def validate_against_blanket_order(order_doc):
 									"Item {0} cannot be ordered more than {1} against Blanket Order {2}."
 								).format(item.item_code, allowed_qty, bo_name)
 							)
-
-
-def validate_blanket_order_is_open(blanket_order: str, item_codes: list[str]) -> None:
-	check_on_hold_or_closed_status("Blanket Order", blanket_order)
-
-	closed_item_code = frappe.db.get_value(
-		"Blanket Order Item",
-		{
-			"parent": blanket_order,
-			"parenttype": "Blanket Order",
-			"item_code": ("in", item_codes),
-			"closed": 1,
-		},
-		"item_code",
-	)
-	if closed_item_code:
-		frappe.throw(
-			_("Item {0} is closed in Blanket Order {1}").format(
-				frappe.bold(closed_item_code), frappe.bold(blanket_order)
-			),
-			frappe.InvalidStatusError,
-		)
