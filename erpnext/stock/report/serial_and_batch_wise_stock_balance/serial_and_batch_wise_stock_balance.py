@@ -3,9 +3,10 @@ from collections import Counter
 import frappe
 from frappe import _
 from frappe.query_builder.functions import Coalesce
-from frappe.utils import flt
+from frappe.utils import flt, getdate
 
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.doctype.stock_closing_entry.stock_closing_entry import StockClosing
 from erpnext.stock.report.stock_balance.stock_balance import (
 	StockBalanceFilter,
 	StockBalanceReport,
@@ -15,6 +16,14 @@ from erpnext.stock.report.stock_balance.stock_balance import (
 
 def execute(filters: StockBalanceFilter | None = None):
 	return SerialAndBatchWiseStockBalanceReport(filters).run()
+
+
+@frappe.whitelist()
+def has_stock_closing_entry_before(from_date: str, company: str | None = None) -> bool:
+	frappe.has_permission("Stock Ledger Entry", "report", throw=True)
+
+	from_date = getdate(from_date)
+	return bool(StockClosing(company, from_date, from_date).last_closing_balance)
 
 
 class SerialAndBatchWiseStockBalanceReport(StockBalanceReport):
