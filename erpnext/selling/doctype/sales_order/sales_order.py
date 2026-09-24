@@ -502,6 +502,9 @@ class SalesOrder(SellingController):
 				if doc.docstatus.is_cancelled():
 					frappe.throw(_("Quotation {0} is cancelled").format(quotation))
 
+				if flag == "submit" and doc.status == "Lost":
+					frappe.throw(_("Quotation {0} is Lost").format(quotation))
+
 				if flag == "submit" and not doc.is_active:
 					frappe.throw(_("Quotation {0} is inactive").format(quotation))
 
