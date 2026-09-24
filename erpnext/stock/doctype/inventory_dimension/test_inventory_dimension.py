@@ -737,6 +737,30 @@ class TestInventoryDimension(ERPNextTestSuite):
 		dn_doc.save()
 		self.assertRaises(InventoryDimensionNegativeStockError, dn_doc.submit)
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_validate_negative_stock_for_multiple_rows_in_single_voucher(self):
+		item_code = "Test Negative Inventory Dimension Multi Row Item"
+		create_item(item_code)
+
+		inv_dimension = create_inventory_dimension(
+			apply_to_all_doctypes=1,
+			dimension_name="Inv Site",
+			reference_document="Inv Site",
+			document_type="Inv Site",
+			validate_negative_stock=1,
+		)
+		inv_dimension.db_set("validate_negative_stock", 1)
+
+		for site in ["Site 1", "Site 2"]:
+			pr_doc = make_purchase_receipt(item_code=item_code, qty=100, do_not_submit=True)
+			pr_doc.items[0].inv_site = site
+			pr_doc.submit()
+
+		dn_doc = create_delivery_note(item_code=item_code, qty=60, do_not_submit=True)
+		dn_doc.items[0].inv_site = "Site 1"
+		dn_doc.append("items", dn_doc.items[0].as_dict(no_default_fields=True, no_child_table_fields=True))
+		self.assertRaises(InventoryDimensionNegativeStockError, dn_doc.submit)
+
 
 def get_voucher_sl_entries(voucher_no, fields):
 	return frappe.get_all(
