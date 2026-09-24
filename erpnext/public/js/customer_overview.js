@@ -85,6 +85,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 		this.period_field.set_value(this.state.period);
 
 		this.$position = $('<div class="co-section co-kpis">').appendTo(this.$root);
+		this.$trend = $('<div class="co-section">').appendTo(this.$root);
 		this.$charts = $('<div class="co-section co-two-col">').appendTo(this.$root);
 		this.$pipeline = $('<div class="co-section">').appendTo(this.$root);
 		this.$recent = $('<div class="co-section">').appendTo(this.$root);
@@ -204,8 +205,42 @@ erpnext.CustomerOverview = class CustomerOverview {
 				caption: __("Not yet applied to invoices"),
 				onclick: () => this.open_ar(),
 			});
-		if (p.credit) items.push(this.credit_opts(p.credit));
 		frappe.ui.stat_cards({ items }).appendTo(this.$position);
+	}
+
+	render_credit() {
+		const p = this.data.position;
+		const limit = flt(p.credit.limit);
+		const receivable = Math.max(flt((p.outstanding || {}).value), 0);
+		const overdue = Math.min(Math.max(flt((p.overdue || {}).value), 0), receivable);
+		const $panel = this.panel(this.$charts, {
+			title: __("Credit Limit"),
+			subtitle: limit
+				? __("{0} of {1} used", [this.short_money(receivable), this.short_money(limit)])
+				: __("No credit limit set for {0}", [this.state.company]),
+			right: frappe.ui.button({
+				icon: "pencil",
+				variant: "ghost",
+				tooltip: limit ? __("Edit credit limit") : __("Set credit limit"),
+				onclick: () => this.edit_credit_limit(),
+			}),
+		});
+		if (!limit) return;
+		const over = receivable > limit;
+		frappe.ui
+			.donut({
+				segments: [
+					{ label: __("Overdue"), value: overdue, color: "rgb(40, 158, 96)" },
+					{ label: __("Not due"), value: receivable - overdue, color: CHART_BLUE },
+					{ label: __("Available"), value: limit - receivable, color: "var(--surface-gray-3)" },
+				],
+				center: {
+					value: flt((receivable / limit) * 100, 1) + "%",
+					label: over ? __("over limit") : __("used"),
+				},
+				format: (v) => this.short_money(v),
+			})
+			.appendTo($('<div class="co-chart">').appendTo($panel));
 	}
 
 	outstanding_sub(o) {
@@ -213,35 +248,6 @@ erpnext.CustomerOverview = class CustomerOverview {
 		if (o.unpaid_count) parts.push(o.unpaid_count + " " + __("unpaid"));
 		if (o.days_to_pay) parts.push(o.days_to_pay + " " + __("days to pay"));
 		return parts.join(" · ");
-	}
-
-	credit_opts(credit) {
-		if (!credit.limit) {
-			return {
-				label: __("Credit limit used"),
-				value: $('<span class="text-muted">').text("—"),
-				caption: __("Set a credit limit"),
-				onclick: () => this.edit_credit_limit(),
-			};
-		}
-		const pct = flt(credit.used_pct, 1);
-		const color = pct >= 90 ? "var(--ink-red-5)" : pct >= 70 ? "var(--ink-amber-5)" : "rgb(40, 158, 96)";
-		const left = flt(credit.limit) * (1 - pct / 100);
-		const $caption = $("<div>");
-		$("<div>")
-			.text(__("{0} of {1} left", [this.short_money(left), this.short_money(credit.limit)]))
-			.appendTo($caption);
-		const $bar = $(
-			'<div class="es-progress"><div class="es-progress__track" data-size="lg"><div class="es-progress__fill"></div></div></div>'
-		).css("margin-top", "6px");
-		$bar.find(".es-progress__fill").css({ width: Math.min(pct, 100) + "%", background: color });
-		$bar.appendTo($caption);
-		return {
-			label: __("Credit limit used"),
-			value: pct + "%",
-			caption: $caption,
-			onclick: () => this.edit_credit_limit(),
-		};
 	}
 
 	edit_credit_limit() {
@@ -288,19 +294,24 @@ erpnext.CustomerOverview = class CustomerOverview {
 
 	render_charts() {
 		this.$charts.empty();
+		this.$trend.empty();
 		const t = this.data.trend;
 		const a = this.data.ageing;
-		const has_trend = t && t.points && t.points.some((p) => flt(p.value) > 0);
+		const credit = (this.data.position || {}).credit;
 		const has_ageing = a && flt(a.total) > 0;
+		const has_credit = credit && (flt(credit.limit) > 0 || has_ageing);
+		const has_trend = t && t.points && t.points.some((p) => flt(p.value) > 0);
 		if (has_trend) this.render_trend();
 		if (has_ageing) this.render_ageing();
-		this.$charts.toggle(!!(has_trend || has_ageing));
+		if (has_credit) this.render_credit();
+		this.$charts.toggle(!!(has_credit || has_ageing));
+		this.$trend.toggle(!!has_trend);
 	}
 
 	render_trend() {
 		const t = this.data.trend;
-		const $panel = this.panel(this.$charts, {
-			title: __("Monthly sales trend"),
+		const $panel = this.panel(this.$trend, {
+			title: __("Monthly Sales Trend"),
 			subtitle: __("Monthly, net of returns"),
 			right: this.report_link(__("Sales Analytics"), () => this.open_analytics()),
 		});
@@ -330,7 +341,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 	render_ageing() {
 		const a = this.data.ageing;
 		const $panel = this.panel(this.$charts, {
-			title: __("Receivables ageing"),
+			title: __("Receivables Ageing"),
 			subtitle: __("Outstanding by due date, net of credit notes"),
 			right: this.report_link(__("Accounts Receivable"), () => this.open_ar()),
 		});
@@ -344,6 +355,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 				format: (v) => this.short_money(v),
 				color: CHART_BLUE,
 				on_click: () => this.open_ar(),
+				values_on_hover: true,
 			})
 			.appendTo($('<div class="co-age-chart">').appendTo($panel));
 		$('<div class="co-note text-muted">')
@@ -363,7 +375,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 			);
 		this.$pipeline.toggle(!!any);
 		if (!any) return;
-		this.section_head(this.$pipeline, { title: __("Open pipeline") });
+		this.section_head(this.$pipeline, { title: __("Open Pipeline") });
 		const name = this.frm.doc.name;
 		const company = this.state.company;
 
@@ -424,7 +436,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 
 	build_recent() {
 		this.section_head(this.$recent, {
-			title: __("Recent transactions"),
+			title: __("Recent Transactions"),
 			right: this.build_type_filter(),
 		});
 		this.$list = $('<div class="co-list">').appendTo(this.$recent);
