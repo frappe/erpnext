@@ -564,6 +564,17 @@ class TestQuotation(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("Quotation", revision.name, "is_active"), 1)
 		self.assertEqual(frappe.db.get_value("Quotation", quotation.name, "is_active"), 0)
 
+	def test_latest_version_is_ordered_by_transaction_date(self):
+		quotation = make_quotation()
+		revision = make_revision(quotation.name)
+		revision.transaction_date = add_days(quotation.transaction_date, -1)
+		revision.insert()
+		revision.submit()
+		quotation.reload()
+
+		self.assertTrue(quotation.is_latest_version)
+		self.assertFalse(revision.is_latest_version)
+
 	def test_only_the_latest_version_can_be_revised(self):
 		quotation = make_quotation()
 		revision = make_revision(quotation.name)
