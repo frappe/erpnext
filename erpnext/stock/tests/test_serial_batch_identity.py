@@ -72,6 +72,16 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 				self.assertEqual(names, [second.name, first.name, second.name])
 				self.assertEqual(identity.get_numbers(self.item.name, []), [])
 
+	def test_label_lookup_refuses_records_of_another_item(self):
+		for doctype in ("Serial No", "Batch"):
+			with self.subTest(doctype=doctype):
+				record = self.make_number(doctype, "Unlinked-001")
+				identity = SerialBatchIdentity(doctype)
+				with self.assertRaisesRegex(frappe.DoesNotExistError, "Unlinked-001.*_Identity Item B"):
+					identity.get_numbers(self.other_item.name, [record.name])
+				with self.assertRaises(frappe.DoesNotExistError):
+					identity.get_numbers(self.item.name, [record.name, "Missing-ID"])
+
 	def test_resolution_uses_the_selected_item(self):
 		for doctype in ("Serial No", "Batch"):
 			self.make_number(doctype, "Physical-001")
