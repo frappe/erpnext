@@ -49,10 +49,6 @@ def set_company_currency_service_amounts():
 
 
 def recost_order(order):
-	already_converted = any(row.base_amount for row in order.service_items)
-	if already_converted:
-		return
-
 	order.set_service_item_base_amounts()
 	for item in order.items:
 		item.service_cost_per_qty *= order.conversion_rate
