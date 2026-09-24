@@ -194,7 +194,7 @@ def auto_fetch_serial_number(
 	exclude_sr_nos: str | None = None,
 	as_numbers: bool = False,
 ) -> list[str]:
-	frappe.has_permission("Item", "read", doc=item_code, throw=True)
+	frappe.has_permission("Item", "select", doc=item_code, throw=True)
 	filters = frappe._dict({"item_code": item_code, "warehouse": warehouse})
 
 	if exclude_sr_nos is None:
@@ -224,15 +224,8 @@ def auto_fetch_serial_number(
 	serial_numbers = fetch_serial_numbers(filters, qty, do_not_include=exclude_sr_nos)
 
 	serial_ids = sorted(d.name for d in serial_numbers)
-	if not serial_ids:
-		return []
-	serials = {
-		row.name: row.serial_no
-		for row in frappe.get_list(
-			"Serial No", filters={"name": ("in", serial_ids)}, fields=["name", "serial_no"]
-		)
-	}
-	return [serials[name] if as_numbers else name for name in serial_ids if name in serials]
+	numbers = SerialBatchIdentity("Serial No").get_number_map(serial_ids, item_code=item_code)
+	return [numbers[name] if as_numbers else name for name in serial_ids if name in numbers]
 
 
 @frappe.whitelist()
@@ -242,12 +235,12 @@ def get_pos_reserved_serial_nos(filters: str | dict):
 	)
 
 	filters = frappe._dict(frappe.parse_json(filters))
-	frappe.has_permission("Item", "read", doc=filters.item_code, throw=True)
+	frappe.has_permission("Item", "select", doc=filters.item_code, throw=True)
 	serial_ids = get_reserved_serial_nos_for_pos(frappe._dict(item_code=filters.item_code))
 	if not serial_ids:
 		return []
 
-	return frappe.get_list(
+	return frappe.get_all(
 		"Serial No",
 		filters={"name": ("in", serial_ids), "item_code": filters.item_code, "warehouse": filters.warehouse},
 		pluck="serial_no",
