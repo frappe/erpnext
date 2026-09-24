@@ -16,7 +16,7 @@ ISSUE = {"from_warehouse": WAREHOUSE}
 
 
 class TestSerialAndBatchWiseStockBalance(ERPNextTestSuite):
-	def run_report(self, properties, movements):
+	def run_report(self, properties, movements, include_zero_stock_items=0):
 		item_code = make_item(properties={"is_stock_item": 1, **properties}).name
 		for movement in movements:
 			make_stock_entry(item_code=item_code, **movement)
@@ -27,6 +27,7 @@ class TestSerialAndBatchWiseStockBalance(ERPNextTestSuite):
 			warehouse=WAREHOUSE,
 			from_date="2020-01-01",
 			to_date=today(),
+			include_zero_stock_items=include_zero_stock_items,
 		)
 		return [_dict(row) for row in execute(filters)[1]]
 
@@ -48,6 +49,16 @@ class TestSerialAndBatchWiseStockBalance(ERPNextTestSuite):
 			[(0, 30, 5, 25, 2500), (1, 10, 5, 5, 500), (1, 20, 0, 20, 2000)],
 		)
 		self.assertTrue(all(row.batch_no for row in rows[1:]))
+		self.assertEqual(rows[0].batch_no, f"{rows[1].batch_no}\n{rows[2].batch_no}")
+
+	def test_item_row_lists_the_batches_under_it(self):
+		rows = self.run_report(
+			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "SBW-Z-.#####"},
+			[{"qty": 10, **RECEIVE}, {"qty": 10, **ISSUE}, {"qty": 5, **RECEIVE}],
+			include_zero_stock_items=1,
+		)
+
+		self.assertEqual([row.bal_qty for row in rows], [5, 0, 5])
 		self.assertEqual(rows[0].batch_no, f"{rows[1].batch_no}\n{rows[2].batch_no}")
 
 	def test_serial_nos_in_stock_on_item_row(self):
