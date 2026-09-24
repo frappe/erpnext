@@ -554,7 +554,8 @@ def get_items(filters):
 
 	else:
 		if brand := filters.get("brand"):
-			conditions.append(item.brand == brand)
+			condition = item.brand.isin(brand) if isinstance(brand, list) else item.brand == brand
+			conditions.append(condition)
 
 		if filters.get("item_group") and (
 			condition := get_item_group_condition(filters.get("item_group"), item)
