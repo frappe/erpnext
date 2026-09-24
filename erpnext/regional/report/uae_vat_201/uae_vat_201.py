@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import Sum
 
 from erpnext import get_region
 
@@ -144,28 +145,6 @@ def append_data(data, no, legend, amount, vat_amount):
 
 def get_total_emiratewise(filters):
 	"""Returns Emiratewise Amount and Taxes."""
-<<<<<<< HEAD
-	conditions = get_conditions(filters)
-	try:
-		return frappe.db.sql(
-			f"""
-			select
-				s.vat_emirate as emirate, sum(i.base_net_amount) as total, sum(i.tax_amount)
-			from
-				`tabSales Invoice Item` i inner join `tabSales Invoice` s
-			on
-				i.parent = s.name
-			where
-				s.docstatus = 1 and i.is_exempt != 1 and i.is_zero_rated != 1
-				{conditions}
-			group by
-				s.vat_emirate;
-			""",
-			filters,
-		)
-	except (IndexError, TypeError):
-		return 0
-=======
 	amounts = get_emiratewise_standard_rated_amount(filters)
 	vat_amounts = get_emiratewise_vat_amount(filters)
 	return [
@@ -186,7 +165,7 @@ def get_emiratewise_standard_rated_amount(filters):
 		.where((s.docstatus == 1) & (i.is_exempt != 1) & (i.is_zero_rated != 1))
 		.groupby(s.vat_emirate)
 	)
-	for condition in get_conditions(filters, s):
+	for condition in get_sales_conditions(filters, s):
 		query = query.where(condition)
 	return dict(query.run())
 
@@ -224,10 +203,9 @@ def get_emiratewise_vat_amount(filters):
 		)
 		.groupby(s.vat_emirate)
 	)
-	for condition in get_conditions(filters, s):
+	for condition in get_sales_conditions(filters, s):
 		query = query.where(condition)
 	return dict(query.run())
->>>>>>> 6e0ec5a (fix(regional): report uae vat 201 sales vat in company currency (#59168))
 
 
 def get_emirates():
@@ -486,4 +464,16 @@ def get_conditions(filters):
 	):
 		if filters.get(opts[0]):
 			conditions += opts[1]
+	return conditions
+
+
+def get_sales_conditions(filters, sales_invoice):
+	"""Return Query Builder conditions for Sales Invoice report filters."""
+	conditions = []
+	if filters.get("company"):
+		conditions.append(sales_invoice.company == filters.get("company"))
+	if filters.get("from_date"):
+		conditions.append(sales_invoice.posting_date >= filters.get("from_date"))
+	if filters.get("to_date"):
+		conditions.append(sales_invoice.posting_date <= filters.get("to_date"))
 	return conditions
