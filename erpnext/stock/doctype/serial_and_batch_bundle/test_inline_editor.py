@@ -252,6 +252,13 @@ class TestSerialBatchInlineEditor(ERPNextTestSuite):
 		self.assertEqual(new_entries, [])
 		self.assertEqual(entry.qty, -6)
 
+	def test_batch_rescan_of_a_zero_qty_row_sets_the_scanned_qty(self):
+		item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1}).name
+		batch = frappe.get_doc({"doctype": "Batch", "item": item, "batch_id": "Zero-Batch"}).insert()
+		entry = frappe._dict(batch_no=batch.name, qty=0)
+		append_scanned_batches([], [{"batch_number": "Zero-Batch", "qty": 2}], item, "Inward", [entry])
+		self.assertEqual(entry.qty, 2)
+
 	def test_batch_qty_update(self):
 		item = make_item(
 			properties={
