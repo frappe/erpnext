@@ -320,7 +320,8 @@ class TestBOM(ERPNextTestSuite):
 			item_price.insert()
 
 		bom = frappe.copy_doc(self.globalTestRecords["BOM"][2])
-		bom.set_rate_of_sub_assembly_item_based_on_bom = 0
+		for item in bom.items:
+			item.set_rate_of_sub_assembly_item_based_on_bom = 0
 		bom.rm_cost_as_per = "Price List"
 		bom.buying_price_list = "_Test Price List"
 		bom.items[0].uom = "_Test UOM 1"
@@ -346,7 +347,8 @@ class TestBOM(ERPNextTestSuite):
 	@timeout
 	def test_bom_cost_multi_uom_based_on_valuation_rate(self):
 		bom = frappe.copy_doc(self.globalTestRecords["BOM"][2])
-		bom.set_rate_of_sub_assembly_item_based_on_bom = 0
+		for item in bom.items:
+			item.set_rate_of_sub_assembly_item_based_on_bom = 0
 		bom.rm_cost_as_per = "Valuation Rate"
 		bom.items[0].uom = "_Test UOM 1"
 		bom.items[0].conversion_factor = 6
