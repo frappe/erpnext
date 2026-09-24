@@ -731,6 +731,22 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 		return known;
 	}
 
+	is_batch_number(row, key) {
+		const number = row.batch_number || frappe.utils.get_link_title("Batch", row.batch_no) || "";
+		return !row.serial_no && !row.serial_number && number.toLowerCase() === key;
+	}
+
+	get_active_server_batch_row(key) {
+		let p = this.pending;
+		if (p.delete_all) return null;
+
+		return this.last_entries.find(
+			(d) =>
+				this.is_batch_number({ ...d, ...p.updates[d.name] }, key) &&
+				!p.deleted.some((x) => x.name === d.name)
+		);
+	}
+
 	add_scanned_value(value) {
 		let p = this.pending;
 
@@ -745,9 +761,15 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 
 			p.new_entries.push({ serial_number: value, qty: 1 });
 		} else {
-			let existing = p.new_entries.find((d) => d.batch_number === value);
+			const key = value.toLowerCase();
+			let existing = p.new_entries.find((d) => this.is_batch_number(d, key));
+			let server_row = existing ? null : this.get_active_server_batch_row(key);
 			if (existing) {
 				existing.qty = flt(existing.qty) + 1;
+			} else if (server_row) {
+				let update = p.updates[server_row.name];
+				let current = update && update.qty != null ? flt(update.qty) : Math.abs(flt(server_row.qty));
+				this.update_entry(server_row.name, { qty: current + 1 });
 			} else {
 				p.new_entries.push({ batch_number: value, qty: 1 });
 			}

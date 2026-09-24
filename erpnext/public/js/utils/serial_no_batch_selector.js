@@ -651,7 +651,14 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 		);
 
 		if (existing_row) {
-			if (!this.item.has_serial_no) existing_row.qty = flt(existing_row.qty) + 1;
+			if (this.item.has_serial_no) {
+				frappe.show_alert({
+					message: __("Serial No {0} already added", [frappe.utils.escape_html(number)]),
+					indicator: "orange",
+				});
+			} else {
+				existing_row.qty = flt(existing_row.qty) + 1;
+			}
 		} else if (record.name) {
 			entries.df.data.push({ batch_no: record.batch_no, [fieldname]: record.name, qty: 1 });
 		} else {
