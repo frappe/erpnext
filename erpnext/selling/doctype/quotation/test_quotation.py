@@ -548,6 +548,14 @@ class TestQuotation(ERPNextTestSuite):
 
 		self.assertEqual(frappe.db.get_value("Quotation", quotation.name, "status"), "Lost")
 
+	def test_inactive_quotation_cannot_be_revised(self):
+		quotation = make_quotation()
+		revision = make_revision(quotation.name)
+		revision.insert()
+		revision.submit()
+
+		self.assertRaises(frappe.ValidationError, make_revision, quotation.name)
+
 	def test_draft_quotation_cannot_be_revised(self):
 		quotation = make_quotation(do_not_submit=1)
 
