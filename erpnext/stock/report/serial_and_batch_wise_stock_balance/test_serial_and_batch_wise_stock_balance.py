@@ -48,6 +48,7 @@ class TestSerialAndBatchWiseStockBalance(ERPNextTestSuite):
 			[(0, 30, 5, 25, 2500), (1, 10, 5, 5, 500), (1, 20, 0, 20, 2000)],
 		)
 		self.assertTrue(all(row.batch_no for row in rows[1:]))
+		self.assertEqual(rows[0].batch_no, f"{rows[1].batch_no}\n{rows[2].batch_no}")
 
 	def test_serial_nos_in_stock_on_item_row(self):
 		rows = self.run_report(
@@ -72,7 +73,8 @@ class TestSerialAndBatchWiseStockBalance(ERPNextTestSuite):
 		)
 
 		self.assertEqual([row.bal_qty for row in rows], [3, 1, 2])
-		self.assertEqual(rows[0].serial_no, "")
+		self.assertEqual(rows[0].batch_no, f"{rows[1].batch_no}\n{rows[2].batch_no}")
+		self.assertEqual(rows[0].serial_no, self.get_serial_nos_in_warehouse(rows[0].item_code))
 		for row in rows[1:]:
 			self.assertEqual(row.serial_no, self.get_serial_nos_in_warehouse(row.item_code, row.batch_no))
 
