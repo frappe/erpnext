@@ -66,9 +66,16 @@ class SerialBatchIdentity:
 		return [names_by_number[number] for number in numbers]
 
 	def _resolve_unique(self, item_code, numbers, create, defaults):
+		names = []
+		for start in range(0, len(numbers), MATCH_CHUNK_SIZE):
+			chunk = numbers[start : start + MATCH_CHUNK_SIZE]
+			names += self._resolve_chunk(item_code, chunk, create, defaults)
+		return names
+
+	def _resolve_chunk(self, item_code, numbers, create, defaults):
 		names = [None] * len(numbers)
 		created = {}
-		for index, name, first_index in self._match_numbers(item_code, numbers):
+		for index, name, first_index in self._match_chunk(item_code, numbers):
 			if not name:
 				if not create:
 					self.throw_missing(item_code, escape_html(numbers[index]))
@@ -153,16 +160,6 @@ class SerialBatchIdentity:
 				)
 			values["status"] = "Inactive"
 		return frappe.get_doc(values).insert(ignore_permissions=True).name
-
-	def _match_numbers(self, item_code, numbers):
-		rows = []
-		for start in range(0, len(numbers), MATCH_CHUNK_SIZE):
-			chunk = numbers[start : start + MATCH_CHUNK_SIZE]
-			rows += [
-				(start + ordinal, name, start + first_index)
-				for ordinal, name, first_index in self._match_chunk(item_code, chunk)
-			]
-		return rows
 
 	def _match_chunk(self, item_code, numbers):
 		table = frappe.qb.DocType(self.doctype)
