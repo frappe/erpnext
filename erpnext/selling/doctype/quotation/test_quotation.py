@@ -632,6 +632,17 @@ class TestQuotation(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, make_sales_order, quotation.name)
 		self.assertRaises(frappe.ValidationError, make_sales_invoice, quotation.name)
 
+	def test_sales_order_cannot_be_submitted_against_an_inactive_quotation(self):
+		quotation = make_quotation()
+		sales_order = make_sales_order(quotation.name)
+		sales_order.delivery_date = nowdate()
+		sales_order.insert()
+
+		quotation.is_active = 0
+		quotation.save()
+
+		self.assertRaises(frappe.ValidationError, sales_order.submit)
+
 	def test_inactive_quotation_is_not_an_active_offer(self):
 		opportunity = make_opportunity(with_items=1)
 		quotation = make_quotation(do_not_save=1)
