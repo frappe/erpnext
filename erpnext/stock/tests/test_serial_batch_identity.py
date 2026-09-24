@@ -1370,9 +1370,20 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 		doc.validate_return_items_qty()
 		self.assertEqual(doc.items[0].serial_and_batch_bundle, "Identity-POS-Return-Bundle")
 
-	def test_pos_screen_reservation_lookup_requires_item_read_permission(self):
+	def test_pos_screen_reservation_lookup_requires_item_permission(self):
 		with self.set_user("Guest"), self.assertRaises(frappe.PermissionError):
 			get_pos_reserved_serial_nos({"item_code": self.item.name, "warehouse": "_Test Warehouse - _TC"})
+
+	def test_serial_auto_fetch_works_without_master_read_permission(self):
+		serial = self.make_number("Serial No", "Fetch-001")
+		warehouse = "_Test Warehouse - _TC"
+		serial.db_set("warehouse", warehouse)
+		user = self.make_role_user("identity-delivery-user@example.com", "Delivery User")
+		with self.set_user(user):
+			self.assertFalse(frappe.has_permission("Serial No", "read"))
+			self.assertEqual(
+				auto_fetch_serial_number(1, self.item.name, warehouse, as_numbers=True), ["Fetch-001"]
+			)
 
 	def test_pos_auto_selection_excludes_reserved_and_selected_serial_ids(self):
 		reserved = self.make_number("Serial No", "POS-Reserved")
