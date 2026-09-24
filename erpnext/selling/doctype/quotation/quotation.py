@@ -326,10 +326,10 @@ class Quotation(SellingController):
 			for competitor in competitors:
 				self.append("competitors", competitor)
 
+			self.set_other_versions_as_lost()
 			self.update_opportunity("Lost")
 			self.update_lead()
 			self.save()
-			self.set_other_versions_as_lost()
 
 		else:
 			frappe.throw(_("Cannot set as Lost as Sales Order is made."))
