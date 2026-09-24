@@ -594,16 +594,15 @@ class TestQuotation(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, revision.insert)
 
-	def test_only_the_latest_version_can_be_revised(self):
+	def test_an_older_version_can_be_revised(self):
 		quotation = make_quotation()
-		revision = make_revision(quotation.name)
-		revision.insert()
-		revision.submit()
-		quotation.reload()
-		quotation.is_active = 1
-		quotation.save()
+		first_revision = make_revision(quotation.name)
+		first_revision.insert()
+		first_revision.submit()
 
-		self.assertRaises(frappe.ValidationError, make_revision, quotation.name)
+		second_revision = make_revision(quotation.name).insert()
+
+		self.assertEqual(second_revision.name, f"{quotation.name}-R2")
 
 	def test_is_active_is_locked_on_a_lost_quotation(self):
 		quotation = make_quotation()
@@ -616,14 +615,6 @@ class TestQuotation(ERPNextTestSuite):
 	def test_lost_quotation_cannot_be_revised(self):
 		quotation = make_quotation()
 		quotation.declare_enquiry_lost([], [])
-
-		self.assertRaises(frappe.ValidationError, make_revision, quotation.name)
-
-	def test_inactive_quotation_cannot_be_revised(self):
-		quotation = make_quotation()
-		revision = make_revision(quotation.name)
-		revision.insert()
-		revision.submit()
 
 		self.assertRaises(frappe.ValidationError, make_revision, quotation.name)
 
