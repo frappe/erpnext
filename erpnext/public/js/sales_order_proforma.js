@@ -120,6 +120,12 @@ Object.assign(erpnext.proforma, {
 							in_list_view: 1,
 						},
 						{
+							fieldname: "description",
+							fieldtype: "Text Editor",
+							label: __("Description"),
+							in_list_view: 1,
+						},
+						{
 							fieldname: "qty",
 							fieldtype: "Float",
 							label: __("Qty"),
@@ -207,11 +213,12 @@ Object.assign(erpnext.proforma, {
 		const by_amount = values.based_on === "Amount";
 		const items = (values.items || [])
 			.filter((row) => flt(by_amount ? row.amount : row.qty) > 0)
-			.map((row) =>
-				by_amount
-					? { so_detail: row.so_detail, qty: row.qty, amount: row.amount }
-					: { so_detail: row.so_detail, qty: row.qty }
-			);
+			.map((row) => ({
+				so_detail: row.so_detail,
+				description: row.description,
+				qty: row.qty,
+				amount: row.amount,
+			}));
 
 		if (!items.length) {
 			frappe.msgprint(__("Please enter a quantity or amount for at least one item."));
