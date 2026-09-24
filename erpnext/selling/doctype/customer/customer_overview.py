@@ -13,8 +13,7 @@ OPEN_SO_STATUS = ("Closed", "Completed", "On Hold")
 
 @frappe.whitelist()
 def get_customer_overview(customer: str, company: str, period: str = "This fiscal year"):
-	if not frappe.has_permission("Customer", "read", doc=customer):
-		frappe.throw(_("Not permitted"), frappe.PermissionError)
+	check_access(customer, company)
 
 	if period not in PERIODS:
 		period = "This fiscal year"
@@ -43,8 +42,8 @@ def get_customer_overview(customer: str, company: str, period: str = "This fisca
 			frappe.log_error(title="Customer Overview: receivables")
 
 	for key, fn, args in (
-		("position", position, (customer, company, from_date, to_date, as_of, ar)),
-		("trend", trend, (customer, company, from_date, to_date, as_of)),
+		("position", position, (customer, company, from_date, to_date, as_of, ar, accounts)),
+		("trend", trend, (customer, company, from_date, to_date, as_of, accounts)),
 		("ageing", ageing, (ar,)),
 		("pipeline", pipeline, (customer, company, as_of, accounts)),
 	):
@@ -56,6 +55,15 @@ def get_customer_overview(customer: str, company: str, period: str = "This fisca
 			frappe.log_error(title="Customer Overview: " + key)
 
 	return payload
+
+
+def check_access(customer, company=None):
+	if not frappe.has_permission("Customer", "read", doc=customer):
+		frappe.throw(_("Not permitted"), frappe.PermissionError)
+
+	allowed = frappe.permissions.get_user_permissions(frappe.session.user).get("Company")
+	if company and allowed and company not in {p.get("doc") for p in allowed}:
+		frappe.throw(_("Not permitted for company {0}").format(company), frappe.PermissionError)
 
 
 def accounts_access():
@@ -100,8 +108,10 @@ def net_sales(customer, company, from_date, to_date):
 	return flt(result[0][0])
 
 
-def position(customer, company, from_date, to_date, as_of, ar):
+def position(customer, company, from_date, to_date, as_of, ar, accounts):
 	cards = {}
+	if not accounts:
+		return cards
 
 	current = net_sales(customer, company, from_date, to_date)
 	prev = net_sales(customer, company, add_to_date(from_date, years=-1), add_to_date(to_date, years=-1))
@@ -214,7 +224,9 @@ def ageing(ar):
 	}
 
 
-def trend(customer, company, from_date, to_date, as_of):
+def trend(customer, company, from_date, to_date, as_of, accounts):
+	if not accounts:
+		return None
 	si = DocType("Sales Invoice")
 	rows = (
 		frappe.qb.from_(si)
@@ -253,7 +265,16 @@ def trend(customer, company, from_date, to_date, as_of):
 
 def pipeline(customer, company, as_of, accounts):
 	tiles = {}
+	if frappe.has_permission("Quotation", "read"):
+		tiles.update(quotation_tiles(customer, company))
+	if frappe.has_permission("Sales Order", "read"):
+		tiles.update(sales_order_tiles(customer, company, as_of))
+	if accounts:
+		tiles.update(invoice_tiles(customer, company, as_of))
+	return tiles
 
+
+def quotation_tiles(customer, company):
 	quotation = DocType("Quotation")
 	quote = (
 		frappe.qb.from_(quotation)
@@ -269,8 +290,10 @@ def pipeline(customer, company, as_of, accounts):
 			& (quotation.company == company)
 		)
 	).run(as_dict=True)[0]
-	tiles["quotations"] = {"value": flt(quote.value), "count": quote.count}
+	return {"quotations": {"value": flt(quote.value), "count": quote.count}}
 
+
+def sales_order_tiles(customer, company, as_of):
 	so = DocType("Sales Order")
 	open_so = (
 		(so.docstatus == 1)
@@ -288,11 +311,6 @@ def pipeline(customer, company, as_of, accounts):
 		)
 		.where(open_so & (so.per_delivered < 100))
 	).run(as_dict=True)[0]
-	tiles["delivery"] = {
-		"value": flt(delivery.value),
-		"count": delivery.count,
-		"past_due": delivery.past_due or 0,
-	}
 
 	billing = (
 		frappe.qb.from_(so)
@@ -302,32 +320,40 @@ def pipeline(customer, company, as_of, accounts):
 		)
 		.where(open_so & (so.per_billed < 100))
 	).run(as_dict=True)[0]
-	tiles["billing"] = {"value": flt(billing.value), "count": billing.count}
+	return {
+		"delivery": {
+			"value": flt(delivery.value),
+			"count": delivery.count,
+			"past_due": delivery.past_due or 0,
+		},
+		"billing": {"value": flt(billing.value), "count": billing.count},
+	}
 
-	if accounts:
-		si = DocType("Sales Invoice")
-		invoices = (
-			frappe.qb.from_(si)
-			.select(
-				Coalesce(Sum(si.outstanding_amount), 0).as_("value"),
-				Count(si.name).as_("count"),
-				Coalesce(Sum(Case().when(si.due_date < as_of, 1).else_(0)), 0).as_("overdue"),
-			)
-			.where(
-				(si.docstatus == 1)
-				& (si.customer == customer)
-				& (si.company == company)
-				& (si.is_return == 0)
-				& (si.outstanding_amount > 0)
-			)
-		).run(as_dict=True)[0]
-		tiles["invoices"] = {
+
+def invoice_tiles(customer, company, as_of):
+	si = DocType("Sales Invoice")
+	invoices = (
+		frappe.qb.from_(si)
+		.select(
+			Coalesce(Sum(si.outstanding_amount), 0).as_("value"),
+			Count(si.name).as_("count"),
+			Coalesce(Sum(Case().when(si.due_date < as_of, 1).else_(0)), 0).as_("overdue"),
+		)
+		.where(
+			(si.docstatus == 1)
+			& (si.customer == customer)
+			& (si.company == company)
+			& (si.is_return == 0)
+			& (si.outstanding_amount > 0)
+		)
+	).run(as_dict=True)[0]
+	return {
+		"invoices": {
 			"value": flt(invoices.value),
 			"count": invoices.count,
 			"overdue": invoices.overdue or 0,
 		}
-
-	return tiles
+	}
 
 
 TRANSACTION_TYPES = ("Sales Invoice", "Sales Order", "Payment Entry")
@@ -335,8 +361,7 @@ TRANSACTION_TYPES = ("Sales Invoice", "Sales Order", "Payment Entry")
 
 @frappe.whitelist()
 def get_customer_transactions(customer: str, company: str, doc_type: str = "All", limit: int = 20):
-	if not frappe.has_permission("Customer", "read", doc=customer):
-		frappe.throw(_("Not permitted"), frappe.PermissionError)
+	check_access(customer, company)
 
 	limit = min(cint(limit) or 20, 100)
 	accounts = accounts_access()
@@ -344,7 +369,9 @@ def get_customer_transactions(customer: str, company: str, doc_type: str = "All"
 
 	rows = []
 	for dt in wanted:
-		if dt in ("Sales Invoice", "Payment Entry") and not accounts:
+		if (dt in ("Sales Invoice", "Payment Entry") and not accounts) or not frappe.has_permission(
+			dt, "read"
+		):
 			continue
 		rows.extend(_fetch_rows(dt, customer, company, limit))
 
@@ -401,7 +428,7 @@ def _fetch_rows(doctype, customer, company, limit):
 	spec = TXN_SPECS[doctype]
 	filters = {"docstatus": 1, "company": company, spec["party_field"]: customer, **spec["extra"]}
 	rows = []
-	for r in frappe.get_all(
+	for r in frappe.get_list(
 		doctype, filters=filters, fields=spec["fields"], order_by=spec["order_by"], limit=limit
 	):
 		rows.append(
@@ -424,8 +451,7 @@ def pct_change(current, previous):
 
 @frappe.whitelist()
 def get_customer_companies(customer: str):
-	if not frappe.has_permission("Customer", "read", doc=customer):
-		frappe.throw(_("Not permitted"), frappe.PermissionError)
+	check_access(customer)
 
 	companies = set()
 	for doctype, field in (
@@ -433,8 +459,11 @@ def get_customer_companies(customer: str):
 		("Sales Order", "customer"),
 		("Quotation", "party_name"),
 	):
-		companies.update(
-			frappe.get_all(doctype, filters={field: customer, "docstatus": 1}, distinct=True, pluck="company")
-		)
+		if frappe.has_permission(doctype, "read"):
+			companies.update(
+				frappe.get_list(
+					doctype, filters={field: customer, "docstatus": 1}, distinct=True, pluck="company"
+				)
+			)
 	companies.discard(None)
 	return sorted(companies)
