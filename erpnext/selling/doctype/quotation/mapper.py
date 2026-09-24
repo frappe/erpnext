@@ -206,9 +206,7 @@ def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, 
 
 @frappe.whitelist()
 def make_revision(source_name: str, target_doc: str | dict | Document | None = None):
-	status = frappe.db.get_value("Quotation", source_name, "status")
-	if status in ("Lost", "Ordered"):
-		frappe.throw(_("Cannot revise a Quotation with status {0}.").format(_(status)))
+	frappe.get_doc("Quotation", source_name).validate_can_be_revised()
 
 	def set_revision_of(source, target):
 		target.revision_of = source.revision_of or source.name
@@ -219,7 +217,7 @@ def make_revision(source_name: str, target_doc: str | dict | Document | None = N
 		{
 			"Quotation": {
 				"doctype": "Quotation",
-				"validation": {"docstatus": ["=", 1], "is_active": ["=", 1]},
+				"validation": {"docstatus": ["=", 1]},
 				"field_no_map": ["valid_till"],
 			},
 			"Quotation Item": {
