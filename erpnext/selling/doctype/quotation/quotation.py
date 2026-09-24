@@ -142,6 +142,11 @@ class Quotation(SellingController):
 		)
 		return max((cint(name.rsplit("-R", 1)[-1]) for name in revisions), default=0) + 1
 
+	def onload(self):
+		super().onload()
+		if self.docstatus == 1:
+			self.set_onload("is_latest_version", self.is_latest_version)
+
 	def set_indicator(self):
 		if self.docstatus == 1:
 			self.indicator_color = "blue"
@@ -283,8 +288,8 @@ class Quotation(SellingController):
 	):
 		self.check_permission("write")
 
-		if not self.is_active:
-			frappe.throw(_("Cannot set an inactive Quotation as Lost."))
+		if not self.is_latest_version:
+			frappe.throw(_("Only the latest version of a Quotation can be set as Lost."))
 
 		if not (self.is_fully_ordered() or self.is_partially_ordered()):
 			get_lost_reasons = frappe.get_list("Quotation Lost Reason", fields=["name"])
@@ -309,6 +314,7 @@ class Quotation(SellingController):
 
 			self.update_opportunity("Lost")
 			self.update_lead()
+			self.is_active = 1
 			self.save()
 			self.set_other_versions_as_lost()
 
@@ -335,7 +341,11 @@ class Quotation(SellingController):
 
 	def set_other_versions_as_lost(self):
 		for name in self.get_other_versions({"status": ["not in", ["Partially Ordered", "Ordered", "Lost"]]}):
-			frappe.db.set_value("Quotation", name, "status", "Lost")
+			frappe.db.set_value("Quotation", name, {"status": "Lost", "is_active": 0})
+
+	@property
+	def is_latest_version(self) -> bool:
+		return not self.get_other_versions({"creation": [">", self.creation]})
 
 	def get_other_versions(self, filters: dict) -> list[str]:
 		original = self.revision_of or self.name

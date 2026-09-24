@@ -144,7 +144,7 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 				});
 			}
 
-			if (doc.is_active && doc.status !== "Ordered" && this.frm.has_perm("write")) {
+			if (doc.__onload?.is_latest_version && doc.status !== "Ordered" && this.frm.has_perm("write")) {
 				this.frm.add_custom_button(__("Set as Lost"), () => {
 					this.frm.trigger("set_as_lost_dialog");
 				});
