@@ -579,6 +579,14 @@ class TestQuotation(ERPNextTestSuite):
 		self.assertTrue(first_revision.is_latest_version)
 		self.assertFalse(second_revision.is_latest_version)
 
+	def test_older_revision_cannot_be_submitted_after_a_newer_one(self):
+		quotation = make_quotation()
+		first_revision = make_revision(quotation.name).insert()
+		second_revision = make_revision(quotation.name).insert()
+		second_revision.submit()
+
+		self.assertRaises(frappe.ValidationError, first_revision.submit)
+
 	def test_revision_cannot_be_dated_before_the_latest_version(self):
 		quotation = make_quotation()
 		revision = make_revision(quotation.name)
