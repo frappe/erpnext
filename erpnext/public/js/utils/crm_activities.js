@@ -6,6 +6,10 @@ erpnext.utils.CRMActivities = class CRMActivities {
 	refresh() {
 		var me = this;
 		$(this.open_activities_wrapper).empty();
+
+		// an unsaved doc has no activities and its temp name can't be permission-checked
+		if (this.frm.is_new()) return;
+
 		let cur_form_footer = this.form_wrapper.find(".form-footer");
 
 		// all activities
