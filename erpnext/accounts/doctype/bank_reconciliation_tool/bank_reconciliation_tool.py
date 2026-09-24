@@ -11,7 +11,7 @@ from frappe.query_builder.custom import ConstantColumn
 from frappe.query_builder.functions import Max, Sum
 from frappe.utils import cint, create_batch, flt, getdate
 
-from erpnext import get_default_cost_center
+from erpnext import get_default_cost_center, get_writable_vouchers, require_permission
 from erpnext.accounts.doctype.bank_transaction.bank_transaction import get_total_allocated_amount
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.report.bank_reconciliation_statement.bank_reconciliation_statement import (
@@ -162,6 +162,8 @@ def create_journal_entry_bts(
 	allow_edit: bool | None = None,
 ):
 	# Create a new journal entry based on the bank transaction
+	require_permission("Bank Transaction", bank_transaction_name, "write")
+
 	bank_transaction = frappe.db.get_values(
 		"Bank Transaction",
 		bank_transaction_name,
@@ -304,7 +306,7 @@ def create_journal_entry_bts(
 		]
 	)
 
-	return reconcile_vouchers(bank_transaction_name, vouchers, is_new_voucher=True)
+	return _reconcile_vouchers(bank_transaction_name, vouchers, is_new_voucher=True)
 
 
 @frappe.whitelist(methods=["POST"])
@@ -322,6 +324,8 @@ def create_payment_entry_bts(
 	company_bank_account: str | None = None,
 ):
 	# Create a new payment entry based on the bank transaction
+	require_permission("Bank Transaction", bank_transaction_name, "write")
+
 	bank_transaction = frappe.db.get_values(
 		"Bank Transaction",
 		bank_transaction_name,
@@ -381,7 +385,7 @@ def create_payment_entry_bts(
 			}
 		]
 	)
-	return reconcile_vouchers(bank_transaction_name, vouchers, is_new_voucher=True)
+	return _reconcile_vouchers(bank_transaction_name, vouchers, is_new_voucher=True)
 
 
 # APIs for new bank reconciliation tool (/banking)
@@ -420,6 +424,12 @@ def get_older_unreconciled_transactions(bank_account: str, from_date: str):
 	return {"count": 0, "oldest_date": None}
 
 
+# the vouchers the bank clearance summary reports, and so the only ones whose clearance
+# date this tool sets. `payment_document` arrives in the request body, so it is matched
+# against this list before it is used to address a table.
+CLEARANCE_DATE_DOCTYPES = ("Payment Entry", "Journal Entry", "Purchase Invoice", "Sales Invoice")
+
+
 @frappe.whitelist()
 def update_clearance_date(
 	payment_document: str, payment_entry: str, account: str, clearance_date: str | None
@@ -433,6 +443,13 @@ def update_clearance_date(
 
 	# Check for permissions
 	frappe.has_permission("Bank Clearance", ptype="write", throw=True)
+
+	if payment_document not in CLEARANCE_DATE_DOCTYPES:
+		frappe.throw(_("{0} is not a voucher this tool can clear").format(payment_document))
+
+	# the clearance date is written onto the voucher itself, so the caller needs write on
+	# that voucher -- holding the tool's own permission is not enough.
+	require_permission(payment_document, payment_entry, "write")
 
 	if payment_document == "Sales Invoice":
 		frappe.db.set_value(
@@ -567,11 +584,11 @@ def create_internal_transfer(
 		]
 	)
 
-	transaction_id = reconcile_vouchers(bank_transaction_name, vouchers, is_new_voucher=True)
+	transaction_id = _reconcile_vouchers(bank_transaction_name, vouchers, is_new_voucher=True)
 
 	if mirror_transaction_name:
 		# Reconcile the mirror transaction
-		reconcile_vouchers(mirror_transaction_name, vouchers, is_new_voucher=False)
+		_reconcile_vouchers(mirror_transaction_name, vouchers, is_new_voucher=False)
 
 	return {
 		"transaction": transaction_id,
@@ -750,7 +767,7 @@ def create_bank_entry_and_reconcile(
 	else:
 		paid_amount = bank_transaction.withdrawal
 
-	transaction = reconcile_vouchers(
+	transaction = _reconcile_vouchers(
 		bank_transaction_name,
 		json.dumps(
 			[
@@ -841,7 +858,7 @@ def create_bulk_payment_entry_and_reconcile(
 		payment_entry_doc.insert()
 		payment_entry_doc.submit()
 
-		final_transaction = reconcile_vouchers(
+		final_transaction = _reconcile_vouchers(
 			bank_transaction_name,
 			json.dumps(
 				[
@@ -879,7 +896,7 @@ def create_payment_entry_and_reconcile(bank_transaction_name: str | int, payment
 	set_multi_currency_amounts(payment_entry)
 	payment_entry.insert()
 	payment_entry.submit()
-	transaction = reconcile_vouchers(
+	transaction = _reconcile_vouchers(
 		bank_transaction_name,
 		json.dumps(
 			[
@@ -1028,7 +1045,7 @@ def start_auto_reconcile(
 
 	reconciled, partially_reconciled = set(), set()
 	for transaction in bank_transactions:
-		linked_payments = get_linked_payments(
+		linked_payments = _get_linked_payments(
 			transaction.name,
 			["payment_entry", "journal_entry", "sales_invoice"],
 			from_date,
@@ -1041,18 +1058,27 @@ def start_auto_reconcile(
 		if not linked_payments:
 			continue
 
-		vouchers = list(
-			map(
-				lambda entry: {
-					"payment_doctype": entry.get("doctype"),
-					"payment_name": entry.get("name"),
-					"amount": entry.get("paid_amount"),
-				},
-				linked_payments,
-			)
+		# the matcher picks these, not the caller, but reconciling still stamps a clearance
+		# date onto each voucher through clear_linked_payment_entry(), which checks nothing.
+		# Drop the ones this user cannot write and reconcile the rest -- one unreachable
+		# voucher must not fail the whole run.
+		writable = get_writable_vouchers(
+			(entry.get("doctype"), entry.get("name")) for entry in linked_payments
 		)
+		vouchers = [
+			{
+				"payment_doctype": entry.get("doctype"),
+				"payment_name": entry.get("name"),
+				"amount": entry.get("paid_amount"),
+			}
+			for entry in linked_payments
+			if (entry.get("doctype"), entry.get("name")) in writable
+		]
 
-		updated_transaction = reconcile_vouchers(transaction.name, json.dumps(vouchers))
+		if not vouchers:
+			continue
+
+		updated_transaction = _reconcile_vouchers(transaction.name, json.dumps(vouchers))
 
 		if updated_transaction.status == "Reconciled":
 			reconciled.add(updated_transaction.name)
@@ -1087,8 +1113,19 @@ def get_auto_reconcile_message(partially_reconciled, reconciled):
 	return alert_message, indicator
 
 
-@frappe.whitelist(methods=["POST"])
-def reconcile_vouchers(bank_transaction_name: str | int, vouchers: str | list, is_new_voucher: bool = False):
+# the vouchers a bank transaction can be reconciled against -- `get_payment_doctypes` in
+# bank_transaction.js offers exactly these. `payment_doctype` arrives in the request body,
+# so it is matched against this list before it is used to address a record.
+RECONCILABLE_DOCTYPES = (
+	"Payment Entry",
+	"Journal Entry",
+	"Sales Invoice",
+	"Purchase Invoice",
+	"Bank Transaction",
+)
+
+
+def _reconcile_vouchers(bank_transaction_name: str | int, vouchers: str | list, is_new_voucher: bool = False):
 	# updated clear date of all the vouchers based on the bank transaction
 	vouchers = frappe.parse_json(vouchers)
 	transaction = frappe.get_doc("Bank Transaction", bank_transaction_name)
@@ -1102,8 +1139,38 @@ def reconcile_vouchers(bank_transaction_name: str | int, vouchers: str | list, i
 	return transaction
 
 
-@frappe.whitelist()
-def get_linked_payments(
+def validate_reconcilable_vouchers(vouchers):
+	by_doctype = {}
+	asked = set()
+	for voucher in vouchers:
+		payment_doctype = voucher.get("payment_doctype")
+		if payment_doctype not in RECONCILABLE_DOCTYPES:
+			frappe.throw(_("{0} cannot be reconciled against a bank transaction").format(payment_doctype))
+
+		by_doctype.setdefault(payment_doctype, set()).add(voucher.get("payment_name"))
+		asked.add((payment_doctype, voucher.get("payment_name")))
+
+	writable = get_writable_vouchers(asked)
+	for payment_doctype, names in by_doctype.items():
+		if {(payment_doctype, name) for name in names} - writable:
+			frappe.throw(
+				_("Not permitted to reconcile against {0}").format(payment_doctype), frappe.PermissionError
+			)
+
+
+@frappe.whitelist(methods=["POST"])
+def reconcile_vouchers(bank_transaction_name: str | int, vouchers: str | list, is_new_voucher: bool = False):
+	vouchers = frappe.parse_json(vouchers)
+
+	# save() in _reconcile_vouchers() checks write on the Bank Transaction, but the allocation
+	# and the clearance date land on each voucher too, and those names come from the request.
+	# The internal callers below build `vouchers` themselves and are not routed through here.
+	validate_reconcilable_vouchers(vouchers)
+
+	return _reconcile_vouchers(bank_transaction_name, vouchers, is_new_voucher)
+
+
+def _get_linked_payments(
 	bank_transaction_name: str,
 	document_types: str | list[str] | None = None,
 	from_date: str | date | None = None,
@@ -1131,6 +1198,31 @@ def get_linked_payments(
 		to_reference_date,
 	)
 	return subtract_allocations(gl_account, matching)
+
+
+@frappe.whitelist()
+def get_linked_payments(
+	bank_transaction_name: str,
+	document_types: str | list[str] | None = None,
+	from_date: str | date | None = None,
+	to_date: str | date | None = None,
+	filter_by_reference_date: bool | None = None,
+	from_reference_date: str | date | None = None,
+	to_reference_date: str | date | None = None,
+):
+	# the auto-reconcile job calls _get_linked_payments() directly; the check belongs on the
+	# request boundary, not on the shared body.
+	require_permission("Bank Transaction", bank_transaction_name, "read")
+
+	return _get_linked_payments(
+		bank_transaction_name,
+		document_types,
+		from_date,
+		to_date,
+		filter_by_reference_date,
+		from_reference_date,
+		to_reference_date,
+	)
 
 
 def validate_date_range(
