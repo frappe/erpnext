@@ -605,6 +605,14 @@ class TestQuotation(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, make_revision, quotation.name)
 
+	def test_is_active_is_locked_on_a_lost_quotation(self):
+		quotation = make_quotation()
+		quotation.declare_enquiry_lost([], [])
+		quotation.reload()
+		quotation.is_active = 0
+
+		self.assertRaises(frappe.ValidationError, quotation.save)
+
 	def test_lost_quotation_cannot_be_revised(self):
 		quotation = make_quotation()
 		quotation.declare_enquiry_lost([], [])
