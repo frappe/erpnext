@@ -576,6 +576,22 @@ class TestQuotation(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, quotation.declare_enquiry_lost, [], [])
 
+	def test_opportunity_is_lost_when_an_older_version_is_set_as_lost(self):
+		opportunity = make_opportunity(with_items=1)
+		quotation = make_quotation(do_not_save=1)
+		quotation.items[0].prevdoc_doctype = "Opportunity"
+		quotation.items[0].prevdoc_docname = opportunity.name
+		quotation.insert()
+		quotation.submit()
+		revision = make_revision(quotation.name)
+		revision.insert()
+		revision.submit()
+		quotation.reload()
+
+		quotation.declare_enquiry_lost([], [])
+
+		self.assertEqual(frappe.db.get_value("Opportunity", opportunity.name, "status"), "Lost")
+
 	def test_an_older_version_can_be_set_as_lost(self):
 		quotation = make_quotation()
 		revision = make_revision(quotation.name)
