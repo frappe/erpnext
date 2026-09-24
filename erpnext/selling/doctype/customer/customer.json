@@ -11,6 +11,9 @@
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/customer",
  "engine": "InnoDB",
  "field_order": [
+  "overview_tab",
+  "overview_html",
+  "details_tab",
   "basic_info",
   "naming_series",
   "customer_name",
@@ -104,6 +107,22 @@
   "connections_tab"
  ],
  "fields": [
+  {
+   "fieldname": "overview_tab",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "depends_on": "eval: !doc.__islocal",
+   "fieldname": "overview_html",
+   "fieldtype": "HTML",
+   "label": "Overview HTML"
+  },
+  {
+   "fieldname": "details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Details"
+  },
   {
    "fieldname": "basic_info",
    "fieldtype": "Section Break",
@@ -731,7 +750,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2026-08-21 23:11:41.175219",
+ "modified": "2026-09-24 11:56:39.993467",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
