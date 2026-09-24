@@ -527,3 +527,4 @@ erpnext.patches.v16_0.enable_serial_no_wise_valuation
 erpnext.patches.v16_0.add_voucher_index_to_repost_item_valuation
 erpnext.patches.v16_0.set_blanket_order_status
 erpnext.patches.v16_0.set_blanket_order_item_stock_uom
+erpnext.patches.v16_0.recalculate_subcontracting_order_service_cost
