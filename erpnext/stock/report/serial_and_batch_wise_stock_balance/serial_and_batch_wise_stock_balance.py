@@ -13,6 +13,7 @@ from erpnext.stock.report.stock_balance.stock_balance import (
 	filter_items_with_no_transactions,
 )
 from erpnext.stock.report.utils import prepare_serial_batch_report
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 
 def execute(filters: StockBalanceFilter | None = None):
@@ -60,6 +61,10 @@ class SerialAndBatchWiseStockBalanceReport(StockBalanceReport):
 
 		for batches in self.batch_map.values():
 			filter_items_with_no_transactions(batches, self.float_precision, self.inventory_dimensions)
+
+		self.batch_numbers = SerialBatchIdentity("Batch").get_number_map(
+			{batch_no for batches in self.batch_map.values() for batch_no in batches}
+		)
 
 	def get_serial_batch_query(self):
 		sle = frappe.qb.DocType("Stock Ledger Entry")
@@ -130,7 +135,10 @@ class SerialAndBatchWiseStockBalanceReport(StockBalanceReport):
 		dimensions = {field: item_row.get(field) for field in self.inventory_dimensions}
 
 		rows = []
-		for batch_no, batch_data in sorted(self.batch_map.get(key, {}).items()):
+		batches = self.batch_map.get(key, {}).items()
+		for batch_no, batch_data in sorted(
+			batches, key=lambda item: self.batch_numbers.get(item[0], item[0])
+		):
 			if self.is_hidden_zero_stock(batch_data):
 				continue
 

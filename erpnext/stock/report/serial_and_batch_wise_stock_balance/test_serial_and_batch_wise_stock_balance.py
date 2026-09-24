@@ -119,6 +119,7 @@ class TestSerialAndBatchWiseStockBalance(ERPNextTestSuite):
 		)
 		report.inventory_dimensions = ["project"]
 		report.serial_map = {}
+		report.batch_numbers = {}
 		report.batch_map = {
 			("SBW Item", WAREHOUSE, "SBW Project"): {"SBW Batch": _dict(bal_qty=5, bal_val=500)}
 		}
