@@ -115,9 +115,10 @@ def finished_good_bom_query(
 	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict | str | None = None
 ):
 	"""BOMs of the finished good and of its template."""
-	finished_good = (frappe.parse_json(filters) or {}).get("finished_good")
-	item_filters = {"item": ["in", get_applicable_bom_items(finished_good)]} if finished_good else {}
-	return bom(doctype, txt, searchfield, start, page_len, item_filters)
+	filters = frappe.parse_json(filters) or {}
+	if finished_good := filters.pop("finished_good", None):
+		filters["item"] = ["in", get_applicable_bom_items(finished_good)]
+	return bom(doctype, txt, searchfield, start, page_len, filters)
 
 
 @frappe.whitelist()
