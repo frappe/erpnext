@@ -548,21 +548,21 @@ class TestQuotation(ERPNextTestSuite):
 
 		self.assertEqual(frappe.db.get_value("Quotation", quotation.name, "status"), "Lost")
 
-	def test_only_the_latest_version_can_be_set_as_lost(self):
+	def test_an_older_version_can_be_set_as_lost(self):
 		quotation = make_quotation()
 		revision = make_revision(quotation.name)
 		revision.insert()
 		revision.submit()
-		revision.is_active = 0
-		revision.save()
-
 		quotation.reload()
-		self.assertRaises(frappe.ValidationError, quotation.declare_enquiry_lost, [], [])
+		self.assertTrue(quotation.has_versions_to_set_as_lost)
 
-		revision.declare_enquiry_lost([], [])
+		quotation.declare_enquiry_lost([], [])
 
-		self.assertEqual(frappe.db.get_value("Quotation", revision.name, "is_active"), 1)
-		self.assertEqual(frappe.db.get_value("Quotation", quotation.name, "is_active"), 0)
+		self.assertEqual(frappe.db.get_value("Quotation", quotation.name, "is_active"), 1)
+		self.assertEqual(
+			frappe.db.get_value("Quotation", revision.name, ["status", "is_active"]), ("Lost", 0)
+		)
+		self.assertFalse(quotation.has_versions_to_set_as_lost)
 
 	def test_latest_version_is_ordered_by_transaction_date(self):
 		quotation = make_quotation()
