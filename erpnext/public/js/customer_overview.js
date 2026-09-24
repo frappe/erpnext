@@ -187,7 +187,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 		const items = [];
 		if (p.net_sales)
 			items.push({
-				label: __("Net invoiced sales"),
+				label: __("Net Sales"),
 				value: this.money0(p.net_sales.value),
 				delta: this.delta_opts(p.net_sales, __("since last year")),
 				caption: (p.net_sales.count || 0) + " " + __("invoices"),
@@ -195,7 +195,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 			});
 		if (p.outstanding)
 			items.push({
-				label: __("Outstanding"),
+				label: __("Receivable"),
 				value: this.money0(p.outstanding.value),
 				caption: this.outstanding_sub(p.outstanding),
 				onclick: () => this.open_ar(),
@@ -205,6 +205,13 @@ erpnext.CustomerOverview = class CustomerOverview {
 				label: __("Overdue"),
 				value: this.money0(p.overdue.value),
 				delta: this.delta_opts(p.overdue, __("since last month"), "red"),
+				onclick: () => this.open_ar(),
+			});
+		if (p.advances)
+			items.push({
+				label: __("Advances"),
+				value: this.money0(p.advances.value),
+				caption: __("Not yet applied to invoices"),
 				onclick: () => this.open_ar(),
 			});
 		if (p.credit) items.push(this.credit_opts(p.credit));
@@ -322,7 +329,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 			colors: [CHART_BLUE],
 			data: {
 				labels: t.points.map((p) => p.label),
-				datasets: [{ name: __("Net sales"), values: t.points.map((p) => flt(p.value)) }],
+				datasets: [{ name: __("Net Sales"), values: t.points.map((p) => flt(p.value)) }],
 			},
 			lineOptions: { regionFill: 1, hideDots: 1 },
 			axisOptions: { xIsSeries: 1, shortenYAxisNumbers: 1 },
@@ -482,7 +489,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 					label: __("Amount"),
 					render: (row) => `<div class="text-right">${me.money(row.amount)}</div>`,
 				},
-				{ label: __("Outstanding"), render: (row) => me.outstanding_cell(row) },
+				{ label: __("Receivable"), render: (row) => me.outstanding_cell(row) },
 			],
 			get_data() {
 				if (!me.state.company) return Promise.resolve([]);
