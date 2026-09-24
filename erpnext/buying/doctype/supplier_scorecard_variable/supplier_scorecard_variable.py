@@ -36,14 +36,11 @@ class SupplierScorecardVariable(Document):
 
 	def validate_path_exists(self):
 		if "." in self.path:
-			try:
-				from erpnext.buying.doctype.supplier_scorecard_period.supplier_scorecard_period import (
-					import_string_path,
-				)
+			from erpnext.buying.doctype.supplier_scorecard_period.supplier_scorecard_period import (
+				import_string_path,
+			)
 
-				import_string_path(self.path)
-			except AttributeError:
-				frappe.throw(_("Could not find path for {0}").format(self.path), VariablePathNotFound)
+			import_string_path(self.path)
 
 		else:
 			if not hasattr(sys.modules[__name__], self.path):
