@@ -9,7 +9,7 @@ from frappe.utils import add_days, add_months, flt, getdate, nowdate
 
 from erpnext.controllers.accounts_controller import InvalidQtyError, update_child_qty_rate
 from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
-from erpnext.selling.doctype.quotation.mapper import make_revision, make_sales_order
+from erpnext.selling.doctype.quotation.mapper import make_revision, make_sales_invoice, make_sales_order
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -528,6 +528,29 @@ class TestQuotation(ERPNextTestSuite):
 		quotation = make_quotation(do_not_submit=1)
 
 		self.assertRaises(frappe.ValidationError, make_revision, quotation.name)
+
+	def test_inactive_quotation_cannot_be_ordered_or_invoiced(self):
+		quotation = make_quotation()
+		quotation.is_active = 0
+		quotation.save()
+
+		self.assertRaises(frappe.ValidationError, make_sales_order, quotation.name)
+		self.assertRaises(frappe.ValidationError, make_sales_invoice, quotation.name)
+
+	def test_inactive_quotation_is_not_an_active_offer(self):
+		opportunity = make_opportunity(with_items=1)
+		quotation = make_quotation(do_not_save=1)
+		quotation.items[0].prevdoc_doctype = "Opportunity"
+		quotation.items[0].prevdoc_docname = opportunity.name
+		quotation.insert()
+		quotation.submit()
+		opportunity.reload()
+		self.assertTrue(opportunity.has_active_quotation())
+
+		quotation.is_active = 0
+		quotation.save()
+
+		self.assertFalse(opportunity.has_active_quotation())
 
 	def test_create_quotation_with_margin(self):
 		from erpnext.selling.doctype.quotation.mapper import make_sales_order
