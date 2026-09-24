@@ -486,6 +486,32 @@ class TestMappedDiscounts(ERPNextTestSuite):
 		self.assertEqual(sales_order.discount_amount, 0)
 		self.assertEqual(sales_order.grand_total, 200)
 
+	def test_header_edit_through_the_api_replaces_carried_discounts(self):
+		for field, value, discount, regular_net_amount in (
+			("discount_amount", 5, 5, 197.5),
+			("additional_discount_percentage", 5, 20, 190),
+			("apply_discount_on", "Grand Total", 20, 190),
+		):
+			with self.subTest(field=field):
+				receipt, regular = self.make_combined_receipt()
+				receipt.set(field, value)
+				receipt.save()
+				self.assertFalse(receipt.has_mapped_discount)
+				self.assertEqual(receipt.discount_amount, discount)
+				self.assertEqual(
+					receipt.getone("items", {"purchase_order": regular.name}).net_amount, regular_net_amount
+				)
+
+	def test_recalculated_quantity_change_keeps_carried_discounts(self):
+		receipt, regular = self.make_combined_receipt()
+		discounted_row = receipt.getone("items", {"purchase_order": ("!=", regular.name)})
+		discounted_row.update({"qty": 1, "received_qty": 1})
+		receipt.calculate_taxes_and_totals()
+		receipt.save()
+		self.assertTrue(receipt.has_mapped_discount)
+		self.assertEqual(receipt.discount_amount, 10)
+		self.assertEqual(receipt.grand_total, 290)
+
 	def assert_percentage_discounts(self, document, source_field, expected_net_amounts):
 		items = {item.get(source_field): item for item in document.items}
 		self.assertEqual(document.apply_discount_on, "Net Total")
@@ -526,6 +552,11 @@ class TestMappedDiscounts(ERPNextTestSuite):
 				},
 			)
 		return order.save().submit()
+
+	def make_combined_receipt(self):
+		discounted = self.make_order(qty=2, percentage=10)
+		regular = self.make_order(item="_Test Item 2", qty=2)
+		return self.combine(discounted, regular).save(), regular
 
 	def make_combined_sales_order(self):
 		from erpnext.selling.doctype.quotation.test_quotation import make_quotation
