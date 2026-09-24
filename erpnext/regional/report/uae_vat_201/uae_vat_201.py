@@ -2,8 +2,13 @@
 # For license information, please see license.txt
 
 
+import json
+from collections import defaultdict
+
 import frappe
 from frappe import _
+from frappe.query_builder.functions import Sum
+from frappe.utils import flt
 
 from erpnext import get_region
 
@@ -144,28 +149,6 @@ def append_data(data, no, legend, amount, vat_amount):
 
 def get_total_emiratewise(filters):
 	"""Returns Emiratewise Amount and Taxes."""
-<<<<<<< HEAD
-	conditions = get_conditions(filters)
-	try:
-		return frappe.db.sql(
-			f"""
-			select
-				s.vat_emirate as emirate, sum(i.base_net_amount) as total, sum(i.tax_amount)
-			from
-				`tabSales Invoice Item` i inner join `tabSales Invoice` s
-			on
-				i.parent = s.name
-			where
-				s.docstatus = 1 and i.is_exempt != 1 and i.is_zero_rated != 1
-				{conditions}
-			group by
-				s.vat_emirate;
-			""",
-			filters,
-		)
-	except (IndexError, TypeError):
-		return 0
-=======
 	amounts = get_emiratewise_standard_rated_amount(filters)
 	vat_amounts = get_emiratewise_vat_amount(filters)
 	return [
@@ -186,7 +169,7 @@ def get_emiratewise_standard_rated_amount(filters):
 		.where((s.docstatus == 1) & (i.is_exempt != 1) & (i.is_zero_rated != 1))
 		.groupby(s.vat_emirate)
 	)
-	for condition in get_conditions(filters, s):
+	for condition in get_sales_conditions(filters, s):
 		query = query.where(condition)
 	return dict(query.run())
 
@@ -194,40 +177,51 @@ def get_emiratewise_standard_rated_amount(filters):
 def get_emiratewise_vat_amount(filters):
 	"""Returns emiratewise VAT on standard rated supplies in company currency.
 
-	Item Wise Tax Detail.amount is the item's share of the tax row already converted to
-	company currency, so it keeps the item level exempt / zero rated split.
+	Sales Taxes and Charges.item_wise_tax_detail stores each item's share of the tax
+	row in company currency, so it keeps the item level exempt / zero rated split.
 	"""
 	i = frappe.qb.DocType("Sales Invoice Item")
 	s = frappe.qb.DocType("Sales Invoice")
 	t = frappe.qb.DocType("Sales Taxes and Charges")
-	d = frappe.qb.DocType("Item Wise Tax Detail")
 	uae_vat = frappe.qb.DocType("UAE VAT Account")
-	query = (
-		frappe.qb.from_(d)
+
+	standard_rated_items_query = (
+		frappe.qb.from_(i)
 		.inner_join(s)
-		.on(d.parent == s.name)
-		.inner_join(i)
-		.on(d.item_row == i.name)
-		.inner_join(t)
-		.on(d.tax_row == t.name)
-		.select(s.vat_emirate, Sum(d.amount))
+		.on(i.parent == s.name)
+		.select(s.name, i.item_code)
+		.where((s.docstatus == 1) & (i.is_exempt != 1) & (i.is_zero_rated != 1))
+	)
+	for condition in get_sales_conditions(filters, s):
+		standard_rated_items_query = standard_rated_items_query.where(condition)
+
+	standard_rated_items = defaultdict(set)
+	for invoice, item_code in standard_rated_items_query.run():
+		standard_rated_items[invoice].add(item_code)
+
+	vat_query = (
+		frappe.qb.from_(t)
+		.inner_join(s)
+		.on(t.parent == s.name)
+		.select(s.name, s.vat_emirate, t.item_wise_tax_detail)
 		.where(
-			(d.parenttype == "Sales Invoice")
-			& (s.docstatus == 1)
-			& (i.is_exempt != 1)
-			& (i.is_zero_rated != 1)
+			(s.docstatus == 1)
 			& t.account_head.isin(
 				frappe.qb.from_(uae_vat)
 				.select(uae_vat.account)
 				.where(uae_vat.parent == filters.get("company"))
 			)
 		)
-		.groupby(s.vat_emirate)
 	)
-	for condition in get_conditions(filters, s):
-		query = query.where(condition)
-	return dict(query.run())
->>>>>>> 6e0ec5a (fix(regional): report uae vat 201 sales vat in company currency (#59168))
+	for condition in get_sales_conditions(filters, s):
+		vat_query = vat_query.where(condition)
+
+	vat_amounts = defaultdict(float)
+	for invoice, emirate, item_wise_tax_detail in vat_query.run():
+		for item_code, tax_detail in json.loads(item_wise_tax_detail or "{}").items():
+			if item_code in standard_rated_items[invoice]:
+				vat_amounts[emirate] += flt(tax_detail[1])
+	return vat_amounts
 
 
 def get_emirates():
@@ -474,4 +468,16 @@ def get_conditions(filters):
 	):
 		if filters.get(opts[0]):
 			conditions += opts[1]
+	return conditions
+
+
+def get_sales_conditions(filters, sales_invoice):
+	"""Return Query Builder conditions for Sales Invoice report filters."""
+	conditions = []
+	if filters.get("company"):
+		conditions.append(sales_invoice.company == filters.get("company"))
+	if filters.get("from_date"):
+		conditions.append(sales_invoice.posting_date >= filters.get("from_date"))
+	if filters.get("to_date"):
+		conditions.append(sales_invoice.posting_date <= filters.get("to_date"))
 	return conditions

@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 import frappe
+from frappe.tests.utils import change_settings
 
 import erpnext
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
@@ -102,7 +103,7 @@ class TestUaeVat201(TestCase):
 		self.assertEqual(get_standard_rated_expenses_total(filters), 917.5)
 		self.assertEqual(get_standard_rated_expenses_tax(filters), 50)
 
-	@ERPNextTestSuite.change_settings(
+	@change_settings(
 		"Accounts Settings", {"allow_multi_currency_invoices_against_single_party_account": True}
 	)
 	def test_uae_vat_201_sales_vat_in_foreign_currency(self):
