@@ -24,6 +24,7 @@ from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
 )
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults, get_last_purchase_details
+from erpnext.stock.get_item_details import get_default_bom
 from erpnext.stock.stock_balance import get_ordered_qty, update_bin_qty
 from erpnext.stock.utils import get_bin
 from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import (
@@ -393,7 +394,7 @@ class PurchaseOrder(BuyingController):
 									item.idx, item.fg_item
 								)
 							)
-						elif not item.bom and not frappe.get_value("Item", item.fg_item, "default_bom"):
+						elif not item.bom and not get_default_bom(item.fg_item):
 							frappe.throw(
 								_("Row #{0}: Default BOM not found for FG Item {1}").format(
 									item.idx, item.fg_item
