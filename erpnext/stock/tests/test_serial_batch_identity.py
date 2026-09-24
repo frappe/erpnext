@@ -86,7 +86,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 	def test_resolution_spans_match_chunks(self):
 		first = self.make_number("Serial No", "Chunk-001")
 		second = self.make_number("Serial No", "Chunk-002")
-		numbers = ["Chunk-001", "Chunk-new", "Chunk-002", "Chunk-new", "Chunk-001"]
+		numbers = ["Chunk-001", "Chunk-new", "Chunk-002", "CHUNK-NEW", "Chunk-001"]
 		with patch("erpnext.stock.serial_batch_identity.MATCH_CHUNK_SIZE", 2):
 			names = SerialBatchIdentity("Serial No").resolve(
 				self.item.name, numbers, create=True, defaults={"company": "_Test Company"}
@@ -94,7 +94,10 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 		created = names[1]
 		self.assertEqual(names, [first.name, created, second.name, created, first.name])
 		self.assertEqual(
-			frappe.db.count("Serial No", {"item_code": self.item.name, "serial_no": "Chunk-new"}), 1
+			frappe.db.count(
+				"Serial No", {"item_code": self.item.name, "serial_no": ("in", ["Chunk-new", "CHUNK-NEW"])}
+			),
+			1,
 		)
 
 	def test_resolution_uses_the_selected_item(self):
