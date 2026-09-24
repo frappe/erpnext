@@ -63,12 +63,7 @@ class SerialBatchIdentity:
 		for index, name, first_index in self._match_numbers(item_code, numbers):
 			if not name:
 				if not create:
-					frappe.throw(
-						_("{0} {1} does not exist for Item {2}").format(
-							_(self.doctype), escape_html(numbers[index]), escape_html(item_code)
-						),
-						exc=frappe.DoesNotExistError,
-					)
+					self.throw_missing(item_code, escape_html(numbers[index]))
 				if first_index not in created:
 					created[first_index] = self._create_record(item_code, numbers[first_index], defaults)
 				name = created[first_index]
@@ -92,7 +87,16 @@ class SerialBatchIdentity:
 		if not names:
 			return []
 		numbers = self.get_number_map(names, item_code=item_code)
+		missing = [name for name in dict.fromkeys(names) if name not in numbers]
+		if missing:
+			self.throw_missing(item_code, ", ".join(self.get_label(name) for name in missing))
 		return [numbers[name] for name in names]
+
+	def throw_missing(self, item_code, labels):
+		frappe.throw(
+			_("{0} {1} does not exist for Item {2}").format(_(self.doctype), labels, escape_html(item_code)),
+			exc=frappe.DoesNotExistError,
+		)
 
 	def get_number_map(self, names, *, item_code=None):
 		if not names:
