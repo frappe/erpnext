@@ -135,6 +135,7 @@ class Quotation(SellingController):
 			self.name = f"{self.revision_of}-R{self.get_next_revision_index()}"
 
 	def get_next_revision_index(self):
+		frappe.db.get_value("Quotation", self.revision_of, "name", for_update=True)
 		revisions = frappe.get_all(
 			"Quotation",
 			filters={"revision_of": self.revision_of, "amended_from": ["is", "not set"]},
