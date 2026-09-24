@@ -280,7 +280,7 @@ def item_query(
 	searchfield: str,
 	start: int,
 	page_len: int,
-	filters: dict | str | None = None,
+	filters: dict | list | str | None = None,
 	as_dict: bool = False,
 ):
 	"""
@@ -451,6 +451,22 @@ def item_query(
 		query = query.where(get_restriction_criterion("Item", [company]))
 
 	return query.run(as_dict=as_dict)
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def subcontracted_item_query(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict | str | None = None
+):
+	"""Sub-contracted stock items with a default BOM of their own or of their template."""
+	subcontracted_filters = [
+		["is_stock_item", "=", 1],
+		"and",
+		["is_sub_contracted_item", "=", 1],
+		"and",
+		[["default_bom", "is", "set"], "or", ["variant_of.default_bom", "is", "set"]],
+	]
+	return item_query(doctype, txt, searchfield, start, page_len, subcontracted_filters)
 
 
 @frappe.whitelist()
