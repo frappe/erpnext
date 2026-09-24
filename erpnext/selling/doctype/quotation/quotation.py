@@ -5,7 +5,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, get_datetime, getdate, nowdate
+from frappe.utils import cint, formatdate, get_datetime, getdate, nowdate
 from pypika.terms import ExistsCriterion
 
 from erpnext.controllers.selling_controller import SellingController
@@ -165,6 +165,7 @@ class Quotation(SellingController):
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_valid_till()
+		self.validate_revision_date()
 		self.set_customer_name()
 		if self.items:
 			self.with_items = 1
@@ -182,6 +183,21 @@ class Quotation(SellingController):
 	def validate_valid_till(self):
 		if self.valid_till and getdate(self.valid_till) < getdate(self.transaction_date):
 			frappe.throw(_("Valid till date cannot be before transaction date"))
+
+	def validate_revision_date(self):
+		if not self.revision_of:
+			return
+
+		later_dates = [
+			version.transaction_date
+			for version in self.get_other_versions({"transaction_date": [">", self.transaction_date]})
+		]
+		if later_dates:
+			frappe.throw(
+				_(
+					"Transaction Date cannot be before {0}, the date of the latest version of this Quotation."
+				).format(formatdate(max(later_dates)))
+			)
 
 	def set_has_alternative_item(self):
 		"""Mark 'Has Alternative Item' for rows."""
