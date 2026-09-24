@@ -3,11 +3,37 @@
 
 import frappe
 
+from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import (
+	finished_good_bom_query,
+	get_subcontracting_boms_for_finished_goods,
+)
+from erpnext.subcontracting.doctype.subcontracting_order.test_subcontracting_order import (
+	make_subcontracted_variant,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestSubcontractingBOM(ERPNextTestSuite):
-	pass
+	def test_variant_finished_good_can_use_template_bom(self):
+		variant, template_bom = make_subcontracted_variant()
+		service_item = make_item("Subcontracted Template Service Item", {"is_stock_item": 0})
+
+		create_subcontracting_bom(
+			finished_good=variant.name, finished_good_bom=template_bom.name, service_item=service_item.name
+		)
+
+		subcontracting_bom = get_subcontracting_boms_for_finished_goods(variant.name)
+		self.assertEqual(subcontracting_bom.finished_good_bom, template_bom.name)
+
+	def test_finished_good_bom_query_lists_variant_and_template_boms(self):
+		variant, template_bom = make_subcontracted_variant()
+		variant_bom = make_bom(item=variant.name, raw_materials=["Subcontracted Template RM Item"])
+
+		boms = finished_good_bom_query("BOM", "", "name", 0, 20, {"finished_good": variant.name})
+
+		self.assertEqual({row[0] for row in boms}, {template_bom.name, variant_bom.name})
 
 
 def create_subcontracting_bom(**kwargs):
