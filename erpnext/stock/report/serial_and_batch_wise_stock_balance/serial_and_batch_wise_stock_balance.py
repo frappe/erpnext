@@ -112,7 +112,7 @@ class SerialAndBatchWiseStockBalanceReport(StockBalanceReport):
 		item_row.update(
 			{
 				"indent": 0,
-				"batch_no": "\n".join(row.batch_no for row in batch_rows if row.bal_qty > 0),
+				"batch_no": "\n".join(row.batch_no for row in batch_rows),
 				"serial_no": self.get_serial_nos_in_stock(key, list(self.serial_map.get(key, {}))),
 			}
 		)
@@ -153,8 +153,8 @@ class SerialAndBatchWiseStockBalanceReport(StockBalanceReport):
 		columns = super().get_columns()
 		position = next(i for i, column in enumerate(columns) if column["fieldname"] == "val_rate") + 1
 		columns[position:position] = [
-			{"label": _("Batch No"), "fieldname": "batch_no", "width": 120},
-			{"label": _("Serial No"), "fieldname": "serial_no", "width": 150},
+			{"label": _("Batch No"), "fieldname": "batch_no", "width": 120, "align": "left"},
+			{"label": _("Serial No"), "fieldname": "serial_no", "width": 150, "align": "left"},
 		]
 
 		return columns
