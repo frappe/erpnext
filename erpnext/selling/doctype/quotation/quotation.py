@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from frappe.desk.notifications import get_open_count as get_linked_document_counts
 from frappe.model.document import Document
 from frappe.utils import cint, formatdate, get_datetime, getdate, nowdate
 from pypika.terms import ExistsCriterion
@@ -458,6 +459,22 @@ def get_list_context(context=None):
 	)
 
 	return list_context
+
+
+@frappe.whitelist()
+def get_open_count(doctype: str, name: str, items: str | list[str]) -> dict:
+	counts = get_linked_document_counts(
+		doctype, name, [item for item in frappe.parse_json(items) if item != "Quotation"]
+	)
+	versions = [
+		version.name
+		for version in frappe.get_doc("Quotation", name).get_other_versions({"docstatus": ["!=", 2]})
+	]
+	if versions and counts["count"]:
+		counts["count"]["internal_links_found"].append(
+			{"doctype": "Quotation", "names": versions, "count": len(versions), "open_count": 0}
+		)
+	return counts
 
 
 def set_expired_status():
