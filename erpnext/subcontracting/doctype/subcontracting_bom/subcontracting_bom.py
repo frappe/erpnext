@@ -6,6 +6,8 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt
 
+from erpnext.stock.get_item_details import get_default_bom
+
 
 class SubcontractingBOM(Document):
 	# begin: auto-generated types
@@ -81,6 +83,19 @@ class SubcontractingBOM(Document):
 
 	def set_conversion_factor(self):
 		self.conversion_factor = flt(self.service_item_qty) / flt(self.finished_good_qty)
+
+
+def get_finished_good_bom(finished_good: str) -> str | None:
+	"""BOM of the active Subcontracting BOM, else the default BOM of the item or its template."""
+	return frappe.db.get_value(
+		"Subcontracting BOM", {"finished_good": finished_good, "is_active": 1}, "finished_good_bom"
+	) or get_default_bom(finished_good)
+
+
+def get_applicable_bom_items(item_code: str) -> list[str]:
+	"""Items whose BOMs can be used for `item_code`: the item and its template."""
+	template = frappe.get_cached_value("Item", item_code, "variant_of")
+	return [item_code, template] if template else [item_code]
 
 
 @frappe.whitelist()
