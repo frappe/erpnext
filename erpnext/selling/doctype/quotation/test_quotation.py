@@ -592,6 +592,20 @@ class TestQuotation(ERPNextTestSuite):
 
 		self.assertEqual(frappe.db.get_value("Opportunity", opportunity.name, "status"), "Lost")
 
+	def test_draft_revision_cannot_be_submitted_after_the_quotation_is_lost(self):
+		quotation = make_quotation()
+		revision = make_revision(quotation.name).insert()
+		quotation.declare_enquiry_lost([], [])
+
+		self.assertRaises(frappe.ValidationError, revision.submit)
+
+	def test_revision_keeps_the_company_of_the_original(self):
+		quotation = make_quotation()
+		revision = make_revision(quotation.name)
+		revision.company = "_Test Company 1"
+
+		self.assertRaisesRegex(frappe.ValidationError, "same company", revision.insert)
+
 	def test_an_older_version_can_be_set_as_lost(self):
 		quotation = make_quotation()
 		revision = make_revision(quotation.name)
