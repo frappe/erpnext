@@ -424,6 +424,7 @@ def apply_pricing_rule(args, doc=None):
 	for item in item_list:
 		args_copy = copy.deepcopy(args)
 		args_copy.update(item)
+		set_transaction_type(args_copy)
 		data = get_pricing_rule_for_item(args_copy, doc=doc)
 		out.append(data)
 
