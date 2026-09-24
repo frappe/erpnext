@@ -261,6 +261,9 @@ class WorkOrder(Document):
 	def on_discard(self):
 		self.db_set("status", "Cancelled")
 
+	def before_insert(self):
+		self.enable_reserve_stock_for_produced_serial_no()
+
 	def validate(self):
 		self.validate_production_item()
 		if self.bom_no:
@@ -327,6 +330,20 @@ class WorkOrder(Document):
 					),
 					title=_("Target Warehouse Reservation Error"),
 				)
+
+	def enable_reserve_stock_for_produced_serial_no(self):
+		"""Reserve the produced serial nos for a Sales Order Item with ensure delivery by serial no."""
+
+		if self.reserve_stock or not self.sales_order_item:
+			return
+
+		if not frappe.db.get_single_value("Stock Settings", "enable_stock_reservation"):
+			return
+
+		if frappe.db.get_value(
+			"Sales Order Item", self.sales_order_item, "ensure_delivery_based_on_produced_serial_no"
+		):
+			self.reserve_stock = 1
 
 	def set_reserve_stock(self):
 		for row in self.required_items:
