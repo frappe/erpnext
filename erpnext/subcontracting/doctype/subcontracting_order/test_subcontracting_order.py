@@ -1076,6 +1076,17 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		self.assertEqual(sco.items[0].rate, sco.items[0].rm_cost_per_qty + 500 * 80)
 		self.assertEqual(sco.total, sco.items[0].amount)
 
+	def test_service_cost_backfill_recosts_order_without_purchase_order_item(self):
+		sco = make_foreign_currency_subcontracting_order()
+		set_unconverted_service_cost(sco)
+		sco.items[0].db_set("purchase_order_item", None)
+
+		recalculate_subcontracting_order_service_cost()
+
+		sco.reload()
+		self.assertEqual(sco.items[0].service_cost_per_qty, 500 * 80)
+		self.assertEqual(sco.total, sco.items[0].amount)
+
 	def test_service_cost_backfill_updates_draft_receipt(self):
 		sco = make_foreign_currency_subcontracting_order()
 		scr = make_subcontracting_receipt(sco.name).save()
