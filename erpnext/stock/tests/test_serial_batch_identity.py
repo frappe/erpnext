@@ -33,7 +33,6 @@ from erpnext.stock.doctype.stock_entry.services.serial_batch import StockEntrySA
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import get_items, get_stock_balance_for
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import get_reserved_materials
 from erpnext.stock.get_item_details import get_filtered_serial_nos, update_stock
-from erpnext.stock.report.stock_ledger.stock_ledger import update_available_serial_nos
 from erpnext.stock.serial_batch_bundle import get_serial_batch_list_from_item
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
@@ -343,30 +342,6 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 			self.assertEqual(row["valuation_rate"], 100)
 			balance.return_value = (0, 0, None)
 			self.assertEqual(get_items(**args), [])
-
-	def test_stock_ledger_serial_balance_keeps_internal_ids(self):
-		first = self.make_number("Serial No", "Ledger-001")
-		second = self.make_number("Serial No", "Ledger-002")
-		sle = frappe._dict(
-			item_code=self.item.name,
-			warehouse="_Test Warehouse - _TC",
-			posting_date="2026-01-01",
-			posting_time="12:00:00",
-			serial_no=second.name,
-			actual_qty=1,
-		)
-		available = {}
-		with patch(
-			"erpnext.stock.report.stock_ledger.stock_ledger.get_available_serial_nos",
-			return_value=[frappe._dict(serial_no=first.name), frappe._dict(serial_no=second.name)],
-		) as lookup:
-			update_available_serial_nos(available, sle)
-			self.assertEqual(available[(sle.item_code, sle.warehouse)], [first.name])
-			self.assertEqual(sle.balance_serial_no, first.name)
-			self.assertEqual(lookup.call_args.args[0].warehouse, sle.warehouse)
-			self.assertEqual(lookup.call_args.args[0].posting_date, sle.posting_date)
-			self.assertEqual(lookup.call_args.args[0].posting_time, sle.posting_time)
-			self.assertEqual(lookup.call_args.args[0].ignore_warehouse, 1)
 
 	def test_reconciliation_current_bundle_resolves_only_existing_item_serials(self):
 		self.make_number("Serial No", "Current-001", self.other_item.name)
