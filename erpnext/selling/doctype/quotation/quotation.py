@@ -214,14 +214,22 @@ class Quotation(SellingController):
 				_("A revision must have the same company as Quotation {0}.").format(self.revision_of)
 			)
 
-		if original.quotation_to != "Lead" and (
-			self.quotation_to != original.quotation_to or self.party_name != original.party_name
-		):
+		if not self.has_party_of(original):
 			frappe.throw(
 				_("A revision must be for the same {0} as Quotation {1}.").format(
 					_(original.quotation_to), self.revision_of
 				)
 			)
+
+	def has_party_of(self, original: frappe._dict) -> bool:
+		if self.quotation_to == original.quotation_to and self.party_name == original.party_name:
+			return True
+
+		return (
+			original.quotation_to == "Lead"
+			and self.quotation_to == "Customer"
+			and frappe.db.get_value("Customer", self.party_name, "lead_name") == original.party_name
+		)
 
 	def set_has_alternative_item(self):
 		"""Mark 'Has Alternative Item' for rows."""
