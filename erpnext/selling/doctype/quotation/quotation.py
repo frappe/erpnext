@@ -323,6 +323,20 @@ class Quotation(SellingController):
 		# update enquiry status
 		self.update_opportunity("Quotation")
 		self.update_lead()
+		self.deactivate_other_versions()
+
+	def deactivate_other_versions(self):
+		if not (self.revision_of and self.is_active):
+			return
+
+		other_versions = frappe.get_all(
+			"Quotation",
+			filters={"docstatus": 1, "is_active": 1, "name": ["!=", self.name]},
+			or_filters={"name": self.revision_of, "revision_of": self.revision_of},
+			pluck="name",
+		)
+		for name in other_versions:
+			frappe.db.set_value("Quotation", name, "is_active", 0)
 
 	def on_cancel(self):
 		if self.lost_reasons:
