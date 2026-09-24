@@ -265,7 +265,8 @@
    "fieldname": "is_active",
    "fieldtype": "Check",
    "label": "Is Active",
-   "no_copy": 1
+   "no_copy": 1,
+   "read_only_depends_on": "eval:doc.status==\"Lost\""
   },
   {
    "default": "Sales",
@@ -1167,7 +1168,7 @@
  "idx": 82,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-24 13:00:00.000000",
+ "modified": "2026-09-24 14:00:00.000000",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

@@ -308,7 +308,7 @@ class Quotation(SellingController):
 		if not (self.is_fully_ordered() or self.is_partially_ordered()):
 			get_lost_reasons = frappe.get_list("Quotation Lost Reason", fields=["name"])
 			lost_reasons_lst = [reason.get("name") for reason in get_lost_reasons]
-			self.db_set("status", "Lost")
+			self.db_set({"status": "Lost", "is_active": 1})
 
 			if detailed_reason:
 				self.db_set("order_lost_reason", detailed_reason)
@@ -328,12 +328,15 @@ class Quotation(SellingController):
 
 			self.update_opportunity("Lost")
 			self.update_lead()
-			self.is_active = 1
 			self.save()
 			self.set_other_versions_as_lost()
 
 		else:
 			frappe.throw(_("Cannot set as Lost as Sales Order is made."))
+
+	def before_update_after_submit(self):
+		if self.status == "Lost" and self.has_value_changed("is_active"):
+			frappe.throw(_("Is Active cannot be changed on a Lost Quotation."))
 
 	def on_submit(self):
 		# Check for Approving Authority
