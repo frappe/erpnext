@@ -188,14 +188,11 @@ class Quotation(SellingController):
 		if not self.revision_of:
 			return
 
-		later_dates = [
-			version.transaction_date
-			for version in self.get_other_versions({"transaction_date": [">", self.transaction_date]})
-		]
+		later_dates = [version.transaction_date for version in self.get_newer_versions()]
 		if later_dates:
 			frappe.throw(
 				_(
-					"Transaction Date cannot be before {0}, the date of the latest version of this Quotation."
+					"Transaction Date must be after {0}, the date of the latest version of this Quotation."
 				).format(formatdate(max(later_dates)))
 			)
 
@@ -363,11 +360,15 @@ class Quotation(SellingController):
 
 	@property
 	def is_latest_version(self) -> bool:
+		return not self.get_newer_versions()
+
+	def get_newer_versions(self) -> list[frappe._dict]:
 		own_order = (getdate(self.transaction_date), get_datetime(self.creation))
-		return all(
-			(version.transaction_date, version.creation) < own_order
+		return [
+			version
 			for version in self.get_other_versions({})
-		)
+			if (version.transaction_date, version.creation) > own_order
+		]
 
 	def validate_can_be_revised(self):
 		if self.status in ("Lost", "Ordered"):
