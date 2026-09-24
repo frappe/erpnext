@@ -54,6 +54,15 @@ class TestSerialAndBatchSummary(ERPNextTestSuite):
 
 		self.assertEqual([tuple(row) for row in rows], [(batch.name, "Summary-Filter-Batch", item)])
 
+	def test_filters_list_nothing_without_item_or_voucher(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.report.serial_and_batch_summary.serial_and_batch_summary import get_batch_nos
+
+		item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1}).name
+		frappe.get_doc(doctype="Batch", item=item, batch_id="Summary-Unscoped-Batch").insert()
+
+		self.assertEqual(get_batch_nos("Batch", "Summary-Unscoped", "name", 0, 5, {}), [])
+
 	def test_batch_receipt_listed(self):
 		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
