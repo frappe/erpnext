@@ -39,6 +39,16 @@ class TestSubcontractedItemsToBeDelivered(ERPNextTestSuite):
 
 		self.assertEqual(get_report_rows(scio), [])
 
+	def test_customer_return_does_not_reopen_pending_qty(self):
+		_so, scio = create_so_scio()
+		produce_and_deliver(scio, 2)
+		return_finished_good(scio, 1)
+
+		rows = get_report_rows(scio)
+
+		self.assertEqual(rows[0].delivered_qty, 2)
+		self.assertEqual(rows[0].pending_qty, 3)
+
 
 def produce_and_deliver(scio, qty):
 	frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
@@ -54,6 +64,15 @@ def produce_and_deliver(scio, qty):
 	delivery = frappe.new_doc("Stock Entry").update(scio.make_subcontracting_delivery())
 	delivery.items[0].qty = qty
 	delivery.submit()
+	scio.reload()
+
+
+def return_finished_good(scio, qty):
+	fg_return = frappe.new_doc("Stock Entry").update(scio.make_subcontracting_return())
+	fg_return.items[0].qty = qty
+	fg_return.items[0].t_warehouse = "_Test Warehouse - _TC"
+	fg_return.submit()
+	scio.reload()
 
 
 def get_report_rows(scio):
