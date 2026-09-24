@@ -504,9 +504,11 @@ def get_list_context(context=None):
 
 @frappe.whitelist()
 def get_open_count(doctype: str, name: str, items: str | list[str]) -> dict:
-	counts = get_linked_document_counts(
-		doctype, name, [item for item in frappe.parse_json(items) if item != "Quotation"]
-	)
+	items = frappe.parse_json(items)
+	if not (isinstance(items, list) and all(isinstance(item, str) for item in items)):
+		frappe.throw(_("Items must be a list of DocType names."))
+
+	counts = get_linked_document_counts(doctype, name, [item for item in items if item != "Quotation"])
 	versions = [
 		version.name
 		for version in frappe.get_doc("Quotation", name).get_other_versions(
