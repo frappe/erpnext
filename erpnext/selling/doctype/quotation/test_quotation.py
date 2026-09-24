@@ -10,6 +10,7 @@ from frappe.utils import add_days, add_months, flt, getdate, nowdate
 from erpnext.controllers.accounts_controller import InvalidQtyError, update_child_qty_rate
 from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
 from erpnext.selling.doctype.quotation.mapper import make_revision, make_sales_invoice, make_sales_order
+from erpnext.selling.doctype.quotation.quotation import get_open_count
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -508,6 +509,20 @@ class TestQuotation(ERPNextTestSuite):
 		self.assertEqual(first_revision.name, f"{quotation.name}-R1")
 		self.assertEqual(second_revision.name, f"{quotation.name}-R2")
 		self.assertEqual(second_revision.revision_of, quotation.name)
+
+	def test_every_version_lists_the_other_versions(self):
+		quotation = make_quotation()
+		first_revision = make_revision(quotation.name)
+		first_revision.insert()
+		first_revision.submit()
+		second_revision = make_revision(first_revision.name).insert()
+
+		counts = get_open_count("Quotation", first_revision.name, ["Quotation", "Sales Order"])
+
+		versions = next(
+			link for link in counts["count"]["internal_links_found"] if link["doctype"] == "Quotation"
+		)
+		self.assertCountEqual(versions["names"], [quotation.name, second_revision.name])
 
 	def test_revision_copies_items_and_clears_validity(self):
 		opportunity = make_opportunity(with_items=1)
