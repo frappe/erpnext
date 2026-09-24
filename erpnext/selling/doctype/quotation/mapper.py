@@ -215,7 +215,7 @@ def make_revision(source_name: str, target_doc: str | dict | Document | None = N
 		{
 			"Quotation": {
 				"doctype": "Quotation",
-				"validation": {"docstatus": ["=", 1]},
+				"validation": {"docstatus": ["=", 1], "is_active": ["=", 1]},
 				"field_no_map": ["valid_till"],
 			},
 			"Quotation Item": {

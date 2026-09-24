@@ -151,7 +151,7 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 			}
 		}
 
-		if (doc.docstatus == 1 && frappe.model.can_create("Quotation")) {
+		if (doc.docstatus == 1 && doc.is_active && frappe.model.can_create("Quotation")) {
 			this.frm.add_custom_button(
 				__("Revision"),
 				() =>
