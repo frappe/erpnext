@@ -458,6 +458,12 @@ def validate_child_on_delete(row, parent, ordered_item=None) -> None:
 					"Row #{0}: Cannot delete item {1} which is already ordered against this Sales Order."
 				).format(row.idx, row.item_code)
 			)
+		if frappe.db.exists("Proforma Invoice Item", {"so_detail": row.name, "docstatus": 1}):
+			frappe.throw(
+				_("Row #{0}: Cannot delete item {1} which has an issued Proforma Invoice.").format(
+					row.idx, row.item_code
+				)
+			)
 
 	if parent.doctype == "Purchase Order" and flt(row.received_qty):
 		frappe.throw(
