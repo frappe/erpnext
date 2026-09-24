@@ -6,8 +6,9 @@ import json
 from collections import defaultdict
 
 import frappe
-from frappe import _, bold, qb, throw
+from frappe import _, _dict, bold, qb, throw
 from frappe.contacts.doctype.address.address import get_address_display
+from frappe.model.document import Document
 from frappe.model.workflow import get_workflow_name
 from frappe.query_builder import Criterion, DocType
 from frappe.query_builder.custom import ConstantColumn
@@ -29,6 +30,7 @@ from frappe.utils import (
 )
 
 import erpnext
+from erpnext import require_permission
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 	get_dimensions,
@@ -2714,7 +2716,7 @@ class AccountsController(TransactionBase):
 				if self.get("payment_terms_template"):
 					self.ignore_default_payment_terms_template = 1
 			elif self.get("payment_terms_template"):
-				data = get_payment_terms(
+				data = _get_payment_terms(
 					self.payment_terms_template, posting_date, grand_total, base_grand_total
 				)
 				for item in data:
@@ -3732,6 +3734,30 @@ def update_invoice_status():
 
 @frappe.whitelist()
 def get_payment_terms(
+	terms_template: str | None,
+	posting_date: str | None = None,
+	grand_total: float | int | str | None = None,
+	base_grand_total: float | int | str | None = None,
+	bill_date: str | None = None,
+):
+	"""Whitelisted entry point: authorise the template, then read its rows.
+
+	set_payment_schedule() uses _get_payment_terms(): it runs on every Sales Invoice,
+	Purchase Invoice and Sales Order save carrying a terms template and keeps its
+	existing behaviour.
+
+	`read` rather than `select`: Payment Terms Template grants `select` to the `All`
+	role, so `read` is the level that matches returning the template's rows.
+	"""
+	if not terms_template:
+		return
+
+	require_permission("Payment Terms Template", terms_template)
+
+	return _get_payment_terms(terms_template, posting_date, grand_total, base_grand_total, bill_date)
+
+
+def _get_payment_terms(
 	terms_template, posting_date=None, grand_total=None, base_grand_total=None, bill_date=None
 ):
 	if not terms_template:
@@ -3749,10 +3775,22 @@ def get_payment_terms(
 
 @frappe.whitelist()
 def get_payment_term_details(
-	term, posting_date=None, grand_total=None, base_grand_total=None, bill_date=None
+	# a _dict, not dict: pydantic coerces a bare `dict` and would rebuild a frappe._dict as a
+	# plain dict, losing the attribute access this function uses on the row.
+	term: str | _dict | Document,
+	posting_date: str | None = None,
+	grand_total: float | int | str | None = None,
+	base_grand_total: float | int | str | None = None,
+	bill_date: str | None = None,
 ):
 	term_details = frappe._dict()
 	if isinstance(term, str):
+		# only the HTTP path names a term; get_payment_terms() passes a child row object,
+		# so an invoice being built never reaches this check. `select` rather than `read`:
+		# every role that builds a payment schedule except Accounts holds only select on
+		# Payment Term, and has_permission falls back select -> read.
+		require_permission("Payment Term", term, "select")
+
 		term = frappe.get_doc("Payment Term", term)
 	else:
 		term_details.payment_term = term.payment_term
