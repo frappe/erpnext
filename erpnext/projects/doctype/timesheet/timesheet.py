@@ -503,8 +503,7 @@ def make_sales_invoice(
 	return target
 
 
-@frappe.whitelist()
-def get_activity_cost(
+def _get_activity_cost(
 	employee: str | None = None, activity_type: str | None = None, currency: str | None = None
 ):
 	base_currency = frappe.defaults.get_global_default("currency")
@@ -527,6 +526,18 @@ def get_activity_cost(
 			rate[0]["billing_rate"] = rate[0]["billing_rate"] * exchange_rate
 
 	return rate[0] if rate else {}
+
+
+@frappe.whitelist()
+def get_activity_cost(
+	employee: str | None = None, activity_type: str | None = None, currency: str | None = None
+):
+	# gated on Timesheet, not on Activity Cost: five of the six roles that can write a
+	# Timesheet hold no Activity Cost row at all. timesheet_detail.update_cost() calls
+	# _get_activity_cost() in-process on every save and does not pass through here.
+	frappe.has_permission("Timesheet", throw=True)
+
+	return _get_activity_cost(employee, activity_type, currency)
 
 
 @frappe.whitelist()
