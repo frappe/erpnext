@@ -101,16 +101,23 @@ class SerialAndBatchWiseStockBalanceReport(StockBalanceReport):
 		)
 
 	def add_serial_nos(self, group_by_key, entry):
-		serial_nos = self.serial_map.setdefault((group_by_key, entry.batch_no or None), Counter())
+		batches = self.serial_map.setdefault(group_by_key, {})
+		serial_nos = batches.setdefault(entry.batch_no or None, Counter())
 		for serial_no in get_serial_nos(entry.serial_no):
 			serial_nos[serial_no] += 1 if flt(entry.actual_qty) > 0 else -1
 
 	def get_item_and_batch_rows(self, item_row) -> list:
 		key = self.get_group_by_key(item_row)
-		item_row.indent = 0
-		item_row.serial_no = self.get_serial_nos_in_stock(key, None)
+		batch_rows = self.get_batch_rows(key, item_row)
+		item_row.update(
+			{
+				"indent": 0,
+				"batch_no": "\n".join(row.batch_no for row in batch_rows if row.bal_qty > 0),
+				"serial_no": self.get_serial_nos_in_stock(key, list(self.serial_map.get(key, {}))),
+			}
+		)
 
-		return [item_row, *self.get_batch_rows(key, item_row)]
+		return [item_row, *batch_rows]
 
 	def get_batch_rows(self, key, item_row) -> list:
 		dimensions = {field: item_row.get(field) for field in self.inventory_dimensions}
@@ -125,7 +132,7 @@ class SerialAndBatchWiseStockBalanceReport(StockBalanceReport):
 				{
 					"indent": 1,
 					"batch_no": batch_no,
-					"serial_no": self.get_serial_nos_in_stock(key, batch_no),
+					"serial_no": self.get_serial_nos_in_stock(key, [batch_no]),
 					"val_rate": flt(batch_data.bal_val / batch_data.bal_qty) if batch_data.bal_qty else 0.0,
 				}
 			)
@@ -133,21 +140,20 @@ class SerialAndBatchWiseStockBalanceReport(StockBalanceReport):
 
 		return rows
 
-	def get_serial_nos_in_stock(self, key, batch_no) -> str:
-		serial_nos = self.serial_map.get((key, batch_no), {})
-		return "\n".join(sorted(serial_no for serial_no, qty in serial_nos.items() if qty > 0))
+	def get_serial_nos_in_stock(self, key, batch_nos) -> str:
+		batches = self.serial_map.get(key, {})
+
+		serial_nos = []
+		for batch_no in batch_nos:
+			serial_nos += [serial_no for serial_no, qty in batches.get(batch_no, {}).items() if qty > 0]
+
+		return "\n".join(sorted(serial_nos))
 
 	def get_columns(self):
 		columns = super().get_columns()
 		position = next(i for i, column in enumerate(columns) if column["fieldname"] == "val_rate") + 1
 		columns[position:position] = [
-			{
-				"label": _("Batch No"),
-				"fieldname": "batch_no",
-				"fieldtype": "Link",
-				"options": "Batch",
-				"width": 120,
-			},
+			{"label": _("Batch No"), "fieldname": "batch_no", "width": 120},
 			{"label": _("Serial No"), "fieldname": "serial_no", "width": 150},
 		]
 
