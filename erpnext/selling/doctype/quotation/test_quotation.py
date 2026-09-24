@@ -723,6 +723,18 @@ class TestQuotation(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, sales_order.submit)
 
+	def test_deactivating_a_quotation_reopens_its_opportunity(self):
+		opportunity = make_opportunity(with_items=0)
+		quotation = make_quotation(do_not_save=1)
+		quotation.opportunity = opportunity.name
+		quotation.insert()
+		quotation.submit()
+
+		quotation.is_active = 0
+		quotation.save()
+
+		self.assertEqual(frappe.db.get_value("Opportunity", opportunity.name, "status"), "Open")
+
 	def test_inactive_quotation_is_not_an_active_offer(self):
 		opportunity = make_opportunity(with_items=1)
 		quotation = make_quotation(do_not_save=1)
