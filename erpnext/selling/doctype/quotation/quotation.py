@@ -361,6 +361,11 @@ class Quotation(SellingController):
 		if self.status == "Lost" and self.has_value_changed("is_active"):
 			frappe.throw(_("Is Active cannot be changed on a Lost Quotation."))
 
+	def on_update_after_submit(self):
+		if self.has_value_changed("is_active"):
+			self.update_opportunity("Quotation" if self.is_active else "Open")
+			self.update_lead()
+
 	def on_submit(self):
 		# Check for Approving Authority
 		frappe.get_cached_doc("Authorization Control").validate_approving_authority(
