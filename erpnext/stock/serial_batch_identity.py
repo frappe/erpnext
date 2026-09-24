@@ -7,6 +7,8 @@ from frappe.query_builder.terms import ParameterizedValueWrapper
 from frappe.utils import escape_html
 from pypika.analytics import Min
 
+MATCH_CHUNK_SIZE = 1000
+
 
 class SerialBatchIdentity:
 	def __init__(self, doctype):
@@ -58,6 +60,12 @@ class SerialBatchIdentity:
 		if not ignore_permissions:
 			frappe.has_permission("Item", "select", doc=item_code, throw=True)
 
+		unique_numbers = list(dict.fromkeys(numbers))
+		names = self._resolve_unique(item_code, unique_numbers, create, defaults)
+		names_by_number = dict(zip(unique_numbers, names, strict=True))
+		return [names_by_number[number] for number in numbers]
+
+	def _resolve_unique(self, item_code, numbers, create, defaults):
 		names = [None] * len(numbers)
 		created = {}
 		for index, name, first_index in self._match_numbers(item_code, numbers):
@@ -74,7 +82,6 @@ class SerialBatchIdentity:
 					)
 				)
 			names[index] = name
-
 		return names
 
 	def get_label(self, name):
@@ -148,6 +155,16 @@ class SerialBatchIdentity:
 		return frappe.get_doc(values).insert(ignore_permissions=True).name
 
 	def _match_numbers(self, item_code, numbers):
+		rows = []
+		for start in range(0, len(numbers), MATCH_CHUNK_SIZE):
+			chunk = numbers[start : start + MATCH_CHUNK_SIZE]
+			rows += [
+				(start + ordinal, name, start + first_index)
+				for ordinal, name, first_index in self._match_chunk(item_code, chunk)
+			]
+		return rows
+
+	def _match_chunk(self, item_code, numbers):
 		table = frappe.qb.DocType(self.doctype)
 		# Retain the physical column's collation when comparing input on MariaDB.
 		inputs = (
