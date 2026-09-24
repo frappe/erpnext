@@ -615,18 +615,24 @@ class TestQuotation(ERPNextTestSuite):
 
 		self.assertRaisesRegex(frappe.ValidationError, "same Customer", revision.insert)
 
-	def test_revision_of_a_lead_quotation_can_change_the_party(self):
+	def test_revision_of_a_lead_quotation_can_move_to_its_customer(self):
+		from erpnext.crm.doctype.lead.mapper import make_customer
 		from erpnext.crm.doctype.lead.test_lead import make_lead
 
+		lead = make_lead()
 		quotation = make_quotation(do_not_save=1)
 		quotation.quotation_to = "Lead"
-		quotation.party_name = make_lead().name
+		quotation.party_name = lead.name
 		quotation.insert()
 		quotation.submit()
-		revision = make_revision(quotation.name)
-		revision.quotation_to = "Customer"
-		revision.party_name = "_Test Customer"
+		customer = make_customer(lead.name).insert(ignore_permissions=True)
 
+		unrelated_revision = make_revision(quotation.name)
+		unrelated_revision.update({"quotation_to": "Customer", "party_name": "_Test Customer"})
+		self.assertRaisesRegex(frappe.ValidationError, "same Lead", unrelated_revision.insert)
+
+		revision = make_revision(quotation.name)
+		revision.update({"quotation_to": "Customer", "party_name": customer.name})
 		revision.insert()
 
 	def test_an_older_version_can_be_set_as_lost(self):
