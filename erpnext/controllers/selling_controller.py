@@ -904,6 +904,77 @@ class SellingController(StockController):
 					title=_("Not Allowed"),
 				)
 
+	def validate_produced_serial_nos_against_reservation(self):
+		"""Restrict delivery to the serial nos reserved for a Sales Order Item with ensure delivery by serial no."""
+
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			get_sre_reserved_serial_nos_for_voucher_detail_nos,
+		)
+
+		if self.is_return:
+			return
+
+		so_field = "sales_order" if self.doctype == "Sales Invoice" else "against_sales_order"
+		rows = [d for d in self.items if d.get(so_field) and d.so_detail]
+		if not rows:
+			return
+
+		flagged_so_details = frappe.get_all(
+			"Sales Order Item",
+			filters={
+				"name": ("in", [d.so_detail for d in rows]),
+				"ensure_delivery_based_on_produced_serial_no": 1,
+			},
+			pluck="name",
+		)
+		rows = [d for d in rows if d.so_detail in flagged_so_details]
+		if not rows:
+			return
+
+		reserved_serial_nos = get_sre_reserved_serial_nos_for_voucher_detail_nos(
+			"Sales Order", flagged_so_details
+		)
+		bundle_map = dict(
+			frappe.get_all(
+				rows[0].doctype,
+				filters={"name": ("in", [d.name for d in rows])},
+				fields=["name", "serial_and_batch_bundle"],
+				as_list=True,
+			)
+		)
+		bundle_serial_nos = frappe._dict()
+		if bundles := [b for b in bundle_map.values() if b]:
+			for entry in frappe.get_all(
+				"Serial and Batch Entry",
+				filters={"parent": ("in", bundles), "serial_no": ("is", "set")},
+				fields=["parent", "serial_no"],
+			):
+				bundle_serial_nos.setdefault(entry.parent, []).append(entry.serial_no)
+
+		for row in rows:
+			if not reserved_serial_nos.get(row.so_detail):
+				frappe.throw(
+					_(
+						"Row #{0}: Delivery of Item {1} is ensured by produced Serial No, but no Serial No is reserved against Sales Order {2}. Reserve the stock through the Work Order."
+					).format(row.idx, frappe.bold(row.item_code), frappe.bold(row.get(so_field))),
+					title=_("Serial No Not Reserved"),
+				)
+
+			bundle = bundle_map.get(row.name)
+			serial_nos = bundle_serial_nos.get(bundle, []) if bundle else get_serial_nos(row.serial_no)
+			if invalid_serial_nos := [
+				sn for sn in serial_nos if sn not in reserved_serial_nos[row.so_detail]
+			]:
+				frappe.throw(
+					_(
+						"Row #{0}: Serial No {1} is not reserved against Sales Order {2}. Deliver only the Serial Nos produced and reserved for it."
+					).format(
+						row.idx, frappe.bold(", ".join(invalid_serial_nos)), frappe.bold(row.get(so_field))
+					),
+					title=_("Serial No Not Reserved"),
+				)
+
 	def update_stock_reservation_entries(self) -> None:
 		"""Updates Delivered Qty in Stock Reservation Entries."""
 
