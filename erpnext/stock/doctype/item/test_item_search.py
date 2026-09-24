@@ -241,23 +241,33 @@ class TestItemSearchIndex(ERPNextTestSuite):
 		"""The query re-filters, so extra candidates are safe but missing ones are not.
 
 		None is an answer too: the index declined, and the query scans without narrowing, which
-		cannot lose a row. A term matching more than CANDIDATE_LIMIT rows takes that path.
+		cannot lose a row. Any term can take that path on a large enough catalogue, so the
+		property is anchored on one selective enough that it never can.
 		"""
-		answered = 0
-		for txt in ("Test", "Item", "est", "_Test"):
+		probe = "ZZ-SUPERSET-PROBE-7413"
+		frappe.get_doc(
+			{
+				"doctype": "Item",
+				"item_code": probe,
+				"item_name": "Superset Probe",
+				"item_group": frappe.db.get_value("Item Group", {"is_group": 0}, "name"),
+				"stock_uom": frappe.db.get_value("UOM", {}, "name"),
+			}
+		).insert()
+
+		self.assertIsNotNone(self.candidates(probe), "a term this selective cannot reach the limit")
+
+		for txt in (probe, "Test", "Item", "est", "_Test"):
 			candidates = self.candidates(txt)
 			if candidates is None:
 				continue
 
-			answered += 1
 			matched = frappe.get_all(
 				"Item",
 				filters={"name": ("like", f"%{txt}%"), "disabled": 0, "has_variants": 0},
 				pluck="name",
 			)
 			self.assertTrue(set(matched) <= set(candidates), txt)
-
-		self.assertTrue(answered, "the index declined every term, so nothing was compared")
 
 	def test_item_query_output_is_unchanged(self):
 		cases = [
