@@ -396,13 +396,14 @@ class Quotation(SellingController):
 		if self.status in ("Lost", "Ordered"):
 			frappe.throw(_("Cannot revise a Quotation with status {0}.").format(_(self.status)))
 
-	def get_other_versions(self, filters: dict) -> list[frappe._dict]:
+	def get_other_versions(self, filters: dict, ignore_permissions: bool = True) -> list[frappe._dict]:
 		original = self.revision_of or self.name
-		return frappe.get_all(
+		return frappe.get_list(
 			"Quotation",
 			filters={"docstatus": 1, "name": ["!=", self.name], **filters},
 			or_filters={"name": original, "revision_of": original},
 			fields=["name", "transaction_date", "creation"],
+			ignore_permissions=ignore_permissions,
 		)
 
 	def on_cancel(self):
@@ -480,7 +481,9 @@ def get_open_count(doctype: str, name: str, items: str | list[str]) -> dict:
 	)
 	versions = [
 		version.name
-		for version in frappe.get_doc("Quotation", name).get_other_versions({"docstatus": ["!=", 2]})
+		for version in frappe.get_doc("Quotation", name).get_other_versions(
+			{"docstatus": ["!=", 2]}, ignore_permissions=False
+		)
 	]
 	if versions and counts["count"]:
 		counts["count"]["internal_links_found"].append(
