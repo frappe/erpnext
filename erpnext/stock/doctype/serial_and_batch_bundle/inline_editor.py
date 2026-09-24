@@ -350,8 +350,8 @@ def append_scanned_batches(entries, scans, item_code, type_of_transaction, exist
 		qty = flt(scan.get("qty"))
 		if batch_id in by_batch:
 			row = by_batch[batch_id]
-			current_qty = flt(row.qty) or 1
-			row.qty = current_qty + (qty if current_qty > 0 else -qty)
+			current_qty = flt(row.qty)
+			row.qty = current_qty - qty if current_qty < 0 else current_qty + qty
 		else:
 			row = frappe._dict(batch_no=batch_id, qty=qty)
 			entries.append(row)
