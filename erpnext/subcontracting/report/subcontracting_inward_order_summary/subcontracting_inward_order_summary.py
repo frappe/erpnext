@@ -69,8 +69,12 @@ def get_raw_materials(orders):
 
 
 def get_finished_good_rows(finished_good, raw_materials):
-	rows = raw_materials or [{}]
-	return [{**finished_good, **rows[0]}, *rows[1:]]
+	rows = []
+	for index, raw_material in enumerate(raw_materials or [{}]):
+		finished_good_columns = finished_good if index == 0 else dict.fromkeys(finished_good)
+		rows.append({**finished_good_columns, **raw_material})
+
+	return rows
 
 
 def get_columns():
