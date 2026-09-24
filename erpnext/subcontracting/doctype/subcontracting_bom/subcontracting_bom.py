@@ -32,6 +32,7 @@ class SubcontractingBOM(Document):
 
 	def validate(self):
 		self.validate_finished_good()
+		self.validate_finished_good_bom()
 		self.validate_service_item()
 		self.validate_is_active()
 
@@ -56,6 +57,15 @@ class SubcontractingBOM(Document):
 		if not is_sub_contracted_item:
 			frappe.throw(
 				_("Finished Good {0} must be a sub-contracted item.").format(frappe.bold(self.finished_good))
+			)
+
+	def validate_finished_good_bom(self):
+		bom_item = frappe.db.get_value("BOM", self.finished_good_bom, "item")
+		if bom_item not in get_applicable_bom_items(self.finished_good):
+			frappe.throw(
+				_("BOM {0} does not belong to Item {1}").format(
+					frappe.bold(self.finished_good_bom), frappe.bold(self.finished_good)
+				)
 			)
 
 	def validate_service_item(self):
