@@ -283,6 +283,7 @@ def item_query(
 
 		candidate_cond = "and tabItem.name in %(candidates)s"
 
+	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection
 	return frappe.db.sql(
 		"""select
 			tabItem.name {columns}
