@@ -1583,7 +1583,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 					doc: this.frm.doc,
 					method: "apply_shipping_rule",
 					callback: function (r) {
-						me._calculate_taxes_and_totals();
+						me.calculate_discounted_totals();
 					},
 				})
 				.fail(() => this.frm.set_value("shipping_rule", ""));

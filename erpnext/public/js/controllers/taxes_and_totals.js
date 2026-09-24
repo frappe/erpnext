@@ -43,19 +43,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	}
 
 	async calculate_taxes_and_totals(update_paid_amount) {
-		this.discount_amount_applied = false;
-		this._calculate_taxes_and_totals();
-		this.calculate_discount_amount();
-
-		// # Update grand total as per cash and non trade discount
-		if (this.frm.doc.apply_discount_on == "Grand Total" && this.frm.doc.is_cash_or_non_trade_discount) {
-			this.frm.doc.grand_total -= this.frm.doc.discount_amount;
-			this.frm.doc.base_grand_total -= this.frm.doc.base_discount_amount;
-			this.frm.doc.rounding_adjustment = 0;
-			this.frm.doc.base_rounding_adjustment = 0;
-			this.set_rounded_total();
-		}
-
+		this.calculate_discounted_totals();
 		await this.calculate_shipping_charges();
 
 		// Advance calculation applicable to Sales/Purchase Invoice
@@ -93,6 +81,20 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		}
 
 		this.frm.refresh_fields();
+	}
+
+	calculate_discounted_totals() {
+		this.discount_amount_applied = false;
+		this._calculate_taxes_and_totals();
+		this.calculate_discount_amount();
+
+		if (this.frm.doc.apply_discount_on == "Grand Total" && this.frm.doc.is_cash_or_non_trade_discount) {
+			this.frm.doc.grand_total -= this.frm.doc.discount_amount;
+			this.frm.doc.base_grand_total -= this.frm.doc.base_discount_amount;
+			this.frm.doc.rounding_adjustment = 0;
+			this.frm.doc.base_rounding_adjustment = 0;
+			this.set_rounded_total();
+		}
 	}
 
 	calculate_discount_amount() {
