@@ -45,7 +45,16 @@ class ProformaInvoice(Document):
 
 	def validate(self) -> None:
 		validate_feature_enabled()
+		self.validate_amended_doc()
 		self.set_total_qty()
+
+	def validate_amended_doc(self) -> None:
+		if self.amended_from:
+			frappe.throw(
+				_("Cannot amend {0} {1}, please create a new one instead.").format(
+					self.doctype, frappe.bold(self.amended_from)
+				)
+			)
 
 	def before_submit(self) -> None:
 		self.status = "Issued"
