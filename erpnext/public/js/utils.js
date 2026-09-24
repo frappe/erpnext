@@ -987,11 +987,7 @@ erpnext.utils.update_child_items = function (opts) {
 				label: __("Finished Good Item"),
 				get_query: () => {
 					return {
-						filters: {
-							is_stock_item: 1,
-							is_sub_contracted_item: 1,
-							default_bom: ["!=", ""],
-						},
+						query: "erpnext.controllers.queries.subcontracted_item_query",
 					};
 				},
 			},

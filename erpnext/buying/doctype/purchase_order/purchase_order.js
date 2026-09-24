@@ -35,11 +35,7 @@ frappe.ui.form.on("Purchase Order", {
 
 		frm.set_query("fg_item", "items", function () {
 			return {
-				filters: {
-					is_stock_item: 1,
-					is_sub_contracted_item: 1,
-					default_bom: ["!=", ""],
-				},
+				query: "erpnext.controllers.queries.subcontracted_item_query",
 			};
 		});
 	},
