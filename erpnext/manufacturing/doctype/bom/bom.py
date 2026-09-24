@@ -8,7 +8,7 @@ import frappe
 from frappe import _, bold
 from frappe.model.document import Document
 from frappe.query_builder import Field
-from frappe.query_builder.functions import Count, IfNull, Max, Min, NullIf, Sum
+from frappe.query_builder.functions import Count, IfNull, Max, Min, NullIf, Round, Sum
 from frappe.utils import cint, cstr, flt, get_link_to_form, parse_json
 from frappe.utils.caching import request_cache
 from frappe.website.website_generator import WebsiteGenerator
@@ -1475,6 +1475,7 @@ def _get_bom_item_tables(opts):
 
 
 def _build_base_bom_items_query(bom, company, qty, t):
+	precision = cint(frappe.db.get_default("float_precision")) or 3
 	return (
 		frappe.qb.from_(t.bom_item)
 		.join(t.bom_doc)
@@ -1490,7 +1491,7 @@ def _build_base_bom_items_query(bom, company, qty, t):
 			# returns the value MySQL picked arbitrarily while making the GROUP BY valid on postgres.
 			Min(t.bom_item.idx).as_("idx"),
 			Max(t.item_doc.item_name).as_("item_name"),
-			(Sum(t.qty_field_col / IfNull(t.bom_doc.quantity, 1)) * qty).as_("qty"),
+			Round(Sum(t.qty_field_col / IfNull(t.bom_doc.quantity, 1)) * qty, precision).as_("qty"),
 			Max(t.item_doc.image).as_("image"),
 			Max(t.bom_doc.project).as_("project"),
 			Max(t.item_doc.stock_uom).as_("stock_uom"),
