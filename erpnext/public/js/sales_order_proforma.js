@@ -4,19 +4,21 @@
 frappe.ui.form.on("Sales Order", {
 	refresh(frm) {
 		erpnext.proforma.toggle_tab(frm, false);
-		if (frm.doc.docstatus !== 1) return;
+		if (frm.doc.docstatus === 0) return;
 
 		frappe.db.get_single_value("Selling Settings", "enable_proforma_invoice").then((enabled) => {
 			if (!enabled) return;
 
-			// Defer so the button lands after the standard Create options, not before them.
-			setTimeout(() => {
-				frm.add_custom_button(
-					__("Proforma Invoice"),
-					() => erpnext.proforma.open_dialog(frm),
-					__("Create")
-				);
-			}, 0);
+			if (frm.doc.docstatus === 1) {
+				// Defer so the button lands after the standard Create options, not before them.
+				setTimeout(() => {
+					frm.add_custom_button(
+						__("Proforma Invoice"),
+						() => erpnext.proforma.open_dialog(frm),
+						__("Create")
+					);
+				}, 0);
+			}
 			erpnext.proforma.render_list(frm);
 		});
 	},
@@ -314,6 +316,7 @@ Object.assign(erpnext.proforma, {
 			],
 		});
 		list.refresh();
+		if (frm.doc.docstatus !== 1) return;
 
 		frappe.ui
 			.button({
