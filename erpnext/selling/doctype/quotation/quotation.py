@@ -283,6 +283,9 @@ class Quotation(SellingController):
 	):
 		self.check_permission("write")
 
+		if not self.is_active:
+			frappe.throw(_("Cannot set an inactive Quotation as Lost."))
+
 		if not (self.is_fully_ordered() or self.is_partially_ordered()):
 			get_lost_reasons = frappe.get_list("Quotation Lost Reason", fields=["name"])
 			lost_reasons_lst = [reason.get("name") for reason in get_lost_reasons]
