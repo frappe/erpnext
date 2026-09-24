@@ -192,10 +192,7 @@ class Quotation(SellingController):
 		if not self.revision_of:
 			return
 
-		if self.company != frappe.db.get_value("Quotation", self.revision_of, "company"):
-			frappe.throw(
-				_("A revision must have the same company as Quotation {0}.").format(self.revision_of)
-			)
+		self.validate_revision_matches_original()
 
 		if self.get_other_versions({"status": "Lost"}):
 			frappe.throw(_("Quotation {0} is Lost and cannot be revised.").format(self.revision_of))
@@ -206,6 +203,24 @@ class Quotation(SellingController):
 				_(
 					"Transaction Date must be after {0}, the date of the latest version of this Quotation."
 				).format(formatdate(max(later_dates)))
+			)
+
+	def validate_revision_matches_original(self):
+		original = frappe.db.get_value(
+			"Quotation", self.revision_of, ["company", "quotation_to", "party_name"], as_dict=True
+		)
+		if self.company != original.company:
+			frappe.throw(
+				_("A revision must have the same company as Quotation {0}.").format(self.revision_of)
+			)
+
+		if original.quotation_to != "Lead" and (
+			self.quotation_to != original.quotation_to or self.party_name != original.party_name
+		):
+			frappe.throw(
+				_("A revision must be for the same {0} as Quotation {1}.").format(
+					_(original.quotation_to), self.revision_of
+				)
 			)
 
 	def set_has_alternative_item(self):
