@@ -1257,6 +1257,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 						get_query_filters: {
 							company: me.frm.doc.company,
 							docstatus: 1,
+							is_active: 1,
 							status: ["not in", ["Lost", "Ordered"]],
 						},
 						allow_child_item_selection: true,

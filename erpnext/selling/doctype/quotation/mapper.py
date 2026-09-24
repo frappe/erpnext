@@ -123,7 +123,7 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False, ar
 		{
 			"Quotation": {
 				"doctype": "Sales Order",
-				"validation": {"docstatus": ["=", 1]},
+				"validation": {"docstatus": ["=", 1], "is_active": ["=", 1]},
 				"field_no_map": ["payment_terms_template"],
 			},
 			"Quotation Item": {
@@ -184,7 +184,10 @@ def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, 
 		"Quotation",
 		source_name,
 		{
-			"Quotation": {"doctype": "Sales Invoice", "validation": {"docstatus": ["=", 1]}},
+			"Quotation": {
+				"doctype": "Sales Invoice",
+				"validation": {"docstatus": ["=", 1], "is_active": ["=", 1]},
+			},
 			"Quotation Item": {
 				"doctype": "Sales Invoice Item",
 				"postprocess": update_item,

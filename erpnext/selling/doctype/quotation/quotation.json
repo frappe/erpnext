@@ -18,6 +18,7 @@
   "column_break_7",
   "transaction_date",
   "valid_till",
+  "is_active",
   "column_break1",
   "order_type",
   "company",
@@ -256,6 +257,14 @@
    "fieldname": "valid_till",
    "fieldtype": "Date",
    "label": "Valid Till"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "1",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "label": "Is Active",
+   "no_copy": 1
   },
   {
    "default": "Sales",
@@ -1157,7 +1166,7 @@
  "idx": 82,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-24 12:00:00.000000",
+ "modified": "2026-09-24 12:30:00.000000",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

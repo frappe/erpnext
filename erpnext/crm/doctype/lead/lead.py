@@ -228,7 +228,7 @@ class Lead(SellingController, CRMNote):
 
 	def has_quotation(self):
 		return frappe.db.get_value(
-			"Quotation", {"party_name": self.name, "docstatus": 1, "status": ["!=", "Lost"]}
+			"Quotation", {"party_name": self.name, "docstatus": 1, "is_active": 1, "status": ["!=", "Lost"]}
 		)
 
 	def has_lost_quotation(self):

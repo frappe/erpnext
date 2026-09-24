@@ -127,6 +127,7 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 
 		if (doc.docstatus == 1 && !["Lost", "Ordered"].includes(doc.status)) {
 			if (
+				doc.is_active &&
 				frappe.model.can_create("Sales Order") &&
 				(frappe.boot.sysdefaults.allow_sales_order_creation_for_expired_quotation ||
 					!doc.valid_till ||
