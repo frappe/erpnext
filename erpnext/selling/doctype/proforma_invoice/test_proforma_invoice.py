@@ -172,6 +172,21 @@ class TestProformaInvoice(ERPNextTestSuite):
 			("Proforma Invoice PRO-TEST-0001", "Please find attached the proforma invoice PRO-TEST-0001."),
 		)
 
+	def test_line_description_is_editable(self):
+		sales_order = make_sales_order(qty=10, do_not_submit=True)
+		sales_order.items[0].description = "Ordered description"
+		sales_order.submit()
+		so_detail = sales_order.items[0].name
+
+		edited = make_proforma_invoice(
+			sales_order.name, json.dumps([{"so_detail": so_detail, "qty": 4, "description": "Edited"}])
+		)
+		unedited = self.create_proforma(sales_order, [(so_detail, 4)])
+
+		self.assertEqual(get_sales_order_items(sales_order.name)[0]["description"], "Ordered description")
+		self.assertEqual(frappe.get_doc("Proforma Invoice", edited).items[0].description, "Edited")
+		self.assertEqual(unedited.items[0].description, "Ordered description")
+
 	def test_amended_proforma_is_rejected(self):
 		proforma = frappe.get_doc({"doctype": "Proforma Invoice", "amended_from": "PRO-TEST-0001"})
 
