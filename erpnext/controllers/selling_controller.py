@@ -912,7 +912,7 @@ class SellingController(StockController):
 			get_sre_reserved_serial_nos_for_voucher_detail_nos,
 		)
 
-		if self.is_return:
+		if self.is_return or not frappe.db.get_single_value("Stock Settings", "enable_stock_reservation"):
 			return
 
 		so_field = "sales_order" if self.doctype == "Sales Invoice" else "against_sales_order"
@@ -956,7 +956,7 @@ class SellingController(StockController):
 			if not reserved_serial_nos.get(row.so_detail):
 				frappe.throw(
 					_(
-						"Row #{0}: Delivery of Item {1} is ensured by produced Serial No, but no Serial No is reserved against Sales Order {2}. Reserve the stock through the Work Order."
+						"Row #{0}: Delivery of Item {1} is ensured by produced Serial No, but no Serial No is reserved against Sales Order {2}. Reserve the produced Serial Nos from the Sales Order."
 					).format(row.idx, frappe.bold(row.item_code), frappe.bold(row.get(so_field))),
 					title=_("Serial No Not Reserved"),
 				)
