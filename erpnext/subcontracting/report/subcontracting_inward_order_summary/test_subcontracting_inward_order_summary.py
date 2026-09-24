@@ -43,4 +43,5 @@ class TestSubcontractingInwardOrderSummary(ERPNextTestSuite):
 		self.assertEqual(data[0]["required_qty"], 5)
 		self.assertEqual(data[0]["received_qty"], 2)
 		self.assertEqual(data[0]["rm_returned_qty"], 1)
-		self.assertNotIn("item_code", data[1])
+		self.assertIsNone(data[1]["item_code"])
+		self.assertIsNone(data[1]["qty"])
