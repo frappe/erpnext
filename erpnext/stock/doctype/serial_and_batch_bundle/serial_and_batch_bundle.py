@@ -27,6 +27,7 @@ from frappe.utils import (
 )
 from frappe.utils.csvutils import build_csv_response
 
+from erpnext import require_permission
 from erpnext.stock.doctype.purchase_receipt_item.purchase_receipt_item import PurchaseReceiptItem
 from erpnext.stock.serial_batch_bundle import (
 	BatchNoValuation,
@@ -2159,7 +2160,66 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 
 
 @frappe.whitelist()
-def get_serial_batch_ledgers(item_code=None, docstatus=None, voucher_no=None, name=None, child_row=None):
+def get_serial_batch_ledgers(
+	item_code: str | None = None,
+	docstatus: str | list | int | None = None,
+	voucher_no: str | None = None,
+	name: str | list | None = None,
+	# `_dict` must be listed BEFORE `dict`, and both must be present. get_reference_serial_and_batch_bundle()
+	# reads child_row.doctype, and pydantic rebuilds a bare `dict` into a plain one with no
+	# attribute access -- so `dict` alone breaks a _dict caller. But `_dict` alone would reject a
+	# plain dict, and the selector sends `child_row: this.item`, a JS object, which arrives as one.
+	child_row: str | _dict | dict | None = None,
+):
+	"""Whitelisted entry point: authorise the caller, then read.
+
+	The in-process callers use _get_serial_batch_ledgers(): they run while a document is
+	being saved and keep their existing behaviour.
+	"""
+	# The selector sends `child_row: this.item`, a JS object, so over HTTP it arrives as a plain
+	# dict -- and get_reference_serial_and_batch_bundle() reads child_row.doctype, which a plain
+	# dict does not support. Normalise at the boundary, which is where untyped payloads enter;
+	# the JSON-string form already becomes a _dict via parse_json() further in. Pre-existing:
+	# base has no annotation and a plain dict reached the same attribute read.
+	if isinstance(child_row, dict):
+		child_row = _dict(child_row)
+
+	# `read`, explicitly, before anything is resolved. The entry rows carry qty, warehouse,
+	# batch_no and serial_no, and those are contents: `select` entitles naming the bundle in a
+	# link field, not reading what is in it. This doctype ships no search_fields, so select
+	# permits `name` alone -- resolving names under select and then reading the entries would
+	# hand over five columns the caller was never granted.
+	frappe.has_permission("Serial and Batch Bundle", ptype="read", throw=True)
+
+	# Then resolve the bundles through get_list on the parent, which applies User Permissions --
+	# something a doctype-level check cannot do when no single bundle is named. The entry rows
+	# are read for exactly those bundles, so the child table is never joined under the caller's
+	# rights.
+	filters = get_filters_for_bundle(
+		item_code=item_code, docstatus=docstatus, voucher_no=voucher_no, name=name, child_row=child_row
+	)
+	permitted = frappe.get_list("Serial and Batch Bundle", filters=as_parent_filters(filters), pluck="name")
+	if not permitted:
+		return []
+
+	return _get_serial_batch_ledgers(name=permitted, child_row=child_row)
+
+
+def as_parent_filters(filters):
+	"""Rewrite the child-table condition onto the parent, so the parent can be queried alone.
+
+	get_filters_for_bundle() expresses the bundle selection as `Serial and Batch Entry`.`parent`;
+	every other condition is already on the parent.
+	"""
+	return [
+		["Serial and Batch Bundle", "name", condition[2], condition[3]]
+		if condition[0] == "Serial and Batch Entry" and condition[1] == "parent"
+		else condition
+		for condition in filters
+	]
+
+
+def _get_serial_batch_ledgers(item_code=None, docstatus=None, voucher_no=None, name=None, child_row=None):
 	filters = get_filters_for_bundle(
 		item_code=item_code, docstatus=docstatus, voucher_no=voucher_no, name=name, child_row=child_row
 	)
@@ -2251,6 +2311,11 @@ def add_serial_batch_ledgers(
 	if parent_doc and isinstance(parent_doc, str):
 		parent_doc = parse_json(parent_doc)
 
+	if do_not_save:
+		# the create path links the bundle onto this row -- authorise the row first, so no
+		# bundle is created for a call that is going to be refused
+		validate_child_row_is_writable(child_row)
+
 	bundle = child_row.serial_and_batch_bundle
 	if child_row.get("is_rejected"):
 		bundle = child_row.rejected_serial_and_batch_bundle
@@ -2263,6 +2328,32 @@ def add_serial_batch_ledgers(
 		)
 
 	return sb_doc
+
+
+def validate_child_row_is_writable(child_row) -> None:
+	"""Authorise the row that receives the bundle link.
+
+	The `do_not_save` branch links the bundle onto a row named by the request. The row
+	belongs to a child table, so its parent document is the boundary to authorise.
+	"""
+	meta = frappe.get_meta(child_row.doctype)
+	if not meta.istable or not meta.has_field("serial_and_batch_bundle"):
+		frappe.throw(
+			_("{0} does not hold a Serial and Batch Bundle").format(child_row.doctype),
+			frappe.PermissionError,
+		)
+
+	# No branch for "row not found": an absent row leaves parent None, which require_permission
+	# refuses on the same path as a forbidden one. A separate `raise` here would be a second
+	# refusal site, and it drifted from the helper's once already -- bare, so it carried no
+	# message where the helper's carries one, and the difference told a caller which child row
+	# names exist.
+	row = (
+		frappe.db.get_value(child_row.doctype, child_row.name, ["parenttype", "parent"], as_dict=True)
+		or frappe._dict()
+	)
+
+	require_permission(row.parenttype, row.parent, "write")
 
 
 def create_serial_batch_no_ledgers(
@@ -2762,7 +2853,7 @@ def get_reserved_serial_nos_for_pos(kwargs):
 	if not ids:
 		return []
 
-	for d in get_serial_batch_ledgers(kwargs.item_code, docstatus=1, name=ids):
+	for d in _get_serial_batch_ledgers(kwargs.item_code, docstatus=1, name=ids):
 		ignore_serial_nos.append(d.serial_no)
 
 	returned_serial_nos = []
@@ -2935,7 +3026,7 @@ def get_reserved_batches_for_pos(kwargs) -> dict:
 	]
 
 	if ids:
-		for d in get_serial_batch_ledgers(kwargs.item_code, docstatus=1, name=ids):
+		for d in _get_serial_batch_ledgers(kwargs.item_code, docstatus=1, name=ids):
 			key = (d.batch_no, d.warehouse)
 			if key not in pos_batches:
 				pos_batches[key] = frappe._dict(

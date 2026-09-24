@@ -252,7 +252,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-16 11:42:07.000000",
+ "modified": "2026-09-24 14:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial and Batch Bundle",
@@ -386,24 +386,24 @@
    "write": 1
   },
   {
-   "role": "Accounts Manager",
-   "select": 1
+   "read": 1,
+   "role": "Accounts Manager"
   },
   {
-   "role": "Accounts User",
-   "select": 1
+   "read": 1,
+   "role": "Accounts User"
   },
   {
-   "role": "Maintenance Manager",
-   "select": 1
+   "read": 1,
+   "role": "Maintenance Manager"
   },
   {
-   "role": "Maintenance User",
-   "select": 1
+   "read": 1,
+   "role": "Maintenance User"
   },
   {
-   "role": "Quality Manager",
-   "select": 1
+   "read": 1,
+   "role": "Quality Manager"
   }
  ],
  "row_format": "Dynamic",
