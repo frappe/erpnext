@@ -566,14 +566,25 @@ class TestQuotation(ERPNextTestSuite):
 
 	def test_latest_version_is_ordered_by_transaction_date(self):
 		quotation = make_quotation()
+		first_revision = make_revision(quotation.name)
+		first_revision.transaction_date = add_days(quotation.transaction_date, 2)
+		first_revision.insert()
+		second_revision = make_revision(quotation.name)
+		second_revision.transaction_date = add_days(quotation.transaction_date, 1)
+		second_revision.insert()
+
+		second_revision.submit()
+		first_revision.submit()
+
+		self.assertTrue(first_revision.is_latest_version)
+		self.assertFalse(second_revision.is_latest_version)
+
+	def test_revision_cannot_be_dated_before_the_latest_version(self):
+		quotation = make_quotation()
 		revision = make_revision(quotation.name)
 		revision.transaction_date = add_days(quotation.transaction_date, -1)
-		revision.insert()
-		revision.submit()
-		quotation.reload()
 
-		self.assertTrue(quotation.is_latest_version)
-		self.assertFalse(revision.is_latest_version)
+		self.assertRaises(frappe.ValidationError, revision.insert)
 
 	def test_only_the_latest_version_can_be_revised(self):
 		quotation = make_quotation()
