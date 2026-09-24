@@ -50,14 +50,21 @@ def set_company_currency_service_amounts():
 
 def recost_order(order):
 	rows = order.items + order.service_items
-	if not all(row.purchase_order_item for row in rows):
-		return
+	if all(row.purchase_order_item for row in rows):
+		order.calculate_service_costs()
+	else:
+		set_service_costs_by_position(order)
 
-	order.calculate_service_costs()
 	order.calculate_items_qty_and_amount()
 	order.db_update()
 	for row in rows:
 		row.db_update()
+
+
+def set_service_costs_by_position(order):
+	order.set_service_item_base_amounts()
+	for item, service_item in zip(order.items, order.service_items, strict=False):
+		item.service_cost_per_qty = service_item.base_amount / item.qty if item.qty else 0
 
 
 def update_draft_receipts():
