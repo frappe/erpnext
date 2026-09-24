@@ -8,7 +8,8 @@ from frappe.tests import change_settings
 from frappe.utils import add_days, add_months, flt, getdate, nowdate
 
 from erpnext.controllers.accounts_controller import InvalidQtyError, update_child_qty_rate
-from erpnext.selling.doctype.quotation.mapper import make_sales_order
+from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
+from erpnext.selling.doctype.quotation.mapper import make_revision, make_sales_order
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -495,6 +496,38 @@ class TestQuotation(ERPNextTestSuite):
 		frappe.db.set_single_value("Selling Settings", "allow_sales_order_creation_for_expired_quotation", 1)
 
 		make_sales_order(quotation.name)
+
+	def test_revision_names_follow_the_original(self):
+		quotation = make_quotation()
+
+		first_revision = make_revision(quotation.name)
+		first_revision.insert()
+		first_revision.submit()
+		second_revision = make_revision(first_revision.name).insert()
+
+		self.assertEqual(first_revision.name, f"{quotation.name}-R1")
+		self.assertEqual(second_revision.name, f"{quotation.name}-R2")
+		self.assertEqual(second_revision.revision_of, quotation.name)
+
+	def test_revision_copies_items_and_clears_validity(self):
+		opportunity = make_opportunity(with_items=1)
+		quotation = make_quotation(rate=250, do_not_save=1)
+		quotation.valid_till = add_days(nowdate(), 10)
+		quotation.items[0].prevdoc_doctype = "Opportunity"
+		quotation.items[0].prevdoc_docname = opportunity.name
+		quotation.insert()
+		quotation.submit()
+
+		revision = make_revision(quotation.name).insert()
+
+		self.assertIsNone(revision.valid_till)
+		self.assertEqual(revision.items[0].rate, 250)
+		self.assertEqual(revision.items[0].prevdoc_docname, opportunity.name)
+
+	def test_draft_quotation_cannot_be_revised(self):
+		quotation = make_quotation(do_not_submit=1)
+
+		self.assertRaises(frappe.ValidationError, make_revision, quotation.name)
 
 	def test_create_quotation_with_margin(self):
 		from erpnext.selling.doctype.quotation.mapper import make_sales_order
