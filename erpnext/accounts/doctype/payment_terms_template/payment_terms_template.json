@@ -35,7 +35,7 @@
   }
  ],
  "links": [],
- "modified": "2024-04-07 11:26:42.021585",
+ "modified": "2026-09-24 14:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Terms Template",
@@ -79,13 +79,40 @@
    "write": 1
   },
   {
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "report": 1,
-   "role": "All",
-   "select": 1,
-   "share": 1
+   "role": "HR Manager",
+   "select": 1
+  },
+  {
+   "read": 1,
+   "role": "Maintenance Manager"
+  },
+  {
+   "read": 1,
+   "role": "Maintenance User"
+  },
+  {
+   "read": 1,
+   "role": "Purchase Manager"
+  },
+  {
+   "role": "Purchase Master Manager",
+   "select": 1
+  },
+  {
+   "read": 1,
+   "role": "Purchase User"
+  },
+  {
+   "read": 1,
+   "role": "Sales Manager"
+  },
+  {
+   "role": "Sales Master Manager",
+   "select": 1
+  },
+  {
+   "read": 1,
+   "role": "Sales User"
   }
  ],
  "sort_field": "creation",
