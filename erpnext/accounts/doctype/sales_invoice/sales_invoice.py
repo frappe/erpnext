@@ -494,6 +494,7 @@ class SalesInvoice(SellingController):
 			self.validate_standalone_serial_nos_customer()
 			self.update_stock_reservation_entries()
 			self.update_stock_ledger()
+			self.validate_produced_serial_nos_against_reservation()
 
 		self.process_asset_depreciation()
 

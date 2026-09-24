@@ -3111,6 +3111,74 @@ class TestDeliveryNote(FrappeTestCase):
 		dn.items[0].stock_qty = 2
 		dn.save()
 
+	@change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_delivery_restricted_to_reserved_produced_serial_nos(self):
+		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
+		from erpnext.stock.serial_batch_bundle import get_serial_nos_from_bundle
+
+		so, reserved, unreserved = make_so_with_reserved_produced_serial_no()
+
+		frappe.db.savepoint("unreserved_serial_no")
+		dn = make_delivery_note(so.name)
+		dn.items[0].use_serial_batch_fields = 1
+		dn.items[0].serial_no = unreserved[0]
+		dn.save()
+		self.assertRaises(frappe.ValidationError, dn.submit)
+		frappe.db.rollback(save_point="unreserved_serial_no")
+
+		dn = make_delivery_note(so.name)
+		dn.items[0].use_serial_batch_fields = 1
+		dn.items[0].serial_no = reserved[0]
+		dn.save()
+		dn.submit()
+		self.assertEqual(get_serial_nos_from_bundle(dn.items[0].serial_and_batch_bundle), reserved)
+
+	@change_settings("Stock Settings", {"enable_stock_reservation": 0})
+	def test_ensure_delivery_by_serial_no_cleared_without_stock_reservation(self):
+		item_code = make_item("Test Ensure Serial Without SRE", {"is_stock_item": 1, "has_serial_no": 1}).name
+
+		so = make_sales_order(item_code=item_code, qty=1, do_not_save=True)
+		so.items[0].ensure_delivery_based_on_produced_serial_no = 1
+		so.save()
+
+		self.assertEqual(so.items[0].ensure_delivery_based_on_produced_serial_no, 0)
+
+
+def make_so_with_reserved_produced_serial_no():
+	from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+	from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+		get_sre_reserved_serial_nos_for_voucher_detail_nos,
+	)
+
+	warehouse = "_Test Warehouse - _TC"
+	fg_item = make_item(
+		"Test Produced Serial FG", {"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "TPSFG-.####"}
+	).name
+	rm_item = make_item("Test Produced Serial RM", {"is_stock_item": 1}).name
+	make_bom(item=fg_item, raw_materials=[rm_item], source_warehouse=warehouse)
+	make_stock_entry(item_code=fg_item, target=warehouse, qty=2, basic_rate=100)
+
+	so = make_sales_order(item_code=fg_item, qty=1, warehouse=warehouse, do_not_submit=True)
+	so.items[0].ensure_delivery_based_on_produced_serial_no = 1
+	so.items[0].reserve_stock = 1
+	so.submit()
+	so.create_stock_reservation_entries(
+		items_details=[{"sales_order_item": so.items[0].name, "warehouse": warehouse, "qty_to_reserve": 1}]
+	)
+
+	reserved = sorted(
+		get_sre_reserved_serial_nos_for_voucher_detail_nos("Sales Order", [so.items[0].name])[
+			so.items[0].name
+		]
+	)
+	unreserved = frappe.get_all(
+		"Serial No",
+		filters={"item_code": fg_item, "status": "Active", "name": ("not in", reserved)},
+		pluck="name",
+	)
+
+	return so, reserved, unreserved
+
 
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")
