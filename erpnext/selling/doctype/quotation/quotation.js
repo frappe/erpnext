@@ -176,6 +176,7 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 					},
 					__("Create")
 				);
+				this.frm.page.set_inner_btn_group_as_primary(__("Create"));
 			}
 		}
 
