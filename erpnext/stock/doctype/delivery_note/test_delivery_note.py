@@ -3116,6 +3116,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
 
 		so, reserved, unreserved = make_so_with_reserved_produced_serial_no()
+		self.assertEqual(frappe.db.get_value("Work Order", {"sales_order": so.name}, "reserve_stock"), 1)
 
 		frappe.db.savepoint("unreserved_serial_no")
 		dn = make_delivery_note(so.name)
@@ -3129,6 +3130,46 @@ class TestDeliveryNote(ERPNextTestSuite):
 		dn.save()
 		dn.submit()
 		self.assertEqual(get_serial_nos_from_bundle(dn.items[0].serial_and_batch_bundle), reserved)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 0})
+	def test_ensure_delivery_by_serial_no_cleared_without_stock_reservation(self):
+		item_code = make_item("Test Ensure Serial Without SRE", {"is_stock_item": 1, "has_serial_no": 1}).name
+
+		so = make_sales_order(item_code=item_code, qty=1, do_not_save=True)
+		so.items[0].ensure_delivery_based_on_produced_serial_no = 1
+		so.save()
+
+		self.assertEqual(so.items[0].ensure_delivery_based_on_produced_serial_no, 0)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_production_plan_work_order_reserves_stock_for_ensure_delivery_by_serial_no(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import (
+			create_production_plan,
+			make_bom,
+		)
+
+		fg_item = make_item(
+			"Test PP Produced Serial FG",
+			{"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "TPPSFG-.####"},
+		).name
+		rm_item = make_item("Test PP Produced Serial RM", {"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item])
+
+		so = make_sales_order(item_code=fg_item, qty=1, do_not_submit=True)
+		so.items[0].ensure_delivery_based_on_produced_serial_no = 1
+		so.submit()
+
+		pln = create_production_plan(
+			company=so.company, get_items_from="Sales Order", sales_order=so, skip_getting_mr_items=True
+		)
+		pln.make_work_order()
+
+		self.assertEqual(
+			frappe.db.get_value(
+				"Work Order", {"production_plan": pln.name}, ["sales_order_item", "reserve_stock"]
+			),
+			(so.items[0].name, 1),
+		)
 
 
 def make_so_with_reserved_produced_serial_no():
@@ -3156,14 +3197,14 @@ def make_so_with_reserved_produced_serial_no():
 		item=fg_item,
 		qty=1,
 		sales_order=so.name,
-		reserve_stock=1,
 		source_warehouse=warehouse,
 		wip_warehouse=warehouse,
 		fg_warehouse=warehouse,
 		skip_transfer=1,
-		do_not_submit=True,
+		do_not_save=True,
 	)
 	wo.sales_order_item = so.items[0].name
+	wo.insert()
 	wo.submit()
 	frappe.get_doc(make_wo_entry(wo.name, "Manufacture", 1)).submit()
 
