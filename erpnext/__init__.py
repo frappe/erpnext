@@ -4,6 +4,7 @@ from typing import TypeVar
 
 import frappe
 from frappe.model.document import Document
+from frappe.utils.messages import throw_permission_error
 from frappe.utils.user import is_website_user
 
 __version__ = "16.26.2"
@@ -198,3 +199,80 @@ def normalize_ctx_input(T: type) -> callable:
 		return wrapper
 
 	return decorator
+
+
+def _permitted(check) -> bool:
+	"""Run `check` with frappe's own reporting suppressed, treating an absent record as refused.
+
+	Two things have to be swallowed. has_permission reports through push_perm_check_log, which
+	is inert only while nothing is collecting -- an enclosing has_permission(print_logs=True) IS
+	collecting, and the record-derived text would land in that caller's log. And resolving a
+	string name goes through get_doc, which msgprints "<doctype> <name> not found" BEFORE it
+	raises, so the absence is already in the message log by the time we refuse. Swap both and
+	restore whatever was there, so an absent name and a forbidden one are indistinguishable.
+	"""
+	_message_log = frappe.local.message_log
+	_check_logs = frappe.flags.get("has_permission_check_logs")
+	frappe.local.message_log = []
+	frappe.flags["has_permission_check_logs"] = None
+	try:
+		return bool(check())
+	except frappe.DoesNotExistError:
+		return False
+	finally:
+		frappe.local.message_log = _message_log
+		frappe.flags["has_permission_check_logs"] = _check_logs
+
+
+def _refuse() -> None:
+	"""The single refusal, so the two helpers cannot drift apart in how they deny."""
+	# frappe sets this inside its own throw path, which we are deliberately not using.
+	frappe.flags.disable_traceback = True
+	# frappe's own constant: `throw(_("Not permitted"), frappe.PermissionError)`. A constant
+	# cannot carry record data, and calling theirs means the message and the exception cannot
+	# drift from frappe's. Do not interpolate -- the doctype is not always the caller's own:
+	# validate_child_row_is_writable() passes a parenttype resolved from the database.
+	throw_permission_error()
+
+
+def require_permission(doctype: str, name: str | int | None, ptype: str = "read") -> None:
+	"""Raise PermissionError unless the caller may `ptype` the named record.
+
+	`frappe.has_permission` is called WITHOUT `throw`, which is what keeps the refusal quiet:
+	the wrapper forwards `print_logs=throw`, so with throw set frappe msgprints the permission
+	check log. On a User Permission miss that log is built from the record itself -- "linked to
+	Warehouse 'Goods In Transit - CFC' in row 1" -- so a caller who may not read the record is
+	told what is on it. Asking without throw collects nothing and we refuse here instead.
+
+	`name` is tested before the call because it is NOT redundant: has_permission treats a falsy
+	doc as absent and answers at doctype level, so an omitted name would be ALLOWED for anyone
+	holding the doctype.
+
+	The cost is that an entitled caller who mistypes a name is told "not permitted" rather than
+	"not found" -- the same answer an unentitled one gets, which is the point.
+	"""
+	if not (name and _permitted(lambda: frappe.has_permission(doctype, ptype, doc=name))):
+		_refuse()
+
+
+def require_user_permission(doctype: str, name: str | int | None) -> None:
+	"""Apply the caller's User Permissions to `name` without requiring DocPerm rights on it.
+
+	For an endpoint whose callers are not expected to hold the record in their own right,
+	require_permission() is too strong. Quick Stock Balance is granted to exactly Stock Manager,
+	Stock User and System Manager, but Warehouse ships no DocPerm row for Stock Manager, so
+	authorising the Warehouse outright denies a role the feature exists for -- measured.
+
+	What is missing on those endpoints is the User Permission fence, so apply that and only
+	that. `has_user_permission()` is the walk `has_permission()` performs after its role check:
+	the record itself, then every link field on it and on its child rows. That breadth is the
+	point -- an Item carrying a fenced Item Group is caught, where a fence keyed on the Item
+	alone would miss it.
+
+	Refuses exactly as require_permission() does, so the two are indistinguishable to a caller.
+	"""
+	# a `from` import binds only this name, leaving `frappe` the module-level global
+	from frappe.permissions import has_user_permission
+
+	if not (name and _permitted(lambda: has_user_permission(frappe.get_doc(doctype, name)))):
+		_refuse()
