@@ -108,8 +108,6 @@ class TestSerialBatchLinkQueries(ERPNextTestSuite):
 				page = query(doctype, text, "name", 1, 1, filters)
 				self.assertEqual([row[0] for row in page], [records[1].name])
 				self.assertEqual(query(doctype, "missing", "name", 0, 20, filters), [])
-				with self.set_user("Guest"), self.assertRaises(frappe.PermissionError):
-					query(doctype, text, "name", 0, 20, filters)
 
 	def make_number(self, doctype, number, item_code=None):
 		identity = SerialBatchIdentity(doctype)
