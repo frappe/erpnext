@@ -13,18 +13,50 @@ def get_data(filters):
 	rows = get_open_inward_order_rows(
 		filters,
 		"received_items",
-		["main_item_code", "rm_item_code", "stock_uom", "required_qty", "received_qty", "returned_qty"],
+		[
+			"reference_name",
+			"main_item_code",
+			"rm_item_code",
+			"stock_uom",
+			"required_qty",
+			"received_qty",
+			"returned_qty",
+		],
 		[
 			["per_produced", "<", 100],
 			["Subcontracting Inward Order Received Item", "is_customer_provided_item", "=", 1],
 		],
 	)
-
-	precision = frappe.get_precision("Subcontracting Inward Order Received Item", "required_qty")
-	for row in rows:
-		row.pending_qty = flt(row.required_qty - row.received_qty + row.returned_qty, precision)
+	set_pending_qty(rows)
 
 	return [row for row in rows if row.pending_qty > 0]
+
+
+def set_pending_qty(rows):
+	finished_goods = get_finished_goods({row.reference_name for row in rows})
+	precision = frappe.get_precision("Subcontracting Inward Order Received Item", "required_qty")
+	for row in rows:
+		finished_good = finished_goods[row.reference_name]
+		row.process_loss_qty = flt(
+			row.required_qty / finished_good.qty * finished_good.process_loss_qty, precision
+		)
+		row.pending_qty = flt(
+			row.required_qty - row.received_qty + row.returned_qty + row.process_loss_qty, precision
+		)
+
+
+def get_finished_goods(order_items):
+	if not order_items:
+		return {}
+
+	return {
+		row.name: row
+		for row in frappe.get_all(
+			"Subcontracting Inward Order Item",
+			filters={"name": ["in", list(order_items)]},
+			fields=["name", "qty", "process_loss_qty"],
+		)
+	}
 
 
 def get_columns():
@@ -48,5 +80,11 @@ def get_columns():
 		{"label": _("Required Qty"), "fieldname": "required_qty", "fieldtype": "Float", "width": 110},
 		{"label": _("Received Qty"), "fieldname": "received_qty", "fieldtype": "Float", "width": 110},
 		{"label": _("Returned Qty"), "fieldname": "returned_qty", "fieldtype": "Float", "width": 110},
+		{
+			"label": _("Process Loss Qty"),
+			"fieldname": "process_loss_qty",
+			"fieldtype": "Float",
+			"width": 130,
+		},
 		{"label": _("Pending Qty"), "fieldname": "pending_qty", "fieldtype": "Float", "width": 110},
 	]
