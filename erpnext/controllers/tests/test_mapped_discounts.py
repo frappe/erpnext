@@ -456,6 +456,36 @@ class TestMappedDiscounts(ERPNextTestSuite):
 		self.assertEqual(sales_order.discount_amount, 0)
 		self.assertEqual(sales_order.grand_total, 100)
 
+	def test_update_items_replacing_the_last_discounted_row_clears_the_header(self):
+		from erpnext.accounts.services.child_item_update import update_child_qty_rate
+
+		sales_order = self.make_combined_sales_order()
+		regular = sales_order.items[1]
+		update_child_qty_rate(
+			"Sales Order",
+			frappe.as_json(
+				[
+					{
+						"docname": regular.name,
+						"item_code": regular.item_code,
+						"qty": regular.qty,
+						"rate": 100,
+					},
+					{
+						"item_code": "_Test Item",
+						"qty": 1,
+						"rate": 100,
+						"delivery_date": sales_order.delivery_date,
+					},
+				]
+			),
+			sales_order.name,
+		)
+
+		sales_order.reload()
+		self.assertEqual(sales_order.discount_amount, 0)
+		self.assertEqual(sales_order.grand_total, 200)
+
 	def assert_percentage_discounts(self, document, source_field, expected_net_amounts):
 		items = {item.get(source_field): item for item in document.items}
 		self.assertEqual(document.apply_discount_on, "Net Total")
