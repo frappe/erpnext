@@ -40,7 +40,10 @@ from erpnext.accounts.utils import (
 	get_advance_payment_doctypes as _get_advance_payment_doctypes,
 )
 from erpnext.accounts.utils import get_fiscal_year, validate_fiscal_year
-from erpnext.buying.doctype.buying_settings.buying_settings import get_billed_qty
+from erpnext.buying.doctype.buying_settings.buying_settings import (
+	bills_rejected_quantity,
+	get_billed_qty,
+)
 from erpnext.controllers.item_close import clear_closed_rows_on_amend
 from erpnext.controllers.print_settings import (
 	set_print_templates_for_item_table,
@@ -1714,31 +1717,49 @@ class AccountsController(TransactionBase):
 		self.calculate_taxes_and_totals()
 
 	def get_mapped_discount_applied(self, source_doc, reference_fieldname):
-		item_meta = frappe.get_meta(self.meta.get_field("items").options)
-		fields = ["parent", "qty", "mapped_additional_discount_amount"]
-		if item_meta.has_field("rejected_qty"):
-			fields.append("rejected_qty")
-
-		rows = frappe.get_all(
-			item_meta.name,
-			filters={
-				reference_fieldname: source_doc.name,
-				"docstatus": 1,
-				"mapped_additional_discount_amount": ("!=", 0),
-			},
-			fields=fields,
+		item_table = frappe.qb.DocType(self.meta.get_field("items").options)
+		linked_rows = (
+			frappe.qb.from_(item_table)
+			.where(item_table.docstatus == 1)
+			.where(item_table[reference_fieldname] == source_doc.name)
+			.where(item_table.mapped_additional_discount_amount != 0)
 		)
-		applied = sum(
-			row.mapped_additional_discount_amount
-			* get_billed_qty(frappe.get_cached_doc(self.doctype, row.parent), row)
-			for row in rows
+		applied = flt(
+			linked_rows.select(Sum(item_table.mapped_additional_discount_amount * item_table.qty)).run()[0][0]
 		)
+		if self.doctype == "Purchase Invoice":
+			applied += self.get_mapped_discount_on_billed_rejected_qty(linked_rows, item_table)
 
 		distributed_discount = sum(flt(item.distributed_discount_amount) for item in source_doc.items)
 		if not distributed_discount:
-			return flt(applied)
+			return applied
 
-		return flt(applied) * source_doc.discount_amount / distributed_discount
+		return applied * source_doc.discount_amount / distributed_discount
+
+	def get_mapped_discount_on_billed_rejected_qty(self, linked_rows, item_table):
+		invoice = frappe.qb.DocType(self.doctype)
+		invoice_fields = (
+			invoice.update_stock,
+			invoice.is_internal_supplier,
+			invoice.represents_company,
+			invoice.company,
+		)
+		invoices = (
+			linked_rows.join(invoice)
+			.on(invoice.name == item_table.parent)
+			.where(item_table.rejected_qty != 0)
+			.select(
+				*invoice_fields,
+				Sum(item_table.mapped_additional_discount_amount * item_table.rejected_qty).as_("discount"),
+			)
+			.groupby(invoice.name, *invoice_fields)
+		).run(as_dict=True)
+
+		return sum(
+			flt(row.discount)
+			for row in invoices
+			if bills_rejected_quantity(frappe._dict(row, doctype=self.doctype))
+		)
 
 
 from erpnext.accounts.services.advances import (
