@@ -1,11 +1,14 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and Contributors
 # MIT License. See license.txt
 
+import frappe
+
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
-from erpnext.selling.page.point_of_sale.point_of_sale import get_items
+from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.selling.page.point_of_sale.point_of_sale import get_items, get_receipt_email_content
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-from erpnext.tests.utils import ERPNextTestSuite
+from erpnext.tests.utils import ERPNextTestSuite, make_email_template
 
 
 class TestPointOfSale(ERPNextTestSuite):
@@ -50,3 +53,18 @@ class TestPointOfSale(ERPNextTestSuite):
 
 		self.assertEqual(len(filtered_items), 1)
 		self.assertEqual(filtered_items[0]["item_code"], item2.item_code)
+
+	def test_receipt_email_uses_pos_profile_template(self):
+		pos_profile = make_pos_profile()
+		template = make_email_template("Receipt {{ doc.name }}", "Thanks, {{ doc.customer }}")
+		frappe.db.set_value("POS Profile", pos_profile.name, "receipt_email_template", template)
+		invoice = create_sales_invoice(do_not_save=True)
+		invoice.pos_profile = pos_profile.name
+		invoice.insert()
+
+		email = get_receipt_email_content("Sales Invoice", invoice.name)
+
+		self.assertEqual(email, {"subject": f"Receipt {invoice.name}", "message": "Thanks, _Test Customer"})
+
+	def test_receipt_email_rejects_other_doctypes(self):
+		self.assertRaises(frappe.ValidationError, get_receipt_email_content, "User", "Administrator")

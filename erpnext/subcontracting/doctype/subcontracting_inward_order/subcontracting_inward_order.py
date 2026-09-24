@@ -9,6 +9,7 @@ from frappe.utils import comma_and, flt, get_link_to_form
 
 from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.subcontracting_controller import SubcontractingController
+from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import get_finished_good_bom
 
 
 class SubcontractingInwardOrder(SubcontractingController):
@@ -182,15 +183,6 @@ class SubcontractingInwardOrder(SubcontractingController):
 				)
 				si.amount = available_qty * si.rate
 
-				bom = (
-					frappe.db.get_value(
-						"Subcontracting BOM",
-						{"finished_good": item.name, "is_active": 1},
-						"finished_good_bom",
-					)
-					or item.default_bom
-				)
-
 				items.append(
 					{
 						"item_code": item.name,
@@ -202,7 +194,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 						"qty": si.fg_item_qty,
 						"subcontracting_conversion_factor": conversion_factor,
 						"stock_uom": item.stock_uom,
-						"bom": bom,
+						"bom": get_finished_good_bom(item),
 						"sales_order_item": si.sales_order_item,
 					}
 				)

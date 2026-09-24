@@ -6,6 +6,10 @@ from frappe.core.doctype.user_permission.user_permission import add_user_permiss
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 
 from erpnext.controllers import queries
+from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.subcontracting.doctype.subcontracting_order.test_subcontracting_order import (
+	make_subcontracted_variant,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -68,6 +72,18 @@ class TestQueries(ERPNextTestSuite):
 		query(txt="", filters={"customer": ""})
 		query(txt="", filters={"supplier": None})
 		query(txt="", filters={"supplier": ""})
+
+	def test_subcontracted_item_query(self):
+		variant, _ = make_subcontracted_variant()
+		item_without_bom = make_item(
+			"Subcontracted Item Without BOM", {"is_stock_item": 1, "is_sub_contracted_item": 1}
+		)
+		query = add_default_params(queries.subcontracted_item_query, "Item")
+
+		items = query(txt="Subcontracted", page_len=100)
+
+		self.assert_nested_in(variant.name, items)
+		self.assertNotIn(item_without_bom.name, [row[0] for row in items])
 
 	def test_bom_qury(self):
 		query = add_default_params(queries.bom, "BOM")

@@ -3,8 +3,6 @@
 
 frappe.provide("erpnext.accounts");
 
-cur_frm.cscript.tax_table = "Purchase Taxes and Charges";
-
 erpnext.accounts.payment_triggers.setup("Purchase Invoice");
 erpnext.accounts.taxes.setup_tax_filters("Purchase Taxes and Charges");
 erpnext.accounts.taxes.setup_tax_validations("Purchase Invoice");
@@ -88,7 +86,12 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 			erpnext.accounts.ledger_preview.show_stock_ledger_preview(this.frm);
 		}
 
-		if (!doc.is_return && doc.docstatus == 1 && doc.outstanding_amount != 0) {
+		if (
+			!doc.is_return &&
+			doc.docstatus == 1 &&
+			doc.outstanding_amount != 0 &&
+			this.frm.has_perm("write")
+		) {
 			if (doc.on_hold) {
 				this.frm.add_custom_button(
 					__("Change Release Date"),
@@ -125,7 +128,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 			this.frm.page.set_inner_btn_group_as_primary(__("Create"));
 		}
 
-		if (!doc.is_return && doc.docstatus == 1) {
+		if (!doc.is_return && doc.docstatus == 1 && frappe.model.can_create("Purchase Invoice")) {
 			if (doc.outstanding_amount >= 0 || Math.abs(flt(doc.outstanding_amount)) < flt(doc.grand_total)) {
 				this.frm.add_custom_button(
 					__("Return / Debit Note"),
@@ -218,7 +221,11 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 		}
 		this.frm.toggle_reqd("supplier_warehouse", this.frm.doc.is_subcontracted);
 
-		if (doc.docstatus == 1 && !doc.inter_company_invoice_reference) {
+		if (
+			doc.docstatus == 1 &&
+			!doc.inter_company_invoice_reference &&
+			frappe.model.can_create("Sales Invoice")
+		) {
 			frappe.model.with_doc("Supplier", me.frm.doc.supplier, function () {
 				var supplier = frappe.model.get_doc("Supplier", me.frm.doc.supplier);
 				var internal = supplier.is_internal_supplier;
@@ -478,7 +485,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 	}
 };
 
-cur_frm.script_manager.make(erpnext.accounts.PurchaseInvoice);
+frappe.ui.form.set_controller("Purchase Invoice", erpnext.accounts.PurchaseInvoice);
 
 // Hide Fields
 // ------------
@@ -504,70 +511,23 @@ function hide_fields(frm) {
 	frm.refresh_fields();
 }
 
-cur_frm.fields_dict.cash_bank_account.get_query = function (doc) {
-	return {
-		filters: [
-			["Account", "account_type", "in", ["Cash", "Bank"]],
-			["Account", "is_group", "=", 0],
-			["Account", "company", "=", doc.company],
-			["Account", "report_type", "=", "Balance Sheet"],
-		],
-	};
-};
-
-cur_frm.fields_dict["items"].grid.get_field("item_code").get_query = function (doc, cdt, cdn) {
-	return {
-		query: "erpnext.controllers.queries.item_query",
-		filters: { is_purchase_item: 1 },
-	};
-};
-
-cur_frm.fields_dict["credit_to"].get_query = function (doc) {
-	// filter on Account
-	return {
-		filters: {
-			account_type: "Payable",
-			is_group: 0,
-			company: doc.company,
-		},
-	};
-};
-
-// Get Print Heading
-cur_frm.fields_dict["select_print_heading"].get_query = function (doc, cdt, cdn) {
-	return {
-		filters: [["Print Heading", "docstatus", "!=", 2]],
-	};
-};
-
-cur_frm.set_query("wip_composite_asset", "items", function () {
-	return {
-		filters: { asset_type: "Composite Asset", docstatus: 0 },
-	};
-});
-
-cur_frm.cscript.expense_account = function (doc, cdt, cdn) {
-	var d = locals[cdt][cdn];
-	if (d.idx == 1 && d.expense_account) {
-		var cl = doc.items || [];
-		for (var i = 0; i < cl.length; i++) {
-			if (!cl[i].expense_account) cl[i].expense_account = d.expense_account;
+frappe.ui.form.on("Purchase Invoice Item", {
+	expense_account: function (frm, cdt, cdn) {
+		let d = locals[cdt][cdn];
+		if (d.idx == 1 && d.expense_account) {
+			for (const item of frm.doc.items || []) {
+				if (!item.expense_account) item.expense_account = d.expense_account;
+			}
 		}
-	}
-	refresh_field("items");
-};
-
-cur_frm.fields_dict["items"].grid.get_field("cost_center").get_query = function (doc) {
-	return {
-		filters: {
-			company: doc.company,
-			is_group: 0,
-		},
-	};
-};
+		frm.refresh_field("items");
+	},
+});
 
 frappe.ui.form.on("Purchase Invoice", {
 	setup: function (frm) {
+		frm.cscript.tax_table = "Purchase Taxes and Charges";
+		frm.events.set_queries(frm);
+
 		frm.custom_make_buttons = {
 			"Purchase Invoice": "Return / Debit Note",
 			"Payment Entry": "Payment",
@@ -627,6 +587,50 @@ frappe.ui.form.on("Purchase Invoice", {
 		};
 	},
 
+	set_queries: function (frm) {
+		frm.set_query("cash_bank_account", function (doc) {
+			return {
+				filters: [
+					["Account", "account_type", "in", ["Cash", "Bank"]],
+					["Account", "is_group", "=", 0],
+					["Account", "company", "=", doc.company],
+					["Account", "report_type", "=", "Balance Sheet"],
+				],
+			};
+		});
+
+		frm.set_query("credit_to", function (doc) {
+			return {
+				filters: {
+					account_type: "Payable",
+					is_group: 0,
+					company: doc.company,
+				},
+			};
+		});
+
+		frm.set_query("select_print_heading", function () {
+			return {
+				filters: [["Print Heading", "docstatus", "!=", 2]],
+			};
+		});
+
+		frm.set_query("wip_composite_asset", "items", function () {
+			return {
+				filters: { asset_type: "Composite Asset", docstatus: 0 },
+			};
+		});
+
+		frm.set_query("cost_center", "items", function (doc) {
+			return {
+				filters: {
+					company: doc.company,
+					is_group: 0,
+				},
+			};
+		});
+	},
+
 	refresh: function (frm) {
 		frm.events.add_custom_buttons(frm);
 	},
@@ -638,7 +642,12 @@ frappe.ui.form.on("Purchase Invoice", {
 	},
 
 	add_custom_buttons: function (frm) {
-		if (frm.doc.docstatus == 1 && frm.doc.per_received < 100 && frm.doc.update_stock == 0) {
+		if (
+			frm.doc.docstatus == 1 &&
+			frm.doc.per_received < 100 &&
+			frm.doc.update_stock == 0 &&
+			frappe.model.can_create("Purchase Receipt")
+		) {
 			frm.add_custom_button(
 				__("Purchase Receipt"),
 				() => {
@@ -662,7 +671,11 @@ frappe.ui.form.on("Purchase Invoice", {
 			);
 		}
 
-		if (frm.doc.docstatus === 1 && frm.doc.update_stock) {
+		if (
+			frm.doc.docstatus === 1 &&
+			frm.doc.update_stock &&
+			frappe.model.can_create("Landed Cost Voucher")
+		) {
 			frm.add_custom_button(
 				__("Landed Cost Voucher"),
 				() => {

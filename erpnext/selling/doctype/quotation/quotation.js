@@ -1,8 +1,6 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-cur_frm.cscript.tax_table = "Sales Taxes and Charges";
-
 erpnext.accounts.taxes.setup_tax_validations("Sales Taxes and Charges Template");
 erpnext.accounts.taxes.setup_tax_filters("Sales Taxes and Charges");
 erpnext.pre_sales.set_as_lost("Quotation");
@@ -10,6 +8,8 @@ erpnext.sales_common.setup_selling_controller();
 
 frappe.ui.form.on("Quotation", {
 	setup: function (frm) {
+		frm.cscript.tax_table = "Sales Taxes and Charges";
+
 		(frm.custom_make_buttons = {
 			"Sales Order": "Sales Order",
 		}),
@@ -132,7 +132,7 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 					frappe.datetime.get_diff(doc.valid_till, frappe.datetime.get_today()) >= 0)
 			) {
 				this.frm.add_custom_button(__("Sales Order"), () => this.make_sales_order(), __("Create"));
-				cur_frm.page.set_inner_btn_group_as_primary(__("Create"));
+				this.frm.page.set_inner_btn_group_as_primary(__("Create"));
 				this.frm.add_custom_button(__("Update Items"), () => {
 					erpnext.utils.update_child_items({
 						frm: this.frm,
@@ -389,7 +389,7 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 	}
 };
 
-cur_frm.script_manager.make(erpnext.selling.QuotationController);
+frappe.ui.form.set_controller("Quotation", erpnext.selling.QuotationController);
 
 frappe.ui.form.on(
 	"Quotation Item",

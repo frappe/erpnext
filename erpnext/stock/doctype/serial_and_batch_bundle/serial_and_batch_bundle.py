@@ -3739,14 +3739,23 @@ def is_serial_batch_no_exists(
 	item_code: str, type_of_transaction: str, serial_no: str | None = None, batch_no: str | None = None
 ):
 	frappe.has_permission("Item", ptype="select", throw=True)
+	frappe.has_permission("Serial and Batch Bundle", ptype="create", throw=True)
 
-	if serial_no and not frappe.db.exists("Serial No", serial_no):
+	if (
+		serial_no
+		and frappe.has_permission("Serial No", ptype="select")
+		and not frappe.db.exists("Serial No", serial_no)
+	):
 		if type_of_transaction != "Inward":
 			frappe.throw(_("Serial No {0} does not exist").format(serial_no))
 
 		make_serial_no(serial_no, item_code)
 
-	if batch_no and not frappe.db.exists("Batch", batch_no):
+	if (
+		batch_no
+		and frappe.has_permission("Batch", ptype="select")
+		and not frappe.db.exists("Batch", batch_no)
+	):
 		if type_of_transaction != "Inward":
 			frappe.throw(_("Batch No {0} does not exist").format(batch_no))
 

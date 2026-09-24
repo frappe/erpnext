@@ -388,6 +388,8 @@ pre_submit_validation_doctypes = [
 	"Sales Order",
 ]
 
+sqlite_search = ["erpnext.stock.doctype.item.item_search.ItemSearch"]
+
 doc_events = {
 	"*": {
 		"validate": [
@@ -404,6 +406,10 @@ doc_events = {
 	},
 	("Item", "Customer", "Supplier"): {
 		"validate": "erpnext.stock.doctype.company_restriction.company_restriction.validate_allowed_companies",
+	},
+	"Item": {
+		"on_update": "erpnext.stock.doctype.item.item_search.reindex_item",
+		"after_rename": "erpnext.stock.doctype.item.item_search.reindex_renamed_item",
 	},
 	"Stock Entry": {
 		"on_submit": "erpnext.stock.doctype.material_request.material_request.update_completed_and_requested_qty",

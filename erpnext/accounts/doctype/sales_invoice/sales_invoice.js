@@ -3,8 +3,6 @@
 
 frappe.provide("erpnext.accounts");
 
-cur_frm.cscript.tax_table = "Sales Taxes and Charges";
-
 erpnext.accounts.taxes.setup_tax_validations("Sales Invoice");
 erpnext.accounts.payment_triggers.setup("Sales Invoice");
 erpnext.accounts.pos.setup("Sales Invoice");
@@ -106,7 +104,10 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 				return item.is_delivered_by_supplier ? true : false;
 			});
 
-			if (doc.outstanding_amount >= 0 || Math.abs(flt(doc.outstanding_amount)) < flt(doc.grand_total)) {
+			if (
+				frappe.model.can_create("Sales Invoice") &&
+				(doc.outstanding_amount >= 0 || Math.abs(flt(doc.outstanding_amount)) < flt(doc.grand_total))
+			) {
 				this.frm.add_custom_button(
 					__("Return / Credit Note"),
 					this.make_sales_return.bind(this),
@@ -115,7 +116,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 				this.frm.page.set_inner_btn_group_as_primary(__("Create"));
 			}
 
-			if (cint(doc.update_stock) != 1) {
+			if (cint(doc.update_stock) != 1 && frappe.model.can_create("Delivery Note")) {
 				if (!is_delivered_by_supplier) {
 					const should_create_delivery_note = doc.items.some(
 						(item) =>
@@ -127,7 +128,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 					if (should_create_delivery_note) {
 						this.frm.add_custom_button(
 							__("Delivery Note"),
-							this.frm.cscript["Make Delivery Note"],
+							() => this.make_delivery_note(),
 							__("Create")
 						);
 					}
@@ -144,22 +145,24 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 						__("Create")
 					);
 				}
-				this.frm.add_custom_button(
-					__("Invoice Discounting"),
-					this.make_invoice_discounting.bind(this),
-					__("Create")
-				);
+				if (frappe.model.can_create("Invoice Discounting")) {
+					this.frm.add_custom_button(
+						__("Invoice Discounting"),
+						this.make_invoice_discounting.bind(this),
+						__("Create")
+					);
+				}
 
 				const payment_is_overdue = doc.payment_schedule
 					.map((row) => Date.parse(row.due_date) < Date.now())
 					.reduce((prev, current) => prev || current, false);
 
-				if (payment_is_overdue) {
+				if (payment_is_overdue && frappe.model.can_create("Dunning")) {
 					this.frm.add_custom_button(__("Dunning"), this.make_dunning.bind(this), __("Create"));
 				}
 			}
 
-			if (doc.docstatus === 1) {
+			if (doc.docstatus === 1 && frappe.model.can_create("Maintenance Schedule")) {
 				this.frm.add_custom_button(
 					__("Maintenance Schedule"),
 					this.make_maintenance_schedule.bind(this),
@@ -170,7 +173,11 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 		this.toggle_get_items();
 
 		this.set_default_print_format();
-		if (doc.docstatus == 1 && !doc.inter_company_invoice_reference) {
+		if (
+			doc.docstatus == 1 &&
+			!doc.inter_company_invoice_reference &&
+			frappe.model.can_create("Purchase Invoice")
+		) {
 			let internal = me.frm.doc.is_internal_customer;
 			if (internal) {
 				let button_label =
@@ -732,28 +739,31 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 	is_return() {
 		this.toggle_get_items();
 	}
+
+	make_delivery_note() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.accounts.doctype.sales_invoice.mapper.make_delivery_note",
+			frm: this.frm,
+		});
+	}
 };
 
-// for backward compatibility: combine new and previous states
-extend_cscript(cur_frm.cscript, new erpnext.accounts.SalesInvoiceController({ frm: cur_frm }));
+frappe.ui.form.set_controller("Sales Invoice", erpnext.accounts.SalesInvoiceController);
 
-cur_frm.cscript["Make Delivery Note"] = function () {
-	frappe.model.open_mapped_doc({
-		method: "erpnext.accounts.doctype.sales_invoice.mapper.make_delivery_note",
-		frm: cur_frm,
-	});
-};
+frappe.ui.form.on("Sales Invoice Item", {
+	income_account: function (frm, cdt, cdn) {
+		erpnext.utils.copy_value_in_all_rows(frm.doc, cdt, cdn, "items", "income_account");
+	},
 
-cur_frm.cscript.income_account = function (doc, cdt, cdn) {
-	erpnext.utils.copy_value_in_all_rows(doc, cdt, cdn, "items", "income_account");
-};
-
-cur_frm.cscript.expense_account = function (doc, cdt, cdn) {
-	erpnext.utils.copy_value_in_all_rows(doc, cdt, cdn, "items", "expense_account");
-};
+	expense_account: function (frm, cdt, cdn) {
+		erpnext.utils.copy_value_in_all_rows(frm.doc, cdt, cdn, "items", "expense_account");
+	},
+});
 
 frappe.ui.form.on("Sales Invoice", {
 	setup: function (frm) {
+		frm.cscript.tax_table = "Sales Taxes and Charges";
+
 		frm.add_fetch("customer", "tax_id", "tax_id");
 		frm.add_fetch("payment_term", "invoice_portion", "invoice_portion");
 		frm.add_fetch("payment_term", "description", "description");

@@ -1,8 +1,6 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-cur_frm.add_fetch("contact", "email_id", "email_id");
-
 erpnext.buying.setup_buying_controller();
 
 frappe.ui.form.on("Request for Quotation", {
@@ -585,5 +583,4 @@ erpnext.buying.RequestforQuotationController = class RequestforQuotationControll
 	}
 };
 
-// for backward compatibility: combine new and previous states
-extend_cscript(cur_frm.cscript, new erpnext.buying.RequestforQuotationController({ frm: cur_frm }));
+frappe.ui.form.set_controller("Request for Quotation", erpnext.buying.RequestforQuotationController);

@@ -127,5 +127,4 @@ erpnext.buying.SupplierQuotationController = class SupplierQuotationController e
 	}
 };
 
-// for backward compatibility: combine new and previous states
-extend_cscript(cur_frm.cscript, new erpnext.buying.SupplierQuotationController({ frm: cur_frm }));
+frappe.ui.form.set_controller("Supplier Quotation", erpnext.buying.SupplierQuotationController);

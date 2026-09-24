@@ -408,7 +408,7 @@ frappe.ui.form.on("Material Request", {
 						} else {
 							erpnext.utils.remove_empty_first_row(frm, "items");
 							$.each(r.message, function (i, item) {
-								var d = frappe.model.add_child(cur_frm.doc, "Material Request Item", "items");
+								var d = frappe.model.add_child(frm.doc, "Material Request Item", "items");
 								d.item_code = item.item_code;
 								d.item_name = item.item_name;
 								d.description = item.description;
@@ -840,8 +840,7 @@ erpnext.buying.MaterialRequestController = class MaterialRequestController exten
 	}
 };
 
-// for backward compatibility: combine new and previous states
-extend_cscript(cur_frm.cscript, new erpnext.buying.MaterialRequestController({ frm: cur_frm }));
+frappe.ui.form.set_controller("Material Request", erpnext.buying.MaterialRequestController);
 
 function set_schedule_date(frm) {
 	if (frm.doc.schedule_date) {
