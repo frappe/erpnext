@@ -360,8 +360,9 @@ class Quotation(SellingController):
 
 	def update_other_versions(self, filters: dict, values: dict):
 		names = [version.name for version in self.get_other_versions(filters)]
-		if names:
-			frappe.db.set_value("Quotation", {"name": ["in", names]}, values)
+		frappe.db.bulk_update("Quotation", {name: values for name in names})
+		for name in names:
+			frappe.clear_document_cache("Quotation", name)
 
 	@property
 	def is_latest_version(self) -> bool:
