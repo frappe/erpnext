@@ -383,9 +383,6 @@ class Quotation(SellingController):
 		if self.status in ("Lost", "Ordered"):
 			frappe.throw(_("Cannot revise a Quotation with status {0}.").format(_(self.status)))
 
-		if not (self.is_active and self.is_latest_version):
-			frappe.throw(_("Only the latest active version of a Quotation can be revised."))
-
 	def get_other_versions(self, filters: dict) -> list[frappe._dict]:
 		original = self.revision_of or self.name
 		return frappe.get_all(

@@ -158,14 +158,22 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 				});
 			}
 
-			if (doc.is_active && doc.__onload?.is_latest_version && frappe.model.can_create("Quotation")) {
+			if (frappe.model.can_create("Quotation")) {
 				this.frm.add_custom_button(
 					__("Revision"),
-					() =>
-						frappe.model.open_mapped_doc({
-							method: "erpnext.selling.doctype.quotation.mapper.make_revision",
-							frm: this.frm,
-						}),
+					() => {
+						if (doc.__onload?.is_latest_version) {
+							this.make_revision();
+							return;
+						}
+
+						frappe.confirm(
+							__(
+								"Newer versions of this Quotation already exist. Create a new revision anyway?"
+							),
+							() => this.make_revision()
+						);
+					},
 					__("Create")
 				);
 			}
@@ -221,6 +229,13 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 				frm: me.frm,
 			});
 		}
+	}
+
+	make_revision() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.selling.doctype.quotation.mapper.make_revision",
+			frm: this.frm,
+		});
 	}
 
 	set_dynamic_field_label() {
