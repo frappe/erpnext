@@ -172,6 +172,11 @@ class TestProformaInvoice(ERPNextTestSuite):
 			("Proforma Invoice PRO-TEST-0001", "Please find attached the proforma invoice PRO-TEST-0001."),
 		)
 
+	def test_amended_proforma_is_rejected(self):
+		proforma = frappe.get_doc({"doctype": "Proforma Invoice", "amended_from": "PRO-TEST-0001"})
+
+		self.assertRaises(frappe.ValidationError, proforma.validate_amended_doc)
+
 	def test_requires_submitted_sales_order(self):
 		"""The server rejects a proforma against a draft Sales Order (the button is JS-gated only)."""
 		sales_order = make_sales_order(qty=10, do_not_submit=True)
