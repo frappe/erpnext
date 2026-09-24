@@ -6,6 +6,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt
 
+from erpnext.controllers.queries import bom
 from erpnext.stock.get_item_details import get_default_bom
 
 
@@ -38,17 +39,17 @@ class SubcontractingBOM(Document):
 		self.set_conversion_factor()
 
 	def validate_finished_good(self):
-		disabled, is_stock_item, default_bom, is_sub_contracted_item = frappe.db.get_value(
+		disabled, is_stock_item, is_sub_contracted_item = frappe.db.get_value(
 			"Item",
 			self.finished_good,
-			["disabled", "is_stock_item", "default_bom", "is_sub_contracted_item"],
+			["disabled", "is_stock_item", "is_sub_contracted_item"],
 		)
 
 		if disabled:
 			frappe.throw(_("Finished Good {0} is disabled.").format(frappe.bold(self.finished_good)))
 		if not is_stock_item:
 			frappe.throw(_("Finished Good {0} must be a stock item.").format(frappe.bold(self.finished_good)))
-		if not default_bom:
+		if not get_default_bom(self.finished_good):
 			frappe.throw(
 				_("Finished Good {0} does not have a default BOM.").format(frappe.bold(self.finished_good))
 			)
@@ -96,6 +97,17 @@ def get_applicable_bom_items(item_code: str) -> list[str]:
 	"""Items whose BOMs can be used for `item_code`: the item and its template."""
 	template = frappe.get_cached_value("Item", item_code, "variant_of")
 	return [item_code, template] if template else [item_code]
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def finished_good_bom_query(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict | str | None = None
+):
+	"""BOMs of the finished good and of its template."""
+	finished_good = (frappe.parse_json(filters) or {}).get("finished_good")
+	item_filters = {"item": ["in", get_applicable_bom_items(finished_good)]} if finished_good else {}
+	return bom(doctype, txt, searchfield, start, page_len, item_filters)
 
 
 @frappe.whitelist()
