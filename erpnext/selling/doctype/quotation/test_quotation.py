@@ -563,6 +563,19 @@ class TestQuotation(ERPNextTestSuite):
 
 		self.assertEqual(frappe.db.get_value("Quotation", quotation.name, "status"), "Lost")
 
+	def test_version_cannot_be_set_as_lost_when_another_version_is_ordered(self):
+		quotation = make_quotation()
+		revision = make_revision(quotation.name)
+		revision.insert()
+		revision.submit()
+		sales_order = make_sales_order(revision.name)
+		sales_order.delivery_date = nowdate()
+		sales_order.insert()
+		sales_order.submit()
+		quotation.reload()
+
+		self.assertRaises(frappe.ValidationError, quotation.declare_enquiry_lost, [], [])
+
 	def test_an_older_version_can_be_set_as_lost(self):
 		quotation = make_quotation()
 		revision = make_revision(quotation.name)
