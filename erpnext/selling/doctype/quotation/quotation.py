@@ -5,7 +5,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import getdate, nowdate
+from frappe.utils import cint, getdate, nowdate
 from pypika.terms import ExistsCriterion
 
 from erpnext.controllers.selling_controller import SellingController
@@ -97,6 +97,7 @@ class Quotation(SellingController):
 		pricing_rules: DF.Table[PricingRuleDetail]
 		quotation_to: DF.Link
 		referral_sales_partner: DF.Link | None
+		revision_of: DF.Link | None
 		rounded_total: DF.Currency
 		rounding_adjustment: DF.Currency
 		scan_barcode: DF.Data | None
@@ -127,6 +128,18 @@ class Quotation(SellingController):
 		utm_source: DF.Link | None
 		valid_till: DF.Date | None
 	# end: auto-generated types
+
+	def autoname(self):
+		if self.revision_of:
+			self.name = f"{self.revision_of}-R{self.get_next_revision_index()}"
+
+	def get_next_revision_index(self):
+		revisions = frappe.get_all(
+			"Quotation",
+			filters={"revision_of": self.revision_of, "amended_from": ["is", "not set"]},
+			pluck="name",
+		)
+		return max((cint(name.rsplit("-R", 1)[-1]) for name in revisions), default=0) + 1
 
 	def set_indicator(self):
 		if self.docstatus == 1:

@@ -23,6 +23,7 @@
   "company",
   "has_unit_price_items",
   "amended_from",
+  "revision_of",
   "currency_and_price_list",
   "currency",
   "conversion_rate",
@@ -213,6 +214,16 @@
    "print_hide": 1,
    "read_only": 1,
    "width": "150px"
+  },
+  {
+   "fieldname": "revision_of",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Revision Of",
+   "no_copy": 1,
+   "options": "Quotation",
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fieldname": "company",
@@ -1146,7 +1157,7 @@
  "idx": 82,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-12 12:00:00.000000",
+ "modified": "2026-09-24 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",
