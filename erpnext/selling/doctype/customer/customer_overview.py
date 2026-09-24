@@ -7,16 +7,16 @@ from frappe.utils import add_days, add_months, add_to_date, cint, flt, getdate, 
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.selling.doctype.customer.customer import get_credit_limit
 
-PERIODS = ("This fiscal year", "Last 12 months", "This quarter", "Last fiscal year")
+PERIODS = ("Current fiscal year", "Last 12 months", "This quarter", "Last fiscal year")
 OPEN_SO_STATUS = ("Closed", "Completed", "On Hold")
 
 
 @frappe.whitelist()
-def get_customer_overview(customer: str, company: str, period: str = "This fiscal year"):
+def get_customer_overview(customer: str, company: str, period: str = "Current fiscal year"):
 	check_access(customer, company)
 
 	if period not in PERIODS:
-		period = "This fiscal year"
+		period = "Current fiscal year"
 
 	as_of = getdate(today())
 	from_date, to_date = resolve_period(period, company, as_of)

@@ -1,7 +1,7 @@
 frappe.provide("erpnext");
 
 const OVERVIEW_METHOD = "erpnext.selling.doctype.customer.customer_overview";
-const PERIODS = ["This fiscal year", "Last 12 months", "This quarter", "Last fiscal year"];
+const PERIODS = ["Current fiscal year", "Last 12 months", "This quarter", "Last fiscal year"];
 const TXN_TYPES = ["All", "Sales Invoice", "Sales Order", "Payment Entry"];
 const STATUS_THEME = {
 	Paid: "green",
@@ -17,6 +17,7 @@ const STATUS_THEME = {
 	Closed: "gray",
 };
 const CHART_BLUE = "#095895";
+const RECENT_LIMIT = 10;
 
 frappe.ui.form.on("Customer", {
 	refresh(frm) {
@@ -32,7 +33,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 		this.wrapper = frm.get_field("overview_html").$wrapper;
 		this.state = {
 			company: this.pref("company") || frappe.defaults.get_user_default("Company"),
-			period: this.pref("period") || PERIODS[0],
+			period: PERIODS.includes(this.pref("period")) ? this.pref("period") : PERIODS[0],
 			doc_type: "All",
 		};
 		this.seq = 0;
@@ -469,7 +470,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 		this.list = new frappe.ui.EmbeddedList({
 			wrapper: this.$list,
 			show_search: false,
-			page_size: 7,
+			page_size: RECENT_LIMIT,
 			empty_message: __("No transactions yet"),
 			empty_icon: "list",
 			columns: [
@@ -499,7 +500,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 					customer: me.frm.doc.name,
 					company: me.state.company,
 					doc_type: me.state.doc_type,
-					limit: 7,
+					limit: RECENT_LIMIT,
 				});
 			},
 		});
