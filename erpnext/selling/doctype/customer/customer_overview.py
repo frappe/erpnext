@@ -166,10 +166,7 @@ def position(customer, company, from_date, to_date, as_of, ar, accounts):
 		cards["advances"] = {"value": advance}
 
 	credit_limit = flt(get_credit_limit(customer, company))
-	cards["credit"] = {
-		"limit": credit_limit,
-		"used_pct": flt(outstanding / credit_limit * 100, 1) if credit_limit else None,
-	}
+	cards["credit"] = {"limit": credit_limit}
 
 	return cards
 
