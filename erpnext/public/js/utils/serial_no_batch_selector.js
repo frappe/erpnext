@@ -70,11 +70,14 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 		const batch_no = this.item.batch_no;
 		let batch_number;
 		if (batch_no) {
-			const { message } = await frappe.db.get_value("Batch", batch_no, ["batch_id", "item"]);
-			if (!message?.batch_id || message.item !== this.item.item_code) {
+			const numbers = await frappe.xcall(
+				"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_serial_batch_numbers",
+				{ item_code: this.item.item_code, doctype: "Batch", names: [batch_no] }
+			);
+			batch_number = numbers[batch_no];
+			if (!batch_number) {
 				frappe.throw(__("Please select a valid Batch No for this Item in the transaction row"));
 			}
-			batch_number = message.batch_id;
 			frappe.utils.add_link_title("Batch", batch_no, batch_number);
 		}
 

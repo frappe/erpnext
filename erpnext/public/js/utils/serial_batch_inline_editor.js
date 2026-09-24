@@ -884,20 +884,19 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 		];
 		await Promise.all(
 			[
-				["Serial No", "serial_no", "serial_no"],
-				["Batch", "batch_no", "batch_id"],
-			].map(async ([doctype, field, title_field]) => {
+				["Serial No", "serial_no"],
+				["Batch", "batch_no"],
+			].map(async ([doctype, field]) => {
 				const names = [...new Set(rows.map((row) => row[field]))].filter(
 					(name) => name && !frappe.utils.get_link_title(doctype, name)
 				);
 				if (!names.length) return;
-				const records = await frappe.db.get_list(doctype, {
-					filters: { name: ["in", names] },
-					fields: ["name", title_field],
-					limit: names.length,
-				});
-				for (const record of records) {
-					frappe.utils.add_link_title(doctype, record.name, record[title_field]);
+				const numbers = await this.call(
+					"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_serial_batch_numbers",
+					{ item_code: this.row.item_code, doctype, names }
+				);
+				for (const [name, number] of Object.entries(numbers)) {
+					frappe.utils.add_link_title(doctype, name, number);
 				}
 			})
 		);

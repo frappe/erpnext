@@ -3674,6 +3674,14 @@ def get_serial_batch_scan(item_code: str, number: str, doctype: Literal["Serial 
 
 
 @frappe.whitelist()
+def get_serial_batch_numbers(
+	item_code: str, doctype: Literal["Serial No", "Batch"], names: str | list[str]
+) -> dict[str, str]:
+	frappe.has_permission("Item", "select", doc=item_code, throw=True)
+	return SerialBatchIdentity(doctype).get_number_map(frappe.parse_json(names), item_code=item_code)
+
+
+@frappe.whitelist()
 def is_duplicate_serial_no(bundle_id: str, serial_no: str):
 	return frappe.db.exists("Serial and Batch Entry", {"parent": bundle_id, "serial_no": serial_no})
 
