@@ -184,7 +184,6 @@ class BOM(WebsiteGenerator):
 		secondary_items: DF.Table[BOMSecondaryItem]
 		secondary_items_cost: DF.Currency
 		set_qty_based_on_percentage: DF.Check
-		set_rate_of_sub_assembly_item_based_on_bom: DF.Check
 		show_in_website: DF.Check
 		show_items: DF.Check
 		show_operations: DF.Check
@@ -538,8 +537,7 @@ class BOM(WebsiteGenerator):
 				own_cost += flt(item.cost)
 			total_secondary_items_per += flt(item.cost_allocation_per)
 
-		if self.cost_allocation_per == 100 and total_secondary_items_per:
-			self.cost_allocation_per -= total_secondary_items_per
+		self.cost_allocation_per = flt(100 - total_secondary_items_per)
 
 		self.cost_allocation = (self.raw_material_cost - own_cost) * (self.cost_allocation_per / 100)
 
@@ -624,6 +622,7 @@ class BOM(WebsiteGenerator):
 					"conversion_factor": item.conversion_factor,
 					"sourced_by_supplier": item.sourced_by_supplier,
 					"do_not_explode": item.do_not_explode,
+					"set_rate_of_sub_assembly_item_based_on_bom": item.set_rate_of_sub_assembly_item_based_on_bom,
 					"source_warehouse": item.source_warehouse or self.default_source_warehouse,
 					"fetch_rate": True,
 				}

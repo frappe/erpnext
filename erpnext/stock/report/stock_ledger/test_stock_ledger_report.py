@@ -2,10 +2,12 @@
 # See license.txt
 
 import frappe
+from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.utils import add_days, today
 
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.report.stock_ledger.stock_ledger import execute
+from erpnext.stock.serial_batch_bundle import get_serial_nos_from_bundle
 from erpnext.tests.utils import ERPNextTestSuite
 
 WAREHOUSE = "Stores - _TC"
@@ -77,6 +79,17 @@ class TestStockLedgerReport(ERPNextTestSuite):
 		# the in-range issue draws down from the opening balance
 		issue = next(row for row in rows if row.get("out_qty"))
 		self.assertEqual(issue["qty_after_transaction"], 6)
+
+	def test_stock_user_can_view_rows_with_serial_nos_as_text(self):
+		item = "_Test Serialized Item With Series"
+		entry = make_stock_entry(item_code=item, qty=1, to_warehouse=WAREHOUSE, basic_rate=100)
+		serial_no = get_serial_nos_from_bundle(entry.items[0].serial_and_batch_bundle)[0]
+		frappe.db.set_value("Stock Ledger Entry", {"voucher_no": entry.name}, "serial_no", serial_no)
+
+		with self.set_user(create_user("_test_stock_ledger_user@example.com", "Stock User").name):
+			rows = self.run_report(item)
+
+		self.assertIn(entry.name, [row.get("voucher_no") for row in rows])
 
 	def test_filters_to_requested_item_only(self):
 		item_a = "_Test Item"

@@ -12,8 +12,6 @@ from pypika import Order
 from pypika.analytics import RowNumber
 
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
-from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_available_serial_nos
-from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
 from erpnext.stock.report.utils import prepare_serial_batch_report
 from erpnext.stock.utils import (
@@ -65,8 +63,6 @@ def execute(filters=None):
 		actual_qty = opening_rows[0].get("qty_after_transaction", 0)
 		stock_value = opening_rows[0].get("stock_value", 0)
 
-	available_serial_nos = {}
-
 	batch_balance_dict = frappe._dict({})
 	if actual_qty and filters.get("batch_no"):
 		batch_balance_dict[filters.batch_no] = [actual_qty, stock_value]
@@ -108,9 +104,6 @@ def execute(filters=None):
 			sle.update({"qty_after_transaction": actual_qty, "stock_value": stock_value})
 
 		sle.update({"in_qty": max(sle.actual_qty, 0), "out_qty": min(sle.actual_qty, 0)})
-
-		if sle.serial_no:
-			update_available_serial_nos(available_serial_nos, sle)
 
 		if sle.actual_qty < 0:
 			sle["in_out_rate"] = flt(sle.stock_value_difference / sle.actual_qty, precision)
@@ -256,37 +249,6 @@ def get_serial_batch_bundle_details(sl_entries, filters=None):
 		_bundle_details.setdefault(entry.parent, []).append(entry)
 
 	return _bundle_details
-
-
-def update_available_serial_nos(available_serial_nos, sle):
-	serial_nos = get_serial_nos(sle.serial_no)
-	key = (sle.item_code, sle.warehouse)
-	if key not in available_serial_nos:
-		serial_details = get_available_serial_nos(
-			frappe._dict(
-				item_code=sle.item_code,
-				warehouse=sle.warehouse,
-				posting_date=sle.posting_date,
-				posting_time=sle.posting_time,
-				ignore_warehouse=1,
-			)
-		)
-		available_serial_nos[key] = [row.serial_no for row in serial_details]
-
-	existing_serial_no = available_serial_nos[key]
-	for sn in serial_nos:
-		if sle.actual_qty > 0:
-			if sn in existing_serial_no:
-				existing_serial_no.remove(sn)
-			else:
-				existing_serial_no.append(sn)
-		else:
-			if sn in existing_serial_no:
-				existing_serial_no.remove(sn)
-			else:
-				existing_serial_no.append(sn)
-
-	sle.balance_serial_no = "\n".join(existing_serial_no)
 
 
 def get_columns(filters):
