@@ -6,6 +6,7 @@ import json
 import frappe
 from frappe.utils import flt
 
+from erpnext.accounts.services.child_item_update import update_child_qty_rate
 from erpnext.selling.doctype.proforma_invoice.proforma_invoice import (
 	get_sales_order_items,
 	make_proforma_invoice,
@@ -186,6 +187,28 @@ class TestProformaInvoice(ERPNextTestSuite):
 		self.assertEqual(get_sales_order_items(sales_order.name)[0]["description"], "Ordered description")
 		self.assertEqual(frappe.get_doc("Proforma Invoice", edited).items[0].description, "Edited")
 		self.assertEqual(unedited.items[0].description, "Ordered description")
+
+	def test_update_items_cannot_delete_a_proformed_row(self):
+		sales_order = make_sales_order(
+			item_list=[
+				{"item_code": "_Test Item", "qty": 5, "rate": 100},
+				{"item_code": "_Test Item 2", "qty": 2, "rate": 50},
+			]
+		)
+		proformed, other = sales_order.items
+		proforma = self.create_proforma(sales_order, [(proformed.name, 2)])
+		keep_other = json.dumps(
+			[{"item_code": other.item_code, "qty": other.qty, "rate": other.rate, "docname": other.name}]
+		)
+
+		self.assertRaises(
+			frappe.ValidationError, update_child_qty_rate, "Sales Order", keep_other, sales_order.name
+		)
+
+		proforma.cancel()
+		update_child_qty_rate("Sales Order", keep_other, sales_order.name)
+		sales_order.reload()
+		self.assertEqual([item.name for item in sales_order.items], [other.name])
 
 	def test_amended_proforma_is_rejected(self):
 		proforma = frappe.get_doc({"doctype": "Proforma Invoice", "amended_from": "PRO-TEST-0001"})
