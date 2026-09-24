@@ -200,3 +200,112 @@ def normalize_ctx_input(T: type) -> callable:
 		return wrapper
 
 	return decorator
+
+
+def get_writable_vouchers(vouchers) -> set:
+	"""Of `vouchers`, given as (doctype, name) pairs, the ones this user may write.
+
+	get_list narrows the batch to readable names in one query per doctype -- names the caller
+	cannot read at all, or that do not exist, cost nothing beyond that. Each surviving name is
+	then confirmed individually, because no list query can stand in for the record-level check:
+	has_user_permission() walks `doc.get_all_children()` and applies User Permissions to every
+	child row's link fields, while permission query conditions only ever touch the parent table.
+	A voucher readable at parent level whose item row points at a fenced warehouse is admitted by
+	one and refused by the other.
+
+	Returning the writable pairs keeps it fail-closed -- a voucher missing a doctype or a name is
+	simply absent from the set.
+	"""
+	by_doctype = {}
+	for doctype, name in vouchers:
+		if doctype and name:
+			by_doctype.setdefault(doctype, set()).add(name)
+
+	writable = set()
+	for doctype, names in by_doctype.items():
+		try:
+			readable = names & set(
+				frappe.get_list(doctype, filters={"name": ("in", list(names))}, pluck="name")
+			)
+		except frappe.PermissionError:
+			continue
+
+		writable.update(
+			(doctype, name) for name in readable if frappe.has_permission(doctype, ptype="write", doc=name)
+		)
+
+	return writable
+
+
+def require_user_permission(doctype: str, name: str | int | None) -> None:
+	"""Raise PermissionError unless the caller's User Permissions admit the named record.
+
+	This enforces the fence only -- it does not ask whether the caller's roles grant `doctype`.
+	Use it where the entitlement to call something lives on a different doctype from the record
+	it reads: Quick Stock Balance is readable by Stock User, Stock Manager and System Manager,
+	but warehouse.json ships a row for only the first of those, so gating on Warehouse would
+	refuse a caller the page itself admits. What separates one caller's stock from another's
+	there is the User Permission, and has_user_permission() is exactly that -- frappe's own
+	link-field walk, the one has_permission() runs after its role check. It walks the record's
+	links too, so a fence on Item Group still catches an Item outside it.
+	"""
+	from frappe.permissions import has_user_permission
+
+	_refuse_unless(lambda: has_user_permission(frappe.get_doc(doctype, name), frappe.session.user), name)
+
+
+def require_permission(doctype: str, name: str | int | None, ptype: str = "read") -> None:
+	"""Raise PermissionError unless the caller may `ptype` the named record.
+
+	`throw` is left at its default, which is what keeps the refusal quiet: frappe forwards
+	print_logs=throw, and on a User Permission miss the log it would otherwise msgprint names
+	the field and the value it tripped on -- "linked to Warehouse 'Goods In Transit - CFC' in
+	row 1" -- describing a record the caller was just told it may not see.
+	"""
+	_refuse_unless(lambda: frappe.has_permission(doctype, ptype, doc=name), name)
+
+
+def _refuse_unless(check, name) -> None:
+	"""Run `check` behind detached logs; raise PermissionError unless it returns truthy.
+
+	Every rejected input leaves by this one path, so a name that is forbidden, one that does not
+	resolve and one that is empty are indistinguishable -- same exception, same message log, same
+	disable_traceback. Left alone they are three different exits:
+
+	- An empty name is falsy, and has_permission() with a falsy `doc` answers at DOCTYPE level,
+	  which is True for anyone holding the doctype. Testing bool(name) first is what stops a
+	  caller passing the guard by omitting the argument.
+	- An absent name reaches get_doc(), which msgprints "<doctype> <name> not found" BEFORE
+	  raising, and print_logs does not reach that call. Swapping message_log drops it.
+	- has_permission_check_logs is appended to by push_perm_check_log whenever it is not None, so
+	  an enclosing has_permission(print_logs=True) would collect this guard's refusal, naming the
+	  record in someone else's response. Nulling it for the duration keeps it out.
+
+	Both logs are restored, so a caller's own earlier messages and its in-progress collection
+	survive a refusal.
+	"""
+	_message_log = frappe.local.message_log
+	_check_logs = frappe.flags.get("has_permission_check_logs")
+	frappe.local.message_log = []
+	frappe.flags.has_permission_check_logs = None
+	try:
+		allowed = bool(name) and check()
+	except frappe.DoesNotExistError:
+		allowed = False
+	finally:
+		frappe.local.message_log = _message_log
+		frappe.flags.has_permission_check_logs = _check_logs
+
+	if not allowed:
+		# throw() does not touch disable_traceback -- it is set in only two places in frappe, one
+		# of which is check_doctype_permission, which this no longer calls. So set it here, or the
+		# refusal carries a traceback into the response for a system user.
+		frappe.flags.disable_traceback = True
+
+		# frappe's own constant-message refusal, rather than a bare raise: a legitimate caller
+		# gets something readable and every refusal still carries the SAME message. It must stay
+		# constant -- naming the doctype would disclose it, and `doctype` is not always the
+		# caller's own word for it. validate_child_row_is_writable() passes a parenttype read off
+		# the database, so on a child table shared between parents an interpolated message would
+		# name a parent doctype the caller never mentioned.
+		frappe.throw_permission_error()
