@@ -8,8 +8,11 @@ if TYPE_CHECKING:
 	from erpnext.manufacturing.doctype.bom_update_log.bom_update_log import BOMUpdateLog
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
 from frappe.utils import date_diff, get_datetime, now
+
+from erpnext import require_permission
 
 
 class BOMUpdateTool(Document):
@@ -35,8 +38,35 @@ def enqueue_replace_bom(boms: dict | str | None = None, args: dict | str | None 
 	if isinstance(boms, str):
 		boms = json.loads(boms)
 
+	validate_bom_replacement_access(boms)
+
 	update_log = create_bom_update_log(boms=boms)
 	return update_log
+
+
+def validate_bom_replacement_access(boms: dict | None = None) -> None:
+	"""Authorise the BOMs being swapped.
+
+	Replacing a BOM rewrites every parent BOM that references it, so both BOMs are
+	authorised here; create_bom_update_log() covers the log itself.
+	"""
+	from erpnext.manufacturing.doctype.bom_update_log.bom_update_log import BOMMissingError
+
+	boms = boms or {}
+
+	# An omitted BOM names no record, so there is nothing to authorise and nothing protected by
+	# refusing -- the caller learns only that its own request was incomplete. Raise what the
+	# Log's own validate_boms_are_specified() would, so the answer does not depend on whether
+	# the request was stopped here or one layer down.
+	if not (boms.get("current_bom") and boms.get("new_bom")):
+		frappe.throw(
+			msg=_("Please mention the Current and New BOM for replacement."),
+			title=_("Mandatory"),
+			exc=BOMMissingError,
+		)
+
+	require_permission("BOM", boms.get("current_bom"), "write")
+	require_permission("BOM", boms.get("new_bom"))
 
 
 @frappe.whitelist()
