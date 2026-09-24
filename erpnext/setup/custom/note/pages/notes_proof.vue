@@ -3,7 +3,10 @@
 		<h1 class="text-xl font-semibold text-ink-gray-9">Replacement page from ERPNext</h1>
 		<p class="text-base text-ink-gray-7">doctype: {{ doctype }}</p>
 		<p class="text-base text-ink-gray-7">name: {{ name ?? "(none)" }}</p>
-		<RouterLink class="text-base text-ink-gray-9 underline" :to="routeFor(doctype, null, { standard: true })">
+		<RouterLink
+			class="text-base text-ink-gray-9 underline"
+			:to="routeFor(doctype, null, { standard: true })"
+		>
 			Open the standard page
 		</RouterLink>
 	</div>
