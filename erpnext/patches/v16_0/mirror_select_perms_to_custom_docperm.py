@@ -240,6 +240,13 @@ GRANTS = {
 		"Sales Manager",
 		"Sales User",
 	],
+	# `select` for the roles that only pick a template on a form -- Company, Supplier and
+	# Customer and their groups -- and reached it through the `All` row this release removes.
+	"Payment Terms Template": [
+		"HR Manager",
+		"Purchase Master Manager",
+		"Sales Master Manager",
+	],
 	"Plant Floor": [
 		"Manufacturing User",
 	],
@@ -353,13 +360,6 @@ GRANTS = {
 	"Serial No": [
 		"Delivery Manager",
 		"Delivery User",
-		"Maintenance User",
-		"Quality Manager",
-	],
-	"Serial and Batch Bundle": [
-		"Accounts Manager",
-		"Accounts User",
-		"Maintenance Manager",
 		"Maintenance User",
 		"Quality Manager",
 	],
@@ -489,7 +489,28 @@ READ_GRANTS = {
 		"Stock User": ("read",),
 	},
 	"Company": {"Sales Manager": ("read",)},
+	# moved from the select map: the selector returns entry columns -- qty, warehouse, batch_no,
+	# serial_no -- and those are contents. This doctype ships no search_fields, so `select`
+	# entitles `name` alone and cannot cover them.
+	"Serial and Batch Bundle": {
+		"Accounts Manager": ("read",),
+		"Accounts User": ("read",),
+		"Maintenance Manager": ("read",),
+		"Maintenance User": ("read",),
+		"Quality Manager": ("read",),
+	},
 	"Material Request": {"Manufacturing Manager": ("read", "report")},
+	# get_payment_terms() checks `read`, so `read` is the level that matters for the roles
+	# that build a payment schedule. These are the roles that can create a document
+	# carrying a Link to Payment Terms Template.
+	"Payment Terms Template": {
+		"Maintenance Manager": ("read",),
+		"Maintenance User": ("read",),
+		"Purchase Manager": ("read",),
+		"Purchase User": ("read",),
+		"Sales Manager": ("read",),
+		"Sales User": ("read",),
+	},
 }
 
 
@@ -514,9 +535,10 @@ def removed_roles(doctype):
 	"""Return roles whose rule on `doctype` this site created and then deleted.
 
 	A pair in GRANTS never shipped a DocPerm row, so copy_perms() cannot have produced a
-	Custom DocPerm row for it and it was never on screen in Role Permission Manager to be
-	removed. The one way it can be absent by choice is that an administrator added the rule
-	themselves and later deleted it, and that leaves a trail: hooks.py registers
+	Custom DocPerm row for it. It can still be absent by choice two ways: an administrator
+	added the rule themselves and later deleted it, or -- since an earlier run of this patch
+	went out in v16.36.0 -- that run added it and an administrator deleted it afterwards.
+	Either way the deletion leaves the trail this reads: hooks.py registers
 	make_perm_log on after_delete for every DocType, Custom DocPerm opts in through
 	get_permission_log_options(), and permission_log.py writes status="Removed" when the
 	document is neither being saved nor inserted. Nothing purges those rows -- Permission Log
@@ -552,30 +574,6 @@ def removed_roles(doctype):
 	return roles
 
 
-def log_added(doctype, row):
-	"""Record an inserted row in Permission Log by hand.
-
-	insert_perm_log() returns early on frappe.flags.in_migrate, so nothing this patch writes
-	would otherwise reach the log an administrator reads. Shape matches what that function
-	would have written for an insert.
-	"""
-	after = {field: row.get(field) for field in ("role", "permlevel", "if_owner", "select", *PTYPES)}
-
-	frappe.get_doc(
-		{
-			"doctype": "Permission Log",
-			"owner": frappe.session.user,
-			"changed_by": frappe.session.user,
-			"reference_type": "Custom DocPerm",
-			"reference": row.name,
-			"for_doctype": "DocType",
-			"for_document": doctype,
-			"status": "Added",
-			"changes": frappe.as_json({"from": dict.fromkeys(after, ""), "to": after}, indent=0),
-		}
-	).db_insert()
-
-
 def execute():
 	# Permission Log is the only thing that distinguishes a rule the site deleted from one that never
 	# existed. It arrived after v15, so without it this test cannot be evaluated at all.
@@ -602,8 +600,32 @@ def execute():
 			if not frappe.db.exists("Role", role):
 				continue
 
-			# leave any existing rule for this role and level as the site configured it
-			if frappe.db.exists("Custom DocPerm", {"parent": doctype, "role": role, "permlevel": 0}):
+			existing = frappe.db.get_value(
+				"Custom DocPerm",
+				{"parent": doctype, "role": role, "permlevel": 0},
+				["name", *PTYPES, "select"],
+				as_dict=True,
+			)
+			if existing:
+				# An existing row used to be left exactly as found, on the reasoning that it was
+				# the site's own decision. That premise does not hold once this patch has run
+				# before: a row it wrote at 16.36.0 is indistinguishable from one an administrator
+				# configured, so "leave it alone" silently pins the earlier, narrower grant and
+				# nothing this release ships can ever reach the site.
+				#
+				# Widen instead, and only ever widen: grant a ptype this release ships that the
+				# row lacks, never clear one it holds. A site that deliberately narrowed a rule is
+				# overridden toward what the release grants -- an accepted cost, not an oversight.
+				missing = sorted(p for p in ptypes if not existing.get(p))
+				if missing:
+					frappe.db.set_value(
+						"Custom DocPerm",
+						existing.name,
+						{p: 1 for p in missing},
+						update_modified=False,
+					)
+					print(f"{doctype} / {role}: upgraded, added {', '.join(missing)}")
+					added = True
 				continue
 
 			# the site held this rule and deleted it again: that is a decision, not a gap
@@ -630,7 +652,9 @@ def execute():
 					row.set(ptype, 1 if ptype in ptypes else 0)
 
 				row.insert(ignore_permissions=True)
-				log_added(doctype, row)
+				# make_perm_log declines to write while frappe.flags.in_migrate is set, so these
+				# additions leave no Permission Log row. Print them instead of synthesising one.
+				print(f"{doctype} / {role}: added {', '.join(sorted(ptypes))}")
 				added = True
 			except Exception:
 				# Roll back before logging. A failed statement leaves the transaction
