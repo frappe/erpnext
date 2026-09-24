@@ -243,16 +243,26 @@ class TestItemSearchIndex(ERPNextTestSuite):
 		self.search.build_index()
 
 	def test_candidates_are_a_superset_of_the_scan(self):
-		"""The query re-filters, so extra candidates are safe but missing ones are not."""
+		"""The query re-filters, so extra candidates are safe but missing ones are not.
+
+		None is an answer too: the index declined, and the query scans without narrowing, which
+		cannot lose a row. A term matching more than CANDIDATE_LIMIT rows takes that path.
+		"""
+		answered = 0
 		for txt in ("Test", "Item", "est", "_Test"):
 			candidates = self.candidates(txt)
-			self.assertIsNotNone(candidates, txt)
+			if candidates is None:
+				continue
+
+			answered += 1
 			matched = frappe.get_all(
 				"Item",
 				filters={"name": ("like", f"%{txt}%"), "disabled": 0, "has_variants": 0},
 				pluck="name",
 			)
 			self.assertTrue(set(matched) <= set(candidates), txt)
+
+		self.assertTrue(answered, "the index declined every term, so nothing was compared")
 
 	def test_item_query_output_is_unchanged(self):
 		cases = [
