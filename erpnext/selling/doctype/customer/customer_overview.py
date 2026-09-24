@@ -161,6 +161,10 @@ def position(customer, company, from_date, to_date, as_of, ar, accounts):
 		"delta_positive_is_good": False,
 	}
 
+	advance = flt(ar.get("advance"))
+	if advance:
+		cards["advances"] = {"value": advance}
+
 	credit_limit = flt(get_credit_limit(customer, company))
 	cards["credit"] = {
 		"limit": credit_limit,
@@ -207,6 +211,7 @@ def receivables(customer, company, report_date):
 		"buckets": buckets,
 		"outstanding": outstanding,
 		"overdue": overdue,
+		"advance": flt(row.get("advance")),
 	}
 
 
