@@ -6,23 +6,25 @@ from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 
-def prepare_serial_batch_report(columns, data, *, serial_fields=()):
-	"""Add physical labels to report results. serial_fields explicitly identifies multiline ID text."""
+def prepare_serial_batch_report(columns, data, *, serial_fields=(), batch_fields=()):
+	"""Add physical labels to report results. The field arguments name multiline ID text."""
 	columns = [get_column_as_dict(column) for column in columns]
 	data = [frappe._dict(row) for row in normalize_result(data or [], columns)]
-	number_columns = prepare_number_columns(columns, serial_fields)
+	number_columns = prepare_number_columns(columns, serial_fields, batch_fields)
 	set_number_labels(data, number_columns)
 	return columns, data
 
 
-def prepare_number_columns(columns, serial_fields):
+def prepare_number_columns(columns, serial_fields, batch_fields=()):
 	number_columns = []
 	fieldnames = {column.fieldname for column in columns}
 	for index, column in reversed(list(enumerate(columns))):
-		multiple = column.fieldname in serial_fields
+		multiple = column.fieldname in serial_fields or column.fieldname in batch_fields
 		doctype = column.options if column.fieldtype == "Link" else None
-		if multiple:
+		if column.fieldname in serial_fields:
 			doctype = "Serial No"
+		elif column.fieldname in batch_fields:
+			doctype = "Batch"
 		if doctype not in ("Serial No", "Batch"):
 			continue
 
