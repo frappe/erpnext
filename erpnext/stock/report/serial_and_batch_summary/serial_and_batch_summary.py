@@ -232,7 +232,6 @@ def get_serial_batch_options(doctype, txt, start, page_len, filters):
 		order_by=f"{identity.number_field} asc, name asc",
 		limit=page_len,
 		offset=start,
-		ignore_permissions=False,
 	)
 	if filters.get("voucher_no"):
 		bundle_filters = {
@@ -247,7 +246,6 @@ def get_serial_batch_options(doctype, txt, start, page_len, filters):
 			"Serial and Batch Bundle",
 			fields=[f"entries.{entry_field}"],
 			filters=bundle_filters,
-			ignore_permissions=False,
 		)
 		query = query.where(frappe.qb.DocType(doctype).name.isin(used_ids))
 	return query.run(as_list=True)
