@@ -89,6 +89,7 @@ class ProformaInvoice(Document):
 		for item in sales_order.items:
 			item.qty = lines[item.name].qty
 			item.rate = lines[item.name].rate
+			item.description = lines[item.name].description
 			item.discount_amount = 0
 			item.discount_percentage = 0
 		sales_order.run_method("calculate_taxes_and_totals")
@@ -125,6 +126,7 @@ def get_sales_order_items(sales_order: str) -> list[dict]:
 		{
 			"item_code": item.item_code,
 			"item_name": item.item_name,
+			"description": item.description,
 			"uom": item.uom,
 			"so_detail": item.name,
 			"qty": flt(item.qty),
@@ -222,6 +224,7 @@ def _proforma_line(so_item, based_on: str, row: dict) -> dict | None:
 	return {
 		"item_code": so_item.item_code,
 		"item_name": so_item.item_name,
+		"description": row.get("description") or so_item.description,
 		"uom": so_item.uom,
 		"qty": qty,
 		"rate": rate,
