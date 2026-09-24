@@ -6,7 +6,22 @@ frappe.query_reports["Subcontracting Inward Order Summary"] = {
 			label: __("Subcontracting Inward Order"),
 			fieldtype: "Link",
 			options: "Subcontracting Inward Order",
-			get_query: () => ({ filters: { docstatus: 1 } }),
+			get_query: () => {
+				const report = frappe.query_report;
+				const filters = {
+					docstatus: 1,
+					company: report.get_filter_value("company"),
+					transaction_date: [
+						"between",
+						[report.get_filter_value("from_date"), report.get_filter_value("to_date")],
+					],
+				};
+				if (report.get_filter_value("customer")) {
+					filters.customer = report.get_filter_value("customer");
+				}
+
+				return { filters };
+			},
 		},
 	],
 };
