@@ -249,7 +249,7 @@ class AccountsController(TransactionBase):
 
 	def validate(self):
 		clear_closed_rows_on_amend(self)
-		self.clear_mapped_discount_total_of_removed_rows()
+		self.sync_mapped_discount_with_header()
 
 		if not self.get("is_return") and not self.get("is_debit_note"):
 			self.validate_qty_is_not_zero()
@@ -1512,12 +1512,26 @@ class AccountsController(TransactionBase):
 		if not self.has_mapped_discount:
 			self.discount_amount = 0
 
-	def clear_mapped_discount_total_of_removed_rows(self):
+	@property
+	def is_discount_header_derived(self):
+		precision = self.precision("discount_amount")
+		return (
+			self.get("apply_discount_on") == "Net Total"
+			and not flt(self.get("additional_discount_percentage"))
+			and flt(self.get("discount_amount"), precision)
+			== flt(sum(flt(item.distributed_discount_amount) for item in self.items), precision)
+		)
+
+	def sync_mapped_discount_with_header(self):
 		previous = self.get_doc_before_save()
-		if not previous or not previous.has_mapped_discount:
+		if not previous:
 			return
 
-		if not any(self.has_value_changed(field) for field in ADDITIONAL_DISCOUNT_FIELDS):
+		header_changed = any(self.has_value_changed(field) for field in ADDITIONAL_DISCOUNT_FIELDS)
+		if self.has_mapped_discount and header_changed and not self.is_discount_header_derived:
+			for item in self.items:
+				item.mapped_additional_discount_amount = 0
+		elif previous.has_mapped_discount and not header_changed:
 			self.clear_stale_mapped_discount_total()
 
 	def is_same_transaction_side(self, source_doc):
