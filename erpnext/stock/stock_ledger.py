@@ -2015,14 +2015,16 @@ def get_previous_sle_of_current_voucher(args, operator="<", exclude_current_vouc
 		args["posting_datetime"] = get_combine_datetime(args["posting_date"], args["posting_time"])
 
 	voucher_condition = ""
+	datetime_condition = f"posting_datetime {operator} %(posting_datetime)s"
 	if exclude_current_voucher:
 		voucher_no = args.get("voucher_no")
 		voucher_condition = f"and voucher_no != '{voucher_no}'"
 
-	elif args.get("creation") and args.get("sle_id") and not args.get("cancelled"):
-		creation = args.get("creation")
-		operator = "<="
-		voucher_condition = f"and creation < '{creation}'"
+	elif operator == "<" and args.get("creation") and args.get("sle_id") and not args.get("cancelled"):
+		# creation only breaks ties at the same posting_datetime. Applying it to earlier rows too
+		# would skip a backdated SLE that a concurrent submit created just after this one.
+		datetime_condition = """posting_datetime < %(posting_datetime)s
+				or (posting_datetime = %(posting_datetime)s and creation < %(creation)s)"""
 
 	sle = frappe.db.sql(  # nosemgrep
 		f"""
@@ -2033,7 +2035,7 @@ def get_previous_sle_of_current_voucher(args, operator="<", exclude_current_vouc
 			and is_cancelled = 0
 			{voucher_condition}
 			and (
-				posting_datetime {operator} %(posting_datetime)s
+				{datetime_condition}
 			)
 		order by posting_datetime desc, creation desc
 		limit 1
@@ -2042,6 +2044,7 @@ def get_previous_sle_of_current_voucher(args, operator="<", exclude_current_vouc
 			"item_code": args.get("item_code"),
 			"warehouse": args.get("warehouse"),
 			"posting_datetime": args.get("posting_datetime"),
+			"creation": args.get("creation"),
 		},
 		as_dict=1,
 	)
