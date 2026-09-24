@@ -26,6 +26,9 @@ def execute(filters=None):
 	include_uom = filters.get("include_uom")
 	columns = get_columns(filters)
 	items = get_items(filters)
+	if items == []:
+		return columns, []
+
 	sl_entries = get_stock_ledger_entries(filters, items)
 	item_details = get_item_details(items, sl_entries, include_uom)
 
@@ -562,7 +565,7 @@ def get_items(filters):
 		):
 			conditions.append(condition)
 
-	items = []
+	items = None
 	if conditions:
 		for condition in conditions:
 			query = query.where(condition)
