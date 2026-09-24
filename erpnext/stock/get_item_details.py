@@ -1919,6 +1919,8 @@ def get_blanket_order_details(ctx: ItemDetailsCtx):
 				(bo.company == ctx.company)
 				& (bo_item.item_code == ctx.item_code)
 				& (bo.docstatus == 1)
+				& (bo.status != "Closed")
+				& (bo_item.closed == 0)
 				& (bo.name == bo_item.parent)
 			)
 		)

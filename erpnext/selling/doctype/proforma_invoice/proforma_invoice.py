@@ -8,6 +8,8 @@ from frappe.query_builder.functions import Sum
 from frappe.utils import flt, now
 from frappe.utils.file_manager import save_file
 
+from erpnext.utilities.email_template import get_email_subject_and_message
+
 
 class ProformaInvoice(Document):
 	# begin: auto-generated types
@@ -92,6 +94,14 @@ class ProformaInvoice(Document):
 			file_name=self.name,
 			print_format=self.print_format,
 			letterhead=self.letter_head,
+		)
+
+	def get_email_content(self) -> tuple[str, str]:
+		return get_email_subject_and_message(
+			frappe.db.get_single_value("Selling Settings", "proforma_email_template"),
+			{"doc": self},
+			default_subject=_("Proforma Invoice {0}").format(self.name),
+			default_message=_("Please find attached the proforma invoice {0}.").format(self.name),
 		)
 
 
@@ -223,10 +233,11 @@ def send_proforma_email(proforma_name: str, recipients: str) -> None:
 	file_name = frappe.db.get_value("File", {"file_url": proforma.proforma_pdf}, "name")
 	if not file_name:
 		frappe.throw(_("The attached PDF file could not be found."))
+	subject, message = proforma.get_email_content()
 	frappe.sendmail(
 		recipients=[email.strip() for email in recipients.split(",") if email.strip()],
-		subject=_("Proforma Invoice {0}").format(proforma.name),
-		message=_("Please find attached the proforma invoice {0}.").format(proforma.name),
+		subject=subject,
+		message=message,
 		attachments=[{"fid": file_name}],
 	)
 	proforma.db_set("sent_on", now())

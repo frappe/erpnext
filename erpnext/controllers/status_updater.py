@@ -186,6 +186,12 @@ status_map = {
 		["Completed", "eval:self.purpose == 'Delivery' and self.delivery_status == 'Fully Delivered'"],
 		["Cancelled", "eval:self.docstatus == 2"],
 	],
+	"Blanket Order": [
+		["Draft", None],
+		["Submitted", "eval:self.docstatus == 1"],
+		["Closed", "eval:self.status == 'Closed' and self.docstatus == 1"],
+		["Cancelled", "eval:self.docstatus == 2"],
+	],
 }
 
 

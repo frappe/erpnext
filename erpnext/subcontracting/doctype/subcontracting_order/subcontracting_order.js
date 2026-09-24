@@ -101,10 +101,9 @@ frappe.ui.form.on("Subcontracting Order", {
 		frm.set_query("bom", "items", (doc, cdt, cdn) => {
 			let d = locals[cdt][cdn];
 			return {
+				query: "erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom.finished_good_bom_query",
 				filters: {
-					item: d.item_code,
-					is_active: 1,
-					docstatus: 1,
+					finished_good: d.item_code,
 					company: frm.doc.company,
 				},
 			};

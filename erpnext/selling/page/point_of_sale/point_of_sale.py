@@ -16,6 +16,7 @@ from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.utils import scan_barcode
+from erpnext.utilities.email_template import get_email_subject_and_message
 
 
 def search_by_term(search_term, warehouse, price_list, pos_profile, item_code=None, record_type=None):
@@ -643,6 +644,23 @@ def get_pos_profile_data(pos_profile: str):
 
 	pos_profile.customer_groups = _customer_groups_with_children
 	return pos_profile
+
+
+@frappe.whitelist()
+def get_receipt_email_content(doctype: str, name: str) -> dict[str, str]:
+	if doctype not in ("POS Invoice", "Sales Invoice"):
+		frappe.throw(_("Receipts can only be emailed for a POS Invoice or a Sales Invoice."))
+
+	doc = frappe.get_doc(doctype, name)
+	doc.check_permission("email")
+	template_name = doc.pos_profile and frappe.db.get_value(
+		"POS Profile", doc.pos_profile, "receipt_email_template"
+	)
+	default_text = f"{_(doctype)}: {name}"
+	subject, message = get_email_subject_and_message(
+		template_name, {"doc": doc}, default_subject=default_text, default_message=default_text
+	)
+	return {"subject": subject, "message": message}
 
 
 def add_doctype_to_results(doctype, results):

@@ -486,7 +486,8 @@ class ReportData:
 				{
 					"fieldname": "reference_doctype",
 					"label": _("Voucher Type"),
-					"fieldtype": "Data",
+					"fieldtype": "Link",
+					"options": "DocType",
 					"width": 130,
 				},
 				{
