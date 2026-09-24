@@ -310,6 +310,7 @@ class Quotation(SellingController):
 			self.update_opportunity("Lost")
 			self.update_lead()
 			self.save()
+			self.set_other_versions_as_lost()
 
 		else:
 			frappe.throw(_("Cannot set as Lost as Sales Order is made."))
@@ -329,14 +330,21 @@ class Quotation(SellingController):
 		if not (self.revision_of and self.is_active):
 			return
 
-		other_versions = frappe.get_all(
+		for name in self.get_other_versions({"is_active": 1}):
+			frappe.db.set_value("Quotation", name, "is_active", 0)
+
+	def set_other_versions_as_lost(self):
+		for name in self.get_other_versions({"status": ["not in", ["Partially Ordered", "Ordered", "Lost"]]}):
+			frappe.db.set_value("Quotation", name, "status", "Lost")
+
+	def get_other_versions(self, filters: dict) -> list[str]:
+		original = self.revision_of or self.name
+		return frappe.get_all(
 			"Quotation",
-			filters={"docstatus": 1, "is_active": 1, "name": ["!=", self.name]},
-			or_filters={"name": self.revision_of, "revision_of": self.revision_of},
+			filters={"docstatus": 1, "name": ["!=", self.name], **filters},
+			or_filters={"name": original, "revision_of": original},
 			pluck="name",
 		)
-		for name in other_versions:
-			frappe.db.set_value("Quotation", name, "is_active", 0)
 
 	def on_cancel(self):
 		if self.lost_reasons:

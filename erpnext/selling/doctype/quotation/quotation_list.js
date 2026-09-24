@@ -34,7 +34,9 @@ frappe.listview_settings["Quotation"] = {
 	},
 
 	get_indicator: function (doc) {
-		if (doc.docstatus === 1 && !doc.is_active) {
+		if (doc.status === "Lost") {
+			return [__("Lost"), "gray", "status,=,Lost"];
+		} else if (doc.docstatus === 1 && !doc.is_active) {
 			return [__("Inactive"), "red", "is_active,=,0"];
 		} else if (doc.status === "Open") {
 			return [__("Open"), "orange", "status,=,Open"];
@@ -42,8 +44,6 @@ frappe.listview_settings["Quotation"] = {
 			return [__("Partially Ordered"), "yellow", "status,=,Partially Ordered"];
 		} else if (doc.status === "Ordered") {
 			return [__("Ordered"), "green", "status,=,Ordered"];
-		} else if (doc.status === "Lost") {
-			return [__("Lost"), "gray", "status,=,Lost"];
 		} else if (doc.status === "Expired") {
 			return [__("Expired"), "gray", "status,=,Expired"];
 		}
