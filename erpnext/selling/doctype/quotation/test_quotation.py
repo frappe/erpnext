@@ -524,6 +524,20 @@ class TestQuotation(ERPNextTestSuite):
 		self.assertEqual(revision.items[0].rate, 250)
 		self.assertEqual(revision.items[0].prevdoc_docname, opportunity.name)
 
+	def test_submitting_a_revision_deactivates_other_versions(self):
+		quotation = make_quotation()
+		first_revision = make_revision(quotation.name)
+		first_revision.insert()
+		first_revision.submit()
+		self.assertEqual(frappe.db.get_value("Quotation", quotation.name, "is_active"), 0)
+
+		second_revision = make_revision(first_revision.name)
+		second_revision.insert()
+		second_revision.submit()
+
+		self.assertEqual(frappe.db.get_value("Quotation", first_revision.name, "is_active"), 0)
+		self.assertEqual(frappe.db.get_value("Quotation", second_revision.name, "is_active"), 1)
+
 	def test_draft_quotation_cannot_be_revised(self):
 		quotation = make_quotation(do_not_submit=1)
 
