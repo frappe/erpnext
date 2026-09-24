@@ -175,6 +175,51 @@ class TestPurchaseRegister(ERPNextTestSuite):
 		self.assertEqual(first_row.credit, 600)
 		self.assertEqual(first_row.balance, 500)
 
+	def test_cross_currency_refund_payment_entry(self):
+		payable_usd = "_Test Payable USD - _TC"
+
+		pe = frappe.new_doc("Payment Entry")
+		pe.company = "_Test Company"
+		pe.payment_type = "Receive"
+		pe.party_type = "Supplier"
+		pe.party = "_Test Supplier USD"
+		pe.paid_from = payable_usd
+		pe.paid_to = "Cash - _TC"
+		pe.paid_amount = 1000
+		pe.source_exchange_rate = 75
+		pe.target_exchange_rate = 1
+		pe.received_amount = 75000
+		pe.reference_no = "Test001"
+		pe.reference_date = today()
+		pe.setup_party_account_field()
+		pe.set_missing_values()
+		pe.set_exchange_rate()
+		pe.set_amounts()
+		pe.insert()
+		pe.submit()
+
+		gl_entry = frappe.db.get_value(
+			"GL Entry",
+			{"voucher_no": pe.name, "account": payable_usd, "is_cancelled": 0},
+			["debit", "credit"],
+			as_dict=True,
+		)
+
+		filters = frappe._dict(
+			company="_Test Company",
+			from_date=add_months(today(), -1),
+			to_date=today(),
+			include_payments=True,
+			supplier="_Test Supplier USD",
+		)
+		rows = execute(filters)[1]
+		pe_row = next(x for x in rows if x.get("voucher_no") == pe.name)
+
+		self.assertEqual(flt(pe_row.get("debit")), flt(gl_entry.credit))
+		self.assertEqual(flt(pe_row.get("credit")), flt(gl_entry.debit))
+		self.assertEqual(flt(pe_row.get("debit")), 75000.0)
+		self.assertEqual(flt(pe_row.get("credit")), 0.0)
+
 
 def make_purchase_invoice():
 	from erpnext.accounts.doctype.account.test_account import create_account

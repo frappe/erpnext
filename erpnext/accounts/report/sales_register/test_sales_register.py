@@ -313,3 +313,50 @@ class TestItemWiseSalesRegister(ERPNextTestSuite, AccountsTestMixin):
 		data_by_name = {x.get("voucher_no"): x.get("outstanding_amount") for x in data}
 		self.assertEqual(data_by_name.get(foreign_invoice.name), flt((100.236 * 80), outstanding_precision))
 		self.assertEqual(data_by_name.get(local_invoice.name), flt(200.456, outstanding_precision))
+
+	def test_cross_currency_refund_payment_entry(self):
+		receivable_usd = "_Test Receivable USD - _TC"
+
+		pe = frappe.new_doc("Payment Entry")
+		pe.company = self.company
+		pe.payment_type = "Pay"
+		pe.party_type = "Customer"
+		pe.party = "_Test Customer USD"
+		pe.paid_from = self.cash
+		pe.paid_to = receivable_usd
+		pe.paid_amount = 75000
+		pe.source_exchange_rate = 1
+		pe.target_exchange_rate = 75
+		pe.received_amount = 1000
+		pe.reference_no = "Test001"
+		pe.reference_date = today()
+		pe.setup_party_account_field()
+		pe.set_missing_values()
+		pe.set_exchange_rate()
+		pe.set_amounts()
+		pe.insert()
+		pe.submit()
+
+		gl_entry = frappe.db.get_value(
+			"GL Entry",
+			{"voucher_no": pe.name, "account": receivable_usd, "is_cancelled": 0},
+			["debit", "credit"],
+			as_dict=True,
+		)
+
+		filters = frappe._dict(
+			{
+				"from_date": today(),
+				"to_date": today(),
+				"company": self.company,
+				"include_payments": True,
+				"customer": "_Test Customer USD",
+			}
+		)
+		rows = execute(filters)[1]
+		pe_row = next(x for x in rows if x.get("voucher_no") == pe.name)
+
+		self.assertEqual(flt(pe_row.get("debit")), flt(gl_entry.debit))
+		self.assertEqual(flt(pe_row.get("credit")), flt(gl_entry.credit))
+		self.assertEqual(flt(pe_row.get("debit")), 75000.0)
+		self.assertEqual(flt(pe_row.get("credit")), 0.0)

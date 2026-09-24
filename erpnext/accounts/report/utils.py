@@ -3,7 +3,7 @@ from frappe import _
 from frappe.query_builder.custom import ConstantColumn
 from frappe.query_builder.functions import Sum
 from frappe.utils import flt, formatdate, get_datetime_str, get_table_name
-from pypika import Order
+from pypika import Case, Order
 
 from erpnext import get_company_currency, get_default_company
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
@@ -275,6 +275,8 @@ def get_journal_entries(filters, args):
 			je.total_amount.as_("base_grand_total"),
 			je.mode_of_payment,
 			journal_account.project,
+			journal_account.debit.as_("account_debit"),
+			journal_account.credit.as_("account_credit"),
 		)
 		.where(
 			(je.voucher_type == "Journal Entry")
@@ -294,29 +296,29 @@ def get_journal_entries(filters, args):
 
 def get_payment_entries(filters, args):
 	pe = frappe.qb.DocType("Payment Entry")
+	party_account = Case().when(pe.paid_from.isin(args.party_account), pe.paid_from).else_(pe.paid_to)
 	query = (
 		frappe.qb.from_(pe)
 		.select(
 			ConstantColumn("Payment Entry").as_("doctype"),
 			pe.name,
 			pe.posting_date,
-			pe[args.account_fieldname].as_(args.account),
+			party_account.as_(args.account),
 			pe.party.as_(args.party),
 			pe.party_name.as_(args.party_name),
 			pe.remarks,
 			pe.paid_amount.as_("base_net_total"),
-			pe.paid_amount_after_tax.as_("base_grand_total"),
+			pe.base_paid_amount_after_tax,
+			pe.base_received_amount_after_tax,
 			pe.mode_of_payment,
 			pe.project,
 			pe.cost_center,
 			pe.payment_type,
-			pe.source_exchange_rate,
-			pe.target_exchange_rate,
 		)
 		.where(
 			(pe.docstatus == 1)
 			& (pe.party == filters.get(args.party))
-			& (pe[args.account_fieldname].isin(args.party_account))
+			& (pe.paid_from.isin(args.party_account) | pe.paid_to.isin(args.party_account))
 		)
 		.orderby(pe.posting_date, pe.name, order=Order.desc)
 	)
@@ -333,10 +335,12 @@ def get_payment_entries(filters, args):
 			.run()
 		)
 		for d in payment_entries:
-			exchange_rate = (
-				d.source_exchange_rate if d.payment_type == "Receive" else d.target_exchange_rate
-			) or 1
-			d.base_grand_total = flt(d.base_grand_total) + flt(deduction_totals.get(d.name)) / exchange_rate
+			base_amount = (
+				d.base_paid_amount_after_tax
+				if d.payment_type == "Receive"
+				else d.base_received_amount_after_tax
+			)
+			d.base_grand_total = flt(base_amount) + flt(deduction_totals.get(d.name))
 
 	return payment_entries
 
