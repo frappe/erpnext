@@ -2,7 +2,7 @@ import sqlite3
 from unittest.mock import MagicMock, patch
 
 import frappe
-from frappe.search.sqlite_search import get_search_classes, index_docs_in_queue, update_doc_index
+from frappe.search.sqlite_search import get_search_classes, update_doc_index
 
 from erpnext.controllers import queries
 from erpnext.stock.doctype.item.item_search import ItemSearch, build_match_query
@@ -79,13 +79,12 @@ class TestItemSearchIndex(ERPNextTestSuite):
 
 		item.append("barcodes", {"barcode": "8809988776655"})
 		item.save()
-		index_docs_in_queue()
 
 		self.assertIn("ZZ-BARCODE-PROBE", self.candidates("8809988776655"))
 		self.assertEqual(self.run_query("8809988776655", None), self.run_query("8809988776655", None, False))
 
-	def test_a_new_item_is_searchable_before_the_queue_drains(self):
-		"""index_doc only queues, and the scheduler drains every 5 minutes."""
+	def test_a_new_item_is_searchable_immediately(self):
+		"""index_doc writes to search_fts during the save, so there is no window to miss."""
 		item = frappe.get_doc(
 			{
 				"doctype": "Item",
@@ -157,7 +156,6 @@ class TestItemSearchIndex(ERPNextTestSuite):
 				"stock_uom": frappe.db.get_value("UOM", {}, "name"),
 			}
 		).insert()
-		index_docs_in_queue()
 
 		self.assertIn("ZZ-NO-BARCODE-3312", self.candidates("3312"))
 
@@ -192,11 +190,9 @@ class TestItemSearchIndex(ERPNextTestSuite):
 				"stock_uom": frappe.db.get_value("UOM", {}, "name"),
 			}
 		).insert()
-		index_docs_in_queue()
 		self.assertIn("ZZ-RENAME-FROM-5521", self.candidates("5521"))
 
 		frappe.rename_doc("Item", item.name, "ZZ-RENAME-TO-5521", force=True)
-		index_docs_in_queue()
 
 		self.assertIn("ZZ-RENAME-TO-5521", self.candidates("5521"))
 		self.assertNotIn("ZZ-RENAME-FROM-5521", self.candidates("5521"))
@@ -212,7 +208,6 @@ class TestItemSearchIndex(ERPNextTestSuite):
 				"stock_uom": frappe.db.get_value("UOM", {}, "name"),
 			}
 		).insert()
-		index_docs_in_queue()
 
 		for txt in ("Valve  3", "example.com"):
 			with self.subTest(txt=txt):
@@ -243,16 +238,26 @@ class TestItemSearchIndex(ERPNextTestSuite):
 		self.search.build_index()
 
 	def test_candidates_are_a_superset_of_the_scan(self):
-		"""The query re-filters, so extra candidates are safe but missing ones are not."""
+		"""The query re-filters, so extra candidates are safe but missing ones are not.
+
+		None is an answer too: the index declined, and the query scans without narrowing, which
+		cannot lose a row. A term matching more than CANDIDATE_LIMIT rows takes that path.
+		"""
+		answered = 0
 		for txt in ("Test", "Item", "est", "_Test"):
 			candidates = self.candidates(txt)
-			self.assertIsNotNone(candidates, txt)
+			if candidates is None:
+				continue
+
+			answered += 1
 			matched = frappe.get_all(
 				"Item",
 				filters={"name": ("like", f"%{txt}%"), "disabled": 0, "has_variants": 0},
 				pluck="name",
 			)
 			self.assertTrue(set(matched) <= set(candidates), txt)
+
+		self.assertTrue(answered, "the index declined every term, so nothing was compared")
 
 	def test_item_query_output_is_unchanged(self):
 		cases = [
