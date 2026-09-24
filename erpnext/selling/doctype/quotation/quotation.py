@@ -350,14 +350,18 @@ class Quotation(SellingController):
 		if not (self.revision_of and self.is_active):
 			return
 
-		for version in self.get_other_versions({"is_active": 1}):
-			frappe.db.set_value("Quotation", version.name, "is_active", 0)
+		self.update_other_versions({"is_active": 1}, {"is_active": 0})
 
 	def set_other_versions_as_lost(self):
-		for version in self.get_other_versions(
-			{"status": ["not in", ["Partially Ordered", "Ordered", "Lost"]]}
-		):
-			frappe.db.set_value("Quotation", version.name, {"status": "Lost", "is_active": 0})
+		self.update_other_versions(
+			{"status": ["not in", ["Partially Ordered", "Ordered", "Lost"]]},
+			{"status": "Lost", "is_active": 0},
+		)
+
+	def update_other_versions(self, filters: dict, values: dict):
+		names = [version.name for version in self.get_other_versions(filters)]
+		if names:
+			frappe.db.set_value("Quotation", {"name": ["in", names]}, values)
 
 	@property
 	def is_latest_version(self) -> bool:
