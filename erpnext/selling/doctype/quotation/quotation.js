@@ -149,18 +149,18 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 					this.frm.trigger("set_as_lost_dialog");
 				});
 			}
-		}
 
-		if (doc.docstatus == 1 && doc.is_active && frappe.model.can_create("Quotation")) {
-			this.frm.add_custom_button(
-				__("Revision"),
-				() =>
-					frappe.model.open_mapped_doc({
-						method: "erpnext.selling.doctype.quotation.mapper.make_revision",
-						frm: this.frm,
-					}),
-				__("Create")
-			);
+			if (doc.is_active && frappe.model.can_create("Quotation")) {
+				this.frm.add_custom_button(
+					__("Revision"),
+					() =>
+						frappe.model.open_mapped_doc({
+							method: "erpnext.selling.doctype.quotation.mapper.make_revision",
+							frm: this.frm,
+						}),
+					__("Create")
+				);
+			}
 		}
 
 		if (this.frm.doc.docstatus === 0 && frappe.model.can_read("Opportunity")) {
