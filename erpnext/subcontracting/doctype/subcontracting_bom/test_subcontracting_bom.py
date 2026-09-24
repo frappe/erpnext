@@ -27,6 +27,20 @@ class TestSubcontractingBOM(ERPNextTestSuite):
 		subcontracting_bom = get_subcontracting_boms_for_finished_goods(variant.name)
 		self.assertEqual(subcontracting_bom.finished_good_bom, template_bom.name)
 
+	def test_finished_good_bom_must_belong_to_finished_good(self):
+		variant, _ = make_subcontracted_variant()
+		service_item = make_item("Subcontracted Template Service Item", {"is_stock_item": 0})
+		unrelated_item = make_item("Subcontracted Unrelated Item", {"is_stock_item": 1})
+		unrelated_bom = make_bom(item=unrelated_item.name, raw_materials=["Subcontracted Template RM Item"])
+
+		self.assertRaises(
+			frappe.ValidationError,
+			create_subcontracting_bom,
+			finished_good=variant.name,
+			finished_good_bom=unrelated_bom.name,
+			service_item=service_item.name,
+		)
+
 	def test_finished_good_bom_query_lists_variant_and_template_boms(self):
 		variant, template_bom = make_subcontracted_variant()
 		variant_bom = make_bom(item=variant.name, raw_materials=["Subcontracted Template RM Item"])
