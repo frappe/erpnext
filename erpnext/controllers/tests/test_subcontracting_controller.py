@@ -1301,10 +1301,9 @@ def update_item_details(child_row, details):
 	details.use_serial_batch_fields = child_row.get("use_serial_batch_fields")
 	if child_row.serial_and_batch_bundle:
 		doc = frappe.get_doc("Serial and Batch Bundle", child_row.serial_and_batch_bundle)
+		serial_ids = [row.serial_no for row in doc.get("entries") if row.serial_no]
+		details.serial_no.extend(SerialBatchIdentity("Serial No").get_numbers(doc.item_code, serial_ids))
 		for row in doc.get("entries"):
-			if row.serial_no:
-				details.serial_no.append(frappe.db.get_value("Serial No", row.serial_no, "serial_no"))
-
 			if row.batch_no:
 				details.batch_no[row.batch_no] += row.qty * (
 					-1 if doc.type_of_transaction == "Outward" else 1
