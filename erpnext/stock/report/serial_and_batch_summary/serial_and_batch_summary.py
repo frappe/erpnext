@@ -220,6 +220,9 @@ def get_batch_nos(doctype: str, txt: str, searchfield: str, start: int, page_len
 
 
 def get_serial_batch_options(doctype, txt, start, page_len, filters):
+	if not filters.get("item_code") and not filters.get("voucher_no"):
+		return []
+
 	identity = SerialBatchIdentity(doctype)
 	query = frappe.qb.get_query(
 		doctype,
