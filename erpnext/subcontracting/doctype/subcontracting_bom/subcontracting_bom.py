@@ -116,12 +116,15 @@ def get_applicable_bom_items(item_code: str) -> list[str]:
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def finished_good_bom_query(
-	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict | str | None = None
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict | None = None
 ):
 	"""BOMs of the finished good and of its template."""
-	filters = frappe.parse_json(filters) or {}
-	if finished_good := filters.pop("finished_good", None):
-		filters["item"] = ["in", get_applicable_bom_items(finished_good)]
+	filters = filters or {}
+	finished_good = filters.pop("finished_good", None)
+	if not finished_good or not isinstance(finished_good, str):
+		return []
+
+	filters["item"] = ["in", get_applicable_bom_items(finished_good)]
 	return bom(doctype, txt, searchfield, start, page_len, filters)
 
 
