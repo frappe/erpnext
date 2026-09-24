@@ -144,9 +144,17 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 				});
 			}
 
-			if (doc.__onload?.is_latest_version && doc.status !== "Ordered" && this.frm.has_perm("write")) {
+			if (doc.status !== "Ordered" && this.frm.has_perm("write")) {
 				this.frm.add_custom_button(__("Set as Lost"), () => {
-					this.frm.trigger("set_as_lost_dialog");
+					if (!doc.__onload?.has_versions_to_set_as_lost) {
+						this.frm.trigger("set_as_lost_dialog");
+						return;
+					}
+
+					frappe.confirm(
+						__("The other versions of this Quotation will also be set as Lost. Continue?"),
+						() => this.frm.trigger("set_as_lost_dialog")
+					);
 				});
 			}
 

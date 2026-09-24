@@ -15,6 +15,7 @@ from .mapper import (
 )
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
+VERSIONS_TO_SET_AS_LOST = {"status": ["not in", ["Partially Ordered", "Ordered", "Lost"]]}
 
 
 class Quotation(SellingController):
@@ -147,6 +148,7 @@ class Quotation(SellingController):
 		super().onload()
 		if self.docstatus == 1:
 			self.set_onload("is_latest_version", self.is_latest_version)
+			self.set_onload("has_versions_to_set_as_lost", self.has_versions_to_set_as_lost)
 
 	def set_indicator(self):
 		if self.docstatus == 1:
@@ -302,9 +304,6 @@ class Quotation(SellingController):
 	):
 		self.check_permission("write")
 
-		if not self.is_latest_version:
-			frappe.throw(_("Only the latest version of a Quotation can be set as Lost."))
-
 		if not (self.is_fully_ordered() or self.is_partially_ordered()):
 			get_lost_reasons = frappe.get_list("Quotation Lost Reason", fields=["name"])
 			lost_reasons_lst = [reason.get("name") for reason in get_lost_reasons]
@@ -356,10 +355,11 @@ class Quotation(SellingController):
 		self.update_other_versions({"is_active": 1}, {"is_active": 0})
 
 	def set_other_versions_as_lost(self):
-		self.update_other_versions(
-			{"status": ["not in", ["Partially Ordered", "Ordered", "Lost"]]},
-			{"status": "Lost", "is_active": 0},
-		)
+		self.update_other_versions(VERSIONS_TO_SET_AS_LOST, {"status": "Lost", "is_active": 0})
+
+	@property
+	def has_versions_to_set_as_lost(self) -> bool:
+		return bool(self.get_other_versions(VERSIONS_TO_SET_AS_LOST))
 
 	def update_other_versions(self, filters: dict, values: dict):
 		names = [version.name for version in self.get_other_versions(filters)]
