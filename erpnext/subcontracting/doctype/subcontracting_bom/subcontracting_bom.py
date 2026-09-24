@@ -96,11 +96,15 @@ class SubcontractingBOM(Document):
 		self.conversion_factor = flt(self.service_item_qty) / flt(self.finished_good_qty)
 
 
-def get_finished_good_bom(finished_good: str) -> str | None:
+def get_finished_good_bom(item: Document) -> str | None:
 	"""BOM of the active Subcontracting BOM, else the default BOM of the item or its template."""
-	return frappe.db.get_value(
-		"Subcontracting BOM", {"finished_good": finished_good, "is_active": 1}, "finished_good_bom"
-	) or get_default_bom(finished_good)
+	return (
+		frappe.db.get_value(
+			"Subcontracting BOM", {"finished_good": item.name, "is_active": 1}, "finished_good_bom"
+		)
+		or item.default_bom
+		or get_default_bom(item.variant_of)
+	)
 
 
 def get_applicable_bom_items(item_code: str) -> list[str]:

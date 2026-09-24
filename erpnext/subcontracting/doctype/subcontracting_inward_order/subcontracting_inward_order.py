@@ -194,7 +194,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 						"qty": si.fg_item_qty,
 						"subcontracting_conversion_factor": conversion_factor,
 						"stock_uom": item.stock_uom,
-						"bom": get_finished_good_bom(item.name),
+						"bom": get_finished_good_bom(item),
 						"sales_order_item": si.sales_order_item,
 					}
 				)
