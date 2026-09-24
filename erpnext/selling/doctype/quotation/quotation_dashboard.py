@@ -12,6 +12,6 @@ def get_data():
 		"transactions": [
 			{"label": _("Sales Order"), "items": ["Sales Order"]},
 			{"label": _("Subscription"), "items": ["Auto Repeat"]},
-			{"label": _("Revisions"), "items": ["Quotation"]},
+			{"label": _("Versions"), "items": ["Quotation"]},
 		],
 	}
