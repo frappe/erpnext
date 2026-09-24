@@ -171,7 +171,7 @@ frappe.ui.form.on("Item", {
 		if (frappe.defaults.get_default("item_naming_by") != "Naming Series" || frm.doc.variant_of) {
 			frm.toggle_display("naming_series", false);
 		} else {
-			erpnext.toggle_naming_series();
+			erpnext.toggle_naming_series(frm);
 		}
 
 		frm.toggle_display(["standard_rate"], frappe.model.can_create("Item Price"));

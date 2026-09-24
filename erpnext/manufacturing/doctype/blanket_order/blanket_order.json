@@ -19,6 +19,7 @@
   "from_date",
   "to_date",
   "company",
+  "status",
   "currency_and_price_list",
   "currency",
   "conversion_rate",
@@ -104,6 +105,17 @@
    "options": "Company",
    "reqd": 1,
    "search_index": 1
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Status",
+   "no_copy": 1,
+   "options": "Draft\nSubmitted\nClosed\nCancelled",
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "collapsible": 1,
@@ -217,7 +229,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-27 10:55:37.000000",
+ "modified": "2026-09-23 20:00:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Blanket Order",
@@ -268,6 +280,11 @@
  "search_fields": "blanket_order_type, to_date",
  "sort_field": "creation",
  "sort_order": "DESC",
- "states": [],
+ "states": [
+  {
+   "color": "Green",
+   "title": "Closed"
+  }
+ ],
  "track_changes": 1
 }

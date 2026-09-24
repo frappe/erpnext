@@ -26,6 +26,7 @@ from pypika import Order
 import erpnext
 from erpnext.accounts.utils import build_qb_match_conditions
 from erpnext.stock.doctype.company_restriction.company_restriction import get_restriction_criterion
+from erpnext.stock.doctype.item.item_search import get_item_search_candidates
 from erpnext.stock.get_item_details import _get_item_tax_template
 from erpnext.stock.utils import get_combine_datetime
 from erpnext.utilities.query import get_filter_conditions_qb
@@ -388,9 +389,11 @@ def item_query(
 	db_fields = [f.fieldname for f in meta.fields] + ["name"]
 	search_str = f"%{txt}%"
 	search_conditions = []
+	searched_fields = []
 	for fieldname in fields_to_process:
 		if fieldname in db_fields:
 			search_conditions.append(item[fieldname].like(search_str))
+			searched_fields.append(fieldname)
 
 	barcode_tbl = DocType("Item Barcode")
 	barcode_subquery = (
@@ -401,6 +404,9 @@ def item_query(
 	# Condition for the description
 	if frappe.db.estimate_count("Item") < 50000 and "description" not in fields_to_process:
 		search_conditions.append(item.description.like(search_str))
+		searched_fields.append("description")
+
+	candidates = get_item_search_candidates(txt, searched_fields)
 
 	txt_no_percent = txt.replace("%", "")
 
@@ -435,6 +441,11 @@ def item_query(
 		.limit(page_len)
 		.offset(start)
 	)
+
+	if candidates is not None:
+		if not candidates:
+			return [] if as_dict else ()
+		query = query.where(item.name.isin(candidates))
 
 	if company:
 		query = query.where(get_restriction_criterion("Item", [company]))
@@ -822,16 +833,18 @@ def get_account_list(
 def get_blanket_orders(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
 	bo_filters = [
 		["docstatus", "=", 1],
+		["status", "!=", "Closed"],
 		["blanket_order_type", "=", filters.get("blanket_order_type")],
 		["company", "=", filters.get("company")],
 	]
 
 	if frappe.has_permission("Blanket Order", "read"):
 		bo_filters.append(["Blanket Order Item", "item_code", "=", filters.get("item")])
+		bo_filters.append(["Blanket Order Item", "closed", "=", 0])
 	else:
 		parents = frappe.get_all(
 			"Blanket Order Item",
-			filters={"item_code": filters.get("item"), "parenttype": "Blanket Order"},
+			filters={"item_code": filters.get("item"), "parenttype": "Blanket Order", "closed": 0},
 			pluck="parent",
 			distinct=True,
 		)
@@ -839,6 +852,9 @@ def get_blanket_orders(doctype: str, txt: str, searchfield: str, start: int, pag
 
 	if currency := filters.get("currency"):
 		bo_filters.append(["currency", "=", currency])
+
+	if transaction_date := filters.get("transaction_date"):
+		bo_filters.append(["to_date", ">=", transaction_date])
 
 	return frappe.get_list(
 		"Blanket Order",

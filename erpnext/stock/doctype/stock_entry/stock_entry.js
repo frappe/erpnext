@@ -849,7 +849,7 @@ frappe.ui.form.on("Stock Entry", {
 					} else {
 						erpnext.utils.remove_empty_first_row(frm, "items");
 						$.each(r.message, function (i, item) {
-							let d = frappe.model.add_child(cur_frm.doc, "Stock Entry Detail", "items");
+							let d = frappe.model.add_child(frm.doc, "Stock Entry Detail", "items");
 							d.item_code = item.item_code;
 							d.item_name = item.item_name;
 							d.item_group = item.item_group;
@@ -947,7 +947,7 @@ frappe.ui.form.on("Stock Entry", {
 			erpnext.utils.map_current_doc({
 				method: "erpnext.stock.doctype.stock_entry.services.subcontracting.get_items_from_subcontract_order",
 				source_name: frm.doc.purchase_order,
-				target_doc: frm,
+				target: frm,
 				freeze: true,
 			});
 		}
@@ -959,7 +959,7 @@ frappe.ui.form.on("Stock Entry", {
 			erpnext.utils.map_current_doc({
 				method: "erpnext.stock.doctype.stock_entry.services.subcontracting.get_items_from_subcontract_order",
 				source_name: frm.doc.subcontracting_order,
-				target_doc: frm,
+				target: frm,
 				freeze: true,
 			});
 		}
@@ -1345,7 +1345,7 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 	}
 
 	refresh() {
-		erpnext.toggle_naming_series();
+		erpnext.toggle_naming_series(this.frm);
 		this.toggle_related_fields(this.frm.doc);
 		this.toggle_enable_bom();
 		this.show_stock_ledger();
@@ -1708,4 +1708,4 @@ function check_should_not_attach_bom_items(bom_no) {
 	return bom_no === undefined || (erpnext.stock.bom && erpnext.stock.bom.name === bom_no);
 }
 
-extend_cscript(cur_frm.cscript, new erpnext.stock.StockEntry({ frm: cur_frm }));
+frappe.ui.form.set_controller("Stock Entry", erpnext.stock.StockEntry);

@@ -120,7 +120,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	validate_conversion_rate() {
 		this.frm.doc.conversion_rate = flt(
 			this.frm.doc.conversion_rate,
-			cur_frm ? precision("conversion_rate") : 9
+			frappe.meta.get_field_precision(this.frm.get_docfield("conversion_rate"), this.frm.doc)
 		);
 		var conversion_rate_label = frappe.meta.get_translated_label(
 			this.frm.doc.doctype,

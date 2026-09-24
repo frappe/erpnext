@@ -11,6 +11,13 @@ frappe.ui.form.on("Blanket Order", {
 	},
 
 	setup: function (frm) {
+		frm.set_indicator_formatter("item_code", function (doc) {
+			if (doc.closed) {
+				return "gray";
+			}
+			return flt(doc.ordered_qty) >= flt(doc.qty) ? "green" : "orange";
+		});
+
 		frm.custom_make_buttons = {
 			"Purchase Order": "Purchase Order",
 			"Sales Order": "Sales Order",
@@ -26,7 +33,15 @@ frappe.ui.form.on("Blanket Order", {
 	refresh: function (frm) {
 		erpnext.hide_company(frm);
 		blanket_order_pricing.update_labels(frm);
-		if (frm.doc.customer && frm.doc.docstatus === 1 && frm.doc.to_date > frappe.datetime.get_today()) {
+		add_blanket_order_status_buttons(frm);
+		erpnext.item_close.add_buttons(frm, get_blanket_order_item_close_config());
+		if (frm.doc.status === "Closed") {
+			return;
+		}
+
+		const can_order = frm.doc.docstatus === 1 && frm.doc.to_date >= frappe.datetime.get_today();
+
+		if (frm.doc.customer && can_order) {
 			frm.add_custom_button(
 				__("Sales Order"),
 				function () {
@@ -56,7 +71,7 @@ frappe.ui.form.on("Blanket Order", {
 			);
 		}
 
-		if (frm.doc.supplier && frm.doc.docstatus === 1) {
+		if (frm.doc.supplier && can_order) {
 			frm.add_custom_button(
 				__("Purchase Order"),
 				function () {
@@ -228,6 +243,56 @@ const blanket_order_pricing = {
 		}
 	},
 };
+
+function add_blanket_order_status_buttons(frm) {
+	if (frm.doc.docstatus !== 1 || !frm.has_perm("submit")) {
+		return;
+	}
+
+	if (frm.doc.status === "Closed") {
+		frm.add_custom_button(
+			__("Re-open"),
+			() => update_blanket_order_status(frm, "Submitted"),
+			__("Status")
+		);
+	} else {
+		frm.add_custom_button(__("Close"), () => update_blanket_order_status(frm, "Closed"), __("Status"));
+	}
+}
+
+function get_blanket_order_item_close_config() {
+	return {
+		is_closable: (item) => !item.closed && flt(item.ordered_qty) < flt(item.qty),
+		help: __(
+			"Closed rows can no longer be ordered. They are skipped when creating an order from this Blanket Order."
+		),
+		summarise: (item) => ({
+			item_code: item.item_code,
+			item_name: item.item_name,
+			qty: item.qty,
+			ordered_qty: item.ordered_qty || 0,
+			pending_qty: Math.max(flt(item.qty) - flt(item.ordered_qty), 0),
+			stock_uom: item.stock_uom,
+		}),
+		columns: [
+			erpnext.item_close.column("item_code", __("Item Code"), "Data", 3),
+			erpnext.item_close.column("item_name", __("Item Name"), "Data", 2),
+			erpnext.item_close.column("qty", __("Qty")),
+			erpnext.item_close.column("ordered_qty", __("Ordered Qty")),
+			erpnext.item_close.column("pending_qty", __("Pending Qty")),
+			erpnext.item_close.column("stock_uom", __("Stock UOM"), "Data"),
+		],
+	};
+}
+
+function update_blanket_order_status(frm, status) {
+	frappe.call({
+		method: "erpnext.manufacturing.doctype.blanket_order.blanket_order.update_status",
+		args: { status: status, name: frm.doc.name },
+		freeze: true,
+		callback: () => frm.reload_doc(),
+	});
+}
 
 function reset_party_pricing(frm) {
 	return blanket_order_pricing.apply(frm, null, { reset_party_values: true });

@@ -32,7 +32,7 @@ frappe.ui.form.on("Journal Entry", {
 			erpnext.journal_entry.lock_reversal_entry(frm);
 		}
 
-		erpnext.toggle_naming_series();
+		erpnext.toggle_naming_series(frm);
 		erpnext.journal_entry.add_custom_buttons(frm);
 		erpnext.journal_entry.toggle_fields_based_on_currency(frm);
 		erpnext.accounts.unreconcile_payment.add_unreconcile_btn(frm);
