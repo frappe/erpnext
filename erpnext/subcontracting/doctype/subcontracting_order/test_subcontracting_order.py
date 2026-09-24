@@ -8,6 +8,7 @@ import frappe
 from frappe.utils import flt
 
 from erpnext.buying.doctype.purchase_order.mapper import get_mapped_subcontracting_order
+from erpnext.controllers.item_variant import create_variant
 from erpnext.controllers.subcontracting_controller import (
 	get_materials_from_supplier,
 	make_rm_stock_entry,
@@ -191,6 +192,24 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 
 		for item in sco.items:
 			self.assertEqual(item.service_cost_per_qty, expected[item.purchase_order_item])
+
+	def test_variant_without_bom_uses_template_bom(self):
+		variant, template_bom = make_subcontracted_variant()
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 7",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": variant.name,
+				"fg_item_qty": 10,
+			},
+		]
+
+		sco = get_subcontracting_order(service_items=service_items, do_not_submit=1)
+
+		self.assertEqual(sco.items[0].bom, template_bom.name)
+		self.assertEqual([d.rm_item_code for d in sco.supplied_items], ["Subcontracted Template RM Item"])
 
 	def test_make_rm_stock_entry(self):
 		sco = get_subcontracting_order()
@@ -1174,6 +1193,26 @@ def create_subcontracting_order(**args):
 			sco.submit()
 
 	return sco
+
+
+def make_subcontracted_variant():
+	template = make_item(
+		"Subcontracted Template Item",
+		{
+			"is_stock_item": 1,
+			"is_sub_contracted_item": 1,
+			"has_variants": 1,
+			"attributes": [{"attribute": "Test Size"}],
+		},
+	)
+	raw_material = make_item("Subcontracted Template RM Item", {"is_stock_item": 1})
+	template_bom = make_bom(item=template.name, raw_materials=[raw_material.name])
+
+	variant = create_variant(template.name, {"Test Size": "Small"})
+	variant.is_sub_contracted_item = 1
+	variant.insert()
+
+	return variant, template_bom
 
 
 def make_subcontracted_purchase_order(project):
