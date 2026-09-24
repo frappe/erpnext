@@ -4,6 +4,7 @@
 import frappe
 from frappe import _, throw
 from frappe.model.document import Document
+from frappe.query_builder.functions import Max
 from frappe.utils import add_days, cint, cstr, date_diff, escape_html, formatdate, getdate
 
 from erpnext.setup.doctype.employee.employee import get_holiday_list_for_employee
@@ -325,6 +326,7 @@ class MaintenanceSchedule(TransactionBase):
 			serial_no_doc.save()
 
 	def validate_serial_no(self, item_code, serial_nos, amc_start_date):
+		delivery_dates = self.get_delivery_dates(item_code, serial_nos)
 		for serial_no in serial_nos:
 			sr_details = frappe.db.get_value(
 				"Serial No",
@@ -370,25 +372,35 @@ class MaintenanceSchedule(TransactionBase):
 			if sr_details.warehouse:
 				continue
 
-			delivery_date = frappe.db.get_value(
-				"Serial and Batch Entry",
-				{
-					"serial_no": serial_no,
-					"item_code": item_code,
-					"docstatus": 1,
-					"is_cancelled": 0,
-					"type_of_transaction": "Outward",
-					"voucher_type": ("in", ["Delivery Note", "Sales Invoice"]),
-				},
-				"posting_datetime",
-				order_by="posting_datetime desc",
-			)
+			delivery_date = delivery_dates.get(serial_no)
 			if delivery_date and getdate(delivery_date) >= getdate(amc_start_date):
 				throw(
 					_("Maintenance start date can not be before delivery date for Serial No {0}").format(
 						number
 					)
 				)
+
+	def get_delivery_dates(self, item_code, serial_nos):
+		"""Latest outward movement per serial, so validation reads them once rather than per row."""
+		if not serial_nos:
+			return {}
+
+		entry = frappe.qb.DocType("Serial and Batch Entry")
+		rows = (
+			frappe.qb.from_(entry)
+			.select(entry.serial_no, Max(entry.posting_datetime).as_("posting_datetime"))
+			.where(
+				entry.serial_no.isin(serial_nos)
+				& (entry.item_code == item_code)
+				& (entry.docstatus == 1)
+				& (entry.is_cancelled == 0)
+				& (entry.type_of_transaction == "Outward")
+				& entry.voucher_type.isin(["Delivery Note", "Sales Invoice"])
+			)
+			.groupby(entry.serial_no)
+		).run(as_dict=True)
+
+		return {row.serial_no: row.posting_datetime for row in rows}
 
 	def validate_schedule(self):
 		item_lst1 = []
