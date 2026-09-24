@@ -169,7 +169,7 @@ class Quotation(SellingController):
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_valid_till()
-		self.validate_revision_date()
+		self.validate_revision()
 		self.set_customer_name()
 		if self.items:
 			self.with_items = 1
@@ -188,9 +188,17 @@ class Quotation(SellingController):
 		if self.valid_till and getdate(self.valid_till) < getdate(self.transaction_date):
 			frappe.throw(_("Valid till date cannot be before transaction date"))
 
-	def validate_revision_date(self):
+	def validate_revision(self):
 		if not self.revision_of:
 			return
+
+		if self.company != frappe.db.get_value("Quotation", self.revision_of, "company"):
+			frappe.throw(
+				_("A revision must have the same company as Quotation {0}.").format(self.revision_of)
+			)
+
+		if self.get_other_versions({"status": "Lost"}):
+			frappe.throw(_("Quotation {0} is Lost and cannot be revised.").format(self.revision_of))
 
 		later_dates = [version.transaction_date for version in self.get_newer_versions()]
 		if later_dates:
