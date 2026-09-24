@@ -20,6 +20,7 @@ from erpnext.stock.doctype.pick_list.pick_list import (
 )
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 	get_reserved_serial_nos_for_pos,
+	get_serial_batch_numbers,
 	get_serial_batch_scan,
 )
 from erpnext.stock.doctype.serial_no.serial_no import auto_fetch_serial_number, get_pos_reserved_serial_nos
@@ -179,6 +180,19 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 			self.assertEqual(get_serial_batch_scan(self.item.name, "Scan-001", "Batch")["name"], batch.name)
 			self.assertEqual(get_serial_batch_scan(self.item.name, "Missing-Scan", "Batch"), {})
 		self.assertFalse(frappe.db.exists("Batch", {"item": self.item.name, "batch_id": "Missing-Scan"}))
+
+	def test_number_lookup_works_without_master_read_permission(self):
+		batch = self.make_number("Batch", "Titled-001")
+		foreign = self.make_number("Batch", "Foreign-001", self.other_item.name)
+		user = self.make_role_user("identity-title-reader@example.com", "Sales User")
+		with self.set_user(user):
+			self.assertFalse(frappe.has_permission("Batch", "read"))
+			self.assertEqual(
+				get_serial_batch_numbers(self.item.name, "Batch", [batch.name, foreign.name]),
+				{batch.name: "Titled-001"},
+			)
+		with self.set_user("Guest"), self.assertRaises(frappe.PermissionError):
+			get_serial_batch_numbers(self.item.name, "Batch", [batch.name])
 
 	def test_sql_characters_in_physical_numbers(self):
 		for doctype in ("Serial No", "Batch"):
