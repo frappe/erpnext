@@ -16,6 +16,7 @@ from pypika import Order
 
 import erpnext
 from erpnext.accounts.utils import build_qb_match_conditions
+from erpnext.stock.doctype.item.item_search import get_item_search_candidates
 from erpnext.stock.get_item_details import ItemDetailsCtx, _get_item_tax_template
 from erpnext.stock.utils import get_combine_datetime
 
@@ -176,7 +177,15 @@ def tax_account_query(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=False):
+def item_query(
+	doctype: str,
+	txt: str,
+	searchfield: str,
+	start: int,
+	page_len: int,
+	filters: dict | str | None,
+	as_dict: bool = False,
+):
 	doctype = "Item"
 	conditions = []
 
@@ -207,6 +216,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 		]
 		if field not in searchfields
 	]
+	searched_fields = list(searchfields)
 	searchfields = " or ".join([field + " like %(txt)s" for field in searchfields])
 
 	if filters and isinstance(filters, dict):
@@ -263,7 +273,17 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 	if frappe.db.estimate_count(doctype) < 50000:
 		# scan description only if items are less than 50000
 		description_cond = "or tabItem.description LIKE %(txt)s"
+		searched_fields.append("description")
 
+	candidate_cond = ""
+	candidates = get_item_search_candidates(txt, searched_fields)
+	if candidates is not None:
+		if not candidates:
+			return [] if as_dict else ()
+
+		candidate_cond = "and tabItem.name in %(candidates)s"
+
+	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection
 	return frappe.db.sql(
 		"""select
 			tabItem.name {columns}
@@ -274,7 +294,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 			and (tabItem.end_of_life > %(today)s or ifnull(tabItem.end_of_life, '0000-00-00')='0000-00-00')
 			and ({scond} or tabItem.item_code IN (select parent from `tabItem Barcode` where barcode LIKE %(txt)s)
 				{description_cond})
-			{fcond} {mcond}
+			{fcond} {mcond} {candidate_cond}
 		order by
 			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
 			if(locate(%(_txt)s, item_name), locate(%(_txt)s, item_name), 99999),
@@ -286,6 +306,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 			fcond=get_filters_cond(doctype, filters, conditions).replace("%", "%%"),
 			mcond=get_match_cond(doctype).replace("%", "%%"),
 			description_cond=description_cond,
+			candidate_cond=candidate_cond,
 		),
 		{
 			"today": nowdate(),
@@ -293,6 +314,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 			"_txt": txt.replace("%", ""),
 			"start": start,
 			"page_len": page_len,
+			"candidates": tuple(candidates or ()),
 		},
 		as_dict=as_dict,
 	)

@@ -14,7 +14,8 @@
   "disable_rounded_total",
   "disable_in_words",
   "use_posting_datetime_for_naming_documents",
-  "demo_company"
+  "demo_company",
+  "enable_item_search_index"
  ],
  "fields": [
   {
@@ -81,6 +82,14 @@
    "label": "Demo Company",
    "options": "Company",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "Speeds up Item search on large catalogues. Requires a single app server: the index is a file on that server's disk, and several servers would each answer from a different copy. Building it takes about 20 minutes for 3 million items, and runs in the background.",
+   "fieldname": "enable_item_search_index",
+   "fieldtype": "Check",
+   "label": "Enable Item Search Index",
+   "show_description_on_click": 1
   },
   {
    "default": "0",
