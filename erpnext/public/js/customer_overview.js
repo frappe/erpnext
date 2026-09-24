@@ -157,21 +157,11 @@ erpnext.CustomerOverview = class CustomerOverview {
 		return format_currency(flt(value), this.currency, 0);
 	}
 	short_money(v) {
-		const n = Math.abs(flt(v));
-		let x = n,
-			suf = "";
-		if (n >= 1e9) {
-			x = n / 1e9;
-			suf = "B";
-		} else if (n >= 1e6) {
-			x = n / 1e6;
-			suf = "M";
-		} else if (n >= 1e3) {
-			x = n / 1e3;
-			suf = "K";
-		}
-		const num = suf ? Math.round(x * 10) / 10 : Math.round(x);
-		return (flt(v) < 0 ? "-" : "") + window.get_currency_symbol(this.currency) + num + suf;
+		const format = window.get_number_format(this.currency) || "";
+		const country = format.includes(",##,") ? "India" : null;
+		const n = flt(v);
+		const short = frappe.utils.shorten_number(Math.abs(n), country, 4, 1);
+		return (n < 0 ? "-" : "") + window.get_currency_symbol(this.currency) + (short || "0");
 	}
 	date_range() {
 		const from = moment(this.data.period_range.from_date);
