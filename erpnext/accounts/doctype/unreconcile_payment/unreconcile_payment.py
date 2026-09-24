@@ -10,11 +10,16 @@ from frappe.query_builder import Criterion
 from frappe.query_builder.functions import Abs, Max, Sum
 from frappe.utils.data import comma_and
 
+from erpnext import get_writable_vouchers
 from erpnext.accounts.utils import (
 	cancel_exchange_gain_loss_journal,
 	unlink_ref_doc_from_payment_entries,
 	update_voucher_outstanding,
 )
+
+# the vouchers this tool can unreconcile. `voucher_type` arrives in the request body, so it
+# is matched against this list before it is used to address a record.
+UNRECONCILABLE_DOCTYPES = ("Payment Entry", "Journal Entry")
 
 
 class UnreconcilePayment(Document):
@@ -38,7 +43,7 @@ class UnreconcilePayment(Document):
 	# end: auto-generated types
 
 	def validate(self):
-		self.supported_types = ["Payment Entry", "Journal Entry"]
+		self.supported_types = list(UNRECONCILABLE_DOCTYPES)
 		if self.voucher_type not in self.supported_types:
 			frappe.throw(_("Only {0} are supported").format(comma_and(self.supported_types)))
 
@@ -206,6 +211,27 @@ def get_linked_advances(company, docname):
 def create_unreconcile_doc_for_selection(selections: str | list | None = None):
 	if selections:
 		selections = frappe.parse_json(selections)
+		# unreconciling rewrites the voucher's allocations, so read is not enough. save() and
+		# submit() below only cover the Unreconcile Payment document itself. Authorised per
+		# doctype rather than per row: get_list applies the record-level conditions and User
+		# Permissions to the whole batch.
+		by_doctype = {}
+		for row in selections:
+			voucher_type = row.get("voucher_type")
+			if voucher_type not in UNRECONCILABLE_DOCTYPES:
+				frappe.throw(_("Only {0} are supported").format(comma_and(list(UNRECONCILABLE_DOCTYPES))))
+
+			by_doctype.setdefault(voucher_type, set()).add(row.get("voucher_no"))
+
+		writable = get_writable_vouchers(
+			(row.get("voucher_type"), row.get("voucher_no")) for row in selections
+		)
+		for voucher_type, names in by_doctype.items():
+			if {(voucher_type, name) for name in names} - writable:
+				frappe.throw(
+					_("Not permitted to unreconcile {0}").format(voucher_type), frappe.PermissionError
+				)
+
 		# assuming each row is a unique voucher
 		for row in selections:
 			unrecon = frappe.new_doc("Unreconcile Payment")
