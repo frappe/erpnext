@@ -5,7 +5,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, getdate, nowdate
+from frappe.utils import cint, get_datetime, getdate, nowdate
 from pypika.terms import ExistsCriterion
 
 from erpnext.controllers.selling_controller import SellingController
@@ -336,16 +336,22 @@ class Quotation(SellingController):
 		if not (self.revision_of and self.is_active):
 			return
 
-		for name in self.get_other_versions({"is_active": 1}):
-			frappe.db.set_value("Quotation", name, "is_active", 0)
+		for version in self.get_other_versions({"is_active": 1}):
+			frappe.db.set_value("Quotation", version.name, "is_active", 0)
 
 	def set_other_versions_as_lost(self):
-		for name in self.get_other_versions({"status": ["not in", ["Partially Ordered", "Ordered", "Lost"]]}):
-			frappe.db.set_value("Quotation", name, {"status": "Lost", "is_active": 0})
+		for version in self.get_other_versions(
+			{"status": ["not in", ["Partially Ordered", "Ordered", "Lost"]]}
+		):
+			frappe.db.set_value("Quotation", version.name, {"status": "Lost", "is_active": 0})
 
 	@property
 	def is_latest_version(self) -> bool:
-		return not self.get_other_versions({"creation": [">", self.creation]})
+		own_order = (getdate(self.transaction_date), get_datetime(self.creation))
+		return all(
+			(version.transaction_date, version.creation) < own_order
+			for version in self.get_other_versions({})
+		)
 
 	def validate_can_be_revised(self):
 		if self.status in ("Lost", "Ordered"):
@@ -354,13 +360,13 @@ class Quotation(SellingController):
 		if not (self.is_active and self.is_latest_version):
 			frappe.throw(_("Only the latest active version of a Quotation can be revised."))
 
-	def get_other_versions(self, filters: dict) -> list[str]:
+	def get_other_versions(self, filters: dict) -> list[frappe._dict]:
 		original = self.revision_of or self.name
 		return frappe.get_all(
 			"Quotation",
 			filters={"docstatus": 1, "name": ["!=", self.name], **filters},
 			or_filters={"name": original, "revision_of": original},
-			pluck="name",
+			fields=["name", "transaction_date", "creation"],
 		)
 
 	def on_cancel(self):
