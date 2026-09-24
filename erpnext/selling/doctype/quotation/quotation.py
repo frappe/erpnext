@@ -305,7 +305,7 @@ class Quotation(SellingController):
 	):
 		self.check_permission("write")
 
-		if not (self.is_fully_ordered() or self.is_partially_ordered()):
+		if not (self.is_fully_ordered() or self.is_partially_ordered() or self.has_ordered_versions):
 			get_lost_reasons = frappe.get_list("Quotation Lost Reason", fields=["name"])
 			lost_reasons_lst = [reason.get("name") for reason in get_lost_reasons]
 			self.db_set({"status": "Lost", "is_active": 1})
@@ -357,6 +357,10 @@ class Quotation(SellingController):
 
 	def set_other_versions_as_lost(self):
 		self.update_other_versions(VERSIONS_TO_SET_AS_LOST, {"status": "Lost", "is_active": 0})
+
+	@property
+	def has_ordered_versions(self) -> bool:
+		return bool(self.get_other_versions({"status": ["in", ["Partially Ordered", "Ordered"]]}))
 
 	@property
 	def has_versions_to_set_as_lost(self) -> bool:
