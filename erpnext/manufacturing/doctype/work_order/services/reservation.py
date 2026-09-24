@@ -80,6 +80,44 @@ class WorkOrderStockReservation:
 			title=_("Target Warehouse Reservation Error"),
 		)
 
+	def validate_substituted_items(self):
+		"""Block a Work Order substitution that would strand the Production Plan's reservation.
+
+		Stock is reserved on the Production Plan against the item the plan planned for. Swapping
+		that item here would leave the plan holding stock nobody consumes while this Work Order
+		reserves the alternative separately, so the swap belongs on the plan (Alternate Item),
+		which releases and re-makes the reservation as one operation.
+		"""
+		if not (self.doc.production_plan and self.doc.reserve_stock):
+			return
+
+		substituted = {
+			row.original_item
+			for row in self.doc.required_items
+			if row.get("original_item") and row.original_item != row.item_code
+		}
+		if not substituted:
+			return
+
+		reserved = frappe.get_all(
+			"Stock Reservation Entry",
+			filters={
+				"voucher_type": "Production Plan",
+				"voucher_no": self.doc.production_plan,
+				"item_code": ("in", list(substituted)),
+				"docstatus": 1,
+			},
+			pluck="item_code",
+		)
+		if reserved:
+			frappe.throw(
+				_(
+					"Item {0} is still reserved by Production Plan {1}. Substitute it from the "
+					"Production Plan (Alternate Item) so the reservation moves with it."
+				).format(frappe.bold(reserved[0]), frappe.bold(self.doc.production_plan)),
+				title=_("Stock Reserved by Production Plan"),
+			)
+
 	def set_reserve_stock(self):
 		for row in self.doc.required_items:
 			row.reserve_stock = self.doc.reserve_stock
