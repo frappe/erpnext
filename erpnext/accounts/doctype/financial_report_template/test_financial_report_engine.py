@@ -1196,8 +1196,7 @@ class TestFormulaCalculator(FinancialReportTemplateTestCase):
 
 		calculator = FormulaCalculator(row_data, period_list)
 
-		# Test that potentially harmful expressions are safely handled
-		# These should all return 0.0 due to safe evaluation failures
+		# Harmful expressions are refused outright, not quietly turned into a zero
 		harmful_expressions = [
 			"__import__('os').system('ls')",  # Import attempts
 			"eval('1+1')",  # Nested eval attempts
@@ -1209,8 +1208,8 @@ class TestFormulaCalculator(FinancialReportTemplateTestCase):
 
 		for expr in harmful_expressions:
 			with self.subTest(expression=expr):
-				result = calculator.evaluate_formula(self._create_mock_report_row(expr))
-				self.assertEqual(result, [0.0], f"Harmful expression '{expr}' should return [0.0]")
+				with self.assertRaises(frappe.ValidationError):
+					calculator.evaluate_formula(self._create_mock_report_row(expr))
 
 		# Only safe mathematical operations work
 		safe_expressions = [
