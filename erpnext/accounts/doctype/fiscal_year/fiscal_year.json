@@ -6,6 +6,7 @@
  "description": "Represents a Financial Year. All accounting entries and other major transactions are tracked against the Fiscal Year.",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/fiscal-year",
  "engine": "InnoDB",
  "field_order": [
   "year",
@@ -79,7 +80,7 @@
    "set_only_once": 1
   }
  ],
- "icon": "fa fa-calendar",
+ "icon": "calendar",
  "idx": 1,
  "links": [],
  "modified": "2026-09-16 11:42:07.000000",

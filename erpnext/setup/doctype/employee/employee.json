@@ -7,6 +7,7 @@
  "creation": "2022-02-21 11:54:09.632218",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/employee",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -829,7 +830,7 @@
    "fieldtype": "Column Break"
   }
  ],
- "icon": "fa fa-user",
+ "icon": "user",
  "idx": 24,
  "image_field": "image",
  "is_tree": 1,

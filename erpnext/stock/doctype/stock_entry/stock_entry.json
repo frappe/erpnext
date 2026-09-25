@@ -5,6 +5,7 @@
  "creation": "2013-04-09 11:43:55",
  "doctype": "DocType",
  "document_type": "Document",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/stock-entry",
  "engine": "InnoDB",
  "field_order": [
   "stock_entry_details_tab",
@@ -763,7 +764,7 @@
   }
  ],
  "grid_page_length": 50,
- "icon": "fa fa-file-text",
+ "icon": "arrow-left-right",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,

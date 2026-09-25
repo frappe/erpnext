@@ -8,7 +8,7 @@ app_email = "hello@frappe.io"
 app_license = "GNU General Public License (v3)"
 source_link = "https://github.com/frappe/erpnext"
 app_logo_url = "/assets/erpnext/images/erpnext-logo.svg"
-app_home = "/desk"
+app_home = "/desk/home"
 
 add_to_apps_screen = [
 	{
@@ -17,8 +17,26 @@ add_to_apps_screen = [
 		"title": app_title,
 		"route": app_home,
 		"has_permission": "erpnext.check_app_permission",
+		"sequence_id": 1,
 	}
 ]
+
+# Modules that are a folder of code and nothing else. Their doctypes, reports and controllers stay
+# where they are; what they no longer own is navigation, which now sits in the sidebar named beside
+# each. Left in the dock, each would carry an entry of its own for two to four records. See
+# `frappe.utils.modules.get_code_only_modules`.
+#
+# The value names the modules that inherited that navigation, so a Call Log or a Code List resolves
+# to a sidebar the user can actually navigate to instead of dead-ending in a module the dock never
+# shows.
+code_only_modules = {
+	"Telephony": ["ERPNext Integrations"],
+	# Its one doctype, Communication Medium, describes how a call reaches someone, so it sits in
+	# the Telephony section beside the call settings rather than in a shell of its own.
+	"Communication": ["ERPNext Integrations"],
+	"EDI": ["Utilities"],
+	"Bulk Transaction": ["Utilities"],
+}
 
 develop_version = "15.x.x-develop"
 
@@ -74,7 +92,6 @@ never_skip_patches = ["erpnext.patches.v16_0.update_serial_batch_entries"]
 boot_session = "erpnext.startup.boot.boot_session"
 notification_config = "erpnext.startup.notifications.get_notification_config"
 get_help_messages = "erpnext.utilities.activation.get_help_messages"
-leaderboards = "erpnext.startup.leaderboard.get_leaderboards"
 filters_config = "erpnext.startup.filters.get_filters_config"
 additional_print_settings = "erpnext.controllers.print_settings.get_print_settings"
 

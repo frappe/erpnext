@@ -118,7 +118,6 @@ erpnext.setup.slides_settings = [
 		// Organization
 		name: "organization",
 		title: __("Setup your organization"),
-		icon: "fa fa-building",
 		fields: [
 			{
 				fieldname: "company_name",
@@ -313,6 +312,8 @@ erpnext.setup.slides_settings = [
 				parent: $(dialog.body),
 				label: parent,
 				expandable: true,
+				// read-only preview: row-mode visuals without actions
+				row_style: true,
 				method: "erpnext.accounts.utils.get_coa",
 				args: {
 					chart: chart_template,

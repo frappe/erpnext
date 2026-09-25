@@ -8,6 +8,7 @@
  "description": "Supplier of Goods or Services.",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/supplier",
  "engine": "InnoDB",
  "field_order": [
   "naming_series",
@@ -383,6 +384,7 @@
   {
    "fieldname": "primary_address_and_contact_detail_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Primary Address and Contact"
   },
   {
@@ -397,6 +399,7 @@
    "fetch_from": "supplier_primary_contact.mobile_no",
    "fieldname": "mobile_no",
    "fieldtype": "Read Only",
+   "hidden": 1,
    "label": "Mobile No",
    "no_copy": 1
   },
@@ -404,12 +407,14 @@
    "fetch_from": "supplier_primary_contact.email_id",
    "fieldname": "email_id",
    "fieldtype": "Read Only",
+   "hidden": 1,
    "label": "Email ID",
    "no_copy": 1
   },
   {
    "fieldname": "primary_address",
    "fieldtype": "Text Editor",
+   "hidden": 1,
    "label": "Primary Address Preview",
    "no_copy": 1,
    "read_only": 1
@@ -552,7 +557,7 @@
   }
  ],
  "grid_page_length": 50,
- "icon": "fa fa-user",
+ "icon": "truck",
  "idx": 370,
  "image_field": "image",
  "links": [
@@ -562,7 +567,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2026-09-16 11:42:07.000000",
+ "modified": "2026-09-25 15:31:05.845989",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",

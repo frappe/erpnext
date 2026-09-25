@@ -3,6 +3,7 @@
  "allow_copy": 1,
  "creation": "2014-07-09 12:04:51.681583",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/payment-reconciliation",
  "engine": "InnoDB",
  "field_order": [
   "company",
@@ -235,7 +236,7 @@
   }
  ],
  "hide_toolbar": 1,
- "icon": "icon-resize-horizontal",
+ "icon": "arrow-left-right",
  "is_virtual": 1,
  "issingle": 1,
  "links": [],

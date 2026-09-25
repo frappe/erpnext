@@ -3,6 +3,7 @@
  "autoname": "naming_series:",
  "creation": "2015-12-15 22:23:24.745065",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/payment-request",
  "engine": "InnoDB",
  "field_order": [
   "payment_request_type",
@@ -474,6 +475,7 @@
   }
  ],
  "grid_page_length": 50,
+ "icon": "hand-coins",
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,

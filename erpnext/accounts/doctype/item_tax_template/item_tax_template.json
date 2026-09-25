@@ -5,6 +5,7 @@
  "creation": "2022-01-19 01:09:13.297137",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/item-tax-template",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -56,6 +57,7 @@
    "fieldtype": "Section Break"
   }
  ],
+ "icon": "circle-percent",
  "links": [],
  "modified": "2026-09-16 11:42:07.000000",
  "modified_by": "Administrator",

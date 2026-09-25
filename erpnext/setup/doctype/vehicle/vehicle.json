@@ -5,6 +5,7 @@
  "creation": "2016-09-03 03:33:27.680331",
  "doctype": "DocType",
  "document_type": "Document",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/vehicle",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -203,6 +204,7 @@
    "options": "Company"
   }
  ],
+ "icon": "car",
  "links": [],
  "modified": "2026-09-16 11:42:07.000000",
  "modified_by": "Administrator",

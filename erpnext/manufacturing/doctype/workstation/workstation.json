@@ -6,6 +6,7 @@
  "creation": "2013-01-10 16:34:17",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/workstation",
  "engine": "InnoDB",
  "field_order": [
   "dashboard_tab",
@@ -219,7 +220,7 @@
   }
  ],
  "hide_toolbar": 1,
- "icon": "icon-wrench",
+ "icon": "robot-arm",
  "idx": 1,
  "image_field": "on_status_image",
  "links": [],

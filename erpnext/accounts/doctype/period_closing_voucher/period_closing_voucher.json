@@ -3,6 +3,7 @@
  "autoname": "ACC-PCV-.YYYY.-.#####",
  "creation": "2013-01-10 16:34:07",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/period-closing-voucher",
  "engine": "InnoDB",
  "field_order": [
   "transaction_date",
@@ -110,7 +111,7 @@
    "reqd": 1
   }
  ],
- "icon": "fa fa-file-text",
+ "icon": "folder-lock",
  "idx": 1,
  "is_submittable": 1,
  "links": [],

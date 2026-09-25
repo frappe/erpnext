@@ -4,6 +4,7 @@
  "autoname": "field:quality_procedure_name",
  "creation": "2018-10-06 00:06:29.756804",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/quality_procedure",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -93,6 +94,7 @@
    "print_hide": 1
   }
  ],
+ "icon": "clipboard-list",
  "is_tree": 1,
  "links": [
   {

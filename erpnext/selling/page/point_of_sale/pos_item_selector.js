@@ -279,14 +279,14 @@ erpnext.PointOfSale.ItemSelector = class {
 		this.search_field.$wrapper.find(".control-input").append(
 			`<span class="link-btn">
 				<a class="btn-open no-decoration" title="${__("Clear")}">
-					${frappe.utils.icon("close", "sm")}
+					${frappe.utils.icon("x", "sm")}
 				</a>
 			</span>`
 		);
 
 		this.item_group_field.$wrapper.find(".link-btn").append(
 			`<a class="btn-clear" tabindex="-1" style="display: inline-block;" title="${__("Clear Link")}">
-				${frappe.utils.icon("close", "xs", "es-icon")}
+				${frappe.utils.icon("x", "xs")}
 			</a>`
 		);
 

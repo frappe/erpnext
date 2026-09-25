@@ -3,6 +3,7 @@
  "autoname": "ACC-PDA-.#####",
  "creation": "2019-11-04 18:01:23.454775",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/process-deferred-accounting",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -74,6 +75,7 @@
    "reqd": 1
   }
  ],
+ "icon": "list-clock",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],

@@ -6,6 +6,7 @@
  "description": "Distinct unit of an Item",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/serial-no",
  "engine": "InnoDB",
  "field_order": [
   "details",
@@ -309,7 +310,7 @@
    "read_only": 1
   }
  ],
- "icon": "fa fa-barcode",
+ "icon": "hash",
  "idx": 1,
  "links": [],
  "modified": "2026-09-16 11:42:07.000000",

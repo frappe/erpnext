@@ -7,6 +7,7 @@
  "description": "Heads (or groups) against which Accounting Entries are made and balances are maintained.",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/chart-of-accounts",
  "engine": "InnoDB",
  "field_order": [
   "properties",
@@ -122,6 +123,7 @@
    "description": "Setting Account Type helps in selecting this Account in transactions.",
    "fieldname": "account_type",
    "fieldtype": "Select",
+   "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Account Type",
    "oldfieldname": "account_type",
@@ -199,11 +201,11 @@
    "options": "Account Category"
   }
  ],
- "icon": "fa fa-money",
+ "icon": "vault",
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2026-09-16 11:42:07.000000",
+ "modified": "2026-09-25 15:33:56.058228",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account",
