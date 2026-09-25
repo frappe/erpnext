@@ -4,6 +4,20 @@
 frappe.ui.form.on("Quality Inspection", {
 	onload(frm) {
 		frm.trigger("set_default_company");
+		frm.trigger("set_serial_no_from_number");
+	},
+
+	set_serial_no_from_number(frm) {
+		if (!frm.is_new() || !frm.doc.item_code || !frm.doc.item_serial_no) return;
+
+		frappe
+			.call({
+				method: "erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_serial_batch_scan",
+				args: { item_code: frm.doc.item_code, number: frm.doc.item_serial_no, doctype: "Serial No" },
+			})
+			.then((r) => {
+				if (r.message?.name) frm.set_value("item_serial_no", r.message.name);
+			});
 	},
 
 	set_default_company(frm) {
