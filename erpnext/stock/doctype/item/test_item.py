@@ -22,6 +22,7 @@ from erpnext.stock.doctype.item.item import (
 	get_item_attribute,
 	get_timeline_data,
 	get_uom_conv_factor,
+	set_item_default,
 	validate_is_stock_item,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -399,6 +400,14 @@ class TestItem(ERPNextTestSuite):
 		)
 		for key, value in purchase_item_check.items():
 			self.assertEqual(value, purchase_item_details.get(key))
+
+	def test_set_item_default_refreshes_cached_item(self):
+		item = make_item(properties={"item_defaults": [{"company": "_Test Company"}]})
+
+		set_item_default(item.name, "_Test Company", "income_account", "_Test Account Sales - _TC")
+
+		cached_item = frappe.get_cached_doc("Item", item.name)
+		self.assertEqual(cached_item.item_defaults[0].income_account, "_Test Account Sales - _TC")
 
 	def test_item_default_validations(self):
 		with self.assertRaises(frappe.ValidationError) as ve:
