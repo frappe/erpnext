@@ -1930,6 +1930,7 @@ class WorkOrder(Document):
 
 				doc.update_status()
 				doc.update_reserved_stock_in_bin()
+				doc.update_reserved_qty_in_voucher()
 
 	def update_returned_qty(self):
 		returned_dict = self._material_transfer_qty_by_item(is_return=1)
@@ -1990,6 +1991,7 @@ class WorkOrder(Document):
 
 				doc.update_status()
 				doc.update_reserved_stock_in_bin()
+				doc.update_reserved_qty_in_voucher()
 
 	def validate_reserved_qty(self):
 		sre_details = get_sre_details(self.name)
