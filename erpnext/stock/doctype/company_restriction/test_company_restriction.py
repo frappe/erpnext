@@ -98,15 +98,7 @@ class TestCompanyRestriction(ERPNextTestSuite):
 	def test_unrestricted_party_ignores_company_permission(self):
 		customer = make_customer("_Test Party Details Company Permission Customer")
 		user = self.make_user_with_roles("test_party_details_company@example.com", ["Sales User"])
-		permission = {
-			"user": user,
-			"allow": "Company",
-			"for_value": "_Test Company 1",
-			"apply_to_all_doctypes": 1,
-		}
-		if not frappe.db.exists("User Permission", permission):
-			frappe.get_doc({"doctype": "User Permission", **permission}).insert(ignore_permissions=True)
-		frappe.clear_cache(user=user)
+		self.allow_company(user, "_Test Company 1")
 
 		with self.set_user(user):
 			results = party_query(
@@ -154,6 +146,99 @@ class TestCompanyRestriction(ERPNextTestSuite):
 		self.restrict_to_companies("Item", item.name, ["_Test Company 1"])
 		stock_entry.reload()
 		stock_entry.cancel()
+
+	def allow_company(self, user, company):
+		permission = {
+			"user": user,
+			"allow": "Company",
+			"for_value": company,
+			"apply_to_all_doctypes": 1,
+		}
+		if not frappe.db.exists("User Permission", permission):
+			frappe.get_doc({"doctype": "User Permission", **permission}).insert(ignore_permissions=True)
+		frappe.clear_cache(user=user)
+
+	def make_item_price(self, item_code):
+		return (
+			frappe.get_doc(
+				{
+					"doctype": "Item Price",
+					"price_list": "_Test Price List",
+					"item_code": item_code,
+					"price_list_rate": 100,
+				}
+			)
+			.insert()
+			.name
+		)
+
+	def make_party_specific_item(self, customer, item_code):
+		return (
+			frappe.get_doc(
+				{
+					"doctype": "Party Specific Item",
+					"party_type": "Customer",
+					"party": customer,
+					"restrict_based_on": "Item",
+					"based_on_value": item_code,
+				}
+			)
+			.insert()
+			.name
+		)
+
+	def test_item_price_inherits_item_company_restriction(self):
+		restricted = make_item()
+		allowed = make_item()
+		self.restrict_to_companies("Item", restricted.name, ["_Test Company 1"])
+		prices = {item.name: self.make_item_price(item.name) for item in (restricted, allowed)}
+
+		user = self.make_user_with_roles("test_item_price_restriction@example.com", ["Sales Master Manager"])
+		self.allow_company(user, "_Test Company")
+
+		with self.set_user(user):
+			visible = frappe.get_list(
+				"Item Price",
+				filters={"item_code": ("in", [restricted.name, allowed.name])},
+				pluck="item_code",
+			)
+			self.assertEqual(visible, [allowed.name])
+
+			self.assertFalse(frappe.has_permission("Item Price", doc=prices[restricted.name]))
+			self.assertTrue(frappe.has_permission("Item Price", doc=prices[allowed.name]))
+
+	def test_item_price_is_visible_without_company_permission(self):
+		restricted = make_item()
+		self.restrict_to_companies("Item", restricted.name, ["_Test Company 1"])
+		price = self.make_item_price(restricted.name)
+
+		user = self.make_user_with_roles("test_item_price_unrestricted@example.com", ["Sales Master Manager"])
+
+		with self.set_user(user):
+			self.assertTrue(frappe.has_permission("Item Price", doc=price))
+
+	def test_dynamic_link_inherits_master_company_restriction(self):
+		item = make_item()
+		restricted = make_customer("_Test Dynamic Link Restricted Customer")
+		allowed = make_customer("_Test Dynamic Link Allowed Customer")
+		self.restrict_to_companies("Customer", restricted, ["_Test Company 1"])
+		records = {
+			customer: self.make_party_specific_item(customer, item.name) for customer in (restricted, allowed)
+		}
+
+		user = self.make_user_with_roles("test_dynamic_link_restriction@example.com", ["System Manager"])
+		self.allow_company(user, "_Test Company")
+
+		with self.set_user(user):
+			visible = frappe.get_list(
+				"Party Specific Item",
+				filters={"name": ("in", list(records.values()))},
+				pluck="party",
+			)
+			self.assertEqual(visible, [allowed])
+
+			self.assertFalse(frappe.has_permission("Party Specific Item", doc=records[restricted]))
+			self.assertTrue(frappe.has_permission("Party Specific Item", doc=records[allowed]))
 
 	def make_user_with_roles(self, email, roles):
 		if not frappe.db.exists("User", email):
