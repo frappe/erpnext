@@ -1921,51 +1921,88 @@ def set_default_warehouses(row, default_warehouses):
 
 
 def get_reserved_qty_for_production_plan(item_code, warehouse):
-	from erpnext.manufacturing.doctype.work_order.work_order import get_reserved_qty_for_production
+	plan_reservations = _get_plan_reservations(item_code)
+	if not plan_reservations:
+		return None
 
+	work_order_reservations = _get_work_order_reservations(item_code, list(plan_reservations))
+	reserved_qty = 0.0
+	for plan, plan_qty_by_warehouse in plan_reservations.items():
+		reserved_qty += _get_remaining_reserved_qty(
+			plan_qty_by_warehouse, work_order_reservations.get(plan, {}), warehouse
+		)
+
+	return reserved_qty
+
+
+def _get_remaining_reserved_qty(plan_qty_by_warehouse, work_order_qty_by_warehouse, warehouse):
+	remaining_qty_by_warehouse = {
+		plan_warehouse: max(qty - work_order_qty_by_warehouse.get(plan_warehouse, 0.0), 0.0)
+		for plan_warehouse, qty in plan_qty_by_warehouse.items()
+	}
+	total_remaining_qty = sum(remaining_qty_by_warehouse.values())
+	if not total_remaining_qty:
+		return 0.0
+
+	matched_qty = sum(plan_qty_by_warehouse.values()) - total_remaining_qty
+	unmatched_qty = min(sum(work_order_qty_by_warehouse.values()) - matched_qty, total_remaining_qty)
+	remaining_qty = remaining_qty_by_warehouse.get(warehouse, 0.0)
+	return remaining_qty - remaining_qty * unmatched_qty / total_remaining_qty
+
+
+def _get_plan_reservations(item_code):
 	table = frappe.qb.DocType("Production Plan")
 	child = frappe.qb.DocType("Material Request Plan Item")
-
-	non_completed_production_plans = get_non_completed_production_plans()
-
 	query = (
 		frappe.qb.from_(table)
 		.inner_join(child)
 		.on(table.name == child.parent)
 		.select(
+			table.name.as_("production_plan"),
+			child.warehouse,
 			Sum(
 				(Case().when(child.quantity == 0, child.required_bom_qty).else_(child.quantity))
 				* child.conversion_factor
-			)
+			).as_("reserved_qty"),
 		)
 		.where(
 			(table.docstatus == 1)
 			& (child.item_code == item_code)
-			& (child.warehouse == warehouse)
 			& (table.status.notin(["Completed", "Closed"]))
 		)
+		.groupby(table.name, child.warehouse)
 	)
+	return _group_by_plan_and_warehouse(query)
 
-	if non_completed_production_plans:
-		query = query.where(table.name.isin(non_completed_production_plans))
 
-	query = query.run()
-
-	if not query or query[0][0] is None:
-		return None
-
-	reserved_qty_for_production_plan = flt(query[0][0])
-
-	reserved_qty_for_production = flt(
-		get_reserved_qty_for_production(
-			item_code, warehouse, non_completed_production_plans, check_production_plan=True
+def _get_work_order_reservations(item_code, plan_names):
+	work_order = frappe.qb.DocType("Work Order")
+	work_order_item = frappe.qb.DocType("Work Order Item")
+	query = (
+		frappe.qb.from_(work_order)
+		.from_(work_order_item)
+		.select(
+			work_order.production_plan,
+			work_order_item.source_warehouse.as_("warehouse"),
+			Sum(work_order_item.required_qty).as_("reserved_qty"),
 		)
+		.where(
+			(work_order_item.item_code == item_code)
+			& (work_order_item.parent == work_order.name)
+			& (work_order.docstatus == 1)
+			& (IfNull(work_order_item.source_warehouse, "") != "")
+			& work_order.production_plan.isin(plan_names)
+		)
+		.groupby(work_order.production_plan, work_order_item.source_warehouse)
 	)
+	return _group_by_plan_and_warehouse(query)
 
-	if reserved_qty_for_production > reserved_qty_for_production_plan:
-		return 0.0
 
-	return reserved_qty_for_production_plan - reserved_qty_for_production
+def _group_by_plan_and_warehouse(query):
+	reservations = {}
+	for row in query.run(as_dict=True):
+		reservations.setdefault(row.production_plan, {})[row.warehouse] = flt(row.reserved_qty)
+	return reservations
 
 
 @frappe.request_cache
