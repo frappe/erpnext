@@ -216,8 +216,11 @@ $.extend(erpnext.stock_reservation, {
 	unreserve_stock(frm) {
 		erpnext.stock_reservation.get_stock_reservation_entries(frm.doctype, frm.docname).then((r) => {
 			if (!r.exc && r.message) {
-				if (r.message.length > 0) {
-					erpnext.stock_reservation.prepare_for_cancel_sre_entries(frm, r.message);
+				const sre_entries = r.message.filter(
+					(sre) => erpnext.stock_reservation.get_held_qty(sre) > 0
+				);
+				if (sre_entries.length > 0) {
+					erpnext.stock_reservation.prepare_for_cancel_sre_entries(frm, sre_entries);
 				} else {
 					frappe.msgprint(__("No reserved stock to unreserve."));
 				}
@@ -253,12 +256,18 @@ $.extend(erpnext.stock_reservation, {
 				sre: sre.name,
 				item_code: sre.item_code,
 				warehouse: sre.warehouse,
-				qty: flt(sre.reserved_qty) - flt(sre.delivered_qty),
+				qty: erpnext.stock_reservation.get_held_qty(sre),
 			});
 		});
 
 		dialog.fields_dict.sr_entries.grid.refresh();
 		dialog.show();
+	},
+
+	get_held_qty(sre) {
+		return (
+			flt(sre.reserved_qty) - flt(sre.delivered_qty) - flt(sre.transferred_qty) - flt(sre.consumed_qty)
+		);
 	},
 
 	cancel_stock_reservation(dialog, frm) {
