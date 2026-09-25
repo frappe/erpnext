@@ -2369,6 +2369,22 @@ class TestProductionPlan(FrappeTestCase):
 		bin.reload()
 		self.assertEqual(bin.reserved_qty_for_production_plan, 5)
 
+	def test_plan_reservation_released_when_work_order_fully_orders_plan(self):
+		plan, work_order = make_plan_with_sub_assembly()
+		raw_material = plan.mr_items[0]
+		bin = frappe.get_doc(
+			"Bin", {"item_code": raw_material.item_code, "warehouse": raw_material.warehouse}
+		)
+		self.assertEqual(bin.reserved_qty_for_production_plan, 5)
+
+		work_order.submit()
+		bin.reload()
+		self.assertEqual(bin.reserved_qty_for_production_plan, 0)
+
+		work_order.cancel()
+		bin.reload()
+		self.assertEqual(bin.reserved_qty_for_production_plan, 5)
+
 	def test_plan_reservation_offsets_are_distributed_across_warehouses(self):
 		from erpnext.manufacturing.doctype.production_plan.production_plan import (
 			_get_remaining_reserved_qty,
