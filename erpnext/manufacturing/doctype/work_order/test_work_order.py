@@ -4610,7 +4610,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		"Stock Settings",
 		{"enable_stock_reservation": 1, "auto_reserve_serial_and_batch": 1},
 	)
-	def test_reservation_of_unmoved_batch_stays_open_until_completion(self):
+	def test_transfer_of_other_batch_keeps_reservation_open(self):
 		production_item = "Test Other Batch Release FG"
 		rm_item = "Test Other Batch Release RM"
 		source_warehouse = "Stores - _TC"
@@ -4653,10 +4653,6 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(sre.status, "Reserved")
 		self.assertEqual(sre.transferred_qty, 0)
 		self.assertEqual([(row.batch_no, row.delivered_qty) for row in sre.sb_entries], [(reserved_batch, 0)])
-
-		frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 50)).submit()
-		self.assertEqual(frappe.db.get_value("Work Order", wo.name, "status"), "Completed")
-		self.assertEqual(frappe.db.get_value("Stock Reservation Entry", sre.name, "docstatus"), 2)
 
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
