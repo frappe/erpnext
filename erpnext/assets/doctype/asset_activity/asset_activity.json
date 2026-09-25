@@ -37,7 +37,7 @@
   },
   {
    "fieldname": "subject",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "in_list_view": 1,
    "label": "Subject",
    "print_width": "518",
@@ -75,7 +75,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-03-27 13:06:32.933603",
+ "modified": "2026-09-25 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Activity",

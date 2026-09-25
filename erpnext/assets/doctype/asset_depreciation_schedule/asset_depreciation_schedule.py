@@ -41,7 +41,7 @@ class AssetDepreciationSchedule(DepreciationScheduleController):
 		frequency_of_depreciation: DF.Int
 		naming_series: DF.Literal["ACC-ADS-.YYYY.-"]
 		net_purchase_amount: DF.Currency
-		notes: DF.SmallText | None
+		notes: DF.TextEditor | None
 		opening_accumulated_depreciation: DF.Currency
 		opening_number_of_booked_depreciations: DF.Int
 		rate_of_depreciation: DF.Percent
