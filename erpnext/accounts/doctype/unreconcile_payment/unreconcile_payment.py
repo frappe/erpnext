@@ -16,6 +16,10 @@ from erpnext.accounts.utils import (
 	update_voucher_outstanding,
 )
 
+# mirrors UnreconcilePayment.validate()'s supported_types, which only runs at save() — by then
+# add_references() has already read the voucher
+UNRECONCILABLE_DOCTYPES = ("Payment Entry", "Journal Entry")
+
 
 class UnreconcilePayment(Document):
 	# begin: auto-generated types
@@ -199,6 +203,46 @@ def get_linked_advances(company, docname):
 def create_unreconcile_doc_for_selection(selections=None):
 	if selections:
 		selections = json.loads(selections)
+
+		# authorise the vouchers named in the selection: the downstream check is conditional and
+		# does not cover this path, and it checks `read` while submitting this document rewrites
+		# the voucher's allocations. Resolved with one role check and one query per voucher type
+		# rather than a lookup per row -- get_list() applies User Permissions, so a voucher this
+		# caller cannot reach simply does not come back.
+		by_voucher_type = {}
+		for row in selections:
+			voucher_type = row.get("voucher_type")
+			if voucher_type not in UNRECONCILABLE_DOCTYPES:
+				frappe.throw(_("{0} cannot be unreconciled").format(voucher_type))
+
+			if voucher_no := row.get("voucher_no"):
+				by_voucher_type.setdefault(voucher_type, set()).add(voucher_no)
+
+		for voucher_type, voucher_nos in by_voucher_type.items():
+			frappe.has_permission(voucher_type, ptype="write", throw=True)
+
+			permitted = set(
+				frappe.get_list(
+					voucher_type,
+					filters={"name": ("in", list(voucher_nos))},
+					pluck="name",
+					limit_page_length=0,
+				)
+			)
+
+			# get_list() unions in documents shared with `read`, so a voucher reachable only
+			# through a read-only share would otherwise satisfy this write check. Confirm those
+			# individually; bounded by the share count, not by the size of the selection.
+			for shared in permitted & set(frappe.share.get_shared(voucher_type, rights=["read"])):
+				if not frappe.has_permission(voucher_type, ptype="write", doc=shared):
+					permitted.discard(shared)
+
+			if unpermitted := sorted(voucher_nos - permitted):
+				frappe.throw(
+					_("Not permitted to unreconcile {0}").format(comma_and(unpermitted)),
+					frappe.PermissionError,
+				)
+
 		# assuming each row is a unique voucher
 		for row in selections:
 			unrecon = frappe.new_doc("Unreconcile Payment")

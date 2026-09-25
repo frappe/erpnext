@@ -520,6 +520,11 @@ def make_sales_invoice(
 
 @frappe.whitelist()
 def get_activity_cost(employee=None, activity_type=None, currency=None):
+	# both rate lookups below use db.get_values, which checks nothing, so any caller at all could
+	# read an employee's costing and billing rate. This endpoint only ever serves timesheet entry
+	# (timesheet.js and Timesheet.set_cost), so it is gated on the same permission.
+	frappe.has_permission("Timesheet", throw=True)
+
 	base_currency = frappe.defaults.get_global_default("currency")
 	rate = frappe.db.get_values(
 		"Activity Cost",

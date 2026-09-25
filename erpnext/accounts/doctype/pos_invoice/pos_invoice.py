@@ -5,7 +5,7 @@
 import frappe
 from frappe import _, bold
 from frappe.query_builder.functions import IfNull, Sum
-from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
+from frappe.utils import cint, comma_and, flt, get_link_to_form, getdate, nowdate
 from frappe.utils.nestedset import get_descendants_of
 
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_loyalty_points
@@ -953,6 +953,18 @@ def make_merge_log(invoices):
 
 	if len(invoices) == 0:
 		frappe.throw(_("Atleast one invoice has to be selected."))
+
+	# nothing is persisted here, so no insert()/save() check ever fires — the invoice names come
+	# straight from the request and their customer and totals are returned to the caller.
+	# One role check and one query for the whole list: get_list() applies the permission model,
+	# so an invoice the caller cannot reach simply does not come back.
+	names = [inv.get("name") for inv in invoices if inv.get("name")]
+	frappe.has_permission("POS Invoice", throw=True)
+	permitted = set(
+		frappe.get_list("POS Invoice", filters={"name": ("in", names)}, pluck="name", limit_page_length=0)
+	)
+	if unpermitted := [name for name in names if name not in permitted]:
+		frappe.throw(_("Not permitted to read {0}").format(comma_and(unpermitted)), frappe.PermissionError)
 
 	merge_log = frappe.new_doc("POS Invoice Merge Log")
 	merge_log.posting_date = getdate(nowdate())

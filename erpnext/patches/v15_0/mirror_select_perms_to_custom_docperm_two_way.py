@@ -243,6 +243,16 @@ GRANTS = {
 		"Sales Manager",
 		"Sales User",
 	],
+	"Payment Terms Template": [
+		"Maintenance Manager",
+		"Maintenance User",
+		"Purchase Manager",
+		"Purchase Master Manager",
+		"Purchase User",
+		"Sales Manager",
+		"Sales Master Manager",
+		"Sales User",
+	],
 	"Plant Floor": [
 		"Manufacturing User",
 	],
@@ -466,7 +476,9 @@ GRANTS = {
 # is not a substitute -- purged at 180 days, it would fail OPEN. Hence this patch's distinct name.
 
 # exceptions to the select-only mirror: their shipped rows grant more. `select` does not imply
-# `read` on this branch, and bom.get_bom_items() checks `read`.
+# `read` on this branch, and bom.get_bom_items() checks `read`. Payment Terms Template is the same
+# shape for a different reason -- it grants `select` to `All`, so only a `read` row is worth
+# anything to these six, and get_payment_terms() checks `read`.
 PAIR_PTYPES = {
 	("BOM", "Purchase Manager"): ("read", "select"),
 	("BOM", "Purchase User"): ("read", "select"),
@@ -474,6 +486,12 @@ PAIR_PTYPES = {
 	("BOM", "Stock User"): ("read", "select"),
 	("Company", "Sales Manager"): ("read",),
 	("Material Request", "Manufacturing Manager"): ("read", "report"),
+	("Payment Terms Template", "Maintenance Manager"): ("read",),
+	("Payment Terms Template", "Maintenance User"): ("read",),
+	("Payment Terms Template", "Purchase Manager"): ("read",),
+	("Payment Terms Template", "Purchase User"): ("read",),
+	("Payment Terms Template", "Sales Manager"): ("read",),
+	("Payment Terms Template", "Sales User"): ("read",),
 }
 
 # Custom DocPerm defaults `read` and `export` to 1 and add_permission leaves them, so every

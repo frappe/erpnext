@@ -2663,7 +2663,7 @@ class AccountsController(TransactionBase):
 				if self.get("payment_terms_template"):
 					self.ignore_default_payment_terms_template = 1
 			elif self.get("payment_terms_template"):
-				data = get_payment_terms(
+				data = _get_payment_terms(
 					self.payment_terms_template, posting_date, grand_total, base_grand_total
 				)
 				for item in data:
@@ -3671,6 +3671,19 @@ def update_invoice_status():
 def get_payment_terms(
 	terms_template, posting_date=None, grand_total=None, base_grand_total=None, bill_date=None
 ):
+	# request boundary. `All` carries select on Payment Terms Template, so a select check — and
+	# therefore a select-or-read one — admits every identity including portal users; read is the
+	# only grant that tells them apart here. set_payment_schedule() calls _get_payment_terms(),
+	# so saving a transaction that carries a template does not go through this check.
+	if terms_template:
+		frappe.has_permission("Payment Terms Template", doc=terms_template, throw=True)
+
+	return _get_payment_terms(terms_template, posting_date, grand_total, base_grand_total, bill_date)
+
+
+def _get_payment_terms(
+	terms_template, posting_date=None, grand_total=None, base_grand_total=None, bill_date=None
+):
 	if not terms_template:
 		return
 
@@ -3690,6 +3703,18 @@ def get_payment_term_details(
 ):
 	term_details = frappe._dict()
 	if isinstance(term, str):
+		# a caller-supplied name, and get_doc checks nothing. Every transaction form passes a
+		# string here, and the selling/buying/maintenance roles that do so hold `select` on
+		# Payment Term while accounts roles hold `read` — v15 implies neither from the other,
+		# so either grant is accepted.
+		if not (
+			frappe.has_permission("Payment Term", ptype="select", doc=term)
+			or frappe.has_permission("Payment Term", ptype="read", doc=term)
+		):
+			frappe.throw(
+				_("No permission to read {0} {1}").format(_("Payment Term"), term), frappe.PermissionError
+			)
+
 		term = frappe.get_doc("Payment Term", term)
 	else:
 		term_details.payment_term = term.payment_term
