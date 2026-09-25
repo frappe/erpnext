@@ -1005,8 +1005,9 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		self._validate_work_order()
 		if self.doc.fg_completed_qty:
 			self.wo_doc.run_method("update_work_order_qty")
-			self.wo_doc.run_method("update_planned_qty")
 		self.wo_doc.run_method("update_status")
+		if self.doc.fg_completed_qty:
+			self.wo_doc.run_method("update_planned_qty")
 		if not self.wo_doc.operations:
 			self.wo_doc.set_actual_dates()
 
