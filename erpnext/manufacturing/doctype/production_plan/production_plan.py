@@ -1975,6 +1975,11 @@ def _get_plan_reservations(item_code):
 		)
 		.groupby(table.name, child.warehouse)
 	)
+
+	non_completed_production_plans = get_non_completed_production_plans()
+	if non_completed_production_plans:
+		query = query.where(table.name.isin(non_completed_production_plans))
+
 	return _group_by_plan_and_warehouse(query)
 
 
