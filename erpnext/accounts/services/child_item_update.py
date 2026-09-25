@@ -458,12 +458,6 @@ def validate_child_on_delete(row, parent, ordered_item=None) -> None:
 					"Row #{0}: Cannot delete item {1} which is already ordered against this Sales Order."
 				).format(row.idx, row.item_code)
 			)
-		if frappe.db.exists("Proforma Invoice Item", {"so_detail": row.name, "docstatus": 1}):
-			frappe.throw(
-				_("Row #{0}: Cannot delete item {1} which has an issued Proforma Invoice.").format(
-					row.idx, row.item_code
-				)
-			)
 
 	if parent.doctype == "Purchase Order" and flt(row.received_qty):
 		frappe.throw(
@@ -505,6 +499,27 @@ def update_bin_on_delete(row, doctype: str) -> None:
 		update_bin_qty(row.item_code, row.warehouse, qty_dict)
 
 
+def validate_no_issued_proforma(rows) -> None:
+	"""Raise if a Sales Order row being deleted has an issued Proforma Invoice."""
+	if not rows:
+		return
+
+	proformed = set(
+		frappe.get_all(
+			"Proforma Invoice Item",
+			filters={"so_detail": ["in", [row.name for row in rows]], "docstatus": 1},
+			pluck="so_detail",
+		)
+	)
+	for row in rows:
+		if row.name in proformed:
+			frappe.throw(
+				_("Row #{0}: Cannot delete item {1} which has an issued Proforma Invoice.").format(
+					row.idx, row.item_code
+				)
+			)
+
+
 def validate_and_delete_children(parent, data, ordered_item=None) -> bool:
 	"""Delete child rows not present in data; return True if any were removed."""
 	updated_item_names = [d.get("docname") for d in data]
@@ -513,6 +528,9 @@ def validate_and_delete_children(parent, data, ordered_item=None) -> bool:
 	deleted_children = [
 		item for item in parent.items if item.name not in updated_item_names and not item.get("closed")
 	]
+
+	if parent.doctype == "Sales Order":
+		validate_no_issued_proforma(deleted_children)
 
 	for d in deleted_children:
 		validate_child_on_delete(d, parent, ordered_item)
