@@ -1,4 +1,5 @@
 import frappe
+from frappe.utils import escape_html
 
 FIELDS_NOW_TEXT_EDITOR = {
 	"Delivery Stop": "customer_address",
@@ -14,5 +15,5 @@ def execute():
 			fields=["name", fieldname],
 		)
 		for row in rows:
-			html = row[fieldname].replace("\n", "<br>")
+			html = escape_html(row[fieldname]).replace("\n", "<br>")
 			frappe.db.set_value(doctype, row.name, fieldname, html, update_modified=False)
