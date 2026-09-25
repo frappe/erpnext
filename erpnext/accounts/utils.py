@@ -1337,7 +1337,9 @@ def get_companies():
 
 
 @frappe.whitelist()
-def get_children(doctype, parent, company, is_root=False, include_disabled=False):
+def get_children(
+	doctype: str, parent: str, company: str, is_root: bool = False, include_disabled: bool = False
+):
 	if isinstance(include_disabled, str):
 		include_disabled = loads(include_disabled)
 	from erpnext.accounts.report.financial_statements import sort_accounts
