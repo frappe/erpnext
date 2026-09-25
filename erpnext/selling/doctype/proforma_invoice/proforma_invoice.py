@@ -185,8 +185,10 @@ def make_proforma_invoice(
 	proforma.hide_item_qty = 1 if (based_on == "Amount" and int(hide_item_qty or 0)) else 0
 	if naming_series:
 		proforma.naming_series = naming_series
-	proforma.print_format = print_format or frappe.db.get_single_value(
-		"Selling Settings", "default_proforma_print_format"
+	proforma.print_format = (
+		print_format
+		or frappe.db.get_single_value("Selling Settings", "default_proforma_print_format")
+		or "Proforma Invoice"
 	)
 	proforma.letter_head = letter_head
 
