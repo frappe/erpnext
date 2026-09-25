@@ -595,6 +595,9 @@ class ProductionPlan(Document):
 				data.db_update()
 
 		self.calculate_total_produced_qty()
+		self.update_status_and_bin_qty()
+
+	def update_status_and_bin_qty(self):
 		previous_status = self.status
 		self.set_status()
 		self.db_set("status", self.status)
