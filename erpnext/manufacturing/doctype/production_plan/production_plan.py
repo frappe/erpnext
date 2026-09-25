@@ -703,6 +703,9 @@ class ProductionPlan(Document):
 	def set_status(self, close: bool | None = None, update_bin: bool = False):
 		self.check_permission("write")
 
+		if close is None and self.status == "Closed":
+			return
+
 		self.status = {0: "Draft", 1: "Submitted", 2: "Cancelled"}.get(self.docstatus)
 
 		if close:
