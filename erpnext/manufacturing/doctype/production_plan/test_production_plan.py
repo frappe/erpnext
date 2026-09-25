@@ -2130,6 +2130,27 @@ class TestProductionPlan(ERPNextTestSuite):
 		bin.reload()
 		self.assertEqual(bin.reserved_qty_for_production_plan, 0)
 
+	def test_closed_plan_stays_closed_on_production(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		fg_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		warehouse = "_Test Warehouse - _TC"
+		make_bom(item=fg_item, raw_materials=[rm_item], source_warehouse=warehouse)
+		plan = create_production_plan(item_code=fg_item, planned_qty=10, ignore_existing_ordered_qty=1)
+		work_order = submit_work_order_from_plan(plan, 5, warehouse)
+		plan.set_status(close=True)
+
+		make_stock_entry(item_code=rm_item, qty=5, rate=10, target=warehouse)
+		frappe.get_doc(make_se_from_wo(work_order.name, "Material Transfer for Manufacture", 5)).submit()
+		frappe.get_doc(make_se_from_wo(work_order.name, "Manufacture", 5)).submit()
+
+		self.assertEqual(frappe.db.get_value("Production Plan", plan.name, "status"), "Closed")
+		self.assertEqual(
+			frappe.db.get_value(
+				"Bin", {"item_code": rm_item, "warehouse": warehouse}, "reserved_qty_for_production_plan"
+			),
+			0,
+		)
+
 	def test_plan_reservation_offsets_are_distributed_across_warehouses(self):
 		from erpnext.manufacturing.doctype.production_plan.production_plan import (
 			_get_remaining_reserved_qty,
