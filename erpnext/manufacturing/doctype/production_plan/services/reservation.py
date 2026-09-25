@@ -107,17 +107,6 @@ def _group_by_plan_and_warehouse(query):
 	return reservations
 
 
-def get_non_completed_production_plans():
-	table = frappe.qb.DocType("Production Plan")
-
-	return (
-		frappe.qb.from_(table)
-		.select(table.name)
-		.distinct()
-		.where((table.docstatus == 1) & (table.status.notin(["Completed", "Closed"])))
-	).run(pluck="name")
-
-
 def get_reserved_qty_for_sub_assembly(item_code, warehouse):
 	table = frappe.qb.DocType("Production Plan")
 	child = frappe.qb.DocType("Production Plan Sub Assembly Item")

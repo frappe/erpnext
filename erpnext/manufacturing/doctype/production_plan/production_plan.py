@@ -32,7 +32,6 @@ from erpnext.manufacturing.doctype.production_plan.services.material_request imp
 )
 from erpnext.manufacturing.doctype.production_plan.services.reservation import (
 	cancel_stock_reservation_entries,
-	get_non_completed_production_plans,
 	get_reserved_qty_for_production_plan,
 	get_reserved_qty_for_sub_assembly,
 	make_stock_reservation_entries,
