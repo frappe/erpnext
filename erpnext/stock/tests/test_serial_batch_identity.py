@@ -1055,6 +1055,30 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 				self.assertEqual(available.qty, 1)
 				self.assertEqual(bundled_row.serial_no, "Ignored-Text")
 
+	def test_available_materials_list_serials_in_number_order(self):
+		first_by_id = self.make_number("Serial No", "Available-B")
+		first_by_number = self.make_number("Serial No", "Available-C")
+		frappe.db.set_value("Serial No", first_by_number.name, "serial_no", "Available-A")
+		warehouse = "_Test Warehouse - _TC"
+		transfer = frappe._dict(
+			name="Transfer",
+			item_code=self.item.name,
+			warehouse=warehouse,
+			qty=2,
+			purpose="Material Transfer for Manufacture",
+			serial_no="Available-B\nAvailable-A",
+		)
+
+		with patch(
+			"erpnext.stock.doctype.stock_entry.services.disassemble._run_stock_entry_query",
+			return_value=[transfer],
+		):
+			materials = get_available_materials("_Identity Work Order")
+
+		self.assertEqual(
+			materials[(self.item.name, warehouse)].serial_nos, [first_by_number.name, first_by_id.name]
+		)
+
 	def test_disassembly_resolves_source_serial_text_by_item(self):
 		first = self.make_number("Serial No", "Disassembly-001")
 		second = self.make_number("Serial No", "Disassembly-002")
