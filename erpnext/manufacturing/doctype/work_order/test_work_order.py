@@ -4633,11 +4633,17 @@ class TestWorkOrder(ERPNextTestSuite):
 				item_code=rm_item, target=source_warehouse, qty=50, basic_rate=100
 			)
 			batches.append(get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle))
-		reserved_batch, other_batch = batches
 
 		wo = make_wo_order_test_record(
 			item=production_item, qty=50, reserve_stock=1, source_warehouse=source_warehouse
 		)
+		sre = frappe.get_doc(
+			"Stock Reservation Entry",
+			{"voucher_no": wo.name, "warehouse": source_warehouse, "docstatus": 1},
+		)
+		reserved_batch = sre.sb_entries[0].batch_no
+		other_batch = batches[1] if batches[0] == reserved_batch else batches[0]
+
 		transfer = frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 50))
 		for row in transfer.items:
 			row.update(
@@ -4646,10 +4652,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		transfer.insert()
 		transfer.submit()
 
-		sre = frappe.get_doc(
-			"Stock Reservation Entry",
-			{"voucher_no": wo.name, "warehouse": source_warehouse, "docstatus": 1},
-		)
+		sre.reload()
 		self.assertEqual(sre.status, "Reserved")
 		self.assertEqual(sre.transferred_qty, 0)
 		self.assertEqual([(row.batch_no, row.delivered_qty) for row in sre.sb_entries], [(reserved_batch, 0)])
