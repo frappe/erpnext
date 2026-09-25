@@ -423,7 +423,7 @@ class StatusService:
 
 		doc = frappe.get_doc("Production Plan", self.doc.production_plan)
 		doc.flags.ignore_permissions = True
-		doc.set_status()
+		doc.set_status(update_bin=True)
 		doc.db_set("status", doc.status)
 
 	def _production_plan_ordered_qty(self):
