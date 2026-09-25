@@ -3139,11 +3139,14 @@ def get_batch_nos_from_sre(kwargs):
 
 	table = frappe.qb.DocType("Stock Reservation Entry")
 	child_table = frappe.qb.DocType("Serial and Batch Entry")
+	batch = frappe.qb.DocType("Batch")
 
 	query = (
 		frappe.qb.from_(table)
 		.join(child_table)
 		.on(table.name == child_table.parent)
+		.left_join(batch)
+		.on(batch.name == child_table.batch_no)
 		.select(
 			child_table.batch_no,
 			child_table.warehouse,
@@ -3154,8 +3157,8 @@ def get_batch_nos_from_sre(kwargs):
 			& (table.voucher_detail_no == kwargs.scio_detail)
 			& (child_table.qty != child_table.delivered_qty)
 		)
-		.groupby(child_table.batch_no, child_table.warehouse)
-		.orderby(child_table.batch_no, order=frappe.query_builder.Order.asc)
+		.groupby(child_table.batch_no, child_table.warehouse, batch.batch_id)
+		.orderby(batch.batch_id, order=frappe.query_builder.Order.asc)
 	)
 
 	result = query.run(as_dict=True)
