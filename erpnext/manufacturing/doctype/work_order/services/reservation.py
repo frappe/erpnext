@@ -49,6 +49,7 @@ _SERIAL_BATCH_FIELDS = [
 	"`tabSerial and Batch Bundle`.`item_code`",
 	"`tabSerial and Batch Bundle`.`voucher_detail_no`",
 ]
+CONSUMPTION_PURPOSES = ("Manufacture", "Material Consumption for Manufacture")
 
 
 class WorkOrderStockReservation:
@@ -158,7 +159,7 @@ class WorkOrderStockReservation:
 		if not self.doc.skip_transfer:
 			filters["from_voucher_no"] = ("is", "set")
 
-		row_wise_serial_batch = get_row_wise_serial_batch(self.doc.name, "Manufacture")
+		row_wise_serial_batch = get_row_wise_serial_batch(self.doc.name, CONSUMPTION_PURPOSES)
 		names = frappe.get_all("Stock Reservation Entry", filters=filters, pluck="name", order_by="creation")
 		for name in names:
 			consumed_qty = self._apply_consumed_qty(name, consumed_qty, row_wise_serial_batch)
@@ -667,7 +668,7 @@ def get_consumed_qty(work_order, item_code):
 def _consumed_qty_filter(stock_entry, stock_entry_detail, work_order, item_code):
 	return (
 		(stock_entry.work_order == work_order)
-		& (stock_entry.purpose.isin(["Manufacture", "Material Consumption for Manufacture"]))
+		& (stock_entry.purpose.isin(CONSUMPTION_PURPOSES))
 		& (stock_entry.docstatus == 1)
 		& (stock_entry_detail.s_warehouse.isnotnull())
 		# An attributed row belongs to its original requirement, not both item codes.
@@ -729,11 +730,10 @@ def _apply_production_plan_filter(query, wo, wo_item, check_production_plan, non
 	return query
 
 
-def get_row_wise_serial_batch(work_order, purpose=None):
-	purpose = purpose or "Material Transfer for Manufacture"
+def get_row_wise_serial_batch(work_order, purposes=("Material Transfer for Manufacture",)):
 	stock_entries = frappe.get_all(
 		"Stock Entry",
-		filters={"work_order": work_order, "purpose": purpose, "docstatus": 1},
+		filters={"work_order": work_order, "purpose": ("in", purposes), "docstatus": 1},
 		pluck="name",
 	)
 
