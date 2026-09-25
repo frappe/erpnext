@@ -1956,6 +1956,12 @@ def _get_remaining_reserved_qty(plan_qty_by_warehouse, work_order_qty_by_warehou
 def _get_plan_reservations(item_code):
 	table = frappe.qb.DocType("Production Plan")
 	child = frappe.qb.DocType("Material Request Plan Item")
+	plan_item = frappe.qb.DocType("Production Plan Item")
+	unordered_plan_items = (
+		frappe.qb.from_(plan_item)
+		.select(plan_item.name)
+		.where((plan_item.parent == table.name) & (plan_item.planned_qty > plan_item.ordered_qty))
+	)
 	query = (
 		frappe.qb.from_(table)
 		.inner_join(child)
@@ -1972,14 +1978,10 @@ def _get_plan_reservations(item_code):
 			(table.docstatus == 1)
 			& (child.item_code == item_code)
 			& (table.status.notin(["Completed", "Closed"]))
+			& ExistsCriterion(unordered_plan_items)
 		)
 		.groupby(table.name, child.warehouse)
 	)
-
-	non_completed_production_plans = get_non_completed_production_plans()
-	if non_completed_production_plans:
-		query = query.where(table.name.isin(non_completed_production_plans))
-
 	return _group_by_plan_and_warehouse(query)
 
 
