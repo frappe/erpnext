@@ -145,6 +145,7 @@ class WorkOrderStockReservation:
 
 		doc.update_status()
 		doc.update_reserved_stock_in_bin()
+		doc.update_reserved_qty_in_voucher()
 
 	def update_consumed_qty_in_stock_reservation(self, item, consumed_qty, wip_warehouse):
 		filters = {
@@ -177,6 +178,7 @@ class WorkOrderStockReservation:
 
 		doc.update_status()
 		doc.update_reserved_stock_in_bin()
+		doc.update_reserved_qty_in_voucher()
 		return consumed_qty
 
 	def validate_reserved_qty(self):
