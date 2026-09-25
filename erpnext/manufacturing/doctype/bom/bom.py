@@ -1490,6 +1490,7 @@ def _build_base_bom_items_query(bom, company, qty, t):
 			Min(t.bom_item.idx).as_("idx"),
 			Max(t.item_doc.item_name).as_("item_name"),
 			(Sum(t.qty_field_col / IfNull(t.bom_doc.quantity, 1)) * qty).as_("qty"),
+			(Sum(t.bom_item.stock_qty / IfNull(t.bom_doc.quantity, 1)) * qty).as_("stock_qty"),
 			Max(t.item_doc.image).as_("image"),
 			Max(t.bom_doc.project).as_("project"),
 			Max(t.item_doc.stock_uom).as_("stock_uom"),
@@ -1607,19 +1608,20 @@ def _add_bom_item_to_dict(item_dict, item, company, opts):
 	if item.operation:
 		key = (item.item_code, item.operation)
 
+	stock_qty = item.pop("stock_qty")
 	if item.get("is_phantom_item"):
-		_merge_phantom_bom_items(item_dict, item, company, opts)
+		_merge_phantom_bom_items(item_dict, item, stock_qty, company, opts)
 	elif key in item_dict:
 		item_dict[key]["qty"] += flt(item.qty)
 	else:
 		item_dict[key] = item
 
 
-def _merge_phantom_bom_items(item_dict, item, company, opts):
+def _merge_phantom_bom_items(item_dict, item, stock_qty, company, opts):
 	data = get_bom_items_as_dict(
 		item.get("bom_no"),
 		company,
-		qty=item.get("qty"),
+		qty=stock_qty,
 		fetch_exploded=opts.fetch_exploded,
 		fetch_secondary_items=opts.fetch_secondary_items,
 		include_non_stock_items=opts.include_non_stock_items,
