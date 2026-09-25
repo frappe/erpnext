@@ -1644,10 +1644,26 @@ class TestProductionPlan(ERPNextTestSuite):
 		)
 
 		reservations = {"Warehouse A": 6, "Warehouse B": 4}
-		self.assertEqual(_get_remaining_reserved_qty(reservations, 5, "Warehouse A"), 3)
-		self.assertEqual(_get_remaining_reserved_qty(reservations, 5, "Warehouse B"), 2)
-		self.assertEqual(_get_remaining_reserved_qty(reservations, 20, "Warehouse A"), 0)
-		self.assertEqual(_get_remaining_reserved_qty(reservations, 20, "Warehouse B"), 0)
+		cases = [
+			({"Warehouse A": 5}, 1, 4),
+			({"Warehouse C": 5}, 3, 2),
+			({"Warehouse A": 8}, 0, 2),
+			({"Warehouse C": 20}, 0, 0),
+		]
+		for work_order_reservations, warehouse_a_qty, warehouse_b_qty in cases:
+			with self.subTest(work_order_reservations=work_order_reservations):
+				self.assertEqual(
+					_get_remaining_reserved_qty(reservations, work_order_reservations, "Warehouse A"),
+					warehouse_a_qty,
+				)
+				self.assertEqual(
+					_get_remaining_reserved_qty(reservations, work_order_reservations, "Warehouse B"),
+					warehouse_b_qty,
+				)
+
+		self.assertEqual(
+			_get_remaining_reserved_qty({"Warehouse A": 5}, {"Warehouse B": 4}, "Warehouse A"), 1
+		)
 
 	def test_reserved_qty_for_production_plan_for_less_rm_qty(self):
 		from erpnext.stock.utils import get_or_make_bin
