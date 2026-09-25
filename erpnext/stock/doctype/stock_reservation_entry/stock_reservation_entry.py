@@ -702,20 +702,11 @@ class StockReservationEntry(Document):
 				elif entry.batch_no in data.batch_nos:
 					entry.delivered_qty = flt(data.batch_nos[entry.batch_no])
 
-		self.mark_unmatched_rows_as_used()
-
-	def mark_unmatched_rows_as_used(self):
-		"""Marks reserved rows as used when a different serial or batch was moved instead."""
-		pending_qty = (
-			flt(self.transferred_qty)
-			+ flt(self.consumed_qty)
-			- sum(flt(entry.delivered_qty) for entry in self.sb_entries)
-		)
-		for entry in self.sb_entries:
-			qty = max(min(flt(entry.qty) - flt(entry.delivered_qty), pending_qty), 0)
-			entry.delivered_qty = flt(entry.delivered_qty) + qty
-			pending_qty -= qty
 			entry.db_update()
+
+	@property
+	def matched_serial_batch_qty(self):
+		return sum(min(flt(entry.delivered_qty), flt(entry.qty)) for entry in self.sb_entries)
 
 
 def validate_stock_reservation_settings(voucher: object) -> None:
