@@ -891,7 +891,6 @@ class WorkOrder(Document):
 			qty = flt(query[0][0]) if query else 0
 
 			doc = frappe.get_doc("Production Plan", self.production_plan)
-			was_closed = doc.status == "Closed"
 			had_unordered_items = doc.has_unordered_items
 
 			if self.production_plan_item:
@@ -907,7 +906,7 @@ class WorkOrder(Document):
 			doc.reload()
 			doc.flags.ignore_permissions = True
 			doc.update_status_and_bin_qty()
-			if had_unordered_items != doc.has_unordered_items and not was_closed:
+			if had_unordered_items != doc.has_unordered_items:
 				doc.update_raw_material_bin_qty()
 			else:
 				doc.update_raw_material_bin_qty({d.item_code for d in self.required_items})
