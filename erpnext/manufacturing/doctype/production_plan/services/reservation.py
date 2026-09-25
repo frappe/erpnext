@@ -93,6 +93,7 @@ def _get_work_order_reservations(item_code, plan_names):
 			(work_order_item.item_code == item_code)
 			& (work_order_item.parent == work_order.name)
 			& (work_order.docstatus == 1)
+			& (IfNull(work_order_item.source_warehouse, "") != "")
 			& work_order.production_plan.isin(plan_names)
 		)
 		.groupby(work_order.production_plan, work_order_item.source_warehouse)
