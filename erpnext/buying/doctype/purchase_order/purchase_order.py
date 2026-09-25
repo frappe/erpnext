@@ -116,6 +116,7 @@ class PurchaseOrder(BuyingController):
 		pricing_rules: DF.Table[PricingRuleDetail]
 		project: DF.Link | None
 		ref_sq: DF.Link | None
+		remarks: DF.SmallText | None
 		represents_company: DF.Link | None
 		rounded_total: DF.Currency
 		rounding_adjustment: DF.Currency
