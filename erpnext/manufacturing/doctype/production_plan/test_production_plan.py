@@ -2257,6 +2257,36 @@ class TestProductionPlan(FrappeTestCase):
 		self.assertGreater(requested_qty, 0)
 		self.assertEqual(pln.status, "Material Requested")
 
+	def test_plan_reservation_offsets_work_order_in_another_warehouse(self):
+		from erpnext.manufacturing.doctype.production_plan.production_plan import (
+			get_reserved_qty_for_production_plan,
+		)
+
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		fg_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		plan_warehouse = "_Test Warehouse - _TC"
+		work_order_warehouse = "_Test Warehouse 1 - _TC"
+		make_bom(item=fg_item, raw_materials=[rm_item], source_warehouse=plan_warehouse)
+
+		plan = create_production_plan(item_code=fg_item, planned_qty=10, ignore_existing_ordered_qty=1)
+		self.assertEqual(get_reserved_qty_for_production_plan(rm_item, plan_warehouse), 10)
+		bin_name = frappe.db.get_value("Bin", {"item_code": rm_item, "warehouse": plan_warehouse}, "name")
+		bin = frappe.get_doc("Bin", bin_name)
+		self.assertEqual(bin.reserved_qty_for_production_plan, 10)
+		projected_qty = bin.projected_qty
+
+		work_order = submit_work_order_from_plan(plan, 5, work_order_warehouse)
+
+		self.assertEqual(get_reserved_qty_for_production_plan(rm_item, plan_warehouse), 5)
+		bin.reload()
+		self.assertEqual(bin.reserved_qty_for_production_plan, 5)
+		self.assertEqual(bin.projected_qty, projected_qty + 5)
+
+		work_order.cancel()
+		bin.reload()
+		self.assertEqual(bin.reserved_qty_for_production_plan, 10)
+		self.assertEqual(bin.projected_qty, projected_qty)
+
 	def test_plan_reservation_ignores_work_orders_of_other_plans(self):
 		from erpnext.manufacturing.doctype.production_plan.production_plan import (
 			get_reserved_qty_for_production_plan,
