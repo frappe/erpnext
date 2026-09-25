@@ -4660,6 +4660,44 @@ class TestWorkOrder(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
+		{"enable_stock_reservation": 1, "auto_reserve_serial_and_batch": 1},
+	)
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"material_consumption": 1})
+	def test_material_consumption_uses_batch_reservation(self):
+		production_item = "Test Consumption Reservation FG"
+		rm_item = "Test Consumption Reservation RM"
+		source_warehouse = "Stores - _TC"
+
+		make_item(production_item, {"is_stock_item": 1})
+		make_item(
+			rm_item,
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"batch_number_series": "TST-BATCH-MCM-.###",
+				"create_new_batch": 1,
+			},
+		)
+		make_bom(item=production_item, source_warehouse=source_warehouse, raw_materials=[rm_item])
+		test_stock_entry.make_stock_entry(item_code=rm_item, target=source_warehouse, qty=50, basic_rate=100)
+
+		wo = make_wo_order_test_record(
+			item=production_item, qty=50, reserve_stock=1, source_warehouse=source_warehouse
+		)
+		frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 50)).submit()
+		frappe.get_doc(make_stock_entry(wo.name, "Material Consumption for Manufacture", 50)).submit()
+
+		wip_reservation = frappe.db.get_value(
+			"Stock Reservation Entry",
+			{"voucher_no": wo.name, "warehouse": wo.wip_warehouse, "docstatus": 1},
+			["consumed_qty", "status"],
+			as_dict=True,
+		)
+		self.assertEqual(wip_reservation.consumed_qty, 50)
+		self.assertEqual(wip_reservation.status, "Delivered")
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
 		{"enable_stock_reservation": 1, "allow_negative_stock": 0},
 	)
 	def test_ledger_preview_ignores_own_work_order_reservation(self):
