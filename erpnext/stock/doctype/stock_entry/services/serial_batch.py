@@ -330,10 +330,12 @@ def get_batchwise_serial_nos(item_code, row):
 		serial_nos = frappe.get_all(
 			"Serial No",
 			filters={"item_code": item_code, "batch_no": batch_no, "name": ("in", row.serial_nos)},
+			fields=["name", "serial_no"],
 		)
 
 		if serial_nos:
-			batchwise_serial_nos[batch_no] = sorted([serial_no.name for serial_no in serial_nos])
+			serial_nos = sorted(serial_nos, key=lambda serial: serial.serial_no)
+			batchwise_serial_nos[batch_no] = [serial.name for serial in serial_nos]
 
 	return batchwise_serial_nos
 

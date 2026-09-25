@@ -265,7 +265,8 @@ class BaseManufactureStockEntry(BaseStockEntry):
 
 	def update_batches_to_be_consume(self, batches, row, qty):
 		qty_to_be_consumed = qty
-		for batch_no, batch_qty in sorted(batches.items(), key=lambda x: x[0]):
+		numbers = SerialBatchIdentity("Batch").get_number_map(list(batches))
+		for batch_no, batch_qty in sorted(batches.items(), key=lambda x: numbers.get(x[0], x[0])):
 			if qty_to_be_consumed <= 0 or batch_qty <= 0:
 				continue
 			batch_qty = min(batch_qty, qty_to_be_consumed)
