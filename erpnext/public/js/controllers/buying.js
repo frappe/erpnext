@@ -179,7 +179,11 @@ erpnext.buying = {
 
 						this.frm.set_value("billing_address", r.message.primary_address || "");
 
-						if (frappe.meta.has_field(this.frm.doc.doctype, "shipping_address")) {
+						const is_drop_ship = this.frm.doc.items.some((item) => item.delivered_by_supplier);
+						if (
+							frappe.meta.has_field(this.frm.doc.doctype, "shipping_address") &&
+							!is_drop_ship
+						) {
 							this.frm.set_value("shipping_address", r.message.shipping_address || "");
 						}
 					},
