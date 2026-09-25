@@ -27,15 +27,11 @@ _RESERVATION_TABLES = {
 
 
 def get_reserved_qty_for_production_plan(item_code, warehouse):
-	non_completed_production_plans = get_non_completed_production_plans()
-	if not non_completed_production_plans:
-		return None
-
-	plan_reservations = _get_plan_reservations(item_code, non_completed_production_plans)
+	plan_reservations = _get_plan_reservations(item_code)
 	if not plan_reservations:
 		return None
 
-	work_order_reservations = _get_work_order_reservations(item_code, non_completed_production_plans)
+	work_order_reservations = _get_work_order_reservations(item_code, list(plan_reservations))
 	reserved_qty = 0.0
 	for plan, warehouses in plan_reservations.items():
 		reserved_qty += _get_remaining_reserved_qty(
@@ -55,7 +51,7 @@ def _get_remaining_reserved_qty(warehouse_reservations, work_order_qty, warehous
 	return warehouse_reserved * (1 - work_order_qty / total_reserved)
 
 
-def _get_plan_reservations(item_code, non_completed_production_plans):
+def _get_plan_reservations(item_code):
 	table = frappe.qb.DocType("Production Plan")
 	child = frappe.qb.DocType("Material Request Plan Item")
 	query = (
@@ -67,7 +63,6 @@ def _get_plan_reservations(item_code, non_completed_production_plans):
 			(table.docstatus == 1)
 			& (child.item_code == item_code)
 			& (table.status.notin(["Completed", "Closed"]))
-			& table.name.isin(non_completed_production_plans)
 		)
 		.groupby(table.name, child.warehouse)
 	)
@@ -78,24 +73,22 @@ def _get_plan_reservations(item_code, non_completed_production_plans):
 	return reservations
 
 
-def _get_work_order_reservations(item_code, non_completed_production_plans):
+def _get_work_order_reservations(item_code, plan_names):
 	work_order = frappe.qb.DocType("Work Order")
 	work_order_item = frappe.qb.DocType("Work Order Item")
-	return {
-		row.production_plan: flt(row.reserved_qty)
-		for row in (
-			frappe.qb.from_(work_order)
-			.from_(work_order_item)
-			.select(work_order.production_plan, Sum(work_order_item.required_qty).as_("reserved_qty"))
-			.where(
-				(work_order_item.item_code == item_code)
-				& (work_order_item.parent == work_order.name)
-				& (work_order.docstatus == 1)
-				& work_order.production_plan.isin(non_completed_production_plans)
-			)
-			.groupby(work_order.production_plan)
-		).run(as_dict=True)
-	}
+	query = (
+		frappe.qb.from_(work_order)
+		.from_(work_order_item)
+		.select(work_order.production_plan, Sum(work_order_item.required_qty).as_("reserved_qty"))
+		.where(
+			(work_order_item.item_code == item_code)
+			& (work_order_item.parent == work_order.name)
+			& (work_order.docstatus == 1)
+			& work_order.production_plan.isin(plan_names)
+		)
+		.groupby(work_order.production_plan)
+	)
+	return {row.production_plan: flt(row.reserved_qty) for row in query.run(as_dict=True)}
 
 
 def get_non_completed_production_plans():
