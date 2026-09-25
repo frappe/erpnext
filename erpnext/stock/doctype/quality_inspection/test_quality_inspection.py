@@ -21,6 +21,7 @@ from erpnext.stock.doctype.quality_inspection.quality_inspection import (
 	parse_reading,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.stock.serial_batch_bundle import get_serial_nos_from_bundle
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -205,6 +206,17 @@ class TestQualityInspection(ERPNextTestSuite):
 		for qi in quality_inspections:
 			frappe.delete_doc("Quality Inspection", qi)
 		dn.delete()
+
+	def test_make_quality_inspections_links_serial_id_for_row_number(self):
+		item = "_Test Serialized Item With Series"
+		se = make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=1, basic_rate=100)
+		serial_id = get_serial_nos_from_bundle(se.items[0].serial_and_batch_bundle)[0]
+		frappe.db.set_value("Serial No", serial_id, "serial_no", "QI-Row-Serial")
+		row = {"item_code": item, "serial_no": "QI-Row-Serial", "sample_size": 1, "qty": 1}
+
+		(inspection,) = make_quality_inspections(se.company, se.doctype, se.name, [row], "Incoming")
+
+		self.assertEqual(frappe.db.get_value("Quality Inspection", inspection, "item_serial_no"), serial_id)
 
 	def test_rejected_qi_validation(self):
 		"""Test if rejected QI blocks Stock Entry as per Stock Settings."""
