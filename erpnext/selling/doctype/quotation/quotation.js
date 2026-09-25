@@ -12,7 +12,7 @@ frappe.ui.form.on("Quotation", {
 
 		(frm.custom_make_buttons = {
 			"Sales Order": "Sales Order",
-			Quotation: "Revision",
+			Quotation: "New Version",
 		}),
 			frm.set_query("quotation_to", function () {
 				return {
@@ -160,7 +160,7 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 
 			if (frappe.model.can_create("Quotation")) {
 				this.frm.add_custom_button(
-					__("Revision"),
+					__("New Version"),
 					() => {
 						if (doc.__onload?.is_latest_version) {
 							this.make_revision();
@@ -169,7 +169,7 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 
 						frappe.confirm(
 							__(
-								"Newer versions of this Quotation already exist. Create a new revision anyway?"
+								"Newer versions of this Quotation already exist. Create a new version anyway?"
 							),
 							() => this.make_revision()
 						);
