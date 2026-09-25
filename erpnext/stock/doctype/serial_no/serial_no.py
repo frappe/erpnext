@@ -223,9 +223,10 @@ def auto_fetch_serial_number(
 
 	serial_numbers = fetch_serial_numbers(filters, qty, do_not_include=exclude_sr_nos)
 
-	serial_ids = sorted(d.name for d in serial_numbers)
+	serial_ids = [d.name for d in serial_numbers]
 	numbers = SerialBatchIdentity("Serial No").get_number_map(serial_ids, item_code=item_code)
-	return [numbers[name] if as_numbers else name for name in serial_ids if name in numbers]
+	serial_ids = sorted((name for name in serial_ids if name in numbers), key=numbers.get)
+	return [numbers[name] if as_numbers else name for name in serial_ids]
 
 
 @frappe.whitelist()

@@ -36,11 +36,11 @@ def get_root_batches(filters):
 		frappe.qb.from_(batch)
 		.inner_join(child)
 		.on(child.parent_batch == batch.name)
-		.select(batch.name)
+		.select(batch.name, batch.batch_id)
 		.distinct()
 		.where(batch.parent_batch.isnull())
 		.where(child.reference_name.isnotnull() & (child.reference_name != ""))
-		.orderby(batch.name)
+		.orderby(batch.batch_id)
 	)
 
 	if filters.item_code:
