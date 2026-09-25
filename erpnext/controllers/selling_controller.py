@@ -5,7 +5,7 @@
 import frappe
 from frappe import _, bold, throw
 from frappe.query_builder.functions import Sum
-from frappe.utils import cint, flt, get_link_to_form, nowtime
+from frappe.utils import cint, escape_html, flt, get_link_to_form, nowtime
 
 from erpnext.accounts.party import render_address
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
@@ -91,14 +91,14 @@ class SellingController(StockController):
 			if serial_nos := frappe.get_all(
 				"Serial No",
 				filters={"name": ("in", serial_nos), "customer": ("is", "set")},
-				fields=["name", "customer"],
+				fields=["serial_no", "customer"],
 			):
 				for sn in serial_nos:
 					if sn.customer and sn.customer != self.customer:
 						frappe.throw(
 							_(
 								"Serial No {0} is already assigned to customer {1}. Can only be returned against the customer {1}"
-							).format(frappe.bold(sn.name), frappe.bold(sn.customer)),
+							).format(frappe.bold(escape_html(sn.serial_no)), frappe.bold(sn.customer)),
 							title=_("Serial No Already Assigned"),
 						)
 

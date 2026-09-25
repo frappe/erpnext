@@ -9,7 +9,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import cint, flt, get_link_to_form
+from frappe.utils import cint, escape_html, flt, get_link_to_form
 
 from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.doctype.batch.batch import get_batch_qty
@@ -1065,7 +1065,9 @@ class SubcontractingController(StockController):
 				self.subcontract_data.order_doctype, row.get(self.subcontract_data.order_field)
 			)
 			msg = _("The Batch No {0} has not been supplied against the {1} {2}").format(
-				frappe.bold(row.get("batch_no")), self.subcontract_data.order_doctype, link
+				frappe.bold(SerialBatchIdentity("Batch").get_label(row.get("batch_no"))),
+				self.subcontract_data.order_doctype,
+				link,
 			)
 			frappe.throw(msg, title=_("Incorrect Batch Consumed"))
 
@@ -1075,7 +1077,8 @@ class SubcontractingController(StockController):
 			incorrect_sn = set(serial_nos).difference(self.__transferred_items.get(key).get("serial_no"))
 
 			if incorrect_sn:
-				incorrect_sn = "\n".join(incorrect_sn)
+				numbers = SerialBatchIdentity("Serial No").get_number_map(incorrect_sn)
+				incorrect_sn = "\n".join(escape_html(numbers.get(name, name)) for name in incorrect_sn)
 				link = get_link_to_form(
 					self.subcontract_data.order_doctype, row.get(self.subcontract_data.order_field)
 				)

@@ -1674,9 +1674,10 @@ def _adjust_sample_quantity(item_code, sample_quantity, batch_no, get_batch_qty,
 
 
 def _warn_max_retained(retainted_qty, batch_no, item_code):
+	batch_label = SerialBatchIdentity("Batch").get_label(batch_no)
 	frappe.msgprint(
 		_("Maximum Samples - {0} have already been retained for Batch {1} and Item {2} in Batch {3}.").format(
-			retainted_qty, batch_no, item_code, batch_no
+			retainted_qty, batch_label, item_code, batch_label
 		),
 		alert=True,
 	)
@@ -1687,7 +1688,7 @@ def _cap_sample_quantity(sample_quantity, max_retain_qty, retainted_qty, batch_n
 	if cint(sample_quantity) > cint(qty_diff):
 		frappe.msgprint(
 			_("Maximum Samples - {0} can be retained for Batch {1} and Item {2}.").format(
-				max_retain_qty, batch_no, item_code
+				max_retain_qty, SerialBatchIdentity("Batch").get_label(batch_no), item_code
 			),
 			alert=True,
 		)

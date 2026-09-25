@@ -385,7 +385,9 @@ class StockLedgerEntry(Document):
 			if expiry_date:
 				if getdate(self.posting_date) > getdate(expiry_date):
 					frappe.throw(
-						_("Batch {0} of Item {1} has expired.").format(self.batch_no, self.item_code)
+						_("Batch {0} of Item {1} has expired.").format(
+							SerialBatchIdentity("Batch").get_label(self.batch_no), self.item_code
+						)
 					)
 
 	def validate_and_set_fiscal_year(self):
