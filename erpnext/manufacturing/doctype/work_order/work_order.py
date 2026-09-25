@@ -3232,7 +3232,11 @@ def make_stock_return_entry(work_order):
 	return stock_entry
 
 
-def get_row_wise_serial_batch(work_order, purposes=("Material Transfer for Manufacture",)):
+def get_row_wise_serial_batch(work_order, purpose=None):
+	if not purpose:
+		purpose = "Material Transfer for Manufacture"
+
+	purposes = [purpose] if isinstance(purpose, str) else purpose
 	stock_entries = frappe.get_all(
 		"Stock Entry",
 		filters={
