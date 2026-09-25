@@ -1334,10 +1334,10 @@ class FormulaCalculator:
 		negation_factor = -1 if report_row.reverse_sign else 1
 
 		if validation_result.issues:
-			# TODO: Throw?
-			messages = "<br><br>".join(str(issue) for issue in validation_result.issues)
-			frappe.log_error(f"Formula validation errors found:\n{messages}")
-			return [0.0] * len(self.period_list)
+			frappe.throw(
+				"<br><br>".join(str(issue) for issue in validation_result.issues),
+				title=_("Invalid Formula"),
+			)
 
 		results = []
 		for i in range(len(self.period_list)):
@@ -1347,21 +1347,29 @@ class FormulaCalculator:
 		return results
 
 	def _evaluate_for_period(self, formula: str, period_index: int, negation_factor: int) -> float:
-		# TODO: consistent error handling
 		try:
 			context = self._build_context(period_index)
 			result = frappe.safe_eval(formula, eval_globals=None, eval_locals=context)
 
 		except ZeroDivisionError:
-			frappe.log_error(f"Division by zero in formula: {formula}")
-			return 0.0
+			frappe.throw(
+				_("Formula {0} divides by zero").format(frappe.bold(formula)),
+				title=_("Invalid Formula"),
+			)
 		except Exception as e:
-			frappe.log_error(f"Formula evaluation error: {formula} - {e!s}")
-			return 0.0
+			frappe.throw(
+				_("Formula {0} could not be calculated: {1}").format(frappe.bold(formula), str(e)),
+				title=_("Invalid Formula"),
+			)
 
+		# frappe.throw outside the try, so the handlers above do not swallow it
 		if isinstance(result, bool) or not isinstance(result, int | float):
-			frappe.log_error(f"Formula did not return a number: {formula} - got {type(result).__name__}")
-			return 0.0
+			frappe.throw(
+				_("Formula {0} must return a number, but it returned {1}").format(
+					frappe.bold(formula), frappe.bold(type(result).__name__)
+				),
+				title=_("Invalid Formula"),
+			)
 
 		return flt(result * negation_factor, self.precision)
 

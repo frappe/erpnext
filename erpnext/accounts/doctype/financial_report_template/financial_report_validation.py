@@ -349,25 +349,18 @@ class CalculationFormulaValidator(Validator):
 			result.add_error(ValidationIssue(message=_("Formula is too complex"), row_idx=row.idx))
 			return result
 
-		if error := self._formula_error(tree, formula):
-			result.add_error(ValidationIssue(message=error, row_idx=row.idx))
+		if unsupported := self._unsupported_reason(tree, formula):
+			result.add_error(
+				ValidationIssue(
+					message=_("Formula is not allowed: {0}").format(unsupported),
+					row_idx=row.idx,
+				)
+			)
 			return result
 
 		result.merge(self._validate_formula_names(tree, row))
 
 		return result
-
-	def _formula_error(self, tree: ast.Expression, formula: str) -> str | None:
-		if unsupported := self._unsupported_reason(tree, formula):
-			return _("Formula is not allowed: {0}").format(unsupported)
-
-		if non_numeric := self._non_numeric_reason(tree):
-			return _("Formula gives {0}, not a number").format(non_numeric)
-
-		if self._divides_by_literal_zero(tree):
-			return _("Formula divides by zero")
-
-		return None
 
 	def _unsupported_reason(self, tree: ast.Expression, formula: str) -> str | None:
 		from frappe.utils.safe_exec import FrappeTransformer
@@ -391,56 +384,6 @@ class CalculationFormulaValidator(Validator):
 			return _("it is too deeply nested")
 		except Exception as e:
 			return str(e)
-
-	def _non_numeric_reason(self, tree: ast.Expression) -> str | None:
-		return self._non_numeric_node(tree.body)
-
-	def _non_numeric_node(self, node: ast.expr) -> str | None:
-		"""Describe the result type when an expression can never produce a number, else None."""
-		# `A if X else B` and `A and B` return one of their operands, so every operand
-		# must be able to produce a number
-		if isinstance(node, ast.IfExp):
-			return self._non_numeric_node(node.body) or self._non_numeric_node(node.orelse)
-		if isinstance(node, ast.BoolOp):
-			for value in node.values:
-				if reason := self._non_numeric_node(value):
-					return reason
-			return None
-
-		if isinstance(node, ast.Compare):
-			return _("a true/false comparison")
-		if isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.Not):
-			return _("a true/false value")
-		if isinstance(node, ast.JoinedStr):
-			return _("text")
-		if isinstance(node, ast.List | ast.Tuple | ast.Set | ast.Dict):
-			return _("a list")
-		if isinstance(node, ast.ListComp | ast.SetComp | ast.DictComp | ast.GeneratorExp):
-			return _("a list")
-		if isinstance(node, ast.Constant):
-			if isinstance(node.value, bool):
-				return _("a true/false value")
-			if isinstance(node.value, str):
-				return _("text")
-			if node.value is None:
-				return _("nothing")
-
-		return None
-
-	def _divides_by_literal_zero(self, tree: ast.Expression) -> bool:
-		"""Return True when a zero literal is used as a divisor.
-
-		Only a literal counts. `A / B` may be valid in most periods, so a calculated
-		divisor is left to the engine.
-		"""
-
-		return any(
-			isinstance(node, ast.BinOp)
-			and isinstance(node.op, ast.Div | ast.FloorDiv | ast.Mod)
-			and isinstance(node.right, ast.Constant)
-			and node.right.value == 0
-			for node in ast.walk(tree)
-		)
 
 	def _validate_formula_names(self, tree: ast.Expression, row) -> ValidationResult:
 		"""
