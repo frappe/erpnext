@@ -4610,7 +4610,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		"Stock Settings",
 		{"enable_stock_reservation": 1, "auto_reserve_serial_and_batch": 1},
 	)
-	def test_transfer_of_other_batch_releases_reserved_batch(self):
+	def test_transfer_of_other_batch_keeps_reservation_open(self):
 		production_item = "Test Other Batch Release FG"
 		rm_item = "Test Other Batch Release RM"
 		source_warehouse = "Stores - _TC"
@@ -4650,10 +4650,9 @@ class TestWorkOrder(ERPNextTestSuite):
 			"Stock Reservation Entry",
 			{"voucher_no": wo.name, "warehouse": source_warehouse, "docstatus": 1},
 		)
-		self.assertEqual(sre.status, "Closed")
-		self.assertEqual(
-			[(row.batch_no, row.delivered_qty) for row in sre.sb_entries], [(reserved_batch, 50)]
-		)
+		self.assertEqual(sre.status, "Reserved")
+		self.assertEqual(sre.transferred_qty, 0)
+		self.assertEqual([(row.batch_no, row.delivered_qty) for row in sre.sb_entries], [(reserved_batch, 0)])
 
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
