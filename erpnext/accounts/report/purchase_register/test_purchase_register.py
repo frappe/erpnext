@@ -97,6 +97,23 @@ class TestPurchaseRegister(FrappeTestCase):
 		self.assertEqual(first_row.credit, 600)
 		self.assertEqual(first_row.balance, 500)
 
+	def test_supplier_group_filter_uses_supplier_master(self):
+		# invoices created before the supplier_group field existed have it blank
+		pi = make_purchase_invoice()
+		pi.db_set("supplier_group", None, update_modified=False)
+		supplier_group = frappe.db.get_value("Supplier", pi.supplier, "supplier_group")
+
+		filters = frappe._dict(
+			company="_Test Company 6",
+			from_date=add_months(today(), -1),
+			to_date=today(),
+			supplier_group=supplier_group,
+		)
+		rows = [frappe._dict(row) for row in execute(filters)[1] if row.get("voucher_no") == pi.name]
+
+		self.assertEqual(len(rows), 1)
+		self.assertEqual(rows[0].supplier_group, supplier_group)
+
 
 def make_purchase_invoice():
 	from erpnext.accounts.doctype.account.test_account import create_account
