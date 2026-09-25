@@ -1597,6 +1597,50 @@ class TestProductionPlan(ERPNextTestSuite):
 
 			self.assertEqual(after_qty, before_qty)
 
+	def test_plan_reservation_offsets_work_order_in_another_warehouse(self):
+		from erpnext.manufacturing.doctype.production_plan.services.reservation import (
+			get_reserved_qty_for_production_plan,
+		)
+
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		fg_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		plan_warehouse = "_Test Warehouse - _TC"
+		work_order_warehouse = "_Test Warehouse 1 - _TC"
+		make_bom(item=fg_item, raw_materials=[rm_item], source_warehouse=plan_warehouse)
+
+		plan = create_production_plan(
+			item_code=fg_item, planned_qty=10, ignore_existing_ordered_qty=1, do_not_submit=1
+		)
+		plan.submit()
+		self.assertEqual(get_reserved_qty_for_production_plan(rm_item, plan_warehouse), 10)
+
+		production_item = next(iter(plan.get_production_items().values()))
+		production_item["qty"] = 5
+		work_order = frappe.get_doc("Work Order", plan.create_work_order(production_item))
+		work_order.source_warehouse = work_order_warehouse
+		for item in work_order.required_items:
+			item.source_warehouse = work_order_warehouse
+			make_stock_entry(
+				item_code=item.item_code,
+				qty=item.required_qty,
+				rate=10,
+				target=work_order_warehouse,
+			)
+		work_order.submit()
+
+		self.assertEqual(get_reserved_qty_for_production_plan(rm_item, plan_warehouse), 5)
+
+	def test_plan_reservation_offsets_are_distributed_across_warehouses(self):
+		from erpnext.manufacturing.doctype.production_plan.services.reservation import (
+			_get_remaining_reserved_qty,
+		)
+
+		reservations = {"Warehouse A": 6, "Warehouse B": 4}
+		self.assertEqual(_get_remaining_reserved_qty(reservations, 5, "Warehouse A"), 3)
+		self.assertEqual(_get_remaining_reserved_qty(reservations, 5, "Warehouse B"), 2)
+		self.assertEqual(_get_remaining_reserved_qty(reservations, 20, "Warehouse A"), 0)
+		self.assertEqual(_get_remaining_reserved_qty(reservations, 20, "Warehouse B"), 0)
+
 	def test_reserved_qty_for_production_plan_for_less_rm_qty(self):
 		from erpnext.stock.utils import get_or_make_bin
 
