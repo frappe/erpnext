@@ -730,7 +730,9 @@ def _apply_production_plan_filter(query, wo, wo_item, check_production_plan, non
 	return query
 
 
-def get_row_wise_serial_batch(work_order, purposes=("Material Transfer for Manufacture",)):
+def get_row_wise_serial_batch(work_order, purpose=None):
+	purpose = purpose or "Material Transfer for Manufacture"
+	purposes = [purpose] if isinstance(purpose, str) else purpose
 	stock_entries = frappe.get_all(
 		"Stock Entry",
 		filters={"work_order": work_order, "purpose": ("in", purposes), "docstatus": 1},
