@@ -20,6 +20,7 @@ from erpnext.stock.doctype.pick_list.pick_list import (
 	get_pick_list_holders,
 )
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+	get_batch_nos_from_sre,
 	get_reserved_serial_nos_for_pos,
 	get_serial_batch_numbers,
 	get_serial_batch_scan,
@@ -895,6 +896,28 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 				row.serial_no = "Manual-Selection"
 				service.get_serial_batch_fields_for_subcontracting_inward()
 				self.assertEqual(row.serial_no, "Manual-Selection")
+
+	def test_subcontracting_inward_reserved_batches_come_in_number_order(self):
+		first_by_id = self.make_number("Batch", "Reserved-B")
+		first_by_number = self.make_number("Batch", "Reserved-C")
+		frappe.db.set_value("Batch", first_by_number.name, "batch_id", "Reserved-A")
+		reservation = frappe.get_doc(
+			doctype="Stock Reservation Entry",
+			voucher_detail_no="_Identity Inward Order Row",
+			docstatus=1,
+			sb_entries=[
+				{"batch_no": batch.name, "warehouse": "_Test Warehouse - _TC", "qty": 1}
+				for batch in (first_by_id, first_by_number)
+			],
+		)
+		reservation.db_insert()
+		for entry in reservation.sb_entries:
+			entry.parent = reservation.name
+			entry.db_insert()
+
+		batches = get_batch_nos_from_sre(frappe._dict(scio_detail="_Identity Inward Order Row", qty=1))
+
+		self.assertEqual([batch.batch_no for batch in batches], [first_by_number.name])
 
 	def test_subcontracting_serial_list_resolves_physical_text_by_item(self):
 		first = self.make_number("Serial No", "Subcontracting-001")
