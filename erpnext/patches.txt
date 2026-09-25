@@ -529,4 +529,3 @@ erpnext.patches.v16_0.set_blanket_order_status
 erpnext.patches.v16_0.set_blanket_order_item_stock_uom
 erpnext.patches.v16_0.recalculate_subcontracting_order_service_cost
 erpnext.patches.v16_0.move_sub_assembly_rate_setting_to_bom_item
-erpnext.patches.v16_0.repair_work_order_serial_batch_reservations
