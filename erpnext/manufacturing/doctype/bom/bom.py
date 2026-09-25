@@ -1457,16 +1457,20 @@ def _get_bom_item_tables(opts):
 	if cint(opts.fetch_exploded):
 		bom_item = frappe.qb.DocType("BOM Explosion Item")
 		qty_field_col = bom_item.stock_qty
+		phantom_qty_field_col = None
 	elif opts.fetch_secondary_items:
 		bom_item = frappe.qb.DocType("BOM Secondary Item")
 		qty_field_col = bom_item.stock_qty
+		phantom_qty_field_col = None
 	else:
 		bom_item = frappe.qb.DocType("BOM Item")
 		qty_field_col = bom_item.stock_qty if opts.fetch_qty_in_stock_uom else bom_item.qty
+		phantom_qty_field_col = None if opts.fetch_qty_in_stock_uom else bom_item.stock_qty
 
 	return frappe._dict(
 		bom_item=bom_item,
 		qty_field_col=qty_field_col,
+		phantom_qty_field_col=phantom_qty_field_col,
 		bom_doc=frappe.qb.DocType("BOM"),
 		item_doc=frappe.qb.DocType("Item"),
 		item_default=frappe.qb.DocType("Item Default"),
@@ -1474,7 +1478,7 @@ def _get_bom_item_tables(opts):
 
 
 def _build_base_bom_items_query(bom, company, qty, t):
-	return (
+	query = (
 		frappe.qb.from_(t.bom_item)
 		.join(t.bom_doc)
 		.on(t.bom_item.parent == t.bom_doc.name)
@@ -1501,6 +1505,12 @@ def _build_base_bom_items_query(bom, company, qty, t):
 		)
 		.where((t.bom_item.docstatus < 2) & (t.bom_doc.name == bom))
 	)
+	if t.phantom_qty_field_col is not None:
+		query = query.select(
+			(Sum(t.phantom_qty_field_col / IfNull(t.bom_doc.quantity, 1)) * qty).as_("phantom_qty")
+		)
+
+	return query
 
 
 def _add_bom_item_columns(query, t, bom, opts, track_semi_finished_goods):
@@ -1609,17 +1619,19 @@ def _add_bom_item_to_dict(item_dict, item, company, opts):
 
 	if item.get("is_phantom_item"):
 		_merge_phantom_bom_items(item_dict, item, company, opts)
-	elif key in item_dict:
-		item_dict[key]["qty"] += flt(item.qty)
 	else:
-		item_dict[key] = item
+		item.pop("phantom_qty", None)
+		if key in item_dict:
+			item_dict[key]["qty"] += flt(item.qty)
+		else:
+			item_dict[key] = item
 
 
 def _merge_phantom_bom_items(item_dict, item, company, opts):
 	data = get_bom_items_as_dict(
 		item.get("bom_no"),
 		company,
-		qty=item.get("qty"),
+		qty=item.get("phantom_qty") if item.get("phantom_qty") is not None else item.get("qty"),
 		fetch_exploded=opts.fetch_exploded,
 		fetch_secondary_items=opts.fetch_secondary_items,
 		include_non_stock_items=opts.include_non_stock_items,
