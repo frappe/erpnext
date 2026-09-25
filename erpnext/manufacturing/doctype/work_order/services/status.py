@@ -16,6 +16,7 @@ from frappe.utils import cint, flt, get_link_to_form
 from erpnext.manufacturing.doctype.production_plan.services.work_order_quantities import (
 	ProductionPlanWorkOrderQuantities,
 )
+from erpnext.manufacturing.doctype.work_order.services.reservation import WorkOrderStockReservation
 from erpnext.stock.stock_balance import get_planned_qty, update_bin_qty
 
 _QTY_PURPOSES = (
@@ -104,6 +105,8 @@ class StatusService:
 				self.doc.db_set("status", status)
 
 		self.doc.update_required_items()
+		if self.doc.status == "Completed" and self.doc.reserve_stock:
+			WorkOrderStockReservation(self.doc).cancel_unused_reservations()
 
 		return status or self.doc.status
 

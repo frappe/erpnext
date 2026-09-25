@@ -179,6 +179,21 @@ class WorkOrderStockReservation:
 		doc.update_reserved_stock_in_bin()
 		return consumed_qty
 
+	def cancel_unused_reservations(self):
+		"""Cancels the reservations that a completed Work Order no longer needs."""
+		names = frappe.get_all(
+			"Stock Reservation Entry",
+			filters={
+				"voucher_type": self.doc.doctype,
+				"voucher_no": self.doc.name,
+				"docstatus": 1,
+				"status": ("not in", ["Closed", "Delivered"]),
+			},
+			pluck="name",
+		)
+		if names:
+			StockReservation(self.doc).cancel_stock_reservation_entries(names)
+
 	def validate_reserved_qty(self):
 		sre_details = get_sre_details(self.doc.name)
 		for item in self.doc.required_items:
