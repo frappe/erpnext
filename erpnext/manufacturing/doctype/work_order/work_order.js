@@ -240,6 +240,11 @@ frappe.ui.form.on("Work Order", {
 		frm.trigger("toggle_items_editable");
 		frm.trigger("set_fg_warehouse_mandatory");
 		frm.trigger("toggle_hide_fields");
+		erpnext.work_order.render_linked_lists(frm);
+	},
+
+	on_tab_change(frm) {
+		frm.wo_linked_lists && frm.wo_linked_lists.load_active_tab();
 	},
 
 	toggle_hide_fields(frm) {
@@ -1334,3 +1339,215 @@ frappe.tour["Work Order"] = [
 		),
 	},
 ];
+
+erpnext.work_order.render_linked_lists = function (frm) {
+	if (!frm.wo_linked_lists) {
+		frm.wo_linked_lists = new erpnext.work_order.LinkedLists(frm);
+	}
+	frm.wo_linked_lists.render();
+};
+
+// Same conditions as the "Material Request" toolbar button in set_custom_buttons().
+erpnext.work_order.can_create_material_request = function (frm) {
+	const doc = frm.doc;
+	if (doc.docstatus !== 1) return false;
+	if (["Closed", "Completed", "Stopped"].includes(doc.status)) return false;
+	if (doc.track_semi_finished_goods) return false;
+	if (doc.skip_transfer || doc.transfer_material_against === "Job Card") return false;
+
+	return (doc.required_items || []).some((item) => flt(item.transferred_qty) < flt(item.required_qty));
+};
+
+// EmbeddedList with an action in the empty state. Lazy: the class only exists once
+// embedded_list.bundle.js has loaded.
+erpnext.work_order.get_embedded_list_class = function () {
+	if (erpnext.work_order._EmbeddedListWithEmptyAction) {
+		return erpnext.work_order._EmbeddedListWithEmptyAction;
+	}
+
+	erpnext.work_order._EmbeddedListWithEmptyAction = class extends frappe.ui.EmbeddedList {
+		toggle_result_area() {
+			super.toggle_result_area();
+
+			const has_rows = this.data.length > 0;
+			const searched = this._all_data && this._all_data.length > 0;
+			if (has_rows || searched || !this.empty_state_action) return;
+
+			const $empty = frappe.ui.empty_state({
+				icon: this.empty_icon,
+				title: this.empty_message,
+				description: this.empty_description,
+				actions: [this.empty_state_action],
+			});
+			this.$no_result.replaceWith($empty);
+			this.$no_result = $empty;
+			this.$no_result.toggle(true);
+		}
+	};
+
+	return erpnext.work_order._EmbeddedListWithEmptyAction;
+};
+
+erpnext.work_order.LinkedLists = class WorkOrderLinkedLists {
+	constructor(frm) {
+		this.frm = frm;
+		this.lists = {};
+		this.tabs = {
+			job_card_tab: {
+				html_field: "job_card_list_html",
+				doctype: "Job Card",
+				fields: ["name", "status", "docstatus", "operation", "workstation", "for_quantity"],
+				columns: [
+					{
+						label: __("Job Card"),
+						fieldname: "name",
+						type: "link",
+						route: (row) => ["Form", "Job Card", row.name],
+					},
+					{ label: __("Operation"), fieldname: "operation" },
+					{ label: __("Workstation"), fieldname: "workstation" },
+					{ label: __("For Qty"), fieldname: "for_quantity", align: "right" },
+					{
+						label: __("Status"),
+						render: (row) => {
+							const [label, color] = frappe.get_indicator(row, "Job Card") || [
+								row.status,
+								"gray",
+							];
+							return frappe.ui.badge.html({ label, theme: color });
+						},
+					},
+				],
+			},
+			material_request_tab: {
+				html_field: "material_request_list_html",
+				doctype: "Material Request",
+				fields: ["name", "status", "material_request_type", "transaction_date"],
+				empty_message: __("No Material Request created"),
+				empty_description: __("Create your first Material Request to get started."),
+				can_add: (frm) => erpnext.work_order.can_create_material_request(frm),
+				empty_state_action: {
+					label: __("Create Material Request"),
+					icon: "plus",
+					onclick: () => erpnext.work_order.make_material_request(this.frm),
+				},
+				columns: [
+					{
+						label: __("Material Request"),
+						fieldname: "name",
+						type: "link",
+						route: (row) => ["Form", "Material Request", row.name],
+					},
+					{ label: __("Type"), fieldname: "material_request_type" },
+					{
+						label: __("Date"),
+						render: (row) => frappe.format(row.transaction_date, { fieldtype: "Date" }),
+					},
+					{ label: __("Status"), fieldname: "status", type: "badge" },
+				],
+			},
+			stock_entry_tab: {
+				html_field: "stock_entry_list_html",
+				doctype: "Stock Entry",
+				fields: ["name", "stock_entry_type", "posting_date", "docstatus"],
+				columns: [
+					{
+						label: __("Stock Entry"),
+						fieldname: "name",
+						type: "link",
+						route: (row) => ["Form", "Stock Entry", row.name],
+					},
+					{ label: __("Purpose"), fieldname: "stock_entry_type" },
+					{
+						label: __("Date"),
+						render: (row) => frappe.format(row.posting_date, { fieldtype: "Date" }),
+					},
+					{
+						label: __("Status"),
+						render: (row) =>
+							frappe.ui.badge.html({
+								label: { 0: __("Draft"), 1: __("Submitted"), 2: __("Cancelled") }[
+									row.docstatus
+								],
+								theme: { 0: "gray", 1: "green", 2: "red" }[row.docstatus],
+							}),
+					},
+				],
+			},
+		};
+	}
+
+	render() {
+		if (this.frm.is_new()) {
+			Object.values(this.tabs).forEach((cfg) => {
+				const wrapper = this.frm.fields_dict[cfg.html_field]?.$wrapper;
+				wrapper &&
+					wrapper
+						.empty()
+						.append(
+							$('<div class="text-muted">').text(
+								__("Save the Work Order to view linked documents.")
+							)
+						);
+			});
+			return;
+		}
+
+		frappe
+			.require("embedded_list.bundle.js")
+			.then(() => {
+				this._loaded = true;
+				this.lists = {};
+				this.load_active_tab();
+			})
+			.catch((e) => {
+				console.error("Work Order: failed to load embedded_list.bundle.js", e);
+			});
+	}
+
+	build(tab_fieldname) {
+		const cfg = this.tabs[tab_fieldname];
+		if (!cfg) return;
+		if (this.lists[tab_fieldname]) return;
+
+		const wrapper = this.frm.fields_dict[cfg.html_field]?.$wrapper;
+		if (!wrapper) return;
+		wrapper.empty();
+
+		const can_add = !cfg.can_add || cfg.can_add(this.frm);
+
+		const opts = {
+			wrapper,
+			doctype: cfg.doctype,
+			filters: { work_order: this.frm.doc.name },
+			fields: cfg.fields,
+			columns: cfg.columns,
+			order_by: "creation desc",
+			add_button: can_add ? cfg.add_button : undefined,
+			empty_state_action: can_add ? cfg.empty_state_action : undefined,
+			empty_description: cfg.empty_description,
+			empty_message: cfg.empty_message || __("No {0} linked to this Work Order.", [__(cfg.doctype)]),
+		};
+		const ListClass = erpnext.work_order.get_embedded_list_class();
+		const list = new ListClass(opts);
+		this.lists[tab_fieldname] = list;
+
+		if (tab_fieldname === "job_card_tab") {
+			// Load Job Card's list settings first so the status badge can reuse its
+			// indicator colors on the very first render.
+			frappe.model.with_doctype("Job Card", () => list.refresh());
+			return;
+		}
+
+		list.refresh();
+	}
+
+	load_active_tab() {
+		if (!this._loaded || this.frm.is_new()) return;
+		const active = this.frm.get_active_tab && this.frm.get_active_tab();
+		const fieldname = active?.df?.fieldname;
+		if (fieldname && this.tabs[fieldname]) {
+			this.build(fieldname);
+		}
+	}
+};
