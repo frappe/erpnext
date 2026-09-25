@@ -121,7 +121,7 @@ class WorkOrder(Document):
 		bom_no: DF.Link
 		company: DF.Link
 		corrective_operation_cost: DF.Currency
-		description: DF.SmallText | None
+		description: DF.TextEditor | None
 		disassembled_qty: DF.Float
 		expected_delivery_date: DF.Date | None
 		fg_warehouse: DF.Link | None
