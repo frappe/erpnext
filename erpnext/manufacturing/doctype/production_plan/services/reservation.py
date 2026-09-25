@@ -33,22 +33,27 @@ def get_reserved_qty_for_production_plan(item_code, warehouse):
 
 	work_order_reservations = _get_work_order_reservations(item_code, list(plan_reservations))
 	reserved_qty = 0.0
-	for plan, warehouses in plan_reservations.items():
+	for plan, plan_qty_by_warehouse in plan_reservations.items():
 		reserved_qty += _get_remaining_reserved_qty(
-			warehouses, work_order_reservations.get(plan, 0.0), warehouse
+			plan_qty_by_warehouse, work_order_reservations.get(plan, {}), warehouse
 		)
 
 	return reserved_qty
 
 
-def _get_remaining_reserved_qty(warehouse_reservations, work_order_qty, warehouse):
-	total_reserved = sum(warehouse_reservations.values())
-	if not total_reserved:
+def _get_remaining_reserved_qty(plan_qty_by_warehouse, work_order_qty_by_warehouse, warehouse):
+	remaining_qty_by_warehouse = {
+		plan_warehouse: max(qty - work_order_qty_by_warehouse.get(plan_warehouse, 0.0), 0.0)
+		for plan_warehouse, qty in plan_qty_by_warehouse.items()
+	}
+	total_remaining_qty = sum(remaining_qty_by_warehouse.values())
+	if not total_remaining_qty:
 		return 0.0
 
-	work_order_qty = min(flt(work_order_qty), total_reserved)
-	warehouse_reserved = warehouse_reservations.get(warehouse, 0.0)
-	return warehouse_reserved * (1 - work_order_qty / total_reserved)
+	matched_qty = sum(plan_qty_by_warehouse.values()) - total_remaining_qty
+	unmatched_qty = min(sum(work_order_qty_by_warehouse.values()) - matched_qty, total_remaining_qty)
+	remaining_qty = remaining_qty_by_warehouse.get(warehouse, 0.0)
+	return remaining_qty - remaining_qty * unmatched_qty / total_remaining_qty
 
 
 def _get_plan_reservations(item_code):
@@ -58,7 +63,11 @@ def _get_plan_reservations(item_code):
 		frappe.qb.from_(table)
 		.inner_join(child)
 		.on(table.name == child.parent)
-		.select(table.name, child.warehouse, Sum(child.required_bom_qty).as_("reserved_qty"))
+		.select(
+			table.name.as_("production_plan"),
+			child.warehouse,
+			Sum(child.required_bom_qty).as_("reserved_qty"),
+		)
 		.where(
 			(table.docstatus == 1)
 			& (child.item_code == item_code)
@@ -66,11 +75,7 @@ def _get_plan_reservations(item_code):
 		)
 		.groupby(table.name, child.warehouse)
 	)
-
-	reservations = {}
-	for row in query.run(as_dict=True):
-		reservations.setdefault(row.name, {})[row.warehouse] = flt(row.reserved_qty)
-	return reservations
+	return _group_by_plan_and_warehouse(query)
 
 
 def _get_work_order_reservations(item_code, plan_names):
@@ -79,16 +84,27 @@ def _get_work_order_reservations(item_code, plan_names):
 	query = (
 		frappe.qb.from_(work_order)
 		.from_(work_order_item)
-		.select(work_order.production_plan, Sum(work_order_item.required_qty).as_("reserved_qty"))
+		.select(
+			work_order.production_plan,
+			work_order_item.source_warehouse.as_("warehouse"),
+			Sum(work_order_item.required_qty).as_("reserved_qty"),
+		)
 		.where(
 			(work_order_item.item_code == item_code)
 			& (work_order_item.parent == work_order.name)
 			& (work_order.docstatus == 1)
 			& work_order.production_plan.isin(plan_names)
 		)
-		.groupby(work_order.production_plan)
+		.groupby(work_order.production_plan, work_order_item.source_warehouse)
 	)
-	return {row.production_plan: flt(row.reserved_qty) for row in query.run(as_dict=True)}
+	return _group_by_plan_and_warehouse(query)
+
+
+def _group_by_plan_and_warehouse(query):
+	reservations = {}
+	for row in query.run(as_dict=True):
+		reservations.setdefault(row.production_plan, {})[row.warehouse] = flt(row.reserved_qty)
+	return reservations
 
 
 def get_non_completed_production_plans():
