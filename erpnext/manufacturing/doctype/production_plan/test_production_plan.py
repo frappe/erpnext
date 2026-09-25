@@ -1622,14 +1622,10 @@ class TestProductionPlan(ERPNextTestSuite):
 		production_item["qty"] = 5
 		work_order = frappe.get_doc("Work Order", plan.create_work_order(production_item))
 		work_order.source_warehouse = work_order_warehouse
+		work_order.wip_warehouse = "_Test Warehouse 2 - _TC"
+		work_order.fg_warehouse = plan_warehouse
 		for item in work_order.required_items:
 			item.source_warehouse = work_order_warehouse
-			make_stock_entry(
-				item_code=item.item_code,
-				qty=item.required_qty,
-				rate=10,
-				target=work_order_warehouse,
-			)
 		work_order.submit()
 
 		self.assertEqual(get_reserved_qty_for_production_plan(rm_item, plan_warehouse), 5)
