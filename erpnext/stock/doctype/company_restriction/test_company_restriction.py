@@ -238,3 +238,76 @@ class TestCompanyRestriction(ERPNextTestSuite):
 			doc.reload()
 			self.assertEqual(doc.restrict_to_companies, 1)
 			self.assertEqual([row.company for row in doc.allowed_companies], ["_Test Company"])
+
+	def make_report_user(self):
+		user = self.make_user_with_roles(
+			"test_company_restriction_reports@example.com", ["Stock User", "Sales User", "Accounts User"]
+		)
+		self.allow_company(user, "_Test Company")
+		return user
+
+	def run_report(self, module, report_name, filters):
+		report = frappe.scrub(report_name)
+		execute = frappe.get_attr(f"erpnext.{module}.report.{report}.{report}.execute")
+		return execute(frappe._dict(filters))[1]
+
+	def test_item_prices_report_hides_restricted_items(self):
+		restricted, allowed = make_item(), make_item()
+		self.restrict_to_companies("Item", restricted.name, ["_Test Company 1"])
+
+		items = {row[0] for row in self.run_report("stock", "Item Prices", {})}
+		self.assertTrue({restricted.name, allowed.name} <= items)
+
+		with self.set_user(self.make_report_user()):
+			items = {row[0] for row in self.run_report("stock", "Item Prices", {})}
+			self.assertIn(allowed.name, items)
+			self.assertNotIn(restricted.name, items)
+
+	def test_variant_reports_hide_restricted_variants(self):
+		from erpnext.controllers.item_variant import create_variant
+
+		template = make_item(properties={"has_variants": 1, "attributes": [{"attribute": "Test Size"}]})
+		restricted = create_variant(template.name, {"Test Size": "Small"}).insert()
+		allowed = create_variant(template.name, {"Test Size": "Large"}).insert()
+		self.restrict_to_companies("Item", restricted.name, ["_Test Company 1"])
+
+		with self.set_user(self.make_report_user()):
+			rows = self.run_report("stock", "Item Variant Details", {"item": template.name})
+			self.assertEqual([row["variant_name"] for row in rows], [allowed.name])
+
+			rows = self.run_report("stock", "Item Where Used", {"item": template.name})
+			self.assertEqual([row.related_item for row in rows], [allowed.name])
+
+	def test_bom_search_hides_restricted_product_bundles(self):
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+
+		component = make_item()
+		restricted = make_product_bundle(make_item(properties={"is_stock_item": 0}).name, [component.name])
+		allowed = make_product_bundle(make_item(properties={"is_stock_item": 0}).name, [component.name])
+		self.restrict_to_companies("Item", restricted.new_item_code, ["_Test Company 1"])
+
+		with self.set_user(self.make_report_user()):
+			rows = self.run_report(
+				"stock", "BOM Search", {"search_sub_assemblies": 0, "item1": component.name}
+			)
+			self.assertEqual([row[0] for row in rows], [allowed.name])
+
+	def test_trial_balance_for_party_hides_restricted_customers(self):
+		from erpnext.accounts.utils import get_fiscal_year
+
+		restricted = make_customer("_Test Trial Balance Restricted Customer")
+		allowed = make_customer("_Test Trial Balance Allowed Customer")
+		self.restrict_to_companies("Customer", restricted, ["_Test Company 1"])
+		filters = {
+			"company": "_Test Company",
+			"fiscal_year": get_fiscal_year(frappe.utils.nowdate(), company="_Test Company")[0],
+			"party_type": "Customer",
+			"show_zero_values": 1,
+			"exclude_zero_balance_parties": 0,
+		}
+
+		with self.set_user(self.make_report_user()):
+			rows = self.run_report("accounts", "Trial Balance for Party", filters)
+			parties = {row.get("party") for row in rows}
+			self.assertIn(allowed, parties)
+			self.assertNotIn(restricted, parties)
