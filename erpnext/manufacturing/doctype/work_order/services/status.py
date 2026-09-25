@@ -425,6 +425,8 @@ class StatusService:
 		doc.flags.ignore_permissions = True
 		doc.set_status()
 		doc.db_set("status", doc.status)
+		if doc.docstatus == 1:
+			doc.update_bin_qty()
 
 	def _production_plan_ordered_qty(self):
 		table = frappe.qb.DocType("Work Order")

@@ -269,6 +269,8 @@ class ProductionPlan(Document):
 		self.calculate_total_produced_qty()
 		self.set_status()
 		self.db_set("status", self.status)
+		if self.docstatus == 1:
+			self.update_bin_qty()
 
 	def on_submit(self):
 		self.update_bin_qty()
