@@ -7,6 +7,7 @@
  "field_order": [
   "item_code",
   "item_name",
+  "description",
   "column_break_qty",
   "qty",
   "uom",
@@ -31,6 +32,11 @@
    "in_list_view": 1,
    "label": "Item Name",
    "read_only": 1
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Text Editor",
+   "label": "Description"
   },
   {
    "fieldname": "column_break_qty",
@@ -79,7 +85,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-07-16 00:00:00.000000",
+ "modified": "2026-09-24 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Proforma Invoice Item",
