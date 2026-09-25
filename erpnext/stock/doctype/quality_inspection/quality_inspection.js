@@ -8,15 +8,17 @@ frappe.ui.form.on("Quality Inspection", {
 	},
 
 	set_serial_no_from_number(frm) {
-		if (!frm.is_new() || !frm.doc.item_code || !frm.doc.item_serial_no) return;
+		const { item_code, item_serial_no: number } = frm.doc;
+		if (!frm.is_new() || !item_code || !number) return;
 
 		frappe
 			.call({
 				method: "erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_serial_batch_scan",
-				args: { item_code: frm.doc.item_code, number: frm.doc.item_serial_no, doctype: "Serial No" },
+				args: { item_code, number, doctype: "Serial No" },
 			})
 			.then((r) => {
-				if (r.message?.name) frm.set_value("item_serial_no", r.message.name);
+				const unchanged = frm.doc.item_code === item_code && frm.doc.item_serial_no === number;
+				if (unchanged && r.message?.name) frm.set_value("item_serial_no", r.message.name);
 			});
 	},
 
