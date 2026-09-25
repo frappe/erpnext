@@ -2343,7 +2343,6 @@ class TestProductionPlan(FrappeTestCase):
 		frappe.db.set_value("Material Request Plan Item", plan.mr_items[0].name, "quantity", 15)
 
 		submit_work_order_from_plan(plan, 10, warehouse)
-		frappe.local.request_cache.clear()
 
 		self.assertEqual(get_reserved_qty_for_production_plan(rm_item, warehouse), 10)
 
