@@ -1638,6 +1638,35 @@ class TestProductionPlan(ERPNextTestSuite):
 		self.assertEqual(bin.reserved_qty_for_production_plan, 10)
 		self.assertEqual(bin.projected_qty, projected_qty)
 
+	def test_plan_reservation_ignores_work_orders_of_other_plans(self):
+		from erpnext.manufacturing.doctype.production_plan.services.reservation import (
+			get_reserved_qty_for_production_plan,
+		)
+
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		first_warehouse = "_Test Warehouse - _TC"
+		second_warehouse = "_Test Warehouse 1 - _TC"
+		plans = []
+		for warehouse in (first_warehouse, second_warehouse):
+			fg_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+			make_bom(item=fg_item, raw_materials=[rm_item], source_warehouse=warehouse)
+			plans.append(
+				create_production_plan(item_code=fg_item, planned_qty=10, ignore_existing_ordered_qty=1)
+			)
+
+		second_plan = plans[1]
+		production_item = next(iter(second_plan.get_production_items().values()))
+		work_order = frappe.get_doc("Work Order", second_plan.create_work_order(production_item))
+		work_order.source_warehouse = first_warehouse
+		work_order.wip_warehouse = "_Test Warehouse 2 - _TC"
+		work_order.fg_warehouse = first_warehouse
+		for item in work_order.required_items:
+			item.source_warehouse = first_warehouse
+		work_order.submit()
+
+		self.assertEqual(get_reserved_qty_for_production_plan(rm_item, first_warehouse), 10)
+		self.assertEqual(get_reserved_qty_for_production_plan(rm_item, second_warehouse), 0)
+
 	def test_plan_reservation_offsets_are_distributed_across_warehouses(self):
 		from erpnext.manufacturing.doctype.production_plan.services.reservation import (
 			_get_remaining_reserved_qty,
