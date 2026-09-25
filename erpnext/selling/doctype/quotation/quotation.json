@@ -18,11 +18,13 @@
   "column_break_7",
   "transaction_date",
   "valid_till",
+  "is_active",
   "column_break1",
   "order_type",
   "company",
   "has_unit_price_items",
   "amended_from",
+  "revision_of",
   "currency_and_price_list",
   "currency",
   "conversion_rate",
@@ -215,6 +217,17 @@
    "width": "150px"
   },
   {
+   "fieldname": "revision_of",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Revision Of",
+   "no_copy": 1,
+   "options": "Quotation",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
    "fieldname": "company",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -245,6 +258,16 @@
    "fieldname": "valid_till",
    "fieldtype": "Date",
    "label": "Valid Till"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "1",
+   "depends_on": "eval:doc.docstatus==1",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "label": "Is Active",
+   "no_copy": 1,
+   "read_only_depends_on": "eval:doc.status==\"Lost\""
   },
   {
    "default": "Sales",
@@ -1146,7 +1169,7 @@
  "idx": 82,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-12 12:00:00.000000",
+ "modified": "2026-09-24 14:30:00.000000",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",
