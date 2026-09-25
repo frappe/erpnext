@@ -576,6 +576,10 @@ class ProductionPlan(Document):
 	def is_open(self):
 		return self.docstatus == 1 and self.status not in ("Completed", "Closed")
 
+	@property
+	def has_unordered_items(self):
+		return any(flt(d.planned_qty) > flt(d.ordered_qty) for d in self.po_items)
+
 	def on_submit(self):
 		self.update_bin_qty()
 		self.update_sales_order()
