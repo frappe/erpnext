@@ -4608,6 +4608,55 @@ class TestWorkOrder(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
+		{"enable_stock_reservation": 1, "auto_reserve_serial_and_batch": 1},
+	)
+	def test_transfer_of_other_batch_releases_reserved_batch(self):
+		production_item = "Test Other Batch Release FG"
+		rm_item = "Test Other Batch Release RM"
+		source_warehouse = "Stores - _TC"
+
+		make_item(production_item, {"is_stock_item": 1})
+		make_item(
+			rm_item,
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"batch_number_series": "TST-BATCH-OTH-.###",
+				"create_new_batch": 1,
+			},
+		)
+		make_bom(item=production_item, source_warehouse=source_warehouse, raw_materials=[rm_item])
+
+		batches = []
+		for _ in range(2):
+			receipt = test_stock_entry.make_stock_entry(
+				item_code=rm_item, target=source_warehouse, qty=50, basic_rate=100
+			)
+			batches.append(get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle))
+		reserved_batch, other_batch = batches
+
+		wo = make_wo_order_test_record(
+			item=production_item, qty=50, reserve_stock=1, source_warehouse=source_warehouse
+		)
+		transfer = frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 50))
+		for row in transfer.items:
+			row.update(
+				{"batch_no": other_batch, "use_serial_batch_fields": 1, "serial_and_batch_bundle": None}
+			)
+		transfer.insert()
+		transfer.submit()
+
+		sre = frappe.get_doc(
+			"Stock Reservation Entry",
+			{"voucher_no": wo.name, "warehouse": source_warehouse, "docstatus": 1},
+		)
+		self.assertEqual(sre.status, "Closed")
+		self.assertEqual(
+			[(row.batch_no, row.delivered_qty) for row in sre.sb_entries], [(reserved_batch, 50)]
+		)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
 		{"enable_stock_reservation": 1, "allow_partial_reservation": 1},
 	)
 	def test_partial_reservation_records_full_voucher_qty(self):
