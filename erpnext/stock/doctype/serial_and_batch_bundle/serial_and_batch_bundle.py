@@ -3602,16 +3602,34 @@ def get_batch_no_from_serial_no(serial_no):
 
 
 @frappe.whitelist()
+<<<<<<< HEAD
 def is_serial_batch_no_exists(item_code, type_of_transaction, serial_no=None, batch_no=None):
 	frappe.has_permission("Item", ptype="select", throw=True)
 
 	if serial_no and not frappe.db.exists("Serial No", serial_no):
+=======
+def is_serial_batch_no_exists(
+	item_code: str, type_of_transaction: str, serial_no: str | None = None, batch_no: str | None = None
+):
+	frappe.has_permission("Item", ptype="select", throw=True)
+	frappe.has_permission("Serial and Batch Bundle", ptype="create", throw=True)
+
+	if (
+		serial_no
+		and frappe.has_permission("Serial No", ptype="select")
+		and not frappe.db.exists("Serial No", serial_no)
+	):
+>>>>>>> bc6e5e2 (fix: permission checks for serial / batch creation using scanning (#59325))
 		if type_of_transaction != "Inward":
 			frappe.throw(_("Serial No {0} does not exists").format(serial_no))
 
 		make_serial_no(serial_no, item_code)
 
-	if batch_no and not frappe.db.exists("Batch", batch_no):
+	if (
+		batch_no
+		and frappe.has_permission("Batch", ptype="select")
+		and not frappe.db.exists("Batch", batch_no)
+	):
 		if type_of_transaction != "Inward":
 			frappe.throw(_("Batch No {0} does not exists").format(batch_no))
 
