@@ -1920,10 +1920,11 @@ class WorkOrder(Document):
 				if qty_to_update < 0:
 					continue
 
-				doc.db_set("transferred_qty", flt(qty_to_update), update_modified=False)
 				if (doc.has_batch_no or doc.has_serial_no) and doc.reservation_based_on == "Serial and Batch":
 					doc.consume_serial_batch_for_material_transfer(row_wise_serial_batch)
+					qty_to_update = doc.matched_serial_batch_qty
 
+				doc.db_set("transferred_qty", flt(qty_to_update), update_modified=False)
 				if doc.transferred_qty >= doc.reserved_qty:
 					doc.db_set("status", "Closed", update_modified=False)
 
@@ -1985,6 +1986,7 @@ class WorkOrder(Document):
 
 				if (doc.has_batch_no or doc.has_serial_no) and doc.reservation_based_on == "Serial and Batch":
 					doc.consume_serial_batch_for_material_transfer(row_wise_serial_batch)
+					doc.db_set("consumed_qty", doc.matched_serial_batch_qty, update_modified=False)
 
 				doc.update_status()
 				doc.update_reserved_stock_in_bin()
