@@ -3703,9 +3703,6 @@ class StockEntry(StockController, SubcontractingInwardController):
 			row.stock_qty -= flt(used_secondary_items.get(key))
 			row.stock_qty = (row.stock_qty) * flt(self.fg_completed_qty) / flt(pending_qty)
 
-			if used_secondary_items.get(key):
-				used_secondary_items[key] -= row.stock_qty
-
 			if cint(frappe.get_cached_value("UOM", row.stock_uom, "must_be_whole_number")):
 				row.stock_qty = frappe.utils.ceil(row.stock_qty)
 
@@ -3719,7 +3716,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		StockEntry = frappe.qb.DocType("Stock Entry")
 		StockEntryDetail = frappe.qb.DocType("Stock Entry Detail")
-		data = (
+		query = (
 			frappe.qb.from_(StockEntry)
 			.inner_join(StockEntryDetail)
 			.on(StockEntryDetail.parent == StockEntry.name)
@@ -3739,9 +3736,11 @@ class StockEntry(StockController, SubcontractingInwardController):
 				& (StockEntry.docstatus == 1)
 				& (StockEntry.purpose.isin(["Repack", "Manufacture"]))
 			)
-		).run(as_dict=1)
+		)
+		if self.job_card:
+			query = query.where(StockEntry.job_card == self.job_card)
 
-		for row in data:
+		for row in query.run(as_dict=1):
 			used_secondary_items[get_secondary_item_key(row)] += row.qty
 
 		return used_secondary_items
