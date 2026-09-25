@@ -1613,6 +1613,10 @@ class TestProductionPlan(ERPNextTestSuite):
 		)
 		plan.submit()
 		self.assertEqual(get_reserved_qty_for_production_plan(rm_item, plan_warehouse), 10)
+		bin_name = frappe.db.get_value("Bin", {"item_code": rm_item, "warehouse": plan_warehouse}, "name")
+		bin = frappe.get_doc("Bin", bin_name)
+		self.assertEqual(bin.reserved_qty_for_production_plan, 10)
+		projected_qty = bin.projected_qty
 
 		production_item = next(iter(plan.get_production_items().values()))
 		production_item["qty"] = 5
@@ -1629,6 +1633,14 @@ class TestProductionPlan(ERPNextTestSuite):
 		work_order.submit()
 
 		self.assertEqual(get_reserved_qty_for_production_plan(rm_item, plan_warehouse), 5)
+		bin.reload()
+		self.assertEqual(bin.reserved_qty_for_production_plan, 5)
+		self.assertEqual(bin.projected_qty, projected_qty + 5)
+
+		work_order.cancel()
+		bin.reload()
+		self.assertEqual(bin.reserved_qty_for_production_plan, 10)
+		self.assertEqual(bin.projected_qty, projected_qty)
 
 	def test_plan_reservation_offsets_are_distributed_across_warehouses(self):
 		from erpnext.manufacturing.doctype.production_plan.services.reservation import (
