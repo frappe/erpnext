@@ -13,6 +13,8 @@ from frappe.contacts.address_and_contact import (
 from frappe.model.document import Document
 from frappe.utils import comma_and, get_link_to_form
 
+from erpnext import require_permission
+
 
 class BankAccount(Document):
 	# begin: auto-generated types
@@ -196,8 +198,7 @@ def get_closing_balance_as_per_statement(bank_account: str, date: str):
 	return {"balance": 0, "date": None}
 
 
-@frappe.whitelist(methods=["POST"])
-def set_closing_balance_as_per_statement(bank_account: str, date: str | datetime.date, balance: float):
+def _set_closing_balance_as_per_statement(bank_account: str, date: str | datetime.date, balance: float):
 	"""
 	Set the closing balance as per statement for a bank account and date
 	"""
@@ -214,3 +215,13 @@ def set_closing_balance_as_per_statement(bank_account: str, date: str | datetime
 		doc.date = date
 		doc.balance = balance
 		doc.save()
+
+
+@frappe.whitelist(methods=["POST"])
+def set_closing_balance_as_per_statement(bank_account: str, date: str | datetime.date, balance: float):
+	# doc.save() covers the Bank Account Balance; nothing covers the account it is recorded
+	# against, and over HTTP that name comes from the caller. The bank statement import
+	# calls _set_closing_balance_as_per_statement() with the account off its own log row.
+	require_permission("Bank Account", bank_account, "write")
+
+	return _set_closing_balance_as_per_statement(bank_account, date, balance)

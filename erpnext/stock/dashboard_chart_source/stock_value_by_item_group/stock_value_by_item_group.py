@@ -9,6 +9,8 @@ from frappe import _
 from frappe.query_builder.functions import Sum
 from frappe.utils.dashboard import cache_source
 
+from erpnext import require_permission
+
 
 @frappe.whitelist()
 @cache_source
@@ -30,6 +32,11 @@ def get(
 	if not company:
 		company = frappe.defaults.get_defaults().company
 
+	if company:
+		# `select`, not `read`: Company carries a Desk User select row, so this rejects the
+		# identities with no desk access at all without denying any role that owns the chart.
+		require_permission("Company", company, "select")
+
 	labels, datasets = get_stock_value_by_item_group(company)
 
 	return {
@@ -48,6 +55,11 @@ def get_stock_value_by_item_group(company):
 
 	warehouses = frappe.get_list("Warehouse", pluck="name", filters=warehouse_filters)
 
+	if not warehouses:
+		# get_list already applied the caller's permissions. No readable warehouse means no
+		# figures -- falling through would drop the warehouse clause and total every Bin.
+		return [], []
+
 	stock_value = Sum(doctype.stock_value)
 
 	query = (
@@ -60,8 +72,7 @@ def get_stock_value_by_item_group(company):
 		.limit(10)
 	)
 
-	if warehouses:
-		query = query.where(doctype.warehouse.isin(warehouses))
+	query = query.where(doctype.warehouse.isin(warehouses))
 
 	results = query.run(as_dict=True)
 

@@ -8,6 +8,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint, flt, get_link_to_form
 
+from erpnext import require_permission
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
 from erpnext.assets.doctype.asset.depreciation import (
 	get_depreciation_accounts,
@@ -170,6 +171,11 @@ def make_asset_movement(
 	asset_movement = frappe.new_doc("Asset Movement")
 	asset_movement.purpose = purpose
 	for asset in assets:
+		# the movement is returned as a dict, never saved, so nothing downstream checks the
+		# assets it names. `select` rather than `read`: Stock Manager is the only role that
+		# can create an Asset Movement and it holds select, not read, on Asset.
+		require_permission("Asset", asset.get("name"), "select")
+
 		asset = frappe.get_doc("Asset", asset.get("name"))
 		asset_movement.company = asset.get("company")
 		asset_movement.append(

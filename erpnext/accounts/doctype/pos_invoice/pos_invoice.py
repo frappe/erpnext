@@ -1064,6 +1064,16 @@ def make_merge_log(invoices: str | list):
 	if len(invoices) == 0:
 		frappe.throw(_("At least one invoice has to be selected."))
 
+	# nothing below this is persisted -- the merge log is returned as a dict -- so the caller's
+	# access to each invoice has to be checked here. One role check and one scoped query for the
+	# whole batch, rather than a pair per invoice: get_list applies the record-level conditions
+	# and User Permissions, so an invoice the caller may not read simply does not come back.
+	named = {inv.get("name") for inv in invoices}
+	frappe.has_permission("POS Invoice", throw=True)
+	permitted = set(frappe.get_list("POS Invoice", filters={"name": ("in", list(named))}, pluck="name"))
+	if named - permitted:
+		frappe.throw(_("Not permitted to merge these POS Invoices"), frappe.PermissionError)
+
 	merge_log = frappe.new_doc("POS Invoice Merge Log")
 	merge_log.posting_date = getdate(nowdate())
 	for inv in invoices:

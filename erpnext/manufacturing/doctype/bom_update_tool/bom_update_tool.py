@@ -8,8 +8,11 @@ if TYPE_CHECKING:
 	from erpnext.manufacturing.doctype.bom_update_log.bom_update_log import BOMUpdateLog
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
 from frappe.utils import date_diff, get_datetime, now
+
+from erpnext import require_permission
 
 
 class BOMUpdateTool(Document):
@@ -31,8 +34,26 @@ class BOMUpdateTool(Document):
 @frappe.whitelist()
 def enqueue_replace_bom(boms: dict | str | None = None, args: dict | str | None = None) -> "BOMUpdateLog":
 	"""Returns a BOM Update Log (that queues a job) for BOM Replacement."""
-	boms = boms or args
-	boms = frappe.parse_json(boms)
+	boms = frappe.parse_json(boms or args) or {}
+
+	# Presence is validated before permission, because an omitted BOM names no record: refusing
+	# it protects nothing, and it would replace the tool's own "which BOM?" error with
+	# "Not permitted", losing a documented exception type the callers test for. BOM Update Log
+	# raises the same error from validate_boms_are_specified(); this runs the check at the
+	# request boundary, which is where the permission check now sits.
+	if not (boms.get("current_bom") and boms.get("new_bom")):
+		from erpnext.manufacturing.doctype.bom_update_log.bom_update_log import BOMMissingError
+
+		frappe.throw(
+			msg=_("Please mention the Current and New BOM for replacement."),
+			title=_("Mandatory"),
+			exc=BOMMissingError,
+		)
+
+	# replacing a BOM rewrites every parent BOM that uses it, so the caller needs write on
+	# both. create_bom_update_log() below only checks the BOM Update Log it submits.
+	for fieldname in ("current_bom", "new_bom"):
+		require_permission("BOM", boms[fieldname], "write")
 
 	update_log = create_bom_update_log(boms=boms)
 	return update_log

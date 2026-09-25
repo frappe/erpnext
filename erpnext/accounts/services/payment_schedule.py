@@ -7,6 +7,7 @@ import frappe
 from frappe import _
 from frappe.utils import DateTimeLikeObject, add_days, add_months, cint, flt, get_last_day, getdate
 
+from erpnext import require_permission
 from erpnext.accounts.party import get_party_account_currency
 
 
@@ -64,7 +65,7 @@ class PaymentScheduleService:
 				if doc.get("payment_terms_template"):
 					doc.ignore_default_payment_terms_template = 1
 			elif doc.get("payment_terms_template"):
-				data = get_payment_terms(
+				data = _get_payment_terms(
 					doc.payment_terms_template, posting_date, grand_total, base_grand_total
 				)
 				for item in data:
@@ -335,8 +336,7 @@ def linked_order_has_payment_schedule(po_or_so) -> list:
 	return frappe.get_all("Payment Schedule", filters={"parent": po_or_so})
 
 
-@frappe.whitelist()
-def get_payment_terms(
+def _get_payment_terms(
 	terms_template: str,
 	posting_date: DateTimeLikeObject | None = None,
 	grand_total: float | None = None,
@@ -357,6 +357,20 @@ def get_payment_terms(
 
 
 @frappe.whitelist()
+def get_payment_terms(
+	terms_template: str,
+	posting_date: DateTimeLikeObject | None = None,
+	grand_total: float | None = None,
+	base_grand_total: float | None = None,
+	bill_date: DateTimeLikeObject | None = None,
+) -> list:
+	if terms_template:
+		require_permission("Payment Terms Template", terms_template, "read")
+
+	return _get_payment_terms(terms_template, posting_date, grand_total, base_grand_total, bill_date)
+
+
+@frappe.whitelist()
 def get_payment_term_details(
 	term: str | frappe._dict,
 	posting_date: DateTimeLikeObject | None = None,
@@ -366,6 +380,11 @@ def get_payment_term_details(
 ) -> frappe._dict:
 	term_details = frappe._dict()
 	if isinstance(term, str):
+		# a name from the caller. `select` rather than `read`: the payment schedule grid on
+		# every transaction form resolves a term this way, and the roles that own those forms
+		# hold select on Payment Term, not read.
+		require_permission("Payment Term", term, "select")
+
 		term = frappe.get_doc("Payment Term", term)
 	else:
 		term_details.payment_term = term.payment_term
