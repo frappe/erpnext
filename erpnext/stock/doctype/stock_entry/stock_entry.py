@@ -366,10 +366,10 @@ class StockEntry(StockController, SubcontractingInwardController):
 			self.purpose_cls(self).before_submit()
 
 	def on_submit(self):
+		self.make_bundle_using_old_serial_batch_fields()
 		if self.purpose_cls and hasattr(self.purpose_cls, "on_submit"):
 			self.purpose_cls(self).on_submit()
 
-		self.make_bundle_using_old_serial_batch_fields()
 		self.adjust_stock_reservation_entries_for_return()
 		self.update_stock_reservation_entries()
 		# Release the Work Order's own reservation for items being sent to the subcontractor
