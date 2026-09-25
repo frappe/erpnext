@@ -2329,6 +2329,24 @@ class TestProductionPlan(FrappeTestCase):
 			10,
 		)
 
+	def test_plan_reservation_released_once_plan_is_fully_ordered(self):
+		from erpnext.manufacturing.doctype.production_plan.production_plan import (
+			get_reserved_qty_for_production_plan,
+		)
+
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		fg_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		warehouse = "_Test Warehouse - _TC"
+		make_bom(item=fg_item, raw_materials=[rm_item], source_warehouse=warehouse)
+		plan = create_production_plan(item_code=fg_item, planned_qty=10, ignore_existing_ordered_qty=1)
+		create_production_plan(item_code=fg_item, planned_qty=10, ignore_existing_ordered_qty=1)
+		frappe.db.set_value("Material Request Plan Item", plan.mr_items[0].name, "quantity", 15)
+
+		submit_work_order_from_plan(plan, 10, warehouse)
+		frappe.local.request_cache.clear()
+
+		self.assertEqual(get_reserved_qty_for_production_plan(rm_item, warehouse), 10)
+
 	def test_plan_reservation_offsets_are_distributed_across_warehouses(self):
 		from erpnext.manufacturing.doctype.production_plan.production_plan import (
 			_get_remaining_reserved_qty,
