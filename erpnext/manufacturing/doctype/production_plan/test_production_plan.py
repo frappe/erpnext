@@ -6,7 +6,6 @@ from frappe.utils import add_to_date, flt, getdate, now_datetime, nowdate
 from erpnext.controllers.item_variant import create_variant
 from erpnext.manufacturing.doctype.production_plan.production_plan import (
 	get_items_for_material_requests,
-	get_non_completed_production_plans,
 	get_sales_orders,
 	get_warehouse_list,
 )
@@ -1709,7 +1708,6 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		pln.make_work_order()
 
-		plans = []
 		for row in frappe.get_all("Work Order", filters={"production_plan": pln.name}, fields=["name"]):
 			wo_doc = frappe.get_doc("Work Order", row.name)
 			wo_doc.source_warehouse = "_Test Warehouse - _TC"
@@ -1726,16 +1724,12 @@ class TestProductionPlan(ERPNextTestSuite):
 				)
 
 			wo_doc.submit()
-			plans.append(pln.name)
 
 		bin_name = get_or_make_bin("Raw Material Item 1", "_Test Warehouse - _TC")
 		after_qty = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
 
 		self.assertEqual(after_qty, before_qty)
-		non_completed_plans = get_non_completed_production_plans()
-
-		for plan in plans:
-			self.assertIn(plan, non_completed_plans)
+		self.assertNotIn(frappe.db.get_value("Production Plan", pln.name, "status"), ["Completed", "Closed"])
 
 	def test_reserved_qty_for_production_plan_for_material_requests_with_multi_UOM(self):
 		from erpnext.stock.utils import get_or_make_bin
