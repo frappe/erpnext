@@ -246,8 +246,7 @@ class TestCompanyRestriction(ERPNextTestSuite):
 		self.allow_company(user, "_Test Company")
 		return user
 
-	def run_report(self, module, report_name, filters):
-		report = frappe.scrub(report_name)
+	def run_report(self, module, report, filters):
 		execute = frappe.get_attr(f"erpnext.{module}.report.{report}.{report}.execute")
 		return execute(frappe._dict(filters))[1]
 
@@ -255,11 +254,11 @@ class TestCompanyRestriction(ERPNextTestSuite):
 		restricted, allowed = make_item(), make_item()
 		self.restrict_to_companies("Item", restricted.name, ["_Test Company 1"])
 
-		items = {row[0] for row in self.run_report("stock", "Item Prices", {})}
+		items = {row[0] for row in self.run_report("stock", "item_prices", {})}
 		self.assertTrue({restricted.name, allowed.name} <= items)
 
 		with self.set_user(self.make_report_user()):
-			items = {row[0] for row in self.run_report("stock", "Item Prices", {})}
+			items = {row[0] for row in self.run_report("stock", "item_prices", {})}
 			self.assertIn(allowed.name, items)
 			self.assertNotIn(restricted.name, items)
 
@@ -272,10 +271,10 @@ class TestCompanyRestriction(ERPNextTestSuite):
 		self.restrict_to_companies("Item", restricted.name, ["_Test Company 1"])
 
 		with self.set_user(self.make_report_user()):
-			rows = self.run_report("stock", "Item Variant Details", {"item": template.name})
+			rows = self.run_report("stock", "item_variant_details", {"item": template.name})
 			self.assertEqual([row["variant_name"] for row in rows], [allowed.name])
 
-			rows = self.run_report("stock", "Item Where Used", {"item": template.name})
+			rows = self.run_report("stock", "item_where_used", {"item": template.name})
 			self.assertEqual([row.related_item for row in rows], [allowed.name])
 
 	def test_bom_search_hides_restricted_product_bundles(self):
@@ -288,7 +287,7 @@ class TestCompanyRestriction(ERPNextTestSuite):
 
 		with self.set_user(self.make_report_user()):
 			rows = self.run_report(
-				"stock", "BOM Search", {"search_sub_assemblies": 0, "item1": component.name}
+				"stock", "bom_search", {"search_sub_assemblies": 0, "item1": component.name}
 			)
 			self.assertEqual([row[0] for row in rows], [allowed.name])
 
@@ -307,7 +306,24 @@ class TestCompanyRestriction(ERPNextTestSuite):
 		}
 
 		with self.set_user(self.make_report_user()):
-			rows = self.run_report("accounts", "Trial Balance for Party", filters)
+			rows = self.run_report("accounts", "trial_balance_for_party", filters)
 			parties = {row.get("party") for row in rows}
 			self.assertIn(allowed, parties)
 			self.assertNotIn(restricted, parties)
+
+	def test_converted_query_reports_hide_restricted_masters(self):
+		restricted_item, allowed_item = make_item(), make_item()
+		restricted_customer = make_customer("_Test Query Report Restricted Customer")
+		allowed_customer = make_customer("_Test Query Report Allowed Customer")
+		self.restrict_to_companies("Item", restricted_item.name, ["_Test Company 1"])
+		self.restrict_to_companies("Customer", restricted_customer, ["_Test Company 1"])
+
+		with self.set_user(self.make_report_user()):
+			items = {row.item_code for row in self.run_report("stock", "item_balance", {})}
+			self.assertIn(allowed_item.name, items)
+			self.assertNotIn(restricted_item.name, items)
+
+			rows = self.run_report("selling", "customers_without_any_sales_transactions", {})
+			customers = {row.customer for row in rows}
+			self.assertIn(allowed_customer, customers)
+			self.assertNotIn(restricted_customer, customers)
