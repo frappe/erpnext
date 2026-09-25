@@ -676,30 +676,26 @@ def _consumed_qty_filter(stock_entry, stock_entry_detail, work_order, item_code)
 	)
 
 
-def get_reserved_qty_for_production(
-	item_code: str,
-	warehouse: str,
-	non_completed_production_plans: list | None = None,
-	check_production_plan: bool = False,
-) -> float:
+def get_reserved_qty_for_production(item_code: str, warehouse: str) -> float:
 	"""Get total reserved quantity for any item in specified warehouse"""
 	wo = frappe.qb.DocType("Work Order")
 	wo_item = frappe.qb.DocType("Work Order Item")
-	qty_field = wo_item.required_qty if check_production_plan else _production_reserved_qty_field(wo, wo_item)
 
 	query = (
 		frappe.qb.from_(wo)
 		.from_(wo_item)
-		.select(Sum(qty_field))
+		.select(Sum(_production_reserved_qty_field(wo, wo_item)))
 		.where(
 			(wo_item.item_code == item_code)
 			& (wo_item.parent == wo.name)
 			& (wo.docstatus == 1)
 			& (wo_item.source_warehouse == warehouse)
+			& (wo.status.notin(["Stopped", "Completed", "Closed"]))
+			& (
+				(wo_item.required_qty > wo_item.transferred_qty)
+				| (wo_item.required_qty > wo_item.consumed_qty)
+			)
 		)
-	)
-	query = _apply_production_plan_filter(
-		query, wo, wo_item, check_production_plan, non_completed_production_plans
 	)
 	return query.run()[0][0] or 0.0
 
@@ -711,23 +707,6 @@ def _production_reserved_qty_field(wo, wo_item):
 	)
 	qty_field = qty_field.when(wo.skip_transfer == 0, wo_item.required_qty - wo_item.transferred_qty)
 	return qty_field.else_(wo_item.required_qty - wo_item.consumed_qty)
-
-
-def _apply_production_plan_filter(query, wo, wo_item, check_production_plan, non_completed_production_plans):
-	if check_production_plan:
-		query = query.where(wo.production_plan.isnotnull())
-	else:
-		query = query.where(
-			(wo.status.notin(["Stopped", "Completed", "Closed"]))
-			& (
-				(wo_item.required_qty > wo_item.transferred_qty)
-				| (wo_item.required_qty > wo_item.consumed_qty)
-			)
-		)
-
-	if non_completed_production_plans:
-		query = query.where(wo.production_plan.isin(non_completed_production_plans))
-	return query
 
 
 def get_row_wise_serial_batch(work_order, purpose=None):
