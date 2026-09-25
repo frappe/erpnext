@@ -2440,6 +2440,59 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			sorted(serial_nos),
 		)
 
+	def test_internal_transfer_rejected_serial_numbers_typed_in_the_serial_field(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		prepare_data_for_internal_transfer()
+		company = "_Test Company with perpetual inventory"
+		from_warehouse = create_warehouse("_Test Typed Serial Transfer From", company=company)
+		transit_warehouse = create_warehouse("_Test Typed Serial Transfer Transit", company=company)
+		to_warehouse = create_warehouse("_Test Typed Serial Transfer To", company=company)
+		rejected_warehouse = create_warehouse("_Test Typed Serial Transfer Rejected", company=company)
+		item_code = make_item(
+			"_Test Typed Serial Item For Rejected Transfer",
+			{"has_serial_no": 1, "serial_no_series": "SN-TSIFRT-.####"},
+		).name
+
+		receipt = make_purchase_receipt(
+			item_code=item_code, company=company, warehouse=from_warehouse, qty=4, rate=100
+		)
+		serial_nos = get_serial_nos_from_bundle(receipt.items[0].serial_and_batch_bundle)
+		rejected_numbers = []
+		for serial_no in serial_nos[3:]:
+			frappe.db.set_value("Serial No", serial_no, "serial_no", f"{serial_no}-Typed")
+			rejected_numbers.append(f"{serial_no}-Typed")
+
+		dn = create_delivery_note(
+			item_code=item_code,
+			company=company,
+			customer="_Test Internal Customer 2",
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=4,
+			rate=100,
+			warehouse=from_warehouse,
+			target_warehouse=transit_warehouse,
+			serial_no=serial_nos,
+		)
+
+		pr = make_inter_company_purchase_receipt(dn.name)
+		pr.items[0].update(
+			{
+				"warehouse": to_warehouse,
+				"qty": 3,
+				"rejected_qty": 1,
+				"received_qty": 4,
+				"rejected_warehouse": rejected_warehouse,
+				"use_serial_batch_fields": 1,
+				"rejected_serial_no": "\n".join(rejected_numbers),
+			}
+		)
+		pr.save()
+
+		self.assertCountEqual(get_serial_nos_from_bundle(pr.items[0].serial_and_batch_bundle), serial_nos[:3])
+
 	def test_internal_transfer_rejected_qty_for_batch_item(self):
 		"""A batch item rejected on an internal transfer leaves the in-transit warehouse with the
 		accepted material, and the outgoing package holds both."""
