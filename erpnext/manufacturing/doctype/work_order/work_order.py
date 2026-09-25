@@ -714,6 +714,8 @@ class WorkOrder(Document):
 				self.db_set("status", status)
 
 		self.update_required_items()
+		if self.status == "Completed" and self.reserve_stock:
+			self.cancel_unused_reservations()
 
 		return status or self.status
 
@@ -1990,6 +1992,21 @@ class WorkOrder(Document):
 
 				doc.update_status()
 				doc.update_reserved_stock_in_bin()
+
+	def cancel_unused_reservations(self):
+		"""Cancels the reservations that a completed Work Order no longer needs."""
+		names = frappe.get_all(
+			"Stock Reservation Entry",
+			filters={
+				"voucher_type": self.doctype,
+				"voucher_no": self.name,
+				"docstatus": 1,
+				"status": ("not in", ["Closed", "Delivered"]),
+			},
+			pluck="name",
+		)
+		if names:
+			StockReservation(self).cancel_stock_reservation_entries(names)
 
 	def validate_reserved_qty(self):
 		sre_details = get_sre_details(self.name)
