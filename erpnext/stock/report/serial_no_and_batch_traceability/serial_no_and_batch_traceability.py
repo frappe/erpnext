@@ -5,6 +5,11 @@ import frappe
 from frappe import _
 from frappe.query_builder import Case
 
+from erpnext.stock.doctype.company_restriction.company_restriction import (
+	get_allowed_companies_condition,
+	get_allowed_masters_condition,
+)
+
 
 def execute(filters: dict | None = None):
 	report = ReportData(filters)
@@ -170,6 +175,9 @@ class ReportData:
 		else:
 			query = query.where(sabb_entry.serial_no == row.serial_no)
 
+		if condition := get_allowed_companies_condition(sabb.company, "Serial and Batch Bundle"):
+			query = query.where(condition)
+
 		results = query.run(as_dict=True)
 		return results[0] if results else {}
 
@@ -255,6 +263,10 @@ class ReportData:
 			else:
 				query = query.where(doctype.item == self.filters.item_code)
 
+		item_field = doctype.item_code if self.doctype_name == "Serial No" else doctype.item
+		if condition := get_allowed_masters_condition(item_field, "Item"):
+			query = query.where(condition)
+
 		return query.run(as_dict=True)
 
 	def get_doctype(self):
@@ -318,6 +330,9 @@ class ReportData:
 			)
 		)
 
+		if condition := get_allowed_companies_condition(stock_entry.company, "Stock Entry"):
+			query = query.where(condition)
+
 		return query.run(as_dict=True)
 
 	def set_forward_data(self, value, sabb_data):
@@ -366,6 +381,9 @@ class ReportData:
 		)
 
 		query = query.where((SABE.serial_no == value) | (SABE.batch_no == value))
+
+		if condition := get_allowed_companies_condition(SABB.company, "Serial and Batch Bundle"):
+			query = query.where(condition)
 
 		return query.run(as_dict=True)
 

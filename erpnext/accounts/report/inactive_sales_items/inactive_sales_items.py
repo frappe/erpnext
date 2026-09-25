@@ -7,7 +7,10 @@ from frappe import _
 from frappe.query_builder.functions import CurDate, DateDiff
 from frappe.utils import cint
 
-from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_masters_condition
+from erpnext.stock.doctype.company_restriction.company_restriction import (
+	get_allowed_companies_condition,
+	get_allowed_masters_condition,
+)
 
 
 def execute(filters=None):
@@ -110,7 +113,7 @@ def get_sales_details(filters):
 	# renders the bare CURRENT_DATE keyword. Yields the integer number of days.
 	days_since_last_order = DateDiff(CurDate(), date_col)
 
-	sales_data = (
+	query = (
 		frappe.qb.from_(parent)
 		.inner_join(child)
 		.on(parent.name == child.parent)
@@ -125,7 +128,12 @@ def get_sales_details(filters):
 		)
 		.where(parent.docstatus == 1)
 		.orderby(days_since_last_order)
-	).run(as_dict=True)
+	)
+
+	if condition := get_allowed_companies_condition(parent.company, filters["based_on"]):
+		query = query.where(condition)
+
+	sales_data = query.run(as_dict=True)
 
 	for d in sales_data:
 		item_details_map.setdefault((d.territory, d.item_code), d)
