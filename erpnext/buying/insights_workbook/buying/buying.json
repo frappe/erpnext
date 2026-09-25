@@ -1050,7 +1050,7 @@
  "folders": [],
  "idx": 0,
  "is_standard": 1,
- "modified": "2026-09-19 19:01:58.267020",
+ "modified": "2026-09-25 15:51:53.216962",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "buying",
@@ -1437,6 +1437,45 @@
       "type": "table"
      },
      "type": "join"
+    },
+    {
+     "join_condition": {
+      "left_column": {
+       "column_name": "purchase_order",
+       "type": "column"
+      },
+      "right_column": {
+       "column_name": "name",
+       "type": "column"
+      }
+     },
+     "join_type": "inner",
+     "select_columns": [
+      {
+       "column_name": "per_received",
+       "type": "column"
+      }
+     ],
+     "table": {
+      "data_source": "Site DB",
+      "table_name": "tabPurchase Order",
+      "type": "table"
+     },
+     "type": "join"
+    },
+    {
+     "filters": [
+      {
+       "column": {
+        "column_name": "per_received",
+        "type": "column"
+       },
+       "operator": ">=",
+       "value": 100
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
     },
     {
      "column_names": [

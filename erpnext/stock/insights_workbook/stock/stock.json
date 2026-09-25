@@ -909,7 +909,7 @@
  "folders": [],
  "idx": 0,
  "is_standard": 1,
- "modified": "2026-09-19 19:02:02.182683",
+ "modified": "2026-09-25 15:51:53.214572",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "stock",
@@ -1062,8 +1062,11 @@
         "column_name": "status",
         "type": "column"
        },
-       "operator": "=",
-       "value": "To Receive and Bill"
+       "operator": "in",
+       "value": [
+        "To Receive and Bill",
+        "To Receive"
+       ]
       }
      ],
      "logical_operator": "And",

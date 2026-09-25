@@ -1019,7 +1019,7 @@
  "folders": [],
  "idx": 0,
  "is_standard": 1,
- "modified": "2026-09-19 19:02:15.833865",
+ "modified": "2026-09-25 15:51:53.217789",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "assets",
@@ -1538,6 +1538,14 @@
        },
        "operator": "=",
        "value": 1
+      },
+      {
+       "column": {
+        "column_name": "journal_entry",
+        "type": "column"
+       },
+       "operator": "is_set",
+       "value": null
       }
      ],
      "logical_operator": "And",

@@ -1004,7 +1004,7 @@
  "folders": [],
  "idx": 0,
  "is_standard": 1,
- "modified": "2026-09-19 19:02:10.805459",
+ "modified": "2026-09-25 15:51:39.622860",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "accounts",
@@ -1948,7 +1948,7 @@
     {
      "data_type": "Decimal",
      "expression": {
-      "expression": "incoming_rate * qty",
+      "expression": "incoming_rate * stock_qty",
       "type": "expression"
      },
      "new_name": "line_cogs",
