@@ -569,7 +569,15 @@ def get_available_materials(work_order, stock_entry_doc=None) -> dict:
 				{"item_details": row, "batch_details": defaultdict(float), "qty": 0, "serial_nos": []}
 			)
 		_update_material_qty(available_materials[key], row, stock_entry_doc)
+	sort_serial_nos_by_number(available_materials)
 	return available_materials
+
+
+def sort_serial_nos_by_number(available_materials):
+	serial_nos = [serial_no for material in available_materials.values() for serial_no in material.serial_nos]
+	numbers = SerialBatchIdentity("Serial No").get_number_map(serial_nos)
+	for material in available_materials.values():
+		material.serial_nos.sort(key=lambda name: numbers.get(name, name))
 
 
 def _get_material_key(row, stock_entry_doc):
@@ -603,7 +611,6 @@ def _add_inward_material_qty(item_data, row):
 def _extend_serial_nos_from_row(item_data, row):
 	if row.serial_nos:
 		item_data.serial_nos.extend(row.serial_nos)
-		item_data.serial_nos.sort()
 
 
 def _deduct_consumed_material_qty(item_data, row):
