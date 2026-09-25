@@ -595,8 +595,15 @@ class ProductionPlan(Document):
 				data.db_update()
 
 		self.calculate_total_produced_qty()
+		was_open = self.is_open
 		self.set_status()
 		self.db_set("status", self.status)
+		if was_open != self.is_open:
+			self.update_bin_qty()
+
+	@property
+	def is_open(self):
+		return self.docstatus == 1 and self.status not in ("Completed", "Closed")
 
 	def on_submit(self):
 		self.update_bin_qty()
