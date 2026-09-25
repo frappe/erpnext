@@ -41,10 +41,14 @@ frappe.query_reports["Material Requirements Planning Report"] = {
 		{
 			fieldname: "warehouse",
 			label: __("Warehouse"),
-			fieldtype: "Link",
+			fieldtype: "MultiSelectList",
 			options: "Warehouse",
 			reqd: 1,
 			default: frappe.defaults.get_user_default("Warehouse"),
+			get_data: function (txt) {
+				let company = frappe.query_report.get_filter_value("company");
+				return frappe.db.get_link_options("Warehouse", txt, company ? { company } : {});
+			},
 		},
 		{
 			fieldname: "mps",
@@ -187,6 +191,13 @@ function prompt_and_make_order(selected_rows) {
 			label: __("Warehouse"),
 			fieldtype: "Link",
 			options: "Warehouse",
+			get_query: function () {
+				return {
+					filters: {
+						company: frappe.query_report.get_filter_value("company"),
+					},
+				};
+			},
 			depends_on: "eval:!doc.use_default_warehouse",
 			mandatory_depends_on: "eval:!doc.use_default_warehouse",
 		},

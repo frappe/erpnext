@@ -40,8 +40,12 @@ frappe.query_reports["Asset Depreciation Ledger"] = {
 		{
 			fieldname: "cost_center",
 			label: __("Cost Center"),
-			fieldtype: "Link",
+			fieldtype: "MultiSelectList",
 			options: "Cost Center",
+			get_data: function (txt) {
+				let company = frappe.query_report.get_filter_value("company");
+				return frappe.db.get_link_options("Cost Center", txt, company ? { company } : {});
+			},
 		},
 		{
 			fieldname: "finance_book",

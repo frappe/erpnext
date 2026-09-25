@@ -47,8 +47,10 @@ def get_filter_conditions(filters):
 
 	for field in ["voucher_type", "voucher_no", "item_code", "warehouse", "company"]:
 		if filters.get(field):
-			if field == "voucher_no":
-				filter_conditions.append(["Serial and Batch Bundle", field, "in", filters.get(field)])
+			if field in ("voucher_no", "warehouse"):
+				filter_conditions.append(
+					["Serial and Batch Bundle", field, "in", get_filter_values(filters.get(field))]
+				)
 			else:
 				filter_conditions.append(["Serial and Batch Bundle", field, "=", filters.get(field)])
 
@@ -67,6 +69,16 @@ def get_filter_conditions(filters):
 			filter_conditions.append(["Serial and Batch Entry", field, "=", filters.get(field)])
 
 	return filter_conditions
+
+
+def get_filter_values(value):
+	if isinstance(value, str) and value.startswith("["):
+		value = frappe.parse_json(value)
+
+	if isinstance(value, list | tuple):
+		return value
+
+	return [value]
 
 
 def get_columns(filters, data):

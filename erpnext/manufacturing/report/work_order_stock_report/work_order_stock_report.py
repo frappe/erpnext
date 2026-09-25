@@ -9,7 +9,8 @@ from frappe.utils import cint
 
 
 def execute(filters=None):
-	wo_list = get_work_orders()
+	filters = frappe._dict(filters or {})
+	wo_list = get_work_orders(filters)
 	data = get_item_list(wo_list, filters)
 	columns = get_columns()
 	return columns, data
@@ -22,6 +23,7 @@ def get_item_list(wo_list, filters):
 		bin = frappe.qb.DocType("Bin")
 		bom = frappe.qb.DocType("BOM")
 		bom_item = frappe.qb.DocType("BOM Item")
+		warehouses = get_filter_values(filters.get("warehouse"))
 
 		# Add a row for each item/qty
 		for wo_details in wo_list:
@@ -30,24 +32,40 @@ def get_item_list(wo_list, filters):
 			for wo_item_details in frappe.db.get_values(
 				"Work Order Item", {"parent": wo_details.name}, ["item_code", "source_warehouse"], as_dict=1
 			):
+				qty_field = bin.actual_qty
+				stock_join = bin
+				join_condition = (bom_item.item_code == bin.item_code) & (
+					bin.warehouse == wo_item_details.source_warehouse
+				)
+				if not wo_item_details.source_warehouse and warehouses:
+					bin_qty = (
+						frappe.qb.from_(bin)
+						.select(bin.item_code, Sum(bin.actual_qty).as_("actual_qty"))
+						.where(bin.warehouse.isin(warehouses))
+						.where(bin.item_code == wo_item_details.item_code)
+						.groupby(bin.item_code)
+					).as_("bin_qty")
+
+					qty_field = bin_qty.actual_qty
+					stock_join = bin_qty
+					join_condition = bom_item.item_code == bin_qty.item_code
+
 				item_list = (
 					frappe.qb.from_(bom)
 					.from_(bom_item)
-					.left_join(bin)
-					.on(
-						(bom_item.item_code == bin.item_code)
-						& (bin.warehouse == IfNull(wo_item_details.source_warehouse, filters.warehouse))
-					)
+					.left_join(stock_join)
+					.on(join_condition)
 					.select(
 						bom_item.item_code.as_("item_code"),
 						# Aggregate so the query stays one row per item_code and is Postgres
 						# GROUP-BY-valid. A BOM may list the same item on several lines; adding the
 						# qty columns to GROUP BY would split the row and change the row count on
-						# MariaDB. actual_qty (single warehouse) and bom.quantity (single BOM) are
-						# pinned to one value, so Max() returns that value; the per-unit requirement
-						# is the TOTAL of this item across its lines, so stock_qty is summed. For the
-						# common single-line item this equals the prior expression exactly.
-						IfNull(Max(bin.actual_qty) * Max(bom.quantity) / Sum(bom_item.stock_qty), 0).as_(
+						# MariaDB. qty_field (single warehouse, or a per-item warehouse sum) and
+						# bom.quantity (single BOM) are pinned to one value, so Max() returns that
+						# value; the per-unit requirement is the TOTAL of this item across its lines,
+						# so stock_qty is summed. For the common single-line item this equals the
+						# prior expression exactly.
+						IfNull(Max(qty_field) * Max(bom.quantity) / Sum(bom_item.stock_qty), 0).as_(
 							"build_qty"
 						),
 					)
@@ -59,17 +77,17 @@ def get_item_list(wo_list, filters):
 					.groupby(bom_item.item_code)
 				).run(as_dict=1)
 
-				stock_qty = 0
+				in_stock_count = 0
 				count = 0
 				buildable_qty = wo_details.qty
 				for item in item_list:
 					count = count + 1
 					if item.build_qty >= (wo_details.qty - wo_details.produced_qty):
-						stock_qty = stock_qty + 1
+						in_stock_count = in_stock_count + 1
 					elif buildable_qty >= item.build_qty:
 						buildable_qty = item.build_qty
 
-				if count == stock_qty:
+				if count == in_stock_count:
 					build = "Y"
 				else:
 					build = "N"
@@ -79,7 +97,7 @@ def get_item_list(wo_list, filters):
 						"work_order": wo_details.name,
 						"status": wo_details.status,
 						"req_items": cint(count),
-						"instock": stock_qty,
+						"instock": in_stock_count,
 						"description": desc,
 						"source_warehouse": wo_item_details.source_warehouse,
 						"item_code": wo_item_details.item_code,
@@ -95,15 +113,32 @@ def get_item_list(wo_list, filters):
 	return out
 
 
-def get_work_orders():
+def get_work_orders(filters):
+	wo_filters = {"docstatus": 1, "status": ("!=", "Completed")}
+	if filters.get("company"):
+		wo_filters["company"] = filters.company
+
 	out = frappe.get_all(
 		"Work Order",
-		filters={"docstatus": 1, "status": ("!=", "Completed")},
+		filters=wo_filters,
 		fields=["name", "status", "bom_no", "qty", "produced_qty"],
 		order_by="name",
 	)
 
 	return out
+
+
+def get_filter_values(value):
+	if not value:
+		return []
+
+	if isinstance(value, str) and value.startswith("["):
+		value = frappe.parse_json(value)
+
+	if isinstance(value, list | tuple):
+		return value
+
+	return [value]
 
 
 def get_columns():
