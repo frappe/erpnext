@@ -1324,6 +1324,20 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		return False
 
+	def before_sl_preview(self):
+		self.release_work_order_reservation_for_preview()
+
+	def before_gl_preview(self):
+		self.release_work_order_reservation_for_preview()
+
+	def release_work_order_reservation_for_preview(self):
+		"""Releases the Work Order's own reservation as submit does, inside the rolled-back preview."""
+		if not self.is_stock_reserve_for_work_order():
+			return
+
+		self.db_set("docstatus", 1, update_modified=False)
+		self.pro_doc.update_required_items()
+
 	def update_wo_reservation_for_subcontracting(self):
 		# A "Send to Subcontractor" entry never keeps its `work_order` (validate clears it for this
 		# purpose), so the owning Work Order is derived from the Subcontracting Order / Purchase Order
