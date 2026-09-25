@@ -142,6 +142,71 @@ class TestBOM(ERPNextTestSuite):
 			self.assertNotIn(rm_normal, items_dict)
 
 	@timeout
+	def test_get_phantom_bom_items_converts_each_row_uom_before_aggregation(self):
+		from erpnext.manufacturing.doctype.bom.bom import _query_bom_items, get_bom_items_as_dict
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		paint = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg", "valuation_rate": 10})
+		hardener = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg", "valuation_rate": 10})
+		kit = make_item(
+			properties={"is_stock_item": 0, "stock_uom": "Kg"},
+			uoms=[{"uom": "Gram", "conversion_factor": 0.001}],
+		)
+		finished_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"})
+
+		phantom_bom = make_bom(item=kit.name, raw_materials=[paint.name, hardener.name], do_not_save=True)
+		phantom_bom.items[0].qty = 0.8
+		phantom_bom.items[1].qty = 0.2
+		phantom_bom.is_phantom_bom = 1
+		phantom_bom.save()
+		phantom_bom.submit()
+
+		bom = make_bom(item=finished_item.name, raw_materials=[kit.name], do_not_save=True)
+		bom.items[0].qty = 500
+		bom.items[0].uom = "Gram"
+		bom.items[0].bom_no = phantom_bom.name
+		bom.append(
+			"items",
+			{
+				"item_code": kit.name,
+				"qty": 1,
+				"uom": "Kg",
+				"stock_uom": "Kg",
+				"conversion_factor": 1,
+				"bom_no": phantom_bom.name,
+			},
+		)
+		bom.save()
+		bom.submit()
+		rows = _query_bom_items(
+			bom.name,
+			"_Test Company",
+			frappe._dict(
+				qty=10,
+				fetch_exploded=0,
+				fetch_secondary_items=0,
+				include_non_stock_items=0,
+				fetch_qty_in_stock_uom=False,
+				ignore_permissions=True,
+			),
+		)
+		phantom_row = next(row for row in rows if row.is_phantom_item)
+
+		self.assertAlmostEqual(flt(phantom_row.qty), 5010)
+		self.assertAlmostEqual(flt(phantom_row.phantom_qty), 15)
+
+		items = get_bom_items_as_dict(
+			bom.name,
+			"_Test Company",
+			qty=10,
+			fetch_exploded=0,
+			fetch_qty_in_stock_uom=False,
+		)
+
+		self.assertAlmostEqual(flt(items[paint.name].qty), 12)
+		self.assertAlmostEqual(flt(items[hardener.name].qty), 3)
+
+	@timeout
 	def test_get_items_amount_uses_each_lines_own_rate(self):
 		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
