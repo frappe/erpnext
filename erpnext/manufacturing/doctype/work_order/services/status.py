@@ -423,8 +423,9 @@ class StatusService:
 
 		doc = frappe.get_doc("Production Plan", self.doc.production_plan)
 		doc.flags.ignore_permissions = True
-		doc.set_status(update_bin=True)
+		doc.set_status()
 		doc.db_set("status", doc.status)
+		doc.update_raw_material_bin_qty({d.item_code for d in self.doc.required_items})
 
 	def _production_plan_ordered_qty(self):
 		table = frappe.qb.DocType("Work Order")
