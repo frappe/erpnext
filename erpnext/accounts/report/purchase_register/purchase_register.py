@@ -423,7 +423,15 @@ def get_invoices(filters, additional_query_columns):
 	if filters.get("supplier"):
 		query = query.where(pi.supplier == filters.supplier)
 	if filters.get("supplier_group"):
-		query = query.where(pi.supplier_group == filters.supplier_group)
+		# read the group from the supplier master, to match the Supplier Group column
+		supplier = frappe.qb.DocType("Supplier")
+		query = query.where(
+			pi.supplier.isin(
+				frappe.qb.from_(supplier)
+				.select(supplier.name)
+				.where(supplier.supplier_group == filters.supplier_group)
+			)
+		)
 
 	query = get_conditions(filters, query, "Purchase Invoice")
 
