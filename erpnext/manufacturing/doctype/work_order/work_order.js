@@ -788,8 +788,6 @@ erpnext.work_order = {
 				);
 			}
 
-			erpnext.work_order.setup_stock_reservation(frm);
-
 			if (!frm.doc.track_semi_finished_goods) {
 				const show_start_btn =
 					frm.doc.skip_transfer || frm.doc.transfer_material_against == "Job Card" ? 0 : 1;
@@ -933,11 +931,14 @@ erpnext.work_order = {
 				}
 			}
 		}
+
+		erpnext.work_order.setup_stock_reservation(frm);
 	},
 
 	setup_stock_reservation(frm) {
 		if (frm.doc.docstatus === 1 && frm.doc.reserve_stock) {
 			if (
+				!["Closed", "Completed"].includes(frm.doc.status) &&
 				frm.events.has_unreserved_stock(frm) &&
 				(frm.doc.skip_transfer || frm.doc.material_transferred_for_manufacturing < frm.doc.qty)
 			) {
@@ -949,13 +950,11 @@ erpnext.work_order = {
 			}
 
 			if (frm.events.has_reserved_stock(frm)) {
-				if (frm.doc.skip_transfer || frm.doc.material_transferred_for_manufacturing < frm.doc.qty) {
-					frm.add_custom_button(
-						__("Unreserve"),
-						() => erpnext.stock_reservation.unreserve_stock(frm),
-						__("Stock Reservation")
-					);
-				}
+				frm.add_custom_button(
+					__("Unreserve"),
+					() => erpnext.stock_reservation.unreserve_stock(frm),
+					__("Stock Reservation")
+				);
 
 				frm.add_custom_button(
 					__("Reserved Stock"),
