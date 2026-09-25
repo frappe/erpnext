@@ -906,8 +906,7 @@ class WorkOrder(Document):
 
 			doc.reload()
 			doc.flags.ignore_permissions = True
-			doc.set_status()
-			doc.db_set("status", doc.status)
+			doc.update_status_and_bin_qty()
 			if had_unordered_items != doc.has_unordered_items and not was_closed:
 				doc.update_raw_material_bin_qty()
 			else:
