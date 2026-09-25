@@ -44,7 +44,11 @@ def get_stock_value_by_item_group(company):
 	if company:
 		warehouse_filters.append(["company", "=", company])
 
+	# permission-aware, so this is what scopes the chart to the caller's warehouses
 	warehouses = frappe.get_list("Warehouse", pluck="name", filters=warehouse_filters)
+	if not warehouses:
+		# fail closed: with no permitted warehouse there is nothing in scope to report
+		return [], []
 
 	stock_value = Sum(doctype.stock_value)
 
@@ -58,8 +62,7 @@ def get_stock_value_by_item_group(company):
 		.limit(10)
 	)
 
-	if warehouses:
-		query = query.where(doctype.warehouse.isin(warehouses))
+	query = query.where(doctype.warehouse.isin(warehouses))
 
 	results = query.run(as_dict=True)
 

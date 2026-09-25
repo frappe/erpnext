@@ -10,11 +10,14 @@ from frappe.query_builder import Criterion
 from frappe.query_builder.functions import Abs, Sum
 from frappe.utils.data import comma_and
 
+from erpnext import require_permission
 from erpnext.accounts.utils import (
 	cancel_exchange_gain_loss_journal,
 	unlink_ref_doc_from_payment_entries,
 	update_voucher_outstanding,
 )
+
+SUPPORTED_VOUCHER_TYPES = ["Payment Entry", "Journal Entry"]
 
 
 class UnreconcilePayment(Document):
@@ -38,7 +41,7 @@ class UnreconcilePayment(Document):
 	# end: auto-generated types
 
 	def validate(self):
-		self.supported_types = ["Payment Entry", "Journal Entry"]
+		self.supported_types = SUPPORTED_VOUCHER_TYPES
 		if self.voucher_type not in self.supported_types:
 			frappe.throw(_("Only {0} are supported").format(comma_and(self.supported_types)))
 
@@ -99,6 +102,18 @@ def doc_has_references(doctype: str | None = None, docname: str | None = None):
 		)
 
 	return count
+
+
+def validate_voucher_is_writable(voucher_type: str | None, voucher_no: str | None) -> None:
+	"""Authorise the voucher that unreconciliation writes back.
+
+	Submitting this document rewrites the voucher's outstanding amount and delinks its
+	ledger entries, so `write` is the level required here.
+	"""
+	if voucher_type not in SUPPORTED_VOUCHER_TYPES:
+		frappe.throw(_("Only {0} are supported").format(comma_and(SUPPORTED_VOUCHER_TYPES)))
+
+	require_permission(voucher_type, voucher_no, "write")
 
 
 @frappe.whitelist()
@@ -196,11 +211,13 @@ def get_linked_advances(company, docname):
 
 
 @frappe.whitelist()
-def create_unreconcile_doc_for_selection(selections=None):
+def create_unreconcile_doc_for_selection(selections: str | list | None = None):
 	if selections:
 		selections = json.loads(selections)
 		# assuming each row is a unique voucher
 		for row in selections:
+			validate_voucher_is_writable(row.get("voucher_type"), row.get("voucher_no"))
+
 			unrecon = frappe.new_doc("Unreconcile Payment")
 			unrecon.company = row.get("company")
 			unrecon.voucher_type = row.get("voucher_type")

@@ -9,6 +9,7 @@ from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
 from frappe.utils.nestedset import get_descendants_of
 
+from erpnext import require_permission
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_loyalty_points
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
@@ -1041,7 +1042,7 @@ def make_sales_return(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def make_merge_log(invoices):
+def make_merge_log(invoices: str | list):
 	import json
 
 	if isinstance(invoices, str):
@@ -1053,6 +1054,9 @@ def make_merge_log(invoices):
 	merge_log = frappe.new_doc("POS Invoice Merge Log")
 	merge_log.posting_date = getdate(nowdate())
 	for inv in invoices:
+		# authorise each invoice before its details are read
+		require_permission("POS Invoice", inv.get("name"))
+
 		inv_data = frappe.db.get_values(
 			"POS Invoice", inv.get("name"), ["customer", "posting_date", "grand_total"], as_dict=1
 		)[0]
