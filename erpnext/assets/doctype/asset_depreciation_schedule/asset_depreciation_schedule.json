@@ -121,7 +121,7 @@
   },
   {
    "fieldname": "notes",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Notes",
    "read_only": 1
   },
@@ -217,7 +217,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-05-23 01:17:16.708004",
+ "modified": "2026-09-25 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Depreciation Schedule",
