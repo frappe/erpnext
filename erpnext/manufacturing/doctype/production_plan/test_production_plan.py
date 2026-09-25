@@ -2076,6 +2076,48 @@ class TestProductionPlan(ERPNextTestSuite):
 			10,
 		)
 
+	def test_plan_reservation_released_when_plan_completes(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		sub_assembly_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		fg_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		plan_warehouse = "_Test Warehouse - _TC"
+		make_bom(item=sub_assembly_item, raw_materials=[rm_item], source_warehouse=plan_warehouse)
+		make_bom(item=fg_item, raw_materials=[sub_assembly_item], source_warehouse=plan_warehouse)
+
+		plan = create_production_plan(
+			item_code=fg_item,
+			planned_qty=5,
+			ignore_existing_ordered_qty=1,
+			sub_assembly_warehouse="_Test Warehouse 1 - _TC",
+			skip_getting_mr_items=1,
+			do_not_submit=1,
+		)
+		plan.get_sub_assembly_items()
+		for row in get_items_for_material_requests(plan.as_dict()):
+			plan.append("mr_items", row)
+		plan.submit()
+
+		plan.make_work_order()
+		work_order = frappe.get_doc("Work Order", {"production_plan": plan.name, "production_item": fg_item})
+		work_order.wip_warehouse = "_Test Warehouse 2 - _TC"
+		work_order.fg_warehouse = plan_warehouse
+		work_order.submit()
+
+		make_stock_entry(item_code=sub_assembly_item, qty=5, rate=10, target=plan_warehouse)
+		frappe.get_doc(make_se_from_wo(work_order.name, "Material Transfer for Manufacture", 5)).submit()
+		bin = frappe.get_doc("Bin", {"item_code": rm_item, "warehouse": plan_warehouse})
+		self.assertEqual(bin.reserved_qty_for_production_plan, 5)
+
+		manufacture = frappe.get_doc(make_se_from_wo(work_order.name, "Manufacture", 5))
+		manufacture.submit()
+		self.assertEqual(frappe.db.get_value("Production Plan", plan.name, "status"), "Completed")
+		bin.reload()
+		self.assertEqual(bin.reserved_qty_for_production_plan, 0)
+
+		manufacture.cancel()
+		bin.reload()
+		self.assertEqual(bin.reserved_qty_for_production_plan, 5)
+
 	def test_plan_reservation_offsets_are_distributed_across_warehouses(self):
 		from erpnext.manufacturing.doctype.production_plan.production_plan import (
 			_get_remaining_reserved_qty,
