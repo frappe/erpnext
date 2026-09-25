@@ -1897,6 +1897,8 @@ def _get_stock_reservation_entries_for_voucher(
 			"voucher_detail_no",
 			"reserved_qty",
 			"delivered_qty",
+			"transferred_qty",
+			"consumed_qty",
 			"stock_uom",
 		]
 
