@@ -1,3 +1,4 @@
+from collections import defaultdict
 from unittest.mock import patch
 
 import frappe
@@ -29,7 +30,10 @@ from erpnext.stock.doctype.stock_entry.services.disassemble import (
 	get_available_materials,
 )
 from erpnext.stock.doctype.stock_entry.services.manufacturing import ManufactureStockEntry
-from erpnext.stock.doctype.stock_entry.services.serial_batch import StockEntrySABB
+from erpnext.stock.doctype.stock_entry.services.serial_batch import (
+	StockEntrySABB,
+	get_batchwise_serial_nos,
+)
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import get_items, get_stock_balance_for
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import get_reserved_materials
 from erpnext.stock.get_item_details import get_filtered_serial_nos, update_stock
@@ -1116,6 +1120,34 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 					serial.item_code != self.item.name,
 				)
 		self.assertEqual(row.serial_and_batch_bundle, "_Identity Finished Bundle")
+
+	def test_manufacture_consumes_batches_in_number_order(self):
+		first_by_id = self.make_number("Batch", "Consume-B")
+		first_by_number = self.make_number("Batch", "Consume-C")
+		frappe.db.set_value("Batch", first_by_number.name, "batch_id", "Consume-A")
+		row = frappe._dict(batches_to_be_consume=defaultdict(float))
+
+		ManufactureStockEntry(frappe._dict()).update_batches_to_be_consume(
+			{first_by_id.name: 1, first_by_number.name: 1}, row, 1
+		)
+
+		self.assertEqual(dict(row.batches_to_be_consume), {first_by_number.name: 1})
+
+	def test_backflush_takes_serials_of_a_batch_in_number_order(self):
+		batch = self.make_number("Batch", "Backflush-Batch")
+		first_by_id = self.make_number("Serial No", "Backflush-B")
+		first_by_number = self.make_number("Serial No", "Backflush-C")
+		frappe.db.set_value("Serial No", first_by_number.name, "serial_no", "Backflush-A")
+		for serial in (first_by_id, first_by_number):
+			frappe.db.set_value("Serial No", serial.name, "batch_no", batch.name)
+		row = frappe._dict(
+			batches_to_be_consume={batch.name: 2}, serial_nos=[first_by_id.name, first_by_number.name]
+		)
+
+		self.assertEqual(
+			get_batchwise_serial_nos(self.item.name, row),
+			{batch.name: [first_by_number.name, first_by_id.name]},
+		)
 
 	def test_manufacturing_material_row_uses_physical_numbers_in_selected_order(self):
 		serials = [
