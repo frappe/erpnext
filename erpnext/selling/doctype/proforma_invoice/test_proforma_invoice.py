@@ -25,6 +25,9 @@ class TestProformaInvoice(ERPNextTestSuite):
 		name = make_proforma_invoice(sales_order.name, json.dumps(items), **kwargs)
 		return frappe.get_doc("Proforma Invoice", name)
 
+	def make_draft_proforma(self, sales_order, **item):
+		return frappe.new_doc("Proforma Invoice", sales_order=sales_order.name, items=[item]).insert()
+
 	def test_partial_proforma_is_non_blocking(self):
 		"""A proforma must not touch delivery/billing or the source Sales Order."""
 		sales_order = make_sales_order(qty=10)
@@ -209,6 +212,32 @@ class TestProformaInvoice(ERPNextTestSuite):
 		update_child_qty_rate("Sales Order", keep_other, sales_order.name)
 		sales_order.reload()
 		self.assertEqual([item.name for item in sales_order.items], [other.name])
+
+	def test_line_from_another_sales_order_is_rejected(self):
+		sales_order = make_sales_order(qty=10)
+		other_item = make_sales_order(qty=10).items[0]
+
+		self.assertRaises(
+			frappe.ValidationError,
+			self.make_draft_proforma,
+			sales_order,
+			so_detail=other_item.name,
+			item_code=other_item.item_code,
+			qty=4,
+		)
+
+	def test_quantity_basis_bills_at_sales_order_rate(self):
+		sales_order = make_sales_order(qty=10)
+		so_item = sales_order.items[0]
+
+		proforma = self.make_draft_proforma(
+			sales_order, so_detail=so_item.name, item_code=so_item.item_code, qty=4, rate=1, amount=1
+		)
+
+		item = proforma.items[0]
+		self.assertEqual(item.item_code, so_item.item_code)
+		self.assertEqual(flt(item.rate), flt(so_item.rate))
+		self.assertEqual(flt(item.amount), 4 * flt(so_item.rate))
 
 	def test_amended_proforma_is_rejected(self):
 		proforma = frappe.get_doc({"doctype": "Proforma Invoice", "amended_from": "PRO-TEST-0001"})
