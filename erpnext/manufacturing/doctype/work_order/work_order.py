@@ -890,6 +890,9 @@ class WorkOrder(Document):
 			query = query.run()
 			qty = flt(query[0][0]) if query else 0
 
+			doc = frappe.get_doc("Production Plan", self.production_plan)
+			had_unordered_items = doc.has_unordered_items
+
 			if self.production_plan_item:
 				frappe.db.set_value("Production Plan Item", self.production_plan_item, "ordered_qty", qty)
 			elif self.production_plan_sub_assembly_item:
@@ -900,11 +903,13 @@ class WorkOrder(Document):
 					qty,
 				)
 
-			doc = frappe.get_doc("Production Plan", self.production_plan)
+			doc.reload()
 			doc.flags.ignore_permissions = True
-			doc.set_status()
-			doc.db_set("status", doc.status)
-			doc.update_raw_material_bin_qty({d.item_code for d in self.required_items})
+			doc.update_status_and_bin_qty()
+			if had_unordered_items != doc.has_unordered_items:
+				doc.update_raw_material_bin_qty()
+			else:
+				doc.update_raw_material_bin_qty({d.item_code for d in self.required_items})
 
 	def update_work_order_qty_in_so(self):
 		if (not self.sales_order and not self.sales_order_item) or self.production_plan_sub_assembly_item:
