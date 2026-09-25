@@ -4654,6 +4654,10 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(sre.transferred_qty, 0)
 		self.assertEqual([(row.batch_no, row.delivered_qty) for row in sre.sb_entries], [(reserved_batch, 0)])
 
+		frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 50)).submit()
+		wo.reload()
+		self.assertEqual(wo.required_items[0].stock_reserved_qty, 50)
+
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
 		{"enable_stock_reservation": 1, "allow_negative_stock": 0},
