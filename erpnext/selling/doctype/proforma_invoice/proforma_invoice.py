@@ -46,7 +46,49 @@ class ProformaInvoice(Document):
 	def validate(self) -> None:
 		validate_feature_enabled()
 		self.validate_amended_doc()
+		self.validate_sales_order()
+		self.set_item_values()
 		self.set_total_qty()
+
+	def validate_sales_order(self) -> None:
+		if frappe.db.get_value("Sales Order", self.sales_order, "docstatus") != 1:
+			frappe.throw(_("A Proforma Invoice can only be created against a submitted Sales Order."))
+
+	def set_item_values(self) -> None:
+		"""Copy each line's item details from its Sales Order line, then set the rate and amount."""
+		so_items = {
+			row.name: row
+			for row in frappe.get_all(
+				"Sales Order Item",
+				filters={"parent": self.sales_order, "parenttype": "Sales Order"},
+				fields=["name", "item_code", "item_name", "description", "uom", "rate"],
+			)
+		}
+		for item in self.items:
+			so_item = so_items.get(item.so_detail)
+			if not so_item:
+				frappe.throw(
+					_("Row #{0}: The line does not belong to Sales Order {1}").format(
+						item.idx, frappe.bold(self.sales_order)
+					)
+				)
+			item.item_code = so_item.item_code
+			item.item_name = so_item.item_name
+			item.uom = so_item.uom
+			item.description = item.description or so_item.description
+			self.set_rate_and_amount(item, so_item.rate)
+
+	def set_rate_and_amount(self, item, sales_order_rate: float) -> None:
+		"""Quantity basis bills at the Sales Order rate; Amount basis derives the rate from the amount."""
+		if flt(item.qty) <= 0:
+			frappe.throw(_("Row #{0}: Qty must be a positive number").format(item.idx))
+		if self.based_on == "Amount":
+			if flt(item.amount) <= 0:
+				frappe.throw(_("Row #{0}: Amount must be a positive number").format(item.idx))
+			item.rate = flt(item.amount) / flt(item.qty)
+		else:
+			item.rate = sales_order_rate
+			item.amount = flt(item.qty) * flt(sales_order_rate)
 
 	def validate_amended_doc(self) -> None:
 		if self.amended_from:
@@ -166,19 +208,13 @@ def make_proforma_invoice(
 	print_format: str | None = None,
 	letter_head: str | None = None,
 ) -> str:
-	"""The sole creation path for a Proforma Invoice (the doctype is `in_create`).
+	"""Create and submit a Proforma Invoice from the Sales Order dialog.
 
 	`based_on` decides what the user edited per line: "Quantity" (rate fixed, amount = qty x rate)
 	or "Amount" (both qty and amount entered, rate derived). `hide_item_qty` (Amount basis only)
 	hides the qty and rate on the printed proforma for a clean value-based document.
 	"""
 	validate_feature_enabled()
-	selected = frappe.parse_json(items)
-	sales_order_doc = frappe.get_doc("Sales Order", sales_order)
-	if sales_order_doc.docstatus != 1:
-		frappe.throw(_("A Proforma Invoice can only be created against a submitted Sales Order."))
-	so_items = {item.name: item for item in sales_order_doc.items}
-
 	proforma = frappe.new_doc("Proforma Invoice")
 	proforma.sales_order = sales_order
 	proforma.based_on = based_on
@@ -192,13 +228,16 @@ def make_proforma_invoice(
 	)
 	proforma.letter_head = letter_head
 
-	for row in selected:
-		so_item = so_items.get(row.get("so_detail"))
-		if not so_item:
-			continue
-		line = _proforma_line(so_item, based_on, row)
-		if line:
-			proforma.append("items", line)
+	for row in frappe.parse_json(items):
+		proforma.append(
+			"items",
+			{
+				"so_detail": row.get("so_detail"),
+				"qty": row.get("qty"),
+				"amount": row.get("amount"),
+				"description": row.get("description"),
+			},
+		)
 
 	if not proforma.items:
 		frappe.throw(_("Please enter a quantity or amount for at least one item."))
@@ -206,33 +245,6 @@ def make_proforma_invoice(
 	proforma.insert()
 	proforma.submit()
 	return proforma.name
-
-
-def _proforma_line(so_item, based_on: str, row: dict) -> dict | None:
-	if based_on == "Amount":
-		# Amount basis: both qty and amount are user-entered; the rate is derived.
-		qty = flt(row.get("qty"))
-		amount = flt(row.get("amount"))
-		if amount <= 0 or qty <= 0:
-			return None
-		rate = amount / qty
-	else:
-		qty = flt(row.get("qty"))
-		if qty <= 0:
-			return None
-		rate = flt(so_item.rate)
-		amount = qty * rate
-
-	return {
-		"item_code": so_item.item_code,
-		"item_name": so_item.item_name,
-		"description": row.get("description") or so_item.description,
-		"uom": so_item.uom,
-		"qty": qty,
-		"rate": rate,
-		"amount": amount,
-		"so_detail": so_item.name,
-	}
 
 
 @frappe.whitelist()
