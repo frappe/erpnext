@@ -859,9 +859,8 @@ class TestFormulaCalculator(FinancialReportTemplateTestCase):
 
 		calculator = FormulaCalculator(row_data, period_list)
 
-		result = calculator.evaluate_formula(self._create_mock_report_row("NUMERATOR / ZERO_VAL"))
-		expected = [0.0, 0.0, 0.0]
-		self.assertEqual(result, expected)
+		with self.assertRaises(frappe.ValidationError):
+			calculator.evaluate_formula(self._create_mock_report_row("NUMERATOR / ZERO_VAL"))
 
 	# 2. DATA HANDLING TESTS
 	def test_handle_missing_values(self):
@@ -885,9 +884,8 @@ class TestFormulaCalculator(FinancialReportTemplateTestCase):
 
 		# Empty row_data
 		empty_calculator = FormulaCalculator({}, period_list)
-		result = empty_calculator.evaluate_formula(self._create_mock_report_row("MISSING_CODE * 2"))
-		expected = [0.0, 0.0, 0.0]
-		self.assertEqual(result, expected)
+		with self.assertRaises(frappe.ValidationError):
+			empty_calculator.evaluate_formula(self._create_mock_report_row("MISSING_CODE * 2"))
 
 		# None values
 		row_data_with_none = {
@@ -926,17 +924,13 @@ class TestFormulaCalculator(FinancialReportTemplateTestCase):
 		expected = [200.0, 400.0, 600.0]
 		self.assertEqual(result, expected)
 
-		# Test with invalid reference code - should return 0.0 (code won't be in context)
-		result = calculator.evaluate_formula(self._create_mock_report_row("INVALID_CODE * 2"))
-		expected = [0.0, 0.0, 0.0]
-		self.assertEqual(result, expected)
+		# an unknown reference code stops the report rather than showing a zero
+		with self.assertRaises(frappe.ValidationError):
+			calculator.evaluate_formula(self._create_mock_report_row("INVALID_CODE * 2"))
 
-		# Test reference code case sensitivity
-		result = calculator.evaluate_formula(
-			self._create_mock_report_row("valid_code * 2")
-		)  # lowercase version
-		expected = [0.0, 0.0, 0.0]  # Should fail since codes are case-sensitive
-		self.assertEqual(result, expected)
+		# reference codes are case sensitive, so this one is unknown too
+		with self.assertRaises(frappe.ValidationError):
+			calculator.evaluate_formula(self._create_mock_report_row("valid_code * 2"))
 
 	def test_handle_mismatched_period_data_lengths(self):
 		"""Test scenarios with mismatched period data"""
@@ -1157,20 +1151,10 @@ class TestFormulaCalculator(FinancialReportTemplateTestCase):
 
 		calculator = FormulaCalculator(row_data, period_list)
 
-		# Test invalid syntax - should return 0.0 for all periods
-		result = calculator.evaluate_formula(self._create_mock_report_row("NORMAL + +"))  # Invalid syntax
-		expected = [0.0, 0.0, 0.0]
-		self.assertEqual(result, expected)
-
-		# Test undefined variable - should return 0.0 for all periods
-		result = calculator.evaluate_formula(self._create_mock_report_row("UNDEFINED_VAR * 2"))
-		expected = [0.0, 0.0, 0.0]
-		self.assertEqual(result, expected)
-
-		# Test empty formula - should return 0.0 for all periods
-		result = calculator.evaluate_formula(self._create_mock_report_row(""))
-		expected = [0.0, 0.0, 0.0]
-		self.assertEqual(result, expected)
+		# a broken formula stops the report instead of showing a plausible zero
+		for broken in ("NORMAL + +", "UNDEFINED_VAR * 2", "", "NORMAL + ∞"):
+			with self.assertRaises(frappe.ValidationError, msg=broken):
+				calculator.evaluate_formula(self._create_mock_report_row(broken))
 
 		# Test whitespace and formatting tolerance
 		result = calculator.evaluate_formula(
@@ -1183,13 +1167,6 @@ class TestFormulaCalculator(FinancialReportTemplateTestCase):
 		long_formula = "NORMAL + " + " + ".join(["10"] * 100)  # Very long formula
 		result = calculator.evaluate_formula(self._create_mock_report_row(long_formula))
 		expected = [1100.0, 1200.0, 1300.0]  # 100 + (100 * 10) = 1100 added to each value
-		self.assertEqual(result, expected)
-
-		# Test Unicode characters in formula (should fail gracefully)
-		result = calculator.evaluate_formula(
-			self._create_mock_report_row("NORMAL + ∞")
-		)  # Unicode infinity symbol
-		expected = [0.0, 0.0, 0.0]
 		self.assertEqual(result, expected)
 
 	def test_evaluate_math_function_edge_cases(self):

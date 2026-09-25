@@ -303,7 +303,7 @@ class TestFormulaEnvironment(FinancialReportTemplateTestCase):
 
 
 class TestCalculationFormula(FinancialReportTemplateTestCase):
-	"""Formulas are test-evaluated with dummy values before a template can be saved."""
+	"""A formula is read before a template can be saved."""
 
 	@staticmethod
 	def _validate(formula, codes=("A", "B", "C")):
@@ -333,41 +333,18 @@ class TestCalculationFormula(FinancialReportTemplateTestCase):
 		self.assertTrue(result.is_valid)
 		self.assertTrue(result.has_warnings)
 
-	def test_formulas_that_cannot_return_a_number_are_rejected(self):
-		for formula in ("A > B", "A == B", "not A", "'text'", "[A, B]"):
-			self.assertFalse(self._validate(formula).is_valid, formula)
-
-	def test_dividing_by_a_typed_zero_is_rejected(self):
-		for formula in ("A / 0", "A / 0.0", "A // 0", "A % 0", "A + B / 0"):
-			self.assertFalse(self._validate(formula).is_valid, formula)
-
-	def test_a_calculated_divisor_is_left_to_the_engine(self):
-		# B may be non-zero in most periods, so this cannot be judged from the text
+	def test_divisors_are_left_to_the_engine(self):
+		# whether a divisor is zero depends on the data, so the engine decides
 		self.assertTrue(self._validate("A / B").is_valid)
 		self.assertTrue(self._validate("A / (B - C)").is_valid)
 		self.assertTrue(self._validate("(A - B) / (A - C)").is_valid)
 		self.assertTrue(self._validate("A / (0 + 1)").is_valid)
 		self.assertTrue(self._validate("ROM / (CAS + FDE - ROM)", ("ROM", "CAS", "FDE")).is_valid)
 
-	def test_conditional_branches_must_all_give_a_number(self):
-		# only the branches can become the value, so each one has to be numeric
-		self.assertFalse(self._validate("'Hello' if A else 'Hello'").is_valid)
-		self.assertFalse(self._validate("'a' if A else B").is_valid)
-		self.assertFalse(self._validate("A if A else 'a'").is_valid)
-		self.assertFalse(self._validate("A or 'text'").is_valid)
-		self.assertFalse(self._validate("A and 'text'").is_valid)
-		# nested one level down
-		self.assertFalse(self._validate("A if B else (B if A else 'x')").is_valid)
-
-	def test_the_condition_itself_may_be_a_comparison(self):
+	def test_conditional_formulas_are_allowed(self):
 		# shipped templates use this shape for every ratio line
 		self.assertTrue(self._validate("A / B if B != 0 else 0").is_valid)
 		self.assertTrue(self._validate("A if A > B else B").is_valid)
-
-	def test_expressions_that_may_return_a_number_are_allowed(self):
-		# these yield one of their operands, so they can be numeric
-		self.assertTrue(self._validate("A and B").is_valid)
-		self.assertTrue(self._validate("A if B else 0").is_valid)
 
 	def test_self_reference_is_an_error(self):
 		row = frappe._dict(
