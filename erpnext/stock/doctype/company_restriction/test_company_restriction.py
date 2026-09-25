@@ -327,3 +327,35 @@ class TestCompanyRestriction(ERPNextTestSuite):
 			customers = {row.customer for row in rows}
 			self.assertIn(allowed_customer, customers)
 			self.assertNotIn(restricted_customer, customers)
+
+	def test_reports_keep_to_permitted_companies(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+		from erpnext.stock.report.stock_projected_qty.stock_projected_qty import (
+			execute as stock_projected_qty,
+		)
+
+		make_stock_entry(item_code="_Test Item", qty=5, to_warehouse="Stores - _TC", basic_rate=100)
+		make_stock_entry(
+			item_code="_Test Item",
+			qty=5,
+			to_warehouse="Stores - _TC1",
+			company="_Test Company 1",
+			basic_rate=100,
+		)
+		own_request = make_material_request()
+		other_request = make_material_request(
+			company="_Test Company 1", warehouse="Stores - _TC1", cost_center="Main - _TC1"
+		)
+
+		with self.set_user(self.make_report_user()):
+			columns, rows = stock_projected_qty(frappe._dict(item_code="_Test Item"))
+			warehouse_index = [column["fieldname"] for column in columns].index("warehouse")
+			warehouses = {row[warehouse_index] for row in rows}
+			self.assertIn("Stores - _TC", warehouses)
+			self.assertNotIn("Stores - _TC1", warehouses)
+
+			requests = {
+				row["material_request_no"] for row in self.run_report("buying", "procurement_tracker", {})
+			}
+			self.assertIn(own_request.name, requests)
+			self.assertNotIn(other_request.name, requests)
