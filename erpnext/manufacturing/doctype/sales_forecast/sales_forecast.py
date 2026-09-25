@@ -46,17 +46,22 @@ class SalesForecast(Document):
 				fields=["name", "item_name", "stock_uom as uom"],
 			)
 		}
-		case_insensitive_items = {}
+		ascii_items_by_lowercase_code = {}
 		if frappe.db.db_type == "mariadb":
-			case_insensitive_items = {code.casefold(): item for code, item in item_details_by_code.items()}
+			# Unicode casefold does not always match MariaDB's collation.
+			ascii_items_by_lowercase_code = {
+				code.lower(): item for code, item in item_details_by_code.items() if code.isascii()
+			}
 
 		forecast_demand = []
 		for row in self.selected_items:
 			if row.item_code not in item_details_by_code:
+				matching_item = None
+				if row.item_code.isascii():
+					matching_item = ascii_items_by_lowercase_code.get(row.item_code.lower())
+
 				# Fall back to the database for other collation-equivalent Item codes.
-				item_details_by_code[row.item_code] = case_insensitive_items.get(
-					row.item_code.casefold()
-				) or frappe.db.get_value(
+				item_details_by_code[row.item_code] = matching_item or frappe.db.get_value(
 					"Item", row.item_code, ["item_name", "stock_uom as uom"], as_dict=True
 				)
 			item_details = item_details_by_code[row.item_code]
