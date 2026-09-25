@@ -78,18 +78,24 @@ def get_inherited_permission_query_conditions(user, doctype=None):
 		return None
 
 	master_doctype, fieldname = inherited
-	allowed_companies = get_allowed_companies(user, master_doctype)
+	return get_allowed_masters_condition(frappe.qb.DocType(doctype)[fieldname], master_doctype, user)
+
+
+def get_allowed_masters_condition(field, doctype, user=None):
+	if doctype not in RESTRICTABLE_MASTER_DOCTYPES:
+		return None
+
+	allowed_companies = get_allowed_companies(user, doctype)
 	if not allowed_companies:
 		return None
 
-	child = frappe.qb.DocType(doctype)
-	master = frappe.qb.DocType(master_doctype)
+	master = frappe.qb.DocType(doctype)
 	allowed_masters = (
 		frappe.qb.from_(master)
 		.select(master.name)
-		.where(get_restriction_criterion(master_doctype, allowed_companies))
+		.where(get_restriction_criterion(doctype, allowed_companies))
 	)
-	return child[fieldname].isin(allowed_masters)
+	return field.isin(allowed_masters)
 
 
 def get_restriction_criterion(doctype, companies):

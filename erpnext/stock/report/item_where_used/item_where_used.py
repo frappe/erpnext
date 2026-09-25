@@ -4,6 +4,8 @@
 import frappe
 from frappe import _
 
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_masters_condition
+
 WHERE_USED_SECTION = "Where Used"
 REFERENCES_SECTION = "References"
 
@@ -130,7 +132,19 @@ def get_data(filters):
 	if not filters.get("section") or filters.section == REFERENCES_SECTION:
 		data.extend(get_reference_data(filters))
 
-	return data
+	return remove_restricted_items(data)
+
+
+def remove_restricted_items(data):
+	condition = get_allowed_masters_condition(frappe.qb.DocType("Item").name, "Item")
+	if not condition or not data:
+		return data
+
+	related_items = get_unique_names(row.related_item for row in data)
+	allowed_items = set(
+		frappe.get_all("Item", filters=[{"name": ("in", related_items)}, condition], pluck="name")
+	)
+	return [row for row in data if row.related_item in allowed_items]
 
 
 def get_where_used_data(filters):

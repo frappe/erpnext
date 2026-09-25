@@ -3,6 +3,8 @@ from collections import defaultdict
 import frappe
 from frappe import _
 
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_masters_condition
+
 
 def execute(filters=None):
 	filters = frappe._dict(filters or {})
@@ -43,6 +45,9 @@ def get_root_batches(filters):
 
 	if filters.item_code:
 		query = query.where(batch.item == filters.item_code)
+
+	if condition := get_allowed_masters_condition(batch.item, "Item"):
+		query = query.where(condition)
 
 	return query.run(pluck=True)
 

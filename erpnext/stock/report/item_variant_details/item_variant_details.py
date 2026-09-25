@@ -5,6 +5,8 @@
 import frappe
 from frappe import _
 
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_masters_condition
+
 
 def execute(filters=None):
 	columns = get_columns(filters.item)
@@ -17,9 +19,11 @@ def get_data(item):
 		return []
 	item_dicts = []
 
-	variant_results = frappe.db.get_all(
-		"Item", fields=["name"], filters={"variant_of": ["=", item], "disabled": 0}
-	)
+	variant_filters = [{"variant_of": ["=", item], "disabled": 0}]
+	if condition := get_allowed_masters_condition(frappe.qb.DocType("Item").name, "Item"):
+		variant_filters.append(condition)
+
+	variant_results = frappe.db.get_all("Item", fields=["name"], filters=variant_filters)
 
 	if not variant_results:
 		frappe.msgprint(_("There are no item variants for the selected item"))
