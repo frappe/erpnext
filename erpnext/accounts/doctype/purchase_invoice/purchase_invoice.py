@@ -34,6 +34,7 @@ from erpnext.accounts.party import get_due_date, get_party_account
 from erpnext.accounts.utils import (
 	get_account_currency,
 	get_fiscal_year,
+	pre_submit_validation,
 	refresh_subscription_status,
 	update_voucher_outstanding,
 )
@@ -310,6 +311,8 @@ class PurchaseInvoice(BuyingController):
 
 		if self.on_hold:
 			self.validate_invoice_hold()
+
+		pre_submit_validation(self, check_prev_docstatus=True)
 
 	def set_percentage_received(self):
 		total_billed_qty = 0.0
