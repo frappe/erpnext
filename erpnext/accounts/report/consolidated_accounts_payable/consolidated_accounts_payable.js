@@ -103,6 +103,11 @@ frappe.query_reports["Consolidated Accounts Payable"] = {
 			fieldtype: "Check",
 		},
 		{
+			fieldname: "for_revaluation_journals",
+			label: __("Revaluation Journals"),
+			fieldtype: "Check",
+		},
+		{
 			fieldname: "in_party_currency",
 			label: __("In Party Currency"),
 			fieldtype: "Check",
