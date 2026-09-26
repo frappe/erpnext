@@ -1165,6 +1165,18 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(receipts[0].per_billed, 0)
 		self.assertEqual(receipts[1].per_billed, 100)
 
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"maintain_same_rate": 0, "set_landed_cost_based_on_purchase_invoice_rate": 1}
+	)
+	def test_zero_rate_receipt_billed_by_qty(self):
+		pr = make_purchase_receipt(item_code="_Test Non Stock Item", qty=10, rate=0)
+		pi = make_purchase_invoice(pr.name)
+		pi.items[0].rate = 5
+		pi.submit()
+
+		pr.reload()
+		self.assertEqual(pr.per_billed, 100)
+
 	def test_serial_no_against_purchase_receipt(self):
 		item_code = "Test Manual Created Serial No"
 		if not frappe.db.exists("Item", item_code):
