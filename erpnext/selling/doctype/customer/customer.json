@@ -241,11 +241,13 @@
   },
   {
    "depends_on": "is_internal_customer",
+   "description": "The Company that this Customer actually is (e.g. a sister, parent, or subsidiary company) -- used to link inter-company transactions between them",
    "fieldname": "represents_company",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
    "label": "Represents Company",
    "options": "Company",
+   "show_description_on_click": 1,
    "unique": 1
   },
   {
