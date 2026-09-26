@@ -159,10 +159,16 @@ class Asset(AccountsController):
 		self.status = self.get_status()
 
 	def before_submit(self):
-		if self.is_composite_asset and not has_active_capitalization(self.name):
-			if self.split_from and has_active_capitalization(self.split_from):
-				return
+		if self.is_composite_asset and not has_active_capitalization(self.get_original_asset()):
 			frappe.throw(_("Please capitalize this asset before submitting."))
+
+	def get_original_asset(self):
+		"""Return the asset this one was (transitively) split from, or itself."""
+		asset, parent = self.name, self.split_from
+		while parent:
+			asset = parent
+			parent = frappe.db.get_value("Asset", asset, "split_from")
+		return asset
 
 	def on_submit(self):
 		self.validate_in_use_date()

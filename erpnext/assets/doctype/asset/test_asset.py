@@ -571,6 +571,19 @@ class TestAsset(AssetSetup):
 
 		composite_asset.save()
 
+		# splitting an asset that was itself split from the capitalized asset must also pass
+		nested_asset = split_asset(new_asset.name, 1)
+
+		new_asset.load_from_db()
+		self.assertEqual(new_asset.asset_quantity, 3)
+		self.assertEqual(new_asset.gross_purchase_amount, 36000)
+
+		self.assertEqual(nested_asset.docstatus, 1)
+		self.assertEqual(nested_asset.split_from, new_asset.name)
+		self.assertEqual(nested_asset.asset_quantity, 1)
+		self.assertEqual(nested_asset.gross_purchase_amount, 12000)
+		self.assertEqual(nested_asset.purchase_amount, nested_asset.gross_purchase_amount)
+
 	def test_asset_splitting(self):
 		asset = create_asset(
 			calculate_depreciation=1,
