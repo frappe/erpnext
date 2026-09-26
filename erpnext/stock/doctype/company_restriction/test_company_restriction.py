@@ -240,18 +240,28 @@ class TestCompanyRestriction(ERPNextTestSuite):
 			self.assertFalse(frappe.has_permission("Party Specific Item", doc=records[restricted]))
 			self.assertTrue(frappe.has_permission("Party Specific Item", doc=records[allowed]))
 
-	def test_record_without_company_inherits_master_company_restriction(self):
-		restricted = make_customer("_Test Empty Company Restricted Customer")
-		allowed = make_customer("_Test Empty Company Allowed Customer")
-		self.restrict_to_companies("Customer", restricted, ["_Test Company 1"])
-		leads = {
-			customer: frappe.get_doc({"doctype": "Lead", "first_name": "_Test", "customer": customer})
+	def make_lead(self, customer, company=None):
+		return (
+			frappe.get_doc(
+				{"doctype": "Lead", "first_name": "_Test", "customer": customer, "company": company}
+			)
 			.insert()
 			.name
-			for customer in (restricted, allowed)
-		}
+		)
 
-		user = self.make_user_with_roles("test_empty_company_restriction@example.com", ["Sales Manager"])
+	def test_optional_company_record_inherits_master_company_restriction(self):
+		restricted = make_customer("_Test Optional Company Restricted Customer")
+		restricted_later = make_customer("_Test Optional Company Restricted Later Customer")
+		allowed = make_customer("_Test Optional Company Allowed Customer")
+		self.restrict_to_companies("Customer", restricted, ["_Test Company 1"])
+		leads = {
+			restricted: self.make_lead(restricted),
+			restricted_later: self.make_lead(restricted_later, "_Test Company"),
+			allowed: self.make_lead(allowed),
+		}
+		self.restrict_to_companies("Customer", restricted_later, ["_Test Company 1"])
+
+		user = self.make_user_with_roles("test_optional_company_restriction@example.com", ["Sales Manager"])
 		self.allow_company(user, "_Test Company")
 
 		with self.set_user(user):
@@ -261,6 +271,7 @@ class TestCompanyRestriction(ERPNextTestSuite):
 			self.assertEqual(visible, [allowed])
 
 			self.assertFalse(frappe.has_permission("Lead", doc=leads[restricted]))
+			self.assertFalse(frappe.has_permission("Lead", doc=leads[restricted_later]))
 			self.assertTrue(frappe.has_permission("Lead", doc=leads[allowed]))
 
 	def make_user_with_roles(self, email, roles):
