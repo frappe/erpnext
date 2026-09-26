@@ -275,7 +275,8 @@ class ReceivablePayableReport:
 		# Build and use a separate row for Employee Advances.
 		# This allows Payments or Journals made against Emp Advance to be processed.
 		if not row and (
-			(ple.against_voucher_type == "Employee Advance" and self.filters.handle_employee_advances)
+			ple.against_voucher_type == "Payroll Entry"
+			or (ple.against_voucher_type == "Employee Advance" and self.filters.handle_employee_advances)
 			or (
 				ple.against_voucher_type == "Exchange Rate Revaluation"
 				and self.filters.for_revaluation_journals
@@ -314,6 +315,7 @@ class ReceivablePayableReport:
 			if (
 				ple.voucher_type in ["Journal Entry", "Payment Entry"]
 				and ple.voucher_no != ple.against_voucher_no
+				and ple.against_voucher_type != "Payroll Entry"
 			):
 				row.paid -= amount
 				row.paid_in_account_currency -= amount_in_account_currency
@@ -519,11 +521,9 @@ class ReceivablePayableReport:
 				self.invoice_details.setdefault(je.name, je)
 
 	def set_party_details(self, row):
-		if not row.party:
-			return
-		# customer / supplier name
-		party_details = self.get_party_details(row.party) or {}
-		row.update(party_details)
+		if row.party:
+			# customer / supplier name
+			row.update(self.get_party_details(row.party) or {})
 
 		if self.filters.get("in_party_currency") or self.filters.get("party_account"):
 			row.currency = row.account_currency
