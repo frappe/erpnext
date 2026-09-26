@@ -28,19 +28,32 @@ class ConsolidatedReceivablePayable(ReceivablePayableReport):
 	def run(self, args):
 		self.companies = get_consolidated_companies(self.filters)
 		self.args = args  # the engine's get_data() takes no arguments
+		columns, data, _message, chart, _report_summary, skip_total_row = super().run(args)
 
-		return super().run(args)
+		if self.filters.get("group_by_company"):
+			# a grand total would double count the company subtotals
+			skip_total_row = 1
+
+		return columns, data, None, chart, None, skip_total_row
 
 	def get_columns(self):
 		super().get_columns()
 		add_company_columns(self.columns)
 
 	def get_data(self):
+		# party wins when both are checked
+		if self.filters.get("group_by_party"):
+			group_by, subtotal_of = "party", self.party_subtotal
+		elif self.filters.get("group_by_company"):
+			group_by, subtotal_of = "company", self.company_subtotal
+		else:
+			group_by, subtotal_of = "party", None
+
 		self.data = []
-		for rows in self.get_grouped_rows("party").values():
+		for rows in self.get_grouped_rows(group_by).values():
 			self.data.extend(rows)
-			if self.filters.get("group_by_party"):
-				self.data.append(self.party_subtotal(rows))
+			if subtotal_of:
+				self.data.append(subtotal_of(rows))
 				self.data.append({})  # blank separator, like the engine's own grouping
 
 	def get_grouped_rows(self, group_by):
@@ -53,6 +66,9 @@ class ConsolidatedReceivablePayable(ReceivablePayableReport):
 
 	def party_subtotal(self, rows):
 		return self.subtotal(rows, party=rows[0].party)
+
+	def company_subtotal(self, rows):
+		return self.subtotal(rows, company=rows[0].company)
 
 	def subtotal(self, rows, **label):
 		subtotal = frappe._dict(currency=rows[0].get("currency"), bold=1, **label)

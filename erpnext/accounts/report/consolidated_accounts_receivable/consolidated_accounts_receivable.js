@@ -86,6 +86,11 @@ frappe.query_reports["Consolidated Accounts Receivable"] = {
 			fieldtype: "Check",
 		},
 		{
+			fieldname: "group_by_company",
+			label: __("Group By Company"),
+			fieldtype: "Check",
+		},
+		{
 			fieldname: "ignore_accounts",
 			label: __("Group by Voucher"),
 			fieldtype: "Check",
