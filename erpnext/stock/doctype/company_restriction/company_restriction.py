@@ -98,6 +98,16 @@ def get_allowed_masters_condition(field, doctype, user=None):
 	return field.isin(allowed_masters)
 
 
+def remove_restricted_masters(rows, fieldname, doctype):
+	condition = get_allowed_masters_condition(frappe.qb.DocType(doctype).name, doctype)
+	names = list({row.get(fieldname) for row in rows if row.get(fieldname)})
+	if not condition or not names:
+		return rows
+
+	allowed = set(frappe.get_all(doctype, filters=[{"name": ("in", names)}, condition], pluck="name"))
+	return [row for row in rows if row.get(fieldname) in allowed]
+
+
 def get_restriction_criterion(doctype, companies):
 	parent = frappe.qb.DocType(doctype)
 	restriction = frappe.qb.DocType("Company Restriction")
