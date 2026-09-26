@@ -1538,17 +1538,22 @@ class StockEntry(StockController, SubcontractingInwardController):
 	def set_process_loss_from_finished_goods(self):
 		"""Loss is the part of Finished Good Quantity the rows of the BOM item or its variants do not cover."""
 		bom_item = frappe.get_cached_value("BOM", self.bom_no, "item")
-		finished_qty = 0
-		for row in self.items:
-			if not row.is_finished_item:
-				continue
-
-			if bom_item in (row.item_code, frappe.get_cached_value("Item", row.item_code, "variant_of")):
-				finished_qty += flt(row.transfer_qty)
+		finished_rows = [row for row in self.items if row.is_finished_item]
+		bom_outputs = [bom_item, *self.get_variants_of(bom_item, {row.item_code for row in finished_rows})]
+		finished_qty = sum(flt(row.transfer_qty) for row in finished_rows if row.item_code in bom_outputs)
 
 		process_loss_qty = max(flt(self.fg_completed_qty) - finished_qty, 0)
 		self.process_loss_qty = flt(process_loss_qty, self.precision("process_loss_qty"))
 		self.set_process_loss_percentage()
+
+	def get_variants_of(self, template, item_codes):
+		other_items = item_codes - {template}
+		if not other_items:
+			return []
+
+		return frappe.get_all(
+			"Item", filters={"name": ["in", list(other_items)], "variant_of": template}, pluck="name"
+		)
 
 	def set_process_loss_percentage(self):
 		if not flt(self.fg_completed_qty):
