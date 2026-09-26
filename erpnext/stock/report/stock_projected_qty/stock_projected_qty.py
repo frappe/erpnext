@@ -9,7 +9,7 @@ from frappe.utils.nestedset import get_descendants_of
 from pypika.terms import ExistsCriterion
 
 from erpnext.accounts.doctype.pos_invoice.pos_invoice import get_pos_reserved_qty
-from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_warehouses_condition
 from erpnext.stock.utils import (
 	is_reposting_item_valuation_in_progress,
 	update_included_uom_in_report,
@@ -284,10 +284,8 @@ def get_bin_list(filters):
 				)
 			)
 
-	warehouse = frappe.qb.DocType("Warehouse")
-	if condition := get_allowed_companies_condition(warehouse.company, "Warehouse"):
-		allowed_warehouses = frappe.qb.from_(warehouse).select(warehouse.name).where(condition)
-		query = query.where(bin.warehouse.isin(allowed_warehouses))
+	if condition := get_allowed_warehouses_condition(bin.warehouse):
+		query = query.where(condition)
 
 	bin_list = query.run(as_dict=True)
 

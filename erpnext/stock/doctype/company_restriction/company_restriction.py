@@ -68,6 +68,13 @@ def get_allowed_companies_condition(field, doctype):
 	return None
 
 
+def get_allowed_warehouses_condition(field):
+	warehouse = frappe.qb.DocType("Warehouse")
+	if condition := get_allowed_companies_condition(warehouse.company, "Warehouse"):
+		return field.isin(frappe.qb.from_(warehouse).select(warehouse.name).where(condition))
+	return None
+
+
 def get_permission_query_conditions(user, doctype=None):
 	if not doctype:
 		return None

@@ -8,7 +8,10 @@ from frappe.query_builder import Criterion
 
 from erpnext import get_default_company
 from erpnext.accounts.party import _get_party_details
-from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_masters_condition
+from erpnext.stock.doctype.company_restriction.company_restriction import (
+	get_allowed_masters_condition,
+	get_allowed_warehouses_condition,
+)
 
 
 def execute(filters=None):
@@ -95,8 +98,15 @@ def get_data(filters=None):
 	customer_details = get_customer_details(filters)
 
 	items = get_selling_items(filters)
+	bin_filters = []
+	if condition := get_allowed_warehouses_condition(frappe.qb.DocType("Bin").warehouse):
+		bin_filters.append(condition)
+
 	item_stock_map = frappe.get_all(
-		"Bin", fields=["item_code", {"SUM": "actual_qty", "as": "available"}], group_by="item_code"
+		"Bin",
+		fields=["item_code", {"SUM": "actual_qty", "as": "available"}],
+		filters=bin_filters,
+		group_by="item_code",
 	)
 	item_stock_map = {item.item_code: item.available for item in item_stock_map}
 	price_list_map = fetch_item_prices(

@@ -5,7 +5,10 @@
 import frappe
 from frappe import _
 
-from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_masters_condition
+from erpnext.stock.doctype.company_restriction.company_restriction import (
+	get_allowed_masters_condition,
+	get_allowed_warehouses_condition,
+)
 
 
 def execute(filters=None):
@@ -144,6 +147,10 @@ def get_open_sales_orders_count(variants_list):
 
 
 def get_stock_details_map(variant_list):
+	bin_filters = [{"item_code": ["in", variant_list]}]
+	if condition := get_allowed_warehouses_condition(frappe.qb.DocType("Bin").warehouse):
+		bin_filters.append(condition)
+
 	stock_details = frappe.db.get_all(
 		"Bin",
 		fields=[
@@ -152,7 +159,7 @@ def get_stock_details_map(variant_list):
 			{"SUM": "projected_qty", "as": "projected_qty"},
 			"item_code",
 		],
-		filters={"item_code": ["in", variant_list]},
+		filters=bin_filters,
 		group_by="item_code",
 	)
 

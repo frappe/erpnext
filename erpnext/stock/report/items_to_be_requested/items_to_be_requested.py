@@ -4,7 +4,10 @@
 import frappe
 from frappe import _
 
-from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_masters_condition
+from erpnext.stock.doctype.company_restriction.company_restriction import (
+	get_allowed_masters_condition,
+	get_allowed_warehouses_condition,
+)
 
 
 def execute(filters=None):
@@ -50,6 +53,9 @@ def get_data():
 	)
 
 	if condition := get_allowed_masters_condition(item.name, "Item"):
+		query = query.where(condition)
+
+	if condition := get_allowed_warehouses_condition(bin_table.warehouse):
 		query = query.where(condition)
 
 	return query.run(as_dict=True)
