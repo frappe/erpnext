@@ -297,14 +297,12 @@ class PurchaseInvoice(BuyingController):
 
 		from erpnext.accounts.services.billing_validation import BillingValidationService
 
-		receipt_billing_basis = (
-			"qty"
-			if frappe.db.get_single_value("Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate")
-			else "amount"
-		)
-		BillingValidationService(self).validate_multiple_billing(
-			"Purchase Receipt", "pr_detail", receipt_billing_basis
-		)
+		billing_validation = BillingValidationService(self)
+		if is_billed_by_qty():
+			billing_validation.validate_multiple_billing("Purchase Receipt", "pr_detail", "qty")
+			billing_validation.validate_multiple_billing("Purchase Order", "po_detail", "qty")
+		else:
+			billing_validation.validate_multiple_billing("Purchase Receipt", "pr_detail", "amount")
 		self.set_status()
 		self.validate_purchase_receipt_if_update_stock()
 		self.validate_exchange_rate_with_purchase_receipt()
@@ -651,10 +649,11 @@ class PurchaseInvoice(BuyingController):
 				)
 
 	def set_purchase_order_billing_by_qty(self):
-		"""The status updater keeps billed_amt current; billing % follows invoiced qty instead."""
+		"""The status updater keeps billed_amt current; billing % and over-billing follow invoiced qty instead."""
 		for args in self.status_updater:
 			if args.get("overflow_type") == "billing":
 				args.pop("percent_join_field", None)
+				args["validate_overflow"] = False
 
 	def validate_purchase_receipt_if_update_stock(self):
 		if self.update_stock:
