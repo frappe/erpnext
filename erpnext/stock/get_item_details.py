@@ -431,20 +431,28 @@ def get_item_code(barcode=None, serial_no=None):
 		if not item_code:
 			frappe.throw(_("No Item with Barcode {0}").format(barcode))
 	elif serial_no:
-		serials = SerialBatchIdentity("Serial No").get_records(
-			None, [serial_no.strip()], ["item_code"], ignore_permissions=False
-		)
-		if not serials:
+		item_codes = get_permitted_items_for_serial_number(serial_no)
+		if not item_codes:
 			frappe.throw(_("No Item with Serial No {0}").format(frappe.utils.escape_html(serial_no)))
-		if len(serials) > 1:
+		if len(item_codes) > 1:
 			frappe.throw(
 				_("Serial No {0} belongs to multiple items. Please select an Item first.").format(
 					frappe.utils.escape_html(serial_no)
 				)
 			)
-		item_code = serials[0].item_code
+		item_code = item_codes[0]
 
 	return item_code
+
+
+def get_permitted_items_for_serial_number(serial_no):
+	"""The Item entitles serial work: match the number first, then keep the Items the user may select."""
+	records = SerialBatchIdentity("Serial No").get_records(None, [serial_no.strip()], ["item_code"])
+	if not records:
+		return []
+	return frappe.get_list(
+		"Item", filters={"name": ("in", [record.item_code for record in records])}, pluck="name"
+	)
 
 
 def validate_item_details(ctx: frappe._dict, item):
