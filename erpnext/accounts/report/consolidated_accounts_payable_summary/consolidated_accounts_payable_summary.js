@@ -82,6 +82,16 @@ frappe.query_reports["Consolidated Accounts Payable Summary"] = {
 			label: __("Show GL Balance"),
 			fieldtype: "Check",
 		},
+		{
+			fieldname: "based_on_payment_terms",
+			label: __("Based On Payment Terms"),
+			fieldtype: "Check",
+		},
+		{
+			fieldname: "for_revaluation_journals",
+			label: __("Revaluation Journals"),
+			fieldtype: "Check",
+		},
 	],
 	collapsible_filters: true,
 	separate_check_filters: true,

@@ -87,8 +87,35 @@ frappe.query_reports["Consolidated Accounts Receivable Summary"] = {
 			fieldtype: "Check",
 		},
 		{
+			fieldname: "sales_partner",
+			label: __("Sales Partner"),
+			fieldtype: "Link",
+			options: "Sales Partner",
+		},
+		{
+			fieldname: "sales_person",
+			label: __("Sales Person"),
+			fieldtype: "Link",
+			options: "Sales Person",
+		},
+		{
 			fieldname: "show_gl_balance",
 			label: __("Show GL Balance"),
+			fieldtype: "Check",
+		},
+		{
+			fieldname: "show_sales_person",
+			label: __("Show Sales Person"),
+			fieldtype: "Check",
+		},
+		{
+			fieldname: "based_on_payment_terms",
+			label: __("Based On Payment Terms"),
+			fieldtype: "Check",
+		},
+		{
+			fieldname: "for_revaluation_journals",
+			label: __("Revaluation Journals"),
 			fieldtype: "Check",
 		},
 	],
