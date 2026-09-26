@@ -220,6 +220,14 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 	}
 
 	get_datatable(proposals_wrapper) {
+		if (!this.dialog.display) {
+			this.dialog.on_page_show = () => {
+				this.dialog.on_page_show = null;
+				this.get_datatable(proposals_wrapper);
+			};
+			return;
+		}
+
 		if (!this.datatable) {
 			const datatable_options = {
 				columns: this.columns,
@@ -436,7 +444,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				label: "Company Bank Account",
 				options: "Bank Account",
 				depends_on: "eval:doc.party",
-				get_query: function () {
+				get_query: () => {
 					return {
 						filters: {
 							is_company_account: 1,
