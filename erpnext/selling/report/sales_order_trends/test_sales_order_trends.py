@@ -26,7 +26,7 @@ class TestSalesOrderTrends(ERPNextTestSuite):
 			"based_on": "Item",
 			"group_by": "Customer",
 		}
-		columns, data, _chart_none, _chart = execute(filters)
+		columns, data, _chart_none, _chart = execute(filters)[:4]
 
 		self.assertTrue(columns)
 		self.assertTrue(any("_Test Item" in [str(cell) for cell in row] for row in data))
@@ -53,7 +53,7 @@ class TestSalesOrderTrends(ERPNextTestSuite):
 
 		columns, data, _chart_none, _chart = execute(
 			{"company": "_Test Company", "period": "Monthly", "based_on": "Customer"}
-		)
+		)[:4]
 
 		self.assertTrue(columns)
 		customer_rows = [row for row in data if row[0] == "_Test Customer"]
@@ -79,7 +79,7 @@ class TestSalesOrderTrends(ERPNextTestSuite):
 			"period": "Monthly",
 			"based_on": "Customer",
 		}
-		columns, data, _chart_none, _chart = execute(filters)
+		columns, data, _chart_none, _chart = execute(filters)[:4]
 
 		self.assertTrue(columns)
 		customer_rows = [row for row in data if row[0] == "_Test Customer"]
@@ -106,7 +106,7 @@ class TestSalesOrderTrends(ERPNextTestSuite):
 			}
 		)
 
-		columns, data, _message, chart = execute(filters)
+		columns, data, _message, chart = execute(filters)[:4]
 		self.assertTrue(columns)
 		self.assertTrue(data)
 
@@ -135,7 +135,7 @@ class TestSalesOrderTrends(ERPNextTestSuite):
 			}
 		)
 
-		_columns, _data, _message, chart = execute(filters)
+		_columns, _data, _message, chart = execute(filters)[:4]
 		expected_currency = frappe.get_cached_value("Company", "_Test Company", "default_currency")
 		self.assertEqual(chart["currency"], expected_currency)
 
@@ -168,7 +168,7 @@ class TestSalesOrderTrends(ERPNextTestSuite):
 			}
 		)
 
-		columns, data, _message, chart = execute(filters)
+		columns, data, _message, chart = execute(filters)[:4]
 		self.assertTrue(columns)
 		self.assertTrue(data)
 
@@ -206,7 +206,7 @@ class TestSalesOrderTrends(ERPNextTestSuite):
 			}
 		)
 
-		columns, data, _message, chart = execute(filters)
+		_columns, data, _message, chart = execute(filters)[:4]
 		total_row = next(row for row in data if row[0] == f"'{_('Total')}'")
 		expected_total = total_row[-1]
 		chart_total = sum(chart["data"]["datasets"][0]["values"])
@@ -236,7 +236,7 @@ class TestSalesOrderTrends(ERPNextTestSuite):
 			}
 		)
 
-		columns, data, _message, chart = execute(filters)
+		_columns, _data, _message, chart = execute(filters)[:4]
 		chart_total = sum(chart["data"]["datasets"][0]["values"])
 
 		self.assertGreater(chart_total, 0)

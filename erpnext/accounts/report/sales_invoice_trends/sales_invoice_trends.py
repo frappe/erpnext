@@ -12,4 +12,4 @@ def execute(filters=None):
 	conditions = get_columns(filters, "Sales Invoice")
 	data = get_data(filters, conditions)
 
-	return conditions["columns"], data
+	return conditions["columns"], data, None, None, None, True

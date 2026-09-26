@@ -28,7 +28,7 @@ class TestPurchaseOrderTrends(ERPNextTestSuite):
 			"period": "Monthly",
 			"based_on": "Supplier",
 		}
-		columns, data, _chart_none, _chart = execute(filters)
+		columns, data, _chart_none, _chart = execute(filters)[:4]
 
 		self.assertTrue(columns)
 		supplier_rows = [row for row in data if row[0] == "_Test Supplier"]
@@ -56,7 +56,7 @@ class TestPurchaseOrderTrends(ERPNextTestSuite):
 			}
 		)
 
-		columns, data, _message, chart = execute(filters)
+		columns, data, _message, chart = execute(filters)[:4]
 
 		self.assertTrue(columns)
 		self.assertTrue(data)
@@ -89,7 +89,7 @@ class TestPurchaseOrderTrends(ERPNextTestSuite):
 			}
 		)
 
-		_columns, _data, _message, chart = execute(filters)
+		_columns, _data, _message, chart = execute(filters)[:4]
 
 		expected_currency = frappe.get_cached_value("Company", "_Test Company", "default_currency")
 		self.assertEqual(chart["currency"], expected_currency)
@@ -123,7 +123,7 @@ class TestPurchaseOrderTrends(ERPNextTestSuite):
 			}
 		)
 
-		columns, data, _message, chart = execute(filters)
+		columns, data, _message, chart = execute(filters)[:4]
 		self.assertTrue(columns)
 		self.assertTrue(data)
 
@@ -161,7 +161,7 @@ class TestPurchaseOrderTrends(ERPNextTestSuite):
 			}
 		)
 
-		columns, data, _message, chart = execute(filters)
+		_columns, data, _message, chart = execute(filters)[:4]
 		total_row = next(row for row in data if row[0] == f"'{_('Total')}'")
 		expected_total = total_row[-1]
 		chart_total = sum(chart["data"]["datasets"][0]["values"])
@@ -191,7 +191,7 @@ class TestPurchaseOrderTrends(ERPNextTestSuite):
 			}
 		)
 
-		columns, data, _message, chart = execute(filters)
+		_columns, _data, _message, chart = execute(filters)[:4]
 		chart_total = sum(chart["data"]["datasets"][0]["values"])
 
 		self.assertGreater(chart_total, 0)

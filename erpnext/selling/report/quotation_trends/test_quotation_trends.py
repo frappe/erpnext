@@ -192,7 +192,7 @@ class TestQuotationTrends(ERPNextTestSuite):
 			item="_Test Item 2", party_name="_Test Customer", qty=3, rate=100, transaction_date=TXN_DATE
 		)
 
-		columns, data, _message, chart = execute(filters)
+		columns, data, _message, chart = execute(filters)[:4]
 		self.assertTrue(columns)
 		self.assertTrue(data)
 
@@ -226,7 +226,7 @@ class TestQuotationTrends(ERPNextTestSuite):
 			party_name="_Test Customer", item="_Test Item 2", qty=1, rate=100, transaction_date=TXN_DATE
 		)
 
-		columns, data, _message, chart = execute(filters)
+		_columns, data, _message, chart = execute(filters)[:4]
 		total_row = next(row for row in data if row[0] == f"'{_('Total')}'")
 		expected_total = total_row[-1]
 		chart_total = sum(chart["data"]["datasets"][0]["values"])
@@ -252,7 +252,7 @@ class TestQuotationTrends(ERPNextTestSuite):
 			item="_Test Item", party_name="_Test Customer", qty=2, rate=150, transaction_date=TXN_DATE
 		)
 
-		columns, data, _message, chart = execute(filters)
+		_columns, _data, _message, chart = execute(filters)[:4]
 		chart_total = sum(chart["data"]["datasets"][0]["values"])
 
 		self.assertGreater(chart_total, 0)

@@ -1,7 +1,11 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from importlib import import_module
+from unittest.mock import patch
+
 import frappe
+from frappe.desk.query_report import generate_report_result
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.sales_invoice_trends.sales_invoice_trends import execute
@@ -22,7 +26,7 @@ class TestSalesInvoiceTrends(ERPNextTestSuite):
 			}
 		)
 		filters.update(extra)
-		columns, data = execute(filters)
+		columns, data = execute(filters)[:2]
 		labels = [c.split(":")[0] if isinstance(c, str) else c.get("label") for c in columns]
 		return labels, data
 
@@ -35,6 +39,50 @@ class TestSalesInvoiceTrends(ERPNextTestSuite):
 			if row[key_idx] == key_value:
 				return row[col_idx] or 0
 		return 0
+
+	def test_trends_skip_framework_total_row(self):
+		columns = [
+			{"fieldname": "item", "label": "Item", "fieldtype": "Data"},
+			{"fieldname": "amount", "label": "Amount", "fieldtype": "Currency"},
+		]
+		data = [["Desk", 100], ["Total", 100]]
+		for area, report_name in (
+			("accounts", "sales_invoice_trends"),
+			("accounts", "purchase_invoice_trends"),
+			("selling", "sales_order_trends"),
+			("selling", "quotation_trends"),
+			("buying", "purchase_order_trends"),
+			("stock", "delivery_note_trends"),
+			("stock", "purchase_receipt_trends"),
+		):
+			with self.subTest(report=report_name):
+				module = import_module(f"erpnext.{area}.report.{report_name}.{report_name}")
+				with (
+					patch.object(module, "get_columns", return_value={"columns": columns}),
+					patch.object(module, "get_data", return_value=data),
+				):
+					if hasattr(module, "get_chart_data"):
+						with patch.object(module, "get_chart_data", return_value={"type": "line"}):
+							result = module.execute({})
+						self.assertEqual(result[3], {"type": "line"})
+					else:
+						result = module.execute({})
+
+				report = frappe._dict(name=report_name, add_total_row=1)
+				with (
+					patch("frappe.desk.query_report.get_report_result", return_value=result),
+					patch(
+						"frappe.desk.query_report.get_filtered_data",
+						side_effect=lambda _, columns, rows, user: rows,
+					),
+					patch("frappe.cache"),
+				):
+					output = generate_report_result.__wrapped__(report, user="Administrator")
+
+				self.assertEqual(
+					output["result"], [{"item": "Desk", "amount": 100}, {"item": "Total", "amount": 100}]
+				)
+				self.assertTrue(output["skip_total_row"])
 
 	def test_yearly_item_amount_and_total(self):
 		# Yearly period => a single "<FY> (Qty)"/"(Amt)" bucket, plus Total(Qty)/Total(Amt).

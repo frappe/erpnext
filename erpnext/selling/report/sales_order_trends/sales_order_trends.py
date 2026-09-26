@@ -15,7 +15,7 @@ def execute(filters=None):
 	data = get_data(filters, conditions)
 	chart_data = get_chart_data(data, conditions, filters)
 
-	return conditions["columns"], data, None, chart_data
+	return conditions["columns"], data, None, chart_data, None, True
 
 
 def get_chart_data(data, conditions, filters):
