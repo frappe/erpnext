@@ -18,10 +18,12 @@ from erpnext.stock.expected_valuation import (
 	MovingAveragePool,
 	QueuePool,
 	get_expected_valuation,
+	iterate_expected_valuations,
 )
 from erpnext.stock.report.stock_valuation_comparison.stock_valuation_comparison import (
 	SHOW_ALL_DIFFERENCES,
 	SHOW_ALL_ENTRIES,
+	SHOW_FIRST_DIFFERENCE,
 	execute,
 )
 from erpnext.tests.utils import ERPNextTestSuite
@@ -204,6 +206,45 @@ class TestStockValuationComparison(ERPNextTestSuite):
 		issue = get_expected_valuation(item, WAREHOUSE)[-1][1]
 		self.assertEqual(issue.stock_value_difference, -150)
 
+	def test_serial_no_reconciliation_without_serial_no_wise_valuation(self):
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_serial_no": 1,
+				"serial_no_series": "SVC-NSR-.#####",
+				"valuation_method": "Moving Average",
+				"use_serial_no_wise_valuation": 0,
+			}
+		).name
+
+		first = make_stock_entry(item_code=item, target=WAREHOUSE, qty=2, rate=100)
+		second = make_stock_entry(item_code=item, target=WAREHOUSE, qty=2, rate=200)
+		counted = get_serial_nos_of_entry(first) + get_serial_nos_of_entry(second)[:1]
+
+		reconciliation = create_stock_reconciliation(
+			item_code=item, warehouse=WAREHOUSE, qty=3, rate=180, serial_no=counted
+		)
+		make_stock_entry(item_code=item, source=WAREHOUSE, qty=1, serial_no=[counted[0]])
+
+		self.assertNoDifferences(item)
+
+		expected = {entry.voucher_no: values for entry, values in get_expected_valuation(item, WAREHOUSE)}
+		self.assertEqual(expected[reconciliation.name].stock_value, 3 * 180)
+
+		# the replay works the reconciled balance out itself, so a wrong one is still caught
+		count_in = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": reconciliation.name, "actual_qty": (">", 0), "is_cancelled": 0},
+			"name",
+		)
+		frappe.db.set_value(
+			"Stock Ledger Entry",
+			count_in,
+			{"stock_value": 999, "valuation_rate": 333, "stock_value_difference": 999},
+			update_modified=False,
+		)
+		self.assertEqual(self.run_report(item, show=SHOW_FIRST_DIFFERENCE)[0].stock_ledger_entry, count_in)
+
 	def test_moving_average_with_fractional_rates_has_no_rounding_differences(self):
 		item = make_item(properties={"is_stock_item": 1, "valuation_method": "Moving Average"}).name
 
@@ -257,6 +298,39 @@ class TestStockValuationComparison(ERPNextTestSuite):
 		reconciliation, issue = (expected for _entry, expected in get_expected_valuation(item, WAREHOUSE)[1:])
 		self.assertEqual(reconciliation.stock_value, 6 * 130)
 		self.assertEqual(issue.stock_value_difference, -2 * 130)
+
+	def test_queries_do_not_grow_with_item_warehouses(self):
+		items = [
+			make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name for _i in range(6)
+		]
+		for item in items:
+			make_stock_entry(item_code=item, target=WAREHOUSE, qty=5, rate=100)
+			make_stock_entry(item_code=item, source=WAREHOUSE, qty=2)
+
+		def count_queries(item_warehouses) -> int:
+			original_sql = frappe.db.sql
+			calls = []
+
+			def counting_sql(*args, **kwargs):
+				calls.append(args)
+				return original_sql(*args, **kwargs)
+
+			frappe.db.sql = counting_sql
+			try:
+				for _item_code, _warehouse, expected_valuation in iterate_expected_valuations(
+					item_warehouses
+				):
+					list(expected_valuation)
+			finally:
+				frappe.db.sql = original_sql
+
+			return len(calls)
+
+		count_queries([(items[0], WAREHOUSE)])  # warm the caches
+		self.assertEqual(
+			count_queries([(item, WAREHOUSE) for item in items[:2]]),
+			count_queries([(item, WAREHOUSE) for item in items]),
+		)
 
 	def test_tampered_entry_is_reported(self):
 		item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
