@@ -3,6 +3,7 @@
 
 import frappe
 import frappe.utils
+from frappe.core.doctype.user_permission.user_permission import get_user_permissions
 from frappe.query_builder import Criterion
 
 import erpnext
@@ -62,6 +63,33 @@ class TestEmployee(ERPNextTestSuite):
 
 		self.assertEqual(qb_employee_list, employee_list)
 		frappe.set_user("Administrator")
+
+	def test_reports_to_change_refreshes_manager_permissions(self):
+		employee1 = make_employee(
+			"employee_4_test@company.com", create_user_permission=1, company="_Test Company"
+		)
+		employee2 = make_employee("employee_5_test@company.com", company="_Test Company")
+
+		employee1_doc = frappe.get_doc("Employee", employee1)
+		employee2_doc = frappe.get_doc("Employee", employee2)
+
+		# warm the cache before the change so a stale-cache regression surfaces
+		get_user_permissions(employee1_doc.user_id)
+
+		after_commit_count = len(frappe.db.after_commit)
+		employee2_doc.reload()
+		employee2_doc.reports_to = employee1_doc.name
+		employee2_doc.save()
+
+		frappe.set_user(employee1_doc.user_id)
+		visible_employees = frappe.get_list("Employee", pluck="name")
+		frappe.set_user("Administrator")
+
+		# must be visible immediately, within the same request
+		self.assertIn(employee2, visible_employees)
+		# must also be cleared once the change is durable
+		self.assertGreater(len(frappe.db.after_commit), after_commit_count)
+		frappe.db.after_commit.reset()
 
 	def test_create_user_automatically(self):
 		def get_new_employee(email: str, create_user_permission: int):
