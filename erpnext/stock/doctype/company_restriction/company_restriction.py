@@ -7,6 +7,7 @@ from typing import NamedTuple
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.query_builder.functions import IfNull
 from frappe.utils import comma_and
 from pypika.terms import Bracket, Criterion, ExistsCriterion
 
@@ -114,7 +115,14 @@ def get_inherited_permission_query_conditions(user, doctype=None):
 		if allowed_companies := get_allowed_companies(user, link.doctype):
 			conditions.append(get_linked_master_criterion(doctype, link, allowed_companies))
 
-	return Criterion.all(conditions) if conditions else None
+	if not conditions:
+		return None
+
+	table = frappe.qb.DocType(doctype)
+	company_is_set = [
+		IfNull(table[field.fieldname], "") != "" for field in get_company_fields(frappe.get_meta(doctype))
+	]
+	return Criterion.any([*company_is_set, Criterion.all(conditions)])
 
 
 def get_linked_master_criterion(doctype, link, companies):
@@ -136,6 +144,9 @@ def has_inherited_permission(doc, ptype=None, user=None):
 	if not get_inherited_master_links(doc.doctype):
 		return True
 
+	if any(doc.get(field.fieldname) for field in get_company_fields(doc.meta)):
+		return True
+
 	references = defaultdict(set)
 	collect_master_references([doc], references)
 	for doctype, names in references.items():
@@ -151,10 +162,14 @@ def get_inherited_master_links(doctype):
 	if doctype in RESTRICTABLE_MASTER_DOCTYPES or meta.istable or meta.issingle:
 		return []
 
-	if any(field.options == "Company" for field in meta.get_link_fields()):
+	if any(field.reqd for field in get_company_fields(meta)):
 		return []
 
 	return get_master_links(meta)
+
+
+def get_company_fields(meta):
+	return [field for field in meta.get_link_fields() if field.options == "Company"]
 
 
 def get_master_links(meta):
