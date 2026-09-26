@@ -1117,6 +1117,123 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		po.reload()
 		po.cancel()
 
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"maintain_same_rate": 0, "set_landed_cost_based_on_purchase_invoice_rate": 1}
+	)
+	def test_per_billed_by_qty_when_landed_cost_follows_invoice_rate(self):
+		pr = make_purchase_receipt(qty=100, rate=50)
+		pi = make_purchase_invoice(pr.name)
+		pi.items[0].qty = 25
+		pi.items[0].rate = 200
+		pi.submit()
+
+		pr.reload()
+		self.assertEqual(pr.per_billed, 25)
+		self.assertEqual(pr.status, "Partly Billed")
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"maintain_same_rate": 0, "set_landed_cost_based_on_purchase_invoice_rate": 1}
+	)
+	def test_po_invoice_qty_spread_fifo_when_landed_cost_follows_invoice_rate(self):
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		po = create_purchase_order(qty=100, rate=50)
+		receipts = make_receipts_against_order(po.name, ((60, "08:00"), (40, "10:00")))
+		make_invoice_against_order(po.name, qty=70, rate=40)
+
+		for pr in receipts:
+			pr.reload()
+
+		self.assertEqual(receipts[0].per_billed, 100)
+		self.assertEqual(receipts[1].per_billed, 25)
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings",
+		{
+			"maintain_same_rate": 0,
+			"set_landed_cost_based_on_purchase_invoice_rate": 1,
+			"bill_for_rejected_quantity_in_purchase_invoice": 0,
+		},
+	)
+	def test_fully_returned_receipt_skipped_in_po_invoice_split(self):
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
+
+		po = create_purchase_order(qty=100, rate=50)
+		receipts = make_receipts_against_order(po.name, ((60, "08:00"), (40, "10:00")))
+		make_purchase_return(receipts[0].name).submit()
+		make_invoice_against_order(po.name, qty=40, rate=50)
+
+		for pr in receipts:
+			pr.reload()
+
+		self.assertEqual(receipts[0].per_billed, 0)
+		self.assertEqual(receipts[1].per_billed, 100)
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings",
+		{
+			"maintain_same_rate": 0,
+			"set_landed_cost_based_on_purchase_invoice_rate": 1,
+			"bill_for_rejected_quantity_in_purchase_invoice": 0,
+		},
+	)
+	def test_fully_returned_row_left_out_of_qty_billing(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
+
+		pr = make_purchase_receipt(qty=10, rate=50, do_not_save=True)
+		pr.append("items", pr.items[0].as_dict(no_default_fields=True))
+		pr.submit()
+		returned_row, invoiced_row = pr.items
+
+		pr_return = make_purchase_return(pr.name)
+		pr_return.set(
+			"items", [row for row in pr_return.items if row.purchase_receipt_item == returned_row.name]
+		)
+		pr_return.submit()
+
+		pi = make_purchase_invoice(pr.name)
+		pi.set("items", [row for row in pi.items if row.pr_detail == invoiced_row.name])
+		pi.submit()
+
+		pr.reload()
+		self.assertEqual(pr.per_billed, 100)
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"maintain_same_rate": 0, "set_landed_cost_based_on_purchase_invoice_rate": 1}
+	)
+	def test_zero_rate_receipt_billed_by_qty(self):
+		pr = make_purchase_receipt(item_code="_Test Non Stock Item", qty=10, rate=0)
+		pi = make_purchase_invoice(pr.name)
+		pi.items[0].rate = 5
+		pi.submit()
+
+		pr.reload()
+		self.assertEqual(pr.per_billed, 100)
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"maintain_same_rate": 0, "set_landed_cost_based_on_purchase_invoice_rate": 1}
+	)
+	def test_non_updating_debit_note_kept_out_of_qty_billing(self):
+		from erpnext.accounts.doctype.purchase_invoice.mapper import make_debit_note
+
+		pr = make_purchase_receipt(qty=100, rate=50)
+		pi = make_purchase_invoice(pr.name)
+		pi.items[0].qty = 50
+		pi.submit()
+
+		debit_note = make_debit_note(pi.name)
+		debit_note.items[0].qty = -20
+		debit_note.update_billed_amount_in_purchase_receipt = 0
+		debit_note.submit()
+
+		pi = make_purchase_invoice(pr.name)
+		pi.items[0].qty = 50
+		pi.submit()
+
+		pr.reload()
+		self.assertEqual(pr.per_billed, 100)
+
 	def test_serial_no_against_purchase_receipt(self):
 		item_code = "Test Manual Created Serial No"
 		if not frappe.db.exists("Item", item_code):
@@ -7769,6 +7886,31 @@ def get_items(**args):
 			"cost_center": args.cost_center or "Main - _TC",
 		},
 	]
+
+
+def make_receipts_against_order(purchase_order: str, receipts: tuple) -> list:
+	from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt as make_receipt_from_order
+
+	receipt_docs = []
+	for qty, posting_time in receipts:
+		pr = make_receipt_from_order(purchase_order)
+		pr.set_posting_time = 1
+		pr.posting_time = posting_time
+		pr.items[0].received_qty = qty
+		pr.items[0].qty = qty
+		pr.submit()
+		receipt_docs.append(pr)
+
+	return receipt_docs
+
+
+def make_invoice_against_order(purchase_order: str, qty: float, rate: float) -> None:
+	from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice as make_invoice_from_order
+
+	pi = make_invoice_from_order(purchase_order)
+	pi.items[0].qty = qty
+	pi.items[0].rate = rate
+	pi.submit()
 
 
 def make_purchase_receipt(**args):

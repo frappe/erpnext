@@ -49,7 +49,7 @@ class BillingValidationService:
 					overbilled_items.append(row)
 
 		if overbilled_items:
-			self.throw_overbill_exception(overbilled_items, precision)
+			self.throw_overbill_exception(overbilled_items, precision, based_on)
 
 		if is_overbilling_allowed and total_overbilled_amt > 0.1:
 			frappe.msgprint(
@@ -92,7 +92,9 @@ class BillingValidationService:
 
 			ref_wise_billed_amount.setdefault(
 				key,
-				frappe._dict(item_code=item.item_code, billed_amt=0.0, ref_amt=ref_amt, rows=[]),
+				frappe._dict(
+					item_code=item.item_code, uom=item.get("uom"), billed_amt=0.0, ref_amt=ref_amt, rows=[]
+				),
 			)
 			ref_wise_billed_amount[key]["rows"].append(item.idx)
 			ref_wise_billed_amount[key]["ref_amt"] = ref_amt
@@ -131,7 +133,7 @@ class BillingValidationService:
 			).run()
 		)
 
-	def throw_overbill_exception(self, overbilled_items: list, precision: int) -> None:
+	def throw_overbill_exception(self, overbilled_items: list, precision: int, based_on: str) -> None:
 		message = (
 			_("<p>Cannot overbill for the following Items:</p>")
 			+ "<ul>"
@@ -139,9 +141,7 @@ class BillingValidationService:
 				_("<li>Item {0} in row(s) {1} billed more than {2}</li>").format(
 					frappe.bold(item.item_code),
 					", ".join(str(x) for x in item.rows),
-					frappe.bold(
-						fmt_money(item.max_allowed_amt, precision=precision, currency=self.doc.currency)
-					),
+					frappe.bold(self.get_formatted_limit(item, precision, based_on)),
 				)
 				for item in overbilled_items
 			)
@@ -149,3 +149,9 @@ class BillingValidationService:
 		)
 		message += _("<p>To allow over-billing, please set allowance in Accounts Settings.</p>")
 		frappe.throw(message)
+
+	def get_formatted_limit(self, item: frappe._dict, precision: int, based_on: str) -> str:
+		if based_on == "qty":
+			return f"{flt(item.max_allowed_amt, precision)} {item.uom}"
+
+		return fmt_money(item.max_allowed_amt, precision=precision, currency=self.doc.currency)
