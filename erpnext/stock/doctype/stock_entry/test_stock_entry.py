@@ -4915,6 +4915,16 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 			self.assertEqual(se.process_loss_qty, 10)
 			self.assertEqual(se.process_loss_percentage, 10)
 
+	def test_process_loss_counts_finished_item_other_than_bom_item(self):
+		other_item = make_item("Process Loss FG Other", properties={"is_stock_item": 1}).name
+		for purpose in ("Manufacture", "Repack"):
+			se = self.make_process_loss_entry(purpose)
+			self.get_finished_good_row(se).item_code = other_item
+			self.get_finished_good_row(se).qty = 90
+			se.save()
+
+			self.assertEqual(se.process_loss_qty, 10)
+
 	def test_zero_process_loss_saves_despite_bom_percentage(self):
 		se = self.make_process_loss_entry()
 		self.get_finished_good_row(se).qty = 100
