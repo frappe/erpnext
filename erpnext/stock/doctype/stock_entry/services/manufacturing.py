@@ -1669,12 +1669,15 @@ def _warn_max_retained(retainted_qty, batch_no, item_code):
 def _cap_sample_quantity(sample_quantity, max_retain_qty, retainted_qty, batch_no, item_code):
 	qty_diff = max_retain_qty - retainted_qty
 	if cint(sample_quantity) > cint(qty_diff):
-		frappe.msgprint(
-			_("Maximum Samples - {0} can be retained for Batch {1} and Item {2}.").format(
+		if batch_no:
+			message = _("Maximum Samples - {0} can be retained for Batch {1} and Item {2}.").format(
 				max_retain_qty, batch_no, item_code
-			),
-			alert=True,
-		)
+			)
+		else:
+			message = _("Maximum Samples - {0} can be retained for Item {1}.").format(
+				max_retain_qty, item_code
+			)
+		frappe.msgprint(message, alert=True)
 		return qty_diff
 	return sample_quantity
 
