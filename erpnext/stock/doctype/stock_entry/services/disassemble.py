@@ -433,8 +433,10 @@ class DisassembleStockEntry(BaseStockEntry):
 
 		return representative
 
-	def on_submit(self):
+	def before_submit(self):
 		self.set_serial_batch_for_disassembly()
+
+	def on_submit(self):
 		self.update_disassembled_order()
 
 	def on_cancel(self):

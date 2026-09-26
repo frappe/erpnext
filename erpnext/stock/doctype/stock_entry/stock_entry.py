@@ -366,10 +366,10 @@ class StockEntry(StockController, SubcontractingInwardController):
 			self.purpose_cls(self).before_submit()
 
 	def on_submit(self):
+		self.make_bundle_using_old_serial_batch_fields()
 		if self.purpose_cls and hasattr(self.purpose_cls, "on_submit"):
 			self.purpose_cls(self).on_submit()
 
-		self.make_bundle_using_old_serial_batch_fields()
 		self.adjust_stock_reservation_entries_for_return()
 		self.update_stock_reservation_entries()
 		# Release the Work Order's own reservation for items being sent to the subcontractor
@@ -1323,6 +1323,20 @@ class StockEntry(StockController, SubcontractingInwardController):
 			return True
 
 		return False
+
+	def before_sl_preview(self):
+		self.release_work_order_reservation_for_preview()
+
+	def before_gl_preview(self):
+		self.release_work_order_reservation_for_preview()
+
+	def release_work_order_reservation_for_preview(self):
+		"""Releases the Work Order's own reservation as submit does, inside the rolled-back preview."""
+		if not self.is_stock_reserve_for_work_order():
+			return
+
+		self.db_set("docstatus", 1, update_modified=False)
+		self.pro_doc.update_required_items()
 
 	def update_wo_reservation_for_subcontracting(self):
 		# A "Send to Subcontractor" entry never keeps its `work_order` (validate clears it for this

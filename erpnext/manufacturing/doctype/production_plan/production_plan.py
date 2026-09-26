@@ -32,7 +32,6 @@ from erpnext.manufacturing.doctype.production_plan.services.material_request imp
 )
 from erpnext.manufacturing.doctype.production_plan.services.reservation import (
 	cancel_stock_reservation_entries,
-	get_non_completed_production_plans,
 	get_reserved_qty_for_production_plan,
 	get_reserved_qty_for_sub_assembly,
 	make_stock_reservation_entries,
@@ -267,8 +266,14 @@ class ProductionPlan(Document):
 				data.db_update()
 
 		self.calculate_total_produced_qty()
+		self.update_status_and_bin_qty()
+
+	def update_status_and_bin_qty(self):
+		previous_status = self.status
 		self.set_status()
 		self.db_set("status", self.status)
+		if previous_status != self.status and "Completed" in (previous_status, self.status):
+			self.update_bin_qty()
 
 	def on_submit(self):
 		self.update_bin_qty()
@@ -362,17 +367,20 @@ class ProductionPlan(Document):
 		return so_wise_planned_qty
 
 	def update_bin_qty(self):
-		for d in self.mr_items:
-			if d.warehouse:
-				bin_name = get_or_make_bin(d.item_code, d.warehouse)
-				bin = frappe.get_doc("Bin", bin_name, for_update=True)
-				bin.update_reserved_qty_for_production_plan()
+		self.update_raw_material_bin_qty()
 
 		for d in self.sub_assembly_items:
 			if d.fg_warehouse and d.type_of_manufacturing == "In House":
 				bin_name = get_or_make_bin(d.production_item, d.fg_warehouse)
 				bin = frappe.get_doc("Bin", bin_name, for_update=True)
 				bin.update_reserved_qty_for_for_sub_assembly()
+
+	def update_raw_material_bin_qty(self, item_codes: set[str] | None = None):
+		for d in self.mr_items:
+			if d.warehouse and (item_codes is None or d.item_code in item_codes):
+				bin_name = get_or_make_bin(d.item_code, d.warehouse)
+				bin = frappe.get_doc("Bin", bin_name, for_update=True)
+				bin.update_reserved_qty_for_production_plan()
 
 	def delete_draft_work_order(self):
 		for d in frappe.get_all(
@@ -383,6 +391,9 @@ class ProductionPlan(Document):
 	@frappe.whitelist()
 	def set_status(self, close: bool | None = None, update_bin: bool = False):
 		self.check_permission("write")
+
+		if close is None and self.status == "Closed":
+			return
 
 		self.status = {0: "Draft", 1: "Submitted", 2: "Cancelled"}.get(self.docstatus)
 

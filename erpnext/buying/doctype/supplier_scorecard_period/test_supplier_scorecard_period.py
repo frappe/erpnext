@@ -1,9 +1,30 @@
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+import sys
+import tempfile
+from contextlib import contextmanager
+from pathlib import Path
+from unittest.mock import patch
+
 import frappe
 
+from erpnext.buying.doctype.supplier_scorecard_variable.supplier_scorecard_variable import (
+	VariablePathNotFound,
+)
 from erpnext.tests.utils import ERPNextTestSuite
+
+CUSTOM_APP = "custom_scorecard_app"
+CUSTOM_VARIABLES_SOURCE = """
+def get_value(scorecard):
+	return 7
+
+
+class Metrics:
+	@staticmethod
+	def get_value(scorecard):
+		return 7
+"""
 
 
 class TestSupplierScorecardPeriod(ERPNextTestSuite):
@@ -54,6 +75,60 @@ class TestSupplierScorecardPeriod(ERPNextTestSuite):
 			criteria=[{"criteria_name": "C1", "formula": "100", "max_score": 100, "weight": 60}]
 		)
 		self.assertRaises(frappe.ValidationError, period.validate_criteria_weights)
+
+	def test_custom_variable_path_in_unimported_module(self):
+		for attribute in ("get_value", "Metrics.get_value"):
+			with self.subTest(attribute=attribute):
+				path = f"{CUSTOM_APP}.variables.{attribute}"
+				variable = make_variable(path)
+				period = make_period(
+					variables=[{"variable_label": "Custom", "param_name": "custom", "path": path}]
+				)
+
+				with unimported_custom_app():
+					variable.validate_path_exists()
+
+				with unimported_custom_app():
+					period.calculate_variables()
+
+				self.assertEqual(period.variables[0].value, 7)
+
+	def test_variable_path_outside_installed_apps_is_rejected(self):
+		period = make_period(variables=[{"variable_label": "OS", "param_name": "os", "path": "os.getcwd"}])
+		self.assertRaises(frappe.AppNotInstalledError, period.calculate_variables)
+
+	def test_missing_variable_path_is_rejected(self):
+		for path in ("erpnext.no_such_module.get_value", f"{CUSTOM_APP}.variables.missing"):
+			with self.subTest(path=path):
+				variable = make_variable(path)
+				with unimported_custom_app():
+					self.assertRaises(VariablePathNotFound, variable.validate_path_exists)
+
+	def test_variable_module_import_error_is_not_hidden(self):
+		variable = make_variable(f"{CUSTOM_APP}.broken.get_value")
+		with unimported_custom_app():
+			self.assertRaises(ModuleNotFoundError, variable.validate_path_exists)
+
+
+@contextmanager
+def unimported_custom_app():
+	with tempfile.TemporaryDirectory() as directory:
+		package = Path(directory, CUSTOM_APP)
+		package.mkdir()
+		(package / "__init__.py").touch()
+		(package / "variables.py").write_text(CUSTOM_VARIABLES_SOURCE)
+		(package / "broken.py").write_text("import scorecard_missing_dependency\n")
+		installed_apps = [*frappe.get_installed_apps(), CUSTOM_APP]
+		with (
+			patch.object(sys, "path", [directory, *sys.path]),
+			patch.dict(sys.modules),
+			patch.object(frappe, "get_installed_apps", return_value=installed_apps),
+		):
+			yield
+
+
+def make_variable(path):
+	return frappe.get_doc({"doctype": "Supplier Scorecard Variable", "path": path})
 
 
 def make_period(variables=None, criteria=None):

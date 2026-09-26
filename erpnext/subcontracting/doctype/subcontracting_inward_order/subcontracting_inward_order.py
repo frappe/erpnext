@@ -323,13 +323,13 @@ class SubcontractingInwardOrder(SubcontractingController):
 				["process_loss_qty", "include_exploded_items"],
 				as_dict=True,
 			)
-			stock_qty = frappe.get_value(
+			qty_consumed_per_unit = frappe.get_value(
 				"BOM Explosion Item" if data.include_exploded_items else "BOM Item",
 				{"name": rm_item.bom_detail_no},
-				"stock_qty",
+				"qty_consumed_per_unit",
 			)
 			qty = flt(
-				stock_qty * data.process_loss_qty,
+				qty_consumed_per_unit * data.process_loss_qty,
 				frappe.get_precision("Subcontracting Inward Order Received Item", "required_qty"),
 			)
 			return rm_item.required_qty - rm_item.received_qty + rm_item.returned_qty + qty

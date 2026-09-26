@@ -8,7 +8,9 @@ from frappe.tests import change_settings
 from frappe.utils import add_days, add_months, flt, getdate, nowdate
 
 from erpnext.controllers.accounts_controller import InvalidQtyError, update_child_qty_rate
-from erpnext.selling.doctype.quotation.mapper import make_sales_order
+from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
+from erpnext.selling.doctype.quotation.mapper import make_revision, make_sales_invoice, make_sales_order
+from erpnext.selling.doctype.quotation.quotation import get_open_count
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -496,6 +498,274 @@ class TestQuotation(ERPNextTestSuite):
 
 		make_sales_order(quotation.name)
 
+	def test_revision_names_follow_the_original(self):
+		quotation = make_quotation()
+
+		first_revision = make_revision(quotation.name)
+		first_revision.insert()
+		first_revision.submit()
+		second_revision = make_revision(first_revision.name).insert()
+
+		self.assertEqual(first_revision.name, f"{quotation.name}-R1")
+		self.assertEqual(second_revision.name, f"{quotation.name}-R2")
+		self.assertEqual(second_revision.revision_of, quotation.name)
+
+	def test_every_version_lists_the_other_versions(self):
+		quotation = make_quotation()
+		first_revision = make_revision(quotation.name)
+		first_revision.insert()
+		first_revision.submit()
+		second_revision = make_revision(first_revision.name).insert()
+
+		counts = get_open_count("Quotation", first_revision.name, ["Quotation", "Sales Order"])
+
+		versions = next(
+			link for link in counts["count"]["internal_links_found"] if link["doctype"] == "Quotation"
+		)
+		self.assertCountEqual(versions["names"], [quotation.name, second_revision.name])
+
+	def test_revision_copies_items_and_clears_validity(self):
+		opportunity = make_opportunity(with_items=1)
+		quotation = make_quotation(rate=250, do_not_save=1)
+		quotation.valid_till = add_days(nowdate(), 10)
+		quotation.items[0].prevdoc_doctype = "Opportunity"
+		quotation.items[0].prevdoc_docname = opportunity.name
+		quotation.insert()
+		quotation.submit()
+
+		revision = make_revision(quotation.name).insert()
+
+		self.assertIsNone(revision.valid_till)
+		self.assertEqual(revision.items[0].rate, 250)
+		self.assertEqual(revision.items[0].prevdoc_docname, opportunity.name)
+
+	def test_submitting_a_revision_deactivates_other_versions(self):
+		quotation = make_quotation()
+		first_revision = make_revision(quotation.name)
+		first_revision.insert()
+		first_revision.submit()
+		self.assertEqual(frappe.db.get_value("Quotation", quotation.name, "is_active"), 0)
+
+		second_revision = make_revision(first_revision.name)
+		second_revision.insert()
+		second_revision.submit()
+
+		self.assertEqual(frappe.db.get_value("Quotation", first_revision.name, "is_active"), 0)
+		self.assertEqual(frappe.db.get_value("Quotation", second_revision.name, "is_active"), 1)
+
+	def test_setting_a_revision_as_lost_sets_other_versions_as_lost(self):
+		quotation = make_quotation()
+		revision = make_revision(quotation.name)
+		revision.insert()
+		revision.submit()
+
+		revision.declare_enquiry_lost([], [])
+
+		self.assertEqual(frappe.db.get_value("Quotation", quotation.name, "status"), "Lost")
+
+	def test_version_cannot_be_set_as_lost_when_another_version_is_ordered(self):
+		quotation = make_quotation()
+		revision = make_revision(quotation.name)
+		revision.insert()
+		revision.submit()
+		sales_order = make_sales_order(revision.name)
+		sales_order.delivery_date = nowdate()
+		sales_order.insert()
+		sales_order.submit()
+		quotation.reload()
+
+		self.assertRaises(frappe.ValidationError, quotation.declare_enquiry_lost, [], [])
+
+	def test_opportunity_is_lost_when_an_older_version_is_set_as_lost(self):
+		opportunity = make_opportunity(with_items=1)
+		quotation = make_quotation(do_not_save=1)
+		quotation.items[0].prevdoc_doctype = "Opportunity"
+		quotation.items[0].prevdoc_docname = opportunity.name
+		quotation.insert()
+		quotation.submit()
+		revision = make_revision(quotation.name)
+		revision.insert()
+		revision.submit()
+		quotation.reload()
+
+		quotation.declare_enquiry_lost([], [])
+
+		self.assertEqual(frappe.db.get_value("Opportunity", opportunity.name, "status"), "Lost")
+
+	def test_draft_revision_cannot_be_submitted_after_the_quotation_is_lost(self):
+		quotation = make_quotation()
+		revision = make_revision(quotation.name).insert()
+		quotation.declare_enquiry_lost([], [])
+
+		self.assertRaises(frappe.ValidationError, revision.submit)
+
+	def test_revision_keeps_the_company_of_the_original(self):
+		quotation = make_quotation()
+		revision = make_revision(quotation.name)
+		revision.company = "_Test Company 1"
+
+		self.assertRaisesRegex(frappe.ValidationError, "same company", revision.insert)
+
+	def test_revision_keeps_the_customer_of_the_original(self):
+		quotation = make_quotation()
+		revision = make_revision(quotation.name)
+		revision.update(
+			{"party_name": "_Test Customer 1", "customer_address": None, "shipping_address_name": None}
+		)
+
+		self.assertRaisesRegex(frappe.ValidationError, "same Customer", revision.insert)
+
+	def test_revision_of_a_lead_quotation_can_move_to_its_customer(self):
+		from erpnext.crm.doctype.lead.mapper import make_customer
+		from erpnext.crm.doctype.lead.test_lead import make_lead
+
+		lead = make_lead()
+		quotation = make_quotation(do_not_save=1)
+		quotation.quotation_to = "Lead"
+		quotation.party_name = lead.name
+		quotation.insert()
+		quotation.submit()
+		customer = make_customer(lead.name).insert(ignore_permissions=True)
+
+		unrelated_revision = make_revision(quotation.name)
+		unrelated_revision.update({"quotation_to": "Customer", "party_name": "_Test Customer"})
+		self.assertRaisesRegex(frappe.ValidationError, "same Lead", unrelated_revision.insert)
+
+		revision = make_revision(quotation.name)
+		revision.update({"quotation_to": "Customer", "party_name": customer.name})
+		revision.insert()
+
+	def test_an_older_version_can_be_set_as_lost(self):
+		quotation = make_quotation()
+		revision = make_revision(quotation.name)
+		revision.insert()
+		revision.submit()
+		quotation.reload()
+		self.assertTrue(quotation.has_versions_to_set_as_lost)
+
+		quotation.declare_enquiry_lost([], [])
+
+		self.assertEqual(frappe.db.get_value("Quotation", quotation.name, "is_active"), 1)
+		self.assertEqual(
+			frappe.db.get_value("Quotation", revision.name, ["status", "is_active"]), ("Lost", 0)
+		)
+		self.assertFalse(quotation.has_versions_to_set_as_lost)
+
+	def test_latest_version_is_ordered_by_transaction_date(self):
+		quotation = make_quotation()
+		first_revision = make_revision(quotation.name)
+		first_revision.transaction_date = add_days(quotation.transaction_date, 2)
+		first_revision.insert()
+		second_revision = make_revision(quotation.name)
+		second_revision.transaction_date = add_days(quotation.transaction_date, 1)
+		second_revision.insert()
+
+		second_revision.submit()
+		first_revision.submit()
+
+		self.assertTrue(first_revision.is_latest_version)
+		self.assertFalse(second_revision.is_latest_version)
+
+	def test_older_revision_cannot_be_submitted_after_a_newer_one(self):
+		quotation = make_quotation()
+		first_revision = make_revision(quotation.name).insert()
+		second_revision = make_revision(quotation.name).insert()
+		second_revision.submit()
+
+		self.assertRaises(frappe.ValidationError, first_revision.submit)
+
+	def test_revision_cannot_be_dated_before_the_latest_version(self):
+		quotation = make_quotation()
+		revision = make_revision(quotation.name)
+		revision.transaction_date = add_days(quotation.transaction_date, -1)
+
+		self.assertRaises(frappe.ValidationError, revision.insert)
+
+	def test_an_older_version_can_be_revised(self):
+		quotation = make_quotation()
+		first_revision = make_revision(quotation.name)
+		first_revision.insert()
+		first_revision.submit()
+
+		second_revision = make_revision(quotation.name).insert()
+
+		self.assertEqual(second_revision.name, f"{quotation.name}-R2")
+
+	def test_is_active_is_locked_on_a_lost_quotation(self):
+		quotation = make_quotation()
+		quotation.declare_enquiry_lost([], [])
+		quotation.reload()
+		quotation.is_active = 0
+
+		self.assertRaises(frappe.ValidationError, quotation.save)
+
+	def test_lost_quotation_cannot_be_revised(self):
+		quotation = make_quotation()
+		quotation.declare_enquiry_lost([], [])
+
+		self.assertRaises(frappe.ValidationError, make_revision, quotation.name)
+
+	def test_draft_quotation_cannot_be_revised(self):
+		quotation = make_quotation(do_not_submit=1)
+
+		self.assertRaises(frappe.ValidationError, make_revision, quotation.name)
+
+	def test_inactive_quotation_cannot_be_ordered_or_invoiced(self):
+		quotation = make_quotation()
+		quotation.is_active = 0
+		quotation.save()
+
+		self.assertRaises(frappe.ValidationError, make_sales_order, quotation.name)
+		self.assertRaises(frappe.ValidationError, make_sales_invoice, quotation.name)
+
+	def test_sales_order_cannot_be_submitted_against_a_lost_quotation(self):
+		quotation = make_quotation()
+		sales_order = make_sales_order(quotation.name)
+		sales_order.delivery_date = nowdate()
+		sales_order.insert()
+
+		quotation.declare_enquiry_lost([], [])
+
+		self.assertRaisesRegex(frappe.ValidationError, "is Lost", sales_order.submit)
+
+	def test_sales_order_cannot_be_submitted_against_an_inactive_quotation(self):
+		quotation = make_quotation()
+		sales_order = make_sales_order(quotation.name)
+		sales_order.delivery_date = nowdate()
+		sales_order.insert()
+
+		quotation.is_active = 0
+		quotation.save()
+
+		self.assertRaises(frappe.ValidationError, sales_order.submit)
+
+	def test_deactivating_a_quotation_reopens_its_opportunity(self):
+		opportunity = make_opportunity(with_items=0)
+		quotation = make_quotation(do_not_save=1)
+		quotation.opportunity = opportunity.name
+		quotation.insert()
+		quotation.submit()
+
+		quotation.is_active = 0
+		quotation.save()
+
+		self.assertEqual(frappe.db.get_value("Opportunity", opportunity.name, "status"), "Open")
+
+	def test_inactive_quotation_is_not_an_active_offer(self):
+		opportunity = make_opportunity(with_items=1)
+		quotation = make_quotation(do_not_save=1)
+		quotation.items[0].prevdoc_doctype = "Opportunity"
+		quotation.items[0].prevdoc_docname = opportunity.name
+		quotation.insert()
+		quotation.submit()
+		opportunity.reload()
+		self.assertTrue(opportunity.has_active_quotation())
+
+		quotation.is_active = 0
+		quotation.save()
+
+		self.assertFalse(opportunity.has_active_quotation())
+
 	def test_create_quotation_with_margin(self):
 		from erpnext.selling.doctype.quotation.mapper import make_sales_order
 		from erpnext.selling.doctype.sales_order.mapper import (
@@ -505,15 +775,14 @@ class TestQuotation(ERPNextTestSuite):
 
 		rate_with_margin = flt((1500 * 18.75) / 100 + 1500)
 
-		test_record = frappe.copy_doc(self.globalTestRecords["Quotation"][0])
+		quotation = frappe.copy_doc(self.globalTestRecords["Quotation"][0])
 
-		test_record.items[0].price_list_rate = 1500
-		test_record.items[0].margin_type = "Percentage"
-		test_record.items[0].margin_rate_or_amount = 18.75
+		quotation.items[0].price_list_rate = 1500
+		quotation.items[0].margin_type = "Percentage"
+		quotation.items[0].margin_rate_or_amount = 18.75
 		# set rate to zero, so that it is recalculated on save
-		test_record.items[0].rate = 0
+		quotation.items[0].rate = 0
 
-		quotation = frappe.copy_doc(test_record)
 		quotation.transaction_date = nowdate()
 		quotation.valid_till = add_months(quotation.transaction_date, 1)
 		quotation.insert()

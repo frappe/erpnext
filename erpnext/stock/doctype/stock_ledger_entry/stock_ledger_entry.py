@@ -134,7 +134,7 @@ class StockLedgerEntry(Document):
 			.where(
 				(sle.item_code == self.item_code)
 				& (sle.warehouse == self.warehouse)
-				& (sle.posting_datetime < self.posting_datetime)
+				& (sle.posting_datetime <= self.posting_datetime)
 				& (sle.company == self.company)
 				& (sle.is_cancelled == 0)
 			)

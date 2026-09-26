@@ -18,33 +18,30 @@
   "qty",
   "sales_order",
   "reserve_stock",
+  "allow_alternative_item",
   "section_break_vrpa",
-  "max_producible_qty",
-  "material_transferred_for_manufacturing",
-  "additional_transferred_qty",
-  "column_break_ezmq",
   "produced_qty",
   "process_loss_qty",
   "disassembled_qty",
+  "column_break_ezmq",
+  "material_transferred_for_manufacturing",
+  "additional_transferred_qty",
+  "max_producible_qty",
   "warehouses",
-  "source_warehouse",
   "wip_warehouse",
-  "column_break_12",
   "fg_warehouse",
   "scrap_warehouse",
+  "column_break_dqlq",
+  "skip_transfer",
+  "from_wip_warehouse",
   "operations_section",
   "transfer_material_against",
   "operations",
   "section_break_ndpq",
+  "use_multi_level_bom",
+  "source_warehouse",
   "required_items",
   "work_order_configuration",
-  "settings_section",
-  "allow_alternative_item",
-  "use_multi_level_bom",
-  "column_break_17",
-  "skip_transfer",
-  "from_wip_warehouse",
-  "update_consumed_material_cost_in_project",
   "time",
   "planned_start_date",
   "planned_end_date",
@@ -60,6 +57,12 @@
   "column_break_24",
   "corrective_operation_cost",
   "total_operating_cost",
+  "job_card_tab",
+  "job_card_list_html",
+  "material_request_tab",
+  "material_request_list_html",
+  "stock_entry_tab",
+  "stock_entry_list_html",
   "more_info",
   "production_item_info_section",
   "image",
@@ -77,6 +80,7 @@
   "secondary_items_section",
   "secondary_items",
   "reference_section",
+  "update_consumed_material_cost_in_project",
   "project",
   "subcontracting_inward_order",
   "production_plan",
@@ -286,10 +290,6 @@
    "read_only_depends_on": "subcontracting_inward_order"
   },
   {
-   "fieldname": "column_break_12",
-   "fieldtype": "Column Break"
-  },
-  {
    "description": "This is a location where scraped materials are stored.",
    "fieldname": "scrap_warehouse",
    "fieldtype": "Link",
@@ -422,7 +422,7 @@
   },
   {
    "fieldname": "description",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Item Description",
    "read_only": 1
   },
@@ -504,10 +504,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "settings_section",
-   "fieldtype": "Section Break"
-  },
-  {
    "fieldname": "column_break_18",
    "fieldtype": "Column Break"
   },
@@ -521,7 +517,7 @@
    "description": "This is a location where raw materials are available.",
    "fieldname": "source_warehouse",
    "fieldtype": "Link",
-   "label": "Source Warehouse",
+   "label": "Default source Warehouse",
    "link_filters": "[[\"Warehouse\",\"disabled\",\"=\",0],[\"Warehouse\",\"is_group\",\"=\",0]]",
    "options": "Warehouse",
    "read_only_depends_on": "eval:doc.subcontracting_inward_order"
@@ -539,10 +535,6 @@
    "fieldname": "serial_no_and_batch_for_finished_good_section",
    "fieldtype": "Section Break",
    "label": "Finished Good Serial / Batch"
-  },
-  {
-   "fieldname": "column_break_17",
-   "fieldtype": "Column Break"
   },
   {
    "default": "0",
@@ -604,7 +596,7 @@
   {
    "fieldname": "work_order_configuration",
    "fieldtype": "Tab Break",
-   "label": "Configuration"
+   "label": "Scheduling & Costing"
   },
   {
    "collapsible": 1,
@@ -732,6 +724,40 @@
    "label": "Secondary Items (as per BOM)",
    "options": "Work Order Additional Item",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_dqlq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "job_card_tab",
+   "fieldtype": "Tab Break",
+   "label": "Job Cards"
+  },
+  {
+   "fieldname": "job_card_list_html",
+   "fieldtype": "HTML",
+   "label": "Job Cards"
+  },
+  {
+   "fieldname": "material_request_tab",
+   "fieldtype": "Tab Break",
+   "label": "Material Requests"
+  },
+  {
+   "fieldname": "material_request_list_html",
+   "fieldtype": "HTML",
+   "label": "Material Requests"
+  },
+  {
+   "fieldname": "stock_entry_tab",
+   "fieldtype": "Tab Break",
+   "label": "Stock Entries"
+  },
+  {
+   "fieldname": "stock_entry_list_html",
+   "fieldtype": "HTML",
+   "label": "Stock Entries"
   }
  ],
  "grid_page_length": 50,
@@ -740,7 +766,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-08 12:00:00.000000",
+ "modified": "2026-09-25 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",

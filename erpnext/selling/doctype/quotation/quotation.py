@@ -4,8 +4,9 @@
 
 import frappe
 from frappe import _
+from frappe.desk.notifications import get_open_count as get_linked_document_counts
 from frappe.model.document import Document
-from frappe.utils import getdate, nowdate
+from frappe.utils import cint, formatdate, get_datetime, getdate, nowdate
 from pypika.terms import ExistsCriterion
 
 from erpnext.controllers.selling_controller import SellingController
@@ -15,6 +16,7 @@ from .mapper import (
 )
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
+VERSIONS_TO_SET_AS_LOST = {"status": ["not in", ["Partially Ordered", "Ordered", "Lost"]]}
 
 
 class Quotation(SellingController):
@@ -76,6 +78,7 @@ class Quotation(SellingController):
 		ignore_pricing_rule: DF.Check
 		in_words: DF.Data | None
 		incoterm: DF.Link | None
+		is_active: DF.Check
 		item_wise_tax_details: DF.Table[ItemWiseTaxDetail]
 		items: DF.Table[QuotationItem]
 		language: DF.Link | None
@@ -97,6 +100,7 @@ class Quotation(SellingController):
 		pricing_rules: DF.Table[PricingRuleDetail]
 		quotation_to: DF.Link
 		referral_sales_partner: DF.Link | None
+		revision_of: DF.Link | None
 		rounded_total: DF.Currency
 		rounding_adjustment: DF.Currency
 		scan_barcode: DF.Data | None
@@ -128,6 +132,25 @@ class Quotation(SellingController):
 		valid_till: DF.Date | None
 	# end: auto-generated types
 
+	def autoname(self):
+		if self.revision_of:
+			self.name = f"{self.revision_of}-R{self.get_next_revision_index()}"
+
+	def get_next_revision_index(self):
+		frappe.db.get_value("Quotation", self.revision_of, "name", for_update=True)
+		revisions = frappe.get_all(
+			"Quotation",
+			filters={"revision_of": self.revision_of, "amended_from": ["is", "not set"]},
+			pluck="name",
+		)
+		return max((cint(name.rsplit("-R", 1)[-1]) for name in revisions), default=0) + 1
+
+	def onload(self):
+		super().onload()
+		if self.docstatus == 1:
+			self.set_onload("is_latest_version", self.is_latest_version)
+			self.set_onload("has_versions_to_set_as_lost", self.has_versions_to_set_as_lost)
+
 	def set_indicator(self):
 		if self.docstatus == 1:
 			self.indicator_color = "blue"
@@ -146,6 +169,7 @@ class Quotation(SellingController):
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_valid_till()
+		self.validate_revision()
 		self.set_customer_name()
 		if self.items:
 			self.with_items = 1
@@ -163,6 +187,49 @@ class Quotation(SellingController):
 	def validate_valid_till(self):
 		if self.valid_till and getdate(self.valid_till) < getdate(self.transaction_date):
 			frappe.throw(_("Valid till date cannot be before transaction date"))
+
+	def validate_revision(self):
+		if not self.revision_of:
+			return
+
+		self.validate_revision_matches_original()
+
+		if self.get_other_versions({"status": "Lost"}):
+			frappe.throw(_("Quotation {0} is Lost and cannot be revised.").format(self.revision_of))
+
+		later_dates = [version.transaction_date for version in self.get_newer_versions()]
+		if later_dates:
+			frappe.throw(
+				_(
+					"Transaction Date must be after {0}, the date of the latest version of this Quotation."
+				).format(formatdate(max(later_dates)))
+			)
+
+	def validate_revision_matches_original(self):
+		original = frappe.db.get_value(
+			"Quotation", self.revision_of, ["company", "quotation_to", "party_name"], as_dict=True
+		)
+		if self.company != original.company:
+			frappe.throw(
+				_("A revision must have the same company as Quotation {0}.").format(self.revision_of)
+			)
+
+		if not self.has_party_of(original):
+			frappe.throw(
+				_("A revision must be for the same {0} as Quotation {1}.").format(
+					_(original.quotation_to), self.revision_of
+				)
+			)
+
+	def has_party_of(self, original: frappe._dict) -> bool:
+		if self.quotation_to == original.quotation_to and self.party_name == original.party_name:
+			return True
+
+		return (
+			original.quotation_to == "Lead"
+			and self.quotation_to == "Customer"
+			and frappe.db.get_value("Customer", self.party_name, "lead_name") == original.party_name
+		)
 
 	def set_has_alternative_item(self):
 		"""Mark 'Has Alternative Item' for rows."""
@@ -269,10 +336,10 @@ class Quotation(SellingController):
 	):
 		self.check_permission("write")
 
-		if not (self.is_fully_ordered() or self.is_partially_ordered()):
+		if not (self.is_fully_ordered() or self.is_partially_ordered() or self.has_ordered_versions):
 			get_lost_reasons = frappe.get_list("Quotation Lost Reason", fields=["name"])
 			lost_reasons_lst = [reason.get("name") for reason in get_lost_reasons]
-			self.db_set("status", "Lost")
+			self.db_set({"status": "Lost", "is_active": 1})
 
 			if detailed_reason:
 				self.db_set("order_lost_reason", detailed_reason)
@@ -290,12 +357,22 @@ class Quotation(SellingController):
 			for competitor in competitors:
 				self.append("competitors", competitor)
 
+			self.set_other_versions_as_lost()
 			self.update_opportunity("Lost")
 			self.update_lead()
 			self.save()
 
 		else:
 			frappe.throw(_("Cannot set as Lost as Sales Order is made."))
+
+	def before_update_after_submit(self):
+		if self.status == "Lost" and self.has_value_changed("is_active"):
+			frappe.throw(_("Is Active cannot be changed on a Lost Quotation."))
+
+	def on_update_after_submit(self):
+		if self.has_value_changed("is_active"):
+			self.update_opportunity("Quotation" if self.is_active else "Open")
+			self.update_lead()
 
 	def on_submit(self):
 		# Check for Approving Authority
@@ -306,6 +383,56 @@ class Quotation(SellingController):
 		# update enquiry status
 		self.update_opportunity("Quotation")
 		self.update_lead()
+		self.deactivate_other_versions()
+
+	def deactivate_other_versions(self):
+		if not (self.revision_of and self.is_active):
+			return
+
+		self.update_other_versions({"is_active": 1}, {"is_active": 0})
+
+	def set_other_versions_as_lost(self):
+		self.update_other_versions(VERSIONS_TO_SET_AS_LOST, {"status": "Lost", "is_active": 0})
+
+	@property
+	def has_ordered_versions(self) -> bool:
+		return bool(self.get_other_versions({"status": ["in", ["Partially Ordered", "Ordered"]]}))
+
+	@property
+	def has_versions_to_set_as_lost(self) -> bool:
+		return bool(self.get_other_versions(VERSIONS_TO_SET_AS_LOST))
+
+	def update_other_versions(self, filters: dict, values: dict):
+		names = [version.name for version in self.get_other_versions(filters)]
+		frappe.db.bulk_update("Quotation", {name: values for name in names})
+		for name in names:
+			frappe.clear_document_cache("Quotation", name)
+
+	@property
+	def is_latest_version(self) -> bool:
+		return not self.get_newer_versions()
+
+	def get_newer_versions(self) -> list[frappe._dict]:
+		own_order = (getdate(self.transaction_date), get_datetime(self.creation))
+		return [
+			version
+			for version in self.get_other_versions({})
+			if (version.transaction_date, version.creation) > own_order
+		]
+
+	def validate_can_be_revised(self):
+		if self.status in ("Lost", "Ordered"):
+			frappe.throw(_("Cannot revise a Quotation with status {0}.").format(_(self.status)))
+
+	def get_other_versions(self, filters: dict, ignore_permissions: bool = True) -> list[frappe._dict]:
+		original = self.revision_of or self.name
+		return frappe.get_list(
+			"Quotation",
+			filters={"docstatus": 1, "name": ["!=", self.name], **filters},
+			or_filters={"name": original, "revision_of": original},
+			fields=["name", "transaction_date", "creation"],
+			ignore_permissions=ignore_permissions,
+		)
 
 	def on_cancel(self):
 		if self.lost_reasons:
@@ -373,6 +500,26 @@ def get_list_context(context=None):
 	)
 
 	return list_context
+
+
+@frappe.whitelist()
+def get_open_count(doctype: str, name: str, items: str | list[str]) -> dict:
+	items = frappe.parse_json(items)
+	if not (isinstance(items, list) and all(isinstance(item, str) for item in items)):
+		frappe.throw(_("Items must be a list of DocType names."))
+
+	counts = get_linked_document_counts(doctype, name, [item for item in items if item != "Quotation"])
+	versions = [
+		version.name
+		for version in frappe.get_doc("Quotation", name).get_other_versions(
+			{"docstatus": ["!=", 2]}, ignore_permissions=False
+		)
+	]
+	if versions and counts["count"]:
+		counts["count"]["internal_links_found"].append(
+			{"doctype": "Quotation", "names": versions, "count": len(versions), "open_count": 0}
+		)
+	return counts
 
 
 def set_expired_status():

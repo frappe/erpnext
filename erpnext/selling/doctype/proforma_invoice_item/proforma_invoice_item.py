@@ -14,6 +14,7 @@ class ProformaInvoiceItem(Document):
 		from frappe.types import DF
 
 		amount: DF.Currency
+		description: DF.TextEditor | None
 		item_code: DF.Link
 		item_name: DF.Data | None
 		parent: DF.Data

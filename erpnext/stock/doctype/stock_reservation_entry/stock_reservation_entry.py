@@ -709,6 +709,10 @@ class StockReservationEntry(Document):
 
 			entry.db_update()
 
+	@property
+	def matched_serial_batch_qty(self):
+		return sum(min(flt(entry.delivered_qty), flt(entry.qty)) for entry in self.sb_entries)
+
 
 def validate_stock_reservation_settings(voucher: object) -> None:
 	"""Raises an exception if `Stock Reservation` is not enabled or `Voucher Type` is not allowed."""
@@ -1937,6 +1941,8 @@ def _get_stock_reservation_entries_for_voucher(
 			"voucher_detail_no",
 			"reserved_qty",
 			"delivered_qty",
+			"transferred_qty",
+			"consumed_qty",
 			"stock_uom",
 		]
 

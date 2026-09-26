@@ -123,7 +123,7 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False, ar
 		{
 			"Quotation": {
 				"doctype": "Sales Order",
-				"validation": {"docstatus": ["=", 1]},
+				"validation": {"docstatus": ["=", 1], "is_active": ["=", 1]},
 				"field_no_map": ["payment_terms_template"],
 			},
 			"Quotation Item": {
@@ -184,7 +184,10 @@ def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, 
 		"Quotation",
 		source_name,
 		{
-			"Quotation": {"doctype": "Sales Invoice", "validation": {"docstatus": ["=", 1]}},
+			"Quotation": {
+				"doctype": "Sales Invoice",
+				"validation": {"docstatus": ["=", 1], "is_active": ["=", 1]},
+			},
 			"Quotation Item": {
 				"doctype": "Sales Invoice Item",
 				"postprocess": update_item,
@@ -199,6 +202,32 @@ def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, 
 	)
 
 	return doclist
+
+
+@frappe.whitelist()
+def make_revision(source_name: str, target_doc: str | dict | Document | None = None):
+	frappe.get_doc("Quotation", source_name).validate_can_be_revised()
+
+	def set_revision_of(source, target):
+		target.revision_of = source.revision_of or source.name
+
+	return get_mapped_doc(
+		"Quotation",
+		source_name,
+		{
+			"Quotation": {
+				"doctype": "Quotation",
+				"validation": {"docstatus": ["=", 1]},
+				"field_no_map": ["valid_till"],
+			},
+			"Quotation Item": {
+				"doctype": "Quotation Item",
+				"field_map": {"prevdoc_doctype": "prevdoc_doctype", "prevdoc_docname": "prevdoc_docname"},
+			},
+		},
+		target_doc,
+		set_revision_of,
+	)
 
 
 def _make_customer(source_name, ignore_permissions=False):

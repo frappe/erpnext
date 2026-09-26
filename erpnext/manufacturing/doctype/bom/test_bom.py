@@ -142,6 +142,36 @@ class TestBOM(ERPNextTestSuite):
 			self.assertNotIn(rm_normal, items_dict)
 
 	@timeout
+	def test_get_items_explodes_phantom_row_by_stock_qty(self):
+		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		rm = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		kit = make_item(
+			properties={"is_stock_item": 0, "uoms": [{"uom": "Box", "conversion_factor": 5}]}
+		).name
+		phantom_bom = make_bom(item=kit, raw_materials=[rm], do_not_save=True)
+		phantom_bom.is_phantom_bom = 1
+		phantom_bom.save()
+		phantom_bom.submit()
+
+		fg_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		bom = make_bom(item=fg_item, raw_materials=[kit], do_not_save=True)
+		bom.items[0].update({"qty": 2, "uom": "Box", "bom_no": phantom_bom.name})
+		bom.save()
+		bom.submit()
+
+		for fetch_qty_in_stock_uom in (True, False):
+			items_dict = get_bom_items_as_dict(
+				bom.name,
+				"_Test Company",
+				qty=1,
+				fetch_exploded=0,
+				fetch_qty_in_stock_uom=fetch_qty_in_stock_uom,
+			)
+			self.assertEqual(flt(items_dict[rm].qty), 10.0)
+
+	@timeout
 	def test_get_items_amount_uses_each_lines_own_rate(self):
 		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom

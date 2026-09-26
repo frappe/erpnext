@@ -49,6 +49,7 @@ _SERIAL_BATCH_FIELDS = [
 	"`tabSerial and Batch Bundle`.`item_code`",
 	"`tabSerial and Batch Bundle`.`voucher_detail_no`",
 ]
+CONSUMPTION_PURPOSES = ("Manufacture", "Material Consumption for Manufacture")
 
 
 class WorkOrderStockReservation:
@@ -135,15 +136,17 @@ class WorkOrderStockReservation:
 
 	@staticmethod
 	def _apply_reservation_transfer(doc, qty_to_update, row_wise_serial_batch):
-		doc.db_set("transferred_qty", flt(qty_to_update), update_modified=False)
 		if (doc.has_batch_no or doc.has_serial_no) and doc.reservation_based_on == "Serial and Batch":
 			doc.consume_serial_batch_for_material_transfer(row_wise_serial_batch)
+			qty_to_update = doc.matched_serial_batch_qty
 
+		doc.db_set("transferred_qty", flt(qty_to_update), update_modified=False)
 		if doc.transferred_qty >= doc.reserved_qty:
 			doc.db_set("status", "Closed", update_modified=False)
 
 		doc.update_status()
 		doc.update_reserved_stock_in_bin()
+		doc.update_reserved_qty_in_voucher()
 
 	def update_consumed_qty_in_stock_reservation(self, item, consumed_qty, wip_warehouse):
 		filters = {
@@ -156,7 +159,7 @@ class WorkOrderStockReservation:
 		if not self.doc.skip_transfer:
 			filters["from_voucher_no"] = ("is", "set")
 
-		row_wise_serial_batch = get_row_wise_serial_batch(self.doc.name, "Manufacture")
+		row_wise_serial_batch = get_row_wise_serial_batch(self.doc.name, CONSUMPTION_PURPOSES)
 		names = frappe.get_all("Stock Reservation Entry", filters=filters, pluck="name", order_by="creation")
 		for name in names:
 			consumed_qty = self._apply_consumed_qty(name, consumed_qty, row_wise_serial_batch)
@@ -172,9 +175,11 @@ class WorkOrderStockReservation:
 
 		if (doc.has_batch_no or doc.has_serial_no) and doc.reservation_based_on == "Serial and Batch":
 			doc.consume_serial_batch_for_material_transfer(row_wise_serial_batch)
+			doc.db_set("consumed_qty", doc.matched_serial_batch_qty, update_modified=False)
 
 		doc.update_status()
 		doc.update_reserved_stock_in_bin()
+		doc.update_reserved_qty_in_voucher()
 		return consumed_qty
 
 	def validate_reserved_qty(self):
@@ -663,7 +668,7 @@ def get_consumed_qty(work_order, item_code):
 def _consumed_qty_filter(stock_entry, stock_entry_detail, work_order, item_code):
 	return (
 		(stock_entry.work_order == work_order)
-		& (stock_entry.purpose.isin(["Manufacture", "Material Consumption for Manufacture"]))
+		& (stock_entry.purpose.isin(CONSUMPTION_PURPOSES))
 		& (stock_entry.docstatus == 1)
 		& (stock_entry_detail.s_warehouse.isnotnull())
 		# An attributed row belongs to its original requirement, not both item codes.
@@ -671,30 +676,26 @@ def _consumed_qty_filter(stock_entry, stock_entry_detail, work_order, item_code)
 	)
 
 
-def get_reserved_qty_for_production(
-	item_code: str,
-	warehouse: str,
-	non_completed_production_plans: list | None = None,
-	check_production_plan: bool = False,
-) -> float:
+def get_reserved_qty_for_production(item_code: str, warehouse: str) -> float:
 	"""Get total reserved quantity for any item in specified warehouse"""
 	wo = frappe.qb.DocType("Work Order")
 	wo_item = frappe.qb.DocType("Work Order Item")
-	qty_field = wo_item.required_qty if check_production_plan else _production_reserved_qty_field(wo, wo_item)
 
 	query = (
 		frappe.qb.from_(wo)
 		.from_(wo_item)
-		.select(Sum(qty_field))
+		.select(Sum(_production_reserved_qty_field(wo, wo_item)))
 		.where(
 			(wo_item.item_code == item_code)
 			& (wo_item.parent == wo.name)
 			& (wo.docstatus == 1)
 			& (wo_item.source_warehouse == warehouse)
+			& (wo.status.notin(["Stopped", "Completed", "Closed"]))
+			& (
+				(wo_item.required_qty > wo_item.transferred_qty)
+				| (wo_item.required_qty > wo_item.consumed_qty)
+			)
 		)
-	)
-	query = _apply_production_plan_filter(
-		query, wo, wo_item, check_production_plan, non_completed_production_plans
 	)
 	return query.run()[0][0] or 0.0
 
@@ -708,28 +709,12 @@ def _production_reserved_qty_field(wo, wo_item):
 	return qty_field.else_(wo_item.required_qty - wo_item.consumed_qty)
 
 
-def _apply_production_plan_filter(query, wo, wo_item, check_production_plan, non_completed_production_plans):
-	if check_production_plan:
-		query = query.where(wo.production_plan.isnotnull())
-	else:
-		query = query.where(
-			(wo.status.notin(["Stopped", "Completed", "Closed"]))
-			& (
-				(wo_item.required_qty > wo_item.transferred_qty)
-				| (wo_item.required_qty > wo_item.consumed_qty)
-			)
-		)
-
-	if non_completed_production_plans:
-		query = query.where(wo.production_plan.isin(non_completed_production_plans))
-	return query
-
-
 def get_row_wise_serial_batch(work_order, purpose=None):
 	purpose = purpose or "Material Transfer for Manufacture"
+	purposes = [purpose] if isinstance(purpose, str) else purpose
 	stock_entries = frappe.get_all(
 		"Stock Entry",
-		filters={"work_order": work_order, "purpose": purpose, "docstatus": 1},
+		filters={"work_order": work_order, "purpose": ("in", purposes), "docstatus": 1},
 		pluck="name",
 	)
 
