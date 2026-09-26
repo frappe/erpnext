@@ -409,10 +409,6 @@ doc_events = {
 	("Item", "Customer", "Supplier"): {
 		"validate": "erpnext.stock.doctype.company_restriction.company_restriction.validate_allowed_companies",
 	},
-	"Item": {
-		"on_update": "erpnext.stock.doctype.item.item_search.reindex_item",
-		"after_rename": "erpnext.stock.doctype.item.item_search.reindex_renamed_item",
-	},
 	"User": {
 		"after_insert": "frappe.contacts.doctype.contact.contact.update_contact",
 		"validate": "erpnext.setup.doctype.employee.employee.validate_employee_role",

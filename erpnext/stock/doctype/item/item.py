@@ -30,6 +30,7 @@ from erpnext.controllers.item_variant import (
 	make_variant_item_code,
 	validate_item_variant_attributes,
 )
+from erpnext.stock.doctype.item.item_search import queue_item
 from erpnext.stock.doctype.item_default.item_default import ItemDefault
 from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 from erpnext.stock.utils import get_valuation_method
@@ -259,6 +260,7 @@ class Item(Document):
 		self.update_variants()
 		self.update_item_price()
 		clear_valuation_method_cache()
+		queue_item(self.name)
 
 	def validate_description(self):
 		"""Clean HTML description if set"""
@@ -679,6 +681,8 @@ class Item(Document):
 		if merge:
 			self.set_last_purchase_rate(new_name)
 			self.recalculate_bin_qty(new_name)
+
+		queue_item(new_name, drop=old_name)
 
 	def delete_old_bins(self, old_name):
 		frappe.db.delete("Bin", {"item_code": old_name})

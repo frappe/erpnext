@@ -213,21 +213,6 @@ def get_barcodes_by_item(item_codes: list[str]) -> dict[str, str]:
 	return barcodes
 
 
-def reindex_item(doc, method=None):
-	"""Queue an Item on every save.
-
-	Item Barcode rows raise no document events, so the Item save is the only signal one moved, and
-	no indexed field of the Item need have changed.
-	"""
-	queue_item(doc.name)
-
-
-def reindex_renamed_item(doc, method=None, old=None, new=None, merge=False):
-	"""A rename writes the new name straight to the table without saving the Item, so on_update
-	never runs and the index would keep answering with the name that is gone."""
-	queue_item(doc.name, drop=old)
-
-
 def queue_item(item_code: str, drop: str | None = None):
 	"""Queue one Item, and drop the name a rename replaced.
 
