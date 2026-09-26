@@ -4881,27 +4881,110 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 		frappe.db.set_value("Work Order", wo.name, "produced_qty", wo.qty)
 		self.assertNotIn(wo.name, pending_work_orders())
 
-	def test_process_loss_percentage_resyncs_from_qty(self):
-		# changing fg qty recomputes process_loss_qty and process_loss_percentage
-		se = frappe.new_doc("Stock Entry")
-		se.purpose = "Manufacture"
+	def make_process_loss_entry(self, purpose="Manufacture", fg_item=None):
+		"""Entry for 100 units from a BOM with 5% process loss, items fetched but not saved."""
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		fg_item = fg_item or make_item("Process Loss FG", properties={"is_stock_item": 1}).name
+		rm_item = make_item("Process Loss RM", properties={"is_stock_item": 1}).name
+
+		se = make_stock_entry(
+			item_code=fg_item, qty=100, purpose=purpose, company="_Test Company", do_not_save=True
+		)
+		se.items = []
+		se.from_bom = 1
+		se.bom_no = make_bom(
+			item=fg_item, quantity=100, raw_materials=[rm_item], process_loss_percentage=5
+		).name
+		se.fg_completed_qty = 100
+		se.from_warehouse = "_Test Warehouse - _TC"
+		se.to_warehouse = "_Test Warehouse 1 - _TC"
+		se.get_items()
+		return se
+
+	def get_finished_good_row(self, se):
+		return next(row for row in se.items if row.is_finished_item)
+
+	def test_process_loss_follows_finished_good_qty(self):
+		for purpose in ("Manufacture", "Repack"):
+			se = self.make_process_loss_entry(purpose)
+			self.assertEqual(self.get_finished_good_row(se).qty, 95)
+
+			self.get_finished_good_row(se).qty = 90
+			se.save()
+
+			self.assertEqual(se.process_loss_qty, 10)
+			self.assertEqual(se.process_loss_percentage, 10)
+
+	def test_process_loss_counts_variant_of_bom_item(self):
+		make_item_variant()
+		se = self.make_process_loss_entry(fg_item="_Test Variant Item")
+		self.get_finished_good_row(se).item_code = "_Test Variant Item-S"
+		self.get_finished_good_row(se).qty = 90
+		se.save()
+
+		self.assertEqual(se.process_loss_qty, 10)
+
+	def test_process_loss_counts_alternative_of_bom_item(self):
+		properties = {"is_stock_item": 1, "allow_alternative_item": 1}
+		fg_item = make_item("Process Loss Alternative Source", properties=properties).name
+		alternative = make_item("Process Loss Alternative FG", properties=properties).name
+		frappe.get_doc(
+			{"doctype": "Item Alternative", "item_code": fg_item, "alternative_item_code": alternative}
+		).insert()
+
+		se = self.make_process_loss_entry(fg_item=fg_item)
+		self.get_finished_good_row(se).item_code = alternative
+		self.get_finished_good_row(se).qty = 90
+		se.save()
+
+		self.assertEqual(se.process_loss_qty, 10)
+
+	def test_from_bom_entry_rejects_finished_item_other_than_bom_item(self):
+		other_item = make_item("Process Loss Unrelated FG", properties={"is_stock_item": 1}).name
+		for purpose in ("Manufacture", "Repack"):
+			se = self.make_process_loss_entry(purpose)
+			self.get_finished_good_row(se).item_code = other_item
+
+			self.assertRaises(FinishedGoodError, se.save)
+
+	def test_process_loss_ignores_other_repack_outputs(self):
+		other_item = make_item("Process Loss Other Output", properties={"is_stock_item": 1}).name
+		se = self.make_process_loss_entry("Repack")
+		other_output = se.append(
+			"items",
+			{
+				"item_code": other_item,
+				"qty": 10,
+				"uom": "Nos",
+				"conversion_factor": 1,
+				"t_warehouse": "_Test Warehouse 1 - _TC",
+			},
+		)
+		se.items.remove(other_output)
+		se.items.insert(0, other_output)
+		se.save()
+
+		self.assertEqual(se.process_loss_qty, 5)
+
+	def test_zero_process_loss_saves_despite_bom_percentage(self):
+		se = self.make_process_loss_entry()
+		self.get_finished_good_row(se).qty = 100
+		se.save()
+
+		self.assertEqual(se.process_loss_qty, 0)
+		self.assertEqual(se.process_loss_percentage, 0)
+
+	def test_get_items_recomputes_process_loss_from_bom(self):
+		se = self.make_process_loss_entry()
+		se.save()
+
 		se.fg_completed_qty = 200
-		se.process_loss_qty = 100
-		se.process_loss_percentage = 80
+		se.get_items()
 
-		se.set_process_loss_qty()
-
-		self.assertEqual(se.process_loss_percentage, 50)
-
-	def test_process_loss_qty_derived_from_percentage_when_qty_blank(self):
-		se = frappe.new_doc("Stock Entry")
-		se.purpose = "Manufacture"
-		se.fg_completed_qty = 200
-		se.process_loss_percentage = 25
-
-		se.set_process_loss_qty()
-
-		self.assertEqual(se.process_loss_qty, 50)
+		self.assertEqual(se.process_loss_qty, 10)
+		self.assertEqual(se.process_loss_percentage, 5)
+		self.assertEqual(self.get_finished_good_row(se).qty, 190)
 
 
 def make_serialized_item(self, **args):
