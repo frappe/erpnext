@@ -87,8 +87,8 @@ class TestStockValuationComparison(ERPNextTestSuite):
 	def setUp(self):
 		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 0)
 
-	def run_report(self, item_code, show=SHOW_ALL_DIFFERENCES):
-		return execute(frappe._dict(company="_Test Company", item_code=item_code, show=show))[1]
+	def run_report(self, item_code, show=SHOW_ALL_DIFFERENCES, **filters):
+		return execute(frappe._dict(company="_Test Company", item_code=item_code, show=show, **filters))[1]
 
 	def assertNoDifferences(self, item_code):
 		differences = self.run_report(item_code)
@@ -180,6 +180,53 @@ class TestStockValuationComparison(ERPNextTestSuite):
 		issue = get_expected_valuation(item, WAREHOUSE)[-1][1]
 		self.assertEqual(issue.stock_value_difference, -100)
 		self.assertEqual(issue.basis, BASIS_SERIAL_RATE)
+
+	def test_serial_nos_without_serial_no_wise_valuation_go_out_at_the_pool_rate(self):
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_serial_no": 1,
+				"serial_no_series": "SVC-NSV-.#####",
+				"valuation_method": "Moving Average",
+				"use_serial_no_wise_valuation": 0,
+			}
+		).name
+
+		first = make_stock_entry(item_code=item, target=WAREHOUSE, qty=2, rate=100)
+		make_stock_entry(item_code=item, target=WAREHOUSE, qty=2, rate=200)
+		serial_no = get_serial_nos_of_entry(first)[0]
+
+		# the serial no came in at 100, but goes out at the item's moving average
+		make_stock_entry(item_code=item, source=WAREHOUSE, qty=1, serial_no=[serial_no])
+
+		self.assertNoDifferences(item)
+
+		issue = get_expected_valuation(item, WAREHOUSE)[-1][1]
+		self.assertEqual(issue.stock_value_difference, -150)
+
+	def test_moving_average_with_fractional_rates_has_no_rounding_differences(self):
+		item = make_item(properties={"is_stock_item": 1, "valuation_method": "Moving Average"}).name
+
+		for qty, rate in ((3, 10.333), (7, 12.777), (11, 9.119), (13, 14.421)):
+			make_stock_entry(item_code=item, target=WAREHOUSE, qty=qty, rate=rate)
+			make_stock_entry(item_code=item, source=WAREHOUSE, qty=2)
+
+		rows = self.run_report(item, tolerance=0)
+		self.assertEqual(rows, [], msg=frappe.as_json(rows))
+
+	def test_zero_tolerance_shows_every_difference(self):
+		item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
+
+		make_stock_entry(item_code=item, target=WAREHOUSE, qty=10, rate=100)
+		issue = make_stock_entry(item_code=item, source=WAREHOUSE, qty=4)
+
+		sle = frappe.db.get_value("Stock Ledger Entry", {"voucher_no": issue.name, "is_cancelled": 0}, "name")
+		frappe.db.set_value(
+			"Stock Ledger Entry", sle, "stock_value_difference", -400.005, update_modified=False
+		)
+
+		self.assertEqual(self.run_report(item), [])
+		self.assertEqual(len(self.run_report(item, tolerance=0)), 1)
 
 	def test_fifo_purchase_return_goes_out_at_the_returned_receipt_rate(self):
 		item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
