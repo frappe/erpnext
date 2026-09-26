@@ -88,9 +88,12 @@ frappe.query_reports["Stock Ledger"] = {
 		},
 		{
 			fieldname: "brand",
-			label: __("Brand"),
-			fieldtype: "Link",
+			label: __("Brands"),
+			fieldtype: "MultiSelectList",
 			options: "Brand",
+			get_data: function (txt) {
+				return frappe.db.get_link_options("Brand", txt);
+			},
 		},
 		{
 			fieldname: "voucher_no",

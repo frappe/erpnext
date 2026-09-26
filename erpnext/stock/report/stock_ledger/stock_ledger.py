@@ -24,6 +24,9 @@ def execute(filters=None):
 	include_uom = filters.get("include_uom")
 	columns = get_columns(filters)
 	items = get_items(filters)
+	if items == []:
+		return columns, []
+
 	sl_entries = get_stock_ledger_entries(filters, items)
 	item_details = get_item_details(items, sl_entries, include_uom)
 
@@ -521,14 +524,15 @@ def get_items(filters):
 
 	else:
 		if brand := filters.get("brand"):
-			conditions.append(item.brand == brand)
+			condition = item.brand.isin(brand) if isinstance(brand, list) else item.brand == brand
+			conditions.append(condition)
 
 		if filters.get("item_group") and (
 			condition := get_item_group_condition(filters.get("item_group"), item)
 		):
 			conditions.append(condition)
 
-	items = []
+	items = None
 	if conditions:
 		for condition in conditions:
 			query = query.where(condition)
