@@ -274,6 +274,22 @@ class TestCompanyRestriction(ERPNextTestSuite):
 			self.assertFalse(frappe.has_permission("Lead", doc=leads[restricted_later]))
 			self.assertTrue(frappe.has_permission("Lead", doc=leads[allowed]))
 
+	def test_transaction_hides_when_master_is_restricted_later(self):
+		customer = make_customer("_Test Restricted Later Quotation Customer")
+		quotation = make_quotation(party_name=customer, do_not_submit=1)
+
+		user = self.make_user_with_roles("test_quotation_restriction@example.com", ["Sales User"])
+		self.allow_company(user, "_Test Company")
+
+		with self.set_user(user):
+			self.assertTrue(frappe.has_permission("Quotation", doc=quotation.name))
+
+		self.restrict_to_companies("Customer", customer, ["_Test Company 1"])
+
+		with self.set_user(user):
+			self.assertEqual(frappe.get_list("Quotation", filters={"name": quotation.name}), [])
+			self.assertFalse(frappe.has_permission("Quotation", doc=quotation.name))
+
 	def make_user_with_roles(self, email, roles):
 		if not frappe.db.exists("User", email):
 			frappe.get_doc(
