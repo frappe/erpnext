@@ -4925,6 +4925,14 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 
 		self.assertEqual(se.process_loss_qty, 10)
 
+	def test_from_bom_entry_rejects_finished_item_other_than_bom_item(self):
+		other_item = make_item("Process Loss Unrelated FG", properties={"is_stock_item": 1}).name
+		for purpose in ("Manufacture", "Repack"):
+			se = self.make_process_loss_entry(purpose)
+			self.get_finished_good_row(se).item_code = other_item
+
+			self.assertRaises(FinishedGoodError, se.save)
+
 	def test_process_loss_ignores_other_repack_outputs(self):
 		other_item = make_item("Process Loss Other Output", properties={"is_stock_item": 1}).name
 		se = self.make_process_loss_entry("Repack")
