@@ -151,9 +151,6 @@ def get_inherited_master_links(doctype):
 	if doctype in RESTRICTABLE_MASTER_DOCTYPES or meta.istable or meta.issingle:
 		return []
 
-	if any(field.options == "Company" and field.reqd for field in meta.get_link_fields()):
-		return []
-
 	return get_master_links(meta)
 
 
