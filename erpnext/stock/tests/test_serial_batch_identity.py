@@ -180,7 +180,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 			email="identity-scan-reader@example.com",
 			first_name="Scan Reader",
 			send_welcome_email=0,
-			roles=[{"role": "Sales User"}],
+			roles=[{"role": "Purchase User"}],
 		).insert()
 		with self.set_user(user.name):
 			self.assertFalse(frappe.has_permission("Batch", "read"))
@@ -191,7 +191,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 	def test_number_lookup_works_without_master_read_permission(self):
 		batch = self.make_number("Batch", "Titled-001")
 		foreign = self.make_number("Batch", "Foreign-001", self.other_item.name)
-		user = self.make_role_user("identity-title-reader@example.com", "Sales User")
+		user = self.make_role_user("identity-title-reader@example.com", "Purchase User")
 		with self.set_user(user):
 			self.assertFalse(frappe.has_permission("Batch", "read"))
 			self.assertEqual(
@@ -1432,7 +1432,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 		serial = self.make_number("Serial No", "Fetch-001")
 		warehouse = "_Test Warehouse - _TC"
 		serial.db_set("warehouse", warehouse)
-		user = self.make_role_user("identity-delivery-user@example.com", "Delivery User")
+		user = self.make_role_user("identity-manufacturing-user@example.com", "Manufacturing User")
 		with self.set_user(user):
 			self.assertFalse(frappe.has_permission("Serial No", "read"))
 			self.assertEqual(
@@ -1667,7 +1667,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 		self.assertEqual(frappe.db.count("Serial No"), count)
 
 	def test_the_item_entitles_serial_and_batch_work(self):
-		user = self.make_role_user("identity-sales-user@example.com", "Sales User")
+		user = self.make_role_user("identity-purchase-user@example.com", "Purchase User")
 		serial = self.make_number("Serial No", "Existing-001")
 		batch = self.make_number("Batch", "Existing-Batch")
 		with self.set_user(user):
