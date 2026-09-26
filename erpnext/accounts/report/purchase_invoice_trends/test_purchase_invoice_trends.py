@@ -37,7 +37,7 @@ class TestPurchaseInvoiceTrends(ERPNextTestSuite):
 			}
 		)
 		filters.update(extra)
-		columns, data = execute(filters)
+		columns, data = execute(filters)[:2]
 		labels = [c.split(":")[0] if isinstance(c, str) else c.get("label") for c in columns]
 		return labels, data
 
