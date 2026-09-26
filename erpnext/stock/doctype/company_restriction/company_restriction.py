@@ -112,10 +112,17 @@ def get_inherited_permission_query_conditions(user, doctype=None):
 
 	conditions = []
 	for link in get_inherited_master_links(doctype):
-		if allowed_companies := get_allowed_companies(user, link.doctype):
+		allowed_companies = get_allowed_companies(user, link.doctype)
+		if allowed_companies and has_restricted_masters(link.doctype):
 			conditions.append(get_linked_master_criterion(doctype, link, allowed_companies))
 
 	return Criterion.all(conditions) if conditions else None
+
+
+def has_restricted_masters(doctype):
+	return bool(
+		frappe.db.exists("Company Restriction", {"parenttype": doctype, "parentfield": "allowed_companies"})
+	)
 
 
 def get_linked_master_criterion(doctype, link, companies):
