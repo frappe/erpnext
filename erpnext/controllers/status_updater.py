@@ -394,7 +394,7 @@ class StatusUpdater(Document):
 						)
 					)
 
-			if items_to_validate:
+			if items_to_validate and args.get("validate_overflow") is not False:
 				pp_sub_assembly_items = [
 					item.production_plan_sub_assembly_item
 					for item in items_to_validate
