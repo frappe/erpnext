@@ -5,9 +5,13 @@ from collections import OrderedDict
 
 import frappe
 from frappe import _
+from frappe.model import numeric_fieldtypes
 from frappe.utils import flt
 
 from erpnext.accounts.report.accounts_receivable.accounts_receivable import ReceivablePayableReport
+from erpnext.accounts.report.consolidated_financial_statement.consolidated_financial_statement import (
+	get_subsidiary_companies,
+)
 
 # Outstanding invoices of a party across companies that need not be related to each other.
 
@@ -22,7 +26,7 @@ def execute(filters=None):
 
 class ConsolidatedReceivablePayable(ReceivablePayableReport):
 	def run(self, args):
-		self.companies = self.filters.get("companies") or []
+		self.companies = get_consolidated_companies(self.filters)
 		self.args = args  # the engine's get_data() takes no arguments
 
 		return super().run(args)
@@ -60,20 +64,42 @@ class ConsolidatedReceivablePayable(ReceivablePayableReport):
 
 def rows_per_company(companies, filters, args, engine):
 	"""Run `engine` once per company, tagging every row with the company it came from."""
+	# every parent in one query, not a lookup per company
+	parents = dict(
+		frappe.get_all(
+			"Company",
+			filters={"name": ["in", companies]},
+			fields=["name", "parent_company"],
+			as_list=True,
+		)
+	)
+
 	for company in companies:
 		# subtotals are appended once per group by the caller, not once per company
 		company_filters = frappe._dict(filters, company=company, group_by_party=0)
 		company_filters.pop("companies", None)
 
 		for row in engine(company_filters).run(args)[1]:
-			row.company = company
+			row.company, row.parent_company = company, parents.get(company)
 			yield row
 
 
+def get_consolidated_companies(filters):
+	"""Selected companies, a group company standing for the companies under it."""
+	companies = []
+	for selected in filters.get("companies") or []:
+		for company in get_subsidiary_companies(selected):
+			if company not in companies:
+				companies.append(company)
+
+	return companies
+
+
 def add_company_columns(columns):
-	"""The company a row came from, right after the party columns."""
+	"""Company and its parent, right after the party columns, plus header alignment."""
+	at = company_column_index(columns)
 	columns.insert(
-		company_column_index(columns),
+		at,
 		dict(
 			label=_("Company"),
 			fieldname="company",
@@ -83,6 +109,20 @@ def add_company_columns(columns):
 			sticky=True,
 		),
 	)
+	columns.insert(
+		at + 1,
+		dict(
+			label=_("Parent Company"),
+			fieldname="parent_company",
+			fieldtype="Link",
+			options="Company",
+			width=160,
+		),
+	)
+
+	# datatable guesses alignment from the first row, which misreads an empty column
+	for column in columns:
+		column["align"] = "right" if column["fieldtype"] in numeric_fieldtypes else "left"
 
 
 def company_column_index(columns):
