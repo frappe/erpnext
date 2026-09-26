@@ -25,6 +25,7 @@
   "has_unit_price_items",
   "amended_from",
   "revision_of",
+  "is_latest_revision",
   "currency_and_price_list",
   "currency",
   "conversion_rate",
@@ -226,6 +227,16 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_latest_revision",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Latest Revision",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fieldname": "company",
@@ -1169,7 +1180,7 @@
  "idx": 82,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-24 14:30:00.000000",
+ "modified": "2026-09-26 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",
