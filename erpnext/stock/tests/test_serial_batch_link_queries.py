@@ -4,9 +4,18 @@ from frappe.utils import add_days, nowdate
 
 from erpnext.controllers.queries import get_batch_no, get_batch_numbers, get_empty_batches
 from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.report.available_batch_report.available_batch_report import (
+	execute as run_available_batch_report,
+)
+from erpnext.stock.report.batch_wise_balance_history.batch_wise_balance_history import (
+	get_data as get_batch_balance_rows,
+)
 from erpnext.stock.report.serial_and_batch_summary.serial_and_batch_summary import (
 	get_batch_nos,
 	get_serial_nos,
+)
+from erpnext.stock.report.serial_and_batch_wise_stock_balance.serial_and_batch_wise_stock_balance import (
+	sort_serial_nos_by_number,
 )
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.tests.utils import ERPNextTestSuite
@@ -108,6 +117,50 @@ class TestSerialBatchLinkQueries(ERPNextTestSuite):
 				page = query(doctype, text, "name", 1, 1, filters)
 				self.assertEqual([row[0] for row in page], [records[1].name])
 				self.assertEqual(query(doctype, "missing", "name", 0, 20, filters), [])
+
+	def test_batch_link_lists_batches_in_number_order(self):
+		self.make_batches_with_names_against_number_order()
+		rows = get_batch_no(
+			"Batch", "order-", "name", 0, 20, {"item_code": self.item.name, "warehouse": self.warehouse}
+		)
+		self.assertEqual([row[1] for row in rows], ["Order-A", "Order-B", "Order-C"])
+
+	def test_batch_reports_list_batches_in_number_order(self):
+		batches = self.make_batches_with_names_against_number_order()
+		filters = frappe._dict(
+			company="_Test Company",
+			item_code=self.item.name,
+			warehouse=self.warehouse,
+			from_date=nowdate(),
+			to_date=add_days(nowdate(), 1),
+		)
+		_columns, rows = run_available_batch_report(filters)
+		self.assertEqual([row.batch_no_number for row in rows], ["Order-A", "Order-B", "Order-C"])
+		rows = get_batch_balance_rows(filters)
+		self.assertEqual([row[4] for row in rows], [batch.name for batch in batches])
+
+	def test_serial_cell_is_sorted_by_number_with_its_ids(self):
+		row = frappe._dict(serial_no="id-c\nid-a\nid-b", serial_no_number="SN-3\nSN-1\nSN-2")
+		sort_serial_nos_by_number(row)
+		self.assertEqual(row.serial_no_number, "SN-1\nSN-2\nSN-3")
+		self.assertEqual(row.serial_no, "id-a\nid-b\nid-c")
+
+	def make_batches_with_names_against_number_order(self):
+		batches = []
+		for number, name in (("Order-A", "order-z"), ("Order-B", "order-y"), ("Order-C", "order-x")):
+			batch = frappe.get_doc(doctype="Batch", item=self.item.name, batch_id=number).insert(
+				set_name=name
+			)
+			self.make_ledger(
+				batch_no=batch.name,
+				actual_qty=1,
+				voucher_no=f"Order-Voucher-{number}",
+				posting_datetime=f"{nowdate()} 12:00:00",
+				company="_Test Company",
+				docstatus=1,
+			)
+			batches.append(batch)
+		return batches
 
 	def make_number(self, doctype, number, item_code=None):
 		identity = SerialBatchIdentity(doctype)
