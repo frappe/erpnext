@@ -154,12 +154,7 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 					(d.voucher_detail_no, d.warehouse), d.stock_value_difference
 				)
 
-		valuation_tax_accounts = [
-			d.account_head
-			for d in doc.get("taxes")
-			if d.category in ("Valuation", "Valuation and Total")
-			and flt(d.base_tax_amount_after_discount_amount)
-		]
+		receipt_valuation_tax = self.get_receipt_valuation_tax()
 
 		exchange_rate_map, net_rate_map = get_purchase_document_details(doc)
 
@@ -413,54 +408,69 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 									)
 								)
 
-			if (
-				doc.auto_accounting_for_stock
-				and doc.is_opening == "No"
-				and item.item_code in stock_items
-				and item.item_tax_amount
-			):
-				# Post reverse entry for Stock-Received-But-Not-Billed if booked in Purchase Receipt
-				if item.purchase_receipt and valuation_tax_accounts:
-					negative_expense_booked_in_pr = frappe.get_all(
-						"GL Entry",
-						filters={
-							"voucher_type": "Purchase Receipt",
-							"voucher_no": item.purchase_receipt,
-							"account": ["in", valuation_tax_accounts],
+			tax_amount = receipt_valuation_tax.get(item.name)
+			if tax_amount:
+				gl_entries.append(
+					self.get_gl_dict(
+						{
+							"account": doc.stock_received_but_not_billed,
+							"against": doc.supplier,
+							"debit": tax_amount,
+							"debit_in_transaction_currency": flt(
+								item.item_tax_amount / doc.conversion_rate,
+								item.precision("item_tax_amount"),
+							),
+							"remarks": doc.remarks or _("Accounting Entry for Stock"),
+							"cost_center": doc.cost_center,
+							"project": item.project or doc.project,
 						},
-						pluck="name",
+						item=item,
 					)
-
-					(
-						doc.get_company_default("asset_received_but_not_billed")
-						if item.is_fixed_asset
-						else doc.stock_received_but_not_billed
-					)
-
-					if not negative_expense_booked_in_pr:
-						gl_entries.append(
-							self.get_gl_dict(
-								{
-									"account": doc.stock_received_but_not_billed,
-									"against": doc.supplier,
-									"debit": flt(item.item_tax_amount, item.precision("item_tax_amount")),
-									"debit_in_transaction_currency": flt(
-										item.item_tax_amount / doc.conversion_rate,
-										item.precision("item_tax_amount"),
-									),
-									"remarks": doc.remarks or _("Accounting Entry for Stock"),
-									"cost_center": doc.cost_center,
-									"project": item.project or doc.project,
-								},
-								item=item,
-							)
-						)
-						doc.negative_expense_to_be_booked += flt(
-							item.item_tax_amount, item.precision("item_tax_amount")
-						)
+				)
+				doc.negative_expense_to_be_booked += tax_amount
 
 			if item.is_fixed_asset and item.landed_cost_voucher_amount:
 				self.update_net_purchase_amount_for_linked_assets(item)
+
+	def get_receipt_valuation_tax(self) -> dict:
+		"""Valuation tax per row that its Purchase Receipt did not book, which the invoice adds to the
+		receipt's stock value through Stock Received But Not Billed."""
+		doc = self.doc
+		receipts = {item.purchase_receipt for item in doc.get("items") if item.purchase_receipt}
+		valuation_tax_accounts = [
+			tax.account_head
+			for tax in doc.get("taxes")
+			if tax.category in ("Valuation", "Valuation and Total")
+			and flt(tax.base_tax_amount_after_discount_amount)
+		]
+		if (
+			not receipts
+			or not valuation_tax_accounts
+			or doc.is_opening != "No"
+			or not erpnext.is_perpetual_inventory_enabled(doc.company)
+		):
+			return {}
+
+		receipts_with_valuation_tax = frappe.get_all(
+			"GL Entry",
+			filters={
+				"voucher_type": "Purchase Receipt",
+				"voucher_no": ("in", receipts),
+				"account": ("in", valuation_tax_accounts),
+			},
+			pluck="voucher_no",
+			distinct=True,
+		)
+		stock_items = doc.get_stock_items()
+
+		return {
+			item.name: flt(item.item_tax_amount, item.precision("item_tax_amount"))
+			for item in doc.get("items")
+			if item.purchase_receipt
+			and item.purchase_receipt not in receipts_with_valuation_tax
+			and item.item_code in stock_items
+			and item.item_tax_amount
+		}
 
 	def get_provisional_accounts(self):
 		doc = self.doc

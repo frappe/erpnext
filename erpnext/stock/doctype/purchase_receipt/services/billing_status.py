@@ -13,6 +13,8 @@ from frappe.query_builder.functions import CombineDatetime
 from frappe.utils import flt
 from pypika import functions as fn
 
+from erpnext.accounts.doctype.purchase_invoice.services.gl_composer import PurchaseInvoiceGLComposer
+
 
 class BillingStatusService:
 	def __init__(self, doc):
@@ -315,16 +317,38 @@ def get_billed_qty_amount_against_purchase_receipt(pr_doc) -> dict:
 	if not invoice_data:
 		return frappe._dict()
 
+	valuation_tax = get_valuation_tax_billed_against_purchase_receipt(pr_doc)
 	billed_qty_amt = frappe._dict()
 
 	for row in invoice_data:
 		if row.pr_detail not in billed_qty_amt:
-			billed_qty_amt[row.pr_detail] = {"amount": 0, "qty": 0}
+			billed_qty_amt[row.pr_detail] = {"amount": flt(valuation_tax.get(row.pr_detail)), "qty": 0}
 
 		billed_qty_amt[row.pr_detail]["amount"] += flt(row.amount)
 		billed_qty_amt[row.pr_detail]["qty"] += flt(row.qty)
 
 	return billed_qty_amt
+
+
+def get_valuation_tax_billed_against_purchase_receipt(pr_doc) -> dict:
+	"""Valuation tax per receipt row that its Purchase Invoices add to the stock value."""
+	invoices = frappe.get_all(
+		"Purchase Invoice Item",
+		filters={"purchase_receipt": pr_doc.name, "docstatus": 1},
+		pluck="parent",
+		distinct=True,
+	)
+
+	valuation_tax = {}
+	for invoice in invoices:
+		invoice_doc = frappe.get_doc("Purchase Invoice", invoice)
+		tax_by_invoice_row = PurchaseInvoiceGLComposer(invoice_doc).get_receipt_valuation_tax()
+		for item in invoice_doc.items:
+			if item.purchase_receipt == pr_doc.name and item.name in tax_by_invoice_row:
+				valuation_tax.setdefault(item.pr_detail, 0.0)
+				valuation_tax[item.pr_detail] += tax_by_invoice_row[item.name]
+
+	return valuation_tax
 
 
 def get_billed_qty_amount_against_purchase_order(pr_doc) -> dict:
