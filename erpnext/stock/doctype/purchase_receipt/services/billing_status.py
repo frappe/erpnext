@@ -334,7 +334,7 @@ def get_valuation_tax_billed_against_purchase_receipt(pr_doc) -> dict:
 	"""Valuation tax per receipt row that its Purchase Invoices add to the stock value."""
 	invoices = frappe.get_all(
 		"Purchase Invoice Item",
-		filters={"purchase_receipt": pr_doc.name, "docstatus": 1},
+		filters={"purchase_receipt": pr_doc.name, "docstatus": 1, "item_tax_amount": ("!=", 0)},
 		pluck="parent",
 		distinct=True,
 	)
