@@ -238,7 +238,7 @@ class StockLedgerService:
 		if self.doc.docstatus == 2:
 			force = True
 
-		if force or future_sle_exists(args) or repost_required_for_queue(self.doc):
+		if force or future_sle_exists(args, for_update=True) or repost_required_for_queue(self.doc):
 			item_based_reposting = frappe.get_single_value("Stock Reposting Settings", "item_based_reposting")
 			if item_based_reposting:
 				create_item_wise_repost_entries(
