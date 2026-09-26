@@ -8,6 +8,7 @@ from frappe.query_builder import Criterion
 
 from erpnext import get_default_company
 from erpnext.accounts.party import _get_party_details
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_masters_condition
 
 
 def execute(filters=None):
@@ -135,9 +136,12 @@ def get_customer_details(filters):
 
 def get_selling_items(filters):
 	if filters.get("item"):
-		item_filters = {"item_code": filters.get("item"), "is_sales_item": 1, "disabled": 0}
+		item_filters = [{"item_code": filters.get("item"), "is_sales_item": 1, "disabled": 0}]
 	else:
-		item_filters = {"is_sales_item": 1, "disabled": 0}
+		item_filters = [{"is_sales_item": 1, "disabled": 0}]
+
+	if condition := get_allowed_masters_condition(frappe.qb.DocType("Item").name, "Item"):
+		item_filters.append(condition)
 
 	items = frappe.get_all(
 		"Item", filters=item_filters, fields=["item_code", "item_name"], order_by="item_name"

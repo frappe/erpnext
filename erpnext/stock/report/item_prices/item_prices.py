@@ -7,6 +7,8 @@ from frappe import _
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import flt
 
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_masters_condition
+
 
 def execute(filters=None):
 	if not filters:
@@ -79,6 +81,9 @@ def get_item_details(filters):
 		query = query.where(item.disabled == 0)
 	elif filters.get("items") == "Disabled Items only":
 		query = query.where(item.disabled == 1)
+
+	if condition := get_allowed_masters_condition(item.name, "Item"):
+		query = query.where(condition)
 
 	for i in query.run(as_dict=True):
 		item_map.setdefault(i.name, i)
